@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Patch>
+	<Operation Class="PatchOperationSequence">
+		<operations>
+			
+			<li Class="PatchOperationRemove">
+				<xpath>Defs/TerrainDef[@Name="WaterDeepBase"]/passability</xpath>
+			</li>
+			<!--
+			<li Class="PatchOperationReplace">
+				<xpath>Defs/TerrainDef[@Name="WaterDeepBase"]</xpath>
+				<value>
+					<pathCost>1</pathCost>
+				</value>
+			</li>
+			-->
+		</operations>
+		
+	</Operation>
+</Patch>

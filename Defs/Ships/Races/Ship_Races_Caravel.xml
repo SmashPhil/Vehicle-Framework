@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<PawnKindDef>
+		<defName>Caravel</defName>
+		<label>caravel</label>
+		<defaultFactionType>PlayerColony</defaultFactionType>
+		<aiAvoidCover>false</aiAvoidCover>
+		<destroyGearOnDrop>true</destroyGearOnDrop>
+		<race>Ships_Caravel</race>
+		<backstoryCategories><li>Civil</li></backstoryCategories>
+		<combatPower>20</combatPower>
+		<lifeStages>
+			<li>
+				<bodyGraphicData>
+					<texPath>Ships/caravel/CaravelBoat/Caravel_v2</texPath>
+					<graphicClass>Graphic_Multi</graphicClass>
+					<drawSize>(6,11)</drawSize>
+					<shadowData>
+						<volume>(0.4,0.1,0.4)</volume>
+					</shadowData>
+				</bodyGraphicData>
+			</li>
+		</lifeStages>
+	</PawnKindDef>
+	
+	<BodyPartDef>
+		<defName>caravel_Body</defName>
+		<label>body</label>
+		<hitPoints>150</hitPoints>
+		<skinCovered>false</skinCovered>
+		<solid>true</solid>
+		<bleedRate>0</bleedRate>
+		<alive>false</alive>
+		<frostbiteVulnerability>0.01</frostbiteVulnerability>
+		<tags>
+			<li>MovingLimbCore</li>
+		</tags>
+	</BodyPartDef>
+	
+	<BodyPartDef>
+		<defName>caravel_Mast</defName>
+		<label>mast</label>
+		<hitPoints>5</hitPoints>
+		<skinCovered>false</skinCovered>
+		<solid>true</solid>
+		<bleedRate>0</bleedRate>
+		<alive>false</alive>
+	</BodyPartDef>
+	
+	<BodyDef>
+		<defName>caravel_Body</defName>
+		<label>caravelbody</label>
+		<corePart>
+			<def>caravel_Body</def>
+			<height>Middle</height>
+			<depth>Outside</depth>
+			<groups>
+				<li>HeadAttackTool</li>
+			</groups>
+			
+			<parts>
+				<li>
+					<def>caravel_Mast</def>
+					<coverage>0.4</coverage>
+				</li>
+			</parts>
+		</corePart>
+	</BodyDef>
+	
+	<ThingDef ParentName="BaseShip">
+		<defName>Ships_Caravel</defName>
+		<label>caravel</label>
+		<description>A medium sized trade ship designed to be both fast and versatile</description>
+		
+		<statBases>
+			<MoveSpeed>5</MoveSpeed>
+			<Mass>7500</Mass>
+			<ArmorRating_Blunt>0.25</ArmorRating_Blunt>
+			<ArmorRating_Sharp>0.9</ArmorRating_Sharp>
+			<MarketValue>2000</MarketValue>
+		</statBases>
+		
+		<size>(3,8)</size>
+		
+		<tools>
+			<li>
+				<label>hull</label>
+				<capacities>
+					<li>Blunt</li>
+				</capacities>
+				<power>20</power>
+				<cooldownTime>10</cooldownTime>
+				<linkedBodyPartsGroup>HeadAttackTool</linkedBodyPartsGroup>
+				<ensureLinkedBodyPartsGroupAlwaysUsable>true</ensureLinkedBodyPartsGroupAlwaysUsable>
+			</li>
+		</tools>
+		
+		<race>
+			<thinkTreeMain>shipThinkTree_Simple</thinkTreeMain>
+			<thinkTreeConstant>shipThinkTree_SimpleConstant</thinkTreeConstant>
+			<intelligence>ToolUser</intelligence>
+			<fleshType>Mechanoid</fleshType>
+			<needsRest>false</needsRest>
+			<hasGenders>false</hasGenders>
+			<foodType>None</foodType>
+			
+
+			<body>caravel_Body</body>
+			<baseBodySize>100.0</baseBodySize>
+			<baseHealthScale>1.0</baseHealthScale>
+			<lifeStageAges>
+				<li>
+					<def>MechanoidFullyFormed</def>
+					<minAge>0</minAge>
+					<soundWounded>BulletImpact_Wood</soundWounded>
+					<soundDeath>Explosion_Bomb</soundDeath>
+				</li>
+			</lifeStageAges>
+			
+			<soundMeleeHitPawn>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitPawn>
+			<soundMeleeHitBuilding>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitBuilding>
+			<soundMeleeMiss>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeMiss>
+		</race>
+
+		<comps>	
+			<li Class = "RimShips.ShipProperties">
+				<driverRequired>true</driverRequired>
+				<drawDriver>false</drawDriver>
+				<downable>false</downable>
+				<movesWhenDowned>false</movesWhenDowned>
+				
+				<cargoMax>750</cargoMax>
+				<ejectPassengersWhenDestroyed>false</ejectPassengersWhenDestroyed>
+				
+				<loadCargo>NotAllowed</loadCargo>
+				<moveable>DriverNeeded</moveable>
+				<armament>DriverNeeded</armament>
+				<shipPowerType>Paddles</shipPowerType>
+				<nameable>true</nameable>
+				
+				<healthLabel_Healthy>Operational</healthLabel_Healthy>
+				<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
+				<healthLabel_Immobile>Inoperable</healthLabel_Immobile>
+				<healthLabel_Dead>Sunken</healthLabel_Dead>
+				<healthLabel_Beached>Beached</healthLabel_Beached>
+				
+				<roles>
+					<li>
+						<label>Captain</label>
+						<handlingTypes>Movement</handlingTypes>
+						<slots>1</slots>
+						<slotsToOperate>1</slotsToOperate>
+						<slotTag>Driver</slotTag>
+					</li>
+					
+					<li>
+						<label>Passenger</label>
+						<handlingTypes>None</handlingTypes>
+						<slots>10</slots>
+						<slotTag>Passenger</slotTag>
+					</li>
+				</roles>
+			</li>
+		</comps>
+	</ThingDef>
+</Defs>

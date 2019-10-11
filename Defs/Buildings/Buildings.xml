@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	
+	<!-- Ship base -->
+	<ThingDef Name="ShipBase" Abstract="True">
+		<category>Ship</category>
+		<thingClass>Building</thingClass>
+		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
+		<selectable>true</selectable>
+		<terrainAffordanceNeeded>ShallowWater</terrainAffordanceNeeded>
+		<repairEffect>Repair</repairEffect>
+		<leaveResourcesWhenKilled>false</leaveResourcesWhenKilled>
+		<statBases>
+			<SellPriceFactor>0.8</SellPriceFactor>
+		</statBases>
+	</ThingDef>
+	
+	<!-- Canoe -->
+	<ThingDef ParentName="ShipBase">
+		<defName>RowboatBlueprint</defName>
+		<label>Rowboat</label>
+		<description>A simple wooden canoe for light travel</description>
+		<graphicData>
+			<texPath>Ships/rowboat/Canoe_north</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+			<drawSize>(1,3)</drawSize>
+		</graphicData>
+		<category>Building</category>
+		<rotatable>true</rotatable>
+		<statBases>
+			<MaxHitPoints>100</MaxHitPoints>
+			<WorkToBuild>15000</WorkToBuild> <!-- CHANGE LATER -->
+			<Flammability>75</Flammability>
+			<Beauty>2</Beauty>
+		</statBases>
+		<size>(1,3)</size>
+		<clearBuildingArea>true</clearBuildingArea>
+		<designationCategory>RimShips</designationCategory>
+		<researchPrerequisites>
+			<li>Canoe</li>
+		</researchPrerequisites>
+		<costList>
+			<WoodLog>150</WoodLog>
+		</costList>
+		
+		<modExtensions>
+			<li Class="RimShips.Build.SpawnThingBuilt">
+				<thingToSpawn>Canoe</thingToSpawn>
+				<soundFinished>ShipBigConstruction</soundFinished>
+			</li>
+		</modExtensions>
+			
+	</ThingDef>
+	
+	<!-- Caravel -->
+	<ThingDef ParentName="ShipBase">
+		<defName>CaravelBlueprint</defName>
+		<label>Caravel</label>
+		<description>A medium sized trade ship designed to be both fast and versatile.</description>
+		<graphicData>
+			<texPath>Ships/caravel/CaravelBoat/Caravel_v2_north</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+			<drawSize>(6,11)</drawSize>
+		</graphicData>
+		<category>Building</category>
+		<rotatable>true</rotatable>
+		<statBases>
+			<MaxHitPoints>100</MaxHitPoints>
+			<WorkToBuild>150000</WorkToBuild>
+			<Flammability>75</Flammability>
+			<Beauty>5</Beauty>
+		</statBases>
+		<size>(3,8)</size>
+		<clearBuildingArea>true</clearBuildingArea>
+		<designationCategory>RimShips</designationCategory>
+		<researchPrerequisites>
+			<li>Caravel</li>
+		</researchPrerequisites>
+		<costList>
+			<WoodLog>150</WoodLog>
+		</costList>
+		
+		<modExtensions>
+			<li Class="RimShips.Build.SpawnThingBuilt">
+				<thingToSpawn>Caravel</thingToSpawn>
+				<soundFinished>ShipBigConstruction</soundFinished>
+			</li>
+		</modExtensions>
+			
+	</ThingDef>
+	
+	<!-- Cargo Ship 
+	    <building>
+      <hasFuelingPort>true</hasFuelingPort>
+    </building>
+	-->
+</Defs>

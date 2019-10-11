@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<JobDef>
+		<defName>Board</defName>
+		<driverClass>RimShips.Jobs.JobDriver_Board</driverClass>
+		<reportString>Boarding</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+	<!--
+	<JobDef>
+		<defName>Disembark</defName>
+		<driverClass>JobDriver_Disembark</driverClass>
+		<reportString>disembarking</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+	-->
+	<JobDef>
+		<defName>IdleShip</defName>
+		<driverClass>RimShips.Jobs.JobDriver_IdleShip</driverClass>
+		<reportString>Awaiting Orders</reportString>
+		<isIdle>true</isIdle>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+	</JobDef>
+</Defs>

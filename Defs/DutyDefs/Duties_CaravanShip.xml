@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	
+	<DutyDef>
+		<defName>PrepareCaravan_BoardShip</defName>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="ThinkNode_Subtree">
+					<treeDef>SatisfyVeryUrgentNeeds</treeDef>
+				</li>
+				
+				<li Class="ThinkNode_ConditionalColonist">
+					<subNodes>
+						<li Class="RimShips.Jobs.JobGiver_BoardShip">
+							<locomotionUrgency>Jog</locomotionUrgency>
+						</li>
+					</subNodes>
+				</li>
+				
+				<li Class="ThinkNode_ConditionalColonist">
+					<invert>true</invert>
+					<subNodes>
+						<li Class="ThinkNode_ConditionalHasDutyPawnTarget">
+							<subNodes>
+								<li Class="RimShips.Jobs.JobGiver_BoardShip"/>
+							</subNodes>
+						</li>
+					</subNodes>
+				</li>
+				
+				<li Class="ThinkNode_ConditionalPrisonerInPrisonCell">
+					<subNodes>
+						<li Class="JobGiver_WanderCurrentRoom">
+							<wanderRadius>5</wanderRadius>
+						</li>
+					</subNodes>
+				</li>
+				
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+
+</Defs>
+				

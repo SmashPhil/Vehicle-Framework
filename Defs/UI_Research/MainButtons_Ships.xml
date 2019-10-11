@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<MainButtonDef>
+		<defName>RimShips</defName>
+		<label>rimships</label>
+		<description>Configure the colony's ships</description>
+		<tabWindowClass>RimShips.UI.MainTabWindow_Ships</tabWindowClass>
+		<order>35</order>
+	</MainButtonDef>
+</Defs>

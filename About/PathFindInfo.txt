@@ -1,0 +1,36 @@
+flag1: pass all destroyable things (or pass destroyable things not water)
+flag2: not NoPassClosedDoorsOrWater and not Pass destroyable things not water
+flag3: not flag 1
+flag4: cellrect width and height are 1
+flag5: should collide with pawns
+flag6: drawPaths
+flag7: not flag 1 and GetRegion != null and flag2 is true
+flag8: not flag 1 or not flag 3
+flag9: num4 >= num5 and flag7 is true and not flag9
+flag10: pawn is drafted
+flag11: pawn is colonist
+flag12: num15 is not WalkableFast
+
+
+num: costNode.index
+num2: destination index
+num3: 0
+num4: 0
+num5: not flag11 -> 2000 : 100,000
+num6: += openList.Count
+num7: counter for for(;;)
+num8: DetermineHeuristicStrength
+num9: TicksPerMoveCardinal
+num10: TicksPerMoveDiagonal
+num11: uint x2+Directions[i]
+num12: uint z2+Directions[i+8]
+num13: int num11
+num14: int num12
+num15: CellToIndex of num13 and num14 
+num16: 
+num17: if i <= 3 ? num9 : num10
+num18: blueprint cost 
+num19: num17 + known cost 
+num20:
+num21:
+num22:

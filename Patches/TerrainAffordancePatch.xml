@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+	<Operation Class="PatchOperationSequence">
+		<operations>
+			<li Class="PatchOperationInsert">
+				<xpath>Defs/TerrainDef[defName="WaterDeep"]</xpath>
+				<value>
+					<affordances>
+						<li>WaterDeep</li>
+					</affordances>
+				</value>
+			</li>
+			
+			<li Class="PatchOperationInsert">
+				<xpath>Defs/TerrainDef[defName="WaterOceanDeep"]</xpath>
+				<value>
+					<affordances>
+						<li>WaterOceanDeep</li>
+					</affordances>
+				</value>
+			</li>
+			
+			
+			
+		
+		</operations>
+	</Operation>
+</Patch>

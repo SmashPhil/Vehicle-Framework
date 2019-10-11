@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{357562A0-ED54-4AE8-AA13-5FC3AC4C5B8E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>RimShips</RootNamespace>
+    <AssemblyName>RimShips</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\Assemblies\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\Assemblies\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony, Version=1.2.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Assemblies\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Bill_BoardShip.cs" />
+    <Compile Include="CompShips.cs" />
+    <Compile Include="DesignationCategoryDefOf_Ships.cs" />
+    <Compile Include="Dialog_GiveShipName.cs" />
+    <Compile Include="DutyDefOf_Ships.cs" />
+    <Compile Include="GatherItemsForShipCaravanUtility.cs" />
+    <Compile Include="GenGridShips.cs" />
+    <Compile Include="GenPathShip.cs" />
+    <Compile Include="ITab_Ship_Passengers.cs" />
+    <Compile Include="JobDefOf_Ships.cs" />
+    <Compile Include="JobDriver_Board.cs" />
+    <Compile Include="JobDriver_IdleShip.cs" />
+    <Compile Include="JobDriver_PrepareCaravan_GatheringShip.cs" />
+    <Compile Include="JobGiver_AwaitOrders.cs" />
+    <Compile Include="JobGiver_BoardShip.cs" />
+    <Compile Include="LordJob_FormAndSendCaravanShip.cs" />
+    <Compile Include="LordToil_PrepareCaravan_BoardShip.cs" />
+    <Compile Include="LordToil_PrepareCaravan_GatherShip.cs" />
+    <Compile Include="MainTabWindow_Ships.cs" />
+    <Compile Include="MapExtension.cs" />
+    <Compile Include="PawnTableDefOf_Ships.cs" />
+    <Compile Include="PawnTable_Ships.cs" />
+    <Compile Include="Projectile_Water.cs" />
+    <Compile Include="Projectile_WaterHarmony.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RimShips_JobDefOf.cs" />
+    <Compile Include="ShipHandler.cs" />
+    <Compile Include="ShipHarmony.cs" />
+    <Compile Include="ShipPassengerCardUtility.cs" />
+    <Compile Include="ShipPathFinder.cs" />
+    <Compile Include="ShipPathGrid.cs" />
+    <Compile Include="ShipProperties.cs" />
+    <Compile Include="ShipReachability.cs" />
+    <Compile Include="ShipReachabilityUtility.cs" />
+    <Compile Include="ShipRole.cs" />
+    <Compile Include="SpawnThingOnBuild.cs" />
+    <Compile Include="TexCommand.cs" />
+    <Compile Include="Toils_Board.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

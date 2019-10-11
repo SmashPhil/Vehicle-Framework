@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<!-- FOR FUTURE USAGE -->
+	<TerrainAffordanceDef>
+		<defName>Ocean</defName>
+		<label>ocean</label>
+		<order>2700</order>
+	</TerrainAffordanceDef>
+	
+	<TerrainAffordanceDef>
+		<defName>OceanAny</defName>
+		<label>Ocean Any</label>
+		<order>2700</order>
+	</TerrainAffordanceDef>
+</Defs>

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<PawnKindDef>
+		<defName>Canoe</defName>
+		<label>Row Boat</label>
+		<defaultFactionType>PlayerColony</defaultFactionType>
+		<aiAvoidCover>false</aiAvoidCover>
+		<destroyGearOnDrop>true</destroyGearOnDrop>
+		<race>Ships_Canoe</race>
+		<backstoryCategories><li>Civil</li></backstoryCategories>
+		<combatPower>10</combatPower>
+		<lifeStages>
+			<li>
+				<bodyGraphicData>
+					<texPath>Ships/rowboat/Canoe</texPath>
+					<graphicClass>Graphic_Multi</graphicClass>
+					<drawSize>(1,3)</drawSize>
+					<shadowData>
+						<volume>(0.4,0.1,0.4)</volume>
+					</shadowData>
+				</bodyGraphicData>
+			</li>
+		</lifeStages>
+	</PawnKindDef>
+	
+	<BodyPartDef>
+		<defName>canoe_Body</defName>
+		<label>body</label>
+		<hitPoints>25</hitPoints>
+		<skinCovered>false</skinCovered>
+		<solid>true</solid>
+		<bleedRate>0</bleedRate>
+		<alive>false</alive>
+		<frostbiteVulnerability>0.01</frostbiteVulnerability>
+		<tags>
+			<li>MovingLimbCore</li>
+		</tags>
+	</BodyPartDef>
+	
+	<BodyPartDef>
+		<defName>canoe_Seat</defName>
+		<label>seat</label>
+		<hitPoints>1</hitPoints>
+		<skinCovered>false</skinCovered>
+		<solid>true</solid>
+		<bleedRate>0</bleedRate>
+		<alive>false</alive>
+	</BodyPartDef>
+	
+	<BodyDef>
+		<defName>canoe_Body</defName>
+		<label>canoebody</label>
+		<corePart>
+			<def>canoe_Body</def>
+			<height>Middle</height>
+			<depth>Outside</depth>
+			<groups>
+				<li>HeadAttackTool</li>
+			</groups>
+			
+			<parts>
+				<li>
+					<def>canoe_Seat</def>
+					<coverage>0.4</coverage>
+				</li>
+			</parts>
+		</corePart>
+	</BodyDef>
+	
+	<ThingDef ParentName="BaseShip">
+		<defName>Ships_Canoe</defName>
+		<label>canoe</label>
+		<description>A small one passanger boat capable of short trips</description>
+		
+		<statBases>
+			<MoveSpeed>4</MoveSpeed>
+			<CarryingCapacity>75</CarryingCapacity>
+			<ArmorRating_Blunt>0.1</ArmorRating_Blunt>
+			<ArmorRating_Sharp>0.2</ArmorRating_Sharp>
+			<MarketValue>100</MarketValue>
+		</statBases>
+		
+		<size>(1,3)</size>
+		
+		<tools>
+			<li>
+				<label>hull</label>
+				<capacities>
+					<li>Blunt</li>
+				</capacities>
+				<power>20</power>
+				<cooldownTime>10</cooldownTime>
+				<linkedBodyPartsGroup>HeadAttackTool</linkedBodyPartsGroup>
+				<ensureLinkedBodyPartsGroupAlwaysUsable>true</ensureLinkedBodyPartsGroupAlwaysUsable>
+			</li>
+		</tools>
+		
+		<race>
+			<thinkTreeMain>shipThinkTree_Simple</thinkTreeMain>
+			<thinkTreeConstant>shipThinkTree_SimpleConstant</thinkTreeConstant>
+			<intelligence>ToolUser</intelligence>
+			<fleshType>Mechanoid</fleshType>
+			<needsRest>false</needsRest>
+			<hasGenders>false</hasGenders>
+			<foodType>None</foodType>
+
+			<body>canoe_Body</body>
+			<baseBodySize>1.0</baseBodySize>
+			<baseHealthScale>1.0</baseHealthScale>
+			<lifeStageAges>
+				<li>
+					<def>MechanoidFullyFormed</def>
+					<minAge>0</minAge>
+					<soundWounded>BulletImpact_Wood</soundWounded>
+					<soundDeath>Explosion_Bomb</soundDeath>
+				</li>
+			</lifeStageAges>
+			
+			<soundMeleeHitPawn>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitPawn>
+			<soundMeleeHitBuilding>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitBuilding>
+			<soundMeleeMiss>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeMiss>
+		</race>
+
+		<comps>			
+			<li Class = "RimShips.ShipProperties">
+				<driverRequired>true</driverRequired>
+				<drawDriver>false</drawDriver>
+				<downable>false</downable>
+				<movesWhenDowned>false</movesWhenDowned>
+				
+				<cargoMax>100</cargoMax>
+				<ejectPassengersWhenDestroyed>false</ejectPassengersWhenDestroyed>
+				
+				<loadCargo>NotAllowed</loadCargo>
+				<moveable>DriverNeeded</moveable>
+				<armament>DriverNeeded</armament>
+				<shipPowerType>Paddles</shipPowerType>
+				<nameable>false</nameable>
+				
+				<healthLabel_Healthy>Operational</healthLabel_Healthy>
+				<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
+				<healthLabel_Immobile>Inoperable</healthLabel_Immobile>
+				<healthLabel_Dead>Sunken</healthLabel_Dead>
+				<healthLabel_Beached>Beached</healthLabel_Beached>
+				
+				<roles>
+					<li>
+						<label>Driver</label>
+						<handlingTypes>Movement</handlingTypes>
+						<slots>1</slots>
+						<slotsToOperate>1</slotsToOperate>
+						<slotTag>Driver</slotTag>
+					</li>
+				</roles>
+			</li>
+		</comps>
+	</ThingDef>
+</Defs>
