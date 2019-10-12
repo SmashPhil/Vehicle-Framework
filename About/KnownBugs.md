@@ -1,6 +1,0 @@
-- Beached ships need pathing disabled
-- HealthTracker.NotifyPlayerOfKilled explosion sound when shell hits ship
-- Ships despawn when attempting to render outside of map (Disable selection of path if too close to map edge)
-- MapExtension needs to be reinitialized if mod added mid game!
-- CHANGE: Sound when ship is constructed (make situational)
-- CHECK: PassAllDestroyableThingsNotWater
