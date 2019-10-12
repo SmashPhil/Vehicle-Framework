@@ -1,5 +1,7 @@
 # RimShips
 
+Stay up to date with this mod's [progress](https://trello.com/b/xOZiNOOU/rimships)!
+
 **Work In Progress**
 This mod is currently a work in progress.  When will it be ready for
 release? I have no idea.  Maybe by Christmas? Maybe not
