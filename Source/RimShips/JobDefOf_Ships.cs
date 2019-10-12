@@ -30,6 +30,8 @@ namespace RimShips.Defs
 
         public static JobDef Board;
 
+        public static JobDef PrepareCaravan_GatheringShip;
+
         //Disembark
     }
 }

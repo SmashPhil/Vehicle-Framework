@@ -22,4 +22,11 @@
 		<isIdle>true</isIdle>
 		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
 	</JobDef>
+	
+	<JobDef>
+		<defName>PrepareCaravan_GatheringShip</defName>
+		<driverClass>RimShips.Jobs.JobDriver_PrepareCaravan_GatheringShip</driverClass>
+		<reportString>Loading cargo</reportString>
+		<suspendable>false</suspendable>
+	</JobDef>
 </Defs>

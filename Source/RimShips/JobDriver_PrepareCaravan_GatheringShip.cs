@@ -65,16 +65,17 @@ namespace RimShips.Jobs
 
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
-            return false;
+            Pawn pawn = this.pawn;
+            LocalTargetInfo target = this.ToHaul;
+            Job job = this.job;
+            return pawn.Reserve(target, job, 1, -1, null, errorOnFailed);
         }
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
             this.FailOn(() => !base.Map.lordManager.lords.Contains(this.job.lord));
             Toil reserve = Toils_Reserve.Reserve(TargetIndex.A, 1, -1, null).FailOnDespawnedOrNull(TargetIndex.A);
-            Log.Message("TEST2");
             yield return reserve;
-            Log.Message("TEST");
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
             yield return this.DetermineNumToHaul();
             yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, true, false);
@@ -83,9 +84,9 @@ namespace RimShips.Jobs
                 this.Transferable.things.Contains(x));
             Toil findCarrier = this.FindCarrier();
             yield return findCarrier;
-            yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).JumpIf(() => !JobDriver_PrepareCaravan_GatheringShip.IsUsableCarrier(this.Carrier, this.pawn, true),
+            yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).JumpIf(() => !JobDriver_PrepareCaravan_GatheringShip.IsUsableCarrier(this.Carrier, this.pawn),
                 findCarrier);
-            yield return Toils_General.Wait(25, TargetIndex.None).JumpIf(() => !JobDriver_PrepareCaravan_GatheringShip.IsUsableCarrier(this.Carrier, this.pawn, true),
+            yield return Toils_General.Wait(25, TargetIndex.None).JumpIf(() => !JobDriver_PrepareCaravan_GatheringShip.IsUsableCarrier(this.Carrier, this.pawn),
                 findCarrier).WithProgressBarToilDelay(TargetIndex.B, false, -0.5f);
             yield return this.PlaceTargetInCarrierInventory();
             yield break;
@@ -97,7 +98,7 @@ namespace RimShips.Jobs
             {
                 initAction = delegate ()
                 {
-                    int num = GatherItemsForCaravanUtility.CountLeftToTransfer(this.pawn, this.Transferable, this.job.lord);
+                    int num = GatherItemsForShipCaravanUtility.CountLeftToTransfer(this.pawn, this.Transferable, this.job.lord);
                     if (!(this.pawn.carryTracker.CarriedThing is null))
                     {
                         num -= this.pawn.carryTracker.CarriedThing.stackCount;
@@ -151,14 +152,14 @@ namespace RimShips.Jobs
                         {
                             if(pawn is null)
                             {
-                                if(flag)
+                                if (flag)
                                 {
                                     pawn = this.pawn;
                                 }
                                 else
                                 {
                                     IEnumerable<Pawn> source = from x in this.job.lord.ownedPawns
-                                                               where JobDriver_PrepareCaravan_GatheringShip.IsUsableCarrier(x, this.pawn, true)
+                                                               where JobDriver_PrepareCaravan_GatheringShip.IsUsableCarrier(x, this.pawn)
                                                                select x;
                                     if(!source.Any<Pawn>())
                                     {
@@ -190,12 +191,11 @@ namespace RimShips.Jobs
             };
         }
 
-        public static bool IsUsableCarrier(Pawn ship, Pawn forPawn, bool allowColonists)
+        public static bool IsUsableCarrier(Pawn ship, Pawn forPawn)
         {
-            return ship.IsFormingCaravan() && (ship == forPawn || (!ship.DestroyedOrNull() && ship.Spawned && !ship.inventory.UnloadEverything &&
-                forPawn.CanReachShip(ship, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn) && ((allowColonists && ship.IsColonist) ||
-                (!(ship.GetComp<CompShips>() is null) || ship.HostFaction == Faction.OfPlayer) && !ship.IsBurning() && ship.GetComp<CompShips>().movementStatus
-                != ShipMovementStatus.Offline && !MassUtility.IsOverEncumbered(ship))));
+            return ship.IsFormingCaravan() && (!ship.DestroyedOrNull() && ship.Spawned) && ship.Faction == forPawn.Faction 
+                && !ship.IsBurning() && ship.GetComp<CompShips>().movementStatus != ShipMovementStatus.Offline
+                && !MassUtility.IsOverEncumbered(ship);
         }
 
         private float GetCarrierScore(Pawn pawn)
@@ -212,9 +212,9 @@ namespace RimShips.Jobs
             {
                 foreach(Pawn p in lord.ownedPawns)
                 {
-                    if(p != this.pawn)
+                    if(p != this.pawn && !(p.GetComp<CompShips>() is null) )
                     {
-                        if(JobDriver_PrepareCaravan_GatheringShip.IsUsableCarrier(p,this.pawn, false))
+                        if(JobDriver_PrepareCaravan_GatheringShip.IsUsableCarrier(p,this.pawn))
                         {
                             float carrierScore = this.GetCarrierScore(p);
                             if(pawn is null || carrierScore > num)
@@ -226,7 +226,6 @@ namespace RimShips.Jobs
                     }
                 }
             }
-            Log.Message("Pawn: " + pawn.LabelShort);
             return pawn;
         }
     }

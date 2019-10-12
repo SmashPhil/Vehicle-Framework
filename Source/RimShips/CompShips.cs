@@ -20,7 +20,6 @@ using Verse.Sound;
 
 namespace RimShips
 {
-    public enum ShipSeats { Captain, Cannon, Crew, Passenger }
     public enum ShipWeaponStatus { Offline, Online }
     public enum ShipMovementStatus { Offline, Online }
 

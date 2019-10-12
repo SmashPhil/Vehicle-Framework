@@ -92,6 +92,7 @@ namespace RimShips.Lords
                 }
                 if(flag)
                 {
+                    Log.Message("End");
                     this.lord.ReceiveMemo("AllItemsGathered");
                 }
             }

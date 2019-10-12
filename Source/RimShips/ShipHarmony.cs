@@ -47,7 +47,7 @@ namespace RimShips
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(ShipShouldWiggle)));
 
-            //Rendering and Rotation
+            //Rendering
             harmony.Patch(original: AccessTools.Method(typeof(Pawn_RotationTracker), name: nameof(Pawn_RotationTracker.UpdateRotation)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(UpdateShipRotation)));
@@ -58,7 +58,7 @@ namespace RimShips
                 name: nameof(CheckForShipAttack)));
             harmony.Patch(original: AccessTools.Method(typeof(PawnAttackGizmoUtility), name: "ShouldUseMeleeAttackGizmo"),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(ShipMeleeAttacks_Nullified)));
+                name: nameof(ShipMeleeAttacksNullified)));
 
             //Pathing
             harmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), name: nameof(Pawn_PathFollower.StartPath)),
@@ -118,6 +118,9 @@ namespace RimShips
                 prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(GetShipAndSendCaravanLord)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanFormingUtility), name: nameof(CaravanFormingUtility.IsFormingCaravan)),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(IsFormingCaravanShip)));
             harmony.Patch(original: AccessTools.Method(type: typeof(TransferableUtility), name: nameof(TransferableUtility.CanStack)),
                 prefix: null,
                 postfix: null,
@@ -147,7 +150,7 @@ namespace RimShips
                 name: nameof(IsShipDraftable)));
             //  Possibly change draft gizmo  
 
-            //Building
+            //Construction
             harmony.Patch(original: AccessTools.Method(type: typeof(Frame), name: nameof(Frame.CompleteConstruction)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(CompleteConstructionShip)));
@@ -161,7 +164,7 @@ namespace RimShips
             #endregion Functions
         }
 
-        #region FunctionsMethods
+        #region HealthStats
 
         public static bool ReplaceConditionLabel(ref string __result, Pawn pawn, bool shortVersion = false)
         {
@@ -200,14 +203,6 @@ namespace RimShips
             return true;
         }
 
-        public static bool CheckForShipAttack(JobDriver_Wait __instance)
-        {
-            if (__instance.pawn?.GetComp<CompShips>().weaponStatus == ShipWeaponStatus.Offline)
-            {
-                return false;
-            }
-            return true;
-        }
         public static bool ShipShouldBeDowned(Pawn_HealthTracker __instance, ref bool __result)
         {
             Pawn pawn = (Pawn)AccessTools.Field(typeof(Pawn_HealthTracker), "pawn").GetValue(__instance);
@@ -238,72 +233,9 @@ namespace RimShips
             return true;
         }
 
-        public static bool DraftedShipsCanMove(Pawn_DraftController __instance, bool value)
-        {
-            if (IsShip(__instance?.pawn))
-            {
-                if (value && !__instance.Drafted)
-                {
-                    if (!__instance.pawn.GetComp<CompShips>().CanMove)
-                    {
-                        Messages.Message("CompShips_CannotMove".Translate(), MessageTypeDefOf.RejectInput);
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
+        #endregion HealthStats
 
-        public static bool IsShipDraftable(Pawn __instance, ref bool __result)
-        {
-            if (__instance.Spawned && IsShip(__instance))
-            {
-                if (__instance.drafter is null && __instance.GetComp<CompShips>().movementStatus != ShipMovementStatus.Offline)
-                {
-                    __instance.drafter = new Pawn_DraftController(__instance);
-                }
-                __result = true;
-                return false;
-            }
-            return true;
-        }
-
-        public static bool CompleteConstructionShip(Pawn worker, Frame __instance)
-        {
-            if(__instance.def.entityDefToBuild.designationCategory == DesignationCategoryDefOf_Ships.RimShips)
-            {
-                Pawn ship = PawnGenerator.GeneratePawn(__instance.def.entityDefToBuild.GetModExtension<Build.SpawnThingBuilt>().thingToSpawn);
-                __instance.resourceContainer.ClearAndDestroyContents(DestroyMode.Vanish);
-                Map map = __instance.Map;
-                __instance.Destroy(DestroyMode.Vanish);
-
-                if (!(__instance.def.entityDefToBuild.GetModExtension<SpawnThingBuilt>().soundFinished is null))
-                {
-                    __instance.def.entityDefToBuild.GetModExtension<SpawnThingBuilt>().soundFinished.PlayOneShot(new TargetInfo(__instance.Position, map, false));
-                }
-                ship.SetFaction(worker.Faction);
-                GenSpawn.Spawn(ship, __instance.Position, map, __instance.Rotation, WipeMode.FullRefund, false);
-                worker.records.Increment(RecordDefOf.ThingsConstructed);
-                
-                ship.GetComp<CompShips>().Rename();
-                //Quality?
-                //Art?
-                //Tale RecordTale LongConstructionProject?
-                return false;
-            }
-            return true;
-        }
-
-        public static bool ShipMeleeAttacks_Nullified(Pawn pawn, bool __result)
-        {
-            if (IsShip(pawn) && pawn.Drafted)
-            {
-                __result = false;
-                return false;
-            }
-            return true;
-        }
-        
+        #region Rendering
         public static bool UpdateShipRotation(Pawn_RotationTracker __instance)
         {
             if (Traverse.Create(__instance).Field("pawn").GetValue<Pawn>() is Pawn shipPawn &&
@@ -340,17 +272,61 @@ namespace RimShips
             }
             return true;
         }
+        #endregion Rendering
 
-
-        /*public static bool CanShipMove(LocalTargetInfo dest, PathEndMode peMode, Pawn_PathFollower __instance)
+        #region Drafting
+        public static bool DraftedShipsCanMove(Pawn_DraftController __instance, bool value)
         {
-            if (Traverse.Create(__instance).Field("pawn").GetValue<Pawn>() is Pawn pawn && IsShip(pawn))
+            if (IsShip(__instance?.pawn))
             {
-                if (pawn.GetComp<CompShips>().movementStatus == ShipMovementStatus.Offline) { return false; }
+                if (value && !__instance.Drafted)
+                {
+                    if (!__instance.pawn.GetComp<CompShips>().CanMove)
+                    {
+                        Messages.Message("CompShips_CannotMove".Translate(), MessageTypeDefOf.RejectInput);
+                        return false;
+                    }
+                }
             }
             return true;
-        }*/
+        }
 
+        public static bool IsShipDraftable(Pawn __instance, ref bool __result)
+        {
+            if (__instance.Spawned && IsShip(__instance))
+            {
+                if (__instance.drafter is null && __instance.GetComp<CompShips>().movementStatus != ShipMovementStatus.Offline)
+                {
+                    __instance.drafter = new Pawn_DraftController(__instance);
+                }
+                __result = true;
+                return false;
+            }
+            return true;
+        }
+        #endregion Drafting
+
+        #region Gizmos
+        public static bool CheckForShipAttack(JobDriver_Wait __instance)
+        {
+            if (__instance.pawn?.GetComp<CompShips>().weaponStatus == ShipWeaponStatus.Offline)
+            {
+                return false;
+            }
+            return true;
+        }
+        public static bool ShipMeleeAttacksNullified(Pawn pawn, bool __result)
+        {
+            if (IsShip(pawn) && pawn.Drafted)
+            {
+                __result = false;
+                return false;
+            }
+            return true;
+        }
+        #endregion Gizmos
+
+        #region Pathing
         public static bool CanShipMove(LocalTargetInfo dest, PathEndMode peMode, Pawn_PathFollower __instance, ref Pawn ___pawn, ref PathEndMode ___peMode,
             LocalTargetInfo ___destination, ref bool ___moving)
         {
@@ -359,7 +335,7 @@ namespace RimShips
             {
                 Log.Message("Starting path for pawn: " + ___pawn.LabelShort);
                 dest = (LocalTargetInfo)GenPathShip.ResolvePathMode(___pawn, dest.ToTargetInfo(___pawn.Map), ref peMode, mapE);
-                if(dest.HasThing && dest.ThingDestroyed)
+                if (dest.HasThing && dest.ThingDestroyed)
                 {
                     Log.Error(___pawn + " pathing to destroyed thing " + dest.Thing, false);
                     PatherFailedHelper(__instance, ___pawn);
@@ -397,21 +373,21 @@ namespace RimShips
                 Log.Message("cp5");
                 PawnDestinationReservationManager.PawnDestinationReservation pawnDestinationReservation = ___pawn.Map.pawnDestinationReservationManager.
                     MostRecentReservationFor(___pawn);
-                if(!(pawnDestinationReservation is null) && ((__instance.Destination.HasThing && pawnDestinationReservation.target != __instance.Destination.Cell)
+                if (!(pawnDestinationReservation is null) && ((__instance.Destination.HasThing && pawnDestinationReservation.target != __instance.Destination.Cell)
                     || (pawnDestinationReservation.job != ___pawn.CurJob && pawnDestinationReservation.target != __instance.Destination.Cell)))
                 {
                     ___pawn.Map.pawnDestinationReservationManager.ObsoleteAllClaimedBy(___pawn);
                 }
-                if(___pawn.CanReachImmediate(dest, peMode))
+                if (___pawn.CanReachImmediate(dest, peMode))
                 {
                     PatherArrivedHelper(__instance, ___pawn);
                     return false;
                 }
-                if(___pawn.Downed)
+                if (___pawn.Downed)
                 {
                     Log.Error("Ships should not be downable. Contact Mod Author.");
                 }
-                if(!(__instance.curPath is null))
+                if (!(__instance.curPath is null))
                 {
                     __instance.curPath.ReleaseToPool();
                 }
@@ -423,6 +399,345 @@ namespace RimShips
             }
             return true;
         }
+        #endregion Pathing
+
+        #region Jobs
+        public static bool ShipErrorRecoverJob(Pawn pawn, string message,
+            Exception exception = null, JobDriver concreteDriver = null)
+        {
+            if (IsShip(pawn))
+            {
+                if (!(pawn.jobs is null))
+                {
+                    if (!(pawn.jobs.curJob is null))
+                    {
+                        pawn.jobs.EndCurrentJob(JobCondition.Errored, false);
+                    }
+                    try
+                    {
+                        pawn.jobs.StartJob(new Job(JobDefOf_Ships.IdleShip, 150, false), JobCondition.None, null, false, true, null, null, false);
+                    }
+                    catch
+                    {
+                        Log.Error("An error occurred when trying to recover the job for ship " + pawn.def + ". Please contact Mod Author.");
+                    }
+                }
+                return false;
+            }
+            return true;
+        }
+        #endregion Jobs
+
+        #region Caravan
+        public static void AddShipsSections(TransferableOneWayWidget widget, List<TransferableOneWay> transferables)
+        {
+            IEnumerable<TransferableOneWay> source = from x in transferables
+                                                     where x.ThingDef.category == ThingCategory.Pawn
+                                                     select x;
+            widget.AddSection("ShipSection".Translate(), from x in source
+                                                         where !(((Pawn)x.AnyThing).GetComp<CompShips>() is null)
+                                                         select x);
+        }
+
+        public static bool StartFormingCaravanForShips(List<Pawn> pawns, List<Pawn> downedPawns, Faction faction, List<TransferableOneWay> transferables,
+            IntVec3 meetingPoint, IntVec3 exitSpot, int startingTile, int destinationTile)
+        {
+            if (pawns.Any((Pawn x) => !(x.GetComp<CompShips>() is null) && (x.GetComp<CompShips>().movementStatus is ShipMovementStatus.Online)))
+            {
+                if (startingTile < 0)
+                {
+                    Log.Error("Can't start forming caravan because startingTile is invalid.", false);
+                    return false;
+                }
+                if (!pawns.Any<Pawn>())
+                {
+                    Log.Error("Can't start forming caravan with 0 pawns.", false);
+                    return false;
+                }
+                if (pawns.Any((Pawn x) => x.Downed))
+                {
+                    Log.Warning("Forming a caravan with a downed pawn. This shouldn't happen because we have to create a Lord.", false);
+                }
+
+                List<TransferableOneWay> list = transferables.ToList<TransferableOneWay>();
+                list.RemoveAll((TransferableOneWay x) => x.CountToTransfer <= 0 || !x.HasAnyThing || x.AnyThing is Pawn);
+
+                foreach (Pawn p in pawns)
+                {
+                    Lord lord = p.GetLord();
+                    if (!(lord is null))
+                    {
+                        lord.Notify_PawnLost(p, PawnLostCondition.ForcedToJoinOtherLord, null);
+                    }
+                }
+                List<Pawn> ships = pawns.Where(x => !(x.GetComp<CompShips>() is null)).ToList();
+                int seats = 0;
+                foreach (Pawn ship in ships)
+                {
+                    seats += ship.GetComp<CompShips>().SeatsAvailable;
+                }
+                if ((pawns.Count + downedPawns.Count) > seats)
+                {
+                    Log.Error("Can't start forming caravan with ship(s) selected and not enough seats to house all pawns.", false);
+                    return false;
+                }
+
+                LordJob_FormAndSendCaravanShip lordJob = new LordJob_FormAndSendCaravanShip(list, ships, downedPawns, meetingPoint, exitSpot, startingTile,
+                    destinationTile);
+                LordMaker.MakeNewLord(Faction.OfPlayer, lordJob, pawns[0].MapHeld, pawns);
+
+                foreach (Pawn p in pawns)
+                {
+                    if (p.Spawned)
+                    {
+                        p.jobs.EndCurrentJob(JobCondition.InterruptForced, true);
+                    }
+                }
+                return false;
+            }
+            return true;
+        }
+
+        private static IEnumerable<CodeInstruction> DoBottomButtonsTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+        {
+            List<CodeInstruction> instructionList = instructions.ToList();
+            MethodInfo methodSetSail = AccessTools.Method(type: typeof(ShipHarmony), name: nameof(CanSetSail));
+            Label breakLabel = ilg.DefineLabel();
+
+            for (int i = 0; i < instructionList.Count; i++)
+            {
+                CodeInstruction instruction = instructionList[i];
+                if (instruction.opcode == OpCodes.Ldloc_S && ((LocalBuilder)instruction.operand).LocalIndex == 19)
+                {
+                    yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 19);
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: methodSetSail);
+                    yield return new CodeInstruction(opcode: OpCodes.Brfalse, operand: breakLabel);
+                }
+                else if (instruction.opcode == OpCodes.Ldfld && instruction.operand == AccessTools.Field(type: typeof(Dialog_FormCaravan), name: "destinationTile"))
+                {
+                    instructionList[i - 1].labels.Add(breakLabel);
+                }
+                yield return instruction;
+            }
+        }
+
+        public static bool CanCarryIfShip(Pawn p, ref bool __result)
+        {
+            return p.GetComp<CompShips>() is null ? true : !(__result = true);
+        }
+
+        public static bool RemovePawnAddShip(Pawn pawn, Lord lord, bool removeFromDowned = true)
+        {
+            if (lord.ownedPawns.Any(x => !(x.GetComp<CompShips>() is null)))
+            {
+                bool flag = false;
+                bool flag2 = false;
+                string text = "";
+                string textShip = "";
+                List<Pawn> ownedShips = lord.ownedPawns.FindAll(x => !(x.GetComp<CompShips>() is null));
+                foreach (Pawn ship in ownedShips)
+                {
+                    if (ship.GetComp<CompShips>().AllPawnsAboard.Contains(pawn))
+                    {
+                        textShip = "MessagePawnBoardedFormingCaravan".Translate(pawn, ship.LabelShort).CapitalizeFirst();
+                        flag2 = true;
+                        break;
+                    }
+                }
+                if (!flag2)
+                {
+                    foreach (Pawn p in lord.ownedPawns)
+                    {
+                        if (p != pawn && CaravanUtility.IsOwner(p, Faction.OfPlayer))
+                        {
+                            flag = true;
+                            break;
+                        }
+                    }
+                }
+                text += flag ? "MessagePawnLostWhileFormingCaravan".Translate(pawn).CapitalizeFirst() : flag2 ? textShip :
+                    "MessagePawnLostWhileFormingCaravan".Translate(pawn).CapitalizeFirst() + "MessagePawnLostWhileFormingCaravan_AllLost".Translate();
+                //Message for boarding ship?
+                bool flag3 = true;
+                if (!flag2 && !flag) CaravanFormingUtility.StopFormingCaravan(lord);
+                if (flag)
+                {
+                    pawn.inventory.UnloadEverything = true;
+                    if (lord.ownedPawns.Contains(pawn))
+                    {
+                        lord.Notify_PawnLost(pawn, PawnLostCondition.ForcedByPlayerAction, null);
+                        flag3 = false;
+                    }
+                    LordJob_FormAndSendCaravanShip lordJob_FormAndSendCaravanShip = lord.LordJob as LordJob_FormAndSendCaravanShip;
+                    if (!(lordJob_FormAndSendCaravanShip is null) && lordJob_FormAndSendCaravanShip.downedPawns.Contains(pawn))
+                    {
+                        if (!removeFromDowned)
+                        {
+                            flag3 = false;
+                        }
+                        else
+                        {
+                            lordJob_FormAndSendCaravanShip.downedPawns.Remove(pawn);
+                        }
+                    }
+                }
+                if (flag3)
+                {
+                    MessageTypeDef msg = flag2 ? MessageTypeDefOf.SilentInput : MessageTypeDefOf.NegativeEvent;
+                    Messages.Message(text, pawn, msg, true);
+                }
+
+                return false;
+            }
+            return true;
+        }
+
+        public static bool TryGiveJobShipCaravan(Pawn pawn, ref Job __result)
+        {
+            if (pawn.GetLord().LordJob is LordJob_FormAndSendCaravanShip)
+            {
+                if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation)) __result = null;
+                Thing thing = GatherItemsForShipCaravanUtility.FindThingToHaul(pawn, pawn.GetLord());
+                if (thing is null) __result = null;
+                __result = new Job(JobDefOf_Ships.PrepareCaravan_GatheringShip, thing) { lord = pawn.GetLord() };
+                return false;
+            }
+            return true;
+        }
+
+        public static void GetShipAndSendCaravanLord(Pawn p, ref Lord __result)
+        {
+            if (__result is null)
+            {
+                if (IsFormingCaravanShipHelper(p))
+                {
+                    __result = p.GetLord();
+                    return;
+                }
+                if (p.Spawned)
+                {
+                    List<Lord> lords = p.Map.lordManager.lords;
+                    foreach (Lord lord in lords)
+                    {
+                        LordJob_FormAndSendCaravanShip lordJob_FormAndSendCaravanShip = lord.LordJob as LordJob_FormAndSendCaravanShip;
+                        if (!(lordJob_FormAndSendCaravanShip is null) && lordJob_FormAndSendCaravanShip.downedPawns.Contains(p))
+                        {
+                            __result = lord;
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        public static bool IsFormingCaravanShip(Pawn p, ref bool __result)
+        {
+            Lord lord = p.GetLord();
+            if (!(lord is null) && (lord.LordJob is LordJob_FormAndSendCaravanShip))
+            {
+                __result = true;
+                return false;
+            }
+            return true;
+        }
+
+        public static IEnumerable<CodeInstruction> CanStackShip(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+        {
+            List<CodeInstruction> instructionList = instructions.ToList();
+            MethodInfo shipMethod = AccessTools.Method(type: typeof(ShipHarmony), name: nameof(IsShip));
+
+            for (int i = 0; i < instructionList.Count; i++)
+            {
+                CodeInstruction instruction = instructionList[i];
+                if (instruction.opcode == OpCodes.Stloc_0)
+                {
+                    Label label = ilg.DefineLabel();
+
+                    i++;
+                    yield return instruction;
+                    yield return new CodeInstruction(opcode: OpCodes.Ldloc_0);
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: shipMethod);
+                    yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
+
+                    yield return new CodeInstruction(opcode: OpCodes.Ldc_I4_0);
+                    yield return new CodeInstruction(opcode: OpCodes.Ret);
+                    instruction = instructionList[i];
+                    instruction.labels.Add(label);
+                }
+                yield return instruction;
+            }
+        }
+
+        private static bool TransferablesShip(JobDriver_PrepareCaravan_GatherItems __instance, ref List<TransferableOneWay> __result)
+        {
+            if (__instance.job.lord.LordJob is LordJob_FormAndSendCaravanShip)
+            {
+                __result = ((LordJob_FormAndSendCaravanShip)__instance.job.lord.LordJob).transferables;
+                return false;
+            }
+            return true;
+        }
+
+        private static IEnumerable<CodeInstruction> AddHumanLikeOrdersTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+        {
+            List<CodeInstruction> instructionList = instructions.ToList();
+
+            for (int i = 0; i < instructionList.Count; i++)
+            {
+                CodeInstruction instruction = instructionList[i];
+                if (instruction.opcode == OpCodes.Stloc_S && ((LocalBuilder)instruction.operand).LocalIndex == 50)
+                {
+                    i++;
+                    Label label = ilg.DefineLabel();
+                    yield return instruction;
+                    yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 50);
+                    yield return new CodeInstruction(opcode: OpCodes.Brfalse_S, operand: label);
+                    instruction = instructionList[i];
+                    instruction.labels.Add(label);
+                }
+                yield return instruction;
+            }
+        }
+
+        #endregion Caravan
+
+        #region Construction
+        public static bool CompleteConstructionShip(Pawn worker, Frame __instance)
+        {
+            if (__instance.def.entityDefToBuild.designationCategory == DesignationCategoryDefOf_Ships.RimShips)
+            {
+                Pawn ship = PawnGenerator.GeneratePawn(__instance.def.entityDefToBuild.GetModExtension<Build.SpawnThingBuilt>().thingToSpawn);
+                __instance.resourceContainer.ClearAndDestroyContents(DestroyMode.Vanish);
+                Map map = __instance.Map;
+                __instance.Destroy(DestroyMode.Vanish);
+
+                if (!(__instance.def.entityDefToBuild.GetModExtension<SpawnThingBuilt>().soundFinished is null))
+                {
+                    __instance.def.entityDefToBuild.GetModExtension<SpawnThingBuilt>().soundFinished.PlayOneShot(new TargetInfo(__instance.Position, map, false));
+                }
+                ship.SetFaction(worker.Faction);
+                GenSpawn.Spawn(ship, __instance.Position, map, __instance.Rotation, WipeMode.FullRefund, false);
+                worker.records.Increment(RecordDefOf.ThingsConstructed);
+
+                ship.GetComp<CompShips>().Rename();
+                //Quality?
+                //Art?
+                //Tale RecordTale LongConstructionProject?
+                return false;
+            }
+            return true;
+        }
+        #endregion Construction
+
+
+        /*public static bool CanShipMove(LocalTargetInfo dest, PathEndMode peMode, Pawn_PathFollower __instance)
+        {
+            if (Traverse.Create(__instance).Field("pawn").GetValue<Pawn>() is Pawn pawn && IsShip(pawn))
+            {
+                if (pawn.GetComp<CompShips>().movementStatus == ShipMovementStatus.Offline) { return false; }
+            }
+            return true;
+        }*/
 
         public static bool CanReachShipImmediate(IntVec3 start, LocalTargetInfo target, Map map, PathEndMode peMode, Pawn pawn, ref bool __result)
         {
@@ -498,219 +813,6 @@ namespace RimShips
             if(IsShip(___pawn))
             {
                 __result = mapE.getShipPathFinder.FindShipPath(___pawn.Position, __instance.Destination, ___pawn, ___peMode);
-                return false;
-            }
-            return true;
-        }
-
-        public static bool ShipErrorRecoverJob(Pawn pawn, string message,
-            Exception exception = null, JobDriver concreteDriver = null)
-        {
-            if ( IsShip(pawn) )
-            {
-                if( !(pawn.jobs is null) )
-                {
-                    if( !(pawn.jobs.curJob is null ) )
-                    {
-                        pawn.jobs.EndCurrentJob(JobCondition.Errored, false);
-                    }
-                    try
-                    {
-                        pawn.jobs.StartJob(new Job(JobDefOf_Ships.IdleShip, 150, false), JobCondition.None, null, false, true, null, null, false);
-                    }
-                    catch
-                    {
-                        Log.Error("An error occurred when trying to recover the job for ship " + pawn.def + ". Please contact Mod Author.");
-                    }
-                }
-                return false;
-            }
-            return true;
-        }
-
-        public static void AddShipsSections(TransferableOneWayWidget widget, List<TransferableOneWay> transferables)
-        {
-            IEnumerable<TransferableOneWay> source = from x in transferables
-            where x.ThingDef.category == ThingCategory.Pawn
-            select x;
-            widget.AddSection("ShipSection".Translate(), from x in source
-            where !( ((Pawn)x.AnyThing).GetComp<CompShips>() is null )
-            select x);
-        }
-
-        public static bool StartFormingCaravanForShips(List<Pawn> pawns, List<Pawn> downedPawns, Faction faction, List<TransferableOneWay> transferables, 
-            IntVec3 meetingPoint, IntVec3 exitSpot, int startingTile, int destinationTile)
-        {
-            if(pawns.Any((Pawn x) => !(x.GetComp<CompShips>() is null) && (x.GetComp<CompShips>().movementStatus is ShipMovementStatus.Online)) )
-            {
-                if (startingTile < 0)
-                {
-                    Log.Error("Can't start forming caravan because startingTile is invalid.", false);
-                    return false;
-                }
-                if (!pawns.Any<Pawn>())
-                {
-                    Log.Error("Can't start forming caravan with 0 pawns.", false);
-                    return false;
-                }
-                if (pawns.Any((Pawn x) => x.Downed))
-                {
-                    Log.Warning("Forming a caravan with a downed pawn. This shouldn't happen because we have to create a Lord.", false);
-                }
-
-                List<TransferableOneWay> list = transferables.ToList<TransferableOneWay>();
-                list.RemoveAll((TransferableOneWay x) => x.CountToTransfer <= 0 || !x.HasAnyThing || x.AnyThing is Pawn);
-
-                foreach (Pawn p in pawns)
-                {
-                    Lord lord = p.GetLord();
-                    if(!(lord is null))
-                    {
-                        lord.Notify_PawnLost(p, PawnLostCondition.ForcedToJoinOtherLord, null);
-                    }
-                }
-                List<Pawn> ships = pawns.Where(x => !(x.GetComp<CompShips>() is null)).ToList();
-                int seats = 0;
-                foreach (Pawn ship in ships)
-                {
-                    seats += ship.GetComp<CompShips>().SeatsAvailable;
-                }
-                if ((pawns.Count + downedPawns.Count) > seats)
-                {
-                    Log.Error("Can't start forming caravan with ship(s) selected and not enough seats to house all pawns.", false);
-                    return false;
-                }
-
-                LordJob_FormAndSendCaravanShip lordJob = new LordJob_FormAndSendCaravanShip(list, ships, downedPawns, meetingPoint, exitSpot, startingTile,
-                    destinationTile);
-                LordMaker.MakeNewLord(Faction.OfPlayer, lordJob, pawns[0].MapHeld, pawns);
-
-                foreach(Pawn p in pawns)
-                {
-                    if(p.Spawned)
-                    {
-                        p.jobs.EndCurrentJob(JobCondition.InterruptForced, true);
-                    }
-                }
-                return false;
-            }
-            return true;
-        }
-
-        public static bool CanCarryIfShip(Pawn p, ref bool __result)
-        {
-            return p.GetComp<CompShips>() is null ? true : !(__result = true);
-        }
-
-        public static bool RemovePawnAddShip(Pawn pawn, Lord lord, bool removeFromDowned = true)
-        {
-            if(lord.ownedPawns.Any(x => !(x.GetComp<CompShips>() is null)))
-            {
-                bool flag = false;
-                bool flag2 = false;
-                string text = "";
-                string textShip = "";
-                List<Pawn> ownedShips = lord.ownedPawns.FindAll(x => !(x.GetComp<CompShips>() is null));
-                foreach(Pawn ship in ownedShips)
-                {
-                    if (ship.GetComp<CompShips>().AllPawnsAboard.Contains(pawn))
-                    {
-                        textShip = "MessagePawnBoardedFormingCaravan".Translate(pawn, ship.LabelShort).CapitalizeFirst();
-                        flag2 = true;
-                        break;
-                    }
-                }
-                if(!flag2)
-                {
-                    foreach (Pawn p in lord.ownedPawns)
-                    {
-                        if (p != pawn && CaravanUtility.IsOwner(p, Faction.OfPlayer))
-                        {
-                            flag = true;
-                            break;
-                        }
-                    }
-                }
-                text += flag ? "MessagePawnLostWhileFormingCaravan".Translate(pawn).CapitalizeFirst() : flag2 ? textShip :
-                    "MessagePawnLostWhileFormingCaravan".Translate(pawn).CapitalizeFirst() + "MessagePawnLostWhileFormingCaravan_AllLost".Translate();
-                //Message for boarding ship?
-                bool flag3 = true;
-                if (!flag2 && !flag) CaravanFormingUtility.StopFormingCaravan(lord);
-                if(flag)
-                {
-                    pawn.inventory.UnloadEverything = true;
-                    if(lord.ownedPawns.Contains(pawn))
-                    {
-                        lord.Notify_PawnLost(pawn, PawnLostCondition.ForcedByPlayerAction, null);
-                        flag3 = false;
-                    }
-                    LordJob_FormAndSendCaravanShip lordJob_FormAndSendCaravanShip = lord.LordJob as LordJob_FormAndSendCaravanShip;
-                    if(!(lordJob_FormAndSendCaravanShip is null) && lordJob_FormAndSendCaravanShip.downedPawns.Contains(pawn))
-                    {
-                        if(!removeFromDowned)
-                        {
-                            flag3 = false;
-                        }
-                        else
-                        {
-                            lordJob_FormAndSendCaravanShip.downedPawns.Remove(pawn);
-                        }
-                    }
-                }
-                if(flag3)
-                {
-                    MessageTypeDef msg = flag2 ? MessageTypeDefOf.SilentInput : MessageTypeDefOf.NegativeEvent;
-                    Messages.Message(text, pawn, msg, true);
-                }
-
-                return false;
-            }
-            return true;
-        }
-
-        public static bool TryGiveJobShipCaravan(Pawn pawn, ref Job __result)
-        {
-            if(pawn.GetLord().LordJob is LordJob_FormAndSendCaravanShip)
-            {
-                if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation)) __result = null;
-                Thing thing = GatherItemsForShipCaravanUtility.FindThingToHaul(pawn, pawn.GetLord());
-                if (thing is null) __result = null;
-                __result = new Job(JobDefOf.PrepareCaravan_GatherItems, thing) { lord = pawn.GetLord() };
-                return false;
-            }
-            return true;
-        }
-
-        public static void GetShipAndSendCaravanLord(Pawn p, ref Lord __result)
-        {
-            if(__result is null)
-            {
-                if(IsFormingCaravanShip(p))
-                {
-                    __result = p.GetLord();
-                    return;
-                }
-                if(p.Spawned)
-                {
-                    List<Lord> lords = p.Map.lordManager.lords;
-                    foreach(Lord lord in lords)
-                    {
-                        LordJob_FormAndSendCaravanShip lordJob_FormAndSendCaravanShip = lord.LordJob as LordJob_FormAndSendCaravanShip;
-                        if(!(lordJob_FormAndSendCaravanShip is null) && lordJob_FormAndSendCaravanShip.downedPawns.Contains(p))
-                        {
-                            __result = lord;
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-
-        private static bool TransferablesShip(JobDriver_PrepareCaravan_GatherItems __instance, ref List<TransferableOneWay> __result)
-        {
-            if(__instance.job.lord.LordJob is LordJob_FormAndSendCaravanShip)
-            {
-                __result = ((LordJob_FormAndSendCaravanShip)__instance.job.lord.LordJob).transferables;
                 return false;
             }
             return true;
@@ -804,80 +906,9 @@ namespace RimShips
             }
             return true;
         }
-        #endregion FunctionsMethods
 
-        #region Transpilers
+        #region TranspilersWIP
 
-        private static IEnumerable<CodeInstruction> DoBottomButtonsTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
-        {
-            List<CodeInstruction> instructionList = instructions.ToList();
-            MethodInfo methodSetSail = AccessTools.Method(type: typeof(ShipHarmony), name: nameof(CanSetSail));
-            Label breakLabel = ilg.DefineLabel();
-
-            for (int i = 0; i < instructionList.Count; i++)
-            {
-                CodeInstruction instruction = instructionList[i];
-                if (instruction.opcode == OpCodes.Ldloc_S && ((LocalBuilder)instruction.operand).LocalIndex == 19)
-                {
-                    yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 19);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: methodSetSail);
-                    yield return new CodeInstruction(opcode: OpCodes.Brfalse, operand: breakLabel);
-                }
-                else if (instruction.opcode == OpCodes.Ldfld && instruction.operand == AccessTools.Field(type: typeof(Dialog_FormCaravan), name: "destinationTile"))
-                {
-                    instructionList[i - 1].labels.Add(breakLabel);
-                }
-                yield return instruction;
-            }
-        }
-
-        public static IEnumerable<CodeInstruction> CanStackShip(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
-        {
-            List<CodeInstruction> instructionList = instructions.ToList();
-            MethodInfo shipMethod = AccessTools.Method(type: typeof(ShipHarmony), name: nameof(IsShip));
-
-            for(int i = 0; i < instructionList.Count; i++)
-            {
-                CodeInstruction instruction = instructionList[i];
-                if(instruction.opcode == OpCodes.Stloc_0)
-                {
-                    Label label = ilg.DefineLabel();
-
-                    i++;
-                    yield return instruction;
-                    yield return new CodeInstruction(opcode: OpCodes.Ldloc_0);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: shipMethod);
-                    yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
-
-                    yield return new CodeInstruction(opcode: OpCodes.Ldc_I4_0);
-                    yield return new CodeInstruction(opcode: OpCodes.Ret);
-                    instruction = instructionList[i];
-                    instruction.labels.Add(label);
-                }
-                yield return instruction;
-            }
-        }
-
-        private static IEnumerable<CodeInstruction> AddHumanLikeOrdersTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
-        {
-            List<CodeInstruction> instructionList = instructions.ToList();
-
-            for(int i = 0; i < instructionList.Count; i++)
-            {
-                CodeInstruction instruction = instructionList[i];
-                if(instruction.opcode == OpCodes.Stloc_S && ((LocalBuilder)instruction.operand).LocalIndex == 50)
-                {
-                    i++;
-                    Label label = ilg.DefineLabel();
-                    yield return instruction;
-                    yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 50);
-                    yield return new CodeInstruction(opcode: OpCodes.Brfalse_S, operand: label);
-                    instruction = instructionList[i];
-                    instruction.labels.Add(label);
-                }
-                yield return instruction;
-            }
-        }
         /*public static IEnumerable<CodeInstruction> FindPathShips(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
         {
             List<CodeInstruction> instructionList = instructions.ToList();
@@ -906,7 +937,7 @@ namespace RimShips
     yield return instruction;
 }
 }*/
-        #endregion Transpilers
+        #endregion TranspilersWIP
 
         #region HelperFunctions
 
@@ -1034,10 +1065,10 @@ namespace RimShips
             return Mathf.Max(num, 1);
         }
 
-        public static bool IsFormingCaravanShip(Pawn p)
+        public static bool IsFormingCaravanShipHelper(Pawn p)
         {
             Lord lord = p.GetLord();
-            return !(lord is null) && lord.LordJob is LordJob_FormAndSendCaravan;
+            return !(lord is null) && lord.LordJob is LordJob_FormAndSendCaravanShip;
         }
 
         public static float CapacityLeft(LordJob_FormAndSendCaravanShip lordJob, ref List<ThingCount> tmpCaravanPawns)
