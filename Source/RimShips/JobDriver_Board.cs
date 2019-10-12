@@ -24,7 +24,7 @@ namespace RimShips.Jobs
         {
             Pawn pawn = this.pawn;
             LocalTargetInfo targetA = this.job.targetA;
-
+            Log.Message("Reserve?");
             // Needs Edits
             return true;
         }

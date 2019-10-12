@@ -60,6 +60,7 @@ namespace RimShips.Lords
                 }
                 else
                 {
+                    //CHANGE SO SHIPS DONT WANDER
                     pawn.mindState.duty = new PawnDuty(DutyDefOf.PrepareCaravan_Wait);
                 }
             }
@@ -92,7 +93,6 @@ namespace RimShips.Lords
                 }
                 if(flag)
                 {
-                    Log.Message("End");
                     this.lord.ReceiveMemo("AllItemsGathered");
                 }
             }

@@ -12,6 +12,7 @@ using RimWorld.Planet;
 using RimShips.Build;
 using RimShips.Defs;
 using RimShips.Lords;
+using RimShips.Jobs;
 using UnityEngine;
 using UnityEngine.AI;
 using Verse;
@@ -55,7 +56,8 @@ namespace RimShips
             {
                 return 0;
             }
-            return Mathf.Max(transferable.CountToTransfer - GatherItemsForShipCaravanUtility.TransferableCountHauledByOthers(pawn, transferable, lord), 0);
+            int x = Mathf.Max(transferable.CountToTransfer - GatherItemsForShipCaravanUtility.TransferableCountHauledByOthers(pawn, transferable, lord), 0);
+            return x;
         }
 
         private static int TransferableCountHauledByOthers(Pawn pawn, TransferableOneWay transferable, Lord lord)
@@ -72,9 +74,9 @@ namespace RimShips
                 Pawn pawn2 = allPawnsSpawned[i];
                 if (pawn2 != pawn)
                 {
-                    if (pawn2.CurJob != null && pawn2.CurJob.def == JobDefOf.PrepareCaravan_GatherItems && pawn2.CurJob.lord == lord)
+                    if (pawn2.CurJob != null && pawn2.CurJob.def == JobDefOf_Ships.PrepareCaravan_GatheringShip && pawn2.CurJob.lord == lord)
                     {
-                        Thing toHaul = ((JobDriver_PrepareCaravan_GatherItems)pawn2.jobs.curDriver).ToHaul;
+                        Thing toHaul = ((JobDriver_PrepareCaravan_GatheringShip)pawn2.jobs.curDriver).ToHaul;
                         if (transferable.things.Contains(toHaul) || TransferableUtility.TransferAsOne(transferable.AnyThing, toHaul, TransferAsOneMode.PodsOrCaravanPacking))
                         {
                             num += toHaul.stackCount;
