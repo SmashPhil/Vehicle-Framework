@@ -31,6 +31,8 @@ namespace RimShips.Defs
 
         public static DutyDef PrepareCaravan_BoardShip;
 
+        public static DutyDef PrepareCaravan_GatherShip;
+
     }
 
 }

@@ -219,7 +219,7 @@ namespace RimShips.Lords
             //stateGraph.AddToil(this.gatherDownedPawns);
             //this.gatherDownedPawns_pause = new LordToil_PrepareCaravan_Pause();
             //stateGraph.AddToil(this.gatherDownedPawns_pause);
-            this.boardShip = new LordToil_PrepareCaravan_BoardShip(GetAvailableShip);
+            this.boardShip = new LordToil_PrepareCaravan_BoardShip(this.exitPoint, ships);
             stateGraph.AddToil(this.boardShip);
             this.boardShip_pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(this.boardShip_pause);
@@ -247,10 +247,14 @@ namespace RimShips.Lords
             transition4.AddTrigger(new Trigger_Memo("AllSlavesGathered"));
             transition4.AddPostAction(new TransitionAction_EndAllJobs());
             stateGraph.AddTransition(transition4, false);
-            Transition transition5 = new Transition(lordToil_PrepareCaravan_Wait, this.leave, false, true);
+            Transition transition5 = new Transition(lordToil_PrepareCaravan_Wait, this.boardShip, false, true);
             transition5.AddTrigger(new Trigger_NoPawnsVeryTiredAndSleeping(0f));
             transition5.AddPostAction(new TransitionAction_WakeAll());
             stateGraph.AddTransition(transition5, false);
+            Transition transitionB = new Transition(this.boardShip, this.leave, false, true);
+            transitionB.AddTrigger(new Trigger_Memo("ReadyToBoardShips"));
+            transitionB.AddPostAction(new TransitionAction_EndAllJobs());
+            stateGraph.AddTransition(transitionB, false);
             Transition transition6 = new Transition(this.leave, lordToil_End, false, true);
             transition6.AddTrigger(new Trigger_Memo("ReadyToExitMap"));
             transition6.AddPreAction(new TransitionAction_Custom(new Action(this.SendCaravan)));
@@ -267,14 +271,18 @@ namespace RimShips.Lords
             stateGraph.AddTransition(transition11, false);
             Transition transition12 = this.UnpauseTransition(this.gatherSlaves_pause, this.gatherSlaves);
             stateGraph.AddTransition(transition12, false);
-            Transition transition13 = this.PauseTransition(this.leave, this.leave_pause);
+            Transition transition13 = this.PauseTransition(this.boardShip, this.boardShip_pause);
             stateGraph.AddTransition(transition13, false);
-            Transition transition14 = this.UnpauseTransition(this.leave_pause, this.leave);
+            Transition transition14 = this.UnpauseTransition(this.boardShip_pause, this.boardShip);
             stateGraph.AddTransition(transition14, false);
-            Transition transition15 = this.PauseTransition(lordToil_PrepareCaravan_Wait, lordToil_PrepareCaravan_Pause);
+            Transition transition15 = this.PauseTransition(this.leave, this.leave_pause);
             stateGraph.AddTransition(transition15, false);
-            Transition transition16 = this.UnpauseTransition(lordToil_PrepareCaravan_Pause, lordToil_PrepareCaravan_Wait);
+            Transition transition16 = this.UnpauseTransition(this.leave_pause, this.leave);
             stateGraph.AddTransition(transition16, false);
+            Transition transition17 = this.PauseTransition(lordToil_PrepareCaravan_Wait, lordToil_PrepareCaravan_Pause);
+            stateGraph.AddTransition(transition17, false);
+            Transition transition18 = this.UnpauseTransition(lordToil_PrepareCaravan_Pause, lordToil_PrepareCaravan_Wait);
+            stateGraph.AddTransition(transition18, false);
             return stateGraph;
         }
 

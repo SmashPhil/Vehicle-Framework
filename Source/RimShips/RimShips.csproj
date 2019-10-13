@@ -57,6 +57,7 @@
     <Compile Include="DesignationCategoryDefOf_Ships.cs" />
     <Compile Include="Dialog_GiveShipName.cs" />
     <Compile Include="DutyDefOf_Ships.cs" />
+    <Compile Include="GatherAnimalsAndSlavesForShipsUtility.cs" />
     <Compile Include="GatherItemsForShipCaravanUtility.cs" />
     <Compile Include="GenGridShips.cs" />
     <Compile Include="GenPathShip.cs" />
@@ -67,6 +68,7 @@
     <Compile Include="JobDriver_PrepareCaravan_GatheringShip.cs" />
     <Compile Include="JobGiver_AwaitOrders.cs" />
     <Compile Include="JobGiver_BoardShip.cs" />
+    <Compile Include="JobGiver_PrepareCaravan_GatheringShip.cs" />
     <Compile Include="LordJob_FormAndSendCaravanShip.cs" />
     <Compile Include="LordToil_PrepareCaravan_BoardShip.cs" />
     <Compile Include="LordToil_PrepareCaravan_GatherShip.cs" />

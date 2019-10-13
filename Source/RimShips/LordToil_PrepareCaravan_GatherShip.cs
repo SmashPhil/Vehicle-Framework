@@ -52,7 +52,7 @@ namespace RimShips.Lords
             {
                 if(pawn.IsColonist)
                 {
-                    pawn.mindState.duty = new PawnDuty(DutyDefOf.PrepareCaravan_GatherItems);
+                    pawn.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_GatherShip);
                 }
                 else if(pawn.RaceProps.Animal)
                 {

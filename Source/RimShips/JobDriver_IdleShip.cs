@@ -6,6 +6,7 @@ using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Harmony;
+using RimShips.Lords;
 using RimWorld;
 using RimWorld.BaseGen;
 using RimWorld.Planet;
@@ -34,7 +35,7 @@ namespace RimShips.Jobs
         {
             get
             {
-                Thing thing = job.GetTarget(TargetIndex.A).Thing;
+                Thing thing = job.GetTarget(TargetIndex.B).Thing;
                 if (thing is null) return null;
                 return thing.TryGetComp<CompShips>();
             }
@@ -51,8 +52,8 @@ namespace RimShips.Jobs
             wait.tickAction = delegate ()
             {
                 if ((Find.TickManager.TicksGame + this.pawn.thingIDNumber) % JobSearchInterval == 0)
-                {
-                    this.CheckForNewJob();
+                { 
+                    this.CheckForCaravan();
                 }
             };
             wait.defaultCompleteMode = ToilCompleteMode.Never;
@@ -60,11 +61,14 @@ namespace RimShips.Jobs
             yield break;
         }
 
-        private void CheckForNewJob()
+        private void CheckForCaravan()
         {
-            //Log.Message("Checking for caravan job");
+            if(!(this.pawn.GetLord() is null) && this.pawn.GetLord().LordJob is LordJob_FormAndSendCaravanShip)
+            {
+                
+            }
         }
 
-        private const int JobSearchInterval = 250;
+        private const int JobSearchInterval = 300;
     }
 }

@@ -23,9 +23,10 @@ namespace RimShips.Lords
 {
     public class LordToil_PrepareCaravan_BoardShip : LordToil
     {
-        public LordToil_PrepareCaravan_BoardShip(Pawn shipToBoard)
+        public LordToil_PrepareCaravan_BoardShip(IntVec3 gatherPoint, List<Pawn> ships)
         {
-            this.shipToBoard = shipToBoard;
+            this.ships = ships;
+            this.gatherPoint = gatherPoint;
         }
 
         public override float? CustomWakeThreshold
@@ -48,37 +49,25 @@ namespace RimShips.Lords
         {
             foreach(Pawn p in this.lord.ownedPawns)
             {
-                if(p.IsColonist)
+                if(p.GetComp<CompShips>() is null)
                 {
+                    Log.Message("Board ship for - " + p.LabelShort);
                     p.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_BoardShip);
+                    p.mindState.duty.locomotion = LocomotionUrgency.Jog;
                 }
             }
         }
 
         public override void LordToilTick()
         {
-            base.LordToilTick();
-            if(Find.TickManager.TicksGame % 120 == 0)
+            if(Find.TickManager.TicksGame % 100 == 0)
             {
-                bool flag = true;
-                foreach(Pawn pawn in this.lord.ownedPawns)
-                {
-                    if(pawn.IsColonist && pawn.mindState.lastJobTag != JobTag.WaitingForOthersToFinishGatheringItems)
-                    {
-                        flag = false;
-                        break;
-                    }
-                }
-                if(flag)
-                {
-                    foreach(Pawn pawn in base.Map.mapPawns.AllPawnsSpawned)
-                    {
-
-                    }
-                }
+                GatherAnimalsAndSlavesForShipsUtility.CheckArrived(this.lord, this.lord.ownedPawns, ships, this.gatherPoint, "ReadyToBoardShips", (Pawn x) => true, null);
             }
         }
 
-        private Pawn shipToBoard;
+        private List<Pawn> ships;
+
+        private IntVec3 gatherPoint;
     }
 }

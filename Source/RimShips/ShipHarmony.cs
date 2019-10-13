@@ -91,7 +91,6 @@ namespace RimShips
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(ShipErrorRecoverJob)));
             
-
             //Caravan
             harmony.Patch(original: AccessTools.Method(typeof(CaravanUIUtility), name: nameof(CaravanUIUtility.AddPawnsSections)),
                 prefix: null,
@@ -111,9 +110,6 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(CaravanFormingUtility), name: nameof(CaravanFormingUtility.RemovePawnFromCaravan)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(RemovePawnAddShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(JobGiver_PrepareCaravan_GatherItems), name: "TryGiveJob"),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(TryGiveJobShipCaravan))); //DOUBLE CHECK
             harmony.Patch(original: AccessTools.Method(type: typeof(CaravanFormingUtility), name: nameof(CaravanFormingUtility.GetFormAndSendCaravanLord)),
                 prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
@@ -587,19 +583,6 @@ namespace RimShips
                     Messages.Message(text, pawn, msg, true);
                 }
 
-                return false;
-            }
-            return true;
-        }
-
-        public static bool TryGiveJobShipCaravan(Pawn pawn, ref Job __result)
-        {
-            if (pawn.GetLord().LordJob is LordJob_FormAndSendCaravanShip)
-            {
-                if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation)) __result = null;
-                Thing thing = GatherItemsForShipCaravanUtility.FindThingToHaul(pawn, pawn.GetLord());
-                if (thing is null) __result = null;
-                __result = new Job(JobDefOf_Ships.PrepareCaravan_GatheringShip, thing) { lord = pawn.GetLord() };
                 return false;
             }
             return true;
