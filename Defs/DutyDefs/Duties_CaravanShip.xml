@@ -10,11 +10,12 @@
 					<treeDef>SatisfyVeryUrgentNeeds</treeDef>
 				</li>
 				
+				<li Class="RimShips.Jobs.JobGiver_BoardShip"/>
+				
+				<!--
 				<li Class="ThinkNode_ConditionalColonist">
 					<subNodes>
-						<li Class="RimShips.Jobs.JobGiver_BoardShip">
-							<locomotionUrgency>Jog</locomotionUrgency>
-						</li>
+						<li Class="RimShips.Jobs.JobGiver_BoardShip"/>
 					</subNodes>
 				</li>
 				
@@ -36,40 +37,50 @@
 						</li>
 					</subNodes>
 				</li>
-				
+				-->
+				<li Class="JobGiver_WanderAnywhere"/>
 			</subNodes>
 		</thinkNode>
 	</DutyDef>
 	
 	<DutyDef>
-    <defName>PrepareCaravan_GatherShip</defName>
-    <thinkNode Class="ThinkNode_Priority">
-      <subNodes>
-        <!-- Basic needs -->
-        <li Class="ThinkNode_Subtree">
-          <treeDef>SatisfyVeryUrgentNeeds</treeDef>
-        </li>
+		<defName>PrepareCaravan_GatherShip</defName>
+		<thinkNode Class="ThinkNode_Priority">
+		  <subNodes>
+			<!-- Basic needs -->
+			<li Class="ThinkNode_Subtree">
+			  <treeDef>SatisfyVeryUrgentNeeds</treeDef>
+			</li>
 
-        <!-- Drop items if you're assigned to unload everything -->
-        <!-- (before loading new items!) -->
-        <li Class="JobGiver_UnloadYourInventory" />
+			<!-- Drop items if you're assigned to unload everything -->
+			<!-- (before loading new items!) -->
+			<li Class="JobGiver_UnloadYourInventory" />
 
-        <!-- Unload carriers if they're assigned to unload everything -->
-        <!-- (before loading new items!) -->
-        <li Class="JobGiver_UnloadMyLordCarriers" />
+			<!-- Unload carriers if they're assigned to unload everything -->
+			<!-- (before loading new items!) -->
+			<li Class="JobGiver_UnloadMyLordCarriers" />
 
-        <!-- Gather items -->
-        <li Class="RimShips.Jobs.JobGiver_PrepareCaravan_GatheringShip"/>
-        
-        <!-- Wander -->
-        <li Class="ThinkNode_Tagger">
-          <tagToGive>WaitingForOthersToFinishGatheringItems</tagToGive>
-          <subNodes>
-            <li Class="JobGiver_WanderAnywhere"/>
-          </subNodes>
-        </li>
-      </subNodes>
-    </thinkNode>
-  </DutyDef>
+			<!-- Gather items -->
+			<li Class="RimShips.Jobs.JobGiver_PrepareCaravan_GatheringShip"/>
+			
+			<!-- Wander -->
+			<li Class="ThinkNode_Tagger">
+			  <tagToGive>WaitingForOthersToFinishGatheringItems</tagToGive>
+			  <subNodes>
+				<li Class="JobGiver_WanderAnywhere"/>
+			  </subNodes>
+			</li>
+		  </subNodes>
+		</thinkNode>
+	</DutyDef>
+  
+	<DutyDef>
+		<defName>PrepareCaravan_WaitShip</defName>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="RimShips.Jobs.JobGiver_AwaitOrders"/>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
 </Defs>
 				

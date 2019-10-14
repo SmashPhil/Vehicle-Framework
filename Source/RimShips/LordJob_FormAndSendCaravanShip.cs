@@ -207,11 +207,11 @@ namespace RimShips.Lords
             stateGraph.AddToil(this.gatherAnimals);
             this.gatherAnimals_pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(this.gatherAnimals_pause);
-            this.gatherItems = new LordToil_PrepareCaravan_GatherShip(this.ships, this.meetingPoint);
+            this.gatherItems = new LordToil_PrepareCaravan_GatherShip(this.meetingPoint);
             stateGraph.AddToil(this.gatherItems);
             this.gatherItems_pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(this.gatherItems_pause);
-            this.gatherSlaves = new LordToil_PrepareCaravan_GatherSlaves(this.meetingPoint);
+            this.gatherSlaves = new LordToil_PrepareCaravan_GatherSlavesShip(this.meetingPoint);
             stateGraph.AddToil(this.gatherSlaves);
             this.gatherSlaves_pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(this.gatherSlaves_pause);
@@ -219,7 +219,7 @@ namespace RimShips.Lords
             //stateGraph.AddToil(this.gatherDownedPawns);
             //this.gatherDownedPawns_pause = new LordToil_PrepareCaravan_Pause();
             //stateGraph.AddToil(this.gatherDownedPawns_pause);
-            this.boardShip = new LordToil_PrepareCaravan_BoardShip(this.exitPoint, ships);
+            this.boardShip = new LordToil_PrepareCaravan_BoardShip(this.exitPoint);
             stateGraph.AddToil(this.boardShip);
             this.boardShip_pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(this.boardShip_pause);
@@ -252,7 +252,7 @@ namespace RimShips.Lords
             transition5.AddPostAction(new TransitionAction_WakeAll());
             stateGraph.AddTransition(transition5, false);
             Transition transitionB = new Transition(this.boardShip, this.leave, false, true);
-            transitionB.AddTrigger(new Trigger_Memo("ReadyToBoardShips"));
+            transitionB.AddTrigger(new Trigger_Memo("AllPawnsOnboard"));
             transitionB.AddPostAction(new TransitionAction_EndAllJobs());
             stateGraph.AddTransition(transitionB, false);
             Transition transition6 = new Transition(this.leave, lordToil_End, false, true);

@@ -147,10 +147,10 @@
 				
 				<roles>
 					<li>
-						<label>Captain</label>
+						<label>Crew</label>
 						<handlingTypes>Movement</handlingTypes>
-						<slots>1</slots>
-						<slotsToOperate>1</slotsToOperate>
+						<slots>2</slots>
+						<slotsToOperate>2</slotsToOperate>
 						<slotTag>Driver</slotTag>
 					</li>
 					

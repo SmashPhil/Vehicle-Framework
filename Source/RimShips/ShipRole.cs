@@ -12,9 +12,8 @@ namespace RimShips
         public HandlingTypeFlags handlingTypes;
         public string label = "Driver";
         public List<PawnGenOption> preferredHandlers = new List<PawnGenOption>();
-        public int slots = 1;
-        public int slotsLeft;
-        public int slotsToOperate = 1;
+        public int slots;
+        public int slotsToOperate;
         public string slotTag;
         public ShipRole()
         {
@@ -25,6 +24,7 @@ namespace RimShips
             label = group.role.label;
             handlingTypes = group.role.handlingTypes;
             slots = group.role.slots;
+            slotsToOperate = group.role.slotsToOperate;
             slotTag = group.role.slotTag;
             preferredHandlers = group.role.preferredHandlers;
         }

@@ -29,10 +29,7 @@ namespace RimShips.Jobs
         }
         protected override Job TryGiveJob(Pawn pawn)
         {
-            return new Job(JobDefOf_Ships.IdleShip)
-            {
-                expiryInterval = this.ticks
-            };
+            return new Job(JobDefOf_Ships.IdleShip);
         }
 
         public int ticks = 250;

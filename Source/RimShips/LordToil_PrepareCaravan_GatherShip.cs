@@ -24,10 +24,9 @@ namespace RimShips.Lords
 {
     public class LordToil_PrepareCaravan_GatherShip : LordToil
     {
-        public LordToil_PrepareCaravan_GatherShip(List<Pawn> ships, IntVec3 meetingPoint)
+        public LordToil_PrepareCaravan_GatherShip(IntVec3 meetingPoint)
         {
             this.meetingPoint = meetingPoint;
-            this.ships = ships;
         }
 
         public override float? CustomWakeThreshold
@@ -58,9 +57,12 @@ namespace RimShips.Lords
                 {
                     pawn.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_BoardShip);
                 }
+                else if(!(pawn.GetComp<CompShips>() is null))
+                {
+                    pawn.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_WaitShip);
+                }
                 else
                 {
-                    //CHANGE SO SHIPS DONT WANDER
                     pawn.mindState.duty = new PawnDuty(DutyDefOf.PrepareCaravan_Wait);
                 }
             }
@@ -99,7 +101,5 @@ namespace RimShips.Lords
         }
 
         private IntVec3 meetingPoint;
-
-        private List<Pawn> ships;
     }
 }

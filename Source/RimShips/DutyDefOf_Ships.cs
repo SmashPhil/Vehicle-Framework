@@ -33,6 +33,7 @@ namespace RimShips.Defs
 
         public static DutyDef PrepareCaravan_GatherShip;
 
+        public static DutyDef PrepareCaravan_WaitShip;
     }
 
 }

@@ -70,8 +70,7 @@ namespace RimShips
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(TryEnterNextCellShip)));
 
-            harmony.Patch(original: AccessTools.Method(type: typeof(MapGenerator), name: nameof(MapGenerator.GenerateMap)),
-                prefix: null,
+            harmony.Patch(original: AccessTools.Method(type: typeof(MapGenerator), name: nameof(MapGenerator.GenerateMap)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(GenerateMapExtension)));
             harmony.Patch(original: AccessTools.Method(typeof(ReachabilityImmediate), parameters: new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(Map),
@@ -90,18 +89,18 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(typeof(JobUtility), name: nameof(JobUtility.TryStartErrorRecoverJob)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(ShipErrorRecoverJob)));
+            harmony.Patch(original: AccessTools.Method(typeof(JobGiver_Wander), name: "TryGiveJob"),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(ShipsDontWander)));
             
             //Caravan
-            harmony.Patch(original: AccessTools.Method(typeof(CaravanUIUtility), name: nameof(CaravanUIUtility.AddPawnsSections)),
-                prefix: null,
+            harmony.Patch(original: AccessTools.Method(typeof(CaravanUIUtility), name: nameof(CaravanUIUtility.AddPawnsSections)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(AddShipsSections)));
             harmony.Patch(original: AccessTools.Method(typeof(CaravanFormingUtility), name: nameof(CaravanFormingUtility.StartFormingCaravan)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(StartFormingCaravanForShips)));
-            harmony.Patch(original: AccessTools.Method(typeof(Dialog_FormCaravan), name: "DoBottomButtons"),
-                prefix: null,
-                postfix: null,
+            harmony.Patch(original: AccessTools.Method(typeof(Dialog_FormCaravan), name: "DoBottomButtons"), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(DoBottomButtonsTranspiler)));
             harmony.Patch(original: AccessTools.Method(typeof(MassUtility), name: nameof(MassUtility.CanEverCarryAnything)),
@@ -110,26 +109,24 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(CaravanFormingUtility), name: nameof(CaravanFormingUtility.RemovePawnFromCaravan)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(RemovePawnAddShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanFormingUtility), name: nameof(CaravanFormingUtility.GetFormAndSendCaravanLord)),
-                prefix: null,
+            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanFormingUtility), name: nameof(CaravanFormingUtility.GetFormAndSendCaravanLord)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(GetShipAndSendCaravanLord)));
             harmony.Patch(original: AccessTools.Method(type: typeof(CaravanFormingUtility), name: nameof(CaravanFormingUtility.IsFormingCaravan)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(IsFormingCaravanShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(TransferableUtility), name: nameof(TransferableUtility.CanStack)),
-                prefix: null,
-                postfix: null,
+            harmony.Patch(original: AccessTools.Method(type: typeof(TransferableUtility), name: nameof(TransferableUtility.CanStack)), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(CanStackShip)));
             harmony.Patch(original: AccessTools.Property(type: typeof(JobDriver_PrepareCaravan_GatherItems), name: "Transferables").GetGetMethod(nonPublic: true),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(TransferablesShip))); //DOUBLE CHECK
-            harmony.Patch(original: AccessTools.Method(type: typeof(FloatMenuMakerMap), name: "AddHumanlikeOrders"),
-                prefix: null, postfix: null,
+            harmony.Patch(original: AccessTools.Method(type: typeof(FloatMenuMakerMap), name: "AddHumanlikeOrders"), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(AddHumanLikeOrdersTranspiler)));
-
+            harmony.Patch(original: AccessTools.Method(type: typeof(LordToil_PrepareCaravan_GatherAnimals), name: nameof(LordToil_PrepareCaravan_GatherAnimals.UpdateAllDuties)), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(UpdateDutyOfShip)));
 
             //TO DO
             harmony.Patch(original: AccessTools.Method(type: typeof(PathGrid), parameters: new Type[] { typeof(IntVec3)} , 
@@ -422,6 +419,16 @@ namespace RimShips
             }
             return true;
         }
+
+        private static bool ShipsDontWander(Pawn pawn, ref Job __result, JobGiver_Wander __instance)
+        {
+            if(IsShip(pawn))
+            {
+                __result = new Job(JobDefOf_Ships.IdleShip);
+                return false;
+            }
+            return true;
+        }
         #endregion Jobs
 
         #region Caravan
@@ -682,6 +689,18 @@ namespace RimShips
             }
         }
 
+        public static void UpdateDutyOfShip(LordToil_PrepareCaravan_GatherAnimals __instance)
+        {
+            if(__instance.lord.LordJob is LordJob_FormAndSendCaravanShip)
+            {
+                List<Pawn> ships = __instance.lord.ownedPawns.Where(x => !(x.GetComp<CompShips>() is null)).ToList();
+                foreach(Pawn ship in ships)
+                {
+                    ship.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_WaitShip);
+                }
+            }
+        }
+
         #endregion Caravan
 
         #region Construction
@@ -711,16 +730,6 @@ namespace RimShips
             return true;
         }
         #endregion Construction
-
-
-        /*public static bool CanShipMove(LocalTargetInfo dest, PathEndMode peMode, Pawn_PathFollower __instance)
-        {
-            if (Traverse.Create(__instance).Field("pawn").GetValue<Pawn>() is Pawn pawn && IsShip(pawn))
-            {
-                if (pawn.GetComp<CompShips>().movementStatus == ShipMovementStatus.Offline) { return false; }
-            }
-            return true;
-        }*/
 
         public static bool CanReachShipImmediate(IntVec3 start, LocalTargetInfo target, Map map, PathEndMode peMode, Pawn pawn, ref bool __result)
         {
@@ -930,6 +939,7 @@ namespace RimShips
         {
             int seats = 0;
             int pawns = 0;
+            int prereq = 0;
             bool flag = caravan.Any(x => !(x.GetComp<CompShips>() is null)); //Ships or No Ships
             if(flag)
             {
@@ -938,6 +948,7 @@ namespace RimShips
                     if (!(p.GetComp<CompShips>() is null))
                     {
                         seats += p.GetComp<CompShips>().SeatsAvailable;
+                        prereq += p.GetComp<CompShips>().PawnCountToOperate;
                     }
                     else
                     {
@@ -946,11 +957,14 @@ namespace RimShips
                 }
             }
             bool flag2 = flag ? pawns > seats : false; //Not Enough Room
-            if(flag && flag2)
+            bool flag3 = flag ? pawns < prereq : false; //Not Enough Pawns to Sail
+            if(flag2)
                 Messages.Message("CaravanMustHaveEnoughSpaceOnShip".Translate(), MessageTypeDefOf.RejectInput, false);
             if(!caravan.Any(x => CaravanUtility.IsOwner(x, Faction.OfPlayer) && !x.Downed))
                 Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, false);
-            return !flag2;
+            if (flag3)
+                Messages.Message("CaravanMustHaveEnoughPawnsToOperate".Translate(prereq), MessageTypeDefOf.RejectInput, false);
+            return !flag2 && !flag3;
         }
 
         private static bool IsShip(Pawn p)

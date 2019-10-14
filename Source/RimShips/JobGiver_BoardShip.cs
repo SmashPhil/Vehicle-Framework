@@ -26,21 +26,16 @@ namespace RimShips.Jobs
     {
         protected override Job TryGiveJob(Pawn pawn)
         {
-            Lord lord = pawn.GetLord();
-            return pawn.health.capacities.CapableOf(PawnCapacityDefOf.Moving) ? new Job(JobDefOf_Ships.Board, FindAvailableShip(pawn)) : null;
+            if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Moving)) return null;
+            return new Job(JobDefOf_Ships.Board, FindAvailableShip(pawn))
+            {
+                lord = pawn.GetLord()
+            };
         }
 
         private Pawn FindAvailableShip(Pawn pawn)
         {
             return ((LordJob_FormAndSendCaravanShip)pawn.GetLord().LordJob).GetAvailableShip;
         }
-        
-        private Pawn targetShip;
-
-        private LocomotionUrgency locomotionUrgency = LocomotionUrgency.Jog;
-
-        private Danger maxDanger = Danger.Deadly;
-
-        private int jobMaxDuration = 999999;
     }
 }

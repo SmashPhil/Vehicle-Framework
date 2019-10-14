@@ -25,12 +25,20 @@ namespace RimShips.Jobs
         public static Toil BoardShip(Pawn pawnBoarding, TargetIndex index)
         {
             Toil toil = new Toil();
-
             toil.initAction = delegate ()
             {
                 CompShips ship = toil.actor.jobs.curJob.GetTarget(index).Thing.TryGetComp<CompShips>();
                 ship.Notify_Boarded(pawnBoarding);
+                foreach(ShipHandler handler in ship.handlers)
+                {
+                    if(handler.AreSlotsAvailable)
+                    {
+                        ship.GiveLoadJob(pawnBoarding, handler);
+                        break;
+                    }
+                }
             };
+            toil.defaultCompleteMode = ToilCompleteMode.Instant;
             return toil;
         }
     }

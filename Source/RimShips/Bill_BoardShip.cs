@@ -28,7 +28,7 @@ namespace RimShips.Jobs
 
         }
 
-        public Bill_BoardShip(Pawn newBoard, Pawn newShip, ShipHandler newHandler)
+        public Bill_BoardShip(Pawn newBoard, ShipHandler newHandler)
         {
             pawnToBoard = newBoard;
             handler = newHandler;

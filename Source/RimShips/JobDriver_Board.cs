@@ -24,21 +24,9 @@ namespace RimShips.Jobs
         {
             Pawn pawn = this.pawn;
             LocalTargetInfo targetA = this.job.targetA;
-            Log.Message("Reserve?");
-            // Needs Edits
+            // Needs Edits for reserving roles
             return true;
         }
-
-        private CompShips Ship
-        {
-            get
-            {
-                Thing thing = job.GetTarget(TargetIndex.A).Thing;
-                if (thing is null) return null;
-                return thing.TryGetComp<CompShips>();
-            }
-        }
-        
         
         protected override IEnumerable<Toil> MakeNewToils()
         {

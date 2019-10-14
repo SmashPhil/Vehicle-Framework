@@ -72,6 +72,7 @@
     <Compile Include="LordJob_FormAndSendCaravanShip.cs" />
     <Compile Include="LordToil_PrepareCaravan_BoardShip.cs" />
     <Compile Include="LordToil_PrepareCaravan_GatherShip.cs" />
+    <Compile Include="LordToil_PrepareCaravan_GatherSlavesShip.cs" />
     <Compile Include="MainTabWindow_Ships.cs" />
     <Compile Include="MapExtension.cs" />
     <Compile Include="PawnTableDefOf_Ships.cs" />
@@ -79,7 +80,6 @@
     <Compile Include="Projectile_Water.cs" />
     <Compile Include="Projectile_WaterHarmony.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RimShips_JobDefOf.cs" />
     <Compile Include="ShipHandler.cs" />
     <Compile Include="ShipHarmony.cs" />
     <Compile Include="ShipPassengerCardUtility.cs" />

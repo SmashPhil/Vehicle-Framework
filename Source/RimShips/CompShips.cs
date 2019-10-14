@@ -69,19 +69,39 @@ namespace RimShips
                 {
                     foreach (ShipHandler h in handlers)
                     {
-                        if (h.handlers != null && h.handlers.Count > 0)
+                        if (h.handlers != null && h.handlers.Count >= h.role.slotsToOperate)
                         {
                             if (h.role != null)
                             {
                                 if ((h.role.handlingTypes & HandlingTypeFlags.Movement) != HandlingTypeFlags.None)
                                 {
-                                    result = h.handlers.Any((Pawn x) => !x.Dead && !x.Downed);
+                                    result = h.handlers.All((Pawn x) => !x.Dead && !x.Downed);
                                 }
                             }
                         }
                     }
                 }
                 return result;
+            }
+        }
+
+        public int PawnCountToOperate
+        {
+            get
+            {
+                int pawnCount = 0;
+                foreach(ShipRole r in Props.roles)
+                {
+                    pawnCount += r.slotsToOperate;
+                    foreach(ShipHandler handler in handlers)
+                    {
+                        if(handler.role.slotsToOperate > 0)
+                        {
+                            pawnCount -= handler.handlers.Count;
+                        }
+                    }
+                }
+                return pawnCount >= 0 ? pawnCount : 0;
             }
         }
 
@@ -189,7 +209,7 @@ namespace RimShips
                 {
                     FloatMenuOption opt = new FloatMenuOption("BoardShip".Translate(this.parent.LabelShort, handler.role.label, (handler.role.slots - handler.handlers.Count).ToString()), delegate ()
                     {
-                        Job job = new Job(RimShips_JobDefOf.Board, this.parent);
+                        Job job = new Job(JobDefOf_Ships.Board, this.parent);
                         pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
                         GiveLoadJob(pawn, handler);
                     }, MenuOptionPriority.Default, null, null, 0f, null, null);
@@ -212,7 +232,7 @@ namespace RimShips
                     return;
                 }
             }
-            bills.Add(new Jobs.Bill_BoardShip(pawn, Pawn, handler));
+            bills.Add(new Jobs.Bill_BoardShip(pawn, handler));
         }
 
         public ShipRole uniqueShip(ShipRole _role)

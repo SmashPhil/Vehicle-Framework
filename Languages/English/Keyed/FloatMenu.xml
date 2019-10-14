@@ -2,13 +2,14 @@
 
 <LanguageData>
 	<BoardShip>Board {0} as {1}  [{2}]</BoardShip>
-	<CompShips_CannotMove>Cannot draft. Ship needs Captain in order to navigate.</CompShips_CannotMove>
+	<CompShips_CannotMove>Cannot draft. Ship needs more crew in order to navigate.</CompShips_CannotMove>
 	<ShipSection>Ships</ShipSection>
 	<AwaitOrders>Awaiting Orders</AwaitOrders>
 	<NameIsInvalid>Name invalid for ship.</NameIsInvalid>
 	<ShipGainsName>Your new ship has been named {0}</ShipGainsName>
 	
 	<CaravanMustHaveEnoughSpaceOnShip>Not enough space on ships to house all pawns.</CaravanMustHaveEnoughSpaceOnShip>
+	<CaravanMustHaveEnoughPawnsToOperate>Not enough Pawns selected to set sail. Need {0}</CaravanMustHaveEnoughPawnsToOperate>
 	<MessagePawnBoardedFormingCaravan>{0} has boarded the {1} and is ready for departure.</MessagePawnBoardedFormingCaravan>
 
 	<FormingCaravanStatus_GatheringItems_Ship>Loading cargo onto Ships.</FormingCaravanStatus_GatheringItems_Ship>

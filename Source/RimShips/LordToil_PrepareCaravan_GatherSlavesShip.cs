@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -10,20 +9,23 @@ using Harmony;
 using RimWorld;
 using RimWorld.BaseGen;
 using RimWorld.Planet;
-using RimShips.AI;
-using RimShips.Defs;
 using UnityEngine;
 using UnityEngine.AI;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 using Verse.Sound;
+using RimShips.AI;
+using RimShips.Defs;
+using RimShips.Build;
+using RimShips.Jobs;
+using RimShips.UI;
 
 namespace RimShips.Lords
 {
-    public class LordToil_PrepareCaravan_BoardShip : LordToil
+    public class LordToil_PrepareCaravan_GatherSlavesShip : LordToil
     {
-        public LordToil_PrepareCaravan_BoardShip(IntVec3 meetingPoint)
+        public LordToil_PrepareCaravan_GatherSlavesShip(IntVec3 meetingPoint)
         {
             this.meetingPoint = meetingPoint;
         }
@@ -48,33 +50,34 @@ namespace RimShips.Lords
         {
             foreach(Pawn p in this.lord.ownedPawns)
             {
-                if(p.GetComp<CompShips>() is null)
+                if (!(p.GetComp<CompShips>() is null))
                 {
-                    p.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_BoardShip)
-                    {
-                        locomotion = LocomotionUrgency.Jog
-                    };
+                    p.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_WaitShip);
+                }
+                else if (!p.RaceProps.Animal && (p.GetComp<CompShips>() is null))
+                {
+                    //CHANGE DUTY DEF
+                    p.mindState.duty = new PawnDuty(DutyDefOf.PrepareCaravan_GatherPawns, this.meetingPoint, -1f);
+                    p.mindState.duty.pawnsToGather = PawnsToGather.Slaves;
                 }
                 else
                 {
-                    p.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_WaitShip);
+                    p.mindState.duty = new PawnDuty(DutyDefOf.PrepareCaravan_Wait, this.meetingPoint, -1f);
                 }
             }
         }
 
         public override void LordToilTick()
         {
-            if(Find.TickManager.TicksGame % 200 == 0)
+            if(Find.TickManager.TicksGame % 100 == 0)
             {
                 Lord lord = this.lord;
-                List<Pawn> pawnsLeft = this.lord.ownedPawns.Where(x => (x.GetComp<CompShips>() is null)).ToList();
+                List<Pawn> ownedPawns = this.lord.ownedPawns.Where(x => (x.GetComp<CompShips>() is null)).ToList();
                 List<Pawn> ships = this.lord.ownedPawns.Where(x => !(x.GetComp<CompShips>() is null)).ToList();
                 IntVec3 intVec = this.meetingPoint;
-                
-                if(!pawnsLeft.Any())
-                {
-                    this.lord.ReceiveMemo("AllPawnsOnboard");
-                }
+                string memo = "AllSlavesGathered";
+                bool shouldCheckIfArrived(Pawn x) => !x.IsColonist && !x.RaceProps.Animal && !(x.GetComp<CompShips>() is null);
+                GatherAnimalsAndSlavesForShipsUtility.CheckArrived(lord, ownedPawns, ships, intVec, memo, shouldCheckIfArrived, null);
             }
         }
 

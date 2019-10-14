@@ -35,9 +35,8 @@ namespace RimShips
         public static void CheckArrived(Lord lord, List<Pawn> pawns, List<Pawn> ships, IntVec3 meetingPoint, string memo, Predicate<Pawn> shouldCheckIfArrived,
             Predicate<Pawn> extraValidator = null)
         {
-            List<Pawn> boardablePawns = ships.Where(x => (x.GetComp<CompShips>() is null)).ToList();
             bool flag = true;
-            foreach(Pawn p in pawns)
+            foreach (Pawn p in pawns)
             {
                 if(shouldCheckIfArrived(p))
                 {
