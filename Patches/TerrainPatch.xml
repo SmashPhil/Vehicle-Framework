@@ -3,11 +3,11 @@
 <Patch>
 	<Operation Class="PatchOperationSequence">
 		<operations>
-			
+			<!--
 			<li Class="PatchOperationRemove">
 				<xpath>Defs/TerrainDef[@Name="WaterDeepBase"]/passability</xpath>
 			</li>
-			<!--
+			
 			<li Class="PatchOperationReplace">
 				<xpath>Defs/TerrainDef[@Name="WaterDeepBase"]</xpath>
 				<value>

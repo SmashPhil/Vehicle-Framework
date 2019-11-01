@@ -21,15 +21,15 @@ namespace RimShips.AI
 {
     public class ShipPathFinder
     {
-        public ShipPathFinder(Map map, MapExtension mapExt)
+        public ShipPathFinder(Map map)
         {
             this.map = map;
-            this.mapE = mapExt;
+            this.mapE = MapExtensionUtility.GetExtensionToMap(map);
             this.mapSizeX = map.Size.x;
             this.mapSizeZ = map.Size.z;
             this.calcGrid = new ShipPathFinder.ShipPathFinderNodeFast[this.mapSizeX * this.mapSizeZ];
             this.openList = new FastPriorityQueue<ShipPathFinder.CostNode>(new ShipPathFinder.CostNodeComparer());
-            this.regionCostCalculator = new RegionCostCalculatorWrapper(map);
+            this.regionCostCalculator = new RegionCostCalculatorWrapperShips(map);
         }
 
         public bool PawnIsShip(Pawn p)
@@ -56,8 +56,7 @@ namespace RimShips.AI
                 traverseParms.mode = TraverseMode.PassAllDestroyableThings;
             }
             Pawn pawn = traverseParms.pawn;
-            Log.Message("" + (pawn.Map != this.map));
-            if(!(pawn is null) && pawn.Map != this.map)
+            if (!(pawn is null) && pawn.Map != this.map)
             {
                 Log.Error(string.Concat(new object[]
                 {
@@ -129,18 +128,18 @@ namespace RimShips.AI
             Area allowedArea = this.GetAllowedArea(pawn);
             bool flag5 = !(pawn is null) && PawnUtility.ShouldCollideWithPawns(pawn);
             bool flag6 = true && DebugViewSettings.drawPaths;
-            bool flag7 = !flag && !(start.GetRegion(this.map, RegionType.Set_Passable) is null) && flag2;
+            bool flag7 = !flag && !(WaterGridsUtility.GetRegion(start, this.map, RegionType.Set_Passable) is null) && flag2;
             bool flag8 = !flag || !flag3;
             bool flag9 = false;
             bool flag10 = !(pawn is null) && pawn.Drafted;
-            bool flag11 = !(pawn is null) && pawn.IsColonist;
+            bool flag11 = !(pawn is null) && !(pawn.GetComp<CompShips>() is null);
 
-            int num5 = (!flag11) ? 2000 : 100000;
+            int num5 = (!flag11) ? NodesToOpenBeforeRegionbasedPathing_NonShip : NodesToOpenBeforeRegionBasedPathing_Ship;
             int num6 = 0;
             int num7 = 0;
             float num8 = this.DetermineHeuristicStrength(pawn, start, dest);
-            int num9 = !(pawn is null) ? pawn.TicksPerMoveCardinal : 13;
-            int num10 = !(pawn is null) ? pawn.TicksPerMoveDiagonal : 18;
+            int num9 = !(pawn is null) ? pawn.TicksPerMoveCardinal : DefaultMoveTicksCardinal;
+            int num10 = !(pawn is null) ? pawn.TicksPerMoveDiagonal : DefaultMoveTicksDiagonal;
 
             this.CalculateAndAddDisallowedCorners(traverseParms, peMode, cellRect);
             this.InitStatusesAndPushStartNode(ref num, start);
@@ -183,7 +182,7 @@ namespace RimShips.AI
                     {
                         goto Block_34;
                     }
-                    if(num3 > 160000)
+                    if(num3 > SearchLimit)
                     {
                         goto Block_35;
                     }
@@ -202,7 +201,7 @@ namespace RimShips.AI
                             {
                                 int num16 = 0;
                                 bool flag12 = false;
-                                //Needed? Maybe not
+
                                 if(flag2 || !new IntVec3(num13, 0 ,num14).GetTerrain(this.map).HasTag("Water"))
                                 {
                                     if(!this.shipPathGrid.WalkableFast(num15))
@@ -340,19 +339,20 @@ namespace RimShips.AI
                                     }
                                     int num17 = (i <= 3) ? num9 : num10;
                                     num17 += num16;
-                                    if(!flag12)
+                                    /*if(!flag12)
                                     {
+                                        //Extra Costs for traversing water
                                         num17 += array[num15];
-                                        //Adds extra costs over water to prevent "soaked" thought
-                                    }
-                                    if(!(byteGrid is null))
+                                        num17 += flag10 ? topGrid[num15].extraDraftedPerceivedPathCost : topGrid[num15].extraNonDraftedPerceivedPathCost;
+                                    }*/
+                                    if (!(byteGrid is null))
                                     {
                                         num17 += (int)(byteGrid[num15] * 8);
                                     }
                                     //Allowed area cost?
                                     if(flag5 && PawnUtility.AnyPawnBlockingPathAt(new IntVec3(num13, 0, num14), pawn, false, false, true))
                                     {
-                                        num17 += 175;
+                                        num17 += Cost_PawnCollision;
                                     }
                                     Building building2 = this.edificeGrid[num15];
                                     if(!(building2 is null))
@@ -378,7 +378,9 @@ namespace RimShips.AI
                                     }
                                     int num19 = num17 + this.calcGrid[num].knownCost;
                                     ushort status = this.calcGrid[num15].status;
-                                    if(status == this.statusClosedValue || status == this.statusOpenValue)
+                                    if (!(pawn.GetComp<CompShips>() is null) && !this.map.terrainGrid.TerrainAt(num15).IsWater)
+                                        num19 += 10000;
+                                    if (status == this.statusClosedValue || status == this.statusOpenValue)
                                     {
                                         int num20 = 0;
                                         if(status == this.statusClosedValue)
@@ -413,6 +415,7 @@ namespace RimShips.AI
                                         this.calcGrid[num15].heuristicCost = Mathf.RoundToInt((float)num21 * num8);
                                     }
                                     int num22 = num19 + this.calcGrid[num15].heuristicCost;
+                                    //Log.Message("Num19: " + num19 + " || num22: " + num22);
                                     if(num22 < 0)
                                     {
                                         Log.ErrorOnce(string.Concat(new object[]
@@ -461,11 +464,13 @@ namespace RimShips.AI
             return PawnPath.NotFound;
             Block_32:
             this.PfProfilerEndSample();
+            //Log.Message("Block 32 " + num + "Region Heuristics " + flag9);
             PawnPath result = this.FinalizedPath(num, flag9);
             this.PfProfilerEndSample();
             return result;
             Block_34:
             this.PfProfilerEndSample();
+            //Log.Message("Block 34 " + num + "Region Heuristics " + flag9);
             PawnPath result2 = this.FinalizedPath(num, flag9);
             this.PfProfilerEndSample();
             return result2;
@@ -473,15 +478,82 @@ namespace RimShips.AI
             Log.Warning(string.Concat(new object[]
             {
                 "Ship ", pawn, " pathing from ", start,
-                " to ", dest, " hit search limit of ", 160000, " cells."
+                " to ", dest, " hit search limit of ", SearchLimit, " cells."
             }), false);
             this.DebugDrawRichData();
             this.PfProfilerEndSample();
             return PawnPath.NotFound;
-            
         }
 
-        //GetBuildingCostFor
+        public static int GetBuildingCost(Building b, TraverseParms traverseParms, Pawn pawn)
+        {
+            Building_Door building_Door = b as Building_Door;
+            if (building_Door != null)
+            {
+                switch (traverseParms.mode)
+                {
+                    case TraverseMode.ByPawn:
+                        if (!traverseParms.canBash && building_Door.IsForbiddenToPass(pawn))
+                        {
+                            if (DebugViewSettings.drawPaths)
+                            {
+                                ShipPathFinder.DebugFlash(b.Position, b.Map, 0.77f, "forbid");
+                            }
+                            return int.MaxValue;
+                        }
+                        if (building_Door.PawnCanOpen(pawn) && !building_Door.FreePassage)
+                        {
+                            return building_Door.TicksToOpenNow;
+                        }
+                        if (building_Door.CanPhysicallyPass(pawn))
+                        {
+                            return 0;
+                        }
+                        if (traverseParms.canBash)
+                        {
+                            return 300;
+                        }
+                        if (DebugViewSettings.drawPaths)
+                        {
+                            ShipPathFinder.DebugFlash(b.Position, b.Map, 0.34f, "cant pass");
+                        }
+                        return int.MaxValue;
+                    case TraverseMode.PassDoors:
+                        if (pawn != null && building_Door.PawnCanOpen(pawn) && !building_Door.IsForbiddenToPass(pawn) && !building_Door.FreePassage)
+                        {
+                            return building_Door.TicksToOpenNow;
+                        }
+                        if ((pawn != null && building_Door.CanPhysicallyPass(pawn)) || building_Door.FreePassage)
+                        {
+                            return 0;
+                        }
+                        return 150;
+                    case TraverseMode.NoPassClosedDoors:
+                    case TraverseMode.NoPassClosedDoorsOrWater:
+                        if (building_Door.FreePassage)
+                        {
+                            return 0;
+                        }
+                        return int.MaxValue;
+                    case TraverseMode.PassAllDestroyableThings:
+                    case TraverseMode.PassAllDestroyableThingsNotWater:
+                        if (pawn != null && building_Door.PawnCanOpen(pawn) && !building_Door.IsForbiddenToPass(pawn) && !building_Door.FreePassage)
+                        {
+                            return building_Door.TicksToOpenNow;
+                        }
+                        if ((pawn != null && building_Door.CanPhysicallyPass(pawn)) || building_Door.FreePassage)
+                        {
+                            return 0;
+                        }
+                        return 50 + (int)((float)building_Door.HitPoints * 0.2f);
+                }
+            }
+            else if (pawn != null)
+            {
+                return (int)b.PathFindCostFor(pawn);
+            }
+            return 0;
+        }
 
         public static int GetBlueprintCost(Blueprint b, Pawn pawn)
         {
@@ -497,7 +569,7 @@ namespace RimShips.AI
             return t.def.useHitPoints && t.def.destroyable;
         }
 
-        private bool BlocksDiagonalMovement(int x, int z, MapExtension mapE)
+        private bool BlocksDiagonalMovement(int x, int z)
         {
             return ShipPathFinder.BlocksDiagonalMovement(x, z, this.map, mapE);
         }
@@ -675,7 +747,7 @@ namespace RimShips.AI
 
         private ushort statusClosedValue = 2;
 
-        private RegionCostCalculatorWrapper regionCostCalculator;
+        private RegionCostCalculatorWrapperShips regionCostCalculator;
 
         private int mapSizeX;
 
@@ -726,12 +798,10 @@ namespace RimShips.AI
         public const int Cost_OutsideAllowedArea = 600;
 
         private const int Cost_PawnCollision = 200; //175
+        
+        private const int NodesToOpenBeforeRegionbasedPathing_NonShip = 2000; //Needed?
 
-        private const int NodesToOpenBeforeRegionbasedPathing_NonColonist = 2000; //Needed?
-
-        private const int NodesToOpenBeforeRegionBasedPathing_Colonist = 100000; //Needed
-
-        private const float NonRegionBasedHeuristicStrengthAnimal = 1.75f;
+        private const int NodesToOpenBeforeRegionBasedPathing_Ship = 100000; //Needed
 
         private static readonly SimpleCurve NonRegionBasedHeuristicStrengthHuman_DistanceCurve = new SimpleCurve
         {

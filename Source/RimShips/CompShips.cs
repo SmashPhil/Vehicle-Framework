@@ -43,18 +43,6 @@ namespace RimShips
         public bool warnNoFuel;
         public ShipWeaponStatus weaponStatus = ShipWeaponStatus.Offline;
 
-        public List<Pawn> Passengers
-        {
-            get
-            {
-                List<Pawn> pawns = new List<Pawn>();
-                foreach(ShipHandler h in handlers)
-                {
-                    pawns.Add(h.shipPawn);
-                }
-                return pawns;
-            }
-        }
         public bool CanMove => Props.moveable > ShipPermissions.DriverNeeded || MovementHandlerAvailable;
 
         public Pawn Pawn => parent as Pawn;
@@ -117,6 +105,7 @@ namespace RimShips
                         if (!(handler.handlers is null) && handler.handlers.Count > 0) pawnsOnShip.AddRange(handler.handlers);
                     }
                 }
+                
                 return pawnsOnShip;
             }
         }

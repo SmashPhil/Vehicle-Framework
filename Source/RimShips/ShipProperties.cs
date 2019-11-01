@@ -16,7 +16,6 @@ namespace RimShips
         public bool downable = false;
         public bool movesWhenDowned = false;
 
-        public float cargoMax;
         public bool nameable;
         //public float rotationSpeed;
         public bool ejectPassengersWhenDestroyed = false;

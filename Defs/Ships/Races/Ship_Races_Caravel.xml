@@ -78,7 +78,7 @@
 			<Mass>7500</Mass>
 			<ArmorRating_Blunt>0.25</ArmorRating_Blunt>
 			<ArmorRating_Sharp>0.9</ArmorRating_Sharp>
-			<MarketValue>2000</MarketValue>
+			<MarketValue>18000</MarketValue>
 		</statBases>
 		
 		<size>(3,8)</size>
@@ -129,8 +129,6 @@
 				<drawDriver>false</drawDriver>
 				<downable>false</downable>
 				<movesWhenDowned>false</movesWhenDowned>
-				
-				<cargoMax>750</cargoMax>
 				<ejectPassengersWhenDestroyed>false</ejectPassengersWhenDestroyed>
 				
 				<loadCargo>NotAllowed</loadCargo>
@@ -149,8 +147,8 @@
 					<li>
 						<label>Crew</label>
 						<handlingTypes>Movement</handlingTypes>
-						<slots>2</slots>
-						<slotsToOperate>2</slotsToOperate>
+						<slots>4</slots>
+						<slotsToOperate>4</slotsToOperate>
 						<slotTag>Driver</slotTag>
 					</li>
 					

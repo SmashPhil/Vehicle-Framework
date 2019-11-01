@@ -25,12 +25,12 @@ namespace RimShips.AI
     {
         public static bool InNoBuildEdgeArea(this IntVec3 c, Map map)
         {
-            return c.CloseToEdge(map, 10);
+            return c.CloseToEdge(map, NoBuildEdgeWidth);
         }
 
         public static bool InNoZoneEdgeArea(this IntVec3 c, Map map)
         {
-            return c.CloseToEdge(map, 5);
+            return c.CloseToEdge(map, NoZoneEdgeWidth);
         }
 
         public static bool CloseToEdge(this IntVec3 c, Map map, int edgeDist)

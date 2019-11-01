@@ -25,8 +25,10 @@ namespace RimShips
 
         public static readonly Texture2D UnloadPassenger = ContentFinder<Texture2D>.Get("UI/UnloadPassenger", true);
 
-        public static readonly Texture2D UnloadCaptain = ContentFinder<Texture2D>.Get("UI/UnloadCaptain",true);
+        public static readonly Texture2D UnloadCaptain = ContentFinder<Texture2D>.Get("UI/UnloadCaptain", true);
 
         public static readonly Texture2D Anchor = ContentFinder<Texture2D>.Get("UI/Anchor", true);
+
+        public static readonly Texture2D OnboardIcon = ContentFinder<Texture2D>.Get("UI/OnboardIcon", true);
     }
 }

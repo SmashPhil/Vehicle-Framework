@@ -22,4 +22,15 @@
 			<!--CHANGE ALL THIS TO INCLUDE FLEET RELATED TABS -->
 		</inspectorTabs>
 	</WorldObjectDef>
+	
+	<WorldObjectDef>
+		<defName>DebugSettlement</defName>
+		<label>Original Location</label>
+		<description>Debug</description>
+		<worldObjectClass>PeaceTalks</worldObjectClass>
+		<texture>World/WorldObjects/PeaceTalks</texture>
+		<expandingIcon>true</expandingIcon>
+		<expandingIconTexture>Debug/SettlementOld</expandingIconTexture>
+		<expandingIconPriority>70</expandingIconPriority>
+	</WorldObjectDef>
 </Defs>

@@ -36,6 +36,14 @@ namespace RimShips
 
             #region Functions
 
+            //Map Gen
+            harmony.Patch(original: AccessTools.Method(typeof(BeachMaker), name: nameof(BeachMaker.Init)), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(BeachMakerTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(TileFinder), name: nameof(TileFinder.RandomSettlementTileFor)), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(PushSettlementToCoastTranspiler)));
+
             //Health 
             harmony.Patch(original: AccessTools.Method(typeof(HealthUtility), name: nameof(HealthUtility.GetGeneralConditionLabel)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
@@ -51,6 +59,16 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(typeof(Pawn_RotationTracker), name: nameof(Pawn_RotationTracker.UpdateRotation)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(UpdateShipRotation)));
+            harmony.Patch(original: AccessTools.Method(typeof(PawnRenderer), parameters: new Type[] { typeof(Vector3), typeof(float), typeof(bool), typeof(Rot4), typeof(Rot4),
+                    typeof(RotDrawMode), typeof(bool), typeof(bool)}, name: "RenderPawnInternal"), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                name: nameof(RenderPawnRotationTranspiler)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(ColonistBar), name: "CheckRecacheEntries"), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(CheckRecacheEntriesTranspiler)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(ColonistBarColonistDrawer), "DrawIcons"), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                name: nameof(DrawIconsShips)));
 
             //Gizmos
             harmony.Patch(original: AccessTools.Method(typeof(JobDriver_Wait), name: "CheckForAutoAttack"),
@@ -63,9 +81,7 @@ namespace RimShips
             //Pathing
             harmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), name: nameof(Pawn_PathFollower.StartPath)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(CanShipMove)));
-
-            //?
+                name: nameof(StartPathShip)));
             harmony.Patch(original: AccessTools.Method(type: typeof(Pawn_PathFollower), name: "TryEnterNextPathCell"), 
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(TryEnterNextCellShip)));
@@ -80,11 +96,12 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), name: "GenerateNewPath"),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(GenerateNewShipPath)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(PathFinder), parameters: new Type[] { typeof(IntVec3), typeof(LocalTargetInfo)
-                    , typeof(TraverseParms), typeof(PathEndMode)}, name: nameof(PathFinder.FindPath)),
+            harmony.Patch(original: AccessTools.Method(typeof(Map), name: nameof(Map.ExposeData)), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(ExposeDataMapExtensions)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(FloatMenuMakerMap), name: "GotoLocationOption"),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(FindPathShips)));
-
+                name: nameof(GotoLocationShips)));
             //Jobs
             harmony.Patch(original: AccessTools.Method(typeof(JobUtility), name: nameof(JobUtility.TryStartErrorRecoverJob)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
@@ -92,6 +109,7 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(typeof(JobGiver_Wander), name: "TryGiveJob"),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(ShipsDontWander)));
+
             
             //Caravan
             harmony.Patch(original: AccessTools.Method(typeof(CaravanUIUtility), name: nameof(CaravanUIUtility.AddPawnsSections)), prefix: null,
@@ -117,7 +135,7 @@ namespace RimShips
                 name: nameof(IsFormingCaravanShip)));
             harmony.Patch(original: AccessTools.Method(type: typeof(TransferableUtility), name: nameof(TransferableUtility.CanStack)), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(CanStackShip)));
+                name: nameof(CanStackShipTranspiler)));
             harmony.Patch(original: AccessTools.Property(type: typeof(JobDriver_PrepareCaravan_GatherItems), name: "Transferables").GetGetMethod(nonPublic: true),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(TransferablesShip))); //DOUBLE CHECK
@@ -127,6 +145,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(LordToil_PrepareCaravan_GatherAnimals), name: nameof(LordToil_PrepareCaravan_GatherAnimals.UpdateAllDuties)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(UpdateDutyOfShip)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(Dialog_FormCaravan), name: "TryFormAndSendCaravan"), 
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(TryFormAndSendCaravanShips)));
 
             //TO DO
             harmony.Patch(original: AccessTools.Method(type: typeof(PathGrid), parameters: new Type[] { typeof(IntVec3)} , 
@@ -148,14 +169,68 @@ namespace RimShips
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(CompleteConstructionShip)));
 
-            //Transpilers
-            /*harmony.Patch(original: AccessTools.Method(type: typeof(PathFinder), parameters: new Type[] { typeof(IntVec3), typeof(LocalTargetInfo)
-                    , typeof(TraverseParms), typeof(PathEndMode)}, name: "FindPath"), prefix: null, postfix: null, 
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony), 
-                name: nameof(FindPathShips)));*/
-
+            //Debug
+            if (debug)
+            {
+                harmony.Patch(original: AccessTools.Method(typeof(WorldRoutePlanner), name: nameof(WorldRoutePlanner.WorldRoutePlannerUpdate)), prefix: null,
+                    postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                    name: nameof(DebugSettlementPaths)));
+                harmony.Patch(original: AccessTools.Method(typeof(WorldObjectsHolder), name: nameof(WorldObjectsHolder.Add)),
+                    prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                    name: nameof(DebugWorldObjects)));
+            }
             #endregion Functions
         }
+
+        public static void DebugWorldObjects(WorldObject o)
+        {
+            if(o is Settlement)
+            {
+                tiles.Add(new Pair<int, int>(o.Tile, 0));
+            }
+        }
+
+        #region MapGen
+        public static IEnumerable<CodeInstruction> BeachMakerTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+        {
+            List<CodeInstruction> instructionList = instructions.ToList();
+            MethodInfo randomRange = AccessTools.Property(type: typeof(FloatRange), name: nameof(FloatRange.RandomInRange)).GetGetMethod();
+            MethodInfo floatMultiplier = AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipHarmony.CustomFloatBeach));
+            for(int i = 0; i < instructionList.Count; i++)
+            {
+                CodeInstruction instruction = instructionList[i];
+
+                if(instruction.opcode == OpCodes.Call && instruction.operand == randomRange)
+                {
+                    i++;
+                    instruction = instructionList[i];
+                    //yield return new CodeInstruction(opcode: OpCodes.Ldc_R8, operand: 60);
+                    yield return new CodeInstruction(opcode: OpCodes.Pop);
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: floatMultiplier);
+                }
+                yield return instruction;
+            }
+        }
+
+        public static IEnumerable<CodeInstruction> PushSettlementToCoastTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+        {
+            List<CodeInstruction> instructionList = instructions.ToList();
+
+            for(int i = 0; i < instructionList.Count; i++)
+            {
+                CodeInstruction instruction = instructionList[i];
+
+                if(instruction.opcode == OpCodes.Ldnull && instructionList[i-1].opcode == OpCodes.Ldloc_1)
+                {
+                    yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipHarmony.PushSettlementToCoast)));
+                    yield return new CodeInstruction(opcode: OpCodes.Stloc_1);
+                    yield return new CodeInstruction(opcode: OpCodes.Ldloc_1);
+                }
+                yield return instruction;
+            }
+        }
+        #endregion MapGen
 
         #region HealthStats
 
@@ -196,32 +271,21 @@ namespace RimShips
             return true;
         }
 
-        public static bool ShipShouldBeDowned(Pawn_HealthTracker __instance, ref bool __result)
+        public static bool ShipShouldBeDowned(Pawn_HealthTracker __instance, ref bool __result, ref Pawn ___pawn)
         {
-            Pawn pawn = (Pawn)AccessTools.Field(typeof(Pawn_HealthTracker), "pawn").GetValue(__instance);
-            if (pawn != null)
+            if (___pawn != null && IsShip(___pawn))
             {
-                if (IsShip(pawn))
-                {
-                    if (!pawn.GetComp<CompShips>().Props.downable)
-                    {
-                        __result = false;
-                        return false;
-                    }
-                }
+                __result = ___pawn.GetComp<CompShips>().Props.downable;
+                return false;
             }
             return true;
         }
 
-        public static bool ShipShouldWiggle(PawnDownedWiggler __instance)
+        public static bool ShipShouldWiggle(PawnDownedWiggler __instance, ref Pawn ___pawn)
         {
-            Pawn pawn = Traverse.Create(__instance).Field("pawn").GetValue<Pawn>();
-            if (pawn != null)
+            if (___pawn != null && IsShip(___pawn) && !___pawn.GetComp<CompShips>().Props.movesWhenDowned)
             {
-                if (IsShip(pawn))
-                {
-                    if (!pawn.GetComp<CompShips>().Props.movesWhenDowned) return false;
-                }
+                return false;
             }
             return true;
         }
@@ -264,6 +328,90 @@ namespace RimShips
                 return false;
             }
             return true;
+        }
+
+        public static IEnumerable<CodeInstruction> RenderPawnRotationTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+        {
+            List<CodeInstruction> instructionList = instructions.ToList();
+
+            Label label = ilg.DefineLabel();
+
+            yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+            yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(type: typeof(PawnRenderer), name: "pawn"));
+            yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(IsShip)));
+            yield return new CodeInstruction(opcode: OpCodes.Brfalse, operand: label);
+
+            yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+            yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(type: typeof(PawnRenderer), name: "pawn"));
+            yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipHarmony.ShipAngle)));
+            yield return new CodeInstruction(opcode: OpCodes.Starg_S, operand: 2);
+
+            yield return new CodeInstruction(opcode: OpCodes.Nop) { labels = new List<Label> { label } };
+            foreach (CodeInstruction instruction in instructionList)
+            {
+                yield return instruction;
+            }
+        }
+
+        public static IEnumerable<CodeInstruction> CheckRecacheEntriesTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+        {
+            List<CodeInstruction> instructionList = instructions.ToList();
+            bool flag = false;
+            for (int i = 0; i < instructionList.Count; i++)
+            {
+                CodeInstruction instruction = instructionList[i];
+
+                if(!flag && instruction.opcode == OpCodes.Stloc_S && ((LocalBuilder)instruction.operand).LocalIndex == 5)
+                {
+                    yield return instruction;
+                    instruction = instructionList[++i];
+                    flag = true;
+
+                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(type: typeof(ColonistBar), name: "tmpPawns"));
+                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(type: typeof(ColonistBar), name: "tmpMaps"));
+                    yield return new CodeInstruction(opcode: OpCodes.Ldloc_1);
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(GetShipsForColonistBar)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(List<Pawn>), name: nameof(List<Pawn>.AddRange)));
+                }
+
+                yield return instruction;
+            }
+        }
+
+        private static void DrawIconsShips(Rect rect, Pawn colonist, ColonistBarColonistDrawer __instance)
+        {
+            if (colonist.Dead)
+            {
+                return;
+            }
+            float num = 20f * Find.ColonistBar.Scale;
+            Vector2 vector = new Vector2(rect.x + 1f, rect.yMax - num - 1f);
+            bool flag = false;
+            if (colonist.CurJob != null)
+            {
+                JobDef def = colonist.CurJob.def;
+                if (def == JobDefOf.AttackMelee || def == JobDefOf.AttackStatic)
+                {
+                    flag = true;
+                }
+                else if (def == JobDefOf.Wait_Combat)
+                {
+                    Stance_Busy stance_Busy = colonist.stances.curStance as Stance_Busy;
+                    if (stance_Busy != null && stance_Busy.focusTarg.IsValid)
+                    {
+                        flag = true;
+                    }
+                }
+            }
+            
+            List<Pawn> ships = Find.CurrentMap.mapPawns.AllPawnsSpawned.FindAll(x => !(x.GetComp<CompShips>() is null));
+            if(ships.Any(x => x.GetComp<CompShips>().AllPawnsAboard.Contains(colonist)))
+            {
+                Rect rect2 = new Rect(vector.x, vector.y, num, num);
+                GUI.DrawTexture(rect2, TexCommandShips.OnboardIcon);
+                TooltipHandler.TipRegion(rect2, "ActivityIconOnBoardShip".Translate());
+                vector.x += num;
+            }
         }
         #endregion Rendering
 
@@ -320,50 +468,40 @@ namespace RimShips
         #endregion Gizmos
 
         #region Pathing
-        public static bool CanShipMove(LocalTargetInfo dest, PathEndMode peMode, Pawn_PathFollower __instance, ref Pawn ___pawn, ref PathEndMode ___peMode,
-            LocalTargetInfo ___destination, ref bool ___moving)
+        public static bool StartPathShip(LocalTargetInfo dest, PathEndMode peMode, Pawn_PathFollower __instance, ref Pawn ___pawn, ref PathEndMode ___peMode,
+            ref LocalTargetInfo ___destination, ref bool ___moving)
         {
             if (disabled) return true;
             if (IsShip(___pawn))
             {
-                Log.Message("Starting path for pawn: " + ___pawn.LabelShort);
-                dest = (LocalTargetInfo)GenPathShip.ResolvePathMode(___pawn, dest.ToTargetInfo(___pawn.Map), ref peMode, mapE);
+                dest = (LocalTargetInfo)GenPathShip.ResolvePathMode(___pawn, dest.ToTargetInfo(___pawn.Map), ref peMode, MapExtensionUtility.GetExtensionToMap(___pawn.Map));
                 if (dest.HasThing && dest.ThingDestroyed)
                 {
                     Log.Error(___pawn + " pathing to destroyed thing " + dest.Thing, false);
-                    PatherFailedHelper(__instance, ___pawn);
+                    PatherFailedHelper(ref __instance, ___pawn);
                     return false;
                 }
-                Log.Message("cp1"); // RESUME WORK HERE
                 //Add Building and Position Recoverable extras
-                if (!GenGridShips.Walkable(___pawn.Position, mapE))
+                if (!GenGridShips.Walkable(___pawn.Position, MapExtensionUtility.GetExtensionToMap(___pawn.Map)))
                 {
-                    Log.Message("not walkable");
                     return false;
                 }
-                Log.Message("cp2");
-                if (__instance.Moving && __instance.curPath != null && __instance.Destination == dest && ___peMode == peMode)
+                if (__instance.Moving && __instance.curPath != null && ___destination == dest && ___peMode == peMode)
                 {
-                    Log.Message("already moving");
                     return false;
                 }
-                Log.Message("cp3");
-                //Log.Message("Check: " + (mapE.getShipReachability));
-                if (!mapE.getShipReachability.CanReachShip(___pawn.Position, dest, peMode, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false)))
+                if (!MapExtensionUtility.GetExtensionToMap(___pawn.Map).getShipReachability.CanReachShip(___pawn.Position, dest, peMode, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false)))
                 {
-                    Log.Message("not reachable");
-                    PatherFailedHelper(__instance, ___pawn);
+                    PatherFailedHelper(ref __instance, ___pawn);
                     return false;
                 }
-                Log.Message("cp4");
                 ___peMode = peMode;
                 ___destination = dest;
-                if ((GenGridShips.Walkable(__instance.nextCell, mapE) || __instance.WillCollideWithPawnOnNextPathCell()) || __instance.nextCellCostLeft
+                if ((GenGridShips.Walkable(__instance.nextCell, MapExtensionUtility.GetExtensionToMap(___pawn.Map)) || __instance.WillCollideWithPawnOnNextPathCell()) || __instance.nextCellCostLeft
                     == __instance.nextCellCostTotal)
                 {
                     __instance.ResetToCurrentPosition();
                 }
-                Log.Message("cp5");
                 PawnDestinationReservationManager.PawnDestinationReservation pawnDestinationReservation = ___pawn.Map.pawnDestinationReservationManager.
                     MostRecentReservationFor(___pawn);
                 if (!(pawnDestinationReservation is null) && ((__instance.Destination.HasThing && pawnDestinationReservation.target != __instance.Destination.Cell)
@@ -387,7 +525,7 @@ namespace RimShips
                 __instance.curPath = null;
                 ___moving = true;
                 ___pawn.jobs.posture = PawnPosture.Standing;
-                Log.Message("Ended Path");
+
                 return false;
             }
             return true;
@@ -631,7 +769,7 @@ namespace RimShips
             return true;
         }
 
-        public static IEnumerable<CodeInstruction> CanStackShip(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+        public static IEnumerable<CodeInstruction> CanStackShipTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
         {
             List<CodeInstruction> instructionList = instructions.ToList();
             MethodInfo shipMethod = AccessTools.Method(type: typeof(ShipHarmony), name: nameof(IsShip));
@@ -701,6 +839,29 @@ namespace RimShips
             }
         }
 
+        //COME BACK TO THIS -> For Exit Point
+        private static bool TryFormAndSendCaravanShips(Dialog_FormCaravan __instance, ref bool __result, ref int ___startingTile)
+        {
+            return true;
+            List<Pawn> pawnsTransferables = TransferableUtility.GetPawnsFromTransferables(__instance.transferables);
+            
+            if(pawnsTransferables.Any(x => IsShip(x)))
+            {
+                MethodInfo checkMethod = typeof(Dialog_FormCaravan).GetMethod("CheckForErrors", BindingFlags.NonPublic | BindingFlags.Instance);
+                bool flag = Convert.ToBoolean(checkMethod.Invoke(__instance, new System.Object[] { pawnsTransferables })); 
+                if(!flag)
+                {
+                    __result = false;
+                    return false;
+                }
+                //Direction8Way direction8WayFromToj = FindWorldGrid.GetDirection8WayFromTo(__instance.CurrentTile, ___startingTile);
+
+                return false;
+            }
+
+            return true;
+        }
+
         #endregion Caravan
 
         #region Construction
@@ -741,7 +902,7 @@ namespace RimShips
                     __result = false;
                     return false;
                 }
-                target = (LocalTargetInfo)GenPathShip.ResolvePathMode(pawn, target.ToTargetInfo(map), ref peMode, mapE);
+                target = (LocalTargetInfo)GenPathShip.ResolvePathMode(pawn, target.ToTargetInfo(map), ref peMode, MapExtensionUtility.GetExtensionToMap(map));
                 if (target.HasThing)
                 {
                     Thing thing = target.Thing;
@@ -798,13 +959,15 @@ namespace RimShips
             return true;
         }
 
-        private static bool GenerateNewShipPath(ref PawnPath __result, Pawn_PathFollower __instance, ref Pawn ___pawn, ref PathEndMode ___peMode)
+        private static bool GenerateNewShipPath(ref PawnPath __result, ref Pawn_PathFollower __instance, ref Pawn ___pawn, ref PathEndMode ___peMode)
         {
             if (disabled) return true;
-            __instance.lastPathedTargetPosition = __instance.Destination.Cell;
+            
             if(IsShip(___pawn))
             {
-                __result = mapE.getShipPathFinder.FindShipPath(___pawn.Position, __instance.Destination, ___pawn, ___peMode);
+                __instance.lastPathedTargetPosition = __instance.Destination.Cell;
+                __result = MapExtensionUtility.GetExtensionToMap(___pawn.Map).getShipPathFinder.FindShipPath(___pawn.Position, __instance.Destination, ___pawn, ___peMode);
+                if (!__result.Found) Log.Warning("Path Not Found");
                 return false;
             }
             return true;
@@ -816,8 +979,9 @@ namespace RimShips
             if (disabled) return true;
             if (IsShip(___pawn))
             {
-                if(___pawn.GetComp<CompShips>().beached)
+                if(___pawn.GetComp<CompShips>().beached || !___pawn.Position.GetTerrain(___pawn.Map).IsWater)
                 {
+                    ___pawn.GetComp<CompShips>().BeachShip();
                     __instance.StopDead();
                     ___pawn.jobs.curDriver.Notify_PatherFailed();
                 }
@@ -826,41 +990,19 @@ namespace RimShips
                 ___pawn.Position = __instance.nextCell;
                 //Clamor?
                 //More Buildings?
-                if(___pawn.CanReachImmediate(___destination, ___peMode))
+                
+                if(NeedNewPath(___destination, __instance.curPath, ___pawn, ___peMode, __instance.lastPathedTargetPosition) && !TrySetNewPath(ref __instance, __instance.lastPathedTargetPosition, 
+                    ___destination, ___pawn, ___pawn.Map, ref ___peMode))
+                {
+                    return false;
+                }
+                if(___pawn.CanReachImmediateShip(___destination, ___peMode))
                 {
                     PatherArrivedHelper(__instance, ___pawn);
                 }
                 else
                 {
-                    if(__instance.curPath.NodesLeftCount <= 1)
-                    {
-                        Log.Error(string.Concat(new object[]
-                        {
-                            ___pawn,
-                            " at ",
-                            ___pawn.Position,
-                            " ran out of path nodes while pathing to ",
-                            ___destination,
-                            "."
-                        }), false);
-                        PatherFailedHelper(__instance, ___pawn);
-                        return false;
-                    }
-                    __instance.nextCell = __instance.curPath.ConsumeNextNode();
-                    if(!GenGridShips.Walkable(__instance.nextCell,mapE))
-                    {
-                        Log.Error(string.Concat(new object[]
-                        {
-                            ___pawn,
-                            " entering ",
-                            __instance.nextCell,
-                            " which is unwalkable."
-                        }), false);
-                    }
-                    int num = CostToMoveIntoCellShips(___pawn, __instance.nextCell);
-                    __instance.nextCellCostTotal = (float)num;
-                    __instance.nextCellCostLeft = (float)num;
-                    //notify door of pawn?
+                    SetupMoveIntoNextCell(ref __instance, ___pawn, ___destination);
                 }
                 return false;
             }
@@ -878,62 +1020,86 @@ namespace RimShips
         public static void GenerateMapExtension(IntVec3 mapSize, MapParent parent, MapGeneratorDef mapGenerator, ref Map __result,
             IEnumerable<GenStepWithParams> extraGenStepDefs = null, Action<Map> extraInitBeforeContentGen = null)
         {
-            mapE = new MapExtension(__result);
+            MapExtension mapE = new MapExtension(__result);
             mapE.ConstructComponents();
-            Log.Message("Map Extension Initialized!");
         }
 
-        public static bool FindPathShips(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, ref PawnPath __result,
-            PathEndMode peMode = PathEndMode.OnCell)
+        public static void ExposeDataMapExtensions()
+        {
+            MapExtensionUtility.ClearMapExtensions();
+        }
+
+        private static bool GotoLocationShips(IntVec3 clickCell, Pawn pawn, ref FloatMenuOption __result)
         {
             if (disabled) return true;
-
-            if(!(traverseParms.pawn is null))
+            if(IsShip(pawn))
             {
-                if (IsShip(traverseParms.pawn))
+                int num = GenRadial.NumCellsInRadius(2.9f);
+                int i = 0;
+                IntVec3 curLoc;
+                while(i < num)
                 {
-                    __result = mapE.getShipPathFinder.FindShipPath(start, dest, traverseParms, peMode);
-                    return false;
+                    curLoc = GenRadial.RadialPattern[i] + clickCell;
+                    if (GenGridShips.Standable(curLoc, pawn.Map, MapExtensionUtility.GetExtensionToMap(pawn.Map)))
+                    {
+                        Log.Message("Standable!");
+                        if (curLoc == pawn.Position)
+                        {
+                            __result = null;
+                            return false;
+                        }
+                        if(!ShipReachabilityUtility.CanReachShip(pawn, curLoc, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
+                        {
+                            Log.Message("CANT REACH ");
+                            __result = new FloatMenuOption("CannotSailToCell".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null);
+                            return false;
+                        }
+                        Log.Message("Reachable?");
+                        Action action = delegate ()
+                        {
+                            Job job = new Job(JobDefOf.Goto, curLoc);
+                            if(pawn.Map.exitMapGrid.IsExitCell(Verse.UI.MouseCell()))
+                            {
+                                job.exitMapOnArrival = true;
+                            }
+                            else if(!pawn.Map.IsPlayerHome && !pawn.Map.exitMapGrid.MapUsesExitGrid && CellRect.WholeMap(pawn.Map).IsOnEdge(Verse.UI.MouseCell(), 3) &&
+                                pawn.Map.Parent.GetComponent<FormCaravanComp>() != null && MessagesRepeatAvoider.MessageShowAllowed("MessagePlayerTriedToLeaveMapViaExitGrid-" +
+                                pawn.Map.uniqueID, 60f))
+                            {
+                                FormCaravanComp component = pawn.Map.Parent.GetComponent<FormCaravanComp>();
+                                if(component.CanFormOrReformCaravanNow)
+                                {
+                                    Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CanReform".Translate(), pawn.Map.Parent, MessageTypeDefOf.RejectInput, false);
+                                }
+                                else
+                                {
+                                    Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CantReform".Translate(), pawn.Map.Parent, MessageTypeDefOf.RejectInput, false);
+                                }
+                            }
+                            if(pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc))
+                            {
+                                MoteMaker.MakeStaticMote(curLoc, pawn.Map, ThingDefOf.Mote_FeedbackGoto, 1f);
+                            }
+                        };
+                        __result = new FloatMenuOption("GoHere".Translate(), action, MenuOptionPriority.GoHere, null, null, 0f, null, null)
+                        {
+                            autoTakeable = true,
+                            autoTakeablePriority = 10f
+                        };
+                        return false;
+                    }
+                    else
+                    {
+                        i++;
+                    }
                 }
+                __result = null;
+                return false;
             }
             return true;
         }
 
-        #region TranspilersWIP
-
-        /*public static IEnumerable<CodeInstruction> FindPathShips(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
-        {
-            List<CodeInstruction> instructionList = instructions.ToList();
-            MethodInfo methodIsShip = AccessTools.Method(type: typeof(ShipHarmony), name: nameof(IsShip));
-            MethodInfo test = AccessTools.Method(type: typeof(Log), name: nameof(Log.Message));
-            foreach(CodeInstruction instruction in instructionList)
-            {
-
-                if(instruction.opcode == OpCodes.Stloc_S && ((LocalBuilder)instruction.operand).LocalIndex == 55)
-                {
-                    Label skip = ilg.DefineLabel();
-
-                    yield return new CodeInstruction(opcode: OpCodes.Ldloc_0);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: methodIsShip);
-                    yield return new CodeInstruction(opcode: OpCodes.Brfalse, operand: skip);
-
-                    *//*yield return new CodeInstruction(opcode: OpCodes.Ldstr, operand: "test");
-                    yield return new CodeInstruction(opcode: OpCodes.Ldc_I4_0, operand: test);*/
-
-        /*yield return new CodeInstruction(opcode: OpCodes.Ldloc_0);
-        yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 5);
-        yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipPawnCellCost)));*//*
-
-        instruction.labels.Add(item: skip);
-    }
-    yield return instruction;
-}
-}*/
-        #endregion TranspilersWIP
-
         #region HelperFunctions
-
-        private static MapExtension mapE;
 
         private static bool CanSetSail(List<Pawn> caravan)
         {
@@ -972,7 +1138,7 @@ namespace RimShips
             return !(p?.TryGetComp<CompShips>() is null) ? true : false;
         }
 
-        private static void PatherFailedHelper(Pawn_PathFollower instance, Pawn pawn)
+        private static void PatherFailedHelper(ref Pawn_PathFollower instance, Pawn pawn)
         {
             instance.StopDead();
             pawn.jobs.curDriver.Notify_PatherFailed();
@@ -1021,7 +1187,7 @@ namespace RimShips
         private static int CostToMoveIntoCellShips(Pawn pawn, IntVec3 c)
         {
             int num = (c.x == pawn.Position.x || c.z == pawn.Position.z) ? pawn.TicksPerMoveCardinal : pawn.TicksPerMoveDiagonal;
-            num += mapE.getShipPathGrid.CalculatedCostAt(c, false, pawn.Position);
+            num += MapExtensionUtility.GetExtensionToMap(pawn.Map).getShipPathGrid.CalculatedCostAt(c, false, pawn.Position);
             if (pawn.CurJob != null)
             {
                 Pawn locomotionUrgencySameAs = pawn.jobs.curDriver.locomotionUrgencySameAs;
@@ -1083,8 +1249,339 @@ namespace RimShips
             return num2 - num;
         }
 
+        private static bool TryFindExitSpotHelper(List<Pawn> pawns, List<Pawn> ships, bool reachableForEveryShip, out IntVec3 spot, ref int startingTile, Map map)
+        {
+            Rot4 rotFromTo = Find.WorldGrid.GetRotFromTo(map.Tile, startingTile);
+            return TryFindExitSpotHelper(pawns, ships, reachableForEveryShip, rotFromTo, out spot, ref startingTile, map) ||
+                TryFindExitSpotHelper(pawns, ships, reachableForEveryShip, rotFromTo.Rotated(RotationDirection.Clockwise), out spot, ref startingTile, map) ||
+                TryFindExitSpotHelper(pawns, ships, reachableForEveryShip, rotFromTo.Rotated(RotationDirection.Counterclockwise), out spot, ref startingTile, map);
+        }
+
+        private static bool TryFindExitSpotHelper(List<Pawn> pawns, List<Pawn> ships, bool reachableForEveryShip, Rot4 exitDirection, out IntVec3 spot, ref int startingTile, Map map)
+        {
+            if(startingTile < 0)
+            {
+                Log.Error("Can't find exit spot because startingTile is not set.", false);
+                spot = IntVec3.Invalid;
+                return false;
+            }
+            Predicate<IntVec3> validator = (IntVec3 x) => !x.Fogged(map); //Add Water based Check
+            if(reachableForEveryShip)
+            {
+                return CellFinder.TryFindRandomEdgeCellWith(delegate (IntVec3 x)
+                {
+                    if (!validator(x))
+                    {
+                        return false;
+                    }
+                    foreach(Pawn ship in ships)
+                    {
+                        foreach (Pawn pawn in pawns)
+                        {
+                            if (pawn.IsColonist && !pawn.Downed && !pawn.CanReachShip(ship.Position, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn))
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                }, map, exitDirection, CellFinder.EdgeRoadChance_Always, out spot);
+            }
+            IntVec3 intVec = IntVec3.Invalid;
+            int num = -1;
+            foreach(IntVec3 intVec2 in CellRect.WholeMap(map).GetEdgeCells(exitDirection).InRandomOrder(null))
+            {
+                if(validator(intVec2))
+                {
+                    int num2 = 0;
+                    foreach(Pawn pawn in pawns)
+                    {
+                        if(pawn.IsColonist && !pawn.Downed && pawn.CanReachShip(intVec2, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn))
+                        {
+                            num2++;
+                        }
+                    }
+                    if(num2 > num)
+                    {
+                        num = num2;
+                        intVec = intVec2;
+                    }
+                }
+            }
+            spot = intVec;
+            return intVec.IsValid;
+        }
+
+        public static float ShipAngle(Pawn pawn)
+        {
+            float angle = 0f;
+            if (pawn.pather.Moving)
+            {
+                IntVec3 c = pawn.pather.nextCell - pawn.Position;
+                if (c.x > 0 && c.z > 0)
+                {
+                    angle = -45f;
+                }
+                else if (c.x > 0 && c.z < 0)
+                {
+                    angle = 45;
+                }
+                else if (c.x < 0 && c.z < 0)
+                {
+                    angle = -45;
+                }
+                else if (c.x < 0 && c.z > 0)
+                {
+                    angle = 45f;
+                }
+            }
+            return angle;
+        }
+
+        public static bool NeedNewPath(LocalTargetInfo destination, PawnPath curPath, Pawn pawn, PathEndMode peMode, IntVec3 lastPathedTargetPosition)
+        {
+            if(!destination.IsValid || curPath is null || !curPath.Found || curPath.NodesLeftCount == 0)
+                return true;
+
+            if (destination.HasThing && destination.Thing.Map != pawn.Map)
+                return true;
+
+            if((pawn.Position.InHorDistOf(curPath.LastNode, 15f) || pawn.Position.InHorDistOf(destination.Cell, 15f)) && !ShipReachabilityImmediate.CanReachImmediateShip(
+                curPath.LastNode, destination, pawn.Map, peMode, pawn))
+                return true;
+
+            if(curPath.UsedRegionHeuristics && curPath.NodesConsumedCount >= 75)
+                return true;
+
+            if (lastPathedTargetPosition != destination.Cell)
+            {
+                float num = (float)(pawn.Position - destination.Cell).LengthHorizontalSquared;
+                float num2;
+                if (num > 900f) num2 = 10f;
+                else if (num > 289f) num2 = 5f;
+                else if (num > 100f) num2 = 3f;
+                else if (num > 49f) num2 = 2f;
+                else num2 = 0.5f;
+
+                if ((float)(lastPathedTargetPosition - destination.Cell).LengthHorizontalSquared > num2 * num2)
+                    return true;
+            }
+            bool flag = curPath.NodesLeftCount < 30;
+            IntVec3 other = IntVec3.Invalid;
+            IntVec3 intVec = IntVec3.Invalid;
+            int num3 = 0;
+            while(num3 < 20 && num3 < curPath.NodesLeftCount)
+            {
+                intVec = curPath.Peek(num3);
+                if (!GenGridShips.Walkable(intVec, MapExtensionUtility.GetExtensionToMap(pawn.Map)))
+                    return true;
+                //Handle Doors?
+
+                if (num3 != 0 && intVec.AdjacentToDiagonal(other) && (ShipPathFinder.BlocksDiagonalMovement(pawn.Map.cellIndices.CellToIndex(intVec.x, other.z), pawn.Map,
+                    MapExtensionUtility.GetExtensionToMap(pawn.Map)) || ShipPathFinder.BlocksDiagonalMovement(pawn.Map.cellIndices.CellToIndex(other.x, intVec.z), pawn.Map,
+                    MapExtensionUtility.GetExtensionToMap(pawn.Map))) )
+                    return true;
+                other = intVec;
+                num3++;
+            }
+            return false;
+        }
+
+        private static bool TrySetNewPath(ref Pawn_PathFollower instance, IntVec3 lastPathedTargetPosition, LocalTargetInfo destination, Pawn pawn, Map map, ref PathEndMode peMode)
+        {
+            PawnPath pawnPath = ShipHarmony.GenerateNewPath(ref lastPathedTargetPosition, destination, ref pawn, map, peMode);
+            if(!pawnPath.Found)
+            {
+                PatherFailedHelper(ref instance, pawn);
+            }
+            if(!(instance.curPath is null))
+            {
+                instance.curPath.ReleaseToPool();
+            }
+            instance.curPath = pawnPath;
+            int num = 0;
+            int foundPathWhichCollidesWithPawns = Traverse.Create(instance).Field("foundPathWhichCollidesWithPawns").GetValue<int>();
+            int foundPathWithDanger = Traverse.Create(instance).Field("foundPathWithDanger").GetValue<int>();
+            while(num < 20 && num < instance.curPath.NodesLeftCount)
+            {
+                IntVec3 c = instance.curPath.Peek(num);
+                if(PawnUtility.ShouldCollideWithPawns(pawn) && PawnUtility.AnyPawnBlockingPathAt(c, pawn, false, false, false))
+                {
+                    foundPathWhichCollidesWithPawns = Find.TickManager.TicksGame;
+                }
+                if(PawnUtility.KnownDangerAt(c, pawn.Map, pawn))
+                {
+                    foundPathWithDanger = Find.TickManager.TicksGame;
+                }
+                if(foundPathWhichCollidesWithPawns == Find.TickManager.TicksGame && foundPathWithDanger == Find.TickManager.TicksGame)
+                {
+                    break;
+                }
+                num++;
+            }
+            return true;
+        }
+
+        private static PawnPath GenerateNewPath(ref IntVec3 lastPathedTargetPosition, LocalTargetInfo destination, ref Pawn pawn, Map map, PathEndMode peMode)
+        {
+            lastPathedTargetPosition = destination.Cell;
+            return MapExtensionUtility.GetExtensionToMap(map).getShipPathFinder.FindShipPath(pawn.Position, destination, pawn, peMode);
+        }
+
+        private static void SetupMoveIntoNextCell(ref Pawn_PathFollower instance, Pawn pawn, LocalTargetInfo destination)
+        {
+            if(instance.curPath.NodesLeftCount <= 1)
+            {
+                Log.Error(string.Concat(new object[]
+                {
+                    pawn,
+                    " at ",
+                    pawn.Position,
+                    " ran out of path nodes while pathing to ",
+                    destination, "."
+                }), false);
+                PatherFailedHelper(ref instance, pawn);
+                return;
+            }
+            instance.nextCell = instance.curPath.ConsumeNextNode();
+            if(!GenGridShips.Walkable(instance.nextCell, MapExtensionUtility.GetExtensionToMap(pawn.Map)))
+            {
+                Log.Error(string.Concat(new object[]
+                {
+                pawn,
+                " entering ",
+                instance.nextCell,
+                " which is unwalkable."
+                }), false);
+            }
+            int num = CostToMoveIntoCellShips(pawn, instance.nextCell);
+            instance.nextCellCostTotal = (float)num;
+            instance.nextCellCostLeft = (float)num;
+            //Doors?
+        }
+
+        public static float CustomFloatBeach()
+        {
+            return (float)40 * (RimShipMod.mod.settings.beachMultiplier / 20f);
+        }
+
+        private static int PushSettlementToCoast(int tileID, Faction faction)
+        {
+            List<int> neighbors = new List<int>();
+            Stack<int> stack = new Stack<int>();
+            stack.Push(tileID);
+            Stack<int> stackFull = stack;
+            List<int> newTilesSearch = new List<int>();
+            List<int> allSearchedTiles = new List<int>() { tileID };
+            int searchTile;
+            int searchedRadius = 0;
+
+            if(Find.World.CoastDirectionAt(tileID).IsValid)
+            {
+                if(Find.WorldGrid[tileID].biome.canBuildBase && !(faction is null))
+                    tiles.Add(new Pair<int, int>(tileID, 0));
+                return tileID;
+            }
+
+            while (searchedRadius < RimShipMod.mod.settings.coastRadius)
+            {
+                for (int j = 0; j < stackFull.Count; j++)
+                {
+                    searchTile = stack.Pop();
+                    GetList<int>(Find.WorldGrid.tileIDToNeighbors_offsets, Find.WorldGrid.tileIDToNeighbors_values, searchTile, neighbors);
+                    int count = neighbors.Count;
+                    for (int i = 0; i < count; i++)
+                    {
+                        if (allSearchedTiles.Any(x => x == neighbors[i]))
+                            continue;
+                        newTilesSearch.Add(neighbors[i]);
+                        allSearchedTiles.Add(neighbors[i]);
+                        if (Find.World.CoastDirectionAt(neighbors[i]).IsValid)
+                        {
+                            if(Find.WorldGrid[neighbors[i]].biome.canBuildBase && Find.WorldGrid[neighbors[i]].biome.implemented && Find.WorldGrid[neighbors[i]].hilliness != Hilliness.Impassable)
+                            {
+                                if (debug && !(faction is null)) DebugDrawSettlement(tileID, neighbors[i]);
+                                if(!(faction is null))
+                                    tiles.Add(new Pair<int, int>(neighbors[i], searchedRadius));
+                                return neighbors[i];
+                            }
+                        }
+                    }
+                }
+                stack.Clear();
+                stack = new Stack<int>(newTilesSearch);
+                stackFull = stack;
+                newTilesSearch.Clear();
+                searchedRadius++;
+            }
+            return tileID;
+        }
+
+        private static void GetList<T>(List<int> offsets, List<T> values, int index, List<T> outList)
+        {
+            outList.Clear();
+            int num = offsets[index];
+            int num2 = values.Count;
+            if (index + 1 < offsets.Count)
+            {
+                num2 = offsets[index + 1];
+            }
+            
+            for (int i = num; i < num2; i++)
+            {
+                outList.Add(values[i]);
+            }
+        }
+
+        public static void DebugSettlementPaths()
+        {
+            if (drawPaths && (debugLines is null || !debugLines.Any())) return;
+            if (!drawPaths) goto DrawRings;
+            foreach (WorldPath wp in debugLines)
+            {
+                wp.DrawPath(null);
+            }
+            DrawRings:
+                foreach(Pair<int, int> t in tiles)
+                {
+                    GenDraw.DrawWorldRadiusRing(t.First, t.Second);
+                }
+        }
+
+        private static void DebugDrawSettlement(int from, int to)
+        {
+            PeaceTalks o = (PeaceTalks)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfShips.DebugSettlement);
+            o.Tile = from;
+            o.SetFaction(Faction.OfMechanoids);
+            Find.WorldObjects.Add(o);
+            if(drawPaths)
+                debugLines.Add(Find.WorldPathFinder.FindPath(from, to, null, null));
+        }
+
+        private static List<Pawn> GetShipsForColonistBar(List<Map> maps, int i)
+        {
+            Map map = maps[i];
+            List<Pawn> ships = new List<Pawn>();
+            foreach(Pawn ship in map.mapPawns.AllPawnsSpawned)
+            {
+                if(IsShip(ship))
+                {
+                    //ships.Add(ship); /*  Uncomment to add Ships to colonist bar  */
+                    foreach(Pawn p in ship.GetComp<CompShips>().AllPawnsAboard)
+                    {
+                        ships.Add(p);
+                    }
+                }
+            }
+            return ships;
+        }
+
         #endregion HelperFunctions
 
-        private static bool disabled = true;
+        private static readonly bool disabled = true;
+        public static readonly bool debug = true;
+        public static readonly bool drawPaths = false;
+        private static List<WorldPath> debugLines = new List<WorldPath>();
+        private static List<Pair<int, int>> tiles = new List<Pair<int,int>>(); // Pair -> TileID : Cycle
     }
 }

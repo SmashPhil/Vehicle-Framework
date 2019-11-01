@@ -30,7 +30,7 @@ namespace RimShips.AI
 
         public void ChangePathCosts()
         {
-            Log.Message("CHANGING PATH COSTS");
+            //Change path costs here?
         }
         public void ResetPathGrid()
         {
@@ -90,9 +90,10 @@ namespace RimShips.AI
             }
             bool flag = this.WalkableFast(c);
             this.pathGrid[this.map.cellIndices.CellToIndex(c)] = this.CalculatedCostAt(c, true, IntVec3.Invalid);
+            Log.Message("Cost: " + this.pathGrid[this.map.cellIndices.CellToIndex(c)]);
             if (this.WalkableFast(c) != flag)
             {
-                this.map.reachability.ClearCache();
+                MapExtensionUtility.GetExtensionToMap(this.map).getShipReachability.ClearCache();
                 //this.map.regionDirtyer.Notify_WalkabilityChanged(c);
             }
         }
@@ -109,7 +110,7 @@ namespace RimShips.AI
         {
             //bool flag = false;
             TerrainDef terrainDef = this.map.terrainGrid.TerrainAt(c);
-            if(terrainDef is null || (terrainDef.passability == Traversability.Impassable && !terrainDef.IsWater) || !terrainDef.IsWater)
+            if (terrainDef is null || (terrainDef.passability == Traversability.Impassable && !terrainDef.IsWater) || !terrainDef.IsWater)
             {
                 return ImpassableCost;
             }

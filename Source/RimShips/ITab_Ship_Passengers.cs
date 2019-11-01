@@ -39,7 +39,7 @@ namespace RimShips.UI
         {
             get
             {
-                return base.SelPawn.TryGetComp<CompShips>() is null ? null : base.SelPawn.GetComp<CompShips>().Passengers;
+                return base.SelPawn.TryGetComp<CompShips>() is null ? null : base.SelPawn.GetComp<CompShips>().AllPawnsAboard;
             }
         }
 

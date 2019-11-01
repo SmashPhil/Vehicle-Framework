@@ -75,11 +75,15 @@
     <Compile Include="LordToil_PrepareCaravan_GatherSlavesShip.cs" />
     <Compile Include="MainTabWindow_Ships.cs" />
     <Compile Include="MapExtension.cs" />
+    <Compile Include="MapExtensionUtility.cs" />
     <Compile Include="PawnTableDefOf_Ships.cs" />
     <Compile Include="PawnTable_Ships.cs" />
     <Compile Include="Projectile_Water.cs" />
     <Compile Include="Projectile_WaterHarmony.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RegionCostCalculatorShips.cs" />
+    <Compile Include="RegionCostCalculatorWrapperShips.cs" />
+    <Compile Include="RimshipsModSettings.cs" />
     <Compile Include="ShipHandler.cs" />
     <Compile Include="ShipHarmony.cs" />
     <Compile Include="ShipPassengerCardUtility.cs" />
@@ -87,11 +91,25 @@
     <Compile Include="ShipPathGrid.cs" />
     <Compile Include="ShipProperties.cs" />
     <Compile Include="ShipReachability.cs" />
+    <Compile Include="ShipReachabilityImmediate.cs" />
     <Compile Include="ShipReachabilityUtility.cs" />
     <Compile Include="ShipRole.cs" />
     <Compile Include="SpawnThingOnBuild.cs" />
     <Compile Include="TexCommand.cs" />
     <Compile Include="Toils_Board.cs" />
+    <Compile Include="TouchPathEndModeUtilityShips.cs" />
+    <Compile Include="WaterGridsUtility.cs" />
+    <Compile Include="WaterRegion.cs" />
+    <Compile Include="WaterRegionAndRoomQuery.cs" />
+    <Compile Include="WaterRegionAndRoomUpdater.cs" />
+    <Compile Include="WaterRegionGrid.cs" />
+    <Compile Include="WaterRegionLink.cs" />
+    <Compile Include="WaterRegionLinkDatabase.cs" />
+    <Compile Include="WaterRegionListersUpdater.cs" />
+    <Compile Include="WaterRegionMaker.cs" />
+    <Compile Include="WaterRegionTraverser.cs" />
+    <Compile Include="WaterRegionTypeUtility.cs" />
+    <Compile Include="WorldObjectDefOfShips.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

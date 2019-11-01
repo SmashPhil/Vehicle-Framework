@@ -21,10 +21,10 @@ namespace RimShips.AI
 {
     public class ShipReachability
     {
-        public ShipReachability(Map map, MapExtension mapE)
+        public ShipReachability(Map map)
         {
             this.map = map;
-            this.mapExt = mapE;
+            this.mapExt = MapExtensionUtility.GetExtensionToMap(map);
         }
         
         public void ClearCache()
@@ -42,7 +42,7 @@ namespace RimShips.AI
             this.cache.ClearForHostile(hostileTo);
         }
 
-        private void QueueNewOpenRegion(Region region)
+        private void QueueNewOpenRegion(WaterRegion region)
         {
             if(region is null)
             {
@@ -51,7 +51,7 @@ namespace RimShips.AI
             }
             if(region.reachedIndex == this.reachedIndex)
             {
-                Log.ErrorOnce("Region is already reached; you can't open it. Region: " + region.ToString(), 719991, false);
+                Log.ErrorOnce("WaterRegion is already reached; you can't open it. WaterRegion: " + region.ToString(), 719991, false);
                 return;
             }
             this.openQueue.Enqueue(region);
@@ -66,7 +66,6 @@ namespace RimShips.AI
 
         private void FinalizeCheck()
         {
-            Log.Message("Finalize Check called");
             this.working = false;
         }
 
@@ -87,13 +86,16 @@ namespace RimShips.AI
 
         public bool CanReachShip(IntVec3 start, LocalTargetInfo dest, PathEndMode peMode, TraverseParms traverseParms)
         {
-            Log.Message("At canreach");
             if(this.working)
             {
                 Log.ErrorOnce("Called CanReach() while working for Ships. This should never happen. Suppressing further errors.", 7312233, false);
                 return false;
             }
-            if(!(traverseParms.pawn is null))
+            if(!this.map.terrainGrid.TerrainAt(dest.Cell).IsWater)
+            {
+                return false;
+            }
+            if (!(traverseParms.pawn is null))
             {
                 if(!traverseParms.pawn.Spawned)
                 {
@@ -111,15 +113,15 @@ namespace RimShips.AI
                     return false;
                 }
             }
-            if(!dest.IsValid)
+            if (!dest.IsValid)
             {
                 return false;
             }
-            if(dest.HasThing && dest.Thing.Map != this.map)
+            if (dest.HasThing && dest.Thing.Map != this.map)
             {
                 return false;
             }
-            if(!start.InBounds(this.map) || !dest.Cell.InBounds(this.map))
+            if (!GenGridShips.InBounds(start, this.map) || !GenGridShips.InBounds(dest.Cell, this.map)) 
             {
                 return false;
             }
@@ -133,82 +135,73 @@ namespace RimShips.AI
                     return true;
                 }
             }
-            Log.Message("Check before: " + (this.mapExt is null));
             dest = (LocalTargetInfo)GenPathShip.ResolvePathMode(traverseParms.pawn, dest.ToTargetInfo(this.map), ref peMode, this.mapExt);
             this.working = true;
             bool result;
             try
             {
                 this.pathGrid = mapExt.getShipPathGrid;
-                this.regionGrid = this.map.regionGrid;
+                this.regionGrid = this.mapExt.getWaterRegionGrid;
                 this.reachedIndex += 1u;
                 this.destRegions.Clear();
                 if(peMode == PathEndMode.OnCell)
                 {
-                    Region region = dest.Cell.GetRegion(this.map, RegionType.Set_All);
+                    WaterRegion region = WaterGridsUtility.GetRegion(dest.Cell, this.map, RegionType.Set_All);
                     if(!(region is null) && region.Allows(traverseParms, true))
                     {
                         this.destRegions.Add(region);
                     }
+                    Log.Message("-> " + (region is null));
+                    //Log.Message("-x " + region.Allows(traverseParms, true));
                 }
                 else if(peMode == PathEndMode.Touch)
                 {
-                    TouchPathEndModeUtility.AddAllowedAdjacentRegions(dest, traverseParms, this.map, this.destRegions);
+                    TouchPathEndModeUtilityShips.AddAllowedAdjacentRegions(dest, traverseParms, this.map, this.destRegions);
                 }
                 if(this.destRegions.Count == 0 && traverseParms.mode != TraverseMode.PassAllDestroyableThings && traverseParms.mode !=
                     TraverseMode.PassAllDestroyableThingsNotWater)
                 {
-                    Log.Message("Am I supposed to be here?");
                     this.FinalizeCheck();
                     result = false;
                 }
                 else
                 {
-                    this.destRegions.RemoveDuplicates<Region>();
+                    this.destRegions.RemoveDuplicates<WaterRegion>();
                     this.openQueue.Clear();
                     this.numRegionsOpened = 0;
                     this.DetermineStartRegions(start);
                     if(this.openQueue.Count == 0 && traverseParms.mode != TraverseMode.PassAllDestroyableThings && traverseParms.mode !=
                         TraverseMode.PassAllDestroyableThingsNotWater)
                     {
-                        Log.Message("Here?");
                         this.FinalizeCheck();
                         result = false;
                     }
                     else
                     {
-                        Log.Message("HERE");
-                        //Fix Later
-                        /*if(this.startingRegions.Any<Region>() && this.destRegions.Any<Region>() && this.CanUseCache(traverseParms.mode))
+                        /*if (this.startingRegions.Any<WaterRegion>() && this.destRegions.Any<WaterRegion>() && this.CanUseCache(traverseParms.mode))
                         {
                             BoolUnknown cachedResult = this.GetCachedResult(traverseParms);
                             if (cachedResult == BoolUnknown.True)
-							{
-                                Log.Message("1");
-								this.FinalizeCheck();
-								return true;
-							}
-							if (cachedResult == BoolUnknown.False)
-							{
-                                Log.Message("2");
-								this.FinalizeCheck();
-								return false;
-							}
-							if (cachedResult != BoolUnknown.Unknown)
-							{
-							}
+                            {
+                                this.FinalizeCheck();
+                                return true;
+                            }
+                            if (cachedResult == BoolUnknown.False)
+                            {
+                                this.FinalizeCheck();
+                                return false;
+                            }
                         }*/
-                        if(traverseParms.mode == TraverseMode.PassAllDestroyableThings || traverseParms.mode == TraverseMode.PassAllDestroyableThingsNotWater || 
+                        if (traverseParms.mode == TraverseMode.PassAllDestroyableThings || traverseParms.mode == TraverseMode.PassAllDestroyableThingsNotWater || 
                             traverseParms.mode == TraverseMode.NoPassClosedDoorsOrWater)
                         {
-                            Log.Message("Check Final1");
                             bool flag = this.CheckCellBasedReachability(start, dest, peMode, traverseParms);
                             this.FinalizeCheck();
                             result = flag;
                         }
                         else
                         {
-                            Log.Message("Check Final2");
+                            Log.Message("6");
                             bool flag2 = this.CheckRegionBasedReachability(traverseParms);
                             this.FinalizeCheck();
                             result = flag2;
@@ -218,9 +211,10 @@ namespace RimShips.AI
             }
             finally
             {
+                Log.Message("test");
                 this.working = false;
             }
-            Log.Message("Result: " + result);
+            Log.Message("result: " + result);
             return result;
         }
 
@@ -229,7 +223,7 @@ namespace RimShips.AI
             this.startingRegions.Clear();
             if(this.pathGrid.WalkableFast(start))
             {
-                Region validRegionAt = this.regionGrid.GetValidRegionAt(start);
+                WaterRegion validRegionAt = this.regionGrid.GetValidRegionAt(start);
                 this.QueueNewOpenRegion(validRegionAt);
                 this.startingRegions.Add(validRegionAt);
             }
@@ -238,11 +232,11 @@ namespace RimShips.AI
                 for(int i = 0; i < 8; i++)
                 {
                     IntVec3 c = start + GenAdj.AdjacentCells[i];
-                    if(c.InBounds(this.map))
+                    if(GenGridShips.InBounds(c, this.map))
                     {
                         if(this.pathGrid.WalkableFast(c))
                         {
-                            Region validRegionAt2 = this.regionGrid.GetValidRegionAt(c);
+                            WaterRegion validRegionAt2 = this.regionGrid.GetValidRegionAt(c);
                             if(!(validRegionAt2 is null) && validRegionAt2.reachedIndex != this.reachedIndex)
                             {
                                 this.QueueNewOpenRegion(validRegionAt2);
@@ -265,7 +259,7 @@ namespace RimShips.AI
                     {
                         return BoolUnknown.True;
                     }
-                    BoolUnknown boolUnknown = this.cache.CachedResultFor(this.startingRegions[i].Room, this.destRegions[j].Room, traverseParms);
+                    /*BoolUnknown boolUnknown = this.cache.CachedResultFor(this.startingRegions[i].Room, this.destRegions[j].Room, traverseParms);
                     if (boolUnknown == BoolUnknown.True)
                     {
                         return BoolUnknown.True;
@@ -273,9 +267,10 @@ namespace RimShips.AI
                     if (boolUnknown == BoolUnknown.Unknown)
                     {
                         flag = true;
-                    }
+                    }*/
                 }
             }
+            Log.Message("GETTING CACHED RESULT");
             if (!flag)
             {
                 return BoolUnknown.False;
@@ -287,21 +282,21 @@ namespace RimShips.AI
         {
             while(this.openQueue.Count > 0)
             {
-                Region region = this.openQueue.Dequeue();
-                foreach(RegionLink regionLink in region.links)
+                WaterRegion region = this.openQueue.Dequeue();
+                foreach(WaterRegionLink regionLink in region.links)
                 {
                     for(int i = 0; i < 2; i++)
                     {
-                        Region region2 = regionLink.regions[i];
+                        WaterRegion region2 = regionLink.regions[i];
                         if(!(region2 is null) && region2.reachedIndex != this.reachedIndex && region2.type.Passable())
                         {
                             if(region2.Allows(traverseParms, false))
                             {
                                 if(this.destRegions.Contains(region2))
                                 {
-                                    foreach(Region startRegion in this.startingRegions)
+                                    foreach(WaterRegion startRegion in this.startingRegions)
                                     {
-                                        this.cache.AddCachedResult(startRegion.Room, region2.Room, traverseParms, true);
+                                        //this.cache.AddCachedResult(startRegion.Room, region2.Room, traverseParms, true);
                                     }
                                     return true;
                                 }
@@ -311,11 +306,11 @@ namespace RimShips.AI
                     }
                 }
             }
-            foreach(Region startRegion in this.startingRegions)
+            foreach(WaterRegion startRegion in this.startingRegions)
             {
-                foreach(Region destRegion in this.destRegions)
+                foreach(WaterRegion destRegion in this.destRegions)
                 {
-                    this.cache.AddCachedResult(startRegion.Room, destRegion.Room, traverseParms, false);
+                    //this.cache.AddCachedResult(startRegion.Room, destRegion.Room, traverseParms, false);
                 }
             }
             return false;
@@ -324,7 +319,7 @@ namespace RimShips.AI
         private bool CheckCellBasedReachability(IntVec3 start, LocalTargetInfo dest, PathEndMode peMode, TraverseParms traverseParms)
         {
             IntVec3 foundCell = IntVec3.Invalid;
-            Region[] directionRegionGrid = this.regionGrid.DirectGrid;
+            WaterRegion[] directionRegionGrid = this.regionGrid.DirectGrid;
             ShipPathGrid pathGrid = mapExt.getShipPathGrid;
             CellIndices cellIndices = this.map.cellIndices;
             this.map.floodFiller.FloodFill(start, delegate (IntVec3 c)
@@ -346,19 +341,19 @@ namespace RimShips.AI
                         }
                     }
                 }
-                else if (traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater)
+                /*else if (traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater)
                 {
                     Log.ErrorOnce("Do not use this method for non-cell based modes!", 938476762, false);
                     if (!pathGrid.WalkableFast(num))
                     {
                         return false;
                     }
-                }
-                Region region = directionRegionGrid[num];
+                }*/
+                WaterRegion region = directionRegionGrid[num];
                 return region is null || region.Allows(traverseParms, false);
             }, delegate (IntVec3 c)
             {
-                if (ReachabilityImmediate.CanReachImmediate(c, dest, this.map, peMode, traverseParms.pawn))
+                if (ShipReachabilityImmediate.CanReachImmediateShip(c, dest, this.map, peMode, traverseParms.pawn))
                 {
                     foundCell = c;
                     return true;
@@ -370,12 +365,12 @@ namespace RimShips.AI
             {
                 if(this.CanUseCache(traverseParms.mode))
                 {
-                    Region validRegionAt = this.regionGrid.GetValidRegionAt(foundCell);
+                    WaterRegion validRegionAt = this.regionGrid.GetValidRegionAt(foundCell);
                     if( !(validRegionAt is null) )
                     {
-                        foreach(Region startRegion in this.startingRegions)
+                        foreach(WaterRegion startRegion in this.startingRegions)
                         {
-                            this.cache.AddCachedResult(startRegion.Room, validRegionAt.Room, traverseParms, true);
+                            //this.cache.AddCachedResult(startRegion.Room, validRegionAt.Room, traverseParms, true);
                         }
                     }
                 }
@@ -383,11 +378,11 @@ namespace RimShips.AI
             }
             if(this.CanUseCache(traverseParms.mode))
             {
-                foreach(Region startRegion in this.startingRegions)
+                foreach(WaterRegion startRegion in this.startingRegions)
                 {
-                    foreach(Region destRegion in this.destRegions)
+                    foreach(WaterRegion destRegion in this.destRegions)
                     {
-                        this.cache.AddCachedResult(startRegion.Room, destRegion.Room, traverseParms, false);
+                        //this.cache.AddCachedResult(startRegion.Room, destRegion.Room, traverseParms, false);
                     }
                 }
             }
@@ -485,27 +480,23 @@ namespace RimShips.AI
                     return false;
                 }
             }
-            Region region = c.GetRegion(this.map, RegionType.Set_Passable);
-            if (region == null)
-            {
+            WaterRegion region = WaterGridsUtility.GetRegion(c, this.map, RegionType.Set_Passable);
+            if (region is null)
                 return false;
-            }
-            if (region.Room.TouchesMapEdge)
-            {
-                return true;
-            }
-            RegionEntryPredicate entryCondition = (Region from, Region r) => r.Allows(traverseParms, false);
+            /*if (region.Room.TouchesMapEdge)
+                return true;*/
+            WaterRegionEntryPredicate entryCondition = (WaterRegion from, WaterRegion r) => r.Allows(traverseParms, false);
             bool foundReg = false;
-            RegionProcessor regionProcessor = delegate (Region r)
+            WaterRegionProcessor regionProcessor = delegate (WaterRegion r)
             {
-                if (r.Room.TouchesMapEdge)
+                /*if (r.Room.TouchesMapEdge)
                 {
                     foundReg = true;
                     return true;
-                }
+                }*/
                 return false;
             };
-            RegionTraverser.BreadthFirstTraverse(region, entryCondition, regionProcessor, 9999, RegionType.Set_Passable);
+            WaterRegionTraverser.BreadthFirstTraverse(region, entryCondition, regionProcessor, 9999, RegionType.Set_Passable);
             return foundReg;
         }
 
@@ -531,7 +522,7 @@ namespace RimShips.AI
                     return false;
                 }
             }
-            if (!c.InBounds(this.map))
+            if (!GenGridShips.InBounds(c, this.map))
             {
                 return false;
             }
@@ -539,14 +530,14 @@ namespace RimShips.AI
             {
                 return true;
             }
-            Region region = c.GetRegion(this.map, RegionType.Set_Passable);
+            WaterRegion region = WaterGridsUtility.GetRegion(c, this.map, RegionType.Set_Passable);
             if (region == null)
             {
                 return false;
             }
-            RegionEntryPredicate entryCondition = (Region from, Region r) => r.Allows(traverseParms, false);
+            WaterRegionEntryPredicate entryCondition = (WaterRegion from, WaterRegion r) => r.Allows(traverseParms, false);
             bool foundReg = false;
-            RegionProcessor regionProcessor = delegate (Region r)
+            WaterRegionProcessor regionProcessor = delegate (WaterRegion r)
             {
                 if (!r.AnyCell.Fogged(this.map))
                 {
@@ -555,7 +546,7 @@ namespace RimShips.AI
                 }
                 return false;
             };
-            RegionTraverser.BreadthFirstTraverse(region, entryCondition, regionProcessor, 9999, RegionType.Set_Passable);
+            WaterRegionTraverser.BreadthFirstTraverse(region, entryCondition, regionProcessor, 9999, RegionType.Set_Passable);
             return foundReg;
         }
 
@@ -566,11 +557,11 @@ namespace RimShips.AI
 
         private Map map;
 
-        private Queue<Region> openQueue = new Queue<Region>();
+        private Queue<WaterRegion> openQueue = new Queue<WaterRegion>();
 
-        private List<Region> startingRegions = new List<Region>();
+        private List<WaterRegion> startingRegions = new List<WaterRegion>();
 
-        private List<Region> destRegions = new List<Region>();
+        private List<WaterRegion> destRegions = new List<WaterRegion>();
 
         private uint reachedIndex = 1u;
 
@@ -578,11 +569,11 @@ namespace RimShips.AI
 
         private bool working;
 
-        private ReachabilityCache cache;
+        private ReachabilityCache cache = new ReachabilityCache(); //COME BACK LATER
 
         private ShipPathGrid pathGrid;
 
-        private RegionGrid regionGrid;
+        private WaterRegionGrid regionGrid;
 
         private MapExtension mapExt;
     }

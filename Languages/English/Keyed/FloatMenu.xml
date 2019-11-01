@@ -1,12 +1,20 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <LanguageData>
+	<RimShips>RimShips</RimShips>
 	<BoardShip>Board {0} as {1}  [{2}]</BoardShip>
 	<CompShips_CannotMove>Cannot draft. Ship needs more crew in order to navigate.</CompShips_CannotMove>
 	<ShipSection>Ships</ShipSection>
 	<AwaitOrders>Awaiting Orders</AwaitOrders>
 	<NameIsInvalid>Name invalid for ship.</NameIsInvalid>
 	<ShipGainsName>Your new ship has been named {0}</ShipGainsName>
+	<ActivityIconOnBoardShip>Onboard ship</ActivityIconOnBoardShip>
+	
+	<BeachGenMultiplier>Beach Size Multiplier: {0}%</BeachGenMultiplier>
+	<ForceSettlementCoastOption>Push Settlements to Coast</ForceSettlementCoastOption>
+	<ForceSettlementCoastTooltip>Push nearby faction settlements to the coast if within given radius</ForceSettlementCoastTooltip>
+	<ForceSettlementCoast>Push Settlement to Coast Radius: {0}</ForceSettlementCoast>
+	<CannotSailToCell>Ship cannot reach this area.</CannotSailToCell>
 	
 	<CaravanMustHaveEnoughSpaceOnShip>Not enough space on ships to house all pawns.</CaravanMustHaveEnoughSpaceOnShip>
 	<CaravanMustHaveEnoughPawnsToOperate>Not enough Pawns selected to set sail. Need {0}</CaravanMustHaveEnoughPawnsToOperate>

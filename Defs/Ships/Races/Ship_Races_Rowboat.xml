@@ -75,10 +75,9 @@
 		
 		<statBases>
 			<MoveSpeed>4</MoveSpeed>
-			<CarryingCapacity>75</CarryingCapacity>
 			<ArmorRating_Blunt>0.1</ArmorRating_Blunt>
 			<ArmorRating_Sharp>0.2</ArmorRating_Sharp>
-			<MarketValue>100</MarketValue>
+			<MarketValue>200</MarketValue>
 		</statBases>
 		
 		<size>(1,3)</size>
@@ -106,7 +105,7 @@
 			<foodType>None</foodType>
 
 			<body>canoe_Body</body>
-			<baseBodySize>1.0</baseBodySize>
+			<baseBodySize>4.0</baseBodySize>
 			<baseHealthScale>1.0</baseHealthScale>
 			<lifeStageAges>
 				<li>
@@ -128,8 +127,6 @@
 				<drawDriver>false</drawDriver>
 				<downable>false</downable>
 				<movesWhenDowned>false</movesWhenDowned>
-				
-				<cargoMax>100</cargoMax>
 				<ejectPassengersWhenDestroyed>false</ejectPassengersWhenDestroyed>
 				
 				<loadCargo>NotAllowed</loadCargo>
@@ -146,9 +143,9 @@
 				
 				<roles>
 					<li>
-						<label>Driver</label>
+						<label>Passenger</label>
 						<handlingTypes>Movement</handlingTypes>
-						<slots>1</slots>
+						<slots>2</slots>
 						<slotsToOperate>1</slotsToOperate>
 						<slotTag>Driver</slotTag>
 					</li>
