@@ -318,10 +318,198 @@ namespace RimShips
             this.beached = true;
         }
 
+        private void TrySatisfyPawnNeeds()
+        {
+            foreach(Pawn p in this.AllPawnsAboard)
+            {
+                TrySatisfyPawnNeeds(p);
+            }
+        }
+        private void TrySatisfyPawnNeeds(Pawn pawn)
+        {
+            if (pawn.Dead) return;
+
+            List<Need> allNeeds = pawn.needs.AllNeeds;
+            foreach(Need need in allNeeds)
+            {
+                if(need is Need_Rest)
+                {
+                    this.TrySatisfyRest(pawn, need as Need_Rest);
+                }
+                else if(need is Need_Food)
+                {
+                    this.TrySatisfyFood(pawn, need as Need_Food);
+                }
+                else if(need is Need_Chemical)
+                {
+                    this.TrySatisfyChemicalNeed(pawn, need as Need_Chemical);
+                }
+                else if(need is Need_Joy)
+                {
+                    this.TrySatisfyJoyNeed(pawn, need as Need_Joy);
+                }
+            }
+        }
+
+        private void TrySatisfyRest(Pawn pawn, Need_Rest rest)
+        {
+            //Add Check
+            Building_Bed bed = (Building_Bed)this.Pawn.inventory.innerContainer.InnerListForReading.Find(x => x is Building_Bed); // Reserve?
+            float restValue = bed is null ? 0.75f : bed.GetStatValue(StatDefOf.BedRestEffectiveness, true);
+            rest.TickResting(restValue);
+        }
+
+        private void TrySatisfyFood(Pawn pawn, Need_Food food)
+        {
+            if (food.CurCategory < HungerCategory.Hungry)
+                return;
+            Thing thing;
+            if(this.TryGetBestFood(pawn, out thing))
+            {
+                food.CurLevel += thing.Ingested(pawn, food.NutritionWanted);
+                if(thing.Destroyed)
+                {
+                    this.Pawn.inventory.innerContainer.Remove(thing);
+                }
+                if(!TryGetBestFood(pawn, out thing))
+                {
+                    Messages.Message("ShipOutOfFood".Translate(this.Pawn.LabelShort), this.Pawn, MessageTypeDefOf.NegativeEvent, false);
+                }
+            }
+        }
+        public bool TryGetBestFood(Pawn forPawn, out Thing food)
+        {
+            List<Thing> list = this.Pawn.inventory.innerContainer.InnerListForReading;
+            Thing thing = null;
+            float num = 0f;
+            foreach(Thing foodItem in list)
+            {
+                if(CanEatForNutrition(foodItem, forPawn))
+                {
+                    float foodScore = CaravanPawnsNeedsUtility.GetFoodScore(foodItem, forPawn);
+                    if(thing is null || foodScore > num)
+                    {
+                        thing = foodItem;
+                        num = foodScore;
+                    }
+                }
+            }
+            if(!(thing is null))
+            {
+                food = thing;
+                return true;
+            }
+            food = null;
+            return false;
+        }
+
+        private void TrySatisfyChemicalNeed(Pawn pawn, Need_Chemical chemical)
+        {
+            if (chemical.CurCategory >= DrugDesireCategory.Satisfied)
+                return;
+            Thing drug;
+            if(TryGetDrugToSatisfyNeed(pawn, chemical, out drug))
+                this.IngestDrug(pawn, drug);
+        }
+
+        public void IngestDrug(Pawn pawn, Thing drug)
+        {
+            float num = drug.Ingested(pawn, 0f);
+            Need_Food food = pawn.needs.food;
+            if(!(food is null))
+            {
+                food.CurLevel += num;
+            }
+            if(drug.Destroyed)
+            {
+                this.Pawn.inventory.innerContainer.Remove(drug);
+            }
+        }
+        public bool TryGetDrugToSatisfyNeed(Pawn forPawn, Need_Chemical chemical, out Thing drug)
+        {
+            Hediff_Addiction addictionHediff = chemical.AddictionHediff;
+            if(addictionHediff is null)
+            {
+                drug = null;
+                return false;
+            }
+            List<Thing> list = this.Pawn.inventory.innerContainer.InnerListForReading;
+            Thing thing = null;
+            foreach(Thing t in list)
+            {
+                if(t.IngestibleNow && t.def.IsDrug)
+                {
+                    CompDrug compDrug = t.TryGetComp<CompDrug>();
+                    if(!(compDrug is null) && !(compDrug.Props.chemical is null))
+                    {
+                        if(compDrug.Props.chemical.addictionHediff == addictionHediff.def)
+                        {
+                            if(forPawn.drugs is null || forPawn.drugs.CurrentPolicy[t.def].allowedForAddiction || forPawn.story is null || forPawn.story.traits.DegreeOfTrait(TraitDefOf.DrugDesire) > 0)
+                            {
+                                thing = t;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if(!(thing is null))
+            {
+                drug = thing;
+                return true;
+            }
+            drug = null;
+            return false;
+        }
+        public static bool CanEatForNutrition(Thing item, Pawn forPawn)
+        {
+            return item.IngestibleNow && item.def.IsNutritionGivingIngestible && forPawn.WillEat(item, null) && item.def.ingestible.preferability > FoodPreferability.NeverForNutrition &&
+                (!item.def.IsDrug || !forPawn.IsTeetotaler()) && (!forPawn.RaceProps.Humanlike || forPawn.needs.food.CurCategory >= HungerCategory.Starving || item.def.ingestible.preferability >
+                FoodPreferability.DesperateOnlyForHumanlikes);
+        }
+
+        private void TrySatisfyJoyNeed(Pawn pawn, Need_Joy joy)
+        {
+            if(pawn.IsHashIntervalTick(1250))
+            {
+                float num = this.Pawn.pather.MovingNow ? 4E-05f : 4E-3f; //Incorporate 'shifts'
+                if (num <= 0f)
+                    return;
+                num *= 1250f;
+                List<JoyKindDef> tmpJoyList = GetAvailableJoyKindsFor(pawn);
+                JoyKindDef joyKind;
+                if (!tmpJoyList.TryRandomElementByWeight((JoyKindDef x) => 1f - Mathf.Clamp01(pawn.needs.joy.tolerances[x]), out joyKind))
+                    return;
+                joy.GainJoy(num, joyKind);
+                tmpJoyList.Clear();
+            }
+        }
+
+        public List<JoyKindDef> GetAvailableJoyKindsFor(Pawn p)
+        {
+            List<JoyKindDef> outJoyKinds = new List<JoyKindDef>();
+            if (!p.needs.joy.tolerances.BoredOf(JoyKindDefOf.Meditative))
+                outJoyKinds.Add(JoyKindDefOf.Meditative);
+            if(!p.needs.joy.tolerances.BoredOf(JoyKindDefOf.Social))
+            {
+                int num = 0;
+                foreach(Pawn targetpawn in this.AllPawnsAboard)
+                {
+                    if(!targetpawn.Downed && targetpawn.RaceProps.Humanlike && !targetpawn.InMentalState)
+                    {
+                        num++;
+                    }
+                }
+                if (num >= 2)
+                    outJoyKinds.Add(JoyKindDefOf.Social);
+            }
+            return outJoyKinds;
+        }
         public override void CompTick()
         {
             base.CompTick();
-            InitializeShipHandlers();
+            this.TrySatisfyPawnNeeds();
+            this.InitializeShipHandlers();
         }
         public override void PostSpawnSetup(bool respawningAfterLoad)
         {

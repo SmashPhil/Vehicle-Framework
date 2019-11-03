@@ -10,6 +10,15 @@
 	<ShipGainsName>Your new ship has been named {0}</ShipGainsName>
 	<ActivityIconOnBoardShip>Onboard ship</ActivityIconOnBoardShip>
 	
+	<CaravanShips>Ships</CaravanShips>
+	<CaravanShipsSingle>1 Ship</CaravanShipsSingle>
+	<CaravanShipsPlural>{0} Ships</CaravanShipsPlural>
+	<CaravanSailing>Sailing</CaravanSailing>
+	<TabCargo>Cargo</TabCargo>
+	<TabPassengers>Pawns</TabPassengers>
+	<Cargo>Cargo</Cargo>
+	<ShipOutOfFood>No food in {0} with Pawns onboard</ShipOutOfFood>
+	
 	<BeachGenMultiplier>Beach Size Multiplier: {0}%</BeachGenMultiplier>
 	<ForceSettlementCoastOption>Push Settlements to Coast</ForceSettlementCoastOption>
 	<ForceSettlementCoastTooltip>Push nearby faction settlements to the coast if within given radius</ForceSettlementCoastTooltip>

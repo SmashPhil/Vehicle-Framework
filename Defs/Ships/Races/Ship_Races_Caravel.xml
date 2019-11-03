@@ -126,10 +126,8 @@
 		<comps>	
 			<li Class = "RimShips.ShipProperties">
 				<driverRequired>true</driverRequired>
-				<drawDriver>false</drawDriver>
 				<downable>false</downable>
 				<movesWhenDowned>false</movesWhenDowned>
-				<ejectPassengersWhenDestroyed>false</ejectPassengersWhenDestroyed>
 				
 				<loadCargo>NotAllowed</loadCargo>
 				<moveable>DriverNeeded</moveable>

@@ -30,7 +30,7 @@ namespace RimShips
     {
         static ShipHarmony()
         {
-            var harmony = HarmonyInstance.Create("rimworld.rimships.comps.ship");
+            var harmony = HarmonyInstance.Create("rimworld.rimships.smashphil");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             //HarmonyInstance.DEBUG = true;
 
@@ -121,6 +121,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(typeof(Dialog_FormCaravan), name: "DoBottomButtons"), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(DoBottomButtonsTranspiler)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(CollectionsMassCalculator), parameters: new Type[] { typeof(List<ThingCount>), typeof(StringBuilder) }, name: nameof(CollectionsMassCalculator.Capacity)),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(CapacityWithShip)));
             harmony.Patch(original: AccessTools.Method(typeof(MassUtility), name: nameof(MassUtility.CanEverCarryAnything)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(CanCarryIfShip)));
@@ -138,22 +141,34 @@ namespace RimShips
                 name: nameof(CanStackShipTranspiler)));
             harmony.Patch(original: AccessTools.Property(type: typeof(JobDriver_PrepareCaravan_GatherItems), name: "Transferables").GetGetMethod(nonPublic: true),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(TransferablesShip))); //DOUBLE CHECK
+                name: nameof(TransferablesShip)));
             harmony.Patch(original: AccessTools.Method(type: typeof(FloatMenuMakerMap), name: "AddHumanlikeOrders"), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(AddHumanLikeOrdersTranspiler)));
             harmony.Patch(original: AccessTools.Method(type: typeof(LordToil_PrepareCaravan_GatherAnimals), name: nameof(LordToil_PrepareCaravan_GatherAnimals.UpdateAllDuties)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(UpdateDutyOfShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Dialog_FormCaravan), name: "TryFormAndSendCaravan"), 
+            harmony.Patch(original: AccessTools.Method(type: typeof(Dialog_FormCaravan), parameters: new Type[] {typeof(List<Pawn>), typeof(bool), typeof(Rot4), typeof(IntVec3).MakeByRefType()}, name: "TryFindExitSpot"), 
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(TryFormAndSendCaravanShips)));
-
-            //TO DO
-            harmony.Patch(original: AccessTools.Method(type: typeof(PathGrid), parameters: new Type[] { typeof(IntVec3)} , 
-                        name: nameof(PathGrid.Walkable)),
+                name: nameof(TryFindExitSpotShips)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "FillTab"),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(Walkable_RestrictWater)));
+                name: nameof(FillTabShipCaravan)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "DoPeopleAndAnimals"), 
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(DoPeopleAnimalsAndShip)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanEnterMapUtility), name: "GetEnterCell"), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(GetEnterCellOffset)));
+            harmony.Patch(original: AccessTools.Property(type: typeof(Caravan), name: nameof(Caravan.AllOwnersDowned)).GetGetMethod(),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(AllOwnersDownedShip)));
+            harmony.Patch(original: AccessTools.Property(type: typeof(Caravan), name: nameof(Caravan.AllOwnersHaveMentalBreak)).GetGetMethod(),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(AllOwnersMentalBreakShip)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(Caravan), name: nameof(Caravan.GetInspectString)),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(GetInspectStringShip)));
 
             //Draftable
             harmony.Patch(original: AccessTools.Property(typeof(Pawn_DraftController), name: nameof(Pawn_DraftController.Drafted)).GetSetMethod(),
@@ -162,7 +177,6 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Property(typeof(Pawn), name: nameof(Pawn.IsColonistPlayerControlled)).GetGetMethod(),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(IsShipDraftable)));
-            //  Possibly change draft gizmo  
 
             //Construction
             harmony.Patch(original: AccessTools.Method(type: typeof(Frame), name: nameof(Frame.CompleteConstruction)),
@@ -386,23 +400,6 @@ namespace RimShips
             }
             float num = 20f * Find.ColonistBar.Scale;
             Vector2 vector = new Vector2(rect.x + 1f, rect.yMax - num - 1f);
-            bool flag = false;
-            if (colonist.CurJob != null)
-            {
-                JobDef def = colonist.CurJob.def;
-                if (def == JobDefOf.AttackMelee || def == JobDefOf.AttackStatic)
-                {
-                    flag = true;
-                }
-                else if (def == JobDefOf.Wait_Combat)
-                {
-                    Stance_Busy stance_Busy = colonist.stances.curStance as Stance_Busy;
-                    if (stance_Busy != null && stance_Busy.focusTarg.IsValid)
-                    {
-                        flag = true;
-                    }
-                }
-            }
             
             List<Pawn> ships = Find.CurrentMap.mapPawns.AllPawnsSpawned.FindAll(x => !(x.GetComp<CompShips>() is null));
             if(ships.Any(x => x.GetComp<CompShips>().AllPawnsAboard.Contains(colonist)))
@@ -617,9 +614,10 @@ namespace RimShips
                 {
                     seats += ship.GetComp<CompShips>().SeatsAvailable;
                 }
-                if ((pawns.Count + downedPawns.Count) > seats)
+                if ((pawns.Where(x => x.GetComp<CompShips>() is null).ToList().Count + downedPawns.Count) > seats)
                 {
-                    Log.Error("Can't start forming caravan with ship(s) selected and not enough seats to house all pawns.", false);
+                    Log.Error("Can't start forming caravan with ship(s) selected and not enough seats to house all pawns. Seats: " + seats + " Pawns boarding: " +
+                        (pawns.Where(x => x.GetComp<CompShips>() is null).ToList().Count + downedPawns.Count), false);
                     return false;
                 }
 
@@ -662,6 +660,27 @@ namespace RimShips
             }
         }
 
+        public static bool CapacityWithShip(List<ThingCount> thingCounts, ref float __result, StringBuilder explanation = null)
+        {
+            if(thingCounts.Any(x => IsShip(x.Thing as Pawn)))
+            {
+                float num = 0f;
+                foreach(ThingCount tc in thingCounts)
+                {
+                    if(tc.Count > 0)
+                    {
+                        Pawn p = tc.Thing as Pawn;
+                        if (!(p is null) && IsShip(p))
+                        {
+                            num += MassUtility.Capacity(p, explanation) * (float)tc.Count;
+                        }
+                    }
+                }
+                __result = Mathf.Max(num, 0f);
+                return false;
+            }
+            return true;
+        }
         public static bool CanCarryIfShip(Pawn p, ref bool __result)
         {
             return p.GetComp<CompShips>() is null ? true : !(__result = true);
@@ -698,7 +717,6 @@ namespace RimShips
                 }
                 text += flag ? "MessagePawnLostWhileFormingCaravan".Translate(pawn).CapitalizeFirst() : flag2 ? textShip :
                     "MessagePawnLostWhileFormingCaravan".Translate(pawn).CapitalizeFirst() + "MessagePawnLostWhileFormingCaravan_AllLost".Translate();
-                //Message for boarding ship?
                 bool flag3 = true;
                 if (!flag2 && !flag) CaravanFormingUtility.StopFormingCaravan(lord);
                 if (flag)
@@ -772,7 +790,6 @@ namespace RimShips
         public static IEnumerable<CodeInstruction> CanStackShipTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
         {
             List<CodeInstruction> instructionList = instructions.ToList();
-            MethodInfo shipMethod = AccessTools.Method(type: typeof(ShipHarmony), name: nameof(IsShip));
 
             for (int i = 0; i < instructionList.Count; i++)
             {
@@ -784,7 +801,7 @@ namespace RimShips
                     i++;
                     yield return instruction;
                     yield return new CodeInstruction(opcode: OpCodes.Ldloc_0);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: shipMethod);
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(IsShip)));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldc_I4_0);
@@ -839,26 +856,423 @@ namespace RimShips
             }
         }
 
-        //COME BACK TO THIS -> For Exit Point
-        private static bool TryFormAndSendCaravanShips(Dialog_FormCaravan __instance, ref bool __result, ref int ___startingTile)
+        private static bool TryFindExitSpotShips(List<Pawn> pawns, bool reachableForEveryColonist, Rot4 exitDirection, out IntVec3 spot, Dialog_FormCaravan __instance, 
+            int ___startingTile, Map ___map)
         {
-            return true;
-            List<Pawn> pawnsTransferables = TransferableUtility.GetPawnsFromTransferables(__instance.transferables);
-            
-            if(pawnsTransferables.Any(x => IsShip(x)))
+            if(pawns.Any(x => IsShip(x)))
             {
-                MethodInfo checkMethod = typeof(Dialog_FormCaravan).GetMethod("CheckForErrors", BindingFlags.NonPublic | BindingFlags.Instance);
-                bool flag = Convert.ToBoolean(checkMethod.Invoke(__instance, new System.Object[] { pawnsTransferables })); 
-                if(!flag)
+                if(___startingTile < 0)
                 {
-                    __result = false;
+                    Log.Error("Can't find expit spot because startingTile is not set.", false);
+                    spot = IntVec3.Invalid;
                     return false;
                 }
-                //Direction8Way direction8WayFromToj = FindWorldGrid.GetDirection8WayFromTo(__instance.CurrentTile, ___startingTile);
+                Predicate<IntVec3> validator = (IntVec3 x) => !x.Fogged(___map) && x.Standable(___map); //CHANGE TO PICK SPOT ON WATER
+                
+                //NEEDS FINISHING WHEN REGIONS ARE COMPLETE
+            }
+            spot = IntVec3.Invalid;
+            return true;
+        }
 
+        private static bool FillTabShipCaravan(ITab_Pawn_FormingCaravan __instance, ref List<Thing> ___thingsToSelect, Vector2 ___size, 
+            ref float ___lastDrawnHeight, Vector2 ___scrollPosition, ref List<Thing> ___tmpSingleThing)
+        {
+            if((Find.Selector.SingleSelectedThing as Pawn).GetLord().LordJob is LordJob_FormAndSendCaravanShip)
+            {
+                ___thingsToSelect.Clear();
+                Rect outRect = new Rect(default(Vector2), ___size).ContractedBy(10f);
+                outRect.yMin += 20f;
+                Rect rect = new Rect(0f, 0f, outRect.width - 16f, Mathf.Max(___lastDrawnHeight, outRect.height));
+                Widgets.BeginScrollView(outRect, ref ___scrollPosition, rect, true);
+                float num = 0f;
+                string status = ((LordJob_FormAndSendCaravanShip)(Find.Selector.SingleSelectedThing as Pawn).GetLord().LordJob).Status;
+                Widgets.Label(new Rect(0f, num, rect.width, 100f), status);
+                num += 22f;
+                num += 4f;
+                object[] method1Args = new object[2] { rect, num };
+                MethodInfo doPeopleAndAnimals = AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "DoPeopleAndAnimals");
+                doPeopleAndAnimals.Invoke(__instance, method1Args);
+                num = (float)method1Args[1];
+                num += 4f;
+                DoItemsListForShip(rect, ref num, ref ___tmpSingleThing, __instance);
+                ___lastDrawnHeight = num;
+                Widgets.EndScrollView();
+                if(___thingsToSelect.Any<Thing>())
+                {
+                    ITab_Pawn_FormingCaravan.SelectNow(___thingsToSelect);
+                    ___thingsToSelect.Clear();
+                }
                 return false;
             }
+            return true;
+        }
 
+        private static bool DoPeopleAnimalsAndShip(Rect inRect, ref float curY, ITab_Pawn_FormingCaravan __instance, ref List<Thing> ___tmpPawns)
+        {
+            if((Find.Selector.SingleSelectedThing as Pawn).GetLord().LordJob is LordJob_FormAndSendCaravanShip)
+            {
+                Widgets.ListSeparator(ref curY, inRect.width, "CaravanMembers".Translate());
+                int num = 0;
+                int num2 = 0;
+                int num3 = 0;
+                int num4 = 0;
+                int num5 = 0;
+                int num6 = 0;
+                int num7 = 0;
+                int numShip = 0;
+                Lord lord = (Find.Selector.SingleSelectedThing as Pawn).GetLord();
+                for (int i = 0; i < lord.ownedPawns.Count; i++)
+                {
+                    Pawn pawn = lord.ownedPawns[i];
+                    if (pawn.IsFreeColonist)
+                    {
+                        num++;
+                        if (pawn.InMentalState)
+                        {
+                            num2++;
+                        }
+                    }
+                    if(IsShip(pawn))
+                    {
+                        if(pawn.GetComp<CompShips>().AllPawnsAboard.Any())
+                        {
+                            num += pawn.GetComp<CompShips>().AllPawnsAboard.FindAll(x => x.IsFreeColonist).Count;
+                            num2 += pawn.GetComp<CompShips>().AllPawnsAboard.FindAll(x => x.IsFreeColonist && x.InMentalState).Count;
+                            num3 += pawn.GetComp<CompShips>().AllPawnsAboard.FindAll(x => x.IsPrisoner).Count;
+                            num4 += pawn.GetComp<CompShips>().AllPawnsAboard.FindAll(x => x.IsPrisoner && x.InMentalState).Count;
+                            num5 += pawn.GetComp<CompShips>().AllPawnsAboard.FindAll(x => x.RaceProps.Animal).Count;
+                            num6 += pawn.GetComp<CompShips>().AllPawnsAboard.FindAll(x => x.RaceProps.Animal && x.InMentalState).Count;
+                            num7 += pawn.GetComp<CompShips>().AllPawnsAboard.FindAll(x => x.RaceProps.Animal && x.RaceProps.packAnimal).Count;
+                        }
+                        if(!pawn.GetComp<CompShips>().beached)
+                        {
+                            numShip++;
+                        }
+                    }
+                    else if (pawn.IsPrisoner)
+                    {
+                        num3++;
+                        if (pawn.InMentalState)
+                        {
+                            num4++;
+                        }
+                    }
+                    else if (pawn.RaceProps.Animal)
+                    {
+                        num5++;
+                        if (pawn.InMentalState)
+                        {
+                            num6++;
+                        }
+                        if (pawn.RaceProps.packAnimal)
+                        {
+                            num7++;
+                        }
+                    }
+                }
+                MethodInfo getPawnsCountLabel = AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "GetPawnsCountLabel");
+                string pawnsCountLabel = (string)getPawnsCountLabel.Invoke(__instance, new object[] { num, num2, -1 });
+                string pawnsCountLabel2 = (string)getPawnsCountLabel.Invoke(__instance, new object[] { num3, num4, -1 });
+                string pawnsCountLabel3 = (string)getPawnsCountLabel.Invoke(__instance, new object[] { num5, num6, num7 });
+                string pawnsCountLabelShip = (string)getPawnsCountLabel.Invoke(__instance, new object[] { numShip, -1, -1});
+
+                MethodInfo doPeopleAndAnimalsEntry = AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "DoPeopleAndAnimalsEntry");
+
+                float y = curY;
+                float num8;
+                object[] m1args = new object[] { inRect, Faction.OfPlayer.def.pawnsPlural.CapitalizeFirst(), pawnsCountLabel, curY, null };
+                doPeopleAndAnimalsEntry.Invoke(__instance, m1args);
+                curY = (float)m1args[3];
+                num8 = (float)m1args[4];
+
+                float yShip = curY;
+                float numS;
+                object[] mSargs = new object[] { inRect, "CaravanShips".Translate(), pawnsCountLabelShip, curY, null };
+                doPeopleAndAnimalsEntry.Invoke(__instance, mSargs);
+                curY = (float)mSargs[3];
+                numS = (float)mSargs[4];
+
+                float y2 = curY;
+                float num9;
+                object[] m2args = new object[] { inRect, "CaravanPrisoners".Translate(), pawnsCountLabel2, curY, null };
+                doPeopleAndAnimalsEntry.Invoke(__instance, m2args);
+                curY = (float)m2args[3];
+                num9 = (float)m2args[4];
+
+                float y3 = curY;
+                float num10;
+                object[] m3args = new object[] { inRect, "CaravanAnimals".Translate(), pawnsCountLabel3, curY, null };
+                doPeopleAndAnimalsEntry.Invoke(__instance, m3args);
+                curY = (float)m3args[3];
+                num10 = (float)m3args[4];
+
+                float width = Mathf.Max(new float[]
+                {
+                    num8,
+                    numS,
+                    num9,
+                    num10
+                }) + 2f;
+
+                Rect rect = new Rect(0f, y, width, 22f);
+                if (Mouse.IsOver(rect))
+                {
+                    Widgets.DrawHighlight(rect);
+                    AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "HighlightColonists").Invoke(__instance, null);
+                }
+                if (Widgets.ButtonInvisible(rect, false))
+                {
+                    AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "SelectColonistsLater").Invoke(__instance, null);
+                }
+
+                Rect rectS = new Rect(0f, yShip, width, 22f);
+                if(Mouse.IsOver(rectS))
+                {
+                    Widgets.DrawHighlight(rectS);
+                    foreach(Pawn p in lord.ownedPawns)
+                    {
+                        if(IsShip(p))
+                        {
+                            TargetHighlighter.Highlight(p, true, true, false);
+                        }
+                    }
+                }
+                if(Widgets.ButtonInvisible(rectS, false))
+                {
+                    ___tmpPawns.Clear();
+                    foreach(Pawn p in lord.ownedPawns)
+                    {
+                        if(IsShip(p))
+                        {
+                            ___tmpPawns.Add(p);
+                        }
+                    }
+                    AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "SelectLater").Invoke(__instance, new object[] { ___tmpPawns });
+                    ___tmpPawns.Clear();
+                }
+
+                Rect rect2 = new Rect(0f, y2, width, 22f);
+                if (Mouse.IsOver(rect2))
+                {
+                    Widgets.DrawHighlight(rect2);
+                    AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "HighlightPrisoners").Invoke(__instance, null);
+                }
+                if (Widgets.ButtonInvisible(rect2, false))
+                {
+                    AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "SelectPrisonersLater").Invoke(__instance, null);
+                }
+
+                Rect rect3 = new Rect(0f, y3, width, 22f);
+                if (Mouse.IsOver(rect3))
+                {
+                    Widgets.DrawHighlight(rect3);
+                    AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "HighlightAnimals").Invoke(__instance, null);
+                }
+                if (Widgets.ButtonInvisible(rect3, false))
+                {
+                    AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "SelectAnimalsLater").Invoke(__instance, null);
+                }
+                return false;
+            }
+            return true;
+        }
+
+        private static void GetEnterCellOffset(Caravan caravan, Map map, CaravanEnterMode enterMode, Predicate<IntVec3> extraCellValidator, ref IntVec3 __result)
+        {
+            if(caravan.PawnsListForReading.Any(x => IsShip(x)))
+            {
+                float offset = caravan.PawnsListForReading.FindAll(x => IsShip(x)).Max(x => x.kindDef.lifeStages.First().bodyGraphicData.drawSize.x > x.kindDef.lifeStages.First().bodyGraphicData.drawSize.y
+                    ? x.kindDef.lifeStages.First().bodyGraphicData.drawSize.x : x.kindDef.lifeStages.First().bodyGraphicData.drawSize.y);
+                if(__result.x < offset)
+                {
+                    __result.x = (int)offset;
+                }
+                else if(__result.x >= (map.Size.x - offset))
+                {
+                    __result.x = (int)(map.Size.x - offset);
+                }
+                if(__result.z < offset)
+                {
+                    __result.z = (int)offset;
+                }
+                else if(__result.z > (map.Size.z - offset))
+                {
+                    __result.z = (int)(map.Size.z - offset);
+                }
+            }
+        }
+
+        public static bool AllOwnersDownedShip(Caravan __instance, ref bool __result)
+        {
+            if(__instance.PawnsListForReading.Any(x => IsShip(x)))
+            {
+                foreach (Pawn ship in __instance.pawns)
+                {
+                    if(ship.GetComp<CompShips>().AllPawnsAboard.All(x => x.Downed))
+                    {
+                        __result = true;
+                        return false;
+                    }
+                }
+                __result = false;
+                return false;
+            }
+            return true;
+        }
+
+        public static bool AllOwnersMentalBreakShip(Caravan __instance, ref bool __result)
+        {
+            if(__instance.PawnsListForReading.Any(x => IsShip(x)))
+            {
+                foreach(Pawn ship in __instance.pawns)
+                {
+                    if (ship.GetComp<CompShips>().AllPawnsAboard.All(x => x.InMentalState))
+                    {
+                        __result = true;
+                        return false;
+                    }
+                }
+                __result = false;
+                return false;
+            }
+            return true;
+        }
+
+        public static bool GetInspectStringShip(Caravan __instance, ref string __result)
+        {
+            if(__instance.PawnsListForReading.Any(x => IsShip(x)))
+            {
+                StringBuilder stringBuilder = new StringBuilder();
+                
+                // base inspect string? 
+
+                if (stringBuilder.Length != 0)
+                    stringBuilder.AppendLine();
+                int num = 0;
+                int num2 = 0;
+                int num3 = 0;
+                int num4 = 0;
+                int num5 = 0;
+                int numS = 0;
+                foreach(Pawn ship in __instance.PawnsListForReading)
+                {
+                    numS++;
+                    foreach(Pawn p in ship.GetComp<CompShips>().AllPawnsAboard)
+                    {
+                        if(p.IsColonist)
+                            num++;
+                        if(p.RaceProps.Animal)
+                            num2++;
+                        if(p.IsPrisoner)
+                            num3++;
+                        if(p.Downed)
+                            num4++;
+                        if(p.InMentalState)
+                            num5++;
+                    }
+                }
+                if (numS == 1)
+                    stringBuilder.Append("CaravanShipsSingle".Translate());
+                else if (numS > 1)
+                    stringBuilder.Append("CaravanShipsPlural".Translate(numS));
+                stringBuilder.Append(", " + "CaravanColonistsCount".Translate(num, (num != 1) ? Faction.OfPlayer.def.pawnsPlural : Faction.OfPlayer.def.pawnSingular));
+                if (num2 == 1)
+                    stringBuilder.Append(", " + "CaravanAnimal".Translate());
+                else if (num2 > 1)
+                    stringBuilder.Append(", " + "CaravanAnimalsCount".Translate(num2));
+                if (num3 == 1)
+                    stringBuilder.Append(", " + "CaravanPrisoner".Translate());
+                else if (num3 > 1)
+                    stringBuilder.Append(", " + "CaravanPrisonersCount".Translate(num3));
+                stringBuilder.AppendLine();
+                if (num5 > 0)
+                    stringBuilder.Append("CaravanPawnsInMentalState".Translate(num5));
+                if (num4 > 0)
+                {
+                    if (num5 > 0)
+                    {
+                        stringBuilder.Append(", ");
+                    }
+                    stringBuilder.Append("CaravanPawnsDowned".Translate(num4));
+                }
+                if (num5 > 0 || num4 > 0)
+                {
+                    stringBuilder.AppendLine();
+                }
+
+                if(__instance.pather.Moving)
+                {
+                    if (!(__instance.pather.ArrivalAction is null))
+                        stringBuilder.Append(__instance.pather.ArrivalAction.ReportString);
+                    else
+                        stringBuilder.Append("CaravanSailing".Translate());
+                }
+                else
+                {
+                    SettlementBase settlementBase = CaravanVisitUtility.SettlementVisitedNow(__instance);
+                    if (!(settlementBase is null))
+                        stringBuilder.Append("CaravanVisiting".Translate(settlementBase.Label));
+                    else
+                        stringBuilder.Append("CaravanWaiting".Translate());
+                }
+                if (__instance.pather.Moving)
+                {
+                    float num6 = (float)CaravanArrivalTimeEstimator.EstimatedTicksToArrive(__instance, true) / 60000f;
+                    stringBuilder.AppendLine();
+                    stringBuilder.Append("CaravanEstimatedTimeToDestination".Translate(num6.ToString("0.#")));
+                }
+                if (__instance.AllOwnersDowned)
+                {
+                    stringBuilder.AppendLine();
+                    stringBuilder.Append("AllCaravanMembersDowned".Translate());
+                }
+                else if (__instance.AllOwnersHaveMentalBreak)
+                {
+                    stringBuilder.AppendLine();
+                    stringBuilder.Append("AllCaravanMembersMentalBreak".Translate());
+                }
+                else if (__instance.ImmobilizedByMass)
+                {
+                    stringBuilder.AppendLine();
+                    stringBuilder.Append("CaravanImmobilizedByMass".Translate());
+                }
+                string text;
+                if (__instance.needs.AnyPawnOutOfFood(out text))
+                {
+                    stringBuilder.AppendLine();
+                    stringBuilder.Append("CaravanOutOfFood".Translate());
+                    if (!text.NullOrEmpty())
+                    {
+                        stringBuilder.Append(" ");
+                        stringBuilder.Append(text);
+                        stringBuilder.Append(".");
+                    }
+                }
+                if (!__instance.pather.MovingNow)
+                {
+                    int usedBedCount = __instance.beds.GetUsedBedCount();
+                    stringBuilder.AppendLine();
+                    stringBuilder.Append(CaravanBedUtility.AppendUsingBedsLabel("CaravanResting".Translate(), usedBedCount));
+                }
+                else
+                {
+                    string inspectStringLine = __instance.carryTracker.GetInspectStringLine();
+                    if (!inspectStringLine.NullOrEmpty())
+                    {
+                        stringBuilder.AppendLine();
+                        stringBuilder.Append(inspectStringLine);
+                    }
+                    string inBedForMedicalReasonsInspectStringLine = __instance.beds.GetInBedForMedicalReasonsInspectStringLine();
+                    if (!inBedForMedicalReasonsInspectStringLine.NullOrEmpty())
+                    {
+                        stringBuilder.AppendLine();
+                        stringBuilder.Append(inBedForMedicalReasonsInspectStringLine);
+                    }
+                }
+                __result = stringBuilder.ToString();
+                return false;
+            }
             return true;
         }
 
@@ -1006,14 +1420,6 @@ namespace RimShips
                 }
                 return false;
             }
-            return true;
-        }
-
-        //[HarmonyPatch(typeof(PawnPath), "DrawPath")]
-
-        public static bool Walkable_RestrictWater(IntVec3 loc, PathGrid __instance, ref bool __result)
-        {
-            
             return true;
         }
 
@@ -1249,69 +1655,6 @@ namespace RimShips
             return num2 - num;
         }
 
-        private static bool TryFindExitSpotHelper(List<Pawn> pawns, List<Pawn> ships, bool reachableForEveryShip, out IntVec3 spot, ref int startingTile, Map map)
-        {
-            Rot4 rotFromTo = Find.WorldGrid.GetRotFromTo(map.Tile, startingTile);
-            return TryFindExitSpotHelper(pawns, ships, reachableForEveryShip, rotFromTo, out spot, ref startingTile, map) ||
-                TryFindExitSpotHelper(pawns, ships, reachableForEveryShip, rotFromTo.Rotated(RotationDirection.Clockwise), out spot, ref startingTile, map) ||
-                TryFindExitSpotHelper(pawns, ships, reachableForEveryShip, rotFromTo.Rotated(RotationDirection.Counterclockwise), out spot, ref startingTile, map);
-        }
-
-        private static bool TryFindExitSpotHelper(List<Pawn> pawns, List<Pawn> ships, bool reachableForEveryShip, Rot4 exitDirection, out IntVec3 spot, ref int startingTile, Map map)
-        {
-            if(startingTile < 0)
-            {
-                Log.Error("Can't find exit spot because startingTile is not set.", false);
-                spot = IntVec3.Invalid;
-                return false;
-            }
-            Predicate<IntVec3> validator = (IntVec3 x) => !x.Fogged(map); //Add Water based Check
-            if(reachableForEveryShip)
-            {
-                return CellFinder.TryFindRandomEdgeCellWith(delegate (IntVec3 x)
-                {
-                    if (!validator(x))
-                    {
-                        return false;
-                    }
-                    foreach(Pawn ship in ships)
-                    {
-                        foreach (Pawn pawn in pawns)
-                        {
-                            if (pawn.IsColonist && !pawn.Downed && !pawn.CanReachShip(ship.Position, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn))
-                            {
-                                return false;
-                            }
-                        }
-                    }
-                    return true;
-                }, map, exitDirection, CellFinder.EdgeRoadChance_Always, out spot);
-            }
-            IntVec3 intVec = IntVec3.Invalid;
-            int num = -1;
-            foreach(IntVec3 intVec2 in CellRect.WholeMap(map).GetEdgeCells(exitDirection).InRandomOrder(null))
-            {
-                if(validator(intVec2))
-                {
-                    int num2 = 0;
-                    foreach(Pawn pawn in pawns)
-                    {
-                        if(pawn.IsColonist && !pawn.Downed && pawn.CanReachShip(intVec2, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn))
-                        {
-                            num2++;
-                        }
-                    }
-                    if(num2 > num)
-                    {
-                        num = num2;
-                        intVec = intVec2;
-                    }
-                }
-            }
-            spot = intVec;
-            return intVec.IsValid;
-        }
-
         public static float ShipAngle(Pawn pawn)
         {
             float angle = 0f;
@@ -1459,10 +1802,10 @@ namespace RimShips
             instance.nextCellCostLeft = (float)num;
             //Doors?
         }
-
         public static float CustomFloatBeach()
         {
-            return (float)40 * (RimShipMod.mod.settings.beachMultiplier / 20f);
+            float beach = Rand.Range(40f, 80f);
+            return (float)(beach + (beach * (RimShipMod.mod.settings.beachMultiplier) / 100f));
         }
 
         private static int PushSettlementToCoast(int tileID, Faction faction)
@@ -1576,10 +1919,63 @@ namespace RimShips
             return ships;
         }
 
+        private static void DoItemsListForShip(Rect inRect, ref float curY, ref List<Thing> tmpSingleThing, ITab_Pawn_FormingCaravan instance)
+        {
+            LordJob_FormAndSendCaravanShip lordJob_FormAndSendCaravanShip = (LordJob_FormAndSendCaravanShip)(Find.Selector.SingleSelectedThing as Pawn).GetLord().LordJob;
+            Rect position = new Rect(0f, curY, (inRect.width - 10f) / 2f, inRect.height);
+            float a = 0f;
+            GUI.BeginGroup(position);
+            Widgets.ListSeparator(ref a, position.width, "ItemsToLoad".Translate());
+            bool flag = false;
+            foreach(TransferableOneWay transferableOneWay in lordJob_FormAndSendCaravanShip.transferables)
+            {
+                if(transferableOneWay.CountToTransfer > 0 && transferableOneWay.HasAnyThing)
+                {
+                    flag = true;
+                    MethodInfo doThingRow = AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "DoThingRow");
+                    object[] args = new object[] { transferableOneWay.ThingDef, transferableOneWay.CountToTransfer, transferableOneWay.things, position.width, a };
+                    doThingRow.Invoke(instance, args);
+                    a = (float)args[4];
+                }
+            }
+            if(!flag)
+            {
+                Widgets.NoneLabel(ref a, position.width, null);
+            }
+            GUI.EndGroup();
+            Rect position2 = new Rect((inRect.width + 10f) / 2f, curY, (inRect.width - 10f) / 2f, inRect.height);
+            float b = 0f;
+            GUI.BeginGroup(position2);
+            Widgets.ListSeparator(ref b, position2.width, "LoadedItems".Translate());
+            bool flag2 = false;
+            foreach(Pawn pawn in lordJob_FormAndSendCaravanShip.lord.ownedPawns)
+            {
+                if(!pawn.inventory.UnloadEverything)
+                {
+                    foreach (Thing thing in pawn.inventory.innerContainer)
+                    {
+                        flag2 = true;
+                        tmpSingleThing.Clear();
+                        tmpSingleThing.Add(thing);
+                        MethodInfo doThingRow = AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "DoThingRow");
+                        object[] args = new object[] { thing.def, thing.stackCount, tmpSingleThing, position2.width, b };
+                        doThingRow.Invoke(instance, args);
+                        b = (float)args[4];
+                    }
+                }
+            }
+            if(!flag2)
+            {
+                Widgets.NoneLabel(ref b, position.width, null);
+            }
+            GUI.EndGroup();
+            curY += Mathf.Max(a, b);
+        }
+
         #endregion HelperFunctions
 
         private static readonly bool disabled = true;
-        public static readonly bool debug = true;
+        public static readonly bool debug = false;
         public static readonly bool drawPaths = false;
         private static List<WorldPath> debugLines = new List<WorldPath>();
         private static List<Pair<int, int>> tiles = new List<Pair<int,int>>(); // Pair -> TileID : Cycle

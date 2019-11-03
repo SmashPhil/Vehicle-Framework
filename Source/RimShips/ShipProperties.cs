@@ -12,13 +12,10 @@ namespace RimShips
     public class ShipProperties : CompProperties
     {
         public bool driverRequired = true;
-        public bool drawDriver = false;
         public bool downable = false;
         public bool movesWhenDowned = false;
 
         public bool nameable;
-        //public float rotationSpeed;
-        public bool ejectPassengersWhenDestroyed = false;
 
         public string healthLabel_Healthy = "Operational";
         public string healthLabel_Injured = "Needs Repairs";
@@ -32,8 +29,6 @@ namespace RimShips
         public ShipType shipPowerType = ShipType.Sails;
 
         public List<ShipRole> roles  = new List<ShipRole>();
-        //public ListableOption<>
-
         public SoundDef soundWhileMoving = null;
 
         public ShipProperties()

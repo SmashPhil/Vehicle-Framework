@@ -50,10 +50,9 @@ namespace RimShips
         {
             Listing_Standard listingStandard = new Listing_Standard();
 
-            //listingStandard.ColumnWidth = (inRect.width - 40f) * 0.3f;
             listingStandard.Begin(inRect);
             listingStandard.Label("BeachGenMultiplier".Translate(Mathf.Round(settings.beachMultiplier)));
-            settings.beachMultiplier = listingStandard.Slider(settings.beachMultiplier, 0f, 100f);
+            settings.beachMultiplier = listingStandard.Slider(settings.beachMultiplier, 0f, 200f);
             listingStandard.GapLine(16f);
 
             listingStandard.CheckboxLabeled("ForceSettlementCoastOption".Translate(), ref settings.forceFactionCoastOption, "ForceSettlementCoastTooltip".Translate());

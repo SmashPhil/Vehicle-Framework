@@ -71,10 +71,11 @@
 	<ThingDef ParentName="BaseShip">
 		<defName>Ships_Canoe</defName>
 		<label>canoe</label>
-		<description>A small one passanger boat capable of short trips</description>
+		<description>A small two passanger boat capable of short trips</description>
 		
 		<statBases>
 			<MoveSpeed>4</MoveSpeed>
+			<Mass>300</Mass>
 			<ArmorRating_Blunt>0.1</ArmorRating_Blunt>
 			<ArmorRating_Sharp>0.2</ArmorRating_Sharp>
 			<MarketValue>200</MarketValue>
@@ -124,10 +125,8 @@
 		<comps>			
 			<li Class = "RimShips.ShipProperties">
 				<driverRequired>true</driverRequired>
-				<drawDriver>false</drawDriver>
 				<downable>false</downable>
 				<movesWhenDowned>false</movesWhenDowned>
-				<ejectPassengersWhenDestroyed>false</ejectPassengersWhenDestroyed>
 				
 				<loadCargo>NotAllowed</loadCargo>
 				<moveable>DriverNeeded</moveable>
@@ -143,7 +142,7 @@
 				
 				<roles>
 					<li>
-						<label>Passenger</label>
+						<label>Rower</label>
 						<handlingTypes>Movement</handlingTypes>
 						<slots>2</slots>
 						<slotsToOperate>1</slotsToOperate>
