@@ -121,10 +121,8 @@ namespace RimShips.UI
             PawnNeedsUIUtility.SortInDisplayOrder(tmpNeeds);
 
             float xMax = bgRect.xMax;
-            Log.Message("-> " + tmpNeeds.Count);
             foreach(Need need in tmpNeeds)
             {
-                Log.Message("- " + need);
                 int maxThresholdMarkers = 0;
                 bool doTooltip = true;
                 Rect rect4 = new Rect(xMax, 0f, 100f, 50f);

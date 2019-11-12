@@ -25,11 +25,9 @@ namespace RimShips
     {
         public static WaterRegion RegionAt(IntVec3 c, Map map, RegionType allowedRegionTypes = RegionType.Set_Passable)
         {
-            Log.Message("in bounds? " + (GenGridShips.InBounds(c, map)));
             if (!GenGridShips.InBounds(c, map))
                 return null;
             WaterRegion validRegionAt = MapExtensionUtility.GetExtensionToMap(map).getWaterRegionGrid.GetValidRegionAt(c);
-            Log.Message("is null? " + (validRegionAt is null));
             return !(validRegionAt is null) && (validRegionAt.type & allowedRegionTypes) != RegionType.None ? validRegionAt : null;
         }
 
@@ -40,18 +38,44 @@ namespace RimShips
             return !thing.Spawned ? null : WaterRegionAndRoomQuery.RegionAt(thing.Position, thing.Map, allowedRegiontypes);
         }
 
-        //RoomAt
+        public static WaterRoom RoomAt(IntVec3 c, Map map, RegionType allowedRegionTypes = RegionType.Set_Passable)
+        {
+            WaterRegion region = WaterRegionAndRoomQuery.RegionAt(c, map, allowedRegionTypes);
+            return region is null ? null : region.Room;
+        }
 
-        //RoomGroupAt
+        //RoomGroup
 
-        //GetRoom
+        public static WaterRoom GetRoom(this Thing thing, RegionType allowedRegionTypes = RegionType.Set_Passable)
+        {
+            if (!thing.Spawned)
+                return null;
+            return WaterRegionAndRoomQuery.RoomAt(thing.Position, thing.Map, allowedRegionTypes);
+        }
 
         //GetRoomGroup
 
-        //RoomAtFast
+        public static WaterRoom RoomAtFast(IntVec3 c, Map map, RegionType allowedRegionTypes = RegionType.Set_Passable)
+        {
+            WaterRegion validRegionAt = MapExtensionUtility.GetExtensionToMap(map).getWaterRegionGrid.GetValidRegionAt(c);
+            if(!(validRegionAt is null) && (validRegionAt.type & allowedRegionTypes) != RegionType.None)
+                return validRegionAt.Room;
+            return null;
+        }
 
-        //RoomAtOrAdjacent
-
-
+        public static WaterRoom RoomAtOrAdjacent(IntVec3 c, Map map, RegionType allowedRegionTypes = RegionType.Set_Passable)
+        {
+            WaterRoom room = WaterRegionAndRoomQuery.RoomAt(c, map, allowedRegionTypes);
+            if (!(room is null))
+                return room;
+            for(int i = 0; i < 8; i++)
+            {
+                IntVec3 c2 = c + GenAdj.AdjacentCells[i];
+                room = WaterRegionAndRoomQuery.RoomAt(c2, map, allowedRegionTypes);
+                if (!(room is null))
+                    return room;
+            }
+            return room;
+        }
     }
 }

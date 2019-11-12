@@ -16,7 +16,7 @@
 			<Mass>40</Mass>
 			<PsychicSensitivity>0</PsychicSensitivity>
 			<ToxicSensitivity>0</ToxicSensitivity>
-			<Flammability>0</Flammability>
+			<Flammability>0.4</Flammability>
 			<ComfyTemperatureMin>-200</ComfyTemperatureMin>
 			<ComfyTemperatureMax>200</ComfyTemperatureMax>
 			<MeatAmount>0</MeatAmount>

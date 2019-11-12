@@ -15,7 +15,7 @@ namespace RimShips
         protected static bool Prefix(Thing hitThing, ref Projectile __instance)
         {
             Map map = __instance.Map;
-            if (__instance.def.projectile.explosionDelay == 0 && map.terrainGrid.TerrainAt(__instance.Position).IsWater)
+            if(__instance.def.projectile.explosionDelay == 0 && map.terrainGrid.TerrainAt(__instance.Position).IsWater)
             { 
                 __instance.Destroy(DestroyMode.Vanish);
                 if (__instance.def.projectile.explosionEffect != null)

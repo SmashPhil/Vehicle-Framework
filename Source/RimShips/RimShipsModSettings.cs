@@ -26,6 +26,9 @@ namespace RimShips
         public bool forceFactionCoastOption;
         public int forceFactionCoastRadius;
 
+        public bool debugDrawRegions;
+        public bool debugDrawRegionLinks;
+        public bool debugDrawRegionThings;
         public int coastRadius => forceFactionCoastOption ? forceFactionCoastRadius : 0;
         public override void ExposeData()
         {
@@ -63,7 +66,9 @@ namespace RimShips
             }
             listingStandard.GapLine(16f);
 
-
+            listingStandard.CheckboxLabeled("DebugDrawRegions".Translate(), ref settings.debugDrawRegions);
+            listingStandard.CheckboxLabeled("DebugDrawRegionLinks".Translate(), ref settings.debugDrawRegionLinks);
+            listingStandard.CheckboxLabeled("DebugDrawRegionThings".Translate(), ref settings.debugDrawRegionThings);
             listingStandard.End();
             base.DoSettingsWindowContents(inRect);
         }

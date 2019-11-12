@@ -464,13 +464,11 @@ namespace RimShips.AI
             return PawnPath.NotFound;
             Block_32:
             this.PfProfilerEndSample();
-            //Log.Message("Block 32 " + num + "Region Heuristics " + flag9);
             PawnPath result = this.FinalizedPath(num, flag9);
             this.PfProfilerEndSample();
             return result;
             Block_34:
             this.PfProfilerEndSample();
-            //Log.Message("Block 34 " + num + "Region Heuristics " + flag9);
             PawnPath result2 = this.FinalizedPath(num, flag9);
             this.PfProfilerEndSample();
             return result2;

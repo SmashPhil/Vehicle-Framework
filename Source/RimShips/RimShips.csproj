@@ -62,6 +62,7 @@
     <Compile Include="GenGridShips.cs" />
     <Compile Include="GenPathShip.cs" />
     <Compile Include="ITab_Ship_Cargo.cs" />
+    <Compile Include="ITab_Ship_Health.cs" />
     <Compile Include="ITab_Ship_Passengers.cs" />
     <Compile Include="JobDefOf_Ships.cs" />
     <Compile Include="JobDriver_Board.cs" />
@@ -92,6 +93,7 @@
     <Compile Include="ShipPathGrid.cs" />
     <Compile Include="ShipProperties.cs" />
     <Compile Include="ShipReachability.cs" />
+    <Compile Include="ShipReachabilityCache.cs" />
     <Compile Include="ShipReachabilityImmediate.cs" />
     <Compile Include="ShipReachabilityUtility.cs" />
     <Compile Include="ShipRole.cs" />
@@ -110,6 +112,8 @@
     <Compile Include="WaterRegionMaker.cs" />
     <Compile Include="WaterRegionTraverser.cs" />
     <Compile Include="WaterRegionTypeUtility.cs" />
+    <Compile Include="WaterRoom.cs" />
+    <Compile Include="WaterRoomGroup.cs" />
     <Compile Include="WorldObjectDefOfShips.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

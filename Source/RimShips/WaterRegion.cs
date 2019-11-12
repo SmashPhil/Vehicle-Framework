@@ -98,7 +98,23 @@ namespace RimShips
             }
         }
 
-        //Room regions?
+        public WaterRoom Room
+        {
+            get
+            {
+                return this.roomInt;
+            }
+            set
+            {
+                if (value == this.roomInt)
+                    return;
+                if(!(this.roomInt is null))
+                    this.roomInt.RemoveRegion(this);
+                this.roomInt = value;
+                if (!(this.roomInt is null))
+                    this.roomInt.AddRegion(this);
+            }
+        }
 
         public IntVec3 RandomCell
         {
@@ -404,7 +420,7 @@ namespace RimShips
         public void DebugDrawMouseover()
         {
             int num = Mathf.RoundToInt(Time.realtimeSinceStartup * 2f) % 2;
-            if(ShipHarmony.debug)
+            if(RimShipMod.mod.settings.debugDrawRegions)
             {
                 Color color;
                 if (!this.valid)
@@ -420,22 +436,26 @@ namespace RimShips
                     GenDraw.DrawFieldEdges(region.Cells.ToList<IntVec3>(), Color.grey);
                 }
 
-                foreach(WaterRegionLink regionLink in this.links)
+                if(RimShipMod.mod.settings.debugDrawRegionLinks)
                 {
-                    if(num == 1)
+                    foreach (WaterRegionLink regionLink in this.links)
                     {
-                        foreach(IntVec3 c in regionLink.span.Cells)
+                        if (num == 1)
                         {
-                            CellRenderer.RenderCell(c, DebugSolidColorMats.MaterialOf(Color.magenta));
+                            foreach (IntVec3 c in regionLink.span.Cells)
+                            {
+                                CellRenderer.RenderCell(c, DebugSolidColorMats.MaterialOf(Color.magenta));
+                            }
                         }
                     }
                 }
-
-                //Draw region things?
-                /*foreach(Thing thing in this.listerThings.AllThings)
+                if(RimShipMod.mod.settings.debugDrawRegionThings)
                 {
-                    CellRenderer.RenderSpot(thing.TrueCenter(), (float)(thing.thingIDNumber % 256) / 256f);
-                }*/
+                    foreach (Thing thing in this.listerThings.AllThings)
+                    {
+                        CellRenderer.RenderSpot(thing.TrueCenter(), (float)(thing.thingIDNumber % 256) / 256f);
+                    }
+                }
             }
         }
 
@@ -463,6 +483,8 @@ namespace RimShips
         public int id = -1;
 
         public sbyte mapIndex = -1;
+
+        private WaterRoom roomInt;
 
         public List<WaterRegionLink> links = new List<WaterRegionLink>();
 

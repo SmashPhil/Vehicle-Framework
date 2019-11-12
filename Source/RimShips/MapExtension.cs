@@ -43,6 +43,8 @@ namespace RimShips.AI
 
         public WaterRegionLinkDatabase getWaterRegionLinkDatabase => waterRegionLinkDatabase;
 
+        public WaterRegionAndRoomUpdater getWaterRegionAndRoomUpdater => waterRegionAndRoomUpdater;
+
         public void ConstructComponents()
         {
             this.shipPathGrid = new ShipPathGrid(this.map);
@@ -50,9 +52,8 @@ namespace RimShips.AI
             this.shipReachability = new ShipReachability(this.map);
             this.waterRegionGrid = new WaterRegionGrid(this.map);
             this.waterRegionMaker = new WaterRegionMaker(this.map);
-            //this.waterRegionAndRoomUpdater = new WaterRegionAndRoomUpdater(this.map);
+            this.waterRegionAndRoomUpdater = new WaterRegionAndRoomUpdater(this.map);
             this.waterRegionLinkDatabase = new WaterRegionLinkDatabase();
-            //region dirtyer?
         }
 
         public void ExposeData()

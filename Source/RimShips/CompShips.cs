@@ -52,23 +52,20 @@ namespace RimShips
         {
             get
             {
-                bool result = false;
-                if (handlers != null && handlers.Count > 0)
+                bool result = true;
+                if (!(handlers is null) && handlers.Any())
                 {
-                    foreach (ShipHandler h in handlers)
+                    foreach(ShipHandler handler in handlers)
                     {
-                        if (h.handlers != null && h.handlers.Count >= h.role.slotsToOperate)
+                        if(handler.handlers.Count < handler.role.slotsToOperate && handler.role.handlingTypes is HandlingTypeFlags.Movement)
                         {
-                            if (h.role != null)
-                            {
-                                if ((h.role.handlingTypes & HandlingTypeFlags.Movement) != HandlingTypeFlags.None)
-                                {
-                                    result = h.handlers.All((Pawn x) => !x.Dead && !x.Downed);
-                                }
-                            }
+                            result = false;
+                            break;
                         }
                     }
                 }
+                if (!(this.Pawn.TryGetComp<CompRefuelable>() is null) && this.Pawn.GetComp<CompRefuelable>().Fuel <= 0f)
+                    result = false;
                 return result;
             }
         }
@@ -334,18 +331,22 @@ namespace RimShips
             {
                 if(need is Need_Rest)
                 {
+                    this.TickNeeds(need);
                     this.TrySatisfyRest(pawn, need as Need_Rest);
                 }
                 else if(need is Need_Food)
                 {
+                    this.TickNeeds(need);
                     this.TrySatisfyFood(pawn, need as Need_Food);
                 }
                 else if(need is Need_Chemical)
                 {
+                    this.TickNeeds(need);
                     this.TrySatisfyChemicalNeed(pawn, need as Need_Chemical);
                 }
                 else if(need is Need_Joy)
                 {
+                    this.TickNeeds(need);
                     this.TrySatisfyJoyNeed(pawn, need as Need_Joy);
                 }
             }
@@ -505,6 +506,72 @@ namespace RimShips
             }
             return outJoyKinds;
         }
+
+        public void TickNeeds(Need n)
+        {
+            if(this.Pawn.pather.Moving)
+            {
+                switch (this.Props.shipPowerType)
+                {
+                    case ShipType.Paddles:
+                        if (n is Need_Rest)
+                            n.CurLevel -= 2.15E-05f;
+                        else if (n is Need_Food)
+                            n.CurLevel -= 2.25E-05f;
+                        else if (n is Need_Chemical)
+                            n.CurLevel -= 2.0E-05f;
+                        else if (n is Need_Joy)
+                            n.CurLevel -= 2.0E-05f;
+                        break;
+                    case ShipType.Sails:
+                        if (n is Need_Rest)
+                            n.CurLevel -= 2.10E-05f;
+                        else if (n is Need_Food)
+                            n.CurLevel -= 2.05E-05f;
+                        else if (n is Need_Chemical)
+                            n.CurLevel -= 2.0E-05f;
+                        else if (n is Need_Joy)
+                            n.CurLevel -= 2.0E-05f;
+                        break;
+                    case ShipType.Steam:
+                        if (n is Need_Rest)
+                            n.CurLevel -= 2.05E-05f;
+                        else if (n is Need_Food)
+                            n.CurLevel -= 2.0E-05f;
+                        else if (n is Need_Chemical)
+                            n.CurLevel -= 2.0E-05f;
+                        else if (n is Need_Joy)
+                            n.CurLevel -= 2.0E-05f;
+                        break;
+                    case ShipType.Fuel:
+                        if (n is Need_Rest)
+                            n.CurLevel -= 2.0E-05f;
+                        else if (n is Need_Food)
+                            n.CurLevel -= 1.8E-05f;
+                        else if (n is Need_Chemical)
+                            n.CurLevel -= 2.0E-05f;
+                        else if (n is Need_Joy)
+                            n.CurLevel -= 2.0E-05f;
+                        break;
+                    case ShipType.Nuclear:
+                        if (n is Need_Rest)
+                            n.CurLevel -= 2.0E-05f;
+                        else if (n is Need_Food)
+                            n.CurLevel -= 1.8E-05f;
+                        else if (n is Need_Chemical)
+                            n.CurLevel -= 2.0E-05f;
+                        else if (n is Need_Joy)
+                            n.CurLevel -= 2.0E-05f;
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                } 
+            }
+            else
+            {
+                n.CurLevel -= 2.0E-05f;
+            }
+        }
         public override void CompTick()
         {
             base.CompTick();
@@ -523,7 +590,6 @@ namespace RimShips
             Scribe_Values.Look(ref movementStatus, "movingStatus", ShipMovementStatus.Online);
             Scribe_Values.Look(ref lastDirection, "lastDirection", Rot4.South);
 
-            
             Scribe_Collections.Look(ref handlers, "handlers", LookMode.Deep);
             Scribe_Collections.Look(ref bills, "bills", LookMode.Deep);
         }

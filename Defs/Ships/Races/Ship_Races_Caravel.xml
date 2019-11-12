@@ -13,9 +13,11 @@
 		<lifeStages>
 			<li>
 				<bodyGraphicData>
-					<texPath>Ships/caravel/CaravelBoat/Caravel_v2</texPath>
+					<texPath>Ships/caravel/CaravelBoat/Caravel</texPath>
 					<graphicClass>Graphic_Multi</graphicClass>
 					<drawSize>(6,11)</drawSize>
+					<shaderType>CutoutComplex</shaderType>
+					<color>(155,0,0)</color>
 					<shadowData>
 						<volume>(0.4,0.1,0.4)</volume>
 					</shadowData>
@@ -95,7 +97,16 @@
 				<ensureLinkedBodyPartsGroupAlwaysUsable>true</ensureLinkedBodyPartsGroupAlwaysUsable>
 			</li>
 		</tools>
-		
+		<!--
+		<colorGenerator Class="ColorGenerator_Options">
+			<options>
+				<li>
+					<weight>10</weight>
+					<only>(0.55,0.33,0.33,1)</only>
+				</li>
+			</options>
+		</colorGenerator>
+		-->
 		<race>
 			<thinkTreeMain>shipThinkTree_Simple</thinkTreeMain>
 			<thinkTreeConstant>shipThinkTree_SimpleConstant</thinkTreeConstant>
@@ -143,18 +154,21 @@
 				
 				<roles>
 					<li>
+						<label>Captain</label>
+						<handlingTypes>Movement</handlingTypes>
+						<slots>1</slots>
+						<slotsToOperate>1</slotsToOperate>
+					</li>
+					<li>
 						<label>Crew</label>
 						<handlingTypes>Movement</handlingTypes>
 						<slots>4</slots>
 						<slotsToOperate>4</slotsToOperate>
-						<slotTag>Driver</slotTag>
 					</li>
-					
 					<li>
 						<label>Passenger</label>
 						<handlingTypes>None</handlingTypes>
 						<slots>10</slots>
-						<slotTag>Passenger</slotTag>
 					</li>
 				</roles>
 			</li>

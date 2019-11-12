@@ -146,6 +146,7 @@ namespace RimShips
                 return;
             }
             
+            //Region Traversal
             if(ShipHarmony.debug)
             {
                 CellRect currentViewRect = Find.CameraDriver.CurrentViewRect;
@@ -164,6 +165,8 @@ namespace RimShips
             IntVec3 intVec = Verse.UI.MouseCell();
             if(GenGridShips.InBounds(intVec, this.map))
             {
+                //Room?
+                //Room Group?
                 WaterRegion regionAt_NoRebuild_InvalidAllowed = this.GetRegionAt_NoRebuild_InvalidAllowed(intVec);
                 if (!(regionAt_NoRebuild_InvalidAllowed is null))
                     regionAt_NoRebuild_InvalidAllowed.DebugDrawMouseover();
@@ -176,7 +179,7 @@ namespace RimShips
 
         private int curCleanIndex;
 
-        public List<Room> allRooms = new List<Room>();
+        public List<WaterRoom> allRooms = new List<WaterRoom>();
 
         public static HashSet<WaterRegion> allRegionsYielded = new HashSet<WaterRegion>();
 

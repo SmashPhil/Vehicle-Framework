@@ -1,21 +1,19 @@
-<?xml version="1.0" encoding="utf-8" ?>
-
 <Defs>
 	<PawnKindDef>
-		<defName>Canoe</defName>
-		<label>Row Boat</label>
+		<defName>Steamboat</defName>
+		<label>steamboat</label>
 		<defaultFactionType>PlayerColony</defaultFactionType>
 		<aiAvoidCover>false</aiAvoidCover>
 		<destroyGearOnDrop>true</destroyGearOnDrop>
-		<race>Ships_Canoe</race>
+		<race>Ships_Steamboat</race>
 		<backstoryCategories><li>Civil</li></backstoryCategories>
-		<combatPower>10</combatPower>
+		<combatPower>30</combatPower>
 		<lifeStages>
 			<li>
 				<bodyGraphicData>
-					<texPath>Ships/rowboat/Canoe</texPath>
+					<texPath>Ships/caravel/CaravelBare/Caravel_v1</texPath>
 					<graphicClass>Graphic_Multi</graphicClass>
-					<drawSize>(1,3)</drawSize>
+					<drawSize>(20,52)</drawSize>
 					<shadowData>
 						<volume>(0.4,0.1,0.4)</volume>
 					</shadowData>
@@ -25,9 +23,19 @@
 	</PawnKindDef>
 	
 	<BodyPartDef>
-		<defName>canoe_Body</defName>
+		<defName>steamboat_Body</defName>
 		<label>body</label>
-		<hitPoints>25</hitPoints>
+		<hitPoints>275</hitPoints>
+		<skinCovered>false</skinCovered>
+		<solid>true</solid>
+		<bleedRate>0</bleedRate>
+		<alive>false</alive>
+	</BodyPartDef>
+	
+	<BodyPartDef>
+		<defName>steamboat_Engine</defName>
+		<label>mast</label>
+		<hitPoints>75</hitPoints>
 		<skinCovered>false</skinCovered>
 		<solid>true</solid>
 		<bleedRate>0</bleedRate>
@@ -38,21 +46,11 @@
 		</tags>
 	</BodyPartDef>
 	
-	<BodyPartDef>
-		<defName>canoe_Seat</defName>
-		<label>seat</label>
-		<hitPoints>1</hitPoints>
-		<skinCovered>false</skinCovered>
-		<solid>true</solid>
-		<bleedRate>0</bleedRate>
-		<alive>false</alive>
-	</BodyPartDef>
-	
 	<BodyDef>
-		<defName>canoe_Body</defName>
-		<label>canoebody</label>
+		<defName>steamboat_Body</defName>
+		<label>steamboatbody</label>
 		<corePart>
-			<def>canoe_Body</def>
+			<def>steamboat_Body</def>
 			<height>Middle</height>
 			<depth>Outside</depth>
 			<groups>
@@ -61,27 +59,27 @@
 			
 			<parts>
 				<li>
-					<def>canoe_Seat</def>
-					<coverage>0.4</coverage>
+					<def>steamboat_Engine</def>
+					<coverage>0.1</coverage>
 				</li>
 			</parts>
 		</corePart>
 	</BodyDef>
 	
 	<ThingDef ParentName="BaseShip">
-		<defName>Ships_Canoe</defName>
-		<label>canoe</label>
-		<description>A small two passanger boat capable of short trips</description>
+		<defName>Ships_Steamboat</defName>
+		<label>Steamboat</label>
+		<description>Converts fuel into steam.  Useful for traveling upstream.</description>
 		
 		<statBases>
-			<MoveSpeed>4</MoveSpeed>
-			<Mass>300</Mass>
-			<ArmorRating_Blunt>0.1</ArmorRating_Blunt>
-			<ArmorRating_Sharp>0.2</ArmorRating_Sharp>
-			<MarketValue>200</MarketValue>
+			<MoveSpeed>4.5</MoveSpeed>
+			<Mass>18000</Mass>
+			<ArmorRating_Blunt>0.5</ArmorRating_Blunt>
+			<ArmorRating_Sharp>0.9</ArmorRating_Sharp>
+			<MarketValue>27000</MarketValue>
 		</statBases>
 		
-		<size>(1,3)</size>
+		<size>(20,42)</size>
 		
 		<tools>
 			<li>
@@ -104,15 +102,16 @@
 			<needsRest>false</needsRest>
 			<hasGenders>false</hasGenders>
 			<foodType>None</foodType>
+			
 
-			<body>canoe_Body</body>
-			<baseBodySize>4.0</baseBodySize>
+			<body>steamboat_Body</body>
+			<baseBodySize>150.0</baseBodySize>
 			<baseHealthScale>1.0</baseHealthScale>
 			<lifeStageAges>
 				<li>
 					<def>MechanoidFullyFormed</def>
 					<minAge>0</minAge>
-					<soundWounded>BulletImpact_Wood</soundWounded>
+					<soundWounded>BulletImpact_Metal</soundWounded>
 					<soundDeath>Explosion_Bomb</soundDeath>
 				</li>
 			</lifeStageAges>
@@ -122,7 +121,7 @@
 			<soundMeleeMiss>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeMiss>
 		</race>
 
-		<comps>			
+		<comps>	
 			<li Class = "RimShips.ShipProperties">
 				<driverRequired>true</driverRequired>
 				<downable>false</downable>
@@ -131,8 +130,8 @@
 				<loadCargo>NotAllowed</loadCargo>
 				<moveable>DriverNeeded</moveable>
 				<armament>DriverNeeded</armament>
-				<shipPowerType>Paddles</shipPowerType>
-				<nameable>false</nameable>
+				<shipPowerType>Steam</shipPowerType>
+				<nameable>true</nameable>
 				
 				<healthLabel_Healthy>Operational</healthLabel_Healthy>
 				<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
@@ -142,10 +141,21 @@
 				
 				<roles>
 					<li>
-						<label>Rower</label>
+						<label>Captain</label>
 						<handlingTypes>Movement</handlingTypes>
-						<slots>2</slots>
+						<slots>1</slots>
 						<slotsToOperate>1</slotsToOperate>
+					</li>
+					<li>
+						<label>Crew</label>
+						<handlingTypes>Movement</handlingTypes>
+						<slots>8</slots>
+						<slotsToOperate>4</slotsToOperate>
+					</li>
+					<li>
+						<label>Passenger</label>
+						<handlingTypes>None</handlingTypes>
+						<slots>20</slots>
 					</li>
 				</roles>
 			</li>

@@ -7,7 +7,7 @@ using Harmony;
 namespace RimShips
 {
     public enum ShipPermissions {NotAllowed, DriverNeeded, NoDriverNeeded}
-    public enum ShipType {Paddles, Sails, Chemfuel, Nuclear}
+    public enum ShipType {Paddles, Sails, Steam, Fuel, Nuclear}
 
     public class ShipProperties : CompProperties
     {

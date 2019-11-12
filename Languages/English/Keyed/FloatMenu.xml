@@ -8,7 +8,7 @@
 	<AwaitOrders>Awaiting Orders</AwaitOrders>
 	<NameIsInvalid>Name invalid for ship.</NameIsInvalid>
 	<ShipGainsName>Your new ship has been named {0}</ShipGainsName>
-	<ActivityIconOnBoardShip>Onboard ship</ActivityIconOnBoardShip>
+	<ActivityIconOnBoardShip>Onboard {0}</ActivityIconOnBoardShip>
 	
 	<CaravanShips>Ships</CaravanShips>
 	<CaravanShipsSingle>1 Ship</CaravanShipsSingle>
@@ -23,6 +23,9 @@
 	<ForceSettlementCoastOption>Push Settlements to Coast</ForceSettlementCoastOption>
 	<ForceSettlementCoastTooltip>Push nearby faction settlements to the coast if within given radius</ForceSettlementCoastTooltip>
 	<ForceSettlementCoast>Push Settlement to Coast Radius: {0}</ForceSettlementCoast>
+	<DebugDrawRegions>Debug Draw Regions</DebugDrawRegions>
+	<DebugDrawRegionLinks>Debug Draw RegionLinks</DebugDrawRegionLinks>
+	<DebugDrawRegionThings>Debug Draw Region Things</DebugDrawRegionThings>
 	<CannotSailToCell>Ship cannot reach this area.</CannotSailToCell>
 	
 	<CaravanMustHaveEnoughSpaceOnShip>Not enough space on ships to house all pawns.</CaravanMustHaveEnoughSpaceOnShip>
