@@ -79,7 +79,7 @@ namespace RimShips.AI
                         this.RecalculatePerceivedPathCostAt(c);
                     }
                 }
-            }
+            } 
         }
 
         public void RecalculatePerceivedPathCostAt(IntVec3 c)
@@ -90,11 +90,10 @@ namespace RimShips.AI
             }
             bool flag = this.WalkableFast(c);
             this.pathGrid[this.map.cellIndices.CellToIndex(c)] = this.CalculatedCostAt(c, true, IntVec3.Invalid);
-            Log.Message("Cost: " + this.pathGrid[this.map.cellIndices.CellToIndex(c)]);
             if (this.WalkableFast(c) != flag)
             {
                 MapExtensionUtility.GetExtensionToMap(this.map).getShipReachability.ClearCache();
-                //this.map.regionDirtyer.Notify_WalkabilityChanged(c);
+                AccessTools.Method(type: typeof(RegionDirtyer), name: "Notify_WalkabilityChanged").Invoke(this.map.regionDirtyer, new object[] { c });
             }
         }
 
@@ -108,7 +107,6 @@ namespace RimShips.AI
 
         public int CalculatedCostAt(IntVec3 c, bool perceivedStatic, IntVec3 prevCell)
         {
-            //bool flag = false;
             TerrainDef terrainDef = this.map.terrainGrid.TerrainAt(c);
             if (terrainDef is null || (terrainDef.passability == Traversability.Impassable && !terrainDef.IsWater) || !terrainDef.IsWater)
             {

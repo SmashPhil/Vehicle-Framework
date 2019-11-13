@@ -43,6 +43,15 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(typeof(TileFinder), name: nameof(TileFinder.RandomSettlementTileFor)), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(PushSettlementToCoastTranspiler)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(Map), name: nameof(Map.FinalizeInit)), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(RecalculateShipPathGrid)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(PathGrid), name: nameof(PathGrid.RecalculatePerceivedPathCostUnderThing)), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(RecalculateShipPathCostUnderThing)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(TerrainGrid), name: "DoTerrainChangedEffects"), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(RecalculateShipPathCostTerrainChange)));
 
             //Health 
             harmony.Patch(original: AccessTools.Method(typeof(HealthUtility), name: nameof(HealthUtility.GetGeneralConditionLabel)),
@@ -153,9 +162,12 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(LordToil_PrepareCaravan_GatherAnimals), name: nameof(LordToil_PrepareCaravan_GatherAnimals.UpdateAllDuties)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(UpdateDutyOfShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Dialog_FormCaravan), parameters: new Type[] {typeof(List<Pawn>), typeof(bool), typeof(Rot4), typeof(IntVec3).MakeByRefType()}, name: "TryFindExitSpot"), 
+            harmony.Patch(original: AccessTools.Method(type: typeof(Dialog_FormCaravan), parameters: new Type[] {typeof(List<Pawn>), typeof(bool), typeof(IntVec3).MakeByRefType()}, name: "TryFindExitSpot"), 
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(TryFindExitSpotShips)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(Dialog_FormCaravan), name: "TryFindRandomPackingSpot"),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(TryFindPackingSpotShips)));
             harmony.Patch(original: AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "FillTab"),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(FillTabShipCaravan)));
@@ -261,6 +273,22 @@ namespace RimShips
                 yield return instruction;
             }
         }
+
+        public static void RecalculateShipPathGrid(Map __instance)
+        {
+            MapExtensionUtility.GetExtensionToMap(__instance).getShipPathGrid.RecalculateAllPerceivedPathCosts();
+        }
+
+        public static void RecalculateShipPathCostUnderThing(Thing t, Map ___map)
+        {
+            MapExtensionUtility.GetExtensionToMap(___map).getShipPathGrid.RecalculatePerceivedPathCostUnderThing(t);
+        }
+
+        private static void RecalculateShipPathCostTerrainChange(IntVec3 c, Map ___map)
+        {
+            MapExtensionUtility.GetExtensionToMap(___map).getShipPathGrid.RecalculatePerceivedPathCostAt(c);
+        }
+
         #endregion MapGen
 
         #region HealthStats
@@ -872,22 +900,115 @@ namespace RimShips
             }
         }
 
-        private static bool TryFindExitSpotShips(List<Pawn> pawns, bool reachableForEveryColonist, Rot4 exitDirection, out IntVec3 spot, Dialog_FormCaravan __instance, 
-            int ___startingTile, Map ___map)
+        private static bool TryFindExitSpotShips(List<Pawn> pawns, bool reachableForEveryColonist, out IntVec3 spot, Map ___map, Dialog_FormCaravan __instance, int ___startingTile, ref bool __result)
         {
-            if(pawns.Any(x => IsShip(x)))
+            if (pawns.Any(x => IsShip(x)))
             {
-                if(___startingTile < 0)
-                {
-                    Log.Error("Can't find expit spot because startingTile is not set.", false);
-                    spot = IntVec3.Invalid;
-                    return false;
-                }
-                Predicate<IntVec3> validator = (IntVec3 x) => !x.Fogged(___map) && x.Standable(___map); //CHANGE TO PICK SPOT ON WATER
+                //Rot4 rotFromTo = Find.WorldGrid.GetRotFromTo(__instance.CurrentTile, ___startingTile); WHEN WORLD GRID IS ESTABLISHED
+                Rot4 rotFromTo = Find.World.CoastDirectionAt(___map.Tile);
+                //reachableForEveryColonist = false;
+                __result = TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo, out spot, ___startingTile, ___map) || TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo.Rotated(RotationDirection.Clockwise),
+                    out spot, ___startingTile, ___map) || TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo.Rotated(RotationDirection.Counterclockwise), out spot, ___startingTile, ___map);
                 
-                //NEEDS FINISHING WHEN REGIONS ARE COMPLETE
+                float offset = pawns.FindAll(x => IsShip(x)).Max(x => x.kindDef.lifeStages.First().bodyGraphicData.drawSize.x > x.kindDef.lifeStages.First().bodyGraphicData.drawSize.y
+                    ? x.kindDef.lifeStages.First().bodyGraphicData.drawSize.x : x.kindDef.lifeStages.First().bodyGraphicData.drawSize.y);
+                PushCellByOffset(offset, ref spot, ___map);
+                return false;
             }
             spot = IntVec3.Invalid;
+            return true;
+        }
+        private static bool TryFindExitSpotOnWater(List<Pawn> pawns, bool reachableForEveryColonist, Rot4 exitDirection, out IntVec3 spot, int startingTile, Map map)
+        {
+            if(startingTile < 0)
+            {
+                Log.Error("Can't find exit spot because startingTile is not set.", false);
+                spot = IntVec3.Invalid;
+                return false;
+            }
+
+            Predicate<IntVec3> validator = (IntVec3 x) => !x.Fogged(map) && GenGridShips.Standable(x, map, MapExtensionUtility.GetExtensionToMap(map));
+
+            if(reachableForEveryColonist)
+            {
+                return CellFinder.TryFindRandomEdgeCellWith(delegate (IntVec3 c)
+                {
+                    if (!validator(c))
+                        return false;
+                    foreach (Pawn p in pawns)
+                    {
+                        if (IsShip(p) && !p.GetComp<CompShips>().beached && !p.Downed && !ShipReachabilityUtility.CanReachShip(p, c, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn))
+                        {
+                            return false;
+                        }
+                    }
+                    return true;
+                }, map, exitDirection, CellFinder.EdgeRoadChance_Ignore, out spot);
+            }
+            
+            IntVec3 intVec = IntVec3.Invalid;
+            int num = -1;
+
+            foreach(IntVec3 iV2 in CellRect.WholeMap(map).GetEdgeCells(exitDirection).InRandomOrder(null))
+            {
+                if(validator(iV2))
+                {
+                    int num2 = 0;
+                    foreach(Pawn p in pawns)
+                    {
+                        if(IsShip(p) && !p.Downed && !p.GetComp<CompShips>().beached && ShipReachabilityUtility.CanReachShip(p, iV2, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn))
+                        {
+                            num2++;
+                        }
+                    }
+                    if(num2 > num)
+                    {
+                        num = num2;
+                        intVec = iV2;
+                    }
+                }
+            }
+            spot = intVec;
+            return intVec.IsValid;
+        }
+
+        private static bool TryFindPackingSpotShips(IntVec3 exitSpot, out IntVec3 packingSpot, ref bool __result, ref List<Thing> ___tmpPackingSpots, Dialog_FormCaravan __instance, Map ___map)
+        {
+            if(__instance.transferables.Any(x => x.ThingDef.category is ThingCategory.Pawn && IsShip(x.AnyThing as Pawn)))
+            {
+                ___tmpPackingSpots.Clear();
+                List<Thing> list = ___map.listerThings.ThingsOfDef(ThingDefOf.CaravanPackingSpot);
+                TraverseParms traverseParms = TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false);
+                foreach(Thing t in list)
+                {
+                    if(MapExtensionUtility.GetExtensionToMap(___map).getShipReachability.CanReachShip(exitSpot, t, PathEndMode.OnCell, traverseParms))
+                        ___tmpPackingSpots.Add(t);
+                }
+                if(___tmpPackingSpots.Any())
+                {
+                    Thing t = ___tmpPackingSpots.RandomElement<Thing>();
+                    ___tmpPackingSpots.Clear();
+                    packingSpot = t.Position;
+                    __result = true;
+                    return false;
+                }
+                List<TransferableOneWay> ships = __instance.transferables.Where(x => x.AnyThing is Pawn && IsShip(x.AnyThing as Pawn)).ToList();
+
+                for(int i = 0; i < ships.Count; i++)
+                {
+                    Pawn s = ships[i].AnyThing as Pawn;
+                    if(!(s is null) && ___map.terrainGrid.TerrainAt(s.Position).passability == Traversability.Impassable)
+                    {
+                        Messages.Message("ShipNotDockedCancelCaravan".Translate(s), MessageTypeDefOf.RejectInput, false);
+                        packingSpot = IntVec3.Invalid;
+                        return false;
+                    }
+                }
+                Pawn first = ships.First().AnyThing as Pawn;
+                __result = RCellFinder.TryFindRandomSpotJustOutsideColony(first.Position, ___map, out packingSpot);
+                return false;
+            }
+            packingSpot = IntVec3.Invalid;
             return true;
         }
 
@@ -1100,7 +1221,7 @@ namespace RimShips
             {
                 float offset = caravan.PawnsListForReading.FindAll(x => IsShip(x)).Max(x => x.kindDef.lifeStages.First().bodyGraphicData.drawSize.x > x.kindDef.lifeStages.First().bodyGraphicData.drawSize.y
                     ? x.kindDef.lifeStages.First().bodyGraphicData.drawSize.x : x.kindDef.lifeStages.First().bodyGraphicData.drawSize.y);
-                if(__result.x < offset)
+                /*if(__result.x < offset)
                 {
                     __result.x = (int)offset;
                 }
@@ -1115,7 +1236,9 @@ namespace RimShips
                 else if(__result.z > (map.Size.z - offset))
                 {
                     __result.z = (int)(map.Size.z - offset);
-                }
+                }*/
+
+                PushCellByOffset(offset, ref __result, map);
             }
         }
 
@@ -1408,11 +1531,12 @@ namespace RimShips
             if (disabled) return true;
             if (IsShip(___pawn))
             {
-                if(___pawn.GetComp<CompShips>().beached || !___pawn.Position.GetTerrain(___pawn.Map).IsWater)
+                if(___pawn.GetComp<CompShips>().beached || !__instance.nextCell.GetTerrain(___pawn.Map).IsWater)
                 {
                     ___pawn.GetComp<CompShips>().BeachShip();
+                    ___pawn.Position = __instance.nextCell;
                     __instance.StopDead();
-                    ___pawn.jobs.curDriver.Notify_PatherFailed();
+                    ___pawn.jobs.curDriver.Notify_PatherFailed(); 
                 }
                 //Buildings?
                 ___lastCell = ___pawn.Position;
@@ -1473,7 +1597,7 @@ namespace RimShips
                     curLoc = GenRadial.RadialPattern[i] + clickCell;
                     if (GenGridShips.Standable(curLoc, pawn.Map, MapExtensionUtility.GetExtensionToMap(pawn.Map)))
                     {
-                        if (curLoc == pawn.Position)
+                        if (curLoc == pawn.Position || pawn.GetComp<CompShips>().beached)
                         {
                             __result = null;
                             return false;
@@ -1562,7 +1686,7 @@ namespace RimShips
             return !flag2 && !flag3;
         }
 
-        private static bool IsShip(Pawn p)
+        public static bool IsShip(Pawn p)
         {
             return !(p?.TryGetComp<CompShips>() is null) ? true : false;
         }
@@ -1610,6 +1734,26 @@ namespace RimShips
             else
             {
                 pawn.Rotation = Rot4.South;
+            }
+        }
+
+        private static void PushCellByOffset(float offset, ref IntVec3 result, Map map)
+        {
+            if (result.x < offset)
+            {
+                result.x = (int)(offset/2);
+            }
+            else if (result.x >= (map.Size.x - (offset / 2)))
+            {
+                result.x = (int)(map.Size.x - (offset / 2));
+            }
+            if (result.z < offset)
+            {
+                result.z = (int)(offset / 2);
+            }
+            else if (result.z > (map.Size.z - (offset / 2)))
+            {
+                result.z = (int)(map.Size.z - (offset / 2));
             }
         }
 
@@ -1680,28 +1824,31 @@ namespace RimShips
 
         public static float ShipAngle(Pawn pawn)
         {
-            float angle = 0f;
             if (pawn.pather.Moving)
             {
                 IntVec3 c = pawn.pather.nextCell - pawn.Position;
                 if (c.x > 0 && c.z > 0)
                 {
-                    angle = -45f;
+                    pawn.GetComp<CompShips>().Angle = -45f;
                 }
                 else if (c.x > 0 && c.z < 0)
                 {
-                    angle = 45;
+                    pawn.GetComp<CompShips>().Angle = 45f;
                 }
                 else if (c.x < 0 && c.z < 0)
                 {
-                    angle = -45;
+                    pawn.GetComp<CompShips>().Angle = -45f;
                 }
                 else if (c.x < 0 && c.z > 0)
                 {
-                    angle = 45f;
+                    pawn.GetComp<CompShips>().Angle = 45f;
+                }
+                else
+                {
+                    pawn.GetComp<CompShips>().Angle = 0f;
                 }
             }
-            return angle;
+            return pawn.GetComp<CompShips>().Angle;
         }
 
         public static bool NeedNewPath(LocalTargetInfo destination, PawnPath curPath, Pawn pawn, PathEndMode peMode, IntVec3 lastPathedTargetPosition)
@@ -1715,7 +1862,6 @@ namespace RimShips
                 return true;
             if (curPath.UsedRegionHeuristics && curPath.NodesConsumedCount >= 75)
                 return true;
-            Log.Message("c => " + lastPathedTargetPosition);
             if (lastPathedTargetPosition != destination.Cell)
             {
                 float num = (float)(pawn.Position - destination.Cell).LengthHorizontalSquared;
@@ -1733,7 +1879,6 @@ namespace RimShips
             IntVec3 other = IntVec3.Invalid;
             IntVec3 intVec = IntVec3.Invalid;
             int num3 = 0;
-            Log.Message("5");
             while(num3 < 20 && num3 < curPath.NodesLeftCount)
             {
                 intVec = curPath.Peek(num3);
@@ -1755,6 +1900,7 @@ namespace RimShips
             if(!pawnPath.Found)
             {
                 PatherFailedHelper(ref instance, pawn);
+                return false;
             }
             if(!(instance.curPath is null))
             {
@@ -1767,6 +1913,8 @@ namespace RimShips
             while(num < 20 && num < instance.curPath.NodesLeftCount)
             {
                 IntVec3 c = instance.curPath.Peek(num);
+
+                if(pawn.GetComp<CompShips>().beached) break;
                 if(PawnUtility.ShouldCollideWithPawns(pawn) && PawnUtility.AnyPawnBlockingPathAt(c, pawn, false, false, false))
                 {
                     foundPathWhichCollidesWithPawns = Find.TickManager.TicksGame;

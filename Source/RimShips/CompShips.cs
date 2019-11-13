@@ -29,7 +29,7 @@ namespace RimShips
 
         public bool draftStatusChanged = false;
         public bool beached = false;
-        public float rotation = 0f;
+        private float angle = 0f;
 
         public List<ShipHandler> handlers = new List<ShipHandler>();
         public Rot4 lastDirection = Rot4.South;
@@ -127,19 +127,19 @@ namespace RimShips
                 Find.WindowStack.Add(new Dialog_GiveShipName(this.Pawn));
             }
         }
-        public float Rotation
+        public float Angle
         {
             get
             {
-                return this.rotation;
+                return this.angle;
             }
             set
             {
-                if (value == this.rotation)
+                if (value == this.angle)
                 {
                     return;
                 }
-                this.rotation = value;
+                this.angle = value;
             }
         }
         public override IEnumerable<Gizmo> CompGetGizmosExtra()

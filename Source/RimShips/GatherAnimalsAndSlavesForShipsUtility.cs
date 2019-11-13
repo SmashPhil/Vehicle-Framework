@@ -10,6 +10,7 @@ using RimWorld;
 using RimWorld.BaseGen;
 using RimWorld.Planet;
 using RimShips.Defs;
+using RimShips.AI;
 using UnityEngine;
 using UnityEngine.AI;
 using Verse;
@@ -32,16 +33,18 @@ namespace RimShips
             p.mindState.duty.radius = 10f;
         }
 
-        public static void CheckArrived(Lord lord, List<Pawn> pawns, List<Pawn> ships, IntVec3 meetingPoint, string memo, Predicate<Pawn> shouldCheckIfArrived,
+        public static void CheckArrived(Lord lord, List<Pawn> pawnsToCheck, IntVec3 meetingPoint, string memo, Predicate<Pawn> shouldCheckIfArrived, bool waterPathing,
             Predicate<Pawn> extraValidator = null)
         {
             bool flag = true;
-            foreach (Pawn p in pawns)
+            bool flag2;
+            foreach (Pawn p in pawnsToCheck)
             {
                 if(shouldCheckIfArrived(p))
                 {
-                    if (!p.Spawned || !p.Position.InHorDistOf(meetingPoint, 10f) || !p.CanReach(meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false,
-                        TraverseMode.ByPawn) || (extraValidator != null && !extraValidator(p)))
+                    flag2 = waterPathing ? ShipReachabilityUtility.CanReachShip(p, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, TraverseMode.ByPawn) :
+                        ReachabilityUtility.CanReach(p, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, TraverseMode.ByPawn);
+                    if (!p.Spawned || !p.Position.InHorDistOf(meetingPoint, 10f) || !flag2 || (extraValidator != null && !extraValidator(p)))
                     {
                         flag = false;
                         break;

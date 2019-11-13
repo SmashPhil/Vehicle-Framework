@@ -65,7 +65,7 @@ namespace RimShips.Jobs
         {
             if(!(this.pawn.GetLord() is null) && this.pawn.GetLord().LordJob is LordJob_FormAndSendCaravanShip)
             {
-                if(this.pawn.GetLord().CurLordToil is LordToil_PrepareCaravan_Leave)
+                if(this.pawn.GetLord().CurLordToil is LordToil_PrepareCaravan_LeaveShip)
                 {
                     this.pawn.drafter.Drafted = true;
                 }

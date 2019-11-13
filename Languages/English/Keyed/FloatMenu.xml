@@ -14,6 +14,7 @@
 	<CaravanShipsSingle>1 Ship</CaravanShipsSingle>
 	<CaravanShipsPlural>{0} Ships</CaravanShipsPlural>
 	<CaravanSailing>Sailing</CaravanSailing>
+	<ShipNotDockedCancelCaravan>{0} is not on shallow water.</ShipNotDockedCancelCaravan>
 	<TabCargo>Cargo</TabCargo>
 	<TabPassengers>Pawns</TabPassengers>
 	<Cargo>Cargo</Cargo>

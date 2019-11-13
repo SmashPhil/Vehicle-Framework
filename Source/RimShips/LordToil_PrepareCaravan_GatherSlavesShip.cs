@@ -72,12 +72,10 @@ namespace RimShips.Lords
             if(Find.TickManager.TicksGame % 100 == 0)
             {
                 Lord lord = this.lord;
-                List<Pawn> ownedPawns = this.lord.ownedPawns.Where(x => (x.GetComp<CompShips>() is null)).ToList();
-                List<Pawn> ships = this.lord.ownedPawns.Where(x => !(x.GetComp<CompShips>() is null)).ToList();
                 IntVec3 intVec = this.meetingPoint;
                 string memo = "AllSlavesGathered";
                 bool shouldCheckIfArrived(Pawn x) => !x.IsColonist && !x.RaceProps.Animal && !(x.GetComp<CompShips>() is null);
-                GatherAnimalsAndSlavesForShipsUtility.CheckArrived(lord, ownedPawns, ships, intVec, memo, shouldCheckIfArrived, null);
+                GatherAnimalsAndSlavesForShipsUtility.CheckArrived(lord, this.lord.ownedPawns.Where(x => !ShipHarmony.IsShip(x)).ToList(), intVec, memo, shouldCheckIfArrived, false, null);
             }
         }
 

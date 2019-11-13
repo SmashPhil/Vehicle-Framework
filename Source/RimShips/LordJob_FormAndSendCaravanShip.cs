@@ -227,7 +227,7 @@ namespace RimShips.Lords
             stateGraph.AddToil(lordToil_PrepareCaravan_Wait);
             LordToil_PrepareCaravan_Pause lordToil_PrepareCaravan_Pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(lordToil_PrepareCaravan_Pause);
-            this.leave = new LordToil_PrepareCaravan_Leave(this.exitPoint);
+            this.leave = new LordToil_PrepareCaravan_LeaveShip(this.exitPoint);
             stateGraph.AddToil(this.leave);
             this.leave_pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(this.leave_pause);
