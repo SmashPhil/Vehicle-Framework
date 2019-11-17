@@ -26,23 +26,48 @@ namespace RimShips.Lords
         {
         }
 
-        public LordJob_FormAndSendCaravanShip(List<TransferableOneWay> transferables, List<Pawn> ships, List<Pawn> downedPawns, IntVec3 meetingPoint, IntVec3 exitPoint,
+        public LordJob_FormAndSendCaravanShip(List<TransferableOneWay> transferables, List<Pawn> ships, List<Pawn> sailors, List<Pawn> downedPawns, IntVec3 meetingPoint, IntVec3 exitPoint,
             int startingTile, int destinationTile)
         {
             this.transferables = transferables;
             this.ships = ships;
+            this.leadShip =  ships.First(x => ShipHarmony.IsShip(x) && x.RaceProps.baseBodySize == ships.Max(y => y.RaceProps.baseBodySize));
             this.downedPawns = downedPawns;
             this.meetingPoint = meetingPoint;
             this.exitPoint = exitPoint;
             this.startingTile = startingTile;
             this.destinationTile = destinationTile;
+            this.sailors = sailors;
         }
 
-        public Pawn GetAvailableShip
+        public Pawn LeadShip => this.leadShip;
+
+        public Pawn GetShipAssigned(Pawn p)
         {
-            get
+            return shipAssigned.TryGetValue(p);
+        }
+
+        public void AssignSeats()
+        {
+            shipAssigned = new Dictionary<Pawn, Pawn>();
+            List<Pawn> sailorsTmp = sailors;
+            foreach(Pawn p in ships)
             {
-                return this.ships.Find(x => x.GetComp<CompShips>().SeatsAvailable > 0);
+                for(int i = 0; i < p.GetComp<CompShips>().PawnCountToOperate; i++)
+                {
+                    shipAssigned.Add(sailorsTmp.Pop(), p);
+                }
+            }
+
+            if(sailorsTmp.Count > 0)
+            {
+                int i = 0;
+                while(sailorsTmp.Count > 0)
+                {
+                    Pawn p = ships[i];
+                    shipAssigned.Add(sailorsTmp.Pop(), p);
+                    i = (i+2) > ships.Count ? 0 : ++i;
+                }
             }
         }
 
@@ -219,6 +244,7 @@ namespace RimShips.Lords
             //stateGraph.AddToil(this.gatherDownedPawns);
             //this.gatherDownedPawns_pause = new LordToil_PrepareCaravan_Pause();
             //stateGraph.AddToil(this.gatherDownedPawns_pause);
+            this.AssignSeats();
             this.boardShip = new LordToil_PrepareCaravan_BoardShip(this.exitPoint);
             stateGraph.AddToil(this.boardShip);
             this.boardShip_pause = new LordToil_PrepareCaravan_Pause();
@@ -310,6 +336,12 @@ namespace RimShips.Lords
         public List<Pawn> downedPawns;
 
         public List<Pawn> ships;
+
+        private List<Pawn> sailors;
+
+        private Dictionary<Pawn, Pawn> shipAssigned;
+
+        private Pawn leadShip;
 
         private IntVec3 meetingPoint;
 

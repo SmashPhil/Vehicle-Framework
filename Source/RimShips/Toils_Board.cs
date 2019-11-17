@@ -34,6 +34,7 @@ namespace RimShips.Jobs
                     if(handler.AreSlotsAvailable)
                     {
                         ship.GiveLoadJob(pawnBoarding, handler);
+                        ship.ReserveSeat(pawnBoarding, handler);
                         break;
                     }
                 }

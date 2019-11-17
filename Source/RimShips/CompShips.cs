@@ -36,10 +36,6 @@ namespace RimShips
         public ShipMovementStatus movementStatus = ShipMovementStatus.Online;
         public List<ThingCountClass> repairCostList = new List<ThingCountClass>();
 
-        public bool CanMoveOnLand = false;
-        public bool ResolvedITTab;
-        public bool ResolvedPawns;
-
         public bool warnNoFuel;
         public ShipWeaponStatus weaponStatus = ShipWeaponStatus.Offline;
 
@@ -193,11 +189,13 @@ namespace RimShips
             {
                 if (handler.AreSlotsAvailable)
                 {
-                    FloatMenuOption opt = new FloatMenuOption("BoardShip".Translate(this.parent.LabelShort, handler.role.label, (handler.role.slots - handler.handlers.Count).ToString()), delegate ()
+                    FloatMenuOption opt = new FloatMenuOption("BoardShip".Translate(this.parent.LabelShort, handler.role.label, (handler.role.slots - (handler.handlers.Count + handler.currentlyReserving.Count)).ToString()), 
+                    delegate ()
                     {
                         Job job = new Job(JobDefOf_Ships.Board, this.parent);
                         pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
                         GiveLoadJob(pawn, handler);
+                        ReserveSeat(pawn, handler);
                     }, MenuOptionPriority.Default, null, null, 0f, null, null);
                     yield return opt;
                 }
@@ -207,7 +205,7 @@ namespace RimShips
 
         public void GiveLoadJob(Pawn pawn, ShipHandler handler)
         {
-            if (this.bills is null) Log.Error("List of bills is NULL, please notify Mod Author of RimShips.");
+            if (this.bills is null) this.bills = new List<Jobs.Bill_BoardShip>();
 
             if (!(bills is null) && bills.Count > 0)
             {
@@ -221,10 +219,6 @@ namespace RimShips
             bills.Add(new Jobs.Bill_BoardShip(pawn, handler));
         }
 
-        public ShipRole uniqueShip(ShipRole _role)
-        {
-            return _role;
-        }
         public void Notify_Boarded(Pawn pawnToBoard)
         {
             if( !(bills is null) & (bills.Count > 0))
@@ -296,18 +290,6 @@ namespace RimShips
                 }
             }
         }
-        public void InitializeShipHandlers()
-        {
-            if (!(handlers is null) && handlers.Count > 0) return;
-
-            if( !(Props.roles is null) && Props.roles.Count > 0)
-            {
-                foreach(ShipRole role in Props.roles)
-                {
-                    handlers.Add(new ShipHandler(Pawn, role, new List<Pawn>()));
-                }
-            }
-        }
 
         public void BeachShip()
         {
@@ -317,9 +299,12 @@ namespace RimShips
 
         private void TrySatisfyPawnNeeds()
         {
-            foreach(Pawn p in this.AllPawnsAboard)
+            if(this.Pawn.Spawned)
             {
-                TrySatisfyPawnNeeds(p);
+                foreach (Pawn p in this.AllPawnsAboard)
+                {
+                    TrySatisfyPawnNeeds(p);
+                }
             }
         }
         private void TrySatisfyPawnNeeds(Pawn pawn)
@@ -572,11 +557,37 @@ namespace RimShips
                 n.CurLevel -= 2.0E-05f;
             }
         }
+
+        public void ReserveSeat(Pawn p, ShipHandler handler)
+        {
+            handler.currentlyReserving.Add(p);
+        }
+
         public override void CompTick()
         {
             base.CompTick();
+            this.InitializeShip();
             this.TrySatisfyPawnNeeds();
-            this.InitializeShipHandlers();
+            foreach(ShipHandler handler in handlers)
+            {
+                handler.ReservationHandler();
+            }
+        }
+
+        public void InitializeShip()
+        {
+            if (!(handlers is null) && handlers.Count > 0) return;
+            foreach (ShipHandler handler in handlers)
+            {
+                if(handler.currentlyReserving is null) handler.currentlyReserving = new List<Pawn>();
+            }
+            if (!(Props.roles is null) && Props.roles.Count > 0)
+            {
+                foreach (ShipRole role in Props.roles)
+                {
+                    handlers.Add(new ShipHandler(Pawn, role, new List<Pawn>()));
+                }
+            }
         }
         public override void PostSpawnSetup(bool respawningAfterLoad)
         {

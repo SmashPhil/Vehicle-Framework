@@ -32,7 +32,8 @@ namespace RimShips.Jobs
         {
             this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
             this.FailOnDowned(TargetIndex.A);
-            
+            //Func<bool> noAvailableSeats = delegate () { return !(TargetA.Thing).TryGetComp<CompShips>().handlers.Find(x => x.currentlyReserving.Contains(pawn)).AreSlotsAvailable; };
+            //this.FailOn(noAvailableSeats);
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
             yield return Toils_Board.BoardShip(pawn, TargetIndex.A);
         }

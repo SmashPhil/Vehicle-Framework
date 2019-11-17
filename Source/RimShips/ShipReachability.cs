@@ -59,11 +59,6 @@ namespace RimShips.AI
             this.numRegionsOpened++;
         }
 
-        private uint NewReachedIndex()
-        {
-            return this.reachedIndex++;
-        }
-
         private void FinalizeCheck()
         {
             this.working = false;
@@ -152,7 +147,7 @@ namespace RimShips.AI
                 this.destRegions.Clear();
                 if(peMode == PathEndMode.OnCell)
                 {
-                    WaterRegion region = WaterGridsUtility.GetRegion(dest.Cell, this.map, RegionType.Set_All);
+                    WaterRegion region = WaterGridsUtility.GetRegion(dest.Cell, this.map, RegionType.Set_Passable);
                     if(!(region is null) && region.Allows(traverseParms, true))
                     {
                         this.destRegions.Add(region);
@@ -205,7 +200,8 @@ namespace RimShips.AI
                         }
                         else
                         {
-                            bool flag2 = this.CheckRegionBasedReachability(traverseParms);
+                            //bool flag2 = this.CheckRegionBasedReachability(traverseParms);
+                            bool flag2 = this.CheckCellBasedReachability(start, dest, peMode, traverseParms); //Change back to region based later
                             this.FinalizeCheck();
                             result = flag2;
                         }
@@ -343,7 +339,7 @@ namespace RimShips.AI
                 }
                 else if (traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater)
                 {
-                    Log.ErrorOnce("Do not use this method for non-cell based modes!", 938476762, false);
+                    //Log.ErrorOnce("Do not use this method for non-cell based modes!", 938476762, false);
                     if (!pathGrid.WalkableFast(num))
                     {
                         return false;

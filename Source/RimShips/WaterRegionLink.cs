@@ -25,14 +25,26 @@ namespace RimShips
     {
         public WaterRegion RegionA
         {
-            get => this.regions[0];
-            set => this.regions[0] = value;
+            get
+            {
+                return this.regions[0];
+            }
+            set
+            {
+                this.regions[0] = value;
+            }
         }
 
         public WaterRegion RegionB
         {
-            get => this.regions[1];
-            set => this.regions[1] = value;
+            get
+            {
+                return this.regions[1];
+            }
+            set
+            {
+                this.regions[1] = value;
+            }
         }
 
         public void Register(WaterRegion reg)

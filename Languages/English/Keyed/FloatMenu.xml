@@ -32,6 +32,8 @@
 	<CaravanMustHaveEnoughSpaceOnShip>Not enough space on ships to house all pawns.</CaravanMustHaveEnoughSpaceOnShip>
 	<CaravanMustHaveEnoughPawnsToOperate>Not enough Pawns selected to set sail. Need {0}</CaravanMustHaveEnoughPawnsToOperate>
 	<MessagePawnBoardedFormingCaravan>{0} has boarded the {1} and is ready for departure.</MessagePawnBoardedFormingCaravan>
+	<MessageCantAddWaypointBecauseNoShip>Must have a boat in order to travel across {0}</MessageCantAddWaypointBecauseNoShip>
+	<MessageCantAddWaypointBecauseShip>Cannot travel on land with boats.</MessageCantAddWaypointBecauseShip>
 
 	<FormingCaravanStatus_GatheringItems_Ship>Loading cargo onto Ships.</FormingCaravanStatus_GatheringItems_Ship>
 	<FormingCaravanStatus_GatheringItems_Ship_Pause>Loading cargo onto Ships (waiting)</FormingCaravanStatus_GatheringItems_Ship_Pause>

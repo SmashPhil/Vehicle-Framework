@@ -2,6 +2,7 @@
 using RimWorld.Planet;
 using Verse;
 using Harmony;
+using RimShips.Defs;
 using System.Collections.Generic;
 
 namespace RimShips
@@ -13,6 +14,8 @@ namespace RimShips
         public List<BodyPartRecord> occupiedParts;
 
         public ShipRole role;
+
+        public List<Pawn> currentlyReserving = new List<Pawn>();
 
         private List<Pawn> tempSavedPawns = new List<Pawn>();
 
@@ -57,6 +60,10 @@ namespace RimShips
             {
                 handlers = new ThingOwner<Pawn>(this, false, LookMode.Reference);
             }
+            if(currentlyReserving is null)
+            {
+                currentlyReserving = new List<Pawn>();
+            }
             if((newHandlers?.Count ?? 0) > 0)
             {
                 foreach(Pawn p in newHandlers)
@@ -69,11 +76,25 @@ namespace RimShips
             }
         }
 
+        public void ReservationHandler()
+        {
+            if (currentlyReserving is null) currentlyReserving = new List<Pawn>();
+
+            for(int i = 0; i < currentlyReserving.Count; i++)
+            {
+                Pawn p = currentlyReserving[i];
+                if (!p.Spawned || (p.CurJob.def != JobDefOf_Ships.Board && (p.CurJob.targetA.Thing as Pawn) != this.shipPawn))
+                {
+                    currentlyReserving.Remove(p);
+                }
+            }
+        }
+
         public bool AreSlotsAvailable
         {
             get
-            {
-                return !(role is null) && (this?.handlers?.Count ?? 0) >= role.slots ? false : true;
+            { 
+                return !(role is null) && ((this?.handlers?.Count ?? 0) + (currentlyReserving?.Count ?? 0)) >= role.slots ? false : true;
             }
         }
 
@@ -91,6 +112,7 @@ namespace RimShips
             }
 
             Scribe_Collections.Look(ref tempSavedPawns, "tempSavedPawns", LookMode.Reference);
+            Scribe_Collections.Look(ref currentlyReserving, "currentlyReserving", LookMode.Deep);
             Scribe_Deep.Look(ref handlers, "handlers", this);
 
             if(Scribe.mode == LoadSaveMode.PostLoadInit || Scribe.mode == LoadSaveMode.Saving)

@@ -11,6 +11,7 @@ using RimWorld.BaseGen;
 using RimWorld.Planet;
 using RimShips.Defs;
 using RimShips.AI;
+using RimShips.Lords;
 using UnityEngine;
 using UnityEngine.AI;
 using Verse;
@@ -37,15 +38,26 @@ namespace RimShips
             Predicate<Pawn> extraValidator = null)
         {
             bool flag = true;
-            bool flag2;
-            foreach (Pawn p in pawnsToCheck)
+            foreach(Pawn p in pawnsToCheck)
             {
-                if(shouldCheckIfArrived(p))
+                if(shouldCheckIfArrived(p) && !waterPathing)
                 {
-                    flag2 = waterPathing ? ShipReachabilityUtility.CanReachShip(p, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, TraverseMode.ByPawn) :
-                        ReachabilityUtility.CanReach(p, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, TraverseMode.ByPawn);
-                    if (!p.Spawned || !p.Position.InHorDistOf(meetingPoint, 10f) || !flag2 || (extraValidator != null && !extraValidator(p)))
+                    if (!p.Spawned || !p.Position.InHorDistOf(meetingPoint, 10f) || !ReachabilityUtility.CanReach(p, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, TraverseMode.ByPawn) 
+                        || (extraValidator != null && !extraValidator(p)))
                     {
+                        flag = false;
+                        break;
+                    }
+                }
+                else if(waterPathing)
+                {
+                    if(!p.Spawned || !p.Position.InHorDistOf(((LordJob_FormAndSendCaravanShip)lord.LordJob).LeadShip.Position, 5f) || !((LordJob_FormAndSendCaravanShip)lord.LordJob).LeadShip.Position.InHorDistOf(meetingPoint, 2f) ||
+                        !ShipReachabilityUtility.CanReachShip(p, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, TraverseMode.ByPawn) || (extraValidator != null && !extraValidator(p)))
+                    {
+                        Log.Message("Not passed");
+                        Log.Message("1=> " + p.Position.InHorDistOf(((LordJob_FormAndSendCaravanShip)lord.LordJob).LeadShip.Position, 5f));
+                        Log.Message("2=> " + ((LordJob_FormAndSendCaravanShip)lord.LordJob).LeadShip.Position.InHorDistOf(meetingPoint, 2f));
+                        Log.Message("3=> " + ShipReachabilityUtility.CanReachShip(p, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, TraverseMode.ByPawn));
                         flag = false;
                         break;
                     }

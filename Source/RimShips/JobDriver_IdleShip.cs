@@ -72,6 +72,6 @@ namespace RimShips.Jobs
             }
         }
 
-        private const int JobSearchInterval = 300;
+        private const int JobSearchInterval = 200;
     }
 }

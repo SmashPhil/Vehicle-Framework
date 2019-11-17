@@ -27,15 +27,16 @@ namespace RimShips.Jobs
         protected override Job TryGiveJob(Pawn pawn)
         {
             if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Moving)) return null;
-            return new Job(JobDefOf_Ships.Board, FindAvailableShip(pawn))
+            Pawn ship = null;
+            if (pawn.GetLord().LordJob is LordJob_FormAndSendCaravanShip)
+            {
+                ship = ((LordJob_FormAndSendCaravanShip)pawn.GetLord().LordJob).GetShipAssigned(pawn);
+            }
+            
+            return new Job(JobDefOf_Ships.Board, ship)
             {
                 lord = pawn.GetLord()
             };
-        }
-
-        private Pawn FindAvailableShip(Pawn pawn)
-        {
-            return ((LordJob_FormAndSendCaravanShip)pawn.GetLord().LordJob).GetAvailableShip;
         }
     }
 }
