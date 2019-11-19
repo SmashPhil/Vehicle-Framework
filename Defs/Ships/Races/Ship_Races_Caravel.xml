@@ -134,7 +134,7 @@
 				<loadCargo>NotAllowed</loadCargo>
 				<moveable>DriverNeeded</moveable>
 				<armament>DriverNeeded</armament>
-				<shipPowerType>Paddles</shipPowerType>
+				<shipPowerType>Sails</shipPowerType>
 				<nameable>true</nameable>
 				<buildDef>CaravelBlueprint</buildDef>
 				

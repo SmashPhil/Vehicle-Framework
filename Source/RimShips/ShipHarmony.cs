@@ -208,6 +208,15 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Property(type: typeof(MapPawns), name: nameof(MapPawns.AnyPawnBlockingMapRemoval)).GetGetMethod(), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(AnyShipBlockingMapRemoval)));
+            harmony.Patch(original: AccessTools.Property(type: typeof(Caravan), name: nameof(Caravan.NightResting)).GetGetMethod(),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(NoRestForBoats)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(BestCaravanPawnUtility), name: nameof(BestCaravanPawnUtility.FindPawnWithBestStat)),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(FindPawnInShipsWithBestStat)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanVisitUtility), name: nameof(CaravanVisitUtility.TradeCommand)),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(TradeCommandShips)));
 
             //Draftable
             harmony.Patch(original: AccessTools.Property(typeof(Pawn_DraftController), name: nameof(Pawn_DraftController.Drafted)).GetSetMethod(),
@@ -987,12 +996,21 @@ namespace RimShips
                 CodeInstruction instruction = instructionList[i];
                 if (instruction.opcode == OpCodes.Stloc_S && ((LocalBuilder)instruction.operand).LocalIndex == 50)
                 {
-                    i++;
-                    Label label = ilg.DefineLabel();
                     yield return instruction;
-                    yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 50);
-                    yield return new CodeInstruction(opcode: OpCodes.Brfalse_S, operand: label);
-                    instruction = instructionList[i];
+                    instruction = instructionList[++i];
+                    Label label = ilg.DefineLabel();
+
+                    yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(CaravanUtility), name: nameof(CaravanUtility.GetCaravan)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), parameters: new Type[] { typeof(Caravan) }, name: nameof(ShipHarmony.HasShip)));
+                    yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
+
+                    yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(LordUtility), name: "GetLord"));
+                    yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Property(type: typeof(Lord), name: nameof(Lord.LordJob)).GetGetMethod());
+                    yield return new CodeInstruction(opcode: OpCodes.Castclass, operand: typeof(LordJob_FormAndSendCaravanShip));
+                    yield return new CodeInstruction(opcode: OpCodes.Stloc_S, operand: 50);
+
                     instruction.labels.Add(label);
                 }
                 yield return instruction;
@@ -1580,6 +1598,61 @@ namespace RimShips
                     }
                 }
             }
+        }
+
+        public static bool NoRestForBoats(Caravan __instance, ref bool __result)
+        {
+            if(HasShip(__instance))
+            {
+                __result = false;
+                if(__instance.PawnsListForReading.Any(x => x.GetComp<CompShips>().Props.shipPowerType == ShipType.Paddles))
+                {
+                    __result = __instance.Spawned && (!__instance.pather.Moving || __instance.pather.nextTile != __instance.pather.Destination || !Caravan_PathFollower.IsValidFinalPushDestination(__instance.pather.Destination) ||
+                        Mathf.CeilToInt(__instance.pather.nextTileCostLeft / 1f) > 10000) && CaravanNightRestUtility.RestingNowAt(__instance.Tile);
+                }
+                return false;
+            }
+            return true;
+        }
+
+        public static bool FindPawnInShipsWithBestStat(Caravan caravan, StatDef stat, ref Pawn __result)
+        {
+            if(HasShip(caravan))
+            {
+                Pawn pawn = null;
+                float num = -1f;
+                foreach(Pawn ship in caravan.PawnsListForReading)
+                {
+                    foreach(Pawn sailor in ship.GetComp<CompShips>().AllPawnsAboard)
+                    {
+                        if(!sailor.Dead && !sailor.Downed && !sailor.InMentalState && sailor.IsColonist)
+                        {
+                            if(!stat.Worker.IsDisabledFor(sailor))
+                            {
+                                float statValue = sailor.GetStatValue(stat, true);
+                                if(pawn is null || statValue > num)
+                                {
+                                    pawn = sailor;
+                                    num = statValue;
+                                }
+                            }
+                        }
+                    }
+                }
+                Log.Message("PN: " + pawn.LabelShort);
+                __result = pawn;
+                return false;
+            }
+            return true;
+        }
+
+        public static bool TradeCommandShips(Caravan caravan, ref Command __result)
+        {
+            if(HasShip(caravan))
+            {
+                
+            }
+            return true;
         }
 
         #endregion Caravan
