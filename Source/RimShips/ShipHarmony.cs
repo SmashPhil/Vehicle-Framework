@@ -994,24 +994,40 @@ namespace RimShips
             for (int i = 0; i < instructionList.Count; i++)
             {
                 CodeInstruction instruction = instructionList[i];
-                if (instruction.opcode == OpCodes.Stloc_S && ((LocalBuilder)instruction.operand).LocalIndex == 50)
+                if(instruction.opcode == OpCodes.Callvirt && instruction.operand == AccessTools.Property(type: typeof(Lord), name: nameof(Lord.LordJob)).GetGetMethod())
                 {
                     yield return instruction;
                     instruction = instructionList[++i];
                     Label label = ilg.DefineLabel();
+                    Label label2 = ilg.DefineLabel();
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
                     yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(CaravanUtility), name: nameof(CaravanUtility.GetCaravan)));
                     yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), parameters: new Type[] { typeof(Caravan) }, name: nameof(ShipHarmony.HasShip)));
-                    yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
+                    yield return new CodeInstruction(opcode: OpCodes.Brtrue, label);
 
+                    yield return instruction; //CASTCLASS : LordJob_FormAndSendCaravan
+                    instruction = instructionList[++i]; 
+                    yield return instruction; //STLOC_S : 50
+                    instruction = instructionList[++i];
+                    yield return instruction; //LDLOC_S : 49
+                    instruction = instructionList[++i];
+                    yield return instruction; //LDLOC_S : 50
+                    instruction = instructionList[++i];
+                    yield return instruction; //CALL : CapacityLeft
+                    instruction = instructionList[++i];
+                    yield return new CodeInstruction(opcode: OpCodes.Br, label2);
+
+                    yield return new CodeInstruction(opcode: OpCodes.Pop) { labels = new List<Label> { label } };
+                    yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 49);
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
                     yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(LordUtility), name: "GetLord"));
                     yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Property(type: typeof(Lord), name: nameof(Lord.LordJob)).GetGetMethod());
-                    yield return new CodeInstruction(opcode: OpCodes.Castclass, operand: typeof(LordJob_FormAndSendCaravanShip));
-                    yield return new CodeInstruction(opcode: OpCodes.Stloc_S, operand: 50);
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipHarmony.CapacityLeft)));
 
-                    instruction.labels.Add(label);
+                    instruction.labels.Add(label2);
+                    yield return instruction; //STFLD
+                    instruction = instructionList[++i];
                 }
                 yield return instruction;
             }
@@ -1939,9 +1955,6 @@ namespace RimShips
             {
                 return true;
             }
-            Log.Message("map: " + map.Size.x + " | " + map.Size.z);
-            Log.Message("hitbox: " + hitbox + " | " + (x > z ? p.def.size.x : p.def.size.z));
-            Log.Message("-> " + nextCell.x + " | " + nextCell.z);
             return false;
         }
 
@@ -2134,10 +2147,10 @@ namespace RimShips
             return !(lord is null) && lord.LordJob is LordJob_FormAndSendCaravanShip;
         }
 
-        public static float CapacityLeft(LordJob_FormAndSendCaravanShip lordJob, ref List<ThingCount> tmpCaravanPawns)
+        public static float CapacityLeft(LordJob_FormAndSendCaravanShip lordJob)
         {
             float num = CollectionsMassCalculator.MassUsageTransferables(lordJob.transferables, IgnorePawnsInventoryMode.IgnoreIfAssignedToUnload, false, false);
-            tmpCaravanPawns.Clear();
+            List<ThingCount> tmpCaravanPawns = new List<ThingCount>();
             for (int i = 0; i < lordJob.lord.ownedPawns.Count; i++)
             {
                 Pawn pawn = lordJob.lord.ownedPawns[i];
@@ -2472,7 +2485,7 @@ namespace RimShips
         #endregion HelperFunctions
         
         private static readonly bool disabled = false;
-        public static readonly bool debug = true;
+        public static readonly bool debug = false;
         public static readonly bool drawPaths = false;
         private static List<WorldPath> debugLines = new List<WorldPath>();
         private static List<Pair<int, int>> tiles = new List<Pair<int,int>>(); // Pair -> TileID : Cycle
