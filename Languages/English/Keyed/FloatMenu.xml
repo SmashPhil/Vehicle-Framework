@@ -9,6 +9,7 @@
 	<NameIsInvalid>Name invalid for ship.</NameIsInvalid>
 	<ShipGainsName>Your new ship has been named {0}</ShipGainsName>
 	<ActivityIconOnBoardShip>Onboard {0}</ActivityIconOnBoardShip>
+	<IsIncapableOfRamming>Ram {0}</IsIncapableOfRamming>
 	
 	<CaravanShips>Ships</CaravanShips>
 	<CaravanShipsSingle>1 Ship</CaravanShipsSingle>

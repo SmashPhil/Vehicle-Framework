@@ -59,7 +59,7 @@
 		<label>Caravel</label>
 		<description>A medium sized trade ship designed to be both fast and versatile.</description>
 		<graphicData>
-			<texPath>Ships/caravel/CaravelBoat/Caravel_v2_north</texPath>
+			<texPath>Ships/caravel/CaravelBoat/Caravel_north</texPath>
 			<graphicClass>Graphic_Single</graphicClass>
 			<drawSize>(6,11)</drawSize>
 		</graphicData>

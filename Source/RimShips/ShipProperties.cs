@@ -16,6 +16,7 @@ namespace RimShips
         public bool movesWhenDowned = false;
 
         public bool nameable;
+        public ThingDef buildDef;
 
         public string healthLabel_Healthy = "Operational";
         public string healthLabel_Injured = "Needs Repairs";

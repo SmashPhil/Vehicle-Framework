@@ -37,10 +37,10 @@ namespace RimShips
             #region Functions
 
             //Map Gen
-            harmony.Patch(original: AccessTools.Method(typeof(BeachMaker), name: nameof(BeachMaker.Init)), prefix: null, postfix: null,
+            harmony.Patch(original: AccessTools.Method(type: typeof(BeachMaker), name: nameof(BeachMaker.Init)), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(BeachMakerTranspiler)));
-            harmony.Patch(original: AccessTools.Method(typeof(TileFinder), name: nameof(TileFinder.RandomSettlementTileFor)), prefix: null, postfix: null,
+            harmony.Patch(original: AccessTools.Method(type: typeof(TileFinder), name: nameof(TileFinder.RandomSettlementTileFor)), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(PushSettlementToCoastTranspiler)));
             harmony.Patch(original: AccessTools.Method(type: typeof(Map), name: nameof(Map.FinalizeInit)), prefix: null,
@@ -54,16 +54,18 @@ namespace RimShips
                 name: nameof(RecalculateShipPathCostTerrainChange)));
 
             //Health 
-            harmony.Patch(original: AccessTools.Method(typeof(HealthUtility), name: nameof(HealthUtility.GetGeneralConditionLabel)),
+            harmony.Patch(original: AccessTools.Method(type: typeof(HealthUtility), name: nameof(HealthUtility.GetGeneralConditionLabel)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(ReplaceConditionLabel)));
-            harmony.Patch(original: AccessTools.Method(typeof(Pawn_HealthTracker), name: "ShouldBeDowned"),
+            harmony.Patch(original: AccessTools.Method(type: typeof(Pawn_HealthTracker), name: "ShouldBeDowned"),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(ShipShouldBeDowned)));
-            harmony.Patch(original: AccessTools.Method(typeof(PawnDownedWiggler), name: nameof(PawnDownedWiggler.WigglerTick)),
+            harmony.Patch(original: AccessTools.Method(type: typeof(PawnDownedWiggler), name: nameof(PawnDownedWiggler.WigglerTick)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(ShipShouldWiggle)));
-
+            harmony.Patch(original: AccessTools.Method(type: typeof(Pawn), name: nameof(Pawn.Kill)),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(KillAndDespawnShip)));
             //Rendering
             harmony.Patch(original: AccessTools.Method(typeof(Pawn_RotationTracker), name: nameof(Pawn_RotationTracker.UpdateRotation)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
@@ -115,6 +117,8 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(RegionLink), name: nameof(RegionLink.Deregister)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(DeregisterWaterRegion))); //MORE WORK
+
+            //World Pathing
             harmony.Patch(original: AccessTools.Method(type: typeof(WorldPathFinder), name: nameof(WorldPathFinder.FindPath)), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(FindPathWithShipTranspiler)));
@@ -198,6 +202,12 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(CaravanEnterMapUtility), name: "GetEnterCell"),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(GetEnterCellWater)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(Caravan), name: nameof(Caravan.Notify_MemberDied)), 
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(CaravanLostAllShips)));
+            harmony.Patch(original: AccessTools.Property(type: typeof(MapPawns), name: nameof(MapPawns.AnyPawnBlockingMapRemoval)).GetGetMethod(), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(AnyShipBlockingMapRemoval)));
 
             //Draftable
             harmony.Patch(original: AccessTools.Property(typeof(Pawn_DraftController), name: nameof(Pawn_DraftController.Drafted)).GetSetMethod(),
@@ -206,6 +216,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Property(typeof(Pawn), name: nameof(Pawn.IsColonistPlayerControlled)).GetGetMethod(),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(IsShipDraftable)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(FloatMenuUtility), name: nameof(FloatMenuUtility.GetMeleeAttackAction)),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(NoMeleeForShips)));
 
             //Construction
             harmony.Patch(original: AccessTools.Method(type: typeof(Frame), name: nameof(Frame.CompleteConstruction)),
@@ -287,11 +300,19 @@ namespace RimShips
 
         public static void RecalculateShipPathGrid(Map __instance)
         {
-            MapExtensionUtility.GetExtensionToMap(__instance)?.getShipPathGrid?.RecalculateAllPerceivedPathCosts();
+            MapExtension mapE = MapExtensionUtility.GetExtensionToMap(__instance);
+            mapE?.getShipPathGrid?.RecalculateAllPerceivedPathCosts();
+
+            if(mapE != null && mapE.getWaterRegionAndRoomUpdater != null)
+            {
+                mapE.getWaterRegionAndRoomUpdater.Enabled = true;
+            }
+            mapE?.getWaterRegionAndRoomUpdater.RebuildAllWaterRegions();
         }
 
         public static void RecalculateShipPathCostUnderThing(Thing t, Map ___map)
         {
+            if (t is null) return;
             MapExtensionUtility.GetExtensionToMap(___map)?.getShipPathGrid?.RecalculatePerceivedPathCostUnderThing(t);
         }
 
@@ -355,6 +376,72 @@ namespace RimShips
         {
             if (___pawn != null && IsShip(___pawn) && !___pawn.GetComp<CompShips>().Props.movesWhenDowned)
             {
+                return false;
+            }
+            return true;
+        }
+
+        public static bool KillAndDespawnShip(DamageInfo? dinfo, Pawn __instance)
+        {
+            if(IsShip(__instance))
+            {
+                IntVec3 position = __instance.PositionHeld;
+                float angle = __instance.GetComp<CompShips>().Angle;
+                Rot4 rotation = __instance.Rotation;
+
+                Map map = __instance.Map;
+                Map mapHeld = __instance.MapHeld;
+                bool flag = __instance.Spawned;
+                bool worldPawn = __instance.IsWorldPawn();
+                Caravan caravan = __instance.GetCaravan();
+                ThingDef shipDef = __instance.GetComp<CompShips>().Props.buildDef;
+
+                Thing thing = ThingMaker.MakeThing(shipDef);
+                thing.SetFactionDirect(__instance.Faction);
+                thing.HitPoints = __instance.MaxHitPoints / 3;
+
+                if (Current.ProgramState == ProgramState.Playing)
+                {
+                    Find.Storyteller.Notify_PawnEvent(__instance, AdaptationEvent.Died, null);
+                }
+                if(flag && dinfo != null && dinfo.Value.Def.ExternalViolenceFor(__instance))
+                {
+                    LifeStageUtility.PlayNearestLifestageSound(__instance, (LifeStageAge ls) => ls.soundDeath, 1f);
+                }
+                if(dinfo != null && dinfo.Value.Instigator != null)
+                {
+                    Pawn pawn = dinfo.Value.Instigator as Pawn;
+                    if(pawn != null)
+                    {
+                        RecordsUtility.Notify_PawnKilled(__instance, pawn);
+                    }
+                }
+
+                if(__instance.GetLord() != null)
+                {
+                    __instance.GetLord().Notify_PawnLost(__instance, PawnLostCondition.IncappedOrKilled, dinfo);
+                }
+                if(flag)
+                {
+                    __instance.DropAndForbidEverything(false);
+                }
+
+                __instance.meleeVerbs.Notify_PawnKilled();
+                if(flag)
+                {
+                    if (map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterOceanDeep && map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterDeep)
+                    {
+                        __instance.Destroy();
+                        return false;
+                    }
+                    else
+                    {
+                        __instance.GetComp<CompShips>().DisembarkAll();
+                        __instance.Destroy();
+                    }
+                }
+                GenSpawn.Spawn(thing, position, map, rotation, WipeMode.Vanish, false);
+
                 return false;
             }
             return true;
@@ -499,6 +586,18 @@ namespace RimShips
             }
             return true;
         }
+
+        public static bool NoMeleeForShips(Pawn pawn, LocalTargetInfo target, out string failStr)
+        {
+            if(IsShip(pawn))
+            {
+                failStr = "IsIncapableOfRamming".Translate(target.Thing.LabelShort);
+                //Add more to string or Action if ramming is implemented
+                return false;
+            }
+            failStr = string.Empty;
+            return true;
+        }
         #endregion Drafting
 
         #region Gizmos
@@ -544,7 +643,7 @@ namespace RimShips
                 {
                     return false;
                 }
-                if (!MapExtensionUtility.GetExtensionToMap(___pawn.Map).getShipReachability.CanReachShip(___pawn.Position, dest, peMode, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false)))
+                if (!MapExtensionUtility.GetExtensionToMap(___pawn.Map)?.getShipReachability?.CanReachShip(___pawn.Position, dest, peMode, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false)) ?? false)
                 {
                     PatherFailedHelper(ref __instance, ___pawn);
                     return false;
@@ -986,7 +1085,7 @@ namespace RimShips
                 TraverseParms traverseParms = TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false);
                 foreach(Thing t in list)
                 {
-                    if(MapExtensionUtility.GetExtensionToMap(___map).getShipReachability.CanReachShip(exitSpot, t, PathEndMode.OnCell, traverseParms))
+                    if(MapExtensionUtility.GetExtensionToMap(___map)?.getShipReachability?.CanReachShip(exitSpot, t, PathEndMode.OnCell, traverseParms) ?? false)
                         ___tmpPackingSpots.Add(t);
                 }
                 if(___tmpPackingSpots.Any())
@@ -1420,6 +1519,69 @@ namespace RimShips
             return true;
         }
 
+        public static bool CaravanLostAllShips(Pawn member, Caravan __instance)
+        {
+            if(HasShip(__instance))
+            {
+                if(!__instance.Spawned)
+                {
+                    Log.Error("Caravan member died in an unspawned caravan. Unspawned caravans shouldn't be kept for more than a single frame.", false);
+                }
+                if(!__instance.PawnsListForReading.Any(x => IsShip(x) && !x.Dead && x.GetComp<CompShips>().AllPawnsAboard.Any((Pawn y) => y != member && __instance.IsOwner(y))))
+                {
+                    __instance.RemovePawn(member);
+                    if (__instance.Faction == Faction.OfPlayer)
+                    {
+                        Find.LetterStack.ReceiveLetter("LetterLabelAllCaravanColonistsDied".Translate(), "LetterAllCaravanColonistsDied".Translate(__instance.Name).CapitalizeFirst(), LetterDefOf.NegativeEvent, new GlobalTargetInfo(__instance.Tile), null, null);
+                    }
+                    __instance.pawns.Clear();
+                    Find.WorldObjects.Remove(__instance);
+                }
+                else
+                {
+                    member.Strip();
+                    __instance.RemovePawn(member);
+                }
+                return false;
+            }
+            return true;
+        }
+
+        public static void AnyShipBlockingMapRemoval(MapPawns __instance, ref bool __result)
+        {
+            if(__result is false)
+            {
+                foreach(Pawn p in __instance.AllPawnsSpawned)
+                {
+                    if(IsShip(p) && p.GetComp<CompShips>().AllPawnsAboard.Any())
+                    {
+                        foreach (Pawn sailor in p.GetComp<CompShips>().AllPawnsAboard)
+                        {
+                            if (!sailor.Downed && sailor.IsColonist)
+                            {
+                                __result = true;
+                                return;
+                            }
+                            if (sailor.relations != null && sailor.relations.relativeInvolvedInRescueQuest != null)
+                            {
+                                __result = true;
+                                return;
+                            }
+                            if (sailor.Faction == Faction.OfPlayer || sailor.HostFaction == Faction.OfPlayer)
+                            {
+                                if (sailor.CurJob != null && sailor.CurJob.exitMapOnArrival)
+                                {
+                                    __result = true;
+                                    return;
+                                }
+                            }
+                            //Caravan to join for?
+                        }
+                    }
+                }
+            }
+        }
+
         #endregion Caravan
 
         #region Construction
@@ -1427,7 +1589,7 @@ namespace RimShips
         {
             if (__instance.def.entityDefToBuild.designationCategory == DesignationCategoryDefOf_Ships.RimShips)
             {
-                Pawn ship = PawnGenerator.GeneratePawn(__instance.def.entityDefToBuild.GetModExtension<Build.SpawnThingBuilt>().thingToSpawn);
+                Pawn ship = PawnGenerator.GeneratePawn(__instance.def.entityDefToBuild.GetModExtension<SpawnThingBuilt>().thingToSpawn);
                 __instance.resourceContainer.ClearAndDestroyContents(DestroyMode.Vanish);
                 Map map = __instance.Map;
                 __instance.Destroy(DestroyMode.Vanish);
@@ -1470,13 +1632,24 @@ namespace RimShips
             if (disabled) return true;
             if (IsShip(___pawn))
             {
-                if(___pawn.GetComp<CompShips>().beached || !__instance.nextCell.GetTerrain(___pawn.Map).IsWater)
+                if(!___pawn.Drafted)
+                {
+                    __instance.StopDead();
+                    ___pawn.jobs.curDriver.Notify_PatherFailed();
+                }
+                else if(ShipHarmony.ShipEdgeOfMap(___pawn, __instance.nextCell, ___pawn.Map))
+                {
+                    __instance.StopDead();
+                    ___pawn.jobs.curDriver.Notify_PatherFailed();
+                }
+                if (___pawn.GetComp<CompShips>().beached || !__instance.nextCell.GetTerrain(___pawn.Map).IsWater)
                 {
                     ___pawn.GetComp<CompShips>().BeachShip();
                     ___pawn.Position = __instance.nextCell;
                     __instance.StopDead();
-                    ___pawn.jobs.curDriver.Notify_PatherFailed(); 
+                    ___pawn.jobs.curDriver.Notify_PatherFailed();
                 }
+
                 //Buildings?
                 ___lastCell = ___pawn.Position;
                 ___pawn.Position = __instance.nextCell;
@@ -1678,6 +1851,26 @@ namespace RimShips
         }
 
         #region HelperFunctions
+
+        private static bool ShipEdgeOfMap(Pawn p, IntVec3 nextCell, Map map)
+        {
+            int x = p.def.size.x % 2 == 0 ? p.def.size.x / 2 : (p.def.size.x + 1) / 2;
+            int z = p.def.size.z % 2 == 0 ? p.def.size.z / 2 : (p.def.size.z + 1) / 2;
+
+            int hitbox = x > z ? x : z;
+            if(nextCell.x + hitbox >= map.Size.x || nextCell.z + hitbox >= map.Size.z)
+            {
+                return true;
+            }
+            if(nextCell.x - hitbox <= 0 || nextCell.z - hitbox <= 0)
+            {
+                return true;
+            }
+            Log.Message("map: " + map.Size.x + " | " + map.Size.z);
+            Log.Message("hitbox: " + hitbox + " | " + (x > z ? p.def.size.x : p.def.size.z));
+            Log.Message("-> " + nextCell.x + " | " + nextCell.z);
+            return false;
+        }
 
         private static bool IsWaterTile(int tile)
         {
@@ -1885,6 +2078,7 @@ namespace RimShips
 
         public static float ShipAngle(Pawn pawn)
         {
+            if (pawn is null) return 0f;
             if (pawn.pather.Moving)
             {
                 IntVec3 c = pawn.pather.nextCell - pawn.Position;

@@ -57,7 +57,7 @@ namespace RimShips
 
         public static WaterRoom RoomAtFast(IntVec3 c, Map map, RegionType allowedRegionTypes = RegionType.Set_Passable)
         {
-            WaterRegion validRegionAt = MapExtensionUtility.GetExtensionToMap(map).getWaterRegionGrid.GetValidRegionAt(c);
+            WaterRegion validRegionAt = MapExtensionUtility.GetExtensionToMap(map)?.getWaterRegionGrid?.GetValidRegionAt(c);
             if(!(validRegionAt is null) && (validRegionAt.type & allowedRegionTypes) != RegionType.None)
                 return validRegionAt.Room;
             return null;

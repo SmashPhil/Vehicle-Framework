@@ -97,16 +97,7 @@
 				<ensureLinkedBodyPartsGroupAlwaysUsable>true</ensureLinkedBodyPartsGroupAlwaysUsable>
 			</li>
 		</tools>
-		<!--
-		<colorGenerator Class="ColorGenerator_Options">
-			<options>
-				<li>
-					<weight>10</weight>
-					<only>(0.55,0.33,0.33,1)</only>
-				</li>
-			</options>
-		</colorGenerator>
-		-->
+
 		<race>
 			<thinkTreeMain>shipThinkTree_Simple</thinkTreeMain>
 			<thinkTreeConstant>shipThinkTree_SimpleConstant</thinkTreeConstant>
@@ -145,6 +136,7 @@
 				<armament>DriverNeeded</armament>
 				<shipPowerType>Paddles</shipPowerType>
 				<nameable>true</nameable>
+				<buildDef>CaravelBlueprint</buildDef>
 				
 				<healthLabel_Healthy>Operational</healthLabel_Healthy>
 				<healthLabel_Injured>Needs Repairs</healthLabel_Injured>

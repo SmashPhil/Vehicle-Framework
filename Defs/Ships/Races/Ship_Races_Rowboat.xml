@@ -133,6 +133,7 @@
 				<armament>DriverNeeded</armament>
 				<shipPowerType>Paddles</shipPowerType>
 				<nameable>false</nameable>
+				<buildDef>RowboatBlueprint</buildDef>
 				
 				<healthLabel_Healthy>Operational</healthLabel_Healthy>
 				<healthLabel_Injured>Needs Repairs</healthLabel_Injured>

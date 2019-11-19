@@ -22,7 +22,6 @@ namespace RimShips
 {
     public enum ShipWeaponStatus { Offline, Online }
     public enum ShipMovementStatus { Offline, Online }
-
     public class CompShips : ThingComp
     {
         public List<Jobs.Bill_BoardShip> bills = new List<Jobs.Bill_BoardShip>();
@@ -30,7 +29,7 @@ namespace RimShips
         public bool draftStatusChanged = false;
         public bool beached = false;
         private float angle = 0f;
-
+        
         public List<ShipHandler> handlers = new List<ShipHandler>();
         public Rot4 lastDirection = Rot4.South;
         public ShipMovementStatus movementStatus = ShipMovementStatus.Online;
@@ -289,6 +288,18 @@ namespace RimShips
                     }
                 }
             }
+        }
+
+        public void DeadPawnReplace(Pawn pawn)
+        {
+            //NEEDS IMPLEMENTATION
+            /*foreach(ShipHandler h in handlers)
+            {
+                if(h.handlers.InnerListForReading.Contains(pawn))
+                {
+                    
+                }
+            }*/
         }
 
         public void BeachShip()
