@@ -1,4 +1,4 @@
-# RimShips
+# Boats
 
 Stay up to date with this mod's progress on [Trello](https://trello.com/b/xOZiNOOU/rimships)!
 
