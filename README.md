@@ -1,10 +1,7 @@
-# RimShips
+# Boats
 
 Stay up to date with this mod's progress on [Trello](https://trello.com/b/xOZiNOOU/rimships)!
 
 **Work In Progress**
-This mod is currently a work in progress.  When will it be ready for
-release? I have no idea.  Maybe by Christmas? Maybe not
-until next March.  I take pride in my work and will not release a half
-finished or buggy mod.  That being said, you are more than welcome to download
-here and try it out.  
+
+It is currently available for Bug Testing. This means that while the game has all (or most of) the features added that make this mod complete, you may encounter some bugs.  Please report them to me so I can fix them.  This mod will be released on Steam after I am confident most (if not all) bugs are fixed.
