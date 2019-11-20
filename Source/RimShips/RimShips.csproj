@@ -83,7 +83,6 @@
     <Compile Include="PawnTableDefOf_Ships.cs" />
     <Compile Include="PawnTable_Ships.cs" />
     <Compile Include="Projectile_Water.cs" />
-    <Compile Include="Projectile_WaterHarmony.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegionCostCalculatorShips.cs" />
     <Compile Include="RegionCostCalculatorWrapperShips.cs" />

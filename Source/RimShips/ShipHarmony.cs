@@ -66,6 +66,7 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(Pawn), name: nameof(Pawn.Kill)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(KillAndDespawnShip)));
+
             //Rendering
             harmony.Patch(original: AccessTools.Method(typeof(Pawn_RotationTracker), name: nameof(Pawn_RotationTracker.UpdateRotation)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
@@ -88,6 +89,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(typeof(PawnAttackGizmoUtility), name: "ShouldUseMeleeAttackGizmo"),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(ShipMeleeAttacksNullified)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(SettlementBase), name: nameof(SettlementBase.GetCaravanGizmos)), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(AddDockingGizmo)));
 
             //Pathing
             harmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), name: nameof(Pawn_PathFollower.StartPath)),
@@ -211,12 +215,6 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Property(type: typeof(Caravan), name: nameof(Caravan.NightResting)).GetGetMethod(),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(NoRestForBoats)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(BestCaravanPawnUtility), name: nameof(BestCaravanPawnUtility.FindPawnWithBestStat)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(FindPawnInShipsWithBestStat)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanVisitUtility), name: nameof(CaravanVisitUtility.TradeCommand)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(TradeCommandShips)));
 
             //Draftable
             harmony.Patch(original: AccessTools.Property(typeof(Pawn_DraftController), name: nameof(Pawn_DraftController.Drafted)).GetSetMethod(),
@@ -228,6 +226,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(FloatMenuUtility), name: nameof(FloatMenuUtility.GetMeleeAttackAction)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(NoMeleeForShips)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(Projectile_Explosive), name: "Impact"),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(ShellsImpactWater)));
 
             //Construction
             harmony.Patch(original: AccessTools.Method(type: typeof(Frame), name: nameof(Frame.CompleteConstruction)),
@@ -607,6 +608,51 @@ namespace RimShips
             failStr = string.Empty;
             return true;
         }
+
+        private static bool ShellsImpactWater(Thing hitThing, ref Projectile __instance)
+        {
+            Map map = __instance.Map;
+            TerrainDef terrainImpact = map.terrainGrid.TerrainAt(__instance.Position);
+            if (__instance.def.projectile.explosionDelay == 0 && terrainImpact.IsWater)
+            {
+                __instance.Destroy(DestroyMode.Vanish);
+                if (__instance.def.projectile.explosionEffect != null)
+                {
+                    Effecter effecter = __instance.def.projectile.explosionEffect.Spawn();
+                    effecter.Trigger(new TargetInfo(__instance.Position, map, false), new TargetInfo(__instance.Position, map, false));
+                    effecter.Cleanup();
+                }
+                IntVec3 position = __instance.Position;
+                Map map2 = map;
+
+                int waterDepth = terrainImpact == TerrainDefOf.WaterMovingShallow || terrainImpact == TerrainDefOf.WaterShallow || terrainImpact == TerrainDefOf.WaterOceanShallow ? 1 :
+                    terrainImpact == TerrainDefOf.WaterMovingChestDeep || terrainImpact == TerrainDefOf.WaterDeep || terrainImpact == TerrainDefOf.WaterOceanDeep ? 2 : 0;
+                if (waterDepth == 0) Log.Error("Impact Water Depth is 0, but terrain is water.");
+                float explosionRadius = (__instance.def.projectile.explosionRadius / (2f * waterDepth));
+                DamageDef damageDef = __instance.def.projectile.damageDef;
+                Thing launcher = null;
+                int damageAmount = __instance.DamageAmount;
+                float armorPenetration = __instance.ArmorPenetration;
+                SoundDef soundExplode;
+                if (__instance.def.HasModExtension<Projectile_Water>()) { soundExplode = __instance.def.GetModExtension<Projectile_Water>().soundExplodeWater; }
+                else { soundExplode = __instance.def.projectile.soundHitThickRoof; Log.Message("Missing Water Explosion sound from " + __instance); }
+                Verse.Sound.SoundStarter.PlayOneShot(__instance.def.projectile.soundExplode, new TargetInfo(__instance.Position, map, false));
+                ThingDef equipmentDef = null;
+                ThingDef def = __instance.def;
+                Thing thing = null;
+                ThingDef postExplosionSpawnThingDef = __instance.def.projectile.postExplosionSpawnThingDef;
+                float postExplosionSpawnChance = 0.0f;
+                float chanceToStartFire = __instance.def.projectile.explosionChanceToStartFire * 0.0f;
+                int postExplosionSpawnThingCount = __instance.def.projectile.postExplosionSpawnThingCount;
+                ThingDef preExplosionSpawnThingDef = __instance.def.projectile.preExplosionSpawnThingDef;
+                GenExplosion.DoExplosion(position, map2, explosionRadius, damageDef, launcher, damageAmount, armorPenetration, soundExplode,
+                    equipmentDef, def, thing, postExplosionSpawnThingDef, postExplosionSpawnChance, postExplosionSpawnThingCount,
+                    __instance.def.projectile.applyDamageToExplosionCellsNeighbors, preExplosionSpawnThingDef, __instance.def.projectile.preExplosionSpawnChance,
+                    __instance.def.projectile.preExplosionSpawnThingCount, chanceToStartFire, __instance.def.projectile.explosionDamageFalloff);
+                return false;
+            }
+            return true;
+        }
         #endregion Drafting
 
         #region Gizmos
@@ -627,6 +673,46 @@ namespace RimShips
             }
             return true;
         }
+
+        public static void AddDockingGizmo(Caravan caravan, ref IEnumerable<Gizmo> __result, SettlementBase __instance)
+        {
+            if(HasShip(caravan))
+            {
+                if(!caravan.pather.Moving && __instance.CanTradeNow && !caravan.PawnsListForReading.Any(x => !IsShip(x)) && !__instance.Faction.HostileTo(caravan.Faction))
+                {
+                    Command_Action gizmo = new Command_Action();
+                    gizmo.icon = TexCommandShips.Anchor;
+                    gizmo.defaultLabel = "CommandDockShip".Translate();
+                    gizmo.defaultDesc = "CommandDockShipDesc".Translate(__instance.Label);
+                    gizmo.action = delegate ()
+                    {
+                        ShipHarmony.ToggleDocking(caravan, __instance, true);
+                    };
+
+                    List<Gizmo> gizmos = __result.ToList();
+                    gizmos.Add(gizmo);
+                    __result = gizmos;
+                }
+                else if(!caravan.pather.Moving && CaravanVisitUtility.SettlementVisitedNow(caravan) != null && caravan.PawnsListForReading.Any(x => !IsShip(x)))
+                {
+                    Command_Action gizmo = new Command_Action();
+                    gizmo.icon = TexCommandShips.UnloadAll;
+                    gizmo.defaultLabel = "CommandUndockShip".Translate();
+                    gizmo.defaultDesc = "CommandUndockShipDesc".Translate(__instance.Label);
+                    gizmo.action = delegate ()
+                    {
+                        ShipHarmony.ToggleDocking(caravan, __instance, false);
+                    };
+
+                    List<Gizmo> gizmos = __result.ToList();
+                    int index = gizmos.FindIndex(x => (x as Command_Action).icon == SettlementBase.AttackCommand);
+                    gizmos[index].Disable("CommandAttackDockDisable".Translate(__instance.LabelShort));
+                    gizmos.Add(gizmo);
+                    __result = gizmos;
+                }
+            }
+        }
+
         #endregion Gizmos
 
         #region Pathing
@@ -1369,7 +1455,7 @@ namespace RimShips
             {
                 foreach (Pawn ship in __instance.pawns)
                 {
-                    if(ship.GetComp<CompShips>().AllPawnsAboard.All(x => x.Downed))
+                    if(IsShip(ship) && (ship?.GetComp<CompShips>()?.AllPawnsAboard.All(x => x.Downed) ?? false))
                     {
                         __result = true;
                         return false;
@@ -1387,7 +1473,7 @@ namespace RimShips
             {
                 foreach(Pawn ship in __instance.pawns)
                 {
-                    if (ship.GetComp<CompShips>().AllPawnsAboard.All(x => x.InMentalState))
+                    if(IsShip(ship) && (ship?.GetComp<CompShips>()?.AllPawnsAboard.All(x => x.InMentalState) ?? false))
                     {
                         __result = true;
                         return false;
@@ -1415,7 +1501,7 @@ namespace RimShips
                 int num4 = 0;
                 int num5 = 0;
                 int numS = 0;
-                foreach(Pawn ship in __instance.PawnsListForReading)
+                foreach(Pawn ship in __instance.PawnsListForReading.Where(x => IsShip(x)))
                 {
                     numS++;
                     foreach(Pawn p in ship.GetComp<CompShips>().AllPawnsAboard)
@@ -1555,7 +1641,7 @@ namespace RimShips
 
         public static bool CaravanLostAllShips(Pawn member, Caravan __instance)
         {
-            if(HasShip(__instance))
+            if(HasShip(__instance) && !__instance.PawnsListForReading.Any(x => !IsShip(x)))
             {
                 if(!__instance.Spawned)
                 {
@@ -1618,7 +1704,7 @@ namespace RimShips
 
         public static bool NoRestForBoats(Caravan __instance, ref bool __result)
         {
-            if(HasShip(__instance))
+            if(HasShip(__instance) && !__instance.PawnsListForReading.Any(x => !IsShip(x)))
             {
                 __result = false;
                 if(__instance.PawnsListForReading.Any(x => x.GetComp<CompShips>().Props.shipPowerType == ShipType.Paddles))
@@ -1627,46 +1713,6 @@ namespace RimShips
                         Mathf.CeilToInt(__instance.pather.nextTileCostLeft / 1f) > 10000) && CaravanNightRestUtility.RestingNowAt(__instance.Tile);
                 }
                 return false;
-            }
-            return true;
-        }
-
-        public static bool FindPawnInShipsWithBestStat(Caravan caravan, StatDef stat, ref Pawn __result)
-        {
-            if(HasShip(caravan))
-            {
-                Pawn pawn = null;
-                float num = -1f;
-                foreach(Pawn ship in caravan.PawnsListForReading)
-                {
-                    foreach(Pawn sailor in ship.GetComp<CompShips>().AllPawnsAboard)
-                    {
-                        if(!sailor.Dead && !sailor.Downed && !sailor.InMentalState && sailor.IsColonist)
-                        {
-                            if(!stat.Worker.IsDisabledFor(sailor))
-                            {
-                                float statValue = sailor.GetStatValue(stat, true);
-                                if(pawn is null || statValue > num)
-                                {
-                                    pawn = sailor;
-                                    num = statValue;
-                                }
-                            }
-                        }
-                    }
-                }
-                Log.Message("PN: " + pawn.LabelShort);
-                __result = pawn;
-                return false;
-            }
-            return true;
-        }
-
-        public static bool TradeCommandShips(Caravan caravan, ref Command __result)
-        {
-            if(HasShip(caravan))
-            {
-                
             }
             return true;
         }
@@ -2008,6 +2054,69 @@ namespace RimShips
             if (flag3)
                 Messages.Message("CaravanMustHaveEnoughPawnsToOperate".Translate(prereq), MessageTypeDefOf.RejectInput, false);
             return !flag2 && !flag3;
+        }
+
+        private static void ToggleDocking(Caravan caravan, SettlementBase settlement = null, bool dock = false)
+        {
+            if(settlement is null)
+            {
+                Log.Warning("You should only be able to Dock at settlements");
+            }
+
+            if(HasShip(caravan))
+            {
+                if(!dock)
+                {
+                    List<Pawn> pawns = caravan.PawnsListForReading.Where(x => !IsShip(x)).ToList();
+                    List<Pawn> ships = caravan.PawnsListForReading.Where(x => IsShip(x)).ToList();
+                    for(int i = 0; i < ships.Count; i++)
+                    {
+                        Pawn ship = ships[i];
+                        for(int j = 0; j < ship?.GetComp<CompShips>()?.PawnCountToOperate; j++)
+                        {
+                            if(pawns.Count <= 0)
+                            {
+                                Messages.Message("NotEnoughPawnsForShips".Translate(), MessageTypeDefOf.NegativeEvent, false);
+                                return;
+                            }
+                            foreach(ShipHandler handler in ship.GetComp<CompShips>().handlers)
+                            {
+                                if(handler.AreSlotsAvailable)
+                                {
+                                    ship.GetComp<CompShips>().Notify_BoardedCaravan(pawns.Pop(), handler.handlers);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if(pawns.Count > 0)
+                    {
+                        int x = 0;
+                        while(pawns.Count > 0)
+                        {
+                            Pawn ship = ships[x];
+                            foreach(ShipHandler handler in ship.GetComp<CompShips>().handlers)
+                            {
+                                if(handler.AreSlotsAvailable)
+                                {
+                                    ship.GetComp<CompShips>().Notify_BoardedCaravan(pawns.Pop(), handler.handlers);
+                                    break;
+                                }
+                            }
+                            x = (x + 2) > ships.Count ? 0 : ++x;
+                        }
+                    }
+                }
+                else
+                {
+                    List<Pawn> ships = caravan.PawnsListForReading.Where(x => IsShip(x)).ToList();
+                    for(int i = 0; i < ships.Count; i++)
+                    {
+                        Pawn ship = ships[i];
+                        ship?.GetComp<CompShips>()?.DisembarkAll();
+                    }
+                }
+            }
         }
 
         public static bool IsShip(Pawn p)

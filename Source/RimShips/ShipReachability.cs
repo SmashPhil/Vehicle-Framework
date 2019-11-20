@@ -549,7 +549,7 @@ namespace RimShips.AI
         private bool CanUseCache(TraverseMode mode)
         {
             return false;
-            return mode != TraverseMode.PassAllDestroyableThingsNotWater && mode != TraverseMode.NoPassClosedDoorsOrWater;
+            //return mode != TraverseMode.PassAllDestroyableThingsNotWater && mode != TraverseMode.NoPassClosedDoorsOrWater;
         }
 
         private Map map;

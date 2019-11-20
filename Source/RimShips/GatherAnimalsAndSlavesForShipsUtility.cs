@@ -54,10 +54,6 @@ namespace RimShips
                     if(!p.Spawned || !p.Position.InHorDistOf(((LordJob_FormAndSendCaravanShip)lord.LordJob).LeadShip.Position, 5f) || !((LordJob_FormAndSendCaravanShip)lord.LordJob).LeadShip.Position.InHorDistOf(meetingPoint, 2f) ||
                         !ShipReachabilityUtility.CanReachShip(p, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, TraverseMode.ByPawn) || (extraValidator != null && !extraValidator(p)))
                     {
-                        Log.Message("Not passed");
-                        Log.Message("1=> " + p.Position.InHorDistOf(((LordJob_FormAndSendCaravanShip)lord.LordJob).LeadShip.Position, 5f));
-                        Log.Message("2=> " + ((LordJob_FormAndSendCaravanShip)lord.LordJob).LeadShip.Position.InHorDistOf(meetingPoint, 2f));
-                        Log.Message("3=> " + ShipReachabilityUtility.CanReachShip(p, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, TraverseMode.ByPawn));
                         flag = false;
                         break;
                     }

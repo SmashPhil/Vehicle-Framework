@@ -218,9 +218,26 @@ namespace RimShips
             bills.Add(new Jobs.Bill_BoardShip(pawn, handler));
         }
 
+        public void Notify_BoardedCaravan(Pawn pawnToBoard, ThingOwner handler)
+        {
+            if (!pawnToBoard.IsWorldPawn())
+            {
+                Log.Warning("Tried boarding Caravan with non-worldpawn");
+            }
+
+            if (!(pawnToBoard.holdingOwner is null))
+            {
+                pawnToBoard.holdingOwner.TryTransferToContainer(pawnToBoard, handler);
+            }
+            else
+            {
+                handler.TryAdd(pawnToBoard);
+            }
+        }
+
         public void Notify_Boarded(Pawn pawnToBoard)
         {
-            if( !(bills is null) & (bills.Count > 0))
+            if( !(bills is null) && (bills.Count > 0))
             {
                 Jobs.Bill_BoardShip bill = bills.FirstOrDefault(x => x.pawnToBoard == pawnToBoard);
                 if(!(bill is null))
@@ -269,6 +286,16 @@ namespace RimShips
             var pawnsToDisembark = new List<Pawn>(AllPawnsAboard);
             if( !(pawnsToDisembark is null) && pawnsToDisembark.Count > 0)
             {
+                if(Pawn.GetCaravan() != null && !Pawn.Spawned)
+                {
+                    List<ShipHandler> handlerList = this.handlers;
+                    for(int i = 0; i < handlerList.Count; i++)
+                    {
+                        ShipHandler handler = handlerList[i];
+                        handler.handlers.TryTransferAllToContainer(Pawn.GetCaravan().pawns, false);
+                    }
+                    return;
+                }
                 foreach(Pawn p in pawnsToDisembark)
                 {
                     DisembarkPawn(p);

@@ -20,6 +20,11 @@
 	<TabPassengers>Pawns</TabPassengers>
 	<Cargo>Cargo</Cargo>
 	<ShipOutOfFood>No food in {0} with Pawns onboard</ShipOutOfFood>
+	<CommandDockShip>Dock</CommandDockShip>
+	<CommandDockShipDesc>Unload all passengers and enable trade with the Settlement of {0}.</CommandDockShipDesc>
+	<CommandUndockShip>Board ships</CommandUndockShip>
+	<CommandUndockShipDesc>Load all pawns and items into Ships</CommandUndockShipDesc>
+	<CommandAttackDockDisable>Cannot attack {0} while docked at their Settlement</CommandAttackDockDisable>
 	
 	<BeachGenMultiplier>Beach Size Multiplier: {0}%</BeachGenMultiplier>
 	<ForceSettlementCoastOption>Push Settlements to Coast</ForceSettlementCoastOption>
