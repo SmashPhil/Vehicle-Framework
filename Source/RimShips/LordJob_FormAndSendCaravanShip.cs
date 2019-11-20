@@ -26,7 +26,7 @@ namespace RimShips.Lords
         {
         }
 
-        public LordJob_FormAndSendCaravanShip(List<TransferableOneWay> transferables, List<Pawn> ships, List<Pawn> sailors, List<Pawn> downedPawns, IntVec3 meetingPoint, IntVec3 exitPoint,
+        public LordJob_FormAndSendCaravanShip(List<TransferableOneWay> transferables, List<Pawn> ships, List<Pawn> sailors, List<Pawn> downedPawns, List<Pawn> prisoners, IntVec3 meetingPoint, IntVec3 exitPoint,
             int startingTile, int destinationTile)
         {
             this.transferables = transferables;
@@ -38,6 +38,7 @@ namespace RimShips.Lords
             this.startingTile = startingTile;
             this.destinationTile = destinationTile;
             this.sailors = sailors;
+            this.prisoners = prisoners;
         }
 
         public Pawn LeadShip => this.leadShip;
@@ -50,7 +51,9 @@ namespace RimShips.Lords
         public void AssignSeats()
         {
             shipAssigned = new Dictionary<Pawn, Pawn>();
-            List<Pawn> sailorsTmp = sailors;
+            List<Pawn> sailorsTmp = this.sailors;
+            List<Pawn> prisonersTmp = this.prisoners;
+            
             foreach(Pawn p in ships)
             {
                 for(int i = 0; i < p.GetComp<CompShips>().PawnCountToOperate; i++)
@@ -62,11 +65,18 @@ namespace RimShips.Lords
             if(sailorsTmp.Count > 0)
             {
                 int i = 0;
+                int j = 0;
                 while(sailorsTmp.Count > 0)
                 {
                     Pawn p = ships[i];
                     shipAssigned.Add(sailorsTmp.Pop(), p);
                     i = (i+2) > ships.Count ? 0 : ++i;
+                }
+                while(prisonersTmp.Count > 0)
+                {
+                    Pawn p = ships[j];
+                    shipAssigned.Add(prisonersTmp.Pop(), p);
+                    j = (j + 2) > ships.Count ? 0 : ++j;
                 }
             }
         }
@@ -224,7 +234,7 @@ namespace RimShips.Lords
                     where JobGiver_PrepareCaravan_GatherDownedPawns.IsDownedPawnNearExitPoint(x, this.exitPoint)
                     select x), this.lord.faction, base.Map.Tile, this.startingTile, this.destinationTile);
         }
-
+        
         public override StateGraph CreateGraph()
         {
             StateGraph stateGraph = new StateGraph();
@@ -240,10 +250,10 @@ namespace RimShips.Lords
             stateGraph.AddToil(this.gatherSlaves);
             this.gatherSlaves_pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(this.gatherSlaves_pause);
-            //this.gatherDownedPawns = new LordToil_PrepareCaravan_GatherDownedPawns(this.meetingPoint, this.exitPoint);
-            //stateGraph.AddToil(this.gatherDownedPawns);
-            //this.gatherDownedPawns_pause = new LordToil_PrepareCaravan_Pause();
-            //stateGraph.AddToil(this.gatherDownedPawns_pause);
+            this.gatherDownedPawns = new LordToil_PrepareCaravan_GatherDownedPawnsShip(this.meetingPoint, this.exitPoint);
+            stateGraph.AddToil(this.gatherDownedPawns);
+            this.gatherDownedPawns_pause = new LordToil_PrepareCaravan_Pause();
+            stateGraph.AddToil(this.gatherDownedPawns_pause);
             this.AssignSeats();
             this.boardShip = new LordToil_PrepareCaravan_BoardShip(this.exitPoint);
             stateGraph.AddToil(this.boardShip);
@@ -262,13 +272,13 @@ namespace RimShips.Lords
             Transition transition = new Transition(this.gatherAnimals, this.gatherItems, false, true);
             transition.AddTrigger(new Trigger_Memo("AllAnimalsGathered"));
             stateGraph.AddTransition(transition, false);
-            Transition transition2 = new Transition(this.gatherItems, this.gatherSlaves, false, true);
+            Transition transition2 = new Transition(this.gatherItems, this.gatherDownedPawns, false, true);
             transition2.AddTrigger(new Trigger_Memo("AllItemsGathered"));
             transition2.AddPostAction(new TransitionAction_EndAllJobs());
             stateGraph.AddTransition(transition2, false);
-            /*Transition transition3 = new Transition(this.gatherAnimals, this.gatherAnimals, false, true);
-            transition3.AddTrigger(new Trigger_Memo("AllSlavesGathered"));
-            stateGraph.AddTransition(transition3, false);*/
+            Transition transition3 = new Transition(this.gatherDownedPawns, this.gatherSlaves, false, true);
+            transition3.AddTrigger(new Trigger_Memo("AllDownedPawnsGathered"));
+            stateGraph.AddTransition(transition3, false);
             Transition transition4 = new Transition(this.gatherSlaves, lordToil_PrepareCaravan_Wait, false, true);
             transition4.AddTrigger(new Trigger_Memo("AllSlavesGathered"));
             transition4.AddPostAction(new TransitionAction_EndAllJobs());
@@ -293,22 +303,26 @@ namespace RimShips.Lords
             stateGraph.AddTransition(transition9, false);
             Transition transition10 = this.UnpauseTransition(this.gatherItems_pause, this.gatherItems);
             stateGraph.AddTransition(transition10, false);
-            Transition transition11 = this.PauseTransition(this.gatherSlaves, this.gatherSlaves_pause);
+            Transition transition11 = this.PauseTransition(this.gatherDownedPawns, this.gatherDownedPawns_pause);
             stateGraph.AddTransition(transition11, false);
-            Transition transition12 = this.UnpauseTransition(this.gatherSlaves_pause, this.gatherSlaves);
+            Transition transition12 = this.UnpauseTransition(this.gatherDownedPawns_pause, this.gatherDownedPawns);
             stateGraph.AddTransition(transition12, false);
-            Transition transition13 = this.PauseTransition(this.boardShip, this.boardShip_pause);
+            Transition transition13 = this.PauseTransition(this.gatherSlaves, this.gatherSlaves_pause);
             stateGraph.AddTransition(transition13, false);
-            Transition transition14 = this.UnpauseTransition(this.boardShip_pause, this.boardShip);
+            Transition transition14 = this.UnpauseTransition(this.gatherSlaves_pause, this.gatherSlaves);
             stateGraph.AddTransition(transition14, false);
-            Transition transition15 = this.PauseTransition(this.leave, this.leave_pause);
+            Transition transition15 = this.PauseTransition(this.boardShip, this.boardShip_pause);
             stateGraph.AddTransition(transition15, false);
-            Transition transition16 = this.UnpauseTransition(this.leave_pause, this.leave);
+            Transition transition16 = this.UnpauseTransition(this.boardShip_pause, this.boardShip);
             stateGraph.AddTransition(transition16, false);
-            Transition transition17 = this.PauseTransition(lordToil_PrepareCaravan_Wait, lordToil_PrepareCaravan_Pause);
+            Transition transition17 = this.PauseTransition(this.leave, this.leave_pause);
             stateGraph.AddTransition(transition17, false);
-            Transition transition18 = this.UnpauseTransition(lordToil_PrepareCaravan_Pause, lordToil_PrepareCaravan_Wait);
+            Transition transition18 = this.UnpauseTransition(this.leave_pause, this.leave);
             stateGraph.AddTransition(transition18, false);
+            Transition transition19 = this.PauseTransition(lordToil_PrepareCaravan_Wait, lordToil_PrepareCaravan_Pause);
+            stateGraph.AddTransition(transition19, false);
+            Transition transition20 = this.UnpauseTransition(lordToil_PrepareCaravan_Pause, lordToil_PrepareCaravan_Wait);
+            stateGraph.AddTransition(transition20, false);
             return stateGraph;
         }
 
@@ -335,9 +349,11 @@ namespace RimShips.Lords
 
         public List<Pawn> downedPawns;
 
+        public List<Pawn> prisoners;
+
         public List<Pawn> ships;
 
-        private List<Pawn> sailors;
+        public List<Pawn> sailors;
 
         private Dictionary<Pawn, Pawn> shipAssigned;
 

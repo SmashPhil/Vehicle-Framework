@@ -166,9 +166,9 @@ namespace RimShips
             if (this.regions.Count == 0)
             {
                 //this.Group = null;
-                this.cachedOpenRoofCount = -1;
+                /*this.cachedOpenRoofCount = -1;
                 this.cachedOpenRoofState = null;
-                this.statsAndRoleDirty = true;
+                this.statsAndRoleDirty = true;*/
                 MapExtensionUtility.GetExtensionToMap(this.Map).getWaterRegionGrid.allRooms.Remove(this);
             }
         }
@@ -180,7 +180,7 @@ namespace RimShips
 
         public sbyte mapIndex = -1;
 
-        private WaterRoomGroup groupInt;
+        //private WaterRoomGroup groupInt;
 
         private List<WaterRegion> regions = new List<WaterRegion>();
 
@@ -190,19 +190,19 @@ namespace RimShips
 
         private int numRegionsTouchingMapEdge;
 
-        private int cachedOpenRoofCount = -1;
+        //private int cachedOpenRoofCount = -1;
 
-        private IEnumerator<IntVec3> cachedOpenRoofState;
+        //private IEnumerator<IntVec3> cachedOpenRoofState;
 
         public bool isPrisonCell;
 
         private int cachedCellCount = -1;
 
-        private bool statsAndRoleDirty = true;
+        //private bool statsAndRoleDirty = true;
 
         private DefMap<RoomStatDef, float> stats = new DefMap<RoomStatDef, float>();
 
-        private RoomRoleDef role;
+        //private RoomRoleDef role;
 
         public int newOrReusedRoomGroupIndex = -1;
 

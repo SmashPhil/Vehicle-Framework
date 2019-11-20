@@ -51,7 +51,7 @@ namespace RimShips.Jobs
             };
             wait.tickAction = delegate ()
             {
-                if ((Find.TickManager.TicksGame + this.pawn.thingIDNumber) % JobSearchInterval == 0)
+                if((Find.TickManager.TicksGame + this.pawn.thingIDNumber) % JobSearchInterval == 0)
                 { 
                     this.CheckForCaravan();
                 }
@@ -67,11 +67,12 @@ namespace RimShips.Jobs
             {
                 if(this.pawn.GetLord().CurLordToil is LordToil_PrepareCaravan_LeaveShip)
                 {
-                    this.pawn.drafter.Drafted = true;
+                    if(this.pawn?.GetComp<CompShips>()?.AllPawnsAboard.Count >= this.pawn?.GetComp<CompShips>()?.PawnCountToOperate)
+                        this.pawn.drafter.Drafted = true;
                 }
             }
         }
 
-        private const int JobSearchInterval = 200;
+        private const int JobSearchInterval = 100;
     }
 }

@@ -42,7 +42,7 @@ namespace RimShips
             {
                 if(shouldCheckIfArrived(p) && !waterPathing)
                 {
-                    if (!p.Spawned || !p.Position.InHorDistOf(meetingPoint, 10f) || !ReachabilityUtility.CanReach(p, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, TraverseMode.ByPawn) 
+                    if (!p.Spawned || !p.Position.InHorDistOf(meetingPoint, 15f) || !ReachabilityUtility.CanReach(p, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, TraverseMode.ByPawn) 
                         || (extraValidator != null && !extraValidator(p)))
                     {
                         flag = false;

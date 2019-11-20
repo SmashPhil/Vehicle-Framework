@@ -12,32 +12,36 @@
 				
 				<li Class="RimShips.Jobs.JobGiver_BoardShip"/>
 				
-				<!--
-				<li Class="ThinkNode_ConditionalColonist">
-					<subNodes>
-						<li Class="RimShips.Jobs.JobGiver_BoardShip"/>
-					</subNodes>
+				<li Class="JobGiver_WanderAnywhere"/>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+	
+	<DutyDef>
+		<defName>PrepareCaravan_GatherDownedPawns</defName>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="ThinkNode_Subtree">
+					<treeDef>SatisfyVeryUrgentNeeds</treeDef>
 				</li>
 				
-				<li Class="ThinkNode_ConditionalColonist">
-					<invert>true</invert>
-					<subNodes>
-						<li Class="ThinkNode_ConditionalHasDutyPawnTarget">
-							<subNodes>
-								<li Class="RimShips.Jobs.JobGiver_BoardShip"/>
-							</subNodes>
-						</li>
-					</subNodes>
+				<li Class="RimShips.Jobs.JobGiver_CarryPawnToShip"/>
+				
+				<li Class="JobGiver_WanderAnywhere"/>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+	
+	<DutyDef>
+		<defName>PrepareCaravan_SendSlavesToShip</defName>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="ThinkNode_Subtree">
+					<treeDef>SatisfyVeryUrgentNeeds</treeDef>
 				</li>
 				
-				<li Class="ThinkNode_ConditionalPrisonerInPrisonCell">
-					<subNodes>
-						<li Class="JobGiver_WanderCurrentRoom">
-							<wanderRadius>5</wanderRadius>
-						</li>
-					</subNodes>
-				</li>
-				-->
+				<li Class="RimShips.Jobs.JobGiver_CarryPawnToShip"/>
+				
 				<li Class="JobGiver_WanderAnywhere"/>
 			</subNodes>
 		</thinkNode>

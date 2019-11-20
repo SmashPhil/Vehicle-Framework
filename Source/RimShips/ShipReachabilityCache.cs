@@ -41,10 +41,9 @@ namespace RimShips.AI
 
         public void AddCachedResult(WaterRoom A, WaterRoom B, TraverseParms traverseParams, bool reachable)
         {
-            return;
-            ShipReachabilityCache.CachedEntry key = new ShipReachabilityCache.CachedEntry(A.ID, B.ID, traverseParams);
+            /*ShipReachabilityCache.CachedEntry key = new ShipReachabilityCache.CachedEntry(A.ID, B.ID, traverseParams);
             if (!this.cacheDict.ContainsKey(key))
-                this.cacheDict.Add(key, reachable);
+                this.cacheDict.Add(key, reachable)*/;
         }
 
         public void Clear()

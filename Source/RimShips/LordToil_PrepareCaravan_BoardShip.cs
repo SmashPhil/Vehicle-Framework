@@ -48,7 +48,7 @@ namespace RimShips.Lords
         {
             foreach(Pawn p in this.lord.ownedPawns)
             {
-                if(p.GetComp<CompShips>() is null)
+                if(!ShipHarmony.IsShip(p))
                 {
                     p.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_BoardShip)
                     {
@@ -67,12 +67,12 @@ namespace RimShips.Lords
             if(Find.TickManager.TicksGame % 200 == 0)
             {
                 Lord lord = this.lord;
-                List<Pawn> pawnsLeft = this.lord.ownedPawns.Where(x => (x.GetComp<CompShips>() is null)).ToList();
-                List<Pawn> ships = this.lord.ownedPawns.Where(x => !(x.GetComp<CompShips>() is null)).ToList();
+                List<Pawn> pawnsLeft = this.lord.ownedPawns.Where(x => !ShipHarmony.IsShip(x)).ToList();
                 IntVec3 intVec = this.meetingPoint;
                 
-                if(!pawnsLeft.Any())
+                if(!pawnsLeft.Any(x => x.Spawned))
                 {
+                    this.lord.ownedPawns.RemoveAll(x => !ShipHarmony.IsShip(x));
                     this.lord.ReceiveMemo("AllPawnsOnboard");
                 }
             }

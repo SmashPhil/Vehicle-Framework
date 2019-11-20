@@ -29,14 +29,25 @@ namespace RimShips.Jobs
             {
                 CompShips ship = toil.actor.jobs.curJob.GetTarget(index).Thing.TryGetComp<CompShips>();
                 ship.Notify_Boarded(pawnBoarding);
-                foreach(ShipHandler handler in ship.handlers)
+                bool flag = !pawnBoarding.IsColonist;
+                if(!flag)
                 {
-                    if(handler.AreSlotsAvailable)
+                    foreach (ShipHandler handler in ship.handlers)
                     {
-                        ship.GiveLoadJob(pawnBoarding, handler);
-                        ship.ReserveSeat(pawnBoarding, handler);
-                        break;
+                        if (handler.AreSlotsAvailable)
+                        {
+                            ship.GiveLoadJob(pawnBoarding, handler);
+                            ship.ReserveSeat(pawnBoarding, handler);
+                            break;
+                        }
                     }
+                }
+                else
+                {
+                    ShipHandler handler = ship.handlers.Find(x => x.role.handlingTypes == HandlingTypeFlags.None && x.AreSlotsAvailable);
+                    if (handler is null) Log.Error("Could not find ship for " + pawnBoarding.LabelShort + " to board.");
+                    ship.GiveLoadJob(pawnBoarding, handler);
+                    ship.ReserveSeat(pawnBoarding, handler);
                 }
             };
             toil.defaultCompleteMode = ToilCompleteMode.Instant;

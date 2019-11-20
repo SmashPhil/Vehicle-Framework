@@ -237,19 +237,21 @@ namespace RimShips
 
         public void Notify_Boarded(Pawn pawnToBoard)
         {
-            if( !(bills is null) && (bills.Count > 0))
+            if(!(bills is null) && (bills.Count > 0))
             {
                 Jobs.Bill_BoardShip bill = bills.FirstOrDefault(x => x.pawnToBoard == pawnToBoard);
                 if(!(bill is null))
                 {
-                    if (pawnToBoard.IsWorldPawn())
+                    if(pawnToBoard.IsWorldPawn())
                     {
                         Log.Warning("Tried boarding ship with world pawn");
                     }
 
                     Faction faction = pawnToBoard.Faction;
-                    pawnToBoard.DeSpawn();
                     
+                    if(pawnToBoard.Spawned)
+                        pawnToBoard.DeSpawn();
+
                     if ( !(pawnToBoard.holdingOwner is null))
                     {
                         pawnToBoard.holdingOwner.TryTransferToContainer(pawnToBoard, bill.handler.handlers);
@@ -262,7 +264,7 @@ namespace RimShips
                     {
                         Find.WorldPawns.PassToWorld(pawnToBoard, PawnDiscardDecideMode.Decide);
                     }
-                    pawnToBoard.SetFaction(faction);
+                    if(pawnToBoard.Faction != faction) pawnToBoard.SetFaction(faction);
                     bills.Remove(bill);
                 }
             }

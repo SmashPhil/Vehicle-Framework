@@ -28,9 +28,13 @@ namespace RimShips.Jobs
         {
             if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Moving)) return null;
             Pawn ship = null;
-            if (pawn.GetLord().LordJob is LordJob_FormAndSendCaravanShip)
+            if(pawn.GetLord().LordJob is LordJob_FormAndSendCaravanShip)
             {
                 ship = ((LordJob_FormAndSendCaravanShip)pawn.GetLord().LordJob).GetShipAssigned(pawn);
+                if(ship is null)
+                {
+                    ship = ((LordJob_FormAndSendCaravanShip)pawn.GetLord().LordJob).ships.First();
+                }
             }
             
             return new Job(JobDefOf_Ships.Board, ship)

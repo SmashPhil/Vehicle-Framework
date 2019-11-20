@@ -36,7 +36,7 @@ namespace RimShips.Jobs
         protected override Job TryGiveJob(Pawn pawn)
         {
             pawn.mindState.nextMoveOrderIsWait = !pawn.mindState.nextMoveOrderIsWait;
-            if(pawn.mindState.nextMoveOrderIsWait && !this.exactCell)
+            if (pawn.mindState.nextMoveOrderIsWait && !this.exactCell)
             {
                 return new Job(JobDefOf_Ships.IdleShip)
                 {

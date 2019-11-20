@@ -35,6 +35,10 @@ namespace RimShips.Defs
 
         public static DutyDef PrepareCaravan_WaitShip;
 
+        public static DutyDef PrepareCaravan_GatherDownedPawns;
+
+        public static DutyDef PrepareCaravan_SendSlavesToShip;
+
         public static DutyDef TravelOrWaitOcean;
 
         public static DutyDef TravelOrLeaveOcean;

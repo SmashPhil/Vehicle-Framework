@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -9,25 +10,23 @@ using Harmony;
 using RimWorld;
 using RimWorld.BaseGen;
 using RimWorld.Planet;
+using RimShips.AI;
+using RimShips.Defs;
 using UnityEngine;
 using UnityEngine.AI;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 using Verse.Sound;
-using RimShips.AI;
-using RimShips.Defs;
-using RimShips.Build;
-using RimShips.Jobs;
-using RimShips.UI;
 
 namespace RimShips.Lords
 {
-    public class LordToil_PrepareCaravan_GatherSlavesShip : LordToil
+    public class LordToil_PrepareCaravan_GatherDownedPawnsShip : LordToil
     {
-        public LordToil_PrepareCaravan_GatherSlavesShip(IntVec3 meetingPoint)
+        public LordToil_PrepareCaravan_GatherDownedPawnsShip(IntVec3 meetingPoint, IntVec3 exitSpot)
         {
             this.meetingPoint = meetingPoint;
+            this.exitSpot = exitSpot;
         }
 
         public override float? CustomWakeThreshold
@@ -50,14 +49,9 @@ namespace RimShips.Lords
         {
             foreach(Pawn p in this.lord.ownedPawns)
             {
-                if (ShipHarmony.IsShip(p))
+                if(p.IsColonist)
                 {
-                    p.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_WaitShip);
-                }
-                else if(!p.RaceProps.Animal && (!ShipHarmony.IsShip(p)))
-                {
-                    p.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_SendSlavesToShip, this.meetingPoint, -1f);
-                    p.mindState.duty.pawnsToGather = PawnsToGather.Slaves;
+                    p.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_GatherDownedPawns, this.meetingPoint, this.exitSpot, -1f);
                 }
                 else
                 {
@@ -70,17 +64,27 @@ namespace RimShips.Lords
         {
             if(Find.TickManager.TicksGame % 100 == 0)
             {
-                Lord lord = this.lord;
-                List<Pawn> pawns = this.lord.ownedPawns.Where(x => !ShipHarmony.IsShip(x)).ToList();
+                List<Pawn> downedPawns = ((LordJob_FormAndSendCaravanShip)this.lord.LordJob).downedPawns;
+                List<Pawn> ships = ((LordJob_FormAndSendCaravanShip)this.lord.LordJob).ships;
+                List<Pawn> pawnsOnShips = new List<Pawn>();
 
-                IntVec3 intVec = this.meetingPoint;
-                string memo = "AllSlavesGathered";
-                Predicate<Pawn> shouldCheckIfArrived = (Pawn x) => !x.IsColonist && !x.RaceProps.Animal;
+                foreach(Pawn p in ships)
+                {
+                    pawnsOnShips.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
+                }
 
-                GatherAnimalsAndSlavesForShipsUtility.CheckArrived(lord, pawns, intVec, memo, shouldCheckIfArrived, false, null);
+                Log.Message("-> " + pawnsOnShips.Count);
+                Log.Message("2: " + downedPawns.Count);
+                if(pawnsOnShips.Intersect(downedPawns).Count() == downedPawns.Count())
+                { 
+                    this.lord.ReceiveMemo("AllDownedPawnsGathered");
+                }
+
             }
         }
 
         private IntVec3 meetingPoint;
+
+        private IntVec3 exitSpot;
     }
 }

@@ -74,7 +74,8 @@ namespace RimShips.Lords
             if(Find.TickManager.TicksGame % 120 == 0)
             {
                 bool flag = true;
-                foreach(Pawn pawn in this.lord.ownedPawns)
+                List<Pawn> capablePawns = this.lord.ownedPawns.Where(x => !x.Downed && !x.Dead).ToList();
+                foreach(Pawn pawn in capablePawns)
                 {
                     if(pawn.IsColonist && pawn.mindState.lastJobTag != JobTag.WaitingForOthersToFinishGatheringItems)
                     {

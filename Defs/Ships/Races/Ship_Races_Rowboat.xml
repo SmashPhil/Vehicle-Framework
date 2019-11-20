@@ -8,7 +8,9 @@
 		<aiAvoidCover>false</aiAvoidCover>
 		<destroyGearOnDrop>true</destroyGearOnDrop>
 		<race>Ships_Canoe</race>
-		<backstoryCategories><li>Civil</li></backstoryCategories>
+		<backstoryCategories>
+			<li>Neolithic</li>
+		</backstoryCategories>
 		<combatPower>10</combatPower>
 		<lifeStages>
 			<li>

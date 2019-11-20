@@ -200,7 +200,7 @@ namespace RimShips.AI
                             if(this.calcGrid[num15].status != this.statusClosedValue || flag9)
                             {
                                 int num16 = 0;
-                                bool flag12 = false;
+                                //bool flag12 = false; Extra cost for traversing water
 
                                 if(flag2 || !new IntVec3(num13, 0 ,num14).GetTerrain(this.map).HasTag("Water"))
                                 {
@@ -214,7 +214,7 @@ namespace RimShips.AI
                                             }
                                             goto IL_E3A;
                                         }
-                                        flag12 = true;
+                                        //flag12 = true;
                                         num16 += 70;
                                         Building building = edificeGrid[num15];
                                         if (building is null)

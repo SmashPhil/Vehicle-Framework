@@ -8,7 +8,9 @@
 		<aiAvoidCover>false</aiAvoidCover>
 		<destroyGearOnDrop>true</destroyGearOnDrop>
 		<race>Ships_Caravel</race>
-		<backstoryCategories><li>Civil</li></backstoryCategories>
+		<backstoryCategories>
+			<li>Medieval</li>
+		</backstoryCategories>
 		<combatPower>20</combatPower>
 		<lifeStages>
 			<li>
