@@ -69,6 +69,7 @@
     <Compile Include="JobDriver_CarryPawnToShip.cs" />
     <Compile Include="JobDriver_IdleShip.cs" />
     <Compile Include="JobDriver_PrepareCaravan_GatheringShip.cs" />
+    <Compile Include="JobDriver_RepairShip.cs" />
     <Compile Include="JobGiver_AwaitOrders.cs" />
     <Compile Include="JobGiver_BoardShip.cs" />
     <Compile Include="JobGiver_CarryPawnToShip.cs" />

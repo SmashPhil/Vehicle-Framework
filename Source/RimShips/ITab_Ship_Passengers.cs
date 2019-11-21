@@ -173,7 +173,43 @@ namespace RimShips.UI
         {
             this.EnsureSpecificNeedsTabForPawnValid();
             base.UpdateSize();
+
+            this.size = ITab_Ship_Passengers.GetSize(Passengers, this.PaneTopY, true);
+            this.size.y = Mathf.Max(this.size.y, NeedsCardUtility.FullSize.y);
         }
+
+        private static Vector2 GetSize(List<Pawn> pawns, float paneTopY, bool doNeeds = true)
+        {
+            float num = 100f;
+            if (doNeeds)
+            {
+                num += (float)ITab_Ship_Passengers.MaxNeedsCount(pawns) * 100f;
+            }
+            num += 24f;
+            Vector2 result;
+            result.x = 103f + num + 16f;
+            result.y = Mathf.Min(550f, paneTopY - 30f);
+            return result;
+        }
+
+        private static int MaxNeedsCount(List<Pawn> pawns)
+        {
+            int num = 0;
+            foreach(Pawn p in pawns)
+            {
+                List<Need> pawnNeeds = new List<Need>();
+                foreach (Need need in p.needs.AllNeeds)
+                {
+                    if(need.def.showForCaravanMembers)
+                    {
+                        pawnNeeds.Add(need);
+                    }
+                }
+                num = Mathf.Max(num, pawnNeeds.Count);
+            }
+            return num;
+        }
+
         protected override void ExtraOnGUI()
         {
             this.EnsureSpecificNeedsTabForPawnValid();

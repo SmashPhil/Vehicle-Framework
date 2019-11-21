@@ -73,8 +73,6 @@ namespace RimShips.Lords
                     pawnsOnShips.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
                 }
 
-                Log.Message("-> " + pawnsOnShips.Count);
-                Log.Message("2: " + downedPawns.Count);
                 if(pawnsOnShips.Intersect(downedPawns).Count() == downedPawns.Count())
                 { 
                     this.lord.ReceiveMemo("AllDownedPawnsGathered");

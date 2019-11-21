@@ -132,6 +132,12 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(Dialog_FormCaravan), name: nameof(Dialog_FormCaravan.DoWindowContents)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(Dialog_SetInstance)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(WorldReachability), parameters: new Type[] { typeof(Caravan), typeof(int) }, name: nameof(WorldReachability.CanReach)),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(CanReachWithShip)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanTicksPerMoveUtility), parameters: new Type[] { typeof(List<Pawn>), typeof(float), typeof(float), typeof(StringBuilder)}, name: nameof(CaravanTicksPerMoveUtility.GetTicksPerMove)),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(GetTicksPerMoveShips)));
 
             //Jobs
             harmony.Patch(original: AccessTools.Method(typeof(JobUtility), name: nameof(JobUtility.TryStartErrorRecoverJob)),
@@ -141,7 +147,6 @@ namespace RimShips
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(ShipsDontWander)));
 
-            
             //Caravan
             harmony.Patch(original: AccessTools.Method(typeof(CaravanUIUtility), name: nameof(CaravanUIUtility.AddPawnsSections)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
@@ -241,6 +246,7 @@ namespace RimShips
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(CompleteConstructionShip)));
 
+
             //Debug
             if(debug)
             {
@@ -254,20 +260,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(RegionGrid), name: nameof(RegionGrid.DebugDraw)), prefix: null,
                     postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                     name: nameof(DebugDrawWaterRegion)));
-
-            harmony.Patch(original: AccessTools.Method(type: typeof(Pawn), name: nameof(Pawn.Tick)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(TEST)));
             #endregion Functions
         }
 
-        public static void TEST(Pawn __instance)
-        {
-            if(__instance.CurJob != null && __instance.IsColonistPlayerControlled)
-            {
-                //Log.Message("-> " + __instance.CurJob);
-            }
-        }
         #region Debug
         public static void DebugWorldObjects(WorldObject o)
         {
@@ -659,7 +654,7 @@ namespace RimShips
                 float armorPenetration = __instance.ArmorPenetration;
                 SoundDef soundExplode;
                 if (__instance.def.HasModExtension<Projectile_Water>()) { soundExplode = __instance.def.GetModExtension<Projectile_Water>().soundExplodeWater; }
-                else { soundExplode = __instance.def.projectile.soundHitThickRoof; Log.Message("Missing Water Explosion sound from " + __instance); }
+                else { soundExplode = __instance.def.projectile.soundHitThickRoof; Log.Warning("Missing Water Explosion sound from " + __instance); }
                 Verse.Sound.SoundStarter.PlayOneShot(__instance.def.projectile.soundExplode, new TargetInfo(__instance.Position, map, false));
                 ThingDef equipmentDef = null;
                 ThingDef def = __instance.def;
@@ -688,7 +683,6 @@ namespace RimShips
 
                 if (instruction.opcode == OpCodes.Call && instruction.operand == AccessTools.Property(type: typeof(Pawn), name: nameof(Pawn.IsColonistPlayerControlled)).GetGetMethod())
                 {
-                    //Log.Message("-> " + instruction.opcode);
                     yield return instruction; //CALL : IsColonistPlayerControlled
                     instruction = instructionList[++i];
 
@@ -1855,13 +1849,13 @@ namespace RimShips
             {
                 if(!___pawn.Drafted)
                 {
+                    ___pawn?.jobs?.curDriver.Notify_PatherFailed();
                     __instance.StopDead();
-                    ___pawn.jobs.curDriver.Notify_PatherFailed();
                 }
                 else if(ShipHarmony.ShipEdgeOfMap(___pawn, __instance.nextCell, ___pawn.Map))
                 {
-                    __instance.StopDead();
                     ___pawn.jobs.curDriver.Notify_PatherFailed();
+                    __instance.StopDead();
                 }
                 if (___pawn.GetComp<CompShips>().beached || !__instance.nextCell.GetTerrain(___pawn.Map).IsWater)
                 {
@@ -2071,6 +2065,131 @@ namespace RimShips
             currentFormingCaravan = __instance;
         }
 
+        public static bool CanReachWithShip(Caravan c, int tile, int[] ___fields, int ___impassableFieldID, WorldReachability __instance, ref bool __result)
+        {
+            if(HasShip(c))
+            {
+                int start = c.Tile;
+                if (start < 0 || start >= ___fields.Length || tile < 0 || tile >= ___fields.Length)
+                {
+                    __result = false;
+                    return false;
+                }
+                if(!IsWaterTile(start) || !IsWaterTile(tile))
+                {
+                    __result = false;
+                    return false;
+                }
+                if(___fields[start] == ___impassableFieldID || ___fields[tile] == ___impassableFieldID)
+                {
+                    __result = false;
+                    return false;
+                }
+                MethodInfo validField = AccessTools.Method(type: typeof(WorldReachability), name: "IsValidField");
+                if((bool)validField.Invoke(__instance, new object[] { start }) || (bool)validField.Invoke(__instance, new object[] { tile }))
+                {
+                    __result = ___fields[start] == ___fields[tile];
+                    return false;
+                }
+                AccessTools.Method(type: typeof(WorldReachability), name: "FloodFillAt").Invoke(__instance, new object[] { start });
+                __result = ___fields[start] != ___impassableFieldID && ___fields[start] != ___fields[tile];
+                return false;
+            }
+            return true;
+        }
+
+        public static bool GetTicksPerMoveShips(List<Pawn> pawns, float massUsage, float massCapacity, ref int __result, StringBuilder explanation = null)
+        {
+            if(pawns.Any<Pawn>() && HasShip(pawns))
+            {
+                //Caravan Const Values
+                const int MaxShipPawnTicksPerMove = 150;
+                const float CellToTilesConversionRatio = 340f;
+                const int DefaultTicksPerMove = 3300;
+                const float MoveSpeedFactorAtLowMass = 2f;
+
+                if(!(explanation is null))
+                {
+                    explanation.Append("CaravanMovementSpeedFull".Translate() + ":");
+                    float num = 0f;
+                    for(int i = 0; i  < pawns.Count; i++)
+                    {
+                        num = Mathf.Min((float)pawns[i].TicksPerMoveCardinal, MaxShipPawnTicksPerMove) * CellToTilesConversionRatio;
+                        float num2 = 60000f / num;
+                        if(!(explanation is null))
+                        {
+                            explanation.AppendLine();
+                            explanation.Append(string.Concat(new string[]
+                            {
+                            "  - ",
+                            pawns[i].LabelShortCap,
+                            ": ",
+                            num2.ToString("0.#"),
+                            " ",
+                            "TilesPerDay".Translate()
+                            }));
+                        }
+                        int count = 0;
+                        foreach(Pawn p in pawns)
+                            count += p?.GetComp<CompShips>()?.AllPawnsAboard?.Count ?? 1;
+                        num += num2 / (float)count;
+                    }
+                    float moveSpeedFactorFromMass = massCapacity <= 0f ? 1f : Mathf.Lerp(MoveSpeedFactorAtLowMass, 1f, massUsage / massCapacity);
+                    if(!(explanation is null))
+                    {
+                        float num3 = 60000f / num;
+                        explanation.AppendLine();
+                        explanation.Append(string.Concat(new string[]
+                        {
+                            "  ",
+                            "Average".Translate(),
+                            ": ",
+                            num3.ToString("0.#"),
+                            " ",
+                            "TilesPerDay".Translate()
+                        }));
+                        explanation.AppendLine();
+                        explanation.Append("  " + "MultiplierForCarriedMass".Translate(moveSpeedFactorFromMass.ToStringPercent()));
+                    }
+                    int num4 = Mathf.Max(Mathf.RoundToInt(num / moveSpeedFactorFromMass), 1);
+                    if(!(explanation is null))
+                    {
+                        float num5 = 60000f / (float)num4;
+                        explanation.AppendLine();
+                        explanation.Append(string.Concat(new string[]
+                        {
+                            "  ",
+                            "FinalCaravanPawnsMovementSpeed".Translate(),
+                            ": ",
+                            num5.ToString("0.#"),
+                            " ",
+                            "TilesPerDay".Translate()
+                        }));
+                    }
+                    __result = num4;
+                    return false;
+                }
+                if(!(explanation is null))
+                {
+                    explanation.Append("CaravanMovementSpeedFull".Translate() + ":");
+                    float num = 18.181818f;
+                    explanation.AppendLine();
+                    explanation.Append(string.Concat(new string[]
+                    {
+                        "  ",
+                        "Default".Translate(),
+                        ": ",
+                        num.ToString("0.#"),
+                        " ",
+                        "TilesPerDay".Translate()
+                    }));
+                }
+                __result = DefaultTicksPerMove;
+                return false;
+            }
+            return true;
+        }
+
         #region HelperFunctions
 
         private static bool ShipEdgeOfMap(Pawn p, IntVec3 nextCell, Map map)
@@ -2092,7 +2211,7 @@ namespace RimShips
 
         private static bool IsWaterTile(int tile)
         {
-            return Find.WorldGrid[tile].WaterCovered;
+            return Find.WorldGrid[tile].WaterCovered || Find.World.CoastDirectionAt(tile).IsValid;
         }
 
         private static IntVec3 FindNearEdgeWaterCell(Map map, Predicate<IntVec3> extraCellValidator)

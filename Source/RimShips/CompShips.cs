@@ -600,13 +600,13 @@ namespace RimShips
 
         public void ReserveSeat(Pawn p, ShipHandler handler)
         {
-            handler.currentlyReserving.Add(p);
+            if(!handler.currentlyReserving.Contains(p))
+                handler.currentlyReserving.Add(p);
         }
 
         public override void CompTick()
         {
             base.CompTick();
-            this.InitializeShip();
             this.TrySatisfyPawnNeeds();
             foreach(ShipHandler handler in handlers)
             {
@@ -632,7 +632,7 @@ namespace RimShips
         public override void PostSpawnSetup(bool respawningAfterLoad)
         {
             base.PostSpawnSetup(respawningAfterLoad);
-            //init your variables here
+            this.InitializeShip();
         }
         public override void PostExposeData()
         {

@@ -80,6 +80,7 @@ namespace RimShips
         {
             if (currentlyReserving is null) currentlyReserving = new List<Pawn>();
 
+            currentlyReserving.RemoveDuplicates<Pawn>();
             for(int i = 0; i < currentlyReserving.Count; i++)
             {
                 Pawn p = currentlyReserving[i];
