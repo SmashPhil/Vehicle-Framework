@@ -100,12 +100,6 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(Pawn_PathFollower), name: "TryEnterNextPathCell"), 
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(TryEnterNextCellShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(RegionAndRoomUpdater), name: nameof(RegionAndRoomUpdater.TryRebuildDirtyRegionsAndRooms)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(TryRebuildWaterRegions)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(RegionAndRoomUpdater), name: nameof(RegionAndRoomUpdater.RebuildAllRegionsAndRooms)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(RebuildAllWaterRegions)));
             harmony.Patch(original: AccessTools.Method(type: typeof(MapGenerator), name: nameof(MapGenerator.GenerateMap)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(GenerateMapExtension)));
@@ -331,7 +325,9 @@ namespace RimShips
             {
                 mapE.getWaterRegionAndRoomUpdater.Enabled = true;
             }
-            mapE?.getWaterRegionAndRoomUpdater.RebuildAllWaterRegions();
+            mapE?.getWaterRegionAndRoomUpdater?.RebuildAllWaterRegions();
+            if(mapE?.getWaterRegionAndRoomUpdater != null)
+                Log.Message("[Boats]: Water Regions built");
         }
 
         public static void RecalculateShipPathCostUnderThing(Thing t, Map ___map)
@@ -711,6 +707,10 @@ namespace RimShips
             if(IsShip(pawn) && (pawn.Spawned || actAsIfSpawned) && pawn.drafter is null)
             {
                 pawn.drafter = new Pawn_DraftController(pawn);
+                pawn.trader = new Pawn_TraderTracker(pawn);
+                pawn.training = new Pawn_TrainingTracker(pawn);
+                pawn.story = new Pawn_StoryTracker(pawn);
+                pawn.playerSettings = new Pawn_PlayerSettings(pawn);
             }
         }
         #endregion Drafting
@@ -1884,8 +1884,11 @@ namespace RimShips
             {
                 if(!___pawn.Drafted)
                 {
-                    ___pawn?.jobs?.curDriver.Notify_PatherFailed();
-                    __instance.StopDead();
+                    if(___pawn.CurJob is null)
+                    {
+                        ShipHarmony.ShipErrorRecoverJob(___pawn, "");
+                    }
+                    __instance?.StopDead();
                 }
                 else if(ShipHarmony.ShipEdgeOfMap(___pawn, __instance.nextCell, ___pawn.Map))
                 {
@@ -1922,16 +1925,6 @@ namespace RimShips
                 return false;
             }
             return true;
-        }
-
-        public static void TryRebuildWaterRegions(Map ___map)
-        {
-            //MapExtensionUtility.GetExtensionToMap(___map).getWaterRegionAndRoomUpdater.TryRebuildWaterRegions();
-        }
-
-        public static void RebuildAllWaterRegions(Map ___map)
-        {
-            MapExtensionUtility.GetExtensionToMap(___map)?.getWaterRegionAndRoomUpdater?.RebuildAllWaterRegions();
         }
 
         public static void GenerateMapExtension(IntVec3 mapSize, MapParent parent, MapGeneratorDef mapGenerator, ref Map __result,

@@ -97,6 +97,11 @@ namespace RimShips
             {
                 Log.Error("Tried to get valid water region out of bounds at " + c, false);
             }
+            if(!MapExtensionUtility.GetExtensionToMap(this.map).getWaterRegionAndRoomUpdater.Enabled && MapExtensionUtility.GetExtensionToMap(this.map).getWaterRegionAndRoomUpdater.AnythingToRebuild)
+            {
+                Log.Warning("Trying to get valid water region at " + c + " but RegionAndRoomUpdater is disabled. The result may be incorrect.", false);
+            }
+            MapExtensionUtility.GetExtensionToMap(this.map).getWaterRegionAndRoomUpdater.TryRebuildWaterRegions();
             WaterRegion region = this.regionGrid[this.map.cellIndices.CellToIndex(c)];
             
             return !(region is null) && region.valid ? region : null;

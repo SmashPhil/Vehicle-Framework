@@ -180,6 +180,8 @@ namespace RimShips
             {
                 yield break;
             }
+            if(pawn is null)
+                yield break;
             if (this.movementStatus is ShipMovementStatus.Offline)
             {
                 yield break;
@@ -604,10 +606,28 @@ namespace RimShips
                 handler.currentlyReserving.Add(p);
         }
 
+        public void ResolveSeating()
+        {
+            if (!this.CanMove && this.AllPawnsAboard.Count >= this.PawnCountToOperate)
+            {
+                for(int i = 0; i < this.handlers.Count; i++)
+                {
+                    ShipHandler handler = this.handlers[i];
+                    if (handler.role.handlingTypes == HandlingTypeFlags.Movement && handler.handlers.Count < handler.role.slotsToOperate)
+                    {
+                        ShipHandler passengerHandler = this.handlers.Find(x => x.role.handlingTypes == HandlingTypeFlags.None);
+                        Pawn transferingPawn = passengerHandler.handlers.InnerListForReading.First();
+                        passengerHandler.handlers.TryTransferToContainer(transferingPawn, handler.handlers, false);
+                    }
+                }
+            }
+        }
+
         public override void CompTick()
         {
             base.CompTick();
             this.TrySatisfyPawnNeeds();
+            this.ResolveSeating();
             foreach(ShipHandler handler in handlers)
             {
                 handler.ReservationHandler();

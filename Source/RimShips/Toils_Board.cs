@@ -30,11 +30,12 @@ namespace RimShips.Jobs
                 CompShips ship = toil.actor.jobs.curJob.GetTarget(index).Thing.TryGetComp<CompShips>();
                 ship.Notify_Boarded(pawnBoarding);
                 bool flag = !pawnBoarding.IsColonist;
+
                 if(!flag)
                 {
                     foreach (ShipHandler handler in ship.handlers)
                     {
-                        if (handler.AreSlotsAvailable)
+                        if(handler.AreSlotsAvailable)
                         {
                             ship.GiveLoadJob(pawnBoarding, handler);
                             ship.ReserveSeat(pawnBoarding, handler);

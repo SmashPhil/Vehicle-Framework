@@ -69,6 +69,7 @@ namespace RimShips.AI
 
         public static bool InBounds(this IntVec3 c, Map map)
         {
+            if (map is null) return false;
             IntVec3 size = map.Size;
             return (ulong)c.x < (ulong)((long)size.x) && (ulong)c.z < (ulong)((long)size.z);
         }

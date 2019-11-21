@@ -29,7 +29,7 @@ namespace RimShips.Jobs
         }
         protected override Job TryGiveJob(Pawn pawn)
         {
-            if(pawn.pather.Moving)
+            if(pawn?.pather?.Moving ?? false)
                 return null;
             return new Job(JobDefOf_Ships.IdleShip);
         }
