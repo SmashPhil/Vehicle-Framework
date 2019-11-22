@@ -30,7 +30,7 @@ namespace RimShips
     {
         static ShipHarmony()
         {
-            var harmony = HarmonyInstance.Create("rimworld.rimships.smashphil");
+            var harmony = HarmonyInstance.Create("rimworld.boats.smashphil");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             //HarmonyInstance.DEBUG = true;
 
@@ -66,6 +66,12 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(Pawn), name: nameof(Pawn.Kill)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(KillAndDespawnShip)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(HediffUtility), name: nameof(HediffUtility.CanHealNaturally)),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(ShipsDontHeal)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(HediffUtility), name: nameof(HediffUtility.CanHealFromTending)),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(ShipsDontHealTended)));
 
             //Rendering
             harmony.Patch(original: AccessTools.Method(typeof(Pawn_RotationTracker), name: nameof(Pawn_RotationTracker.UpdateRotation)),
@@ -336,8 +342,7 @@ namespace RimShips
                 mapE.getWaterRegionAndRoomUpdater.Enabled = true;
             }
             mapE?.getWaterRegionAndRoomUpdater?.RebuildAllWaterRegions();
-            if(mapE?.getWaterRegionAndRoomUpdater != null)
-                Log.Message("[Boats]: Water Regions built");
+            Log.Message("[Boats]: Water Regions built");
         }
 
         public static void RecalculateShipPathCostUnderThing(Thing t, Map ___map)
@@ -481,6 +486,29 @@ namespace RimShips
                 }
                 GenSpawn.Spawn(thing, position, map, rotation, WipeMode.Vanish, false);
 
+                return false;
+            }
+            return true;
+        }
+
+        public static bool ShipsDontHeal(Hediff_Injury hd, ref bool __result)
+        {
+            Pawn pawn = Traverse.Create(hd).Field("pawn").GetValue<Pawn>();
+            if(IsShip(pawn))
+            {
+                __result = false;
+                return false;
+            }
+            return true;
+        }
+
+        public static bool ShipsDontHealTended(Hediff_Injury hd, ref bool __result)
+        {
+            Pawn pawn = Traverse.Create(hd).Field("pawn").GetValue<Pawn>();
+            
+            if (IsShip(pawn))
+            {
+                __result = false;
                 return false;
             }
             return true;
@@ -1933,7 +1961,7 @@ namespace RimShips
         #region Construction
         public static bool CompleteConstructionShip(Pawn worker, Frame __instance)
         {
-            if (__instance.def.entityDefToBuild.designationCategory == DesignationCategoryDefOf_Ships.RimShips)
+            if (__instance.def.entityDefToBuild?.GetModExtension<SpawnThingBuilt>()?.thingToSpawn != null)
             {
                 Pawn ship = PawnGenerator.GeneratePawn(__instance.def.entityDefToBuild.GetModExtension<SpawnThingBuilt>().thingToSpawn);
                 __instance.resourceContainer.ClearAndDestroyContents(DestroyMode.Vanish);
@@ -2054,6 +2082,11 @@ namespace RimShips
             if (disabled) return true;
             if(IsShip(pawn))
             {
+                if (debug)
+                {
+                    Log.Message("-> " + clickCell + " | " + pawn.Map.terrainGrid.TerrainAt(clickCell).LabelCap + " | " + pawn.Map.terrainGrid.TerrainAt(clickCell).pathCost);
+                }
+                
                 int num = GenRadial.NumCellsInRadius(2.9f);
                 int i = 0;
                 IntVec3 curLoc;

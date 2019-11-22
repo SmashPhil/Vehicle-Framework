@@ -2,19 +2,51 @@
 
 <Patch>
 	<Operation Class="PatchOperationSequence">
-		<operations>
-			<!--
-			<li Class="PatchOperationRemove">
-				<xpath>Defs/TerrainDef[@Name="WaterDeepBase"]/passability</xpath>
-			</li>
-			
+		<operations>	
 			<li Class="PatchOperationReplace">
-				<xpath>Defs/TerrainDef[@Name="WaterDeepBase"]</xpath>
+				<xpath>Defs/TerrainDef[defName="WaterShallow"]/label</xpath>
 				<value>
-					<pathCost>1</pathCost>
+					<label>Shallow Water</label>
+				</value>
+			</li>	
+			<li Class="PatchOperationAdd">
+				<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
+				<value>
+					<description>Dig shallow water that ships may pass through.</description>
+				</value>
+			</li>		
+			<li Class="PatchOperationAdd">
+				<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
+				<value>
+					<designationCategory>RimShips</designationCategory>
 				</value>
 			</li>
-			-->
+			<li Class="PatchOperationAdd">
+				<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
+				<value>
+					<constructEffect>ConstructDirt</constructEffect>
+				</value>
+			</li>
+			<li Class="PatchOperationAdd">
+				<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
+				<value>
+					<terrainAffordanceNeeded>Diggable</terrainAffordanceNeeded>
+				</value>
+			</li>
+			<li Class="PatchOperationAdd">
+				<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
+				<value>
+					<statBases>
+						<WorkToBuild>10000</WorkToBuild>
+					</statBases>
+				</value>
+			</li>
+			<li Class="PatchOperationAdd">
+				<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
+				<value>
+					<designationHotKey>Misc6</designationHotKey>
+				</value>
+			</li>
 		</operations>
 		
 	</Operation>

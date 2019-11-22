@@ -45,7 +45,7 @@ namespace RimShips.Jobs
                 }
                 else
                 {
-                    ShipHandler handler = ship.handlers.Find(x => x.role.handlingTypes == HandlingTypeFlags.None && x.AreSlotsAvailable);
+                    ShipHandler handler = ship.handlers.Find(x => x.role.handlingType == HandlingTypeFlags.None && x.AreSlotsAvailable);
                     if (handler is null) Log.Error("Could not find ship for " + pawnBoarding.LabelShort + " to board.");
                     ship.GiveLoadJob(pawnBoarding, handler);
                     ship.ReserveSeat(pawnBoarding, handler);

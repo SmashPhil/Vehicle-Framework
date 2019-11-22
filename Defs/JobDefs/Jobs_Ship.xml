@@ -36,4 +36,11 @@
 		<reportString>Loading downed pawns.</reportString>
 		<casualInterruptible>false</casualInterruptible>
 	</JobDef>
+	
+	<JobDef>
+		<defName>RepairShip</defName>
+		<driverClass>RimShips.Jobs.JobDriver_RepairShip</driverClass>
+		<reportString>Repairing ship.</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
 </Defs>

@@ -30,7 +30,7 @@ namespace RimShips.Jobs
             if (pawn2 is null)
                 return null;
             Pawn ship = this.FindShipToDeposit(pawn, pawn2);
-            ShipHandler handler = ship.GetComp<CompShips>().handlers.Find(x => x.role.handlingTypes == HandlingTypeFlags.None);
+            ShipHandler handler = ship.GetComp<CompShips>().handlers.Find(x => x.role.handlingType == HandlingTypeFlags.None);
             return new Job(JobDefOf.PrepareCaravan_GatherPawns, pawn2)
             {
                 count = 1
@@ -57,7 +57,7 @@ namespace RimShips.Jobs
         private Pawn FindShipToDeposit(Pawn pawn, Pawn downedPawn)
         {
             List<Pawn> ships = pawn.GetLord().ownedPawns.Where(x => ShipHarmony.IsShip(x)).ToList();
-            return ships.MaxBy(x => x.GetComp<CompShips>().Props.roles.Find(y => y.handlingTypes == HandlingTypeFlags.None).slots);
+            return ships.MaxBy(x => x.GetComp<CompShips>().Props.roles.Find(y => y.handlingType == HandlingTypeFlags.None).slots);
         }
     }
 }

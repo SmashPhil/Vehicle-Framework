@@ -10,6 +10,7 @@
 		<altitudeLayer>Pawn</altitudeLayer>
 		<useHitPoints>false</useHitPoints>
 		<hasTooltip>true</hasTooltip>
+		<repairEffect>Repair</repairEffect>
 		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
 		
 		<statBases>

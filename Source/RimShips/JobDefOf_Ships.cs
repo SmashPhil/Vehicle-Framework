@@ -34,6 +34,8 @@ namespace RimShips.Defs
 
         public static JobDef CarryPawnToShip;
 
+        public static JobDef RepairShip;
+
         //Disembark
     }
 }

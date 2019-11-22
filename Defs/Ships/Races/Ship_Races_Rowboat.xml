@@ -106,7 +106,7 @@
 			<needsRest>false</needsRest>
 			<hasGenders>false</hasGenders>
 			<foodType>None</foodType>
-
+			
 			<body>canoe_Body</body>
 			<baseBodySize>4.0</baseBodySize>
 			<baseHealthScale>1.0</baseHealthScale>
@@ -136,6 +136,7 @@
 				<shipPowerType>Paddles</shipPowerType>
 				<nameable>false</nameable>
 				<buildDef>RowboatBlueprint</buildDef>
+				<ticksBetweenRepair>50</ticksBetweenRepair>
 				
 				<healthLabel_Healthy>Operational</healthLabel_Healthy>
 				<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
@@ -146,7 +147,7 @@
 				<roles>
 					<li>
 						<label>Rower</label>
-						<handlingTypes>Movement</handlingTypes>
+						<handlingType>Movement</handlingType>
 						<slots>2</slots>
 						<slotsToOperate>1</slotsToOperate>
 					</li>

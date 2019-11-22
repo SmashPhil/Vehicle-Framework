@@ -52,7 +52,7 @@ namespace RimShips
             {
                 foreach(ShipHandler handler in this.handlers)
                 {
-                    if(handler.role.handlingTypes == HandlingTypeFlags.Movement && handler.handlers.Count < handler.role.slotsToOperate)
+                    if(handler.role.handlingType == HandlingTypeFlags.Movement && handler.handlers.Count < handler.role.slotsToOperate)
                     {
                         return false;
                     }
@@ -214,12 +214,21 @@ namespace RimShips
                     delegate ()
                     {
                         Job job = new Job(JobDefOf_Ships.Board, this.parent);
-                        pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+                        pawn.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
                         GiveLoadJob(pawn, handler);
                         ReserveSeat(pawn, handler);
                     }, MenuOptionPriority.Default, null, null, 0f, null, null);
                     yield return opt;
                 }
+            }
+            if(this.Pawn.health.summaryHealth.SummaryHealthPercent < 0.99f)
+            {
+                yield return new FloatMenuOption("RepairShip".Translate(this.Pawn.LabelShort),
+                delegate ()
+                {
+                    Job job = new Job(JobDefOf_Ships.RepairShip, this.parent);
+                    pawn.jobs.TryTakeOrderedJob(job, JobTag.MiscWork);
+                }, MenuOptionPriority.Default, null, null, 0f, null, null);
             }
             yield break;
         }
@@ -641,9 +650,9 @@ namespace RimShips
                     for (int i = 0; i < this.handlers.Count; i++)
                     {
                         ShipHandler handler = this.handlers[i];
-                        if (handler.role.handlingTypes == HandlingTypeFlags.Movement && handler.handlers.Count < handler.role.slotsToOperate)
+                        if (handler.role.handlingType == HandlingTypeFlags.Movement && handler.handlers.Count < handler.role.slotsToOperate)
                         {
-                            ShipHandler passengerHandler = this.handlers.Find(x => x.role.handlingTypes == HandlingTypeFlags.None);
+                            ShipHandler passengerHandler = this.handlers.Find(x => x.role.handlingType == HandlingTypeFlags.None);
                             Pawn transferingPawn = passengerHandler.handlers.InnerListForReading.First(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
                             if (transferingPawn != null)
                                 passengerHandler.handlers.TryTransferToContainer(transferingPawn, handler.handlers, false);
@@ -689,6 +698,9 @@ namespace RimShips
         {
             base.PostSpawnSetup(respawningAfterLoad);
             this.InitializeShip();
+            this.Pawn.ageTracker.AgeBiologicalTicks = 0;
+            this.Pawn.ageTracker.AgeChronologicalTicks = 0;
+            this.Pawn.ageTracker.BirthAbsTicks = 0;
         }
         public override void PostExposeData()
         {

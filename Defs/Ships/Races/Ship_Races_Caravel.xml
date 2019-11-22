@@ -108,7 +108,6 @@
 			<needsRest>false</needsRest>
 			<hasGenders>false</hasGenders>
 			<foodType>None</foodType>
-			
 
 			<body>caravel_Body</body>
 			<baseBodySize>100.0</baseBodySize>
@@ -139,6 +138,7 @@
 				<shipPowerType>Sails</shipPowerType>
 				<nameable>true</nameable>
 				<buildDef>CaravelBlueprint</buildDef>
+				<ticksBetweenRepair>200</ticksBetweenRepair>
 				
 				<healthLabel_Healthy>Operational</healthLabel_Healthy>
 				<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
@@ -149,19 +149,25 @@
 				<roles>
 					<li>
 						<label>Captain</label>
-						<handlingTypes>Movement</handlingTypes>
+						<handlingType>Movement</handlingType>
 						<slots>1</slots>
 						<slotsToOperate>1</slotsToOperate>
 					</li>
 					<li>
 						<label>Crew</label>
-						<handlingTypes>Movement</handlingTypes>
+						<handlingType>Movement</handlingType>
 						<slots>4</slots>
 						<slotsToOperate>4</slotsToOperate>
 					</li>
 					<li>
+						<label>Cannons</label>
+						<handlingType>Cannons</handlingType>
+						<slots>4</slots>
+						<slotsToOperate>2</slotsToOperate>
+					</li>
+					<li>
 						<label>Passenger</label>
-						<handlingTypes>None</handlingTypes>
+						<handlingType>None</handlingType>
 						<slots>10</slots>
 					</li>
 				</roles>

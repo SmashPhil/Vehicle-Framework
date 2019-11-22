@@ -6,6 +6,7 @@
 	<CompShips_CannotMove>Cannot draft. Ship needs more crew in order to navigate.</CompShips_CannotMove>
 	<ShipSection>Ships</ShipSection>
 	<AwaitOrders>Awaiting Orders</AwaitOrders>
+	<RepairShip>Repair {0}</RepairShip>
 	<NameIsInvalid>Name invalid for ship.</NameIsInvalid>
 	<ShipGainsName>Your new ship has been named {0}</ShipGainsName>
 	<ActivityIconOnBoardShip>Onboard {0}</ActivityIconOnBoardShip>

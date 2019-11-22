@@ -132,6 +132,7 @@
 				<armament>DriverNeeded</armament>
 				<shipPowerType>Steam</shipPowerType>
 				<nameable>true</nameable>
+				<ticksBetweenRepair>500</ticksBetweenRepair>
 				
 				<healthLabel_Healthy>Operational</healthLabel_Healthy>
 				<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
@@ -142,19 +143,19 @@
 				<roles>
 					<li>
 						<label>Captain</label>
-						<handlingTypes>Movement</handlingTypes>
+						<handlingType>Movement</handlingType>
 						<slots>1</slots>
 						<slotsToOperate>1</slotsToOperate>
 					</li>
 					<li>
 						<label>Crew</label>
-						<handlingTypes>Movement</handlingTypes>
+						<handlingType>Movement</handlingType>
 						<slots>8</slots>
 						<slotsToOperate>4</slotsToOperate>
 					</li>
 					<li>
 						<label>Passenger</label>
-						<handlingTypes>None</handlingTypes>
+						<handlingType>None</handlingType>
 						<slots>20</slots>
 					</li>
 				</roles>

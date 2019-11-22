@@ -38,7 +38,7 @@ namespace RimShips.Jobs
             this.FailOnAggroMentalState(TargetIndex.A);
             this.FailOnBurningImmobile(TargetIndex.B);
 
-            this.FailOn(() => !ShipToBoard.GetComp<CompShips>().handlers.Find(x => x.role.handlingTypes == HandlingTypeFlags.None).AreSlotsAvailable);
+            this.FailOn(() => !ShipToBoard.GetComp<CompShips>().handlers.Find(x => x.role.handlingType == HandlingTypeFlags.None).AreSlotsAvailable);
 
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell).FailOnDestroyedNullOrForbidden(TargetIndex.A).FailOnDespawnedNullOrForbidden(TargetIndex.B).FailOn(() =>
                 !PawnToBoard.Downed).FailOn(() => !this.pawn.CanReach(this.PawnToBoard, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn)).FailOnSomeonePhysicallyInteracting(TargetIndex.A);
@@ -57,7 +57,7 @@ namespace RimShips.Jobs
             {
                 CompShips shipComp = ship.GetComp<CompShips>();
                 shipComp.Notify_Boarded(pawnToBoard);
-                ShipHandler handler = shipComp.handlers.Find(x => x.role.handlingTypes == HandlingTypeFlags.None);
+                ShipHandler handler = shipComp.handlers.Find(x => x.role.handlingType == HandlingTypeFlags.None);
                 shipComp.GiveLoadJob(pawnToBoard, handler);
             };
             toil.defaultCompleteMode = ToilCompleteMode.Instant;

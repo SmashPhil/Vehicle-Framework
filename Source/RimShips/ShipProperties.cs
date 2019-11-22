@@ -14,8 +14,9 @@ namespace RimShips
         public bool driverRequired = true;
         public bool downable = false;
         public bool movesWhenDowned = false;
+        public float ticksBetweenRepair = 250f;
 
-        public bool nameable;
+        public bool nameable = false;
         public ThingDef buildDef;
 
         public string healthLabel_Healthy = "Operational";
