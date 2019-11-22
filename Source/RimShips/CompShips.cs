@@ -11,6 +11,7 @@ using RimWorld.BaseGen;
 using RimWorld.Planet;
 using RimShips.Build;
 using RimShips.Defs;
+using RimShips.Lords;
 using UnityEngine;
 using UnityEngine.AI;
 using Verse;
@@ -49,21 +50,16 @@ namespace RimShips
         {
             get
             {
-                bool result = true;
-                if (!(handlers is null) && handlers.Any())
+                foreach(ShipHandler handler in this.handlers)
                 {
-                    foreach(ShipHandler handler in handlers)
+                    if(handler.role.handlingTypes == HandlingTypeFlags.Movement && handler.handlers.Count < handler.role.slotsToOperate)
                     {
-                        if(handler.handlers.Count < handler.role.slotsToOperate && handler.role.handlingTypes is HandlingTypeFlags.Movement)
-                        {
-                            result = false;
-                            break;
-                        }
+                        return false;
                     }
                 }
                 if (!(this.Pawn.TryGetComp<CompRefuelable>() is null) && this.Pawn.GetComp<CompRefuelable>().Fuel <= 0f)
-                    result = false;
-                return result;
+                    return false;
+                return true;
             }
         }
 
@@ -109,8 +105,8 @@ namespace RimShips
                         if (!(handler.handlers is null) && handler.handlers.Count > 0) pawnsOnShip.AddRange(handler.handlers);
                     }
                 }
-                pawnsOnShip = pawnsOnShip.Where(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation)).ToList();
-                return pawnsOnShip;
+                pawnsOnShip = pawnsOnShip.Where(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))?.ToList();
+                return pawnsOnShip ?? new List<Pawn>() { };
             }
         }
 
@@ -639,7 +635,6 @@ namespace RimShips
                     if(handler.currentlyReserving.Count > 0)
                         return;
                 }
-
                 reseatTimer++;
                 if(reseatTimer >= 200)
                 {
@@ -668,6 +663,7 @@ namespace RimShips
             base.CompTick();
             this.TrySatisfyPawnNeeds();
             this.ResolveSeating();
+
             foreach(ShipHandler handler in handlers)
             {
                 handler.ReservationHandler();
@@ -683,7 +679,7 @@ namespace RimShips
             }
             if (!(Props.roles is null) && Props.roles.Count > 0)
             {
-                foreach (ShipRole role in Props.roles)
+                foreach(ShipRole role in Props.roles)
                 {
                     handlers.Add(new ShipHandler(Pawn, role, new List<Pawn>()));
                 }

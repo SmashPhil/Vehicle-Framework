@@ -88,10 +88,16 @@ namespace RimShips
                 name: nameof(CheckForShipAttack)));
             harmony.Patch(original: AccessTools.Method(type: typeof(SettlementBase), name: nameof(SettlementBase.GetCaravanGizmos)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(AddDockingGizmo)));
+                name: nameof(NoAttackSettlementWhenDocked)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(Caravan), name: nameof(Caravan.GetGizmos)), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(AddAnchorGizmo)));
             harmony.Patch(original: AccessTools.Method(type: typeof(Pawn), name: nameof(Pawn.GetGizmos)), prefix: null, 
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(GetGizmosForShip)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanFormingUtility), name: nameof(CaravanFormingUtility.GetGizmos)), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(GizmosForShipCaravans)));
 
             //Pathing
             harmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), name: nameof(Pawn_PathFollower.StartPath)),
@@ -462,12 +468,13 @@ namespace RimShips
                         {
                             textPawnList += p.LabelShort + ". ";
                         }
-                        Find.LetterStack.ReceiveLetter("ShipSunkLabel".Translate(), "ShipSunk".Translate(__instance.LabelShort, textPawnList), LetterDefOf.NegativeEvent, new TargetInfo(lookCell, map, false), null, null);
+                        Find.LetterStack.ReceiveLetter("ShipSunkLabel".Translate(), "ShipSunkDeep".Translate(__instance.LabelShort, textPawnList), LetterDefOf.NegativeEvent, new TargetInfo(lookCell, map, false), null, null);
                         __instance.Destroy();
                         return false;
                     }
                     else
                     {
+                        Find.LetterStack.ReceiveLetter("ShipSunkLabel".Translate(), "ShipSunkShallow".Translate(__instance.LabelShort), LetterDefOf.NegativeEvent, new TargetInfo(position, map, false), null, null);
                         __instance.GetComp<CompShips>().DisembarkAll();
                         __instance.Destroy();
                     }
@@ -737,11 +744,25 @@ namespace RimShips
             return true;
         }
 
-        public static void AddDockingGizmo(Caravan caravan, ref IEnumerable<Gizmo> __result, SettlementBase __instance)
+        public static void NoAttackSettlementWhenDocked(Caravan caravan, ref IEnumerable<Gizmo> __result, SettlementBase __instance)
         {
-            if(HasShip(caravan))
+            if (HasShip(caravan))
             {
-                if(!caravan.pather.Moving && __instance.CanTradeNow && !caravan.PawnsListForReading.Any(x => !IsShip(x)) && !__instance.Faction.HostileTo(caravan.Faction))
+                if (!caravan.pather.Moving && CaravanVisitUtility.SettlementVisitedNow(caravan) != null && caravan.PawnsListForReading.Any(x => !IsShip(x)))
+                {
+                    List<Gizmo> gizmos = __result.ToList();
+                    int index = gizmos.FindIndex(x => (x as Command_Action).icon == SettlementBase.AttackCommand);
+                    gizmos[index].Disable("CommandAttackDockDisable".Translate(__instance.LabelShort));
+                    __result = gizmos;
+                }
+            }
+        }
+
+        public static void AddAnchorGizmo(ref IEnumerable<Gizmo> __result, Caravan __instance)
+        {
+            if(HasShip(__instance) && Find.World.CoastDirectionAt(__instance.Tile).IsValid)
+            {
+                if(!__instance.pather.Moving && !__instance.PawnsListForReading.Any(x => !IsShip(x)))
                 {
                     Command_Action gizmo = new Command_Action();
                     gizmo.icon = TexCommandShips.Anchor;
@@ -749,14 +770,14 @@ namespace RimShips
                     gizmo.defaultDesc = "CommandDockShipDesc".Translate(__instance.Label);
                     gizmo.action = delegate ()
                     {
-                        ShipHarmony.ToggleDocking(caravan, __instance, true);
+                        ShipHarmony.ToggleDocking(__instance, true);
                     };
 
                     List<Gizmo> gizmos = __result.ToList();
                     gizmos.Add(gizmo);
                     __result = gizmos;
                 }
-                else if(!caravan.pather.Moving && CaravanVisitUtility.SettlementVisitedNow(caravan) != null && caravan.PawnsListForReading.Any(x => !IsShip(x)))
+                else if (!__instance.pather.Moving && __instance.PawnsListForReading.Any(x => !IsShip(x)))
                 {
                     Command_Action gizmo = new Command_Action();
                     gizmo.icon = TexCommandShips.UnloadAll;
@@ -764,12 +785,10 @@ namespace RimShips
                     gizmo.defaultDesc = "CommandUndockShipDesc".Translate(__instance.Label);
                     gizmo.action = delegate ()
                     {
-                        ShipHarmony.ToggleDocking(caravan, __instance, false);
+                        ShipHarmony.ToggleDocking(__instance, false);
                     };
 
                     List<Gizmo> gizmos = __result.ToList();
-                    int index = gizmos.FindIndex(x => (x as Command_Action).icon == SettlementBase.AttackCommand);
-                    gizmos[index].Disable("CommandAttackDockDisable".Translate(__instance.LabelShort));
                     gizmos.Add(gizmo);
                     __result = gizmos;
                 }
@@ -797,6 +816,71 @@ namespace RimShips
                 }
                 __result = gizmos;
             }
+        }
+
+        public static void GizmosForShipCaravans(ref IEnumerable<Gizmo> __result, Pawn pawn, Texture2D ___AddToCaravanCommand)
+        {
+            Command_Action joinCaravan = new Command_Action();
+            if(pawn.Spawned)
+            {
+                bool anyCaravanToJoin = false;
+                foreach (Lord lord in pawn.Map.lordManager.lords)
+                {
+                    if(lord.faction == Faction.OfPlayer && lord.LordJob is LordJob_FormAndSendCaravanShip && !(lord.CurLordToil is LordToil_PrepareCaravan_LeaveShip) && !(lord.CurLordToil is LordToil_PrepareCaravan_BoardShip))
+                    {
+                        anyCaravanToJoin = true;
+                        break;
+                    }
+                }
+                if(anyCaravanToJoin && Dialog_FormCaravan.AllSendablePawns(pawn.Map, false).Contains(pawn))
+                {
+                    joinCaravan = new Command_Action
+                    {
+                        defaultLabel = "CommandAddToCaravan".Translate(),
+                        defaultDesc = "CommandAddToCaravanDesc".Translate(),
+                        icon = ___AddToCaravanCommand,
+                        action = delegate()
+                        {
+                            List<Lord> list = new List<Lord>();
+                            foreach(Lord lord in pawn.Map.lordManager.lords)
+                            {
+                                if(lord.faction == Faction.OfPlayer && lord.LordJob is LordJob_FormAndSendCaravanShip)
+                                {
+                                    list.Add(lord);
+                                }
+                            }
+                            if (list.Count <= 0)
+                                return;
+                            if(list.Count == 1)
+                            {
+                                AccessTools.Method(type: typeof(CaravanFormingUtility), name: "LateJoinFormingCaravan").Invoke(null, new object[] { pawn, list[0] });
+                                SoundDefOf.Click.PlayOneShotOnCamera(null);
+                            }
+                            else
+                            {
+                                List<FloatMenuOption> list2 = new List<FloatMenuOption>();
+                                for(int i = 0; i < list.Count; i++)
+                                {
+                                    Lord caravanLocal = list[i];
+                                    string label = "Caravan".Translate() + " " + (i + 1);
+                                    list2.Add(new FloatMenuOption(label, delegate ()
+                                    {
+                                        if (pawn.Spawned && pawn.Map.lordManager.lords.Contains(caravanLocal) && Dialog_FormCaravan.AllSendablePawns(pawn.Map, false).Contains(pawn))
+                                        {
+                                            AccessTools.Method(type: typeof(CaravanFormingUtility), name: "LateJoinFormingCaravan").Invoke(null, new object[] { pawn, caravanLocal });
+                                        } 
+                                    }, MenuOptionPriority.Default, null, null, 0f, null, null));
+                                }
+                                Find.WindowStack.Add(new FloatMenu(list2));
+                            }
+                        },
+                        hotKey = KeyBindingDefOf.Misc7
+                    };
+                }
+            }
+            List<Gizmo> gizmos = __result.ToList();
+            gizmos.Add(joinCaravan);
+            __result = gizmos;
         }
 
         #endregion Gizmos
@@ -2315,18 +2399,8 @@ namespace RimShips
             return !flag2 && !flag3;
         }
 
-        public static bool IsDraftable(Pawn p)
+        private static void ToggleDocking(Caravan caravan, bool dock = false)
         {
-            return true;
-        }
-
-        private static void ToggleDocking(Caravan caravan, SettlementBase settlement = null, bool dock = false)
-        {
-            if(settlement is null)
-            {
-                Log.Warning("You should only be able to Dock at settlements");
-            }
-
             if(HasShip(caravan))
             {
                 if(!dock)
@@ -2340,7 +2414,6 @@ namespace RimShips
                         {
                             if(pawns.Count <= 0)
                             {
-                                Messages.Message("NotEnoughPawnsForShips".Translate(), MessageTypeDefOf.NegativeEvent, false);
                                 return;
                             }
                             foreach(ShipHandler handler in ship.GetComp<CompShips>().handlers)

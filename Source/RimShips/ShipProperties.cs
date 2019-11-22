@@ -41,8 +41,5 @@ namespace RimShips
         {
             this.compClass = compClass;
         }
-
-
-        
     }
 }

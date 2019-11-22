@@ -41,6 +41,8 @@ namespace RimShips.Lords
             {
                 p.mindState.duty = new PawnDuty(DutyDefOf_Ships.TravelOrWaitOcean, this.exitSpot, -1f);
                 p.mindState.duty.locomotion = LocomotionUrgency.Jog;
+                if(p.GetComp<CompShips>()?.CanMove ?? false)
+                    p.drafter.Drafted = true;
             }
         }
 

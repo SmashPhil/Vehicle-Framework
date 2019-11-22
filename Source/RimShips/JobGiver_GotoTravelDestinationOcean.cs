@@ -49,7 +49,7 @@ namespace RimShips.Jobs
             if (this.exactCell && pawn.Position == cell)
                 return null;
             IntVec3 c = cell;
-
+            
             return new Job(JobDefOf.Goto, c)
             {
                 locomotionUrgency = PawnUtility.ResolveLocomotion(pawn, this.locomotionUrgency),

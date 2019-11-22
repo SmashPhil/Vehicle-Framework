@@ -12,8 +12,8 @@
 	<IsIncapableOfRamming>Ram {0}</IsIncapableOfRamming>
 	
 	<ShipSunkLabel>Ship Sunk</ShipSunkLabel>
-	<ShipSunk>{0} has sunk to the depths of the ocean and taken with it: {1}</ShipSunk>
-	<LastEventsForShip>{0} has sunk to the depths of the ocean and has taken with it:</LastEventsForShip>
+	<ShipSunkDeep>{0} has sunk to the depths of the ocean and taken with it: {1}</ShipSunkDeep>
+	<ShipSunkShallow>{0} has sunk but is still salvageable.</ShipSunkShallow>
 	
 	<CaravanShips>Ships</CaravanShips>
 	<CaravanShipsSingle>1 Ship</CaravanShipsSingle>
