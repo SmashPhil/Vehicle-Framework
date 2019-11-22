@@ -102,7 +102,7 @@
 			<thinkTreeMain>shipThinkTree_Simple</thinkTreeMain>
 			<thinkTreeConstant>shipThinkTree_SimpleConstant</thinkTreeConstant>
 			<intelligence>ToolUser</intelligence>
-			<fleshType>Mechanoid</fleshType>
+			<fleshType>WoodenShip</fleshType>
 			<needsRest>false</needsRest>
 			<hasGenders>false</hasGenders>
 			<foodType>None</foodType>

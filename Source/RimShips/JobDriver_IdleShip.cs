@@ -67,7 +67,7 @@ namespace RimShips.Jobs
             {
                 if(this.pawn.GetLord().CurLordToil is LordToil_PrepareCaravan_LeaveShip)
                 {
-                    if(this.pawn?.GetComp<CompShips>()?.AllPawnsAboard.Count >= this.pawn?.GetComp<CompShips>()?.PawnCountToOperate)
+                    if(this.pawn?.GetComp<CompShips>()?.AllCapablePawns.Count >= this.pawn?.GetComp<CompShips>()?.PawnCountToOperate)
                         this.pawn.drafter.Drafted = true;
                 }
             }

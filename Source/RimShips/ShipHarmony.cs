@@ -243,6 +243,10 @@ namespace RimShips
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(CompleteConstructionShip)));
 
+            //Extra
+            harmony.Patch(original: AccessTools.Property(type: typeof(MapPawns), name: nameof(MapPawns.FreeColonistsSpawnedOrInPlayerEjectablePodsCount)).GetGetMethod(), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(FreeColonistsInShips)));
 
             //Debug
             if(debug)
@@ -449,8 +453,16 @@ namespace RimShips
                 __instance.meleeVerbs.Notify_PawnKilled();
                 if(flag)
                 {
-                    if (map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterOceanDeep && map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterDeep)
+                    if (map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterOceanDeep || map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterDeep)
                     {
+                        __instance.GetComp<CompShips>().KillAll();
+                        IntVec3 lookCell = __instance.Position;
+                        string textPawnList = "";
+                        foreach (Pawn p in __instance?.GetComp<CompShips>()?.AllPawnsAboard)
+                        {
+                            textPawnList += p.LabelShort + ". ";
+                        }
+                        Find.LetterStack.ReceiveLetter("ShipSunkLabel".Translate(), "ShipSunk".Translate(__instance.LabelShort, textPawnList), LetterDefOf.NegativeEvent, new TargetInfo(lookCell, map, false), null, null);
                         __instance.Destroy();
                         return false;
                     }
@@ -1862,6 +1874,20 @@ namespace RimShips
         }
         #endregion Construction
 
+        #region Extra
+        
+        public static void FreeColonistsInShips(ref int __result, List<Pawn> ___pawnsSpawned)
+        {
+            List<Pawn> ships = ___pawnsSpawned.Where(x => IsShip(x)).ToList();
+            
+            foreach(Pawn ship in ships)
+            {
+                if(ship.GetComp<CompShips>().AllPawnsAboard.Any(x => !x.Dead))
+                    __result += ship.GetComp<CompShips>().AllPawnsAboard.Count;
+            }
+        }
+
+        #endregion Extra
         private static bool GenerateNewShipPath(ref PawnPath __result, ref Pawn_PathFollower __instance, ref Pawn ___pawn, ref PathEndMode ___peMode)
         {
             if (disabled) return true;

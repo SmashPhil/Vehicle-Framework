@@ -43,6 +43,8 @@ namespace RimShips
         public Pawn Pawn => parent as Pawn;
         public ShipProperties Props => (ShipProperties)props;
 
+        private int reseatTimer = 0;
+
         public bool MovementHandlerAvailable
         {
             get
@@ -73,13 +75,6 @@ namespace RimShips
                 foreach(ShipRole r in Props.roles)
                 {
                     pawnCount += r.slotsToOperate;
-                    foreach(ShipHandler handler in handlers)
-                    {
-                        if(handler.role.slotsToOperate > 0)
-                        {
-                            pawnCount -= handler.handlers.Count;
-                        }
-                    }
                 }
                 return pawnCount >= 0 ? pawnCount : 0;
             }
@@ -102,6 +97,23 @@ namespace RimShips
             }
         }
 
+        public List<Pawn> AllCapablePawns
+        {
+            get
+            {
+                List<Pawn> pawnsOnShip = new List<Pawn>();
+                if(!(handlers is null) && handlers.Count > 0)
+                {
+                    foreach (ShipHandler handler in handlers)
+                    {
+                        if (!(handler.handlers is null) && handler.handlers.Count > 0) pawnsOnShip.AddRange(handler.handlers);
+                    }
+                }
+                pawnsOnShip = pawnsOnShip.Where(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation)).ToList();
+                return pawnsOnShip;
+            }
+        }
+
         public int SeatsAvailable
         {
             get
@@ -113,6 +125,18 @@ namespace RimShips
                 }
                 return x;
             }
+        }
+
+        public void KillAll()
+        {
+            /*for(int i = 0; i < handlers.Count; i++)
+            {
+                ShipHandler handler = handlers[i];
+                foreach(Pawn p in handler.handlers)
+                {
+                    p.Destroy();
+                }
+            }*/
         }
 
         public void Rename()
@@ -608,18 +632,34 @@ namespace RimShips
 
         public void ResolveSeating()
         {
-            if (!this.CanMove && this.AllPawnsAboard.Count >= this.PawnCountToOperate)
+            if (!this.CanMove && this.AllCapablePawns.Count >= this.PawnCountToOperate)
             {
-                for(int i = 0; i < this.handlers.Count; i++)
+                foreach(ShipHandler handler in handlers)
                 {
-                    ShipHandler handler = this.handlers[i];
-                    if (handler.role.handlingTypes == HandlingTypeFlags.Movement && handler.handlers.Count < handler.role.slotsToOperate)
+                    if(handler.currentlyReserving.Count > 0)
+                        return;
+                }
+
+                reseatTimer++;
+                if(reseatTimer >= 200)
+                {
+                    for (int i = 0; i < this.handlers.Count; i++)
                     {
-                        ShipHandler passengerHandler = this.handlers.Find(x => x.role.handlingTypes == HandlingTypeFlags.None);
-                        Pawn transferingPawn = passengerHandler.handlers.InnerListForReading.First();
-                        passengerHandler.handlers.TryTransferToContainer(transferingPawn, handler.handlers, false);
+                        ShipHandler handler = this.handlers[i];
+                        if (handler.role.handlingTypes == HandlingTypeFlags.Movement && handler.handlers.Count < handler.role.slotsToOperate)
+                        {
+                            ShipHandler passengerHandler = this.handlers.Find(x => x.role.handlingTypes == HandlingTypeFlags.None);
+                            Pawn transferingPawn = passengerHandler.handlers.InnerListForReading.First(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
+                            if (transferingPawn != null)
+                                passengerHandler.handlers.TryTransferToContainer(transferingPawn, handler.handlers, false);
+                        }
                     }
                 }
+            }
+            else
+            {
+                if(reseatTimer > 0)
+                    reseatTimer = 0;
             }
         }
 
