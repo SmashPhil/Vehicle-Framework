@@ -67,14 +67,15 @@ namespace RimShips.AI
             return false;
         }
 
-        public static bool InBounds(this IntVec3 c, Map map)
+        public static bool InBoundsShip(this IntVec3 c, Map map)
         {
-            if (map is null) return false;
+            if(map is null || map.Size == IntVec3.Invalid)
+                return false;
             IntVec3 size = map.Size;
             return (ulong)c.x < (ulong)((long)size.x) && (ulong)c.z < (ulong)((long)size.z);
         }
 
-        public static bool InBounds(this Vector3 v, Map map)
+        public static bool InBoundsShip(this Vector3 v, Map map)
         {
             IntVec3 size = map.Size;
             return v.x >= 0f && v.z >= 0f && v.x < (float)size.x && v.z < (float)size.z;
@@ -122,7 +123,7 @@ namespace RimShips.AI
 
         public static bool CanBeSeenOver(this IntVec3 c, Map map)
         {
-            if (!c.InBounds(map))
+            if (!c.InBoundsShip(map))
             {
                 return false;
             }
@@ -148,7 +149,7 @@ namespace RimShips.AI
 
         public static SurfaceType GetSurfaceType(this IntVec3 c, Map map)
         {
-            if(!c.InBounds(map))
+            if(!c.InBoundsShip(map))
             {
                 return SurfaceType.None;
             }

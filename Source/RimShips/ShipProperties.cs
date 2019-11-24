@@ -31,6 +31,7 @@ namespace RimShips
         public ShipType shipPowerType = ShipType.Sails;
 
         public List<ShipRole> roles  = new List<ShipRole>();
+        public List<ShipCannons> cannons = new List<ShipCannons>();
         public SoundDef soundWhileMoving = null;
 
         public ShipProperties()

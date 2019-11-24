@@ -116,7 +116,7 @@ namespace RimShips.AI
             {
                 return false;
             }
-            if (!GenGridShips.InBounds(start, this.map) || !GenGridShips.InBounds(dest.Cell, this.map)) 
+            if (!start.InBoundsShip(this.map) || !dest.Cell.InBoundsShip(this.map)) 
             {
                 return false;
             }
@@ -229,7 +229,7 @@ namespace RimShips.AI
                 for(int i = 0; i < 8; i++)
                 {
                     IntVec3 c = start + GenAdj.AdjacentCells[i];
-                    if(GenGridShips.InBounds(c, this.map))
+                    if(c.InBoundsShip(this.map))
                     {
                         if(this.pathGrid.WalkableFast(c))
                         {
@@ -518,7 +518,7 @@ namespace RimShips.AI
                     return false;
                 }
             }
-            if (!GenGridShips.InBounds(c, this.map))
+            if (!c.InBoundsShip(this.map))
             {
                 return false;
             }

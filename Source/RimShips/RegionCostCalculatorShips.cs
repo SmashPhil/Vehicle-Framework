@@ -282,7 +282,7 @@ namespace RimShips.AI
                 while(!iterator.Done())
                 {
                     IntVec3 c = iterator.Current;
-                    if(GenGridShips.InBounds(c, this.map))
+                    if(c.InBoundsShip(this.map))
                     {
                         RegionCostCalculatorShips.tmpCellIndices.Add(this.map.cellIndices.CellToIndex(c));
                     }

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Defs>	
 	<ResearchProjectDef>
-		<defName>Canoe</defName>
-		<label>canoe</label>
+		<defName>Rowboat</defName>
+		<label>rowboat</label>
 		<tab>RimShips</tab>
 		<description>Build canoes.  Designed for small caravans with limited space.</description>
 		<baseCost>500</baseCost>
@@ -22,12 +22,10 @@
 		<baseCost>2000</baseCost>
 		<techLevel>Medieval</techLevel>
 		<prerequisites>
-		<li>Canoe</li>
+		<li>Rowboat</li>
 		<li>Smithing</li>
 		</prerequisites>
-		<tags>
-			<li>ClassicStart</li>
-		</tags>
+		
 		<researchViewX>1</researchViewX>
 		<researchViewY>0</researchViewY>
 	</ResearchProjectDef>

@@ -84,7 +84,7 @@ namespace RimShips
             while(!iterator.Done())
             {
                 IntVec3 intVec = iterator.Current;
-                if(GenGridShips.InBounds(intVec, map))
+                if(intVec.InBoundsShip(map))
                 {
                     WaterRegion validRegionAt_NoRebuild = MapExtensionUtility.GetExtensionToMap(map).getWaterRegionGrid.GetValidRegionAt_NoRebuild(intVec);
                     if(!(validRegionAt_NoRebuild is null) && validRegionAt_NoRebuild.type.Passable() && !outRegions.Contains(validRegionAt_NoRebuild))

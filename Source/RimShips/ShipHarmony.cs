@@ -43,12 +43,18 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(TileFinder), name: nameof(TileFinder.RandomSettlementTileFor)), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(PushSettlementToCoastTranspiler)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(MapGenerator), name: nameof(MapGenerator.GenerateMap)), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(GenerateMapExtension)));
+            harmony.Patch(original: AccessTools.Method(typeof(Map), name: nameof(Map.ExposeData)), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(ExposeDataMapExtensions)));
             harmony.Patch(original: AccessTools.Method(type: typeof(Map), name: nameof(Map.FinalizeInit)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(RecalculateShipPathGrid)));
             harmony.Patch(original: AccessTools.Method(type: typeof(PathGrid), name: nameof(PathGrid.RecalculatePerceivedPathCostUnderThing)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(RecalculateShipPathCostUnderThing)));
+                name: nameof(RecalculateShipPathCostUnderThing))); //DOUBLE CHECK
             harmony.Patch(original: AccessTools.Method(type: typeof(TerrainGrid), name: "DoTerrainChangedEffects"), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(RecalculateShipPathCostTerrainChange)));
@@ -112,15 +118,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(Pawn_PathFollower), name: "TryEnterNextPathCell"), 
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(TryEnterNextCellShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(MapGenerator), name: nameof(MapGenerator.GenerateMap)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(GenerateMapExtension)));
             harmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), name: "GenerateNewPath"),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(GenerateNewShipPath)));
-            harmony.Patch(original: AccessTools.Method(typeof(Map), name: nameof(Map.ExposeData)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(ExposeDataMapExtensions)));
             harmony.Patch(original: AccessTools.Method(type: typeof(FloatMenuMakerMap), name: "GotoLocationOption"),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(GotoLocationShips)));
@@ -337,7 +337,7 @@ namespace RimShips
             MapExtension mapE = MapExtensionUtility.GetExtensionToMap(__instance);
             mapE?.getShipPathGrid?.RecalculateAllPerceivedPathCosts();
 
-            if(mapE != null && mapE.getWaterRegionAndRoomUpdater != null)
+            if (mapE != null && mapE.getWaterRegionAndRoomUpdater != null)
             {
                 mapE.getWaterRegionAndRoomUpdater.Enabled = true;
             }
@@ -678,7 +678,7 @@ namespace RimShips
         {
             Map map = __instance.Map;
             TerrainDef terrainImpact = map.terrainGrid.TerrainAt(__instance.Position);
-            if (__instance.def.projectile.explosionDelay == 0 && terrainImpact.IsWater)
+            if(__instance.def.projectile.explosionDelay == 0 && terrainImpact.IsWater && !__instance.Position.GetThingList(__instance.Map).Any(x => IsShip(x as Pawn)))
             {
                 __instance.Destroy(DestroyMode.Vanish);
                 if (__instance.def.projectile.explosionEffect != null)
@@ -690,10 +690,10 @@ namespace RimShips
                 IntVec3 position = __instance.Position;
                 Map map2 = map;
 
-                int waterDepth = terrainImpact == TerrainDefOf.WaterMovingShallow || terrainImpact == TerrainDefOf.WaterShallow || terrainImpact == TerrainDefOf.WaterOceanShallow ? 1 :
-                    terrainImpact == TerrainDefOf.WaterMovingChestDeep || terrainImpact == TerrainDefOf.WaterDeep || terrainImpact == TerrainDefOf.WaterOceanDeep ? 2 : 0;
+                int waterDepth = map.terrainGrid.TerrainAt(__instance.Position).IsWater ? 2 : 0;
                 if (waterDepth == 0) Log.Error("Impact Water Depth is 0, but terrain is water.");
                 float explosionRadius = (__instance.def.projectile.explosionRadius / (2f * waterDepth));
+                if (explosionRadius < 1) explosionRadius = 1f;
                 DamageDef damageDef = __instance.def.projectile.damageDef;
                 Thing launcher = null;
                 int damageAmount = __instance.DamageAmount;
@@ -701,7 +701,7 @@ namespace RimShips
                 SoundDef soundExplode;
                 if (__instance.def.HasModExtension<Projectile_Water>()) { soundExplode = __instance.def.GetModExtension<Projectile_Water>().soundExplodeWater; }
                 else { soundExplode = __instance.def.projectile.soundHitThickRoof; Log.Warning("Missing Water Explosion sound from " + __instance); }
-                Verse.Sound.SoundStarter.PlayOneShot(__instance.def.projectile.soundExplode, new TargetInfo(__instance.Position, map, false));
+                SoundStarter.PlayOneShot(__instance.def.projectile.soundExplode, new TargetInfo(__instance.Position, map, false));
                 ThingDef equipmentDef = null;
                 ThingDef def = __instance.def;
                 Thing thing = null;
@@ -765,7 +765,7 @@ namespace RimShips
         #region Gizmos
         public static bool CheckForShipAttack(JobDriver_Wait __instance)
         {
-            if (__instance.pawn?.GetComp<CompShips>().weaponStatus == ShipWeaponStatus.Offline)
+            if (__instance.pawn?.GetComp<CompShips>()?.weaponStatus == ShipWeaponStatus.Offline)
             {
                 return false;
             }
@@ -1130,7 +1130,6 @@ namespace RimShips
         private static IEnumerable<CodeInstruction> DoBottomButtonsTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
         {
             List<CodeInstruction> instructionList = instructions.ToList();
-            MethodInfo methodSetSail = AccessTools.Method(type: typeof(ShipHarmony), name: nameof(CanSetSail));
             Label breakLabel = ilg.DefineLabel();
 
             for (int i = 0; i < instructionList.Count; i++)
@@ -1139,7 +1138,7 @@ namespace RimShips
                 if (instruction.opcode == OpCodes.Ldloc_S && ((LocalBuilder)instruction.operand).LocalIndex == 19)
                 {
                     yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 19);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: methodSetSail);
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(CanSetSail)));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, operand: breakLabel);
                 }
                 else if (instruction.opcode == OpCodes.Ldfld && instruction.operand == AccessTools.Field(type: typeof(Dialog_FormCaravan), name: "destinationTile"))
@@ -2408,7 +2407,7 @@ namespace RimShips
             bool flag = caravan.Any(x => !(x.GetComp<CompShips>() is null)); //Ships or No Ships
             if(flag)
             {
-                foreach (Pawn p in caravan)
+                foreach(Pawn p in caravan)
                 {
                     if(IsShip(p))
                     {

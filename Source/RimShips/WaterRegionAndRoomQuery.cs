@@ -25,7 +25,7 @@ namespace RimShips
     {
         public static WaterRegion RegionAt(IntVec3 c, Map map, RegionType allowedRegionTypes = RegionType.Set_Passable)
         {
-            if (!GenGridShips.InBounds(c, map))
+            if (!c.InBoundsShip(map))
                 return null;
             WaterRegion validRegionAt = MapExtensionUtility.GetExtensionToMap(map).getWaterRegionGrid.GetValidRegionAt(c);
             return !(validRegionAt is null) && (validRegionAt.type & allowedRegionTypes) != RegionType.None ? validRegionAt : null;

@@ -161,7 +161,7 @@
 					</li>
 					<li>
 						<label>Cannons</label>
-						<handlingType>Cannons</handlingType>
+						<handlingType>Weapons</handlingType>
 						<slots>4</slots>
 						<slotsToOperate>2</slotsToOperate>
 					</li>
@@ -171,6 +171,37 @@
 						<slots>10</slots>
 					</li>
 				</roles>
+				
+				<cannons>
+					<li>
+						<label>Portside</label>
+						<weaponType>Broadside</weaponType>
+						<weaponLocation>Port</weaponLocation>
+						<projectile>SmashPhil_Cannonball</projectile>
+						<numberCannons>2</numberCannons>
+						<spacing>1.75</spacing>
+						<spreadRadius>5</spreadRadius>
+						<range>45</range>
+						<damageDealt>10</damageDealt>
+						<explosionRadius>10</explosionRadius>
+
+						<ricochet>true</ricochet>
+					</li>
+					<li>
+						<label>Starboardside</label>
+						<weaponType>Broadside</weaponType>
+						<weaponLocation>Starboard</weaponLocation>
+						<projectile>SmashPhil_Cannonball</projectile>
+						<numberCannons>2</numberCannons>
+						<spacing>1.75</spacing>
+						<spreadRadius>5</spreadRadius>
+						<range>45</range>
+						<damageDealt>10</damageDealt>
+						<explosionRadius>10</explosionRadius>
+						
+						<ricochet>true</ricochet>
+					</li>
+				</cannons>
 			</li>
 		</comps>
 	</ThingDef>

@@ -122,7 +122,7 @@ namespace RimShips
             if (hashSet.Contains(c))
                 return;
             IntVec3 c2 = c + potentialOtherRegionDir.FacingCell;
-            if (GenGridShips.InBounds(c2, this.map) && this.regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(c2) == this.newReg)
+            if (c2.InBoundsShip(this.map) && this.regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(c2) == this.newReg)
                 return;
             RegionType expectedRegionType = WaterRegionTypeUtility.GetExpectedRegionType(c2, this.map);
             if (expectedRegionType == RegionType.None)
@@ -137,7 +137,7 @@ namespace RimShips
                 for(;;)
                 {
                     IntVec3 intVec = c + rot.FacingCell * (num + 1);
-                    if (!GenGridShips.InBounds(intVec, this.map) || this.regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(intVec) != this.newReg ||
+                    if (!intVec.InBoundsShip(this.map) || this.regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(intVec) != this.newReg ||
                         WaterRegionTypeUtility.GetExpectedRegionType(intVec + potentialOtherRegionDir.FacingCell, this.map) != expectedRegionType)
                         break;
                     if (!hashSet.Add(intVec))
@@ -147,7 +147,7 @@ namespace RimShips
                 for(; ;)
                 {
                     IntVec3 intVec2 = c - rot.FacingCell * (num2 + 1);
-                    if (!GenGridShips.InBounds(intVec2, this.map) || this.regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(intVec2) != this.newReg ||
+                    if (!intVec2.InBoundsShip(this.map) || this.regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(intVec2) != this.newReg ||
                         WaterRegionTypeUtility.GetExpectedRegionType(intVec2 + potentialOtherRegionDir.FacingCell, this.map) != expectedRegionType)
                         break;
                     if (!hashSet.Add(intVec2))
@@ -200,7 +200,7 @@ namespace RimShips
                 for(int i = 0; i < 9; i++)
                 {
                     IntVec3 c = intVec + GenAdj.AdjacentCellsAndInside[i];
-                    if(GenGridShips.InBounds(c, this.map))
+                    if(c.InBoundsShip(this.map))
                     {
                         if(this.regionGrid.GetValidRegionAt(c) == this.newReg)
                         {

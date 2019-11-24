@@ -93,7 +93,7 @@ namespace RimShips
 
         public WaterRegion GetValidRegionAt(IntVec3 c)
         {
-            if(!GenGridShips.InBounds(c, this.map))
+            if(!c.InBoundsShip(this.map))
             {
                 Log.Error("Tried to get valid water region out of bounds at " + c, false);
             }
@@ -109,7 +109,7 @@ namespace RimShips
 
         public WaterRegion GetValidRegionAt_NoRebuild(IntVec3 c)
         {
-            if(!GenGridShips.InBounds(c, this.map))
+            if(!c.InBoundsShip(this.map))
             {
                 Log.Error("Tried to get valid region out of bounds at " + c, false);
             }
@@ -168,7 +168,7 @@ namespace RimShips
                 this.drawnRegions.Clear();
             }
             IntVec3 intVec = Verse.UI.MouseCell();
-            if(GenGridShips.InBounds(intVec, this.map))
+            if(intVec.InBoundsShip(this.map))
             {
                 //Room?
                 //Room Group?

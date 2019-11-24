@@ -60,7 +60,7 @@ namespace RimShips.AI
                 for (int i = 0; i < 8; i++)
                 {
                     IntVec3 intVec = GenAdj.AdjacentCells[i] + cell;
-                    if (intVec.InBounds(map) && !TouchPathEndModeUtility.IsAdjacentCornerAndNotAllowed(intVec, bl, tl, tr, br, map))
+                    if (intVec.InBoundsShip(map) && !TouchPathEndModeUtility.IsAdjacentCornerAndNotAllowed(intVec, bl, tl, tr, br, map))
                     {
                         WaterRegion region = WaterGridsUtility.GetRegion(intVec, map, RegionType.Set_Passable);
                         if (region != null && region.Allows(traverseParams, true))
@@ -75,7 +75,7 @@ namespace RimShips.AI
                 List<IntVec3> list = GenAdjFast.AdjacentCells8Way(dest);
                 for (int j = 0; j < list.Count; j++)
                 {
-                    if (list[j].InBounds(map) && !TouchPathEndModeUtility.IsAdjacentCornerAndNotAllowed(list[j], bl, tl, tr, br, map))
+                    if (list[j].InBoundsShip(map) && !TouchPathEndModeUtility.IsAdjacentCornerAndNotAllowed(list[j], bl, tl, tr, br, map))
                     {
                         WaterRegion region2 = WaterGridsUtility.GetRegion(list[j], map, RegionType.Set_Passable);
                         if (region2 != null && region2.Allows(traverseParams, true))

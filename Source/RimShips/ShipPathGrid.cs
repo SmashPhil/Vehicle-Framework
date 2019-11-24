@@ -25,13 +25,8 @@ namespace RimShips.AI
         {
             this.map = map;
             this.ResetPathGrid();
-            this.ChangePathCosts();
         }
 
-        public void ChangePathCosts()
-        {
-            //Change path costs here?
-        }
         public void ResetPathGrid()
         {
             this.pathGrid = new int[this.map.cellIndices.NumGridCells];
@@ -39,7 +34,7 @@ namespace RimShips.AI
 
         public bool Walkable(IntVec3 loc)
         {
-            return loc.InBounds(this.map) && this.pathGrid[this.map.cellIndices.CellToIndex(loc)] < 10000;
+            return loc.InBoundsShip(this.map) && this.pathGrid[this.map.cellIndices.CellToIndex(loc)] < 10000;
         }
 
         public bool WalkableFast(IntVec3 loc)
@@ -84,7 +79,7 @@ namespace RimShips.AI
 
         public void RecalculatePerceivedPathCostAt(IntVec3 c)
         {
-            if (!c.InBounds(this.map))
+            if(c.InBoundsShip(this?.map))
             {
                 return;
             }

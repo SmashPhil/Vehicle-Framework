@@ -70,7 +70,8 @@ namespace RimShips
                 int pawnCount = 0;
                 foreach(ShipRole r in Props.roles)
                 {
-                    pawnCount += r.slotsToOperate;
+                    if(r.handlingType is HandlingTypeFlags.Movement)
+                        pawnCount += r.slotsToOperate;
                 }
                 return pawnCount >= 0 ? pawnCount : 0;
             }
@@ -135,6 +136,13 @@ namespace RimShips
             }*/
         }
 
+        public override void PostDrawExtraSelectionOverlays()
+        {
+            base.PostDrawExtraSelectionOverlays();
+            if(this.Props?.cannons?.Count > 0 && this.Pawn.Drafted)
+                GenDraw.DrawRadiusRing(this.Pawn.Position, this.Props.cannons.Max(x => x.range));
+        }
+
         public void Rename()
         {
             if(this.Props.nameable)
@@ -159,10 +167,62 @@ namespace RimShips
         }
         public override IEnumerable<Gizmo> CompGetGizmosExtra()
         {
-            if (!this.Pawn.Dead && !this.Pawn.Drafted)
+            if(this.Pawn.Drafted)
+            {
+                if (this.Props.cannons != null && this.Props.cannons.Count > 0)
+                {
+                    if (this.Props.cannons.Any(x => x.weaponType == WeaponType.Broadside))
+                    {
+                        if (this.Props.cannons.Any(x => x.weaponLocation == WeaponLocation.Port))
+                        {
+                            ShipCannons cannon = this.Props.cannons.Find(x => x.weaponLocation == WeaponLocation.Port);
+                            List<int> tickTillFire = new List<int>();
+
+                            Command_Action portSideCannons = new Command_Action();
+                            portSideCannons.defaultLabel = "PortSideCannonsLabel".Translate();
+                            portSideCannons.icon = TexCommand.FireAtWill;
+                            portSideCannons.action = delegate ()
+                            {
+                                FireCannon(cannon);
+                            };
+                            portSideCannons.hotKey = KeyBindingDefOf.Misc4;
+                            foreach (ShipHandler handler in this.handlers)
+                            {
+                                if (handler.role.handlingType == HandlingTypeFlags.Weapons && handler.handlers.Count < handler.role.slotsToOperate)
+                                {
+                                    portSideCannons.Disable("NotEnoughCannonCrew".Translate(this.Pawn.LabelShort, handler.role.label));
+                                }
+                            }
+                            yield return portSideCannons;
+                        }
+                        if (this.Props.cannons.Any(x => x.weaponLocation == WeaponLocation.Starboard))
+                        {
+                            ShipCannons cannon = this.Props.cannons.Find(x => x.weaponLocation == WeaponLocation.Starboard);
+
+                            Command_Action starboardSideCannons = new Command_Action();
+                            starboardSideCannons.defaultLabel = "StarboardSideCannonsLabel".Translate();
+                            starboardSideCannons.icon = TexCommand.RearmTrap;
+                            starboardSideCannons.action = delegate ()
+                            {
+                                FireCannon(cannon);
+                            };
+                            starboardSideCannons.hotKey = KeyBindingDefOf.Misc5;
+                            foreach(ShipHandler handler in this.handlers)
+                            {
+                                if(handler.role.handlingType == HandlingTypeFlags.Weapons && handler.handlers.Count < handler.role.slotsToOperate)
+                                {
+                                    starboardSideCannons.Disable("NotEnoughCannonCrew".Translate(this.Pawn.LabelShort, handler.role.label));
+                                }
+                            }
+                            yield return starboardSideCannons;
+                        }
+                    }
+                }
+            }
+            else if(!this.Pawn.Dead)
             {
                 Command_Action unloadAll = new Command_Action();
-                unloadAll.defaultLabel = "Unload Everyone";
+                unloadAll.defaultLabel = "Disembark".Translate();
                 unloadAll.icon = TexCommandShips.UnloadAll;
                 unloadAll.action = delegate ()
                 {
@@ -667,6 +727,102 @@ namespace RimShips
             }
         }
 
+        public void FireCannon(ShipCannons cannon)
+        {
+            if(cannon is null) return;
+
+            float initialOffset = ((cannon.numberCannons - 1) * cannon.spacing) / 2f;
+            float projectileOffset = (this.Pawn.def.size.x / 2f) + 1;
+            for(int i = 0; i < cannon.numberCannons; i++)
+            {
+                float offset = (cannon.numberCannons * i) - initialOffset;
+
+                ThingDef projectile = cannon.projectile;
+                IntVec3 targetCell = IntVec3.Invalid;
+                Vector3 launchCell = this.Pawn.DrawPos;
+                switch (cannon.weaponLocation)
+                {
+                    case WeaponLocation.Port:
+                        if (this.Pawn.Rotation == Rot4.North)
+                        {
+                            targetCell = this.Pawn.Position;
+                            targetCell.x -= (int)cannon.range;
+                            launchCell.x -= projectileOffset;
+                            launchCell.z += offset;
+                        }
+                        else if (this.Pawn.Rotation == Rot4.East)
+                        {
+                            targetCell = this.Pawn.Position;
+                            targetCell.z += (int)cannon.range;
+                            launchCell.z += projectileOffset;
+                            launchCell.x += offset;
+                        }
+                        else if (this.Pawn.Rotation == Rot4.South)
+                        {
+                            targetCell = this.Pawn.Position;
+                            targetCell.x += (int)cannon.range;
+                            launchCell.x += projectileOffset;
+                            launchCell.z += offset;
+                        }
+                        else if (this.Pawn.Rotation == Rot4.West)
+                        {
+                            targetCell = this.Pawn.Position;
+                            targetCell.z -= (int)cannon.range;
+                            launchCell.z -= projectileOffset;
+                            launchCell.x += offset;
+                        }
+                        break;
+                    case WeaponLocation.Starboard:
+                        if (this.Pawn.Rotation == Rot4.North)
+                        {
+                            targetCell = this.Pawn.Position;
+                            targetCell.x += (int)cannon.range;
+                            launchCell.x += projectileOffset;
+                            launchCell.z += offset;
+                        }
+                        else if (this.Pawn.Rotation == Rot4.East)
+                        {
+                            targetCell = this.Pawn.Position;
+                            targetCell.z -= (int)cannon.range;
+                            launchCell.z -= projectileOffset;
+                            launchCell.x += offset;
+                        }
+                        else if (this.Pawn.Rotation == Rot4.South)
+                        {
+                            targetCell = this.Pawn.Position;
+                            targetCell.x -= (int)cannon.range;
+                            launchCell.x -= projectileOffset;
+                            launchCell.z += offset;
+                        }
+                        else if (this.Pawn.Rotation == Rot4.West)
+                        {
+                            targetCell = this.Pawn.Position;
+                            targetCell.z += (int)cannon.range;
+                            launchCell.z += projectileOffset;
+                            launchCell.x += offset;
+                        }
+                        break;
+                    case WeaponLocation.Turret:
+                        throw new NotImplementedException();
+                }
+                LocalTargetInfo target = new LocalTargetInfo(targetCell);
+                ShootLine shootLine;
+                bool flag = TryFindShootLineFromTo(this.Pawn.Position, target, out shootLine);
+
+                //FIX FOR MULTIPLAYER
+                IntVec3 c = target.Cell + GenRadial.RadialPattern[Rand.Range(0, GenRadial.NumCellsInRadius(cannon.spreadRadius))];
+
+                Projectile projectile2 = (Projectile)GenSpawn.Spawn(projectile, this.Pawn.Position, this.Pawn.Map, WipeMode.Vanish);
+                //SoundDefOf.Interact_BeatFire.PlayOneShotOnCamera(this.Pawn.Map);
+                projectile2.Launch(this.Pawn, launchCell, c, target, ProjectileHitFlags.All, null);
+            }
+        }
+
+        private bool TryFindShootLineFromTo(IntVec3 root, LocalTargetInfo targ, out ShootLine resultingLine)
+        {
+            resultingLine = new ShootLine(root, targ.Cell);
+            return false;
+        }
         public override void CompTick()
         {
             base.CompTick();

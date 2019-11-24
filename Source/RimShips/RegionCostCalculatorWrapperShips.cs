@@ -55,7 +55,7 @@ namespace RimShips.AI
                 while (!iterator.Done())
                 {
                     IntVec3 intVec = iterator.Current;
-                    if (GenGridShips.InBounds(intVec, this.map) && !disallowedCorners.Contains(this.map.cellIndices.CellToIndex(intVec)))
+                    if (intVec.InBoundsShip(this.map) && !disallowedCorners.Contains(this.map.cellIndices.CellToIndex(intVec)))
                     {
                         WaterRegion region2 = WaterGridsUtility.GetRegion(intVec, this.map, RegionType.Set_Passable);
                         if (region2 != null)

@@ -93,6 +93,7 @@
     <Compile Include="RegionCostCalculatorShips.cs" />
     <Compile Include="RegionCostCalculatorWrapperShips.cs" />
     <Compile Include="RimshipsModSettings.cs" />
+    <Compile Include="ShipCannons.cs" />
     <Compile Include="ShipHandler.cs" />
     <Compile Include="ShipHarmony.cs" />
     <Compile Include="ShipPassengerCardUtility.cs" />

@@ -38,7 +38,7 @@ namespace RimShips
 
         public static RegionType GetExpectedRegionType(this IntVec3 c, Map map)
         {
-            if(!GenGridShips.InBounds(c,map))
+            if(!c.InBoundsShip(map))
                 return RegionType.None;
             if(!(c.GetDoor(map) is null))
                 return RegionType.Portal;

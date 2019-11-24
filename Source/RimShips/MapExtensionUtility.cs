@@ -30,7 +30,7 @@ namespace RimShips.AI
             {
                 result = new MapExtension(map);
                 result.ConstructComponents();
-                StoreMapExtension(result);
+                result.StoreMapExtension();
             }
             return result;
         }

@@ -26,7 +26,7 @@ namespace RimShips.AI
         {
             this.map = map;
             this.extensionID = map.uniqueID;
-            MapExtensionUtility.StoreMapExtension(this);
+            this.StoreMapExtension();
         }
 
         public int MapExtensionID => this.extensionID;
@@ -66,7 +66,7 @@ namespace RimShips.AI
             Scribe_Deep.Look<WaterRegionGrid>(ref this.waterRegionGrid, "waterRegionGrid", this.map, this, false);
             Scribe_Deep.Look<WaterRegionLinkDatabase>(ref this.waterRegionLinkDatabase, "waterRegionLinkDatabase", false);
             Scribe_Values.Look<int>(ref this.extensionID, "extensionID", -1, false);
-            if(Scribe.mode == LoadSaveMode.LoadingVars)
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
                 this.ConstructComponents();
             }
