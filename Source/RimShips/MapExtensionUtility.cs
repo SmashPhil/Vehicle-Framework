@@ -24,46 +24,32 @@ namespace RimShips.AI
     {
         public static MapExtension GetExtensionToMap(Map map)
         {
-            NullListCheck();
-            MapExtension result = mapExtensions.Find(x => map.uniqueID == x.MapExtensionID);
-            if(result is null)
+            if (!mapExtensions.ContainsKey(map))
             {
-                result = new MapExtension(map);
-                result.ConstructComponents();
-                result.StoreMapExtension();
+                MapExtension result = new MapExtension(map);
+                mapExtensions.Add(map, result);
+                mapExtensions[map].ConstructComponents();
             }
-            return result;
-        }
-
-        public static void StoreMapExtension(this MapExtension mapE)
-        {
-            NullListCheck();
-            mapExtensions.Add(mapE);
-        }
-
-        private static void NullListCheck()
-        {
-            if (mapExtensions is null)  mapExtensions = new List<MapExtension>();
+            return mapExtensions[map];
         }
 
         public static void RemoveMapExtension(Map map)
         {
-            NullListCheck();
-            MapExtension extToRemove = mapExtensions.Find(x => map.uniqueID == x.MapExtensionID);
+            MapExtension extToRemove = mapExtensions[map];
             if (extToRemove is null)
             {
                 Log.Warning("Unable to find MapExtension for Map " + map.uniqueID + ". Error with mod RimShips");
                 return;
             }
-            mapExtensions.Remove(extToRemove);
+            mapExtensions.Remove(map);
         }
 
         public static void ClearMapExtensions()
         {
-            if (mapExtensions is null) mapExtensions = new List<MapExtension>();
+            if(mapExtensions is null) mapExtensions = new Dictionary<Map, MapExtension>();
             mapExtensions.Clear();
         }
 
-        private static List<MapExtension> mapExtensions;
+        private static Dictionary<Map, MapExtension> mapExtensions = new Dictionary<Map, MapExtension>();
     }
 }

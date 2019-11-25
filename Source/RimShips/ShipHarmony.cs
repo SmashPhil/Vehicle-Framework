@@ -2067,8 +2067,7 @@ namespace RimShips
         public static void GenerateMapExtension(IntVec3 mapSize, MapParent parent, MapGeneratorDef mapGenerator, ref Map __result,
             IEnumerable<GenStepWithParams> extraGenStepDefs = null, Action<Map> extraInitBeforeContentGen = null)
         {
-            MapExtension mapE = new MapExtension(__result);
-            mapE.ConstructComponents();
+            MapExtensionUtility.GetExtensionToMap(__result).VerifyComponents();
         }
 
         public static void ExposeDataMapExtensions()
