@@ -30,8 +30,6 @@ namespace RimShips.UI
 
         public override bool IsVisible => !this.SelPawnForCargo.GetComp<CompShips>().beached;
 
-        private bool CanControl => !this.SelPawnForCargo.Downed && !this.SelPawnForCargo.Dead && this.SelPawnForCargo.Faction == Faction.OfPlayer && !this.SelPawnForCargo.GetComp<CompShips>().beached;
-
         private Pawn SelPawnForCargo
         {
             get

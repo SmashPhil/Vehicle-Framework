@@ -39,7 +39,22 @@ namespace RimShips.UI
         {
             get
             {
-                return base.SelPawn.TryGetComp<CompShips>() is null ? null : base.SelPawn.GetComp<CompShips>().AllPawnsAboard;
+                return base.SelPawn.TryGetComp<CompShips>() is null ? new List<Pawn>() : base.SelPawn.GetComp<CompShips>().Passengers;
+            }
+        }
+
+        private List<Pawn> AllAboard
+        {
+            get
+            {
+                return base.SelPawn.TryGetComp<CompShips>() is null ? new List<Pawn>() : base.SelPawn.GetComp<CompShips>().AllPawnsAboard;
+            }
+        }
+        private List<ShipHandler> Handlers
+        {
+            get
+            {
+                return base.SelPawn.TryGetComp<CompShips>()?.handlers;
             }
         }
 
@@ -53,13 +68,25 @@ namespace RimShips.UI
             Widgets.BeginScrollView(rect, ref scrollPosition, viewRect, true);
             float num = 0f;
             bool flag = false;
+            foreach(ShipHandler handler in Handlers)
+            {
+                if(handler.role.handlingType == HandlingTypeFlags.Movement || handler.role.handlingType == HandlingTypeFlags.Weapons)
+                {
+                    Widgets.ListSeparator(ref num, viewRect.width, handler.role.label);
+                    foreach(Pawn pawn in handler.handlers.InnerListForReading)
+                    {
+                        ITab_Ship_Passengers.DoRow(ref num, viewRect, rect, scrollPosition, pawn, ref specificNeedsTabForPawn);
+                    }
+                }
+            }
+
             foreach(Pawn pawn in Passengers)
             {
                 if(pawn.IsColonist)
                 {
                     if(!flag)
                     {
-                        Widgets.ListSeparator(ref num, viewRect.width, "CaravanColonists".Translate());
+                        Widgets.ListSeparator(ref num, viewRect.width, "CaravanPassengers".Translate());
                         flag = true;
                     }
                     ITab_Ship_Passengers.DoRow(ref num, viewRect, rect, scrollPosition, pawn, ref specificNeedsTabForPawn);
@@ -174,7 +201,7 @@ namespace RimShips.UI
             this.EnsureSpecificNeedsTabForPawnValid();
             base.UpdateSize();
 
-            this.size = ITab_Ship_Passengers.GetSize(Passengers, this.PaneTopY, true);
+            this.size = ITab_Ship_Passengers.GetSize(AllAboard, this.PaneTopY, true);
             this.size.y = Mathf.Max(this.size.y, NeedsCardUtility.FullSize.y);
         }
 
@@ -241,7 +268,7 @@ namespace RimShips.UI
         }
         private void EnsureSpecificNeedsTabForPawnValid()
         {
-            if(!(this.specificNeedsTabForPawn is null) && (this.specificNeedsTabForPawn.Destroyed || !Passengers.Contains(specificNeedsTabForPawn)))
+            if(!(this.specificNeedsTabForPawn is null) && (this.specificNeedsTabForPawn.Destroyed || !AllAboard.Contains(specificNeedsTabForPawn)))
             {
                 this.specificNeedsTabForPawn = null;
             }

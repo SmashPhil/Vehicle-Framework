@@ -255,6 +255,30 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(Tale_DoublePawn), name: nameof(Tale_DoublePawn.Concerns)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(ConcernNullThing)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(WITab_Caravan_Needs), name: "FillTab"), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(SailorNeedsFillTabTranspiler)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(WITab_Caravan_Needs), name: "UpdateSize"), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(SailorNeedsUpdateSizeTranspiler)));
+            harmony.Patch(original: AccessTools.Property(type: typeof(WITab_Caravan_Gear), name: "Pawns").GetGetMethod(nonPublic: true), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(SailorGearTabPawns)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanInventoryUtility), name: nameof(CaravanInventoryUtility.AllInventoryItems)), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(SailorAllInventoryItemsTranspiler)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanInventoryUtility), name: nameof(CaravanInventoryUtility.GiveThing)), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(SailorGiveThingInventoryTranspiler)));
+            harmony.Patch(original: AccessTools.Property(type: typeof(WITab_Caravan_Health), name: "Pawns").GetGetMethod(nonPublic: true), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(SailorHealthTabPawns)));
+            harmony.Patch(original: AccessTools.Property(type: typeof(WITab_Caravan_Social), name: "Pawns").GetGetMethod(nonPublic: true), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(SailorSocialTabPawns)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(Caravan), name: nameof(Caravan.ContainsPawn)), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(ContainsPawnInShip)));
 
             //Draftable
             harmony.Patch(original: AccessTools.Property(type: typeof(Pawn_DraftController), name: nameof(Pawn_DraftController.Drafted)).GetSetMethod(),
@@ -491,7 +515,6 @@ namespace RimShips
                 {
                     if (map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterOceanDeep || map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterDeep)
                     {
-                        __instance.GetComp<CompShips>().KillAll();
                         IntVec3 lookCell = __instance.Position;
                         string textPawnList = "";
                         foreach (Pawn p in __instance?.GetComp<CompShips>()?.AllPawnsAboard)
@@ -2128,7 +2151,7 @@ namespace RimShips
 
         public static bool GenerateTaleFromShip(Pawn pawn, TaleData_Pawn __result)
         {
-            if(IsShip(pawn))
+            if(IsShip(pawn) && pawn.GetComp<CompShips>().AllPawnsAboard.Any())
             {
                 __result = TaleData_Pawn.GenerateFrom(pawn.GetComp<CompShips>().AllCapablePawns.First());
                 return false;
@@ -2162,6 +2185,142 @@ namespace RimShips
                 return false;
             }
             return true;
+        }
+
+        public static IEnumerable<CodeInstruction> SailorNeedsFillTabTranspiler(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> instructionList = instructions.ToList();
+
+            for (int i = 0; i < instructionList.Count; i++)
+            {
+                CodeInstruction instruction = instructionList[i];
+
+                if (instruction.opcode == OpCodes.Callvirt && instruction.operand == AccessTools.Property(type: typeof(Caravan), name: nameof(Caravan.PawnsListForReading)).GetGetMethod())
+                {
+                    yield return instruction;
+                    instruction = instructionList[++i];
+
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipHarmony.GrabPawnsFromShips)));
+                }
+
+                yield return instruction;
+            }
+        }
+
+        public static IEnumerable<CodeInstruction> SailorNeedsUpdateSizeTranspiler(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> instructionList = instructions.ToList();
+
+            for(int i = 0; i < instructionList.Count; i++)
+            {
+                CodeInstruction instruction = instructionList[i];
+
+                if(instruction.opcode == OpCodes.Callvirt && instruction.operand == AccessTools.Property(type: typeof(Caravan), name: nameof(Caravan.PawnsListForReading)).GetGetMethod())
+                {
+                    yield return instruction;
+                    instruction = instructionList[++i];
+
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipHarmony.GrabPawnsFromShips)));
+                }
+
+                yield return instruction;
+            }
+        }
+        
+        public static void SailorGearTabPawns(ref List<Pawn> __result)
+        {
+            if(HasShip(__result) && __result.All(x => IsShip(x)))
+            {
+                List<Pawn> sailors = new List<Pawn>();
+                foreach(Pawn p in __result)
+                {
+                    sailors.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
+                }
+                __result = sailors;
+            }
+        }
+
+        public static IEnumerable<CodeInstruction> SailorAllInventoryItemsTranspiler(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> instructionList = instructions.ToList();
+
+            for(int i = 0; i < instructionList.Count; i++)
+            {
+                CodeInstruction instruction = instructionList[i];
+
+                if (instruction.opcode == OpCodes.Callvirt && instruction.operand == AccessTools.Property(type: typeof(Caravan), name: nameof(Caravan.PawnsListForReading)).GetGetMethod())
+                {
+                    yield return instruction;
+                    instruction = instructionList[++i];
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipHarmony.GrabPawnsFromShips)));
+                }
+
+                yield return instruction;
+            }
+        }
+
+        public static IEnumerable<CodeInstruction> SailorGiveThingInventoryTranspiler(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> instructionList = instructions.ToList();
+
+            for (int i = 0; i < instructionList.Count; i++)
+            {
+                CodeInstruction instruction = instructionList[i];
+
+                if(instruction.opcode == OpCodes.Callvirt && instruction.operand == AccessTools.Property(type: typeof(Caravan), name: nameof(Caravan.PawnsListForReading)).GetGetMethod())
+                {
+                    yield return instruction;
+                    instruction = instructionList[++i];
+
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipHarmony.GrabPawnsFromShips)));
+                }
+
+                yield return instruction;
+            }
+        }
+
+        public static void SailorHealthTabPawns(ref List<Pawn> __result)
+        {
+            if (HasShip(__result) && __result.All(x => IsShip(x)))
+            {
+                List<Pawn> sailors = new List<Pawn>();
+                foreach (Pawn p in __result)
+                {
+                    sailors.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
+                }
+                __result = sailors;
+            }
+        }
+
+        public static void SailorSocialTabPawns(ref List<Pawn> __result)
+        {
+            if (HasShip(__result) && __result.All(x => IsShip(x)))
+            {
+                List<Pawn> sailors = new List<Pawn>();
+                foreach (Pawn p in __result)
+                {
+                    sailors.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
+                }
+                __result = sailors;
+            }
+        }
+
+        public static void ContainsPawnInShip(Pawn p, Caravan __instance, ref bool __result)
+        {
+            if(__result is false && HasShip(__instance))
+            {
+                bool flag = false;
+                List<Pawn> ships = __instance.PawnsListForReading.Where(x => IsShip(x)).ToList();
+                foreach (Pawn ship in ships)
+                {
+                    if(ship.GetComp<CompShips>().AllPawnsAboard.Contains(p))
+                    {
+                        flag = true;
+                        break;
+                    }
+                }
+                __result = flag;
+            }
         }
 
         #endregion Caravan
@@ -2704,17 +2863,16 @@ namespace RimShips
             return playerShips.RandomElement<Pawn>().GetComp<CompShips>()?.AllCapablePawns;
         }
 
-        public static Pawn GrabPawnFromShip(Pawn ship, HandlingTypeFlags roleType)
+        public static List<Pawn> GrabPawnsFromShips(List<Pawn> ships)
         {
-            foreach(ShipHandler handler in ship?.GetComp<CompShips>()?.handlers)
+            if (!ships.All(x => IsShip(x)))
+                return ships;
+            List<Pawn> pawns = new List<Pawn>();
+            foreach (Pawn p in ships)
             {
-                if(handler.role.handlingType == roleType)
-                {
-                    return handler.handlers.InnerListForReading.First();
-                }
+                pawns.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
             }
-            Log.Warning("Could not find pawn in " + roleType + " aboard " + ship.LabelShort);
-            return ship.GetComp<CompShips>()?.AllCapablePawns.First();
+            return pawns;
         }
 
         public static bool ImpassableModified(World world, int tileID, Caravan caravan)
@@ -3157,7 +3315,7 @@ namespace RimShips
         #endregion HelperFunctions
         
         private static readonly bool disabled = false;
-        public static readonly bool debug = true;
+        public static readonly bool debug = false;
         public static readonly bool drawPaths = false;
         private static List<WorldPath> debugLines = new List<WorldPath>();
         private static List<Pair<int, int>> tiles = new List<Pair<int,int>>(); // Pair -> TileID : Cycle

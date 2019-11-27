@@ -85,30 +85,8 @@ namespace RimShips
                 result = IntVec3.Invalid;
                 return false;
             }
-            /* Temporary Middle Piece */
             result = CellFinderExtended.RandomEdgeCell(Find.World.CoastDirectionAt(map.Tile), map, (IntVec3 c) => GenGridShips.Standable(c, map, MapExtensionUtility.GetExtensionToMap(map)) && !c.Fogged(map));
             return true;
-            /*                        */
-            List<WaterRegion> workingRegions = new List<WaterRegion>();
-            float radSquared = radius * radius;
-            WaterRegionTraverser.BreadthFirstTraverse(region, (WaterRegion from, WaterRegion r) => r.Allows(traverseParms, true) && (radius > 1000f || r.extentsClose.ClosestDistSquaredTo(root) <=
-            radSquared) && (regionValidator is null || regionValidator(r)), delegate (WaterRegion r)
-            {
-                workingRegions.Add(r);
-                return false;
-            }, maxRegions, RegionType.Set_Passable);
-
-            while(workingRegions.Count > 0)
-            {
-                WaterRegion region2 = workingRegions.RandomElementByWeight((WaterRegion r) => (float)r.CellCount);
-                if(region2.TryFindRandomCellInWaterRegion((IntVec3 c) => (float)(c - root).LengthHorizontalSquared <= radSquared && (validator is null || validator(c)), out result))
-                {
-                    return true;
-                }
-                workingRegions.Remove(region2);
-            }
-            result = CellFinderExtended.RandomEdgeCell(Find.World.CoastDirectionAt(map.Tile), map, (IntVec3 c) => GenGridShips.Standable(c, map, MapExtensionUtility.GetExtensionToMap(map)) && !c.Fogged(map));
-            return false;
         }
 
         public static bool TryFindRandomCellInWaterRegion(this WaterRegion reg, Predicate<IntVec3> validator, out IntVec3 result)

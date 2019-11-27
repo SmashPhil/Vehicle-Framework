@@ -23,9 +23,11 @@
 	<CaravanShipsSingle>1 Ship</CaravanShipsSingle>
 	<CaravanShipsPlural>{0} Ships</CaravanShipsPlural>
 	<CaravanSailing>Sailing</CaravanSailing>
+	<CaravanPassengers>Passengers</CaravanPassengers>
 	<ShipNotDockedCancelCaravan>{0} is not on shallow water.</ShipNotDockedCancelCaravan>
 	<TabCargo>Cargo</TabCargo>
 	<TabPassengers>Pawns</TabPassengers>
+	<TabBoatHealth>Health</TabBoatHealth>
 	<Cargo>Cargo</Cargo>
 	<ShipOutOfFood>No food in {0} with Pawns onboard</ShipOutOfFood>
 	<CommandDockShip>Dock</CommandDockShip>

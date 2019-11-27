@@ -30,7 +30,7 @@ namespace RimShips
         public bool draftStatusChanged = false;
         public bool beached = false;
         private float angle = 0f;
-        
+
         public List<ShipHandler> handlers = new List<ShipHandler>();
         public Rot4 lastDirection = Rot4.South;
         public ShipMovementStatus movementStatus = ShipMovementStatus.Online;
@@ -50,9 +50,9 @@ namespace RimShips
         {
             get
             {
-                foreach(ShipHandler handler in this.handlers)
+                foreach (ShipHandler handler in this.handlers)
                 {
-                    if(handler.role.handlingType == HandlingTypeFlags.Movement && handler.handlers.Count < handler.role.slotsToOperate)
+                    if (handler.role.handlingType == HandlingTypeFlags.Movement && handler.handlers.Count < handler.role.slotsToOperate)
                     {
                         return false;
                     }
@@ -68,9 +68,9 @@ namespace RimShips
             get
             {
                 int pawnCount = 0;
-                foreach(ShipRole r in Props.roles)
+                foreach (ShipRole r in Props.roles)
                 {
-                    if(r.handlingType is HandlingTypeFlags.Movement)
+                    if (r.handlingType is HandlingTypeFlags.Movement)
                         pawnCount += r.slotsToOperate;
                 }
                 return pawnCount >= 0 ? pawnCount : 0;
@@ -89,8 +89,46 @@ namespace RimShips
                         if (!(handler.handlers is null) && handler.handlers.Count > 0) pawnsOnShip.AddRange(handler.handlers);
                     }
                 }
-                
+
                 return pawnsOnShip;
+            }
+        }
+
+        public List<Pawn> AllCrewAboard
+        {
+            get
+            {
+                List<Pawn> crewOnShip = new List<Pawn>();
+                if (!(handlers is null))
+                {
+                    foreach (ShipHandler handler in handlers)
+                    {
+                        if (handler.role.handlingType == HandlingTypeFlags.Movement || handler.role.handlingType == HandlingTypeFlags.Weapons)
+                        {
+                            crewOnShip.AddRange(handler.handlers);
+                        }
+                    }
+                }
+                return crewOnShip;
+            }
+        }
+
+        public List<Pawn> Passengers
+        {
+            get
+            {
+                List<Pawn> passengersOnShip = new List<Pawn>();
+                if(!(handlers is null))
+                {
+                    foreach(ShipHandler handler in handlers)
+                    {
+                        if(handler.role.handlingType == HandlingTypeFlags.None)
+                        {
+                            passengersOnShip.AddRange(handler.handlers);
+                        }
+                    }
+                }
+                return passengersOnShip;
             }
         }
 
@@ -122,18 +160,6 @@ namespace RimShips
                 }
                 return x;
             }
-        }
-
-        public void KillAll()
-        {
-            /*for(int i = 0; i < handlers.Count; i++)
-            {
-                ShipHandler handler = handlers[i];
-                foreach(Pawn p in handler.handlers)
-                {
-                    p.Destroy();
-                }
-            }*/
         }
 
         public override void PostDrawExtraSelectionOverlays()
