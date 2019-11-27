@@ -140,7 +140,7 @@ namespace RimShips
         {
             base.PostDrawExtraSelectionOverlays();
             if(this.Props?.cannons?.Count > 0 && this.Pawn.Drafted)
-                GenDraw.DrawRadiusRing(this.Pawn.Position, this.Props.cannons.Max(x => x.range));
+                GenDraw.DrawRadiusRing(this.Pawn.Position, this.Props.cannons.Max(x => x.Range));
         }
 
         public void Rename()
@@ -171,7 +171,7 @@ namespace RimShips
             {
                 if (this.Props.cannons != null && this.Props.cannons.Count > 0)
                 {
-                    if (this.Props.cannons.Any(x => x.weaponType == WeaponType.Broadside))
+                    if(this.Props.cannons.Any(x => x.weaponType == WeaponType.Broadside))
                     {
                         if (this.Props.cannons.Any(x => x.weaponLocation == WeaponLocation.Port))
                         {
@@ -179,8 +179,8 @@ namespace RimShips
                             List<int> tickTillFire = new List<int>();
 
                             Command_Action portSideCannons = new Command_Action();
-                            portSideCannons.defaultLabel = "PortSideCannonsLabel".Translate();
-                            portSideCannons.icon = TexCommand.FireAtWill;
+                            portSideCannons.defaultLabel = "CannonLabel".Translate(cannon.label);
+                            portSideCannons.icon = TexCommandShips.BroadsideCannon_Port;
                             portSideCannons.action = delegate ()
                             {
                                 FireCannon(cannon);
@@ -200,8 +200,8 @@ namespace RimShips
                             ShipCannons cannon = this.Props.cannons.Find(x => x.weaponLocation == WeaponLocation.Starboard);
 
                             Command_Action starboardSideCannons = new Command_Action();
-                            starboardSideCannons.defaultLabel = "StarboardSideCannonsLabel".Translate();
-                            starboardSideCannons.icon = TexCommand.RearmTrap;
+                            starboardSideCannons.defaultLabel = "CannonLabel".Translate(cannon.label);
+                            starboardSideCannons.icon = TexCommandShips.BroadsideCannon_Starboard;
                             starboardSideCannons.action = delegate ()
                             {
                                 FireCannon(cannon);
@@ -216,6 +216,12 @@ namespace RimShips
                             }
                             yield return starboardSideCannons;
                         }
+
+                        Command_SetRange range = new Command_SetRange();
+                        range.defaultLabel = "SetRange".Translate();
+                        range.icon = TexCommandShips.UnloadCaptain;
+                        range.activeCannons = this.Props.cannons.FindAll(x => x.weaponType == WeaponType.Broadside);
+                        yield return range;
                     }
                 }
             }
@@ -731,7 +737,7 @@ namespace RimShips
         {
             if(cannon is null) return;
 
-            float initialOffset = ((cannon.numberCannons - 1) * cannon.spacing) / 2f;
+            float initialOffset = ((cannon.numberCannons - 1) * (cannon.spacing) ) / 2f;
             float projectileOffset = (this.Pawn.def.size.x / 2f) + 1;
             for(int i = 0; i < cannon.numberCannons; i++)
             {
@@ -743,63 +749,139 @@ namespace RimShips
                 switch (cannon.weaponLocation)
                 {
                     case WeaponLocation.Port:
-                        if (this.Pawn.Rotation == Rot4.North)
+                        if(this.angle == 0)
                         {
-                            targetCell = this.Pawn.Position;
-                            targetCell.x -= (int)cannon.range;
-                            launchCell.x -= projectileOffset;
-                            launchCell.z += offset;
+                            if (this.Pawn.Rotation == Rot4.North)
+                            {
+                                targetCell = this.Pawn.Position;
+                                targetCell.x -= (int)cannon.Range;
+                                launchCell.x -= projectileOffset;
+                                launchCell.z += offset;
+                            }
+                            else if (this.Pawn.Rotation == Rot4.East)
+                            {
+                                targetCell = this.Pawn.Position;
+                                targetCell.z += (int)cannon.Range;
+                                launchCell.z += projectileOffset;
+                                launchCell.x += offset;
+                            }
+                            else if (this.Pawn.Rotation == Rot4.South)
+                            {
+                                targetCell = this.Pawn.Position;
+                                targetCell.x += (int)cannon.Range;
+                                launchCell.x += projectileOffset;
+                                launchCell.z += offset;
+                            }
+                            else if (this.Pawn.Rotation == Rot4.West)
+                            {
+                                targetCell = this.Pawn.Position;
+                                targetCell.z -= (int)cannon.Range;
+                                launchCell.z -= projectileOffset;
+                                launchCell.x += offset;
+                            }
                         }
-                        else if (this.Pawn.Rotation == Rot4.East)
+                        else
                         {
-                            targetCell = this.Pawn.Position;
-                            targetCell.z += (int)cannon.range;
-                            launchCell.z += projectileOffset;
-                            launchCell.x += offset;
-                        }
-                        else if (this.Pawn.Rotation == Rot4.South)
-                        {
-                            targetCell = this.Pawn.Position;
-                            targetCell.x += (int)cannon.range;
-                            launchCell.x += projectileOffset;
-                            launchCell.z += offset;
-                        }
-                        else if (this.Pawn.Rotation == Rot4.West)
-                        {
-                            targetCell = this.Pawn.Position;
-                            targetCell.z -= (int)cannon.range;
-                            launchCell.z -= projectileOffset;
-                            launchCell.x += offset;
+                            if(this.Pawn.Rotation == Rot4.East && this.angle == -45)
+                            {
+                                targetCell = this.Pawn.Position;
+                                targetCell.x -= (int)(Math.Cos(this.angle.DegreesToRadians()) * cannon.Range);
+                                targetCell.z -= (int)(Math.Sin(this.angle.DegreesToRadians()) * cannon.Range);
+                                launchCell.x -= projectileOffset;
+                                launchCell.z += offset;
+                            }
+                            else if (this.Pawn.Rotation == Rot4.East && this.angle == 45)
+                            {
+                                targetCell = this.Pawn.Position;
+                                targetCell.x += (int)(Math.Cos(this.angle.DegreesToRadians()) * cannon.Range);
+                                targetCell.z += (int)(Math.Sin(this.angle.DegreesToRadians()) * cannon.Range);
+                                launchCell.x -= projectileOffset;
+                                launchCell.z += offset;
+                            }
+                            else if (this.Pawn.Rotation == Rot4.West && this.angle == -45)
+                            {
+                                targetCell = this.Pawn.Position;
+                                targetCell.x += (int)(Math.Cos(this.angle.DegreesToRadians()) * cannon.Range);
+                                targetCell.z += (int)(Math.Sin(this.angle.DegreesToRadians()) * cannon.Range);
+                                launchCell.x -= projectileOffset;
+                                launchCell.z += offset;
+                            }
+                            else if (this.Pawn.Rotation == Rot4.West && this.angle == 45)
+                            {
+                                targetCell = this.Pawn.Position;
+                                targetCell.x -= (int)(Math.Cos(this.angle.DegreesToRadians()) * cannon.Range);
+                                targetCell.z -= (int)(Math.Sin(this.angle.DegreesToRadians()) * cannon.Range);
+                                launchCell.x -= projectileOffset;
+                                launchCell.z += offset;
+                            }
                         }
                         break;
                     case WeaponLocation.Starboard:
-                        if (this.Pawn.Rotation == Rot4.North)
+                        if(this.Angle == 0)
                         {
-                            targetCell = this.Pawn.Position;
-                            targetCell.x += (int)cannon.range;
-                            launchCell.x += projectileOffset;
-                            launchCell.z += offset;
+                            if (this.Pawn.Rotation == Rot4.North)
+                            {
+                                targetCell = this.Pawn.Position;
+                                targetCell.x += (int)cannon.Range;
+                                launchCell.x += projectileOffset;
+                                launchCell.z += offset;
+                            }
+                            else if (this.Pawn.Rotation == Rot4.East)
+                            {
+                                targetCell = this.Pawn.Position;
+                                targetCell.z -= (int)cannon.Range;
+                                launchCell.z -= projectileOffset;
+                                launchCell.x += offset;
+                            }
+                            else if (this.Pawn.Rotation == Rot4.South)
+                            {
+                                targetCell = this.Pawn.Position;
+                                targetCell.x -= (int)cannon.Range;
+                                launchCell.x -= projectileOffset;
+                                launchCell.z += offset;
+                            }
+                            else if (this.Pawn.Rotation == Rot4.West)
+                            {
+                                targetCell = this.Pawn.Position;
+                                targetCell.z += (int)cannon.Range;
+                                launchCell.z += projectileOffset;
+                                launchCell.x += offset;
+                            }
                         }
-                        else if (this.Pawn.Rotation == Rot4.East)
+                        else
                         {
-                            targetCell = this.Pawn.Position;
-                            targetCell.z -= (int)cannon.range;
-                            launchCell.z -= projectileOffset;
-                            launchCell.x += offset;
-                        }
-                        else if (this.Pawn.Rotation == Rot4.South)
-                        {
-                            targetCell = this.Pawn.Position;
-                            targetCell.x -= (int)cannon.range;
-                            launchCell.x -= projectileOffset;
-                            launchCell.z += offset;
-                        }
-                        else if (this.Pawn.Rotation == Rot4.West)
-                        {
-                            targetCell = this.Pawn.Position;
-                            targetCell.z += (int)cannon.range;
-                            launchCell.z += projectileOffset;
-                            launchCell.x += offset;
+                            if (this.Pawn.Rotation == Rot4.East && this.angle == -45)
+                            {
+                                targetCell = this.Pawn.Position;
+                                targetCell.x += (int)(Math.Cos(this.angle.DegreesToRadians()) * cannon.Range);
+                                targetCell.z += (int)(Math.Sin(this.angle.DegreesToRadians()) * cannon.Range);
+                                launchCell.x -= projectileOffset;
+                                launchCell.z += offset;
+                            }
+                            else if (this.Pawn.Rotation == Rot4.East && this.angle == 45)
+                            {
+                                targetCell = this.Pawn.Position;
+                                targetCell.x -= (int)(Math.Cos(this.angle.DegreesToRadians()) * cannon.Range);
+                                targetCell.z -= (int)(Math.Sin(this.angle.DegreesToRadians()) * cannon.Range);
+                                launchCell.x -= projectileOffset;
+                                launchCell.z += offset;
+                            }
+                            else if (this.Pawn.Rotation == Rot4.West && this.angle == -45)
+                            {
+                                targetCell = this.Pawn.Position;
+                                targetCell.x -= (int)(Math.Cos(this.angle.DegreesToRadians()) * cannon.Range);
+                                targetCell.z -= (int)(Math.Sin(this.angle.DegreesToRadians()) * cannon.Range);
+                                launchCell.x -= projectileOffset;
+                                launchCell.z += offset;
+                            }
+                            else if (this.Pawn.Rotation == Rot4.West && this.angle == 45)
+                            {
+                                targetCell = this.Pawn.Position;
+                                targetCell.x += (int)(Math.Cos(this.angle.DegreesToRadians()) * cannon.Range);
+                                targetCell.z += (int)(Math.Sin(this.angle.DegreesToRadians()) * cannon.Range);
+                                launchCell.x -= projectileOffset;
+                                launchCell.z += offset;
+                            }
                         }
                         break;
                     case WeaponLocation.Turret:
@@ -810,10 +892,11 @@ namespace RimShips
                 bool flag = TryFindShootLineFromTo(this.Pawn.Position, target, out shootLine);
 
                 //FIX FOR MULTIPLAYER
-                IntVec3 c = target.Cell + GenRadial.RadialPattern[Rand.Range(0, GenRadial.NumCellsInRadius(cannon.spreadRadius))];
+                IntVec3 c = target.Cell + GenRadial.RadialPattern[Rand.Range(0, GenRadial.NumCellsInRadius(cannon.spreadRadius * (cannon.Range / cannon.maxRange)))];
 
                 Projectile projectile2 = (Projectile)GenSpawn.Spawn(projectile, this.Pawn.Position, this.Pawn.Map, WipeMode.Vanish);
-                //SoundDefOf.Interact_BeatFire.PlayOneShotOnCamera(this.Pawn.Map);
+                if (cannon.cannonSound is null) SoundDefOf_Ships.Explosion_PirateCannon.PlayOneShot(new TargetInfo(this.Pawn.Position, this.Pawn.Map, false));
+                else { cannon.cannonSound.PlayOneShot(new TargetInfo(this.Pawn.Position, this.Pawn.Map, false)); }
                 projectile2.Launch(this.Pawn, launchCell, c, target, ProjectileHitFlags.All, null);
             }
         }

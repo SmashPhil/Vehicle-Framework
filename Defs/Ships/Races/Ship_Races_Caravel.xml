@@ -178,28 +178,28 @@
 						<weaponType>Broadside</weaponType>
 						<weaponLocation>Port</weaponLocation>
 						<projectile>SmashPhil_Cannonball</projectile>
+						<cannonSound>Explosion_PirateCannon</cannonSound>
 						<numberCannons>2</numberCannons>
 						<spacing>1.75</spacing>
 						<spreadRadius>5</spreadRadius>
-						<range>45</range>
+						<minRange>10</minRange>
+						<maxRange>45</maxRange>
 						<damageDealt>10</damageDealt>
 						<explosionRadius>10</explosionRadius>
-
-						<ricochet>true</ricochet>
 					</li>
 					<li>
-						<label>Starboardside</label>
+						<label>Starboard</label>
 						<weaponType>Broadside</weaponType>
 						<weaponLocation>Starboard</weaponLocation>
 						<projectile>SmashPhil_Cannonball</projectile>
+						<cannonSound>Explosion_PirateCannon</cannonSound>
 						<numberCannons>2</numberCannons>
 						<spacing>1.75</spacing>
 						<spreadRadius>5</spreadRadius>
-						<range>45</range>
+						<minRange>10</minRange>
+						<maxRange>45</maxRange>
 						<damageDealt>10</damageDealt>
 						<explosionRadius>10</explosionRadius>
-						
-						<ricochet>true</ricochet>
 					</li>
 				</cannons>
 			</li>

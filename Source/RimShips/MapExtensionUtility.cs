@@ -33,17 +33,6 @@ namespace RimShips.AI
             return mapExtensions[map];
         }
 
-        public static void RemoveMapExtension(Map map)
-        {
-            MapExtension extToRemove = mapExtensions[map];
-            if (extToRemove is null)
-            {
-                Log.Warning("Unable to find MapExtension for Map " + map.uniqueID + ". Error with mod RimShips");
-                return;
-            }
-            mapExtensions.Remove(map);
-        }
-
         public static void ClearMapExtensions()
         {
             if(mapExtensions is null) mapExtensions = new Dictionary<Map, MapExtension>();

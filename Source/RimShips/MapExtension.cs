@@ -22,7 +22,7 @@ namespace RimShips.AI
 {
     public sealed class MapExtension : IExposable
     {
-        public MapExtension(Map map)
+        public MapExtension(Map map) //: base(map)
         {
             this.map = map;
         }

@@ -29,7 +29,6 @@
 			<li>RimShips.UI.ITab_Ship_Passengers</li>
 		</inspectorTabs>
 		
-		
 		<comps>
 			<li>
 				<compClass>CompAttachBase</compClass>

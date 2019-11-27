@@ -84,7 +84,7 @@ namespace RimShips.AI
                 return;
             }
             bool flag = this.WalkableFast(c);
-            this.pathGrid[this.map.cellIndices.CellToIndex(c)] = this.CalculatedCostAt(c, true, IntVec3.Invalid);
+            this.pathGrid[this.map.cellIndices.CellToIndex(c)] = this.CalculatedCostAt(c);
             if (this.WalkableFast(c) != flag)
             {
                 MapExtensionUtility.GetExtensionToMap(this.map).getShipReachability.ClearCache();
@@ -94,13 +94,14 @@ namespace RimShips.AI
 
         public void RecalculateAllPerceivedPathCosts()
         {
+            Log.Message("PATHGRID RECALCULATED");
             foreach (IntVec3 c in this.map.AllCells)
             {
                 this.RecalculatePerceivedPathCostAt(c);
             }
         }
 
-        public int CalculatedCostAt(IntVec3 c, bool perceivedStatic, IntVec3 prevCell)
+        public int CalculatedCostAt(IntVec3 c)
         {
             TerrainDef terrainDef = this.map.terrainGrid.TerrainAt(c);
             if (terrainDef is null || (terrainDef.passability == Traversability.Impassable && !terrainDef.IsWater) || !terrainDef.IsWater)

@@ -2,14 +2,12 @@
 <Defs>
 	<SoundDef>
 		<defName>Explode_BombWater</defName>
-		<sustain>False</sustain>
 		<context>MapOnly</context>
 		<eventNames />
 		<maxSimultaneous>10</maxSimultaneous>
-		<priorityMode>PrioritizeNearest</priorityMode>
 		<subSounds>
 			<li>
-				<muteWhenPaused>True</muteWhenPaused>
+				<muteWhenPaused>False</muteWhenPaused>
 				<grains>
 					<li Class = "AudioGrain_Clip">
 						<clipPath>Explosives/Explosion_BombWater</clipPath>
@@ -28,11 +26,36 @@
 	</SoundDef>
 	
 	<SoundDef>
+		<defName>Explosion_PirateCannon</defName>
+		<context>MapOnly</context>
+		<eventNames />
+		<maxSimultaneous>5</maxSimultaneous>
+		<subSounds>
+			<li>
+				<muteWhenPaused>True</muteWhenPaused>
+				<grains>
+					<li Class = "AudioGrain_Clip">
+						<clipPath>Explosives/Explosion_PirateCannon</clipPath>
+					</li>
+				</grains>
+				<volumeRange>
+					<min>100</min>
+					<max>120</max>
+				</volumeRange>
+				<distRange>
+					<min>0</min>
+					<max>200</max>
+				</distRange>
+			</li>
+		</subSounds>
+	</SoundDef>
+	
+	<SoundDef>
 		<defName>ShipBigConstruction</defName>
 		<sustain>False</sustain>
 		<context>MapOnly</context>
 		<eventNames />
-		<maxSimultaneous>3</maxSimultaneous>
+		<maxSimultaneous>5</maxSimultaneous>
 		<priorityMode>PrioritizeNearest</priorityMode>
 		<subSounds>
 			<li>	
