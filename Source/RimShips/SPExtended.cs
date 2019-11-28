@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace RimShips
 {
+    [StaticConstructorOnStartup]
     public static class SPExtended
     {
         public static class SPTuple

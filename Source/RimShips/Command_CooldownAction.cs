@@ -138,7 +138,7 @@ namespace RimShips
 
         private ShipCannons cannon;
         private const float GizmoSize = 75f;
-        private static readonly Texture2D FillableBar = SolidColorMaterials.NewSolidColorTexture(0.5f, 0.5f, 0.5f, 0.25f);
-        private static readonly Texture2D ClearBar = SolidColorMaterials.NewSolidColorTexture(Color.clear);
+        private readonly Texture2D FillableBar = SolidColorMaterials.NewSolidColorTexture(0.5f, 0.5f, 0.5f, 0.25f);
+        private readonly Texture2D ClearBar = SolidColorMaterials.NewSolidColorTexture(Color.clear);
     }
 }

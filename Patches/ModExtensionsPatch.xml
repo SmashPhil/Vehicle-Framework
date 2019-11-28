@@ -2,7 +2,6 @@
 
 <Patch>
 	<Operation Class="PatchOperationSequence">
-	
 		<operations>
 			<li Class="PatchOperationAddModExtension">
 				<xpath>Defs/ThingDef[@Name="BaseBullet"]</xpath>
