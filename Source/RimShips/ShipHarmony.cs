@@ -2766,7 +2766,7 @@ namespace RimShips
                     if(IsShip(p))
                     {
                         seats += p.GetComp<CompShips>().SeatsAvailable;
-                        prereq += p.GetComp<CompShips>().PawnCountToOperate;
+                        prereq += p.GetComp<CompShips>().PawnCountToOperate - p.GetComp<CompShips>().AllCrewAboard.Count;
                     }
                     else if(p.IsColonistPlayerControlled && !p.Downed && !p.Dead)
                     {
@@ -2791,44 +2791,7 @@ namespace RimShips
             {
                 if(!dock)
                 {
-                    List<Pawn> pawns = caravan.PawnsListForReading.Where(x => !IsShip(x)).ToList();
-                    List<Pawn> ships = caravan.PawnsListForReading.Where(x => IsShip(x)).ToList();
-                    for(int i = 0; i < ships.Count; i++)
-                    {
-                        Pawn ship = ships[i];
-                        for(int j = 0; j < ship?.GetComp<CompShips>()?.PawnCountToOperate; j++)
-                        {
-                            if(pawns.Count <= 0)
-                            {
-                                return;
-                            }
-                            foreach(ShipHandler handler in ship.GetComp<CompShips>().handlers)
-                            {
-                                if(handler.AreSlotsAvailable)
-                                {
-                                    ship.GetComp<CompShips>().Notify_BoardedCaravan(pawns.Pop(), handler.handlers);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    if(pawns.Count > 0)
-                    {
-                        int x = 0;
-                        while(pawns.Count > 0)
-                        {
-                            Pawn ship = ships[x];
-                            foreach(ShipHandler handler in ship.GetComp<CompShips>().handlers)
-                            {
-                                if(handler.AreSlotsAvailable)
-                                {
-                                    ship.GetComp<CompShips>().Notify_BoardedCaravan(pawns.Pop(), handler.handlers);
-                                    break;
-                                }
-                            }
-                            x = (x + 2) > ships.Count ? 0 : ++x;
-                        }
-                    }
+                    BoardAllCaravanPawns(caravan);
                 }
                 else
                 {
@@ -2838,6 +2801,48 @@ namespace RimShips
                         Pawn ship = ships[i];
                         ship?.GetComp<CompShips>()?.DisembarkAll();
                     }
+                }
+            }
+        }
+
+        public static void BoardAllCaravanPawns(Caravan caravan)
+        {
+            List<Pawn> sailors = caravan.PawnsListForReading.Where(x => !ShipHarmony.IsShip(x)).ToList();
+            List<Pawn> ships = caravan.PawnsListForReading.Where(x => ShipHarmony.IsShip(x)).ToList();
+            for (int i = 0; i < ships.Count; i++)
+            {
+                Pawn ship = ships[i];
+                for (int j = 0; j < ship.GetComp<CompShips>().PawnCountToOperate; j++)
+                {
+                    if (sailors.Count <= 0)
+                    {
+                        return;
+                    }
+                    foreach (ShipHandler handler in ship.GetComp<CompShips>().handlers)
+                    {
+                        if (handler.AreSlotsAvailable)
+                        {
+                            ship.GetComp<CompShips>().Notify_BoardedCaravan(sailors.Pop(), handler.handlers);
+                            break;
+                        }
+                    }
+                }
+            }
+            if (sailors.Count > 0)
+            {
+                int x = 0;
+                while (sailors.Count > 0)
+                {
+                    Pawn ship = ships[x];
+                    foreach (ShipHandler handler in ship.GetComp<CompShips>().handlers)
+                    {
+                        if (handler.AreSlotsAvailable)
+                        {
+                            ship.GetComp<CompShips>().Notify_BoardedCaravan(sailors.Pop(), handler.handlers);
+                            break;
+                        }
+                    }
+                    x = (x + 2) > ships.Count ? 0 : ++x;
                 }
             }
         }

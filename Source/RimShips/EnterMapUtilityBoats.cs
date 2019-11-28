@@ -32,6 +32,11 @@ namespace RimShips
                 }), false);
                 enterMode = CaravanEnterMode.Edge;
             }
+            //Ensure pawns are onboard till a fix for dock settling is done
+            if (ShipHarmony.HasShip(caravan) && caravan.PawnsListForReading.Any(x => !ShipHarmony.IsShip(x)))
+            {
+                ShipHarmony.BoardAllCaravanPawns(caravan);
+            }
             IntVec3 enterCell = GetWaterCell(caravan, map, CaravanEnterMode.Edge); //Caravan Enter Mode back to enterMode
             Func<Pawn, IntVec3> spawnCellGetter = (Pawn p) => p.ClampToMap(CellFinderExtended.RandomSpawnCellForPawnNear(enterCell, map, 4), map);
             EnterMapUtilityBoats.EnterSpawn(caravan, map, spawnCellGetter, dropInventoryMode, draftColonists);
@@ -57,14 +62,14 @@ namespace RimShips
             }
         }
 
-        private static IntVec3 GetWaterCell(Caravan caravan, Map map, CaravanEnterMode enterMode)
+        private static IntVec3 GetWaterCell(Caravan caravan, Map map, CaravanEnterMode enterMode, bool landing = false)
         {
             switch(enterMode)
             {
                 case CaravanEnterMode.Edge:
                     return FindNearEdgeWaterCell(map);
                 case CaravanEnterMode.Center:
-                    return FindCenterWaterCell(map);
+                    return FindCenterWaterCell(map, landing);
                 default:
                     throw new NotImplementedException("ShipEnterMode");
             }
@@ -87,7 +92,7 @@ namespace RimShips
             return CellFinder.RandomCell(map);
         }
 
-        private static IntVec3 FindCenterWaterCell(Map map)
+        private static IntVec3 FindCenterWaterCell(Map map, bool landing = false)
         {
             TraverseParms tp = TraverseParms.For(TraverseMode.NoPassClosedDoors, Danger.Deadly, false);
             MapExtension mapE = MapExtensionUtility.GetExtensionToMap(map);

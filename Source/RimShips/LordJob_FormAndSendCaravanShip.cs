@@ -53,10 +53,11 @@ namespace RimShips.Lords
             shipAssigned = new Dictionary<Pawn, Pawn>();
             List<Pawn> sailorsTmp = this.sailors;
             List<Pawn> prisonersTmp = this.prisoners;
-            
-            foreach(Pawn p in ships)
+            int numPreassign = 0;
+            foreach (Pawn p in ships)
             {
-                for(int i = 0; i < p.GetComp<CompShips>().PawnCountToOperate; i++)
+                numPreassign = p.GetComp<CompShips>().PawnCountToOperate - p.GetComp<CompShips>().AllCrewAboard.Count;
+                for(int i = 0; i < numPreassign; i++)
                 {
                     shipAssigned.Add(sailorsTmp.Pop(), p);
                 }
@@ -68,6 +69,7 @@ namespace RimShips.Lords
                 int j = 0;
                 while(sailorsTmp.Count > 0)
                 {
+                    Log.Message("Passthrough Here");
                     Pawn p = ships[i];
                     shipAssigned.Add(sailorsTmp.Pop(), p);
                     i = (i+2) > ships.Count ? 0 : ++i;
