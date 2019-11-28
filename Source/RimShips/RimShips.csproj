@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="Bill_BoardShip.cs" />
     <Compile Include="CellFinderExtended.cs" />
+    <Compile Include="Command_CooldownAction.cs" />
     <Compile Include="Command_SetRange.cs" />
     <Compile Include="CompShips.cs" />
     <Compile Include="DesignationCategoryDefOf_Ships.cs" />

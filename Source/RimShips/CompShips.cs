@@ -102,13 +102,29 @@ namespace RimShips
                 {
                     foreach (ShipHandler handler in handlers)
                     {
-                        if (handler.role.handlingType == HandlingTypeFlags.Movement || handler.role.handlingType == HandlingTypeFlags.Weapons)
+                        if (handler.role.handlingType == HandlingTypeFlags.Movement)
                         {
                             crewOnShip.AddRange(handler.handlers);
                         }
                     }
                 }
                 return crewOnShip;
+            }
+        }
+
+        public List<Pawn> AllCannonCrew
+        {
+            get
+            {
+                List<Pawn> weaponCrewOnShip = new List<Pawn>();
+                foreach(ShipHandler handler in handlers)
+                {
+                    if (handler.role.handlingType is HandlingTypeFlags.Cannons)
+                    {
+                        weaponCrewOnShip.AddRange(handler.handlers);
+                    }
+                }
+                return weaponCrewOnShip;
             }
         }
 
@@ -161,6 +177,16 @@ namespace RimShips
             }
         }
 
+        public int PawnsInHandler(HandlingTypeFlags handlingTypeFlag)
+        {
+            return handlers.Where(x => x.role.handlingType == handlingTypeFlag).ToList().Sum(x => x.handlers.Count);
+        }
+
+        public int MaxPawnsForHandler(HandlingTypeFlags handlingTypeFlag)
+        {
+            return handlers.Where(x => x.role.handlingType == handlingTypeFlag).ToList().Sum(x => x.role.slots);
+        }
+
         public override void PostDrawExtraSelectionOverlays()
         {
             base.PostDrawExtraSelectionOverlays();
@@ -203,7 +229,7 @@ namespace RimShips
                             ShipCannons cannon = this.Props.cannons.Find(x => x.weaponLocation == WeaponLocation.Port);
                             List<int> tickTillFire = new List<int>();
 
-                            Command_Action portSideCannons = new Command_Action();
+                            Command_CooldownAction portSideCannons = new Command_CooldownAction(cannon);
                             portSideCannons.defaultLabel = "CannonLabel".Translate(cannon.label);
                             portSideCannons.icon = TexCommandShips.BroadsideCannon_Port;
                             portSideCannons.action = delegate ()
@@ -213,7 +239,7 @@ namespace RimShips
                             portSideCannons.hotKey = KeyBindingDefOf.Misc4;
                             foreach (ShipHandler handler in this.handlers)
                             {
-                                if (handler.role.handlingType == HandlingTypeFlags.Weapons && handler.handlers.Count < handler.role.slotsToOperate)
+                                if (handler.role.handlingType == HandlingTypeFlags.Cannons && handler.handlers.Count < handler.role.slotsToOperate)
                                 {
                                     portSideCannons.Disable("NotEnoughCannonCrew".Translate(this.Pawn.LabelShort, handler.role.label));
                                 }
@@ -224,7 +250,7 @@ namespace RimShips
                         {
                             ShipCannons cannon = this.Props.cannons.Find(x => x.weaponLocation == WeaponLocation.Starboard);
 
-                            Command_Action starboardSideCannons = new Command_Action();
+                            Command_CooldownAction starboardSideCannons = new Command_CooldownAction(cannon);
                             starboardSideCannons.defaultLabel = "CannonLabel".Translate(cannon.label);
                             starboardSideCannons.icon = TexCommandShips.BroadsideCannon_Starboard;
                             starboardSideCannons.action = delegate ()
@@ -234,7 +260,7 @@ namespace RimShips
                             starboardSideCannons.hotKey = KeyBindingDefOf.Misc5;
                             foreach(ShipHandler handler in this.handlers)
                             {
-                                if(handler.role.handlingType == HandlingTypeFlags.Weapons && handler.handlers.Count < handler.role.slotsToOperate)
+                                if(handler.role.handlingType == HandlingTypeFlags.Cannons && handler.handlers.Count < handler.role.slotsToOperate)
                                 {
                                     starboardSideCannons.Disable("NotEnoughCannonCrew".Translate(this.Pawn.LabelShort, handler.role.label));
                                 }
@@ -817,31 +843,31 @@ namespace RimShips
                         {
                             if (this.Pawn.Rotation == Rot4.North)
                             {
-                                targetCell = this.Pawn.Position;
-                                targetCell.x -= (int)cannon.Range;
                                 launchCell.x -= projectileOffset;
                                 launchCell.z += offset;
+                                targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                                targetCell.x -= (int)cannon.Range;
                             }
                             else if (this.Pawn.Rotation == Rot4.East)
                             {
-                                targetCell = this.Pawn.Position;
-                                targetCell.z += (int)cannon.Range;
                                 launchCell.x += offset;
                                 launchCell.z += projectileOffset;
+                                targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                                targetCell.z += (int)cannon.Range;
                             }
                             else if (this.Pawn.Rotation == Rot4.South)
                             {
-                                targetCell = this.Pawn.Position;
-                                targetCell.x += (int)cannon.Range;
                                 launchCell.x += projectileOffset;
                                 launchCell.z += offset;
+                                targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                                targetCell.x += (int)cannon.Range;
                             }
                             else if (this.Pawn.Rotation == Rot4.West)
                             {
-                                targetCell = this.Pawn.Position;
-                                targetCell.z -= (int)cannon.Range;
                                 launchCell.x += offset;
                                 launchCell.z -= projectileOffset;
+                                targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                                targetCell.z -= (int)cannon.Range;
                             }
                         }
                         else
@@ -975,11 +1001,12 @@ namespace RimShips
             base.CompTick();
             this.TrySatisfyPawnNeeds();
             this.ResolveSeating();
-
-            foreach(ShipHandler handler in handlers)
+            foreach(ShipCannons cannon in this.Props.cannons)
             {
-                handler.ReservationHandler();
+                cannon.DoTick();
             }
+            foreach(ShipHandler handler in handlers)
+                handler.ReservationHandler();
         }
 
         public void InitializeShip()
@@ -1004,6 +1031,11 @@ namespace RimShips
             this.Pawn.ageTracker.AgeBiologicalTicks = 0;
             this.Pawn.ageTracker.AgeChronologicalTicks = 0;
             this.Pawn.ageTracker.BirthAbsTicks = 0;
+
+            foreach(ShipCannons cannon in this.Props.cannons)
+            {
+                cannon.ship = this;
+            }
         }
         public override void PostExposeData()
         {

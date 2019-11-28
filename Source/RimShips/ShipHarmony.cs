@@ -738,7 +738,8 @@ namespace RimShips
                 IntVec3 position = __instance.Position;
                 Map map2 = map;
 
-                int waterDepth = map.terrainGrid.TerrainAt(__instance.Position).IsWater ? 2 : 0;
+                int waterDepth = map.terrainGrid.TerrainAt(__instance.Position).IsWater ? map.terrainGrid.TerrainAt(__instance.Position) == TerrainDefOf.WaterOceanShallow ||
+                    map.terrainGrid.TerrainAt(__instance.Position) == TerrainDefOf.WaterShallow || map.terrainGrid.TerrainAt(__instance.Position) == TerrainDefOf.WaterMovingShallow ? 1 : 2 : 0;
                 if (waterDepth == 0) Log.Error("Impact Water Depth is 0, but terrain is water.");
                 float explosionRadius = (__instance.def.projectile.explosionRadius / (2f * waterDepth));
                 if (explosionRadius < 1) explosionRadius = 1f;

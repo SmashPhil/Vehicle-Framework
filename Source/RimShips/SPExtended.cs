@@ -248,6 +248,37 @@ namespace RimShips
         {
             return Convert.ToDouble(deg).DegreesToRadians();
         }
+
+        public static Rect VerticalFillableBar(Rect rect, float fillPercent)
+        {
+            return SPExtended.VerticalFillableBar(rect, fillPercent, FillableBarTexture);
+        }
+
+        public static Rect VerticalFillableBar(Rect rect, float fillPercent, Texture2D fillTex)
+        {
+            bool doBorder = rect.height > 15f && rect.width > 20f;
+            return SPExtended.VerticalFillableBar(rect, fillPercent, fillTex, ClearBarTexture, doBorder);
+        }
+
+        public static Rect VerticalFillableBar(Rect rect, float fillPercent, Texture2D fillTex, Texture2D bgTex, bool doBorder = false, bool flip = false)
+        {
+            if(doBorder)
+            {
+                GUI.DrawTexture(rect, bgTex);
+                rect = rect.ContractedBy(3f);
+            }
+            if(bgTex != null)
+            {
+                GUI.DrawTexture(rect, bgTex);
+            }
+            Rect result = rect;
+            rect.height *= fillPercent;
+            GUI.DrawTexture(rect, fillTex);
+            return result;
+        }
+
+        private static readonly Texture2D FillableBarTexture = SolidColorMaterials.NewSolidColorTexture(0.5f, 0.5f, 0.5f, 0.5f);
+        private static readonly Texture2D ClearBarTexture = BaseContent.ClearTex;
     }
 
 }

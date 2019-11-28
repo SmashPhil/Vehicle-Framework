@@ -161,9 +161,9 @@
 					</li>
 					<li>
 						<label>Cannons</label>
-						<handlingType>Weapons</handlingType>
+						<handlingType>Cannons</handlingType>
 						<slots>4</slots>
-						<slotsToOperate>2</slotsToOperate>
+						<slotsToOperate>4</slotsToOperate>
 					</li>
 					<li>
 						<label>Passenger</label>
@@ -180,6 +180,7 @@
 						<projectile>SmashPhil_Cannonball</projectile>
 						<cannonSound>Explosion_PirateCannon</cannonSound>
 						<numberCannons>2</numberCannons>
+						<cooldownTimer>8</cooldownTimer>
 						<spacing>1.75</spacing>
 						<hitFlags>All</hitFlags>
 						<spreadRadius>5</spreadRadius>
@@ -195,6 +196,7 @@
 						<projectile>SmashPhil_Cannonball</projectile>
 						<cannonSound>Explosion_PirateCannon</cannonSound>
 						<numberCannons>2</numberCannons>
+						<cooldownTimer>8</cooldownTimer>
 						<spacing>1.75</spacing>
 						<hitFlags>All</hitFlags>
 						<spreadRadius>5</spreadRadius>

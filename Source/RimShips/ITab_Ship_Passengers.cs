@@ -70,7 +70,7 @@ namespace RimShips.UI
             bool flag = false;
             foreach(ShipHandler handler in Handlers)
             {
-                if(handler.role.handlingType == HandlingTypeFlags.Movement || handler.role.handlingType == HandlingTypeFlags.Weapons)
+                if(handler.role.handlingType != HandlingTypeFlags.None)
                 {
                     Widgets.ListSeparator(ref num, viewRect.width, handler.role.label);
                     foreach(Pawn pawn in handler.handlers.InnerListForReading)

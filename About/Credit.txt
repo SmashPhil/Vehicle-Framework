@@ -1,7 +1,7 @@
-Error Resolving: Erdelf, Dr_Zhivago, dninemfive, Jamaican Castle
+Error Resolving: Erdelf, Dr_Zhivago, dninemfive, Jamaican Castle, Dyrewulfe
 
 Bug Testing: Dr_Zhivago, Kerberos, NECEROS
 
 Textures: MistorLove (Early concepts) , Odz (Boats)
 
-Early Boat Concept and Design based on Jecrell's CompVehicle class.
+Early Boat Concept / Design, and Gizmo Cooldown inspired by Jecrell.

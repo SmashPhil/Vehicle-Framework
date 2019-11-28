@@ -10,6 +10,8 @@
 	<AwaitOrders>Awaiting Orders</AwaitOrders>
 	<RepairShip>Repair {0}</RepairShip>
 	<Disembark>Disembark</Disembark>
+	<SetRange>Set Range</SetRange>
+	<CannonRange>{0} Tiles</CannonRange>
 	<NameIsInvalid>Name invalid for ship.</NameIsInvalid>
 	<ShipGainsName>Your new ship has been named {0}</ShipGainsName>
 	<ActivityIconOnBoardShip>Onboard {0}</ActivityIconOnBoardShip>
