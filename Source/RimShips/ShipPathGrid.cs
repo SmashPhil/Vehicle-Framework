@@ -79,7 +79,7 @@ namespace RimShips.AI
 
         public void RecalculatePerceivedPathCostAt(IntVec3 c)
         {
-            if(c.InBoundsShip(this?.map))
+            if(!c.InBoundsShip(this.map))
             {
                 return;
             }
@@ -94,7 +94,6 @@ namespace RimShips.AI
 
         public void RecalculateAllPerceivedPathCosts()
         {
-            Log.Message("PATHGRID RECALCULATED");
             foreach (IntVec3 c in this.map.AllCells)
             {
                 this.RecalculatePerceivedPathCostAt(c);

@@ -55,7 +55,6 @@ namespace RimShips
         public ThingDef projectile;
         public SoundDef cannonSound;
         private float range;
-        
 
         public int MaxTicks => Mathf.CeilToInt(this.cooldownTimer * 60f);
 

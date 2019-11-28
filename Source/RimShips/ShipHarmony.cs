@@ -1109,7 +1109,7 @@ namespace RimShips
                                                      where x.ThingDef.category == ThingCategory.Pawn
                                                      select x;
             widget.AddSection("ShipSection".Translate(), from x in source
-                                                         where !(((Pawn)x.AnyThing).GetComp<CompShips>() is null)
+                                                         where !(((Pawn)x.AnyThing).GetComp<CompShips>() is null) && !((Pawn)x.AnyThing).OnDeepWater()
                                                          select x);
         }
 
@@ -2451,7 +2451,8 @@ namespace RimShips
             {
                 if (debug)
                 {
-                    Log.Message("-> " + clickCell + " | " + pawn.Map.terrainGrid.TerrainAt(clickCell).LabelCap + " | " + MapExtensionUtility.GetExtensionToMap(pawn.Map).getShipPathGrid.CalculatedCostAt(clickCell));
+                    Log.Message("-> " + clickCell + " | " + pawn.Map.terrainGrid.TerrainAt(clickCell).LabelCap + " | " + MapExtensionUtility.GetExtensionToMap(pawn.Map).getShipPathGrid.CalculatedCostAt(clickCell) +
+                        " - " + MapExtensionUtility.GetExtensionToMap(pawn.Map).getShipPathGrid.pathGrid[pawn.Map.cellIndices.CellToIndex(clickCell)]);
                 }
                 
                 int num = GenRadial.NumCellsInRadius(2.9f);
@@ -2470,7 +2471,7 @@ namespace RimShips
                         if(!ShipReachabilityUtility.CanReachShip(pawn, curLoc, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
                         {
                             if(debug) Log.Message("CANT REACH ");
-                            //__result = new FloatMenuOption("CannotSailToCell".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null);
+                            __result = new FloatMenuOption("CannotSailToCell".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null);
                             return false;
                         }
                         Action action = delegate ()
@@ -3256,6 +3257,12 @@ namespace RimShips
                 }
             }
             return ships;
+        }
+
+        private static bool OnDeepWater(this Pawn pawn)
+        {
+            return pawn.Map.terrainGrid.TerrainAt(pawn.Position) == TerrainDefOf.WaterDeep || pawn.Map.terrainGrid.TerrainAt(pawn.Position) == TerrainDefOf.WaterMovingChestDeep || 
+                pawn.Map.terrainGrid.TerrainAt(pawn.Position) == TerrainDefOf.WaterOceanDeep;
         }
 
         private static void DoItemsListForShip(Rect inRect, ref float curY, ref List<Thing> tmpSingleThing, ITab_Pawn_FormingCaravan instance)

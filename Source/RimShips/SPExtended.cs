@@ -249,15 +249,15 @@ namespace RimShips
             return Convert.ToDouble(deg).DegreesToRadians();
         }
 
-        public static Rect VerticalFillableBar(Rect rect, float fillPercent)
+        public static Rect VerticalFillableBar(Rect rect, float fillPercent, bool flip = false)
         {
-            return SPExtended.VerticalFillableBar(rect, fillPercent, FillableBarTexture);
+            return SPExtended.VerticalFillableBar(rect, fillPercent, FillableBarTexture, flip);
         }
 
-        public static Rect VerticalFillableBar(Rect rect, float fillPercent, Texture2D fillTex)
+        public static Rect VerticalFillableBar(Rect rect, float fillPercent, Texture2D fillTex, bool flip = false)
         {
             bool doBorder = rect.height > 15f && rect.width > 20f;
-            return SPExtended.VerticalFillableBar(rect, fillPercent, fillTex, ClearBarTexture, doBorder);
+            return SPExtended.VerticalFillableBar(rect, fillPercent, fillTex, ClearBarTexture, doBorder, flip);
         }
 
         public static Rect VerticalFillableBar(Rect rect, float fillPercent, Texture2D fillTex, Texture2D bgTex, bool doBorder = false, bool flip = false)
@@ -270,6 +270,11 @@ namespace RimShips
             if(bgTex != null)
             {
                 GUI.DrawTexture(rect, bgTex);
+            }
+            if(!flip)
+            {
+                rect.y += rect.height;
+                rect.height *= -1;
             }
             Rect result = rect;
             rect.height *= fillPercent;

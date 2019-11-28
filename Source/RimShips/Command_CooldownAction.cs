@@ -35,7 +35,7 @@ namespace RimShips
         public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth)
         {
             Text.Font = GameFont.Tiny;
-            Rect rect = new Rect(topLeft.x, topLeft.y, this.GetWidth(maxWidth), 75f);
+            Rect rect = new Rect(topLeft.x, topLeft.y, this.GetWidth(maxWidth), GizmoSize);
             bool flag = false;
             if (Mouse.IsOver(rect))
             {
@@ -106,7 +106,7 @@ namespace RimShips
             if(this.cannon.CooldownTicks > 0)
             {
                 float percent = (float)this.cannon.CooldownTicks / (float)this.cannon.MaxTicks;
-                SPExtended.VerticalFillableBar(new Rect(topLeft.x, topLeft.y + GizmoSize, this.GetWidth(maxWidth), -GizmoSize), percent, FillableBar, ClearBar);
+                SPExtended.VerticalFillableBar(rect, percent, FillableBar, ClearBar);
             }
             if (!this.HighlightTag.NullOrEmpty() && (Find.WindowStack.FloatMenu == null || !Find.WindowStack.FloatMenu.windowRect.Overlaps(rect)))
             {

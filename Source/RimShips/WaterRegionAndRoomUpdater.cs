@@ -87,6 +87,7 @@ namespace RimShips
                 if(WaterGridsUtility.GetRegion(c, this.map, RegionType.Set_All) is null)
                 {
                     WaterRegion region = MapExtensionUtility.GetExtensionToMap(map).getWaterRegionmaker.TryGenerateRegionFrom(c);
+                    
                     if (!(region is null))
                         this.newRegions.Add(region);
                 }
