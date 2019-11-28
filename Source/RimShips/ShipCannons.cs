@@ -32,6 +32,9 @@ namespace RimShips
         public SoundDef cannonSound;
         private float range;
 
+        [DefaultValue(ProjectileHitFlags.All)]
+        public ProjectileHitFlags hitFlags;
+
         [DefaultValue(0f)]
         public float spreadRadius;
 

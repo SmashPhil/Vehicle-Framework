@@ -8,7 +8,6 @@
 		<specialDesignatorClasses>
 			<li>Designator_Cancel</li>
 			<li>Designator_Deconstruct</li>
-			<!-- Possibly add salvaging for ships -->
 		</specialDesignatorClasses>
 	</DesignationCategoryDef>
 </Defs>

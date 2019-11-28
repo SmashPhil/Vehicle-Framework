@@ -181,6 +181,7 @@
 						<cannonSound>Explosion_PirateCannon</cannonSound>
 						<numberCannons>2</numberCannons>
 						<spacing>1.75</spacing>
+						<hitFlags>All</hitFlags>
 						<spreadRadius>5</spreadRadius>
 						<minRange>10</minRange>
 						<maxRange>45</maxRange>
@@ -195,6 +196,7 @@
 						<cannonSound>Explosion_PirateCannon</cannonSound>
 						<numberCannons>2</numberCannons>
 						<spacing>1.75</spacing>
+						<hitFlags>All</hitFlags>
 						<spreadRadius>5</spreadRadius>
 						<minRange>10</minRange>
 						<maxRange>45</maxRange>
