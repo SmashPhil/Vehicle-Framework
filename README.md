@@ -4,4 +4,4 @@ Stay up to date with this mod's progress on [Trello](https://trello.com/b/xOZiNO
 
 **Work In Progress**
 
-It is currently available for Bug Testing. This means that while the game has all (or most of) the features added that make this mod complete, you may encounter some bugs.  Please report them to me so I can fix them.  This mod will be released on Steam after I am confident most (if not all) bugs are fixed.
+It is currently in the final stages of Bug Testing. Download the mod here or wait a week or two for it to be on steam. I will be ironing out any further incompatibilities or bugs that arrise till then. This mod is huge, and also not perfect. Please report any mod incompatabilities or bugs so I can fix them. 
