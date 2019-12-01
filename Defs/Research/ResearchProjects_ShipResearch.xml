@@ -31,15 +31,15 @@
 	</ResearchProjectDef>
 	
 	<ResearchProjectDef>
-		<defName>CargoShip</defName>
-		<label>cargo ship</label>
+		<defName>Galleon</defName>
+		<label>galleon</label>
 		<tab>RimShips</tab>
-		<description>Construct massive freighters for large amounts of cargo. Requires fuel</description>
-		<baseCost>6000</baseCost>
-		<techLevel>Industrial</techLevel>
+		<description>Construct large vessels designed to take control of the seas</description>
+		<baseCost>5000</baseCost>
+		<techLevel>Medieval</techLevel>
 		<prerequisites>
 		<li>Caravel</li>
-		<li>Machining</li>
+		<li>Stonecutting</li>
 		</prerequisites>
 		<researchViewX>2</researchViewX>
 		<researchViewY>0</researchViewY>

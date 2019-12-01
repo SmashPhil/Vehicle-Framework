@@ -10,6 +10,7 @@ using RimWorld;
 using RimWorld.BaseGen;
 using RimWorld.Planet;
 using RimShips.AI;
+using SPExtendedLibrary;
 using UnityEngine;
 using UnityEngine.AI;
 using Verse;

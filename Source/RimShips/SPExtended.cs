@@ -4,7 +4,7 @@ using System.Linq;
 using Verse;
 using UnityEngine;
 
-namespace RimShips
+namespace SPExtendedLibrary
 {
     [StaticConstructorOnStartup]
     public static class SPExtended
@@ -113,6 +113,20 @@ namespace RimShips
             T item = list[rand.Next(0, list.Count)];
             list.Remove(item);
             return item;
+        }
+
+        public static void SPShuffle<T>(this IList<T> list)
+        {
+            System.Random rand = new System.Random();
+            int n = list.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = rand.Next(n + 1);
+                T value = list[k];
+                list[k] = list[n];
+                list[n] = value;
+            }
         }
 
         public static List<T> ConvertToList<T>(this T typeObject)

@@ -2,7 +2,7 @@
 
 <Defs>
 	<ThingDef ParentName="BaseBullet">
-		<defName>SmashPhil_Cannonball</defName>
+		<defName>Caravel_cannonball</defName>
 		<label>Cannon Ball</label>
 		<graphicData>
 			<texPath>Things/Projectile/ShellHighExplosive</texPath>
@@ -11,13 +11,32 @@
 		</graphicData>
 		<thingClass>Projectile_Explosive</thingClass>
 		<projectile>
-			<damageDef>Bomb</damageDef>
-			<speed>35</speed>
+			<damageDef>CaravelCannonball</damageDef>
+			<speed>25</speed>
 			<explosionRadius>2</explosionRadius>
 			<flyOverhead>false</flyOverhead>
 			<soundHitThickRoof>Artillery_HitThickRoof</soundHitThickRoof>
 			<soundExplode>MortarBomb_Explode</soundExplode>
-			<soundImpactAnticipate>MortarRound_PreImpact</soundImpactAnticipate>
+			<soundAmbient>MortarRound_Ambient</soundAmbient>
+		</projectile>
+	</ThingDef>
+	
+	<ThingDef ParentName="BaseBullet">
+		<defName>Galleon_cannonball</defName>
+		<label>Cannon Ball</label>
+		<graphicData>
+			<texPath>Things/Projectile/ShellHighExplosive</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+			<shaderType>TransparentPostLight</shaderType>
+		</graphicData>
+		<thingClass>Projectile_Explosive</thingClass>
+		<projectile>
+			<damageDef>GalleonCannonball</damageDef>
+			<speed>30</speed>
+			<explosionRadius>1</explosionRadius>
+			<flyOverhead>false</flyOverhead>
+			<soundHitThickRoof>Artillery_HitThickRoof</soundHitThickRoof>
+			<soundExplode>MortarBomb_Explode</soundExplode>
 			<soundAmbient>MortarRound_Ambient</soundAmbient>
 		</projectile>
 	</ThingDef>

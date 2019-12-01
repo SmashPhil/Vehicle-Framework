@@ -2,24 +2,24 @@
 
 <Defs>
 	<PawnKindDef>
-		<defName>Caravel</defName>
-		<label>caravel</label>
+		<defName>Galleon</defName>
+		<label>galleon</label>
 		<defaultFactionType>PlayerColony</defaultFactionType>
 		<aiAvoidCover>false</aiAvoidCover>
 		<destroyGearOnDrop>true</destroyGearOnDrop>
-		<race>Ships_Caravel</race>
+		<race>Ships_Galleon</race>
 		<backstoryCategories>
 			<li>Medieval</li>
 		</backstoryCategories>
-		<combatPower>20</combatPower>
+		<combatPower>50</combatPower>
 		<lifeStages>
 			<li>
 				<bodyGraphicData>
 					<texPath>Ships/caravel/CaravelBoat/Caravel</texPath>
 					<graphicClass>Graphic_Multi</graphicClass>
-					<drawSize>(6,11)</drawSize>
+					<drawSize>(8,17)</drawSize>
 					<shaderType>CutoutComplex</shaderType>
-					<color>(155,0,0)</color>
+					<color>(30,30,30)</color>
 					<shadowData>
 						<volume>(0.4,0.1,0.4)</volume>
 					</shadowData>
@@ -29,9 +29,9 @@
 	</PawnKindDef>
 	
 	<BodyPartDef>
-		<defName>caravel_Body</defName>
+		<defName>galleon_Body</defName>
 		<label>body</label>
-		<hitPoints>150</hitPoints>
+		<hitPoints>500</hitPoints>
 		<skinCovered>false</skinCovered>
 		<solid>true</solid>
 		<bleedRate>0</bleedRate>
@@ -43,9 +43,29 @@
 	</BodyPartDef>
 	
 	<BodyPartDef>
-		<defName>caravel_Mast</defName>
+		<defName>galleon_Mast1</defName>
 		<label>mast</label>
-		<hitPoints>5</hitPoints>
+		<hitPoints>30</hitPoints>
+		<skinCovered>false</skinCovered>
+		<solid>true</solid>
+		<bleedRate>0</bleedRate>
+		<alive>false</alive>
+	</BodyPartDef>
+	
+	<BodyPartDef>
+		<defName>galleon_Mast2</defName>
+		<label>mast</label>
+		<hitPoints>30</hitPoints>
+		<skinCovered>false</skinCovered>
+		<solid>true</solid>
+		<bleedRate>0</bleedRate>
+		<alive>false</alive>
+	</BodyPartDef>
+	
+	<BodyPartDef>
+		<defName>galleon_Mast3</defName>
+		<label>mast</label>
+		<hitPoints>30</hitPoints>
 		<skinCovered>false</skinCovered>
 		<solid>true</solid>
 		<bleedRate>0</bleedRate>
@@ -53,10 +73,10 @@
 	</BodyPartDef>
 	
 	<BodyDef>
-		<defName>caravel_Body</defName>
-		<label>caravelbody</label>
+		<defName>galleon_Body</defName>
+		<label>galleonbody</label>
 		<corePart>
-			<def>caravel_Body</def>
+			<def>galleon_Body</def>
 			<height>Middle</height>
 			<depth>Outside</depth>
 			<groups>
@@ -65,17 +85,25 @@
 			
 			<parts>
 				<li>
-					<def>caravel_Mast</def>
-					<coverage>0.4</coverage>
+					<def>galleon_Mast1</def>
+					<coverage>0.12</coverage>
+				</li>
+				<li>
+					<def>galleon_Mast2</def>
+					<coverage>0.12</coverage>
+				</li>
+				<li>
+					<def>galleon_Mast3</def>
+					<coverage>0.12</coverage>
 				</li>
 			</parts>
 		</corePart>
 	</BodyDef>
 	
 	<ThingDef ParentName="BaseShip">
-		<defName>Ships_Caravel</defName>
-		<label>caravel</label>
-		<description>A medium sized trade ship designed to be both fast and versatile</description>
+		<defName>Ships_Galleon</defName>
+		<label>galleon</label>
+		<description>A large sized war vessel designed for ship to ship combat.</description>
 		
 		<statBases>
 			<MoveSpeed>5</MoveSpeed>
@@ -85,7 +113,7 @@
 			<MarketValue>18000</MarketValue>
 		</statBases>
 		
-		<size>(3,8)</size>
+		<size>(4,13)</size>
 		
 		<tools>
 			<li>
@@ -109,8 +137,8 @@
 			<hasGenders>false</hasGenders>
 			<foodType>None</foodType>
 
-			<body>caravel_Body</body>
-			<baseBodySize>100.0</baseBodySize>
+			<body>galleon_Body</body>
+			<baseBodySize>60.0</baseBodySize>
 			<baseHealthScale>1.0</baseHealthScale>
 			<lifeStageAges>
 				<li>
@@ -137,8 +165,8 @@
 				<armament>DriverNeeded</armament>
 				<shipPowerType>Sails</shipPowerType>
 				<nameable>true</nameable>
-				<buildDef>CaravelBlueprint</buildDef>
-				<ticksBetweenRepair>200</ticksBetweenRepair>
+				<buildDef>GalleonBlueprint</buildDef>
+				<ticksBetweenRepair>350</ticksBetweenRepair>
 				
 				<healthLabel_Healthy>Operational</healthLabel_Healthy>
 				<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
@@ -162,8 +190,8 @@
 					<li>
 						<label>Cannons</label>
 						<handlingType>Cannons</handlingType>
-						<slots>4</slots>
-						<slotsToOperate>4</slotsToOperate>
+						<slots>6</slots>
+						<slotsToOperate>6</slotsToOperate>
 					</li>
 					<li>
 						<label>Passenger</label>
@@ -177,31 +205,31 @@
 						<label>Portside</label>
 						<weaponType>Broadside</weaponType>
 						<weaponLocation>Port</weaponLocation>
-						<projectile>Caravel_cannonball</projectile>
+						<projectile>Galleon_cannonball</projectile>
 						<cannonSound>Explosion_PirateCannon</cannonSound>
-						<numberCannons>2</numberCannons>
-						<baseTicksBetweenShots>30</baseTicksBetweenShots>
-						<cooldownTimer>8</cooldownTimer>
-						<spacing>1.75</spacing>
+						<numberCannons>6</numberCannons>
+						<cooldownTimer>10</cooldownTimer>
+						<baseTicksBetweenShots>15</baseTicksBetweenShots>
+						<spacing>0.75</spacing>
 						<hitFlags>All</hitFlags>
-						<spreadRadius>5</spreadRadius>
-						<minRange>10</minRange>
-						<maxRange>45</maxRange>
+						<spreadRadius>4</spreadRadius>
+						<minRange>15</minRange>
+						<maxRange>55</maxRange>
 					</li>
 					<li>
 						<label>Starboard</label>
 						<weaponType>Broadside</weaponType>
 						<weaponLocation>Starboard</weaponLocation>
-						<projectile>Caravel_cannonball</projectile>
+						<projectile>Galleon_cannonball</projectile>
 						<cannonSound>Explosion_PirateCannon</cannonSound>
-						<numberCannons>2</numberCannons>
-						<baseTicksBetweenShots>30</baseTicksBetweenShots>
-						<cooldownTimer>8</cooldownTimer>
-						<spacing>1.75</spacing>
+						<numberCannons>6</numberCannons>
+						<cooldownTimer>10</cooldownTimer>
+						<baseTicksBetweenShots>15</baseTicksBetweenShots>
+						<spacing>0.75</spacing>
 						<hitFlags>All</hitFlags>
-						<spreadRadius>5</spreadRadius>
-						<minRange>10</minRange>
-						<maxRange>45</maxRange>
+						<spreadRadius>4</spreadRadius>
+						<minRange>15</minRange>
+						<maxRange>55</maxRange>
 					</li>
 				</cannons>
 			</li>

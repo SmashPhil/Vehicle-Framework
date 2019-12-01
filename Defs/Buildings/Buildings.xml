@@ -6,9 +6,10 @@
 	<ThingDef Name="ShipBase" Abstract="True">
 		<thingClass>Building</thingClass>
 		<selectable>true</selectable>
+		<altitudeLayer>Building</altitudeLayer>
 		<terrainAffordanceNeeded>ShallowWater</terrainAffordanceNeeded>
 		<repairEffect>Repair</repairEffect>
-		<leaveResourcesWhenKilled>false</leaveResourcesWhenKilled>
+		<leaveResourcesWhenKilled>true</leaveResourcesWhenKilled>
 		<passability>Impassable</passability>
 		<fillPercent>1</fillPercent>
 		<neverMultiSelect>true</neverMultiSelect>
@@ -16,9 +17,8 @@
 		<clearBuildingArea>true</clearBuildingArea>
 		<category>Building</category>
 		<rotatable>true</rotatable>
-		<statBases>
-			<SellPriceFactor>0.8</SellPriceFactor>
-		</statBases>
+		<blockWind>true</blockWind>
+		<useHitPoints>true</useHitPoints>
 	</ThingDef>
 	
 	<!-- Rowboat -->
@@ -34,9 +34,8 @@
 
 		<statBases>
 			<MaxHitPoints>400</MaxHitPoints>
-			<WorkToBuild>15000</WorkToBuild> <!-- CHANGE LATER -->
+			<WorkToBuild>15000</WorkToBuild>
 			<Flammability>75</Flammability>
-			<Beauty>2</Beauty>
 		</statBases>
 		<size>(1,3)</size>
 		
@@ -90,6 +89,43 @@
 		<modExtensions>
 			<li Class="RimShips.Build.SpawnThingBuilt">
 				<thingToSpawn>Caravel</thingToSpawn>
+				<soundFinished>ShipBigConstruction</soundFinished>
+			</li>
+		</modExtensions>
+			
+	</ThingDef>
+	
+	<ThingDef ParentName="ShipBase">
+		<defName>GalleonBlueprint</defName>
+		<label>Galleon</label>
+		<description>A large sized war vessel designed for ship to ship combat.</description>
+		<graphicData>
+			<texPath>Ships/caravel/CaravelBoat/Caravel_north</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+			<drawSize>(8,17)</drawSize>
+		</graphicData>
+		
+		<statBases>
+			<MaxHitPoints>12000</MaxHitPoints>
+			<WorkToBuild>150000</WorkToBuild>
+			<Flammability>75</Flammability>
+			<Beauty>5</Beauty>
+		</statBases>
+		<size>(4,13)</size>
+		
+		<researchPrerequisites>
+			<li>Galleon</li>
+		</researchPrerequisites>
+		
+		<costList>
+			<WoodLog>150</WoodLog>
+		</costList>
+		
+		<soundImpactDefault>BulletImpact_Wood</soundImpactDefault>
+		
+		<modExtensions>
+			<li Class="RimShips.Build.SpawnThingBuilt">
+				<thingToSpawn>Galleon</thingToSpawn>
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
 		</modExtensions>

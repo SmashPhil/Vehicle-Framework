@@ -6,6 +6,7 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 using RimShips.AI;
+using SPExtendedLibrary;
 
 namespace RimShips
 {

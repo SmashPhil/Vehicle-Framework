@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<ThingDef ParentName="BaseGas">
+		<defName>Gas_Smoke_CannonSmall</defName>
+		<label>smoke</label>
+		<graphicData>
+			<texPath>Things/Gas/Puff</texPath>
+			<drawSize>(1,1)</drawSize>
+			<color>(1.0,1.0,1.0,0.25)</color>
+		</graphicData>
+		<gas>
+			<expireSeconds>
+				<min>.15</min>
+				<max>.15</max>
+			</expireSeconds>
+			<blockTurretTracking>true</blockTurretTracking>
+			<accuracyPenalty>0.5</accuracyPenalty>
+			<rotationSpeed>0</rotationSpeed>
+		</gas>
+	</ThingDef>
+ </Defs>

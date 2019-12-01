@@ -60,6 +60,7 @@
     <Compile Include="DesignationCategoryDefOf_Ships.cs" />
     <Compile Include="Dialog_GiveShipName.cs" />
     <Compile Include="DutyDefOf_Ships.cs" />
+    <Compile Include="EffectsDefOf_Ships.cs" />
     <Compile Include="EnterMapUtilityBoats.cs" />
     <Compile Include="FleshTypeDefOf_Ships.cs" />
     <Compile Include="GatherAnimalsAndSlavesForShipsUtility.cs" />

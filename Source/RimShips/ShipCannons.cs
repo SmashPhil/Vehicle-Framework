@@ -6,6 +6,7 @@ using UnityEngine;
 using RimWorld;
 using Verse;
 using Harmony;
+using SPExtendedLibrary;
 
 namespace RimShips
 {
@@ -32,7 +33,7 @@ namespace RimShips
 
         public void DoTick()
         {
-            if(this.CooldownTicks > 0)
+            if(this.CooldownTicks > 0 && this.Reloading)
             {
                 CooldownTicks--;
             }
@@ -45,9 +46,13 @@ namespace RimShips
             this.CooldownTicks = MaxTicks;
             return true;
         }
+
+        public int TicksPerShot => baseTicksBetweenShots * (this.ship.AllCannonCrew.Count / this.cannonCrewMax);
+
         public bool Reloading { get; set; }
         public int CooldownTicks { get; set; }
         public CompShips ship;
+        public int cannonCrewMax;
 
         public string label = "Label Not Set";
         public WeaponType weaponType;
@@ -79,10 +84,7 @@ namespace RimShips
         [DefaultValue(0)]
         public float spacing;
 
-        [DefaultValue(5)]
-        public int damageDealt;
-
-        [DefaultValue(2f)]
-        public float explosionRadius;
+        [DefaultValue(50)]
+        public int baseTicksBetweenShots;
     }
 }

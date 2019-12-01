@@ -21,6 +21,7 @@ using RimShips.Build;
 using RimShips.Jobs;
 using RimShips.Lords;
 using RimShips.UI;
+using SPExtendedLibrary;
 using OpCodes = System.Reflection.Emit.OpCodes;
 
 namespace RimShips
@@ -482,7 +483,6 @@ namespace RimShips
 
                 Thing thing = ThingMaker.MakeThing(shipDef);
                 thing.SetFactionDirect(__instance.Faction);
-                int hitpoints = __instance.MaxHitPoints / 3;
 
                 if (Current.ProgramState == ProgramState.Playing)
                 {
@@ -532,8 +532,8 @@ namespace RimShips
                         __instance.Destroy();
                     }
                 }
-                Thing t = GenSpawn.Spawn(thing, position, map, rotation, WipeMode.Vanish, false);
-                t.HitPoints = t.MaxHitPoints / 10;
+                thing.HitPoints = thing.MaxHitPoints / 10;
+                Thing t = GenSpawn.Spawn(thing, position, map, rotation, WipeMode.FullRefund, false);
                 return false;
             }
             return true;
@@ -896,7 +896,6 @@ namespace RimShips
 
         public static void GizmosForShipCaravans(ref IEnumerable<Gizmo> __result, Pawn pawn, Texture2D ___AddToCaravanCommand)
         {
-            Command_Action joinCaravan = new Command_Action();
             if(pawn.Spawned)
             {
                 bool anyCaravanToJoin = false;
@@ -910,6 +909,7 @@ namespace RimShips
                 }
                 if(anyCaravanToJoin && Dialog_FormCaravan.AllSendablePawns(pawn.Map, false).Contains(pawn))
                 {
+                    Command_Action joinCaravan = new Command_Action();
                     joinCaravan = new Command_Action
                     {
                         defaultLabel = "CommandAddToCaravan".Translate(),
@@ -952,11 +952,11 @@ namespace RimShips
                         },
                         hotKey = KeyBindingDefOf.Misc7
                     };
+                    List<Gizmo> gizmos = __result.ToList();
+                    gizmos.Add(joinCaravan);
+                    __result = gizmos;
                 }
             }
-            List<Gizmo> gizmos = __result.ToList();
-            gizmos.Add(joinCaravan);
-            __result = gizmos;
         }
 
         #endregion Gizmos
