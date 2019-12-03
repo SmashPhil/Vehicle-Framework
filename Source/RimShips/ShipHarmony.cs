@@ -79,6 +79,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(HediffUtility), name: nameof(HediffUtility.CanHealFromTending)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(ShipsDontHealTended)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(Widgets), parameters: new Type[] { typeof(float), typeof(float), typeof(Thing) }, name: nameof(Widgets.InfoCardButton)), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(InfoCardShipsTranspiler)));
 
             //Rendering
             harmony.Patch(original: AccessTools.Method(typeof(Pawn_RotationTracker), name: nameof(Pawn_RotationTracker.UpdateRotation)),
@@ -305,6 +308,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(Frame), name: nameof(Frame.CompleteConstruction)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(CompleteConstructionShip)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(ListerBuildingsRepairable), name: nameof(ListerBuildingsRepairable.Notify_BuildingRepaired)),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(Notify_RepairedShip)));
 
             //Extra
             harmony.Patch(original: AccessTools.Property(type: typeof(MapPawns), name: nameof(MapPawns.FreeColonistsSpawnedOrInPlayerEjectablePodsCount)).GetGetMethod(), prefix: null,
@@ -562,6 +568,34 @@ namespace RimShips
             return true;
         }
 
+        public static IEnumerable<CodeInstruction> InfoCardShipsTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+        {
+            List<CodeInstruction> instructionList = instructions.ToList();
+
+            for(int i = 0; i < instructionList.Count; i++)
+            {
+                CodeInstruction instruction = instructionList[i];
+
+                if (instruction.opcode == OpCodes.Call && instruction.operand == AccessTools.Property(type: typeof(Find), name: nameof(Find.WindowStack)).GetGetMethod())
+                {
+                    Label label = ilg.DefineLabel();
+                    yield return new CodeInstruction(opcode: OpCodes.Ldarg_2);
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), parameters: new Type[] { typeof(Thing) }, name: nameof(ShipHarmony.IsShip)));
+                    yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
+
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Property(type: typeof(Find), name: nameof(Find.WindowStack)).GetGetMethod());
+                    yield return new CodeInstruction(opcode: OpCodes.Ldarg_2);
+                    yield return new CodeInstruction(opcode: OpCodes.Newobj, operand: AccessTools.Constructor(type: typeof(Dialog_InfoCard_Ship), new Type[] { typeof(Thing) }));
+                    yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Method(type: typeof(WindowStack), name: nameof(WindowStack.Add)));
+                    yield return new CodeInstruction(opcode: OpCodes.Ldc_I4_1);
+                    yield return new CodeInstruction(opcode: OpCodes.Ret);
+
+                    instruction.labels.Add(label);
+                }
+
+                yield return instruction;
+            }
+        }
         #endregion HealthStats
 
         #region Rendering
@@ -610,7 +644,7 @@ namespace RimShips
 
             yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
             yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(type: typeof(PawnRenderer), name: "pawn"));
-            yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(IsShip)));
+            yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), parameters: new Type[] { typeof(Pawn) }, name: nameof(ShipHarmony.IsShip)));
             yield return new CodeInstruction(opcode: OpCodes.Brfalse, operand: label);
 
             yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
@@ -785,7 +819,7 @@ namespace RimShips
 
                     yield return new CodeInstruction(opcode: OpCodes.Brtrue, label);
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipHarmony.IsShip)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), parameters: new Type[] { typeof(Pawn) }, name: nameof(ShipHarmony.IsShip)));
                     yield return new CodeInstruction(opcode: OpCodes.Br, label2);
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldc_I4_1) { labels = new List<Label> { label } };
@@ -889,10 +923,12 @@ namespace RimShips
                     {
                         gizmos.Add(c2);
                     }
-
-                    foreach(Gizmo c3 in __instance.GetComp<CompCannons>()?.CompGetGizmosExtra())
+                    if(__instance.HasCannons())
                     {
-                        gizmos.Add(c3);
+                        foreach (Gizmo c3 in __instance.GetComp<CompCannons>().CompGetGizmosExtra())
+                        {
+                            gizmos.Add(c3);
+                        }
                     }
                 }
                 __result = gizmos;
@@ -1342,7 +1378,7 @@ namespace RimShips
                     i++;
                     yield return instruction;
                     yield return new CodeInstruction(opcode: OpCodes.Ldloc_0);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(IsShip)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), parameters: new Type[] { typeof(Pawn) }, name: nameof(ShipHarmony.IsShip)));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldc_I4_0);
@@ -2357,10 +2393,32 @@ namespace RimShips
             }
             return true;
         }
+
+        public static bool Notify_RepairedShip(Building b, ListerBuildingsRepairable __instance)
+        {
+            if (b.def.HasModExtension<SpawnThingBuilt>() && b.def.GetModExtension<SpawnThingBuilt>()?.thingToSpawn != null)
+            {
+                Pawn ship = PawnGenerator.GeneratePawn(b.def.GetModExtension<SpawnThingBuilt>().thingToSpawn);
+                Map map = b.Map;
+                IntVec3 position = b.Position;
+                Rot4 rotation = b.Rotation;
+
+                AccessTools.Method(type: typeof(ListerBuildingsRepairable), name: "UpdateBuilding").Invoke(__instance, new object[] { b });
+                if (!(b.def.GetModExtension<SpawnThingBuilt>().soundFinished is null))
+                {
+                    b.def.GetModExtension<SpawnThingBuilt>().soundFinished.PlayOneShot(new TargetInfo(position, map, false));
+                }
+                ship.SetFaction(b.Faction);
+                b.Destroy(DestroyMode.Vanish);
+                GenSpawn.Spawn(ship, position, map, rotation, WipeMode.FullRefund, false);
+                return false;
+            }
+            return true;
+        }
         #endregion Construction
 
         #region Extra
-        
+
         public static void FreeColonistsInShips(ref int __result, List<Pawn> ___pawnsSpawned)
         {
             List<Pawn> ships = ___pawnsSpawned.Where(x => IsShip(x)).ToList();
@@ -2840,6 +2898,11 @@ namespace RimShips
             return !(p?.TryGetComp<CompShips>() is null) ? true : false;
         }
 
+        public static bool IsShip(Thing t)
+        {
+            return IsShip(t as Pawn);
+        }
+
         public static bool HasShip(List<Pawn> pawns)
         {
             return pawns?.Any(x => IsShip(x)) ?? false;
@@ -2848,6 +2911,16 @@ namespace RimShips
         public static bool HasShip(Caravan c)
         {
             return (c is null) ? (currentFormingCaravan is null) ? false : HasShip(TransferableUtility.GetPawnsFromTransferables(currentFormingCaravan.transferables)) : HasShip(c?.PawnsListForReading);
+        }
+
+        public static bool HasCannons(this Pawn p)
+        {
+            return !(p?.TryGetComp<CompCannons>() is null) ? true : false;
+        }
+
+        public static bool HasCannons(List<Pawn> pawns)
+        {
+            return pawns.All(x => x.HasCannons());
         }
 
         public static List<Pawn> GrabPawnsFromMapPawnsInShip(List<Pawn> allPawns)

@@ -32,6 +32,8 @@ namespace RimShips
             this.spreadRadius = reference.spreadRadius;
             this.minRange = reference.minRange;
             this.maxRange = reference.maxRange;
+            this.offset = reference.offset;
+            this.projectileOffset = reference.projectileOffset;
         }
         public void ExposeData()
         {
@@ -106,8 +108,14 @@ namespace RimShips
         [DefaultValue(1)]
         public int numberCannons;
 
-        [DefaultValue(0)]
+        [DefaultValue(0f)]
         public float spacing;
+
+        [DefaultValue(0f)]
+        public float offset;
+
+        [DefaultValue(0f)]
+        public float projectileOffset;
 
         [DefaultValue(50)]
         public int baseTicksBetweenShots;

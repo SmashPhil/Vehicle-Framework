@@ -13,7 +13,7 @@
 		<projectile>
 			<damageDef>CaravelCannonball</damageDef>
 			<speed>25</speed>
-			<explosionRadius>2</explosionRadius>
+			<explosionRadius>1</explosionRadius>
 			<flyOverhead>false</flyOverhead>
 			<soundHitThickRoof>Artillery_HitThickRoof</soundHitThickRoof>
 			<soundExplode>MortarBomb_Explode</soundExplode>

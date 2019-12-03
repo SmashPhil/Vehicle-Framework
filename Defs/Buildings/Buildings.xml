@@ -72,7 +72,6 @@
 			<MaxHitPoints>12000</MaxHitPoints>
 			<WorkToBuild>150000</WorkToBuild>
 			<Flammability>75</Flammability>
-			<Beauty>5</Beauty>
 		</statBases>
 		<size>(3,8)</size>
 		
@@ -109,7 +108,6 @@
 			<MaxHitPoints>12000</MaxHitPoints>
 			<WorkToBuild>1</WorkToBuild>
 			<Flammability>75</Flammability>
-			<Beauty>5</Beauty>
 		</statBases>
 		<size>(4,13)</size>
 		

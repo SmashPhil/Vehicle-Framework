@@ -146,27 +146,27 @@ namespace SPExtendedLibrary
             return sourceList.Intersect(searchingList).Any();
         }
 
-        public static void ClampToMap(Pawn pawn, ref IntVec3 entryPoint, Map map, int extraOffset = 0)
+        public static void ClampToMap(Pawn pawn, ref IntVec3 exitPoint, Map map, int extraOffset = 0)
         {
             int x = pawn.def.size.x;
             int z = pawn.def.size.z;
             int offset = x > z ? x+extraOffset : z+extraOffset;
 
-            if (entryPoint.x < offset)
+            if (exitPoint.x < offset)
             {
-                entryPoint.x = (int)(offset / 2);
+                exitPoint.x = (int)(offset / 2);
             }
-            else if (entryPoint.x >= (map.Size.x - (offset / 2)))
+            else if (exitPoint.x >= (map.Size.x - (offset / 2)))
             {
-                entryPoint.x = (int)(map.Size.x - (offset / 2));
+                exitPoint.x = (int)(map.Size.x - (offset / 2));
             }
-            if (entryPoint.z < offset)
+            if (exitPoint.z < offset)
             {
-                entryPoint.z = (int)(offset / 2);
+                exitPoint.z = (int)(offset / 2);
             }
-            else if (entryPoint.z > (map.Size.z - (offset / 2)))
+            else if (exitPoint.z > (map.Size.z - (offset / 2)))
             {
-                entryPoint.z = (int)(map.Size.z - (offset / 2));
+                exitPoint.z = (int)(map.Size.z - (offset / 2));
             }
         }
         public static IntVec3 ClampToMap(this Pawn pawn, IntVec3 spawnPoint, Map map, int extraOffset = 0)
@@ -178,7 +178,7 @@ namespace SPExtendedLibrary
             {
                 spawnPoint.x = (int)(offset / 2);
             }
-            else if (spawnPoint.x >= (map.Size.x - Mathf.Ceil(offset / 2)))
+            else if (spawnPoint.x >= (map.Size.x - (offset / 2)))
             {
                 spawnPoint.x = (int)(map.Size.x - (offset / 2));
             }
@@ -271,6 +271,10 @@ namespace SPExtendedLibrary
             return new SPTuple<float, float>(xPrime, yPrime);
         }
 
+        public static SPTuple<float, float> ReflectPointAcrossAxis(float x, float y)
+        {
+            return new SPTuple<float, float>(y, x);
+        }
         public static double DegreesToRadians(this double deg)
         {
             return deg * Math.PI / 180;
