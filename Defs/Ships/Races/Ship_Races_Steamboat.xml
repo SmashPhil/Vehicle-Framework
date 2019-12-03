@@ -11,7 +11,7 @@
 		<lifeStages>
 			<li>
 				<bodyGraphicData>
-					<texPath>Ships/caravel/CaravelBare/Caravel_v1</texPath>
+					<texPath>Ships/caravel/CaravelBoat/Caravel</texPath>
 					<graphicClass>Graphic_Multi</graphicClass>
 					<drawSize>(20,52)</drawSize>
 					<shadowData>
@@ -122,7 +122,7 @@
 		</race>
 
 		<comps>	
-			<li Class = "RimShips.ShipProperties">
+			<li Class = "RimShips.CompProperties_Ships">
 				<driverRequired>true</driverRequired>
 				<downable>false</downable>
 				<movesWhenDowned>false</movesWhenDowned>

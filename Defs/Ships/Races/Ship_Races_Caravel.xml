@@ -15,7 +15,7 @@
 		<lifeStages>
 			<li>
 				<bodyGraphicData>
-					<texPath>Ships/caravel/CaravelBoat/Caravel</texPath>
+					<texPath>Ships/caravel/CaravelBoat/Caravel_cannons</texPath>
 					<graphicClass>Graphic_Multi</graphicClass>
 					<drawSize>(6,11)</drawSize>
 					<shaderType>CutoutComplex</shaderType>
@@ -127,7 +127,7 @@
 		</race>
 
 		<comps>	
-			<li Class = "RimShips.ShipProperties">
+			<li Class = "RimShips.CompProperties_Ships">
 				<driverRequired>true</driverRequired>
 				<downable>false</downable>
 				<movesWhenDowned>false</movesWhenDowned>
@@ -171,7 +171,7 @@
 						<slots>10</slots>
 					</li>
 				</roles>
-				
+				<!--
 				<cannons>
 					<li>
 						<label>Portside</label>
@@ -204,6 +204,7 @@
 						<maxRange>45</maxRange>
 					</li>
 				</cannons>
+				-->
 			</li>
 		</comps>
 	</ThingDef>

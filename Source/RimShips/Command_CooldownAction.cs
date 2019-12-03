@@ -21,15 +21,9 @@ namespace RimShips
 {
     public class Command_CooldownAction : Command_Action
     {
-
-        public Command_CooldownAction(ShipCannons cannon)
-        {
-            this.cannon = cannon;
-        }
-
         public override void ProcessInput(Event ev)
         {
-            if(this.cannon.ActivateTimer())
+            if (this.cannon.ActivateTimer())
                 base.ProcessInput(ev);
         }
 
@@ -104,9 +98,9 @@ namespace RimShips
                 }
                 TooltipHandler.TipRegion(rect, tip);
             }
-            if(this.cannon.CooldownTicks > 0)
+            if(this.cannon.cooldownTicks > 0)
             {
-                float percent = (float)this.cannon.CooldownTicks / (float)this.cannon.MaxTicks;
+                float percent = (float)this.cannon.cooldownTicks / (float)this.cannon.MaxTicks;
                 SPExtended.VerticalFillableBar(rect, percent, FillableBar, ClearBar);
             }
             if (!this.HighlightTag.NullOrEmpty() && (Find.WindowStack.FloatMenu == null || !Find.WindowStack.FloatMenu.windowRect.Overlaps(rect)))
@@ -135,9 +129,8 @@ namespace RimShips
             return new GizmoResult(GizmoState.Clear, null);
         }
 
-        
-
-        private ShipCannons cannon;
+        public CannonHandler cannon;
+        public CompCannons comp;
         private const float GizmoSize = 75f;
         private readonly Texture2D FillableBar = SolidColorMaterials.NewSolidColorTexture(0.5f, 0.5f, 0.5f, 0.25f);
         private readonly Texture2D ClearBar = SolidColorMaterials.NewSolidColorTexture(Color.clear);

@@ -1,7 +1,7 @@
-Error Resolving: Erdelf, Dr_Zhivago, dninemfive, Jamaican Castle, Dyrewulfe
+Error Resolving: Erdelf, Dr_Zhivago, dninemfive, Jamaican Castle, Dyrewulfe, Pelador
 
-Bug Testing: Dr_Zhivago, Kerberos, NECEROS
+Bug Testing: Dr_Zhivago, NECEROS, Kerberos
 
-Textures: MistorLove (Early concepts) , Odz (Boats)
+Textures: MistorLove (Early boat texture concepts) , Odz (Boat textures)
 
-Early Boat Concept / Design, and Gizmo Cooldown inspired by Jecrell.
+Initial Boat design inspired by Jecrell.

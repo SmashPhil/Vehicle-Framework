@@ -889,6 +889,11 @@ namespace RimShips
                     {
                         gizmos.Add(c2);
                     }
+
+                    foreach(Gizmo c3 in __instance.GetComp<CompCannons>()?.CompGetGizmosExtra())
+                    {
+                        gizmos.Add(c3);
+                    }
                 }
                 __result = gizmos;
             }
@@ -2152,10 +2157,10 @@ namespace RimShips
 
         public static bool GenerateTaleFromShip(Pawn pawn, TaleData_Pawn __result)
         {
-            if(IsShip(pawn) && pawn.GetComp<CompShips>().AllPawnsAboard.Any())
+            if(IsShip(pawn))
             {
                 __result = TaleData_Pawn.GenerateFrom(pawn.GetComp<CompShips>().AllCapablePawns.First());
-                return false;
+                return true;
             }
             return true;
         }
@@ -2396,7 +2401,7 @@ namespace RimShips
                     }
                     __instance?.StopDead();
                 }
-                else if(ShipHarmony.ShipEdgeOfMap(___pawn, __instance.nextCell, ___pawn.Map))
+                else if(SPExtended.ClampHitboxToMap(___pawn, __instance.nextCell, ___pawn.Map))
                 {
                     ___pawn.jobs.curDriver.Notify_PatherFailed();
                     __instance.StopDead();
@@ -2730,23 +2735,6 @@ namespace RimShips
         }
 
         #region HelperFunctions
-
-        private static bool ShipEdgeOfMap(Pawn p, IntVec3 nextCell, Map map)
-        {
-            int x = p.def.size.x % 2 == 0 ? p.def.size.x / 2 : (p.def.size.x + 1) / 2;
-            int z = p.def.size.z % 2 == 0 ? p.def.size.z / 2 : (p.def.size.z + 1) / 2;
-
-            int hitbox = x > z ? x : z;
-            if(nextCell.x + hitbox >= map.Size.x || nextCell.z + hitbox >= map.Size.z)
-            {
-                return true;
-            }
-            if(nextCell.x - hitbox <= 0 || nextCell.z - hitbox <= 0)
-            {
-                return true;
-            }
-            return false;
-        }
 
         private static bool IsWaterTile(int tile)
         {

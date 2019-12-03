@@ -16,6 +16,7 @@
 	<ShipGainsName>Your new ship has been named {0}</ShipGainsName>
 	<ActivityIconOnBoardShip>Onboard {0}</ActivityIconOnBoardShip>
 	<IsIncapableOfRamming>Ram {0}</IsIncapableOfRamming>
+	<BoardTooSoonFail>Cannot order Board Ship twice in same tick</BoardTooSoonFail>
 	
 	<ShipSunkLabel>Ship Sunk</ShipSunkLabel>
 	<ShipSunkDeep>{0} has sunk to the depths of the ocean and has taken with it: {1}</ShipSunkDeep>

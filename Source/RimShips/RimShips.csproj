@@ -53,9 +53,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bill_BoardShip.cs" />
+    <Compile Include="CannonHandler.cs" />
     <Compile Include="CellFinderExtended.cs" />
     <Compile Include="Command_CooldownAction.cs" />
     <Compile Include="Command_SetRange.cs" />
+    <Compile Include="CompProperties_Cannons.cs" />
     <Compile Include="CompShips.cs" />
     <Compile Include="DesignationCategoryDefOf_Ships.cs" />
     <Compile Include="Dialog_GiveShipName.cs" />
@@ -98,13 +100,13 @@
     <Compile Include="RegionCostCalculatorShips.cs" />
     <Compile Include="RegionCostCalculatorWrapperShips.cs" />
     <Compile Include="RimshipsModSettings.cs" />
-    <Compile Include="ShipCannons.cs" />
+    <Compile Include="CompCannons.cs" />
     <Compile Include="ShipHandler.cs" />
     <Compile Include="ShipHarmony.cs" />
     <Compile Include="ShipPassengerCardUtility.cs" />
     <Compile Include="ShipPathFinder.cs" />
     <Compile Include="ShipPathGrid.cs" />
-    <Compile Include="ShipProperties.cs" />
+    <Compile Include="CompProperties_Ships.cs" />
     <Compile Include="ShipReachability.cs" />
     <Compile Include="ShipReachabilityCache.cs" />
     <Compile Include="ShipReachabilityImmediate.cs" />

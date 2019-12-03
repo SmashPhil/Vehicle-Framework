@@ -17,7 +17,7 @@ namespace RimShips
 
         public List<Pawn> currentlyReserving = new List<Pawn>();
 
-        private List<Pawn> tempSavedPawns = new List<Pawn>();
+        /*private List<Pawn> tempSavedPawns = new List<Pawn>();*/
 
         public int uniqueID = -1;
         public Pawn shipPawn;
@@ -42,17 +42,7 @@ namespace RimShips
 
         public ShipHandler(Pawn newShip, ShipRole newRole)
         {
-            uniqueID = Find.UniqueIDsManager.GetNextThingID();
-            shipPawn = newShip;
-            role = newRole;
-            if (handlers is null)
-            {
-                handlers = new ThingOwner<Pawn>(this, false, LookMode.Reference);
-            }
-        }
-
-        public ShipHandler(Pawn newShip, ShipRole newRole, List<Pawn> newHandlers)
-        {
+            List<Pawn> newHandlers = new List<Pawn>();
             uniqueID = Find.UniqueIDsManager.GetNextThingID();
             shipPawn = newShip;
             role = newRole;
@@ -105,25 +95,29 @@ namespace RimShips
             Scribe_References.Look(ref shipPawn, "shipPawn");
             Scribe_Deep.Look(ref role, "role");
 
-            if(Scribe.mode == LoadSaveMode.Saving)
+            if (Scribe.mode == LoadSaveMode.Saving)
             {
-                tempSavedPawns.Clear();
+                /*tempSavedPawns.Clear();
                 tempSavedPawns.AddRange(handlers.InnerListForReading);
-                handlers.RemoveAll(x => x is Pawn);
+                handlers.RemoveAll(x => x is Pawn);*/
+                this.handlers.RemoveAll(x => x.Destroyed);
             }
 
-            Scribe_Collections.Look(ref tempSavedPawns, "tempSavedPawns", LookMode.Reference);
+            /*Scribe_Collections.Look(ref tempSavedPawns, "tempSavedPawns", LookMode.Reference);*/
             Scribe_Collections.Look(ref currentlyReserving, "currentlyReserving", LookMode.Deep);
-            Scribe_Deep.Look(ref handlers, "handlers", this);
+            Scribe_Deep.Look<ThingOwner<Pawn>>(ref handlers, "handlers", new object[]
+            {
+                this
+            });
 
-            if(Scribe.mode == LoadSaveMode.PostLoadInit || Scribe.mode == LoadSaveMode.Saving)
+            /*if(Scribe.mode == LoadSaveMode.PostLoadInit || Scribe.mode == LoadSaveMode.Saving)
             {
                 for(int j = 0; j < tempSavedPawns.Count; j++)
                 {
                     handlers.TryAdd(tempSavedPawns[j], true);
                 }
                 tempSavedPawns.Clear();
-            }
+            }*/
         }
 
         public string GetUniqueLoadID()

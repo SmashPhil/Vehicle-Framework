@@ -1,28 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <Defs>
-
-	<WorldObjectDef>
-		<defName>Fleet</defName>
-		<label>fleet</label>
-		<description>A group of ships for military or trading purposes</description>
-		<worldObjectClass>Caravan</worldObjectClass>
-		<texture>fleetIcon</texture>
-		<useDynamicDrawer>true</useDynamicDrawer>
-		<allowCaravanIncidentsWhichGenerateMap>true</allowCaravanIncidentsWhichGenerateMap>
-		<IncidentTargetTags>
-			<li>Caravan</li> <!-- Change later -->
-		</IncidentTargetTags>
-		<inspectorTabs>
-			<li>WITab_Caravan_Health</li>
-			<li>WITab_Caravan_Needs</li>
-			<li>WITab_Caravan_Gear</li>
-			<li>WITab_Caravan_Social</li>
-			<li>WITab_Caravan_Items</li>
-			<!--CHANGE ALL THIS TO INCLUDE FLEET RELATED TABS -->
-		</inspectorTabs>
-	</WorldObjectDef>
-	
 	<WorldObjectDef>
 		<defName>DebugSettlement</defName>
 		<label>Original Location</label>

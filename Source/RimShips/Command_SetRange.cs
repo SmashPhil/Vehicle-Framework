@@ -25,37 +25,21 @@ namespace RimShips
         public override void ProcessInput(Event ev)
         {
             base.ProcessInput(ev);
-            if (this.cannons is null) this.cannons = new List<ShipCannons>();
-            if (!this.cannons.ContainsAllOfList(activeCannons)) this.cannons.AddRange(this.activeCannons);
 
-            int startLevel = (int)this.activeCannons.Min(x => x.Range);
-            int minRange = (int)this.activeCannons.Max(x => x.minRange);
-            int maxRange = (int)this.activeCannons.Min(x => x.maxRange);
+            int startLevel = (int)this.cannonComp.Range;
+            int minRange = (int)this.cannonComp.MinRange;
+            int maxRange = (int)this.cannonComp.MaxRange;
 
             Func<int, string> textGetter;
             textGetter = ((int x) => "CannonRange".Translate(x));
             Dialog_Slider window = new Dialog_Slider(textGetter, (int)minRange, (int)maxRange, delegate (int value)
             {
-                foreach (ShipCannons shipcannon in this.cannons)
-                {
-                    shipcannon.Range = (float)value;
-                }
+                cannonComp.Range = (float)value;
             }, startLevel);
             Find.WindowStack.Add(window);
         }
 
-        public override bool InheritInteractionsFrom(Gizmo other)
-        {
-            if (this.cannons is null)
-            {
-                this.cannons = new List<ShipCannons>();
-            }
-            this.cannons.AddRange(((Command_SetRange)other).activeCannons);
-            return false;
-        }
-
-        public List<ShipCannons> activeCannons;
-
-        private List<ShipCannons> cannons;
+        public List<CannonHandler> activeCannons;
+        public CompCannons cannonComp;
     }
 }

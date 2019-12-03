@@ -9,20 +9,33 @@ namespace RimShips
     public enum ShipPermissions {NotAllowed, DriverNeeded, NoDriverNeeded}
     public enum ShipType {Paddles, Sails, Steam, Fuel, Nuclear}
 
-    public class ShipProperties : CompProperties
+    public class CompProperties_Ships : CompProperties
     {
-        public bool driverRequired = true;
-        public bool downable = false;
-        public bool movesWhenDowned = false;
-        public float ticksBetweenRepair = 250f;
 
-        public bool nameable = false;
-        public ThingDef buildDef;
+        public CompProperties_Ships()
+        {
+            this.compClass = typeof(CompShips);
+        }
+
+        [DefaultValue(true)]
+        public bool driverRequired;
+
+        [DefaultValue(false)]
+        public bool downable;
+
+        [DefaultValue(false)]
+        public bool movesWhenDowned;
+
+        [DefaultValue(250f)]
+        public float ticksBetweenRepair;
+
+        [DefaultValue(false)]
+        public bool nameable;
 
         public string healthLabel_Healthy = "Operational";
         public string healthLabel_Injured = "Needs Repairs";
         public string healthLabel_Immobile = "Inoperable";
-        public string healthLabel_Dead = "Sunken";
+        public string healthLabel_Dead = "Sinking";
         public string healthLabel_Beached = "Beached";
 
         public ShipPermissions loadCargo = ShipPermissions.NotAllowed;
@@ -31,17 +44,7 @@ namespace RimShips
         public ShipType shipPowerType = ShipType.Sails;
 
         public List<ShipRole> roles  = new List<ShipRole>();
-        public List<ShipCannons> cannons = new List<ShipCannons>();
-        public SoundDef soundWhileMoving = null;
-
-        public ShipProperties()
-        {
-            this.compClass = typeof(CompShips);
-        }
-
-        public ShipProperties(Type compClass) : base(compClass)
-        {
-            this.compClass = compClass;
-        }
+        public SoundDef soundWhileMoving;
+        public ThingDef buildDef;
     }
 }

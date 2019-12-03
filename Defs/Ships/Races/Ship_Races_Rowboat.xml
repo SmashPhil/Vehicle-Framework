@@ -125,7 +125,7 @@
 		</race>
 
 		<comps>			
-			<li Class = "RimShips.ShipProperties">
+			<li Class = "RimShips.CompProperties_Ships">
 				<driverRequired>true</driverRequired>
 				<downable>false</downable>
 				<movesWhenDowned>false</movesWhenDowned>

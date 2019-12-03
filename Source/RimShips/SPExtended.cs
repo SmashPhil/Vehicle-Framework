@@ -193,6 +193,23 @@ namespace SPExtendedLibrary
             return spawnPoint;
         }
 
+        public static bool ClampHitboxToMap(Pawn p, IntVec3 nextCell, Map map)
+        {
+            int x = p.def.size.x % 2 == 0 ? p.def.size.x / 2 : (p.def.size.x + 1) / 2;
+            int z = p.def.size.z % 2 == 0 ? p.def.size.z / 2 : (p.def.size.z + 1) / 2;
+
+            int hitbox = x > z ? x : z;
+            if (nextCell.x + hitbox >= map.Size.x || nextCell.z + hitbox >= map.Size.z)
+            {
+                return true;
+            }
+            if (nextCell.x - hitbox <= 0 || nextCell.z - hitbox <= 0)
+            {
+                return true;
+            }
+            return false;
+        }
+
         public static List<IntVec3> PawnOccupiedCells(this Pawn pawn, IntVec3 centerPoint)
         {
             int x = pawn.def.size.x % 2 == 0 ? pawn.def.size.x + 1 : pawn.def.size.x;
@@ -295,6 +312,15 @@ namespace SPExtendedLibrary
             rect.height *= fillPercent;
             GUI.DrawTexture(rect, fillTex);
             return result;
+        }
+
+        public static Texture2D ConvertToTexture2D(this RenderTexture rTex)
+        {
+            Texture2D tex2d = new Texture2D(512, 512, TextureFormat.RGB24, false);
+            RenderTexture.active = rTex;
+            tex2d.ReadPixels(new Rect(0, 0, rTex.width, rTex.height), 0, 0);
+            tex2d.Apply();
+            return tex2d;
         }
 
         private static readonly Texture2D FillableBarTexture = SolidColorMaterials.NewSolidColorTexture(0.5f, 0.5f, 0.5f, 0.5f);
