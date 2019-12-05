@@ -285,6 +285,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Property(type: typeof(Pawn_DraftController), name: nameof(Pawn_DraftController.Drafted)).GetSetMethod(),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(DraftedShipsCanMove)));
+            harmony.Patch(original: AccessTools.Property(type: typeof(Pawn_DraftController), name: nameof(Pawn_DraftController.Drafted)).GetGetMethod(), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(UndraftedShipsStopPathing)));
             harmony.Patch(original: AccessTools.Method(type: typeof(FloatMenuMakerMap), name: "CanTakeOrder"), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(CanShipTakeOrder)));
@@ -737,6 +740,17 @@ namespace RimShips
             return true;
         }
 
+        public static void UndraftedShipsStopPathing(Pawn_DraftController __instance, bool __result)
+        {
+            if(IsShip(__instance?.pawn))
+            {
+                if(__result is false && __instance?.pawn?.pather?.curPath != null)
+                {
+                    if(debug) Log.Message("Pawn_PathFollower is null: " + (__instance.pawn?.pather is null) + " | PawnPath is null: " + (__instance.pawn?.pather?.curPath is null));
+                    PatherFailedHelper(ref __instance.pawn.pather, __instance.pawn);
+                }
+            }
+        }
         private static void CanShipTakeOrder(Pawn pawn, ref bool __result)
         {
             if(__result is false)
@@ -2708,6 +2722,10 @@ namespace RimShips
             int start = c.Tile;
             if (HasShip(c))
             {
+                if(!c.PawnsListForReading.All(x => IsShip(x)))
+                {
+                    ToggleDocking(c, false);
+                }
                 if (start < 0 || start >= ___fields.Length || tile < 0 || tile >= ___fields.Length)
                 {
                     __result = false;
@@ -3030,7 +3048,7 @@ namespace RimShips
         private static void PatherFailedHelper(ref Pawn_PathFollower instance, Pawn pawn)
         {
             instance.StopDead();
-            pawn.jobs.curDriver.Notify_PatherFailed();
+            pawn?.jobs?.curDriver?.Notify_PatherFailed();
         }
 
         private static void PatherArrivedHelper(Pawn_PathFollower instance, Pawn pawn)
