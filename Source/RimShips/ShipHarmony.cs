@@ -364,6 +364,7 @@ namespace RimShips
                     i++;
                     instruction = instructionList[i];
                     yield return new CodeInstruction(opcode: OpCodes.Pop);
+                    yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
                     yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipHarmony.CustomFloatBeach)));
                 }
                 yield return instruction;
@@ -3301,10 +3302,11 @@ namespace RimShips
             instance.nextCellCostLeft = (float)num;
             //Doors?
         }
-        public static float CustomFloatBeach()
+        public static float CustomFloatBeach(Map map)
         {
+            float mapSizeMultiplier = (float)(map.Size.x >= map.Size.z ? map.Size.x : map.Size.z) / 250f;
             float beach = 60f; //Rand.Range(40f, 80f);
-            return (float)(beach + (beach * (RimShipMod.mod.settings.beachMultiplier) / 100f));
+            return (float)(beach + (beach * (RimShipMod.mod.settings.beachMultiplier) / 100f)) * mapSizeMultiplier;
         }
 
         private static int PushSettlementToCoast(int tileID, Faction faction)

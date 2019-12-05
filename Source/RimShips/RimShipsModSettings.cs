@@ -54,7 +54,9 @@ namespace RimShips
             Listing_Standard listingStandard = new Listing_Standard();
 
             listingStandard.Begin(inRect);
-            listingStandard.Label("BeachGenMultiplier".Translate(Mathf.Round(settings.beachMultiplier)));
+            bool beachLarge = settings.beachMultiplier > 150f;
+            listingStandard.Label(beachLarge ? "BeachGenMultiplierLarge".Translate(Mathf.Round(settings.beachMultiplier)) : "BeachGenMultiplier".Translate(Mathf.Round(settings.beachMultiplier)),
+                -1f, beachLarge ? "BeachGenMultiplierLargeTooltip".Translate() : "BeachGenMultiplierTooltip".Translate());
             settings.beachMultiplier = listingStandard.Slider(settings.beachMultiplier, 0f, 200f);
             listingStandard.GapLine(16f);
 

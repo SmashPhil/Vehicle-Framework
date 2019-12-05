@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <LanguageData>
-	<RimShips>RimShips</RimShips>
+	<RimShips>Boats</RimShips>
 	<BoardShip>Board {0} as {1}  [{2}]</BoardShip>
 	<BoardShipGroup>Board {0}</BoardShipGroup>
 	<BoardShipGroupFail>Board {0} (Too many selected)</BoardShipGroupFail>
@@ -42,6 +42,9 @@
 	<CommandAttackDockDisable>Cannot attack {0} while docked at their Settlement</CommandAttackDockDisable>
 	
 	<BeachGenMultiplier>Beach Size Multiplier: {0}%</BeachGenMultiplier>
+	<BeachGenMultiplierLarge>Beach Size Multiplier: {0}% (Test Sizes)</BeachGenMultiplierLarge>
+	<BeachGenMultiplierTooltip>Increase the amount of water on the coastline.</BeachGenMultiplierTooltip>
+	<BeachGenMultiplierLargeTooltip>Current number is larger than recommended. The ocean can and may take up to as large as 80% of the map and larger maps will be scattereed with lakes.</BeachGenMultiplierLargeTooltip>
 	<ForceSettlementCoastOption>Push Settlements to Coast</ForceSettlementCoastOption>
 	<ForceSettlementCoastTooltip>Push nearby faction settlements to the coast if within given radius</ForceSettlementCoastTooltip>
 	<ForceSettlementCoast>Push Settlement to Coast Radius: {0}</ForceSettlementCoast>
