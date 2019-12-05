@@ -137,7 +137,7 @@ namespace RimShips
             {
                 foreach(SPExtended.SPTuple<Stack<int>, CannonHandler> side in broadsideFire)
                 {
-                    side.Second.Reloading = true;
+                    side.Second.reloading = true;
                 }
                 this.broadsideFire.Clear();
             }
@@ -147,7 +147,7 @@ namespace RimShips
                 for (int i = 0; i < this.broadsideFire.Count; i++)
                 {
                     SPExtended.SPTuple<Stack<int>, CannonHandler> side = broadsideFire[i];
-                    side.Second.Reloading = false;
+                    side.Second.reloading = false;
 
                     if (Find.TickManager.TicksGame % side.Second.TicksPerShot == 0)
                     {
@@ -155,7 +155,7 @@ namespace RimShips
                     }
                     if (!side.First.Any())
                     {
-                        side.Second.Reloading = true;
+                        side.Second.reloading = true;
                         broadsideFire.RemoveAt(i);
                     }
                 }
@@ -213,36 +213,35 @@ namespace RimShips
                         {
                             if (this.Pawn.Rotation == Rot4.East && this.CompShip.Angle == -45)
                             {
-                                targetCell = this.Pawn.Position;
-                                targetCell.x -= (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
-                                targetCell.z -= (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                                 launchCell.x += angleOffset.First;
                                 launchCell.z += angleOffset.Second;
+                                targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                                targetCell.x -= (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
+                                targetCell.z -= (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                             }
                             else if (this.Pawn.Rotation == Rot4.East && this.CompShip.Angle == 45)
                             {
-                                targetCell = this.Pawn.Position;
-                                targetCell.x += (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
-                                targetCell.z += (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                                 launchCell.x += angleOffset.First;
                                 launchCell.z += angleOffset.Second;
+                                targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                                targetCell.x += (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
+                                targetCell.z += (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                             }
                             else if (this.Pawn.Rotation == Rot4.West && this.CompShip.Angle == -45)
                             {
-                                targetCell = this.Pawn.Position;
-                                targetCell.x += (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
-                                targetCell.z += (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                                 launchCell.x -= angleOffset.First;
                                 launchCell.z += angleOffset.Second;
-
+                                targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                                targetCell.x += (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
+                                targetCell.z += (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                             }
                             else if (this.Pawn.Rotation == Rot4.West && this.CompShip.Angle == 45)
                             {
-                                targetCell = this.Pawn.Position;
-                                targetCell.x -= (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
-                                targetCell.z -= (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                                 launchCell.x -= angleOffset.First;
                                 launchCell.z += angleOffset.Second;
+                                targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                                targetCell.x -= (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
+                                targetCell.z -= (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                             }
                         }
                         break;
@@ -251,66 +250,66 @@ namespace RimShips
                         {
                             if (this.Pawn.Rotation == Rot4.North)
                             {
-                                targetCell = this.Pawn.Position;
-                                targetCell.x += (int)this.Range;
                                 launchCell.x += projectileOffset;
                                 launchCell.z += offset;
+                                targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                                targetCell.x += (int)this.Range;
                             }
                             else if (this.Pawn.Rotation == Rot4.East)
                             {
-                                targetCell = this.Pawn.Position;
-                                targetCell.z -= (int)this.Range;
                                 launchCell.z -= projectileOffset;
                                 launchCell.x += offset;
+                                targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                                targetCell.z -= (int)this.Range;
                             }
                             else if (this.Pawn.Rotation == Rot4.South)
                             {
-                                targetCell = this.Pawn.Position;
-                                targetCell.x -= (int)this.Range;
                                 launchCell.x -= projectileOffset;
                                 launchCell.z += offset;
+                                targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                                targetCell.x -= (int)this.Range;
                             }
                             else if (this.Pawn.Rotation == Rot4.West)
                             {
-                                targetCell = this.Pawn.Position;
-                                targetCell.z += (int)this.Range;
                                 launchCell.z += projectileOffset;
                                 launchCell.x += offset;
+                                targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                                targetCell.z += (int)this.Range;
                             }
                         }
                         else
                         {
                             if (this.Pawn.Rotation == Rot4.East && this.CompShip.Angle == -45)
                             {
-                                targetCell = this.Pawn.Position;
-                                targetCell.x += (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
-                                targetCell.z += (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                                 launchCell.x -= angleOffset.First;
                                 launchCell.z -= angleOffset.Second;
+                                targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                                targetCell.x += (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
+                                targetCell.z += (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                             }
                             else if (this.Pawn.Rotation == Rot4.East && this.CompShip.Angle == 45)
                             {
-                                targetCell = this.Pawn.Position;
-                                targetCell.x -= (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
-                                targetCell.z -= (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                                 launchCell.x -= angleOffset.First;
                                 launchCell.z -= angleOffset.Second;
+                                targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                                targetCell.x -= (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
+                                targetCell.z -= (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                             }
                             else if (this.Pawn.Rotation == Rot4.West && this.CompShip.Angle == -45)
                             {
-                                targetCell = this.Pawn.Position;
-                                targetCell.x -= (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
-                                targetCell.z -= (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                                 launchCell.x += angleOffset.First;
                                 launchCell.z -= angleOffset.Second;
+                                targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                                targetCell.x -= (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
+                                targetCell.z -= (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                             }
                             else if (this.Pawn.Rotation == Rot4.West && this.CompShip.Angle == 45)
                             {
-                                targetCell = this.Pawn.Position;
-                                targetCell.x += (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
-                                targetCell.z += (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                                 launchCell.x += angleOffset.First;
                                 launchCell.z -= angleOffset.Second;
+                                targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                                targetCell.x += (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
+                                targetCell.z += (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                             }
                         }
                         break;
@@ -380,36 +379,35 @@ namespace RimShips
                     {
                         if (this.Pawn.Rotation == Rot4.East && this.CompShip.Angle == -45)
                         {
-                            targetCell = this.Pawn.Position;
-                            targetCell.x -= (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z -= (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                             launchCell.x += angleOffset.First;
                             launchCell.z += angleOffset.Second;
+                            targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                            targetCell.x -= (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z -= (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                         }
                         else if (this.Pawn.Rotation == Rot4.East && this.CompShip.Angle == 45)
                         {
-                            targetCell = this.Pawn.Position;
-                            targetCell.x += (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z += (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                             launchCell.x += angleOffset.First;
                             launchCell.z += angleOffset.Second;
+                            targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                            targetCell.x += (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z += (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                         }
                         else if (this.Pawn.Rotation == Rot4.West && this.CompShip.Angle == -45)
                         {
-                            targetCell = this.Pawn.Position;
-                            targetCell.x += (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z += (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                             launchCell.x -= angleOffset.First;
                             launchCell.z += angleOffset.Second;
-
+                            targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                            targetCell.x += (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z += (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                         }
                         else if (this.Pawn.Rotation == Rot4.West && this.CompShip.Angle == 45)
                         {
-                            targetCell = this.Pawn.Position;
-                            targetCell.x -= (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z -= (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                             launchCell.x -= angleOffset.First;
                             launchCell.z += angleOffset.Second;
+                            targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                            targetCell.x -= (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z -= (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                         }
                     }
                     break;
@@ -418,66 +416,66 @@ namespace RimShips
                     {
                         if (this.Pawn.Rotation == Rot4.North)
                         {
-                            targetCell = this.Pawn.Position;
-                            targetCell.x += (int)this.Range;
                             launchCell.x += projectileOffset;
                             launchCell.z += offset;
+                            targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                            targetCell.x += (int)this.Range;
                         }
                         else if (this.Pawn.Rotation == Rot4.East)
                         {
-                            targetCell = this.Pawn.Position;
-                            targetCell.z -= (int)this.Range;
                             launchCell.z -= projectileOffset;
                             launchCell.x += offset;
+                            targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                            targetCell.z -= (int)this.Range;
                         }
                         else if (this.Pawn.Rotation == Rot4.South)
                         {
-                            targetCell = this.Pawn.Position;
-                            targetCell.x -= (int)this.Range;
                             launchCell.x -= projectileOffset;
                             launchCell.z += offset;
+                            targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                            targetCell.x -= (int)this.Range;
                         }
                         else if (this.Pawn.Rotation == Rot4.West)
                         {
-                            targetCell = this.Pawn.Position;
-                            targetCell.z += (int)this.Range;
                             launchCell.z += projectileOffset;
                             launchCell.x += offset;
+                            targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                            targetCell.z += (int)this.Range;
                         }
                     }
                     else
                     {
                         if (this.Pawn.Rotation == Rot4.East && this.CompShip.Angle == -45)
                         {
-                            targetCell = this.Pawn.Position;
-                            targetCell.x += (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z += (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                             launchCell.x += angleOffset.Second;
                             launchCell.z += angleOffset.First;
+                            targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                            targetCell.x += (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z += (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                         }
                         else if (this.Pawn.Rotation == Rot4.East && this.CompShip.Angle == 45)
                         {
-                            targetCell = this.Pawn.Position;
-                            targetCell.x -= (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z -= (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                             launchCell.x -= angleOffset.Second;
                             launchCell.z -= angleOffset.First;
+                            targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                            targetCell.x -= (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z -= (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                         }
                         else if (this.Pawn.Rotation == Rot4.West && this.CompShip.Angle == -45)
                         {
-                            targetCell = this.Pawn.Position;
-                            targetCell.x -= (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z -= (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                             launchCell.x += angleOffset.Second;
                             launchCell.z -= angleOffset.First;
+                            targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                            targetCell.x -= (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z -= (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                         }
                         else if (this.Pawn.Rotation == Rot4.West && this.CompShip.Angle == 45)
                         {
-                            targetCell = this.Pawn.Position;
-                            targetCell.x += (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z += (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                             launchCell.x -= angleOffset.Second;
                             launchCell.z += angleOffset.First;
+                            targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
+                            targetCell.x += (int)(Math.Cos(this.CompShip.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z += (int)(Math.Sin(this.CompShip.Angle.DegreesToRadians()) * this.Range);
                         }
                     }
                     break;
@@ -493,7 +491,7 @@ namespace RimShips
             Projectile projectile2 = (Projectile)GenSpawn.Spawn(projectile, this.Pawn.Position, this.Pawn.Map, WipeMode.Vanish);
             if (cannon.cannonSound is null) SoundDefOf_Ships.Explosion_PirateCannon.PlayOneShot(new TargetInfo(this.Pawn.Position, this.Pawn.Map, false));
             else { cannon.cannonSound.PlayOneShot(new TargetInfo(this.Pawn.Position, this.Pawn.Map, false)); }
-            GenSpawn.Spawn(EffectsDefOf_Ships.Gas_Smoke_CannonSmall, new IntVec3((int)launchCell.x, (int)launchCell.y, (int)launchCell.z), this.Pawn.Map);
+            //GenSpawn.Spawn(EffectsDefOf_Ships.Gas_Smoke_CannonSmall, new IntVec3((int)launchCell.x, (int)launchCell.y, (int)launchCell.z), this.Pawn.Map);
             projectile2.Launch(this.Pawn, launchCell, c, target, cannon.hitFlags);
         }
 
@@ -570,12 +568,12 @@ namespace RimShips
                 }
             }
         }
-
         public override void PostExposeData()
         {
             base.PostExposeData();
             Scribe_Collections.Look(ref broadsideFire, "broadsideFire", LookMode.Deep);
             Scribe_Collections.Look(ref cannons, "cannons", LookMode.Deep);
+            Scribe_Values.Look(ref range, "range", this.MaxRange);
         }
     }
 }

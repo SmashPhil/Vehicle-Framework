@@ -34,5 +34,7 @@ namespace RimShips
         public static readonly Texture2D BroadsideCannon_Port = ContentFinder<Texture2D>.Get("UI/Cannon_Left", true);
 
         public static readonly Texture2D BroadsideCannon_Starboard = ContentFinder<Texture2D>.Get("UI/Cannon_Right", true);
+
+        public static readonly Texture2D Rename = ContentFinder<Texture2D>.Get("UI/Buttons/Rename", true);
     }
 }

@@ -24,10 +24,10 @@
 		</statBases>
 		
 		<inspectorTabs>
-			<li>ITab_Pawn_FormingCaravan</li>
-			<li>RimShips.UI.ITab_Ship_Cargo</li>
-			<li>RimShips.UI.ITab_Ship_Passengers</li>
 			<li>RimShips.UI.ITab_Ship_Health</li>
+			<li>RimShips.UI.ITab_Ship_Passengers</li>
+			<li>RimShips.UI.ITab_Ship_Cargo</li>
+			<li>ITab_Pawn_FormingCaravan</li>
 		</inspectorTabs>
 		
 		<comps>

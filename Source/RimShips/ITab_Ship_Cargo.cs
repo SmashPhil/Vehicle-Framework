@@ -56,6 +56,15 @@ namespace RimShips.UI
             Widgets.BeginScrollView(outRect, ref this.scrollPosition, viewRect, true);
             float num = 0f;
             this.TryDrawMassInfo(ref num, viewRect.width);
+            if(this.SelPawnForCargo.def.GetCompProperties<CompProperties_Ships>().nameable)
+            {
+                Rect rectRename = new Rect(this.size.x - 55f, 0f, 30f, 30f);
+                TooltipHandler.TipRegion(rectRename, "RenameShip".Translate(this.SelPawnForCargo));
+                if (Widgets.ButtonImage(rectRename, TexCommandShips.Rename))
+                {
+                    this.SelPawnForCargo.GetComp<CompShips>().Rename();
+                }
+            }
             if(this.IsVisible)
             {
                 Widgets.ListSeparator(ref num, viewRect.width, "Cargo".Translate());

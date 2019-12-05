@@ -72,11 +72,11 @@
 	
 	<ThingDef ParentName="BaseShip">
 		<defName>Ships_Canoe</defName>
-		<label>canoe</label>
+		<label>Row Boat</label>
 		<description>A small two passanger boat capable of short trips</description>
 		
 		<statBases>
-			<MoveSpeed>4</MoveSpeed>
+			<MoveSpeed>3.6</MoveSpeed>
 			<Mass>300</Mass>
 			<ArmorRating_Blunt>0.1</ArmorRating_Blunt>
 			<ArmorRating_Sharp>0.2</ArmorRating_Sharp>
@@ -132,6 +132,7 @@
 				
 				<loadCargo>NotAllowed</loadCargo>
 				<moveable>DriverNeeded</moveable>
+				<riverTraversability>Creek</riverTraversability>
 				<armament>DriverNeeded</armament>
 				<shipPowerType>Paddles</shipPowerType>
 				<nameable>false</nameable>

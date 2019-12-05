@@ -164,6 +164,20 @@ namespace RimShips
             }
         }
 
+        public ShipHandler NextAvailableHandler
+        {
+            get
+            {
+                foreach(ShipHandler handler in this.handlers)
+                {
+                    if(handler.AreSlotsAvailable)
+                    {
+                        return handler;
+                    }
+                }
+                return null;
+            }
+        }
         public int SeatsAvailable
         {
             get
@@ -213,18 +227,19 @@ namespace RimShips
         {
             if(!this.Pawn.Dead)
             {
-                Command_Action unloadAll = new Command_Action();
-                unloadAll.defaultLabel = "Disembark".Translate();
-                unloadAll.icon = TexCommandShips.UnloadAll;
-                unloadAll.action = delegate ()
+                if (!this.Pawn.Drafted)
                 {
-                    DisembarkAll();
-                    this.Pawn.drafter.Drafted = false;
-                };
-                unloadAll.hotKey = KeyBindingDefOf.Misc2;
-                yield return unloadAll;
-                if(!this.Pawn.Drafted)
-                {
+                    Command_Action unloadAll = new Command_Action();
+                    unloadAll.defaultLabel = "Disembark".Translate();
+                    unloadAll.icon = TexCommandShips.UnloadAll;
+                    unloadAll.action = delegate ()
+                    {
+                        DisembarkAll();
+                        this.Pawn.drafter.Drafted = false;
+                    };
+                    unloadAll.hotKey = KeyBindingDefOf.Misc2;
+                    yield return unloadAll;
+                
                     foreach (ShipHandler handler in handlers)
                     {
                         for (int i = 0; i < handler.handlers.Count; i++)
@@ -245,6 +260,33 @@ namespace RimShips
             yield break;
         }
 
+        public void MultiplePawnFloatMenuOptions(List<Pawn> pawns)
+        {
+            List<FloatMenuOption> options = new List<FloatMenuOption>();
+            FloatMenuOption opt1 = new FloatMenuOption("BoardShipGroup".Translate(this.Pawn.LabelShort), delegate ()
+            {
+                List<IntVec3> cells = this.Pawn.OccupiedRect().Cells.ToList();
+                foreach (Pawn p in pawns)
+                {
+                    if(cells.Contains(p.Position))
+                        continue;
+                    Job job = new Job(JobDefOf_Ships.Board, this.parent);
+                    p.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
+                    ShipHandler handler = this.NextAvailableHandler;
+                    this.GiveLoadJob(p, handler);
+                    this.ReserveSeat(p, handler);
+                }
+            }, MenuOptionPriority.Default, null, null, 0f, null, null);
+            FloatMenuOption opt2 = new FloatMenuOption("BoardShipGroupFail".Translate(this.Pawn.LabelShort), null, MenuOptionPriority.Default, null, null, 0f, null, null);
+            opt2.Disabled = true;
+            options.Add(pawns.Count > this.SeatsAvailable ? opt2 : opt1);
+            
+            FloatMenuMulti floatMenuMap = new FloatMenuMulti(options, pawns, this.Pawn, pawns[0].LabelCap, Verse.UI.MouseMapPosition())
+            {
+                givesColonistOrders = true
+            };
+            Find.WindowStack.Add(floatMenuMap);
+        }
         public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn pawn)
         {
             if (!pawn.RaceProps.ToolUser)
@@ -305,7 +347,6 @@ namespace RimShips
             }
             bills.Add(new Jobs.Bill_BoardShip(pawn, handler));
         }
-
         public void Notify_BoardedCaravan(Pawn pawnToBoard, ThingOwner handler)
         {
             if (!pawnToBoard.IsWorldPawn())

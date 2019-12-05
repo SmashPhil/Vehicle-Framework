@@ -9,6 +9,7 @@ namespace RimShips
     public enum ShipPermissions {NotAllowed, DriverNeeded, NoDriverNeeded}
     public enum ShipType {Paddles, Sails, Steam, Fuel, Nuclear}
 
+    //public enum RiverTraversability { Creek, River, LargeRiver, HugeRiver, Impassable }
     public class CompProperties_Ships : CompProperties
     {
 
@@ -43,6 +44,7 @@ namespace RimShips
         public ShipPermissions armament = ShipPermissions.DriverNeeded;
         public ShipType shipPowerType = ShipType.Sails;
 
+        public RiverDef riverTraversability;
         public List<ShipRole> roles  = new List<ShipRole>();
         public SoundDef soundWhileMoving;
         public ThingDef buildDef;

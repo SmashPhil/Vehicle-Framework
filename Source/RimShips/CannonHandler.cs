@@ -45,6 +45,17 @@ namespace RimShips
             Scribe_Values.Look(ref spacing, "spacing");
             Scribe_Values.Look(ref baseTicksBetweenShots, "baseTicksBetweenShots");
             Scribe_Values.Look(ref uniqueID, "uniqueID", -1);
+            Scribe_Values.Look(ref offset, "offset");
+            Scribe_Values.Look(ref projectileOffset, "projectileOffset");
+            Scribe_Values.Look(ref cooldownTicks, "cooldownTicks");
+            Scribe_Values.Look(ref label, "label");
+            Scribe_Values.Look(ref weaponType, "weaponType");
+            Scribe_Values.Look(ref weaponLocation, "weaponLocation");
+            Scribe_Defs.Look(ref projectile, "projectile");
+            Scribe_Defs.Look(ref cannonSound, "cannonSound");
+            Scribe_References.Look(ref pawn, "pawn");
+            Scribe_Values.Look(ref reloading, "reloading");
+            Scribe_Values.Look(ref hitFlags, "hitFlags", ProjectileHitFlags.All);
         }
 
         public bool ActivateTimer()
@@ -57,7 +68,7 @@ namespace RimShips
 
         public void DoTick()
         {
-            if (this.cooldownTicks > 0 && this.Reloading)
+            if (this.cooldownTicks > 0 && this.reloading)
             {
                 cooldownTicks--;
             }
@@ -77,7 +88,7 @@ namespace RimShips
             return "CannonHandlerGroup_" + uniqueID;
         }
 
-        public bool Reloading { get; set; }
+        public bool reloading;
         public int cooldownTicks;
         public int uniqueID = -1;
         public int MaxTicks => Mathf.CeilToInt(this.cooldownTimer * 60f);

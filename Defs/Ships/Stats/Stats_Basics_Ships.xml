@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+	<StatDef>
+		<defName>MoveSpeedShips</defName>
+		<label>move speed</label>
+		<description>Speed of movement in cells per second. (Work in Progress)</description>
+		<category>BasicsShip</category>
+		<defaultBaseValue>3.0</defaultBaseValue>
+		<minValue>0.15</minValue>
+		<toStringStyle>FloatTwo</toStringStyle>
+		<formatString>{0} c/s</formatString>
+		<displayPriorityInCategory>90</displayPriorityInCategory>
+		<capacityFactors>
+		  <li>
+			<capacity>Moving</capacity>
+			<weight>1.0</weight>
+		  </li>
+		</capacityFactors>
+		<parts>
+			<li Class="StatPart_Glow">
+				<factorFromGlowCurve>
+					<points>
+						<li>(0,0.80)</li>
+						<li>(0.30,1.00)</li>
+					</points>
+				</factorFromGlowCurve>
+			</li>
+		</parts>
+		<scenarioRandomizable>true</scenarioRandomizable>
+	</StatDef>
+  
+	<StatDef>
+		<defName>CarryingCapacityShips</defName>
+		<label>cargo capacity</label>
+		<description>The amount of weight this ship can carry. (Work in Progress)</description>
+		<category>BasicsShip</category>
+		<defaultBaseValue>75</defaultBaseValue>
+		<minValue>1</minValue>
+		<toStringStyle>Integer</toStringStyle>
+		<parts>
+			<li Class="StatPart_BodySize" />
+		</parts>
+		<capacityFactors>
+			<li>
+				<capacity>Moving</capacity>
+				<weight>1.0</weight>
+			</li>
+		</capacityFactors>
+	</StatDef>
+	
+</Defs>

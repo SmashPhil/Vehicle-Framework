@@ -69,7 +69,6 @@ namespace RimShips.Lords
                 int j = 0;
                 while(sailorsTmp.Count > 0)
                 {
-                    Log.Message("Passthrough Here");
                     Pawn p = ships[i];
                     shipAssigned.Add(sailorsTmp.Pop(), p);
                     i = (i+2) > ships.Count ? 0 : ++i;

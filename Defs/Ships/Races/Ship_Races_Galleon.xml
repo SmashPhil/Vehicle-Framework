@@ -3,7 +3,7 @@
 <Defs>
 	<PawnKindDef>
 		<defName>Galleon</defName>
-		<label>galleon</label>
+		<label>Galleon</label>
 		<defaultFactionType>PlayerColony</defaultFactionType>
 		<aiAvoidCover>false</aiAvoidCover>
 		<destroyGearOnDrop>true</destroyGearOnDrop>
@@ -11,7 +11,7 @@
 		<backstoryCategories>
 			<li>Medieval</li>
 		</backstoryCategories>
-		<combatPower>50</combatPower>
+		<combatPower>200</combatPower>
 		<lifeStages>
 			<li>
 				<bodyGraphicData>
@@ -31,7 +31,7 @@
 	<BodyPartDef>
 		<defName>galleon_Body</defName>
 		<label>body</label>
-		<hitPoints>500</hitPoints>
+		<hitPoints>600</hitPoints>
 		<skinCovered>false</skinCovered>
 		<solid>true</solid>
 		<bleedRate>0</bleedRate>
@@ -45,7 +45,7 @@
 	<BodyPartDef>
 		<defName>galleon_Mast1</defName>
 		<label>mast</label>
-		<hitPoints>30</hitPoints>
+		<hitPoints>60</hitPoints>
 		<skinCovered>false</skinCovered>
 		<solid>true</solid>
 		<bleedRate>0</bleedRate>
@@ -55,7 +55,7 @@
 	<BodyPartDef>
 		<defName>galleon_Mast2</defName>
 		<label>mast</label>
-		<hitPoints>30</hitPoints>
+		<hitPoints>60</hitPoints>
 		<skinCovered>false</skinCovered>
 		<solid>true</solid>
 		<bleedRate>0</bleedRate>
@@ -102,15 +102,15 @@
 	
 	<ThingDef ParentName="BaseShip">
 		<defName>Ships_Galleon</defName>
-		<label>galleon</label>
+		<label>Galleon</label>
 		<description>A large sized war vessel designed for ship to ship combat.</description>
 		
 		<statBases>
-			<MoveSpeed>5</MoveSpeed>
-			<Mass>7500</Mass>
-			<ArmorRating_Blunt>0.25</ArmorRating_Blunt>
+			<MoveSpeed>4.6</MoveSpeed>
+			<Mass>9000</Mass>
+			<ArmorRating_Blunt>0.9</ArmorRating_Blunt>
 			<ArmorRating_Sharp>0.9</ArmorRating_Sharp>
-			<MarketValue>18000</MarketValue>
+			<MarketValue>30000</MarketValue>
 		</statBases>
 		
 		<size>(4,13)</size>
@@ -138,7 +138,7 @@
 			<foodType>None</foodType>
 
 			<body>galleon_Body</body>
-			<baseBodySize>60.0</baseBodySize>
+			<baseBodySize>35.0</baseBodySize>
 			<baseHealthScale>1.0</baseHealthScale>
 			<lifeStageAges>
 				<li>
@@ -162,6 +162,7 @@
 				
 				<loadCargo>NotAllowed</loadCargo>
 				<moveable>DriverNeeded</moveable>
+				<riverTraversability>LargeRiver</riverTraversability>
 				<armament>DriverNeeded</armament>
 				<shipPowerType>Sails</shipPowerType>
 				<nameable>true</nameable>
@@ -178,20 +179,20 @@
 					<li>
 						<label>Captain</label>
 						<handlingType>Movement</handlingType>
-						<slots>1</slots> <!--1-->
+						<slots>1</slots>
 						<slotsToOperate>1</slotsToOperate>
 					</li>
 					<li>
 						<label>Crew</label>
 						<handlingType>Movement</handlingType>
-						<slots>1</slots> <!--4-->
-						<slotsToOperate>1</slotsToOperate>
+						<slots>4</slots>
+						<slotsToOperate>4</slotsToOperate>
 					</li>
 					<li>
 						<label>Cannons</label>
 						<handlingType>Cannons</handlingType>
-						<slots>1</slots> <!--6-->
-						<slotsToOperate>1</slotsToOperate>
+						<slots>6</slots>
+						<slotsToOperate>6</slotsToOperate>
 					</li>
 					<li>
 						<label>Passenger</label>
@@ -210,9 +211,11 @@
 						<projectile>Galleon_cannonball</projectile>
 						<cannonSound>Explosion_PirateCannon</cannonSound>
 						<numberCannons>6</numberCannons>
-						<cooldownTimer>10</cooldownTimer>
 						<baseTicksBetweenShots>15</baseTicksBetweenShots>
+						<cooldownTimer>10</cooldownTimer>
 						<spacing>0.75</spacing>
+						<offset>0</offset>
+						<projectileOffset>0.1</projectileOffset>
 						<hitFlags>All</hitFlags>
 						<spreadRadius>4</spreadRadius>
 						<minRange>15</minRange>
@@ -225,9 +228,11 @@
 						<projectile>Galleon_cannonball</projectile>
 						<cannonSound>Explosion_PirateCannon</cannonSound>
 						<numberCannons>6</numberCannons>
-						<cooldownTimer>10</cooldownTimer>
 						<baseTicksBetweenShots>15</baseTicksBetweenShots>
+						<cooldownTimer>10</cooldownTimer>
 						<spacing>0.75</spacing>
+						<offset>0</offset>
+						<projectileOffset>0.1</projectileOffset>
 						<hitFlags>All</hitFlags>
 						<spreadRadius>4</spreadRadius>
 						<minRange>15</minRange>

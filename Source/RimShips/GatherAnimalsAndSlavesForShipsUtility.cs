@@ -51,7 +51,8 @@ namespace RimShips
                 }
                 else if(waterPathing)
                 {
-                    if(!p.Spawned || !p.Position.InHorDistOf(((LordJob_FormAndSendCaravanShip)lord.LordJob).LeadShip.Position, 5f) || !((LordJob_FormAndSendCaravanShip)lord.LordJob).LeadShip.Position.InHorDistOf(meetingPoint, 2f) ||
+                    Pawn leadShip = ((LordJob_FormAndSendCaravanShip)lord.LordJob).LeadShip;
+                    if (!p.Spawned || !p.Position.InHorDistOf(((LordJob_FormAndSendCaravanShip)lord.LordJob).LeadShip.Position, 5f) || !leadShip.Position.InHorDistOf(meetingPoint, leadShip.def.size.z > 5 ? (float)leadShip.def.size.z/2 : 3f) ||
                         !ShipReachabilityUtility.CanReachShip(p, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, TraverseMode.ByPawn) || (extraValidator != null && !extraValidator(p)))
                     {
                         flag = false;

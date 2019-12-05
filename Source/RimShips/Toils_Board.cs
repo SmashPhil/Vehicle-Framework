@@ -33,7 +33,7 @@ namespace RimShips.Jobs
 
                 if(!flag)
                 {
-                    foreach (ShipHandler handler in ship.handlers)
+                    foreach(ShipHandler handler in ship.handlers)
                     {
                         if(handler.AreSlotsAvailable)
                         {

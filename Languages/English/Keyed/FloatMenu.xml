@@ -3,9 +3,11 @@
 <LanguageData>
 	<RimShips>RimShips</RimShips>
 	<BoardShip>Board {0} as {1}  [{2}]</BoardShip>
-	<CompShips_CannotMove>Cannot draft. Ship needs more crew in order to navigate.</CompShips_CannotMove>
+	<BoardShipGroup>Board {0}</BoardShipGroup>
+	<BoardShipGroupFail>Board {0} (Too many selected)</BoardShipGroupFail>
+	<CompShips_CannotMove>Cannot draft. Boat needs more crew in order to navigate.</CompShips_CannotMove>
 	<NotEnoughCannonCrew>Not enough colonists in {0} to operate {1}.</NotEnoughCannonCrew>
-	<ShipSection>Ships</ShipSection>
+	<ShipSection>Boats</ShipSection>
 	<CannonLabel>{0} Cannons</CannonLabel>
 	<AwaitOrders>Awaiting Orders</AwaitOrders>
 	<RepairShip>Repair {0}</RepairShip>
@@ -13,18 +15,18 @@
 	<SetRange>Set Range</SetRange>
 	<CannonRange>{0} Tiles</CannonRange>
 	<NameIsInvalid>Name invalid for ship.</NameIsInvalid>
-	<ShipGainsName>Your new ship has been named {0}</ShipGainsName>
+	<RenameShip>Rename {0}</RenameShip>
+	<ShipGainsName>Your new boat has been named {0}</ShipGainsName>
 	<ActivityIconOnBoardShip>Onboard {0}</ActivityIconOnBoardShip>
 	<IsIncapableOfRamming>Ram {0}</IsIncapableOfRamming>
-	<BoardTooSoonFail>Cannot order Board Ship twice in same tick</BoardTooSoonFail>
 	
-	<ShipSunkLabel>Ship Sunk</ShipSunkLabel>
+	<ShipSunkLabel>Boat Sunk</ShipSunkLabel>
 	<ShipSunkDeep>{0} has sunk to the depths of the ocean and has taken with it: {1}</ShipSunkDeep>
 	<ShipSunkShallow>{0} has sunk but is still salvageable.</ShipSunkShallow>
 	
-	<CaravanShips>Ships</CaravanShips>
-	<CaravanShipsSingle>1 Ship</CaravanShipsSingle>
-	<CaravanShipsPlural>{0} Ships</CaravanShipsPlural>
+	<CaravanShips>Boat</CaravanShips>
+	<CaravanShipsSingle>1 Boat</CaravanShipsSingle>
+	<CaravanShipsPlural>{0} Boats</CaravanShipsPlural>
 	<CaravanSailing>Sailing</CaravanSailing>
 	<CaravanPassengers>Passengers</CaravanPassengers>
 	<ShipNotDockedCancelCaravan>{0} is not on shallow water.</ShipNotDockedCancelCaravan>
@@ -35,8 +37,8 @@
 	<ShipOutOfFood>No food in {0} with Pawns onboard</ShipOutOfFood>
 	<CommandDockShip>Dock</CommandDockShip>
 	<CommandDockShipDesc>Unload all passengers and enable trade with the Settlement of {0}.</CommandDockShipDesc>
-	<CommandUndockShip>Board ships</CommandUndockShip>
-	<CommandUndockShipDesc>Load all pawns and items into Ships</CommandUndockShipDesc>
+	<CommandUndockShip>Board boats</CommandUndockShip>
+	<CommandUndockShipDesc>Load all pawns and items into Boats</CommandUndockShipDesc>
 	<CommandAttackDockDisable>Cannot attack {0} while docked at their Settlement</CommandAttackDockDisable>
 	
 	<BeachGenMultiplier>Beach Size Multiplier: {0}%</BeachGenMultiplier>

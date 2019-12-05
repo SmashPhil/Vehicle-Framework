@@ -146,6 +146,27 @@ namespace SPExtendedLibrary
             return sourceList.Intersect(searchingList).Any();
         }
 
+        public static List<T> ConvertObjectList<T>(this List<object> objects)
+        {
+            for(int i = 0; i < objects.Count; i++)
+            {
+                object o = objects[i];
+                if(o.GetType() != typeof(T))
+                {
+                    objects.Remove(o);
+                }
+            }
+            return objects.Cast<T>().ToList();
+        }
+
+        public static IntVec2 Abs(this IntVec2 c)
+        {
+            return new IntVec2(Math.Abs(c.x), Math.Abs(c.z));
+        }
+        public static IntVec3 Abs(this IntVec3 c)
+        {
+            return new IntVec3(Math.Abs(c.x), Math.Abs(c.y), Math.Abs(c.z));
+        }
         public static void ClampToMap(Pawn pawn, ref IntVec3 exitPoint, Map map, int extraOffset = 0)
         {
             int x = pawn.def.size.x;

@@ -66,6 +66,7 @@
     <Compile Include="EffectsDefOf_Ships.cs" />
     <Compile Include="EnterMapUtilityBoats.cs" />
     <Compile Include="FleshTypeDefOf_Ships.cs" />
+    <Compile Include="FloatMenuMulti.cs" />
     <Compile Include="GatherAnimalsAndSlavesForShipsUtility.cs" />
     <Compile Include="GatherItemsForShipCaravanUtility.cs" />
     <Compile Include="GenGridShips.cs" />
@@ -102,6 +103,8 @@
     <Compile Include="RegionCostCalculatorWrapperShips.cs" />
     <Compile Include="RimshipsModSettings.cs" />
     <Compile Include="CompCannons.cs" />
+    <Compile Include="RiverDefOf.cs" />
+    <Compile Include="RiverToSize.cs" />
     <Compile Include="ShipHandler.cs" />
     <Compile Include="ShipHarmony.cs" />
     <Compile Include="ShipPassengerCardUtility.cs" />
@@ -116,6 +119,7 @@
     <Compile Include="SoundDefOf_Ships.cs" />
     <Compile Include="SpawnThingOnBuild.cs" />
     <Compile Include="SPExtended.cs" />
+    <Compile Include="StatCategoryDefOf_Ships.cs" />
     <Compile Include="TexCommand.cs" />
     <Compile Include="Toils_Board.cs" />
     <Compile Include="TouchPathEndModeUtilityShips.cs" />

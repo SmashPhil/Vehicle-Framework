@@ -6,6 +6,8 @@ using UnityEngine;
 using Verse;
 using Verse.Sound;
 using RimWorld;
+using RimShips.Defs;
+using Harmony;
 
 namespace RimShips.UI
 {
@@ -82,7 +84,7 @@ namespace RimShips.UI
             switch(this.tab)
             {
                 case InfoCardTab.Stats:
-                    //this.DrawStatsWorker(cardRect);
+                    this.DrawStatsWorker(cardRect);
                     break;
                 case InfoCardTab.Health:
                     cardRect.yMin += 8f;
@@ -106,6 +108,7 @@ namespace RimShips.UI
             Widgets.BeginScrollView(rect2, ref scrollPosition, viewRect, true);
             float num = 0f;
             string b = null;
+            cachedDrawEntries = this.StatsToDraw(this.thing).ToList();
             this.FinalizeCachedDrawEntries();
             mousedOverEntry = null;
             foreach(StatDrawEntry stat in cachedDrawEntries)
@@ -155,12 +158,58 @@ namespace RimShips.UI
             }
             GUI.EndGroup();
         }
+        
+        private IEnumerable<StatDrawEntry> StatsToDraw(Thing thing)
+        {
+            yield return new StatDrawEntry(StatCategoryDefOf_Ships.BasicsShip, "Description".Translate(), string.Empty, 99999, string.Empty)
+            {
+                overrideReportText = thing.DescriptionFlavor
+            };
+            foreach (StatDef stat in from st in DefDatabase<StatDef>.AllDefs
+                                     where st.category == StatCategoryDefOf_Ships.BasicsShip
+                                     select st)
+            {
+                yield return new StatDrawEntry(stat.category, stat);
+            }
 
+        }
         private void FinalizeCachedDrawEntries()
         {
             cachedDrawEntries = (from sde in this.cachedDrawEntries
                                 orderby sde.category.displayOrder, sde.DisplayPriorityWithinCategory descending, sde.LabelCap
                                 select sde).ToList<StatDrawEntry>();
+        }
+
+        private string GetExplanationTextShip(StatDrawEntry sde, StatRequest optionalReq)
+        {
+            if(!sde.overrideReportText.NullOrEmpty())
+            {
+                return sde.overrideReportText;
+            }
+            if(sde is null)
+            {
+                return string.Empty;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(sde.stat.LabelCap);
+            sb.AppendLine();
+            sb.AppendLine(sde.stat.description);
+            sb.AppendLine();
+            if(!optionalReq.Empty)
+            {
+                sb.AppendLine(sde.stat.Worker.GetExplanationFull(optionalReq, Traverse.Create(sde).Field("numberSense").GetValue<ToStringNumberSense>(), Traverse.Create(sde).Field("value").GetValue<float>()));
+            }
+            return sb.ToString().TrimEndNewlines();
+        }
+
+        private string GetExplanationFullShip(StatWorker sw, StatRequest req, ToStringNumberSense numSense, float value)
+        {
+            if (sw.IsDisabledFor(req.Thing))
+            {
+                return "StatsReport_PermanentlyDisabled".Translate();
+            }
+            return String.Empty;
         }
 
         private Thing thing;

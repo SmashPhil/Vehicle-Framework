@@ -3,7 +3,7 @@
 <Defs>
 	<PawnKindDef>
 		<defName>Caravel</defName>
-		<label>caravel</label>
+		<label>Caravel</label>
 		<defaultFactionType>PlayerColony</defaultFactionType>
 		<aiAvoidCover>false</aiAvoidCover>
 		<destroyGearOnDrop>true</destroyGearOnDrop>
@@ -31,7 +31,7 @@
 	<BodyPartDef>
 		<defName>caravel_Body</defName>
 		<label>body</label>
-		<hitPoints>150</hitPoints>
+		<hitPoints>250</hitPoints>
 		<skinCovered>false</skinCovered>
 		<solid>true</solid>
 		<bleedRate>0</bleedRate>
@@ -45,7 +45,7 @@
 	<BodyPartDef>
 		<defName>caravel_Mast</defName>
 		<label>mast</label>
-		<hitPoints>5</hitPoints>
+		<hitPoints>60</hitPoints>
 		<skinCovered>false</skinCovered>
 		<solid>true</solid>
 		<bleedRate>0</bleedRate>
@@ -74,13 +74,13 @@
 	
 	<ThingDef ParentName="BaseShip">
 		<defName>Ships_Caravel</defName>
-		<label>caravel</label>
+		<label>Caravel</label>
 		<description>A medium sized trade ship designed to be both fast and versatile</description>
 		
 		<statBases>
 			<MoveSpeed>5</MoveSpeed>
 			<Mass>7500</Mass>
-			<ArmorRating_Blunt>0.25</ArmorRating_Blunt>
+			<ArmorRating_Blunt>0.6</ArmorRating_Blunt>
 			<ArmorRating_Sharp>0.9</ArmorRating_Sharp>
 			<MarketValue>18000</MarketValue>
 		</statBases>
@@ -134,6 +134,7 @@
 				
 				<loadCargo>NotAllowed</loadCargo>
 				<moveable>DriverNeeded</moveable>
+				<riverTraversability>LargeRiver</riverTraversability>
 				<armament>DriverNeeded</armament>
 				<shipPowerType>Sails</shipPowerType>
 				<nameable>true</nameable>
@@ -190,7 +191,7 @@
 							<hitFlags>All</hitFlags>
 							<spreadRadius>3</spreadRadius>
 							<minRange>8</minRange>
-							<maxRange>42</maxRange>
+							<maxRange>38</maxRange>
 						</li>
 						<li>
 							<label>Starboard</label>
@@ -207,7 +208,7 @@
 							<hitFlags>All</hitFlags>
 							<spreadRadius>3</spreadRadius>
 							<minRange>8</minRange>
-							<maxRange>42</maxRange>
+							<maxRange>38</maxRange>
 						</li>
 				</cannons>
 			</li>

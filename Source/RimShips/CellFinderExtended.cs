@@ -31,29 +31,39 @@ namespace RimShips
 
         public static IntVec3 MiddleEdgeCell(Rot4 dir, Map map, Pawn pawn, Predicate<IntVec3> validator)
         {
-            List<IntVec3> cellsToCheck = CellRect.WholeMap(map).GetEdgeCells(dir).ToList();
-            
+            List<IntVec3> cellsToCheck = CellRect.WholeMap(map).GetEdgeCells(dir).Where(x => validator(x)).ToList();
+            int padding = 3;
             int startIndex = cellsToCheck.Count / 2;
-            int i = 0;
-            while(cellsToCheck.Count > 0 && i < cellsToCheck.Count/2)
+
+            for (int j = 0; j < 100; j++)
             {
-                if(i > cellsToCheck.Count)
+                IntVec3 c = pawn.ClampToMap(CellFinder.RandomEdgeCell(dir, map), map, padding);
+                if (pawn.PawnOccupiedCells(c).All(x => validator(x)))
+                {
+                    return c;
+                }
+            }
+            Log.Warning("Running secondary spawn cell check for boats");
+            int i = 0;
+            while (cellsToCheck.Count > 0 && i < cellsToCheck.Count / 2)
+            {
+                if (i > cellsToCheck.Count)
                 {
                     Log.Warning("List of Cells almost went out of bounds. Report to Boats mod author - Smash Phil");
-                    return cellsToCheck.Pop();
+                    break;
                 }
-                IntVec3 rCell = pawn.ClampToMap(cellsToCheck[startIndex + i], map, 2);
+                IntVec3 rCell = pawn.ClampToMap(cellsToCheck[startIndex + i], map, padding);
                 if (ShipHarmony.debug) Log.Message("Checking r: " + rCell + " | " + validator(rCell));
                 List<IntVec3> occupiedCellsRCell = pawn.PawnOccupiedCells(rCell);
-                foreach(IntVec3 c in occupiedCellsRCell)
+                foreach (IntVec3 c in occupiedCellsRCell)
                 {
-                    if(!validator(c))
+                    if (!validator(c))
                         goto Block_0;
                 }
                 return rCell;
 
-                Block_0:;
-                IntVec3 lCell = pawn.ClampToMap(cellsToCheck[startIndex - i], map, 2);
+            Block_0:;
+                IntVec3 lCell = pawn.ClampToMap(cellsToCheck[startIndex - i], map, padding);
                 if (ShipHarmony.debug) Log.Message("Checking l: " + lCell + " | " + validator(lCell));
                 List<IntVec3> occupiedCellsLCell = pawn.PawnOccupiedCells(rCell);
                 foreach (IntVec3 c in occupiedCellsLCell)
@@ -63,12 +73,12 @@ namespace RimShips
                 }
                 return lCell;
 
-                Block_1:;
+            Block_1:;
                 i++;
                 if (ShipHarmony.debug) Log.Message("==============");
             }
-            Log.Error("No edge cells spawned...? Problem with Boats by Smash Phil. Choosing Random Cell");
-            return CellFinder.RandomCell(map);
+            Log.Error("Could not find valid edge cell to spawn boats on. Choosing Random Cell. Please report to mod author of Boats.");
+            return pawn.ClampToMap(CellFinder.RandomEdgeCell(dir, map), map, padding);
         }
 
         public static bool TryFindRandomReachableCellNear(IntVec3 root, Map map, float radius, TraverseParms traverseParms, Predicate<IntVec3> validator, out IntVec3 result,

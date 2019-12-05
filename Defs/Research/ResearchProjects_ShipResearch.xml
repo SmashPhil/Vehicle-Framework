@@ -19,15 +19,30 @@
 		<label>caravel</label>
 		<tab>RimShips</tab>
 		<description>Build Caravels.  A fast and cheap ship designed for trade.</description>
-		<baseCost>2000</baseCost>
+		<baseCost>4000</baseCost>
 		<techLevel>Medieval</techLevel>
 		<prerequisites>
-		<li>Rowboat</li>
-		<li>Smithing</li>
+			<li>Rowboat</li>
+			<li>Smithing</li>
 		</prerequisites>
 		
 		<researchViewX>1</researchViewX>
 		<researchViewY>0</researchViewY>
+	</ResearchProjectDef>
+	
+	<ResearchProjectDef>
+		<defName>BoatCannons</defName>
+		<label>Cannons</label>
+		<tab>RimShips</tab>
+		<description>Mount cannons onboard ships for "defense"</description>
+		<baseCost>2250</baseCost>
+		<techLevel>Medieval</techLevel>
+		<prerequisites>
+			<li>Caravel</li>
+		</prerequisites>
+		
+		<researchViewX>1</researchViewX>
+		<researchViewY>1</researchViewY>
 	</ResearchProjectDef>
 	
 	<ResearchProjectDef>
@@ -38,8 +53,8 @@
 		<baseCost>5000</baseCost>
 		<techLevel>Medieval</techLevel>
 		<prerequisites>
-		<li>Caravel</li>
-		<li>Stonecutting</li>
+			<li>Caravel</li>
+			<li>BoatCannons</li>
 		</prerequisites>
 		<researchViewX>2</researchViewX>
 		<researchViewY>0</researchViewY>

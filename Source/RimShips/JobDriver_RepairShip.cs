@@ -44,6 +44,13 @@ namespace RimShips.Jobs
                 this.ticksToNextRepair -= statValue;
                 if (this.ticksToNextRepair <= 0f)
                 {
+                    if (!(this.TargetThingA as Pawn).health.hediffSet.hediffs.Any())
+                    {
+                        actor.records.Increment(RecordDefOf.ThingsRepaired);
+                        actor.jobs.EndCurrentJob(JobCondition.Succeeded, true);
+                        return;
+                    }
+
                     this.ticksToNextRepair += this.pawn?.GetComp<CompShips>()?.Props.ticksBetweenRepair ?? InitialRepairTickCount;
                     Hediff repairPart = (this.TargetThingA as Pawn).health.hediffSet.hediffs.First();
 

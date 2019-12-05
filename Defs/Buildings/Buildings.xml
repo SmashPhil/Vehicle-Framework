@@ -43,7 +43,8 @@
 			<li>Rowboat</li>
 		</researchPrerequisites>
 		<costList>
-			<WoodLog>150</WoodLog>
+			<WoodLog>225</WoodLog>
+			<Steel>25</Steel>
 		</costList>
 		
 		<soundImpactDefault>BulletImpact_Wood</soundImpactDefault>
@@ -80,7 +81,9 @@
 		</researchPrerequisites>
 		
 		<costList>
-			<WoodLog>150</WoodLog>
+			<WoodLog>1250</WoodLog>
+			<Cloth>200</Cloth>
+			<Steel>50</Steel>
 		</costList>
 		
 		<soundImpactDefault>BulletImpact_Wood</soundImpactDefault>
@@ -106,7 +109,7 @@
 		
 		<statBases>
 			<MaxHitPoints>12000</MaxHitPoints>
-			<WorkToBuild>1</WorkToBuild>
+			<WorkToBuild>250000</WorkToBuild>
 			<Flammability>75</Flammability>
 		</statBases>
 		<size>(4,13)</size>
@@ -116,7 +119,9 @@
 		</researchPrerequisites>
 		
 		<costList>
-			<WoodLog>150</WoodLog>
+			<WoodLog>2500</WoodLog>
+			<Cloth>500</Cloth>
+			<Steel>120</Steel>
 		</costList>
 		
 		<soundImpactDefault>BulletImpact_Wood</soundImpactDefault>

@@ -2,7 +2,7 @@
 <Defs>
 	<DesignationCategoryDef>
 		<defName>RimShips</defName>
-		<label>rimships</label>
+		<label>Boats</label>
 		<description>Ships from the mod RimShips</description>
 		<order>8</order>
 		<specialDesignatorClasses>
