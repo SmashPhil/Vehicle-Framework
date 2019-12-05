@@ -11,7 +11,7 @@
 			<li>ClassicStart</li>
 		</tags>
 		<researchViewX>0</researchViewX>
-		<researchViewY>0</researchViewY>
+		<researchViewY>2.5</researchViewY>
 	</ResearchProjectDef>
 	
 	<ResearchProjectDef>
@@ -19,44 +19,43 @@
 		<label>caravel</label>
 		<tab>RimShips</tab>
 		<description>Build Caravels.  A fast and cheap ship designed for trade.</description>
-		<baseCost>4000</baseCost>
+		<baseCost>2500</baseCost>
 		<techLevel>Medieval</techLevel>
 		<prerequisites>
 			<li>Rowboat</li>
 			<li>Smithing</li>
 		</prerequisites>
 		
-		<researchViewX>1</researchViewX>
-		<researchViewY>0</researchViewY>
+		<researchViewX>1.5</researchViewX>
+		<researchViewY>2.5</researchViewY>
 	</ResearchProjectDef>
-	
+	<!--
 	<ResearchProjectDef>
 		<defName>BoatCannons</defName>
 		<label>Cannons</label>
 		<tab>RimShips</tab>
 		<description>Mount cannons onboard ships for "defense"</description>
-		<baseCost>2250</baseCost>
+		<baseCost>1750</baseCost>
 		<techLevel>Medieval</techLevel>
 		<prerequisites>
 			<li>Caravel</li>
 		</prerequisites>
 		
-		<researchViewX>1</researchViewX>
-		<researchViewY>1</researchViewY>
+		<researchViewX>2.5</researchViewX>
+		<researchViewY>4</researchViewY>
 	</ResearchProjectDef>
-	
+	-->
 	<ResearchProjectDef>
 		<defName>Galleon</defName>
 		<label>galleon</label>
 		<tab>RimShips</tab>
 		<description>Construct large vessels designed to take control of the seas</description>
-		<baseCost>5000</baseCost>
+		<baseCost>3500</baseCost>
 		<techLevel>Medieval</techLevel>
 		<prerequisites>
 			<li>Caravel</li>
-			<li>BoatCannons</li>
 		</prerequisites>
-		<researchViewX>2</researchViewX>
-		<researchViewY>0</researchViewY>
+		<researchViewX>3.5</researchViewX>
+		<researchViewY>4</researchViewY>
 	</ResearchProjectDef>
 </Defs>
