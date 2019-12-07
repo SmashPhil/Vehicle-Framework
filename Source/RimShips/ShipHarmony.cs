@@ -741,6 +741,7 @@ namespace RimShips
                 }
                 return false;
             }
+            //Add for building too?
             return true;
         }
 

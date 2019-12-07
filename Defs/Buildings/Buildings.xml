@@ -104,7 +104,7 @@
 		<graphicData>
 			<texPath>Ships/galleon/Galleon_north</texPath>
 			<graphicClass>Graphic_Single</graphicClass>
-			<drawSize>(6,17)</drawSize>
+			<drawSize>(8,16)</drawSize>
 		</graphicData>
 		
 		<statBases>
@@ -112,7 +112,7 @@
 			<WorkToBuild>250000</WorkToBuild>
 			<Flammability>75</Flammability>
 		</statBases>
-		<size>(4,13)</size>
+		<size>(3,10)</size>
 		
 		<researchPrerequisites>
 			<li>Galleon</li>
