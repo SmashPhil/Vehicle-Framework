@@ -2,12 +2,12 @@
 
 <Defs>
 	<PawnKindDef>
-		<defName>Galleon</defName>
+		<defName>SPBoats_PawnKind_Galleon</defName>
 		<label>Galleon</label>
 		<defaultFactionType>PlayerColony</defaultFactionType>
 		<aiAvoidCover>false</aiAvoidCover>
 		<destroyGearOnDrop>true</destroyGearOnDrop>
-		<race>Ships_Galleon</race>
+		<race>SPBoats_Galleon</race>
 		<backstoryCategories>
 			<li>Medieval</li>
 		</backstoryCategories>
@@ -15,11 +15,11 @@
 		<lifeStages>
 			<li>
 				<bodyGraphicData>
-					<texPath>Ships/caravel/CaravelBoat/Caravel</texPath>
+					<texPath>Ships/galleon/Galleon</texPath>
 					<graphicClass>Graphic_Multi</graphicClass>
-					<drawSize>(8,17)</drawSize>
+					<drawSize>(8,16)</drawSize>
 					<shaderType>CutoutComplex</shaderType>
-					<color>(30,30,30)</color>
+					<color>(155,0,0)</color>
 					<shadowData>
 						<volume>(0.4,0.1,0.4)</volume>
 					</shadowData>
@@ -101,7 +101,7 @@
 	</BodyDef>
 	
 	<ThingDef ParentName="BaseShip">
-		<defName>Ships_Galleon</defName>
+		<defName>SPBoats_Galleon</defName>
 		<label>Galleon</label>
 		<description>A large sized war vessel designed for ship to ship combat.</description>
 		
@@ -113,7 +113,7 @@
 			<MarketValue>30000</MarketValue>
 		</statBases>
 		
-		<size>(4,13)</size>
+		<size>(3,10)</size>
 		
 		<tools>
 			<li>
@@ -166,7 +166,7 @@
 				<armament>DriverNeeded</armament>
 				<shipPowerType>Sails</shipPowerType>
 				<nameable>true</nameable>
-				<buildDef>GalleonBlueprint</buildDef>
+				<buildDef>SPBoats_GalleonBlueprint</buildDef>
 				<ticksBetweenRepair>350</ticksBetweenRepair>
 				
 				<healthLabel_Healthy>Operational</healthLabel_Healthy>
@@ -174,6 +174,9 @@
 				<healthLabel_Immobile>Inoperable</healthLabel_Immobile>
 				<healthLabel_Dead>Sunken</healthLabel_Dead>
 				<healthLabel_Beached>Beached</healthLabel_Beached>
+				
+				<hitboxOffsetX>0.0</hitboxOffsetX>
+				<hitboxOffsetZ>-2.0</hitboxOffsetZ>
 				
 				<roles>
 					<li>
@@ -212,10 +215,20 @@
 						<cannonSound>Explosion_PirateCannon</cannonSound>
 						<numberCannons>6</numberCannons>
 						<baseTicksBetweenShots>15</baseTicksBetweenShots>
-						<cooldownTimer>10</cooldownTimer>
-						<spacing>0.75</spacing>
-						<offset>0</offset>
-						<projectileOffset>0.1</projectileOffset>
+						<cooldownTimer>14</cooldownTimer>
+						<spacing>.63</spacing>
+						
+						<splitCannonGroups>true</splitCannonGroups>
+						<centerPoints>
+							<li>.25</li>
+							<li>5.3</li>
+						</centerPoints>
+						<cannonsPerPoint>
+							<li>3</li>
+							<li>3</li>
+						</cannonsPerPoint>
+						<offset>2.0</offset>
+						<projectileOffset>1</projectileOffset>
 						<hitFlags>All</hitFlags>
 						<spreadRadius>4</spreadRadius>
 						<minRange>15</minRange>
@@ -229,10 +242,21 @@
 						<cannonSound>Explosion_PirateCannon</cannonSound>
 						<numberCannons>6</numberCannons>
 						<baseTicksBetweenShots>15</baseTicksBetweenShots>
-						<cooldownTimer>10</cooldownTimer>
-						<spacing>0.75</spacing>
-						<offset>0</offset>
-						<projectileOffset>0.1</projectileOffset>
+						<cooldownTimer>14</cooldownTimer>
+						<spacing>0.63</spacing>
+						
+						<splitCannonGroups>true</splitCannonGroups>
+						<centerPoints>
+							<li>.25</li>
+							<li>5.3</li>
+						</centerPoints>
+						<cannonsPerPoint>
+							<li>3</li>
+							<li>3</li>
+						</cannonsPerPoint>
+						
+						<offset>2.0</offset>
+						<projectileOffset>1</projectileOffset>
 						<hitFlags>All</hitFlags>
 						<spreadRadius>4</spreadRadius>
 						<minRange>15</minRange>

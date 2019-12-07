@@ -1,7 +1,5 @@
-﻿using RimWorld;
-using RimWorld.Planet;
+﻿using RimWorld.Planet;
 using Verse;
-using Harmony;
 using RimShips.Defs;
 using System.Collections.Generic;
 

@@ -276,6 +276,103 @@ namespace SPExtendedLibrary
 
             return hDistance.Second <= vDistance.Second ? hDistance.First : vDistance.First;
         }
+        
+        public static void CalculateSelectionBracketPositionsWorldForMultiCellPawns<T>(Vector3[] bracketLocs, T obj, Vector3 worldPos, Vector2 worldSize, Dictionary<T, float> dict, Vector2 textureSize, float pawnAngle = 0f, float jumpDistanceFactor = 1f)
+        {
+            float num;
+            float num2;
+            if (!dict.TryGetValue(obj, out num))
+            {
+                num2 = 1f;
+            }
+            else
+            {
+                num2 = Mathf.Max(0f, 1f - (Time.realtimeSinceStartup - num) / 0.07f);
+            }
+            float num3 = num2 * 0.2f * jumpDistanceFactor;
+            float num4 = 0.5f * (worldSize.x - textureSize.x) + num3;
+            float num5 = 0.5f * (worldSize.y - textureSize.y) + num3;
+            float y = AltitudeLayer.MetaOverlays.AltitudeFor();
+            bracketLocs[0] = new Vector3(worldPos.x - num4, y, worldPos.z - num5);
+            bracketLocs[1] = new Vector3(worldPos.x + num4, y, worldPos.z - num5);
+            bracketLocs[2] = new Vector3(worldPos.x + num4, y, worldPos.z + num5);
+            bracketLocs[3] = new Vector3(worldPos.x - num4, y, worldPos.z + num5);
+
+            switch(pawnAngle)
+            {
+                case 45f:
+                    for(int i = 0; i < 4; i++)
+                    {
+                        float xPos = bracketLocs[i].x - worldPos.x;
+                        float yPos = bracketLocs[i].z - worldPos.z;
+                        SPTuple<float, float> newPos = RotatePointClockwise(xPos, yPos, 45f);
+                        bracketLocs[i].x = newPos.First + worldPos.x;
+                        bracketLocs[i].z = newPos.Second + worldPos.z;
+                    }
+                    break;
+                case -45:
+                    for (int i = 0; i < 4; i++)
+                    {
+                        float xPos = bracketLocs[i].x - worldPos.x;
+                        float yPos = bracketLocs[i].z - worldPos.z;
+                        SPTuple<float, float> newPos = RotatePointCounterClockwise(xPos, yPos, 45f);
+                        bracketLocs[i].x = newPos.First + worldPos.x;
+                        bracketLocs[i].z = newPos.Second + worldPos.z;
+                    }
+                    break;
+            }
+        }
+
+        public static Vector3 DrawPosTransformed(this Pawn pawn, float x, float z, float angle = 0)
+        {
+            Vector3 drawPos = pawn.DrawPos;
+            switch (pawn.Rotation.AsInt)
+            {
+                case 0:
+                    drawPos.x += x;
+                    drawPos.z += z;
+                    break;
+                case 1:
+                    if (angle == -45)
+                    {
+                        drawPos.x += x == 0 ? z / (float)Math.Sqrt(2d) : x / (float)Math.Sqrt(2d);
+                        drawPos.z += x == 0 ? z / (float)Math.Sqrt(2d) : x / (float)Math.Sqrt(2d);
+                        break;
+                    }
+                    else if (angle == 45)
+                    {
+                        drawPos.x += x == 0 ? z / (float)Math.Sqrt(2d) : x / (float)Math.Sqrt(2d);
+                        drawPos.z -= x == 0 ? z / (float)Math.Sqrt(2d) : x / (float)Math.Sqrt(2d);
+                        break;
+                    }
+                    drawPos.x += z;
+                    drawPos.z += x;
+                    break;
+                case 2:
+                    drawPos.x -= x;
+                    drawPos.z -= z;
+                    break;
+                case 3:
+                    if (angle == -45)
+                    {
+                        drawPos.x -= x == 0 ? z / (float)Math.Sqrt(2d) : x / (float)Math.Sqrt(2d);
+                        drawPos.z -= x == 0 ? z / (float)Math.Sqrt(2d) : x / (float)Math.Sqrt(2d);
+                        break;
+                    }
+                    else if (angle == 45)
+                    {
+                        drawPos.x -= x == 0 ? z / (float)Math.Sqrt(2d) : x / (float)Math.Sqrt(2d);
+                        drawPos.z += x == 0 ? z / (float)Math.Sqrt(2d) : x / (float)Math.Sqrt(2d);
+                        break;
+                    }
+                    drawPos.x -= z;
+                    drawPos.z -= x;
+                    break;
+                default:
+                    throw new NotImplementedException("Pawn Rotation outside Rot4");
+            }
+            return drawPos;
+        }
 
         public static SPTuple<float, float> RotatePointClockwise(float x, float y, float theta)
         {

@@ -2,12 +2,12 @@
 
 <Defs>
 	<PawnKindDef>
-		<defName>Canoe</defName>
+		<defName>SPBoats_PawnKind_RowBoat</defName>
 		<label>Row Boat</label>
 		<defaultFactionType>PlayerColony</defaultFactionType>
 		<aiAvoidCover>false</aiAvoidCover>
 		<destroyGearOnDrop>true</destroyGearOnDrop>
-		<race>Ships_Canoe</race>
+		<race>SPBoats_RowBoat</race>
 		<backstoryCategories>
 			<li>Neolithic</li>
 		</backstoryCategories>
@@ -71,7 +71,7 @@
 	</BodyDef>
 	
 	<ThingDef ParentName="BaseShip">
-		<defName>Ships_Canoe</defName>
+		<defName>SPBoats_RowBoat</defName>
 		<label>Row Boat</label>
 		<description>A small two passanger boat capable of short trips</description>
 		
@@ -136,7 +136,7 @@
 				<armament>DriverNeeded</armament>
 				<shipPowerType>Paddles</shipPowerType>
 				<nameable>false</nameable>
-				<buildDef>RowboatBlueprint</buildDef>
+				<buildDef>SPBoats_RowboatBlueprint</buildDef>
 				<ticksBetweenRepair>50</ticksBetweenRepair>
 				
 				<healthLabel_Healthy>Operational</healthLabel_Healthy>

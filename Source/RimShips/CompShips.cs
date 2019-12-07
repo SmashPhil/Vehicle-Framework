@@ -1,24 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
-using System.Text;
-using Harmony;
 using RimWorld;
-using RimWorld.BaseGen;
 using RimWorld.Planet;
 using RimShips.Build;
 using RimShips.Defs;
-using SPExtendedLibrary;
-using RimShips.Lords;
 using UnityEngine;
-using UnityEngine.AI;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
-using Verse.Sound;
 
 namespace RimShips
 {
@@ -30,7 +20,7 @@ namespace RimShips
 
         public bool draftStatusChanged = false;
         public bool beached = false;
-        private float angle = 0f;
+        private float angle = 0f; /* East: -45 is TopRight, 45 is BottomRight | West: -45 is BottomLeft, 45 is TopLeft */
 
         public List<ShipHandler> handlers = new List<ShipHandler>();
         public ShipMovementStatus movementStatus = ShipMovementStatus.Online;
@@ -279,7 +269,12 @@ namespace RimShips
             }, MenuOptionPriority.Default, null, null, 0f, null, null);
             FloatMenuOption opt2 = new FloatMenuOption("BoardShipGroupFail".Translate(this.Pawn.LabelShort), null, MenuOptionPriority.Default, null, null, 0f, null, null);
             opt2.Disabled = true;
-            options.Add(pawns.Count > this.SeatsAvailable ? opt2 : opt1);
+            int r = 0;
+            foreach(ShipHandler h in this.handlers)
+            {
+                r += h.currentlyReserving.Count;
+            }
+            options.Add(pawns.Count + r > this.SeatsAvailable ? opt2 : opt1);
             
             FloatMenuMulti floatMenuMap = new FloatMenuMulti(options, pawns, this.Pawn, pawns[0].LabelCap, Verse.UI.MouseMapPosition())
             {

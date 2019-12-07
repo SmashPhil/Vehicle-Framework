@@ -2,12 +2,12 @@
 
 <Defs>
 	<PawnKindDef>
-		<defName>Caravel</defName>
+		<defName>SPBoats_PawnKind_Caravel</defName>
 		<label>Caravel</label>
 		<defaultFactionType>PlayerColony</defaultFactionType>
 		<aiAvoidCover>false</aiAvoidCover>
 		<destroyGearOnDrop>true</destroyGearOnDrop>
-		<race>Ships_Caravel</race>
+		<race>SPBoats_Caravel</race>
 		<backstoryCategories>
 			<li>Medieval</li>
 		</backstoryCategories>
@@ -73,7 +73,7 @@
 	</BodyDef>
 	
 	<ThingDef ParentName="BaseShip">
-		<defName>Ships_Caravel</defName>
+		<defName>SPBoats_Caravel</defName>
 		<label>Caravel</label>
 		<description>A medium sized trade ship designed to be both fast and versatile</description>
 		
@@ -138,7 +138,7 @@
 				<armament>DriverNeeded</armament>
 				<shipPowerType>Sails</shipPowerType>
 				<nameable>true</nameable>
-				<buildDef>CaravelBlueprint</buildDef>
+				<buildDef>SPBoats_CaravelBlueprint</buildDef>
 				<ticksBetweenRepair>200</ticksBetweenRepair>
 				
 				<healthLabel_Healthy>Operational</healthLabel_Healthy>

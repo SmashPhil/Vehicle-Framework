@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using RimWorld;
-using UnityEngine;
 using Verse;
-using Verse.AI;
 using RimShips.AI;
 using SPExtendedLibrary;
 
@@ -32,7 +29,7 @@ namespace RimShips
         public static IntVec3 MiddleEdgeCell(Rot4 dir, Map map, Pawn pawn, Predicate<IntVec3> validator)
         {
             List<IntVec3> cellsToCheck = CellRect.WholeMap(map).GetEdgeCells(dir).Where(x => validator(x)).ToList();
-            int padding = 3;
+            int padding = (pawn.def.size.z/2) > 3 ? (pawn.def.size.z/2 + 1) : 3;
             int startIndex = cellsToCheck.Count / 2;
 
             for (int j = 0; j < 100; j++)

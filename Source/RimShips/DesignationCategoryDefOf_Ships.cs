@@ -1,6 +1,4 @@
-﻿using System;
-using RimWorld;
-using UnityEngine;
+﻿using RimWorld;
 using Verse;
 
 namespace RimShips.Defs

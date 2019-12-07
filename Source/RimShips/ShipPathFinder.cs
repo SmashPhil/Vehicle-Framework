@@ -1,21 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
-using System.Text;
-using Harmony;
 using RimWorld;
-using RimWorld.BaseGen;
-using RimWorld.Planet;
 using UnityEngine;
-using UnityEngine.AI;
 using Verse;
 using Verse.AI;
-using Verse.AI.Group;
-using Verse.Sound;
 
 namespace RimShips.AI
 {
@@ -415,7 +404,6 @@ namespace RimShips.AI
                                         this.calcGrid[num15].heuristicCost = Mathf.RoundToInt((float)num21 * num8);
                                     }
                                     int num22 = num19 + this.calcGrid[num15].heuristicCost;
-                                    //Log.Message("Num19: " + num19 + " || num22: " + num22);
                                     if(num22 < 0)
                                     {
                                         Log.ErrorOnce(string.Concat(new object[]

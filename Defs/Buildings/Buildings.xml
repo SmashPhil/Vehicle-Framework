@@ -23,7 +23,7 @@
 	
 	<!-- Rowboat -->
 	<ThingDef ParentName="ShipBase">
-		<defName>RowboatBlueprint</defName>
+		<defName>SPBoats_RowboatBlueprint</defName>
 		<label>Rowboat</label>
 		<description>A simple wooden rowboat for light travel</description>
 		<graphicData>
@@ -51,7 +51,7 @@
 		
 		<modExtensions>
 			<li Class="RimShips.Build.SpawnThingBuilt">
-				<thingToSpawn>Canoe</thingToSpawn>
+				<thingToSpawn>SPBoats_PawnKind_RowBoat</thingToSpawn>
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
 		</modExtensions>
@@ -60,7 +60,7 @@
 	
 	<!-- Caravel -->
 	<ThingDef ParentName="ShipBase">
-		<defName>CaravelBlueprint</defName>
+		<defName>SPBoats_CaravelBlueprint</defName>
 		<label>Caravel</label>
 		<description>A medium sized trade ship designed to be both fast and versatile.</description>
 		<graphicData>
@@ -90,7 +90,7 @@
 		
 		<modExtensions>
 			<li Class="RimShips.Build.SpawnThingBuilt">
-				<thingToSpawn>Caravel</thingToSpawn>
+				<thingToSpawn>SPBoats_PawnKind_Caravel</thingToSpawn>
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
 		</modExtensions>
@@ -98,13 +98,13 @@
 	</ThingDef>
 	
 	<ThingDef ParentName="ShipBase">
-		<defName>GalleonBlueprint</defName>
+		<defName>SPBoats_GalleonBlueprint</defName>
 		<label>Galleon</label>
 		<description>A large sized war vessel designed for ship to ship combat.</description>
 		<graphicData>
-			<texPath>Ships/caravel/CaravelBoat/Caravel_north</texPath>
+			<texPath>Ships/galleon/Galleon_north</texPath>
 			<graphicClass>Graphic_Single</graphicClass>
-			<drawSize>(8,17)</drawSize>
+			<drawSize>(6,17)</drawSize>
 		</graphicData>
 		
 		<statBases>
@@ -128,7 +128,7 @@
 		
 		<modExtensions>
 			<li Class="RimShips.Build.SpawnThingBuilt">
-				<thingToSpawn>Galleon</thingToSpawn>
+				<thingToSpawn>SPBoats_PawnKind_Galleon</thingToSpawn>
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
 		</modExtensions>

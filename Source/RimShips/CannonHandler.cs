@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using Verse;
 using UnityEngine;
 
@@ -34,6 +31,42 @@ namespace RimShips
             this.maxRange = reference.maxRange;
             this.offset = reference.offset;
             this.projectileOffset = reference.projectileOffset;
+            this.splitCannonGroups = reference.splitCannonGroups;
+
+            if(splitCannonGroups)
+            {
+                foreach (float f in reference.centerPoints)
+                {
+                    this.centerPoints.Add(f);
+                }
+                foreach (int i in reference.cannonsPerPoint)
+                {
+                    this.cannonsPerPoint.Add(i);
+                }
+
+                if(this.cannonsPerPoint.Count != this.centerPoints.Count || (cannonsPerPoint.Count == 0 && centerPoints.Count == 0))
+                {
+                    Log.Warning("Could Not initialize cannon groups for " + this.pawn.LabelShort);
+                    return;
+                }
+                int group = 0;
+                for (int i = 0; i < numberCannons; i++)
+                {
+                    if((i+1) > (this.cannonsPerPoint[group] * (group + 1)))
+                        group++;
+                    cannonGroupDict.Add(i, group);
+                    if(ShipHarmony.debug)
+                    {
+                        Log.Message(string.Concat(new object[]
+                        {
+                        "Initializing ", pawn.LabelShortCap,
+                        " with cannon ", this.label,
+                        " with ", cannonsPerPoint[group],
+                        " cannons in group: ", group
+                        }));
+                    }
+                }
+            }
         }
         public void ExposeData()
         {
@@ -56,6 +89,11 @@ namespace RimShips
             Scribe_References.Look(ref pawn, "pawn");
             Scribe_Values.Look(ref reloading, "reloading");
             Scribe_Values.Look(ref hitFlags, "hitFlags", ProjectileHitFlags.All);
+
+            Scribe_Values.Look(ref splitCannonGroups, "splitCannonGroups");
+            Scribe_Collections.Look(ref centerPoints, "centerPoints");
+            Scribe_Collections.Look(ref cannonsPerPoint, "cannonsPerPoints");
+            Scribe_Collections.Look(ref cannonGroupDict, "cannonGroupDict");
         }
 
         public bool ActivateTimer()
@@ -83,10 +121,22 @@ namespace RimShips
             }
         }
 
+        public int CannonGroup(int cannonNumber)
+        {
+            if(centerPoints.Count == 0 || cannonsPerPoint.Count == 0 || centerPoints.Count != cannonsPerPoint.Count)
+            {
+                Log.Error("Error in Cannon Group. CenterPoints is 0, CannonsPerPoint is 0, or CannonsPerPoint and CenterPoints do not have same number of entries");
+                return 0;
+            }
+            return cannonGroupDict[cannonNumber];
+        }
+
         public string GetUniqueLoadID()
         {
             return "CannonHandlerGroup_" + uniqueID;
         }
+
+        private Dictionary<int, int> cannonGroupDict = new Dictionary<int, int>();
 
         public bool reloading;
         public int cooldownTicks;
@@ -99,36 +149,32 @@ namespace RimShips
         public ThingDef projectile;
         public SoundDef cannonSound;
 
+        public List<float> centerPoints = new List<float>();
+        public List<int> cannonsPerPoint = new List<int>();
+
         public Pawn pawn;
 
         [DefaultValue(ProjectileHitFlags.All)]
         public ProjectileHitFlags hitFlags;
 
-        [DefaultValue(0f)]
-        public float spreadRadius;
+        public bool splitCannonGroups = false;
 
-        [DefaultValue(30f)]
-        public float maxRange;
+        public float spreadRadius = 0f;
 
-        [DefaultValue(10f)]
-        public float minRange;
+        public float maxRange = 30f;
 
-        [DefaultValue(5)]
-        public float cooldownTimer;
+        public float minRange = 10f;
 
-        [DefaultValue(1)]
-        public int numberCannons;
+        public float cooldownTimer = 5;
 
-        [DefaultValue(0f)]
-        public float spacing;
+        public int numberCannons = 1;
 
-        [DefaultValue(0f)]
-        public float offset;
+        public float spacing = 0f;
 
-        [DefaultValue(0f)]
-        public float projectileOffset;
+        public float offset = 0f;
 
-        [DefaultValue(50)]
-        public int baseTicksBetweenShots;
+        public float projectileOffset = 0f;
+
+        public int baseTicksBetweenShots = 50;
     }
 }

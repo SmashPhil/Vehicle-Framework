@@ -95,6 +95,7 @@
     <Compile Include="MainTabWindow_Ships.cs" />
     <Compile Include="MapExtension.cs" />
     <Compile Include="MapExtensionUtility.cs" />
+    <Compile Include="MaterialDefOf.cs" />
     <Compile Include="PawnTableDefOf_Ships.cs" />
     <Compile Include="PawnTable_Ships.cs" />
     <Compile Include="Projectile_Water.cs" />

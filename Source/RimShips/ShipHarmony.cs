@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
 using System.Text;
 using Harmony;
 using RimWorld;
-using RimWorld.BaseGen;
 using RimWorld.Planet;
 using UnityEngine;
-using UnityEngine.AI;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
@@ -18,7 +15,6 @@ using Verse.Sound;
 using RimShips.AI;
 using RimShips.Defs;
 using RimShips.Build;
-using RimShips.Jobs;
 using RimShips.Lords;
 using RimShips.UI;
 using SPExtendedLibrary;
@@ -97,6 +93,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(ColonistBarColonistDrawer), "DrawIcons"), prefix: null,
                 postfix: new HarmonyMethod(typeof(ShipHarmony),
                 name: nameof(DrawIconsShips)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(SelectionDrawer), name: "DrawSelectionBracketFor"),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(DrawSelectionBracketsShips)));
 
             //Gizmos
             harmony.Patch(original: AccessTools.Method(typeof(JobDriver_Wait), name: "CheckForAutoAttack"),
@@ -481,7 +480,6 @@ namespace RimShips
             if(IsShip(__instance))
             {
                 IntVec3 position = __instance.PositionHeld;
-                float angle = __instance.GetComp<CompShips>().Angle;
                 Rot4 rotation = __instance.Rotation;
 
                 Map map = __instance.Map;
@@ -721,6 +719,31 @@ namespace RimShips
                 vector.x += num;
             }
         }
+
+        private static bool DrawSelectionBracketsShips(object obj)
+        {
+            if(IsShip(obj as Pawn))
+            {
+                Thing thing = obj as Thing;
+                Vector3[] brackets = new Vector3[4];
+                Vector3 newDrawPos = (thing as Pawn).DrawPosTransformed((thing as Pawn).GetComp<CompShips>().Props.hitboxOffsetX, (thing as Pawn).GetComp<CompShips>().Props.hitboxOffsetZ, (thing as Pawn).GetComp<CompShips>().Angle);
+
+                FieldInfo info = AccessTools.Field(type: typeof(SelectionDrawer), name: "selectTimes");
+                object o = info.GetValue(null);
+                SPExtended.CalculateSelectionBracketPositionsWorldForMultiCellPawns<object>(brackets, thing, newDrawPos, thing.RotatedSize.ToVector2(), (Dictionary<object, float>)o, Vector2.one, (obj as Pawn).GetComp<CompShips>().Angle, 1f);
+
+                int num = (obj as Pawn).GetComp<CompShips>().Angle != 0 ? (int)(obj as Pawn).GetComp<CompShips>().Angle : 0;
+                for (int i = 0; i < 4; i++)
+                {
+                    Quaternion rotation = Quaternion.AngleAxis((float)num, Vector3.up);
+                    Graphics.DrawMesh(MeshPool.plane10, brackets[i], rotation, MaterialDefOf.SelectionBracketMat, 0);
+                    num -= 90;
+                }
+                return false;
+            }
+            return true;
+        }
+
         #endregion Rendering
 
         #region Drafting
@@ -747,6 +770,8 @@ namespace RimShips
                 if(__result is false && __instance?.pawn?.pather?.curPath != null)
                 {
                     if(debug) Log.Message("Pawn_PathFollower is null: " + (__instance.pawn?.pather is null) + " | PawnPath is null: " + (__instance.pawn?.pather?.curPath is null));
+                    Job job = new Job(JobDefOf_Ships.IdleShip);
+                    __instance.pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
                     PatherFailedHelper(ref __instance.pawn.pather, __instance.pawn);
                 }
             }
@@ -1482,7 +1507,7 @@ namespace RimShips
                 __result = TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo, out spot, ___startingTile, ___map) || TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo.Rotated(RotationDirection.Clockwise),
                     out spot, ___startingTile, ___map) || TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo.Rotated(RotationDirection.Counterclockwise), out spot, ___startingTile, ___map);
                 
-                Pawn pawn = pawns.FindAll(x => IsShip(x)).MaxBy(x => x.def.size);
+                Pawn pawn = pawns.FindAll(x => IsShip(x)).MaxBy(x => x.def.size.z);
                 SPExtended.ClampToMap(pawn, ref spot, ___map);
                 return false;
             }

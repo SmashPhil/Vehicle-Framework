@@ -1,8 +1,6 @@
 ﻿using RimWorld;
 using Verse;
-using System;
 using System.Collections.Generic;
-using Harmony;
 
 namespace RimShips
 {
@@ -32,6 +30,9 @@ namespace RimShips
 
         [DefaultValue(false)]
         public bool nameable;
+
+        public float hitboxOffsetX = 0f;
+        public float hitboxOffsetZ = 0f;
 
         public string healthLabel_Healthy = "Operational";
         public string healthLabel_Injured = "Needs Repairs";

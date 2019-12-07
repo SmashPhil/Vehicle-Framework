@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 using RimWorld;
 using Verse;
-using Harmony;
 using SPExtendedLibrary;
 using RimShips.Defs;
 using Verse.Sound;
@@ -15,7 +13,7 @@ namespace RimShips
     public class CompCannons : ThingComp
     {
         private float range;
-        private List<SPExtended.SPTuple<Stack<int>, CannonHandler>> broadsideFire = new List<SPExtended.SPTuple<Stack<int>, CannonHandler>>();
+        private List<SPExtended.SPTuple<Stack<int>, CannonHandler, int>> broadsideFire = new List<SPExtended.SPTuple<Stack<int>, CannonHandler, int>>();
         private List<CannonHandler> cannons = new List<CannonHandler>();
         public CompProperties_Cannons Props => (CompProperties_Cannons)this.props;
         public float MaxRange => this.cannons.Min(x => x.maxRange);
@@ -70,9 +68,10 @@ namespace RimShips
                             portSideCannons.icon = TexCommandShips.BroadsideCannon_Port;
                             portSideCannons.action = delegate ()
                             {
-                                SPExtended.SPTuple<Stack<int>, CannonHandler> tmpCannonItem = new SPExtended.SPTuple<Stack<int>, CannonHandler>(new Stack<int>(), cannon);
+                                SPExtended.SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPExtended.SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
                                 List<int> cannonOrder = Enumerable.Range(0, cannon.numberCannons).ToList();
-                                cannonOrder.SPShuffle();
+                                if(RimShipMod.mod.settings.shuffledCannonFire)
+                                    cannonOrder.SPShuffle();
                                 foreach (int i in cannonOrder)
                                 {
                                     tmpCannonItem.First.Push(i);
@@ -100,9 +99,10 @@ namespace RimShips
                             starboardSideCannons.icon = TexCommandShips.BroadsideCannon_Starboard;
                             starboardSideCannons.action = delegate ()
                             {
-                                SPExtended.SPTuple<Stack<int>, CannonHandler> tmpCannonItem = new SPExtended.SPTuple<Stack<int>, CannonHandler>(new Stack<int>(), cannon);
+                                SPExtended.SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPExtended.SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
                                 List<int> cannonOrder = Enumerable.Range(0, cannon.numberCannons).ToList();
-                                cannonOrder.SPShuffle();
+                                if (RimShipMod.mod.settings.shuffledCannonFire)
+                                    cannonOrder.SPShuffle();
                                 foreach (int i in cannonOrder)
                                 {
                                     tmpCannonItem.First.Push(i);
@@ -148,11 +148,14 @@ namespace RimShips
                 {
                     SPExtended.SPTuple<Stack<int>, CannonHandler> side = broadsideFire[i];
                     side.Second.reloading = false;
-
-                    if (Find.TickManager.TicksGame % side.Second.TicksPerShot == 0)
+                    int tick = broadsideFire[i].Third;
+                    if(broadsideFire[i].Third % side.Second.TicksPerShot == 0)
                     {
                         this.FireCannonBroadside(side.Second, side.First.Pop());
+                        
                     }
+                    tick++;
+                    broadsideFire[i].Third = tick;
                     if (!side.First.Any())
                     {
                         side.Second.reloading = true;
@@ -332,11 +335,25 @@ namespace RimShips
         public void FireCannonBroadside(CannonHandler cannon, int i)
         {
             if (cannon is null) return;
-            
-            float initialOffset = ((cannon.spacing * (cannon.numberCannons - 1)) / 2f) + (this.Pawn.Rotation == Rot4.South || this.Pawn.Rotation == Rot4.West ? -cannon.offset : cannon.offset); // s(n-1) / 2
-            float projectileOffset = (this.Pawn.def.size.x / 2f) + cannon.projectileOffset; // (s/2)
+            float initialOffset;
+            float offset;
+            bool mirrored = false;
+            if (this.Pawn.Rotation == Rot4.South || this.Pawn.Rotation == Rot4.West)
+                mirrored = true;
+            if(cannon.splitCannonGroups)
+            {
+                int group = cannon.CannonGroup(i);
+                float groupOffset = cannon.centerPoints[group];
+                initialOffset = ((cannon.spacing * (cannon.cannonsPerPoint[group] - 1)) / 2f) + groupOffset; // s(n-1) / 2
+                offset = (cannon.spacing * i - initialOffset) * (mirrored ? -1 : 1); //s*i - x
+            }
+            else
+            {
+                initialOffset = ((cannon.spacing * (cannon.numberCannons - 1)) / 2f) + cannon.offset; // s(n-1) / 2
+                offset = (cannon.spacing * i - initialOffset) * (mirrored ? -1 : 1); //s*i - x
+            }
 
-            float offset = cannon.spacing * i - initialOffset; //s*i - x
+            float projectileOffset = (this.Pawn.def.size.x / 2f) + cannon.projectileOffset; // (s/2)
             SPExtended.SPTuple<float, float> angleOffset = this.AngleRotationProjectileOffset(offset, projectileOffset);
             ThingDef projectile = cannon.projectile;
             IntVec3 targetCell = IntVec3.Invalid;
@@ -554,7 +571,7 @@ namespace RimShips
         {
             base.PostSpawnSetup(respawningAfterLoad);
             this.InitializeCannons();
-            this.broadsideFire = new List<SPExtended.SPTuple<Stack<int>, CannonHandler>>();
+            this.broadsideFire = new List<SPExtended.SPTuple<Stack<int>, CannonHandler, int>>();
         }
 
         private void InitializeCannons()

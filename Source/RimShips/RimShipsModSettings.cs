@@ -1,22 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
-using System.Text;
-using Harmony;
-using RimWorld;
-using RimWorld.BaseGen;
-using RimWorld.Planet;
-using RimShips.Build;
-using RimShips.Defs;
-using UnityEngine;
-using UnityEngine.AI;
+﻿using UnityEngine;
 using Verse;
-using Verse.AI;
-using Verse.AI.Group;
-using Verse.Sound;
 
 namespace RimShips
 {
@@ -25,6 +8,8 @@ namespace RimShips
         public float beachMultiplier;
         public bool forceFactionCoastOption;
         public int forceFactionCoastRadius;
+
+        public bool shuffledCannonFire;
 
         public bool debugDrawRegions;
         public bool debugDrawRegionLinks;
@@ -35,6 +20,7 @@ namespace RimShips
             Scribe_Values.Look(ref beachMultiplier, "beachMultiplier");
             Scribe_Values.Look(ref forceFactionCoastRadius, "forceFactionCoastRadius", 1);
             Scribe_Values.Look(ref forceFactionCoastOption, "forceFactionCoastOption", true);
+            Scribe_Values.Look(ref shuffledCannonFire, "shuffledCannonFire", true);
             base.ExposeData();
         }
     }
@@ -67,6 +53,8 @@ namespace RimShips
                 settings.forceFactionCoastRadius = (int)listingStandard.Slider((float)settings.forceFactionCoastRadius, 0f, 10f);  
             }
             listingStandard.GapLine(16f);
+
+            listingStandard.CheckboxLabeled("ShuffledCannonFire".Translate(), ref settings.shuffledCannonFire, "ShuffledCannonFireTooltip".Translate());
 
             if(Prefs.DevMode)
             {
