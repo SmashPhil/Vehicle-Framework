@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Manifest>
+    <identifier>smashphil.boats.rimworld</identifier>
+    <version>1.0.0</version>
+    <dependencies/>
+    <loadAfter/>
+    <suggests>
+		<li>1906469966</li> <!-- Coastlines -->
+	</suggests>
+    <showCrossPromotions>true</showCrossPromotions>
+    <manifestUri>https://raw.githubusercontent.com/dninemfive/ctm/master/About/Manifest.xml</manifestUri>
+    <downloadUri>https://github.com/dninemfive/ctm/releases/latest</downloadUri>
+</Manifest>

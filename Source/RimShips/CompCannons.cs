@@ -122,7 +122,7 @@ namespace RimShips
 
                         Command_SetRange range = new Command_SetRange();
                         range.defaultLabel = "SetRange".Translate();
-                        range.icon = TexCommandShips.UnloadCaptain;
+                        range.icon = TexCommand.Attack;
                         range.activeCannons = this.cannons.FindAll(x => x.weaponType == WeaponType.Broadside);
                         range.cannonComp = this;
                         yield return range;
