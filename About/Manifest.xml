@@ -8,6 +8,6 @@
 		<li>1906469966</li> <!-- Coastlines -->
 	</suggests>
     <showCrossPromotions>true</showCrossPromotions>
-    <manifestUri>https://raw.githubusercontent.com/dninemfive/ctm/master/About/Manifest.xml</manifestUri>
-    <downloadUri>https://github.com/dninemfive/ctm/releases/latest</downloadUri>
+    <manifestUri>https://raw.githubusercontent.com/smashphil/boats/master/About/Manifest.xml</manifestUri>
+    <downloadUri>https://github.com/SmashPhil/Boats/releases/latest</downloadUri>
 </Manifest>
