@@ -32,7 +32,7 @@ namespace RimShips
             int padding = (pawn.def.size.z/2) > 3 ? (pawn.def.size.z/2 + 1) : 3;
             int startIndex = cellsToCheck.Count / 2;
 
-            for (int j = 0; j < 100; j++)
+            for (int j = 0; j < 10000; j++)
             {
                 IntVec3 c = pawn.ClampToMap(CellFinder.RandomEdgeCell(dir, map), map, padding);
                 if (pawn.PawnOccupiedCells(c).All(x => validator(x)))
@@ -59,7 +59,7 @@ namespace RimShips
                 }
                 return rCell;
 
-            Block_0:;
+                Block_0:;
                 IntVec3 lCell = pawn.ClampToMap(cellsToCheck[startIndex - i], map, padding);
                 if (ShipHarmony.debug) Log.Message("Checking l: " + lCell + " | " + validator(lCell));
                 List<IntVec3> occupiedCellsLCell = pawn.PawnOccupiedCells(rCell);
@@ -70,11 +70,11 @@ namespace RimShips
                 }
                 return lCell;
 
-            Block_1:;
+                Block_1:;
                 i++;
                 if (ShipHarmony.debug) Log.Message("==============");
             }
-            Log.Error("Could not find valid edge cell to spawn boats on. Choosing Random Cell. Please report to mod author of Boats.");
+            Log.Error("Could not find valid edge cell to spawn boats on. This could be due to the Boat being too large to spawn on the coast of a Mountainous Map.");
             return pawn.ClampToMap(CellFinder.RandomEdgeCell(dir, map), map, padding);
         }
 
