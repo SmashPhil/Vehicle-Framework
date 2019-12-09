@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <RimShips>Boats</RimShips>
+  <BoardShip>{1}として{0}に乗船する [残り：{2}名]</BoardShip>
+  <BoardShipGroup>{0}に乗船する</BoardShipGroup>
+  <BoardShipGroupFail>{0}に乗船する（選択者が多すぎ）</BoardShipGroupFail>
+  <CompShips_CannotMove>出航できません。船が航行するためにはもっと多くの乗組員を必要とします。</CompShips_CannotMove>
+  <NotEnoughCannonCrew>{0}の入植者たちの人数では{1}を操作するには人数が足りません。</NotEnoughCannonCrew>
+  <ShipSection>船</ShipSection>
+  <CannonLabel>大砲：{0}</CannonLabel>
+  <AwaitOrders>命令を待機中</AwaitOrders>
+  <RepairShip>{0}を修理する</RepairShip>
+  <Disembark>下船する</Disembark>
+  <SetRange>航続距離の設定</SetRange>
+  <CannonRange>射程：{0}マス</CannonRange>
+  <RenameShip>{0}を改名する</RenameShip>
+  <ShipGainsName>船の新しい名前は{0}です</ShipGainsName>
+  <ActivityIconOnBoardShip>{0}に乗船</ActivityIconOnBoardShip>
+  <IsIncapableOfRamming>{0}に体当たり</IsIncapableOfRamming>
+
+  <ShuffledCannonFire>自由砲撃</ShuffledCannonFire>
+  <ShuffledCannonFireTooltip>一斉射撃せずに各砲門を自由に射撃させます。</ShuffledCannonFireTooltip>
+
+  <ShipSunkLabel>船が沈没</ShipSunkLabel>
+  <ShipSunkDeep>{0}は海の底に沈没した。一緒に沈んだもの：{1}</ShipSunkDeep>
+  <ShipSunkShallow>{0}は沈没したが、まだ回収可能です。</ShipSunkShallow>
+
+  <CaravanShips>船隊</CaravanShips>
+  <CaravanShipsSingle>1隻</CaravanShipsSingle>
+  <CaravanShipsPlural>{0}隻</CaravanShipsPlural>
+  <CaravanSailing>航海中</CaravanSailing>
+  <CaravanPassengers>乗組員</CaravanPassengers>
+  <ShipNotDockedCancelCaravan>{0}は浅瀬ではありません。</ShipNotDockedCancelCaravan>
+  <TabCargo>積み荷</TabCargo>
+  <TabPassengers>ポーン</TabPassengers>
+  <TabBoatHealth>耐久度</TabBoatHealth>
+  <Cargo>積み荷</Cargo>
+  <ShipOutOfFood>ポーンを載せた{0}に食べ物がありません</ShipOutOfFood>
+  <CommandDockShip>停泊</CommandDockShip>
+  <CommandDockShipDesc>乗務員を全員降ろして、{0}の拠点で取引可能になります。</CommandDockShipDesc>
+  <CommandUndockShip>舟に乗船</CommandUndockShip>
+  <CommandUndockShipDesc>ポーンとアイテムをすべて船に載せます</CommandUndockShipDesc>
+  <CommandAttackDockDisable>拠点に停泊している間は{0}を攻撃できません</CommandAttackDockDisable>
+
+  <BeachGenMultiplier>海岸の大きさ係数：{0}%</BeachGenMultiplier>
+  <BeachGenMultiplierLarge>海岸の大きさ係数：{0}%（テストサイズ）</BeachGenMultiplierLarge>
+  <BeachGenMultiplierTooltip>海岸線の水深を増加します。</BeachGenMultiplierTooltip>
+  <BeachGenMultiplierLargeTooltip>現在の数値は推奨値よりも大きくなっています。海は最大で世界地図の80%を占める可能性があり、さらに大きな世界地図では湖が散在しています。</BeachGenMultiplierLargeTooltip>
+  <ForceSettlementCoastOption>拠点を沿岸に配置</ForceSettlementCoastOption>
+  <ForceSettlementCoastTooltip>一定の範囲内なら、近隣にある派閥の拠点を海岸に強制配置します</ForceSettlementCoastTooltip>
+  <ForceSettlementCoast>拠点を海岸に移転する範囲：{0}</ForceSettlementCoast>
+  <DebugDrawRegions>描画領域のデバッグ</DebugDrawRegions>
+  <DebugDrawRegionLinks>描画領域結合のデバッグ</DebugDrawRegionLinks>
+  <DebugDrawRegionThings>描画領域(Things)のデバッグ</DebugDrawRegionThings>
+  <CannotSailToCell>船はこのエリアに到達できません。</CannotSailToCell>
+
+  <CaravanMustHaveEnoughSpaceOnShip>ポーンを全員載せるのに十分な場所がありません。</CaravanMustHaveEnoughSpaceOnShip>
+  <CaravanMustHaveEnoughPawnsToOperate>帆を張るのに十分なポーンが選択されていません。{0}人が必要</CaravanMustHaveEnoughPawnsToOperate>
+  <MessagePawnBoardedFormingCaravan>{0}は{1}に乗船して出航する準備が完了しました。</MessagePawnBoardedFormingCaravan>
+  <MessageCantAddWaypointBecauseNoShip>{0}を横断するには船が必要です</MessageCantAddWaypointBecauseNoShip>
+  <MessageCantAddWaypointBecauseShip>船で陸上を旅行することはできません。</MessageCantAddWaypointBecauseShip>
+
+  <FormingCaravanStatus_GatheringItems_Ship>積み荷を船に載せます。</FormingCaravanStatus_GatheringItems_Ship>
+  <FormingCaravanStatus_GatheringItems_Ship_Pause>積み荷を船に載せる（待機中）</FormingCaravanStatus_GatheringItems_Ship_Pause>
+  <FormingCaravanStatus_GatheringSlaves_Ship>船に奴隷を載せる。</FormingCaravanStatus_GatheringSlaves_Ship>
+  <FormingCaravanStatus_GatheringSlaves_Ship_Pause>船に奴隷を載せる（待機中）</FormingCaravanStatus_GatheringSlaves_Ship_Pause>
+  <FormingCaravanStatus_GatheringDownedPawns_Ship>倒れたポーンを船に載せる。</FormingCaravanStatus_GatheringDownedPawns_Ship>
+  <FormingCaravanStatus_GatheringDownedPawns_Ship_Pause>倒れたポーンを船に載せる（待機中）</FormingCaravanStatus_GatheringDownedPawns_Ship_Pause>
+  <FormingCaravanStatus_BoardShip>船に乗船する。</FormingCaravanStatus_BoardShip>
+  <FormingCaravanStatus_BoardShip_Pause>船に乗船する（待機中）</FormingCaravanStatus_BoardShip_Pause>
+  <FormingCaravanStatus_Leaving_Ship>航海中</FormingCaravanStatus_Leaving_Ship>
+  <FormingCaravanStatus_Leaving_Ship_Pause>航海中（待機中）</FormingCaravanStatus_Leaving_Ship_Pause>
+  <Ships>船団</Ships>
+
+</LanguageData>
