@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <BoatsNotice.label>Boatsアップデート</BoatsNotice.label>
+  <BoatsNotice.description>Boatsが更新されました！
+
+以下が追加または変更されました：
+  
+・海岸線に沿った山の多いマップに乗り込もうと足掻いている船の緊急セル検索数が増加。
+
+・ボートの在庫品から荷物を直接ドロップする機能が追加されました。
+
+・乗船するポーンのグループを選択すると、動物は自動的に乗務員として乗船します。
+
+・移動経路に関連するバグを修正
+
+・船から下船(出る)すると作業優先順位がリセットされるバグを修正しました。
+
+・再配置が改善され、最適化されました。船に帆をかけるのに十分なポーン数があり、彼らが間違った配置にある場合、徴兵することで優先的に彼らを再配置します。</BoatsNotice.description>
+  <BoatsNotice.letter>D9更新注意</BoatsNotice.letter>
+
+</LanguageData>
