@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <!-- Ships -->
+
+  <BasicsShip.label>基本性能(船)</BasicsShip.label>
+  <CombatShip.label>戦闘力(船)</CombatShip.label>
+
+</LanguageData>

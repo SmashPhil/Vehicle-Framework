@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <SPBoats_Caravel.label>カラベル船</SPBoats_Caravel.label>
+  <SPBoats_Caravel.description>高い速力を持ち多目的に使えるように設計された中型の貿易用帆船です。</SPBoats_Caravel.description>
+  <SPBoats_Caravel.comps.CompShips.roles.0.label>船長</SPBoats_Caravel.comps.CompShips.roles.0.label>
+  <SPBoats_Caravel.comps.CompShips.roles.1.label>船員</SPBoats_Caravel.comps.CompShips.roles.1.label>
+  <SPBoats_Caravel.comps.CompShips.roles.2.label>大砲</SPBoats_Caravel.comps.CompShips.roles.2.label>
+  <SPBoats_Caravel.comps.CompShips.roles.3.label>乗組員</SPBoats_Caravel.comps.CompShips.roles.3.label>
+  <SPBoats_Caravel.comps.CompCannons.cannons.0.label>左舷</SPBoats_Caravel.comps.CompCannons.cannons.0.label>
+  <SPBoats_Caravel.comps.CompCannons.cannons.1.label>右舷</SPBoats_Caravel.comps.CompCannons.cannons.1.label>
+  <SPBoats_Caravel.tools.hull.label>船体</SPBoats_Caravel.tools.hull.label>
+  <SPBoats_Caravel.comps.CompShips.healthLabel_Injured>修理が必要</SPBoats_Caravel.comps.CompShips.healthLabel_Injured>
+  <!-- Leather Amount: 0 -->
+  <!-- Meat Amount: 0 -->
+  <Corpse_SPBoats_Caravel.label>カラベル船の残骸</Corpse_SPBoats_Caravel.label>
+  <Corpse_SPBoats_Caravel.description>カラベル船の残骸</Corpse_SPBoats_Caravel.description>
+
+</LanguageData>
