@@ -34,4 +34,21 @@
 			</li>
 		</wounds>
 	</FleshTypeDef>
+	
+	<FleshTypeDef>
+		<defName>SpacerShip</defName>
+		<corpseCategory>CorpsesMechanoid</corpseCategory>
+		<!-- Change Later -->
+		<wounds>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechA</texture>
+			</li>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechB</texture>
+			</li>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechC</texture>
+			</li>
+		</wounds>
+	</FleshTypeDef>
 </Defs>

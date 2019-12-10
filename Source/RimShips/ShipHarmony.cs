@@ -325,6 +325,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(WorldPawns), name: nameof(WorldPawns.GetSituation)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(SituationBoardedShip)));
+            harmony.Patch(original: AccessTools.Property(type: typeof(RaceProperties), name: nameof(RaceProperties.IsFlesh)).GetGetMethod(), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(BoatsNotFlesh)));
 
             //Debug
             if(debug)
@@ -2529,6 +2532,14 @@ namespace RimShips
             }
         }
 
+        public static void BoatsNotFlesh(ref bool __result, RaceProperties __instance)
+        {
+            if(__instance.FleshType == FleshTypeDefOf_Ships.WoodenShip || __instance.FleshType == FleshTypeDefOf_Ships.MetalShip)
+            {
+                __result = false;
+            }
+        }
+
         #endregion Extra
         private static bool GenerateNewShipPath(ref PawnPath __result, ref Pawn_PathFollower __instance, ref Pawn ___pawn, ref PathEndMode ___peMode)
         {
@@ -2931,6 +2942,11 @@ namespace RimShips
         }
 
         #region HelperFunctions
+
+        private static bool IsShipDef(ThingDef td)
+        {
+            return td?.GetCompProperties<CompProperties_Ships>() != null;
+        }
 
         private static bool IsOceanTile(int tile)
         {

@@ -33,8 +33,6 @@ namespace RimShips
         public Pawn Pawn => parent as Pawn;
         public CompProperties_Ships Props => (CompProperties_Ships)this.props;
 
-        private int reseatTimer = 0;
-
         public bool MovementHandlerAvailable
         {
             get
@@ -744,11 +742,10 @@ namespace RimShips
                     {
                         ShipHandler handler = this.handlers[i];
                         ShipHandler passengerHandler = this.handlers.Find(x => x.role.handlingType == HandlingTypeFlags.None);
-
                         if (handler.handlers.Count > handler.role.slots)
                         {
                             int j = 0;
-                            while (handler.handlers.Count > handler.role.slots)
+                            while(handler.handlers.Count > handler.role.slots)
                             {
                                 Pawn p = handler.handlers.InnerListForReading[j];
                                 handler.handlers.TryTransferToContainer(p, passengerHandler.handlers, false);
@@ -760,21 +757,20 @@ namespace RimShips
                             if (passengerHandler.handlers.Count <= 0)
                             {
                                 ShipHandler emergencyHandler = this.handlers.Find(x => x.role.handlingType < HandlingTypeFlags.Movement && x.handlers.Count > 0); //Can Optimize
-                                Pawn transferPawnE = emergencyHandler.handlers.InnerListForReading.First(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
-                                emergencyHandler.handlers.TryTransferToContainer(transferPawnE, handler.handlers, false);
+                                Pawn transferPawnE = emergencyHandler?.handlers.InnerListForReading.First(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
+                                emergencyHandler?.handlers.TryTransferToContainer(transferPawnE, handler.handlers, false);
                                 continue;
                             }
                             Pawn transferingPawn = passengerHandler.handlers.InnerListForReading.First(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
                             passengerHandler.handlers.TryTransferToContainer(transferingPawn, handler.handlers, false);
                         }
-
-                        if(handler.role.handlingType == HandlingTypeFlags.Cannons && handler.handlers.Count < handler.role.slotsToOperate && this.CanMove)
+                        if (handler.role.handlingType == HandlingTypeFlags.Cannons && handler.handlers.Count < handler.role.slotsToOperate && this.CanMove)
                         {
                             if(passengerHandler.handlers.Count <= 0)
                             {
                                 ShipHandler emergencyHandler = this.handlers.Find(x => x.role.handlingType < HandlingTypeFlags.Cannons && x.handlers.Count > 0); //Can Optimize
-                                Pawn transferPawnE = emergencyHandler.handlers.InnerListForReading.First(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
-                                emergencyHandler.handlers.TryTransferToContainer(transferPawnE, handler.handlers, false);
+                                Pawn transferPawnE = emergencyHandler?.handlers.InnerListForReading.First(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
+                                emergencyHandler?.handlers.TryTransferToContainer(transferPawnE, handler.handlers, false);
                                 continue;
                             }
                             Pawn transferingPawn = passengerHandler.handlers.InnerListForReading.First(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));

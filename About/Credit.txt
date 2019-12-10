@@ -1,9 +1,0 @@
-Error Resolving: Dr_Zhivago, dninemfive, Jamaican Castle, Dyrewulfe, Pelador, Mehni
-
-Bug Testing: Dr_Zhivago, NECEROS, Kerberos
-
-Textures: MistorLove (Early boat texture concepts) , Odz (Boat textures)
-
-Initial Boat design inspired by Jecrell.
-
-Mod Update .dll: dninemfive

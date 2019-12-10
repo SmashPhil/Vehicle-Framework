@@ -13,5 +13,7 @@ namespace RimShips.Defs
         public static FleshTypeDef WoodenShip;
 
         public static FleshTypeDef MetalShip;
+
+        public static FleshTypeDef SpacerShip;
     }
 }
