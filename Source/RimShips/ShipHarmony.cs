@@ -147,6 +147,10 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(CaravanTicksPerMoveUtility), parameters: new Type[] { typeof(List<Pawn>), typeof(float), typeof(float), typeof(StringBuilder)}, name: nameof(CaravanTicksPerMoveUtility.GetTicksPerMove)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(GetTicksPerMoveShips)));
+            //Needs Work
+            harmony.Patch(original: AccessTools.Method(type: typeof(CompLaunchable), name: "ChoseWorldTarget"), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(LaunchersImpassableForWaterTranspiler)));
 
             //Jobs
             harmony.Patch(original: AccessTools.Method(type: typeof(JobUtility), name: nameof(JobUtility.TryStartErrorRecoverJob)),
@@ -318,6 +322,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(Selector), name: "HandleMapClicks"), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(MultiSelectFloatMenuTranspiler)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(WorldPawns), name: nameof(WorldPawns.GetSituation)), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(SituationBoardedShip)));
 
             //Debug
             if(debug)
@@ -754,7 +761,7 @@ namespace RimShips
             {
                 if (value && !__instance.Drafted)
                 {
-                    if (!__instance.pawn.GetComp<CompShips>().CanMove)
+                    if(!__instance.pawn.GetComp<CompShips>().ResolveSeating())
                     {
                         Messages.Message("CompShips_CannotMove".Translate(), MessageTypeDefOf.RejectInput);
                         return false;
@@ -2504,6 +2511,24 @@ namespace RimShips
             }
         }
 
+        public static void SituationBoardedShip(Pawn p, ref WorldPawnSituation __result, WorldPawns __instance)
+        {
+            if(__result == WorldPawnSituation.Free && p.Faction == Faction.OfPlayer)
+            {
+                foreach(Map map in Find.Maps)
+                {
+                    foreach(Pawn ship in map.mapPawns.AllPawnsSpawned.Where(x => IsShip(x) && x.Faction == Faction.OfPlayer))
+                    {
+                        if(ship.GetComp<CompShips>().AllPawnsAboard.Contains(p))
+                        {
+                            __result = WorldPawnSituation.CaravanMember;
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
         #endregion Extra
         private static bool GenerateNewShipPath(ref PawnPath __result, ref Pawn_PathFollower __instance, ref Pawn ___pawn, ref PathEndMode ___peMode)
         {
@@ -2716,9 +2741,12 @@ namespace RimShips
             }
         }
 
-        public static bool TryAddWayPointWater(int tile, Dialog_FormCaravan ___currentFormCaravanDialog, bool playSound = true)
+        public static bool TryAddWayPointWater(int tile, Dialog_FormCaravan ___currentFormCaravanDialog, WorldRoutePlanner __instance, bool playSound = true)
         {
-            List<Pawn> pawnsOnCaravan = TransferableUtility.GetPawnsFromTransferables(___currentFormCaravanDialog.transferables);
+            List<Pawn> pawnsOnCaravan = ___currentFormCaravanDialog is null ? ((Caravan)(AccessTools.Property(type: typeof(WorldRoutePlanner), name: "CaravanAtTheFirstWaypoint").GetGetMethod().Invoke(__instance, null)))?.PawnsListForReading
+                : TransferableUtility.GetPawnsFromTransferables(___currentFormCaravanDialog?.transferables);
+            if(pawnsOnCaravan is null || !pawnsOnCaravan.Any())
+                return true;
             if(Find.WorldGrid[tile].biome == BiomeDefOf.Ocean || Find.WorldGrid[tile].biome == BiomeDefOf.Lake || (Find.World.CoastDirectionAt(tile).IsValid && HasShip(pawnsOnCaravan)))
             {
                 if(!HasShip(pawnsOnCaravan))
@@ -2876,8 +2904,38 @@ namespace RimShips
             return true;
         }
 
+        public static IEnumerable<CodeInstruction> LaunchersImpassableForWaterTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+        {
+            List<CodeInstruction> instructionList = instructions.ToList();
+
+            for(int i = 0; i < instructionList.Count; i++)
+            {
+                CodeInstruction instruction = instructionList[i];
+
+                /*if(instruction.opcode == OpCodes.Callvirt && instruction.operand == AccessTools.Method(type: typeof(World), name: nameof(World.Impassable)))
+                {
+                    Label label = ilg.DefineLabel();
+
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipHarmony.IsOceanTile)));
+                    yield return new CodeInstruction(opcode: OpCodes.Brtrue, label);
+
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Property(type: typeof(Find), name: nameof(Find.World)).GetGetMethod());
+                    yield return instructionList[i - 2];
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Property(type: typeof(GlobalTargetInfo), name: nameof(GlobalTargetInfo.Tile)).GetGetMethod());
+
+                    instructionList[i + 2].labels.Add(label);
+                }*/
+
+                yield return instruction;
+            }
+        }
+
         #region HelperFunctions
 
+        private static bool IsOceanTile(int tile)
+        {
+            return Find.WorldGrid[tile].WaterCovered;
+        }
         private static bool IsWaterTile(int tile, Caravan caravan)
         {
             bool riverAllowed = !riversDisabled && (Find.WorldGrid[tile]?.Rivers?.Any() ?? false) ? caravan.PawnsListForReading.All(x => IsShip(x) &&

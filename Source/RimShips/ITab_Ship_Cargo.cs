@@ -4,6 +4,7 @@ using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
+using Verse.Sound;
 
 namespace RimShips.UI
 {
@@ -79,6 +80,18 @@ namespace RimShips.UI
             Widgets.InfoCardButton(rect.width - 24f, y, thing);
             rect.width -= 24f;
 
+            if(inventory && this.SelPawnForCargo.Spawned)
+            {
+                Rect rectDrop = new Rect(rect.width - 24f, y, 24f, 24f);
+                TooltipHandler.TipRegion(rectDrop, "DropThing".Translate());
+                if(Widgets.ButtonImage(rectDrop, TexCommandShips.Drop))
+                {
+                    SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
+                    InterfaceDrop(thing);
+                }
+                rect.width -= 24f;
+            }
+
             Rect rect2 = rect;
             rect2.xMin = rect2.xMax - 60f;
             CaravanThingsTabUtility.DrawMass(thing, rect2);
@@ -122,6 +135,11 @@ namespace RimShips.UI
             float num2 = MassUtility.Capacity(this.SelPawnForCargo, null);
             Widgets.Label(rect, "MassCarried".Translate(num.ToString("0.##"), num2.ToString("0.##")));
             curY += 22f;
+        }
+
+        private void InterfaceDrop(Thing t)
+        {
+            this.SelPawnForCargo.inventory.innerContainer.TryDrop(t, this.SelPawnForCargo.Position, this.SelPawnForCargo.Map, ThingPlaceMode.Near, out Thing thing, null, null);
         }
 
         private Vector2 scrollPosition = Vector2.zero;

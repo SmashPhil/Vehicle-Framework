@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<LetterDef>
+		<defName>D9UpdateNotice</defName>
+		<color>(0, 190, 90)</color>
+		<flashColor>(0,225,90)</flashColor>
+		<flashInterval>2</flashInterval>
+		<bounce>true</bounce>
+		<arriveSound>LetterArrive</arriveSound>
+		<pauseIfPauseOnUrgentLetter>true</pauseIfPauseOnUrgentLetter>
+	</LetterDef>
+</Defs>

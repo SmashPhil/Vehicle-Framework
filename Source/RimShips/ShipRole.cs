@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace RimShips
 {
-    public enum HandlingTypeFlags {None, Movement, Cannons, Turret}
+    public enum HandlingTypeFlags {None, Cannons, Turret, Movement }
 
     public class ShipRole : IExposable
     {

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+	<LiteUpdateNotice.NoticeDef>
+		<defName>BoatsNotice</defName>
+		<label>Boats Updated</label>
+		<description>Boats have been updated!
+
+The following have been added or changed:
+
+- Increased emergency cell search count for boats struggling to enter a map with a lot of mountains along the coastline.
+
+- Added the ability to drop cargo items directly from the boats inventory.
+
+- Animals will now automatically board into passenger seats when selecting a group of pawns to board.
+
+- Fixed bug involving Waypoints
+
+- Fixed bug where work priorities would be reset upon exiting a boat.
+
+- Reseating has been improved and optimized. If your boat has enough pawns to set sail but they are in the wrong seats, drafting will now reseat them by priority.</description>
+		<letter>D9UpdateNotice</letter>
+	</LiteUpdateNotice.NoticeDef>
+</Defs>

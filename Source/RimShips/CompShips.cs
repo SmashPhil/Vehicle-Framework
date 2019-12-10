@@ -262,7 +262,7 @@ namespace RimShips
                         continue;
                     Job job = new Job(JobDefOf_Ships.Board, this.parent);
                     p.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
-                    ShipHandler handler = this.NextAvailableHandler;
+                    ShipHandler handler = p.IsColonistPlayerControlled ? this.NextAvailableHandler : this.handlers.Find(x => x.role.handlingType == HandlingTypeFlags.None);
                     this.GiveLoadJob(p, handler);
                     this.ReserveSeat(p, handler);
                 }
@@ -342,6 +342,7 @@ namespace RimShips
             }
             bills.Add(new Jobs.Bill_BoardShip(pawn, handler));
         }
+
         public void Notify_BoardedCaravan(Pawn pawnToBoard, ThingOwner handler)
         {
             if (!pawnToBoard.IsWorldPawn())
@@ -368,28 +369,24 @@ namespace RimShips
                 {
                     if(pawnToBoard.IsWorldPawn())
                     {
-                        Log.Warning("Tried boarding ship with world pawn");
+                        Log.Error("Tried boarding ship with world pawn.");
+                        return;
                     }
 
-                    Faction faction = pawnToBoard.Faction;
-                    
                     if(pawnToBoard.Spawned)
-                        pawnToBoard.DeSpawn();
-
-                    if ( !(pawnToBoard.holdingOwner is null))
+                        pawnToBoard.DeSpawn(DestroyMode.Vanish);
+                    if (bill.handler.handlers.TryAdd(pawnToBoard, true))
+                    {
+                        if(pawnToBoard != null)
+                        {
+                            if (bill.handler.currentlyReserving.Contains(pawnToBoard)) bill.handler.currentlyReserving.Remove(pawnToBoard);
+                            Find.WorldPawns.PassToWorld(pawnToBoard, PawnDiscardDecideMode.Decide);
+                        }
+                    }
+                    else if(!(pawnToBoard.holdingOwner is null))
                     {
                         pawnToBoard.holdingOwner.TryTransferToContainer(pawnToBoard, bill.handler.handlers);
                     }
-                    else
-                    {
-                        bill.handler.handlers.TryAdd(pawnToBoard);
-                    }
-                    if (!pawnToBoard.IsWorldPawn())
-                    {
-                        if (bill.handler.currentlyReserving.Contains(pawnToBoard)) bill.handler.currentlyReserving.Remove(pawnToBoard);
-                        Find.WorldPawns.PassToWorld(pawnToBoard, PawnDiscardDecideMode.Decide);
-                    }
-                    if(pawnToBoard.Faction != faction) pawnToBoard.SetFaction(faction);
                     bills.Remove(bill);
                 }
             }
@@ -399,8 +396,8 @@ namespace RimShips
         {
             if(!pawn.Spawned)
             {
-                GenSpawn.Spawn(pawn, Pawn.PositionHeld.RandomAdjacentCellCardinal(), Pawn.MapHeld);
-                if(!(this.Pawn.GetLord() is null))
+                GenSpawn.Spawn(pawn, this.Pawn.PositionHeld.RandomAdjacentCellCardinal(), Pawn.MapHeld);
+                if (!(this.Pawn.GetLord() is null))
                 {
                     this.Pawn.GetLord().AddPawn(pawn);
                 }
@@ -731,44 +728,68 @@ namespace RimShips
                 handler.currentlyReserving.Add(p);
         }
 
-        private void ResolveSeating()
+        public bool ResolveSeating()
         {
-            if (!this.CanMove && this.AllCapablePawns.Count >= this.PawnCountToOperate)
+            if(this.AllCapablePawns.Count >= this.PawnCountToOperate)
             {
-                for(int i = 0; i < this.handlers.Count; i++)
-                {
-                    ShipHandler handler = this.handlers[i];
-                    if(handler.currentlyReserving.Count > 0)
-                        return;
-                }
-                reseatTimer++;
-                if(reseatTimer >= 200)
+                for(int r = 0; r < 100; r++)
                 {
                     for (int i = 0; i < this.handlers.Count; i++)
                     {
                         ShipHandler handler = this.handlers[i];
+                        if (handler.currentlyReserving.Count > 0)
+                            return false;
+                    }
+                    for (int i = 0; i < this.handlers.Count; i++)
+                    {
+                        ShipHandler handler = this.handlers[i];
+                        ShipHandler passengerHandler = this.handlers.Find(x => x.role.handlingType == HandlingTypeFlags.None);
+
+                        if (handler.handlers.Count > handler.role.slots)
+                        {
+                            int j = 0;
+                            while (handler.handlers.Count > handler.role.slots)
+                            {
+                                Pawn p = handler.handlers.InnerListForReading[j];
+                                handler.handlers.TryTransferToContainer(p, passengerHandler.handlers, false);
+                                j++;
+                            }
+                        }
                         if (handler.role.handlingType == HandlingTypeFlags.Movement && handler.handlers.Count < handler.role.slotsToOperate)
                         {
-                            ShipHandler passengerHandler = this.handlers.Find(x => x.role.handlingType == HandlingTypeFlags.None);
+                            if (passengerHandler.handlers.Count <= 0)
+                            {
+                                ShipHandler emergencyHandler = this.handlers.Find(x => x.role.handlingType < HandlingTypeFlags.Movement && x.handlers.Count > 0); //Can Optimize
+                                Pawn transferPawnE = emergencyHandler.handlers.InnerListForReading.First(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
+                                emergencyHandler.handlers.TryTransferToContainer(transferPawnE, handler.handlers, false);
+                                continue;
+                            }
                             Pawn transferingPawn = passengerHandler.handlers.InnerListForReading.First(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
-                            if (transferingPawn != null)
-                                passengerHandler.handlers.TryTransferToContainer(transferingPawn, handler.handlers, false);
+                            passengerHandler.handlers.TryTransferToContainer(transferingPawn, handler.handlers, false);
+                        }
+
+                        if(handler.role.handlingType == HandlingTypeFlags.Cannons && handler.handlers.Count < handler.role.slotsToOperate && this.CanMove)
+                        {
+                            if(passengerHandler.handlers.Count <= 0)
+                            {
+                                ShipHandler emergencyHandler = this.handlers.Find(x => x.role.handlingType < HandlingTypeFlags.Cannons && x.handlers.Count > 0); //Can Optimize
+                                Pawn transferPawnE = emergencyHandler.handlers.InnerListForReading.First(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
+                                emergencyHandler.handlers.TryTransferToContainer(transferPawnE, handler.handlers, false);
+                                continue;
+                            }
+                            Pawn transferingPawn = passengerHandler.handlers.InnerListForReading.First(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
+                            passengerHandler.handlers.TryTransferToContainer(transferingPawn, handler.handlers, false);
                         }
                     }
                 }
             }
-            else
-            {
-                if(reseatTimer > 0)
-                    reseatTimer = 0;
-            }
+            return this.CanMove;
         }
 
         public override void CompTick()
         {
             base.CompTick();
             this.TrySatisfyPawnNeeds();
-            this.ResolveSeating();
 
             foreach(ShipHandler handler in handlers)
             {
