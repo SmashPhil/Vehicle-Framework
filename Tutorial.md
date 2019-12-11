@@ -1,4 +1,4 @@
-# Tutorial
+# Modding Tutorial
 So you want to make your own boats huh? Great choice! I'm really looking forward to seeing what ideas and designs come out. One thing you
 should keep in mind, I am constantly working on improving this mod for both mechanics and content. If you find out that
 later on I have added a new mechanic, attachment, or comp class, you are absolutely more than welcome to expand on that. 
