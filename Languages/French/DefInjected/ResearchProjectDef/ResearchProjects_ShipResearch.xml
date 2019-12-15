@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <Rowboat.label>barque</Rowboat.label>
+  <Rowboat.description>Vous permet de construire des chaloupes à rames, conçues pour des caravanes petites et avec peu d'espace.</Rowboat.description>
+
+  <Caravel.label>Caravelle</Caravel.label>
+  <Caravel.description>Vous permet de construire des caravelles, des navires rapides et peu coûteux conçus pour la commerce.</Caravel.description>
+
+  <!-- <BoatCannons.label>Canons à bord</BoatCannons.label> -->
+  <!-- <BoatCannons.description>Vous permet de construire des canons sur le pont d'un navire pour la défense.</BoatCannons.description> -->
+
+  <Galleon.label>Galion</Galleon.label>
+  <Galleon.description>Vous permet de construire des navires grands pour arracher le contrôle des mers.</Galleon.description>
+
+</LanguageData>
