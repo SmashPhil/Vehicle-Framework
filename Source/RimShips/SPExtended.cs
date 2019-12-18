@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
+using RimWorld.Planet;
 using UnityEngine;
 
 namespace SPExtendedLibrary
@@ -9,6 +10,11 @@ namespace SPExtendedLibrary
     [StaticConstructorOnStartup]
     public static class SPExtended
     {
+        /// <summary>SmashPhil's implementation of Tuples
+        /// <para>Create a Tuple in .Net3.5 that functions the same as Tuple while avoiding boxing.</para>
+        /// <seealso cref="SPTuple{T1, T2}"/>
+        /// <seealso cref="SPTuple{T1, T2, T3}"/>
+        /// </summary>
         public static class SPTuple
         {
             public static SPTuple<T1, T2> Create<T1, T2>(T1 first, T2 second)
@@ -21,7 +27,11 @@ namespace SPExtendedLibrary
                 return new SPTuple<T1, T2, T3>(first, second, third);
             }
         }
-
+        /// <summary>
+        /// SPTuple of 2 Types
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
         public class SPTuple<T1, T2>
         {
             public T1 First { get; set; }
@@ -41,9 +51,9 @@ namespace SPExtendedLibrary
             public override int GetHashCode()
             {
                 int hash = 0;
-                if(!object.ReferenceEquals(First, null))
+                if(First is object)
                     hash = FirstComparer.GetHashCode(First);
-                if (!object.ReferenceEquals(Second, null))
+                if(Second is object)
                     hash = (hash << 5) + hash ^ SecondComparer.GetHashCode(Second);
                 return hash;
             }
@@ -56,7 +66,12 @@ namespace SPExtendedLibrary
                 return FirstComparer.Equals(First, o2.First) && SecondComparer.Equals(Second, o2.Second);
             }
         }
-
+        /// <summary>
+        /// SPTuple of 3 types
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <typeparam name="T3"></typeparam>
         public class SPTuple<T1, T2, T3> : SPTuple<T1,T2>
         {
             public T3 Third { get; set; }
@@ -74,11 +89,11 @@ namespace SPExtendedLibrary
             public override int GetHashCode()
             {
                 int hash = 0;
-                if (!object.ReferenceEquals(First, null))
+                if(First is object)
                     hash = FirstComparer.GetHashCode(First);
-                if(!object.ReferenceEquals(Second, null))
+                if(Second is object)
                     hash = (hash << 3) + hash ^ SecondComparer.GetHashCode(Second);
-                if (!object.ReferenceEquals(Third, null))
+                if(Third is object)
                     hash = (hash << 5) + hash ^ ThirdComparer.GetHashCode(Third);
                 return hash;
             }
@@ -91,6 +106,15 @@ namespace SPExtendedLibrary
                 return FirstComparer.Equals(First, o2.First) && SecondComparer.Equals(Second, o2.Second) && ThirdComparer.Equals(Third, o2.Third);
             }
         }
+
+        /// <summary>
+        /// Get neighbors of Tile on world map.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="offsets"></param>
+        /// <param name="values"></param>
+        /// <param name="index"></param>
+        /// <param name="outList"></param>
         public static void GetList<T>(List<int> offsets, List<T> values, int index, List<T> outList)
         {
             outList.Clear();
@@ -107,14 +131,40 @@ namespace SPExtendedLibrary
             }
         }
 
+        /// <summary>
+        /// Pop random value from List
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <returns></returns>
         public static T PopRandom<T>(ref List<T> list)
         {
+            if(list is null || !list.Any())
+                return default(T);
             System.Random rand = new System.Random();
             T item = list[rand.Next(0, list.Count)];
             list.Remove(item);
             return item;
         }
 
+        /// <summary>
+        /// Grab random value from dictionary
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <param name="dictionary"></param>
+        /// <returns></returns>
+        public static KeyValuePair<T1,T2> RandomKVPFromDictionary<T1, T2>(this IDictionary<T1, T2> dictionary)
+        {
+            System.Random rand = new System.Random();
+            return dictionary.ElementAt(rand.Next(0, dictionary.Count));
+        }
+
+        /// <summary>
+        /// Shuffle List pseudo randomly
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
         public static void SPShuffle<T>(this IList<T> list)
         {
             System.Random rand = new System.Random();
@@ -129,23 +179,51 @@ namespace SPExtendedLibrary
             }
         }
 
+        /// <summary>
+        /// Initialize new list of object type T with object at index 0
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="typeObject"></param>
+        /// <returns></returns>
         public static List<T> ConvertToList<T>(this T typeObject)
         {
             return new List<T>() { typeObject };
         }
 
+        /// <summary>
+        /// Clamp value of type T between max and min
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="val"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
         public static T Clamp<T>(this T val, T min, T max) where T : IComparable<T>
         {
             if (val.CompareTo(min) < 0) return min;
             if (val.CompareTo(max) > 0) return max;
             return val;
         }
+
+        /// <summary>
+        /// Check if one List is entirely contained within another List
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sourceList"></param>
+        /// <param name="searchingList"></param>
+        /// <returns></returns>
         public static bool ContainsAllOfList<T>(this IEnumerable<T> sourceList, IEnumerable<T> searchingList)
         {
             if(sourceList is null || searchingList is null) return false;
             return sourceList.Intersect(searchingList).Any();
         }
 
+        /// <summary>
+        /// Unbox list of objects into List of object type T
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="objects"></param>
+        /// <returns></returns>
         public static List<T> ConvertObjectList<T>(this List<object> objects)
         {
             for(int i = 0; i < objects.Count; i++)
@@ -159,14 +237,58 @@ namespace SPExtendedLibrary
             return objects.Cast<T>().ToList();
         }
 
+        /// <summary>
+        /// Get Absolute Value of IntVec2
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
         public static IntVec2 Abs(this IntVec2 c)
         {
             return new IntVec2(Math.Abs(c.x), Math.Abs(c.z));
         }
+
+        /// <summary>
+        /// Get Absolute Value of IntVec3
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
         public static IntVec3 Abs(this IntVec3 c)
         {
             return new IntVec3(Math.Abs(c.x), Math.Abs(c.y), Math.Abs(c.z));
         }
+
+        /// <summary>
+        /// Find Rot4 direction with largest cell count
+        /// <para>Useful for taking edge cells of specific terrain and getting edge with highest cell count</para>
+        /// </summary>
+        /// <param name="northCellCount"></param>
+        /// <param name="eastCellCount"></param>
+        /// <param name="southCellCount"></param>
+        /// <param name="westCellCount"></param>
+        /// <returns></returns>
+        public static Rot4 Max4IntToRot(int northCellCount, int eastCellCount, int southCellCount, int westCellCount)
+        {
+            int ans1 = northCellCount > eastCellCount ? northCellCount : eastCellCount;
+            int ans2 = southCellCount > westCellCount ? southCellCount : westCellCount;
+            int ans3 = ans1 > ans2 ? ans1 : ans2;
+            if(ans3 == northCellCount)
+                return Rot4.North;
+            if(ans3 == eastCellCount)
+                return Rot4.East;
+            if(ans3 == southCellCount)
+                return Rot4.South;
+            if(ans3 == westCellCount)
+                return Rot4.West;
+            return Rot4.Invalid;
+        }
+
+        /// <summary>
+        /// Clamp a Pawn's exit point to their hitbox size. Avoids derendering issues for multicell-pawns
+        /// </summary>
+        /// <param name="pawn"></param>
+        /// <param name="exitPoint"></param>
+        /// <param name="map"></param>
+        /// <param name="extraOffset"></param>
         public static void ClampToMap(Pawn pawn, ref IntVec3 exitPoint, Map map, int extraOffset = 0)
         {
             int x = pawn.def.size.x;
@@ -190,6 +312,15 @@ namespace SPExtendedLibrary
                 exitPoint.z = (int)(map.Size.z - (offset / 2));
             }
         }
+
+        /// <summary>
+        /// Clamp a Pawn's spawn point to their hitbox size. Avoids derendering issues for multicell-pawns
+        /// </summary>
+        /// <param name="pawn"></param>
+        /// <param name="spawnPoint"></param>
+        /// <param name="map"></param>
+        /// <param name="extraOffset"></param>
+        /// <returns></returns>
         public static IntVec3 ClampToMap(this Pawn pawn, IntVec3 spawnPoint, Map map, int extraOffset = 0)
         {
             int x = pawn.def.size.x;
@@ -214,6 +345,13 @@ namespace SPExtendedLibrary
             return spawnPoint;
         }
 
+        /// <summary>
+        /// Clamp a pawns active location based on their hitbox size. Avoids derendering issues for multicell-pawns
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="nextCell"></param>
+        /// <param name="map"></param>
+        /// <returns></returns>
         public static bool ClampHitboxToMap(Pawn p, IntVec3 nextCell, Map map)
         {
             int x = p.def.size.x % 2 == 0 ? p.def.size.x / 2 : (p.def.size.x + 1) / 2;
@@ -231,41 +369,47 @@ namespace SPExtendedLibrary
             return false;
         }
 
-        public static List<IntVec3> PawnOccupiedCells(this Pawn pawn, IntVec3 centerPoint)
+        /// <summary>
+        /// Get occupied cells of pawn with hitbox larger than 1x1
+        /// </summary>
+        /// <param name="pawn"></param>
+        /// <param name="centerPoint"></param>
+        /// <param name="direction"></param>
+        /// <returns></returns>
+        public static List<IntVec3> PawnOccupiedCells(this Pawn pawn, IntVec3 centerPoint, Rot4 direction)
         {
-            int x = pawn.def.size.x % 2 == 0 ? pawn.def.size.x + 1 : pawn.def.size.x;
-            int z = pawn.def.size.z % 2 == 0 ? pawn.def.size.z + 1 : pawn.def.size.z;
-
-            List<IntVec3> pawnCells = new List<IntVec3>();
-            //Edge case
-            int xEdgeCase = centerPoint.x - ((x - 1) / 2);
-            for(int i = 0; i < x; i++)
+            int sizeX;
+            int sizeZ;
+            switch(direction.AsInt)
             {
-                pawnCells.Add(new IntVec3(xEdgeCase + i, centerPoint.y, centerPoint.z));
+                case 0:
+                    sizeX = pawn.def.size.x;
+                    sizeZ = pawn.def.size.z;
+                    break;
+                case 1:
+                    sizeX = pawn.def.size.z;
+                    sizeZ = pawn.def.size.x;
+                    break;
+                case 2:
+                    sizeX = pawn.def.size.x;
+                    sizeZ = pawn.def.size.z;
+                    break;
+                case 3:
+                    sizeX = pawn.def.size.z;
+                    sizeZ = pawn.def.size.x;
+                    break;
+                default:
+                    throw new NotImplementedException("MoreThan4Rotations");
             }
-            //Upper half
-            int xUpperhalf = centerPoint.x - ((x - 1) / 2);
-            int zUpperhalf = centerPoint.z;
-            for(int i = 0; i < x; i++)
-            {
-                for(int j = 1; j < (z - 1)/2; j++)
-                {
-                    pawnCells.Add(new IntVec3(xUpperhalf + i, centerPoint.y, xUpperhalf + j));
-                }
-            }
-            //Lower half
-            int xLowerhalf = centerPoint.x - ((x - 1) / 2);
-            int zLowerhalf = centerPoint.z;
-            for (int i = 0; i < x; i++)
-            {
-                for (int j = 1; j < (z - 1)/2; j++)
-                {
-                    pawnCells.Add(new IntVec3(xUpperhalf + i, centerPoint.y, xUpperhalf - j));
-                }
-            }
-            return pawnCells;
+            return CellRect.CenteredOn(centerPoint, sizeX, sizeZ).Cells.ToList();
         }
 
+        /// <summary>
+        /// Get edge of map the pawn is closest too
+        /// </summary>
+        /// <param name="pawn"></param>
+        /// <param name="map"></param>
+        /// <returns></returns>
         public static Rot4 ClosestEdge(Pawn pawn, Map map)
         {
             IntVec2 mapSize = new IntVec2(map.Size.x, map.Size.z);
@@ -276,7 +420,65 @@ namespace SPExtendedLibrary
 
             return hDistance.Second <= vDistance.Second ? hDistance.First : vDistance.First;
         }
+
+        /// <summary>
+        /// Check if pawn is within certain distance of edge of map. Useful for multicell pawns who are clamped to the map beyond normal edge cell checks.
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="distance"></param>
+        /// <param name="map"></param>
+        /// <returns></returns>
+        public static bool WithinDistanceToEdge(this IntVec3 position, int distance, Map map)
+        {
+            return position.x < distance || position.z < distance || (map.Size.x - position.x < distance) || (map.Size.z - position.z < distance);
+        }
+
+        /// <summary>
+        /// Get direction of river in Rot4 value. (Can be either start or end of River)
+        /// </summary>
+        /// <param name="map"></param>
+        /// <returns></returns>
+        public static Rot4 RiverDirection(Map map)
+        {
+            List<Tile.RiverLink> rivers = Find.WorldGrid[map.Tile].Rivers;
+
+            float angle = Find.WorldGrid.GetHeadingFromTo(map.Tile, (from r1 in rivers
+                                                                     orderby -r1.river.degradeThreshold
+                                                                     select r1).First<Tile.RiverLink>().neighbor);
+            if (angle < 45)
+            {
+                return Rot4.South;
+            }
+            else if (angle < 135)
+            {
+                return Rot4.East;
+            }
+            else if (angle < 225)
+            {
+                return Rot4.North;
+            }
+            else if (angle < 315)
+            {
+                return Rot4.West;
+            }
+            else
+            {
+                return Rot4.South;
+            }
+        }
         
+        /// <summary>
+        /// Draw selection brackets for pawn with angle
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="bracketLocs"></param>
+        /// <param name="obj"></param>
+        /// <param name="worldPos"></param>
+        /// <param name="worldSize"></param>
+        /// <param name="dict"></param>
+        /// <param name="textureSize"></param>
+        /// <param name="pawnAngle"></param>
+        /// <param name="jumpDistanceFactor"></param>
         public static void CalculateSelectionBracketPositionsWorldForMultiCellPawns<T>(Vector3[] bracketLocs, T obj, Vector3 worldPos, Vector2 worldSize, Dictionary<T, float> dict, Vector2 textureSize, float pawnAngle = 0f, float jumpDistanceFactor = 1f)
         {
             float num;
@@ -323,6 +525,14 @@ namespace SPExtendedLibrary
             }
         }
 
+        /// <summary>
+        /// Draw selection brackets transformed on position x,z for pawns whose selection brackets have been shifted
+        /// </summary>
+        /// <param name="pawn"></param>
+        /// <param name="x"></param>
+        /// <param name="z"></param>
+        /// <param name="angle"></param>
+        /// <returns></returns>
         public static Vector3 DrawPosTransformed(this Pawn pawn, float x, float z, float angle = 0)
         {
             Vector3 drawPos = pawn.DrawPos;
@@ -374,6 +584,13 @@ namespace SPExtendedLibrary
             return drawPos;
         }
 
+        /// <summary>
+        /// Rotate point clockwise by angle theta
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="theta"></param>
+        /// <returns></returns>
         public static SPTuple<float, float> RotatePointClockwise(float x, float y, float theta)
         {
             theta = -theta;
@@ -382,6 +599,13 @@ namespace SPExtendedLibrary
             return new SPTuple<float, float>(xPrime, yPrime);
         }
 
+        /// <summary>
+        /// Rotate point counter clockwise by angle theta
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="theta"></param>
+        /// <returns></returns>
         public static SPTuple<float, float> RotatePointCounterClockwise(float x, float y, float theta)
         {
             float xPrime = (float)(x * Math.Cos(theta.DegreesToRadians())) - (float)(y * Math.Sin(theta.DegreesToRadians()));
@@ -389,31 +613,62 @@ namespace SPExtendedLibrary
             return new SPTuple<float, float>(xPrime, yPrime);
         }
 
-        public static SPTuple<float, float> ReflectPointAcrossAxis(float x, float y)
-        {
-            return new SPTuple<float, float>(y, x);
-        }
+        /// <summary>
+        /// Convert degrees (double) to radians
+        /// </summary>
+        /// <param name="deg"></param>
+        /// <returns></returns>
         public static double DegreesToRadians(this double deg)
         {
             return deg * Math.PI / 180;
         }
 
+        /// <summary>
+        /// Convert degrees (float) to radians
+        /// </summary>
+        /// <param name="deg"></param>
+        /// <returns></returns>
         public static double DegreesToRadians(this float deg)
         {
             return Convert.ToDouble(deg).DegreesToRadians();
         }
 
+        /// <summary>
+        /// Draw vertical fillable bar
+        /// </summary>
+        /// <param name="rect"></param>
+        /// <param name="fillPercent"></param>
+        /// <param name="flip"></param>
+        /// <returns></returns>
         public static Rect VerticalFillableBar(Rect rect, float fillPercent, bool flip = false)
         {
             return SPExtended.VerticalFillableBar(rect, fillPercent, FillableBarTexture, flip);
         }
 
+        /// <summary>
+        /// Draw vertical fillable bar with texture
+        /// </summary>
+        /// <param name="rect"></param>
+        /// <param name="fillPercent"></param>
+        /// <param name="fillTex"></param>
+        /// <param name="flip"></param>
+        /// <returns></returns>
         public static Rect VerticalFillableBar(Rect rect, float fillPercent, Texture2D fillTex, bool flip = false)
         {
             bool doBorder = rect.height > 15f && rect.width > 20f;
             return SPExtended.VerticalFillableBar(rect, fillPercent, fillTex, ClearBarTexture, doBorder, flip);
         }
 
+        /// <summary>
+        /// Draw vertical fillable bar with background texture
+        /// </summary>
+        /// <param name="rect"></param>
+        /// <param name="fillPercent"></param>
+        /// <param name="fillTex"></param>
+        /// <param name="bgTex"></param>
+        /// <param name="doBorder"></param>
+        /// <param name="flip"></param>
+        /// <returns></returns>
         public static Rect VerticalFillableBar(Rect rect, float fillPercent, Texture2D fillTex, Texture2D bgTex, bool doBorder = false, bool flip = false)
         {
             if(doBorder)
@@ -436,6 +691,12 @@ namespace SPExtendedLibrary
             return result;
         }
 
+        /// <summary>
+        /// Convert RenderTexture to Texture2D
+        /// <para>Warning: This is very costly. Do not do often.</para>
+        /// </summary>
+        /// <param name="rTex"></param>
+        /// <returns></returns>
         public static Texture2D ConvertToTexture2D(this RenderTexture rTex)
         {
             Texture2D tex2d = new Texture2D(512, 512, TextureFormat.RGB24, false);

@@ -36,11 +36,11 @@ namespace RimShips.Lords
         {
             foreach(Pawn p in this.lord.ownedPawns)
             {
-                if (ShipHarmony.IsShip(p))
+                if(ShipHarmony.IsShip(p))
                 {
                     p.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_WaitShip);
                 }
-                else if(!p.RaceProps.Animal && (!ShipHarmony.IsShip(p)))
+                else if(!p.RaceProps.Animal && !p.IsColonist && (!ShipHarmony.IsShip(p)))
                 {
                     p.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_SendSlavesToShip, this.meetingPoint, -1f);
                     p.mindState.duty.pawnsToGather = PawnsToGather.Slaves;
@@ -59,11 +59,8 @@ namespace RimShips.Lords
                 Lord lord = this.lord;
                 List<Pawn> pawns = this.lord.ownedPawns.Where(x => !ShipHarmony.IsShip(x)).ToList();
 
-                IntVec3 intVec = this.meetingPoint;
-                string memo = "AllSlavesGathered";
-                Predicate<Pawn> shouldCheckIfArrived = (Pawn x) => !x.IsColonist && !x.RaceProps.Animal;
-
-                GatherAnimalsAndSlavesForShipsUtility.CheckArrived(lord, pawns, intVec, memo, shouldCheckIfArrived, false, null);
+                if(!pawns.Any(x => !x.IsColonist && !x.RaceProps.Animal && x.Spawned))
+                    lord.ReceiveMemo("AllSlavesGathered");
             }
         }
 

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<LanguageData>
+	<!-- Labels and Titles -->
+	<RimShips>Boats</RimShips>
+	<ShipSection>Boats</ShipSection>
+	<CannonLabel>{0} Cannons</CannonLabel>
+	<RepairShip>Repair {0}</RepairShip>
+	<Disembark>Disembark</Disembark>
+	<SetRange>Set Range</SetRange>
+	<CannonRange>{0} Tiles</CannonRange>
+	<RenameShip>Rename {0}</RenameShip>
+	<OceanPassable>Ocean: +0.5</OceanPassable>
+	<BoatFishing>Fish</BoatFishing>
+	<BoatFishingDesc>Gather fish. Depth of water affects fishing chances.</BoatFishingDesc>
+		
+	<TabCargo>Cargo</TabCargo>
+	<TabPassengers>Pawns</TabPassengers>
+	<TabBoatHealth>Health</TabBoatHealth>
+	<Cargo>Cargo</Cargo>
+	
+	
+	<!-- Settings -->
+	<DevModeShips>DevMode Options</DevModeShips>
+	<DevModeShipsTooltip>Turn on DevMode to view the different options for debugging or fixing stuff with Boats</DevModeShipsTooltip>
+	<BeachGenMultiplier>Beach Size Multiplier: {0}%</BeachGenMultiplier>
+	<BeachGenMultiplierLarge>Beach Size Multiplier: {0}% (Test Sizes)</BeachGenMultiplierLarge>
+	<BeachGenMultiplierTooltip>Increase the amount of water on the coastline.</BeachGenMultiplierTooltip>
+	<BeachGenMultiplierLargeTooltip>Current number is larger than recommended. The ocean can and may take up to as large as 80% of the map and larger maps will be scattered with lakes.</BeachGenMultiplierLargeTooltip>
+	<ForceSettlementCoastOption>Push Settlements to Coast</ForceSettlementCoastOption>
+	<ForceSettlementCoastTooltip>Push nearby faction settlements to the coast if within given radius</ForceSettlementCoastTooltip>
+	<ForceSettlementCoast>Push Settlement to Coast Radius: {0}</ForceSettlementCoast>
+	<DebugDrawRegions>Debug Draw Regions</DebugDrawRegions>
+	<DebugDrawRegionLinks>Debug Draw RegionLinks</DebugDrawRegionLinks>
+	<DebugDrawRegionThings>Debug Draw Region Things</DebugDrawRegionThings>
+	<DebugDraftAnyShip>Debug Draft Any Boat</DebugDraftAnyShip>
+	<DebugDraftAnyShipTooltip>Be able to draft and move any boat regardless of passengers. Useful if your boat gets stuck somewhere.</DebugDraftAnyShipTooltip>
+	<DebugDisablePathing>Debug Disable Water Pathing</DebugDisablePathing>
+	<DebugDisablePathingTooltip>Disable boats using custom water based path finding, and instead use vanilla pathfinding. NOTE: Boats will travel like pawns</DebugDisablePathingTooltip>
+	<ShuffledCannonFire>Shuffled Cannons</ShuffledCannonFire>
+	<ShuffledCannonFireTooltip>Randomize the order in which broadside cannons fire.</ShuffledCannonFireTooltip>
+	<RiverTravelAllowed>Travel on Rivers</RiverTravelAllowed>
+	<RiverTravelAllowedTooltip>Allow boats to travel along rivers.</RiverTravelAllowedTooltip>
+	<BoatSizeMattersOnRivers>River Size Matters</BoatSizeMattersOnRivers>
+	<BoatSizeMattersOnRiversTooltip>Restrict boats to only be able to travel on rivers that are large enough to fit it. If disabled, all boats can travel on any river. If you bring a boat into a map with a river that cannot fit the size of the boat, you may end up beaching it.</BoatSizeMattersOnRiversTooltip>
+	<FishingDelay>Fishing Delay</FishingDelay>
+	<FishingDelayTooltip>Base amount of ticks it takes to gather fish on a fishing boat.</FishingDelayTooltip>
+	<FishingSkill>Fishing Skill</FishingSkill>
+	<FishingSkillTooltip>How much exp is given by fishing on a boat</FishingSkillTooltip>
+	<FishingPersists>Fishing Persists</FishingPersists>
+	<FishingPersistsTooltip>The Fishing Boat fishing selection will not reset upon drafting.</FishingPersistsTooltip>
+	
+
+	<!-- Float Menu -->
+	<BoardShip>Board {0} as {1}  [{2}]</BoardShip>
+	<BoardShipGroup>Board {0}</BoardShipGroup>
+	<BoardShipGroupFail>Board {0} (Too many selected)</BoardShipGroupFail>
+	<ActivityIconOnBoardShip>Onboard {0}</ActivityIconOnBoardShip>
+	<IsIncapableOfRamming>Ram {0}</IsIncapableOfRamming>
+	<CannotSailToCell>Ship cannot reach this area.</CannotSailToCell>
+	
+	
+	<!-- Messages -->
+	<CompShips_CannotMove>Cannot draft. Boat needs more crew in order to navigate.</CompShips_CannotMove>
+	<NotEnoughCannonCrew>Not enough colonists in {0} to operate {1}.</NotEnoughCannonCrew>
+	<NameIsInvalid>Name invalid for ship.</NameIsInvalid>
+	<ShipGainsName>Your new boat has been named {0}</ShipGainsName>
+	<ShipSunkLabel>Boat Sunk</ShipSunkLabel>
+	<ShipSunkDeep>{0} has sunk to the depths of the ocean and has taken with it: {1}</ShipSunkDeep>
+	<ShipSunkShallow>{0} has sunk but is still salvageable.</ShipSunkShallow>
+	<ShipOutOfFood>No food in {0} with Pawns onboard</ShipOutOfFood>
+	<MessagePawnBoardedFormingCaravan>{0} has boarded the {1} and is ready for departure.</MessagePawnBoardedFormingCaravan>
+	<MessageCantAddWaypointBecauseNoShip>Must have a boat in order to travel across {0}</MessageCantAddWaypointBecauseNoShip>
+	<MessageCantAddWaypointBecauseShip>Cannot travel on land with boats.</MessageCantAddWaypointBecauseShip>
+	<MessageCantAddWaypointBecauseRiverUnreachable>Boat is not able to travel on this river</MessageCantAddWaypointBecauseRiverUnreachable>
+	
+	
+	<!-- Caravans -->
+	<CaravanShips>Boat</CaravanShips>
+	<CaravanShipsSingle>1 Boat</CaravanShipsSingle>
+	<CaravanShipsPlural>{0} Boats</CaravanShipsPlural>
+	<CaravanSailing>Sailing</CaravanSailing>
+	<CommandDockShip>Dock</CommandDockShip>
+	<CommandDockShipDesc>Unload all passengers and enable trade with the Settlement of {0}.</CommandDockShipDesc>
+	<CommandUndockShip>Board boats</CommandUndockShip>
+	<CommandUndockShipDesc>Load all pawns and items into Boats</CommandUndockShipDesc>
+	<CommandAttackDockDisable>Cannot attack {0} while docked at their Settlement</CommandAttackDockDisable>
+	<CaravanMustHaveEnoughSpaceOnShip>Not enough space on ships to house all pawns.</CaravanMustHaveEnoughSpaceOnShip>
+	<CaravanMustHaveEnoughPawnsToOperate>Not enough Pawns selected to set sail. Need {0}</CaravanMustHaveEnoughPawnsToOperate>
+
+
+	<!-- Status -->
+	<FormingCaravanStatus_GatheringItems_Ship>Loading cargo onto Ships.</FormingCaravanStatus_GatheringItems_Ship>
+	<FormingCaravanStatus_GatheringItems_Ship_Pause>Loading cargo onto Ships (waiting)</FormingCaravanStatus_GatheringItems_Ship_Pause>
+	<FormingCaravanStatus_GatheringSlaves_Ship>Loading Slaves onto Ships.</FormingCaravanStatus_GatheringSlaves_Ship>
+	<FormingCaravanStatus_GatheringSlaves_Ship_Pause>Loading Slaves onto Ships (waiting)</FormingCaravanStatus_GatheringSlaves_Ship_Pause>
+	<FormingCaravanStatus_GatheringDownedPawns_Ship>Loading downed people onto Ships.</FormingCaravanStatus_GatheringDownedPawns_Ship>
+	<FormingCaravanStatus_GatheringDownedPawns_Ship_Pause>Loading downed people onto Ships.</FormingCaravanStatus_GatheringDownedPawns_Ship_Pause>
+	<FormingCaravanStatus_BoardShip>Boarding Ship.</FormingCaravanStatus_BoardShip>
+	<FormingCaravanStatus_BoardShip_Pause>Boarding Ship (waiting)</FormingCaravanStatus_BoardShip_Pause>
+	<FormingCaravanStatus_Leaving_Ship>Sailing.</FormingCaravanStatus_Leaving_Ship>
+	<FormingCaravanStatus_Leaving_Ship_Pause>Sailing (waiting)</FormingCaravanStatus_Leaving_Ship_Pause>
+	<AwaitOrders>Awaiting Orders.</AwaitOrders>
+
+</LanguageData>

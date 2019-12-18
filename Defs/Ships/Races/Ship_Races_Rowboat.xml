@@ -126,14 +126,11 @@
 
 		<comps>			
 			<li Class = "RimShips.CompProperties_Ships">
-				<driverRequired>true</driverRequired>
 				<downable>false</downable>
 				<movesWhenDowned>false</movesWhenDowned>
 				
-				<loadCargo>NotAllowed</loadCargo>
 				<moveable>DriverNeeded</moveable>
 				<riverTraversability>Creek</riverTraversability>
-				<armament>DriverNeeded</armament>
 				<shipPowerType>Paddles</shipPowerType>
 				<nameable>false</nameable>
 				<buildDef>SPBoats_RowboatBlueprint</buildDef>

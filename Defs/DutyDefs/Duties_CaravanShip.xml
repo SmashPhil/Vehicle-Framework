@@ -40,7 +40,7 @@
 					<treeDef>SatisfyVeryUrgentNeeds</treeDef>
 				</li>
 				
-				<li Class="RimShips.Jobs.JobGiver_CarryPawnToShip"/>
+				<li Class="RimShips.Jobs.JobGiver_BoardShip"/>
 				
 				<li Class="JobGiver_WanderAnywhere"/>
 			</subNodes>

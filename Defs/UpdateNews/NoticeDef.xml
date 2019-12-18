@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+	<LiteUpdateNotice.NoticeDef>
+		<defName>TestNotice</defName>
+		<label>Boats Updated</label>
+		<description>Boats has been updated. \n \n This notification will now only show when boats is updated. To view more info about the update please visit the steam page</description>
+		<letter>D9UpdateNotice</letter>
+		<version>1.0.0</version>
+	</LiteUpdateNotice.NoticeDef>
+</Defs>

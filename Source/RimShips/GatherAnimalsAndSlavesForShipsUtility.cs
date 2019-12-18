@@ -5,6 +5,7 @@ using RimShips.Lords;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
+using SPExtendedLibrary;
 
 namespace RimShips
 {
@@ -39,7 +40,7 @@ namespace RimShips
                 else if(waterPathing)
                 {
                     Pawn leadShip = ((LordJob_FormAndSendCaravanShip)lord.LordJob).LeadShip;
-                    if (!p.Spawned || !p.Position.InHorDistOf(((LordJob_FormAndSendCaravanShip)lord.LordJob).LeadShip.Position, 5f) || !leadShip.Position.InHorDistOf(meetingPoint, leadShip.def.size.z > 5 ? (float)leadShip.def.size.z/2 : 3f) ||
+                    if (!p.Spawned || !p.Position.InHorDistOf(((LordJob_FormAndSendCaravanShip)lord.LordJob).LeadShip.Position, 5f) || !(leadShip.Position.InHorDistOf(meetingPoint, leadShip.def.size.z > 5 ? (float)leadShip.def.size.z/2 : 3f) || leadShip.Position.WithinDistanceToEdge(leadShip.def.size.z, leadShip.Map)) ||
                         !ShipReachabilityUtility.CanReachShip(p, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, TraverseMode.ByPawn) || (extraValidator != null && !extraValidator(p)))
                     {
                         flag = false;

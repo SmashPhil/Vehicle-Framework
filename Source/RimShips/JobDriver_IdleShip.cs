@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
-using RimShips.Lords;
+using System.Linq;
+using RimWorld;
 using Verse;
 using Verse.AI;
-using Verse.AI.Group;
+using SPExtendedLibrary;
 
 namespace RimShips.Jobs
 {
@@ -15,53 +16,114 @@ namespace RimShips.Jobs
 
         public override string GetReport()
         {
-            return  ( !(Ship is null) ) ? "AwaitOrders".Translate() : base.GetReport();
+            return Ship != null ? "AwaitOrders".Translate() : base.GetReport();
         }
 
         private CompShips Ship
         {
             get
             {
-                Thing thing = job.GetTarget(TargetIndex.B).Thing;
-                if (thing is null) return null;
-                return thing.TryGetComp<CompShips>();
+                return Pawn.TryGetComp<CompShips>();
+            }
+        }
+
+        private Thing Pawn
+        {
+            get
+            {
+                Thing thing = job.GetTarget(TargetIndex.A).Thing;
+                if(thing is null) return null;
+                return thing;
             }
         }
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
-            Toil wait = new Toil();
-            wait.initAction = delegate ()
+            Toil wait = new Toil
             {
-                base.Map.pawnDestinationReservationManager.Reserve(this.pawn, this.job, this.pawn.Position);
-                this.pawn.pather.StopDead();
+                initAction = delegate ()
+                {
+                    base.Map.pawnDestinationReservationManager.Reserve(this.pawn, this.job, this.pawn.Position);
+                    this.pawn.pather.StopDead();
+                },
+                tickAction = delegate()
+                {
+                    if(Ship.currentlyFishing && Ship.CanMove)
+                    {
+                        foreach(Pawn p in Ship.AllPawnsAboard)
+                        {
+                            p.skills.Learn(SkillDefOf.Animals, RimShipMod.mod.settings.FishingSkillValue, false);
+                        }
+                        if(Find.TickManager.TicksGame % (RimShipMod.mod.settings.fishingDelay - (Ship.AverageSkillOfCapablePawns(SkillDefOf.Animals) * (RimShipMod.mod.settings.fishingDelay/100)))  == 0)
+                        {
+                            KeyValuePair<ThingDef, int> fishStats;
+                            bool shallowMultiplier = false;
+                            if(Pawn.Map.terrainGrid.TerrainAt(Pawn.Position) == TerrainDefOf.WaterOceanDeep || Pawn.Map.terrainGrid.TerrainAt(Pawn.Position) == TerrainDefOf.WaterOceanShallow)
+                            {
+                                fishStats = FishingCompatibility.fishDictionarySaltWater.RandomKVPFromDictionary();
+                            }
+                            else
+                            {
+                                if(Pawn.Map.Biome == BiomeDefOf.AridShrubland && FishingCompatibility.fishDictionaryTemperateBiomeFreshWater.Any())
+                                {
+                                    fishStats = FishingCompatibility.fishDictionaryTemperateBiomeFreshWater.RandomKVPFromDictionary();
+                                }
+                                else if(Pawn.Map.Biome == BiomeDefOf.TemperateForest && FishingCompatibility.fishDictionaryTemperateBiomeFreshWater.Any())
+                                {
+                                    fishStats = FishingCompatibility.fishDictionaryTemperateBiomeFreshWater.RandomKVPFromDictionary();
+                                }
+                                else if(Pawn.Map.Biome == BiomeDefOf.Desert && FishingCompatibility.fishDictionaryTemperateBiomeFreshWater.Any())
+                                {
+                                    fishStats = FishingCompatibility.fishDictionaryTemperateBiomeFreshWater.RandomKVPFromDictionary();
+                                }
+                                else if(Pawn.Map.Biome == BiomeDefOf.TropicalRainforest && FishingCompatibility.fishDictionaryTropicalBiomeFreshWater.Any())
+                                {
+                                    fishStats = FishingCompatibility.fishDictionaryTropicalBiomeFreshWater.RandomKVPFromDictionary();
+                                }
+                                else if(Pawn.Map.Biome == BiomeDefOf.BorealForest && FishingCompatibility.fishDictionaryTropicalBiomeFreshWater.Any())
+                                {
+                                    fishStats = FishingCompatibility.fishDictionaryTropicalBiomeFreshWater.RandomKVPFromDictionary();
+                                }
+                                else if(Pawn.Map.Biome == BiomeDefOf.Tundra && FishingCompatibility.fishDictionaryColdBiomeFreshWater.Any())
+                                {
+                                    fishStats = FishingCompatibility.fishDictionaryColdBiomeFreshWater.RandomKVPFromDictionary();
+                                }
+                                else if(Pawn.Map.Biome == BiomeDefOf.IceSheet && FishingCompatibility.fishDictionaryColdBiomeFreshWater.Any())
+                                {
+                                    fishStats = FishingCompatibility.fishDictionaryColdBiomeFreshWater.RandomKVPFromDictionary();
+                                }
+                                else if(Pawn.Map.Biome == BiomeDefOf.SeaIce && FishingCompatibility.fishDictionaryColdBiomeFreshWater.Any())
+                                {
+                                    fishStats = FishingCompatibility.fishDictionaryColdBiomeFreshWater.RandomKVPFromDictionary();
+                                }
+                                else
+                                {
+                                    fishStats = FishingCompatibility.fishDictionarySaltWater.RandomKVPFromDictionary();
+                                }
+                            }
+
+                            if(Pawn.Map.terrainGrid.TerrainAt(Pawn.Position) == TerrainDefOf.WaterMovingShallow || Pawn.Map.terrainGrid.TerrainAt(Pawn.Position) == TerrainDefOf.WaterOceanShallow ||
+                                Pawn.Map.terrainGrid.TerrainAt(Pawn.Position) == TerrainDefOf.WaterShallow)
+                                shallowMultiplier = true;
+
+                            float statValue = 0;
+                            foreach(Pawn p in Ship.AllCapablePawns)
+                            {
+                                statValue += p.skills.GetSkill(SkillDefOf.Animals).Level;
+                            }
+                            statValue /= Ship.AllCapablePawns.Count;
+                            int countByFishingSkill = (int)(fishStats.Value * (statValue/10) * (shallowMultiplier ? 0.5 : 1));
+                            if(countByFishingSkill <= 0) countByFishingSkill = 1;
+                            Thing fish = ThingMaker.MakeThing(fishStats.Key);
+                            fish.stackCount = countByFishingSkill;
+                            Ship.Pawn.inventory.innerContainer.TryAdd(fish, countByFishingSkill, true);
+                        }
+                    }
+                },
+                defaultCompleteMode = ToilCompleteMode.Never
             };
-            wait.tickAction = delegate ()
-            {
-                if((Find.TickManager.TicksGame + this.pawn.thingIDNumber) % JobSearchInterval == 0)
-                { 
-                    this.CheckForCaravan();
-                }
-            };
-            wait.defaultCompleteMode = ToilCompleteMode.Never;
             yield return wait;
             yield break;
         }
-
-        private void CheckForCaravan()
-        {
-            if(!(this.pawn.GetLord() is null) && this.pawn.GetLord().LordJob is LordJob_FormAndSendCaravanShip)
-            {
-                if(this.pawn.GetLord().CurLordToil is LordToil_PrepareCaravan_LeaveShip)
-                {
-                    if(this.pawn.GetComp<CompShips>().CanMove)
-                    {
-                        this.pawn.drafter.Drafted = true;
-                    } 
-                }
-            }
-        }
-
-        private const int JobSearchInterval = 100;
     }
 }

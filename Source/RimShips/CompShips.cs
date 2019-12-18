@@ -18,6 +18,7 @@ namespace RimShips
     {
         public List<Jobs.Bill_BoardShip> bills = new List<Jobs.Bill_BoardShip>();
 
+        public bool currentlyFishing = false;
         public bool draftStatusChanged = false;
         public bool beached = false;
         private float angle = 0f; /* East: -45 is TopRight, 45 is BottomRight | West: -45 is BottomLeft, 45 is TopLeft */
@@ -28,7 +29,7 @@ namespace RimShips
         public bool warnNoFuel;
         public ShipWeaponStatus weaponStatus = ShipWeaponStatus.Offline;
 
-        public bool CanMove => Props.moveable > ShipPermissions.DriverNeeded || MovementHandlerAvailable;
+        public bool CanMove => (Props.moveable > ShipPermissions.DriverNeeded || MovementHandlerAvailable) && movementStatus == ShipMovementStatus.Online;
 
         public Pawn Pawn => parent as Pawn;
         public CompProperties_Ships Props => (CompProperties_Ships)this.props;
@@ -179,6 +180,15 @@ namespace RimShips
             }
         }
 
+        public int AverageSkillOfCapablePawns(SkillDef skill)
+        {
+            int value = 0;
+            foreach(Pawn p in AllCapablePawns)
+                value += p.skills.GetSkill(skill).Level;
+            value /= AllCapablePawns.Count;
+            return value;
+        }
+
         public int PawnsInHandler(HandlingTypeFlags handlingTypeFlag)
         {
             return handlers.Where(x => x.role.handlingType == handlingTypeFlag).ToList().Sum(x => x.handlers.Count);
@@ -200,6 +210,8 @@ namespace RimShips
         {
             get
             {
+                if(!this.Props.diagonalRotation)
+                    return 0f;
                 return this.angle;
             }
             set
@@ -242,6 +254,21 @@ namespace RimShips
                             };
                             yield return unload;
                         }
+                    }
+                    if(this.Props.fishing && FishingCompatibility.fishingActivated)
+                    {
+                        Command_Toggle fishing = new Command_Toggle
+                        {
+                            defaultLabel = "BoatFishing".Translate(),
+                            defaultDesc = "BoatFishingDesc".Translate(),
+                            icon = TexCommandShips.FishingIcon,
+                            isActive = (() => this.currentlyFishing),
+                            toggleAction = delegate ()
+                            {
+                                this.currentlyFishing = !this.currentlyFishing;
+                            }
+                        };
+                        yield return fishing;
                     }
                 }
             }
@@ -449,6 +476,12 @@ namespace RimShips
         {
             this.movementStatus = ShipMovementStatus.Offline;
             this.beached = true;
+        }
+
+        public void RemoveBeachedStatus()
+        {
+            this.movementStatus = ShipMovementStatus.Online;
+            this.beached = false;
         }
 
         private void TrySatisfyPawnNeeds()
@@ -785,7 +818,7 @@ namespace RimShips
         public override void CompTick()
         {
             base.CompTick();
-            this.TrySatisfyPawnNeeds();
+            //this.TrySatisfyPawnNeeds();
 
             foreach(ShipHandler handler in handlers)
             {
@@ -821,6 +854,7 @@ namespace RimShips
             base.PostExposeData();
             Scribe_Values.Look(ref weaponStatus, "weaponStatus", ShipWeaponStatus.Online);
             Scribe_Values.Look(ref movementStatus, "movingStatus", ShipMovementStatus.Online);
+            Scribe_Values.Look(ref currentlyFishing, "currentlyFishing", false);
 
             Scribe_Collections.Look(ref handlers, "handlers", LookMode.Deep);
             Scribe_Collections.Look(ref bills, "bills", LookMode.Deep);

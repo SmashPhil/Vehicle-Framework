@@ -58,6 +58,44 @@
 			
 	</ThingDef>
 	
+	<!--Fishing Boat-->
+	<ThingDef ParentName="ShipBase">
+		<defName>SPBoats_FishingBoatBlueprint</defName>
+		<label>Fishing Boat</label>
+		<description>A small fishing boat able to gather fish from the sea. (Must have Fishing mod in order to gather fish)</description>
+		<graphicData>
+			<texPath>Ships/fishingboat/FishingBoat_north</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+			<drawSize>(3,5)</drawSize>
+		</graphicData>
+
+		<statBases>
+			<MaxHitPoints>1200</MaxHitPoints>
+			<WorkToBuild>30000</WorkToBuild>
+			<Flammability>75</Flammability>
+		</statBases>
+		<size>(1,4)</size>
+		
+		<researchPrerequisites>
+			<li>Rowboat</li>
+		</researchPrerequisites>
+		<costList>
+			<WoodLog>400</WoodLog>
+			<Cloth>100</Cloth>
+			<Steel>25</Steel>
+		</costList>
+		
+		<soundImpactDefault>BulletImpact_Wood</soundImpactDefault>
+		
+		<modExtensions>
+			<li Class="RimShips.Build.SpawnThingBuilt">
+				<thingToSpawn>SPBoats_PawnKind_FishingBoat</thingToSpawn>
+				<soundFinished>ShipBigConstruction</soundFinished>
+			</li>
+		</modExtensions>
+			
+	</ThingDef>
+	
 	<!-- Caravel -->
 	<ThingDef ParentName="ShipBase">
 		<defName>SPBoats_CaravelBlueprint</defName>

@@ -3,7 +3,7 @@
 <Patch>
 	<Operation Class="PatchOperationSequence">
 		<operations>
-			
+			<!--
 			<li Class="PatchOperationConditional">
 				<xpath>Defs/BiomeDef[defName="Ocean"]/impassable</xpath>
 				<match Class="PatchOperationRemove">
@@ -49,6 +49,7 @@
 					</value>
 				</nomatch>
 			</li>
+			-->
 		</operations>
 	</Operation>
 </Patch>

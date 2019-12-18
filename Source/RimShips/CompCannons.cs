@@ -59,65 +59,67 @@ namespace RimShips
                     {
                         if (this.cannons.Any(x => x.weaponLocation == WeaponLocation.Port))
                         {
-                            CannonHandler cannon = this.cannons.Find(x => x.weaponLocation == WeaponLocation.Port);
-
-                            Command_CooldownAction portSideCannons = new Command_CooldownAction();
-                            portSideCannons.cannon = cannon;
-                            portSideCannons.comp = this;
-                            portSideCannons.defaultLabel = "CannonLabel".Translate(cannon.label);
-                            portSideCannons.icon = TexCommandShips.BroadsideCannon_Port;
-                            portSideCannons.action = delegate ()
+                            foreach(CannonHandler cannon in this.cannons.Where(x => x.weaponLocation == WeaponLocation.Port))
                             {
-                                SPExtended.SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPExtended.SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
-                                List<int> cannonOrder = Enumerable.Range(0, cannon.numberCannons).ToList();
-                                if(RimShipMod.mod.settings.shuffledCannonFire)
-                                    cannonOrder.SPShuffle();
-                                foreach (int i in cannonOrder)
+                                Command_CooldownAction portSideCannons = new Command_CooldownAction();
+                                portSideCannons.cannon = cannon;
+                                portSideCannons.comp = this;
+                                portSideCannons.defaultLabel = "CannonLabel".Translate(cannon.label);
+                                portSideCannons.icon = TexCommandShips.BroadsideCannon_Port;
+                                portSideCannons.action = delegate ()
                                 {
-                                    tmpCannonItem.First.Push(i);
-                                }
-                                this.broadsideFire.Add(tmpCannonItem);
-                            };
-                            portSideCannons.hotKey = KeyBindingDefOf.Misc4;
-                            foreach (ShipHandler handler in this.CompShip.handlers)
-                            {
-                                if (handler.role.handlingType == HandlingTypeFlags.Cannons && handler.handlers.Count < handler.role.slotsToOperate)
+                                    SPExtended.SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPExtended.SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
+                                    List<int> cannonOrder = Enumerable.Range(0, cannon.numberCannons).ToList();
+                                    if (RimShipMod.mod.settings.shuffledCannonFire)
+                                        cannonOrder.SPShuffle();
+                                    foreach (int i in cannonOrder)
+                                    {
+                                        tmpCannonItem.First.Push(i);
+                                    }
+                                    this.broadsideFire.Add(tmpCannonItem);
+                                };
+                                portSideCannons.hotKey = KeyBindingDefOf.Misc4;
+                                foreach (ShipHandler handler in this.CompShip.handlers)
                                 {
-                                    portSideCannons.Disable("NotEnoughCannonCrew".Translate(this.Pawn.LabelShort, handler.role.label));
+                                    if (handler.role.handlingType == HandlingTypeFlags.Cannons && handler.handlers.Count < handler.role.slotsToOperate)
+                                    {
+                                        portSideCannons.Disable("NotEnoughCannonCrew".Translate(this.Pawn.LabelShort, handler.role.label));
+                                    }
                                 }
+                                yield return portSideCannons;
                             }
-                            yield return portSideCannons;
                         }
                         if (this.cannons.Any(x => x.weaponLocation == WeaponLocation.Starboard))
                         {
-                            CannonHandler cannon = this.cannons.Find(x => x.weaponLocation == WeaponLocation.Starboard);
-
-                            Command_CooldownAction starboardSideCannons = new Command_CooldownAction();
-                            starboardSideCannons.cannon = cannon;
-                            starboardSideCannons.comp = this;
-                            starboardSideCannons.defaultLabel = "CannonLabel".Translate(cannon.label);
-                            starboardSideCannons.icon = TexCommandShips.BroadsideCannon_Starboard;
-                            starboardSideCannons.action = delegate ()
+                            foreach(CannonHandler cannon in this.cannons.Where(x => x.weaponLocation == WeaponLocation.Starboard))
                             {
-                                SPExtended.SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPExtended.SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
-                                List<int> cannonOrder = Enumerable.Range(0, cannon.numberCannons).ToList();
-                                if (RimShipMod.mod.settings.shuffledCannonFire)
-                                    cannonOrder.SPShuffle();
-                                foreach (int i in cannonOrder)
+                                Command_CooldownAction starboardSideCannons = new Command_CooldownAction();
+                                starboardSideCannons.cannon = cannon;
+                                starboardSideCannons.comp = this;
+                                starboardSideCannons.defaultLabel = "CannonLabel".Translate(cannon.label);
+                                starboardSideCannons.icon = TexCommandShips.BroadsideCannon_Starboard;
+                                starboardSideCannons.action = delegate ()
                                 {
-                                    tmpCannonItem.First.Push(i);
-                                }
-                                this.broadsideFire.Add(tmpCannonItem);
-                            };
-                            starboardSideCannons.hotKey = KeyBindingDefOf.Misc5;
-                            foreach (ShipHandler handler in this.CompShip.handlers)
-                            {
-                                if (handler.role.handlingType == HandlingTypeFlags.Cannons && handler.handlers.Count < handler.role.slotsToOperate)
+                                    SPExtended.SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPExtended.SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
+                                    List<int> cannonOrder = Enumerable.Range(0, cannon.numberCannons).ToList();
+                                    if (RimShipMod.mod.settings.shuffledCannonFire)
+                                        cannonOrder.SPShuffle();
+                                    foreach (int i in cannonOrder)
+                                    {
+                                        tmpCannonItem.First.Push(i);
+                                    }
+                                    this.broadsideFire.Add(tmpCannonItem);
+                                };
+                                starboardSideCannons.hotKey = KeyBindingDefOf.Misc5;
+                                foreach (ShipHandler handler in this.CompShip.handlers)
                                 {
-                                    starboardSideCannons.Disable("NotEnoughCannonCrew".Translate(this.Pawn.LabelShort, handler.role.label));
+                                    if (handler.role.handlingType == HandlingTypeFlags.Cannons && handler.handlers.Count < handler.role.slotsToOperate)
+                                    {
+                                        starboardSideCannons.Disable("NotEnoughCannonCrew".Translate(this.Pawn.LabelShort, handler.role.label));
+                                    }
                                 }
+                                yield return starboardSideCannons;
                             }
-                            yield return starboardSideCannons;
                         }
 
                         Command_SetRange range = new Command_SetRange();

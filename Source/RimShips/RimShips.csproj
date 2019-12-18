@@ -65,6 +65,7 @@
     <Compile Include="DutyDefOf_Ships.cs" />
     <Compile Include="EffectsDefOf_Ships.cs" />
     <Compile Include="EnterMapUtilityBoats.cs" />
+    <Compile Include="FishingCompatibility.cs" />
     <Compile Include="FleshTypeDefOf_Ships.cs" />
     <Compile Include="FloatMenuMulti.cs" />
     <Compile Include="GatherAnimalsAndSlavesForShipsUtility.cs" />

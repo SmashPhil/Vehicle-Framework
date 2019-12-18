@@ -36,13 +36,14 @@ namespace RimShips
         {
             List<Pawn> pawns = new List<Pawn>(caravan.PawnsListForReading).Where(x => ShipHarmony.IsShip(x)).ToList();
             MapExtension mapE = MapExtensionUtility.GetExtensionToMap(map);
-            Rot4 coast = Find.World.CoastDirectionAt(map.Tile);
+            Rot4 spawnDir = GetEdgeToSpawnBoatOn(caravan, map);
+
             for(int i = 0; i < pawns.Count; i++)
             {
-                IntVec3 loc = CellFinderExtended.MiddleEdgeCell(coast, map, pawns[i], (IntVec3 c) => GenGridShips.Standable(c, map, mapE) && !c.Fogged(map)); //Change back to spawnCellGetter later
+                IntVec3 loc = CellFinderExtended.MiddleEdgeCell(spawnDir, map, pawns[i], (IntVec3 c) => GenGridShips.Standable(c, map, mapE) && !c.Fogged(map)); //Change back to spawnCellGetter later
                 
                 pawns[i].GetComp<CompShips>().Angle = 0;
-                Pawn ship = GenSpawn.Spawn(pawns[i], loc, map, coast.Opposite, WipeMode.Vanish, false) as Pawn;
+                Pawn ship = GenSpawn.Spawn(pawns[i], loc, map, spawnDir.Opposite, WipeMode.Vanish, false) as Pawn;
                 ship.drafter.Drafted = draftColonists ? true : false;
             }
             caravan.RemoveAllPawns();
@@ -63,6 +64,42 @@ namespace RimShips
                 default:
                     throw new NotImplementedException("ShipEnterMode");
             }
+        }
+
+        private static Rot4 GetEdgeToSpawnBoatOn(Caravan caravan, Map map)
+        {
+            if (!Find.World.CoastDirectionAt(map.Tile).IsValid)
+            {
+                if(Find.WorldGrid[map.Tile]?.Rivers?.Any() ?? false)
+                {
+                    List<Tile.RiverLink> rivers = Find.WorldGrid[map.Tile].Rivers;
+
+                    float angle = Find.WorldGrid.GetHeadingFromTo(map.Tile, (from r1 in rivers
+                                                                             orderby -r1.river.degradeThreshold
+                                                                             select r1).First<Tile.RiverLink>().neighbor);
+                    if(angle < 45)
+                    {
+                        return Rot4.South;
+                    }
+                    else if(angle < 135)
+                    {
+                        return Rot4.East;
+                    }
+                    else if(angle < 225)
+                    {
+                        return Rot4.North;
+                    }
+                    else if(angle < 315)
+                    {
+                        return Rot4.West;
+                    }
+                    else
+                    {
+                        return Rot4.South;
+                    }
+                }
+            }
+            return Find.World.CoastDirectionAt(map.Tile);
         }
 
         private static IntVec3 FindNearEdgeWaterCell(Map map)

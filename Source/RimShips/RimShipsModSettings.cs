@@ -10,17 +10,33 @@ namespace RimShips
         public int forceFactionCoastRadius;
 
         public bool shuffledCannonFire;
+        public bool riverTravel;
+        public bool boatSizeMatters;
 
+        public int fishingDelay;
+        public int fishingSkillIncrease;
+        public bool fishingPersists;
+
+        public bool debugDraftAnyShip;
+        public bool debugDisableWaterPathing;
         public bool debugDrawRegions;
         public bool debugDrawRegionLinks;
         public bool debugDrawRegionThings;
-        public int coastRadius => forceFactionCoastOption ? forceFactionCoastRadius : 0;
+        public int CoastRadius => forceFactionCoastOption ? forceFactionCoastRadius : 0;
+        public float FishingSkillValue => fishingSkillIncrease / 100;
         public override void ExposeData()
         {
             Scribe_Values.Look(ref beachMultiplier, "beachMultiplier");
             Scribe_Values.Look(ref forceFactionCoastRadius, "forceFactionCoastRadius", 1);
             Scribe_Values.Look(ref forceFactionCoastOption, "forceFactionCoastOption", true);
+
             Scribe_Values.Look(ref shuffledCannonFire, "shuffledCannonFire", true);
+            Scribe_Values.Look(ref riverTravel, "riverTravel", true);
+            Scribe_Values.Look(ref boatSizeMatters, "boatSizeMatters", true);
+
+            Scribe_Values.Look(ref fishingDelay, "fishingDelay", 10000);
+            Scribe_Values.Look(ref fishingSkillIncrease, "fishingSkillIncrease", 5);
+            Scribe_Values.Look(ref fishingPersists, "fishingPersists", true);
             base.ExposeData();
         }
     }
@@ -38,8 +54,8 @@ namespace RimShips
         public override void DoSettingsWindowContents(Rect inRect)
         {
             Listing_Standard listingStandard = new Listing_Standard();
-
-            listingStandard.Begin(inRect);
+            Rect group1 = new Rect(inRect.x, inRect.y, inRect.width/2, inRect.height);
+            listingStandard.Begin(group1);
             bool beachLarge = settings.beachMultiplier > 150f;
             listingStandard.Label(beachLarge ? "BeachGenMultiplierLarge".Translate(Mathf.Round(settings.beachMultiplier)) : "BeachGenMultiplier".Translate(Mathf.Round(settings.beachMultiplier)),
                 -1f, beachLarge ? "BeachGenMultiplierLargeTooltip".Translate() : "BeachGenMultiplierTooltip".Translate());
@@ -55,16 +71,39 @@ namespace RimShips
             listingStandard.GapLine(16f);
 
             listingStandard.CheckboxLabeled("ShuffledCannonFire".Translate(), ref settings.shuffledCannonFire, "ShuffledCannonFireTooltip".Translate());
+            listingStandard.CheckboxLabeled("RiverTravelAllowed".Translate(), ref settings.riverTravel, "RiverTravelAllowedTooltip".Translate());
 
-            if(Prefs.DevMode)
+            if(settings.riverTravel)
             {
+                listingStandard.CheckboxLabeled("BoatSizeMattersOnRivers".Translate(), ref settings.boatSizeMatters, "BoatSizeMattersOnRiversTooltip".Translate());
+            }
+            if(FishingCompatibility.fishingActivated)
+            {
+                listingStandard.GapLine(16f);
+                string fishDelay = settings.fishingDelay.ToString();
+                string fishSkill = settings.fishingSkillIncrease.ToString();
+                listingStandard.Label("FishingDelay".Translate(), -1, "FishingDelayTooltip".Translate());
+                listingStandard.IntEntry(ref settings.fishingDelay, ref fishDelay);
+                listingStandard.Label("FishingSkill".Translate(), -1, "FishingSkillTooltip".Translate());
+                listingStandard.IntEntry(ref settings.fishingSkillIncrease, ref fishSkill);
+                listingStandard.CheckboxLabeled("FishingPersists".Translate(), ref settings.fishingPersists, "FishingPersistsTooltip".Translate());
+            }
+
+            listingStandard.Gap(20f);
+            listingStandard.Label("DevModeShips".Translate(), -1f, "DevModeShipsTooltip".Translate());
+            if (Prefs.DevMode)
+            {
+                
+                listingStandard.GapLine(16f);
+                listingStandard.CheckboxLabeled("DebugDraftAnyShip".Translate(), ref settings.debugDraftAnyShip, "DebugDraftAnyShipTooltip".Translate());
+                listingStandard.CheckboxLabeled("DebugDisablePathing".Translate(), ref settings.debugDisableWaterPathing, "DebugDisablePathingTooltip".Translate());
                 listingStandard.CheckboxLabeled("DebugDrawRegions".Translate(), ref settings.debugDrawRegions);
                 listingStandard.CheckboxLabeled("DebugDrawRegionLinks".Translate(), ref settings.debugDrawRegionLinks);
                 listingStandard.CheckboxLabeled("DebugDrawRegionThings".Translate(), ref settings.debugDrawRegionThings);
             }
 
             listingStandard.End();
-            base.DoSettingsWindowContents(inRect);
+            base.DoSettingsWindowContents(group1);
         }
 
         public override string SettingsCategory()

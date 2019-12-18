@@ -1,124 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <Patch>
-	<Operation Class="PatchOperationSequence">
-		<operations>
-			<li Class="PatchOperationConditional">
-				<xpath>Defs/TerrainDef[defName="WaterShallow"]/label</xpath>
-				<match Class="PatchOperationReplace">
+
+	<!-- If mod *[RF] Fertile Fields [1.0]* is installed: Do not add Shallow Water buildable terrain, otherwise add to boat architect menu -->
+	<Operation Class="PatchOperationFindMod">
+		<mods>
+			<li>[RF] Fertile Fields [1.0]</li>
+		</mods>
+		<nomatch Class="PatchOperationSequence">
+			<operations>
+				<li Class="PatchOperationConditional">
 					<xpath>Defs/TerrainDef[defName="WaterShallow"]/label</xpath>
-					<value>
-						<label>Shallow Water</label>
-					</value>
-				</match>
-				<nomatch Class="PatchOperationAdd">
-					<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
-					<value>
-						<label>Shallow Water</label>
-					</value>
-				</nomatch>
-			</li>	
-			
-			<li Class="PatchOperationConditional">
-				<xpath>Defs/TerrainDef[defName="WaterShallow"]/description</xpath>
-				<match Class="PatchOperationReplace">
-					<xpath>Defs/TerrainDef[defName="WaterShallow"]/description</xpath>
-					<value>
-						<description>Dig shallow water that ships may pass through.</description>
-					</value>
-				</match>
-				<nomatch Class="PatchOperationAdd">
-					<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
-					<value>
-						<description>Dig shallow water that ships may pass through.</description>
-					</value>
-				</nomatch>
-			</li>	
-			
-			<li Class="PatchOperationConditional">
-				<xpath>Defs/TerrainDef[defName="WaterShallow"]/designationCategory</xpath>
-				<match Class="PatchOperationReplace">
-					<xpath>Defs/TerrainDef[defName="WaterShallow"]/designationCategory</xpath>
-					<value>
-						<designationCategory>RimShips</designationCategory>
-					</value>
-				</match>
-				<nomatch Class="PatchOperationAdd">
-					<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
-					<value>
-						<designationCategory>RimShips</designationCategory>
-					</value>
-				</nomatch>
-			</li>
-			
-			<li Class="PatchOperationConditional">
-				<xpath>Defs/TerrainDef[defName="WaterShallow"]/constructEffect</xpath>
-				<match Class="PatchOperationReplace">
-					<xpath>Defs/TerrainDef[defName="WaterShallow"]/constructEffect</xpath>
-					<value>
-						<constructEffect>ConstructDirt</constructEffect>
-					</value>
-				</match>
-				<nomatch Class="PatchOperationAdd">
-					<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
-					<value>
-						<constructEffect>ConstructDirt</constructEffect>
-					</value>
-				</nomatch>
-			</li>
-			
-			<li Class="PatchOperationConditional">
-				<xpath>Defs/TerrainDef[defName="WaterShallow"]/terrainAffordanceNeeded</xpath>
-				<match Class="PatchOperationReplace">
-					<xpath>Defs/TerrainDef[defName="WaterShallow"]/terrainAffordanceNeeded</xpath>
-					<value>
-						<terrainAffordanceNeeded>Diggable</terrainAffordanceNeeded>
-					</value>
-				</match>
-				<nomatch Class="PatchOperationAdd">
-					<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
-					<value>
-						<terrainAffordanceNeeded>Diggable</terrainAffordanceNeeded>
-					</value>
-				</nomatch>
-			</li>
-			
-			<li Class="PatchOperationConditional">
-				<xpath>Defs/TerrainDef[defName="WaterShallow"]/statBases</xpath>
-				<match Class="PatchOperationConditional">
-					<xpath>Defs/TerrainDef[defName="WaterShallow"]/statBases/WorkToBuild</xpath>
-					<nomatch Class="PatchOperationAdd">
-						<xpath>Defs/TerrainDef[defName="WaterShallow"]/statBases</xpath>
+					<match Class="PatchOperationReplace">
+						<xpath>Defs/TerrainDef[defName="WaterShallow"]/label</xpath>
 						<value>
-							<WorkToBuild>10000</WorkToBuild>
+							<label>Shallow Water</label>
+						</value>
+					</match>
+					<nomatch Class="PatchOperationAdd">
+						<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
+						<value>
+							<label>Shallow Water</label>
 						</value>
 					</nomatch>
-				</match>
-				<nomatch Class="PatchOperationAdd">
-					<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
-					<value>
-						<statBases>
-							<WorkToBuild>10000</WorkToBuild>
-						</statBases>
-					</value>
-				</nomatch>
-			</li>
-			
-			<li Class="PatchOperationConditional">
-				<xpath>Defs/TerrainDef[defName="WaterShallow"]/designationHotKey</xpath>
-				<match Class="PatchOperationReplace">
+				</li>
+
+				<li Class="PatchOperationConditional">
+					<xpath>Defs/TerrainDef[defName="WaterShallow"]/description</xpath>
+					<match Class="PatchOperationReplace">
+						<xpath>Defs/TerrainDef[defName="WaterShallow"]/description</xpath>
+						<value>
+							<description>Dig shallow water that ships may pass through.</description>
+						</value>
+					</match>
+					<nomatch Class="PatchOperationAdd">
+						<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
+						<value>
+							<description>Dig shallow water that ships may pass through.</description>
+						</value>
+					</nomatch>
+				</li>
+
+				<li Class="PatchOperationConditional">
+					<xpath>Defs/TerrainDef[defName="WaterShallow"]/designationCategory</xpath>
+					<match Class="PatchOperationReplace">
+						<xpath>Defs/TerrainDef[defName="WaterShallow"]/designationCategory</xpath>
+						<value>
+							<designationCategory>RimShips</designationCategory>
+						</value>
+					</match>
+					<nomatch Class="PatchOperationAdd">
+						<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
+						<value>
+							<designationCategory>RimShips</designationCategory>
+						</value>
+					</nomatch>
+				</li>
+
+				<li Class="PatchOperationConditional">
+					<xpath>Defs/TerrainDef[defName="WaterShallow"]/constructEffect</xpath>
+					<match Class="PatchOperationReplace">
+						<xpath>Defs/TerrainDef[defName="WaterShallow"]/constructEffect</xpath>
+						<value>
+							<constructEffect>ConstructDirt</constructEffect>
+						</value>
+					</match>
+					<nomatch Class="PatchOperationAdd">
+						<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
+						<value>
+							<constructEffect>ConstructDirt</constructEffect>
+						</value>
+					</nomatch>
+				</li>
+
+				<li Class="PatchOperationConditional">
+					<xpath>Defs/TerrainDef[defName="WaterShallow"]/terrainAffordanceNeeded</xpath>
+					<match Class="PatchOperationReplace">
+						<xpath>Defs/TerrainDef[defName="WaterShallow"]/terrainAffordanceNeeded</xpath>
+						<value>
+							<terrainAffordanceNeeded>Diggable</terrainAffordanceNeeded>
+						</value>
+					</match>
+					<nomatch Class="PatchOperationAdd">
+						<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
+						<value>
+							<terrainAffordanceNeeded>Diggable</terrainAffordanceNeeded>
+						</value>
+					</nomatch>
+				</li>
+
+				<li Class="PatchOperationConditional">
+					<xpath>Defs/TerrainDef[defName="WaterShallow"]/statBases</xpath>
+					<match Class="PatchOperationConditional">
+						<xpath>Defs/TerrainDef[defName="WaterShallow"]/statBases/WorkToBuild</xpath>
+						<nomatch Class="PatchOperationAdd">
+							<xpath>Defs/TerrainDef[defName="WaterShallow"]/statBases</xpath>
+							<value>
+								<WorkToBuild>10000</WorkToBuild>
+							</value>
+						</nomatch>
+					</match>
+					<nomatch Class="PatchOperationAdd">
+						<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
+						<value>
+							<statBases>
+								<WorkToBuild>10000</WorkToBuild>
+							</statBases>
+						</value>
+					</nomatch>
+				</li>
+
+				<li Class="PatchOperationConditional">
 					<xpath>Defs/TerrainDef[defName="WaterShallow"]/designationHotKey</xpath>
-					<value>
-						<designationHotKey>Misc6</designationHotKey>
-					</value>
-				</match>
-				<nomatch Class="PatchOperationAdd">
-					<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
-					<value>
-						<designationHotKey>Misc6</designationHotKey>
-					</value>
-				</nomatch>
-			</li>
-		</operations>
-	</Operation>	
+					<match Class="PatchOperationReplace">
+						<xpath>Defs/TerrainDef[defName="WaterShallow"]/designationHotKey</xpath>
+						<value>
+							<designationHotKey>Misc6</designationHotKey>
+						</value>
+					</match>
+					<nomatch Class="PatchOperationAdd">
+						<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
+						<value>
+							<designationHotKey>Misc6</designationHotKey>
+						</value>
+					</nomatch>
+				</li>
+			</operations>
+		</nomatch>
+	</Operation>
+
 </Patch>

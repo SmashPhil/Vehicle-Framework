@@ -128,14 +128,11 @@
 
 		<comps>	
 			<li Class = "RimShips.CompProperties_Ships">
-				<driverRequired>true</driverRequired>
 				<downable>false</downable>
 				<movesWhenDowned>false</movesWhenDowned>
 				
-				<loadCargo>NotAllowed</loadCargo>
 				<moveable>DriverNeeded</moveable>
 				<riverTraversability>LargeRiver</riverTraversability>
-				<armament>DriverNeeded</armament>
 				<shipPowerType>Sails</shipPowerType>
 				<nameable>true</nameable>
 				<buildDef>SPBoats_CaravelBlueprint</buildDef>

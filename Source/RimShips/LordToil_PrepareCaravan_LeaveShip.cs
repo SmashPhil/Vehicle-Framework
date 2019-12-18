@@ -25,9 +25,11 @@ namespace RimShips.Lords
         {
             foreach(Pawn p in this.lord.ownedPawns)
             {
-                p.mindState.duty = new PawnDuty(DutyDefOf_Ships.TravelOrWaitOcean, this.exitSpot, -1f);
-                p.mindState.duty.locomotion = LocomotionUrgency.Jog;
-                if(p.GetComp<CompShips>()?.CanMove ?? false)
+                p.mindState.duty = new PawnDuty(DutyDefOf_Ships.TravelOrWaitOcean, this.exitSpot, -1f)
+                {
+                    locomotion = LocomotionUrgency.Jog
+                };
+                if(p.GetComp<CompShips>()?.ResolveSeating() ?? false)
                     p.drafter.Drafted = true;
             }
         }

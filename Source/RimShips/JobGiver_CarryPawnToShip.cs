@@ -15,6 +15,8 @@ namespace RimShips.Jobs
         {
             if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
                 return null;
+            if(!(pawn.GetLord().LordJob is LordJob_FormAndSendCaravanShip))
+                return null;
             Pawn pawn2 = this.FindDownedPawn(pawn);
             if (pawn2 is null)
                 return null;

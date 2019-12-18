@@ -335,15 +335,6 @@ namespace RimShips.Lords
             Scribe_Values.Look<IntVec3>(ref this.exitPoint, "exitPoint", default(IntVec3), false);
             Scribe_Values.Look<int>(ref this.startingTile, "startingTile", 0, false);
             Scribe_Values.Look<int>(ref this.destinationTile, "destinationTile", 0, false);
-            /*if(Scribe.mode == LoadSaveMode.PostLoadInit)
-            {
-                List<Pawn> list = this.downedPawns;
-                if (LordJob_FormAndSendCaravan.<> f__mg$cache0 == null)
-				{
-                    LordJob_FormAndSendCaravan.<> f__mg$cache0 = new Predicate<Pawn>(ThingUtility.DestroyedOrNull);
-                }
-                list.RemoveAll(LordJob_FormAndSendCaravan.<> f__mg$cache0);
-            }*/
         }
 
         public List<TransferableOneWay> transferables;
@@ -395,9 +386,5 @@ namespace RimShips.Lords
         private LordToil leave_pause;
 
         public const float CustomWakeThreshold = 0.5f;
-
-
-        /*[CompilerGenerated]
-        private static Predicate<Pawn> <>f__mg$cache0;*/
     }
 }

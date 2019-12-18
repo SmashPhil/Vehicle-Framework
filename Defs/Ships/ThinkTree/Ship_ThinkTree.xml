@@ -43,7 +43,7 @@
 								</li>
 					</subNodes>
 				</li>
-
+				
 				<!-- Idle Ship -->
 				<li Class= "RimShips.Jobs.JobGiver_AwaitOrders"/>
 			</subNodes>

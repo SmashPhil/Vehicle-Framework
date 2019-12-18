@@ -4,6 +4,7 @@ using System.Linq;
 using Verse;
 using RimShips.AI;
 using SPExtendedLibrary;
+using RimWorld;
 
 namespace RimShips
 {
@@ -11,7 +12,7 @@ namespace RimShips
     {
         public static IntVec3 RandomEdgeCell(Rot4 dir, Map map, Predicate<IntVec3> validator)
         {
-            List<IntVec3> cellsToCheck = CellRect.WholeMap(map).GetEdgeCells(dir).ToList();
+            List<IntVec3> cellsToCheck = dir.IsValid ? CellRect.WholeMap(map).GetEdgeCells(dir).ToList() : CellRect.WholeMap(map).EdgeCells.ToList();
             for(;;)
             {
                 IntVec3 rCell = SPExtended.PopRandom(ref cellsToCheck);
@@ -19,7 +20,7 @@ namespace RimShips
                     return rCell;
                 if(cellsToCheck.Count <= 0)
                 {
-                    Log.Warning("Failed to find edge cell at " + dir);
+                    Log.Warning("Failed to find edge cell at " + dir.AsInt);
                     break;
                 }
             }
@@ -28,17 +29,42 @@ namespace RimShips
 
         public static IntVec3 MiddleEdgeCell(Rot4 dir, Map map, Pawn pawn, Predicate<IntVec3> validator)
         {
-            List<IntVec3> cellsToCheck = CellRect.WholeMap(map).GetEdgeCells(dir).Where(x => validator(x)).ToList();
-            int padding = (pawn.def.size.z/2) > 3 ? (pawn.def.size.z/2 + 1) : 3;
+            List<IntVec3> cellsToCheck = CellRect.WholeMap(map).GetEdgeCells(dir).ToList();
+            bool riverSpawn = Find.World.CoastDirectionAt(map.Tile) != dir && (Find.WorldGrid[map.Tile].Rivers?.Any() ?? false);
+            int padding = (pawn.def.size.z/2) > 4 ? (pawn.def.size.z/2 + 1) : 4;
             int startIndex = cellsToCheck.Count / 2;
 
+            bool riverSpawnValidator(IntVec3 x) => map.terrainGrid.TerrainAt(x) == TerrainDefOf.WaterMovingChestDeep || map.terrainGrid.TerrainAt(x) == TerrainDefOf.WaterMovingShallow;
+            
             for (int j = 0; j < 10000; j++)
             {
                 IntVec3 c = pawn.ClampToMap(CellFinder.RandomEdgeCell(dir, map), map, padding);
-                if (pawn.PawnOccupiedCells(c).All(x => validator(x)))
+                List<IntVec3> occupiedCells = pawn.PawnOccupiedCells(c, dir.Opposite);
+                if(ShipHarmony.debug)
                 {
-                    return c;
+                    foreach (IntVec3 q in occupiedCells)
+                    {
+                        Log.Message(":: " + q);
+                        GenSpawn.Spawn(ThingDefOf.Chocolate, q, map);
+                    }
+                    if (validator(c))
+                    {
+                        Log.Message("Validated: " + c);
+                    }
                 }
+                
+                foreach(IntVec3 cAll in occupiedCells)
+                {
+                    if(ShipHarmony.debug && cAll != c) GenSpawn.Spawn(ThingDefOf.Beer, cAll, map);
+                    if(!validator(cAll) || (riverSpawn && !riverSpawnValidator(cAll)))
+                    {
+                        goto Block_Skip;
+                    }
+                }
+                if(ShipHarmony.debug) Log.Message("Found: " + c);
+                return c;
+                Block_Skip:;
+                if(ShipHarmony.debug) GenSpawn.Spawn(ThingDefOf.AIPersonaCore, c, map);
             }
             Log.Warning("Running secondary spawn cell check for boats");
             int i = 0;
@@ -51,7 +77,7 @@ namespace RimShips
                 }
                 IntVec3 rCell = pawn.ClampToMap(cellsToCheck[startIndex + i], map, padding);
                 if (ShipHarmony.debug) Log.Message("Checking r: " + rCell + " | " + validator(rCell));
-                List<IntVec3> occupiedCellsRCell = pawn.PawnOccupiedCells(rCell);
+                List<IntVec3> occupiedCellsRCell = pawn.PawnOccupiedCells(rCell, dir.Opposite);
                 foreach (IntVec3 c in occupiedCellsRCell)
                 {
                     if (!validator(c))
@@ -62,7 +88,7 @@ namespace RimShips
                 Block_0:;
                 IntVec3 lCell = pawn.ClampToMap(cellsToCheck[startIndex - i], map, padding);
                 if (ShipHarmony.debug) Log.Message("Checking l: " + lCell + " | " + validator(lCell));
-                List<IntVec3> occupiedCellsLCell = pawn.PawnOccupiedCells(rCell);
+                List<IntVec3> occupiedCellsLCell = pawn.PawnOccupiedCells(lCell, dir.Opposite);
                 foreach (IntVec3 c in occupiedCellsLCell)
                 {
                     if (!validator(c))
@@ -93,7 +119,8 @@ namespace RimShips
                 result = IntVec3.Invalid;
                 return false;
             }
-            result = CellFinderExtended.RandomEdgeCell(Find.World.CoastDirectionAt(map.Tile), map, (IntVec3 c) => GenGridShips.Standable(c, map, MapExtensionUtility.GetExtensionToMap(map)) && !c.Fogged(map));
+            Rot4 dir = Find.World.CoastDirectionAt(map.Tile).IsValid ? Find.World.CoastDirectionAt(map.Tile) : Find.WorldGrid[map.Tile].Rivers?.Any() ?? false ? SPExtended.RiverDirection(map) : Rot4.Invalid;
+            result = CellFinderExtended.RandomEdgeCell(dir, map, (IntVec3 c) => GenGridShips.Standable(c, map, MapExtensionUtility.GetExtensionToMap(map)) && !c.Fogged(map));
             return true;
         }
 

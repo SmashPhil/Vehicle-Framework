@@ -16,7 +16,7 @@ namespace RimShips.Jobs
         {
             if(pawn?.pather?.Moving ?? false)
                 return null;
-            return new Job(JobDefOf_Ships.IdleShip);
+            return new Job(JobDefOf_Ships.IdleShip, pawn);
         }
 
         public int ticks = 250;

@@ -15,6 +15,21 @@
 	</ResearchProjectDef>
 	
 	<ResearchProjectDef>
+		<defName>FishingBoat</defName>
+		<label>Fishing Boat</label>
+		<tab>RimShips</tab>
+		<description>Build fishing boats capable of bringing in fish if a compatible fishing mod is also loaded.</description>
+		<baseCost>1200</baseCost>
+		<techLevel>Neolithic</techLevel>
+		<prerequisites>
+			<li>Rowboat</li>
+		</prerequisites>
+		
+		<researchViewX>1</researchViewX>
+		<researchViewY>2.5</researchViewY>
+	</ResearchProjectDef>
+	
+	<ResearchProjectDef>
 		<defName>Caravel</defName>
 		<label>caravel</label>
 		<tab>RimShips</tab>
@@ -22,12 +37,12 @@
 		<baseCost>2500</baseCost>
 		<techLevel>Medieval</techLevel>
 		<prerequisites>
-			<li>Rowboat</li>
+			<li>FishingBoat</li>
 			<li>Smithing</li>
 		</prerequisites>
 		
-		<researchViewX>1.5</researchViewX>
-		<researchViewY>2.5</researchViewY>
+		<researchViewX>2</researchViewX>
+		<researchViewY>4</researchViewY>
 	</ResearchProjectDef>
 	<!--
 	<ResearchProjectDef>
@@ -55,7 +70,7 @@
 		<prerequisites>
 			<li>Caravel</li>
 		</prerequisites>
-		<researchViewX>3.5</researchViewX>
+		<researchViewX>3</researchViewX>
 		<researchViewY>4</researchViewY>
 	</ResearchProjectDef>
 </Defs>

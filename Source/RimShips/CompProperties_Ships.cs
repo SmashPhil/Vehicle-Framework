@@ -16,23 +16,15 @@ namespace RimShips
             this.compClass = typeof(CompShips);
         }
 
-        [DefaultValue(true)]
-        public bool driverRequired;
-
-        [DefaultValue(false)]
-        public bool downable;
-
-        [DefaultValue(false)]
-        public bool movesWhenDowned;
-
-        [DefaultValue(250f)]
-        public float ticksBetweenRepair;
-
-        [DefaultValue(false)]
-        public bool nameable;
-
+        public bool downable = false;
+        public bool movesWhenDowned = false;
+        public float ticksBetweenRepair = 250f;
+        public bool nameable = false;
+        public bool fishing = false;
         public float hitboxOffsetX = 0f;
         public float hitboxOffsetZ = 0f;
+
+        public bool diagonalRotation = true;
 
         public string healthLabel_Healthy = "Operational";
         public string healthLabel_Injured = "Needs Repairs";
@@ -40,9 +32,7 @@ namespace RimShips
         public string healthLabel_Dead = "Sinking";
         public string healthLabel_Beached = "Beached";
 
-        public ShipPermissions loadCargo = ShipPermissions.NotAllowed;
         public ShipPermissions moveable = ShipPermissions.DriverNeeded;
-        public ShipPermissions armament = ShipPermissions.DriverNeeded;
         public ShipType shipPowerType = ShipType.Sails;
 
         public RiverDef riverTraversability;

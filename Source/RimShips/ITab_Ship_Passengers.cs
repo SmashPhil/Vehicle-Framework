@@ -59,37 +59,23 @@ namespace RimShips.UI
             bool flag = false;
             foreach(ShipHandler handler in Handlers)
             {
-                if(handler.role.handlingType != HandlingTypeFlags.None)
+                Widgets.ListSeparator(ref num, viewRect.width, handler.role.label);
+                foreach(Pawn pawn in handler.handlers.InnerListForReading)
                 {
-                    Widgets.ListSeparator(ref num, viewRect.width, handler.role.label);
-                    foreach(Pawn pawn in handler.handlers.InnerListForReading)
-                    {
-                        ITab_Ship_Passengers.DoRow(ref num, viewRect, rect, scrollPosition, pawn, ref specificNeedsTabForPawn);
-                    }
+                    if(!pawn.IsColonist)
+                        continue;
+                    ITab_Ship_Passengers.DoRow(ref num, viewRect, rect, scrollPosition, pawn, ref specificNeedsTabForPawn);
                 }
             }
 
             foreach(Pawn pawn in Passengers)
             {
-                if(pawn.IsColonist)
+                if(!pawn.IsColonist)
                 {
                     if(!flag)
                     {
-                        Widgets.ListSeparator(ref num, viewRect.width, "CaravanPassengers".Translate());
-                        flag = true;
-                    }
-                    ITab_Ship_Passengers.DoRow(ref num, viewRect, rect, scrollPosition, pawn, ref specificNeedsTabForPawn);
-                }
-            }
-            bool flag2 = false;
-            foreach(Pawn pawn in Passengers)
-            {
-                if(!pawn.IsColonist)
-                {
-                    if(!flag2)
-                    {
                         Widgets.ListSeparator(ref num, viewRect.width, "CaravanPrisonersAndAnimals".Translate());
-                        flag2 = true;
+                        flag = true;
                     }
                     ITab_Ship_Passengers.DoRow(ref num, viewRect, rect, scrollPosition, pawn, ref specificNeedsTabForPawn);
                 }
