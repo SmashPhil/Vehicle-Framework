@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <!-- Rowboat -->
+
+  <SPBoats_RowboatBlueprint.label>Barque</SPBoats_RowboatBlueprint.label>
+  <SPBoats_RowboatBlueprint.description>Une chaloupe à rames capable de courts trajets.</SPBoats_RowboatBlueprint.description>
+  <Blueprint_SPBoats_RowboatBlueprint.label>Barque (plan)</Blueprint_SPBoats_RowboatBlueprint.label>
+  <Frame_SPBoats_RowboatBlueprint.label>Barque (construction)</Frame_SPBoats_RowboatBlueprint.label>
+  <Frame_SPBoats_RowboatBlueprint.description>Une chaloupe à rames capable de courts trajets.</Frame_SPBoats_RowboatBlueprint.description>
+
+
+  <!-- Caravel -->
+
+  <SPBoats_CaravelBlueprint.label>Caravelle</SPBoats_CaravelBlueprint.label>
+  <SPBoats_CaravelBlueprint.description>Un vaisseau de commerce moyen conçu pour être rapide et polyvalent.</SPBoats_CaravelBlueprint.description>
+  <Blueprint_SPBoats_CaravelBlueprint.label>Caravelle (plan)</Blueprint_SPBoats_CaravelBlueprint.label>
+  <Frame_SPBoats_CaravelBlueprint.label>Caravelle (construction)</Frame_SPBoats_CaravelBlueprint.label>
+  <Frame_SPBoats_CaravelBlueprint.description>Un vaisseau de commerce moyen conçu pour être rapide et polyvalent.</Frame_SPBoats_CaravelBlueprint.description>
+
+
+  <!-- Galleon -->
+
+  <SPBoats_GalleonBlueprint.label>Galion</SPBoats_GalleonBlueprint.label>
+  <SPBoats_GalleonBlueprint.description>Un gros vaisseau de guerre conçu pour les batailles de navire à navire.</SPBoats_GalleonBlueprint.description>
+  <Blueprint_SPBoats_GalleonBlueprint.label>Galion (plan)</Blueprint_SPBoats_GalleonBlueprint.label>
+  <Frame_SPBoats_GalleonBlueprint.label>Galion (construction)</Frame_SPBoats_GalleonBlueprint.label>
+  <Frame_SPBoats_GalleonBlueprint.description>Un gros vaisseau de guerre conçu pour les batailles de navire à navire.</Frame_SPBoats_GalleonBlueprint.description>
+
+</LanguageData>

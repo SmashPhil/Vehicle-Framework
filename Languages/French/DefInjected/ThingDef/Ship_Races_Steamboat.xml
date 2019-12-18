@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <Ships_Steamboat.label>Bateau à vapeur</Ships_Steamboat.label>
+  <Ships_Steamboat.description>Transforme le carburant en vapeur. Utile pour la navigation à contre-courant.</Ships_Steamboat.description>
+  <Ships_Steamboat.comps.CompShips.roles.0.label>Capitaine</Ships_Steamboat.comps.CompShips.roles.0.label>
+  <Ships_Steamboat.comps.CompShips.roles.1.label>Membre d'équipage</Ships_Steamboat.comps.CompShips.roles.1.label>
+  <Ships_Steamboat.comps.CompShips.roles.2.label>Passager(ère)</Ships_Steamboat.comps.CompShips.roles.2.label>
+  <Ships_Steamboat.tools.hull.label>coque</Ships_Steamboat.tools.hull.label>
+  <Ships_Steamboat.comps.CompShips.healthLabel_Injured>Nécessite des réparations</Ships_Steamboat.comps.CompShips.healthLabel_Injured>
+  <!-- Leather Amount: 0 -->
+  <!-- Meat Amount: 0 -->
+  <Corpse_Ships_Steamboat.label>Épave de bateau à vapeur</Corpse_Ships_Steamboat.label>
+  <Corpse_Ships_Steamboat.description>Épave de bateau à vapeur</Corpse_Ships_Steamboat.description>
+
+</LanguageData>
