@@ -10,6 +10,15 @@
   <Frame_SPBoats_RowboatBlueprint.description>近距離航海用の二人乗りな木製手漕ぎボートです。</Frame_SPBoats_RowboatBlueprint.description>
 
 
+  <!-- Fishing Boat -->
+
+  <SPBoats_FishingBoatBlueprint.label>釣り船</SPBoats_FishingBoatBlueprint.label>
+  <SPBoats_FishingBoatBlueprint.description>海で魚を釣ることができる小さな釣り船です。（魚を釣るためには互換性のある釣りModが必要です）</SPBoats_FishingBoatBlueprint.description>
+  <Blueprint_SPBoats_FishingBoatBlueprint.label>釣り船 (設計)</Blueprint_SPBoats_FishingBoatBlueprint.label>
+  <Frame_SPBoats_FishingBoatBlueprint.label>釣り船 (施工)</Frame_SPBoats_FishingBoatBlueprint.label>
+  <Frame_SPBoats_FishingBoatBlueprint.description>海で魚を釣ることができる小さな釣り船です。（魚を釣るためには互換性のある釣りModが必要です）</Frame_SPBoats_FishingBoatBlueprint.description>
+
+
   <!-- Caravel -->
 
   <SPBoats_CaravelBlueprint.label>カラベル船</SPBoats_CaravelBlueprint.label>

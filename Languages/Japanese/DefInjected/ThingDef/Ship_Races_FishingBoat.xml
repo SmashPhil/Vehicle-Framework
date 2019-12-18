@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <SPBoats_FishingBoat.label>釣り船</SPBoats_FishingBoat.label>
+  <SPBoats_FishingBoat.description>航続距離が短い小さな2人乗りの釣り用ボートです。</SPBoats_FishingBoat.description>
+  <SPBoats_FishingBoat.comps.CompShips.roles.0.label>船長</SPBoats_FishingBoat.comps.CompShips.roles.0.label>
+  <SPBoats_FishingBoat.comps.CompShips.roles.1.label>船員</SPBoats_FishingBoat.comps.CompShips.roles.1.label>
+  <SPBoats_FishingBoat.tools.hull.label>船体</SPBoats_FishingBoat.tools.hull.label>
+  <SPBoats_FishingBoat.comps.CompShips.healthLabel_Injured>修理が必要</SPBoats_FishingBoat.comps.CompShips.healthLabel_Injured>
+  <!-- Leather Amount: 0 -->
+  <!-- Meat Amount: 0 -->
+  <Corpse_SPBoats_FishingBoat.label>釣り船の残骸</Corpse_SPBoats_FishingBoat.label>
+  <Corpse_SPBoats_FishingBoat.description>釣り船の残骸</Corpse_SPBoats_FishingBoat.description>
+
+</LanguageData>
