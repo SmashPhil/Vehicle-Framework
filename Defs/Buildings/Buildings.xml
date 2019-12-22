@@ -77,7 +77,7 @@
 		<size>(1,4)</size>
 		
 		<researchPrerequisites>
-			<li>Rowboat</li>
+			<li>FishingBoat</li>
 		</researchPrerequisites>
 		<costList>
 			<WoodLog>400</WoodLog>

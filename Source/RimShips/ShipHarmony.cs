@@ -46,13 +46,14 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(typeof(Map), name: nameof(Map.ExposeData)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(ExposeDataMapExtensions)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Map), name: nameof(Map.FinalizeInit)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+            harmony.Patch(original: AccessTools.Method(type: typeof(Map), name: nameof(Map.FinalizeInit)),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(RecalculateShipPathGrid)));
             harmony.Patch(original: AccessTools.Method(type: typeof(PathGrid), name: nameof(PathGrid.RecalculatePerceivedPathCostUnderThing)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(RecalculateShipPathCostUnderThing))); //DOUBLE CHECK
-            harmony.Patch(original: AccessTools.Method(type: typeof(TerrainGrid), name: "DoTerrainChangedEffects"), prefix: null,
+                name: nameof(RecalculateShipPathCostUnderThing)));
+            //Needs More Work
+            harmony.Patch(original: AccessTools.Method(type: typeof(TerrainGrid), name: nameof(TerrainGrid.SetTerrain)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(RecalculateShipPathCostTerrainChange)));
 
@@ -310,9 +311,15 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Property(type: typeof(WITab_Caravan_Social), name: "Pawns").GetGetMethod(nonPublic: true), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(SailorSocialTabPawns)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(BestCaravanPawnUtility), name: nameof(BestCaravanPawnUtility.FindPawnWithBestStat)),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(FindSailorWithBestStat)));
             harmony.Patch(original: AccessTools.Method(type: typeof(Caravan), name: nameof(Caravan.ContainsPawn)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(ContainsPawnInShip)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(Caravan), name: nameof(Caravan.IsOwner)), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(IsOwnerSailor)));
 
             //Draftable
             harmony.Patch(original: AccessTools.Property(type: typeof(Pawn_DraftController), name: nameof(Pawn_DraftController.Drafted)).GetSetMethod(),
@@ -394,7 +401,6 @@ namespace RimShips
 
         #endregion Debug
 
-
         public static bool BoatsDontParty(Pawn p, ref bool __result)
         {
             if(IsShip(p))
@@ -445,7 +451,7 @@ namespace RimShips
             }
         }
 
-        public static void RecalculateShipPathGrid(Map __instance)
+        public static bool RecalculateShipPathGrid(Map __instance)
         {
             MapExtension mapE = MapExtensionUtility.GetExtensionToMap(__instance);
             mapE?.getShipPathGrid?.RecalculateAllPerceivedPathCosts();
@@ -455,6 +461,7 @@ namespace RimShips
                 mapE.getWaterRegionAndRoomUpdater.Enabled = true;
             }
             mapE?.getWaterRegionAndRoomUpdater?.RebuildAllWaterRegions();
+            return true;
         }
 
         public static void RecalculateShipPathCostUnderThing(Thing t, Map ___map)
@@ -463,9 +470,17 @@ namespace RimShips
             MapExtensionUtility.GetExtensionToMap(___map)?.getShipPathGrid?.RecalculatePerceivedPathCostUnderThing(t);
         }
 
-        private static void RecalculateShipPathCostTerrainChange(IntVec3 c, Map ___map)
+        public static void RecalculateShipPathCostTerrainChange(IntVec3 c, TerrainDef newTerr, Map ___map)
         {
-            MapExtensionUtility.GetExtensionToMap(___map)?.getShipPathGrid?.RecalculatePerceivedPathCostAt(c);
+            //Needs fixing later
+            /*Log.Message("BUILD");
+            if(newTerr == TerrainDefOf.WaterShallow || newTerr == TerrainDefOf.WaterMovingShallow || newTerr == TerrainDefOf.WaterOceanShallow || newTerr == TerrainDefOf.WaterDeep ||
+                newTerr == TerrainDefOf.WaterMovingChestDeep || newTerr == TerrainDefOf.WaterOceanDeep)
+            {
+                Log.Message("RESET");
+                MapExtensionUtility.GetExtensionToMap(___map)?.getShipPathGrid?.RecalculatePerceivedPathCostAt(c);
+                MapExtensionUtility.GetExtensionToMap(___map)?.getWaterRegionAndRoomUpdater?.RebuildAllWaterRegions();
+            }*/
         }
 
         #endregion MapGen
@@ -955,11 +970,20 @@ namespace RimShips
         {
             if (HasShip(caravan))
             {
-                if (!caravan.pather.Moving && CaravanVisitUtility.SettlementVisitedNow(caravan) != null && caravan.PawnsListForReading.Any(x => !IsShip(x)))
+                if(!caravan.pather.Moving && CaravanVisitUtility.SettlementVisitedNow(caravan) != null)
                 {
                     List<Gizmo> gizmos = __result.ToList();
-                    int index = gizmos.FindIndex(x => (x as Command_Action).icon == SettlementBase.AttackCommand);
-                    gizmos[index].Disable("CommandAttackDockDisable".Translate(__instance.LabelShort));
+                    if(caravan.PawnsListForReading.Any(x => !IsShip(x)))
+                    {
+                        int index = gizmos.FindIndex(x => (x as Command_Action).icon == SettlementBase.AttackCommand);
+                        gizmos[index].Disable("CommandAttackDockDisable".Translate(__instance.LabelShort));
+                    }
+                    if(caravan.PawnsListForReading.All(x => IsShip(x)))
+                    {
+                        int index2 = gizmos.FindIndex(x => (x as Command_Action).icon == ContentFinder<Texture2D>.Get("UI/Commands/Trade", false));
+                        if(index2 >= 0 && index2 < gizmos.Count)
+                            gizmos[index2].Disable("CommandTradeDockDisable".Translate(__instance.LabelShort));
+                    }
                     __result = gizmos;
                 }
             }
@@ -2503,15 +2527,44 @@ namespace RimShips
 
         public static void SailorSocialTabPawns(ref List<Pawn> __result)
         {
-            if (HasShip(__result) && __result.All(x => IsShip(x)))
+            if(HasShip(__result) && __result.Any(x => IsShip(x)))
             {
                 List<Pawn> sailors = new List<Pawn>();
-                foreach (Pawn p in __result)
+                foreach(Pawn p in __result.Where(x => IsShip(x)))
                 {
-                    sailors.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
+                    sailors.AddRange(p.GetComp<CompShips>().AllPawnsAboard.Where(x => x.RaceProps.Humanlike));
                 }
+                sailors.AddRange(__result.Where(x => x.RaceProps.Humanlike));
                 __result = sailors;
             }
+        }
+
+        public static bool FindSailorWithBestStat(Caravan caravan, StatDef stat, ref Pawn __result)
+        {
+            if(HasShip(caravan) && caravan.PawnsListForReading.All(x => IsShip(x)))
+            {
+                List<Pawn> pawns = caravan.PawnsListForReading;
+                Pawn pawn = null;
+                float num = -1f;
+                foreach(Pawn s in pawns)
+                {
+                    foreach(Pawn p in s.GetComp<CompShips>().AllPawnsAboard.Where(x => !x.Dead && !x.Downed && !x.InMentalState && caravan.IsOwner(x)))
+                    {
+                        if(!stat.Worker.IsDisabledFor(p))
+                        {
+                            float statValue = p.GetStatValue(stat, true);
+                            if(pawn is null || statValue > num)
+                            {
+                                pawn = p;
+                                num = statValue;
+                            }
+                        }
+                    }
+                }
+                __result = pawn;
+                return false;
+            }
+            return true;
         }
 
         public static void ContainsPawnInShip(Pawn p, Caravan __instance, ref bool __result)
@@ -2529,6 +2582,21 @@ namespace RimShips
                     }
                 }
                 __result = flag;
+            }
+        }
+
+        public static void IsOwnerSailor(Pawn p, Caravan __instance, ref bool __result)
+        {
+            if(!__result && HasShip(__instance))
+            {
+                foreach(Pawn s in __instance.PawnsListForReading.Where(x => IsShip(x)))
+                {
+                    if(s.GetComp<CompShips>().AllPawnsAboard.Contains(p) && CaravanUtility.IsOwner(p, __instance.Faction))
+                    {
+                        __result = true;
+                        return;
+                    }
+                }
             }
         }
 
@@ -3275,13 +3343,13 @@ namespace RimShips
 
         public static void PerceivedMovementDifficultyOnWater(int tile, ref float __result)
         {
-            if(Find.WorldGrid[tile].WaterCovered)
+            if(Find.WorldGrid[tile].biome == BiomeDefOf.Ocean || Find.WorldGrid[tile].biome == BiomeDefOf.Lake || Find.WorldGrid[tile].WaterCovered)
                 __result = 0.5f;
         }
 
         public static bool CalculatedMovementDifficultyAtOcean(int tile, bool perceivedStatic, ref float __result, int? ticksAbs = null, StringBuilder explanation = null)
         {
-            if( (Find.WorldGrid[tile].biome == BiomeDefOf.Ocean || Find.WorldGrid[tile].biome == BiomeDefOf.Lake) && !perceivedStatic)
+            if( (Find.WorldGrid[tile].biome == BiomeDefOf.Ocean || Find.WorldGrid[tile].biome == BiomeDefOf.Lake) && (!perceivedStatic || ticksAbs is null))
             {
                 if(explanation != null && explanation.Length > 0)
                     explanation.AppendLine();

@@ -73,7 +73,7 @@
 	<ThingDef ParentName="BaseShip">
 		<defName>SPBoats_FishingBoat</defName>
 		<label>Fishing Boat</label>
-		<description>A small two passanger boat capable of short trips</description>
+		<description>A small boat designed for gathering fish at sea.</description>
 		
 		<statBases>
 			<MoveSpeed>3.75</MoveSpeed>

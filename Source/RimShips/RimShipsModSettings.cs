@@ -1,21 +1,24 @@
 ﻿using UnityEngine;
 using Verse;
+using System;
 
 namespace RimShips
 {
     public class RimshipsModSettings : ModSettings
     {
-        public float beachMultiplier;
-        public bool forceFactionCoastOption;
-        public int forceFactionCoastRadius;
+        public float beachMultiplier = 0f;
+        public bool forceFactionCoastOption = true;
+        public int forceFactionCoastRadius = 1;
 
-        public bool shuffledCannonFire;
-        public bool riverTravel;
-        public bool boatSizeMatters;
+        public bool matchWaterTerrain;
+        public bool shuffledCannonFire = true;
+        public bool riverTravel = true;
+        public bool boatSizeMatters = true;
 
-        public int fishingDelay;
-        public int fishingSkillIncrease;
-        public bool fishingPersists;
+        public float fishingMultiplier = 1f;
+        public int fishingDelay = 10000;
+        public int fishingSkillIncrease = 5;
+        public bool fishingPersists = true;
 
         public bool debugDraftAnyShip;
         public bool debugDisableWaterPathing;
@@ -30,10 +33,12 @@ namespace RimShips
             Scribe_Values.Look(ref forceFactionCoastRadius, "forceFactionCoastRadius", 1);
             Scribe_Values.Look(ref forceFactionCoastOption, "forceFactionCoastOption", true);
 
+            Scribe_Values.Look(ref matchWaterTerrain, "matchWaterTerrain", true);
             Scribe_Values.Look(ref shuffledCannonFire, "shuffledCannonFire", true);
             Scribe_Values.Look(ref riverTravel, "riverTravel", true);
             Scribe_Values.Look(ref boatSizeMatters, "boatSizeMatters", true);
 
+            Scribe_Values.Look(ref fishingMultiplier, "fishingMultiplier", 1f);
             Scribe_Values.Look(ref fishingDelay, "fishingDelay", 10000);
             Scribe_Values.Look(ref fishingSkillIncrease, "fishingSkillIncrease", 5);
             Scribe_Values.Look(ref fishingPersists, "fishingPersists", true);
@@ -66,8 +71,9 @@ namespace RimShips
             if(settings.forceFactionCoastOption)
             {
                 listingStandard.Label("ForceSettlementCoast".Translate(Mathf.Round(settings.forceFactionCoastRadius)));
-                settings.forceFactionCoastRadius = (int)listingStandard.Slider((float)settings.forceFactionCoastRadius, 0f, 10f);  
+                settings.forceFactionCoastRadius = (int)listingStandard.Slider((float)settings.forceFactionCoastRadius, 0f, 10f);
             }
+            //listingStandard.CheckboxLabeled("MatchWaterTerrain".Translate(), ref settings.matchWaterTerrain, "MatchWaterTerrainTooltip".Translate());
             listingStandard.GapLine(16f);
 
             listingStandard.CheckboxLabeled("ShuffledCannonFire".Translate(), ref settings.shuffledCannonFire, "ShuffledCannonFireTooltip".Translate());
@@ -82,6 +88,8 @@ namespace RimShips
                 listingStandard.GapLine(16f);
                 string fishDelay = settings.fishingDelay.ToString();
                 string fishSkill = settings.fishingSkillIncrease.ToString();
+                listingStandard.Label("FishingMultiplier".Translate(Math.Round(settings.fishingMultiplier, 2)), -1, "FishingMultiplierTooltip".Translate());
+                settings.fishingMultiplier = listingStandard.Slider((float)settings.fishingMultiplier, 1f, 4f);
                 listingStandard.Label("FishingDelay".Translate(), -1, "FishingDelayTooltip".Translate());
                 listingStandard.IntEntry(ref settings.fishingDelay, ref fishDelay);
                 listingStandard.Label("FishingSkill".Translate(), -1, "FishingSkillTooltip".Translate());

@@ -39,7 +39,7 @@ namespace RimShips.Jobs
                     }
                     
                     this.ticksToNextRepair += this.pawn?.GetComp<CompShips>()?.Props.ticksBetweenRepair ?? InitialRepairTickCount;
-                    Log.Message("Repair: " + statValue + " | " + ticksToNextRepair);
+
                     Hediff repairPart = (this.TargetThingA as Pawn).health.hediffSet.hediffs.First();
 
                     if( ( (repairPart is Hediff_MissingPart) || repairPart.IsPermanent() ) && !this.permanentRepair)

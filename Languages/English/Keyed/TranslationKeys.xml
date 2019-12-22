@@ -43,14 +43,17 @@
 	<RiverTravelAllowedTooltip>Allow boats to travel along rivers.</RiverTravelAllowedTooltip>
 	<BoatSizeMattersOnRivers>River Size Matters</BoatSizeMattersOnRivers>
 	<BoatSizeMattersOnRiversTooltip>Restrict boats to only be able to travel on rivers that are large enough to fit it. If disabled, all boats can travel on any river. If you bring a boat into a map with a river that cannot fit the size of the boat, you may end up beaching it.</BoatSizeMattersOnRiversTooltip>
+	<FishingMultiplier>Fishing Multiplier: {0}%</FishingMultiplier>
+	<FishingMultiplierTooltip>Multiplier of fish gathered from fishing boat. 1 = normal, 4 = 4x as much</FishingMultiplierTooltip>
 	<FishingDelay>Fishing Delay</FishingDelay>
 	<FishingDelayTooltip>Base amount of ticks it takes to gather fish on a fishing boat.</FishingDelayTooltip>
 	<FishingSkill>Fishing Skill</FishingSkill>
 	<FishingSkillTooltip>How much exp is given by fishing on a boat</FishingSkillTooltip>
 	<FishingPersists>Fishing Persists</FishingPersists>
 	<FishingPersistsTooltip>The Fishing Boat fishing selection will not reset upon drafting.</FishingPersistsTooltip>
+	<MatchWaterTerrain>Match Water Terrain</MatchWaterTerrain>
+	<MatchWaterTerrainTooltip>Water tiles that are placed will match the water of adjacent water tiles (Disabled: Still WIP)</MatchWaterTerrainTooltip>
 	
-
 	<!-- Float Menu -->
 	<BoardShip>Board {0} as {1}  [{2}]</BoardShip>
 	<BoardShipGroup>Board {0}</BoardShipGroup>
@@ -85,6 +88,7 @@
 	<CommandUndockShip>Board boats</CommandUndockShip>
 	<CommandUndockShipDesc>Load all pawns and items into Boats</CommandUndockShipDesc>
 	<CommandAttackDockDisable>Cannot attack {0} while docked at their Settlement</CommandAttackDockDisable>
+	<CommandTradeDockDisable>Cannot trade with {0}. Must dock boat first</CommandTradeDockDisable>
 	<CaravanMustHaveEnoughSpaceOnShip>Not enough space on ships to house all pawns.</CaravanMustHaveEnoughSpaceOnShip>
 	<CaravanMustHaveEnoughPawnsToOperate>Not enough Pawns selected to set sail. Need {0}</CaravanMustHaveEnoughPawnsToOperate>
 

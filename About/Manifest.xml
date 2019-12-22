@@ -5,7 +5,7 @@
     <dependencies/>
     <loadAfter/>
     <suggests>
-		<li>1906469966</li> <!-- Coastlines -->
+		<li>1541721856</li> <!-- Alpha Animals -->
 	</suggests>
     <showCrossPromotions>true</showCrossPromotions>
     <manifestUri>https://raw.githubusercontent.com/smashphil/boats/master/About/Manifest.xml</manifestUri>

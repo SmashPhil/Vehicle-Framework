@@ -32,7 +32,6 @@ namespace RimShips
             if (!this.Enabled)
                 Log.Warning("Called RebuildAllRegions but WaterRegionAndRoomUpdater is disabled. Regions won't be rebuilt.", false);
 
-            this.map.temperatureCache.ResetTemperatureCache();
             AccessTools.Method(type: typeof(RegionDirtyer), name: "SetAllDirty").Invoke(this.map.regionDirtyer, null);
             this.TryRebuildWaterRegions();
         }

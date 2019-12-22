@@ -112,7 +112,7 @@ namespace RimShips.Jobs
                                 statValue += p.skills.GetSkill(SkillDefOf.Animals).Level;
                             }
                             statValue /= Ship.AllCapablePawns.Count;
-                            int countByFishingSkill = (int)(fishStats.Value * (statValue/10) * (shallowMultiplier ? 0.5 : 1));
+                            int countByFishingSkill = (int)(fishStats.Value * (statValue/10) * (shallowMultiplier ? 0.5 : 1) * RimShipMod.mod.settings.fishingMultiplier);
                             if(countByFishingSkill <= 0) countByFishingSkill = 1;
                             Thing fish = ThingMaker.MakeThing(fishStats.Key);
                             fish.stackCount = countByFishingSkill;
