@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<LanguageData>
+  <!-- Labels and Titles -->
+  <RimShips>Boats</RimShips>
+  <ShipSection>船</ShipSection>
+  <CannonLabel>大砲：{0}</CannonLabel>
+  <RepairShip>{0}を修理する</RepairShip>
+  <Disembark>下船する</Disembark>
+  <SetRange>航続距離の設定</SetRange>
+  <CannonRange>射程：{0}マス</CannonRange>
+  <RenameShip>{0}を改名する</RenameShip>
+  <OceanPassable>海通行可：+0.5</OceanPassable>
+  <BoatFishing>釣り</BoatFishing>
+  <BoatFishingDesc>魚を捕らえます。水深は釣りの成功確率に影響します。</BoatFishingDesc>
+
+  <TabCargo>積み荷</TabCargo>
+  <TabPassengers>ポーン</TabPassengers>
+  <TabBoatHealth>耐久度</TabBoatHealth>
+  <Cargo>積み荷</Cargo>
+
+
+  <!-- Settings -->
+  <DevModeShips>開発者モードの設定</DevModeShips>
+  <DevModeShipsTooltip>開発者モードをオンにして、Boatsを使ったデバッグや修正用の色々な設定を表示する</DevModeShipsTooltip>
+  <BeachGenMultiplier>海岸の大きさ係数：{0}%</BeachGenMultiplier>
+  <BeachGenMultiplierLarge>海岸の大きさ係数：{0}%（テストサイズ）</BeachGenMultiplierLarge>
+  <BeachGenMultiplierTooltip>海岸線の水深を増加します。</BeachGenMultiplierTooltip>
+  <BeachGenMultiplierLargeTooltip>現在の数値は推奨値よりも大きくなっています。海は最大で世界地図の80%を占める可能性があり、さらに大きな世界地図では湖が散在しています。</BeachGenMultiplierLargeTooltip>
+  <ForceSettlementCoastOption>拠点を沿岸に配置する</ForceSettlementCoastOption>
+  <ForceSettlementCoastTooltip>一定の範囲内なら、近隣にある派閥の拠点を海岸に強制配置します</ForceSettlementCoastTooltip>
+  <ForceSettlementCoast>拠点を海岸に移転する範囲：{0}</ForceSettlementCoast>
+  <DebugDrawRegions>デバッグ：描画領域</DebugDrawRegions>
+  <DebugDrawRegionLinks>デバッグ：描画領域結合</DebugDrawRegionLinks>
+  <DebugDrawRegionThings>デバッグ：描画領域(Things)</DebugDrawRegionThings>
+  <DebugDraftAnyShip>デバッグ：任意のボートを徴兵する</DebugDraftAnyShip>
+  <DebugDraftAnyShipTooltip>乗組員に関係なく、ボートを徴兵して移動できるようにします。ボートがどこかに引っかかった場合に便利です。</DebugDraftAnyShipTooltip>
+  <DebugDisablePathing>デバッグ：水面の経路を無効化</DebugDisablePathing>
+  <DebugDisablePathingTooltip>Modの水面移動経路の検出処理を使ってボートが移動するのを無効にして、その代わりに通常の移動経路の検出処理を使用します。注意：無効化するとボートはポーンのように移動します。</DebugDisablePathingTooltip>
+  <ShuffledCannonFire>自由砲撃</ShuffledCannonFire>
+  <ShuffledCannonFireTooltip>一斉射撃せずに各砲門を自由に射撃させます。</ShuffledCannonFireTooltip>
+  <RiverTravelAllowed>川を移動可能にする</RiverTravelAllowed>
+  <RiverTravelAllowedTooltip>ボートが川に沿って移動できるようにします。</RiverTravelAllowedTooltip>
+  <BoatSizeMattersOnRivers>船体と川の大きさ</BoatSizeMattersOnRivers>
+  <BoatSizeMattersOnRiversTooltip>ボートが通行するのに十分な大きさの川だけを移動できるように制限します。無効にすると、全てのボートがどの川でも移動可能になります。ボートの大きさに合わない川が存在するマップにボートを持ち込んだ場合、最終的に座礁するかもしれません。</BoatSizeMattersOnRiversTooltip>
+  <FishingMultiplier>釣り係数：{0}％</FishingMultiplier>
+  <FishingMultiplierTooltip>釣り船で釣れた魚の係数です。1=通常、4で4倍</FishingMultiplierTooltip>
+  <FishingDelay>釣りの遅延</FishingDelay>
+  <FishingDelayTooltip>釣り船で魚を獲るために必要な基礎的な時間(Tick)です。</FishingDelayTooltip>
+  <FishingSkill>釣りスキル</FishingSkill>
+  <FishingSkillTooltip>ボートを使った釣りでどれくらい経験値を得られるかです。</FishingSkillTooltip>
+  <FishingPersists>釣りを継続する</FishingPersists>
+  <FishingPersistsTooltip>釣り船での釣りは、徴兵時でもリセットされません。</FishingPersistsTooltip>
+  <MatchWaterTerrain>水タイルが一致</MatchWaterTerrain>
+  <MatchWaterTerrainTooltip>配置された水タイルは、隣接する水タイルの種類と一致します（無効：まだWIP中）</MatchWaterTerrainTooltip>
+
+
+  <!-- Float Menu -->
+  <BoardShip>{1}として{0}に乗船する [残り：{2}名]</BoardShip>
+  <BoardShipGroup>{0}に乗船する</BoardShipGroup>
+  <BoardShipGroupFail>{0}に乗船する（選択者が多すぎ）</BoardShipGroupFail>
+  <ActivityIconOnBoardShip>{0}に乗船</ActivityIconOnBoardShip>
+  <IsIncapableOfRamming>{0}に体当たり</IsIncapableOfRamming>
+  <CannotSailToCell>船はこのエリアに到達できません。</CannotSailToCell>
+
+
+  <!-- Messages -->
+  <CompShips_CannotMove>出航できません。船が航行するためにはもっと多くの乗組員を必要とします。</CompShips_CannotMove>
+  <NotEnoughCannonCrew>{0}の入植者たちの人数では{1}を操作するには人数が足りません。</NotEnoughCannonCrew>
+  <!--[Core] <NameIsInvalid>正しい名前を入力してください.</NameIsInvalid>-->
+  <ShipGainsName>船の新しい名前は{0}です</ShipGainsName>
+  <ShipSunkLabel>船が沈没</ShipSunkLabel>
+  <ShipSunkDeep>{0}は海の底に沈没した。一緒に沈んだもの：{1}</ShipSunkDeep>
+  <ShipSunkShallow>{0}は沈没したが、まだ回収可能です。</ShipSunkShallow>
+  <ShipOutOfFood>ポーンを載せた{0}に食べ物がありません</ShipOutOfFood>
+  <MessagePawnBoardedFormingCaravan>{0}は{1}に乗船して出航する準備が完了しました。</MessagePawnBoardedFormingCaravan>
+  <MessageCantAddWaypointBecauseNoShip>{0}を横断するには船が必要です</MessageCantAddWaypointBecauseNoShip>
+  <MessageCantAddWaypointBecauseShip>船で陸上を旅行することはできません。</MessageCantAddWaypointBecauseShip>
+  <MessageCantAddWaypointBecauseRiverUnreachable>このボートでは、この川を移動できません</MessageCantAddWaypointBecauseRiverUnreachable>
+
+
+  <!-- Caravans -->
+  <CaravanShips>船隊</CaravanShips>
+  <CaravanShipsSingle>1隻</CaravanShipsSingle>
+  <CaravanShipsPlural>{0}隻</CaravanShipsPlural>
+  <CaravanSailing>航海中</CaravanSailing>
+  <CommandDockShip>停泊</CommandDockShip>
+  <CommandDockShipDesc>乗客を全員降ろして、{0}の拠点で取引可能になります。</CommandDockShipDesc>
+  <CommandUndockShip>舟に乗船</CommandUndockShip>
+  <CommandUndockShipDesc>ポーンとアイテムをすべて船に載せます</CommandUndockShipDesc>
+  <CommandAttackDockDisable>拠点に停泊している間は{0}を攻撃できません</CommandAttackDockDisable>
+  <CommandTradeDockDisable>{0}と取引できません。まず最初にボートを着岸させる必要があります</CommandTradeDockDisable>
+  <CaravanMustHaveEnoughSpaceOnShip>ポーンを全員載せるのに十分な場所がありません。</CaravanMustHaveEnoughSpaceOnShip>
+  <CaravanMustHaveEnoughPawnsToOperate>帆を張るのに十分なポーンが選択されていません。{0}人が必要</CaravanMustHaveEnoughPawnsToOperate>
+
+
+  <!-- Status -->
+  <FormingCaravanStatus_GatheringItems_Ship>積み荷を船に載せます。</FormingCaravanStatus_GatheringItems_Ship>
+  <FormingCaravanStatus_GatheringItems_Ship_Pause>積み荷を船に載せる（待機中）</FormingCaravanStatus_GatheringItems_Ship_Pause>
+  <FormingCaravanStatus_GatheringSlaves_Ship>船に奴隷を載せる。</FormingCaravanStatus_GatheringSlaves_Ship>
+  <FormingCaravanStatus_GatheringSlaves_Ship_Pause>船に奴隷を載せる（待機中）</FormingCaravanStatus_GatheringSlaves_Ship_Pause>
+  <FormingCaravanStatus_GatheringDownedPawns_Ship>倒れたポーンを船に載せる。</FormingCaravanStatus_GatheringDownedPawns_Ship>
+  <FormingCaravanStatus_GatheringDownedPawns_Ship_Pause>倒れたポーンを船に載せる（待機中）</FormingCaravanStatus_GatheringDownedPawns_Ship_Pause>
+  <FormingCaravanStatus_BoardShip>船に乗船する。</FormingCaravanStatus_BoardShip>
+  <FormingCaravanStatus_BoardShip_Pause>船に乗船する（待機中）</FormingCaravanStatus_BoardShip_Pause>
+  <FormingCaravanStatus_Leaving_Ship>航海中</FormingCaravanStatus_Leaving_Ship>
+  <FormingCaravanStatus_Leaving_Ship_Pause>航海中（待機中）</FormingCaravanStatus_Leaving_Ship_Pause>
+  <AwaitOrders>命令を待機中</AwaitOrders>
+
+</LanguageData>
