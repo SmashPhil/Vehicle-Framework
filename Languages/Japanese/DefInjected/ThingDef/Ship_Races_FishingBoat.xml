@@ -2,7 +2,7 @@
 <LanguageData>
 
   <SPBoats_FishingBoat.label>釣り船</SPBoats_FishingBoat.label>
-  <SPBoats_FishingBoat.description>航続距離が短い小さな2人乗りの釣り用ボートです。</SPBoats_FishingBoat.description>
+  <SPBoats_FishingBoat.description>海で釣りをする為の2人乗りの小さなボートです。</SPBoats_FishingBoat.description>
   <SPBoats_FishingBoat.comps.CompShips.roles.0.label>船長</SPBoats_FishingBoat.comps.CompShips.roles.0.label>
   <SPBoats_FishingBoat.comps.CompShips.roles.1.label>船員</SPBoats_FishingBoat.comps.CompShips.roles.1.label>
   <SPBoats_FishingBoat.tools.hull.label>船体</SPBoats_FishingBoat.tools.hull.label>
