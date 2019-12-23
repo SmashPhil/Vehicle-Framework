@@ -43,12 +43,16 @@
   <RiverTravelAllowedTooltip>ボートが川に沿って移動できるようにします。</RiverTravelAllowedTooltip>
   <BoatSizeMattersOnRivers>船体と川の大きさ</BoatSizeMattersOnRivers>
   <BoatSizeMattersOnRiversTooltip>ボートが通行するのに十分な大きさの川だけを移動できるように制限します。無効にすると、全てのボートがどの川でも移動可能になります。ボートの大きさに合わない川が存在するマップにボートを持ち込んだ場合、最終的に座礁するかもしれません。</BoatSizeMattersOnRiversTooltip>
+  <FishingMultiplier>釣り係数：{0}％</FishingMultiplier>
+  <FishingMultiplierTooltip>釣り船で釣れた魚の係数です。1=通常、4で4倍</FishingMultiplierTooltip>
   <FishingDelay>釣りの遅延</FishingDelay>
   <FishingDelayTooltip>釣り船で魚を獲るために必要な基礎的な時間(Tick)です。</FishingDelayTooltip>
   <FishingSkill>釣りスキル</FishingSkill>
   <FishingSkillTooltip>ボートを使った釣りでどれくらい経験値を得られるかです。</FishingSkillTooltip>
   <FishingPersists>釣りを継続する</FishingPersists>
   <FishingPersistsTooltip>釣り船での釣りは、徴兵時でもリセットされません。</FishingPersistsTooltip>
+  <MatchWaterTerrain>水タイルが一致</MatchWaterTerrain>
+  <MatchWaterTerrainTooltip>配置された水タイルは、隣接する水タイルの種類と一致します（無効：まだWIP中）</MatchWaterTerrainTooltip>
 
 
   <!-- Float Menu -->
@@ -85,6 +89,7 @@
   <CommandUndockShip>舟に乗船</CommandUndockShip>
   <CommandUndockShipDesc>ポーンとアイテムをすべて船に載せます</CommandUndockShipDesc>
   <CommandAttackDockDisable>拠点に停泊している間は{0}を攻撃できません</CommandAttackDockDisable>
+  <CommandTradeDockDisable>{0}と取引できません。まず最初にボートを着岸させる必要があります</CommandTradeDockDisable>
   <CaravanMustHaveEnoughSpaceOnShip>ポーンを全員載せるのに十分な場所がありません。</CaravanMustHaveEnoughSpaceOnShip>
   <CaravanMustHaveEnoughPawnsToOperate>帆を張るのに十分なポーンが選択されていません。{0}人が必要</CaravanMustHaveEnoughPawnsToOperate>
 
