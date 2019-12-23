@@ -11,6 +11,6 @@ namespace RimShips.Defs
             DefOfHelper.EnsureInitializedInCtor(typeof(EffectsDefOf_Ships));
         }
 
-        public static ThingDef Gas_Smoke_CannonSmall;
+        public static ThingDef Mote_Smoke_CannonSmall;
     }
 }

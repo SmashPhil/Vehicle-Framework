@@ -19,6 +19,7 @@ namespace RimShips
             this.label = reference.label;
             this.weaponType = reference.weaponType;
             this.weaponLocation = reference.weaponLocation;
+            this.moteCannon = reference.moteCannon;
             this.projectile = reference.projectile;
             this.cannonSound = reference.cannonSound;
             this.numberCannons = reference.numberCannons;
@@ -84,6 +85,7 @@ namespace RimShips
             Scribe_Values.Look(ref label, "label");
             Scribe_Values.Look(ref weaponType, "weaponType");
             Scribe_Values.Look(ref weaponLocation, "weaponLocation");
+            Scribe_Defs.Look(ref moteCannon, "moteCannon");
             Scribe_Defs.Look(ref projectile, "projectile");
             Scribe_Defs.Look(ref cannonSound, "cannonSound");
             Scribe_References.Look(ref pawn, "pawn");
@@ -147,6 +149,7 @@ namespace RimShips
         public WeaponType weaponType;
         public WeaponLocation weaponLocation;
         public ThingDef projectile;
+        public ThingDef moteCannon;
         public SoundDef cannonSound;
 
         public List<float> centerPoints = new List<float>();

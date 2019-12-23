@@ -209,6 +209,7 @@
 						<weaponType>Broadside</weaponType>
 						<weaponLocation>Port</weaponLocation>
 						<projectile>Galleon_cannonball</projectile>
+						<moteCannon>Mote_Smoke_CannonSmall</moteCannon>
 						<cannonSound>Explosion_PirateCannon</cannonSound>
 						<numberCannons>6</numberCannons>
 						<baseTicksBetweenShots>15</baseTicksBetweenShots>
@@ -236,6 +237,7 @@
 						<weaponType>Broadside</weaponType>
 						<weaponLocation>Starboard</weaponLocation>
 						<projectile>Galleon_cannonball</projectile>
+						<moteCannon>Mote_Smoke_CannonSmall</moteCannon>
 						<cannonSound>Explosion_PirateCannon</cannonSound>
 						<numberCannons>6</numberCannons>
 						<baseTicksBetweenShots>15</baseTicksBetweenShots>

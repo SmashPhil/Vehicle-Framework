@@ -178,6 +178,7 @@
 							<weaponType>Broadside</weaponType>
 							<weaponLocation>Port</weaponLocation>
 							<projectile>Caravel_cannonball</projectile>
+							<moteCannon>Mote_Smoke_CannonSmall</moteCannon>
 							<cannonSound>Explosion_PirateCannon</cannonSound>
 							<numberCannons>2</numberCannons>
 							<baseTicksBetweenShots>30</baseTicksBetweenShots>
@@ -195,6 +196,7 @@
 							<weaponType>Broadside</weaponType>
 							<weaponLocation>Starboard</weaponLocation>
 							<projectile>Caravel_cannonball</projectile>
+							<moteCannon>Mote_Smoke_CannonSmall</moteCannon>
 							<cannonSound>Explosion_PirateCannon</cannonSound>
 							<numberCannons>2</numberCannons>
 							<baseTicksBetweenShots>30</baseTicksBetweenShots>

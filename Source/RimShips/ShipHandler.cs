@@ -72,7 +72,7 @@ namespace RimShips
             for(int i = 0; i < currentlyReserving.Count; i++)
             {
                 Pawn p = currentlyReserving[i];
-                if (!p.Spawned || (p.CurJob.def != JobDefOf_Ships.Board && (p.CurJob.targetA.Thing as Pawn) != this.shipPawn))
+                if (!p.Spawned || p.InMentalState || p.Downed || p.Dead || (p.CurJob.def != JobDefOf_Ships.Board && (p.CurJob.targetA.Thing as Pawn) != this.shipPawn))
                 {
                     currentlyReserving.Remove(p);
                 }

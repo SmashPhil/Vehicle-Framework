@@ -52,8 +52,7 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(PathGrid), name: nameof(PathGrid.RecalculatePerceivedPathCostUnderThing)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(RecalculateShipPathCostUnderThing)));
-            //Needs More Work
-            harmony.Patch(original: AccessTools.Method(type: typeof(TerrainGrid), name: nameof(TerrainGrid.SetTerrain)), prefix: null,
+            harmony.Patch(original: AccessTools.Method(type: typeof(TerrainGrid), name: "DoTerrainChangedEffects"), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(RecalculateShipPathCostTerrainChange)));
 
@@ -470,17 +469,9 @@ namespace RimShips
             MapExtensionUtility.GetExtensionToMap(___map)?.getShipPathGrid?.RecalculatePerceivedPathCostUnderThing(t);
         }
 
-        public static void RecalculateShipPathCostTerrainChange(IntVec3 c, TerrainDef newTerr, Map ___map)
+        private static void RecalculateShipPathCostTerrainChange(IntVec3 c, Map ___map)
         {
-            //Needs fixing later
-            /*Log.Message("BUILD");
-            if(newTerr == TerrainDefOf.WaterShallow || newTerr == TerrainDefOf.WaterMovingShallow || newTerr == TerrainDefOf.WaterOceanShallow || newTerr == TerrainDefOf.WaterDeep ||
-                newTerr == TerrainDefOf.WaterMovingChestDeep || newTerr == TerrainDefOf.WaterOceanDeep)
-            {
-                Log.Message("RESET");
-                MapExtensionUtility.GetExtensionToMap(___map)?.getShipPathGrid?.RecalculatePerceivedPathCostAt(c);
-                MapExtensionUtility.GetExtensionToMap(___map)?.getWaterRegionAndRoomUpdater?.RebuildAllWaterRegions();
-            }*/
+            MapExtensionUtility.GetExtensionToMap(___map)?.getShipPathGrid?.RecalculatePerceivedPathCostAt(c);
         }
 
         #endregion MapGen
@@ -3486,11 +3477,11 @@ namespace RimShips
         public static void MultiSelectClicker(Selector instance)
         {
             List<object> selectedObjects = Traverse.Create(instance).Field("selected").GetValue<List<object>>();
+            if(!selectedObjects.All(x => x is Pawn))
+                return;
             List<Pawn> selPawns = selectedObjects.ConvertObjectList<Pawn>();
             if(selPawns.Any(x => x.Drafted || x.Faction != Faction.OfPlayer || IsShip(x)))
-            {
                 return;
-            }
             IntVec3 mousePos = Verse.UI.MouseMapPosition().ToIntVec3();
             if (selectedObjects.Count > 1 && selectedObjects.All(x => x is Pawn))
             {
