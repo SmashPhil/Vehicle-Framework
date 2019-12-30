@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using RimWorld;
 using Verse;
-using SPExtendedLibrary;
+using SPExtended;
 using RimShips.Defs;
 using Verse.Sound;
 
@@ -13,7 +13,7 @@ namespace RimShips
     public class CompCannons : ThingComp
     {
         private float range;
-        private List<SPExtended.SPTuple<Stack<int>, CannonHandler, int>> broadsideFire = new List<SPExtended.SPTuple<Stack<int>, CannonHandler, int>>();
+        private List<SPTuples.SPTuple<Stack<int>, CannonHandler, int>> broadsideFire = new List<SPTuples.SPTuple<Stack<int>, CannonHandler, int>>();
         private List<CannonHandler> cannons = new List<CannonHandler>();
         public CompProperties_Cannons Props => (CompProperties_Cannons)this.props;
         public float MaxRange => this.cannons.Min(x => x.maxRange);
@@ -38,7 +38,7 @@ namespace RimShips
             }
             set
             {
-                this.range = SPExtended.Clamp(value, this.MinRange, this.MaxRange);
+                this.range = SPMultiCell.Clamp(value, this.MinRange, this.MaxRange);
             }
         }
 
@@ -51,7 +51,7 @@ namespace RimShips
         
         public override IEnumerable<Gizmo> CompGetGizmosExtra()
         {
-            if (this.Pawn.Drafted)
+            if(this.Pawn.Drafted && this.Pawn.Faction == Faction.OfPlayer)
             {
                 if (this.cannons != null && this.cannons.Count > 0)
                 {
@@ -68,7 +68,7 @@ namespace RimShips
                                 portSideCannons.icon = TexCommandShips.BroadsideCannon_Port;
                                 portSideCannons.action = delegate ()
                                 {
-                                    SPExtended.SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPExtended.SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
+                                    SPTuples.SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPTuples.SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
                                     List<int> cannonOrder = Enumerable.Range(0, cannon.numberCannons).ToList();
                                     if (RimShipMod.mod.settings.shuffledCannonFire)
                                         cannonOrder.SPShuffle();
@@ -100,7 +100,7 @@ namespace RimShips
                                 starboardSideCannons.icon = TexCommandShips.BroadsideCannon_Starboard;
                                 starboardSideCannons.action = delegate ()
                                 {
-                                    SPExtended.SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPExtended.SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
+                                    SPTuples.SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPTuples.SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
                                     List<int> cannonOrder = Enumerable.Range(0, cannon.numberCannons).ToList();
                                     if (RimShipMod.mod.settings.shuffledCannonFire)
                                         cannonOrder.SPShuffle();
@@ -137,7 +137,7 @@ namespace RimShips
         {
             if (!this.Pawn.Drafted && this.broadsideFire.Count > 0)
             {
-                foreach(SPExtended.SPTuple<Stack<int>, CannonHandler> side in broadsideFire)
+                foreach(SPTuples.SPTuple<Stack<int>, CannonHandler> side in broadsideFire)
                 {
                     side.Second.reloading = true;
                 }
@@ -148,7 +148,7 @@ namespace RimShips
             {
                 for (int i = 0; i < this.broadsideFire.Count; i++)
                 {
-                    SPExtended.SPTuple<Stack<int>, CannonHandler> side = broadsideFire[i];
+                    SPTuples.SPTuple<Stack<int>, CannonHandler> side = broadsideFire[i];
                     side.Second.reloading = false;
                     int tick = broadsideFire[i].Third;
                     if(broadsideFire[i].Third % side.Second.TicksPerShot == 0)
@@ -194,7 +194,7 @@ namespace RimShips
             }
 
             float projectileOffset = (this.Pawn.def.size.x / 2f) + cannon.projectileOffset; // (s/2)
-            SPExtended.SPTuple<float, float> angleOffset = this.AngleRotationProjectileOffset(offset, projectileOffset);
+            SPTuples.SPTuple2<float, float> angleOffset = this.AngleRotationProjectileOffset(offset, projectileOffset);
             ThingDef projectile = cannon.projectile;
             IntVec3 targetCell = IntVec3.Invalid;
             Vector3 launchCell = this.Pawn.DrawPos;
@@ -353,21 +353,21 @@ namespace RimShips
             projectile2.Launch(this.Pawn, launchCell, c, target, cannon.hitFlags);
         }
 
-        private SPExtended.SPTuple<float, float> AngleRotationProjectileOffset(float preOffsetX, float preOffsetY)
+        private SPTuples.SPTuple2<float, float> AngleRotationProjectileOffset(float preOffsetX, float preOffsetY)
         {
-            SPExtended.SPTuple<float, float> offset = new SPExtended.SPTuple<float, float>(preOffsetX, preOffsetY);
+            SPTuples.SPTuple2<float, float> offset = new SPTuples.SPTuple2<float, float>(preOffsetX, preOffsetY);
             switch (this.Pawn.Rotation.AsInt)
             {
                 case 1:
                     if (this.CompShip.Angle == -45)
                     {
-                        SPExtended.SPTuple<float, float> newOffset = SPExtended.RotatePointCounterClockwise(preOffsetX, preOffsetY, 45f);
+                        SPTuples.SPTuple2<float, float> newOffset = SPTrig.RotatePointCounterClockwise(preOffsetX, preOffsetY, 45f);
                         offset.First = newOffset.First;
                         offset.Second = newOffset.Second;
                     }
                     else if (this.CompShip.Angle == 45)
                     {
-                        SPExtended.SPTuple<float, float> newOffset = SPExtended.RotatePointClockwise(preOffsetX, preOffsetY, 45f);
+                        SPTuples.SPTuple2<float, float> newOffset = SPTrig.RotatePointClockwise(preOffsetX, preOffsetY, 45f);
                         offset.First = newOffset.First;
                         offset.Second = newOffset.Second;
                     }
@@ -375,13 +375,13 @@ namespace RimShips
                 case 3:
                     if (this.CompShip.Angle == -45)
                     {
-                        SPExtended.SPTuple<float, float> newOffset = SPExtended.RotatePointClockwise(preOffsetX, preOffsetY, 225f);
+                        SPTuples.SPTuple2<float, float> newOffset = SPTrig.RotatePointClockwise(preOffsetX, preOffsetY, 225f);
                         offset.First = newOffset.First;
                         offset.Second = newOffset.Second;
                     }
                     else if (this.CompShip.Angle == 45)
                     {
-                        SPExtended.SPTuple<float, float> newOffset = SPExtended.RotatePointCounterClockwise(preOffsetX, preOffsetY, 225f);
+                        SPTuples.SPTuple2<float, float> newOffset = SPTrig.RotatePointCounterClockwise(preOffsetX, preOffsetY, 225f);
                         offset.First = newOffset.First;
                         offset.Second = newOffset.Second;
                     }
@@ -412,7 +412,7 @@ namespace RimShips
         {
             base.PostSpawnSetup(respawningAfterLoad);
             this.InitializeCannons();
-            this.broadsideFire = new List<SPExtended.SPTuple<Stack<int>, CannonHandler, int>>();
+            this.broadsideFire = new List<SPTuples.SPTuple<Stack<int>, CannonHandler, int>>();
         }
 
         private void InitializeCannons()

@@ -2,7 +2,7 @@
 using UnityEngine;
 using Verse;
 using Verse.Sound;
-using SPExtendedLibrary;
+using SPExtended;
 
 namespace RimShips
 {
@@ -88,7 +88,7 @@ namespace RimShips
             if(this.cannon.cooldownTicks > 0)
             {
                 float percent = (float)this.cannon.cooldownTicks / (float)this.cannon.MaxTicks;
-                SPExtended.VerticalFillableBar(rect, percent, FillableBar, ClearBar);
+                SPExtra.VerticalFillableBar(rect, percent, FillableBar, ClearBar);
             }
             if (!this.HighlightTag.NullOrEmpty() && (Find.WindowStack.FloatMenu == null || !Find.WindowStack.FloatMenu.windowRect.Overlaps(rect)))
             {

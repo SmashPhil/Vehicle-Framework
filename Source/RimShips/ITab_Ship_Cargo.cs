@@ -16,7 +16,7 @@ namespace RimShips.UI
             this.labelKey = "TabCargo";
         }
 
-        public override bool IsVisible => !this.SelPawnForCargo.GetComp<CompShips>().beached;
+        public override bool IsVisible => !this.SelPawnForCargo.GetComp<CompShips>().beached && this.SelPawnForCargo.Faction == Faction.OfPlayer;
 
         private Pawn SelPawnForCargo
         {

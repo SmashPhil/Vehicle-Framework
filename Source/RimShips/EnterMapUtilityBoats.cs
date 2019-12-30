@@ -4,7 +4,7 @@ using System.Linq;
 using RimWorld;
 using RimWorld.Planet;
 using RimShips.AI;
-using SPExtendedLibrary;
+using SPExtended;
 using Verse;
 
 namespace RimShips

@@ -11,7 +11,7 @@
 		<backstoryCategories>
 			<li>Neolithic</li>
 		</backstoryCategories>
-		<combatPower>10</combatPower>
+		<combatPower>80</combatPower>
 		<lifeStages>
 			<li>
 				<bodyGraphicData>
@@ -132,11 +132,15 @@
 				<moveable>DriverNeeded</moveable>
 				<riverTraversability>River</riverTraversability>
 				<shipPowerType>Sails</shipPowerType>
+				<shipCategory>Misc</shipCategory>
+				<shipTech>Medieval</shipTech>
 				<nameable>false</nameable>
 				<buildDef>SPBoats_FishingBoatBlueprint</buildDef>
 				<ticksBetweenRepair>120</ticksBetweenRepair>
 				
 				<fishing>true</fishing>
+				<wakeMultiplier>1.6</wakeMultiplier>
+				<wakeSpeed>1.6</wakeSpeed>
 
 				<healthLabel_Healthy>Operational</healthLabel_Healthy>
 				<healthLabel_Injured>Needs Repairs</healthLabel_Injured>

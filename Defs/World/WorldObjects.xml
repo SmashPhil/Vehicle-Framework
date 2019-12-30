@@ -11,4 +11,18 @@
 		<expandingIconTexture>Debug/SettlementOld</expandingIconTexture>
 		<expandingIconPriority>70</expandingIconPriority>
 	</WorldObjectDef>
+	
+	<WorldObjectDef>
+		<defName>DockedBoat</defName>
+		<label>Boat</label>
+		<description>Boats</description>
+		<worldObjectClass>RimShips.DockedBoat</worldObjectClass>
+		<texture>World/WorldObjects/PeaceTalks</texture>
+		<expandingIcon>true</expandingIcon>
+		<expandingIconTexture>UI/BoatObject</expandingIconTexture>
+		<expandingIconPriority>60</expandingIconPriority>
+		<comps>
+			<li Class="WorldObjectCompProperties_Timeout" />
+		</comps>
+	</WorldObjectDef>
 </Defs>

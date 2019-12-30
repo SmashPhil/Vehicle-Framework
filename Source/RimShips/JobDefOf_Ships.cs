@@ -21,6 +21,6 @@ namespace RimShips.Defs
 
         public static JobDef RepairShip;
 
-        //Disembark
+        public static JobDef DisembarkLord;
     }
 }

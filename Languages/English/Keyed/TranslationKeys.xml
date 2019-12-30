@@ -17,12 +17,14 @@
 	<TabCargo>Cargo</TabCargo>
 	<TabPassengers>Pawns</TabPassengers>
 	<TabBoatHealth>Health</TabBoatHealth>
+	<TabUpgrades>Upgrade</TabUpgrades>
 	<Cargo>Cargo</Cargo>
 	
 	
 	<!-- Settings -->
 	<DevModeShips>DevMode Options</DevModeShips>
 	<DevModeShipsTooltip>Turn on DevMode to view the different options for debugging or fixing stuff with Boats</DevModeShipsTooltip>
+	<BoatsResetToDefault>Reset to Default</BoatsResetToDefault>
 	<BeachGenMultiplier>Beach Size Multiplier: {0}%</BeachGenMultiplier>
 	<BeachGenMultiplierLarge>Beach Size Multiplier: {0}% (Test Sizes)</BeachGenMultiplierLarge>
 	<BeachGenMultiplierTooltip>Increase the amount of water on the coastline.</BeachGenMultiplierTooltip>
@@ -62,7 +64,6 @@
 	<IsIncapableOfRamming>Ram {0}</IsIncapableOfRamming>
 	<CannotSailToCell>Ship cannot reach this area.</CannotSailToCell>
 	
-	
 	<!-- Messages -->
 	<CompShips_CannotMove>Cannot draft. Boat needs more crew in order to navigate.</CompShips_CannotMove>
 	<NotEnoughCannonCrew>Not enough colonists in {0} to operate {1}.</NotEnoughCannonCrew>
@@ -85,7 +86,8 @@
 	<CaravanSailing>Sailing</CaravanSailing>
 	<CommandDockShip>Dock</CommandDockShip>
 	<CommandDockShipDesc>Unload all passengers and enable trade with the Settlement of {0}.</CommandDockShipDesc>
-	<CommandUndockShip>Board boats</CommandUndockShip>
+	<CommandDockShipObjectDesc>Dock Boats and go on foot</CommandDockShipObjectDesc>
+	<CommandUndockShip>Board Boats</CommandUndockShip>
 	<CommandUndockShipDesc>Load all pawns and items into Boats</CommandUndockShipDesc>
 	<CommandAttackDockDisable>Cannot attack {0} while docked at their Settlement</CommandAttackDockDisable>
 	<CommandTradeDockDisable>Cannot trade with {0}. Must dock boat first</CommandTradeDockDisable>
