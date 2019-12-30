@@ -912,7 +912,7 @@ namespace RimShips
                 int damageAmount = __instance.DamageAmount;
                 float armorPenetration = __instance.ArmorPenetration;
                 SoundDef soundExplode;
-                soundExplode = __instance.def.HasModExtension<Projectile_Water>() ? __instance.def.GetModExtension<Projectile_Water>()?.soundExplodeWater : SoundDefOf_Ships.Explode_BombWater;
+                soundExplode = SoundDefOf_Ships.Explode_BombWater; //Changed for current issues
                 SoundStarter.PlayOneShot(soundExplode, new TargetInfo(__instance.Position, map, false));
                 ThingDef equipmentDef = null;
                 ThingDef def = __instance.def;
