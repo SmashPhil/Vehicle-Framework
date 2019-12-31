@@ -3506,7 +3506,7 @@ namespace RimShips
 
         private static void SpawnDockedBoatObject(Caravan caravan)
         {
-            /*if (!HasShip(caravan))
+            if (!HasShip(caravan))
                 Log.Error("Attempted to dock boats with no boats in caravan");
 
             DockedBoat dockedBoat = (DockedBoat)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfShips.DockedBoat);
@@ -3523,7 +3523,7 @@ namespace RimShips
                     dockedBoat.dockedBoats.TryAddOrTransfer(p);
                 }
             }
-            Find.WorldObjects.Add(dockedBoat);*/
+            Find.WorldObjects.Add(dockedBoat);
         }
 
         public static void BoardAllCaravanPawns(Caravan caravan)

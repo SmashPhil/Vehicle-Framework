@@ -132,9 +132,14 @@
 				<moveable>DriverNeeded</moveable>
 				<riverTraversability>Creek</riverTraversability>
 				<shipPowerType>Paddles</shipPowerType>
+				<shipCategory>Misc</shipCategory>
+				<shipTech>Neolithic</shipTech>
 				<nameable>false</nameable>
 				<buildDef>SPBoats_RowboatBlueprint</buildDef>
 				<ticksBetweenRepair>50</ticksBetweenRepair>
+				
+				<wakeMultiplier>1.3</wakeMultiplier>
+				<wakeSpeed>1.5</wakeSpeed>
 				
 				<healthLabel_Healthy>Operational</healthLabel_Healthy>
 				<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
