@@ -3,8 +3,8 @@
 	<LiteUpdateNotice.NoticeDef>
 		<defName>TestNotice</defName>
 		<label>Boats Update</label>
-		<description>Boats has been updated for a few minor bug fixes. \n \n To view more info about the update please visit the steam page</description>
+		<description>Boats has been reupdated, previous issue has been resolved. \n \n To view more info about the update please visit the steam page</description>
 		<letter>D9UpdateNotice</letter>
-		<version>1.0.1</version>
+		<version>1.0.3a</version>
 	</LiteUpdateNotice.NoticeDef>
 </Defs>
