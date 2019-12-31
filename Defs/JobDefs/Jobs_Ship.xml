@@ -7,14 +7,14 @@
 		<reportString>Boarding.</reportString>
 		<casualInterruptible>false</casualInterruptible>
 	</JobDef>
-	
+	<!--
 	<JobDef>
-		<defName>DisembarkLord</defName>
-		<driverClass>RimShips.Jobs.JobDriver_Disembark</driverClass>
-		<reportString>Disembarking.</reportString>
+		<defName>Disembark</defName>
+		<driverClass>JobDriver_Disembark</driverClass>
+		<reportString>disembarking</reportString>
 		<casualInterruptible>false</casualInterruptible>
 	</JobDef>
-	
+	-->
 	<JobDef>
 		<defName>IdleShip</defName>
 		<driverClass>RimShips.Jobs.JobDriver_IdleShip</driverClass>

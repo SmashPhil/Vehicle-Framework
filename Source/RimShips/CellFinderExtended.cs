@@ -3,21 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using Verse;
 using RimShips.AI;
-using SPExtended;
+using SPExtendedLibrary;
 using RimWorld;
 
 namespace RimShips
 {
     public static class CellFinderExtended
     {
-        public static IntVec3 RandomEdgeCell(Rot4 dir, Map map, Predicate<IntVec3> validator, List<IntVec3> excludeCells = null, Pawn pawn = null)
+        public static IntVec3 RandomEdgeCell(Rot4 dir, Map map, Predicate<IntVec3> validator)
         {
             List<IntVec3> cellsToCheck = dir.IsValid ? CellRect.WholeMap(map).GetEdgeCells(dir).ToList() : CellRect.WholeMap(map).EdgeCells.ToList();
-            cellsToCheck.Shuffle();
             for(;;)
             {
-                IntVec3 rCell = pawn is null ? SPExtra.PopRandom(ref cellsToCheck) : pawn.ClampToMap(SPExtra.PopRandom(ref cellsToCheck), map, pawn.def.size.z > 4 ? (int)Math.Ceiling(pawn.def.size.z / 2d) : 3);
-                if(validator(rCell) && (excludeCells is null || !excludeCells.Contains(rCell)) && (pawn is null || pawn.PawnOccupiedCells(rCell, dir.Opposite).All(x => validator(x))))
+                IntVec3 rCell = SPExtended.PopRandom(ref cellsToCheck);
+                if(validator(rCell))
                     return rCell;
                 if(cellsToCheck.Count <= 0)
                 {
@@ -120,7 +119,7 @@ namespace RimShips
                 result = IntVec3.Invalid;
                 return false;
             }
-            Rot4 dir = Find.World.CoastDirectionAt(map.Tile).IsValid ? Find.World.CoastDirectionAt(map.Tile) : Find.WorldGrid[map.Tile].Rivers?.Any() ?? false ? SPExtra.RiverDirection(map) : Rot4.Invalid;
+            Rot4 dir = Find.World.CoastDirectionAt(map.Tile).IsValid ? Find.World.CoastDirectionAt(map.Tile) : Find.WorldGrid[map.Tile].Rivers?.Any() ?? false ? SPExtended.RiverDirection(map) : Rot4.Invalid;
             result = CellFinderExtended.RandomEdgeCell(dir, map, (IntVec3 c) => GenGridShips.Standable(c, map, MapExtensionUtility.GetExtensionToMap(map)) && !c.Fogged(map));
             return true;
         }

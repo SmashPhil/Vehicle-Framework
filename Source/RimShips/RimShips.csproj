@@ -40,10 +40,6 @@
       <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SPExtended, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\SRTS-Expanded\Assemblies\SPExtended.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -57,11 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bill_BoardShip.cs" />
-    <Compile Include="BoatStrategyDef.cs" />
-    <Compile Include="BoatStrategyDefOf.cs" />
-    <Compile Include="BoatStrategyWorker.cs" />
     <Compile Include="CannonHandler.cs" />
-    <Compile Include="CaravanArrivalAction_DockedBoats.cs" />
     <Compile Include="CellFinderExtended.cs" />
     <Compile Include="Command_CooldownAction.cs" />
     <Compile Include="Command_SetRange.cs" />
@@ -70,7 +62,6 @@
     <Compile Include="DesignationCategoryDefOf_Ships.cs" />
     <Compile Include="Dialog_GiveShipName.cs" />
     <Compile Include="Dialog_InfoCard_Ship.cs" />
-    <Compile Include="DockedBoat.cs" />
     <Compile Include="DutyDefOf_Ships.cs" />
     <Compile Include="EffectsDefOf_Ships.cs" />
     <Compile Include="EnterMapUtilityBoats.cs" />
@@ -81,17 +72,12 @@
     <Compile Include="GatherItemsForShipCaravanUtility.cs" />
     <Compile Include="GenGridShips.cs" />
     <Compile Include="GenPathShip.cs" />
-    <Compile Include="IncidentDefOf_Boats.cs" />
-    <Compile Include="IncidentWorker_RaidBoats.cs" />
-    <Compile Include="IncidentWorker_TraderCaravanBoats.cs" />
     <Compile Include="ITab_Ship_Cargo.cs" />
     <Compile Include="ITab_Ship_Health.cs" />
     <Compile Include="ITab_Ship_Passengers.cs" />
-    <Compile Include="ITab_Ship_Upgrades.cs" />
     <Compile Include="JobDefOf_Ships.cs" />
     <Compile Include="JobDriver_Board.cs" />
     <Compile Include="JobDriver_CarryPawnToShip.cs" />
-    <Compile Include="JobDriver_Disembark.cs" />
     <Compile Include="JobDriver_IdleShip.cs" />
     <Compile Include="JobDriver_PrepareCaravan_GatheringShip.cs" />
     <Compile Include="JobDriver_RepairShip.cs" />
@@ -133,10 +119,10 @@
     <Compile Include="ShipRole.cs" />
     <Compile Include="SoundDefOf_Ships.cs" />
     <Compile Include="SpawnThingOnBuild.cs" />
+    <Compile Include="SPExtended.cs" />
     <Compile Include="StatCategoryDefOf_Ships.cs" />
     <Compile Include="TexCommand.cs" />
     <Compile Include="Toils_Board.cs" />
-    <Compile Include="Toils_Disembark.cs" />
     <Compile Include="TouchPathEndModeUtilityShips.cs" />
     <Compile Include="WaterGridsUtility.cs" />
     <Compile Include="WaterRegion.cs" />

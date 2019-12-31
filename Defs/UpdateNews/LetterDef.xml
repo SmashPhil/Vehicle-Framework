@@ -2,7 +2,7 @@
 <Defs>
 	<LetterDef>
 		<defName>D9UpdateNotice</defName>
-		<color>(110, 180, 255)</color>
+		<color>(0, 50, 100)</color>
 		<flashColor>(80,70,255)</flashColor>
 		<flashInterval>6</flashInterval>
 		<bounce>true</bounce>

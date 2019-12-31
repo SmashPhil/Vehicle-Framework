@@ -23,10 +23,6 @@ namespace RimShips
         public bool beached = false;
         private float angle = 0f; /* East: -45 is TopRight, 45 is BottomRight | West: -45 is BottomLeft, 45 is TopLeft */
 
-        public LordJob lordJobToAssign;
-        public List<Pawn> lordShipGroup = new List<Pawn>();
-        public List<Pawn> lordPawnGroup = new List<Pawn>();
-
         public List<ShipHandler> handlers = new List<ShipHandler>();
         public ShipMovementStatus movementStatus = ShipMovementStatus.Online;
 
@@ -65,7 +61,7 @@ namespace RimShips
                     if (r.handlingType is HandlingTypeFlags.Movement)
                         pawnCount += r.slotsToOperate;
                 }
-                return pawnCount;
+                return pawnCount >= 0 ? pawnCount : 0;
             }
         }
 
@@ -184,53 +180,6 @@ namespace RimShips
             }
         }
 
-        public void DisembarkAndAssignLord()
-        {
-            if(this.lordJobToAssign is null)
-            {
-                Log.Error("Attempted to disembark and assign lord without lord job");
-                return;
-            }
-            var pawnsToDisembark = this.AllPawnsAboard;
-            
-            if (!(pawnsToDisembark is null) && pawnsToDisembark.Count > 0)
-            {
-                if(Pawn.GetCaravan() != null && !Pawn.Spawned)
-                {
-                    throw new NotImplementedException("Attempting to Assign LordJob to Caravan");
-                }
-                List<Pawn> pawnsForLord = new List<Pawn>();
-                foreach (Pawn p in pawnsToDisembark)
-                {
-                    if (!p.Spawned)
-                    {
-                        Pawn p2 = (Pawn)GenSpawn.Spawn(p, this.Pawn.PositionHeld.RandomAdjacentCellCardinal(), Pawn.MapHeld);
-                        pawnsForLord.Add(p2);
-                    }
-                    RemovePawn(p);
-                }
-                Lord existingLord;
-                if (this.lordPawnGroup is null || !this.lordPawnGroup.Any())
-                {
-                    LordMaker.MakeNewLord(this.Pawn.Faction, lordJobToAssign, this.Pawn.Map, pawnsForLord);
-                    foreach (Pawn p in lordShipGroup)
-                        p.GetComp<CompShips>().lordPawnGroup.AddRange(pawnsForLord);
-                }
-                else
-                {
-                    existingLord = lordPawnGroup.First().GetLord();
-                    foreach (Pawn p in pawnsForLord)
-                    {
-                        existingLord.AddPawn(p);
-                        foreach (Pawn p2 in lordShipGroup)
-                            p2.GetComp<CompShips>().lordPawnGroup.Add(p);
-                    }
-                }
-                foreach(Pawn p in pawnsForLord)
-                    Log.Message("Test: " + p.LabelShort + " : " + p.GetLord().CurLordToil.ToString());
-            }
-        }
-
         public int AverageSkillOfCapablePawns(SkillDef skill)
         {
             int value = 0;
@@ -276,9 +225,9 @@ namespace RimShips
         }
         public override IEnumerable<Gizmo> CompGetGizmosExtra()
         {
-            if(!this.Pawn.Dead && this.Pawn.Faction == Faction.OfPlayer)
+            if(!this.Pawn.Dead)
             {
-                if(!this.Pawn.Drafted)
+                if (!this.Pawn.Drafted)
                 {
                     Command_Action unloadAll = new Command_Action();
                     unloadAll.defaultLabel = "Disembark".Translate();
@@ -328,8 +277,6 @@ namespace RimShips
 
         public void MultiplePawnFloatMenuOptions(List<Pawn> pawns)
         {
-            if(!pawns.All(x => x.Faction == Faction.OfPlayer) || this.Pawn.Faction != Faction.OfPlayer)
-                return;
             List<FloatMenuOption> options = new List<FloatMenuOption>();
             FloatMenuOption opt1 = new FloatMenuOption("BoardShipGroup".Translate(this.Pawn.LabelShort), delegate ()
             {
@@ -362,7 +309,7 @@ namespace RimShips
         }
         public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn pawn)
         {
-            if(!pawn.RaceProps.ToolUser)
+            if (!pawn.RaceProps.ToolUser)
             {
                 yield break;
             }
@@ -370,7 +317,7 @@ namespace RimShips
             {
                 yield break;
             }
-            if(pawn is null || pawn.Faction != Faction.OfPlayer)
+            if(pawn is null)
                 yield break;
             if (this.movementStatus is ShipMovementStatus.Offline)
             {
@@ -468,19 +415,6 @@ namespace RimShips
                     bills.Remove(bill);
                 }
             }
-        }
-
-        public void BoardDirectly(Pawn pawn, ThingOwner handler)
-        {
-            if(pawn.IsWorldPawn())
-            {
-                Log.Error("Tried boarding ship with world pawn.");
-                return;
-            }
-            if(pawn.Spawned)
-                pawn.DeSpawn();
-            handler.TryAdd(pawn);
-            Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.Decide);
         }
 
         public void DisembarkPawn(Pawn pawn)
@@ -914,8 +848,6 @@ namespace RimShips
             this.Pawn.ageTracker.AgeBiologicalTicks = 0;
             this.Pawn.ageTracker.AgeChronologicalTicks = 0;
             this.Pawn.ageTracker.BirthAbsTicks = 0;
-            lordShipGroup = new List<Pawn>();
-            lordPawnGroup = new List<Pawn>();
         }
         public override void PostExposeData()
         {

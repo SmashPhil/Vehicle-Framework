@@ -11,7 +11,5 @@ namespace RimShips.Defs
         }
 
         public static WorldObjectDef DebugSettlement;
-
-        public static WorldObjectDef DockedBoat;
     }
 }

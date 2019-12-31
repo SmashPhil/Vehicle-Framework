@@ -11,7 +11,7 @@
 		<backstoryCategories>
 			<li>Neolithic</li>
 		</backstoryCategories>
-		<combatPower>50</combatPower>
+		<combatPower>10</combatPower>
 		<lifeStages>
 			<li>
 				<bodyGraphicData>
@@ -132,8 +132,6 @@
 				<moveable>DriverNeeded</moveable>
 				<riverTraversability>Creek</riverTraversability>
 				<shipPowerType>Paddles</shipPowerType>
-				<shipCategory>Carrier</shipCategory>
-				<shipTech>Neolithic</shipTech>
 				<nameable>false</nameable>
 				<buildDef>SPBoats_RowboatBlueprint</buildDef>
 				<ticksBetweenRepair>50</ticksBetweenRepair>

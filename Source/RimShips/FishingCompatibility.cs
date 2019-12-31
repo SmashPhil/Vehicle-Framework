@@ -4,7 +4,7 @@ using System.Linq;
 using System.Xml;
 using System.Globalization;
 using Verse;
-using SPExtended;
+using SPExtendedLibrary;
 
 namespace RimShips
 {

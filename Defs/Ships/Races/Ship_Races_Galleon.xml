@@ -11,7 +11,7 @@
 		<backstoryCategories>
 			<li>Medieval</li>
 		</backstoryCategories>
-		<combatPower>1200</combatPower>
+		<combatPower>200</combatPower>
 		<lifeStages>
 			<li>
 				<bodyGraphicData>
@@ -162,8 +162,6 @@
 				<moveable>DriverNeeded</moveable>
 				<riverTraversability>LargeRiver</riverTraversability>
 				<shipPowerType>Sails</shipPowerType>
-				<shipCategory>Combat</shipCategory>
-				<shipTech>Medieval</shipTech>
 				<nameable>true</nameable>
 				<buildDef>SPBoats_GalleonBlueprint</buildDef>
 				<ticksBetweenRepair>350</ticksBetweenRepair>

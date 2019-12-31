@@ -11,7 +11,7 @@
 		<backstoryCategories>
 			<li>Medieval</li>
 		</backstoryCategories>
-		<combatPower>500</combatPower>
+		<combatPower>20</combatPower>
 		<lifeStages>
 			<li>
 				<bodyGraphicData>
@@ -134,8 +134,6 @@
 				<moveable>DriverNeeded</moveable>
 				<riverTraversability>LargeRiver</riverTraversability>
 				<shipPowerType>Sails</shipPowerType>
-				<shipCategory>Trader</shipCategory>
-				<shipTech>Medieval</shipTech>
 				<nameable>true</nameable>
 				<buildDef>SPBoats_CaravelBlueprint</buildDef>
 				<ticksBetweenRepair>200</ticksBetweenRepair>
