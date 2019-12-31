@@ -5,7 +5,7 @@ using RimShips.Lords;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
-using SPExtendedLibrary;
+using SPExtended;
 
 namespace RimShips
 {

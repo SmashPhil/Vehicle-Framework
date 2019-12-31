@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Verse;
 using RimShips.AI;
-using SPExtendedLibrary;
+using SPExtended;
 using RimWorld;
 
 namespace RimShips
@@ -15,7 +15,7 @@ namespace RimShips
             List<IntVec3> cellsToCheck = dir.IsValid ? CellRect.WholeMap(map).GetEdgeCells(dir).ToList() : CellRect.WholeMap(map).EdgeCells.ToList();
             for(;;)
             {
-                IntVec3 rCell = SPExtended.PopRandom(ref cellsToCheck);
+                IntVec3 rCell = SPExtra.PopRandom(ref cellsToCheck);
                 if(validator(rCell))
                     return rCell;
                 if(cellsToCheck.Count <= 0)
@@ -119,7 +119,7 @@ namespace RimShips
                 result = IntVec3.Invalid;
                 return false;
             }
-            Rot4 dir = Find.World.CoastDirectionAt(map.Tile).IsValid ? Find.World.CoastDirectionAt(map.Tile) : Find.WorldGrid[map.Tile].Rivers?.Any() ?? false ? SPExtended.RiverDirection(map) : Rot4.Invalid;
+            Rot4 dir = Find.World.CoastDirectionAt(map.Tile).IsValid ? Find.World.CoastDirectionAt(map.Tile) : Find.WorldGrid[map.Tile].Rivers?.Any() ?? false ? SPExtra.RiverDirection(map) : Rot4.Invalid;
             result = CellFinderExtended.RandomEdgeCell(dir, map, (IntVec3 c) => GenGridShips.Standable(c, map, MapExtensionUtility.GetExtensionToMap(map)) && !c.Fogged(map));
             return true;
         }

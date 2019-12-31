@@ -29,7 +29,7 @@ namespace RimShips
         public float FishingSkillValue => fishingSkillIncrease / 100;
         public override void ExposeData()
         {
-            Scribe_Values.Look(ref beachMultiplier, "beachMultiplier");
+            Scribe_Values.Look(ref beachMultiplier, "beachMultiplier", 0f);
             Scribe_Values.Look(ref forceFactionCoastRadius, "forceFactionCoastRadius", 1);
             Scribe_Values.Look(ref forceFactionCoastOption, "forceFactionCoastOption", true);
 
@@ -59,8 +59,16 @@ namespace RimShips
         public override void DoSettingsWindowContents(Rect inRect)
         {
             Listing_Standard listingStandard = new Listing_Standard();
-            Rect group1 = new Rect(inRect.x, inRect.y, inRect.width/2, inRect.height);
+            Rect group1 = new Rect(inRect.width / 2 - (inRect.width / 8), inRect.y, inRect.width / 4, inRect.height);
             listingStandard.Begin(group1);
+            if (listingStandard.ButtonText("BoatsResetToDefault".Translate()))
+            {
+                this.ResetToDefaultValues();
+            }
+            listingStandard.End();
+
+            Rect group2 = new Rect(inRect.x, inRect.y + 15f, inRect.width / 2, inRect.height);
+            listingStandard.Begin(group2);
             bool beachLarge = settings.beachMultiplier > 150f;
             listingStandard.Label(beachLarge ? "BeachGenMultiplierLarge".Translate(Mathf.Round(settings.beachMultiplier)) : "BeachGenMultiplier".Translate(Mathf.Round(settings.beachMultiplier)),
                 -1f, beachLarge ? "BeachGenMultiplierLargeTooltip".Translate() : "BeachGenMultiplierTooltip".Translate());
@@ -68,7 +76,7 @@ namespace RimShips
             listingStandard.GapLine(16f);
 
             listingStandard.CheckboxLabeled("ForceSettlementCoastOption".Translate(), ref settings.forceFactionCoastOption, "ForceSettlementCoastTooltip".Translate());
-            if(settings.forceFactionCoastOption)
+            if (settings.forceFactionCoastOption)
             {
                 listingStandard.Label("ForceSettlementCoast".Translate(Mathf.Round(settings.forceFactionCoastRadius)));
                 settings.forceFactionCoastRadius = (int)listingStandard.Slider((float)settings.forceFactionCoastRadius, 0f, 10f);
@@ -79,11 +87,11 @@ namespace RimShips
             listingStandard.CheckboxLabeled("ShuffledCannonFire".Translate(), ref settings.shuffledCannonFire, "ShuffledCannonFireTooltip".Translate());
             listingStandard.CheckboxLabeled("RiverTravelAllowed".Translate(), ref settings.riverTravel, "RiverTravelAllowedTooltip".Translate());
 
-            if(settings.riverTravel)
+            if (settings.riverTravel)
             {
                 listingStandard.CheckboxLabeled("BoatSizeMattersOnRivers".Translate(), ref settings.boatSizeMatters, "BoatSizeMattersOnRiversTooltip".Translate());
             }
-            if(FishingCompatibility.fishingActivated)
+            if (FishingCompatibility.fishingActivated)
             {
                 listingStandard.GapLine(16f);
                 string fishDelay = settings.fishingDelay.ToString();
@@ -101,7 +109,7 @@ namespace RimShips
             listingStandard.Label("DevModeShips".Translate(), -1f, "DevModeShipsTooltip".Translate());
             if (Prefs.DevMode)
             {
-                
+
                 listingStandard.GapLine(16f);
                 listingStandard.CheckboxLabeled("DebugDraftAnyShip".Translate(), ref settings.debugDraftAnyShip, "DebugDraftAnyShipTooltip".Translate());
                 listingStandard.CheckboxLabeled("DebugDisablePathing".Translate(), ref settings.debugDisableWaterPathing, "DebugDisablePathingTooltip".Translate());
@@ -109,14 +117,36 @@ namespace RimShips
                 listingStandard.CheckboxLabeled("DebugDrawRegionLinks".Translate(), ref settings.debugDrawRegionLinks);
                 listingStandard.CheckboxLabeled("DebugDrawRegionThings".Translate(), ref settings.debugDrawRegionThings);
             }
-
             listingStandard.End();
-            base.DoSettingsWindowContents(group1);
+
+            base.DoSettingsWindowContents(inRect);
         }
 
         public override string SettingsCategory()
         {
             return "RimShips".Translate();
+        }
+
+        private void ResetToDefaultValues()
+        {
+            settings.beachMultiplier = 0f;
+            settings.forceFactionCoastOption = true;
+            settings.forceFactionCoastRadius = 1;
+
+            settings.shuffledCannonFire = true;
+            settings.riverTravel = true;
+            settings.boatSizeMatters = true;
+
+            settings.fishingMultiplier = 1f;
+            settings.fishingDelay = 10000;
+            settings.fishingSkillIncrease = 5;
+            settings.fishingPersists = true;
+
+            settings.debugDraftAnyShip = false;
+            settings.debugDisableWaterPathing = false;
+            settings.debugDrawRegions = false;
+            settings.debugDrawRegionLinks = false;
+            settings.debugDrawRegionThings = false;
         }
     }
 }

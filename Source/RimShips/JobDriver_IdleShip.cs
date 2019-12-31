@@ -3,7 +3,7 @@ using System.Linq;
 using RimWorld;
 using Verse;
 using Verse.AI;
-using SPExtendedLibrary;
+using SPExtended;
 
 namespace RimShips.Jobs
 {

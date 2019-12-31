@@ -40,6 +40,10 @@
       <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="SPExtended, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\SRTS-Expanded\Assemblies\SPExtended.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -119,7 +123,6 @@
     <Compile Include="ShipRole.cs" />
     <Compile Include="SoundDefOf_Ships.cs" />
     <Compile Include="SpawnThingOnBuild.cs" />
-    <Compile Include="SPExtended.cs" />
     <Compile Include="StatCategoryDefOf_Ships.cs" />
     <Compile Include="TexCommand.cs" />
     <Compile Include="Toils_Board.cs" />

@@ -17,7 +17,7 @@ using RimShips.Defs;
 using RimShips.Build;
 using RimShips.Lords;
 using RimShips.UI;
-using SPExtendedLibrary;
+using SPExtended;
 using OpCodes = System.Reflection.Emit.OpCodes;
 
 namespace RimShips
@@ -96,6 +96,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(SelectionDrawer), name: "DrawSelectionBracketFor"),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(DrawSelectionBracketsShips)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(PawnFootprintMaker), name: nameof(PawnFootprintMaker.FootprintMakerTick)),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(BoatWakesTicker)));
 
             //Gizmos
             harmony.Patch(original: AccessTools.Method(typeof(JobDriver_Wait), name: "CheckForAutoAttack"),
@@ -181,6 +184,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(WorldPathGrid), name: nameof(WorldPathGrid.CalculatedMovementDifficultyAt)), 
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(CalculatedMovementDifficultyAtOcean)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(Dialog_FormCaravan), name: nameof(Dialog_FormCaravan.Notify_ChoseRoute)), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(IslandExitTile)));
 
             //Jobs
             harmony.Patch(original: AccessTools.Method(type: typeof(JobUtility), name: nameof(JobUtility.TryStartErrorRecoverJob)),
@@ -319,6 +325,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(Caravan), name: nameof(Caravan.IsOwner)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(IsOwnerSailor)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanArrivalAction_OfferGifts), name: nameof(CaravanArrivalAction_OfferGifts.Arrived)),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(DockBoatOfferGifts)));
 
             //Draftable
             harmony.Patch(original: AccessTools.Property(type: typeof(Pawn_DraftController), name: nameof(Pawn_DraftController.Drafted)).GetSetMethod(),
@@ -789,7 +798,7 @@ namespace RimShips
 
                 FieldInfo info = AccessTools.Field(type: typeof(SelectionDrawer), name: "selectTimes");
                 object o = info.GetValue(null);
-                SPExtended.CalculateSelectionBracketPositionsWorldForMultiCellPawns<object>(brackets, thing, newDrawPos, thing.RotatedSize.ToVector2(), (Dictionary<object, float>)o, Vector2.one, (obj as Pawn).GetComp<CompShips>().Angle, 1f);
+                SPMultiCell.CalculateSelectionBracketPositionsWorldForMultiCellPawns<object>(brackets, thing, newDrawPos, thing.RotatedSize.ToVector2(), (Dictionary<object, float>)o, Vector2.one, (obj as Pawn).GetComp<CompShips>().Angle, 1f);
 
                 int num = (obj as Pawn).GetComp<CompShips>().Angle != 0 ? (int)(obj as Pawn).GetComp<CompShips>().Angle : 0;
                 for (int i = 0; i < 4; i++)
@@ -801,6 +810,24 @@ namespace RimShips
                 return false;
             }
             //Add for building too?
+            return true;
+        }
+
+        public static bool BoatWakesTicker(Pawn ___pawn, ref Vector3 ___lastFootprintPlacePos)
+        {
+            if (IsShip(___pawn))
+            {
+                if ((___pawn.Drawer.DrawPos - ___lastFootprintPlacePos).MagnitudeHorizontalSquared() > 0.1)
+                {
+                    Vector3 drawPos = ___pawn.Drawer.DrawPos;
+                    if (drawPos.ToIntVec3().InBounds(___pawn.Map) && !___pawn.GetComp<CompShips>().beached)
+                    {
+                        MoteMaker.MakeWaterSplash(drawPos, ___pawn.Map, ___pawn.BodySize * ___pawn.GetComp<CompShips>().Props.wakeMultiplier, ___pawn.GetComp<CompShips>().Props.wakeSpeed);
+                        ___lastFootprintPlacePos = drawPos;
+                    }
+                }
+                return false;
+            }
             return true;
         }
 
@@ -959,40 +986,45 @@ namespace RimShips
 
         public static void NoAttackSettlementWhenDocked(Caravan caravan, ref IEnumerable<Gizmo> __result, SettlementBase __instance)
         {
-            if (HasShip(caravan))
+            if (HasShip(caravan) && !caravan.pather.Moving)
             {
-                if(!caravan.pather.Moving && CaravanVisitUtility.SettlementVisitedNow(caravan) != null)
+                List<Gizmo> gizmos = __result.ToList();
+                if (caravan.PawnsListForReading.Any(x => !IsShip(x)))
                 {
-                    List<Gizmo> gizmos = __result.ToList();
-                    if(caravan.PawnsListForReading.Any(x => !IsShip(x)))
-                    {
-                        int index = gizmos.FindIndex(x => (x as Command_Action).icon == SettlementBase.AttackCommand);
+                    int index = gizmos.FindIndex(x => (x as Command_Action).icon == SettlementBase.AttackCommand);
+                    if (index >= 0 && index < gizmos.Count)
                         gizmos[index].Disable("CommandAttackDockDisable".Translate(__instance.LabelShort));
-                    }
-                    if(caravan.PawnsListForReading.All(x => IsShip(x)))
-                    {
-                        int index2 = gizmos.FindIndex(x => (x as Command_Action).icon == ContentFinder<Texture2D>.Get("UI/Commands/Trade", false));
-                        if(index2 >= 0 && index2 < gizmos.Count)
-                            gizmos[index2].Disable("CommandTradeDockDisable".Translate(__instance.LabelShort));
-                    }
-                    __result = gizmos;
                 }
+                if (caravan.PawnsListForReading.All(x => IsShip(x)))
+                {
+                    int index2 = gizmos.FindIndex(x => (x as Command_Action).icon == ContentFinder<Texture2D>.Get("UI/Commands/Trade", false));
+                    if (index2 >= 0 && index2 < gizmos.Count)
+                        gizmos[index2].Disable("CommandTradeDockDisable".Translate(__instance.LabelShort));
+                    int index3 = gizmos.FindIndex(x => (x as Command_Action).icon == ContentFinder<Texture2D>.Get("UI/Commands/OfferGifts", false));
+                    if (index3 >= 0 && index3 < gizmos.Count)
+                        gizmos[index3].Disable("CommandTradeDockDisable".Translate(__instance.LabelShort));
+                }
+                __result = gizmos;
             }
         }
 
         public static void AddAnchorGizmo(ref IEnumerable<Gizmo> __result, Caravan __instance)
         {
-            if(HasShip(__instance) && Find.World.CoastDirectionAt(__instance.Tile).IsValid)
+            if(HasShip(__instance) && (Find.World.CoastDirectionAt(__instance.Tile).IsValid || RiverIsValid(__instance.Tile, __instance.PawnsListForReading.Where(x => IsShip(x)).ToList())))
             {
                 if(!__instance.pather.Moving && !__instance.PawnsListForReading.Any(x => !IsShip(x)))
                 {
                     Command_Action gizmo = new Command_Action();
                     gizmo.icon = TexCommandShips.Anchor;
                     gizmo.defaultLabel = "CommandDockShip".Translate();
-                    gizmo.defaultDesc = "CommandDockShipDesc".Translate(__instance.Label);
+                    gizmo.defaultDesc = Find.WorldObjects.AnySettlementBaseAt(__instance.Tile) ? "CommandDockShipDesc".Translate(Find.WorldObjects.SettlementBaseAt(__instance.Tile)) : "CommandDockShipObjectDesc".Translate();
                     gizmo.action = delegate ()
                     {
-                        ShipHarmony.ToggleDocking(__instance, true);
+                        List<WorldObject> objects = Find.WorldObjects.ObjectsAt(__instance.Tile).ToList();
+                        if(!objects.All(x => x is Caravan))
+                            ShipHarmony.ToggleDocking(__instance, true);
+                        else
+                            ShipHarmony.SpawnDockedBoatObject(__instance);
                     };
 
                     List<Gizmo> gizmos = __result.ToList();
@@ -1617,14 +1649,14 @@ namespace RimShips
                     int e = CellRect.WholeMap(___map).GetEdgeCells(Rot4.East).Where(x => GenGridShips.Standable(x, ___map, MapExtensionUtility.GetExtensionToMap(___map))).Count();
                     int s = CellRect.WholeMap(___map).GetEdgeCells(Rot4.South).Where(x => GenGridShips.Standable(x, ___map, MapExtensionUtility.GetExtensionToMap(___map))).Count();
                     int w = CellRect.WholeMap(___map).GetEdgeCells(Rot4.West).Where(x => GenGridShips.Standable(x, ___map, MapExtensionUtility.GetExtensionToMap(___map))).Count();
-                    rotFromTo = SPExtended.Max4IntToRot(n, e, s, w);
+                    rotFromTo = SPExtra.Max4IntToRot(n, e, s, w);
                 }
                 __result = TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo, out spot, ___startingTile, ___map) || TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo.Rotated(RotationDirection.Clockwise),
                     out spot, ___startingTile, ___map) || TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo.Rotated(RotationDirection.Counterclockwise), out spot, ___startingTile, ___map) ||
                     TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo.Opposite, out spot, ___startingTile, ___map); 
                 
                 Pawn pawn = pawns.FindAll(x => IsShip(x)).MaxBy(x => x.def.size.z);
-                SPExtended.ClampToMap(pawn, ref spot, ___map);
+                SPMultiCell.ClampToMap(pawn, ref spot, ___map);
                 return false;
             }
             spot = IntVec3.Invalid;
@@ -2591,6 +2623,14 @@ namespace RimShips
             }
         }
 
+        public static void DockBoatOfferGifts(Caravan caravan)
+        {
+            if (HasShip(caravan))
+            {
+                ToggleDocking(caravan, true);
+            }
+        }
+
         #endregion Caravan
 
         #region Construction
@@ -2692,6 +2732,17 @@ namespace RimShips
                         }
                     }
                 }
+                foreach(Caravan c in Find.WorldObjects.Caravans)
+                {
+                    foreach(Pawn ship in c.PawnsListForReading.Where(x => IsShip(x)))
+                    {
+                        if(ship.GetComp<CompShips>().AllPawnsAboard.Contains(p))
+                        {
+                            __result = WorldPawnSituation.CaravanMember;
+                            return;
+                        }
+                    }
+                }
             }
         }
 
@@ -2738,7 +2789,7 @@ namespace RimShips
                     }
                     __instance?.StopDead();
                 }
-                else if(SPExtended.ClampHitboxToMap(___pawn, __instance.nextCell, ___pawn.Map))
+                else if(SPMultiCell.ClampHitboxToMap(___pawn, __instance.nextCell, ___pawn.Map))
                 {
                     ___pawn.jobs.curDriver.Notify_PatherFailed();
                     __instance.StopDead();
@@ -3352,6 +3403,27 @@ namespace RimShips
             return true;
         }
 
+        public static void IslandExitTile(int destinationTile, Dialog_FormCaravan __instance, bool ___reform, ref int ___startingTile, Map ___map)
+        {
+            if (currentFormingCaravan != null && (!___reform && ___startingTile < 0))
+            {
+                List<Pawn> pawns = TransferableUtility.GetPawnsFromTransferables(currentFormingCaravan.transferables);
+                if (HasShip(pawns))
+                {
+                    List<int> neighboringCells = new List<int>();
+                    Find.WorldGrid.GetTileNeighbors(___map.Tile, neighboringCells);
+                    foreach (int neighbor in neighboringCells)
+                    {
+                        if (Find.WorldGrid[neighbor].WaterCovered)
+                        {
+                            ___startingTile = neighbor;
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
         #region HelperFunctions
 
         private static bool IsShipDef(ThingDef td)
@@ -3430,6 +3502,28 @@ namespace RimShips
                     }
                 }
             }
+        }
+
+        private static void SpawnDockedBoatObject(Caravan caravan)
+        {
+            /*if (!HasShip(caravan))
+                Log.Error("Attempted to dock boats with no boats in caravan");
+
+            DockedBoat dockedBoat = (DockedBoat)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfShips.DockedBoat);
+            dockedBoat.Tile = caravan.Tile;
+            float randomInRange = Rand.Range(2f, 4f) + (50 * (1 - caravan.PawnsListForReading.Where(x => IsShip(x)).Max(x => x.GetComp<CompShips>().Props.visibility)));
+            dockedBoat.GetComponent<TimeoutComp>().StartTimeout(Mathf.CeilToInt(randomInRange * 60000));
+
+            ShipHarmony.ToggleDocking(caravan, true);
+            for (int i = caravan.PawnsListForReading.Count - 1; i >= 0; i--)
+            {
+                Pawn p = caravan.PawnsListForReading[i];
+                if (IsShip(p))
+                {
+                    dockedBoat.dockedBoats.TryAddOrTransfer(p);
+                }
+            }
+            Find.WorldObjects.Add(dockedBoat);*/
         }
 
         public static void BoardAllCaravanPawns(Caravan caravan)
@@ -3911,7 +4005,7 @@ namespace RimShips
                 for (int j = 0; j < stackFull.Count; j++)
                 {
                     searchTile = stack.Pop();
-                    SPExtended.GetList<int>(Find.WorldGrid.tileIDToNeighbors_offsets, Find.WorldGrid.tileIDToNeighbors_values, searchTile, neighbors);
+                    SPExtra.GetList<int>(Find.WorldGrid.tileIDToNeighbors_offsets, Find.WorldGrid.tileIDToNeighbors_values, searchTile, neighbors);
                     int count = neighbors.Count;
                     for (int i = 0; i < count; i++)
                     {
