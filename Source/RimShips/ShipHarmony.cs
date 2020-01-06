@@ -376,6 +376,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(GatheringsUtility), name: nameof(GatheringsUtility.ShouldGuestKeepAttendingGathering)),
                 prefix: new HarmonyMethod(typeof(ShipHarmony),
                 name: nameof(BoatsDontParty)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(WorldPawns), name: nameof(WorldPawns.RemoveAndDiscardPawnViaGC)),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(DoNotRemoveDockedBoats)));
 
             //Debug
             if (debug)
@@ -390,6 +393,7 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(RegionGrid), name: nameof(RegionGrid.DebugDraw)), prefix: null,
                     postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                     name: nameof(DebugDrawWaterRegion)));
+
             #endregion Functions
         }
 
@@ -408,16 +412,6 @@ namespace RimShips
         }
 
         #endregion Debug
-
-        public static bool BoatsDontParty(Pawn p, ref bool __result)
-        {
-            if(IsShip(p))
-            {
-                __result = false;
-                return false;
-            }
-            return true;
-        }
 
         #region MapGen
         public static IEnumerable<CodeInstruction> BeachMakerTranspiler(IEnumerable<CodeInstruction> instructions)
@@ -2754,6 +2748,26 @@ namespace RimShips
             }
         }
 
+        public static bool BoatsDontParty(Pawn p, ref bool __result)
+        {
+            if (IsShip(p))
+            {
+                __result = false;
+                return false;
+            }
+            return true;
+        }
+
+        public static bool DoNotRemoveDockedBoats(Pawn p)
+        {
+            foreach (DockedBoat obj in Find.WorldObjects.AllWorldObjects.Where(x => x is DockedBoat))
+            {
+                if (obj.dockedBoats.Contains(p))
+                    return false;
+            }
+            return true;
+        }
+
         #endregion Extra
         private static bool GenerateNewShipPath(ref PawnPath __result, ref Pawn_PathFollower __instance, ref Pawn ___pawn, ref PathEndMode ___peMode)
         {
@@ -3514,13 +3528,17 @@ namespace RimShips
             float randomInRange = Rand.Range(2f, 4f) + (50 * (1 - caravan.PawnsListForReading.Where(x => IsShip(x)).Max(x => x.GetComp<CompShips>().Props.visibility)));
             dockedBoat.GetComponent<TimeoutComp>().StartTimeout(Mathf.CeilToInt(randomInRange * 60000));
 
+            Log.Message("-> " + caravan.pawns.Count);
             ShipHarmony.ToggleDocking(caravan, true);
-            for (int i = caravan.PawnsListForReading.Count - 1; i >= 0; i--)
+            Log.Message("-> " + caravan.pawns.Count);
+
+            for (int i = caravan.pawns.Count - 1; i >= 0; i--)
             {
                 Pawn p = caravan.PawnsListForReading[i];
-                if (IsShip(p))
+                Log.Message("- " + p.Label);
+                if(IsShip(p))
                 {
-                    dockedBoat.dockedBoats.TryAddOrTransfer(p);
+                    dockedBoat.dockedBoats.TryAddOrTransfer(p, false);
                 }
             }
             Find.WorldObjects.Add(dockedBoat);

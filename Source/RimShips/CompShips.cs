@@ -747,7 +747,7 @@ namespace RimShips
 
         public void ReserveSeat(Pawn p, ShipHandler handler)
         {
-            if (!p.Spawned) return;
+            if(p is null || !p.Spawned) return;
             foreach(ShipHandler h in this.handlers)
             {
                 if(h != handler && h.currentlyReserving.Contains(p))
