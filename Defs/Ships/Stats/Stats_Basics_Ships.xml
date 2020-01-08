@@ -4,13 +4,14 @@
 	<StatDef>
 		<defName>MoveSpeedShips</defName>
 		<label>move speed</label>
-		<description>Speed of movement in cells per second. (Work in Progress)</description>
+		<description>Speed of movement.</description>
 		<category>BasicsShip</category>
 		<defaultBaseValue>3.0</defaultBaseValue>
 		<minValue>0.15</minValue>
 		<toStringStyle>FloatTwo</toStringStyle>
 		<formatString>{0} c/s</formatString>
 		<displayPriorityInCategory>90</displayPriorityInCategory>
+		<alwaysHide>true</alwaysHide>
 		<capacityFactors>
 		  <li>
 			<capacity>Moving</capacity>
@@ -38,6 +39,7 @@
 		<defaultBaseValue>75</defaultBaseValue>
 		<minValue>1</minValue>
 		<toStringStyle>Integer</toStringStyle>
+		<alwaysHide>true</alwaysHide>
 		<parts>
 			<li Class="StatPart_BodySize" />
 		</parts>

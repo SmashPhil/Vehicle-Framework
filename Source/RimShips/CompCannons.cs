@@ -70,8 +70,8 @@ namespace RimShips
                                 {
                                     SPTuples.SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPTuples.SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
                                     List<int> cannonOrder = Enumerable.Range(0, cannon.numberCannons).ToList();
-                                    if (RimShipMod.mod.settings.shuffledCannonFire)
-                                        cannonOrder.SPShuffle();
+                                    if(RimShipMod.mod.settings.shuffledCannonFire)
+                                        cannonOrder.Shuffle();
                                     foreach (int i in cannonOrder)
                                     {
                                         tmpCannonItem.First.Push(i);
@@ -103,7 +103,7 @@ namespace RimShips
                                     SPTuples.SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPTuples.SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
                                     List<int> cannonOrder = Enumerable.Range(0, cannon.numberCannons).ToList();
                                     if (RimShipMod.mod.settings.shuffledCannonFire)
-                                        cannonOrder.SPShuffle();
+                                        cannonOrder.Shuffle();
                                     foreach (int i in cannonOrder)
                                     {
                                         tmpCannonItem.First.Push(i);

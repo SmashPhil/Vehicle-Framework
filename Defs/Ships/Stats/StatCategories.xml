@@ -7,7 +7,6 @@
 		<defName>BasicsShip</defName>
 		<label>Basics</label>
 		<displayOrder>10</displayOrder>
-		<displayAllByDefault>true</displayAllByDefault>
 	</StatCategoryDef>
 	
 	<StatCategoryDef>

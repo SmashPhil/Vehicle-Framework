@@ -20,18 +20,26 @@
 	<TabUpgrades>Upgrade</TabUpgrades>
 	<Cargo>Cargo</Cargo>
 	
+	<MainSettings>Main Settings</MainSettings>
 	
 	<!-- Settings -->
 	<DevModeShips>DevMode Options</DevModeShips>
+	<DevModeReset>DevMode Reset</DevModeReset>
 	<DevModeShipsTooltip>Turn on DevMode to view the different options for debugging or fixing stuff with Boats</DevModeShipsTooltip>
+	<BoatsReset>Reset</BoatsReset>
 	<BoatsResetToDefault>Reset to Default</BoatsResetToDefault>
-	<BeachGenMultiplier>Beach Size Multiplier: {0}%</BeachGenMultiplier>
+	<BeachGenMultiplier>Beach Size Multiplier</BeachGenMultiplier>
 	<BeachGenMultiplierLarge>Beach Size Multiplier: {0}% (Test Sizes)</BeachGenMultiplierLarge>
 	<BeachGenMultiplierTooltip>Increase the amount of water on the coastline.</BeachGenMultiplierTooltip>
 	<BeachGenMultiplierLargeTooltip>Current number is larger than recommended. The ocean can and may take up to as large as 80% of the map and larger maps will be scattered with lakes.</BeachGenMultiplierLargeTooltip>
 	<ForceSettlementCoastOption>Push Settlements to Coast</ForceSettlementCoastOption>
 	<ForceSettlementCoastTooltip>Push nearby faction settlements to the coast if within given radius</ForceSettlementCoastTooltip>
-	<ForceSettlementCoast>Push Settlement to Coast Radius: {0}</ForceSettlementCoast>
+	<ForceSettlementCoast>Push Settlement to Coast</ForceSettlementCoast>
+	<Tiles> Tiles</Tiles>
+	<Days> Days</Days>
+	<ResetWaterRegions>Reset Water Regions</ResetWaterRegions>
+	<Disabled>Disabled</Disabled>
+	<Everything>Every Settlement</Everything>
 	<DebugDrawRegions>Debug Draw Regions</DebugDrawRegions>
 	<DebugDrawRegionLinks>Debug Draw RegionLinks</DebugDrawRegionLinks>
 	<DebugDrawRegionThings>Debug Draw Region Things</DebugDrawRegionThings>
@@ -44,7 +52,7 @@
 	<RiverTravelAllowed>Travel on Rivers</RiverTravelAllowed>
 	<RiverTravelAllowedTooltip>Allow boats to travel along rivers.</RiverTravelAllowedTooltip>
 	<BoatSizeMattersOnRivers>River Size Matters</BoatSizeMattersOnRivers>
-	<BoatSizeMattersOnRiversTooltip>Restrict boats to only be able to travel on rivers that are large enough to fit it. If disabled, all boats can travel on any river. If you bring a boat into a map with a river that cannot fit the size of the boat, you may end up beaching it.</BoatSizeMattersOnRiversTooltip>
+	<BoatSizeMattersOnRiversTooltip>Restrict boats to only be able to travel on rivers that are large enough to fit it. If disabled, all boats can travel on any river. If you bring a boat into a map with a river that cannot fit the size of the boat, it might spawn on land.</BoatSizeMattersOnRiversTooltip>
 	<FishingMultiplier>Fishing Multiplier: {0}%</FishingMultiplier>
 	<FishingMultiplierTooltip>Multiplier of fish gathered from fishing boat. 1 = normal, 4 = 4x as much</FishingMultiplierTooltip>
 	<FishingDelay>Fishing Delay</FishingDelay>
@@ -77,7 +85,7 @@
 	<MessageCantAddWaypointBecauseNoShip>Must have a boat in order to travel across {0}</MessageCantAddWaypointBecauseNoShip>
 	<MessageCantAddWaypointBecauseShip>Cannot travel on land with boats.</MessageCantAddWaypointBecauseShip>
 	<MessageCantAddWaypointBecauseRiverUnreachable>Boat is not able to travel on this river</MessageCantAddWaypointBecauseRiverUnreachable>
-	
+	<TerrainReset>({0}) Water Regions have been reset.</TerrainReset>
 	
 	<!-- Caravans -->
 	<CaravanShips>Boat</CaravanShips>
@@ -85,6 +93,8 @@
 	<CaravanShipsPlural>{0} Boats</CaravanShipsPlural>
 	<CaravanSailing>Sailing</CaravanSailing>
 	<CommandDockShip>Dock</CommandDockShip>
+	<CommandDockShipDisembark>Dock and Disembark</CommandDockShipDisembark>
+	<DockCaravan>Items to Take</DockCaravan>
 	<CommandDockShipDesc>Unload all passengers and enable trade with the Settlement of {0}.</CommandDockShipDesc>
 	<CommandDockShipObjectDesc>Dock Boats and go on foot</CommandDockShipObjectDesc>
 	<CommandUndockShip>Board Boats</CommandUndockShip>

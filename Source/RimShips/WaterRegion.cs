@@ -128,7 +128,7 @@ namespace RimShips
                 CellIndices cellIndices = map.cellIndices;
                 WaterRegion[] directGrid = MapExtensionUtility.GetExtensionToMap(map).getWaterRegionGrid.DirectGrid;
                 CellRect.CellRectIterator iterator = this.extentsClose.GetIterator();
-                while (!iterator.Done())
+                while(!iterator.Done())
                 {
                     IntVec3 intVec = iterator.Current;
                     if (directGrid[cellIndices.CellToIndex(intVec)] == this)

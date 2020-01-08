@@ -55,6 +55,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(TerrainGrid), name: "DoTerrainChangedEffects"), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(RecalculateShipPathCostTerrainChange)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(Map), name: nameof(Map.MapUpdate)), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(MapTickUpdateWaterTerrain)));
 
             //Health 
             harmony.Patch(original: AccessTools.Method(type: typeof(HealthUtility), name: nameof(HealthUtility.GetGeneralConditionLabel)),
@@ -304,9 +307,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Property(type: typeof(WITab_Caravan_Gear), name: "Pawns").GetGetMethod(nonPublic: true), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(SailorGearTabPawns)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanInventoryUtility), name: nameof(CaravanInventoryUtility.AllInventoryItems)), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(SailorAllInventoryItemsTranspiler)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanInventoryUtility), name: nameof(CaravanInventoryUtility.AllInventoryItems)),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(SailorAllInventoryItems)));
             harmony.Patch(original: AccessTools.Method(type: typeof(CaravanInventoryUtility), name: nameof(CaravanInventoryUtility.GiveThing)), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(SailorGiveThingInventoryTranspiler)));
@@ -472,9 +475,27 @@ namespace RimShips
             MapExtensionUtility.GetExtensionToMap(___map)?.getShipPathGrid?.RecalculatePerceivedPathCostUnderThing(t);
         }
 
-        private static void RecalculateShipPathCostTerrainChange(IntVec3 c, Map ___map)
+        public static void RecalculateShipPathCostTerrainChange(IntVec3 c, Map ___map)
         {
+            //Log.Message("Terrain Added");
             MapExtensionUtility.GetExtensionToMap(___map)?.getShipPathGrid?.RecalculatePerceivedPathCostAt(c);
+            /*if(!terrainChangedCount.ContainsKey(___map))
+                terrainChangedCount.Add(___map, new List<WaterRegion>() { c.GetRegion(___map, RegionType.Normal) });
+            if(!terrainChangedCount[___map].Contains(c.GetRegion(___map, RegionType.Normal)))
+                terrainChangedCount[___map].Add(c.GetRegion(___map, RegionType.Normal));
+            Log.Message("Count: " + terrainChangedCount.Count());*/
+            
+        }
+
+        public static void MapTickUpdateWaterTerrain(Map __instance)
+        {
+            /*if(GenLocalDate.HourOfDay(__instance) == 6 && terrainChangedCount.ContainsKey(__instance) && terrainChangedCount[__instance].Count > 0)
+            {
+                Log.Message("Count: " + terrainChangedCount[__instance].Count);
+                __instance.GetExtensionToMap().getWaterRegionAndRoomUpdater.RebuildAllWaterRegions();
+                Messages.Message("TerrainReset".Translate(terrainChangedCount[__instance].Count), MessageTypeDefOf.SilentInput, false);
+                terrainChangedCount.Clear();
+            }*/
         }
 
         #endregion MapGen
@@ -1010,7 +1031,7 @@ namespace RimShips
                 {
                     Command_Action gizmo = new Command_Action();
                     gizmo.icon = TexCommandShips.Anchor;
-                    gizmo.defaultLabel = "CommandDockShip".Translate();
+                    gizmo.defaultLabel = Find.WorldObjects.AnySettlementBaseAt(__instance.Tile) ? "CommandDockShip".Translate() : "CommandDockShipDisembark".Translate();
                     gizmo.defaultDesc = Find.WorldObjects.AnySettlementBaseAt(__instance.Tile) ? "CommandDockShipDesc".Translate(Find.WorldObjects.SettlementBaseAt(__instance.Tile)) : "CommandDockShipObjectDesc".Translate();
                     gizmo.action = delegate ()
                     {
@@ -2490,23 +2511,29 @@ namespace RimShips
             }
         }
 
-        public static IEnumerable<CodeInstruction> SailorAllInventoryItemsTranspiler(IEnumerable<CodeInstruction> instructions)
+        public static bool SailorAllInventoryItems(Caravan caravan, ref List<Thing> __result)
         {
-            List<CodeInstruction> instructionList = instructions.ToList();
-
-            for(int i = 0; i < instructionList.Count; i++)
+            if(HasShip(caravan) && caravan.PawnsListForReading.All(x => IsShip(x)))
             {
-                CodeInstruction instruction = instructionList[i];
-
-                if (instruction.opcode == OpCodes.Callvirt && instruction.operand == AccessTools.Property(type: typeof(Caravan), name: nameof(Caravan.PawnsListForReading)).GetGetMethod())
+                List<Thing> inventoryItems = new List<Thing>();
+                foreach(Pawn p in caravan.PawnsListForReading)
                 {
-                    yield return instruction;
-                    instruction = instructionList[++i];
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipHarmony.GrabPawnsFromShips)));
+                    foreach(Thing t in p.inventory.innerContainer)
+                    {
+                        inventoryItems.Add(t);
+                    }
+                    foreach(Pawn sailor in p.GetComp<CompShips>().AllPawnsAboard)
+                    {
+                        foreach(Thing t in sailor.inventory.innerContainer)
+                        {
+                            inventoryItems.Add(t);
+                        }
+                    }
                 }
-
-                yield return instruction;
+                __result = inventoryItems;
+                return false;
             }
+            return true;
         }
 
         public static IEnumerable<CodeInstruction> SailorGiveThingInventoryTranspiler(IEnumerable<CodeInstruction> instructions)
@@ -2951,10 +2978,8 @@ namespace RimShips
                 {
                     Label label = ilg.DefineLabel();
                     
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Property(type: typeof(Find), name: nameof(Find.WorldGrid)).GetGetMethod());
                     yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, 14);
-                    yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Property(type: typeof(WorldGrid), name: "Item").GetGetMethod());
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Property(type: typeof(Tile), name: nameof(Tile.WaterCovered)).GetGetMethod());
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: "WaterCovered"));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
                     yield return new CodeInstruction(opcode: OpCodes.Pop);
@@ -2969,7 +2994,7 @@ namespace RimShips
 
         public static bool FindPathNoCaravan(int startTile, int destTile, Caravan caravan, Func<float, bool> terminator = null)
         {
-            if (ShipHarmony.debug)
+            if(ShipHarmony.debug)
             {
                 Log.Message("==========");
                 Log.Message("Finding Path");
@@ -3099,7 +3124,7 @@ namespace RimShips
                     __result = false;
                     return false;
                 }
-                if( (___fields[startTile] == ___impassableFieldID && !Find.WorldGrid[startTile].WaterCovered) || (___fields[destTile] == ___impassableFieldID && !Find.WorldGrid[destTile].WaterCovered))
+                if( (___fields[startTile] == ___impassableFieldID && !WaterCovered(startTile)) || (___fields[destTile] == ___impassableFieldID && !WaterCovered(destTile)))
                 {
                     __result = false;
                     return false;
@@ -3109,12 +3134,12 @@ namespace RimShips
                 AccessTools.Method(type: typeof(WorldReachability), name: "FloodFillAt").Invoke(__instance, new object[] { startTile });
                 if ((bool)validField.Invoke(__instance, new object[] { startTile }) || (bool)validField.Invoke(__instance, new object[] { destTile }))
                 {
-                    __result = ___fields[startTile] == ___fields[destTile] || ( (Find.WorldGrid[startTile].WaterCovered || Find.World.CoastDirectionAt(startTile).IsValid) && 
-                        (Find.WorldGrid[destTile].WaterCovered || Find.World.CoastDirectionAt(destTile).IsValid) );
+                    __result = ___fields[startTile] == ___fields[destTile] || ( (WaterCovered(startTile) || Find.World.CoastDirectionAt(startTile).IsValid) && 
+                        (WaterCovered(destTile) || Find.World.CoastDirectionAt(destTile).IsValid) );
                     return false;
                 }
-                __result = ((___fields[startTile] != ___impassableFieldID) && ___fields[startTile] == ___fields[destTile]) || (Find.WorldGrid[startTile].WaterCovered && Find.WorldGrid[destTile].WaterCovered) ||
-                    (Find.World.CoastDirectionAt(startTile).IsValid && Find.WorldGrid[destTile].WaterCovered);
+                __result = ((___fields[startTile] != ___impassableFieldID) && ___fields[startTile] == ___fields[destTile]) || (WaterCovered(startTile) && WaterCovered(destTile)) ||
+                    (Find.World.CoastDirectionAt(startTile).IsValid && WaterCovered(destTile));
                 return false;
             }
             return true;
@@ -3399,7 +3424,7 @@ namespace RimShips
 
         public static void PerceivedMovementDifficultyOnWater(int tile, ref float __result)
         {
-            if(Find.WorldGrid[tile].biome == BiomeDefOf.Ocean || Find.WorldGrid[tile].biome == BiomeDefOf.Lake || Find.WorldGrid[tile].WaterCovered)
+            if(Find.WorldGrid[tile].biome == BiomeDefOf.Ocean || Find.WorldGrid[tile].biome == BiomeDefOf.Lake || WaterCovered(tile))
                 __result = 0.5f;
         }
 
@@ -3419,16 +3444,16 @@ namespace RimShips
 
         public static void IslandExitTile(int destinationTile, Dialog_FormCaravan __instance, bool ___reform, ref int ___startingTile, Map ___map)
         {
-            if (currentFormingCaravan != null && (!___reform && ___startingTile < 0))
+            if(currentFormingCaravan != null && (!___reform && ___startingTile < 0))
             {
                 List<Pawn> pawns = TransferableUtility.GetPawnsFromTransferables(currentFormingCaravan.transferables);
-                if (HasShip(pawns))
+                if(HasShip(pawns))
                 {
                     List<int> neighboringCells = new List<int>();
                     Find.WorldGrid.GetTileNeighbors(___map.Tile, neighboringCells);
-                    foreach (int neighbor in neighboringCells)
+                    foreach(int neighbor in neighboringCells)
                     {
-                        if (Find.WorldGrid[neighbor].WaterCovered)
+                        if(WaterCovered(neighbor))
                         {
                             ___startingTile = neighbor;
                             return;
@@ -3447,7 +3472,7 @@ namespace RimShips
 
         private static bool BoatCantTraverse(int tile)
         {
-            bool flag = !Find.WorldGrid[tile].WaterCovered && (!Find.World.CoastDirectionAt(tile).IsValid || Find.World.Impassable(tile));
+            bool flag = !WaterCovered(tile) && (!Find.World.CoastDirectionAt(tile).IsValid || Find.World.Impassable(tile));
             bool riverFlag = false;
             if(currentFormingCaravan != null || ((Find.WorldSelector.SelectedObjects.Any() && Find.WorldSelector.SelectedObjects.All(x => x is Caravan && (x as Caravan).IsPlayerControlled && HasShip(x as Caravan))) && !routePlannerActive))
             {
@@ -3458,7 +3483,12 @@ namespace RimShips
         }
         private static bool IsWaterTile(int tile, List<Pawn> pawns = null)
         {
-            return Find.WorldGrid[tile].WaterCovered || Find.World.CoastDirectionAt(tile).IsValid || RiverIsValid(tile, pawns.Where(x => IsShip(x)).ToList());
+            return  WaterCovered(tile) || Find.World.CoastDirectionAt(tile).IsValid || RiverIsValid(tile, pawns.Where(x => IsShip(x)).ToList());
+        }
+
+        private static bool WaterCovered(int tile)
+        {
+            return Find.WorldGrid[tile].biome == BiomeDefOf.Ocean || Find.WorldGrid[tile].biome == BiomeDefOf.Lake;
         }
 
         private static bool IsNotWaterTile(int tile, List<Pawn> pawns = null)
@@ -3498,7 +3528,7 @@ namespace RimShips
             return !flag2 && !flag3;
         }
 
-        private static void ToggleDocking(Caravan caravan, bool dock = false)
+        public static void ToggleDocking(Caravan caravan, bool dock = false)
         {
             if(HasShip(caravan))
             {
@@ -3523,25 +3553,8 @@ namespace RimShips
             if (!HasShip(caravan))
                 Log.Error("Attempted to dock boats with no boats in caravan");
 
-            DockedBoat dockedBoat = (DockedBoat)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfShips.DockedBoat);
-            dockedBoat.Tile = caravan.Tile;
-            float randomInRange = Rand.Range(2f, 4f) + (50 * (1 - caravan.PawnsListForReading.Where(x => IsShip(x)).Max(x => x.GetComp<CompShips>().Props.visibility)));
-            dockedBoat.GetComponent<TimeoutComp>().StartTimeout(Mathf.CeilToInt(randomInRange * 60000));
-
-            Log.Message("-> " + caravan.pawns.Count);
             ShipHarmony.ToggleDocking(caravan, true);
-            Log.Message("-> " + caravan.pawns.Count);
-
-            for (int i = caravan.pawns.Count - 1; i >= 0; i--)
-            {
-                Pawn p = caravan.PawnsListForReading[i];
-                Log.Message("- " + p.Label);
-                if(IsShip(p))
-                {
-                    dockedBoat.dockedBoats.TryAddOrTransfer(p, false);
-                }
-            }
-            Find.WorldObjects.Add(dockedBoat);
+            Find.WindowStack.Add(new Dialog_DockBoat(caravan));
         }
 
         public static void BoardAllCaravanPawns(Caravan caravan)
@@ -3681,12 +3694,12 @@ namespace RimShips
             {
                 if(routePlannerActive && world.CoastDirectionAt(startTile).IsValid && world.CoastDirectionAt(destTile).IsValid)
                     return ImpassableForBoatPlanner(tileID, destTile) && world.Impassable(tileID); //Route planner doesn't know if you have boat or not, so check both
-                return routePlannerActive && (Find.WorldGrid[startTile].WaterCovered || Find.World.CoastDirectionAt(startTile).IsValid) && (Find.WorldGrid[destTile].WaterCovered || world.CoastDirectionAt(destTile).IsValid) ?
+                return routePlannerActive && (WaterCovered(startTile) || Find.World.CoastDirectionAt(startTile).IsValid) && (WaterCovered(destTile) || world.CoastDirectionAt(destTile).IsValid) ?
                     ImpassableForBoatPlanner(tileID, destTile) :  world.Impassable(tileID);
             }
             bool riverValid = caravan is null && !(currentFormingCaravan is null) ? RiverIsValid(tileID, TransferableUtility.GetPawnsFromTransferables(currentFormingCaravan.transferables)) : RiverIsValid(tileID, caravan.PawnsListForReading.Where(x => IsShip(x)).ToList());
             bool flag = Find.WorldGrid[tileID].biome == BiomeDefOf.Ocean || Find.WorldGrid[tileID].biome == BiomeDefOf.Lake;
-            return HasShip(caravan) ? (!Find.WorldGrid[tileID].WaterCovered && !(Find.World.CoastDirectionAt(tileID).IsValid && tileID == destTile) && 
+            return HasShip(caravan) ? (!WaterCovered(tileID) && !(Find.World.CoastDirectionAt(tileID).IsValid && tileID == destTile) && 
                 !(RimShipMod.mod.settings.riverTravel && riverValid)) : (flag || world.Impassable(tileID));
         }
 
@@ -4098,6 +4111,9 @@ namespace RimShips
 
         private static bool OnDeepWater(this Pawn pawn)
         {
+            //Splitting Caravan?
+            if(pawn?.Map is null && pawn.IsWorldPawn())
+                return false; 
             return (pawn.Map.terrainGrid.TerrainAt(pawn.Position) == TerrainDefOf.WaterDeep || pawn.Map.terrainGrid.TerrainAt(pawn.Position) == TerrainDefOf.WaterMovingChestDeep ||
                 pawn.Map.terrainGrid.TerrainAt(pawn.Position) == TerrainDefOf.WaterOceanDeep) && GenGrid.Impassable(pawn.Position, pawn.Map);
         }
@@ -4162,6 +4178,8 @@ namespace RimShips
         private static int[] boatFields;
 
         private static bool inverseFloodFill;
+
+        private static Dictionary<Map, List<WaterRegion>> terrainChangedCount = new Dictionary<Map, List<WaterRegion>>();
 
         #endregion HelperFunctions
         public static readonly bool debug = false;

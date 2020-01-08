@@ -61,8 +61,10 @@
     <Compile Include="CompProperties_Cannons.cs" />
     <Compile Include="CompShips.cs" />
     <Compile Include="DesignationCategoryDefOf_Ships.cs" />
+    <Compile Include="Dialog_DockBoat.cs" />
     <Compile Include="Dialog_GiveShipName.cs" />
     <Compile Include="Dialog_InfoCard_Ship.cs" />
+    <Compile Include="Dialog_ResearchChange.cs" />
     <Compile Include="DockedBoat.cs" />
     <Compile Include="DutyDefOf_Ships.cs" />
     <Compile Include="EffectsDefOf_Ships.cs" />
@@ -123,6 +125,7 @@
     <Compile Include="SpawnThingOnBuild.cs" />
     <Compile Include="SPExtra.cs" />
     <Compile Include="SPMultiCell.cs" />
+    <Compile Include="SPSettings.cs" />
     <Compile Include="SPTrig.cs" />
     <Compile Include="SPTuples.cs" />
     <Compile Include="StatCategoryDefOf_Ships.cs" />

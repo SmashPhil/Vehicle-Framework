@@ -34,8 +34,7 @@ namespace RimShips
             get
             {
                 int num = 0;
-
-                foreach (Pawn p in dockedBoats)
+                foreach(Pawn p in dockedBoats)
                 {
                     num += p.GetComp<CompShips>()?.SeatsAvailable ?? 0;
                 }
@@ -51,6 +50,19 @@ namespace RimShips
                 return;
             }
             caravan.pawns.TryAddRangeOrTransfer(this.dockedBoats);
+            List<Pawn> boats = caravan.PawnsListForReading.Where(x => ShipHarmony.IsShip(x)).ToList();
+            foreach(Pawn p in caravan.pawns)
+            {
+                if(!ShipHarmony.IsShip(p))
+                {
+                    for(int i = p.inventory.innerContainer.Count - 1; i >= 0; i--)
+                    {
+                        Thing t = p.inventory.innerContainer[i];
+                        p.inventory.innerContainer.TryTransferToContainer(t, boats.Find(x => !MassUtility.IsOverEncumbered(x)).inventory.innerContainer, true);
+                    } 
+                }
+            }
+            ShipHarmony.ToggleDocking(caravan, false);
             Find.WorldObjects.Remove(this);
         }
 
@@ -87,7 +99,7 @@ namespace RimShips
             {
                 for (int j = 0; j < tmpSavedBoats.Count; j++)
                 {
-                    dockedBoats.TryAdd(tmpSavedBoats[j], true);
+                    dockedBoats.TryAdd(tmpSavedBoats[j], false);
                 }
                 tmpSavedBoats.Clear();
             }
@@ -107,6 +119,6 @@ namespace RimShips
 
         private Material cachedMaterial;
 
-        private List<Pawn> tmpSavedBoats;
+        private List<Pawn> tmpSavedBoats = new List<Pawn>();
     }
 }

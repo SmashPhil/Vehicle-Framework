@@ -5,7 +5,7 @@ namespace RimShips.AI
 {
     public static class MapExtensionUtility
     {
-        public static MapExtension GetExtensionToMap(Map map)
+        public static MapExtension GetExtensionToMap(this Map map)
         {
             if (!mapExtensions.ContainsKey(map))
             {

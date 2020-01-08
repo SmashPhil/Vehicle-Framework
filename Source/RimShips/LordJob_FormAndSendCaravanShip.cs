@@ -54,7 +54,7 @@ namespace RimShips.Lords
             List<Pawn> sailorsTmp = this.sailors;
             List<Pawn> prisonersTmp = this.prisoners;
             int numPreassign = 0;
-            foreach (Pawn p in ships)
+            foreach(Pawn p in ships)
             {
                 numPreassign = p.GetComp<CompShips>().PawnCountToOperate - p.GetComp<CompShips>().AllCrewAboard.Count;
                 for(int i = 0; i < numPreassign; i++)

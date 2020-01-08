@@ -41,6 +41,26 @@ namespace RimShips
             return result;
         }
 
+        public void TryRegenerateRegionFrom(WaterRegion region, IntVec3 root)
+        {
+            if(this.working)
+            {
+                Log.Error("Trying to regenerate a current water region but we are currently generating one. Nested calls are not allowed.", false);
+                return;
+            }
+            this.working = true;
+            try
+            {
+                this.FloodFillAndAddCells(root);
+                this.CreateLinks();
+                this.RegisterThingsInRegionListers();
+            }
+            finally
+            {
+                this.working = false;
+            }
+        }
+
         private void FloodFillAndAddCells(IntVec3 root)
         {
             this.newRegCells.Clear();

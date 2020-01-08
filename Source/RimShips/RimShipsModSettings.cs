@@ -1,14 +1,19 @@
 ﻿using UnityEngine;
-using Verse;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using Verse;
+using Verse.Sound;
+using RimWorld;
+using SPExtended;
 
 namespace RimShips
 {
     public class RimshipsModSettings : ModSettings
     {
         public float beachMultiplier = 0f;
-        public bool forceFactionCoastOption = true;
         public int forceFactionCoastRadius = 1;
+        public int daysToResetRegions = 2;
 
         public bool matchWaterTerrain;
         public bool shuffledCannonFire = true;
@@ -25,13 +30,13 @@ namespace RimShips
         public bool debugDrawRegions;
         public bool debugDrawRegionLinks;
         public bool debugDrawRegionThings;
-        public int CoastRadius => forceFactionCoastOption ? forceFactionCoastRadius : 0;
+        public int CoastRadius => forceFactionCoastRadius;
         public float FishingSkillValue => fishingSkillIncrease / 100;
         public override void ExposeData()
         {
             Scribe_Values.Look(ref beachMultiplier, "beachMultiplier", 0f);
             Scribe_Values.Look(ref forceFactionCoastRadius, "forceFactionCoastRadius", 1);
-            Scribe_Values.Look(ref forceFactionCoastOption, "forceFactionCoastOption", true);
+            Scribe_Values.Look(ref daysToResetRegions, "daysToResetRegions", 2);
 
             Scribe_Values.Look(ref matchWaterTerrain, "matchWaterTerrain", true);
             Scribe_Values.Look(ref shuffledCannonFire, "shuffledCannonFire", true);
@@ -58,57 +63,124 @@ namespace RimShips
         }
         public override void DoSettingsWindowContents(Rect inRect)
         {
+            var font = Text.Font;
+            Text.Font = GameFont.Tiny;
+            string credit = "Settings by Smash Phil";
+            Widgets.Label(new Rect(inRect.width - (6 * credit.Count()), inRect.height + 64f, inRect.width, inRect.height), credit);
+            Text.Font = font;
+
             Listing_Standard listingStandard = new Listing_Standard();
-            Rect group1 = new Rect(inRect.width / 2 - (inRect.width / 8), inRect.y, inRect.width / 4, inRect.height);
-            listingStandard.Begin(group1);
-            if (listingStandard.ButtonText("BoatsResetToDefault".Translate()))
+            Rect settingsCategory = new Rect(inRect.width / 2 - (inRect.width / 12), inRect.y, inRect.width / 6, inRect.height);
+            Rect pageRect = new Rect(settingsCategory.x - settingsCategory.width, settingsCategory.y, settingsCategory.width, settingsCategory.height);
+
+            if(Prefs.DevMode || currentPage == SettingsPage.DevMode)
             {
-                this.ResetToDefaultValues();
+                Rect emergencyReset = new Rect(inRect.width - settingsCategory.width, settingsCategory.y, settingsCategory.width, settingsCategory.height);
+                listingStandard.Begin(emergencyReset);
+                if(listingStandard.ButtonText("DevModeReset".Translate()))
+                {
+                    this.ResetToDefaultValues();
+                }
+                listingStandard.End();
+            }
+            //BoatsResetToDefault
+
+            listingStandard.Begin(pageRect);
+            if(currentPage == SettingsPage.MainSettings || currentPage == SettingsPage.DevMode)
+            {
+                listingStandard.ButtonText(string.Empty);
+            }
+            else if(currentPage == SettingsPage.Stats || currentPage == SettingsPage.Research)
+            {
+                
             }
             listingStandard.End();
 
-            Rect group2 = new Rect(inRect.x, inRect.y + 15f, inRect.width / 2, inRect.height);
-            listingStandard.Begin(group2);
-            bool beachLarge = settings.beachMultiplier > 150f;
-            listingStandard.Label(beachLarge ? "BeachGenMultiplierLarge".Translate(Mathf.Round(settings.beachMultiplier)) : "BeachGenMultiplier".Translate(Mathf.Round(settings.beachMultiplier)),
-                -1f, beachLarge ? "BeachGenMultiplierLargeTooltip".Translate() : "BeachGenMultiplierTooltip".Translate());
-            settings.beachMultiplier = listingStandard.Slider(settings.beachMultiplier, 0f, 200f);
-            listingStandard.GapLine(16f);
-
-            listingStandard.CheckboxLabeled("ForceSettlementCoastOption".Translate(), ref settings.forceFactionCoastOption, "ForceSettlementCoastTooltip".Translate());
-            if (settings.forceFactionCoastOption)
+            listingStandard.Begin(settingsCategory);
+            if(listingStandard.ButtonText(EnumToString(currentPage)))
             {
-                listingStandard.Label("ForceSettlementCoast".Translate(Mathf.Round(settings.forceFactionCoastRadius)));
-                settings.forceFactionCoastRadius = (int)listingStandard.Slider((float)settings.forceFactionCoastRadius, 0f, 10f);
+                FloatMenuOption op1 = new FloatMenuOption("MainSettings".Translate(), () => currentPage = SettingsPage.MainSettings, MenuOptionPriority.Default, null, null, 0f, null, null);
+                FloatMenuOption op2 = new FloatMenuOption("RimShips".Translate(), () => currentPage = SettingsPage.Boats, MenuOptionPriority.Default, null, null, 0f, null, null);
+                List<FloatMenuOption> options = new List<FloatMenuOption>() { op1, op2 };
+                if(Prefs.DevMode)
+                {
+                    FloatMenuOption op3 = new FloatMenuOption("DevModeShips".Translate(), () => currentPage = SettingsPage.DevMode, MenuOptionPriority.Default, null, null, 0f, null, null);
+                    options.Add(op3);
+                }
+
+                Find.WindowStack.Add(new FloatMenu(options));
             }
-            //listingStandard.CheckboxLabeled("MatchWaterTerrain".Translate(), ref settings.matchWaterTerrain, "MatchWaterTerrainTooltip".Translate());
-            listingStandard.GapLine(16f);
+            listingStandard.End();
 
-            listingStandard.CheckboxLabeled("ShuffledCannonFire".Translate(), ref settings.shuffledCannonFire, "ShuffledCannonFireTooltip".Translate());
-            listingStandard.CheckboxLabeled("RiverTravelAllowed".Translate(), ref settings.riverTravel, "RiverTravelAllowedTooltip".Translate());
-
-            if (settings.riverTravel)
+            Rect propsReset = new Rect(settingsCategory.x + settingsCategory.width, settingsCategory.y, settingsCategory.width, settingsCategory.height);
+            listingStandard.Begin(propsReset);
+            if(listingStandard.ButtonText("BoatsReset".Translate()))
             {
-                listingStandard.CheckboxLabeled("BoatSizeMattersOnRivers".Translate(), ref settings.boatSizeMatters, "BoatSizeMattersOnRiversTooltip".Translate());
+                if (currentPage == SettingsPage.MainSettings)
+                {
+                    this.ResetToDefaultValues();
+                }
+                /*else if (currentPage == SRTS.SettingsCategory.Stats || currentPage == SRTS.SettingsCategory.Research)
+                {
+                    FloatMenuOption op1 = new FloatMenuOption("ResetThisSRTS".Translate(), () => props.ResetToDefaultValues(), MenuOptionPriority.Default, null, null, 0f, null, null);
+                    FloatMenuOption op2 = new FloatMenuOption("ResetAll".Translate(), delegate ()
+                    {
+                        for (int i = 0; i < settings.defProperties.Count; i++)
+                        {
+                            SRTS_DefProperties p = settings.defProperties.ElementAt(i).Value;
+                            this.ReferenceDefCheck(ref p);
+                            p.ResetToDefaultValues();
+                        }
+                    }, MenuOptionPriority.Default, null, null, 0f, null, null);
+                    Find.WindowStack.Add(new FloatMenu(new List<FloatMenuOption>() { op1, op2 }));
+                }*/
             }
-            if (FishingCompatibility.fishingActivated)
-            {
-                listingStandard.GapLine(16f);
-                string fishDelay = settings.fishingDelay.ToString();
-                string fishSkill = settings.fishingSkillIncrease.ToString();
-                listingStandard.Label("FishingMultiplier".Translate(Math.Round(settings.fishingMultiplier, 2)), -1, "FishingMultiplierTooltip".Translate());
-                settings.fishingMultiplier = listingStandard.Slider((float)settings.fishingMultiplier, 1f, 4f);
-                listingStandard.Label("FishingDelay".Translate(), -1, "FishingDelayTooltip".Translate());
-                listingStandard.IntEntry(ref settings.fishingDelay, ref fishDelay);
-                listingStandard.Label("FishingSkill".Translate(), -1, "FishingSkillTooltip".Translate());
-                listingStandard.IntEntry(ref settings.fishingSkillIncrease, ref fishSkill);
-                listingStandard.CheckboxLabeled("FishingPersists".Translate(), ref settings.fishingPersists, "FishingPersistsTooltip".Translate());
-            }
+            listingStandard.End();
 
-            listingStandard.Gap(20f);
-            listingStandard.Label("DevModeShips".Translate(), -1f, "DevModeShipsTooltip".Translate());
-            if (Prefs.DevMode)
+            if (currentPage == SettingsPage.MainSettings)
             {
+                Rect mainSettings = new Rect(inRect.x, inRect.y + 30f, inRect.width / 3, inRect.height);
+                listingStandard.Begin(mainSettings);
+                bool beachLarge = settings.beachMultiplier > 150f;
+                listingStandard.Settings_SliderLabeled(beachLarge ? "BeachGenMultiplierLarge".Translate() : "BeachGenMultiplier".Translate(),
+                    "%", ref settings.beachMultiplier, 0f, 200f, 1f, 0);
+                
+                listingStandard.Gap(16f);
+
+                listingStandard.Settings_SliderLabeled("ForceSettlementCoast".Translate(), "Tiles".Translate(), ref settings.forceFactionCoastRadius, 0, 11, 9999, "Everything".Translate());
+
+                listingStandard.Gap(16f);
+
+                listingStandard.CheckboxLabeled("ShuffledCannonFire".Translate(), ref settings.shuffledCannonFire, "ShuffledCannonFireTooltip".Translate());
+                listingStandard.CheckboxLabeled("RiverTravelAllowed".Translate(), ref settings.riverTravel, "RiverTravelAllowedTooltip".Translate());
+
+                //listingStandard.Settings_SliderLabeled("ResetWaterRegions".Translate(), "Days".Translate(), ref settings.daysToResetRegions, 0, 7, -1, string.Empty, 0, "Disabled".Translate());
+
+                if (settings.riverTravel)
+                {
+                    listingStandard.CheckboxLabeled("BoatSizeMattersOnRivers".Translate(), ref settings.boatSizeMatters, "BoatSizeMattersOnRiversTooltip".Translate());
+                }
+                if(FishingCompatibility.fishingActivated)
+                {
+                    listingStandard.GapLine(16f);
+                    string fishDelay = settings.fishingDelay.ToString();
+                    string fishSkill = settings.fishingSkillIncrease.ToString();
+                    listingStandard.Label("FishingMultiplier".Translate(Math.Round(settings.fishingMultiplier, 2)), -1, "FishingMultiplierTooltip".Translate());
+                    settings.fishingMultiplier = listingStandard.Slider((float)settings.fishingMultiplier, 1f, 4f);
+                    listingStandard.Label("FishingDelay".Translate(), -1, "FishingDelayTooltip".Translate());
+                    listingStandard.IntEntry(ref settings.fishingDelay, ref fishDelay);
+                    listingStandard.Label("FishingSkill".Translate(), -1, "FishingSkillTooltip".Translate());
+                    listingStandard.IntEntry(ref settings.fishingSkillIncrease, ref fishSkill);
+                    listingStandard.CheckboxLabeled("FishingPersists".Translate(), ref settings.fishingPersists, "FishingPersistsTooltip".Translate());
+                }
+                listingStandard.End();
+            }
+            else if(currentPage == SettingsPage.DevMode)
+            {
+                float width = inRect.width / 1.5f;
+                Rect devMode = new Rect((inRect.width - width) / 2, inRect.y + 45f, width, inRect.height);
+                listingStandard.Begin(devMode);
+                listingStandard.Settings_Header("DevModeShips".Translate(), SPSettings.highlightColor, GameFont.Medium, TextAnchor.MiddleCenter);
 
                 listingStandard.GapLine(16f);
                 listingStandard.CheckboxLabeled("DebugDraftAnyShip".Translate(), ref settings.debugDraftAnyShip, "DebugDraftAnyShipTooltip".Translate());
@@ -116,8 +188,9 @@ namespace RimShips
                 listingStandard.CheckboxLabeled("DebugDrawRegions".Translate(), ref settings.debugDrawRegions);
                 listingStandard.CheckboxLabeled("DebugDrawRegionLinks".Translate(), ref settings.debugDrawRegionLinks);
                 listingStandard.CheckboxLabeled("DebugDrawRegionThings".Translate(), ref settings.debugDrawRegionThings);
+
+                listingStandard.End();
             }
-            listingStandard.End();
 
             base.DoSettingsWindowContents(inRect);
         }
@@ -129,9 +202,9 @@ namespace RimShips
 
         private void ResetToDefaultValues()
         {
+            SoundDefOf.RadioButtonClicked.PlayOneShotOnCamera(null);
             settings.beachMultiplier = 0f;
-            settings.forceFactionCoastOption = true;
-            settings.forceFactionCoastRadius = 1;
+            settings.forceFactionCoastRadius = 0;
 
             settings.shuffledCannonFire = true;
             settings.riverTravel = true;
@@ -148,5 +221,30 @@ namespace RimShips
             settings.debugDrawRegionLinks = false;
             settings.debugDrawRegionThings = false;
         }
+
+        private string EnumToString(SettingsPage page)
+        {
+            switch(page)
+            {
+                case SettingsPage.MainSettings:
+                    return "MainSettings".Translate();
+                case SettingsPage.DevMode:
+                    return "DevModeShips".Translate();
+                case SettingsPage.Boats:
+                    return "RimShips".Translate();
+            }
+            Log.Error(page.ToString() + " Page has not been implemented yet. - Smash Phil");
+            return page.ToString();
+        }
+
+        enum SettingsPage { MainSettings, Boats, Stats, Research, Upgrades, DevMode}
+        enum StatName { }
+
+
+        public string currentKey;
+
+        public Vector2 scrollPosition;
+
+        private SettingsPage currentPage;
     }
 }
