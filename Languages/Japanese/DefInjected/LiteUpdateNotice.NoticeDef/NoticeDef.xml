@@ -2,7 +2,7 @@
 <LanguageData>
 
   <TestNotice.label>Boatsアップデート</TestNotice.label>
-  <TestNotice.description>Boatsが更新され以前の問題は解決しました。\n\nこの通知は、ボートが更新されたときだけ表示されます。\nアップデートの詳細については、Steamのワークショップページをご覧ください。</TestNotice.description>
+  <TestNotice.description>Boatsが更新され以前の問題は解決しました。\n\nこの通知は、ボートが更新されたときだけ表示されます。アップデートの詳細は、Steamのワークショップページをご覧ください。</TestNotice.description>
   <!-- <TestNotice.letter>D9更新注意</TestNotice.letter> -->
 
 </LanguageData>
