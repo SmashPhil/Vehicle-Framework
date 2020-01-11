@@ -4,4 +4,7 @@
   <DebugSettlement.label>元の場所</DebugSettlement.label>
   <DebugSettlement.description>デバック</DebugSettlement.description>
 
+  <DockedBoat.label>ボート(停泊)</DockedBoat.label>
+  <DockedBoat.description>停泊中のボートです</DockedBoat.description>
+
 </LanguageData>
