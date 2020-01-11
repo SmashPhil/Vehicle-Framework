@@ -53,7 +53,7 @@
 		  <subNodes>
 			<!-- Basic needs -->
 			<li Class="ThinkNode_Subtree">
-			  <treeDef>SatisfyBasicNeeds</treeDef> <!--SatisfyVeryUrgentNeeds --> <!-- SatisfyBasicNeeds -->
+			  <treeDef>SatisfyVeryUrgentNeeds</treeDef> <!--SatisfyVeryUrgentNeeds --> <!-- SatisfyBasicNeeds -->
 			</li>
 
 			<!-- Drop items if you're assigned to unload everything -->

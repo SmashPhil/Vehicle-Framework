@@ -19,7 +19,7 @@
 		<label>Fishing Boat</label>
 		<tab>RimShips</tab>
 		<description>Build fishing boats capable of bringing in fish if a compatible fishing mod is also loaded.</description>
-		<baseCost>1200</baseCost>
+		<baseCost>800</baseCost>
 		<techLevel>Neolithic</techLevel>
 		<prerequisites>
 			<li>Rowboat</li>
@@ -34,7 +34,7 @@
 		<label>caravel</label>
 		<tab>RimShips</tab>
 		<description>Build Caravels.  A fast and cheap ship designed for trade.</description>
-		<baseCost>2500</baseCost>
+		<baseCost>1800</baseCost>
 		<techLevel>Medieval</techLevel>
 		<prerequisites>
 			<li>FishingBoat</li>
@@ -65,7 +65,7 @@
 		<label>galleon</label>
 		<tab>RimShips</tab>
 		<description>Construct large vessels designed to take control of the seas</description>
-		<baseCost>3500</baseCost>
+		<baseCost>2300</baseCost>
 		<techLevel>Medieval</techLevel>
 		<prerequisites>
 			<li>Caravel</li>

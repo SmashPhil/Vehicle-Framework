@@ -168,6 +168,9 @@
 				<buildDef>SPBoats_GalleonBlueprint</buildDef>
 				<ticksBetweenRepair>350</ticksBetweenRepair>
 				
+				<wakeMultiplier>2</wakeMultiplier>
+				<wakeSpeed>2</wakeSpeed>
+				
 				<healthLabel_Healthy>Operational</healthLabel_Healthy>
 				<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
 				<healthLabel_Immobile>Inoperable</healthLabel_Immobile>

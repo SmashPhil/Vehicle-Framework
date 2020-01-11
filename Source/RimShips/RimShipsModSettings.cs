@@ -153,7 +153,7 @@ namespace RimShips
 
                 listingStandard.CheckboxLabeled("ShuffledCannonFire".Translate(), ref settings.shuffledCannonFire, "ShuffledCannonFireTooltip".Translate());
                 listingStandard.CheckboxLabeled("RiverTravelAllowed".Translate(), ref settings.riverTravel, "RiverTravelAllowedTooltip".Translate());
-
+                
                 //listingStandard.Settings_SliderLabeled("ResetWaterRegions".Translate(), "Days".Translate(), ref settings.daysToResetRegions, 0, 7, -1, string.Empty, 0, "Disabled".Translate());
 
                 if (settings.riverTravel)

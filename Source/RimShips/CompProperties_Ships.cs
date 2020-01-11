@@ -25,8 +25,8 @@ namespace RimShips
         public bool fishing = false;
         public float hitboxOffsetX = 0f;
         public float hitboxOffsetZ = 0f;
-        public float wakeMultiplier = 1.25f;
-        public float wakeSpeed = 1.5f;
+        public float wakeMultiplier = 1.6f;
+        public float wakeSpeed = 1.6f;
         public float visibility = 0.5f;
 
         public bool diagonalRotation = true;

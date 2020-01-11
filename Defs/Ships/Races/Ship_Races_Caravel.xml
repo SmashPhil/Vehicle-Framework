@@ -140,6 +140,9 @@
 				<buildDef>SPBoats_CaravelBlueprint</buildDef>
 				<ticksBetweenRepair>200</ticksBetweenRepair>
 				
+				<wakeMultiplier>1.75</wakeMultiplier>
+				<wakeSpeed>1.75</wakeSpeed>
+				
 				<healthLabel_Healthy>Operational</healthLabel_Healthy>
 				<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
 				<healthLabel_Immobile>Inoperable</healthLabel_Immobile>

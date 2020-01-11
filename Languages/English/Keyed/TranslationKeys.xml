@@ -13,7 +13,8 @@
 	<OceanPassable>Ocean: +0.5</OceanPassable>
 	<BoatFishing>Fish</BoatFishing>
 	<BoatFishingDesc>Gather fish. Depth of water affects fishing chances.</BoatFishingDesc>
-		
+	<BaseSpeed>Base Speed</BaseSpeed>
+	
 	<TabCargo>Cargo</TabCargo>
 	<TabPassengers>Pawns</TabPassengers>
 	<TabBoatHealth>Health</TabBoatHealth>
@@ -86,6 +87,7 @@
 	<MessageCantAddWaypointBecauseShip>Cannot travel on land with boats.</MessageCantAddWaypointBecauseShip>
 	<MessageCantAddWaypointBecauseRiverUnreachable>Boat is not able to travel on this river</MessageCantAddWaypointBecauseRiverUnreachable>
 	<TerrainReset>({0}) Water Regions have been reset.</TerrainReset>
+	<CantMoveDocked>Cannot Move. Caravan is currently Docked.</CantMoveDocked>
 	
 	<!-- Caravans -->
 	<CaravanShips>Boat</CaravanShips>

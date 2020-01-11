@@ -162,6 +162,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(CaravanTicksPerMoveUtility), parameters: new Type[] { typeof(List<Pawn>), typeof(float), typeof(float), typeof(StringBuilder)}, name: nameof(CaravanTicksPerMoveUtility.GetTicksPerMove)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(GetTicksPerMoveShips)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(TilesPerDayCalculator), parameters: new Type[] { typeof(Caravan), typeof(StringBuilder) }, name: nameof(TilesPerDayCalculator.ApproxTilesPerDay)),
+                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(ApproxTilesForShips)));
             harmony.Patch(original: AccessTools.Method(type: typeof(WorldRoutePlanner), name: nameof(WorldRoutePlanner.WorldRoutePlannerUpdate)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(WorldRoutePlannerActive)));
@@ -331,6 +334,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(CaravanArrivalAction_OfferGifts), name: nameof(CaravanArrivalAction_OfferGifts.Arrived)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(DockBoatOfferGifts)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(SettlementBase_TraderTracker), name: nameof(SettlementBase_TraderTracker.GiveSoldThingToPlayer)), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(GiveSoldThingToShipTranspiler)));
 
             //Draftable
             harmony.Patch(original: AccessTools.Property(type: typeof(Pawn_DraftController), name: nameof(Pawn_DraftController.Drafted)).GetSetMethod(),
@@ -837,7 +843,7 @@ namespace RimShips
                     Vector3 drawPos = ___pawn.Drawer.DrawPos;
                     if (drawPos.ToIntVec3().InBounds(___pawn.Map) && !___pawn.GetComp<CompShips>().beached)
                     {
-                        MoteMaker.MakeWaterSplash(drawPos, ___pawn.Map, ___pawn.BodySize * ___pawn.GetComp<CompShips>().Props.wakeMultiplier, ___pawn.GetComp<CompShips>().Props.wakeSpeed);
+                        MoteMaker.MakeWaterSplash(drawPos, ___pawn.Map, 7 * ___pawn.GetComp<CompShips>().Props.wakeMultiplier, ___pawn.GetComp<CompShips>().Props.wakeSpeed);
                         ___lastFootprintPlacePos = drawPos;
                     }
                 }
@@ -2652,6 +2658,26 @@ namespace RimShips
             }
         }
 
+        public static IEnumerable<CodeInstruction> GiveSoldThingToShipTranspiler(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> instructionList = instructions.ToList();
+
+            for(int i = 0; i < instructionList.Count; i++)
+            {
+                CodeInstruction instruction = instructionList[i];
+
+                if(instruction.opcode == OpCodes.Ldnull && instructionList[i+1].opcode == OpCodes.Ldnull)
+                {
+                    yield return new CodeInstruction(opcode: OpCodes.Ldarg_3);
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(CaravanUtility), name: nameof(CaravanUtility.GetCaravan)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipHarmony.GrabPawnsFromShipCaravanSilentFail)));
+                    instruction = instructionList[++i];
+                }
+
+                yield return instruction;
+            }
+        }
+
         #endregion Caravan
 
         #region Construction
@@ -3008,10 +3034,13 @@ namespace RimShips
 
         public static bool TryAddWayPointWater(int tile, Dialog_FormCaravan ___currentFormCaravanDialog, WorldRoutePlanner __instance, bool playSound = true)
         {
+            /*Log.Message("======================================");
+            Log.Message("TryAddWaypoint");*/
             if(__instance.FormingCaravan)
             {
                 List<Pawn> pawnsOnCaravan = TransferableUtility.GetPawnsFromTransferables(currentFormingCaravan.transferables);
-                if(Find.WorldGrid[tile].biome == BiomeDefOf.Ocean || Find.WorldGrid[tile].biome == BiomeDefOf.Lake || (Find.World.CoastDirectionAt(tile).IsValid && HasShip(pawnsOnCaravan)) || (RiverIsValid(tile, pawnsOnCaravan) && !Find.World.Impassable(tile)))
+                /*Log.Message("Forming Caravan w/ River Travel:" + (RiverIsValid(tile, pawnsOnCaravan)));*/
+                if (Find.WorldGrid[tile].biome == BiomeDefOf.Ocean || Find.WorldGrid[tile].biome == BiomeDefOf.Lake || (Find.World.CoastDirectionAt(tile).IsValid && HasShip(pawnsOnCaravan)) || (RiverIsValid(tile, pawnsOnCaravan) && !Find.World.Impassable(tile)))
                 {
                     if(!HasShip(pawnsOnCaravan))
                     {
@@ -3031,7 +3060,7 @@ namespace RimShips
                 {
                     if(HasShip(pawnsOnCaravan))
                     {
-                        if (RimShipMod.mod.settings.riverTravel && (Find.WorldGrid[tile]?.Rivers?.Any() ?? false))
+                        if(RimShipMod.mod.settings.riverTravel && (Find.WorldGrid[tile]?.Rivers?.Any() ?? false))
                         {
                             Messages.Message("MessageCantAddWaypointBecauseRiverUnreachable".Translate(), MessageTypeDefOf.RejectInput, false);
                             return false;
@@ -3051,6 +3080,7 @@ namespace RimShips
             }
             else if(routePlannerActive)
             {
+                /*Log.Message("Route Planner");*/
                 if(__instance.waypoints.Any<RoutePlannerWaypoint>() && !Find.WorldReachability.CanReach(__instance.waypoints[__instance.waypoints.Count - 1].Tile, tile))
                 {
                     Messages.Message("MessageCantAddWaypointBecauseUnreachable".Translate(), MessageTypeDefOf.RejectInput, false);
@@ -3082,11 +3112,19 @@ namespace RimShips
 
         public static bool CanReachWaypoints(int startTile, int destTile, WorldReachability __instance, ref bool __result, int[] ___fields, int ___impassableFieldID, ref int ___nextFieldID)
         {
+            /*Log.Message("======================================");
+            Log.Message("CanReachWaypoints");*/
             if(currentFormingCaravan != null || ( (Find.WorldSelector.SelectedObjects.Any() && Find.WorldSelector.SelectedObjects.All(x => x is Caravan && (x as Caravan).IsPlayerControlled && HasShip(x as Caravan))) && !routePlannerActive) )
             {
-                List<Pawn> pawns = currentFormingCaravan is null ? ShipHarmony.GrabShipsFromCaravans(Find.WorldSelector.SelectedObjects.Cast<Caravan>().ToList()) : TransferableUtility.GetPawnsFromTransferables(currentFormingCaravan.transferables);
-                if(HasShip(pawns))
+                List<Pawn> pawns = currentFormingCaravan is null ? (Find.WorldSelector.SingleSelectedObject as Caravan)?.PawnsListForReading : TransferableUtility.GetPawnsFromTransferables(currentFormingCaravan.transferables);
+                if (pawns != null && HasShip(pawns))
                 {
+                    if(currentFormingCaravan is null && !pawns.All(x => IsShip(x)))
+                    {
+                        __result = false;
+                        Messages.Message("CantMoveDocked".Translate(), MessageTypeDefOf.RejectInput, false);
+                        return false;
+                    }
                     if(currentFormingCaravan != null || boatFields is null)
                     {
                         inverseFloodFill = true;
@@ -3119,6 +3157,7 @@ namespace RimShips
             }
             if(routePlannerActive)
             {
+                /*Log.Message("RoutePlanner");*/
                 if (startTile < 0 || destTile >= ___fields.Length || destTile < 0 || destTile >= ___fields.Length)
                 {
                     __result = false;
@@ -3147,6 +3186,8 @@ namespace RimShips
 
         public static bool FloodFillInverse(int tile, int ___impassableFieldID, ref int ___nextFieldID)
         {
+            /*Log.Message("======================================");
+            Log.Message("Flood Fill: " + inverseFloodFill);*/
             if(inverseFloodFill)
             {
                 inverseFloodFill = false;
@@ -3172,88 +3213,84 @@ namespace RimShips
                 //Caravan Const Values
                 const int MaxShipPawnTicksPerMove = 150;
                 const float CellToTilesConversionRatio = 340f;
-                const int DefaultTicksPerMove = 3300;
                 const float MoveSpeedFactorAtLowMass = 2f;
 
-                if(!(explanation is null))
+                if (!(explanation is null))
                 {
                     explanation.Append("CaravanMovementSpeedFull".Translate() + ":");
                     float num = 0f;
-                    for(int i = 0; i  < pawns.Count; i++)
+                    Pawn slowestShip = pawns.Where(x => IsShip(x)).MinBy(x => x.def.statBases.Find(y => y.stat == StatDefOf.MoveSpeed).value);
+                    num = Mathf.Min((float)slowestShip.TicksPerMoveCardinal, MaxShipPawnTicksPerMove) * CellToTilesConversionRatio;
+                    float num2 = 60000f / num;
+                    float moveSpeedMultiplier = 1f;
+                    switch(slowestShip.GetComp<CompShips>().Props.shipPowerType)
                     {
-                        num = Mathf.Min((float)pawns[i].TicksPerMoveCardinal, MaxShipPawnTicksPerMove) * CellToTilesConversionRatio;
-                        float num2 = 60000f / num;
-                        if(!(explanation is null))
-                        {
-                            explanation.AppendLine();
-                            explanation.Append(string.Concat(new string[]
-                            {
-                            "  - ",
-                            pawns[i].LabelShortCap,
-                            ": ",
-                            num2.ToString("0.#"),
-                            " ",
-                            "TilesPerDay".Translate()
-                            }));
-                        }
-                        int count = 0;
-                        foreach(Pawn p in pawns)
-                            count += p?.GetComp<CompShips>()?.AllPawnsAboard?.Count ?? 1;
-                        num += num2 / (float)count;
+                        case ShipType.Paddles:
+                            moveSpeedMultiplier = 0.8f;
+                            break;
+                        case ShipType.Sails:
+                            moveSpeedMultiplier = 1.15f;
+                            break;
+                        case ShipType.Steam:
+                            moveSpeedMultiplier = 1.1f;
+                            break;
+                        case ShipType.Fuel:
+                            moveSpeedMultiplier = 1.25f;
+                            break;
+                        case ShipType.Nuclear:
+                            moveSpeedMultiplier = 1.4f;
+                            break;
                     }
-                    float moveSpeedFactorFromMass = massCapacity <= 0f ? 1f : Mathf.Lerp(MoveSpeedFactorAtLowMass, 1f, massUsage / massCapacity);
-                    if(!(explanation is null))
+                    
+                    if(explanation != null)
                     {
-                        float num3 = 60000f / num;
                         explanation.AppendLine();
                         explanation.Append(string.Concat(new string[]
                         {
-                            "  ",
-                            "Average".Translate(),
-                            ": ",
-                            num3.ToString("0.#"),
-                            " ",
-                            "TilesPerDay".Translate()
+                        "Slowest Ship: ",
+                        slowestShip.LabelShortCap,
+                        "\nShip Type: ",
+                        slowestShip.GetComp<CompShips>().Props.shipPowerType.ToString(),
+                        " - ",
+                        moveSpeedMultiplier.ToString("0.#"),
+                        "x Speed\n", "BaseSpeed".Translate(), ": ",
+                        num2.ToString("0.#"),
+                        " ",
+                        "TilesPerDay".Translate()
                         }));
-                        explanation.AppendLine();
-                        explanation.Append("  " + "MultiplierForCarriedMass".Translate(moveSpeedFactorFromMass.ToStringPercent()));
                     }
-                    int num4 = Mathf.Max(Mathf.RoundToInt(num / moveSpeedFactorFromMass), 1);
-                    if(!(explanation is null))
+                    num += num2;
+                    float moveSpeedFactorFromMass = massCapacity <= 0f ? 1f : Mathf.Lerp(MoveSpeedFactorAtLowMass, 1f, massUsage / massCapacity);
+                    
+                    if(explanation != null)
+                    {
+                        explanation.AppendLine();
+                        explanation.Append("MultiplierForCarriedMass".Translate(moveSpeedFactorFromMass.ToStringPercent()));
+                    }
+                    int num4 = Mathf.Max(Mathf.RoundToInt(num / (moveSpeedFactorFromMass * moveSpeedMultiplier)), 1);
+                    if(explanation != null)
                     {
                         float num5 = 60000f / (float)num4;
                         explanation.AppendLine();
                         explanation.Append(string.Concat(new string[]
                         {
-                            "  ",
                             "FinalCaravanPawnsMovementSpeed".Translate(),
                             ": ",
                             num5.ToString("0.#"),
                             " ",
-                            "TilesPerDay".Translate()
+                            "TilesPerDay".Translate(),
                         }));
                     }
                     __result = num4;
                     return false;
                 }
-                if(!(explanation is null))
-                {
-                    explanation.Append("CaravanMovementSpeedFull".Translate() + ":");
-                    float num = 18.181818f;
-                    explanation.AppendLine();
-                    explanation.Append(string.Concat(new string[]
-                    {
-                        "  ",
-                        "Default".Translate(),
-                        ": ",
-                        num.ToString("0.#"),
-                        " ",
-                        "TilesPerDay".Translate()
-                    }));
-                }
-                __result = DefaultTicksPerMove;
-                return false;
             }
+            return true;
+        }
+
+        public static bool ApproxTilesForShips(Caravan caravan, StringBuilder explanation = null)
+        {
+            //Continue here
             return true;
         }
 
@@ -3572,7 +3609,7 @@ namespace RimShips
                     }
                     foreach (ShipHandler handler in ship.GetComp<CompShips>().handlers)
                     {
-                        if (handler.AreSlotsAvailable)
+                        if(handler.AreSlotsAvailable)
                         {
                             ship.GetComp<CompShips>().Notify_BoardedCaravan(sailors.Pop(), handler.handlers);
                             break;
@@ -3676,6 +3713,41 @@ namespace RimShips
             return pawns;
         }
 
+        public static List<Pawn> GrabPawnsFromShipCaravan(Caravan caravan)
+        {
+            if(caravan is null)
+                return null;
+            if(!HasShip(caravan))
+            {
+                Log.Error("Attempted to grab pawns from Ship Caravan when caravan does not have a ship");
+                return null;
+            }
+            List<Pawn> ships = new List<Pawn>();
+            foreach(Pawn p in caravan.PawnsListForReading)
+            {
+                if(IsShip(p))
+                    ships.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
+                else
+                    ships.Add(p);
+            }
+            return ships;
+        }
+
+        public static List<Pawn> GrabPawnsFromShipCaravanSilentFail(Caravan caravan)
+        {
+            if (caravan is null || !HasShip(caravan))
+                return null;
+            List<Pawn> ships = new List<Pawn>();
+            foreach (Pawn p in caravan.PawnsListForReading)
+            {
+                if(IsShip(p))
+                    ships.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
+                else
+                    ships.Add(p);
+            }
+            return ships;
+        }
+
         public static List<Pawn> GrabShipsFromCaravans(List<Caravan> caravans)
         {
             if(!caravans.All(x => HasShip(x)))
@@ -3724,7 +3796,7 @@ namespace RimShips
 
         public static bool ShipsFitOnRiver(RiverDef river, List<Pawn> pawns)
         {
-            foreach(Pawn p in pawns)
+            foreach(Pawn p in pawns.Where(x => IsShip(x)))
             {
                 if((p.def.GetCompProperties<CompProperties_Ships>()?.riverTraversability?.GetRiverSize() ?? 5) > river.GetRiverSize())
                     return false;

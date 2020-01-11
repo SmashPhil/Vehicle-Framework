@@ -71,7 +71,7 @@
 
 		<statBases>
 			<MaxHitPoints>1200</MaxHitPoints>
-			<WorkToBuild>30000</WorkToBuild>
+			<WorkToBuild>28000</WorkToBuild>
 			<Flammability>75</Flammability>
 		</statBases>
 		<size>(1,4)</size>
@@ -119,7 +119,7 @@
 		</researchPrerequisites>
 		
 		<costList>
-			<WoodLog>1250</WoodLog>
+			<WoodLog>950</WoodLog>
 			<Cloth>200</Cloth>
 			<Steel>50</Steel>
 		</costList>
@@ -147,7 +147,7 @@
 		
 		<statBases>
 			<MaxHitPoints>12000</MaxHitPoints>
-			<WorkToBuild>250000</WorkToBuild>
+			<WorkToBuild>200000</WorkToBuild>
 			<Flammability>75</Flammability>
 		</statBases>
 		<size>(3,10)</size>
@@ -157,7 +157,7 @@
 		</researchPrerequisites>
 		
 		<costList>
-			<WoodLog>2500</WoodLog>
+			<WoodLog>1600</WoodLog>
 			<Cloth>500</Cloth>
 			<Steel>120</Steel>
 		</costList>
