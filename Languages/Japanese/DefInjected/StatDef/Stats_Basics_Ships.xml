@@ -2,7 +2,7 @@
 <LanguageData>
 
   <MoveSpeedShips.label>速力</MoveSpeedShips.label>
-  <MoveSpeedShips.description>ワールドマップ上の移動速度(マス/秒)です。（航海中の場合）</MoveSpeedShips.description>
+  <MoveSpeedShips.description>ワールドマップ上の移動速度(マス/秒)です。</MoveSpeedShips.description>
   <MoveSpeedShips.formatString>{0}マス/秒</MoveSpeedShips.formatString>
 
   <CarryingCapacityShips.label>積荷容量</CarryingCapacityShips.label>
