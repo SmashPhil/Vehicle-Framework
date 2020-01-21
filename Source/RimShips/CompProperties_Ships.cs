@@ -7,7 +7,7 @@ namespace RimShips
     public enum ShipPermissions {NotAllowed, DriverNeeded, NoDriverNeeded}
     public enum ShipType {Paddles, Sails, Steam, Fuel, Nuclear}
 
-    public enum ShipCategory { Misc, Carrier, Trader, Combat }
+    public enum ShipCategory { Misc, Carrier, Trader, Combat, Hybrid }
 
     //public enum RiverTraversability { Creek, River, LargeRiver, HugeRiver, Impassable }
     public class CompProperties_Ships : CompProperties

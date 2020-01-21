@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
+using System.Diagnostics;
 using Harmony;
 using RimWorld;
 using RimWorld.Planet;
@@ -337,6 +338,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(type: typeof(SettlementBase_TraderTracker), name: nameof(SettlementBase_TraderTracker.GiveSoldThingToPlayer)), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(GiveSoldThingToShipTranspiler)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(Dialog_FormCaravan), name: "TryReformCaravan"), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(BoardBoatsWhenReformingCaravanTranspiler)));
 
             //Draftable
             harmony.Patch(original: AccessTools.Property(type: typeof(Pawn_DraftController), name: nameof(Pawn_DraftController.Drafted)).GetSetMethod(),
@@ -372,22 +376,22 @@ namespace RimShips
             //Extra
             harmony.Patch(original: AccessTools.Property(type: typeof(MapPawns), name: nameof(MapPawns.FreeColonistsSpawnedOrInPlayerEjectablePodsCount)).GetGetMethod(), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(FreeColonistsInShips)));
+                name: nameof(FreeColonistsInShipsTransport)));
             harmony.Patch(original: AccessTools.Method(type: typeof(Selector), name: "HandleMapClicks"), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(MultiSelectFloatMenuTranspiler)));
             harmony.Patch(original: AccessTools.Method(type: typeof(WorldPawns), name: nameof(WorldPawns.GetSituation)), prefix: null,
                 postfix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(SituationBoardedShip)));
-            harmony.Patch(original: AccessTools.Property(type: typeof(RaceProperties), name: nameof(RaceProperties.IsFlesh)).GetGetMethod(), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(BoatsNotFlesh)));
             harmony.Patch(original: AccessTools.Method(type: typeof(GatheringsUtility), name: nameof(GatheringsUtility.ShouldGuestKeepAttendingGathering)),
                 prefix: new HarmonyMethod(typeof(ShipHarmony),
                 name: nameof(BoatsDontParty)));
             harmony.Patch(original: AccessTools.Method(type: typeof(WorldPawns), name: nameof(WorldPawns.RemoveAndDiscardPawnViaGC)),
                 prefix: new HarmonyMethod(type: typeof(ShipHarmony),
                 name: nameof(DoNotRemoveDockedBoats)));
+            harmony.Patch(original: AccessTools.Method(type: typeof(MentalState_Manhunter), parameters: new Type[] { typeof(Thing) }, name: nameof(MentalState_Manhunter.ForceHostileTo)), prefix: null,
+                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
+                name: nameof(ManhunterDontAttackBoats)));
 
             //Debug
             if (debug)
@@ -1786,7 +1790,18 @@ namespace RimShips
                     return false;
                 }
 
-                __result = RCellFinder.TryFindRandomSpotJustOutsideColony(ships.First().Position, ___map, out packingSpot);
+                __result = CellFinder.TryFindRandomCellNear(ships.First().Position, ___map, 15, (IntVec3 c) => c.InBounds(___map) && c.Standable(___map) && !___map.terrainGrid.TerrainAt(c).IsWater, out packingSpot);
+                if(!__result)
+                {
+                    __result = CellFinder.TryFindRandomCellNear(ships.First().Position, ___map, 20, (IntVec3 c) => c.InBounds(___map) && c.Standable(___map), out packingSpot);
+                }
+                GenSpawn.Spawn(ThingDefOf.AIPersonaCore, packingSpot, ___map);
+
+                if(!__result)
+                {
+                    Messages.Message("PackingSpotNotFoundBoats".Translate(), MessageTypeDefOf.CautionInput, false);
+                    __result = RCellFinder.TryFindRandomSpotJustOutsideColony(ships.First().Position, ___map, out packingSpot);
+                }
                 return false;
             }
             packingSpot = IntVec3.Invalid;
@@ -1794,7 +1809,7 @@ namespace RimShips
         }
 
         private static bool FillTabShipCaravan(ITab_Pawn_FormingCaravan __instance, ref List<Thing> ___thingsToSelect, Vector2 ___size, 
-            ref float ___lastDrawnHeight, Vector2 ___scrollPosition, ref List<Thing> ___tmpSingleThing)
+            ref float ___lastDrawnHeight, ref Vector2 ___scrollPosition, ref List<Thing> ___tmpSingleThing)
         {
             if((Find.Selector.SingleSelectedThing as Pawn).GetLord().LordJob is LordJob_FormAndSendCaravanShip)
             {
@@ -2477,7 +2492,7 @@ namespace RimShips
                     yield return instruction;
                     instruction = instructionList[++i];
 
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipHarmony.GrabPawnsFromShips)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipHarmony.GrabPawnsIfShips)));
                 }
 
                 yield return instruction;
@@ -2497,7 +2512,7 @@ namespace RimShips
                     yield return instruction;
                     instruction = instructionList[++i];
 
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipHarmony.GrabPawnsFromShips)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipHarmony.GrabPawnsIfShips)));
                 }
 
                 yield return instruction;
@@ -2553,9 +2568,11 @@ namespace RimShips
                 if(instruction.opcode == OpCodes.Callvirt && instruction.operand == AccessTools.Property(type: typeof(Caravan), name: nameof(Caravan.PawnsListForReading)).GetGetMethod())
                 {
                     yield return instruction;
-                    instruction = instructionList[++i];
+                    i += 2;
+                    instruction = instructionList[i];
 
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipHarmony.GrabPawnsFromShips)));
+                    yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipHarmony.GrabPawnsFromShipCaravanSilentFail)));
                 }
 
                 yield return instruction;
@@ -2678,6 +2695,32 @@ namespace RimShips
             }
         }
 
+        public static IEnumerable<CodeInstruction> BoardBoatsWhenReformingCaravanTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+        {
+            foreach(CodeInstruction instruction in instructions)
+            {
+                if(instruction.opcode == OpCodes.Ret)
+                {
+                    Label label = ilg.DefineLabel();
+                    Label label2 = ilg.DefineLabel();
+
+                    yield return new CodeInstruction(opcode: OpCodes.Ldloc_1);
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), parameters: new Type[] { typeof(Caravan) }, name: nameof(ShipHarmony.HasShip)));
+                    yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
+
+                    /*yield return new CodeInstruction(opcode: OpCodes.Ldloc_1);
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), parameters: new Type[] { typeof(Caravan) }, name: nameof(ShipHarmony.AbleToEmbark)));
+                    yield return new CodeInstruction(opcode: OpCodes.Brtrue, label2);*/
+
+                    yield return new CodeInstruction(opcode: OpCodes.Ldloc_1);
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), name: nameof(ShipHarmony.BoardAllCaravanPawns)));
+
+                    instruction.labels.Add(label);
+                }
+                yield return instruction;
+            }
+        }
+
         #endregion Caravan
 
         #region Construction
@@ -2734,7 +2777,7 @@ namespace RimShips
 
         #region Extra
 
-        public static void FreeColonistsInShips(ref int __result, List<Pawn> ___pawnsSpawned)
+        public static void FreeColonistsInShipsTransport(ref int __result, List<Pawn> ___pawnsSpawned)
         {
             List<Pawn> ships = ___pawnsSpawned.Where(x => IsShip(x) && x.Faction == Faction.OfPlayer).ToList();
             
@@ -2793,14 +2836,6 @@ namespace RimShips
             }
         }
 
-        public static void BoatsNotFlesh(ref bool __result, RaceProperties __instance)
-        {
-            if(__instance.FleshType == FleshTypeDefOf_Ships.WoodenShip || __instance.FleshType == FleshTypeDefOf_Ships.MetalShip)
-            {
-                __result = false;
-            }
-        }
-
         public static bool BoatsDontParty(Pawn p, ref bool __result)
         {
             if (IsShip(p))
@@ -2821,10 +2856,18 @@ namespace RimShips
             return true;
         }
 
+        public static void ManhunterDontAttackBoats(Thing t, ref bool __result)
+        {
+            if(__result is true && IsShip(t))
+            {
+                __result = false;
+            }
+        }
+
         #endregion Extra
         private static bool GenerateNewShipPath(ref PawnPath __result, ref Pawn_PathFollower __instance, ref Pawn ___pawn, ref PathEndMode ___peMode)
         {
-            if (RimShipMod.mod.settings.debugDisableWaterPathing)
+            if(RimShipMod.mod.settings.debugDisableWaterPathing)
                 return true;
             
             if(IsShip(___pawn))
@@ -3121,9 +3164,16 @@ namespace RimShips
                 {
                     if(currentFormingCaravan is null && !pawns.All(x => IsShip(x)))
                     {
-                        __result = false;
-                        Messages.Message("CantMoveDocked".Translate(), MessageTypeDefOf.RejectInput, false);
-                        return false;
+                        if(AbleToEmbark(pawns))
+                        {
+                            BoardAllCaravanPawns(Find.WorldSelector.SingleSelectedObject as Caravan);
+                        }
+                        else
+                        {
+                            __result = false;
+                            Messages.Message("CantMoveDocked".Translate(), MessageTypeDefOf.RejectInput, false);
+                            return false;
+                        }
                     }
                     if(currentFormingCaravan != null || boatFields is null)
                     {
@@ -3251,9 +3301,9 @@ namespace RimShips
                         slowestShip.LabelShortCap,
                         "\nShip Type: ",
                         slowestShip.GetComp<CompShips>().Props.shipPowerType.ToString(),
-                        " - ",
+                        " (",
                         moveSpeedMultiplier.ToString("0.#"),
-                        "x Speed\n", "BaseSpeed".Translate(), ": ",
+                        "x Speed)\n", "BaseSpeed".Translate(), ": ",
                         num2.ToString("0.#"),
                         " ",
                         "TilesPerDay".Translate()
@@ -3334,7 +3384,7 @@ namespace RimShips
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
                     yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(ShipHarmony), parameters: new Type[] { typeof(IEnumerable<Pawn>) }, name: nameof(ShipHarmony.HasShip)));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
-
+                    
                     yield return new CodeInstruction(opcode: OpCodes.Pop);
                     yield return new CodeInstruction(opcode: OpCodes.Pop);
 
@@ -3596,6 +3646,14 @@ namespace RimShips
 
         public static void BoardAllCaravanPawns(Caravan caravan)
         {
+            if(!AbleToEmbark(caravan))
+            {
+                if(caravan.pather.Moving)
+                    caravan.pather.StopDead();
+                Messages.Message("CantMoveDocked".Translate(), MessageTypeDefOf.RejectInput, false);
+                return;
+            }
+
             List<Pawn> sailors = caravan.PawnsListForReading.Where(x => !ShipHarmony.IsShip(x)).ToList();
             List<Pawn> ships = caravan.PawnsListForReading.Where(x => ShipHarmony.IsShip(x)).ToList();
             for (int i = 0; i < ships.Count; i++)
@@ -3668,6 +3726,11 @@ namespace RimShips
             return IsShip(t as Pawn);
         }
 
+        public static bool IsShip(ThingDef td)
+        {
+            return td.GetCompProperties<CompProperties_Ships>() != null;
+        }
+
         public static bool HasShip(List<Pawn> pawns)
         {
             return pawns?.Any(x => IsShip(x)) ?? false;
@@ -3681,6 +3744,45 @@ namespace RimShips
         public static bool HasShip(Caravan c)
         {
             return (c is null) ? (currentFormingCaravan is null) ? false : HasShip(TransferableUtility.GetPawnsFromTransferables(currentFormingCaravan.transferables)) : HasShip(c?.PawnsListForReading);
+        }
+
+        private static bool HasEnoughSpacePawns(List<Pawn> pawns)
+        {
+            int num = 0;
+            foreach(Pawn p in pawns.Where(x => IsShip(x)))
+            {
+                num += p.GetComp<CompShips>().TotalSeats;
+            }
+            return pawns.Where(x => !IsShip(x)).Count() <= num;
+        }
+
+        private static bool HasEnoughPawnsToEmbark(List<Pawn> pawns)
+        {
+            int num = 0;
+            foreach(Pawn p in pawns.Where(x => IsShip(x)))
+            {
+                num += p.GetComp<CompShips>().PawnCountToOperate;
+            }
+            return pawns.Where(x => !IsShip(x)).Count() >= num;
+        }
+
+        public static bool AbleToEmbark(List<Pawn> pawns)
+        {
+            return HasEnoughSpacePawns(pawns) && HasEnoughPawnsToEmbark(pawns);
+        }
+
+        public static bool AbleToEmbark(Caravan caravan)
+        {
+            List<Pawn> pawns = new List<Pawn>();
+            foreach(Pawn p in caravan.PawnsListForReading)
+            {
+                if(IsShip(p))
+                {
+                    pawns.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
+                }
+                pawns.Add(p);
+            }
+            return AbleToEmbark(pawns);
         }
 
         public static bool HasCannons(this Pawn p)
@@ -3703,27 +3805,29 @@ namespace RimShips
 
         public static List<Pawn> GrabPawnsFromShips(List<Pawn> ships)
         {
-            if (!ships.All(x => IsShip(x)))
-                return ships;
+            if(!ships.Any(x => IsShip(x)))
+                return null;
             List<Pawn> pawns = new List<Pawn>();
             foreach (Pawn p in ships)
             {
-                pawns.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
+                if(IsShip(p))
+                    pawns.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
+                else
+                    pawns.Add(p);
             }
             return pawns;
         }
 
-        public static List<Pawn> GrabPawnsFromShipCaravan(Caravan caravan)
+        public static List<Pawn> GrabPawnsIfShips(List<Pawn> pawns)
         {
-            if(caravan is null)
+            if(pawns is null)
                 return null;
-            if(!HasShip(caravan))
+            if(!HasShip(pawns))
             {
-                Log.Error("Attempted to grab pawns from Ship Caravan when caravan does not have a ship");
-                return null;
+                return pawns;
             }
             List<Pawn> ships = new List<Pawn>();
-            foreach(Pawn p in caravan.PawnsListForReading)
+            foreach(Pawn p in pawns)
             {
                 if(IsShip(p))
                     ships.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
@@ -3735,10 +3839,10 @@ namespace RimShips
 
         public static List<Pawn> GrabPawnsFromShipCaravanSilentFail(Caravan caravan)
         {
-            if (caravan is null || !HasShip(caravan))
+            if(caravan is null || !HasShip(caravan))
                 return null;
             List<Pawn> ships = new List<Pawn>();
-            foreach (Pawn p in caravan.PawnsListForReading)
+            foreach(Pawn p in caravan.PawnsListForReading)
             {
                 if(IsShip(p))
                     ships.AddRange(p.GetComp<CompShips>().AllPawnsAboard);

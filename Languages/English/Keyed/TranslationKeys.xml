@@ -87,7 +87,8 @@
 	<MessageCantAddWaypointBecauseShip>Cannot travel on land with boats.</MessageCantAddWaypointBecauseShip>
 	<MessageCantAddWaypointBecauseRiverUnreachable>Boat is not able to travel on this river</MessageCantAddWaypointBecauseRiverUnreachable>
 	<TerrainReset>({0}) Water Regions have been reset.</TerrainReset>
-	<CantMoveDocked>Cannot Move. Caravan is currently Docked.</CantMoveDocked>
+	<CantMoveDocked>Not enough pawns to set sail.</CantMoveDocked>
+	<PackingSpotNotFoundBoats>Packing Spot was not found for Boat caravan. It is recommended you place a Packing Spot from Misc.</PackingSpotNotFoundBoats>
 	
 	<!-- Caravans -->
 	<CaravanShips>Boat</CaravanShips>

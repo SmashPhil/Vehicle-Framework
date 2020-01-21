@@ -41,28 +41,36 @@ namespace RimShips.Lords
             this.prisoners = prisoners;
         }
 
-        public Pawn LeadShip => this.leadShip;
+        public Pawn LeadShip
+        {
+            get
+            {
+                if (this.leadShip is null)
+                    this.leadShip = ships.First(x => ShipHarmony.IsShip(x) && x.RaceProps.baseBodySize == ships.Max(y => y.RaceProps.baseBodySize));
+                return this.leadShip;
+            }
+        }
 
         public Pawn GetShipAssigned(Pawn p)
         {
-            return shipAssigned.TryGetValue(p);
+            return this.shipAssigned.TryGetValue(p);
         }
 
         public void AssignSeats()
         {
-            shipAssigned = new Dictionary<Pawn, Pawn>();
+            if(this.shipAssigned != null && this.shipAssigned.Count > 0 /*&& this.shipAssigned.Keys.Count == (this.sailors.Count + this.prisoners.Count)*/)
+                return;
             List<Pawn> sailorsTmp = this.sailors;
             List<Pawn> prisonersTmp = this.prisoners;
             int numPreassign = 0;
-            foreach(Pawn p in ships)
+            foreach(Pawn p in this.ships)
             {
                 numPreassign = p.GetComp<CompShips>().PawnCountToOperate - p.GetComp<CompShips>().AllCrewAboard.Count;
                 for(int i = 0; i < numPreassign; i++)
                 {
-                    shipAssigned.Add(sailorsTmp.Pop(), p);
+                    this.shipAssigned.Add(sailorsTmp.Pop(), p);
                 }
             }
-
             if(sailorsTmp.Count > 0)
             {
                 int i = 0;
@@ -70,13 +78,13 @@ namespace RimShips.Lords
                 while(sailorsTmp.Count > 0)
                 {
                     Pawn p = ships[i];
-                    shipAssigned.Add(sailorsTmp.Pop(), p);
+                    this.shipAssigned.Add(sailorsTmp.Pop(), p);
                     i = (i+2) > ships.Count ? 0 : ++i;
                 }
                 while(prisonersTmp.Count > 0)
                 {
                     Pawn p = ships[j];
-                    shipAssigned.Add(prisonersTmp.Pop(), p);
+                    this.shipAssigned.Add(prisonersTmp.Pop(), p);
                     j = (j + 2) > ships.Count ? 0 : ++j;
                 }
             }
@@ -331,23 +339,27 @@ namespace RimShips.Lords
         {
             Scribe_Collections.Look<TransferableOneWay>(ref this.transferables, "transferables", LookMode.Deep, new object[0]);
             Scribe_Collections.Look<Pawn>(ref this.downedPawns, "downedPawns", LookMode.Reference, new object[0]);
+            Scribe_Collections.Look<Pawn>(ref this.prisoners, "prisoners", LookMode.Reference, new object[0]);
+            Scribe_Collections.Look<Pawn>(ref this.ships, "ships", LookMode.Reference, new object[0]);
+            Scribe_Collections.Look<Pawn>(ref this.sailors, "sailors", LookMode.Reference, new object[0]);
             Scribe_Values.Look<IntVec3>(ref this.meetingPoint, "meetingPoint", default(IntVec3), false);
             Scribe_Values.Look<IntVec3>(ref this.exitPoint, "exitPoint", default(IntVec3), false);
             Scribe_Values.Look<int>(ref this.startingTile, "startingTile", 0, false);
             Scribe_Values.Look<int>(ref this.destinationTile, "destinationTile", 0, false);
+            Scribe_Collections.Look<Pawn, Pawn>(ref this.shipAssigned, "shipAssigned", LookMode.Reference, LookMode.Reference);
         }
 
-        public List<TransferableOneWay> transferables;
+        public List<TransferableOneWay> transferables = new List<TransferableOneWay>();
 
-        public List<Pawn> downedPawns;
+        public List<Pawn> downedPawns = new List<Pawn>();
 
-        public List<Pawn> prisoners;
+        public List<Pawn> prisoners = new List<Pawn>();
 
-        public List<Pawn> ships;
+        public List<Pawn> ships = new List<Pawn>();
 
-        public List<Pawn> sailors;
+        public List<Pawn> sailors = new List<Pawn>();
 
-        private Dictionary<Pawn, Pawn> shipAssigned;
+        private Dictionary<Pawn, Pawn> shipAssigned = new Dictionary<Pawn, Pawn>();
 
         private Pawn leadShip;
 

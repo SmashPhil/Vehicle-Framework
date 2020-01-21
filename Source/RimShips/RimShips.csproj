@@ -76,6 +76,7 @@
     <Compile Include="GatherItemsForShipCaravanUtility.cs" />
     <Compile Include="GenGridShips.cs" />
     <Compile Include="GenPathShip.cs" />
+    <Compile Include="HarmonyPatches_Bootstrap.cs" />
     <Compile Include="ITab_Ship_Cargo.cs" />
     <Compile Include="ITab_Ship_Health.cs" />
     <Compile Include="ITab_Ship_Passengers.cs" />

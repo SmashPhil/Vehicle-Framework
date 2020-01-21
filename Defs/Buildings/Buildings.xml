@@ -172,4 +172,42 @@
 		</modExtensions>
 			
 	</ThingDef>
+	
+	<ThingDef ParentName="ShipBase">
+		<defName>SPBoats_PaddleSteamerBlueprint</defName>
+		<label>Paddle Steamer</label>
+		<description>A versatile boat capable of carrying large amounts of cargo over long distances, while still packing a punch.</description>
+		<graphicData>
+			<texPath>Ships/paddlesteamer/PaddleSteamer_north</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+			<drawSize>(7,17)</drawSize>
+		</graphicData>
+		
+		<statBases>
+			<MaxHitPoints>13500</MaxHitPoints>
+			<WorkToBuild>225000</WorkToBuild>
+			<Flammability>0.15</Flammability>
+		</statBases>
+		<size>(4,10)</size>
+		
+		<researchPrerequisites>
+			<li>Caravel</li>
+		</researchPrerequisites>
+		
+		<costList>
+			<WoodLog>150</WoodLog>
+			<ComponentIndustrial>12</ComponentIndustrial>
+			<Steel>800</Steel>
+		</costList>
+		
+		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
+		
+		<modExtensions>
+			<li Class="RimShips.Build.SpawnThingBuilt">
+				<thingToSpawn>SPBoats_PawnKind_PaddleSteamer</thingToSpawn>
+				<soundFinished>ShipBigConstruction</soundFinished>
+			</li>
+		</modExtensions>
+			
+	</ThingDef>
 </Defs>

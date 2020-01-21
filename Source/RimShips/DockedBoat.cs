@@ -51,15 +51,15 @@ namespace RimShips
             }
             caravan.pawns.TryAddRangeOrTransfer(this.dockedBoats);
             List<Pawn> boats = caravan.PawnsListForReading.Where(x => ShipHarmony.IsShip(x)).ToList();
-            foreach(Pawn p in caravan.pawns)
+            foreach (Pawn p in caravan.pawns)
             {
-                if(!ShipHarmony.IsShip(p))
+                if (!ShipHarmony.IsShip(p))
                 {
-                    for(int i = p.inventory.innerContainer.Count - 1; i >= 0; i--)
+                    for (int i = p.inventory.innerContainer.Count - 1; i >= 0; i--)
                     {
                         Thing t = p.inventory.innerContainer[i];
                         p.inventory.innerContainer.TryTransferToContainer(t, boats.Find(x => !MassUtility.IsOverEncumbered(x)).inventory.innerContainer, true);
-                    } 
+                    }
                 }
             }
             ShipHarmony.ToggleDocking(caravan, false);

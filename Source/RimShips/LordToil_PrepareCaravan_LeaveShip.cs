@@ -25,12 +25,14 @@ namespace RimShips.Lords
         {
             foreach(Pawn p in this.lord.ownedPawns)
             {
+                if(!ShipHarmony.IsShip(p))
+                    this.lord.LordJob.Notify_PawnLost(p, PawnLostCondition.LeftVoluntarily);
                 p.mindState.duty = new PawnDuty(DutyDefOf_Ships.TravelOrWaitOcean, this.exitSpot, -1f)
                 {
                     locomotion = LocomotionUrgency.Jog
                 };
-                if(p.GetComp<CompShips>()?.ResolveSeating() ?? false)
-                    p.drafter.Drafted = true;
+                p.GetComp<CompShips>().ResolveSeating();
+                p.drafter.Drafted = true;
             }
         }
 

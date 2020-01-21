@@ -23,6 +23,8 @@ namespace RimShips
         public bool beached = false;
         private float angle = 0f; /* East: -45 is TopRight, 45 is BottomRight | West: -45 is BottomLeft, 45 is TopLeft */
 
+        private bool outOfFoodNotified = false;
+
         public List<ShipHandler> handlers = new List<ShipHandler>();
         public ShipMovementStatus movementStatus = ShipMovementStatus.Online;
 
@@ -180,6 +182,19 @@ namespace RimShips
             }
         }
 
+        public int TotalSeats
+        {
+            get
+            {
+                int x = 0;
+                foreach(ShipHandler handler in handlers)
+                {
+                    x += handler.role.slots;
+                }
+                return x;
+            }
+        }
+
         public int AverageSkillOfCapablePawns(SkillDef skill)
         {
             int value = 0;
@@ -223,6 +238,7 @@ namespace RimShips
                 this.angle = value;
             }
         }
+
         public override IEnumerable<Gizmo> CompGetGizmosExtra()
         {
             if(!this.Pawn.Dead)
@@ -428,6 +444,8 @@ namespace RimShips
                 }
             }
             RemovePawn(pawn);
+            if(!this.AllPawnsAboard.Any() && outOfFoodNotified)
+                outOfFoodNotified = false;
         }
 
         public void DisembarkAll()
@@ -496,45 +514,68 @@ namespace RimShips
         }
         private void TrySatisfyPawnNeeds(Pawn pawn)
         {
-            if (pawn.Dead) return;
-
+            if(pawn.Dead) return;
             List<Need> allNeeds = pawn.needs.AllNeeds;
-            foreach(Need need in allNeeds)
+            int tile = this.Pawn.IsCaravanMember() ? this.Pawn.GetCaravan().Tile : this.Pawn.Map.Tile;
+            for(int i = 0; i < allNeeds.Count; i++)
             {
+                Need need = allNeeds[i];
                 if(need is Need_Rest)
                 {
-                    this.TickNeeds(need);
-                    this.TrySatisfyRest(pawn, need as Need_Rest);
+                    if(CaravanNightRestUtility.RestingNowAt(tile))
+                    {
+                        this.TrySatisfyRest(pawn, need as Need_Rest);
+                    }
+                    else
+                    {
+                        this.TickNeeds(need, pawn);
+                    }
                 }
-                else if(need is Need_Food)
+                else if (need is Need_Food)
                 {
-                    this.TickNeeds(need);
-                    this.TrySatisfyFood(pawn, need as Need_Food);
+                    this.TickNeeds(need, pawn);
+                    if(!CaravanNightRestUtility.RestingNowAt(tile))
+                        this.TrySatisfyFood(pawn, need as Need_Food);
                 }
-                else if(need is Need_Chemical)
+                else if (need is Need_Chemical)
                 {
-                    this.TickNeeds(need);
-                    this.TrySatisfyChemicalNeed(pawn, need as Need_Chemical);
+                    this.TickNeeds(need, pawn);
+                    if(!CaravanNightRestUtility.RestingNowAt(tile))
+                        this.TrySatisfyChemicalNeed(pawn, need as Need_Chemical);
                 }
-                else if(need is Need_Joy)
+                else if (need is Need_Joy)
                 {
-                    this.TickNeeds(need);
-                    this.TrySatisfyJoyNeed(pawn, need as Need_Joy);
+                    this.TickNeeds(need, pawn);
+                    if (!CaravanNightRestUtility.RestingNowAt(tile))
+                        this.TrySatisfyJoyNeed(pawn, need as Need_Joy);
+                }
+                else if(need is Need_Mood)
+                {
+                    need.NeedInterval();
+                }
+                else if(need is Need_Comfort)
+                {
+                    need.CurLevel = 0.5f;
+                }
+                else if(need is Need_Outdoors)
+                {
+                    need.NeedInterval();
                 }
             }
         }
 
         private void TrySatisfyRest(Pawn pawn, Need_Rest rest)
         {
-            //Add Check
             Building_Bed bed = (Building_Bed)this.Pawn.inventory.innerContainer.InnerListForReading.Find(x => x is Building_Bed); // Reserve?
             float restValue = bed is null ? 0.75f : bed.GetStatValue(StatDefOf.BedRestEffectiveness, true);
-            rest.TickResting(restValue);
+            restValue *= pawn.GetStatValue(StatDefOf.RestRateMultiplier, true);
+            if(restValue > 0)
+                rest.CurLevel += 0.0057142857f * restValue;
         }
 
         private void TrySatisfyFood(Pawn pawn, Need_Food food)
         {
-            if (food.CurCategory < HungerCategory.Hungry)
+            if(food.CurCategory < HungerCategory.Hungry)
                 return;
             Thing thing;
             if(this.TryGetBestFood(pawn, out thing))
@@ -544,9 +585,10 @@ namespace RimShips
                 {
                     this.Pawn.inventory.innerContainer.Remove(thing);
                 }
-                if(!TryGetBestFood(pawn, out thing))
+                if(!outOfFoodNotified && !TryGetBestFood(pawn, out thing))
                 {
                     Messages.Message("ShipOutOfFood".Translate(this.Pawn.LabelShort), this.Pawn, MessageTypeDefOf.NegativeEvent, false);
+                    outOfFoodNotified = true;
                 }
             }
         }
@@ -572,6 +614,7 @@ namespace RimShips
                 food = thing;
                 return true;
             }
+            Log.Message("no Food");
             food = null;
             return false;
         }
@@ -679,70 +722,63 @@ namespace RimShips
             return outJoyKinds;
         }
 
-        public void TickNeeds(Need n)
+        public void TickNeeds(Need n, Pawn pawn)
         {
-            if(this.Pawn.pather.Moving)
+            switch (this.Props.shipPowerType)
             {
-                switch (this.Props.shipPowerType)
-                {
-                    case ShipType.Paddles:
-                        if (n is Need_Rest)
-                            n.CurLevel -= 2.15E-05f;
-                        else if (n is Need_Food)
-                            n.CurLevel -= 2.25E-05f;
-                        else if (n is Need_Chemical)
-                            n.CurLevel -= 2.0E-05f;
-                        else if (n is Need_Joy)
-                            n.CurLevel -= 2.0E-05f;
-                        break;
-                    case ShipType.Sails:
-                        if (n is Need_Rest)
-                            n.CurLevel -= 2.10E-05f;
-                        else if (n is Need_Food)
-                            n.CurLevel -= 2.05E-05f;
-                        else if (n is Need_Chemical)
-                            n.CurLevel -= 2.0E-05f;
-                        else if (n is Need_Joy)
-                            n.CurLevel -= 2.0E-05f;
-                        break;
-                    case ShipType.Steam:
-                        if (n is Need_Rest)
-                            n.CurLevel -= 2.05E-05f;
-                        else if (n is Need_Food)
-                            n.CurLevel -= 2.0E-05f;
-                        else if (n is Need_Chemical)
-                            n.CurLevel -= 2.0E-05f;
-                        else if (n is Need_Joy)
-                            n.CurLevel -= 2.0E-05f;
-                        break;
-                    case ShipType.Fuel:
-                        if (n is Need_Rest)
-                            n.CurLevel -= 2.0E-05f;
-                        else if (n is Need_Food)
-                            n.CurLevel -= 1.8E-05f;
-                        else if (n is Need_Chemical)
-                            n.CurLevel -= 2.0E-05f;
-                        else if (n is Need_Joy)
-                            n.CurLevel -= 2.0E-05f;
-                        break;
-                    case ShipType.Nuclear:
-                        if (n is Need_Rest)
-                            n.CurLevel -= 2.0E-05f;
-                        else if (n is Need_Food)
-                            n.CurLevel -= 1.8E-05f;
-                        else if (n is Need_Chemical)
-                            n.CurLevel -= 2.0E-05f;
-                        else if (n is Need_Joy)
-                            n.CurLevel -= 2.0E-05f;
-                        break;
-                    default:
-                        throw new NotImplementedException();
-                } 
-            }
-            else
-            {
-                n.CurLevel -= 2.0E-05f;
-            }
+                case ShipType.Paddles:
+                    if (n is Need_Rest)
+                        n.CurLevel -= 2E-05f * pawn.health.hediffSet.RestFallFactor * 90f;
+                    else if (n is Need_Food)
+                        n.CurLevel -= 2.6666667E-05f * pawn.ageTracker.CurLifeStage.hungerRateFactor * pawn.RaceProps.baseHungerRate * pawn.health.hediffSet.HungerRateFactor * pawn.GetStatValue(StatDefOf.HungerRateMultiplier, true) * 155f;
+                    else if (n is Need_Chemical)
+                        n.CurLevel -= 2.0E-05f * 150f;
+                    else if (n is Need_Joy)
+                        n.CurLevel -= 2.0E-05f * 150f;
+                    break;
+                case ShipType.Sails:
+                    if (n is Need_Rest)
+                        n.CurLevel -= 2E-05f * pawn.health.hediffSet.RestFallFactor * 80f;
+                    else if (n is Need_Food)
+                        n.CurLevel -= 2.6666667E-05f * pawn.ageTracker.CurLifeStage.hungerRateFactor * pawn.RaceProps.baseHungerRate * pawn.health.hediffSet.HungerRateFactor * pawn.GetStatValue(StatDefOf.HungerRateMultiplier, true) * 150f;
+                    else if (n is Need_Chemical)
+                        n.CurLevel -= 2.0E-05f * 150f;
+                    else if (n is Need_Joy)
+                        n.CurLevel -= 2.0E-05f * 150f;
+                    break;
+                case ShipType.Steam:
+                    if (n is Need_Rest)
+                        n.CurLevel -= 2E-05f * pawn.health.hediffSet.RestFallFactor * 75f;
+                    else if (n is Need_Food)
+                        n.CurLevel -= 2.6666667E-05f * pawn.ageTracker.CurLifeStage.hungerRateFactor * pawn.RaceProps.baseHungerRate * pawn.health.hediffSet.HungerRateFactor * pawn.GetStatValue(StatDefOf.HungerRateMultiplier, true) * 150f;
+                    else if (n is Need_Chemical)
+                        n.CurLevel -= 2.0E-05f * 150f;
+                    else if (n is Need_Joy)
+                        n.CurLevel -= 2.0E-05f * 150f;
+                    break;
+                case ShipType.Fuel:
+                    if (n is Need_Rest)
+                        n.CurLevel -= 2E-05f * pawn.health.hediffSet.RestFallFactor * 75f;
+                    else if (n is Need_Food)
+                        n.CurLevel -= 2.6666667E-05f * pawn.ageTracker.CurLifeStage.hungerRateFactor * pawn.RaceProps.baseHungerRate * pawn.health.hediffSet.HungerRateFactor * pawn.GetStatValue(StatDefOf.HungerRateMultiplier, true) * 150f;
+                    else if (n is Need_Chemical)
+                        n.CurLevel -= 2.0E-05f * 150f;
+                    else if (n is Need_Joy)
+                        n.CurLevel -= 2.0E-05f * 150f;
+                    break;
+                case ShipType.Nuclear:
+                    if (n is Need_Rest)
+                        n.CurLevel -= 2E-05f * pawn.health.hediffSet.RestFallFactor * 75f;
+                    else if (n is Need_Food)
+                        n.CurLevel -= 2.6666667E-05f * pawn.ageTracker.CurLifeStage.hungerRateFactor * pawn.RaceProps.baseHungerRate * pawn.health.hediffSet.HungerRateFactor * pawn.GetStatValue(StatDefOf.HungerRateMultiplier, true) * 150f;
+                    else if (n is Need_Chemical)
+                        n.CurLevel -= 2.0E-05f * 150f;
+                    else if (n is Need_Joy)
+                        n.CurLevel -= 2.0E-05f * 150f;
+                    break;
+                default:
+                    throw new NotImplementedException();
+            } 
         }
 
         public void ReserveSeat(Pawn p, ShipHandler handler)
@@ -790,11 +826,15 @@ namespace RimShips
                             if (passengerHandler.handlers.Count <= 0)
                             {
                                 ShipHandler emergencyHandler = this.handlers.Find(x => x.role.handlingType < HandlingTypeFlags.Movement && x.handlers.Count > 0); //Can Optimize
-                                Pawn transferPawnE = emergencyHandler?.handlers.InnerListForReading.First(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
+                                Pawn transferPawnE = emergencyHandler?.handlers.InnerListForReading.Find(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && x.RaceProps.Humanlike);
+                                if(transferPawnE is null)
+                                    continue;
                                 emergencyHandler?.handlers.TryTransferToContainer(transferPawnE, handler.handlers, false);
                                 continue;
                             }
-                            Pawn transferingPawn = passengerHandler.handlers.InnerListForReading.First(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
+                            Pawn transferingPawn = passengerHandler.handlers.InnerListForReading.Find(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && x.RaceProps.Humanlike);
+                            if(transferingPawn is null)
+                                continue;
                             passengerHandler.handlers.TryTransferToContainer(transferingPawn, handler.handlers, false);
                         }
                         if (handler.role.handlingType == HandlingTypeFlags.Cannons && handler.handlers.Count < handler.role.slotsToOperate && this.CanMove)
@@ -802,11 +842,15 @@ namespace RimShips
                             if(passengerHandler.handlers.Count <= 0)
                             {
                                 ShipHandler emergencyHandler = this.handlers.Find(x => x.role.handlingType < HandlingTypeFlags.Cannons && x.handlers.Count > 0); //Can Optimize
-                                Pawn transferPawnE = emergencyHandler?.handlers.InnerListForReading.First(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
+                                Pawn transferPawnE = emergencyHandler?.handlers.InnerListForReading.Find(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && x.RaceProps.Humanlike);
+                                if(transferPawnE is null)
+                                    continue;
                                 emergencyHandler?.handlers.TryTransferToContainer(transferPawnE, handler.handlers, false);
                                 continue;
                             }
-                            Pawn transferingPawn = passengerHandler.handlers.InnerListForReading.First(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
+                            Pawn transferingPawn = passengerHandler.handlers.InnerListForReading.Find(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && x.RaceProps.Humanlike);
+                            if(transferingPawn is null)
+                                continue;
                             passengerHandler.handlers.TryTransferToContainer(transferingPawn, handler.handlers, false);
                         }
                     }
@@ -818,9 +862,10 @@ namespace RimShips
         public override void CompTick()
         {
             base.CompTick();
-            //this.TrySatisfyPawnNeeds();
+            if (this.Pawn.IsHashIntervalTick(150))
+                this.TrySatisfyPawnNeeds();
 
-            foreach(ShipHandler handler in handlers)
+            foreach (ShipHandler handler in handlers)
             {
                 handler.ReservationHandler();
             }

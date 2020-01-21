@@ -48,7 +48,18 @@ namespace RimShips
             if (this?.cannons?.Count > 0 && this.Pawn.Drafted)
                 GenDraw.DrawRadiusRing(this.Pawn.Position, this.Range);
         }
-        
+
+        /*public override void PostDraw()
+        {
+            foreach(CannonHandler cannon in this.Cannons)
+            {
+                if(cannon.CannonTexture != null)
+                {
+                    Graphic graphic = GhostUtility.GhostGraphicFor(cannon.CannonTexture, )
+                }
+            }
+        }*/
+
         public override IEnumerable<Gizmo> CompGetGizmosExtra()
         {
             if (this.Pawn.Drafted)

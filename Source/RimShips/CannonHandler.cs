@@ -33,8 +33,10 @@ namespace RimShips
             this.offset = reference.offset;
             this.projectileOffset = reference.projectileOffset;
             this.splitCannonGroups = reference.splitCannonGroups;
+            this.cannonTexPath = reference.cannonTexPath;
+            this.baseCannonTexPath = reference.baseCannonTexPath;
 
-            if(splitCannonGroups)
+            if (splitCannonGroups)
             {
                 foreach (float f in reference.centerPoints)
                 {
@@ -85,6 +87,8 @@ namespace RimShips
             Scribe_Values.Look(ref label, "label");
             Scribe_Values.Look(ref weaponType, "weaponType");
             Scribe_Values.Look(ref weaponLocation, "weaponLocation");
+            Scribe_Values.Look(ref cannonTexPath, "cannonTexPath");
+            Scribe_Values.Look(ref baseCannonTexPath, "baseCannonTexPath");
             Scribe_Defs.Look(ref moteCannon, "moteCannon");
             Scribe_Defs.Look(ref projectile, "projectile");
             Scribe_Defs.Look(ref cannonSound, "cannonSound");
@@ -123,6 +127,30 @@ namespace RimShips
             }
         }
 
+        public Graphic CannonTexture
+        {
+            get
+            {
+                if(cannonTexPath.NullOrEmpty())
+                    return null;
+                if(cannonTextureLoaded is null)
+                    cannonTextureLoaded = GraphicDatabase.Get<Graphic_Single>(cannonTexPath, ShaderDatabase.Cutout, cannonSize, Color.white);
+                return cannonTextureLoaded;
+            }
+        }
+
+        public Graphic BasePlateTexture
+        {
+            get
+            {
+                if(baseCannonTexPath.NullOrEmpty())
+                    return null;
+                if(baseCannonTextureLoaded is null)
+                    baseCannonTextureLoaded = GraphicDatabase.Get<Graphic_Single>(baseCannonTexPath, ShaderDatabase.Cutout, baseCannonSize, Color.white);
+                return baseCannonTextureLoaded;
+            }
+        }
+
         public int CannonGroup(int cannonNumber)
         {
             if(centerPoints.Count == 0 || cannonsPerPoint.Count == 0 || centerPoints.Count != cannonsPerPoint.Count)
@@ -151,6 +179,14 @@ namespace RimShips
         public ThingDef projectile;
         public ThingDef moteCannon;
         public SoundDef cannonSound;
+
+        public string cannonTexPath;
+        private Graphic cannonTextureLoaded;
+        public Vector2 cannonSize;
+
+        public string baseCannonTexPath;
+        private Graphic baseCannonTextureLoaded;
+        public Vector2 baseCannonSize;
 
         public List<float> centerPoints = new List<float>();
         public List<int> cannonsPerPoint = new List<int>();
