@@ -44,7 +44,7 @@ namespace RimShips.Jobs
 
         private Pawn FindShipToDeposit(Pawn pawn, Pawn downedPawn)
         {
-            List<Pawn> ships = pawn.GetLord().ownedPawns.Where(x => ShipHarmony.IsShip(x)).ToList();
+            List<Pawn> ships = pawn.GetLord().ownedPawns.Where(x => HelperMethods.IsShip(x)).ToList();
             return ships.MaxBy(x => x.GetComp<CompShips>().Props.roles.Find(y => y.handlingType == HandlingTypeFlags.None).slots);
         }
     }

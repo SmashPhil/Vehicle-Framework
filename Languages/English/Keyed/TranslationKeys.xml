@@ -89,7 +89,10 @@
 	<TerrainReset>({0}) Water Regions have been reset.</TerrainReset>
 	<CantMoveDocked>Not enough pawns to set sail.</CantMoveDocked>
 	<PackingSpotNotFoundBoats>Packing Spot was not found for Boat caravan. It is recommended you place a Packing Spot from Misc.</PackingSpotNotFoundBoats>
-	
+	<ForceLeaveCaravan>Force to Leave</ForceLeaveCaravan>
+	<ForceLeaveCaravanDesc>Force Boat Caravan to leave the map. Will skip loading whatever items are not currently onboard</ForceLeaveCaravanDesc>
+	<ForceLeaveConfirmation>Crew is preparing to leave.</ForceLeaveConfirmation>
+	<BoatCaravanTerminatedNoBoats>Caravan process has been terminated. No boats remain. </BoatCaravanTerminatedNoBoats>
 	<!-- Caravans -->
 	<CaravanShips>Boat</CaravanShips>
 	<CaravanShipsSingle>1 Boat</CaravanShipsSingle>

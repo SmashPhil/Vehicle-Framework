@@ -373,12 +373,14 @@ namespace RimShips
                     if (this.CompShip.Angle == -45)
                     {
                         SPTuples.SPTuple2<float, float> newOffset = SPTrig.RotatePointCounterClockwise(preOffsetX, preOffsetY, 45f);
+                        Log.Message("1: " + newOffset.First + " type: " + newOffset.First.GetType() + " | 2: " + newOffset.Second + " type: " + newOffset.Second.GetType());
                         offset.First = newOffset.First;
                         offset.Second = newOffset.Second;
                     }
                     else if (this.CompShip.Angle == 45)
                     {
                         SPTuples.SPTuple2<float, float> newOffset = SPTrig.RotatePointClockwise(preOffsetX, preOffsetY, 45f);
+                        Log.Message("1: " + newOffset.First + " type: " + newOffset.First.GetType() + " | 2: " + newOffset.Second + " type: " + newOffset.Second.GetType());
                         offset.First = newOffset.First;
                         offset.Second = newOffset.Second;
                     }
@@ -387,18 +389,18 @@ namespace RimShips
                     if (this.CompShip.Angle == -45)
                     {
                         SPTuples.SPTuple2<float, float> newOffset = SPTrig.RotatePointClockwise(preOffsetX, preOffsetY, 225f);
+                        Log.Message("1: " + newOffset.First + " type: " + newOffset.First.GetType() + " | 2: " + newOffset.Second + " type: " + newOffset.Second.GetType());
                         offset.First = newOffset.First;
                         offset.Second = newOffset.Second;
                     }
                     else if (this.CompShip.Angle == 45)
                     {
                         SPTuples.SPTuple2<float, float> newOffset = SPTrig.RotatePointCounterClockwise(preOffsetX, preOffsetY, 225f);
+                        Log.Message("1: " + newOffset.First + " type: " + newOffset.First.GetType() + " | 2: " + newOffset.Second + " type: " + newOffset.Second.GetType());
                         offset.First = newOffset.First;
                         offset.Second = newOffset.Second;
                     }
                     break;
-                default:
-                    return offset;
             }
             return offset;
         }

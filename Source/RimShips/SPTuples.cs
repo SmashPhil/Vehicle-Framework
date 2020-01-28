@@ -121,9 +121,12 @@ namespace SPExtended
                 }
                 set
                 {
-                    if (value is T1)
+                    if(value is T1)
+                    {
                         this.first = value;
-                    Log.Error("Tried to assign value of different type to Tuple of type " + typeof(T1));
+                        return;
+                    }
+                    Log.Error("Tried to assign value of different type to Tuple. T1: " + typeof(T1) + " value: " + value.GetType() + ". - Smash Phil");
                 }
             }
 
@@ -136,8 +139,11 @@ namespace SPExtended
                 set
                 {
                     if (value is T2)
+                    {
                         this.second = value;
-                    Log.Error("Tried to assign value of different type to Tuple of type " + typeof(T2));
+                        return;
+                    }
+                    Log.Error("Tried to assign value of different type to Tuple. T2: " + typeof(T2) + " value: " + value.GetType() + ". - Smash Phil");
                 }
             }
 

@@ -25,5 +25,7 @@ namespace RimShips
         public static readonly Texture2D Drop = ContentFinder<Texture2D>.Get("UI/Buttons/Drop", true);
 
         public static readonly Texture2D FishingIcon = ContentFinder<Texture2D>.Get("UI/FishingIcon", true);
+
+        public static readonly Texture2D CaravanIcon = ContentFinder<Texture2D>.Get("UI/Commands/FormCaravan", true);
     }
 }

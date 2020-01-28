@@ -25,7 +25,7 @@ namespace RimShips.Lords
         {
             foreach(Pawn p in this.lord.ownedPawns)
             {
-                if(!ShipHarmony.IsShip(p))
+                if(!HelperMethods.IsShip(p))
                     this.lord.LordJob.Notify_PawnLost(p, PawnLostCondition.LeftVoluntarily);
                 p.mindState.duty = new PawnDuty(DutyDefOf_Ships.TravelOrWaitOcean, this.exitSpot, -1f)
                 {
@@ -40,7 +40,7 @@ namespace RimShips.Lords
         {
             if(Find.TickManager.TicksGame % 100 == 0)
             {
-                GatherAnimalsAndSlavesForShipsUtility.CheckArrived(this.lord, this.lord.ownedPawns.Where(x => ShipHarmony.IsShip(x)).ToList(), this.exitSpot, "ReadyToExitMap", (Pawn x) => true, true, null);
+                GatherAnimalsAndSlavesForShipsUtility.CheckArrived(this.lord, this.lord.ownedPawns.Where(x => HelperMethods.IsShip(x)).ToList(), this.exitSpot, "ReadyToExitMap", (Pawn x) => true, true, null);
             }
         }
 

@@ -5,6 +5,7 @@ using RimWorld;
 using RimWorld.Planet;
 using RimShips.Build;
 using RimShips.Defs;
+using RimShips.Lords;
 using UnityEngine;
 using Verse;
 using Verse.AI;
@@ -286,6 +287,21 @@ namespace RimShips
                         };
                         yield return fishing;
                     }
+                }
+                if(this.Pawn.GetLord()?.LordJob is LordJob_FormAndSendCaravanShip)
+                {
+                    Command_Action forceCaravanLeave = new Command_Action
+                    {
+                        defaultLabel = "ForceLeaveCaravan".Translate(),
+                        defaultDesc = "ForceLeaveCaravanDesc".Translate(),
+                        icon = TexCommandShips.CaravanIcon,
+                        action = delegate ()
+                        {
+                            (this.Pawn.GetLord().LordJob as LordJob_FormAndSendCaravanShip).ForceCaravanLeave = true;
+                            Messages.Message("ForceLeaveConfirmation".Translate(), MessageTypeDefOf.TaskCompletion);
+                        }
+                    };
+                    yield return forceCaravanLeave;
                 }
             }
             yield break;
@@ -614,7 +630,6 @@ namespace RimShips
                 food = thing;
                 return true;
             }
-            Log.Message("no Food");
             food = null;
             return false;
         }

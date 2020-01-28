@@ -5,9 +5,10 @@
 		<defName>Caravel_cannonball</defName>
 		<label>Cannon Ball</label>
 		<graphicData>
-			<texPath>Things/Projectile/ShellHighExplosive</texPath>
+			<texPath>Projectiles/cannonball_Caravel</texPath>
 			<graphicClass>Graphic_Single</graphicClass>
 			<shaderType>TransparentPostLight</shaderType>
+			<drawSize>(0.65,0.65)</drawSize>
 		</graphicData>
 		<thingClass>Projectile_Explosive</thingClass>
 		<projectile>

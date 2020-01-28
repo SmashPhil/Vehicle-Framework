@@ -77,12 +77,14 @@
     <Compile Include="GenGridShips.cs" />
     <Compile Include="GenPathShip.cs" />
     <Compile Include="HarmonyPatches_Bootstrap.cs" />
+    <Compile Include="HelperMethods.cs" />
     <Compile Include="ITab_Ship_Cargo.cs" />
     <Compile Include="ITab_Ship_Health.cs" />
     <Compile Include="ITab_Ship_Passengers.cs" />
     <Compile Include="JobDefOf_Ships.cs" />
     <Compile Include="JobDriver_Board.cs" />
     <Compile Include="JobDriver_CarryPawnToShip.cs" />
+    <Compile Include="JobDriver_GiveToShip.cs" />
     <Compile Include="JobDriver_IdleShip.cs" />
     <Compile Include="JobDriver_PrepareCaravan_GatheringShip.cs" />
     <Compile Include="JobDriver_RepairShip.cs" />

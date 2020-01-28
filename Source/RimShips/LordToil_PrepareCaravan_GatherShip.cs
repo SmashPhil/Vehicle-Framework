@@ -81,7 +81,7 @@ namespace RimShips.Lords
                         }
                     }
                 }
-                if(flag)
+                if(flag || (lord.LordJob as LordJob_FormAndSendCaravanShip).ForceCaravanLeave)
                 {
                     this.lord.ReceiveMemo("AllItemsGathered");
                 }

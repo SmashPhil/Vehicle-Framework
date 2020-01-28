@@ -32,7 +32,7 @@ namespace RimShips
             {
                 foreach (Pawn p in this.caravan.PawnsListForReading)
                 {
-                    if (!ShipHarmony.IsShip(p))
+                    if (!HelperMethods.IsShip(p))
                         yield return p;
                 }
             }
@@ -274,8 +274,8 @@ namespace RimShips
         public override void PostClose()
         {
             base.PostClose();
-            if(this.caravan.PawnsListForReading.Any(x => ShipHarmony.IsShip(x)))
-                ShipHarmony.ToggleDocking(caravan, false);
+            if(this.caravan.PawnsListForReading.Any(x => HelperMethods.IsShip(x)))
+                HelperMethods.ToggleDocking(caravan, false);
         }
 
         public override void DoWindowContents(Rect inRect)
@@ -351,11 +351,11 @@ namespace RimShips
         {
             DockedBoat dockedBoat = (DockedBoat)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfShips.DockedBoat);
             dockedBoat.Tile = caravan.Tile;
-            float randomInRange = Rand.Range(2f, 4f) + (50 * (1 - caravan.PawnsListForReading.Where(x => ShipHarmony.IsShip(x)).Max(x => x.GetComp<CompShips>().Props.visibility)));
+            float randomInRange = Rand.Range(2f, 4f) + (50 * (1 - caravan.PawnsListForReading.Where(x => HelperMethods.IsShip(x)).Max(x => x.GetComp<CompShips>().Props.visibility)));
             dockedBoat.GetComponent<TimeoutComp>().StartTimeout(Mathf.CeilToInt(randomInRange * 60000));
-            List<Pawn> boats = caravan.PawnsListForReading.Where(x => ShipHarmony.IsShip(x)).ToList();
-            List<Pawn> pawns = caravan.PawnsListForReading.Where(x => !ShipHarmony.IsShip(x)).ToList();
-            if(caravan.PawnsListForReading.Where(x => !ShipHarmony.IsShip(x)).Count() <= 0)
+            List<Pawn> boats = caravan.PawnsListForReading.Where(x => HelperMethods.IsShip(x)).ToList();
+            List<Pawn> pawns = caravan.PawnsListForReading.Where(x => !HelperMethods.IsShip(x)).ToList();
+            if(caravan.PawnsListForReading.Where(x => !HelperMethods.IsShip(x)).Count() <= 0)
                 return false;
 
             foreach(TransferableOneWay t in this.transferables)
@@ -372,7 +372,7 @@ namespace RimShips
             for(int i = caravan.pawns.Count - 1; i >= 0; i--)
             {
                 Pawn p = caravan.PawnsListForReading[i];
-                if(ShipHarmony.IsShip(p))
+                if(HelperMethods.IsShip(p))
                 {
                     dockedBoat.dockedBoats.TryAddOrTransfer(p, false);
                 }

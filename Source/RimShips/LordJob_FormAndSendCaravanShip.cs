@@ -31,7 +31,7 @@ namespace RimShips.Lords
         {
             this.transferables = transferables;
             this.ships = ships;
-            this.leadShip =  ships.First(x => ShipHarmony.IsShip(x) && x.RaceProps.baseBodySize == ships.Max(y => y.RaceProps.baseBodySize));
+            this.leadShip = ships.First(x => HelperMethods.IsShip(x) && x.RaceProps.baseBodySize == ships.Max(y => y.RaceProps.baseBodySize));
             this.downedPawns = downedPawns;
             this.meetingPoint = meetingPoint;
             this.exitPoint = exitPoint;
@@ -39,6 +39,7 @@ namespace RimShips.Lords
             this.destinationTile = destinationTile;
             this.sailors = sailors;
             this.prisoners = prisoners;
+            this.forceCaravan = false;
         }
 
         public Pawn LeadShip
@@ -46,8 +47,20 @@ namespace RimShips.Lords
             get
             {
                 if (this.leadShip is null)
-                    this.leadShip = ships.First(x => ShipHarmony.IsShip(x) && x.RaceProps.baseBodySize == ships.Max(y => y.RaceProps.baseBodySize));
+                    this.leadShip = ships.First(x => HelperMethods.IsShip(x) && x.RaceProps.baseBodySize == ships.Max(y => y.RaceProps.baseBodySize));
                 return this.leadShip;
+            }
+        }
+
+        public bool ForceCaravanLeave
+        {
+            get
+            {
+                return forceCaravan;
+            }
+            set
+            {
+                forceCaravan = value;
             }
         }
 
@@ -228,6 +241,11 @@ namespace RimShips.Lords
                     this.downedPawns.RemoveAt(i);
                 }
             }
+            if(!lord.ownedPawns.Any(x => HelperMethods.IsShip(x)))
+            {
+                lord.lordManager.RemoveLord(lord);
+                Messages.Message("BoatCaravanTerminatedNoBoats".Translate(), MessageTypeDefOf.NegativeEvent);
+            }
         }
 
         public override string GetReport()
@@ -337,16 +355,16 @@ namespace RimShips.Lords
 
         public override void ExposeData()
         {
-            Scribe_Collections.Look<TransferableOneWay>(ref this.transferables, "transferables", LookMode.Deep, new object[0]);
-            Scribe_Collections.Look<Pawn>(ref this.downedPawns, "downedPawns", LookMode.Reference, new object[0]);
-            Scribe_Collections.Look<Pawn>(ref this.prisoners, "prisoners", LookMode.Reference, new object[0]);
-            Scribe_Collections.Look<Pawn>(ref this.ships, "ships", LookMode.Reference, new object[0]);
-            Scribe_Collections.Look<Pawn>(ref this.sailors, "sailors", LookMode.Reference, new object[0]);
-            Scribe_Values.Look<IntVec3>(ref this.meetingPoint, "meetingPoint", default(IntVec3), false);
-            Scribe_Values.Look<IntVec3>(ref this.exitPoint, "exitPoint", default(IntVec3), false);
-            Scribe_Values.Look<int>(ref this.startingTile, "startingTile", 0, false);
-            Scribe_Values.Look<int>(ref this.destinationTile, "destinationTile", 0, false);
-            Scribe_Collections.Look<Pawn, Pawn>(ref this.shipAssigned, "shipAssigned", LookMode.Reference, LookMode.Reference);
+            Scribe_Collections.Look(ref this.transferables, "transferables", LookMode.Deep);
+            Scribe_Collections.Look(ref this.downedPawns, "downedPawns", LookMode.Reference);
+            Scribe_Collections.Look(ref this.prisoners, "prisoners", LookMode.Reference);
+            Scribe_Collections.Look(ref this.ships, "ships", LookMode.Reference);
+            Scribe_Collections.Look(ref this.sailors, "sailors", LookMode.Reference);
+            Scribe_Values.Look(ref this.meetingPoint, "meetingPoint", default, false);
+            Scribe_Values.Look(ref this.exitPoint, "exitPoint", default, false);
+            Scribe_Values.Look(ref this.startingTile, "startingTile", 0, false);
+            Scribe_Values.Look(ref this.destinationTile, "destinationTile", 0, false);
+            Scribe_Collections.Look(ref this.shipAssigned, "shipAssigned", LookMode.Reference, LookMode.Reference);
         }
 
         public List<TransferableOneWay> transferables = new List<TransferableOneWay>();
@@ -398,5 +416,7 @@ namespace RimShips.Lords
         private LordToil leave_pause;
 
         public const float CustomWakeThreshold = 0.5f;
+
+        private bool forceCaravan;
     }
 }

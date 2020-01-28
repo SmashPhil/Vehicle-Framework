@@ -44,16 +44,16 @@ namespace RimShips
 
         public void Notify_CaravanArrived(Caravan caravan)
         {
-            if(caravan.PawnsListForReading.Where(x => !ShipHarmony.IsShip(x)).Count() > this.TotalAvailableSeats)
+            if(caravan.PawnsListForReading.Where(x => !HelperMethods.IsShip(x)).Count() > this.TotalAvailableSeats)
             {
                 Messages.Message("CaravanMustHaveEnoughSpaceOnShip".Translate(), this, MessageTypeDefOf.RejectInput, false);
                 return;
             }
             caravan.pawns.TryAddRangeOrTransfer(this.dockedBoats);
-            List<Pawn> boats = caravan.PawnsListForReading.Where(x => ShipHarmony.IsShip(x)).ToList();
+            List<Pawn> boats = caravan.PawnsListForReading.Where(x => HelperMethods.IsShip(x)).ToList();
             foreach (Pawn p in caravan.pawns)
             {
-                if (!ShipHarmony.IsShip(p))
+                if (!HelperMethods.IsShip(p))
                 {
                     for (int i = p.inventory.innerContainer.Count - 1; i >= 0; i--)
                     {
@@ -62,7 +62,7 @@ namespace RimShips
                     }
                 }
             }
-            ShipHarmony.ToggleDocking(caravan, false);
+            HelperMethods.ToggleDocking(caravan, false);
             Find.WorldObjects.Remove(this);
         }
 

@@ -8,9 +8,6 @@ namespace RimShips.Jobs
     {
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
-            Pawn pawn = this.pawn;
-            LocalTargetInfo targetA = this.job.targetA;
-            // Needs Edits for reserving roles
             return true;
         }
         

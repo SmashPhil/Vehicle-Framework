@@ -23,9 +23,9 @@ namespace RimShips
                 enterMode = CaravanEnterMode.Edge;
             }
             //Ensure pawns are onboard till a fix for dock settling is done
-            if (ShipHarmony.HasShip(caravan) && caravan.PawnsListForReading.Any(x => !ShipHarmony.IsShip(x)))
+            if (HelperMethods.HasShip(caravan) && caravan.PawnsListForReading.Any(x => !HelperMethods.IsShip(x)))
             {
-                ShipHarmony.BoardAllCaravanPawns(caravan);
+                HelperMethods.BoardAllCaravanPawns(caravan);
             }
             IntVec3 enterCell = GetWaterCell(caravan, map, CaravanEnterMode.Edge); //Caravan Enter Mode back to enterMode
             Func<Pawn, IntVec3> spawnCellGetter = (Pawn p) => p.ClampToMap(CellFinderExtended.RandomSpawnCellForPawnNear(enterCell, map, 4), map);
@@ -34,7 +34,7 @@ namespace RimShips
 
         public static void EnterSpawn(Caravan caravan, Map map, Func<Pawn, IntVec3> spawnCellGetter, CaravanDropInventoryMode caravanDropInventoryMode = CaravanDropInventoryMode.DoNotDrop, bool draftColonists = true)
         {
-            List<Pawn> pawns = new List<Pawn>(caravan.PawnsListForReading).Where(x => ShipHarmony.IsShip(x)).ToList();
+            List<Pawn> pawns = new List<Pawn>(caravan.PawnsListForReading).Where(x => HelperMethods.IsShip(x)).ToList();
             MapExtension mapE = MapExtensionUtility.GetExtensionToMap(map);
             Rot4 spawnDir = GetEdgeToSpawnBoatOn(caravan, map);
 

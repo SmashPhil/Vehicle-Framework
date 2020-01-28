@@ -12,9 +12,9 @@ namespace RimShips
     {
         public HarmonyPatches_Bootstrap(ModContentPack content) : base(content)
         {
-            var harmony2 = HarmonyInstance.Create("rimworld.boats_bootstrap.smashphil");
+            var harmony = HarmonyInstance.Create("rimworld.boats_bootstrap.smashphil");
 
-            harmony2.Patch(original: AccessTools.Property(type: typeof(RaceProperties), name: nameof(RaceProperties.IsFlesh)).GetGetMethod(),
+            harmony.Patch(original: AccessTools.Property(type: typeof(RaceProperties), name: nameof(RaceProperties.IsFlesh)).GetGetMethod(),
                 prefix: new HarmonyMethod(type: typeof(HarmonyPatches_Bootstrap),
                 name: nameof(BoatsNotFlesh)));
         }
