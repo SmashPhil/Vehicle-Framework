@@ -92,7 +92,7 @@ namespace RimShips
                                 portSideCannons.hotKey = KeyBindingDefOf.Misc4;
                                 foreach (ShipHandler handler in this.CompShip.handlers)
                                 {
-                                    if (handler.role.handlingType == HandlingTypeFlags.Cannons && handler.handlers.Count < handler.role.slotsToOperate)
+                                    if(!RimShipMod.mod.settings.debugDraftAnyShip && handler.role.handlingType == HandlingTypeFlags.Cannons && handler.handlers.Count < handler.role.slotsToOperate)
                                     {
                                         portSideCannons.Disable("NotEnoughCannonCrew".Translate(this.Pawn.LabelShort, handler.role.label));
                                     }
@@ -124,7 +124,7 @@ namespace RimShips
                                 starboardSideCannons.hotKey = KeyBindingDefOf.Misc5;
                                 foreach (ShipHandler handler in this.CompShip.handlers)
                                 {
-                                    if (handler.role.handlingType == HandlingTypeFlags.Cannons && handler.handlers.Count < handler.role.slotsToOperate)
+                                    if(!RimShipMod.mod.settings.debugDraftAnyShip && handler.role.handlingType == HandlingTypeFlags.Cannons && handler.handlers.Count < handler.role.slotsToOperate)
                                     {
                                         starboardSideCannons.Disable("NotEnoughCannonCrew".Translate(this.Pawn.LabelShort, handler.role.label));
                                     }
@@ -373,14 +373,12 @@ namespace RimShips
                     if (this.CompShip.Angle == -45)
                     {
                         SPTuples.SPTuple2<float, float> newOffset = SPTrig.RotatePointCounterClockwise(preOffsetX, preOffsetY, 45f);
-                        Log.Message("1: " + newOffset.First + " type: " + newOffset.First.GetType() + " | 2: " + newOffset.Second + " type: " + newOffset.Second.GetType());
                         offset.First = newOffset.First;
                         offset.Second = newOffset.Second;
                     }
                     else if (this.CompShip.Angle == 45)
                     {
                         SPTuples.SPTuple2<float, float> newOffset = SPTrig.RotatePointClockwise(preOffsetX, preOffsetY, 45f);
-                        Log.Message("1: " + newOffset.First + " type: " + newOffset.First.GetType() + " | 2: " + newOffset.Second + " type: " + newOffset.Second.GetType());
                         offset.First = newOffset.First;
                         offset.Second = newOffset.Second;
                     }
@@ -389,14 +387,12 @@ namespace RimShips
                     if (this.CompShip.Angle == -45)
                     {
                         SPTuples.SPTuple2<float, float> newOffset = SPTrig.RotatePointClockwise(preOffsetX, preOffsetY, 225f);
-                        Log.Message("1: " + newOffset.First + " type: " + newOffset.First.GetType() + " | 2: " + newOffset.Second + " type: " + newOffset.Second.GetType());
                         offset.First = newOffset.First;
                         offset.Second = newOffset.Second;
                     }
                     else if (this.CompShip.Angle == 45)
                     {
                         SPTuples.SPTuple2<float, float> newOffset = SPTrig.RotatePointCounterClockwise(preOffsetX, preOffsetY, 225f);
-                        Log.Message("1: " + newOffset.First + " type: " + newOffset.First.GetType() + " | 2: " + newOffset.Second + " type: " + newOffset.Second.GetType());
                         offset.First = newOffset.First;
                         offset.Second = newOffset.Second;
                     }

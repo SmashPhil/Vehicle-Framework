@@ -47,6 +47,15 @@ namespace RimShips
             Scribe_Values.Look(ref fishingDelay, "fishingDelay", 10000);
             Scribe_Values.Look(ref fishingSkillIncrease, "fishingSkillIncrease", 5);
             Scribe_Values.Look(ref fishingPersists, "fishingPersists", true);
+
+            if(Prefs.DevMode)
+            {
+                Scribe_Values.Look(ref debugDraftAnyShip, "debugDraftAnyShip", false);
+                Scribe_Values.Look(ref debugDisableWaterPathing, "debugDisableWaterPathing", false);
+                Scribe_Values.Look(ref debugDrawRegions, "debugDrawRegions", false);
+                Scribe_Values.Look(ref debugDrawRegionLinks, "debugDrawRegionLinks", false);
+                Scribe_Values.Look(ref debugDrawRegionThings, "debugDrawRegionThings", false);
+            }
             base.ExposeData();
         }
     }

@@ -3607,7 +3607,7 @@ namespace RimShips
         {
             if(HelperMethods.HasShip(pawns))
             {
-                Log.Message("Has Ship");
+                //Log.Message("Has Ship");
             }
             return true;
         }
