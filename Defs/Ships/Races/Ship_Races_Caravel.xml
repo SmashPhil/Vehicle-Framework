@@ -17,7 +17,7 @@
 				<bodyGraphicData>
 					<texPath>Ships/caravel/CaravelBoat/Caravel_cannons</texPath>
 					<graphicClass>Graphic_Multi</graphicClass>
-					<drawSize>(6,11)</drawSize>
+					<drawSize>(30,17)</drawSize>
 					<shaderType>CutoutComplex</shaderType>
 					<color>(155,0,0)</color>
 					<shadowData>

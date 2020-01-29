@@ -17,7 +17,7 @@
 				<bodyGraphicData>
 					<texPath>Ships/paddlesteamer/PaddleSteamer</texPath>
 					<graphicClass>Graphic_Multi</graphicClass>
-					<drawSize>(7,17)</drawSize>
+					<drawSize>(30,17)</drawSize>
 					<shaderType>CutoutComplex</shaderType>
 					<color>(155,0,0)</color>
 					<shadowData>

@@ -222,6 +222,9 @@ namespace RimShips
                 Find.WindowStack.Add(new Dialog_GiveShipName(this.Pawn));
             }
         }
+
+
+
         public float Angle
         {
             get

@@ -47,11 +47,17 @@ namespace RimShips.UI
             if(this.SelPawnForCargo.def.GetCompProperties<CompProperties_Ships>().nameable)
             {
                 Rect rectRename = new Rect(this.size.x - 55f, 0f, 30f, 30f);
-                TooltipHandler.TipRegion(rectRename, "RenameShip".Translate(this.SelPawnForCargo));
+                TooltipHandler.TipRegion(rectRename, "RenameShip".Translate(this.SelPawnForCargo.LabelShort));
                 if (Widgets.ButtonImage(rectRename, TexCommandShips.Rename))
                 {
                     this.SelPawnForCargo.GetComp<CompShips>().Rename();
                 }
+                /*Rect rectRecolor = new Rect(this.size.x - 85f, 0f, 30f, 30f);
+                TooltipHandler.TipRegion(rectRecolor, "RecolorFlags".Translate());
+                if(Widgets.ButtonImage(rectRecolor, TexCommandShips.Rename))
+                {
+
+                }*/
             }
             if(this.IsVisible)
             {

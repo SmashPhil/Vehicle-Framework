@@ -17,7 +17,7 @@
 				<bodyGraphicData>
 					<texPath>Ships/galleon/Galleon</texPath>
 					<graphicClass>Graphic_Multi</graphicClass>
-					<drawSize>(8,16)</drawSize>
+					<drawSize>(28,17)</drawSize>
 					<shaderType>CutoutComplex</shaderType>
 					<color>(155,0,0)</color>
 					<shadowData>
