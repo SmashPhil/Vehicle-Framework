@@ -6,6 +6,7 @@
   <IdleShip.reportString>命令を待機中</IdleShip.reportString>
   <PrepareCaravan_GatheringShip.reportString>積み荷を載せている</PrepareCaravan_GatheringShip.reportString>
   <CarryPawnToShip.reportString>倒れたポーンを船に載せている</CarryPawnToShip.reportString>
+  <CarryItemToShip.reportString>アイテムほ船に載せている</CarryItemToShip.reportString>
   <RepairShip.reportString>船を修理中</RepairShip.reportString>
 
 </LanguageData>
