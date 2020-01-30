@@ -3042,7 +3042,7 @@ namespace RimShips
 
         public static void SituationBoardedShip(Pawn p, ref WorldPawnSituation __result, WorldPawns __instance)
         {
-            if(__result == WorldPawnSituation.Free && p.Faction == Faction.OfPlayer)
+            if(__result == WorldPawnSituation.Free && p.Faction != null && p.Faction == Faction.OfPlayer)
             {
                 foreach(Map map in Find.Maps)
                 {

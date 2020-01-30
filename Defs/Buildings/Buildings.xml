@@ -21,6 +21,25 @@
 		<useHitPoints>true</useHitPoints>
 	</ThingDef>
 	
+	<!--Unreleased Ship base -->
+	<ThingDef Name="UnreleasedShipBase" Abstract="True">
+		<thingClass>Building</thingClass>
+		<selectable>true</selectable>
+		<altitudeLayer>Building</altitudeLayer>
+		<terrainAffordanceNeeded>ShallowWater</terrainAffordanceNeeded>
+		<repairEffect>Repair</repairEffect>
+		<leaveResourcesWhenKilled>true</leaveResourcesWhenKilled>
+		<passability>Impassable</passability>
+		<fillPercent>1</fillPercent>
+		<neverMultiSelect>true</neverMultiSelect>
+		<!-- <designationCategory>RimShips</designationCategory> -->
+		<clearBuildingArea>true</clearBuildingArea>
+		<category>Building</category>
+		<rotatable>true</rotatable>
+		<blockWind>true</blockWind>
+		<useHitPoints>true</useHitPoints>
+	</ThingDef>
+	
 	<!-- Rowboat -->
 	<ThingDef ParentName="ShipBase">
 		<defName>SPBoats_RowboatBlueprint</defName>
@@ -29,7 +48,7 @@
 		<graphicData>
 			<texPath>Ships/rowboat/Canoe_north</texPath>
 			<graphicClass>Graphic_Single</graphicClass>
-			<drawSize>(1,3)</drawSize>
+			<drawSize>(2.5,3)</drawSize>
 		</graphicData>
 
 		<statBases>
@@ -173,7 +192,7 @@
 			
 	</ThingDef>
 	
-	<ThingDef ParentName="ShipBase">
+	<ThingDef ParentName="UnreleasedShipBase">
 		<defName>SPBoats_PaddleSteamerBlueprint</defName>
 		<label>Paddle Steamer</label>
 		<description>A versatile boat capable of carrying large amounts of cargo over long distances, while still packing a punch.</description>
@@ -190,8 +209,9 @@
 		</statBases>
 		<size>(4,10)</size>
 		
+		
 		<researchPrerequisites>
-			<li>Caravel</li>
+			<li>Caravel</li> <!-- CHANGE -->
 		</researchPrerequisites>
 		
 		<costList>
