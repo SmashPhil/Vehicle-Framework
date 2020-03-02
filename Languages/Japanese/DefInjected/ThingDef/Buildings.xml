@@ -36,4 +36,13 @@
   <Frame_SPBoats_GalleonBlueprint.label>ガレオン船 (施工)</Frame_SPBoats_GalleonBlueprint.label>
   <Frame_SPBoats_GalleonBlueprint.description>船を相手に戦う艦として設計された大型の戦闘用帆船です。</Frame_SPBoats_GalleonBlueprint.description>
 
+
+  <!-- Paddle Steamer -->
+
+  <SPBoats_PaddleSteamerBlueprint.label>外輪船</SPBoats_PaddleSteamerBlueprint.label>
+  <SPBoats_PaddleSteamerBlueprint.description>長距離交易用の汎用大型貨物運搬船で沢山荷物を積み込めます。</SPBoats_PaddleSteamerBlueprint.description>
+  <Blueprint_SPBoats_PaddleSteamerBlueprint.label>外輪船 (設計)</Blueprint_SPBoats_PaddleSteamerBlueprint.label>
+  <Frame_SPBoats_PaddleSteamerBlueprint.label>外輪船 (施工)</Frame_SPBoats_PaddleSteamerBlueprint.label>
+  <Frame_SPBoats_PaddleSteamerBlueprint.description>長距離交易用の汎用大型貨物運搬船で沢山荷物を積み込めます。</Frame_SPBoats_PaddleSteamerBlueprint.description>
+
 </LanguageData>

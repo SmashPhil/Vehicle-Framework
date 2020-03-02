@@ -10,6 +10,7 @@
   <SetRange>航続距離の設定</SetRange>
   <CannonRange>射程：{0}マス</CannonRange>
   <RenameShip>{0}を改名する</RenameShip>
+  <RecolorFlags>旗色を変更</RecolorFlags>
   <OceanPassable>海通行可：+0.5</OceanPassable>
   <BoatFishing>釣り</BoatFishing>
   <BoatFishingDesc>魚を捕らえます。水深は釣りの成功確率に影響します。</BoatFishingDesc>
@@ -87,7 +88,12 @@
   <MessageCantAddWaypointBecauseShip>船で陸上を旅行することはできません。</MessageCantAddWaypointBecauseShip>
   <MessageCantAddWaypointBecauseRiverUnreachable>このボートでは、この川を移動できません</MessageCantAddWaypointBecauseRiverUnreachable>
   <TerrainReset>（{0}）水域がリセットされました。</TerrainReset>
-  <CantMoveDocked>移動不可能。現在キャラバン隊は停泊中です。</CantMoveDocked>
+  <CantMoveDocked>帆を張るのに必要なポーンが足りません。</CantMoveDocked>
+  <PackingSpotNotFoundBoats>船隊用の物流拠点が見つかりませんでした。その他のキャラバン隊物流拠点を設置することをお勧めします。</PackingSpotNotFoundBoats>
+  <ForceLeaveCaravan>強制退出</ForceLeaveCaravan>
+  <ForceLeaveCaravanDesc>船隊を強制的にマップから脱出させます。今搭載されていないアイテムの積み込み作業を中断します。</ForceLeaveCaravanDesc>
+  <ForceLeaveConfirmation>乗組員は出航の準備中</ForceLeaveConfirmation>
+  <BoatCaravanTerminatedNoBoats>船隊の活動は終了しました。船が残っていません。 </BoatCaravanTerminatedNoBoats>
 
   <!-- Caravans -->
   <CaravanShips>船隊</CaravanShips>
