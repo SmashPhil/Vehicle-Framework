@@ -211,7 +211,7 @@ namespace RimShips
 
         private void ResetToDefaultValues()
         {
-            SoundDefOf.RadioButtonClicked.PlayOneShotOnCamera(null);
+            SoundDefOf.Click.PlayOneShotOnCamera(null);
             settings.beachMultiplier = 0f;
             settings.forceFactionCoastRadius = 0;
 

@@ -6,13 +6,12 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Harmony;
+using HarmonyLib;
 using RimWorld;
 using RimWorld.BaseGen;
 using RimWorld.Planet;
 using RimShips.AI;
 using UnityEngine;
-using UnityEngine.AI;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
@@ -248,7 +247,7 @@ namespace RimShips.Lords
             }
         }
 
-        public override string GetReport()
+        public override string GetReport(Pawn pawn)
         {
             return "LordReportFormingCaravan".Translate();
         }

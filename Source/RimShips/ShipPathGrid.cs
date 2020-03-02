@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text;
-using Harmony;
+using HarmonyLib;
 using Verse;
 
 namespace RimShips.AI

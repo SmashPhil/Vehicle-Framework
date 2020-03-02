@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using System.Diagnostics;
-using Harmony;
+using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
@@ -28,392 +28,389 @@ namespace RimShips
     {
         static ShipHarmony()
         {
-            var harmony = HarmonyInstance.Create("rimworld.boats.smashphil");
+            var harmony = new Harmony("rimworld.boats.smashphil");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
-            //HarmonyInstance.DEBUG = true;
+            Harmony.DEBUG = true;
 
             #region Functions
 
             /* Map Gen */
-            harmony.Patch(original: AccessTools.Method(type: typeof(BeachMaker), name: nameof(BeachMaker.Init)), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(BeachMakerTranspiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(TileFinder), name: nameof(TileFinder.RandomSettlementTileFor)), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(PushSettlementToCoastTranspiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(MapGenerator), name: nameof(MapGenerator.GenerateMap)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(GenerateMapExtension)));
-            harmony.Patch(original: AccessTools.Method(typeof(Map), name: nameof(Map.ExposeData)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(ExposeDataMapExtensions)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Map), name: nameof(Map.FinalizeInit)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(RecalculateShipPathGrid)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(PathGrid), name: nameof(PathGrid.RecalculatePerceivedPathCostUnderThing)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(RecalculateShipPathCostUnderThing)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(TerrainGrid), name: "DoTerrainChangedEffects"), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(RecalculateShipPathCostTerrainChange)));
-            /*harmony.Patch(original: AccessTools.Method(type: typeof(Map), name: nameof(Map.MapUpdate)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(MapTickUpdateWaterTerrain)));*/
+            harmony.Patch(original: AccessTools.Method(typeof(BeachMaker), nameof(BeachMaker.Init)), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(BeachMakerTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(TileFinder), nameof(TileFinder.RandomSettlementTileFor)), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(PushSettlementToCoastTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(MapGenerator), nameof(MapGenerator.GenerateMap)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(GenerateMapExtension)));
+            harmony.Patch(original: AccessTools.Method(typeof(Map), nameof(Map.ExposeData)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(ExposeDataMapExtensions)));
+            harmony.Patch(original: AccessTools.Method(typeof(Map), nameof(Map.FinalizeInit)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(RecalculateShipPathGrid)));
+            harmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.RecalculatePerceivedPathCostUnderThing)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(RecalculateShipPathCostUnderThing)));
+            harmony.Patch(original: AccessTools.Method(typeof(TerrainGrid), "DoTerrainChangedEffects"), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(RecalculateShipPathCostTerrainChange)));
+            /*harmony.Patch(original: AccessTools.Method(typeof(Map), nameof(Map.MapUpdate)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(MapTickUpdateWaterTerrain)));*/
 
             /* Health */
-            harmony.Patch(original: AccessTools.Method(type: typeof(HealthUtility), name: nameof(HealthUtility.GetGeneralConditionLabel)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(ReplaceConditionLabel)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Pawn_HealthTracker), name: "ShouldBeDowned"),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(ShipShouldBeDowned)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(PawnDownedWiggler), name: nameof(PawnDownedWiggler.WigglerTick)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(ShipShouldWiggle)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Pawn), name: nameof(Pawn.Kill)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(KillAndDespawnShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(HediffUtility), name: nameof(HediffUtility.CanHealNaturally)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(ShipsDontHeal)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(HediffUtility), name: nameof(HediffUtility.CanHealFromTending)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(ShipsDontHealTended)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Widgets), parameters: new Type[] { typeof(float), typeof(float), typeof(Thing) }, name: nameof(Widgets.InfoCardButton)), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(InfoCardShipsTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(HealthUtility), nameof(HealthUtility.GetGeneralConditionLabel)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(ReplaceConditionLabel)));
+            harmony.Patch(original: AccessTools.Method(typeof(Pawn_HealthTracker), "ShouldBeDowned"),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(ShipShouldBeDowned)));
+            harmony.Patch(original: AccessTools.Method(typeof(PawnDownedWiggler), nameof(PawnDownedWiggler.WigglerTick)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(ShipShouldWiggle)));
+            harmony.Patch(original: AccessTools.Method(typeof(Pawn), nameof(Pawn.Kill)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(KillAndDespawnShip)));
+            harmony.Patch(original: AccessTools.Method(typeof(HediffUtility), nameof(HediffUtility.CanHealNaturally)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(ShipsDontHeal)));
+            harmony.Patch(original: AccessTools.Method(typeof(HediffUtility), nameof(HediffUtility.CanHealFromTending)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(ShipsDontHealTended)));
+            harmony.Patch(original: AccessTools.Method(typeof(Widgets), nameof(Widgets.InfoCardButton), new Type[] { typeof(float), typeof(float), typeof(Thing) }), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(InfoCardShipsTranspiler)));
 
             /* Rendering */
-            harmony.Patch(original: AccessTools.Method(typeof(Pawn_RotationTracker), name: nameof(Pawn_RotationTracker.UpdateRotation)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(UpdateShipRotation)));
-            harmony.Patch(original: AccessTools.Method(typeof(PawnRenderer), parameters: new Type[] { typeof(Vector3), typeof(float), typeof(bool), typeof(Rot4), typeof(Rot4),
-                    typeof(RotDrawMode), typeof(bool), typeof(bool)}, name: "RenderPawnInternal"), prefix: null, postfix: null,
+            harmony.Patch(original: AccessTools.Method(typeof(Pawn_RotationTracker), nameof(Pawn_RotationTracker.UpdateRotation)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(UpdateShipRotation)));
+            harmony.Patch(original: AccessTools.Method(typeof(PawnRenderer), "RenderPawnInternal", new Type[] { typeof(Vector3), typeof(float), typeof(bool), typeof(Rot4), typeof(Rot4),
+                    typeof(RotDrawMode), typeof(bool), typeof(bool), typeof(bool)}), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(typeof(ShipHarmony),
-                name: nameof(RenderPawnRotationTranspiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(ColonistBar), name: "CheckRecacheEntries"), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(CheckRecacheEntriesTranspiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(ColonistBarColonistDrawer), "DrawIcons"), prefix: null,
+                nameof(RenderPawnRotationTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(ColonistBar), "CheckRecacheEntries"), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(CheckRecacheEntriesTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(ColonistBarColonistDrawer), "DrawIcons"), prefix: null,
                 postfix: new HarmonyMethod(typeof(ShipHarmony),
-                name: nameof(DrawIconsShips)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(SelectionDrawer), name: "DrawSelectionBracketFor"),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(DrawSelectionBracketsShips)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(PawnFootprintMaker), name: nameof(PawnFootprintMaker.FootprintMakerTick)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(BoatWakesTicker)));
+                nameof(DrawIconsShips)));
+            harmony.Patch(original: AccessTools.Method(typeof(SelectionDrawer), "DrawSelectionBracketFor"),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(DrawSelectionBracketsShips)));
+            harmony.Patch(original: AccessTools.Method(typeof(PawnFootprintMaker), nameof(PawnFootprintMaker.FootprintMakerTick)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(BoatWakesTicker)));
 
             /* Gizmos */
-            harmony.Patch(original: AccessTools.Method(typeof(JobDriver_Wait), name: "CheckForAutoAttack"),
-                prefix: new HarmonyMethod(type: typeof(JobDriver_Wait),
-                name: nameof(CheckForShipAttack)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(SettlementBase), name: nameof(SettlementBase.GetCaravanGizmos)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(NoAttackSettlementWhenDocked)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Caravan), name: nameof(Caravan.GetGizmos)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(AddAnchorGizmo)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Pawn), name: nameof(Pawn.GetGizmos)), prefix: null, 
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(GetGizmosForShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanFormingUtility), name: nameof(CaravanFormingUtility.GetGizmos)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(GizmosForShipCaravans)));
+            harmony.Patch(original: AccessTools.Method(typeof(JobDriver_Wait), "CheckForAutoAttack"),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(CheckForShipAttack)));
+            harmony.Patch(original: AccessTools.Method(typeof(Settlement), nameof(Settlement.GetCaravanGizmos)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(NoAttackSettlementWhenDocked)));
+            harmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.GetGizmos)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(AddAnchorGizmo)));
+            harmony.Patch(original: AccessTools.Method(typeof(Pawn), nameof(Pawn.GetGizmos)), prefix: null, 
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(GetGizmosForShip)));
+            harmony.Patch(original: AccessTools.Method(typeof(CaravanFormingUtility), nameof(CaravanFormingUtility.GetGizmos)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(GizmosForShipCaravans)));
 
             /* Pathing */
-            harmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), name: nameof(Pawn_PathFollower.StartPath)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(StartPathShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Pawn_PathFollower), name: "TryEnterNextPathCell"), 
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(TryEnterNextCellShip)));
-            harmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), name: "GenerateNewPath"),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(GenerateNewShipPath)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(FloatMenuMakerMap), name: "GotoLocationOption"),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(GotoLocationShips)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(RegionLink), name: nameof(RegionLink.Deregister)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(DeregisterWaterRegion))); //MORE WORK
+            harmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), nameof(Pawn_PathFollower.StartPath)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(StartPathShip)));
+            harmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), "TryEnterNextPathCell"), 
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(TryEnterNextCellShip)));
+            harmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), "GenerateNewPath"),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(GenerateNewShipPath)));
+            harmony.Patch(original: AccessTools.Method(typeof(FloatMenuMakerMap), "GotoLocationOption"),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(GotoLocationShips)));
+            harmony.Patch(original: AccessTools.Method(typeof(RegionLink), nameof(RegionLink.Deregister)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(DeregisterWaterRegion))); //MORE WORK
 
             /* World Pathing */
-            harmony.Patch(original: AccessTools.Method(type: typeof(WorldPathFinder), name: nameof(WorldPathFinder.FindPath)), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(FindPathWithShipTranspiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(WorldPathFinder), name: nameof(WorldPathFinder.FindPath)), 
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(FindPathNoCaravan)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(WorldRoutePlanner), name: "TryAddWaypoint"), 
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(TryAddWayPointWater)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Dialog_FormCaravan), name: nameof(Dialog_FormCaravan.PostOpen)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(PostOpenSetInstance)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Dialog_FormCaravan), name: nameof(Dialog_FormCaravan.PostClose)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(PostCloseSetInstance)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(WorldReachability), parameters: new Type[] { typeof(int), typeof(int) }, name: nameof(WorldReachability.CanReach)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(CanReachWaypoints)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(WorldReachability), name: "FloodFillAt"),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(FloodFillInverse)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanTicksPerMoveUtility), parameters: new Type[] { typeof(List<Pawn>), typeof(float), typeof(float), typeof(StringBuilder)}, name: nameof(CaravanTicksPerMoveUtility.GetTicksPerMove)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(GetTicksPerMoveShips)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(TilesPerDayCalculator), parameters: new Type[] { typeof(Caravan), typeof(StringBuilder) }, name: nameof(TilesPerDayCalculator.ApproxTilesPerDay)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(ApproxTilesForShips)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(WorldRoutePlanner), name: nameof(WorldRoutePlanner.WorldRoutePlannerUpdate)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(WorldRoutePlannerActive)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanUtility), name: nameof(CaravanUtility.BestGotoDestNear)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(BestGotoDestNearOcean)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanExitMapUtility), parameters: new Type[] { typeof(IEnumerable<Pawn>), typeof(Faction), typeof(int), typeof(int), typeof(int), typeof(bool) }, 
-                name: nameof(CaravanExitMapUtility.ExitMapAndCreateCaravan)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(TryFindClosestSailableTile)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Caravan_PathFollower), name: "SetupMoveIntoNextTile"), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(SetupMoveIntoNextOceanTileTranspiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Caravan_PathFollower), name: "IsPassable"), 
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(IsPassableForBoats)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Caravan_PathFollower), name: "NeedNewPath"), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(NeedNewPathForBoatTranspiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(WorldPathGrid), name: nameof(WorldPathGrid.PerceivedMovementDifficultyAt)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(PerceivedMovementDifficultyOnWater)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(WorldPathGrid), name: nameof(WorldPathGrid.CalculatedMovementDifficultyAt)), 
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(CalculatedMovementDifficultyAtOcean)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Dialog_FormCaravan), name: nameof(Dialog_FormCaravan.Notify_ChoseRoute)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(IslandExitTile)));
+            harmony.Patch(original: AccessTools.Method(typeof(WorldPathFinder), nameof(WorldPathFinder.FindPath)), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(FindPathWithShipTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(WorldPathFinder), nameof(WorldPathFinder.FindPath)), 
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(FindPathNoCaravan)));
+            harmony.Patch(original: AccessTools.Method(typeof(WorldRoutePlanner), "TryAddWaypoint"), 
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(TryAddWayPointWater)));
+            harmony.Patch(original: AccessTools.Method(typeof(Dialog_FormCaravan), nameof(Dialog_FormCaravan.PostOpen)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(PostOpenSetInstance)));
+            harmony.Patch(original: AccessTools.Method(typeof(Dialog_FormCaravan), nameof(Dialog_FormCaravan.PostClose)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(PostCloseSetInstance)));
+            harmony.Patch(original: AccessTools.Method(typeof(WorldReachability), nameof(WorldReachability.CanReach), new Type[] { typeof(int), typeof(int) }),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(CanReachWaypoints)));
+            harmony.Patch(original: AccessTools.Method(typeof(WorldReachability), "FloodFillAt"),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(FloodFillInverse)));
+            harmony.Patch(original: AccessTools.Method(typeof(CaravanTicksPerMoveUtility), nameof(CaravanTicksPerMoveUtility.GetTicksPerMove), new Type[] { typeof(List<Pawn>), typeof(float), typeof(float), typeof(StringBuilder)}),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(GetTicksPerMoveShips)));
+            harmony.Patch(original: AccessTools.Method(typeof(TilesPerDayCalculator), nameof(TilesPerDayCalculator.ApproxTilesPerDay), new Type[] { typeof(Caravan), typeof(StringBuilder) }),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(ApproxTilesForShips)));
+            harmony.Patch(original: AccessTools.Method(typeof(WorldRoutePlanner), nameof(WorldRoutePlanner.WorldRoutePlannerUpdate)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(WorldRoutePlannerActive)));
+            harmony.Patch(original: AccessTools.Method(typeof(CaravanUtility), nameof(CaravanUtility.BestGotoDestNear)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(BestGotoDestNearOcean)));
+            harmony.Patch(original: AccessTools.Method(typeof(CaravanExitMapUtility), nameof(CaravanExitMapUtility.ExitMapAndCreateCaravan), new Type[] { typeof(IEnumerable<Pawn>), typeof(Faction), typeof(int), typeof(int), typeof(int), typeof(bool) }),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(TryFindClosestSailableTile)));
+            harmony.Patch(original: AccessTools.Method(typeof(Caravan_PathFollower), "SetupMoveIntoNextTile"), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(SetupMoveIntoNextOceanTileTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(Caravan_PathFollower), "IsPassable"), 
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(IsPassableForBoats)));
+            harmony.Patch(original: AccessTools.Method(typeof(Caravan_PathFollower), "NeedNewPath"), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(NeedNewPathForBoatTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(WorldPathGrid), nameof(WorldPathGrid.PerceivedMovementDifficultyAt)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(PerceivedMovementDifficultyOnWater)));
+            harmony.Patch(original: AccessTools.Method(typeof(WorldPathGrid), nameof(WorldPathGrid.CalculatedMovementDifficultyAt)), 
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(CalculatedMovementDifficultyAtOcean)));
+            harmony.Patch(original: AccessTools.Method(typeof(Dialog_FormCaravan), nameof(Dialog_FormCaravan.Notify_ChoseRoute)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(IslandExitTile)));
 
             /* World Handling */
-            harmony.Patch(original: AccessTools.Method(type: typeof(WorldPawns), name: nameof(WorldPawns.GetSituation)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(SituationBoardedShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(WorldPawns), name: nameof(WorldPawns.RemoveAndDiscardPawnViaGC)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(DoNotRemoveDockedBoats)));
+            harmony.Patch(original: AccessTools.Method(typeof(WorldPawns), nameof(WorldPawns.GetSituation)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(SituationBoardedShip)));
+            harmony.Patch(original: AccessTools.Method(typeof(WorldPawns), nameof(WorldPawns.RemoveAndDiscardPawnViaGC)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(DoNotRemoveDockedBoats)));
 
             /* Jobs */
-            harmony.Patch(original: AccessTools.Method(type: typeof(JobUtility), name: nameof(JobUtility.TryStartErrorRecoverJob)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(ShipErrorRecoverJob)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(JobGiver_Wander), name: "TryGiveJob"),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(ShipsDontWander)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Pawn_JobTracker), name: nameof(Pawn_JobTracker.CheckForJobOverride)), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(NoOverrideDamageTakenTranspiler)));
-            harmony.Patch(original: AccessTools.Property(type: typeof(JobDriver_PrepareCaravan_GatherItems), name: "Transferables").GetGetMethod(nonPublic: true),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(TransferablesShip)));
+            harmony.Patch(original: AccessTools.Method(typeof(JobUtility), nameof(JobUtility.TryStartErrorRecoverJob)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(ShipErrorRecoverJob)));
+            harmony.Patch(original: AccessTools.Method(typeof(JobGiver_Wander), "TryGiveJob"),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(ShipsDontWander)));
+            harmony.Patch(original: AccessTools.Method(typeof(Pawn_JobTracker), nameof(Pawn_JobTracker.CheckForJobOverride)), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(NoOverrideDamageTakenTranspiler)));
+            harmony.Patch(original: AccessTools.Property(typeof(JobDriver_PrepareCaravan_GatherItems), "Transferables").GetGetMethod(nonPublic: true),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(TransferablesShip)));
 
             /* Lords */
-            harmony.Patch(original: AccessTools.Method(type: typeof(LordToil_PrepareCaravan_GatherAnimals), name: nameof(LordToil_PrepareCaravan_GatherAnimals.UpdateAllDuties)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(UpdateDutyOfShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(GatheringsUtility), name: nameof(GatheringsUtility.ShouldGuestKeepAttendingGathering)),
+            harmony.Patch(original: AccessTools.Method(typeof(LordToil_PrepareCaravan_GatherAnimals), nameof(LordToil_PrepareCaravan_GatherAnimals.UpdateAllDuties)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(UpdateDutyOfShip)));
+            harmony.Patch(original: AccessTools.Method(typeof(GatheringsUtility), nameof(GatheringsUtility.ShouldGuestKeepAttendingGathering)),
                 prefix: new HarmonyMethod(typeof(ShipHarmony),
-                name: nameof(BoatsDontParty)));
+                nameof(BoatsDontParty)));
 
             /* Forming Caravan */
-            harmony.Patch(original: AccessTools.Method(type: typeof(Dialog_FormCaravan), parameters: new Type[] { typeof(List<Pawn>), typeof(bool), typeof(IntVec3).MakeByRefType() }, name: "TryFindExitSpot"),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(TryFindExitSpotShips)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Dialog_FormCaravan), name: "TryFindRandomPackingSpot"),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(TryFindPackingSpotShips)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Dialog_FormCaravan), name: "TryReformCaravan"), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(BoardBoatsWhenReformingCaravanTranspiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Dialog_FormCaravan), name: "DoBottomButtons"), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(DoBottomButtonsTranspiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanUIUtility), name: nameof(CaravanUIUtility.AddPawnsSections)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(AddShipsSections)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanFormingUtility), name: nameof(CaravanFormingUtility.StartFormingCaravan)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(StartFormingCaravanForShips)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanFormingUtility), name: nameof(CaravanFormingUtility.RemovePawnFromCaravan)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(RemovePawnAddShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanFormingUtility), name: nameof(CaravanFormingUtility.GetFormAndSendCaravanLord)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(GetShipAndSendCaravanLord)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanFormingUtility), name: nameof(CaravanFormingUtility.IsFormingCaravan)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(IsFormingCaravanShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(TransferableUtility), name: nameof(TransferableUtility.CanStack)), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(CanStackShipTranspiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(GiveToPackAnimalUtility), name: nameof(GiveToPackAnimalUtility.UsablePackAnimalWithTheMostFreeSpace)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(UsableBoatWithMostFreeSpace)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(FloatMenuMakerMap), name: "AddHumanlikeOrders"), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(AddHumanLikeOrdersLoadBoatsTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(Dialog_FormCaravan), "TryFindExitSpot", new Type[] { typeof(List<Pawn>), typeof(bool), typeof(IntVec3).MakeByRefType() }),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(TryFindExitSpotShips)));
+            harmony.Patch(original: AccessTools.Method(typeof(Dialog_FormCaravan), "TryFindRandomPackingSpot"),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(TryFindPackingSpotShips)));
+            harmony.Patch(original: AccessTools.Method(typeof(Dialog_FormCaravan), "TryReformCaravan"), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(BoardBoatsWhenReformingCaravanTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(Dialog_FormCaravan), "DoBottomButtons"), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(DoBottomButtonsTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(CaravanUIUtility), nameof(CaravanUIUtility.AddPawnsSections)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(AddShipsSections)));
+            harmony.Patch(original: AccessTools.Method(typeof(CaravanFormingUtility), nameof(CaravanFormingUtility.StartFormingCaravan)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(StartFormingCaravanForShips)));
+            harmony.Patch(original: AccessTools.Method(typeof(CaravanFormingUtility), nameof(CaravanFormingUtility.RemovePawnFromCaravan)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(RemovePawnAddShip)));
+            harmony.Patch(original: AccessTools.Method(typeof(CaravanFormingUtility), nameof(CaravanFormingUtility.GetFormAndSendCaravanLord)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(GetShipAndSendCaravanLord)));
+            harmony.Patch(original: AccessTools.Method(typeof(CaravanFormingUtility), nameof(CaravanFormingUtility.IsFormingCaravan)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(IsFormingCaravanShip)));
+            harmony.Patch(original: AccessTools.Method(typeof(TransferableUtility), nameof(TransferableUtility.CanStack)), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(CanStackShipTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(GiveToPackAnimalUtility), nameof(GiveToPackAnimalUtility.UsablePackAnimalWithTheMostFreeSpace)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(UsableBoatWithMostFreeSpace)));
+            harmony.Patch(original: AccessTools.Method(typeof(FloatMenuMakerMap), "AddHumanlikeOrders"), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(AddHumanLikeOrdersLoadBoatsTranspiler)));
 
             /* Caravan */
-            harmony.Patch(original: AccessTools.Method(type: typeof(CollectionsMassCalculator), parameters: new Type[] { typeof(List<ThingCount>), typeof(StringBuilder) }, name: nameof(CollectionsMassCalculator.Capacity)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(CapacityWithShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(MassUtility), name: nameof(MassUtility.CanEverCarryAnything)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(CanCarryIfShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "FillTab"),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(FillTabShipCaravan)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "DoPeopleAndAnimals"), 
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(DoPeopleAnimalsAndShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanArrivalAction_Enter), name: nameof(CaravanArrivalAction_Enter.Arrived)), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(ShipsArrivedTranspiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanArrivalAction_VisitEscapeShip), name: "DoArrivalAction"), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(ShipsVisitEscapeShipTranspiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(SettlementUtility), name: "AttackNow"), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(AttackNowWithShipsTranspiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(SettleInEmptyTileUtility), name: nameof(SettleInEmptyTileUtility.Settle)), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(SettleFromSeaTranspiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(SiteCoreWorker), name: "DoEnter"), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(DoEnterWithShipsTranspiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanEnterMapUtility), parameters: new Type[]{typeof(Caravan), typeof(Map), typeof(CaravanEnterMode), typeof(CaravanDropInventoryMode),
-                typeof(bool), typeof(Predicate<IntVec3>) }, name: nameof(CaravanEnterMapUtility.Enter)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(EnterMapShipsCatchAll1)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanEnterMapUtility), parameters: new Type[] { typeof(Caravan), typeof(Map), typeof(Func<Pawn, IntVec3>), typeof(CaravanDropInventoryMode),
-                typeof(bool) }, name: nameof(CaravanEnterMapUtility.Enter)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(EnterMapShipsCatchAll2)));
-            harmony.Patch(original: AccessTools.Property(type: typeof(Caravan), name: nameof(Caravan.AllOwnersDowned)).GetGetMethod(),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(AllOwnersDownedShip)));
-            harmony.Patch(original: AccessTools.Property(type: typeof(Caravan), name: nameof(Caravan.AllOwnersHaveMentalBreak)).GetGetMethod(),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(AllOwnersMentalBreakShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Caravan), name: nameof(Caravan.GetInspectString)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(GetInspectStringShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Caravan), name: nameof(Caravan.Notify_MemberDied)), 
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(CaravanLostAllShips)));
-            harmony.Patch(original: AccessTools.Property(type: typeof(MapPawns), name: nameof(MapPawns.AnyPawnBlockingMapRemoval)).GetGetMethod(), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(AnyShipBlockingMapRemoval)));
-            harmony.Patch(original: AccessTools.Property(type: typeof(Caravan), name: nameof(Caravan.NightResting)).GetGetMethod(),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(NoRestForBoats)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(SettlementDefeatUtility), name: nameof(SettlementDefeatUtility.CheckDefeated)), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(CheckDefeatedWithShipsTranspiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Tale_DoublePawn), name: nameof(Tale_DoublePawn.Concerns)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(ConcernNullThing)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(WITab_Caravan_Needs), name: "FillTab"), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(SailorNeedsFillTabTranspiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(WITab_Caravan_Needs), name: "UpdateSize"), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(SailorNeedsUpdateSizeTranspiler)));
-            harmony.Patch(original: AccessTools.Property(type: typeof(WITab_Caravan_Gear), name: "Pawns").GetGetMethod(nonPublic: true), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(SailorGearTabPawns)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanInventoryUtility), name: nameof(CaravanInventoryUtility.AllInventoryItems)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(SailorAllInventoryItems)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanInventoryUtility), name: nameof(CaravanInventoryUtility.GiveThing)), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(SailorGiveThingInventoryTranspiler)));
-            harmony.Patch(original: AccessTools.Property(type: typeof(WITab_Caravan_Health), name: "Pawns").GetGetMethod(nonPublic: true), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(SailorHealthTabPawns)));
-            harmony.Patch(original: AccessTools.Property(type: typeof(WITab_Caravan_Social), name: "Pawns").GetGetMethod(nonPublic: true), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(SailorSocialTabPawns)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(BestCaravanPawnUtility), name: nameof(BestCaravanPawnUtility.FindPawnWithBestStat)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(FindSailorWithBestStat)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Caravan), name: nameof(Caravan.ContainsPawn)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(ContainsPawnInShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Caravan), name: nameof(Caravan.IsOwner)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(IsOwnerSailor)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(CaravanArrivalAction_OfferGifts), name: nameof(CaravanArrivalAction_OfferGifts.Arrived)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(DockBoatOfferGifts)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(SettlementBase_TraderTracker), name: nameof(SettlementBase_TraderTracker.GiveSoldThingToPlayer)), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(GiveSoldThingToShipTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(CollectionsMassCalculator), nameof(CollectionsMassCalculator.Capacity), new Type[] { typeof(List<ThingCount>), typeof(StringBuilder) }),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(CapacityWithShip)));
+            harmony.Patch(original: AccessTools.Method(typeof(MassUtility), nameof(MassUtility.CanEverCarryAnything)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(CanCarryIfShip)));
+            harmony.Patch(original: AccessTools.Method(typeof(ITab_Pawn_FormingCaravan), "FillTab"),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(FillTabShipCaravan)));
+            harmony.Patch(original: AccessTools.Method(typeof(ITab_Pawn_FormingCaravan), "DoPeopleAndAnimals"), 
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(DoPeopleAnimalsAndShip)));
+            harmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_Enter), nameof(CaravanArrivalAction_Enter.Arrived)), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(ShipsArrivedTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_VisitEscapeShip), "DoArrivalAction"), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(ShipsVisitEscapeShipTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(SettlementUtility), "AttackNow"), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(AttackNowWithShipsTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(SettleInEmptyTileUtility), nameof(SettleInEmptyTileUtility.Settle)), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(SettleFromSeaTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_VisitSite), "DoEnter"), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(DoEnterWithShipsTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(CaravanEnterMapUtility), nameof(CaravanEnterMapUtility.Enter), new Type[]{typeof(Caravan), typeof(Map), typeof(CaravanEnterMode), typeof(CaravanDropInventoryMode), typeof(bool), typeof(Predicate<IntVec3>) }),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(EnterMapShipsCatchAll1)));
+            harmony.Patch(original: AccessTools.Method(typeof(CaravanEnterMapUtility), nameof(CaravanEnterMapUtility.Enter), new Type[] { typeof(Caravan), typeof(Map), typeof(Func<Pawn, IntVec3>), typeof(CaravanDropInventoryMode), typeof(bool) }),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(EnterMapShipsCatchAll2)));
+            harmony.Patch(original: AccessTools.Property(typeof(Caravan), nameof(Caravan.AllOwnersDowned)).GetGetMethod(),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(AllOwnersDownedShip)));
+            harmony.Patch(original: AccessTools.Property(typeof(Caravan), nameof(Caravan.AllOwnersHaveMentalBreak)).GetGetMethod(),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(AllOwnersMentalBreakShip)));
+            harmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.GetInspectString)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(GetInspectStringShip)));
+            harmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.Notify_MemberDied)), 
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(CaravanLostAllShips)));
+            harmony.Patch(original: AccessTools.Property(typeof(MapPawns), nameof(MapPawns.AnyPawnBlockingMapRemoval)).GetGetMethod(), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(AnyShipBlockingMapRemoval)));
+            harmony.Patch(original: AccessTools.Property(typeof(Caravan), nameof(Caravan.NightResting)).GetGetMethod(),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(NoRestForBoats)));
+            harmony.Patch(original: AccessTools.Method(typeof(SettlementDefeatUtility), nameof(SettlementDefeatUtility.CheckDefeated)), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(CheckDefeatedWithShipsTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(Tale_DoublePawn), nameof(Tale_DoublePawn.Concerns)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(ConcernNullThing)));
+            harmony.Patch(original: AccessTools.Method(typeof(WITab_Caravan_Needs), "FillTab"), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(SailorNeedsFillTabTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(WITab_Caravan_Needs), "UpdateSize"), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(SailorNeedsUpdateSizeTranspiler)));
+            harmony.Patch(original: AccessTools.Property(typeof(WITab_Caravan_Gear), "Pawns").GetGetMethod(nonPublic: true), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(SailorGearTabPawns)));
+            harmony.Patch(original: AccessTools.Method(typeof(CaravanInventoryUtility), nameof(CaravanInventoryUtility.AllInventoryItems)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(SailorAllInventoryItems)));
+            harmony.Patch(original: AccessTools.Method(typeof(CaravanInventoryUtility), nameof(CaravanInventoryUtility.GiveThing)), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(SailorGiveThingInventoryTranspiler)));
+            harmony.Patch(original: AccessTools.Property(typeof(WITab_Caravan_Health), "Pawns").GetGetMethod(nonPublic: true), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(SailorHealthTabPawns)));
+            harmony.Patch(original: AccessTools.Property(typeof(WITab_Caravan_Social), "Pawns").GetGetMethod(nonPublic: true), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(SailorSocialTabPawns)));
+            harmony.Patch(original: AccessTools.Method(typeof(BestCaravanPawnUtility), nameof(BestCaravanPawnUtility.FindPawnWithBestStat)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(FindSailorWithBestStat)));
+            harmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.ContainsPawn)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(ContainsPawnInShip)));
+            harmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.IsOwner)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(IsOwnerSailor)));
+            harmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_OfferGifts), nameof(CaravanArrivalAction_OfferGifts.Arrived)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(DockBoatOfferGifts)));
+            harmony.Patch(original: AccessTools.Method(typeof(Settlement_TraderTracker), nameof(Settlement_TraderTracker.GiveSoldThingToPlayer)), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(GiveSoldThingToShipTranspiler)));
 
             /* Draftable */
-            harmony.Patch(original: AccessTools.Property(type: typeof(Pawn_DraftController), name: nameof(Pawn_DraftController.Drafted)).GetSetMethod(),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(DraftedShipsCanMove)));
-            harmony.Patch(original: AccessTools.Property(type: typeof(Pawn_DraftController), name: nameof(Pawn_DraftController.Drafted)).GetGetMethod(), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(UndraftedShipsStopPathing)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(FloatMenuMakerMap), name: "CanTakeOrder"), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(CanShipTakeOrder)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(FloatMenuUtility), name: nameof(FloatMenuUtility.GetMeleeAttackAction)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(NoMeleeForShips))); //Change..?
-            harmony.Patch(original: AccessTools.Method(type: typeof(Pawn), name: nameof(Pawn.DrawExtraSelectionOverlays)), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(DrawESOShipsTranspiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(PawnComponentsUtility), name: nameof(PawnComponentsUtility.AddAndRemoveDynamicComponents)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(AddAndRemoveShipComponents)));
+            harmony.Patch(original: AccessTools.Property(typeof(Pawn_DraftController), nameof(Pawn_DraftController.Drafted)).GetSetMethod(),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(DraftedShipsCanMove)));
+            harmony.Patch(original: AccessTools.Property(typeof(Pawn_DraftController), nameof(Pawn_DraftController.Drafted)).GetGetMethod(), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(UndraftedShipsStopPathing)));
+            harmony.Patch(original: AccessTools.Method(typeof(FloatMenuMakerMap), "CanTakeOrder"), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(CanShipTakeOrder)));
+            harmony.Patch(original: AccessTools.Method(typeof(FloatMenuUtility), nameof(FloatMenuUtility.GetMeleeAttackAction)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(NoMeleeForShips))); //Change..?
+            harmony.Patch(original: AccessTools.Method(typeof(Pawn), nameof(Pawn.DrawExtraSelectionOverlays)), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(DrawESOShipsTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(PawnComponentsUtility), nameof(PawnComponentsUtility.AddAndRemoveDynamicComponents)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(AddAndRemoveShipComponents)));
 
             /* Construction */
-            harmony.Patch(original: AccessTools.Method(type: typeof(Frame), name: nameof(Frame.CompleteConstruction)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(CompleteConstructionShip)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(ListerBuildingsRepairable), name: nameof(ListerBuildingsRepairable.Notify_BuildingRepaired)),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(Notify_RepairedShip)));
+            harmony.Patch(original: AccessTools.Method(typeof(Frame), nameof(Frame.CompleteConstruction)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(CompleteConstructionShip)));
+            harmony.Patch(original: AccessTools.Method(typeof(ListerBuildingsRepairable), nameof(ListerBuildingsRepairable.Notify_BuildingRepaired)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(Notify_RepairedShip)));
 
             /* Extra */
-            harmony.Patch(original: AccessTools.Property(type: typeof(MapPawns), name: nameof(MapPawns.FreeColonistsSpawnedOrInPlayerEjectablePodsCount)).GetGetMethod(), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(FreeColonistsInShipsTransport)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Selector), name: "HandleMapClicks"), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(MultiSelectFloatMenuTranspiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(MentalState_Manhunter), parameters: new Type[] { typeof(Thing) }, name: nameof(MentalState_Manhunter.ForceHostileTo)), prefix: null,
-                postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(ManhunterDontAttackBoats)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Projectile_Explosive), name: "Impact"),
-                prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                name: nameof(ShellsImpactWater)));
+            harmony.Patch(original: AccessTools.Property(typeof(MapPawns), nameof(MapPawns.FreeColonistsSpawnedOrInPlayerEjectablePodsCount)).GetGetMethod(), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(FreeColonistsInShipsTransport)));
+            harmony.Patch(original: AccessTools.Method(typeof(Selector), "HandleMapClicks"), prefix: null, postfix: null,
+                transpiler: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(MultiSelectFloatMenuTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(MentalState_Manhunter), nameof(MentalState_Manhunter.ForceHostileTo), new Type[] { typeof(Thing) }), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(ManhunterDontAttackBoats)));
+            harmony.Patch(original: AccessTools.Method(typeof(Projectile_Explosive), "Impact"),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(ShellsImpactWater)));
 
             /* Debug */
             if(debug)
             {
-                harmony.Patch(original: AccessTools.Method(type: typeof(WorldRoutePlanner), name: nameof(WorldRoutePlanner.WorldRoutePlannerUpdate)), prefix: null,
-                    postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                    name: nameof(DebugSettlementPaths)));
-                harmony.Patch(original: AccessTools.Method(type: typeof(WorldObjectsHolder), name: nameof(WorldObjectsHolder.Add)),
-                    prefix: new HarmonyMethod(type: typeof(ShipHarmony),
-                    name: nameof(DebugWorldObjects)));
-                harmony.Patch(original: AccessTools.Method(type: typeof(RegionGrid), name: nameof(RegionGrid.DebugDraw)), prefix: null,
-                    postfix: new HarmonyMethod(type: typeof(ShipHarmony),
-                    name: nameof(DebugDrawWaterRegion)));
+                harmony.Patch(original: AccessTools.Method(typeof(WorldRoutePlanner), nameof(WorldRoutePlanner.WorldRoutePlannerUpdate)), prefix: null,
+                    postfix: new HarmonyMethod(typeof(ShipHarmony),
+                    nameof(DebugSettlementPaths)));
+                harmony.Patch(original: AccessTools.Method(typeof(WorldObjectsHolder), nameof(WorldObjectsHolder.Add)),
+                    prefix: new HarmonyMethod(typeof(ShipHarmony),
+                    nameof(DebugWorldObjects)));
+                harmony.Patch(original: AccessTools.Method(typeof(RegionGrid), nameof(RegionGrid.DebugDraw)), prefix: null,
+                    postfix: new HarmonyMethod(typeof(ShipHarmony),
+                    nameof(DebugDrawWaterRegion)));
             }
 
             #endregion Functions
@@ -477,13 +474,13 @@ namespace RimShips
             {
                 CodeInstruction instruction = instructionList[i];
 
-                if(instruction.opcode == OpCodes.Call && instruction.operand == AccessTools.Property(type: typeof(FloatRange), name: nameof(FloatRange.RandomInRange)).GetGetMethod())
+                if(instruction.Calls(AccessTools.Property(typeof(FloatRange), nameof(FloatRange.RandomInRange)).GetGetMethod()))
                 {
                     i++;
                     instruction = instructionList[i];
                     yield return new CodeInstruction(opcode: OpCodes.Pop);
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), name: nameof(HelperMethods.CustomFloatBeach)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.CustomFloatBeach)));
                 }
                 yield return instruction;
             }
@@ -507,7 +504,7 @@ namespace RimShips
                 {
                     ///Call method, grab new location and store
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), name: nameof(HelperMethods.PushSettlementToCoast)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.PushSettlementToCoast)));
                     yield return new CodeInstruction(opcode: OpCodes.Stloc_1);
                     yield return new CodeInstruction(opcode: OpCodes.Ldloc_1);
                 }
@@ -522,6 +519,12 @@ namespace RimShips
         /// <returns></returns>
         public static bool RecalculateShipPathGrid(Map __instance)
         {
+            if(__instance is null)
+            {
+                Log.Error("Recalculating Water PathGrid on null map. This should never happen. - Smash Phil");
+                return true;
+            }
+
             MapExtension mapE = MapExtensionUtility.GetExtensionToMap(__instance);
             mapE?.getShipPathGrid?.RecalculateAllPerceivedPathCosts();
 
@@ -760,19 +763,19 @@ namespace RimShips
             {
                 CodeInstruction instruction = instructionList[i];
 
-                if (instruction.opcode == OpCodes.Call && instruction.operand == AccessTools.Property(type: typeof(Find), name: nameof(Find.WindowStack)).GetGetMethod())
+                if (instruction.Calls(AccessTools.Property(typeof(Find), nameof(Find.WindowStack)).GetGetMethod()))
                 {
                     Label label = ilg.DefineLabel();
                     ///Check if pawn in question is a Boat
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_2);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), parameters: new Type[] { typeof(Thing) }, name: nameof(HelperMethods.IsShip)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.IsShip), new Type[] { typeof(Thing) }));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
                     ///Load a new object of type Dialog_InfoCard_Ship and load onto the WindowStack. Return after
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Property(type: typeof(Find), name: nameof(Find.WindowStack)).GetGetMethod());
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Property(typeof(Find), nameof(Find.WindowStack)).GetGetMethod());
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_2);
-                    yield return new CodeInstruction(opcode: OpCodes.Newobj, operand: AccessTools.Constructor(type: typeof(Dialog_InfoCard_Ship), new Type[] { typeof(Thing) }));
-                    yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Method(type: typeof(WindowStack), name: nameof(WindowStack.Add)));
+                    yield return new CodeInstruction(opcode: OpCodes.Newobj, operand: AccessTools.Constructor(typeof(Dialog_InfoCard_Ship), new Type[] { typeof(Thing) }));
+                    yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Method(typeof(WindowStack), nameof(WindowStack.Add)));
                     yield return new CodeInstruction(opcode: OpCodes.Ldc_I4_1);
                     yield return new CodeInstruction(opcode: OpCodes.Ret);
 
@@ -841,14 +844,14 @@ namespace RimShips
 
             ///Check if the pawn being rendered is a boat
             yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-            yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(type: typeof(PawnRenderer), name: "pawn"));
-            yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), parameters: new Type[] { typeof(Pawn) }, name: nameof(HelperMethods.IsShip)));
+            yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(typeof(PawnRenderer), "pawn"));
+            yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.IsShip), new Type[] { typeof(Pawn) }));
             yield return new CodeInstruction(opcode: OpCodes.Brfalse, operand: label);
 
             ///Get resulting angle value determined by diagonal movement, store inside angle vector
             yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-            yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(type: typeof(PawnRenderer), name: "pawn"));
-            yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), name: nameof(HelperMethods.ShipAngle)));
+            yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(typeof(PawnRenderer), "pawn"));
+            yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.ShipAngle)));
             yield return new CodeInstruction(opcode: OpCodes.Starg_S, operand: 2);
 
             yield return new CodeInstruction(opcode: OpCodes.Nop) { labels = new List<Label> { label } };
@@ -878,26 +881,26 @@ namespace RimShips
                     flag = true;
 
                     ///Get pawns onboard boat and store inside list to render on colonist bar
-                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(type: typeof(ColonistBar), name: "tmpPawns"));
-                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(type: typeof(ColonistBar), name: "tmpMaps"));
+                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(typeof(ColonistBar), "tmpPawns"));
+                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(typeof(ColonistBar), "tmpMaps"));
                     yield return new CodeInstruction(opcode: OpCodes.Ldloc_1);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), name: nameof(HelperMethods.GetShipsForColonistBar)));
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(List<Pawn>), name: nameof(List<Pawn>.AddRange)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.GetShipsForColonistBar)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(List<Pawn>), nameof(List<Pawn>.AddRange)));
                 }
-                if ((instruction.opcode == OpCodes.Callvirt && instruction.operand == AccessTools.Method(type: typeof(List<Pawn>), name: nameof(List<Pawn>.AddRange))) &&
-                    (instructionList[i-1].opcode == OpCodes.Callvirt && instructionList[i-1].operand == AccessTools.Property(type: typeof(Caravan), name: nameof(Caravan.PawnsListForReading)).GetGetMethod()))
+                if ((instruction.Calls(AccessTools.Method(typeof(List<Pawn>), nameof(List<Pawn>.AddRange)))) &&
+                    (instructionList[i-1].Calls(AccessTools.Property(typeof(Caravan), nameof(Caravan.PawnsListForReading)).GetGetMethod())))
                 {
                     yield return instruction; //CALLVIRT : AddRange
                     instruction = instructionList[++i];
 
                     ///Grab pawns from Boat caravan and store inside list to be rendered on colonist bar
-                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(type: typeof(ColonistBar), "tmpPawns"));
-                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(type: typeof(ColonistBar), "tmpCaravans"));
+                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(typeof(ColonistBar), "tmpPawns"));
+                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(typeof(ColonistBar), "tmpCaravans"));
                     yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, 9);
-                    yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Property(type: typeof(List<Caravan>), name: "Item").GetGetMethod());
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), name: nameof(HelperMethods.ExtractPawnsFromCaravan)));
+                    yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Property(typeof(List<Caravan>), "Item").GetGetMethod());
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.ExtractPawnsFromCaravan)));
 
-                    yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Method(type: typeof(List<Pawn>), name: nameof(List<Pawn>.AddRange)));
+                    yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Method(typeof(List<Pawn>), nameof(List<Pawn>.AddRange)));
                 }
 
                 yield return instruction;
@@ -911,16 +914,16 @@ namespace RimShips
         /// <param name="colonist"></param>
         public static void DrawIconsShips(Rect rect, Pawn colonist)
         {
-            if (colonist.Dead)
+            if(colonist.Dead)
             {
                 return;
             }
             float num = 20f * Find.ColonistBar.Scale;
             Vector2 vector = new Vector2(rect.x + 1f, rect.yMax - num - 1f);
-            
-            List<Pawn> ships = Find.CurrentMap.mapPawns.AllPawnsSpawned.FindAll(x => x.GetComp<CompShips>() != null);
-            Pawn p = ships.Find(x => x.GetComp<CompShips>().AllPawnsAboard.Contains(colonist));
-            if(!(p is null))
+
+            List<Pawn> ships = Find.CurrentMap?.mapPawns?.AllPawnsSpawned?.FindAll(x => HelperMethods.IsShip(x));
+            Pawn p = ships?.Find(x => x.GetComp<CompShips>().AllPawnsAboard.Contains(colonist));
+            if(p != null)
             {
                 Rect rect2 = new Rect(vector.x, vector.y, num, num);
                 GUI.DrawTexture(rect2, TexCommandShips.OnboardIcon);
@@ -942,7 +945,7 @@ namespace RimShips
                 Vector3[] brackets = new Vector3[4];
                 Vector3 newDrawPos = (thing as Pawn).DrawPosTransformed((thing as Pawn).GetComp<CompShips>().Props.hitboxOffsetX, (thing as Pawn).GetComp<CompShips>().Props.hitboxOffsetZ, (thing as Pawn).GetComp<CompShips>().Angle);
 
-                FieldInfo info = AccessTools.Field(type: typeof(SelectionDrawer), name: "selectTimes");
+                FieldInfo info = AccessTools.Field(typeof(SelectionDrawer), "selectTimes");
                 object o = info.GetValue(null);
                 SPMultiCell.CalculateSelectionBracketPositionsWorldForMultiCellPawns<object>(brackets, thing, newDrawPos, thing.RotatedSize.ToVector2(), (Dictionary<object, float>)o, Vector2.one, (obj as Pawn).GetComp<CompShips>().Angle, 1f);
 
@@ -1128,7 +1131,7 @@ namespace RimShips
             {
                 CodeInstruction instruction = instructionList[i];
 
-                if (instruction.opcode == OpCodes.Call && instruction.operand == AccessTools.Property(type: typeof(Pawn), name: nameof(Pawn.IsColonistPlayerControlled)).GetGetMethod())
+                if (instruction.Calls(AccessTools.Property(typeof(Pawn), nameof(Pawn.IsColonistPlayerControlled)).GetGetMethod()))
                 {
                     yield return instruction; //CALL : IsColonistPlayerControlled
                     instruction = instructionList[++i];
@@ -1139,7 +1142,7 @@ namespace RimShips
                     ///If object is Boat, enable for ESO rendering
                     yield return new CodeInstruction(opcode: OpCodes.Brtrue, label);
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), parameters: new Type[] { typeof(Pawn) }, name: nameof(HelperMethods.IsShip)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.IsShip), new Type[] { typeof(Pawn) }));
                     yield return new CodeInstruction(opcode: OpCodes.Br, label2);
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldc_I4_1) { labels = new List<Label> { label } };
@@ -1190,14 +1193,14 @@ namespace RimShips
         /// <param name="caravan"></param>
         /// <param name="__result"></param>
         /// <param name="__instance"></param>
-        public static void NoAttackSettlementWhenDocked(Caravan caravan, ref IEnumerable<Gizmo> __result, SettlementBase __instance)
+        public static void NoAttackSettlementWhenDocked(Caravan caravan, ref IEnumerable<Gizmo> __result, Settlement __instance)
         {
             if(HelperMethods.HasShip(caravan) && !caravan.pather.Moving)
             {
                 List<Gizmo> gizmos = __result.ToList();
                 if (caravan.PawnsListForReading.Any(x => !HelperMethods.IsShip(x)))
                 {
-                    int index = gizmos.FindIndex(x => (x as Command_Action).icon == SettlementBase.AttackCommand);
+                    int index = gizmos.FindIndex(x => (x as Command_Action).icon == Settlement.AttackCommand);
                     if (index >= 0 && index < gizmos.Count)
                         gizmos[index].Disable("CommandAttackDockDisable".Translate(__instance.LabelShort));
                 }
@@ -1274,7 +1277,7 @@ namespace RimShips
 
                 if(__instance.drafter != null)
                 {
-                    IEnumerable<Gizmo> draftGizmos = (IEnumerable<Gizmo>)AccessTools.Method(type: typeof(Pawn_DraftController), name: "GetGizmos").Invoke(__instance.drafter, null);
+                    IEnumerable<Gizmo> draftGizmos = (IEnumerable<Gizmo>)AccessTools.Method(typeof(Pawn_DraftController), "GetGizmos").Invoke(__instance.drafter, null);
                     foreach(Gizmo c in draftGizmos)
                     {
                         gizmos.Add(c);
@@ -1337,7 +1340,7 @@ namespace RimShips
                                 return;
                             if(list.Count == 1)
                             {
-                                AccessTools.Method(type: typeof(CaravanFormingUtility), name: "LateJoinFormingCaravan").Invoke(null, new object[] { pawn, list[0] });
+                                AccessTools.Method(typeof(CaravanFormingUtility), "LateJoinFormingCaravan").Invoke(null, new object[] { pawn, list[0] });
                                 SoundDefOf.Click.PlayOneShotOnCamera(null);
                             }
                             else
@@ -1351,7 +1354,7 @@ namespace RimShips
                                     {
                                         if (pawn.Spawned && pawn.Map.lordManager.lords.Contains(caravanLocal) && Dialog_FormCaravan.AllSendablePawns(pawn.Map, false).Contains(pawn))
                                         {
-                                            AccessTools.Method(type: typeof(CaravanFormingUtility), name: "LateJoinFormingCaravan").Invoke(null, new object[] { pawn, caravanLocal });
+                                            AccessTools.Method(typeof(CaravanFormingUtility), "LateJoinFormingCaravan").Invoke(null, new object[] { pawn, caravanLocal });
                                         } 
                                     }, MenuOptionPriority.Default, null, null, 0f, null, null));
                                 }
@@ -1497,7 +1500,7 @@ namespace RimShips
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, retlabel);
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldloca_S, operand: 1);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Property(type: typeof(ThinkResult), name: nameof(ThinkResult.IsValid)).GetGetMethod());
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Property(typeof(ThinkResult), nameof(ThinkResult.IsValid)).GetGetMethod());
                     yield return new CodeInstruction(opcode: OpCodes.Brtrue, label);
 
                     yield return new CodeInstruction(opcode: OpCodes.Ret) { labels = new List<Label> { retlabel } };
@@ -1595,10 +1598,10 @@ namespace RimShips
                 if (instruction.opcode == OpCodes.Ldloc_S && ((LocalBuilder)instruction.operand).LocalIndex == 19)
                 {
                     yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 19);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), name: nameof(HelperMethods.CanSetSail)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.CanSetSail)));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, operand: breakLabel);
                 }
-                else if (instruction.opcode == OpCodes.Ldfld && instruction.operand == AccessTools.Field(type: typeof(Dialog_FormCaravan), name: "destinationTile"))
+                else if (instruction.LoadsField(AccessTools.Field(typeof(Dialog_FormCaravan), "destinationTile")))
                 {
                     instructionList[i - 1].labels.Add(breakLabel);
                 }
@@ -1663,10 +1666,11 @@ namespace RimShips
                         }
                     }
                 }
-                text += flag ? "MessagePawnLostWhileFormingCaravan".Translate(pawn).CapitalizeFirst() : flag2 ? textShip :
-                    "MessagePawnLostWhileFormingCaravan".Translate(pawn).CapitalizeFirst() + "MessagePawnLostWhileFormingCaravan_AllLost".Translate();
+                text += flag ? "MessagePawnLostWhileFormingCaravan".Translate(pawn).CapitalizeFirst().ToString() : flag2 ? textShip :
+                    ("MessagePawnLostWhileFormingCaravan".Translate(pawn).CapitalizeFirst().ToString() + "MessagePawnLostWhileFormingCaravan_AllLost".Translate().ToString());
                 bool flag3 = true;
-                if (!flag2 && !flag) CaravanFormingUtility.StopFormingCaravan(lord);
+                if (!flag2 && !flag)
+                    CaravanFormingUtility.StopFormingCaravan(lord);
                 if (flag)
                 {
                     pawn.inventory.UnloadEverything = true;
@@ -1749,7 +1753,7 @@ namespace RimShips
                     i++;
                     yield return instruction;
                     yield return new CodeInstruction(opcode: OpCodes.Ldloc_0);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), parameters: new Type[] { typeof(Pawn) }, name: nameof(HelperMethods.IsShip)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.IsShip), new Type[] { typeof(Pawn) }));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldc_I4_0);
@@ -1787,18 +1791,18 @@ namespace RimShips
             for (int i = 0; i < instructionList.Count; i++)
             {
                 CodeInstruction instruction = instructionList[i];
-                if(instruction.opcode == OpCodes.Ldsfld && instruction.operand == AccessTools.Field(type: typeof(JobDefOf), name: nameof(JobDefOf.GiveToPackAnimal)))
+                if(instruction.LoadsField(AccessTools.Field(typeof(JobDefOf), nameof(JobDefOf.GiveToPackAnimal))))
                 {
                     yield return instruction; //Ldsfld : JobDefOf::GiveToPackAnimal
                     instruction = instructionList[++i];
                     Label jobLabel = ilg.DefineLabel();
 
-                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(type: typeof(FloatMenuMakerMap), name: nameof(FloatMenuMakerMap.makingFor)));
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), name: nameof(HelperMethods.HasShipInCaravan)));
+                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(typeof(FloatMenuMakerMap), nameof(FloatMenuMakerMap.makingFor)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasShipInCaravan)));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, jobLabel);
 
                     yield return new CodeInstruction(opcode: OpCodes.Pop);
-                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, AccessTools.Field(type: typeof(JobDefOf_Ships), name: nameof(JobDefOf_Ships.CarryItemToShip)));
+                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, AccessTools.Field(typeof(JobDefOf_Ships), nameof(JobDefOf_Ships.CarryItemToShip)));
                     int j = i;
                     while(j < instructionList.Count)
                     {
@@ -1810,7 +1814,7 @@ namespace RimShips
                         }
                     }
                 }
-                if(instruction.opcode == OpCodes.Callvirt && instruction.operand == AccessTools.Property(type: typeof(Lord), name: nameof(Lord.LordJob)).GetGetMethod())
+                if(instruction.Calls(AccessTools.Property(typeof(Lord), nameof(Lord.LordJob)).GetGetMethod()))
                 {
                     yield return instruction;
                     instruction = instructionList[++i];
@@ -1836,10 +1840,10 @@ namespace RimShips
                     yield return new CodeInstruction(opcode: OpCodes.Pop) { labels = new List<Label> { label } };
                     yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 49);
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(LordUtility), name: "GetLord"));
-                    yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Property(type: typeof(Lord), name: nameof(Lord.LordJob)).GetGetMethod());
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(LordUtility), "GetLord", new Type[] { typeof(Pawn) }));
+                    yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Property(typeof(Lord), nameof(Lord.LordJob)).GetGetMethod());
                     yield return new CodeInstruction(opcode: OpCodes.Castclass, operand: typeof(LordJob_FormAndSendCaravanShip));
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), name: nameof(HelperMethods.CapacityLeft)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.CapacityLeft)));
 
                     instruction.labels.Add(label2);
                     yield return instruction; //STFLD : capacityLeft
@@ -2028,7 +2032,6 @@ namespace RimShips
                 {
                     __result = CellFinder.TryFindRandomCellNear(ships.First().Position, ___map, 20, (IntVec3 c) => c.InBounds(___map) && c.Standable(___map), out packingSpot);
                 }
-                GenSpawn.Spawn(ThingDefOf.AIPersonaCore, packingSpot, ___map);
 
                 if(!__result)
                 {
@@ -2057,7 +2060,7 @@ namespace RimShips
                 num += 22f;
                 num += 4f;
                 object[] method1Args = new object[2] { rect, num };
-                MethodInfo doPeopleAndAnimals = AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "DoPeopleAndAnimals");
+                MethodInfo doPeopleAndAnimals = AccessTools.Method(typeof(ITab_Pawn_FormingCaravan), "DoPeopleAndAnimals");
                 doPeopleAndAnimals.Invoke(__instance, method1Args);
                 num = (float)method1Args[1];
                 num += 4f;
@@ -2137,13 +2140,13 @@ namespace RimShips
                         }
                     }
                 }
-                MethodInfo getPawnsCountLabel = AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "GetPawnsCountLabel");
+                MethodInfo getPawnsCountLabel = AccessTools.Method(typeof(ITab_Pawn_FormingCaravan), "GetPawnsCountLabel");
                 string pawnsCountLabel = (string)getPawnsCountLabel.Invoke(__instance, new object[] { num, num2, -1 });
                 string pawnsCountLabel2 = (string)getPawnsCountLabel.Invoke(__instance, new object[] { num3, num4, -1 });
                 string pawnsCountLabel3 = (string)getPawnsCountLabel.Invoke(__instance, new object[] { num5, num6, num7 });
                 string pawnsCountLabelShip = (string)getPawnsCountLabel.Invoke(__instance, new object[] { numShip, -1, -1});
 
-                MethodInfo doPeopleAndAnimalsEntry = AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "DoPeopleAndAnimalsEntry");
+                MethodInfo doPeopleAndAnimalsEntry = AccessTools.Method(typeof(ITab_Pawn_FormingCaravan), "DoPeopleAndAnimalsEntry");
 
                 float y = curY;
                 float num8;
@@ -2185,11 +2188,11 @@ namespace RimShips
                 if (Mouse.IsOver(rect))
                 {
                     Widgets.DrawHighlight(rect);
-                    AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "HighlightColonists").Invoke(__instance, null);
+                    AccessTools.Method(typeof(ITab_Pawn_FormingCaravan), "HighlightColonists").Invoke(__instance, null);
                 }
                 if (Widgets.ButtonInvisible(rect, false))
                 {
-                    AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "SelectColonistsLater").Invoke(__instance, null);
+                    AccessTools.Method(typeof(ITab_Pawn_FormingCaravan), "SelectColonistsLater").Invoke(__instance, null);
                 }
 
                 Rect rectS = new Rect(0f, yShip, width, 22f);
@@ -2214,7 +2217,7 @@ namespace RimShips
                             ___tmpPawns.Add(p);
                         }
                     }
-                    AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "SelectLater").Invoke(__instance, new object[] { ___tmpPawns });
+                    AccessTools.Method(typeof(ITab_Pawn_FormingCaravan), "SelectLater").Invoke(__instance, new object[] { ___tmpPawns });
                     ___tmpPawns.Clear();
                 }
 
@@ -2222,22 +2225,22 @@ namespace RimShips
                 if (Mouse.IsOver(rect2))
                 {
                     Widgets.DrawHighlight(rect2);
-                    AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "HighlightPrisoners").Invoke(__instance, null);
+                    AccessTools.Method(typeof(ITab_Pawn_FormingCaravan), "HighlightPrisoners").Invoke(__instance, null);
                 }
                 if (Widgets.ButtonInvisible(rect2, false))
                 {
-                    AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "SelectPrisonersLater").Invoke(__instance, null);
+                    AccessTools.Method(typeof(ITab_Pawn_FormingCaravan), "SelectPrisonersLater").Invoke(__instance, null);
                 }
 
                 Rect rect3 = new Rect(0f, y3, width, 22f);
                 if (Mouse.IsOver(rect3))
                 {
                     Widgets.DrawHighlight(rect3);
-                    AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "HighlightAnimals").Invoke(__instance, null);
+                    AccessTools.Method(typeof(ITab_Pawn_FormingCaravan), "HighlightAnimals").Invoke(__instance, null);
                 }
                 if (Widgets.ButtonInvisible(rect3, false))
                 {
-                    AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "SelectAnimalsLater").Invoke(__instance, null);
+                    AccessTools.Method(typeof(ITab_Pawn_FormingCaravan), "SelectAnimalsLater").Invoke(__instance, null);
                 }
                 return false;
             }
@@ -2252,17 +2255,17 @@ namespace RimShips
             {
                 CodeInstruction instruction = instructionList[i];
 
-                if(instruction.opcode == OpCodes.Call && instruction.operand == AccessTools.Method(type: typeof(CaravanEnterMapUtility), parameters: new Type[]{typeof(Caravan), typeof(Map),
-                    typeof(CaravanEnterMode), typeof(CaravanDropInventoryMode), typeof(bool), typeof(Predicate<IntVec3>) }, name: nameof(CaravanEnterMapUtility.Enter)))
+                if(instruction.Calls(AccessTools.Method(typeof(CaravanEnterMapUtility), nameof(CaravanEnterMapUtility.Enter), new Type[]{typeof(Caravan), typeof(Map),
+                    typeof(CaravanEnterMode), typeof(CaravanDropInventoryMode), typeof(bool), typeof(Predicate<IntVec3>) })))
                 {
                     Label label = ilg.DefineLabel();
                     Label brlabel = ilg.DefineLabel();
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), parameters: new Type[] { typeof(Caravan) }, name: nameof(HelperMethods.HasShip)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasShip), new Type[] { typeof(Caravan) }));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(EnterMapUtilityBoats), name: nameof(EnterMapUtilityBoats.Enter)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityBoats), nameof(EnterMapUtilityBoats.Enter)));
                     yield return new CodeInstruction(opcode: OpCodes.Br, brlabel);
 
                     instruction.labels.Add(label);
@@ -2283,17 +2286,17 @@ namespace RimShips
             {
                 CodeInstruction instruction = instructionList[i];
 
-                if (instruction.opcode == OpCodes.Call && instruction.operand == AccessTools.Method(type: typeof(CaravanEnterMapUtility), parameters: new Type[]{typeof(Caravan), typeof(Map),
-                    typeof(CaravanEnterMode), typeof(CaravanDropInventoryMode), typeof(bool), typeof(Predicate<IntVec3>) }, name: nameof(CaravanEnterMapUtility.Enter)))
+                if (instruction.Calls(AccessTools.Method(typeof(CaravanEnterMapUtility), nameof(CaravanEnterMapUtility.Enter), new Type[]{typeof(Caravan), typeof(Map),
+                    typeof(CaravanEnterMode), typeof(CaravanDropInventoryMode), typeof(bool), typeof(Predicate<IntVec3>) })))
                 {
                     Label label = ilg.DefineLabel();
                     Label brlabel = ilg.DefineLabel();
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), parameters: new Type[] { typeof(Caravan) }, name: nameof(HelperMethods.HasShip)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasShip), new Type[] { typeof(Caravan) }));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(EnterMapUtilityBoats), name: nameof(EnterMapUtilityBoats.Enter)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityBoats), nameof(EnterMapUtilityBoats.Enter)));
                     yield return new CodeInstruction(opcode: OpCodes.Br, brlabel);
 
                     instruction.labels.Add(label);
@@ -2314,17 +2317,17 @@ namespace RimShips
             {
                 CodeInstruction instruction = instructionList[i];
 
-                if (instruction.opcode == OpCodes.Call && instruction.operand == AccessTools.Method(type: typeof(CaravanEnterMapUtility), parameters: new Type[]{typeof(Caravan), typeof(Map),
-                    typeof(CaravanEnterMode), typeof(CaravanDropInventoryMode), typeof(bool), typeof(Predicate<IntVec3>) }, name: nameof(CaravanEnterMapUtility.Enter)))
+                if (instruction.Calls(AccessTools.Method(typeof(CaravanEnterMapUtility), nameof(CaravanEnterMapUtility.Enter), new Type[]{typeof(Caravan), typeof(Map),
+                    typeof(CaravanEnterMode), typeof(CaravanDropInventoryMode), typeof(bool), typeof(Predicate<IntVec3>) })))
                 {
                     Label label = ilg.DefineLabel();
                     Label brlabel = ilg.DefineLabel();
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), parameters: new Type[] { typeof(Caravan) }, name: nameof(HelperMethods.HasShip)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasShip), new Type[] { typeof(Caravan) }));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(EnterMapUtilityBoats), name: nameof(EnterMapUtilityBoats.Enter)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityBoats), nameof(EnterMapUtilityBoats.Enter)));
                     yield return new CodeInstruction(opcode: OpCodes.Br, brlabel);
 
                     instruction.labels.Add(label);
@@ -2345,17 +2348,17 @@ namespace RimShips
             {
                 CodeInstruction instruction = instructionList[i];
 
-                if (instruction.opcode == OpCodes.Call && instruction.operand == AccessTools.Method(type: typeof(CaravanEnterMapUtility), parameters: new Type[]{typeof(Caravan), typeof(Map),
-                    typeof(CaravanEnterMode), typeof(CaravanDropInventoryMode), typeof(bool), typeof(Predicate<IntVec3>) }, name: nameof(CaravanEnterMapUtility.Enter)))
+                if (instruction.Calls(AccessTools.Method(typeof(CaravanEnterMapUtility), nameof(CaravanEnterMapUtility.Enter), new Type[]{typeof(Caravan), typeof(Map),
+                    typeof(CaravanEnterMode), typeof(CaravanDropInventoryMode), typeof(bool), typeof(Predicate<IntVec3>) })))
                 {
                     Label label = ilg.DefineLabel();
                     Label brlabel = ilg.DefineLabel();
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), parameters: new Type[] { typeof(Caravan) }, name: nameof(HelperMethods.HasShip)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasShip), new Type[] { typeof(Caravan) }));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(EnterMapUtilityBoats), name: nameof(EnterMapUtilityBoats.Enter)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityBoats), nameof(EnterMapUtilityBoats.Enter)));
                     yield return new CodeInstruction(opcode: OpCodes.Br, brlabel);
 
                     instruction.labels.Add(label);
@@ -2376,17 +2379,17 @@ namespace RimShips
             {
                 CodeInstruction instruction = instructionList[i];
 
-                if (instruction.opcode == OpCodes.Call && instruction.operand == AccessTools.Method(type: typeof(CaravanEnterMapUtility), parameters: new Type[]{typeof(Caravan), typeof(Map),
-                    typeof(CaravanEnterMode), typeof(CaravanDropInventoryMode), typeof(bool), typeof(Predicate<IntVec3>) }, name: nameof(CaravanEnterMapUtility.Enter)))
+                if (instruction.Calls(AccessTools.Method(typeof(CaravanEnterMapUtility), nameof(CaravanEnterMapUtility.Enter), new Type[]{typeof(Caravan), typeof(Map),
+                    typeof(CaravanEnterMode), typeof(CaravanDropInventoryMode), typeof(bool), typeof(Predicate<IntVec3>) })))
                 {
                     Label label = ilg.DefineLabel();
                     Label brlabel = ilg.DefineLabel();
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), parameters: new Type[] { typeof(Caravan) }, name: nameof(HelperMethods.HasShip)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasShip), new Type[] { typeof(Caravan) }));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(EnterMapUtilityBoats), name: nameof(EnterMapUtilityBoats.Enter)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityBoats), nameof(EnterMapUtilityBoats.Enter)));
                     yield return new CodeInstruction(opcode: OpCodes.Br, brlabel);
 
                     instruction.labels.Add(label);
@@ -2541,7 +2544,7 @@ namespace RimShips
                 }
                 else
                 {
-                    SettlementBase settlementBase = CaravanVisitUtility.SettlementVisitedNow(__instance);
+                    Settlement settlementBase = CaravanVisitUtility.SettlementVisitedNow(__instance);
                     if (!(settlementBase is null))
                         stringBuilder.Append("CaravanVisiting".Translate(settlementBase.Label));
                     else
@@ -2692,10 +2695,10 @@ namespace RimShips
             {
                 CodeInstruction instruction = instructionList[i];
 
-                if (instruction.opcode == OpCodes.Callvirt && instruction.operand == AccessTools.Property(type: typeof(MapPawns), name: nameof(MapPawns.FreeColonists)).GetGetMethod())
+                if (instruction.Calls(AccessTools.Property(typeof(MapPawns), nameof(MapPawns.FreeColonists)).GetGetMethod()))
                 {
-                    yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Property(type: typeof(MapPawns), name: nameof(MapPawns.AllPawnsSpawned)).GetGetMethod());
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), name: nameof(HelperMethods.GrabPawnsFromMapPawnsInShip)));
+                    yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Property(typeof(MapPawns), nameof(MapPawns.AllPawnsSpawned)).GetGetMethod());
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.GrabPawnsFromMapPawnsInShip)));
                     instruction = instructionList[++i];
                 }
                 yield return instruction;
@@ -2720,12 +2723,12 @@ namespace RimShips
             {
                 CodeInstruction instruction = instructionList[i];
 
-                if (instruction.opcode == OpCodes.Callvirt && instruction.operand == AccessTools.Property(type: typeof(Caravan), name: nameof(Caravan.PawnsListForReading)).GetGetMethod())
+                if (instruction.Calls(AccessTools.Property(typeof(Caravan), nameof(Caravan.PawnsListForReading)).GetGetMethod()))
                 {
                     yield return instruction;
                     instruction = instructionList[++i];
 
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), name: nameof(HelperMethods.GrabPawnsIfShips)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.GrabPawnsIfShips)));
                 }
 
                 yield return instruction;
@@ -2740,12 +2743,12 @@ namespace RimShips
             {
                 CodeInstruction instruction = instructionList[i];
 
-                if(instruction.opcode == OpCodes.Callvirt && instruction.operand == AccessTools.Property(type: typeof(Caravan), name: nameof(Caravan.PawnsListForReading)).GetGetMethod())
+                if(instruction.Calls(AccessTools.Property(typeof(Caravan), nameof(Caravan.PawnsListForReading)).GetGetMethod()))
                 {
                     yield return instruction;
                     instruction = instructionList[++i];
 
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), name: nameof(HelperMethods.GrabPawnsIfShips)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.GrabPawnsIfShips)));
                 }
 
                 yield return instruction;
@@ -2798,14 +2801,14 @@ namespace RimShips
             {
                 CodeInstruction instruction = instructionList[i];
 
-                if(instruction.opcode == OpCodes.Callvirt && instruction.operand == AccessTools.Property(type: typeof(Caravan), name: nameof(Caravan.PawnsListForReading)).GetGetMethod())
+                if(instruction.Calls(AccessTools.Property(typeof(Caravan), nameof(Caravan.PawnsListForReading)).GetGetMethod()))
                 {
                     yield return instruction;
                     i += 2;
                     instruction = instructionList[i];
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), name: nameof(HelperMethods.GrabPawnsFromShipCaravanSilentFail)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.GrabPawnsFromShipCaravanSilentFail)));
                 }
 
                 yield return instruction;
@@ -2919,8 +2922,8 @@ namespace RimShips
                 if(instruction.opcode == OpCodes.Ldnull && instructionList[i+1].opcode == OpCodes.Ldnull)
                 {
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_3);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(CaravanUtility), name: nameof(CaravanUtility.GetCaravan)));
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), name: nameof(HelperMethods.GrabPawnsFromShipCaravanSilentFail)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(CaravanUtility), nameof(CaravanUtility.GetCaravan)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.GrabPawnsFromShipCaravanSilentFail)));
                     instruction = instructionList[++i];
                 }
 
@@ -2938,15 +2941,15 @@ namespace RimShips
                     Label label2 = ilg.DefineLabel();
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldloc_1);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), parameters: new Type[] { typeof(Caravan) }, name: nameof(HelperMethods.HasShip)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasShip), new Type[] { typeof(Caravan) }));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
                     /*yield return new CodeInstruction(opcode: OpCodes.Ldloc_1);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), parameters: new Type[] { typeof(Caravan) }, name: nameof(HelperMethods.AbleToEmbark)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), parameters: new Type[] { typeof(Caravan) }, nameof(HelperMethods.AbleToEmbark)));
                     yield return new CodeInstruction(opcode: OpCodes.Brtrue, label2);*/
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldloc_1);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), name: nameof(HelperMethods.BoardAllCaravanPawns)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.BoardAllCaravanPawns)));
 
                     instruction.labels.Add(label);
                 }
@@ -2994,7 +2997,7 @@ namespace RimShips
                 IntVec3 position = b.Position;
                 Rot4 rotation = b.Rotation;
 
-                AccessTools.Method(type: typeof(ListerBuildingsRepairable), name: "UpdateBuilding").Invoke(__instance, new object[] { b });
+                AccessTools.Method(typeof(ListerBuildingsRepairable), "UpdateBuilding").Invoke(__instance, new object[] { b });
                 if (!(b.def.GetModExtension<SpawnThingBuilt>().soundFinished is null))
                 {
                     b.def.GetModExtension<SpawnThingBuilt>().soundFinished.PlayOneShot(new TargetInfo(position, map, false));
@@ -3024,17 +3027,16 @@ namespace RimShips
         public static IEnumerable<CodeInstruction> MultiSelectFloatMenuTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
         {
             List<CodeInstruction> instructionList = instructions.ToList();
-            FieldInfo selected = AccessTools.Field(type: typeof(Selector), 1);
+
             for (int i = 0; i < instructionList.Count; i++)
             {
                 CodeInstruction instruction = instructionList[i];
 
-                if(instruction.opcode == OpCodes.Ldfld && instruction.operand == AccessTools.Field(type: typeof(Selector), 1) && instructionList[i + 8].opcode == OpCodes.Isinst)
+                if(instruction.opcode == OpCodes.Ble_S)
                 {
-                    
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), name: nameof(HelperMethods.MultiSelectClicker)));
-
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+                    yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(typeof(Selector), "selected"));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.MultiSelectClicker)));
                 }
                 yield return instruction;
             }
@@ -3268,12 +3270,12 @@ namespace RimShips
             {
                 CodeInstruction instruction = instructionList[i];
 
-                if(instruction.opcode == OpCodes.Callvirt && instruction.operand == AccessTools.Method(type: typeof(World), name: nameof(World.Impassable)))
+                if(instruction.Calls(AccessTools.Method(typeof(World), nameof(World.Impassable))))
                 {
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_2);
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_3);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), name: nameof(HelperMethods.ImpassableModified)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.ImpassableModified)));
                     instruction = instructionList[++i];
                 }
                 if(instruction.opcode == OpCodes.Stloc_S && ((LocalBuilder)instruction.operand).LocalIndex == 15)
@@ -3281,7 +3283,7 @@ namespace RimShips
                     Label label = ilg.DefineLabel();
                     
                     yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, 14);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), name: "WaterCovered"));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), "WaterCovered"));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
                     yield return new CodeInstruction(opcode: OpCodes.Pop);
@@ -3328,7 +3330,7 @@ namespace RimShips
                     routePlannerWaypoint.Tile = tile;
                     Find.WorldObjects.Add(routePlannerWaypoint);
                     __instance.waypoints.Add(routePlannerWaypoint);
-                    AccessTools.Method(type: typeof(WorldRoutePlanner), name: "RecreatePaths").Invoke(__instance, null);
+                    AccessTools.Method(typeof(WorldRoutePlanner), "RecreatePaths").Invoke(__instance, null);
                     if(playSound)
                         SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
                     return false;
@@ -3368,7 +3370,7 @@ namespace RimShips
                 routePlannerWaypoint.Tile = tile;
                 Find.WorldObjects.Add(routePlannerWaypoint);
                 __instance.waypoints.Add(routePlannerWaypoint);
-                AccessTools.Method(type: typeof(WorldRoutePlanner), name: "RecreatePaths").Invoke(__instance, null);
+                AccessTools.Method(typeof(WorldRoutePlanner), "RecreatePaths").Invoke(__instance, null);
                 if (playSound)
                     SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
                 return false;
@@ -3414,7 +3416,7 @@ namespace RimShips
                     if(currentFormingCaravan != null || boatFields is null)
                     {
                         inverseFloodFill = true;
-                        AccessTools.Method(type: typeof(WorldReachability), name: "FloodFillAt").Invoke(__instance, new object[] { startTile });
+                        AccessTools.Method(typeof(WorldReachability), "FloodFillAt").Invoke(__instance, new object[] { startTile });
                     }
                     if (startTile < 0 || destTile >= boatFields.Length || destTile < 0 || destTile >= boatFields.Length)
                     {
@@ -3431,7 +3433,7 @@ namespace RimShips
                         __result = false;
                         return false;
                     }
-                    MethodInfo validField = AccessTools.Method(type: typeof(WorldReachability), name: "IsValidField");
+                    MethodInfo validField = AccessTools.Method(typeof(WorldReachability), "IsValidField");
                     if ((bool)validField.Invoke(__instance, new object[] { startTile }) || (bool)validField.Invoke(__instance, new object[] { destTile }))
                     {
                         __result = boatFields[startTile] == boatFields[destTile] || (HelperMethods.IsWaterTile(startTile, pawns) && HelperMethods.IsWaterTile(destTile, pawns));
@@ -3454,9 +3456,9 @@ namespace RimShips
                     __result = false;
                     return false;
                 }
-                MethodInfo validField = AccessTools.Method(type: typeof(WorldReachability), name: "IsValidField");
+                MethodInfo validField = AccessTools.Method(typeof(WorldReachability), "IsValidField");
                 inverseFloodFill = true;
-                AccessTools.Method(type: typeof(WorldReachability), name: "FloodFillAt").Invoke(__instance, new object[] { startTile });
+                AccessTools.Method(typeof(WorldReachability), "FloodFillAt").Invoke(__instance, new object[] { startTile });
                 if ((bool)validField.Invoke(__instance, new object[] { startTile }) || (bool)validField.Invoke(__instance, new object[] { destTile }))
                 {
                     __result = ___fields[startTile] == ___fields[destTile] || ( (HelperMethods.WaterCovered(startTile) || Find.World.CoastDirectionAt(startTile).IsValid) && 
@@ -3620,7 +3622,7 @@ namespace RimShips
             {
                 CodeInstruction instruction = instructionList[i];
 
-                if(instruction.opcode == OpCodes.Stfld && instruction.operand == AccessTools.Field(type: typeof(Caravan_PathFollower), name: nameof(Caravan_PathFollower.previousTileForDrawingIfInDoubt)))
+                if(instruction.LoadsField(AccessTools.Field(typeof(Caravan_PathFollower), nameof(Caravan_PathFollower.previousTileForDrawingIfInDoubt))))
                 {
                     yield return instruction;
                     instruction = instructionList[++i];
@@ -3629,16 +3631,16 @@ namespace RimShips
                     Label brlabel = ilg.DefineLabel();
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(type: typeof(Caravan_PathFollower), name: "caravan"));
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), parameters: new Type[] { typeof(Caravan) }, name: nameof(HelperMethods.HasShip)));
+                    yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(typeof(Caravan_PathFollower), "caravan"));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasShip), new Type[] { typeof(Caravan) }));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(type: typeof(Caravan_PathFollower), name: nameof(Caravan_PathFollower.nextTile)));
+                    yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(typeof(Caravan_PathFollower), nameof(Caravan_PathFollower.nextTile)));
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(type: typeof(Caravan_PathFollower), name: "caravan"));
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Property(type: typeof(Caravan), name: nameof(Caravan.PawnsListForReading)).GetGetMethod());
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), name: nameof(HelperMethods.IsNotWaterTile)));
+                    yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(typeof(Caravan_PathFollower), "caravan"));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Property(typeof(Caravan), nameof(Caravan.PawnsListForReading)).GetGetMethod());
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.IsNotWaterTile)));
                     yield return new CodeInstruction(opcode: OpCodes.Br, brlabel);
 
                     instruction.labels.Add(label);
@@ -3688,12 +3690,12 @@ namespace RimShips
                     Label brlabel = ilg.DefineLabel();
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(type: typeof(Caravan_PathFollower), name: "caravan"));
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), parameters: new Type[] { typeof(Caravan) }, name: nameof(HelperMethods.HasShip)));
+                    yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(typeof(Caravan_PathFollower), "caravan"));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasShip), new Type[] { typeof(Caravan) }));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldloc_1);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(HelperMethods), name: nameof(HelperMethods.BoatCantTraverse)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.BoatCantTraverse)));
                     yield return new CodeInstruction(opcode: OpCodes.Br, brlabel);
 
                     instruction.labels.Add(label);
@@ -3703,7 +3705,7 @@ namespace RimShips
                     while (j < instructionList.Count)
                     {
                         tmpInstruction = instructionList[j];
-                        if (tmpInstruction.opcode == OpCodes.Brfalse)
+                        if (tmpInstruction.opcode == OpCodes.Brfalse_S)
                         {
                             tmpInstruction.labels.Add(brlabel);
                             break;

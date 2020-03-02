@@ -10,7 +10,7 @@ using RimWorld.Planet;
 using RimShips.AI;
 using RimShips.Lords;
 using RimShips.Defs;
-using Harmony;
+using HarmonyLib;
 using SPExtended;
 
 namespace RimShips
@@ -161,12 +161,17 @@ namespace RimShips
             }
         }
 
-        public static void MultiSelectClicker(Selector instance)
+        public static void MultiSelectClicker(List<object> selectedObjects)
         {
-            List<object> selectedObjects = Traverse.Create(instance).Field("selected").GetValue<List<object>>();
+            Log.Message("CLICK");
             if (!selectedObjects.All(x => x is Pawn))
                 return;
-            List<Pawn> selPawns = selectedObjects.ConvertObjectList<Pawn>();
+            List<Pawn> selPawns = new List<Pawn>();
+            foreach(object o in selectedObjects)
+            {
+                if(o is Pawn)
+                    selPawns.Add(o as Pawn);
+            }
             if (selPawns.Any(x => x.Drafted || x.Faction != Faction.OfPlayer || IsShip(x)))
                 return;
             IntVec3 mousePos = Verse.UI.MouseMapPosition().ToIntVec3();

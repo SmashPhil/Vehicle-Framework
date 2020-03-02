@@ -2,7 +2,7 @@
 using System.Linq;
 using Verse;
 using RimWorld;
-using Harmony;
+using HarmonyLib;
 using RimShips.Defs;
 
 namespace RimShips
@@ -12,11 +12,11 @@ namespace RimShips
     {
         public HarmonyPatches_Bootstrap(ModContentPack content) : base(content)
         {
-            var harmony = HarmonyInstance.Create("rimworld.boats_bootstrap.smashphil");
+            var harmony = new Harmony("rimworld.boats_bootstrap.smashphil");
 
             harmony.Patch(original: AccessTools.Property(type: typeof(RaceProperties), name: nameof(RaceProperties.IsFlesh)).GetGetMethod(),
-                prefix: new HarmonyMethod(type: typeof(HarmonyPatches_Bootstrap),
-                name: nameof(BoatsNotFlesh)));
+                prefix: new HarmonyMethod(typeof(HarmonyPatches_Bootstrap),
+                nameof(BoatsNotFlesh)));
         }
 
         public static bool BoatsNotFlesh(ref bool __result, RaceProperties __instance)

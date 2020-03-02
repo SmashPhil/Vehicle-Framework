@@ -16,7 +16,7 @@ namespace RimShips.Jobs
 
         public override string GetReport()
         {
-            return Ship != null ? "AwaitOrders".Translate() : base.GetReport();
+            return Ship != null ? "AwaitOrders".Translate().ToString() : base.GetReport();
         }
 
         private CompShips Ship

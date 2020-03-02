@@ -7,7 +7,7 @@ using Verse;
 using Verse.Sound;
 using RimWorld;
 using RimShips.Defs;
-using Harmony;
+using HarmonyLib;
 
 namespace RimShips.UI
 {
@@ -161,10 +161,10 @@ namespace RimShips.UI
         
         private IEnumerable<StatDrawEntry> StatsToDraw(Thing thing)
         {
-            yield return new StatDrawEntry(StatCategoryDefOf_Ships.BasicsShip, "Description".Translate(), string.Empty, 99999, string.Empty)
-            {
-                overrideReportText = thing.DescriptionFlavor
-            };
+            StatDrawEntry entry = new StatDrawEntry(StatCategoryDefOf_Ships.BasicsShip, "Description".Translate(), string.Empty, string.Empty, 99999);
+            AccessTools.Field(typeof(StatDrawEntry), "overrideReportText").SetValue(entry, thing.DescriptionFlavor);
+            yield return entry;
+
             foreach (StatDef stat in from st in DefDatabase<StatDef>.AllDefs
                                      where st.category == StatCategoryDefOf_Ships.BasicsShip
                                      select st)
@@ -182,9 +182,10 @@ namespace RimShips.UI
 
         private string GetExplanationTextShip(StatDrawEntry sde, StatRequest optionalReq)
         {
-            if(!sde.overrideReportText.NullOrEmpty())
+            string reportText = (string)AccessTools.Field(typeof(StatDrawEntry), "overrideReportText").GetValue(sde);
+            if(!reportText.NullOrEmpty())
             {
-                return sde.overrideReportText;
+                return reportText;
             }
             if(sde is null)
             {
