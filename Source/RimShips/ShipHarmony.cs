@@ -30,7 +30,7 @@ namespace RimShips
         {
             var harmony = new Harmony("rimworld.boats.smashphil");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
-            Harmony.DEBUG = true;
+            //Harmony.DEBUG = true;
 
             #region Functions
 
