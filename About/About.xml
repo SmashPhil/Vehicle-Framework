@@ -14,7 +14,7 @@
 			<downloadUrl>https://github.com/pardeike/HarmonyRimWorld/releases/latest</downloadUrl>
 		</li>
 	</modDependencies>
-	<packageId>smashphil.boats</packageId>
+	<packageId>smashphil.boats.testversion</packageId>
 	<description>
 		Control the seas, trade with allies, and explore the ocean with boats! (Test)
 	</description>
