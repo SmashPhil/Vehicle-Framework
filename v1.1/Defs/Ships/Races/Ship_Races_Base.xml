@@ -2,7 +2,7 @@
 
 <Defs>
 
-	<ThingDef Name="BaseShip" Abstract="True">
+	<ThingDef Name="BaseBoatPawn" Abstract="True">
 		<thingClass>Pawn</thingClass>
 		<category>Pawn</category>
 		<selectable>true</selectable>

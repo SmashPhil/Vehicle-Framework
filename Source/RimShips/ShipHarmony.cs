@@ -998,16 +998,22 @@ namespace RimShips
         /// <returns></returns>
         public static bool DraftedShipsCanMove(Pawn_DraftController __instance, bool value)
         {
+            Log.Message("1");
             if(HelperMethods.IsShip(__instance?.pawn))
             {
+                Log.Message("2");
                 if(RimShipMod.mod.settings.debugDraftAnyShip)
                     return true;
+                Log.Message("3");
                 if (RimShipMod.mod.settings.debugDisableWaterPathing && __instance.pawn.GetComp<CompShips>().beached)
                     __instance.pawn.GetComp<CompShips>().RemoveBeachedStatus();
+                Log.Message("4");
                 if (value && !__instance.Drafted)
                 {
+                    Log.Message("5");
                     if(!__instance.pawn.GetComp<CompShips>().ResolveSeating())
                     {
+                        Log.Message("6");
                         Messages.Message("CompShips_CannotMove".Translate(), MessageTypeDefOf.RejectInput);
                         return false;
                     }

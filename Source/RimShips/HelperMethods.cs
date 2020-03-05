@@ -163,7 +163,6 @@ namespace RimShips
 
         public static void MultiSelectClicker(List<object> selectedObjects)
         {
-            Log.Message("CLICK");
             if (!selectedObjects.All(x => x is Pawn))
                 return;
             List<Pawn> selPawns = new List<Pawn>();

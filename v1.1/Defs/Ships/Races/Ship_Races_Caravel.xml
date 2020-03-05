@@ -72,7 +72,7 @@
 		</corePart>
 	</BodyDef>
 	
-	<ThingDef ParentName="BaseShip">
+	<ThingDef ParentName="BaseBoatPawn">
 		<defName>SPBoats_Caravel</defName>
 		<label>Caravel</label>
 		<description>A medium sized trade ship designed to be both fast and versatile</description>

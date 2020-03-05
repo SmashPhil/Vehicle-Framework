@@ -71,7 +71,7 @@
 		</corePart>
 	</BodyDef>
 	
-	<ThingDef ParentName="BaseShip">
+	<ThingDef ParentName="BaseBoatPawn">
 		<defName>SPBoats_PaddleSteamer</defName>
 		<label>Paddle Steamer</label>
 		<description>A versatile boat capable of carrying large amounts of cargo over long distances, while still packing a punch.</description>
@@ -126,6 +126,18 @@
 		</race>
 
 		<comps>	
+			<!--
+			<li Class="CompProperties_Refuelable">
+				<fuelConsumptionRate>22.0</fuelConsumptionRate>
+				<fuelCapacity>75.0</fuelCapacity>
+				<fuelFilter>
+					<thingDefs>
+						<li>WoodLog</li>
+					</thingDefs>
+				</fuelFilter>
+				<showAllowAutoRefuelToggle>true</showAllowAutoRefuelToggle>
+			</li>
+			-->
 			<li Class = "RimShips.CompProperties_Ships">
 				<downable>false</downable>
 				<movesWhenDowned>false</movesWhenDowned>
