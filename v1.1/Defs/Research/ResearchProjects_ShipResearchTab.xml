@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+	<ResearchTabDef>
+		<defName>RimShips</defName>
+		<label>Boats</label>
+	</ResearchTabDef>
+</Defs>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>	
+	<ResearchProjectDef>
+		<defName>Rowboat</defName>
+		<label>rowboat</label>
+		<tab>RimShips</tab>
+		<description>Build canoes.  Designed for small caravans with limited space.</description>
+		<baseCost>500</baseCost>
+		<techLevel>Neolithic</techLevel>
+		<tags>
+			<li>ClassicStart</li>
+		</tags>
+		<researchViewX>0</researchViewX>
+		<researchViewY>2.5</researchViewY>
+	</ResearchProjectDef>
+	
+	<ResearchProjectDef>
+		<defName>FishingBoat</defName>
+		<label>Fishing Boat</label>
+		<tab>RimShips</tab>
+		<description>Build fishing boats capable of bringing in fish if a compatible fishing mod is also loaded.</description>
+		<baseCost>800</baseCost>
+		<techLevel>Neolithic</techLevel>
+		<prerequisites>
+			<li>Rowboat</li>
+		</prerequisites>
+		
+		<researchViewX>1</researchViewX>
+		<researchViewY>2.5</researchViewY>
+	</ResearchProjectDef>
+	
+	<ResearchProjectDef>
+		<defName>Caravel</defName>
+		<label>caravel</label>
+		<tab>RimShips</tab>
+		<description>Build Caravels.  A fast and cheap ship designed for trade.</description>
+		<baseCost>1800</baseCost>
+		<techLevel>Medieval</techLevel>
+		<prerequisites>
+			<li>FishingBoat</li>
+			<li>Smithing</li>
+		</prerequisites>
+		
+		<researchViewX>2</researchViewX>
+		<researchViewY>4</researchViewY>
+	</ResearchProjectDef>
+	<!--
+	<ResearchProjectDef>
+		<defName>BoatCannons</defName>
+		<label>Cannons</label>
+		<tab>RimShips</tab>
+		<description>Mount cannons onboard ships for "defense"</description>
+		<baseCost>1750</baseCost>
+		<techLevel>Medieval</techLevel>
+		<prerequisites>
+			<li>Caravel</li>
+		</prerequisites>
+		
+		<researchViewX>2.5</researchViewX>
+		<researchViewY>4</researchViewY>
+	</ResearchProjectDef>
+	-->
+	<ResearchProjectDef>
+		<defName>Galleon</defName>
+		<label>galleon</label>
+		<tab>RimShips</tab>
+		<description>Construct large vessels designed to take control of the seas</description>
+		<baseCost>2300</baseCost>
+		<techLevel>Medieval</techLevel>
+		<prerequisites>
+			<li>Caravel</li>
+		</prerequisites>
+		<researchViewX>3</researchViewX>
+		<researchViewY>4</researchViewY>
+	</ResearchProjectDef>
+</Defs>

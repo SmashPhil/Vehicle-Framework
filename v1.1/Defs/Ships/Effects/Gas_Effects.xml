@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<ThingDef ParentName="MoteBase">
+		<defName>Mote_Smoke_CannonSmall</defName>
+		<label>smoke</label>
+		<category>Mote</category>
+		<altitudeLayer>MoteOverhead</altitudeLayer>
+		<mote>
+			<solidTime>0.5</solidTime>
+			<fadeOutTime>0.5</fadeOutTime>
+		</mote>
+		<graphicData>
+			<texPath>Things/Gas/Puff</texPath>
+			<drawSize>(1,1)</drawSize>
+			<color>(1.0,1.0,1.0,0.4)</color>
+		</graphicData>
+	</ThingDef>
+ </Defs>

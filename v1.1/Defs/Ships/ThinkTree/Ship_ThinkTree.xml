@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<ThinkTreeDef>
+		<defName>shipThinkTree_Simple</defName>
+		<thinkRoot Class="ThinkNode_Priority">
+			<subNodes>
+				<!-- Lord Directives -->
+				<li Class = "ThinkNode_Subtree">
+					<treeDef>LordDuty</treeDef>
+				</li>
+				
+				<!-- Downed -->
+				<li Class = "ThinkNode_Subtree">
+					<treeDef>Downed</treeDef>
+				</li>
+				
+				<!-- Go Idle -->
+				<li Class = "ThinkNode_Tagger">
+					<tagToGive>Idle</tagToGive>
+				</li>
+				
+				<!--Do a queued job -->
+				<li Class = "ThinkNode_QueuedJob"/>
+				
+				<!-- Lord directives (high priority -->
+				<li Class="ThinkNode_JoinVoluntarilyJoinableLord">
+					<dutyHook>HighPriority</dutyHook>
+					<subNodes>
+						<li Class="ThinkNode_Subtree">
+							<treeDef>LordDuty</treeDef>
+						</li>
+					</subNodes>
+				</li>
+				
+				<!-- Lord directives (medium priority) -->
+
+				<li Class="ThinkNode_JoinVoluntarilyJoinableLord">
+					<dutyHook>MediumPriority</dutyHook>
+					<subNodes>
+						<li Class="ThinkNode_Subtree">
+							<treeDef>LordDuty</treeDef>
+								</li>
+					</subNodes>
+				</li>
+				
+				<!-- Idle Ship -->
+				<li Class= "RimShips.Jobs.JobGiver_AwaitOrders"/>
+			</subNodes>
+		</thinkRoot>
+	</ThinkTreeDef>
+	
+	<ThinkTreeDef>
+		<defName>shipThinkTree_SimpleConstant</defName>
+		<thinkRoot Class = "ThinkNode_Priority">
+			<subNodes>
+				<li Class = "ThinkNode_ConditionalCanDoConstantThinkTreeJobNow">
+					<subNodes>
+						<li Class = "ThinkNode_Subtree">
+							<treeDef>LordDutyConstant</treeDef>
+						</li>
+						
+						<li Class = "ThinkNode_Subtree">
+							<treeDef>JoinAutoJoinableCaravan</treeDef>
+						</li>
+					</subNodes>
+				</li>
+			</subNodes>
+		</thinkRoot>
+	</ThinkTreeDef>
+</Defs>
