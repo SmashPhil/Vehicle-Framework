@@ -4,7 +4,7 @@
 	<Operation Class="PatchOperationSequence">
 		<operations>
 			<li Class="PatchOperationInsert">
-				<xpath>Defs/TerrainDef[defName="WaterDeep"]</xpath>
+				<xpath>/Defs/TerrainDef[defName="WaterDeep"]</xpath>
 				<value>
 					<affordances>
 						<li>WaterDeep</li>
@@ -13,7 +13,7 @@
 			</li>
 			
 			<li Class="PatchOperationInsert">
-				<xpath>Defs/TerrainDef[defName="WaterOceanDeep"]</xpath>
+				<xpath>/Defs/TerrainDef[defName="WaterOceanDeep"]</xpath>
 				<value>
 					<affordances>
 						<li>WaterOceanDeep</li>
