@@ -100,7 +100,7 @@
 		</corePart>
 	</BodyDef>
 	
-	<ThingDef ParentName="BaseShip">
+	<ThingDef ParentName="BaseBoatPawn">
 		<defName>SPBoats_Galleon</defName>
 		<label>Galleon</label>
 		<description>A large sized war vessel designed for ship to ship combat.</description>

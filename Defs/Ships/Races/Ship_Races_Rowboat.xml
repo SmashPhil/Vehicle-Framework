@@ -70,7 +70,7 @@
 		</corePart>
 	</BodyDef>
 	
-	<ThingDef ParentName="BaseShip">
+	<ThingDef ParentName="BaseBoatPawn">
 		<defName>SPBoats_RowBoat</defName>
 		<label>Row Boat</label>
 		<description>A small two passanger boat capable of short trips</description>

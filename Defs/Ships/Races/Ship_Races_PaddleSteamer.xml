@@ -71,7 +71,7 @@
 		</corePart>
 	</BodyDef>
 	
-	<ThingDef ParentName="BaseShip">
+	<ThingDef ParentName="BaseBoatPawn">
 		<defName>SPBoats_PaddleSteamer</defName>
 		<label>Paddle Steamer</label>
 		<description>A versatile boat capable of carrying large amounts of cargo over long distances, while still packing a punch.</description>
