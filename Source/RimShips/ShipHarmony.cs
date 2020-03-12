@@ -998,22 +998,16 @@ namespace RimShips
         /// <returns></returns>
         public static bool DraftedShipsCanMove(Pawn_DraftController __instance, bool value)
         {
-            Log.Message("1");
             if(HelperMethods.IsShip(__instance?.pawn))
             {
-                Log.Message("2");
                 if(RimShipMod.mod.settings.debugDraftAnyShip)
                     return true;
-                Log.Message("3");
                 if (RimShipMod.mod.settings.debugDisableWaterPathing && __instance.pawn.GetComp<CompShips>().beached)
                     __instance.pawn.GetComp<CompShips>().RemoveBeachedStatus();
-                Log.Message("4");
                 if (value && !__instance.Drafted)
                 {
-                    Log.Message("5");
                     if(!__instance.pawn.GetComp<CompShips>().ResolveSeating())
                     {
-                        Log.Message("6");
                         Messages.Message("CompShips_CannotMove".Translate(), MessageTypeDefOf.RejectInput);
                         return false;
                     }
@@ -2163,21 +2157,21 @@ namespace RimShips
 
                 float yShip = curY;
                 float numS;
-                object[] mSargs = new object[] { inRect, "CaravanShips".Translate(), pawnsCountLabelShip, curY, null };
+                object[] mSargs = new object[] { inRect, "CaravanShips".Translate().ToStringSafe(), pawnsCountLabelShip, curY, null };
                 doPeopleAndAnimalsEntry.Invoke(__instance, mSargs);
                 curY = (float)mSargs[3];
                 numS = (float)mSargs[4];
 
                 float y2 = curY;
                 float num9;
-                object[] m2args = new object[] { inRect, "CaravanPrisoners".Translate(), pawnsCountLabel2, curY, null };
+                object[] m2args = new object[] { inRect, "CaravanPrisoners".Translate().ToStringSafe(), pawnsCountLabel2, curY, null };
                 doPeopleAndAnimalsEntry.Invoke(__instance, m2args);
                 curY = (float)m2args[3];
                 num9 = (float)m2args[4];
 
                 float y3 = curY;
                 float num10;
-                object[] m3args = new object[] { inRect, "CaravanAnimals".Translate(), pawnsCountLabel3, curY, null };
+                object[] m3args = new object[] { inRect, "CaravanAnimals".Translate().ToStringSafe(), pawnsCountLabel3, curY, null };
                 doPeopleAndAnimalsEntry.Invoke(__instance, m3args);
                 curY = (float)m3args[3];
                 num10 = (float)m3args[4];
@@ -2391,7 +2385,7 @@ namespace RimShips
                     Label label = ilg.DefineLabel();
                     Label brlabel = ilg.DefineLabel();
 
-                    yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
+                    yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
                     yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasShip), new Type[] { typeof(Caravan) }));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 

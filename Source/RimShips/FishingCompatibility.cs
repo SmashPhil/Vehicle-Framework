@@ -4,6 +4,7 @@ using System.Linq;
 using System.Xml;
 using System.Globalization;
 using Verse;
+using RimWorld;
 using SPExtended;
 
 namespace RimShips
@@ -35,13 +36,27 @@ namespace RimShips
             fishDictionaryTropicalBiomeFreshWater.Clear();
             fishDictionaryColdBiomeFreshWater.Clear();
             fishDictionarySaltWater.Clear();
-            if (mod.Name == "Vanilla Fishing Expanded")
+
+            if (string.Equals(mod.PackageId, "VanillaExpanded.VCEF", StringComparison.OrdinalIgnoreCase))
             {
-                string modDirectory = mod.RootDir + "/Defs/FishDefs/FishDefs.xml";
+                string[] versionControl = VersionControl.CurrentVersionString.Split('.');
+                string currentVersion = string.Concat(new string[]{ versionControl[0], ".", versionControl[1] });
+                string modDirectory = string.Concat(new string[] { mod.RootDir.ToString(), "/", currentVersion, "/Defs/FishDefs/FishDefs.xml" });
                 if(Prefs.DevMode || ShipHarmony.debug)
-                    Log.Message("[Debug] Loading Fishing Mod Info for [Boats] from: " + modDirectory);
+                    Log.Message(string.Concat(new string[] { "[Debug] Loading Fishing Mod Info for [Boats] from: \n", modDirectory, "\n using version ", currentVersion }));
                 XmlDocument doc = new XmlDocument();
-                doc.Load(modDirectory);
+                try
+                {
+                    doc.Load(modDirectory);
+                }
+                catch
+                {
+                    Log.Error(string.Concat(new string[]{
+                    "[Boats] Failed to load document from ",
+                    mod.Name,
+                    ". Terminating Fishing Compatibility but game should load normally."}));
+                    return false;
+                }
 
                 XmlNodeList fishDefs = doc.GetElementsByTagName("VCE_Fishing.FishDef");
 

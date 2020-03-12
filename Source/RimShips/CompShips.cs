@@ -815,10 +815,8 @@ namespace RimShips
 
         public bool ResolveSeating()
         {
-            Log.Message("start");
             if(this.AllCapablePawns.Count >= this.PawnCountToOperate)
             {
-                Log.Message("enter");
                 for(int r = 0; r < 100; r++)
                 {
                     for (int i = 0; i < this.handlers.Count; i++)
@@ -876,7 +874,6 @@ namespace RimShips
                     }
                 }
             }
-            Log.Message("final: " + this.CanMove);
             return this.CanMove;
         }
 
