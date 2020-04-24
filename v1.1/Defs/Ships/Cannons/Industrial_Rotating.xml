@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<RimShips.CannonDef>
+		<defName>12inRotatingSingle</defName>
+		<label>Bow</label>
+		<weaponType>Rotatable</weaponType>
+		<weaponLocation>Turret</weaponLocation>
+		<projectile>Rotating_PirateCannon_cannonball</projectile>
+		<moteCannon>Mote_CannonSmoke</moteCannon>
+		<moteFlash>Mote_CannonFlash</moteFlash>
+		<cannonSound>Explosion_PirateCannon</cannonSound>
+		<baseTicksBetweenShots>20</baseTicksBetweenShots>
+		<numberOfShots>1</numberOfShots>
+		<cooldownTimer>30</cooldownTimer>
+		
+		<cannonTexPath>Ships/dreadnought/Cannons/12inchSingle</cannonTexPath>
+		<baseCannonTexPath>Ships/paddlesteamer/Cannons/SwivelCannonBase</baseCannonTexPath>
+
+		<projectileOffset>2.6</projectileOffset>
+		<hitFlags>IntendedTarget</hitFlags>
+		<spreadRadius>2</spreadRadius>
+		<minRange>15</minRange>
+	</RimShips.CannonDef>
+	
+	<RimShips.CannonDef>
+		<defName>12inRotatingDouble</defName>
+		<label>Bow</label>
+		<weaponType>Rotatable</weaponType>
+		<weaponLocation>Turret</weaponLocation>
+		<projectile>Rotating_PirateCannon_cannonball</projectile>
+		<moteCannon>Mote_CannonSmoke</moteCannon>
+		<moteFlash>Mote_CannonFlash</moteFlash>
+		<cannonSound>Explosion_PirateCannon</cannonSound>
+		<baseTicksBetweenShots>20</baseTicksBetweenShots>
+		<numberOfShots>2</numberOfShots>
+		<cooldownTimer>30</cooldownTimer>
+		
+		<cannonTexPath>Ships/dreadnought/Cannons/12inchDouble</cannonTexPath>
+		<baseCannonTexPath>Ships/paddlesteamer/Cannons/SwivelCannonBase</baseCannonTexPath>
+
+		<projectileOffset>2.6</projectileOffset>
+		<hitFlags>IntendedTarget</hitFlags>
+		<spreadRadius>2</spreadRadius>
+		<minRange>15</minRange>
+	</RimShips.CannonDef>
+</Defs>

@@ -21,4 +21,11 @@
 		<defaultStoppingPower>0.35</defaultStoppingPower>
 		<defaultArmorPenetration>0.35</defaultArmorPenetration>
 	</DamageDef>
+	
+	<DamageDef ParentName="Bomb">
+		<defName>RotatingPirateCannonBall</defName>
+		<defaultDamage>75</defaultDamage>
+		<defaultStoppingPower>0.4</defaultStoppingPower>
+		<defaultArmorPenetration>0.4</defaultArmorPenetration>
+	</DamageDef>
 </Defs>

@@ -2,22 +2,22 @@
 
 <Defs>
 	<PawnKindDef>
-		<defName>SPBoats_PawnKind_PaddleSteamer</defName>
-		<label>Paddle Steamer</label>
+		<defName>SPBoats_PawnKind_Dreadnought</defName>
+		<label>Dreadnought</label>
 		<defaultFactionType>PlayerColony</defaultFactionType>
 		<aiAvoidCover>false</aiAvoidCover>
 		<destroyGearOnDrop>true</destroyGearOnDrop>
-		<race>SPBoats_PaddleSteamer</race>
+		<race>SPBoats_Dreadnought</race>
 		<backstoryCategories>
 			<li>Industrial</li>
 		</backstoryCategories>
-		<combatPower>1500</combatPower>
+		<combatPower>3000</combatPower>
 		<lifeStages>
 			<li>
 				<bodyGraphicData>
-					<texPath>Ships/paddlesteamer/PaddleSteamer</texPath>
+					<texPath>Ships/dreadnought/Dreadnought</texPath>
 					<graphicClass>Graphic_Multi</graphicClass>
-					<drawSize>(30,17)</drawSize>
+					<drawSize>(22.63,35)</drawSize>
 					<shaderType>CutoutComplex</shaderType>
 					<color>(155,0,0)</color>
 					<shadowData>
@@ -29,7 +29,7 @@
 	</PawnKindDef>
 	
 	<BodyPartDef>
-		<defName>steamer_Body</defName>
+		<defName>dreadnought_Body</defName>
 		<label>body</label>
 		<hitPoints>600</hitPoints>
 		<skinCovered>false</skinCovered>
@@ -43,10 +43,10 @@
 	</BodyPartDef>
 	
 	<BodyDef>
-		<defName>steamer_Body</defName>
-		<label>steamerbody</label>
+		<defName>dreadnought_Body</defName>
+		<label>dreadnoughtbody</label>
 		<corePart>
-			<def>steamer_Body</def>
+			<def>dreadnought_Body</def>
 			<height>Middle</height>
 			<depth>Outside</depth>
 			<groups>
@@ -72,19 +72,19 @@
 	</BodyDef>
 	
 	<ThingDef ParentName="BaseBoatPawn">
-		<defName>SPBoats_PaddleSteamer</defName>
-		<label>Paddle Steamer</label>
-		<description>A versatile boat capable of carrying large amounts of cargo over long distances, while still packing a punch.</description>
+		<defName>SPBoats_Dreadnought</defName>
+		<label>Dreadnought</label>
+		<description>A heavy warship to rule the seas.</description>
 		
 		<statBases>
-			<MoveSpeed>4.85</MoveSpeed>
-			<Mass>15000</Mass>
+			<MoveSpeed>4.35</MoveSpeed>
+			<Mass>25000</Mass>
 			<ArmorRating_Blunt>1.0</ArmorRating_Blunt>
 			<ArmorRating_Sharp>1.0</ArmorRating_Sharp>
-			<MarketValue>70000</MarketValue>
+			<MarketValue>250000</MarketValue>
 		</statBases>
 		
-		<size>(4,10)</size>
+		<size>(5,22)</size>
 		
 		<tools>
 			<li>
@@ -108,7 +108,7 @@
 			<hasGenders>false</hasGenders>
 			<foodType>None</foodType>
 
-			<body>steamer_Body</body>
+			<body>dreadnought_Body</body>
 			<baseBodySize>45.0</baseBodySize>
 			<baseHealthScale>2.0</baseHealthScale>
 			<lifeStageAges>
@@ -130,50 +130,44 @@
 			<li Class="RimShips.CompProperties_FueledTravel">
 				<!-- Must Include -->
 				<fuelType>Chemfuel</fuelType>
-				<fuelConsumptionRate>60</fuelConsumptionRate>
-				<fuelCapacity>1200</fuelCapacity>
+				<fuelConsumptionRate>80</fuelConsumptionRate>
+				<fuelCapacity>2000</fuelCapacity>
 				<fuelConsumptionCondition>Drafted</fuelConsumptionCondition>
 				
 				<!-- Optional -->
 				<motesGenerated>
 					<li>
 						<xOffset>0</xOffset>
-						<zOffset>-1.4</zOffset>
-						<numTimesSpawned>2</numTimesSpawned>
+						<zOffset>-0.1</zOffset>
+						<numTimesSpawned>5</numTimesSpawned>
 						<windAffected>true</windAffected>
 					</li>
 					<li>
 						<xOffset>0</xOffset>
-						<zOffset>-2.45</zOffset>
-						<numTimesSpawned>2</numTimesSpawned>
-						<windAffected>true</windAffected>
-					</li>
-					<li>
-						<xOffset>0</xOffset>
-						<zOffset>-3.2</zOffset>
-						<numTimesSpawned>2</numTimesSpawned>
+						<zOffset>1.55</zOffset>
+						<numTimesSpawned>5</numTimesSpawned>
 						<windAffected>true</windAffected>
 					</li>
 				</motesGenerated>
 				
 				<MoteDisplayed>Mote_ChimneySmoke</MoteDisplayed>
-				<TicksToSpawnMote>10</TicksToSpawnMote>
+				<TicksToSpawnMote>12</TicksToSpawnMote>
 			</li>
 			<li Class = "RimShips.CompProperties_Ships">
 				<downable>false</downable>
 				<movesWhenDowned>false</movesWhenDowned>
 				
 				<moveable>DriverNeeded</moveable>
-				<riverTraversability>LargeRiver</riverTraversability>
-				<shipPowerType>Steam</shipPowerType>
-				<shipCategory>Hybrid</shipCategory>
+				<riverTraversability>HugeRiver</riverTraversability>
+				<shipPowerType>Fuel</shipPowerType>
+				<shipCategory>Combat</shipCategory>
 				<shipTech>Industrial</shipTech>
 				<nameable>true</nameable>
-				<buildDef>SPBoats_PaddleSteamerBlueprint</buildDef>
-				<ticksBetweenRepair>500</ticksBetweenRepair>
+				<buildDef>SPBoats_DreadnoughtBlueprint</buildDef>
+				<ticksBetweenRepair>650</ticksBetweenRepair>
 				
-				<armor>20</armor>
-				<cargoCapacity>1500</cargoCapacity>
+				<armor>50</armor>
+				<cargoCapacity>3000</cargoCapacity>
 				
 				<wakeMultiplier>2.15</wakeMultiplier>
 				<wakeSpeed>2.15</wakeSpeed>
@@ -185,7 +179,7 @@
 				<healthLabel_Beached>Beached</healthLabel_Beached>
 				
 				<hitboxOffsetX>0.0</hitboxOffsetX>
-				<hitboxOffsetZ>-2.0</hitboxOffsetZ>
+				<hitboxOffsetZ>0.0</hitboxOffsetZ>
 				
 				<roles>
 					<li>
@@ -214,7 +208,62 @@
 				</roles>
 			</li>
 			
-			<li Class="RimShips.CompProperties_Cannons"/>
+			<li Class="RimShips.CompProperties_Cannons">
+				<cannons>
+					<li>
+						<cannonDef>12inRotatingDouble</cannonDef>
+						<cannonRenderLocation>(0,7)</cannonRenderLocation>
+						<cannonRenderOffset>(0, 0)</cannonRenderOffset>
+						<cannonTurretDrawSize>(5.5, 5.5)</cannonTurretDrawSize>
+						
+						<baseCannonRenderLocation>(0,7)</baseCannonRenderLocation>
+						<baseCannonDrawSize>(5.8,5.8)</baseCannonDrawSize>
+						
+						<angleRestricted>(230, 130)</angleRestricted>
+						<aimPieOffset>(0,1.2)</aimPieOffset>
+						<drawLayer>0</drawLayer>
+					</li>
+					<li>
+						<cannonDef>12inRotatingDouble</cannonDef>
+						<cannonRenderLocation>(0,5.2)</cannonRenderLocation>
+						<cannonRenderOffset>(0, 0)</cannonRenderOffset>
+						<cannonTurretDrawSize>(5.5, 5.5)</cannonTurretDrawSize>
+						
+						<baseCannonRenderLocation>(0,5.2)</baseCannonRenderLocation>
+						<baseCannonDrawSize>(5.8,5.8)</baseCannonDrawSize>
+						
+						<angleRestricted>(230, 130)</angleRestricted>
+						<aimPieOffset>(0,1.2)</aimPieOffset>
+						<drawLayer>1</drawLayer>
+					</li>
+					<li>
+						<cannonDef>12inRotatingDouble</cannonDef>
+						<cannonRenderLocation>(0,-6.2)</cannonRenderLocation>
+						<cannonRenderOffset>(0, 0)</cannonRenderOffset>
+						<cannonTurretDrawSize>(5.5, 5.5)</cannonTurretDrawSize>
+						
+						<baseCannonRenderLocation>(0,-6.2)</baseCannonRenderLocation>
+						<baseCannonDrawSize>(5.8,5.8)</baseCannonDrawSize>
+						
+						<angleRestricted>(310, 50)</angleRestricted>
+						<aimPieOffset>(0,1.2)</aimPieOffset>
+						<drawLayer>1</drawLayer>
+					</li>
+					<li>
+						<cannonDef>12inRotatingDouble</cannonDef>
+						<cannonRenderLocation>(0,-8.2)</cannonRenderLocation>
+						<cannonRenderOffset>(0, 0)</cannonRenderOffset>
+						<cannonTurretDrawSize>(5.5, 5.5)</cannonTurretDrawSize>
+						
+						<baseCannonRenderLocation>(0,-8.2)</baseCannonRenderLocation>
+						<baseCannonDrawSize>(5.8,5.8)</baseCannonDrawSize>
+						
+						<angleRestricted>(310, 50)</angleRestricted>
+						<aimPieOffset>(0,1.2)</aimPieOffset>
+						<drawLayer>0</drawLayer>
+					</li>
+				</cannons>
+			</li>
 			
 			<li Class="RimShips.CompProperties_UpgradeTree">
 				<displayUICoord>(415,50)</displayUICoord>
@@ -230,6 +279,7 @@
 						<rootNodeLabel>Armor</rootNodeLabel>
 						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
 						
+						<upgradeTime>3h</upgradeTime>
 						<values>
 							<li>
 								<key>Armor</key>

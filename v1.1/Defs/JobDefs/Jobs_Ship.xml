@@ -50,4 +50,11 @@
 		<reportString>Repairing ship.</reportString>
 		<casualInterruptible>false</casualInterruptible>
 	</JobDef>
+	
+	<JobDef>
+		<defName>RefuelBoat</defName>
+		<driverClass>RimShips.Jobs.JobDriver_RefuelBoat</driverClass>
+		<reportString>Refueling ship</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
 </Defs>

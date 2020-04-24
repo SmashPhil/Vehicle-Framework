@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -15,13 +16,10 @@ using SPExtended;
 
 namespace RimShips
 {
+    [StaticConstructorOnStartup]
     public static class HelperMethods
     {
-        public static bool IsShipDef(ThingDef td)
-        {
-            return td?.GetCompProperties<CompProperties_Ships>() != null;
-        }
-
+        #region Pathing
         public static bool BoatCantTraverse(int tile)
         {
             bool flag = !WaterCovered(tile) && (!Find.World.CoastDirectionAt(tile).IsValid || Find.World.Impassable(tile));
@@ -34,310 +32,6 @@ namespace RimShips
                 riverFlag = !pawns.Any(x => IsShip(x)) ? false : RiverIsValid(tile, pawns);
             }
             return flag && !riverFlag;
-        }
-        public static bool IsWaterTile(int tile, List<Pawn> pawns = null)
-        {
-            return WaterCovered(tile) || Find.World.CoastDirectionAt(tile).IsValid || RiverIsValid(tile, pawns.Where(x => IsShip(x)).ToList());
-        }
-
-        public static bool WaterCovered(int tile)
-        {
-            return Find.WorldGrid[tile].biome == BiomeDefOf.Ocean || Find.WorldGrid[tile].biome == BiomeDefOf.Lake;
-        }
-
-        public static bool IsNotWaterTile(int tile, List<Pawn> pawns = null)
-        {
-            return !IsWaterTile(tile, pawns);
-        }
-
-        public static bool CanSetSail(List<Pawn> caravan)
-        {
-            int seats = 0;
-            int pawns = 0;
-            int prereq = 0;
-            bool flag = caravan.Any(x => !(x.GetComp<CompShips>() is null)); //Ships or No Ships
-            if (flag)
-            {
-                foreach (Pawn p in caravan)
-                {
-                    if (IsShip(p))
-                    {
-                        seats += p.GetComp<CompShips>().SeatsAvailable;
-                        prereq += p.GetComp<CompShips>().PawnCountToOperate - p.GetComp<CompShips>().AllCrewAboard.Count;
-                    }
-                    else if (p.IsColonistPlayerControlled && !p.Downed && !p.Dead)
-                    {
-                        pawns++;
-                    }
-                }
-            }
-            bool flag2 = flag ? pawns > seats : false; //Not Enough Room
-            bool flag3 = flag ? pawns < prereq : false; //Not Enough Pawns to Sail
-            if (flag2)
-                Messages.Message("CaravanMustHaveEnoughSpaceOnShip".Translate(), MessageTypeDefOf.RejectInput, false);
-            if (!caravan.Any(x => CaravanUtility.IsOwner(x, Faction.OfPlayer) && !x.Downed))
-                Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, false);
-            if (flag3)
-                Messages.Message("CaravanMustHaveEnoughPawnsToOperate".Translate(prereq), MessageTypeDefOf.RejectInput, false);
-            return !flag2 && !flag3;
-        }
-
-        public static void ToggleDocking(Caravan caravan, bool dock = false)
-        {
-            if (HasShip(caravan))
-            {
-                if (!dock)
-                {
-                    BoardAllCaravanPawns(caravan);
-                }
-                else
-                {
-                    List<Pawn> ships = caravan.PawnsListForReading.Where(x => IsShip(x)).ToList();
-                    for (int i = 0; i < ships.Count; i++)
-                    {
-                        Pawn ship = ships[i];
-                        ship?.GetComp<CompShips>()?.DisembarkAll();
-                    }
-                }
-            }
-        }
-
-        public static void SpawnDockedBoatObject(Caravan caravan)
-        {
-            if (!HasShip(caravan))
-                Log.Error("Attempted to dock boats with no boats in caravan. This could have serious errors in the future. - Smash Phil");
-
-            ToggleDocking(caravan, true);
-            Find.WindowStack.Add(new Dialog_DockBoat(caravan));
-        }
-
-        public static void BoardAllCaravanPawns(Caravan caravan)
-        {
-            if (!AbleToEmbark(caravan))
-            {
-                if (caravan.pather.Moving)
-                    caravan.pather.StopDead();
-                Messages.Message("CantMoveDocked".Translate(), MessageTypeDefOf.RejectInput, false);
-                return;
-            }
-
-            List<Pawn> sailors = caravan.PawnsListForReading.Where(x => !IsShip(x)).ToList();
-            List<Pawn> ships = caravan.PawnsListForReading.Where(x => IsShip(x)).ToList();
-            for (int i = 0; i < ships.Count; i++)
-            {
-                Pawn ship = ships[i];
-                for (int j = 0; j < ship.GetComp<CompShips>().PawnCountToOperate; j++)
-                {
-                    if (sailors.Count <= 0)
-                    {
-                        return;
-                    }
-                    foreach (ShipHandler handler in ship.GetComp<CompShips>().handlers)
-                    {
-                        if (handler.AreSlotsAvailable)
-                        {
-                            ship.GetComp<CompShips>().Notify_BoardedCaravan(sailors.Pop(), handler.handlers);
-                            break;
-                        }
-                    }
-                }
-            }
-            if (sailors.Count > 0)
-            {
-                int x = 0;
-                while (sailors.Count > 0)
-                {
-                    Pawn ship = ships[x];
-                    foreach (ShipHandler handler in ship.GetComp<CompShips>().handlers)
-                    {
-                        if (handler.AreSlotsAvailable)
-                        {
-                            ship.GetComp<CompShips>().Notify_BoardedCaravan(sailors.Pop(), handler.handlers);
-                            break;
-                        }
-                    }
-                    x = (x + 2) > ships.Count ? 0 : ++x;
-                }
-            }
-        }
-
-        public static void MultiSelectClicker(List<object> selectedObjects)
-        {
-            if (!selectedObjects.All(x => x is Pawn))
-                return;
-            List<Pawn> selPawns = new List<Pawn>();
-            foreach(object o in selectedObjects)
-            {
-                if(o is Pawn)
-                    selPawns.Add(o as Pawn);
-            }
-            if (selPawns.Any(x => x.Drafted || x.Faction != Faction.OfPlayer || IsShip(x)))
-                return;
-            IntVec3 mousePos = Verse.UI.MouseMapPosition().ToIntVec3();
-            if (selectedObjects.Count > 1 && selectedObjects.All(x => x is Pawn))
-            {
-                foreach (Thing thing in selPawns[0].Map.thingGrid.ThingsAt(mousePos))
-                {
-                    if (IsShip(thing))
-                    {
-                        (thing as Pawn).GetComp<CompShips>().MultiplePawnFloatMenuOptions(selPawns);
-                        return;
-                    }
-                }
-            }
-        }
-
-        public static bool IsShip(Pawn p)
-        {
-            return !(p?.TryGetComp<CompShips>() is null) ? true : false;
-        }
-
-        public static bool IsShip(Thing t)
-        {
-            return IsShip(t as Pawn);
-        }
-
-        public static bool IsShip(ThingDef td)
-        {
-            return td.GetCompProperties<CompProperties_Ships>() != null;
-        }
-
-        public static bool HasShip(List<Pawn> pawns)
-        {
-            return pawns?.Any(x => IsShip(x)) ?? false;
-        }
-
-        public static bool HasShip(IEnumerable<Pawn> pawns)
-        {
-            return pawns?.Any(x => IsShip(x)) ?? false;
-        }
-
-        public static bool HasShip(Caravan c)
-        {
-            return (c is null) ? (ShipHarmony.currentFormingCaravan is null) ? false : HasShip(TransferableUtility.GetPawnsFromTransferables(ShipHarmony.currentFormingCaravan.transferables)) : HasShip(c?.PawnsListForReading);
-        }
-
-        public static bool HasShipInCaravan(Pawn p)
-        {
-            return p.IsFormingCaravan() && p.GetLord().LordJob is LordJob_FormAndSendCaravanShip && p.GetLord().ownedPawns.Any(x => IsShip(x));
-        }
-
-        public static bool HasEnoughSpacePawns(List<Pawn> pawns)
-        {
-            int num = 0;
-            foreach (Pawn p in pawns.Where(x => IsShip(x)))
-            {
-                num += p.GetComp<CompShips>().TotalSeats;
-            }
-            return pawns.Where(x => !IsShip(x)).Count() <= num;
-        }
-
-        public static bool HasEnoughPawnsToEmbark(List<Pawn> pawns)
-        {
-            int num = 0;
-            foreach (Pawn p in pawns.Where(x => IsShip(x)))
-            {
-                num += p.GetComp<CompShips>().PawnCountToOperate;
-            }
-            return pawns.Where(x => !IsShip(x)).Count() >= num;
-        }
-
-        public static bool AbleToEmbark(List<Pawn> pawns)
-        {
-            return HasEnoughSpacePawns(pawns) && HasEnoughPawnsToEmbark(pawns);
-        }
-
-        public static bool AbleToEmbark(Caravan caravan)
-        {
-            List<Pawn> pawns = new List<Pawn>();
-            foreach (Pawn p in caravan.PawnsListForReading)
-            {
-                if (IsShip(p))
-                {
-                    pawns.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
-                }
-                pawns.Add(p);
-            }
-            return AbleToEmbark(pawns);
-        }
-
-        public static bool HasCannons(this Pawn p)
-        {
-            return !(p?.TryGetComp<CompCannons>() is null) ? true : false;
-        }
-
-        public static bool HasCannons(List<Pawn> pawns)
-        {
-            return pawns.All(x => x.HasCannons());
-        }
-
-        public static List<Pawn> GrabPawnsFromMapPawnsInShip(List<Pawn> allPawns)
-        {
-            List<Pawn> playerShips = allPawns.Where(x => x.Faction == Faction.OfPlayer && IsShip(x)).ToList();
-            if (!playerShips.Any())
-                return allPawns.Where(x => x.Faction == Faction.OfPlayer && x.RaceProps.Humanlike).ToList();
-            return playerShips.RandomElement<Pawn>().GetComp<CompShips>()?.AllCapablePawns;
-        }
-
-        public static List<Pawn> GrabPawnsFromShips(List<Pawn> ships)
-        {
-            if (!ships.Any(x => IsShip(x)))
-                return null;
-            List<Pawn> pawns = new List<Pawn>();
-            foreach (Pawn p in ships)
-            {
-                if (IsShip(p))
-                    pawns.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
-                else
-                    pawns.Add(p);
-            }
-            return pawns;
-        }
-
-        public static List<Pawn> GrabPawnsIfShips(List<Pawn> pawns)
-        {
-            if (pawns is null)
-                return null;
-            if (!HasShip(pawns))
-            {
-                return pawns;
-            }
-            List<Pawn> ships = new List<Pawn>();
-            foreach (Pawn p in pawns)
-            {
-                if (IsShip(p))
-                    ships.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
-                else
-                    ships.Add(p);
-            }
-            return ships;
-        }
-
-        public static List<Pawn> GrabPawnsFromShipCaravanSilentFail(Caravan caravan)
-        {
-            if (caravan is null || !HasShip(caravan))
-                return null;
-            List<Pawn> ships = new List<Pawn>();
-            foreach (Pawn p in caravan.PawnsListForReading)
-            {
-                if (IsShip(p))
-                    ships.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
-                else
-                    ships.Add(p);
-            }
-            return ships;
-        }
-
-        public static List<Pawn> GrabShipsFromCaravans(List<Caravan> caravans)
-        {
-            if (!caravans.All(x => HasShip(x)))
-                return null;
-            List<Pawn> ships = new List<Pawn>();
-            foreach (Caravan c in caravans)
-            {
-                ships.AddRange(c.PawnsListForReading.Where(x => IsShip(x)));
-            }
-            return ships;
         }
 
         public static bool ImpassableModified(World world, int tileID, int startTile, int destTile, Caravan caravan)
@@ -362,28 +56,6 @@ namespace RimShips
             return !flag;
         }
 
-        public static bool RiverIsValid(int tileID, List<Pawn> ships)
-        {
-            if (!RimShipMod.mod.settings.riverTravel || ships is null || !ships.Any(x => IsShip(x)))
-                return false;
-            bool flag = RimShipMod.mod.settings.boatSizeMatters ? (Find.WorldGrid[tileID].Rivers?.Any() ?? false) ? ShipsFitOnRiver(BiggestRiverOnTile(Find.WorldGrid[tileID]?.Rivers).river, ships) : false : (Find.WorldGrid[tileID].Rivers?.Any() ?? false);
-            return flag;
-        }
-
-        public static Tile.RiverLink BiggestRiverOnTile(List<Tile.RiverLink> list)
-        {
-            return list.MaxBy(x => x.river.GetRiverSize());
-        }
-
-        public static bool ShipsFitOnRiver(RiverDef river, List<Pawn> pawns)
-        {
-            foreach (Pawn p in pawns.Where(x => IsShip(x)))
-            {
-                if ((p.def.GetCompProperties<CompProperties_Ships>()?.riverTraversability?.GetRiverSize() ?? 5) > river.GetRiverSize())
-                    return false;
-            }
-            return true;
-        }
         public static void PatherFailedHelper(ref Pawn_PathFollower instance, Pawn pawn)
         {
             instance.StopDead();
@@ -397,13 +69,6 @@ namespace RimShips
             {
                 pawn.jobs.curDriver.Notify_PatherArrived();
             }
-        }
-
-        //Needs case for captured ships?
-
-        public static bool WillAutoJoinIfCaptured(Pawn ship)
-        {
-            return ship.GetComp<CompShips>().movementStatus != ShipMovementStatus.Offline && !ship.GetComp<CompShips>().beached;
         }
 
         public static void FaceShipAdjacentCell(IntVec3 c, Pawn pawn)
@@ -430,6 +95,7 @@ namespace RimShips
                 pawn.Rotation = Rot4.South;
             }
         }
+
         public static int CostToMoveIntoCellShips(Pawn pawn, IntVec3 c)
         {
             int num = (c.x == pawn.Position.x || c.z == pawn.Position.z) ? pawn.TicksPerMoveCardinal : pawn.TicksPerMoveDiagonal;
@@ -472,41 +138,6 @@ namespace RimShips
                 }
             }
             return Mathf.Max(num, 1);
-        }
-
-        public static bool IsFormingCaravanShipHelper(Pawn p)
-        {
-            Lord lord = p.GetLord();
-            return !(lord is null) && lord.LordJob is LordJob_FormAndSendCaravanShip;
-        }
-
-        public static List<Pawn> ExtractPawnsFromCaravan(Caravan caravan)
-        {
-            List<Pawn> sailors = new List<Pawn>();
-
-            foreach (Pawn ship in caravan.PawnsListForReading)
-            {
-                if (IsShip(ship))
-                {
-                    sailors.AddRange(ship.GetComp<CompShips>().AllPawnsAboard);
-                }
-            }
-            return sailors;
-        }
-
-        public static float CapacityLeft(LordJob_FormAndSendCaravanShip lordJob)
-        {
-            float num = CollectionsMassCalculator.MassUsageTransferables(lordJob.transferables, IgnorePawnsInventoryMode.IgnoreIfAssignedToUnload, false, false);
-            List<ThingCount> tmpCaravanPawns = new List<ThingCount>();
-            for (int i = 0; i < lordJob.lord.ownedPawns.Count; i++)
-            {
-                Pawn pawn = lordJob.lord.ownedPawns[i];
-                tmpCaravanPawns.Add(new ThingCount(pawn, pawn.stackCount));
-            }
-            num += CollectionsMassCalculator.MassUsage(tmpCaravanPawns, IgnorePawnsInventoryMode.IgnoreIfAssignedToUnload, false, false);
-            float num2 = CollectionsMassCalculator.Capacity(tmpCaravanPawns, null);
-            tmpCaravanPawns.Clear();
-            return num2 - num;
         }
 
         public static float ShipAngle(Pawn pawn)
@@ -657,6 +288,566 @@ namespace RimShips
             instance.nextCellCostLeft = (float)num;
             //Doors?
         }
+
+        public static bool OnDeepWater(this Pawn pawn)
+        {
+            //Splitting Caravan?
+            if (pawn?.Map is null && pawn.IsWorldPawn())
+                return false;
+            return (pawn.Map.terrainGrid.TerrainAt(pawn.Position) == TerrainDefOf.WaterDeep || pawn.Map.terrainGrid.TerrainAt(pawn.Position) == TerrainDefOf.WaterMovingChestDeep ||
+                pawn.Map.terrainGrid.TerrainAt(pawn.Position) == TerrainDefOf.WaterOceanDeep) && GenGrid.Impassable(pawn.Position, pawn.Map);
+        }
+
+        #endregion
+
+        #region FeatureChecking
+
+        public static bool IsShipDef(ThingDef td)
+        {
+            return td?.GetCompProperties<CompProperties_Ships>() != null;
+        }
+
+        public static bool IsShip(Pawn p)
+        {
+            return p?.TryGetComp<CompShips>() != null;
+        }
+
+        public static bool IsShip(Thing t)
+        {
+            return IsShip(t as Pawn);
+        }
+
+        public static bool IsShip(ThingDef td)
+        {
+            return td.GetCompProperties<CompProperties_Ships>() != null;
+        }
+
+        public static bool HasShip(List<Pawn> pawns)
+        {
+            return pawns?.Any(x => IsShip(x)) ?? false;
+        }
+
+        public static bool HasShip(IEnumerable<Pawn> pawns)
+        {
+            return pawns?.Any(x => IsShip(x)) ?? false;
+        }
+
+        public static bool HasShip(Caravan c)
+        {
+            return (c is null) ? (ShipHarmony.currentFormingCaravan is null) ? false : HasShip(TransferableUtility.GetPawnsFromTransferables(ShipHarmony.currentFormingCaravan.transferables)) : HasShip(c?.PawnsListForReading);
+        }
+
+        public static bool HasShipInCaravan(Pawn p)
+        {
+            return p.IsFormingCaravan() && p.GetLord().LordJob is LordJob_FormAndSendCaravanShip && p.GetLord().ownedPawns.Any(x => IsShip(x));
+        }
+
+        public static bool HasUpgradeMenu(Pawn p)
+        {
+            return p?.TryGetComp<CompUpgradeTree>() != null;
+        }
+
+        public static bool HasEnoughSpacePawns(List<Pawn> pawns)
+        {
+            int num = 0;
+            foreach (Pawn p in pawns.Where(x => IsShip(x)))
+            {
+                num += p.GetComp<CompShips>().TotalSeats;
+            }
+            return pawns.Where(x => !IsShip(x)).Count() <= num;
+        }
+
+        public static bool HasEnoughPawnsToEmbark(List<Pawn> pawns)
+        {
+            int num = 0;
+            foreach (Pawn p in pawns.Where(x => IsShip(x)))
+            {
+                num += p.GetComp<CompShips>().PawnCountToOperate;
+            }
+            return pawns.Where(x => !IsShip(x)).Count() >= num;
+        }
+
+        public static bool AbleToEmbark(List<Pawn> pawns)
+        {
+            return HasEnoughSpacePawns(pawns) && HasEnoughPawnsToEmbark(pawns);
+        }
+
+        public static bool AbleToEmbark(Caravan caravan)
+        {
+            List<Pawn> pawns = new List<Pawn>();
+            foreach (Pawn p in caravan.PawnsListForReading)
+            {
+                if (IsShip(p))
+                {
+                    pawns.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
+                }
+                pawns.Add(p);
+            }
+            return AbleToEmbark(pawns);
+        }
+
+        public static bool HasCannons(this Pawn p)
+        {
+            return !(p?.TryGetComp<CompCannons>() is null) ? true : false;
+        }
+
+        public static bool HasCannons(List<Pawn> pawns)
+        {
+            return pawns.All(x => x.HasCannons());
+        }
+
+        public static bool FueledBoat(this Pawn p)
+        {
+            return IsShip(p) && !(p?.TryGetComp<CompFueledTravel>() is null) ? true : false;
+        }
+
+        //Needs case for captured ships?
+
+        public static bool WillAutoJoinIfCaptured(Pawn ship)
+        {
+            return ship.GetComp<CompShips>().movementStatus != ShipMovementStatus.Offline && !ship.GetComp<CompShips>().beached;
+        }
+
+        #endregion
+
+        #region WorldMap
+        public static bool IsWaterTile(int tile, List<Pawn> pawns = null)
+        {
+            return WaterCovered(tile) || Find.World.CoastDirectionAt(tile).IsValid || RiverIsValid(tile, pawns.Where(x => IsShip(x)).ToList());
+        }
+
+        public static bool WaterCovered(int tile)
+        {
+            return Find.WorldGrid[tile].biome == BiomeDefOf.Ocean || Find.WorldGrid[tile].biome == BiomeDefOf.Lake;
+        }
+
+        public static bool IsNotWaterTile(int tile, List<Pawn> pawns = null)
+        {
+            return !IsWaterTile(tile, pawns);
+        }
+
+        public static void ToggleDocking(Caravan caravan, bool dock = false)
+        {
+            if (HasShip(caravan))
+            {
+                if (!dock)
+                {
+                    BoardAllCaravanPawns(caravan);
+                }
+                else
+                {
+                    List<Pawn> ships = caravan.PawnsListForReading.Where(x => IsShip(x)).ToList();
+                    for (int i = 0; i < ships.Count; i++)
+                    {
+                        Pawn ship = ships[i];
+                        ship?.GetComp<CompShips>()?.DisembarkAll();
+                    }
+                }
+            }
+        }
+
+        public static void SpawnDockedBoatObject(Caravan caravan)
+        {
+            if (!HasShip(caravan))
+                Log.Error("Attempted to dock boats with no boats in caravan. This could have serious errors in the future. - Smash Phil");
+
+            ToggleDocking(caravan, true);
+            Find.WindowStack.Add(new Dialog_DockBoat(caravan));
+        }
+
+        public static void BoardAllCaravanPawns(Caravan caravan)
+        {
+            if (!AbleToEmbark(caravan))
+            {
+                if (caravan.pather.Moving)
+                    caravan.pather.StopDead();
+                Messages.Message("CantMoveDocked".Translate(), MessageTypeDefOf.RejectInput, false);
+                return;
+            }
+
+            List<Pawn> sailors = caravan.PawnsListForReading.Where(x => !IsShip(x)).ToList();
+            List<Pawn> ships = caravan.PawnsListForReading.Where(x => IsShip(x)).ToList();
+            for (int i = 0; i < ships.Count; i++)
+            {
+                Pawn ship = ships[i];
+                for (int j = 0; j < ship.GetComp<CompShips>().PawnCountToOperate; j++)
+                {
+                    if (sailors.Count <= 0)
+                    {
+                        return;
+                    }
+                    foreach (ShipHandler handler in ship.GetComp<CompShips>().handlers)
+                    {
+                        if (handler.AreSlotsAvailable)
+                        {
+                            ship.GetComp<CompShips>().Notify_BoardedCaravan(sailors.Pop(), handler.handlers);
+                            break;
+                        }
+                    }
+                }
+            }
+            if (sailors.Count > 0)
+            {
+                int x = 0;
+                while (sailors.Count > 0)
+                {
+                    Pawn ship = ships[x];
+                    foreach (ShipHandler handler in ship.GetComp<CompShips>().handlers)
+                    {
+                        if (handler.AreSlotsAvailable)
+                        {
+                            ship.GetComp<CompShips>().Notify_BoardedCaravan(sailors.Pop(), handler.handlers);
+                            break;
+                        }
+                    }
+                    x = (x + 2) > ships.Count ? 0 : ++x;
+                }
+            }
+        }
+
+        public static bool RiverIsValid(int tileID, List<Pawn> ships)
+        {
+            if (!RimShipMod.mod.settings.riverTravel || ships is null || !ships.Any(x => IsShip(x)))
+                return false;
+            bool flag = RimShipMod.mod.settings.boatSizeMatters ? (Find.WorldGrid[tileID].Rivers?.Any() ?? false) ? ShipsFitOnRiver(BiggestRiverOnTile(Find.WorldGrid[tileID]?.Rivers).river, ships) : false : (Find.WorldGrid[tileID].Rivers?.Any() ?? false);
+            return flag;
+        }
+
+        public static Tile.RiverLink BiggestRiverOnTile(List<Tile.RiverLink> list)
+        {
+            return list.MaxBy(x => x.river.widthOnMap);
+        }
+
+        public static bool ShipsFitOnRiver(RiverDef river, List<Pawn> pawns)
+        {
+            foreach (Pawn p in pawns.Where(x => IsShip(x)))
+            {
+                if ((p.def.GetCompProperties<CompProperties_Ships>()?.riverTraversability?.widthOnMap ?? int.MaxValue) > river.widthOnMap)
+                    return false;
+            }
+            return true;
+        }
+
+        //Work In Progress
+        public static bool TryFindClosestWaterTile(int sourceTile, int destinationTile, out int exitTile)
+        {
+            exitTile = -1;
+            List<int> neighbors = new List<int>();
+            Find.WorldGrid.GetTileNeighbors(sourceTile, neighbors);
+            Rot4 dir = Find.WorldGrid.GetRotFromTo(sourceTile, destinationTile);
+            foreach(int tile in neighbors)
+            {
+                if(WaterCovered(tile))
+                {
+                    exitTile = tile;
+
+                }
+            }
+            return exitTile > 0;
+        }
+
+        #endregion
+
+        #region CaravanFormation
+            public static bool CanSetSail(List<Pawn> caravan)
+            {
+                int seats = 0;
+                int pawns = 0;
+                int prereq = 0;
+                bool flag = caravan.Any(x => !(x.GetComp<CompShips>() is null)); //Ships or No Ships
+                if (flag)
+                {
+                    foreach (Pawn p in caravan)
+                    {
+                        if (IsShip(p))
+                        {
+                            seats += p.GetComp<CompShips>().SeatsAvailable;
+                            prereq += p.GetComp<CompShips>().PawnCountToOperate - p.GetComp<CompShips>().AllCrewAboard.Count;
+                        }
+                        else if (p.IsColonistPlayerControlled && !p.Downed && !p.Dead)
+                        {
+                            pawns++;
+                        }
+                    }
+                }
+                bool flag2 = flag ? pawns > seats : false; //Not Enough Room
+                bool flag3 = flag ? pawns < prereq : false; //Not Enough Pawns to Sail
+                if (flag2)
+                    Messages.Message("CaravanMustHaveEnoughSpaceOnShip".Translate(), MessageTypeDefOf.RejectInput, false);
+                if (!caravan.Any(x => CaravanUtility.IsOwner(x, Faction.OfPlayer) && !x.Downed))
+                    Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, false);
+                if (flag3)
+                    Messages.Message("CaravanMustHaveEnoughPawnsToOperate".Translate(prereq), MessageTypeDefOf.RejectInput, false);
+                return !flag2 && !flag3;
+            }
+        #endregion
+
+        #region GetData
+
+        public static List<Pawn> GrabPawnsFromMapPawnsInShip(List<Pawn> allPawns)
+        {
+            List<Pawn> playerShips = allPawns.Where(x => x.Faction == Faction.OfPlayer && IsShip(x)).ToList();
+            if (!playerShips.Any())
+                return allPawns.Where(x => x.Faction == Faction.OfPlayer && x.RaceProps.Humanlike).ToList();
+            return playerShips.RandomElement<Pawn>().GetComp<CompShips>()?.AllCapablePawns;
+        }
+
+        public static List<Pawn> GrabPawnsFromShips(List<Pawn> ships)
+        {
+            if (!ships.Any(x => IsShip(x)))
+                return null;
+            List<Pawn> pawns = new List<Pawn>();
+            foreach (Pawn p in ships)
+            {
+                if (IsShip(p))
+                    pawns.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
+                else
+                    pawns.Add(p);
+            }
+            return pawns;
+        }
+
+        public static List<Pawn> GrabPawnsIfShips(List<Pawn> pawns)
+        {
+            if (pawns is null)
+                return null;
+            if (!HasShip(pawns))
+            {
+                return pawns;
+            }
+            List<Pawn> ships = new List<Pawn>();
+            foreach (Pawn p in pawns)
+            {
+                if (IsShip(p))
+                    ships.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
+                else
+                    ships.Add(p);
+            }
+            return ships;
+        }
+
+        public static List<Pawn> GrabPawnsFromShipCaravanSilentFail(Caravan caravan)
+        {
+            if (caravan is null || !HasShip(caravan))
+                return null;
+            List<Pawn> ships = new List<Pawn>();
+            foreach (Pawn p in caravan.PawnsListForReading)
+            {
+                if (IsShip(p))
+                    ships.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
+                else
+                    ships.Add(p);
+            }
+            return ships;
+        }
+
+        public static List<Pawn> GrabShipsFromCaravans(List<Caravan> caravans)
+        {
+            if (!caravans.All(x => HasShip(x)))
+                return null;
+            List<Pawn> ships = new List<Pawn>();
+            foreach (Caravan c in caravans)
+            {
+                ships.AddRange(c.PawnsListForReading.Where(x => IsShip(x)));
+            }
+            return ships;
+        }
+
+        public static bool IsFormingCaravanShipHelper(Pawn p)
+        {
+            Lord lord = p.GetLord();
+            return !(lord is null) && lord.LordJob is LordJob_FormAndSendCaravanShip;
+        }
+
+        public static List<Pawn> ExtractPawnsFromCaravan(Caravan caravan)
+        {
+            List<Pawn> sailors = new List<Pawn>();
+
+            foreach (Pawn ship in caravan.PawnsListForReading)
+            {
+                if (IsShip(ship))
+                {
+                    sailors.AddRange(ship.GetComp<CompShips>().AllPawnsAboard);
+                }
+            }
+            return sailors;
+        }
+
+        public static float CapacityLeft(LordJob_FormAndSendCaravanShip lordJob)
+        {
+            float num = CollectionsMassCalculator.MassUsageTransferables(lordJob.transferables, IgnorePawnsInventoryMode.IgnoreIfAssignedToUnload, false, false);
+            List<ThingCount> tmpCaravanPawns = new List<ThingCount>();
+            for (int i = 0; i < lordJob.lord.ownedPawns.Count; i++)
+            {
+                Pawn pawn = lordJob.lord.ownedPawns[i];
+                tmpCaravanPawns.Add(new ThingCount(pawn, pawn.stackCount));
+            }
+            num += CollectionsMassCalculator.MassUsage(tmpCaravanPawns, IgnorePawnsInventoryMode.IgnoreIfAssignedToUnload, false, false);
+            float num2 = CollectionsMassCalculator.Capacity(tmpCaravanPawns, null);
+            tmpCaravanPawns.Clear();
+            return num2 - num;
+        }
+
+        public static float ExtractUpgradeValue(Pawn boat, StatUpgrade stat)
+        {
+            if(IsShip(boat) && HasUpgradeMenu(boat))
+            {
+                switch(stat)
+                {
+                    case StatUpgrade.Armor:
+                        return boat.GetComp<CompShips>().ArmorPoints;
+                    case StatUpgrade.Speed:
+                        return boat.GetComp<CompShips>().MoveSpeedModifier;
+                    case StatUpgrade.CargoCapacity:
+                        return boat.GetComp<CompShips>().CargoCapacity;
+                    case StatUpgrade.FuelConsumptionRate:
+                        return boat.GetComp<CompFueledTravel>().FuelEfficiency;
+                    case StatUpgrade.FuelCapacity:
+                        return boat.GetComp<CompFueledTravel>().FuelCapacity;
+                }
+            }
+            return 0f;
+        }
+
+        public static List<Pawn> GetShipsForColonistBar(List<Map> maps, int i)
+        {
+            Map map = maps[i];
+            List<Pawn> ships = new List<Pawn>();
+            foreach (Pawn ship in map.mapPawns.AllPawnsSpawned)
+            {
+                if (IsShip(ship))
+                {
+                    //ships.Add(ship); /*  Uncomment to add Ships to colonist bar  */
+                    foreach (Pawn p in ship.GetComp<CompShips>().AllPawnsAboard)
+                    {
+                        if (p.IsColonist)
+                            ships.Add(p);
+                    }
+                }
+            }
+            return ships;
+        }
+
+        public static IEnumerable<Pawn> UsableCandidatesForCargo(Pawn pawn)
+        {
+            IEnumerable<Pawn> candidates = (!pawn.IsFormingCaravan()) ? pawn.Map.mapPawns.SpawnedPawnsInFaction(pawn.Faction) : pawn.GetLord().ownedPawns;
+            candidates = from x in candidates
+                         where IsShip(x)
+                         select x;
+            return candidates;
+        }
+
+        public static Pawn UsableBoatWithTheMostFreeSpace(Pawn pawn)
+        {
+            
+            Pawn carrierPawn = null;
+            float num = 0f;
+            foreach(Pawn p in UsableCandidatesForCargo(pawn))
+            {
+                if(IsShip(p) && p != pawn && pawn.CanReach(p, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn))
+                {
+                    float num2 = MassUtility.FreeSpace(p);
+                    if(carrierPawn is null || num2 > num)
+                    {
+                        carrierPawn = p;
+                        num = num2;
+                    }
+                }
+            }
+            return carrierPawn;
+        }
+
+        public static int GetTickMultiplier(char c)
+		{
+			switch(char.ToLower(c))
+			{
+				case 'h':
+					return 2500;
+				case 'd':
+					return 60000;
+				case 'q':
+					return 900000;
+				case 'y':
+					return 3600000;
+				case 't':
+					return 1;
+			}
+            throw new NotSupportedException($"Unable to Parse {c} in RimWorld Duration String.");
+		}
+
+        #endregion
+
+        #region Selector
+        public static void MultiSelectClicker(List<object> selectedObjects)
+        {
+            if (!selectedObjects.All(x => x is Pawn))
+                return;
+            List<Pawn> selPawns = new List<Pawn>();
+            foreach(object o in selectedObjects)
+            {
+                if(o is Pawn)
+                    selPawns.Add(o as Pawn);
+            }
+            if (selPawns.Any(x => x.Drafted || x.Faction != Faction.OfPlayer || IsShip(x)))
+                return;
+            IntVec3 mousePos = Verse.UI.MouseMapPosition().ToIntVec3();
+            if (selectedObjects.Count > 1 && selectedObjects.All(x => x is Pawn))
+            {
+                foreach (Thing thing in selPawns[0].Map.thingGrid.ThingsAt(mousePos))
+                {
+                    if (IsShip(thing))
+                    {
+                        (thing as Pawn).GetComp<CompShips>().MultiplePawnFloatMenuOptions(selPawns);
+                        return;
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region Rendering
+        public static Pair<float,float> ShipDrawOffset(CompShips shipComp, float xOffset, float yOffset)
+        {
+            switch(shipComp.Pawn.Rotation.AsInt)
+            {
+                //East
+                case 1:
+                    if(shipComp.Angle == 45)
+                    {
+                        SPTuples.SPTuple2<float,float> rotatedOffset = SPTrig.RotatePointClockwise(yOffset, -xOffset, 45f);
+                        return new Pair<float, float>(rotatedOffset.First, rotatedOffset.Second);
+                    }
+                    else if(shipComp.Angle == -45)
+                    {
+                        SPTuples.SPTuple2<float,float> rotatedOffset = SPTrig.RotatePointCounterClockwise(yOffset, -xOffset, 45f);
+                        return new Pair<float, float>(rotatedOffset.First, rotatedOffset.Second);
+                    }
+                    return new Pair<float, float>(yOffset, -xOffset);
+                //South
+                case 2:
+                    return new Pair<float, float>(-xOffset, -yOffset);
+                //West
+                case 3:
+                    if(shipComp.Angle != 0)
+                    {
+                        if(shipComp.Angle == 45)
+                        {
+                            SPTuples.SPTuple2<float,float> rotatedOffset = SPTrig.RotatePointClockwise(-yOffset, xOffset, 45f);
+                            return new Pair<float, float>(rotatedOffset.First, rotatedOffset.Second);
+                        }
+                        else if(shipComp.Angle == -45)
+                        {
+                            SPTuples.SPTuple2<float,float> rotatedOffset = SPTrig.RotatePointCounterClockwise(-yOffset, xOffset, 45f);
+                            return new Pair<float, float>(rotatedOffset.First, rotatedOffset.Second);
+                        }
+                    }
+                    return new Pair<float, float>(-yOffset, xOffset);
+                //North
+                default:
+                    return new Pair<float, float>(xOffset, yOffset);
+            }
+        }
+
         public static float CustomFloatBeach(Map map)
         {
             float mapSizeMultiplier = (float)(map.Size.x >= map.Size.z ? map.Size.x : map.Size.z) / 250f;
@@ -726,32 +917,164 @@ namespace RimShips
                 ShipHarmony.debugLines.Add(Find.WorldPathFinder.FindPath(from, to, null, null));
         }
 
-        public static List<Pawn> GetShipsForColonistBar(List<Map> maps, int i)
+        public static Mote ThrowMoteEnhanced(Vector3 loc, Map map, MoteThrown mote, bool overrideSaturation = false)
         {
-            Map map = maps[i];
-            List<Pawn> ships = new List<Pawn>();
-            foreach (Pawn ship in map.mapPawns.AllPawnsSpawned)
+            if(!loc.ShouldSpawnMotesAt(map) || (overrideSaturation && map.moteCounter.Saturated))
             {
-                if (IsShip(ship))
-                {
-                    //ships.Add(ship); /*  Uncomment to add Ships to colonist bar  */
-                    foreach (Pawn p in ship.GetComp<CompShips>().AllPawnsAboard)
-                    {
-                        if (p.IsColonist)
-                            ships.Add(p);
-                    }
-                }
+                return null;
             }
-            return ships;
+
+            GenSpawn.Spawn(mote, loc.ToIntVec3(), map, WipeMode.Vanish);
+            return mote;
+        }
+        #endregion
+
+        #region UI
+        public static void LabelStyled(Rect rect, string label, GUIStyle style)
+        {
+	        Rect position = rect;
+	        float num = Prefs.UIScale / 2f;
+	        if (Prefs.UIScale > 1f && Math.Abs(num - Mathf.Floor(num)) > 1E-45f)
+	        {
+		        position.xMin = Widgets.AdjustCoordToUIScalingFloor(rect.xMin);
+		        position.yMin = Widgets.AdjustCoordToUIScalingFloor(rect.yMin);
+		        position.xMax = Widgets.AdjustCoordToUIScalingCeil(rect.xMax + 1E-05f);
+		        position.yMax = Widgets.AdjustCoordToUIScalingCeil(rect.yMax + 1E-05f);
+	        }
+	        GUI.Label(position, label, style);
         }
 
-        public static bool OnDeepWater(this Pawn pawn)
+        public static void LabelOutlineStyled(Rect rect, string label, GUIStyle style, Color outerColor)
         {
-            //Splitting Caravan?
-            if (pawn?.Map is null && pawn.IsWorldPawn())
-                return false;
-            return (pawn.Map.terrainGrid.TerrainAt(pawn.Position) == TerrainDefOf.WaterDeep || pawn.Map.terrainGrid.TerrainAt(pawn.Position) == TerrainDefOf.WaterMovingChestDeep ||
-                pawn.Map.terrainGrid.TerrainAt(pawn.Position) == TerrainDefOf.WaterOceanDeep) && GenGrid.Impassable(pawn.Position, pawn.Map);
+            Rect position = rect;
+	        float num = Prefs.UIScale / 2f;
+	        if (Prefs.UIScale > 1f && Math.Abs(num - Mathf.Floor(num)) > 1E-45f)
+	        {
+		        position.xMin = Widgets.AdjustCoordToUIScalingFloor(rect.xMin);
+		        position.yMin = Widgets.AdjustCoordToUIScalingFloor(rect.yMin);
+		        position.xMax = Widgets.AdjustCoordToUIScalingCeil(rect.xMax + 1E-05f);
+		        position.yMax = Widgets.AdjustCoordToUIScalingCeil(rect.yMax + 1E-05f);
+	        }
+
+            var innerColor = style.normal.textColor;
+            style.normal.textColor = outerColor;
+            position.x--;
+            GUI.Label(position, label, style);
+            position.x += 2;
+            GUI.Label(position, label, style);
+            position.x--;
+            position.y--;
+            GUI.Label(position, label, style);
+            position.y += 2;
+            GUI.Label(position, label, style);
+            position.y--;
+            style.normal.textColor = innerColor;
+	        GUI.Label(position, label, style);
+        }
+
+        public static void FillableBarLabeled(Rect rect, float fillPercent, string label, StatUpgrade upgrade, Texture2D innerTex, Texture2D outlineTex, float? actualValue = null, float addedValue = 0f, float bgFillPercent = 0f)
+        {
+	        if (fillPercent < 0f)
+	        {
+		        fillPercent = 0f;
+	        }
+	        if (fillPercent > 1f)
+	        {
+		        fillPercent = 1f;
+	        }
+
+            Texture2D fillTex;
+            Texture2D addedFillTex;
+            switch(upgrade)
+            {
+                case StatUpgrade.Armor:
+                    fillTex = ArmorStatBarTexture;
+                    addedFillTex = ArmorAddedStatBarTexture;
+                    break;
+                case StatUpgrade.Speed:
+                    fillTex = SpeedStatBarTexture;
+                    addedFillTex = SpeedAddedStatBarTexture;
+                    break;
+                case StatUpgrade.CargoCapacity:
+                    fillTex = CargoStatBarTexture;
+                    addedFillTex = CargoAddedStatBarTexture;
+                    break;
+                case StatUpgrade.FuelConsumptionRate:
+                    fillTex = FuelStatBarTexture;
+                    addedFillTex = FuelAddedStatBarTexture;
+                    break;
+                case StatUpgrade.FuelCapacity:
+                    fillTex = FuelStatBarTexture;
+                    addedFillTex = FuelAddedStatBarTexture;
+                    break;
+                default:
+                    fillTex = BaseContent.BadTex;
+                    addedFillTex = BaseContent.WhiteTex;
+                    break;
+            }
+
+            FillableBarHollowed(rect, fillPercent, bgFillPercent, fillTex, addedFillTex, innerTex, outlineTex);
+            
+            Rect rectLabel = rect;
+            rectLabel.x += 5f;
+
+            GUIStyle style = new GUIStyle(Text.CurFontStyle);
+            //style.fontStyle = FontStyle.Bold;
+
+            LabelOutlineStyled(rectLabel, label, style, Color.black);
+            if(actualValue != null)
+            {
+                Rect valueRect = rect;
+                valueRect.width /= 2;
+                valueRect.x = rectLabel.x + rectLabel.width / 2 - 6f;
+                style.alignment = TextAnchor.MiddleRight;
+
+                string value = string.Format("{1} {0}", actualValue.ToString(), addedValue != 0 ? "(" + (addedValue > 0 ? "+" : "") +  addedValue.ToString() + ")" : "");
+                LabelOutlineStyled(valueRect, value, style, Color.black);
+                //GUI.DrawTexture(valueRect, fillTex); //For Alignment
+            }
+        }
+
+        public static void FillableBarHollowed(Rect rect, float fillPercent, float bgFillPercent, Texture2D fillTex, Texture2D addedFillTex, Texture2D innerTex, Texture2D bgTex)
+        {
+            GUI.DrawTexture(rect, bgTex);
+            rect = rect.ContractedBy(2f);
+
+            Rect rect2 = rect;
+            rect2.width -= 2f;
+            GUI.DrawTexture(rect2, innerTex);
+
+
+            Rect fullBarRect = rect;
+            fullBarRect.width *= fillPercent;
+            GUI.DrawTexture(fullBarRect, fillTex);
+
+            if(bgFillPercent != 0)
+            {
+                if(bgFillPercent < 0)
+                {
+                    Rect rectBG = rect;
+
+                    if(fillPercent + bgFillPercent < 0)
+                    {
+                        rectBG.width *= fillPercent;
+                        rectBG.x = fullBarRect.x;
+                    }
+                    else
+                    {
+                        rectBG.width *= bgFillPercent;
+                        rectBG.x = fullBarRect.x + fullBarRect.width;
+                    }
+                    GUI.DrawTexture(rectBG, innerTex);
+                }
+                else
+                {
+                    Rect rectBG = rect;
+                    rectBG.x = fullBarRect.x + fullBarRect.width;
+                    rectBG.width *= bgFillPercent;
+                    GUI.DrawTexture(rectBG, addedFillTex);
+                }
+            }
         }
 
         public static void DoItemsListForShip(Rect inRect, ref float curY, ref List<Thing> tmpSingleThing, ITab_Pawn_FormingCaravan instance)
@@ -806,52 +1129,27 @@ namespace RimShips
             GUI.EndGroup();
             curY += Mathf.Max(a, b);
         }
+        #endregion
 
-        public static IEnumerable<Pawn> UsableCandidatesForCargo(Pawn pawn)
-        {
-            IEnumerable<Pawn> candidates = (!pawn.IsFormingCaravan()) ? pawn.Map.mapPawns.SpawnedPawnsInFaction(pawn.Faction) : pawn.GetLord().ownedPawns;
-            candidates = from x in candidates
-                         where IsShip(x)
-                         select x;
-            return candidates;
-        }
+        public static CannonTargeter CannonTargeter = new CannonTargeter();
+        public static Texture2D missingIcon;
 
-        public static Pawn UsableBoatWithTheMostFreeSpace(Pawn pawn)
-        {
-            
-            Pawn carrierPawn = null;
-            float num = 0f;
-            foreach(Pawn p in UsableCandidatesForCargo(pawn))
-            {
-                if(IsShip(p) && p != pawn && pawn.CanReach(p, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn))
-                {
-                    float num2 = MassUtility.FreeSpace(p);
-                    if(carrierPawn is null || num2 > num)
-                    {
-                        carrierPawn = p;
-                        num = num2;
-                    }
-                }
-            }
-            return carrierPawn;
-        }
+        public static Texture2D FillableBarBackgroundTex = SolidColorMaterials.NewSolidColorTexture(Color.black);
+        public static Texture2D FillableBarInnerTex = SolidColorMaterials.NewSolidColorTexture(new ColorInt(19, 22, 27).ToColor);
 
-        //Work In Progress
-        public static bool TryFindClosestWaterTile(int sourceTile, int destinationTile, out int exitTile)
-        {
-            exitTile = -1;
-            List<int> neighbors = new List<int>();
-            Find.WorldGrid.GetTileNeighbors(sourceTile, neighbors);
-            Rot4 dir = Find.WorldGrid.GetRotFromTo(sourceTile, destinationTile);
-            foreach(int tile in neighbors)
-            {
-                if(WaterCovered(tile))
-                {
-                    exitTile = tile;
+        public static Texture2D ArmorStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(35, 50, 185).ToColor);
+        public static Texture2D ArmorAddedStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(35, 50, 185, 120).ToColor);
 
-                }
-            }
-            return exitTile > 0;
-        }
+        public static Texture2D SpeedStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(0, 115, 40).ToColor);
+        public static Texture2D SpeedAddedStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(0, 115, 40, 120).ToColor);
+        
+        public static Texture2D CargoStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(185, 110, 15).ToColor);
+        public static Texture2D CargoAddedStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(185, 110, 15, 120).ToColor);
+
+        //public static Texture2D FuelEffStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(150, 10, 20).ToColor);
+        //public static Texture2D FuelEffAddedStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(150, 10, 20, 120).ToColor);
+
+        public static Texture2D FuelStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(60, 30, 30).ToColor);
+        public static Texture2D FuelAddedStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(60, 30, 30, 120).ToColor);
     }
 }

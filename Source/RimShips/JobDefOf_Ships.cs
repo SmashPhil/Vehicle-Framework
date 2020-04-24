@@ -23,6 +23,6 @@ namespace RimShips.Defs
 
         public static JobDef CarryItemToShip;
 
-        //Disembark
+        public static JobDef RefuelBoat;
     }
 }

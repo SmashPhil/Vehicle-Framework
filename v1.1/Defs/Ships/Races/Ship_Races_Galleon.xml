@@ -207,67 +207,67 @@
 				</roles>
 			</li>
 			
-			<li Class="RimShips.CompProperties_Cannons">
-				<cannons>
-					<li>
-						<label>Portside</label>
-						<weaponType>Broadside</weaponType>
-						<weaponLocation>Port</weaponLocation>
-						<projectile>Galleon_cannonball</projectile>
-						<moteCannon>Mote_Smoke_CannonSmall</moteCannon>
-						<cannonSound>Explosion_PirateCannon</cannonSound>
-						<numberCannons>6</numberCannons>
-						<baseTicksBetweenShots>15</baseTicksBetweenShots>
-						<cooldownTimer>14</cooldownTimer>
-						<spacing>.63</spacing>
+			<!-- <li Class="RimShips.CompProperties_Cannons"> -->
+				<!-- <cannons> -->
+					<!-- <li> -->
+						<!-- <label>Portside</label> -->
+						<!-- <weaponType>Broadside</weaponType> -->
+						<!-- <weaponLocation>Port</weaponLocation> -->
+						<!-- <projectile>Galleon_cannonball</projectile> -->
+						<!-- <moteCannon>Mote_Smoke_CannonSmall</moteCannon> -->
+						<!-- <cannonSound>Explosion_PirateCannon</cannonSound> -->
+						<!-- <numberCannons>6</numberCannons> -->
+						<!-- <baseTicksBetweenShots>15</baseTicksBetweenShots> -->
+						<!-- <cooldownTimer>14</cooldownTimer> -->
+						<!-- <spacing>.63</spacing> -->
 						
-						<splitCannonGroups>true</splitCannonGroups>
-						<centerPoints>
-							<li>.25</li>
-							<li>5.3</li>
-						</centerPoints>
-						<cannonsPerPoint>
-							<li>3</li>
-							<li>3</li>
-						</cannonsPerPoint>
-						<offset>2.0</offset>
-						<projectileOffset>1</projectileOffset>
-						<hitFlags>All</hitFlags>
-						<spreadRadius>4</spreadRadius>
-						<minRange>15</minRange>
-						<maxRange>55</maxRange>
-					</li>
-					<li>
-						<label>Starboard</label>
-						<weaponType>Broadside</weaponType>
-						<weaponLocation>Starboard</weaponLocation>
-						<projectile>Galleon_cannonball</projectile>
-						<moteCannon>Mote_Smoke_CannonSmall</moteCannon>
-						<cannonSound>Explosion_PirateCannon</cannonSound>
-						<numberCannons>6</numberCannons>
-						<baseTicksBetweenShots>15</baseTicksBetweenShots>
-						<cooldownTimer>14</cooldownTimer>
-						<spacing>0.63</spacing>
+						<!-- <splitCannonGroups>true</splitCannonGroups> -->
+						<!-- <centerPoints> -->
+							<!-- <li>.25</li> -->
+							<!-- <li>5.3</li> -->
+						<!-- </centerPoints> -->
+						<!-- <cannonsPerPoint> -->
+							<!-- <li>3</li> -->
+							<!-- <li>3</li> -->
+						<!-- </cannonsPerPoint> -->
+						<!-- <offset>2.0</offset> -->
+						<!-- <projectileOffset>1</projectileOffset> -->
+						<!-- <hitFlags>All</hitFlags> -->
+						<!-- <spreadRadius>4</spreadRadius> -->
+						<!-- <minRange>15</minRange> -->
+						<!-- <maxRange>55</maxRange> -->
+					<!-- </li> -->
+					<!-- <li> -->
+						<!-- <label>Starboard</label> -->
+						<!-- <weaponType>Broadside</weaponType> -->
+						<!-- <weaponLocation>Starboard</weaponLocation> -->
+						<!-- <projectile>Galleon_cannonball</projectile> -->
+						<!-- <moteCannon>Mote_Smoke_CannonSmall</moteCannon> -->
+						<!-- <cannonSound>Explosion_PirateCannon</cannonSound> -->
+						<!-- <numberCannons>6</numberCannons> -->
+						<!-- <baseTicksBetweenShots>15</baseTicksBetweenShots> -->
+						<!-- <cooldownTimer>14</cooldownTimer> -->
+						<!-- <spacing>0.63</spacing> -->
 						
-						<splitCannonGroups>true</splitCannonGroups>
-						<centerPoints>
-							<li>.25</li>
-							<li>5.3</li>
-						</centerPoints>
-						<cannonsPerPoint>
-							<li>3</li>
-							<li>3</li>
-						</cannonsPerPoint>
+						<!-- <splitCannonGroups>true</splitCannonGroups> -->
+						<!-- <centerPoints> -->
+							<!-- <li>.25</li> -->
+							<!-- <li>5.3</li> -->
+						<!-- </centerPoints> -->
+						<!-- <cannonsPerPoint> -->
+							<!-- <li>3</li> -->
+							<!-- <li>3</li> -->
+						<!-- </cannonsPerPoint> -->
 						
-						<offset>2.0</offset>
-						<projectileOffset>1</projectileOffset>
-						<hitFlags>All</hitFlags>
-						<spreadRadius>4</spreadRadius>
-						<minRange>15</minRange>
-						<maxRange>55</maxRange>
-					</li>
-				</cannons>
-			</li>
+						<!-- <offset>2.0</offset> -->
+						<!-- <projectileOffset>1</projectileOffset> -->
+						<!-- <hitFlags>All</hitFlags> -->
+						<!-- <spreadRadius>4</spreadRadius> -->
+						<!-- <minRange>15</minRange> -->
+						<!-- <maxRange>55</maxRange> -->
+					<!-- </li> -->
+				<!-- </cannons> -->
+			<!-- </li> -->
 		</comps>
 	</ThingDef>
 </Defs>

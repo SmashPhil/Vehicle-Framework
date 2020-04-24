@@ -37,6 +37,55 @@ namespace RimShips
         public Pawn Pawn => parent as Pawn;
         public CompProperties_Ships Props => (CompProperties_Ships)this.props;
 
+        private float cargoCapacity;
+        private float armorPoints;
+        private float moveSpeedModifier;
+
+        public float ActualMoveSpeed => this.Pawn.GetStatValue(StatDefOf.MoveSpeed, true) + MoveSpeedModifier;
+
+        public float ArmorPoints
+        {
+            get
+            {
+                return armorPoints;
+            }
+            set
+            {
+                if (value < 0)
+                    armorPoints = 0f;
+                armorPoints = value;
+            }
+        }
+
+        public float CargoCapacity
+        {
+            get
+            {
+                return cargoCapacity;
+            }
+            set
+            {
+                if (value < 0)
+                    cargoCapacity = 0f;
+                cargoCapacity = value;
+            }
+        }
+
+        public float MoveSpeedModifier
+        {
+            get
+            {
+                return moveSpeedModifier;
+            }
+            set
+            {
+                if (value < 0)
+                    moveSpeedModifier = 0;
+                moveSpeedModifier = value;
+            }
+        }
+
+
         public bool MovementHandlerAvailable
         {
             get
@@ -48,7 +97,7 @@ namespace RimShips
                         return false;
                     }
                 }
-                if (!(this.Pawn.TryGetComp<CompRefuelable>() is null) && this.Pawn.GetComp<CompRefuelable>().Fuel <= 0f)
+                if (Pawn.TryGetComp<CompRefuelable>() != null && Pawn.GetComp<CompRefuelable>().Fuel <= 0f)
                     return false;
                 return true;
             }
@@ -889,7 +938,7 @@ namespace RimShips
             }
         }
 
-        public void InitializeShip()
+        private void InitializeShip()
         {
             if (!(this.handlers is null) && this.handlers.Count > 0) return;
             foreach(ShipHandler handler in handlers)
@@ -904,13 +953,25 @@ namespace RimShips
                 }
             }
         }
+
+        private void InitializeStats()
+        {
+            armorPoints = Props.armor;
+            cargoCapacity = Props.cargoCapacity;
+            moveSpeedModifier = 0f;
+        }
+
         public override void PostSpawnSetup(bool respawningAfterLoad)
         {
             base.PostSpawnSetup(respawningAfterLoad);
-            this.InitializeShip();
-            this.Pawn.ageTracker.AgeBiologicalTicks = 0;
-            this.Pawn.ageTracker.AgeChronologicalTicks = 0;
-            this.Pawn.ageTracker.BirthAbsTicks = 0;
+            if(!respawningAfterLoad)
+            {
+                InitializeShip();
+                InitializeStats();
+                Pawn.ageTracker.AgeBiologicalTicks = 0;
+                Pawn.ageTracker.AgeChronologicalTicks = 0;
+                Pawn.ageTracker.BirthAbsTicks = 0;
+            }
         }
         public override void PostExposeData()
         {
@@ -918,6 +979,10 @@ namespace RimShips
             Scribe_Values.Look(ref weaponStatus, "weaponStatus", ShipWeaponStatus.Online);
             Scribe_Values.Look(ref movementStatus, "movingStatus", ShipMovementStatus.Online);
             Scribe_Values.Look(ref currentlyFishing, "currentlyFishing", false);
+
+            Scribe_Values.Look(ref armorPoints, "armorPoints");
+            Scribe_Values.Look(ref cargoCapacity, "cargoCapacity");
+            Scribe_Values.Look(ref moveSpeedModifier, "moveSpeed");
 
             Scribe_Collections.Look(ref handlers, "handlers", LookMode.Deep);
             Scribe_Collections.Look(ref bills, "bills", LookMode.Deep);

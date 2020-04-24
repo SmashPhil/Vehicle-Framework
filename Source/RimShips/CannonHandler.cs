@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Verse;
 using UnityEngine;
+using SPExtended;
 
 namespace RimShips
 {
@@ -15,56 +17,43 @@ namespace RimShips
         {
             this.pawn = pawn;
             uniqueID = Find.UniqueIDsManager.GetNextThingID();
+            cannonDef = reference.cannonDef;
+            Log.Message("ID: " + uniqueID);
 
-            this.label = reference.label;
-            this.weaponType = reference.weaponType;
-            this.weaponLocation = reference.weaponLocation;
-            this.moteCannon = reference.moteCannon;
-            this.projectile = reference.projectile;
-            this.cannonSound = reference.cannonSound;
-            this.numberCannons = reference.numberCannons;
-            this.cooldownTimer = reference.cooldownTimer;
-            this.baseTicksBetweenShots = reference.baseTicksBetweenShots;
-            this.spacing = reference.spacing;
-            this.hitFlags = reference.hitFlags;
-            this.spreadRadius = reference.spreadRadius;
-            this.minRange = reference.minRange;
-            this.maxRange = reference.maxRange;
-            this.offset = reference.offset;
-            this.projectileOffset = reference.projectileOffset;
-            this.splitCannonGroups = reference.splitCannonGroups;
-            this.cannonTexPath = reference.cannonTexPath;
-            this.baseCannonTexPath = reference.baseCannonTexPath;
+            cannonSize = reference.cannonSize;
+            cannonRenderOffset = reference.cannonRenderOffset;
+            cannonRenderLocation = reference.cannonRenderLocation;
 
-            if (splitCannonGroups)
+            aimPieOffset = reference.aimPieOffset;
+            angleRestricted = reference.angleRestricted;
+
+            baseCannonSize = reference.baseCannonSize;
+            baseCannonRenderLocation = reference.baseCannonRenderLocation;
+            cannonTurretDrawSize = reference.cannonTurretDrawSize;
+
+            cannonTurretDrawSize = reference.cannonTurretDrawSize;
+            baseCannonDrawSize = reference.baseCannonDrawSize;
+
+            if (cannonDef.splitCannonGroups)
             {
-                foreach (float f in reference.centerPoints)
-                {
-                    this.centerPoints.Add(f);
-                }
-                foreach (int i in reference.cannonsPerPoint)
-                {
-                    this.cannonsPerPoint.Add(i);
-                }
-
-                if(this.cannonsPerPoint.Count != this.centerPoints.Count || (cannonsPerPoint.Count == 0 && centerPoints.Count == 0))
+                if (cannonDef.cannonsPerPoint.Count != cannonDef.centerPoints.Count || (cannonDef.cannonsPerPoint.Count == 0 && cannonDef.centerPoints.Count == 0))
                 {
                     Log.Warning("Could Not initialize cannon groups for " + this.pawn.LabelShort);
                     return;
                 }
                 int group = 0;
-                for (int i = 0; i < numberCannons; i++)
+                for (int i = 0; i < cannonDef.numberCannons; i++)
                 {
-                    if((i+1) > (this.cannonsPerPoint[group] * (group + 1)))
+                    if ((i + 1) > (cannonDef.cannonsPerPoint[group] * (group + 1)))
                         group++;
                     cannonGroupDict.Add(i, group);
-                    if(ShipHarmony.debug)
+                    if (ShipHarmony.debug)
                     {
                         Log.Message(string.Concat(new object[]
                         {
                         "Initializing ", pawn.LabelShortCap,
-                        " with cannon ", this.label,
-                        " with ", cannonsPerPoint[group],
+                        " with cannon ", cannonDef.label,
+                        " with ", cannonDef.cannonsPerPoint[group],
                         " cannons in group: ", group
                         }));
                     }
@@ -73,48 +62,72 @@ namespace RimShips
         }
         public void ExposeData()
         {
-            Scribe_Values.Look(ref spreadRadius, "spreadRadius");
-            Scribe_Values.Look(ref maxRange, "maxRange");
-            Scribe_Values.Look(ref minRange, "minRange");
-            Scribe_Values.Look(ref cooldownTimer, "cooldownTimer");
-            Scribe_Values.Look(ref numberCannons, "numberCannons");
-            Scribe_Values.Look(ref spacing, "spacing");
-            Scribe_Values.Look(ref baseTicksBetweenShots, "baseTicksBetweenShots");
+            Scribe_Defs.Look<CannonDef>(ref cannonDef, "cannonDef");
             Scribe_Values.Look(ref uniqueID, "uniqueID", -1);
-            Scribe_Values.Look(ref offset, "offset");
-            Scribe_Values.Look(ref projectileOffset, "projectileOffset");
             Scribe_Values.Look(ref cooldownTicks, "cooldownTicks");
-            Scribe_Values.Look(ref label, "label");
-            Scribe_Values.Look(ref weaponType, "weaponType");
-            Scribe_Values.Look(ref weaponLocation, "weaponLocation");
-            Scribe_Values.Look(ref cannonTexPath, "cannonTexPath");
-            Scribe_Values.Look(ref baseCannonTexPath, "baseCannonTexPath");
-            Scribe_Defs.Look(ref moteCannon, "moteCannon");
-            Scribe_Defs.Look(ref projectile, "projectile");
-            Scribe_Defs.Look(ref cannonSound, "cannonSound");
-            Scribe_References.Look(ref pawn, "pawn");
-            Scribe_Values.Look(ref reloading, "reloading");
-            Scribe_Values.Look(ref hitFlags, "hitFlags", ProjectileHitFlags.All);
+            
+            Scribe_Values.Look(ref cannonSize, "cannonSize");
+            Scribe_Values.Look(ref cannonRenderOffset, "cannonRenderOffset");
+            Scribe_Values.Look(ref cannonRenderLocation, "cannonRenderLocation");
+            Scribe_Values.Look(ref currentRotation, "currentRotation", defaultAngleRotated - 90);
 
-            Scribe_Values.Look(ref splitCannonGroups, "splitCannonGroups");
-            Scribe_Collections.Look(ref centerPoints, "centerPoints");
-            Scribe_Collections.Look(ref cannonsPerPoint, "cannonsPerPoints");
+            Scribe_Values.Look(ref aimPieOffset, "aimPieOffset");
+            Scribe_Values.Look(ref angleRestricted, "angleRestricted");
+
+            Scribe_Values.Look(ref baseCannonSize, "baseCannonSize");
+            Scribe_Values.Look(ref baseCannonRenderLocation, "baseCannonRenderLocation");
+
+            Scribe_Values.Look(ref cannonTurretDrawSize, "cannonTurretDrawSize");
+            Scribe_Values.Look(ref baseCannonDrawSize, "baseCannonDrawSize");
+
+            Scribe_References.Look(ref pawn, "pawn");
+
             Scribe_Collections.Look(ref cannonGroupDict, "cannonGroupDict");
+            Scribe_TargetInfo.Look(ref cannonTarget, "cannonTarget", LocalTargetInfo.Invalid);
         }
+
+        public bool IsTargetable => cannonDef?.weaponType == WeaponType.Rotatable; //Add to this later
 
         public bool ActivateTimer()
         {
-            if (this.cooldownTicks > 0)
+            if (cooldownTicks > 0)
                 return false;
-            this.cooldownTicks = MaxTicks;
+            cooldownTicks = MaxTicks;
             return true;
         }
 
         public void DoTick()
         {
-            if (this.cooldownTicks > 0 && this.reloading)
+            Log.Message("PAWN: " + this.pawn?.thingIDNumber);
+            if (cooldownTicks > 0)
             {
                 cooldownTicks--;
+            }
+            if(IsTargetable)
+            {
+                if(cannonTarget.Cell.IsValid)
+                {
+                    LockedStatusRotation = false;
+                    if(PrefireTickCount > 0)
+                    {
+                        if(!CannonTargeter.TargetMeetsRequirements(this, cannonTarget) || !pawn.Drafted)
+                        {
+                            SetTarget(LocalTargetInfo.Invalid);
+                            return;
+                        }
+                        currentRotation = (float)TurretLocation.ToIntVec3().AngleToPoint(cannonTarget.Cell, pawn.Map);
+
+                        float facing = cannonTarget.Thing != null ? (cannonTarget.Thing.DrawPos - TurretLocation).AngleFlat() : (cannonTarget.Cell - TurretLocation.ToIntVec3()).AngleFlat;
+                        GenDraw.DrawAimPieRaw(TurretLocation + new Vector3(cannonRenderOffset.x + aimPieOffset.x, 0.5f, cannonRenderOffset.y + aimPieOffset.y).RotatedBy(TurretRotation), facing, (int)(PrefireTickCount * 0.5f));
+
+                        PrefireTickCount--;
+                    }
+                    else if(cooldownTicks <= 0)
+                    {
+                        CompCannon.multiFireCannon.Add(new SPTuples.SPTuple<int, CannonHandler, int>(cannonDef.numberOfShots, this, 0));
+                        ActivateTimer();
+                    }
+                }
             }
         }
 
@@ -123,37 +136,127 @@ namespace RimShips
         {
             get
             {
-                return baseTicksBetweenShots;
+                return cannonDef.baseTicksBetweenShots;
             }
         }
 
-        public Graphic CannonTexture
+        public Material CannonMaterial
         {
             get
             {
-                if(cannonTexPath.NullOrEmpty())
+                if(cannonDef.cannonTexPath.NullOrEmpty())
                     return null;
-                if(cannonTextureLoaded is null)
-                    cannonTextureLoaded = GraphicDatabase.Get<Graphic_Single>(cannonTexPath, ShaderDatabase.Cutout, cannonSize, Color.white);
-                return cannonTextureLoaded;
+                if (cannonMaterialLoaded is null)
+                    cannonMaterialLoaded = MaterialPool.MatFrom(cannonDef.cannonTexPath);
+                return cannonMaterialLoaded;
             }
         }
 
-        public Graphic BasePlateTexture
+        public Material CannonBaseMaterial
         {
             get
             {
-                if(baseCannonTexPath.NullOrEmpty())
+                if(cannonDef.baseCannonTexPath.NullOrEmpty())
                     return null;
-                if(baseCannonTextureLoaded is null)
-                    baseCannonTextureLoaded = GraphicDatabase.Get<Graphic_Single>(baseCannonTexPath, ShaderDatabase.Cutout, baseCannonSize, Color.white);
-                return baseCannonTextureLoaded;
+                if (baseCannonMaterialLoaded is null)
+                    baseCannonMaterialLoaded = MaterialPool.MatFrom(cannonDef.baseCannonTexPath);
+                return baseCannonMaterialLoaded;
+            }
+        }
+
+        public Texture2D CannonTexture
+        {
+            get
+            {
+                if (cannonDef.cannonTexPath.NullOrEmpty())
+                    return null;
+                if (cannonTex is null)
+                    cannonTex = ContentFinder<Texture2D>.Get(cannonDef.cannonTexPath, true);
+                return cannonTex;
+            }
+        }
+
+        public Texture2D CannonBaseTexture
+        {
+            get
+            {
+                if (cannonDef.baseCannonTexPath.NullOrEmpty())
+                    return null;
+                if (cannonBaseTex is null)
+                    cannonBaseTex = ContentFinder<Texture2D>.Get(cannonDef.baseCannonTexPath, true);
+                return cannonBaseTex;
+            }
+        }
+
+        public Vector3 TurretLocation
+        {
+            get
+            {
+                Pair<float, float> turretLoc = HelperMethods.ShipDrawOffset(CompShip, cannonRenderLocation.x, cannonRenderLocation.y);
+                return new Vector3(pawn.DrawPos.x + turretLoc.First, pawn.DrawPos.y, pawn.DrawPos.z + turretLoc.Second);
+            }
+        }
+
+        public Vector3 TurretLocationRotated
+        {
+            get
+            {
+                Pair<float, float> turretLoc = HelperMethods.ShipDrawOffset(CompShip, cannonRenderLocation.x + cannonRenderOffset.x, cannonRenderLocation.y + cannonRenderOffset.y);
+                return new Vector3(pawn.DrawPos.x + turretLoc.First, pawn.DrawPos.y, pawn.DrawPos.z + turretLoc.Second).RotatedBy(currentRotation);
+            }
+        }
+
+        public float TurretRotation
+        {
+            get
+            {
+                float trueRotation = currentRotation;
+                if(!cannonTarget.IsValid && HelperMethods.CannonTargeter.cannon != this && LockedStatusRotation)
+                {
+                    trueRotation -= 90 * pawn.Rotation.AsInt + CompShip.Angle;
+                }
+                float rotation = 270 - trueRotation;
+                if(rotation < 0)
+                {
+                    return 360 + rotation;
+                }
+                return rotation;
+            }
+        }
+
+        public bool AngleBetween(Vector3 mousePosition)
+        {
+            if(angleRestricted == Vector2.zero)
+                return true;
+            float rotationOffset = pawn.Rotation.AsInt * 90;
+            float start = angleRestricted.x + rotationOffset;
+            float end = angleRestricted.y + rotationOffset;
+            if (start > 360)
+                start -= 360;
+            if(end > 360)
+                end -= 360;
+            Log.Message($"RotationOffset: {rotationOffset} Start: {start} End: {end}");
+            float mid = (mousePosition - TurretLocation).AngleFlat();
+            end = (end - start) < 0f ? end - start + 360 : end - start;
+            mid = (mid - start) < 0f ? mid - start + 360 : mid - start;
+            return mid < end;
+        }
+
+        public float MaxRange
+        {
+            get
+            {
+                if(cannonDef.maxRange > GenRadial.MaxRadialPatternRadius)
+                {
+                    return (float)Math.Floor(GenRadial.MaxRadialPatternRadius);
+                }
+                return cannonDef.maxRange;
             }
         }
 
         public int CannonGroup(int cannonNumber)
         {
-            if(centerPoints.Count == 0 || cannonsPerPoint.Count == 0 || centerPoints.Count != cannonsPerPoint.Count)
+            if(cannonDef.centerPoints.Count == 0 || cannonDef.cannonsPerPoint.Count == 0 || cannonDef.centerPoints.Count != cannonDef.cannonsPerPoint.Count)
             {
                 Log.Error("Error in Cannon Group. CenterPoints is 0, CannonsPerPoint is 0, or CannonsPerPoint and CenterPoints do not have same number of entries");
                 return 0;
@@ -161,59 +264,86 @@ namespace RimShips
             return cannonGroupDict[cannonNumber];
         }
 
+        public void SetTarget(LocalTargetInfo target)
+        {
+            cannonTarget = target;
+        }
+
+        public void ResetCannonAngle()
+        {
+            currentRotation = defaultAngleRotated - 90;
+        }
+
+        public void ResetPrefireTimer()
+        {
+            PrefireTickCount = WarmupTicks;
+        }
+
+        public void ValidateLockStatus()
+        {
+            if (parentRotCached != pawn.Rotation)
+            {
+                parentRotCached = pawn.Rotation;
+                if(!cannonTarget.IsValid && HelperMethods.CannonTargeter.cannon != this)
+                {
+                    LockedStatusRotation = true;
+                }
+            }
+        }
+
         public string GetUniqueLoadID()
         {
+            if(uniqueID < 0)
+            {
+                Log.Message("Finding New ID : " + cannonDef?.label);
+                uniqueID = Find.UniqueIDsManager.GetNextThingID();
+            }
             return "CannonHandlerGroup_" + uniqueID;
         }
 
         private Dictionary<int, int> cannonGroupDict = new Dictionary<int, int>();
 
-        public bool reloading;
         public int cooldownTicks;
+
         public int uniqueID = -1;
-        public int MaxTicks => Mathf.CeilToInt(this.cooldownTimer * 60f);
+        public int MaxTicks => Mathf.CeilToInt(cannonDef.cooldownTimer * 60f);
+        public int WarmupTicks => Mathf.CeilToInt(cannonDef.warmUpTimer * 60f);
 
-        public string label = "Label Not Set";
-        public WeaponType weaponType;
-        public WeaponLocation weaponLocation;
-        public ThingDef projectile;
-        public ThingDef moteCannon;
-        public SoundDef cannonSound;
+        private Texture2D cannonTex;
+        private Texture2D cannonBaseTex;
 
-        public string cannonTexPath;
-        private Graphic cannonTextureLoaded;
+        public CannonDef cannonDef;
+
+        private Material cannonMaterialLoaded;
         public Vector2 cannonSize;
+        public Vector2 cannonRenderOffset;
+        public Vector2 cannonRenderLocation;
 
-        public string baseCannonTexPath;
-        private Graphic baseCannonTextureLoaded;
+        private Material baseCannonMaterialLoaded;
         public Vector2 baseCannonSize;
+        public Vector2 baseCannonRenderLocation;
 
-        public List<float> centerPoints = new List<float>();
-        public List<int> cannonsPerPoint = new List<int>();
+        public Vector2 cannonTurretDrawSize = Vector2.one;
+        public Vector2 baseCannonDrawSize = Vector2.one;
+
+        public Vector2 aimPieOffset = Vector2.zero;
+
+        public Vector2 angleRestricted = Vector2.zero;
+        public float defaultAngleRotated = 0f;
+
+        public LocalTargetInfo cannonTarget;
+        public int drawLayer = 0;
+
+        public int PrefireTickCount { get; private set; }
+
+        public float currentRotation = 0f;
 
         public Pawn pawn;
 
-        [DefaultValue(ProjectileHitFlags.All)]
-        public ProjectileHitFlags hitFlags;
+        private CompShips CompShip => pawn.TryGetComp<CompShips>();
+        private CompCannons CompCannon => pawn.TryGetComp<CompCannons>();
 
-        public bool splitCannonGroups = false;
-
-        public float spreadRadius = 0f;
-
-        public float maxRange = 30f;
-
-        public float minRange = 10f;
-
-        public float cooldownTimer = 5;
-
-        public int numberCannons = 1;
-
-        public float spacing = 0f;
-
-        public float offset = 0f;
-
-        public float projectileOffset = 0f;
-
-        public int baseTicksBetweenShots = 50;
+        public bool LockedStatusRotation { get; private set; }
+        private Rot4 parentRotCached = default;
     }
 }

@@ -149,13 +149,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bill_BoardShip.cs" />
+    <Compile Include="CannonDef.cs" />
     <Compile Include="CannonHandler.cs" />
+    <Compile Include="CannonTargeter.cs" />
     <Compile Include="CaravanArrivalAction_DockedBoats.cs" />
     <Compile Include="CellFinderExtended.cs" />
     <Compile Include="Command_CooldownAction.cs" />
     <Compile Include="Command_SetRange.cs" />
+    <Compile Include="Command_TargeterCooldownAction.cs" />
+    <Compile Include="CompFueledTravel.cs" />
     <Compile Include="CompProperties_Cannons.cs" />
+    <Compile Include="CompProperties_FueledTravel.cs" />
+    <Compile Include="CompProperties_UpgradeTree.cs" />
     <Compile Include="CompShips.cs" />
+    <Compile Include="CompUpgradeTree.cs" />
     <Compile Include="DesignationCategoryDefOf_Ships.cs" />
     <Compile Include="Dialog_DockBoat.cs" />
     <Compile Include="Dialog_GiveShipName.cs" />
@@ -172,17 +179,20 @@
     <Compile Include="GatherItemsForShipCaravanUtility.cs" />
     <Compile Include="GenGridShips.cs" />
     <Compile Include="GenPathShip.cs" />
+    <Compile Include="Gizmo_RefuelableFuelTravel.cs" />
     <Compile Include="HarmonyPatches_Bootstrap.cs" />
     <Compile Include="HelperMethods.cs" />
     <Compile Include="ITab_Ship_Cargo.cs" />
     <Compile Include="ITab_Ship_Health.cs" />
     <Compile Include="ITab_Ship_Passengers.cs" />
+    <Compile Include="ITab_Ship_Upgrades.cs" />
     <Compile Include="JobDefOf_Ships.cs" />
     <Compile Include="JobDriver_Board.cs" />
     <Compile Include="JobDriver_CarryPawnToShip.cs" />
     <Compile Include="JobDriver_GiveToShip.cs" />
     <Compile Include="JobDriver_IdleShip.cs" />
     <Compile Include="JobDriver_PrepareCaravan_GatheringShip.cs" />
+    <Compile Include="JobDriver_RefuelBoat.cs" />
     <Compile Include="JobDriver_RepairShip.cs" />
     <Compile Include="JobGiver_AwaitOrders.cs" />
     <Compile Include="JobGiver_BoardShip.cs" />
@@ -208,7 +218,6 @@
     <Compile Include="RimshipsModSettings.cs" />
     <Compile Include="CompCannons.cs" />
     <Compile Include="RiverDefOf.cs" />
-    <Compile Include="RiverToSize.cs" />
     <Compile Include="ShipHandler.cs" />
     <Compile Include="ShipHarmony.cs" />
     <Compile Include="ShipPassengerCardUtility.cs" />
@@ -231,6 +240,7 @@
     <Compile Include="TexCommand.cs" />
     <Compile Include="Toils_Board.cs" />
     <Compile Include="TouchPathEndModeUtilityShips.cs" />
+    <Compile Include="UpgradeNode.cs" />
     <Compile Include="WaterGridsUtility.cs" />
     <Compile Include="WaterRegion.cs" />
     <Compile Include="WaterRegionAndRoomQuery.cs" />
@@ -244,6 +254,7 @@
     <Compile Include="WaterRegionTypeUtility.cs" />
     <Compile Include="WaterRoom.cs" />
     <Compile Include="WaterRoomGroup.cs" />
+    <Compile Include="WindDirectional.cs" />
     <Compile Include="WorldObjectDefOfShips.cs" />
   </ItemGroup>
   <ItemGroup>

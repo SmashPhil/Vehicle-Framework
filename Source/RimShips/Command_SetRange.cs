@@ -12,9 +12,9 @@ namespace RimShips
         {
             base.ProcessInput(ev);
 
-            int startLevel = (int)this.cannonComp.Range;
-            int minRange = (int)this.cannonComp.MinRange;
-            int maxRange = (int)this.cannonComp.MaxRange;
+            int startLevel = (int)cannonComp.Range;
+            int minRange = (int)cannonComp.MinRange;
+            int maxRange = (int)cannonComp.MaxRangeGrouped;
 
             Func<int, string> textGetter;
             textGetter = ((int x) => "CannonRange".Translate(x));

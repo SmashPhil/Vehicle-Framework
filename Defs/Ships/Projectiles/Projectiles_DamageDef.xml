@@ -21,4 +21,5 @@
 		<defaultStoppingPower>0.35</defaultStoppingPower>
 		<defaultArmorPenetration>0.35</defaultArmorPenetration>
 	</DamageDef>
+
 </Defs>

@@ -69,7 +69,7 @@
 		<soundImpactDefault>BulletImpact_Wood</soundImpactDefault>
 		
 		<modExtensions>
-			<li Class="RimShips.Build.SpawnThingBuilt">
+			<li Class="RimShips.SpawnThingBuilt">
 				<thingToSpawn>SPBoats_PawnKind_RowBoat</thingToSpawn>
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
@@ -107,7 +107,7 @@
 		<soundImpactDefault>BulletImpact_Wood</soundImpactDefault>
 		
 		<modExtensions>
-			<li Class="RimShips.Build.SpawnThingBuilt">
+			<li Class="RimShips.SpawnThingBuilt">
 				<thingToSpawn>SPBoats_PawnKind_FishingBoat</thingToSpawn>
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
@@ -146,7 +146,7 @@
 		<soundImpactDefault>BulletImpact_Wood</soundImpactDefault>
 		
 		<modExtensions>
-			<li Class="RimShips.Build.SpawnThingBuilt">
+			<li Class="RimShips.SpawnThingBuilt">
 				<thingToSpawn>SPBoats_PawnKind_Caravel</thingToSpawn>
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
@@ -184,7 +184,7 @@
 		<soundImpactDefault>BulletImpact_Wood</soundImpactDefault>
 		
 		<modExtensions>
-			<li Class="RimShips.Build.SpawnThingBuilt">
+			<li Class="RimShips.SpawnThingBuilt">
 				<thingToSpawn>SPBoats_PawnKind_Galleon</thingToSpawn>
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
@@ -223,11 +223,48 @@
 		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
 		
 		<modExtensions>
-			<li Class="RimShips.Build.SpawnThingBuilt">
+			<li Class="RimShips.SpawnThingBuilt">
 				<thingToSpawn>SPBoats_PawnKind_PaddleSteamer</thingToSpawn>
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
 		</modExtensions>
-			
+	</ThingDef>
+	
+	<ThingDef ParentName="UnreleasedBoatBase">
+		<defName>SPBoats_DreadnoughtBlueprint</defName>
+		<label>Dreadnought</label>
+		<description>A heavy warship to rule the seas.</description>
+		<graphicData>
+			<texPath>Ships/dreadnought/Dreadnought_north</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+			<drawSize>(62,20.5)</drawSize>
+		</graphicData>
+		
+		<statBases>
+			<MaxHitPoints>20000</MaxHitPoints>
+			<WorkToBuild>300000</WorkToBuild>
+			<Flammability>0.05</Flammability>
+		</statBases>
+		<size>(60,20)</size>
+		
+		
+		<researchPrerequisites>
+			<li>Caravel</li> <!-- CHANGE -->
+		</researchPrerequisites>
+		
+		<costList>
+			<ComponentSpacer>2</ComponentSpacer>
+			<ComponentIndustrial>35</ComponentIndustrial>
+			<Steel>3000</Steel>
+		</costList>
+		
+		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
+		
+		<modExtensions>
+			<li Class="RimShips.SpawnThingBuilt">
+				<thingToSpawn>SPBoats_PawnKind_Dreadnought</thingToSpawn>
+				<soundFinished>ShipBigConstruction</soundFinished>
+			</li>
+		</modExtensions>
 	</ThingDef>
 </Defs>

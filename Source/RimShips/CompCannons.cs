@@ -14,18 +14,53 @@ namespace RimShips
     {
         private float range;
         private List<SPTuples.SPTuple<Stack<int>, CannonHandler, int>> broadsideFire = new List<SPTuples.SPTuple<Stack<int>, CannonHandler, int>>();
+        public List<SPTuples.SPTuple<int, CannonHandler, int>> multiFireCannon = new List<SPTuples.SPTuple<int, CannonHandler, int>>();
         private List<CannonHandler> cannons = new List<CannonHandler>();
+        private const float cellOffsetIntVec3ToVector3 = 0.5f;
         public CompProperties_Cannons Props => (CompProperties_Cannons)this.props;
-        public float MaxRange => this.cannons.Min(x => x.maxRange);
-        public float MinRange => this.cannons.Max(x => x.minRange);
         public Pawn Pawn => parent as Pawn;
         public CompShips CompShip => this.Pawn.GetComp<CompShips>();
+
+        public float MinRange => Cannons.Max(x => x.cannonDef.minRange);
+        public float MaxRangeGrouped
+        {
+            get
+            {
+                IEnumerable<CannonHandler> cannonRange = Cannons.Where(x => x.cannonDef.maxRange <= GenRadial.MaxRadialPatternRadius);
+                if(!cannonRange.Any())
+                {
+                    return (float)Math.Floor(GenRadial.MaxRadialPatternRadius);
+                }
+                return cannonRange.Min(x => x.cannonDef.maxRange);
+            }
+        }
 
         public List<CannonHandler> Cannons
         {
             get
             {
-                return this?.cannons ?? new List<CannonHandler>();
+                if (cannons is null)
+                {
+                    cannons = new List<CannonHandler>();
+                }
+                return cannons;
+            }
+        }
+
+        public void AddCannons(List<CannonHandler> cannonList)
+        {
+            if (cannonList is null)
+                return;
+            foreach(CannonHandler cannon in cannonList)
+            {
+                var cannonPermanent = new CannonHandler(this.Pawn, cannon);
+                cannonPermanent.SetTarget(LocalTargetInfo.Invalid);
+                cannonPermanent.currentRotation = cannonPermanent.defaultAngleRotated - 90;
+                if(Cannons.Any(x => x.baseCannonRenderLocation == cannonPermanent.baseCannonRenderLocation))
+                {
+                    Cannons.RemoveAll(x => x.baseCannonRenderLocation == cannonPermanent.baseCannonRenderLocation);
+                }
+                Cannons.Add(cannonPermanent);
             }
         }
 
@@ -33,54 +68,117 @@ namespace RimShips
         {
             get
             {
-                if (this.range <= 0) this.range = this.MaxRange;
+                if (range <= 0) range = MaxRangeGrouped;
                 return this.range;
             }
             set
             {
-                this.range = SPMultiCell.Clamp(value, this.MinRange, this.MaxRange);
+                range = SPMultiCell.Clamp(value, MinRange, MaxRangeGrouped);
             }
         }
 
         public override void PostDrawExtraSelectionOverlays()
         {
             base.PostDrawExtraSelectionOverlays();
-            if (this?.cannons?.Count > 0 && this.Pawn.Drafted)
-                GenDraw.DrawRadiusRing(this.Pawn.Position, this.Range);
+            if (Cannons?.Where(x => x.cannonDef.weaponType == WeaponType.Broadside).Count() > 0 && this.Pawn.Drafted)
+            {
+                if(MinRange > 0)
+                {
+                    GenDraw.DrawRadiusRing(this.Pawn.DrawPosTransformed(CompShip.Props.hitboxOffsetX, CompShip.Props.hitboxOffsetZ, CompShip.Angle).ToIntVec3(), this.MinRange, Color.red);
+                }
+                GenDraw.DrawRadiusRing(this.Pawn.DrawPosTransformed(CompShip.Props.hitboxOffsetX, CompShip.Props.hitboxOffsetZ, CompShip.Angle).ToIntVec3(), this.Range);
+            }
         }
 
-        /*public override void PostDraw()
+        public override void PostDraw()
         {
-            foreach(CannonHandler cannon in this.Cannons)
+            foreach (CannonHandler cannon in Cannons.OrderBy(x => x.drawLayer))
             {
-                if(cannon.CannonTexture != null)
+                if (cannon.CannonTexture != null && cannon.cannonRenderLocation != null)
                 {
-                    Graphic graphic = GhostUtility.GhostGraphicFor(cannon.CannonTexture, )
+                    cannon.ValidateLockStatus();
+                    try
+                    {
+                        Matrix4x4 matrix = default;
+                        Vector3 topVectorRotation = new Vector3(cannon.cannonRenderOffset.x, 1f, cannon.cannonRenderOffset.y).RotatedBy(cannon.TurretRotation);
+                        Pair<float, float> drawOffset = HelperMethods.ShipDrawOffset(Pawn.GetComp<CompShips>(), cannon.cannonRenderLocation.x, cannon.cannonRenderLocation.y);
+                        Vector3 topVectorLocation = new Vector3(parent.DrawPos.x + drawOffset.First, parent.DrawPos.y, parent.DrawPos.z + drawOffset.Second);
+                        matrix.SetTRS(topVectorLocation + Altitudes.AltIncVect + topVectorRotation, cannon.TurretRotation.ToQuat(), new Vector3(cannon.cannonTurretDrawSize.x, 1f, cannon.cannonTurretDrawSize.y));
+
+                        if(RimShipMod.mod.settings.debugDrawCannonGrid)
+                        {
+                            Material debugCenterMat = MaterialPool.MatFrom("Debug/cannonCenter");
+                            Matrix4x4 debugCenter = default;
+                            debugCenter.SetTRS(topVectorLocation + Altitudes.AltIncVect, Quaternion.identity, new Vector3(0.15f, 1f, 0.15f));
+                            Graphics.DrawMesh(MeshPool.plane10, debugCenter, debugCenterMat, 0);
+                        }
+                        Graphics.DrawMesh(MeshPool.plane10, matrix, cannon.CannonMaterial, 0);
+
+                        if(cannon.CannonBaseMaterial != null && cannon.baseCannonRenderLocation != null)
+                        {
+                            Matrix4x4 baseMatrix = default;
+                            Pair<float, float> baseDrawOffset = HelperMethods.ShipDrawOffset(Pawn.GetComp<CompShips>(), cannon.baseCannonRenderLocation.x, cannon.baseCannonRenderLocation.y);
+                            Vector3 baseVectorLocation = new Vector3(parent.DrawPos.x + baseDrawOffset.First, parent.DrawPos.y, parent.DrawPos.z + baseDrawOffset.Second);
+                            baseMatrix.SetTRS(baseVectorLocation + Altitudes.AltIncVect, parent.Rotation.AsQuat, new Vector3(cannon.baseCannonDrawSize.x, 1f, cannon.baseCannonDrawSize.y));
+                            Graphics.DrawMesh(MeshPool.plane10, baseMatrix, cannon.CannonBaseMaterial, 0);
+                        }
+
+                        if(RimShipMod.mod.settings.debugDrawCannonGrid)
+                        {
+                            Material debugMat = MaterialPool.MatFrom("Debug/cannonAlignment");
+                            Matrix4x4 debugGrid = default;
+                            debugGrid.SetTRS(topVectorLocation + Altitudes.AltIncVect, 0f.ToQuat(), new Vector3(5f, 1f, 5f));
+                            Graphics.DrawMesh(MeshPool.plane10, debugGrid, debugMat, 0);
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        Log.Error(string.Format("Error occurred during rendering of cannon {0}. Exception: {1}", cannon.cannonDef.label, ex.Message));
+                    }
                 }
             }
-        }*/
+        }
 
         public override IEnumerable<Gizmo> CompGetGizmosExtra()
         {
             if (this.Pawn.Drafted)
             {
-                if (this.cannons != null && this.cannons.Count > 0)
+                if (Cannons.Count > 0)
                 {
-                    if (this.cannons.Any(x => x.weaponType == WeaponType.Broadside))
+                    if(Cannons.Any(x => x.cannonDef.weaponType == WeaponType.Rotatable))
                     {
-                        if (this.cannons.Any(x => x.weaponLocation == WeaponLocation.Port))
+                        int i = 0;
+                        foreach(CannonHandler cannon in Cannons.Where(x => x.cannonDef.weaponLocation == WeaponLocation.Turret))
                         {
-                            foreach(CannonHandler cannon in this.cannons.Where(x => x.weaponLocation == WeaponLocation.Port))
+                            Command_TargeterCooldownAction turretCannons = new Command_TargeterCooldownAction();
+                            turretCannons.cannon = cannon;
+                            turretCannons.comp = this;
+                            turretCannons.defaultLabel = "TestFire".Translate(cannon.cannonDef.label) + i;
+                            turretCannons.icon = TexCommand.Attack;
+                            turretCannons.targetingParams = new TargetingParameters
+                            {
+                                //Buildings, Things, Animals, Humans, and Mechs default to targetable
+                                canTargetLocations = true
+                            };
+                            i++;
+                            yield return turretCannons;
+                        }
+                    }
+                    if (Cannons.Any(x => x.cannonDef.weaponType == WeaponType.Broadside))
+                    {
+                        if (Cannons.Any(x => x.cannonDef.weaponLocation == WeaponLocation.Port))
+                        {
+                            foreach(CannonHandler cannon in Cannons.Where(x => x.cannonDef.weaponLocation == WeaponLocation.Port))
                             {
                                 Command_CooldownAction portSideCannons = new Command_CooldownAction();
                                 portSideCannons.cannon = cannon;
                                 portSideCannons.comp = this;
-                                portSideCannons.defaultLabel = "CannonLabel".Translate(cannon.label);
+                                portSideCannons.defaultLabel = "CannonLabel".Translate(cannon.cannonDef.label);
                                 portSideCannons.icon = TexCommandShips.BroadsideCannon_Port;
                                 portSideCannons.action = delegate ()
                                 {
                                     SPTuples.SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPTuples.SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
-                                    List<int> cannonOrder = Enumerable.Range(0, cannon.numberCannons).ToList();
+                                    List<int> cannonOrder = Enumerable.Range(0, cannon.cannonDef.numberCannons).ToList();
                                     if(RimShipMod.mod.settings.shuffledCannonFire)
                                         cannonOrder.Shuffle();
                                     foreach (int i in cannonOrder)
@@ -100,19 +198,19 @@ namespace RimShips
                                 yield return portSideCannons;
                             }
                         }
-                        if (this.cannons.Any(x => x.weaponLocation == WeaponLocation.Starboard))
+                        if (Cannons.Any(x => x.cannonDef.weaponLocation == WeaponLocation.Starboard))
                         {
-                            foreach(CannonHandler cannon in this.cannons.Where(x => x.weaponLocation == WeaponLocation.Starboard))
+                            foreach(CannonHandler cannon in Cannons.Where(x => x.cannonDef.weaponLocation == WeaponLocation.Starboard))
                             {
                                 Command_CooldownAction starboardSideCannons = new Command_CooldownAction();
                                 starboardSideCannons.cannon = cannon;
                                 starboardSideCannons.comp = this;
-                                starboardSideCannons.defaultLabel = "CannonLabel".Translate(cannon.label);
+                                starboardSideCannons.defaultLabel = "CannonLabel".Translate(cannon.cannonDef.label);
                                 starboardSideCannons.icon = TexCommandShips.BroadsideCannon_Starboard;
                                 starboardSideCannons.action = delegate ()
                                 {
                                     SPTuples.SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPTuples.SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
-                                    List<int> cannonOrder = Enumerable.Range(0, cannon.numberCannons).ToList();
+                                    List<int> cannonOrder = Enumerable.Range(0, cannon.cannonDef.numberCannons).ToList();
                                     if (RimShipMod.mod.settings.shuffledCannonFire)
                                         cannonOrder.Shuffle();
                                     foreach (int i in cannonOrder)
@@ -126,7 +224,7 @@ namespace RimShips
                                 {
                                     if(!RimShipMod.mod.settings.debugDraftAnyShip && handler.role.handlingType == HandlingTypeFlags.Cannons && handler.handlers.Count < handler.role.slotsToOperate)
                                     {
-                                        starboardSideCannons.Disable("NotEnoughCannonCrew".Translate(this.Pawn.LabelShort, handler.role.label));
+                                        starboardSideCannons.Disable("NotEnoughCannonCrew".Translate(Pawn.LabelShort, handler.role.label));
                                     }
                                 }
                                 yield return starboardSideCannons;
@@ -136,7 +234,7 @@ namespace RimShips
                         Command_SetRange range = new Command_SetRange();
                         range.defaultLabel = "SetRange".Translate();
                         range.icon = TexCommand.Attack;
-                        range.activeCannons = this.cannons.FindAll(x => x.weaponType == WeaponType.Broadside);
+                        range.activeCannons = Cannons.FindAll(x => x.cannonDef.weaponType == WeaponType.Broadside);
                         range.cannonComp = this;
                         yield return range;
                     }
@@ -146,41 +244,82 @@ namespace RimShips
 
         private void ResolveCannons()
         {
-            if (!this.Pawn.Drafted && this.broadsideFire.Count > 0)
+            if (!this.Pawn.Drafted && broadsideFire.Count > 0)
             {
-                foreach(SPTuples.SPTuple<Stack<int>, CannonHandler> side in broadsideFire)
-                {
-                    side.Second.reloading = true;
-                }
-                this.broadsideFire.Clear();
+                broadsideFire.Clear();
             }
-
-            if (this.broadsideFire.Count > 0)
+            
+            if (broadsideFire?.Count > 0)
             {
-                for (int i = 0; i < this.broadsideFire.Count; i++)
+                for (int i = 0; i < broadsideFire.Count; i++)
                 {
                     SPTuples.SPTuple<Stack<int>, CannonHandler> side = broadsideFire[i];
-                    side.Second.reloading = false;
                     int tick = broadsideFire[i].Third;
                     if(broadsideFire[i].Third % side.Second.TicksPerShot == 0)
                     {
-                        this.FireCannonBroadside(side.Second, side.First.Pop());
+                        FireCannonBroadside(side.Second, side.First.Pop());
                         
                     }
                     tick++;
                     broadsideFire[i].Third = tick;
                     if (!side.First.Any())
                     {
-                        side.Second.reloading = true;
                         broadsideFire.RemoveAt(i);
+                    }
+                }
+            }
+
+            if(multiFireCannon?.Count > 0)
+            {
+                for(int i = 0; i < multiFireCannon.Count; i++)
+                {
+                    if (multiFireCannon[i].Third <= 0)
+                    {
+                        FireTurretCannon(multiFireCannon[i].Second);
+                        multiFireCannon[i].First--;
+                        multiFireCannon[i].Third = multiFireCannon[i].Second.TicksPerShot;
+                        if (multiFireCannon[i].First == 0)
+                        {
+                            multiFireCannon[i].Second.SetTarget(LocalTargetInfo.Invalid);
+                            multiFireCannon.RemoveAt(i);
+                        }
+                    }
+                    else
+                    {
+                        multiFireCannon[i].Third--;
                     }
                 }
             }
         }
 
-        public void FireCannon(CannonHandler cannon)
+        public void FireTurretCannon(CannonHandler cannon)
         {
-            
+            if (cannon is null)
+                return;
+            bool flag = TryFindShootLineFromTo(cannon.TurretLocation.ToIntVec3(), cannon.cannonTarget, out ShootLine shootLine);
+
+            //FIX FOR MULTIPLAYER
+            IntVec3 c = cannon.cannonTarget.Cell + GenRadial.RadialPattern[Rand.Range(0, GenRadial.NumCellsInRadius(cannon.cannonDef.spreadRadius * (Range / cannon.cannonDef.maxRange)))];
+            Vector3 launchCell = cannon.TurretLocation + new Vector3(0f, 1f, cannon.cannonDef.projectileOffset).RotatedBy(cannon.TurretRotation);
+
+            Projectile projectile2 = (Projectile)GenSpawn.Spawn(cannon.cannonDef.projectile, Pawn.Position, Pawn.Map, WipeMode.Vanish);
+            if (cannon.cannonDef.cannonSound is null) SoundDefOf_Ships.Explosion_PirateCannon.PlayOneShot(new TargetInfo(Pawn.Position, Pawn.Map, false));
+            else { cannon.cannonDef.cannonSound.PlayOneShot(new TargetInfo(Pawn.Position, Pawn.Map, false)); }
+
+            if(cannon.cannonDef.moteFlash != null)
+            {
+                MoteMaker.MakeStaticMote(launchCell, Pawn.Map, cannon.cannonDef.moteFlash, 2);
+            }
+            if (cannon.cannonDef.moteCannon != null)
+            {
+                MoteThrown mote = (MoteThrown)ThingMaker.MakeThing(cannon.cannonDef.moteCannon, null);
+                mote.exactPosition = launchCell;
+                mote.Scale = 1f;
+                mote.rotationRate = 15f;
+                mote.SetVelocity(cannon.TurretRotation, cannon.cannonDef.moteSpeedThrown);
+                HelperMethods.ThrowMoteEnhanced(launchCell, Pawn.Map, mote);
+            }
+            projectile2.Launch(Pawn, launchCell, c, cannon.cannonTarget, cannon.cannonDef.hitFlags);
         }
 
         public void FireCannonBroadside(CannonHandler cannon, int i)
@@ -189,27 +328,27 @@ namespace RimShips
             float initialOffset;
             float offset;
             bool mirrored = false;
-            if (this.Pawn.Rotation == Rot4.South || this.Pawn.Rotation == Rot4.West)
+            if (this.Pawn.Rotation == Rot4.South || Pawn.Rotation == Rot4.West)
                 mirrored = true;
-            if(cannon.splitCannonGroups)
+            if(cannon.cannonDef.splitCannonGroups)
             {
                 int group = cannon.CannonGroup(i);
-                float groupOffset = cannon.centerPoints[group];
-                initialOffset = ((cannon.spacing * (cannon.cannonsPerPoint[group] - 1)) / 2f) + groupOffset; // s(n-1) / 2
-                offset = (cannon.spacing * i - initialOffset) * (mirrored ? -1 : 1); //s*i - x
+                float groupOffset = cannon.cannonDef.centerPoints[group];
+                initialOffset = ((cannon.cannonDef.spacing * (cannon.cannonDef.cannonsPerPoint[group] - 1)) / 2f) + groupOffset; // s(n-1) / 2
+                offset = (cannon.cannonDef.spacing * i - initialOffset) * (mirrored ? -1 : 1); //s*i - x
             }
             else
             {
-                initialOffset = ((cannon.spacing * (cannon.numberCannons - 1)) / 2f) + cannon.offset; // s(n-1) / 2
-                offset = (cannon.spacing * i - initialOffset) * (mirrored ? -1 : 1); //s*i - x
+                initialOffset = ((cannon.cannonDef.spacing * (cannon.cannonDef.numberCannons - 1)) / 2f) + cannon.cannonDef.offset; // s(n-1) / 2
+                offset = (cannon.cannonDef.spacing * i - initialOffset) * (mirrored ? -1 : 1); //s*i - x
             }
 
-            float projectileOffset = (this.Pawn.def.size.x / 2f) + cannon.projectileOffset; // (s/2)
+            float projectileOffset = (this.Pawn.def.size.x / 2f) + cannon.cannonDef.projectileOffset; // (s/2)
             SPTuples.SPTuple2<float, float> angleOffset = this.AngleRotationProjectileOffset(offset, projectileOffset);
-            ThingDef projectile = cannon.projectile;
+            ThingDef projectile = cannon.cannonDef.projectile;
             IntVec3 targetCell = IntVec3.Invalid;
             Vector3 launchCell = this.Pawn.DrawPos;
-            switch (cannon.weaponLocation)
+            switch (cannon.cannonDef.weaponLocation)
             {
                 case WeaponLocation.Port:
                     if (this.CompShip.Angle == 0)
@@ -347,21 +486,19 @@ namespace RimShips
                         }
                     }
                     break;
-                case WeaponLocation.Turret:
-                    throw new NotImplementedException();
             }
             LocalTargetInfo target = new LocalTargetInfo(targetCell);
             ShootLine shootLine;
             bool flag = TryFindShootLineFromTo(this.Pawn.Position, target, out shootLine);
 
             //FIX FOR MULTIPLAYER
-            IntVec3 c = target.Cell + GenRadial.RadialPattern[Rand.Range(0, GenRadial.NumCellsInRadius(cannon.spreadRadius * (this.Range / cannon.maxRange)))];
+            IntVec3 c = target.Cell + GenRadial.RadialPattern[Rand.Range(0, GenRadial.NumCellsInRadius(cannon.cannonDef.spreadRadius * (this.Range / cannon.cannonDef.maxRange)))];
             Projectile projectile2 = (Projectile)GenSpawn.Spawn(projectile, this.Pawn.Position, this.Pawn.Map, WipeMode.Vanish);
-            if (cannon.cannonSound is null) SoundDefOf_Ships.Explosion_PirateCannon.PlayOneShot(new TargetInfo(this.Pawn.Position, this.Pawn.Map, false));
-            else { cannon.cannonSound.PlayOneShot(new TargetInfo(this.Pawn.Position, this.Pawn.Map, false)); }
-            if(cannon.moteCannon != null)
-                MoteMaker.MakeStaticMote(launchCell, this.Pawn.Map, cannon.moteCannon, 1f);
-            projectile2.Launch(this.Pawn, launchCell, c, target, cannon.hitFlags);
+            if (cannon.cannonDef.cannonSound is null) SoundDefOf_Ships.Explosion_PirateCannon.PlayOneShot(new TargetInfo(this.Pawn.Position, this.Pawn.Map, false));
+            else { cannon.cannonDef.cannonSound.PlayOneShot(new TargetInfo(this.Pawn.Position, this.Pawn.Map, false)); }
+            if(cannon.cannonDef.moteCannon != null)
+                MoteMaker.MakeStaticMote(launchCell, this.Pawn.Map, cannon.cannonDef.moteCannon, 1f);
+            projectile2.Launch(this.Pawn, launchCell, c, target, cannon.cannonDef.hitFlags);
         }
 
         private SPTuples.SPTuple2<float, float> AngleRotationProjectileOffset(float preOffsetX, float preOffsetY)
@@ -410,8 +547,8 @@ namespace RimShips
         public override void CompTick()
         {
             base.CompTick();
-            this.ResolveCannons();
-            foreach(CannonHandler cannon in this.cannons)
+            ResolveCannons();
+            foreach(CannonHandler cannon in Cannons)
             {
                 cannon.DoTick();
             }
@@ -420,27 +557,34 @@ namespace RimShips
         public override void PostSpawnSetup(bool respawningAfterLoad)
         {
             base.PostSpawnSetup(respawningAfterLoad);
-            this.InitializeCannons();
-            this.broadsideFire = new List<SPTuples.SPTuple<Stack<int>, CannonHandler, int>>();
+            if(!respawningAfterLoad)
+            {
+                InitializeCannons();
+            }
+
+            broadsideFire = new List<SPTuples.SPTuple<Stack<int>, CannonHandler, int>>();
+            multiFireCannon = new List<SPTuples.SPTuple<int, CannonHandler, int>>();
         }
 
         private void InitializeCannons()
         {
-            if(this.cannons is null) this.cannons = new List<CannonHandler>();
-            if(this.cannons.Count <= 0 && this.Props.cannons.Any())
+            if(Cannons.Count <= 0 && Props.cannons.Any())
             {
-                foreach(CannonHandler cannon in this.Props.cannons)
+                foreach(CannonHandler cannon in Props.cannons)
                 {
-                    this.cannons.Add(new CannonHandler(this.Pawn, cannon));
+                    var cannonPermanent = new CannonHandler(this.Pawn, cannon);
+                    cannonPermanent.SetTarget(LocalTargetInfo.Invalid);
+                    cannon.currentRotation = cannon.defaultAngleRotated - 90;
+                    Cannons.Add(cannonPermanent);
                 }
             }
         }
+
         public override void PostExposeData()
         {
             base.PostExposeData();
-            Scribe_Collections.Look(ref broadsideFire, "broadsideFire", LookMode.Deep);
             Scribe_Collections.Look(ref cannons, "cannons", LookMode.Deep);
-            Scribe_Values.Look(ref range, "range", this.MaxRange);
+            Scribe_Values.Look(ref range, "range", MaxRangeGrouped);
         }
     }
 }

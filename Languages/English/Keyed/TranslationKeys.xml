@@ -76,6 +76,7 @@
 	
 	<!-- Messages -->
 	<CompShips_CannotMove>Cannot draft. Boat needs more crew in order to navigate.</CompShips_CannotMove>
+	<CompShips_OutOfFuel>Cannot draft. Boat needs more fuel.</CompShips_OutOfFuel>
 	<NotEnoughCannonCrew>Not enough colonists in {0} to operate {1}.</NotEnoughCannonCrew>
 	<NameIsInvalid>Name invalid for ship.</NameIsInvalid>
 	<ShipGainsName>Your new boat has been named {0}</ShipGainsName>

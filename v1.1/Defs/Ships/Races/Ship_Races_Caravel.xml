@@ -176,46 +176,46 @@
 				</roles>
 			</li>
 			
-			<li Class="RimShips.CompProperties_Cannons">
-				<cannons>
-						<li>
-							<label>Portside</label>
-							<weaponType>Broadside</weaponType>
-							<weaponLocation>Port</weaponLocation>
-							<projectile>Caravel_cannonball</projectile>
-							<moteCannon>Mote_Smoke_CannonSmall</moteCannon>
-							<cannonSound>Explosion_PirateCannon</cannonSound>
-							<numberCannons>2</numberCannons>
-							<baseTicksBetweenShots>30</baseTicksBetweenShots>
-							<cooldownTimer>8</cooldownTimer>
-							<spacing>1.9</spacing>
-							<offset>.4</offset>
-							<projectileOffset>.5</projectileOffset>
-							<hitFlags>All</hitFlags>
-							<spreadRadius>3</spreadRadius>
-							<minRange>8</minRange>
-							<maxRange>38</maxRange>
-						</li>
-						<li>
-							<label>Starboard</label>
-							<weaponType>Broadside</weaponType>
-							<weaponLocation>Starboard</weaponLocation>
-							<projectile>Caravel_cannonball</projectile>
-							<moteCannon>Mote_Smoke_CannonSmall</moteCannon>
-							<cannonSound>Explosion_PirateCannon</cannonSound>
-							<numberCannons>2</numberCannons>
-							<baseTicksBetweenShots>30</baseTicksBetweenShots>
-							<cooldownTimer>8</cooldownTimer>
-							<spacing>1.9</spacing>
-							<offset>.4</offset>
-							<projectileOffset>.5</projectileOffset>
-							<hitFlags>All</hitFlags>
-							<spreadRadius>3</spreadRadius>
-							<minRange>8</minRange>
-							<maxRange>38</maxRange>
-						</li>
-				</cannons>
-			</li>
+			<!-- <li Class="RimShips.CompProperties_Cannons"> -->
+				<!-- <cannons> -->
+						<!-- <li> -->
+							<!-- <label>Portside</label> -->
+							<!-- <weaponType>Broadside</weaponType> -->
+							<!-- <weaponLocation>Port</weaponLocation> -->
+							<!-- <projectile>Caravel_cannonball</projectile> -->
+							<!-- <moteCannon>Mote_Smoke_CannonSmall</moteCannon> -->
+							<!-- <cannonSound>Explosion_PirateCannon</cannonSound> -->
+							<!-- <numberCannons>2</numberCannons> -->
+							<!-- <baseTicksBetweenShots>30</baseTicksBetweenShots> -->
+							<!-- <cooldownTimer>8</cooldownTimer> -->
+							<!-- <spacing>1.9</spacing> -->
+							<!-- <offset>.4</offset> -->
+							<!-- <projectileOffset>.5</projectileOffset> -->
+							<!-- <hitFlags>All</hitFlags> -->
+							<!-- <spreadRadius>3</spreadRadius> -->
+							<!-- <minRange>8</minRange> -->
+							<!-- <maxRange>38</maxRange> -->
+						<!-- </li> -->
+						<!-- <li> -->
+							<!-- <label>Starboard</label> -->
+							<!-- <weaponType>Broadside</weaponType> -->
+							<!-- <weaponLocation>Starboard</weaponLocation> -->
+							<!-- <projectile>Caravel_cannonball</projectile> -->
+							<!-- <moteCannon>Mote_Smoke_CannonSmall</moteCannon> -->
+							<!-- <cannonSound>Explosion_PirateCannon</cannonSound> -->
+							<!-- <numberCannons>2</numberCannons> -->
+							<!-- <baseTicksBetweenShots>30</baseTicksBetweenShots> -->
+							<!-- <cooldownTimer>8</cooldownTimer> -->
+							<!-- <spacing>1.9</spacing> -->
+							<!-- <offset>.4</offset> -->
+							<!-- <projectileOffset>.5</projectileOffset> -->
+							<!-- <hitFlags>All</hitFlags> -->
+							<!-- <spreadRadius>3</spreadRadius> -->
+							<!-- <minRange>8</minRange> -->
+							<!-- <maxRange>38</maxRange> -->
+						<!-- </li> -->
+				<!-- </cannons> -->
+			<!-- </li> -->
 		</comps>
 	</ThingDef>
 </Defs>

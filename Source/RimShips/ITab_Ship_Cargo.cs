@@ -33,24 +33,24 @@ namespace RimShips.UI
         protected override void FillTab()
         {
             Text.Font = GameFont.Small;
-            Rect rect = new Rect(0f, TopPadding, this.size.x, this.size.y - TopPadding);
+            Rect rect = new Rect(0f, TopPadding, size.x, size.y - TopPadding);
             Rect rect2 = rect.ContractedBy(10f);
             Rect position = new Rect(rect2.x, rect2.y, rect2.width, rect2.height);
             GUI.BeginGroup(position);
             Text.Font = GameFont.Small;
             GUI.color = Color.white;
             Rect outRect = new Rect(0f, 0f, position.width, position.height);
-            Rect viewRect = new Rect(0f, 0f, position.width - 16f, this.scrollViewHeight);
-            Widgets.BeginScrollView(outRect, ref this.scrollPosition, viewRect, true);
+            Rect viewRect = new Rect(0f, 0f, position.width - 16f, scrollViewHeight);
+            Widgets.BeginScrollView(outRect, ref scrollPosition, viewRect, true);
             float num = 0f;
-            this.TryDrawMassInfo(ref num, viewRect.width);
-            if(this.SelPawnForCargo.def.GetCompProperties<CompProperties_Ships>().nameable)
+            TryDrawMassInfo(ref num, viewRect.width);
+            if(SelPawnForCargo.def.GetCompProperties<CompProperties_Ships>().nameable)
             {
-                Rect rectRename = new Rect(this.size.x - 55f, 0f, 30f, 30f);
-                TooltipHandler.TipRegion(rectRename, "RenameShip".Translate(this.SelPawnForCargo.LabelShort));
+                Rect rectRename = new Rect(size.x - 55f, 0f, 30f, 30f);
+                TooltipHandler.TipRegion(rectRename, "RenameShip".Translate(SelPawnForCargo.LabelShort));
                 if (Widgets.ButtonImage(rectRename, TexCommandShips.Rename))
                 {
-                    this.SelPawnForCargo.GetComp<CompShips>().Rename();
+                    SelPawnForCargo.GetComp<CompShips>().Rename();
                 }
                 /*Rect rectRecolor = new Rect(this.size.x - 85f, 0f, 30f, 30f);
                 TooltipHandler.TipRegion(rectRecolor, "RecolorFlags".Translate());
@@ -59,20 +59,20 @@ namespace RimShips.UI
 
                 }*/
             }
-            if(this.IsVisible)
+            if(IsVisible)
             {
                 Widgets.ListSeparator(ref num, viewRect.width, "Cargo".Translate());
                 ITab_Ship_Cargo.workingInvList.Clear();
-                ITab_Ship_Cargo.workingInvList.AddRange(this.SelPawnForCargo.inventory.innerContainer);
+                ITab_Ship_Cargo.workingInvList.AddRange(SelPawnForCargo.inventory.innerContainer);
                 foreach(Thing t in ITab_Ship_Cargo.workingInvList)
                 {
-                    this.DrawThingRow(ref num, viewRect.width, t, true);
+                    DrawThingRow(ref num, viewRect.width, t, true);
                 }
                 ITab_Ship_Cargo.workingInvList.Clear();
             }
             if(Event.current.type is EventType.Layout)
             {
-                this.scrollViewHeight = num + 30f;
+                scrollViewHeight = num + 30f;
             }
             Widgets.EndScrollView();
             GUI.EndGroup();

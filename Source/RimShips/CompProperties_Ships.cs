@@ -29,6 +29,9 @@ namespace RimShips
         public float wakeSpeed = 1.6f;
         public float visibility = 0.5f;
 
+        public float armor = 5f;
+        public float cargoCapacity = 1000;
+
         public bool diagonalRotation = true;
 
         public string healthLabel_Healthy = "Operational";

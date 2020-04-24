@@ -19,6 +19,8 @@ namespace RimShips
         public bool shuffledCannonFire = true;
         public bool riverTravel = true;
         public bool boatSizeMatters = true;
+        public bool passiveWaterWaves = true;
+        public bool drawUpgradeInformationScreen = true;
 
         public float fishingMultiplier = 1f;
         public int fishingDelay = 10000;
@@ -27,9 +29,15 @@ namespace RimShips
 
         public bool debugDraftAnyShip;
         public bool debugDisableWaterPathing;
+        public bool debugSpawnBoatBuidingGodMode;
+
+        public bool debugDrawCannonGrid;
+        public bool debugDrawNodeGrid;
+
         public bool debugDrawRegions;
         public bool debugDrawRegionLinks;
         public bool debugDrawRegionThings;
+        
         public int CoastRadius => forceFactionCoastRadius;
         public float FishingSkillValue => fishingSkillIncrease / 100;
         public override void ExposeData()
@@ -42,6 +50,7 @@ namespace RimShips
             Scribe_Values.Look(ref shuffledCannonFire, "shuffledCannonFire", true);
             Scribe_Values.Look(ref riverTravel, "riverTravel", true);
             Scribe_Values.Look(ref boatSizeMatters, "boatSizeMatters", true);
+            Scribe_Values.Look(ref passiveWaterWaves, "passiveWaterWaves", true);
 
             Scribe_Values.Look(ref fishingMultiplier, "fishingMultiplier", 1f);
             Scribe_Values.Look(ref fishingDelay, "fishingDelay", 10000);
@@ -52,6 +61,11 @@ namespace RimShips
             {
                 Scribe_Values.Look(ref debugDraftAnyShip, "debugDraftAnyShip", false);
                 Scribe_Values.Look(ref debugDisableWaterPathing, "debugDisableWaterPathing", false);
+                Scribe_Values.Look(ref debugSpawnBoatBuidingGodMode, "debugSpawnBoatBuidingGodMode", false);
+
+                Scribe_Values.Look(ref debugDrawCannonGrid, "debugDrawCannonGrid", false);
+                Scribe_Values.Look(ref debugDrawNodeGrid, "debugDrawNodeGrid", false);
+
                 Scribe_Values.Look(ref debugDrawRegions, "debugDrawRegions", false);
                 Scribe_Values.Look(ref debugDrawRegionLinks, "debugDrawRegionLinks", false);
                 Scribe_Values.Look(ref debugDrawRegionThings, "debugDrawRegionThings", false);
@@ -160,6 +174,8 @@ namespace RimShips
 
                 listingStandard.Gap(16f);
 
+                listingStandard.CheckboxLabeled("DrawUpgradeInformationScreen".Translate(), ref settings.drawUpgradeInformationScreen, "DrawUpgradeInformationScreenTooltip".Translate());
+                listingStandard.CheckboxLabeled("PassiveWaterWaves".Translate(), ref settings.passiveWaterWaves, "PassiveWaterWavesTooltip".Translate());
                 listingStandard.CheckboxLabeled("ShuffledCannonFire".Translate(), ref settings.shuffledCannonFire, "ShuffledCannonFireTooltip".Translate());
                 listingStandard.CheckboxLabeled("RiverTravelAllowed".Translate(), ref settings.riverTravel, "RiverTravelAllowedTooltip".Translate());
                 
@@ -194,6 +210,11 @@ namespace RimShips
                 listingStandard.GapLine(16f);
                 listingStandard.CheckboxLabeled("DebugDraftAnyShip".Translate(), ref settings.debugDraftAnyShip, "DebugDraftAnyShipTooltip".Translate());
                 listingStandard.CheckboxLabeled("DebugDisablePathing".Translate(), ref settings.debugDisableWaterPathing, "DebugDisablePathingTooltip".Translate());
+                listingStandard.CheckboxLabeled("debugSpawnBoatBuidingGodMode".Translate(), ref settings.debugSpawnBoatBuidingGodMode);
+
+                listingStandard.CheckboxLabeled("DebugCannonDrawer".Translate(), ref settings.debugDrawCannonGrid);
+                listingStandard.CheckboxLabeled("debugDrawNodeGrid".Translate(), ref settings.debugDrawNodeGrid);
+
                 listingStandard.CheckboxLabeled("DebugDrawRegions".Translate(), ref settings.debugDrawRegions);
                 listingStandard.CheckboxLabeled("DebugDrawRegionLinks".Translate(), ref settings.debugDrawRegionLinks);
                 listingStandard.CheckboxLabeled("DebugDrawRegionThings".Translate(), ref settings.debugDrawRegionThings);
@@ -226,6 +247,9 @@ namespace RimShips
 
             settings.debugDraftAnyShip = false;
             settings.debugDisableWaterPathing = false;
+            settings.debugSpawnBoatBuidingGodMode = false;
+            settings.debugDrawCannonGrid = false;
+            settings.debugDrawNodeGrid = false;
             settings.debugDrawRegions = false;
             settings.debugDrawRegionLinks = false;
             settings.debugDrawRegionThings = false;
