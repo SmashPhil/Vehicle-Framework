@@ -221,7 +221,7 @@
 						
 						<angleRestricted>(230, 130)</angleRestricted>
 						<aimPieOffset>(0,1.2)</aimPieOffset>
-						<drawLayer>0</drawLayer>
+						<drawLayer>1</drawLayer>
 					</li>
 					<li>
 						<cannonDef>12inRotatingDouble</cannonDef>
@@ -234,7 +234,7 @@
 						
 						<angleRestricted>(230, 130)</angleRestricted>
 						<aimPieOffset>(0,1.2)</aimPieOffset>
-						<drawLayer>1</drawLayer>
+						<drawLayer>2</drawLayer>
 					</li>
 					<li>
 						<cannonDef>12inRotatingDouble</cannonDef>
@@ -245,9 +245,10 @@
 						<baseCannonRenderLocation>(0,-6.2)</baseCannonRenderLocation>
 						<baseCannonDrawSize>(5.8,5.8)</baseCannonDrawSize>
 						
-						<angleRestricted>(310, 50)</angleRestricted>
+						<defaultAngleRotated>180</defaultAngleRotated>
+						<angleRestricted>(50, 310)</angleRestricted>
 						<aimPieOffset>(0,1.2)</aimPieOffset>
-						<drawLayer>1</drawLayer>
+						<drawLayer>2</drawLayer>
 					</li>
 					<li>
 						<cannonDef>12inRotatingDouble</cannonDef>
@@ -258,9 +259,10 @@
 						<baseCannonRenderLocation>(0,-8.2)</baseCannonRenderLocation>
 						<baseCannonDrawSize>(5.8,5.8)</baseCannonDrawSize>
 						
-						<angleRestricted>(310, 50)</angleRestricted>
+						<defaultAngleRotated>180</defaultAngleRotated>
+						<angleRestricted>(50, 310)</angleRestricted>
 						<aimPieOffset>(0,1.2)</aimPieOffset>
-						<drawLayer>0</drawLayer>
+						<drawLayer>1</drawLayer>
 					</li>
 				</cannons>
 			</li>

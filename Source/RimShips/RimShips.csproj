@@ -160,7 +160,9 @@
     <Compile Include="CompFueledTravel.cs" />
     <Compile Include="CompProperties_Cannons.cs" />
     <Compile Include="CompProperties_FueledTravel.cs" />
+    <Compile Include="CompProperties_SavePawnReference.cs" />
     <Compile Include="CompProperties_UpgradeTree.cs" />
+    <Compile Include="CompSavePawnReference.cs" />
     <Compile Include="CompShips.cs" />
     <Compile Include="CompUpgradeTree.cs" />
     <Compile Include="DesignationCategoryDefOf_Ships.cs" />

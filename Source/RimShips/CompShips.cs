@@ -503,6 +503,11 @@ namespace RimShips
 
         public void DisembarkPawn(Pawn pawn)
         {
+            if(!Pawn.Position.Standable(Pawn.Map))
+            {
+                Messages.Message("RejectDisembarkInvalidTile".Translate(), MessageTypeDefOf.RejectInput, false);
+                return;
+            }
             if(!pawn.Spawned)
             {
                 GenSpawn.Spawn(pawn, this.Pawn.PositionHeld.RandomAdjacentCellCardinal(), Pawn.MapHeld);
@@ -518,6 +523,11 @@ namespace RimShips
 
         public void DisembarkAll()
         {
+            if(!Pawn.Position.Standable(Pawn.Map))
+            {
+                Messages.Message("RejectDisembarkInvalidTile".Translate(), MessageTypeDefOf.RejectInput, false);
+                return;
+            }
             var pawnsToDisembark = new List<Pawn>(AllPawnsAboard);
             if( !(pawnsToDisembark is null) && pawnsToDisembark.Count > 0)
             {

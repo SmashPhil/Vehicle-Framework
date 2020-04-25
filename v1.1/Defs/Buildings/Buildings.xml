@@ -74,6 +74,10 @@
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
 		</modExtensions>
+		
+		<comps>
+			<li Class="RimShips.CompProperties_SavePawnReference"/>
+		</comps>
 			
 	</ThingDef>
 	
@@ -112,6 +116,10 @@
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
 		</modExtensions>
+		
+		<comps>
+			<li Class="RimShips.CompProperties_SavePawnReference"/>
+		</comps>
 			
 	</ThingDef>
 	
@@ -151,6 +159,10 @@
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
 		</modExtensions>
+		
+		<comps>
+			<li Class="RimShips.CompProperties_SavePawnReference"/>
+		</comps>
 			
 	</ThingDef>
 	
@@ -189,10 +201,14 @@
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
 		</modExtensions>
+		
+		<comps>
+			<li Class="RimShips.CompProperties_SavePawnReference"/>
+		</comps>
 			
 	</ThingDef>
 	
-	<ThingDef ParentName="UnreleasedBoatBase">
+	<ThingDef ParentName="BoatBase">
 		<defName>SPBoats_PaddleSteamerBlueprint</defName>
 		<label>Paddle Steamer</label>
 		<description>A versatile boat capable of carrying large amounts of cargo over long distances, while still packing a punch.</description>
@@ -203,7 +219,7 @@
 		</graphicData>
 		
 		<statBases>
-			<MaxHitPoints>13500</MaxHitPoints>
+			<MaxHitPoints>135</MaxHitPoints> <!-- 13500 -->
 			<WorkToBuild>225000</WorkToBuild>
 			<Flammability>0.15</Flammability>
 		</statBases>
@@ -228,9 +244,13 @@
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
 		</modExtensions>
+		
+		<comps>
+			<li Class="RimShips.CompProperties_SavePawnReference"/>
+		</comps>
 	</ThingDef>
 	
-	<ThingDef ParentName="UnreleasedBoatBase">
+	<ThingDef ParentName="BoatBase">
 		<defName>SPBoats_DreadnoughtBlueprint</defName>
 		<label>Dreadnought</label>
 		<description>A heavy warship to rule the seas.</description>
@@ -266,5 +286,9 @@
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
 		</modExtensions>
+		
+		<comps>
+			<li Class="RimShips.CompProperties_SavePawnReference"/>
+		</comps>
 	</ThingDef>
 </Defs>

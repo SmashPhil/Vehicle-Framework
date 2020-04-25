@@ -170,7 +170,7 @@
 				<shipTech>Industrial</shipTech>
 				<nameable>true</nameable>
 				<buildDef>SPBoats_PaddleSteamerBlueprint</buildDef>
-				<ticksBetweenRepair>500</ticksBetweenRepair>
+				<ticksBetweenRepair>1</ticksBetweenRepair> <!-- CHANGE TO 500 -->
 				
 				<armor>20</armor>
 				<cargoCapacity>1500</cargoCapacity>

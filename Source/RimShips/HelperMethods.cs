@@ -549,37 +549,38 @@ namespace RimShips
         #endregion
 
         #region CaravanFormation
-            public static bool CanSetSail(List<Pawn> caravan)
+        public static bool CanSetSail(List<Pawn> caravan)
+        {
+            int seats = 0;
+            int pawns = 0;
+            int prereq = 0;
+            bool flag = caravan.Any(x => x.GetComp<CompShips>() != null); //Ships or No Ships
+            if (flag)
             {
-                int seats = 0;
-                int pawns = 0;
-                int prereq = 0;
-                bool flag = caravan.Any(x => !(x.GetComp<CompShips>() is null)); //Ships or No Ships
-                if (flag)
+                foreach (Pawn p in caravan)
                 {
-                    foreach (Pawn p in caravan)
+                    if (IsShip(p))
                     {
-                        if (IsShip(p))
-                        {
-                            seats += p.GetComp<CompShips>().SeatsAvailable;
-                            prereq += p.GetComp<CompShips>().PawnCountToOperate - p.GetComp<CompShips>().AllCrewAboard.Count;
-                        }
-                        else if (p.IsColonistPlayerControlled && !p.Downed && !p.Dead)
-                        {
-                            pawns++;
-                        }
+                        seats += p.GetComp<CompShips>().SeatsAvailable;
+                        prereq += p.GetComp<CompShips>().PawnCountToOperate - p.GetComp<CompShips>().AllCrewAboard.Count;
+                    }
+                    else if (p.IsColonistPlayerControlled && !p.Downed && !p.Dead)
+                    {
+                        pawns++;
                     }
                 }
-                bool flag2 = flag ? pawns > seats : false; //Not Enough Room
-                bool flag3 = flag ? pawns < prereq : false; //Not Enough Pawns to Sail
-                if (flag2)
-                    Messages.Message("CaravanMustHaveEnoughSpaceOnShip".Translate(), MessageTypeDefOf.RejectInput, false);
-                if (!caravan.Any(x => CaravanUtility.IsOwner(x, Faction.OfPlayer) && !x.Downed))
-                    Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, false);
-                if (flag3)
-                    Messages.Message("CaravanMustHaveEnoughPawnsToOperate".Translate(prereq), MessageTypeDefOf.RejectInput, false);
-                return !flag2 && !flag3;
             }
+            Log.Message("CHECKING");
+            bool flag2 = flag ? pawns > seats : false; //Not Enough Room
+            bool flag3 = flag ? pawns < prereq : false; //Not Enough Pawns to Sail
+            if (flag2)
+                Messages.Message("CaravanMustHaveEnoughSpaceOnShip".Translate(), MessageTypeDefOf.RejectInput, false);
+            if (!caravan.Any(x => CaravanUtility.IsOwner(x, Faction.OfPlayer) && !x.Downed))
+                Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, false);
+            if (flag3)
+                Messages.Message("CaravanMustHaveEnoughPawnsToOperate".Translate(prereq), MessageTypeDefOf.RejectInput, false);
+            return !flag2 && !flag3;
+        }
         #endregion
 
         #region GetData
@@ -778,18 +779,18 @@ namespace RimShips
         #endregion
 
         #region Selector
-        public static void MultiSelectClicker(List<object> selectedObjects)
+        public static bool MultiSelectClicker(List<object> selectedObjects)
         {
             if (!selectedObjects.All(x => x is Pawn))
-                return;
+                return false;
             List<Pawn> selPawns = new List<Pawn>();
             foreach(object o in selectedObjects)
             {
                 if(o is Pawn)
                     selPawns.Add(o as Pawn);
             }
-            if (selPawns.Any(x => x.Drafted || x.Faction != Faction.OfPlayer || IsShip(x)))
-                return;
+            if (selPawns.Any(x => x.Faction != Faction.OfPlayer || IsShip(x)))
+                return false;
             IntVec3 mousePos = Verse.UI.MouseMapPosition().ToIntVec3();
             if (selectedObjects.Count > 1 && selectedObjects.All(x => x is Pawn))
             {
@@ -798,10 +799,11 @@ namespace RimShips
                     if (IsShip(thing))
                     {
                         (thing as Pawn).GetComp<CompShips>().MultiplePawnFloatMenuOptions(selPawns);
-                        return;
+                        return true;
                     }
                 }
             }
+            return false;
         }
         #endregion
 
@@ -814,12 +816,12 @@ namespace RimShips
                 case 1:
                     if(shipComp.Angle == 45)
                     {
-                        SPTuples.SPTuple2<float,float> rotatedOffset = SPTrig.RotatePointClockwise(yOffset, -xOffset, 45f);
+                        SPTuple2<float,float> rotatedOffset = SPTrig.RotatePointClockwise(yOffset, -xOffset, 45f);
                         return new Pair<float, float>(rotatedOffset.First, rotatedOffset.Second);
                     }
                     else if(shipComp.Angle == -45)
                     {
-                        SPTuples.SPTuple2<float,float> rotatedOffset = SPTrig.RotatePointCounterClockwise(yOffset, -xOffset, 45f);
+                        SPTuple2<float,float> rotatedOffset = SPTrig.RotatePointCounterClockwise(yOffset, -xOffset, 45f);
                         return new Pair<float, float>(rotatedOffset.First, rotatedOffset.Second);
                     }
                     return new Pair<float, float>(yOffset, -xOffset);
@@ -832,12 +834,12 @@ namespace RimShips
                     {
                         if(shipComp.Angle == 45)
                         {
-                            SPTuples.SPTuple2<float,float> rotatedOffset = SPTrig.RotatePointClockwise(-yOffset, xOffset, 45f);
+                            SPTuple2<float,float> rotatedOffset = SPTrig.RotatePointClockwise(-yOffset, xOffset, 45f);
                             return new Pair<float, float>(rotatedOffset.First, rotatedOffset.Second);
                         }
                         else if(shipComp.Angle == -45)
                         {
-                            SPTuples.SPTuple2<float,float> rotatedOffset = SPTrig.RotatePointCounterClockwise(-yOffset, xOffset, 45f);
+                            SPTuple2<float,float> rotatedOffset = SPTrig.RotatePointCounterClockwise(-yOffset, xOffset, 45f);
                             return new Pair<float, float>(rotatedOffset.First, rotatedOffset.Second);
                         }
                     }

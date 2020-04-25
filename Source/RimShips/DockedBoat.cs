@@ -9,7 +9,6 @@ using UnityEngine;
 
 namespace RimShips
 {
-    [HasDebugOutput]
     public class DockedBoat : WorldObject, IThingHolder, ILoadReferenceable
     {
         public override Material Material

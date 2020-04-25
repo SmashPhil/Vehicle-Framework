@@ -157,8 +157,8 @@ namespace SPExtended
             IntVec2 mapSize = new IntVec2(map.Size.x, map.Size.z);
             IntVec2 position = new IntVec2(pawn.Position.x, pawn.Position.z);
 
-            SPTuples.SPTuple2<Rot4, int> hDistance = Math.Abs(position.x) < Math.Abs(position.x - mapSize.x) ? new SPTuples.SPTuple2<Rot4, int>(Rot4.West, position.x) : new SPTuples.SPTuple2<Rot4, int>(Rot4.East, Math.Abs(position.x - mapSize.x));
-            SPTuples.SPTuple2<Rot4, int> vDistance = Math.Abs(position.z) < Math.Abs(position.z - mapSize.z) ? new SPTuples.SPTuple2<Rot4, int>(Rot4.South, position.z) : new SPTuples.SPTuple2<Rot4, int>(Rot4.North, Math.Abs(position.z - mapSize.z));
+            SPTuple2<Rot4, int> hDistance = Math.Abs(position.x) < Math.Abs(position.x - mapSize.x) ? new SPTuple2<Rot4, int>(Rot4.West, position.x) : new SPTuple2<Rot4, int>(Rot4.East, Math.Abs(position.x - mapSize.x));
+            SPTuple2<Rot4, int> vDistance = Math.Abs(position.z) < Math.Abs(position.z - mapSize.z) ? new SPTuple2<Rot4, int>(Rot4.South, position.z) : new SPTuple2<Rot4, int>(Rot4.North, Math.Abs(position.z - mapSize.z));
 
             return hDistance.Second <= vDistance.Second ? hDistance.First : vDistance.First;
         }
@@ -215,7 +215,7 @@ namespace SPExtended
                     {
                         float xPos = bracketLocs[i].x - worldPos.x;
                         float yPos = bracketLocs[i].z - worldPos.z;
-                        SPTuples.SPTuple2<float, float> newPos = SPTrig.RotatePointClockwise(xPos, yPos, 45f);
+                        SPTuple2<float, float> newPos = SPTrig.RotatePointClockwise(xPos, yPos, 45f);
                         bracketLocs[i].x = newPos.First + worldPos.x;
                         bracketLocs[i].z = newPos.Second + worldPos.z;
                     }
@@ -225,7 +225,7 @@ namespace SPExtended
                     {
                         float xPos = bracketLocs[i].x - worldPos.x;
                         float yPos = bracketLocs[i].z - worldPos.z;
-                        SPTuples.SPTuple2<float, float> newPos = SPTrig.RotatePointCounterClockwise(xPos, yPos, 45f);
+                        SPTuple2<float, float> newPos = SPTrig.RotatePointCounterClockwise(xPos, yPos, 45f);
                         bracketLocs[i].x = newPos.First + worldPos.x;
                         bracketLocs[i].z = newPos.Second + worldPos.z;
                     }

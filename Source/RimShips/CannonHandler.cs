@@ -18,11 +18,11 @@ namespace RimShips
             this.pawn = pawn;
             uniqueID = Find.UniqueIDsManager.GetNextThingID();
             cannonDef = reference.cannonDef;
-            Log.Message("ID: " + uniqueID);
 
             cannonSize = reference.cannonSize;
             cannonRenderOffset = reference.cannonRenderOffset;
             cannonRenderLocation = reference.cannonRenderLocation;
+            defaultAngleRotated = reference.defaultAngleRotated;
 
             aimPieOffset = reference.aimPieOffset;
             angleRestricted = reference.angleRestricted;
@@ -33,6 +33,7 @@ namespace RimShips
 
             cannonTurretDrawSize = reference.cannonTurretDrawSize;
             baseCannonDrawSize = reference.baseCannonDrawSize;
+            drawLayer = reference.drawLayer;
 
             if (cannonDef.splitCannonGroups)
             {
@@ -80,6 +81,8 @@ namespace RimShips
             Scribe_Values.Look(ref cannonTurretDrawSize, "cannonTurretDrawSize");
             Scribe_Values.Look(ref baseCannonDrawSize, "baseCannonDrawSize");
 
+             Scribe_Values.Look(ref drawLayer, "drawLayer");
+
             Scribe_References.Look(ref pawn, "pawn");
 
             Scribe_Collections.Look(ref cannonGroupDict, "cannonGroupDict");
@@ -98,7 +101,6 @@ namespace RimShips
 
         public void DoTick()
         {
-            Log.Message("PAWN: " + this.pawn?.thingIDNumber);
             if (cooldownTicks > 0)
             {
                 cooldownTicks--;
@@ -124,7 +126,7 @@ namespace RimShips
                     }
                     else if(cooldownTicks <= 0)
                     {
-                        CompCannon.multiFireCannon.Add(new SPTuples.SPTuple<int, CannonHandler, int>(cannonDef.numberOfShots, this, 0));
+                        CompCannon.multiFireCannon.Add(new SPTuple<int, CannonHandler, SPTuple2<int,int>>(cannonDef.numberOfShots, this, new SPTuple2<int,int>(0, 0)));
                         ActivateTimer();
                     }
                 }
@@ -188,12 +190,36 @@ namespace RimShips
             }
         }
 
+        public Graphic CannonGraphic
+        {
+            get
+            {
+                if (cannonDef.cannonTexPath.NullOrEmpty())
+                    return null;
+                if (cannonGraphic is null)
+                    cannonGraphic = GraphicDatabase.Get<Graphic_Multi>(cannonDef.cannonTexPath, ShaderDatabase.DefaultShader, cannonTurretDrawSize, Color.white);
+                return cannonGraphic;
+            }
+        }
+
+        public Graphic CannonBaseGraphic
+        {
+            get
+            {
+                if (cannonDef.baseCannonTexPath.NullOrEmpty())
+                    return null;
+                if (baseCannonGraphic is null)
+                    baseCannonGraphic = GraphicDatabase.Get<Graphic_Multi>(cannonDef.baseCannonTexPath, ShaderDatabase.DefaultShader);
+                return baseCannonGraphic;
+            }
+        }
+
         public Vector3 TurretLocation
         {
             get
             {
                 Pair<float, float> turretLoc = HelperMethods.ShipDrawOffset(CompShip, cannonRenderLocation.x, cannonRenderLocation.y);
-                return new Vector3(pawn.DrawPos.x + turretLoc.First, pawn.DrawPos.y, pawn.DrawPos.z + turretLoc.Second);
+                return new Vector3(pawn.DrawPos.x + turretLoc.First, pawn.DrawPos.y + drawLayer, pawn.DrawPos.z + turretLoc.Second);
             }
         }
 
@@ -202,7 +228,7 @@ namespace RimShips
             get
             {
                 Pair<float, float> turretLoc = HelperMethods.ShipDrawOffset(CompShip, cannonRenderLocation.x + cannonRenderOffset.x, cannonRenderLocation.y + cannonRenderOffset.y);
-                return new Vector3(pawn.DrawPos.x + turretLoc.First, pawn.DrawPos.y, pawn.DrawPos.z + turretLoc.Second).RotatedBy(currentRotation);
+                return new Vector3(pawn.DrawPos.x + turretLoc.First, pawn.DrawPos.y + drawLayer, pawn.DrawPos.z + turretLoc.Second).RotatedBy(currentRotation);
             }
         }
 
@@ -211,7 +237,7 @@ namespace RimShips
             get
             {
                 float trueRotation = currentRotation;
-                if(!cannonTarget.IsValid && HelperMethods.CannonTargeter.cannon != this && LockedStatusRotation)
+                if(HelperMethods.CannonTargeter.cannon != this && !cannonTarget.IsValid)
                 {
                     trueRotation -= 90 * pawn.Rotation.AsInt + CompShip.Angle;
                 }
@@ -228,18 +254,33 @@ namespace RimShips
         {
             if(angleRestricted == Vector2.zero)
                 return true;
-            float rotationOffset = pawn.Rotation.AsInt * 90;
+
+            float rotationOffset = pawn.Rotation.AsInt * 90 + pawn.GetComp<CompShips>().Angle;
+            
             float start = angleRestricted.x + rotationOffset;
             float end = angleRestricted.y + rotationOffset;
+
             if (start > 360)
                 start -= 360;
             if(end > 360)
                 end -= 360;
-            Log.Message($"RotationOffset: {rotationOffset} Start: {start} End: {end}");
+
             float mid = (mousePosition - TurretLocation).AngleFlat();
             end = (end - start) < 0f ? end - start + 360 : end - start;
             mid = (mid - start) < 0f ? mid - start + 360 : mid - start;
             return mid < end;
+        }
+
+        public void AlignToAngleRestricted(float angle, Vector3 mousePos)
+        {
+            int? sign = AngleDirectionalRestricted(angle, mousePos);
+            currentRotation = angle; // CHANGE LATER
+        }
+
+        private int? AngleDirectionalRestricted(float angle, Vector3 mousePos)
+        {
+            //REDO LATER
+            return null;
         }
 
         public float MaxRange
@@ -281,7 +322,7 @@ namespace RimShips
 
         public void ValidateLockStatus()
         {
-            if (parentRotCached != pawn.Rotation)
+            if(parentRotCached != pawn.Rotation)
             {
                 parentRotCached = pawn.Rotation;
                 if(!cannonTarget.IsValid && HelperMethods.CannonTargeter.cannon != this)
@@ -293,11 +334,6 @@ namespace RimShips
 
         public string GetUniqueLoadID()
         {
-            if(uniqueID < 0)
-            {
-                Log.Message("Finding New ID : " + cannonDef?.label);
-                uniqueID = Find.UniqueIDsManager.GetNextThingID();
-            }
             return "CannonHandlerGroup_" + uniqueID;
         }
 
@@ -311,6 +347,9 @@ namespace RimShips
 
         private Texture2D cannonTex;
         private Texture2D cannonBaseTex;
+
+        private Graphic cannonGraphic;
+        private Graphic baseCannonGraphic;
 
         public CannonDef cannonDef;
 
@@ -332,7 +371,7 @@ namespace RimShips
         public float defaultAngleRotated = 0f;
 
         public LocalTargetInfo cannonTarget;
-        public int drawLayer = 0;
+        public int drawLayer = 1;
 
         public int PrefireTickCount { get; private set; }
 

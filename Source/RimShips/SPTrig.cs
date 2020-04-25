@@ -15,12 +15,12 @@ namespace SPExtended
         /// <param name="y"></param>
         /// <param name="theta"></param>
         /// <returns></returns>
-        public static SPTuples.SPTuple2<float, float> RotatePointClockwise(float x, float y, float theta)
+        public static SPTuple2<float, float> RotatePointClockwise(float x, float y, float theta)
         {
             theta = -theta;
             float xPrime = (float)(x * Math.Cos(theta.DegreesToRadians())) - (float)(y * Math.Sin(theta.DegreesToRadians()));
             float yPrime = (float)(x * Math.Sin(theta.DegreesToRadians())) + (float)(y * Math.Cos(theta.DegreesToRadians()));
-            return new SPTuples.SPTuple2<float, float>(xPrime, yPrime);
+            return new SPTuple2<float, float>(xPrime, yPrime);
         }
 
         /// <summary>
@@ -30,11 +30,11 @@ namespace SPExtended
         /// <param name="y"></param>
         /// <param name="theta"></param>
         /// <returns></returns>
-        public static SPTuples.SPTuple2<float, float> RotatePointCounterClockwise(float x, float y, float theta)
+        public static SPTuple2<float, float> RotatePointCounterClockwise(float x, float y, float theta)
         {
             float xPrime = (float)(x * Math.Cos(theta.DegreesToRadians())) - (float)(y * Math.Sin(theta.DegreesToRadians()));
             float yPrime = (float)(x * Math.Sin(theta.DegreesToRadians())) + (float)(y * Math.Cos(theta.DegreesToRadians()));
-            return new SPTuples.SPTuple2<float, float>(xPrime, yPrime);
+            return new SPTuple2<float, float>(xPrime, yPrime);
         }
 
         /// <summary>

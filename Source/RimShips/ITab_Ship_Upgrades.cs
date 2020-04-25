@@ -102,7 +102,7 @@ namespace RimShips.UI
                     SoundDefOf.ExecuteTrade.PlayOneShotOnCamera(SelPawnUpgrade.Map);
                     SoundDefOf.Building_Complete.PlayOneShot(SelPawnUpgrade);
 
-                    Comp.nodeUnlocking = selectedNode;
+                    Comp.StartUnlock(selectedNode);
                     selectedNode = null;
                 }
                 else

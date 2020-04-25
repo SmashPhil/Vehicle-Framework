@@ -251,6 +251,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(typeof(Dialog_FormCaravan), "DoBottomButtons"), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(DoBottomButtonsTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(Dialog_FormCaravan), "CheckForErrors"),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(CheckBoatCrewRequirements)));
             harmony.Patch(original: AccessTools.Method(typeof(CaravanUIUtility), nameof(CaravanUIUtility.AddPawnsSections)), prefix: null,
                 postfix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(AddShipsSections)));
@@ -406,9 +409,9 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Property(typeof(MapPawns), nameof(MapPawns.FreeColonistsSpawnedOrInPlayerEjectablePodsCount)).GetGetMethod(), prefix: null,
                 postfix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(FreeColonistsInShipsTransport)));
-            harmony.Patch(original: AccessTools.Method(typeof(Selector), "HandleMapClicks"), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(typeof(ShipHarmony),
-                nameof(MultiSelectFloatMenuTranspiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(Selector), "HandleMapClicks"),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(MultiSelectFloatMenu)));
             harmony.Patch(original: AccessTools.Method(typeof(MentalState_Manhunter), nameof(MentalState_Manhunter.ForceHostileTo), new Type[] { typeof(Thing) }), prefix: null,
                 postfix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(ManhunterDontAttackBoats)));
@@ -714,6 +717,11 @@ namespace RimShips
                 if(flag)
                 {
                     __instance.DropAndForbidEverything(false);
+                }
+
+                if(thing.TryGetComp<CompSavePawnReference>() != null)
+                {
+                    thing.TryGetComp<CompSavePawnReference>().pawnReference = __instance;
                 }
 
                 __instance.meleeVerbs.Notify_PawnKilled();
@@ -2340,6 +2348,16 @@ namespace RimShips
             }
         }
 
+        public static bool CheckBoatCrewRequirements(List<Pawn> pawns, ref bool __result)
+        {
+            if(HelperMethods.HasShip(pawns))
+            {
+                __result = HelperMethods.CanSetSail(pawns);
+                return __result;
+            }
+            return true;
+        }
+
         public static bool CapacityWithShip(List<ThingCount> thingCounts, ref float __result, StringBuilder explanation = null)
         {
             if(thingCounts.Any(x => HelperMethods.IsShip(x.Thing as Pawn)))
@@ -3740,7 +3758,19 @@ namespace RimShips
             {
                 if (b.HitPoints < b.MaxHitPoints)
                     return true;
-                Pawn ship = PawnGenerator.GeneratePawn(b.def.GetModExtension<SpawnThingBuilt>().thingToSpawn);
+
+                Pawn ship;
+                if(b.TryGetComp<CompSavePawnReference>()?.pawnReference != null)
+                {
+                    ship = b.GetComp<CompSavePawnReference>().pawnReference;
+                    ship.health.Reset();
+                }
+                else
+                {
+                    ship = PawnGenerator.GeneratePawn(b.def.GetModExtension<SpawnThingBuilt>().thingToSpawn);
+
+                }
+                
                 Map map = b.Map;
                 IntVec3 position = b.Position;
                 Rot4 rotation = b.Rotation;
@@ -3750,8 +3780,12 @@ namespace RimShips
                 {
                     b.def.GetModExtension<SpawnThingBuilt>().soundFinished.PlayOneShot(new TargetInfo(position, map, false));
                 }
-                ship.SetFaction(b.Faction);
+                if(ship.Faction != Faction.OfPlayer)
+                {
+                    ship.SetFaction(Faction.OfPlayer);
+                }
                 b.Destroy(DestroyMode.Vanish);
+                ship.ForceSetStateToUnspawned();
                 GenSpawn.Spawn(ship, position, map, rotation, WipeMode.FullRefund, false);
                 return false;
             }
@@ -3791,22 +3825,19 @@ namespace RimShips
             }
         }
 
-        public static IEnumerable<CodeInstruction> MultiSelectFloatMenuTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+        public static bool MultiSelectFloatMenu(List<object> ___selected)
         {
-            List<CodeInstruction> instructionList = instructions.ToList();
-
-            for (int i = 0; i < instructionList.Count; i++)
+            if(Event.current.type == EventType.MouseDown)
             {
-                CodeInstruction instruction = instructionList[i];
-
-                if(instruction.opcode == OpCodes.Ble_S)
+                if(Event.current.button == 1 && ___selected.Count > 0)
                 {
-                    yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(typeof(Selector), "selected"));
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.MultiSelectClicker)));
+                    if(___selected.Count > 1)
+                    {
+                        return !HelperMethods.MultiSelectClicker(___selected);
+                    }
                 }
-                yield return instruction;
             }
+            return true;
         }
 
         public static void SituationBoardedShip(Pawn p, ref WorldPawnSituation __result, WorldPawns __instance)

@@ -39,7 +39,31 @@ namespace RimShips
 
         public string upgradeTime;
 
-        public int upgradeTicksLeft;
+        public int upgradeTicksLeft; //Uninitialized
+
+        public UpgradeNode()
+        {
+        }
+
+        public UpgradeNode(UpgradeNode reference)
+        {
+            nodeID = Find.UniqueIDsManager.GetNextThingID();
+
+            label = reference.label;
+            upgradeID = reference.upgradeID;
+            rootNodeLabel = reference.rootNodeLabel;
+            informationHighlighted = reference.informationHighlighted;
+            disableIfUpgradeNodeEnabled = reference.disableIfUpgradeNodeEnabled;
+            upgradeCategory = reference.upgradeCategory;
+            values = reference.values;
+            cannonsUnlocked = reference.cannonsUnlocked;
+            cost = reference.cost;
+            researchPrerequisites = reference.researchPrerequisites;
+            prerequisiteNodes = reference.prerequisiteNodes;
+            imageFilePath = reference.imageFilePath;
+            gridCoordinate = reference.gridCoordinate;
+            upgradeTime = reference.upgradeTime;
+        }
 
         public int UpgradeTimeParsed
         {
@@ -101,12 +125,24 @@ namespace RimShips
         {
             if (values is null)
                 values = new Dictionary<StatUpgrade, float>();
+
             if(cannonsUnlocked is null)
                 cannonsUnlocked = new List<CannonHandler>();
+
+            foreach(CannonHandler cannon in cannonsUnlocked)
+            {
+                if(cannon.uniqueID < 0)
+                {
+                    cannon.uniqueID = Find.UniqueIDsManager.GetNextThingID();
+                }
+            }
+
             if(cost is null)
                 cost = new Dictionary<ThingDef,int>();
+
             if(researchPrerequisites is null)
                 researchPrerequisites = new List<ResearchProjectDef>();
+
             if(prerequisiteNodes is null)
                 prerequisiteNodes = new List<string>();
         }
@@ -138,7 +174,7 @@ namespace RimShips
 
         public string GetUniqueLoadID()
         {
-            return $"UpgradeNode_{upgradeID}{nodeID}";
+            return $"UpgradeNode_{upgradeID}-{nodeID}";
         }
 
         public void ExposeData()
@@ -157,6 +193,7 @@ namespace RimShips
             Scribe_Collections.Look<StatUpgrade, float>(ref values, "values", LookMode.Value, LookMode.Value);
 
             Scribe_Collections.Look(ref researchPrerequisites, "researchPrerequisites", LookMode.Def);
+            
             Scribe_Collections.Look(ref cannonsUnlocked, "cannonsUnlocked", LookMode.Deep);
 
             Scribe_Collections.Look(ref prerequisiteNodes, "prerequisiteNodes", LookMode.Value);

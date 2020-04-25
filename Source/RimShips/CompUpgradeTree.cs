@@ -42,7 +42,7 @@ namespace RimShips
 
         public void StartUnlock(UpgradeNode node)
         {
-            nodeUnlocking = node;
+            nodeUnlocking = upgradeList.Find(x => x.upgradeID == node.upgradeID);
             nodeUnlocking.ResetTimer();
         }
 
@@ -85,8 +85,7 @@ namespace RimShips
             try
             {
                 Pawn.GetComp<CompCannons>().AddCannons(nodeUnlocking.cannonsUnlocked);
-                upgradeList.Find(x => x.upgradeID == nodeUnlocking.upgradeID).upgradeActive = true;
-                nodeUnlocking = null;
+                nodeUnlocking.upgradeActive = true;
             }
             catch(Exception ex)
             {
@@ -94,7 +93,6 @@ namespace RimShips
                 return false;
             }
             Pawn.GetComp<CompShips>().Props.buildDef.GetModExtension<SpawnThingBuilt>().soundFinished?.PlayOneShot(new TargetInfo(Pawn.Position, Pawn.Map, false));
-            Log.Message("UNLOCKED : " + Pawn.thingIDNumber);
             return true;
         }
 
@@ -106,14 +104,23 @@ namespace RimShips
                 upgradeList = new List<UpgradeNode>();
                 foreach(UpgradeNode node in Props.upgradesAvailable)
                 {
-                    node.nodeID = parent.thingIDNumber;
-                    node.InitializeLists();
-                    upgradeList.Add(node);
+                    UpgradeNode permanentNode = new UpgradeNode(node);
+                    permanentNode.InitializeLists();
+                    upgradeList.Add(permanentNode);
                 }
 
                 if(upgradeList.Select(x => x.upgradeID).GroupBy(y => y).Where(y => y.Count() > 1).Select(z => z.Key).Any())
                 {
-                    Log.Error(string.Format("Duplicate UpgradeID detected on def {0}. This is not supported.", parent.def.defName));
+                    Log.Error(string.Format("Duplicate UpgradeID's detected on def {0}. This is not supported.", parent.def.defName));
+                    if(Prefs.DevMode)
+                    {
+                        Log.Message("====== Duplicate UpgradeID's for this Boat ======");
+                        foreach(UpgradeNode errorNode in upgradeList.GroupBy(grp => grp).SelectMany(n => n.Skip(1)))
+                        {
+                            Log.Message($"UpgradeID: {errorNode.upgradeID} UniqueID: {errorNode.GetUniqueLoadID()} Location: {errorNode.gridCoordinate}");
+                        }
+                        Log.Message("===========================================");
+                    }
                 }
             }
         }
@@ -121,7 +128,7 @@ namespace RimShips
         public override void CompTick()
         {
             base.CompTick();
-            if(nodeUnlocking != null)
+            if(nodeUnlocking != null && !nodeUnlocking.upgradeActive)
             {
                 nodeUnlocking.upgradeTicksLeft--;
                 if(nodeUnlocking.upgradeTicksLeft <= 0)

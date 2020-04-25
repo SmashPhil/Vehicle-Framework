@@ -6,7 +6,7 @@
 		<label>Bow</label>
 		<weaponType>Rotatable</weaponType>
 		<weaponLocation>Turret</weaponLocation>
-		<projectile>Rotating_PirateCannon_cannonball</projectile>
+		<projectile>MarkX_Mk6A</projectile>
 		<moteCannon>Mote_CannonSmoke</moteCannon>
 		<moteFlash>Mote_CannonFlash</moteFlash>
 		<cannonSound>Explosion_PirateCannon</cannonSound>
@@ -28,7 +28,7 @@
 		<label>Bow</label>
 		<weaponType>Rotatable</weaponType>
 		<weaponLocation>Turret</weaponLocation>
-		<projectile>Rotating_PirateCannon_cannonball</projectile>
+		<projectile>MarkX_Mk6A</projectile>
 		<moteCannon>Mote_CannonSmoke</moteCannon>
 		<moteFlash>Mote_CannonFlash</moteFlash>
 		<cannonSound>Explosion_PirateCannon</cannonSound>
@@ -40,6 +40,10 @@
 		<baseCannonTexPath>Ships/paddlesteamer/Cannons/SwivelCannonBase</baseCannonTexPath>
 
 		<projectileOffset>2.6</projectileOffset>
+		<projectileShifting>
+			<li>0.25</li>
+			<li>-0.25</li>
+		</projectileShifting>
 		<hitFlags>IntendedTarget</hitFlags>
 		<spreadRadius>2</spreadRadius>
 		<minRange>15</minRange>

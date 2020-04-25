@@ -100,7 +100,7 @@ namespace RimShips
                 if (TargetMeetsRequirements(cannon, CurrentTargetUnderMouse()))
                 {
                     GenDraw.DrawTargetHighlight(CurrentTargetUnderMouse());
-                    cannon.currentRotation = (float)cannon.TurretLocation.ToIntVec3().AngleToPoint(CurrentTargetUnderMouse().Cell, map);
+                    cannon.AlignToAngleRestricted((float)cannon.TurretLocation.ToIntVec3().AngleToPoint(CurrentTargetUnderMouse().Cell, map), CurrentTargetUnderMouse().CenterVector3);
                 }
 
                 GenDraw.DrawRadiusRing(cannon.TurretLocation.ToIntVec3(), cannon.cannonDef.minRange, Color.red);

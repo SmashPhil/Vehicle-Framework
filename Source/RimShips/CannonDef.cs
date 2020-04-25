@@ -21,6 +21,8 @@ namespace RimShips
         public List<float> centerPoints = new List<float>();
         public List<int> cannonsPerPoint = new List<int>();
 
+        public List<float> projectileShifting = new List<float>();
+
         [DefaultValue(ProjectileHitFlags.All)]
         public ProjectileHitFlags hitFlags;
 
