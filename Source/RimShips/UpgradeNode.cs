@@ -100,6 +100,8 @@ namespace RimShips
 
         public bool upgradeActive;
 
+        public bool upgradePurchased;
+
         public int nodeID;
 
         private Texture2D upgradeImage;
@@ -188,6 +190,7 @@ namespace RimShips
             Scribe_Values.Look(ref upgradeTicksLeft, "upgradeTicksLeft");
 
             Scribe_Values.Look(ref upgradeActive, "upgradeActive");
+            Scribe_Values.Look(ref upgradePurchased, "upgradePurchased");
 
             Scribe_Collections.Look<ThingDef, int>(ref cost, "cost", LookMode.Def, LookMode.Value);
             Scribe_Collections.Look<StatUpgrade, float>(ref values, "values", LookMode.Value, LookMode.Value);

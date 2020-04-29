@@ -1,19 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <Defs>
+	<ThingDef ParentName="MakeableShellBase">
+    <defName>MarkX_Mk6A_Shell</defName>
+    <label>Mk6A</label>
+    <description>Mk6A Capped Common-Pointed shell filled Shellite 70/30</description>
+    <graphicData>
+      <texPath>Projectiles/Shells/Mk6A_Shell</texPath>
+      <graphicClass>Graphic_StackCount</graphicClass>
+    </graphicData>
+    <comps>
+      <li Class="CompProperties_Explosive">
+        <explosiveRadius>3</explosiveRadius>
+        <explosiveDamageType>Bomb</explosiveDamageType>
+        <explosiveExpandPerStackcount>0.4</explosiveExpandPerStackcount>
+        <startWickHitPointsPercent>0.7</startWickHitPointsPercent>
+        <wickTicks>30~60</wickTicks>
+      </li>
+    </comps>
+    <projectileWhenLoaded>MarkX_Mk6A</projectileWhenLoaded>
+    <costList>
+      <Steel>45</Steel>
+      <Chemfuel>30</Chemfuel>
+    </costList>
+    <recipeMaker>
+      <researchPrerequisite>Mortars</researchPrerequisite>
+    </recipeMaker>
+  </ThingDef>
+
 	<ThingDef ParentName="BaseBullet">
 		<defName>MarkX_Mk6A</defName>
-		<label>Mk 6A</label>
+		<label>Mk6A</label>
 		<graphicData>
-			<texPath>Projectiles/Mk6A</texPath>
+			<texPath>Projectiles/Shells/Projectile/Mk6A_projectile</texPath>
 			<graphicClass>Graphic_Single</graphicClass>
 			<shaderType>TransparentPostLight</shaderType>
-			<drawSize>(0.8,0.8)</drawSize>
+			<drawSize>(0.3, 1.2)</drawSize>
 		</graphicData>
 		<thingClass>Projectile_Explosive</thingClass>
 		<projectile>
 			<damageDef>MarkX_Mk6A_Damage</damageDef>
-			<speed>120</speed>
+			<speed>150</speed>
+			<explosionRadius>4</explosionRadius>
+			<flyOverhead>false</flyOverhead>
+			<soundHitThickRoof>Artillery_HitThickRoof</soundHitThickRoof>
+			<soundExplode>MortarBomb_Explode</soundExplode>
+			<soundAmbient>MortarRound_Ambient</soundAmbient>
+		</projectile>
+	</ThingDef>
+	
+	
+	<ThingDef ParentName="MakeableShellBase">
+    <defName>MarkX_MkXA_Shell</defName>
+    <label>MkXA</label>
+    <description>MkXA Capped Armor-Piercing shell filled with TNT</description>
+    <graphicData>
+      <texPath>Projectiles/Shells/MkXA_Shell</texPath>
+      <graphicClass>Graphic_StackCount</graphicClass>
+    </graphicData>
+    <comps>
+      <li Class="CompProperties_Explosive">
+        <explosiveRadius>4</explosiveRadius>
+        <explosiveDamageType>Bomb</explosiveDamageType>
+        <explosiveExpandPerStackcount>0.5</explosiveExpandPerStackcount>
+        <startWickHitPointsPercent>0.7</startWickHitPointsPercent>
+        <wickTicks>30~60</wickTicks>
+      </li>
+    </comps>
+    <projectileWhenLoaded>MarkX_MkXA</projectileWhenLoaded>
+    <costList>
+      <Steel>55</Steel>
+      <Chemfuel>20</Chemfuel>
+    </costList>
+    <recipeMaker>
+      <researchPrerequisite>Mortars</researchPrerequisite>
+    </recipeMaker>
+  </ThingDef>
+
+	<ThingDef ParentName="BaseBullet">
+		<defName>MarkX_MkXA</defName>
+		<label>Mk XA</label>
+		<graphicData>
+			<texPath>Projectiles/Shells/Projectile/MkXA_projectile</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+			<shaderType>TransparentPostLight</shaderType>
+			<drawSize>(0.3, 1.2)</drawSize>
+		</graphicData>
+		<thingClass>Projectile_Explosive</thingClass>
+		<projectile>
+			<damageDef>MarkX_MkXA_Damage</damageDef>
+			<speed>150</speed>
 			<explosionRadius>4</explosionRadius>
 			<flyOverhead>false</flyOverhead>
 			<soundHitThickRoof>Artillery_HitThickRoof</soundHitThickRoof>

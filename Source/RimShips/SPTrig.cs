@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Verse;
+using UnityEngine;
 
 namespace SPExtended
 {
@@ -116,6 +117,50 @@ namespace SPExtended
                     return 180 - angle;
             }
             return angle;
+        }
+
+        /// <summary>
+        /// Calculate bearing angle between 2 points : -180 -> 0 <- 180
+        /// </summary>
+        /// <param name="pos1"></param>
+        /// <param name="pos2"></param>
+        /// <returns></returns>
+        public static double Angle180RotationTracker(this Vector3 pos1, Vector3 pos2)
+        {
+            //θ = atan2(b1−a1,b2−a2) ∈ (−π,π]
+            if(pos1.x == pos2.x && pos1.z == pos2.z)
+                return 0;
+            double θ = Math.Atan2(pos2.x - pos1.x, pos2.z - pos1.z).RadiansToDegrees();
+            if (θ < 0)
+                θ += 360;
+            if (θ > 180)
+                θ = -(360 - θ);
+            return θ;
+        }
+
+        /// <summary>
+        /// Convert bearing angle to absolute angle : 0 -> 360
+        /// </summary>
+        /// <param name="angle"></param>
+        /// <returns></returns>
+        public static float BearingToAbsoluteAngle(float angle)
+        {
+            if (angle < 0)
+                angle = 360 + angle;
+            return angle;
+        }
+
+        /// <summary>
+        /// Take step forward in directional angle
+        /// </summary>
+        /// <param name="angle"></param>
+        /// <param name="stepSize"></param>
+        /// <returns></returns>
+        public static Vector3 ForwardStep(float angle, float stepSize)
+        {
+            float x = stepSize * (float)Math.Cos(angle);
+            float z = stepSize * (float)Math.Sin(angle);
+            return new Vector3(x, 0, z);
         }
 
         /// <summary>

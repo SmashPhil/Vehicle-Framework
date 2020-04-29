@@ -35,4 +35,11 @@
 		<defaultStoppingPower>0.6</defaultStoppingPower>
 		<defaultArmorPenetration>0.75</defaultArmorPenetration>
 	</DamageDef>
+	
+	<DamageDef ParentName="Bomb">
+		<defName>MarkX_MkXA_Damage</defName>
+		<defaultDamage>100</defaultDamage>
+		<defaultStoppingPower>0.75</defaultStoppingPower>
+		<defaultArmorPenetration>0.9</defaultArmorPenetration>
+	</DamageDef>
 </Defs>

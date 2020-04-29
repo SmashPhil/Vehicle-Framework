@@ -3,7 +3,7 @@
 <Defs>
 
 	<ThingDef Name="BaseBoatPawn" Abstract="True">
-		<thingClass>Pawn</thingClass>
+		<thingClass>RimShips.BoatPawn</thingClass>
 		<category>Pawn</category>
 		<selectable>true</selectable>
 		<tickerType>Normal</tickerType>

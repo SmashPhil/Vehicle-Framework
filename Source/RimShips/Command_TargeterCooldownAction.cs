@@ -14,7 +14,7 @@ namespace RimShips
     {
         public override void ProcessInput(Event ev)
         {
-            if (cannon.cooldownTicks <= 0)
+            if (cannon.cooldownTicks <= 0/* && cannon.loadedAmmo != null*/)
             {
                 base.ProcessInput(ev);
                 SoundDefOf.Tick_Tiny.PlayOneShotOnCamera(null);
@@ -26,48 +26,97 @@ namespace RimShips
             }
         }
 
+        public override float GetWidth(float maxWidth)
+        {
+            return 140;
+        }
+
         public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth)
         {
             Text.Font = GameFont.Tiny;
-            Rect rect = new Rect(topLeft.x, topLeft.y, this.GetWidth(maxWidth), GizmoSize);
+            Rect rect = new Rect(topLeft.x, topLeft.y, GetWidth(maxWidth), GizmoSize);
             bool flag = false;
-            if (Mouse.IsOver(rect))
-            {
-                flag = true;
-                if (!this.disabled)
-                    GUI.color = GenUI.MouseoverColor;
-            }
-            Texture2D badTex = this.icon;
+
+            Rect gizmoRect = new Rect(rect.x + 3.5f, rect.y, rect.width / 2, rect.height).ContractedBy(7);
+            Texture2D badTex = icon;
             if (badTex == null)
             {
                 badTex = BaseContent.BadTex;
             }
-            Material material = (!this.disabled) ? null : TexUI.GrayscaleGUI;
-            GenUI.DrawTextureWithMaterial(rect, Command.BGTex, material, default(Rect));
-            MouseoverSounds.DoRegion(rect, SoundDefOf.Mouseover_Command);
-            Rect outerRect = rect;
-            outerRect.position += new Vector2(this.iconOffset.x * outerRect.size.x, this.iconOffset.y * outerRect.size.y);
-            GUI.color = this.IconDrawColor;
-            Widgets.DrawTextureFitted(outerRect, badTex, this.iconDrawScale * 0.85f, this.iconProportions, this.iconTexCoords, this.iconAngle, material);
+            var gizmoColor = GUI.color;
+            var ammoColor = GUI.color;
+            var reloadColor = GUI.color;
+            
+            
+            Material material = (!disabled) ? null : TexUI.GrayscaleGUI;
+            GenUI.DrawTextureWithMaterial(rect, AmmoBG, material, default);
+            Rect ammoRect = new Rect(gizmoRect.x + gizmoRect.width + 7, gizmoRect.y, gizmoRect.width, (gizmoRect.height / 2) - 3.5f);
+            Rect reloadRect = new Rect(gizmoRect.x + gizmoRect.width + 7, ammoRect.y + ammoRect.height + 7, gizmoRect.width, (gizmoRect.height / 2) - 3.5f);
+
+            MouseoverSounds.DoRegion(gizmoRect, SoundDefOf.Mouseover_Command);
+            MouseoverSounds.DoRegion(ammoRect, SoundDefOf.Mouseover_Command);
+            MouseoverSounds.DoRegion(reloadRect, SoundDefOf.Mouseover_Command);
+
+            if (Mouse.IsOver(gizmoRect))
+            {
+                flag = true;
+                if (!disabled)
+                    GUI.color = GenUI.MouseoverColor;
+            }
+            GenUI.DrawTextureWithMaterial(gizmoRect, BGTex, material, default);
+            GUI.color = gizmoColor;
+            if (cannon.cannonDef.ammoAllowed?.Any() ?? false)
+            {
+                if (Mouse.IsOver(ammoRect))
+                {
+                    flag = true;
+                    if (!disabled)
+                        GUI.color = GenUI.MouseoverColor;
+                }
+                GenUI.DrawTextureWithMaterial(ammoRect, BGTex, material, default);
+                GUI.color = ammoColor;
+                if (Mouse.IsOver(reloadRect))
+                {
+                    flag = true;
+                    if (!disabled)
+                        GUI.color = GenUI.MouseoverColor;
+                }
+                GenUI.DrawTextureWithMaterial(reloadRect, BGTex, material, default);
+                GUI.color = reloadColor;
+                Rect reloadLabel = new Rect(reloadRect.x + 10, reloadRect.y + reloadRect.height / 4, reloadRect.width - 10, reloadRect.height / 1.5f);
+                Widgets.Label(reloadLabel, "Extract".Translate());
+            }
+            GUI.color = IconDrawColor;
+            Widgets.DrawTextureFitted(gizmoRect, badTex, iconDrawScale * 0.85f, iconProportions, iconTexCoords, iconAngle, material);
             GUI.color = Color.white;
             bool flag2 = false;
-            KeyCode keyCode = (this.hotKey != null) ? this.hotKey.MainKey : KeyCode.None;
+            bool flag3 = false;
+            bool flag4 = false;
+            KeyCode keyCode = (hotKey != null) ? hotKey.MainKey : KeyCode.None;
             if (keyCode != KeyCode.None && !GizmoGridDrawer.drawnHotKeys.Contains(keyCode))
             {
                 Rect rect2 = new Rect(rect.x + 5f, rect.y + 5f, rect.width - 10f, 18f);
                 Widgets.Label(rect2, keyCode.ToStringReadable());
                 GizmoGridDrawer.drawnHotKeys.Add(keyCode);
-                if (this.hotKey.KeyDownEvent)
+                if (hotKey.KeyDownEvent)
                 {
                     flag2 = true;
                     Event.current.Use();
                 }
             }
-            if (Widgets.ButtonInvisible(rect, false))
+            if (Widgets.ButtonInvisible(gizmoRect, false))
             {
                 flag2 = true;
             }
-            string labelCap = this.LabelCap;
+            if(Widgets.ButtonInvisible(ammoRect, false))
+            {
+                flag3 = true;
+            }
+            if(Widgets.ButtonInvisible(reloadRect, false))
+            {
+                flag4 = false;
+            }
+            string labelCap = LabelCap;
             if (!labelCap.NullOrEmpty())
             {
                 float num = Text.CalcHeight(labelCap, rect.width);
@@ -80,48 +129,57 @@ namespace RimShips
                 GUI.color = Color.white;
             }
             GUI.color = Color.white;
-            if (this.DoTooltip)
+            if (DoTooltip)
             {
-                TipSignal tip = this.Desc;
-                if (this.disabled && !this.disabledReason.NullOrEmpty())
+                TipSignal tip = Desc;
+                if (disabled && !disabledReason.NullOrEmpty())
                 {
                     string text = tip.text;
                     tip.text = string.Concat(new string[]
                     {
-                text,
-                "\n\n",
-                "DisabledCommand".Translate(),
-                ": ",
-                this.disabledReason
+                        text,
+                        "\n\n",
+                        "DisabledCommand".Translate(),
+                        ": ",
+                        disabledReason
                     });
                 }
-                TooltipHandler.TipRegion(rect, tip);
+                TooltipHandler.TipRegion(gizmoRect, tip);
             }
-            if(this.cannon.cooldownTicks > 0)
+            if(cannon.cooldownTicks > 0)
             {
-                float percent = (float)this.cannon.cooldownTicks / (float)this.cannon.MaxTicks;
-                SPExtra.VerticalFillableBar(rect, percent, FillableBar, ClearBar);
+                float percent = cannon.cooldownTicks / (float)cannon.MaxTicks;
+                SPExtra.VerticalFillableBar(gizmoRect, percent, FillableBar, ClearBar);
             }
-            if (!this.HighlightTag.NullOrEmpty() && (Find.WindowStack.FloatMenu == null || !Find.WindowStack.FloatMenu.windowRect.Overlaps(rect)))
+            if (!HighlightTag.NullOrEmpty() && (Find.WindowStack.FloatMenu == null || !Find.WindowStack.FloatMenu.windowRect.Overlaps(gizmoRect)))
             {
-                UIHighlighter.HighlightOpportunity(rect, this.HighlightTag);
+                UIHighlighter.HighlightOpportunity(gizmoRect, HighlightTag);
             }
             Text.Font = GameFont.Small;
             if (flag2)
             {
-                if (this.disabled)
+                if (disabled)
                 {
-                    if (!this.disabledReason.NullOrEmpty())
-                        Messages.Message(this.disabledReason, MessageTypeDefOf.RejectInput, false);
+                    if (!disabledReason.NullOrEmpty())
+                        Messages.Message(disabledReason, MessageTypeDefOf.RejectInput, false);
                     return new GizmoResult(GizmoState.Mouseover, null);
                 }
-                if (!TutorSystem.AllowAction(this.TutorTagSelect))
+                if (!TutorSystem.AllowAction(TutorTagSelect))
                 {
                     return new GizmoResult(GizmoState.Mouseover, null);
                 }
                 var result = new GizmoResult(GizmoState.Interacted, Event.current);
-                TutorSystem.Notify_Event(this.TutorTagSelect);
+                TutorSystem.Notify_Event(TutorTagSelect);
                 return result;
+            }
+            if(flag3)
+            {
+                //Change later
+                cannon.ReloadCannon(cannon.pawn.inventory.innerContainer.FirstOrDefault(x => cannon.cannonDef.ammoAllowed.Contains(x.def)).def);
+            }
+            if(flag4)
+            {
+                cannon.TryRemoveShell();
             }
             if (flag)
                 return new GizmoResult(GizmoState.Mouseover, null);
@@ -134,5 +192,6 @@ namespace RimShips
         private const float GizmoSize = 75f;
         private readonly Texture2D FillableBar = SolidColorMaterials.NewSolidColorTexture(0.5f, 0.5f, 0.5f, 0.25f);
         private readonly Texture2D ClearBar = SolidColorMaterials.NewSolidColorTexture(Color.clear);
+        private static readonly Texture2D AmmoBG = ContentFinder<Texture2D>.Get("UI/GizmoGrid/AmmoBoxBG", true);
     }
 }

@@ -10,6 +10,7 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
+using SPExtended;
 
 namespace RimShips
 {
@@ -22,7 +23,12 @@ namespace RimShips
         public bool currentlyFishing = false;
         public bool draftStatusChanged = false;
         public bool beached = false;
-        private float angle = 0f; /* East: -45 is TopRight, 45 is BottomRight | West: -45 is BottomLeft, 45 is TopLeft */
+        private float angle = 0f; /* -45 is left, 45 is right : relative to Rot4 direction*/
+        private float bearingAngle;
+        private int turnSign;
+        public float turnSpeed;
+
+        private List<IntVec3> currentTravelCells;
 
         private bool outOfFoodNotified = false;
 
@@ -34,7 +40,7 @@ namespace RimShips
 
         public bool CanMove => (Props.moveable > ShipPermissions.DriverNeeded || MovementHandlerAvailable) && movementStatus == ShipMovementStatus.Online;
 
-        public Pawn Pawn => parent as Pawn;
+        public BoatPawn Pawn => parent as BoatPawn;
         public CompProperties_Ships Props => (CompProperties_Ships)this.props;
 
         private float cargoCapacity;
@@ -272,13 +278,22 @@ namespace RimShips
             }
         }
 
+        public void EnqueueCellImmediate(IntVec3 cell)
+        {
+            currentTravelCells.Clear();
+            currentTravelCells.Add(cell);
+        }
 
+        public void EnqueueCell(IntVec3 cell)
+        {
+            currentTravelCells.Add(cell);
+        }
 
         public float Angle
         {
             get
             {
-                if(!this.Props.diagonalRotation)
+                if(!Props.diagonalRotation)
                     return 0f;
                 return this.angle;
             }
@@ -289,6 +304,20 @@ namespace RimShips
                     return;
                 }
                 this.angle = value;
+            }
+        }
+
+        public float BearingAngle
+        {
+            get
+            {
+                if (!Props.diagonalRotation)
+                    throw new NotSupportedException($"Attempting to get relative angle when smooth pathing has been disabled for {Pawn.LabelShort} with DiagonalRotation: {this.Props.diagonalRotation}. It should not reach here.");
+                return bearingAngle;
+            }
+            set
+            {
+                bearingAngle = value;
             }
         }
 
@@ -936,9 +965,46 @@ namespace RimShips
             return this.CanMove;
         }
 
+        public void CheckTurnSign(float? turnAngle = null)
+        {
+            if(turnAngle is null)
+                turnAngle = (float)Pawn.DrawPos.Angle180RotationTracker(currentTravelCells.First().ToVector3Shifted());
+            turnSign = HelperMethods.NearestTurnSign(BearingAngle, turnAngle.Value);
+        }
+
+        public void SmoothPatherTick()
+        {
+            if(!RimShipMod.mod.settings.debugDisableSmoothPathing && currentTravelCells.Any() && Pawn.Drafted)
+            {
+                float angle = (float)Pawn.DrawPos.Angle180RotationTracker(currentTravelCells.First().ToVector3Shifted());
+                if (Pawn.DrawPos.ToIntVec3() != Pawn.Position)
+                    Pawn.Position = Pawn.DrawPos.ToIntVec3();
+
+                //Pawn.DrawPos += SPTrig.ForwardStep(angle, ActualMoveSpeed / 60);
+
+                if(BearingAngle != angle)
+                {
+                    BearingAngle += turnSign * turnSpeed;
+                    if (Math.Abs(BearingAngle - angle) < (turnSpeed*2))
+                        BearingAngle = angle;
+                }
+            }
+        }
+
+        public override void CompTickRare()
+        {
+            base.CompTickRare();
+            if(!RimShipMod.mod.settings.debugDisableSmoothPathing && currentTravelCells.Any())
+            {
+                float angle = (float)Pawn.DrawPos.Angle180RotationTracker(currentTravelCells.First().ToVector3Shifted());
+                CheckTurnSign(angle);
+            }
+        }
+
         public override void CompTick()
         {
             base.CompTick();
+            SmoothPatherTick();
             if (this.Pawn.IsHashIntervalTick(150))
                 this.TrySatisfyPawnNeeds();
 
@@ -950,7 +1016,10 @@ namespace RimShips
 
         private void InitializeShip()
         {
-            if (!(this.handlers is null) && this.handlers.Count > 0) return;
+            if (handlers != null && handlers.Count > 0)
+                return;
+            if (currentTravelCells is null)
+                currentTravelCells = new List<IntVec3>();
             foreach(ShipHandler handler in handlers)
             {
                 if(handler.currentlyReserving is null) handler.currentlyReserving = new List<Pawn>();
@@ -969,6 +1038,7 @@ namespace RimShips
             armorPoints = Props.armor;
             cargoCapacity = Props.cargoCapacity;
             moveSpeedModifier = 0f;
+            turnSpeed = Props.turnSpeed;
         }
 
         public override void PostSpawnSetup(bool respawningAfterLoad)
@@ -989,6 +1059,13 @@ namespace RimShips
             Scribe_Values.Look(ref weaponStatus, "weaponStatus", ShipWeaponStatus.Online);
             Scribe_Values.Look(ref movementStatus, "movingStatus", ShipMovementStatus.Online);
             Scribe_Values.Look(ref currentlyFishing, "currentlyFishing", false);
+            Scribe_Values.Look(ref bearingAngle, "bearingAngle");
+            Scribe_Values.Look(ref turnSign, "turnSign");
+            Scribe_Values.Look(ref turnSpeed, "turnSpeed");
+
+            Scribe_Values.Look(ref angle, "angle");
+
+            Scribe_Collections.Look(ref currentTravelCells, "currentTravelCells");
 
             Scribe_Values.Look(ref armorPoints, "armorPoints");
             Scribe_Values.Look(ref cargoCapacity, "cargoCapacity");

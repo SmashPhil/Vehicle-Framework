@@ -6,17 +6,23 @@
 		<label>Bow</label>
 		<weaponType>Rotatable</weaponType>
 		<weaponLocation>Turret</weaponLocation>
-		<projectile>MarkX_Mk6A</projectile>
 		<moteCannon>Mote_CannonSmoke</moteCannon>
 		<moteFlash>Mote_CannonFlash</moteFlash>
 		<cannonSound>Explosion_PirateCannon</cannonSound>
 		<baseTicksBetweenShots>20</baseTicksBetweenShots>
 		<numberOfShots>1</numberOfShots>
 		<cooldownTimer>30</cooldownTimer>
+		<warmUpTimer>1</warmUpTimer>
+		
+		<gizmoDescription>Select Target.\n\nFire for effect</gizmoDescription>
 		
 		<cannonTexPath>Ships/dreadnought/Cannons/12inchSingle</cannonTexPath>
 		<baseCannonTexPath>Ships/paddlesteamer/Cannons/SwivelCannonBase</baseCannonTexPath>
 
+		<ammoAllowed>
+			<li>MarkX_Mk6A_Shell</li>
+			<li>MarkX_MkXA_Shell</li>
+		</ammoAllowed>
 		<projectileOffset>2.6</projectileOffset>
 		<hitFlags>IntendedTarget</hitFlags>
 		<spreadRadius>2</spreadRadius>
@@ -28,17 +34,24 @@
 		<label>Bow</label>
 		<weaponType>Rotatable</weaponType>
 		<weaponLocation>Turret</weaponLocation>
-		<projectile>MarkX_Mk6A</projectile>
+		<!--<projectile>MarkX_MkXA</projectile>-->
 		<moteCannon>Mote_CannonSmoke</moteCannon>
 		<moteFlash>Mote_CannonFlash</moteFlash>
 		<cannonSound>Explosion_PirateCannon</cannonSound>
 		<baseTicksBetweenShots>20</baseTicksBetweenShots>
 		<numberOfShots>2</numberOfShots>
 		<cooldownTimer>30</cooldownTimer>
+		<warmUpTimer>1</warmUpTimer>
+		
+		<gizmoDescription>Select Target.\n\nFire for effect</gizmoDescription>
 		
 		<cannonTexPath>Ships/dreadnought/Cannons/12inchDouble</cannonTexPath>
 		<baseCannonTexPath>Ships/paddlesteamer/Cannons/SwivelCannonBase</baseCannonTexPath>
-
+		
+		<ammoAllowed>
+			<li>MarkX_Mk6A_Shell</li>
+			<li>MarkX_MkXA_Shell</li>
+		</ammoAllowed>
 		<projectileOffset>2.6</projectileOffset>
 		<projectileShifting>
 			<li>0.25</li>

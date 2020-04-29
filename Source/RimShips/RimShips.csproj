@@ -149,6 +149,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bill_BoardShip.cs" />
+    <Compile Include="BoatPawn.cs" />
     <Compile Include="CannonDef.cs" />
     <Compile Include="CannonHandler.cs" />
     <Compile Include="CannonTargeter.cs" />
@@ -258,6 +259,7 @@
     <Compile Include="WaterRoomGroup.cs" />
     <Compile Include="WindDirectional.cs" />
     <Compile Include="WorldObjectDefOfShips.cs" />
+    <Compile Include="WorldOceanPathFinder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

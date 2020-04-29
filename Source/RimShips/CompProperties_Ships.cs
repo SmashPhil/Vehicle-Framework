@@ -33,6 +33,7 @@ namespace RimShips
         public float cargoCapacity = 1000;
 
         public bool diagonalRotation = true;
+        public float turnSpeed = 0.1f;
 
         public string healthLabel_Healthy = "Operational";
         public string healthLabel_Injured = "Needs Repairs";

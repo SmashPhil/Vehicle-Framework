@@ -208,75 +208,18 @@
 				</roles>
 			</li>
 			
-			<li Class="RimShips.CompProperties_Cannons">
-				<cannons>
-					<li>
-						<cannonDef>12inRotatingDouble</cannonDef>
-						<cannonRenderLocation>(0,7)</cannonRenderLocation>
-						<cannonRenderOffset>(0, 0)</cannonRenderOffset>
-						<cannonTurretDrawSize>(5.5, 5.5)</cannonTurretDrawSize>
-						
-						<baseCannonRenderLocation>(0,7)</baseCannonRenderLocation>
-						<baseCannonDrawSize>(5.8,5.8)</baseCannonDrawSize>
-						
-						<angleRestricted>(230, 130)</angleRestricted>
-						<aimPieOffset>(0,1.2)</aimPieOffset>
-						<drawLayer>1</drawLayer>
-					</li>
-					<li>
-						<cannonDef>12inRotatingDouble</cannonDef>
-						<cannonRenderLocation>(0,5.2)</cannonRenderLocation>
-						<cannonRenderOffset>(0, 0)</cannonRenderOffset>
-						<cannonTurretDrawSize>(5.5, 5.5)</cannonTurretDrawSize>
-						
-						<baseCannonRenderLocation>(0,5.2)</baseCannonRenderLocation>
-						<baseCannonDrawSize>(5.8,5.8)</baseCannonDrawSize>
-						
-						<angleRestricted>(230, 130)</angleRestricted>
-						<aimPieOffset>(0,1.2)</aimPieOffset>
-						<drawLayer>2</drawLayer>
-					</li>
-					<li>
-						<cannonDef>12inRotatingDouble</cannonDef>
-						<cannonRenderLocation>(0,-6.2)</cannonRenderLocation>
-						<cannonRenderOffset>(0, 0)</cannonRenderOffset>
-						<cannonTurretDrawSize>(5.5, 5.5)</cannonTurretDrawSize>
-						
-						<baseCannonRenderLocation>(0,-6.2)</baseCannonRenderLocation>
-						<baseCannonDrawSize>(5.8,5.8)</baseCannonDrawSize>
-						
-						<defaultAngleRotated>180</defaultAngleRotated>
-						<angleRestricted>(50, 310)</angleRestricted>
-						<aimPieOffset>(0,1.2)</aimPieOffset>
-						<drawLayer>2</drawLayer>
-					</li>
-					<li>
-						<cannonDef>12inRotatingDouble</cannonDef>
-						<cannonRenderLocation>(0,-8.2)</cannonRenderLocation>
-						<cannonRenderOffset>(0, 0)</cannonRenderOffset>
-						<cannonTurretDrawSize>(5.5, 5.5)</cannonTurretDrawSize>
-						
-						<baseCannonRenderLocation>(0,-8.2)</baseCannonRenderLocation>
-						<baseCannonDrawSize>(5.8,5.8)</baseCannonDrawSize>
-						
-						<defaultAngleRotated>180</defaultAngleRotated>
-						<angleRestricted>(50, 310)</angleRestricted>
-						<aimPieOffset>(0,1.2)</aimPieOffset>
-						<drawLayer>1</drawLayer>
-					</li>
-				</cannons>
-			</li>
+			<li Class="RimShips.CompProperties_Cannons"/>
 			
 			<li Class="RimShips.CompProperties_UpgradeTree">
-				<displayUICoord>(415,50)</displayUICoord>
-				<displayUISize>(600,337.5)</displayUISize>
+				<displayUICoord>(587,50)</displayUICoord>
+				<displayUISize>(259,400)</displayUISize>
 				
 				<upgradesAvailable>
 					<li>
 						<upgradeID>Armor_I</upgradeID>
 						<label>Steel Plating</label>
 						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath/>
+						<imageFilePath>UI/UpgradeTree/ArmorSaturated</imageFilePath>
 						<gridCoordinate>(2,2)</gridCoordinate>
 						<rootNodeLabel>Armor</rootNodeLabel>
 						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
@@ -305,7 +248,7 @@
 						<upgradeID>Armor_II</upgradeID>
 						<label>Secondary Steel Plating Layer</label>
 						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
+						<imageFilePath>UI/UpgradeTree/ArmorNodeBG</imageFilePath>
 						<gridCoordinate>(2,4)</gridCoordinate>
 						<informationHighlighted>An extra layer of steel plating for higher defense.</informationHighlighted>
 						<values>
@@ -589,57 +532,181 @@
 						<researchPrerequisites/>
 						<prerequisiteNodes/>
 					</li>
+					<!-- Cannons -->
 					<li>
-						<upgradeID>Cannons_I</upgradeID>
-						<label>Howitzer</label>
+						<upgradeID>Cannons_I_Single</upgradeID>
+						<label>BL 12-inch Mk X</label>
 						<upgradeCategory>Cannon</upgradeCategory>
 						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
-						<gridCoordinate>(26,2)</gridCoordinate>
-						<informationHighlighted>Rotating Howitzer that is capable of dealing devastating damage. Not very accurate at long range.</informationHighlighted>
-
+						<gridCoordinate>(24,2)</gridCoordinate>
+						<rootNodeLabel>Cannons</rootNodeLabel>
+						<informationHighlighted>45-calibre naval cannon for devastating bombardment.</informationHighlighted>
+						
 						<values/>
 						<cannonsUnlocked>
 							<li>
-								<cannonDef>rotatingSingleShot</cannonDef>
-								<cannonRenderLocation>(0,2.65)</cannonRenderLocation>
+								<cannonDef>12inRotatingSingle</cannonDef>
+								<cannonRenderLocation>(0,7)</cannonRenderLocation>
 								<cannonRenderOffset>(0, 0)</cannonRenderOffset>
-								<cannonTurretDrawSize>(4, 4)</cannonTurretDrawSize>
+								<cannonTurretDrawSize>(5.5, 5.5)</cannonTurretDrawSize>
 								
-								<baseCannonRenderLocation>(0,2.65)</baseCannonRenderLocation>
-								<baseCannonDrawSize>(4,4)</baseCannonDrawSize>
+								<baseCannonRenderLocation>(0,7)</baseCannonRenderLocation>
+								<baseCannonDrawSize>(5.8,5.8)</baseCannonDrawSize>
+								
+								<angleRestricted>(230, 130)</angleRestricted>
+								<aimPieOffset>(0,1.2)</aimPieOffset>
+								<drawLayer>1</drawLayer>
 							</li>
 						</cannonsUnlocked>
 						<cost>
 							<li>
 								<key>Steel</key>
-								<value>600</value>
+								<value>1200</value>
 							</li>
 							<li>
 								<key>ComponentIndustrial</key>
-								<value>2</value>
+								<value>18</value>
 							</li>
 						</cost>
 						<researchPrerequisites/>
 						<prerequisiteNodes/>
 					</li>
 					<li>
-						<upgradeID>Cannons_II</upgradeID>
-						<label>Double Barrel Howitzer</label>
+						<upgradeID>Cannons_II_Single</upgradeID>
+						<label>BL 12-inch Mk X</label>
 						<upgradeCategory>Cannon</upgradeCategory>
 						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
-						<gridCoordinate>(26,6)</gridCoordinate>
-						<informationHighlighted>Double the pain at half the cost.</informationHighlighted>
-
+						<gridCoordinate>(24,4)</gridCoordinate>
+						<informationHighlighted>45-calibre naval cannon for devastating bombardment.</informationHighlighted>
+						
 						<values/>
 						<cannonsUnlocked>
 							<li>
-								<cannonDef>rotatingDoubleShot</cannonDef>
-								<cannonRenderLocation>(0,2.65)</cannonRenderLocation>
+								<cannonDef>12inRotatingSingle</cannonDef>
+								<cannonRenderLocation>(0,5.2)</cannonRenderLocation>
 								<cannonRenderOffset>(0, 0)</cannonRenderOffset>
-								<cannonTurretDrawSize>(4, 4)</cannonTurretDrawSize>
+								<cannonTurretDrawSize>(5.5, 5.5)</cannonTurretDrawSize>
 								
-								<baseCannonRenderLocation>(0,2.65)</baseCannonRenderLocation>
-								<baseCannonDrawSize>(4,4)</baseCannonDrawSize>
+								<baseCannonRenderLocation>(0,5.2)</baseCannonRenderLocation>
+								<baseCannonDrawSize>(5.8,5.8)</baseCannonDrawSize>
+								
+								<angleRestricted>(230, 130)</angleRestricted>
+								<aimPieOffset>(0,1.2)</aimPieOffset>
+								<drawLayer>2</drawLayer>
+							</li>
+						</cannonsUnlocked>
+						<cost>
+							<li>
+								<key>Steel</key>
+								<value>1200</value>
+							</li>
+							<li>
+								<key>ComponentIndustrial</key>
+								<value>18</value>
+							</li>
+						</cost>
+						<researchPrerequisites/>
+						<prerequisiteNodes/>
+					</li>
+					<li>
+						<upgradeID>Cannons_III_Single</upgradeID>
+						<label>BL 12-inch Mk X</label>
+						<upgradeCategory>Cannon</upgradeCategory>
+						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
+						<gridCoordinate>(24,6)</gridCoordinate>
+						<informationHighlighted>45-calibre naval cannon for devastating bombardment.</informationHighlighted>
+						
+						<values/>
+						<cannonsUnlocked>
+							<li>
+								<cannonDef>12inRotatingSingle</cannonDef>
+								<cannonRenderLocation>(0,-6.2)</cannonRenderLocation>
+								<cannonRenderOffset>(0, 0)</cannonRenderOffset>
+								<cannonTurretDrawSize>(5.5, 5.5)</cannonTurretDrawSize>
+								
+								<baseCannonRenderLocation>(0,-6.2)</baseCannonRenderLocation>
+								<baseCannonDrawSize>(5.8,5.8)</baseCannonDrawSize>
+								
+								<defaultAngleRotated>180</defaultAngleRotated>
+								<angleRestricted>(50, 310)</angleRestricted>
+								<aimPieOffset>(0,1.2)</aimPieOffset>
+								<drawLayer>2</drawLayer>
+							</li>
+						</cannonsUnlocked>
+						<cost>
+							<li>
+								<key>Steel</key>
+								<value>1200</value>
+							</li>
+							<li>
+								<key>ComponentIndustrial</key>
+								<value>18</value>
+							</li>
+						</cost>
+						<researchPrerequisites/>
+						<prerequisiteNodes/>
+					</li>
+					<li>
+						<upgradeID>Cannons_IV_Single</upgradeID>
+						<label>BL 12-inch Mk X</label>
+						<upgradeCategory>Cannon</upgradeCategory>
+						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
+						<gridCoordinate>(24,8)</gridCoordinate>
+						<informationHighlighted>45-calibre naval cannon for devastating bombardment.</informationHighlighted>
+						
+						<values/>
+						<cannonsUnlocked>
+							<li>
+								<cannonDef>12inRotatingSingle</cannonDef>
+								<cannonRenderLocation>(0,-8.2)</cannonRenderLocation>
+								<cannonRenderOffset>(0, 0)</cannonRenderOffset>
+								<cannonTurretDrawSize>(5.5, 5.5)</cannonTurretDrawSize>
+								
+								<baseCannonRenderLocation>(0,-8.2)</baseCannonRenderLocation>
+								<baseCannonDrawSize>(5.8,5.8)</baseCannonDrawSize>
+								
+								<defaultAngleRotated>180</defaultAngleRotated>
+								<angleRestricted>(50, 310)</angleRestricted>
+								<aimPieOffset>(0,1.2)</aimPieOffset>
+								<drawLayer>1</drawLayer>
+							</li>
+						</cannonsUnlocked>
+						<cost>
+							<li>
+								<key>Steel</key>
+								<value>1200</value>
+							</li>
+							<li>
+								<key>ComponentIndustrial</key>
+								<value>18</value>
+							</li>
+						</cost>
+						<researchPrerequisites/>
+						<prerequisiteNodes/>
+					</li>
+					<li>
+						<upgradeID>Cannons_I_Double</upgradeID>
+						<label>BL 12-inch Mk X</label>
+						<upgradeCategory>Cannon</upgradeCategory>
+						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
+						<gridCoordinate>(27,2)</gridCoordinate>
+						<rootNodeLabel>Cannons</rootNodeLabel>
+						<informationHighlighted>Double mounted 45-calibre naval cannon for devastating bombardment.</informationHighlighted>
+						
+						<values/>
+						<cannonsUnlocked>
+							<li>
+								<cannonDef>12inRotatingDouble</cannonDef>
+								<cannonRenderLocation>(0,7)</cannonRenderLocation>
+								<cannonRenderOffset>(0, 0)</cannonRenderOffset>
+								<cannonTurretDrawSize>(5.5, 5.5)</cannonTurretDrawSize>
+								
+								<baseCannonRenderLocation>(0,7)</baseCannonRenderLocation>
+								<baseCannonDrawSize>(5.8,5.8)</baseCannonDrawSize>
+								
+								<angleRestricted>(230, 130)</angleRestricted>
+								<aimPieOffset>(0,1.2)</aimPieOffset>
+								<drawLayer>1</drawLayer>
 							</li>
 						</cannonsUnlocked>
 						<cost>
@@ -649,15 +716,133 @@
 							</li>
 							<li>
 								<key>ComponentIndustrial</key>
-								<value>6</value>
+								<value>18</value>
 							</li>
 						</cost>
 						<researchPrerequisites/>
 						<prerequisiteNodes>
-							<li>Cannons_I</li>
+							<li>Cannons_I_Single</li>
 						</prerequisiteNodes>
 					</li>
-					
+					<li>
+						<upgradeID>Cannons_II_Double</upgradeID>
+						<label>BL 12-inch Mk X</label>
+						<upgradeCategory>Cannon</upgradeCategory>
+						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
+						<gridCoordinate>(27,4)</gridCoordinate>
+						<informationHighlighted>Double mounted 45-calibre naval cannon for devastating bombardment.</informationHighlighted>
+						
+						<values/>
+						<cannonsUnlocked>
+							<li>
+								<cannonDef>12inRotatingDouble</cannonDef>
+								<cannonRenderLocation>(0,5.2)</cannonRenderLocation>
+								<cannonRenderOffset>(0, 0)</cannonRenderOffset>
+								<cannonTurretDrawSize>(5.5, 5.5)</cannonTurretDrawSize>
+								
+								<baseCannonRenderLocation>(0,5.2)</baseCannonRenderLocation>
+								<baseCannonDrawSize>(5.8,5.8)</baseCannonDrawSize>
+								
+								<angleRestricted>(230, 130)</angleRestricted>
+								<aimPieOffset>(0,1.2)</aimPieOffset>
+								<drawLayer>2</drawLayer>
+							</li>
+						</cannonsUnlocked>
+						<cost>
+							<li>
+								<key>Steel</key>
+								<value>900</value>
+							</li>
+							<li>
+								<key>ComponentIndustrial</key>
+								<value>18</value>
+							</li>
+						</cost>
+						<researchPrerequisites/>
+						<prerequisiteNodes>
+							<li>Cannons_II_Single</li>
+						</prerequisiteNodes>
+					</li>
+					<li>
+						<upgradeID>Cannons_III_Double</upgradeID>
+						<label>BL 12-inch Mk X</label>
+						<upgradeCategory>Cannon</upgradeCategory>
+						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
+						<gridCoordinate>(27,6)</gridCoordinate>
+						<informationHighlighted>Double mounted 45-calibre naval cannon for devastating bombardment.</informationHighlighted>
+						
+						<values/>
+						<cannonsUnlocked>
+							<li>
+								<cannonDef>12inRotatingDouble</cannonDef>
+								<cannonRenderLocation>(0,-6.2)</cannonRenderLocation>
+								<cannonRenderOffset>(0, 0)</cannonRenderOffset>
+								<cannonTurretDrawSize>(5.5, 5.5)</cannonTurretDrawSize>
+								
+								<baseCannonRenderLocation>(0,-6.2)</baseCannonRenderLocation>
+								<baseCannonDrawSize>(5.8,5.8)</baseCannonDrawSize>
+								
+								<defaultAngleRotated>180</defaultAngleRotated>
+								<angleRestricted>(50, 310)</angleRestricted>
+								<aimPieOffset>(0,1.2)</aimPieOffset>
+								<drawLayer>2</drawLayer>
+							</li>
+						</cannonsUnlocked>
+						<cost>
+							<li>
+								<key>Steel</key>
+								<value>900</value>
+							</li>
+							<li>
+								<key>ComponentIndustrial</key>
+								<value>18</value>
+							</li>
+						</cost>
+						<researchPrerequisites/>
+						<prerequisiteNodes>
+							<li>Cannons_III_Single</li>
+						</prerequisiteNodes>
+					</li>
+					<li>
+						<upgradeID>Cannons_IV_Double</upgradeID>
+						<label>BL 12-inch Mk X</label>
+						<upgradeCategory>Cannon</upgradeCategory>
+						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
+						<gridCoordinate>(27,8)</gridCoordinate>
+						<informationHighlighted>Double mounted 45-calibre naval cannon for devastating bombardment.</informationHighlighted>
+						
+						<values/>
+						<cannonsUnlocked>
+							<li>
+								<cannonDef>12inRotatingDouble</cannonDef>
+								<cannonRenderLocation>(0,-8.2)</cannonRenderLocation>
+								<cannonRenderOffset>(0, 0)</cannonRenderOffset>
+								<cannonTurretDrawSize>(5.5, 5.5)</cannonTurretDrawSize>
+								
+								<baseCannonRenderLocation>(0,-8.2)</baseCannonRenderLocation>
+								<baseCannonDrawSize>(5.8,5.8)</baseCannonDrawSize>
+								
+								<defaultAngleRotated>180</defaultAngleRotated>
+								<angleRestricted>(50, 310)</angleRestricted>
+								<aimPieOffset>(0,1.2)</aimPieOffset>
+								<drawLayer>1</drawLayer>
+							</li>
+						</cannonsUnlocked>
+						<cost>
+							<li>
+								<key>Steel</key>
+								<value>900</value>
+							</li>
+							<li>
+								<key>ComponentIndustrial</key>
+								<value>18</value>
+							</li>
+						</cost>
+						<researchPrerequisites/>
+						<prerequisiteNodes>
+							<li>Cannons_IV_Single</li>
+						</prerequisiteNodes>
+					</li>
 				</upgradesAvailable>
 			</li>
 		</comps>

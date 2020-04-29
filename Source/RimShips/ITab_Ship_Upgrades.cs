@@ -103,6 +103,7 @@ namespace RimShips.UI
                     SoundDefOf.Building_Complete.PlayOneShot(SelPawnUpgrade);
 
                     Comp.StartUnlock(selectedNode);
+                    selectedNode.upgradePurchased = true;
                     selectedNode = null;
                 }
                 else
@@ -132,7 +133,7 @@ namespace RimShips.UI
                                 float imageWidth = TotalIconSizeScalar / preUpgrade.UpgradeImage.width;
                                 float imageHeight = TotalIconSizeScalar / preUpgrade.UpgradeImage.height;
                                 Rect preUpgradeRect = new Rect(GridOrigin.x + (GridSpacing.x * preUpgrade.GridCoordinate.x) - (imageWidth/2), GridOrigin.y + (GridSpacing.y * preUpgrade.GridCoordinate.z) - (imageHeight/2) + (TopPadding*2), imageWidth, imageHeight);
-                                if(preUpgrade.upgradeActive)
+                                if(preUpgrade.upgradePurchased)
                                 {
                                     color = Color.black;
                                 }
@@ -178,7 +179,7 @@ namespace RimShips.UI
                 {
                     preDrawingDescriptions = true;
 
-                    if(!upgradeNode.upgradeActive)
+                    if(!upgradeNode.upgradePurchased)
                     {
                         additionalStatNode = upgradeNode;
                         highlightedPreMetNode = upgradeNode;
@@ -188,12 +189,12 @@ namespace RimShips.UI
                     Widgets.Label(new Rect(infoLabelRect.x, infoLabelRect.y + 20f, infoLabelRect.width, 140f), upgradeNode.informationHighlighted);
                 }
 
-                if((Mouse.IsOver(upgradeRect) || upgradeNode.upgradeActive) && Comp.PrerequisitesMet(upgradeNode))
+                if((Mouse.IsOver(upgradeRect) || upgradeNode.upgradePurchased) && Comp.PrerequisitesMet(upgradeNode))
                 {
                     GUI.DrawTexture(upgradeRect, TexUI.HighlightTex);
                 }
 
-                if(!upgradeNode.upgradeActive && Comp.PrerequisitesMet(upgradeNode))
+                if(!upgradeNode.upgradePurchased && Comp.PrerequisitesMet(upgradeNode))
                 {
                     if(Widgets.ButtonInvisible(buttonRect,true))
                     {
@@ -217,7 +218,7 @@ namespace RimShips.UI
 
             if(selectedNode != null && !preDrawingDescriptions)
             {
-                if(!selectedNode.upgradeActive)
+                if(!selectedNode.upgradePurchased)
                     additionalStatNode = selectedNode;
                     
                 HelperMethods.LabelStyled(selectedLabelRect, selectedNode.label, selectedLabelFont);
@@ -266,6 +267,20 @@ namespace RimShips.UI
                                 Resize = new Vector2(screenWidth + displayRect.x, screenHeight);
                                 resizeCheck = true;
                             }
+                        }
+                        if(RimShipMod.mod.settings.debugDrawNodeGrid)
+                        {
+                            Widgets.DrawLineHorizontal(LeftWindowEdge, 70f, screenWidth - LeftWindowEdge);
+                            int lineCount = (int)(screenWidth - LeftWindowEdge) / 10;
+                            
+                            for(int i = 1; i <= lineCount; i++)
+                            {
+                                Widgets.DrawLineVertical(LeftWindowEdge + 10 * i, 70f, (i % 5 == 0) ? 10 : 5);
+                            }
+                            var color = GUI.color;
+                            GUI.color = Color.red;
+                            Widgets.DrawLineVertical(LeftWindowEdge + (((screenWidth - BottomDisplayedOffset) - LeftWindowEdge) / 2), 70f, 12f);
+                            GUI.color = color;
                         }
 
                         foreach(CannonHandler cannon in Comp.upgradeList.Where(x => x.upgradeActive && (x.cannonsUnlocked?.Any() ?? false)).SelectMany(y => y.cannonsUnlocked))

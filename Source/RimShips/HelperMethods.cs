@@ -143,6 +143,12 @@ namespace RimShips
         public static float ShipAngle(Pawn pawn)
         {
             if (pawn is null) return 0f;
+
+            if(!RimShipMod.mod.settings.debugDisableSmoothPathing)
+            {
+                return pawn.GetComp<CompShips>().BearingAngle;
+            }
+
             if (pawn.pather.Moving)
             {
                 IntVec3 c = pawn.pather.nextCell - pawn.Position;
@@ -296,6 +302,49 @@ namespace RimShips
                 return false;
             return (pawn.Map.terrainGrid.TerrainAt(pawn.Position) == TerrainDefOf.WaterDeep || pawn.Map.terrainGrid.TerrainAt(pawn.Position) == TerrainDefOf.WaterMovingChestDeep ||
                 pawn.Map.terrainGrid.TerrainAt(pawn.Position) == TerrainDefOf.WaterOceanDeep) && GenGrid.Impassable(pawn.Position, pawn.Map);
+        }
+
+        #endregion
+
+        #region SmoothPathing
+
+        public static bool InitiateSmoothPath(this BoatPawn boat, IntVec3 cell)
+        {
+            if (!cell.IsValid)
+                return false;
+            try
+            {
+                boat.GetComp<CompShips>().EnqueueCellImmediate(cell);
+                boat.GetComp<CompShips>().CheckTurnSign();
+            }
+            catch(Exception ex)
+            {
+                Log.Error($"Unable to initiate Smooth Pathing. Cell: {cell} Boat: {boat.LabelShort} Exception: {ex.Message}");
+                return false;
+            }
+            return true;
+        }
+
+        public static int NearestTurnSign(float bearingAngle, float angle)
+        {
+            if (bearingAngle == angle)
+                return 0;
+            float angleAbs = SPTrig.BearingToAbsoluteAngle(bearingAngle);
+
+            float angleCheck = angle - angleAbs;
+            float provisional = 0f;
+            if (angleCheck < 180 && angleCheck > -180)
+                provisional = angleCheck;
+            else if (angleCheck > 180)
+                provisional = angleCheck - 360;
+            else if (angleCheck < -180)
+                provisional = angleCheck + 360;
+            if (provisional > 0)
+                return 1; // right turn;
+            if (provisional < 0)
+                return -1; // left turn;
+            int turn = Rand.RangeInclusive(1, 2);
+            return turn == 1 ? 1 : -1;
         }
 
         #endregion
@@ -1147,9 +1196,6 @@ namespace RimShips
         
         public static Texture2D CargoStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(185, 110, 15).ToColor);
         public static Texture2D CargoAddedStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(185, 110, 15, 120).ToColor);
-
-        //public static Texture2D FuelEffStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(150, 10, 20).ToColor);
-        //public static Texture2D FuelEffAddedStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(150, 10, 20, 120).ToColor);
 
         public static Texture2D FuelStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(60, 30, 30).ToColor);
         public static Texture2D FuelAddedStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(60, 30, 30, 120).ToColor);

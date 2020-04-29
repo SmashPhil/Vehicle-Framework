@@ -113,7 +113,17 @@
 	<CaravanMustHaveEnoughSpaceOnShip>Not enough space on ships to house all pawns.</CaravanMustHaveEnoughSpaceOnShip>
 	<CaravanMustHaveEnoughPawnsToOperate>Not enough Pawns selected to set sail. Need {0}</CaravanMustHaveEnoughPawnsToOperate>
 
-
+	<!-- Upgrades -->
+	<Extract>Extract</Extract>
+	<Upgrade>Upgrade</Upgrade>
+	<DisabledFromOtherNode>Cannot upgrade. Node is now inaccessible from previous unlock.</DisabledFromOtherNode>
+	<MissingPrerequisiteUpgrade>Missing prerequisite node</MissingPrerequisiteUpgrade>
+	<BoatMaxArmor>Max Armor</BoatMaxArmor>
+	<BoatMaxSpeed>Max Speed</BoatMaxSpeed>
+	<BoatCargoCapacity>Cargo Capacity</BoatCargoCapacity>
+	<BoatFuelCost>Fuel Cost</BoatFuelCost>
+	<BoatFuelCapacity>Fuel Capacity</BoatFuelCapacity>
+	
 	<!-- Status -->
 	<FormingCaravanStatus_GatheringItems_Ship>Loading cargo onto Ships.</FormingCaravanStatus_GatheringItems_Ship>
 	<FormingCaravanStatus_GatheringItems_Ship_Pause>Loading cargo onto Ships (waiting)</FormingCaravanStatus_GatheringItems_Ship_Pause>

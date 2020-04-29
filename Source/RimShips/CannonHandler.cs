@@ -6,8 +6,8 @@ using SPExtended;
 
 namespace RimShips
 {
-    public enum WeaponType { None, Broadside, Rotatable }
-    public enum WeaponLocation { Port, Starboard, Turret }
+    public enum WeaponType { None, Static, Rotatable }
+    public enum WeaponLocation { Port, Starboard, Bow, Stern, Turret }
     public class CannonHandler : IExposable, ILoadReferenceable
     {
         public CannonHandler()
@@ -84,6 +84,9 @@ namespace RimShips
              Scribe_Values.Look(ref drawLayer, "drawLayer");
 
             Scribe_References.Look(ref pawn, "pawn");
+            Scribe_Defs.Look(ref loadedAmmo, "loadedAmmo");
+            Scribe_Defs.Look(ref savedAmmoType, "savedAmmoType");
+            Scribe_Values.Look(ref shellCount, "shellCount");
 
             Scribe_Collections.Look(ref cannonGroupDict, "cannonGroupDict");
             Scribe_TargetInfo.Look(ref cannonTarget, "cannonTarget", LocalTargetInfo.Invalid);
@@ -104,6 +107,10 @@ namespace RimShips
             if (cooldownTicks > 0)
             {
                 cooldownTicks--;
+                if(cooldownTicks <= 0)
+                {
+                    ReloadCannon();
+                }
             }
             if(IsTargetable)
             {
@@ -214,6 +221,21 @@ namespace RimShips
             }
         }
 
+        public Texture2D GizmoIcon
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(cannonDef.gizmoIconTexPath) && gizmoIcon is null)
+                    gizmoIcon = ContentFinder<Texture2D>.Get(cannonDef.gizmoIconTexPath);
+                else if (gizmoIcon is null)
+                    gizmoIcon = CannonTexture;
+
+                if (gizmoIcon is null)
+                    gizmoIcon = TexCommandShips.BroadsideCannon_Port;
+                return gizmoIcon;
+            }
+        }
+
         public Vector3 TurretLocation
         {
             get
@@ -283,6 +305,59 @@ namespace RimShips
             return null;
         }
 
+        public bool ReloadCannon(ThingDef ammo = null)
+        {
+            try
+            {
+                if(pawn.inventory.innerContainer.Contains(savedAmmoType) || pawn.inventory.innerContainer.Contains(ammo))
+                {
+                    Thing storedAmmo = null;
+                    if (ammo != null)
+                    {
+                        storedAmmo = pawn.inventory.innerContainer.FirstOrFallback(x => x.def == ammo);
+                        savedAmmoType = ammo;
+                        TryRemoveShell();
+                    }
+                    else if(savedAmmoType != null)
+                    {
+                        storedAmmo = pawn.inventory.innerContainer.FirstOrFallback(x => x.def == savedAmmoType);
+                    }
+                    else
+                    {
+                        throw new NotImplementedException("No saved or specified shell upon reload");
+                    }
+
+                    int countToTake = storedAmmo.stackCount >= cannonDef.magazineCapacity ? cannonDef.magazineCapacity : storedAmmo.stackCount;
+                    Thing loadedThing = pawn.inventory.innerContainer.Take(storedAmmo, countToTake);
+                    loadedAmmo = loadedThing.def;
+                    shellCount = loadedThing.stackCount;
+                }    
+            }
+            catch(Exception ex)
+            {
+                Log.Error($"Unable to reload Cannon: {uniqueID} on Pawn: {pawn.LabelShort}. Exception: {ex.Message}");
+                return false;
+            }
+
+            return loadedAmmo != null;
+        }
+
+        public void ConsumeShellChambered()
+        {
+            shellCount--;
+            if (shellCount <= 0)
+                loadedAmmo = null;
+        }
+        public void TryRemoveShell()
+        {
+            if(loadedAmmo != null && shellCount > 0)
+            {
+                Thing thing = ThingMaker.MakeThing(loadedAmmo);
+                thing.stackCount = shellCount;
+                pawn.inventory.innerContainer.TryAdd(thing);
+            }
+        }
+
         public float MaxRange
         {
             get
@@ -348,6 +423,8 @@ namespace RimShips
         private Texture2D cannonTex;
         private Texture2D cannonBaseTex;
 
+        private Texture2D gizmoIcon;
+
         private Graphic cannonGraphic;
         private Graphic baseCannonGraphic;
 
@@ -378,6 +455,10 @@ namespace RimShips
         public float currentRotation = 0f;
 
         public Pawn pawn;
+
+        public ThingDef loadedAmmo;
+        public ThingDef savedAmmoType;
+        public int shellCount;
 
         private CompShips CompShip => pawn.TryGetComp<CompShips>();
         private CompCannons CompCannon => pawn.TryGetComp<CompCannons>();

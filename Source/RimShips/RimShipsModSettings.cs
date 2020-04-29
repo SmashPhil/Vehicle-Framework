@@ -29,7 +29,9 @@ namespace RimShips
 
         public bool debugDraftAnyShip;
         public bool debugDisableWaterPathing;
-        public bool debugSpawnBoatBuidingGodMode;
+        public bool debugDisableSmoothPathing;
+
+        public bool debugSpawnBoatBuildingGodMode;
 
         public bool debugDrawCannonGrid;
         public bool debugDrawNodeGrid;
@@ -61,7 +63,9 @@ namespace RimShips
             {
                 Scribe_Values.Look(ref debugDraftAnyShip, "debugDraftAnyShip", false);
                 Scribe_Values.Look(ref debugDisableWaterPathing, "debugDisableWaterPathing", false);
-                Scribe_Values.Look(ref debugSpawnBoatBuidingGodMode, "debugSpawnBoatBuidingGodMode", false);
+                Scribe_Values.Look(ref debugDisableSmoothPathing, "debugDisableSmoothPathing", false);
+
+                Scribe_Values.Look(ref debugSpawnBoatBuildingGodMode, "debugSpawnBoatBuidingGodMode", false);
 
                 Scribe_Values.Look(ref debugDrawCannonGrid, "debugDrawCannonGrid", false);
                 Scribe_Values.Look(ref debugDrawNodeGrid, "debugDrawNodeGrid", false);
@@ -88,7 +92,7 @@ namespace RimShips
         {
             var font = Text.Font;
             Text.Font = GameFont.Tiny;
-            string credit = "Settings by Smash Phil";
+            string credit = "Boats! - by Smash Phil";
             Widgets.Label(new Rect(inRect.width - (6 * credit.Count()), inRect.height + 64f, inRect.width, inRect.height), credit);
             Text.Font = font;
 
@@ -210,7 +214,8 @@ namespace RimShips
                 listingStandard.GapLine(16f);
                 listingStandard.CheckboxLabeled("DebugDraftAnyShip".Translate(), ref settings.debugDraftAnyShip, "DebugDraftAnyShipTooltip".Translate());
                 listingStandard.CheckboxLabeled("DebugDisablePathing".Translate(), ref settings.debugDisableWaterPathing, "DebugDisablePathingTooltip".Translate());
-                listingStandard.CheckboxLabeled("debugSpawnBoatBuidingGodMode".Translate(), ref settings.debugSpawnBoatBuidingGodMode);
+                listingStandard.CheckboxLabeled("DebugDisableSmoothPathing".Translate(), ref settings.debugDisableSmoothPathing, "DebugDisableSmoothPathingTooltip".Translate());
+                listingStandard.CheckboxLabeled("debugSpawnBoatBuidingGodMode".Translate(), ref settings.debugSpawnBoatBuildingGodMode);
 
                 listingStandard.CheckboxLabeled("DebugCannonDrawer".Translate(), ref settings.debugDrawCannonGrid);
                 listingStandard.CheckboxLabeled("debugDrawNodeGrid".Translate(), ref settings.debugDrawNodeGrid);
@@ -247,7 +252,8 @@ namespace RimShips
 
             settings.debugDraftAnyShip = false;
             settings.debugDisableWaterPathing = false;
-            settings.debugSpawnBoatBuidingGodMode = false;
+            settings.debugDisableSmoothPathing = true;
+            settings.debugSpawnBoatBuildingGodMode = false;
             settings.debugDrawCannonGrid = false;
             settings.debugDrawNodeGrid = false;
             settings.debugDrawRegions = false;

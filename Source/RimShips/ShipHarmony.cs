@@ -70,9 +70,6 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(typeof(PawnDownedWiggler), nameof(PawnDownedWiggler.WigglerTick)),
                 prefix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(ShipShouldWiggle)));
-            harmony.Patch(original: AccessTools.Method(typeof(Pawn), nameof(Pawn.Kill)),
-                prefix: new HarmonyMethod(typeof(ShipHarmony),
-                nameof(KillAndDespawnShip)));
             harmony.Patch(original: AccessTools.Method(typeof(HediffUtility), nameof(HediffUtility.CanHealNaturally)),
                 prefix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(ShipsDontHeal)));
@@ -123,9 +120,6 @@ namespace RimShips
             harmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.GetGizmos)), prefix: null,
                 postfix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(AddAnchorGizmo)));
-            harmony.Patch(original: AccessTools.Method(typeof(Pawn), nameof(Pawn.GetGizmos)), prefix: null, 
-                postfix: new HarmonyMethod(typeof(ShipHarmony),
-                nameof(GetGizmosForShipPassthrough)));
             harmony.Patch(original: AccessTools.Method(typeof(CaravanFormingUtility), nameof(CaravanFormingUtility.GetGizmos)), prefix: null,
                 postfix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(GizmosForShipCaravans)));
@@ -153,10 +147,10 @@ namespace RimShips
                 nameof(ShipCargoCapacity)));
 
             /* World Pathing */
-            harmony.Patch(original: AccessTools.Method(typeof(WorldPathFinder), nameof(WorldPathFinder.FindPath)), prefix: null, postfix: null,
+            harmony.Patch(original: AccessTools.Method(typeof(WorldOceanPathFinder), nameof(WorldPathFinder.FindPath)), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(FindPathWithShipTranspiler)));
-            harmony.Patch(original: AccessTools.Method(typeof(WorldPathFinder), nameof(WorldPathFinder.FindPath)), 
+            harmony.Patch(original: AccessTools.Method(typeof(WorldOceanPathFinder), nameof(WorldPathFinder.FindPath)), 
                 prefix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(FindPathNoCaravan)));
             harmony.Patch(original: AccessTools.Method(typeof(WorldRoutePlanner), "TryAddWaypoint"), 
@@ -671,89 +665,6 @@ namespace RimShips
         }
 
         /// <summary>
-        /// When a Boat is killed, despawn the Thing, disallow body generation, and spawn a shipwreck building
-        /// </summary>
-        /// <param name="dinfo"></param>
-        /// <param name="__instance"></param>
-        /// <returns></returns>
-        public static bool KillAndDespawnShip(DamageInfo? dinfo, Pawn __instance)
-        {
-            if(HelperMethods.IsShip(__instance))
-            {
-                IntVec3 position = __instance.PositionHeld;
-                Rot4 rotation = __instance.Rotation;
-
-                Map map = __instance.Map;
-                Map mapHeld = __instance.MapHeld;
-                bool flag = __instance.Spawned;
-                bool worldPawn = __instance.IsWorldPawn();
-                Caravan caravan = __instance.GetCaravan();
-                ThingDef shipDef = __instance.GetComp<CompShips>().Props.buildDef;
-
-                Thing thing = ThingMaker.MakeThing(shipDef);
-                thing.SetFactionDirect(__instance.Faction);
-
-                if (Current.ProgramState == ProgramState.Playing)
-                {
-                    Find.Storyteller.Notify_PawnEvent(__instance, AdaptationEvent.Died, null);
-                }
-                if(flag && dinfo != null && dinfo.Value.Def.ExternalViolenceFor(__instance))
-                {
-                    LifeStageUtility.PlayNearestLifestageSound(__instance, (LifeStageAge ls) => ls.soundDeath, 1f);
-                }
-                if(dinfo != null && dinfo.Value.Instigator != null)
-                {
-                    Pawn pawn = dinfo.Value.Instigator as Pawn;
-                    if(pawn != null)
-                    {
-                        RecordsUtility.Notify_PawnKilled(__instance, pawn);
-                    }
-                }
-
-                if(__instance.GetLord() != null)
-                {
-                    __instance.GetLord().Notify_PawnLost(__instance, PawnLostCondition.IncappedOrKilled, dinfo);
-                }
-                if(flag)
-                {
-                    __instance.DropAndForbidEverything(false);
-                }
-
-                if(thing.TryGetComp<CompSavePawnReference>() != null)
-                {
-                    thing.TryGetComp<CompSavePawnReference>().pawnReference = __instance;
-                }
-
-                __instance.meleeVerbs.Notify_PawnKilled();
-                if(flag)
-                {
-                    if (map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterOceanDeep || map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterDeep)
-                    {
-                        IntVec3 lookCell = __instance.Position;
-                        string textPawnList = "";
-                        foreach (Pawn p in __instance?.GetComp<CompShips>()?.AllPawnsAboard)
-                        {
-                            textPawnList += p.LabelShort + ". ";
-                        }
-                        Find.LetterStack.ReceiveLetter("ShipSunkLabel".Translate(), "ShipSunkDeep".Translate(__instance.LabelShort, textPawnList), LetterDefOf.NegativeEvent, new TargetInfo(lookCell, map, false), null, null);
-                        __instance.Destroy();
-                        return false;
-                    }
-                    else
-                    {
-                        Find.LetterStack.ReceiveLetter("ShipSunkLabel".Translate(), "ShipSunkShallow".Translate(__instance.LabelShort), LetterDefOf.NegativeEvent, new TargetInfo(position, map, false), null, null);
-                        __instance.GetComp<CompShips>().DisembarkAll();
-                        __instance.Destroy();
-                    }
-                }
-                thing.HitPoints = thing.MaxHitPoints / 10;
-                Thing t = GenSpawn.Spawn(thing, position, map, rotation, WipeMode.FullRefund, false);
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
         /// Boats do not heal over time, and must be repaired instead
         /// </summary>
         /// <param name="hd"></param>
@@ -978,17 +889,19 @@ namespace RimShips
         /// <returns></returns>
         public static bool DrawSelectionBracketsShips(object obj)
         {
-            if(HelperMethods.IsShip(obj as Pawn))
+            if(HelperMethods.IsShip(obj as BoatPawn))
             {
                 Thing thing = obj as Thing;
                 Vector3[] brackets = new Vector3[4];
-                Vector3 newDrawPos = (thing as Pawn).DrawPosTransformed((thing as Pawn).GetComp<CompShips>().Props.hitboxOffsetX, (thing as Pawn).GetComp<CompShips>().Props.hitboxOffsetZ, (thing as Pawn).GetComp<CompShips>().Angle);
+                float angle = RimShipMod.mod.settings.debugDisableSmoothPathing ? (thing as BoatPawn).GetComp<CompShips>().Angle : (thing as BoatPawn).GetComp<CompShips>().BearingAngle;
+
+                Vector3 newDrawPos = (thing as BoatPawn).DrawPosTransformed((thing as BoatPawn).GetComp<CompShips>().Props.hitboxOffsetX, (thing as BoatPawn).GetComp<CompShips>().Props.hitboxOffsetZ, angle);
 
                 FieldInfo info = AccessTools.Field(typeof(SelectionDrawer), "selectTimes");
                 object o = info.GetValue(null);
-                SPMultiCell.CalculateSelectionBracketPositionsWorldForMultiCellPawns<object>(brackets, thing, newDrawPos, thing.RotatedSize.ToVector2(), (Dictionary<object, float>)o, Vector2.one, (obj as Pawn).GetComp<CompShips>().Angle, 1f);
+                SPMultiCell.CalculateSelectionBracketPositionsWorldForMultiCellPawns<object>(brackets, thing, newDrawPos, thing.RotatedSize.ToVector2(), (Dictionary<object, float>)o, Vector2.one, angle, 1f);
 
-                int num = (obj as Pawn).GetComp<CompShips>().Angle != 0 ? (int)(obj as Pawn).GetComp<CompShips>().Angle : 0;
+                int num = (angle != 0) ? (int)angle : 0;
                 for (int i = 0; i < 4; i++)
                 {
                     Quaternion rotation = Quaternion.AngleAxis((float)num, Vector3.up);
@@ -1330,50 +1243,6 @@ namespace RimShips
             }
         }
 
-        /// <summary>
-        /// Insert Gizmos for Boats that allow drafting, boarding / disembarking, and firing cannons
-        /// </summary>
-        /// <param name="__result"></param>
-        /// <param name="__instance"></param>
-        public static IEnumerable<Gizmo> GetGizmosForShipPassthrough(IEnumerable<Gizmo> __result, Pawn __instance)
-        {
-            IEnumerator<Gizmo> enumerator = __result.GetEnumerator();
-            while(enumerator.MoveNext())
-            {
-                var element = enumerator.Current;
-                yield return element;
-            }
-            if(HelperMethods.IsShip(__instance))
-            {
-                if(__instance.drafter != null)
-                {
-                    IEnumerable<Gizmo> draftGizmos = (IEnumerable<Gizmo>)AccessTools.Method(typeof(Pawn_DraftController), "GetGizmos").Invoke(__instance.drafter, null);
-                    foreach(Gizmo c in draftGizmos)
-                    {
-                        yield return c;
-                    }
-
-                    foreach(Gizmo c2 in __instance.GetComp<CompShips>().CompGetGizmosExtra())
-                    {
-                        yield return c2;
-                    }
-                    if(__instance.FueledBoat())
-                    {
-                        foreach(Gizmo c3 in __instance.GetComp<CompFueledTravel>().CompGetGizmosExtra())
-                        {
-                            yield return c3;
-                        }
-                    }
-                    if(__instance.HasCannons())
-                    {
-                        foreach (Gizmo c4 in __instance.GetComp<CompCannons>().CompGetGizmosExtra())
-                        {
-                            yield return c4;
-                        }
-                    }
-                }
-            }
-        }
 
         /// <summary>
         /// Insert Gizmos from Boat caravans which are still forming. Allows for pawns to join the caravan if the Lord Toile has not yet reached LeaveShip
@@ -1520,6 +1389,11 @@ namespace RimShips
             
             if(HelperMethods.IsShip(___pawn))
             {
+                if(!RimShipMod.mod.settings.debugDisableSmoothPathing)
+                {
+                    Log.Error($"Currently set to [Smooth Pathing], it should not get to this method call. Correcting.");
+                    return false;
+                }
                 __instance.lastPathedTargetPosition = __instance.Destination.Cell;
                 __result = MapExtensionUtility.GetExtensionToMap(___pawn.Map).getShipPathFinder.FindShipPath(___pawn.Position, __instance.Destination, ___pawn, ___peMode);
                 if (!__result.Found) Log.Warning("Path Not Found");
@@ -1590,11 +1464,22 @@ namespace RimShips
                 return true;
             if(HelperMethods.IsShip(pawn))
             {
-                if (debug)
+                if (DebugSettings.godMode)
                 {
                     Log.Message("-> " + clickCell + " | " + pawn.Map.terrainGrid.TerrainAt(clickCell).LabelCap + " | " + MapExtensionUtility.GetExtensionToMap(pawn.Map).getShipPathGrid.CalculatedCostAt(clickCell) +
                         " - " + MapExtensionUtility.GetExtensionToMap(pawn.Map).getShipPathGrid.pathGrid[pawn.Map.cellIndices.CellToIndex(clickCell)]);
                 }
+
+
+                if(!RimShipMod.mod.settings.debugDisableSmoothPathing && pawn.GetComp<CompShips>().Props.diagonalRotation)
+                {
+                    if(!(pawn as BoatPawn).InitiateSmoothPath(clickCell))
+                    {
+                        Log.Error($"Failed Smooth Pathing. Cell: {clickCell} Pawn: {pawn.LabelShort}");
+                    }
+                    return false;
+                }
+
                 
                 int num = GenRadial.NumCellsInRadius(2.9f);
                 int i = 0;
@@ -3794,7 +3679,7 @@ namespace RimShips
 
         public static bool SpawnShipGodMode(Thing newThing, IntVec3 loc, Map map, Rot4 rot, Thing __result, WipeMode wipeMode = WipeMode.Vanish, bool respawningAfterLoad = false)
         {
-            if(!RimShipMod.mod.settings.debugSpawnBoatBuidingGodMode && Prefs.DevMode && DebugSettings.godMode && newThing.def.HasModExtension<SpawnThingBuilt>())
+            if(!RimShipMod.mod.settings.debugSpawnBoatBuildingGodMode && Prefs.DevMode && DebugSettings.godMode && newThing.def.HasModExtension<SpawnThingBuilt>())
             {
                 Pawn ship = PawnGenerator.GeneratePawn(newThing.def.GetModExtension<SpawnThingBuilt>().thingToSpawn);
                 if (!(newThing.def.GetModExtension<SpawnThingBuilt>().soundFinished is null))

@@ -13,10 +13,17 @@ namespace RimShips
         public ThingDef projectile;
         public ThingDef moteCannon;
         public ThingDef moteFlash;
+
+        public List<ThingDef> ammoAllowed = new List<ThingDef>();
+        public int magazineCapacity;
+
         public SoundDef cannonSound;
 
         public string cannonTexPath;
         public string baseCannonTexPath;
+
+        public string gizmoDescription;
+        public string gizmoIconTexPath;
 
         public List<float> centerPoints = new List<float>();
         public List<int> cannonsPerPoint = new List<int>();
