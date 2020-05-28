@@ -79,13 +79,13 @@
 					<match Class="PatchOperationReplace">
 						<xpath>Defs/TerrainDef[defName="WaterShallow"]/designationCategory</xpath>
 						<value>
-							<designationCategory>RimShips</designationCategory>
+							<designationCategory>Vehicles</designationCategory>
 						</value>
 					</match>
 					<nomatch Class="PatchOperationAdd">
 						<xpath>Defs/TerrainDef[defName="WaterShallow"]</xpath>
 						<value>
-							<designationCategory>RimShips</designationCategory>
+							<designationCategory>Vehicles</designationCategory>
 						</value>
 					</nomatch>
 				</li>

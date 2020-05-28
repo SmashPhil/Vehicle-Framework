@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using RimShips.Defs;
-using RimShips.Lords;
+using Vehicles.Defs;
+using Vehicles.Lords;
 using RimWorld;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimShips.Jobs
+namespace Vehicles.Jobs
 {
     public class JobGiver_CarryPawnToShip : ThinkNode_JobGiver
     {
@@ -21,7 +21,7 @@ namespace RimShips.Jobs
             if (pawn2 is null)
                 return null;
             Pawn ship = this.FindShipToDeposit(pawn, pawn2);
-            ShipHandler handler = ship.GetComp<CompShips>().handlers.Find(x => x.role.handlingType == HandlingTypeFlags.None);
+            ShipHandler handler = ship.GetComp<CompVehicle>().handlers.Find(x => x.role.handlingType == HandlingTypeFlags.None);
             return new Job(JobDefOf_Ships.CarryPawnToShip, pawn2, ship)
             {
                 count = 1
@@ -47,8 +47,8 @@ namespace RimShips.Jobs
 
         private Pawn FindShipToDeposit(Pawn pawn, Pawn downedPawn)
         {
-            List<Pawn> ships = pawn.GetLord().ownedPawns.Where(x => HelperMethods.IsShip(x)).ToList();
-            return ships.MaxBy(x => x.GetComp<CompShips>().Props.roles.Find(y => y.handlingType == HandlingTypeFlags.None).slots);
+            List<Pawn> ships = pawn.GetLord().ownedPawns.Where(x => HelperMethods.IsVehicle(x)).ToList();
+            return ships.MaxBy(x => x.GetComp<CompVehicle>().Props.roles.Find(y => y.handlingType == HandlingTypeFlags.None).slots);
         }
     }
 }

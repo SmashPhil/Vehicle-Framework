@@ -5,7 +5,7 @@ using Verse;
 using Verse.AI;
 using SPExtended;
 
-namespace RimShips.Jobs
+namespace Vehicles.Jobs
 {
     public class JobDriver_IdleShip : JobDriver
     {
@@ -19,11 +19,11 @@ namespace RimShips.Jobs
             return Ship != null ? "AwaitOrders".Translate().ToString() : base.GetReport();
         }
 
-        private CompShips Ship
+        private CompVehicle Ship
         {
             get
             {
-                return Pawn.TryGetComp<CompShips>();
+                return Pawn.TryGetComp<CompVehicle>();
             }
         }
 

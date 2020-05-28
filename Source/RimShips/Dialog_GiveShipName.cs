@@ -2,7 +2,7 @@
 using UnityEngine;
 using Verse;
 
-namespace RimShips.Build
+namespace Vehicles.Build
 {
     public class Dialog_GiveShipName : Window
     {

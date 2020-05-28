@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
-using RimShips.Defs;
+using Vehicles.Defs;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimShips.Lords
+namespace Vehicles.Lords
 {
     public class LordToil_PrepareCaravan_GatherDownedPawnsShip : LordToil
     {
@@ -57,7 +57,7 @@ namespace RimShips.Lords
 
                 foreach(Pawn p in ships)
                 {
-                    pawnsOnShips.AddRange(p.GetComp<CompShips>().AllPawnsAboard);
+                    pawnsOnShips.AddRange(p.GetComp<CompVehicle>().AllPawnsAboard);
                 }
 
                 if(pawnsOnShips.Intersect(downedPawns).Count() == downedPawns.Count())

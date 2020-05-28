@@ -1,12 +1,12 @@
 ﻿using System.Linq;
 using RimWorld;
-using RimShips.Defs;
-using RimShips.Lords;
+using Vehicles.Defs;
+using Vehicles.Lords;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimShips.Jobs
+namespace Vehicles.Jobs
 {
     public class  JobGiver_BoardShip : ThinkNode_JobGiver
     {

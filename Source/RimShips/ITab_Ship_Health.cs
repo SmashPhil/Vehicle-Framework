@@ -1,7 +1,7 @@
 ﻿using RimWorld;
 using UnityEngine;
 
-namespace RimShips.UI
+namespace Vehicles.UI
 {
     public class ITab_Ship_Health : ITab
     {
@@ -11,7 +11,7 @@ namespace RimShips.UI
             this.labelKey = "TabBoatHealth";
         }
 
-        public override bool IsVisible => !base.SelPawn.GetComp<CompShips>()?.beached ?? false;
+        public override bool IsVisible => !base.SelPawn.GetComp<CompVehicle>()?.beached ?? false;
 
         protected override void FillTab()
         {

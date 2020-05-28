@@ -1,8 +1,8 @@
 ﻿using System.Linq;
-using RimShips.AI;
+using Vehicles.AI;
 using Verse;
 
-namespace RimShips
+namespace Vehicles
 {
     public class WaterRegionLink
     {

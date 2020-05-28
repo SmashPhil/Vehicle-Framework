@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimShips.AI
+namespace Vehicles.AI
 {
     public class RegionCostCalculatorShips
     {
@@ -285,7 +285,7 @@ namespace RimShips.AI
                     if(!RegionCostCalculatorShips.tmpDistances.TryGetValue(this.map.cellIndices.CellToIndex(this.linkTargetCells[regionLink]), out num))
                     {
                         Log.ErrorOnce("Dijkstra couldn't reach one of the cells even though they are in the same region. There is most likely something wrong with the " +
-                            "neighbor nodes getter. Error occurred in ShipPathFinder of RimShips", 1938471531, false);
+                            "neighbor nodes getter. Error occurred in ShipPathFinder of Vehicles", 1938471531, false);
                         num = 100f;
                     }
                     outDistances.Add(new Pair<WaterRegionLink, int>(regionLink, (int)num));

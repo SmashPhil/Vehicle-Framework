@@ -1,11 +1,11 @@
-﻿using RimShips.Defs;
+﻿using Vehicles.Defs;
 using RimWorld;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
 
-namespace RimShips.Jobs
+namespace Vehicles.Jobs
 {
     public class JobGiver_PrepareCaravan_GatheringShip : ThinkNode_JobGiver
     {

@@ -3,9 +3,9 @@ using System.Linq;
 using Verse;
 using RimWorld;
 using HarmonyLib;
-using RimShips.Defs;
+using Vehicles.Defs;
 
-namespace RimShips
+namespace Vehicles
 {
 
     public class HarmonyPatches_Bootstrap : Mod

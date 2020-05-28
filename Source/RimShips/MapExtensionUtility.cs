@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Verse;
 
-namespace RimShips.AI
+namespace Vehicles.AI
 {
     public static class MapExtensionUtility
     {

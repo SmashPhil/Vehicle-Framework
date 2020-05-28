@@ -6,27 +6,27 @@ using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimShips.UI
+namespace Vehicles.UI
 {
     public class ITab_Ship_Cargo : ITab
     {
         public ITab_Ship_Cargo()
         {
-            this.size = new Vector2(460f, 450f);
-            this.labelKey = "TabCargo";
+            size = new Vector2(460f, 450f);
+            labelKey = "TabCargo";
         }
 
-        public override bool IsVisible => !this.SelPawnForCargo.GetComp<CompShips>().beached;
+        public override bool IsVisible => !SelPawnForCargo.GetComp<CompVehicle>().beached;
 
-        private Pawn SelPawnForCargo
+        private VehiclePawn SelPawnForCargo
         {
             get
             {
-                if(!(base.SelPawn is null) && !(base.SelPawn.TryGetComp<CompShips>() is null) )
+                if(!(SelPawn is null) && !(SelPawn.TryGetComp<CompVehicle>() is null) )
                 {
-                    return base.SelPawn;
+                    return SelPawn as VehiclePawn;
                 }
-                throw new InvalidOperationException("Cargo tab on non-pawn ship " + base.SelThing);
+                throw new InvalidOperationException("Cargo tab on non-pawn ship " + SelThing);
             }
         }
 
@@ -44,17 +44,17 @@ namespace RimShips.UI
             Widgets.BeginScrollView(outRect, ref scrollPosition, viewRect, true);
             float num = 0f;
             TryDrawMassInfo(ref num, viewRect.width);
-            if(SelPawnForCargo.def.GetCompProperties<CompProperties_Ships>().nameable)
+            if(SelPawnForCargo.def.GetCompProperties<CompProperties_Vehicle>().nameable)
             {
-                Rect rectRename = new Rect(size.x - 55f, 0f, 30f, 30f);
+                Rect rectRename = new Rect(size.x - 75f, 0f, 30f, 30f);
                 TooltipHandler.TipRegion(rectRename, "RenameShip".Translate(SelPawnForCargo.LabelShort));
-                if (Widgets.ButtonImage(rectRename, TexCommandShips.Rename))
+                if (Widgets.ButtonImage(rectRename, TexCommandVehicles.Rename))
                 {
-                    SelPawnForCargo.GetComp<CompShips>().Rename();
+                    SelPawnForCargo.GetComp<CompVehicle>().Rename();
                 }
                 /*Rect rectRecolor = new Rect(this.size.x - 85f, 0f, 30f, 30f);
                 TooltipHandler.TipRegion(rectRecolor, "RecolorFlags".Translate());
-                if(Widgets.ButtonImage(rectRecolor, TexCommandShips.Rename))
+                if(Widgets.ButtonImage(rectRecolor, TexCommandVehicles.Rename))
                 {
 
                 }*/
@@ -70,6 +70,17 @@ namespace RimShips.UI
                 }
                 ITab_Ship_Cargo.workingInvList.Clear();
             }
+            if(IsVisible && !SelPawnForCargo.GetComp<CompVehicle>().cargoToLoad.NullOrEmpty())
+            {
+                foreach (TransferableOneWay transferable in SelPawnForCargo.GetComp<CompVehicle>().cargoToLoad)
+                {
+                    if (transferable.AnyThing != null && transferable.CountToTransfer > 0 && !SelPawnForCargo.inventory.innerContainer.Contains(transferable.AnyThing))
+                    {
+                        DrawThingRow(ref num, viewRect.width, transferable.AnyThing, false, true);
+                    }
+                }
+            }
+
             if(Event.current.type is EventType.Layout)
             {
                 scrollViewHeight = num + 30f;
@@ -80,17 +91,23 @@ namespace RimShips.UI
             Text.Anchor = TextAnchor.UpperLeft;
         }
 
-        private void DrawThingRow(ref float y, float width, Thing thing, bool inventory = false)
+        private void DrawThingRow(ref float y, float width, Thing thing, bool inventory = false, bool missingFromInventory = false)
         {
+            var color = GUI.color;
+
+
+            if (missingFromInventory)
+                GUI.color = MissingItemColor;
+
             Rect rect = new Rect(0f, y, width, ThingIconSize);
             Widgets.InfoCardButton(rect.width - 24f, y, thing);
             rect.width -= 24f;
 
-            if(inventory && this.SelPawnForCargo.Spawned)
+            if(inventory && SelPawnForCargo.Spawned)
             {
                 Rect rectDrop = new Rect(rect.width - 24f, y, 24f, 24f);
                 TooltipHandler.TipRegion(rectDrop, "DropThing".Translate());
-                if(Widgets.ButtonImage(rectDrop, TexCommandShips.Drop))
+                if(Widgets.ButtonImage(rectDrop, TexCommandVehicles.Drop))
                 {
                     SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
                     InterfaceDrop(thing);
@@ -102,7 +119,7 @@ namespace RimShips.UI
             rect2.xMin = rect2.xMax - 60f;
             CaravanThingsTabUtility.DrawMass(thing, rect2);
             rect.width -= 60f;
-
+            GUI.color = color;
             if(Mouse.IsOver(rect))
             {
                 GUI.color = ITab_Ship_Cargo.HighlightColor;
@@ -112,8 +129,12 @@ namespace RimShips.UI
             {
                 Widgets.ThingIcon(new Rect(4f, y, ThingIconSize, ThingRowheight), thing, 1f);
             }
+
             Text.Anchor = TextAnchor.MiddleLeft;
-            GUI.color = ITab_Ship_Cargo.ThingLabelColor;
+            if (!missingFromInventory)
+                GUI.color = ITab_Ship_Cargo.ThingLabelColor;
+            else
+                GUI.color = MissingItemColor;
             Rect rect3 = new Rect(ThingLeftX, y, rect.width - ThingLeftX, rect.height);
             string text = thing.LabelCap;
             Text.WordWrap = false;
@@ -130,22 +151,32 @@ namespace RimShips.UI
             }
             TooltipHandler.TipRegion(rect, text2);
             y += ThingRowheight;
+
+            GUI.color = color;
         }
         
         private void TryDrawMassInfo(ref float curY, float width)
         {
-            if (this.SelPawnForCargo.GetComp<CompShips>().beached)
+            if (SelPawnForCargo.GetComp<CompVehicle>().beached)
                 return;
             Rect rect = new Rect(0f, curY, width, 22f);
-            float num = MassUtility.GearAndInventoryMass(this.SelPawnForCargo);
-            float num2 = MassUtility.Capacity(this.SelPawnForCargo, null);
+            float cannonsNum = 0f;
+            if(SelPawnForCargo.TryGetComp<CompCannons>() != null)
+            {
+                foreach(CannonHandler cannon in SelPawnForCargo.GetComp<CompCannons>().Cannons)
+                {
+                    cannonsNum += cannon.loadedAmmo is null ? 0f : cannon.loadedAmmo.BaseMass * cannon.shellCount;
+                }
+            }
+            float num = MassUtility.GearAndInventoryMass(SelPawnForCargo) + cannonsNum;
+            float num2 = MassUtility.Capacity(SelPawnForCargo, null);
             Widgets.Label(rect, "MassCarried".Translate(num.ToString("0.##"), num2.ToString("0.##")));
             curY += 22f;
         }
 
         private void InterfaceDrop(Thing t)
         {
-            this.SelPawnForCargo.inventory.innerContainer.TryDrop(t, this.SelPawnForCargo.Position, this.SelPawnForCargo.Map, ThingPlaceMode.Near, out Thing thing, null, null);
+            SelPawnForCargo.inventory.innerContainer.TryDrop(t, SelPawnForCargo.Position, SelPawnForCargo.Map, ThingPlaceMode.Near, out Thing thing, null, null);
         }
 
         private Vector2 scrollPosition = Vector2.zero;
@@ -157,6 +188,8 @@ namespace RimShips.UI
         public static readonly Color ThingLabelColor = new Color(0.9f, 0.9f, 0.9f, 1f);
 
         public static readonly Color HighlightColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+
+        public static readonly Color MissingItemColor = new Color(0.8f, 0, 0, 0.5f);
 
         private const float ThingIconSize = 28f;
 

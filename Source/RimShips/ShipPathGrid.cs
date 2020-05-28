@@ -3,7 +3,7 @@ using System.Text;
 using HarmonyLib;
 using Verse;
 
-namespace RimShips.AI
+namespace Vehicles.AI
 {
     public sealed class ShipPathGrid
     {

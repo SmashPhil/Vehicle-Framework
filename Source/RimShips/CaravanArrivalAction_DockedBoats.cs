@@ -6,7 +6,7 @@ using Verse;
 using RimWorld;
 using RimWorld.Planet;
 
-namespace RimShips
+namespace Vehicles
 {
     public class CaravanArrivalAction_DockedBoats : CaravanArrivalAction
     {

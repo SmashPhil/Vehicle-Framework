@@ -7,7 +7,7 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 
-namespace RimShips.Jobs
+namespace Vehicles.Jobs
 {
     public class JobDriver_RefuelBoat : JobDriver
 	{

@@ -8,7 +8,7 @@ using RimWorld;
 using UnityEngine;
 using SPExtended;
 
-namespace RimShips.UI
+namespace Vehicles.UI
 {
     public class ITab_Ship_Upgrades : ITab
     {
@@ -38,11 +38,11 @@ namespace RimShips.UI
             }
         }
 
-        private CompShips BoatComp
+        private CompVehicle BoatComp
         {
             get
             {
-                return SelPawnUpgrade.GetComp<CompShips>();
+                return SelPawnUpgrade.GetComp<CompVehicle>();
             }
         }
 
@@ -61,12 +61,12 @@ namespace RimShips.UI
             GUI.BeginGroup(rect2);
             Text.Font = GameFont.Small;
             GUI.color = Color.white;
-            float num = 0f;
 
             UpgradeNode additionalStatNode = null;
             UpgradeNode highlightedPreMetNode = null;
 
-            Rect upgradeButtonRect = new Rect(screenWidth - BottomDisplayedOffset - 80f, BottomWindowEdge - 30f, 75, 25f);
+            Rect upgradeButtonRect = new Rect(screenWidth - BottomDisplayedOffset - 80f, BottomWindowEdge - 30f, 75f, 25f);
+            Rect cancelButtonRect = new Rect(LeftWindowEdge + 5f, BottomWindowEdge - 30f, 75f, 25f);
             Rect displayRect = new Rect(Comp.Props.displayUICoord.x, Comp.Props.displayUICoord.y, Comp.Props.displayUISize.x, Comp.Props.displayUISize.y);
 
             if(RimShipMod.mod.settings.debugDrawNodeGrid)
@@ -82,12 +82,12 @@ namespace RimShips.UI
                 Text.Font = font;
             }
 
-            if (selectedNode != null)
+            if (selectedNode != null && !Comp.CurrentlyUpgrading)
             {
                 float imageWidth = TotalIconSizeScalar / selectedNode.UpgradeImage.width;
                 float imageHeight = TotalIconSizeScalar / selectedNode.UpgradeImage.height;
                 Rect selectedRect = new Rect(GridOrigin.x + (GridSpacing.x * selectedNode.GridCoordinate.x) - (imageWidth / 2), GridOrigin.y + (GridSpacing.y * selectedNode.GridCoordinate.z) - (imageHeight / 2) + (TopPadding * 2), imageWidth, imageHeight);
-                selectedRect.ContractedBy(3f);
+                selectedRect = selectedRect.ExpandedBy(2f);
                 GUI.DrawTexture(selectedRect, BaseContent.WhiteTex);
             }
 
@@ -103,6 +103,8 @@ namespace RimShips.UI
                     SoundDefOf.Building_Complete.PlayOneShot(SelPawnUpgrade);
 
                     Comp.StartUnlock(selectedNode);
+                    if (DebugSettings.godMode)
+                        Comp.FinishUnlock();
                     selectedNode.upgradePurchased = true;
                     selectedNode = null;
                 }
@@ -111,10 +113,25 @@ namespace RimShips.UI
                     Messages.Message("MissingPrerequisiteUpgrade".Translate(), MessageTypeDefOf.RejectInput, false);
                 }
             }
+            
+            if(Comp.CurrentlyUpgrading)
+            {
+                if(Widgets.ButtonText(cancelButtonRect, "CancelUpgrade".Translate()))
+                    Comp.RefundUnlock();
+            }
+            else if(selectedNode != null && Comp.NodeListed(selectedNode).upgradeActive && Comp.LastNodeUnlocked(selectedNode))
+            {
+                if(Widgets.ButtonText(cancelButtonRect, "RefundUpgrade".Translate()))
+                    Comp.RefundUnlock(Comp.NodeListed(selectedNode));
+            }
+            else
+            {
+                Widgets.ButtonText(cancelButtonRect, string.Empty);
+            }
 
             foreach(UpgradeNode upgradeNode in Comp.upgradeList)
             {
-                if(upgradeNode.prerequisiteNodes?.Any() ?? false)
+                if(!upgradeNode.prerequisiteNodes.NullOrEmpty())
                 {
                     foreach(UpgradeNode prerequisite in Comp.upgradeList.FindAll(x => upgradeNode.prerequisiteNodes.Contains(x.upgradeID)))
                     {
@@ -129,17 +146,20 @@ namespace RimShips.UI
                         {
                             try
                             {
-                                UpgradeNode preUpgrade = Comp.upgradeList.First(x => x.upgradeID == upgradeNode.disableIfUpgradeNodeEnabled);
+                                UpgradeNode preUpgrade = Comp.NodeListed(upgradeNode.disableIfUpgradeNodeEnabled);
                                 float imageWidth = TotalIconSizeScalar / preUpgrade.UpgradeImage.width;
                                 float imageHeight = TotalIconSizeScalar / preUpgrade.UpgradeImage.height;
                                 Rect preUpgradeRect = new Rect(GridOrigin.x + (GridSpacing.x * preUpgrade.GridCoordinate.x) - (imageWidth/2), GridOrigin.y + (GridSpacing.y * preUpgrade.GridCoordinate.z) - (imageHeight/2) + (TopPadding*2), imageWidth, imageHeight);
-                                if(preUpgrade.upgradePurchased)
+                                if(!Comp.CurrentlyUpgrading)
                                 {
-                                    color = Color.black;
-                                }
-                                else if(Mouse.IsOver(preUpgradeRect))
-                                {
-                                    color = Color.red;
+                                    if (preUpgrade.upgradePurchased)
+                                    {
+                                        color = Color.black;
+                                    }
+                                    else if(Mouse.IsOver(preUpgradeRect))
+                                    {
+                                        color = Color.red;
+                                    }
                                 }
                             }
                             catch
@@ -151,6 +171,7 @@ namespace RimShips.UI
                     }
                 }
             }
+
             bool preDrawingDescriptions = false;
             for(int i = 0; i < Comp.upgradeList.Count; i++)
             {
@@ -161,6 +182,15 @@ namespace RimShips.UI
                 Rect upgradeRect = new Rect(GridOrigin.x + (GridSpacing.x * upgradeNode.GridCoordinate.x) - (imageWidth/2), GridOrigin.y + (GridSpacing.y * upgradeNode.GridCoordinate.z) - (imageHeight/2) + (TopPadding*2), imageWidth, imageHeight);
                 Widgets.DrawTextureFitted(upgradeRect, upgradeNode.UpgradeImage, 1);
                 
+                if(!Comp.PrerequisitesMet(upgradeNode))
+                {
+                    Widgets.DrawBoxSolid(upgradeRect, PrerequisitesNotMetColor);
+                }
+                else if(!upgradeNode.upgradeActive || !upgradeNode.upgradePurchased)
+                {
+                    Widgets.DrawBoxSolid(upgradeRect, NotUpgradedColor);
+                }
+
                 if(!upgradeNode.prerequisiteNodes.Any())
                 {
                     if(!string.IsNullOrEmpty(upgradeNode.rootNodeLabel))
@@ -175,39 +205,42 @@ namespace RimShips.UI
                 GUIStyle infoLabelFont = new GUIStyle(Text.CurFontStyle);
                 infoLabelFont.fontStyle = FontStyle.Bold;
                 
-                if(Mouse.IsOver(upgradeRect))
+                if(!Comp.CurrentlyUpgrading)
                 {
-                    preDrawingDescriptions = true;
-
-                    if(!upgradeNode.upgradePurchased)
+                    if(Mouse.IsOver(upgradeRect))
                     {
-                        additionalStatNode = upgradeNode;
-                        highlightedPreMetNode = upgradeNode;
-                    }
-                    HelperMethods.LabelStyled(infoLabelRect, upgradeNode.label, infoLabelFont);
+                        preDrawingDescriptions = true;
 
-                    Widgets.Label(new Rect(infoLabelRect.x, infoLabelRect.y + 20f, infoLabelRect.width, 140f), upgradeNode.informationHighlighted);
-                }
-
-                if((Mouse.IsOver(upgradeRect) || upgradeNode.upgradePurchased) && Comp.PrerequisitesMet(upgradeNode))
-                {
-                    GUI.DrawTexture(upgradeRect, TexUI.HighlightTex);
-                }
-
-                if(!upgradeNode.upgradePurchased && Comp.PrerequisitesMet(upgradeNode))
-                {
-                    if(Widgets.ButtonInvisible(buttonRect,true))
-                    {
-
-                        if (selectedNode != upgradeNode)
+                        if(!upgradeNode.upgradePurchased)
                         {
-                            selectedNode = upgradeNode;
-                            SoundDefOf.Checkbox_TurnedOn.PlayOneShotOnCamera();
+                            additionalStatNode = upgradeNode;
+                            highlightedPreMetNode = upgradeNode;
                         }
-                        else
+                        HelperMethods.LabelStyled(infoLabelRect, upgradeNode.label, infoLabelFont);
+
+                        Widgets.Label(new Rect(infoLabelRect.x, infoLabelRect.y + 20f, infoLabelRect.width, 140f), upgradeNode.informationHighlighted);
+                    }
+
+                    if((Mouse.IsOver(upgradeRect)) && Comp.PrerequisitesMet(upgradeNode) && !upgradeNode.upgradeActive)
+                    {
+                        GUI.DrawTexture(upgradeRect, TexUI.HighlightTex);
+                    }
+
+                    if(Comp.PrerequisitesMet(upgradeNode))
+                    {
+                        if(Widgets.ButtonInvisible(buttonRect,true))
                         {
-                            selectedNode = null;
-                            SoundDefOf.Checkbox_TurnedOff.PlayOneShotOnCamera();
+
+                            if (selectedNode != upgradeNode)
+                            {
+                                selectedNode = upgradeNode;
+                                SoundDefOf.Checkbox_TurnedOn.PlayOneShotOnCamera();
+                            }
+                            else
+                            {
+                                selectedNode = null;
+                                SoundDefOf.Checkbox_TurnedOff.PlayOneShotOnCamera();
+                            }
                         }
                     }
                 }
@@ -227,7 +260,7 @@ namespace RimShips.UI
             }
 
             Rect labelRect = new Rect(0f, 0f, rect2.width - 16f, 20f);
-            num += labelRect.height;
+
             if(!RimShipMod.mod.settings.debugDrawNodeGrid)
             {
                 Widgets.Label(labelRect, SelPawnUpgrade.Label);
@@ -236,15 +269,15 @@ namespace RimShips.UI
             Color lineColor = GUI.color;
             GUI.color = new Color(0.3f, 0.3f, 0.3f, 1f);
 
-            Widgets.DrawLineHorizontal(0, num, screenWidth);
+            Widgets.DrawLineHorizontal(0, TopViewPadding, screenWidth);
             Widgets.DrawLineHorizontal(0, BottomWindowEdge, screenWidth);
             Widgets.DrawLineHorizontal(0, screenHeight - SideDisplayedOffset - 1f, screenWidth);
 
-            Widgets.DrawLineVertical(0, num, screenHeight);
-            Widgets.DrawLineVertical(screenWidth - BottomDisplayedOffset - 1f, num, screenHeight);
+            Widgets.DrawLineVertical(0, TopViewPadding, screenHeight);
+            Widgets.DrawLineVertical(screenWidth - BottomDisplayedOffset - 1f, TopViewPadding, screenHeight);
             
             if(RimShipMod.mod.settings.drawUpgradeInformationScreen)
-                Widgets.DrawLineVertical(LeftWindowEdge, num, screenHeight);
+                Widgets.DrawLineVertical(LeftWindowEdge, TopViewPadding, screenHeight);
             GUI.color = lineColor;
 
             if(RimShipMod.mod.settings.drawUpgradeInformationScreen)
@@ -283,7 +316,7 @@ namespace RimShips.UI
                             GUI.color = color;
                         }
 
-                        foreach(CannonHandler cannon in Comp.upgradeList.Where(x => x.upgradeActive && (x.cannonsUnlocked?.Any() ?? false)).SelectMany(y => y.cannonsUnlocked))
+                        foreach(CannonHandler cannon in Comp.upgradeList.Where(x => x.upgradeActive && !x.cannonsUnlocked.NullOrEmpty()).SelectMany(y => y.cannonsUnlocked))
                         {
                             PawnKindLifeStage biggestStage = SelPawnUpgrade.kindDef.lifeStages.MaxBy(x => x.bodyGraphicData?.drawSize ?? Vector2.zero);
                             float baseWidth = (Comp.Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.baseCannonDrawSize.x;
@@ -312,7 +345,7 @@ namespace RimShips.UI
                                 Widgets.DrawLineVertical(cannonDrawnRect.x + cannonDrawnRect.width, cannonDrawnRect.y, cannonDrawnRect.height);
                             }
                         }
-                        if(selectedNode?.cannonsUnlocked?.Any() ?? false)
+                        if(!selectedNode?.cannonsUnlocked.NullOrEmpty() ?? false)
                         {
                             foreach(CannonHandler cannon in selectedNode.cannonsUnlocked)
                             {
@@ -345,7 +378,7 @@ namespace RimShips.UI
                                 }
                             }
                         }
-                        else if((highlightedPreMetNode?.cannonsUnlocked?.Any() ?? false) && !highlightedPreMetNode.upgradeActive)
+                        else if((!highlightedPreMetNode?.cannonsUnlocked.NullOrEmpty() ?? false) && !highlightedPreMetNode.upgradeActive)
                         {
                             foreach(CannonHandler cannon in highlightedPreMetNode.cannonsUnlocked)
                             {
@@ -384,9 +417,24 @@ namespace RimShips.UI
                     }
                 }
             }
+            if (additionalStatNode != null)
+                DrawCostItems(additionalStatNode);
+            else if (selectedNode != null)
+                DrawCostItems(selectedNode);
 
             DrawStats(additionalStatNode);
             
+            if(Comp.CurrentlyUpgrading)
+            {
+                Rect greyedViewRect = new Rect(0, TopViewPadding, LeftWindowEdge, BottomWindowEdge - TopViewPadding);
+                Widgets.DrawBoxSolid(greyedViewRect, LockScreenColor);
+                Rect greyedLabelRect = new Rect(LeftWindowEdge / 2 - 17f, (BottomWindowEdge - TopViewPadding) / 2, 100f, 100f);
+                string timeFormatted = RimShipMod.mod.settings.useInGameTime ? HelperMethods.TicksToGameTime(Comp.TimeLeftUpgrading) : HelperMethods.TicksToRealTime(Comp.TimeLeftUpgrading);
+                Widgets.Label(greyedLabelRect, timeFormatted);
+
+                DrawCostItems(null, true);
+            }
+
             GUI.EndGroup();
 
             GUI.color = Color.white;
@@ -423,7 +471,50 @@ namespace RimShips.UI
             GUI.color = color;
         }
 
-        private void DrawStats(UpgradeNode nodeRect)
+        private void DrawCostItems(UpgradeNode node = null, bool currentlyUpgrading = false)
+        {
+            int i = 0;
+            float offset = 0;
+            if(currentlyUpgrading)
+            {
+                offset = 25f;
+                foreach(KeyValuePair<ThingDef, int> item in Comp.NodeUnlocking.cost)
+                {
+                    string itemCount = $"{Comp.NodeUnlocking.itemContainer.TotalStackCountOfDef(item.Key)}/{item.Value}";
+                    Vector2 textSize = Text.CalcSize(itemCount);
+
+                    Rect itemCostRect = new Rect( (LeftWindowEdge / 2) - (textSize.x / 2), ((BottomWindowEdge - TopViewPadding) / 2) + offset, 20f, 20f);
+                    GUI.DrawTexture(itemCostRect, item.Key.uiIcon);
+                    
+                    Rect itemLabelRect = new Rect(itemCostRect.x + 25f, itemCostRect.y, textSize.x, 20f);
+                    Widgets.Label(itemLabelRect, itemCount);
+                    i++;
+                    offset += textSize.y + 5;
+                }
+            }
+            else
+            {
+                if (node is null)
+                    return;
+                Rect timeRect = new Rect(5f, screenHeight - SideDisplayedOffset * 2, LeftWindowEdge, 20f);
+                string timeForUpgrade = RimShipMod.mod.settings.useInGameTime ? HelperMethods.TicksToGameTime(node.UpgradeTimeParsed) : HelperMethods.TicksToRealTime(node.UpgradeTimeParsed);
+                Widgets.Label(timeRect, timeForUpgrade);
+
+                foreach(KeyValuePair<ThingDef, int> item in node.cost)
+                {
+                    Rect itemCostRect = new Rect(5f + offset, screenHeight - SideDisplayedOffset - 23f, 20f, 20f);
+                    GUI.DrawTexture(itemCostRect, item.Key.uiIcon);
+                    string itemCount = "x" + item.Value;
+                    Vector2 textSize = Text.CalcSize(itemCount);
+                    Rect itemLabelRect = new Rect(25f + offset, itemCostRect.y, textSize.x, 20f);
+                    Widgets.Label(itemLabelRect, itemCount);
+                    i++;
+                    offset += textSize.x + 30f;
+                }
+            }
+        }
+
+        private void DrawStats(UpgradeNode node)
         {
             float barWidth = screenWidth - LeftWindowEdge - EdgePadding * 2 - BottomDisplayedOffset - 1f; //219
 
@@ -433,9 +524,9 @@ namespace RimShips.UI
             float fuelEffAdded = 0f;
             float fuelCapAdded = 0f;
 
-            if(nodeRect != null)
+            if(node != null)
             {
-                foreach(KeyValuePair<StatUpgrade,float> stat in nodeRect.values)
+                foreach(KeyValuePair<StatUpgrade,float> stat in node.values)
                 {
                     switch(stat.Key)
                     {
@@ -490,6 +581,8 @@ namespace RimShips.UI
 
         private const float BottomDisplayedOffset = 20f;
 
+        private const float TopViewPadding = 20f;
+
         private const float LeftWindowEdge = 600;
 
         private const float screenWidth = 850f;
@@ -501,6 +594,12 @@ namespace RimShips.UI
         public static readonly Color ThingLabelColor = new Color(0.9f, 0.9f, 0.9f, 1f);
 
         public static readonly Color HighlightColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+
+        public static readonly Color NotUpgradedColor = new Color(0, 0, 0, 0.5f);
+
+        public static readonly Color PrerequisitesNotMetColor = new Color(0, 0, 0, 0.8f);
+
+        public static readonly Color LockScreenColor = new Color(0, 0, 0, 0.6f);
 
         private const float TotalIconSizeScalar = 6000f;
 

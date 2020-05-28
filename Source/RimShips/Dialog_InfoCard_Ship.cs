@@ -6,10 +6,10 @@ using UnityEngine;
 using Verse;
 using Verse.Sound;
 using RimWorld;
-using RimShips.Defs;
+using Vehicles.Defs;
 using HarmonyLib;
 
-namespace RimShips.UI
+namespace Vehicles.UI
 {
     public class Dialog_InfoCard_Ship : Window
     {

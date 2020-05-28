@@ -1,7 +1,7 @@
-﻿using RimShips.AI;
+﻿using Vehicles.AI;
 using Verse;
 
-namespace RimShips
+namespace Vehicles
 {
     public static class WaterRegionTypeUtility
     {

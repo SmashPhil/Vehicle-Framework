@@ -3,7 +3,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace RimShips.AI
+namespace Vehicles.AI
 {
     public static class GenGridShips
     {

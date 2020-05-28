@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Verse;
 
-namespace RimShips
+namespace Vehicles
 {
     public delegate bool WaterRegionEntryPredicate(WaterRegion from, WaterRegion to);
 

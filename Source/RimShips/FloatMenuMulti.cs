@@ -3,7 +3,7 @@ using System.Linq;
 using Verse;
 using UnityEngine;
 
-namespace RimShips
+namespace Vehicles
 {
     public class FloatMenuMulti : FloatMenu
     {

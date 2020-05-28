@@ -6,26 +6,28 @@ using System.Threading.Tasks;
 using Verse;
 using Verse.Sound;
 using RimWorld;
-using RimShips.Defs;
+using Vehicles.Defs;
 
-namespace RimShips
+namespace Vehicles
 {
     public class CompUpgradeTree : ThingComp
     {
         public CompProperties_UpgradeTree Props => (CompProperties_UpgradeTree)props;
 
-        public Pawn Pawn => parent as Pawn;
+        public VehiclePawn Pawn => parent as VehiclePawn;
 
         public List<UpgradeNode> upgradeList = new List<UpgradeNode>();
 
-        public UpgradeNode nodeUnlocking;
+        public int TimeLeftUpgrading => CurrentlyUpgrading ? NodeUnlocking.GetSetTicks() : 0;
+        public bool CurrentlyUpgrading => NodeUnlocking != null && NodeUnlocking.upgradePurchased && !NodeUnlocking.upgradeActive;
+        public UpgradeNode NodeUnlocking { get; set; }
 
         public UpgradeNode RootNode(UpgradeNode child)
         {
             UpgradeNode parentOfChild = child;
             while(parentOfChild.prerequisiteNodes.Any())
             {
-                parentOfChild = upgradeList.Find(x => x.upgradeID == parentOfChild.prerequisiteNodes.First());
+                parentOfChild = NodeListed(parentOfChild.prerequisiteNodes.First());
             }
             return parentOfChild;
         }
@@ -40,28 +42,100 @@ namespace RimShips
             return !string.IsNullOrEmpty(node.disableIfUpgradeNodeEnabled) && upgradeList.FirstOrDefault(x => x.upgradeID == node.disableIfUpgradeNodeEnabled).upgradeActive;
         }
 
+        public UpgradeNode NodeListed(UpgradeNode node)
+        {
+            UpgradeNode matchedNode = upgradeList.Find(x => x.upgradeID == node.upgradeID);
+            if(matchedNode is null)
+            {
+                Log.Error($"Unable to locate node {node.upgradeID} in upgrade list. Cross referencing comp upgrades?");
+                return node;
+            }
+            return matchedNode;
+        }
+
+        public UpgradeNode NodeListed(string upgradeID)
+        {
+            UpgradeNode matchedNode = upgradeList.Find(x => x.upgradeID == upgradeID);
+            if(matchedNode is null)
+            {
+                Log.Error($"Unable to locate node {upgradeID} in upgrade list. Cross referencing comp upgrades?");
+                return null;
+            }
+            return matchedNode;
+        }
+
+        public bool LastNodeUnlocked(UpgradeNode node)
+        {
+            UpgradeNode nodeListed = NodeListed(node);
+            List<UpgradeNode> unlocksNodes = upgradeList.FindAll(x => x.prerequisiteNodes.Contains(nodeListed.upgradeID));
+            return !unlocksNodes.Any(x => x.upgradeActive);
+        }
+
+        public void RefundUnlock()
+        {
+            if (NodeUnlocking is null)
+                return;
+            NodeUnlocking.itemContainer.TryDropAll(Pawn.Position, Pawn.Map, ThingPlaceMode.Near);
+            NodeUnlocking.ResetNode();
+        }
+
+        public void RefundUnlock(UpgradeNode node)
+        {
+            if (node is null)
+                return;
+            if (!node.upgradeActive)
+                return;
+            node.itemContainer.TryDropAll(Pawn.Position, Pawn.Map, ThingPlaceMode.Near);
+            foreach(KeyValuePair<StatUpgrade, float> stat in node.values)
+            {
+                switch(stat.Key)
+                {
+                    case StatUpgrade.Armor:
+                        Pawn.GetComp<CompVehicle>().ArmorPoints -= stat.Value;
+                        break;
+                    case StatUpgrade.Speed:
+                        Pawn.GetComp<CompVehicle>().MoveSpeedModifier -= stat.Value;
+                        break;
+                    case StatUpgrade.CargoCapacity:
+                        Pawn.GetComp<CompVehicle>().CargoCapacity -= stat.Value;
+                        break;
+                    case StatUpgrade.FuelConsumptionRate:
+                        Pawn.GetComp<CompFueledTravel>().FuelEfficiency -= stat.Value;
+                        break;
+                    case StatUpgrade.FuelCapacity:
+                        Pawn.GetComp<CompFueledTravel>().FuelCapacity -= stat.Value;
+                        break;
+                    case StatUpgrade.Cannon:
+                        break;
+                    default:
+                        throw new NotImplementedException("StatUpgrade Not Valid");
+                }
+            }
+            node.ResetNode();
+        }
+
         public void StartUnlock(UpgradeNode node)
         {
-            nodeUnlocking = upgradeList.Find(x => x.upgradeID == node.upgradeID);
-            nodeUnlocking.ResetTimer();
+            NodeUnlocking = NodeListed(node);
+            NodeUnlocking.ResetTimer();
         }
 
         public bool FinishUnlock()
         {
             try
             {
-                foreach(KeyValuePair<StatUpgrade, float> stat in nodeUnlocking.values)
+                foreach(KeyValuePair<StatUpgrade, float> stat in NodeUnlocking.values)
                 {
                     switch(stat.Key)
                     {
                         case StatUpgrade.Armor:
-                            Pawn.GetComp<CompShips>().ArmorPoints += stat.Value;
+                            Pawn.GetComp<CompVehicle>().ArmorPoints += stat.Value;
                             break;
                         case StatUpgrade.Speed:
-                            Pawn.GetComp<CompShips>().MoveSpeedModifier += stat.Value;
+                            Pawn.GetComp<CompVehicle>().MoveSpeedModifier += stat.Value;
                             break;
                         case StatUpgrade.CargoCapacity:
-                            Pawn.GetComp<CompShips>().CargoCapacity += stat.Value;
+                            Pawn.GetComp<CompVehicle>().CargoCapacity += stat.Value;
                             break;
                         case StatUpgrade.FuelConsumptionRate:
                             Pawn.GetComp<CompFueledTravel>().FuelEfficiency += stat.Value;
@@ -84,27 +158,28 @@ namespace RimShips
             
             try
             {
-                Pawn.GetComp<CompCannons>().AddCannons(nodeUnlocking.cannonsUnlocked);
-                nodeUnlocking.upgradeActive = true;
+                Pawn.GetComp<CompCannons>().AddCannons(NodeUnlocking.cannonsUnlocked);
+                NodeUnlocking.upgradeActive = true;
             }
             catch(Exception ex)
             {
                 Log.Error($"Unable to add cannon to {Pawn.LabelShort}. Report on Boats workshop page. \nException: {ex.Message} \nStackTrace: {ex.StackTrace}");
                 return false;
             }
-            Pawn.GetComp<CompShips>().Props.buildDef.GetModExtension<SpawnThingBuilt>().soundFinished?.PlayOneShot(new TargetInfo(Pawn.Position, Pawn.Map, false));
+            Pawn.GetComp<CompVehicle>().Props.buildDef.GetModExtension<SpawnThingBuilt>().soundFinished?.PlayOneShot(new TargetInfo(Pawn.Position, Pawn.Map, false));
             return true;
         }
 
         public override void PostSpawnSetup(bool respawningAfterLoad)
         {
             base.PostSpawnSetup(respawningAfterLoad);
+            NodeUnlocking = upgradeList.Find(x => x.upgradePurchased && !x.upgradeActive);
             if(!respawningAfterLoad)
             {
                 upgradeList = new List<UpgradeNode>();
                 foreach(UpgradeNode node in Props.upgradesAvailable)
                 {
-                    UpgradeNode permanentNode = new UpgradeNode(node);
+                    UpgradeNode permanentNode = new UpgradeNode(node, Pawn);
                     permanentNode.InitializeLists();
                     upgradeList.Add(permanentNode);
                 }
@@ -128,10 +203,10 @@ namespace RimShips
         public override void CompTick()
         {
             base.CompTick();
-            if(nodeUnlocking != null && !nodeUnlocking.upgradeActive)
+            if(NodeUnlocking != null && !NodeUnlocking.upgradeActive && NodeUnlocking.StoredCostSatisfied)
             {
-                nodeUnlocking.upgradeTicksLeft--;
-                if(nodeUnlocking.upgradeTicksLeft <= 0)
+                NodeUnlocking.GetSetTicks(-1);
+                if(NodeUnlocking.GetSetTicks() <= 0)
                 {
                     FinishUnlock();
                 }
@@ -142,7 +217,6 @@ namespace RimShips
         {
             base.PostExposeData();
             Scribe_Collections.Look(ref upgradeList, "upgradeList", LookMode.Deep);
-            Scribe_Deep.Look(ref nodeUnlocking, "nodeUnlocking");
         }
     }
 }

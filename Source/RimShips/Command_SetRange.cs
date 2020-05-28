@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimShips
+namespace Vehicles
 {
     [StaticConstructorOnStartup]
     public class Command_SetRange : Command

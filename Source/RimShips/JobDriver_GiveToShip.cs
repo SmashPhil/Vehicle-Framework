@@ -5,11 +5,11 @@ using Verse;
 using Verse.AI;
 using RimWorld;
 
-namespace RimShips.Jobs
+namespace Vehicles.Jobs
 {
     public class JobDriver_GiveToShip : JobDriver
     {
-        public Thing Item
+        public virtual Thing Item
         {
             get
             {
@@ -17,39 +17,39 @@ namespace RimShips.Jobs
             }
         }
 
-        public Pawn Ship
+        public virtual VehiclePawn Ship
         {
             get
             {
-                Pawn p = job.GetTarget(TargetIndex.B).Thing as Pawn;
-                return p;
+                return job.GetTarget(TargetIndex.B).Thing as VehiclePawn;
             }
         }
 
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
-            return pawn.Reserve(this.Item, job, 1, -1, null, errorOnFailed);
+            return pawn.Reserve(Item, job, 1, -1, null, errorOnFailed);
         }
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
+            this.FailOnDestroyedOrNull(TargetIndex.A);
+            this.FailOnDestroyedOrNull(TargetIndex.B);
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch);
             yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false);
-            yield return this.FindNearestShip();
-            yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).FailOnDespawnedNullOrForbidden(TargetIndex.B);//.JumpIf(() => !MassUtility.WillBeOverEncumberedAfterPickingUp(Ship, Item, 1),
-                //FindNearestShip()); //REDO LATER
+            yield return FindNearestShip();
+            yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).FailOnDespawnedNullOrForbidden(TargetIndex.B);
             yield return GiveAsMuchToShipAsPossible();
             yield return Toils_Jump.JumpIf(FindNearestShip(), () => pawn.carryTracker.CarriedThing != null);
             yield break;
         }
 
-        private Toil FindNearestShip()
+        protected virtual Toil FindNearestShip()
         {
             return new Toil
             {
                 initAction = delegate ()
                 {
-                    Pawn pawn = HelperMethods.UsableBoatWithTheMostFreeSpace(this.pawn);
+                    Pawn pawn = HelperMethods.UsableVehicleWithTheMostFreeSpace(this.pawn);
                     if (pawn is null)
                     {
                         this.pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true);
@@ -62,7 +62,7 @@ namespace RimShips.Jobs
             };
         }
 
-        private Toil GiveAsMuchToShipAsPossible()
+        protected virtual Toil GiveAsMuchToShipAsPossible()
         {
             return new Toil
             {

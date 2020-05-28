@@ -5,9 +5,9 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
-using RimShips.Defs;
+using Vehicles.Defs;
 
-namespace RimShips.Lords
+namespace Vehicles.Lords
 {
     public class LordToil_PrepareCaravan_GatherSlavesShip : LordToil
     {
@@ -36,11 +36,11 @@ namespace RimShips.Lords
         {
             foreach(Pawn p in this.lord.ownedPawns)
             {
-                if(HelperMethods.IsShip(p))
+                if(HelperMethods.IsVehicle(p))
                 {
                     p.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_WaitShip);
                 }
-                else if(!p.RaceProps.Animal && !p.IsColonist && (!HelperMethods.IsShip(p)))
+                else if(!p.RaceProps.Animal && !p.IsColonist && (!HelperMethods.IsVehicle(p)))
                 {
                     p.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_SendSlavesToShip, this.meetingPoint, -1f);
                     p.mindState.duty.pawnsToGather = PawnsToGather.Slaves;
@@ -57,7 +57,7 @@ namespace RimShips.Lords
             if(Find.TickManager.TicksGame % 100 == 0)
             {
                 Lord lord = this.lord;
-                List<Pawn> pawns = this.lord.ownedPawns.Where(x => !HelperMethods.IsShip(x)).ToList();
+                List<Pawn> pawns = this.lord.ownedPawns.Where(x => !HelperMethods.IsVehicle(x)).ToList();
 
                 if(!pawns.Any(x => !x.IsColonist && !x.RaceProps.Animal && x.Spawned))
                     lord.ReceiveMemo("AllSlavesGathered");

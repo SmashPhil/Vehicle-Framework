@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using RimShips.AI;
+using Vehicles.AI;
 using Verse;
 using Verse.AI;
 
-namespace RimShips
+namespace Vehicles
 {
     public static class WaterRegionListersUpdater
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using RimWorld;
 using Verse;
 
-namespace RimShips
+namespace Vehicles
 {
     public class CannonDef : Def
     {
@@ -15,11 +15,12 @@ namespace RimShips
         public ThingDef moteFlash;
 
         public List<ThingDef> ammoAllowed = new List<ThingDef>();
-        public int magazineCapacity;
+        public int magazineCapacity = 1;
 
         public SoundDef cannonSound;
 
-        public string cannonTexPath;
+        public GraphicData graphicData;
+
         public string baseCannonTexPath;
 
         public string gizmoDescription;
@@ -34,6 +35,10 @@ namespace RimShips
         public ProjectileHitFlags hitFlags;
 
         public bool splitCannonGroups = false;
+
+        public bool autoSnapTargeting = true;
+
+        public float rotationSpeed = 1f;
 
         public float spreadRadius = 0f;
 

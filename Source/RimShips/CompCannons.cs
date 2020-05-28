@@ -5,10 +5,10 @@ using UnityEngine;
 using RimWorld;
 using Verse;
 using SPExtended;
-using RimShips.Defs;
+using Vehicles.Defs;
 using Verse.Sound;
 
-namespace RimShips
+namespace Vehicles
 {
     public class CompCannons : ThingComp
     {
@@ -22,7 +22,7 @@ namespace RimShips
         private const float cellOffsetIntVec3ToVector3 = 0.5f;
         public CompProperties_Cannons Props => (CompProperties_Cannons)this.props;
         public Pawn Pawn => parent as Pawn;
-        public CompShips CompShip => this.Pawn.GetComp<CompShips>();
+        public CompVehicle CompShip => this.Pawn.GetComp<CompVehicle>();
 
         public float MinRange => Cannons.Max(x => x.cannonDef.minRange);
         public float MaxRangeGrouped
@@ -58,9 +58,10 @@ namespace RimShips
             {
                 var cannonPermanent = new CannonHandler(this.Pawn, cannon);
                 cannonPermanent.SetTarget(LocalTargetInfo.Invalid);
-                cannonPermanent.currentRotation = cannonPermanent.defaultAngleRotated - 90;
+                cannonPermanent.ResetCannonAngle();
                 if(Cannons.Any(x => x.baseCannonRenderLocation == cannonPermanent.baseCannonRenderLocation))
                 {
+                    Cannons.FindAll(x => x.baseCannonRenderLocation == cannonPermanent.baseCannonRenderLocation).ForEach(y => y.TryRemoveShell());
                     Cannons.RemoveAll(x => x.baseCannonRenderLocation == cannonPermanent.baseCannonRenderLocation);
                 }
                 Cannons.Add(cannonPermanent);
@@ -97,48 +98,7 @@ namespace RimShips
         {
             foreach (CannonHandler cannon in Cannons.OrderBy(x => x.drawLayer))
             {
-                if (cannon.CannonTexture != null && cannon.cannonRenderLocation != null)
-                {
-                    cannon.ValidateLockStatus();
-                    try
-                    {
-                        Vector3 topVectorRotation = new Vector3(cannon.cannonRenderOffset.x, 1f, cannon.cannonRenderOffset.y).RotatedBy(cannon.TurretRotation);
-                        Pair<float, float> drawOffset = HelperMethods.ShipDrawOffset(Pawn.GetComp<CompShips>(), cannon.cannonRenderLocation.x, cannon.cannonRenderLocation.y);
-                        Vector3 topVectorLocation = new Vector3(parent.DrawPos.x + drawOffset.First, parent.DrawPos.y + cannon.drawLayer, parent.DrawPos.z + drawOffset.Second);
-                        Mesh cannonMesh = cannon.CannonGraphic.MeshAt(Rot4.North);
-
-                        if(RimShipMod.mod.settings.debugDrawCannonGrid)
-                        {
-                            Material debugCenterMat = MaterialPool.MatFrom("Debug/cannonCenter");
-                            Matrix4x4 debugCenter = default;
-                            debugCenter.SetTRS(topVectorLocation + Altitudes.AltIncVect, Quaternion.identity, new Vector3(0.15f, 1f, 0.15f));
-                            Graphics.DrawMesh(MeshPool.plane10, debugCenter, debugCenterMat, 0);
-                        }
-
-                        Graphics.DrawMesh(cannonMesh, topVectorLocation, cannon.TurretRotation.ToQuat(), cannon.CannonMaterial, 0);
-
-                        if(cannon.CannonBaseMaterial != null && cannon.baseCannonRenderLocation != null)
-                        {
-                            Matrix4x4 baseMatrix = default;
-                            Pair<float, float> baseDrawOffset = HelperMethods.ShipDrawOffset(Pawn.GetComp<CompShips>(), cannon.baseCannonRenderLocation.x, cannon.baseCannonRenderLocation.y);
-                            Vector3 baseVectorLocation = new Vector3(parent.DrawPos.x + baseDrawOffset.First, parent.DrawPos.y, parent.DrawPos.z + baseDrawOffset.Second);
-                            baseMatrix.SetTRS(baseVectorLocation + Altitudes.AltIncVect, parent.Rotation.AsQuat, new Vector3(cannon.baseCannonDrawSize.x, 1f, cannon.baseCannonDrawSize.y));
-                            Graphics.DrawMesh(MeshPool.plane10, baseMatrix, cannon.CannonBaseMaterial, 0);
-                        }
-
-                        if(RimShipMod.mod.settings.debugDrawCannonGrid)
-                        {
-                            Material debugMat = MaterialPool.MatFrom("Debug/cannonAlignment");
-                            Matrix4x4 debugGrid = default;
-                            debugGrid.SetTRS(topVectorLocation + Altitudes.AltIncVect, 0f.ToQuat(), new Vector3(5f, 1f, 5f));
-                            Graphics.DrawMesh(MeshPool.plane10, debugGrid, debugMat, 0);
-                        }
-                    }
-                    catch(Exception ex)
-                    {
-                        Log.Error(string.Format("Error occurred during rendering of cannon {0}. Exception: {1}", cannon.cannonDef.label, ex.Message));
-                    }
-                }
+                cannon.Draw();
             }
         }
 
@@ -156,7 +116,7 @@ namespace RimShips
                             Command_TargeterCooldownAction turretCannons = new Command_TargeterCooldownAction();
                             turretCannons.cannon = cannon;
                             turretCannons.comp = this;
-                            turretCannons.defaultLabel = "TestFire".Translate(cannon.cannonDef.label) + i;
+                            turretCannons.defaultLabel = !string.IsNullOrEmpty(cannon.gizmoLabel) ? cannon.gizmoLabel : cannon.cannonDef.LabelCap + i;
                             turretCannons.icon = cannon.GizmoIcon;
                             if(!string.IsNullOrEmpty(cannon.cannonDef.gizmoDescription))
                                 turretCannons.defaultDesc = cannon.cannonDef.gizmoDescription;
@@ -357,7 +317,10 @@ namespace RimShips
                         PairedData.First = multiFireCannon[i].Second.TicksPerShot;
                         if (multiFireCannon[i].First == 0)
                         {
-                            multiFireCannon[i].Second.SetTarget(LocalTargetInfo.Invalid);
+                            if(multiFireCannon[i].Second.targetPersists)
+                                multiFireCannon[i].Second.SetTargetConditionalOnThing(LocalTargetInfo.Invalid);
+                            else
+                                multiFireCannon[i].Second.SetTarget(LocalTargetInfo.Invalid);
                             multiFireCannon.RemoveAt(i);
                             continue;
                         }
@@ -375,9 +338,8 @@ namespace RimShips
         {
             if (cannon is null)
                 return;
-            bool flag = TryFindShootLineFromTo(cannon.TurretLocation.ToIntVec3(), cannon.cannonTarget, out ShootLine shootLine);
+            TryFindShootLineFromTo(cannon.TurretLocation.ToIntVec3(), cannon.cannonTarget, out ShootLine shootLine);
 
-            //FIX FOR MULTIPLAYER
             IntVec3 c = cannon.cannonTarget.Cell + GenRadial.RadialPattern[Rand.Range(0, GenRadial.NumCellsInRadius(cannon.cannonDef.spreadRadius * (Range / cannon.cannonDef.maxRange)))];
             if (data.Second >= cannon.cannonDef.projectileShifting.Count)
                 data.Second = 0;
@@ -385,9 +347,9 @@ namespace RimShips
             Vector3 launchCell = cannon.TurretLocation + new Vector3(horizontalOffset, 1f, cannon.cannonDef.projectileOffset).RotatedBy(cannon.TurretRotation);
 
             ThingDef projectile;
-            if(cannon.cannonDef.ammoAllowed?.Any() ?? false)
+            if(!cannon.cannonDef.ammoAllowed.NullOrEmpty())
             {
-                projectile = cannon.loadedAmmo;
+                projectile = cannon.loadedAmmo?.projectileWhenLoaded;
             }
             else
             {
@@ -396,7 +358,7 @@ namespace RimShips
             try
             {
                 Projectile projectile2 = (Projectile)GenSpawn.Spawn(projectile, Pawn.Position, Pawn.Map, WipeMode.Vanish);
-                if(cannon.cannonDef.ammoAllowed?.Any() ?? false)
+                if(!cannon.cannonDef.ammoAllowed.NullOrEmpty())
                 {
                     cannon.ConsumeShellChambered();
                 }
@@ -416,7 +378,11 @@ namespace RimShips
                     mote.SetVelocity(cannon.TurretRotation, cannon.cannonDef.moteSpeedThrown);
                     HelperMethods.ThrowMoteEnhanced(launchCell, Pawn.Map, mote);
                 }
-                projectile2.Launch(Pawn, launchCell, c, cannon.cannonTarget, cannon.cannonDef.hitFlags);
+                projectile2.Launch(Pawn, launchCell, c, cannon.cannonTarget, cannon.cannonDef.hitFlags, parent);
+                if(cannon.cannonDef.graphicData.graphicClass == typeof(Graphic_Animate))
+                {
+                    (cannon.CannonGraphic as Graphic_Animate).StartAnimation(2, 1, AnimationWrapperType.Reset);
+                }
             }
             catch(Exception ex)
             {
@@ -800,6 +766,14 @@ namespace RimShips
                 InitializeCannons();
             }
 
+            foreach(CannonHandler cannon in Cannons)
+            {
+                if(!string.IsNullOrEmpty(cannon.attachableKey))
+                {
+                    Cannons.Where(x => x.parentKey == cannon.attachableKey).ToList().ForEach(y => y.attachedTo = cannon);
+                }
+            }
+
             broadsideFire = new List<SPTuple<Stack<int>, CannonHandler, int>>();
             multiFireCannon = new List<SPTuple<int, CannonHandler, SPTuple2<int,int>>>();
         }
@@ -814,6 +788,11 @@ namespace RimShips
                     cannonPermanent.SetTarget(LocalTargetInfo.Invalid);
                     cannonPermanent.ResetCannonAngle();
                     Cannons.Add(cannonPermanent);
+                }
+
+                if(Cannons.Select(x => x.attachableKey).GroupBy(y => y).Any(key => key.Count() > 1))
+                {
+                    Log.Warning("Duplicate CannonHandler attachableKey has been found. These are intended to be unique.");
                 }
             }
         }

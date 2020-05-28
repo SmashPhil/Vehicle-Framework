@@ -102,9 +102,11 @@ namespace SPExtended
         /// <returns></returns>
         public static double AngleToPoint(this IntVec3 pos, IntVec3 point, Map map)
         {
-            int xPrime = pos.x - point.x;
-            int yPrime = pos.z - point.z;
-            double slope = (double)yPrime / (double)xPrime;
+            Vector3 posVector = pos.ToVector3Shifted();
+            Vector3 pointVector = point.ToVector3Shifted();
+            float xPrime = posVector.x - pointVector.x;
+            float yPrime = posVector.z - pointVector.z;
+            double slope = (double)yPrime / xPrime;
             double angleRadians = Math.Atan(slope);
             double angle = Math.Abs(angleRadians.RadiansToDegrees());
             switch(SPExtra.Quadrant.QuadrantRelativeToPoint(pos, point, map).AsInt)
@@ -151,16 +153,18 @@ namespace SPExtended
         }
 
         /// <summary>
-        /// Take step forward in directional angle
+        /// Take step forward in Bearing Angle direction
         /// </summary>
         /// <param name="angle"></param>
         /// <param name="stepSize"></param>
         /// <returns></returns>
-        public static Vector3 ForwardStep(float angle, float stepSize)
+        public static Vector3 ForwardStep(float angle, float stepSize = 0.1f)
         {
-            float x = stepSize * (float)Math.Cos(angle);
-            float z = stepSize * (float)Math.Sin(angle);
-            return new Vector3(x, 0, z);
+            float absAngle = BearingToAbsoluteAngle(angle);
+
+            SPTuple2<float, float> step = RotatePointClockwise(0, 1, absAngle);
+
+            return new Vector3(step.First * stepSize, 0, step.Second * stepSize);
         }
 
         /// <summary>

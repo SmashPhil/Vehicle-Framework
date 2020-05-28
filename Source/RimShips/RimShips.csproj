@@ -7,8 +7,8 @@
     <ProjectGuid>{357562A0-ED54-4AE8-AA13-5FC3AC4C5B8E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RimShips</RootNamespace>
-    <AssemblyName>RimShips</AssemblyName>
+    <RootNamespace>Vehicles</RootNamespace>
+    <AssemblyName>Vehicles</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -149,7 +149,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bill_BoardShip.cs" />
-    <Compile Include="BoatPawn.cs" />
+    <Compile Include="CompProperties_VehicleTracks.cs" />
+    <Compile Include="CompVehicleTracks.cs" />
+    <Compile Include="Graphic_Animate.cs" />
+    <Compile Include="Graphic_OmniDirectional.cs" />
+    <Compile Include="VehiclePawn.cs" />
     <Compile Include="CannonDef.cs" />
     <Compile Include="CannonHandler.cs" />
     <Compile Include="CannonTargeter.cs" />
@@ -164,12 +168,13 @@
     <Compile Include="CompProperties_SavePawnReference.cs" />
     <Compile Include="CompProperties_UpgradeTree.cs" />
     <Compile Include="CompSavePawnReference.cs" />
-    <Compile Include="CompShips.cs" />
+    <Compile Include="CompVehicle.cs" />
     <Compile Include="CompUpgradeTree.cs" />
     <Compile Include="DesignationCategoryDefOf_Ships.cs" />
     <Compile Include="Dialog_DockBoat.cs" />
     <Compile Include="Dialog_GiveShipName.cs" />
     <Compile Include="Dialog_InfoCard_Ship.cs" />
+    <Compile Include="Dialog_LoadCargo.cs" />
     <Compile Include="Dialog_ResearchChange.cs" />
     <Compile Include="DockedBoat.cs" />
     <Compile Include="DutyDefOf_Ships.cs" />
@@ -189,10 +194,12 @@
     <Compile Include="ITab_Ship_Health.cs" />
     <Compile Include="ITab_Ship_Passengers.cs" />
     <Compile Include="ITab_Ship_Upgrades.cs" />
+    <Compile Include="IUpgradeable.cs" />
     <Compile Include="JobDefOf_Ships.cs" />
     <Compile Include="JobDriver_Board.cs" />
     <Compile Include="JobDriver_CarryPawnToShip.cs" />
     <Compile Include="JobDriver_GiveToShip.cs" />
+    <Compile Include="JobDriver_GiveToUpgradeContainer.cs" />
     <Compile Include="JobDriver_IdleShip.cs" />
     <Compile Include="JobDriver_PrepareCaravan_GatheringShip.cs" />
     <Compile Include="JobDriver_RefuelBoat.cs" />
@@ -226,7 +233,7 @@
     <Compile Include="ShipPassengerCardUtility.cs" />
     <Compile Include="ShipPathFinder.cs" />
     <Compile Include="ShipPathGrid.cs" />
-    <Compile Include="CompProperties_Ships.cs" />
+    <Compile Include="CompProperties_Vehicle.cs" />
     <Compile Include="ShipReachability.cs" />
     <Compile Include="ShipReachabilityCache.cs" />
     <Compile Include="ShipReachabilityImmediate.cs" />
@@ -258,8 +265,11 @@
     <Compile Include="WaterRoom.cs" />
     <Compile Include="WaterRoomGroup.cs" />
     <Compile Include="WindDirectional.cs" />
+    <Compile Include="WorkGiver_BringUpgradeMaterial.cs" />
+    <Compile Include="WorkGiver_PackBoat.cs" />
     <Compile Include="WorldObjectDefOfShips.cs" />
     <Compile Include="WorldOceanPathFinder.cs" />
+    <Compile Include="WorldOceanReachability.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

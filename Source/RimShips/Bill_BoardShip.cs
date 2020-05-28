@@ -1,6 +1,6 @@
 ﻿using Verse;
 
-namespace RimShips.Jobs
+namespace Vehicles.Jobs
 {
     public class Bill_BoardShip : IExposable
     {

@@ -3,10 +3,12 @@
 <LanguageData>
 	<!-- Labels and Titles -->
 	<RimShips>Boats</RimShips>
+	<Vehicles>Vehicles</Vehicles>
 	<ShipSection>Boats</ShipSection>
 	<CannonLabel>{0} Cannons</CannonLabel>
 	<RepairShip>Repair {0}</RepairShip>
 	<Disembark>Disembark</Disembark>
+	<LoadShip>Load Cargo</LoadShip>
 	<SetRange>Set Range</SetRange>
 	<CannonRange>{0} Tiles</CannonRange>
 	<RenameShip>Rename {0}</RenameShip>
@@ -42,13 +44,27 @@
 	<ResetWaterRegions>Reset Water Regions</ResetWaterRegions>
 	<Disabled>Disabled</Disabled>
 	<Everything>Every Settlement</Everything>
-	<DebugDrawRegions>Debug Draw Regions</DebugDrawRegions>
-	<DebugDrawRegionLinks>Debug Draw RegionLinks</DebugDrawRegionLinks>
-	<DebugDrawRegionThings>Debug Draw Region Things</DebugDrawRegionThings>
-	<DebugDraftAnyShip>Debug Draft Any Boat</DebugDraftAnyShip>
+	<PassiveWaterWaves>Passive Water Waves</PassiveWaterWaves>
+	<PassiveWaterWavesTooltip>Generate passive waves for each boat. Purely cosmetic.</PassiveWaterWavesTooltip>
+	<DrawUpgradeInformationScreen>Draw Upgrade Menu Info Screen</DrawUpgradeInformationScreen>
+	<DrawUpgradeInformationScreenTooltip>Draw additional menu on the upgrade menu to display ship stats and ship icon.</DrawUpgradeInformationScreenTooltip>
+	<UseIngameTime>Time Scale: {0}</UseIngameTime>
+	<UseIngameTimeTooltip>Switch the time scale for what is displayed in the upgrade menu.</UseIngameTimeTooltip>
+	<IngameTime>In-game Time</IngameTime>
+	<RealTime>Real time</RealTime>
+	
+	<DebugDrawRegions>Draw Regions</DebugDrawRegions>
+	<DebugDrawRegionLinks>Draw RegionLinks</DebugDrawRegionLinks>
+	<DebugDrawRegionThings>Draw Region Things</DebugDrawRegionThings>
+	<DebugDraftAnyShip>Draft Any Boat</DebugDraftAnyShip>
 	<DebugDraftAnyShipTooltip>Be able to draft and move any boat regardless of passengers. Useful if your boat gets stuck somewhere.</DebugDraftAnyShipTooltip>
-	<DebugDisablePathing>Debug Disable Water Pathing</DebugDisablePathing>
+	<DebugDisablePathing>Disable Water Pathing</DebugDisablePathing>
 	<DebugDisablePathingTooltip>Disable boats using custom water based path finding, and instead use vanilla pathfinding. NOTE: Boats will travel like pawns</DebugDisablePathingTooltip>
+	<DebugDisableSmoothPathing>Disable Smooth Pathing</DebugDisableSmoothPathing>
+	<DebugSpawnVehiclesGodMode>Spawn Vehicle Buildings (god mode)</DebugSpawnVehiclesGodMode>
+	<DebugCannonDrawer>Cannon Drawer Grid</DebugCannonDrawer>
+	<DebugDrawNodeGrid>UpgradeTree Drawer Grid</DebugDrawNodeGrid>
+	<DebugDrawVehicleTracks>VehicleTracks Cell Drawer</DebugDrawVehicleTracks>
 	<ShuffledCannonFire>Shuffled Cannons</ShuffledCannonFire>
 	<ShuffledCannonFireTooltip>Randomize the order in which broadside cannons fire.</ShuffledCannonFireTooltip>
 	<RiverTravelAllowed>Travel on Rivers</RiverTravelAllowed>
@@ -65,6 +81,8 @@
 	<FishingPersistsTooltip>The Fishing Boat fishing selection will not reset upon drafting.</FishingPersistsTooltip>
 	<MatchWaterTerrain>Match Water Terrain</MatchWaterTerrain>
 	<MatchWaterTerrainTooltip>Water tiles that are placed will match the water of adjacent water tiles (Disabled: Still WIP)</MatchWaterTerrainTooltip>
+	<ShowAllItemsOnMap>Show All Items On Map</ShowAllItemsOnMap>
+	
 	
 	<!-- Float Menu -->
 	<BoardShip>Board {0} as {1}  [{2}]</BoardShip>
@@ -95,11 +113,10 @@
 	<ForceLeaveCaravanDesc>Force Boat Caravan to leave the map. Will skip loading whatever items are not currently onboard</ForceLeaveCaravanDesc>
 	<ForceLeaveConfirmation>Crew is preparing to leave.</ForceLeaveConfirmation>
 	<BoatCaravanTerminatedNoBoats>Caravan process has been terminated. No boats remain. </BoatCaravanTerminatedNoBoats>
+	<NoAmmoLoadedCannon>No ammo loaded.</NoAmmoLoadedCannon>
 	
 	<!-- Caravans -->
 	<CaravanShips>Boat</CaravanShips>
-	<CaravanShipsSingle>1 Boat</CaravanShipsSingle>
-	<CaravanShipsPlural>{0} Boats</CaravanShipsPlural>
 	<CaravanSailing>Sailing</CaravanSailing>
 	<CommandDockShip>Dock</CommandDockShip>
 	<CommandDockShipDisembark>Dock and Disembark</CommandDockShipDisembark>
@@ -114,7 +131,7 @@
 	<CaravanMustHaveEnoughPawnsToOperate>Not enough Pawns selected to set sail. Need {0}</CaravanMustHaveEnoughPawnsToOperate>
 
 	<!-- Upgrades -->
-	<Extract>Extract</Extract>
+	<ExtractCannon>Extract</ExtractCannon>
 	<Upgrade>Upgrade</Upgrade>
 	<DisabledFromOtherNode>Cannot upgrade. Node is now inaccessible from previous unlock.</DisabledFromOtherNode>
 	<MissingPrerequisiteUpgrade>Missing prerequisite node</MissingPrerequisiteUpgrade>
@@ -123,6 +140,8 @@
 	<BoatCargoCapacity>Cargo Capacity</BoatCargoCapacity>
 	<BoatFuelCost>Fuel Cost</BoatFuelCost>
 	<BoatFuelCapacity>Fuel Capacity</BoatFuelCapacity>
+	<CancelUpgrade>Cancel</CancelUpgrade>
+	<RefundUpgrade>Uninstall</RefundUpgrade>
 	
 	<!-- Status -->
 	<FormingCaravanStatus_GatheringItems_Ship>Loading cargo onto Ships.</FormingCaravanStatus_GatheringItems_Ship>

@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using RimShips.AI;
+using Vehicles.AI;
 using UnityEngine;
 using Verse;
 
-namespace RimShips
+namespace Vehicles
 {
     public sealed class WaterRoom
     {

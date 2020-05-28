@@ -2,7 +2,7 @@
 using UnityEngine;
 using Verse;
 
-namespace RimShips.AI
+namespace Vehicles.AI
 {
     public class RegionCostCalculatorWrapperShips
     {

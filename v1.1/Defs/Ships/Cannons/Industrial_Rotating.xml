@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <Defs>
-	<RimShips.CannonDef>
+	<Vehicles.CannonDef>
 		<defName>12inRotatingSingle</defName>
 		<label>Bow</label>
 		<weaponType>Rotatable</weaponType>
@@ -13,10 +13,11 @@
 		<numberOfShots>1</numberOfShots>
 		<cooldownTimer>30</cooldownTimer>
 		<warmUpTimer>1</warmUpTimer>
+		<magazineCapacity>1</magazineCapacity>
 		
 		<gizmoDescription>Select Target.\n\nFire for effect</gizmoDescription>
 		
-		<cannonTexPath>Ships/dreadnought/Cannons/12inchSingle</cannonTexPath>
+		<!-- <cannonTexPath>Ships/dreadnought/Cannons/12inchSingle</cannonTexPath> -->
 		<baseCannonTexPath>Ships/paddlesteamer/Cannons/SwivelCannonBase</baseCannonTexPath>
 
 		<ammoAllowed>
@@ -27,9 +28,9 @@
 		<hitFlags>IntendedTarget</hitFlags>
 		<spreadRadius>2</spreadRadius>
 		<minRange>15</minRange>
-	</RimShips.CannonDef>
+	</Vehicles.CannonDef>
 	
-	<RimShips.CannonDef>
+	<Vehicles.CannonDef>
 		<defName>12inRotatingDouble</defName>
 		<label>Bow</label>
 		<weaponType>Rotatable</weaponType>
@@ -42,10 +43,11 @@
 		<numberOfShots>2</numberOfShots>
 		<cooldownTimer>30</cooldownTimer>
 		<warmUpTimer>1</warmUpTimer>
+		<magazineCapacity>2</magazineCapacity>
 		
 		<gizmoDescription>Select Target.\n\nFire for effect</gizmoDescription>
 		
-		<cannonTexPath>Ships/dreadnought/Cannons/12inchDouble</cannonTexPath>
+		<!-- <cannonTexPath>Ships/dreadnought/Cannons/12inchDouble</cannonTexPath> -->
 		<baseCannonTexPath>Ships/paddlesteamer/Cannons/SwivelCannonBase</baseCannonTexPath>
 		
 		<ammoAllowed>
@@ -60,5 +62,5 @@
 		<hitFlags>IntendedTarget</hitFlags>
 		<spreadRadius>2</spreadRadius>
 		<minRange>15</minRange>
-	</RimShips.CannonDef>
+	</Vehicles.CannonDef>
 </Defs>

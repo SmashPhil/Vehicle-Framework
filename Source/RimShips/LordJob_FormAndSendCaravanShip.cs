@@ -10,14 +10,14 @@ using HarmonyLib;
 using RimWorld;
 using RimWorld.BaseGen;
 using RimWorld.Planet;
-using RimShips.AI;
+using Vehicles.AI;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 using Verse.Sound;
 
-namespace RimShips.Lords
+namespace Vehicles.Lords
 {
     public class LordJob_FormAndSendCaravanShip : LordJob
     {
@@ -30,7 +30,7 @@ namespace RimShips.Lords
         {
             this.transferables = transferables;
             this.ships = ships;
-            this.leadShip = ships.First(x => HelperMethods.IsShip(x) && x.RaceProps.baseBodySize == ships.Max(y => y.RaceProps.baseBodySize));
+            this.leadShip = ships.First(x => HelperMethods.IsVehicle(x) && x.RaceProps.baseBodySize == ships.Max(y => y.RaceProps.baseBodySize));
             this.downedPawns = downedPawns;
             this.meetingPoint = meetingPoint;
             this.exitPoint = exitPoint;
@@ -46,7 +46,7 @@ namespace RimShips.Lords
             get
             {
                 if (this.leadShip is null)
-                    this.leadShip = ships.First(x => HelperMethods.IsShip(x) && x.RaceProps.baseBodySize == ships.Max(y => y.RaceProps.baseBodySize));
+                    this.leadShip = ships.First(x => HelperMethods.IsVehicle(x) && x.RaceProps.baseBodySize == ships.Max(y => y.RaceProps.baseBodySize));
                 return this.leadShip;
             }
         }
@@ -77,7 +77,7 @@ namespace RimShips.Lords
             int numPreassign = 0;
             foreach(Pawn p in this.ships)
             {
-                numPreassign = p.GetComp<CompShips>().PawnCountToOperate - p.GetComp<CompShips>().AllCrewAboard.Count;
+                numPreassign = p.GetComp<CompVehicle>().PawnCountToOperate - p.GetComp<CompVehicle>().AllCrewAboard.Count;
                 for(int i = 0; i < numPreassign; i++)
                 {
                     this.shipAssigned.Add(sailorsTmp.Pop(), p);
@@ -240,7 +240,7 @@ namespace RimShips.Lords
                     this.downedPawns.RemoveAt(i);
                 }
             }
-            if(!lord.ownedPawns.Any(x => HelperMethods.IsShip(x)))
+            if(!lord.ownedPawns.Any(x => HelperMethods.IsVehicle(x)))
             {
                 lord.lordManager.RemoveLord(lord);
                 Messages.Message("BoatCaravanTerminatedNoBoats".Translate(), MessageTypeDefOf.NegativeEvent);

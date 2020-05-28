@@ -4,7 +4,7 @@ using Verse;
 using Verse.Sound;
 using SPExtended;
 
-namespace RimShips
+namespace Vehicles
 {
     public class Command_CooldownAction : Command_Action
     {
@@ -33,7 +33,7 @@ namespace RimShips
             Material material = (!disabled) ? null : TexUI.GrayscaleGUI;
             Rect ammoRect = new Rect(rect.x + (rect.width), rect.y + (rect.height), rect.width / 10, rect.height / 10);
             GenUI.DrawTextureWithMaterial(rect, BGTex, material, default);
-            if (cannon.cannonDef.ammoAllowed?.Any() ?? false)
+            if (!cannon.cannonDef.ammoAllowed.NullOrEmpty())
             {
                 GenUI.DrawTextureWithMaterial(ammoRect, BGTex, material, default);
             }

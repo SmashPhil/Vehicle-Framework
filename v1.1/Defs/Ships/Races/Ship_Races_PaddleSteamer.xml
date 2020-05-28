@@ -127,7 +127,7 @@
 
 		<comps>	
 			
-			<li Class="RimShips.CompProperties_FueledTravel">
+			<li Class="Vehicles.CompProperties_FueledTravel">
 				<!-- Must Include -->
 				<fuelType>Chemfuel</fuelType>
 				<fuelConsumptionRate>60</fuelConsumptionRate>
@@ -159,15 +159,16 @@
 				<MoteDisplayed>Mote_ChimneySmoke</MoteDisplayed>
 				<TicksToSpawnMote>10</TicksToSpawnMote>
 			</li>
-			<li Class = "RimShips.CompProperties_Ships">
+			<li Class = "Vehicles.CompProperties_Vehicle">
 				<downable>false</downable>
 				<movesWhenDowned>false</movesWhenDowned>
 				
 				<moveable>DriverNeeded</moveable>
 				<riverTraversability>LargeRiver</riverTraversability>
-				<shipPowerType>Steam</shipPowerType>
-				<shipCategory>Hybrid</shipCategory>
-				<shipTech>Industrial</shipTech>
+				<vehiclePowerType>Steam</vehiclePowerType>
+				<vehicleCategory>Hybrid</vehicleCategory>
+				<vehicleTech>Industrial</vehicleTech>
+				<vehicleType>Sea</vehicleType>
 				<nameable>true</nameable>
 				<buildDef>SPBoats_PaddleSteamerBlueprint</buildDef>
 				<ticksBetweenRepair>1</ticksBetweenRepair> <!-- CHANGE TO 500 -->
@@ -214,9 +215,9 @@
 				</roles>
 			</li>
 			
-			<li Class="RimShips.CompProperties_Cannons"/>
+			<li Class="Vehicles.CompProperties_Cannons"/>
 			
-			<li Class="RimShips.CompProperties_UpgradeTree">
+			<li Class="Vehicles.CompProperties_UpgradeTree">
 				<displayUICoord>(415,50)</displayUICoord>
 				<displayUISize>(600,337.5)</displayUISize>
 				
@@ -225,7 +226,7 @@
 						<upgradeID>Armor_I</upgradeID>
 						<label>Steel Plating</label>
 						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath/>
+						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
 						<gridCoordinate>(2,2)</gridCoordinate>
 						<rootNodeLabel>Armor</rootNodeLabel>
 						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
@@ -253,7 +254,7 @@
 						<upgradeID>Armor_II</upgradeID>
 						<label>Secondary Steel Plating Layer</label>
 						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
+						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
 						<gridCoordinate>(2,4)</gridCoordinate>
 						<informationHighlighted>An extra layer of steel plating for higher defense.</informationHighlighted>
 						<values>
@@ -281,7 +282,7 @@
 						<upgradeID>Armor_III_Tank</upgradeID>
 						<label>Advanced Armor Designs</label>
 						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
+						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
 						<gridCoordinate>(1,6)</gridCoordinate>
 						<disableIfUpgradeNodeEnabled>Armor_III_Hybrid</disableIfUpgradeNodeEnabled>
 						<informationHighlighted>Replaces solid steel layering with a steel alloy for stronger armor plating.</informationHighlighted>
@@ -310,7 +311,7 @@
 						<upgradeID>Armor_III_Hybrid</upgradeID>
 						<label>Hybrid Plating</label>
 						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
+						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
 						<gridCoordinate>(3,6)</gridCoordinate>
 						<disableIfUpgradeNodeEnabled>Armor_III_Tank</disableIfUpgradeNodeEnabled>
 						<informationHighlighted>Implement advanced armor designs with hybrid layering for solid protection with minimal weight excess.</informationHighlighted>
@@ -339,7 +340,7 @@
 						<upgradeID>Speed_I</upgradeID>
 						<label>Feathered Paddlewheel</label>
 						<upgradeCategory>Speed</upgradeCategory>
-						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
+						<imageFilePath>UI/UpgradeTree/SpeedBG</imageFilePath>
 						<gridCoordinate>(8,2)</gridCoordinate>
 						<rootNodeLabel>Speed</rootNodeLabel>
 						<informationHighlighted>Holds consistent 90 degree angle between water and paddlewheel fins, resulting in maximum thrust.</informationHighlighted>
@@ -371,7 +372,7 @@
 						<upgradeID>Speed_II</upgradeID>
 						<label>Lightened Frame</label>
 						<upgradeCategory>Speed</upgradeCategory>
-						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
+						<imageFilePath>UI/UpgradeTree/SpeedBG</imageFilePath>
 						<gridCoordinate>(7,4)</gridCoordinate>
 						<informationHighlighted>Removes the majority of armor plating for extremely lightweight travel.</informationHighlighted>
 						<values>
@@ -399,7 +400,7 @@
 						<upgradeID>Speed_III</upgradeID>
 						<label>Advanced Combustion</label>
 						<upgradeCategory>Speed</upgradeCategory>
-						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
+						<imageFilePath>UI/UpgradeTree/SpeedBG</imageFilePath>
 						<gridCoordinate>(9,4)</gridCoordinate>
 						<informationHighlighted>Install a complex engine design that increases steam combustion.</informationHighlighted>
 						<values>
@@ -436,7 +437,7 @@
 						<upgradeID>Cargo_I</upgradeID>
 						<label>Storage Crates</label>
 						<upgradeCategory>CargoCapacity</upgradeCategory>
-						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
+						<imageFilePath>UI/UpgradeTree/CargoBG</imageFilePath>
 						<gridCoordinate>(14,2)</gridCoordinate>
 						<rootNodeLabel>Cargo</rootNodeLabel>
 						<informationHighlighted>Add storage crates to the cargo deck for compact storage.</informationHighlighted>
@@ -466,9 +467,9 @@
 					</li>
 					<li>
 						<upgradeID>Cargo_II</upgradeID>
-						<label>value Cargo Bay</label>
+						<label>Additional Cargo Bay</label>
 						<upgradeCategory>CargoCapacity</upgradeCategory>
-						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
+						<imageFilePath>UI/UpgradeTree/CargoBG</imageFilePath>
 						<gridCoordinate>(14,4)</gridCoordinate>
 						<informationHighlighted>Builds an extra cargo bay in the lower decks.</informationHighlighted>
 
@@ -505,7 +506,7 @@
 						<upgradeID>Fuel_I</upgradeID>
 						<label>Larger Fuel Tanks</label>
 						<upgradeCategory>FuelCapacity</upgradeCategory>
-						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
+						<imageFilePath>UI/UpgradeTree/FuelBG</imageFilePath>
 						<gridCoordinate>(20,2)</gridCoordinate>
 						<rootNodeLabel>Fuel</rootNodeLabel>
 						<informationHighlighted>Larger Fuel Tanks for increased fuel capacity.</informationHighlighted>
@@ -541,7 +542,7 @@
 						<upgradeID>Cannons_I</upgradeID>
 						<label>Howitzer</label>
 						<upgradeCategory>Cannon</upgradeCategory>
-						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
+						<imageFilePath>UI/UpgradeTree/FuelBG</imageFilePath>
 						<gridCoordinate>(26,2)</gridCoordinate>
 						<informationHighlighted>Rotating Howitzer that is capable of dealing devastating damage. Not very accurate at long range.</informationHighlighted>
 
@@ -574,7 +575,7 @@
 						<upgradeID>Cannons_II</upgradeID>
 						<label>Double Barrel Howitzer</label>
 						<upgradeCategory>Cannon</upgradeCategory>
-						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
+						<imageFilePath>UI/UpgradeTree/FuelBG</imageFilePath>
 						<gridCoordinate>(26,6)</gridCoordinate>
 						<informationHighlighted>Double the pain at half the cost.</informationHighlighted>
 

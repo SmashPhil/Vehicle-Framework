@@ -1,7 +1,7 @@
 ﻿using RimWorld;
 using Verse;
 
-namespace RimShips.Defs
+namespace Vehicles.Defs
 {
     [DefOf]
     public static class JobDefOf_Ships
@@ -22,6 +22,8 @@ namespace RimShips.Defs
         public static JobDef RepairShip;
 
         public static JobDef CarryItemToShip;
+
+        public static JobDef LoadUpgradeMaterials;
 
         public static JobDef RefuelBoat;
     }

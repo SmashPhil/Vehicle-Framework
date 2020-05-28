@@ -7,7 +7,7 @@ using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
 
-namespace RimShips
+namespace Vehicles
 {
     public class DockedBoat : WorldObject, IThingHolder, ILoadReferenceable
     {
@@ -35,7 +35,7 @@ namespace RimShips
                 int num = 0;
                 foreach(Pawn p in dockedBoats)
                 {
-                    num += p.GetComp<CompShips>()?.SeatsAvailable ?? 0;
+                    num += p.GetComp<CompVehicle>()?.SeatsAvailable ?? 0;
                 }
                 return num;
             }
@@ -43,16 +43,16 @@ namespace RimShips
 
         public void Notify_CaravanArrived(Caravan caravan)
         {
-            if(caravan.PawnsListForReading.Where(x => !HelperMethods.IsShip(x)).Count() > this.TotalAvailableSeats)
+            if(caravan.PawnsListForReading.Where(x => !HelperMethods.IsBoat(x)).Count() > this.TotalAvailableSeats)
             {
                 Messages.Message("CaravanMustHaveEnoughSpaceOnShip".Translate(), this, MessageTypeDefOf.RejectInput, false);
                 return;
             }
             caravan.pawns.TryAddRangeOrTransfer(this.dockedBoats);
-            List<Pawn> boats = caravan.PawnsListForReading.Where(x => HelperMethods.IsShip(x)).ToList();
+            List<Pawn> boats = caravan.PawnsListForReading.Where(x => HelperMethods.IsBoat(x)).ToList();
             foreach (Pawn p in caravan.pawns)
             {
-                if (!HelperMethods.IsShip(p))
+                if (!HelperMethods.IsBoat(p))
                 {
                     for (int i = p.inventory.innerContainer.Count - 1; i >= 0; i--)
                     {

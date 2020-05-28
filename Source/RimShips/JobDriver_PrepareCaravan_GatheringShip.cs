@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using RimWorld.Planet;
-using RimShips.Lords;
+using Vehicles.Lords;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimShips.Jobs
+namespace Vehicles.Jobs
 {
     public class JobDriver_PrepareCaravan_GatheringShip : JobDriver
     {
@@ -182,7 +182,7 @@ namespace RimShips.Jobs
         public static bool IsUsableCarrier(Pawn ship, Pawn forPawn)
         {
             return ship.IsFormingCaravan() && (!ship.DestroyedOrNull() && ship.Spawned) && ship.Faction == forPawn.Faction 
-                && !ship.IsBurning() && ship.GetComp<CompShips>().movementStatus != ShipMovementStatus.Offline
+                && !ship.IsBurning() && ship.GetComp<CompVehicle>().movementStatus != VehicleMovementStatus.Offline
                 && !MassUtility.IsOverEncumbered(ship);
         }
 
@@ -200,7 +200,7 @@ namespace RimShips.Jobs
             {
                 foreach(Pawn p in lord.ownedPawns)
                 {
-                    if(p != this.pawn && !(p.GetComp<CompShips>() is null) )
+                    if(p != this.pawn && !(p.GetComp<CompVehicle>() is null) )
                     {
                         if(JobDriver_PrepareCaravan_GatheringShip.IsUsableCarrier(p,this.pawn))
                         {

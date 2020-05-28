@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Manifest>
-    <identifier>smashphil.boats.rimworld</identifier>
-    <version>1.0.0</version>
+    <identifier>smashphil.vehicles.rimworld</identifier>
+    <version>1.1.0</version>
     <dependencies/>
     <loadAfter/>
     <suggests>

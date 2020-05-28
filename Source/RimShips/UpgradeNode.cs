@@ -7,9 +7,9 @@ using RimWorld;
 using Verse;
 using UnityEngine;
 
-namespace RimShips
+namespace Vehicles
 {
-    public class UpgradeNode : IExposable, ILoadReferenceable
+    public class UpgradeNode : IExposable, ILoadReferenceable, IUpgradeable, IThingHolder
     {
         public string label;
 
@@ -39,13 +39,18 @@ namespace RimShips
 
         public string upgradeTime;
 
-        public int upgradeTicksLeft; //Uninitialized
+        private int upgradeTicksLeft; //Post-purchase
+
+        private VehiclePawn parent;
+        public ThingOwner itemContainer; //Post-purchase
+        public List<ThingDefCountClass> cachedMaterialsNeeded = new List<ThingDefCountClass>();
+        private bool cachedStoredCostSatisfied = false;
 
         public UpgradeNode()
         {
         }
 
-        public UpgradeNode(UpgradeNode reference)
+        public UpgradeNode(UpgradeNode reference, VehiclePawn parent)
         {
             nodeID = Find.UniqueIDsManager.GetNextThingID();
 
@@ -63,6 +68,9 @@ namespace RimShips
             imageFilePath = reference.imageFilePath;
             gridCoordinate = reference.gridCoordinate;
             upgradeTime = reference.upgradeTime;
+
+            this.parent = parent;
+            itemContainer = new ThingOwner<Thing>(this, false, LookMode.Deep);
         }
 
         public int UpgradeTimeParsed
@@ -80,6 +88,67 @@ namespace RimShips
 			    return totalTicks;
             }
         }
+
+        public bool StoredCostSatisfied
+        {
+            get
+            {
+                if (itemContainer is null)
+                    return false;
+                if (cachedStoredCostSatisfied)
+                    return true;
+                foreach(KeyValuePair<ThingDef, int> item in cost)
+                {
+                    if (itemContainer.TotalStackCountOfDef(item.Key) < item.Value)
+                        return false;
+                }
+                cachedStoredCostSatisfied = true;
+                return true;
+            }
+        }
+
+        public void ResetNode()
+        {
+            cachedStoredCostSatisfied = false;
+            upgradeActive = false;
+            upgradePurchased = false;
+        }
+
+        public bool AvailableSpace(Thing item)
+        {
+            return ExtractRequiredMaterials().Any(x => x.thingDef == item.def) ? MaterialsNeeded().Find(x => x.thingDef == item.def)?.count > 0 : false;
+        }
+
+        public List<ThingDefCountClass> MaterialsNeeded()
+        {
+            cachedMaterialsNeeded.Clear();
+            List<ThingDefCountClass> itemsNeeded = ExtractRequiredMaterials().ToList();
+
+            foreach(ThingDefCountClass item in itemsNeeded)
+            {
+                int num = itemContainer.TotalStackCountOfDef(item.thingDef);
+                int num2 = item.count - num;
+                if (num2 > 0)
+                    cachedMaterialsNeeded.Add(new ThingDefCountClass(item.thingDef, num2));
+            }
+            return cachedMaterialsNeeded;
+        }
+
+        private IEnumerable<ThingDefCountClass> ExtractRequiredMaterials()
+        {
+            foreach(KeyValuePair<ThingDef, int> upgCost in cost)
+            {
+                yield return new ThingDefCountClass(upgCost.Key, upgCost.Value);
+            }
+        }
+
+        public int GetSetTicks(int tickCount = 0)
+        {
+            upgradeTicksLeft += tickCount;
+            return upgradeTicksLeft;
+        }
+
+        public bool NodeUpgrading => upgradePurchased && !upgradeActive;
 
         public void ResetTimer()
         {
@@ -179,6 +248,24 @@ namespace RimShips
             return $"UpgradeNode_{upgradeID}-{nodeID}";
         }
 
+        public IThingHolder ParentHolder
+        {
+            get
+            {
+                return parent;
+            }
+        }
+
+        public ThingOwner GetDirectlyHeldThings()
+        {
+            return itemContainer;
+        }
+
+        public void GetChildHolders(List<IThingHolder> outChildren)
+        {
+            ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, GetDirectlyHeldThings());
+        }
+
         public void ExposeData()
         {
             Scribe_Values.Look(ref label, "label");
@@ -187,13 +274,17 @@ namespace RimShips
             Scribe_Values.Look(ref informationHighlighted, "informationHighlighted");
             Scribe_Values.Look(ref disableIfUpgradeNodeEnabled, "disableIfUpgradeNodeEnabled");
             Scribe_Values.Look(ref upgradeCategory, "upgradeCategory");
+            Scribe_References.Look(ref parent, "parent");
+
+            /* Post-purchase */
             Scribe_Values.Look(ref upgradeTicksLeft, "upgradeTicksLeft");
+            Scribe_Deep.Look(ref itemContainer, "itemContainer");
 
             Scribe_Values.Look(ref upgradeActive, "upgradeActive");
             Scribe_Values.Look(ref upgradePurchased, "upgradePurchased");
 
-            Scribe_Collections.Look<ThingDef, int>(ref cost, "cost", LookMode.Def, LookMode.Value);
-            Scribe_Collections.Look<StatUpgrade, float>(ref values, "values", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref cost, "cost", LookMode.Def, LookMode.Value);
+            Scribe_Collections.Look(ref values, "values", LookMode.Value, LookMode.Value);
 
             Scribe_Collections.Look(ref researchPrerequisites, "researchPrerequisites", LookMode.Def);
             

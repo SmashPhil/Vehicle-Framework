@@ -2,8 +2,8 @@
 
 <Defs>
 	<PawnTableDef>
-		<defName>RimShips</defName>
-		<workerClass>RimShips.UI.PawnTable_Ships</workerClass>
+		<defName>Vehicles</defName>
+		<workerClass>Vehicles.UI.PawnTable_Ships</workerClass>
 		<columns>
 			<li>Label</li>
 			<li>GapTiny</li>

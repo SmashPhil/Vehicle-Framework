@@ -5,7 +5,7 @@ using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimShips.UI
+namespace Vehicles.UI
 {
     public class ITab_Ship_Passengers : ITab
     {
@@ -19,7 +19,7 @@ namespace RimShips.UI
         {
             get
             {
-                return !(base.SelPawn.Faction is null) && !(base.SelPawn.TryGetComp<CompShips>() is null) && !base.SelPawn.GetComp<CompShips>().beached;
+                return !(base.SelPawn.Faction is null) && !(base.SelPawn.TryGetComp<CompVehicle>() is null) && !base.SelPawn.GetComp<CompVehicle>().beached;
             }
         }
 
@@ -28,7 +28,7 @@ namespace RimShips.UI
         {
             get
             {
-                return base.SelPawn.TryGetComp<CompShips>() is null ? new List<Pawn>() : base.SelPawn.GetComp<CompShips>().Passengers;
+                return base.SelPawn.TryGetComp<CompVehicle>() is null ? new List<Pawn>() : base.SelPawn.GetComp<CompVehicle>().Passengers;
             }
         }
 
@@ -36,14 +36,14 @@ namespace RimShips.UI
         {
             get
             {
-                return base.SelPawn.TryGetComp<CompShips>() is null ? new List<Pawn>() : base.SelPawn.GetComp<CompShips>().AllPawnsAboard;
+                return base.SelPawn.TryGetComp<CompVehicle>() is null ? new List<Pawn>() : base.SelPawn.GetComp<CompVehicle>().AllPawnsAboard;
             }
         }
         private List<ShipHandler> Handlers
         {
             get
             {
-                return base.SelPawn.TryGetComp<CompShips>()?.handlers;
+                return base.SelPawn.TryGetComp<CompVehicle>()?.handlers;
             }
         }
 

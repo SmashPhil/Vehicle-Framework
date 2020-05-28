@@ -3,7 +3,7 @@ using RimWorld.Planet;
 using Verse;
 using Verse.AI;
 
-namespace RimShips.Jobs
+namespace Vehicles.Jobs
 {
     public class JobDriver_CarryPawnToShip : JobDriver
     {
@@ -25,7 +25,7 @@ namespace RimShips.Jobs
             this.FailOnAggroMentalState(TargetIndex.A);
             this.FailOnBurningImmobile(TargetIndex.B);
 
-            this.FailOn(() => !ShipToBoard.GetComp<CompShips>().handlers.Find(x => x.role.handlingType == HandlingTypeFlags.None).AreSlotsAvailable);
+            this.FailOn(() => !ShipToBoard.GetComp<CompVehicle>().handlers.Find(x => x.role.handlingType == HandlingTypeFlags.None).AreSlotsAvailable);
 
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell).FailOnDestroyedNullOrForbidden(TargetIndex.A).FailOnDespawnedNullOrForbidden(TargetIndex.B).FailOn(() =>
                 !PawnToBoard.Downed).FailOn(() => !this.pawn.CanReach(this.PawnToBoard, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn)).FailOnSomeonePhysicallyInteracting(TargetIndex.A);
@@ -42,7 +42,7 @@ namespace RimShips.Jobs
             Toil toil = new Toil();
             toil.initAction = delegate ()
             {
-                CompShips shipComp = ship.GetComp<CompShips>();
+                CompVehicle shipComp = ship.GetComp<CompVehicle>();
                 shipComp.Notify_Boarded(pawnToBoard);
                 ShipHandler handler = shipComp.handlers.Find(x => x.role.handlingType == HandlingTypeFlags.None);
                 shipComp.GiveLoadJob(pawnToBoard, handler);

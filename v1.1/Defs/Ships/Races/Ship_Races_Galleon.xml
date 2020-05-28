@@ -155,15 +155,16 @@
 		</race>
 
 		<comps>	
-			<li Class = "RimShips.CompProperties_Ships">
+			<li Class = "Vehicles.CompProperties_Vehicle">
 				<downable>false</downable>
 				<movesWhenDowned>false</movesWhenDowned>
 				
 				<moveable>DriverNeeded</moveable>
 				<riverTraversability>LargeRiver</riverTraversability>
-				<shipPowerType>Sails</shipPowerType>
-				<shipCategory>Combat</shipCategory>
-				<shipTech>Medieval</shipTech>
+				<vehiclePowerType>WindPowered</vehiclePowerType>
+				<vehicleCategory>Combat</vehicleCategory>
+				<vehicleTech>Medieval</vehicleTech>
+				<vehicleType>Sea</vehicleType>
 				<nameable>true</nameable>
 				<buildDef>SPBoats_GalleonBlueprint</buildDef>
 				<ticksBetweenRepair>350</ticksBetweenRepair>
@@ -207,7 +208,7 @@
 				</roles>
 			</li>
 			
-			<!-- <li Class="RimShips.CompProperties_Cannons"> -->
+			<!-- <li Class="Vehicles.CompProperties_Cannons"> -->
 				<!-- <cannons> -->
 					<!-- <li> -->
 						<!-- <label>Portside</label> -->

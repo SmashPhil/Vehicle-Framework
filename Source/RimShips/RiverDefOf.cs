@@ -1,6 +1,6 @@
 ﻿using RimWorld;
 
-namespace RimShips
+namespace Vehicles
 {
     [DefOf]
     public static class RiverDefOf

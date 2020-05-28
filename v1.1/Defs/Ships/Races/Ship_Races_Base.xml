@@ -3,7 +3,7 @@
 <Defs>
 
 	<ThingDef Name="BaseBoatPawn" Abstract="True">
-		<thingClass>RimShips.BoatPawn</thingClass>
+		<thingClass>Vehicles.VehiclePawn</thingClass>
 		<category>Pawn</category>
 		<selectable>true</selectable>
 		<tickerType>Normal</tickerType>
@@ -24,10 +24,10 @@
 		</statBases>
 		
 		<inspectorTabs>
-			<li>RimShips.UI.ITab_Ship_Health</li>
-			<li>RimShips.UI.ITab_Ship_Passengers</li>
-			<li>RimShips.UI.ITab_Ship_Cargo</li>
-			<li>RimShips.UI.ITab_Ship_Upgrades</li>
+			<li>Vehicles.UI.ITab_Ship_Health</li>
+			<li>Vehicles.UI.ITab_Ship_Passengers</li>
+			<li>Vehicles.UI.ITab_Ship_Cargo</li>
+			<li>Vehicles.UI.ITab_Ship_Upgrades</li>
 			<li>ITab_Pawn_FormingCaravan</li>
 		</inspectorTabs>
 		

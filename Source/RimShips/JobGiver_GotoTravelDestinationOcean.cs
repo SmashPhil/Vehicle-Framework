@@ -1,10 +1,10 @@
 ﻿using RimWorld;
-using RimShips.Defs;
-using RimShips.AI;
+using Vehicles.Defs;
+using Vehicles.AI;
 using Verse;
 using Verse.AI;
 
-namespace RimShips.Jobs
+namespace Vehicles.Jobs
 {
     public class JobGiver_GotoTravelDestinationOcean : ThinkNode_JobGiver
     {

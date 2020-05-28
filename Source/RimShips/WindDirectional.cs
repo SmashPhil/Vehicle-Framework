@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Verse;
 using UnityEngine;
 
-namespace RimShips
+namespace Vehicles
 {
     public class WindDirectional : MapComponent
     {

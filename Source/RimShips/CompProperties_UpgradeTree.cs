@@ -6,7 +6,7 @@ using Verse;
 using RimWorld;
 using UnityEngine;
 
-namespace RimShips
+namespace Vehicles
 {
     public enum StatUpgrade { Other, Cannon, Armor, Speed, CargoCapacity, FuelConsumptionRate, FuelCapacity}
     public class CompProperties_UpgradeTree : CompProperties

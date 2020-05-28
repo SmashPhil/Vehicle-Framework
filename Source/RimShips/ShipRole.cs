@@ -2,7 +2,7 @@
 using Verse;
 using System.Collections.Generic;
 
-namespace RimShips
+namespace Vehicles
 {
     public enum HandlingTypeFlags {None, Cannons, Turret, Movement }
 

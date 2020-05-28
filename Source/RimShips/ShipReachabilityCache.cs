@@ -5,7 +5,7 @@ using RimWorld;
 using Verse;
 
 
-namespace RimShips.AI
+namespace Vehicles.AI
 {
     public class ShipReachabilityCache
     {

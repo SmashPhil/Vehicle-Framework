@@ -1,8 +1,8 @@
-﻿using RimShips.Defs;
+﻿using Vehicles.Defs;
 using Verse;
 using Verse.AI;
 
-namespace RimShips.Jobs
+namespace Vehicles.Jobs
 {
     public class JobGiver_AwaitOrders : ThinkNode_JobGiver
     {

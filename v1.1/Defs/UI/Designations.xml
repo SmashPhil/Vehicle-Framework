@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
 	<DesignationCategoryDef>
-		<defName>RimShips</defName>
-		<label>Boats</label>
-		<description>Ships from the mod RimShips</description>
+		<defName>Vehicles</defName>
+		<label>Vehicles</label>
+		<description>Vehicles for operating.</description>
 		<order>8</order>
 		<specialDesignatorClasses>
 			<li>Designator_Cancel</li>

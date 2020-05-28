@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<Vehicles.CannonDef>
+		<defName>tankMainTurret</defName>
+		<label>Tank</label>
+		<weaponType>Rotatable</weaponType>
+		<weaponLocation>Turret</weaponLocation>
+		<moteCannon>Mote_CannonSmoke</moteCannon>
+		<moteFlash>Mote_CannonFlash</moteFlash>
+		<cannonSound>Explosion_PirateCannon</cannonSound>
+		<projectile>MarkX_MkXA</projectile>
+		<baseTicksBetweenShots>20</baseTicksBetweenShots>
+		<numberOfShots>1</numberOfShots>
+		<cooldownTimer>1</cooldownTimer>
+		<warmUpTimer>2</warmUpTimer>
+		<magazineCapacity>1</magazineCapacity>
+		
+		<autoSnapTargeting>false</autoSnapTargeting>
+		<rotationSpeed>0.5</rotationSpeed>
+		
+		<gizmoDescription>Select Target.\n\nFire for effect</gizmoDescription>
+		
+		<graphicData>
+			<texPath>Vehicles/Tank/TankCannonTop</texPath>
+			<graphicClass>Vehicles.Graphic_Animate</graphicClass>
+			<drawSize>(7, 7)</drawSize>
+		</graphicData>
+		
+		<baseCannonTexPath/>
+
+		<ammoAllowed/>
+		
+		<projectileOffset>3</projectileOffset>
+		<hitFlags>IntendedTarget</hitFlags>
+		<spreadRadius>1</spreadRadius>
+		<minRange>0</minRange>
+	</Vehicles.CannonDef>
+	
+	<Vehicles.CannonDef>
+		<defName>turret50cal</defName>
+		<label>.50 cal</label>
+		<weaponType>Rotatable</weaponType>
+		<weaponLocation>Turret</weaponLocation>
+		<moteCannon>Mote_CannonSmoke</moteCannon>
+		<moteFlash>Mote_CannonFlash</moteFlash>
+		<cannonSound>Shot_Minigun</cannonSound>
+		<projectile>Bullet_50CalMounted</projectile>
+		<baseTicksBetweenShots>5</baseTicksBetweenShots>
+		<numberOfShots>6</numberOfShots>
+		<cooldownTimer>1.5</cooldownTimer>
+		<warmUpTimer>1</warmUpTimer>
+		<magazineCapacity>1</magazineCapacity>
+		
+		<autoSnapTargeting>true</autoSnapTargeting>
+		
+		<gizmoDescription>Select Target.\n\nFire for effect</gizmoDescription>
+		
+		<graphicData>
+			<texPath>Vehicles/50cal</texPath>
+			<graphicClass>Vehicles.Graphic_Animate</graphicClass>
+			<drawSize>(6, 6)</drawSize>
+		</graphicData>
+		
+		<baseCannonTexPath/>
+
+		<ammoAllowed/>
+		
+		<projectileOffset>1</projectileOffset>
+		<hitFlags>All</hitFlags>
+		<spreadRadius>0</spreadRadius>
+		<minRange>0</minRange>
+	</Vehicles.CannonDef>
+</Defs>

@@ -5,9 +5,9 @@ using System.Text;
 using RimWorld;
 using UnityEngine;
 using Verse;
-using RimShips.AI;
+using Vehicles.AI;
 
-namespace RimShips
+namespace Vehicles
 {
     public sealed class WaterRegion
     {

@@ -10,7 +10,7 @@
 					<treeDef>SatisfyVeryUrgentNeeds</treeDef>
 				</li>
 				
-				<li Class="RimShips.Jobs.JobGiver_BoardShip"/>
+				<li Class="Vehicles.Jobs.JobGiver_BoardShip"/>
 				
 				<li Class="JobGiver_WanderAnywhere"/>
 			</subNodes>
@@ -25,7 +25,7 @@
 					<treeDef>SatisfyVeryUrgentNeeds</treeDef>
 				</li>
 				
-				<li Class="RimShips.Jobs.JobGiver_CarryPawnToShip"/>
+				<li Class="Vehicles.Jobs.JobGiver_CarryPawnToShip"/>
 				
 				<li Class="JobGiver_WanderAnywhere"/>
 			</subNodes>
@@ -40,7 +40,7 @@
 					<treeDef>SatisfyVeryUrgentNeeds</treeDef>
 				</li>
 				
-				<li Class="RimShips.Jobs.JobGiver_BoardShip"/>
+				<li Class="Vehicles.Jobs.JobGiver_BoardShip"/>
 				
 				<li Class="JobGiver_WanderAnywhere"/>
 			</subNodes>
@@ -65,7 +65,7 @@
 			<li Class="JobGiver_UnloadMyLordCarriers" />
 
 			<!-- Gather items -->
-			<li Class="RimShips.Jobs.JobGiver_PrepareCaravan_GatheringShip"/>
+			<li Class="Vehicles.Jobs.JobGiver_PrepareCaravan_GatheringShip"/>
 			
 			<!-- Wander -->
 			<li Class="ThinkNode_Tagger">
@@ -82,7 +82,7 @@
 		<defName>PrepareCaravan_WaitShip</defName>
 		<thinkNode Class="ThinkNode_Priority">
 			<subNodes>
-				<li Class="RimShips.Jobs.JobGiver_AwaitOrders"/>
+				<li Class="Vehicles.Jobs.JobGiver_AwaitOrders"/>
 			</subNodes>
 		</thinkNode>
 	</DutyDef>

@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
-using RimShips.Defs;
-using RimShips.Jobs;
+using Vehicles.Defs;
+using Vehicles.Jobs;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimShips.Lords
+namespace Vehicles.Lords
 {
     public class LordToil_PrepareCaravan_GatherShip : LordToil
     {
@@ -44,7 +44,7 @@ namespace RimShips.Lords
                 {
                     pawn.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_BoardShip);
                 }
-                else if(!(pawn.GetComp<CompShips>() is null))
+                else if(!(pawn.GetComp<CompVehicle>() is null))
                 {
                     pawn.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_WaitShip);
                 }

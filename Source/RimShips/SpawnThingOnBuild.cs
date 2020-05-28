@@ -1,6 +1,6 @@
 ﻿using Verse;
 
-namespace RimShips
+namespace Vehicles
 {
     public class SpawnThingBuilt : DefModExtension
     {

@@ -1,9 +1,9 @@
 ﻿using RimWorld.Planet;
 using Verse;
-using RimShips.Defs;
+using Vehicles.Defs;
 using System.Collections.Generic;
 
-namespace RimShips
+namespace Vehicles
 {
     public class ShipHandler : IExposable, ILoadReferenceable, IThingHolder
     {

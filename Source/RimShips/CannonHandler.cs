@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using Verse;
+using Verse.Sound;
+using RimWorld;
 using UnityEngine;
 using SPExtended;
 
-namespace RimShips
+namespace Vehicles
 {
     public enum WeaponType { None, Static, Rotatable }
     public enum WeaponLocation { Port, Starboard, Bow, Stern, Turret }
@@ -13,10 +15,12 @@ namespace RimShips
         public CannonHandler()
         {
         }
+
         public CannonHandler(Pawn pawn, CannonHandler reference)
         {
             this.pawn = pawn;
             uniqueID = Find.UniqueIDsManager.GetNextThingID();
+            
             cannonDef = reference.cannonDef;
 
             cannonSize = reference.cannonSize;
@@ -34,6 +38,15 @@ namespace RimShips
             cannonTurretDrawSize = reference.cannonTurretDrawSize;
             baseCannonDrawSize = reference.baseCannonDrawSize;
             drawLayer = reference.drawLayer;
+
+            attachableKey = reference.attachableKey;
+            parentKey = reference.parentKey;
+
+            targetPersists = reference.targetPersists;
+            targetAutomatically = reference.targetAutomatically;
+
+            (CannonGraphic as Graphic_Animate)?.DisableAnimation();
+            ResetCannonAngle();
 
             if (cannonDef.splitCannonGroups)
             {
@@ -71,6 +84,10 @@ namespace RimShips
             Scribe_Values.Look(ref cannonRenderOffset, "cannonRenderOffset");
             Scribe_Values.Look(ref cannonRenderLocation, "cannonRenderLocation");
             Scribe_Values.Look(ref currentRotation, "currentRotation", defaultAngleRotated - 90);
+            Scribe_Values.Look(ref rotationTargeted, "rotationTargeted", defaultAngleRotated - 90);
+
+            Scribe_Values.Look(ref targetPersists, "targetPersists");
+            Scribe_Values.Look(ref targetAutomatically, "targetAutomatically");
 
             Scribe_Values.Look(ref aimPieOffset, "aimPieOffset");
             Scribe_Values.Look(ref angleRestricted, "angleRestricted");
@@ -81,18 +98,24 @@ namespace RimShips
             Scribe_Values.Look(ref cannonTurretDrawSize, "cannonTurretDrawSize");
             Scribe_Values.Look(ref baseCannonDrawSize, "baseCannonDrawSize");
 
-             Scribe_Values.Look(ref drawLayer, "drawLayer");
+            Scribe_Values.Look(ref drawLayer, "drawLayer");
+
+            Scribe_Values.Look(ref parentKey, "parentKey");
+            Scribe_Values.Look(ref attachableKey, "attachableKey");
 
             Scribe_References.Look(ref pawn, "pawn");
             Scribe_Defs.Look(ref loadedAmmo, "loadedAmmo");
             Scribe_Defs.Look(ref savedAmmoType, "savedAmmoType");
             Scribe_Values.Look(ref shellCount, "shellCount");
+            Scribe_Values.Look(ref gizmoLabel, "gizmoLabel");
 
             Scribe_Collections.Look(ref cannonGroupDict, "cannonGroupDict");
             Scribe_TargetInfo.Look(ref cannonTarget, "cannonTarget", LocalTargetInfo.Invalid);
         }
 
         public bool IsTargetable => cannonDef?.weaponType == WeaponType.Rotatable; //Add to this later
+
+        public bool RotationIsValid => currentRotation == rotationTargeted;
 
         public bool ActivateTimer()
         {
@@ -104,7 +127,7 @@ namespace RimShips
 
         public void DoTick()
         {
-            if (cooldownTicks > 0)
+            if (cooldownTicks > 0 && RotationIsValid && pawn.GetComp<CompCannons>().multiFireCannon.NullOrEmpty())
             {
                 cooldownTicks--;
                 if(cooldownTicks <= 0)
@@ -112,34 +135,100 @@ namespace RimShips
                     ReloadCannon();
                 }
             }
+            if(rotationTargeted != currentRotation)
+            {
+                if(pawn.Drafted)
+                {
+                    float relativeCurrentRotation = currentRotation + 90;
+                    float relativeTargetedRotation = rotationTargeted + 90;
+                    if (relativeCurrentRotation < 0)
+                        relativeCurrentRotation += 360;
+                    else if (relativeCurrentRotation > 360)
+                        relativeCurrentRotation -= 360;
+                    if (relativeTargetedRotation < 0)
+                        relativeTargetedRotation += 360;
+                    else if (relativeTargetedRotation > 360)
+                        relativeTargetedRotation -= 360;
+                    if(Math.Abs(relativeCurrentRotation - relativeTargetedRotation) < cannonDef.rotationSpeed)
+                    {
+                        currentRotation = rotationTargeted;
+                    }
+                    else
+                    {
+                        int? sign = AngleDirectionalRestricted(relativeTargetedRotation);
+                    
+                        if(relativeCurrentRotation < relativeTargetedRotation)
+                        {
+                            if(Math.Abs(relativeCurrentRotation - relativeTargetedRotation) < 180)
+                               currentRotation += cannonDef.rotationSpeed;
+                            else currentRotation -= cannonDef.rotationSpeed;
+                        }
+                        else
+                        {
+                            if(Math.Abs(relativeCurrentRotation - relativeTargetedRotation) < 180)
+                               currentRotation -= cannonDef.rotationSpeed;
+                            else currentRotation += cannonDef.rotationSpeed;
+                        }
+                    }
+                }
+                else
+                {
+                    rotationTargeted = currentRotation;
+                }
+            }
             if(IsTargetable)
             {
                 if(cannonTarget.Cell.IsValid)
                 {
+                    if(!CannonTargeter.TargetMeetsRequirements(this, cannonTarget) || !pawn.Drafted)
+                    {
+                        Log.Message("Reset");
+                        SetTarget(LocalTargetInfo.Invalid);
+                        return;
+                    }
+                    Log.Message("Unlocked");
                     LockedStatusRotation = false;
                     if(PrefireTickCount > 0)
                     {
-                        if(!CannonTargeter.TargetMeetsRequirements(this, cannonTarget) || !pawn.Drafted)
+                        rotationTargeted = (float)TurretLocation.ToIntVec3().AngleToPoint(cannonTarget.Cell, pawn.Map);
+                        if(cannonDef.autoSnapTargeting)
                         {
-                            SetTarget(LocalTargetInfo.Invalid);
-                            return;
+                            currentRotation = rotationTargeted;
                         }
-                        currentRotation = (float)TurretLocation.ToIntVec3().AngleToPoint(cannonTarget.Cell, pawn.Map);
-
-                        float facing = cannonTarget.Thing != null ? (cannonTarget.Thing.DrawPos - TurretLocation).AngleFlat() : (cannonTarget.Cell - TurretLocation.ToIntVec3()).AngleFlat;
-                        GenDraw.DrawAimPieRaw(TurretLocation + new Vector3(cannonRenderOffset.x + aimPieOffset.x, 0.5f, cannonRenderOffset.y + aimPieOffset.y).RotatedBy(TurretRotation), facing, (int)(PrefireTickCount * 0.5f));
-
-                        PrefireTickCount--;
+                        
+                        if(RotationIsValid)
+                        {
+                            float facing = cannonTarget.Thing != null ? (cannonTarget.Thing.DrawPos - TurretLocation).AngleFlat() : (cannonTarget.Cell - TurretLocation.ToIntVec3()).AngleFlat;
+                            GenDraw.DrawAimPieRaw(TurretLocation + new Vector3(cannonRenderOffset.x + aimPieOffset.x, 0.5f, cannonRenderOffset.y + aimPieOffset.y).RotatedBy(TurretRotation), facing, (int)(PrefireTickCount * 0.5f));
+                            PrefireTickCount--;
+                        }
                     }
-                    else if(cooldownTicks <= 0)
+                    else if(cooldownTicks <= 0 && RotationIsValid)
                     {
-                        CompCannon.multiFireCannon.Add(new SPTuple<int, CannonHandler, SPTuple2<int,int>>(cannonDef.numberOfShots, this, new SPTuple2<int,int>(0, 0)));
-                        ActivateTimer();
+                        Log.Message("Prepare checks");
+                        if(!targetPersists || !SetTargetConditionalOnThing(LocalTargetInfo.Invalid, true))
+                        {
+                            Log.Message("Prepare Fire");
+                            CompCannon.multiFireCannon.Add(new SPTuple<int, CannonHandler, SPTuple2<int,int>>(cannonDef.numberOfShots, this, new SPTuple2<int,int>(0, 0)));
+                            ActivateTimer();
+                        }
                     }
                 }
             }
         }
 
+        public void Draw()
+        {
+            if(cannonDef.graphicData.graphicClass == typeof(Graphic_Animate))
+            {
+                (CannonGraphic as Graphic_Animate).DrawAnimationWorker(this);
+            }
+            else
+            {
+                HelperMethods.DrawAttachedThing(CannonBaseTexture, CannonBaseGraphic, baseCannonRenderLocation, baseCannonDrawSize, CannonTexture, CannonGraphic, 
+                cannonRenderLocation, cannonRenderOffset, CannonBaseMaterial, CannonMaterial, TurretRotation, pawn, drawLayer);
+            }
+        }
 
         public int TicksPerShot
         {
@@ -149,14 +238,33 @@ namespace RimShips
             }
         }
 
+        public float CannonIconAlphaTicked
+        {
+            get
+            {
+                if (cooldownTicks <= 0)
+                    return 0.5f;
+                return Mathf.PingPong(cooldownTicks, 25) / 100;
+            }
+        }
+
         public Material CannonMaterial
         {
             get
             {
-                if(cannonDef.cannonTexPath.NullOrEmpty())
+                if(cannonDef.graphicData.texPath.NullOrEmpty())
                     return null;
                 if (cannonMaterialLoaded is null)
-                    cannonMaterialLoaded = MaterialPool.MatFrom(cannonDef.cannonTexPath);
+                {
+                    if(cannonDef.graphicData.graphicClass == typeof(Graphic_Animate))
+                    {
+                        cannonMaterialLoaded = MaterialPool.MatFrom(Graphic_Animate.GetDefaultTexPath(cannonDef.graphicData.texPath));
+                    }
+                    else
+                    {
+                        cannonMaterialLoaded = MaterialPool.MatFrom(cannonDef.graphicData.texPath);
+                    }
+                }
                 return cannonMaterialLoaded;
             }
         }
@@ -177,10 +285,19 @@ namespace RimShips
         {
             get
             {
-                if (cannonDef.cannonTexPath.NullOrEmpty())
+                if (cannonDef.graphicData.texPath.NullOrEmpty())
                     return null;
                 if (cannonTex is null)
-                    cannonTex = ContentFinder<Texture2D>.Get(cannonDef.cannonTexPath, true);
+                {
+                    if(cannonDef.graphicData.graphicClass == typeof(Graphic_Animate))
+                    {
+                        cannonTex = ContentFinder<Texture2D>.Get(Graphic_Animate.GetDefaultTexPath(cannonDef.graphicData.texPath));
+                    }
+                    else
+                    {
+                        cannonTex = ContentFinder<Texture2D>.Get(cannonDef.graphicData.texPath, true);
+                    }
+                }
                 return cannonTex;
             }
         }
@@ -201,10 +318,14 @@ namespace RimShips
         {
             get
             {
-                if (cannonDef.cannonTexPath.NullOrEmpty())
-                    return null;
                 if (cannonGraphic is null)
-                    cannonGraphic = GraphicDatabase.Get<Graphic_Multi>(cannonDef.cannonTexPath, ShaderDatabase.DefaultShader, cannonTurretDrawSize, Color.white);
+                {
+                    if (cannonDef.graphicData is null)
+                    {
+                        return BaseContent.BadGraphic;
+                    }
+                    cannonGraphic = cannonDef.graphicData.Graphic; //GraphicDatabase.Get<Graphic_Animate>(cannonDef.cannonTexPath, ShaderDatabase.DefaultShader, cannonTurretDrawSize, Color.white);
+                }
                 return cannonGraphic;
             }
         }
@@ -231,7 +352,7 @@ namespace RimShips
                     gizmoIcon = CannonTexture;
 
                 if (gizmoIcon is null)
-                    gizmoIcon = TexCommandShips.BroadsideCannon_Port;
+                    gizmoIcon = TexCommandVehicles.BroadsideCannon_Port;
                 return gizmoIcon;
             }
         }
@@ -240,7 +361,7 @@ namespace RimShips
         {
             get
             {
-                Pair<float, float> turretLoc = HelperMethods.ShipDrawOffset(CompShip, cannonRenderLocation.x, cannonRenderLocation.y);
+                Pair<float, float> turretLoc = HelperMethods.ShipDrawOffset(CompVehicle, cannonRenderLocation.x, cannonRenderLocation.y);
                 return new Vector3(pawn.DrawPos.x + turretLoc.First, pawn.DrawPos.y + drawLayer, pawn.DrawPos.z + turretLoc.Second);
             }
         }
@@ -249,7 +370,7 @@ namespace RimShips
         {
             get
             {
-                Pair<float, float> turretLoc = HelperMethods.ShipDrawOffset(CompShip, cannonRenderLocation.x + cannonRenderOffset.x, cannonRenderLocation.y + cannonRenderOffset.y);
+                Pair<float, float> turretLoc = HelperMethods.ShipDrawOffset(CompVehicle, cannonRenderLocation.x + cannonRenderOffset.x, cannonRenderLocation.y + cannonRenderOffset.y);
                 return new Vector3(pawn.DrawPos.x + turretLoc.First, pawn.DrawPos.y + drawLayer, pawn.DrawPos.z + turretLoc.Second).RotatedBy(currentRotation);
             }
         }
@@ -258,12 +379,18 @@ namespace RimShips
         {
             get
             {
-                float trueRotation = currentRotation;
-                if(HelperMethods.CannonTargeter.cannon != this && !cannonTarget.IsValid)
+                ValidateLockStatus();
+
+                if(currentRotation > 360)
                 {
-                    trueRotation -= 90 * pawn.Rotation.AsInt + CompShip.Angle;
+                    currentRotation -= 360;
                 }
-                float rotation = 270 - trueRotation;
+                else if(currentRotation < 0)
+                {
+                    currentRotation += 360;
+                }
+
+                float rotation = 270 - currentRotation;
                 if(rotation < 0)
                 {
                     return 360 + rotation;
@@ -277,7 +404,7 @@ namespace RimShips
             if(angleRestricted == Vector2.zero)
                 return true;
 
-            float rotationOffset = pawn.Rotation.AsInt * 90 + pawn.GetComp<CompShips>().Angle;
+            float rotationOffset = pawn.Rotation.AsInt * 90 + pawn.GetComp<CompVehicle>().Angle;
             
             float start = angleRestricted.x + rotationOffset;
             float end = angleRestricted.y + rotationOffset;
@@ -293,61 +420,78 @@ namespace RimShips
             return mid < end;
         }
 
-        public void AlignToAngleRestricted(float angle, Vector3 mousePos)
+        public void AlignToAngleRestricted(float angle)
         {
-            int? sign = AngleDirectionalRestricted(angle, mousePos);
-            currentRotation = angle; // CHANGE LATER
+            if (cannonDef.autoSnapTargeting)
+            {
+                currentRotation = angle;
+                rotationTargeted = angle;
+            }
+            else
+            {
+                rotationTargeted = angle;
+            }
         }
 
-        private int? AngleDirectionalRestricted(float angle, Vector3 mousePos)
+        private int? AngleDirectionalRestricted(float angle)
         {
-            //REDO LATER
+            if (angleRestricted != Vector2.zero)
+            {
+                
+            }
             return null;
         }
 
         public bool ReloadCannon(ThingDef ammo = null)
         {
-            try
+            if (loadedAmmo is null || shellCount < cannonDef.magazineCapacity || ammo != null)
             {
-                if(pawn.inventory.innerContainer.Contains(savedAmmoType) || pawn.inventory.innerContainer.Contains(ammo))
+                try
                 {
-                    Thing storedAmmo = null;
-                    if (ammo != null)
+                    if(pawn.inventory.innerContainer.Contains(savedAmmoType) || pawn.inventory.innerContainer.Contains(ammo))
                     {
-                        storedAmmo = pawn.inventory.innerContainer.FirstOrFallback(x => x.def == ammo);
-                        savedAmmoType = ammo;
-                        TryRemoveShell();
-                    }
-                    else if(savedAmmoType != null)
-                    {
-                        storedAmmo = pawn.inventory.innerContainer.FirstOrFallback(x => x.def == savedAmmoType);
-                    }
-                    else
-                    {
-                        throw new NotImplementedException("No saved or specified shell upon reload");
-                    }
+                        Thing storedAmmo = null;
+                        if (ammo != null)
+                        {
+                            storedAmmo = pawn.inventory.innerContainer.FirstOrFallback(x => x.def == ammo);
+                            savedAmmoType = ammo;
+                            TryRemoveShell();
+                        }
+                        else if(savedAmmoType != null)
+                        {
+                            storedAmmo = pawn.inventory.innerContainer.FirstOrFallback(x => x.def == savedAmmoType);
+                        }
+                        else
+                        {
+                            throw new NotImplementedException("No saved or specified shell upon reload");
+                        }
 
-                    int countToTake = storedAmmo.stackCount >= cannonDef.magazineCapacity ? cannonDef.magazineCapacity : storedAmmo.stackCount;
-                    Thing loadedThing = pawn.inventory.innerContainer.Take(storedAmmo, countToTake);
-                    loadedAmmo = loadedThing.def;
-                    shellCount = loadedThing.stackCount;
-                }    
-            }
-            catch(Exception ex)
-            {
-                Log.Error($"Unable to reload Cannon: {uniqueID} on Pawn: {pawn.LabelShort}. Exception: {ex.Message}");
-                return false;
-            }
-
+                        int countToTake = storedAmmo.stackCount >= cannonDef.magazineCapacity - shellCount ? cannonDef.magazineCapacity - shellCount : storedAmmo.stackCount;
+                        Thing loadedThing = pawn.inventory.innerContainer.Take(storedAmmo, countToTake);
+                        loadedAmmo = loadedThing.def;
+                        shellCount = loadedThing.stackCount;
+                        SoundDefOf.Artillery_ShellLoaded.PlayOneShot(new TargetInfo(pawn.Position, pawn.Map, false));
+                    }    
+                }
+                catch(Exception ex)
+                {
+                    Log.Error($"Unable to reload Cannon: {uniqueID} on Pawn: {pawn.LabelShort}. Exception: {ex.Message}");
+                    return false;
+                }
+            } 
             return loadedAmmo != null;
         }
 
         public void ConsumeShellChambered()
         {
             shellCount--;
-            if (shellCount <= 0)
+            if (shellCount <= 0 && pawn.inventory.innerContainer.FirstOrFallback(x => x.def == loadedAmmo) is null)
+            {
                 loadedAmmo = null;
+                shellCount = 0;
+            }
         }
+
         public void TryRemoveShell()
         {
             if(loadedAmmo != null && shellCount > 0)
@@ -355,6 +499,8 @@ namespace RimShips
                 Thing thing = ThingMaker.MakeThing(loadedAmmo);
                 thing.stackCount = shellCount;
                 pawn.inventory.innerContainer.TryAdd(thing);
+                loadedAmmo = null;
+                shellCount = 0;
             }
         }
 
@@ -385,9 +531,53 @@ namespace RimShips
             cannonTarget = target;
         }
 
+        /// <summary>
+        /// Set target only if cannonTarget is no longer valid or if target is cell based
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="checkOnly"></param>
+        /// <returns>true if cannonTarget set to target, false if target is still valid</returns>
+        public bool SetTargetConditionalOnThing(LocalTargetInfo target, bool validationOnly = false)
+        {
+            Log.Message($"Conditional Check: {cannonTarget.IsValid} && ( {cannonTarget.HasThing} || {!cannonTarget.IsValid} )");
+            if(validationOnly && cannonTarget.IsValid)
+            {
+                return false;
+            }
+            else if(cannonTarget.IsValid && (cannonTarget.HasThing || !cannonTarget.IsValid))
+            {
+                Log.Message("1");
+                if(cannonTarget.Thing is Pawn pawn)
+                {
+                    Log.Message("2");
+                    if (pawn.Dead || pawn.Downed)
+                    {
+                        Log.Message("3");
+                        cannonTarget = target;
+                        return true;
+                    }
+                }
+                else
+                {
+                    Log.Message("4");
+                    if (cannonTarget.Thing.HitPoints > 0)
+                    {
+                        Log.Message("5");
+                        cannonTarget = target;
+                        return true;
+                    }
+                }
+                //ResetPrefireTimer();
+                return false;
+            }
+            cannonTarget = target;
+            return true;
+        }
+
         public void ResetCannonAngle()
         {
             currentRotation = defaultAngleRotated - 90;
+            rotationTargeted = currentRotation;
         }
 
         public void ResetPrefireTimer()
@@ -395,15 +585,19 @@ namespace RimShips
             PrefireTickCount = WarmupTicks;
         }
 
-        public void ValidateLockStatus()
+        private void ValidateLockStatus()
         {
-            if(parentRotCached != pawn.Rotation)
+            if(parentRotCached != pawn.Rotation || parentAngleCached != CompVehicle.Angle)
             {
-                parentRotCached = pawn.Rotation;
                 if(!cannonTarget.IsValid && HelperMethods.CannonTargeter.cannon != this)
                 {
+                    float angleDifference = CompVehicle.Angle - parentAngleCached;
+                    currentRotation -= 90 * (pawn.Rotation.AsInt - parentRotCached.AsInt) + angleDifference;
+                    rotationTargeted = currentRotation;
                     LockedStatusRotation = true;
                 }
+                parentRotCached = pawn.Rotation;
+                parentAngleCached = CompVehicle.Angle;
             }
         }
 
@@ -430,6 +624,14 @@ namespace RimShips
 
         public CannonDef cannonDef;
 
+        public bool targetPersists;
+        public bool targetAutomatically;
+
+        /* Optional */
+        public CannonHandler attachedTo;
+        public string parentKey;
+        public string attachableKey;
+
         private Material cannonMaterialLoaded;
         public Vector2 cannonSize;
         public Vector2 cannonRenderOffset;
@@ -453,17 +655,22 @@ namespace RimShips
         public int PrefireTickCount { get; private set; }
 
         public float currentRotation = 0f;
+        private float rotationTargeted = 0f;
 
         public Pawn pawn;
 
         public ThingDef loadedAmmo;
         public ThingDef savedAmmoType;
         public int shellCount;
+        public bool ammoWindowOpened;
+        public string gizmoLabel;
 
-        private CompShips CompShip => pawn.TryGetComp<CompShips>();
+        private CompVehicle CompVehicle => pawn.TryGetComp<CompVehicle>();
         private CompCannons CompCannon => pawn.TryGetComp<CompCannons>();
 
-        public bool LockedStatusRotation { get; private set; }
+        public bool LockedStatusRotation { get; set; }
+
         private Rot4 parentRotCached = default;
+        private float parentAngleCached = 0f;
     }
 }

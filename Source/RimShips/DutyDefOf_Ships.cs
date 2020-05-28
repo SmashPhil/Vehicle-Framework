@@ -1,7 +1,7 @@
 ﻿using RimWorld;
 using Verse.AI;
 
-namespace RimShips.Defs
+namespace Vehicles.Defs
 {
     [DefOf]
     public static class DutyDefOf_Ships

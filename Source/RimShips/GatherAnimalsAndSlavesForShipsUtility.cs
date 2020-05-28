@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using RimShips.AI;
-using RimShips.Lords;
+using Vehicles.AI;
+using Vehicles.Lords;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 using SPExtended;
 
-namespace RimShips
+namespace Vehicles
 {
     public static class GatherAnimalsAndSlavesForShipsUtility
     {

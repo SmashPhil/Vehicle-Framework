@@ -7,7 +7,7 @@ using Verse.Sound;
 using RimWorld;
 using SPExtended;
 
-namespace RimShips
+namespace Vehicles
 {
     public class RimshipsModSettings : ModSettings
     {
@@ -20,7 +20,9 @@ namespace RimShips
         public bool riverTravel = true;
         public bool boatSizeMatters = true;
         public bool passiveWaterWaves = true;
+
         public bool drawUpgradeInformationScreen = true;
+        public bool useInGameTime = true;
 
         public float fishingMultiplier = 1f;
         public int fishingDelay = 10000;
@@ -35,11 +37,15 @@ namespace RimShips
 
         public bool debugDrawCannonGrid;
         public bool debugDrawNodeGrid;
+        public bool debugDrawVehicleTracks;
 
         public bool debugDrawRegions;
         public bool debugDrawRegionLinks;
         public bool debugDrawRegionThings;
-        
+
+        /* Not displayed in mod settings page */
+        public bool showAllCargoItems;
+
         public int CoastRadius => forceFactionCoastRadius;
         public float FishingSkillValue => fishingSkillIncrease / 100;
         public override void ExposeData()
@@ -47,6 +53,9 @@ namespace RimShips
             Scribe_Values.Look(ref beachMultiplier, "beachMultiplier", 0f);
             Scribe_Values.Look(ref forceFactionCoastRadius, "forceFactionCoastRadius", 1);
             Scribe_Values.Look(ref daysToResetRegions, "daysToResetRegions", 2);
+
+            Scribe_Values.Look(ref drawUpgradeInformationScreen, "drawUpgradeInformationScreen", true);
+            Scribe_Values.Look(ref useInGameTime, "useInGameTime", true);
 
             Scribe_Values.Look(ref matchWaterTerrain, "matchWaterTerrain", true);
             Scribe_Values.Look(ref shuffledCannonFire, "shuffledCannonFire", true);
@@ -59,6 +68,9 @@ namespace RimShips
             Scribe_Values.Look(ref fishingSkillIncrease, "fishingSkillIncrease", 5);
             Scribe_Values.Look(ref fishingPersists, "fishingPersists", true);
 
+            /* Non Dialog Variables */
+            Scribe_Values.Look(ref showAllCargoItems, "showAllCargoItems");
+
             if(Prefs.DevMode)
             {
                 Scribe_Values.Look(ref debugDraftAnyShip, "debugDraftAnyShip", false);
@@ -69,6 +81,7 @@ namespace RimShips
 
                 Scribe_Values.Look(ref debugDrawCannonGrid, "debugDrawCannonGrid", false);
                 Scribe_Values.Look(ref debugDrawNodeGrid, "debugDrawNodeGrid", false);
+                Scribe_Values.Look(ref debugDrawVehicleTracks, "debugDrawVehicleTracks", false);
 
                 Scribe_Values.Look(ref debugDrawRegions, "debugDrawRegions", false);
                 Scribe_Values.Look(ref debugDrawRegionLinks, "debugDrawRegionLinks", false);
@@ -127,7 +140,7 @@ namespace RimShips
             if(listingStandard.ButtonText(EnumToString(currentPage)))
             {
                 FloatMenuOption op1 = new FloatMenuOption("MainSettings".Translate(), () => currentPage = SettingsPage.MainSettings, MenuOptionPriority.Default, null, null, 0f, null, null);
-                FloatMenuOption op2 = new FloatMenuOption("RimShips".Translate(), () => currentPage = SettingsPage.Boats, MenuOptionPriority.Default, null, null, 0f, null, null);
+                FloatMenuOption op2 = new FloatMenuOption("Vehicles".Translate(), () => currentPage = SettingsPage.Boats, MenuOptionPriority.Default, null, null, 0f, null, null);
                 List<FloatMenuOption> options = new List<FloatMenuOption>() { op1, op2 };
                 if(Prefs.DevMode)
                 {
@@ -179,6 +192,10 @@ namespace RimShips
                 listingStandard.Gap(16f);
 
                 listingStandard.CheckboxLabeled("DrawUpgradeInformationScreen".Translate(), ref settings.drawUpgradeInformationScreen, "DrawUpgradeInformationScreenTooltip".Translate());
+                listingStandard.CheckboxLabeled("UseIngameTime".Translate(settings.useInGameTime ? "IngameTime".Translate() : "RealTime".Translate()), ref settings.useInGameTime, "UseIngameTimeTooltip".Translate());
+
+                listingStandard.Gap(16f);
+
                 listingStandard.CheckboxLabeled("PassiveWaterWaves".Translate(), ref settings.passiveWaterWaves, "PassiveWaterWavesTooltip".Translate());
                 listingStandard.CheckboxLabeled("ShuffledCannonFire".Translate(), ref settings.shuffledCannonFire, "ShuffledCannonFireTooltip".Translate());
                 listingStandard.CheckboxLabeled("RiverTravelAllowed".Translate(), ref settings.riverTravel, "RiverTravelAllowedTooltip".Translate());
@@ -215,10 +232,11 @@ namespace RimShips
                 listingStandard.CheckboxLabeled("DebugDraftAnyShip".Translate(), ref settings.debugDraftAnyShip, "DebugDraftAnyShipTooltip".Translate());
                 listingStandard.CheckboxLabeled("DebugDisablePathing".Translate(), ref settings.debugDisableWaterPathing, "DebugDisablePathingTooltip".Translate());
                 listingStandard.CheckboxLabeled("DebugDisableSmoothPathing".Translate(), ref settings.debugDisableSmoothPathing, "DebugDisableSmoothPathingTooltip".Translate());
-                listingStandard.CheckboxLabeled("debugSpawnBoatBuidingGodMode".Translate(), ref settings.debugSpawnBoatBuildingGodMode);
+                listingStandard.CheckboxLabeled("DebugSpawnVehiclesGodMode".Translate(), ref settings.debugSpawnBoatBuildingGodMode);
 
                 listingStandard.CheckboxLabeled("DebugCannonDrawer".Translate(), ref settings.debugDrawCannonGrid);
-                listingStandard.CheckboxLabeled("debugDrawNodeGrid".Translate(), ref settings.debugDrawNodeGrid);
+                listingStandard.CheckboxLabeled("DebugDrawNodeGrid".Translate(), ref settings.debugDrawNodeGrid);
+                listingStandard.CheckboxLabeled("DebugDrawVehicleTracks".Translate(), ref settings.debugDrawVehicleTracks);
 
                 listingStandard.CheckboxLabeled("DebugDrawRegions".Translate(), ref settings.debugDrawRegions);
                 listingStandard.CheckboxLabeled("DebugDrawRegionLinks".Translate(), ref settings.debugDrawRegionLinks);
@@ -232,7 +250,7 @@ namespace RimShips
 
         public override string SettingsCategory()
         {
-            return "RimShips".Translate();
+            return "Vehicles".Translate();
         }
 
         private void ResetToDefaultValues()
@@ -254,8 +272,11 @@ namespace RimShips
             settings.debugDisableWaterPathing = false;
             settings.debugDisableSmoothPathing = true;
             settings.debugSpawnBoatBuildingGodMode = false;
+
             settings.debugDrawCannonGrid = false;
             settings.debugDrawNodeGrid = false;
+            settings.debugDrawVehicleTracks = false;
+
             settings.debugDrawRegions = false;
             settings.debugDrawRegionLinks = false;
             settings.debugDrawRegionThings = false;
@@ -270,7 +291,7 @@ namespace RimShips
                 case SettingsPage.DevMode:
                     return "DevModeShips".Translate();
                 case SettingsPage.Boats:
-                    return "RimShips".Translate();
+                    return "Vehicles".Translate();
             }
             Log.Error(page.ToString() + " Page has not been implemented yet. - Smash Phil");
             return page.ToString();

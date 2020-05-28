@@ -8,17 +8,28 @@ using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
 
-namespace RimShips
+namespace Vehicles
 {
-    public class WorldOceanPathFinder
+    public class WorldOceanPathFinder : WorldComponent
     {
-        public WorldOceanPathFinder()
+        public WorldOceanPathFinder(World world) : base(world)
         {
+            this.world = world;
             calcGrid = new WorldOceanPathFinder.PathFinderNodeFast[Find.WorldGrid.TilesCount];
         }
 
         public WorldPath FindOceanPath(int startTile, int destTile, Caravan caravan, Func<float, bool> terminator = null)
         {
+            if(ShipHarmony.debug)
+            {
+                Log.Message("==========");
+                Log.Message("Finding Path");
+                Log.Message("Caravan: " + caravan?.LabelShort + " | " + (caravan is null));
+                Log.Message("Terminator: " + (terminator is null));
+                Log.Message("Planner: " + ShipHarmony.routePlannerActive);
+                Log.Message("==========");
+            }
+
             if (startTile < 0)
 			{
 				Log.Error(string.Concat(new object[]
@@ -107,7 +118,7 @@ namespace RimShips
 							int num5 = tileIDToNeighbors_values[i];
 							if (calcGrid[num5].status != statusClosedValue && !HelperMethods.ImpassableModified(world, num5, startTile, destTile, caravan))
 							{
-								int num6 = (int)((float)num2 * movementDifficulty[num5] * grid.GetRoadMovementDifficultyMultiplier(tile, num5, null)) + calcGrid[tile].knownCost;
+                                int num6 = (int)(num2 * movementDifficulty[num5] + calcGrid[tile].knownCost);
 								ushort status = calcGrid[num5].status;
 								if ((status != statusClosedValue && status != statusOpenValue) || calcGrid[num5].knownCost > num6)
 								{
@@ -115,7 +126,7 @@ namespace RimShips
 									if (status != statusClosedValue && status != statusOpenValue)
 									{
 										float num7 = grid.ApproxDistanceInTiles(GenMath.SphericalDistance(tileCenter.normalized, normalized));
-										calcGrid[num5].heuristicCost = Mathf.RoundToInt((float)num2 * num7 * (float)num3 * 0.5f);
+										calcGrid[num5].heuristicCost = Mathf.RoundToInt(num2 * num7 * num3 * 0.5f);
 									}
 									int num8 = num6 + calcGrid[num5].heuristicCost;
 									calcGrid[num5].parentTile = tile;

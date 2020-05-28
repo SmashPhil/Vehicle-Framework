@@ -13,7 +13,7 @@
 		<passability>Impassable</passability>
 		<fillPercent>1</fillPercent>
 		<neverMultiSelect>true</neverMultiSelect>
-		<designationCategory>RimShips</designationCategory>
+		<designationCategory>Vehicles</designationCategory>
 		<clearBuildingArea>true</clearBuildingArea>
 		<category>Building</category>
 		<rotatable>true</rotatable>
@@ -32,7 +32,7 @@
 		<passability>Impassable</passability>
 		<fillPercent>1</fillPercent>
 		<neverMultiSelect>true</neverMultiSelect>
-		<!-- <designationCategory>RimShips</designationCategory> -->
+		<!-- <designationCategory>Vehicles</designationCategory> -->
 		<clearBuildingArea>true</clearBuildingArea>
 		<category>Building</category>
 		<rotatable>true</rotatable>
@@ -69,14 +69,14 @@
 		<soundImpactDefault>BulletImpact_Wood</soundImpactDefault>
 		
 		<modExtensions>
-			<li Class="RimShips.SpawnThingBuilt">
+			<li Class="Vehicles.SpawnThingBuilt">
 				<thingToSpawn>SPBoats_PawnKind_RowBoat</thingToSpawn>
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
 		</modExtensions>
 		
 		<comps>
-			<li Class="RimShips.CompProperties_SavePawnReference"/>
+			<li Class="Vehicles.CompProperties_SavePawnReference"/>
 		</comps>
 			
 	</ThingDef>
@@ -111,14 +111,14 @@
 		<soundImpactDefault>BulletImpact_Wood</soundImpactDefault>
 		
 		<modExtensions>
-			<li Class="RimShips.SpawnThingBuilt">
+			<li Class="Vehicles.SpawnThingBuilt">
 				<thingToSpawn>SPBoats_PawnKind_FishingBoat</thingToSpawn>
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
 		</modExtensions>
 		
 		<comps>
-			<li Class="RimShips.CompProperties_SavePawnReference"/>
+			<li Class="Vehicles.CompProperties_SavePawnReference"/>
 		</comps>
 			
 	</ThingDef>
@@ -154,14 +154,14 @@
 		<soundImpactDefault>BulletImpact_Wood</soundImpactDefault>
 		
 		<modExtensions>
-			<li Class="RimShips.SpawnThingBuilt">
+			<li Class="Vehicles.SpawnThingBuilt">
 				<thingToSpawn>SPBoats_PawnKind_Caravel</thingToSpawn>
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
 		</modExtensions>
 		
 		<comps>
-			<li Class="RimShips.CompProperties_SavePawnReference"/>
+			<li Class="Vehicles.CompProperties_SavePawnReference"/>
 		</comps>
 			
 	</ThingDef>
@@ -196,14 +196,14 @@
 		<soundImpactDefault>BulletImpact_Wood</soundImpactDefault>
 		
 		<modExtensions>
-			<li Class="RimShips.SpawnThingBuilt">
+			<li Class="Vehicles.SpawnThingBuilt">
 				<thingToSpawn>SPBoats_PawnKind_Galleon</thingToSpawn>
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
 		</modExtensions>
 		
 		<comps>
-			<li Class="RimShips.CompProperties_SavePawnReference"/>
+			<li Class="Vehicles.CompProperties_SavePawnReference"/>
 		</comps>
 			
 	</ThingDef>
@@ -239,14 +239,14 @@
 		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
 		
 		<modExtensions>
-			<li Class="RimShips.SpawnThingBuilt">
+			<li Class="Vehicles.SpawnThingBuilt">
 				<thingToSpawn>SPBoats_PawnKind_PaddleSteamer</thingToSpawn>
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
 		</modExtensions>
 		
 		<comps>
-			<li Class="RimShips.CompProperties_SavePawnReference"/>
+			<li Class="Vehicles.CompProperties_SavePawnReference"/>
 		</comps>
 	</ThingDef>
 	
@@ -281,14 +281,14 @@
 		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
 		
 		<modExtensions>
-			<li Class="RimShips.SpawnThingBuilt">
+			<li Class="Vehicles.SpawnThingBuilt">
 				<thingToSpawn>SPBoats_PawnKind_Dreadnought</thingToSpawn>
 				<soundFinished>ShipBigConstruction</soundFinished>
 			</li>
 		</modExtensions>
 		
 		<comps>
-			<li Class="RimShips.CompProperties_SavePawnReference"/>
+			<li Class="Vehicles.CompProperties_SavePawnReference"/>
 		</comps>
 	</ThingDef>
 </Defs>

@@ -125,15 +125,16 @@
 		</race>
 
 		<comps>			
-			<li Class = "RimShips.CompProperties_Ships">
+			<li Class = "Vehicles.CompProperties_Vehicle">
 				<downable>false</downable>
 				<movesWhenDowned>false</movesWhenDowned>
 				
 				<moveable>DriverNeeded</moveable>
 				<riverTraversability>River</riverTraversability>
-				<shipPowerType>Sails</shipPowerType>
-				<shipCategory>Misc</shipCategory>
-				<shipTech>Medieval</shipTech>
+				<vehiclePowerType>WindPowered</vehiclePowerType>
+				<vehicleCategory>Misc</vehicleCategory>
+				<vehicleTech>Medieval</vehicleTech>
+				<vehicleType>Sea</vehicleType>
 				<nameable>false</nameable>
 				<buildDef>SPBoats_FishingBoatBlueprint</buildDef>
 				<ticksBetweenRepair>120</ticksBetweenRepair>

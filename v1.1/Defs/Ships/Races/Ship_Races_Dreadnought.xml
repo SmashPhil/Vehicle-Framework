@@ -127,7 +127,7 @@
 
 		<comps>	
 			
-			<li Class="RimShips.CompProperties_FueledTravel">
+			<li Class="Vehicles.CompProperties_FueledTravel">
 				<!-- Must Include -->
 				<fuelType>Chemfuel</fuelType>
 				<fuelConsumptionRate>80</fuelConsumptionRate>
@@ -153,15 +153,16 @@
 				<MoteDisplayed>Mote_ChimneySmoke</MoteDisplayed>
 				<TicksToSpawnMote>12</TicksToSpawnMote>
 			</li>
-			<li Class = "RimShips.CompProperties_Ships">
+			<li Class = "Vehicles.CompProperties_Vehicle">
 				<downable>false</downable>
 				<movesWhenDowned>false</movesWhenDowned>
 				
 				<moveable>DriverNeeded</moveable>
 				<riverTraversability>HugeRiver</riverTraversability>
-				<shipPowerType>Fuel</shipPowerType>
-				<shipCategory>Combat</shipCategory>
-				<shipTech>Industrial</shipTech>
+				<vehiclePowerType>Fuel</vehiclePowerType>
+				<vehicleCategory>Combat</vehicleCategory>
+				<vehicleTech>Industrial</vehicleTech>
+				<vehicleType>Sea</vehicleType>
 				<nameable>true</nameable>
 				<buildDef>SPBoats_DreadnoughtBlueprint</buildDef>
 				<ticksBetweenRepair>650</ticksBetweenRepair>
@@ -208,9 +209,9 @@
 				</roles>
 			</li>
 			
-			<li Class="RimShips.CompProperties_Cannons"/>
+			<li Class="Vehicles.CompProperties_Cannons"/>
 			
-			<li Class="RimShips.CompProperties_UpgradeTree">
+			<li Class="Vehicles.CompProperties_UpgradeTree">
 				<displayUICoord>(587,50)</displayUICoord>
 				<displayUISize>(259,400)</displayUISize>
 				
@@ -219,7 +220,7 @@
 						<upgradeID>Armor_I</upgradeID>
 						<label>Steel Plating</label>
 						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>UI/UpgradeTree/ArmorSaturated</imageFilePath>
+						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
 						<gridCoordinate>(2,2)</gridCoordinate>
 						<rootNodeLabel>Armor</rootNodeLabel>
 						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
@@ -248,7 +249,7 @@
 						<upgradeID>Armor_II</upgradeID>
 						<label>Secondary Steel Plating Layer</label>
 						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>UI/UpgradeTree/ArmorNodeBG</imageFilePath>
+						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
 						<gridCoordinate>(2,4)</gridCoordinate>
 						<informationHighlighted>An extra layer of steel plating for higher defense.</informationHighlighted>
 						<values>
@@ -461,7 +462,7 @@
 					</li>
 					<li>
 						<upgradeID>Cargo_II</upgradeID>
-						<label>value Cargo Bay</label>
+						<label>Secondary Cargo Bay</label>
 						<upgradeCategory>CargoCapacity</upgradeCategory>
 						<imageFilePath>Upgrades/testUpgradeImage</imageFilePath>
 						<gridCoordinate>(14,4)</gridCoordinate>

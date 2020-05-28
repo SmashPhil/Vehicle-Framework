@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<ThingDef ParentName="BaseBullet">
+    <defName>Bullet_50CalMounted</defName>
+    <label>.50 cal bullet</label>
+    <graphicData>
+      <texPath>Things/Projectile/Bullet_Small</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+    </graphicData>
+    <projectile>
+      <damageDef>Bullet</damageDef>
+      <damageAmountBase>30</damageAmountBase>
+      <stoppingPower>1</stoppingPower>
+      <speed>125</speed>
+    </projectile>
+  </ThingDef>
+</Defs>

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Verse;
 using SPExtended;
 
-namespace RimShips
+namespace Vehicles
 {
     public enum FuelConsumptionCondition {Moving, Drafted, Always };
     public class CompProperties_FueledTravel : CompProperties

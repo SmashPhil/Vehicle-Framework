@@ -4,7 +4,7 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 
-namespace RimShips.Jobs
+namespace Vehicles.Jobs
 {
     public class JobDriver_RepairShip : JobDriver
     {
@@ -20,42 +20,42 @@ namespace RimShips.Jobs
             Toil repair = new Toil();
             repair.initAction = delegate ()
             {
-                this.ticksToNextRepair = InitialRepairTickCount;
-                this.permanentRepair = false;
+                ticksToNextRepair = InitialRepairTickCount;
+                permanentRepair = false;
             };
             repair.tickAction = delegate ()
             {
                 Pawn actor = repair.actor;
                 actor.skills.Learn(SkillDefOf.Construction, 0.08f, false);
                 float statValue = actor.GetStatValue(StatDefOf.ConstructionSpeed, true);
-                this.ticksToNextRepair -= statValue;
-                if (this.ticksToNextRepair <= 0f)
+                ticksToNextRepair -= statValue;
+                if (ticksToNextRepair <= 0f)
                 {
-                    if (!(this.TargetThingA as Pawn).health.hediffSet.hediffs.Any())
+                    if (!(TargetThingA as Pawn).health.hediffSet.hediffs.Any())
                     {
                         actor.records.Increment(RecordDefOf.ThingsRepaired);
                         actor.jobs.EndCurrentJob(JobCondition.Succeeded, true);
                         return;
                     }
                     
-                    this.ticksToNextRepair += this.pawn?.GetComp<CompShips>()?.Props.ticksBetweenRepair ?? InitialRepairTickCount;
+                    ticksToNextRepair += pawn?.GetComp<CompVehicle>()?.Props.ticksBetweenRepair ?? InitialRepairTickCount;
 
-                    Hediff repairPart = (this.TargetThingA as Pawn).health.hediffSet.hediffs.First();
+                    Hediff repairPart = (TargetThingA as Pawn).health.hediffSet.hediffs.First();
 
-                    if( ( (repairPart is Hediff_MissingPart) || repairPart.IsPermanent() ) && !this.permanentRepair)
+                    if( ( (repairPart is Hediff_MissingPart) || repairPart.IsPermanent() ) && !permanentRepair)
                     {
-                        this.ticksToNextRepair *= PermanentDamageMultiplier;
-                        this.permanentRepair = true;
+                        ticksToNextRepair *= PermanentDamageMultiplier;
+                        permanentRepair = true;
                     }
                     else if((repairPart is Hediff_MissingPart) && permanentRepair)
                     {
-                        this.HealBodyBart(repairPart.Part, (this.TargetThingA as Pawn));
-                        this.permanentRepair = false;
+                        HealBodyBart(repairPart.Part, (TargetThingA as Pawn));
+                        permanentRepair = false;
                     }
                     else if(repairPart.IsPermanent() && permanentRepair)
                     {
-                        (this.TargetThingA as Pawn).health.RemoveHediff(repairPart);
-                        this.permanentRepair = false;
+                        (TargetThingA as Pawn).health.RemoveHediff(repairPart);
+                        permanentRepair = false;
                     }
                     else
                     {

@@ -8,7 +8,7 @@ using Verse.Sound;
 using UnityEngine;
 using SPExtended;
 
-namespace RimShips
+namespace Vehicles
 {
     public class CannonTargeter
     {
@@ -24,7 +24,7 @@ namespace RimShips
             this.actionWhenFinished = actionWhenFinished;
             this.mouseAttachment = mouseAttachment;
             map = cannon.pawn.Map;
-
+            this.cannon.LockedStatusRotation = false;
         }
 
         public static bool TargetMeetsRequirements(CannonHandler cannon, LocalTargetInfo obj)
@@ -34,15 +34,17 @@ namespace RimShips
                         && cannon.AngleBetween(obj.CenterVector3);
         }
 
-        public void StopTargeting()
+        public void StopTargeting(bool cancled = true)
         {
-            if(this.actionWhenFinished != null)
+            if(actionWhenFinished != null)
             {
-                Action action = this.actionWhenFinished;
-                this.actionWhenFinished = null;
+                Action action = actionWhenFinished;
+                actionWhenFinished = null;
                 action();
             }
-            this.cannon = null;
+            if (cancled && cannon != null)
+                cannon.AlignToAngleRestricted(cannon.currentRotation);
+            cannon = null;
             this.action = null;
         }
 
@@ -56,12 +58,12 @@ namespace RimShips
                     Event.current.Use();
                     if(action != null)
                     {                      
-                        LocalTargetInfo obj = this.CurrentTargetUnderMouse();
+                        LocalTargetInfo obj = CurrentTargetUnderMouse();
                         if(obj.Cell.InBounds(map) && TargetMeetsRequirements(cannon, obj))
                         {
                             action(obj);
                             SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
-                            StopTargeting();
+                            StopTargeting(false);
                         }
                         else
                         {
@@ -72,7 +74,7 @@ namespace RimShips
                 }
                 if ((Event.current.type == EventType.MouseDown && Event.current.button == 1) || KeyBindingDefOf.Cancel.KeyDownEvent)
                 {
-                    this.StopTargeting();
+                    StopTargeting();
                     SoundDefOf.CancelMode.PlayOneShotOnCamera(null);
                     Event.current.Use();
                 }
@@ -100,11 +102,12 @@ namespace RimShips
                 if (TargetMeetsRequirements(cannon, CurrentTargetUnderMouse()))
                 {
                     GenDraw.DrawTargetHighlight(CurrentTargetUnderMouse());
-                    cannon.AlignToAngleRestricted((float)cannon.TurretLocation.ToIntVec3().AngleToPoint(CurrentTargetUnderMouse().Cell, map), CurrentTargetUnderMouse().CenterVector3);
+                    cannon.AlignToAngleRestricted((float)cannon.TurretLocation.ToIntVec3().AngleToPoint(CurrentTargetUnderMouse().Cell, map));
                 }
-
-                GenDraw.DrawRadiusRing(cannon.TurretLocation.ToIntVec3(), cannon.cannonDef.minRange, Color.red);
-                GenDraw.DrawRadiusRing(cannon.TurretLocation.ToIntVec3(), cannon.MaxRange, Color.white);
+                if(cannon.cannonDef.minRange > 0)
+                    GenDraw.DrawRadiusRing(cannon.TurretLocation.ToIntVec3(), cannon.cannonDef.minRange, Color.red);
+                if(cannon.cannonDef.maxRange <= GenRadial.MaxRadialPatternRadius)
+                    GenDraw.DrawRadiusRing(cannon.TurretLocation.ToIntVec3(), cannon.MaxRange, Color.white);
             }
         }
 

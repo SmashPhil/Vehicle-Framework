@@ -7,7 +7,7 @@ using RimWorld;
 using Verse;
 using UnityEngine;
 
-namespace RimShips
+namespace Vehicles
 {    
     [StaticConstructorOnStartup]
 	public class Gizmo_RefuelableFuelTravel : Gizmo

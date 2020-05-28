@@ -6,9 +6,9 @@ using RimWorld.Planet;
 using Verse;
 using Verse.AI;
 using UnityEngine;
-using RimShips.Defs;
+using Vehicles.Defs;
 
-namespace RimShips
+namespace Vehicles
 {
     public class CompFueledTravel : ThingComp
     {
@@ -26,7 +26,7 @@ namespace RimShips
         public bool FullTank => fuel == FuelCapacity;
         public int FuelCountToFull => Mathf.CeilToInt(FuelCapacity - fuel);
         public Pawn Pawn => parent as Pawn;
-        public CompShips CompShip => Pawn.TryGetComp<CompShips>();
+        public CompVehicle CompShip => Pawn.TryGetComp<CompVehicle>();
         public FuelConsumptionCondition FuelCondition => Props.fuelConsumptionCondition;
 
         private float fuelCost;
@@ -212,7 +212,7 @@ namespace RimShips
             if(SatisfiesFuelConsumptionConditional)
             {
                 ConsumeFuel(ConsumptionRatePerTick);
-                if(!terminateMotes && Props.motesGenerated.Any())
+                if(!terminateMotes && !Props.motesGenerated.NullOrEmpty())
                 {
                     if(Find.TickManager.TicksGame % Props.TicksToSpawnMote == 0)
                         DrawMotes();

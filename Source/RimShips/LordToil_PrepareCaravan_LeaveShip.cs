@@ -1,10 +1,10 @@
 ﻿using System.Linq;
-using RimShips.Defs;
+using Vehicles.Defs;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimShips.Lords
+namespace Vehicles.Lords
 {
     public class LordToil_PrepareCaravan_LeaveShip : LordToil
     {
@@ -25,13 +25,13 @@ namespace RimShips.Lords
         {
             foreach(Pawn p in this.lord.ownedPawns)
             {
-                if(!HelperMethods.IsShip(p))
+                if(!HelperMethods.IsVehicle(p))
                     this.lord.LordJob.Notify_PawnLost(p, PawnLostCondition.LeftVoluntarily);
                 p.mindState.duty = new PawnDuty(DutyDefOf_Ships.TravelOrWaitOcean, this.exitSpot, -1f)
                 {
                     locomotion = LocomotionUrgency.Jog
                 };
-                p.GetComp<CompShips>().ResolveSeating();
+                p.GetComp<CompVehicle>().ResolveSeating();
                 p.drafter.Drafted = true;
             }
         }
@@ -40,7 +40,7 @@ namespace RimShips.Lords
         {
             if(Find.TickManager.TicksGame % 100 == 0)
             {
-                GatherAnimalsAndSlavesForShipsUtility.CheckArrived(this.lord, this.lord.ownedPawns.Where(x => HelperMethods.IsShip(x)).ToList(), this.exitSpot, "ReadyToExitMap", (Pawn x) => true, true, null);
+                GatherAnimalsAndSlavesForShipsUtility.CheckArrived(this.lord, this.lord.ownedPawns.Where(x => HelperMethods.IsVehicle(x)).ToList(), this.exitSpot, "ReadyToExitMap", (Pawn x) => true, true, null);
             }
         }
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Verse;
 using RimWorld;
 
-namespace RimShips
+namespace Vehicles
 {
     public class CompSavePawnReference : ThingComp
     {

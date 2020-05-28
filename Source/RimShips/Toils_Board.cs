@@ -1,7 +1,7 @@
 ﻿using Verse;
 using Verse.AI;
 
-namespace RimShips.Jobs
+namespace Vehicles.Jobs
 {
     internal class Toils_Board
     {
@@ -10,7 +10,7 @@ namespace RimShips.Jobs
             Toil toil = new Toil();
             toil.initAction = delegate ()
             {
-                CompShips ship = toil.actor.jobs.curJob.GetTarget(index).Thing.TryGetComp<CompShips>();
+                CompVehicle ship = toil.actor.jobs.curJob.GetTarget(index).Thing.TryGetComp<CompVehicle>();
                 ship.Notify_Boarded(pawnBoarding);
                 bool flag = !pawnBoarding.IsColonist;
 

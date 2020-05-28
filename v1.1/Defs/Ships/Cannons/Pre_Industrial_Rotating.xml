@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <Defs>
-	<RimShips.CannonDef>
+	<Vehicles.CannonDef>
 		<defName>rotatingSingleShot</defName>
 		<label>Bow</label>
 		<weaponType>Rotatable</weaponType>
@@ -13,16 +13,16 @@
 		<numberOfShots>1</numberOfShots>
 		<cooldownTimer>14</cooldownTimer>
 		
-		<cannonTexPath>Ships/paddlesteamer/Cannons/SwivelCannon</cannonTexPath>
+		<!-- <cannonTexPath>Ships/paddlesteamer/Cannons/SwivelCannon</cannonTexPath> -->
 		<baseCannonTexPath>Ships/paddlesteamer/Cannons/SwivelCannonBase</baseCannonTexPath>
 
 		<projectileOffset>1</projectileOffset>
 		<hitFlags>All</hitFlags>
 		<spreadRadius>3</spreadRadius>
 		<minRange>12</minRange>
-	</RimShips.CannonDef>
+	</Vehicles.CannonDef>
 	
-	<RimShips.CannonDef>
+	<Vehicles.CannonDef>
 		<defName>rotatingDoubleShot</defName>
 		<label>Bow</label>
 		<weaponType>Rotatable</weaponType>
@@ -34,12 +34,12 @@
 		<numberOfShots>2</numberOfShots>
 		<cooldownTimer>30</cooldownTimer>
 		
-		<cannonTexPath>Ships/paddlesteamer/Cannons/TwinSwivelCannon</cannonTexPath>
+		<!-- <cannonTexPath>Ships/paddlesteamer/Cannons/TwinSwivelCannon</cannonTexPath> -->
 		<baseCannonTexPath>Ships/paddlesteamer/Cannons/SwivelCannonBase</baseCannonTexPath>
 
 		<projectileOffset>1</projectileOffset>
 		<hitFlags>All</hitFlags>
 		<spreadRadius>3</spreadRadius>
 		<minRange>12</minRange>
-	</RimShips.CannonDef>
+	</Vehicles.CannonDef>
 </Defs>

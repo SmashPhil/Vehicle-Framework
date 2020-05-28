@@ -16,7 +16,7 @@
 		<defName>DockedBoat</defName>
 		<label>Boat</label>
 		<description>Boats</description>
-		<worldObjectClass>RimShips.DockedBoat</worldObjectClass>
+		<worldObjectClass>Vehicles.DockedBoat</worldObjectClass>
 		<texture>World/WorldObjects/PeaceTalks</texture>
 		<expandingIcon>true</expandingIcon>
 		<expandingIconTexture>UI/BoatObject</expandingIconTexture>

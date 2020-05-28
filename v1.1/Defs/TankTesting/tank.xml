@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<PawnKindDef>
+		<defName>SPBoats_PawnKind_Tank</defName>
+		<label>TANK - TEST</label>
+		<defaultFactionType>PlayerColony</defaultFactionType>
+		<aiAvoidCover>false</aiAvoidCover>
+		<destroyGearOnDrop>true</destroyGearOnDrop>
+		<race>SPBoats_Tank</race>
+		<backstoryCategories>
+			<li>Industrial</li>
+		</backstoryCategories>
+		<combatPower>3000</combatPower>
+		<lifeStages>
+			<li>
+				<bodyGraphicData>
+					<texPath>Vehicles/Tank/Tank</texPath>
+					<graphicClass>Vehicles.Graphic_OmniDirectional</graphicClass>
+					<drawSize>(4,7)</drawSize>
+					<shaderType>CutoutComplex</shaderType>
+					<color>(155,0,0)</color>
+					<shadowData>
+						<volume>(0.4,0.1,0.4)</volume>
+					</shadowData>
+				</bodyGraphicData>
+			</li>
+		</lifeStages>
+	</PawnKindDef>
+	
+	<BodyPartDef>
+		<defName>test_Body</defName>
+		<label>body</label>
+		<hitPoints>600</hitPoints>
+		<skinCovered>false</skinCovered>
+		<solid>true</solid>
+		<bleedRate>0</bleedRate>
+		<alive>false</alive>
+		<frostbiteVulnerability>0.01</frostbiteVulnerability>
+		<tags>
+			<li>MovingLimbCore</li>
+		</tags>
+	</BodyPartDef>
+	
+	<BodyDef>
+		<defName>test_Body</defName>
+		<label>dreadnoughtbody</label>
+		<corePart>
+			<def>dreadnought_Body</def>
+			<height>Middle</height>
+			<depth>Outside</depth>
+			<groups>
+				<li>HeadAttackTool</li>
+			</groups>
+			<!--
+			<parts>
+				<li>
+					<def>galleon_Mast1</def>
+					<coverage>0.12</coverage>
+				</li>
+				<li>
+					<def>galleon_Mast2</def>
+					<coverage>0.12</coverage>
+				</li>
+				<li>
+					<def>galleon_Mast3</def>
+					<coverage>0.12</coverage>
+				</li>
+			</parts>
+			-->
+		</corePart>
+	</BodyDef>
+	
+	<ThingDef ParentName="BaseBoatPawn">
+		<defName>SPBoats_Tank</defName>
+		<label>Tank</label>
+		<description>A heavy warship to rule the seas.</description>
+		
+		<statBases>
+			<MoveSpeed>2</MoveSpeed>
+			<Mass>25000</Mass>
+			<ArmorRating_Blunt>1.0</ArmorRating_Blunt>
+			<ArmorRating_Sharp>1.0</ArmorRating_Sharp>
+			<MarketValue>250000</MarketValue>
+		</statBases>
+		
+		<size>(3,5)</size>
+		
+		<tools>
+			<li>
+				<label>hull</label>
+				<capacities>
+					<li>Blunt</li>
+				</capacities>
+				<power>20</power>
+				<cooldownTime>10</cooldownTime>
+				<linkedBodyPartsGroup>HeadAttackTool</linkedBodyPartsGroup>
+				<ensureLinkedBodyPartsGroupAlwaysUsable>true</ensureLinkedBodyPartsGroupAlwaysUsable>
+			</li>
+		</tools>
+
+		<race>
+			<thinkTreeMain>shipThinkTree_Simple</thinkTreeMain>
+			<thinkTreeConstant>shipThinkTree_SimpleConstant</thinkTreeConstant>
+			<intelligence>ToolUser</intelligence>
+			<fleshType>MetalShip</fleshType>
+			<needsRest>false</needsRest>
+			<hasGenders>false</hasGenders>
+			<foodType>None</foodType>
+
+			<body>test_Body</body>
+			<baseBodySize>45.0</baseBodySize>
+			<baseHealthScale>2.0</baseHealthScale>
+			<lifeStageAges>
+				<li>
+					<def>MechanoidFullyFormed</def>
+					<minAge>0</minAge>
+					<soundWounded>BulletImpact_Metal</soundWounded>
+					<soundDeath>Explosion_Bomb</soundDeath>
+				</li>
+			</lifeStageAges>
+			
+			<soundMeleeHitPawn>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitPawn>
+			<soundMeleeHitBuilding>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitBuilding>
+			<soundMeleeMiss>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeMiss>
+		</race>
+
+		<comps>	
+			
+			<li Class="Vehicles.CompProperties_FueledTravel">
+				<!-- Must Include -->
+				<fuelType>Chemfuel</fuelType>
+				<fuelConsumptionRate>80</fuelConsumptionRate>
+				<fuelCapacity>2000</fuelCapacity>
+				<fuelConsumptionCondition>Drafted</fuelConsumptionCondition>
+			</li>
+			<li Class="Vehicles.CompProperties_VehicleTracks">
+				<tracks>
+					<li>
+						<trackPoint>
+							<first>-1,-2</first>
+							<second>-1,2</second>
+						</trackPoint>
+						<destroyableCategories>
+							<li>Plant</li>
+							<li>Pawn</li>
+						</destroyableCategories>
+					</li>
+					<li>
+						<trackPoint>
+							<first>1,-2</first>
+							<second>1,2</second>
+						</trackPoint>
+						<destroyableCategories>
+							<li>Plant</li>
+							<li>Pawn</li>
+						</destroyableCategories>
+					</li>
+				</tracks>
+			</li>
+			<li Class = "Vehicles.CompProperties_Vehicle">
+				<downable>false</downable>
+				<movesWhenDowned>false</movesWhenDowned>
+				
+				<moveable>DriverNeeded</moveable>
+				<riverTraversability>HugeRiver</riverTraversability>
+				<vehiclePowerType>Fuel</vehiclePowerType>
+				<vehicleCategory>Combat</vehicleCategory>
+				<vehicleTech>Industrial</vehicleTech>
+				<vehicleType>Land</vehicleType>
+				
+				<nameable>true</nameable>
+				<buildDef>SPBoats_DreadnoughtBlueprint</buildDef>
+				<ticksBetweenRepair>650</ticksBetweenRepair>
+				
+				<armor>50</armor>
+				<cargoCapacity>3000</cargoCapacity>
+				
+				<wakeMultiplier>2.15</wakeMultiplier>
+				<wakeSpeed>2.15</wakeSpeed>
+				
+				<healthLabel_Healthy>Operational</healthLabel_Healthy>
+				<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
+				<healthLabel_Immobile>Inoperable</healthLabel_Immobile>
+				<healthLabel_Dead>Sunken</healthLabel_Dead>
+				<healthLabel_Beached>Beached</healthLabel_Beached>
+				
+				<hitboxOffsetX>0.0</hitboxOffsetX>
+				<hitboxOffsetZ>0.0</hitboxOffsetZ>
+				
+				<roles>
+					<li>
+						<label>Captain</label>
+						<handlingType>Movement</handlingType>
+						<slots>1</slots>
+						<slotsToOperate>1</slotsToOperate>
+					</li>
+					<li>
+						<label>Crew</label>
+						<handlingType>Movement</handlingType>
+						<slots>1</slots>
+						<slotsToOperate>1</slotsToOperate>
+					</li>
+					<li>
+						<label>Cannons</label>
+						<handlingType>Cannons</handlingType>
+						<slots>1</slots>
+						<slotsToOperate>1</slotsToOperate>
+					</li>
+					<li>
+						<label>Passenger</label>
+						<handlingType>None</handlingType>
+						<slots>10</slots>
+					</li>
+				</roles>
+			</li>
+			
+			<li Class="Vehicles.CompProperties_Cannons">
+				<cannons>
+					<li>
+						<cannonDef>turret50cal</cannonDef>
+						<cannonRenderLocation>(-.43,.38)</cannonRenderLocation>
+						<cannonRenderOffset>(0, 0)</cannonRenderOffset>
+						<cannonTurretDrawSize>(1, 1)</cannonTurretDrawSize>
+						
+						<targetPersists>true</targetPersists>
+						
+						<angleRestricted/>
+						<aimPieOffset/>
+						<drawLayer>2</drawLayer>
+						
+						<parentKey>mainTurret</parentKey>
+					</li>
+					<li>
+						<cannonDef>tankMainTurret</cannonDef>
+						<cannonRenderLocation>(0,0)</cannonRenderLocation>
+						<cannonRenderOffset>(0, 0)</cannonRenderOffset>
+						<cannonTurretDrawSize>(7, 7)</cannonTurretDrawSize>
+						
+						<angleRestricted/>
+						<aimPieOffset/>
+						<drawLayer>1</drawLayer>
+						
+						<attachableKey>mainTurret</attachableKey>
+					</li>
+					
+				</cannons>
+			</li>
+			<li Class="Vehicles.CompProperties_UpgradeTree">
+				<displayUICoord>(587,50)</displayUICoord>
+				<displayUISize>(259,400)</displayUISize>
+				
+				<upgradesAvailable>
+					<li>
+						<upgradeID>Armor_I</upgradeID>
+						<label>Steel Plating</label>
+						<upgradeCategory>Armor</upgradeCategory>
+						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
+						<gridCoordinate>(2,2)</gridCoordinate>
+						<rootNodeLabel>Armor</rootNodeLabel>
+						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
+						
+						<upgradeTime>3h</upgradeTime>
+						<values>
+							<li>
+								<key>Armor</key>
+								<value>10</value>
+							</li>
+							<li>
+								<key>Speed</key>
+								<value>-0.25</value>
+							</li>
+						</values>
+						<cost>
+							<li>
+								<key>Steel</key>
+								<value>500</value>
+							</li>
+						</cost>
+						<researchPrerequisites/>
+						<prerequisiteNodes/>
+					</li>
+				</upgradesAvailable>
+			</li>
+		</comps>
+	</ThingDef>
+</Defs>

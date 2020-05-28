@@ -1,6 +1,6 @@
 ﻿using RimWorld;
 
-namespace RimShips.Defs
+namespace Vehicles.Defs
 {
     [DefOf]
     public static class StatCategoryDefOf_Ships

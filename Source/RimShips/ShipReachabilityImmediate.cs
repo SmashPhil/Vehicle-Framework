@@ -2,7 +2,7 @@
 using Verse.AI;
 
 
-namespace RimShips.AI
+namespace Vehicles.AI
 {
     public static class ShipReachabilityImmediate
     {

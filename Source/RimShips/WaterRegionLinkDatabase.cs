@@ -2,7 +2,7 @@
 using System.Text;
 using Verse;
 
-namespace RimShips
+namespace Vehicles
 {
     public class WaterRegionLinkDatabase
     {

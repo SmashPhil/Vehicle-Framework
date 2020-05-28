@@ -2,14 +2,14 @@
 using UnityEngine;
 using Verse;
 
-namespace RimShips.UI
+namespace Vehicles.UI
 {
     [StaticConstructorOnStartup]
     public static class ShipPassengerCardUtility
     {
         public static void DrawShipPassengersCard(Rect outRect, Pawn pawn, List<Pawn> passengers)
         {
-            if(pawn.GetComp<CompShips>() is null)
+            if(pawn.GetComp<CompVehicle>() is null)
             {
                 Log.Error("Called DrawShipPassengersCard with a non ship pawn. Please stop messing with my files... thanks.");
             }

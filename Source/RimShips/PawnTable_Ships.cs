@@ -4,7 +4,7 @@ using System.Linq;
 using RimWorld;
 using Verse;
 
-namespace RimShips.UI
+namespace Vehicles.UI
 {
     public class PawnTable_Ships : PawnTable
     {

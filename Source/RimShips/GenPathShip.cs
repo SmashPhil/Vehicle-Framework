@@ -2,7 +2,7 @@
 using Verse;
 using Verse.AI;
 
-namespace RimShips.AI
+namespace Vehicles.AI
 {
     public static class GenPathShip
     {
@@ -48,7 +48,7 @@ namespace RimShips.AI
             {
                 return true;
             }
-            if(!(pawn is null) && !(pawn.GetComp<CompShips>() is null))
+            if(!(pawn is null) && !(pawn.GetComp<CompVehicle>() is null))
             {
                 if(dest.IsForbidden(pawn))
                 {

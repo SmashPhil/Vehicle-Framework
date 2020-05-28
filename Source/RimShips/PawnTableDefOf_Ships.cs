@@ -1,6 +1,6 @@
 ﻿using RimWorld;
 
-namespace RimShips.Defs
+namespace Vehicles.Defs
 {
     [DefOf]
     public static class PawnTableDefOf_Ships
@@ -10,6 +10,6 @@ namespace RimShips.Defs
             DefOfHelper.EnsureInitializedInCtor(typeof(PawnTableDefOf_Ships));
         }
 
-        public static PawnTableDef RimShips;
+        public static PawnTableDef Vehicles;
     }
 }

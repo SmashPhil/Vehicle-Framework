@@ -7,7 +7,7 @@ using Verse;
 using RimWorld;
 using SPExtended;
 
-namespace RimShips
+namespace Vehicles
 {
     public enum BiomeCategory { None, Temperate, Tropical, Cold}
 

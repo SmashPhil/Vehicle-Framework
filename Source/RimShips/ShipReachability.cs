@@ -5,7 +5,7 @@ using RimWorld.Planet;
 using Verse;
 using Verse.AI;
 
-namespace RimShips.AI
+namespace Vehicles.AI
 {
     public class ShipReachability
     {
@@ -34,7 +34,7 @@ namespace RimShips.AI
         {
             if(region is null)
             {
-                Log.ErrorOnce("Tried to queue null region (RimShips).", 881121, false);
+                Log.ErrorOnce("Tried to queue null region (Vehicles).", 881121, false);
                 return;
             }
             if(region.reachedIndex == this.reachedIndex)

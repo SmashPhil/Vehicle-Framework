@@ -7,7 +7,7 @@ using Verse;
 using RimWorld;
 using UnityEngine;
 
-namespace RimShips
+namespace Vehicles
 {
     public class Dialog_ResearchChange : Window
     {

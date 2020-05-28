@@ -45,7 +45,7 @@
 				</li>
 				
 				<!-- Idle Ship -->
-				<li Class= "RimShips.Jobs.JobGiver_AwaitOrders"/>
+				<li Class= "Vehicles.Jobs.JobGiver_AwaitOrders"/>
 			</subNodes>
 		</thinkRoot>
 	</ThinkTreeDef>

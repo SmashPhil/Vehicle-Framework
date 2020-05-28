@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using RimWorld.Planet;
-using RimShips.AI;
+using Vehicles.AI;
 using SPExtended;
 using Verse;
 
-namespace RimShips
+namespace Vehicles
 {
     public static class EnterMapUtilityBoats
     {
@@ -23,7 +23,7 @@ namespace RimShips
                 enterMode = CaravanEnterMode.Edge;
             }
             //Ensure pawns are onboard till a fix for dock settling is done
-            if (HelperMethods.HasShip(caravan) && caravan.PawnsListForReading.Any(x => !HelperMethods.IsShip(x)))
+            if (HelperMethods.HasBoat(caravan) && caravan.PawnsListForReading.Any(x => !HelperMethods.IsBoat(x)))
             {
                 HelperMethods.BoardAllCaravanPawns(caravan);
             }
@@ -34,7 +34,7 @@ namespace RimShips
 
         public static void EnterSpawn(Caravan caravan, Map map, Func<Pawn, IntVec3> spawnCellGetter, CaravanDropInventoryMode caravanDropInventoryMode = CaravanDropInventoryMode.DoNotDrop, bool draftColonists = true)
         {
-            List<Pawn> pawns = new List<Pawn>(caravan.PawnsListForReading).Where(x => HelperMethods.IsShip(x)).ToList();
+            List<Pawn> pawns = new List<Pawn>(caravan.PawnsListForReading).Where(x => HelperMethods.IsBoat(x)).ToList();
             MapExtension mapE = MapExtensionUtility.GetExtensionToMap(map);
             Rot4 spawnDir = GetEdgeToSpawnBoatOn(caravan, map);
 
@@ -42,7 +42,7 @@ namespace RimShips
             {
                 IntVec3 loc = CellFinderExtended.MiddleEdgeCell(spawnDir, map, pawns[i], (IntVec3 c) => GenGridShips.Standable(c, map, mapE) && !c.Fogged(map)); //Change back to spawnCellGetter later
                 
-                pawns[i].GetComp<CompShips>().Angle = 0;
+                pawns[i].GetComp<CompVehicle>().Angle = 0;
                 Pawn ship = GenSpawn.Spawn(pawns[i], loc, map, spawnDir.Opposite, WipeMode.Vanish, false) as Pawn;
                 ship.drafter.Drafted = draftColonists ? true : false;
             }
@@ -70,7 +70,7 @@ namespace RimShips
         {
             if (!Find.World.CoastDirectionAt(map.Tile).IsValid)
             {
-                if(Find.WorldGrid[map.Tile]?.Rivers?.Any() ?? false)
+                if(!Find.WorldGrid[map.Tile]?.Rivers.NullOrEmpty() ?? false)
                 {
                     List<Tile.RiverLink> rivers = Find.WorldGrid[map.Tile].Rivers;
 

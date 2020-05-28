@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
-	<name>Boats</name>
+	<name>Vehicles</name>
 	<author>Smash Phil</author>
 	<supportedVersions>
 		<li>1.0</li>
@@ -14,8 +14,8 @@
 			<downloadUrl>https://github.com/pardeike/HarmonyRimWorld/releases/latest</downloadUrl>
 		</li>
 	</modDependencies>
-	<packageId>smashphil.boats.testversion</packageId>
+	<packageId>smashphil.vehicles.testrelease</packageId>
 	<description>
-		Control the seas, trade with allies, and explore the ocean with boats! (Test)
+Vehicles to drive. Vroom vroom.
 	</description>
 </ModMetaData>

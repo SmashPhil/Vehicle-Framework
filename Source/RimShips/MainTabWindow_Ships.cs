@@ -2,10 +2,10 @@
 using System.Linq;
 using RimWorld;
 using RimWorld.Planet;
-using RimShips.Defs;
+using Vehicles.Defs;
 using Verse;
 
-namespace RimShips.UI
+namespace Vehicles.UI
 {
     public class MainTabWindow_Ships : MainTabWindow_PawnTable
     {
@@ -13,7 +13,7 @@ namespace RimShips.UI
         {
             get
             {
-                return PawnTableDefOf_Ships.RimShips;
+                return PawnTableDefOf_Ships.Vehicles;
             }
         }
 
@@ -22,7 +22,7 @@ namespace RimShips.UI
             get
             {
                 return from p in Find.CurrentMap.mapPawns.PawnsInFaction(Faction.OfPlayer)
-                       where p.RaceProps.ToolUser && !(p.TryGetComp<CompShips>() is null)
+                       where p.RaceProps.ToolUser && !(p.TryGetComp<CompVehicle>() is null)
                        select p;
             }
         }

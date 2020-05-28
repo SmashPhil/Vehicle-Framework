@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<WorkGiverDef>
+		<defName>PackBoat</defName>
+		<label>pack boat</label>
+		<giverClass>Vehicles.Jobs.WorkGiver_PackBoat</giverClass>
+		<workType>Hauling</workType>
+		<verb>pack</verb>
+		<gerund>packing</gerund>
+		<priorityInType>100</priorityInType>
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+		<prioritizeSustains>true</prioritizeSustains>
+	</WorkGiverDef>
+	
+	<WorkGiverDef>
+		<defName>LoadUpgradeMaterials</defName>
+		<label>load materials</label>
+		<giverClass>Vehicles.Jobs.WorkGiver_BringUpgradeMaterial</giverClass>
+		<workType>Hauling</workType>
+		<verb>pack</verb>
+		<gerund>packing</gerund>
+		<priorityInType>90</priorityInType>
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+		<prioritizeSustains>true</prioritizeSustains>
+	</WorkGiverDef>
+</Defs>

@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
-using RimShips.AI;
+using Vehicles.AI;
 using SPExtended;
 using RimWorld;
 
-namespace RimShips
+namespace Vehicles
 {
     public static class CellFinderExtended
     {
@@ -30,7 +30,7 @@ namespace RimShips
         public static IntVec3 MiddleEdgeCell(Rot4 dir, Map map, Pawn pawn, Predicate<IntVec3> validator)
         {
             List<IntVec3> cellsToCheck = CellRect.WholeMap(map).GetEdgeCells(dir).ToList();
-            bool riverSpawn = Find.World.CoastDirectionAt(map.Tile) != dir && (Find.WorldGrid[map.Tile].Rivers?.Any() ?? false);
+            bool riverSpawn = Find.World.CoastDirectionAt(map.Tile) != dir && !Find.WorldGrid[map.Tile].Rivers.NullOrEmpty();
             int padding = (pawn.def.size.z/2) > 4 ? (pawn.def.size.z/2 + 1) : 4;
             int startIndex = cellsToCheck.Count / 2;
 
@@ -119,7 +119,7 @@ namespace RimShips
                 result = IntVec3.Invalid;
                 return false;
             }
-            Rot4 dir = Find.World.CoastDirectionAt(map.Tile).IsValid ? Find.World.CoastDirectionAt(map.Tile) : Find.WorldGrid[map.Tile].Rivers?.Any() ?? false ? SPExtra.RiverDirection(map) : Rot4.Invalid;
+            Rot4 dir = Find.World.CoastDirectionAt(map.Tile).IsValid ? Find.World.CoastDirectionAt(map.Tile) : !Find.WorldGrid[map.Tile].Rivers.NullOrEmpty() ? SPExtra.RiverDirection(map) : Rot4.Invalid;
             result = CellFinderExtended.RandomEdgeCell(dir, map, (IntVec3 c) => GenGridShips.Standable(c, map, MapExtensionUtility.GetExtensionToMap(map)) && !c.Fogged(map));
             return true;
         }

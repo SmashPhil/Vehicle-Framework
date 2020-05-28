@@ -6,7 +6,7 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimShips.AI
+namespace Vehicles.AI
 {
     public class ShipPathFinder
     {
@@ -23,7 +23,7 @@ namespace RimShips.AI
 
         public bool PawnIsShip(Pawn p)
         {
-            return !(p.TryGetComp<CompShips>() is null) ? true : false;
+            return !(p.TryGetComp<CompVehicle>() is null) ? true : false;
         }
 
         public PawnPath FindShipPath(IntVec3 start, LocalTargetInfo dest, Pawn pawn, PathEndMode peMode = PathEndMode.OnCell)
@@ -121,7 +121,7 @@ namespace RimShips.AI
             bool flag8 = !flag || !flag3;
             bool flag9 = false;
             bool flag10 = !(pawn is null) && pawn.Drafted;
-            bool flag11 = !(pawn is null) && !(pawn.GetComp<CompShips>() is null);
+            bool flag11 = !(pawn is null) && !(pawn.GetComp<CompVehicle>() is null);
 
             int num5 = (!flag11) ? NodesToOpenBeforeRegionbasedPathing_NonShip : NodesToOpenBeforeRegionBasedPathing_Ship;
             int num6 = 0;
@@ -367,7 +367,7 @@ namespace RimShips.AI
                                     }
                                     int num19 = num17 + this.calcGrid[num].knownCost;
                                     ushort status = this.calcGrid[num15].status;
-                                    if (!(pawn.GetComp<CompShips>() is null) && !this.map.terrainGrid.TerrainAt(num15).IsWater)
+                                    if (!(pawn.GetComp<CompVehicle>() is null) && !this.map.terrainGrid.TerrainAt(num15).IsWater)
                                         num19 += 10000;
                                     if (status == this.statusClosedValue || status == this.statusOpenValue)
                                     {

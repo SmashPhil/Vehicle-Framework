@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
-using RimShips.Defs;
-using RimShips.Lords;
-using RimShips.Jobs;
+using Vehicles.Defs;
+using Vehicles.Lords;
+using Vehicles.Jobs;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimShips
+namespace Vehicles
 {
     public static class GatherItemsForShipCaravanUtility
     {

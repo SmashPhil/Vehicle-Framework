@@ -127,15 +127,16 @@
 		</race>
 
 		<comps>	
-			<li Class = "RimShips.CompProperties_Ships">
+			<li Class = "Vehicles.CompProperties_Vehicle">
 				<downable>false</downable>
 				<movesWhenDowned>false</movesWhenDowned>
 				
 				<moveable>DriverNeeded</moveable>
 				<riverTraversability>LargeRiver</riverTraversability>
-				<shipPowerType>Sails</shipPowerType>
-				<shipCategory>Trader</shipCategory>
-				<shipTech>Medieval</shipTech>
+				<vehiclePowerType>WindPowered</vehiclePowerType>
+				<vehicleCategory>Trader</vehicleCategory>
+				<vehicleTech>Medieval</vehicleTech>
+				<vehicleType>Sea</vehicleType>
 				<nameable>true</nameable>
 				<buildDef>SPBoats_CaravelBlueprint</buildDef>
 				<ticksBetweenRepair>200</ticksBetweenRepair>
@@ -176,7 +177,7 @@
 				</roles>
 			</li>
 			
-			<!-- <li Class="RimShips.CompProperties_Cannons"> -->
+			<!-- <li Class="Vehicles.CompProperties_Cannons"> -->
 				<!-- <cannons> -->
 						<!-- <li> -->
 							<!-- <label>Portside</label> -->
