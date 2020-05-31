@@ -134,7 +134,6 @@ namespace Vehicles
             }
             if (Widgets.ButtonImageWithBG(gizmoRect, TexCommandVehicles.AmmoBG))
             {
-                Log.Message("TEST");
                 flag2 = true;
             }
             if(Widgets.ButtonInvisible(ammoRect, false))

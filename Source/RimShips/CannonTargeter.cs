@@ -30,11 +30,13 @@ namespace Vehicles
         public static bool TargetMeetsRequirements(CannonHandler cannon, LocalTargetInfo obj)
         {
             float distance = (cannon.TurretLocation.ToIntVec3() - obj.Cell).LengthHorizontal;
-            return (distance >= cannon.cannonDef.minRange && (distance < cannon.cannonDef.maxRange || cannon.MaxRange <= -1))
+            bool result = (distance >= cannon.MinRange && (distance < cannon.MaxRange || cannon.MaxRange <= -1))
                         && cannon.AngleBetween(obj.CenterVector3);
+            //Log.Message($"Result {result} Details--> distance: {distance} min: {cannon.MinRange} max: {cannon.MaxRange} angle: {cannon.AngleBetween(obj.CenterVector3)}");
+            return result;
         }
 
-        public void StopTargeting(bool cancled = true)
+        public void StopTargeting(bool canceled = true)
         {
             if(actionWhenFinished != null)
             {
@@ -42,7 +44,7 @@ namespace Vehicles
                 actionWhenFinished = null;
                 action();
             }
-            if (cancled && cannon != null)
+            if (canceled && cannon != null)
                 cannon.AlignToAngleRestricted(cannon.currentRotation);
             cannon = null;
             this.action = null;
@@ -83,7 +85,7 @@ namespace Vehicles
 
         public void TargeterOnGUI()
         {
-            if(this.action != null)
+            if(action != null)
             {
                 float distance = (cannon.TurretLocation.ToIntVec3() - CurrentTargetUnderMouse().Cell).LengthHorizontal;
                 if (TargetMeetsRequirements(cannon, CurrentTargetUnderMouse()))
@@ -104,10 +106,11 @@ namespace Vehicles
                     GenDraw.DrawTargetHighlight(CurrentTargetUnderMouse());
                     cannon.AlignToAngleRestricted((float)cannon.TurretLocation.ToIntVec3().AngleToPoint(CurrentTargetUnderMouse().Cell, map));
                 }
-                if(cannon.cannonDef.minRange > 0)
-                    GenDraw.DrawRadiusRing(cannon.TurretLocation.ToIntVec3(), cannon.cannonDef.minRange, Color.red);
-                if(cannon.cannonDef.maxRange <= GenRadial.MaxRadialPatternRadius)
-                    GenDraw.DrawRadiusRing(cannon.TurretLocation.ToIntVec3(), cannon.MaxRange, Color.white);
+                //REDO Radius Circle
+                //if(cannon.MinRange > 0)
+                //    GenDraw.DrawRadiusRing(cannon.TurretLocation.ToIntVec3(), cannon.cannonDef.minRange, Color.red);
+                //if(cannon.cannonDef.maxRange <= GenRadial.MaxRadialPatternRadius)
+                //    GenDraw.DrawRadiusRing(cannon.TurretLocation.ToIntVec3(), cannon.MaxRange, Color.white);
             }
         }
 

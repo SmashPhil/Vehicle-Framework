@@ -7,6 +7,7 @@ using Verse;
 using Verse.AI;
 using UnityEngine;
 using Vehicles.Defs;
+using SPExtended;
 
 namespace Vehicles
 {
@@ -232,7 +233,7 @@ namespace Vehicles
                 {
                     try
                     {
-                        Pair<float, float> moteOffset = HelperMethods.ShipDrawOffset(CompShip, offset.xOffset, offset.zOffset);
+                        SPTuple2<float, float> moteOffset = HelperMethods.ShipDrawOffset(CompShip, offset.xOffset, offset.zOffset, out SPTuple2<float,float> rotationOffset);
                         offsetX = moteOffset.First;
                         offsetZ = moteOffset.Second;
 

@@ -24,6 +24,8 @@ namespace Vehicles
         public Pawn Pawn => parent as Pawn;
         public CompVehicle CompShip => this.Pawn.GetComp<CompVehicle>();
 
+        public bool WeaponStatusOnline => !this.Pawn.Downed && !this.Pawn.Dead && this.Pawn.Drafted;
+
         public float MinRange => Cannons.Max(x => x.cannonDef.minRange);
         public float MaxRangeGrouped
         {
@@ -113,20 +115,23 @@ namespace Vehicles
                         int i = 0;
                         foreach(CannonHandler cannon in Cannons.Where(x => x.cannonDef.weaponLocation == WeaponLocation.Turret))
                         {
-                            Command_TargeterCooldownAction turretCannons = new Command_TargeterCooldownAction();
-                            turretCannons.cannon = cannon;
-                            turretCannons.comp = this;
-                            turretCannons.defaultLabel = !string.IsNullOrEmpty(cannon.gizmoLabel) ? cannon.gizmoLabel : cannon.cannonDef.LabelCap + i;
-                            turretCannons.icon = cannon.GizmoIcon;
-                            if(!string.IsNullOrEmpty(cannon.cannonDef.gizmoDescription))
-                                turretCannons.defaultDesc = cannon.cannonDef.gizmoDescription;
-                            turretCannons.targetingParams = new TargetingParameters
+                            if(cannon.manualTargeting)
                             {
-                                //Buildings, Things, Animals, Humans, and Mechs default to targetable
-                                canTargetLocations = true
-                            };
-                            i++;
-                            yield return turretCannons;
+                                Command_TargeterCooldownAction turretCannons = new Command_TargeterCooldownAction();
+                                turretCannons.cannon = cannon;
+                                turretCannons.comp = this;
+                                turretCannons.defaultLabel = !string.IsNullOrEmpty(cannon.gizmoLabel) ? cannon.gizmoLabel : cannon.cannonDef.LabelCap + i;
+                                turretCannons.icon = cannon.GizmoIcon;
+                                if(!string.IsNullOrEmpty(cannon.cannonDef.gizmoDescription))
+                                    turretCannons.defaultDesc = cannon.cannonDef.gizmoDescription;
+                                turretCannons.targetingParams = new TargetingParameters
+                                {
+                                    //Buildings, Things, Animals, Humans, and Mechs default to targetable
+                                    canTargetLocations = true
+                                };
+                                i++;
+                                yield return turretCannons;
+                            }
                         }
                     }
                     if (Cannons.Any(x => x.cannonDef.weaponType == WeaponType.Static))
@@ -158,7 +163,7 @@ namespace Vehicles
                                 };
                                 foreach (ShipHandler handler in this.CompShip.handlers)
                                 {
-                                    if(!RimShipMod.mod.settings.debugDraftAnyShip && handler.role.handlingType == HandlingTypeFlags.Cannons && handler.handlers.Count < handler.role.slotsToOperate)
+                                    if(!RimShipMod.mod.settings.debugDraftAnyShip && handler.role.handlingType == HandlingTypeFlags.Cannon && handler.handlers.Count < handler.role.slotsToOperate)
                                     {
                                         portSideCannons.Disable("NotEnoughCannonCrew".Translate(this.Pawn.LabelShort, handler.role.label));
                                     }
@@ -191,7 +196,7 @@ namespace Vehicles
                                 };
                                 foreach (ShipHandler handler in this.CompShip.handlers)
                                 {
-                                    if(!RimShipMod.mod.settings.debugDraftAnyShip && handler.role.handlingType == HandlingTypeFlags.Cannons && handler.handlers.Count < handler.role.slotsToOperate)
+                                    if(!RimShipMod.mod.settings.debugDraftAnyShip && handler.role.handlingType == HandlingTypeFlags.Cannon && handler.handlers.Count < handler.role.slotsToOperate)
                                     {
                                         starboardSideCannons.Disable("NotEnoughCannonCrew".Translate(Pawn.LabelShort, handler.role.label));
                                     }
@@ -224,7 +229,7 @@ namespace Vehicles
                                 };
                                 foreach (ShipHandler handler in this.CompShip.handlers)
                                 {
-                                    if(!RimShipMod.mod.settings.debugDraftAnyShip && handler.role.handlingType == HandlingTypeFlags.Cannons && handler.handlers.Count < handler.role.slotsToOperate)
+                                    if(!RimShipMod.mod.settings.debugDraftAnyShip && handler.role.handlingType == HandlingTypeFlags.Cannon && handler.handlers.Count < handler.role.slotsToOperate)
                                     {
                                         bowSideCannons.Disable("NotEnoughCannonCrew".Translate(Pawn.LabelShort, handler.role.label));
                                     }
@@ -257,7 +262,7 @@ namespace Vehicles
                                 };
                                 foreach (ShipHandler handler in this.CompShip.handlers)
                                 {
-                                    if(!RimShipMod.mod.settings.debugDraftAnyShip && handler.role.handlingType == HandlingTypeFlags.Cannons && handler.handlers.Count < handler.role.slotsToOperate)
+                                    if(!RimShipMod.mod.settings.debugDraftAnyShip && handler.role.handlingType == HandlingTypeFlags.Cannon && handler.handlers.Count < handler.role.slotsToOperate)
                                     {
                                         sternSideCannons.Disable("NotEnoughCannonCrew".Translate(Pawn.LabelShort, handler.role.label));
                                     }
@@ -742,7 +747,7 @@ namespace Vehicles
             return offset;
         }
 
-        private bool TryFindShootLineFromTo(IntVec3 root, LocalTargetInfo targ, out ShootLine resultingLine)
+        public bool TryFindShootLineFromTo(IntVec3 root, LocalTargetInfo targ, out ShootLine resultingLine)
         {
             resultingLine = new ShootLine(root, targ.Cell);
             return false;

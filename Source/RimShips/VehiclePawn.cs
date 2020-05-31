@@ -137,6 +137,35 @@ namespace Vehicles
 			yield break;
         }
 
+        public override void PreApplyDamage(ref DamageInfo dinfo, out bool absorbed)
+        {
+            absorbed = false;
+            DamageDef defApplied = dinfo.Def;
+	        if (def.damageMultipliers != null && def.damageMultipliers.Any(x => x.damageDef == defApplied))
+	        {
+                return;
+	        }
+
+            float num = dinfo.Amount;
+            float armorPoints = GetComp<CompVehicle>().ArmorPoints;
+            num -= num * (float)(1 - Math.Exp(-0.15 * (armorPoints / 10d))); // ( 1-e ^ { -0.15x } ) -> x = armorPoints / 10
+            if (num < 1)
+                num = 1;
+            if(dinfo.Def.isRanged)
+            {
+                num *= GetComp<CompVehicle>().Props.vehicleDamageMultipliers.rangedDamageMultiplier;
+            }
+            else if(dinfo.Def.isExplosive)
+            {
+                num *= GetComp<CompVehicle>().Props.vehicleDamageMultipliers.explosiveDamageMultiplier;
+            }
+            else
+            {
+                num *= GetComp<CompVehicle>().Props.vehicleDamageMultipliers.meleeDamageMultiplier;
+            }
+            dinfo.SetAmount(num);
+        }
+
         public override void Kill(DamageInfo? dinfo, Hediff exactCulprit = null)
         {
             IntVec3 position = PositionHeld;

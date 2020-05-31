@@ -23,7 +23,6 @@ namespace Vehicles
             
             cannonDef = reference.cannonDef;
 
-            cannonSize = reference.cannonSize;
             cannonRenderOffset = reference.cannonRenderOffset;
             cannonRenderLocation = reference.cannonRenderLocation;
             defaultAngleRotated = reference.defaultAngleRotated;
@@ -31,7 +30,6 @@ namespace Vehicles
             aimPieOffset = reference.aimPieOffset;
             angleRestricted = reference.angleRestricted;
 
-            baseCannonSize = reference.baseCannonSize;
             baseCannonRenderLocation = reference.baseCannonRenderLocation;
             cannonTurretDrawSize = reference.cannonTurretDrawSize;
 
@@ -43,9 +41,12 @@ namespace Vehicles
             parentKey = reference.parentKey;
 
             targetPersists = reference.targetPersists;
-            targetAutomatically = reference.targetAutomatically;
+            autoTargeting = reference.autoTargeting;
+            manualTargeting = reference.manualTargeting;
 
             (CannonGraphic as Graphic_Animate)?.DisableAnimation();
+
+            LockedStatusRotation = true;
             ResetCannonAngle();
 
             if (cannonDef.splitCannonGroups)
@@ -80,19 +81,18 @@ namespace Vehicles
             Scribe_Values.Look(ref uniqueID, "uniqueID", -1);
             Scribe_Values.Look(ref cooldownTicks, "cooldownTicks");
             
-            Scribe_Values.Look(ref cannonSize, "cannonSize");
             Scribe_Values.Look(ref cannonRenderOffset, "cannonRenderOffset");
             Scribe_Values.Look(ref cannonRenderLocation, "cannonRenderLocation");
             Scribe_Values.Look(ref currentRotation, "currentRotation", defaultAngleRotated - 90);
             Scribe_Values.Look(ref rotationTargeted, "rotationTargeted", defaultAngleRotated - 90);
 
             Scribe_Values.Look(ref targetPersists, "targetPersists");
-            Scribe_Values.Look(ref targetAutomatically, "targetAutomatically");
+            Scribe_Values.Look(ref autoTargeting, "autoTargeting");
+            Scribe_Values.Look(ref manualTargeting, "manualTargeting");
 
             Scribe_Values.Look(ref aimPieOffset, "aimPieOffset");
             Scribe_Values.Look(ref angleRestricted, "angleRestricted");
 
-            Scribe_Values.Look(ref baseCannonSize, "baseCannonSize");
             Scribe_Values.Look(ref baseCannonRenderLocation, "baseCannonRenderLocation");
 
             Scribe_Values.Look(ref cannonTurretDrawSize, "cannonTurretDrawSize");
@@ -127,14 +127,31 @@ namespace Vehicles
 
         public void DoTick()
         {
-            if (cooldownTicks > 0 && RotationIsValid && pawn.GetComp<CompCannons>().multiFireCannon.NullOrEmpty())
+            if (pawn.GetComp<CompCannons>().multiFireCannon.NullOrEmpty())
             {
-                cooldownTicks--;
-                if(cooldownTicks <= 0)
+                if (autoTargeting && Find.TickManager.TicksGame % AutoTargetInterval == 0 && pawn.Drafted)
                 {
-                    ReloadCannon();
+                    
+                    if(!cannonTarget.IsValid)
+                    {
+                        LocalTargetInfo autoTarget = this.GetCannonTarget();
+                        if(autoTarget.IsValid)
+                        {
+                            SetTarget(autoTarget);
+                            ResetPrefireTimer();
+                        }
+                    }
+                }
+                if(cooldownTicks > 0 && RotationIsValid)
+                {
+                    cooldownTicks--;
+                    if(cooldownTicks <= 0)
+                    {
+                        ReloadCannon();
+                    }
                 }
             }
+            
             if(rotationTargeted != currentRotation)
             {
                 if(pawn.Drafted)
@@ -182,11 +199,9 @@ namespace Vehicles
                 {
                     if(!CannonTargeter.TargetMeetsRequirements(this, cannonTarget) || !pawn.Drafted)
                     {
-                        Log.Message("Reset");
                         SetTarget(LocalTargetInfo.Invalid);
                         return;
                     }
-                    Log.Message("Unlocked");
                     LockedStatusRotation = false;
                     if(PrefireTickCount > 0)
                     {
@@ -205,10 +220,8 @@ namespace Vehicles
                     }
                     else if(cooldownTicks <= 0 && RotationIsValid)
                     {
-                        Log.Message("Prepare checks");
                         if(!targetPersists || !SetTargetConditionalOnThing(LocalTargetInfo.Invalid, true))
                         {
-                            Log.Message("Prepare Fire");
                             CompCannon.multiFireCannon.Add(new SPTuple<int, CannonHandler, SPTuple2<int,int>>(cannonDef.numberOfShots, this, new SPTuple2<int,int>(0, 0)));
                             ActivateTimer();
                         }
@@ -226,7 +239,7 @@ namespace Vehicles
             else
             {
                 HelperMethods.DrawAttachedThing(CannonBaseTexture, CannonBaseGraphic, baseCannonRenderLocation, baseCannonDrawSize, CannonTexture, CannonGraphic, 
-                cannonRenderLocation, cannonRenderOffset, CannonBaseMaterial, CannonMaterial, TurretRotation, pawn, drawLayer);
+                cannonRenderLocation, cannonRenderOffset, CannonBaseMaterial, CannonMaterial, TurretRotation, pawn, drawLayer, attachedTo);
             }
         }
 
@@ -361,19 +374,16 @@ namespace Vehicles
         {
             get
             {
-                Pair<float, float> turretLoc = HelperMethods.ShipDrawOffset(CompVehicle, cannonRenderLocation.x, cannonRenderLocation.y);
-                return new Vector3(pawn.DrawPos.x + turretLoc.First, pawn.DrawPos.y + drawLayer, pawn.DrawPos.z + turretLoc.Second);
+                float locationRotation = 0f;
+                if(attachedTo != null)
+                {
+                    locationRotation = attachedTo.TurretRotation;
+                }
+                SPTuple2<float, float> turretLoc = HelperMethods.ShipDrawOffset(CompVehicle, cannonRenderLocation.x, cannonRenderLocation.y, out SPTuple2<float,float> renderOffsets, locationRotation, attachedTo);
+                return new Vector3(pawn.DrawPos.x + turretLoc.First + renderOffsets.First, pawn.DrawPos.y + drawLayer, pawn.DrawPos.z + turretLoc.Second + renderOffsets.Second);
             }
         }
 
-        public Vector3 TurretLocationRotated
-        {
-            get
-            {
-                Pair<float, float> turretLoc = HelperMethods.ShipDrawOffset(CompVehicle, cannonRenderLocation.x + cannonRenderOffset.x, cannonRenderLocation.y + cannonRenderOffset.y);
-                return new Vector3(pawn.DrawPos.x + turretLoc.First, pawn.DrawPos.y + drawLayer, pawn.DrawPos.z + turretLoc.Second).RotatedBy(currentRotation);
-            }
-        }
 
         public float TurretRotation
         {
@@ -392,9 +402,10 @@ namespace Vehicles
 
                 float rotation = 270 - currentRotation;
                 if(rotation < 0)
-                {
-                    return 360 + rotation;
-                }
+                    rotation += 360;
+
+                if(LockedStatusRotation && attachedTo != null && !attachedTo.LockedStatusRotation)
+                    return rotation + attachedTo.TurretRotation;
                 return rotation;
             }
         }
@@ -405,7 +416,8 @@ namespace Vehicles
                 return true;
 
             float rotationOffset = pawn.Rotation.AsInt * 90 + pawn.GetComp<CompVehicle>().Angle;
-            
+            if (attachedTo != null)
+                rotationOffset += attachedTo.TurretRotation;
             float start = angleRestricted.x + rotationOffset;
             float end = angleRestricted.y + rotationOffset;
 
@@ -508,11 +520,17 @@ namespace Vehicles
         {
             get
             {
-                if(cannonDef.maxRange > GenRadial.MaxRadialPatternRadius)
-                {
-                    return (float)Math.Floor(GenRadial.MaxRadialPatternRadius);
-                }
+                if (cannonDef.maxRange < 0)
+                    return 9999;
                 return cannonDef.maxRange;
+            }
+        }
+
+        public float MinRange
+        {
+            get
+            {
+                return cannonDef.minRange;
             }
         }
 
@@ -537,37 +555,33 @@ namespace Vehicles
         /// <param name="target"></param>
         /// <param name="checkOnly"></param>
         /// <returns>true if cannonTarget set to target, false if target is still valid</returns>
+        public LocalTargetInfo CachedTarget { get; set; }
         public bool SetTargetConditionalOnThing(LocalTargetInfo target, bool validationOnly = false)
         {
-            Log.Message($"Conditional Check: {cannonTarget.IsValid} && ( {cannonTarget.HasThing} || {!cannonTarget.IsValid} )");
             if(validationOnly && cannonTarget.IsValid)
             {
                 return false;
             }
-            else if(cannonTarget.IsValid && (cannonTarget.HasThing || !cannonTarget.IsValid))
+
+            if(cannonTarget.IsValid && (cannonTarget.HasThing || !cannonTarget.IsValid))
             {
-                Log.Message("1");
                 if(cannonTarget.Thing is Pawn pawn)
                 {
-                    Log.Message("2");
                     if (pawn.Dead || pawn.Downed)
                     {
-                        Log.Message("3");
                         cannonTarget = target;
                         return true;
                     }
                 }
                 else
                 {
-                    Log.Message("4");
                     if (cannonTarget.Thing.HitPoints > 0)
                     {
-                        Log.Message("5");
                         cannonTarget = target;
                         return true;
                     }
                 }
-                //ResetPrefireTimer();
+                ResetPrefireTimer();
                 return false;
             }
             cannonTarget = target;
@@ -577,6 +591,10 @@ namespace Vehicles
         public void ResetCannonAngle()
         {
             currentRotation = defaultAngleRotated - 90;
+            if (currentRotation < 360)
+                currentRotation += 360;
+            else if (currentRotation > 360)
+                currentRotation -= 360;
             rotationTargeted = currentRotation;
         }
 
@@ -625,7 +643,8 @@ namespace Vehicles
         public CannonDef cannonDef;
 
         public bool targetPersists;
-        public bool targetAutomatically;
+        public bool autoTargeting = false;
+        public bool manualTargeting = true;
 
         /* Optional */
         public CannonHandler attachedTo;
@@ -633,12 +652,10 @@ namespace Vehicles
         public string attachableKey;
 
         private Material cannonMaterialLoaded;
-        public Vector2 cannonSize;
         public Vector2 cannonRenderOffset;
         public Vector2 cannonRenderLocation;
 
         private Material baseCannonMaterialLoaded;
-        public Vector2 baseCannonSize;
         public Vector2 baseCannonRenderLocation;
 
         public Vector2 cannonTurretDrawSize = Vector2.one;
@@ -672,5 +689,7 @@ namespace Vehicles
 
         private Rot4 parentRotCached = default;
         private float parentAngleCached = 0f;
+
+        private const int AutoTargetInterval = 50;
     }
 }

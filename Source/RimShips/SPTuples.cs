@@ -145,6 +145,8 @@ namespace SPExtended
             }
         }
 
+        public static SPTuple2<float, float> zero => new SPTuple2<float, float>(0,0);
+
         public override int GetHashCode()
         {
             int hash = 0;

@@ -2,7 +2,7 @@
 
 <Defs>
 	<ThinkTreeDef>
-		<defName>shipThinkTree_Simple</defName>
+		<defName>VehicleThinkTree_Simple</defName>
 		<thinkRoot Class="ThinkNode_Priority">
 			<subNodes>
 				<!-- Lord Directives -->
@@ -51,7 +51,7 @@
 	</ThinkTreeDef>
 	
 	<ThinkTreeDef>
-		<defName>shipThinkTree_SimpleConstant</defName>
+		<defName>VehicleThinkTree_SimpleConstant</defName>
 		<thinkRoot Class = "ThinkNode_Priority">
 			<subNodes>
 				<li Class = "ThinkNode_ConditionalCanDoConstantThinkTreeJobNow">

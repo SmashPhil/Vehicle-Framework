@@ -110,7 +110,7 @@ namespace Vehicles
             }
 
             HelperMethods.DrawAttachedThing(cannon.CannonBaseTexture, cannon.CannonBaseGraphic, cannon.baseCannonRenderLocation, cannon.baseCannonDrawSize, cannon.CannonTexture, SubGraphicCycle(currentFrame), 
-            cannon.cannonRenderLocation, cannon.cannonRenderOffset, cannon.CannonBaseMaterial, SubMaterialCycle(currentFrame), cannon.TurretRotation, cannon.pawn, cannon.drawLayer);
+            cannon.cannonRenderLocation, cannon.cannonRenderOffset, cannon.CannonBaseMaterial, SubMaterialCycle(currentFrame), cannon.TurretRotation, cannon.pawn, cannon.drawLayer, cannon.attachedTo);
         }
 
         public override Graphic GetColoredVersion(Shader newShader, Color newColor, Color newColorTwo)

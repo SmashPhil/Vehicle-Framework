@@ -14,7 +14,6 @@ using SPExtended;
 
 namespace Vehicles
 {
-    public enum VehicleWeaponStatus { Offline, Online }
     public enum VehicleMovementStatus { Offline, Online }
 
     public class CompVehicle : ThingComp
@@ -39,9 +38,8 @@ namespace Vehicles
         public VehicleMovementStatus movementStatus = VehicleMovementStatus.Online;
 
         public bool warnNoFuel;
-        public VehicleWeaponStatus weaponStatus = VehicleWeaponStatus.Offline;
 
-        public bool CanMove => (Props.moveable > VehiclePermissions.DriverNeeded || MovementHandlerAvailable) && movementStatus == VehicleMovementStatus.Online;
+        public bool CanMove => (Props.vehicleMovementPermissions > VehiclePermissions.DriverNeeded || MovementHandlerAvailable) && movementStatus == VehicleMovementStatus.Online;
 
         public VehiclePawn Pawn => parent as VehiclePawn;
         public CompProperties_Vehicle Props => (CompProperties_Vehicle)this.props;
@@ -169,7 +167,7 @@ namespace Vehicles
                 List<Pawn> weaponCrewOnShip = new List<Pawn>();
                 foreach(ShipHandler handler in handlers)
                 {
-                    if (handler.role.handlingType is HandlingTypeFlags.Cannons)
+                    if (handler.role.handlingType is HandlingTypeFlags.Cannon)
                     {
                         weaponCrewOnShip.AddRange(handler.handlers);
                     }
@@ -292,6 +290,7 @@ namespace Vehicles
             currentTravelCells.Add(cell);
         }
 
+        public float CachedAngle { get; set; }
         public float Angle
         {
             get
@@ -980,11 +979,11 @@ namespace Vehicles
                                 continue;
                             passengerHandler.handlers.TryTransferToContainer(transferingPawn, handler.handlers, false);
                         }
-                        if (handler.role.handlingType == HandlingTypeFlags.Cannons && handler.handlers.Count < handler.role.slotsToOperate && this.CanMove)
+                        if (handler.role.handlingType == HandlingTypeFlags.Cannon && handler.handlers.Count < handler.role.slotsToOperate && this.CanMove)
                         {
                             if(passengerHandler.handlers.Count <= 0)
                             {
-                                ShipHandler emergencyHandler = this.handlers.Find(x => x.role.handlingType < HandlingTypeFlags.Cannons && x.handlers.Count > 0); //Can Optimize
+                                ShipHandler emergencyHandler = this.handlers.Find(x => x.role.handlingType < HandlingTypeFlags.Cannon && x.handlers.Count > 0); //Can Optimize
                                 Pawn transferPawnE = emergencyHandler?.handlers.InnerListForReading.Find(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && x.RaceProps.Humanlike);
                                 if(transferPawnE is null)
                                     continue;
@@ -1126,7 +1125,6 @@ namespace Vehicles
         public override void PostExposeData()
         {
             base.PostExposeData();
-            Scribe_Values.Look(ref weaponStatus, "weaponStatus", VehicleWeaponStatus.Online);
             Scribe_Values.Look(ref movementStatus, "movingStatus", VehicleMovementStatus.Online);
             Scribe_Values.Look(ref currentlyFishing, "currentlyFishing", false);
             Scribe_Values.Look(ref bearingAngle, "bearingAngle");

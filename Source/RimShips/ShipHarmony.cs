@@ -103,17 +103,23 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Method(typeof(Targeter), nameof(Targeter.TargeterOnGUI)), prefix: null,
                 postfix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(DrawCannonTargeter)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Targeter), nameof(Targeter.ProcessInputEvents)), prefix: null,
+            harmony.Patch(original: AccessTools.Method(typeof(Targeter), nameof(Targeter.ProcessInputEvents)), prefix: null,
                 postfix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(ProcessCannonInputEvents)));
             harmony.Patch(original: AccessTools.Method(typeof(Targeter), nameof(Targeter.TargeterUpdate)), prefix: null,
                 postfix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(CannonTargeterUpdate)));
+            harmony.Patch(original: AccessTools.Method(typeof(PawnGraphicSet), nameof(PawnGraphicSet.MatsBodyBaseAt)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(RegisterDiagonalMovement)));
+            harmony.Patch(original: AccessTools.Method(typeof(Pawn_DrawTracker), nameof(Pawn_DrawTracker.Notify_DamageApplied)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(VehiclesDamageTakenWiggler)));
+            harmony.Patch(original: AccessTools.Method(typeof(Pawn_DrawTracker), nameof(Pawn_DrawTracker.Notify_DamageDeflected)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(VehiclesDamageDeflectedWiggler)));
 
             /* Gizmos */
-            harmony.Patch(original: AccessTools.Method(typeof(JobDriver_Wait), "CheckForAutoAttack"),
-                prefix: new HarmonyMethod(typeof(ShipHarmony),
-                nameof(CheckForVehicleAttack)));
             harmony.Patch(original: AccessTools.Method(typeof(Settlement), nameof(Settlement.GetCaravanGizmos)), prefix: null,
                 postfix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(NoAttackSettlementWhenDocked)));
@@ -733,6 +739,7 @@ namespace Vehicles
                 yield return instruction;
             }
         }
+
         #endregion HealthStats
 
         #region Rendering
@@ -960,6 +967,38 @@ namespace Vehicles
             HelperMethods.CannonTargeter.TargeterUpdate();
         }
 
+        public static void RegisterDiagonalMovement(Rot4 facing, PawnGraphicSet __instance, ref List<Material> ___cachedMatsBodyBase, ref int ___cachedMatsBodyBaseHash, RotDrawMode bodyCondition = RotDrawMode.Fresh)
+        {
+            if(__instance.pawn is VehiclePawn vehicle && HelperMethods.IsVehicle(vehicle))
+            {
+                if(facing.IsHorizontal && vehicle.GetComp<CompVehicle>().Angle != vehicle.GetComp<CompVehicle>().CachedAngle)
+                {
+                    ___cachedMatsBodyBase.Clear();
+                    ___cachedMatsBodyBaseHash = -1;
+                    vehicle.GetComp<CompVehicle>().CachedAngle = vehicle.GetComp<CompVehicle>().Angle;
+                }
+            }
+        }
+
+        public static bool VehiclesDamageTakenWiggler(DamageInfo dinfo, Pawn ___pawn, Pawn_DrawTracker __instance)
+        {
+            if(HelperMethods.IsVehicle(___pawn) && !___pawn.GetComp<CompVehicle>().Props.movesWhenDowned)
+            {
+                __instance.renderer.Notify_DamageApplied(dinfo);
+                return false;
+            }
+            return true;
+        }
+
+        public static bool VehiclesDamageDeflectedWiggler(DamageInfo dinfo, Pawn ___pawn, Pawn_DrawTracker __instance)
+        {
+            if(HelperMethods.IsVehicle(___pawn) && !___pawn.GetComp<CompVehicle>().Props.movesWhenDowned)
+            {
+                return false;
+            }
+            return true;
+        }
+
         #endregion Rendering
 
         #region Drafting
@@ -1115,20 +1154,6 @@ namespace Vehicles
         #endregion Drafting
 
         #region Gizmos
-        /// <summary>
-        /// Check if weapon status online, which is indicitive of a vehicle's ability to attack, rather than using health capacities. Allow for custom specifications
-        /// </summary>
-        /// <param name="__instance"></param>
-        /// <returns></returns>
-        public static bool CheckForVehicleAttack(JobDriver_Wait __instance)
-        {
-            if (__instance.pawn?.GetComp<CompVehicle>()?.weaponStatus == VehicleWeaponStatus.Offline)
-            {
-                return false;
-            }
-            return true;
-        }
-
         /// <summary>
         /// Disable the ability to attack a settlement when docked there. Breaks immersion and can cause an entry cell error
         /// </summary>

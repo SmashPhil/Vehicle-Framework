@@ -82,6 +82,7 @@
 			<ArmorRating_Blunt>1.0</ArmorRating_Blunt>
 			<ArmorRating_Sharp>1.0</ArmorRating_Sharp>
 			<MarketValue>250000</MarketValue>
+			<Flammability>0</Flammability>
 		</statBases>
 		
 		<size>(3,5)</size>
@@ -109,8 +110,8 @@
 			<foodType>None</foodType>
 
 			<body>test_Body</body>
-			<baseBodySize>45.0</baseBodySize>
-			<baseHealthScale>2.0</baseHealthScale>
+			<baseBodySize>1.0</baseBodySize>
+			<baseHealthScale>1.0</baseHealthScale>
 			<lifeStageAges>
 				<li>
 					<def>MechanoidFullyFormed</def>
@@ -219,13 +220,14 @@
 				<cannons>
 					<li>
 						<cannonDef>turret50cal</cannonDef>
-						<cannonRenderLocation>(-.43,.38)</cannonRenderLocation>
+						<cannonRenderLocation>(-.43, .38)</cannonRenderLocation>
 						<cannonRenderOffset>(0, 0)</cannonRenderOffset>
 						<cannonTurretDrawSize>(1, 1)</cannonTurretDrawSize>
 						
 						<targetPersists>true</targetPersists>
-						
-						<angleRestricted/>
+						<autoTargeting>true</autoTargeting>
+						<manualTargeting>false</manualTargeting>
+						<angleRestricted>(270,90)</angleRestricted>
 						<aimPieOffset/>
 						<drawLayer>2</drawLayer>
 						

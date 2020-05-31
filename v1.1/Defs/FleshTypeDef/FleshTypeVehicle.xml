@@ -2,7 +2,7 @@
 
 <Defs>
 	<FleshTypeDef>
-		<defName>WoodenShip</defName>
+		<defName>WoodenVehicle</defName>
 		<corpseCategory>CorpsesMechanoid</corpseCategory>
 		<!-- Change Later -->
 		<wounds>
@@ -19,7 +19,7 @@
 	</FleshTypeDef>
 	
 	<FleshTypeDef>
-		<defName>MetalShip</defName>
+		<defName>MetalVehicle</defName>
 		<corpseCategory>CorpsesMechanoid</corpseCategory>
 		<!-- Change Later -->
 		<wounds>
@@ -36,7 +36,7 @@
 	</FleshTypeDef>
 	
 	<FleshTypeDef>
-		<defName>SpacerShip</defName>
+		<defName>SpacerVehicle</defName>
 		<corpseCategory>CorpsesMechanoid</corpseCategory>
 		<!-- Change Later -->
 		<wounds>

@@ -122,28 +122,12 @@ namespace Vehicles
 
         public VehiclePawn pawn { get; set; }
 
-        public override Mesh MeshAt(Rot4 rot)
-        {
-            //if(HorizontalAngle != 0)
-            //{
-            //    if(rot == Rot4.East)
-            //    {
-            //        if(HorizontalAngle == -45)
-            //        {
-            //            return 
-            //        }
-            //    }
-            //}
-            return base.MeshAt(rot);
-        }
-
         public override Material MatAt(Rot4 rot, Thing thing = null)
         {
-            if (pawn is null)
+            if (pawn is null || !HelperMethods.IsVehicle(pawn))
                 return base.MatAt(rot, thing);
 
             float angle = pawn.GetComp<CompVehicle>().Angle;
-            Log.Message($"Passed: {angle}");
 	        switch (rot.AsInt)
 	        {
 	            case 0:

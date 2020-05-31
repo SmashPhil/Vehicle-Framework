@@ -912,45 +912,47 @@ namespace Vehicles
         #endregion
 
         #region Rendering
-        public static Pair<float,float> ShipDrawOffset(CompVehicle shipComp, float xOffset, float yOffset)
+        public static SPTuple2<float,float> ShipDrawOffset(CompVehicle shipComp, float xOffset, float yOffset, out SPTuple2<float, float> rotationOffset, float turretRotation = 0, CannonHandler attachedTo = null)
         {
+            rotationOffset = SPTuple2<float,float>.zero; //COME BACK TO
+            if(attachedTo != null)
+            {
+                return SPTrig.RotatePointClockwise(attachedTo.cannonRenderLocation.x + xOffset, attachedTo.cannonRenderLocation.y + yOffset, turretRotation);
+            }
+            
             switch(shipComp.Pawn.Rotation.AsInt)
             {
                 //East
                 case 1:
                     if(shipComp.Angle == 45)
                     {
-                        SPTuple2<float,float> rotatedOffset = SPTrig.RotatePointClockwise(yOffset, -xOffset, 45f);
-                        return new Pair<float, float>(rotatedOffset.First, rotatedOffset.Second);
+                        return SPTrig.RotatePointClockwise(yOffset, -xOffset, 45f);
                     }
                     else if(shipComp.Angle == -45)
                     {
-                        SPTuple2<float,float> rotatedOffset = SPTrig.RotatePointCounterClockwise(yOffset, -xOffset, 45f);
-                        return new Pair<float, float>(rotatedOffset.First, rotatedOffset.Second);
+                        return SPTrig.RotatePointCounterClockwise(yOffset, -xOffset, 45f);
                     }
-                    return new Pair<float, float>(yOffset, -xOffset);
+                    return new SPTuple2<float, float>(yOffset, -xOffset);
                 //South
                 case 2:
-                    return new Pair<float, float>(-xOffset, -yOffset);
+                    return new SPTuple2<float, float>(-xOffset, -yOffset);
                 //West
                 case 3:
                     if(shipComp.Angle != 0)
                     {
                         if(shipComp.Angle == 45)
                         {
-                            SPTuple2<float,float> rotatedOffset = SPTrig.RotatePointClockwise(-yOffset, xOffset, 45f);
-                            return new Pair<float, float>(rotatedOffset.First, rotatedOffset.Second);
+                            return SPTrig.RotatePointClockwise(-yOffset, xOffset, 45f);
                         }
                         else if(shipComp.Angle == -45)
                         {
-                            SPTuple2<float,float> rotatedOffset = SPTrig.RotatePointCounterClockwise(-yOffset, xOffset, 45f);
-                            return new Pair<float, float>(rotatedOffset.First, rotatedOffset.Second);
+                            return SPTrig.RotatePointCounterClockwise(-yOffset, xOffset, 45f);
                         }
                     }
-                    return new Pair<float, float>(-yOffset, xOffset);
+                    return new SPTuple2<float, float>(-yOffset, xOffset);
                 //North
                 default:
-                    return new Pair<float, float>(xOffset, yOffset);
+                    return new SPTuple2<float, float>(xOffset, yOffset);
             }
         }
 
@@ -1035,15 +1037,21 @@ namespace Vehicles
         }
 
         public static void DrawAttachedThing(Texture2D baseTexture, Graphic baseGraphic, Vector2 baseRenderLocation,Vector2 baseDrawSize,
-            Texture2D texture, Graphic graphic, Vector2 renderLocation, Vector2 renderOffset, Material baseMat, Material mat, float rotation, Pawn parent, int drawLayer)
+            Texture2D texture, Graphic graphic, Vector2 renderLocation, Vector2 renderOffset, Material baseMat, Material mat, float rotation, Pawn parent, int drawLayer, CannonHandler attachedTo = null)
         {
             if (texture != null && renderLocation != null)
             {
                 try
                 {
                     Vector3 topVectorRotation = new Vector3(renderOffset.x, 1f, renderOffset.y).RotatedBy(rotation);
-                    Pair<float, float> drawOffset = ShipDrawOffset(parent.GetComp<CompVehicle>(), renderLocation.x, renderLocation.y);
-                    Vector3 topVectorLocation = new Vector3(parent.DrawPos.x + drawOffset.First, parent.DrawPos.y + drawLayer, parent.DrawPos.z + drawOffset.Second);
+                    float locationRotation = 0f;
+                    if(attachedTo != null)
+                    {
+                        locationRotation = attachedTo.TurretRotation;
+                    }
+                    SPTuple2<float, float> drawOffset = ShipDrawOffset(parent.GetComp<CompVehicle>(), renderLocation.x, renderLocation.y, out SPTuple2<float, float> rotOffset1, locationRotation, attachedTo);
+                    
+                    Vector3 topVectorLocation = new Vector3(parent.DrawPos.x + drawOffset.First + rotOffset1.First, parent.DrawPos.y + drawLayer, parent.DrawPos.z + drawOffset.Second + rotOffset1.Second);
                     Mesh cannonMesh = graphic.MeshAt(Rot4.North);
 
                     if(RimShipMod.mod.settings.debugDrawCannonGrid)
@@ -1053,13 +1061,12 @@ namespace Vehicles
                         debugCenter.SetTRS(topVectorLocation + Altitudes.AltIncVect, Quaternion.identity, new Vector3(0.15f, 1f, 0.15f));
                         Graphics.DrawMesh(MeshPool.plane10, debugCenter, debugCenterMat, 0);
                     }
-
                     Graphics.DrawMesh(cannonMesh, topVectorLocation, rotation.ToQuat(), mat, 0);
 
                     if(baseMat != null && baseRenderLocation != null)
                     {
                         Matrix4x4 baseMatrix = default;
-                        Pair<float, float> baseDrawOffset = HelperMethods.ShipDrawOffset(parent.GetComp<CompVehicle>(), baseRenderLocation.x, baseRenderLocation.y);
+                        SPTuple2<float, float> baseDrawOffset = ShipDrawOffset(parent.GetComp<CompVehicle>(), baseRenderLocation.x, baseRenderLocation.y, out SPTuple2<float, float> rotOffset2);
                         Vector3 baseVectorLocation = new Vector3(parent.DrawPos.x + baseDrawOffset.First, parent.DrawPos.y, parent.DrawPos.z + baseDrawOffset.Second);
                         baseMatrix.SetTRS(baseVectorLocation + Altitudes.AltIncVect, parent.Rotation.AsQuat, new Vector3(baseDrawSize.x, 1f, baseDrawSize.y));
                         Graphics.DrawMesh(MeshPool.plane10, baseMatrix, baseMat, 0);
@@ -1281,6 +1288,266 @@ namespace Vehicles
             GUI.EndGroup();
             curY += Mathf.Max(a, b);
         }
+        #endregion
+
+        #region TargetingAndDamage
+
+        public static LocalTargetInfo GetCannonTarget(this CannonHandler cannon, float restrictedAngle = 0f, TargetingParameters param = null)
+        {
+            if (cannon.pawn.GetComp<CompCannons>() != null && cannon.pawn.GetComp<CompCannons>().WeaponStatusOnline && cannon.pawn.Faction != null) //add fire at will option
+            {
+                TargetScanFlags targetScanFlags = TargetScanFlags.NeedLOSToPawns | TargetScanFlags.NeedLOSToNonPawns | TargetScanFlags.NeedThreat | TargetScanFlags.NeedAutoTargetable;
+                Thing thing = (Thing)BestAttackTarget(cannon, targetScanFlags, null, 0f, 9999f, default(IntVec3), float.MaxValue, false, false);
+                if (thing != null)
+                {
+                    return new LocalTargetInfo(thing);
+                }
+            }
+            return LocalTargetInfo.Invalid;
+        }
+
+        public static IAttackTarget BestAttackTarget(CannonHandler cannon, TargetScanFlags flags, Predicate<Thing> validator = null, float minDist = 0f, float maxDist = 9999f, IntVec3 locus = default(IntVec3), float maxTravelRadiusFromLocus = 3.4028235E+38f, bool canBash = false, bool canTakeTargetsCloserThanEffectiveMinRange = true)
+		{
+			VehiclePawn searcherPawn = cannon.pawn as VehiclePawn;
+
+			float minDistSquared = minDist * minDist;
+            float num = maxTravelRadiusFromLocus + cannon.MaxRange;
+			float maxLocusDistSquared = num * num;
+			Func<IntVec3, bool> losValidator = null;
+			if ((flags & TargetScanFlags.LOSBlockableByGas) != TargetScanFlags.None)
+			{
+				losValidator = delegate(IntVec3 vec3)
+				{
+					Gas gas = vec3.GetGas(searcherPawn.Map);
+					return gas == null || !gas.def.gas.blockTurretTracking;
+				};
+			}
+			Predicate<IAttackTarget> innerValidator = delegate(IAttackTarget t)
+			{
+				Thing thing = t.Thing;
+				if (t == searcherPawn)
+				{
+					return false;
+				}
+				if (minDistSquared > 0f && (float)(searcherPawn.Position - thing.Position).LengthHorizontalSquared < minDistSquared)
+				{
+					return false;
+				}
+				if (!canTakeTargetsCloserThanEffectiveMinRange)
+				{
+                    float num2 = cannon.MinRange;
+					if (num2 > 0f && (float)(cannon.pawn.Position - thing.Position).LengthHorizontalSquared < num2 * num2)
+					{
+						return false;
+					}
+				}
+				if (maxTravelRadiusFromLocus < 9999f && (thing.Position - locus).LengthHorizontalSquared > maxLocusDistSquared)
+				{
+					return false;
+				}
+				if (!searcherPawn.HostileTo(thing))
+				{
+					return false;
+				}
+				if (validator != null && !validator(thing))
+				{
+					return false;
+				}
+				if ((flags & TargetScanFlags.NeedLOSToAll) != TargetScanFlags.None)
+				{
+					if (losValidator != null && (!losValidator(searcherPawn.Position) || !losValidator(thing.Position)))
+					{
+						return false;
+					}
+					if (!searcherPawn.CanSee(thing, losValidator))
+					{
+						if (t is Pawn)
+						{
+							if ((flags & TargetScanFlags.NeedLOSToPawns) != TargetScanFlags.None)
+							{
+								return false;
+							}
+						}
+						else if ((flags & TargetScanFlags.NeedLOSToNonPawns) != TargetScanFlags.None)
+						{
+							return false;
+						}
+					}
+				}
+				if (((flags & TargetScanFlags.NeedThreat) != TargetScanFlags.None || (flags & TargetScanFlags.NeedAutoTargetable) != TargetScanFlags.None) && t.ThreatDisabled(searcherPawn))
+				{
+					return false;
+				}
+				if ((flags & TargetScanFlags.NeedAutoTargetable) != TargetScanFlags.None && !AttackTargetFinder.IsAutoTargetable(t))
+				{
+					return false;
+				}
+				if ((flags & TargetScanFlags.NeedActiveThreat) != TargetScanFlags.None && !GenHostility.IsActiveThreatTo(t, searcherPawn.Faction))
+				{
+					return false;
+				}
+				Pawn pawn = t as Pawn;
+				if ((flags & TargetScanFlags.NeedNonBurning) != TargetScanFlags.None && thing.IsBurning())
+				{
+					return false;
+				}
+
+				if (thing.def.size.x == 1 && thing.def.size.z == 1)
+				{
+					if (thing.Position.Fogged(thing.Map))
+					{
+						return false;
+					}
+				}
+				else
+				{
+					bool flag2 = false;
+					using (CellRect.Enumerator enumerator = thing.OccupiedRect().GetEnumerator())
+					{
+						while (enumerator.MoveNext())
+						{
+							if (!enumerator.Current.Fogged(thing.Map))
+							{
+								flag2 = true;
+								break;
+							}
+						}
+					}
+					if (!flag2)
+					{
+						return false;
+					}
+				}
+				return true;
+			};
+
+            List<IAttackTarget> tmpTargets = new List<IAttackTarget>();
+			tmpTargets.AddRange(searcherPawn.Map.attackTargetsCache.GetPotentialTargetsFor(searcherPawn));
+
+			bool flag = false;
+			for (int i = 0; i < tmpTargets.Count; i++)
+			{
+				IAttackTarget attackTarget = tmpTargets[i];
+				if (attackTarget.Thing.Position.InHorDistOf(searcherPawn.Position, maxDist) && innerValidator(attackTarget) && cannon.pawn.GetComp<CompCannons>().TryFindShootLineFromTo(searcherPawn.Position, new LocalTargetInfo(attackTarget.Thing), out ShootLine resultingLine))
+				{
+					flag = true;
+					break;
+				}
+			}
+			IAttackTarget result;
+			if (flag)
+			{
+				tmpTargets.RemoveAll((IAttackTarget x) => !x.Thing.Position.InHorDistOf(searcherPawn.Position, maxDist) || !innerValidator(x));
+				result = GetRandomShootingTargetByScore(tmpTargets, searcherPawn);
+			}
+			else
+			{
+				Predicate<Thing> validator2;
+				if ((flags & TargetScanFlags.NeedReachableIfCantHitFromMyPos) != TargetScanFlags.None && (flags & TargetScanFlags.NeedReachable) == TargetScanFlags.None)
+				{
+					validator2 = ((Thing t) => innerValidator((IAttackTarget)t) && cannon.pawn.GetComp<CompCannons>().TryFindShootLineFromTo(searcherPawn.Position, new LocalTargetInfo(t), out ShootLine resultingLine));
+				}
+				else
+				{
+					validator2 = ((Thing t) => innerValidator((IAttackTarget)t));
+				}
+				result = (IAttackTarget)GenClosest.ClosestThing_Global(searcherPawn.Position, tmpTargets, maxDist, validator2, null);
+			}
+			tmpTargets.Clear();
+			return result;
+		}
+
+        public static IAttackTarget GetRandomShootingTargetByScore(List<IAttackTarget> targets, VehiclePawn searcher)
+        {
+	        Pair<IAttackTarget, float> pair;
+	        if (GetAvailableShootingTargetsByScore(targets, searcher).TryRandomElementByWeight((Pair<IAttackTarget, float> x) => x.Second, out pair))
+	        {
+		        return pair.First;
+	        }
+	        return null;
+        }
+
+        public static List<Pair<IAttackTarget, float>> GetAvailableShootingTargetsByScore(List<IAttackTarget> rawTargets, VehiclePawn searcher)
+        {
+	        List<Pair<IAttackTarget, float>> availableShootingTargets = new List<Pair<IAttackTarget, float>>();
+            List<float> tmpTargetScores = new List<float>();
+            List<bool> tmpCanShootAtTarget = new List<bool>();
+	        if (rawTargets.Count == 0)
+	        {
+                return availableShootingTargets;
+	        }
+	        tmpTargetScores.Clear();
+	        tmpCanShootAtTarget.Clear();
+	        float num = 0f;
+	        IAttackTarget attackTarget = null;
+	        for (int i = 0; i < rawTargets.Count; i++)
+	        {
+		        tmpTargetScores.Add(float.MinValue);
+		        tmpCanShootAtTarget.Add(false);
+		        if (rawTargets[i] != searcher)
+		        {
+			        bool flag = searcher.GetComp<CompCannons>().TryFindShootLineFromTo(searcher.Position, new LocalTargetInfo(rawTargets[i].Thing), out ShootLine shootLine);
+			        tmpCanShootAtTarget[i] = flag;
+			        if (flag)
+			        {
+				        float shootingTargetScore = GetShootingTargetScore(rawTargets[i], searcher);
+				        tmpTargetScores[i] = shootingTargetScore;
+				        if (attackTarget == null || shootingTargetScore > num)
+				        {
+					        attackTarget = rawTargets[i];
+					        num = shootingTargetScore;
+				        }
+			        }
+		        }
+	        }
+	        if (num < 1f)
+	        {
+		        if (attackTarget != null)
+		        {
+			        availableShootingTargets.Add(new Pair<IAttackTarget, float>(attackTarget, 1f));
+		        }
+	        }
+	        else
+	        {
+		        float num2 = num - 30f;
+		        for (int j = 0; j < rawTargets.Count; j++)
+		        {
+			        if (rawTargets[j] != searcher && tmpCanShootAtTarget[j])
+			        {
+				        float num3 = tmpTargetScores[j];
+				        if (num3 >= num2)
+				        {
+					        float second = Mathf.InverseLerp(num - 30f, num, num3);
+					        availableShootingTargets.Add(new Pair<IAttackTarget, float>(rawTargets[j], second));
+				        }
+			        }
+		        }
+	        }
+	        return availableShootingTargets;
+        }
+
+        private static float GetShootingTargetScore(IAttackTarget target, IAttackTargetSearcher searcher)
+        {
+	        float num = 60f;
+	        num -= Mathf.Min((target.Thing.Position - searcher.Thing.Position).LengthHorizontal, 40f);
+	        if (target.TargetCurrentlyAimingAt == searcher.Thing)
+	        {
+		        num += 10f;
+	        }
+	        if (searcher.LastAttackedTarget == target.Thing && Find.TickManager.TicksGame - searcher.LastAttackTargetTick <= 300)
+	        {
+		        num += 40f;
+	        }
+	        num -= CoverUtility.CalculateOverallBlockChance(target.Thing.Position, searcher.Thing.Position, searcher.Thing.Map) * 10f;
+	        Pawn pawn = target as Pawn;
+	        if (pawn != null && pawn.RaceProps.Animal && pawn.Faction != null && !pawn.IsFighting())
+	        {
+		        num -= 50f;
+	        }
+	        //num += _  - add additional cost based on how close to friendly fire
+	        return num * target.TargetPriorityFactor;
+        }
+
         #endregion
 
         public static CannonTargeter CannonTargeter = new CannonTargeter();

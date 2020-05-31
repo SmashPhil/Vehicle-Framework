@@ -2,7 +2,7 @@
 
 <Defs>
 
-	<ThingDef Name="BaseBoatPawn" Abstract="True">
+	<ThingDef Name="BaseVehiclePawn" Abstract="True">
 		<thingClass>Vehicles.VehiclePawn</thingClass>
 		<category>Pawn</category>
 		<selectable>true</selectable>
@@ -24,10 +24,10 @@
 		</statBases>
 		
 		<inspectorTabs>
-			<li>Vehicles.UI.ITab_Ship_Health</li>
-			<li>Vehicles.UI.ITab_Ship_Passengers</li>
-			<li>Vehicles.UI.ITab_Ship_Cargo</li>
-			<li>Vehicles.UI.ITab_Ship_Upgrades</li>
+			<li>Vehicles.UI.ITab_Vehicle_Health</li>
+			<li>Vehicles.UI.ITab_Vehicle_Passengers</li>
+			<li>Vehicles.UI.ITab_Vehicle_Cargo</li>
+			<!-- <li>Vehicles.UI.ITab_Vehicle_Upgrades</li> (optional) -->
 			<li>ITab_Pawn_FormingCaravan</li>
 		</inspectorTabs>
 		
