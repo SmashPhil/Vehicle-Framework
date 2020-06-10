@@ -43,8 +43,8 @@ namespace Vehicles.Jobs
             {
                 initAction = delegate ()
                 {
-                    base.Map.pawnDestinationReservationManager.Reserve(this.pawn, this.job, this.pawn.Position);
-                    this.pawn.pather.StopDead();
+                    base.Map.pawnDestinationReservationManager.Reserve(pawn, job, pawn.Position);
+                    (pawn as VehiclePawn).vPather.StopDead();
                 },
                 tickAction = delegate()
                 {

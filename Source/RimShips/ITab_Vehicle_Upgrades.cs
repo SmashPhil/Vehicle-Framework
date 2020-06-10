@@ -10,9 +10,9 @@ using SPExtended;
 
 namespace Vehicles.UI
 {
-    public class ITab_Ship_Upgrades : ITab
+    public class ITab_Vehicle_Upgrades : ITab
     {
-        public ITab_Ship_Upgrades()
+        public ITab_Vehicle_Upgrades()
         {
             this.size = new Vector2(screenWidth, screenHeight);
             this.labelKey = "TabUpgrades";

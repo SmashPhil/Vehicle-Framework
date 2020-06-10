@@ -11,9 +11,10 @@ using HarmonyLib;
 
 namespace Vehicles.UI
 {
-    public class Dialog_InfoCard_Ship : Window
+    //REDO
+    public class Dialog_InfoCard_Vehicle : Window
     {
-        public Dialog_InfoCard_Ship(Thing thing)
+        public Dialog_InfoCard_Vehicle(Thing thing)
         {
             this.thing = thing;
             this.tab = InfoCardTab.Stats;
@@ -161,18 +162,19 @@ namespace Vehicles.UI
         
         private IEnumerable<StatDrawEntry> StatsToDraw(Thing thing)
         {
-            StatDrawEntry entry = new StatDrawEntry(StatCategoryDefOf_Ships.BasicsShip, "Description".Translate(), string.Empty, string.Empty, 99999);
-            AccessTools.Field(typeof(StatDrawEntry), "overrideReportText").SetValue(entry, thing.DescriptionFlavor);
-            yield return entry;
+            //StatDrawEntry entry = new StatDrawEntry(StatCategoryDefOf_Ships.BasicsShip, "Description".Translate(), string.Empty, string.Empty, 99999);
+            //AccessTools.Field(typeof(StatDrawEntry), "overrideReportText").SetValue(entry, thing.DescriptionFlavor);
+            //yield return entry;
 
-            foreach (StatDef stat in from st in DefDatabase<StatDef>.AllDefs
-                                     where st.category == StatCategoryDefOf_Ships.BasicsShip
-                                     select st)
-            {
-                yield return new StatDrawEntry(stat.category, stat);
-            }
-
+            //foreach (StatDef stat in from st in DefDatabase<StatDef>.AllDefs
+            //                         where st.category == StatCategoryDefOf_Ships.BasicsShip
+            //                         select st)
+            //{
+            //    yield return new StatDrawEntry(stat.category, stat);
+            //}
+            return Enumerable.Empty<StatDrawEntry>();
         }
+
         private void FinalizeCachedDrawEntries()
         {
             cachedDrawEntries = (from sde in this.cachedDrawEntries

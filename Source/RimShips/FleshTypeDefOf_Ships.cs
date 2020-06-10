@@ -10,10 +10,10 @@ namespace Vehicles.Defs
             DefOfHelper.EnsureInitializedInCtor(typeof(FleshTypeDefOf_Ships));
         }
 
-        public static FleshTypeDef WoodenShip;
+        public static FleshTypeDef WoodenVehicle;
 
-        public static FleshTypeDef MetalShip;
+        public static FleshTypeDef MetalVehicle;
 
-        public static FleshTypeDef SpacerShip;
+        public static FleshTypeDef SpacerVehicle;
     }
 }

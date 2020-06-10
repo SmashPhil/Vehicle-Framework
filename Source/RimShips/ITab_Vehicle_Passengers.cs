@@ -7,9 +7,9 @@ using Verse.Sound;
 
 namespace Vehicles.UI
 {
-    public class ITab_Ship_Passengers : ITab
+    public class ITab_Vehicle_Passengers : ITab
     {
-        public ITab_Ship_Passengers()
+        public ITab_Vehicle_Passengers()
         {
             this.size = new Vector2(520f, 450f);
             this.labelKey = "TabPassengers";
@@ -64,7 +64,7 @@ namespace Vehicles.UI
                 {
                     if(!pawn.IsColonist)
                         continue;
-                    ITab_Ship_Passengers.DoRow(ref num, viewRect, rect, scrollPosition, pawn, ref specificNeedsTabForPawn);
+                    DoRow(ref num, viewRect, rect, scrollPosition, pawn, ref specificNeedsTabForPawn);
                 }
             }
 
@@ -77,7 +77,7 @@ namespace Vehicles.UI
                         Widgets.ListSeparator(ref num, viewRect.width, "CaravanPrisonersAndAnimals".Translate());
                         flag = true;
                     }
-                    ITab_Ship_Passengers.DoRow(ref num, viewRect, rect, scrollPosition, pawn, ref specificNeedsTabForPawn);
+                    DoRow(ref num, viewRect, rect, scrollPosition, pawn, ref specificNeedsTabForPawn);
                 }
             }
             if(Event.current.type is EventType.Layout)
@@ -176,7 +176,7 @@ namespace Vehicles.UI
             this.EnsureSpecificNeedsTabForPawnValid();
             base.UpdateSize();
 
-            this.size = ITab_Ship_Passengers.GetSize(AllAboard, this.PaneTopY, true);
+            this.size = GetSize(AllAboard, this.PaneTopY, true);
             this.size.y = Mathf.Max(this.size.y, NeedsCardUtility.FullSize.y);
         }
 
@@ -185,7 +185,7 @@ namespace Vehicles.UI
             float num = 100f;
             if (doNeeds)
             {
-                num += (float)ITab_Ship_Passengers.MaxNeedsCount(pawns) * 100f;
+                num += (float)MaxNeedsCount(pawns) * 100f;
             }
             num += 24f;
             Vector2 result;

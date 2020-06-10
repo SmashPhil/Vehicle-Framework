@@ -52,6 +52,8 @@
 	<UseIngameTimeTooltip>Switch the time scale for what is displayed in the upgrade menu.</UseIngameTimeTooltip>
 	<IngameTime>In-game Time</IngameTime>
 	<RealTime>Real time</RealTime>
+	<FullVehiclePathing>Full Vehicle Pathing</FullVehiclePathing>
+	<FullVehiclePathingTooltip>Use the entire hitbox of the vehicle to determine pathing constraints (prevents Vehicles from going through smaller passages than hitbox size).</FullVehiclePathingTooltip>
 	
 	<DebugDrawRegions>Draw Regions</DebugDrawRegions>
 	<DebugDrawRegionLinks>Draw RegionLinks</DebugDrawRegionLinks>
@@ -65,6 +67,8 @@
 	<DebugCannonDrawer>Cannon Drawer Grid</DebugCannonDrawer>
 	<DebugDrawNodeGrid>UpgradeTree Drawer Grid</DebugDrawNodeGrid>
 	<DebugDrawVehicleTracks>VehicleTracks Cell Drawer</DebugDrawVehicleTracks>
+	<DebugWriteVehiclePathingCosts>Draw Vehicle PathCosts</DebugWriteVehiclePathingCosts>
+	
 	<ShuffledCannonFire>Shuffled Cannons</ShuffledCannonFire>
 	<ShuffledCannonFireTooltip>Randomize the order in which broadside cannons fire.</ShuffledCannonFireTooltip>
 	<RiverTravelAllowed>Travel on Rivers</RiverTravelAllowed>
@@ -114,6 +118,7 @@
 	<ForceLeaveConfirmation>Crew is preparing to leave.</ForceLeaveConfirmation>
 	<BoatCaravanTerminatedNoBoats>Caravan process has been terminated. No boats remain. </BoatCaravanTerminatedNoBoats>
 	<NoAmmoLoadedCannon>No ammo loaded.</NoAmmoLoadedCannon>
+	<VehicleCannotFit>Not enough space.</VehicleCannotFit>
 	
 	<!-- Caravans -->
 	<CaravanShips>Boat</CaravanShips>

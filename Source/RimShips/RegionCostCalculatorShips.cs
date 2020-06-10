@@ -91,7 +91,7 @@ namespace Vehicles.AI
                         int num2 = 0;
                         if(!(otherRegion.door is null))
                         {
-                            num2 = ShipPathFinder.GetBuildingCost(otherRegion.door, this.traverseParms, this.traverseParms.pawn);
+                            num2 = VehiclePathFinder.GetBuildingCost(otherRegion.door, this.traverseParms, this.traverseParms.pawn);
                             if (num2 == int.MaxValue) continue;
                             num2 += this.OctileDistance(1, 0);
                         }
@@ -336,9 +336,9 @@ namespace Vehicles.AI
             {
                 RegionCostCalculatorShips.tmpPathableNeighborIndices.Add(index + x);
             }
-            bool flag5 = !flag || ShipPathFinder.BlocksDiagonalMovement(index - 1, this.map, this.mapE);
-            bool flag6 = !flag2 || ShipPathFinder.BlocksDiagonalMovement(index + 1, this.map, this.mapE);
-            if(flag3 && !ShipPathFinder.BlocksDiagonalMovement(index - x, this.map, this.mapE))
+            bool flag5 = !flag || VehiclePathFinder.BlocksDiagonalMovement(index - 1, map);
+            bool flag6 = !flag2 || VehiclePathFinder.BlocksDiagonalMovement(index + 1, map);
+            if(flag3 && !VehiclePathFinder.BlocksDiagonalMovement(index - x, map))
             {
                 if(!flag6 && pathGrid.WalkableFast(index - x + 1))
                 {
@@ -349,7 +349,7 @@ namespace Vehicles.AI
                     RegionCostCalculatorShips.tmpPathableNeighborIndices.Add(index - x - 1);
                 }
             }
-            if(flag4 && !ShipPathFinder.BlocksDiagonalMovement(index + x, this.map, this.mapE))
+            if(flag4 && !VehiclePathFinder.BlocksDiagonalMovement(index + x, map))
             {
                 if(!flag6 && pathGrid.WalkableFast(index + x + 1))
                 {

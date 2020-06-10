@@ -14,7 +14,7 @@ namespace Vehicles.Jobs
         }
         protected override Job TryGiveJob(Pawn pawn)
         {
-            if(pawn?.pather?.Moving ?? false)
+            if((pawn as VehiclePawn).vPather.Moving)
                 return null;
             return new Job(JobDefOf_Ships.IdleShip, pawn);
         }

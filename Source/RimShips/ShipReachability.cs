@@ -319,7 +319,7 @@ namespace Vehicles.AI
                     if (!pathGrid.WalkableFast(num))
                     {
                         Building edifice = c.GetEdifice(this.map);
-                        if (edifice is null || !ShipPathFinder.IsDestroyable(edifice))
+                        if (edifice is null || !VehiclePathFinder.IsDestroyable(edifice))
                         {
                             return false;
                         }

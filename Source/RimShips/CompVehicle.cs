@@ -38,6 +38,7 @@ namespace Vehicles
         public VehicleMovementStatus movementStatus = VehicleMovementStatus.Online;
 
         public bool warnNoFuel;
+        public List<IntVec3> OffsetIndices => CellRect.CenteredOn(Pawn.Position, Pawn.def.Size.x, Pawn.def.Size.z).ToList();
 
         public bool CanMove => (Props.vehicleMovementPermissions > VehiclePermissions.DriverNeeded || MovementHandlerAvailable) && movementStatus == VehicleMovementStatus.Online;
 
@@ -297,7 +298,7 @@ namespace Vehicles
             {
                 if(!Props.diagonalRotation)
                     return 0f;
-                return this.angle;
+                return angle;
             }
             set
             {
@@ -305,7 +306,7 @@ namespace Vehicles
                 {
                     return;
                 }
-                this.angle = value;
+                angle = value;
             }
         }
 
@@ -830,7 +831,7 @@ namespace Vehicles
         {
             if(pawn.IsHashIntervalTick(1250))
             {
-                float num = this.Pawn.pather.MovingNow ? 4E-05f : 4E-3f; //Incorporate 'shifts'
+                float num = Pawn.vPather.MovingNow ? 4E-05f : 4E-3f; //Incorporate 'shifts'
                 if (num <= 0f)
                     return;
                 num *= 1250f;
@@ -1070,8 +1071,8 @@ namespace Vehicles
         {
             base.CompTick();
             SmoothPatherTick();
-            if (this.Pawn.IsHashIntervalTick(150))
-                this.TrySatisfyPawnNeeds();
+            if (Pawn.IsHashIntervalTick(150))
+                TrySatisfyPawnNeeds();
 
             foreach (ShipHandler handler in handlers)
             {
@@ -1115,6 +1116,10 @@ namespace Vehicles
             {
                 InitializeShip();
                 InitializeStats();
+                if(Props.customTerrainCosts?.Any() ?? false)
+                {
+                    Log.Message($"[Vehicles] Initializing custom pathing costs for {Pawn.def.defName}");
+                }
                 Pawn.ageTracker.AgeBiologicalTicks = 0;
                 Pawn.ageTracker.AgeChronologicalTicks = 0;
                 Pawn.ageTracker.BirthAbsTicks = 0;

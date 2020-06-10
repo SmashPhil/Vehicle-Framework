@@ -1,79 +1,53 @@
 ﻿using Verse;
-
+using UnityEngine;
 
 namespace Vehicles.AI
 {
-    public sealed class MapExtension : IExposable
+    public sealed class MapExtension : MapComponent
     {
-        public MapExtension(Map map) //: base(map)
+        public MapExtension(Map map) : base(map)
         {
-            this.map = map;
+            ConstructComponents();
         }
 
-        public ShipPathGrid getShipPathGrid => shipPathGrid;
+        public ShipPathGrid getShipPathGrid { get; private set; }
 
-        public ShipPathFinder getShipPathFinder => shipPathFinder;
+        public VehiclePathFinder getShipPathFinder { get; private set; }
 
-        public ShipReachability getShipReachability => shipReachability;
+        public VehiclePathFinder threadedPathFinderConstrained { get; private set; }
 
-        public WaterRegionGrid getWaterRegionGrid => waterRegionGrid;
+        public ShipReachability getShipReachability { get; private set; }
 
-        public WaterRegionMaker getWaterRegionmaker => waterRegionMaker;
+        public WaterRegionGrid getWaterRegionGrid { get; private set; }
 
-        public WaterRegionLinkDatabase getWaterRegionLinkDatabase => waterRegionLinkDatabase;
+        public WaterRegionMaker getWaterRegionmaker { get; private set; }
 
-        public WaterRegionAndRoomUpdater getWaterRegionAndRoomUpdater => waterRegionAndRoomUpdater;
+        public WaterRegionLinkDatabase getWaterRegionLinkDatabase { get; private set; }
+
+        public WaterRegionAndRoomUpdater getWaterRegionAndRoomUpdater { get; private set; }
 
         public void ConstructComponents()
         {
-            this.shipPathGrid = new ShipPathGrid(this.map);
-            this.shipPathFinder = new ShipPathFinder(this.map);
-            this.shipReachability = new ShipReachability(this.map);
-            this.waterRegionGrid = new WaterRegionGrid(this.map);
-            this.waterRegionMaker = new WaterRegionMaker(this.map);
-            this.waterRegionAndRoomUpdater = new WaterRegionAndRoomUpdater(this.map);
-            this.waterRegionLinkDatabase = new WaterRegionLinkDatabase();
+            getShipPathGrid = new ShipPathGrid(map);
+            getShipPathFinder = new VehiclePathFinder(map);
+            threadedPathFinderConstrained = new VehiclePathFinder(map, false);
+            getShipReachability = new ShipReachability(map);
+            getWaterRegionGrid = new WaterRegionGrid(map);
+            getWaterRegionmaker = new WaterRegionMaker(map);
+            getWaterRegionAndRoomUpdater = new WaterRegionAndRoomUpdater(map);
+            getWaterRegionLinkDatabase = new WaterRegionLinkDatabase();
         }
 
         public void VerifyComponents()
         {
-            if (this.shipPathGrid is null) this.shipPathGrid = new ShipPathGrid(this.map);
-            if (this.shipPathFinder is null) this.shipPathFinder = new ShipPathFinder(this.map);
-            if (this.shipReachability is null) this.shipReachability = new ShipReachability(this.map);
-            if (this.waterRegionGrid is null) this.waterRegionGrid = new WaterRegionGrid(this.map);
-            if (this.waterRegionMaker is null) this.waterRegionMaker = new WaterRegionMaker(this.map);
-            if (this.waterRegionAndRoomUpdater is null) this.waterRegionAndRoomUpdater = new WaterRegionAndRoomUpdater(this.map);
-            if (this.waterRegionLinkDatabase is null) this.waterRegionLinkDatabase = new WaterRegionLinkDatabase();
+            if (getShipPathGrid is null) getShipPathGrid = new ShipPathGrid(map);
+            if (getShipPathFinder is null) getShipPathFinder = new VehiclePathFinder(map);
+            if (threadedPathFinderConstrained is null) threadedPathFinderConstrained = new VehiclePathFinder(map, false);
+            if (getShipReachability is null) getShipReachability = new ShipReachability(map);
+            if (getWaterRegionGrid is null) getWaterRegionGrid = new WaterRegionGrid(map);
+            if (getWaterRegionmaker is null) getWaterRegionmaker = new WaterRegionMaker(map);
+            if (getWaterRegionAndRoomUpdater is null) getWaterRegionAndRoomUpdater = new WaterRegionAndRoomUpdater(map);
+            if (getWaterRegionLinkDatabase is null) getWaterRegionLinkDatabase = new WaterRegionLinkDatabase();
         }
-
-        public void ExposeData()
-        {
-            Scribe_Deep.Look<ShipPathGrid>(ref this.shipPathGrid, "shipPathGrid", this.map, false);
-            Scribe_Deep.Look<ShipPathFinder>(ref this.shipPathFinder, "shipPathFinder", this.map, this, false);
-            Scribe_Deep.Look<ShipReachability>(ref this.shipReachability, "shipReachability", this.map, this, false);
-            Scribe_Deep.Look<WaterRegionMaker>(ref this.waterRegionMaker, "waterRegionMaker", this.map, this, false);
-            Scribe_Deep.Look<WaterRegionGrid>(ref this.waterRegionGrid, "waterRegionGrid", this.map, this, false);
-            Scribe_Deep.Look<WaterRegionLinkDatabase>(ref this.waterRegionLinkDatabase, "waterRegionLinkDatabase", false);
-            if (Scribe.mode == LoadSaveMode.LoadingVars)
-            {
-                this.ConstructComponents();
-            }
-        }
-
-        private ShipPathGrid shipPathGrid;
-
-        private ShipPathFinder shipPathFinder;
-
-        private ShipReachability shipReachability;
-
-        private WaterRegionMaker waterRegionMaker;
-
-        private WaterRegionGrid waterRegionGrid;
-
-        private WaterRegionLinkDatabase waterRegionLinkDatabase;
-
-        private WaterRegionAndRoomUpdater waterRegionAndRoomUpdater;
-
-        private readonly Map map;
     }
 }

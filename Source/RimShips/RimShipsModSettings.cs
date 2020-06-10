@@ -23,6 +23,7 @@ namespace Vehicles
 
         public bool drawUpgradeInformationScreen = true;
         public bool useInGameTime = true;
+        public bool fullVehiclePathing = true; //disable if you need every ounce of performance
 
         public float fishingMultiplier = 1f;
         public int fishingDelay = 10000;
@@ -38,6 +39,7 @@ namespace Vehicles
         public bool debugDrawCannonGrid;
         public bool debugDrawNodeGrid;
         public bool debugDrawVehicleTracks;
+        public bool debugDrawVehiclePathCosts;
 
         public bool debugDrawRegions;
         public bool debugDrawRegionLinks;
@@ -82,6 +84,7 @@ namespace Vehicles
                 Scribe_Values.Look(ref debugDrawCannonGrid, "debugDrawCannonGrid", false);
                 Scribe_Values.Look(ref debugDrawNodeGrid, "debugDrawNodeGrid", false);
                 Scribe_Values.Look(ref debugDrawVehicleTracks, "debugDrawVehicleTracks", false);
+                Scribe_Values.Look(ref debugDrawVehiclePathCosts, "debugDrawVehiclePathCosts", false);
 
                 Scribe_Values.Look(ref debugDrawRegions, "debugDrawRegions", false);
                 Scribe_Values.Look(ref debugDrawRegionLinks, "debugDrawRegionLinks", false);
@@ -193,6 +196,7 @@ namespace Vehicles
 
                 listingStandard.CheckboxLabeled("DrawUpgradeInformationScreen".Translate(), ref settings.drawUpgradeInformationScreen, "DrawUpgradeInformationScreenTooltip".Translate());
                 listingStandard.CheckboxLabeled("UseIngameTime".Translate(settings.useInGameTime ? "IngameTime".Translate() : "RealTime".Translate()), ref settings.useInGameTime, "UseIngameTimeTooltip".Translate());
+                listingStandard.CheckboxLabeled("FullVehiclePathing".Translate(), ref settings.fullVehiclePathing, "FullVehiclePathingTooltip".Translate());
 
                 listingStandard.Gap(16f);
 
@@ -237,6 +241,7 @@ namespace Vehicles
                 listingStandard.CheckboxLabeled("DebugCannonDrawer".Translate(), ref settings.debugDrawCannonGrid);
                 listingStandard.CheckboxLabeled("DebugDrawNodeGrid".Translate(), ref settings.debugDrawNodeGrid);
                 listingStandard.CheckboxLabeled("DebugDrawVehicleTracks".Translate(), ref settings.debugDrawVehicleTracks);
+                listingStandard.CheckboxLabeled("DebugWriteVehiclePathingCosts".Translate(), ref settings.debugDrawVehiclePathCosts);
 
                 listingStandard.CheckboxLabeled("DebugDrawRegions".Translate(), ref settings.debugDrawRegions);
                 listingStandard.CheckboxLabeled("DebugDrawRegionLinks".Translate(), ref settings.debugDrawRegionLinks);
@@ -276,6 +281,7 @@ namespace Vehicles
             settings.debugDrawCannonGrid = false;
             settings.debugDrawNodeGrid = false;
             settings.debugDrawVehicleTracks = false;
+            settings.debugDrawVehiclePathCosts = false;
 
             settings.debugDrawRegions = false;
             settings.debugDrawRegionLinks = false;

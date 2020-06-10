@@ -26,7 +26,7 @@ namespace Vehicles
         public bool EmptyTank => fuel <= 0f;
         public bool FullTank => fuel == FuelCapacity;
         public int FuelCountToFull => Mathf.CeilToInt(FuelCapacity - fuel);
-        public Pawn Pawn => parent as Pawn;
+        public VehiclePawn Pawn => parent as VehiclePawn;
         public CompVehicle CompShip => Pawn.TryGetComp<CompVehicle>();
         public FuelConsumptionCondition FuelCondition => Props.fuelConsumptionCondition;
 
@@ -83,7 +83,7 @@ namespace Vehicles
                             return true;
                         break;
                     case FuelConsumptionCondition.Moving:
-                        if (Pawn.pather.MovingNow)
+                        if (Pawn.vPather.MovingNow)
                             return true;
                         break;
                     case FuelConsumptionCondition.Always:

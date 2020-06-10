@@ -16,7 +16,7 @@ namespace Vehicles
         {
             base.CompTick();
 
-            if (ParentVehicle.pather.MovingNow && !Props.tracks.NullOrEmpty())
+            if (ParentVehicle.vPather.MovingNow && !Props.tracks.NullOrEmpty())
             {
                 if(ParentVehicle.Position != previousCell)
                 {

@@ -8,9 +8,9 @@ using Verse.Sound;
 
 namespace Vehicles.UI
 {
-    public class ITab_Ship_Cargo : ITab
+    public class ITab_Vehicle_Cargo : ITab
     {
-        public ITab_Ship_Cargo()
+        public ITab_Vehicle_Cargo()
         {
             size = new Vector2(460f, 450f);
             labelKey = "TabCargo";
@@ -62,13 +62,13 @@ namespace Vehicles.UI
             if(IsVisible)
             {
                 Widgets.ListSeparator(ref num, viewRect.width, "Cargo".Translate());
-                ITab_Ship_Cargo.workingInvList.Clear();
-                ITab_Ship_Cargo.workingInvList.AddRange(SelPawnForCargo.inventory.innerContainer);
-                foreach(Thing t in ITab_Ship_Cargo.workingInvList)
+                workingInvList.Clear();
+                workingInvList.AddRange(SelPawnForCargo.inventory.innerContainer);
+                foreach(Thing t in workingInvList)
                 {
                     DrawThingRow(ref num, viewRect.width, t, true);
                 }
-                ITab_Ship_Cargo.workingInvList.Clear();
+                workingInvList.Clear();
             }
             if(IsVisible && !SelPawnForCargo.GetComp<CompVehicle>().cargoToLoad.NullOrEmpty())
             {
@@ -122,7 +122,7 @@ namespace Vehicles.UI
             GUI.color = color;
             if(Mouse.IsOver(rect))
             {
-                GUI.color = ITab_Ship_Cargo.HighlightColor;
+                GUI.color = HighlightColor;
                 GUI.DrawTexture(rect, TexUI.HighlightTex);
             }
             if(!(thing.def.DrawMatSingle is null) && !(thing.def.DrawMatSingle.mainTexture is null))
@@ -132,7 +132,7 @@ namespace Vehicles.UI
 
             Text.Anchor = TextAnchor.MiddleLeft;
             if (!missingFromInventory)
-                GUI.color = ITab_Ship_Cargo.ThingLabelColor;
+                GUI.color = ThingLabelColor;
             else
                 GUI.color = MissingItemColor;
             Rect rect3 = new Rect(ThingLeftX, y, rect.width - ThingLeftX, rect.height);

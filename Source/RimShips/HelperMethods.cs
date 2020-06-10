@@ -2,6 +2,8 @@
 using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 using Verse.AI;
@@ -65,21 +67,6 @@ namespace Vehicles
         {
             bool flag = Find.WorldGrid[tileID].biome == BiomeDefOf.Ocean || Find.WorldGrid[tileID].biome == BiomeDefOf.Lake || (tileID == destTile && Find.World.CoastDirectionAt(tileID).IsValid);
             return !flag;
-        }
-
-        public static void PatherFailedHelper(ref Pawn_PathFollower instance, Pawn pawn)
-        {
-            instance.StopDead();
-            pawn?.jobs?.curDriver?.Notify_PatherFailed();
-        }
-
-        public static void PatherArrivedHelper(Pawn_PathFollower instance, Pawn pawn)
-        {
-            instance.StopDead();
-            if (!(pawn.jobs.curJob is null))
-            {
-                pawn.jobs.curDriver.Notify_PatherArrived();
-            }
         }
 
         public static void FaceShipAdjacentCell(IntVec3 c, Pawn pawn)
@@ -154,156 +141,38 @@ namespace Vehicles
         public static float ShipAngle(Pawn pawn)
         {
             if (pawn is null) return 0f;
+            VehiclePawn vehicle = pawn as VehiclePawn;
 
             if(!RimShipMod.mod.settings.debugDisableSmoothPathing)
             {
-                return pawn.GetComp<CompVehicle>().BearingAngle;
+                return vehicle.GetComp<CompVehicle>().BearingAngle;
             }
 
-            if (pawn.pather.Moving)
+            if (vehicle.vPather.Moving)
             {
-                IntVec3 c = pawn.pather.nextCell - pawn.Position;
+                IntVec3 c = vehicle.vPather.nextCell - vehicle.Position;
                 if (c.x > 0 && c.z > 0)
                 {
-                    pawn.GetComp<CompVehicle>().Angle = -45f;
+                    vehicle.GetComp<CompVehicle>().Angle = -45f;
                 }
                 else if (c.x > 0 && c.z < 0)
                 {
-                    pawn.GetComp<CompVehicle>().Angle = 45f;
+                    vehicle.GetComp<CompVehicle>().Angle = 45f;
                 }
                 else if (c.x < 0 && c.z < 0)
                 {
-                    pawn.GetComp<CompVehicle>().Angle = -45f;
+                    vehicle.GetComp<CompVehicle>().Angle = -45f;
                 }
                 else if (c.x < 0 && c.z > 0)
                 {
-                    pawn.GetComp<CompVehicle>().Angle = 45f;
+                    vehicle.GetComp<CompVehicle>().Angle = 45f;
                 }
                 else
                 {
-                    pawn.GetComp<CompVehicle>().Angle = 0f;
+                    vehicle.GetComp<CompVehicle>().Angle = 0f;
                 }
             }
-            return pawn.GetComp<CompVehicle>().Angle;
-        }
-
-        public static bool NeedNewPath(LocalTargetInfo destination, PawnPath curPath, Pawn pawn, PathEndMode peMode, IntVec3 lastPathedTargetPosition)
-        {
-            if (!destination.IsValid || curPath is null || !curPath.Found || curPath.NodesLeftCount == 0)
-                return true;
-            if (destination.HasThing && destination.Thing.Map != pawn.Map)
-                return true;
-            if ((pawn.Position.InHorDistOf(curPath.LastNode, 15f) || pawn.Position.InHorDistOf(destination.Cell, 15f)) && !ShipReachabilityImmediate.CanReachImmediateShip(
-                curPath.LastNode, destination, pawn.Map, peMode, pawn))
-                return true;
-            if (curPath.UsedRegionHeuristics && curPath.NodesConsumedCount >= 75)
-                return true;
-            if (lastPathedTargetPosition != destination.Cell)
-            {
-                float num = (float)(pawn.Position - destination.Cell).LengthHorizontalSquared;
-                float num2;
-                if (num > 900f) num2 = 10f;
-                else if (num > 289f) num2 = 5f;
-                else if (num > 100f) num2 = 3f;
-                else if (num > 49f) num2 = 2f;
-                else num2 = 0.5f;
-
-                if ((float)(lastPathedTargetPosition - destination.Cell).LengthHorizontalSquared > (num2 * num2))
-                    return true;
-            }
-            bool flag = curPath.NodesLeftCount < 30;
-            IntVec3 other = IntVec3.Invalid;
-            IntVec3 intVec = IntVec3.Invalid;
-            int num3 = 0;
-            while (num3 < 20 && num3 < curPath.NodesLeftCount)
-            {
-                intVec = curPath.Peek(num3);
-                if (!GenGridShips.Walkable(intVec, MapExtensionUtility.GetExtensionToMap(pawn.Map)))
-                    return true;
-                if (num3 != 0 && intVec.AdjacentToDiagonal(other) && (ShipPathFinder.BlocksDiagonalMovement(pawn.Map.cellIndices.CellToIndex(intVec.x, other.z), pawn.Map,
-                    MapExtensionUtility.GetExtensionToMap(pawn.Map)) || ShipPathFinder.BlocksDiagonalMovement(pawn.Map.cellIndices.CellToIndex(other.x, intVec.z), pawn.Map,
-                    MapExtensionUtility.GetExtensionToMap(pawn.Map))))
-                    return true;
-                other = intVec;
-                num3++;
-            }
-            return false;
-        }
-
-        public static bool TrySetNewPath(ref Pawn_PathFollower instance, ref IntVec3 lastPathedTargetPosition, LocalTargetInfo destination, Pawn pawn, Map map, ref PathEndMode peMode)
-        {
-            PawnPath pawnPath = GenerateNewPath(ref lastPathedTargetPosition, destination, ref pawn, map, peMode);
-            if (!pawnPath.Found)
-            {
-                PatherFailedHelper(ref instance, pawn);
-                return false;
-            }
-            if (!(instance.curPath is null))
-            {
-                instance.curPath.ReleaseToPool();
-            }
-            instance.curPath = pawnPath;
-            int num = 0;
-            int foundPathWhichCollidesWithPawns = Traverse.Create(instance).Field("foundPathWhichCollidesWithPawns").GetValue<int>();
-            int foundPathWithDanger = Traverse.Create(instance).Field("foundPathWithDanger").GetValue<int>();
-            while (num < 20 && num < instance.curPath.NodesLeftCount)
-            {
-                IntVec3 c = instance.curPath.Peek(num);
-
-                if (pawn.GetComp<CompVehicle>().beached) break;
-                if (PawnUtility.ShouldCollideWithPawns(pawn) && PawnUtility.AnyPawnBlockingPathAt(c, pawn, false, false, false))
-                {
-                    foundPathWhichCollidesWithPawns = Find.TickManager.TicksGame;
-                }
-                if (PawnUtility.KnownDangerAt(c, pawn.Map, pawn))
-                {
-                    foundPathWithDanger = Find.TickManager.TicksGame;
-                }
-                if (foundPathWhichCollidesWithPawns == Find.TickManager.TicksGame && foundPathWithDanger == Find.TickManager.TicksGame)
-                {
-                    break;
-                }
-                num++;
-            }
-            return true;
-        }
-
-        public static PawnPath GenerateNewPath(ref IntVec3 lastPathedTargetPosition, LocalTargetInfo destination, ref Pawn pawn, Map map, PathEndMode peMode)
-        {
-            lastPathedTargetPosition = destination.Cell;
-            return MapExtensionUtility.GetExtensionToMap(map)?.getShipPathFinder?.FindShipPath(pawn.Position, destination, pawn, peMode) ?? PawnPath.NotFound;
-        }
-
-        public static void SetupMoveIntoNextCell(ref Pawn_PathFollower instance, Pawn pawn, LocalTargetInfo destination)
-        {
-            if (instance.curPath.NodesLeftCount <= 1)
-            {
-                Log.Error(string.Concat(new object[]
-                {
-                    pawn,
-                    " at ",
-                    pawn.Position,
-                    " ran out of path nodes while pathing to ",
-                    destination, "."
-                }), false);
-                PatherFailedHelper(ref instance, pawn);
-                return;
-            }
-            instance.nextCell = instance.curPath.ConsumeNextNode();
-            if (!GenGridShips.Walkable(instance.nextCell, MapExtensionUtility.GetExtensionToMap(pawn.Map)))
-            {
-                Log.Error(string.Concat(new object[]
-                {
-                pawn,
-                " entering ",
-                instance.nextCell,
-                " which is unwalkable."
-                }), false);
-            }
-            int num = CostToMoveIntoCellShips(pawn, instance.nextCell);
-            instance.nextCellCostTotal = (float)num;
-            instance.nextCellCostLeft = (float)num;
-            //Doors?
+            return vehicle.GetComp<CompVehicle>().Angle;
         }
 
         public static bool OnDeepWater(this Pawn pawn)
@@ -315,13 +184,59 @@ namespace Vehicles
                 pawn.Map.terrainGrid.TerrainAt(pawn.Position) == TerrainDefOf.WaterOceanDeep) && GenGrid.Impassable(pawn.Position, pawn.Map);
         }
 
+        public static float MovedPercent(VehiclePawn pawn)
+		{
+			if (!pawn.vPather.Moving)
+			{
+				return 0f;
+			}
+			if (pawn.stances.FullBodyBusy)
+			{
+				return 0f;
+			}
+			if (pawn.vPather.BuildingBlockingNextPathCell() != null)
+			{
+				return 0f;
+			}
+			if (pawn.vPather.NextCellDoorToWaitForOrManuallyOpen() != null)
+			{
+				return 0f;
+			}
+			if (pawn.vPather.WillCollideWithPawnOnNextPathCell())
+			{
+				return 0f;
+			}
+			return 1f - pawn.vPather.nextCellCostLeft / pawn.vPather.nextCellCostTotal;
+		}
+
+        public static bool ImpassableReverseThreaded(this IntVec3 c, Map map, Pawn vehicle)
+		{
+            if (c == vehicle.Position || c.InBounds(map))
+                return false;
+            try
+            {
+                List<Thing> list = map.thingGrid.ThingsListAtFast(c);
+			    for (int i = 0; i < list.Count; i++)
+			    {
+				    if (list[i].def.passability == Traversability.Impassable)
+				    {
+					    return true;
+				    }
+			    }
+            }
+            catch(Exception ex)
+            {
+                Log.ErrorOnce($"Exception Thrown in ThreadId [{Thread.CurrentThread.ManagedThreadId}] Exception: {ex.StackTrace}", Thread.CurrentThread.ManagedThreadId);
+            }
+			return false;
+		}
+
         #endregion
 
         #region SmoothPathing
 
         public static bool InitiateSmoothPath(this VehiclePawn boat, IntVec3 cell)
         {
-            Log.Message("Initiate");
             if (!cell.IsValid)
                 return false;
             try
@@ -1086,6 +1001,73 @@ namespace Vehicles
                 }
             }
         }
+
+        public static void ThrowStaticText(Vector3 loc, Map map, string text, Color color, float timeBeforeStartFadeout = -1f)
+        {
+	        IntVec3 intVec = loc.ToIntVec3();
+	        if (!intVec.InBounds(map))
+	        {
+		        return;
+	        }
+	        MoteText moteText = (MoteText)ThingMaker.MakeThing(ThingDefOf.Mote_Text, null);
+	        moteText.exactPosition = loc;
+	        moteText.SetVelocity(0f, 0f);
+	        moteText.text = text;
+	        moteText.textColor = color;
+	        if (timeBeforeStartFadeout >= 0f)
+	        {
+		        moteText.overrideTimeBeforeStartFadeout = timeBeforeStartFadeout;
+	        }
+	        GenSpawn.Spawn(moteText, intVec, map, WipeMode.Vanish);
+        }
+
+        public static bool LocationRestrictedBySize(this VehiclePawn pawn, IntVec3 dest)
+        {
+                return CellRect.CenteredOn(dest, pawn.def.Size.x, pawn.def.Size.z).Any(c2 => HelperMethods.IsBoat(pawn) ? GenGridShips.Impassable(c2, pawn.Map) : c2.Impassable(pawn.Map)) &&
+                    CellRect.CenteredOn(dest, pawn.def.Size.z, pawn.def.Size.x).Any(c2 => HelperMethods.IsBoat(pawn) ? GenGridShips.Impassable(c2, pawn.Map) : c2.Impassable(pawn.Map));
+        }
+
+        public static void DrawLinesBetweenTargets(VehiclePawn pawn, Job curJob, JobQueue jobQueue)
+		{
+			Vector3 a = pawn.Position.ToVector3Shifted();
+			if (pawn.vPather.curPath != null)
+			{
+				a = pawn.vPather.Destination.CenterVector3;
+			}
+			else if (curJob != null && curJob.targetA.IsValid && (!curJob.targetA.HasThing || (curJob.targetA.Thing.Spawned && curJob.targetA.Thing.Map == pawn.Map)))
+			{
+				GenDraw.DrawLineBetween(a, curJob.targetA.CenterVector3, AltitudeLayer.Item.AltitudeFor());
+				a = curJob.targetA.CenterVector3;
+			}
+			for (int i = 0; i < jobQueue.Count; i++)
+			{
+				if (jobQueue[i].job.targetA.IsValid)
+				{
+					if (!jobQueue[i].job.targetA.HasThing || (jobQueue[i].job.targetA.Thing.Spawned && jobQueue[i].job.targetA.Thing.Map == pawn.Map))
+					{
+						Vector3 centerVector = jobQueue[i].job.targetA.CenterVector3;
+						GenDraw.DrawLineBetween(a, centerVector, AltitudeLayer.Item.AltitudeFor());
+						a = centerVector;
+					}
+				}
+				else
+				{
+					List<LocalTargetInfo> targetQueueA = jobQueue[i].job.targetQueueA;
+					if (targetQueueA != null)
+					{
+						for (int j = 0; j < targetQueueA.Count; j++)
+						{
+							if (!targetQueueA[j].HasThing || (targetQueueA[j].Thing.Spawned && targetQueueA[j].Thing.Map == pawn.Map))
+							{
+								Vector3 centerVector2 = targetQueueA[j].CenterVector3;
+								GenDraw.DrawLineBetween(a, centerVector2, AltitudeLayer.Item.AltitudeFor());
+								a = centerVector2;
+							}
+						}
+					}
+				}
+			}
+		}
         #endregion
 
         #region UI

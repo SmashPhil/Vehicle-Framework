@@ -85,7 +85,7 @@ namespace Vehicles.AI
             return true;
         }
 
-        public static bool Impassable(this IntVec3 c, Map map)
+        public static bool Impassable(IntVec3 c, Map map)
         {
             List<Thing> list = map.thingGrid.ThingsListAt(c);
             foreach(Thing t in list)

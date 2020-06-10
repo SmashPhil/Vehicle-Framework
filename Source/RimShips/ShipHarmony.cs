@@ -4,7 +4,8 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
-using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
@@ -15,7 +16,6 @@ using Verse.AI.Group;
 using Verse.Sound;
 using Vehicles.AI;
 using Vehicles.Defs;
-using Vehicles.Build;
 using Vehicles.Lords;
 using Vehicles.UI;
 using SPExtended;
@@ -31,7 +31,7 @@ namespace Vehicles
             var harmony = new Harmony("rimworld.boats.smashphil");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             //Harmony.DEBUG = true;
-
+            
             #region Functions
 
             /* Map Gen */
@@ -44,9 +44,6 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Method(typeof(MapGenerator), nameof(MapGenerator.GenerateMap)), prefix: null,
                 postfix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(GenerateMapExtension)));
-            harmony.Patch(original: AccessTools.Method(typeof(Map), nameof(Map.ExposeData)), prefix: null,
-                postfix: new HarmonyMethod(typeof(ShipHarmony),
-                nameof(ExposeDataMapExtensions)));
             harmony.Patch(original: AccessTools.Method(typeof(Map), nameof(Map.FinalizeInit)),
                 prefix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(RecalculateShipPathGrid)));
@@ -131,18 +128,15 @@ namespace Vehicles
                 nameof(GizmosForVehicleCaravans)));
 
             /* Pathing */
-            harmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), nameof(Pawn_PathFollower.StartPath)),
-                prefix: new HarmonyMethod(typeof(ShipHarmony),
-                nameof(StartPathShip)));
-            harmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), "TryEnterNextPathCell"), 
-                prefix: new HarmonyMethod(typeof(ShipHarmony),
-                nameof(TryEnterNextCellShip)));
-            harmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), "GenerateNewPath"),
-                prefix: new HarmonyMethod(typeof(ShipHarmony),
-                nameof(GenerateNewShipPath)));
             harmony.Patch(original: AccessTools.Method(typeof(FloatMenuMakerMap), "GotoLocationOption"),
                 prefix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(GotoLocationShips)));
+            harmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), nameof(Pawn_PathFollower.StartPath)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(StartVehiclePath)));
+            harmony.Patch(original: AccessTools.Method(typeof(PawnTweener), "TweenedPosRoot"), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(VehicleTweenedPosRoot)));
 
             /* Upgrade Stats */
             harmony.Patch(original: AccessTools.Method(typeof(Pawn), "TicksPerMove"),
@@ -388,6 +382,9 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Method(typeof(FloatMenuUtility), nameof(FloatMenuUtility.GetMeleeAttackAction)),
                 prefix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(NoMeleeForVehicles))); //Change..?
+            harmony.Patch(original: AccessTools.Method(typeof(PawnComponentsUtility), nameof(PawnComponentsUtility.AddComponentsForSpawn)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(AddComponentsForVehicleSpawn)));
             harmony.Patch(original: AccessTools.Method(typeof(PawnComponentsUtility), nameof(PawnComponentsUtility.AddAndRemoveDynamicComponents)), prefix: null,
                 postfix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(AddAndRemoveVehicleComponents)));
@@ -585,11 +582,6 @@ namespace Vehicles
             MapExtensionUtility.GetExtensionToMap(__result).VerifyComponents();
         }
 
-        public static void ExposeDataMapExtensions()
-        {
-            MapExtensionUtility.ClearMapExtensions();
-        }
-
         #endregion MapGen
 
         #region HealthStats
@@ -728,7 +720,7 @@ namespace Vehicles
                     ///Load a new object of type Dialog_InfoCard_Ship and load onto the WindowStack. Return after
                     yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Property(typeof(Find), nameof(Find.WindowStack)).GetGetMethod());
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_2);
-                    yield return new CodeInstruction(opcode: OpCodes.Newobj, operand: AccessTools.Constructor(typeof(Dialog_InfoCard_Ship), new Type[] { typeof(Thing) }));
+                    yield return new CodeInstruction(opcode: OpCodes.Newobj, operand: AccessTools.Constructor(typeof(Dialog_InfoCard_Vehicle), new Type[] { typeof(Thing) }));
                     yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Method(typeof(WindowStack), nameof(WindowStack.Add)));
                     yield return new CodeInstruction(opcode: OpCodes.Ldc_I4_1);
                     yield return new CodeInstruction(opcode: OpCodes.Ret);
@@ -748,22 +740,21 @@ namespace Vehicles
         /// </summary>
         /// <param name="__instance"></param>
         /// <returns></returns>
-        public static bool UpdateVehicleRotation(Pawn_RotationTracker __instance)
+        public static bool UpdateVehicleRotation(Pawn_RotationTracker __instance, Pawn ___pawn)
         {
-            if (Traverse.Create(__instance).Field("pawn").GetValue<Pawn>() is VehiclePawn pawn &&
-                HelperMethods.IsVehicle(pawn))
+            if (___pawn is VehiclePawn pawn && HelperMethods.IsVehicle(pawn))
             {
                 if (pawn.Destroyed || pawn.jobs.HandlingFacing)
                 {
                     return false;
                 }
-                if (pawn.pather.Moving)
+                if (pawn.vPather.Moving)
                 {
-                    if (pawn.pather.curPath == null || pawn.pather.curPath.NodesLeftCount < 1)
+                    if (pawn.vPather.curPath == null || pawn.vPather.curPath.NodesLeftCount < 1)
                     {
                         return false;
                     }
-                    HelperMethods.FaceShipAdjacentCell(pawn.pather.nextCell, pawn);
+                    HelperMethods.FaceShipAdjacentCell(pawn.vPather.nextCell, pawn);
                 }
                 else
                 {
@@ -1044,10 +1035,9 @@ namespace Vehicles
         {
             if(HelperMethods.IsVehicle(__instance?.pawn))
             {
-                if(__result is false && __instance?.pawn?.pather?.curPath != null)
+                if(__result is false && (__instance.pawn as VehiclePawn).vPather.curPath != null)
                 {
-                    if(debug) Log.Message("Pawn_PathFollower is null: " + (__instance.pawn?.pather is null) + " | PawnPath is null: " + (__instance.pawn?.pather?.curPath is null));
-                    HelperMethods.PatherFailedHelper(ref __instance.pawn.pather, __instance.pawn);
+                    (__instance.pawn as VehiclePawn).vPather.PatherFailed();
                 }
             }
         }
@@ -1133,6 +1123,17 @@ namespace Vehicles
                 return false;
             }
             return true;
+        }
+
+        public static void AddComponentsForVehicleSpawn(Pawn pawn)
+        {
+            if(HelperMethods.IsVehicle(pawn))
+            {
+                if ((pawn as VehiclePawn).vPather == null)
+			    {
+				    (pawn as VehiclePawn).vPather = new Vehicle_PathFollower(pawn as VehiclePawn);
+			    }
+            }
         }
 
         /// <summary>
@@ -1306,225 +1307,124 @@ namespace Vehicles
         #endregion Gizmos
 
         #region Pathing
-        public static bool StartPathShip(LocalTargetInfo dest, PathEndMode peMode, Pawn_PathFollower __instance, ref Pawn ___pawn, ref PathEndMode ___peMode,
-            ref LocalTargetInfo ___destination, ref bool ___moving)
-        {
-            if (RimShipMod.mod.settings.debugDisableWaterPathing)
-                return true;
-            if(HelperMethods.IsBoat(___pawn))
-            {
-                dest = (LocalTargetInfo)GenPathShip.ResolvePathMode(___pawn, dest.ToTargetInfo(___pawn.Map), ref peMode, MapExtensionUtility.GetExtensionToMap(___pawn.Map));
-                if (dest.HasThing && dest.ThingDestroyed)
-                {
-                    Log.Error(___pawn + " pathing to destroyed thing " + dest.Thing, false);
-                    HelperMethods.PatherFailedHelper(ref __instance, ___pawn);
-                    return false;
-                }
-                //Add Building and Position Recoverable extras
-                if (!GenGridShips.Walkable(___pawn.Position, MapExtensionUtility.GetExtensionToMap(___pawn.Map)))
-                {
-                    return false;
-                }
-                if (__instance.Moving && __instance.curPath != null && ___destination == dest && ___peMode == peMode)
-                {
-                    return false;
-                }
-                if (!MapExtensionUtility.GetExtensionToMap(___pawn.Map)?.getShipReachability?.CanReachShip(___pawn.Position, dest, peMode, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false)) ?? false)
-                {
-                    HelperMethods.PatherFailedHelper(ref __instance, ___pawn);
-                    return false;
-                }
-                ___peMode = peMode;
-                ___destination = dest;
-                if ((GenGridShips.Walkable(__instance.nextCell, MapExtensionUtility.GetExtensionToMap(___pawn.Map)) || __instance.WillCollideWithPawnOnNextPathCell()) || __instance.nextCellCostLeft
-                    == __instance.nextCellCostTotal)
-                {
-                    __instance.ResetToCurrentPosition();
-                }
-                PawnDestinationReservationManager.PawnDestinationReservation pawnDestinationReservation = ___pawn.Map.pawnDestinationReservationManager.
-                    MostRecentReservationFor(___pawn);
-                if (!(pawnDestinationReservation is null) && ((__instance.Destination.HasThing && pawnDestinationReservation.target != __instance.Destination.Cell)
-                    || (pawnDestinationReservation.job != ___pawn.CurJob && pawnDestinationReservation.target != __instance.Destination.Cell)))
-                {
-                    ___pawn.Map.pawnDestinationReservationManager.ObsoleteAllClaimedBy(___pawn);
-                }
-                if (ShipReachabilityImmediate.CanReachImmediateShip(___pawn, dest, peMode))
-                {
-                    HelperMethods.PatherArrivedHelper(__instance, ___pawn);
-                    return false;
-                }
-                if (___pawn.Downed)
-                {
-                    Log.Error("Ships should not be downable. Contact Mod Author.");
-                }
-                if (!(__instance.curPath is null))
-                {
-                    __instance.curPath.ReleaseToPool();
-                }
-                __instance.curPath = null;
-                ___moving = true;
-                ___pawn.jobs.posture = PawnPosture.Standing;
-
-                return false;
-            }
-            return true;
-        }
-
-        public static bool GenerateNewShipPath(ref PawnPath __result, ref Pawn_PathFollower __instance, ref Pawn ___pawn, ref PathEndMode ___peMode)
-        {
-            if(HelperMethods.IsBoat(___pawn) && !RimShipMod.mod.settings.debugDisableWaterPathing)
-            {
-                __instance.lastPathedTargetPosition = __instance.Destination.Cell;
-                __result = MapExtensionUtility.GetExtensionToMap(___pawn.Map).getShipPathFinder.FindShipPath(___pawn.Position, __instance.Destination, ___pawn, ___peMode);
-                if (!__result.Found) Log.Warning("Path Not Found");
-                return false;
-            }
-            return true;
-        }
-
-        public static bool TryEnterNextCellShip(Pawn_PathFollower __instance, ref Pawn ___pawn, ref IntVec3 ___lastCell, ref LocalTargetInfo ___destination,
-            ref PathEndMode ___peMode)
-        {
-            if(HelperMethods.IsVehicle(___pawn) && SPMultiCell.ClampHitboxToMap(___pawn, __instance.nextCell, ___pawn.Map))
-            {
-                ___pawn.jobs.curDriver.Notify_PatherFailed();
-                __instance.StopDead();
-                return false;
-            }
-
-            if(RimShipMod.mod.settings.debugDisableWaterPathing)
-            {
-                if(HelperMethods.IsBoat(___pawn) && ___pawn.GetComp<CompVehicle>().beached)
-                    ___pawn.GetComp<CompVehicle>().RemoveBeachedStatus();
-                return true;
-            }
-            if (HelperMethods.IsBoat(___pawn))
-            {
-                if(!___pawn.Drafted)
-                {
-                    if(___pawn.CurJob is null)
-                    {
-                        JobUtility.TryStartErrorRecoverJob(___pawn, string.Empty);
-                    }
-                    __instance?.StopDead();
-                }
-
-                if (___pawn.GetComp<CompVehicle>().beached || !__instance.nextCell.GetTerrain(___pawn.Map).IsWater)
-                {
-                    ___pawn.GetComp<CompVehicle>().BeachShip();
-                    ___pawn.Position = __instance.nextCell;
-                    __instance.StopDead();
-                    ___pawn.jobs.curDriver.Notify_PatherFailed();
-                }
-
-                //Buildings?
-                ___lastCell = ___pawn.Position;
-                ___pawn.Position = __instance.nextCell;
-                //Clamor?
-                //More Buildings?
-                
-                if(HelperMethods.NeedNewPath(___destination, __instance.curPath, ___pawn, ___peMode, __instance.lastPathedTargetPosition) && !HelperMethods.TrySetNewPath(ref __instance, ref __instance.lastPathedTargetPosition, 
-                    ___destination, ___pawn, ___pawn.Map, ref ___peMode))
-                {
-                    return false;
-                }
-                if(ShipReachabilityImmediate.CanReachImmediateShip(___pawn, ___destination, ___peMode))
-                {
-                    HelperMethods.PatherArrivedHelper(__instance, ___pawn);
-                }
-                else
-                {
-                    HelperMethods.SetupMoveIntoNextCell(ref __instance, ___pawn, ___destination);
-                }
-                return false;
-            }
-            return true;
-        }
 
         public static bool GotoLocationShips(IntVec3 clickCell, Pawn pawn, ref FloatMenuOption __result)
         {
-            if(HelperMethods.IsBoat(pawn))
+            if (HelperMethods.IsVehicle(pawn))
             {
-                if (DebugSettings.godMode)
+                if( (pawn as VehiclePawn).LocationRestrictedBySize(clickCell))
                 {
-                    Log.Message("-> " + clickCell + " | " + pawn.Map.terrainGrid.TerrainAt(clickCell).LabelCap + " | " + MapExtensionUtility.GetExtensionToMap(pawn.Map).getShipPathGrid.CalculatedCostAt(clickCell) +
-                        " - " + MapExtensionUtility.GetExtensionToMap(pawn.Map).getShipPathGrid.pathGrid[pawn.Map.cellIndices.CellToIndex(clickCell)]);
-                }
-
-
-                if(!RimShipMod.mod.settings.debugDisableSmoothPathing && pawn.GetComp<CompVehicle>().Props.diagonalRotation)
-                {
-                    if(!(pawn as VehiclePawn).InitiateSmoothPath(clickCell))
-                    {
-                        Log.Error($"Failed Smooth Pathing. Cell: {clickCell} Pawn: {pawn.LabelShort}");
-                    }
+                    Messages.Message("VehicleCannotFit".Translate(), MessageTypeDefOf.RejectInput);
                     return false;
                 }
-                if(RimShipMod.mod.settings.debugDisableWaterPathing)
-                    return true;
-                
-                int num = GenRadial.NumCellsInRadius(2.9f);
-                int i = 0;
-                IntVec3 curLoc;
-                while(i < num)
+
+                if (HelperMethods.IsBoat(pawn))
                 {
-                    curLoc = GenRadial.RadialPattern[i] + clickCell;
-                    if (GenGridShips.Standable(curLoc, pawn.Map, MapExtensionUtility.GetExtensionToMap(pawn.Map)))
+                    if (DebugSettings.godMode)
                     {
-                        if (curLoc == pawn.Position || pawn.GetComp<CompVehicle>().beached)
+                        Log.Message("-> " + clickCell + " | " + pawn.Map.terrainGrid.TerrainAt(clickCell).LabelCap + " | " + MapExtensionUtility.GetExtensionToMap(pawn.Map).getShipPathGrid.CalculatedCostAt(clickCell) +
+                            " - " + MapExtensionUtility.GetExtensionToMap(pawn.Map).getShipPathGrid.pathGrid[pawn.Map.cellIndices.CellToIndex(clickCell)]);
+                    }
+
+
+                    if (!RimShipMod.mod.settings.debugDisableSmoothPathing && pawn.GetComp<CompVehicle>().Props.diagonalRotation)
+                    {
+                        if (!(pawn as VehiclePawn).InitiateSmoothPath(clickCell))
                         {
-                            __result = null;
-                            return false;
+                            Log.Error($"Failed Smooth Pathing. Cell: {clickCell} Pawn: {pawn.LabelShort}");
                         }
-                        if(!ShipReachabilityUtility.CanReachShip(pawn, curLoc, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
-                        {
-                            if(debug) Log.Message("CANT REACH ");
-                            __result = new FloatMenuOption("CannotSailToCell".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null);
-                            return false;
-                        }
-                        Action action = delegate ()
-                        {
-                            Job job = new Job(JobDefOf.Goto, curLoc);
-                            if(pawn.Map.exitMapGrid.IsExitCell(Verse.UI.MouseCell()))
-                            {
-                                job.exitMapOnArrival = true;
-                            }
-                            else if(!pawn.Map.IsPlayerHome && !pawn.Map.exitMapGrid.MapUsesExitGrid && CellRect.WholeMap(pawn.Map).IsOnEdge(Verse.UI.MouseCell(), 3) &&
-                                pawn.Map.Parent.GetComponent<FormCaravanComp>() != null && MessagesRepeatAvoider.MessageShowAllowed("MessagePlayerTriedToLeaveMapViaExitGrid-" +
-                                pawn.Map.uniqueID, 60f))
-                            {
-                                FormCaravanComp component = pawn.Map.Parent.GetComponent<FormCaravanComp>();
-                                if(component.CanFormOrReformCaravanNow)
-                                {
-                                    Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CanReform".Translate(), pawn.Map.Parent, MessageTypeDefOf.RejectInput, false);
-                                }
-                                else
-                                {
-                                    Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CantReform".Translate(), pawn.Map.Parent, MessageTypeDefOf.RejectInput, false);
-                                }
-                            }
-                            if(pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc))
-                            {
-                                MoteMaker.MakeStaticMote(curLoc, pawn.Map, ThingDefOf.Mote_FeedbackGoto, 1f);
-                            }
-                        };
-                        __result = new FloatMenuOption("GoHere".Translate(), action, MenuOptionPriority.GoHere, null, null, 0f, null, null)
-                        {
-                            autoTakeable = true,
-                            autoTakeablePriority = 10f
-                        };
                         return false;
                     }
-                    else
+                    if (RimShipMod.mod.settings.debugDisableWaterPathing)
+                        return true;
+
+                    int num = GenRadial.NumCellsInRadius(2.9f);
+                    int i = 0;
+                    IntVec3 curLoc;
+                    while (i < num)
                     {
-                        i++;
+                        curLoc = GenRadial.RadialPattern[i] + clickCell;
+                        if (GenGridShips.Standable(curLoc, pawn.Map, MapExtensionUtility.GetExtensionToMap(pawn.Map)))
+                        {
+                            if (curLoc == pawn.Position || pawn.GetComp<CompVehicle>().beached)
+                            {
+                                __result = null;
+                                return false;
+                            }
+                            if (!ShipReachabilityUtility.CanReachShip(pawn, curLoc, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
+                            {
+                                if (debug) Log.Message("CANT REACH ");
+                                __result = new FloatMenuOption("CannotSailToCell".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null);
+                                return false;
+                            }
+                            Action action = delegate ()
+                            {
+                                Job job = new Job(JobDefOf.Goto, curLoc);
+                                if (pawn.Map.exitMapGrid.IsExitCell(Verse.UI.MouseCell()))
+                                {
+                                    job.exitMapOnArrival = true;
+                                }
+                                else if (!pawn.Map.IsPlayerHome && !pawn.Map.exitMapGrid.MapUsesExitGrid && CellRect.WholeMap(pawn.Map).IsOnEdge(Verse.UI.MouseCell(), 3) &&
+                                    pawn.Map.Parent.GetComponent<FormCaravanComp>() != null && MessagesRepeatAvoider.MessageShowAllowed("MessagePlayerTriedToLeaveMapViaExitGrid-" +
+                                    pawn.Map.uniqueID, 60f))
+                                {
+                                    FormCaravanComp component = pawn.Map.Parent.GetComponent<FormCaravanComp>();
+                                    if (component.CanFormOrReformCaravanNow)
+                                    {
+                                        Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CanReform".Translate(), pawn.Map.Parent, MessageTypeDefOf.RejectInput, false);
+                                    }
+                                    else
+                                    {
+                                        Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CantReform".Translate(), pawn.Map.Parent, MessageTypeDefOf.RejectInput, false);
+                                    }
+                                }
+                                if (pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc))
+                                {
+                                    MoteMaker.MakeStaticMote(curLoc, pawn.Map, ThingDefOf.Mote_FeedbackGoto, 1f);
+                                }
+                            };
+                            __result = new FloatMenuOption("GoHere".Translate(), action, MenuOptionPriority.GoHere, null, null, 0f, null, null)
+                            {
+                                autoTakeable = true,
+                                autoTakeablePriority = 10f
+                            };
+                            return false;
+                        }
+                        else
+                        {
+                            i++;
+                        }
                     }
+                    __result = null;
+                    return false;
                 }
-                __result = null;
+            }
+            return true;
+        }
+
+        public static bool StartVehiclePath(LocalTargetInfo dest, PathEndMode peMode, Pawn ___pawn)
+        {
+            if(HelperMethods.IsVehicle(___pawn))
+            {
+                (___pawn as VehiclePawn).vPather.StartPath(dest, peMode);
                 return false;
             }
             return true;
         }
+
+        public static void VehicleTweenedPosRoot(ref Vector3 __result, Pawn ___pawn)
+		{
+            if(HelperMethods.IsVehicle(___pawn))
+            {
+                if (!___pawn.Spawned)
+			    {
+				    __result = ___pawn.Position.ToVector3Shifted();
+                    return;
+			    }
+                float num = HelperMethods.MovedPercent(___pawn as VehiclePawn);
+			    __result = (___pawn as VehiclePawn).vPather.nextCell.ToVector3Shifted() * num + ___pawn.Position.ToVector3Shifted() * (1f - num) + PawnCollisionTweenerUtility.PawnCollisionPosOffsetFor(___pawn);
+            }
+		}
 
         public static bool TryAddWayPointWater(int tile, Dialog_FormCaravan ___currentFormCaravanDialog, WorldRoutePlanner __instance, bool playSound = true)
         {
@@ -1986,7 +1886,7 @@ namespace Vehicles
         public static bool StartFormingCaravanForVehicles(List<Pawn> pawns, List<Pawn> downedPawns, Faction faction, List<TransferableOneWay> transferables,
             IntVec3 meetingPoint, IntVec3 exitSpot, int startingTile, int destinationTile)
         {
-            if (pawns.Any((Pawn x) => HelperMethods.IsVehicle(x) && (x.GetComp<CompVehicle>().movementStatus is VehicleMovementStatus.Online)))
+            if (pawns.Any((Pawn x) => HelperMethods.IsBoat(x) && (x.GetComp<CompVehicle>().movementStatus is VehicleMovementStatus.Online)))
             {
                 if (startingTile < 0)
                 {
@@ -2014,7 +1914,7 @@ namespace Vehicles
                         lord.Notify_PawnLost(p, PawnLostCondition.ForcedToJoinOtherLord, null);
                     }
                 }
-                List<Pawn> ships = pawns.Where(x => HelperMethods.IsVehicle(x)).ToList();
+                List<Pawn> ships = pawns.Where(x => HelperMethods.IsBoat(x)).ToList();
                 List<Pawn> capablePawns = pawns.Where(x => !HelperMethods.IsVehicle(x) && x.IsColonist && !x.Downed && !x.Dead).ToList();
                 List<Pawn> prisoners = pawns.Where(x => !HelperMethods.IsVehicle(x) && !x.IsColonist && !x.RaceProps.Animal).ToList();
                 int seats = 0;
@@ -2022,7 +1922,7 @@ namespace Vehicles
                 {
                     seats += ship.GetComp<CompVehicle>().SeatsAvailable;
                 }
-                if ((pawns.Where(x => !HelperMethods.IsVehicle(x)).ToList().Count + downedPawns.Count) > seats)
+                if ((pawns.Where(x => !HelperMethods.IsBoat(x)).ToList().Count + downedPawns.Count) > seats)
                 {
                     Log.Error("Can't start forming caravan with vehicles(s) selected and not enough seats to house all pawns. Seats: " + seats + " Pawns boarding: " +
                         (pawns.Where(x => !HelperMethods.IsVehicle(x)).ToList().Count + downedPawns.Count), false);
@@ -2033,6 +1933,19 @@ namespace Vehicles
                     destinationTile);
                 LordMaker.MakeNewLord(Faction.OfPlayer, lordJob, pawns[0].MapHeld, pawns);
 
+                foreach (Pawn p in pawns)
+                {
+                    if (p.Spawned)
+                    {
+                        p.jobs.EndCurrentJob(JobCondition.InterruptForced, true);
+                    }
+                }
+                return false;
+            }
+            else if(pawns.Any(x => HelperMethods.IsVehicle(x) && x.GetComp<CompVehicle>().movementStatus is VehicleMovementStatus.Online) && !HelperMethods.HasBoat(pawns))
+            {
+                LordJob_FormAndSendVehicles lordJob = new LordJob_FormAndSendVehicles();
+                LordMaker.MakeNewLord(Faction.OfPlayer, lordJob, pawns[0].MapHeld, pawns);
                 foreach (Pawn p in pawns)
                 {
                     if (p.Spawned)

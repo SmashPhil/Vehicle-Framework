@@ -153,6 +153,7 @@
     <Compile Include="CompVehicleTracks.cs" />
     <Compile Include="Graphic_Animate.cs" />
     <Compile Include="Graphic_OmniDirectional.cs" />
+    <Compile Include="LordJob_FormAndSendVehicles.cs" />
     <Compile Include="VehiclePawn.cs" />
     <Compile Include="CannonDef.cs" />
     <Compile Include="CannonHandler.cs" />
@@ -190,10 +191,10 @@
     <Compile Include="Gizmo_RefuelableFuelTravel.cs" />
     <Compile Include="HarmonyPatches_Bootstrap.cs" />
     <Compile Include="HelperMethods.cs" />
-    <Compile Include="ITab_Ship_Cargo.cs" />
-    <Compile Include="ITab_Ship_Health.cs" />
-    <Compile Include="ITab_Ship_Passengers.cs" />
-    <Compile Include="ITab_Ship_Upgrades.cs" />
+    <Compile Include="ITab_Vehicle_Cargo.cs" />
+    <Compile Include="ITab_Vehicle_Health.cs" />
+    <Compile Include="ITab_Vehicle_Passengers.cs" />
+    <Compile Include="ITab_Vehicle_Upgrades.cs" />
     <Compile Include="IUpgradeable.cs" />
     <Compile Include="JobDefOf_Ships.cs" />
     <Compile Include="JobDriver_Board.cs" />
@@ -231,7 +232,7 @@
     <Compile Include="ShipHandler.cs" />
     <Compile Include="ShipHarmony.cs" />
     <Compile Include="ShipPassengerCardUtility.cs" />
-    <Compile Include="ShipPathFinder.cs" />
+    <Compile Include="VehiclePathFinder.cs" />
     <Compile Include="ShipPathGrid.cs" />
     <Compile Include="CompProperties_Vehicle.cs" />
     <Compile Include="ShipReachability.cs" />
@@ -246,11 +247,11 @@
     <Compile Include="SPSettings.cs" />
     <Compile Include="SPTrig.cs" />
     <Compile Include="SPTuples.cs" />
-    <Compile Include="StatCategoryDefOf_Ships.cs" />
     <Compile Include="TexCommand.cs" />
     <Compile Include="Toils_Board.cs" />
     <Compile Include="TouchPathEndModeUtilityShips.cs" />
     <Compile Include="UpgradeNode.cs" />
+    <Compile Include="Vehicle_PathFollower.cs" />
     <Compile Include="WaterGridsUtility.cs" />
     <Compile Include="WaterRegion.cs" />
     <Compile Include="WaterRegionAndRoomQuery.cs" />

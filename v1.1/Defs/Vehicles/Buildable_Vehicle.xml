@@ -3,7 +3,7 @@
 <Defs>
 	
 	<!-- Vehicle base -->
-	<ThingDef Name="VehicleBase" Abstract="True">
+	<ThingDef Name="VehicleBaseBuildable" Abstract="True">
 		<thingClass>Building</thingClass>
 		<selectable>true</selectable>
 		<altitudeLayer>Building</altitudeLayer>
@@ -22,7 +22,7 @@
 	</ThingDef>
 	
 	<!--Unreleased Vehicle base -->
-	<ThingDef Name="UnreleasedVehicleBase" Abstract="True">
+	<ThingDef Name="UnreleasedVehicleBaseBuildable" Abstract="True">
 		<thingClass>Building</thingClass>
 		<selectable>true</selectable>
 		<altitudeLayer>Building</altitudeLayer>

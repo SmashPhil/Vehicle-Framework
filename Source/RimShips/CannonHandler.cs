@@ -37,7 +37,7 @@ namespace Vehicles
             baseCannonDrawSize = reference.baseCannonDrawSize;
             drawLayer = reference.drawLayer;
 
-            attachableKey = reference.attachableKey;
+            key = reference.key;
             parentKey = reference.parentKey;
 
             targetPersists = reference.targetPersists;
@@ -101,7 +101,7 @@ namespace Vehicles
             Scribe_Values.Look(ref drawLayer, "drawLayer");
 
             Scribe_Values.Look(ref parentKey, "parentKey");
-            Scribe_Values.Look(ref attachableKey, "attachableKey");
+            Scribe_Values.Look(ref key, "key");
 
             Scribe_References.Look(ref pawn, "pawn");
             Scribe_Defs.Look(ref loadedAmmo, "loadedAmmo");
@@ -642,14 +642,14 @@ namespace Vehicles
 
         public CannonDef cannonDef;
 
-        public bool targetPersists;
-        public bool autoTargeting = false;
+        public bool targetPersists = true;
+        public bool autoTargeting = true;
         public bool manualTargeting = true;
 
         /* Optional */
         public CannonHandler attachedTo;
         public string parentKey;
-        public string attachableKey;
+        public string key;
 
         private Material cannonMaterialLoaded;
         public Vector2 cannonRenderOffset;

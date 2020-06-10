@@ -1,27 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Verse;
 
 namespace Vehicles.AI
 {
     public static class MapExtensionUtility
     {
+        [Obsolete("MapExtension has been reimplemented as a MapComponent. Utility Method only preexisting method calls. Use map.GetComponent<MapExtension>() instead.")]
         public static MapExtension GetExtensionToMap(this Map map)
         {
-            if (!mapExtensions.ContainsKey(map))
-            {
-                MapExtension result = new MapExtension(map);
-                mapExtensions.Add(map, result);
-                mapExtensions[map].ConstructComponents();
-            }
-            return mapExtensions[map];
+            return map.GetComponent<MapExtension>();;
         }
-
-        public static void ClearMapExtensions()
-        {
-            if(mapExtensions is null) mapExtensions = new Dictionary<Map, MapExtension>();
-            mapExtensions.Clear();
-        }
-
-        private static Dictionary<Map, MapExtension> mapExtensions = new Dictionary<Map, MapExtension>();
     }
 }

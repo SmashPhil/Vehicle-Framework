@@ -2,12 +2,12 @@
 
 <Defs>
 	<PawnKindDef>
-		<defName>SPBoats_PawnKind_Tank</defName>
-		<label>TANK - TEST</label>
+		<defName>SPVehicles_PawnKind_Tank</defName>
+		<label>Tank</label>
 		<defaultFactionType>PlayerColony</defaultFactionType>
 		<aiAvoidCover>false</aiAvoidCover>
 		<destroyGearOnDrop>true</destroyGearOnDrop>
-		<race>SPBoats_Tank</race>
+		<race>SPVehicles_Tank</race>
 		<backstoryCategories>
 			<li>Industrial</li>
 		</backstoryCategories>
@@ -46,7 +46,7 @@
 		<defName>test_Body</defName>
 		<label>dreadnoughtbody</label>
 		<corePart>
-			<def>dreadnought_Body</def>
+			<def>test_Body</def>
 			<height>Middle</height>
 			<depth>Outside</depth>
 			<groups>
@@ -71,8 +71,8 @@
 		</corePart>
 	</BodyDef>
 	
-	<ThingDef ParentName="BaseBoatPawn">
-		<defName>SPBoats_Tank</defName>
+	<ThingDef ParentName="BaseVehiclePawn">
+		<defName>SPVehicles_Tank</defName>
 		<label>Tank</label>
 		<description>A heavy warship to rule the seas.</description>
 		
@@ -101,10 +101,10 @@
 		</tools>
 
 		<race>
-			<thinkTreeMain>shipThinkTree_Simple</thinkTreeMain>
-			<thinkTreeConstant>shipThinkTree_SimpleConstant</thinkTreeConstant>
+			<thinkTreeMain>VehicleThinkTree_Simple</thinkTreeMain>
+			<thinkTreeConstant>VehicleThinkTree_SimpleConstant</thinkTreeConstant>
 			<intelligence>ToolUser</intelligence>
-			<fleshType>MetalShip</fleshType>
+			<fleshType>MetalVehicle</fleshType>
 			<needsRest>false</needsRest>
 			<hasGenders>false</hasGenders>
 			<foodType>None</foodType>
@@ -163,7 +163,7 @@
 				<downable>false</downable>
 				<movesWhenDowned>false</movesWhenDowned>
 				
-				<moveable>DriverNeeded</moveable>
+				<vehicleMovementPermissions>DriverNeeded</vehicleMovementPermissions>
 				<riverTraversability>HugeRiver</riverTraversability>
 				<vehiclePowerType>Fuel</vehiclePowerType>
 				<vehicleCategory>Combat</vehicleCategory>
@@ -171,7 +171,7 @@
 				<vehicleType>Land</vehicleType>
 				
 				<nameable>true</nameable>
-				<buildDef>SPBoats_DreadnoughtBlueprint</buildDef>
+				<buildDef>SPVehicles_Tank_Blueprint</buildDef>
 				<ticksBetweenRepair>650</ticksBetweenRepair>
 				
 				<armor>50</armor>
@@ -204,7 +204,7 @@
 					</li>
 					<li>
 						<label>Cannons</label>
-						<handlingType>Cannons</handlingType>
+						<handlingType>Cannon</handlingType>
 						<slots>1</slots>
 						<slotsToOperate>1</slotsToOperate>
 					</li>
@@ -214,6 +214,13 @@
 						<slots>10</slots>
 					</li>
 				</roles>
+				
+				<customTerrainCosts>
+					<li>
+						<key>Mud</key>
+						<value>250</value>
+					</li>
+				</customTerrainCosts>
 			</li>
 			
 			<li Class="Vehicles.CompProperties_Cannons">
@@ -243,7 +250,7 @@
 						<aimPieOffset/>
 						<drawLayer>1</drawLayer>
 						
-						<attachableKey>mainTurret</attachableKey>
+						<key>mainTurret</key>
 					</li>
 					
 				</cannons>

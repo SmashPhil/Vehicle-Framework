@@ -8,6 +8,7 @@ using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 using Verse.AI.Group;
+using Vehicles.AI;
 
 namespace Vehicles
 {
@@ -15,6 +16,8 @@ namespace Vehicles
     {
 
         private Vector3 smoothPos;
+
+        public Vehicle_PathFollower vPather;
 
         public override Vector3 DrawPos
         {
@@ -241,12 +244,19 @@ namespace Vehicles
 
         public override void DrawExtraSelectionOverlays()
         {
-            base.DrawExtraSelectionOverlays();
-            if(pather.curPath != null)
+            //base.DrawExtraSelectionOverlays();
+            if(vPather.curPath != null)
             {
-                pather.curPath.DrawPath(this);
+                vPather.curPath.DrawPath(this);
             }
-            jobs.DrawLinesBetweenTargets();
+            HelperMethods.DrawLinesBetweenTargets(this, jobs.curJob, jobs.jobQueue);
+            //jobs.DrawLinesBetweenTargets();
+        }
+
+        public override void PostMapInit()
+        {
+            base.PostMapInit();
+            vPather.TryResumePathingAfterLoading();
         }
 
         public override void SpawnSetup(Map map, bool respawningAfterLoad)
@@ -255,13 +265,21 @@ namespace Vehicles
             if(!respawningAfterLoad)
             {
                 smoothPos = Position.ToVector3Shifted();
+                vPather.ResetToCurrentPosition();
             }
-            Log.Message("Check");
+
             if(kindDef.lifeStages.Last().bodyGraphicData.graphicClass == typeof(Graphic_OmniDirectional))
             {
-                Log.Message($"Passed: {kindDef.lifeStages.Last().bodyGraphicData.Graphic}");
-                
                 (kindDef.lifeStages.Last().bodyGraphicData.Graphic as Graphic_OmniDirectional).pawn = this;
+            }
+        }
+
+        public override void Tick()
+        {
+            base.Tick();
+            if(base.Spawned)
+            {
+                vPather.PatherTick();
             }
         }
 
@@ -270,6 +288,7 @@ namespace Vehicles
             base.ExposeData();
 
             Scribe_Values.Look(ref smoothPos, "smoothPos");
+            Scribe_Deep.Look(ref vPather, "vPather", new object[] { this });
         }
     }
 }

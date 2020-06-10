@@ -46,6 +46,7 @@ namespace Vehicles
         public float turnSpeed = 0.1f;
 
         public bool manhunterTargetsVehicle = false;
+        public bool useFullHitboxPathing = true; //Add to guide : REDO
 
         public string healthLabel_Healthy = "Operational";
         public string healthLabel_Injured = "Needs Repairs";
@@ -55,6 +56,9 @@ namespace Vehicles
         public string healthLabel_Beached = "Beached";
 
         public string iconTexPath = "UI/DefaultVehicleIcon";
+
+        public Dictionary<TerrainDef, int> customTerrainCosts; //Add to guide
+        public Dictionary<ThingDef, int> customThingCosts; //Add to guide
 
         public VehiclePermissions vehicleMovementPermissions = VehiclePermissions.DriverNeeded;
         public PowerType vehiclePowerType = PowerType.Fuel;

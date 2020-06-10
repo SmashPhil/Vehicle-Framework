@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace Vehicles.UI
 {
-    public class ITab_Ship_Health : ITab
+    public class ITab_Vehicle_Health : ITab
     {
-        public ITab_Ship_Health()
+        public ITab_Vehicle_Health()
         {
             this.size = new Vector2(460f, 450f);
             this.labelKey = "TabBoatHealth";

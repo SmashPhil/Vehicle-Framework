@@ -43,7 +43,7 @@ namespace SPExtended
 
         private static readonly IEqualityComparer<T1> FirstComparer = EqualityComparer<T1>.Default;
         private static readonly IEqualityComparer<T2> SecondComparer = EqualityComparer<T2>.Default;
-
+        
         public override int GetHashCode()
         {
             int hash = 0;

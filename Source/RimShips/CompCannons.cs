@@ -773,9 +773,9 @@ namespace Vehicles
 
             foreach(CannonHandler cannon in Cannons)
             {
-                if(!string.IsNullOrEmpty(cannon.attachableKey))
+                if(!string.IsNullOrEmpty(cannon.key))
                 {
-                    Cannons.Where(x => x.parentKey == cannon.attachableKey).ToList().ForEach(y => y.attachedTo = cannon);
+                    Cannons.Where(x => x.parentKey == cannon.key).ToList().ForEach(y => y.attachedTo = cannon);
                 }
             }
 
@@ -795,9 +795,9 @@ namespace Vehicles
                     Cannons.Add(cannonPermanent);
                 }
 
-                if(Cannons.Select(x => x.attachableKey).GroupBy(y => y).Any(key => key.Count() > 1))
+                if(Cannons.Select(x => x.key).GroupBy(y => y).Any(key => key.Count() > 1))
                 {
-                    Log.Warning("Duplicate CannonHandler attachableKey has been found. These are intended to be unique.");
+                    Log.Warning("Duplicate CannonHandler key has been found. These are intended to be unique.");
                 }
             }
         }
