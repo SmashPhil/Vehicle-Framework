@@ -7,9 +7,9 @@ using Verse.AI.Group;
 
 namespace Vehicles.Lords
 {
-    public class LordToil_PrepareCaravan_BoardShip : LordToil
+    public class LordToil_PrepareCaravan_BoardVehicles : LordToil
     {
-        public LordToil_PrepareCaravan_BoardShip(IntVec3 meetingPoint)
+        public LordToil_PrepareCaravan_BoardVehicles(IntVec3 meetingPoint)
         {
             this.meetingPoint = meetingPoint;
         }

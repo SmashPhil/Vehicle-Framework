@@ -44,7 +44,7 @@ namespace Vehicles
             autoTargeting = reference.autoTargeting;
             manualTargeting = reference.manualTargeting;
 
-            (CannonGraphic as Graphic_Animate)?.DisableAnimation();
+            DisableAnimation();
 
             LockedStatusRotation = true;
             ResetCannonAngle();
@@ -220,7 +220,7 @@ namespace Vehicles
                     }
                     else if(cooldownTicks <= 0 && RotationIsValid)
                     {
-                        if(!targetPersists || !SetTargetConditionalOnThing(LocalTargetInfo.Invalid, true))
+                        if(targetPersists && (cannonTarget.Pawn is null || !SetTargetConditionalOnThing(LocalTargetInfo.Invalid)))
                         {
                             CompCannon.multiFireCannon.Add(new SPTuple<int, CannonHandler, SPTuple2<int,int>>(cannonDef.numberOfShots, this, new SPTuple2<int,int>(0, 0)));
                             ActivateTimer();
@@ -230,11 +230,61 @@ namespace Vehicles
             }
         }
 
+        public void StartAnimation(int ticksPerFrame, int cyclesLeft, AnimationWrapperType wrapperType)
+        {
+            if ((CannonGraphic as Graphic_Animate).AnimationFrameCount == 1)
+                return;
+            this.ticksPerFrame = ticksPerFrame;
+            this.cyclesLeft = cyclesLeft;
+            this.wrapperType = wrapperType;
+            ticks = 0;
+            currentFrame = 0;
+            reverseAnimate = false;
+        }
+
+        public void DisableAnimation()
+        {
+            currentFrame = 0;
+            cyclesLeft = 0;
+            ticksPerFrame = 1;
+            ticks = -1;
+            wrapperType = AnimationWrapperType.Off;
+        }
+
         public void Draw()
         {
             if(cannonDef.graphicData.graphicClass == typeof(Graphic_Animate))
             {
-                (CannonGraphic as Graphic_Animate).DrawAnimationWorker(this);
+                if(ticks >= 0)
+                {
+                    ticks++;
+                    if (ticks > ticksPerFrame)
+                    {
+                        if(reverseAnimate)
+                            currentFrame--;
+                        else
+                            currentFrame++;
+
+                        ticks = 0;
+                    
+                        if(currentFrame > ((CannonGraphic as Graphic_Animate).AnimationFrameCount - 1) || currentFrame < 0)
+                        {
+                            cyclesLeft--;
+
+                            if (wrapperType == AnimationWrapperType.Oscillate)
+                                reverseAnimate = !reverseAnimate;
+
+                            currentFrame = reverseAnimate ? (CannonGraphic as Graphic_Animate).AnimationFrameCount - 1 : 0;
+                            if(cyclesLeft <= 0)
+                            {
+                                DisableAnimation();
+                            }
+                        }
+                    }
+                }
+                
+                HelperMethods.DrawAttachedThing(CannonBaseTexture, CannonBaseGraphic, baseCannonRenderLocation, baseCannonDrawSize, CannonTexture, (CannonGraphic as Graphic_Animate).SubGraphicCycle(currentFrame), 
+                cannonRenderLocation, cannonRenderOffset, CannonBaseMaterial, (CannonGraphic as Graphic_Animate).SubMaterialCycle(currentFrame), TurretRotation, pawn, drawLayer, attachedTo);
             }
             else
             {
@@ -547,29 +597,37 @@ namespace Vehicles
         public void SetTarget(LocalTargetInfo target)
         {
             cannonTarget = target;
+            if (target.Pawn is Pawn)
+            {
+                if (target.Pawn.Downed)
+                    CachedPawnTargetStatus = PawnStatusOnTarget.Down;
+                else if (target.Pawn.Dead)
+                    CachedPawnTargetStatus = PawnStatusOnTarget.Dead;
+                else
+                    CachedPawnTargetStatus = PawnStatusOnTarget.Alive;
+            }
+            else
+            {
+                CachedPawnTargetStatus = PawnStatusOnTarget.None;
+            }
         }
 
         /// <summary>
         /// Set target only if cannonTarget is no longer valid or if target is cell based
         /// </summary>
         /// <param name="target"></param>
-        /// <param name="checkOnly"></param>
         /// <returns>true if cannonTarget set to target, false if target is still valid</returns>
-        public LocalTargetInfo CachedTarget { get; set; }
-        public bool SetTargetConditionalOnThing(LocalTargetInfo target, bool validationOnly = false)
+        public enum PawnStatusOnTarget { Alive, Down, Dead, None}
+        public PawnStatusOnTarget CachedPawnTargetStatus { get; set; }
+        public bool SetTargetConditionalOnThing(LocalTargetInfo target)
         {
-            if(validationOnly && cannonTarget.IsValid)
+            if(cannonTarget.IsValid && cannonTarget.HasThing)
             {
-                return false;
-            }
-
-            if(cannonTarget.IsValid && (cannonTarget.HasThing || !cannonTarget.IsValid))
-            {
-                if(cannonTarget.Thing is Pawn pawn)
+                if(cannonTarget.Pawn != null)
                 {
-                    if (pawn.Dead || pawn.Downed)
+                    if ( (cannonTarget.Pawn.Dead && CachedPawnTargetStatus != PawnStatusOnTarget.Dead ) || (cannonTarget.Pawn.Downed && CachedPawnTargetStatus != PawnStatusOnTarget.Down) )
                     {
-                        cannonTarget = target;
+                        SetTarget(target);
                         return true;
                     }
                 }
@@ -577,14 +635,14 @@ namespace Vehicles
                 {
                     if (cannonTarget.Thing.HitPoints > 0)
                     {
-                        cannonTarget = target;
+                        SetTarget(target);
                         return true;
                     }
                 }
                 ResetPrefireTimer();
                 return false;
             }
-            cannonTarget = target;
+            SetTarget(target);
             return true;
         }
 
@@ -691,5 +749,17 @@ namespace Vehicles
         private float parentAngleCached = 0f;
 
         private const int AutoTargetInterval = 50;
+
+        private int currentFrame = 0;
+
+        private int ticksPerFrame = 1;
+
+        private int ticks;
+
+        private int cyclesLeft = 0;
+
+        private bool reverseAnimate;
+
+        private AnimationWrapperType wrapperType;
     }
 }

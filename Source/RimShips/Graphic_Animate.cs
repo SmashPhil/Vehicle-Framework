@@ -21,14 +21,6 @@ namespace Vehicles
             }
         }
 
-        public bool Animating
-        {
-            get
-            {
-                return cyclesLeft > 0;
-            }
-        }
-
         public int AnimationFrameCount
         {
             get
@@ -79,46 +71,12 @@ namespace Vehicles
 			}
         }
 
-        public virtual void DrawAnimationWorker(CannonHandler cannon)
-        {
-            if(ticks >= 0)
-            {
-                ticks++;
-                if (ticks > ticksPerFrame)
-                {
-                    if(reverseAnimate)
-                        currentFrame--;
-                    else
-                        currentFrame++;
-
-                    ticks = 0;
-                    
-                    if(currentFrame > (subGraphics.Length - 1) || currentFrame < 0)
-                    {
-                        cyclesLeft--;
-
-                        if (wrapperType == AnimationWrapperType.Oscillate)
-                            reverseAnimate = !reverseAnimate;
-
-                        currentFrame = reverseAnimate ? subGraphics.Length - 1 : 0;
-                        if(cyclesLeft <= 0)
-                        {
-                            DisableAnimation();
-                        }
-                    }
-                }
-            }
-
-            HelperMethods.DrawAttachedThing(cannon.CannonBaseTexture, cannon.CannonBaseGraphic, cannon.baseCannonRenderLocation, cannon.baseCannonDrawSize, cannon.CannonTexture, SubGraphicCycle(currentFrame), 
-            cannon.cannonRenderLocation, cannon.cannonRenderOffset, cannon.CannonBaseMaterial, SubMaterialCycle(currentFrame), cannon.TurretRotation, cannon.pawn, cannon.drawLayer, cannon.attachedTo);
-        }
-
         public override Graphic GetColoredVersion(Shader newShader, Color newColor, Color newColorTwo)
 		{
 			return GraphicDatabase.Get<Graphic_Animate>(path, newShader, drawSize, newColor, newColorTwo, data);
 		}
 
-        protected Graphic SubGraphicCycle(int index)
+        public Graphic SubGraphicCycle(int index)
         {
             if(index > (subGraphics.Length - 1) )
             {
@@ -129,7 +87,7 @@ namespace Vehicles
             return subGraphics[index];
         }
 
-        protected Material SubMaterialCycle(int index)
+        public Material SubMaterialCycle(int index)
         {
             if(index > (subMaterials.Length - 1) )
             {
@@ -157,39 +115,8 @@ namespace Vehicles
             return animationFolder + "/" + ContentFinder<Texture2D>.GetAllInFolder(animationFolder).FirstOrDefault().name;
         }
 
-        public void StartAnimation(int ticksPerFrame, int cyclesLeft, AnimationWrapperType wrapperType)
-        {
-            if (subGraphics.Length == 1)
-                return;
-            this.ticksPerFrame = ticksPerFrame;
-            this.cyclesLeft = cyclesLeft;
-            this.wrapperType = wrapperType;
-            ticks = 0;
-            currentFrame = 0;
-            reverseAnimate = false;
-        }
-
-        public void DisableAnimation()
-        {
-            currentFrame = 0;
-            cyclesLeft = 0;
-            ticksPerFrame = 1;
-            ticks = -1;
-            wrapperType = AnimationWrapperType.Off;
-        }
+        
 
         private Material[] subMaterials;
-
-        private int currentFrame = 0;
-
-        private int ticksPerFrame = 1;
-
-        private int ticks;
-
-        private int cyclesLeft = 0;
-
-        private bool reverseAnimate;
-
-        private AnimationWrapperType wrapperType;
     }
 }

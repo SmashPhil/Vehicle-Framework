@@ -212,11 +212,11 @@
     <Compile Include="JobGiver_PrepareCaravan_GatheringShip.cs" />
     <Compile Include="JobGiver_SendSlavesToShip.cs" />
     <Compile Include="LordJob_FormAndSendCaravanShip.cs" />
-    <Compile Include="LordToil_PrepareCaravan_BoardShip.cs" />
+    <Compile Include="LordToil_PrepareCaravan_BoardVehicles.cs" />
     <Compile Include="LordToil_PrepareCaravan_GatherDownedPawnsShip.cs" />
-    <Compile Include="LordToil_PrepareCaravan_GatherShip.cs" />
-    <Compile Include="LordToil_PrepareCaravan_GatherSlavesShip.cs" />
-    <Compile Include="LordToil_PrepareCaravan_LeaveShip.cs" />
+    <Compile Include="LordToil_PrepareCaravan_GatherCargo.cs" />
+    <Compile Include="LordToil_PrepareCaravan_GatherSlaves.cs" />
+    <Compile Include="LordToil_PrepareCaravan_LeaveWithVehicles.cs" />
     <Compile Include="MainTabWindow_Ships.cs" />
     <Compile Include="MapExtension.cs" />
     <Compile Include="MapExtensionUtility.cs" />

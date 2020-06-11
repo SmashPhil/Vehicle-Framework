@@ -676,6 +676,7 @@ namespace Vehicles.AI
             if (!pawnPath.Found)
             {
                 PatherFailed();
+				Messages.Message("NoPathForVehicle".Translate(), MessageTypeDefOf.RejectInput, false);
                 return false;
             }
             if (curPath != null)
@@ -706,59 +707,61 @@ namespace Vehicles.AI
             return true;
         }
 
-        private PawnPath GenerateNewPath()
+        private PawnPath GenerateNewPathThreaded()
 		{
             var cts = new CancellationTokenSource();
             var tasks = new[]
             {
-                Task<PawnPath>.Factory.StartNew( () => GenerateReversePathThreaded(), cts.Token),
-                Task<PawnPath>.Factory.StartNew( () => GenerateNewPathThreaded(), cts.Token)
+                Task<PawnPath>.Factory.StartNew( () => GenerateReversePath(cts.Token), cts.Token),
+                Task<PawnPath>.Factory.StartNew( () => GenerateNewPath(cts.Token), cts.Token)
             };
 
-            int taskIndex = Task.WaitAny(tasks);
-            cts.Cancel();
-
-            PawnPath result = tasks[1].Result;
-            PawnPath asyncPathingCheck = tasks[0].Result;
-            Log.Message($"Task Completed {taskIndex} ReversePath: {asyncPathingCheck.Found} NewPath: {result.Found}");
-            if (taskIndex == 0 && !asyncPathingCheck.Found)
+            int taskIndex = Task.WaitAny(tasks, cts.Token);
+            
+            try
             {
-                if (Prefs.DevMode && RimShipMod.mod.settings.debugDrawVehiclePathCosts)
-                    Log.Message($"Ending Concurrent Pathing.");
-                return PawnPath.NotFound;
+				if (!tasks[taskIndex].Result.Found)
+				{
+					cts.Cancel();
+					cts.Dispose();
+					if (Prefs.DevMode && RimShipMod.mod.settings.debugDrawVehiclePathCosts)
+						Log.Message($"Ending Concurrent Pathing.");
+					return PawnPath.NotFound;
+				}
             }
-            else if(result.Found)
+			catch(Exception ex)
             {
-                if (Prefs.DevMode && RimShipMod.mod.settings.debugDrawVehiclePathCosts)
-                    Log.Message($"Path Found. Canceling Remaining Tasks.");
-            } 
-            return result;
+				Log.Error($"[Vehicles] Unable to cancel and dispose remaining tasks. \nException: {ex.Message} \nStack: {ex.StackTrace}");
+            }
+            
+            return tasks[1].Result;
 		}
 
-        internal PawnPath GenerateNewPathThreaded()
+        internal PawnPath GenerateNewPath(CancellationToken token)
         {
             lastPathedTargetPosition = destination.Cell;
-            var path = pawn.Map.GetComponent<MapExtension>().getShipPathFinder.FindVehiclePath(pawn.Position, destination, pawn, out bool space, peMode);
+            var path = pawn.Map.GetComponent<MapExtension>().getShipPathFinder.FindVehiclePath(pawn.Position, destination, pawn, out bool space, token, peMode);
             if(!space)
             {
                 Messages.Message("VehicleCannotFit".Translate(), MessageTypeDefOf.RejectInput);
                 return PawnPath.NotFound;
             }
-            if (!path.Found) Log.Warning("Path Not Found");
+            if (!path.Found && Prefs.DevMode && RimShipMod.mod.settings.debugDrawVehiclePathCosts) 
+				Log.Warning("Path Not Found");
             return path;
         }
 
-        internal PawnPath GenerateReversePathThreaded()
+        internal PawnPath GenerateReversePath(CancellationToken token)
         {
             lastPathedTargetPosition = destination.Cell;
-            var path = pawn.Map.GetComponent<MapExtension>().threadedPathFinderConstrained.FindVehiclePath(destination.Cell, new LocalTargetInfo(pawn.Position), pawn, out bool space, peMode);
+            var path = pawn.Map.GetComponent<MapExtension>().threadedPathFinderConstrained.FindVehiclePath(destination.Cell, new LocalTargetInfo(pawn.Position), pawn, out bool space, token, peMode);
             if (!space || !path.Found) return PawnPath.NotFound;
             return path;
         }
 
 		private bool AtDestinationPosition()
 		{
-			return pawn.CanReachImmediate(this.destination, this.peMode);
+			return pawn.CanReachImmediate(destination, peMode);
 		}
 
 		private bool NeedNewPath()

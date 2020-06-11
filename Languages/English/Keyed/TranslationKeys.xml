@@ -119,6 +119,7 @@
 	<BoatCaravanTerminatedNoBoats>Caravan process has been terminated. No boats remain. </BoatCaravanTerminatedNoBoats>
 	<NoAmmoLoadedCannon>No ammo loaded.</NoAmmoLoadedCannon>
 	<VehicleCannotFit>Not enough space.</VehicleCannotFit>
+	<NoPathForVehicle>Cannot path here.</NoPathForVehicle>
 	
 	<!-- Caravans -->
 	<CaravanShips>Boat</CaravanShips>

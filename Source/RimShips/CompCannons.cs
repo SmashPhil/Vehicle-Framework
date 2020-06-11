@@ -386,7 +386,7 @@ namespace Vehicles
                 projectile2.Launch(Pawn, launchCell, c, cannon.cannonTarget, cannon.cannonDef.hitFlags, parent);
                 if(cannon.cannonDef.graphicData.graphicClass == typeof(Graphic_Animate))
                 {
-                    (cannon.CannonGraphic as Graphic_Animate).StartAnimation(2, 1, AnimationWrapperType.Reset);
+                    cannon.StartAnimation(2, 1, AnimationWrapperType.Reset);
                 }
             }
             catch(Exception ex)

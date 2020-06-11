@@ -1246,7 +1246,7 @@ namespace Vehicles
                 bool anyCaravanToJoin = false;
                 foreach (Lord lord in pawn.Map.lordManager.lords)
                 {
-                    if(lord.faction == Faction.OfPlayer && lord.LordJob is LordJob_FormAndSendCaravanShip && !(lord.CurLordToil is LordToil_PrepareCaravan_LeaveShip) && !(lord.CurLordToil is LordToil_PrepareCaravan_BoardShip))
+                    if(lord.faction == Faction.OfPlayer && lord.LordJob is LordJob_FormAndSendCaravanShip && !(lord.CurLordToil is LordToil_PrepareCaravan_LeaveShip) && !(lord.CurLordToil is LordToil_PrepareCaravan_BoardVehicles))
                     {
                         anyCaravanToJoin = true;
                         break;

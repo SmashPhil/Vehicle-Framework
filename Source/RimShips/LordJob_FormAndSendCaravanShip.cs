@@ -281,7 +281,7 @@ namespace Vehicles.Lords
             this.gatherDownedPawns_pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(this.gatherDownedPawns_pause);
             this.AssignSeats();
-            this.boardShip = new LordToil_PrepareCaravan_BoardShip(this.exitPoint);
+            this.boardShip = new LordToil_PrepareCaravan_BoardVehicles(this.exitPoint);
             stateGraph.AddToil(this.boardShip);
             this.boardShip_pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(this.boardShip_pause);

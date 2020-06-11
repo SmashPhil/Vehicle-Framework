@@ -12,7 +12,7 @@ namespace Vehicles.AI
 {
     public class VehiclePathFinder
     {
-        public VehiclePathFinder(Map map, bool reportFailure = true)
+        public VehiclePathFinder(Map map, bool report = true)
         {
             this.map = map;
             mapSizeX = map.Size.x;
@@ -22,22 +22,24 @@ namespace Vehicles.AI
             regionCostCalculatorSea = new RegionCostCalculatorWrapperShips(map);
             regionCostCalculatorLand = new RegionCostCalculatorWrapper(map);
             postCalculatedCells = new Dictionary<IntVec3, int>();
-            this.reportFailure = reportFailure;
+            this.report = report;
         }
 
-        public PawnPath FindVehiclePath(IntVec3 start, LocalTargetInfo dest, VehiclePawn pawn, out bool destinationHasSpace, PathEndMode peMode = PathEndMode.OnCell)
+        public PawnPath FindVehiclePath(IntVec3 start, LocalTargetInfo dest, VehiclePawn pawn, out bool destinationHasSpace, CancellationToken token, PathEndMode peMode = PathEndMode.OnCell)
         {
             destinationHasSpace = false;
             if(pawn.LocationRestrictedBySize(dest.Cell))
                 return PawnPath.NotFound;
             destinationHasSpace = true; //Passed checks;
             Danger maxDanger = Danger.Deadly;
-            return FindVehiclePath(start, dest, TraverseParms.For(pawn, maxDanger, TraverseMode.ByPawn, false), peMode, HelperMethods.IsBoat(pawn));
+            return FindVehiclePath(start, dest, TraverseParms.For(pawn, maxDanger, TraverseMode.ByPawn, false), token, peMode, HelperMethods.IsBoat(pawn));
         }
 
-        public PawnPath FindVehiclePath(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, PathEndMode peMode = PathEndMode.OnCell, bool waterPathing = false)
+        public PawnPath FindVehiclePath(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms,  CancellationToken token, PathEndMode peMode = PathEndMode.OnCell, bool waterPathing = false)
         {
-            if (Prefs.DevMode) Log.Message($"[Vehicles] Pathing {traverseParms.pawn.LabelShort} - ThreadId: [{Thread.CurrentThread.ManagedThreadId}] TaskId: [{Task.CurrentId}]");
+            if (Prefs.DevMode && report) 
+                Log.Message($"[Vehicles] MainPath for {traverseParms.pawn.LabelShort} - ThreadId: [{Thread.CurrentThread.ManagedThreadId}] TaskId: [{Task.CurrentId}]");
+
             postCalculatedCells.Clear();
             MapExtension mapExtension = map.GetComponent<MapExtension>();
             if(DebugSettings.pathThroughWalls)
@@ -159,8 +161,15 @@ namespace Vehicles.AI
             CalculateAndAddDisallowedCorners(traverseParms, peMode, cellRect);
             InitStatusesAndPushStartNode(ref num, start);
 
+            int iterations = 0;
             for(;;)
             {
+                if (token.IsCancellationRequested)
+                {
+                    return PawnPath.NotFound;
+                }
+
+                iterations++;
                 if(openList.Count <= 0)
                 {
                     break;
@@ -211,10 +220,10 @@ namespace Vehicles.AI
                            
                             if(RimShipMod.mod.settings.fullVehiclePathing)
                             {
-                                bool occupiedRectImpassable = CellRect.CenteredOn(cellToCheck, pawn.def.Size.x, pawn.def.Size.z).Any(c2 => waterPathing ? GenGridShips.Impassable(c2, map) : c2.Impassable(map));
+                                bool occupiedRectImpassable = CellRect.CenteredOn(cellToCheck, pawn.def.Size.x, pawn.def.Size.z).Any(c2 => waterPathing ? GenGridShips.Impassable(c2, map) : c2.ImpassableReverseThreaded(map, pawn));
                                 if (occupiedRectImpassable)
                                 {
-                                    if(!CellRect.CenteredOn(cellToCheck, pawn.def.Size.z, pawn.def.Size.x).Any(c2 => waterPathing ? GenGridShips.Impassable(c2, map) : c2.Impassable(map)))
+                                    if(!CellRect.CenteredOn(cellToCheck, pawn.def.Size.z, pawn.def.Size.x).Any(c2 => waterPathing ? GenGridShips.Impassable(c2, map) : c2.ImpassableReverseThreaded(map, pawn)))
                                     {
                                         //Implement more here
                                     }
@@ -472,7 +481,7 @@ namespace Vehicles.AI
                                     //}
 
                                     //Only generate path costs for linear non-reverse pathing check
-                                    if(reportFailure)
+                                    if(report)
                                     {
                                         if(postCalculatedCells.ContainsKey(cellToCheck))
                                         {
@@ -561,13 +570,14 @@ namespace Vehicles.AI
             }
             string text = ((pawn is null) || pawn.CurJob is null) ? "null" : pawn.CurJob.ToString();
             string text2 = ((pawn is null) || pawn.Faction is null) ? "null" : pawn.Faction.ToString();
-            if(reportFailure)
+            if(report)
             {
                 Log.Warning(string.Concat(new object[]
                 {
                     "ship pawn: ", pawn, " pathing from ", start,
                     " to ", dest, " ran out of cells to process.\nJob:", text,
-                    "\nFaction: ", text2
+                    "\nFaction: ", text2,
+                    "\niterations: ", iterations
                 }), false);
             }
             DebugDrawRichData();
@@ -847,11 +857,12 @@ namespace Vehicles.AI
 
         private Map map;
 
-        internal bool reportFailure;
+        internal bool report;
 
         private FastPriorityQueue<CostNode> openList;
 
         private VehiclePathFinderNodeFast[] calcGrid;
+
         private VehiclePathFinderNodeFast[] calcGridBoats;
 
         private ushort statusOpenValue = 1;

@@ -211,8 +211,10 @@ namespace Vehicles
 
         public static bool ImpassableReverseThreaded(this IntVec3 c, Map map, Pawn vehicle)
 		{
-            if (c == vehicle.Position || c.InBounds(map))
+            if (c == vehicle.Position)
                 return false;
+            else if (!c.InBounds(map))
+                return true;
             try
             {
                 List<Thing> list = map.thingGrid.ThingsListAtFast(c);
