@@ -5,22 +5,20 @@ using System.Collections.Generic;
 
 namespace Vehicles
 {
-    public class ShipHandler : IExposable, ILoadReferenceable, IThingHolder
+    public class VehicleHandler : IExposable, ILoadReferenceable, IThingHolder
     {
         public ThingOwner<Pawn> handlers;
 
-        public List<BodyPartRecord> occupiedParts;
-
-        public ShipRole role;
+        public VehicleRole role;
 
         public List<Pawn> currentlyReserving = new List<Pawn>();
 
         private List<Pawn> tempSavedPawns = new List<Pawn>();
 
         public int uniqueID = -1;
-        public Pawn shipPawn;
+        public Pawn vehiclePawn;
          
-        public ShipHandler()
+        public VehicleHandler()
         {
             if(handlers is null)
             {
@@ -28,22 +26,22 @@ namespace Vehicles
             }
         }
 
-        public ShipHandler(Pawn newShip)
+        public VehicleHandler(Pawn vehiclePawn)
         {
             uniqueID = Find.UniqueIDsManager.GetNextThingID();
-            shipPawn = newShip;
+            this.vehiclePawn = vehiclePawn;
             if(handlers is null)
             {
                 handlers = new ThingOwner<Pawn>(this, false, LookMode.Reference);
             }
         }
 
-        public ShipHandler(Pawn newShip, ShipRole newRole)
+        public VehicleHandler(Pawn vehiclePawn, VehicleRole newRole)
         {
             List<Pawn> newHandlers = new List<Pawn>();
             uniqueID = Find.UniqueIDsManager.GetNextThingID();
-            shipPawn = newShip;
-            role = newRole;
+            this.vehiclePawn = vehiclePawn;
+            role = new VehicleRole(newRole);
             if (handlers is null)
             {
                 handlers = new ThingOwner<Pawn>(this, false, LookMode.Reference);
@@ -72,7 +70,7 @@ namespace Vehicles
             for(int i = 0; i < currentlyReserving.Count; i++)
             {
                 Pawn p = currentlyReserving[i];
-                if (!p.Spawned || p.InMentalState || p.Downed || p.Dead || (p.CurJob.def != JobDefOf_Ships.Board && (p.CurJob.targetA.Thing as Pawn) != this.shipPawn))
+                if (!p.Spawned || p.InMentalState || p.Downed || p.Dead || (p.CurJob.def != JobDefOf_Ships.Board && (p.CurJob.targetA.Thing as Pawn) != vehiclePawn))
                 {
                     currentlyReserving.Remove(p);
                 }
@@ -90,7 +88,7 @@ namespace Vehicles
         public void ExposeData()
         {
             Scribe_Values.Look(ref uniqueID, "uniqueID", -1);
-            Scribe_References.Look(ref shipPawn, "shipPawn");
+            Scribe_References.Look(ref vehiclePawn, "vehiclePawn");
             Scribe_Deep.Look(ref role, "role");
 
             if (Scribe.mode == LoadSaveMode.Saving)
@@ -123,7 +121,7 @@ namespace Vehicles
             return "ShipHandlerGroup_" + uniqueID;
         }
 
-        public IThingHolder ParentHolder => shipPawn;
+        public IThingHolder ParentHolder => vehiclePawn;
 
         public void GetChildHolders(List<IThingHolder> outChildren)
         {

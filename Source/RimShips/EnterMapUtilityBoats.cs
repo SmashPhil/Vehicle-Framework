@@ -35,7 +35,7 @@ namespace Vehicles
         public static void EnterSpawn(Caravan caravan, Map map, Func<Pawn, IntVec3> spawnCellGetter, CaravanDropInventoryMode caravanDropInventoryMode = CaravanDropInventoryMode.DoNotDrop, bool draftColonists = true)
         {
             List<Pawn> pawns = new List<Pawn>(caravan.PawnsListForReading).Where(x => HelperMethods.IsBoat(x)).ToList();
-            MapExtension mapE = MapExtensionUtility.GetExtensionToMap(map);
+            WaterMap mapE = WaterMapUtility.GetExtensionToMap(map);
             Rot4 spawnDir = GetEdgeToSpawnBoatOn(caravan, map);
 
             for(int i = 0; i < pawns.Count; i++)
@@ -104,7 +104,7 @@ namespace Vehicles
 
         private static IntVec3 FindNearEdgeWaterCell(Map map)
         {
-            Predicate<IntVec3> validator = (IntVec3 x) => GenGridShips.Standable(x, map, MapExtensionUtility.GetExtensionToMap(map)) && !x.Fogged(map);
+            Predicate<IntVec3> validator = (IntVec3 x) => GenGridShips.Standable(x, map, WaterMapUtility.GetExtensionToMap(map)) && !x.Fogged(map);
             Faction hostFaction = map.ParentFaction;
             IntVec3 root;
             if(CellFinder.TryFindRandomEdgeCellWith(validator, map, CellFinder.EdgeRoadChance_Ignore, out root))
@@ -122,7 +122,7 @@ namespace Vehicles
         private static IntVec3 FindCenterWaterCell(Map map, bool landing = false)
         {
             TraverseParms tp = TraverseParms.For(TraverseMode.NoPassClosedDoors, Danger.Deadly, false);
-            MapExtension mapE = MapExtensionUtility.GetExtensionToMap(map);
+            WaterMap mapE = WaterMapUtility.GetExtensionToMap(map);
             Predicate<IntVec3> validator = (IntVec3 x) => GenGridShips.Standable(x, map, mapE) && !x.Fogged(map) && mapE.getShipReachability.CanReachMapEdge(x, tp);
             IntVec3 result;
             if(RCellFinder.TryFindRandomCellNearTheCenterOfTheMapWith(null /*input validator here*/, map, out result))

@@ -151,9 +151,14 @@
     <Compile Include="Bill_BoardShip.cs" />
     <Compile Include="CompProperties_VehicleTracks.cs" />
     <Compile Include="CompVehicleTracks.cs" />
+    <Compile Include="CustomVehicleDamageMultiplier.cs" />
+    <Compile Include="Dialog_AssignSeats.cs" />
+    <Compile Include="Dialog_FormVehicleCaravan.cs" />
     <Compile Include="Graphic_Animate.cs" />
     <Compile Include="Graphic_OmniDirectional.cs" />
     <Compile Include="LordJob_FormAndSendVehicles.cs" />
+    <Compile Include="TransferableVehicleWidget.cs" />
+    <Compile Include="VehicleCaravan.cs" />
     <Compile Include="VehiclePawn.cs" />
     <Compile Include="CannonDef.cs" />
     <Compile Include="CannonHandler.cs" />
@@ -218,8 +223,8 @@
     <Compile Include="LordToil_PrepareCaravan_GatherSlaves.cs" />
     <Compile Include="LordToil_PrepareCaravan_LeaveWithVehicles.cs" />
     <Compile Include="MainTabWindow_Ships.cs" />
-    <Compile Include="MapExtension.cs" />
-    <Compile Include="MapExtensionUtility.cs" />
+    <Compile Include="WaterMap.cs" />
+    <Compile Include="WaterMapUtility.cs" />
     <Compile Include="MaterialDefOf.cs" />
     <Compile Include="PawnTableDefOf_Ships.cs" />
     <Compile Include="PawnTable_Ships.cs" />
@@ -229,7 +234,7 @@
     <Compile Include="RimshipsModSettings.cs" />
     <Compile Include="CompCannons.cs" />
     <Compile Include="RiverDefOf.cs" />
-    <Compile Include="ShipHandler.cs" />
+    <Compile Include="VehicleHandler.cs" />
     <Compile Include="ShipHarmony.cs" />
     <Compile Include="ShipPassengerCardUtility.cs" />
     <Compile Include="VehiclePathFinder.cs" />
@@ -239,7 +244,7 @@
     <Compile Include="ShipReachabilityCache.cs" />
     <Compile Include="ShipReachabilityImmediate.cs" />
     <Compile Include="ShipReachabilityUtility.cs" />
-    <Compile Include="ShipRole.cs" />
+    <Compile Include="VehicleRole.cs" />
     <Compile Include="SoundDefOf_Ships.cs" />
     <Compile Include="SpawnThingOnBuild.cs" />
     <Compile Include="SPExtra.cs" />

@@ -5,6 +5,7 @@ using Verse.Sound;
 using RimWorld;
 using UnityEngine;
 using SPExtended;
+using System.Linq;
 
 namespace Vehicles
 {
@@ -39,6 +40,15 @@ namespace Vehicles
 
             key = reference.key;
             parentKey = reference.parentKey;
+
+            if(string.IsNullOrEmpty(key))
+            {
+                Log.Error($"Failed to properly create {cannonDef.label} on {pawn.LabelShort}, a key must be included for each CannonHandler");
+            }
+            else if(CompCannon.Cannons.Any(c => c.key == key))
+            {
+                Log.Error($"Duplicate key {key} found on {pawn.LabelShort}. Duplicate registered on {cannonDef.label}{uniqueID}");
+            }
 
             targetPersists = reference.targetPersists;
             autoTargeting = reference.autoTargeting;
@@ -117,6 +127,9 @@ namespace Vehicles
 
         public bool RotationIsValid => currentRotation == rotationTargeted;
 
+        public bool CannonDisabled => !RelatedHandlers.NullOrEmpty() && RelatedHandlers.Any(h => h.handlers.Count < h.role.slotsToOperate);
+
+        public List<VehicleHandler> RelatedHandlers => pawn.GetComp<CompVehicle>().handlers.FindAll(h => !h.role.cannonIds.NullOrEmpty() && h.role.cannonIds.Contains(key));
         public bool ActivateTimer()
         {
             if (cooldownTicks > 0)
@@ -131,7 +144,10 @@ namespace Vehicles
             {
                 if (autoTargeting && Find.TickManager.TicksGame % AutoTargetInterval == 0 && pawn.Drafted)
                 {
-                    
+                    if(CannonDisabled)
+                    {
+                        return;
+                    }
                     if(!cannonTarget.IsValid)
                     {
                         LocalTargetInfo autoTarget = this.GetCannonTarget();
@@ -218,7 +234,7 @@ namespace Vehicles
                             PrefireTickCount--;
                         }
                     }
-                    else if(cooldownTicks <= 0 && RotationIsValid)
+                    else if(cooldownTicks <= 0 && RotationIsValid && !CannonDisabled)
                     {
                         if(targetPersists && (cannonTarget.Pawn is null || !SetTargetConditionalOnThing(LocalTargetInfo.Invalid)))
                         {

@@ -12,7 +12,6 @@ namespace Vehicles.AI
         public ShipReachability(Map map)
         {
             this.map = map;
-            this.mapExt = MapExtensionUtility.GetExtensionToMap(map);
         }
         
         public void ClearCache()
@@ -64,17 +63,17 @@ namespace Vehicles.AI
 
         public bool CanReachShip(IntVec3 start, LocalTargetInfo dest, PathEndMode peMode, TraverseMode traverseMode, Danger maxDanger)
         {
-            return this.CanReachShip(start, dest, peMode, TraverseParms.For(traverseMode, maxDanger, false));
+            return CanReachShip(start, dest, peMode, TraverseParms.For(traverseMode, maxDanger, false));
         }
 
         public bool CanReachShip(IntVec3 start, LocalTargetInfo dest, PathEndMode peMode, TraverseParms traverseParms)
         {
-            if(this.working)
+            if(working)
             {
                 Log.ErrorOnce("Called CanReach() while working for Ships. This should never happen. Suppressing further errors.", 7312233, false);
                 return false;
             }
-            if(!this.map.terrainGrid.TerrainAt(dest.Cell).IsWater)
+            if(!map.terrainGrid.TerrainAt(dest.Cell).IsWater)
             {
                 return false;
             }
@@ -84,7 +83,7 @@ namespace Vehicles.AI
                 {
                     return false;
                 }
-                if(traverseParms.pawn.Map != this.map)
+                if(traverseParms.pawn.Map != map)
                 {
                     Log.Error(string.Concat(new object[]
                     {
@@ -100,18 +99,18 @@ namespace Vehicles.AI
             {
                 return false;
             }
-            if (dest.HasThing && dest.Thing.Map != this.map)
+            if (dest.HasThing && dest.Thing.Map != map)
             {
                 return false;
             }
-            if (!start.InBoundsShip(this.map) || !dest.Cell.InBoundsShip(this.map)) 
+            if (!start.InBoundsShip(map) || !dest.Cell.InBoundsShip(map)) 
             {
                 return false;
             }
             if((peMode == PathEndMode.OnCell || peMode == PathEndMode.Touch || peMode == PathEndMode.ClosestTouch) && traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater &&
                 traverseParms.mode != TraverseMode.PassAllDestroyableThingsNotWater)
             {
-                WaterRoom room = WaterRegionAndRoomQuery.RoomAtFast(start, this.map, RegionType.Set_Passable);
+                WaterRoom room = WaterRegionAndRoomQuery.RoomAtFast(start, map, RegionType.Set_Passable);
                 if (!(room is null) && room == WaterRegionAndRoomQuery.RoomAtFast(dest.Cell, this.map, RegionType.Set_Passable))
                     return true;
             }
@@ -124,15 +123,15 @@ namespace Vehicles.AI
                     return true;
                 }
             }
-            dest = (LocalTargetInfo)GenPathShip.ResolvePathMode(traverseParms.pawn, dest.ToTargetInfo(this.map), ref peMode, this.mapExt);
-            this.working = true;
+            dest = (LocalTargetInfo)GenPathShip.ResolvePathMode(traverseParms.pawn, dest.ToTargetInfo(map), ref peMode);
+            working = true;
             bool result;
             try
             {
-                this.pathGrid = mapExt.getShipPathGrid;
-                this.regionGrid = this.mapExt.getWaterRegionGrid;
-                this.reachedIndex += 1u;
-                this.destRegions.Clear();
+                pathGrid = map.GetComponent<WaterMap>().getShipPathGrid;
+                regionGrid = map.GetComponent<WaterMap>().getWaterRegionGrid;
+                reachedIndex += 1u;
+                destRegions.Clear();
                 if(peMode == PathEndMode.OnCell)
                 {
                     WaterRegion region = WaterGridsUtility.GetRegion(dest.Cell, this.map, RegionType.Set_Passable);
@@ -304,7 +303,7 @@ namespace Vehicles.AI
         {
             IntVec3 foundCell = IntVec3.Invalid;
             WaterRegion[] directionRegionGrid = this.regionGrid.DirectGrid;
-            ShipPathGrid pathGrid = mapExt.getShipPathGrid;
+            ShipPathGrid pathGrid = map.GetComponent<WaterMap>().getShipPathGrid;
             CellIndices cellIndices = this.map.cellIndices;
             this.map.floodFiller.FloodFill(start, delegate (IntVec3 c)
             {
@@ -559,7 +558,5 @@ namespace Vehicles.AI
         private ShipPathGrid pathGrid;
 
         private WaterRegionGrid regionGrid;
-
-        private MapExtension mapExt;
     }
 }

@@ -18,10 +18,20 @@
 	<BoatFishingDesc>Gather fish. Depth of water affects fishing chances.</BoatFishingDesc>
 	<BaseSpeed>Base Speed</BaseSpeed>
 	
+	<AssignSeats>Assign Seats</AssignSeats>
+	<Assign>Assign</Assign>
+	<Assigned>Assigned</Assigned>
+	<Colonists>Colonists</Colonists>
+	<CancelAssigning>Cancel</CancelAssigning>
+	<ClearSeats>Clear</ClearSeats>
+	<RemoveFromRole>Remove</RemoveFromRole>
+	<AddToRole>Add</AddToRole>
+	
 	<TabCargo>Cargo</TabCargo>
 	<TabPassengers>Pawns</TabPassengers>
 	<TabBoatHealth>Health</TabBoatHealth>
 	<TabUpgrades>Upgrade</TabUpgrades>
+	<VehiclesTab>Vehicles</VehiclesTab>
 	<Cargo>Cargo</Cargo>
 	
 	<MainSettings>Main Settings</MainSettings>
@@ -112,6 +122,8 @@
 	<MessageCantAddWaypointBecauseRiverUnreachable>Boat is not able to travel on this river</MessageCantAddWaypointBecauseRiverUnreachable>
 	<TerrainReset>({0}) Water Regions have been reset.</TerrainReset>
 	<CantMoveDocked>Not enough pawns to set sail.</CantMoveDocked>
+	<CantAssignVehicle>Not enough pawns for {0}.</CantAssignVehicle>
+	<AssignFailure>Failed to assign {0}. {1}</AssignFailure>
 	<PackingSpotNotFoundBoats>Packing Spot was not found for Boat caravan. It is recommended you place a Packing Spot from Misc.</PackingSpotNotFoundBoats>
 	<ForceLeaveCaravan>Force to Leave</ForceLeaveCaravan>
 	<ForceLeaveCaravanDesc>Force Boat Caravan to leave the map. Will skip loading whatever items are not currently onboard</ForceLeaveCaravanDesc>
@@ -135,7 +147,9 @@
 	<CommandTradeDockDisable>Cannot trade with {0}. Must dock boat first</CommandTradeDockDisable>
 	<CaravanMustHaveEnoughSpaceOnShip>Not enough space on ships to house all pawns.</CaravanMustHaveEnoughSpaceOnShip>
 	<CaravanMustHaveEnoughPawnsToOperate>Not enough Pawns selected to set sail. Need {0}</CaravanMustHaveEnoughPawnsToOperate>
-
+	<CommandFormVehicleCaravan>Form Vehicle Caravan</CommandFormVehicleCaravan>
+	<CommandFormVehicleCaravanDesc>Form caravan with vehicles included.</CommandFormVehicleCaravanDesc>
+	
 	<!-- Upgrades -->
 	<ExtractCannon>Extract</ExtractCannon>
 	<Upgrade>Upgrade</Upgrade>

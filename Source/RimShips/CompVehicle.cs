@@ -34,7 +34,7 @@ namespace Vehicles
 
         private bool outOfFoodNotified = false;
 
-        public List<ShipHandler> handlers = new List<ShipHandler>();
+        public List<VehicleHandler> handlers = new List<VehicleHandler>();
         public VehicleMovementStatus movementStatus = VehicleMovementStatus.Online;
 
         public bool warnNoFuel;
@@ -98,9 +98,9 @@ namespace Vehicles
         {
             get
             {
-                foreach (ShipHandler handler in this.handlers)
+                foreach (VehicleHandler handler in this.handlers)
                 {
-                    if (handler.role.handlingType == HandlingTypeFlags.Movement && handler.handlers.Count < handler.role.slotsToOperate)
+                    if (handler.role.handlingTypes.Any(h => h == HandlingTypeFlags.Movement) && handler.handlers.Count < handler.role.slotsToOperate)
                     {
                         return false;
                     }
@@ -116,9 +116,9 @@ namespace Vehicles
             get
             {
                 int pawnCount = 0;
-                foreach (ShipRole r in Props.roles)
+                foreach (VehicleRole r in Props.roles)
                 {
-                    if (r.handlingType is HandlingTypeFlags.Movement)
+                    if (r.handlingTypes.Any(h => h == HandlingTypeFlags.Movement))
                         pawnCount += r.slotsToOperate;
                 }
                 return pawnCount >= 0 ? pawnCount : 0;
@@ -132,7 +132,7 @@ namespace Vehicles
                 List<Pawn> pawnsOnShip = new List<Pawn>();
                 if (!(handlers is null) && handlers.Count > 0)
                 {
-                    foreach (ShipHandler handler in handlers)
+                    foreach (VehicleHandler handler in handlers)
                     {
                         if (!(handler.handlers is null) && handler.handlers.Count > 0) pawnsOnShip.AddRange(handler.handlers);
                     }
@@ -149,9 +149,9 @@ namespace Vehicles
                 List<Pawn> crewOnShip = new List<Pawn>();
                 if (!(handlers is null))
                 {
-                    foreach (ShipHandler handler in handlers)
+                    foreach (VehicleHandler handler in handlers)
                     {
-                        if (handler.role.handlingType == HandlingTypeFlags.Movement)
+                        if (handler.role.handlingTypes.Any(h => h == HandlingTypeFlags.Movement))
                         {
                             crewOnShip.AddRange(handler.handlers);
                         }
@@ -166,9 +166,9 @@ namespace Vehicles
             get
             {
                 List<Pawn> weaponCrewOnShip = new List<Pawn>();
-                foreach(ShipHandler handler in handlers)
+                foreach(VehicleHandler handler in handlers)
                 {
-                    if (handler.role.handlingType is HandlingTypeFlags.Cannon)
+                    if (handler.role.handlingTypes.Any(h => h == HandlingTypeFlags.Cannon))
                     {
                         weaponCrewOnShip.AddRange(handler.handlers);
                     }
@@ -184,9 +184,9 @@ namespace Vehicles
                 List<Pawn> passengersOnShip = new List<Pawn>();
                 if(!(handlers is null))
                 {
-                    foreach(ShipHandler handler in handlers)
+                    foreach(VehicleHandler handler in handlers)
                     {
-                        if(handler.role.handlingType == HandlingTypeFlags.None)
+                        if(handler.role.handlingTypes.NullOrEmpty())
                         {
                             passengersOnShip.AddRange(handler.handlers);
                         }
@@ -203,7 +203,7 @@ namespace Vehicles
                 List<Pawn> pawnsOnShip = new List<Pawn>();
                 if(!(handlers is null) && handlers.Count > 0)
                 {
-                    foreach (ShipHandler handler in handlers)
+                    foreach (VehicleHandler handler in handlers)
                     {
                         if (!(handler.handlers is null) && handler.handlers.Count > 0) pawnsOnShip.AddRange(handler.handlers);
                     }
@@ -213,11 +213,11 @@ namespace Vehicles
             }
         }
 
-        public ShipHandler NextAvailableHandler
+        public VehicleHandler NextAvailableHandler
         {
             get
             {
-                foreach(ShipHandler handler in this.handlers)
+                foreach(VehicleHandler handler in this.handlers)
                 {
                     if(handler.AreSlotsAvailable)
                     {
@@ -232,7 +232,7 @@ namespace Vehicles
             get
             {
                 int x = 0;
-                foreach(ShipHandler handler in handlers)
+                foreach(VehicleHandler handler in handlers)
                 {
                     x += handler.role.slots - handler.handlers.Count;
                 }
@@ -245,11 +245,23 @@ namespace Vehicles
             get
             {
                 int x = 0;
-                foreach(ShipHandler handler in handlers)
+                foreach(VehicleHandler handler in handlers)
                 {
                     x += handler.role.slots;
                 }
                 return x;
+            }
+        }
+
+        public void AddHandlers(List<VehicleHandler> handlerList)
+        {
+            if (handlerList is null)
+                return;
+            foreach(VehicleHandler handler in handlerList)
+            {
+                var handlerPermanent = new VehicleHandler(this.Pawn, handler.role);
+                if(handler.currentlyReserving is null) handler.currentlyReserving = new List<Pawn>();
+                handlers.Add(handlerPermanent);
             }
         }
 
@@ -262,14 +274,9 @@ namespace Vehicles
             return value;
         }
 
-        public int PawnsInHandler(HandlingTypeFlags handlingTypeFlag)
+        public List<VehicleHandler> GetAllHandlersMatch(HandlingTypeFlags handlingTypeFlag, string cannonKey = "")
         {
-            return handlers.Where(x => x.role.handlingType == handlingTypeFlag).ToList().Sum(x => x.handlers.Count);
-        }
-
-        public int MaxPawnsForHandler(HandlingTypeFlags handlingTypeFlag)
-        {
-            return handlers.Where(x => x.role.handlingType == handlingTypeFlag).ToList().Sum(x => x.role.slots);
+            return handlers.FindAll(x => x.role.handlingTypes.Any(h => h == handlingTypeFlag) && (handlingTypeFlag != HandlingTypeFlags.Cannon || (!x.role.cannonIds.NullOrEmpty() && x.role.cannonIds.Contains(cannonKey))));
         }
 
         public void Rename()
@@ -375,7 +382,7 @@ namespace Vehicles
                     unloadAll.hotKey = KeyBindingDefOf.Misc2;
                     yield return unloadAll;
                 
-                    foreach (ShipHandler handler in handlers)
+                    foreach (VehicleHandler handler in handlers)
                     {
                         for (int i = 0; i < handler.handlers.Count; i++)
                         {
@@ -437,7 +444,7 @@ namespace Vehicles
                         continue;
                     Job job = new Job(JobDefOf_Ships.Board, this.parent);
                     p.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
-                    ShipHandler handler = p.IsColonistPlayerControlled ? this.NextAvailableHandler : this.handlers.Find(x => x.role.handlingType == HandlingTypeFlags.None);
+                    VehicleHandler handler = p.IsColonistPlayerControlled ? NextAvailableHandler : handlers.FirstOrDefault(h => h.role.handlingTypes.NullOrEmpty());
                     this.GiveLoadJob(p, handler);
                     this.ReserveSeat(p, handler);
                 }
@@ -445,7 +452,7 @@ namespace Vehicles
             FloatMenuOption opt2 = new FloatMenuOption("BoardShipGroupFail".Translate(this.Pawn.LabelShort), null, MenuOptionPriority.Default, null, null, 0f, null, null);
             opt2.Disabled = true;
             int r = 0;
-            foreach(ShipHandler h in this.handlers)
+            foreach(VehicleHandler h in this.handlers)
             {
                 r += h.currentlyReserving.Count;
             }
@@ -474,7 +481,7 @@ namespace Vehicles
                 yield break;
             }
             
-            foreach (ShipHandler handler in handlers)
+            foreach (VehicleHandler handler in handlers)
             {
                 if(handler.AreSlotsAvailable)
                 {
@@ -502,7 +509,7 @@ namespace Vehicles
             yield break;
         }
 
-        public void GiveLoadJob(Pawn pawn, ShipHandler handler)
+        public void GiveLoadJob(Pawn pawn, VehicleHandler handler)
         {
             if (this.bills is null) this.bills = new List<Jobs.Bill_BoardShip>();
 
@@ -599,10 +606,10 @@ namespace Vehicles
             {
                 if(Pawn.GetCaravan() != null && !Pawn.Spawned)
                 {
-                    List<ShipHandler> handlerList = this.handlers;
+                    List<VehicleHandler> handlerList = this.handlers;
                     for(int i = 0; i < handlerList.Count; i++)
                     {
-                        ShipHandler handler = handlerList[i];
+                        VehicleHandler handler = handlerList[i];
                         handler.handlers.TryTransferAllToContainer(Pawn.GetCaravan().pawns, false);
                     }
                     return;
@@ -617,7 +624,7 @@ namespace Vehicles
         {
             for (int i = 0; i < this.handlers.Count; i++)
             {
-                ShipHandler handler = this.handlers[i];
+                VehicleHandler handler = this.handlers[i];
                 if(handler.handlers.Remove(pawn)) return;
             }
         }
@@ -924,10 +931,10 @@ namespace Vehicles
             } 
         }
 
-        public void ReserveSeat(Pawn p, ShipHandler handler)
+        public void ReserveSeat(Pawn p, VehicleHandler handler)
         {
             if(p is null || !p.Spawned) return;
-            foreach(ShipHandler h in this.handlers)
+            foreach(VehicleHandler h in this.handlers)
             {
                 if(h != handler && h.currentlyReserving.Contains(p))
                 {
@@ -940,66 +947,66 @@ namespace Vehicles
 
         public bool ResolveSeating()
         {
-            if(this.AllCapablePawns.Count >= this.PawnCountToOperate)
-            {
-                for(int r = 0; r < 100; r++)
-                {
-                    for (int i = 0; i < this.handlers.Count; i++)
-                    {
-                        ShipHandler handler = this.handlers[i];
-                        if (handler.currentlyReserving.Count > 0)
-                            return false;
-                    }
-                    for (int i = 0; i < this.handlers.Count; i++)
-                    {
-                        ShipHandler handler = this.handlers[i];
-                        ShipHandler passengerHandler = this.handlers.Find(x => x.role.handlingType == HandlingTypeFlags.None);
-                        if (handler.handlers.Count > handler.role.slots)
-                        {
-                            int j = 0;
-                            while(handler.handlers.Count > handler.role.slots)
-                            {
-                                Pawn p = handler.handlers.InnerListForReading[j];
-                                handler.handlers.TryTransferToContainer(p, passengerHandler.handlers, false);
-                                j++;
-                            }
-                        }
-                        if (handler.role.handlingType == HandlingTypeFlags.Movement && handler.handlers.Count < handler.role.slotsToOperate)
-                        {
-                            if (passengerHandler.handlers.Count <= 0)
-                            {
-                                ShipHandler emergencyHandler = this.handlers.Find(x => x.role.handlingType < HandlingTypeFlags.Movement && x.handlers.Count > 0); //Can Optimize
-                                Pawn transferPawnE = emergencyHandler?.handlers.InnerListForReading.Find(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && x.RaceProps.Humanlike);
-                                if(transferPawnE is null)
-                                    continue;
-                                emergencyHandler?.handlers.TryTransferToContainer(transferPawnE, handler.handlers, false);
-                                continue;
-                            }
-                            Pawn transferingPawn = passengerHandler.handlers.InnerListForReading.Find(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && x.RaceProps.Humanlike);
-                            if(transferingPawn is null)
-                                continue;
-                            passengerHandler.handlers.TryTransferToContainer(transferingPawn, handler.handlers, false);
-                        }
-                        if (handler.role.handlingType == HandlingTypeFlags.Cannon && handler.handlers.Count < handler.role.slotsToOperate && this.CanMove)
-                        {
-                            if(passengerHandler.handlers.Count <= 0)
-                            {
-                                ShipHandler emergencyHandler = this.handlers.Find(x => x.role.handlingType < HandlingTypeFlags.Cannon && x.handlers.Count > 0); //Can Optimize
-                                Pawn transferPawnE = emergencyHandler?.handlers.InnerListForReading.Find(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && x.RaceProps.Humanlike);
-                                if(transferPawnE is null)
-                                    continue;
-                                emergencyHandler?.handlers.TryTransferToContainer(transferPawnE, handler.handlers, false);
-                                continue;
-                            }
-                            Pawn transferingPawn = passengerHandler.handlers.InnerListForReading.Find(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && x.RaceProps.Humanlike);
-                            if(transferingPawn is null)
-                                continue;
-                            passengerHandler.handlers.TryTransferToContainer(transferingPawn, handler.handlers, false);
-                        }
-                    }
-                }
-            }
-            return this.CanMove;
+            //if(AllCapablePawns.Count >= PawnCountToOperate)
+            //{
+            //    for(int r = 0; r < 100; r++)
+            //    {
+            //        for (int i = 0; i < handlers.Count; i++)
+            //        {
+            //            VehicleHandler handler = handlers[i];
+            //            if (handler.currentlyReserving.Count > 0)
+            //                return false;
+            //        }
+            //        for (int i = 0; i < handlers.Count; i++)
+            //        {
+            //            VehicleHandler handler = handlers[i];
+            //            VehicleHandler passengerHandler = handlers.FirstOrDefault(h => h.role.handlingTypes.NullOrEmpty());
+            //            if (handler.handlers.Count > handler.role.slots)
+            //            {
+            //                int j = 0;
+            //                while(handler.handlers.Count > handler.role.slots)
+            //                {
+            //                    Pawn p = handler.handlers.InnerListForReading[j];
+            //                    handler.handlers.TryTransferToContainer(p, passengerHandler.handlers, false);
+            //                    j++;
+            //                }
+            //            }
+            //            if (handler.role.handlingTypes.Any(h => h == HandlingTypeFlags.Movement) && handler.handlers.Count < handler.role.slotsToOperate)
+            //            {
+            //                if (passengerHandler.handlers.Count <= 0)
+            //                {
+            //                    VehicleHandler emergencyHandler = handlers.Find(x => x.role.handlingTypes.Any(h => h < HandlingTypeFlags.Movement) && x.handlers.Count > 0); //Can Optimize
+            //                    Pawn transferPawnE = emergencyHandler?.handlers.InnerListForReading.Find(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && x.RaceProps.Humanlike);
+            //                    if(transferPawnE is null)
+            //                        continue;
+            //                    emergencyHandler?.handlers.TryTransferToContainer(transferPawnE, handler.handlers, false);
+            //                    continue;
+            //                }
+            //                Pawn transferingPawn = passengerHandler.handlers.InnerListForReading.Find(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && x.RaceProps.Humanlike);
+            //                if(transferingPawn is null)
+            //                    continue;
+            //                passengerHandler.handlers.TryTransferToContainer(transferingPawn, handler.handlers, false);
+            //            }
+            //            if (handler.role.handlingTypes.Any(h => h == HandlingTypeFlags.Cannon) && handler.handlers.Count < handler.role.slotsToOperate && this.CanMove)
+            //            {
+            //                if(passengerHandler.handlers.Count <= 0)
+            //                {
+            //                    VehicleHandler emergencyHandler = this.handlers.Find(x => x.role.handlingTypes.Any(h => h < HandlingTypeFlags.Cannon) && x.handlers.Count > 0); //Can Optimize
+            //                    Pawn transferPawnE = emergencyHandler?.handlers.InnerListForReading.Find(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && x.RaceProps.Humanlike);
+            //                    if(transferPawnE is null)
+            //                        continue;
+            //                    emergencyHandler?.handlers.TryTransferToContainer(transferPawnE, handler.handlers, false);
+            //                    continue;
+            //                }
+            //                Pawn transferingPawn = passengerHandler.handlers.InnerListForReading.Find(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && x.RaceProps.Humanlike);
+            //                if(transferingPawn is null)
+            //                    continue;
+            //                passengerHandler.handlers.TryTransferToContainer(transferingPawn, handler.handlers, false);
+            //            }
+            //        }
+            //    }
+            //}
+            return CanMove;
         }
 
         public void CheckTurnSign(float? turnAngle = null)
@@ -1074,7 +1081,7 @@ namespace Vehicles
             if (Pawn.IsHashIntervalTick(150))
                 TrySatisfyPawnNeeds();
 
-            foreach (ShipHandler handler in handlers)
+            foreach (VehicleHandler handler in handlers)
             {
                 handler.ReservationHandler();
             }
@@ -1088,15 +1095,15 @@ namespace Vehicles
                 currentTravelCells = new List<IntVec3>();
             if (cargoToLoad is null)
                 cargoToLoad = new List<TransferableOneWay>();
-            foreach(ShipHandler handler in handlers)
+            foreach(VehicleHandler handler in handlers)
             {
                 if(handler.currentlyReserving is null) handler.currentlyReserving = new List<Pawn>();
             }
             if (!(Props.roles is null) && Props.roles.Count > 0)
             {
-                foreach(ShipRole role in Props.roles)
+                foreach(VehicleRole role in Props.roles)
                 {
-                    handlers.Add(new ShipHandler(Pawn, role));
+                    handlers.Add(new VehicleHandler(Pawn, role));
                 }
             }
         }

@@ -158,7 +158,8 @@ namespace Vehicles
             
             try
             {
-                Pawn.GetComp<CompCannons>().AddCannons(NodeUnlocking.cannonsUnlocked);
+                Pawn.GetComp<CompCannons>().AddCannons(NodeUnlocking.cannonsUnlocked.Keys.ToList());
+                Pawn.GetComp<CompVehicle>().AddHandlers(NodeUnlocking.cannonsUnlocked.Values.ToList());
                 NodeUnlocking.upgradeActive = true;
             }
             catch(Exception ex)

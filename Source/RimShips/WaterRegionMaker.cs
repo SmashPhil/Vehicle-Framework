@@ -25,7 +25,7 @@ namespace Vehicles
             WaterRegion result;
             try
             {
-                this.regionGrid = MapExtensionUtility.GetExtensionToMap(this.map).getWaterRegionGrid;
+                this.regionGrid = WaterMapUtility.GetExtensionToMap(this.map).getWaterRegionGrid;
                 this.newReg = WaterRegion.MakeNewUnfilled(root, this.map);
                 this.newReg.type = expectedRegionType;
                 //Portal type?
@@ -184,7 +184,7 @@ namespace Vehicles
                 root = c - rot.FacingCell * num2;
             }
             EdgeSpan span = new EdgeSpan(root, dir, length);
-            WaterRegionLink regionLink = MapExtensionUtility.GetExtensionToMap(this.map).getWaterRegionLinkDatabase.LinkFrom(span);
+            WaterRegionLink regionLink = WaterMapUtility.GetExtensionToMap(this.map).getWaterRegionLinkDatabase.LinkFrom(span);
             regionLink.Register(this.newReg);
             this.newReg.links.Add(regionLink);
         }

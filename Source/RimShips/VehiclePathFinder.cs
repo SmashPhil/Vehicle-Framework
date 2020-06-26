@@ -41,7 +41,7 @@ namespace Vehicles.AI
                 Log.Message($"[Vehicles] MainPath for {traverseParms.pawn.LabelShort} - ThreadId: [{Thread.CurrentThread.ManagedThreadId}] TaskId: [{Task.CurrentId}]");
 
             postCalculatedCells.Clear();
-            MapExtension mapExtension = map.GetComponent<MapExtension>();
+            WaterMap WaterMap = map.GetComponent<WaterMap>();
             if(DebugSettings.pathThroughWalls)
             {
                 traverseParms.mode = TraverseMode.PassAllDestroyableThings;
@@ -106,7 +106,7 @@ namespace Vehicles.AI
             {
                 if (waterPathing)
                 {
-                    if(!mapExtension.getShipReachability.CanReachShip(start, dest, peMode, traverseParms))
+                    if(!WaterMap.getShipReachability.CanReachShip(start, dest, peMode, traverseParms))
                     {
                         return PawnPath.NotFound;
                     }
@@ -121,7 +121,7 @@ namespace Vehicles.AI
             }
             cellIndices = map.cellIndices;
 
-            shipPathGrid = mapExtension.getShipPathGrid;
+            shipPathGrid = WaterMap.getShipPathGrid;
             pathGrid = map.pathGrid;
 
             this.edificeGrid = map.edificeGrid.InnerArray;
@@ -426,7 +426,6 @@ namespace Vehicles.AI
                                         {
                                             num17 += vehicleArray[num15];
                                         }
-                                        num17 += vehicleArray[num15];
                                         num17 += flag10 ? topGrid[num15].extraDraftedPerceivedPathCost : topGrid[num15].extraNonDraftedPerceivedPathCost;
                                     }
                                     if (byteGrid != null)
@@ -701,7 +700,7 @@ namespace Vehicles.AI
 
         public static bool BlocksDiagonalMovement(int index, Map map, bool waterPathing = true)
         {
-            bool walkableFast = waterPathing ? !map.GetComponent<MapExtension>().getShipPathGrid.WalkableFast(index) : !map.pathGrid.WalkableFast(index);
+            bool walkableFast = waterPathing ? !map.GetComponent<WaterMap>().getShipPathGrid.WalkableFast(index) : !map.pathGrid.WalkableFast(index);
             return  walkableFast || map.edificeGrid[index] is Building_Door;
         }
 

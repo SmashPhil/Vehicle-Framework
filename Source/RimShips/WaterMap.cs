@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace Vehicles.AI
 {
-    public sealed class MapExtension : MapComponent
+    public sealed class WaterMap : MapComponent
     {
-        public MapExtension(Map map) : base(map)
+        public WaterMap(Map map) : base(map)
         {
             ConstructComponents();
         }
@@ -26,6 +26,13 @@ namespace Vehicles.AI
 
         public WaterRegionAndRoomUpdater getWaterRegionAndRoomUpdater { get; private set; }
 
+        public override void FinalizeInit()
+        {
+            getShipPathGrid.RecalculateAllPerceivedPathCosts();
+            getWaterRegionAndRoomUpdater.Enabled = true;
+            getWaterRegionAndRoomUpdater.RebuildAllWaterRegions();
+        }
+
         public void ConstructComponents()
         {
             getShipPathGrid = new ShipPathGrid(map);
@@ -36,18 +43,6 @@ namespace Vehicles.AI
             getWaterRegionmaker = new WaterRegionMaker(map);
             getWaterRegionAndRoomUpdater = new WaterRegionAndRoomUpdater(map);
             getWaterRegionLinkDatabase = new WaterRegionLinkDatabase();
-        }
-
-        public void VerifyComponents()
-        {
-            if (getShipPathGrid is null) getShipPathGrid = new ShipPathGrid(map);
-            if (getShipPathFinder is null) getShipPathFinder = new VehiclePathFinder(map);
-            if (threadedPathFinderConstrained is null) threadedPathFinderConstrained = new VehiclePathFinder(map, false);
-            if (getShipReachability is null) getShipReachability = new ShipReachability(map);
-            if (getWaterRegionGrid is null) getWaterRegionGrid = new WaterRegionGrid(map);
-            if (getWaterRegionmaker is null) getWaterRegionmaker = new WaterRegionMaker(map);
-            if (getWaterRegionAndRoomUpdater is null) getWaterRegionAndRoomUpdater = new WaterRegionAndRoomUpdater(map);
-            if (getWaterRegionLinkDatabase is null) getWaterRegionLinkDatabase = new WaterRegionLinkDatabase();
         }
     }
 }

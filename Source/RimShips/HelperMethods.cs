@@ -8,6 +8,7 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
+using Verse.Sound;
 using RimWorld;
 using RimWorld.Planet;
 using Vehicles.AI;
@@ -97,7 +98,7 @@ namespace Vehicles
         public static int CostToMoveIntoCellShips(Pawn pawn, IntVec3 c)
         {
             int num = (c.x == pawn.Position.x || c.z == pawn.Position.z) ? pawn.TicksPerMoveCardinal : pawn.TicksPerMoveDiagonal;
-            num += MapExtensionUtility.GetExtensionToMap(pawn.Map)?.getShipPathGrid?.CalculatedCostAt(c) ?? 200;
+            num += WaterMapUtility.GetExtensionToMap(pawn.Map)?.getShipPathGrid?.CalculatedCostAt(c) ?? 200;
             if (pawn.CurJob != null)
             {
                 Pawn locomotionUrgencySameAs = pawn.jobs.curDriver.locomotionUrgencySameAs;
@@ -476,7 +477,7 @@ namespace Vehicles
                     {
                         return;
                     }
-                    foreach (ShipHandler handler in ship.GetComp<CompVehicle>().handlers)
+                    foreach (VehicleHandler handler in ship.GetComp<CompVehicle>().handlers)
                     {
                         if (handler.AreSlotsAvailable)
                         {
@@ -492,7 +493,7 @@ namespace Vehicles
                 while (sailors.Count > 0)
                 {
                     Pawn ship = ships[x];
-                    foreach (ShipHandler handler in ship.GetComp<CompVehicle>().handlers)
+                    foreach (VehicleHandler handler in ship.GetComp<CompVehicle>().handlers)
                     {
                         if (handler.AreSlotsAvailable)
                         {
@@ -579,6 +580,157 @@ namespace Vehicles
             if (flag3)
                 Messages.Message("CaravanMustHaveEnoughPawnsToOperate".Translate(prereq), MessageTypeDefOf.RejectInput, false);
             return !flag2 && !flag3;
+        }
+
+        public static void CreateVehicleCaravanTransferableWidgets(List<TransferableOneWay> transferables, out TransferableOneWayWidget pawnsTransfer, out TransferableVehicleWidget vehiclesTransfer, out TransferableOneWayWidget itemsTransfer, string thingCountTip, IgnorePawnsInventoryMode ignorePawnInventoryMass, Func<float> availableMassGetter, bool ignoreSpawnedCorpsesGearAndInventoryMass, int tile, bool playerPawnsReadOnly = false)
+        {
+	        pawnsTransfer = new TransferableOneWayWidget(null, null, null, thingCountTip, true, ignorePawnInventoryMass, false, availableMassGetter, 0f, ignoreSpawnedCorpsesGearAndInventoryMass, tile, true, true, true, false, true, false, playerPawnsReadOnly);
+            vehiclesTransfer = new TransferableVehicleWidget(null, null, null, thingCountTip, true, ignorePawnInventoryMass, false, availableMassGetter, 0f, ignoreSpawnedCorpsesGearAndInventoryMass, tile, true, false, false, playerPawnsReadOnly);
+	        AddVehicleAndPawnSections(pawnsTransfer, vehiclesTransfer, transferables);
+	        itemsTransfer = new TransferableOneWayWidget(from x in transferables
+	        where x.ThingDef.category != ThingCategory.Pawn
+	        select x, null, null, thingCountTip, true, ignorePawnInventoryMass, false, availableMassGetter, 0f, ignoreSpawnedCorpsesGearAndInventoryMass, tile, true, false, false, true, false, true, false);
+        }
+
+        public static void AddVehicleAndPawnSections(TransferableOneWayWidget pawnWidget, TransferableVehicleWidget vehicleWidget, List<TransferableOneWay> transferables)
+        {
+	        IEnumerable<TransferableOneWay> source = from x in transferables
+	        where x.ThingDef.category == ThingCategory.Pawn
+	        select x;
+            vehicleWidget.AddSection("VehiclesTab".Translate(), from x in source
+            where !(((Pawn)x.AnyThing).GetComp<CompVehicle>() is null) && !((Pawn)x.AnyThing).OnDeepWater()
+            select x);
+	        pawnWidget.AddSection("ColonistsSection".Translate(), from x in source
+	        where ((Pawn)x.AnyThing).IsFreeColonist
+	        select x);
+	        pawnWidget.AddSection("PrisonersSection".Translate(), from x in source
+	        where ((Pawn)x.AnyThing).IsPrisoner
+	        select x);
+	        pawnWidget.AddSection("CaptureSection".Translate(), from x in source
+	        where ((Pawn)x.AnyThing).Downed && CaravanUtility.ShouldAutoCapture((Pawn)x.AnyThing, Faction.OfPlayer)
+	        select x);
+	        pawnWidget.AddSection("AnimalsSection".Translate(), from x in source
+	        where ((Pawn)x.AnyThing).RaceProps.Animal
+	        select x);
+            vehicleWidget.AvailablePawns = source.Where(x => !IsVehicle(x.AnyThing as Pawn) && (x.AnyThing as Pawn).IsColonistPlayerControlled).ToList();
+        }
+
+        public static void DoCountAdjustInterface(Rect rect, Transferable trad, int index, int min, int max, bool flash = false, List<TransferableCountToTransferStoppingPoint> extraStoppingPoints = null, bool readOnly = false)
+        {
+	        var stoppingPoints = new List<TransferableCountToTransferStoppingPoint>();
+	        if (extraStoppingPoints != null)
+	        {
+		        stoppingPoints.AddRange(extraStoppingPoints);
+	        }
+	        for (int i = stoppingPoints.Count - 1; i >= 0; i--)
+	        {
+		        if (stoppingPoints[i].threshold != 0 && (stoppingPoints[i].threshold <= min || stoppingPoints[i].threshold >= max))
+		        {
+			        stoppingPoints.RemoveAt(i);
+		        }
+	        }
+	        bool flag = false;
+	        for (int j = 0; j < stoppingPoints.Count; j++)
+	        {
+		        if (stoppingPoints[j].threshold == 0)
+		        {
+			        flag = true;
+			        break;
+		        }
+	        }
+	        if (!flag)
+	        {
+		        stoppingPoints.Add(new TransferableCountToTransferStoppingPoint(0, "0", "0"));
+	        }
+	        DoCountAdjustInterfaceInternal(rect, trad, stoppingPoints, index, min, max, flash, readOnly);
+        }
+
+        private static void DoCountAdjustInterfaceInternal(Rect rect, Transferable trad, List<TransferableCountToTransferStoppingPoint> stoppingPoints, int index, int min, int max, bool flash, bool readOnly)
+        {
+            
+	        rect = rect.Rounded();
+	        Rect rect2 = new Rect(rect.center.x - 45f, rect.center.y - 12.5f, 90f, 25f).Rounded();
+	        if (flash)
+	        {
+		        GUI.DrawTexture(rect2, TransferableUIUtility.FlashTex);
+	        }
+	        TransferableOneWay transferableOneWay = trad as TransferableOneWay;
+
+		    bool flag3 = trad.CountToTransfer != 0;
+		    bool flag4 = flag3;
+		    Widgets.Checkbox(rect2.position, ref flag4, 24f, false, true, null, null);
+		    if (flag4 != flag3)
+		    {
+			    if (flag4)
+			    {
+				    trad.AdjustTo(trad.GetMaximumToTransfer());
+			    }
+			    else
+			    {
+				    trad.AdjustTo(trad.GetMinimumToTransfer());
+			    }
+		    }
+	        if (trad.CountToTransfer != 0)
+	        {
+		        Rect position = new Rect(rect2.x + rect2.width / 2f - (float)(TradeArrow.width / 2), rect2.y + rect2.height / 2f - (float)(TradeArrow.height / 2), (float)TradeArrow.width, (float)TradeArrow.height);
+		        TransferablePositiveCountDirection positiveCountDirection2 = trad.PositiveCountDirection;
+		        if ((positiveCountDirection2 == TransferablePositiveCountDirection.Source && trad.CountToTransfer > 0) || (positiveCountDirection2 == TransferablePositiveCountDirection.Destination && trad.CountToTransfer < 0))
+		        {
+			        position.x += position.width;
+			        position.width *= -1f;
+		        }
+		        GUI.DrawTexture(position, TradeArrow);
+	        }
+        }
+
+        public static void DrawVehicleTransferableInfo(Transferable trad, Rect idRect, Color labelColor)
+        {
+	        if (!trad.HasAnyThing && trad.IsThing)
+	        {
+		        return;
+	        }
+	        if (Mouse.IsOver(idRect))
+	        {
+		        Widgets.DrawHighlight(idRect);
+	        }
+	        Rect rect = new Rect(0f, 0f, 27f, 27f);
+	        if (trad.IsThing)
+	        {
+                Widgets.ThingIcon(rect, trad.AnyThing, 1f);
+	        }
+	        else
+	        {
+		        trad.DrawIcon(rect);
+	        }
+	        if (trad.IsThing)
+	        {
+		        //Widgets.InfoCardButton(40f, 0f, trad.AnyThing);
+	        }
+	        Text.Anchor = TextAnchor.MiddleLeft;
+	        Rect rect2 = new Rect(40f, 0f, idRect.width - 80f, idRect.height);
+	        Text.WordWrap = false;
+	        GUI.color = labelColor;
+	        Widgets.Label(rect2, trad.LabelCap);
+	        GUI.color = Color.white;
+	        Text.WordWrap = true;
+	        if (Mouse.IsOver(idRect))
+	        {
+		        Transferable localTrad = trad;
+		        TooltipHandler.TipRegion(idRect, new TipSignal(delegate()
+		        {
+			        if (!localTrad.HasAnyThing && localTrad.IsThing)
+			        {
+				        return "";
+			        }
+			        string text = localTrad.LabelCap;
+			        string tipDescription = localTrad.TipDescription;
+			        if (!tipDescription.NullOrEmpty())
+			        {
+				        text = text + ": " + tipDescription;
+			        }
+			        return text;
+		        }, localTrad.GetHashCode()));
+	        }
         }
         #endregion
 
@@ -1220,7 +1372,7 @@ namespace Vehicles
             }
         }
 
-        public static void DoItemsListForShip(Rect inRect, ref float curY, ref List<Thing> tmpSingleThing, ITab_Pawn_FormingCaravan instance)
+        public static void DoItemsListForVehicle(Rect inRect, ref float curY, ref List<Thing> tmpSingleThing, ITab_Pawn_FormingCaravan instance)
         {
             LordJob_FormAndSendCaravanShip lordJob_FormAndSendCaravanShip = (LordJob_FormAndSendCaravanShip)(Find.Selector.SingleSelectedThing as Pawn).GetLord().LordJob;
             Rect position = new Rect(0f, curY, (inRect.width - 10f) / 2f, inRect.height);
@@ -1271,6 +1423,38 @@ namespace Vehicles
             }
             GUI.EndGroup();
             curY += Mathf.Max(a, b);
+        }
+
+        public static void LabelUnderlined(Rect rect, string label, Color labelColor, Color lineColor)
+        {
+	        Color color = GUI.color;
+	        rect.y += 3f;
+	        GUI.color = labelColor;
+	        Text.Anchor = TextAnchor.UpperLeft;
+	        Widgets.Label(rect, label);
+	        rect.y += 20f;
+            GUI.color = lineColor;
+	        Widgets.DrawLineHorizontal(rect.x - 1, rect.y, rect.width - 1);
+	        rect.y += 2f;
+	        GUI.color = color;
+        }
+
+        public static void LabelUnderlined(Rect rect, string label, string label2, Color labelColor, Color label2Color, Color lineColor)
+        {
+	        Color color = GUI.color;
+	        rect.y += 3f;
+	        GUI.color = labelColor;
+	        Text.Anchor = TextAnchor.UpperLeft;
+	        Widgets.Label(rect, label);
+            GUI.color = label2Color;
+            Rect rect2 = new Rect(rect);
+            rect2.x += Text.CalcSize(label).x + 5f;
+	        Widgets.Label(rect2, label2);
+            rect.y += 20f;
+            GUI.color = lineColor;
+	        Widgets.DrawLineHorizontal(rect.x - 1, rect.y, rect.width - 1);
+	        rect.y += 2f;
+	        GUI.color = color;
         }
         #endregion
 
@@ -1536,6 +1720,7 @@ namespace Vehicles
 
         public static CannonTargeter CannonTargeter = new CannonTargeter();
         public static Texture2D missingIcon;
+        public static Dictionary<Pawn, Pair<VehiclePawn, VehicleHandler>> assignedSeats = new Dictionary<Pawn, Pair<VehiclePawn, VehicleHandler>>();
 
         public static Texture2D FillableBarBackgroundTex = SolidColorMaterials.NewSolidColorTexture(Color.black);
         public static Texture2D FillableBarInnerTex = SolidColorMaterials.NewSolidColorTexture(new ColorInt(19, 22, 27).ToColor);
@@ -1551,5 +1736,7 @@ namespace Vehicles
 
         public static Texture2D FuelStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(60, 30, 30).ToColor);
         public static Texture2D FuelAddedStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(60, 30, 30, 120).ToColor);
+
+        private static readonly Texture2D TradeArrow = ContentFinder<Texture2D>.Get("UI/Widgets/TradeArrow", true);
     }
 }

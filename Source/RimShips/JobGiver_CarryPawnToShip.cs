@@ -21,7 +21,7 @@ namespace Vehicles.Jobs
             if (pawn2 is null)
                 return null;
             Pawn ship = this.FindShipToDeposit(pawn, pawn2);
-            ShipHandler handler = ship.GetComp<CompVehicle>().handlers.Find(x => x.role.handlingType == HandlingTypeFlags.None);
+            VehicleHandler handler = ship.GetComp<CompVehicle>().handlers.Find(x => x.role.handlingTypes.NullOrEmpty());
             return new Job(JobDefOf_Ships.CarryPawnToShip, pawn2, ship)
             {
                 count = 1
@@ -48,7 +48,7 @@ namespace Vehicles.Jobs
         private Pawn FindShipToDeposit(Pawn pawn, Pawn downedPawn)
         {
             List<Pawn> ships = pawn.GetLord().ownedPawns.Where(x => HelperMethods.IsVehicle(x)).ToList();
-            return ships.MaxBy(x => x.GetComp<CompVehicle>().Props.roles.Find(y => y.handlingType == HandlingTypeFlags.None).slots);
+            return ships.MaxBy(x => x.GetComp<CompVehicle>().Props.roles.Find(y => y.handlingTypes.NullOrEmpty()).slots);
         }
     }
 }

@@ -25,7 +25,9 @@ namespace Vehicles
 
         public Dictionary<StatUpgrade, float> values = new Dictionary<StatUpgrade, float>();
 
-        public List<CannonHandler> cannonsUnlocked = new List<CannonHandler>();
+        public Dictionary<CannonHandler, VehicleRole> cannonUpgrades = new Dictionary<CannonHandler, VehicleRole>();
+
+        internal Dictionary<CannonHandler, VehicleHandler> cannonsUnlocked = new Dictionary<CannonHandler, VehicleHandler>();
         
         public Dictionary<ThingDef, int> cost = new Dictionary<ThingDef,int>();
 
@@ -53,6 +55,7 @@ namespace Vehicles
         public UpgradeNode(UpgradeNode reference, VehiclePawn parent)
         {
             nodeID = Find.UniqueIDsManager.GetNextThingID();
+            this.parent = parent;
 
             label = reference.label;
             upgradeID = reference.upgradeID;
@@ -61,7 +64,13 @@ namespace Vehicles
             disableIfUpgradeNodeEnabled = reference.disableIfUpgradeNodeEnabled;
             upgradeCategory = reference.upgradeCategory;
             values = reference.values;
-            cannonsUnlocked = reference.cannonsUnlocked;
+
+            cannonUpgrades = reference.cannonUpgrades;
+            foreach(KeyValuePair<CannonHandler, VehicleRole> cu in cannonUpgrades)
+            {
+                cannonsUnlocked.Add(cu.Key, new VehicleHandler(parent, cu.Value));
+            }
+
             cost = reference.cost;
             researchPrerequisites = reference.researchPrerequisites;
             prerequisiteNodes = reference.prerequisiteNodes;
@@ -69,7 +78,6 @@ namespace Vehicles
             gridCoordinate = reference.gridCoordinate;
             upgradeTime = reference.upgradeTime;
 
-            this.parent = parent;
             itemContainer = new ThingOwner<Thing>(this, false, LookMode.Deep);
         }
 
@@ -198,13 +206,17 @@ namespace Vehicles
                 values = new Dictionary<StatUpgrade, float>();
 
             if(cannonsUnlocked is null)
-                cannonsUnlocked = new List<CannonHandler>();
+                cannonsUnlocked = new Dictionary<CannonHandler, VehicleHandler>();
 
-            foreach(CannonHandler cannon in cannonsUnlocked)
+            foreach(KeyValuePair<CannonHandler,VehicleHandler> cannon in cannonsUnlocked)
             {
-                if(cannon.uniqueID < 0)
+                if(cannon.Key.uniqueID < 0)
                 {
-                    cannon.uniqueID = Find.UniqueIDsManager.GetNextThingID();
+                    cannon.Key.uniqueID = Find.UniqueIDsManager.GetNextThingID();
+                }
+                if(cannon.Value.uniqueID < 0)
+                {
+                    cannon.Value.uniqueID = Find.UniqueIDsManager.GetNextThingID();
                 }
             }
 
@@ -288,7 +300,7 @@ namespace Vehicles
 
             Scribe_Collections.Look(ref researchPrerequisites, "researchPrerequisites", LookMode.Def);
             
-            Scribe_Collections.Look(ref cannonsUnlocked, "cannonsUnlocked", LookMode.Deep);
+            Scribe_Collections.Look(ref cannonsUnlocked, "cannonsUnlocked", LookMode.Deep, LookMode.Deep);
 
             Scribe_Collections.Look(ref prerequisiteNodes, "prerequisiteNodes", LookMode.Value);
             Scribe_Values.Look(ref imageFilePath, "imageFilePath");

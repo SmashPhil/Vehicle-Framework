@@ -10,7 +10,7 @@ namespace Vehicles.AI
         public RegionCostCalculatorShips(Map map)
         {
             this.map = map;
-            this.mapE = MapExtensionUtility.GetExtensionToMap(map);
+            this.mapE = WaterMapUtility.GetExtensionToMap(map);
             this.preciseRegionLinkDistancesDistanceGetter = new Func<int, int, float>(this.PreciseRegionLinkDistancesDistanceGetter);
         }
 
@@ -365,7 +365,7 @@ namespace Vehicles.AI
 
         private Map map;
 
-        private MapExtension mapE;
+        private WaterMap mapE;
 
         private WaterRegion[] regionGrid;
 

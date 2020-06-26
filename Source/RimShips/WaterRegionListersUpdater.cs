@@ -70,7 +70,7 @@ namespace Vehicles
                 IntVec3 intVec = iterator.Current;
                 if(intVec.InBoundsShip(map))
                 {
-                    WaterRegion validRegionAt_NoRebuild = MapExtensionUtility.GetExtensionToMap(map).getWaterRegionGrid.GetValidRegionAt_NoRebuild(intVec);
+                    WaterRegion validRegionAt_NoRebuild = WaterMapUtility.GetExtensionToMap(map).getWaterRegionGrid.GetValidRegionAt_NoRebuild(intVec);
                     if(!(validRegionAt_NoRebuild is null) && validRegionAt_NoRebuild.type.Passable() && !outRegions.Contains(validRegionAt_NoRebuild))
                     {
                         if(cellRect.Contains(intVec))

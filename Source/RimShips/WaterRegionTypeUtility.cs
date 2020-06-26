@@ -21,7 +21,7 @@ namespace Vehicles
                 return RegionType.None;
             if(!(c.GetDoor(map) is null))
                 return RegionType.Portal;
-            if(GenGridShips.Walkable(c, MapExtensionUtility.GetExtensionToMap(map)))
+            if(GenGridShips.Walkable(c, WaterMapUtility.GetExtensionToMap(map)))
                 return RegionType.Normal;
             return RegionType.ImpassableFreeAirExchange;
         }

@@ -120,7 +120,7 @@ namespace Vehicles
                 return false;
             }
             Rot4 dir = Find.World.CoastDirectionAt(map.Tile).IsValid ? Find.World.CoastDirectionAt(map.Tile) : !Find.WorldGrid[map.Tile].Rivers.NullOrEmpty() ? SPExtra.RiverDirection(map) : Rot4.Invalid;
-            result = CellFinderExtended.RandomEdgeCell(dir, map, (IntVec3 c) => GenGridShips.Standable(c, map, MapExtensionUtility.GetExtensionToMap(map)) && !c.Fogged(map));
+            result = CellFinderExtended.RandomEdgeCell(dir, map, (IntVec3 c) => GenGridShips.Standable(c, map, WaterMapUtility.GetExtensionToMap(map)) && !c.Fogged(map));
             return true;
         }
 
@@ -161,7 +161,7 @@ namespace Vehicles
 
         public static IntVec3 RandomSpawnCellForPawnNear(IntVec3 root, Map map, int firstTryWithRadius = 4)
         {
-            MapExtension mapE = MapExtensionUtility.GetExtensionToMap(map);
+            WaterMap mapE = WaterMapUtility.GetExtensionToMap(map);
             if (GenGridShips.Standable(root, map, mapE) && root.GetFirstPawn(map) is null)
             {
                 return root;

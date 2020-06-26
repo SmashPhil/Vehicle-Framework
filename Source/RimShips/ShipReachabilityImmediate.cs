@@ -9,7 +9,7 @@ namespace Vehicles.AI
         public static bool CanReachImmediateShip(IntVec3 start, LocalTargetInfo target, Map map, PathEndMode peMode, Pawn pawn)
         {
             if (!target.IsValid) return false;
-            target = (LocalTargetInfo)GenPathShip.ResolvePathMode(pawn, target.ToTargetInfo(map), ref peMode, MapExtensionUtility.GetExtensionToMap(map));
+            target = (LocalTargetInfo)GenPathShip.ResolvePathMode(pawn, target.ToTargetInfo(map), ref peMode);
             if(target.HasThing)
             {
                 Thing thing = target.Thing;

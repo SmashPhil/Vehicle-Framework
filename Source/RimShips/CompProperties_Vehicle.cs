@@ -1,6 +1,8 @@
 ﻿using RimWorld;
 using Verse;
 using System.Collections.Generic;
+using RimWorld.Planet;
+using UnityEngine;
 
 namespace Vehicles
 {
@@ -46,7 +48,9 @@ namespace Vehicles
         public float turnSpeed = 0.1f;
 
         public bool manhunterTargetsVehicle = false;
-        public bool useFullHitboxPathing = true; //Add to guide : REDO
+
+        public Vector2 displayUICoord;
+        public Vector2 displayUISize;
 
         public string healthLabel_Healthy = "Operational";
         public string healthLabel_Injured = "Needs Repairs";
@@ -57,8 +61,12 @@ namespace Vehicles
 
         public string iconTexPath = "UI/DefaultVehicleIcon";
 
+
         public Dictionary<TerrainDef, int> customTerrainCosts; //Add to guide
-        public Dictionary<ThingDef, int> customThingCosts; //Add to guide
+        public Dictionary<ThingDef, int> customThingCosts; //Add to guide : implement
+
+        public Dictionary<BiomeDef, int> customBiomeCosts; //Add to guide : implement
+        public Dictionary<FeatureDef, int> customFeatureCosts; //Add to guide : implement
 
         public VehiclePermissions vehicleMovementPermissions = VehiclePermissions.DriverNeeded;
         public PowerType vehiclePowerType = PowerType.Fuel;
@@ -68,7 +76,7 @@ namespace Vehicles
         public NavigationCategory navigationCategory = NavigationCategory.Manual;
 
         public RiverDef riverTraversability = RiverDefOf.HugeRiver;
-        public List<ShipRole> roles  = new List<ShipRole>();
+        public List<VehicleRole> roles  = new List<VehicleRole>();
         public SoundDef soundWhileDrafted; //REDO
         public ThingDef buildDef;
     }

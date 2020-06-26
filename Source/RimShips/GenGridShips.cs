@@ -63,12 +63,12 @@ namespace Vehicles.AI
             return v.x >= 0f && v.z >= 0f && v.x < (float)size.x && v.z < (float)size.z;
         }
 
-        public static bool Walkable(this IntVec3 c, MapExtension mapE)
+        public static bool Walkable(this IntVec3 c, WaterMap mapE)
         {
             return mapE.getShipPathGrid.Walkable(c);
         }
 
-        public static bool Standable(this IntVec3 c, Map map, MapExtension mapE)
+        public static bool Standable(this IntVec3 c, Map map, WaterMap mapE)
         {
             if(!mapE.getShipPathGrid.Walkable(c))
             {

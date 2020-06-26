@@ -39,7 +39,7 @@ namespace Vehicles.UI
                 return base.SelPawn.TryGetComp<CompVehicle>() is null ? new List<Pawn>() : base.SelPawn.GetComp<CompVehicle>().AllPawnsAboard;
             }
         }
-        private List<ShipHandler> Handlers
+        private List<VehicleHandler> Handlers
         {
             get
             {
@@ -57,7 +57,7 @@ namespace Vehicles.UI
             Widgets.BeginScrollView(rect, ref scrollPosition, viewRect, true);
             float num = 0f;
             bool flag = false;
-            foreach(ShipHandler handler in Handlers)
+            foreach(VehicleHandler handler in Handlers)
             {
                 Widgets.ListSeparator(ref num, viewRect.width, handler.role.label);
                 foreach(Pawn pawn in handler.handlers.InnerListForReading)

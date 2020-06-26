@@ -19,7 +19,7 @@
 					<graphicClass>Vehicles.Graphic_OmniDirectional</graphicClass>
 					<drawSize>(4,7)</drawSize>
 					<shaderType>CutoutComplex</shaderType>
-					<color>(155,0,0)</color>
+					<color>(255,255,255)</color>
 					<shadowData>
 						<volume>(0.4,0.1,0.4)</volume>
 					</shadowData>
@@ -71,7 +71,7 @@
 		</corePart>
 	</BodyDef>
 	
-	<ThingDef ParentName="BaseVehiclePawn">
+	<ThingDef ParentName="BaseVehiclePawnUpgradeable">
 		<defName>SPVehicles_Tank</defName>
 		<label>Tank</label>
 		<description>A heavy warship to rule the seas.</description>
@@ -164,11 +164,13 @@
 				<movesWhenDowned>false</movesWhenDowned>
 				
 				<vehicleMovementPermissions>DriverNeeded</vehicleMovementPermissions>
-				<riverTraversability>HugeRiver</riverTraversability>
 				<vehiclePowerType>Fuel</vehiclePowerType>
 				<vehicleCategory>Combat</vehicleCategory>
 				<vehicleTech>Industrial</vehicleTech>
 				<vehicleType>Land</vehicleType>
+				
+				<displayUICoord>(0,0)</displayUICoord>
+				<displayUISize>(323.75, 500)</displayUISize>
 				
 				<nameable>true</nameable>
 				<buildDef>SPVehicles_Tank_Blueprint</buildDef>
@@ -183,35 +185,52 @@
 				<healthLabel_Healthy>Operational</healthLabel_Healthy>
 				<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
 				<healthLabel_Immobile>Inoperable</healthLabel_Immobile>
-				<healthLabel_Dead>Sunken</healthLabel_Dead>
-				<healthLabel_Beached>Beached</healthLabel_Beached>
 				
 				<hitboxOffsetX>0.0</hitboxOffsetX>
 				<hitboxOffsetZ>0.0</hitboxOffsetZ>
 				
 				<roles>
 					<li>
-						<label>Captain</label>
-						<handlingType>Movement</handlingType>
+						<label>Commander</label>
+						<handlingTypes>
+							<li>Movement</li>
+							<li>Cannon</li>
+						</handlingTypes>
+						<cannonIds>
+							<li>50cal</li>
+						</cannonIds>
 						<slots>1</slots>
 						<slotsToOperate>1</slotsToOperate>
 					</li>
 					<li>
-						<label>Crew</label>
-						<handlingType>Movement</handlingType>
+						<label>Driver</label>
+						<handlingTypes>
+							<li>Movement</li>
+						</handlingTypes>
 						<slots>1</slots>
 						<slotsToOperate>1</slotsToOperate>
 					</li>
 					<li>
-						<label>Cannons</label>
-						<handlingType>Cannon</handlingType>
+						<label>Gunner</label>
+						<handlingTypes>
+							<li>Cannon</li>
+						</handlingTypes>
+						<cannonIds>
+							<li>mainTurret</li>
+						</cannonIds>
 						<slots>1</slots>
 						<slotsToOperate>1</slotsToOperate>
 					</li>
 					<li>
-						<label>Passenger</label>
-						<handlingType>None</handlingType>
-						<slots>10</slots>
+						<label>Loader</label>
+						<handlingTypes>
+							<li>Cannon</li>
+						</handlingTypes>
+						<cannonIds>
+							<li>mainTurret</li>
+						</cannonIds>
+						<slots>1</slots>
+						<slotsToOperate>1</slotsToOperate>
 					</li>
 				</roles>
 				
@@ -238,6 +257,7 @@
 						<aimPieOffset/>
 						<drawLayer>2</drawLayer>
 						
+						<key>50cal</key>
 						<parentKey>mainTurret</parentKey>
 					</li>
 					<li>
@@ -245,6 +265,8 @@
 						<cannonRenderLocation>(0,0)</cannonRenderLocation>
 						<cannonRenderOffset>(0, 0)</cannonRenderOffset>
 						<cannonTurretDrawSize>(7, 7)</cannonTurretDrawSize>
+						
+						<autoTargeting>true</autoTargeting>
 						
 						<angleRestricted/>
 						<aimPieOffset/>

@@ -9,7 +9,7 @@ namespace Vehicles
         {
             if (!c.InBoundsShip(map))
                 return null;
-            WaterRegion validRegionAt = MapExtensionUtility.GetExtensionToMap(map).getWaterRegionGrid.GetValidRegionAt(c);
+            WaterRegion validRegionAt = WaterMapUtility.GetExtensionToMap(map).getWaterRegionGrid.GetValidRegionAt(c);
             return !(validRegionAt is null) && (validRegionAt.type & allowedRegionTypes) != RegionType.None ? validRegionAt : null;
         }
 
@@ -39,7 +39,7 @@ namespace Vehicles
 
         public static WaterRoom RoomAtFast(IntVec3 c, Map map, RegionType allowedRegionTypes = RegionType.Set_Passable)
         {
-            WaterRegion validRegionAt = MapExtensionUtility.GetExtensionToMap(map)?.getWaterRegionGrid?.GetValidRegionAt(c);
+            WaterRegion validRegionAt = WaterMapUtility.GetExtensionToMap(map)?.getWaterRegionGrid?.GetValidRegionAt(c);
             if(!(validRegionAt is null) && (validRegionAt.type & allowedRegionTypes) != RegionType.None)
                 return validRegionAt.Room;
             return null;

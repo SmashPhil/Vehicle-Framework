@@ -4,7 +4,7 @@ namespace Vehicles.Jobs
 {
     public class Bill_BoardShip : IExposable
     {
-        public ShipHandler handler;
+        public VehicleHandler handler;
         public Pawn pawnToBoard;
 
         public Bill_BoardShip()
@@ -12,7 +12,7 @@ namespace Vehicles.Jobs
 
         }
 
-        public Bill_BoardShip(Pawn newBoard, ShipHandler newHandler)
+        public Bill_BoardShip(Pawn newBoard, VehicleHandler newHandler)
         {
             pawnToBoard = newBoard;
             handler = newHandler;

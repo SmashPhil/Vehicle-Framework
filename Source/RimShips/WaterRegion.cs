@@ -19,7 +19,7 @@ namespace Vehicles
         {
             get
             {
-                WaterRegionGrid regions = MapExtensionUtility.GetExtensionToMap(this.Map).getWaterRegionGrid;
+                WaterRegionGrid regions = WaterMapUtility.GetExtensionToMap(this.Map).getWaterRegionGrid;
                 for(int z = this.extentsClose.minZ; z <= this.extentsClose.maxX; z++)
                 {
                     for(int x = this.extentsClose.minX; x <= this.extentsClose.maxX; x++)
@@ -107,7 +107,7 @@ namespace Vehicles
             {
                 Map map = this.Map;
                 CellIndices cellIndices = map.cellIndices;
-                WaterRegion[] directGrid = MapExtensionUtility.GetExtensionToMap(map).getWaterRegionGrid.DirectGrid;
+                WaterRegion[] directGrid = WaterMapUtility.GetExtensionToMap(map).getWaterRegionGrid.DirectGrid;
                 for (int i = 0; i < 1000; i++)
                 {
                     IntVec3 randomCell = this.extentsClose.RandomCell;
@@ -126,7 +126,7 @@ namespace Vehicles
             {
                 Map map = this.Map;
                 CellIndices cellIndices = map.cellIndices;
-                WaterRegion[] directGrid = MapExtensionUtility.GetExtensionToMap(map).getWaterRegionGrid.DirectGrid;
+                WaterRegion[] directGrid = WaterMapUtility.GetExtensionToMap(map).getWaterRegionGrid.DirectGrid;
                 CellRect.CellRectIterator iterator = this.extentsClose.GetIterator();
                 while(!iterator.Done())
                 {

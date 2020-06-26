@@ -6,7 +6,7 @@ namespace Vehicles.AI
 {
     public static class GenPathShip
     {
-        public static TargetInfo ResolvePathMode(Pawn pawn, TargetInfo dest, ref PathEndMode peMode, MapExtension mapE)
+        public static TargetInfo ResolvePathMode(Pawn pawn, TargetInfo dest, ref PathEndMode peMode)
         {
             if(dest.HasThing && dest.Thing.Spawned)
             {
@@ -24,12 +24,12 @@ namespace Vehicles.AI
             }
             if(peMode == PathEndMode.ClosestTouch)
             {
-                peMode = GenPathShip.ResolveClosestTouchPathMode(pawn, mapE, dest.Cell);
+                peMode = GenPathShip.ResolveClosestTouchPathMode(pawn, pawn.Map.GetComponent<WaterMap>(), dest.Cell);
             }
             return dest;
         }
 
-        public static PathEndMode ResolveClosestTouchPathMode(Pawn pawn, MapExtension mapE, IntVec3 target)
+        public static PathEndMode ResolveClosestTouchPathMode(Pawn pawn, WaterMap mapE, IntVec3 target)
         {
             if(GenPathShip.ShouldNotEnterCell(pawn, mapE, target))
             {
@@ -38,7 +38,7 @@ namespace Vehicles.AI
             return PathEndMode.OnCell;
         }
 
-        private static bool ShouldNotEnterCell(Pawn pawn, MapExtension mapE, IntVec3 dest)
+        private static bool ShouldNotEnterCell(Pawn pawn, WaterMap mapE, IntVec3 dest)
         {
             if(mapE.getShipPathGrid.PerceivedPathCostAt(dest) > 30)
             {

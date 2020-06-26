@@ -316,38 +316,71 @@ namespace Vehicles.UI
                             GUI.color = color;
                         }
 
-                        foreach(CannonHandler cannon in Comp.upgradeList.Where(x => x.upgradeActive && !x.cannonsUnlocked.NullOrEmpty()).SelectMany(y => y.cannonsUnlocked))
+                        if (SelPawnUpgrade.GetComp<CompCannons>() != null)
                         {
-                            PawnKindLifeStage biggestStage = SelPawnUpgrade.kindDef.lifeStages.MaxBy(x => x.bodyGraphicData?.drawSize ?? Vector2.zero);
-                            float baseWidth = (Comp.Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.baseCannonDrawSize.x;
-                            float baseHeight = (Comp.Props.displayUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.baseCannonDrawSize.y;
-
-                            float xBase = displayRect.x + (displayRect.width / 2) - (baseWidth / 2) - ( (Comp.Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.baseCannonRenderLocation.x);
-                            float yBase = displayRect.y + (displayRect.height / 2) - (baseHeight / 2) - ( (Comp.Props.displayUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.baseCannonRenderLocation.y);
-
-                            Rect baseCannonDrawnRect = new Rect(xBase, yBase, baseWidth, baseHeight);
-                            GUI.DrawTexture(baseCannonDrawnRect, cannon.CannonBaseTexture);
-
-                            float cannonWidth = (Comp.Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.cannonTurretDrawSize.x;
-                            float cannonHeight = (Comp.Props.displayUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.cannonTurretDrawSize.y;
-
-                            float xCannon = displayRect.x + (displayRect.width / 2) - (cannonWidth / 2) - ( (Comp.Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.cannonRenderLocation.x);
-                            float yCannon = displayRect.y + (displayRect.height / 2) - (cannonHeight / 2) - ( (Comp.Props.displayUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.cannonRenderLocation.y);
-
-                            Rect cannonDrawnRect = new Rect(xCannon, yCannon, cannonWidth, cannonHeight);
-                            GUI.DrawTexture(cannonDrawnRect, cannon.CannonTexture);
-
-                            if(RimShipMod.mod.settings.debugDrawCannonGrid)
+                            foreach (CannonHandler cannon in Comp.upgradeList.Where(x => x.upgradeActive && !x.cannonsUnlocked.Keys.ToList().NullOrEmpty()).SelectMany(y => y.cannonsUnlocked.Keys).OrderBy(o => o.drawLayer))
                             {
-                                Widgets.DrawLineHorizontal(cannonDrawnRect.x, cannonDrawnRect.y, cannonDrawnRect.width);
-                                Widgets.DrawLineHorizontal(cannonDrawnRect.x, cannonDrawnRect.y + cannonDrawnRect.height, cannonDrawnRect.width);
-                                Widgets.DrawLineVertical(cannonDrawnRect.x, cannonDrawnRect.y, cannonDrawnRect.height);
-                                Widgets.DrawLineVertical(cannonDrawnRect.x + cannonDrawnRect.width, cannonDrawnRect.y, cannonDrawnRect.height);
+                                PawnKindLifeStage biggestStage = SelPawnUpgrade.kindDef.lifeStages.MaxBy(x => x.bodyGraphicData?.drawSize ?? Vector2.zero);
+                                float baseWidth = (Comp.Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.baseCannonDrawSize.x;
+                                float baseHeight = (Comp.Props.displayUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.baseCannonDrawSize.y;
+
+                                float xBase = displayRect.x + (displayRect.width / 2) - (baseWidth / 2) - ((Comp.Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.baseCannonRenderLocation.x);
+                                float yBase = displayRect.y + (displayRect.height / 2) - (baseHeight / 2) - ((Comp.Props.displayUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.baseCannonRenderLocation.y);
+
+                                Rect baseCannonDrawnRect = new Rect(xBase, yBase, baseWidth, baseHeight);
+                                GUI.DrawTexture(baseCannonDrawnRect, cannon.CannonBaseTexture);
+
+                                float cannonWidth = (Comp.Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.cannonTurretDrawSize.x;
+                                float cannonHeight = (Comp.Props.displayUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.cannonTurretDrawSize.y;
+
+                                float xCannon = displayRect.x + (displayRect.width / 2) - (cannonWidth / 2) - ((Comp.Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.cannonRenderLocation.x);
+                                float yCannon = displayRect.y + (displayRect.height / 2) - (cannonHeight / 2) - ((Comp.Props.displayUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.cannonRenderLocation.y);
+
+                                Rect cannonDrawnRect = new Rect(xCannon, yCannon, cannonWidth, cannonHeight);
+                                GUI.DrawTexture(cannonDrawnRect, cannon.CannonTexture);
+
+                                if (RimShipMod.mod.settings.debugDrawCannonGrid)
+                                {
+                                    Widgets.DrawLineHorizontal(cannonDrawnRect.x, cannonDrawnRect.y, cannonDrawnRect.width);
+                                    Widgets.DrawLineHorizontal(cannonDrawnRect.x, cannonDrawnRect.y + cannonDrawnRect.height, cannonDrawnRect.width);
+                                    Widgets.DrawLineVertical(cannonDrawnRect.x, cannonDrawnRect.y, cannonDrawnRect.height);
+                                    Widgets.DrawLineVertical(cannonDrawnRect.x + cannonDrawnRect.width, cannonDrawnRect.y, cannonDrawnRect.height);
+                                }
+                            }
+                            foreach (CannonHandler cannon in SelPawnUpgrade.GetComp<CompCannons>().Cannons.OrderBy(x => x.drawLayer))
+                            {
+                                PawnKindLifeStage biggestStage = SelPawnUpgrade.kindDef.lifeStages.MaxBy(x => x.bodyGraphicData?.drawSize ?? Vector2.zero);
+                                float baseWidth = (Comp.Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.baseCannonDrawSize.x;
+                                float baseHeight = (Comp.Props.displayUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.baseCannonDrawSize.y;
+
+                                float xBase = displayRect.x + (displayRect.width / 2) - (baseWidth / 2) - ((Comp.Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.baseCannonRenderLocation.x);
+                                float yBase = displayRect.y + (displayRect.height / 2) - (baseHeight / 2) - ((Comp.Props.displayUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.baseCannonRenderLocation.y);
+
+                                Rect baseCannonDrawnRect = new Rect(xBase, yBase, baseWidth, baseHeight);
+                                GUI.DrawTexture(baseCannonDrawnRect, cannon.CannonBaseTexture);
+
+                                float cannonWidth = (Comp.Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.cannonTurretDrawSize.x;
+                                float cannonHeight = (Comp.Props.displayUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.cannonTurretDrawSize.y;
+
+                                float xCannon = displayRect.x + (displayRect.width / 2) - (cannonWidth / 2) - ((Comp.Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.cannonRenderLocation.x);
+                                float yCannon = displayRect.y + (displayRect.height / 2) - (cannonHeight / 2) - ((Comp.Props.displayUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.cannonRenderLocation.y);
+
+                                Rect cannonDrawnRect = new Rect(xCannon, yCannon, cannonWidth, cannonHeight);
+                                GUI.DrawTexture(cannonDrawnRect, cannon.CannonTexture);
+
+                                if (RimShipMod.mod.settings.debugDrawCannonGrid)
+                                {
+                                    Widgets.DrawLineHorizontal(cannonDrawnRect.x, cannonDrawnRect.y, cannonDrawnRect.width);
+                                    Widgets.DrawLineHorizontal(cannonDrawnRect.x, cannonDrawnRect.y + cannonDrawnRect.height, cannonDrawnRect.width);
+                                    Widgets.DrawLineVertical(cannonDrawnRect.x, cannonDrawnRect.y, cannonDrawnRect.height);
+                                    Widgets.DrawLineVertical(cannonDrawnRect.x + cannonDrawnRect.width, cannonDrawnRect.y, cannonDrawnRect.height);
+                                }
                             }
                         }
-                        if(!selectedNode?.cannonsUnlocked.NullOrEmpty() ?? false)
+                        
+                        if(!selectedNode?.cannonsUnlocked.Keys.ToList().NullOrEmpty() ?? false)
                         {
-                            foreach(CannonHandler cannon in selectedNode.cannonsUnlocked)
+                            foreach(CannonHandler cannon in selectedNode.cannonsUnlocked.Keys)
                             {
                                 PawnKindLifeStage biggestStage = SelPawnUpgrade.kindDef.lifeStages.MaxBy(x => x.bodyGraphicData?.drawSize ?? Vector2.zero);
                                 float baseWidth = (Comp.Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.baseCannonDrawSize.x;
@@ -378,9 +411,9 @@ namespace Vehicles.UI
                                 }
                             }
                         }
-                        else if((!highlightedPreMetNode?.cannonsUnlocked.NullOrEmpty() ?? false) && !highlightedPreMetNode.upgradeActive)
+                        else if((!highlightedPreMetNode?.cannonsUnlocked.Keys.ToList().NullOrEmpty() ?? false) && !highlightedPreMetNode.upgradeActive)
                         {
-                            foreach(CannonHandler cannon in highlightedPreMetNode.cannonsUnlocked)
+                            foreach(CannonHandler cannon in highlightedPreMetNode.cannonsUnlocked.Keys)
                             {
                                 PawnKindLifeStage biggestStage = SelPawnUpgrade.kindDef.lifeStages.MaxBy(x => x.bodyGraphicData?.drawSize ?? Vector2.zero);
                                 float baseWidth = (Comp.Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.baseCannonDrawSize.x;

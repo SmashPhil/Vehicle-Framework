@@ -27,12 +27,6 @@ namespace Vehicles
             }
         }
 
-        public override void DrawAt(Vector3 drawLoc, bool flip = false)
-        {
-            //Graphic.Draw(drawLoc, flip ? Rotation.Opposite : Rotation, this, 25f);
-            base.DrawAt(drawLoc, flip);
-        }
-
         public Vector3 SmoothPos
         {
             get
@@ -148,24 +142,37 @@ namespace Vehicles
 	        {
                 return;
 	        }
+            bool customDamage = dinfo.Instigator.def.HasModExtension<CustomVehicleDamageMultiplier>();
 
             float num = dinfo.Amount;
             float armorPoints = GetComp<CompVehicle>().ArmorPoints;
-            num -= num * (float)(1 - Math.Exp(-0.15 * (armorPoints / 10d))); // ( 1-e ^ { -0.15x } ) -> x = armorPoints / 10
-            if (num < 1)
-                num = 1;
-            if(dinfo.Def.isRanged)
+            if(!customDamage || !dinfo.Instigator.def.GetModExtension<CustomVehicleDamageMultiplier>().ignoreArmor)
             {
-                num *= GetComp<CompVehicle>().Props.vehicleDamageMultipliers.rangedDamageMultiplier;
+                num -= num * (float)(1 - Math.Exp(-0.15 * (armorPoints / 10d))); // ( 1-e ^ { -0.15x } ) -> x = armorPoints / 10
+                if (num < 1)
+                    num = 0;
             }
-            else if(dinfo.Def.isExplosive)
+            
+            if(customDamage && (dinfo.Instigator.def.GetModExtension<CustomVehicleDamageMultiplier>().vehicleSpecifics.NullOrEmpty() || dinfo.Instigator.def.GetModExtension<CustomVehicleDamageMultiplier>().vehicleSpecifics.Contains(kindDef)))
             {
-                num *= GetComp<CompVehicle>().Props.vehicleDamageMultipliers.explosiveDamageMultiplier;
+                num *= dinfo.Instigator.def.GetModExtension<CustomVehicleDamageMultiplier>().damageMultiplier;
             }
             else
             {
-                num *= GetComp<CompVehicle>().Props.vehicleDamageMultipliers.meleeDamageMultiplier;
+                if(dinfo.Def.isRanged)
+                {
+                    num *= GetComp<CompVehicle>().Props.vehicleDamageMultipliers.rangedDamageMultiplier;
+                }
+                else if(dinfo.Def.isExplosive)
+                {
+                    num *= GetComp<CompVehicle>().Props.vehicleDamageMultipliers.explosiveDamageMultiplier;
+                }
+                else
+                {
+                    num *= GetComp<CompVehicle>().Props.vehicleDamageMultipliers.meleeDamageMultiplier;
+                }
             }
+            
             dinfo.SetAmount(num);
         }
 
@@ -215,7 +222,7 @@ namespace Vehicles
                 thing.TryGetComp<CompSavePawnReference>().pawnReference = this;
             }
 
-            this.meleeVerbs.Notify_PawnKilled();
+            meleeVerbs.Notify_PawnKilled();
             if(flag)
             {
                 if (map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterOceanDeep || map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterDeep)
@@ -244,13 +251,11 @@ namespace Vehicles
 
         public override void DrawExtraSelectionOverlays()
         {
-            //base.DrawExtraSelectionOverlays();
             if(vPather.curPath != null)
             {
                 vPather.curPath.DrawPath(this);
             }
             HelperMethods.DrawLinesBetweenTargets(this, jobs.curJob, jobs.jobQueue);
-            //jobs.DrawLinesBetweenTargets();
         }
 
         public override void PostMapInit()
@@ -266,11 +271,6 @@ namespace Vehicles
             {
                 smoothPos = Position.ToVector3Shifted();
                 vPather.ResetToCurrentPosition();
-            }
-
-            if(kindDef.lifeStages.Last().bodyGraphicData.graphicClass == typeof(Graphic_OmniDirectional))
-            {
-                (kindDef.lifeStages.Last().bodyGraphicData.Graphic as Graphic_OmniDirectional).pawn = this;
             }
         }
 

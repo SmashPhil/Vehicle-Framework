@@ -65,15 +65,15 @@ namespace Vehicles.AI
 
         public void RecalculatePerceivedPathCostAt(IntVec3 c)
         {
-            if(!c.InBoundsShip(this.map))
+            if(!c.InBoundsShip(map))
             {
                 return;
             }
-            bool flag = this.WalkableFast(c);
-            this.pathGrid[this.map.cellIndices.CellToIndex(c)] = this.CalculatedCostAt(c);
-            if (this.WalkableFast(c) != flag)
+            bool flag = WalkableFast(c);
+            pathGrid[map.cellIndices.CellToIndex(c)] = CalculatedCostAt(c);
+            if (WalkableFast(c) != flag)
             {
-                MapExtensionUtility.GetExtensionToMap(this.map).getShipReachability.ClearCache();
+                WaterMapUtility.GetExtensionToMap(map).getShipReachability.ClearCache();
                 AccessTools.Method(type: typeof(RegionDirtyer), name: "Notify_WalkabilityChanged").Invoke(this.map.regionDirtyer, new object[] { c });
             }
         }

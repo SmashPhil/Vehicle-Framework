@@ -16,7 +16,7 @@ namespace Vehicles.Jobs
 
                 if(!flag)
                 {
-                    foreach(ShipHandler handler in ship.handlers)
+                    foreach(VehicleHandler handler in ship.handlers)
                     {
                         if(handler.AreSlotsAvailable)
                         {
@@ -28,7 +28,7 @@ namespace Vehicles.Jobs
                 }
                 else
                 {
-                    ShipHandler handler = ship.handlers.Find(x => x.role.handlingType == HandlingTypeFlags.None && x.AreSlotsAvailable);
+                    VehicleHandler handler = ship.handlers.Find(x => x.role.handlingTypes.NullOrEmpty() && x.AreSlotsAvailable);
                     if(handler is null)
                         handler = ship.handlers.Find(x => x.AreSlotsAvailable);
                     if(handler is null) Log.Error("Could not find spot for " + pawnBoarding.LabelShort + " to board.");

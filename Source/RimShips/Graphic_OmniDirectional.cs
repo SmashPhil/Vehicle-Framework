@@ -120,14 +120,12 @@ namespace Vehicles
 			}
 		}
 
-        public VehiclePawn pawn { get; set; }
-
         public override Material MatAt(Rot4 rot, Thing thing = null)
         {
-            if (pawn is null || !HelperMethods.IsVehicle(pawn))
+            if (thing is null || thing as Pawn is null || !HelperMethods.IsVehicle(thing as VehiclePawn))
                 return base.MatAt(rot, thing);
 
-            float angle = pawn.GetComp<CompVehicle>().Angle;
+            float angle = (thing as VehiclePawn).GetComp<CompVehicle>().Angle;
 	        switch (rot.AsInt)
 	        {
 	            case 0:

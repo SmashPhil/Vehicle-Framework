@@ -64,7 +64,7 @@ namespace Vehicles
                 this.RegionA = null;
                 if(this.RegionB is null)
                 {
-                    MapExtensionUtility.GetExtensionToMap(reg.Map).getWaterRegionLinkDatabase.Notify_LinkHasNoRegions(this);
+                    WaterMapUtility.GetExtensionToMap(reg.Map).getWaterRegionLinkDatabase.Notify_LinkHasNoRegions(this);
                 }
             }
             else if(this.RegionB == reg)
@@ -72,7 +72,7 @@ namespace Vehicles
                 this.RegionB = null;
                 if(this.RegionA is null)
                 {
-                    MapExtensionUtility.GetExtensionToMap(reg.Map).getWaterRegionLinkDatabase.Notify_LinkHasNoRegions(this);
+                    WaterMapUtility.GetExtensionToMap(reg.Map).getWaterRegionLinkDatabase.Notify_LinkHasNoRegions(this);
                 }
             }
         }

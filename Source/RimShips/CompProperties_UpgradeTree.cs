@@ -20,6 +20,5 @@ namespace Vehicles
 
         public Vector2 displayUICoord;
         public Vector2 displayUISize;
-
     }
 }

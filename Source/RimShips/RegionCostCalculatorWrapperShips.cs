@@ -23,7 +23,7 @@ namespace Vehicles.AI
             this.cachedBestLinkCost = 0;
             this.cachedSecondBestLinkCost = 0;
             this.cachedRegionIsDestination = false;
-            this.regionGrid = MapExtensionUtility.GetExtensionToMap(this.map).getWaterRegionGrid.DirectGrid;
+            this.regionGrid = WaterMapUtility.GetExtensionToMap(this.map).getWaterRegionGrid.DirectGrid;
             this.destRegions.Clear();
             if (end.Width == 1 && end.Height == 1)
             {
