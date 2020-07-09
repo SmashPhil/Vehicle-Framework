@@ -33,7 +33,7 @@ namespace Vehicles.Jobs
         {
             get
             {
-                return ((LordJob_FormAndSendCaravanShip)this.job.lord.LordJob).transferables;
+                return ((LordJob_FormAndSendVehicles)job.lord.LordJob).transferables;
             }
         }
 
@@ -41,7 +41,7 @@ namespace Vehicles.Jobs
         {
             get
             {
-                TransferableOneWay transferableOneWay = TransferableUtility.TransferableMatchingDesperate(this.ToHaul, this.Transferables,
+                TransferableOneWay transferableOneWay = TransferableUtility.TransferableMatchingDesperate(ToHaul, Transferables,
                     TransferAsOneMode.PodsOrCaravanPacking);
                 if(!(transferableOneWay is null))
                 {

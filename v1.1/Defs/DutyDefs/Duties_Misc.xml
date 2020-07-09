@@ -5,7 +5,7 @@
     <defName>TravelOrLeaveOcean</defName>
     <thinkNode Class="ThinkNode_Priority">
       <subNodes>
-        <li Class="Vehicles.Jobs.JobGiver_GotoTravelDestinationOcean" />
+        <li Class="Vehicles.Jobs.JobGiver_GotoTravelDestinationVehicle" />
         <!-- Note this exit node can happen at odd times
             like if you block siegers from hitting their siege location before they arrive-->
         <li Class="JobGiver_ExitMapRandom">
@@ -16,11 +16,11 @@
   </DutyDef>
 
   <DutyDef>
-    <defName>TravelOrWaitOcean</defName>
+    <defName>TravelOrWaitVehicle</defName>
     <thinkNode Class="ThinkNode_Priority">
       <subNodes>
         <!-- Goto travel destination if reachable -->
-        <li Class="Vehicles.Jobs.JobGiver_GotoTravelDestinationOcean" />
+        <li Class="Vehicles.Jobs.JobGiver_GotoTravelDestinationVehicle" />
 
         <!-- Basic needs -->
         <li Class="ThinkNode_Subtree">

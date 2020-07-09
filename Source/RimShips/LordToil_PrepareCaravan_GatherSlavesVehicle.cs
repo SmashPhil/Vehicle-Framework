@@ -9,9 +9,9 @@ using Vehicles.Defs;
 
 namespace Vehicles.Lords
 {
-    public class LordToil_PrepareCaravan_GatherSlavesShip : LordToil
+    public class LordToil_PrepareCaravan_GatherSlavesVehicle : LordToil
     {
-        public LordToil_PrepareCaravan_GatherSlavesShip(IntVec3 meetingPoint)
+        public LordToil_PrepareCaravan_GatherSlavesVehicle(IntVec3 meetingPoint)
         {
             this.meetingPoint = meetingPoint;
         }
@@ -38,11 +38,11 @@ namespace Vehicles.Lords
             {
                 if(HelperMethods.IsVehicle(p))
                 {
-                    p.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_WaitShip);
+                    p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_WaitShip);
                 }
                 else if(!p.RaceProps.Animal && !p.IsColonist && (!HelperMethods.IsVehicle(p)))
                 {
-                    p.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_SendSlavesToShip, this.meetingPoint, -1f);
+                    p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_SendSlavesToShip, this.meetingPoint, -1f);
                     p.mindState.duty.pawnsToGather = PawnsToGather.Slaves;
                 }
                 else

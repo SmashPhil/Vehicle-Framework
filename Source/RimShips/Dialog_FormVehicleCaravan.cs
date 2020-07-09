@@ -8,6 +8,8 @@ using Verse.AI;
 using Verse.Sound;
 using RimWorld;
 using RimWorld.Planet;
+using Vehicles.AI;
+using SPExtended;
 using UnityEngine;
 
 namespace Vehicles
@@ -338,7 +340,7 @@ namespace Vehicles
 			inRect.height += 17f;
 			GUI.BeginGroup(inRect);
 			Rect rect2 = inRect.AtZero();
-			this.DoBottomButtons(rect2);
+			DoBottomButtons(rect2);
 			Rect inRect2 = rect2;
 			inRect2.yMax -= 76f;
 			bool flag = false;
@@ -480,14 +482,15 @@ namespace Vehicles
 				if (Widgets.ButtonText(rect3, "ChooseRouteButton".Translate(), true, true, true))
 				{
 					List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables);
+					List<Pawn> innerPawns = pawnsFromTransferables.Where(v => HelperMethods.IsVehicle(v)).SelectMany(v => v.GetComp<CompVehicle>().AllPawnsAboard).ToList();
 					soundClose.PlayOneShotOnCamera(null);
-					if (!pawnsFromTransferables.Any((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer) && !x.Downed))
+					if (!pawnsFromTransferables.Concat(innerPawns).Any((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer) && !x.Downed))
 					{
 						Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, false);
 					}
 					else
 					{
-						//Find.WorldRoutePlanner.Start(this);
+						HelperMethods.VehicleRoutePlanner.Start(this);
 					}
 				}
 				if (destinationTile != -1)
@@ -530,7 +533,8 @@ namespace Vehicles
 		private bool DebugTryFormCaravanInstantly()
 		{
 			List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables);
-			if (!pawnsFromTransferables.Any((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer)))
+			List<Pawn> innerPawns = pawnsFromTransferables.Where(v => HelperMethods.IsVehicle(v)).SelectMany(v => v.GetComp<CompVehicle>().AllPawnsAboard).ToList();
+			if (!pawnsFromTransferables.Concat(innerPawns).Any((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer)) && !pawnsFromTransferables.Any(v => HelperMethods.IsVehicle(v)))
 			{
 				Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, false);
 				return false;
@@ -543,7 +547,7 @@ namespace Vehicles
 			}
 			if (num < 0)
 			{
-				num = this.CurrentTile;
+				num = CurrentTile;
 			}
 			CaravanFormingUtility.FormAndCreateCaravan(pawnsFromTransferables, Faction.OfPlayer, CurrentTile, num, destinationTile);
 			return true;
@@ -573,17 +577,65 @@ namespace Vehicles
 				Messages.Message("CaravanCouldNotFindPackingSpot".Translate(direction8WayFromTo.LabelShort()), new GlobalTargetInfo(intVec, map, false), MessageTypeDefOf.RejectInput, false);
 				return false;
 			}
-			CaravanFormingUtility.StartFormingCaravan((from x in pawnsFromTransferables
+			VehicleCaravanFormingUtility.StartFormingCaravan((from x in pawnsFromTransferables
 			where !x.Downed
-			select x).ToList<Pawn>(), (from x in pawnsFromTransferables
+			select x).ToList(), (from x in pawnsFromTransferables
 			where x.Downed
-			select x).ToList<Pawn>(), Faction.OfPlayer, transferables, meetingPoint, intVec, startingTile, destinationTile);
+			select x).ToList(), Faction.OfPlayer, transferables, meetingPoint, intVec, startingTile, destinationTile);
 			Messages.Message("CaravanFormationProcessStarted".Translate(), pawnsFromTransferables[0], MessageTypeDefOf.PositiveEvent, false);
 			return true;
 		}
 
 		private bool TryReformCaravan()
 		{
+
+			//if (!AbleToEmbark(caravan))
+   //         {
+   //             if (caravan.pather.Moving)
+   //                 caravan.pather.StopDead();
+   //             Messages.Message("CantMoveDocked".Translate(), MessageTypeDefOf.RejectInput, false);
+   //             return;
+   //         }
+
+   //         List<Pawn> sailors = caravan.PawnsListForReading.Where(x => !IsBoat(x)).ToList();
+   //         List<Pawn> ships = caravan.PawnsListForReading.Where(x => IsBoat(x)).ToList();
+   //         for (int i = 0; i < ships.Count; i++)
+   //         {
+   //             Pawn ship = ships[i];
+   //             for (int j = 0; j < ship.GetComp<CompVehicle>().PawnCountToOperate; j++)
+   //             {
+   //                 if (sailors.Count <= 0)
+   //                 {
+   //                     return;
+   //                 }
+   //                 foreach (VehicleHandler handler in ship.GetComp<CompVehicle>().handlers)
+   //                 {
+   //                     if (handler.AreSlotsAvailable)
+   //                     {
+   //                         ship.GetComp<CompVehicle>().Notify_BoardedCaravan(sailors.Pop(), handler.handlers);
+   //                         break;
+   //                     }
+   //                 }
+   //             }
+   //         }
+   //         if (sailors.Count > 0)
+   //         {
+   //             int x = 0;
+   //             while (sailors.Count > 0)
+   //             {
+   //                 Pawn ship = ships[x];
+   //                 foreach (VehicleHandler handler in ship.GetComp<CompVehicle>().handlers)
+   //                 {
+   //                     if (handler.AreSlotsAvailable)
+   //                     {
+   //                         ship.GetComp<CompVehicle>().Notify_BoardedCaravan(sailors.Pop(), handler.handlers);
+   //                         break;
+   //                     }
+   //                 }
+   //                 x = (x + 2) > ships.Count ? 0 : ++x;
+   //             }
+   //         }
+
 			List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables);
 			if (!CheckForErrors(pawnsFromTransferables))
 			{
@@ -629,6 +681,7 @@ namespace Vehicles
 
 		private bool CheckForErrors(List<Pawn> pawns)
 		{
+			List<Pawn> innerPawns = pawns.Where(v => HelperMethods.IsVehicle(v)).SelectMany(v => v.GetComp<CompVehicle>().AllPawnsAboard).ToList();
 			if (MustChooseRoute && destinationTile < 0)
 			{
 				Messages.Message("MessageMustChooseRouteFirst".Translate(), MessageTypeDefOf.RejectInput, false);
@@ -639,7 +692,7 @@ namespace Vehicles
 				Messages.Message("MessageNoValidExitTile".Translate(), MessageTypeDefOf.RejectInput, false);
 				return false;
 			}
-			if (!pawns.Any((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer) && !x.Downed))
+			if (!pawns.Concat(innerPawns).Any((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer) && !x.Downed))
 			{
 				Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, false);
 				return false;
@@ -650,7 +703,11 @@ namespace Vehicles
 				Messages.Message("TooBigCaravanMassUsage".Translate(), MessageTypeDefOf.RejectInput, false);
 				return false;
 			}
-			Pawn pawn = pawns.Find((Pawn x) => !x.IsColonist && !pawns.Any((Pawn y) => y.IsColonist && y.CanReach(x, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn)));
+			if(!HelperMethods.CanStartCaravan(pawns))
+            {
+				return false;
+            }
+			Pawn pawn = pawns.Find((Pawn x) => HelperMethods.IsVehicle(x) && pawns.Any(p => !HelperMethods.IsVehicle(p) && !p.IsWorldPawn() && p.IsColonist && !p.CanReach(x, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn)));
 			if (pawn != null)
 			{
 				Messages.Message("CaravanPawnIsUnreachable".Translate(pawn.LabelShort, pawn), pawn, MessageTypeDefOf.RejectInput, false);
@@ -696,26 +753,87 @@ namespace Vehicles
 
 		private bool TryFindExitSpot(List<Pawn> pawns, bool reachableForEveryColonist, out IntVec3 spot)
 		{
+			bool result;
+			if(pawns.Any(x => HelperMethods.IsBoat(x)))
+            {
+                //Rot4 rotFromTo = Find.WorldGrid.GetRotFromTo(__instance.CurrentTile, ___startingTile); WHEN WORLD GRID IS ESTABLISHED
+                Rot4 rotFromTo;
+                if(Find.World.CoastDirectionAt(map.Tile).IsValid)
+                {
+                    rotFromTo = Find.World.CoastDirectionAt(map.Tile);
+                }
+                else if(!Find.WorldGrid[map.Tile]?.Rivers?.NullOrEmpty() ?? false)
+                {
+                    List<Tile.RiverLink> rivers = Find.WorldGrid[map.Tile].Rivers;
+                    Tile.RiverLink river = HelperMethods.BiggestRiverOnTile(Find.WorldGrid[map.Tile].Rivers);
+
+                    float angle = Find.WorldGrid.GetHeadingFromTo(map.Tile, (from r1 in rivers
+                                                                                orderby -r1.river.degradeThreshold
+                                                                                select r1).First<Tile.RiverLink>().neighbor);
+                    if (angle < 45)
+                    {
+                        rotFromTo = Rot4.South;
+                    }
+                    else if (angle < 135)
+                    {
+                        rotFromTo = Rot4.East;
+                    }
+                    else if (angle < 225)
+                    {
+                        rotFromTo = Rot4.North;
+                    }
+                    else if (angle < 315)
+                    {
+                        rotFromTo = Rot4.West;
+                    }
+                    else
+                    {
+                        rotFromTo = Rot4.South;
+                    }
+                }
+                else
+                {
+                    Log.Warning("No Coastline or River detected on map: " + map.uniqueID + ". Selecting edge of map with most water cells.");
+                    int n = CellRect.WholeMap(map).GetEdgeCells(Rot4.North).Where(x => GenGridShips.Standable(x, map)).Count();
+                    int e = CellRect.WholeMap(map).GetEdgeCells(Rot4.East).Where(x => GenGridShips.Standable(x, map)).Count();
+                    int s = CellRect.WholeMap(map).GetEdgeCells(Rot4.South).Where(x => GenGridShips.Standable(x, map)).Count();
+                    int w = CellRect.WholeMap(map).GetEdgeCells(Rot4.West).Where(x => GenGridShips.Standable(x, map)).Count();
+                    rotFromTo = SPExtra.Max4IntToRot(n, e, s, w);
+                }
+                result = TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo, out spot) || TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo.Rotated(RotationDirection.Clockwise),
+                    out spot) || TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo.Rotated(RotationDirection.Counterclockwise), out spot) ||
+                    TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo.Opposite, out spot); 
+                
+                Pawn pawn = pawns.FindAll(x => HelperMethods.IsBoat(x)).MaxBy(x => x.def.size.z);
+                SPMultiCell.ClampToMap(pawn, ref spot, map);
+                return result;
+            }
 			Rot4 rot;
 			Rot4 rot2;
 			CaravanExitMapUtility.GetExitMapEdges(Find.WorldGrid, CurrentTile, startingTile, out rot, out rot2);
-			return (rot != Rot4.Invalid && TryFindExitSpot(pawns, reachableForEveryColonist, rot, out spot)) || (rot2 != Rot4.Invalid && TryFindExitSpot(pawns, reachableForEveryColonist, rot2, out spot)) || TryFindExitSpot(pawns, reachableForEveryColonist, rot.Rotated(RotationDirection.Clockwise), out spot) || TryFindExitSpot(pawns, reachableForEveryColonist, rot.Rotated(RotationDirection.Counterclockwise), out spot);
+			result = (rot != Rot4.Invalid && TryFindExitSpotLand(pawns, reachableForEveryColonist, rot, out spot)) || (rot2 != Rot4.Invalid && 
+				TryFindExitSpotLand(pawns, reachableForEveryColonist, rot2, out spot)) || 
+				TryFindExitSpotLand(pawns, reachableForEveryColonist, rot.Rotated(RotationDirection.Clockwise), out spot) || 
+				TryFindExitSpotLand(pawns, reachableForEveryColonist, rot.Rotated(RotationDirection.Counterclockwise), out spot);
+			SPMultiCell.ClampToMap(pawns.FindAll(x => HelperMethods.IsVehicle(x)).MaxBy(x => x.def.size.z), ref spot, map);
+			return result;
 		}
 
-		private bool TryFindExitSpot(List<Pawn> pawns, bool reachableForEveryColonist, Rot4 exitDirection, out IntVec3 spot)
+		private bool TryFindExitSpotLand(List<Pawn> pawns, bool reachableForEveryColonist, Rot4 exitDirection, out IntVec3 spot)
 		{
-			if (startingTile < 0)
-			{
-				Log.Error("Can't find exit spot because startingTile is not set.", false);
-				spot = IntVec3.Invalid;
-				return false;
-			}
-			Predicate<IntVec3> validator = (IntVec3 x) => !x.Fogged(map) && x.Standable(map);
+			spot = IntVec3.Invalid;
+			if(startingTile < 0)
+            {
+                Log.Error("Can't find exit spot because startingTile is not set.", false);
+                return spot.IsValid;
+            }
+            
+			Predicate<IntVec3> landValidator = (IntVec3 x) => !x.Fogged(map) && GenGrid.Standable(x, map);
 			if (reachableForEveryColonist)
 			{
 				return CellFinder.TryFindRandomEdgeCellWith(delegate(IntVec3 x)
 				{
-					if (!validator(x))
+					if (!landValidator(x))
 					{
 						return false;
 					}
@@ -733,7 +851,7 @@ namespace Vehicles
 			int num = -1;
 			foreach (IntVec3 intVec2 in CellRect.WholeMap(map).GetEdgeCells(exitDirection).InRandomOrder(null))
 			{
-				if (validator(intVec2))
+				if (landValidator(intVec2))
 				{
 					int num2 = 0;
 					for (int i = 0; i < pawns.Count; i++)
@@ -754,10 +872,121 @@ namespace Vehicles
 			return intVec.IsValid;
 		}
 
+		public bool TryFindExitSpotOnWater(List<Pawn> pawns, bool reachableForEveryColonist, Rot4 exitDirection, out IntVec3 spot)
+        {
+            if(startingTile < 0)
+            {
+                Log.Error("Can't find exit spot because startingTile is not set.", false);
+                spot = IntVec3.Invalid;
+                return false;
+            }
+            Pawn leadShip = pawns.Where(x => HelperMethods.IsBoat(x)).MaxBy(y => y.def.size.z);
+            bool validator(IntVec3 x) => !x.Fogged(map) && GenGridShips.Standable(x, map);
+            List<IntVec3> cells = CellRect.WholeMap(map).GetEdgeCells(exitDirection).ToList();
+            Dictionary<IntVec3, float> cellDist = new Dictionary<IntVec3, float>();
+
+            foreach(IntVec3 c in cells)
+            {
+                float dist = (float)(Math.Sqrt(Math.Pow((c.x - leadShip.Position.x), 2) + Math.Pow((c.z - leadShip.Position.z), 2)));
+                cellDist.Add(c, dist);
+            }
+            cellDist = cellDist.OrderBy(x => x.Value).ToDictionary(z => z.Key, y => y.Value);
+            List<Pawn> ships = pawns.Where(x => HelperMethods.IsBoat(x)).ToList();
+
+            for(int i = 0; i < cells.Count; i++)
+            {
+                IntVec3 iV2 = cellDist.Keys.ElementAt(i);
+                if(validator(iV2))
+                {
+                    if(ships.All(x => ShipReachabilityUtility.CanReachShip(x, iV2, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn)))
+                    {
+                        IntVec2 v2 = new IntVec2(iV2.x, iV2.z);
+                        int halfSize = leadShip.def.size.z + 1;
+                        switch(exitDirection.AsInt)
+                        {
+                            case 0:
+                                for (int j = 0; j < halfSize; j++)
+                                {
+                                    if (!map.terrainGrid.TerrainAt(new IntVec3(iV2.x, iV2.y, iV2.z - j)).IsWater)
+                                        goto IL_0;
+                                }
+                                break;
+                            case 1:
+                                for(int j = 0; j < halfSize; j++)
+                                {
+                                    if(!map.terrainGrid.TerrainAt(new IntVec3(iV2.x - j, iV2.y, iV2.z)).IsWater)
+                                        goto IL_0;
+                                }
+                                break;
+                            case 2:
+                                for (int j = 0; j < halfSize; j++)
+                                {
+                                    if (!map.terrainGrid.TerrainAt(new IntVec3(iV2.x, iV2.y, iV2.z + j)).IsWater)
+                                        goto IL_0;
+                                }
+                                break;
+                            case 3:
+                                for (int j = 0; j < halfSize; j++)
+                                {
+                                    if (!map.terrainGrid.TerrainAt(new IntVec3(iV2.x + j, iV2.y, iV2.z)).IsWater)
+                                        goto IL_0;
+                                }
+                                break;
+                        }
+                        spot = iV2;
+                        return spot.IsValid;
+                    }
+                    IL_0:;
+                }
+            }
+            spot = IntVec3.Invalid;
+            return false;
+        }
+
 		private bool TryFindRandomPackingSpot(IntVec3 exitSpot, out IntVec3 packingSpot)
 		{
 			tmpPackingSpots.Clear();
 			List<Thing> list = map.listerThings.ThingsOfDef(ThingDefOf.CaravanPackingSpot);
+			if(transferables.Any(x => x.ThingDef.category is ThingCategory.Pawn && HelperMethods.IsBoat(x.AnyThing as Pawn)))
+            {
+                TraverseParms traverseParms = TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false);
+                List<Pawn> ships = new List<Pawn>();
+                foreach (TransferableOneWay t in transferables)
+                {
+                    if(HelperMethods.IsBoat(t.AnyThing as Pawn))
+                        ships.Add(t.AnyThing as Pawn);
+                }
+                foreach(Thing t in list)
+                {
+                    foreach(Pawn p in ships)
+                    {
+                        if (map.reachability.CanReach(p.Position, t, PathEndMode.OnCell, traverseParms))
+                        {
+                            tmpPackingSpots.Add(t);
+                        }
+                    }
+                }
+                if(tmpPackingSpots.Any<Thing>())
+                {
+                    Thing thing = tmpPackingSpots.RandomElement<Thing>();
+                    tmpPackingSpots.Clear();
+                    packingSpot = thing.Position;
+					return true;
+                }
+
+                bool flag = CellFinder.TryFindRandomCellNear(ships.First().Position, map, 15, (IntVec3 c) => c.InBounds(map) && GenGrid.Standable(c, map) && !map.terrainGrid.TerrainAt(c).IsWater, out packingSpot);
+                if(!flag)
+                {
+                    flag = CellFinder.TryFindRandomCellNear(ships.First().Position, map, 20, (IntVec3 c) => c.InBounds(map) && GenGrid.Standable(c, map), out packingSpot);
+                }
+
+                if(!flag)
+                {
+                    Messages.Message("PackingSpotNotFoundBoats".Translate(), MessageTypeDefOf.CautionInput, false);
+                    flag = RCellFinder.TryFindRandomSpotJustOutsideColony(ships.First().Position, map, out packingSpot);
+                }
+                return flag;
+            }
 			TraverseParms traverseParams = TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false);
 			for (int i = 0; i < list.Count; i++)
 			{

@@ -19,7 +19,8 @@
 					<graphicClass>Vehicles.Graphic_OmniDirectional</graphicClass>
 					<drawSize>(4,7)</drawSize>
 					<shaderType>CutoutComplex</shaderType>
-					<color>(255,255,255)</color>
+					<color>(0, 80, 30)</color>
+					<colorTwo>(0, 80, 30)</colorTwo>
 					<shadowData>
 						<volume>(0.4,0.1,0.4)</volume>
 					</shadowData>
@@ -231,6 +232,11 @@
 						</cannonIds>
 						<slots>1</slots>
 						<slotsToOperate>1</slotsToOperate>
+					</li>
+					<li>
+						<label>TestSeat</label>
+						<handlingTypes/>
+						<slots>1</slots>
 					</li>
 				</roles>
 				

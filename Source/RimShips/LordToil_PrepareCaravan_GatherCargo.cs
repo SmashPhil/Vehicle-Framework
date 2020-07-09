@@ -9,9 +9,9 @@ using Verse.AI.Group;
 
 namespace Vehicles.Lords
 {
-    public class LordToil_PrepareCaravan_GatherShip : LordToil
+    public class LordToil_PrepareCaravan_GatherCargo : LordToil
     {
-        public LordToil_PrepareCaravan_GatherShip(IntVec3 meetingPoint)
+        public LordToil_PrepareCaravan_GatherCargo(IntVec3 meetingPoint)
         {
             this.meetingPoint = meetingPoint;
         }
@@ -38,15 +38,15 @@ namespace Vehicles.Lords
             {
                 if(pawn.IsColonist)
                 {
-                    pawn.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_GatherShip);
+                    pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_GatherShip);
                 }
                 else if(pawn.RaceProps.Animal)
                 {
-                    pawn.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_BoardShip);
+                    pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_BoardShip);
                 }
                 else if(!(pawn.GetComp<CompVehicle>() is null))
                 {
-                    pawn.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_WaitShip);
+                    pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_WaitShip);
                 }
                 else
                 {
@@ -61,7 +61,7 @@ namespace Vehicles.Lords
             if(Find.TickManager.TicksGame % 120 == 0)
             {
                 bool flag = true;
-                List<Pawn> capablePawns = this.lord.ownedPawns.Where(x => !x.Downed && !x.Dead).ToList();
+                List<Pawn> capablePawns = lord.ownedPawns.Where(x => !x.Downed && !x.Dead).ToList();
                 foreach(Pawn pawn in capablePawns)
                 {
                     if(pawn.IsColonist && pawn.mindState.lastJobTag != JobTag.WaitingForOthersToFinishGatheringItems)
@@ -72,7 +72,7 @@ namespace Vehicles.Lords
                 }
                 if(flag)
                 {
-                    foreach(Pawn pawn in base.Map.mapPawns.AllPawnsSpawned)
+                    foreach(Pawn pawn in Map.mapPawns.AllPawnsSpawned)
                     {
                         if(pawn.CurJob != null && pawn.jobs.curDriver is JobDriver_PrepareCaravan_GatheringShip && pawn.CurJob.lord == this.lord)
                         {
@@ -81,7 +81,7 @@ namespace Vehicles.Lords
                         }
                     }
                 }
-                if(flag || (lord.LordJob as LordJob_FormAndSendCaravanShip).ForceCaravanLeave)
+                if(flag || (lord.LordJob as LordJob_FormAndSendVehicles).ForceCaravanLeave)
                 {
                     this.lord.ReceiveMemo("AllItemsGathered");
                 }

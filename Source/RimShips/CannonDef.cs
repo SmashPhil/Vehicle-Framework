@@ -38,6 +38,8 @@ namespace Vehicles
 
         public bool autoSnapTargeting = true;
 
+        public bool matchParentColor = true;
+
         public float rotationSpeed = 1f;
 
         public float spreadRadius = 0f;

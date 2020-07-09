@@ -11,7 +11,8 @@
 	<LoadShip>Load Cargo</LoadShip>
 	<SetRange>Set Range</SetRange>
 	<CannonRange>{0} Tiles</CannonRange>
-	<RenameShip>Rename {0}</RenameShip>
+	<RenameVehicle>Rename {0}</RenameVehicle>
+	<RecolorVehicle>Paint {0}</RecolorVehicle>
 	<RecolorFlags>Recolor Flags</RecolorFlags>
 	<OceanPassable>Ocean: +0.5</OceanPassable>
 	<BoatFishing>Fish</BoatFishing>
@@ -132,6 +133,7 @@
 	<NoAmmoLoadedCannon>No ammo loaded.</NoAmmoLoadedCannon>
 	<VehicleCannotFit>Not enough space.</VehicleCannotFit>
 	<NoPathForVehicle>Cannot path here.</NoPathForVehicle>
+	<IncapableStatusForRole>{0} is incapable of fulfilling this role.</IncapableStatusForRole>
 	
 	<!-- Caravans -->
 	<CaravanShips>Boat</CaravanShips>

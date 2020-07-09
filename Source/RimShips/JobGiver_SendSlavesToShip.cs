@@ -28,7 +28,7 @@ namespace Vehicles.Jobs
         private Pawn FindPrisoner(Pawn pawn)
         {
             Lord lord = pawn.GetLord();
-            List<Pawn> prisoners = ((LordJob_FormAndSendCaravanShip)lord.LordJob).prisoners;
+            List<Pawn> prisoners = ((LordJob_FormAndSendVehicles)lord.LordJob).prisoners;
             foreach (Pawn slave in prisoners)
             {
                 if(slave != pawn && slave.Spawned)

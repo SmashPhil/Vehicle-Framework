@@ -35,12 +35,12 @@ namespace Vehicles
         public static void EnterSpawn(Caravan caravan, Map map, Func<Pawn, IntVec3> spawnCellGetter, CaravanDropInventoryMode caravanDropInventoryMode = CaravanDropInventoryMode.DoNotDrop, bool draftColonists = true)
         {
             List<Pawn> pawns = new List<Pawn>(caravan.PawnsListForReading).Where(x => HelperMethods.IsBoat(x)).ToList();
-            WaterMap mapE = WaterMapUtility.GetExtensionToMap(map);
+
             Rot4 spawnDir = GetEdgeToSpawnBoatOn(caravan, map);
 
             for(int i = 0; i < pawns.Count; i++)
             {
-                IntVec3 loc = CellFinderExtended.MiddleEdgeCell(spawnDir, map, pawns[i], (IntVec3 c) => GenGridShips.Standable(c, map, mapE) && !c.Fogged(map)); //Change back to spawnCellGetter later
+                IntVec3 loc = CellFinderExtended.MiddleEdgeCell(spawnDir, map, pawns[i], (IntVec3 c) => GenGridShips.Standable(c, map) && !c.Fogged(map)); //Change back to spawnCellGetter later
                 
                 pawns[i].GetComp<CompVehicle>().Angle = 0;
                 Pawn ship = GenSpawn.Spawn(pawns[i], loc, map, spawnDir.Opposite, WipeMode.Vanish, false) as Pawn;
@@ -104,7 +104,7 @@ namespace Vehicles
 
         private static IntVec3 FindNearEdgeWaterCell(Map map)
         {
-            Predicate<IntVec3> validator = (IntVec3 x) => GenGridShips.Standable(x, map, WaterMapUtility.GetExtensionToMap(map)) && !x.Fogged(map);
+            Predicate<IntVec3> validator = (IntVec3 x) => GenGridShips.Standable(x, map) && !x.Fogged(map);
             Faction hostFaction = map.ParentFaction;
             IntVec3 root;
             if(CellFinder.TryFindRandomEdgeCellWith(validator, map, CellFinder.EdgeRoadChance_Ignore, out root))
@@ -122,8 +122,7 @@ namespace Vehicles
         private static IntVec3 FindCenterWaterCell(Map map, bool landing = false)
         {
             TraverseParms tp = TraverseParms.For(TraverseMode.NoPassClosedDoors, Danger.Deadly, false);
-            WaterMap mapE = WaterMapUtility.GetExtensionToMap(map);
-            Predicate<IntVec3> validator = (IntVec3 x) => GenGridShips.Standable(x, map, mapE) && !x.Fogged(map) && mapE.getShipReachability.CanReachMapEdge(x, tp);
+            Predicate<IntVec3> validator = (IntVec3 x) => GenGridShips.Standable(x, map) && !x.Fogged(map) && map.GetComponent<WaterMap>().getShipReachability.CanReachMapEdge(x, tp);
             IntVec3 result;
             if(RCellFinder.TryFindRandomCellNearTheCenterOfTheMapWith(null /*input validator here*/, map, out result))
             {

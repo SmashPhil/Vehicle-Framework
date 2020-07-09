@@ -11,13 +11,13 @@ namespace Vehicles
 {
     public enum AnimationWrapperType { Oscillate, Reset, Off}
     
-    public class Graphic_Animate : Graphic_Collection
+    public class Graphic_Animate : Graphic
     {
         public override Material MatSingle
         {
             get
             {
-                return subGraphics[0].MatSingle; 
+                return materials[0]; 
             }
         }
 
@@ -25,7 +25,7 @@ namespace Vehicles
         {
             get
             {
-                return subGraphics.Length;
+                return graphicPaths.Length;
             }
         }
 
@@ -45,29 +45,57 @@ namespace Vehicles
 			colorTwo = req.colorTwo;
 			drawSize = req.drawSize;
 			List<Texture2D> list = (from x in ContentFinder<Texture2D>.GetAllInFolder(req.path)
-			where !x.name.EndsWith(Graphic_Single.MaskSuffix)
-			orderby x.name
-			select x).ToList<Texture2D>();
+			                        where !x.name.EndsWith(Graphic_Single.MaskSuffix)
+			                        orderby x.name
+			                        select x).ToList();
+            List<Texture2D> listM = (from x in ContentFinder<Texture2D>.GetAllInFolder(req.path)
+                                    where x.name.EndsWith(Graphic_Single.MaskSuffix)
+                                    orderby x.name
+                                    select x).ToList();
 			if (list.NullOrEmpty())
 			{
 				Log.Error("Collection cannot init: No textures found at path " + req.path, false);
-				subGraphics = new Graphic[]
+				graphicPaths = new string[]
 				{
-					BaseContent.BadGraphic
+					BaseContent.BadGraphic.path
 				};
-                subMaterials = new Material[]
+                materials = new Material[]
                 {
                     BaseContent.BadMat
                 };
 				return;
 			}
-			subGraphics = new Graphic[list.Count];
-            subMaterials = new Material[list.Count];
+			graphicPaths = new string[list.Count];
+            materials = new Material[list.Count];
+            if(list.Count != listM.Count && !listM.NullOrEmpty())
+            {
+                Log.Error($"[Vehicles] Could not apply masks for animation classes. Mask and texture count do not match up. Either have a mask for each texture or none at all. \n Graphics: {list.Count} Masks: {listM.Count}");
+                graphicPaths = new string[]
+				{
+					BaseContent.BadGraphic.path
+				};
+                materials = new Material[]
+                {
+                    BaseContent.BadMat
+                };
+                return;
+            }
 			for (int i = 0; i < list.Count; i++)
 			{
 				string path = req.path + "/" + list[i].name;
-				subGraphics[i] = GraphicDatabase.Get(typeof(Graphic_Single), path, req.shader, drawSize, color, colorTwo, null, req.shaderParameters);
-                subMaterials[i] = MaterialPool.MatFrom(path);
+                graphicPaths[i] = path;
+
+                MaterialRequest mReq = new MaterialRequest()
+                {
+                    mainTex = ContentFinder<Texture2D>.Get(path),
+                    shader = req.shader,
+                    color = this.color,
+                    colorTwo = this.colorTwo,
+                    shaderParameters = req.shaderParameters
+                };
+                if (req.shader.SupportsMaskTex() && !listM.NullOrEmpty())
+                    mReq.maskTex = ContentFinder<Texture2D>.Get(path + Graphic_Single.MaskSuffix);
+                materials[i] = MaterialPool.MatFrom(mReq);
 			}
         }
 
@@ -76,26 +104,26 @@ namespace Vehicles
 			return GraphicDatabase.Get<Graphic_Animate>(path, newShader, drawSize, newColor, newColorTwo, data);
 		}
 
-        public Graphic SubGraphicCycle(int index)
+        public Graphic SubGraphicCycle(int index, Shader newShader, Color color1, Color color2)
         {
-            if(index > (subGraphics.Length - 1) )
+            if(index > (graphicPaths.Length - 1) )
             {
-                Log.Warning($"Graphic Retrieval for Graphic_Animate indexed past maximum length of {subGraphics.Length}. Self correcting.");
-                while (index > (subGraphics.Length - 1))
-                    index -= (subGraphics.Length - 1);
+                Log.Warning($"Graphic Retrieval for Graphic_Animate indexed past maximum length of {graphicPaths.Length}. Self correcting.");
+                while (index > (graphicPaths.Length - 1))
+                    index -= (graphicPaths.Length - 1);
             }
-            return subGraphics[index];
+            return GraphicDatabase.Get<Graphic_Single>(graphicPaths[index], newShader, drawSize, color1, color2, data);
         }
 
         public Material SubMaterialCycle(int index)
         {
-            if(index > (subMaterials.Length - 1) )
+            if(index > (materials.Length - 1) )
             {
-                Log.Warning($"Graphic Retrieval for Graphic_Animate indexed past maximum length of {subMaterials.Length}. Self correcting.");
-                while (index > (subMaterials.Length - 1))
-                    index -= (subMaterials.Length - 1);
+                Log.Warning($"Graphic Retrieval for Graphic_Animate indexed past maximum length of {materials.Length}. Self correcting.");
+                while (index > (materials.Length - 1))
+                    index -= (materials.Length - 1);
             }
-            return subMaterials[index];
+            return materials[index];
         }
 
         public override string ToString()
@@ -105,7 +133,7 @@ namespace Vehicles
 		        "AnimationCount(path=",
 		        path,
 		        ", count=",
-		        subGraphics.Length,
+		        materials.Length,
 		        ")"
 	        });
         }
@@ -115,8 +143,8 @@ namespace Vehicles
             return animationFolder + "/" + ContentFinder<Texture2D>.GetAllInFolder(animationFolder).FirstOrDefault().name;
         }
 
-        
+        private string[] graphicPaths;
 
-        private Material[] subMaterials;
+        private Material[] materials;
     }
 }

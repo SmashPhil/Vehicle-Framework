@@ -120,7 +120,7 @@ namespace Vehicles
                 return false;
             }
             Rot4 dir = Find.World.CoastDirectionAt(map.Tile).IsValid ? Find.World.CoastDirectionAt(map.Tile) : !Find.WorldGrid[map.Tile].Rivers.NullOrEmpty() ? SPExtra.RiverDirection(map) : Rot4.Invalid;
-            result = CellFinderExtended.RandomEdgeCell(dir, map, (IntVec3 c) => GenGridShips.Standable(c, map, WaterMapUtility.GetExtensionToMap(map)) && !c.Fogged(map));
+            result = CellFinderExtended.RandomEdgeCell(dir, map, (IntVec3 c) => GenGridShips.Standable(c, map) && !c.Fogged(map));
             return true;
         }
 
@@ -161,8 +161,7 @@ namespace Vehicles
 
         public static IntVec3 RandomSpawnCellForPawnNear(IntVec3 root, Map map, int firstTryWithRadius = 4)
         {
-            WaterMap mapE = WaterMapUtility.GetExtensionToMap(map);
-            if (GenGridShips.Standable(root, map, mapE) && root.GetFirstPawn(map) is null)
+            if (GenGridShips.Standable(root, map) && root.GetFirstPawn(map) is null)
             {
                 return root;
             }
@@ -171,7 +170,7 @@ namespace Vehicles
             for (int i = 0; i < 3; i++)
             {
                 if(CellFinderExtended.TryFindRandomReachableCellNear(root, map, (float)num, TraverseParms.For(TraverseMode.NoPassClosedDoors, Danger.Deadly, false), (IntVec3 c)
-                    => GenGridShips.Standable(c, map, mapE) && (root.Fogged(map) || !c.Fogged(map)) && c.GetFirstPawn(map) is null, out result, null, 999999))
+                    => GenGridShips.Standable(c, map) && (root.Fogged(map) || !c.Fogged(map)) && c.GetFirstPawn(map) is null, out result, null, 999999))
                 {
                     return result;
                 }

@@ -23,7 +23,15 @@ namespace Vehicles
             closeOnCancel = true;
 
             if (assignedSeats is null)
-                this.assignedSeats = new Dictionary<Pawn, Pair<VehiclePawn, VehicleHandler>>();
+                assignedSeats = new Dictionary<Pawn, Pair<VehiclePawn, VehicleHandler>>();
+
+            foreach(VehicleHandler handler in this.vehicle.GetComp<CompVehicle>().handlers)
+            {
+                foreach(Pawn pawn in handler.handlers)
+                {
+                    assignedSeats.Add(pawn, new Pair<VehiclePawn, VehicleHandler>(this.vehicle, handler));
+                }
+            }
         }
 
         public override Vector2 InitialSize => new Vector2(1024f, (float)Verse.UI.screenHeight / 2);
@@ -71,18 +79,25 @@ namespace Vehicles
                 {
                     if(Event.current.type == EventType.MouseUp && Event.current.button == 0)
                     {
-                        assignedSeats.Add(draggedPawn, new Pair<VehiclePawn, VehicleHandler>(vehicle, handler));
+                        if(!handler.role.handlingTypes.NullOrEmpty() && (!draggedPawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) || draggedPawn.Downed || draggedPawn.Dead) )
+                        {
+                            Messages.Message("IncapableStatusForRole".Translate(draggedPawn.LabelShortCap), MessageTypeDefOf.RejectInput);
+                        }
+                        else
+                        {
+                            assignedSeats.Add(draggedPawn, new Pair<VehiclePawn, VehicleHandler>(vehicle, handler));
+                        }
                     }
                 }
                 var removalList = new List<Pawn>();
-                foreach(Pawn assignedPawn in assignedSeats.Where(r => r.Value.Second.role == handler.role).Select(p => p.Key))
+                foreach(KeyValuePair<Pawn, Pair<VehiclePawn, VehicleHandler>> assignedKVP in assignedSeats.Where(r => r.Value.Second.role == handler.role))
                 {
-                    Widgets.Label(assignedPawnRect, assignedPawn.LabelCap);
-                    Widgets.ThingIcon(assignedPawnIconRect, assignedPawn);
+                    Widgets.Label(assignedPawnRect, assignedKVP.Key.LabelCap);
+                    Widgets.ThingIcon(assignedPawnIconRect, assignedKVP.Key);
                     Rect removalButtonRect = new Rect(roleRect.x + roleRect.width - 100f, assignedPawnRect.y, 90f, 20f);
-                    if(Widgets.ButtonText(removalButtonRect, "RemoveFromRole".Translate()))
+                    if(!assignedKVP.Value.First.GetComp<CompVehicle>().AllPawnsAboard.Contains(assignedKVP.Key) && Widgets.ButtonText(removalButtonRect, "RemoveFromRole".Translate()))
                     {
-                        removalList.Add(assignedPawn);
+                        removalList.Add(assignedKVP.Key);
                     }
                     assignedRect.y += 30f;
                     assignedPawnRect.y += 30f;
@@ -186,7 +201,14 @@ namespace Vehicles
                 trad.ForceTo(1);
                 foreach(Pawn assignedPawn in assignedSeats.Keys)
                 {
-                    pawns.Find(p => (p.AnyThing as Pawn) == assignedPawn).ForceTo(1);
+                    pawns.FirstOrDefault(p => (p.AnyThing as Pawn) == assignedPawn)?.ForceTo(1);
+                }
+
+                foreach(KeyValuePair<Pawn, Pair<VehiclePawn, VehicleHandler>> seating in assignedSeats)
+                {
+                    if (HelperMethods.assignedSeats.ContainsKey(seating.Key))
+                        HelperMethods.assignedSeats.Remove(seating.Key);
+                    HelperMethods.assignedSeats.Add(seating.Key, seating.Value);
                 }
             }
             catch(Exception ex)
@@ -195,7 +217,6 @@ namespace Vehicles
                 failReason = ex.Message;
                 return false;
             }
-            
             return true;
         }
         

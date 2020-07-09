@@ -23,6 +23,8 @@ namespace Vehicles
 
         public static readonly Texture2D Rename = ContentFinder<Texture2D>.Get("UI/Buttons/Rename");
 
+        public static readonly Texture2D Recolor = ContentFinder<Texture2D>.Get("UI/Paintbrush");
+
         public static readonly Texture2D Drop = ContentFinder<Texture2D>.Get("UI/Buttons/Drop");
 
         public static readonly Texture2D FishingIcon = ContentFinder<Texture2D>.Get("UI/FishingIcon");

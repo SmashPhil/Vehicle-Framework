@@ -36,10 +36,10 @@ namespace Vehicles.Jobs
             this.FailOnDestroyedOrNull(TargetIndex.B);
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch);
             yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false);
-            yield return FindNearestShip();
+            //yield return FindNearestShip();
             yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).FailOnDespawnedNullOrForbidden(TargetIndex.B);
             yield return GiveAsMuchToShipAsPossible();
-            yield return Toils_Jump.JumpIf(FindNearestShip(), () => pawn.carryTracker.CarriedThing != null);
+            //yield return Toils_Jump.JumpIf(FindNearestShip(), () => pawn.carryTracker.CarriedThing != null);
             yield break;
         }
 

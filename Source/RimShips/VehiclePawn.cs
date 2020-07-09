@@ -258,6 +258,11 @@ namespace Vehicles
             HelperMethods.DrawLinesBetweenTargets(this, jobs.curJob, jobs.jobQueue);
         }
 
+        public override TipSignal GetTooltip()
+        {
+            return base.GetTooltip();
+        }
+
         public override void PostMapInit()
         {
             base.PostMapInit();

@@ -8,9 +8,9 @@ using Verse.AI.Group;
 
 namespace Vehicles.Lords
 {
-    public class LordToil_PrepareCaravan_GatherDownedPawnsShip : LordToil
+    public class LordToil_PrepareCaravan_GatherDownedPawnsVehicle : LordToil
     {
-        public LordToil_PrepareCaravan_GatherDownedPawnsShip(IntVec3 meetingPoint, IntVec3 exitSpot)
+        public LordToil_PrepareCaravan_GatherDownedPawnsVehicle(IntVec3 meetingPoint, IntVec3 exitSpot)
         {
             this.meetingPoint = meetingPoint;
             this.exitSpot = exitSpot;
@@ -38,11 +38,11 @@ namespace Vehicles.Lords
             {
                 if(p.IsColonist)
                 {
-                    p.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_GatherDownedPawns, this.meetingPoint, this.exitSpot, -1f);
+                    p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_GatherDownedPawns, this.meetingPoint, this.exitSpot, -1f);
                 }
                 else
                 {
-                    p.mindState.duty = new PawnDuty(DutyDefOf.PrepareCaravan_Wait, this.meetingPoint, -1f);
+                    p.mindState.duty = new PawnDuty(DutyDefOf.PrepareCaravan_Wait, meetingPoint, -1f);
                 }
             }
         }
@@ -51,11 +51,11 @@ namespace Vehicles.Lords
         {
             if(Find.TickManager.TicksGame % 100 == 0)
             {
-                List<Pawn> downedPawns = ((LordJob_FormAndSendCaravanShip)this.lord.LordJob).downedPawns;
-                List<Pawn> ships = ((LordJob_FormAndSendCaravanShip)this.lord.LordJob).ships;
+                List<Pawn> downedPawns = ((LordJob_FormAndSendVehicles)lord.LordJob).downedPawns;
+                List<VehiclePawn> vehicles = ((LordJob_FormAndSendVehicles)lord.LordJob).vehicles;
                 List<Pawn> pawnsOnShips = new List<Pawn>();
 
-                foreach(Pawn p in ships)
+                foreach(VehiclePawn p in vehicles)
                 {
                     pawnsOnShips.AddRange(p.GetComp<CompVehicle>().AllPawnsAboard);
                 }

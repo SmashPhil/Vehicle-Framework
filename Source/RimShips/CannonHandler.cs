@@ -219,6 +219,7 @@ namespace Vehicles
                         return;
                     }
                     LockedStatusRotation = false;
+                    Log.Message($"PrefireTickCount: {PrefireTickCount} Cooldown: {cooldownTicks} Rotation: {RotationIsValid} Disabled: {CannonDisabled}");
                     if(PrefireTickCount > 0)
                     {
                         rotationTargeted = (float)TurretLocation.ToIntVec3().AngleToPoint(cannonTarget.Cell, pawn.Map);
@@ -238,8 +239,14 @@ namespace Vehicles
                     {
                         if(targetPersists && (cannonTarget.Pawn is null || !SetTargetConditionalOnThing(LocalTargetInfo.Invalid)))
                         {
+                            
                             CompCannon.multiFireCannon.Add(new SPTuple<int, CannonHandler, SPTuple2<int,int>>(cannonDef.numberOfShots, this, new SPTuple2<int,int>(0, 0)));
                             ActivateTimer();
+                        }
+                        
+                        if(cannonTarget.IsValid)
+                        {
+                            
                         }
                     }
                 }
@@ -269,7 +276,7 @@ namespace Vehicles
 
         public void Draw()
         {
-            if(cannonDef.graphicData.graphicClass == typeof(Graphic_Animate))
+            if(CannonGraphicData.graphicClass == typeof(Graphic_Animate))
             {
                 if(ticks >= 0)
                 {
@@ -298,8 +305,8 @@ namespace Vehicles
                         }
                     }
                 }
-                
-                HelperMethods.DrawAttachedThing(CannonBaseTexture, CannonBaseGraphic, baseCannonRenderLocation, baseCannonDrawSize, CannonTexture, (CannonGraphic as Graphic_Animate).SubGraphicCycle(currentFrame), 
+
+                HelperMethods.DrawAttachedThing(CannonBaseTexture, CannonBaseGraphic, baseCannonRenderLocation, baseCannonDrawSize, CannonTexture, (CannonGraphic as Graphic_Animate).SubGraphicCycle(currentFrame, CannonGraphic.Shader, pawn.DrawColor, pawn.DrawColorTwo), 
                 cannonRenderLocation, cannonRenderOffset, CannonBaseMaterial, (CannonGraphic as Graphic_Animate).SubMaterialCycle(currentFrame), TurretRotation, pawn, drawLayer, attachedTo);
             }
             else
@@ -331,17 +338,17 @@ namespace Vehicles
         {
             get
             {
-                if(cannonDef.graphicData.texPath.NullOrEmpty())
+                if(CannonGraphicData.texPath.NullOrEmpty())
                     return null;
                 if (cannonMaterialLoaded is null)
                 {
-                    if(cannonDef.graphicData.graphicClass == typeof(Graphic_Animate))
+                    if(CannonGraphicData.graphicClass == typeof(Graphic_Animate))
                     {
-                        cannonMaterialLoaded = MaterialPool.MatFrom(Graphic_Animate.GetDefaultTexPath(cannonDef.graphicData.texPath));
+                        cannonMaterialLoaded = MaterialPool.MatFrom(Graphic_Animate.GetDefaultTexPath(CannonGraphicData.texPath));
                     }
                     else
                     {
-                        cannonMaterialLoaded = MaterialPool.MatFrom(cannonDef.graphicData.texPath);
+                        cannonMaterialLoaded = MaterialPool.MatFrom(CannonGraphicData.texPath);
                     }
                 }
                 return cannonMaterialLoaded;
@@ -364,17 +371,17 @@ namespace Vehicles
         {
             get
             {
-                if (cannonDef.graphicData.texPath.NullOrEmpty())
+                if (CannonGraphicData.texPath.NullOrEmpty())
                     return null;
                 if (cannonTex is null)
                 {
-                    if(cannonDef.graphicData.graphicClass == typeof(Graphic_Animate))
+                    if(CannonGraphicData.graphicClass == typeof(Graphic_Animate))
                     {
-                        cannonTex = ContentFinder<Texture2D>.Get(Graphic_Animate.GetDefaultTexPath(cannonDef.graphicData.texPath));
+                        cannonTex = ContentFinder<Texture2D>.Get(Graphic_Animate.GetDefaultTexPath(CannonGraphicData.texPath));
                     }
                     else
                     {
-                        cannonTex = ContentFinder<Texture2D>.Get(cannonDef.graphicData.texPath, true);
+                        cannonTex = ContentFinder<Texture2D>.Get(CannonGraphicData.texPath, true);
                     }
                 }
                 return cannonTex;
@@ -403,7 +410,7 @@ namespace Vehicles
                     {
                         return BaseContent.BadGraphic;
                     }
-                    cannonGraphic = cannonDef.graphicData.Graphic; //GraphicDatabase.Get<Graphic_Animate>(cannonDef.cannonTexPath, ShaderDatabase.DefaultShader, cannonTurretDrawSize, Color.white);
+                    cannonGraphic = CannonGraphicData.Graphic; //GraphicDatabase.Get<Graphic_Animate>(cannonDef.cannonTexPath, ShaderDatabase.DefaultShader, cannonTurretDrawSize, Color.white);
                 }
                 return cannonGraphic;
             }
@@ -416,11 +423,31 @@ namespace Vehicles
                 if (cannonDef.baseCannonTexPath.NullOrEmpty())
                     return null;
                 if (baseCannonGraphic is null)
+                {
                     baseCannonGraphic = GraphicDatabase.Get<Graphic_Multi>(cannonDef.baseCannonTexPath, ShaderDatabase.DefaultShader);
+                }
                 return baseCannonGraphic;
             }
         }
 
+        public GraphicData CannonGraphicData
+        {
+            get
+            {
+                if(cachedGraphicData is null)
+                {
+                    cachedGraphicData = new GraphicData();
+                    cachedGraphicData.CopyFrom(cannonDef.graphicData);
+                    if(cannonDef.matchParentColor)
+                    {
+                        cachedGraphicData.color = pawn.kindDef.lifeStages.Last().bodyGraphicData.color;
+                        cachedGraphicData.colorTwo = pawn.kindDef.lifeStages.Last().bodyGraphicData.colorTwo;
+                    }
+                }
+                return cachedGraphicData;
+            }
+        }
+        
         public Texture2D GizmoIcon
         {
             get
@@ -758,6 +785,8 @@ namespace Vehicles
 
         private CompVehicle CompVehicle => pawn.TryGetComp<CompVehicle>();
         private CompCannons CompCannon => pawn.TryGetComp<CompCannons>();
+
+        private GraphicData cachedGraphicData;
 
         public bool LockedStatusRotation { get; set; }
 

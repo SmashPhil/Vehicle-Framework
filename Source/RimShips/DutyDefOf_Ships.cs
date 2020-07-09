@@ -4,11 +4,11 @@ using Verse.AI;
 namespace Vehicles.Defs
 {
     [DefOf]
-    public static class DutyDefOf_Ships
+    public static class DutyDefOf_Vehicles
     {
-        static DutyDefOf_Ships()
+        static DutyDefOf_Vehicles()
         {
-            DefOfHelper.EnsureInitializedInCtor(typeof(DutyDefOf_Ships));
+            DefOfHelper.EnsureInitializedInCtor(typeof(DutyDefOf_Vehicles));
         }
 
         public static DutyDef PrepareCaravan_BoardShip;
@@ -21,7 +21,7 @@ namespace Vehicles.Defs
 
         public static DutyDef PrepareCaravan_SendSlavesToShip;
 
-        public static DutyDef TravelOrWaitOcean;
+        public static DutyDef TravelOrWaitVehicle;
 
         public static DutyDef TravelOrLeaveOcean;
     }

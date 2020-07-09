@@ -19,6 +19,7 @@ using Verse.Sound;
 
 namespace Vehicles.Lords
 {
+    [Obsolete("This LordJob is no longer supported. Refer to LordJob_FormAndSendCaravanVehicles for usage.", true)]
     public class LordJob_FormAndSendCaravanShip : LordJob
     {
         public LordJob_FormAndSendCaravanShip()
@@ -30,7 +31,7 @@ namespace Vehicles.Lords
         {
             this.transferables = transferables;
             this.ships = ships;
-            this.leadShip = ships.First(x => HelperMethods.IsVehicle(x) && x.RaceProps.baseBodySize == ships.Max(y => y.RaceProps.baseBodySize));
+            leadVehicle = ships.First(x => HelperMethods.IsVehicle(x) && x.RaceProps.baseBodySize == ships.Max(y => y.RaceProps.baseBodySize));
             this.downedPawns = downedPawns;
             this.meetingPoint = meetingPoint;
             this.exitPoint = exitPoint;
@@ -41,13 +42,13 @@ namespace Vehicles.Lords
             this.forceCaravan = false;
         }
 
-        public Pawn LeadShip
+        public Pawn LeadVehicle
         {
             get
             {
-                if (this.leadShip is null)
-                    this.leadShip = ships.First(x => HelperMethods.IsVehicle(x) && x.RaceProps.baseBodySize == ships.Max(y => y.RaceProps.baseBodySize));
-                return this.leadShip;
+                if (leadVehicle is null)
+                    leadVehicle = ships.First(x => HelperMethods.IsVehicle(x) && x.RaceProps.baseBodySize == ships.Max(y => y.RaceProps.baseBodySize));
+                return leadVehicle;
             }
         }
 
@@ -65,22 +66,22 @@ namespace Vehicles.Lords
 
         public Pawn GetShipAssigned(Pawn p)
         {
-            return this.shipAssigned.TryGetValue(p);
+            return shipAssigned.TryGetValue(p);
         }
 
         public void AssignSeats()
         {
-            if(this.shipAssigned != null && this.shipAssigned.Count > 0 /*&& this.shipAssigned.Keys.Count == (this.sailors.Count + this.prisoners.Count)*/)
+            if(shipAssigned != null && shipAssigned.Count > 0 /*&& this.shipAssigned.Keys.Count == (this.sailors.Count + this.prisoners.Count)*/)
                 return;
-            List<Pawn> sailorsTmp = this.sailors;
-            List<Pawn> prisonersTmp = this.prisoners;
+            List<Pawn> sailorsTmp = sailors;
+            List<Pawn> prisonersTmp = prisoners;
             int numPreassign = 0;
-            foreach(Pawn p in this.ships)
+            foreach(Pawn p in ships)
             {
                 numPreassign = p.GetComp<CompVehicle>().PawnCountToOperate - p.GetComp<CompVehicle>().AllCrewAboard.Count;
                 for(int i = 0; i < numPreassign; i++)
                 {
-                    this.shipAssigned.Add(sailorsTmp.Pop(), p);
+                    shipAssigned.Add(sailorsTmp.Pop(), p);
                 }
             }
             if(sailorsTmp.Count > 0)
@@ -268,15 +269,15 @@ namespace Vehicles.Lords
             stateGraph.AddToil(this.gatherAnimals);
             this.gatherAnimals_pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(this.gatherAnimals_pause);
-            this.gatherItems = new LordToil_PrepareCaravan_GatherShip(this.meetingPoint);
+            this.gatherItems = new LordToil_PrepareCaravan_GatherCargo(this.meetingPoint);
             stateGraph.AddToil(this.gatherItems);
             this.gatherItems_pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(this.gatherItems_pause);
-            this.gatherSlaves = new LordToil_PrepareCaravan_GatherSlavesShip(this.meetingPoint);
+            this.gatherSlaves = new LordToil_PrepareCaravan_GatherSlavesVehicle(this.meetingPoint);
             stateGraph.AddToil(this.gatherSlaves);
             this.gatherSlaves_pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(this.gatherSlaves_pause);
-            this.gatherDownedPawns = new LordToil_PrepareCaravan_GatherDownedPawnsShip(this.meetingPoint, this.exitPoint);
+            this.gatherDownedPawns = new LordToil_PrepareCaravan_GatherDownedPawnsVehicle(this.meetingPoint, this.exitPoint);
             stateGraph.AddToil(this.gatherDownedPawns);
             this.gatherDownedPawns_pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(this.gatherDownedPawns_pause);
@@ -289,7 +290,7 @@ namespace Vehicles.Lords
             stateGraph.AddToil(lordToil_PrepareCaravan_Wait);
             LordToil_PrepareCaravan_Pause lordToil_PrepareCaravan_Pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(lordToil_PrepareCaravan_Pause);
-            this.leave = new LordToil_PrepareCaravan_LeaveShip(this.exitPoint);
+            this.leave = new LordToil_PrepareCaravan_LeaveWithVehicles(this.exitPoint);
             stateGraph.AddToil(this.leave);
             this.leave_pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(this.leave_pause);
@@ -378,7 +379,7 @@ namespace Vehicles.Lords
 
         private Dictionary<Pawn, Pawn> shipAssigned = new Dictionary<Pawn, Pawn>();
 
-        private Pawn leadShip;
+        private Pawn leadVehicle;
 
         private IntVec3 meetingPoint;
 

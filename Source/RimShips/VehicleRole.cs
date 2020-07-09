@@ -1,10 +1,11 @@
 ﻿using RimWorld;
 using Verse;
 using System.Collections.Generic;
+using UnityEngine.XR;
 
 namespace Vehicles
 {
-    public enum HandlingTypeFlags {Cannon, Turret, Movement}
+    public enum HandlingTypeFlags {Cannon, Turret, Movement, Null}
 
     public class VehicleRole : IExposable
     {
@@ -20,6 +21,7 @@ namespace Vehicles
         {
 
         }
+
         public VehicleRole(VehicleHandler group)
         {
             label = group.role.label;
@@ -38,6 +40,7 @@ namespace Vehicles
             handlingTypes = new List<HandlingTypeFlags>();
             if(reference.handlingTypes != null)
                 handlingTypes.AddRange(reference.handlingTypes);
+            handlingTypes.RemoveAll(h => h == HandlingTypeFlags.Null);
             slots = reference.slots;
             slotsToOperate = reference.slotsToOperate;
             cannonIds = reference.cannonIds;

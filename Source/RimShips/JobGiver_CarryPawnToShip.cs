@@ -15,7 +15,7 @@ namespace Vehicles.Jobs
         {
             if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
                 return null;
-            if(!(pawn.GetLord().LordJob is LordJob_FormAndSendCaravanShip))
+            if(!(pawn.GetLord().LordJob is LordJob_FormAndSendVehicles))
                 return null;
             Pawn pawn2 = this.FindDownedPawn(pawn);
             if (pawn2 is null)
@@ -31,7 +31,7 @@ namespace Vehicles.Jobs
         private Pawn FindDownedPawn(Pawn pawn)
         {
             Lord lord = pawn.GetLord();
-            List<Pawn> downedPawns = ((LordJob_FormAndSendCaravanShip)lord.LordJob).downedPawns;
+            List<Pawn> downedPawns = ((LordJob_FormAndSendVehicles)lord.LordJob).downedPawns;
             foreach(Pawn comatose in downedPawns)
             {
                 if(comatose.Downed && comatose != pawn && comatose.Spawned)

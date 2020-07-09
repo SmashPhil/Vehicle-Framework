@@ -323,7 +323,7 @@ namespace Vehicles
 
         public static bool HasVehicleInCaravan(Pawn p)
         {
-            return p.IsFormingCaravan() && p.GetLord().LordJob is LordJob_FormAndSendCaravanShip && p.GetLord().ownedPawns.Any(x => IsVehicle(x));
+            return p.IsFormingCaravan() && p.GetLord().LordJob is LordJob_FormAndSendVehicles && p.GetLord().ownedPawns.Any(x => IsVehicle(x));
         }
 
         public static bool HasBoat(List<Pawn> pawns)
@@ -555,28 +555,25 @@ namespace Vehicles
             int seats = 0;
             int pawns = 0;
             int prereq = 0;
-            bool flag = caravan.Any(x => x.GetComp<CompVehicle>() != null); //Ships or No Ships
-            if (flag)
+            bool flag = caravan.Any(x => IsBoat(x)); //Ships or No Ships
+
+            foreach (Pawn p in caravan)
             {
-                foreach (Pawn p in caravan)
+                if (IsVehicle(p))
                 {
-                    if (IsVehicle(p))
-                    {
-                        seats += p.GetComp<CompVehicle>().SeatsAvailable;
-                        prereq += p.GetComp<CompVehicle>().PawnCountToOperate - p.GetComp<CompVehicle>().AllCrewAboard.Count;
-                    }
-                    else if (p.IsColonistPlayerControlled && !p.Downed && !p.Dead)
-                    {
-                        pawns++;
-                    }
+                    seats += p.GetComp<CompVehicle>().SeatsAvailable;
+                    prereq += p.GetComp<CompVehicle>().PawnCountToOperate - p.GetComp<CompVehicle>().AllCrewAboard.Count;
+                }
+                else if (p.IsColonistPlayerControlled && !p.Downed && !p.Dead)
+                {
+                    pawns++;
                 }
             }
-            bool flag2 = flag ? pawns > seats : false; //Not Enough Room
-            bool flag3 = flag ? pawns < prereq : false; //Not Enough Pawns to Sail
+
+            bool flag2 = flag ? pawns > seats : false; //Not Enough Room, must board all pawns
+            bool flag3 = pawns < prereq;
             if (flag2)
                 Messages.Message("CaravanMustHaveEnoughSpaceOnShip".Translate(), MessageTypeDefOf.RejectInput, false);
-            if (!caravan.Any(x => CaravanUtility.IsOwner(x, Faction.OfPlayer) && !x.Downed))
-                Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, false);
             if (flag3)
                 Messages.Message("CaravanMustHaveEnoughPawnsToOperate".Translate(prereq), MessageTypeDefOf.RejectInput, false);
             return !flag2 && !flag3;
@@ -808,7 +805,7 @@ namespace Vehicles
         public static bool IsFormingCaravanShipHelper(Pawn p)
         {
             Lord lord = p.GetLord();
-            return !(lord is null) && lord.LordJob is LordJob_FormAndSendCaravanShip;
+            return !(lord is null) && lord.LordJob is LordJob_FormAndSendVehicles;
         }
 
         public static List<Pawn> ExtractPawnsFromCaravan(Caravan caravan)
@@ -825,7 +822,7 @@ namespace Vehicles
             return sailors;
         }
 
-        public static float CapacityLeft(LordJob_FormAndSendCaravanShip lordJob)
+        public static float CapacityLeft(LordJob_FormAndSendVehicles lordJob)
         {
             float num = CollectionsMassCalculator.MassUsageTransferables(lordJob.transferables, IgnorePawnsInventoryMode.IgnoreIfAssignedToUnload, false, false);
             List<ThingCount> tmpCaravanPawns = new List<ThingCount>();
@@ -1106,7 +1103,7 @@ namespace Vehicles
         }
 
         public static void DrawAttachedThing(Texture2D baseTexture, Graphic baseGraphic, Vector2 baseRenderLocation,Vector2 baseDrawSize,
-            Texture2D texture, Graphic graphic, Vector2 renderLocation, Vector2 renderOffset, Material baseMat, Material mat, float rotation, Pawn parent, int drawLayer, CannonHandler attachedTo = null)
+            Texture2D texture, Graphic graphic, Vector2 renderLocation, Vector2 renderOffset, Material baseMat, Material mat, float rotation, Pawn parent, int drawLayer, CannonHandler attachedTo = null, Material mat2 = null)
         {
             if (texture != null && renderLocation != null)
             {
@@ -1122,7 +1119,7 @@ namespace Vehicles
                     
                     Vector3 topVectorLocation = new Vector3(parent.DrawPos.x + drawOffset.First + rotOffset1.First, parent.DrawPos.y + drawLayer, parent.DrawPos.z + drawOffset.Second + rotOffset1.Second);
                     Mesh cannonMesh = graphic.MeshAt(Rot4.North);
-
+                    
                     if(RimShipMod.mod.settings.debugDrawCannonGrid)
                     {
                         Material debugCenterMat = MaterialPool.MatFrom("Debug/cannonCenter");
@@ -1130,6 +1127,7 @@ namespace Vehicles
                         debugCenter.SetTRS(topVectorLocation + Altitudes.AltIncVect, Quaternion.identity, new Vector3(0.15f, 1f, 0.15f));
                         Graphics.DrawMesh(MeshPool.plane10, debugCenter, debugCenterMat, 0);
                     }
+
                     Graphics.DrawMesh(cannonMesh, topVectorLocation, rotation.ToQuat(), mat, 0);
 
                     if(baseMat != null && baseRenderLocation != null)
@@ -1177,8 +1175,7 @@ namespace Vehicles
 
         public static bool LocationRestrictedBySize(this VehiclePawn pawn, IntVec3 dest)
         {
-                return CellRect.CenteredOn(dest, pawn.def.Size.x, pawn.def.Size.z).Any(c2 => HelperMethods.IsBoat(pawn) ? GenGridShips.Impassable(c2, pawn.Map) : c2.Impassable(pawn.Map)) &&
-                    CellRect.CenteredOn(dest, pawn.def.Size.z, pawn.def.Size.x).Any(c2 => HelperMethods.IsBoat(pawn) ? GenGridShips.Impassable(c2, pawn.Map) : c2.Impassable(pawn.Map));
+            return CellRect.CenteredOn(dest, pawn.def.Size.x, pawn.def.Size.z).Any(c2 => IsBoat(pawn) ? (!c2.InBoundsShip(pawn.Map) || GenGridShips.Impassable(c2, pawn.Map)) : (!c2.InBounds(pawn.Map) || c2.Impassable(pawn.Map)));
         }
 
         public static void DrawLinesBetweenTargets(VehiclePawn pawn, Job curJob, JobQueue jobQueue)
@@ -1374,13 +1371,13 @@ namespace Vehicles
 
         public static void DoItemsListForVehicle(Rect inRect, ref float curY, ref List<Thing> tmpSingleThing, ITab_Pawn_FormingCaravan instance)
         {
-            LordJob_FormAndSendCaravanShip lordJob_FormAndSendCaravanShip = (LordJob_FormAndSendCaravanShip)(Find.Selector.SingleSelectedThing as Pawn).GetLord().LordJob;
+            LordJob_FormAndSendVehicles lordJob_FormAndSendCaravanVehicle = (LordJob_FormAndSendVehicles)(Find.Selector.SingleSelectedThing as Pawn).GetLord().LordJob;
             Rect position = new Rect(0f, curY, (inRect.width - 10f) / 2f, inRect.height);
             float a = 0f;
             GUI.BeginGroup(position);
             Widgets.ListSeparator(ref a, position.width, "ItemsToLoad".Translate());
             bool flag = false;
-            foreach (TransferableOneWay transferableOneWay in lordJob_FormAndSendCaravanShip.transferables)
+            foreach (TransferableOneWay transferableOneWay in lordJob_FormAndSendCaravanVehicle.transferables)
             {
                 if (transferableOneWay.CountToTransfer > 0 && transferableOneWay.HasAnyThing)
                 {
@@ -1401,7 +1398,7 @@ namespace Vehicles
             GUI.BeginGroup(position2);
             Widgets.ListSeparator(ref b, position2.width, "LoadedItems".Translate());
             bool flag2 = false;
-            foreach (Pawn pawn in lordJob_FormAndSendCaravanShip.lord.ownedPawns)
+            foreach (Pawn pawn in lordJob_FormAndSendCaravanVehicle.lord.ownedPawns)
             {
                 if (!pawn.inventory.UnloadEverything)
                 {
@@ -1719,6 +1716,7 @@ namespace Vehicles
         #endregion
 
         public static CannonTargeter CannonTargeter = new CannonTargeter();
+        public static VehicleRoutePlanner VehicleRoutePlanner = new VehicleRoutePlanner();
         public static Texture2D missingIcon;
         public static Dictionary<Pawn, Pair<VehiclePawn, VehicleHandler>> assignedSeats = new Dictionary<Pawn, Pair<VehiclePawn, VehicleHandler>>();
 

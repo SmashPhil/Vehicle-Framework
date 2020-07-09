@@ -13,20 +13,27 @@ namespace Vehicles.Jobs
         protected override Job TryGiveJob(Pawn pawn)
         {
             if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Moving)) return null;
-            Pawn ship = null;
-            if(pawn.GetLord().LordJob is LordJob_FormAndSendCaravanShip)
+            if(pawn.GetLord().LordJob is LordJob_FormAndSendVehicles)
             {
-                ship = ((LordJob_FormAndSendCaravanShip)pawn.GetLord().LordJob).GetShipAssigned(pawn);
-                if(ship is null)
+                Pair<VehiclePawn, VehicleHandler> vehicle = ((LordJob_FormAndSendVehicles)pawn.GetLord().LordJob).GetShipAssigned(pawn);
+
+                if(vehicle.Second is null)
                 {
-                    ship = ((LordJob_FormAndSendCaravanShip)pawn.GetLord().LordJob).ships.First();
+                    if (!JobDriver_FollowClose.FarEnoughAndPossibleToStartJob(pawn, vehicle.First, FollowRadius))
+                        return null;
+                    return new Job(JobDefOf.FollowClose, vehicle.First)
+                    {
+                        lord = pawn.GetLord(),
+                        expiryInterval = 140,
+                        checkOverrideOnExpire = true,
+                        followRadius = FollowRadius
+                    };
                 }
+                return new Job(JobDefOf_Ships.Board, vehicle.First);
             }
-            
-            return new Job(JobDefOf_Ships.Board, ship)
-            {
-                lord = pawn.GetLord()
-            };
+            return null;
         }
+
+        public const float FollowRadius = 5;
     }
 }

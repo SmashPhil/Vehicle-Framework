@@ -66,7 +66,7 @@ namespace Vehicles
         {
             if (currentlyReserving is null) currentlyReserving = new List<Pawn>();
 
-            currentlyReserving.RemoveDuplicates<Pawn>();
+            currentlyReserving.RemoveDuplicates();
             for(int i = 0; i < currentlyReserving.Count; i++)
             {
                 Pawn p = currentlyReserving[i];
@@ -81,7 +81,7 @@ namespace Vehicles
         {
             get
             { 
-                return !(role is null) && ((this?.handlers?.Count ?? 0) + (currentlyReserving?.Count ?? 0)) >= role.slots ? false : true;
+                return role != null && ((this?.handlers?.Count ?? 0) + (currentlyReserving?.Count ?? 0)) >= role.slots ? false : true;
             }
         }
 

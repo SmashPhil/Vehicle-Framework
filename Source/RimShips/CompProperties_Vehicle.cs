@@ -8,7 +8,7 @@ namespace Vehicles
 {
     public enum VehiclePermissions {NotAllowed, DriverNeeded, NoDriverNeeded}
     public enum PowerType { Manual, WindPowered, Steam, Fuel, Nuclear, Archotech}
-    public enum NavigationCategory { Manual, Automatic}
+    public enum NavigationCategory { Manual, Opportunistic, Automatic }
     public enum VehicleCategory { Misc, Transport, Trader, Combat, Hybrid }
     public enum VehicleType { Sea, Air, Land}
 
@@ -45,6 +45,7 @@ namespace Vehicles
         public float cargoCapacity = 200;
 
         public bool diagonalRotation = true;
+        public bool reserveFullHitbox = true;
         public float turnSpeed = 0.1f;
 
         public bool manhunterTargetsVehicle = false;
@@ -73,7 +74,7 @@ namespace Vehicles
         public VehicleCategory vehicleCategory = VehicleCategory.Misc;
         public TechLevel vehicleTech = TechLevel.Industrial;
         public VehicleType vehicleType = VehicleType.Land;
-        public NavigationCategory navigationCategory = NavigationCategory.Manual;
+        public NavigationCategory defaultNavigation = NavigationCategory.Opportunistic;
 
         public RiverDef riverTraversability = RiverDefOf.HugeRiver;
         public List<VehicleRole> roles  = new List<VehicleRole>();

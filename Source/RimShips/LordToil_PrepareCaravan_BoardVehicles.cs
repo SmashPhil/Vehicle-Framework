@@ -36,14 +36,14 @@ namespace Vehicles.Lords
             {
                 if(!HelperMethods.IsVehicle(p))
                 {
-                    p.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_BoardShip)
+                    p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_BoardShip)
                     {
                         locomotion = LocomotionUrgency.Jog
                     };
                 }
                 else
                 {
-                    p.mindState.duty = new PawnDuty(DutyDefOf_Ships.PrepareCaravan_WaitShip);
+                    p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_WaitShip);
                 }
             }
         }

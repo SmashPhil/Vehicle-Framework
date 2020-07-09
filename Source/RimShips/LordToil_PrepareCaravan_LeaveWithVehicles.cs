@@ -6,9 +6,9 @@ using Verse.AI.Group;
 
 namespace Vehicles.Lords
 {
-    public class LordToil_PrepareCaravan_LeaveShip : LordToil
+    public class LordToil_PrepareCaravan_LeaveWithVehicles : LordToil
     {
-        public LordToil_PrepareCaravan_LeaveShip(IntVec3 exitSpot)
+        public LordToil_PrepareCaravan_LeaveWithVehicles(IntVec3 exitSpot)
         {
             this.exitSpot = exitSpot;
         }
@@ -23,11 +23,11 @@ namespace Vehicles.Lords
 
         public override void UpdateAllDuties()
         {
-            foreach(Pawn p in this.lord.ownedPawns)
+            foreach(Pawn p in lord.ownedPawns)
             {
                 if(!HelperMethods.IsVehicle(p))
-                    this.lord.LordJob.Notify_PawnLost(p, PawnLostCondition.LeftVoluntarily);
-                p.mindState.duty = new PawnDuty(DutyDefOf_Ships.TravelOrWaitOcean, this.exitSpot, -1f)
+                    lord.LordJob.Notify_PawnLost(p, PawnLostCondition.LeftVoluntarily);
+                p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.TravelOrWaitVehicle, this.exitSpot, -1f)
                 {
                     locomotion = LocomotionUrgency.Jog
                 };
@@ -40,7 +40,7 @@ namespace Vehicles.Lords
         {
             if(Find.TickManager.TicksGame % 100 == 0)
             {
-                GatherAnimalsAndSlavesForShipsUtility.CheckArrived(this.lord, this.lord.ownedPawns.Where(x => HelperMethods.IsVehicle(x)).ToList(), this.exitSpot, "ReadyToExitMap", (Pawn x) => true, true, null);
+                GatherAnimalsAndSlavesForShipsUtility.CheckArrived(lord, lord.ownedPawns.Where(x => HelperMethods.IsVehicle(x)).ToList(), exitSpot, "ReadyToExitMap", (Pawn x) => true, lord.ownedPawns.Any(b => HelperMethods.IsBoat(b)), null);
             }
         }
 

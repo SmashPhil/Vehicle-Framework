@@ -68,9 +68,9 @@ namespace Vehicles.AI
             return mapE.getShipPathGrid.Walkable(c);
         }
 
-        public static bool Standable(this IntVec3 c, Map map, WaterMap mapE)
+        public static bool Standable(this IntVec3 c, Map map)
         {
-            if(!mapE.getShipPathGrid.Walkable(c))
+            if(!map.GetComponent<WaterMap>().getShipPathGrid.Walkable(c))
             {
                 return false;
             }

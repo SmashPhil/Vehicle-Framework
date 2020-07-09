@@ -26,6 +26,7 @@
 		<graphicData>
 			<texPath>Vehicles/Tank/TankCannonTop</texPath>
 			<graphicClass>Vehicles.Graphic_Animate</graphicClass>
+			<shaderType>CutoutComplex</shaderType>
 			<drawSize>(7, 7)</drawSize>
 		</graphicData>
 		
@@ -55,6 +56,8 @@
 		<magazineCapacity>1</magazineCapacity>
 		
 		<autoSnapTargeting>true</autoSnapTargeting>
+		
+		<matchParentColor>false</matchParentColor>
 		
 		<gizmoDescription>Select Target.\n\nFire for effect</gizmoDescription>
 		

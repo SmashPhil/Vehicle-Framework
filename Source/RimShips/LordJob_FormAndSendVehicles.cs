@@ -15,8 +15,8 @@ namespace Vehicles.Lords
         {
         }
 
-        public LordJob_FormAndSendVehicles(List<TransferableOneWay> transferables, List<Pawn> vehicles, List<Pawn> pawns, List<Pawn> downedPawns, List<Pawn> prisoners, IntVec3 meetingPoint, IntVec3 exitPoint,
-            int startingTile, int destinationTile)
+        public LordJob_FormAndSendVehicles(List<TransferableOneWay> transferables, List<VehiclePawn> vehicles, List<Pawn> pawns, List<Pawn> downedPawns, List<Pawn> prisoners, IntVec3 meetingPoint, IntVec3 exitPoint,
+            int startingTile, int destinationTile, Dictionary<Pawn, Pair<VehiclePawn, VehicleHandler>> vehicleAssigned, bool requireAllSeated = false)
         {
             this.transferables = transferables;
             this.vehicles = vehicles;
@@ -27,7 +27,17 @@ namespace Vehicles.Lords
             this.destinationTile = destinationTile;
             this.pawns = pawns;
             this.prisoners = prisoners;
+            this.requireAllSeated = requireAllSeated;
+            this.vehicleAssigned = new Dictionary<Pawn, Pair<VehiclePawn, VehicleHandler>>(vehicleAssigned);
             forceCaravan = false;
+        }
+
+        public VehiclePawn LeadVehicle
+        {
+            get
+            {
+                return vehicles.First(x => HelperMethods.IsVehicle(x) && x.RaceProps.baseBodySize == vehicles.Max(y => y.RaceProps.baseBodySize));
+            }
         }
 
         public bool ForceCaravanLeave
@@ -42,50 +52,89 @@ namespace Vehicles.Lords
             }
         }
 
-        public Pawn GetShipAssigned(Pawn p)
+        public Pair<VehiclePawn, VehicleHandler> GetShipAssigned(Pawn p)
         {
-            return this.vehicleAssigned.TryGetValue(p);
+            if (vehicleAssigned.ContainsKey(p))
+                return vehicleAssigned[p];
+            return new Pair<VehiclePawn, VehicleHandler>(vehicles.FirstOrDefault(), null);
         }
 
-        public void AssignSeats()
+        public bool AssignRemainingPawns()
         {
-            if(vehicleAssigned != null && vehicleAssigned.Count > 0 /*&& this.shipAssigned.Keys.Count == (this.sailors.Count + this.prisoners.Count)*/)
-                return;
-            List<Pawn> sailorsTmp = pawns;
-            List<Pawn> prisonersTmp = prisoners;
-            int numPreassign = 0;
-            foreach(Pawn p in vehicles)
+            if(requireAllSeated)
             {
-                numPreassign = p.GetComp<CompVehicle>().PawnCountToOperate - p.GetComp<CompVehicle>().AllCrewAboard.Count;
-                for(int i = 0; i < numPreassign; i++)
+                foreach(Pawn pawn in pawns.Where(p => !vehicleAssigned.ContainsKey(p)))
                 {
-                    vehicleAssigned.Add(sailorsTmp.Pop(), p);
+                    VehiclePawn nextAvailableVehicle = vehicles.FirstOrDefault(v => v.GetComp<CompVehicle>().SeatsAvailable > 0);
+                    if(nextAvailableVehicle is null)
+                    {
+                        return false;
+                    }
+                    vehicleAssigned.Add(pawn, new Pair<VehiclePawn, VehicleHandler>(nextAvailableVehicle, nextAvailableVehicle.GetComp<CompVehicle>().NextAvailableHandler()));
                 }
             }
-            if(sailorsTmp.Count > 0)
+            else
             {
-                int i = 0;
-                int j = 0;
-                while(sailorsTmp.Count > 0)
+                int nextVehicleIndex = 0;
+                foreach(Pawn pawn in pawns.Where(p => !vehicleAssigned.ContainsKey(p)))
                 {
-                    Pawn p = pawns[i];
-                    vehicleAssigned.Add(sailorsTmp.Pop(), p);
-                    i = (i+2) > pawns.Count ? 0 : ++i;
-                }
-                while(prisonersTmp.Count > 0)
-                {
-                    Pawn p = pawns[j];
-                    vehicleAssigned.Add(prisonersTmp.Pop(), p);
-                    j = (j + 2) > pawns.Count ? 0 : ++j;
+                    VehiclePawn nextAvailableVehicle = vehicles[nextVehicleIndex];
+                    vehicleAssigned.Add(pawn, new Pair<VehiclePawn, VehicleHandler>(nextAvailableVehicle, null));
+                    nextVehicleIndex++;
+                    if (nextVehicleIndex >= vehicles.Count)
+                        nextVehicleIndex = 0;
                 }
             }
+            return true;
+        }
+
+        public bool AssignSeats(VehiclePawn vehicle)
+        {
+            int iterations = 0;
+            while(vehicleAssigned.Where(k => k.Value.First == vehicle).Select(p => p.Key).Count() < vehicle.GetComp<CompVehicle>().PawnCountToOperateLeft)
+            {
+                if (iterations > 200)
+                {
+                    return false;
+                }
+
+                Pawn nextToAssign = pawns.FirstOrDefault(x => !vehicleAssigned.ContainsKey(x));
+                if(nextToAssign is null)
+                {
+                    //Cannot finalize caravan
+                    return false;
+                }
+                
+                vehicleAssigned.Add(nextToAssign, new Pair<VehiclePawn, VehicleHandler>(vehicle, vehicle.GetComp<CompVehicle>().NextAvailableHandler(HandlingTypeFlags.Movement)));
+
+                iterations++;
+            }
+            return true;
+        }
+
+        public void ResolveSeatingAssignments()
+        {
+            foreach(VehiclePawn vehicle in vehicles)
+            {
+                if(vehicleAssigned.Where(k => k.Value.First == vehicle).Select(p => p.Key).Count() < vehicle.GetComp<CompVehicle>().PawnCountToOperateLeft)
+                {
+                    if(!AssignSeats(vehicle))
+                    {
+                        Messages.Message("VehicleCaravanCanceled".Translate(), MessageTypeDefOf.NeutralEvent);
+                        CaravanFormingUtility.StopFormingCaravan(lord);
+                        return;
+                    }
+                }
+            }
+
+            AssignRemainingPawns();
         }
 
         public bool GatherItemsNow
         {
             get
             {
-                return this.lord.CurLordToil == this.gatherItems;
+                return lord.CurLordToil == gatherItems;
             }
         }
 
@@ -190,13 +239,13 @@ namespace Vehicles.Lords
         {
             base.Notify_PawnLost(p, condition);
             ReachabilityUtility.ClearCacheFor(p);
-            if (!this.caravanSent)
+            if (!caravanSent)
             {
                 if (condition == PawnLostCondition.IncappedOrKilled && p.Downed)
                 {
-                    this.downedPawns.Add(p);
+                    downedPawns.Add(p);
                 }
-                CaravanFormingUtility.RemovePawnFromCaravan(p, this.lord, false);
+                CaravanFormingUtility.RemovePawnFromCaravan(p, lord, false);
             }
         }
 
@@ -204,19 +253,20 @@ namespace Vehicles.Lords
         {
             return true;
         }
+
         public override void LordJobTick()
         {
             base.LordJobTick();
-            for(int i = this.downedPawns.Count - 1; i >= 0; i--)
+            for(int i = downedPawns.Count - 1; i >= 0; i--)
             {
-                if (this.downedPawns[i].Destroyed)
+                if (downedPawns[i].Destroyed)
                 {
-                    this.downedPawns.RemoveAt(i);
+                    downedPawns.RemoveAt(i);
                 }
-                else if (!this.downedPawns[i].Downed)
+                else if (!downedPawns[i].Downed)
                 {
-                    this.lord.AddPawn(this.downedPawns[i]);
-                    this.downedPawns.RemoveAt(i);
+                    lord.AddPawn(downedPawns[i]);
+                    downedPawns.RemoveAt(i);
                 }
             }
             if(!lord.ownedPawns.Any(x => HelperMethods.IsVehicle(x)))
@@ -233,11 +283,11 @@ namespace Vehicles.Lords
 
         private void SendCaravan()
         {
-            this.caravanSent = true;
-            CaravanFormingUtility.FormAndCreateCaravan(this.lord.ownedPawns.Concat(
-                from x in this.downedPawns
-                    where JobGiver_PrepareCaravan_GatherDownedPawns.IsDownedPawnNearExitPoint(x, this.exitPoint)
-                    select x), this.lord.faction, base.Map.Tile, this.startingTile, this.destinationTile);
+            caravanSent = true;
+            CaravanFormingUtility.FormAndCreateCaravan(lord.ownedPawns.Concat(
+                from x in downedPawns
+                    where JobGiver_PrepareCaravan_GatherDownedPawns.IsDownedPawnNearExitPoint(x, exitPoint)
+                    select x), lord.faction, Map.Tile, startingTile, destinationTile);
         }
         
         public override StateGraph CreateGraph()
@@ -247,19 +297,19 @@ namespace Vehicles.Lords
             stateGraph.AddToil(gatherAnimals);
             gatherAnimals_pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(gatherAnimals_pause);
-            gatherItems = new LordToil_PrepareCaravan_GatherShip(meetingPoint);
+            gatherItems = new LordToil_PrepareCaravan_GatherCargo(meetingPoint);
             stateGraph.AddToil(gatherItems);
             gatherItems_pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(gatherItems_pause);
-            gatherSlaves = new LordToil_PrepareCaravan_GatherSlavesShip(meetingPoint);
+            gatherSlaves = new LordToil_PrepareCaravan_GatherSlavesVehicle(meetingPoint);
             stateGraph.AddToil(gatherSlaves);
             gatherSlaves_pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(gatherSlaves_pause);
-            gatherDownedPawns = new LordToil_PrepareCaravan_GatherDownedPawnsShip(meetingPoint, exitPoint);
+            gatherDownedPawns = new LordToil_PrepareCaravan_GatherDownedPawnsVehicle(meetingPoint, exitPoint);
             stateGraph.AddToil(gatherDownedPawns);
             gatherDownedPawns_pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(gatherDownedPawns_pause);
-            AssignSeats();
+            ResolveSeatingAssignments();
             boardVehicle = new LordToil_PrepareCaravan_BoardVehicles(exitPoint);
             stateGraph.AddToil(boardVehicle);
             boardVehicle_pause = new LordToil_PrepareCaravan_Pause();
@@ -268,7 +318,7 @@ namespace Vehicles.Lords
             stateGraph.AddToil(lordToil_PrepareCaravan_Wait);
             LordToil_PrepareCaravan_Pause lordToil_PrepareCaravan_Pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(lordToil_PrepareCaravan_Pause);
-            leave = new LordToil_PrepareCaravan_LeaveShip(exitPoint);
+            leave = new LordToil_PrepareCaravan_LeaveWithVehicles(exitPoint);
             stateGraph.AddToil(leave);
             leave_pause = new LordToil_PrepareCaravan_Pause();
             stateGraph.AddToil(leave_pause);
@@ -351,11 +401,11 @@ namespace Vehicles.Lords
 
         public List<Pawn> prisoners = new List<Pawn>();
 
-        public List<Pawn> vehicles = new List<Pawn>();
+        public List<VehiclePawn> vehicles = new List<VehiclePawn>();
 
         public List<Pawn> pawns = new List<Pawn>();
 
-        protected Dictionary<Pawn, Pawn> vehicleAssigned = new Dictionary<Pawn, Pawn>();
+        protected Dictionary<Pawn, Pair<VehiclePawn, VehicleHandler>> vehicleAssigned = new Dictionary<Pawn, Pair<VehiclePawn, VehicleHandler>>();
 
         protected IntVec3 meetingPoint;
 
@@ -394,5 +444,7 @@ namespace Vehicles.Lords
         public const float CustomWakeThreshold = 0.5f;
 
         protected bool forceCaravan;
+
+        protected bool requireAllSeated;
     }
 }

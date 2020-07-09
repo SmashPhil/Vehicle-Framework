@@ -16,7 +16,7 @@ namespace Vehicles
         public static Thing FindThingToHaul(Pawn p, Lord lord)
         {
             GatherItemsForShipCaravanUtility.neededItems.Clear();
-            List<TransferableOneWay> transferables = ((LordJob_FormAndSendCaravanShip)lord.LordJob).transferables;
+            List<TransferableOneWay> transferables = ((LordJob_FormAndSendVehicles)lord.LordJob).transferables;
             for (int i = 0; i < transferables.Count; i++)
             {
                 TransferableOneWay transferableOneWay = transferables[i];

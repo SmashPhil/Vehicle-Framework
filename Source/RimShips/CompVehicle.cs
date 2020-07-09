@@ -37,6 +37,8 @@ namespace Vehicles
         public List<VehicleHandler> handlers = new List<VehicleHandler>();
         public VehicleMovementStatus movementStatus = VehicleMovementStatus.Online;
 
+        public NavigationCategory navigationCategory = NavigationCategory.Opportunistic;
+
         public bool warnNoFuel;
         public List<IntVec3> OffsetIndices => CellRect.CenteredOn(Pawn.Position, Pawn.def.Size.x, Pawn.def.Size.z).ToList();
 
@@ -121,7 +123,20 @@ namespace Vehicles
                     if (r.handlingTypes.Any(h => h == HandlingTypeFlags.Movement))
                         pawnCount += r.slotsToOperate;
                 }
-                return pawnCount >= 0 ? pawnCount : 0;
+                return pawnCount;
+            }
+        }
+
+        public int PawnCountToOperateLeft
+        {
+            get
+            {
+                int pawnsMounted = 0;
+                foreach(VehicleHandler handler in handlers.Where(h => h.role.handlingTypes.Contains(HandlingTypeFlags.Movement)))
+                {
+                    pawnsMounted += handler.handlers.Count;
+                }
+                return PawnCountToOperate - pawnsMounted;
             }
         }
 
@@ -213,20 +228,6 @@ namespace Vehicles
             }
         }
 
-        public VehicleHandler NextAvailableHandler
-        {
-            get
-            {
-                foreach(VehicleHandler handler in this.handlers)
-                {
-                    if(handler.AreSlotsAvailable)
-                    {
-                        return handler;
-                    }
-                }
-                return null;
-            }
-        }
         public int SeatsAvailable
         {
             get
@@ -279,12 +280,47 @@ namespace Vehicles
             return handlers.FindAll(x => x.role.handlingTypes.Any(h => h == handlingTypeFlag) && (handlingTypeFlag != HandlingTypeFlags.Cannon || (!x.role.cannonIds.NullOrEmpty() && x.role.cannonIds.Contains(cannonKey))));
         }
 
+        public VehicleHandler GetHandlersMatch(Pawn pawn)
+        {
+            return handlers.FirstOrDefault(x => x.handlers.Contains(pawn));
+        }
+
+        public VehicleHandler NextAvailableHandler(HandlingTypeFlags flag = HandlingTypeFlags.Null)
+        {
+            foreach(VehicleHandler handler in flag == HandlingTypeFlags.Null ? handlers : handlers.Where(h => h.role.handlingTypes.Contains(flag)))
+            {
+                Log.Message($"Checking: {handler.role.label} Slots: {handler.AreSlotsAvailable}");
+                if(handler.AreSlotsAvailable)
+                {
+                    return handler;
+                }
+            }
+            return null;
+        }
+
+        public VehicleHandler ReservedHandler(Pawn p)
+        {
+            foreach(VehicleHandler handler in handlers)
+            {
+                if(handler.currentlyReserving.Contains(p))
+                {
+                    return handler;
+                }
+            }
+            return null;
+        }
+
         public void Rename()
         {
             if(this.Props.nameable)
             {
                 Find.WindowStack.Add(new Dialog_GiveShipName(this.Pawn));
             }
+        }
+
+        public void Recolor()
+        {
+            Log.Message("COLOR");
         }
 
         public void EnqueueCellImmediate(IntVec3 cell)
@@ -413,7 +449,7 @@ namespace Vehicles
                         yield return fishing;
                     }
                 }
-                if(this.Pawn.GetLord()?.LordJob is LordJob_FormAndSendCaravanShip)
+                if(this.Pawn.GetLord()?.LordJob is LordJob_FormAndSendVehicles)
                 {
                     Command_Action forceCaravanLeave = new Command_Action
                     {
@@ -422,7 +458,7 @@ namespace Vehicles
                         icon = TexCommandVehicles.CaravanIcon,
                         action = delegate ()
                         {
-                            (this.Pawn.GetLord().LordJob as LordJob_FormAndSendCaravanShip).ForceCaravanLeave = true;
+                            (this.Pawn.GetLord().LordJob as LordJob_FormAndSendVehicles).ForceCaravanLeave = true;
                             Messages.Message("ForceLeaveConfirmation".Translate(), MessageTypeDefOf.TaskCompletion);
                         }
                     };
@@ -444,9 +480,9 @@ namespace Vehicles
                         continue;
                     Job job = new Job(JobDefOf_Ships.Board, this.parent);
                     p.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
-                    VehicleHandler handler = p.IsColonistPlayerControlled ? NextAvailableHandler : handlers.FirstOrDefault(h => h.role.handlingTypes.NullOrEmpty());
-                    this.GiveLoadJob(p, handler);
-                    this.ReserveSeat(p, handler);
+                    VehicleHandler handler = p.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(h => h.role.handlingTypes.NullOrEmpty());
+                    GiveLoadJob(p, handler);
+                    ReserveSeat(p, handler);
                 }
             }, MenuOptionPriority.Default, null, null, 0f, null, null);
             FloatMenuOption opt2 = new FloatMenuOption("BoardShipGroupFail".Translate(this.Pawn.LabelShort), null, MenuOptionPriority.Default, null, null, 0f, null, null);
@@ -532,7 +568,7 @@ namespace Vehicles
                 Log.Warning("Tried boarding Caravan with non-worldpawn");
             }
 
-            if (!(pawnToBoard.holdingOwner is null))
+            if (pawnToBoard.holdingOwner != null)
             {
                 pawnToBoard.holdingOwner.TryTransferToContainer(pawnToBoard, handler);
             }
@@ -544,17 +580,16 @@ namespace Vehicles
 
         public void Notify_Boarded(Pawn pawnToBoard)
         {
-            if(!(bills is null) && (bills.Count > 0))
+            if(bills != null && bills.Count > 0)
             {
                 Jobs.Bill_BoardShip bill = bills.FirstOrDefault(x => x.pawnToBoard == pawnToBoard);
-                if(!(bill is null))
+                if(bill != null)
                 {
                     if(pawnToBoard.IsWorldPawn())
                     {
                         Log.Error("Tried boarding ship with world pawn.");
                         return;
                     }
-
                     if(pawnToBoard.Spawned)
                         pawnToBoard.DeSpawn(DestroyMode.Vanish);
                     if (bill.handler.handlers.TryAdd(pawnToBoard, true))
@@ -565,7 +600,7 @@ namespace Vehicles
                             Find.WorldPawns.PassToWorld(pawnToBoard, PawnDiscardDecideMode.Decide);
                         }
                     }
-                    else if(!(pawnToBoard.holdingOwner is null))
+                    else if(pawnToBoard.holdingOwner != null)
                     {
                         pawnToBoard.holdingOwner.TryTransferToContainer(pawnToBoard, bill.handler.handlers);
                     }
@@ -576,21 +611,21 @@ namespace Vehicles
 
         public void DisembarkPawn(Pawn pawn)
         {
-            if(!Pawn.Position.Standable(Pawn.Map))
+            if(!this.Pawn.Position.Standable(this.Pawn.Map))
             {
                 Messages.Message("RejectDisembarkInvalidTile".Translate(), MessageTypeDefOf.RejectInput, false);
                 return;
             }
             if(!pawn.Spawned)
             {
-                GenSpawn.Spawn(pawn, this.Pawn.PositionHeld.RandomAdjacentCellCardinal(), Pawn.MapHeld);
-                if (!(this.Pawn.GetLord() is null))
+                GenSpawn.Spawn(pawn, this.Pawn.PositionHeld.RandomAdjacentCellCardinal(), this.Pawn.MapHeld);
+                if (this.Pawn.GetLord() != null)
                 {
                     this.Pawn.GetLord().AddPawn(pawn);
                 }
             }
             RemovePawn(pawn);
-            if(!this.AllPawnsAboard.Any() && outOfFoodNotified)
+            if(!AllPawnsAboard.Any() && outOfFoodNotified)
                 outOfFoodNotified = false;
         }
 
@@ -606,7 +641,7 @@ namespace Vehicles
             {
                 if(Pawn.GetCaravan() != null && !Pawn.Spawned)
                 {
-                    List<VehicleHandler> handlerList = this.handlers;
+                    List<VehicleHandler> handlerList = handlers;
                     for(int i = 0; i < handlerList.Count; i++)
                     {
                         VehicleHandler handler = handlerList[i];
@@ -620,6 +655,7 @@ namespace Vehicles
                 }
             }
         }
+
         public void RemovePawn(Pawn pawn)
         {
             for (int i = 0; i < this.handlers.Count; i++)
@@ -655,7 +691,7 @@ namespace Vehicles
 
         private void TrySatisfyPawnNeeds()
         {
-            if(this.Pawn.Spawned)
+            if(this.Pawn.Spawned || this.Pawn.IsCaravanMember())
             {
                 foreach (Pawn p in this.AllPawnsAboard)
                 {
@@ -663,46 +699,37 @@ namespace Vehicles
                 }
             }
         }
+
         private void TrySatisfyPawnNeeds(Pawn pawn)
         {
             if(pawn.Dead) return;
             List<Need> allNeeds = pawn.needs.AllNeeds;
             int tile = this.Pawn.IsCaravanMember() ? this.Pawn.GetCaravan().Tile : this.Pawn.Map.Tile;
+
             for(int i = 0; i < allNeeds.Count; i++)
             {
                 Need need = allNeeds[i];
                 if(need is Need_Rest)
                 {
-                    if(CaravanNightRestUtility.RestingNowAt(tile))
+                    if(CaravanNightRestUtility.RestingNowAt(tile) || GetHandlersMatch(pawn).role.handlingTypes.NullOrEmpty())
                     {
-                        this.TrySatisfyRest(pawn, need as Need_Rest);
-                    }
-                    else
-                    {
-                        this.TickNeeds(need, pawn);
+                        TrySatisfyRest(pawn, need as Need_Rest);
                     }
                 }
                 else if (need is Need_Food)
                 {
-                    this.TickNeeds(need, pawn);
                     if(!CaravanNightRestUtility.RestingNowAt(tile))
-                        this.TrySatisfyFood(pawn, need as Need_Food);
+                        TrySatisfyFood(pawn, need as Need_Food);
                 }
                 else if (need is Need_Chemical)
                 {
-                    this.TickNeeds(need, pawn);
                     if(!CaravanNightRestUtility.RestingNowAt(tile))
-                        this.TrySatisfyChemicalNeed(pawn, need as Need_Chemical);
+                        TrySatisfyChemicalNeed(pawn, need as Need_Chemical);
                 }
                 else if (need is Need_Joy)
                 {
-                    this.TickNeeds(need, pawn);
                     if (!CaravanNightRestUtility.RestingNowAt(tile))
-                        this.TrySatisfyJoyNeed(pawn, need as Need_Joy);
-                }
-                else if(need is Need_Mood)
-                {
-                    need.NeedInterval();
+                        TrySatisfyJoyNeed(pawn, need as Need_Joy);
                 }
                 else if(need is Need_Comfort)
                 {
@@ -710,7 +737,7 @@ namespace Vehicles
                 }
                 else if(need is Need_Outdoors)
                 {
-                    need.NeedInterval();
+                    need.CurLevel = 0.25f;
                 }
             }
         }
@@ -728,24 +755,31 @@ namespace Vehicles
         {
             if(food.CurCategory < HungerCategory.Hungry)
                 return;
-            Thing thing;
-            if(this.TryGetBestFood(pawn, out thing))
+
+            if(TryGetBestFood(pawn, out Thing thing, out Pawn owner))
             {
                 food.CurLevel += thing.Ingested(pawn, food.NutritionWanted);
                 if(thing.Destroyed)
                 {
-                    this.Pawn.inventory.innerContainer.Remove(thing);
+                    owner.inventory.innerContainer.Remove(thing);
+                    if(this.Pawn.IsCaravanMember())
+                    {
+                        this.Pawn.GetCaravan().RecacheImmobilizedNow();
+						this.Pawn.GetCaravan().RecacheDaysWorthOfFood();
+                    }
                 }
-                if(!outOfFoodNotified && !TryGetBestFood(pawn, out thing))
+                if(!outOfFoodNotified && !TryGetBestFood(pawn, out thing, out Pawn owner2))
                 {
                     Messages.Message("ShipOutOfFood".Translate(this.Pawn.LabelShort), this.Pawn, MessageTypeDefOf.NegativeEvent, false);
                     outOfFoodNotified = true;
                 }
             }
         }
-        public bool TryGetBestFood(Pawn forPawn, out Thing food)
+
+        public bool TryGetBestFood(Pawn forPawn, out Thing food, out Pawn owner)
         {
             List<Thing> list = this.Pawn.inventory.innerContainer.InnerListForReading;
+            Log.Message($"Pawn {forPawn.LabelShort} list: {list.Count}");
             Thing thing = null;
             float num = 0f;
             foreach(Thing foodItem in list)
@@ -760,12 +794,30 @@ namespace Vehicles
                     }
                 }
             }
-            if(!(thing is null))
+            if(this.Pawn.IsCaravanMember())
+            {
+                foreach(Thing foodItem2 in CaravanInventoryUtility.AllInventoryItems(this.Pawn.GetCaravan()))
+                {
+                    if(CanEatForNutrition(foodItem2, forPawn))
+                    {
+                        float foodScore = CaravanPawnsNeedsUtility.GetFoodScore(foodItem2, forPawn);
+                        if(thing is null || foodScore > num)
+                        {
+                            thing = foodItem2;
+                            num = foodScore;
+                        }
+                    }
+                }
+            }
+            
+            if(thing != null)
             {
                 food = thing;
+                owner = this.Pawn.IsCaravanMember() ? CaravanInventoryUtility.GetOwnerOf(this.Pawn.GetCaravan(), thing) : this.Pawn;
                 return true;
             }
             food = null;
+            owner = null;
             return false;
         }
 
@@ -773,40 +825,42 @@ namespace Vehicles
         {
             if (chemical.CurCategory >= DrugDesireCategory.Satisfied)
                 return;
-            Thing drug;
-            if(TryGetDrugToSatisfyNeed(pawn, chemical, out drug))
-                this.IngestDrug(pawn, drug);
+
+            if(TryGetDrugToSatisfyNeed(pawn, chemical, out Thing drug, out Pawn owner))
+                this.IngestDrug(pawn, drug, owner);
         }
 
-        public void IngestDrug(Pawn pawn, Thing drug)
+        public void IngestDrug(Pawn pawn, Thing drug, Pawn owner)
         {
             float num = drug.Ingested(pawn, 0f);
             Need_Food food = pawn.needs.food;
-            if(!(food is null))
+            if(food != null)
             {
                 food.CurLevel += num;
             }
             if(drug.Destroyed)
             {
-                this.Pawn.inventory.innerContainer.Remove(drug);
+                owner.inventory.innerContainer.Remove(drug);
             }
         }
-        public bool TryGetDrugToSatisfyNeed(Pawn forPawn, Need_Chemical chemical, out Thing drug)
+        public bool TryGetDrugToSatisfyNeed(Pawn forPawn, Need_Chemical chemical, out Thing drug, out Pawn owner)
         {
             Hediff_Addiction addictionHediff = chemical.AddictionHediff;
             if(addictionHediff is null)
             {
                 drug = null;
+                owner = null;
                 return false;
             }
             List<Thing> list = this.Pawn.inventory.innerContainer.InnerListForReading;
+
             Thing thing = null;
             foreach(Thing t in list)
             {
                 if(t.IngestibleNow && t.def.IsDrug)
                 {
                     CompDrug compDrug = t.TryGetComp<CompDrug>();
-                    if(!(compDrug is null) && !(compDrug.Props.chemical is null))
+                    if(compDrug != null && compDrug.Props.chemical != null)
                     {
                         if(compDrug.Props.chemical.addictionHediff == addictionHediff.def)
                         {
@@ -819,14 +873,38 @@ namespace Vehicles
                     }
                 }
             }
-            if(!(thing is null))
+            if(this.Pawn.IsCaravanMember())
+            {
+                foreach(Thing t in CaravanInventoryUtility.AllInventoryItems(this.Pawn.GetCaravan()))
+                {
+                    if(t.IngestibleNow && t.def.IsDrug)
+                    {
+                        CompDrug compDrug = t.TryGetComp<CompDrug>();
+                        if(compDrug != null && compDrug.Props.chemical != null)
+                        {
+                            if(compDrug.Props.chemical.addictionHediff == addictionHediff.def)
+                            {
+                                if(forPawn.drugs is null || forPawn.drugs.CurrentPolicy[t.def].allowedForAddiction || forPawn.story is null || forPawn.story.traits.DegreeOfTrait(TraitDefOf.DrugDesire) > 0)
+                                {
+                                    thing = t;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if(thing != null)
             {
                 drug = thing;
+                owner = this.Pawn.IsCaravanMember() ? CaravanInventoryUtility.GetOwnerOf(this.Pawn.GetCaravan(), thing) : this.Pawn;
                 return true;
             }
             drug = null;
+            owner = null;
             return false;
         }
+
         public static bool CanEatForNutrition(Thing item, Pawn forPawn)
         {
             return item.IngestibleNow && item.def.IsNutritionGivingIngestible && forPawn.WillEat(item, null) && item.def.ingestible.preferability > FoodPreferability.NeverForNutrition &&
@@ -872,69 +950,10 @@ namespace Vehicles
             return outJoyKinds;
         }
 
-        public void TickNeeds(Need n, Pawn pawn)
-        {
-            switch (Props.vehiclePowerType)
-            {
-                case PowerType.Manual:
-                    if (n is Need_Rest)
-                        n.CurLevel -= 2E-05f * pawn.health.hediffSet.RestFallFactor * 90f;
-                    else if (n is Need_Food)
-                        n.CurLevel -= 2.6666667E-05f * pawn.ageTracker.CurLifeStage.hungerRateFactor * pawn.RaceProps.baseHungerRate * pawn.health.hediffSet.HungerRateFactor * pawn.GetStatValue(StatDefOf.HungerRateMultiplier, true) * 155f;
-                    else if (n is Need_Chemical)
-                        n.CurLevel -= 2.0E-05f * 150f;
-                    else if (n is Need_Joy)
-                        n.CurLevel -= 2.0E-05f * 150f;
-                    break;
-                case PowerType.WindPowered:
-                    if (n is Need_Rest)
-                        n.CurLevel -= 2E-05f * pawn.health.hediffSet.RestFallFactor * 80f;
-                    else if (n is Need_Food)
-                        n.CurLevel -= 2.6666667E-05f * pawn.ageTracker.CurLifeStage.hungerRateFactor * pawn.RaceProps.baseHungerRate * pawn.health.hediffSet.HungerRateFactor * pawn.GetStatValue(StatDefOf.HungerRateMultiplier, true) * 150f;
-                    else if (n is Need_Chemical)
-                        n.CurLevel -= 2.0E-05f * 150f;
-                    else if (n is Need_Joy)
-                        n.CurLevel -= 2.0E-05f * 150f;
-                    break;
-                case PowerType.Steam:
-                    if (n is Need_Rest)
-                        n.CurLevel -= 2E-05f * pawn.health.hediffSet.RestFallFactor * 75f;
-                    else if (n is Need_Food)
-                        n.CurLevel -= 2.6666667E-05f * pawn.ageTracker.CurLifeStage.hungerRateFactor * pawn.RaceProps.baseHungerRate * pawn.health.hediffSet.HungerRateFactor * pawn.GetStatValue(StatDefOf.HungerRateMultiplier, true) * 150f;
-                    else if (n is Need_Chemical)
-                        n.CurLevel -= 2.0E-05f * 150f;
-                    else if (n is Need_Joy)
-                        n.CurLevel -= 2.0E-05f * 150f;
-                    break;
-                case PowerType.Fuel:
-                    if (n is Need_Rest)
-                        n.CurLevel -= 2E-05f * pawn.health.hediffSet.RestFallFactor * 75f;
-                    else if (n is Need_Food)
-                        n.CurLevel -= 2.6666667E-05f * pawn.ageTracker.CurLifeStage.hungerRateFactor * pawn.RaceProps.baseHungerRate * pawn.health.hediffSet.HungerRateFactor * pawn.GetStatValue(StatDefOf.HungerRateMultiplier, true) * 150f;
-                    else if (n is Need_Chemical)
-                        n.CurLevel -= 2.0E-05f * 150f;
-                    else if (n is Need_Joy)
-                        n.CurLevel -= 2.0E-05f * 150f;
-                    break;
-                case PowerType.Nuclear:
-                    if (n is Need_Rest)
-                        n.CurLevel -= 2E-05f * pawn.health.hediffSet.RestFallFactor * 75f;
-                    else if (n is Need_Food)
-                        n.CurLevel -= 2.6666667E-05f * pawn.ageTracker.CurLifeStage.hungerRateFactor * pawn.RaceProps.baseHungerRate * pawn.health.hediffSet.HungerRateFactor * pawn.GetStatValue(StatDefOf.HungerRateMultiplier, true) * 150f;
-                    else if (n is Need_Chemical)
-                        n.CurLevel -= 2.0E-05f * 150f;
-                    else if (n is Need_Joy)
-                        n.CurLevel -= 2.0E-05f * 150f;
-                    break;
-                default:
-                    throw new NotImplementedException();
-            } 
-        }
-
         public void ReserveSeat(Pawn p, VehicleHandler handler)
         {
             if(p is null || !p.Spawned) return;
-            foreach(VehicleHandler h in this.handlers)
+            foreach(VehicleHandler h in handlers)
             {
                 if(h != handler && h.currentlyReserving.Contains(p))
                 {
@@ -1077,7 +1096,7 @@ namespace Vehicles
         public override void CompTick()
         {
             base.CompTick();
-            SmoothPatherTick();
+            //SmoothPatherTick();
             if (Pawn.IsHashIntervalTick(150))
                 TrySatisfyPawnNeeds();
 
@@ -1087,7 +1106,7 @@ namespace Vehicles
             }
         }
 
-        private void InitializeShip()
+        private void InitializeVehicle()
         {
             if (handlers != null && handlers.Count > 0)
                 return;
@@ -1095,6 +1114,9 @@ namespace Vehicles
                 currentTravelCells = new List<IntVec3>();
             if (cargoToLoad is null)
                 cargoToLoad = new List<TransferableOneWay>();
+
+            navigationCategory = Props.defaultNavigation;
+
             foreach(VehicleHandler handler in handlers)
             {
                 if(handler.currentlyReserving is null) handler.currentlyReserving = new List<Pawn>();
@@ -1121,7 +1143,7 @@ namespace Vehicles
             base.PostSpawnSetup(respawningAfterLoad);
             if(!respawningAfterLoad)
             {
-                InitializeShip();
+                InitializeVehicle();
                 InitializeStats();
                 if(Props.customTerrainCosts?.Any() ?? false)
                 {
@@ -1138,6 +1160,7 @@ namespace Vehicles
         {
             base.PostExposeData();
             Scribe_Values.Look(ref movementStatus, "movingStatus", VehicleMovementStatus.Online);
+            Scribe_Values.Look(ref navigationCategory, "navigationCategory", NavigationCategory.Opportunistic);
             Scribe_Values.Look(ref currentlyFishing, "currentlyFishing", false);
             Scribe_Values.Look(ref bearingAngle, "bearingAngle");
             Scribe_Values.Look(ref turnSign, "turnSign");

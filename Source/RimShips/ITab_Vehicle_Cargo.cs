@@ -47,10 +47,16 @@ namespace Vehicles.UI
             if(SelPawnForCargo.def.GetCompProperties<CompProperties_Vehicle>().nameable)
             {
                 Rect rectRename = new Rect(size.x - 75f, 0f, 30f, 30f);
-                TooltipHandler.TipRegion(rectRename, "RenameShip".Translate(SelPawnForCargo.LabelShort));
+                Rect rectRecolor = new Rect(size.x - 75f - rectRename.width, 0f, 30f, 30f);
+                TooltipHandler.TipRegion(rectRename, "RenameVehicle".Translate(SelPawnForCargo.LabelShort));
+                TooltipHandler.TipRegion(rectRecolor, "RecolorVehicle".Translate(SelPawnForCargo.LabelShort));
                 if (Widgets.ButtonImage(rectRename, TexCommandVehicles.Rename))
                 {
                     SelPawnForCargo.GetComp<CompVehicle>().Rename();
+                }
+                if (Widgets.ButtonImage(rectRecolor, TexCommandVehicles.Recolor))
+                {
+                    SelPawnForCargo.GetComp<CompVehicle>().Recolor();
                 }
                 /*Rect rectRecolor = new Rect(this.size.x - 85f, 0f, 30f, 30f);
                 TooltipHandler.TipRegion(rectRecolor, "RecolorFlags".Translate());

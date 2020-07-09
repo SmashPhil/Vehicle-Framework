@@ -17,7 +17,7 @@ namespace Vehicles.Jobs
             this.FailOnDowned(TargetIndex.A);
 
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
-            yield return Toils_Board.BoardShip(pawn, TargetIndex.A);
+            yield return Toils_Board.BoardShip(pawn);
         }
     }
 }

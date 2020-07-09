@@ -28,25 +28,26 @@ namespace Vehicles
             bool flag = true;
             foreach(Pawn p in pawnsToCheck)
             {
-                if(shouldCheckIfArrived(p) && !waterPathing)
+                VehiclePawn leadShip = ((LordJob_FormAndSendVehicles)lord.LordJob).LeadVehicle;
+                if (waterPathing)
                 {
-                    if (!p.Spawned || !p.Position.InHorDistOf(meetingPoint, 15f) || !ReachabilityUtility.CanReach(p, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, TraverseMode.ByPawn) 
-                        || (extraValidator != null && !extraValidator(p)))
+                    if (!p.Spawned || !p.Position.InHorDistOf(((LordJob_FormAndSendVehicles)lord.LordJob).LeadVehicle.Position, 5f) || !(leadShip.Position.InHorDistOf(meetingPoint, leadShip.def.size.z > 5 ? (float)leadShip.def.size.z/2 : 3f) || leadShip.Position.WithinDistanceToEdge(leadShip.def.size.z, leadShip.Map)) ||
+                    !ShipReachabilityUtility.CanReachShip(p, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, TraverseMode.ByPawn) || (extraValidator != null && !extraValidator(p)))
                     {
                         flag = false;
                         break;
                     }
                 }
-                else if(waterPathing)
+                else
                 {
-                    Pawn leadShip = ((LordJob_FormAndSendCaravanShip)lord.LordJob).LeadShip;
-                    if (!p.Spawned || !p.Position.InHorDistOf(((LordJob_FormAndSendCaravanShip)lord.LordJob).LeadShip.Position, 5f) || !(leadShip.Position.InHorDistOf(meetingPoint, leadShip.def.size.z > 5 ? (float)leadShip.def.size.z/2 : 3f) || leadShip.Position.WithinDistanceToEdge(leadShip.def.size.z, leadShip.Map)) ||
-                        !ShipReachabilityUtility.CanReachShip(p, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, TraverseMode.ByPawn) || (extraValidator != null && !extraValidator(p)))
+                    if (!p.Spawned || !p.Position.InHorDistOf(((LordJob_FormAndSendVehicles)lord.LordJob).LeadVehicle.Position, 5f) || !(leadShip.Position.InHorDistOf(meetingPoint, leadShip.def.size.z > 5 ? (float)leadShip.def.size.z/2 : 3f) || leadShip.Position.WithinDistanceToEdge(leadShip.def.size.z, leadShip.Map)) ||
+                    !ReachabilityUtility.CanReach(p, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, TraverseMode.ByPawn) || (extraValidator != null && !extraValidator(p)))
                     {
                         flag = false;
                         break;
                     }
                 }
+                
             }
             if(flag)
             {
