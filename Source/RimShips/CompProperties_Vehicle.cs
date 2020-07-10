@@ -66,8 +66,10 @@ namespace Vehicles
         public Dictionary<TerrainDef, int> customTerrainCosts; //Add to guide
         public Dictionary<ThingDef, int> customThingCosts; //Add to guide : implement
 
-        public Dictionary<BiomeDef, int> customBiomeCosts; //Add to guide : implement
-        public Dictionary<FeatureDef, int> customFeatureCosts; //Add to guide : implement
+        public Dictionary<BiomeDef, float> customBiomeCosts; //Add to guide
+        public Dictionary<Hilliness, float> customHillinessCosts; //Add to guide
+        public Dictionary<RoadDef, float> customRoadCosts; //Add to guide
+        public float winterPathCostMultiplier = 1f; //Add to guide
 
         public VehiclePermissions vehicleMovementPermissions = VehiclePermissions.DriverNeeded;
         public PowerType vehiclePowerType = PowerType.Fuel;
@@ -79,6 +81,7 @@ namespace Vehicles
         public RiverDef riverTraversability = RiverDefOf.HugeRiver;
         public List<VehicleRole> roles  = new List<VehicleRole>();
         public SoundDef soundWhileDrafted; //REDO
+
         public ThingDef buildDef;
     }
 

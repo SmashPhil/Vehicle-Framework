@@ -8,14 +8,14 @@ using Vehicles.Defs;
 namespace Vehicles
 {
 
-    public class HarmonyPatches_Bootstrap : Mod
+    public class HarmonyPatches_PreLoad : Mod
     {
-        public HarmonyPatches_Bootstrap(ModContentPack content) : base(content)
+        public HarmonyPatches_PreLoad(ModContentPack content) : base(content)
         {
             var harmony = new Harmony("rimworld.boats_bootstrap.smashphil");
 
             harmony.Patch(original: AccessTools.Property(type: typeof(RaceProperties), name: nameof(RaceProperties.IsFlesh)).GetGetMethod(),
-                prefix: new HarmonyMethod(typeof(HarmonyPatches_Bootstrap),
+                prefix: new HarmonyMethod(typeof(HarmonyPatches_PreLoad),
                 nameof(BoatsNotFlesh)));
         }
 

@@ -12,8 +12,14 @@ using UnityEngine;
 namespace Vehicles
 {
 	[StaticConstructorOnStartup]
-    public class VehicleRoutePlanner
+    public class VehicleRoutePlanner : WorldComponent
     {
+
+		public VehicleRoutePlanner(World world) : base(world)
+        {
+			this.world = world;
+        }
+
 		public bool Active
 		{
 			get

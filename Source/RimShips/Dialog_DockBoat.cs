@@ -349,7 +349,7 @@ namespace Vehicles
 
         private bool DockBoatTransferPawns()
         {
-            DockedBoat dockedBoat = (DockedBoat)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfShips.DockedBoat);
+            DockedBoat dockedBoat = (DockedBoat)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.DockedBoat);
             dockedBoat.Tile = caravan.Tile;
             float randomInRange = Rand.Range(2f, 4f) + (50 * (1 - caravan.PawnsListForReading.Where(x => HelperMethods.IsBoat(x)).Max(x => x.GetComp<CompVehicle>().Props.visibility)));
             dockedBoat.GetComponent<TimeoutComp>().StartTimeout(Mathf.CeilToInt(randomInRange * 60000));

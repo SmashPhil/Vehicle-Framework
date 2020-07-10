@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<ThingDef ParentName="VehicleBaseBuildable">
+		<defName>SPVehicles_Car_Blueprint</defName>
+		<label>Car</label>
+		<description>A casual car for distant travel on roads.</description>
+		<graphicData>
+			<texPath>Vehicles/Car/Car</texPath>
+			<graphicClass>Graphic_Multi</graphicClass>
+			<drawSize>(4,6.7)</drawSize>
+		</graphicData>
+		
+		<statBases>
+			<MaxHitPoints>12000</MaxHitPoints>
+			<WorkToBuild>15000</WorkToBuild>
+			<Flammability>0.1</Flammability>
+		</statBases>
+		<size>(3,5)</size>
+		
+		<researchPrerequisites/>
+		
+		<costList>
+			<ComponentIndustrial>20</ComponentIndustrial>
+			<Steel>2000</Steel>
+		</costList>
+		
+		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
+		
+		<modExtensions>
+			<li Class="Vehicles.SpawnThingBuilt">
+				<thingToSpawn>SPVehicles_PawnKind_Car</thingToSpawn>
+				<soundFinished>ShipBigConstruction</soundFinished>
+			</li>
+		</modExtensions>
+		
+		<comps>
+			<li Class="Vehicles.CompProperties_SavePawnReference"/>
+		</comps>
+	</ThingDef>
+</Defs>

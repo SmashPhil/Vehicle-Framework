@@ -284,10 +284,10 @@ namespace Vehicles.Lords
         private void SendCaravan()
         {
             caravanSent = true;
-            CaravanFormingUtility.FormAndCreateCaravan(lord.ownedPawns.Concat(
+            HelperMethods.ExitMapAndCreateVehicleCaravan(lord.ownedPawns.Concat(
                 from x in downedPawns
-                    where JobGiver_PrepareCaravan_GatherDownedPawns.IsDownedPawnNearExitPoint(x, exitPoint)
-                    select x), lord.faction, Map.Tile, startingTile, destinationTile);
+                where JobGiver_PrepareCaravan_GatherDownedPawns.IsDownedPawnNearExitPoint(x, exitPoint)
+                select x), lord.faction, Map.Tile, startingTile, destinationTile);
         }
         
         public override StateGraph CreateGraph()

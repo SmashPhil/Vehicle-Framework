@@ -490,7 +490,7 @@ namespace Vehicles
 					}
 					else
 					{
-						HelperMethods.VehicleRoutePlanner.Start(this);
+						Find.World.GetComponent<VehicleRoutePlanner>().Start(this);
 					}
 				}
 				if (destinationTile != -1)
@@ -549,7 +549,7 @@ namespace Vehicles
 			{
 				num = CurrentTile;
 			}
-			CaravanFormingUtility.FormAndCreateCaravan(pawnsFromTransferables, Faction.OfPlayer, CurrentTile, num, destinationTile);
+			HelperMethods.ExitMapAndCreateVehicleCaravan(pawnsFromTransferables, Faction.OfPlayer, CurrentTile, num, destinationTile);
 			return true;
 		}
 

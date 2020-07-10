@@ -160,6 +160,9 @@
     <Compile Include="TransferableVehicleWidget.cs" />
     <Compile Include="VehicleCaravan.cs" />
     <Compile Include="VehicleCaravanFormingUtility.cs" />
+    <Compile Include="VehicleCaravanTweenerUtility.cs" />
+    <Compile Include="VehicleCaravan_PathFollower.cs" />
+    <Compile Include="VehicleCaravan_Tweener.cs" />
     <Compile Include="VehiclePawn.cs" />
     <Compile Include="CannonDef.cs" />
     <Compile Include="CannonHandler.cs" />
@@ -195,7 +198,7 @@
     <Compile Include="GenGridShips.cs" />
     <Compile Include="GenPathShip.cs" />
     <Compile Include="Gizmo_RefuelableFuelTravel.cs" />
-    <Compile Include="HarmonyPatches_Bootstrap.cs" />
+    <Compile Include="HarmonyPatches_PreLoad.cs" />
     <Compile Include="HelperMethods.cs" />
     <Compile Include="ITab_Vehicle_Cargo.cs" />
     <Compile Include="ITab_Vehicle_Health.cs" />
@@ -275,9 +278,10 @@
     <Compile Include="WindDirectional.cs" />
     <Compile Include="WorkGiver_BringUpgradeMaterial.cs" />
     <Compile Include="WorkGiver_PackBoat.cs" />
-    <Compile Include="WorldObjectDefOfShips.cs" />
-    <Compile Include="WorldOceanPathFinder.cs" />
-    <Compile Include="WorldOceanReachability.cs" />
+    <Compile Include="WorldObjectDefOfVehicles.cs" />
+    <Compile Include="WorldVehiclePathfinder.cs" />
+    <Compile Include="WorldVehiclePathGrid.cs" />
+    <Compile Include="WorldVehicleReachability.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

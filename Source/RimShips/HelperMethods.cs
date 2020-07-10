@@ -296,7 +296,7 @@ namespace Vehicles
             return p?.TryGetComp<CompVehicle>() != null;
         }
 
-        public static bool IsVehicle(Thing t)
+        public static bool IsVehicle(this Thing t)
         {
             return IsVehicle(t as Pawn);
         }
@@ -316,7 +316,7 @@ namespace Vehicles
             return pawns?.Any(x => IsVehicle(x)) ?? false;
         }
 
-        public static bool HasVehicle(Caravan c)
+        public static bool HasVehicle(this Caravan c)
         {
             return (c is null) ? (ShipHarmony.currentFormingCaravan is null) ? false : HasVehicle(TransferableUtility.GetPawnsFromTransferables(ShipHarmony.currentFormingCaravan.transferables)) : HasVehicle(c?.PawnsListForReading);
         }
@@ -547,6 +547,17 @@ namespace Vehicles
             return exitTile > 0;
         }
 
+        public static int BestGotoDestForVehicle(this Caravan c, int tile)
+        {
+            Predicate<int> predicate = (int t) => c.UniqueVehicleDefsInCaravan().All(v => Find.World.GetComponent<WorldVehiclePathGrid>().Passable(tile, v)) && Find.World.GetComponent<WorldVehicleReachability>().CanReach(c, tile);
+			if (predicate(tile))
+			{
+				return tile;
+			}
+			GenWorldClosest.TryFindClosestTile(tile, predicate, out int result, 50, true);
+			return result;
+        }
+
         #endregion
 
         #region CaravanFormation
@@ -729,6 +740,143 @@ namespace Vehicles
 		        }, localTrad.GetHashCode()));
 	        }
         }
+
+        public static VehicleCaravan ExitMapAndCreateVehicleCaravan(IEnumerable<Pawn> pawns, Faction faction, int exitFromTile, int directionTile, int destinationTile, bool sendMessage = true)
+		{
+			if (!GenWorldClosest.TryFindClosestPassableTile(exitFromTile, out exitFromTile))
+			{
+				Log.Error("Could not find any passable tile for a new caravan.", false);
+				return null;
+			}
+			if (Find.World.Impassable(directionTile))
+			{
+				directionTile = exitFromTile;
+			}
+
+			List<Pawn> tmpPawns = new List<Pawn>();
+            tmpPawns.AddRange(pawns);
+
+			Map map = null;
+			for (int i = 0; i < tmpPawns.Count; i++)
+			{
+				AddCaravanExitTaleIfShould(tmpPawns[i]);
+				map = tmpPawns[i].MapHeld;
+				if (map != null)
+				{
+					break;
+				}
+			}
+			VehicleCaravan caravan = MakeVehicleCaravan(tmpPawns, faction, exitFromTile, false);
+			Rot4 exitDir = (map != null) ? Find.WorldGrid.GetRotFromTo(exitFromTile, directionTile) : Rot4.Invalid;
+			for (int j = 0; j < tmpPawns.Count; j++)
+			{
+				tmpPawns[j].ExitMap(false, exitDir);
+			}
+			List<Pawn> pawnsListForReading = caravan.PawnsListForReading;
+			for (int k = 0; k < pawnsListForReading.Count; k++)
+			{
+				if (!pawnsListForReading[k].IsWorldPawn())
+				{
+					Find.WorldPawns.PassToWorld(pawnsListForReading[k], PawnDiscardDecideMode.Decide);
+				}
+			}
+			if (map != null)
+			{
+				map.Parent.Notify_CaravanFormed(caravan);
+				map.retainedCaravanData.Notify_CaravanFormed(caravan);
+			}
+			if (!caravan.vPather.Moving && caravan.Tile != directionTile)
+			{
+				caravan.vPather.StartPath(directionTile, null, true, true);
+				caravan.vPather.nextTileCostLeft /= 2f;
+				caravan.tweener.ResetTweenedPosToRoot();
+			}
+			if (destinationTile != -1)
+			{
+				List<FloatMenuOption> list = FloatMenuMakerWorld.ChoicesAtFor(destinationTile, caravan);
+				if (list.Any((FloatMenuOption x) => !x.Disabled))
+				{
+					list.First((FloatMenuOption x) => !x.Disabled).action();
+				}
+				else
+				{
+					caravan.vPather.StartPath(destinationTile, null, true, true);
+				}
+			}
+			if (sendMessage)
+			{
+				TaggedString taggedString = "MessageFormedCaravan".Translate(caravan.Name).CapitalizeFirst();
+				if (caravan.vPather.Moving && caravan.vPather.ArrivalAction != null)
+				{
+					taggedString += " " + "MessageFormedCaravan_Orders".Translate() + ": " + caravan.vPather.ArrivalAction.Label + ".";
+				}
+				Messages.Message(taggedString, caravan, MessageTypeDefOf.TaskCompletion, true);
+			}
+			return caravan;
+		}
+
+        public static void AddCaravanExitTaleIfShould(Pawn pawn)
+        {
+	        if (pawn.Spawned && pawn.IsFreeColonist)
+	        {
+		        if (pawn.Map.IsPlayerHome)
+		        {
+			        TaleRecorder.RecordTale(TaleDefOf.CaravanFormed, new object[]
+			        {
+				        pawn
+			        });
+			        return;
+		        }
+		        if (GenHostility.AnyHostileActiveThreatToPlayer(pawn.Map, false))
+		        {
+			        TaleRecorder.RecordTale(TaleDefOf.CaravanFled, new object[]
+			        {
+				        pawn
+			        });
+		        }
+	        }
+        }
+
+        public static VehicleCaravan MakeVehicleCaravan(IEnumerable<Pawn> pawns, Faction faction, int startingTile, bool addToWorldPawnsIfNotAlready)
+		{
+			if (startingTile < 0 && addToWorldPawnsIfNotAlready)
+			{
+				Log.Warning("Tried to create a caravan but chose not to spawn a caravan but pass pawns to world. This can cause bugs because pawns can be discarded.", false);
+			}
+            List<Pawn> tmpPawns = new List<Pawn>();
+            tmpPawns.AddRange(pawns);
+
+			VehicleCaravan caravan = (VehicleCaravan)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.VehicleCaravan);
+			if (startingTile >= 0)
+			{
+				caravan.Tile = startingTile;
+			}
+			caravan.SetFaction(faction);
+			if (startingTile >= 0)
+			{
+				Find.WorldObjects.Add(caravan);
+			}
+			for (int i = 0; i < tmpPawns.Count; i++)
+			{
+				Pawn pawn = tmpPawns[i];
+				if (pawn.Dead)
+				{
+					Log.Warning("Tried to form a caravan with a dead pawn " + pawn, false);
+				}
+				else
+				{
+					caravan.AddPawn(pawn, addToWorldPawnsIfNotAlready);
+					if (addToWorldPawnsIfNotAlready && !pawn.IsWorldPawn())
+					{
+						Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.Decide);
+					}
+				}
+			}
+			caravan.Name = CaravanNameGenerator.GenerateCaravanName(caravan);
+			caravan.SetUniqueId(Find.UniqueIDsManager.GetNextCaravanID());
+			return caravan;
+		}
+
         #endregion
 
         #region GetData
@@ -800,6 +948,16 @@ namespace Vehicles
                 ships.AddRange(c.PawnsListForReading.Where(x => IsBoat(x)));
             }
             return ships;
+        }
+
+        public static HashSet<ThingDef> UniqueVehicleDefsInCaravan(this Caravan c)
+        {
+            var vehicleSet = new HashSet<ThingDef>();
+            foreach(Pawn p in c.PawnsListForReading.Where(v => v.IsVehicle()))
+            {
+                vehicleSet.Add(p.def);
+            }
+            return vehicleSet;
         }
 
         public static bool IsFormingCaravanShipHelper(Pawn p)
@@ -1083,7 +1241,7 @@ namespace Vehicles
 
         public static void DebugDrawSettlement(int from, int to)
         {
-            PeaceTalks o = (PeaceTalks)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfShips.DebugSettlement);
+            PeaceTalks o = (PeaceTalks)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.DebugSettlement);
             o.Tile = from;
             o.SetFaction(Faction.OfMechanoids);
             Find.WorldObjects.Add(o);
@@ -1716,7 +1874,7 @@ namespace Vehicles
         #endregion
 
         public static CannonTargeter CannonTargeter = new CannonTargeter();
-        public static VehicleRoutePlanner VehicleRoutePlanner = new VehicleRoutePlanner();
+
         public static Texture2D missingIcon;
         public static Dictionary<Pawn, Pair<VehiclePawn, VehicleHandler>> assignedSeats = new Dictionary<Pawn, Pair<VehiclePawn, VehicleHandler>>();
 

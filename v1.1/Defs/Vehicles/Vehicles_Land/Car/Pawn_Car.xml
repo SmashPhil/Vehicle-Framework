@@ -2,12 +2,12 @@
 
 <Defs>
 	<PawnKindDef>
-		<defName>SPVehicles_PawnKind_Tank</defName>
-		<label>Tank</label>
+		<defName>SPVehicles_PawnKind_Car</defName>
+		<label>Car</label>
 		<defaultFactionType>PlayerColony</defaultFactionType>
 		<aiAvoidCover>false</aiAvoidCover>
 		<destroyGearOnDrop>true</destroyGearOnDrop>
-		<race>SPVehicles_Tank</race>
+		<race>SPVehicles_Car</race>
 		<backstoryCategories>
 			<li>Industrial</li>
 		</backstoryCategories>
@@ -15,12 +15,12 @@
 		<lifeStages>
 			<li>
 				<bodyGraphicData>
-					<texPath>Vehicles/Tank/Tank</texPath>
+					<texPath>Vehicles/Car/Car</texPath>
 					<graphicClass>Vehicles.Graphic_OmniDirectional</graphicClass>
-					<drawSize>(4,7)</drawSize>
+					<drawSize>(4,6.7)</drawSize>
 					<shaderType>CutoutComplex</shaderType>
-					<color>(0, 80, 30)</color>
-					<colorTwo>(0, 80, 30)</colorTwo>
+					<color>(0, 0, 200)</color>
+					<colorTwo>(0, 0, 200)</colorTwo>
 					<shadowData>
 						<volume>(0.4,0.1,0.4)</volume>
 					</shadowData>
@@ -30,7 +30,7 @@
 	</PawnKindDef>
 	
 	<BodyPartDef>
-		<defName>test_Body</defName>
+		<defName>test_Body2</defName>
 		<label>body</label>
 		<hitPoints>600</hitPoints>
 		<skinCovered>false</skinCovered>
@@ -44,10 +44,10 @@
 	</BodyPartDef>
 	
 	<BodyDef>
-		<defName>test_Body</defName>
+		<defName>test_Body2</defName>
 		<label>dreadnoughtbody</label>
 		<corePart>
-			<def>test_Body</def>
+			<def>test_Body2</def>
 			<height>Middle</height>
 			<depth>Outside</depth>
 			<groups>
@@ -73,16 +73,16 @@
 	</BodyDef>
 	
 	<ThingDef ParentName="BaseVehiclePawnUpgradeable">
-		<defName>SPVehicles_Tank</defName>
-		<label>Tank</label>
-		<description>A heavy warship to rule the seas.</description>
+		<defName>SPVehicles_Car</defName>
+		<label>Car</label>
+		<description>A casual car for distant travel on roads.</description>
 		
 		<statBases>
-			<MoveSpeed>2</MoveSpeed>
+			<MoveSpeed>5</MoveSpeed>
 			<Mass>25000</Mass>
 			<ArmorRating_Blunt>1.0</ArmorRating_Blunt>
 			<ArmorRating_Sharp>1.0</ArmorRating_Sharp>
-			<MarketValue>250000</MarketValue>
+			<MarketValue>40000</MarketValue>
 			<Flammability>0</Flammability>
 		</statBases>
 		
@@ -132,33 +132,9 @@
 			<li Class="Vehicles.CompProperties_FueledTravel">
 				<!-- Must Include -->
 				<fuelType>Chemfuel</fuelType>
-				<fuelConsumptionRate>80</fuelConsumptionRate>
-				<fuelCapacity>2000</fuelCapacity>
+				<fuelConsumptionRate>50</fuelConsumptionRate>
+				<fuelCapacity>1200</fuelCapacity>
 				<fuelConsumptionCondition>Drafted</fuelConsumptionCondition>
-			</li>
-			<li Class="Vehicles.CompProperties_VehicleTracks">
-				<tracks>
-					<li>
-						<trackPoint>
-							<first>-1,-2</first>
-							<second>-1,2</second>
-						</trackPoint>
-						<destroyableCategories>
-							<li>Plant</li>
-							<li>Pawn</li>
-						</destroyableCategories>
-					</li>
-					<li>
-						<trackPoint>
-							<first>1,-2</first>
-							<second>1,2</second>
-						</trackPoint>
-						<destroyableCategories>
-							<li>Plant</li>
-							<li>Pawn</li>
-						</destroyableCategories>
-					</li>
-				</tracks>
 			</li>
 			<li Class = "Vehicles.CompProperties_Vehicle">
 				<downable>false</downable>
@@ -166,7 +142,7 @@
 				
 				<vehicleMovementPermissions>DriverNeeded</vehicleMovementPermissions>
 				<vehiclePowerType>Fuel</vehiclePowerType>
-				<vehicleCategory>Combat</vehicleCategory>
+				<vehicleCategory>Transport</vehicleCategory>
 				<vehicleTech>Industrial</vehicleTech>
 				<vehicleType>Land</vehicleType>
 				
@@ -174,14 +150,11 @@
 				<displayUISize>(323.75, 500)</displayUISize>
 				
 				<nameable>true</nameable>
-				<buildDef>SPVehicles_Tank_Blueprint</buildDef>
-				<ticksBetweenRepair>650</ticksBetweenRepair>
+				<buildDef>SPVehicles_Car_Blueprint</buildDef>
+				<ticksBetweenRepair>350</ticksBetweenRepair>
 				
-				<armor>50</armor>
-				<cargoCapacity>3000</cargoCapacity>
-				
-				<wakeMultiplier>2.15</wakeMultiplier>
-				<wakeSpeed>2.15</wakeSpeed>
+				<armor>5</armor>
+				<cargoCapacity>250</cargoCapacity>
 				
 				<healthLabel_Healthy>Operational</healthLabel_Healthy>
 				<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
@@ -193,23 +166,11 @@
 				<customBiomeCosts>
 					<li>
 						<key>AridShrubland</key>
-						<value>5</value>
+						<value>1</value>
 					</li>
 				</customBiomeCosts>
 				
 				<roles>
-					<li>
-						<label>Commander</label>
-						<handlingTypes>
-							<li>Movement</li>
-							<li>Cannon</li>
-						</handlingTypes>
-						<cannonIds>
-							<li>50cal</li>
-						</cannonIds>
-						<slots>1</slots>
-						<slotsToOperate>1</slotsToOperate>
-					</li>
 					<li>
 						<label>Driver</label>
 						<handlingTypes>
@@ -219,77 +180,19 @@
 						<slotsToOperate>1</slotsToOperate>
 					</li>
 					<li>
-						<label>Gunner</label>
-						<handlingTypes>
-							<li>Cannon</li>
-						</handlingTypes>
-						<cannonIds>
-							<li>mainTurret</li>
-						</cannonIds>
-						<slots>1</slots>
-						<slotsToOperate>1</slotsToOperate>
-					</li>
-					<li>
-						<label>Loader</label>
-						<handlingTypes>
-							<li>Cannon</li>
-						</handlingTypes>
-						<cannonIds>
-							<li>mainTurret</li>
-						</cannonIds>
-						<slots>1</slots>
-						<slotsToOperate>1</slotsToOperate>
-					</li>
-					<li>
-						<label>TestSeat</label>
-						<handlingTypes/>
-						<slots>1</slots>
+						<label>Passenger</label>
+						<slots>4</slots>
 					</li>
 				</roles>
 				
 				<customTerrainCosts>
 					<li>
 						<key>Mud</key>
-						<value>250</value>
+						<value>100</value>
 					</li>
 				</customTerrainCosts>
 			</li>
-			
-			<li Class="Vehicles.CompProperties_Cannons">
-				<cannons>
-					<li>
-						<cannonDef>turret50cal</cannonDef>
-						<cannonRenderLocation>(-.43, .38)</cannonRenderLocation>
-						<cannonRenderOffset>(0, 0)</cannonRenderOffset>
-						<cannonTurretDrawSize>(1, 1)</cannonTurretDrawSize>
-						
-						<targetPersists>true</targetPersists>
-						<autoTargeting>true</autoTargeting>
-						<manualTargeting>false</manualTargeting>
-						<angleRestricted>(270,90)</angleRestricted>
-						<aimPieOffset/>
-						<drawLayer>2</drawLayer>
-						
-						<key>50cal</key>
-						<parentKey>mainTurret</parentKey>
-					</li>
-					<li>
-						<cannonDef>tankMainTurret</cannonDef>
-						<cannonRenderLocation>(0,0)</cannonRenderLocation>
-						<cannonRenderOffset>(0, 0)</cannonRenderOffset>
-						<cannonTurretDrawSize>(7, 7)</cannonTurretDrawSize>
-						
-						<autoTargeting>true</autoTargeting>
-						
-						<angleRestricted/>
-						<aimPieOffset/>
-						<drawLayer>1</drawLayer>
-						
-						<key>mainTurret</key>
-					</li>
-					
-				</cannons>
-			</li>
+
 			<li Class="Vehicles.CompProperties_UpgradeTree">
 				<displayUICoord>(587,50)</displayUICoord>
 				<displayUISize>(259,400)</displayUISize>
