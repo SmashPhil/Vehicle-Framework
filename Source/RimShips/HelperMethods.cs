@@ -61,7 +61,7 @@ namespace Vehicles
                 RiverIsValid(tileID, caravan.PawnsListForReading.Where(x => IsBoat(x)).ToList());
             bool flag = Find.WorldGrid[tileID].biome == BiomeDefOf.Ocean || Find.WorldGrid[tileID].biome == BiomeDefOf.Lake;
             return HasVehicle(caravan) ? (!WaterCovered(tileID) && !(Find.World.CoastDirectionAt(tileID).IsValid && tileID == destTile) &&
-                !(RimShipMod.mod.settings.riverTravel && riverValid)) : (flag || world.Impassable(tileID));
+                !(VehicleMod.mod.settings.riverTravel && riverValid)) : (flag || world.Impassable(tileID));
         }
 
         public static bool ImpassableForBoatPlanner(int tileID, int destTile = 0)
@@ -144,10 +144,10 @@ namespace Vehicles
             if (pawn is null) return 0f;
             VehiclePawn vehicle = pawn as VehiclePawn;
 
-            if(!RimShipMod.mod.settings.debugDisableSmoothPathing)
-            {
-                return vehicle.GetComp<CompVehicle>().BearingAngle;
-            }
+            //if(!VehicleMod.mod.settings.debugDisableSmoothPathing)
+            //{
+            //    return vehicle.GetComp<CompVehicle>().BearingAngle;
+            //}
 
             if (vehicle.vPather.Moving)
             {
@@ -281,12 +281,12 @@ namespace Vehicles
 
         #region FeatureChecking
 
-        public static bool IsShipDef(ThingDef td)
+        public static bool IsVehicleDef(this ThingDef td)
         {
             return td?.GetCompProperties<CompProperties_Vehicle>() != null;
         }
 
-        public static bool IsBoat(Pawn p)
+        public static bool IsBoat(this Pawn p)
         {
             return IsVehicle(p) && p.GetComp<CompVehicle>().Props.vehicleType == VehicleType.Sea;
         }
@@ -326,7 +326,7 @@ namespace Vehicles
             return p.IsFormingCaravan() && p.GetLord().LordJob is LordJob_FormAndSendVehicles && p.GetLord().ownedPawns.Any(x => IsVehicle(x));
         }
 
-        public static bool HasBoat(List<Pawn> pawns)
+        public static bool HasBoat(this List<VehiclePawn> pawns)
         {
             return pawns?.Any(x => IsBoat(x)) ?? false;
         }
@@ -336,7 +336,7 @@ namespace Vehicles
             return pawns?.Any(x => IsBoat(x)) ?? false;
         }
 
-        public static bool HasBoat(Caravan c)
+        public static bool HasBoat(this Caravan c)
         {
             return (c is null) ? (ShipHarmony.currentFormingCaravan is null) ? false : HasBoat(TransferableUtility.GetPawnsFromTransferables(ShipHarmony.currentFormingCaravan.transferables)) : HasBoat(c?.PawnsListForReading);
         }
@@ -409,9 +409,39 @@ namespace Vehicles
             return ship.GetComp<CompVehicle>().movementStatus != VehicleMovementStatus.Offline && !ship.GetComp<CompVehicle>().beached;
         }
 
+        public static void ValidateAllVehicleDefs()
+        {
+            foreach(ThingDef vehicleDef in DefDatabase<ThingDef>.AllDefs.Where(v => v.GetCompProperties<CompProperties_Vehicle>() != null))
+            {
+				if (vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts is null)
+					vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts = new Dictionary<BiomeDef, float>();
+                if (vehicleDef.GetCompProperties<CompProperties_Vehicle>().customHillinessCosts is null)
+                    vehicleDef.GetCompProperties<CompProperties_Vehicle>().customHillinessCosts = new Dictionary<Hilliness, float>();
+                if (vehicleDef.GetCompProperties<CompProperties_Vehicle>().customRoadCosts is null)
+                    vehicleDef.GetCompProperties<CompProperties_Vehicle>().customRoadCosts = new Dictionary<RoadDef, float>();
+                if (vehicleDef.GetCompProperties<CompProperties_Vehicle>().customTerrainCosts is null)
+                    vehicleDef.GetCompProperties<CompProperties_Vehicle>().customTerrainCosts = new Dictionary<TerrainDef, int>();
+                if (vehicleDef.GetCompProperties<CompProperties_Vehicle>().customThingCosts is null)
+                    vehicleDef.GetCompProperties<CompProperties_Vehicle>().customThingCosts = new Dictionary<ThingDef, int>();
+
+				if(vehicleDef.GetCompProperties<CompProperties_Vehicle>().vehicleType == VehicleType.Sea)
+                {
+					if(!vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts.ContainsKey(BiomeDefOf.Ocean))
+						vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts.Add(BiomeDefOf.Ocean, 1);
+					if(!vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts.ContainsKey(BiomeDefOf.Lake))
+						vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts.Add(BiomeDefOf.Lake, 1);
+                }
+            }
+        }
         #endregion
 
         #region WorldMap
+
+        public static float VehicleWorldSpeedMultiplier(this ThingDef vehicleDef)
+        {
+			return vehicleDef.GetCompProperties<CompProperties_Vehicle>().worldSpeedMultiplier;
+        }
+
         public static bool IsWaterTile(int tile, List<Pawn> pawns = null)
         {
             return WaterCovered(tile) || Find.World.CoastDirectionAt(tile).IsValid || RiverIsValid(tile, pawns.Where(x => IsBoat(x)).ToList());
@@ -422,9 +452,11 @@ namespace Vehicles
             return Find.WorldGrid[tile].biome == BiomeDefOf.Ocean || Find.WorldGrid[tile].biome == BiomeDefOf.Lake;
         }
 
-        public static bool IsNotWaterTile(int tile, List<Pawn> pawns = null)
+        public static bool CoastalTravel(this ThingDef vehicleDef, int tile)
         {
-            return !IsWaterTile(tile, pawns);
+            return (vehicleDef.GetCompProperties<CompProperties_Vehicle>().vehicleType == VehicleType.Sea || 
+                (vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts.ContainsKey(BiomeDefOf.Ocean) && vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts[BiomeDefOf.Ocean] <= WorldVehiclePathGrid.ImpassableMovementDifficulty) ) &&
+                Find.World.CoastDirectionAt(tile).IsValid;
         }
 
         public static void ToggleDocking(Caravan caravan, bool dock = false)
@@ -508,9 +540,9 @@ namespace Vehicles
 
         public static bool RiverIsValid(int tileID, List<Pawn> ships)
         {
-            if (!RimShipMod.mod.settings.riverTravel || ships is null || !ships.Any(x => IsBoat(x)))
+            if (!VehicleMod.mod.settings.riverTravel || ships is null || !ships.Any(x => IsBoat(x)))
                 return false;
-            bool flag = RimShipMod.mod.settings.boatSizeMatters ? (!Find.WorldGrid[tileID].Rivers.NullOrEmpty()) ? ShipsFitOnRiver(BiggestRiverOnTile(Find.WorldGrid[tileID]?.Rivers).river, ships) : false : (Find.WorldGrid[tileID].Rivers?.Any() ?? false);
+            bool flag = VehicleMod.mod.settings.boatSizeMatters ? (!Find.WorldGrid[tileID].Rivers.NullOrEmpty()) ? ShipsFitOnRiver(BiggestRiverOnTile(Find.WorldGrid[tileID]?.Rivers).river, ships) : false : (Find.WorldGrid[tileID].Rivers?.Any() ?? false);
             return flag;
         }
 
@@ -529,27 +561,9 @@ namespace Vehicles
             return true;
         }
 
-        //Work In Progress
-        public static bool TryFindClosestWaterTile(int sourceTile, int destinationTile, out int exitTile)
-        {
-            exitTile = -1;
-            List<int> neighbors = new List<int>();
-            Find.WorldGrid.GetTileNeighbors(sourceTile, neighbors);
-            Rot4 dir = Find.WorldGrid.GetRotFromTo(sourceTile, destinationTile);
-            foreach(int tile in neighbors)
-            {
-                if(WaterCovered(tile))
-                {
-                    exitTile = tile;
-
-                }
-            }
-            return exitTile > 0;
-        }
-
         public static int BestGotoDestForVehicle(this Caravan c, int tile)
         {
-            Predicate<int> predicate = (int t) => c.UniqueVehicleDefsInCaravan().All(v => Find.World.GetComponent<WorldVehiclePathGrid>().Passable(tile, v)) && Find.World.GetComponent<WorldVehicleReachability>().CanReach(c, tile);
+            Predicate<int> predicate = (int t) => c.UniqueVehicleDefsInCaravan().All(v => Find.World.GetComponent<WorldVehiclePathGrid>().Passable(t, v)) && Find.World.GetComponent<WorldVehicleReachability>().CanReach(c, t);
 			if (predicate(tile))
 			{
 				return tile;
@@ -623,7 +637,7 @@ namespace Vehicles
             vehicleWidget.AvailablePawns = source.Where(x => !IsVehicle(x.AnyThing as Pawn) && (x.AnyThing as Pawn).IsColonistPlayerControlled).ToList();
         }
 
-        public static void DoCountAdjustInterface(Rect rect, Transferable trad, int index, int min, int max, bool flash = false, List<TransferableCountToTransferStoppingPoint> extraStoppingPoints = null, bool readOnly = false)
+        public static void DoCountAdjustInterface(Rect rect, Transferable trad, List<TransferableOneWay> pawns, int index, int min, int max, bool flash = false, List<TransferableCountToTransferStoppingPoint> extraStoppingPoints = null, bool readOnly = false)
         {
 	        var stoppingPoints = new List<TransferableCountToTransferStoppingPoint>();
 	        if (extraStoppingPoints != null)
@@ -650,10 +664,10 @@ namespace Vehicles
 	        {
 		        stoppingPoints.Add(new TransferableCountToTransferStoppingPoint(0, "0", "0"));
 	        }
-	        DoCountAdjustInterfaceInternal(rect, trad, stoppingPoints, index, min, max, flash, readOnly);
+	        DoCountAdjustInterfaceInternal(rect, trad, pawns, stoppingPoints, index, min, max, flash, readOnly);
         }
 
-        private static void DoCountAdjustInterfaceInternal(Rect rect, Transferable trad, List<TransferableCountToTransferStoppingPoint> stoppingPoints, int index, int min, int max, bool flash, bool readOnly)
+        private static void DoCountAdjustInterfaceInternal(Rect rect, Transferable trad, List<TransferableOneWay> pawns, List<TransferableCountToTransferStoppingPoint> stoppingPoints, int index, int min, int max, bool flash, bool readOnly)
         {
             
 	        rect = rect.Rounded();
@@ -666,7 +680,31 @@ namespace Vehicles
 
 		    bool flag3 = trad.CountToTransfer != 0;
 		    bool flag4 = flag3;
-		    Widgets.Checkbox(rect2.position, ref flag4, 24f, false, true, null, null);
+
+		    Rect buttonRect = new Rect(rect2.x, rect2.y, 120f, rect.height);
+			if(Widgets.ButtonText(buttonRect, "AssignSeats".Translate()))
+            {
+				Find.WindowStack.Add(new Dialog_AssignSeats(pawns, transferableOneWay));
+            }
+            Rect checkboxRect = new Rect(buttonRect.x + buttonRect.width + 5f, buttonRect.y, 24f, 24f);
+            if(Widgets.ButtonImage(checkboxRect, flag4 ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex))
+            {
+                if (!flag4)
+                {
+                    Find.WindowStack.Add(new Dialog_AssignSeats(pawns, transferableOneWay));
+                }
+                else
+                {
+                    foreach(Pawn pawn in (trad.AnyThing as VehiclePawn).GetComp<CompVehicle>().AllPawnsAboard)
+                    {
+                        if (assignedSeats.ContainsKey(pawn))
+                            assignedSeats.Remove(pawn);
+                    }
+                    SoundDefOf.Click.PlayOneShotOnCamera();
+                    flag4 = !flag4;
+                }
+            }
+
 		    if (flag4 != flag3)
 		    {
 			    if (flag4)
@@ -687,7 +725,7 @@ namespace Vehicles
 			        position.x += position.width;
 			        position.width *= -1f;
 		        }
-		        GUI.DrawTexture(position, TradeArrow);
+		        //GUI.DrawTexture(position, TradeArrow); //REDO?
 	        }
         }
 
@@ -960,6 +998,11 @@ namespace Vehicles
             return vehicleSet;
         }
 
+        public static HashSet<ThingDef> UniqueVehicleDefsInList(this List<VehiclePawn> vehicles)
+        {
+            return vehicles.Select(v => v.def).Distinct().ToHashSet();
+        }
+
         public static bool IsFormingCaravanShipHelper(Pawn p)
         {
             Lord lord = p.GetLord();
@@ -1184,7 +1227,7 @@ namespace Vehicles
         {
             float mapSizeMultiplier = (float)(map.Size.x >= map.Size.z ? map.Size.x : map.Size.z) / 250f;
             float beach = 60f; //Rand.Range(40f, 80f);
-            return (float)(beach + (beach * (RimShipMod.mod.settings.beachMultiplier) / 100f)) * mapSizeMultiplier;
+            return (float)(beach + (beach * (VehicleMod.mod.settings.beachMultiplier) / 100f)) * mapSizeMultiplier;
         }
 
         public static int PushSettlementToCoast(int tileID, Faction faction)
@@ -1205,7 +1248,7 @@ namespace Vehicles
                 return tileID;
             }
 
-            while (searchedRadius < RimShipMod.mod.settings.CoastRadius)
+            while (searchedRadius < VehicleMod.mod.settings.CoastRadius)
             {
                 for (int j = 0; j < stackFull.Count; j++)
                 {
@@ -1278,7 +1321,7 @@ namespace Vehicles
                     Vector3 topVectorLocation = new Vector3(parent.DrawPos.x + drawOffset.First + rotOffset1.First, parent.DrawPos.y + drawLayer, parent.DrawPos.z + drawOffset.Second + rotOffset1.Second);
                     Mesh cannonMesh = graphic.MeshAt(Rot4.North);
                     
-                    if(RimShipMod.mod.settings.debugDrawCannonGrid)
+                    if(VehicleMod.mod.settings.debugDrawCannonGrid)
                     {
                         Material debugCenterMat = MaterialPool.MatFrom("Debug/cannonCenter");
                         Matrix4x4 debugCenter = default;
@@ -1297,7 +1340,7 @@ namespace Vehicles
                         Graphics.DrawMesh(MeshPool.plane10, baseMatrix, baseMat, 0);
                     }
 
-                    if(RimShipMod.mod.settings.debugDrawCannonGrid)
+                    if(VehicleMod.mod.settings.debugDrawCannonGrid)
                     {
                         Material debugMat = MaterialPool.MatFrom("Debug/cannonAlignment");
                         Matrix4x4 debugGrid = default;
@@ -1333,7 +1376,8 @@ namespace Vehicles
 
         public static bool LocationRestrictedBySize(this VehiclePawn pawn, IntVec3 dest)
         {
-            return CellRect.CenteredOn(dest, pawn.def.Size.x, pawn.def.Size.z).Any(c2 => IsBoat(pawn) ? (!c2.InBoundsShip(pawn.Map) || GenGridShips.Impassable(c2, pawn.Map)) : (!c2.InBounds(pawn.Map) || c2.Impassable(pawn.Map)));
+            return CellRect.CenteredOn(dest, pawn.def.Size.x, pawn.def.Size.z).Any(c2 => IsBoat(pawn) ? (!c2.InBoundsShip(pawn.Map) || GenGridShips.Impassable(c2, pawn.Map)) : (!c2.InBounds(pawn.Map) || c2.ImpassableReverseThreaded(pawn.Map, pawn)))
+                && CellRect.CenteredOn(dest, pawn.def.Size.z, pawn.def.Size.x).Any(c2 => IsBoat(pawn) ? (!c2.InBoundsShip(pawn.Map) || GenGridShips.Impassable(c2, pawn.Map)) : (!c2.InBounds(pawn.Map) || c2.ImpassableReverseThreaded(pawn.Map, pawn)));
         }
 
         public static void DrawLinesBetweenTargets(VehiclePawn pawn, Job curJob, JobQueue jobQueue)

@@ -19,6 +19,68 @@ namespace Vehicles
             vTweener = new VehicleCaravan_Tweener(this);
         }
 
+        //REDO : Implement custom caravan icons
+        public override void Draw()
+        {
+            float averageTileSize = Find.WorldGrid.averageTileSize;
+            float transitionPct = ExpandableWorldObjectsUtility.TransitionPct;
+            if (def.expandingIcon && transitionPct > 0f)
+            {
+                Color color = Material.color;
+                float num = 1f - transitionPct;
+                propertyBlock.SetColor(ShaderPropertyIDs.Color, new Color(color.r, color.g, color.b, color.a * num));
+                DrawQuadTangentialToPlanet(DrawPos, 0.7f * averageTileSize, 0.015f, Material, false, false, propertyBlock);
+                return;
+            }
+            DrawQuadTangentialToPlanet(DrawPos, 0.7f * averageTileSize, 0.015f, Material, false, false, null);
+        }
+
+        public static void DrawQuadTangentialToPlanet(Vector3 pos, float size, float altOffset, Material material, bool counterClockwise = false, bool useSkyboxLayer = false, MaterialPropertyBlock propertyBlock = null)
+		{
+			if (material == null)
+			{
+				Log.Warning("Tried to draw quad with null material.", false);
+				return;
+			}
+			Vector3 normalized = pos.normalized;
+			Vector3 vector;
+			if (counterClockwise)
+			{
+				vector = -normalized;
+			}
+			else
+			{
+				vector = normalized;
+			}
+			Quaternion q = Quaternion.LookRotation(Vector3.Cross(vector, Vector3.up), vector) * Quaternion.Euler(0, -90f, 0);
+			Vector3 s = new Vector3(size, 1f, size);
+			Matrix4x4 matrix = default(Matrix4x4);
+			matrix.SetTRS(pos + normalized * altOffset, q, s);
+			int layer = useSkyboxLayer ? WorldCameraManager.WorldSkyboxLayer : WorldCameraManager.WorldLayer;
+			if (propertyBlock != null)
+			{
+				Graphics.DrawMesh(MeshPool.plane10, matrix, material, layer, null, 0, propertyBlock);
+				return;
+			}
+			Graphics.DrawMesh(MeshPool.plane10, matrix, material, layer);
+		}
+
+        public override Material Material
+        {
+            get
+            {
+                ThingDef leadVehicleDef = PawnsListForReading.First(v => v.IsVehicle()).def;
+                
+                if(!materials.ContainsKey(leadVehicleDef))
+                {
+                    var texture = TexCommandVehicles.CachedTextureIcons[leadVehicleDef];
+                    var material = MaterialPool.MatFrom(texture, ShaderDatabase.WorldOverlayTransparentLit, Color.white, WorldMaterials.WorldObjectRenderQueue);
+                    materials.Add(leadVehicleDef, material);
+                }
+                return materials[leadVehicleDef];
+            }
+        }
+
         public override Vector3 DrawPos => vTweener.TweenedPos;
 
         public override IEnumerable<Gizmo> GetGizmos()
@@ -448,6 +510,10 @@ namespace Vehicles
         public VehicleCaravan_PathFollower vPather;
         public VehicleCaravan_Tweener vTweener;
 
+        private static MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock();
+
         private static readonly Texture2D SplitCommand = ContentFinder<Texture2D>.Get("UI/Commands/SplitCaravan", true);
+
+        private static Dictionary<ThingDef, Material> materials = new Dictionary<ThingDef, Material>();
     }
 }

@@ -82,7 +82,7 @@ namespace Vehicles
 
 		public void AddSection(string title, IEnumerable<TransferableOneWay> transferables)
 		{
-			Section item = default(Section);
+			Section item = default;
 			item.title = title;
 			item.transferables = transferables;
 			item.cachedTransferables = new List<TransferableOneWay>();
@@ -219,7 +219,7 @@ namespace Vehicles
 			}
 			VehiclePawn pawn = trad.AnyThing as VehiclePawn;
 			bool flag = pawn != null && (pawn.IsColonist || pawn.IsPrisonerOfColony);
-			HelperMethods.DoCountAdjustInterface(rect2, trad, index, 0, maxCount, false, stoppingPoints, playerPawnsReadOnly && flag);
+			HelperMethods.DoCountAdjustInterface(rect2, trad, AvailablePawns, index, 0, maxCount, false, stoppingPoints, playerPawnsReadOnly && flag);
 			num -= 240f;
 			if (drawMarketValue)
 			{
@@ -254,11 +254,7 @@ namespace Vehicles
 				num -= 75f;
 			}
 			num -= 150f;
-			Rect buttonRect = new Rect(num, 0f, 120f, rect.height);
-			if(Widgets.ButtonText(buttonRect, "AssignSeats".Translate()))
-            {
-				Find.WindowStack.Add(new Dialog_AssignSeats(AvailablePawns, trad));
-            }
+			//...
 			num -= 75f;
 
 			Rect idRect = new Rect(0f, 0f, num, rect.height);

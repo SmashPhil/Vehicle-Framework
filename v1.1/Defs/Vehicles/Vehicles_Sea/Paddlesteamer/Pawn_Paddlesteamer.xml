@@ -184,6 +184,9 @@
 				<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
 				<healthLabel_Immobile>Inoperable</healthLabel_Immobile>
 				
+				<iconTexPath>UI/BoatObject</iconTexPath>
+				<generateThingIcon>false</generateThingIcon>
+				
 				<hitboxOffsetX>0.0</hitboxOffsetX>
 				<hitboxOffsetZ>-2.0</hitboxOffsetZ>
 				

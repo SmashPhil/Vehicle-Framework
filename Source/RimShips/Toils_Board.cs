@@ -16,7 +16,7 @@ namespace Vehicles.Jobs
                 Pair<VehiclePawn, VehicleHandler> assignedSeat;
                 if(pawnBoarding.GetLord()?.LordJob is LordJob_FormAndSendVehicles)
                 {
-                    assignedSeat = (pawnBoarding.GetLord().LordJob as LordJob_FormAndSendVehicles).GetShipAssigned(pawnBoarding);
+                    assignedSeat = (pawnBoarding.GetLord().LordJob as LordJob_FormAndSendVehicles).GetVehicleAssigned(pawnBoarding);
                 }
                 else
                 {
@@ -31,7 +31,6 @@ namespace Vehicles.Jobs
                             return;
                         }
                     }
-                    Log.Message($"Pawn: {pawnBoarding.LabelShort} Handler: {handler.role.label}");
                     assignedSeat = new Pair<VehiclePawn, VehicleHandler>(vehicle, handler);
                 }
                 assignedSeat.First.GetComp<CompVehicle>().Notify_Boarded(pawnBoarding);

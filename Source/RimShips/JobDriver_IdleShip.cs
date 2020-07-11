@@ -52,9 +52,9 @@ namespace Vehicles.Jobs
                     {
                         foreach(Pawn p in Ship.AllPawnsAboard)
                         {
-                            p.skills.Learn(SkillDefOf.Animals, RimShipMod.mod.settings.FishingSkillValue, false);
+                            p.skills.Learn(SkillDefOf.Animals, VehicleMod.mod.settings.FishingSkillValue, false);
                         }
-                        if(Find.TickManager.TicksGame % (RimShipMod.mod.settings.fishingDelay - (Ship.AverageSkillOfCapablePawns(SkillDefOf.Animals) * (RimShipMod.mod.settings.fishingDelay/100)))  == 0)
+                        if(Find.TickManager.TicksGame % (VehicleMod.mod.settings.fishingDelay - (Ship.AverageSkillOfCapablePawns(SkillDefOf.Animals) * (VehicleMod.mod.settings.fishingDelay/100)))  == 0)
                         {
                             KeyValuePair<ThingDef, int> fishStats;
                             bool shallowMultiplier = false;
@@ -112,7 +112,7 @@ namespace Vehicles.Jobs
                                 statValue += p.skills.GetSkill(SkillDefOf.Animals).Level;
                             }
                             statValue /= Ship.AllCapablePawns.Count;
-                            int countByFishingSkill = (int)(fishStats.Value * (statValue/10) * (shallowMultiplier ? 0.5 : 1) * RimShipMod.mod.settings.fishingMultiplier);
+                            int countByFishingSkill = (int)(fishStats.Value * (statValue/10) * (shallowMultiplier ? 0.5 : 1) * VehicleMod.mod.settings.fishingMultiplier);
                             if(countByFishingSkill <= 0) countByFishingSkill = 1;
                             Thing fish = ThingMaker.MakeThing(fishStats.Key);
                             fish.stackCount = countByFishingSkill;

@@ -98,6 +98,16 @@ namespace Vehicles
 			{
 				explanation.AppendLine();
 			}
+
+			if(HelperMethods.CoastalTravel(vehicleDef, tile))
+            {
+				return vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts[BiomeDefOf.Ocean] * vehicleDef.VehicleWorldSpeedMultiplier();
+            }
+			else if(vehicleDef.GetCompProperties<CompProperties_Vehicle>().vehicleType == VehicleType.Sea)
+            {
+				return HelperMethods.WaterCovered(tile) ? vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts[tile2.biome] * vehicleDef.VehicleWorldSpeedMultiplier() : ImpassableMovementDifficulty;
+            }
+
 			if ( (tile2.biome.impassable && ( (!vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts?.ContainsKey(tile2.biome) ?? true) || vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts[tile2.biome] >= ImpassableMovementDifficulty)) 
 				|| (tile2.hilliness == Hilliness.Impassable && ( (!vehicleDef.GetCompProperties<CompProperties_Vehicle>().customHillinessCosts?.ContainsKey(tile2.hilliness) ?? true ) || vehicleDef.GetCompProperties<CompProperties_Vehicle>().customHillinessCosts[tile2.hilliness] >= ImpassableMovementDifficulty)))
 			{
@@ -108,10 +118,10 @@ namespace Vehicles
 				return ImpassableMovementDifficulty;
 			}
 
-			float num = tile2.biome.movementDifficulty;
+			float num = tile2.biome.movementDifficulty * vehicleDef.VehicleWorldSpeedMultiplier();
 			if(!vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts.EnumerableNullOrEmpty() && vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts.Keys.Contains(tile2.biome))
             {
-				num = vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts[tile2.biome];
+				num = vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts[tile2.biome] * vehicleDef.VehicleWorldSpeedMultiplier();
             }
 			
 			if (explanation != null)
@@ -198,7 +208,7 @@ namespace Vehicles
 
 		private int allPathCostsRecalculatedDayOfYear = -1;
 
-		private const float ImpassableMovementDifficulty = 1000f;
+		public const float ImpassableMovementDifficulty = 1000f;
 
 		public const float WinterMovementDifficultyOffset = 2f;
 

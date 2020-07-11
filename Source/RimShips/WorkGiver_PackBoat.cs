@@ -35,7 +35,6 @@ namespace Vehicles.Jobs
                 Thing thing = FindThingToPack(availableBoat, pawn);
                 if (thing != null)
                 {
-					Log.Message($"Job: {pawn.LabelShort} Vehicle: {t.LabelShort}");
                     Job job = JobMaker.MakeJob(JobDefOf_Ships.CarryItemToShip, thing, t);
                     job.count = thing.stackCount;
                     return job;

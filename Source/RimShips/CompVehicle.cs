@@ -289,7 +289,6 @@ namespace Vehicles
         {
             foreach(VehicleHandler handler in flag == HandlingTypeFlags.Null ? handlers : handlers.Where(h => h.role.handlingTypes.Contains(flag)))
             {
-                Log.Message($"Checking: {handler.role.label} Slots: {handler.AreSlotsAvailable}");
                 if(handler.AreSlotsAvailable)
                 {
                     return handler;
@@ -317,7 +316,7 @@ namespace Vehicles
                 Find.WindowStack.Add(new Dialog_GiveShipName(this.Pawn));
             }
         }
-
+        
         public void Recolor()
         {
             Log.Message("COLOR");
@@ -779,7 +778,6 @@ namespace Vehicles
         public bool TryGetBestFood(Pawn forPawn, out Thing food, out Pawn owner)
         {
             List<Thing> list = this.Pawn.inventory.innerContainer.InnerListForReading;
-            Log.Message($"Pawn {forPawn.LabelShort} list: {list.Count}");
             Thing thing = null;
             float num = 0f;
             foreach(Thing foodItem in list)
@@ -1037,7 +1035,7 @@ namespace Vehicles
 
         public void SmoothPatherTick()
         {
-            if(!RimShipMod.mod.settings.debugDisableSmoothPathing && currentTravelCells.Any())
+            if(!VehicleMod.mod.settings.debugDisableSmoothPathing && currentTravelCells.Any())
             {
                 float angle = (float)Pawn.DrawPos.Angle180RotationTracker(currentTravelCells.First().ToVector3Shifted());
 
@@ -1066,7 +1064,6 @@ namespace Vehicles
                 if(Prefs.DevMode)
                 {
                     GenDraw.DrawLineBetween(currentTravelCells.First().ToVector3Shifted(), Pawn.DrawPos, SimpleColor.Red);
-                    Log.Message($"Angle: {angle} Bearing: {BearingAngle}");
                 }
 
                 if (Pawn.Position == currentTravelCells.First())
@@ -1081,17 +1078,17 @@ namespace Vehicles
             }
         }
 
-        public override void CompTickRare()
-        {
-            base.CompTickRare();
-            if(!RimShipMod.mod.settings.debugDisableSmoothPathing && currentTravelCells.Any())
-            {
-                float angle = (float)Pawn.DrawPos.Angle180RotationTracker(currentTravelCells.First().ToVector3Shifted());
-                CheckTurnSign(angle);
-            }
-            if (RimShipMod.mod.settings.debugDisableSmoothPathing)
-                Pawn.SmoothPos = Pawn.DrawPos;
-        }
+        //public override void CompTickRare()
+        //{
+        //    base.CompTickRare();
+        //    if(!VehicleMod.mod.settings.debugDisableSmoothPathing && currentTravelCells.Any())
+        //    {
+        //        float angle = (float)Pawn.DrawPos.Angle180RotationTracker(currentTravelCells.First().ToVector3Shifted());
+        //        CheckTurnSign(angle);
+        //    }
+        //    if (VehicleMod.mod.settings.debugDisableSmoothPathing)
+        //        Pawn.SmoothPos = Pawn.DrawPos;
+        //}
 
         public override void CompTick()
         {
@@ -1145,10 +1142,6 @@ namespace Vehicles
             {
                 InitializeVehicle();
                 InitializeStats();
-                if(Props.customTerrainCosts?.Any() ?? false)
-                {
-                    Log.Message($"[Vehicles] Initializing custom pathing costs for {Pawn.def.defName}");
-                }
                 Pawn.ageTracker.AgeBiologicalTicks = 0;
                 Pawn.ageTracker.AgeChronologicalTicks = 0;
                 Pawn.ageTracker.BirthAbsTicks = 0;

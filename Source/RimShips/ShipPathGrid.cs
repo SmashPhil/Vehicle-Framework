@@ -143,7 +143,6 @@ namespace Vehicles.AI
                     stringBuilder.AppendLine(thingDef2.defName + " " + thingDef2.pathCost);
                 }
             }
-            Log.Message(stringBuilder.ToString(), false);
         }
 
         private Map map;

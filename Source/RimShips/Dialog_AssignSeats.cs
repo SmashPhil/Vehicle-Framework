@@ -182,7 +182,11 @@ namespace Vehicles
             if(Widgets.ButtonText(buttonRect, "ClearSeats".Translate()))
             {
                 SoundDefOf.Click.PlayOneShotOnCamera(null);
-                assignedSeats.Clear();
+                foreach (Pawn pawn in assignedSeats.Keys)
+                {
+                    if (pawns.Select(p => p.AnyThing as Pawn).Contains(pawn) && assignedSeats.ContainsKey(pawn))
+                        assignedSeats.Remove(pawn);
+                }
             }
         }
 
@@ -248,7 +252,7 @@ namespace Vehicles
                     Rect cannonDrawnRect = new Rect(xCannon, yCannon, cannonWidth, cannonHeight);
                     GUI.DrawTexture(cannonDrawnRect, cannon.CannonTexture);
 
-                    if (RimShipMod.mod.settings.debugDrawCannonGrid)
+                    if (VehicleMod.mod.settings.debugDrawCannonGrid)
                     {
                         Widgets.DrawLineHorizontal(cannonDrawnRect.x, cannonDrawnRect.y, cannonDrawnRect.width);
                         Widgets.DrawLineHorizontal(cannonDrawnRect.x, cannonDrawnRect.y + cannonDrawnRect.height, cannonDrawnRect.width);

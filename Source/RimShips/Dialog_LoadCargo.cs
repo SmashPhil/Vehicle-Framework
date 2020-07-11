@@ -68,11 +68,11 @@ namespace Vehicles
             DrawCargoNumbers(new Rect(12f, 35f, inRect.width - 24f, 40f));
 
             Rect checkRect = new Rect(inRect.width - 225f, 35f, 225f, 40f);
-            bool checkBox = RimShipMod.mod.settings.showAllCargoItems;
+            bool checkBox = VehicleMod.mod.settings.showAllCargoItems;
             Widgets.Label(checkRect, "ShowAllItemsOnMap".Translate());
             checkRect.x += Text.CalcSize("ShowAllItemsOnMap".Translate()).x + 20f;
-            Widgets.Checkbox(new Vector2(checkRect.x, checkRect.y), ref RimShipMod.mod.settings.showAllCargoItems);
-            if (checkBox != RimShipMod.mod.settings.showAllCargoItems)
+            Widgets.Checkbox(new Vector2(checkRect.x, checkRect.y), ref VehicleMod.mod.settings.showAllCargoItems);
+            if (checkBox != VehicleMod.mod.settings.showAllCargoItems)
             {
                 CalculateAndRecacheTransferables();
             }
@@ -184,7 +184,7 @@ namespace Vehicles
 
         private void AddItemsToTransferables()
 		{
-			List<Thing> list = CaravanFormingUtility.AllReachableColonyItems(boat.Map, RimShipMod.mod.settings.showAllCargoItems, false, false);
+			List<Thing> list = CaravanFormingUtility.AllReachableColonyItems(boat.Map, VehicleMod.mod.settings.showAllCargoItems, false, false);
 			for (int i = 0; i < list.Count; i++)
 			{
 				AddToTransferables(list[i], false);

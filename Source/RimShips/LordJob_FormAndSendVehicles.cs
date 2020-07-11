@@ -52,7 +52,7 @@ namespace Vehicles.Lords
             }
         }
 
-        public Pair<VehiclePawn, VehicleHandler> GetShipAssigned(Pawn p)
+        public Pair<VehiclePawn, VehicleHandler> GetVehicleAssigned(Pawn p)
         {
             if (vehicleAssigned.ContainsKey(p))
                 return vehicleAssigned[p];

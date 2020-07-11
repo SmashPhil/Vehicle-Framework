@@ -132,7 +132,7 @@ namespace Vehicles
                                 i++;
                                 foreach(VehicleHandler relatedHandler in CompVehicle.GetAllHandlersMatch(HandlingTypeFlags.Cannon, cannon.key))
                                 {
-                                    if(!RimShipMod.mod.settings.debugDraftAnyShip && relatedHandler?.handlers.Count < relatedHandler?.role.slotsToOperate)
+                                    if(!VehicleMod.mod.settings.debugDraftAnyShip && relatedHandler?.handlers.Count < relatedHandler?.role.slotsToOperate)
                                     {
                                         turretCannons.Disable("NotEnoughCannonCrew".Translate(this.Pawn.LabelShort, relatedHandler.role.label));
                                         break;
@@ -161,7 +161,7 @@ namespace Vehicles
                                 {
                                     SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
                                     List<int> cannonOrder = Enumerable.Range(0, cannon.cannonDef.numberCannons).ToList();
-                                    if(RimShipMod.mod.settings.shuffledCannonFire)
+                                    if(VehicleMod.mod.settings.shuffledCannonFire)
                                         cannonOrder.Shuffle();
                                     foreach (int i in cannonOrder)
                                     {
@@ -171,7 +171,7 @@ namespace Vehicles
                                 };
                                 foreach (VehicleHandler relatedHandler in CompVehicle.GetAllHandlersMatch(HandlingTypeFlags.Cannon, cannon.key))
                                 {
-                                    if(!RimShipMod.mod.settings.debugDraftAnyShip && relatedHandler?.handlers.Count < relatedHandler?.role.slotsToOperate)
+                                    if(!VehicleMod.mod.settings.debugDraftAnyShip && relatedHandler?.handlers.Count < relatedHandler?.role.slotsToOperate)
                                     {
                                         portSideCannons.Disable("NotEnoughCannonCrew".Translate(this.Pawn.LabelShort, relatedHandler.role.label));
                                     }
@@ -194,7 +194,7 @@ namespace Vehicles
                                 {
                                     SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
                                     List<int> cannonOrder = Enumerable.Range(0, cannon.cannonDef.numberCannons).ToList();
-                                    if (RimShipMod.mod.settings.shuffledCannonFire)
+                                    if (VehicleMod.mod.settings.shuffledCannonFire)
                                         cannonOrder.Shuffle();
                                     foreach (int i in cannonOrder)
                                     {
@@ -204,7 +204,7 @@ namespace Vehicles
                                 };
                                 foreach (VehicleHandler relatedHandler in CompVehicle.GetAllHandlersMatch(HandlingTypeFlags.Cannon, cannon.key))
                                 {
-                                    if(!RimShipMod.mod.settings.debugDraftAnyShip && relatedHandler?.handlers.Count < relatedHandler?.role.slotsToOperate)
+                                    if(!VehicleMod.mod.settings.debugDraftAnyShip && relatedHandler?.handlers.Count < relatedHandler?.role.slotsToOperate)
                                     {
                                         starboardSideCannons.Disable("NotEnoughCannonCrew".Translate(this.Pawn.LabelShort, relatedHandler.role.label));
                                     }
@@ -227,7 +227,7 @@ namespace Vehicles
                                 {
                                     SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
                                     List<int> cannonOrder = Enumerable.Range(0, cannon.cannonDef.numberCannons).ToList();
-                                    if (RimShipMod.mod.settings.shuffledCannonFire)
+                                    if (VehicleMod.mod.settings.shuffledCannonFire)
                                         cannonOrder.Shuffle();
                                     foreach (int i in cannonOrder)
                                     {
@@ -237,7 +237,7 @@ namespace Vehicles
                                 };
                                 foreach (VehicleHandler relatedHandler in CompVehicle.GetAllHandlersMatch(HandlingTypeFlags.Cannon, cannon.key))
                                 {
-                                    if(!RimShipMod.mod.settings.debugDraftAnyShip && relatedHandler?.handlers.Count < relatedHandler?.role.slotsToOperate)
+                                    if(!VehicleMod.mod.settings.debugDraftAnyShip && relatedHandler?.handlers.Count < relatedHandler?.role.slotsToOperate)
                                     {
                                         bowSideCannons.Disable("NotEnoughCannonCrew".Translate(this.Pawn.LabelShort, relatedHandler.role.label));
                                     }
@@ -260,7 +260,7 @@ namespace Vehicles
                                 {
                                     SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
                                     List<int> cannonOrder = Enumerable.Range(0, cannon.cannonDef.numberCannons).ToList();
-                                    if (RimShipMod.mod.settings.shuffledCannonFire)
+                                    if (VehicleMod.mod.settings.shuffledCannonFire)
                                         cannonOrder.Shuffle();
                                     foreach (int i in cannonOrder)
                                     {
@@ -270,7 +270,7 @@ namespace Vehicles
                                 };
                                 foreach (VehicleHandler relatedHandler in CompVehicle.GetAllHandlersMatch(HandlingTypeFlags.Cannon, cannon.key))
                                 {
-                                    if(!RimShipMod.mod.settings.debugDraftAnyShip && relatedHandler?.handlers.Count < relatedHandler?.role.slotsToOperate)
+                                    if(!VehicleMod.mod.settings.debugDraftAnyShip && relatedHandler?.handlers.Count < relatedHandler?.role.slotsToOperate)
                                     {
                                         sternSideCannons.Disable("NotEnoughCannonCrew".Translate(this.Pawn.LabelShort, relatedHandler.role.label));
                                     }

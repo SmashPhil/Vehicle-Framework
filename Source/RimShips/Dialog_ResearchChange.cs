@@ -35,7 +35,7 @@ namespace Vehicles
 
             /*if (researchString.Count() != charCount || researchChanged)
             {
-                projectsSearched = DefDatabase<ResearchProjectDef>.AllDefs.Where(x => !RimShipMod.mod.props.ResearchPrerequisites.Contains(x) && CultureInfo.CurrentCulture.CompareInfo.IndexOf(x.defName, researchString, CompareOptions.IgnoreCase) >= 0).ToList();
+                projectsSearched = DefDatabase<ResearchProjectDef>.AllDefs.Where(x => !VehicleMod.mod.props.ResearchPrerequisites.Contains(x) && CultureInfo.CurrentCulture.CompareInfo.IndexOf(x.defName, researchString, CompareOptions.IgnoreCase) >= 0).ToList();
                 researchChanged = false;
             }
 
@@ -43,11 +43,11 @@ namespace Vehicles
             {
                 ResearchProjectDef proj = projectsSearched[i];
                 Rect projectRect = new Rect(inRect.x, searchBarRect.y + 24 + (24 * i), inRect.width, 30f);
-                if (Widgets.ButtonText(projectRect, proj.defName, false, false, true) && !RimShipMod.mod.props.ResearchPrerequisites.Contains(proj))
+                if (Widgets.ButtonText(projectRect, proj.defName, false, false, true) && !VehicleMod.mod.props.ResearchPrerequisites.Contains(proj))
                 {
                     addedResearch = true;
                     researchChanged = true;
-                    RimShipMod.mod.props.AddCustomResearch(proj);
+                    VehicleMod.mod.props.AddCustomResearch(proj);
                 }
             }*/
         }

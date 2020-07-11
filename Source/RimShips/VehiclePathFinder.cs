@@ -218,22 +218,10 @@ namespace Vehicles.AI
 
                             IntVec3 cellToCheck = cellIndices.IndexToCell(num15);
                            
-                            if(RimShipMod.mod.settings.fullVehiclePathing)
+                            if(VehicleMod.mod.settings.fullVehiclePathing && HelperMethods.LocationRestrictedBySize(pawn, cellToCheck))
                             {
-                                bool occupiedRectImpassable = CellRect.CenteredOn(cellToCheck, pawn.def.Size.x, pawn.def.Size.z).Any(c2 => waterPathing ? GenGridShips.Impassable(c2, map) : c2.ImpassableReverseThreaded(map, pawn));
-                                if (occupiedRectImpassable)
-                                {
-                                    if(!CellRect.CenteredOn(cellToCheck, pawn.def.Size.z, pawn.def.Size.x).Any(c2 => waterPathing ? GenGridShips.Impassable(c2, map) : c2.ImpassableReverseThreaded(map, pawn)))
-                                    {
-                                        //Implement more here
-                                    }
-                                    else
-                                    {
-                                        goto EndPathing;
-                                    }
-                                }
+                                goto EndPathing;
                             }
-                            
 
                             if(calcGrid[num15].status != statusClosedValue || flag9)
                             {
@@ -764,7 +752,7 @@ namespace Vehicles.AI
 
         internal void DebugDrawRichData()
         {
-            if(RimShipMod.mod.settings.debugDrawVehiclePathCosts)
+            if(VehicleMod.mod.settings.debugDrawVehiclePathCosts)
             {
                 while(openList.Count > 0)
                 {
@@ -777,7 +765,7 @@ namespace Vehicles.AI
 
         internal void DebugDrawPathCost(float colorPct = 0f, int duration = 50)
         {
-            if(RimShipMod.mod.settings.debugDrawVehiclePathCosts)
+            if(VehicleMod.mod.settings.debugDrawVehiclePathCosts)
             {
                 foreach(KeyValuePair<IntVec3, int> pathCells in postCalculatedCells)
                 {

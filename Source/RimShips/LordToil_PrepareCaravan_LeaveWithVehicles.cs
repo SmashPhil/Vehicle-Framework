@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using RimWorld;
+using System.Linq;
 using Vehicles.Defs;
 using Verse;
 using Verse.AI;
@@ -25,14 +26,22 @@ namespace Vehicles.Lords
         {
             foreach(Pawn p in lord.ownedPawns)
             {
-                if(!HelperMethods.IsVehicle(p))
-                    lord.LordJob.Notify_PawnLost(p, PawnLostCondition.LeftVoluntarily);
-                p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.TravelOrWaitVehicle, this.exitSpot, -1f)
+                if(p.IsVehicle())
                 {
-                    locomotion = LocomotionUrgency.Jog
-                };
-                p.GetComp<CompVehicle>().ResolveSeating();
-                p.drafter.Drafted = true;
+                    p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.TravelOrWaitVehicle, exitSpot, -1f)
+                    {
+                        locomotion = LocomotionUrgency.Jog
+                    };
+                    p.GetComp<CompVehicle>().ResolveSeating();
+                    p.drafter.Drafted = true;
+                }
+                //else
+                //{
+                //    p.mindState.duty = new PawnDuty(DutyDefOf.TravelOrWait, exitSpot)
+                //    {
+                //        locomotion = LocomotionUrgency.Jog
+                //    };
+                //}
             }
         }
 

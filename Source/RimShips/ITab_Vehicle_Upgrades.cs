@@ -69,7 +69,7 @@ namespace Vehicles.UI
             Rect cancelButtonRect = new Rect(LeftWindowEdge + 5f, BottomWindowEdge - 30f, 75f, 25f);
             Rect displayRect = new Rect(Comp.Props.displayUICoord.x, Comp.Props.displayUICoord.y, Comp.Props.displayUISize.x, Comp.Props.displayUISize.y);
 
-            if(RimShipMod.mod.settings.debugDrawNodeGrid)
+            if(VehicleMod.mod.settings.debugDrawNodeGrid)
             {
                 DrawBackgroundGrid();
             }
@@ -261,7 +261,7 @@ namespace Vehicles.UI
 
             Rect labelRect = new Rect(0f, 0f, rect2.width - 16f, 20f);
 
-            if(!RimShipMod.mod.settings.debugDrawNodeGrid)
+            if(!VehicleMod.mod.settings.debugDrawNodeGrid)
             {
                 Widgets.Label(labelRect, SelPawnUpgrade.Label);
             }
@@ -276,11 +276,11 @@ namespace Vehicles.UI
             Widgets.DrawLineVertical(0, TopViewPadding, screenHeight);
             Widgets.DrawLineVertical(screenWidth - BottomDisplayedOffset - 1f, TopViewPadding, screenHeight);
             
-            if(RimShipMod.mod.settings.drawUpgradeInformationScreen)
+            if(VehicleMod.mod.settings.drawUpgradeInformationScreen)
                 Widgets.DrawLineVertical(LeftWindowEdge, TopViewPadding, screenHeight);
             GUI.color = lineColor;
 
-            if(RimShipMod.mod.settings.drawUpgradeInformationScreen)
+            if(VehicleMod.mod.settings.drawUpgradeInformationScreen)
             {
                 if(SelPawnUpgrade != null)
                 {
@@ -289,7 +289,7 @@ namespace Vehicles.UI
                         Texture2D tex = ContentFinder<Texture2D>.Get(SelPawnUpgrade.kindDef.lifeStages.FirstOrDefault().bodyGraphicData.texPath + "_north", true);
                         GUI.DrawTexture(displayRect, tex);
 
-                        if(RimShipMod.mod.settings.debugDrawCannonGrid)
+                        if(VehicleMod.mod.settings.debugDrawCannonGrid)
                         {
                             Widgets.DrawLineHorizontal(displayRect.x, displayRect.y, displayRect.width);
                             Widgets.DrawLineHorizontal(displayRect.x, displayRect.y + displayRect.height, displayRect.width);
@@ -301,7 +301,7 @@ namespace Vehicles.UI
                                 resizeCheck = true;
                             }
                         }
-                        if(RimShipMod.mod.settings.debugDrawNodeGrid)
+                        if(VehicleMod.mod.settings.debugDrawNodeGrid)
                         {
                             Widgets.DrawLineHorizontal(LeftWindowEdge, 70f, screenWidth - LeftWindowEdge);
                             int lineCount = (int)(screenWidth - LeftWindowEdge) / 10;
@@ -339,7 +339,7 @@ namespace Vehicles.UI
                                 Rect cannonDrawnRect = new Rect(xCannon, yCannon, cannonWidth, cannonHeight);
                                 GUI.DrawTexture(cannonDrawnRect, cannon.CannonTexture);
 
-                                if (RimShipMod.mod.settings.debugDrawCannonGrid)
+                                if (VehicleMod.mod.settings.debugDrawCannonGrid)
                                 {
                                     Widgets.DrawLineHorizontal(cannonDrawnRect.x, cannonDrawnRect.y, cannonDrawnRect.width);
                                     Widgets.DrawLineHorizontal(cannonDrawnRect.x, cannonDrawnRect.y + cannonDrawnRect.height, cannonDrawnRect.width);
@@ -368,7 +368,7 @@ namespace Vehicles.UI
                                 Rect cannonDrawnRect = new Rect(xCannon, yCannon, cannonWidth, cannonHeight);
                                 GUI.DrawTexture(cannonDrawnRect, cannon.CannonTexture);
 
-                                if (RimShipMod.mod.settings.debugDrawCannonGrid)
+                                if (VehicleMod.mod.settings.debugDrawCannonGrid)
                                 {
                                     Widgets.DrawLineHorizontal(cannonDrawnRect.x, cannonDrawnRect.y, cannonDrawnRect.width);
                                     Widgets.DrawLineHorizontal(cannonDrawnRect.x, cannonDrawnRect.y + cannonDrawnRect.height, cannonDrawnRect.width);
@@ -402,7 +402,7 @@ namespace Vehicles.UI
                                 Rect cannonDrawnRect = new Rect(xCannon, yCannon, cannonWidth, cannonHeight);
                                 GUI.DrawTexture(cannonDrawnRect, cannon.CannonTexture);
 
-                                if(RimShipMod.mod.settings.debugDrawCannonGrid)
+                                if(VehicleMod.mod.settings.debugDrawCannonGrid)
                                 {
                                     Widgets.DrawLineHorizontal(cannonDrawnRect.x, cannonDrawnRect.y, cannonDrawnRect.width);
                                     Widgets.DrawLineHorizontal(cannonDrawnRect.x, cannonDrawnRect.y + cannonDrawnRect.height, cannonDrawnRect.width);
@@ -434,7 +434,7 @@ namespace Vehicles.UI
                                 Rect cannonDrawnRect = new Rect(xCannon, yCannon, cannonWidth, cannonHeight);
                                 GUI.DrawTexture(cannonDrawnRect, cannon.CannonTexture);
 
-                                if(RimShipMod.mod.settings.debugDrawCannonGrid)
+                                if(VehicleMod.mod.settings.debugDrawCannonGrid)
                                 {
                                     Widgets.DrawLineHorizontal(cannonDrawnRect.x, cannonDrawnRect.y, cannonDrawnRect.width);
                                     Widgets.DrawLineHorizontal(cannonDrawnRect.x, cannonDrawnRect.y + cannonDrawnRect.height, cannonDrawnRect.width);
@@ -462,7 +462,7 @@ namespace Vehicles.UI
                 Rect greyedViewRect = new Rect(0, TopViewPadding, LeftWindowEdge, BottomWindowEdge - TopViewPadding);
                 Widgets.DrawBoxSolid(greyedViewRect, LockScreenColor);
                 Rect greyedLabelRect = new Rect(LeftWindowEdge / 2 - 17f, (BottomWindowEdge - TopViewPadding) / 2, 100f, 100f);
-                string timeFormatted = RimShipMod.mod.settings.useInGameTime ? HelperMethods.TicksToGameTime(Comp.TimeLeftUpgrading) : HelperMethods.TicksToRealTime(Comp.TimeLeftUpgrading);
+                string timeFormatted = VehicleMod.mod.settings.useInGameTime ? HelperMethods.TicksToGameTime(Comp.TimeLeftUpgrading) : HelperMethods.TicksToRealTime(Comp.TimeLeftUpgrading);
                 Widgets.Label(greyedLabelRect, timeFormatted);
 
                 DrawCostItems(null, true);
@@ -530,7 +530,7 @@ namespace Vehicles.UI
                 if (node is null)
                     return;
                 Rect timeRect = new Rect(5f, screenHeight - SideDisplayedOffset * 2, LeftWindowEdge, 20f);
-                string timeForUpgrade = RimShipMod.mod.settings.useInGameTime ? HelperMethods.TicksToGameTime(node.UpgradeTimeParsed) : HelperMethods.TicksToRealTime(node.UpgradeTimeParsed);
+                string timeForUpgrade = VehicleMod.mod.settings.useInGameTime ? HelperMethods.TicksToGameTime(node.UpgradeTimeParsed) : HelperMethods.TicksToRealTime(node.UpgradeTimeParsed);
                 Widgets.Label(timeRect, timeForUpgrade);
 
                 foreach(KeyValuePair<ThingDef, int> item in node.cost)

@@ -154,6 +154,7 @@
     <Compile Include="CustomVehicleDamageMultiplier.cs" />
     <Compile Include="Dialog_AssignSeats.cs" />
     <Compile Include="Dialog_FormVehicleCaravan.cs" />
+    <Compile Include="Dialog_VehicleSelector.cs" />
     <Compile Include="Graphic_Animate.cs" />
     <Compile Include="Graphic_OmniDirectional.cs" />
     <Compile Include="LordJob_FormAndSendVehicles.cs" />
@@ -236,7 +237,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegionCostCalculatorShips.cs" />
     <Compile Include="RegionCostCalculatorWrapperShips.cs" />
-    <Compile Include="RimshipsModSettings.cs" />
+    <Compile Include="VehiclesModSettings.cs" />
     <Compile Include="CompCannons.cs" />
     <Compile Include="RiverDefOf.cs" />
     <Compile Include="VehicleHandler.cs" />
@@ -257,7 +258,7 @@
     <Compile Include="SPSettings.cs" />
     <Compile Include="SPTrig.cs" />
     <Compile Include="SPTuples.cs" />
-    <Compile Include="TexCommand.cs" />
+    <Compile Include="TexCommandVehicles.cs" />
     <Compile Include="Toils_Board.cs" />
     <Compile Include="TouchPathEndModeUtilityShips.cs" />
     <Compile Include="UpgradeNode.cs" />

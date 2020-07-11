@@ -18,15 +18,10 @@ namespace Vehicles
 		public VehicleRoutePlanner(World world) : base(world)
         {
 			this.world = world;
+			vehicles = new List<VehiclePawn>();
         }
 
-		public bool Active
-		{
-			get
-			{
-				return active;
-			}
-		}
+		public bool Active { get; set; }
 
 		public bool FormingCaravan
 		{
@@ -40,7 +35,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return !active || !WorldRendererUtility.WorldRenderedNow || (Current.ProgramState == ProgramState.Playing && Find.TickManager.CurTimeSpeed != TimeSpeed.Paused);
+				return !Active || !WorldRendererUtility.WorldRenderedNow || (Current.ProgramState == ProgramState.Playing && Find.TickManager.CurTimeSpeed != TimeSpeed.Paused);
 			}
 		}
 
@@ -48,8 +43,8 @@ namespace Vehicles
 		{
 			get
 			{
-				VehicleCaravanTicksPerMoveUtility.CaravanInfo? caravanInfo = CaravanInfo;
-				if (caravanInfo != null && caravanInfo.Value.pawns.Any<Pawn>())
+				VehicleCaravanTicksPerMoveUtility.VehicleInfo? caravanInfo = CaravanInfo;
+				if (caravanInfo != null && caravanInfo.Value.vehicles.Any())
 				{
 					return VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(caravanInfo.Value, null);
 				}
@@ -57,18 +52,18 @@ namespace Vehicles
 			}
 		}
 
-		private VehicleCaravanTicksPerMoveUtility.CaravanInfo? CaravanInfo
+		private VehicleCaravanTicksPerMoveUtility.VehicleInfo? CaravanInfo
 		{
 			get
 			{
 				if (currentFormCaravanDialog != null)
 				{
-					return caravanInfoFromFormCaravanDialog;
+					return caravanInfoFromFormCaravanDialog.Value;
 				}
-				Caravan caravanAtTheFirstWaypoint = this.CaravanAtTheFirstWaypoint;
+				Caravan caravanAtTheFirstWaypoint = CaravanAtTheFirstWaypoint;
 				if (caravanAtTheFirstWaypoint != null)
 				{
-					return new VehicleCaravanTicksPerMoveUtility.CaravanInfo?(new VehicleCaravanTicksPerMoveUtility.CaravanInfo(caravanAtTheFirstWaypoint));
+					return new VehicleCaravanTicksPerMoveUtility.VehicleInfo(caravanAtTheFirstWaypoint);
 				}
 				return null;
 			}
@@ -88,42 +83,49 @@ namespace Vehicles
 
 		public void Start()
 		{
-			if (active)
+			if (Active)
 			{
 				Stop();
 			}
-			active = true;
-			if (Current.ProgramState == ProgramState.Playing)
-			{
-				Find.World.renderer.wantedMode = WorldRenderMode.Planet;
-				Find.TickManager.Pause();
-			}
+			Find.WindowStack.Add(new Dialog_VehicleSelector());
 		}
 
 		public void Start(Dialog_FormVehicleCaravan formCaravanDialog)
 		{
-			if (active)
+			if (Active)
 			{
 				Stop();
 			}
 			currentFormCaravanDialog = formCaravanDialog;
-			caravanInfoFromFormCaravanDialog = new VehicleCaravanTicksPerMoveUtility.CaravanInfo?(new VehicleCaravanTicksPerMoveUtility.CaravanInfo(formCaravanDialog));
+			caravanInfoFromFormCaravanDialog = new VehicleCaravanTicksPerMoveUtility.VehicleInfo(formCaravanDialog);
 			formCaravanDialog.choosingRoute = true;
 			Find.WindowStack.TryRemove(formCaravanDialog, true);
-			Start();
+			vehicles = caravanInfoFromFormCaravanDialog.Value.vehicles.Where(v => v.IsVehicle()).ToList();
+			InitiateRoutePlanner();
 			TryAddWaypoint(formCaravanDialog.CurrentTile, true);
 			cantRemoveFirstWaypoint = true;
 		}
 
+		public void InitiateRoutePlanner()
+        {
+			Find.World.GetComponent<VehicleRoutePlanner>().Active = true;
+		    if (Current.ProgramState == ProgramState.Playing)
+		    {
+			    Find.World.renderer.wantedMode = WorldRenderMode.Planet;
+			    Find.TickManager.Pause();
+		    }
+        }
+
 		public void Stop()
 		{
-			active = false;
+			Active = false;
 			for (int i = 0; i < waypoints.Count; i++)
 			{
 				waypoints[i].Destroy();
 			}
 			waypoints.Clear();
 			cachedTicksToWaypoint.Clear();
+			vehicles.Clear();
 			if (currentFormCaravanDialog != null)
 			{
 				currentFormCaravanDialog.Notify_NoLongerChoosingRoute();
@@ -136,11 +138,11 @@ namespace Vehicles
 
 		public void WorldRoutePlannerUpdate()
 		{
-			if (active && ShouldStop)
+			if (Active && ShouldStop)
 			{
 				Stop();
 			}
-			if (!active)
+			if (!Active)
 			{
 				return;
 			}
@@ -152,7 +154,7 @@ namespace Vehicles
 
 		public void WorldRoutePlannerOnGUI()
 		{
-			if (!active)
+			if (!Active)
 			{
 				return;
 			}
@@ -173,7 +175,7 @@ namespace Vehicles
 			GenUI.DrawMouseAttachment(MouseAttachment);
 			if (Event.current.type == EventType.MouseDown && Event.current.button == 1)
 			{
-				Caravan caravan = Find.WorldSelector.SelectableObjectsUnderMouse().FirstOrDefault<WorldObject>() as Caravan;
+				VehicleCaravan caravan = Find.WorldSelector.SelectableObjectsUnderMouse().FirstOrDefault() as VehicleCaravan;
 				int tile = (caravan != null) ? caravan.Tile : GenWorld.MouseTile(true);
 				if (tile >= 0)
 				{
@@ -215,14 +217,14 @@ namespace Vehicles
 
 		private void DoRouteDetailsBox()
 		{
-			Rect rect = new Rect((Verse.UI.screenWidth - BottomWindowSize.x) / 2f, Verse.UI.screenHeight - BottomWindowSize.y - 45f, BottomWindowSize.x, BottomWindowSize.y);
+			Rect rect = new Rect((Verse.UI.screenWidth - BottomWindowSize.x) / 2f, Verse.UI.screenHeight - BottomWindowSize.y - BottomWindowBotMargin, BottomWindowSize.x, BottomWindowSize.y);
 			if (Current.ProgramState == ProgramState.Entry)
 			{
-				rect.y -= 22f;
+				rect.y -= BottomWindowEntryExtraBotMargin;
 			}
 			Find.WindowStack.ImmediateWindow(1373514241, rect, WindowLayer.Dialog, delegate
 			{
-				if (active)
+				if (Active)
 				{
 					GUI.color = Color.white;
 					Text.Anchor = TextAnchor.UpperCenter;
@@ -241,12 +243,7 @@ namespace Vehicles
 						Widgets.Label(new Rect(0f, num, rect.width, 25f), "RoutePlannerAddTwoOrMoreWaypoints".Translate());
 					}
 					num += 20f;
-					if (!CaravanInfo.HasValue || !CaravanInfo.Value.pawns.Any())
-					{
-						GUI.color = new Color(0.8f, 0.6f, 0.6f);
-						Widgets.Label(new Rect(0f, num, rect.width, 25f), "RoutePlannerUsingAverageTicksPerMoveWarning".Translate());
-					}
-					else if (currentFormCaravanDialog == null && CaravanAtTheFirstWaypoint != null)
+					if (currentFormCaravanDialog == null && CaravanAtTheFirstWaypoint != null)
 					{
 						GUI.color = Color.gray;
 						Widgets.Label(new Rect(0f, num, rect.width, 25f), "RoutePlannerUsingTicksPerMoveOfCaravan".Translate(CaravanAtTheFirstWaypoint.LabelCap));
@@ -272,16 +269,16 @@ namespace Vehicles
 
 		private bool DoChooseRouteButton()
 		{
-			if (this.currentFormCaravanDialog == null || this.waypoints.Count < 2)
+			if (currentFormCaravanDialog == null || waypoints.Count < 2)
 			{
 				return false;
 			}
-			if (Widgets.ButtonText(new Rect((Verse.UI.screenWidth - BottomButtonSize.x) / 2f, Verse.UI.screenHeight - BottomWindowSize.y - 45f - 10f - BottomButtonSize.y, BottomButtonSize.x, BottomButtonSize.y), "ChooseRouteButton".Translate(), true, true, true))
+			if (Widgets.ButtonText(new Rect((Verse.UI.screenWidth - BottomButtonSize.x) / 2f, Verse.UI.screenHeight - BottomWindowSize.y - BottomWindowBotMargin - 10f - BottomButtonSize.y, BottomButtonSize.x, BottomButtonSize.y), "ChooseRouteButton".Translate(), true, true, true))
 			{
-				Find.WindowStack.Add(this.currentFormCaravanDialog);
-				this.currentFormCaravanDialog.Notify_ChoseRoute(this.waypoints[1].Tile);
+				Find.WindowStack.Add(currentFormCaravanDialog);
+				currentFormCaravanDialog.Notify_ChoseRoute(waypoints[1].Tile);
 				SoundDefOf.Click.PlayOneShotOnCamera(null);
-				this.Stop();
+				Stop();
 				return true;
 			}
 			return false;
@@ -298,11 +295,11 @@ namespace Vehicles
 			{
 				return;
 			}
-			for (int i = 0; i < this.paths.Count; i++)
+			for (int i = 0; i < paths.Count; i++)
 			{
-				if (this.paths[i].NodesReversed.Contains(num))
+				if (paths[i].NodesReversed.Contains(num))
 				{
-					string str = this.GetTileTip(num, i);
+					string str = GetTileTip(num, i);
 					Text.Font = GameFont.Small;
 					Vector2 vector = Text.CalcSize(str);
 					vector.x += 20f;
@@ -321,21 +318,21 @@ namespace Vehicles
 
 		private string GetTileTip(int tile, int pathIndex)
 		{
-			int num = this.paths[pathIndex].NodesReversed.IndexOf(tile);
+			int num = paths[pathIndex].NodesReversed.IndexOf(tile);
 			int num2;
 			if (num > 0)
 			{
-				num2 = this.paths[pathIndex].NodesReversed[num - 1];
+				num2 = paths[pathIndex].NodesReversed[num - 1];
 			}
-			else if (pathIndex < this.paths.Count - 1 && this.paths[pathIndex + 1].NodesReversed.Count >= 2)
+			else if (pathIndex < paths.Count - 1 && paths[pathIndex + 1].NodesReversed.Count >= 2)
 			{
-				num2 = this.paths[pathIndex + 1].NodesReversed[this.paths[pathIndex + 1].NodesReversed.Count - 2];
+				num2 = paths[pathIndex + 1].NodesReversed[paths[pathIndex + 1].NodesReversed.Count - 2];
 			}
 			else
 			{
 				num2 = -1;
 			}
-			int num3 = this.cachedTicksToWaypoint[pathIndex] + CaravanArrivalTimeEstimator.EstimatedTicksToArrive(this.paths[pathIndex].FirstNode, tile, this.paths[pathIndex], 0f, this.CaravanTicksPerMove, GenTicks.TicksAbs + this.cachedTicksToWaypoint[pathIndex]);
+			int num3 = cachedTicksToWaypoint[pathIndex] + CaravanArrivalTimeEstimator.EstimatedTicksToArrive(paths[pathIndex].FirstNode, tile, paths[pathIndex], 0f, CaravanTicksPerMove, GenTicks.TicksAbs + cachedTicksToWaypoint[pathIndex]);
 			int num4 = GenTicks.TicksAbs + num3;
 			StringBuilder stringBuilder = new StringBuilder();
 			if (num3 != 0)
@@ -361,12 +358,10 @@ namespace Vehicles
 
 		public void DoRoutePlannerButton(ref float curBaseY)
 		{
-			float num = 57f;
-			float num2 = 33f;
-			Rect rect = new Rect(Verse.UI.screenWidth - 10f - num, curBaseY - 10f - num2, num, num2);
+			Rect rect = new Rect(Verse.UI.screenWidth - 10f - RouteButtonDimensionX, curBaseY - 10f - RouteButtonDimensionY, RouteButtonDimensionX, RouteButtonDimensionY);
 			if (Widgets.ButtonImage(rect, ButtonTex, Color.white, new Color(0.8f, 0.8f, 0.8f), true))
 			{
-				if (active)
+				if (Active)
 				{
 					Stop();
 					SoundDefOf.Tick_Low.PlayOneShotOnCamera(null);
@@ -377,8 +372,8 @@ namespace Vehicles
 					SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
 				}
 			}
-			TooltipHandler.TipRegionByKey(rect, "RoutePlannerButtonTip");
-			curBaseY -= num2 + 20f;
+			TooltipHandler.TipRegion(rect, "VehicleRoutePlannerButtonTip".Translate());
+			curBaseY -= RouteButtonDimensionY + 20f;
 		}
 
 		public int GetTicksToWaypoint(int index)
@@ -388,19 +383,19 @@ namespace Vehicles
 
 		private void TryAddWaypoint(int tile, bool playSound = true)
 		{
-			if (Find.World.Impassable(tile))
+			if (vehicles.Any(v => !Find.World.GetComponent<WorldVehiclePathGrid>().Passable(tile, v.def)))
 			{
 				Messages.Message("MessageCantAddWaypointBecauseImpassable".Translate(), MessageTypeDefOf.RejectInput, false);
 				return;
 			}
-			if (waypoints.Any<RoutePlannerWaypoint>() && !Find.WorldReachability.CanReach(waypoints[waypoints.Count - 1].Tile, tile))
+			if (waypoints.Any() && !Find.World.GetComponent<WorldVehicleReachability>().CanReach(vehicles.UniqueVehicleDefsInList().ToList(), waypoints[waypoints.Count - 1].Tile, tile))
 			{
 				Messages.Message("MessageCantAddWaypointBecauseUnreachable".Translate(), MessageTypeDefOf.RejectInput, false);
 				return;
 			}
-			if (waypoints.Count >= 25)
+			if (waypoints.Count >= MaxCount)
 			{
-				Messages.Message("MessageCantAddWaypointBecauseLimit".Translate(25), MessageTypeDefOf.RejectInput, false);
+				Messages.Message("MessageCantAddWaypointBecauseLimit".Translate(MaxCount), MessageTypeDefOf.RejectInput, false);
 				return;
 			}
 			RoutePlannerWaypoint routePlannerWaypoint = (RoutePlannerWaypoint)WorldObjectMaker.MakeWorldObject(WorldObjectDefOf.RoutePlannerWaypoint);
@@ -450,10 +445,10 @@ namespace Vehicles
 		private void RecreatePaths()
 		{
 			ReleasePaths();
-			WorldPathFinder worldPathFinder = Find.WorldPathFinder;
+
 			for (int i = 1; i < waypoints.Count; i++)
 			{
-				paths.Add(worldPathFinder.FindPath(waypoints[i - 1].Tile, waypoints[i].Tile, null, null));
+				paths.Add(Find.World.GetComponent<WorldVehiclePathfinder>().FindPath(waypoints[i - 1].Tile, waypoints[i].Tile, vehicles, null));
 			}
 			cachedTicksToWaypoint.Clear();
 			int num = 0;
@@ -484,9 +479,9 @@ namespace Vehicles
 			return null;
 		}
 
-		private bool active;
+		public List<VehiclePawn> vehicles = new List<VehiclePawn>();
 
-		private VehicleCaravanTicksPerMoveUtility.CaravanInfo? caravanInfoFromFormCaravanDialog;
+		private VehicleCaravanTicksPerMoveUtility.VehicleInfo? caravanInfoFromFormCaravanDialog;
 
 		private Dialog_FormVehicleCaravan currentFormCaravanDialog;
 
@@ -500,7 +495,7 @@ namespace Vehicles
 
 		private const int MaxCount = 25;
 
-		private static readonly Texture2D ButtonTex = ContentFinder<Texture2D>.Get("UI/Misc/WorldRoutePlanner", true);
+		private static readonly Texture2D ButtonTex = ContentFinder<Texture2D>.Get("UI/VehicleRoutePlannerIcon", true);
 
 		private static readonly Texture2D MouseAttachment = ContentFinder<Texture2D>.Get("UI/Overlays/WaypointMouseAttachment", true);
 
@@ -511,6 +506,10 @@ namespace Vehicles
 		private const float BottomWindowBotMargin = 45f;
 
 		private const float BottomWindowEntryExtraBotMargin = 22f;
+
+		private const float RouteButtonDimensionX = 57f;
+
+		private const float RouteButtonDimensionY = 33f;
     }
 
 	public static class VehicleCaravanTicksPerMoveUtility
@@ -525,15 +524,15 @@ namespace Vehicles
 				}
 				return 3300;
 			}
-			return GetTicksPerMove(new CaravanInfo(caravan), explanation);
+			return GetTicksPerMove(new VehicleInfo(caravan), explanation);
 		}
 
-		public static int GetTicksPerMove(CaravanInfo caravanInfo, StringBuilder explanation = null)
+		public static int GetTicksPerMove(VehicleInfo caravanInfo, StringBuilder explanation = null)
 		{
-			return GetTicksPerMove(caravanInfo.pawns, caravanInfo.massUsage, caravanInfo.massCapacity, explanation);
+			return GetTicksPerMove(caravanInfo.vehicles, caravanInfo.massUsage, caravanInfo.massCapacity, explanation);
 		}
 
-		public static int GetTicksPerMove(List<Pawn> pawns, float massUsage, float massCapacity, StringBuilder explanation = null)
+		public static int GetTicksPerMove(List<VehiclePawn> pawns, float massUsage, float massCapacity, StringBuilder explanation = null)
 		{
 			if (pawns.Any())
 			{
@@ -544,8 +543,8 @@ namespace Vehicles
 				float num = 0f;
 				for (int i = 0; i < pawns.Count; i++)
 				{
-					float num2 = (float)((pawns[i].Downed || pawns[i].CarriedByCaravan()) ? 450 : pawns[i].TicksPerMoveCardinal);
-					num2 = Mathf.Min(num2, 150f) * 340f;
+					float num2 = (float)((pawns[i].Downed || pawns[i].CarriedByCaravan()) ? DownedPawnMoveTicks : pawns[i].TicksPerMoveCardinal);
+					num2 = Mathf.Min(num2, MaxPawnTicksPerMove) * 340f;
 					float num3 = 60000f / num2;
 					if (explanation != null)
 					{
@@ -601,7 +600,7 @@ namespace Vehicles
 				return 1f;
 			}
 			float t = massUsage / massCapacity;
-			return Mathf.Lerp(2f, 1f, t);
+			return Mathf.Lerp(MoveSpeedFactorAtZeroMass, 1f, t);
 		}
 
 		private static void AppendUsingDefaultTicksPerMoveInfo(StringBuilder sb)
@@ -618,23 +617,30 @@ namespace Vehicles
 		public const int DefaultTicksPerMove = 3300;
 		private const float MoveSpeedFactorAtZeroMass = 2f;
 
-		public struct CaravanInfo
+		public struct VehicleInfo
 		{
-			public CaravanInfo(Caravan caravan)
+			public VehicleInfo(List<VehiclePawn> vehicles)
+            {
+				this.vehicles = vehicles;
+				massUsage = vehicles.Sum(v => MassUtility.GearAndInventoryMass(v));
+				massCapacity = vehicles.Sum(v => v.GetComp<CompVehicle>().CargoCapacity);
+            }
+
+			public VehicleInfo(Caravan caravan)
 			{
-				pawns = caravan.PawnsListForReading;
+				vehicles = caravan.PawnsListForReading.Where(v => v.IsVehicle()).Cast<VehiclePawn>().ToList();
 				massUsage = caravan.MassUsage;
 				massCapacity = caravan.MassCapacity;
 			}
 
-			public CaravanInfo(Dialog_FormVehicleCaravan formCaravanDialog)
+			public VehicleInfo(Dialog_FormVehicleCaravan formCaravanDialog)
 			{
-				pawns = TransferableUtility.GetPawnsFromTransferables(formCaravanDialog.transferables);
+				vehicles = TransferableUtility.GetPawnsFromTransferables(formCaravanDialog.transferables).Where(v => v.IsVehicle()).Cast<VehiclePawn>().ToList();
 				massUsage = formCaravanDialog.MassUsage;
 				massCapacity = formCaravanDialog.MassCapacity;
 			}
 
-			public List<Pawn> pawns;
+			public List<VehiclePawn> vehicles;
 			public float massUsage;
 			public float massCapacity;
 		}

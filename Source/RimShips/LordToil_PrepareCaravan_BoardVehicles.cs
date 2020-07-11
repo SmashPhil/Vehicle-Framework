@@ -32,7 +32,7 @@ namespace Vehicles.Lords
 
         public override void UpdateAllDuties()
         {
-            foreach(Pawn p in this.lord.ownedPawns)
+            foreach(Pawn p in lord.ownedPawns)
             {
                 if(!HelperMethods.IsVehicle(p))
                 {
@@ -52,14 +52,26 @@ namespace Vehicles.Lords
         {
             if(Find.TickManager.TicksGame % 200 == 0)
             {
-                Lord lord = this.lord;
-                List<Pawn> pawnsLeft = this.lord.ownedPawns.Where(x => !HelperMethods.IsVehicle(x)).ToList();
-                IntVec3 intVec = this.meetingPoint;
-                
-                if(!pawnsLeft.Any(x => x.Spawned))
+                bool flag = true;
+                List<Pawn> pawns = new List<Pawn>(lord.ownedPawns.Where(p => !p.IsVehicle()));
+                foreach(Pawn pawn in pawns)
                 {
-                    this.lord.ownedPawns.RemoveAll(x => !HelperMethods.IsVehicle(x));
-                    this.lord.ReceiveMemo("AllPawnsOnboard");
+                    var vehicle = (lord.LordJob as LordJob_FormAndSendVehicles).GetVehicleAssigned(pawn);
+                    if(vehicle.Second != null)
+                    {
+                        if(vehicle.First.GetComp<CompVehicle>().AllPawnsAboard.Contains(pawn))
+                        {
+                            lord.ownedPawns.Remove(pawn);
+                        }
+                        else
+                        {
+                            flag = false;
+                        }
+                    }
+                }
+                if(flag)
+                {
+                    lord.ReceiveMemo("AllPawnsOnboard");
                 }
             }
         }

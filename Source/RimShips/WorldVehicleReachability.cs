@@ -28,8 +28,13 @@ namespace Vehicles
 
         public bool CanReach(Caravan c, int destTile)
         {
-            int startTile = c.Tile;
-			List<ThingDef> vehicleDefs = c.UniqueVehicleDefsInCaravan().ToList();
+			int startTile = c.Tile;
+            List<ThingDef> vehicleDefs = c.UniqueVehicleDefsInCaravan().ToList();
+			return CanReach(vehicleDefs, startTile, destTile);
+        }
+
+		public bool CanReach(List<ThingDef> vehicleDefs, int startTile, int destTile)
+        {
 			if (startTile < 0 || startTile >= Find.WorldGrid.TilesCount || destTile < 0 || destTile >= Find.WorldGrid.TilesCount)
 			{
 				return false;
@@ -62,6 +67,15 @@ namespace Vehicles
 			foreach(ThingDef vehicleDef in DefDatabase<ThingDef>.AllDefs.Where(v => v.GetCompProperties<CompProperties_Vehicle>() != null))
             {
 				fields.Add(vehicleDef, new int[Find.WorldGrid.TilesCount]);
+				if (vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts is null)
+					vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts = new Dictionary<BiomeDef, float>();
+				if(vehicleDef.GetCompProperties<CompProperties_Vehicle>().vehicleType == VehicleType.Sea)
+                {
+					if(!vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts.ContainsKey(BiomeDefOf.Ocean))
+						vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts.Add(BiomeDefOf.Ocean, 1);
+					if(!vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts.ContainsKey(BiomeDefOf.Lake))
+						vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts.Add(BiomeDefOf.Lake, 1);
+                }
             }
         }
 

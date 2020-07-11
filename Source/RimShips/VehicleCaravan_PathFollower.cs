@@ -108,7 +108,7 @@ namespace Vehicles
 			{
 				return false;
 			}
-			if (!IsPassable(caravan.Tile) && !TryRecoverFromUnwalkablePosition())
+			if (!IsPassable(caravan.Tile)&& !TryRecoverFromUnwalkablePosition())
 			{
 				return false;
 			}
@@ -117,7 +117,7 @@ namespace Vehicles
 				this.arrivalAction = arrivalAction;
 				return true;
 			}
-			if (!caravan.CanReach(destTile))
+			if (!Find.World.GetComponent<WorldVehicleReachability>().CanReach(caravan, destTile))
 			{
 				PatherFailed();
 				return false;
@@ -193,19 +193,19 @@ namespace Vehicles
 			StopDead();
 		}
 
-		private bool IsPassable(int tile)
-		{
-			return !Find.World.Impassable(tile);
-		}
+		public bool IsPassable(int tile)
+        {
+			return caravan.UniqueVehicleDefsInCaravan().All(v => Find.World.GetComponent<WorldVehiclePathGrid>().Passable(tile, v));
+        }
 
 		public bool IsNextTilePassable()
 		{
-			return IsPassable(nextTile);
+			return caravan.UniqueVehicleDefsInCaravan().All(v => Find.World.GetComponent<WorldVehiclePathGrid>().Passable(nextTile, v));
 		}
 
 		private bool TryRecoverFromUnwalkablePosition()
 		{
-			if (GenWorldClosest.TryFindClosestTile(caravan.Tile, (int t) => IsPassable(t), out int num, 2147483647, true))
+			if (GenWorldClosest.TryFindClosestTile(caravan.Tile, (int t) => IsPassable(t) && Find.World.GetComponent<WorldVehicleReachability>().CanReach(caravan, t), out int num, 2147483647, true))
 			{
 				Log.Warning(string.Concat(new object[]
 				{
@@ -294,7 +294,7 @@ namespace Vehicles
 			}
 			nextTile = curPath.ConsumeNextNode();
 			previousTileForDrawingIfInDoubt = -1;
-			if (Find.World.Impassable(nextTile))
+			if (!IsPassable(nextTile))
 			{
 				Log.Error(string.Concat(new object[]
 				{
@@ -343,7 +343,6 @@ namespace Vehicles
                 }
             }
 			
-			Log.Message($"Next Tile: {Find.WorldGrid[end].biome.defName} Cost: {num}");
 			float roadMovementDifficultyMultiplier = GetRoadMovementDifficultyMultiplier(caravan, start, end, stringBuilder);
 			if (explanation != null)
 			{
@@ -379,6 +378,12 @@ namespace Vehicles
 
 		public static float GetRoadMovementDifficultyMultiplier(VehicleCaravan caravan, int fromTile, int toTile, StringBuilder explanation = null)
 		{
+			List<ThingDef> vehicleDefs = caravan.UniqueVehicleDefsInCaravan().ToList();
+			return GetRoadMovementDifficultyMultiplier(vehicleDefs, fromTile, toTile, explanation);
+		}
+
+		public static float GetRoadMovementDifficultyMultiplier(List<ThingDef> vehicleDefs, int fromTile, int toTile, StringBuilder explanation = null)
+		{
 			List<Tile.RoadLink> roads = Find.WorldGrid.tiles[fromTile].Roads;
 			if (roads == null)
 			{
@@ -393,9 +398,9 @@ namespace Vehicles
 				if (roads[i].neighbor == toTile)
 				{
 					float movementCostMultiplier = roads[i].road.movementCostMultiplier;
-					if(caravan.UniqueVehicleDefsInCaravan().Any(v => !v.GetCompProperties<CompProperties_Vehicle>().customRoadCosts.EnumerableNullOrEmpty()))
+					if(vehicleDefs.Any(v => !v.GetCompProperties<CompProperties_Vehicle>().customRoadCosts.EnumerableNullOrEmpty()))
                     {
-						movementCostMultiplier = caravan.UniqueVehicleDefsInCaravan().Min(v => v.GetCompProperties<CompProperties_Vehicle>().customRoadCosts[roads[i].road]);
+						movementCostMultiplier = vehicleDefs.Min(v => v.GetCompProperties<CompProperties_Vehicle>().customRoadCosts[roads[i].road]);
                     }
 					if (explanation != null)
 					{
@@ -459,7 +464,7 @@ namespace Vehicles
 			int num = (moving && nextTile >= 0 && IsNextTilePassable()) ? nextTile : caravan.Tile;
 			lastPathedTargetTile = destTile;
 			WorldPath worldPath = Find.World.GetComponent<WorldVehiclePathfinder>().FindPath(num, destTile, caravan, null);
-			Log.Message($"Found: {worldPath.Found}");
+
 			if (worldPath.Found && num != caravan.Tile)
 			{
 				if (worldPath.NodesLeftCount >= 2 && worldPath.Peek(1) == caravan.Tile)
@@ -499,7 +504,7 @@ namespace Vehicles
 			while (num < MaxCheckAheadNodes && num < curPath.NodesLeftCount)
 			{
 				int tileID = curPath.Peek(num);
-				if (Find.World.Impassable(tileID))
+				if (!IsPassable(tileID))
 				{
 					return true;
 				}

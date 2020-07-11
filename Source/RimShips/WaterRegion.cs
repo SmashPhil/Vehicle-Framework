@@ -405,7 +405,7 @@ namespace Vehicles
         public void DebugDrawMouseover()
         {
             int num = Mathf.RoundToInt(Time.realtimeSinceStartup * 2f) % 2;
-            if(RimShipMod.mod.settings.debugDrawRegions)
+            if(VehicleMod.mod.settings.debugDrawRegions)
             {
                 Color color;
                 if (!this.valid)
@@ -421,7 +421,7 @@ namespace Vehicles
                     GenDraw.DrawFieldEdges(region.Cells.ToList<IntVec3>(), Color.grey);
                 }
 
-                if(RimShipMod.mod.settings.debugDrawRegionLinks)
+                if(VehicleMod.mod.settings.debugDrawRegionLinks)
                 {
                     foreach (WaterRegionLink regionLink in this.links)
                     {
@@ -434,7 +434,7 @@ namespace Vehicles
                         }
                     }
                 }
-                if(RimShipMod.mod.settings.debugDrawRegionThings)
+                if(VehicleMod.mod.settings.debugDrawRegionThings)
                 {
                     foreach (Thing thing in this.listerThings.AllThings)
                     {

@@ -438,7 +438,7 @@ namespace Vehicles.AI
                 return;
             }
 
-            if(RimShipMod.mod.settings.debugDisableWaterPathing)
+            if(VehicleMod.mod.settings.debugDisableWaterPathing)
             {
                 if(HelperMethods.IsBoat(pawn) && pawn.GetComp<CompVehicle>().beached)
                     pawn.GetComp<CompVehicle>().RemoveBeachedStatus();
@@ -726,7 +726,7 @@ namespace Vehicles.AI
 					{
 						cts.Cancel();
 						cts.Dispose();
-						if (Prefs.DevMode && RimShipMod.mod.settings.debugDrawVehiclePathCosts)
+						if (Prefs.DevMode && VehicleMod.mod.settings.debugDrawVehiclePathCosts)
 							Log.Message($"Ending and disposing remaining tasks...");
 						return PawnPath.NotFound;
 					
@@ -757,7 +757,7 @@ namespace Vehicles.AI
                 Messages.Message("VehicleCannotFit".Translate(), MessageTypeDefOf.RejectInput);
                 return PawnPath.NotFound;
             }
-            if (!path.Found && Prefs.DevMode && RimShipMod.mod.settings.debugDrawVehiclePathCosts) 
+            if (!path.Found && Prefs.DevMode && VehicleMod.mod.settings.debugDrawVehiclePathCosts) 
 				Log.Warning("Path Not Found");
             return path;
         }

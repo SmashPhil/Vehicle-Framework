@@ -39,13 +39,15 @@ namespace Vehicles
 
         public static readonly Texture2D MissingAmmoIcon = ContentFinder<Texture2D>.Get("UI/MissingAmmo");
 
+        public static readonly Texture2D BoatIcon = ContentFinder<Texture2D>.Get("UI/BoatObject");
+
         public static readonly Dictionary<ThingDef, Texture2D> CachedTextureIcons = new Dictionary<ThingDef, Texture2D>();
 
         private static readonly Dictionary<string, Texture2D> cachedTextureFilepaths = new Dictionary<string, Texture2D>();
 
         static TexCommandVehicles()
         {
-            foreach(ThingDef vehicleDef in DefDatabase<ThingDef>.AllDefsListForReading.Where(x => x.GetCompProperties<CompProperties_Vehicle>() != null))
+            foreach(ThingDef vehicleDef in DefDatabase<ThingDef>.AllDefsListForReading.Where(x => x.IsVehicleDef()))
             {
                 string iconFilePath = vehicleDef.GetCompProperties<CompProperties_Vehicle>().iconTexPath;
                 Texture2D tex;

@@ -11,7 +11,7 @@ namespace Vehicles.Jobs
         public override ThinkNode DeepCopy(bool resolve = true)
         {
             JobGiver_GotoTravelDestinationVehicle job = (JobGiver_GotoTravelDestinationVehicle)base.DeepCopy(resolve);
-            job.locomotionUrgency = this.locomotionUrgency;
+            job.locomotionUrgency = locomotionUrgency;
             job.maxDanger = maxDanger;
             job.jobMaxDuration = jobMaxDuration;
             job.exactCell = exactCell;
@@ -20,24 +20,17 @@ namespace Vehicles.Jobs
 
         protected override Job TryGiveJob(Pawn pawn)
         {
-            pawn.mindState.nextMoveOrderIsWait = !pawn.mindState.nextMoveOrderIsWait;
-            if (pawn.mindState.nextMoveOrderIsWait && !exactCell)
-            {
-                return new Job(JobDefOf_Ships.IdleShip)
-                {
-                    expiryInterval = WaitTicks.RandomInRange
-                };
-            }
+            pawn.drafter.Drafted = true;
+
             IntVec3 cell = pawn.mindState.duty.focus.Cell;
-            if (HelperMethods.IsBoat(pawn) && !ShipReachabilityUtility.CanReachShip(pawn, cell, PathEndMode.OnCell, PawnUtility.ResolveMaxDanger(pawn, maxDanger), false, TraverseMode.ByPawn))
+            if (pawn.IsBoat() && !ShipReachabilityUtility.CanReachShip(pawn, cell, PathEndMode.OnCell, PawnUtility.ResolveMaxDanger(pawn, maxDanger), false, TraverseMode.ByPawn))
                 return null;
             else if (!HelperMethods.IsBoat(pawn) && HelperMethods.IsVehicle(pawn) && !ReachabilityUtility.CanReach(pawn, cell, PathEndMode.OnCell, PawnUtility.ResolveMaxDanger(pawn, maxDanger), false, TraverseMode.ByPawn))
                 return null;
             if (exactCell && pawn.Position == cell)
                 return null;
-            IntVec3 c = cell;
-            
-            return new Job(JobDefOf.Goto, c)
+
+            return new Job(JobDefOf.Goto, cell)
             {
                 locomotionUrgency = PawnUtility.ResolveLocomotion(pawn, locomotionUrgency),
                 expiryInterval = jobMaxDuration

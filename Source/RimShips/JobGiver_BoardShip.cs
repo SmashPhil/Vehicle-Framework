@@ -15,7 +15,7 @@ namespace Vehicles.Jobs
             if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Moving)) return null;
             if(pawn.GetLord().LordJob is LordJob_FormAndSendVehicles)
             {
-                Pair<VehiclePawn, VehicleHandler> vehicle = ((LordJob_FormAndSendVehicles)pawn.GetLord().LordJob).GetShipAssigned(pawn);
+                Pair<VehiclePawn, VehicleHandler> vehicle = ((LordJob_FormAndSendVehicles)pawn.GetLord().LordJob).GetVehicleAssigned(pawn);
 
                 if(vehicle.Second is null)
                 {

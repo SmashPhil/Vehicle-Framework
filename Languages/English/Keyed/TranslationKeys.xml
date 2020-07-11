@@ -27,6 +27,9 @@
 	<ClearSeats>Clear</ClearSeats>
 	<RemoveFromRole>Remove</RemoveFromRole>
 	<AddToRole>Add</AddToRole>
+	<VehicleRoutePlannerButtonTip>Click to enter the planning mode for Vehicles where you can select specific vehicles you own, and plan your journey. Pathing is adjusted based on the vehicles selected.</VehicleRoutePlannerButtonTip>
+	<SelectVehiclesForPlanner>Select Vehicles</SelectVehiclesForPlanner>
+	<StartVehicleRoutePlanner>Start Route</StartVehicleRoutePlanner>
 	
 	<TabCargo>Cargo</TabCargo>
 	<TabPassengers>Pawns</TabPassengers>
@@ -134,6 +137,7 @@
 	<VehicleCannotFit>Not enough space.</VehicleCannotFit>
 	<NoPathForVehicle>Cannot path here.</NoPathForVehicle>
 	<IncapableStatusForRole>{0} is incapable of fulfilling this role.</IncapableStatusForRole>
+	<LandAndSeaRoutePlannerRestriction>Cannot plan route for both Sea and Land vehicles. Paths will not register. </LandAndSeaRoutePlannerRestriction>
 	
 	<!-- Caravans -->
 	<CaravanShips>Boat</CaravanShips>

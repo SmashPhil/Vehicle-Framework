@@ -19,13 +19,13 @@ namespace Vehicles
 
         public Vehicle_PathFollower vPather;
 
-        public override Vector3 DrawPos
-        {
-            get
-            {
-                return RimShipMod.mod.settings.debugDisableSmoothPathing ? base.DrawPos : SmoothPos;
-            }
-        }
+        //public override Vector3 DrawPos
+        //{
+        //    get
+        //    {
+        //        return VehicleMod.mod.settings.debugDisableSmoothPathing ? base.DrawPos : SmoothPos;
+        //    }
+        //}
 
         public Vector3 SmoothPos
         {

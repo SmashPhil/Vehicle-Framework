@@ -71,7 +71,7 @@ namespace Vehicles
 
         internal void DebugVehicleTracksDrawer(IntVec3 c1, IntVec3 c2)
         {
-            if(RimShipMod.mod.settings.debugDrawVehicleTracks)
+            if(VehicleMod.mod.settings.debugDrawVehicleTracks)
             {
                 foreach(VehicleTrack track in Props.tracks)
                 {

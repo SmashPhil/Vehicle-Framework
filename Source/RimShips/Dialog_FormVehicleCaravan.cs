@@ -483,6 +483,13 @@ namespace Vehicles
 				{
 					List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables);
 					List<Pawn> innerPawns = pawnsFromTransferables.Where(v => HelperMethods.IsVehicle(v)).SelectMany(v => v.GetComp<CompVehicle>().AllPawnsAboard).ToList();
+
+					if(pawnsFromTransferables.Any(v => v.IsVehicle() && v.GetComp<CompVehicle>().Props.vehicleType == VehicleType.Sea) && pawnsFromTransferables.Any(v => v.IsVehicle() && v.GetComp<CompVehicle>().Props.vehicleType == VehicleType.Land))
+					{
+						Messages.Message("LandAndSeaRoutePlannerRestriction".Translate(), MessageTypeDefOf.RejectInput);
+						return;
+					}
+
 					soundClose.PlayOneShotOnCamera(null);
 					if (!pawnsFromTransferables.Concat(innerPawns).Any((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer) && !x.Downed))
 					{

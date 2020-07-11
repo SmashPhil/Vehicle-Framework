@@ -61,7 +61,7 @@ namespace Vehicles
         public string healthLabel_Beached = "Beached";
 
         public string iconTexPath = "UI/DefaultVehicleIcon";
-
+        public bool generateThingIcon = true;
 
         public Dictionary<TerrainDef, int> customTerrainCosts; //Add to guide
         public Dictionary<ThingDef, int> customThingCosts; //Add to guide : implement
@@ -70,6 +70,7 @@ namespace Vehicles
         public Dictionary<Hilliness, float> customHillinessCosts; //Add to guide
         public Dictionary<RoadDef, float> customRoadCosts; //Add to guide
         public float winterPathCostMultiplier = 1f; //Add to guide
+        public float worldSpeedMultiplier = 1f;
 
         public VehiclePermissions vehicleMovementPermissions = VehiclePermissions.DriverNeeded;
         public PowerType vehiclePowerType = PowerType.Fuel;

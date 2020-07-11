@@ -218,7 +218,7 @@ namespace Vehicles
                     if(Find.TickManager.TicksGame % Props.TicksToSpawnMote == 0)
                         DrawMotes();
                 }
-                if(EmptyTank && !RimShipMod.mod.settings.debugDraftAnyShip)
+                if(EmptyTank && !VehicleMod.mod.settings.debugDraftAnyShip)
                 {
                     Pawn.drafter.Drafted = false;
                 }

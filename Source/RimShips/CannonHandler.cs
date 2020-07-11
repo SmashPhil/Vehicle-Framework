@@ -219,7 +219,7 @@ namespace Vehicles
                         return;
                     }
                     LockedStatusRotation = false;
-                    Log.Message($"PrefireTickCount: {PrefireTickCount} Cooldown: {cooldownTicks} Rotation: {RotationIsValid} Disabled: {CannonDisabled}");
+
                     if(PrefireTickCount > 0)
                     {
                         rotationTargeted = (float)TurretLocation.ToIntVec3().AngleToPoint(cannonTarget.Cell, pawn.Map);

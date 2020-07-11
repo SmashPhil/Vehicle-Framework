@@ -9,7 +9,7 @@ using SPExtended;
 
 namespace Vehicles
 {
-    public class RimshipsModSettings : ModSettings
+    public class VehiclesModSettings : ModSettings
     {
         public float beachMultiplier = 0f;
         public int forceFactionCoastRadius = 1;
@@ -32,7 +32,7 @@ namespace Vehicles
 
         public bool debugDraftAnyShip;
         public bool debugDisableWaterPathing;
-        public bool debugDisableSmoothPathing;
+        public bool debugDisableSmoothPathing = true;
 
         public bool debugSpawnBoatBuildingGodMode;
 
@@ -94,21 +94,21 @@ namespace Vehicles
         }
     }
 
-    public class RimShipMod : Mod
+    public class VehicleMod : Mod
     {
-        public RimshipsModSettings settings;
-        public static RimShipMod mod;
+        public VehiclesModSettings settings;
+        public static VehicleMod mod;
 
-        public RimShipMod(ModContentPack content) : base(content)
+        public VehicleMod(ModContentPack content) : base(content)
         {
-            this.settings = GetSettings<RimshipsModSettings>();
+            settings = GetSettings<VehiclesModSettings>();
             mod = this;
         }
         public override void DoSettingsWindowContents(Rect inRect)
         {
             var font = Text.Font;
             Text.Font = GameFont.Tiny;
-            string credit = "Boats! - by Smash Phil";
+            string credit = "Vehicles! - by Smash Phil";
             Widgets.Label(new Rect(inRect.width - (6 * credit.Count()), inRect.height + 64f, inRect.width, inRect.height), credit);
             Text.Font = font;
 
@@ -235,7 +235,7 @@ namespace Vehicles
                 listingStandard.GapLine(16f);
                 listingStandard.CheckboxLabeled("DebugDraftAnyShip".Translate(), ref settings.debugDraftAnyShip, "DebugDraftAnyShipTooltip".Translate());
                 listingStandard.CheckboxLabeled("DebugDisablePathing".Translate(), ref settings.debugDisableWaterPathing, "DebugDisablePathingTooltip".Translate());
-                listingStandard.CheckboxLabeled("DebugDisableSmoothPathing".Translate(), ref settings.debugDisableSmoothPathing, "DebugDisableSmoothPathingTooltip".Translate());
+                //listingStandard.CheckboxLabeled("DebugDisableSmoothPathing".Translate(), ref settings.debugDisableSmoothPathing, "DebugDisableSmoothPathingTooltip".Translate());
                 listingStandard.CheckboxLabeled("DebugSpawnVehiclesGodMode".Translate(), ref settings.debugSpawnBoatBuildingGodMode);
 
                 listingStandard.CheckboxLabeled("DebugCannonDrawer".Translate(), ref settings.debugDrawCannonGrid);
