@@ -20,60 +20,61 @@ namespace Vehicles.AI
         public BoolUnknown CachedResultFor(WaterRoom A, WaterRoom B, TraverseParms traverseParms)
         {
             bool flag;
-            if (this.cacheDict.TryGetValue(new ShipReachabilityCache.CachedEntry(A.ID, B.ID, traverseParms), out flag))
+            if (cacheDict.TryGetValue(new CachedEntry(A.ID, B.ID, traverseParms), out flag))
                 return (!flag) ? BoolUnknown.False : BoolUnknown.True;
             return BoolUnknown.Unknown;
         }
 
         public void AddCachedResult(WaterRoom A, WaterRoom B, TraverseParms traverseParams, bool reachable)
         {
-            /*ShipReachabilityCache.CachedEntry key = new ShipReachabilityCache.CachedEntry(A.ID, B.ID, traverseParams);
-            if (!this.cacheDict.ContainsKey(key))
-                this.cacheDict.Add(key, reachable)*/;
+            Log.Message($"Null: {cacheDict is null} | {A is null} | {B is null}");
+            CachedEntry key = new CachedEntry(A.ID, B.ID, traverseParams);
+            if (!cacheDict.ContainsKey(key))
+                cacheDict.Add(key, reachable);
         }
 
         public void Clear()
         {
-            this.cacheDict.Clear();
+            cacheDict.Clear();
         }
 
         public void ClearFor(Pawn p)
         {
             tmpCachedEntries.Clear();
-            foreach(KeyValuePair<ShipReachabilityCache.CachedEntry, bool> keyValuePair in this.cacheDict)
+            foreach(KeyValuePair<CachedEntry, bool> keyValuePair in this.cacheDict)
             {
                 if (keyValuePair.Key.TraverseParms.pawn == p)
                     tmpCachedEntries.Add(keyValuePair.Key);
             }
-            foreach (ShipReachabilityCache.CachedEntry ce in tmpCachedEntries)
-                this.cacheDict.Remove(ce);
+            foreach (CachedEntry ce in tmpCachedEntries)
+                cacheDict.Remove(ce);
             tmpCachedEntries.Clear();
         }
 
         public void ClearForHostile(Thing hostileTo)
         {
             tmpCachedEntries.Clear();
-            foreach(KeyValuePair<ShipReachabilityCache.CachedEntry, bool> keyValuePair in this.cacheDict)
+            foreach(KeyValuePair<CachedEntry, bool> keyValuePair in cacheDict)
             {
                 Pawn p = keyValuePair.Key.TraverseParms.pawn;
                 if (!(p is null) && p.HostileTo(hostileTo))
                     tmpCachedEntries.Add(keyValuePair.Key);
             }
-            foreach (ShipReachabilityCache.CachedEntry ce in tmpCachedEntries)
-                this.cacheDict.Remove(ce);
+            foreach (CachedEntry ce in tmpCachedEntries)
+                cacheDict.Remove(ce);
             tmpCachedEntries.Clear();
         }
 
-        private Dictionary<ShipReachabilityCache.CachedEntry, bool> cacheDict = new Dictionary<ShipReachabilityCache.CachedEntry, bool>();
+        private Dictionary<CachedEntry, bool> cacheDict = new Dictionary<CachedEntry, bool>();
 
-        private static List<ShipReachabilityCache.CachedEntry> tmpCachedEntries = new List<ShipReachabilityCache.CachedEntry>();
+        private static List<CachedEntry> tmpCachedEntries = new List<CachedEntry>();
 
         [StructLayout(LayoutKind.Sequential, Size = 1)]
-        private struct CachedEntry : IEquatable<ShipReachabilityCache.CachedEntry>
+        private struct CachedEntry : IEquatable<CachedEntry>
         {
             public CachedEntry(int firstRoomID, int secondRoomID, TraverseParms traverseParms)
             {
-                this = default(ShipReachabilityCache.CachedEntry);
+                this = default(CachedEntry);
                 if(firstRoomID < secondRoomID)
                 {
                     this.FirstRoomID = firstRoomID;

@@ -286,14 +286,14 @@ namespace Vehicles
             return td?.GetCompProperties<CompProperties_Vehicle>() != null;
         }
 
-        public static bool IsBoat(this Pawn p)
+        public static bool IsBoat(this Pawn p) //REDO
         {
             return IsVehicle(p) && p.GetComp<CompVehicle>().Props.vehicleType == VehicleType.Sea;
         }
 
-        public static bool IsVehicle(Pawn p)
+        public static bool IsVehicle(this Pawn p) //REDO
         {
-            return p?.TryGetComp<CompVehicle>() != null;
+            return p is VehiclePawn || p?.TryGetComp<CompVehicle>() != null; 
         }
 
         public static bool IsVehicle(this Thing t)
@@ -1011,16 +1011,15 @@ namespace Vehicles
 
         public static List<Pawn> ExtractPawnsFromCaravan(Caravan caravan)
         {
-            List<Pawn> sailors = new List<Pawn>();
-
-            foreach (Pawn ship in caravan.PawnsListForReading)
+            List<Pawn> innerPawns = new List<Pawn>();
+            foreach (Pawn vehicle in caravan.PawnsListForReading)
             {
-                if (IsVehicle(ship))
+                if (vehicle.IsVehicle())
                 {
-                    sailors.AddRange(ship.GetComp<CompVehicle>().AllPawnsAboard);
+                    innerPawns.AddRange(vehicle.GetComp<CompVehicle>().AllPawnsAboard);
                 }
             }
-            return sailors;
+            return innerPawns;
         }
 
         public static float CapacityLeft(LordJob_FormAndSendVehicles lordJob)
@@ -1059,9 +1058,8 @@ namespace Vehicles
             return 0f;
         }
 
-        public static List<Pawn> GetVehiclesForColonistBar(List<Map> maps, int i)
+        public static List<Pawn> GetVehiclesForColonistBar(Map map)
         {
-            Map map = maps[i];
             List<Pawn> vehicles = new List<Pawn>();
             foreach (Pawn vehicle in map.mapPawns.AllPawnsSpawned)
             {

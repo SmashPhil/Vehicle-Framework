@@ -219,9 +219,9 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Method(typeof(ITab_Pawn_FormingCaravan), "DoPeopleAndAnimals"), 
                 prefix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(DoPeopleAnimalsAndVehicle)));
-            harmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_Enter), nameof(CaravanArrivalAction_Enter.Arrived)), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(typeof(ShipHarmony),
-                nameof(ShipsArrivedTranspiler)));
+            //harmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_Enter), nameof(CaravanArrivalAction_Enter.Arrived)), prefix: null, postfix: null,
+            //    transpiler: new HarmonyMethod(typeof(ShipHarmony),
+            //    nameof(VehiclesArrivedTranspiler)));
             harmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_VisitEscapeShip), "DoArrivalAction"), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(ShipsVisitEscapeShipTranspiler)));
@@ -305,9 +305,6 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Property(typeof(Pawn_DraftController), nameof(Pawn_DraftController.Drafted)).GetSetMethod(),
                 prefix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(DraftedVehiclesCanMove)));
-            harmony.Patch(original: AccessTools.Property(typeof(Pawn_DraftController), nameof(Pawn_DraftController.Drafted)).GetGetMethod(), prefix: null,
-                postfix: new HarmonyMethod(typeof(ShipHarmony),
-                nameof(UndraftedVehiclesStopPathing)));
             harmony.Patch(original: AccessTools.Method(typeof(FloatMenuMakerMap), "CanTakeOrder"), prefix: null,
                 postfix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(CanVehicleTakeOrder)));
@@ -485,7 +482,7 @@ namespace Vehicles
         public static void RecalculateShipPathCostUnderThing(Thing t, Map ___map)
         {
             if (t is null) return;
-            ___map.GetComponent<WaterMap>().getShipPathGrid.RecalculatePerceivedPathCostUnderThing(t);
+            ___map.GetComponent<WaterMap>()?.getShipPathGrid?.RecalculatePerceivedPathCostUnderThing(t);
         }
 
         #endregion MapGen
@@ -752,40 +749,39 @@ namespace Vehicles
             {
                 CodeInstruction instruction = instructionList[i];
 
-                //if (!flag && instruction.opcode == OpCodes.Stloc_S && ((LocalBuilder)instruction.operand).LocalIndex == 6)
-                //{
-                //    yield return instruction;
-                //    instruction = instructionList[++i];
-                //    flag = true;
+                if (instruction.opcode == OpCodes.Stloc_2)
+                {
+                    yield return instruction; //stloc.2
+                    instruction = instructionList[++i];
 
-                //    ///Get pawns onboard boat and store inside list to render on colonist bar
-                //    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(typeof(ColonistBar), "tmpPawns"));
-                //    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(typeof(ColonistBar), "tmpMaps"));
-                //    yield return new CodeInstruction(opcode: OpCodes.Ldloc_1);
-                //    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.GetVehiclesForColonistBar)));
-                //    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(List<Pawn>), nameof(List<Pawn>.AddRange)));
-                //}
-                //if ((instruction.Calls(AccessTools.Method(typeof(List<Pawn>), nameof(List<Pawn>.AddRange)))) &&
-                //    (instructionList[i - 1].Calls(AccessTools.Property(typeof(Caravan), nameof(Caravan.PawnsListForReading)).GetGetMethod())))
-                //{
-                //    yield return instruction; //CALLVIRT : AddRange
-                //    instruction = instructionList[++i];
+                    ///get pawns onboard vehicle and store inside list to render on colonist bar
+                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(typeof(ColonistBar), "tmpPawns"));
+                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(typeof(ColonistBar), "tmpMaps"));
+                    yield return new CodeInstruction(opcode: OpCodes.Ldloc_1);
+                    yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Property(typeof(List<Map>), "Item").GetGetMethod());
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.GetVehiclesForColonistBar)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(List<Pawn>), nameof(List<Pawn>.AddRange)));
+                }
+                if(instruction.opcode == OpCodes.Stloc_S && ((LocalBuilder)instruction.operand).LocalIndex == 9)
+                {
+                    flag = true;
+                }    
+                if (flag && instruction.Calls(AccessTools.Method(typeof(PlayerPawnsDisplayOrderUtility), nameof(PlayerPawnsDisplayOrderUtility.Sort))))
+                {
+                    ///grab pawns from vehicle caravan and store inside list to be rendered on colonist bar
+                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(typeof(ColonistBar), "tmpCaravans"));
+                    yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, 9);
+                    yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Property(typeof(List<Caravan>), "Item").GetGetMethod());
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.ExtractPawnsFromCaravan)));
 
-                //    ///Grab pawns from Boat caravan and store inside list to be rendered on colonist bar
-                //    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(typeof(ColonistBar), "tmpPawns"));
-                //    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(typeof(ColonistBar), "tmpCaravans"));
-                //    yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, 10);
-                //    yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Property(typeof(List<Caravan>), "Item").GetGetMethod());
-                //    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.ExtractPawnsFromCaravan)));
-
-                //    yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Method(typeof(List<Pawn>), nameof(List<Pawn>.AddRange)));
-                //}
+                    yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Method(typeof(List<Pawn>), nameof(List<Pawn>.AddRange)));
+                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(typeof(ColonistBar), "tmpPawns"));
+                }
 
                 yield return instruction;
             }
         }
 
-        //WIP
         /// <summary>
         /// Render small boat icon on colonist bar picture rect if they are currently onboard a boat
         /// </summary>
@@ -793,22 +789,17 @@ namespace Vehicles
         /// <param name="colonist"></param>
         public static void DrawIconsVehicles(Rect rect, Pawn colonist)
         {
-            if(colonist.Dead)
+            if(colonist.Dead || !(colonist.ParentHolder is VehicleHandler handler))
             {
                 return;
             }
             float num = 20f * Find.ColonistBar.Scale;
             Vector2 vector = new Vector2(rect.x + 1f, rect.yMax - num - 1f);
 
-            List<Pawn> ships = Find.CurrentMap?.mapPawns?.AllPawnsSpawned?.FindAll(x => HelperMethods.IsVehicle(x));
-            Pawn p = ships?.Find(x => x.GetComp<CompVehicle>().AllPawnsAboard.Contains(colonist));
-            if(p != null)
-            {
-                Rect rect2 = new Rect(vector.x, vector.y, num, num);
-                GUI.DrawTexture(rect2, TexCommandVehicles.CachedTextureIcons[p.def]);
-                TooltipHandler.TipRegion(rect2, "ActivityIconOnBoardShip".Translate(p.Label)); //REDO
-                vector.x += num;
-            }
+            Rect rect2 = new Rect(vector.x, vector.y, num, num);
+            GUI.DrawTexture(rect2, TexCommandVehicles.CachedTextureIcons[handler.vehiclePawn.def]);
+            TooltipHandler.TipRegion(rect2, "ActivityIconOnBoardShip".Translate(handler.vehiclePawn.Label)); 
+            vector.x += num;
         }
 
         /// <summary>
@@ -934,44 +925,32 @@ namespace Vehicles
         /// <returns></returns>
         public static bool DraftedVehiclesCanMove(Pawn_DraftController __instance, bool value)
         {
-            if(HelperMethods.IsVehicle(__instance?.pawn))
+            if(__instance.pawn.IsVehicle())
             {
-                if(VehicleMod.mod.settings.debugDraftAnyShip)
-                    return true;
+                VehiclePawn vehicle = __instance.pawn as VehiclePawn;
+
                 if (VehicleMod.mod.settings.debugDisableWaterPathing && __instance.pawn.GetComp<CompVehicle>().beached)
-                    __instance.pawn.GetComp<CompVehicle>().RemoveBeachedStatus();
+                    vehicle.GetComp<CompVehicle>().RemoveBeachedStatus();
                 if (value && !__instance.Drafted)
                 {
-                    if(__instance.pawn.TryGetComp<CompFueledTravel>() != null && __instance.pawn.GetComp<CompFueledTravel>().EmptyTank)
+                    if(!VehicleMod.mod.settings.debugDraftAnyShip && vehicle.TryGetComp<CompFueledTravel>() != null && vehicle.GetComp<CompFueledTravel>().EmptyTank)
                     {
                         Messages.Message("CompShips_OutOfFuel".Translate(), MessageTypeDefOf.RejectInput);
                         return false;
                     }
-                    if(!__instance.pawn.GetComp<CompVehicle>().ResolveSeating())
+                    if(!VehicleMod.mod.settings.debugDraftAnyShip && !vehicle.GetComp<CompVehicle>().ResolveSeating())
                     {
                         Messages.Message("CompShips_CannotMove".Translate(), MessageTypeDefOf.RejectInput);
                         return false;
                     }
                 }
+                else if(!value && vehicle.vPather.curPath != null)
+                {
+                    vehicle.vPather.PatherFailed();
+                }
                 if(!VehicleMod.mod.settings.fishingPersists) __instance.pawn.GetComp<CompVehicle>().currentlyFishing = false;
             }
             return true;
-        }
-
-        /// <summary>
-        /// Terminate pathing if boat suddenly becomes undrafted
-        /// </summary>
-        /// <param name="__instance"></param>
-        /// <param name="__result"></param>
-        public static void UndraftedVehiclesStopPathing(Pawn_DraftController __instance, bool __result)
-        {
-            if(HelperMethods.IsVehicle(__instance?.pawn))
-            {
-                if(__result is false && (__instance.pawn as VehiclePawn).vPather.curPath != null)
-                {
-                    (__instance.pawn as VehiclePawn).vPather.PatherFailed();
-                }
-            }
         }
 
         /// <summary>
@@ -1884,7 +1863,7 @@ namespace Vehicles
             return true;
         }
 
-        public static IEnumerable<CodeInstruction> ShipsArrivedTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+        public static IEnumerable<CodeInstruction> VehiclesArrivedTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
         {
             List<CodeInstruction> instructionList = instructions.ToList();
 
@@ -1902,7 +1881,7 @@ namespace Vehicles
                     yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasBoat), new Type[] { typeof(Caravan) }));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityBoats), nameof(EnterMapUtilityBoats.Enter)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityVehicles), nameof(EnterMapUtilityVehicles.Enter)));
                     yield return new CodeInstruction(opcode: OpCodes.Br, brlabel);
 
                     instruction.labels.Add(label);
@@ -1933,7 +1912,7 @@ namespace Vehicles
                     yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasBoat), new Type[] { typeof(Caravan) }));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityBoats), nameof(EnterMapUtilityBoats.Enter)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityVehicles), nameof(EnterMapUtilityVehicles.Enter)));
                     yield return new CodeInstruction(opcode: OpCodes.Br, brlabel);
 
                     instruction.labels.Add(label);
@@ -1964,7 +1943,7 @@ namespace Vehicles
                     yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasBoat), new Type[] { typeof(Caravan) }));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityBoats), nameof(EnterMapUtilityBoats.Enter)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityVehicles), nameof(EnterMapUtilityVehicles.Enter)));
                     yield return new CodeInstruction(opcode: OpCodes.Br, brlabel);
 
                     instruction.labels.Add(label);
@@ -1995,7 +1974,7 @@ namespace Vehicles
                     yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasBoat), new Type[] { typeof(Caravan) }));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityBoats), nameof(EnterMapUtilityBoats.Enter)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityVehicles), nameof(EnterMapUtilityVehicles.Enter)));
                     yield return new CodeInstruction(opcode: OpCodes.Br, brlabel);
 
                     instruction.labels.Add(label);
@@ -2026,7 +2005,7 @@ namespace Vehicles
                     yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasBoat), new Type[] { typeof(Caravan) }));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityBoats), nameof(EnterMapUtilityBoats.Enter)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityVehicles), nameof(EnterMapUtilityVehicles.Enter)));
                     yield return new CodeInstruction(opcode: OpCodes.Br, brlabel);
 
                     instruction.labels.Add(label);
@@ -2042,9 +2021,31 @@ namespace Vehicles
         public static bool EnterMapShipsCatchAll1(Caravan caravan, Map map, CaravanEnterMode enterMode, CaravanDropInventoryMode dropInventoryMode = CaravanDropInventoryMode.DoNotDrop, 
             bool draftColonists = false, Predicate<IntVec3> extraCellValidator = null)
         {
-            if(HelperMethods.HasBoat(caravan))
+            if(caravan.HasVehicle())
             {
-                EnterMapUtilityBoats.Enter(caravan, map, enterMode, dropInventoryMode, draftColonists, extraCellValidator);
+                if(caravan.HasBoat())
+                {
+                    EnterMapUtilityVehicles.Enter(caravan, map, enterMode, dropInventoryMode, draftColonists, extraCellValidator);
+                }
+                else
+                {
+                    if (enterMode == CaravanEnterMode.None)
+	                {
+		                Log.Error(string.Concat(new object[]
+		                {
+			                "Caravan ",
+			                caravan,
+			                " tried to enter map ",
+			                map,
+			                " with enter mode ",
+			                enterMode
+		                }), false);
+		                enterMode = CaravanEnterMode.Edge;
+	                }
+	                IntVec3 enterCell = EnterMapUtilityVehicles.GetEnterCellVehicle(caravan, map, enterMode, extraCellValidator);
+	                Func<Pawn, IntVec3> spawnCellGetter = (Pawn p) => CellFinder.RandomSpawnCellForPawnNear(enterCell, map, 4);
+	                CaravanEnterMapUtility.Enter(caravan, map, spawnCellGetter, dropInventoryMode, draftColonists);
+                }
                 return false;
             }
             return true;
@@ -2054,7 +2055,7 @@ namespace Vehicles
         {
             if(HelperMethods.HasBoat(caravan))
             {
-                EnterMapUtilityBoats.EnterSpawn(caravan, map, spawnCellGetter, dropInventoryMode, draftColonists);
+                EnterMapUtilityVehicles.EnterSpawn(caravan, map, spawnCellGetter, dropInventoryMode, draftColonists);
                 return false;
             }
             return true;

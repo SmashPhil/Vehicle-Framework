@@ -100,7 +100,49 @@ namespace Vehicles
             }
         }
 
-        private static Queue<WaterRegionTraverser.BFSWorker> freeWorkers = new Queue<WaterRegionTraverser.BFSWorker>();
+        public static WaterRoom FloodAndSetRooms(WaterRegion root, Map map, WaterRoom existingRoom)
+        {
+	        WaterRoom floodingRoom;
+	        if (existingRoom == null)
+	        {
+		        floodingRoom = WaterRoom.MakeNew(map);
+	        }
+	        else
+	        {
+		        floodingRoom = existingRoom;
+	        }
+	        root.Room = floodingRoom;
+	        if (!root.type.AllowsMultipleRegionsPerRoom())
+	        {
+		        return floodingRoom;
+	        }
+	        WaterRegionEntryPredicate entryCondition = (WaterRegion from, WaterRegion r) => r.type == root.type && r.Room != floodingRoom;
+	        WaterRegionProcessor regionProcessor = delegate(WaterRegion r)
+	        {
+		        r.Room = floodingRoom;
+		        return false;
+	        };
+	        WaterRegionTraverser.BreadthFirstTraverse(root, entryCondition, regionProcessor, 999999, RegionType.Set_All);
+	        return floodingRoom;
+        }
+
+        public static void FloodAndSetNewRegionIndex(WaterRegion root, int newRegionGroupIndex)
+		{
+			root.newRegionGroupIndex = newRegionGroupIndex;
+			if (!root.type.AllowsMultipleRegionsPerRoom())
+			{
+				return;
+			}
+			WaterRegionEntryPredicate entryCondition = (WaterRegion from, WaterRegion r) => r.type == root.type && r.newRegionGroupIndex < 0;
+			WaterRegionProcessor regionProcessor = delegate(WaterRegion r)
+			{
+				r.newRegionGroupIndex = newRegionGroupIndex;
+				return false;
+			};
+			WaterRegionTraverser.BreadthFirstTraverse(root, entryCondition, regionProcessor, 999999, RegionType.Set_All);
+		}
+
+        private static Queue<BFSWorker> freeWorkers = new Queue<BFSWorker>();
 
         public static int NumWorkers = 8;
 

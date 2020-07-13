@@ -9,7 +9,7 @@ using Verse;
 
 namespace Vehicles
 {
-    public static class EnterMapUtilityBoats
+    public static class EnterMapUtilityVehicles
     {
         public static void Enter(Caravan caravan, Map map, CaravanEnterMode enterMode, CaravanDropInventoryMode dropInventoryMode = CaravanDropInventoryMode.DoNotDrop,
             bool draftColonists = true, Predicate<IntVec3> extraValidator = null)
@@ -29,7 +29,7 @@ namespace Vehicles
             }
             IntVec3 enterCell = GetWaterCell(caravan, map, CaravanEnterMode.Edge); //Caravan Enter Mode back to enterMode
             Func<Pawn, IntVec3> spawnCellGetter = (Pawn p) => p.ClampToMap(CellFinderExtended.RandomSpawnCellForPawnNear(enterCell, map, 4), map);
-            EnterMapUtilityBoats.EnterSpawn(caravan, map, spawnCellGetter, dropInventoryMode, draftColonists);
+            EnterMapUtilityVehicles.EnterSpawn(caravan, map, spawnCellGetter, dropInventoryMode, draftColonists);
         }
 
         public static void EnterSpawn(Caravan caravan, Map map, Func<Pawn, IntVec3> spawnCellGetter, CaravanDropInventoryMode caravanDropInventoryMode = CaravanDropInventoryMode.DoNotDrop, bool draftColonists = true)
@@ -132,9 +132,55 @@ namespace Vehicles
             return CellFinder.RandomCell(map);
         }
 
-        public static void DisembarkShips(List<Pawn> ships)
+        public static IntVec3 GetEnterCellVehicle(Caravan caravan, Map map, CaravanEnterMode enterMode, Predicate<IntVec3> extraCellValidator)
         {
-            //ASSIGN JOBS TO EACH SHIP HERE
+			if (enterMode == CaravanEnterMode.Edge)
+			{
+				return FindNearEdgeCell(map, caravan, extraCellValidator);
+			}
+			if (enterMode != CaravanEnterMode.Center)
+			{
+				throw new NotImplementedException("CaravanEnterMode");
+			}
+			return FindCenterCell(map, extraCellValidator);
         }
+
+        private static IntVec3 FindNearEdgeCell(Map map, Caravan caravan, Predicate<IntVec3> extraCellValidator)
+		{
+			Predicate<IntVec3> baseValidator = (IntVec3 x) => GenGrid.Standable(x, map) && !x.Fogged(map);
+			Faction hostFaction = map.ParentFaction;
+			IntVec3 root;
+			if (CellFinder.TryFindRandomEdgeCellWith((IntVec3 x) => baseValidator(x) && (extraCellValidator == null || extraCellValidator(x)) && ((hostFaction != null && map.reachability.CanReachFactionBase(x, hostFaction)) || (hostFaction == null && map.reachability.CanReachBiggestMapEdgeRoom(x))), map, CellFinder.EdgeRoadChance_Neutral, out root))
+			{
+				return CellFinder.RandomClosewalkCellNear(root, map, 5, null);
+			}
+			if (extraCellValidator != null && CellFinder.TryFindRandomEdgeCellWith((IntVec3 x) => baseValidator(x) && extraCellValidator(x), map, CellFinder.EdgeRoadChance_Neutral, out root))
+			{
+				return CellFinder.RandomClosewalkCellNear(root, map, 5, null);
+			}
+			if (CellFinder.TryFindRandomEdgeCellWith(baseValidator, map, CellFinder.EdgeRoadChance_Neutral, out root))
+			{
+				return CellFinder.RandomClosewalkCellNear(root, map, 5, null);
+			}
+			Log.Warning("Could not find any valid edge cell.", false);
+			return CellFinder.RandomCell(map);
+		}
+
+        private static IntVec3 FindCenterCell(Map map, Predicate<IntVec3> extraCellValidator)
+		{
+			TraverseParms traverseParms = TraverseParms.For(TraverseMode.NoPassClosedDoors, Danger.Deadly, false);
+			Predicate<IntVec3> baseValidator = (IntVec3 x) => GenGrid.Standable(x, map) && !x.Fogged(map) && map.reachability.CanReachMapEdge(x, traverseParms);
+			IntVec3 result;
+			if (extraCellValidator != null && RCellFinder.TryFindRandomCellNearTheCenterOfTheMapWith((IntVec3 x) => baseValidator(x) && extraCellValidator(x), map, out result))
+			{
+				return result;
+			}
+			if (RCellFinder.TryFindRandomCellNearTheCenterOfTheMapWith(baseValidator, map, out result))
+			{
+				return result;
+			}
+			Log.Warning("Could not find any valid cell.", false);
+			return CellFinder.RandomCell(map);
+		}
     }
 }

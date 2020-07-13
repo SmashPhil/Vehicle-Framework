@@ -26,6 +26,9 @@ namespace Vehicles.AI
 
         public WaterRegionAndRoomUpdater getWaterRegionAndRoomUpdater { get; private set; }
 
+        public WaterRegionDirtyer getWaterRegionDirtyer { get; private set; }
+
+
         public override void FinalizeInit()
         {
             getShipPathGrid.RecalculateAllPerceivedPathCosts();
@@ -43,6 +46,7 @@ namespace Vehicles.AI
             getWaterRegionmaker = new WaterRegionMaker(map);
             getWaterRegionAndRoomUpdater = new WaterRegionAndRoomUpdater(map);
             getWaterRegionLinkDatabase = new WaterRegionLinkDatabase();
+            getWaterRegionDirtyer = new WaterRegionDirtyer(map);
         }
     }
 }

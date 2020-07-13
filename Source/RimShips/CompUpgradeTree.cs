@@ -190,8 +190,8 @@ namespace Vehicles
                     Log.Error(string.Format("Duplicate UpgradeID's detected on def {0}. This is not supported.", parent.def.defName));
                     if(Prefs.DevMode)
                     {
-                        Log.Message("====== Duplicate UpgradeID's for this Boat ======");
-                        foreach(UpgradeNode errorNode in upgradeList.GroupBy(grp => grp).SelectMany(n => n.Skip(1)))
+                        Log.Message("====== Duplicate UpgradeID's for this Vehicle ======");
+                        foreach(UpgradeNode errorNode in upgradeList.GroupBy(grp => grp).Where(g => g.Count() > 1))
                         {
                             Log.Message($"UpgradeID: {errorNode.upgradeID} UniqueID: {errorNode.GetUniqueLoadID()} Location: {errorNode.gridCoordinate}");
                         }

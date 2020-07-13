@@ -287,7 +287,8 @@ namespace Vehicles.UI
                     try
                     {
                         Texture2D tex = ContentFinder<Texture2D>.Get(SelPawnUpgrade.kindDef.lifeStages.FirstOrDefault().bodyGraphicData.texPath + "_north", true);
-                        GUI.DrawTexture(displayRect, tex);
+                        Material mat = SelPawnUpgrade.Graphic.MatAt(Rot4.North);
+                        GenUI.DrawTextureWithMaterial(displayRect, tex, mat);
 
                         if(VehicleMod.mod.settings.debugDrawCannonGrid)
                         {

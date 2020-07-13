@@ -190,7 +190,7 @@
     <Compile Include="DockedBoat.cs" />
     <Compile Include="DutyDefOf_Ships.cs" />
     <Compile Include="EffectsDefOf_Ships.cs" />
-    <Compile Include="EnterMapUtilityBoats.cs" />
+    <Compile Include="EnterMapUtilityVehicles.cs" />
     <Compile Include="FishingCompatibility.cs" />
     <Compile Include="FleshTypeDefOf_Ships.cs" />
     <Compile Include="FloatMenuMulti.cs" />
@@ -267,6 +267,7 @@
     <Compile Include="WaterRegion.cs" />
     <Compile Include="WaterRegionAndRoomQuery.cs" />
     <Compile Include="WaterRegionAndRoomUpdater.cs" />
+    <Compile Include="WaterRegionDirtyer.cs" />
     <Compile Include="WaterRegionGrid.cs" />
     <Compile Include="WaterRegionLink.cs" />
     <Compile Include="WaterRegionLinkDatabase.cs" />

@@ -74,7 +74,7 @@ namespace Vehicles.AI
             if (WalkableFast(c) != flag)
             {
                 WaterMapUtility.GetExtensionToMap(map).getShipReachability.ClearCache();
-                AccessTools.Method(type: typeof(RegionDirtyer), name: "Notify_WalkabilityChanged").Invoke(this.map.regionDirtyer, new object[] { c });
+                map.GetComponent<WaterMap>().getWaterRegionDirtyer.Notify_WalkabilityChanged(c);
             }
         }
 

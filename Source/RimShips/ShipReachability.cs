@@ -36,19 +36,19 @@ namespace Vehicles.AI
                 Log.ErrorOnce("Tried to queue null region (Vehicles).", 881121, false);
                 return;
             }
-            if(region.reachedIndex == this.reachedIndex)
+            if(region.reachedIndex == reachedIndex)
             {
                 Log.ErrorOnce("WaterRegion is already reached; you can't open it. WaterRegion: " + region.ToString(), 719991, false);
                 return;
             }
-            this.openQueue.Enqueue(region);
-            region.reachedIndex = this.reachedIndex;
-            this.numRegionsOpened++;
+            openQueue.Enqueue(region);
+            region.reachedIndex = reachedIndex;
+            numRegionsOpened++;
         }
 
         private void FinalizeCheck()
         {
-            this.working = false;
+            working = false;
         }
 
         public bool CanReachShipNonLocal(IntVec3 start, TargetInfo dest, PathEndMode peMode, TraverseMode traverseMode, Danger maxDanger)
@@ -68,6 +68,7 @@ namespace Vehicles.AI
 
         public bool CanReachShip(IntVec3 start, LocalTargetInfo dest, PathEndMode peMode, TraverseParms traverseParms)
         {
+            Log.Message($"Working: {working}");
             if(working)
             {
                 Log.ErrorOnce("Called CanReach() while working for Ships. This should never happen. Suppressing further errors.", 7312233, false);
@@ -90,7 +91,7 @@ namespace Vehicles.AI
                         "Called CanReach() with a ship spawned not on this map. This means that we can't check its reachability here. Pawn's" +
                         "current map should have been used instead of this one. pawn=", traverseParms.pawn,
                         " pawn.Map=", traverseParms.pawn.Map,
-                        " map=", this.map
+                        " map=", map
                     }), false);
                     return false;
                 }
@@ -111,14 +112,14 @@ namespace Vehicles.AI
                 traverseParms.mode != TraverseMode.PassAllDestroyableThingsNotWater)
             {
                 WaterRoom room = WaterRegionAndRoomQuery.RoomAtFast(start, map, RegionType.Set_Passable);
-                if (!(room is null) && room == WaterRegionAndRoomQuery.RoomAtFast(dest.Cell, this.map, RegionType.Set_Passable))
+                if (!(room is null) && room == WaterRegionAndRoomQuery.RoomAtFast(dest.Cell, map, RegionType.Set_Passable))
                     return true;
             }
             if(traverseParms.mode == TraverseMode.PassAllDestroyableThings)
             {
                 TraverseParms traverseParms2 = traverseParms;
                 traverseParms.mode = TraverseMode.PassDoors;
-                if(this.CanReachShip(start, dest, peMode, traverseParms2))
+                if(CanReachShip(start, dest, peMode, traverseParms2))
                 {
                     return true;
                 }
@@ -134,62 +135,62 @@ namespace Vehicles.AI
                 destRegions.Clear();
                 if(peMode == PathEndMode.OnCell)
                 {
-                    WaterRegion region = WaterGridsUtility.GetRegion(dest.Cell, this.map, RegionType.Set_Passable);
+                    WaterRegion region = WaterGridsUtility.GetRegion(dest.Cell, map, RegionType.Set_Passable);
                     if(!(region is null) && region.Allows(traverseParms, true))
                     {
-                        this.destRegions.Add(region);
+                        destRegions.Add(region);
                     }
                 }
                 else if(peMode == PathEndMode.Touch)
                 {
-                    TouchPathEndModeUtilityShips.AddAllowedAdjacentRegions(dest, traverseParms, this.map, this.destRegions);
+                    TouchPathEndModeUtilityShips.AddAllowedAdjacentRegions(dest, traverseParms, map, destRegions);
                 }
-                if(this.destRegions.Count == 0 && traverseParms.mode != TraverseMode.PassAllDestroyableThings && traverseParms.mode !=
+                if(destRegions.Count == 0 && traverseParms.mode != TraverseMode.PassAllDestroyableThings && traverseParms.mode !=
                     TraverseMode.PassAllDestroyableThingsNotWater)
                 {
-                    this.FinalizeCheck();
+                    FinalizeCheck();
                     result = false;
                 }
                 else
                 {
-                    this.destRegions.RemoveDuplicates<WaterRegion>();
-                    this.openQueue.Clear();
-                    this.numRegionsOpened = 0;
-                    this.DetermineStartRegions(start);
-                    if(this.openQueue.Count == 0 && traverseParms.mode != TraverseMode.PassAllDestroyableThings && traverseParms.mode !=
+                    destRegions.RemoveDuplicates();
+                    openQueue.Clear();
+                    numRegionsOpened = 0;
+                    DetermineStartRegions(start);
+                    if(openQueue.Count == 0 && traverseParms.mode != TraverseMode.PassAllDestroyableThings && traverseParms.mode !=
                         TraverseMode.PassAllDestroyableThingsNotWater)
                     {
-                        this.FinalizeCheck();
+                        FinalizeCheck();
                         result = false;
                     }
                     else
                     {
-                        if (this.startingRegions.Any<WaterRegion>() && this.destRegions.Any<WaterRegion>() && this.CanUseCache(traverseParms.mode))
+                        if (startingRegions.Any() && destRegions.Any() && CanUseCache(traverseParms.mode))
                         {
-                            BoolUnknown cachedResult = this.GetCachedResult(traverseParms);
+                            BoolUnknown cachedResult = GetCachedResult(traverseParms);
                             if (cachedResult == BoolUnknown.True)
                             {
-                                this.FinalizeCheck();
+                                FinalizeCheck();
                                 return true;
                             }
                             if (cachedResult == BoolUnknown.False)
                             {
-                                this.FinalizeCheck();
+                                FinalizeCheck();
                                 return false;
                             }
                         }
                         if (traverseParms.mode == TraverseMode.PassAllDestroyableThings || traverseParms.mode == TraverseMode.PassAllDestroyableThingsNotWater || 
                             traverseParms.mode == TraverseMode.NoPassClosedDoorsOrWater)
                         {
-                            bool flag = this.CheckCellBasedReachability(start, dest, peMode, traverseParms);
-                            this.FinalizeCheck();
+                            bool flag = CheckCellBasedReachability(start, dest, peMode, traverseParms);
+                            FinalizeCheck();
                             result = flag;
                         }
                         else
                         {
-                            //bool flag2 = this.CheckRegionBasedReachability(traverseParms);
-                            bool flag2 = this.CheckCellBasedReachability(start, dest, peMode, traverseParms); //Change back to region based later
-                            this.FinalizeCheck();
+                            bool flag2 = CheckRegionBasedReachability(traverseParms);
+                            //bool flag2 = CheckCellBasedReachability(start, dest, peMode, traverseParms); //REDO?
+                            FinalizeCheck();
                             result = flag2;
                         }
                     }
@@ -197,34 +198,34 @@ namespace Vehicles.AI
             }
             finally
             {
-                this.working = false;
+                working = false;
             }
             return result;
         }
 
         private void DetermineStartRegions(IntVec3 start)
         {
-            this.startingRegions.Clear();
-            if(this.pathGrid.WalkableFast(start))
+            startingRegions.Clear();
+            if(pathGrid.WalkableFast(start))
             {
-                WaterRegion validRegionAt = this.regionGrid.GetValidRegionAt(start);
-                this.QueueNewOpenRegion(validRegionAt);
-                this.startingRegions.Add(validRegionAt);
+                WaterRegion validRegionAt = regionGrid.GetValidRegionAt(start);
+                QueueNewOpenRegion(validRegionAt);
+                startingRegions.Add(validRegionAt);
             }
             else
             {
                 for(int i = 0; i < 8; i++)
                 {
                     IntVec3 c = start + GenAdj.AdjacentCells[i];
-                    if(c.InBoundsShip(this.map))
+                    if(c.InBoundsShip(map))
                     {
-                        if(this.pathGrid.WalkableFast(c))
+                        if(pathGrid.WalkableFast(c))
                         {
-                            WaterRegion validRegionAt2 = this.regionGrid.GetValidRegionAt(c);
-                            if(!(validRegionAt2 is null) && validRegionAt2.reachedIndex != this.reachedIndex)
+                            WaterRegion validRegionAt2 = regionGrid.GetValidRegionAt(c);
+                            if(!(validRegionAt2 is null) && validRegionAt2.reachedIndex != reachedIndex)
                             {
-                                this.QueueNewOpenRegion(validRegionAt2);
-                                this.startingRegions.Add(validRegionAt2);
+                                QueueNewOpenRegion(validRegionAt2);
+                                startingRegions.Add(validRegionAt2);
                             }
                         }
                     }
@@ -263,37 +264,37 @@ namespace Vehicles.AI
 
         private bool CheckRegionBasedReachability(TraverseParms traverseParms)
         {
-            while(this.openQueue.Count > 0)
+            while(openQueue.Count > 0)
             {
-                WaterRegion region = this.openQueue.Dequeue();
+                WaterRegion region = openQueue.Dequeue();
                 foreach(WaterRegionLink regionLink in region.links)
                 {
                     for(int i = 0; i < 2; i++)
                     {
                         WaterRegion region2 = regionLink.regions[i];
-                        if(!(region2 is null) && region2.reachedIndex != this.reachedIndex && region2.type.Passable())
+                        if(!(region2 is null) && region2.reachedIndex != reachedIndex && region2.type.Passable())
                         {
                             if(region2.Allows(traverseParms, false))
                             {
-                                if(this.destRegions.Contains(region2))
+                                if(destRegions.Contains(region2))
                                 {
-                                    foreach(WaterRegion startRegion in this.startingRegions)
+                                    foreach(WaterRegion startRegion in startingRegions)
                                     {
-                                        this.cache.AddCachedResult(startRegion.Room, region2.Room, traverseParms, true);
+                                        cache.AddCachedResult(startRegion.Room, region2.Room, traverseParms, true);
                                     }
                                     return true;
                                 }
-                                this.QueueNewOpenRegion(region2);
+                                QueueNewOpenRegion(region2);
                             }
                         }
                     }
                 }
             }
-            foreach(WaterRegion startRegion in this.startingRegions)
+            foreach(WaterRegion startRegion in startingRegions)
             {
-                foreach(WaterRegion destRegion in this.destRegions)
+                foreach(WaterRegion destRegion in destRegions)
                 {
-                    this.cache.AddCachedResult(startRegion.Room, destRegion.Room, traverseParms, false);
+                    cache.AddCachedResult(startRegion.Room, destRegion.Room, traverseParms, false);
                 }
             }
             return false;
@@ -304,12 +305,12 @@ namespace Vehicles.AI
             IntVec3 foundCell = IntVec3.Invalid;
             WaterRegion[] directionRegionGrid = this.regionGrid.DirectGrid;
             ShipPathGrid pathGrid = map.GetComponent<WaterMap>().getShipPathGrid;
-            CellIndices cellIndices = this.map.cellIndices;
-            this.map.floodFiller.FloodFill(start, delegate (IntVec3 c)
+            CellIndices cellIndices = map.cellIndices;
+            map.floodFiller.FloodFill(start, delegate (IntVec3 c)
             {
                 int num = cellIndices.CellToIndex(c);
                 if ((traverseParms.mode == TraverseMode.PassAllDestroyableThingsNotWater || traverseParms.mode == TraverseMode.NoPassClosedDoorsOrWater) &&
-                c.GetTerrain(this.map).IsWater)
+                c.GetTerrain(map).IsWater)
                 {
                     return false;
                 }
@@ -317,7 +318,7 @@ namespace Vehicles.AI
                 {
                     if (!pathGrid.WalkableFast(num))
                     {
-                        Building edifice = c.GetEdifice(this.map);
+                        Building edifice = c.GetEdifice(map);
                         if (edifice is null || !VehiclePathFinder.IsDestroyable(edifice))
                         {
                             return false;
@@ -326,7 +327,7 @@ namespace Vehicles.AI
                 }
                 else if (traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater)
                 {
-                    //Log.ErrorOnce("Do not use this method for non-cell based modes!", 938476762, false);
+                    Log.ErrorOnce("Do not use this method for non-cell based modes!", 938476762, false);
                     if (!pathGrid.WalkableFast(num))
                     {
                         return false;

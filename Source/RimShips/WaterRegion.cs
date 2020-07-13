@@ -87,17 +87,17 @@ namespace Vehicles
         {
             get
             {
-                return this.roomInt;
+                return roomInt;
             }
             set
             {
-                if (value == this.roomInt)
+                if (value == roomInt)
                     return;
-                if(!(this.roomInt is null))
-                    this.roomInt.RemoveRegion(this);
-                this.roomInt = value;
-                if (!(this.roomInt is null))
-                    this.roomInt.AddRegion(this);
+                if(!(roomInt is null))
+                    roomInt.RemoveRegion(this);
+                roomInt = value;
+                if (!(roomInt is null))
+                    roomInt.AddRegion(this);
             }
         }
 
@@ -493,7 +493,7 @@ namespace Vehicles
 
         public uint reachedIndex;
 
-        public int newRegionGroupInt = -1;
+        public int newRegionGroupIndex = -1;
 
         private Dictionary<Area, AreaOverlap> cachedAreaOverlaps;
 

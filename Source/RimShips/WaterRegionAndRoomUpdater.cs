@@ -18,7 +18,7 @@ namespace Vehicles
         {
             get
             {
-                return this.enabledInt;
+                return enabledInt;
             }
             set
             {
@@ -26,85 +26,209 @@ namespace Vehicles
             }
         }
 
-        public bool AnythingToRebuild => !this.initialized;
+        public bool AnythingToRebuild => !initialized;
 
         public void RebuildAllWaterRegions()
         {
-            if (!this.Enabled)
+            if (!Enabled)
                 Log.Warning("Called RebuildAllRegions but WaterRegionAndRoomUpdater is disabled. Regions won't be rebuilt.", false);
-
-            AccessTools.Method(type: typeof(RegionDirtyer), name: "SetAllDirty").Invoke(this.map.regionDirtyer, null);
-            this.TryRebuildWaterRegions();
+            map.GetComponent<WaterMap>().getWaterRegionDirtyer.SetAllDirty();
+            TryRebuildWaterRegions();
         }
 
         public void TryRebuildWaterRegions()
         {
-            if (this.working || !this.Enabled)
+            Log.Message($"Building water regions: {working} | {Enabled}");
+            if (working || !Enabled)
                 return;
-            this.working = true;
-            if (!this.initialized)
-                this.RebuildAllWaterRegions();
-            if(!this.map.regionDirtyer.AnyDirty)
+            working = true;
+            if (!initialized)
+                RebuildAllWaterRegions();
+            if(!map.GetComponent<WaterMap>().getWaterRegionDirtyer.AnyDirty)
             {
-                this.working = false;
+                working = false;
                 return;
             }
             try
             {
-                this.RegenerateNewWaterRegions();
-                this.CreateOrUpdateWaterRooms();
+                RegenerateNewWaterRegions();
+                CreateOrUpdateWaterRooms();
             }
             catch(Exception exc)
             {
                 Log.Error("Exception while rebuilding water regions: " + exc, false);
             }
-            this.newRegions.Clear();
-            this.initialized = true;
-            this.working = false;
+            newRegions.Clear();
+            map.GetComponent<WaterMap>().getWaterRegionDirtyer.SetAllClean();
+            initialized = true;
+            working = false;
         }
 
         private void RegenerateNewWaterRegions()
         {
-            this.newRegions.Clear();
-            List<IntVec3> cells = this.map.regionDirtyer.DirtyCells;
+            newRegions.Clear();
+            List<IntVec3> cells = map.GetComponent<WaterMap>().getWaterRegionDirtyer.DirtyCells;
+
             foreach(IntVec3 c  in cells)
             {
-                if(WaterGridsUtility.GetRegion(c, this.map, RegionType.Set_All) is null)
+                if(WaterGridsUtility.GetRegion(c, map, RegionType.Set_All) is null)
                 {
-                    WaterRegion region = WaterMapUtility.GetExtensionToMap(map).getWaterRegionmaker.TryGenerateRegionFrom(c);
+                    WaterRegion region = map.GetComponent<WaterMap>().getWaterRegionmaker.TryGenerateRegionFrom(c);
                     
                     if (!(region is null))
-                        this.newRegions.Add(region);
+                        newRegions.Add(region);
                 }
             }
         }
 
         private void CreateOrUpdateWaterRooms()
         {
-            this.newRooms.Clear();
-            this.reusedOldRooms.Clear();
-            /*int numRegionGroups = this.CombineNewRegionsIntoContiguousGroups();
-            this.CreateOrAttackToExistingRooms(numRegionGroups);
-            int numRoomGroups = this.CombineNewAndReusedRoomsIntoContiguousGroups();*/
-
-            this.newRooms.Clear();
-            this.reusedOldRooms.Clear();
+            newRooms.Clear();
+			reusedOldRooms.Clear();
+			//newRoomGroups.Clear();
+			//reusedOldRoomGroups.Clear();
+			int numRegionGroups = CombineNewRegionsIntoContiguousGroups();
+			CreateOrAttachToExistingRooms(numRegionGroups);
+			int numRoomGroups = CombineNewAndReusedRoomsIntoContiguousGroups();
+			//CreateOrAttachToExistingRoomGroups(numRoomGroups);
+			//NotifyAffectedRoomsAndRoomGroupsAndUpdateTemperature();
+			newRooms.Clear();
+			reusedOldRooms.Clear();
+			//newRoomGroups.Clear();
+			//reusedOldRoomGroups.Clear();
         }
 
-/*        private int CombineNewRegionsIntoContiguousGroups()
-        {
-            int num = 0;
-            foreach(WaterRegion region in this.newRegions)
-            {
-                if(region.newRegionGroupIndex < 0)
-                {
-                    WaterRegionTraverser.FloodAndSetNewRegionIndex(region, num);
-                    num++;
-                }
-            }
-            return num;
-        }
-*/
+        private int CombineNewAndReusedRoomsIntoContiguousGroups()
+		{
+			int num = 0;
+			foreach (WaterRoom room in reusedOldRooms)
+			{
+				room.newOrReusedRoomGroupIndex = -1;
+			}
+			foreach (WaterRoom room2 in reusedOldRooms.Concat(newRooms))
+			{
+				if (room2.newOrReusedRoomGroupIndex < 0)
+				{
+					tmpRoomStack.Clear();
+					tmpRoomStack.Push(room2);
+					room2.newOrReusedRoomGroupIndex = num;
+					while (tmpRoomStack.Count != 0)
+					{
+						WaterRoom room3 = tmpRoomStack.Pop();
+						foreach (WaterRoom room4 in room3.Neighbors)
+						{
+							if (room4.newOrReusedRoomGroupIndex < 0 && ShouldBeInTheSameRoomGroup(room3, room4))
+							{
+								room4.newOrReusedRoomGroupIndex = num;
+								tmpRoomStack.Push(room4);
+							}
+						}
+					}
+					tmpRoomStack.Clear();
+					num++;
+				}
+			}
+			return num;
+		}
+
+		private bool ShouldBeInTheSameRoomGroup(WaterRoom a, WaterRoom b)
+		{
+			RegionType regionType = a.RegionType;
+			RegionType regionType2 = b.RegionType;
+			return (regionType == RegionType.Normal || regionType == RegionType.ImpassableFreeAirExchange) && (regionType2 == RegionType.Normal || regionType2 == RegionType.ImpassableFreeAirExchange);
+		}
+
+        private void CreateOrAttachToExistingRooms(int numRegionGroups)
+		{
+			for (int i = 0; i < numRegionGroups; i++)
+			{
+				currentRegionGroup.Clear();
+				for (int j = 0; j < newRegions.Count; j++)
+				{
+					if (newRegions[j].newRegionGroupIndex == i)
+					{
+						currentRegionGroup.Add(newRegions[j]);
+					}
+				}
+				if (!currentRegionGroup[0].type.AllowsMultipleRegionsPerRoom())
+				{
+					if (this.currentRegionGroup.Count != 1)
+					{
+						Log.Error("Region type doesn't allow multiple regions per room but there are >1 regions in this group.", false);
+					}
+					WaterRoom room = WaterRoom.MakeNew(map);
+					currentRegionGroup[0].Room = room;
+					newRooms.Add(room);
+				}
+				else
+				{
+					bool flag;
+					WaterRoom room2 = FindCurrentRegionGroupNeighborWithMostRegions(out flag);
+					if (room2 == null)
+					{
+						WaterRoom item = WaterRegionTraverser.FloodAndSetRooms(currentRegionGroup[0], map, null);
+						newRooms.Add(item);
+					}
+					else if (!flag)
+					{
+						for (int k = 0; k < currentRegionGroup.Count; k++)
+						{
+							currentRegionGroup[k].Room = room2;
+						}
+						reusedOldRooms.Add(room2);
+					}
+					else
+					{
+						WaterRegionTraverser.FloodAndSetRooms(currentRegionGroup[0], map, room2);
+						reusedOldRooms.Add(room2);
+					}
+				}
+			}
+		}
+
+        private int CombineNewRegionsIntoContiguousGroups()
+		{
+			int num = 0;
+			for (int i = 0; i < this.newRegions.Count; i++)
+			{
+				if (this.newRegions[i].newRegionGroupIndex < 0)
+				{
+					WaterRegionTraverser.FloodAndSetNewRegionIndex(newRegions[i], num);
+					num++;
+				}
+			}
+			return num;
+		}
+
+        private WaterRoom FindCurrentRegionGroupNeighborWithMostRegions(out bool multipleOldNeighborRooms)
+		{
+			multipleOldNeighborRooms = false;
+			WaterRoom room = null;
+			for (int i = 0; i < currentRegionGroup.Count; i++)
+			{
+				foreach (WaterRegion region in currentRegionGroup[i].NeighborsOfSameType)
+				{
+					if (region.Room != null && !reusedOldRooms.Contains(region.Room))
+					{
+						if (room == null)
+						{
+							room = region.Room;
+						}
+						else if (region.Room != room)
+						{
+							multipleOldNeighborRooms = true;
+							if (region.Room.RegionCount > room.RegionCount)
+							{
+								room = region.Room;
+							}
+						}
+					}
+				}
+			}
+			return room;
+		}
+
+
 
 
         private Map map;
@@ -114,6 +238,8 @@ namespace Vehicles
         private List<WaterRoom> newRooms = new List<WaterRoom>();
 
         private HashSet<WaterRoom> reusedOldRooms = new HashSet<WaterRoom>();
+
+        private List<WaterRegion> currentRegionGroup = new List<WaterRegion>();
 
         private List<WaterRoom> currentRoomGroup = new List<WaterRoom>();
 

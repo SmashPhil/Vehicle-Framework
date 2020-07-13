@@ -21,7 +21,7 @@ namespace Vehicles
 
         public static bool BoatsNotFlesh(ref bool __result, RaceProperties __instance)
         {
-            if (__instance.FleshType == FleshTypeDefOf_Ships.WoodenVehicle || __instance.FleshType == FleshTypeDefOf_Ships.MetalVehicle || __instance.FleshType == FleshTypeDefOf_Ships.SpacerVehicle)
+            if (__instance.FleshType == FleshTypeDefOf_Ships.MetalVehicle || __instance.FleshType == FleshTypeDefOf_Ships.SpacerVehicle || __instance.FleshType == FleshTypeDefOf_Ships.WoodenVehicle)
             {
                 __result = false;
                 return false;
