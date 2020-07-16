@@ -24,7 +24,6 @@ namespace Vehicles
         public bool draftStatusChanged = false;
         public bool beached = false;
         public bool showAllItemsOnMap = false;
-        private float angle = 0f; /* -45 is left, 45 is right : relative to Rot4 direction*/
         private float bearingAngle;
         private int turnSign;
         public float turnSpeed;
@@ -1140,8 +1139,6 @@ namespace Vehicles
             Scribe_Values.Look(ref turnSign, "turnSign");
             Scribe_Values.Look(ref turnSpeed, "turnSpeed");
             Scribe_Values.Look(ref showAllItemsOnMap, "showAllItemsOnMap");
-
-            Scribe_Values.Look(ref angle, "angle");
 
             Scribe_Collections.Look(ref currentTravelCells, "currentTravelCells");
             Scribe_Collections.Look(ref cargoToLoad, "cargoToLoad");

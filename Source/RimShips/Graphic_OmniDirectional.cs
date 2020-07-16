@@ -125,7 +125,7 @@ namespace Vehicles
             if (thing is null || thing as Pawn is null || !HelperMethods.IsVehicle(thing as VehiclePawn))
                 return base.MatAt(rot, thing);
 
-            float angle = (thing as VehiclePawn).GetComp<CompVehicle>().Angle;
+            float angle = (thing as VehiclePawn).Angle;
 	        switch (rot.AsInt)
 	        {
 	            case 0:

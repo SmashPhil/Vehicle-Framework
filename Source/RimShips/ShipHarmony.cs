@@ -69,13 +69,6 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Method(typeof(Pawn_RotationTracker), nameof(Pawn_RotationTracker.UpdateRotation)),
                 prefix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(UpdateVehicleRotation)));
-            //harmony.Patch(original: AccessTools.Method(typeof(PawnRenderer), "RenderPawnInternal", new Type[] { typeof(Vector3), typeof(float), typeof(bool), typeof(Rot4), typeof(Rot4),
-            //        typeof(RotDrawMode), typeof(bool), typeof(bool), typeof(bool)}), prefix: null, postfix: null,
-            //    transpiler: new HarmonyMethod(typeof(ShipHarmony),
-            //    nameof(RenderPawnRotationTranspiler)));
-            harmony.Patch(original: AccessTools.Method(typeof(PawnGraphicSet), nameof(PawnGraphicSet.MatsBodyBaseAt)), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(typeof(ShipHarmony),
-                nameof(MatsBodyOfVehicles)));
             harmony.Patch(original: AccessTools.Method(typeof(ColonistBar), "CheckRecacheEntries"), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(CheckRecacheEntriesTranspiler)));
@@ -99,9 +92,6 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Method(typeof(Targeter), nameof(Targeter.TargeterUpdate)), prefix: null,
                 postfix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(CannonTargeterUpdate)));
-            harmony.Patch(original: AccessTools.Method(typeof(PawnGraphicSet), nameof(PawnGraphicSet.MatsBodyBaseAt)),
-                prefix: new HarmonyMethod(typeof(ShipHarmony),
-                nameof(RegisterDiagonalMovement)));
             harmony.Patch(original: AccessTools.Method(typeof(Pawn_DrawTracker), nameof(Pawn_DrawTracker.Notify_DamageApplied)),
                 prefix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(VehiclesDamageTakenWiggler)));
@@ -196,9 +186,6 @@ namespace Vehicles
                 nameof(VehiclesDontParty)));
 
             /* Forming Caravan */
-            //CaravanFormingUtility.GetFormAndSendCaravanLord
-            //CaravanFormingUtility.FormAndCreateCaravan
-            //CaravanFormingUtility.RemovePawnFromCaravan
             harmony.Patch(original: AccessTools.Method(typeof(CaravanFormingUtility), nameof(CaravanFormingUtility.IsFormingCaravan)),
                 prefix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(IsFormingCaravanVehicle)));
@@ -363,10 +350,6 @@ namespace Vehicles
                     nameof(DebugDrawWaterRegion)));
             }
 
-            harmony.Patch(original: AccessTools.Method(typeof(Need_Food), nameof(Need_Food.NeedInterval)), prefix: null,
-                postfix: new HarmonyMethod(typeof(ShipHarmony),
-                nameof(TestDebug)));
-
             HelperMethods.CannonTargeter = new CannonTargeter();
 
             HelperMethods.missingIcon = ContentFinder<Texture2D>.Get("Upgrades/missingIcon", true);
@@ -376,13 +359,6 @@ namespace Vehicles
             #endregion Functions
         }
 
-        public static void TestDebug(Pawn ___pawn, Need_Food __instance)
-        {
-            if(___pawn.ParentHolder != null && ___pawn.ParentHolder is VehicleHandler)
-            {
-                //Log.Message($"Frozen: {___pawn.LabelShort} - { !(___pawn.SpawnedOrAnyParentSpawned || ___pawn.IsCaravanMember() || PawnUtility.IsTravelingInTransportPodWorldObject(___pawn))}");
-            }
-        }
 
         #region Debug
 
@@ -651,8 +627,9 @@ namespace Vehicles
         /// <returns></returns>
         public static bool UpdateVehicleRotation(Pawn_RotationTracker __instance, Pawn ___pawn)
         {
-            if (___pawn is VehiclePawn pawn && HelperMethods.IsVehicle(pawn))
+            if (HelperMethods.IsVehicle(___pawn))
             {
+                VehiclePawn pawn = ___pawn as VehiclePawn;
                 if (pawn.Destroyed || pawn.jobs.HandlingFacing)
                 {
                     return false;
@@ -663,7 +640,7 @@ namespace Vehicles
                     {
                         return false;
                     }
-                    HelperMethods.FaceShipAdjacentCell(pawn.vPather.nextCell, pawn);
+                    pawn.UpdateRotationAndAngle();
                 }
                 else
                 {
@@ -712,32 +689,6 @@ namespace Vehicles
             yield return new CodeInstruction(opcode: OpCodes.Nop) { labels = new List<Label> { label } };
             foreach (CodeInstruction instruction in instructionList)
             {
-                yield return instruction;
-            }
-        }
-
-        public static IEnumerable<CodeInstruction> MatsBodyOfVehicles(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
-        {
-            List<CodeInstruction> instructionList = instructions.ToList();
-
-            for(int i = 0; i < instructionList.Count; i++)
-            {
-                CodeInstruction instruction = instructionList[i];
-
-                if(instruction.Calls(AccessTools.Method(typeof(Graphic), nameof(Graphic.MatAt))))
-                {
-                    Label brlabel = ilg.DefineLabel();
-                    yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(typeof(PawnGraphicSet), "pawn"));
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.IsVehicle), new Type[] { typeof(Pawn) }));
-                    yield return new CodeInstruction(opcode: OpCodes.Brfalse, brlabel);
-
-                    yield return new CodeInstruction(opcode: OpCodes.Pop);
-                    yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(typeof(PawnGraphicSet), "pawn"));
-
-                    instruction.labels.Add(brlabel);
-                }
                 yield return instruction;
             }
         }
@@ -819,7 +770,7 @@ namespace Vehicles
             {
                 Thing thing = obj as Thing;
                 Vector3[] brackets = new Vector3[4];
-                float angle = (thing as VehiclePawn).GetComp<CompVehicle>().Angle; //(thing as VehiclePawn).GetComp<CompVehicle>().BearingAngle;
+                float angle = (thing as VehiclePawn).Angle; //(thing as VehiclePawn).GetComp<CompVehicle>().BearingAngle;
 
                 Vector3 newDrawPos = (thing as VehiclePawn).DrawPosTransformed((thing as VehiclePawn).GetComp<CompVehicle>().Props.hitboxOffsetX, (thing as VehiclePawn).GetComp<CompVehicle>().Props.hitboxOffsetZ, angle);
 
@@ -885,19 +836,6 @@ namespace Vehicles
         public static void CannonTargeterUpdate()
         {
             HelperMethods.CannonTargeter.TargeterUpdate();
-        }
-
-        public static void RegisterDiagonalMovement(Rot4 facing, PawnGraphicSet __instance, ref List<Material> ___cachedMatsBodyBase, ref int ___cachedMatsBodyBaseHash, RotDrawMode bodyCondition = RotDrawMode.Fresh)
-        {
-            if(__instance.pawn is VehiclePawn vehicle && HelperMethods.IsVehicle(vehicle))
-            {
-                if(facing.IsHorizontal && vehicle.GetComp<CompVehicle>().Angle != vehicle.GetComp<CompVehicle>().CachedAngle)
-                {
-                    ___cachedMatsBodyBase.Clear();
-                    ___cachedMatsBodyBaseHash = -1;
-                    vehicle.GetComp<CompVehicle>().CachedAngle = vehicle.GetComp<CompVehicle>().Angle;
-                }
-            }
         }
 
         public static bool VehiclesDamageTakenWiggler(DamageInfo dinfo, Pawn ___pawn, Pawn_DrawTracker __instance)

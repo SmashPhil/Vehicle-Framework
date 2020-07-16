@@ -20,6 +20,9 @@ namespace Vehicles
         public Vehicle_PathFollower vPather;
         public Vehicle_DrawTracker vDrawer;
 
+        private float angle = 0f; /* -45 is left, 45 is right : relative to Rot4 direction*/
+        private CompVehicle comp;
+
         public Vector3 SmoothPos
         {
             get
@@ -32,46 +35,29 @@ namespace Vehicles
             }
         }
 
+        public CompVehicle Comp
+        {
+            get
+            {
+                if (comp is null)
+                    comp = GetComp<CompVehicle>();
+                return comp;
+            }
+        }
+
         public float CachedAngle { get; set; }
         public float Angle
         {
             get
             {
-                if(!Props.diagonalRotation)
+                if(!Comp.Props.diagonalRotation)
                     return 0f;
-
-                if (this.Pawn.vPather.Moving)
-                {
-                    IntVec3 c = this.Pawn.vPather.nextCell - this.Pawn.Position;
-                    if (c.x > 0 && c.z > 0)
-                    {
-                        angle = -45f;
-                    }
-                    else if (c.x > 0 && c.z < 0)
-                    {
-                        angle = 45f;
-                    }
-                    else if (c.x < 0 && c.z < 0)
-                    {
-                        angle = -45f;
-                    }
-                    else if (c.x < 0 && c.z > 0)
-                    {
-                        angle = 45f;
-                    }
-                    else
-                    {
-                        angle = 0f;
-                    }
-                }
                 return angle;
             }
             set
             {
-                if (value == this.angle)
-                {
+                if (value == angle)
                     return;
-                }
                 angle = value;
             }
         }
@@ -101,6 +87,65 @@ namespace Vehicles
             Drawer.DrawAt(drawLoc);
         }
 
+        public void UpdateRotationAndAngle()
+        {
+            UpdateRotation();
+            UpdateAngle();
+        }
+
+        public void UpdateRotation()
+        {
+            if (vPather.nextCell == Position)
+            {
+                return;
+            }
+            IntVec3 intVec = vPather.nextCell - Position;
+            if (intVec.x > 0)
+            {
+                Rotation = Rot4.East;
+            }
+            else if (intVec.x < 0)
+            {
+                Rotation = Rot4.West;
+            }
+            else if (intVec.z > 0)
+            {
+                Rotation = Rot4.North;
+            }
+            else
+            {
+                Rotation = Rot4.South;
+            }
+        }
+
+        public void UpdateAngle()
+        {
+            if (vPather.Moving)
+            {
+                IntVec3 c = vPather.nextCell - Position;
+                if (c.x > 0 && c.z > 0)
+                {
+                    angle = -45f;
+                }
+                else if (c.x > 0 && c.z < 0)
+                {
+                    angle = 45f;
+                }
+                else if (c.x < 0 && c.z < 0)
+                {
+                    angle = -45f;
+                }
+                else if (c.x < 0 && c.z > 0)
+                {
+                    angle = 45f;
+                }
+                else
+                {
+                    angle = 0f;
+                }
+            }
+        }
+
         public override void DrawGUIOverlay()
 		{
 			Drawer.ui.DrawPawnGUIOverlay();
@@ -120,7 +165,7 @@ namespace Vehicles
                     yield return c;
                 }
 
-                foreach(Gizmo c2 in GetComp<CompVehicle>().CompGetGizmosExtra())
+                foreach(Gizmo c2 in Comp.CompGetGizmosExtra())
                 {
                     yield return c2;
                 }
@@ -356,6 +401,8 @@ namespace Vehicles
 
             Scribe_Values.Look(ref smoothPos, "smoothPos");
             Scribe_Deep.Look(ref vPather, "vPather", new object[] { this });
+
+            Scribe_Values.Look(ref angle, "angle");
         }
     }
 }

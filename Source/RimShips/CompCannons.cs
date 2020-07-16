@@ -22,7 +22,7 @@ namespace Vehicles
         private List<CannonHandler> cannons = new List<CannonHandler>();
         private const float cellOffsetIntVec3ToVector3 = 0.5f;
         public CompProperties_Cannons Props => (CompProperties_Cannons)props;
-        public Pawn Pawn => parent as Pawn;
+        public VehiclePawn Pawn => parent as VehiclePawn;
         public CompVehicle CompVehicle => this.Pawn.GetComp<CompVehicle>();
 
         public bool WeaponStatusOnline => !this.Pawn.Downed && !this.Pawn.Dead && this.Pawn.Drafted;
@@ -91,9 +91,9 @@ namespace Vehicles
             {
                 if(MinRange > 0)
                 {
-                    GenDraw.DrawRadiusRing(this.Pawn.DrawPosTransformed(CompVehicle.Props.hitboxOffsetX, CompVehicle.Props.hitboxOffsetZ, CompVehicle.Angle).ToIntVec3(), this.MinRange, Color.red);
+                    GenDraw.DrawRadiusRing(this.Pawn.DrawPosTransformed(CompVehicle.Props.hitboxOffsetX, CompVehicle.Props.hitboxOffsetZ, Pawn.Angle).ToIntVec3(), this.MinRange, Color.red);
                 }
-                GenDraw.DrawRadiusRing(this.Pawn.DrawPosTransformed(CompVehicle.Props.hitboxOffsetX, CompVehicle.Props.hitboxOffsetZ, CompVehicle.Angle).ToIntVec3(), this.Range);
+                GenDraw.DrawRadiusRing(this.Pawn.DrawPosTransformed(CompVehicle.Props.hitboxOffsetX, CompVehicle.Props.hitboxOffsetZ, Pawn.Angle).ToIntVec3(), this.Range);
             }
         }
 
@@ -433,7 +433,7 @@ namespace Vehicles
             switch (cannon.cannonDef.weaponLocation)
             {
                 case WeaponLocation.Port:
-                    if (this.CompVehicle.Angle == 0)
+                    if (Pawn.Angle == 0)
                     {
                         if (this.Pawn.Rotation == Rot4.North)
                         {
@@ -466,42 +466,42 @@ namespace Vehicles
                     }
                     else
                     {
-                        if (this.Pawn.Rotation == Rot4.East && this.CompVehicle.Angle == -45)
+                        if (this.Pawn.Rotation == Rot4.East && Pawn.Angle == -45)
                         {
                             launchCell.x += angleOffset.First;
                             launchCell.z += angleOffset.Second;
                             targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
-                            targetCell.x -= (int)(Math.Cos(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z -= (int)(Math.Sin(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.x -= (int)(Math.Cos(Pawn.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z -= (int)(Math.Sin(Pawn.Angle.DegreesToRadians()) * this.Range);
                         }
-                        else if (this.Pawn.Rotation == Rot4.East && this.CompVehicle.Angle == 45)
+                        else if (this.Pawn.Rotation == Rot4.East && Pawn.Angle == 45)
                         {
                             launchCell.x += angleOffset.First;
                             launchCell.z += angleOffset.Second;
                             targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
-                            targetCell.x += (int)(Math.Cos(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z += (int)(Math.Sin(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.x += (int)(Math.Cos(Pawn.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z += (int)(Math.Sin(Pawn.Angle.DegreesToRadians()) * this.Range);
                         }
-                        else if (this.Pawn.Rotation == Rot4.West && this.CompVehicle.Angle == -45)
+                        else if (this.Pawn.Rotation == Rot4.West && Pawn.Angle == -45)
                         {
                             launchCell.x -= angleOffset.First;
                             launchCell.z += angleOffset.Second;
                             targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
-                            targetCell.x += (int)(Math.Cos(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z += (int)(Math.Sin(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.x += (int)(Math.Cos(Pawn.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z += (int)(Math.Sin(Pawn.Angle.DegreesToRadians()) * this.Range);
                         }
-                        else if (this.Pawn.Rotation == Rot4.West && this.CompVehicle.Angle == 45)
+                        else if (this.Pawn.Rotation == Rot4.West && Pawn.Angle == 45)
                         {
                             launchCell.x -= angleOffset.First;
                             launchCell.z += angleOffset.Second;
                             targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
-                            targetCell.x -= (int)(Math.Cos(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z -= (int)(Math.Sin(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.x -= (int)(Math.Cos(Pawn.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z -= (int)(Math.Sin(Pawn.Angle.DegreesToRadians()) * this.Range);
                         }
                     }
                     break;
                 case WeaponLocation.Starboard:
-                    if (this.CompVehicle.Angle == 0)
+                    if (Pawn.Angle == 0)
                     {
                         if (this.Pawn.Rotation == Rot4.North)
                         {
@@ -534,42 +534,42 @@ namespace Vehicles
                     }
                     else
                     {
-                        if (this.Pawn.Rotation == Rot4.East && this.CompVehicle.Angle == -45)
+                        if (this.Pawn.Rotation == Rot4.East && Pawn.Angle == -45)
                         {
                             launchCell.x += angleOffset.Second;
                             launchCell.z += angleOffset.First;
                             targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
-                            targetCell.x += (int)(Math.Cos(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z += (int)(Math.Sin(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.x += (int)(Math.Cos(Pawn.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z += (int)(Math.Sin(Pawn.Angle.DegreesToRadians()) * this.Range);
                         }
-                        else if (this.Pawn.Rotation == Rot4.East && this.CompVehicle.Angle == 45)
+                        else if (this.Pawn.Rotation == Rot4.East && Pawn.Angle == 45)
                         {
                             launchCell.x -= angleOffset.Second;
                             launchCell.z -= angleOffset.First;
                             targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
-                            targetCell.x -= (int)(Math.Cos(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z -= (int)(Math.Sin(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.x -= (int)(Math.Cos(Pawn.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z -= (int)(Math.Sin(Pawn.Angle.DegreesToRadians()) * this.Range);
                         }
-                        else if (this.Pawn.Rotation == Rot4.West && this.CompVehicle.Angle == -45)
+                        else if (this.Pawn.Rotation == Rot4.West && Pawn.Angle == -45)
                         {
                             launchCell.x += angleOffset.Second;
                             launchCell.z -= angleOffset.First;
                             targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
-                            targetCell.x -= (int)(Math.Cos(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z -= (int)(Math.Sin(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.x -= (int)(Math.Cos(Pawn.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z -= (int)(Math.Sin(Pawn.Angle.DegreesToRadians()) * this.Range);
                         }
-                        else if (this.Pawn.Rotation == Rot4.West && this.CompVehicle.Angle == 45)
+                        else if (this.Pawn.Rotation == Rot4.West && Pawn.Angle == 45)
                         {
                             launchCell.x -= angleOffset.Second;
                             launchCell.z += angleOffset.First;
                             targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
-                            targetCell.x += (int)(Math.Cos(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z += (int)(Math.Sin(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.x += (int)(Math.Cos(Pawn.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z += (int)(Math.Sin(Pawn.Angle.DegreesToRadians()) * this.Range);
                         }
                     }
                     break;
                 case WeaponLocation.Bow:
-                    if (this.CompVehicle.Angle == 0)
+                    if (Pawn.Angle == 0)
                     {
                         if (this.Pawn.Rotation == Rot4.North)
                         {
@@ -602,42 +602,42 @@ namespace Vehicles
                     }
                     else
                     {
-                        if (this.Pawn.Rotation == Rot4.East && this.CompVehicle.Angle == -45)
+                        if (this.Pawn.Rotation == Rot4.East && Pawn.Angle == -45)
                         {
                             launchCell.x += angleOffset.First;
                             launchCell.z += angleOffset.Second;
                             targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
-                            targetCell.x -= (int)(Math.Cos(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z -= (int)(Math.Sin(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.x -= (int)(Math.Cos(Pawn.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z -= (int)(Math.Sin(Pawn.Angle.DegreesToRadians()) * this.Range);
                         }
-                        else if (this.Pawn.Rotation == Rot4.East && this.CompVehicle.Angle == 45)
+                        else if (this.Pawn.Rotation == Rot4.East && Pawn.Angle == 45)
                         {
                             launchCell.x += angleOffset.First;
                             launchCell.z += angleOffset.Second;
                             targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
-                            targetCell.x += (int)(Math.Cos(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z += (int)(Math.Sin(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.x += (int)(Math.Cos(Pawn.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z += (int)(Math.Sin(Pawn.Angle.DegreesToRadians()) * this.Range);
                         }
-                        else if (this.Pawn.Rotation == Rot4.West && this.CompVehicle.Angle == -45)
+                        else if (this.Pawn.Rotation == Rot4.West && Pawn.Angle == -45)
                         {
                             launchCell.x -= angleOffset.First;
                             launchCell.z += angleOffset.Second;
                             targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
-                            targetCell.x += (int)(Math.Cos(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z += (int)(Math.Sin(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.x += (int)(Math.Cos(Pawn.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z += (int)(Math.Sin(Pawn.Angle.DegreesToRadians()) * this.Range);
                         }
-                        else if (this.Pawn.Rotation == Rot4.West && this.CompVehicle.Angle == 45)
+                        else if (this.Pawn.Rotation == Rot4.West && Pawn.Angle == 45)
                         {
                             launchCell.x -= angleOffset.First;
                             launchCell.z += angleOffset.Second;
                             targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
-                            targetCell.x -= (int)(Math.Cos(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z -= (int)(Math.Sin(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.x -= (int)(Math.Cos(Pawn.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z -= (int)(Math.Sin(Pawn.Angle.DegreesToRadians()) * this.Range);
                         }
                     }
                     break;
                 case WeaponLocation.Stern:
-                    if (this.CompVehicle.Angle == 0)
+                    if (Pawn.Angle == 0)
                     {
                         if (this.Pawn.Rotation == Rot4.North)
                         {
@@ -670,37 +670,37 @@ namespace Vehicles
                     }
                     else
                     {
-                        if (this.Pawn.Rotation == Rot4.East && this.CompVehicle.Angle == -45)
+                        if (this.Pawn.Rotation == Rot4.East && Pawn.Angle == -45)
                         {
                             launchCell.x += angleOffset.First;
                             launchCell.z += angleOffset.Second;
                             targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
-                            targetCell.x -= (int)(Math.Cos(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z -= (int)(Math.Sin(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.x -= (int)(Math.Cos(Pawn.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z -= (int)(Math.Sin(Pawn.Angle.DegreesToRadians()) * this.Range);
                         }
-                        else if (this.Pawn.Rotation == Rot4.East && this.CompVehicle.Angle == 45)
+                        else if (this.Pawn.Rotation == Rot4.East && Pawn.Angle == 45)
                         {
                             launchCell.x += angleOffset.First;
                             launchCell.z += angleOffset.Second;
                             targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
-                            targetCell.x += (int)(Math.Cos(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z += (int)(Math.Sin(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.x += (int)(Math.Cos(Pawn.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z += (int)(Math.Sin(Pawn.Angle.DegreesToRadians()) * this.Range);
                         }
-                        else if (this.Pawn.Rotation == Rot4.West && this.CompVehicle.Angle == -45)
+                        else if (this.Pawn.Rotation == Rot4.West && Pawn.Angle == -45)
                         {
                             launchCell.x -= angleOffset.First;
                             launchCell.z += angleOffset.Second;
                             targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
-                            targetCell.x += (int)(Math.Cos(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z += (int)(Math.Sin(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.x += (int)(Math.Cos(Pawn.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z += (int)(Math.Sin(Pawn.Angle.DegreesToRadians()) * this.Range);
                         }
-                        else if (this.Pawn.Rotation == Rot4.West && this.CompVehicle.Angle == 45)
+                        else if (this.Pawn.Rotation == Rot4.West && Pawn.Angle == 45)
                         {
                             launchCell.x -= angleOffset.First;
                             launchCell.z += angleOffset.Second;
                             targetCell = new IntVec3((int)launchCell.x, this.Pawn.Position.y, (int)launchCell.z);
-                            targetCell.x -= (int)(Math.Cos(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
-                            targetCell.z -= (int)(Math.Sin(this.CompVehicle.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.x -= (int)(Math.Cos(Pawn.Angle.DegreesToRadians()) * this.Range);
+                            targetCell.z -= (int)(Math.Sin(Pawn.Angle.DegreesToRadians()) * this.Range);
                         }
                     }
                     break;
@@ -725,13 +725,13 @@ namespace Vehicles
             switch (this.Pawn.Rotation.AsInt)
             {
                 case 1:
-                    if (this.CompVehicle.Angle == -45)
+                    if (Pawn.Angle == -45)
                     {
                         SPTuple2<float, float> newOffset = SPTrig.RotatePointCounterClockwise(preOffsetX, preOffsetY, 45f);
                         offset.First = newOffset.First;
                         offset.Second = newOffset.Second;
                     }
-                    else if (this.CompVehicle.Angle == 45)
+                    else if (Pawn.Angle == 45)
                     {
                         SPTuple2<float, float> newOffset = SPTrig.RotatePointClockwise(preOffsetX, preOffsetY, 45f);
                         offset.First = newOffset.First;
@@ -739,13 +739,13 @@ namespace Vehicles
                     }
                     break;
                 case 3:
-                    if (this.CompVehicle.Angle == -45)
+                    if (Pawn.Angle == -45)
                     {
                         SPTuple2<float, float> newOffset = SPTrig.RotatePointClockwise(preOffsetX, preOffsetY, 225f);
                         offset.First = newOffset.First;
                         offset.Second = newOffset.Second;
                     }
-                    else if (this.CompVehicle.Angle == 45)
+                    else if (Pawn.Angle == 45)
                     {
                         SPTuple2<float, float> newOffset = SPTrig.RotatePointCounterClockwise(preOffsetX, preOffsetY, 225f);
                         offset.First = newOffset.First;

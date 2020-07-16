@@ -233,7 +233,7 @@ namespace Vehicles
                 {
                     try
                     {
-                        SPTuple2<float, float> moteOffset = HelperMethods.ShipDrawOffset(CompShip, offset.xOffset, offset.zOffset, out SPTuple2<float,float> rotationOffset);
+                        SPTuple2<float, float> moteOffset = HelperMethods.ShipDrawOffset(Pawn, offset.xOffset, offset.zOffset, out SPTuple2<float,float> rotationOffset);
                         offsetX = moteOffset.First;
                         offsetZ = moteOffset.Second;
 

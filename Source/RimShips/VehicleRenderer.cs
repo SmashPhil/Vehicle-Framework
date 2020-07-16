@@ -66,6 +66,7 @@ namespace Vehicles
 
 		private void RenderPawnInternal(Vector3 rootLoc, float angle)
 		{
+			vehicle.UpdateRotationAndAngle();
 			RenderPawnInternal(rootLoc, angle, vehicle.Rotation, vehicle.Rotation, false);
 		}
 

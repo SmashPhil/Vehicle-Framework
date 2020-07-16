@@ -17,7 +17,7 @@ namespace Vehicles
         {
         }
 
-        public CannonHandler(Pawn pawn, CannonHandler reference)
+        public CannonHandler(VehiclePawn pawn, CannonHandler reference)
         {
             this.pawn = pawn;
             uniqueID = Find.UniqueIDsManager.GetNextThingID();
@@ -472,7 +472,7 @@ namespace Vehicles
                 {
                     locationRotation = attachedTo.TurretRotation;
                 }
-                SPTuple2<float, float> turretLoc = HelperMethods.ShipDrawOffset(CompVehicle, cannonRenderLocation.x, cannonRenderLocation.y, out SPTuple2<float,float> renderOffsets, locationRotation, attachedTo);
+                SPTuple2<float, float> turretLoc = HelperMethods.ShipDrawOffset(pawn, cannonRenderLocation.x, cannonRenderLocation.y, out SPTuple2<float,float> renderOffsets, locationRotation, attachedTo);
                 return new Vector3(pawn.DrawPos.x + turretLoc.First + renderOffsets.First, pawn.DrawPos.y + drawLayer, pawn.DrawPos.z + turretLoc.Second + renderOffsets.Second);
             }
         }
@@ -508,7 +508,7 @@ namespace Vehicles
             if(angleRestricted == Vector2.zero)
                 return true;
 
-            float rotationOffset = pawn.Rotation.AsInt * 90 + pawn.GetComp<CompVehicle>().Angle;
+            float rotationOffset = pawn.Rotation.AsInt * 90 + pawn.Angle;
             if (attachedTo != null)
                 rotationOffset += attachedTo.TurretRotation;
             float start = angleRestricted.x + rotationOffset;
@@ -706,17 +706,17 @@ namespace Vehicles
 
         private void ValidateLockStatus()
         {
-            if(parentRotCached != pawn.Rotation || parentAngleCached != CompVehicle.Angle)
+            if(parentRotCached != pawn.Rotation || parentAngleCached != pawn.Angle)
             {
                 if(!cannonTarget.IsValid && HelperMethods.CannonTargeter.cannon != this)
                 {
-                    float angleDifference = CompVehicle.Angle - parentAngleCached;
+                    float angleDifference = pawn.Angle - parentAngleCached;
                     currentRotation -= 90 * (pawn.Rotation.AsInt - parentRotCached.AsInt) + angleDifference;
                     rotationTargeted = currentRotation;
                     LockedStatusRotation = true;
                 }
                 parentRotCached = pawn.Rotation;
-                parentAngleCached = CompVehicle.Angle;
+                parentAngleCached = pawn.Angle;
             }
         }
 
@@ -775,7 +775,7 @@ namespace Vehicles
         public float currentRotation = 0f;
         private float rotationTargeted = 0f;
 
-        public Pawn pawn;
+        public VehiclePawn pawn;
 
         public ThingDef loadedAmmo;
         public ThingDef savedAmmoType;

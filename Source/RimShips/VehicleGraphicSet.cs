@@ -25,15 +25,14 @@ namespace Vehicles
 			}
 		}
 
-		public List<Material> MatsBodyBaseAt(Rot4 facing, float angle, float cachedAngle, RotDrawMode bodyCondition = RotDrawMode.Fresh)
+		public List<Material> MatsBodyBaseAt(Rot4 facing, RotDrawMode bodyCondition = RotDrawMode.Fresh)
 		{
-			if(facing.IsHorizontal && angle != cachedAngle)
+			if(facing.IsHorizontal && vehicle.Angle != vehicle.CachedAngle)
             {
                 cachedMatsBodyBase.Clear();
                 cachedMatsBodyBaseHash = -1;
-                vehicle.GetComp<CompVehicle>().CachedAngle = vehicle.GetComp<CompVehicle>().Angle;
+                vehicle.CachedAngle = vehicle.Angle;
             }
-
 			int num = facing.AsInt + 1000 * (int)bodyCondition;
 			if (num != cachedMatsBodyBaseHash)
 			{

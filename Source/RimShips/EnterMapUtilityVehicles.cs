@@ -57,7 +57,7 @@ namespace Vehicles
                 
                 VehiclePawn vehicle = (VehiclePawn)GenSpawn.Spawn(pawns[i], loc, map, edge.Opposite, WipeMode.Vanish);
                 vehicle.drafter.Drafted = draftColonists ? true : false;
-                vehicle.GetComp<CompVehicle>().Angle = 0;
+                vehicle.Angle = 0;
             }
             caravan.RemoveAllPawns();
             if(caravan.Spawned)
@@ -68,7 +68,7 @@ namespace Vehicles
 
         public static void EnterSpawn(Caravan caravan, Map map, Func<Pawn, IntVec3> spawnCellGetter, CaravanDropInventoryMode caravanDropInventoryMode = CaravanDropInventoryMode.DoNotDrop, bool draftColonists = true)
         {
-            List<Pawn> pawns = new List<Pawn>(caravan.PawnsListForReading).Where(x => HelperMethods.IsBoat(x)).ToList();
+            List<VehiclePawn> pawns = new List<Pawn>(caravan.PawnsListForReading).Where(x => HelperMethods.IsBoat(x)).Cast<VehiclePawn>().ToList();
 
             Rot4 spawnDir = GetEdgeToSpawnBoatOn(caravan, map);
 
@@ -76,7 +76,7 @@ namespace Vehicles
             {
                 IntVec3 loc = CellFinderExtended.MiddleEdgeCell(spawnDir, map, pawns[i], (IntVec3 c) => GenGridShips.Standable(c, map) && !c.Fogged(map)); //Change back to spawnCellGetter later
                 
-                pawns[i].GetComp<CompVehicle>().Angle = 0;
+                pawns[i].Angle = 0;
                 Pawn ship = GenSpawn.Spawn(pawns[i], loc, map, spawnDir.Opposite, WipeMode.Vanish, false) as Pawn;
                 ship.drafter.Drafted = draftColonists ? true : false;
             }

@@ -70,31 +70,6 @@ namespace Vehicles
             return !flag;
         }
 
-        public static void FaceShipAdjacentCell(IntVec3 c, Pawn pawn)
-        {
-            if (c == pawn.Position)
-            {
-                return;
-            }
-            IntVec3 intVec = c - pawn.Position;
-            if (intVec.x > 0)
-            {
-                pawn.Rotation = Rot4.East;
-            }
-            else if (intVec.x < 0)
-            {
-                pawn.Rotation = Rot4.West;
-            }
-            else if (intVec.z > 0)
-            {
-                pawn.Rotation = Rot4.North;
-            }
-            else
-            {
-                pawn.Rotation = Rot4.South;
-            }
-        }
-
         public static int CostToMoveIntoCellShips(Pawn pawn, IntVec3 c)
         {
             int num = (c.x == pawn.Position.x || c.z == pawn.Position.z) ? pawn.TicksPerMoveCardinal : pawn.TicksPerMoveDiagonal;
@@ -144,36 +119,31 @@ namespace Vehicles
             if (pawn is null) return 0f;
             VehiclePawn vehicle = pawn as VehiclePawn;
 
-            //if(!VehicleMod.mod.settings.debugDisableSmoothPathing)
-            //{
-            //    return vehicle.GetComp<CompVehicle>().BearingAngle;
-            //}
-
             if (vehicle.vPather.Moving)
             {
                 IntVec3 c = vehicle.vPather.nextCell - vehicle.Position;
                 if (c.x > 0 && c.z > 0)
                 {
-                    vehicle.GetComp<CompVehicle>().Angle = -45f;
+                    vehicle.Angle = -45f;
                 }
                 else if (c.x > 0 && c.z < 0)
                 {
-                    vehicle.GetComp<CompVehicle>().Angle = 45f;
+                    vehicle.Angle = 45f;
                 }
                 else if (c.x < 0 && c.z < 0)
                 {
-                    vehicle.GetComp<CompVehicle>().Angle = -45f;
+                    vehicle.Angle = -45f;
                 }
                 else if (c.x < 0 && c.z > 0)
                 {
-                    vehicle.GetComp<CompVehicle>().Angle = 45f;
+                    vehicle.Angle = 45f;
                 }
                 else
                 {
-                    vehicle.GetComp<CompVehicle>().Angle = 0f;
+                    vehicle.Angle = 0f;
                 }
             }
-            return vehicle.GetComp<CompVehicle>().Angle;
+            return vehicle.Angle;
         }
 
         public static bool OnDeepWater(this Pawn pawn)
@@ -1177,7 +1147,7 @@ namespace Vehicles
         #endregion
 
         #region Rendering
-        public static SPTuple2<float,float> ShipDrawOffset(CompVehicle shipComp, float xOffset, float yOffset, out SPTuple2<float, float> rotationOffset, float turretRotation = 0, CannonHandler attachedTo = null)
+        public static SPTuple2<float,float> ShipDrawOffset(VehiclePawn vehicle, float xOffset, float yOffset, out SPTuple2<float, float> rotationOffset, float turretRotation = 0, CannonHandler attachedTo = null)
         {
             rotationOffset = SPTuple2<float,float>.zero; //COME BACK TO
             if(attachedTo != null)
@@ -1185,15 +1155,15 @@ namespace Vehicles
                 return SPTrig.RotatePointClockwise(attachedTo.cannonRenderLocation.x + xOffset, attachedTo.cannonRenderLocation.y + yOffset, turretRotation);
             }
             
-            switch(shipComp.Pawn.Rotation.AsInt)
+            switch(vehicle.Rotation.AsInt)
             {
                 //East
                 case 1:
-                    if(shipComp.Angle == 45)
+                    if(vehicle.Angle == 45)
                     {
                         return SPTrig.RotatePointClockwise(yOffset, -xOffset, 45f);
                     }
-                    else if(shipComp.Angle == -45)
+                    else if(vehicle.Angle == -45)
                     {
                         return SPTrig.RotatePointCounterClockwise(yOffset, -xOffset, 45f);
                     }
@@ -1203,13 +1173,13 @@ namespace Vehicles
                     return new SPTuple2<float, float>(-xOffset, -yOffset);
                 //West
                 case 3:
-                    if(shipComp.Angle != 0)
+                    if(vehicle.Angle != 0)
                     {
-                        if(shipComp.Angle == 45)
+                        if(vehicle.Angle == 45)
                         {
                             return SPTrig.RotatePointClockwise(-yOffset, xOffset, 45f);
                         }
-                        else if(shipComp.Angle == -45)
+                        else if(vehicle.Angle == -45)
                         {
                             return SPTrig.RotatePointCounterClockwise(-yOffset, xOffset, 45f);
                         }
@@ -1302,7 +1272,7 @@ namespace Vehicles
         }
 
         public static void DrawAttachedThing(Texture2D baseTexture, Graphic baseGraphic, Vector2 baseRenderLocation,Vector2 baseDrawSize,
-            Texture2D texture, Graphic graphic, Vector2 renderLocation, Vector2 renderOffset, Material baseMat, Material mat, float rotation, Pawn parent, int drawLayer, CannonHandler attachedTo = null, Material mat2 = null)
+            Texture2D texture, Graphic graphic, Vector2 renderLocation, Vector2 renderOffset, Material baseMat, Material mat, float rotation, VehiclePawn parent, int drawLayer, CannonHandler attachedTo = null, Material mat2 = null)
         {
             if (texture != null && renderLocation != null)
             {
@@ -1314,7 +1284,7 @@ namespace Vehicles
                     {
                         locationRotation = attachedTo.TurretRotation;
                     }
-                    SPTuple2<float, float> drawOffset = ShipDrawOffset(parent.GetComp<CompVehicle>(), renderLocation.x, renderLocation.y, out SPTuple2<float, float> rotOffset1, locationRotation, attachedTo);
+                    SPTuple2<float, float> drawOffset = ShipDrawOffset(parent, renderLocation.x, renderLocation.y, out SPTuple2<float, float> rotOffset1, locationRotation, attachedTo);
                     
                     Vector3 topVectorLocation = new Vector3(parent.DrawPos.x + drawOffset.First + rotOffset1.First, parent.DrawPos.y + drawLayer, parent.DrawPos.z + drawOffset.Second + rotOffset1.Second);
                     Mesh cannonMesh = graphic.MeshAt(Rot4.North);
@@ -1332,7 +1302,7 @@ namespace Vehicles
                     if(baseMat != null && baseRenderLocation != null)
                     {
                         Matrix4x4 baseMatrix = default;
-                        SPTuple2<float, float> baseDrawOffset = ShipDrawOffset(parent.GetComp<CompVehicle>(), baseRenderLocation.x, baseRenderLocation.y, out SPTuple2<float, float> rotOffset2);
+                        SPTuple2<float, float> baseDrawOffset = ShipDrawOffset(parent, baseRenderLocation.x, baseRenderLocation.y, out SPTuple2<float, float> rotOffset2);
                         Vector3 baseVectorLocation = new Vector3(parent.DrawPos.x + baseDrawOffset.First, parent.DrawPos.y, parent.DrawPos.z + baseDrawOffset.Second);
                         baseMatrix.SetTRS(baseVectorLocation + Altitudes.AltIncVect, parent.Rotation.AsQuat, new Vector3(baseDrawSize.x, 1f, baseDrawSize.y));
                         Graphics.DrawMesh(MeshPool.plane10, baseMatrix, baseMat, 0);
