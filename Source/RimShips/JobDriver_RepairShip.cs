@@ -31,7 +31,7 @@ namespace Vehicles.Jobs
                 ticksToNextRepair -= statValue;
                 if (ticksToNextRepair <= 0f)
                 {
-                    if (!(TargetThingA as Pawn).health.hediffSet.hediffs.Any())
+                    if (!(TargetThingA as Pawn).health.hediffSet.hediffs.AnyNullified())
                     {
                         actor.records.Increment(RecordDefOf.ThingsRepaired);
                         actor.jobs.EndCurrentJob(JobCondition.Succeeded, true);

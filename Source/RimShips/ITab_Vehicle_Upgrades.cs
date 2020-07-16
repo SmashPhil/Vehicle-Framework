@@ -6,7 +6,7 @@ using Verse;
 using Verse.Sound;
 using RimWorld;
 using UnityEngine;
-using SPExtended;
+
 
 namespace Vehicles.UI
 {
@@ -191,7 +191,7 @@ namespace Vehicles.UI
                     Widgets.DrawBoxSolid(upgradeRect, NotUpgradedColor);
                 }
 
-                if(!upgradeNode.prerequisiteNodes.Any())
+                if(!upgradeNode.prerequisiteNodes.AnyNullified())
                 {
                     if(!string.IsNullOrEmpty(upgradeNode.rootNodeLabel))
                     {

@@ -49,7 +49,7 @@ namespace Vehicles.Lords
         {
             if(Find.TickManager.TicksGame % 100 == 0)
             {
-                GatherAnimalsAndSlavesForShipsUtility.CheckArrived(lord, lord.ownedPawns.Where(x => HelperMethods.IsVehicle(x)).ToList(), exitSpot, "ReadyToExitMap", (Pawn x) => true, lord.ownedPawns.Any(b => HelperMethods.IsBoat(b)), null);
+                GatherAnimalsAndSlavesForShipsUtility.CheckArrived(lord, lord.ownedPawns.Where(x => HelperMethods.IsVehicle(x)).ToList(), exitSpot, "ReadyToExitMap", (Pawn x) => true, lord.ownedPawns.AnyNullified(b => HelperMethods.IsBoat(b)), null);
             }
         }
 

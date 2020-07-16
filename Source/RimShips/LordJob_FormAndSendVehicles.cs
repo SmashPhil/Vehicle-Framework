@@ -269,7 +269,7 @@ namespace Vehicles.Lords
                     downedPawns.RemoveAt(i);
                 }
             }
-            if(!lord.ownedPawns.Any(x => HelperMethods.IsVehicle(x)))
+            if(!lord.ownedPawns.AnyNullified(x => HelperMethods.IsVehicle(x)))
             {
                 lord.lordManager.RemoveLord(lord);
                 Messages.Message("BoatCaravanTerminatedNoBoats".Translate(), MessageTypeDefOf.NegativeEvent);

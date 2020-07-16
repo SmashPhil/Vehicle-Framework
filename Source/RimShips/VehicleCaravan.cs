@@ -170,7 +170,7 @@ namespace Vehicles
 	        }
             if(HelperMethods.HasBoat(this) && (Find.World.CoastDirectionAt(Tile).IsValid || HelperMethods.RiverIsValid(Tile, PawnsListForReading.Where(x => HelperMethods.IsBoat(x)).ToList())))
             {
-                if(!vPather.Moving && !PawnsListForReading.Any(x => !HelperMethods.IsBoat(x)))
+                if(!vPather.Moving && !PawnsListForReading.AnyNullified(x => !HelperMethods.IsBoat(x)))
                 {
                     Command_Action dock = new Command_Action();
                     dock.icon = TexCommandVehicles.Anchor;
@@ -187,7 +187,7 @@ namespace Vehicles
 
                     yield return dock;
                 }
-                else if (!vPather.Moving && PawnsListForReading.Any(x => !HelperMethods.IsBoat(x)))
+                else if (!vPather.Moving && PawnsListForReading.AnyNullified(x => !HelperMethods.IsBoat(x)))
                 {
                     Command_Action undock = new Command_Action();
                     undock.icon = TexCommandVehicles.UnloadAll;
@@ -215,7 +215,7 @@ namespace Vehicles
             {
                 Log.Error("Caravan member died in an unspawned caravan. Unspawned caravans shouldn't be kept for more than a single frame.", false);
             }
-            if(!PawnsListForReading.Any(x => HelperMethods.IsVehicle(x) && !x.Dead && x.GetComp<CompVehicle>().AllPawnsAboard.Any((Pawn y) => y != member && IsOwner(y))))
+            if(!PawnsListForReading.AnyNullified(x => HelperMethods.IsVehicle(x) && !x.Dead && x.GetComp<CompVehicle>().AllPawnsAboard.AnyNullified((Pawn y) => y != member && IsOwner(y))))
             {
                 RemovePawn(member);
                 if (Faction == Faction.OfPlayer)
@@ -395,11 +395,11 @@ namespace Vehicles
 
         public override void DrawExtraSelectionOverlays()
 		{
-			base.DrawExtraSelectionOverlays();
 			if (IsPlayerControlled && vPather.curPath != null)
 			{
 				vPather.curPath.DrawPath(this);
 			}
+            gotoMote.RenderMote();
 		}
 
         public override void PostRemove()

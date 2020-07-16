@@ -3,7 +3,7 @@ using System.Linq;
 using RimWorld;
 using Verse;
 using Verse.AI;
-using SPExtended;
+
 
 namespace Vehicles.Jobs
 {
@@ -64,35 +64,35 @@ namespace Vehicles.Jobs
                             }
                             else
                             {
-                                if(Pawn.Map.Biome == BiomeDefOf.AridShrubland && FishingCompatibility.fishDictionaryTemperateBiomeFreshWater.Any())
+                                if(Pawn.Map.Biome == BiomeDefOf.AridShrubland && FishingCompatibility.fishDictionaryTemperateBiomeFreshWater.AnyNullified())
                                 {
                                     fishStats = FishingCompatibility.fishDictionaryTemperateBiomeFreshWater.RandomKVPFromDictionary();
                                 }
-                                else if(Pawn.Map.Biome == BiomeDefOf.TemperateForest && FishingCompatibility.fishDictionaryTemperateBiomeFreshWater.Any())
+                                else if(Pawn.Map.Biome == BiomeDefOf.TemperateForest && FishingCompatibility.fishDictionaryTemperateBiomeFreshWater.AnyNullified())
                                 {
                                     fishStats = FishingCompatibility.fishDictionaryTemperateBiomeFreshWater.RandomKVPFromDictionary();
                                 }
-                                else if(Pawn.Map.Biome == BiomeDefOf.Desert && FishingCompatibility.fishDictionaryTemperateBiomeFreshWater.Any())
+                                else if(Pawn.Map.Biome == BiomeDefOf.Desert && FishingCompatibility.fishDictionaryTemperateBiomeFreshWater.AnyNullified())
                                 {
                                     fishStats = FishingCompatibility.fishDictionaryTemperateBiomeFreshWater.RandomKVPFromDictionary();
                                 }
-                                else if(Pawn.Map.Biome == BiomeDefOf.TropicalRainforest && FishingCompatibility.fishDictionaryTropicalBiomeFreshWater.Any())
+                                else if(Pawn.Map.Biome == BiomeDefOf.TropicalRainforest && FishingCompatibility.fishDictionaryTropicalBiomeFreshWater.AnyNullified())
                                 {
                                     fishStats = FishingCompatibility.fishDictionaryTropicalBiomeFreshWater.RandomKVPFromDictionary();
                                 }
-                                else if(Pawn.Map.Biome == BiomeDefOf.BorealForest && FishingCompatibility.fishDictionaryTropicalBiomeFreshWater.Any())
+                                else if(Pawn.Map.Biome == BiomeDefOf.BorealForest && FishingCompatibility.fishDictionaryTropicalBiomeFreshWater.AnyNullified())
                                 {
                                     fishStats = FishingCompatibility.fishDictionaryTropicalBiomeFreshWater.RandomKVPFromDictionary();
                                 }
-                                else if(Pawn.Map.Biome == BiomeDefOf.Tundra && FishingCompatibility.fishDictionaryColdBiomeFreshWater.Any())
+                                else if(Pawn.Map.Biome == BiomeDefOf.Tundra && FishingCompatibility.fishDictionaryColdBiomeFreshWater.AnyNullified())
                                 {
                                     fishStats = FishingCompatibility.fishDictionaryColdBiomeFreshWater.RandomKVPFromDictionary();
                                 }
-                                else if(Pawn.Map.Biome == BiomeDefOf.IceSheet && FishingCompatibility.fishDictionaryColdBiomeFreshWater.Any())
+                                else if(Pawn.Map.Biome == BiomeDefOf.IceSheet && FishingCompatibility.fishDictionaryColdBiomeFreshWater.AnyNullified())
                                 {
                                     fishStats = FishingCompatibility.fishDictionaryColdBiomeFreshWater.RandomKVPFromDictionary();
                                 }
-                                else if(Pawn.Map.Biome == BiomeDefOf.SeaIce && FishingCompatibility.fishDictionaryColdBiomeFreshWater.Any())
+                                else if(Pawn.Map.Biome == BiomeDefOf.SeaIce && FishingCompatibility.fishDictionaryColdBiomeFreshWater.AnyNullified())
                                 {
                                     fishStats = FishingCompatibility.fishDictionaryColdBiomeFreshWater.RandomKVPFromDictionary();
                                 }

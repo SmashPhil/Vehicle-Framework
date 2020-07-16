@@ -2,7 +2,6 @@
 using UnityEngine;
 using Verse;
 using Verse.Sound;
-using SPExtended;
 
 namespace Vehicles
 {

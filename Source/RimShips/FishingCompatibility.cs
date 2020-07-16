@@ -5,7 +5,7 @@ using System.Xml;
 using System.Globalization;
 using Verse;
 using RimWorld;
-using SPExtended;
+
 
 namespace Vehicles
 {
@@ -198,12 +198,12 @@ namespace Vehicles
                             }
                         }
 
-                        if(oceanFishing || !biomesAllowed.Any()) fishDictionarySaltWater.Add(td, yield);
+                        if(oceanFishing || !biomesAllowed.AnyNullified()) fishDictionarySaltWater.Add(td, yield);
                     }
                     Block_Skip:;
                 }
             }
-            return fishDictionarySaltWater.Any();
+            return fishDictionarySaltWater.AnyNullified();
         }
 
 

@@ -15,7 +15,7 @@ using Vehicles.AI;
 using Vehicles.Lords;
 using Vehicles.Defs;
 using HarmonyLib;
-using SPExtended;
+
 
 namespace Vehicles
 {
@@ -27,7 +27,7 @@ namespace Vehicles
         {
             bool flag = !WaterCovered(tile) && (!Find.World.CoastDirectionAt(tile).IsValid || Find.World.Impassable(tile));
             bool riverFlag = false;
-            if (ShipHarmony.currentFormingCaravan != null || caravan != null || ((Find.WorldSelector.SelectedObjects.Any() && Find.WorldSelector.SelectedObjects.All(x => x is Caravan && (x as Caravan).IsPlayerControlled && 
+            if (ShipHarmony.currentFormingCaravan != null || caravan != null || ((Find.WorldSelector.SelectedObjects.AnyNullified() && Find.WorldSelector.SelectedObjects.All(x => x is Caravan && (x as Caravan).IsPlayerControlled && 
                 HasVehicle(x as Caravan))) && !ShipHarmony.routePlannerActive))
             {
                 List<Pawn> pawns;
@@ -43,7 +43,7 @@ namespace Vehicles
                 {
                     pawns = GrabBoatsFromCaravans(Find.WorldSelector.SelectedObjects.Cast<Caravan>().ToList());
                 }
-                riverFlag = !pawns.Any(x => IsBoat(x)) ? false : RiverIsValid(tile, pawns);
+                riverFlag = !pawns.AnyNullified(x => IsBoat(x)) ? false : RiverIsValid(tile, pawns);
             }
             return flag && !riverFlag;
         }
@@ -308,32 +308,32 @@ namespace Vehicles
 
         public static bool HasVehicle(List<Pawn> pawns)
         {
-            return pawns?.Any(x => IsVehicle(x)) ?? false;
+            return pawns?.AnyNullified(x => IsVehicle(x)) ?? false;
         }
 
         public static bool HasVehicle(IEnumerable<Pawn> pawns)
         {
-            return pawns?.Any(x => IsVehicle(x)) ?? false;
+            return pawns?.AnyNullified(x => IsVehicle(x)) ?? false;
         }
 
         public static bool HasVehicle(this Caravan c)
         {
-            return (c is null) ? (ShipHarmony.currentFormingCaravan is null) ? false : HasVehicle(TransferableUtility.GetPawnsFromTransferables(ShipHarmony.currentFormingCaravan.transferables)) : HasVehicle(c?.PawnsListForReading);
+            return c is VehicleCaravan && (c is null) ? (ShipHarmony.currentFormingCaravan is null) ? false : HasVehicle(TransferableUtility.GetPawnsFromTransferables(ShipHarmony.currentFormingCaravan.transferables)) : HasVehicle(c?.PawnsListForReading);
         }
 
         public static bool HasVehicleInCaravan(Pawn p)
         {
-            return p.IsFormingCaravan() && p.GetLord().LordJob is LordJob_FormAndSendVehicles && p.GetLord().ownedPawns.Any(x => IsVehicle(x));
+            return p.IsFormingCaravan() && p.GetLord().LordJob is LordJob_FormAndSendVehicles && p.GetLord().ownedPawns.AnyNullified(x => IsVehicle(x));
         }
 
         public static bool HasBoat(this List<VehiclePawn> pawns)
         {
-            return pawns?.Any(x => IsBoat(x)) ?? false;
+            return pawns?.AnyNullified(x => IsBoat(x)) ?? false;
         }
 
         public static bool HasBoat(IEnumerable<Pawn> pawns)
         {
-            return pawns?.Any(x => IsBoat(x)) ?? false;
+            return pawns?.AnyNullified(x => IsBoat(x)) ?? false;
         }
 
         public static bool HasBoat(this Caravan c)
@@ -540,9 +540,9 @@ namespace Vehicles
 
         public static bool RiverIsValid(int tileID, List<Pawn> ships)
         {
-            if (!VehicleMod.mod.settings.riverTravel || ships is null || !ships.Any(x => IsBoat(x)))
+            if (!VehicleMod.mod.settings.riverTravel || ships is null || !ships.AnyNullified(x => IsBoat(x)))
                 return false;
-            bool flag = VehicleMod.mod.settings.boatSizeMatters ? (!Find.WorldGrid[tileID].Rivers.NullOrEmpty()) ? ShipsFitOnRiver(BiggestRiverOnTile(Find.WorldGrid[tileID]?.Rivers).river, ships) : false : (Find.WorldGrid[tileID].Rivers?.Any() ?? false);
+            bool flag = VehicleMod.mod.settings.boatSizeMatters ? (!Find.WorldGrid[tileID].Rivers.NullOrEmpty()) ? ShipsFitOnRiver(BiggestRiverOnTile(Find.WorldGrid[tileID]?.Rivers).river, ships) : false : (Find.WorldGrid[tileID].Rivers?.AnyNullified() ?? false);
             return flag;
         }
 
@@ -580,7 +580,7 @@ namespace Vehicles
             int seats = 0;
             int pawns = 0;
             int prereq = 0;
-            bool flag = caravan.Any(x => IsBoat(x)); //Ships or No Ships
+            bool flag = caravan.AnyNullified(x => IsBoat(x)); //Ships or No Ships
 
             foreach (Pawn p in caravan)
             {
@@ -832,7 +832,7 @@ namespace Vehicles
 			if (destinationTile != -1)
 			{
 				List<FloatMenuOption> list = FloatMenuMakerWorld.ChoicesAtFor(destinationTile, caravan);
-				if (list.Any((FloatMenuOption x) => !x.Disabled))
+				if (list.AnyNullified((FloatMenuOption x) => !x.Disabled))
 				{
 					list.First((FloatMenuOption x) => !x.Disabled).action();
 				}
@@ -922,14 +922,14 @@ namespace Vehicles
         public static List<Pawn> GrabPawnsFromMapPawnsInVehicle(List<Pawn> allPawns)
         {
             List<Pawn> playerShips = allPawns.Where(x => x.Faction == Faction.OfPlayer && IsVehicle(x)).ToList();
-            if (!playerShips.Any())
+            if (!playerShips.AnyNullified())
                 return allPawns.Where(x => x.Faction == Faction.OfPlayer && x.RaceProps.Humanlike).ToList();
             return playerShips.RandomElement<Pawn>().GetComp<CompVehicle>()?.AllCapablePawns;
         }
 
         public static List<Pawn> GrabPawnsFromVehicles(List<Pawn> ships)
         {
-            if (!ships.Any(x => IsVehicle(x)))
+            if (!ships.AnyNullified(x => IsVehicle(x)))
                 return null;
             List<Pawn> pawns = new List<Pawn>();
             foreach (Pawn p in ships)
@@ -1158,7 +1158,7 @@ namespace Vehicles
                 if(o is Pawn)
                     selPawns.Add(o as Pawn);
             }
-            if (selPawns.Any(x => x.Faction != Faction.OfPlayer || IsVehicle(x)))
+            if (selPawns.AnyNullified(x => x.Faction != Faction.OfPlayer || IsVehicle(x)))
                 return false;
             IntVec3 mousePos = Verse.UI.MouseMapPosition().ToIntVec3();
             if (selectedObjects.Count > 1 && selectedObjects.All(x => x is Pawn))
@@ -1255,7 +1255,7 @@ namespace Vehicles
                     int count = neighbors.Count;
                     for (int i = 0; i < count; i++)
                     {
-                        if (allSearchedTiles.Any(x => x == neighbors[i]))
+                        if (allSearchedTiles.AnyNullified(x => x == neighbors[i]))
                             continue;
                         newTilesSearch.Add(neighbors[i]);
                         allSearchedTiles.Add(neighbors[i]);
@@ -1374,8 +1374,8 @@ namespace Vehicles
 
         public static bool LocationRestrictedBySize(this VehiclePawn pawn, IntVec3 dest)
         {
-            return CellRect.CenteredOn(dest, pawn.def.Size.x, pawn.def.Size.z).Any(c2 => IsBoat(pawn) ? (!c2.InBoundsShip(pawn.Map) || GenGridShips.Impassable(c2, pawn.Map)) : (!c2.InBounds(pawn.Map) || c2.ImpassableReverseThreaded(pawn.Map, pawn)))
-                && CellRect.CenteredOn(dest, pawn.def.Size.z, pawn.def.Size.x).Any(c2 => IsBoat(pawn) ? (!c2.InBoundsShip(pawn.Map) || GenGridShips.Impassable(c2, pawn.Map)) : (!c2.InBounds(pawn.Map) || c2.ImpassableReverseThreaded(pawn.Map, pawn)));
+            return CellRect.CenteredOn(dest, pawn.def.Size.x, pawn.def.Size.z).AnyNullified(c2 => IsBoat(pawn) ? (!c2.InBoundsShip(pawn.Map) || GenGridShips.Impassable(c2, pawn.Map)) : (!c2.InBounds(pawn.Map) || c2.ImpassableReverseThreaded(pawn.Map, pawn)))
+                && CellRect.CenteredOn(dest, pawn.def.Size.z, pawn.def.Size.x).AnyNullified(c2 => IsBoat(pawn) ? (!c2.InBoundsShip(pawn.Map) || GenGridShips.Impassable(c2, pawn.Map)) : (!c2.InBounds(pawn.Map) || c2.ImpassableReverseThreaded(pawn.Map, pawn)));
         }
 
         public static void DrawLinesBetweenTargets(VehiclePawn pawn, Job curJob, JobQueue jobQueue)

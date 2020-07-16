@@ -18,7 +18,7 @@ using Vehicles.AI;
 using Vehicles.Defs;
 using Vehicles.Lords;
 using Vehicles.UI;
-using SPExtended;
+
 using OpCodes = System.Reflection.Emit.OpCodes;
 
 namespace Vehicles
@@ -69,10 +69,10 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Method(typeof(Pawn_RotationTracker), nameof(Pawn_RotationTracker.UpdateRotation)),
                 prefix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(UpdateVehicleRotation)));
-            harmony.Patch(original: AccessTools.Method(typeof(PawnRenderer), "RenderPawnInternal", new Type[] { typeof(Vector3), typeof(float), typeof(bool), typeof(Rot4), typeof(Rot4),
-                    typeof(RotDrawMode), typeof(bool), typeof(bool), typeof(bool)}), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(typeof(ShipHarmony),
-                nameof(RenderPawnRotationTranspiler)));
+            //harmony.Patch(original: AccessTools.Method(typeof(PawnRenderer), "RenderPawnInternal", new Type[] { typeof(Vector3), typeof(float), typeof(bool), typeof(Rot4), typeof(Rot4),
+            //        typeof(RotDrawMode), typeof(bool), typeof(bool), typeof(bool)}), prefix: null, postfix: null,
+            //    transpiler: new HarmonyMethod(typeof(ShipHarmony),
+            //    nameof(RenderPawnRotationTranspiler)));
             harmony.Patch(original: AccessTools.Method(typeof(PawnGraphicSet), nameof(PawnGraphicSet.MatsBodyBaseAt)), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(MatsBodyOfVehicles)));
@@ -108,6 +108,9 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Method(typeof(Pawn_DrawTracker), nameof(Pawn_DrawTracker.Notify_DamageDeflected)),
                 prefix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(VehiclesDamageDeflectedWiggler)));
+            harmony.Patch(original: AccessTools.Method(typeof(Pawn_DrawTracker), nameof(Pawn_DrawTracker.DrawTrackerTick)),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(VehiclesDrawTrackerTick)));
             
             /* Gizmos */
             harmony.Patch(original: AccessTools.Method(typeof(Settlement), nameof(Settlement.GetCaravanGizmos)), prefix: null,
@@ -146,6 +149,9 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Method(typeof(WorldSelector), "AutoOrderToTileNow"),
                 prefix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(AutoOrderVehicleCaravanPathing)));
+            harmony.Patch(original: AccessTools.Method(typeof(Caravan_PathFollower), "StartPath"),
+                prefix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(StartVehicleCaravanPath)));
             harmony.Patch(original: AccessTools.Method(typeof(TilesPerDayCalculator), nameof(TilesPerDayCalculator.ApproxTilesPerDay), new Type[] { typeof(Caravan), typeof(StringBuilder) }),
                 prefix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(ApproxTilesForShips)));
@@ -406,7 +412,7 @@ namespace Vehicles
         /// </summary>
         public static void DebugSettlementPaths()
         {
-            if (ShipHarmony.drawPaths && (ShipHarmony.debugLines is null || !ShipHarmony.debugLines.Any())) return;
+            if (ShipHarmony.drawPaths && (ShipHarmony.debugLines is null || !ShipHarmony.debugLines.AnyNullified())) return;
             if (!ShipHarmony.drawPaths) goto DrawRings;
             foreach (WorldPath wp in ShipHarmony.debugLines)
             {
@@ -898,7 +904,7 @@ namespace Vehicles
         {
             if(HelperMethods.IsVehicle(___pawn) && !___pawn.GetComp<CompVehicle>().Props.movesWhenDowned)
             {
-                __instance.renderer.Notify_DamageApplied(dinfo);
+                (___pawn as VehiclePawn).vDrawer.Notify_DamageApplied(dinfo);
                 return false;
             }
             return true;
@@ -908,6 +914,17 @@ namespace Vehicles
         {
             if(HelperMethods.IsVehicle(___pawn) && !___pawn.GetComp<CompVehicle>().Props.movesWhenDowned)
             {
+                (___pawn as VehiclePawn).vDrawer.Notify_DamageDeflected(dinfo);
+                return false;
+            }
+            return true;
+        }
+
+        public static bool VehiclesDrawTrackerTick(Pawn ___pawn)
+        {
+            if(___pawn.IsVehicle())
+            {
+                (___pawn as VehiclePawn).Drawer.VehicleDrawerTick();
                 return false;
             }
             return true;
@@ -995,7 +1012,7 @@ namespace Vehicles
         {
             Map map = __instance.Map;
             TerrainDef terrainImpact = map.terrainGrid.TerrainAt(__instance.Position);
-            if(__instance.def.projectile.explosionDelay == 0 && terrainImpact.IsWater && !__instance.Position.GetThingList(__instance.Map).Any(x => HelperMethods.IsVehicle(x as Pawn)))
+            if(__instance.def.projectile.explosionDelay == 0 && terrainImpact.IsWater && !__instance.Position.GetThingList(__instance.Map).AnyNullified(x => HelperMethods.IsVehicle(x as Pawn)))
             {
                 __instance.Destroy(DestroyMode.Vanish);
                 if (__instance.def.projectile.explosionEffect != null)
@@ -1102,7 +1119,7 @@ namespace Vehicles
             if(HelperMethods.HasBoat(caravan) && !caravan.pather.Moving)
             {
                 List<Gizmo> gizmos = __result.ToList();
-                if (caravan.PawnsListForReading.Any(x => !HelperMethods.IsBoat(x)))
+                if (caravan.PawnsListForReading.AnyNullified(x => !HelperMethods.IsBoat(x)))
                 {
                     int index = gizmos.FindIndex(x => (x as Command_Action).icon == Settlement.AttackCommand);
                     if (index >= 0 && index < gizmos.Count)
@@ -1207,15 +1224,14 @@ namespace Vehicles
                     return false;
                 }
 
-                if (HelperMethods.IsBoat(pawn))
+                if (DebugSettings.godMode)
                 {
-                    if (DebugSettings.godMode)
-                    {
-                        Log.Message("-> " + clickCell + " | " + pawn.Map.terrainGrid.TerrainAt(clickCell).LabelCap + " | " + WaterMapUtility.GetExtensionToMap(pawn.Map).getShipPathGrid.CalculatedCostAt(clickCell) +
-                            " - " + WaterMapUtility.GetExtensionToMap(pawn.Map).getShipPathGrid.pathGrid[pawn.Map.cellIndices.CellToIndex(clickCell)]);
-                    }
+                    Log.Message("-> " + clickCell + " | " + pawn.Map.terrainGrid.TerrainAt(clickCell).LabelCap + " | " + WaterMapUtility.GetExtensionToMap(pawn.Map).getShipPathGrid.CalculatedCostAt(clickCell) +
+                        " - " + WaterMapUtility.GetExtensionToMap(pawn.Map).getShipPathGrid.pathGrid[pawn.Map.cellIndices.CellToIndex(clickCell)]);
+                }
 
-
+                if (HelperMethods.IsBoat(pawn) && !VehicleMod.mod.settings.debugDisableWaterPathing)
+                {
                     //if (!VehicleMod.mod.settings.debugDisableSmoothPathing && pawn.GetComp<CompVehicle>().Props.diagonalRotation)
                     //{
                     //    if (!(pawn as VehiclePawn).InitiateSmoothPath(clickCell))
@@ -1224,9 +1240,6 @@ namespace Vehicles
                     //    }
                     //    return false;
                     //}
-                    if (VehicleMod.mod.settings.debugDisableWaterPathing)
-                        return true;
-
                     int num = GenRadial.NumCellsInRadius(2.9f);
                     int i = 0;
                     IntVec3 curLoc;
@@ -1242,7 +1255,7 @@ namespace Vehicles
                             }
                             if (!ShipReachabilityUtility.CanReachShip(pawn, curLoc, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
                             {
-                                if (debug) Log.Message("CANT REACH ");
+                                if (debug) Log.Message("CANT REACH");
                                 __result = new FloatMenuOption("CannotSailToCell".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null);
                                 return false;
                             }
@@ -1284,9 +1297,69 @@ namespace Vehicles
                             i++;
                         }
                     }
-                    __result = null;
-                    return false;
                 }
+                else
+                {
+                    int num = GenRadial.NumCellsInRadius(2.9f);
+                    int i = 0;
+                    IntVec3 curLoc;
+                    while (i < num)
+                    {
+                        curLoc = GenRadial.RadialPattern[i] + clickCell;
+                        if (GenGrid.Standable(curLoc, pawn.Map))
+                        {
+                            if (curLoc == pawn.Position)
+                            {
+                                __result = null;
+                                return false;
+                            }
+                            if (!ReachabilityUtility.CanReach(pawn, curLoc, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
+                            {
+                                if (debug) Log.Message("CANT REACH");
+                                __result = new FloatMenuOption("CannotSailToCell".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null);
+                                return false;
+                            }
+                            Action action = delegate ()
+                            {
+                                Job job = new Job(JobDefOf.Goto, curLoc);
+                                if (pawn.Map.exitMapGrid.IsExitCell(Verse.UI.MouseCell()))
+                                {
+                                    job.exitMapOnArrival = true;
+                                }
+                                else if (!pawn.Map.IsPlayerHome && !pawn.Map.exitMapGrid.MapUsesExitGrid && CellRect.WholeMap(pawn.Map).IsOnEdge(Verse.UI.MouseCell(), 3) &&
+                                    pawn.Map.Parent.GetComponent<FormCaravanComp>() != null && MessagesRepeatAvoider.MessageShowAllowed("MessagePlayerTriedToLeaveMapViaExitGrid-" +
+                                    pawn.Map.uniqueID, 60f))
+                                {
+                                    FormCaravanComp component = pawn.Map.Parent.GetComponent<FormCaravanComp>();
+                                    if (component.CanFormOrReformCaravanNow)
+                                    {
+                                        Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CanReform".Translate(), pawn.Map.Parent, MessageTypeDefOf.RejectInput, false);
+                                    }
+                                    else
+                                    {
+                                        Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CantReform".Translate(), pawn.Map.Parent, MessageTypeDefOf.RejectInput, false);
+                                    }
+                                }
+                                if (pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc))
+                                {
+                                    MoteMaker.MakeStaticMote(curLoc, pawn.Map, ThingDefOf.Mote_FeedbackGoto, 1f);
+                                }
+                            };
+                            __result = new FloatMenuOption("GoHere".Translate(), action, MenuOptionPriority.GoHere, null, null, 0f, null, null)
+                            {
+                                autoTakeable = true,
+                                autoTakeablePriority = 10f
+                            };
+                            return false;
+                        }
+                        else
+                        {
+                            i++;
+                        }
+                    }
+                }
+                __result = null;
+                return false;
             }
             return true;
         }
@@ -1360,6 +1433,15 @@ namespace Vehicles
 				    SoundDefOf.ColonistOrdered.PlayOneShotOnCamera(null);
 			    }
                 return false;
+            }
+            return true;
+        }
+
+        public static bool StartVehicleCaravanPath(int destTile, CaravanArrivalAction arrivalAction, Caravan ___caravan, bool repathImmediately = false, bool resetPauseStatus = true)
+        {
+            if(___caravan.HasVehicle())
+            {
+                (___caravan as VehicleCaravan).vPather.StartPath(destTile, arrivalAction, repathImmediately, resetPauseStatus);
             }
             return true;
         }
@@ -1497,7 +1579,7 @@ namespace Vehicles
 
         public static bool CapacityWithVehicle(List<ThingCount> thingCounts, ref float __result, StringBuilder explanation = null)
         {
-            if(thingCounts.Any(x => HelperMethods.IsVehicle(x.Thing as Pawn)))
+            if(thingCounts.AnyNullified(x => HelperMethods.IsVehicle(x.Thing as Pawn)))
             {
                 float num = 0f;
                 foreach(ThingCount tc in thingCounts)
@@ -1720,7 +1802,7 @@ namespace Vehicles
                     }
                     if(HelperMethods.IsVehicle(pawn))
                     {
-                        if(pawn.GetComp<CompVehicle>().AllPawnsAboard.Any())
+                        if(pawn.GetComp<CompVehicle>().AllPawnsAboard.AnyNullified())
                         {
                             num += pawn.GetComp<CompVehicle>().AllPawnsAboard.FindAll(x => x.IsFreeColonist).Count;
                             num2 += pawn.GetComp<CompVehicle>().AllPawnsAboard.FindAll(x => x.IsFreeColonist && x.InMentalState).Count;
@@ -2023,9 +2105,10 @@ namespace Vehicles
         {
             if(caravan.HasVehicle())
             {
-                if(caravan.HasBoat())
+                bool coastalSpawn = caravan.HasBoat();
+                if(coastalSpawn)
                 {
-                    EnterMapUtilityVehicles.Enter(caravan, map, enterMode, dropInventoryMode, draftColonists, extraCellValidator);
+                    EnterMapUtilityVehicles.EnterAndSpawn(caravan, map, enterMode, coastalSpawn, dropInventoryMode, draftColonists, extraCellValidator);
                 }
                 else
                 {
@@ -2042,9 +2125,8 @@ namespace Vehicles
 		                }), false);
 		                enterMode = CaravanEnterMode.Edge;
 	                }
-	                IntVec3 enterCell = EnterMapUtilityVehicles.GetEnterCellVehicle(caravan, map, enterMode, extraCellValidator);
-	                Func<Pawn, IntVec3> spawnCellGetter = (Pawn p) => CellFinder.RandomSpawnCellForPawnNear(enterCell, map, 4);
-	                CaravanEnterMapUtility.Enter(caravan, map, spawnCellGetter, dropInventoryMode, draftColonists);
+
+                    EnterMapUtilityVehicles.EnterAndSpawn(caravan, map, enterMode, coastalSpawn, dropInventoryMode, draftColonists, extraCellValidator);
                 }
                 return false;
             }
@@ -2053,9 +2135,17 @@ namespace Vehicles
 
         public static bool EnterMapShipsCatchAll2(Caravan caravan, Map map, Func<Pawn, IntVec3> spawnCellGetter, CaravanDropInventoryMode dropInventoryMode = CaravanDropInventoryMode.DoNotDrop, bool draftColonists = false)
         {
-            if(HelperMethods.HasBoat(caravan))
+            if(caravan.HasVehicle())
             {
-                EnterMapUtilityVehicles.EnterSpawn(caravan, map, spawnCellGetter, dropInventoryMode, draftColonists);
+                bool coastalSpawn = caravan.HasBoat();
+                if(coastalSpawn)
+                {
+                    EnterMapUtilityVehicles.EnterAndSpawn(caravan, map, CaravanEnterMode.None, coastalSpawn, dropInventoryMode, draftColonists, null);
+                }
+                else
+                {
+                    EnterMapUtilityVehicles.EnterAndSpawn(caravan, map, CaravanEnterMode.None, coastalSpawn, dropInventoryMode, draftColonists, null);
+                }
                 return false;
             }
             return true;
@@ -2064,7 +2154,7 @@ namespace Vehicles
         //REDO
         public static bool AllOwnersDownedVehicle(Caravan __instance, ref bool __result)
         {
-            if(__instance.PawnsListForReading.Any(x => HelperMethods.IsVehicle(x)))
+            if(__instance.PawnsListForReading.AnyNullified(x => HelperMethods.IsVehicle(x)))
             {
                 foreach (Pawn ship in __instance.pawns)
                 {
@@ -2083,7 +2173,7 @@ namespace Vehicles
         //REDO
         public static bool AllOwnersMentalBreakVehicle(Caravan __instance, ref bool __result)
         {
-            if(__instance.PawnsListForReading.Any(x => HelperMethods.IsVehicle(x)))
+            if(__instance.PawnsListForReading.AnyNullified(x => HelperMethods.IsVehicle(x)))
             {
                 foreach(Pawn ship in __instance.pawns)
                 {
@@ -2107,7 +2197,7 @@ namespace Vehicles
             {
                 foreach(Pawn p in __instance.AllPawnsSpawned)
                 {
-                    if(HelperMethods.IsVehicle(p) && p.GetComp<CompVehicle>().AllPawnsAboard.Any())
+                    if(HelperMethods.IsVehicle(p) && p.GetComp<CompVehicle>().AllPawnsAboard.AnyNullified())
                     {
                         foreach (Pawn sailor in p.GetComp<CompVehicle>().AllPawnsAboard)
                         {
@@ -2138,15 +2228,15 @@ namespace Vehicles
 
         public static bool NoRestForVehicles(Caravan __instance, ref bool __result)
         {
-            if(HelperMethods.HasVehicle(__instance) && !__instance.PawnsListForReading.Any(x => !HelperMethods.IsVehicle(x)))
+            if(HelperMethods.HasVehicle(__instance) && !__instance.PawnsListForReading.AnyNullified(x => !HelperMethods.IsVehicle(x)))
             {
                 __result = false;
-                if(__instance.PawnsListForReading.Any(x => x.GetComp<CompVehicle>().navigationCategory == NavigationCategory.Manual))
+                if(__instance.PawnsListForReading.AnyNullified(x => x.GetComp<CompVehicle>().navigationCategory == NavigationCategory.Manual))
                 {
                     __result = __instance.Spawned && (!__instance.pather.Moving || __instance.pather.nextTile != __instance.pather.Destination || !Caravan_PathFollower.IsValidFinalPushDestination(__instance.pather.Destination) ||
                         Mathf.CeilToInt(__instance.pather.nextTileCostLeft / 1f) > 10000) && CaravanNightRestUtility.RestingNowAt(__instance.Tile);
                 }
-                else if(__instance.PawnsListForReading.Any(x => x.GetComp<CompVehicle>().navigationCategory == NavigationCategory.Opportunistic))
+                else if(__instance.PawnsListForReading.AnyNullified(x => x.GetComp<CompVehicle>().navigationCategory == NavigationCategory.Opportunistic))
                 {
                     __result = __instance.Spawned && (!__instance.pather.Moving || __instance.pather.nextTile != __instance.pather.Destination || !Caravan_PathFollower.IsValidFinalPushDestination(__instance.pather.Destination) ||
                         Mathf.CeilToInt(__instance.pather.nextTileCostLeft / 1f) > 10000) && CaravanNightRestUtility.RestingNowAt(__instance.Tile);
@@ -2300,7 +2390,7 @@ namespace Vehicles
 
         public static void VehicleSocialTabPawns(ref List<Pawn> __result)
         {
-            if(HelperMethods.HasVehicle(__result) && __result.Any(x => HelperMethods.IsVehicle(x)))
+            if(HelperMethods.HasVehicle(__result) && __result.AnyNullified(x => HelperMethods.IsVehicle(x)))
             {
                 List<Pawn> sailors = new List<Pawn>();
                 foreach(Pawn p in __result.Where(x => HelperMethods.IsVehicle(x)))
@@ -2525,7 +2615,7 @@ namespace Vehicles
             
             foreach(Pawn ship in ships)
             {
-                if(ship.GetComp<CompVehicle>().AllPawnsAboard.Any(x => !x.Dead))
+                if(ship.GetComp<CompVehicle>().AllPawnsAboard.AnyNullified(x => !x.Dead))
                     __result += ship.GetComp<CompVehicle>().AllPawnsAboard.Count;
             }
         }

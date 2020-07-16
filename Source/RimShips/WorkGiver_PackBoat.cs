@@ -30,7 +30,7 @@ namespace Vehicles.Jobs
 
         public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
         {
-            if(t is VehiclePawn availableBoat && t.TryGetComp<CompVehicle>().cargoToLoad.Any() && pawn.CanReach(new LocalTargetInfo(t.Position), PathEndMode.Touch, Danger.Deadly))
+            if(t is VehiclePawn availableBoat && t.TryGetComp<CompVehicle>().cargoToLoad.AnyNullified() && pawn.CanReach(new LocalTargetInfo(t.Position), PathEndMode.Touch, Danger.Deadly))
             {
                 Thing thing = FindThingToPack(availableBoat, pawn);
                 if (thing != null)

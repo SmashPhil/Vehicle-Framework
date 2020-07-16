@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Verse;
 
-namespace SPExtended
+namespace Vehicles
 {
     /// <summary>SmashPhil's implementation of Tuples
     /// <para>Create a Tuple in .Net3.5 that functions the same as Tuple while avoiding boxing and allow reassigning of Items.</para>

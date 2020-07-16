@@ -4,9 +4,10 @@ using System.Linq;
 using UnityEngine;
 using RimWorld;
 using Verse;
-using SPExtended;
+
 using Vehicles.Defs;
 using Verse.Sound;
+
 
 namespace Vehicles
 {
@@ -32,7 +33,7 @@ namespace Vehicles
             get
             {
                 IEnumerable<CannonHandler> cannonRange = Cannons.Where(x => x.cannonDef.maxRange <= GenRadial.MaxRadialPatternRadius);
-                if(!cannonRange.Any())
+                if(!cannonRange.AnyNullified())
                 {
                     return (float)Math.Floor(GenRadial.MaxRadialPatternRadius);
                 }
@@ -61,7 +62,7 @@ namespace Vehicles
                 var cannonPermanent = new CannonHandler(this.Pawn, cannon);
                 cannonPermanent.SetTarget(LocalTargetInfo.Invalid);
                 cannonPermanent.ResetCannonAngle();
-                if(Cannons.Any(x => x.baseCannonRenderLocation == cannonPermanent.baseCannonRenderLocation))
+                if(Cannons.AnyNullified(x => x.baseCannonRenderLocation == cannonPermanent.baseCannonRenderLocation))
                 {
                     Cannons.FindAll(x => x.baseCannonRenderLocation == cannonPermanent.baseCannonRenderLocation).ForEach(y => y.TryRemoveShell());
                     Cannons.RemoveAll(x => x.baseCannonRenderLocation == cannonPermanent.baseCannonRenderLocation);
@@ -110,7 +111,7 @@ namespace Vehicles
             {
                 if (Cannons.Count > 0)
                 {
-                    if(Cannons.Any(x => x.cannonDef.weaponType == WeaponType.Rotatable))
+                    if(Cannons.AnyNullified(x => x.cannonDef.weaponType == WeaponType.Rotatable))
                     {
                         int i = 0;
                         foreach(CannonHandler cannon in Cannons.Where(x => x.cannonDef.weaponLocation == WeaponLocation.Turret))
@@ -142,9 +143,9 @@ namespace Vehicles
                             }
                         }
                     }
-                    if (Cannons.Any(x => x.cannonDef.weaponType == WeaponType.Static))
+                    if (Cannons.AnyNullified(x => x.cannonDef.weaponType == WeaponType.Static))
                     {
-                        if (Cannons.Any(x => x.cannonDef.weaponLocation == WeaponLocation.Port))
+                        if (Cannons.AnyNullified(x => x.cannonDef.weaponLocation == WeaponLocation.Port))
                         {
                             foreach(CannonHandler cannon in Cannons.Where(x => x.cannonDef.weaponLocation == WeaponLocation.Port))
                             {
@@ -179,7 +180,7 @@ namespace Vehicles
                                 yield return portSideCannons;
                             }
                         }
-                        if (Cannons.Any(x => x.cannonDef.weaponLocation == WeaponLocation.Starboard))
+                        if (Cannons.AnyNullified(x => x.cannonDef.weaponLocation == WeaponLocation.Starboard))
                         {
                             foreach(CannonHandler cannon in Cannons.Where(x => x.cannonDef.weaponLocation == WeaponLocation.Starboard))
                             {
@@ -212,7 +213,7 @@ namespace Vehicles
                                 yield return starboardSideCannons;
                             }
                         }
-                        if (Cannons.Any(x => x.cannonDef.weaponLocation == WeaponLocation.Bow))
+                        if (Cannons.AnyNullified(x => x.cannonDef.weaponLocation == WeaponLocation.Bow))
                         {
                             foreach(CannonHandler cannon in Cannons.Where(x => x.cannonDef.weaponLocation == WeaponLocation.Bow))
                             {
@@ -245,7 +246,7 @@ namespace Vehicles
                                 yield return bowSideCannons;
                             }
                         }
-                        if (Cannons.Any(x => x.cannonDef.weaponLocation == WeaponLocation.Stern))
+                        if (Cannons.AnyNullified(x => x.cannonDef.weaponLocation == WeaponLocation.Stern))
                         {
                             foreach(CannonHandler cannon in Cannons.Where(x => x.cannonDef.weaponLocation == WeaponLocation.Starboard))
                             {
@@ -310,7 +311,7 @@ namespace Vehicles
                     }
                     tick++;
                     broadsideFire[i].Third = tick;
-                    if (!side.First.Any())
+                    if (!side.First.AnyNullified())
                     {
                         broadsideFire.RemoveAt(i);
                     }
@@ -356,7 +357,7 @@ namespace Vehicles
             IntVec3 c = cannon.cannonTarget.Cell + GenRadial.RadialPattern[Rand.Range(0, GenRadial.NumCellsInRadius(cannon.cannonDef.spreadRadius * (Range / cannon.cannonDef.maxRange)))];
             if (data.Second >= cannon.cannonDef.projectileShifting.Count)
                 data.Second = 0;
-            float horizontalOffset = cannon.cannonDef.projectileShifting.Any() ? cannon.cannonDef.projectileShifting[data.Second] : 0;
+            float horizontalOffset = cannon.cannonDef.projectileShifting.AnyNullified() ? cannon.cannonDef.projectileShifting[data.Second] : 0;
             Vector3 launchCell = cannon.TurretLocation + new Vector3(horizontalOffset, 1f, cannon.cannonDef.projectileOffset).RotatedBy(cannon.TurretRotation);
 
             ThingDef projectile;
@@ -793,7 +794,7 @@ namespace Vehicles
 
         private void InitializeCannons()
         {
-            if(Cannons.Count <= 0 && Props.cannons.Any())
+            if(Cannons.Count <= 0 && Props.cannons.AnyNullified())
             {
                 foreach(CannonHandler cannon in Props.cannons)
                 {
@@ -803,7 +804,7 @@ namespace Vehicles
                     Cannons.Add(cannonPermanent);
                 }
 
-                if(Cannons.Select(x => x.key).GroupBy(y => y).Any(key => key.Count() > 1))
+                if(Cannons.Select(x => x.key).GroupBy(y => y).AnyNullified(key => key.Count() > 1))
                 {
                     Log.Warning("Duplicate CannonHandler key has been found. These are intended to be unique.");
                 }

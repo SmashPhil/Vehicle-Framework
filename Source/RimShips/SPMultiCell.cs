@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using Verse;
 using UnityEngine;
+using Vehicles.AI;
 
-namespace SPExtended
+namespace Vehicles
 {
     public static class SPMultiCell
     {
@@ -70,19 +71,19 @@ namespace SPExtended
             int offset = x > z ? x + extraOffset : z + extraOffset;
             if (spawnPoint.x < offset)
             {
-                spawnPoint.x = (int)(offset / 2);
+                spawnPoint.x = offset / 2;
             }
             else if (spawnPoint.x >= (map.Size.x - (offset / 2)))
             {
-                spawnPoint.x = (int)(map.Size.x - (offset / 2));
+                spawnPoint.x = map.Size.x - (offset / 2);
             }
             if (spawnPoint.z < offset)
             {
-                spawnPoint.z = (int)(offset / 2);
+                spawnPoint.z = offset / 2;
             }
             else if (spawnPoint.z > (map.Size.z - (offset / 2)))
             {
-                spawnPoint.z = (int)(map.Size.z - (offset / 2));
+                spawnPoint.z = map.Size.z - (offset / 2);
             }
             return spawnPoint;
         }
@@ -100,15 +101,39 @@ namespace SPExtended
             int z = p.def.size.z % 2 == 0 ? p.def.size.z / 2 : (p.def.size.z + 1) / 2;
 
             int hitbox = x > z ? x : z;
-            if (nextCell.x + hitbox >= map.Size.x || nextCell.z + hitbox >= map.Size.z)
+            if (nextCell.x + hitbox > map.Size.x || nextCell.z + hitbox > map.Size.z)
             {
                 return true;
             }
-            if (nextCell.x - hitbox <= 0 || nextCell.z - hitbox <= 0)
+            if (nextCell.x - hitbox < 0 || nextCell.z - hitbox < 0)
             {
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Ensures the cellrect inhabited by the vehicle contains no Things that will block pathing and movement.
+        /// </summary>
+        /// <param name="pawn"></param>
+        /// <param name="c"></param>
+        /// <returns></returns>
+        public static bool CellRectStandable(this Pawn pawn, Map map, IntVec3? c = null)
+        {
+            IntVec3 loc = c.HasValue ? c.Value : pawn.Position;
+            IntVec2 dimensions = pawn.RotatedSize;
+            foreach(IntVec3 cell in CellRect.CenteredOn(loc, dimensions.x, dimensions.z))
+            {
+                if(pawn.IsBoat() && !GenGridShips.Standable(cell, map))
+                {
+                    return false;
+                }
+                else if(!GenGrid.Standable(cell, map))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         /// <summary>

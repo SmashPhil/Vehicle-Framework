@@ -44,7 +44,7 @@ namespace Vehicles
 			get
 			{
 				VehicleCaravanTicksPerMoveUtility.VehicleInfo? caravanInfo = CaravanInfo;
-				if (caravanInfo != null && caravanInfo.Value.vehicles.Any())
+				if (caravanInfo != null && caravanInfo.Value.vehicles.AnyNullified())
 				{
 					return VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(caravanInfo.Value, null);
 				}
@@ -73,7 +73,7 @@ namespace Vehicles
 		{
 			get
 			{
-				if (!waypoints.Any())
+				if (!waypoints.AnyNullified())
 				{
 					return null;
 				}
@@ -383,12 +383,12 @@ namespace Vehicles
 
 		private void TryAddWaypoint(int tile, bool playSound = true)
 		{
-			if (vehicles.Any(v => !Find.World.GetComponent<WorldVehiclePathGrid>().Passable(tile, v.def)))
+			if (vehicles.AnyNullified(v => !Find.World.GetComponent<WorldVehiclePathGrid>().Passable(tile, v.def)))
 			{
 				Messages.Message("MessageCantAddWaypointBecauseImpassable".Translate(), MessageTypeDefOf.RejectInput, false);
 				return;
 			}
-			if (waypoints.Any() && !Find.World.GetComponent<WorldVehicleReachability>().CanReach(vehicles.UniqueVehicleDefsInList().ToList(), waypoints[waypoints.Count - 1].Tile, tile))
+			if (waypoints.AnyNullified() && !Find.World.GetComponent<WorldVehicleReachability>().CanReach(vehicles.UniqueVehicleDefsInList().ToList(), waypoints[waypoints.Count - 1].Tile, tile))
 			{
 				Messages.Message("MessageCantAddWaypointBecauseUnreachable".Translate(), MessageTypeDefOf.RejectInput, false);
 				return;
@@ -411,7 +411,7 @@ namespace Vehicles
 
 		public void TryRemoveWaypoint(RoutePlannerWaypoint point, bool playSound = true)
 		{
-			if (cantRemoveFirstWaypoint && waypoints.Any() && point == waypoints[0])
+			if (cantRemoveFirstWaypoint && waypoints.AnyNullified() && point == waypoints[0])
 			{
 				Messages.Message("MessageCantRemoveWaypointBecauseFirst".Translate(), MessageTypeDefOf.RejectInput, false);
 				return;
@@ -534,7 +534,7 @@ namespace Vehicles
 
 		public static int GetTicksPerMove(List<VehiclePawn> pawns, float massUsage, float massCapacity, StringBuilder explanation = null)
 		{
-			if (pawns.Any())
+			if (pawns.AnyNullified())
 			{
 				if (explanation != null)
 				{

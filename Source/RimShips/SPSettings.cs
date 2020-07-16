@@ -7,7 +7,7 @@ using UnityEngine;
 using Verse;
 using RimWorld;
 
-namespace SPExtended
+namespace Vehicles
 {
     [StaticConstructorOnStartup]
     public static class SPSettings

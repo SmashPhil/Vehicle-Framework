@@ -59,7 +59,7 @@ namespace Vehicles.Lords
                 Lord lord = this.lord;
                 List<Pawn> pawns = this.lord.ownedPawns.Where(x => !HelperMethods.IsVehicle(x)).ToList();
 
-                if(!pawns.Any(x => !x.IsColonist && !x.RaceProps.Animal && x.Spawned))
+                if(!pawns.AnyNullified(x => !x.IsColonist && !x.RaceProps.Animal && x.Spawned))
                     lord.ReceiveMemo("AllSlavesGathered");
             }
         }

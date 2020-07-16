@@ -22,18 +22,18 @@ namespace Vehicles
                 Log.Error("Can't start forming caravan because startingTile is invalid.", false);
                 return;
             }
-            if (!pawns.Any())
+            if (!pawns.AnyNullified())
             {
                 Log.Error("Can't start forming caravan with 0 pawns.", false);
                 return;
             }
-            if(!pawns.Any(x => HelperMethods.IsVehicle(x)))
+            if(!pawns.AnyNullified(x => HelperMethods.IsVehicle(x)))
             {
                 Log.Error("Can't start forming vehicle caravan without any vehicles");
                 return;
             }
 
-            if (pawns.Any(x => HelperMethods.IsBoat(x) && (x.GetComp<CompVehicle>().movementStatus is VehicleMovementStatus.Online)))
+            if (pawns.AnyNullified(x => HelperMethods.IsBoat(x) && (x.GetComp<CompVehicle>().movementStatus is VehicleMovementStatus.Online)))
             {
 
                 List<TransferableOneWay> list = transferables;
@@ -75,7 +75,7 @@ namespace Vehicles
                     }
                 }
             }
-            else if(pawns.Any(x => HelperMethods.IsVehicle(x) && x.GetComp<CompVehicle>().movementStatus is VehicleMovementStatus.Online))
+            else if(pawns.AnyNullified(x => HelperMethods.IsVehicle(x) && x.GetComp<CompVehicle>().movementStatus is VehicleMovementStatus.Online))
             {
                 List<TransferableOneWay> list = transferables;
                 list.RemoveAll((TransferableOneWay x) => x.CountToTransfer <= 0 || !x.HasAnyThing || x.AnyThing is Pawn);

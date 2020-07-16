@@ -25,7 +25,7 @@ namespace Vehicles
         public UpgradeNode RootNode(UpgradeNode child)
         {
             UpgradeNode parentOfChild = child;
-            while(parentOfChild.prerequisiteNodes.Any())
+            while(parentOfChild.prerequisiteNodes.AnyNullified())
             {
                 parentOfChild = NodeListed(parentOfChild.prerequisiteNodes.First());
             }
@@ -68,7 +68,7 @@ namespace Vehicles
         {
             UpgradeNode nodeListed = NodeListed(node);
             List<UpgradeNode> unlocksNodes = upgradeList.FindAll(x => x.prerequisiteNodes.Contains(nodeListed.upgradeID));
-            return !unlocksNodes.Any(x => x.upgradeActive);
+            return !unlocksNodes.AnyNullified(x => x.upgradeActive);
         }
 
         public void RefundUnlock()
@@ -185,7 +185,7 @@ namespace Vehicles
                     upgradeList.Add(permanentNode);
                 }
 
-                if(upgradeList.Select(x => x.upgradeID).GroupBy(y => y).Where(y => y.Count() > 1).Select(z => z.Key).Any())
+                if(upgradeList.Select(x => x.upgradeID).GroupBy(y => y).Where(y => y.Count() > 1).Select(z => z.Key).AnyNullified())
                 {
                     Log.Error(string.Format("Duplicate UpgradeID's detected on def {0}. This is not supported.", parent.def.defName));
                     if(Prefs.DevMode)

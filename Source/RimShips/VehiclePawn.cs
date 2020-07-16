@@ -18,6 +18,7 @@ namespace Vehicles
         private Vector3 smoothPos;
 
         public Vehicle_PathFollower vPather;
+        public Vehicle_DrawTracker vDrawer;
 
         public Vector3 SmoothPos
         {
@@ -31,11 +32,79 @@ namespace Vehicles
             }
         }
 
+        public float CachedAngle { get; set; }
+        public float Angle
+        {
+            get
+            {
+                if(!Props.diagonalRotation)
+                    return 0f;
+
+                if (this.Pawn.vPather.Moving)
+                {
+                    IntVec3 c = this.Pawn.vPather.nextCell - this.Pawn.Position;
+                    if (c.x > 0 && c.z > 0)
+                    {
+                        angle = -45f;
+                    }
+                    else if (c.x > 0 && c.z < 0)
+                    {
+                        angle = 45f;
+                    }
+                    else if (c.x < 0 && c.z < 0)
+                    {
+                        angle = -45f;
+                    }
+                    else if (c.x < 0 && c.z > 0)
+                    {
+                        angle = 45f;
+                    }
+                    else
+                    {
+                        angle = 0f;
+                    }
+                }
+                return angle;
+            }
+            set
+            {
+                if (value == this.angle)
+                {
+                    return;
+                }
+                angle = value;
+            }
+        }
+
+        public new Vehicle_DrawTracker Drawer
+        {
+            get
+            {
+                if(vDrawer is null)
+                {
+                    vDrawer = new Vehicle_DrawTracker(this);
+                }
+                return vDrawer;
+            }
+        }
+
         public override Color DrawColor //ADD COLORABLE FLAGS
         {
             get => base.DrawColor;
             set => base.DrawColor = value;
         }
+
+        public override Vector3 DrawPos => Drawer.DrawPos;
+
+        public override void DrawAt(Vector3 drawLoc, bool flip = false)
+        {
+            Drawer.DrawAt(drawLoc);
+        }
+
+        public override void DrawGUIOverlay()
+		{
+			Drawer.ui.DrawPawnGUIOverlay();
+		}
 
         public override IEnumerable<Gizmo> GetGizmos()
         {
@@ -130,7 +199,7 @@ namespace Vehicles
         {
             absorbed = false;
             DamageDef defApplied = dinfo.Def;
-	        if (def.damageMultipliers != null && def.damageMultipliers.Any(x => x.damageDef == defApplied))
+	        if (def.damageMultipliers != null && def.damageMultipliers.AnyNullified(x => x.damageDef == defApplied))
 	        {
                 return;
 	        }
@@ -269,12 +338,13 @@ namespace Vehicles
                 smoothPos = Position.ToVector3Shifted();
                 vPather.ResetToCurrentPosition();
             }
+            Drawer.Notify_Spawned();
         }
 
         public override void Tick()
         {
             base.Tick();
-            if(base.Spawned)
+            if(Spawned)
             {
                 vPather.PatherTick();
             }

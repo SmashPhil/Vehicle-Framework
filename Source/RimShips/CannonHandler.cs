@@ -4,7 +4,7 @@ using Verse;
 using Verse.Sound;
 using RimWorld;
 using UnityEngine;
-using SPExtended;
+
 using System.Linq;
 
 namespace Vehicles
@@ -45,7 +45,7 @@ namespace Vehicles
             {
                 Log.Error($"Failed to properly create {cannonDef.label} on {pawn.LabelShort}, a key must be included for each CannonHandler");
             }
-            else if(CompCannon.Cannons.Any(c => c.key == key))
+            else if(CompCannon.Cannons.AnyNullified(c => c.key == key))
             {
                 Log.Error($"Duplicate key {key} found on {pawn.LabelShort}. Duplicate registered on {cannonDef.label}{uniqueID}");
             }
@@ -127,7 +127,7 @@ namespace Vehicles
 
         public bool RotationIsValid => currentRotation == rotationTargeted;
 
-        public bool CannonDisabled => !RelatedHandlers.NullOrEmpty() && RelatedHandlers.Any(h => h.handlers.Count < h.role.slotsToOperate);
+        public bool CannonDisabled => !RelatedHandlers.NullOrEmpty() && RelatedHandlers.AnyNullified(h => h.handlers.Count < h.role.slotsToOperate);
 
         public List<VehicleHandler> RelatedHandlers => pawn.GetComp<CompVehicle>().handlers.FindAll(h => !h.role.cannonIds.NullOrEmpty() && h.role.cannonIds.Contains(key));
         public bool ActivateTimer()

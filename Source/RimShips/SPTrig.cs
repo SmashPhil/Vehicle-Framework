@@ -5,7 +5,7 @@ using System.Text;
 using Verse;
 using UnityEngine;
 
-namespace SPExtended
+namespace Vehicles
 {
     public static class SPTrig
     {

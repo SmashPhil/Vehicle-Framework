@@ -10,7 +10,7 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
-using SPExtended;
+
 
 namespace Vehicles
 {
@@ -102,7 +102,7 @@ namespace Vehicles
             {
                 foreach (VehicleHandler handler in this.handlers)
                 {
-                    if (handler.role.handlingTypes.Any(h => h == HandlingTypeFlags.Movement) && handler.handlers.Count < handler.role.slotsToOperate)
+                    if (handler.role.handlingTypes.AnyNullified(h => h == HandlingTypeFlags.Movement) && handler.handlers.Count < handler.role.slotsToOperate)
                     {
                         return false;
                     }
@@ -120,7 +120,7 @@ namespace Vehicles
                 int pawnCount = 0;
                 foreach (VehicleRole r in Props.roles)
                 {
-                    if (r.handlingTypes.Any(h => h == HandlingTypeFlags.Movement))
+                    if (r.handlingTypes.AnyNullified(h => h == HandlingTypeFlags.Movement))
                         pawnCount += r.slotsToOperate;
                 }
                 return pawnCount;
@@ -166,7 +166,7 @@ namespace Vehicles
                 {
                     foreach (VehicleHandler handler in handlers)
                     {
-                        if (handler.role.handlingTypes.Any(h => h == HandlingTypeFlags.Movement))
+                        if (handler.role.handlingTypes.AnyNullified(h => h == HandlingTypeFlags.Movement))
                         {
                             crewOnShip.AddRange(handler.handlers);
                         }
@@ -183,7 +183,7 @@ namespace Vehicles
                 List<Pawn> weaponCrewOnShip = new List<Pawn>();
                 foreach(VehicleHandler handler in handlers)
                 {
-                    if (handler.role.handlingTypes.Any(h => h == HandlingTypeFlags.Cannon))
+                    if (handler.role.handlingTypes.AnyNullified(h => h == HandlingTypeFlags.Cannon))
                     {
                         weaponCrewOnShip.AddRange(handler.handlers);
                     }
@@ -277,7 +277,7 @@ namespace Vehicles
 
         public List<VehicleHandler> GetAllHandlersMatch(HandlingTypeFlags handlingTypeFlag, string cannonKey = "")
         {
-            return handlers.FindAll(x => x.role.handlingTypes.Any(h => h == handlingTypeFlag) && (handlingTypeFlag != HandlingTypeFlags.Cannon || (!x.role.cannonIds.NullOrEmpty() && x.role.cannonIds.Contains(cannonKey))));
+            return handlers.FindAll(x => x.role.handlingTypes.AnyNullified(h => h == handlingTypeFlag) && (handlingTypeFlag != HandlingTypeFlags.Cannon || (!x.role.cannonIds.NullOrEmpty() && x.role.cannonIds.Contains(cannonKey))));
         }
 
         public VehicleHandler GetHandlersMatch(Pawn pawn)
@@ -333,25 +333,6 @@ namespace Vehicles
             currentTravelCells.Add(cell);
         }
 
-        public float CachedAngle { get; set; }
-        public float Angle
-        {
-            get
-            {
-                if(!Props.diagonalRotation)
-                    return 0f;
-                return angle;
-            }
-            set
-            {
-                if (value == this.angle)
-                {
-                    return;
-                }
-                angle = value;
-            }
-        }
-
         public float BearingAngle
         {
             get
@@ -376,7 +357,7 @@ namespace Vehicles
             {
                 if(!cargoToLoad.NullOrEmpty())
                 {
-                    if (!cargoToLoad.Any(x => x.AnyThing != null && x.CountToTransfer > 0 && !this.Pawn.inventory.innerContainer.Contains(x.AnyThing)))
+                    if (!cargoToLoad.AnyNullified(x => x.AnyThing != null && x.CountToTransfer > 0 && !this.Pawn.inventory.innerContainer.Contains(x.AnyThing)))
                     {
                         cargoToLoad.Clear();
                     }
@@ -624,7 +605,7 @@ namespace Vehicles
                 }
             }
             RemovePawn(pawn);
-            if(!AllPawnsAboard.Any() && outOfFoodNotified)
+            if(!AllPawnsAboard.AnyNullified() && outOfFoodNotified)
                 outOfFoodNotified = false;
         }
 
@@ -988,11 +969,11 @@ namespace Vehicles
             //                    j++;
             //                }
             //            }
-            //            if (handler.role.handlingTypes.Any(h => h == HandlingTypeFlags.Movement) && handler.handlers.Count < handler.role.slotsToOperate)
+            //            if (handler.role.handlingTypes.AnyNullified(h => h == HandlingTypeFlags.Movement) && handler.handlers.Count < handler.role.slotsToOperate)
             //            {
             //                if (passengerHandler.handlers.Count <= 0)
             //                {
-            //                    VehicleHandler emergencyHandler = handlers.Find(x => x.role.handlingTypes.Any(h => h < HandlingTypeFlags.Movement) && x.handlers.Count > 0); //Can Optimize
+            //                    VehicleHandler emergencyHandler = handlers.Find(x => x.role.handlingTypes.AnyNullified(h => h < HandlingTypeFlags.Movement) && x.handlers.Count > 0); //Can Optimize
             //                    Pawn transferPawnE = emergencyHandler?.handlers.InnerListForReading.Find(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && x.RaceProps.Humanlike);
             //                    if(transferPawnE is null)
             //                        continue;
@@ -1004,11 +985,11 @@ namespace Vehicles
             //                    continue;
             //                passengerHandler.handlers.TryTransferToContainer(transferingPawn, handler.handlers, false);
             //            }
-            //            if (handler.role.handlingTypes.Any(h => h == HandlingTypeFlags.Cannon) && handler.handlers.Count < handler.role.slotsToOperate && this.CanMove)
+            //            if (handler.role.handlingTypes.AnyNullified(h => h == HandlingTypeFlags.Cannon) && handler.handlers.Count < handler.role.slotsToOperate && this.CanMove)
             //            {
             //                if(passengerHandler.handlers.Count <= 0)
             //                {
-            //                    VehicleHandler emergencyHandler = this.handlers.Find(x => x.role.handlingTypes.Any(h => h < HandlingTypeFlags.Cannon) && x.handlers.Count > 0); //Can Optimize
+            //                    VehicleHandler emergencyHandler = this.handlers.Find(x => x.role.handlingTypes.AnyNullified(h => h < HandlingTypeFlags.Cannon) && x.handlers.Count > 0); //Can Optimize
             //                    Pawn transferPawnE = emergencyHandler?.handlers.InnerListForReading.Find(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && x.RaceProps.Humanlike);
             //                    if(transferPawnE is null)
             //                        continue;
@@ -1035,7 +1016,7 @@ namespace Vehicles
 
         public void SmoothPatherTick()
         {
-            if(!VehicleMod.mod.settings.debugDisableSmoothPathing && currentTravelCells.Any())
+            if(!VehicleMod.mod.settings.debugDisableSmoothPathing && currentTravelCells.AnyNullified())
             {
                 float angle = (float)Pawn.DrawPos.Angle180RotationTracker(currentTravelCells.First().ToVector3Shifted());
 
@@ -1081,7 +1062,7 @@ namespace Vehicles
         //public override void CompTickRare()
         //{
         //    base.CompTickRare();
-        //    if(!VehicleMod.mod.settings.debugDisableSmoothPathing && currentTravelCells.Any())
+        //    if(!VehicleMod.mod.settings.debugDisableSmoothPathing && currentTravelCells.AnyNullified())
         //    {
         //        float angle = (float)Pawn.DrawPos.Angle180RotationTracker(currentTravelCells.First().ToVector3Shifted());
         //        CheckTurnSign(angle);

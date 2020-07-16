@@ -274,7 +274,7 @@ namespace Vehicles
         public override void PostClose()
         {
             base.PostClose();
-            if(this.caravan.PawnsListForReading.Any(x => HelperMethods.IsBoat(x)))
+            if(this.caravan.PawnsListForReading.AnyNullified(x => HelperMethods.IsBoat(x)))
                 HelperMethods.ToggleDocking(caravan, false);
         }
 
@@ -390,7 +390,7 @@ namespace Vehicles
 
         private bool CheckForErrors(List<Pawn> pawns)
         {
-            if(!pawns.Any( (Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer) && !x.Downed))
+            if(!pawns.AnyNullified( (Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer) && !x.Downed))
             {
                 Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), this.caravan, MessageTypeDefOf.RejectInput, false);
                 return false;

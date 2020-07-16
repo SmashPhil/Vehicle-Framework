@@ -4,8 +4,9 @@ using System.Linq;
 using Verse;
 using RimWorld.Planet;
 using UnityEngine;
+using Vehicles.AI;
 
-namespace SPExtended
+namespace Vehicles
 {
     [StaticConstructorOnStartup]
     public static class SPExtra
@@ -128,7 +129,7 @@ namespace SPExtended
         /// <returns></returns>
         public static T PopRandom<T>(ref List<T> list)
         {
-            if (list is null || !list.Any())
+            if (list is null || !list.AnyNullified())
                 return default(T);
             Rand.PushState();
             int index = Rand.Range(0, list.Count);
@@ -136,6 +137,24 @@ namespace SPExtended
             Rand.PopState();
             list.Remove(item);
             return item;
+        }
+
+        /// <summary>
+        /// .Any extension method but takes into account null collections do not contain the object. 
+        /// Does not throw error on null collections
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static bool AnyNullified<T>(this IList<T> list, Predicate<T> predicate = null)
+        {
+            return !list.NullOrEmpty() && (predicate is null ? list.Any() : list.Any(l => predicate(l)));
+        }
+
+        public static bool AnyNullified<T>(this IEnumerable<T> enumerable, Predicate<T> predicate = null)
+        {
+            return enumerable != null && (predicate is null ? enumerable.Any() : enumerable.Any(e => predicate(e)));
         }
 
         /// <summary>
@@ -190,7 +209,7 @@ namespace SPExtended
         public static bool ContainsAllOfList<T>(this IEnumerable<T> sourceList, IEnumerable<T> searchingList)
         {
             if (sourceList is null || searchingList is null) return false;
-            return sourceList.Intersect(searchingList).Any();
+            return sourceList.Intersect(searchingList).AnyNullified();
         }
 
         /// <summary>

@@ -124,7 +124,7 @@ namespace Vehicles
 
         public bool AvailableSpace(Thing item)
         {
-            return ExtractRequiredMaterials().Any(x => x.thingDef == item.def) ? MaterialsNeeded().Find(x => x.thingDef == item.def)?.count > 0 : false;
+            return ExtractRequiredMaterials().AnyNullified(x => x.thingDef == item.def) ? MaterialsNeeded().Find(x => x.thingDef == item.def)?.count > 0 : false;
         }
 
         public List<ThingDefCountClass> MaterialsNeeded()

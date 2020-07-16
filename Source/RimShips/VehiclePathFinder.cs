@@ -8,6 +8,7 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 
+
 namespace Vehicles.AI
 {
     public class VehiclePathFinder
@@ -25,17 +26,18 @@ namespace Vehicles.AI
             this.report = report;
         }
 
-        public PawnPath FindVehiclePath(IntVec3 start, LocalTargetInfo dest, VehiclePawn pawn, out bool destinationHasSpace, CancellationToken token, PathEndMode peMode = PathEndMode.OnCell)
+        public (PawnPath path, bool found) FindVehiclePath(IntVec3 start, LocalTargetInfo dest, VehiclePawn pawn, CancellationToken token, PathEndMode peMode = PathEndMode.OnCell)
         {
-            destinationHasSpace = false;
             if(pawn.LocationRestrictedBySize(dest.Cell))
-                return PawnPath.NotFound;
-            destinationHasSpace = true; //Passed checks;
+            {
+                Messages.Message("VehicleCannotFit".Translate(), MessageTypeDefOf.RejectInput);
+                return (PawnPath.NotFound, false);
+            }
             Danger maxDanger = Danger.Deadly;
             return FindVehiclePath(start, dest, TraverseParms.For(pawn, maxDanger, TraverseMode.ByPawn, false), token, peMode, HelperMethods.IsBoat(pawn));
         }
 
-        public PawnPath FindVehiclePath(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms,  CancellationToken token, PathEndMode peMode = PathEndMode.OnCell, bool waterPathing = false)
+        public (PawnPath path, bool found) FindVehiclePath(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms,  CancellationToken token, PathEndMode peMode = PathEndMode.OnCell, bool waterPathing = false)
         {
             if (Prefs.DevMode && report) 
                 Log.Message($"[Vehicles] MainPath for {traverseParms.pawn.LabelShort} - ThreadId: [{Thread.CurrentThread.ManagedThreadId}] TaskId: [{Task.CurrentId}]");
@@ -61,7 +63,7 @@ namespace Vehicles.AI
                     " pawn.Map=", pawn.Map,
                     " map=", map
                 }), false);
-                return PawnPath.NotFound;
+                return (PawnPath.NotFound, false);
             }
             if(!start.IsValid)
             {
@@ -71,7 +73,7 @@ namespace Vehicles.AI
                     start,
                     ", pawn=", pawn
                 }), false);
-                return PawnPath.NotFound;
+                return (PawnPath.NotFound, false);
             }
             if (!dest.IsValid)
             {
@@ -82,7 +84,7 @@ namespace Vehicles.AI
             ", pawn= ",
             pawn
                 }), false);
-                return PawnPath.NotFound;
+                return (PawnPath.NotFound, false);
             }
             if(traverseParms.mode == TraverseMode.ByPawn)
             {
@@ -90,14 +92,14 @@ namespace Vehicles.AI
                 {
                     if(!ShipReachabilityUtility.CanReachShip(pawn, dest, peMode, Danger.Deadly, false, traverseParms.mode))
                     {
-                        return PawnPath.NotFound;
+                        return (PawnPath.NotFound, false);
                     }
                 }
                 else
                 {
                     if(!ReachabilityUtility.CanReach(pawn, dest, peMode, Danger.Deadly, false, traverseParms.mode))
                     {
-                        return PawnPath.NotFound;
+                        return (PawnPath.NotFound, false);
                     }
                 }
                 
@@ -108,14 +110,14 @@ namespace Vehicles.AI
                 {
                     if(!WaterMap.getShipReachability.CanReachShip(start, dest, peMode, traverseParms))
                     {
-                        return PawnPath.NotFound;
+                        return (PawnPath.NotFound, false);
                     }
                 }
                 else
                 {
                     if(!map.reachability.CanReach(start, dest, peMode, traverseParms))
                     {
-                        return PawnPath.NotFound;
+                        return (PawnPath.NotFound, false);
                     }
                 }
             }
@@ -166,7 +168,7 @@ namespace Vehicles.AI
             {
                 if (token.IsCancellationRequested)
                 {
-                    return PawnPath.NotFound;
+                    return (PawnPath.NotFound, false);
                 }
 
                 iterations++;
@@ -398,7 +400,7 @@ namespace Vehicles.AI
                                     if(!flag12 && !waterPathing)
                                     {
                                         //Extra Terrain costs
-                                        if (pawn.GetComp<CompVehicle>().Props.customTerrainCosts?.Any() ?? false)
+                                        if (pawn.GetComp<CompVehicle>().Props.customTerrainCosts?.AnyNullified() ?? false)
                                         {
                                             TerrainDef currentTerrain = map.terrainGrid.TerrainAt(num15);
                                             if (pawn.GetComp<CompVehicle>().Props.customTerrainCosts.ContainsKey(currentTerrain))
@@ -568,15 +570,23 @@ namespace Vehicles.AI
                 }), false);
             }
             DebugDrawRichData();
-            return PawnPath.NotFound;
-            Block_32:
-            PawnPath result = FinalizedPath(num, flag9);
+            return (PawnPath.NotFound, false);
+        Block_32:
+            PawnPath result = null;
+            if (report)
+            {
+                result = FinalizedPath(num, flag9);
+            }
             DebugDrawPathCost();
-            return result;
+            return (result, true);
             Block_34:
-            PawnPath result2 = FinalizedPath(num, flag9);
+            PawnPath result2 = null;
+            if (report)
+            {
+                result2 = FinalizedPath(num, flag9);
+            }
             DebugDrawPathCost();
-            return result2;
+            return (result2, true);
             Block_35:
             Log.Warning(string.Concat(new object[]
             {
@@ -584,7 +594,7 @@ namespace Vehicles.AI
                 " to ", dest, " hit search limit of ", SearchLimit, " cells."
             }), false);
             DebugDrawRichData();
-            return PawnPath.NotFound;
+            return (PawnPath.NotFound, false);
         }
 
         public static int GetBuildingCost(Building b, TraverseParms traverseParms, Pawn pawn)

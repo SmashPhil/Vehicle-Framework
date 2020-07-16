@@ -7,7 +7,7 @@ using UnityEngine;
 using RimWorld;
 using Verse;
 using Verse.AI;
-using SPExtended;
+using System.IO;
 
 namespace Vehicles.AI
 {
@@ -131,9 +131,11 @@ namespace Vehicles.AI
                 }
                 if (pawn.Downed)
                 {
-                    Log.Error("Ships should not be downable. Contact Mod Author.");
+					Log.Error($"Boat {pawn.LabelCap} tried to path while downed. Downable: {pawn.GetComp<CompVehicle>().Props.downable} CurJob={pawn.CurJob.ToStringSafe()}");
+					PatherFailed();
+					return;
                 }
-                if (!(curPath is null))
+                if (curPath != null)
                 {
                     curPath.ReleaseToPool();
                 }
@@ -146,54 +148,54 @@ namespace Vehicles.AI
             else
             {
                 dest = (LocalTargetInfo)GenPath.ResolvePathMode(pawn, dest.ToTargetInfo(pawn.Map), ref peMode);
-			if (dest.HasThing && dest.ThingDestroyed)
-			{
-				Log.Error(pawn + " pathing to destroyed thing " + dest.Thing, false);
-				PatherFailed();
-				return;
-			}
-			if (!PawnCanOccupy(pawn.Position) && !TryRecoverFromUnwalkablePosition(true))
-			{
-				return;
-			}
-			if (moving && curPath != null && destination == dest && this.peMode == peMode)
-			{
-				return;
-			}
-			if (!pawn.Map.reachability.CanReach(pawn.Position, dest, peMode, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false)))
-			{
-				PatherFailed();
-				return;
-			}
-			this.peMode = peMode;
-			destination = dest;
-			if (!IsNextCellWalkable() || NextCellDoorToWaitForOrManuallyOpen() != null || nextCellCostLeft == nextCellCostTotal)
-			{
-				ResetToCurrentPosition();
-			}
-			PawnDestinationReservationManager.PawnDestinationReservation pawnDestinationReservation = pawn.Map.pawnDestinationReservationManager.MostRecentReservationFor(pawn);
-			if (pawnDestinationReservation != null && ((destination.HasThing && pawnDestinationReservation.target != destination.Cell) || (pawnDestinationReservation.job != pawn.CurJob && pawnDestinationReservation.target != destination.Cell)))
-			{
-				pawn.Map.pawnDestinationReservationManager.ObsoleteAllClaimedBy(pawn);
-			}
-			if (AtDestinationPosition())
-			{
-				PatherArrived();
-				return;
-			}
-			if (pawn.Downed)
-			{
-				Log.Error(pawn.LabelCap + " tried to path while downed. This should never happen. curJob=" + pawn.CurJob.ToStringSafe<Job>(), false);
-				PatherFailed();
-				return;
-			}
-			if (curPath != null)
-			{
-				curPath.ReleaseToPool();
-			}
-			curPath = null;
-			moving = true;
-			pawn.jobs.posture = PawnPosture.Standing;
+				if (dest.HasThing && dest.ThingDestroyed)
+				{
+					Log.Error(pawn + " pathing to destroyed thing " + dest.Thing, false);
+					PatherFailed();
+					return;
+				}
+				if (!PawnCanOccupy(pawn.Position) && !TryRecoverFromUnwalkablePosition(true))
+				{
+					return;
+				}
+				if (moving && curPath != null && destination == dest && this.peMode == peMode)
+				{
+					return;
+				}
+				if (!pawn.Map.reachability.CanReach(pawn.Position, dest, peMode, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false)))
+				{
+					PatherFailed();
+					return;
+				}
+				this.peMode = peMode;
+				destination = dest;
+				if (!IsNextCellWalkable() || NextCellDoorToWaitForOrManuallyOpen() != null || nextCellCostLeft == nextCellCostTotal)
+				{
+					ResetToCurrentPosition();
+				}
+				PawnDestinationReservationManager.PawnDestinationReservation pawnDestinationReservation = pawn.Map.pawnDestinationReservationManager.MostRecentReservationFor(pawn);
+				if (pawnDestinationReservation != null && ((destination.HasThing && pawnDestinationReservation.target != destination.Cell) || (pawnDestinationReservation.job != pawn.CurJob && pawnDestinationReservation.target != destination.Cell)))
+				{
+					pawn.Map.pawnDestinationReservationManager.ObsoleteAllClaimedBy(pawn);
+				}
+				if (AtDestinationPosition())
+				{
+					PatherArrived();
+					return;
+				}
+				if (pawn.Downed)
+				{
+					Log.Error(pawn.LabelCap + " tried to path while downed. This should never happen. curJob=" + pawn.CurJob.ToStringSafe<Job>(), false);
+					PatherFailed();
+					return;
+				}
+				if (curPath != null)
+				{
+					curPath.ReleaseToPool();
+				}
+				curPath = null;
+				moving = true;
+				pawn.jobs.posture = PawnPosture.Standing;
             }
 		}
 
@@ -210,7 +212,7 @@ namespace Vehicles.AI
 
 		public void PatherTick()
 		{
-			if (WillCollideWithPawnAt(this.pawn.Position))
+			if (WillCollideWithPawnAt(pawn.Position))
 			{
 				if (!FailedToFindCloseUnoccupiedCellRecently())
 				{
@@ -219,6 +221,7 @@ namespace Vehicles.AI
 					{
 						pawn.Position = intVec;
 						ResetToCurrentPosition();
+						
 						if (moving && TrySetNewPath())
 						{
 							TryEnterNextPathCell();
@@ -645,7 +648,6 @@ namespace Vehicles.AI
 						}
 						break;
 					case LocomotionUrgency.Jog:
-						num = num;
 						break;
 					case LocomotionUrgency.Sprint:
 						num = Mathf.RoundToInt((float)num * 0.75f);
@@ -715,12 +717,12 @@ namespace Vehicles.AI
             {
 				var tasks = new[]
 				{
-					Task<PawnPath>.Factory.StartNew( () => GenerateReversePath(cts.Token), cts.Token),
-					Task<PawnPath>.Factory.StartNew( () => GenerateNewPath(cts.Token), cts.Token)
+					Task<Tuple<PawnPath, bool>>.Factory.StartNew( () => GenerateReversePath(cts.Token), cts.Token),
+					Task<Tuple<PawnPath, bool>>.Factory.StartNew( () => GenerateNewPath(cts.Token), cts.Token)
 				};
 				int taskIndex = Task.WaitAny(tasks, cts.Token);
 
-				if (!tasks[taskIndex].Result.Found)
+				if (!tasks[taskIndex].Result.Item1.Found && !tasks[taskIndex].Result.Item2)
 				{ 
 					try
 					{
@@ -736,38 +738,33 @@ namespace Vehicles.AI
 						Log.Error($"[Vehicles] Unable to cancel and dispose remaining tasks. \nException: {ex.Message} \nStack: {ex.StackTrace}");
 					}
 				}
-				return tasks[1].Result;
+				return tasks[1].Result.Item1;
             }
-			catch
+			catch(Exception ex)
             {
 				Log.Warning($"[Vehicles] Pathfinding thread encountered an error due to unsafe thread activity. The resulting task and token have been cancelled." +
 					$"\nIf this occurrs often please report this behavior on the workshop page, it should be at worst an edge case.");
+				Log.Error($"[Vehicles] Logging Errors for Multithreaded pathing: \n\n {ex.Message} \n\n{ex.StackTrace}");
 				cts.Cancel();
 				cts.Dispose();
 				return PawnPath.NotFound;
             }
 		}
 
-        internal PawnPath GenerateNewPath(CancellationToken token)
+        internal Tuple<PawnPath, bool> GenerateNewPath(CancellationToken token)
         {
             lastPathedTargetPosition = destination.Cell;
-            var path = pawn.Map.GetComponent<WaterMap>().getShipPathFinder.FindVehiclePath(pawn.Position, destination, pawn, out bool space, token, peMode);
-            if(!space)
-            {
-                Messages.Message("VehicleCannotFit".Translate(), MessageTypeDefOf.RejectInput);
-                return PawnPath.NotFound;
-            }
-            if (!path.Found && Prefs.DevMode && VehicleMod.mod.settings.debugDrawVehiclePathCosts) 
+            var pathResult = pawn.Map.GetComponent<WaterMap>().getShipPathFinder.FindVehiclePath(pawn.Position, destination, pawn, token, peMode);
+            if ( (!pathResult.path.Found && !pathResult.found) && Prefs.DevMode && VehicleMod.mod.settings.debugDrawVehiclePathCosts) 
 				Log.Warning("Path Not Found");
-            return path;
+            return new Tuple<PawnPath, bool>(pathResult.path, pathResult.found);
         }
 
-        internal PawnPath GenerateReversePath(CancellationToken token)
+        internal Tuple<PawnPath, bool> GenerateReversePath(CancellationToken token)
         {
             lastPathedTargetPosition = destination.Cell;
-            var path = pawn.Map.GetComponent<WaterMap>().threadedPathFinderConstrained.FindVehiclePath(destination.Cell, new LocalTargetInfo(pawn.Position), pawn, out bool space, token, peMode);
-            if (!space || !path.Found) return PawnPath.NotFound;
-            return path;
+            var pathResult = pawn.Map.GetComponent<WaterMap>().threadedPathFinderConstrained.FindVehiclePath(destination.Cell, new LocalTargetInfo(pawn.Position), pawn, token, peMode);
+            return new Tuple<PawnPath, bool>(PawnPath.NotFound, pathResult.found);
         }
 
 		private bool AtDestinationPosition()
@@ -808,7 +805,7 @@ namespace Vehicles.AI
                 while (num3 < 20 && num3 < curPath.NodesLeftCount)
                 {
                     intVec = curPath.Peek(num3);
-                    if (!GenGridShips.Walkable(intVec, WaterMapUtility.GetExtensionToMap(pawn.Map)))
+                    if (!GenGridShips.Walkable(intVec, pawn.Map.GetComponent<WaterMap>()))
                         return true;
                     if (num3 != 0 && intVec.AdjacentToDiagonal(other) && (VehiclePathFinder.BlocksDiagonalMovement(pawn.Map.cellIndices.CellToIndex(intVec.x, other.z), pawn.Map) 
                         || VehiclePathFinder.BlocksDiagonalMovement(pawn.Map.cellIndices.CellToIndex(other.x, intVec.z), pawn.Map)))

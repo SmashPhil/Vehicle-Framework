@@ -9,7 +9,7 @@ using Verse.Sound;
 using RimWorld;
 using RimWorld.Planet;
 using Vehicles.AI;
-using SPExtended;
+
 using UnityEngine;
 
 namespace Vehicles
@@ -441,7 +441,7 @@ namespace Vehicles
 					{
 						list.Add("CaravanFoodWillRotSoonWarningDialog".Translate());
 					}
-					if (!TransferableUtility.GetPawnsFromTransferables(transferables).Any((Pawn pawn) => CaravanUtility.IsOwner(pawn, Faction.OfPlayer) && !pawn.skills.GetSkill(SkillDefOf.Social).TotallyDisabled))
+					if (!TransferableUtility.GetPawnsFromTransferables(transferables).AnyNullified((Pawn pawn) => CaravanUtility.IsOwner(pawn, Faction.OfPlayer) && !pawn.skills.GetSkill(SkillDefOf.Social).TotallyDisabled))
 					{
 						list.Add("CaravanIncapableOfSocial".Translate());
 					}
@@ -484,14 +484,14 @@ namespace Vehicles
 					List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables);
 					List<Pawn> innerPawns = pawnsFromTransferables.Where(v => HelperMethods.IsVehicle(v)).SelectMany(v => v.GetComp<CompVehicle>().AllPawnsAboard).ToList();
 
-					if(pawnsFromTransferables.Any(v => v.IsVehicle() && v.GetComp<CompVehicle>().Props.vehicleType == VehicleType.Sea) && pawnsFromTransferables.Any(v => v.IsVehicle() && v.GetComp<CompVehicle>().Props.vehicleType == VehicleType.Land))
+					if(pawnsFromTransferables.AnyNullified(v => v.IsVehicle() && v.GetComp<CompVehicle>().Props.vehicleType == VehicleType.Sea) && pawnsFromTransferables.AnyNullified(v => v.IsVehicle() && v.GetComp<CompVehicle>().Props.vehicleType == VehicleType.Land))
 					{
 						Messages.Message("LandAndSeaRoutePlannerRestriction".Translate(), MessageTypeDefOf.RejectInput);
 						return;
 					}
 
 					soundClose.PlayOneShotOnCamera(null);
-					if (!pawnsFromTransferables.Concat(innerPawns).Any((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer) && !x.Downed))
+					if (!pawnsFromTransferables.Concat(innerPawns).AnyNullified((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer) && !x.Downed))
 					{
 						Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, false);
 					}
@@ -541,7 +541,7 @@ namespace Vehicles
 		{
 			List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables);
 			List<Pawn> innerPawns = pawnsFromTransferables.Where(v => HelperMethods.IsVehicle(v)).SelectMany(v => v.GetComp<CompVehicle>().AllPawnsAboard).ToList();
-			if (!pawnsFromTransferables.Concat(innerPawns).Any((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer)) && !pawnsFromTransferables.Any(v => HelperMethods.IsVehicle(v)))
+			if (!pawnsFromTransferables.Concat(innerPawns).AnyNullified((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer)) && !pawnsFromTransferables.AnyNullified(v => HelperMethods.IsVehicle(v)))
 			{
 				Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, false);
 				return false;
@@ -678,7 +678,7 @@ namespace Vehicles
 				}
 				for (int k = 0; k < transferables.Count; k++)
 				{
-					if (transferables[k].things.Any((Thing x) => !x.Spawned))
+					if (transferables[k].things.AnyNullified((Thing x) => !x.Spawned))
 					{
 						transferables[k].things.SortBy((Thing x) => x.Spawned);
 					}
@@ -699,7 +699,7 @@ namespace Vehicles
 				Messages.Message("MessageNoValidExitTile".Translate(), MessageTypeDefOf.RejectInput, false);
 				return false;
 			}
-			if (!pawns.Concat(innerPawns).Any((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer) && !x.Downed))
+			if (!pawns.Concat(innerPawns).AnyNullified((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer) && !x.Downed))
 			{
 				Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, false);
 				return false;
@@ -714,7 +714,7 @@ namespace Vehicles
             {
 				return false;
             }
-			Pawn pawn = pawns.Find((Pawn x) => HelperMethods.IsVehicle(x) && pawns.Any(p => !HelperMethods.IsVehicle(p) && !p.IsWorldPawn() && p.IsColonist && !p.CanReach(x, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn)));
+			Pawn pawn = pawns.Find((Pawn x) => HelperMethods.IsVehicle(x) && pawns.AnyNullified(p => !HelperMethods.IsVehicle(p) && !p.IsWorldPawn() && p.IsColonist && !p.CanReach(x, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn)));
 			if (pawn != null)
 			{
 				Messages.Message("CaravanPawnIsUnreachable".Translate(pawn.LabelShort, pawn), pawn, MessageTypeDefOf.RejectInput, false);
@@ -731,7 +731,7 @@ namespace Vehicles
 						for (int j = 0; j < transferables[i].things.Count; j++)
 						{
 							Thing t = transferables[i].things[j];
-							if (!t.Spawned || pawns.Any((Pawn x) => x.IsColonist && x.CanReach(t, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn)))
+							if (!t.Spawned || pawns.AnyNullified((Pawn x) => x.IsColonist && x.CanReach(t, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn)))
 							{
 								num += t.stackCount;
 								if (num >= countToTransfer)
@@ -761,7 +761,7 @@ namespace Vehicles
 		private bool TryFindExitSpot(List<Pawn> pawns, bool reachableForEveryColonist, out IntVec3 spot)
 		{
 			bool result;
-			if(pawns.Any(x => HelperMethods.IsBoat(x)))
+			if(pawns.AnyNullified(x => HelperMethods.IsBoat(x)))
             {
                 //Rot4 rotFromTo = Find.WorldGrid.GetRotFromTo(__instance.CurrentTile, ___startingTile); WHEN WORLD GRID IS ESTABLISHED
                 Rot4 rotFromTo;
@@ -954,7 +954,7 @@ namespace Vehicles
 		{
 			tmpPackingSpots.Clear();
 			List<Thing> list = map.listerThings.ThingsOfDef(ThingDefOf.CaravanPackingSpot);
-			if(transferables.Any(x => x.ThingDef.category is ThingCategory.Pawn && HelperMethods.IsBoat(x.AnyThing as Pawn)))
+			if(transferables.AnyNullified(x => x.ThingDef.category is ThingCategory.Pawn && HelperMethods.IsBoat(x.AnyThing as Pawn)))
             {
                 TraverseParms traverseParms = TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false);
                 List<Pawn> ships = new List<Pawn>();

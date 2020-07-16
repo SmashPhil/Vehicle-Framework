@@ -32,7 +32,9 @@
 		
 		<baseCannonTexPath/>
 
-		<ammoAllowed/>
+		<!-- <ammoAllowed> -->
+			<!-- <li>MarkX_MkXA</li> -->
+		<!-- </ammoAllowed> -->
 		
 		<projectileOffset>3</projectileOffset>
 		<hitFlags>IntendedTarget</hitFlags>

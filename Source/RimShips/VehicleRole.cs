@@ -1,7 +1,7 @@
 ﻿using RimWorld;
 using Verse;
 using System.Collections.Generic;
-using UnityEngine.XR;
+
 
 namespace Vehicles
 {
@@ -15,7 +15,7 @@ namespace Vehicles
         public int slotsToOperate;
         public List<string> cannonIds;
 
-        public bool RequiredForCaravan => slotsToOperate > 0 && handlingTypes.Any(h => h == HandlingTypeFlags.Movement);
+        public bool RequiredForCaravan => slotsToOperate > 0 && handlingTypes.AnyNullified(h => h == HandlingTypeFlags.Movement);
 
         public VehicleRole()
         {

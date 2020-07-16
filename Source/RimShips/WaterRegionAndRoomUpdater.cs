@@ -38,7 +38,6 @@ namespace Vehicles
 
         public void TryRebuildWaterRegions()
         {
-            Log.Message($"Building water regions: {working} | {Enabled}");
             if (working || !Enabled)
                 return;
             working = true;

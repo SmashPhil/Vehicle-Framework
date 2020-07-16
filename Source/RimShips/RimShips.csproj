@@ -164,6 +164,7 @@
     <Compile Include="VehicleCaravanTweenerUtility.cs" />
     <Compile Include="VehicleCaravan_PathFollower.cs" />
     <Compile Include="VehicleCaravan_Tweener.cs" />
+    <Compile Include="VehicleGraphicSet.cs" />
     <Compile Include="VehiclePawn.cs" />
     <Compile Include="CannonDef.cs" />
     <Compile Include="CannonHandler.cs" />
@@ -228,7 +229,10 @@
     <Compile Include="LordToil_PrepareCaravan_GatherSlavesVehicle.cs" />
     <Compile Include="LordToil_PrepareCaravan_LeaveWithVehicles.cs" />
     <Compile Include="MainTabWindow_Ships.cs" />
+    <Compile Include="VehicleRenderer.cs" />
     <Compile Include="VehicleRoutePlanner.cs" />
+    <Compile Include="VehicleStatusEffecters.cs" />
+    <Compile Include="Vehicle_DrawTracker.cs" />
     <Compile Include="WaterMap.cs" />
     <Compile Include="WaterMapUtility.cs" />
     <Compile Include="MaterialDefOf.cs" />

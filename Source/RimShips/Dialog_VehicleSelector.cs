@@ -104,7 +104,7 @@ namespace Vehicles
 
             if(Widgets.ButtonText(rect2, "StartVehicleRoutePlanner".Translate()))
             {
-                if(storedVehicles.Any(v => v.GetComp<CompVehicle>().Props.vehicleType == VehicleType.Sea) && storedVehicles.Any(v => v.GetComp<CompVehicle>().Props.vehicleType == VehicleType.Land))
+                if(storedVehicles.AnyNullified(v => v.GetComp<CompVehicle>().Props.vehicleType == VehicleType.Sea) && storedVehicles.AnyNullified(v => v.GetComp<CompVehicle>().Props.vehicleType == VehicleType.Land))
                 {
                     Messages.Message("LandAndSeaRoutePlannerRestriction".Translate(), MessageTypeDefOf.RejectInput);
                     return;
