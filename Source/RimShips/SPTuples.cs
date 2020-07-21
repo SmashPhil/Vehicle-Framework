@@ -32,6 +32,8 @@ namespace Vehicles
     {
         public T1 First { get; set; }
         public T2 Second { get; set; }
+
+
         public SPTuple(T1 first, T2 second)
         {
             First = first;
@@ -56,12 +58,10 @@ namespace Vehicles
 
         public override bool Equals(object o)
         {
-            SPTuple<T1, T2> o2 = o as SPTuple<T1, T2>;
-            if (object.ReferenceEquals(o2, null))
-                return false;
-            return FirstComparer.Equals(First, o2.First) && SecondComparer.Equals(Second, o2.Second);
+            return o is SPTuple<T1, T2> o2 && FirstComparer.Equals(First, o2.First) && SecondComparer.Equals(Second, o2.Second);
         }
     }
+
     /// <summary>
     /// SPTuple of 3 types
     /// </summary>

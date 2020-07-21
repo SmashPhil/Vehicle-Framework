@@ -87,6 +87,12 @@ namespace Vehicles.AI
 
 		public void StartPath(LocalTargetInfo dest, PathEndMode peMode)
 		{
+            if (!pawn.Drafted)
+            {
+				PatherFailed();
+				return;
+            }
+
             if(HelperMethods.IsBoat(pawn))
             {
                 dest = (LocalTargetInfo)GenPathShip.ResolvePathMode(pawn, dest.ToTargetInfo(pawn.Map), ref peMode);
@@ -212,6 +218,12 @@ namespace Vehicles.AI
 
 		public void PatherTick()
 		{
+			if(!pawn.Drafted)
+            {
+				PatherFailed();
+				return;
+            }
+
 			if (WillCollideWithPawnAt(pawn.Position))
 			{
 				if (!FailedToFindCloseUnoccupiedCellRecently())
@@ -235,7 +247,7 @@ namespace Vehicles.AI
 				}
 				return;
 			}
-			if (this.pawn.stances.FullBodyBusy)
+			if (pawn.stances.FullBodyBusy)
 			{
 				return;
 			}
@@ -434,7 +446,7 @@ namespace Vehicles.AI
 
 		private void TryEnterNextPathCell()
 		{
-			if(HelperMethods.IsVehicle(pawn) && SPMultiCell.ClampHitboxToMap(pawn, nextCell, pawn.Map))
+			if(SPMultiCell.ClampHitboxToMap(pawn, nextCell, pawn.Map))
             {
                 pawn.jobs.curDriver.Notify_PatherFailed();
                 StopDead();
@@ -550,7 +562,7 @@ namespace Vehicles.AI
                     " which is unwalkable."
                     }), false);
                 }
-                int num = HelperMethods.CostToMoveIntoCellShips(pawn, nextCell);
+                int num = CostToMoveIntoCell(pawn, nextCell);
                 nextCellCostTotal = (float)num;
                 nextCellCostLeft = (float)num;
             }
@@ -581,7 +593,7 @@ namespace Vehicles.AI
 					    " which is unwalkable."
 				    }), false);
 			    }
-			    int num = CostToMoveIntoCell(nextCell);
+			    int num = CostToMoveIntoCell(pawn, nextCell);
 			    nextCellCostTotal = num;
 			    nextCellCostLeft = num;
 			    Building_Door building_Door = pawn.Map.thingGrid.ThingAt<Building_Door>(nextCell);
@@ -590,11 +602,6 @@ namespace Vehicles.AI
 				    building_Door.Notify_PawnApproaching(pawn, num);
 			    }
             }
-		}
-
-		private int CostToMoveIntoCell(IntVec3 c)
-		{
-			return CostToMoveIntoCell(pawn, c);
 		}
 
 		private static int CostToMoveIntoCell(Pawn pawn, IntVec3 c)
@@ -633,25 +640,25 @@ namespace Vehicles.AI
 				{
 					switch (pawn.jobs.curJob.locomotionUrgency)
 					{
-					case LocomotionUrgency.Amble:
-						num *= 3;
-						if (num < 60)
-						{
-							num = 60;
-						}
-						break;
-					case LocomotionUrgency.Walk:
-						num *= 2;
-						if (num < 50)
-						{
-							num = 50;
-						}
-						break;
-					case LocomotionUrgency.Jog:
-						break;
-					case LocomotionUrgency.Sprint:
-						num = Mathf.RoundToInt((float)num * 0.75f);
-						break;
+						case LocomotionUrgency.Amble:
+							num *= 3;
+							if (num < 60)
+							{
+								num = 60;
+							}
+							break;
+						case LocomotionUrgency.Walk:
+							num *= 2;
+							if (num < 50)
+							{
+								num = 50;
+							}
+							break;
+						case LocomotionUrgency.Jog:
+							break;
+						case LocomotionUrgency.Sprint:
+							num = Mathf.RoundToInt((float)num * 0.75f);
+							break;
 					}
 				}
 			}
@@ -661,10 +668,10 @@ namespace Vehicles.AI
 		private float CostToPayThisTick()
 		{
 			float num = 1f;
-			if (pawn.stances.Staggered)
-			{
-				num *= 0.17f;
-			}
+			//if (pawn.stances.Staggered) //REDO - wrap as option in vehicle props?
+			//{
+			//	num *= 0.17f;
+			//}
 			if (num < nextCellCostTotal / 450f)
 			{
 				num = nextCellCostTotal / 450f;
@@ -675,7 +682,7 @@ namespace Vehicles.AI
         private bool TrySetNewPath()
         {
             PawnPath pawnPath = GenerateNewPathThreaded(); // GenerateNewPath();
-            if (!pawnPath.Found)
+            if (pawnPath is null || !pawnPath.Found)
             {
                 PatherFailed();
 				Messages.Message("NoPathForVehicle".Translate(), MessageTypeDefOf.RejectInput, false);
@@ -722,7 +729,7 @@ namespace Vehicles.AI
 				};
 				int taskIndex = Task.WaitAny(tasks, cts.Token);
 
-				if (!tasks[taskIndex].Result.Item1.Found && !tasks[taskIndex].Result.Item2)
+				if (tasks[taskIndex].Result?.Item1 != null && !tasks[taskIndex].Result.Item1.Found && !tasks[taskIndex].Result.Item2)
 				{ 
 					try
 					{
@@ -738,13 +745,19 @@ namespace Vehicles.AI
 						Log.Error($"[Vehicles] Unable to cancel and dispose remaining tasks. \nException: {ex.Message} \nStack: {ex.StackTrace}");
 					}
 				}
-				return tasks[1].Result.Item1;
+				return tasks[1].Result?.Item1;
             }
-			catch(Exception ex)
+			catch(AggregateException ex)
             {
-				Log.Warning($"[Vehicles] Pathfinding thread encountered an error due to unsafe thread activity. The resulting task and token have been cancelled." +
+				Log.Warning($"[Vehicles] Pathfinding thread encountered an error due to unsafe thread activity. The resulting task and token have been cancelled and disposed." +
 					$"\nIf this occurrs often please report this behavior on the workshop page, it should be at worst an edge case.");
-				Log.Error($"[Vehicles] Logging Errors for Multithreaded pathing: \n\n {ex.Message} \n\n{ex.StackTrace}");
+				Log.Error($"[Vehicles] Logging Errors for Multithreaded pathing:");
+				int exIndex = 1;
+				foreach(Exception innerEx in ex.InnerExceptions)
+                {
+					Log.Error($"InnerException {exIndex}: {innerEx.Message} \nStackTrace: {innerEx.StackTrace} \nSource: {innerEx.Source}");
+					exIndex++;
+                }
 				cts.Cancel();
 				cts.Dispose();
 				return PawnPath.NotFound;

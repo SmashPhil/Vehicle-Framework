@@ -14,7 +14,7 @@ namespace Vehicles
     {
         public override void ProcessInput(Event ev)
         {
-            if (cannon.cooldownTicks <= 0)
+            if (cannon.reloadTicks <= 0)
             {
                 if( (cannon.loadedAmmo is null || cannon.shellCount == 0) && !cannon.cannonDef.ammoAllowed.NullOrEmpty())
                 {
@@ -34,7 +34,7 @@ namespace Vehicles
 
         public override float GetWidth(float maxWidth)
         {
-            return cannon.cannonDef.ammoAllowed.NullOrEmpty() ? 75 : 140;
+            return 210f;// cannon.cannonDef.ammoAllowed.NullOrEmpty() ? 75 : 140;
         }
 
         public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth)
@@ -42,19 +42,14 @@ namespace Vehicles
             Text.Font = GameFont.Tiny;
             Rect rect = new Rect(topLeft.x, topLeft.y, GetWidth(maxWidth), GizmoSize);
             bool flag = false;
-
-            Rect gizmoRect = new Rect(rect.x + 3.5f, rect.y, rect.width / 2, rect.height);
+            bool haltFlag = false;
+            Rect gizmoRect = new Rect(rect.x, rect.y, rect.height, rect.height).ContractedBy(6f);
+            Rect haltIconRect = new Rect(gizmoRect.x + gizmoRect.width / 2f, gizmoRect.y + gizmoRect.height / 2, gizmoRect.width / 2, gizmoRect.height / 2);
 
             Material material = (!disabled) ? null : TexUI.GrayscaleGUI;
             if(cannon.cannonDef.ammoAllowed.NullOrEmpty())
             {
                 gizmoRect = rect;
-                gizmoRect.width = 75f;
-            }
-            else
-            {
-                gizmoRect = gizmoRect.ContractedBy(7);
-                GenUI.DrawTextureWithMaterial(rect, TexCommandVehicles.AmmoBG, material, default);
             }
 
             Texture2D badTex = icon;
@@ -65,21 +60,47 @@ namespace Vehicles
             var gizmoColor = GUI.color;
             var ammoColor = GUI.color;
             var reloadColor = GUI.color;
-            
-            Rect ammoRect = new Rect(gizmoRect.x + gizmoRect.width + 7, gizmoRect.y, gizmoRect.width, (gizmoRect.height / 2) - 3.5f);
-            Rect reloadRect = new Rect(gizmoRect.x + gizmoRect.width + 7, ammoRect.y + ammoRect.height + 7, gizmoRect.width, (gizmoRect.height / 2) - 3.5f);
 
+            Widgets.DrawWindowBackground(rect);
+            Color haltColor = Color.white;
             if (Mouse.IsOver(gizmoRect))
             {
+                if(cannon.cannonTarget.IsValid && Mouse.IsOver(haltIconRect))
+                {
+                    haltColor = GenUI.MouseoverColor;
+                }
+                else
+                {
+                    
+                    if (!disabled)
+                        GUI.color = GenUI.MouseoverColor;
+                }
                 flag = true;
-                if (!disabled)
-                    GUI.color = GenUI.MouseoverColor;
+                cannon.GizmoHighlighted = true;
             }
+            else
+            {
+                cannon.GizmoHighlighted = false;
+            }
+
             GenUI.DrawTextureWithMaterial(gizmoRect, BGTex, material, default);
+            MouseoverSounds.DoRegion(gizmoRect, SoundDefOf.Mouseover_Command);
+            GUI.color = IconDrawColor;
+            Widgets.DrawTextureFitted(gizmoRect, badTex, iconDrawScale, iconProportions, iconTexCoords, iconAngle, material);
             GUI.color = gizmoColor;
+
+            if(cannon.cannonTarget.IsValid)
+            {
+                GUI.color = haltColor;
+                GenUI.DrawTextureWithMaterial(haltIconRect, TexCommandVehicles.HaltIcon, material, default);
+                GUI.color = gizmoColor;
+            }
+
+            Rect ammoRect = new Rect(gizmoRect.x + gizmoRect.width + 6f, gizmoRect.y + 1, gizmoRect.width / 2, gizmoRect.height / 2 - 2);
+            Rect reloadRect = new Rect(ammoRect.x + ammoRect.width + 6f, ammoRect.y, gizmoRect.width / 2, gizmoRect.height / 2 - 2);
+
             if (!cannon.cannonDef.ammoAllowed.NullOrEmpty())
             {
-                MouseoverSounds.DoRegion(gizmoRect, SoundDefOf.Mouseover_Command);
                 MouseoverSounds.DoRegion(ammoRect, SoundDefOf.Mouseover_Command);
                 MouseoverSounds.DoRegion(reloadRect, SoundDefOf.Mouseover_Command);
 
@@ -89,18 +110,14 @@ namespace Vehicles
                     if (!disabled)
                         GUI.color = GenUI.MouseoverColor;
                 }
+                float widthHeight = gizmoRect.height / 2 - 2;
                 GenUI.DrawTextureWithMaterial(ammoRect, BGTex, material, default);
-                float widthHeight = ammoRect.height;
-                Rect ammoIconRect = new Rect(ammoRect.x + (ammoRect.width / 2) - (widthHeight / 2), ammoRect.y + (ammoRect.height / 2) - (widthHeight / 2), widthHeight, widthHeight);
                 if(cannon.loadedAmmo != null)
                 {
                     alphaColorTicked.a = cannon.CannonIconAlphaTicked;
-                    Graphics.DrawTexture(ammoIconRect, cannon.loadedAmmo.uiIcon, new Rect(0f, 0f, 1f, 1f), 0, 0, 0, 0, alphaColorTicked, material);
+                    Graphics.DrawTexture(ammoRect, cannon.loadedAmmo.uiIcon, new Rect(0f, 0f, 1f, 1f), 0, 0, 0, 0, alphaColorTicked, material);
                 }
-                else
-                {
-                    Graphics.DrawTexture(ammoIconRect, TexCommandVehicles.MissingAmmoIcon);
-                }
+
                 GUI.color = ammoColor;
                 if (Mouse.IsOver(reloadRect))
                 {
@@ -109,13 +126,21 @@ namespace Vehicles
                         GUI.color = GenUI.MouseoverColor;
                 }
                 GenUI.DrawTextureWithMaterial(reloadRect, BGTex, material, default);
+                Graphics.DrawTexture(reloadRect, TexCommandVehicles.ReloadIcon, material);
+
                 GUI.color = reloadColor;
-                Rect reloadLabel = new Rect(reloadRect.x + 10, reloadRect.y + reloadRect.height / 4, reloadRect.width - 10, reloadRect.height / 1.5f);
-                string buttonTextLoad = (cannon.loadedAmmo is null || cannon.cooldownTicks > 0) ? string.Empty : "ExtractCannon".Translate().ToString();
-                Widgets.Label(reloadLabel, buttonTextLoad);
+                Rect reloadBar = rect.ContractedBy(6f);
+                reloadBar.yMin = rect.y + (rect.height / 2) + 1;
+                reloadBar.xMin = ammoRect.x;
+                Widgets.FillableBar(reloadBar, (float)cannon.shellCount / cannon.cannonDef.magazineCapacity, TexCommandVehicles.FullBarTex, TexCommandVehicles.EmptyBarTex, true);
+                var font = Text.Font;
+                var anchor = Text.Anchor;
+                Text.Font = GameFont.Small;
+                Text.Anchor = TextAnchor.MiddleCenter;
+                Widgets.Label(reloadBar, cannon.shellCount.ToString("F0") + " / " + cannon.cannonDef.magazineCapacity.ToString("F0"));
+                Text.Font = font;
+                Text.Anchor = anchor;
             }
-            GUI.color = IconDrawColor;
-            Widgets.DrawTextureFitted(gizmoRect, badTex, iconDrawScale * 0.85f, iconProportions, iconTexCoords, iconAngle, material);
             GUI.color = Color.white;
             bool flag2 = false;
             bool flag3 = false;
@@ -132,18 +157,26 @@ namespace Vehicles
                     Event.current.Use();
                 }
             }
-            if (Widgets.ButtonImageWithBG(gizmoRect, TexCommandVehicles.AmmoBG))
+            if(cannon.cannonTarget.IsValid && Widgets.ButtonInvisible(haltIconRect, false))
+            {
+                haltFlag = true;
+            }
+            else if (Widgets.ButtonInvisible(gizmoRect, false))
             {
                 flag2 = true;
             }
-            if(Widgets.ButtonInvisible(ammoRect, false))
+            if(!cannon.cannonDef.ammoAllowed.NullOrEmpty())
             {
-                flag3 = true;
+                if(Widgets.ButtonInvisible(reloadRect, false))
+                {
+                    flag3 = true;
+                }
+                if( (cannon.shellCount > 0) && Widgets.ButtonInvisible(ammoRect, false))
+                {
+                    flag4 = true;
+                }
             }
-            if(Widgets.ButtonInvisible(reloadRect, false))
-            {
-                flag4 = true;
-            }
+            
             string labelCap = LabelCap;
             if (!labelCap.NullOrEmpty())
             {
@@ -174,9 +207,9 @@ namespace Vehicles
                 }
                 TooltipHandler.TipRegion(gizmoRect, tip);
             }
-            if(cannon.cooldownTicks > 0)
+            if(cannon.reloadTicks > 0)
             {
-                float percent = cannon.cooldownTicks / (float)cannon.MaxTicks;
+                float percent = cannon.reloadTicks / (float)cannon.MaxTicks;
                 SPExtra.VerticalFillableBar(gizmoRect, percent, FillableBar, ClearBar);
             }
             if (!HighlightTag.NullOrEmpty() && (Find.WindowStack.FloatMenu == null || !Find.WindowStack.FloatMenu.windowRect.Overlaps(gizmoRect)))
@@ -184,36 +217,39 @@ namespace Vehicles
                 UIHighlighter.HighlightOpportunity(gizmoRect, HighlightTag);
             }
             Rect ammoWindowRect = new Rect(rect);
-            ammoWindowRect.height = 0f;
+            ammoWindowRect.height = AmmoWindowOffset * 2;
+            ammoWindowRect.width = ammoRect.height * 4 + AmmoWindowOffset * 2;
             if(cannon.ammoWindowOpened)
             {
-                List<ThingDef> allCannonDefs = cannon.pawn.inventory.innerContainer.Where(x => cannon.cannonDef.ammoAllowed.Contains(x.def)).Select(y => y.def).Distinct().ToList();
-                if ((allCannonDefs?.Count ?? 0) > 0)
+                List<ThingDef> allCannonDefs = cannon.pawn.inventory.innerContainer.Where(d => cannon.ContainsAmmoDefOrShell(d.def)).Select(t => t.def).Distinct().ToList();
+                ammoWindowRect.height += ammoRect.height + Mathf.CeilToInt(allCannonDefs.Count / 4) * ammoRect.height;
+                ammoWindowRect.y -= (ammoWindowRect.height + AmmoWindowOffset);
+                GenUI.DrawTextureWithMaterial(ammoWindowRect, TexCommandVehicles.AmmoBG, material, default);
+                ammoWindowRect.yMin += 5f;
+                for(int i = 0; i < allCannonDefs.Count; i++)
                 {
-                    ammoWindowRect.height += ammoRect.height + Mathf.CeilToInt(allCannonDefs.Count / 7) * ammoRect.height;
-                    ammoWindowRect.y -= ammoWindowRect.height;
-                    GenUI.DrawTextureWithMaterial(ammoWindowRect, TexCommandVehicles.AmmoBG, material, default);
-                    for(int i = 0; i < allCannonDefs.Count; i++)
+                    Rect potentialAmmoRect = new Rect(ammoWindowRect.x + ammoRect.height * (i % 4) + 5f, ammoWindowRect.y + ammoRect.height * Mathf.FloorToInt(i / 4), ammoRect.height, ammoRect.height);
+                    Graphics.DrawTexture(potentialAmmoRect, allCannonDefs[i].uiIcon, new Rect(0f, 0f, 1f, 1f), 0, 0, 0, 0, alphaColorTicked, material);
+                    if(Mouse.IsOver(potentialAmmoRect))
                     {
-                        Rect potentialAmmoRect = new Rect(ammoWindowRect.x + 5f + ammoRect.height * i, ammoWindowRect.y + 1f, ammoRect.height, ammoRect.height);
-                        Graphics.DrawTexture(potentialAmmoRect, allCannonDefs[i].uiIcon, new Rect(0f, 0f, 1f, 1f), 0, 0, 0, 0, alphaColorTicked, material);
-                        if(Mouse.IsOver(potentialAmmoRect))
-                        {
-                            Graphics.DrawTexture(potentialAmmoRect, TexUI.HighlightTex);
-                        }
-                        if(Widgets.ButtonInvisible(potentialAmmoRect))
-                        {
-                            cannon.ammoWindowOpened = false;
-                            cannon.ReloadCannon(allCannonDefs[i]);
-                            break;
-                        }
+                        Graphics.DrawTexture(potentialAmmoRect, TexUI.HighlightTex);
                     }
+                    if(Widgets.ButtonInvisible(potentialAmmoRect))
+                    {
+                        cannon.ammoWindowOpened = false;
+                        cannon.ReloadCannon(allCannonDefs[i], true);
+                        break;
+                    }
+                    string ammoCount = cannon.pawn.inventory.innerContainer.Where(td => td.def == allCannonDefs[i]).Select(t => t.stackCount).Sum().ToStringSafe();
+                    potentialAmmoRect.y += potentialAmmoRect.height / 2;
+                    potentialAmmoRect.x += potentialAmmoRect.width - Text.CalcSize(ammoCount).x;
+                    Widgets.Label(potentialAmmoRect, ammoCount);
                 }
             }
             Rect fullRect = new Rect(rect);
-            fullRect.y -= ammoWindowRect.height;
-            fullRect.height += ammoWindowRect.height;
-            if(!Mouse.IsOver(fullRect))
+            rect.height += ammoWindowRect.height + AmmoWindowOffset;
+            rect.y -= (ammoWindowRect.height + AmmoWindowOffset);
+            if(!Mouse.IsOver(rect))
             {
                 cannon.ammoWindowOpened = false;
             }
@@ -235,13 +271,24 @@ namespace Vehicles
                 TutorSystem.Notify_Event(TutorTagSelect);
                 return result;
             }
-            if(flag3 && !cannon.cannonDef.ammoAllowed.NullOrEmpty())
+            if(haltFlag)
+            {
+                if (disabled)
+                {
+                    if (!disabledReason.NullOrEmpty())
+                        Messages.Message(disabledReason, MessageTypeDefOf.RejectInput, false);
+                    return new GizmoResult(GizmoState.Mouseover, null);
+                }
+                cannon.SetTarget(LocalTargetInfo.Invalid);
+            }
+            if(flag3)
             {
                 cannon.ammoWindowOpened = !cannon.ammoWindowOpened;
             }
             if(flag4)
             {
                 cannon.TryRemoveShell();
+                SoundDefOf.Artillery_ShellLoaded.PlayOneShot(new TargetInfo(cannon.pawn.Position, cannon.pawn.Map, false));
             }
             if (flag)
                 return new GizmoResult(GizmoState.Mouseover, null);
@@ -250,8 +297,9 @@ namespace Vehicles
 
         public TargetingParameters targetingParams;
         public CannonHandler cannon;
-        public CompCannons comp;
         private const float GizmoSize = 75f;
+        private const float AmmoWindowOffset = 5f;
+        private const float UnloadIconScale = 1.25f;
         private readonly Texture2D FillableBar = SolidColorMaterials.NewSolidColorTexture(0.5f, 0.5f, 0.5f, 0.25f);
         private readonly Texture2D ClearBar = SolidColorMaterials.NewSolidColorTexture(Color.clear);
         private Color alphaColorTicked = new Color(GUI.color.r * 0.5f, GUI.color.g * 0.5f, GUI.color.b * 0.5f, 0.5f);

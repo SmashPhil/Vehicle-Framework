@@ -128,9 +128,12 @@ namespace Vehicles
                 nameof(ReserveEntireVehicle)));
 
             /* Upgrade Stats */
-            harmony.Patch(original: AccessTools.Method(typeof(Pawn), "TicksPerMove"),
-                prefix: new HarmonyMethod(typeof(ShipHarmony),
-                nameof(VehicleMoveSpeedUpgradeModifier)));
+            harmony.Patch(original: AccessTools.PropertyGetter(typeof(Pawn), nameof(Pawn.TicksPerMoveCardinal)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(VehicleMoveSpeedUpgradeModifierCardinal)));
+            harmony.Patch(original: AccessTools.PropertyGetter(typeof(Pawn), nameof(Pawn.TicksPerMoveDiagonal)), prefix: null,
+                postfix: new HarmonyMethod(typeof(ShipHarmony),
+                nameof(VehicleMoveSpeedUpgradeModifierDiagonal)));
             harmony.Patch(original: AccessTools.Method(typeof(MassUtility), nameof(MassUtility.Capacity)), prefix: null,
                 postfix: new HarmonyMethod(typeof(ShipHarmony),
                 nameof(VehicleCargoCapacity)));
@@ -621,7 +624,7 @@ namespace Vehicles
 
         #region Rendering
         /// <summary>
-        /// Use own Boat rotation to disallow moving rotation for various tasks such as Drafted
+        /// Use own Vehicle rotation to disallow moving rotation for various tasks such as Drafted
         /// </summary>
         /// <param name="__instance"></param>
         /// <returns></returns>
@@ -1403,28 +1406,20 @@ namespace Vehicles
 
         #region UpgradeStatModifiers
 
-        public static bool VehicleMoveSpeedUpgradeModifier(bool diagonal, Pawn __instance, ref int __result)
+        public static void VehicleMoveSpeedUpgradeModifierCardinal(Pawn __instance, ref int __result)
         {
             if(HelperMethods.IsVehicle(__instance))
             {
-                float num = __instance.GetComp<CompVehicle>().ActualMoveSpeed / 60f;
-                float num2 = 0f;
-                if(num == 0f)
-                {
-                    num2 = 450f;
-                }
-                else
-                {
-                    num2 = 1 / num;
-                    if(diagonal)
-                    {
-                        num2 *= 1.41421f;
-                    }
-                }
-                __result = Mathf.Clamp(Mathf.RoundToInt(num2), 1, 450);
-                return false;
+                __result += (int)__instance.GetComp<CompVehicle>().MoveSpeedModifier;
             }
-            return true;
+        }
+
+        public static void VehicleMoveSpeedUpgradeModifierDiagonal(Pawn __instance, ref int __result)
+        {
+            if(HelperMethods.IsVehicle(__instance))
+            {
+                __result += (int)__instance.GetComp<CompVehicle>().MoveSpeedModifier;
+            }
         }
 
         public static void VehicleCargoCapacity(Pawn p, ref float __result)
@@ -2648,9 +2643,6 @@ namespace Vehicles
         /// </summary>
         internal static Dialog_FormVehicleCaravan currentFormingCaravan;
         internal static Dictionary<Map, List<WaterRegion>> terrainChangedCount = new Dictionary<Map, List<WaterRegion>>();
-
-        //REDO (remove)
-        internal static bool routePlannerActive;
 
         /// <summary>
         /// Debugging

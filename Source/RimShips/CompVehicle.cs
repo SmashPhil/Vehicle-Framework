@@ -1019,17 +1019,6 @@ namespace Vehicles
             {
                 float angle = (float)Pawn.DrawPos.Angle180RotationTracker(currentTravelCells.First().ToVector3Shifted());
 
-                /*
-                if (BearingAngle > -45 && BearingAngle < 45)
-                    Pawn.Rotation = Rot4.North;
-                else if (BearingAngle > 45 && BearingAngle < 135)
-                    Pawn.Rotation = Rot4.East;
-                else if (BearingAngle > 135 || BearingAngle < -135)
-                    Pawn.Rotation = Rot4.South;
-                else if (BearingAngle < -45 && BearingAngle > -135)
-                    Pawn.Rotation = Rot4.West;
-                */
-
                 if (Pawn.SmoothPos.ToIntVec3() != Pawn.Position)
                     Pawn.Position = Pawn.SmoothPos.ToIntVec3();
                 if (!Pawn.Drafted)

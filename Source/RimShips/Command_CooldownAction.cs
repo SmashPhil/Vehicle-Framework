@@ -89,9 +89,9 @@ namespace Vehicles
                 }
                 TooltipHandler.TipRegion(rect, tip);
             }
-            if(cannon.cooldownTicks > 0)
+            if(cannon.reloadTicks > 0)
             {
-                float percent = cannon.cooldownTicks / (float)cannon.MaxTicks;
+                float percent = cannon.reloadTicks / (float)cannon.MaxTicks;
                 SPExtra.VerticalFillableBar(rect, percent, FillableBar, ClearBar);
             }
             if (!HighlightTag.NullOrEmpty() && (Find.WindowStack.FloatMenu == null || !Find.WindowStack.FloatMenu.windowRect.Overlaps(rect)))

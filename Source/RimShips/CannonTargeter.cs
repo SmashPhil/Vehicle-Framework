@@ -104,7 +104,9 @@ namespace Vehicles
                 if (TargetMeetsRequirements(cannon, CurrentTargetUnderMouse()))
                 {
                     GenDraw.DrawTargetHighlight(CurrentTargetUnderMouse());
-                    cannon.AlignToAngleRestricted((float)cannon.TurretLocation.ToIntVec3().AngleToPoint(CurrentTargetUnderMouse().Cell, map));
+
+                    if(CurrentTargetUnderMouse() != cannon.pawn)
+                        cannon.AlignToAngleRestricted((float)cannon.TurretLocation.ToIntVec3().AngleToCell(CurrentTargetUnderMouse().Cell, map));
                 }
                 //REDO Radius Circle
                 //if(cannon.MinRange > 0)
@@ -127,7 +129,7 @@ namespace Vehicles
             if(!IsTargeting)
                 return LocalTargetInfo.Invalid;
             LocalTargetInfo localTarget = LocalTargetInfo.Invalid;
-            using(IEnumerator<LocalTargetInfo> enumerator = GenUI.TargetsAtMouse(targetParams, false).GetEnumerator())
+            using(IEnumerator<LocalTargetInfo> enumerator = GenUI.TargetsAtMouse_NewTemp(targetParams, false).GetEnumerator())
             {
                 if(enumerator.MoveNext())
                 {

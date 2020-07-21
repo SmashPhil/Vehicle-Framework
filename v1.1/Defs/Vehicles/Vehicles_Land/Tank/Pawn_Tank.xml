@@ -247,42 +247,48 @@
 						<key>Mud</key>
 						<value>250</value>
 					</li>
+					<li>
+						<key>WaterShallow</key>
+						<value>-1</value>
+					</li>
 				</customTerrainCosts>
 			</li>
 			
 			<li Class="Vehicles.CompProperties_Cannons">
 				<cannons>
 					<li>
-						<cannonDef>turret50cal</cannonDef>
-						<cannonRenderLocation>(-.43, .38)</cannonRenderLocation>
-						<cannonRenderOffset>(0, 0)</cannonRenderOffset>
-						<cannonTurretDrawSize>(1, 1)</cannonTurretDrawSize>
-						
-						<targetPersists>true</targetPersists>
-						<autoTargeting>true</autoTargeting>
-						<manualTargeting>false</manualTargeting>
-						<angleRestricted>(270,90)</angleRestricted>
-						<aimPieOffset/>
-						<drawLayer>2</drawLayer>
-						
-						<key>50cal</key>
-						<parentKey>mainTurret</parentKey>
-					</li>
-					<li>
 						<cannonDef>tankMainTurret</cannonDef>
 						<cannonRenderLocation>(0,0)</cannonRenderLocation>
 						<cannonRenderOffset>(0, 0)</cannonRenderOffset>
 						<cannonTurretDrawSize>(7, 7)</cannonTurretDrawSize>
 						
+						<gizmoLabel>Main Turret</gizmoLabel>
 						<autoTargeting>true</autoTargeting>
 						
 						<angleRestricted/>
-						<aimPieOffset/>
+						<aimPieOffset>(.075, 2.75)</aimPieOffset>
 						<drawLayer>1</drawLayer>
 						
 						<key>mainTurret</key>
 					</li>
-					
+					<!-- <li> -->
+						<!-- <cannonDef>turret50cal</cannonDef> -->
+						<!-- <cannonRenderLocation>(-.43, .38)</cannonRenderLocation> -->
+						<!-- <cannonRenderOffset>(0, 0)</cannonRenderOffset> -->
+						<!-- <cannonTurretDrawSize>(1, 1)</cannonTurretDrawSize> -->
+						
+						<!-- <gizmoLabel>.50 Cal</gizmoLabel> -->
+						<!-- <targetPersists>true</targetPersists> -->
+						<!-- <autoTargeting>true</autoTargeting> -->
+						<!-- <manualTargeting>true</manualTargeting> -->
+						
+						<!-- <angleRestricted>(270,90)</angleRestricted> -->
+						<!-- <aimPieOffset/> -->
+						<!-- <drawLayer>2</drawLayer> -->
+						
+						<!-- <key>50cal</key> -->
+						<!-- <parentKey>mainTurret</parentKey> -->
+					<!-- </li> -->
 				</cannons>
 			</li>
 			<li Class="Vehicles.CompProperties_UpgradeTree">

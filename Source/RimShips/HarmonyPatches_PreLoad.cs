@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Verse;
-using RimWorld;
 using HarmonyLib;
 using Vehicles.Defs;
+using System.Runtime.CompilerServices;
+using System.Reflection;
 
 namespace Vehicles
 {
@@ -12,7 +14,7 @@ namespace Vehicles
     {
         public HarmonyPatches_PreLoad(ModContentPack content) : base(content)
         {
-            var harmony = new Harmony("rimworld.boats_bootstrap.smashphil");
+            var harmony = new Harmony("rimworld.vehicles_preload.smashphil");
 
             harmony.Patch(original: AccessTools.Property(type: typeof(RaceProperties), name: nameof(RaceProperties.IsFlesh)).GetGetMethod(),
                 prefix: new HarmonyMethod(typeof(HarmonyPatches_PreLoad),

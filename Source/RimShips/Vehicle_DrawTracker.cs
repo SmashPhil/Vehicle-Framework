@@ -61,7 +61,7 @@ namespace Vehicles
 			{
 				return;
 			}
-			renderer.Notify_DamageApplied(dinfo);
+			//renderer.Notify_DamageApplied(dinfo);
 		}
 
 		public void Notify_DamageDeflected(DamageInfo dinfo)

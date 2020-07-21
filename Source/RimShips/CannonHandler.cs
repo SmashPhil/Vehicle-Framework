@@ -4,7 +4,6 @@ using Verse;
 using Verse.Sound;
 using RimWorld;
 using UnityEngine;
-
 using System.Linq;
 
 namespace Vehicles
@@ -37,6 +36,8 @@ namespace Vehicles
             cannonTurretDrawSize = reference.cannonTurretDrawSize;
             baseCannonDrawSize = reference.baseCannonDrawSize;
             drawLayer = reference.drawLayer;
+
+            gizmoLabel = reference.gizmoLabel;
 
             key = reference.key;
             parentKey = reference.parentKey;
@@ -87,10 +88,10 @@ namespace Vehicles
         }
         public void ExposeData()
         {
-            Scribe_Defs.Look<CannonDef>(ref cannonDef, "cannonDef");
+            Scribe_Defs.Look(ref cannonDef, "cannonDef");
             Scribe_Values.Look(ref uniqueID, "uniqueID", -1);
-            Scribe_Values.Look(ref cooldownTicks, "cooldownTicks");
-            
+            Scribe_Values.Look(ref reloadTicks, "reloadTicks");
+
             Scribe_Values.Look(ref cannonRenderOffset, "cannonRenderOffset");
             Scribe_Values.Look(ref cannonRenderLocation, "cannonRenderLocation");
             Scribe_Values.Look(ref currentRotation, "currentRotation", defaultAngleRotated - 90);
@@ -127,20 +128,33 @@ namespace Vehicles
 
         public bool RotationIsValid => currentRotation == rotationTargeted;
 
+        public bool TargetLocked { get; set; }
+
         public bool CannonDisabled => !RelatedHandlers.NullOrEmpty() && RelatedHandlers.AnyNullified(h => h.handlers.Count < h.role.slotsToOperate);
 
         public List<VehicleHandler> RelatedHandlers => pawn.GetComp<CompVehicle>().handlers.FindAll(h => !h.role.cannonIds.NullOrEmpty() && h.role.cannonIds.Contains(key));
-        public bool ActivateTimer()
+        public bool ActivateTimer(bool ignoreTimer = false)
         {
-            if (cooldownTicks > 0)
+            if (reloadTicks > 0 && !ignoreTimer)
                 return false;
-            cooldownTicks = MaxTicks;
+            reloadTicks = MaxTicks;
+            TargetLocked = false;
             return true;
+        }
+
+        public void ActivateBurstTimer()
+        {
+            burstTicks = BurstMaxTicks;
         }
 
         public void DoTick()
         {
-            if (pawn.GetComp<CompCannons>().multiFireCannon.NullOrEmpty())
+            if(!pawn.Drafted)
+            {
+                GizmoHighlighted = false;
+            }
+
+            if (!pawn.GetComp<CompCannons>().multiFireCannon.AnyNullified(mf => mf.Second == this))
             {
                 if (autoTargeting && Find.TickManager.TicksGame % AutoTargetInterval == 0 && pawn.Drafted)
                 {
@@ -148,23 +162,23 @@ namespace Vehicles
                     {
                         return;
                     }
-                    if(!cannonTarget.IsValid)
+                    if(!cannonTarget.IsValid && HelperMethods.CannonTargeter.cannon != this)
                     {
                         LocalTargetInfo autoTarget = this.GetCannonTarget();
                         if(autoTarget.IsValid)
                         {
+                            AlignToAngleRestricted((float)TurretLocation.AngleToPoint(autoTarget.Thing.DrawPos, pawn.Map));
                             SetTarget(autoTarget);
-                            ResetPrefireTimer();
                         }
                     }
                 }
-                if(cooldownTicks > 0 && RotationIsValid)
+                if(reloadTicks > 0)
                 {
-                    cooldownTicks--;
-                    if(cooldownTicks <= 0)
-                    {
-                        ReloadCannon();
-                    }
+                    reloadTicks--;
+                }
+                if(burstTicks > 0)
+                {
+                    burstTicks--;
                 }
             }
             
@@ -189,18 +203,43 @@ namespace Vehicles
                     else
                     {
                         int? sign = AngleDirectionalRestricted(relativeTargetedRotation);
-                    
                         if(relativeCurrentRotation < relativeTargetedRotation)
                         {
-                            if(Math.Abs(relativeCurrentRotation - relativeTargetedRotation) < 180)
-                               currentRotation += cannonDef.rotationSpeed;
-                            else currentRotation -= cannonDef.rotationSpeed;
+                            if (Math.Abs(relativeCurrentRotation - relativeTargetedRotation) < 180)
+                            {
+                                currentRotation += cannonDef.rotationSpeed;
+                                foreach(CannonHandler cannon in childCannons)
+                                {
+                                    cannon.currentRotation += cannonDef.rotationSpeed;
+                                }
+                            }
+                            else
+                            {
+                                currentRotation -= cannonDef.rotationSpeed;
+                                foreach(CannonHandler cannon in childCannons)
+                                {
+                                    cannon.currentRotation -= cannonDef.rotationSpeed;
+                                }
+                            }
                         }
                         else
                         {
-                            if(Math.Abs(relativeCurrentRotation - relativeTargetedRotation) < 180)
-                               currentRotation -= cannonDef.rotationSpeed;
-                            else currentRotation += cannonDef.rotationSpeed;
+                            if (Math.Abs(relativeCurrentRotation - relativeTargetedRotation) < 180)
+                            {
+                                currentRotation -= cannonDef.rotationSpeed;
+                                foreach(CannonHandler cannon in childCannons)
+                                {
+                                    cannon.currentRotation -= cannonDef.rotationSpeed;
+                                }
+                            }
+                            else
+                            {
+                                currentRotation += cannonDef.rotationSpeed;
+                                foreach(CannonHandler cannon in childCannons)
+                                {
+                                    cannon.currentRotation += cannonDef.rotationSpeed;
+                                }
+                            }
                         }
                     }
                 }
@@ -211,42 +250,49 @@ namespace Vehicles
             }
             if(IsTargetable)
             {
+                if(cannonTarget.IsValid && currentRotation == rotationTargeted && !TargetLocked)
+                {
+                    TargetLocked = true;
+                    ResetPrefireTimer();
+                }
                 if(cannonTarget.Cell.IsValid)
                 {
                     if(!CannonTargeter.TargetMeetsRequirements(this, cannonTarget) || !pawn.Drafted)
                     {
                         SetTarget(LocalTargetInfo.Invalid);
+                        TargetLocked = false;
                         return;
                     }
                     LockedStatusRotation = false;
 
                     if(PrefireTickCount > 0)
                     {
-                        rotationTargeted = (float)TurretLocation.ToIntVec3().AngleToPoint(cannonTarget.Cell, pawn.Map);
+                        if(cannonTarget.HasThing)
+                        {
+                            rotationTargeted = (float)TurretLocation.AngleToPoint(cannonTarget.Thing.DrawPos, pawn.Map);
+                        }
+                        else
+                        {
+                            rotationTargeted = (float)TurretLocation.ToIntVec3().AngleToCell(cannonTarget.Cell, pawn.Map);
+                        }
+                        
                         if(cannonDef.autoSnapTargeting)
                         {
                             currentRotation = rotationTargeted;
                         }
                         
-                        if(RotationIsValid)
+                        if(TargetLocked && reloadTicks <= 0 && burstTicks <= 0)
                         {
                             float facing = cannonTarget.Thing != null ? (cannonTarget.Thing.DrawPos - TurretLocation).AngleFlat() : (cannonTarget.Cell - TurretLocation.ToIntVec3()).AngleFlat;
                             GenDraw.DrawAimPieRaw(TurretLocation + new Vector3(cannonRenderOffset.x + aimPieOffset.x, 0.5f, cannonRenderOffset.y + aimPieOffset.y).RotatedBy(TurretRotation), facing, (int)(PrefireTickCount * 0.5f));
                             PrefireTickCount--;
                         }
                     }
-                    else if(cooldownTicks <= 0 && RotationIsValid && !CannonDisabled)
+                    else if(reloadTicks <= 0 && burstTicks <= 0 && RotationIsValid && !CannonDisabled)
                     {
                         if(targetPersists && (cannonTarget.Pawn is null || !SetTargetConditionalOnThing(LocalTargetInfo.Invalid)))
                         {
-                            
                             CompCannon.multiFireCannon.Add(new SPTuple<int, CannonHandler, SPTuple2<int,int>>(cannonDef.numberOfShots, this, new SPTuple2<int,int>(0, 0)));
-                            ActivateTimer();
-                        }
-                        
-                        if(cannonTarget.IsValid)
-                        {
-                            
                         }
                     }
                 }
@@ -314,6 +360,40 @@ namespace Vehicles
                 HelperMethods.DrawAttachedThing(CannonBaseTexture, CannonBaseGraphic, baseCannonRenderLocation, baseCannonDrawSize, CannonTexture, CannonGraphic, 
                 cannonRenderLocation, cannonRenderOffset, CannonBaseMaterial, CannonMaterial, TurretRotation, pawn, drawLayer, attachedTo);
             }
+
+            if(GizmoHighlighted || HelperMethods.CannonTargeter.cannon == this)
+            {
+                if(MaxRange > -1)
+                {
+                    Vector3 pos = TurretLocation;
+                    pos.y = AltitudeLayer.MoteOverhead.AltitudeFor();
+                    float currentAlpha = 0.65f; // this.GetCurrentAlpha();
+                    if (currentAlpha > 0f)
+                    {
+                        Color value = Color.grey;
+                        value.a *= currentAlpha;
+                        MatPropertyBlock.SetColor(ShaderPropertyIDs.Color, value);
+                        Matrix4x4 matrix = default;
+                        matrix.SetTRS(pos, Quaternion.identity, new Vector3(MaxRange * 2f, 1f, MaxRange * 2f));
+                        Graphics.DrawMesh(MeshPool.plane10, matrix, HelperMethods.RangeMat((int)MaxRange), 0, null, 0, MatPropertyBlock);
+                    }
+                }
+                if(MinRange > 0)
+                {
+                    Vector3 pos = TurretLocation;
+                    pos.y = AltitudeLayer.MoteOverhead.AltitudeFor();
+                    float currentAlpha = 0.65f; // this.GetCurrentAlpha();
+                    if (currentAlpha > 0f)
+                    {
+                        Color value = Color.red;
+                        value.a *= currentAlpha;
+                        MatPropertyBlock.SetColor(ShaderPropertyIDs.Color, value);
+                        Matrix4x4 matrix = default;
+                        matrix.SetTRS(pos, Quaternion.identity, new Vector3(MinRange * 2f, 1f, MinRange * 2f));
+                        Graphics.DrawMesh(MeshPool.plane10, matrix, HelperMethods.RangeMat((int)MinRange), 0, null, 0, MatPropertyBlock);
+                    }
+                }
+            }
         }
 
         public int TicksPerShot
@@ -328,9 +408,9 @@ namespace Vehicles
         {
             get
             {
-                if (cooldownTicks <= 0)
+                if (reloadTicks <= 0)
                     return 0.5f;
-                return Mathf.PingPong(cooldownTicks, 25) / 100;
+                return Mathf.PingPong(reloadTicks, 25) / 100;
             }
         }
 
@@ -453,12 +533,20 @@ namespace Vehicles
             get
             {
                 if (!string.IsNullOrEmpty(cannonDef.gizmoIconTexPath) && gizmoIcon is null)
+                {
                     gizmoIcon = ContentFinder<Texture2D>.Get(cannonDef.gizmoIconTexPath);
+                }
                 else if (gizmoIcon is null)
-                    gizmoIcon = CannonTexture;
-
-                if (gizmoIcon is null)
-                    gizmoIcon = TexCommandVehicles.BroadsideCannon_Port;
+                {
+                    if(CannonTexture != null)
+                    {
+                        gizmoIcon = CannonTexture;
+                    }
+                    else
+                    {
+                        gizmoIcon = TexCommandVehicles.BroadsideCannon_Port;
+                    }
+                }
                 return gizmoIcon;
             }
         }
@@ -508,9 +596,8 @@ namespace Vehicles
             if(angleRestricted == Vector2.zero)
                 return true;
 
-            float rotationOffset = pawn.Rotation.AsInt * 90 + pawn.Angle;
-            if (attachedTo != null)
-                rotationOffset += attachedTo.TurretRotation;
+            float rotationOffset = attachedTo != null ? attachedTo.TurretRotation : pawn.Rotation.AsInt * 90 + pawn.Angle;
+
             float start = angleRestricted.x + rotationOffset;
             float end = angleRestricted.y + rotationOffset;
 
@@ -547,13 +634,13 @@ namespace Vehicles
             return null;
         }
 
-        public bool ReloadCannon(ThingDef ammo = null)
+        public bool ReloadCannon(ThingDef ammo = null, bool ignoreTimer = false)
         {
-            if (loadedAmmo is null || shellCount < cannonDef.magazineCapacity || ammo != null)
+            if (loadedAmmo is null || (ammo != null && shellCount < cannonDef.magazineCapacity) || shellCount <= 0 || ammo != null)
             {
                 try
                 {
-                    if(pawn.inventory.innerContainer.Contains(savedAmmoType) || pawn.inventory.innerContainer.Contains(ammo))
+                    if (pawn.inventory.innerContainer.Contains(savedAmmoType) || pawn.inventory.innerContainer.Contains(ammo))
                     {
                         Thing storedAmmo = null;
                         if (ammo != null)
@@ -562,7 +649,7 @@ namespace Vehicles
                             savedAmmoType = ammo;
                             TryRemoveShell();
                         }
-                        else if(savedAmmoType != null)
+                        else if (savedAmmoType != null)
                         {
                             storedAmmo = pawn.inventory.innerContainer.FirstOrFallback(x => x.def == savedAmmoType);
                         }
@@ -576,14 +663,20 @@ namespace Vehicles
                         loadedAmmo = loadedThing.def;
                         shellCount = loadedThing.stackCount;
                         SoundDefOf.Artillery_ShellLoaded.PlayOneShot(new TargetInfo(pawn.Position, pawn.Map, false));
-                    }    
+                    }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Log.Error($"Unable to reload Cannon: {uniqueID} on Pawn: {pawn.LabelShort}. Exception: {ex.Message}");
                     return false;
                 }
-            } 
+            }
+            else if(loadedAmmo != null && shellCount > 0)
+            {
+                ActivateBurstTimer();
+                return true;
+            }
+            ActivateTimer(ignoreTimer);
             return loadedAmmo != null;
         }
 
@@ -606,6 +699,7 @@ namespace Vehicles
                 pawn.inventory.innerContainer.TryAdd(thing);
                 loadedAmmo = null;
                 shellCount = 0;
+                ActivateTimer(true);
             }
         }
 
@@ -640,6 +734,7 @@ namespace Vehicles
         public void SetTarget(LocalTargetInfo target)
         {
             cannonTarget = target;
+            TargetLocked = false;
             if (target.Pawn is Pawn)
             {
                 if (target.Pawn.Downed)
@@ -653,6 +748,11 @@ namespace Vehicles
             {
                 CachedPawnTargetStatus = PawnStatusOnTarget.None;
             }
+
+            if(!target.IsValid)
+            {
+                rotationTargeted = currentRotation;
+            }
         }
 
         /// <summary>
@@ -662,7 +762,7 @@ namespace Vehicles
         /// <returns>true if cannonTarget set to target, false if target is still valid</returns>
         public enum PawnStatusOnTarget { Alive, Down, Dead, None}
         public PawnStatusOnTarget CachedPawnTargetStatus { get; set; }
-        public bool SetTargetConditionalOnThing(LocalTargetInfo target)
+        public bool SetTargetConditionalOnThing(LocalTargetInfo target, bool resetPrefireTimer = true)
         {
             if(cannonTarget.IsValid && cannonTarget.HasThing)
             {
@@ -682,7 +782,6 @@ namespace Vehicles
                         return true;
                     }
                 }
-                ResetPrefireTimer();
                 return false;
             }
             SetTarget(target);
@@ -725,12 +824,24 @@ namespace Vehicles
             return "CannonHandlerGroup_" + uniqueID;
         }
 
+        public bool ContainsAmmoDefOrShell(ThingDef def)
+        {
+            ThingDef projectile = null;
+            if(def.projectileWhenLoaded != null)
+            {
+                projectile = def.projectileWhenLoaded;
+            }
+            return cannonDef.ammoAllowed.Contains(def) || cannonDef.ammoAllowed.Contains(projectile);
+        }
+
         private Dictionary<int, int> cannonGroupDict = new Dictionary<int, int>();
 
-        public int cooldownTicks;
+        public int reloadTicks;
+        public int burstTicks;
 
         public int uniqueID = -1;
-        public int MaxTicks => Mathf.CeilToInt(cannonDef.cooldownTimer * 60f);
+        public int MaxTicks => Mathf.CeilToInt(cannonDef.reloadTimer * 60f);
+        public int BurstMaxTicks => Mathf.CeilToInt(cannonDef.timeBetweenBursts * 60f);
         public int WarmupTicks => Mathf.CeilToInt(cannonDef.warmUpTimer * 60f);
 
         private Texture2D cannonTex;
@@ -747,8 +858,25 @@ namespace Vehicles
         public bool autoTargeting = true;
         public bool manualTargeting = true;
 
-        /* Optional */
+        public bool GizmoHighlighted { get; set; }
+        public MaterialPropertyBlock MatPropertyBlock
+        {
+            get
+            {
+                if (mtb is null)
+                    mtb = new MaterialPropertyBlock();
+                return mtb;
+            }
+            set
+            {
+                mtb = value;
+            }
+        }
+
+        private MaterialPropertyBlock mtb;
+        
         public CannonHandler attachedTo;
+        public List<CannonHandler> childCannons = new List<CannonHandler>();
         public string parentKey;
         public string key;
 

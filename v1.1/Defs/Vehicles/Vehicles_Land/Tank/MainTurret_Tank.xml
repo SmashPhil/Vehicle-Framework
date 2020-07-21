@@ -14,9 +14,11 @@
 		
 		<baseTicksBetweenShots>20</baseTicksBetweenShots>
 		<numberOfShots>1</numberOfShots>
-		<cooldownTimer>1</cooldownTimer>
+		<reloadTimer>5</reloadTimer>
 		<warmUpTimer>2</warmUpTimer>
-		<magazineCapacity>1</magazineCapacity>
+		<magazineCapacity>3</magazineCapacity>
+		
+		<timeBetweenBursts>0.5</timeBetweenBursts>
 		
 		<autoSnapTargeting>false</autoSnapTargeting>
 		<rotationSpeed>0.5</rotationSpeed>
@@ -32,14 +34,15 @@
 		
 		<baseCannonTexPath/>
 
-		<!-- <ammoAllowed> -->
-			<!-- <li>MarkX_MkXA</li> -->
-		<!-- </ammoAllowed> -->
+		<ammoAllowed>
+			<li>MarkX_MkXA</li>
+		</ammoAllowed>
 		
 		<projectileOffset>3</projectileOffset>
 		<hitFlags>IntendedTarget</hitFlags>
 		<spreadRadius>1</spreadRadius>
-		<minRange>0</minRange>
+		<maxRange>-1</maxRange>
+		<minRange>15</minRange>
 	</Vehicles.CannonDef>
 	
 	<Vehicles.CannonDef>
@@ -53,15 +56,16 @@
 		<projectile>Bullet_50CalMounted</projectile>
 		<baseTicksBetweenShots>5</baseTicksBetweenShots>
 		<numberOfShots>6</numberOfShots>
-		<cooldownTimer>1.5</cooldownTimer>
+		<reloadTimer>1.5</reloadTimer>
 		<warmUpTimer>1</warmUpTimer>
 		<magazineCapacity>1</magazineCapacity>
 		
-		<autoSnapTargeting>true</autoSnapTargeting>
-		
+		<autoSnapTargeting>false</autoSnapTargeting>
+		<rotationSpeed>1.5</rotationSpeed>
 		<matchParentColor>false</matchParentColor>
 		
 		<gizmoDescription>Select Target.\n\nFire for effect</gizmoDescription>
+		<gizmoIconScale>3</gizmoIconScale>
 		
 		<graphicData>
 			<texPath>Vehicles/50cal</texPath>
@@ -76,6 +80,7 @@
 		<projectileOffset>1</projectileOffset>
 		<hitFlags>All</hitFlags>
 		<spreadRadius>0</spreadRadius>
-		<minRange>0</minRange>
+		<maxRange>30</maxRange>
+		<minRange>4</minRange>
 	</Vehicles.CannonDef>
 </Defs>

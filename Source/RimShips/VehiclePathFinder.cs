@@ -405,7 +405,12 @@ namespace Vehicles.AI
                                             TerrainDef currentTerrain = map.terrainGrid.TerrainAt(num15);
                                             if (pawn.GetComp<CompVehicle>().Props.customTerrainCosts.ContainsKey(currentTerrain))
                                             {
-                                                num17 += pawn.GetComp<CompVehicle>().Props.customTerrainCosts[currentTerrain];
+                                                int customCost = pawn.GetComp<CompVehicle>().Props.customTerrainCosts[currentTerrain];
+                                                if(customCost < 0)
+                                                {
+                                                    goto EndPathing;
+                                                }
+                                                num17 += customCost;
                                             }
                                             else
                                             {
@@ -423,7 +428,7 @@ namespace Vehicles.AI
                                         num17 += (byteGrid[num15] * 8);
                                     }
                                     //Allowed area cost?
-                                    if(flag5 && PawnUtility.AnyPawnBlockingPathAt(new IntVec3(num13, 0, num14), pawn, false, false, true))
+                                    if(flag5 && HelperMethods.AnyVehicleBlockingPathAt(new IntVec3(num13, 0, num14), pawn, false, false, true) != null)
                                     {
                                         num17 += Cost_PawnCollision;
                                     }
@@ -432,20 +437,24 @@ namespace Vehicles.AI
                                     {
                                         //Building Costs Here
                                     }
-                                    List<Blueprint> list = blueprintGrid[num15];
-                                    if(!(list is null))
+                                    if(blueprintGrid[num15] != null)
                                     {
-                                        int num18 = 0;
-                                        foreach(Blueprint bp in list)
+                                        List<Blueprint> list = new List<Blueprint>(blueprintGrid[num15]);
+                                        if(!list.NullOrEmpty())
                                         {
-                                            num18 = Mathf.Max(num18, GetBlueprintCost(bp, pawn));
+                                            int num18 = 0;
+                                            foreach(Blueprint bp in list)
+                                            {
+                                                num18 = Mathf.Max(num18, GetBlueprintCost(bp, pawn));
+                                            }
+                                            if(num18 == int.MaxValue)
+                                            {
+                                                goto EndPathing;
+                                            }
+                                            num17 += num18;
                                         }
-                                        if(num18 == int.MaxValue)
-                                        {
-                                            goto EndPathing;
-                                        }
-                                        num17 += num18;
                                     }
+                                    
                                     int num19 = num17 + calcGrid[num].knownCost;
                                     ushort status = calcGrid[num15].status;
                                     
@@ -572,7 +581,7 @@ namespace Vehicles.AI
             DebugDrawRichData();
             return (PawnPath.NotFound, false);
         Block_32:
-            PawnPath result = null;
+            PawnPath result = PawnPath.NotFound;
             if (report)
             {
                 result = FinalizedPath(num, flag9);
@@ -580,7 +589,7 @@ namespace Vehicles.AI
             DebugDrawPathCost();
             return (result, true);
             Block_34:
-            PawnPath result2 = null;
+            PawnPath result2 = PawnPath.NotFound;
             if (report)
             {
                 result2 = FinalizedPath(num, flag9);
@@ -669,7 +678,7 @@ namespace Vehicles.AI
 
         public static int GetBlueprintCost(Blueprint b, Pawn pawn)
         {
-            if(!(pawn is null))
+            if(pawn != null)
             {
                 return (int)b.PathFindCostFor(pawn);
             }
@@ -751,8 +760,7 @@ namespace Vehicles.AI
 
         private void ResetStatuses()
         {
-            int num = calcGrid.Length;
-            for(int i = 0; i < num; i++)
+            for(int i = 0; i < calcGrid.Length; i++)
             {
                 calcGrid[i].status = 0;
             }
@@ -797,7 +805,7 @@ namespace Vehicles.AI
 
         private Area GetAllowedArea(Pawn pawn)
         {
-            if(!(pawn is null) && !(pawn.playerSettings is null) && !pawn.Drafted && ForbidUtility.CaresAboutForbidden(pawn, true))
+            if(pawn != null && pawn.playerSettings != null && !pawn.Drafted && ForbidUtility.CaresAboutForbidden(pawn, true))
             {
                 Area area = pawn.playerSettings.EffectiveAreaRestrictionInPawnCurrentMap;
                 if(!(area is null) && area.TrueCount <= 0)
@@ -859,8 +867,6 @@ namespace Vehicles.AI
         private FastPriorityQueue<CostNode> openList;
 
         private VehiclePathFinderNodeFast[] calcGrid;
-
-        private VehiclePathFinderNodeFast[] calcGridBoats;
 
         private ushort statusOpenValue = 1;
 

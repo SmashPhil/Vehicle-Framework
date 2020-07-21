@@ -149,15 +149,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bill_BoardShip.cs" />
+    <Compile Include="ConditionalPatchApplier.cs" />
     <Compile Include="CompProperties_VehicleTracks.cs" />
     <Compile Include="CompVehicleTracks.cs" />
     <Compile Include="CustomVehicleDamageMultiplier.cs" />
     <Compile Include="Dialog_AssignSeats.cs" />
     <Compile Include="Dialog_FormVehicleCaravan.cs" />
     <Compile Include="Dialog_VehicleSelector.cs" />
+    <Compile Include="CompatibilityPatch_DualWield.cs" />
     <Compile Include="Graphic_Animate.cs" />
     <Compile Include="Graphic_OmniDirectional.cs" />
+    <Compile Include="IConditionalPatch.cs" />
     <Compile Include="LordJob_FormAndSendVehicles.cs" />
+    <Compile Include="ModPatchable.cs" />
     <Compile Include="TransferableVehicleWidget.cs" />
     <Compile Include="VehicleCaravan.cs" />
     <Compile Include="VehicleCaravanFormingUtility.cs" />

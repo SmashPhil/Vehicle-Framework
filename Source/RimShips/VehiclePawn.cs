@@ -386,6 +386,15 @@ namespace Vehicles
             Drawer.Notify_Spawned();
         }
 
+        public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
+        {
+            base.DeSpawn(mode);
+            if(vPather != null)
+            {
+                vPather.StopDead();
+            }
+        }
+
         public override void Tick()
         {
             base.Tick();

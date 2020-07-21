@@ -41,6 +41,18 @@ namespace Vehicles
 
         public static readonly Texture2D BoatIcon = ContentFinder<Texture2D>.Get("UI/BoatObject");
 
+        public static readonly Texture2D UnloadIcon = ContentFinder<Texture2D>.Get("UI/UnloadIcon");
+
+        public static readonly Texture2D ReloadIcon = ContentFinder<Texture2D>.Get("UI/ReloadIcon");
+
+        public static readonly Texture2D HaltIcon = ContentFinder<Texture2D>.Get("UI/Commands/Halt");
+
+        public static readonly Texture2D FullBarTex = SolidColorMaterials.NewSolidColorTexture(new Color(0.35f, 0.35f, 0.2f));
+
+		public static readonly Texture2D EmptyBarTex = SolidColorMaterials.NewSolidColorTexture(Color.black);
+
+		public static readonly Texture2D TargetLevelArrow = ContentFinder<Texture2D>.Get("UI/Misc/BarInstantMarkerRotated", true);
+
         public static readonly Dictionary<ThingDef, Texture2D> CachedTextureIcons = new Dictionary<ThingDef, Texture2D>();
 
         private static readonly Dictionary<string, Texture2D> cachedTextureFilepaths = new Dictionary<string, Texture2D>();

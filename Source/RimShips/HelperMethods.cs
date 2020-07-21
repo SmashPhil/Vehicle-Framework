@@ -15,7 +15,7 @@ using Vehicles.AI;
 using Vehicles.Lords;
 using Vehicles.Defs;
 using HarmonyLib;
-
+using System.Text.RegularExpressions;
 
 namespace Vehicles
 {
@@ -23,57 +23,11 @@ namespace Vehicles
     public static class HelperMethods
     {
         #region Pathing
-        public static bool BoatCantTraverse(int tile, Caravan caravan = null)
-        {
-            bool flag = !WaterCovered(tile) && (!Find.World.CoastDirectionAt(tile).IsValid || Find.World.Impassable(tile));
-            bool riverFlag = false;
-            if (ShipHarmony.currentFormingCaravan != null || caravan != null || ((Find.WorldSelector.SelectedObjects.AnyNullified() && Find.WorldSelector.SelectedObjects.All(x => x is Caravan && (x as Caravan).IsPlayerControlled && 
-                HasVehicle(x as Caravan))) && !ShipHarmony.routePlannerActive))
-            {
-                List<Pawn> pawns;
-                if(caravan != null)
-                {
-                    pawns = caravan.PawnsListForReading;
-                }
-                else if(ShipHarmony.currentFormingCaravan != null)
-                {
-                    pawns = TransferableUtility.GetPawnsFromTransferables(ShipHarmony.currentFormingCaravan.transferables);
-                }
-                else
-                {
-                    pawns = GrabBoatsFromCaravans(Find.WorldSelector.SelectedObjects.Cast<Caravan>().ToList());
-                }
-                riverFlag = !pawns.AnyNullified(x => IsBoat(x)) ? false : RiverIsValid(tile, pawns);
-            }
-            return flag && !riverFlag;
-        }
-
-        public static bool ImpassableModified(World world, int tileID, int startTile, int destTile, Caravan caravan)
-        {
-            if (caravan is null && ShipHarmony.currentFormingCaravan is null)
-            {
-                if (ShipHarmony.routePlannerActive && world.CoastDirectionAt(startTile).IsValid && world.CoastDirectionAt(destTile).IsValid)
-                    return ImpassableForBoatPlanner(tileID, destTile) && world.Impassable(tileID); //Route planner doesn't know if you have boat or not, so check both
-                return ShipHarmony.routePlannerActive && (WaterCovered(startTile) || Find.World.CoastDirectionAt(startTile).IsValid) && (WaterCovered(destTile) || world.CoastDirectionAt(destTile).IsValid) ?
-                    ImpassableForBoatPlanner(tileID, destTile) : world.Impassable(tileID);
-            }
-            bool riverValid = caravan is null && !(ShipHarmony.currentFormingCaravan is null) ? RiverIsValid(tileID, TransferableUtility.GetPawnsFromTransferables(ShipHarmony.currentFormingCaravan.transferables)) : 
-                RiverIsValid(tileID, caravan.PawnsListForReading.Where(x => IsBoat(x)).ToList());
-            bool flag = Find.WorldGrid[tileID].biome == BiomeDefOf.Ocean || Find.WorldGrid[tileID].biome == BiomeDefOf.Lake;
-            return HasVehicle(caravan) ? (!WaterCovered(tileID) && !(Find.World.CoastDirectionAt(tileID).IsValid && tileID == destTile) &&
-                !(VehicleMod.mod.settings.riverTravel && riverValid)) : (flag || world.Impassable(tileID));
-        }
-
-        public static bool ImpassableForBoatPlanner(int tileID, int destTile = 0)
-        {
-            bool flag = Find.WorldGrid[tileID].biome == BiomeDefOf.Ocean || Find.WorldGrid[tileID].biome == BiomeDefOf.Lake || (tileID == destTile && Find.World.CoastDirectionAt(tileID).IsValid);
-            return !flag;
-        }
 
         public static int CostToMoveIntoCellShips(Pawn pawn, IntVec3 c)
         {
             int num = (c.x == pawn.Position.x || c.z == pawn.Position.z) ? pawn.TicksPerMoveCardinal : pawn.TicksPerMoveDiagonal;
-            num += WaterMapUtility.GetExtensionToMap(pawn.Map)?.getShipPathGrid?.CalculatedCostAt(c) ?? 200;
+            num += pawn.Map.GetComponent<WaterMap>().getShipPathGrid.CalculatedCostAt(c);
             if (pawn.CurJob != null)
             {
                 Pawn locomotionUrgencySameAs = pawn.jobs.curDriver.locomotionUrgencySameAs;
@@ -180,29 +134,7 @@ namespace Vehicles
 			return 1f - pawn.vPather.nextCellCostLeft / pawn.vPather.nextCellCostTotal;
 		}
 
-        public static bool ImpassableReverseThreaded(this IntVec3 c, Map map, Pawn vehicle)
-		{
-            if (c == vehicle.Position)
-                return false;
-            else if (!c.InBounds(map))
-                return true;
-            try
-            {
-                List<Thing> list = map.thingGrid.ThingsListAtFast(c);
-			    for (int i = 0; i < list.Count; i++)
-			    {
-				    if (list[i].def.passability == Traversability.Impassable)
-				    {
-					    return true;
-				    }
-			    }
-            }
-            catch(Exception ex)
-            {
-                Log.ErrorOnce($"Exception Thrown in ThreadId [{Thread.CurrentThread.ManagedThreadId}] Exception: {ex.StackTrace}", Thread.CurrentThread.ManagedThreadId);
-            }
-			return false;
-		}
+        
 
         #endregion
 
@@ -258,17 +190,12 @@ namespace Vehicles
 
         public static bool IsBoat(this Pawn p) //REDO
         {
-            return IsVehicle(p) && p.GetComp<CompVehicle>().Props.vehicleType == VehicleType.Sea;
-        }
-
-        public static bool IsVehicle(this Pawn p) //REDO
-        {
-            return p is VehiclePawn || p?.TryGetComp<CompVehicle>() != null; 
+            return p.IsVehicle() && p.GetComp<CompVehicle>().Props.vehicleType == VehicleType.Sea;
         }
 
         public static bool IsVehicle(this Thing t)
         {
-            return IsVehicle(t as Pawn);
+            return t is VehiclePawn;
         }
 
         public static bool IsVehicle(ThingDef td)
@@ -278,17 +205,17 @@ namespace Vehicles
 
         public static bool HasVehicle(List<Pawn> pawns)
         {
-            return pawns?.AnyNullified(x => IsVehicle(x)) ?? false;
+            return pawns.AnyNullified(x => IsVehicle(x));
         }
 
         public static bool HasVehicle(IEnumerable<Pawn> pawns)
         {
-            return pawns?.AnyNullified(x => IsVehicle(x)) ?? false;
+            return pawns.AnyNullified(x => IsVehicle(x));
         }
 
         public static bool HasVehicle(this Caravan c)
         {
-            return c is VehicleCaravan && (c is null) ? (ShipHarmony.currentFormingCaravan is null) ? false : HasVehicle(TransferableUtility.GetPawnsFromTransferables(ShipHarmony.currentFormingCaravan.transferables)) : HasVehicle(c?.PawnsListForReading);
+            return c is VehicleCaravan && (c is null) ? !(ShipHarmony.currentFormingCaravan is null) && HasVehicle(TransferableUtility.GetPawnsFromTransferables(ShipHarmony.currentFormingCaravan.transferables)) : HasVehicle(c?.PawnsListForReading);
         }
 
         public static bool HasVehicleInCaravan(Pawn p)
@@ -1112,7 +1039,68 @@ namespace Vehicles
 			int minutes = Math.DivRem(minuteRemainder, 42, out int secondRemainder);
 			int seconds = Math.DivRem(secondRemainder, 7, out int runoff);
 
-            return $"{days.ToString("D2")}:{hours.ToString("D2")}:{minutes.ToString("D2")}:{seconds.ToString("D2")}";
+            return $"{days:D2}:{hours:D2}:{minutes:D2}:{seconds:D2}";
+        }
+
+        public static bool IsNumericType(this Type o)
+        {   
+            switch (Type.GetTypeCode(o))
+            {
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                case TypeCode.Single:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool IsNumericType<T1, T2>(this SPTuple<T1, T2> o)
+        {
+            switch (Type.GetTypeCode(o.First.GetType()))
+            {
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                case TypeCode.Single:
+                    break;
+                default:
+                    return false;
+            }
+
+            switch (Type.GetTypeCode(o.Second.GetType()))
+            {
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                case TypeCode.Single:
+                    break;
+                default:
+                    return false;
+            }
+            return true;
         }
 
         #endregion
@@ -1389,6 +1377,7 @@ namespace Vehicles
 				}
 			}
 		}
+
         #endregion
 
         #region UI
@@ -1885,6 +1874,83 @@ namespace Vehicles
 
         #endregion
 
+        #region MultithreadingUtils
+
+        public static bool ImpassableReverseThreaded(this IntVec3 c, Map map, Pawn vehicle)
+		{
+            if (c == vehicle.Position)
+                return false;
+            else if (!c.InBounds(map))
+                return true;
+            try
+            {
+                //Create new list for thread safety
+                List<Thing> list = new List<Thing>(map.thingGrid.ThingsListAtFast(c));
+			    for (int i = 0; i < list.Count; i++)
+			    {
+				    if (list[i].def.passability == Traversability.Impassable)
+				    {
+					    return true;
+				    }
+			    }
+            }
+            catch(Exception ex)
+            {
+                Log.ErrorOnce($"Exception Thrown in ThreadId [{Thread.CurrentThread.ManagedThreadId}] Exception: {ex.StackTrace}", vehicle.thingIDNumber ^ Thread.CurrentThread.ManagedThreadId);
+            }
+			return false;
+		}
+
+        ///Exceptions thrown during Task will be handled at the TaskFactory level
+        public static Pawn AnyVehicleBlockingPathAt(IntVec3 c, VehiclePawn vehicle, bool actAsIfHadCollideWithPawnsJob = false, bool collideOnlyWithStandingPawns = false, bool forPathFinder = false)
+		{
+            List<Thing> thingList = new List<Thing>(c.GetThingList(vehicle.Map)); //Create new list so ref type list is not overriden mid-task
+			if (thingList.Count == 0)
+			{
+                return null;
+			}
+			bool flag = false;
+			if (actAsIfHadCollideWithPawnsJob)
+			{
+				flag = true;
+			}
+			else
+			{
+				Job curJob = vehicle.CurJob;
+				if (curJob != null && (curJob.collideWithPawns || curJob.def.collideWithPawns || vehicle.jobs.curDriver.collideWithPawns))
+				{
+					flag = true;
+				}
+				else if (vehicle.Drafted)
+				{
+					bool moving = vehicle.vPather.Moving;
+				}
+			}
+			for (int i = 0; i < thingList.Count; i++)
+			{
+				Pawn pawn = thingList[i] as Pawn;
+				if (pawn != null && pawn != vehicle && !pawn.Downed && (!collideOnlyWithStandingPawns || (!pawn.pather.MovingNow && (!pawn.pather.Moving || !pawn.pather.MovedRecently(60)))))
+				{
+					if (pawn.HostileTo(vehicle))
+					{
+                        return pawn;
+					}
+					if (flag && (forPathFinder || !vehicle.Drafted || !pawn.RaceProps.Animal))
+					{
+						Job curJob2 = pawn.CurJob;
+						if (curJob2 != null && (curJob2.collideWithPawns || curJob2.def.collideWithPawns || pawn.jobs.curDriver.collideWithPawns))
+						{
+                            return pawn;
+						}
+					}
+				}
+			}
+
+            return null;
+		}
+
+        #endregion
+
         public static CannonTargeter CannonTargeter = new CannonTargeter();
 
         public static Texture2D missingIcon;
@@ -1905,6 +1971,33 @@ namespace Vehicles
         public static Texture2D FuelStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(60, 30, 30).ToColor);
         public static Texture2D FuelAddedStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(60, 30, 30, 120).ToColor);
 
-        private static readonly Texture2D TradeArrow = ContentFinder<Texture2D>.Get("UI/Widgets/TradeArrow", true);
+        public static readonly Texture2D TradeArrow = ContentFinder<Texture2D>.Get("UI/Widgets/TradeArrow", true);
+
+        public static readonly Material RangeCircle_ExtraWide = MaterialPool.MatFrom("UI/RangeField_ExtraWide", ShaderDatabase.MoteGlow);
+        public static readonly Material RangeCircle_Wide = MaterialPool.MatFrom("UI/RangeField_Wide", ShaderDatabase.MoteGlow);
+        public static readonly Material RangeCircle_Mid = MaterialPool.MatFrom("UI/RangeField_Mid", ShaderDatabase.MoteGlow);
+        public static readonly Material RangeCircle_Close = MaterialPool.MatFrom("UI/RangeField_Close", ShaderDatabase.MoteGlow);
+
+        public static readonly SPTuple<int, int, int> RangeDistances = SPTuple.Create(5, 15, 25); 
+
+        public static Material RangeMat(int radius)
+        {
+            if(radius <= RangeDistances.First)
+            {
+                return RangeCircle_Close;
+            }
+            else if(radius <= RangeDistances.Second)
+            {
+                return RangeCircle_Mid;
+            }
+            else if(radius <= 25)
+            {
+                return RangeCircle_Wide;
+            }
+            else
+            {
+                return RangeCircle_ExtraWide;
+            }
+        }
     }
 }

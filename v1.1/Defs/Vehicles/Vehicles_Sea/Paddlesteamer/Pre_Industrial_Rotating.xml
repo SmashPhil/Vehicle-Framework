@@ -14,7 +14,7 @@
 		
 		<baseTicksBetweenShots>15</baseTicksBetweenShots>
 		<numberOfShots>1</numberOfShots>
-		<cooldownTimer>14</cooldownTimer>
+		<reloadTimer>14</reloadTimer>
 		<warmUpTimer>3</warmUpTimer>
 		<magazineCapacity>1</magazineCapacity>
 		
@@ -50,7 +50,7 @@
 		
 		<baseTicksBetweenShots>10</baseTicksBetweenShots>
 		<numberOfShots>2</numberOfShots>
-		<cooldownTimer>30</cooldownTimer>
+		<reloadTimer>30</reloadTimer>
 		<warmUpTimer>3</warmUpTimer>
 		<magazineCapacity>2</magazineCapacity>
 		

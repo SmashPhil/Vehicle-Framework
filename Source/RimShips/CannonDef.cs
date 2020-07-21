@@ -25,6 +25,7 @@ namespace Vehicles
 
         public string gizmoDescription;
         public string gizmoIconTexPath;
+        public float gizmoIconScale = 1f;
 
         public List<float> centerPoints = new List<float>();
         public List<int> cannonsPerPoint = new List<int>();
@@ -50,7 +51,9 @@ namespace Vehicles
 
         public int numberOfShots = 1;
 
-        public float cooldownTimer = 5;
+        public float reloadTimer = 5;
+
+        public float timeBetweenBursts = 1;
 
         public float warmUpTimer = 3;
 

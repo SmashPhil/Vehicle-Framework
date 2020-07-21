@@ -35,7 +35,7 @@ namespace Vehicles
 				Rect rect3 = rect;
 				rect3.yMin = overRect.height / 2f;
 				float fillPercent = refuelable.Fuel / refuelable.FuelCapacity;
-				Widgets.FillableBar(rect3, fillPercent, FullBarTex, EmptyBarTex, false);
+				Widgets.FillableBar(rect3, fillPercent, TexCommandVehicles.FullBarTex, TexCommandVehicles.EmptyBarTex, false);
                 /*if (this.refuelable.Props.targetFuelLevelConfigurable)
                 {
                     float num = this.refuelable.TargetFuelLevel / this.refuelable.FuelCapacity;
@@ -45,25 +45,14 @@ namespace Vehicles
                 }*/
                 Text.Font = GameFont.Small;
                 Text.Anchor = TextAnchor.MiddleCenter;
-				Widgets.Label(rect3, this.refuelable.Fuel.ToString("F0") + " / " + this.refuelable.FuelCapacity.ToString("F0"));
+				Widgets.Label(rect3, refuelable.Fuel.ToString("F0") + " / " + refuelable.FuelCapacity.ToString("F0"));
 				Text.Anchor = 0;
 			}, true, false, 1f);
 			return new GizmoResult(GizmoState.Clear);
 		}
 
-		// Token: 0x04002C21 RID: 11297
 		public CompFueledTravel refuelable;
 
-		// Token: 0x04002C22 RID: 11298
-		private static readonly Texture2D FullBarTex = SolidColorMaterials.NewSolidColorTexture(new Color(0.35f, 0.35f, 0.2f));
-
-		// Token: 0x04002C23 RID: 11299
-		private static readonly Texture2D EmptyBarTex = SolidColorMaterials.NewSolidColorTexture(Color.black);
-
-		// Token: 0x04002C24 RID: 11300
-		private static readonly Texture2D TargetLevelArrow = ContentFinder<Texture2D>.Get("UI/Misc/BarInstantMarkerRotated", true);
-
-		// Token: 0x04002C25 RID: 11301
 		private const float ArrowScale = 0.5f;
 	}
 }

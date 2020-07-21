@@ -100,7 +100,7 @@ namespace Vehicles
         /// <param name="point"></param>
         /// <param name="map"></param>
         /// <returns></returns>
-        public static double AngleToPoint(this IntVec3 pos, IntVec3 point, Map map)
+        public static double AngleToCell(this IntVec3 pos, IntVec3 point, Map map)
         {
             Vector3 posVector = pos.ToVector3Shifted();
             Vector3 pointVector = point.ToVector3Shifted();
@@ -110,6 +110,25 @@ namespace Vehicles
             double angleRadians = Math.Atan(slope);
             double angle = Math.Abs(angleRadians.RadiansToDegrees());
             switch(SPExtra.Quadrant.QuadrantRelativeToPoint(pos, point, map).AsInt)
+            {
+                case 2:
+                    return 360 - angle;
+                case 3:
+                    return 180 + angle;
+                case 4:
+                    return 180 - angle;
+            }
+            return angle;
+        }
+
+        public static double AngleToPoint(this Vector3 pos, Vector3 point, Map map)
+        {
+            float xPrime = pos.x - point.x;
+            float yPrime = pos.z - point.z;
+            double slope = (double)yPrime / xPrime;
+            double angleRadians = Math.Atan(slope);
+            double angle = Math.Abs(angleRadians.RadiansToDegrees());
+            switch(SPExtra.Quadrant.QuadrantRelativeToPoint(pos.ToIntVec3(), point.ToIntVec3(), map).AsInt)
             {
                 case 2:
                     return 360 - angle;
