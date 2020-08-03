@@ -12,11 +12,13 @@
 		
 		<projectile>Rotating_PirateCannon_cannonball</projectile>
 		
-		<baseTicksBetweenShots>15</baseTicksBetweenShots>
-		<numberOfShots>1</numberOfShots>
 		<reloadTimer>14</reloadTimer>
 		<warmUpTimer>3</warmUpTimer>
 		<magazineCapacity>1</magazineCapacity>
+		
+		<fireModes>
+			<li>(1, 0, 0, Single, UI/FireSelectIcon)</li>
+		</fireModes>
 		
 		<autoSnapTargeting>false</autoSnapTargeting>
 		<rotationSpeed>0.45</rotationSpeed>
@@ -28,7 +30,7 @@
 			<graphicClass>Graphic_Single</graphicClass>
 			<drawSize>(4, 4)</drawSize>
 		</graphicData>
-		
+		<matchParentColor>false</matchParentColor>
 		<baseCannonTexPath>Ships/paddlesteamer/Cannons/SwivelCannonBase</baseCannonTexPath>
 
 		<projectileOffset>1</projectileOffset>
@@ -48,11 +50,13 @@
 		
 		<projectile>Rotating_PirateCannon_cannonball</projectile>
 		
-		<baseTicksBetweenShots>10</baseTicksBetweenShots>
-		<numberOfShots>2</numberOfShots>
 		<reloadTimer>30</reloadTimer>
 		<warmUpTimer>3</warmUpTimer>
 		<magazineCapacity>2</magazineCapacity>
+		
+		<fireModes>
+			<li>(2, 10, 0, Double, UI/FireSelectIcon)</li>
+		</fireModes>
 		
 		<autoSnapTargeting>false</autoSnapTargeting>
 		<rotationSpeed>0.45</rotationSpeed>
@@ -64,7 +68,7 @@
 			<graphicClass>Graphic_Single</graphicClass>
 			<drawSize>(4, 4)</drawSize>
 		</graphicData>
-		
+		<matchParentColor>false</matchParentColor>
 		<baseCannonTexPath>Ships/paddlesteamer/Cannons/SwivelCannonBase</baseCannonTexPath>
 
 		<projectileOffset>1</projectileOffset>

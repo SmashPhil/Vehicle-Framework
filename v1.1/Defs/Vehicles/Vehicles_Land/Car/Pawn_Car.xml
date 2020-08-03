@@ -197,37 +197,7 @@
 				<displayUICoord>(587,50)</displayUICoord>
 				<displayUISize>(259,400)</displayUISize>
 				
-				<upgradesAvailable>
-					<li>
-						<upgradeID>Armor_I</upgradeID>
-						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
-						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
-						
-						<upgradeTime>3h</upgradeTime>
-						<values>
-							<li>
-								<key>Armor</key>
-								<value>10</value>
-							</li>
-							<li>
-								<key>Speed</key>
-								<value>-0.25</value>
-							</li>
-						</values>
-						<cost>
-							<li>
-								<key>Steel</key>
-								<value>500</value>
-							</li>
-						</cost>
-						<researchPrerequisites/>
-						<prerequisiteNodes/>
-					</li>
-				</upgradesAvailable>
+				<upgradesAvailable/>
 			</li>
 		</comps>
 	</ThingDef>

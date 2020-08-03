@@ -223,7 +223,7 @@
 			</li>
 			
 			<li Class="Vehicles.CompProperties_Cannons"/>
-			
+			<!--
 			<li Class="Vehicles.CompProperties_UpgradeTree">
 				<displayUICoord>(415,50)</displayUICoord>
 				<displayUISize>(600,337.5)</displayUISize>
@@ -560,7 +560,6 @@
 									<cannonDef>rotatingSingleShot</cannonDef>
 									<cannonRenderLocation>(0,2.65)</cannonRenderLocation>
 									<cannonRenderOffset>(0, 0)</cannonRenderOffset>
-									<cannonTurretDrawSize>(4, 4)</cannonTurretDrawSize>
 									
 									<baseCannonRenderLocation>(0,2.65)</baseCannonRenderLocation>
 									<baseCannonDrawSize>(4,4)</baseCannonDrawSize>
@@ -608,8 +607,7 @@
 									<cannonDef>rotatingDoubleShot</cannonDef>
 									<cannonRenderLocation>(0,2.65)</cannonRenderLocation>
 									<cannonRenderOffset>(0, 0)</cannonRenderOffset>
-									<cannonTurretDrawSize>(4, 4)</cannonTurretDrawSize>
-									
+
 									<baseCannonRenderLocation>(0,2.65)</baseCannonRenderLocation>
 									<baseCannonDrawSize>(4,4)</baseCannonDrawSize>
 								</key>
@@ -644,6 +642,7 @@
 					
 				</upgradesAvailable>
 			</li>
+			-->
 		</comps>
 	</ThingDef>
 </Defs>

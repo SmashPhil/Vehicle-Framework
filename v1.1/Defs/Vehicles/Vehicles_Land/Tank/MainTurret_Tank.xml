@@ -9,16 +9,18 @@
 		<moteCannon>Mote_CannonSmoke</moteCannon>
 		<moteFlash>Mote_CannonFlash</moteFlash>
 		<cannonSound>Explosion_PirateCannon</cannonSound>
+		<reloadSound>Artillery_ShellLoaded</reloadSound>
 		
 		<projectile>MarkX_MkXA</projectile>
 		
-		<baseTicksBetweenShots>20</baseTicksBetweenShots>
-		<numberOfShots>1</numberOfShots>
 		<reloadTimer>5</reloadTimer>
 		<warmUpTimer>2</warmUpTimer>
-		<magazineCapacity>3</magazineCapacity>
+		<magazineCapacity>1</magazineCapacity>
 		
-		<timeBetweenBursts>0.5</timeBetweenBursts>
+		<!-- (shotsPerBurst, ticksBetweenShots, ticksBetweenBursts, fireModeLabel, texPath) -->
+		<fireModes>
+			<li>(1, 0, 0, Single, UI/FireSelectIcon)</li>
+		</fireModes>
 		
 		<autoSnapTargeting>false</autoSnapTargeting>
 		<rotationSpeed>0.5</rotationSpeed>
@@ -54,11 +56,17 @@
 		<moteFlash>Mote_CannonFlash</moteFlash>
 		<cannonSound>Shot_Minigun</cannonSound>
 		<projectile>Bullet_50CalMounted</projectile>
-		<baseTicksBetweenShots>5</baseTicksBetweenShots>
-		<numberOfShots>6</numberOfShots>
-		<reloadTimer>1.5</reloadTimer>
+		
+		<reloadTimer>8</reloadTimer>
 		<warmUpTimer>1</warmUpTimer>
-		<magazineCapacity>1</magazineCapacity>
+		<magazineCapacity>50</magazineCapacity>
+		<genericAmmo>true</genericAmmo>
+		
+		<fireModes>
+			<li>(1, 5, 20, Single, UI/FireSelectIcon)</li>
+			<li>(6, 5, 60, Burst, UI/FireSelectIcon)</li>
+			<li>(6, 5, 5, Full-Auto, UI/FireSelectIcon)</li>
+		</fireModes>
 		
 		<autoSnapTargeting>false</autoSnapTargeting>
 		<rotationSpeed>1.5</rotationSpeed>
@@ -75,12 +83,14 @@
 		
 		<baseCannonTexPath/>
 
-		<ammoAllowed/>
+		<ammoAllowed>
+			<li>Steel</li>
+		</ammoAllowed>
 		
 		<projectileOffset>1</projectileOffset>
 		<hitFlags>All</hitFlags>
 		<spreadRadius>0</spreadRadius>
-		<maxRange>30</maxRange>
-		<minRange>4</minRange>
+		<maxRange>40</maxRange>
+		<minRange>7</minRange>
 	</Vehicles.CannonDef>
 </Defs>

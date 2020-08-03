@@ -2,9 +2,9 @@
 
 <LanguageData>
 	<!-- Labels and Titles -->
-	<RimShips>Boats</RimShips>
+	<RimShips>Vehicle</RimShips>
 	<Vehicles>Vehicles</Vehicles>
-	<ShipSection>Boats</ShipSection>
+	<ShipSection>Vehicle</ShipSection>
 	<CannonLabel>{0} Cannons</CannonLabel>
 	<RepairShip>Repair {0}</RepairShip>
 	<Disembark>Disembark</Disembark>
@@ -101,7 +101,6 @@
 	<MatchWaterTerrainTooltip>Water tiles that are placed will match the water of adjacent water tiles (Disabled: Still WIP)</MatchWaterTerrainTooltip>
 	<ShowAllItemsOnMap>Show All Items On Map</ShowAllItemsOnMap>
 	
-	
 	<!-- Float Menu -->
 	<BoardShip>Board {0} as {1}  [{2}]</BoardShip>
 	<BoardShipGroup>Board {0}</BoardShipGroup>
@@ -109,12 +108,17 @@
 	<ActivityIconOnBoardShip>Onboard {0}</ActivityIconOnBoardShip>
 	<IsIncapableOfRamming>Ram {0}</IsIncapableOfRamming>
 	<CannotSailToCell>Ship cannot reach this area.</CannotSailToCell>
+	<AutoTargeting>AutoTarget: {0}</AutoTargeting>
+	
+	<!-- Tooltips -->
+	<ReloadCannonHandler>Reload</ReloadCannonHandler>
 	
 	<!-- Messages -->
-	<CompShips_CannotMove>Cannot draft. Boat needs more crew in order to navigate.</CompShips_CannotMove>
-	<CompShips_OutOfFuel>Cannot draft. Boat needs more fuel.</CompShips_OutOfFuel>
+	<CompShips_CannotMove>Cannot draft. Vehicle needs more crew in order to navigate.</CompShips_CannotMove>
+	<CompShips_OutOfFuel>Cannot draft. Vehicle needs more fuel.</CompShips_OutOfFuel>
+	<CompUpgrade_UpgradeInProgress>Cannot draft while Vehicle is upgrading.</CompUpgrade_UpgradeInProgress>
 	<NotEnoughCannonCrew>Not enough colonists in {0} to operate {1}.</NotEnoughCannonCrew>
-	<NameIsInvalid>Name invalid for ship.</NameIsInvalid>
+	<NameIsInvalid>Name invalid for Vehicle.</NameIsInvalid>
 	<ShipGainsName>Your new boat has been named {0}</ShipGainsName>
 	<ShipSunkLabel>Boat Sunk</ShipSunkLabel>
 	<ShipSunkDeep>{0} has sunk to the depths of the ocean and has taken with it: {1}</ShipSunkDeep>
@@ -128,16 +132,18 @@
 	<CantMoveDocked>Not enough pawns to set sail.</CantMoveDocked>
 	<CantAssignVehicle>Not enough pawns for {0}.</CantAssignVehicle>
 	<AssignFailure>Failed to assign {0}. {1}</AssignFailure>
-	<PackingSpotNotFoundBoats>Packing Spot was not found for Boat caravan. It is recommended you place a Packing Spot from Misc.</PackingSpotNotFoundBoats>
+	<PackingSpotNotFoundBoats>Packing Spot was not found for Vehicle caravan. It is recommended you place a Packing Spot from Misc.</PackingSpotNotFoundBoats>
 	<ForceLeaveCaravan>Force to Leave</ForceLeaveCaravan>
-	<ForceLeaveCaravanDesc>Force Boat Caravan to leave the map. Will skip loading whatever items are not currently onboard</ForceLeaveCaravanDesc>
+	<ForceLeaveCaravanDesc>Force Vehicle Caravan to leave the map. Will skip loading whatever items are not currently onboard</ForceLeaveCaravanDesc>
 	<ForceLeaveConfirmation>Crew is preparing to leave.</ForceLeaveConfirmation>
 	<BoatCaravanTerminatedNoBoats>Caravan process has been terminated. No boats remain. </BoatCaravanTerminatedNoBoats>
 	<NoAmmoLoadedCannon>No ammo loaded.</NoAmmoLoadedCannon>
+	<NoAmmoAvailable>No ammo available in inventory.</NoAmmoAvailable>
 	<VehicleCannotFit>Not enough space.</VehicleCannotFit>
 	<NoPathForVehicle>Cannot path here.</NoPathForVehicle>
 	<IncapableStatusForRole>{0} is incapable of fulfilling this role.</IncapableStatusForRole>
 	<LandAndSeaRoutePlannerRestriction>Cannot plan route for both Sea and Land vehicles. Paths will not register. </LandAndSeaRoutePlannerRestriction>
+	<AutoTargetingDisabled>AutoTargeting is not allowed for this turret.</AutoTargetingDisabled>
 	
 	<!-- Caravans -->
 	<CaravanShips>Boat</CaravanShips>
@@ -147,7 +153,7 @@
 	<DockCaravan>Items to Take</DockCaravan>
 	<CommandDockShipDesc>Unload all passengers and enable trade with the Settlement of {0}.</CommandDockShipDesc>
 	<CommandDockShipObjectDesc>Dock Boats and go on foot</CommandDockShipObjectDesc>
-	<CommandUndockShip>Board Boats</CommandUndockShip>
+	<CommandUndockShip>Board Vehicle</CommandUndockShip>
 	<CommandUndockShipDesc>Load all pawns and items into Boats</CommandUndockShipDesc>
 	<CommandAttackDockDisable>Cannot attack {0} while docked at their Settlement</CommandAttackDockDisable>
 	<CommandTradeDockDisable>Cannot trade with {0}. Must dock boat first</CommandTradeDockDisable>

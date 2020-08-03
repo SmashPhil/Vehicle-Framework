@@ -7,11 +7,10 @@
 		<workType>Hauling</workType>
 		<verb>pack</verb>
 		<gerund>packing</gerund>
-		<priorityInType>100</priorityInType>
+		<priorityInType>80</priorityInType>
 		<requiredCapacities>
 			<li>Manipulation</li>
 		</requiredCapacities>
-		<prioritizeSustains>true</prioritizeSustains>
 	</WorkGiverDef>
 	
 	<WorkGiverDef>
@@ -21,10 +20,22 @@
 		<workType>Hauling</workType>
 		<verb>pack</verb>
 		<gerund>packing</gerund>
-		<priorityInType>90</priorityInType>
+		<priorityInType>60</priorityInType>
 		<requiredCapacities>
 			<li>Manipulation</li>
 		</requiredCapacities>
-		<prioritizeSustains>true</prioritizeSustains>
+	</WorkGiverDef>
+	
+	<WorkGiverDef>
+		<defName>WorkOnUpgrade</defName>
+		<label>Work on Upgrade</label>
+		<giverClass>Vehicles.Jobs.WorkGiver_WorkOnUpgrade</giverClass>
+		<workType>Construction</workType>
+		<verb>upgrade</verb>
+		<gerund>upgrading</gerund>
+		<priorityInType>70</priorityInType>
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
 	</WorkGiverDef>
 </Defs>

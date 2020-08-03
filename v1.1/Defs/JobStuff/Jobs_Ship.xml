@@ -46,13 +46,21 @@
 		<defName>RepairShip</defName>
 		<driverClass>Vehicles.Jobs.JobDriver_RepairShip</driverClass>
 		<reportString>Repairing ship.</reportString>
-		<casualInterruptible>false</casualInterruptible>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+	</JobDef>
+	
+	<JobDef>
+		<defName>UpgradeVehicle</defName>
+		<driverClass>Vehicles.Jobs.JobDriver_WorkOnUpgrade</driverClass>
+		<reportString>Working on vehicles.</reportString>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
 	</JobDef>
 	
 	<JobDef>
 		<defName>RefuelBoat</defName>
 		<driverClass>Vehicles.Jobs.JobDriver_RefuelBoat</driverClass>
 		<reportString>Refueling ship</reportString>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
 		<casualInterruptible>false</casualInterruptible>
 	</JobDef>
 </Defs>

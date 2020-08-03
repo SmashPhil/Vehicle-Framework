@@ -199,6 +199,7 @@
 				
 				<roles>
 					<li>
+						<key>commander</key>
 						<label>Commander</label>
 						<handlingTypes>
 							<li>Movement</li>
@@ -211,6 +212,7 @@
 						<slotsToOperate>1</slotsToOperate>
 					</li>
 					<li>
+						<key>driver</key>
 						<label>Driver</label>
 						<handlingTypes>
 							<li>Movement</li>
@@ -219,6 +221,7 @@
 						<slotsToOperate>1</slotsToOperate>
 					</li>
 					<li>
+						<key>gunner</key>
 						<label>Gunner</label>
 						<handlingTypes>
 							<li>Cannon</li>
@@ -230,6 +233,7 @@
 						<slotsToOperate>1</slotsToOperate>
 					</li>
 					<li>
+						<key>loader</key>
 						<label>Loader</label>
 						<handlingTypes>
 							<li>Cannon</li>
@@ -260,10 +264,9 @@
 						<cannonDef>tankMainTurret</cannonDef>
 						<cannonRenderLocation>(0,0)</cannonRenderLocation>
 						<cannonRenderOffset>(0, 0)</cannonRenderOffset>
-						<cannonTurretDrawSize>(7, 7)</cannonTurretDrawSize>
-						
+
 						<gizmoLabel>Main Turret</gizmoLabel>
-						<autoTargeting>true</autoTargeting>
+						<autoTargeting>false</autoTargeting>
 						
 						<angleRestricted/>
 						<aimPieOffset>(.075, 2.75)</aimPieOffset>
@@ -271,24 +274,6 @@
 						
 						<key>mainTurret</key>
 					</li>
-					<!-- <li> -->
-						<!-- <cannonDef>turret50cal</cannonDef> -->
-						<!-- <cannonRenderLocation>(-.43, .38)</cannonRenderLocation> -->
-						<!-- <cannonRenderOffset>(0, 0)</cannonRenderOffset> -->
-						<!-- <cannonTurretDrawSize>(1, 1)</cannonTurretDrawSize> -->
-						
-						<!-- <gizmoLabel>.50 Cal</gizmoLabel> -->
-						<!-- <targetPersists>true</targetPersists> -->
-						<!-- <autoTargeting>true</autoTargeting> -->
-						<!-- <manualTargeting>true</manualTargeting> -->
-						
-						<!-- <angleRestricted>(270,90)</angleRestricted> -->
-						<!-- <aimPieOffset/> -->
-						<!-- <drawLayer>2</drawLayer> -->
-						
-						<!-- <key>50cal</key> -->
-						<!-- <parentKey>mainTurret</parentKey> -->
-					<!-- </li> -->
 				</cannons>
 			</li>
 			<li Class="Vehicles.CompProperties_UpgradeTree">
@@ -296,16 +281,15 @@
 				<displayUISize>(259,400)</displayUISize>
 				
 				<upgradesAvailable>
-					<li>
+					<li Class="Vehicles.StatUpgrade">
 						<upgradeID>Armor_I</upgradeID>
 						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
 						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
 						<gridCoordinate>(2,2)</gridCoordinate>
 						<rootNodeLabel>Armor</rootNodeLabel>
 						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
 						
-						<upgradeTime>3h</upgradeTime>
+						<upgradeTime>9h</upgradeTime>
 						<values>
 							<li>
 								<key>Armor</key>
@@ -313,57 +297,59 @@
 							</li>
 							<li>
 								<key>Speed</key>
-								<value>-0.25</value>
+								<value>-0.1</value>
 							</li>
 						</values>
-						<cost>
+						<ingredients>
 							<li>
-								<key>Steel</key>
-								<value>500</value>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>800</count>
 							</li>
-						</cost>
+						</ingredients>
 						<researchPrerequisites/>
 						<prerequisiteNodes/>
 					</li>
-					<li>
+					<li Class="Vehicles.StatUpgrade">
 						<upgradeID>Armor_II</upgradeID>
-						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
+						<label>Composite Armor</label>
 						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
+						<gridCoordinate>(2,5)</gridCoordinate>
 						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
 						
-						<upgradeTime>3h</upgradeTime>
+						<upgradeTime>3d12h2000</upgradeTime>
 						<values>
 							<li>
 								<key>Armor</key>
 								<value>10</value>
 							</li>
-							<li>
-								<key>Speed</key>
-								<value>-0.25</value>
-							</li>
 						</values>
-						<cost>
+						<ingredients>
 							<li>
-								<key>Steel</key>
-								<value>500</value>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>400</count>
 							</li>
-						</cost>
+						</ingredients>
 						<researchPrerequisites/>
-						<prerequisiteNodes/>
+						<prerequisiteNodes>
+							<li>Armor_I</li>
+						</prerequisiteNodes>
 					</li>
-					<li>
+					<li Class="Vehicles.StatUpgrade">
 						<upgradeID>Armor_III</upgradeID>
-						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
+						<label>Depleted Uranium Armor</label>
 						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
+						<gridCoordinate>(2,8)</gridCoordinate>
 						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
 						
-						<upgradeTime>3h</upgradeTime>
+						<upgradeTime>1w</upgradeTime>
 						<values>
 							<li>
 								<key>Armor</key>
@@ -374,25 +360,29 @@
 								<value>-0.25</value>
 							</li>
 						</values>
-						<cost>
+						<ingredients>
 							<li>
-								<key>Steel</key>
-								<value>500</value>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>500</count>
 							</li>
-						</cost>
+						</ingredients>
 						<researchPrerequisites/>
-						<prerequisiteNodes/>
+						<prerequisiteNodes>
+							<li>Armor_II</li>
+						</prerequisiteNodes>
 					</li>
-					<li>
+					<li Class="Vehicles.StatUpgrade">
 						<upgradeID>Armor_IV</upgradeID>
-						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
+						<label>Plasteel Composite Armor</label>
 						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
+						<gridCoordinate>(2,11)</gridCoordinate>
 						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
 						
-						<upgradeTime>3h</upgradeTime>
+						<upgradeTime>2w3d</upgradeTime>
 						<values>
 							<li>
 								<key>Armor</key>
@@ -403,22 +393,92 @@
 								<value>-0.25</value>
 							</li>
 						</values>
-						<cost>
+						<ingredients>
 							<li>
-								<key>Steel</key>
-								<value>500</value>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>500</count>
 							</li>
-						</cost>
+						</ingredients>
+						<researchPrerequisites/>
+						<prerequisiteNodes>
+							<li>Armor_III</li>
+						</prerequisiteNodes>
+					</li>
+					<li Class="Vehicles.StatUpgrade">
+						<upgradeID>Speed_I</upgradeID>
+						<label>Increased Combustion</label>
+						<imageFilePath>UI/UpgradeTree/SpeedBG</imageFilePath>
+						<gridCoordinate>(8,2)</gridCoordinate>
+						<rootNodeLabel>Speed</rootNodeLabel>
+						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
+						
+						<upgradeTime>1d</upgradeTime>
+						<values>
+							<li>
+								<key>Armor</key>
+								<value>10</value>
+							</li>
+							<li>
+								<key>Speed</key>
+								<value>-0.25</value>
+							</li>
+						</values>
+						<ingredients>
+							<li>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>500</count>
+							</li>
+						</ingredients>
 						<researchPrerequisites/>
 						<prerequisiteNodes/>
 					</li>
-					<li>
-						<upgradeID>Armor_I</upgradeID>
-						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
+					<li Class="Vehicles.StatUpgrade">
+						<upgradeID>Speed_II</upgradeID>
+						<label>Advanced Parts</label>
+						<imageFilePath>UI/UpgradeTree/SpeedBG</imageFilePath>
+						<gridCoordinate>(8,4)</gridCoordinate>
+						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
+						
+						<upgradeTime>5d8h</upgradeTime>
+						<values>
+							<li>
+								<key>Armor</key>
+								<value>10</value>
+							</li>
+							<li>
+								<key>Speed</key>
+								<value>-0.25</value>
+							</li>
+						</values>
+						<ingredients>
+							<li>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>500</count>
+							</li>
+						</ingredients>
+						<researchPrerequisites/>
+						<prerequisiteNodes>
+							<li>Speed_I</li>
+						</prerequisiteNodes>
+					</li>
+					<li Class="Vehicles.StatUpgrade">
+						<upgradeID>Cargo_I</upgradeID>
+						<label>Blah</label>
+						<imageFilePath>UI/UpgradeTree/CargoBG</imageFilePath>
+						<gridCoordinate>(14,2)</gridCoordinate>
+						<rootNodeLabel>Cargo</rootNodeLabel>
 						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
 						
 						<upgradeTime>3h</upgradeTime>
@@ -432,22 +492,25 @@
 								<value>-0.25</value>
 							</li>
 						</values>
-						<cost>
+						<ingredients>
 							<li>
-								<key>Steel</key>
-								<value>500</value>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>500</count>
 							</li>
-						</cost>
+						</ingredients>
 						<researchPrerequisites/>
 						<prerequisiteNodes/>
 					</li>
-					<li>
-						<upgradeID>Armor_I</upgradeID>
+					<li Class="Vehicles.StatUpgrade">
+						<upgradeID>FuelCost_I</upgradeID>
 						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
+						<imageFilePath>UI/UpgradeTree/FuelBG</imageFilePath>
+						<gridCoordinate>(20,2)</gridCoordinate>
+						<rootNodeLabel>Fuel</rootNodeLabel>
 						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
 						
 						<upgradeTime>3h</upgradeTime>
@@ -461,22 +524,24 @@
 								<value>-0.25</value>
 							</li>
 						</values>
-						<cost>
+						<ingredients>
 							<li>
-								<key>Steel</key>
-								<value>500</value>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>500</count>
 							</li>
-						</cost>
+						</ingredients>
 						<researchPrerequisites/>
 						<prerequisiteNodes/>
 					</li>
-					<li>
-						<upgradeID>Armor_I</upgradeID>
+					<li Class="Vehicles.StatUpgrade">
+						<upgradeID>FuelCost_II</upgradeID>
 						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
+						<imageFilePath>UI/UpgradeTree/FuelBG</imageFilePath>
+						<gridCoordinate>(20,4)</gridCoordinate>
 						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
 						
 						<upgradeTime>3h</upgradeTime>
@@ -490,22 +555,57 @@
 								<value>-0.25</value>
 							</li>
 						</values>
-						<cost>
+						<ingredients>
 							<li>
-								<key>Steel</key>
-								<value>500</value>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>500</count>
 							</li>
-						</cost>
+						</ingredients>
+						<researchPrerequisites/>
+						<prerequisiteNodes>
+							<li>FuelCost_I</li>
+						</prerequisiteNodes>
+					</li>
+					<li Class="Vehicles.StatUpgrade">
+						<upgradeID>FuelCapacity_I</upgradeID>
+						<label>Steel Plating</label>
+						<imageFilePath>UI/UpgradeTree/FuelBG</imageFilePath>
+						<gridCoordinate>(20,6)</gridCoordinate>
+						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
+						
+						<upgradeTime>3h</upgradeTime>
+						<values>
+							<li>
+								<key>Armor</key>
+								<value>10</value>
+							</li>
+							<li>
+								<key>Speed</key>
+								<value>-0.25</value>
+							</li>
+						</values>
+						<ingredients>
+							<li>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>500</count>
+							</li>
+						</ingredients>
 						<researchPrerequisites/>
 						<prerequisiteNodes/>
 					</li>
-					<li>
-						<upgradeID>Armor_I</upgradeID>
+					<li Class="Vehicles.StatUpgrade">
+						<upgradeID>FuelCapacity_II</upgradeID>
 						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
+						<imageFilePath>UI/UpgradeTree/FuelBG</imageFilePath>
+						<gridCoordinate>(20,8)</gridCoordinate>
 						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
 						
 						<upgradeTime>3h</upgradeTime>
@@ -519,391 +619,77 @@
 								<value>-0.25</value>
 							</li>
 						</values>
-						<cost>
+						<ingredients>
 							<li>
-								<key>Steel</key>
-								<value>500</value>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>500</count>
 							</li>
-						</cost>
+						</ingredients>
 						<researchPrerequisites/>
-						<prerequisiteNodes/>
+						<prerequisiteNodes>
+							<li>FuelCapacity_I</li>
+						</prerequisiteNodes>
 					</li>
-					<li>
-						<upgradeID>Armor_I</upgradeID>
-						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
+					<li Class="Vehicles.CannonUpgrade">
+						<upgradeID>M2Browning</upgradeID>
+						<label>.50 cal Machine Gun</label>
 						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
-						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
-						
-						<upgradeTime>3h</upgradeTime>
-						<values>
+						<gridCoordinate>(26,2)</gridCoordinate>
+						<informationHighlighted>Double the pain at half the cost.</informationHighlighted>
+
+						<cannonUpgrades>
 							<li>
-								<key>Armor</key>
-								<value>10</value>
+								<key>
+									<cannonDef>turret50cal</cannonDef>
+									<cannonRenderLocation>(-.44, .38)</cannonRenderLocation>
+									<cannonRenderOffset>(0, 0)</cannonRenderOffset>
+									
+									<gizmoLabel>.50 Cal</gizmoLabel>
+									<targetPersists>true</targetPersists>
+									<autoTargeting>true</autoTargeting>
+									<manualTargeting>true</manualTargeting>
+									
+									<angleRestricted>(300,60)</angleRestricted>
+									<aimPieOffset/>
+									<drawLayer>2</drawLayer>
+									
+									<key>50cal</key>
+									<parentKey>mainTurret</parentKey>
+								</key>
+								<value>
+									<key>commander</key>
+									<cannonIds>
+										<li>mainTurret</li>
+									</cannonIds>
+								</value>
+							</li>
+						</cannonUpgrades>
+						<ingredients>
+							<li>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>900</count>
 							</li>
 							<li>
-								<key>Speed</key>
-								<value>-0.25</value>
+								<filter>
+									<thingDefs>
+										<li>ComponentIndustrial</li>
+									</thingDefs>
+								</filter>
+								<count>6</count>
 							</li>
-						</values>
-						<cost>
-							<li>
-								<key>Steel</key>
-								<value>500</value>
-							</li>
-						</cost>
+						</ingredients>
 						<researchPrerequisites/>
-						<prerequisiteNodes/>
-					</li>
-					<li>
-						<upgradeID>Armor_I</upgradeID>
-						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
-						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
-						
-						<upgradeTime>3h</upgradeTime>
-						<values>
-							<li>
-								<key>Armor</key>
-								<value>10</value>
-							</li>
-							<li>
-								<key>Speed</key>
-								<value>-0.25</value>
-							</li>
-						</values>
-						<cost>
-							<li>
-								<key>Steel</key>
-								<value>500</value>
-							</li>
-						</cost>
-						<researchPrerequisites/>
-						<prerequisiteNodes/>
-					</li>
-					<li>
-						<upgradeID>Armor_I</upgradeID>
-						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
-						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
-						
-						<upgradeTime>3h</upgradeTime>
-						<values>
-							<li>
-								<key>Armor</key>
-								<value>10</value>
-							</li>
-							<li>
-								<key>Speed</key>
-								<value>-0.25</value>
-							</li>
-						</values>
-						<cost>
-							<li>
-								<key>Steel</key>
-								<value>500</value>
-							</li>
-						</cost>
-						<researchPrerequisites/>
-						<prerequisiteNodes/>
-					</li>
-					<li>
-						<upgradeID>Armor_I</upgradeID>
-						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
-						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
-						
-						<upgradeTime>3h</upgradeTime>
-						<values>
-							<li>
-								<key>Armor</key>
-								<value>10</value>
-							</li>
-							<li>
-								<key>Speed</key>
-								<value>-0.25</value>
-							</li>
-						</values>
-						<cost>
-							<li>
-								<key>Steel</key>
-								<value>500</value>
-							</li>
-						</cost>
-						<researchPrerequisites/>
-						<prerequisiteNodes/>
-					</li>
-					<li>
-						<upgradeID>Armor_I</upgradeID>
-						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
-						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
-						
-						<upgradeTime>3h</upgradeTime>
-						<values>
-							<li>
-								<key>Armor</key>
-								<value>10</value>
-							</li>
-							<li>
-								<key>Speed</key>
-								<value>-0.25</value>
-							</li>
-						</values>
-						<cost>
-							<li>
-								<key>Steel</key>
-								<value>500</value>
-							</li>
-						</cost>
-						<researchPrerequisites/>
-						<prerequisiteNodes/>
-					</li>
-					<li>
-						<upgradeID>Armor_I</upgradeID>
-						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
-						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
-						
-						<upgradeTime>3h</upgradeTime>
-						<values>
-							<li>
-								<key>Armor</key>
-								<value>10</value>
-							</li>
-							<li>
-								<key>Speed</key>
-								<value>-0.25</value>
-							</li>
-						</values>
-						<cost>
-							<li>
-								<key>Steel</key>
-								<value>500</value>
-							</li>
-						</cost>
-						<researchPrerequisites/>
-						<prerequisiteNodes/>
-					</li>
-					<li>
-						<upgradeID>Armor_I</upgradeID>
-						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
-						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
-						
-						<upgradeTime>3h</upgradeTime>
-						<values>
-							<li>
-								<key>Armor</key>
-								<value>10</value>
-							</li>
-							<li>
-								<key>Speed</key>
-								<value>-0.25</value>
-							</li>
-						</values>
-						<cost>
-							<li>
-								<key>Steel</key>
-								<value>500</value>
-							</li>
-						</cost>
-						<researchPrerequisites/>
-						<prerequisiteNodes/>
-					</li>
-					<li>
-						<upgradeID>Armor_I</upgradeID>
-						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
-						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
-						
-						<upgradeTime>3h</upgradeTime>
-						<values>
-							<li>
-								<key>Armor</key>
-								<value>10</value>
-							</li>
-							<li>
-								<key>Speed</key>
-								<value>-0.25</value>
-							</li>
-						</values>
-						<cost>
-							<li>
-								<key>Steel</key>
-								<value>500</value>
-							</li>
-						</cost>
-						<researchPrerequisites/>
-						<prerequisiteNodes/>
-					</li>
-					<li>
-						<upgradeID>Armor_I</upgradeID>
-						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
-						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
-						
-						<upgradeTime>3h</upgradeTime>
-						<values>
-							<li>
-								<key>Armor</key>
-								<value>10</value>
-							</li>
-							<li>
-								<key>Speed</key>
-								<value>-0.25</value>
-							</li>
-						</values>
-						<cost>
-							<li>
-								<key>Steel</key>
-								<value>500</value>
-							</li>
-						</cost>
-						<researchPrerequisites/>
-						<prerequisiteNodes/>
-					</li>
-					<li>
-						<upgradeID>Armor_I</upgradeID>
-						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
-						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
-						
-						<upgradeTime>3h</upgradeTime>
-						<values>
-							<li>
-								<key>Armor</key>
-								<value>10</value>
-							</li>
-							<li>
-								<key>Speed</key>
-								<value>-0.25</value>
-							</li>
-						</values>
-						<cost>
-							<li>
-								<key>Steel</key>
-								<value>500</value>
-							</li>
-						</cost>
-						<researchPrerequisites/>
-						<prerequisiteNodes/>
-					</li>
-					<li>
-						<upgradeID>Armor_I</upgradeID>
-						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
-						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
-						
-						<upgradeTime>3h</upgradeTime>
-						<values>
-							<li>
-								<key>Armor</key>
-								<value>10</value>
-							</li>
-							<li>
-								<key>Speed</key>
-								<value>-0.25</value>
-							</li>
-						</values>
-						<cost>
-							<li>
-								<key>Steel</key>
-								<value>500</value>
-							</li>
-						</cost>
-						<researchPrerequisites/>
-						<prerequisiteNodes/>
-					</li>
-					<li>
-						<upgradeID>Armor_I</upgradeID>
-						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
-						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
-						
-						<upgradeTime>3h</upgradeTime>
-						<values>
-							<li>
-								<key>Armor</key>
-								<value>10</value>
-							</li>
-							<li>
-								<key>Speed</key>
-								<value>-0.25</value>
-							</li>
-						</values>
-						<cost>
-							<li>
-								<key>Steel</key>
-								<value>500</value>
-							</li>
-						</cost>
-						<researchPrerequisites/>
-						<prerequisiteNodes/>
-					</li>
-					<li>
-						<upgradeID>Armor_I</upgradeID>
-						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
-						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
-						<gridCoordinate>(2,2)</gridCoordinate>
-						<rootNodeLabel>Armor</rootNodeLabel>
-						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
-						
-						<upgradeTime>3h</upgradeTime>
-						<values>
-							<li>
-								<key>Armor</key>
-								<value>10</value>
-							</li>
-							<li>
-								<key>Speed</key>
-								<value>-0.25</value>
-							</li>
-						</values>
-						<cost>
-							<li>
-								<key>Steel</key>
-								<value>500</value>
-							</li>
-						</cost>
-						<researchPrerequisites/>
-						<prerequisiteNodes/>
+						<prerequisiteNodes>
+							<li>Cannons_I</li>
+						</prerequisiteNodes>
 					</li>
 				</upgradesAvailable>
 			</li>

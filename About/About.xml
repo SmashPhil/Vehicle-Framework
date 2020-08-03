@@ -3,8 +3,8 @@
 	<name>Vehicles</name>
 	<author>Smash Phil</author>
 	<supportedVersions>
-		<li>1.0</li>
 		<li>1.1</li>
+		<li>1.2</li>
 	</supportedVersions>
 	<modDependencies>
 		<li>
@@ -14,7 +14,7 @@
 			<downloadUrl>https://github.com/pardeike/HarmonyRimWorld/releases/latest</downloadUrl>
 		</li>
 	</modDependencies>
-	<packageId>smashphil.vehicles.testrelease</packageId>
+	<packageId>smashphil.vehicles</packageId>
 	<description>
 Vehicles to drive. Vroom vroom.
 	</description>
