@@ -36,7 +36,7 @@ namespace Vehicles
                 {
                     numeric *= GetTickMultiplier(timeStamp[timeStamp.Length - 1]);
                 }
-                totalTicks = numeric;
+                totalTicks += numeric;
 			}
             return totalTicks;
         }

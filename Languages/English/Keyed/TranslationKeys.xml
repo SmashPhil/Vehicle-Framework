@@ -144,6 +144,8 @@
 	<IncapableStatusForRole>{0} is incapable of fulfilling this role.</IncapableStatusForRole>
 	<LandAndSeaRoutePlannerRestriction>Cannot plan route for both Sea and Land vehicles. Paths will not register. </LandAndSeaRoutePlannerRestriction>
 	<AutoTargetingDisabled>AutoTargeting is not allowed for this turret.</AutoTargetingDisabled>
+	<LeaveVehicleBehindCaravan>Are you sure you want to leave Vehicles behind? Vehicles left behind: {0}</LeaveVehicleBehindCaravan>
+	<MessageMustAssignEnoughToVehicle>Must assign enough colonists to man vehicle.</MessageMustAssignEnoughToVehicle>
 	
 	<!-- Caravans -->
 	<CaravanShips>Boat</CaravanShips>
@@ -161,6 +163,7 @@
 	<CaravanMustHaveEnoughPawnsToOperate>Not enough Pawns selected to set sail. Need {0}</CaravanMustHaveEnoughPawnsToOperate>
 	<CommandFormVehicleCaravan>Form Vehicle Caravan</CommandFormVehicleCaravan>
 	<CommandFormVehicleCaravanDesc>Form caravan with vehicles included.</CommandFormVehicleCaravanDesc>
+	<CommandReformVehicleCaravan>Reform Vehicle Caravan</CommandReformVehicleCaravan>
 	
 	<!-- Upgrades -->
 	<Upgrade>Upgrade</Upgrade>
@@ -186,5 +189,5 @@
 	<FormingCaravanStatus_Leaving_Ship>Sailing.</FormingCaravanStatus_Leaving_Ship>
 	<FormingCaravanStatus_Leaving_Ship_Pause>Sailing (waiting)</FormingCaravanStatus_Leaving_Ship_Pause>
 	<AwaitOrders>Awaiting Orders.</AwaitOrders>
-
+	<SpawningVehicles>Spawning Vehicles</SpawningVehicles>
 </LanguageData>

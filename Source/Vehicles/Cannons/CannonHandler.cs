@@ -387,40 +387,45 @@ namespace Vehicles
             if(GizmoHighlighted || HelperMethods.CannonTargeter.cannon == this)
             {
                 //REDO
-                if(MaxRange > -1)
-                {
-                    //Vector3 pos = TurretLocation;
-                    //pos.y = AltitudeLayer.MoteOverhead.AltitudeFor();
-                    //float currentAlpha = 0.65f; // this.GetCurrentAlpha();
-                    //if (currentAlpha > 0f)
-                    //{
-                    //    Color value = Color.grey;
-                    //    value.a *= currentAlpha;
-                    //    MatPropertyBlock.SetColor(ShaderPropertyIDs.Color, value);
-                    //    Matrix4x4 matrix = default;
-                    //    matrix.SetTRS(pos, Quaternion.identity, new Vector3(MaxRange * 2f, 1f, MaxRange * 2f));
-                    //    Graphics.DrawMesh(MeshPool.plane10, matrix, HelperMethods.RangeMat((int)MaxRange), 0, null, 0, MatPropertyBlock);
-                    //}
 
-                    if (angleRestricted != Vector2.zero)
-                    {
-                        var drawLinesTask = new Task(() => { HelperMethods.DrawAngleLines(TurretLocation, angleRestricted, MaxRange, restrictedTheta, attachedTo?.TurretRotation ?? 0f); });
-                        drawLinesTask.RunSynchronously();
-                    }
-                }
-                if(MinRange > 0)
+                if (angleRestricted != Vector2.zero)
                 {
-                    Vector3 pos = TurretLocation;
-                    pos.y = AltitudeLayer.MoteOverhead.AltitudeFor();
-                    float currentAlpha = 0.65f; // this.GetCurrentAlpha();
-                    if (currentAlpha > 0f)
+                    var drawLinesTask = new Task(() => { HelperMethods.DrawAngleLines(TurretLocation, angleRestricted, MinRange, MaxRange, restrictedTheta, attachedTo?.TurretRotation ?? 0f); });
+                    drawLinesTask.RunSynchronously();
+                }
+                else
+                {
+                    if (MaxRange > -1)
                     {
-                        Color value = Color.red;
-                        value.a *= currentAlpha;
-                        MatPropertyBlock.SetColor(ShaderPropertyIDs.Color, value);
-                        Matrix4x4 matrix = default;
-                        matrix.SetTRS(pos, Quaternion.identity, new Vector3(MinRange * 2f, 1f, MinRange * 2f));
-                        Graphics.DrawMesh(MeshPool.plane10, matrix, HelperMethods.RangeMat((int)MinRange), 0, null, 0, MatPropertyBlock);
+                        Vector3 pos = TurretLocation;
+                        pos.y = AltitudeLayer.MoteOverhead.AltitudeFor();
+                        float currentAlpha = 0.65f; // this.GetCurrentAlpha();
+                        if (currentAlpha > 0f)
+                        {
+                            Color value = Color.grey;
+                            value.a *= currentAlpha;
+                            MatPropertyBlock.SetColor(ShaderPropertyIDs.Color, value);
+                            Matrix4x4 matrix = default;
+                            matrix.SetTRS(pos, Quaternion.identity, new Vector3(MaxRange * 2f, 1f, MaxRange * 2f));
+                            Graphics.DrawMesh(MeshPool.plane10, matrix, HelperMethods.RangeMat((int)MaxRange), 0, null, 0, MatPropertyBlock);
+                        }
+
+
+                    }
+                    if (MinRange > 0)
+                    {
+                        Vector3 pos = TurretLocation;
+                        pos.y = AltitudeLayer.MoteOverhead.AltitudeFor();
+                        float currentAlpha = 0.65f; // this.GetCurrentAlpha();
+                        if (currentAlpha > 0f)
+                        {
+                            Color value = Color.red;
+                            value.a *= currentAlpha;
+                            MatPropertyBlock.SetColor(ShaderPropertyIDs.Color, value);
+                            Matrix4x4 matrix = default;
+                            matrix.SetTRS(pos, Quaternion.identity, new Vector3(MinRange * 2f, 1f, MinRange * 2f));
+                            Graphics.DrawMesh(MeshPool.plane10, matrix, HelperMethods.RangeMat((int)MinRange), 0, null, 0, MatPropertyBlock);
+                        }
                     }
                 }
             }

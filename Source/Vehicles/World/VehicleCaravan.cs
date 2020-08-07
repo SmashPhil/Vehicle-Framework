@@ -54,7 +54,7 @@ namespace Vehicles
 			}
 			Quaternion q = Quaternion.LookRotation(Vector3.Cross(vector, Vector3.up), vector) * Quaternion.Euler(0, -90f, 0);
 			Vector3 s = new Vector3(size, 1f, size);
-			Matrix4x4 matrix = default(Matrix4x4);
+			Matrix4x4 matrix = default;
 			matrix.SetTRS(pos + normalized * altOffset, q, s);
 			int layer = useSkyboxLayer ? WorldCameraManager.WorldSkyboxLayer : WorldCameraManager.WorldLayer;
 			if (propertyBlock != null)
@@ -99,27 +99,6 @@ namespace Vehicles
 
 	        if (IsPlayerControlled)
 	        {
-		        if (Find.WorldSelector.SingleSelectedObject == this)
-		        {
-			        yield return SettleInEmptyTileUtility.SettleCommand(this);
-		        }
-		        if (Find.WorldSelector.SingleSelectedObject == this)
-		        {
-			        if (PawnsListForReading.Count((Pawn x) => x.IsColonist) >= 2)
-			        {
-				        yield return new Command_Action
-				        {
-					        defaultLabel = "CommandSplitCaravan".Translate(),
-					        defaultDesc = "CommandSplitCaravanDesc".Translate(),
-					        icon = SplitCommand,
-					        hotKey = KeyBindingDefOf.Misc5,
-					        action = delegate()
-					        {
-						        Find.WindowStack.Add(new Dialog_SplitCaravan(this));
-					        }
-				        };
-			        }
-		        }
 		        if (vPather.Moving)
 		        {
 			        yield return new Command_Toggle

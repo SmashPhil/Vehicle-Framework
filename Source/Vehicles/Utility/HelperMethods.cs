@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 using Verse.AI;
@@ -15,7 +14,6 @@ using Vehicles.AI;
 using Vehicles.Lords;
 using Vehicles.Defs;
 using HarmonyLib;
-using System.Text.RegularExpressions;
 
 namespace Vehicles
 {
@@ -305,23 +303,24 @@ namespace Vehicles
         {
             foreach(ThingDef vehicleDef in DefDatabase<ThingDef>.AllDefs.Where(v => v.GetCompProperties<CompProperties_Vehicle>() != null))
             {
-				if (vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts is null)
-					vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts = new Dictionary<BiomeDef, float>();
-                if (vehicleDef.GetCompProperties<CompProperties_Vehicle>().customHillinessCosts is null)
-                    vehicleDef.GetCompProperties<CompProperties_Vehicle>().customHillinessCosts = new Dictionary<Hilliness, float>();
-                if (vehicleDef.GetCompProperties<CompProperties_Vehicle>().customRoadCosts is null)
-                    vehicleDef.GetCompProperties<CompProperties_Vehicle>().customRoadCosts = new Dictionary<RoadDef, float>();
-                if (vehicleDef.GetCompProperties<CompProperties_Vehicle>().customTerrainCosts is null)
-                    vehicleDef.GetCompProperties<CompProperties_Vehicle>().customTerrainCosts = new Dictionary<TerrainDef, int>();
-                if (vehicleDef.GetCompProperties<CompProperties_Vehicle>().customThingCosts is null)
-                    vehicleDef.GetCompProperties<CompProperties_Vehicle>().customThingCosts = new Dictionary<ThingDef, int>();
+                var props = vehicleDef.GetCompProperties<CompProperties_Vehicle>();
+				if (props.customBiomeCosts is null)
+					props.customBiomeCosts = new Dictionary<BiomeDef, float>();
+                if (props.customHillinessCosts is null)
+                    props.customHillinessCosts = new Dictionary<Hilliness, float>();
+                if (props.customRoadCosts is null)
+                    props.customRoadCosts = new Dictionary<RoadDef, float>();
+                if (props.customTerrainCosts is null)
+                    props.customTerrainCosts = new Dictionary<TerrainDef, int>();
+                if (props.customThingCosts is null)
+                    props.customThingCosts = new Dictionary<ThingDef, int>();
 
-				if(vehicleDef.GetCompProperties<CompProperties_Vehicle>().vehicleType == VehicleType.Sea)
+				if(props.vehicleType == VehicleType.Sea)
                 {
-					if(!vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts.ContainsKey(BiomeDefOf.Ocean))
-						vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts.Add(BiomeDefOf.Ocean, 1);
-					if(!vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts.ContainsKey(BiomeDefOf.Lake))
-						vehicleDef.GetCompProperties<CompProperties_Vehicle>().customBiomeCosts.Add(BiomeDefOf.Lake, 1);
+					if(!props.customBiomeCosts.ContainsKey(BiomeDefOf.Ocean))
+						props.customBiomeCosts.Add(BiomeDefOf.Ocean, 1);
+					if(!props.customBiomeCosts.ContainsKey(BiomeDefOf.Lake))
+						props.customBiomeCosts.Add(BiomeDefOf.Lake, 1);
                 }
             }
         }
@@ -426,6 +425,24 @@ namespace Vehicles
                         }
                     }
                     x = (x + 2) > ships.Count ? 0 : ++x;
+                }
+            }
+        }
+
+        public static void BoardAllAssignedPawns(ref List<Pawn> pawns)
+        {
+            List<VehiclePawn> vehicles = pawns.Where(p => p.IsVehicle()).Cast<VehiclePawn>().ToList();
+            List<Pawn> nonVehicles = pawns.Where(p => !p.IsVehicle()).ToList();
+            Log.Message($"AssignedSeats: {assignedSeats.Count}");
+            foreach(Pawn pawn in nonVehicles)
+            {
+                Log.Message($"Checking: {pawn.LabelShort}");
+                if(assignedSeats.ContainsKey(pawn) && vehicles.Contains(assignedSeats[pawn].First))
+                {
+                    Log.Message("Boarding...");
+                    assignedSeats[pawn].First.GetComp<CompVehicle>().GiveLoadJob(pawn, assignedSeats[pawn].Second);
+                    assignedSeats[pawn].First.GetCachedComp<CompVehicle>().Notify_Boarded(pawn);
+                    pawns.Remove(pawn);
                 }
             }
         }
@@ -853,19 +870,19 @@ namespace Vehicles
             return ships;
         }
 
-        public static List<Pawn> GrabPawnsFromVehicleCaravanSilentFail(Caravan caravan)
+        public static List<Pawn> GrabPawnsFromVehicleCaravanSilentFail(this Caravan caravan)
         {
             if (caravan is null || !HasVehicle(caravan))
                 return null;
-            List<Pawn> ships = new List<Pawn>();
+            List<Pawn> vehicles = new List<Pawn>();
             foreach (Pawn p in caravan.PawnsListForReading)
             {
                 if (IsVehicle(p))
-                    ships.AddRange(p.GetComp<CompVehicle>().AllPawnsAboard);
+                    vehicles.AddRange(p.GetComp<CompVehicle>().AllPawnsAboard);
                 else
-                    ships.Add(p);
+                    vehicles.Add(p);
             }
-            return ships;
+            return vehicles;
         }
 
         public static List<Pawn> GrabBoatsFromCaravans(List<Caravan> caravans)
@@ -1008,6 +1025,11 @@ namespace Vehicles
             }
             objects.Sort();
             return objects;
+        }
+
+        public static int CountAssignedToVehicle(this VehiclePawn vehicle)
+        {
+            return assignedSeats.Where(a => a.Value.First == vehicle).Select(s => s.Key).Count();
         }
 
         #endregion
@@ -1333,21 +1355,38 @@ namespace Vehicles
 			}
 		}
 
-        public static void DrawAngleLines(Vector3 cannonPos, Vector2 restrictedAngle, float distance, float theta, float additionalAngle = 0f)
+        public static void DrawAngleLines(Vector3 cannonPos, Vector2 restrictedAngle, float minRange, float maxRange, float theta, float additionalAngle = 0f)
         {
-            Vector3 targetPos1 = cannonPos.PointFromAngle(distance, restrictedAngle.x + additionalAngle);
-            Vector3 targetPos2 = cannonPos.PointFromAngle(distance, restrictedAngle.y + additionalAngle);
-            GenDraw.DrawLineBetween(cannonPos, targetPos1);
-            GenDraw.DrawLineBetween(cannonPos, targetPos2);
+            Vector3 minTargetPos1 = cannonPos.PointFromAngle(minRange, restrictedAngle.x + additionalAngle);
+            Vector3 minTargetPos2 = cannonPos.PointFromAngle(minRange, restrictedAngle.y + additionalAngle);
+
+            Vector3 maxTargetPos1 = cannonPos.PointFromAngle(maxRange - minRange, restrictedAngle.x + additionalAngle);
+            Vector3 maxTargetPos2 = cannonPos.PointFromAngle(maxRange - minRange, restrictedAngle.y + additionalAngle);
+
+            GenDraw.DrawLineBetween(minTargetPos1, maxTargetPos1);
+            GenDraw.DrawLineBetween(minTargetPos2, maxTargetPos2);
+            if(minRange > 0)
+            {
+                GenDraw.DrawLineBetween(cannonPos, minTargetPos1, SimpleColor.Red);
+                GenDraw.DrawLineBetween(cannonPos, minTargetPos2, SimpleColor.Red);
+            }
 
             float angleStart = restrictedAngle.x;
-            
-            Vector3 lastPoint = targetPos1;
+
+            Vector3 lastPointMin = minTargetPos1;
+            Vector3 lastPointMax = maxTargetPos1;
             for(int angle = 0; angle < theta + 1; angle++)
             {
-                Vector3 targetPoint = cannonPos.PointFromAngle(distance, angleStart + angle + additionalAngle);
-                GenDraw.DrawLineBetween(lastPoint, targetPoint);
-                lastPoint = targetPoint;
+                Vector3 targetPointMax = cannonPos.PointFromAngle(maxRange, angleStart + angle + additionalAngle);
+                GenDraw.DrawLineBetween(lastPointMax, targetPointMax);
+                lastPointMax = targetPointMax;
+
+                if(minRange > 0)
+                {
+                    Vector3 targetPointMin = cannonPos.PointFromAngle(minRange, angleStart + angle + additionalAngle);
+                    GenDraw.DrawLineBetween(lastPointMin, targetPointMin, SimpleColor.Red);
+                    lastPointMin = targetPointMin;
+                }
             }
         }
 

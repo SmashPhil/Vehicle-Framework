@@ -44,7 +44,7 @@ namespace Vehicles
 
         public UpgradeNode NodeListed(UpgradeNode node)
         {
-            UpgradeNode matchedNode = upgradeList.Find(x => x.upgradeID == node.upgradeID);
+            UpgradeNode matchedNode = upgradeList.Find(x => x == node);
             if(matchedNode is null)
             {
                 Log.Error($"Unable to locate node {node.upgradeID} in upgrade list. Cross referencing comp upgrades?");

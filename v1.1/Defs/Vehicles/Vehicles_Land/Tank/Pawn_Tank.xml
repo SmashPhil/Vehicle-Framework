@@ -320,7 +320,7 @@
 						<gridCoordinate>(2,5)</gridCoordinate>
 						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
 						
-						<upgradeTime>3d12h2000</upgradeTime>
+						<upgradeTime>3d,12h,2000</upgradeTime>
 						<values>
 							<li>
 								<key>Armor</key>
@@ -382,7 +382,7 @@
 						<gridCoordinate>(2,11)</gridCoordinate>
 						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
 						
-						<upgradeTime>2w3d</upgradeTime>
+						<upgradeTime>2w,3d</upgradeTime>
 						<values>
 							<li>
 								<key>Armor</key>
@@ -447,7 +447,7 @@
 						<gridCoordinate>(8,4)</gridCoordinate>
 						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
 						
-						<upgradeTime>5d8h</upgradeTime>
+						<upgradeTime>5d,8h</upgradeTime>
 						<values>
 							<li>
 								<key>Armor</key>
@@ -660,6 +660,7 @@
 									<key>50cal</key>
 									<parentKey>mainTurret</parentKey>
 								</key>
+								<!-- If key exists, cannonId's will be concatenated to handler related to existing Key -->
 								<value>
 									<key>commander</key>
 									<cannonIds>

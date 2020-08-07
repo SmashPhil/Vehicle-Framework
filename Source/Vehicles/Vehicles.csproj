@@ -207,12 +207,12 @@
     <Compile Include="Cannons\CannonDef.cs" />
     <Compile Include="Cannons\CannonHandler.cs" />
     <Compile Include="Cannons\CannonTargeter.cs" />
-    <Compile Include="Cannons\Command_CooldownAction.cs" />
-    <Compile Include="Cannons\Command_SetRange.cs" />
-    <Compile Include="Cannons\Command_TargeterCooldownAction.cs" />
+    <Compile Include="Gizmo\Command_CooldownAction.cs" />
+    <Compile Include="Gizmo\Command_SetRange.cs" />
+    <Compile Include="Gizmo\Command_TargeterCooldownAction.cs" />
     <Compile Include="Cannons\FireMode.cs" />
-    <Compile Include="Components\VehicleCaravan_PathFollower.cs" />
-    <Compile Include="Components\VehicleCaravan_Tweener.cs" />
+    <Compile Include="World\VehicleCaravan_PathFollower.cs" />
+    <Compile Include="World\VehicleCaravan_Tweener.cs" />
     <Compile Include="Components\Vehicle_DrawTracker.cs" />
     <Compile Include="Components\Vehicle_PathFollower.cs" />
     <Compile Include="Comps\CompCannons.cs" />

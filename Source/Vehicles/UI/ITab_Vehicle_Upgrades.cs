@@ -103,9 +103,14 @@ namespace Vehicles.UI
 
                     SelPawnUpgrade.drafter.Drafted = false;
                     if (DebugSettings.godMode)
+                    {
                         selectedNode.Upgrade(SelPawnUpgrade);
+                        selectedNode.upgradeActive = true;
+                    }
                     else
+                    {
                         SelPawnUpgrade.GetCachedComp<CompUpgradeTree>().StartUnlock(selectedNode);
+                    }
                     selectedNode.upgradePurchased = true;
                     selectedNode = null;
                 }
@@ -122,8 +127,11 @@ namespace Vehicles.UI
             }
             else if(selectedNode != null && SelPawnUpgrade.GetCachedComp<CompUpgradeTree>().NodeListed(selectedNode).upgradeActive && SelPawnUpgrade.GetCachedComp<CompUpgradeTree>().LastNodeUnlocked(selectedNode))
             {
-                if(Widgets.ButtonText(cancelButtonRect, "RefundUpgrade".Translate()))
+                if (Widgets.ButtonText(cancelButtonRect, "RefundUpgrade".Translate()))
+                {
                     SelPawnUpgrade.GetCachedComp<CompUpgradeTree>().RefundUnlock(SelPawnUpgrade.GetCachedComp<CompUpgradeTree>().NodeListed(selectedNode));
+                    selectedNode = null;
+                }
             }
             else
             {

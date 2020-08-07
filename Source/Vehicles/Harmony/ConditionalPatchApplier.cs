@@ -32,21 +32,13 @@ namespace Vehicles
                         {
                             PackageId = mod.PackageId,
                             FriendlyName = mod.Name,
-                            Active = true
+                            Active = true,
+                            Patched = true
                         };
                         
-                        try
-                        {
-                            patch.PatchAll(newMod, harmony);
-                            Log.Message($"[Vehicles] Successfully applied compatibility patches to: {mod.Name}");
-                            newMod.Patched = true;
-                        }
-                        catch(Exception ex)
-                        {
-                            Log.Error($"[Vehicles] Failed to apply compatibility patches for {mod.Name} in {type.Name}.");
-                            newMod.ExceptionThrown = ex;
-                            newMod.Patched = false;
-                        }
+                        patch.PatchAll(newMod, harmony);
+
+                        Log.Message($"[Vehicles] Successfully applied compatibility patches to: {mod.Name}");
                         patchableModActivators.Add(mod.PackageId, newMod);
                     }
                 }

@@ -279,7 +279,6 @@ namespace Vehicles
         public void ResetTimer()
         {
             upgradeTicksLeft = UpgradeTimeParsed;
-            Log.Message($"Reset {upgradeTicksLeft}");
         }
 
         public virtual void ResetNode()

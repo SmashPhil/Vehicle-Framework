@@ -4,8 +4,6 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
@@ -108,6 +106,9 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Method(typeof(Settlement), nameof(Settlement.GetGizmos)), prefix: null,
                 postfix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(AddVehicleCaravanGizmoPassthrough)));
+            harmony.Patch(original: AccessTools.Method(typeof(FormCaravanComp), nameof(FormCaravanComp.GetGizmos)), prefix: null,
+                postfix: new HarmonyMethod(typeof(VehicleHarmony),
+                nameof(AddVehicleGizmosPassthrough)));
             harmony.Patch(original: AccessTools.Method(typeof(CaravanFormingUtility), nameof(CaravanFormingUtility.GetGizmos)), prefix: null,
                 postfix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(GizmosForVehicleCaravans)));
@@ -202,6 +203,9 @@ namespace Vehicles
                 nameof(AddHumanLikeOrdersLoadVehiclesTranspiler)));
 
             /* Caravan */
+            harmony.Patch(original: AccessTools.Method(typeof(Dialog_FormCaravan), "TryReformCaravan"),
+                prefix: new HarmonyMethod(typeof(VehicleHarmony),
+                nameof(ConfirmLeaveVehiclesOnReform)));
             harmony.Patch(original: AccessTools.Method(typeof(CollectionsMassCalculator), nameof(CollectionsMassCalculator.Capacity), new Type[] { typeof(List<ThingCount>), typeof(StringBuilder) }),
                 prefix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(CapacityWithVehicle)));
@@ -223,18 +227,15 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Method(typeof(SettlementUtility), "AttackNow"), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(AttackNowWithShipsTranspiler)));
-            harmony.Patch(original: AccessTools.Method(typeof(SettleInEmptyTileUtility), nameof(SettleInEmptyTileUtility.Settle)), prefix: null, postfix: null,
-                transpiler: new HarmonyMethod(typeof(VehicleHarmony),
-                nameof(SettleFromSeaTranspiler)));
             harmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_VisitSite), "DoEnter"), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(DoEnterWithShipsTranspiler)));
             harmony.Patch(original: AccessTools.Method(typeof(CaravanEnterMapUtility), nameof(CaravanEnterMapUtility.Enter), new Type[]{typeof(Caravan), typeof(Map), typeof(CaravanEnterMode), typeof(CaravanDropInventoryMode), typeof(bool), typeof(Predicate<IntVec3>) }),
                 prefix: new HarmonyMethod(typeof(VehicleHarmony),
-                nameof(EnterMapShipsCatchAll1)));
+                nameof(EnterMapVehiclesCatchAll1)));
             harmony.Patch(original: AccessTools.Method(typeof(CaravanEnterMapUtility), nameof(CaravanEnterMapUtility.Enter), new Type[] { typeof(Caravan), typeof(Map), typeof(Func<Pawn, IntVec3>), typeof(CaravanDropInventoryMode), typeof(bool) }),
                 prefix: new HarmonyMethod(typeof(VehicleHarmony),
-                nameof(EnterMapShipsCatchAll2)));
+                nameof(EnterMapVehiclesCatchAll2)));
             harmony.Patch(original: AccessTools.Property(typeof(Caravan), nameof(Caravan.AllOwnersDowned)).GetGetMethod(),
                 prefix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(AllOwnersDownedVehicle)));
@@ -295,6 +296,9 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Method(typeof(CaravanUtility), nameof(CaravanUtility.IsCaravanMember)), prefix: null,
                 postfix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(IsParentCaravanMember)));
+            harmony.Patch(original: AccessTools.Method(typeof(CaravanUtility), nameof(CaravanUtility.RandomOwner)),
+                prefix: new HarmonyMethod(typeof(VehicleHarmony),
+                nameof(RandomVehicleOwner)));
 
             /* Draftable */
             harmony.Patch(original: AccessTools.Property(typeof(Pawn_DraftController), nameof(Pawn_DraftController.Drafted)).GetSetMethod(),
@@ -328,6 +332,12 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Property(typeof(MapPawns), nameof(MapPawns.FreeColonistsSpawnedOrInPlayerEjectablePodsCount)).GetGetMethod(), prefix: null,
                 postfix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(FreeColonistsInVehiclesTransport)));
+            harmony.Patch(original: AccessTools.Method(typeof(MapPawns), nameof(MapPawns.FreeHumanlikesSpawnedOfFaction)), prefix: null,
+                postfix: new HarmonyMethod(typeof(VehicleHarmony),
+                nameof(FreeHumanlikesSpawnedInVehicles)));
+            harmony.Patch(original: AccessTools.Method(typeof(MapPawns), nameof(MapPawns.FreeHumanlikesOfFaction)), prefix: null,
+                postfix: new HarmonyMethod(typeof(VehicleHarmony),
+                nameof(FreeHumanlikesInVehicles)));
             harmony.Patch(original: AccessTools.Method(typeof(Selector), "HandleMapClicks"),
                 prefix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(MultiSelectFloatMenu)));
@@ -352,6 +362,10 @@ namespace Vehicles
                     nameof(DebugDrawWaterRegion)));
             }
 
+            //harmony.Patch(original: AccessTools.Method(typeof(), nameof()),
+            //    prefix: new HarmonyMethod(typeof(VehicleHarmony),
+            //    nameof(TestDebug)));
+
             HelperMethods.CannonTargeter = new CannonTargeter();
 
             HelperMethods.missingIcon = ContentFinder<Texture2D>.Get("Upgrades/missingIcon", true);
@@ -361,8 +375,21 @@ namespace Vehicles
             #endregion Functions
         }
 
-
         #region Debug
+
+        /// <summary>
+        /// Generic patch method for testing
+        /// </summary>
+        /// <returns></returns>
+        public static bool TestDebug(Pawn pawn, ref bool __result)
+        {
+            //if(pawn.IsVehicle())
+            //{
+            //    __result = true;
+            //    return false;
+            //}
+            return true;
+        }
 
         /// <summary>
         /// Show original settlement positions before being moved to the coast
@@ -695,6 +722,7 @@ namespace Vehicles
             }
         }
 
+        //REDO (remove flag and implement more concrete transpiler)
         /// <summary>
         /// Draw pawns onboard vehicles and in vehicle caravans onto the colonist bar
         /// </summary>
@@ -708,19 +736,6 @@ namespace Vehicles
             {
                 CodeInstruction instruction = instructionList[i];
 
-                if (instruction.opcode == OpCodes.Stloc_2)
-                {
-                    yield return instruction; //stloc.2
-                    instruction = instructionList[++i];
-
-                    ///get pawns onboard vehicle and store inside list to render on colonist bar
-                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(typeof(ColonistBar), "tmpPawns"));
-                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(typeof(ColonistBar), "tmpMaps"));
-                    yield return new CodeInstruction(opcode: OpCodes.Ldloc_1);
-                    yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Property(typeof(List<Map>), "Item").GetGetMethod());
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.GetVehiclesForColonistBar)));
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(List<Pawn>), nameof(List<Pawn>.AddRange)));
-                }
                 if(instruction.opcode == OpCodes.Stloc_S && ((LocalBuilder)instruction.operand).LocalIndex == 9)
                 {
                     flag = true;
@@ -742,7 +757,7 @@ namespace Vehicles
         }
 
         /// <summary>
-        /// Render small boat icon on colonist bar picture rect if they are currently onboard a boat
+        /// Render small vehicle icon on colonist bar picture rect if they are currently onboard a vehicle
         /// </summary>
         /// <param name="rect"></param>
         /// <param name="colonist"></param>
@@ -1047,6 +1062,52 @@ namespace Vehicles
                         Find.WindowStack.Add(new Dialog_FormVehicleCaravan(__instance.Map));
                     }
                 };
+            }
+            while(enumerator.MoveNext())
+            {
+                var element = enumerator.Current;
+                yield return element;
+            }
+        }
+
+        public static IEnumerable<Gizmo> AddVehicleGizmosPassthrough(IEnumerable<Gizmo> __result, FormCaravanComp __instance)
+        {
+            IEnumerator<Gizmo> enumerator = __result.GetEnumerator();
+            if(__instance.parent is MapParent mapParent && __instance.ParentHasMap)
+            {
+                if(!__instance.Reform)
+                {
+                    yield return new Command_Action()
+                    {
+                        defaultLabel = "CommandFormVehicleCaravan".Translate(),
+		                defaultDesc = "CommandFormVehicleCaravanDesc".Translate(),
+		                icon = Settlement.FormCaravanCommand,
+                        action = delegate ()
+                        {
+                            Find.Tutor.learningReadout.TryActivateConcept(ConceptDefOf.FormCaravan);
+                            Find.WindowStack.Add(new Dialog_FormVehicleCaravan(mapParent.Map));
+                        }
+                    };
+                }
+                else if(mapParent.Map.mapPawns.AllPawnsSpawned.Where(p => p.IsVehicle()).Count() > 0)
+                {
+                    Command_Action command_Action = new Command_Action
+                    {
+                        defaultLabel = "CommandReformVehicleCaravan".Translate(),
+                        defaultDesc = "CommandReformVehicleCaravanDesc".Translate(),
+                        icon = FormCaravanComp.FormCaravanCommand,
+                        hotKey = KeyBindingDefOf.Misc2,
+                        action = delegate ()
+                        {
+                            Find.WindowStack.Add(new Dialog_FormVehicleCaravan(mapParent.Map, true));
+                        }
+                    };
+                    if (GenHostility.AnyHostileActiveThreatToPlayer(mapParent.Map, true))
+			        {
+				        command_Action.Disable("CommandReformCaravanFailHostilePawns".Translate());
+			        }
+			        yield return command_Action;
+                }
             }
             while(enumerator.MoveNext())
             {
@@ -1516,6 +1577,42 @@ namespace Vehicles
 
         #region Caravan
 
+        public static bool ConfirmLeaveVehiclesOnReform(Dialog_FormCaravan __instance, ref List<TransferableOneWay> ___transferables, Map ___map, int ___destinationTile, ref bool __result)
+        {
+            if(HelperMethods.HasVehicle(___map.mapPawns.SpawnedPawnsInFaction(Faction.OfPlayer)))
+            if(HelperMethods.HasVehicle(___map.mapPawns.SpawnedPawnsInFaction(Faction.OfPlayer)))
+            {
+                List<Pawn> pawns = TransferableUtility.GetPawnsFromTransferables(___transferables);
+                List<Pawn> correctedPawns = pawns.Where(p => !p.IsVehicle()).ToList();
+                string vehicles = "";
+                foreach(Pawn pawn in pawns.Where(p => p.IsVehicle()))
+                {
+                    vehicles += pawn.LabelShort;
+                }
+                
+                Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("LeaveVehicleBehindCaravan".Translate(vehicles), delegate ()
+                {
+                    if (!(bool)AccessTools.Method(typeof(Dialog_FormCaravan), "CheckForErrors").Invoke(__instance, new object[] { correctedPawns }))
+                    {
+                        return;
+                    }
+                    AccessTools.Method(typeof(Dialog_FormCaravan), "AddItemsFromTransferablesToRandomInventories").Invoke(__instance, new object[] { correctedPawns });
+                    Caravan caravan = CaravanExitMapUtility.ExitMapAndCreateCaravan(correctedPawns, Faction.OfPlayer, __instance.CurrentTile, __instance.CurrentTile, ___destinationTile, false);
+                    ___map.Parent.CheckRemoveMapNow();
+                    TaggedString taggedString = "MessageReformedCaravan".Translate();
+                    if (caravan.pather.Moving && caravan.pather.ArrivalAction != null)
+                    {
+                        taggedString += " " + "MessageFormedCaravan_Orders".Translate() + ": " + caravan.pather.ArrivalAction.Label + ".";
+                    }
+                    Messages.Message(taggedString, caravan, MessageTypeDefOf.TaskCompletion, false);
+
+                }, false, null));
+                __result = true;
+                return false;
+            }
+            return true;
+        }
+
         public static bool CapacityWithVehicle(List<ThingCount> thingCounts, ref float __result, StringBuilder explanation = null)
         {
             if(thingCounts.AnyNullified(x => HelperMethods.IsVehicle(x.Thing as Pawn)))
@@ -1899,10 +1996,10 @@ namespace Vehicles
                     Label brlabel = ilg.DefineLabel();
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasBoat), new Type[] { typeof(Caravan) }));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasVehicle), new Type[] { typeof(Caravan) }));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityVehicles), nameof(EnterMapUtilityVehicles.Enter)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityVehicles), nameof(EnterMapUtilityVehicles.EnterAndSpawn)));
                     yield return new CodeInstruction(opcode: OpCodes.Br, brlabel);
 
                     instruction.labels.Add(label);
@@ -1930,41 +2027,10 @@ namespace Vehicles
                     Label brlabel = ilg.DefineLabel();
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasBoat), new Type[] { typeof(Caravan) }));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasVehicle), new Type[] { typeof(Caravan) }));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityVehicles), nameof(EnterMapUtilityVehicles.Enter)));
-                    yield return new CodeInstruction(opcode: OpCodes.Br, brlabel);
-
-                    instruction.labels.Add(label);
-                    yield return instruction; //CALL : CaravanEnterMapUtility::Enter
-                    instruction = instructionList[++i];
-
-                    instruction.labels.Add(brlabel);
-                }
-                yield return instruction;
-            }
-        }
-
-        public static IEnumerable<CodeInstruction> SettleFromSeaTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
-        {
-            List<CodeInstruction> instructionList = instructions.ToList();
-
-            for (int i = 0; i < instructionList.Count; i++)
-            {
-                CodeInstruction instruction = instructionList[i];
-
-                if (instruction.Calls(AccessTools.Method(typeof(CaravanEnterMapUtility), nameof(CaravanEnterMapUtility.Enter), new Type[]{typeof(Caravan), typeof(Map),
-                    typeof(CaravanEnterMode), typeof(CaravanDropInventoryMode), typeof(bool), typeof(Predicate<IntVec3>) })))
-                {
-                    Label label = ilg.DefineLabel();
-                    Label brlabel = ilg.DefineLabel();
-
-                    yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasBoat), new Type[] { typeof(Caravan) }));
-                    yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
-
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityVehicles), nameof(EnterMapUtilityVehicles.Enter)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityVehicles), nameof(EnterMapUtilityVehicles.EnterAndSpawn)));
                     yield return new CodeInstruction(opcode: OpCodes.Br, brlabel);
 
                     instruction.labels.Add(label);
@@ -1992,10 +2058,10 @@ namespace Vehicles
                     Label brlabel = ilg.DefineLabel();
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasBoat), new Type[] { typeof(Caravan) }));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasVehicle), new Type[] { typeof(Caravan) }));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityVehicles), nameof(EnterMapUtilityVehicles.Enter)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityVehicles), nameof(EnterMapUtilityVehicles.EnterAndSpawn)));
                     yield return new CodeInstruction(opcode: OpCodes.Br, brlabel);
 
                     instruction.labels.Add(label);
@@ -2023,10 +2089,10 @@ namespace Vehicles
                     Label brlabel = ilg.DefineLabel();
 
                     yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasBoat), new Type[] { typeof(Caravan) }));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.HasVehicle), new Type[] { typeof(Caravan) }));
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
-                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityVehicles), nameof(EnterMapUtilityVehicles.Enter)));
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityVehicles), nameof(EnterMapUtilityVehicles.EnterAndSpawn)));
                     yield return new CodeInstruction(opcode: OpCodes.Br, brlabel);
 
                     instruction.labels.Add(label);
@@ -2039,52 +2105,22 @@ namespace Vehicles
             }
         }
 
-        public static bool EnterMapShipsCatchAll1(Caravan caravan, Map map, CaravanEnterMode enterMode, CaravanDropInventoryMode dropInventoryMode = CaravanDropInventoryMode.DoNotDrop, 
+        public static bool EnterMapVehiclesCatchAll1(Caravan caravan, Map map, CaravanEnterMode enterMode, CaravanDropInventoryMode dropInventoryMode = CaravanDropInventoryMode.DoNotDrop, 
             bool draftColonists = false, Predicate<IntVec3> extraCellValidator = null)
         {
             if(caravan.HasVehicle())
             {
-                bool coastalSpawn = caravan.HasBoat();
-                if(coastalSpawn)
-                {
-                    EnterMapUtilityVehicles.EnterAndSpawn(caravan, map, enterMode, coastalSpawn, dropInventoryMode, draftColonists, extraCellValidator);
-                }
-                else
-                {
-                    if (enterMode == CaravanEnterMode.None)
-	                {
-		                Log.Error(string.Concat(new object[]
-		                {
-			                "Caravan ",
-			                caravan,
-			                " tried to enter map ",
-			                map,
-			                " with enter mode ",
-			                enterMode
-		                }), false);
-		                enterMode = CaravanEnterMode.Edge;
-	                }
-
-                    EnterMapUtilityVehicles.EnterAndSpawn(caravan, map, enterMode, coastalSpawn, dropInventoryMode, draftColonists, extraCellValidator);
-                }
+                EnterMapUtilityVehicles.EnterAndSpawn(caravan, map, enterMode, dropInventoryMode, draftColonists, extraCellValidator);
                 return false;
             }
             return true;
         }
 
-        public static bool EnterMapShipsCatchAll2(Caravan caravan, Map map, Func<Pawn, IntVec3> spawnCellGetter, CaravanDropInventoryMode dropInventoryMode = CaravanDropInventoryMode.DoNotDrop, bool draftColonists = false)
+        public static bool EnterMapVehiclesCatchAll2(Caravan caravan, Map map, Func<Pawn, IntVec3> spawnCellGetter, CaravanDropInventoryMode dropInventoryMode = CaravanDropInventoryMode.DoNotDrop, bool draftColonists = false)
         {
             if(caravan.HasVehicle())
             {
-                bool coastalSpawn = caravan.HasBoat();
-                if(coastalSpawn)
-                {
-                    EnterMapUtilityVehicles.EnterAndSpawn(caravan, map, CaravanEnterMode.None, coastalSpawn, dropInventoryMode, draftColonists, null);
-                }
-                else
-                {
-                    EnterMapUtilityVehicles.EnterAndSpawn(caravan, map, CaravanEnterMode.None, coastalSpawn, dropInventoryMode, draftColonists, null);
-                }
+                EnterMapUtilityVehicles.EnterAndSpawn(caravan, map, CaravanEnterMode.Edge, dropInventoryMode, draftColonists, null);
                 return false;
             }
             return true;
@@ -2438,6 +2474,19 @@ namespace Vehicles
             }
         }
 
+        public static bool RandomVehicleOwner(Caravan caravan, ref Pawn __result)
+        {
+            if(caravan.HasVehicle())
+            {
+                
+                __result = (from p in caravan.GrabPawnsFromVehicleCaravanSilentFail()
+	                        where caravan.IsOwner(p)
+	                        select p).RandomElement();
+                return false;
+            }
+            return true;
+        }
+
         public static bool TrySatisfyVehiclePawnsNeeds(Pawn pawn, Caravan_NeedsTracker __instance)
         {
             if(HelperMethods.IsVehicle(pawn))
@@ -2557,6 +2606,18 @@ namespace Vehicles
                 if(ship.GetComp<CompVehicle>().AllPawnsAboard.AnyNullified(x => !x.Dead))
                     __result += ship.GetComp<CompVehicle>().AllPawnsAboard.Count;
             }
+        }
+
+        public static void FreeHumanlikesSpawnedInVehicles(Faction faction, ref List<Pawn> __result, MapPawns __instance)
+        {
+            List<Pawn> innerPawns = __instance.SpawnedPawnsInFaction(faction).Where(p => p.IsVehicle()).SelectMany(v => (v as VehiclePawn).GetCachedComp<CompVehicle>().AllPawnsAboard).ToList();
+            __result.AddRange(innerPawns);
+        }
+
+        public static void FreeHumanlikesInVehicles(Faction faction, ref List<Pawn> __result, MapPawns __instance)
+        {
+            List<Pawn> innerPawns = __instance.AllPawns.Where(p => p.Faction == faction && p.IsVehicle()).SelectMany(v => (v as VehiclePawn).GetCachedComp<CompVehicle>().AllPawnsAboard).ToList();
+            __result.AddRange(innerPawns);
         }
 
         public static bool MultiSelectFloatMenu(List<object> ___selected)

@@ -392,13 +392,12 @@ namespace Vehicles
 			startingTile = CaravanExitMapUtility.BestExitTileToGoTo(destinationTile, map);
 			ticksToArriveDirty = true;
 			daysWorthOfFoodDirty = true;
-			Messages.Message("MessageChoseRoute".Translate(), MessageTypeDefOf.CautionInput, false);
 			soundAppear.PlayOneShotOnCamera(null);
 		}
 
 		private void AddToTransferables(Thing t, bool setToTransferMax = false)
 		{
-			TransferableOneWay transferableOneWay = TransferableUtility.TransferableMatching<TransferableOneWay>(t, transferables, TransferAsOneMode.PodsOrCaravanPacking);
+			TransferableOneWay transferableOneWay = TransferableUtility.TransferableMatching(t, transferables, TransferAsOneMode.PodsOrCaravanPacking);
 			if (transferableOneWay == null)
 			{
 				transferableOneWay = new TransferableOneWay();
@@ -479,7 +478,7 @@ namespace Vehicles
 			if (canChooseRoute)
 			{
 				Rect rect3 = new Rect(rect.width - BottomButtonSize.x, rect2.y, BottomButtonSize.x, BottomButtonSize.y);
-				if (Widgets.ButtonText(rect3, "ChooseRouteButton".Translate(), true, true, true))
+				if (Widgets.ButtonText(rect3, "ChangeRouteButton".Translate(), true, true, true))
 				{
 					List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables);
 					List<Pawn> innerPawns = pawnsFromTransferables.Where(v => HelperMethods.IsVehicle(v)).SelectMany(v => v.GetComp<CompVehicle>().AllPawnsAboard).ToList();
@@ -546,6 +545,7 @@ namespace Vehicles
 				Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, false);
 				return false;
 			}
+			HelperMethods.BoardAllAssignedPawns(ref pawnsFromTransferables);
 			AddItemsFromTransferablesToRandomInventories(pawnsFromTransferables);
 			int num = startingTile;
 			if (num < 0)
@@ -568,8 +568,7 @@ namespace Vehicles
 				return false;
 			}
 			Direction8Way direction8WayFromTo = Find.WorldGrid.GetDirection8WayFromTo(CurrentTile, startingTile);
-			IntVec3 intVec;
-			if (!TryFindExitSpot(pawnsFromTransferables, true, out intVec))
+			if (!TryFindExitSpot(pawnsFromTransferables, true, out IntVec3 intVec))
 			{
 				if (!TryFindExitSpot(pawnsFromTransferables, false, out intVec))
 				{
@@ -578,8 +577,7 @@ namespace Vehicles
 				}
 				Messages.Message("CaravanCouldNotFindReachableExitSpot".Translate(direction8WayFromTo.LabelShort()), new GlobalTargetInfo(intVec, map, false), MessageTypeDefOf.CautionInput, false);
 			}
-			IntVec3 meetingPoint;
-			if (!TryFindRandomPackingSpot(intVec, out meetingPoint))
+			if (!TryFindRandomPackingSpot(intVec, out IntVec3 meetingPoint))
 			{
 				Messages.Message("CaravanCouldNotFindPackingSpot".Translate(direction8WayFromTo.LabelShort()), new GlobalTargetInfo(intVec, map, false), MessageTypeDefOf.RejectInput, false);
 				return false;
@@ -595,61 +593,16 @@ namespace Vehicles
 
 		private bool TryReformCaravan()
 		{
-
-			//if (!AbleToEmbark(caravan))
-   //         {
-   //             if (caravan.pather.Moving)
-   //                 caravan.pather.StopDead();
-   //             Messages.Message("CantMoveDocked".Translate(), MessageTypeDefOf.RejectInput, false);
-   //             return;
-   //         }
-
-   //         List<Pawn> sailors = caravan.PawnsListForReading.Where(x => !IsBoat(x)).ToList();
-   //         List<Pawn> ships = caravan.PawnsListForReading.Where(x => IsBoat(x)).ToList();
-   //         for (int i = 0; i < ships.Count; i++)
-   //         {
-   //             Pawn ship = ships[i];
-   //             for (int j = 0; j < ship.GetComp<CompVehicle>().PawnCountToOperate; j++)
-   //             {
-   //                 if (sailors.Count <= 0)
-   //                 {
-   //                     return;
-   //                 }
-   //                 foreach (VehicleHandler handler in ship.GetComp<CompVehicle>().handlers)
-   //                 {
-   //                     if (handler.AreSlotsAvailable)
-   //                     {
-   //                         ship.GetComp<CompVehicle>().Notify_BoardedCaravan(sailors.Pop(), handler.handlers);
-   //                         break;
-   //                     }
-   //                 }
-   //             }
-   //         }
-   //         if (sailors.Count > 0)
-   //         {
-   //             int x = 0;
-   //             while (sailors.Count > 0)
-   //             {
-   //                 Pawn ship = ships[x];
-   //                 foreach (VehicleHandler handler in ship.GetComp<CompVehicle>().handlers)
-   //                 {
-   //                     if (handler.AreSlotsAvailable)
-   //                     {
-   //                         ship.GetComp<CompVehicle>().Notify_BoardedCaravan(sailors.Pop(), handler.handlers);
-   //                         break;
-   //                     }
-   //                 }
-   //                 x = (x + 2) > ships.Count ? 0 : ++x;
-   //             }
-   //         }
-
 			List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables);
+			Log.Message($"Before: {pawnsFromTransferables.Count}");
+			HelperMethods.BoardAllAssignedPawns(ref pawnsFromTransferables);
+			Log.Message($"After: {pawnsFromTransferables.Count}");
 			if (!CheckForErrors(pawnsFromTransferables))
 			{
 				return false;
 			}
 			AddItemsFromTransferablesToRandomInventories(pawnsFromTransferables);
-			Caravan caravan = CaravanExitMapUtility.ExitMapAndCreateCaravan(pawnsFromTransferables, Faction.OfPlayer, CurrentTile, CurrentTile, destinationTile, false);
+			VehicleCaravan caravan = HelperMethods.ExitMapAndCreateVehicleCaravan(pawnsFromTransferables, Faction.OfPlayer, CurrentTile, CurrentTile, destinationTile, false);
 			map.Parent.CheckRemoveMapNow();
 			TaggedString taggedString = "MessageReformedCaravan".Translate();
 			if (caravan.pather.Moving && caravan.pather.ArrivalAction != null)
@@ -688,12 +641,18 @@ namespace Vehicles
 
 		private bool CheckForErrors(List<Pawn> pawns)
 		{
-			List<Pawn> innerPawns = pawns.Where(v => HelperMethods.IsVehicle(v)).SelectMany(v => v.GetComp<CompVehicle>().AllPawnsAboard).ToList();
+			List<Pawn> innerPawns = pawns.Where(v => v.IsVehicle()).SelectMany(v => v.GetComp<CompVehicle>().AllPawnsAboard).ToList();
+			List<VehiclePawn> vehicles = pawns.Where(v => v.IsVehicle()).Cast<VehiclePawn>().ToList();
 			if (MustChooseRoute && destinationTile < 0)
 			{
 				Messages.Message("MessageMustChooseRouteFirst".Translate(), MessageTypeDefOf.RejectInput, false);
 				return false;
 			}
+			if(vehicles.Any(v => v.CountAssignedToVehicle() < v.GetCachedComp<CompVehicle>().PawnCountToOperate))
+            {
+				Messages.Message("MessageMustAssignEnoughToVehicle".Translate(), MessageTypeDefOf.RejectInput, false);
+				return false;
+            }
 			if (!reform && startingTile < 0)
 			{
 				Messages.Message("MessageNoValidExitTile".Translate(), MessageTypeDefOf.RejectInput, false);

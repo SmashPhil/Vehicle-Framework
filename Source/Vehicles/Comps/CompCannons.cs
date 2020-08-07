@@ -61,12 +61,12 @@ namespace Vehicles
                 var cannonPermanent = new CannonHandler(Pawn, cannon);
                 cannonPermanent.SetTarget(LocalTargetInfo.Invalid);
                 cannonPermanent.ResetCannonAngle();
-                if(Cannons.AnyNullified(x => x.cannonRenderLocation == cannonPermanent.cannonRenderLocation && cannonPermanent.attachedTo != x && x.attachedTo != cannonPermanent))
+                if(cannons.AnyNullified(x => x.cannonRenderLocation == cannonPermanent.cannonRenderLocation && cannonPermanent.attachedTo != x && x.attachedTo != cannonPermanent))
                 {
-                    Cannons.FindAll(x => x.cannonRenderLocation == cannonPermanent.cannonRenderLocation).ForEach(y => y.TryRemoveShell());
-                    Cannons.RemoveAll(x => x.cannonRenderLocation == cannonPermanent.cannonRenderLocation);
+                    cannons.FindAll(x => x.cannonRenderLocation == cannonPermanent.cannonRenderLocation).ForEach(y => y.TryRemoveShell());
+                    cannons.RemoveAll(x => x.cannonRenderLocation == cannonPermanent.cannonRenderLocation);
                 }
-                Cannons.Add(cannonPermanent);
+                cannons.Add(cannonPermanent);
             }
         }
 
@@ -76,12 +76,12 @@ namespace Vehicles
                 return;
             foreach(CannonHandler cannon in cannonList)
             {
-                CannonHandler resultingHandler = Cannons.FirstOrDefault(c => c.key == cannon.key);
+                CannonHandler resultingHandler = cannons.FirstOrDefault(c => c.key == cannon.key);
                 if(resultingHandler is null)
                 {
                     Log.Error($"Unable to locate {cannon.key} in cannonList for removal. Is Key missing on upgraded cannon?");
                 }
-                Cannons.Remove(resultingHandler);
+                cannons.Remove(resultingHandler);
             }
         }
 
@@ -814,7 +814,7 @@ namespace Vehicles
                     var cannonPermanent = new CannonHandler(Pawn, cannon);
                     cannonPermanent.SetTarget(LocalTargetInfo.Invalid);
                     cannonPermanent.ResetCannonAngle();
-                    Cannons.Add(cannonPermanent);
+                    cannons.Add(cannonPermanent);
                 }
 
                 if(Cannons.Select(x => x.key).GroupBy(y => y).AnyNullified(key => key.Count() > 1))

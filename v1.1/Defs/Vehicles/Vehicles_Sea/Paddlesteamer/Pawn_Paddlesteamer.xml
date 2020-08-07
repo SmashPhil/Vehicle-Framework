@@ -192,6 +192,7 @@
 				
 				<roles>
 					<li>
+						<key>captain</key>
 						<label>Captain</label>
 						<handlingTypes>
 							<li>Movement</li>
@@ -200,22 +201,16 @@
 						<slotsToOperate>1</slotsToOperate>
 					</li>
 					<li>
+						<key>crew</key>
 						<label>Crew</label>
 						<handlingTypes>
 							<li>Movement</li>
 						</handlingTypes>
-						<slots>1</slots>
-						<slotsToOperate>1</slotsToOperate>
+						<slots>4</slots>
+						<slotsToOperate>4</slotsToOperate>
 					</li>
 					<li>
-						<label>Cannons</label>
-						<handlingTypes>
-							<li>Cannon</li>
-						</handlingTypes>
-						<slots>1</slots>
-						<slotsToOperate>1</slotsToOperate>
-					</li>
-					<li>
+						<key>passenger</key>
 						<label>Passenger</label>
 						<slots>10</slots>
 					</li>
@@ -223,20 +218,20 @@
 			</li>
 			
 			<li Class="Vehicles.CompProperties_Cannons"/>
-			<!--
+
 			<li Class="Vehicles.CompProperties_UpgradeTree">
 				<displayUICoord>(415,50)</displayUICoord>
 				<displayUISize>(600,337.5)</displayUISize>
 				
 				<upgradesAvailable>
-					<li>
+					<li Class="Vehicles.StatUpgrade">
 						<upgradeID>Armor_I</upgradeID>
 						<label>Steel Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
 						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
 						<gridCoordinate>(2,2)</gridCoordinate>
 						<rootNodeLabel>Armor</rootNodeLabel>
 						<informationHighlighted>1-inch steel plating for standard defense against bullets and low caliber cannons.</informationHighlighted>
+						<upgradeTime>9h</upgradeTime>
 						
 						<values>
 							<li>
@@ -248,22 +243,27 @@
 								<value>-0.25</value>
 							</li>
 						</values>
-						<cost>
+						<ingredients>
 							<li>
-								<key>Steel</key>
-								<value>500</value>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>800</count>
 							</li>
-						</cost>
+						</ingredients>
 						<researchPrerequisites/>
 						<prerequisiteNodes/>
 					</li>
-					<li>
+					<li Class="Vehicles.StatUpgrade">
 						<upgradeID>Armor_II</upgradeID>
 						<label>Secondary Steel Plating Layer</label>
-						<upgradeCategory>Armor</upgradeCategory>
 						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
 						<gridCoordinate>(2,4)</gridCoordinate>
 						<informationHighlighted>An extra layer of steel plating for higher defense.</informationHighlighted>
+						<upgradeTime>9h</upgradeTime>
+						
 						<values>
 							<li>
 								<key>Armor</key>
@@ -274,25 +274,30 @@
 								<value>-0.5</value>
 							</li>
 						</values>
-						<cost>
+						<ingredients>
 							<li>
-								<key>Steel</key>
-								<value>1200</value>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>1200</count>
 							</li>
-						</cost>
+						</ingredients>
 						<researchPrerequisites/>
 						<prerequisiteNodes>
 							<li>Armor_I</li>
 						</prerequisiteNodes>
 					</li>
-					<li>
+					<li Class="Vehicles.StatUpgrade">
 						<upgradeID>Armor_III_Tank</upgradeID>
 						<label>Advanced Armor Designs</label>
-						<upgradeCategory>Armor</upgradeCategory>
 						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
 						<gridCoordinate>(1,6)</gridCoordinate>
 						<disableIfUpgradeNodeEnabled>Armor_III_Hybrid</disableIfUpgradeNodeEnabled>
 						<informationHighlighted>Replaces solid steel layering with a steel alloy for stronger armor plating.</informationHighlighted>
+						<upgradeTime>9h</upgradeTime>
+						
 						<values>
 							<li>
 								<key>Armor</key>
@@ -303,25 +308,30 @@
 								<value>-1.0</value>
 							</li>
 						</values>
-						<cost>
+						<ingredients>
 							<li>
-								<key>Steel</key>
-								<value>2000</value>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>2000</count>
 							</li>
-						</cost>
+						</ingredients>
 						<researchPrerequisites/>
 						<prerequisiteNodes>
 							<li>Armor_II</li>
 						</prerequisiteNodes>
 					</li>
-					<li>
+					<li Class="Vehicles.StatUpgrade">
 						<upgradeID>Armor_III_Hybrid</upgradeID>
 						<label>Hybrid Plating</label>
-						<upgradeCategory>Armor</upgradeCategory>
 						<imageFilePath>UI/UpgradeTree/ArmorBG</imageFilePath>
 						<gridCoordinate>(3,6)</gridCoordinate>
 						<disableIfUpgradeNodeEnabled>Armor_III_Tank</disableIfUpgradeNodeEnabled>
 						<informationHighlighted>Implement advanced armor designs with hybrid layering for solid protection with minimal weight excess.</informationHighlighted>
+						<upgradeTime>9h</upgradeTime>
+						
 						<values>
 							<li>
 								<key>Armor</key>
@@ -332,26 +342,30 @@
 								<value>-0.1</value>
 							</li>
 						</values>
-						<cost>
+						<ingredients>
 							<li>
-								<key>Steel</key>
-								<value>2000</value>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>2000</count>
 							</li>
-						</cost>
+						</ingredients>
 						<researchPrerequisites/>
 						<prerequisiteNodes>
 							<li>Armor_II</li>
 						</prerequisiteNodes>
 					</li>
-					<li>
+					<li Class="Vehicles.StatUpgrade">
 						<upgradeID>Speed_I</upgradeID>
 						<label>Feathered Paddlewheel</label>
-						<upgradeCategory>Speed</upgradeCategory>
 						<imageFilePath>UI/UpgradeTree/SpeedBG</imageFilePath>
 						<gridCoordinate>(8,2)</gridCoordinate>
 						<rootNodeLabel>Speed</rootNodeLabel>
 						<informationHighlighted>Holds consistent 90 degree angle between water and paddlewheel fins, resulting in maximum thrust.</informationHighlighted>
-						<disableIfUpgradeNodeEnabled/>
+						<upgradeTime>9h</upgradeTime>
+						
 						<values>
 							<li>
 								<key>Speed</key>
@@ -362,26 +376,35 @@
 								<value>-2</value>
 							</li>
 						</values>
-						<cost>
+						<ingredients>
 							<li>
-								<key>ComponentIndustrial</key>
-								<value>10</value>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>250</count>
 							</li>
 							<li>
-								<key>Steel</key>
-								<value>250</value>
+								<filter>
+									<thingDefs>
+										<li>ComponentIndustrial</li>
+									</thingDefs>
+								</filter>
+								<count>10</count>
 							</li>
-						</cost>
+						</ingredients>
 						<researchPrerequisites/>
 						<prerequisiteNodes/>
 					</li>
-					<li>
+					<li Class="Vehicles.StatUpgrade">
 						<upgradeID>Speed_II</upgradeID>
 						<label>Lightened Frame</label>
-						<upgradeCategory>Speed</upgradeCategory>
 						<imageFilePath>UI/UpgradeTree/SpeedBG</imageFilePath>
 						<gridCoordinate>(7,4)</gridCoordinate>
 						<informationHighlighted>Removes the majority of armor plating for extremely lightweight travel.</informationHighlighted>
+						<upgradeTime>9h</upgradeTime>
+						
 						<values>
 							<li>
 								<key>Speed</key>
@@ -392,24 +415,29 @@
 								<value>-30</value>
 							</li>
 						</values>
-						<cost>
+						<ingredients>
 							<li>
-								<key>Steel</key>
-								<value>250</value>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>250</count>
 							</li>
-						</cost>
+						</ingredients>
 						<researchPrerequisites/>
 						<prerequisiteNodes>
 							<li>Speed_I</li>
 						</prerequisiteNodes>
 					</li>
-					<li>
+					<li Class="Vehicles.StatUpgrade">
 						<upgradeID>Speed_III</upgradeID>
 						<label>Advanced Combustion</label>
-						<upgradeCategory>Speed</upgradeCategory>
 						<imageFilePath>UI/UpgradeTree/SpeedBG</imageFilePath>
 						<gridCoordinate>(9,4)</gridCoordinate>
 						<informationHighlighted>Install a complex engine design that increases steam combustion.</informationHighlighted>
+						<upgradeTime>9h</upgradeTime>
+						
 						<values>
 							<li>
 								<key>Speed</key>
@@ -420,66 +448,90 @@
 								<value>-10</value>
 							</li>
 						</values>
-						<cost>
+						<ingredients>
 							<li>
-								<key>ComponentIndustrial</key>
-								<value>15</value>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>500</count>
 							</li>
 							<li>
-								<key>Steel</key>
-								<value>500</value>
+								<filter>
+									<thingDefs>
+										<li>ComponentIndustrial</li>
+									</thingDefs>
+								</filter>
+								<count>15</count>
 							</li>
 							<li>
-								<key>ComponentSpacer</key>
-								<value>1</value>
+								<filter>
+									<thingDefs>
+										<li>ComponentSpacer</li>
+									</thingDefs>
+								</filter>
+								<count>1</count>
 							</li>
-						</cost>
+						</ingredients>
 						<researchPrerequisites/>
 						<prerequisiteNodes>
 							<li>Speed_I</li>
 						</prerequisiteNodes>
 					</li>
 					
-					<li>
+					<li Class="Vehicles.StatUpgrade">
 						<upgradeID>Cargo_I</upgradeID>
 						<label>Storage Crates</label>
-						<upgradeCategory>CargoCapacity</upgradeCategory>
 						<imageFilePath>UI/UpgradeTree/CargoBG</imageFilePath>
 						<gridCoordinate>(14,2)</gridCoordinate>
 						<rootNodeLabel>Cargo</rootNodeLabel>
 						<informationHighlighted>Add storage crates to the cargo deck for compact storage.</informationHighlighted>
-
+						<upgradeTime>9h</upgradeTime>
+						
 						<values>
 							<li>
 								<key>CargoCapacity</key>
 								<value>200</value>
 							</li>
 						</values>
-						<cost>
+						<ingredients>
 							<li>
-								<key>WoodLog</key>
-								<value>150</value>
+								<filter>
+									<thingDefs>
+										<li>WoodLog</li>
+									</thingDefs>
+								</filter>
+								<count>150</count>
 							</li>
 							<li>
-								<key>Cloth</key>
-								<value>50</value>
+								<filter>
+									<thingDefs>
+										<li>Cloth</li>
+									</thingDefs>
+								</filter>
+								<count>50</count>
 							</li>
 							<li>
-								<key>Steel</key>
-								<value>25</value>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>25</count>
 							</li>
-						</cost>
+						</ingredients>
 						<researchPrerequisites/>
 						<prerequisiteNodes/>
 					</li>
-					<li>
+					<li Class="Vehicles.StatUpgrade">
 						<upgradeID>Cargo_II</upgradeID>
 						<label>Additional Cargo Bay</label>
-						<upgradeCategory>CargoCapacity</upgradeCategory>
 						<imageFilePath>UI/UpgradeTree/CargoBG</imageFilePath>
 						<gridCoordinate>(14,4)</gridCoordinate>
 						<informationHighlighted>Builds an extra cargo bay in the lower decks.</informationHighlighted>
-
+						<upgradeTime>9h</upgradeTime>
+						
 						<values>
 							<li>
 								<key>CargoCapacity</key>
@@ -490,34 +542,46 @@
 								<value>-200</value>
 							</li>
 						</values>
-						<cost>
+						<ingredients>
 							<li>
-								<key>WoodLog</key>
-								<value>300</value>
+								<filter>
+									<thingDefs>
+										<li>WoodLog</li>
+									</thingDefs>
+								</filter>
+								<count>300</count>
 							</li>
 							<li>
-								<key>ComponentIndustrial</key>
-								<value>8</value>
+								<filter>
+									<thingDefs>
+										<li>ComponentIndustrial</li>
+									</thingDefs>
+								</filter>
+								<count>8</count>
 							</li>
 							<li>
-								<key>Steel</key>
-								<value>175</value>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>175</count>
 							</li>
-						</cost>
+						</ingredients>
 						<researchPrerequisites/>
 						<prerequisiteNodes>
 							<li>Cargo_I</li>
 						</prerequisiteNodes>
 					</li>
-					<li>
+					<li Class="Vehicles.StatUpgrade">
 						<upgradeID>Fuel_I</upgradeID>
 						<label>Larger Fuel Tanks</label>
-						<upgradeCategory>FuelCapacity</upgradeCategory>
 						<imageFilePath>UI/UpgradeTree/FuelBG</imageFilePath>
 						<gridCoordinate>(20,2)</gridCoordinate>
 						<rootNodeLabel>Fuel</rootNodeLabel>
 						<informationHighlighted>Larger Fuel Tanks for increased fuel capacity.</informationHighlighted>
-
+						<upgradeTime>9h</upgradeTime>
+						
 						<values>
 							<li>
 								<key>FuelCapacity</key>
@@ -532,28 +596,35 @@
 								<value>-0.1</value>
 							</li>
 						</values>
-						<cost>
+						<ingredients>
 							<li>
-								<key>Steel</key>
-								<value>500</value>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>500</count>
 							</li>
 							<li>
-								<key>ComponentIndustrial</key>
-								<value>4</value>
+								<filter>
+									<thingDefs>
+										<li>ComponentIndustrial</li>
+									</thingDefs>
+								</filter>
+								<count>4</count>
 							</li>
-						</cost>
+						</ingredients>
 						<researchPrerequisites/>
 						<prerequisiteNodes/>
 					</li>
-					<li>
+					<li Class="Vehicles.CannonUpgrade">
 						<upgradeID>Cannons_I</upgradeID>
 						<label>Howitzer</label>
-						<upgradeCategory>Cannon</upgradeCategory>
 						<imageFilePath>UI/UpgradeTree/FuelBG</imageFilePath>
 						<gridCoordinate>(26,2)</gridCoordinate>
 						<informationHighlighted>Rotating Howitzer that is capable of dealing devastating damage. Not very accurate at long range.</informationHighlighted>
+						<upgradeTime>9h</upgradeTime>
 
-						<values/>
 						<cannonUpgrades>
 							<li>
 								<key>
@@ -567,6 +638,7 @@
 									<key>BowRotatingShot</key>
 								</key>
 								<value>
+									<key>gunner</key>
 									<label>Gunner</label>
 									<handlingTypes>
 										<li>Cannon</li>
@@ -579,28 +651,35 @@
 								</value>
 							</li>
 						</cannonUpgrades>
-						<cost>
+						<ingredients>
 							<li>
-								<key>Steel</key>
-								<value>600</value>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>600</count>
 							</li>
 							<li>
-								<key>ComponentIndustrial</key>
-								<value>2</value>
+								<filter>
+									<thingDefs>
+										<li>ComponentIndustrial</li>
+									</thingDefs>
+								</filter>
+								<count>2</count>
 							</li>
-						</cost>
+						</ingredients>
 						<researchPrerequisites/>
 						<prerequisiteNodes/>
 					</li>
-					<li>
+					<li Class="Vehicles.CannonUpgrade">
 						<upgradeID>Cannons_II</upgradeID>
 						<label>Double Barrel Howitzer</label>
-						<upgradeCategory>Cannon</upgradeCategory>
 						<imageFilePath>UI/UpgradeTree/FuelBG</imageFilePath>
 						<gridCoordinate>(26,6)</gridCoordinate>
 						<informationHighlighted>Double the pain at half the cost.</informationHighlighted>
-
-						<values/>
+						<upgradeTime>9h</upgradeTime>
+						
 						<cannonUpgrades>
 							<li>
 								<key>
@@ -612,6 +691,7 @@
 									<baseCannonDrawSize>(4,4)</baseCannonDrawSize>
 								</key>
 								<value>
+									<key>gunner</key>
 									<label>Gunner</label>
 									<handlingTypes>
 										<li>Cannon</li>
@@ -624,16 +704,24 @@
 								</value>
 							</li>
 						</cannonUpgrades>
-						<cost>
+						<ingredients>
 							<li>
-								<key>Steel</key>
-								<value>900</value>
+								<filter>
+									<thingDefs>
+										<li>Steel</li>
+									</thingDefs>
+								</filter>
+								<count>900</count>
 							</li>
 							<li>
-								<key>ComponentIndustrial</key>
-								<value>6</value>
+								<filter>
+									<thingDefs>
+										<li>ComponentIndustrial</li>
+									</thingDefs>
+								</filter>
+								<count>6</count>
 							</li>
-						</cost>
+						</ingredients>
 						<researchPrerequisites/>
 						<prerequisiteNodes>
 							<li>Cannons_I</li>
@@ -642,7 +730,6 @@
 					
 				</upgradesAvailable>
 			</li>
-			-->
 		</comps>
 	</ThingDef>
 </Defs>
