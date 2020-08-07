@@ -156,6 +156,8 @@
     <Compile Include="AI\VehicleTargetReservation.cs" />
     <Compile Include="AI\VehicleReservationManager.cs" />
     <Compile Include="AI\WorkGiver_WorkOnUpgrade.cs" />
+    <Compile Include="Comps\VehicleDamageMultipliers.cs" />
+    <Compile Include="Comps\VehicleJobLimitations.cs" />
     <Compile Include="CustomFeatures\CannonUpgrade.cs" />
     <Compile Include="CustomFeatures\IngredientFilter.cs" />
     <Compile Include="CustomFeatures\RimworldTime.cs" />

@@ -12,6 +12,8 @@ namespace Vehicles
         {
             ParseHelper.Parsers<FireMode>.Register(new Func<string, FireMode>(FireMode.FromString));
             ParseHelper.Parsers<RimworldTime>.Register(new Func<string, RimworldTime>(RimworldTime.FromString));
+            ParseHelper.Parsers<VehicleJobLimitations>.Register(new Func<string, VehicleJobLimitations>(VehicleJobLimitations.FromString));
+            ParseHelper.Parsers<VehicleDamageMultipliers>.Register(new Func<string, VehicleDamageMultipliers>(VehicleDamageMultipliers.FromString));
         }
 
         public static bool IsNumericType(this Type o)

@@ -54,8 +54,8 @@ namespace Vehicles
         public float cargoCapacity = 200;
 
         public bool diagonalRotation = true;
-        public bool reserveFullHitbox = true;
-        public float turnSpeed = 0.1f;
+        public bool reserveFullHitbox = true; //Discontinued from Pathing
+        private float turnSpeed = 0.1f; //Discontinued from SmoothPathing
 
         public bool manhunterTargetsVehicle = false;
 
@@ -93,24 +93,5 @@ namespace Vehicles
         public SoundDef soundWhileDrafted; //REDO
 
         public ThingDef buildDef;
-    }
-
-    public struct VehicleDamageMultipliers
-    {
-        public float meleeDamageMultiplier;
-        public float rangedDamageMultiplier;
-        public float explosiveDamageMultiplier;
-    }
-
-    public struct VehicleJobLimitations
-    {
-        public VehicleJobLimitations(string defName, int maxWorkers)
-        {
-            this.defName = defName;
-            this.maxWorkers = maxWorkers;
-        }
-
-        public string defName;
-        public int maxWorkers;
     }
 }
