@@ -32,7 +32,6 @@ namespace Vehicles.Lords
                     {
                         locomotion = LocomotionUrgency.Jog
                     };
-                    p.GetComp<CompVehicle>().ResolveSeating();
                     p.drafter.Drafted = true;
                 }
                 //else

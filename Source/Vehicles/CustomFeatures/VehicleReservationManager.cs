@@ -32,7 +32,7 @@ namespace Vehicles
                 
                 if (reservations.ContainsKey(vehicle))
                 {
-                    if(CanReserve(vehicle, pawn))
+                    if(CanReserve<T1, T2>(vehicle, pawn, target))
                     {
                         (reservations[vehicle] as T2).AddClaimant(pawn, target);
                     }
@@ -84,11 +84,6 @@ namespace Vehicles
             return !reservations.ContainsKey(vehicle) || (reservations[vehicle] as T2).CanReserve(pawn, target);
         }
 
-        public bool CanReserve(VehiclePawn vehicle, Pawn pawn)
-        {
-            return !reservations.ContainsKey(vehicle) || reservations[vehicle].CanReserve(pawn);
-        }
-
         public int TotalReserving(VehiclePawn vehicle)
         {
             return reservations[vehicle].TotalClaimants;
@@ -98,9 +93,14 @@ namespace Vehicles
         {
             if(Find.TickManager.TicksGame % ReservationVerificationInterval == 0)
             {
-                foreach(ReservationBase vehicleReservation in reservations.Values)
+                for(int i = reservations.Count - 1; i >= 0; i--)
                 {
-                    vehicleReservation.VerifyAndValidateClaimants();
+                    KeyValuePair<VehiclePawn, ReservationBase> reservation = reservations.ElementAt(i);
+                    reservation.Value.VerifyAndValidateClaimants();
+                    if(reservation.Value.RemoveNow)
+                    {
+                        reservations.Remove(reservation.Key);
+                    }
                 }
             }
         }

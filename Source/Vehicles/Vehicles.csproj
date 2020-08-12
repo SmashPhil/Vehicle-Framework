@@ -19,7 +19,7 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\v1.1\Assemblies\</OutputPath>
+    <OutputPath>..\..\v1.2\Assemblies\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -152,9 +152,11 @@
     <Compile Include="AI\JobDriver_WorkOnUpgrade.cs" />
     <Compile Include="AI\Reservation.cs" />
     <Compile Include="AI\ReservationBase.cs" />
-    <Compile Include="AI\VehicleNodeReservation.cs" />
-    <Compile Include="AI\VehicleTargetReservation.cs" />
-    <Compile Include="AI\VehicleReservationManager.cs" />
+    <Compile Include="AI\WorkGiver_BringUpgradeMaterial.cs" />
+    <Compile Include="CustomFeatures\VehicleHandlerReservation.cs" />
+    <Compile Include="CustomFeatures\VehicleNodeReservation.cs" />
+    <Compile Include="CustomFeatures\VehicleTargetReservation.cs" />
+    <Compile Include="CustomFeatures\VehicleReservationManager.cs" />
     <Compile Include="AI\WorkGiver_WorkOnUpgrade.cs" />
     <Compile Include="Comps\VehicleDamageMultipliers.cs" />
     <Compile Include="Comps\VehicleJobLimitations.cs" />
@@ -204,7 +206,6 @@
     <Compile Include="AI\LordToil_PrepareCaravan_GatherSlavesVehicle.cs" />
     <Compile Include="AI\LordToil_PrepareCaravan_LeaveWithVehicles.cs" />
     <Compile Include="AI\Toils_Board.cs" />
-    <Compile Include="AI\WorkGiver_BringUpgradeMaterial.cs" />
     <Compile Include="AI\WorkGiver_PackBoat.cs" />
     <Compile Include="Cannons\CannonDef.cs" />
     <Compile Include="Cannons\CannonHandler.cs" />

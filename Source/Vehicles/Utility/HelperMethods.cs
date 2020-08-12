@@ -433,13 +433,10 @@ namespace Vehicles
         {
             List<VehiclePawn> vehicles = pawns.Where(p => p.IsVehicle()).Cast<VehiclePawn>().ToList();
             List<Pawn> nonVehicles = pawns.Where(p => !p.IsVehicle()).ToList();
-            Log.Message($"AssignedSeats: {assignedSeats.Count}");
             foreach(Pawn pawn in nonVehicles)
             {
-                Log.Message($"Checking: {pawn.LabelShort}");
                 if(assignedSeats.ContainsKey(pawn) && vehicles.Contains(assignedSeats[pawn].First))
                 {
-                    Log.Message("Boarding...");
                     assignedSeats[pawn].First.GetComp<CompVehicle>().GiveLoadJob(pawn, assignedSeats[pawn].Second);
                     assignedSeats[pawn].First.GetCachedComp<CompVehicle>().Notify_Boarded(pawn);
                     pawns.Remove(pawn);

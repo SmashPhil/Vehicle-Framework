@@ -1,4 +1,5 @@
-﻿using Vehicles.Lords;
+﻿using System.Linq;
+using Vehicles.Lords;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
@@ -14,26 +15,25 @@ namespace Vehicles.Jobs
             {
                 VehiclePawn vehicle = toil.actor.jobs.curJob.GetTarget(TargetIndex.A).Thing as VehiclePawn;
                 Pair<VehiclePawn, VehicleHandler> assignedSeat;
-                if(pawnBoarding.GetLord()?.LordJob is LordJob_FormAndSendVehicles)
+                if(pawnBoarding.GetLord()?.LordJob is LordJob_FormAndSendVehicles lordJob)
                 {
-                    assignedSeat = (pawnBoarding.GetLord().LordJob as LordJob_FormAndSendVehicles).GetVehicleAssigned(pawnBoarding);
+                    assignedSeat = lordJob.GetVehicleAssigned(pawnBoarding);
                 }
                 else
                 {
-                    VehicleHandler handler = vehicle.TryGetComp<CompVehicle>().handlers.Find(x => !x.role.handlingTypes.NullOrEmpty() && x.AreSlotsAvailable);
+                    VehicleHandler handler = vehicle.GetCachedComp<CompVehicle>().bills.FirstOrDefault(b => b.pawnToBoard == pawnBoarding).handler;
                     if (handler is null)
                     {
-                        handler = vehicle.TryGetComp<CompVehicle>().ReservedHandler(pawnBoarding);
-                        
+                        handler = vehicle.Map.GetComponent<VehicleReservationManager>().GetReservation<VehicleHandlerReservation>(vehicle)?.ReservedHandler(pawnBoarding);
                         if (handler is null)
                         {
-                            Log.Error("Could not find spot for " + pawnBoarding.LabelShort + " to board.");
+                            Log.Error("Could not find assigned spot for " + pawnBoarding.LabelShort + " to board.");
                             return;
                         }
                     }
                     assignedSeat = new Pair<VehiclePawn, VehicleHandler>(vehicle, handler);
                 }
-                assignedSeat.First.GetComp<CompVehicle>().Notify_Boarded(pawnBoarding);
+                
 
                 //REDO - place nonhumanlike in cargo area
 
@@ -41,10 +41,8 @@ namespace Vehicles.Jobs
                 {
                     Log.Error("[Vehicles] VehicleHandler is null. This should never happen as assigned seating either handles arrangements or instructs pawns to follow rather than board.");
                 }
-
                 assignedSeat.First.GetComp<CompVehicle>().GiveLoadJob(pawnBoarding, assignedSeat.Second);
-                assignedSeat.First.GetComp<CompVehicle>().ReserveSeat(pawnBoarding, assignedSeat.Second);
-
+                assignedSeat.First.GetComp<CompVehicle>().Notify_Boarded(pawnBoarding);
             };
             toil.defaultCompleteMode = ToilCompleteMode.Instant;
             return toil;

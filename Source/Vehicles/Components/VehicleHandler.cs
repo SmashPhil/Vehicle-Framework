@@ -2,6 +2,7 @@
 using Verse;
 using Vehicles.Defs;
 using System.Collections.Generic;
+using HarmonyLib;
 
 namespace Vehicles
 {
@@ -11,12 +12,10 @@ namespace Vehicles
 
         public VehicleRole role;
 
-        public List<Pawn> currentlyReserving = new List<Pawn>();
-
         private List<Pawn> tempSavedPawns = new List<Pawn>();
 
         public int uniqueID = -1;
-        public Pawn vehiclePawn;
+        public VehiclePawn vehiclePawn;
         
         public VehicleHandler()
         {
@@ -26,7 +25,7 @@ namespace Vehicles
             }
         }
 
-        public VehicleHandler(Pawn vehiclePawn)
+        public VehicleHandler(VehiclePawn vehiclePawn)
         {
             uniqueID = Current.Game.GetComponent<VehicleIdManager>().GetNextHandlerId();
             this.vehiclePawn = vehiclePawn;
@@ -36,7 +35,7 @@ namespace Vehicles
             }
         }
 
-        public VehicleHandler(Pawn vehiclePawn, VehicleRole newRole)
+        public VehicleHandler(VehiclePawn vehiclePawn, VehicleRole newRole)
         {
             List<Pawn> newHandlers = new List<Pawn>();
             uniqueID = Current.Game.GetComponent<VehicleIdManager>().GetNextHandlerId();
@@ -45,10 +44,6 @@ namespace Vehicles
             if (handlers is null)
             {
                 handlers = new ThingOwner<Pawn>(this, false, LookMode.Reference);
-            }
-            if(currentlyReserving is null)
-            {
-                currentlyReserving = new List<Pawn>();
             }
             if((newHandlers?.Count ?? 0) > 0)
             {
@@ -62,26 +57,12 @@ namespace Vehicles
             }
         }
 
-        public void ReservationHandler()
-        {
-            if (currentlyReserving is null) currentlyReserving = new List<Pawn>();
-
-            currentlyReserving.RemoveDuplicates();
-            for(int i = 0; i < currentlyReserving.Count; i++)
-            {
-                Pawn p = currentlyReserving[i];
-                if (!p.Spawned || p.InMentalState || p.Downed || p.Dead || (p.CurJob.def != JobDefOf_Vehicles.Board && (p.CurJob.targetA.Thing as Pawn) != vehiclePawn))
-                {
-                    currentlyReserving.Remove(p);
-                }
-            }
-        }
-
         public bool AreSlotsAvailable
         {
             get
-            { 
-                return role != null && ((this?.handlers?.Count ?? 0) + (currentlyReserving?.Count ?? 0)) >= role.slots ? false : true;
+            {
+                bool reservation = vehiclePawn.Map?.GetComponent<VehicleReservationManager>().CanReserve<VehicleHandler, VehicleHandlerReservation>(vehiclePawn, null, this) ?? true;
+                return role != null &&  reservation && handlers.Count < role.slots;
             }
         }
 
@@ -91,12 +72,17 @@ namespace Vehicles
 
         public override bool Equals(object obj)
         {
-            return Equals((VehicleHandler)obj);
+            return obj is VehicleHandler handler && Equals(handler);
         }
 
         public bool Equals(VehicleHandler obj2)
         {
             return obj2?.role.key == role.key;
+        }
+
+        public override string ToString()
+        {
+            return $"{role.label}: {handlers.Count}/{role.slots}";
         }
 
         public override int GetHashCode()
@@ -119,7 +105,6 @@ namespace Vehicles
             }
 
             Scribe_Collections.Look(ref tempSavedPawns, "tempSavedPawns", LookMode.Reference);
-            Scribe_Collections.Look(ref currentlyReserving, "currentlyReserving", LookMode.Deep);
             Scribe_Deep.Look<ThingOwner<Pawn>>(ref handlers, "handlers", new object[]
             {
                 this

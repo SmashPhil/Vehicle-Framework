@@ -43,9 +43,9 @@ namespace Vehicles.Jobs
             toil.initAction = delegate ()
             {
                 CompVehicle shipComp = ship.GetComp<CompVehicle>();
-                shipComp.Notify_Boarded(pawnToBoard);
                 VehicleHandler handler = shipComp.handlers.Find(x => x.role.handlingTypes.NullOrEmpty());
                 shipComp.GiveLoadJob(pawnToBoard, handler);
+                shipComp.Notify_Boarded(pawnToBoard);
             };
             toil.defaultCompleteMode = ToilCompleteMode.Instant;
             return toil;

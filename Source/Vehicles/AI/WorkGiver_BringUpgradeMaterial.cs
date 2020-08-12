@@ -63,7 +63,7 @@ namespace Vehicles.Jobs
                 Thing foundResource = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForDef(materialRequired.thingDef), PathEndMode.ClosestTouch, TraverseParms.For(pawn,
                     Danger.Deadly, TraverseMode.ByPawn, false), 9999f, (Thing t) => t.def == materialRequired.thingDef && !t.IsForbidden(pawn) && pawn.CanReserve(t, 1, -1, null, false));
 
-                if(foundResource != null && pawn.Map.GetComponent<VehicleReservationManager>().CanReserve(vehicle, pawn))
+                if(foundResource != null && pawn.Map.GetComponent<VehicleReservationManager>().CanReserve<ThingDefCountClass, VehicleNodeReservation>(vehicle, pawn, null))
                 {
                     FindAvailableNearbyResources(foundResource, pawn, out int resourceTotalAvailable);
                     Job job = JobMaker.MakeJob(JobDefOf_Vehicles.LoadUpgradeMaterials, foundResource, vehicle);

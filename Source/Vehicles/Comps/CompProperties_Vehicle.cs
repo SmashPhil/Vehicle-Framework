@@ -55,7 +55,7 @@ namespace Vehicles
 
         public bool diagonalRotation = true;
         public bool reserveFullHitbox = true; //Discontinued from Pathing
-        private float turnSpeed = 0.1f; //Discontinued from SmoothPathing
+        internal float turnSpeed = 0.1f; //Discontinued from SmoothPathing
 
         public bool manhunterTargetsVehicle = false;
 

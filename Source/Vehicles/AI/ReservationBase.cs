@@ -11,13 +11,14 @@ namespace Vehicles
         public ReservationBase(VehiclePawn vehicle, Job job, int maxClaimants)
         {
             this.vehicle = vehicle;
-            this.job = job;
+            this.jobDef = job.def.defName;
+            this.targetA = job.targetA;
             this.maxClaimants = maxClaimants;
         }
 
-        public abstract int TotalClaimants { get; }
+        public abstract bool RemoveNow { get; }
 
-        public abstract bool CanReserve(Pawn pawn);
+        public abstract int TotalClaimants { get; }
 
         public abstract void ReleaseReservationBy(Pawn pawn);
 
@@ -33,13 +34,16 @@ namespace Vehicles
         public virtual void ExposeData()
         {
             Scribe_References.Look(ref vehicle, "vehicle");
-            Scribe_References.Look(ref job, "job");
+            Scribe_TargetInfo.Look(ref targetA, "targetA");
+            Scribe_Values.Look(ref jobDef, "jobDef");
             Scribe_Values.Look(ref maxClaimants, "maxClaimants");
         }
 
         protected VehiclePawn vehicle;
 
-        protected Job job;
+        protected string jobDef;
+
+        protected LocalTargetInfo targetA;
 
         protected int maxClaimants;
     }

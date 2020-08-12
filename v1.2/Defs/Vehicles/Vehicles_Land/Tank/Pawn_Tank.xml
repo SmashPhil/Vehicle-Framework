@@ -178,7 +178,7 @@
 				<ticksBetweenRepair>650</ticksBetweenRepair>
 				
 				<armor>50</armor>
-				<cargoCapacity>3000</cargoCapacity>
+				<cargoCapacity>250</cargoCapacity>
 				
 				<wakeMultiplier>2.15</wakeMultiplier>
 				<wakeSpeed>2.15</wakeSpeed>

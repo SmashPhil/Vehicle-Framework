@@ -21,7 +21,8 @@ namespace Vehicles.Jobs
         {
             if (t.Faction != pawn.Faction)
                 return null;
-            if(t is VehiclePawn vehicle && t.TryGetComp<CompUpgradeTree>() != null && t.TryGetComp<CompUpgradeTree>().CurrentlyUpgrading && pawn.Map.GetComponent<VehicleReservationManager>().CanReserve(vehicle, pawn) &&
+            if(t is VehiclePawn vehicle && t.TryGetComp<CompUpgradeTree>() != null && t.TryGetComp<CompUpgradeTree>().CurrentlyUpgrading && 
+                pawn.Map.GetComponent<VehicleReservationManager>().CanReserve<ThingDefCountClass, VehicleNodeReservation>(vehicle, pawn, null) &&
                 t.TryGetComp<CompUpgradeTree>().NodeUnlocking.StoredCostSatisfied && pawn.CanReach(new LocalTargetInfo(t.Position), PathEndMode.Touch, Danger.Deadly))
             {
                 return JobMaker.MakeJob(JobDefOf_Vehicles.UpgradeVehicle, vehicle);

@@ -17,6 +17,8 @@ namespace Vehicles
 
         public override int TotalClaimants => claimants.Count;
 
+        public override bool RemoveNow => !claimants.Any();
+
         public override bool AddClaimant(Pawn pawn, ThingDefCountClass target)
         {
             if(claimants.ContainsKey(pawn))
@@ -29,11 +31,6 @@ namespace Vehicles
         }
 
         public override bool CanReserve(Pawn pawn, ThingDefCountClass target)
-        {
-            return CanReserve(pawn);
-        }
-
-        public override bool CanReserve(Pawn pawn)
         {
             return !claimants.ContainsKey(pawn) && claimants.Count < maxClaimants && vehicle.GetCachedComp<CompUpgradeTree>().CurrentlyUpgrading && MaterialsLeft().AnyNullified();
         }
@@ -98,7 +95,7 @@ namespace Vehicles
             foreach(Pawn actor in claims)
             {
                 //Fail if job def changes, vehicle target changes, thingDef is no longer available, or vehicle gets drafted
-                if(actor.CurJob.def != job.def || actor.Drafted || vehicle.Drafted)
+                if(actor.CurJob.def.defName != jobDef || actor.Drafted || vehicle.Drafted)
                 {
                     claimants.Remove(actor);
                 }

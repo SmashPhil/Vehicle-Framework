@@ -61,6 +61,9 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Method(typeof(Widgets), nameof(Widgets.InfoCardButton), new Type[] { typeof(float), typeof(float), typeof(Thing) }), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(InfoCardVehiclesTranspiler))); //REDO - change to remove info card button rather than patching the widget
+            harmony.Patch(original: AccessTools.Method(typeof(Verb), nameof(Verb.CanHitTarget)),
+                prefix: new HarmonyMethod(typeof(VehicleHarmony),
+                nameof(VehiclesImmuneToPsycast)));
 
             /* Rendering */
             harmony.Patch(original: AccessTools.Method(typeof(Pawn_RotationTracker), nameof(Pawn_RotationTracker.UpdateRotation)),
@@ -582,8 +585,7 @@ namespace Vehicles
         /// <returns></returns>
         public static bool VehiclesDontHeal(Hediff_Injury hd, ref bool __result)
         {
-            Pawn pawn = Traverse.Create(hd).Field("pawn").GetValue<Pawn>();
-            if(HelperMethods.IsVehicle(pawn))
+            if(hd.pawn.IsVehicle())
             {
                 __result = false;
                 return false;
@@ -598,10 +600,8 @@ namespace Vehicles
         /// <param name="__result"></param>
         /// <returns></returns>
         public static bool VehiclesDontHealTended(Hediff_Injury hd, ref bool __result)
-        {
-            Pawn pawn = Traverse.Create(hd).Field("pawn").GetValue<Pawn>();
-            
-            if(HelperMethods.IsVehicle(pawn))
+        { 
+            if(hd.pawn.IsVehicle())
             {
                 __result = false;
                 return false;
@@ -644,6 +644,17 @@ namespace Vehicles
 
                 yield return instruction;
             }
+        }
+
+        /// <summary>
+        /// Block vehicles from receiving psycast effects
+        /// </summary>
+        /// <param name="targ"></param>
+        /// <returns></returns>
+        public static bool VehiclesImmuneToPsycast(LocalTargetInfo targ)
+        {
+            Log.Message($"Target: {targ}");
+            return true;
         }
 
         #endregion HealthStats
@@ -909,11 +920,6 @@ namespace Vehicles
                     if(!VehicleMod.mod.settings.debugDraftAnyShip && vehicle.TryGetComp<CompFueledTravel>() != null && vehicle.GetCachedComp<CompFueledTravel>().EmptyTank)
                     {
                         Messages.Message("CompShips_OutOfFuel".Translate(), MessageTypeDefOf.RejectInput);
-                        return false;
-                    }
-                    if(!VehicleMod.mod.settings.debugDraftAnyShip && !vehicle.GetCachedComp<CompVehicle>().ResolveSeating())
-                    {
-                        Messages.Message("CompShips_CannotMove".Translate(), MessageTypeDefOf.RejectInput);
                         return false;
                     }
                     if(vehicle.GetCachedComp<CompUpgradeTree>()?.CurrentlyUpgrading ?? false)

@@ -284,7 +284,6 @@ namespace Vehicles
                 else
                 {
                     var handlerPermanent = new VehicleHandler(this.Pawn, handler.role);
-                    if(handler.currentlyReserving is null) handler.currentlyReserving = new List<Pawn>();
                     handlers.Add(handlerPermanent);
                 }
             }
@@ -324,18 +323,6 @@ namespace Vehicles
             foreach(VehicleHandler handler in flag == HandlingTypeFlags.Null ? handlers : handlers.Where(h => h.role.handlingTypes.Contains(flag)))
             {
                 if(handler.AreSlotsAvailable)
-                {
-                    return handler;
-                }
-            }
-            return null;
-        }
-
-        public VehicleHandler ReservedHandler(Pawn p)
-        {
-            foreach(VehicleHandler handler in handlers)
-            {
-                if(handler.currentlyReserving.Contains(p))
                 {
                     return handler;
                 }
@@ -494,9 +481,9 @@ namespace Vehicles
                         continue;
                     Job job = new Job(JobDefOf_Vehicles.Board, this.parent);
                     p.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
-                    VehicleHandler handler = p.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(h => h.role.handlingTypes.NullOrEmpty());
+                    VehicleHandler handler = p.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(h => h.AreSlotsAvailable && h.role.handlingTypes.NullOrEmpty());
                     GiveLoadJob(p, handler);
-                    ReserveSeat(p, handler);
+                    this.Pawn.Map.GetComponent<VehicleReservationManager>().Reserve<VehicleHandler, VehicleHandlerReservation>(this.Pawn, p, job, handler, 999);
                 }
             }, MenuOptionPriority.Default, null, null, 0f, null, null);
             FloatMenuOption opt2 = new FloatMenuOption("BoardShipGroupFail".Translate(this.Pawn.LabelShort), null, MenuOptionPriority.Default, null, null, 0f, null, null);
@@ -504,18 +491,20 @@ namespace Vehicles
             int r = 0;
             foreach(VehicleHandler h in this.handlers)
             {
-                r += h.currentlyReserving.Count;
+                r += this.Pawn.Map.GetComponent<VehicleReservationManager>().GetReservation<VehicleHandlerReservation>(this.Pawn)?.ClaimantsOnHandler(h) ?? 0;
             }
             options.Add(pawns.Count + r > this.SeatsAvailable ? opt2 : opt1);
-            
             FloatMenuMulti floatMenuMap = new FloatMenuMulti(options, pawns, this.Pawn, pawns[0].LabelCap, Verse.UI.MouseMapPosition())
             {
                 givesColonistOrders = true
             };
             Find.WindowStack.Add(floatMenuMap);
         }
+
         public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn pawn)
         {
+            if (pawn is null) yield break;
+
             if (!pawn.RaceProps.ToolUser)
             {
                 yield break;
@@ -524,25 +513,22 @@ namespace Vehicles
             {
                 yield break;
             }
-            if(pawn is null)
-                yield break;
-            if (this.movementStatus is VehicleMovementStatus.Offline)
+            if (movementStatus is VehicleMovementStatus.Offline)
             {
                 yield break;
             }
-            
             foreach (VehicleHandler handler in handlers)
             {
                 if(handler.AreSlotsAvailable)
                 {
-                    
-                    FloatMenuOption opt = new FloatMenuOption("BoardShip".Translate(this.parent.LabelShort, handler.role.label, (handler.role.slots - (handler.handlers.Count + handler.currentlyReserving.Count)).ToString()), 
+                    FloatMenuOption opt = new FloatMenuOption("BoardShip".Translate(this.parent.LabelShort, handler.role.label, (handler.role.slots - (handler.handlers.Count + 
+                        this.Pawn.Map.GetComponent<VehicleReservationManager>().GetReservation<VehicleHandlerReservation>(this.Pawn)?.ClaimantsOnHandler(handler) ?? 0)).ToString()), 
                     delegate ()
                     {
                         Job job = new Job(JobDefOf_Vehicles.Board, this.parent);
                         pawn.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
                         GiveLoadJob(pawn, handler);
-                        ReserveSeat(pawn, handler);
+                        pawn.Map.GetComponent<VehicleReservationManager>().Reserve<VehicleHandler, VehicleHandlerReservation>(this.Pawn, pawn, pawn.CurJob, handler, 999);
                     }, MenuOptionPriority.Default, null, null, 0f, null, null);
                     yield return opt;
                 }
@@ -563,7 +549,7 @@ namespace Vehicles
         {
             if (this.bills is null) this.bills = new List<Jobs.Bill_BoardShip>();
 
-            if (!(bills is null) && bills.Count > 0)
+            if (bills != null && bills.Count > 0)
             {
                 Jobs.Bill_BoardShip bill = bills.FirstOrDefault(x => x.pawnToBoard == pawn);
                 if (!(bill is null))
@@ -610,7 +596,7 @@ namespace Vehicles
                     {
                         if(pawnToBoard != null)
                         {
-                            if (bill.handler.currentlyReserving.Contains(pawnToBoard)) bill.handler.currentlyReserving.Remove(pawnToBoard);
+                            this.Pawn.Map.GetComponent<VehicleReservationManager>().ReleaseAllClaimedBy(pawnToBoard);
                             Find.WorldPawns.PassToWorld(pawnToBoard, PawnDiscardDecideMode.Decide);
                         }
                     }
@@ -963,84 +949,6 @@ namespace Vehicles
             return outJoyKinds;
         }
 
-        public void ReserveSeat(Pawn p, VehicleHandler handler)
-        {
-            if(p is null || !p.Spawned) return;
-            foreach(VehicleHandler h in handlers)
-            {
-                if(h != handler && h.currentlyReserving.Contains(p))
-                {
-                    h.currentlyReserving.Remove(p);
-                }
-            }
-            if(!handler.currentlyReserving.Contains(p))
-                handler.currentlyReserving.Add(p);
-        }
-
-        public bool ResolveSeating()
-        {
-            //if(AllCapablePawns.Count >= PawnCountToOperate)
-            //{
-            //    for(int r = 0; r < 100; r++)
-            //    {
-            //        for (int i = 0; i < handlers.Count; i++)
-            //        {
-            //            VehicleHandler handler = handlers[i];
-            //            if (handler.currentlyReserving.Count > 0)
-            //                return false;
-            //        }
-            //        for (int i = 0; i < handlers.Count; i++)
-            //        {
-            //            VehicleHandler handler = handlers[i];
-            //            VehicleHandler passengerHandler = handlers.FirstOrDefault(h => h.role.handlingTypes.NullOrEmpty());
-            //            if (handler.handlers.Count > handler.role.slots)
-            //            {
-            //                int j = 0;
-            //                while(handler.handlers.Count > handler.role.slots)
-            //                {
-            //                    Pawn p = handler.handlers.InnerListForReading[j];
-            //                    handler.handlers.TryTransferToContainer(p, passengerHandler.handlers, false);
-            //                    j++;
-            //                }
-            //            }
-            //            if (handler.role.handlingTypes.AnyNullified(h => h == HandlingTypeFlags.Movement) && handler.handlers.Count < handler.role.slotsToOperate)
-            //            {
-            //                if (passengerHandler.handlers.Count <= 0)
-            //                {
-            //                    VehicleHandler emergencyHandler = handlers.Find(x => x.role.handlingTypes.AnyNullified(h => h < HandlingTypeFlags.Movement) && x.handlers.Count > 0); //Can Optimize
-            //                    Pawn transferPawnE = emergencyHandler?.handlers.InnerListForReading.Find(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && x.RaceProps.Humanlike);
-            //                    if(transferPawnE is null)
-            //                        continue;
-            //                    emergencyHandler?.handlers.TryTransferToContainer(transferPawnE, handler.handlers, false);
-            //                    continue;
-            //                }
-            //                Pawn transferingPawn = passengerHandler.handlers.InnerListForReading.Find(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && x.RaceProps.Humanlike);
-            //                if(transferingPawn is null)
-            //                    continue;
-            //                passengerHandler.handlers.TryTransferToContainer(transferingPawn, handler.handlers, false);
-            //            }
-            //            if (handler.role.handlingTypes.AnyNullified(h => h == HandlingTypeFlags.Cannon) && handler.handlers.Count < handler.role.slotsToOperate && this.CanMove)
-            //            {
-            //                if(passengerHandler.handlers.Count <= 0)
-            //                {
-            //                    VehicleHandler emergencyHandler = this.handlers.Find(x => x.role.handlingTypes.AnyNullified(h => h < HandlingTypeFlags.Cannon) && x.handlers.Count > 0); //Can Optimize
-            //                    Pawn transferPawnE = emergencyHandler?.handlers.InnerListForReading.Find(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && x.RaceProps.Humanlike);
-            //                    if(transferPawnE is null)
-            //                        continue;
-            //                    emergencyHandler?.handlers.TryTransferToContainer(transferPawnE, handler.handlers, false);
-            //                    continue;
-            //                }
-            //                Pawn transferingPawn = passengerHandler.handlers.InnerListForReading.Find(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && x.RaceProps.Humanlike);
-            //                if(transferingPawn is null)
-            //                    continue;
-            //                passengerHandler.handlers.TryTransferToContainer(transferingPawn, handler.handlers, false);
-            //            }
-            //        }
-            //    }
-            //}
-            return CanMove;
-        }
-
         public void CheckTurnSign(float? turnAngle = null)
         {
             if(turnAngle is null)
@@ -1100,11 +1008,6 @@ namespace Vehicles
             //SmoothPatherTick();
             if (Pawn.IsHashIntervalTick(150))
                 TrySatisfyPawnNeeds();
-            
-            foreach (VehicleHandler handler in handlers)
-            {
-                handler.ReservationHandler();
-            }
         }
 
         private void InitializeVehicle()
@@ -1118,10 +1021,6 @@ namespace Vehicles
 
             navigationCategory = Props.defaultNavigation;
 
-            foreach(VehicleHandler handler in handlers)
-            {
-                if(handler.currentlyReserving is null) handler.currentlyReserving = new List<Pawn>();
-            }
             if (!(Props.roles is null) && Props.roles.Count > 0)
             {
                 foreach(VehicleRole role in Props.roles)

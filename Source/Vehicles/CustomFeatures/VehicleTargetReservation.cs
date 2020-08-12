@@ -4,7 +4,6 @@ using System.Linq;
 using Verse;
 using RimWorld;
 using Verse.AI;
-using System.Security.Claims;
 
 namespace Vehicles
 {
@@ -16,6 +15,8 @@ namespace Vehicles
         }
 
         public override int TotalClaimants => claimants.Count;
+
+        public override bool RemoveNow => !claimants.Any();
 
         //REDO : Add better reservation for target positions around vehicle when working on job
         public override bool AddClaimant(Pawn pawn, LocalTargetInfo target)
@@ -32,11 +33,6 @@ namespace Vehicles
         public override bool CanReserve(Pawn pawn, LocalTargetInfo target)
         {
             return !claimants.ContainsKey(pawn) && !claimants.ContainsValue(target);
-        }
-
-        public override bool CanReserve(Pawn pawn)
-        {
-            return !claimants.ContainsKey(pawn) && claimants.Count < maxClaimants;
         }
 
         public override void ReleaseAllReservations()
@@ -60,7 +56,7 @@ namespace Vehicles
             foreach(Pawn actor in actors)
             {
                 //Fail if job def changes, vehicle target changes, targetInfo is no longer valid, or vehicle gets drafted
-                if(actor.CurJob.def != job.def || actor.CurJob.targetA != job.targetA || !claimants[actor].IsValid || actor.Drafted || vehicle.Drafted)
+                if(actor.CurJob.def.defName != jobDef || actor.CurJob.targetA != targetA || !claimants[actor].IsValid || actor.Drafted || vehicle.Drafted)
                 {
                     claimants.Remove(actor);
                 }
