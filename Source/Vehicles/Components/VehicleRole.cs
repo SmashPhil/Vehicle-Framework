@@ -5,8 +5,6 @@ using System.Collections.Generic;
 
 namespace Vehicles
 {
-    public enum HandlingTypeFlags {Cannon, Turret, Movement, Null}
-
     public class VehicleRole : IExposable
     {
         public string key;

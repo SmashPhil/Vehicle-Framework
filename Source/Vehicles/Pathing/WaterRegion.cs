@@ -19,7 +19,7 @@ namespace Vehicles
         {
             get
             {
-                WaterRegionGrid regions = WaterMapUtility.GetExtensionToMap(this.Map).getWaterRegionGrid;
+                WaterRegionGrid regions = WaterMapUtility.GetExtensionToMap(this.Map).WaterRegionGrid;
                 for(int z = this.extentsClose.minZ; z <= this.extentsClose.maxX; z++)
                 {
                     for(int x = this.extentsClose.minX; x <= this.extentsClose.maxX; x++)
@@ -107,7 +107,7 @@ namespace Vehicles
             {
                 Map map = this.Map;
                 CellIndices cellIndices = map.cellIndices;
-                WaterRegion[] directGrid = WaterMapUtility.GetExtensionToMap(map).getWaterRegionGrid.DirectGrid;
+                WaterRegion[] directGrid = WaterMapUtility.GetExtensionToMap(map).WaterRegionGrid.DirectGrid;
                 for (int i = 0; i < 1000; i++)
                 {
                     IntVec3 randomCell = this.extentsClose.RandomCell;
@@ -126,7 +126,7 @@ namespace Vehicles
             {
                 Map map = this.Map;
                 CellIndices cellIndices = map.cellIndices;
-                WaterRegion[] directGrid = WaterMapUtility.GetExtensionToMap(map).getWaterRegionGrid.DirectGrid;
+                WaterRegion[] directGrid = WaterMapUtility.GetExtensionToMap(map).WaterRegionGrid.DirectGrid;
                 CellRect.CellRectIterator iterator = this.extentsClose.GetIterator();
                 while(!iterator.Done())
                 {
@@ -405,7 +405,7 @@ namespace Vehicles
         public void DebugDrawMouseover()
         {
             int num = Mathf.RoundToInt(Time.realtimeSinceStartup * 2f) % 2;
-            if(VehicleMod.mod.settings.debugDrawRegions)
+            if(VehicleMod.settings.debugDrawRegions)
             {
                 Color color;
                 if (!this.valid)
@@ -421,7 +421,7 @@ namespace Vehicles
                     GenDraw.DrawFieldEdges(region.Cells.ToList<IntVec3>(), Color.grey);
                 }
 
-                if(VehicleMod.mod.settings.debugDrawRegionLinks)
+                if(VehicleMod.settings.debugDrawRegionLinks)
                 {
                     foreach (WaterRegionLink regionLink in this.links)
                     {
@@ -434,7 +434,7 @@ namespace Vehicles
                         }
                     }
                 }
-                if(VehicleMod.mod.settings.debugDrawRegionThings)
+                if(VehicleMod.settings.debugDrawRegionThings)
                 {
                     foreach (Thing thing in this.listerThings.AllThings)
                     {

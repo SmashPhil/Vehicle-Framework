@@ -9,8 +9,6 @@ using RimWorld;
 
 namespace Vehicles
 {
-    public enum BiomeCategory { None, Temperate, Tropical, Cold}
-
     [StaticConstructorOnStartup]
     internal static class FishingCompatibility
     {

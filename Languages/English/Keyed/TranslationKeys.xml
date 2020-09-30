@@ -12,16 +12,27 @@
 	<SetRange>Set Range</SetRange>
 	<CannonRange>{0} Tiles</CannonRange>
 	<RenameVehicle>Rename {0}</RenameVehicle>
-	<RecolorVehicle>Paint {0}</RecolorVehicle>
+	<RecolorVehicle>Change Color</RecolorVehicle>
+	<ColorOne>ColorOne</ColorOne>
+	<ColorTwo>ColorTwo</ColorTwo>
+	<VehicleSave>Save</VehicleSave>
+	<PaletteText>Palette</PaletteText>
+	<SwapColors>Swap ColorOne and ColorTwo</SwapColors>
 	<RecolorFlags>Recolor Flags</RecolorFlags>
 	<OceanPassable>Ocean: +0.5</OceanPassable>
 	<BoatFishing>Fish</BoatFishing>
 	<BoatFishingDesc>Gather fish. Depth of water affects fishing chances.</BoatFishingDesc>
 	<BaseSpeed>Base Speed</BaseSpeed>
 	
+	<VehicleElectric>Electric</VehicleElectric>
+	<VehicleElectricFlick>Charge Battery</VehicleElectricFlick>
+	<VehicleElectricFlickDesc>Connect to PowerNet below vehicle.</VehicleElectricFlickDesc>
+	<VehicleOutOfFuel>Cannot Move. Out of Fuel.</VehicleOutOfFuel>
+	
 	<AssignSeats>Assign Seats</AssignSeats>
 	<Assign>Assign</Assign>
 	<Assigned>Assigned</Assigned>
+	<Apply>Apply</Apply>
 	<Colonists>Colonists</Colonists>
 	<CancelAssigning>Cancel</CancelAssigning>
 	<ClearSeats>Clear</ClearSeats>
@@ -44,7 +55,7 @@
 	<DevModeShips>DevMode Options</DevModeShips>
 	<DevModeReset>DevMode Reset</DevModeReset>
 	<DevModeShipsTooltip>Turn on DevMode to view the different options for debugging or fixing stuff with Boats</DevModeShipsTooltip>
-	<BoatsReset>Reset</BoatsReset>
+	<VehiclesReset>Reset</VehiclesReset>
 	<BoatsResetToDefault>Reset to Default</BoatsResetToDefault>
 	<BeachGenMultiplier>Beach Size Multiplier</BeachGenMultiplier>
 	<BeachGenMultiplierLarge>Beach Size Multiplier: {0}% (Test Sizes)</BeachGenMultiplierLarge>
@@ -146,6 +157,7 @@
 	<AutoTargetingDisabled>AutoTargeting is not allowed for this turret.</AutoTargetingDisabled>
 	<LeaveVehicleBehindCaravan>Are you sure you want to leave Vehicles behind? Vehicles left behind: {0}</LeaveVehicleBehindCaravan>
 	<MessageMustAssignEnoughToVehicle>Must assign enough colonists to man vehicle.</MessageMustAssignEnoughToVehicle>
+	<MustSelectPalette>Must have a palette selected to save over.</MustSelectPalette>
 	
 	<!-- Caravans -->
 	<CaravanShips>Boat</CaravanShips>
@@ -188,6 +200,5 @@
 	<FormingCaravanStatus_BoardShip_Pause>Boarding Ship (waiting)</FormingCaravanStatus_BoardShip_Pause>
 	<FormingCaravanStatus_Leaving_Ship>Sailing.</FormingCaravanStatus_Leaving_Ship>
 	<FormingCaravanStatus_Leaving_Ship_Pause>Sailing (waiting)</FormingCaravanStatus_Leaving_Ship_Pause>
-	<AwaitOrders>Awaiting Orders.</AwaitOrders>
 	<SpawningVehicles>Spawning Vehicles</SpawningVehicles>
 </LanguageData>

@@ -24,7 +24,7 @@ namespace Vehicles
             cannonUpgrades = reference.cannonUpgrades;
             foreach(KeyValuePair<CannonHandler, VehicleRole> cu in cannonUpgrades)
             {
-                cannonsUnlocked.Add(cu.Key, new VehicleHandler(parent, cu.Value));
+                cannonsUnlocked.Add(new CannonHandler(parent, cu.Key), new VehicleHandler(parent, cu.Value));
             }
         }
 
@@ -40,11 +40,11 @@ namespace Vehicles
             {
                 if(cannon.Key.uniqueID < 0)
                 {
-                    cannon.Key.uniqueID = Current.Game.GetComponent<VehicleIdManager>().GetNextCannonId();
+                    cannon.Key.uniqueID = Current.Game.GetCachedGameComponent<VehicleIdManager>().GetNextCannonId();
                 }
                 if(cannon.Value.uniqueID < 0)
                 {
-                    cannon.Value.uniqueID = Current.Game.GetComponent<VehicleIdManager>().GetNextHandlerId();
+                    cannon.Value.uniqueID = Current.Game.GetCachedGameComponent<VehicleIdManager>().GetNextHandlerId();
                 }
             }
         }
@@ -63,8 +63,11 @@ namespace Vehicles
 
         public override void DrawExtraOnGUI(Rect rect)
         {
-            parent.DrawCannonTextures(rect, cannonsUnlocked.Keys.OrderBy(c => c.drawLayer), true);
-            parent.DrawCannonTextures(rect, parent.GetCachedComp<CompUpgradeTree>().upgradeList.Where(x => x is CannonUpgrade && x.upgradeActive && !cannonsUnlocked.Keys.ToList().NullOrEmpty()).Cast<CannonUpgrade>().SelectMany(y => y.cannonsUnlocked.Keys).OrderBy(o => o.drawLayer), true);
+            Rect displayRect = rect;
+            rect.width = 1f;
+            rect.height = 1f;
+            parent.DrawCannonTextures(displayRect, cannonsUnlocked.Keys.OrderBy(c => c.drawLayer), parent.selectedMask, true, parent.DrawColor, parent.DrawColorTwo);
+            parent.DrawCannonTextures(displayRect, parent.GetCachedComp<CompUpgradeTree>().upgradeList.Where(x => x is CannonUpgrade && x.upgradeActive && !cannonsUnlocked.Keys.ToList().NullOrEmpty()).Cast<CannonUpgrade>().SelectMany(y => y.cannonsUnlocked.Keys).OrderBy(o => o.drawLayer), parent.selectedMask, true, parent.DrawColor, parent.DrawColorTwo);
         }
 
         public override void ExposeData()

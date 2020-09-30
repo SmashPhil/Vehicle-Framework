@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<!-- Default HitFlag that uses Vanilla-like values -->
+	<Vehicles.CustomHitFlags>
+		<defName>Vanilla</defName>
+	</Vehicles.CustomHitFlags>
+
+	<Vehicles.CustomHitFlags>
+		<defName>Tank</defName>
+		<minFillPercent>0.8</minFillPercent>
+		<flyPastTarget>true</flyPastTarget>
+		<ricochet>true</ricochet>
+		<hitThroughPawns>true</hitThroughPawns>
+	</Vehicles.CustomHitFlags>
+</Defs>

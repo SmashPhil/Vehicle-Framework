@@ -11,21 +11,23 @@ namespace Vehicles.Defs
             DefOfHelper.EnsureInitializedInCtor(typeof(JobDefOf_Vehicles));
         }
 
-        public static JobDef IdleShip;
+        public static JobDef IdleVehicle;
 
         public static JobDef Board;
 
-        public static JobDef PrepareCaravan_GatheringShip;
+        public static JobDef PrepareCaravan_GatheringVehicle;
 
-        public static JobDef CarryPawnToShip;
+        public static JobDef CarryPawnToVehicle;
 
-        public static JobDef RepairShip;
+        public static JobDef RepairVehicle;
 
-        public static JobDef CarryItemToShip;
+        public static JobDef CarryItemToVehicle;
 
         public static JobDef LoadUpgradeMaterials;
 
-        public static JobDef RefuelBoat;
+        public static JobDef RefuelVehicle;
+
+        public static JobDef RefuelVehicleAtomic;
 
         public static JobDef UpgradeVehicle;
     }

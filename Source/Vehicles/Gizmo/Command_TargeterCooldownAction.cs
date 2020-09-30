@@ -90,7 +90,7 @@ namespace Vehicles
             if(cannon.cannonTarget.IsValid)
             {
                 GUI.color = haltColor;
-                GenUI.DrawTextureWithMaterial(haltIconRect, TexCommandVehicles.HaltIcon, material, default);
+                GenUI.DrawTextureWithMaterial(haltIconRect, VehicleTex.HaltIcon, material, default);
                 GUI.color = gizmoColor;
             }
 
@@ -136,7 +136,7 @@ namespace Vehicles
                 if (!disabled)
                     GUI.color = GenUI.MouseoverColor;
             }
-            Graphics.DrawTexture(reloadRect, TexCommandVehicles.ReloadIcon, material);
+            Graphics.DrawTexture(reloadRect, VehicleTex.ReloadIcon, material);
             TooltipHandler.TipRegion(reloadRect, "ReloadCannonHandler".Translate());
 
             GUI.color = fireModeColor;
@@ -156,7 +156,7 @@ namespace Vehicles
                 if (!disabled)
                     GUI.color = GenUI.MouseoverColor;
             }
-            Graphics.DrawTexture(autoTargetRect, TexCommandVehicles.AutoTargetIcon, material);
+            Graphics.DrawTexture(autoTargetRect, VehicleTex.AutoTargetIcon, material);
             if(cannon.autoTargeting)
             {
                 Rect checkboxRect = new Rect(autoTargetRect.x + autoTargetRect.width / 2, autoTargetRect.y + autoTargetRect.height / 2, autoTargetRect.width / 2, autoTargetRect.height / 2);
@@ -169,7 +169,7 @@ namespace Vehicles
             Rect reloadBar = rect.ContractedBy(6f);
             reloadBar.yMin = rect.y + (rect.height / 2) + 1;
             reloadBar.xMin = ammoRect.x;
-            Widgets.FillableBar(reloadBar, (float)cannon.shellCount / cannon.cannonDef.magazineCapacity, TexCommandVehicles.FullBarTex, TexCommandVehicles.EmptyBarTex, true);
+            Widgets.FillableBar(reloadBar, (float)cannon.shellCount / cannon.cannonDef.magazineCapacity, VehicleTex.FullBarTex, VehicleTex.EmptyBarTex, true);
             var font = Text.Font;
             var anchor = Text.Anchor;
             Text.Font = GameFont.Small;
@@ -271,7 +271,7 @@ namespace Vehicles
                 List<ThingDef> allCannonDefs = cannon.pawn.inventory.innerContainer.Where(d => cannon.ContainsAmmoDefOrShell(d.def)).Select(t => t.def).Distinct().ToList();
                 ammoWindowRect.height += ammoRect.height + Mathf.CeilToInt(allCannonDefs.Count / 6) * ammoRect.height;
                 ammoWindowRect.y -= (ammoWindowRect.height + AmmoWindowOffset);
-                GenUI.DrawTextureWithMaterial(ammoWindowRect, TexCommandVehicles.AmmoBG, material, default);
+                GenUI.DrawTextureWithMaterial(ammoWindowRect, VehicleTex.AmmoBG, material, default);
                 ammoWindowRect.yMin += 5f;
                 for(int i = 0; i < allCannonDefs.Count; i++)
                 {

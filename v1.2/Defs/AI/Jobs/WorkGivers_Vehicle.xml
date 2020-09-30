@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<WorkGiverDef>
+		<defName>PackBoat</defName>
+		<label>pack boat</label>
+		<giverClass>Vehicles.Jobs.WorkGiver_PackBoat</giverClass>
+		<workType>Hauling</workType>
+		<verb>pack</verb>
+		<gerund>packing</gerund>
+		<priorityInType>80</priorityInType>
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+	</WorkGiverDef>
+	
+	<WorkGiverDef>
+		<defName>LoadUpgradeMaterials</defName>
+		<label>load materials</label>
+		<giverClass>Vehicles.Jobs.WorkGiver_BringUpgradeMaterial</giverClass>
+		<workType>Hauling</workType>
+		<verb>pack</verb>
+		<gerund>packing</gerund>
+		<priorityInType>60</priorityInType>
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+	</WorkGiverDef>
+	
+	<WorkGiverDef>
+		<defName>WorkOnUpgrade</defName>
+		<label>Work on Upgrade</label>
+		<giverClass>Vehicles.Jobs.WorkGiver_WorkOnUpgrade</giverClass>
+		<workType>Construction</workType>
+		<verb>upgrade</verb>
+		<gerund>upgrading</gerund>
+		<priorityInType>70</priorityInType>
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+	</WorkGiverDef>
+	
+	<WorkGiverDef>
+		<defName>RefuelVehicle</defName>
+		<label>Refuel Vehicle</label>
+		<giverClass>Vehicles.Jobs.WorkGiver_RefuelVehicle</giverClass>
+		<workType>Hauling</workType>
+		<verb>hauling</verb>
+		<gerund>hauling</gerund>
+		<priorityInType>90</priorityInType>
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+	</WorkGiverDef>
+</Defs>

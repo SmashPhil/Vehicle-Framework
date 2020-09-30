@@ -59,7 +59,7 @@ namespace Vehicles.Lords
                     var vehicle = (lord.LordJob as LordJob_FormAndSendVehicles).GetVehicleAssigned(pawn);
                     if(vehicle.Second != null)
                     {
-                        if(vehicle.First.GetComp<CompVehicle>().AllPawnsAboard.Contains(pawn))
+                        if(vehicle.First.GetCachedComp<CompVehicle>().AllPawnsAboard.Contains(pawn))
                         {
                             lord.ownedPawns.Remove(pawn);
                         }

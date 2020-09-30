@@ -16,7 +16,7 @@ namespace Vehicles.Jobs
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
             int maxWorkers = Vehicle.GetCachedComp<CompVehicle>().TotalAllowedFor(JobDefOf_Vehicles.LoadUpgradeMaterials);
-            return base.TryMakePreToilReservations(errorOnFailed) && pawn.Map.GetComponent<VehicleReservationManager>().Reserve<ThingDefCountClass, VehicleNodeReservation>(Vehicle, pawn, job, ThingDef, maxWorkers);
+            return base.TryMakePreToilReservations(errorOnFailed) && pawn.Map.GetCachedMapComponent<VehicleReservationManager>().Reserve<ThingDefCountClass, VehicleNodeReservation>(Vehicle, pawn, job, ThingDef, maxWorkers);
         }
 
         public ThingDefCountClass ThingDef => new ThingDefCountClass(Item.def, Item.stackCount);
@@ -57,10 +57,10 @@ namespace Vehicles.Jobs
                         {
                             int count = Mathf.Min(ThingDef.count, Item.stackCount); //Check back here
                             pawn.carryTracker.innerContainer.TryTransferToContainer(Item, Vehicle.GetCachedComp<CompUpgradeTree>().NodeUnlocking.itemContainer, count, true);
-                            pawn.Map.GetComponent<VehicleReservationManager>().ReleaseAllClaimedBy(pawn);
+                            pawn.Map.GetCachedMapComponent<VehicleReservationManager>().ReleaseAllClaimedBy(pawn);
                             if(Vehicle.GetCachedComp<CompUpgradeTree>().NodeUnlocking.StoredCostSatisfied)
                             {
-                                pawn.Map.GetComponent<VehicleReservationManager>().ClearReservedFor(Vehicle);
+                                pawn.Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(Vehicle);
                             }
                         }
                     }

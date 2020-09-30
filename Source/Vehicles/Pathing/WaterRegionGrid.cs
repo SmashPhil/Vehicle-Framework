@@ -77,11 +77,11 @@ namespace Vehicles
             {
                 Log.Error("Tried to get valid water region out of bounds at " + c, false);
             }
-            if(!map.GetComponent<WaterMap>().getWaterRegionAndRoomUpdater.Enabled && map.GetComponent<WaterMap>().getWaterRegionAndRoomUpdater.AnythingToRebuild)
+            if(!map.GetCachedMapComponent<WaterMap>().WaterRegionAndRoomUpdater.Enabled && map.GetCachedMapComponent<WaterMap>().WaterRegionAndRoomUpdater.AnythingToRebuild)
             {
                 Log.Warning("Trying to get valid water region at " + c + " but RegionAndRoomUpdater is disabled. The result may be incorrect.", false);
             }
-            map.GetComponent<WaterMap>().getWaterRegionAndRoomUpdater.TryRebuildWaterRegions();
+            map.GetCachedMapComponent<WaterMap>().WaterRegionAndRoomUpdater.TryRebuildWaterRegions();
             WaterRegion region = this.regionGrid[this.map.cellIndices.CellToIndex(c)];
             
             return !(region is null) && region.valid ? region : null;

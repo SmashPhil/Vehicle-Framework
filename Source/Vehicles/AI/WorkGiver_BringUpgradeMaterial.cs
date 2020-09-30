@@ -21,10 +21,7 @@ namespace Vehicles.Jobs
 			}
 		}
 
-        public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
-		{
-            return pawn.Map.spawnedThings;
-		}
+        public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn) => pawn.Map.GetCachedMapComponent<VehicleReservationManager>().VehicleListers(VehicleRequest.Packing);
 
 
         public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
@@ -48,7 +45,7 @@ namespace Vehicles.Jobs
 
             bool flag = false;
             ThingDefCountClass thingDefCountClass = null;
-            var reservationManager = vehicle.Map.GetComponent<VehicleReservationManager>();
+            var reservationManager = vehicle.Map.GetCachedMapComponent<VehicleReservationManager>();
             for(int i = 0; i < count; i++)
             {
                 ThingDefCountClass materialRequired = materials[i];
@@ -63,7 +60,7 @@ namespace Vehicles.Jobs
                 Thing foundResource = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForDef(materialRequired.thingDef), PathEndMode.ClosestTouch, TraverseParms.For(pawn,
                     Danger.Deadly, TraverseMode.ByPawn, false), 9999f, (Thing t) => t.def == materialRequired.thingDef && !t.IsForbidden(pawn) && pawn.CanReserve(t, 1, -1, null, false));
 
-                if(foundResource != null && pawn.Map.GetComponent<VehicleReservationManager>().CanReserve<ThingDefCountClass, VehicleNodeReservation>(vehicle, pawn, null))
+                if(foundResource != null && pawn.Map.GetCachedMapComponent<VehicleReservationManager>().CanReserve<ThingDefCountClass, VehicleNodeReservation>(vehicle, pawn, null))
                 {
                     FindAvailableNearbyResources(foundResource, pawn, out int resourceTotalAvailable);
                     Job job = JobMaker.MakeJob(JobDefOf_Vehicles.LoadUpgradeMaterials, foundResource, vehicle);

@@ -160,7 +160,7 @@ namespace Vehicles
         private static IntVec3 FindCenterWaterCell(Map map, bool landing = false)
         {
             TraverseParms tp = TraverseParms.For(TraverseMode.NoPassClosedDoors, Danger.Deadly, false);
-            Predicate<IntVec3> validator = (IntVec3 x) => GenGridShips.Standable(x, map) && !x.Fogged(map) && map.GetComponent<WaterMap>().getShipReachability.CanReachMapEdge(x, tp);
+            Predicate<IntVec3> validator = (IntVec3 x) => GenGridShips.Standable(x, map) && !x.Fogged(map) && map.GetCachedMapComponent<WaterMap>().ShipReachability.CanReachMapEdge(x, tp);
             IntVec3 result;
             if(RCellFinder.TryFindRandomCellNearTheCenterOfTheMapWith(null /*input validator here*/, map, out result))
             {

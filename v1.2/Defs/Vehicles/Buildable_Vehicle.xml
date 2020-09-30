@@ -3,8 +3,8 @@
 <Defs>
 	
 	<!-- Vehicle base -->
-	<ThingDef Name="VehicleBaseBuildable" Abstract="True">
-		<thingClass>Building</thingClass>
+	<Vehicles.VehicleBuildDef Name="VehicleBaseBuildable" Abstract="True">
+		<thingClass>Vehicles.Components.VehicleBuilding</thingClass>
 		<selectable>true</selectable>
 		<altitudeLayer>Building</altitudeLayer>
 		<terrainAffordanceNeeded>Heavy</terrainAffordanceNeeded>
@@ -19,11 +19,11 @@
 		<rotatable>true</rotatable>
 		<blockWind>true</blockWind>
 		<useHitPoints>true</useHitPoints>
-	</ThingDef>
+	</Vehicles.VehicleBuildDef>
 	
 	<!--Unreleased Vehicle base -->
-	<ThingDef Name="UnreleasedVehicleBaseBuildable" Abstract="True">
-		<thingClass>Building</thingClass>
+	<Vehicles.VehicleBuildDef Name="UnreleasedVehicleBaseBuildable" Abstract="True">
+		<thingClass>Vehicles.Components.VehicleBuilding</thingClass>
 		<selectable>true</selectable>
 		<altitudeLayer>Building</altitudeLayer>
 		<terrainAffordanceNeeded>Heavy</terrainAffordanceNeeded>
@@ -38,5 +38,5 @@
 		<rotatable>true</rotatable>
 		<blockWind>true</blockWind>
 		<useHitPoints>true</useHitPoints>
-	</ThingDef>
+	</Vehicles.VehicleBuildDef>
 </Defs>

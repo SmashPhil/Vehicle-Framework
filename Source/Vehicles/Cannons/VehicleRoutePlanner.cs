@@ -108,7 +108,7 @@ namespace Vehicles
 
 		public void InitiateRoutePlanner()
         {
-			Find.World.GetComponent<VehicleRoutePlanner>().Active = true;
+			Find.World.GetCachedWorldComponent<VehicleRoutePlanner>().Active = true;
 		    if (Current.ProgramState == ProgramState.Playing)
 		    {
 			    Find.World.renderer.wantedMode = WorldRenderMode.Planet;
@@ -383,12 +383,12 @@ namespace Vehicles
 
 		private void TryAddWaypoint(int tile, bool playSound = true)
 		{
-			if (vehicles.AnyNullified(v => !Find.World.GetComponent<WorldVehiclePathGrid>().Passable(tile, v.def)))
+			if (vehicles.AnyNullified(v => !Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().Passable(tile, v.def)))
 			{
 				Messages.Message("MessageCantAddWaypointBecauseImpassable".Translate(), MessageTypeDefOf.RejectInput, false);
 				return;
 			}
-			if (waypoints.AnyNullified() && !Find.World.GetComponent<WorldVehicleReachability>().CanReach(vehicles.UniqueVehicleDefsInList().ToList(), waypoints[waypoints.Count - 1].Tile, tile))
+			if (waypoints.AnyNullified() && !Find.World.GetCachedWorldComponent<WorldVehicleReachability>().CanReach(vehicles.UniqueVehicleDefsInList().ToList(), waypoints[waypoints.Count - 1].Tile, tile))
 			{
 				Messages.Message("MessageCantAddWaypointBecauseUnreachable".Translate(), MessageTypeDefOf.RejectInput, false);
 				return;
@@ -448,7 +448,7 @@ namespace Vehicles
 
 			for (int i = 1; i < waypoints.Count; i++)
 			{
-				paths.Add(Find.World.GetComponent<WorldVehiclePathfinder>().FindPath(waypoints[i - 1].Tile, waypoints[i].Tile, vehicles, null));
+				paths.Add(Find.World.GetCachedWorldComponent<WorldVehiclePathfinder>().FindPath(waypoints[i - 1].Tile, waypoints[i].Tile, vehicles, null));
 			}
 			cachedTicksToWaypoint.Clear();
 			int num = 0;
@@ -623,7 +623,7 @@ namespace Vehicles
             {
 				this.vehicles = vehicles;
 				massUsage = vehicles.Sum(v => MassUtility.GearAndInventoryMass(v));
-				massCapacity = vehicles.Sum(v => v.GetComp<CompVehicle>().CargoCapacity);
+				massCapacity = vehicles.Sum(v => v.GetCachedComp<CompVehicle>().CargoCapacity);
             }
 
 			public VehicleInfo(Caravan caravan)

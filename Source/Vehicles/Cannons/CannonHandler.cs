@@ -5,14 +5,10 @@ using Verse.Sound;
 using RimWorld;
 using UnityEngine;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Threading;
 
 namespace Vehicles
 {
-    public enum WeaponType { None, Static, Rotatable }
-    public enum WeaponLocation { Port, Starboard, Bow, Stern, Turret }
     public class CannonHandler : IExposable, ILoadReferenceable
     {
         public CannonHandler()
@@ -345,7 +341,7 @@ namespace Vehicles
 
         public void Draw()
         {
-            if(CannonGraphicData.graphicClass == typeof(Graphic_Animate))
+            if(CannonGraphicData.graphicClass == typeof(Graphic_Animate) || CannonGraphicData.graphicClass.IsSubclassOf(typeof(Graphic_Animate)))
             {
                 if(ticks >= 0)
                 {
@@ -453,18 +449,9 @@ namespace Vehicles
         {
             get
             {
-                if (cannonMaterialLoaded is null)
-                {
-                    if(CannonGraphicData.graphicClass == typeof(Graphic_Animate))
-                    {
-                        cannonMaterialLoaded = MaterialPool.MatFrom(Graphic_Animate.GetDefaultTexPath(CannonGraphicData.texPath), ShaderDatabase.CutoutComplex, CannonGraphicData.color);
-                    }
-                    else
-                    {
-                        cannonMaterialLoaded = MaterialPool.MatFrom(CannonGraphicData.texPath, ShaderDatabase.CutoutComplex, CannonGraphicData.color);
-                    }
-                }
-                return cannonMaterialLoaded;
+                if (cannonMaterialCache is null)
+                    ResolveCannonGraphics(pawn);
+                return cannonMaterialCache;
             }
         }
 
@@ -472,9 +459,9 @@ namespace Vehicles
         {
             get
             {
-                if (baseCannonMaterialLoaded is null)
+                if (baseCannonMaterialCache is null)
                     ResolveCannonGraphics(pawn);
-                return baseCannonMaterialLoaded;
+                return baseCannonMaterialCache;
             }
         }
 
@@ -486,9 +473,9 @@ namespace Vehicles
                     return null;
                 if (cannonTex is null)
                 {
-                    if(CannonGraphicData.graphicClass == typeof(Graphic_Animate))
+                    if (CannonGraphicData.graphicClass.IsAssignableFrom(typeof(Graphic_Cannon)))
                     {
-                        cannonTex = ContentFinder<Texture2D>.Get(Graphic_Animate.GetDefaultTexPath(CannonGraphicData.texPath));
+                        cannonTex = ContentFinder<Texture2D>.Get(Graphic_Cannon.GetDefaultTexPath(CannonGraphicData.texPath));
                     }
                     else
                     {
@@ -496,6 +483,27 @@ namespace Vehicles
                     }
                 }
                 return cannonTex;
+            }
+        }
+
+        public Texture2D MainMaskTexture
+        {
+            get
+            {
+                if (CannonGraphicData.texPath.NullOrEmpty())
+                    return null;
+                if (mainMaskTex is null)
+                {
+                    if(CannonGraphicData.graphicClass.IsAssignableFrom(typeof(Graphic_Cannon)))
+                    {
+                        mainMaskTex = ContentFinder<Texture2D>.Get(Graphic_Cannon.GetDefaultTexPath(CannonGraphicData.texPath) + Graphic_Cannon.MaskSuffix);
+                    }
+                    else
+                    {
+                        mainMaskTex = ContentFinder<Texture2D>.Get(CannonGraphicData.texPath + Graphic_Single.MaskSuffix, false);
+                    }
+                }
+                return mainMaskTex;
             }
         }
 
@@ -541,44 +549,49 @@ namespace Vehicles
             }
         }
 
-        public void ResolveCannonGraphics(VehiclePawn forPawn)
+        public void ResolveCannonGraphics(VehiclePawn forPawn, bool forceRegen = false)
         {
-            if(cachedGraphicData is null)
+            if(cachedGraphicData is null || forceRegen)
             {
                 cachedGraphicData = new GraphicData();
                 cachedGraphicData.CopyFrom(cannonDef.graphicData);
+                
                 if(cannonDef.matchParentColor)
                 {
-                    cachedGraphicData.color = forPawn.kindDef.lifeStages.Last().bodyGraphicData.color;
-                    cachedGraphicData.colorTwo = forPawn.kindDef.lifeStages.Last().bodyGraphicData.colorTwo;
+                    cachedGraphicData.color = forPawn.DrawColor;
+                    cachedGraphicData.colorTwo = forPawn.DrawColorTwo;
                 }
             }
 
             if (cannonDef.baseCannonTexPath.NullOrEmpty())
             {
-                baseCannonMaterialLoaded = null;
+                baseCannonMaterialCache = null;
             }
-            else if (baseCannonMaterialLoaded is null)
+            else if (baseCannonMaterialCache is null || forceRegen)
             {
-                baseCannonMaterialLoaded = MaterialPool.MatFrom(cannonDef.baseCannonTexPath);
+                baseCannonMaterialCache = MaterialPool.MatFrom(cannonDef.baseCannonTexPath);
             }
 
             if (cannonDef.baseCannonTexPath.NullOrEmpty())
             {
                 baseCannonGraphic = null;
             }
-            else if (baseCannonGraphic is null)
+            else if (baseCannonGraphic is null || forceRegen)
             {
                 baseCannonGraphic = GraphicDatabase.Get<Graphic_Single>(cannonDef.baseCannonTexPath, ShaderDatabase.DefaultShader);
             }
 
-            if (cannonGraphic is null)
+            if (cannonGraphic is null || forceRegen)
             {
                 if (cannonDef.graphicData is null)
                 {
                     cannonGraphic = BaseContent.BadGraphic;
                 }
-                cannonGraphic = CannonGraphicData.Graphic; //GraphicDatabase.Get<Graphic_Animate>(cannonDef.cannonTexPath, ShaderDatabase.DefaultShader, cannonTurretDrawSize, Color.white);
+                cannonGraphic = CannonGraphicData.Graphic;
+            }
+            if(cannonMaterialCache is null || forceRegen)
+            {
+                cannonMaterialCache = CannonGraphic.MatAt(Rot4.North, pawn);
             }
         }
         
@@ -598,7 +611,7 @@ namespace Vehicles
                     }
                     else
                     {
-                        gizmoIcon = TexCommandVehicles.BroadsideCannon_Port;
+                        gizmoIcon = VehicleTex.BroadsideCannon_Port;
                     }
                 }
                 return gizmoIcon;
@@ -644,6 +657,10 @@ namespace Vehicles
                     return rotation + attachedTo.TurretRotation;
                 }
                 return rotation;
+            }
+            set
+            {
+                currentRotation = SPMultiCell.ClampAndWrap(value + 270, 0, 360);
             }
         }
 
@@ -773,6 +790,20 @@ namespace Vehicles
             ActivateTimer(ignoreTimer);
         }
 
+        /// <summary>
+        /// FOR AI USE ONLY
+        /// </summary>
+        public bool AutoReloadCannon()
+        {
+            ThingDef ammoType = pawn.inventory.innerContainer.FirstOrDefault(t => cannonDef.ammoAllowed.Contains(t.def) || cannonDef.ammoAllowed.Contains(t?.def?.projectileWhenLoaded))?.def;
+            if (ammoType != null)
+            {
+                ReloadCannon(ammoType);
+                return true;
+            }
+            return false;
+        }
+
         public void ConsumeShellChambered()
         {
             shellCount--;
@@ -872,7 +903,6 @@ namespace Vehicles
         /// </summary>
         /// <param name="target"></param>
         /// <returns>true if cannonTarget set to target, false if target is still valid</returns>
-        public enum PawnStatusOnTarget { Alive, Down, Dead, None}
         public PawnStatusOnTarget CachedPawnTargetStatus { get; set; }
         public bool SetTargetConditionalOnThing(LocalTargetInfo target, bool resetPrefireTimer = true)
         {
@@ -920,7 +950,8 @@ namespace Vehicles
             if(!cannonTarget.IsValid && HelperMethods.CannonTargeter.cannon != this)
             {
                 float angleDifference = pawn.Angle - parentAngleCached;
-                currentRotation -= 90 * (pawn.Rotation.AsInt - parentRotCached.AsInt) + angleDifference;
+                if (attachedTo is null)
+                    currentRotation -= 90 * (pawn.Rotation.AsInt - parentRotCached.AsInt) + angleDifference;
                 rotationTargeted = currentRotation;
                 LockedStatusRotation = true;
             }
@@ -1047,6 +1078,8 @@ namespace Vehicles
 
         private Texture2D gizmoIcon;
 
+        private Texture2D mainMaskTex;
+
         private Graphic cannonGraphic;
         private Graphic baseCannonGraphic;
 
@@ -1078,11 +1111,11 @@ namespace Vehicles
         public string parentKey;
         public string key;
 
-        private Material cannonMaterialLoaded;
+        private Material cannonMaterialCache;
         public Vector2 cannonRenderOffset;
         public Vector2 cannonRenderLocation;
 
-        private Material baseCannonMaterialLoaded;
+        private Material baseCannonMaterialCache;
         public Vector2 baseCannonRenderLocation;
 
         public Vector2 baseCannonDrawSize = Vector2.one;

@@ -15,16 +15,16 @@ namespace Vehicles
         {
             get
             {
-                if(this.cachedMaterial is null)
+                if(cachedMaterial is null)
                 {
                     Color color;
-                    if(base.Faction != null)
-                        color = base.Faction.Color;
+                    if(Faction != null)
+                        color = Faction.Color;
                     else
                         color = Color.white;
-                    this.cachedMaterial = MaterialPool.MatFrom(this.def.texture, ShaderDatabase.WorldOverlayTransparentLit, color, WorldMaterials.WorldObjectRenderQueue);
+                    cachedMaterial = MaterialPool.MatFrom(def.texture, ShaderDatabase.WorldOverlayTransparentLit, color, WorldMaterials.WorldObjectRenderQueue);
                 }
-                return this.cachedMaterial;
+                return cachedMaterial;
             }
         }
 
@@ -33,9 +33,9 @@ namespace Vehicles
             get
             {
                 int num = 0;
-                foreach(Pawn p in dockedBoats)
+                foreach(VehiclePawn b in dockedBoats)
                 {
-                    num += p.GetComp<CompVehicle>()?.SeatsAvailable ?? 0;
+                    num += b.GetCachedComp<CompVehicle>().SeatsAvailable;
                 }
                 return num;
             }
@@ -43,7 +43,7 @@ namespace Vehicles
 
         public void Notify_CaravanArrived(Caravan caravan)
         {
-            if(caravan.PawnsListForReading.Where(x => !HelperMethods.IsBoat(x)).Count() > this.TotalAvailableSeats)
+            if(caravan.PawnsListForReading.Where(x => !HelperMethods.IsBoat(x)).Count() > TotalAvailableSeats)
             {
                 Messages.Message("CaravanMustHaveEnoughSpaceOnShip".Translate(), this, MessageTypeDefOf.RejectInput, false);
                 return;
@@ -89,7 +89,7 @@ namespace Vehicles
                 dockedBoats.RemoveAll(x => x.Destroyed);
             }
             Scribe_Collections.Look(ref tmpSavedBoats, "tmpSavedBoats", LookMode.Reference);
-            Scribe_Deep.Look<ThingOwner<Pawn>>(ref dockedBoats, "dockedBoats", new object[]
+            Scribe_Deep.Look(ref dockedBoats, "dockedBoats", new object[]
             {
                 this
             });
@@ -106,15 +106,15 @@ namespace Vehicles
 
         public void GetChildHolders(List<IThingHolder> outChildren)
         {
-            ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, this.GetDirectlyHeldThings());
+            ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, GetDirectlyHeldThings());
         }
 
         public ThingOwner GetDirectlyHeldThings()
         {
-            return this.dockedBoats;
+            return dockedBoats;
         }
 
-        public ThingOwner<Pawn> dockedBoats = new ThingOwner<Pawn>();
+        public ThingOwner<VehiclePawn> dockedBoats = new ThingOwner<VehiclePawn>();
 
         private Material cachedMaterial;
 

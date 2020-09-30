@@ -16,6 +16,9 @@
 		<reloadTimer>5</reloadTimer>
 		<warmUpTimer>2</warmUpTimer>
 		<magazineCapacity>1</magazineCapacity>
+		<recoil>0.2</recoil>
+		
+		<attachProjectileFlag>Tank</attachProjectileFlag>
 		
 		<!-- (shotsPerBurst, ticksBetweenShots, ticksBetweenBursts, fireModeLabel, texPath) -->
 		<fireModes>
@@ -29,7 +32,7 @@
 		
 		<graphicData>
 			<texPath>Vehicles/Tank/TankCannonTop</texPath>
-			<graphicClass>Vehicles.Graphic_Animate</graphicClass>
+			<graphicClass>Vehicles.Graphic_Cannon</graphicClass>
 			<shaderType>CutoutComplex</shaderType>
 			<drawSize>(7, 7)</drawSize>
 		</graphicData>
@@ -76,8 +79,8 @@
 		<gizmoIconScale>3</gizmoIconScale>
 		
 		<graphicData>
-			<texPath>Vehicles/50cal</texPath>
-			<graphicClass>Vehicles.Graphic_Animate</graphicClass>
+			<texPath>Vehicles/50cal/50cal</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
 			<drawSize>(6, 6)</drawSize>
 		</graphicData>
 		

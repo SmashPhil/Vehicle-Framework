@@ -8,15 +8,17 @@ using Verse;
 
 namespace Vehicles
 {
-    public enum FuelConsumptionCondition {Moving, Drafted, Always };
     public class CompProperties_FueledTravel : CompProperties
     {
         public CompProperties_FueledTravel()
         {
-            this.compClass = typeof(CompFueledTravel);
+            compClass = typeof(CompFueledTravel);
         }
 
         public ThingDef fuelType;
+
+        public bool electricPowered;
+        public float ticksPerCharge = 50f;
 
         public float fuelConsumptionRate;
 

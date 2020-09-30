@@ -12,7 +12,6 @@ namespace Vehicles
 		public VehicleRenderer(VehiclePawn vehicle)
 		{
 			this.vehicle = vehicle;
-			wiggler = new PawnDownedWiggler(vehicle);
 			statusOverlays = new PawnHeadOverlays(vehicle);
 			woundOverlays = new PawnWoundDrawer(vehicle);
 			graphics = new VehicleGraphicSet(vehicle);
@@ -36,9 +35,9 @@ namespace Vehicles
 				}
 				shadowGraphic.Draw(drawLoc, Rot4.North, vehicle, 0f);
 			}
-			if (graphics.nakedGraphic != null && graphics.nakedGraphic.ShadowGraphic != null)
+			if (graphics.vehicle.VehicleGraphic != null && graphics.vehicle.VehicleGraphic.ShadowGraphic != null)
 			{
-				graphics.nakedGraphic.ShadowGraphic.Draw(drawLoc, Rot4.North, vehicle, 0f);
+				graphics.vehicle.VehicleGraphic.ShadowGraphic.Draw(drawLoc, Rot4.North, vehicle, 0f);
 			}
 			if (vehicle.Spawned && !vehicle.Dead)
 			{
@@ -77,18 +76,18 @@ namespace Vehicles
 				graphics.ResolveAllGraphics();
 			}
 			Quaternion quaternion = Quaternion.AngleAxis(angle, Vector3.up);
-			Mesh mesh = null;
 
 			Vector3 loc = rootLoc;
 			loc.y += YOffset_Body;
 
-			mesh = graphics.nakedGraphic.MeshAt(bodyFacing);
-
+			Mesh mesh = graphics.vehicle.VehicleGraphic.MeshAt(bodyFacing);
 			List<Material> list = graphics.MatsBodyBaseAt(bodyFacing, RotDrawMode.Fresh);
+
+			Vector3 loc2 = rootLoc;
+
 			for (int i = 0; i < list.Count; i++)
 			{
-				Material mat = OverrideMaterialIfNeeded(list[i], vehicle);
-				GenDraw.DrawMeshNowOrLater(mesh, loc, quaternion, mat, portrait);
+				GenDraw.DrawMeshNowOrLater(mesh, loc, quaternion, list[i], portrait);
 				loc.y += SubInterval;
 			}
 
@@ -119,12 +118,6 @@ namespace Vehicles
 				bodyLoc.y += YOffset_Status;
 				statusOverlays.RenderStatusOverlays(bodyLoc, quaternion, MeshPool.humanlikeHeadSet.MeshAt(headFacing));
 			}
-		}
-
-		private Material OverrideMaterialIfNeeded(Material original, Pawn vehicle)
-		{
-			Material baseMat = vehicle.IsInvisible() ? InvisibilityMatPool.GetInvisibleMat(original) : original;
-			return graphics.flasher.GetDamagedMat(baseMat);
 		}
 
 		public Rot4 LayingFacing()
@@ -177,10 +170,6 @@ namespace Vehicles
 				rotation.AsInt += 2;
 				return rotation.AsAngle;
 			}
-			if (vehicle.Downed || vehicle.Dead)
-			{
-				return wiggler.downedAngle;
-			}
 			if (vehicle.RaceProps.Humanlike)
 			{
 				return LayingFacing().AsAngle;
@@ -220,23 +209,14 @@ namespace Vehicles
 			}
 		}
 
-		public void Notify_DamageApplied(DamageInfo dam)
-		{
-			graphics.flasher.Notify_DamageApplied(dam);
-			wiggler.Notify_DamageApplied(dam);
-		}
-
 		public void RendererTick()
 		{
-			wiggler.WigglerTick();
 			effecters.EffectersTick();
 		}
 
 		private VehiclePawn vehicle;
 
 		public VehicleGraphicSet graphics;
-
-		public PawnDownedWiggler wiggler;
 
 		private PawnHeadOverlays statusOverlays;
 

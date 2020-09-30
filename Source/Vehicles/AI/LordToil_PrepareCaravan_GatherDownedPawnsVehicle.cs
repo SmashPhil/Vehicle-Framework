@@ -57,7 +57,7 @@ namespace Vehicles.Lords
 
                 foreach(VehiclePawn p in vehicles)
                 {
-                    pawnsOnShips.AddRange(p.GetComp<CompVehicle>().AllPawnsAboard);
+                    pawnsOnShips.AddRange(p.GetCachedComp<CompVehicle>().AllPawnsAboard);
                 }
 
                 if(pawnsOnShips.Intersect(downedPawns).Count() == downedPawns.Count())

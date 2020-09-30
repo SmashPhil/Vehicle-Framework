@@ -17,7 +17,7 @@ namespace Vehicles
             absorbInputAroundWindow = true;
             doCloseX = true;
             forcePause = true;
-            availableVehicles = Find.Maps.Select(m => m.mapPawns).SelectMany(v => v.AllPawnsSpawned.Where(p => p.IsVehicle())).Cast<VehiclePawn>().ToList();
+            availableVehicles = Find.Maps.Select(m => m.mapPawns).SelectMany(v => v.AllPawnsSpawned.Where(p => p is VehiclePawn)).Cast<VehiclePawn>().ToList();
         }
         
         public override Vector2 InitialSize => new Vector2(Verse.UI.screenWidth / 2, Verse.UI.screenHeight/1.5f);
@@ -67,13 +67,13 @@ namespace Vehicles
                 }
                 rowRect.x = iconRect.width + 10f;
 
-                if(vehicle.GetComp<CompVehicle>().Props.generateThingIcon)
+                if(vehicle.GetCachedComp<CompVehicle>().Props.generateThingIcon)
                 {
                     Widgets.ThingIcon(iconRect, vehicle);
                 }
                 else
                 {
-                    Widgets.ButtonImageFitted(iconRect, TexCommandVehicles.CachedTextureIcons[vehicle.def]);
+                    Widgets.ButtonImageFitted(iconRect, VehicleTex.CachedTextureIcons[vehicle.def]);
                 }
                 
                 Widgets.Label(rowRect, vehicle.LabelShortCap);
@@ -104,20 +104,20 @@ namespace Vehicles
 
             if(Widgets.ButtonText(rect2, "StartVehicleRoutePlanner".Translate()))
             {
-                if(storedVehicles.AnyNullified(v => v.GetComp<CompVehicle>().Props.vehicleType == VehicleType.Sea) && storedVehicles.AnyNullified(v => v.GetComp<CompVehicle>().Props.vehicleType == VehicleType.Land))
+                if(storedVehicles.AnyNullified(v => v.GetCachedComp<CompVehicle>().Props.vehicleType == VehicleType.Sea) && storedVehicles.AnyNullified(v => v.GetCachedComp<CompVehicle>().Props.vehicleType == VehicleType.Land))
                 {
                     Messages.Message("LandAndSeaRoutePlannerRestriction".Translate(), MessageTypeDefOf.RejectInput);
                     return;
                 }
 
-                Find.World.GetComponent<VehicleRoutePlanner>().vehicles = storedVehicles.ToList();
-                Find.World.GetComponent<VehicleRoutePlanner>().InitiateRoutePlanner();
+                Find.World.GetCachedWorldComponent<VehicleRoutePlanner>().vehicles = storedVehicles.ToList();
+                Find.World.GetCachedWorldComponent<VehicleRoutePlanner>().InitiateRoutePlanner();
                 Close();
             }
             Rect rect3 = new Rect(rect2.x - BottomButtonSize.x - ButtonPadding, rect2.y, BottomButtonSize.x, BottomButtonSize.y);
             if(Widgets.ButtonText(rect3, "CancelButton".Translate()))
             {
-                Find.World.GetComponent<VehicleRoutePlanner>().Stop();
+                Find.World.GetCachedWorldComponent<VehicleRoutePlanner>().Stop();
                 Close();
             }
         }

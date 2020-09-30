@@ -481,9 +481,10 @@ namespace Vehicles
 				if (Widgets.ButtonText(rect3, "ChangeRouteButton".Translate(), true, true, true))
 				{
 					List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables);
-					List<Pawn> innerPawns = pawnsFromTransferables.Where(v => HelperMethods.IsVehicle(v)).SelectMany(v => v.GetComp<CompVehicle>().AllPawnsAboard).ToList();
+					List<Pawn> innerPawns = pawnsFromTransferables.Where(v => v is VehiclePawn).SelectMany(v => (v as VehiclePawn).GetCachedComp<CompVehicle>().AllPawnsAboard).ToList();
 
-					if(pawnsFromTransferables.AnyNullified(v => v.IsVehicle() && v.GetComp<CompVehicle>().Props.vehicleType == VehicleType.Sea) && pawnsFromTransferables.AnyNullified(v => v.IsVehicle() && v.GetComp<CompVehicle>().Props.vehicleType == VehicleType.Land))
+					if(pawnsFromTransferables.AnyNullified(v => v is VehiclePawn vehicle && vehicle.GetCachedComp<CompVehicle>().Props.vehicleType == VehicleType.Sea) 
+						&& pawnsFromTransferables.AnyNullified(v => v is VehiclePawn vehicle && vehicle.GetCachedComp<CompVehicle>().Props.vehicleType == VehicleType.Land))
 					{
 						Messages.Message("LandAndSeaRoutePlannerRestriction".Translate(), MessageTypeDefOf.RejectInput);
 						return;
@@ -496,7 +497,7 @@ namespace Vehicles
 					}
 					else
 					{
-						Find.World.GetComponent<VehicleRoutePlanner>().Start(this);
+						Find.World.GetCachedWorldComponent<VehicleRoutePlanner>().Start(this);
 					}
 				}
 				if (destinationTile != -1)
@@ -539,8 +540,8 @@ namespace Vehicles
 		private bool DebugTryFormCaravanInstantly()
 		{
 			List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables);
-			List<Pawn> innerPawns = pawnsFromTransferables.Where(v => HelperMethods.IsVehicle(v)).SelectMany(v => v.GetComp<CompVehicle>().AllPawnsAboard).ToList();
-			if (!pawnsFromTransferables.Concat(innerPawns).AnyNullified((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer)) && !pawnsFromTransferables.AnyNullified(v => HelperMethods.IsVehicle(v)))
+			List<Pawn> innerPawns = pawnsFromTransferables.Where(v => v is VehiclePawn).SelectMany(v => (v as VehiclePawn).GetCachedComp<CompVehicle>().AllPawnsAboard).ToList();
+			if (!pawnsFromTransferables.Concat(innerPawns).AnyNullified((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer)) && !pawnsFromTransferables.AnyNullified(v => v is VehiclePawn))
 			{
 				Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, false);
 				return false;
@@ -594,9 +595,9 @@ namespace Vehicles
 		private bool TryReformCaravan()
 		{
 			List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables);
-			Log.Message($"Before: {pawnsFromTransferables.Count}");
+
 			HelperMethods.BoardAllAssignedPawns(ref pawnsFromTransferables);
-			Log.Message($"After: {pawnsFromTransferables.Count}");
+
 			if (!CheckForErrors(pawnsFromTransferables))
 			{
 				return false;
@@ -641,8 +642,8 @@ namespace Vehicles
 
 		private bool CheckForErrors(List<Pawn> pawns)
 		{
-			List<Pawn> innerPawns = pawns.Where(v => v.IsVehicle()).SelectMany(v => v.GetComp<CompVehicle>().AllPawnsAboard).ToList();
-			List<VehiclePawn> vehicles = pawns.Where(v => v.IsVehicle()).Cast<VehiclePawn>().ToList();
+			List<Pawn> innerPawns = pawns.Where(v => v is VehiclePawn).SelectMany(v => (v as VehiclePawn).GetCachedComp<CompVehicle>().AllPawnsAboard).ToList();
+			List<VehiclePawn> vehicles = pawns.Where(v => v is VehiclePawn).Cast<VehiclePawn>().ToList();
 			if (MustChooseRoute && destinationTile < 0)
 			{
 				Messages.Message("MessageMustChooseRouteFirst".Translate(), MessageTypeDefOf.RejectInput, false);
@@ -673,7 +674,7 @@ namespace Vehicles
             {
 				return false;
             }
-			Pawn pawn = pawns.Find((Pawn x) => HelperMethods.IsVehicle(x) && pawns.AnyNullified(p => !HelperMethods.IsVehicle(p) && !p.IsWorldPawn() && p.IsColonist && !p.CanReach(x, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn)));
+			Pawn pawn = pawns.Find((Pawn x) => x is VehiclePawn && pawns.AnyNullified(p => !(p is VehiclePawn) && !p.IsWorldPawn() && p.IsColonist && !p.CanReach(x, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn)));
 			if (pawn != null)
 			{
 				Messages.Message("CaravanPawnIsUnreachable".Translate(pawn.LabelShort, pawn), pawn, MessageTypeDefOf.RejectInput, false);
@@ -781,7 +782,7 @@ namespace Vehicles
 				TryFindExitSpotLand(pawns, reachableForEveryColonist, rot2, out spot)) || 
 				TryFindExitSpotLand(pawns, reachableForEveryColonist, rot.Rotated(RotationDirection.Clockwise), out spot) || 
 				TryFindExitSpotLand(pawns, reachableForEveryColonist, rot.Rotated(RotationDirection.Counterclockwise), out spot);
-			SPMultiCell.ClampToMap(pawns.FindAll(x => HelperMethods.IsVehicle(x)).MaxBy(x => x.def.size.z), ref spot, map);
+			SPMultiCell.ClampToMap(pawns.FindAll(x => x is VehiclePawn).MaxBy(x => x.def.size.z), ref spot, map);
 			return result;
 		}
 

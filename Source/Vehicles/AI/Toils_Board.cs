@@ -24,7 +24,7 @@ namespace Vehicles.Jobs
                     VehicleHandler handler = vehicle.GetCachedComp<CompVehicle>().bills.FirstOrDefault(b => b.pawnToBoard == pawnBoarding).handler;
                     if (handler is null)
                     {
-                        handler = vehicle.Map.GetComponent<VehicleReservationManager>().GetReservation<VehicleHandlerReservation>(vehicle)?.ReservedHandler(pawnBoarding);
+                        handler = vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().GetReservation<VehicleHandlerReservation>(vehicle)?.ReservedHandler(pawnBoarding);
                         if (handler is null)
                         {
                             Log.Error("Could not find assigned spot for " + pawnBoarding.LabelShort + " to board.");
@@ -39,10 +39,10 @@ namespace Vehicles.Jobs
 
                 if (assignedSeat.Second is null)
                 {
-                    Log.Error("[Vehicles] VehicleHandler is null. This should never happen as assigned seating either handles arrangements or instructs pawns to follow rather than board.");
+                    Log.Error($"{VehicleHarmony.LogLabel} VehicleHandler is null. This should never happen as assigned seating either handles arrangements or instructs pawns to follow rather than board.");
                 }
-                assignedSeat.First.GetComp<CompVehicle>().GiveLoadJob(pawnBoarding, assignedSeat.Second);
-                assignedSeat.First.GetComp<CompVehicle>().Notify_Boarded(pawnBoarding);
+                assignedSeat.First.GetCachedComp<CompVehicle>().GiveLoadJob(pawnBoarding, assignedSeat.Second);
+                assignedSeat.First.GetCachedComp<CompVehicle>().Notify_Boarded(pawnBoarding);
             };
             toil.defaultCompleteMode = ToilCompleteMode.Instant;
             return toil;

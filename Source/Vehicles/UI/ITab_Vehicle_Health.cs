@@ -11,7 +11,8 @@ namespace Vehicles.UI
             this.labelKey = "TabBoatHealth";
         }
 
-        public override bool IsVisible => !base.SelPawn.GetComp<CompVehicle>()?.beached ?? false;
+        public VehiclePawn SelVehicle => SelPawn as VehiclePawn;
+        public override bool IsVisible => !SelVehicle.GetCachedComp<CompVehicle>()?.beached ?? false;
 
         protected override void FillTab()
         {
@@ -27,7 +28,7 @@ namespace Vehicles.UI
             TabDrawer.DrawTabs(rect, list, 200f);
             rect = rect.ContractedBy(9f)*/
 
-            HealthCardUtility.DrawPawnHealthCard(new Rect(0f, TopPadding, this.size.x, this.size.y - IconSize), base.SelPawn, false, false, base.SelThing);
+            HealthCardUtility.DrawPawnHealthCard(new Rect(0f, TopPadding, size.x, size.y - IconSize), SelVehicle, false, false, SelThing);
         }
 
         private static bool capacityTab = true;

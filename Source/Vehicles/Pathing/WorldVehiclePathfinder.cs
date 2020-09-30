@@ -44,7 +44,7 @@ namespace Vehicles
 				return WorldPath.NotFound;
 			}
 
-			if (!Find.World.GetComponent<WorldVehicleReachability>().CanReach(caravan, destTile))
+			if (!Find.World.GetCachedWorldComponent<WorldVehicleReachability>().CanReach(caravan, destTile))
 			{
 				return WorldPath.NotFound;
 			}
@@ -54,7 +54,7 @@ namespace Vehicles
 			List<int> tileIDToNeighbors_offsets = grid.tileIDToNeighbors_offsets;
 			List<int> tileIDToNeighbors_values = grid.tileIDToNeighbors_values;
 			Vector3 normalized = grid.GetTileCenter(destTile).normalized;
-			Dictionary<ThingDef, float[]> movementDifficulty = Find.World.GetComponent<WorldVehiclePathGrid>().movementDifficulty;
+			Dictionary<ThingDef, float[]> movementDifficulty = Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().movementDifficulty;
 			int num = 0;
 			int num2 = (caravan != null) ? caravan.TicksPerMove : 3300;
 			int num3 = CalculateHeuristicStrength(startTile, destTile);
@@ -102,7 +102,7 @@ namespace Vehicles
 						for (int i = tileIDToNeighbors_offsets[tile]; i < num4; i++)
 						{
 							int num5 = tileIDToNeighbors_values[i];
-							if (calcGrid[num5].status != statusClosedValue && caravan.UniqueVehicleDefsInCaravan().All(v => Find.World.GetComponent<WorldVehiclePathGrid>().Passable(num5, v)) &&
+							if (calcGrid[num5].status != statusClosedValue && caravan.UniqueVehicleDefsInCaravan().All(v => Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().Passable(num5, v)) &&
 								(!caravan.HasBoat() || !(Find.World.CoastDirectionAt(num5).IsValid && num5 != destTile)))
 							{
 								float highestTerrainCost = caravan.UniqueVehicleDefsInCaravan().Max(v => movementDifficulty[v][num5]);
@@ -171,7 +171,7 @@ namespace Vehicles
 				return WorldPath.NotFound;
 			}
 
-			if (!Find.World.GetComponent<WorldVehicleReachability>().CanReach(vehicles.UniqueVehicleDefsInList().ToList(), startTile, destTile))
+			if (!Find.World.GetCachedWorldComponent<WorldVehicleReachability>().CanReach(vehicles.UniqueVehicleDefsInList().ToList(), startTile, destTile))
 			{
 				return WorldPath.NotFound;
 			}
@@ -181,7 +181,7 @@ namespace Vehicles
 			List<int> tileIDToNeighbors_offsets = grid.tileIDToNeighbors_offsets;
 			List<int> tileIDToNeighbors_values = grid.tileIDToNeighbors_values;
 			Vector3 normalized = grid.GetTileCenter(destTile).normalized;
-			Dictionary<ThingDef, float[]> movementDifficulty = Find.World.GetComponent<WorldVehiclePathGrid>().movementDifficulty;
+			Dictionary<ThingDef, float[]> movementDifficulty = Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().movementDifficulty;
 			int num = 0;
 			int num2 = 3300; //REDO
 			int num3 = CalculateHeuristicStrength(startTile, destTile);
@@ -229,7 +229,7 @@ namespace Vehicles
 						for (int i = tileIDToNeighbors_offsets[tile]; i < num4; i++)
 						{
 							int num5 = tileIDToNeighbors_values[i];
-							if (calcGrid[num5].status != statusClosedValue && vehicles.UniqueVehicleDefsInList().All(v => Find.World.GetComponent<WorldVehiclePathGrid>().Passable(num5, v)) &&
+							if (calcGrid[num5].status != statusClosedValue && vehicles.UniqueVehicleDefsInList().All(v => Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().Passable(num5, v)) &&
 								(!vehicles.HasBoat() || !(Find.World.CoastDirectionAt(num5).IsValid && num5 != destTile)))
 							{
 								float highestTerrainCost = vehicles.UniqueVehicleDefsInList().Max(v => movementDifficulty[v][num5]);

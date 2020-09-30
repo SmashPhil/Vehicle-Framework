@@ -31,11 +31,11 @@ namespace Vehicles
 				Rect rect = rect2 = overRect.AtZero().ContractedBy(6f);
 				rect2.height = overRect.height / 2f;
 				Text.Font = GameFont.Tiny;
-				Widgets.Label(rect2, refuelable.Props.fuelType.LabelCap);
+				Widgets.Label(rect2, refuelable.Props.electricPowered ? "VehicleElectric".Translate() : refuelable.Props.fuelType.LabelCap);
 				Rect rect3 = rect;
 				rect3.yMin = overRect.height / 2f;
 				float fillPercent = refuelable.Fuel / refuelable.FuelCapacity;
-				Widgets.FillableBar(rect3, fillPercent, TexCommandVehicles.FullBarTex, TexCommandVehicles.EmptyBarTex, false);
+				Widgets.FillableBar(rect3, fillPercent, VehicleTex.FullBarTex, VehicleTex.EmptyBarTex, false);
                 /*if (this.refuelable.Props.targetFuelLevelConfigurable)
                 {
                     float num = this.refuelable.TargetFuelLevel / this.refuelable.FuelCapacity;

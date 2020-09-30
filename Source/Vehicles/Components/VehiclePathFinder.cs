@@ -40,10 +40,10 @@ namespace Vehicles.AI
         public (PawnPath path, bool found) FindVehiclePath(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms,  CancellationToken token, PathEndMode peMode = PathEndMode.OnCell, bool waterPathing = false)
         {
             if (Prefs.DevMode && report) 
-                Log.Message($"[Vehicles] MainPath for {traverseParms.pawn.LabelShort} - ThreadId: [{Thread.CurrentThread.ManagedThreadId}] TaskId: [{Task.CurrentId}]");
+                Log.Message($"{VehicleHarmony.LogLabel} MainPath for {traverseParms.pawn.LabelShort} - ThreadId: [{Thread.CurrentThread.ManagedThreadId}] TaskId: [{Task.CurrentId}]");
 
             postCalculatedCells.Clear();
-            WaterMap WaterMap = map.GetComponent<WaterMap>();
+            WaterMap WaterMap = map.GetCachedMapComponent<WaterMap>();
             if(DebugSettings.pathThroughWalls)
             {
                 traverseParms.mode = TraverseMode.PassAllDestroyableThings;
@@ -108,7 +108,7 @@ namespace Vehicles.AI
             {
                 if (waterPathing)
                 {
-                    if(!WaterMap.getShipReachability.CanReachShip(start, dest, peMode, traverseParms))
+                    if(!WaterMap.ShipReachability.CanReachShip(start, dest, peMode, traverseParms))
                     {
                         return (PawnPath.NotFound, false);
                     }
@@ -123,7 +123,7 @@ namespace Vehicles.AI
             }
             cellIndices = map.cellIndices;
 
-            shipPathGrid = WaterMap.getShipPathGrid;
+            shipPathGrid = WaterMap.ShipPathGrid;
             pathGrid = map.pathGrid;
 
             this.edificeGrid = map.edificeGrid.InnerArray;
@@ -151,7 +151,7 @@ namespace Vehicles.AI
             bool flag8 = !flag || !flag3;
             bool flag9 = false;
             bool flag10 = !(pawn is null) && pawn.Drafted;
-            bool flag11 = !(pawn is null) && !(pawn.GetComp<CompVehicle>() is null);
+            bool flag11 = !(pawn is null) && !(pawn.GetCachedComp<CompVehicle>() is null);
 
             int num5 = (!flag11) ? NodesToOpenBeforeRegionbasedPathing_NonShip : NodesToOpenBeforeRegionBasedPathing_Ship;
             int num6 = 0;
@@ -220,7 +220,7 @@ namespace Vehicles.AI
 
                             IntVec3 cellToCheck = cellIndices.IndexToCell(num15);
                            
-                            if(VehicleMod.mod.settings.fullVehiclePathing && HelperMethods.LocationRestrictedBySize(pawn, cellToCheck))
+                            if(VehicleMod.settings.fullVehiclePathing && HelperMethods.LocationRestrictedBySize(pawn, cellToCheck))
                             {
                                 goto EndPathing;
                             }
@@ -400,12 +400,12 @@ namespace Vehicles.AI
                                     if(!flag12 && !waterPathing)
                                     {
                                         //Extra Terrain costs
-                                        if (pawn.GetComp<CompVehicle>().Props.customTerrainCosts?.AnyNullified() ?? false)
+                                        if (pawn.GetCachedComp<CompVehicle>().Props.customTerrainCosts?.AnyNullified() ?? false)
                                         {
                                             TerrainDef currentTerrain = map.terrainGrid.TerrainAt(num15);
-                                            if (pawn.GetComp<CompVehicle>().Props.customTerrainCosts.ContainsKey(currentTerrain))
+                                            if (pawn.GetCachedComp<CompVehicle>().Props.customTerrainCosts.ContainsKey(currentTerrain))
                                             {
-                                                int customCost = pawn.GetComp<CompVehicle>().Props.customTerrainCosts[currentTerrain];
+                                                int customCost = pawn.GetCachedComp<CompVehicle>().Props.customTerrainCosts[currentTerrain];
                                                 if(customCost < 0)
                                                 {
                                                     goto EndPathing;
@@ -458,7 +458,7 @@ namespace Vehicles.AI
                                     int num19 = num17 + calcGrid[num].knownCost;
                                     ushort status = calcGrid[num15].status;
                                     
-                                    //if(pawn.GetComp<CompVehicle>().Props.useFullHitboxPathing)
+                                    //if(pawn.GetCachedComp<CompVehicle>().Props.useFullHitboxPathing)
                                     //{
                                     //    foreach(IntVec3 fullRect in fullRectCells)
                                     //    {
@@ -707,7 +707,7 @@ namespace Vehicles.AI
 
         public static bool BlocksDiagonalMovement(int index, Map map, bool waterPathing = true)
         {
-            bool walkableFast = waterPathing ? !map.GetComponent<WaterMap>().getShipPathGrid.WalkableFast(index) : !map.pathGrid.WalkableFast(index);
+            bool walkableFast = waterPathing ? !map.GetCachedMapComponent<WaterMap>().ShipPathGrid.WalkableFast(index) : !map.pathGrid.WalkableFast(index);
             return  walkableFast || map.edificeGrid[index] is Building_Door;
         }
 
@@ -770,7 +770,7 @@ namespace Vehicles.AI
 
         internal void DebugDrawRichData()
         {
-            if(VehicleMod.mod.settings.debugDrawVehiclePathCosts)
+            if(VehicleMod.settings.debugDrawVehiclePathCosts)
             {
                 while(openList.Count > 0)
                 {
@@ -783,7 +783,7 @@ namespace Vehicles.AI
 
         internal void DebugDrawPathCost(float colorPct = 0f, int duration = 50)
         {
-            if(VehicleMod.mod.settings.debugDrawVehiclePathCosts)
+            if(VehicleMod.settings.debugDrawVehiclePathCosts)
             {
                 foreach(KeyValuePair<IntVec3, int> pathCells in postCalculatedCells)
                 {

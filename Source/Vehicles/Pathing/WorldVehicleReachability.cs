@@ -91,13 +91,13 @@ namespace Vehicles
 				fields.Add(vehicleDef, new int[Find.WorldGrid.TilesCount]);
             }
 
-			if(!Find.World.GetComponent<WorldVehiclePathGrid>().Passable(tile, vehicleDef))
+			if(!Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().Passable(tile, vehicleDef))
             {
 				fields[vehicleDef][tile] = impassableFieldID;
 				return;
             }
 
-            Find.WorldFloodFiller.FloodFill(tile, (int x) => Find.World.GetComponent<WorldVehiclePathGrid>().Passable(x, vehicleDef), delegate (int x)
+            Find.WorldFloodFiller.FloodFill(tile, (int x) => Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().Passable(x, vehicleDef), delegate (int x)
             {
                 fields[vehicleDef][x] = nextFieldID;
             }, int.MaxValue, null);

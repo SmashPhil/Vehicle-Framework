@@ -27,7 +27,7 @@
 			<li>Vehicles.UI.ITab_Vehicle_Health</li>
 			<li>Vehicles.UI.ITab_Vehicle_Passengers</li>
 			<li>Vehicles.UI.ITab_Vehicle_Cargo</li>
-			<!-- <li>Vehicles.UI.ITab_Vehicle_Upgrades</li> (optional) -->
+			<!-- <li>Vehicles.UI.ITab_Vehicle_Upgrades</li> (Not implemented by default) -->
 			<li>ITab_Pawn_FormingCaravan</li>
 		</inspectorTabs>
 		
@@ -50,6 +50,7 @@
 		<hasTooltip>true</hasTooltip>
 		<repairEffect>Repair</repairEffect>
 		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
+		
 		
 		<statBases>
 			<Mass>100</Mass>

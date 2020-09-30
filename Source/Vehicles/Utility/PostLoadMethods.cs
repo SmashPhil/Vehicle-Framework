@@ -16,6 +16,16 @@ namespace Vehicles
             ParseHelper.Parsers<VehicleDamageMultipliers>.Register(new Func<string, VehicleDamageMultipliers>(VehicleDamageMultipliers.FromString));
         }
 
+        public static bool SameOrSubclass(this Type source, Type target)
+        {
+            return source == target || source.IsSubclassOf(target);
+        }
+
+        public static bool IsVehicleDef(this ThingDef td)
+        {
+            return td?.thingClass?.SameOrSubclass(typeof(VehiclePawn)) ?? false;
+        }
+
         public static bool IsNumericType(this Type o)
         {   
             switch (Type.GetTypeCode(o))

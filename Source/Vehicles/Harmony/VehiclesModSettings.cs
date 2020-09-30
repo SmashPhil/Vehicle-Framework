@@ -34,13 +34,14 @@ namespace Vehicles
         public bool debugDisableWaterPathing;
         public bool debugDisableSmoothPathing = true;
 
-        public bool debugSpawnBoatBuildingGodMode;
+        public bool debugSpawnVehicleBuildingGodMode;
         public bool debugUseMultithreading = true;
 
         public bool debugDrawCannonGrid;
         public bool debugDrawNodeGrid;
         public bool debugDrawVehicleTracks;
         public bool debugDrawVehiclePathCosts;
+        public bool debugDrawBumpers;
 
         public bool debugDrawRegions;
         public bool debugDrawRegionLinks;
@@ -80,13 +81,14 @@ namespace Vehicles
                 Scribe_Values.Look(ref debugDisableWaterPathing, "debugDisableWaterPathing", false);
                 Scribe_Values.Look(ref debugDisableSmoothPathing, "debugDisableSmoothPathing", false);
 
-                Scribe_Values.Look(ref debugSpawnBoatBuildingGodMode, "debugSpawnBoatBuidingGodMode", false);
+                Scribe_Values.Look(ref debugSpawnVehicleBuildingGodMode, "debugSpawnVehicleBuildingGodMode", false);
                 Scribe_Values.Look(ref debugUseMultithreading, "debugUseMultithreading", true);
 
                 Scribe_Values.Look(ref debugDrawCannonGrid, "debugDrawCannonGrid", false);
                 Scribe_Values.Look(ref debugDrawNodeGrid, "debugDrawNodeGrid", false);
                 Scribe_Values.Look(ref debugDrawVehicleTracks, "debugDrawVehicleTracks", false);
                 Scribe_Values.Look(ref debugDrawVehiclePathCosts, "debugDrawVehiclePathCosts", false);
+                Scribe_Values.Look(ref debugDrawBumpers, "debugDrawBumpers", false);
 
                 Scribe_Values.Look(ref debugDrawRegions, "debugDrawRegions", false);
                 Scribe_Values.Look(ref debugDrawRegionLinks, "debugDrawRegionLinks", false);
@@ -98,14 +100,13 @@ namespace Vehicles
 
     public class VehicleMod : Mod
     {
-        public VehiclesModSettings settings;
-        public static VehicleMod mod;
+        public static VehiclesModSettings settings;
 
         public VehicleMod(ModContentPack content) : base(content)
         {
             settings = GetSettings<VehiclesModSettings>();
-            mod = this;
         }
+
         public override void DoSettingsWindowContents(Rect inRect)
         {
             var font = Text.Font;
@@ -187,12 +188,12 @@ namespace Vehicles
                 Rect mainSettings = new Rect(inRect.x, inRect.y + 30f, inRect.width / 3, inRect.height);
                 listingStandard.Begin(mainSettings);
                 bool beachLarge = settings.beachMultiplier > 150f;
-                listingStandard.Settings_SliderLabeled(beachLarge ? "BeachGenMultiplierLarge".Translate() : "BeachGenMultiplier".Translate(),
+                listingStandard.SliderLabeled(beachLarge ? "BeachGenMultiplierLarge".Translate() : "BeachGenMultiplier".Translate(),
                     "%", ref settings.beachMultiplier, 0f, 200f, 1f, 0);
                 
                 listingStandard.Gap(16f);
 
-                listingStandard.Settings_SliderLabeled("ForceSettlementCoast".Translate(), "Tiles".Translate(), ref settings.forceFactionCoastRadius, 0, 11, 9999, "Everything".Translate());
+                listingStandard.SliderLabeled("ForceSettlementCoast".Translate(), "Tiles".Translate(), ref settings.forceFactionCoastRadius, 0, 11, 9999, "Everything".Translate());
 
                 listingStandard.Gap(16f);
 
@@ -232,7 +233,7 @@ namespace Vehicles
                 float width = inRect.width / 1.5f;
                 Rect devMode = new Rect((inRect.width - width) / 2, inRect.y + 45f, width, inRect.height);
                 listingStandard.Begin(devMode);
-                listingStandard.Settings_Header("DevModeShips".Translate(), SPSettings.highlightColor, GameFont.Medium, TextAnchor.MiddleCenter);
+                listingStandard.Header("DevModeShips".Translate(), SPUI.highlightColor, GameFont.Medium, TextAnchor.MiddleCenter);
 
                 listingStandard.GapLine(16f);
                 listingStandard.CheckboxLabeled("DebugDraftAnyShip".Translate(), ref settings.debugDraftAnyShip, "DebugDraftAnyShipTooltip".Translate());
@@ -240,7 +241,7 @@ namespace Vehicles
 
                 listingStandard.GapLine(16f);
 
-                listingStandard.CheckboxLabeled("DebugSpawnVehiclesGodMode".Translate(), ref settings.debugSpawnBoatBuildingGodMode);
+                listingStandard.CheckboxLabeled("DebugSpawnVehiclesGodMode".Translate(), ref settings.debugSpawnVehicleBuildingGodMode);
                 listingStandard.CheckboxLabeled("MultithreadedMethods".Translate(), ref settings.debugUseMultithreading);
 
                 listingStandard.GapLine(16f);
@@ -249,6 +250,7 @@ namespace Vehicles
                 listingStandard.CheckboxLabeled("DebugDrawNodeGrid".Translate(), ref settings.debugDrawNodeGrid);
                 listingStandard.CheckboxLabeled("DebugDrawVehicleTracks".Translate(), ref settings.debugDrawVehicleTracks);
                 listingStandard.CheckboxLabeled("DebugWriteVehiclePathingCosts".Translate(), ref settings.debugDrawVehiclePathCosts);
+                listingStandard.CheckboxLabeled("DebugDrawBumpers".Translate(), ref settings.debugDrawBumpers);
 
                 listingStandard.GapLine(16f);
 
@@ -286,13 +288,14 @@ namespace Vehicles
             settings.debugDisableWaterPathing = false;
             settings.debugDisableSmoothPathing = true;
 
-            settings.debugSpawnBoatBuildingGodMode = false;
+            settings.debugSpawnVehicleBuildingGodMode = false;
             settings.debugUseMultithreading = true;
 
             settings.debugDrawCannonGrid = false;
             settings.debugDrawNodeGrid = false;
             settings.debugDrawVehicleTracks = false;
             settings.debugDrawVehiclePathCosts = false;
+            settings.debugDrawBumpers = false;
 
             settings.debugDrawRegions = false;
             settings.debugDrawRegionLinks = false;
@@ -313,9 +316,6 @@ namespace Vehicles
             Log.Error(page.ToString() + " Page has not been implemented yet. - Smash Phil");
             return page.ToString();
         }
-
-        enum SettingsPage { MainSettings, Boats, Stats, Research, Upgrades, DevMode}
-        enum StatName { }
 
 
         public string currentKey;

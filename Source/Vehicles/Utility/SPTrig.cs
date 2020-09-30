@@ -39,6 +39,25 @@ namespace Vehicles
         }
 
         /// <summary>
+        /// Rotates angle clockwise in [0:360] range. Used for clamping angle in this range
+        /// </summary>
+        /// <param name="angle"></param>
+        /// <param name="rotation"></param>
+        /// <returns></returns>
+        public static float RotateAngle(float angle, float rotation)
+        {
+            angle += rotation;
+            while (angle > 360 || angle < 0)
+            {
+                if (angle > 360)
+                    angle -= 360f;
+                else if (angle < 0)
+                    angle += 360f;
+            }
+            return angle;
+        }
+
+        /// <summary>
         /// Convert degrees (double) to radians
         /// </summary>
         /// <param name="deg"></param>

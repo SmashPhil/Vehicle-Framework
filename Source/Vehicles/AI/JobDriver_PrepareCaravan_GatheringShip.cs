@@ -17,15 +17,15 @@ namespace Vehicles.Jobs
         {
             get
             {
-                return this.job.GetTarget(TargetIndex.A).Thing;
+                return job.GetTarget(TargetIndex.A).Thing;
             }
         }
 
-        public Pawn Carrier
+        public VehiclePawn Carrier
         {
             get
             {
-                return (Pawn)this.job.GetTarget(TargetIndex.B).Thing;
+                return job.GetTarget(TargetIndex.B).Thing as VehiclePawn;
             }
         }
 
@@ -61,22 +61,22 @@ namespace Vehicles.Jobs
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
-            this.FailOn(() => !base.Map.lordManager.lords.Contains(this.job.lord));
+            this.FailOn(() => !Map.lordManager.lords.Contains(job.lord));
             Toil reserve = Toils_Reserve.Reserve(TargetIndex.A, 1, -1, null).FailOnDespawnedOrNull(TargetIndex.A);
             yield return reserve;
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
-            yield return this.DetermineNumToHaul();
+            yield return DetermineNumToHaul();
             yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, true, false);
-            yield return this.AddCarriedThingToTransferables();
+            yield return AddCarriedThingToTransferables();
             yield return Toils_Haul.CheckForGetOpportunityDuplicate(reserve, TargetIndex.A, TargetIndex.None, true, (Thing x) =>
-                this.Transferable.things.Contains(x));
-            Toil findCarrier = this.FindCarrier();
+                Transferable.things.Contains(x));
+            Toil findCarrier = FindCarrier();
             yield return findCarrier;
-            yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).JumpIf(() => !JobDriver_PrepareCaravan_GatheringShip.IsUsableCarrier(this.Carrier, this.pawn),
+            yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).JumpIf(() => !IsUsableCarrier(Carrier, pawn),
                 findCarrier);
-            yield return Toils_General.Wait(25, TargetIndex.None).JumpIf(() => !JobDriver_PrepareCaravan_GatheringShip.IsUsableCarrier(this.Carrier, this.pawn),
+            yield return Toils_General.Wait(25, TargetIndex.None).JumpIf(() => !IsUsableCarrier(Carrier, pawn),
                 findCarrier).WithProgressBarToilDelay(TargetIndex.B, false, -0.5f);
-            yield return this.PlaceTargetInCarrierInventory();
+            yield return PlaceTargetInCarrierInventory();
             yield break;
         }
 
@@ -86,18 +86,18 @@ namespace Vehicles.Jobs
             {
                 initAction = delegate ()
                 {
-                    int num = GatherItemsForShipCaravanUtility.CountLeftToTransfer(this.pawn, this.Transferable, this.job.lord);
-                    if (!(this.pawn.carryTracker.CarriedThing is null))
+                    int num = GatherItemsForShipCaravanUtility.CountLeftToTransfer(pawn, Transferable, job.lord);
+                    if (pawn.carryTracker.CarriedThing != null)
                     {
-                        num -= this.pawn.carryTracker.CarriedThing.stackCount;
+                        num -= pawn.carryTracker.CarriedThing.stackCount;
                     }
                     if (num <= 0)
                     {
-                        this.pawn.jobs.EndCurrentJob(JobCondition.Succeeded, true);
+                        pawn.jobs.EndCurrentJob(JobCondition.Succeeded, true);
                     }
                     else
                     {
-                        this.job.count = num;
+                        job.count = num;
                     }
                 },
                 defaultCompleteMode = ToilCompleteMode.Instant,
@@ -111,10 +111,10 @@ namespace Vehicles.Jobs
             {
                 initAction = delegate ()
                 {
-                    TransferableOneWay transferable = this.Transferable;
-                    if (!transferable.things.Contains(this.pawn.carryTracker.CarriedThing))
+                    TransferableOneWay transferable = Transferable;
+                    if (!transferable.things.Contains(pawn.carryTracker.CarriedThing))
                     {
-                        transferable.things.Add(this.pawn.carryTracker.CarriedThing);
+                        transferable.things.Add(pawn.carryTracker.CarriedThing);
                     }
                 },
                 defaultCompleteMode = ToilCompleteMode.Instant,
@@ -128,10 +128,10 @@ namespace Vehicles.Jobs
             {
                 initAction = delegate ()
                 {
-                    Pawn pawn = this.FindBestCarrierShips();
+                    Pawn pawn = FindBestCarrierShips();
                     if (pawn is null)
                     {
-                        bool flag = this.pawn.GetLord() == this.job.lord;
+                        bool flag = this.pawn.GetLord() == job.lord;
                         if (flag && !MassUtility.IsOverEncumbered(this.pawn))
                         {
                             pawn = this.pawn;
@@ -146,8 +146,8 @@ namespace Vehicles.Jobs
                                 }
                                 else
                                 {
-                                    IEnumerable<Pawn> source = from x in this.job.lord.ownedPawns
-                                                               where JobDriver_PrepareCaravan_GatheringShip.IsUsableCarrier(x, this.pawn)
+                                    IEnumerable<Pawn> source = from x in job.lord.ownedPawns
+                                                               where x is VehiclePawn v && IsUsableCarrier(v, this.pawn)
                                                                select x;
                                     if(!source.Any<Pawn>())
                                     {
@@ -159,7 +159,7 @@ namespace Vehicles.Jobs
                             }
                         }
                     }
-                    this.job.SetTarget(TargetIndex.B, pawn);
+                    job.SetTarget(TargetIndex.B, pawn);
                 }
             };
         }
@@ -170,20 +170,20 @@ namespace Vehicles.Jobs
             {
                 initAction = delegate ()
                 {
-                    Pawn_CarryTracker carryTracker = this.pawn.carryTracker;
+                    Pawn_CarryTracker carryTracker = pawn.carryTracker;
                     Thing carriedThing = carryTracker.CarriedThing;
-                    this.Transferable.AdjustTo(Mathf.Max(this.Transferable.CountToTransfer - carriedThing.stackCount, 0));
-                    carryTracker.innerContainer.TryTransferToContainer(carriedThing, this.Carrier.inventory.innerContainer,
+                    Transferable.AdjustTo(Mathf.Max(Transferable.CountToTransfer - carriedThing.stackCount, 0));
+                    carryTracker.innerContainer.TryTransferToContainer(carriedThing, Carrier.inventory.innerContainer,
                         carriedThing.stackCount, true);
                 }
             };
         }
 
-        public static bool IsUsableCarrier(Pawn ship, Pawn forPawn)
+        public static bool IsUsableCarrier(VehiclePawn vehicle, Pawn forPawn)
         {
-            return ship.IsFormingCaravan() && (!ship.DestroyedOrNull() && ship.Spawned) && ship.Faction == forPawn.Faction 
-                && !ship.IsBurning() && ship.GetComp<CompVehicle>().movementStatus != VehicleMovementStatus.Offline
-                && !MassUtility.IsOverEncumbered(ship);
+            return vehicle.IsFormingCaravan() && (!vehicle.DestroyedOrNull() && vehicle.Spawned) && vehicle.Faction == forPawn.Faction 
+                && !vehicle.IsBurning() && vehicle.GetCachedComp<CompVehicle>().movementStatus != VehicleMovementStatus.Offline
+                && !MassUtility.IsOverEncumbered(vehicle);
         }
 
         private float GetCarrierScore(Pawn pawn)
@@ -191,23 +191,23 @@ namespace Vehicles.Jobs
             return (1f - MassUtility.EncumbrancePercent(pawn)) - (pawn.Position - this.pawn.Position).LengthHorizontal / 10f * 0.2f;
         }
 
-        private Pawn FindBestCarrierShips()
+        private VehiclePawn FindBestCarrierShips()
         {
-            Lord lord = this.job.lord;
-            Pawn pawn = null;
+            Lord lord = job.lord;
+            VehiclePawn pawn = null;
             float num = 0f;
             if(!(lord is null))
             {
                 foreach(Pawn p in lord.ownedPawns)
                 {
-                    if(p != this.pawn && !(p.GetComp<CompVehicle>() is null) )
+                    if(p != this.pawn && p is VehiclePawn vehicle)
                     {
-                        if(JobDriver_PrepareCaravan_GatheringShip.IsUsableCarrier(p,this.pawn))
+                        if(IsUsableCarrier(vehicle, this.pawn))
                         {
-                            float carrierScore = this.GetCarrierScore(p);
+                            float carrierScore = GetCarrierScore(vehicle);
                             if(pawn is null || carrierScore > num)
                             {
-                                pawn = p;
+                                pawn = vehicle;
                                 num = carrierScore;
                             }
                         }

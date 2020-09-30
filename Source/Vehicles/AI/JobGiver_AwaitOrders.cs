@@ -16,7 +16,7 @@ namespace Vehicles.Jobs
         {
             if((pawn as VehiclePawn).vPather.Moving)
                 return null;
-            return new Job(JobDefOf_Vehicles.IdleShip, pawn);
+            return new Job(JobDefOf_Vehicles.IdleVehicle, pawn);
         }
 
         public int ticks = 250;

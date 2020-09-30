@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
+using RimWorld;
 using Verse;
 
 namespace Vehicles
@@ -23,6 +24,10 @@ namespace Vehicles
             IEnumerable<Type> interfaceImplementations = GenTypes.AllTypes.Where(t => t.GetInterfaces().Contains(typeof(IConditionalPatch)));
             foreach(ModMetaData mod in mods)
             {
+                if(mod.PackageId.EqualsIgnoreCase("smashphil.vehicles"))
+                {
+                    VehicleMMD = mod;
+                }
                 foreach(Type type in interfaceImplementations)
                 {
                     IConditionalPatch patch = (IConditionalPatch)Activator.CreateInstance(type, null);
@@ -38,7 +43,7 @@ namespace Vehicles
                         
                         patch.PatchAll(newMod, harmony);
 
-                        Log.Message($"[Vehicles] Successfully applied compatibility patches to: {mod.Name}");
+                        Log.Message($"{VehicleHarmony.LogLabel} Successfully applied compatibility patches to: {mod.Name}");
                         patchableModActivators.Add(mod.PackageId, newMod);
                     }
                 }
@@ -46,5 +51,9 @@ namespace Vehicles
         }
 
         public static Dictionary<string, ModPatchable> patchableModActivators = new Dictionary<string, ModPatchable>();
+
+        internal static ModMetaData VehicleMMD;
+
+        internal const string ExtraTexturesFolder = "Color";
     }
 }

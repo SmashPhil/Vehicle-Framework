@@ -14,18 +14,9 @@ namespace Vehicles.Jobs
     public class WorkGiver_PackBoat : WorkGiver_Scanner
     {
 
-        public override PathEndMode PathEndMode
-		{
-			get
-			{
-				return PathEndMode.Touch;
-			}
-		}
+        public override PathEndMode PathEndMode => PathEndMode.Touch;
 
-        public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
-		{
-            return pawn.Map.spawnedThings;
-		}
+        public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn) => pawn.Map.GetCachedMapComponent<VehicleReservationManager>().VehicleListers(VehicleRequest.Packing);
 
 
         public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
@@ -35,7 +26,7 @@ namespace Vehicles.Jobs
                 Thing thing = FindThingToPack(availableBoat, pawn);
                 if (thing != null)
                 {
-                    Job job = JobMaker.MakeJob(JobDefOf_Vehicles.CarryItemToShip, thing, t);
+                    Job job = JobMaker.MakeJob(JobDefOf_Vehicles.CarryItemToVehicle, thing, t);
                     job.count = thing.stackCount;
                     return job;
                 }
@@ -46,7 +37,7 @@ namespace Vehicles.Jobs
 
         public static Thing FindThingToPack(VehiclePawn boat, Pawn p)
 		{
-            List<TransferableOneWay> transferables = boat.GetComp<CompVehicle>().cargoToLoad;
+            List<TransferableOneWay> transferables = boat.GetCachedComp<CompVehicle>().cargoToLoad;
 			for (int i = 0; i < transferables.Count; i++)
 			{
 				TransferableOneWay transferableOneWay = transferables[i];

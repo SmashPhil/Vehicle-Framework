@@ -65,7 +65,7 @@ namespace Vehicles
 			movementDifficulty[vehicleDef][tile] = CalculatedMovementDifficultyAt(tile, vehicleDef, ticksAbs, null);
 			if (flag != PassableFast(tile, vehicleDef))
 			{
-				Find.World.GetComponent<WorldVehicleReachability>().ClearCache();
+				Find.World.GetCachedWorldComponent<WorldVehicleReachability>().ClearCache();
 			}
 		}
 

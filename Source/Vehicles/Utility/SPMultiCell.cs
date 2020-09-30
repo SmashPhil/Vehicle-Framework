@@ -26,6 +26,26 @@ namespace Vehicles
         }
 
         /// <summary>
+        /// Clamp value between a min and max but wrap around rather than return min / max
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="val"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
+        public static float ClampAndWrap(this float val, float min, float max)
+        {
+            while (val < min || val > max)
+            {
+                if (val < min)
+                    val += min;
+                if (val > max)
+                    val -= max;
+            }
+            return val;
+        }
+
+        /// <summary>
         /// Clamp a Pawn's exit point to their hitbox size. Avoids derendering issues for multicell-pawns
         /// </summary>
         /// <param name="pawn"></param>
@@ -186,6 +206,40 @@ namespace Vehicles
                     throw new NotImplementedException("MoreThan4Rotations");
             }
             return CellRect.CenteredOn(centerPoint, sizeX, sizeZ).Cells.ToList();
+        }
+
+        /// <summary>
+        /// OccupiedRect shifted from pawns position
+        /// </summary>
+        /// <param name="pawn"></param>
+        /// <param name="shift"></param>
+        /// <returns></returns>
+        public static CellRect OccupiedRectShifted(this Pawn pawn, IntVec2 shift)
+        {
+            IntVec3 center = pawn.Position;
+            switch (pawn.Rotation.AsInt)
+            {
+                case 0:
+                    break;
+                case 1:
+                    int x = shift.x;
+                    shift.x = shift.z;
+                    shift.z = x;
+                    break;
+                case 2:
+                    shift.z *= -1;
+                    break;
+                case 3:
+                    int x2 = shift.x;
+                    shift.x = -shift.z;
+                    shift.z = x2;
+                    break;
+            }
+            center.x += shift.x;
+            center.z += shift.z;
+            IntVec2 size = pawn.def.size;
+            GenAdj.AdjustForRotation(ref center, ref size, pawn.Rotation);
+            return new CellRect(center.x - (size.x - 1) / 2, center.z - (size.z - 1) / 2, size.x, size.z);
         }
 
         /// <summary>

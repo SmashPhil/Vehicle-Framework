@@ -11,12 +11,12 @@
 		<backstoryCategories>
 			<li>Industrial</li>
 		</backstoryCategories>
-		<combatPower>3000</combatPower>
+		<combatPower>1200</combatPower>
 		<lifeStages>
 			<li>
 				<bodyGraphicData>
 					<texPath>Vehicles/Tank/Tank</texPath>
-					<graphicClass>Vehicles.Graphic_OmniDirectional</graphicClass>
+					<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
 					<drawSize>(4,7)</drawSize>
 					<shaderType>CutoutComplex</shaderType>
 					<color>(0, 80, 30)</color>
@@ -77,6 +77,8 @@
 		<label>Tank</label>
 		<description>A heavy warship to rule the seas.</description>
 		
+		<fillPercent>1</fillPercent>
+		
 		<statBases>
 			<MoveSpeed>2</MoveSpeed>
 			<Mass>25000</Mass>
@@ -102,8 +104,7 @@
 		</tools>
 
 		<race>
-			<thinkTreeMain>VehicleThinkTree_Simple</thinkTreeMain>
-			<thinkTreeConstant>VehicleThinkTree_SimpleConstant</thinkTreeConstant>
+			<thinkTreeMain>Vehicle</thinkTreeMain>
 			<intelligence>ToolUser</intelligence>
 			<fleshType>MetalVehicle</fleshType>
 			<needsRest>false</needsRest>
@@ -170,8 +171,8 @@
 				<vehicleTech>Industrial</vehicleTech>
 				<vehicleType>Land</vehicleType>
 				
-				<displayUICoord>(0,0)</displayUICoord>
-				<displayUISize>(323.75, 500)</displayUISize>
+				<displayUISize>(259, 400)</displayUISize>
+				<displayUICoord>(0, 40)</displayUICoord>
 				
 				<nameable>true</nameable>
 				<buildDef>SPVehicles_Tank_Blueprint</buildDef>
@@ -262,7 +263,7 @@
 				<cannons>
 					<li>
 						<cannonDef>tankMainTurret</cannonDef>
-						<cannonRenderLocation>(0,0)</cannonRenderLocation>
+						<cannonRenderLocation>(0, 0)</cannonRenderLocation>
 						<cannonRenderOffset>(0, 0)</cannonRenderOffset>
 
 						<gizmoLabel>Main Turret</gizmoLabel>
@@ -278,7 +279,6 @@
 			</li>
 			<li Class="Vehicles.CompProperties_UpgradeTree">
 				<displayUICoord>(587,50)</displayUICoord>
-				<displayUISize>(259,400)</displayUISize>
 				
 				<upgradesAvailable>
 					<li Class="Vehicles.StatUpgrade">

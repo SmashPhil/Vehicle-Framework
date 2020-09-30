@@ -11,7 +11,7 @@ using Verse.Sound;
 
 namespace Vehicles
 {
-    public class CompCannons : ThingComp
+    public class CompCannons : VehicleComp
     {
         private float range;
         private List<SPTuple<Stack<int>, CannonHandler, int>> broadsideFire = new List<SPTuple<Stack<int>, CannonHandler, int>>();
@@ -27,6 +27,7 @@ namespace Vehicles
         public bool WeaponStatusOnline => !Pawn.Downed && !Pawn.Dead && Pawn.Drafted;
 
         public float MinRange => Cannons.Max(x => x.cannonDef.minRange);
+
         public float MaxRangeGrouped
         {
             get
@@ -160,7 +161,7 @@ namespace Vehicles
                                 {
                                     SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
                                     List<int> cannonOrder = Enumerable.Range(0, cannon.cannonDef.numberCannons).ToList();
-                                    if(VehicleMod.mod.settings.shuffledCannonFire)
+                                    if(VehicleMod.settings.shuffledCannonFire)
                                         cannonOrder.Shuffle();
                                     foreach (int i in cannonOrder)
                                     {
@@ -170,7 +171,7 @@ namespace Vehicles
                                 };
                                 foreach (VehicleHandler relatedHandler in Pawn.GetCachedComp<CompVehicle>().GetAllHandlersMatch(HandlingTypeFlags.Cannon, cannon.key))
                                 {
-                                    if(!VehicleMod.mod.settings.debugDraftAnyShip && relatedHandler?.handlers.Count < relatedHandler?.role.slotsToOperate)
+                                    if(!VehicleMod.settings.debugDraftAnyShip && relatedHandler?.handlers.Count < relatedHandler?.role.slotsToOperate)
                                     {
                                         portSideCannons.Disable("NotEnoughCannonCrew".Translate(Pawn.LabelShort, relatedHandler.role.label));
                                     }
@@ -193,7 +194,7 @@ namespace Vehicles
                                 {
                                     SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
                                     List<int> cannonOrder = Enumerable.Range(0, cannon.cannonDef.numberCannons).ToList();
-                                    if (VehicleMod.mod.settings.shuffledCannonFire)
+                                    if (VehicleMod.settings.shuffledCannonFire)
                                         cannonOrder.Shuffle();
                                     foreach (int i in cannonOrder)
                                     {
@@ -203,7 +204,7 @@ namespace Vehicles
                                 };
                                 foreach (VehicleHandler relatedHandler in Pawn.GetCachedComp<CompVehicle>().GetAllHandlersMatch(HandlingTypeFlags.Cannon, cannon.key))
                                 {
-                                    if(!VehicleMod.mod.settings.debugDraftAnyShip && relatedHandler?.handlers.Count < relatedHandler?.role.slotsToOperate)
+                                    if(!VehicleMod.settings.debugDraftAnyShip && relatedHandler?.handlers.Count < relatedHandler?.role.slotsToOperate)
                                     {
                                         starboardSideCannons.Disable("NotEnoughCannonCrew".Translate(Pawn.LabelShort, relatedHandler.role.label));
                                     }
@@ -226,7 +227,7 @@ namespace Vehicles
                                 {
                                     SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
                                     List<int> cannonOrder = Enumerable.Range(0, cannon.cannonDef.numberCannons).ToList();
-                                    if (VehicleMod.mod.settings.shuffledCannonFire)
+                                    if (VehicleMod.settings.shuffledCannonFire)
                                         cannonOrder.Shuffle();
                                     foreach (int i in cannonOrder)
                                     {
@@ -236,7 +237,7 @@ namespace Vehicles
                                 };
                                 foreach (VehicleHandler relatedHandler in Pawn.GetCachedComp<CompVehicle>().GetAllHandlersMatch(HandlingTypeFlags.Cannon, cannon.key))
                                 {
-                                    if(!VehicleMod.mod.settings.debugDraftAnyShip && relatedHandler?.handlers.Count < relatedHandler?.role.slotsToOperate)
+                                    if(!VehicleMod.settings.debugDraftAnyShip && relatedHandler?.handlers.Count < relatedHandler?.role.slotsToOperate)
                                     {
                                         bowSideCannons.Disable("NotEnoughCannonCrew".Translate(Pawn.LabelShort, relatedHandler.role.label));
                                     }
@@ -259,7 +260,7 @@ namespace Vehicles
                                 {
                                     SPTuple<Stack<int>, CannonHandler, int> tmpCannonItem = new SPTuple<Stack<int>, CannonHandler, int>(new Stack<int>(), cannon, 0);
                                     List<int> cannonOrder = Enumerable.Range(0, cannon.cannonDef.numberCannons).ToList();
-                                    if (VehicleMod.mod.settings.shuffledCannonFire)
+                                    if (VehicleMod.settings.shuffledCannonFire)
                                         cannonOrder.Shuffle();
                                     foreach (int i in cannonOrder)
                                     {
@@ -269,7 +270,7 @@ namespace Vehicles
                                 };
                                 foreach (VehicleHandler relatedHandler in Pawn.GetCachedComp<CompVehicle>().GetAllHandlersMatch(HandlingTypeFlags.Cannon, cannon.key))
                                 {
-                                    if(!VehicleMod.mod.settings.debugDraftAnyShip && relatedHandler?.handlers.Count < relatedHandler?.role.slotsToOperate)
+                                    if(!VehicleMod.settings.debugDraftAnyShip && relatedHandler?.handlers.Count < relatedHandler?.role.slotsToOperate)
                                     {
                                         sternSideCannons.Disable("NotEnoughCannonCrew".Translate(Pawn.LabelShort, relatedHandler.role.label));
                                     }
@@ -399,7 +400,20 @@ namespace Vehicles
                     mote.SetVelocity(cannon.TurretRotation, cannon.cannonDef.moteSpeedThrown);
                     HelperMethods.ThrowMoteEnhanced(launchCell, Pawn.Map, mote);
                 }
+                if (projectile2.GetType().SameOrSubclass(typeof(Projectile_CustomFlags)))
+                {
+                    var projCustom = projectile2 as Projectile_CustomFlags;
+                    if (cannon.cannonDef.attachProjectileFlag is null)
+                    {
+                        projCustom.hitFlag = CustomHitFlagsDefOf.Vanilla;
+                    }
+                    else
+                    {
+                        projCustom.hitFlag = cannon.cannonDef.attachProjectileFlag;
+                    }
+                }
                 projectile2.Launch(Pawn, launchCell, c, cannon.cannonTarget, cannon.cannonDef.hitFlags, parent);
+                Pawn.vDrawer.rTracker.Notify_CannonRecoil(cannon, SPTrig.RotateAngle(cannon.TurretRotation, 180));
                 if(cannon.cannonDef.graphicData.graphicClass == typeof(Graphic_Animate))
                 {
                     cannon.StartAnimation(2, 1, AnimationWrapperType.Reset);
@@ -773,9 +787,25 @@ namespace Vehicles
         {
             base.CompTick();
             ResolveCannons();
-            foreach(CannonHandler cannon in Cannons)
+            foreach (CannonHandler cannon in Cannons)
             {
                 cannon.DoTick();
+            }
+        }
+
+        public override void AITick()
+        {
+            base.AITick();
+        }
+
+        public override void AIAutoCheck()
+        {
+            foreach(CannonHandler cannon in Cannons)
+            {
+                if (cannon.shellCount < Mathf.CeilToInt(cannon.cannonDef.magazineCapacity / 4f) && (!cannon.TargetLocked || cannon.shellCount <= 0))
+                {
+                    cannon.AutoReloadCannon();
+                }
             }
         }
 
@@ -799,6 +829,7 @@ namespace Vehicles
                     }
                 }
                 cannon.pawn = Pawn;
+                cannon.AutoReloadCannon();
             }
 
             broadsideFire = new List<SPTuple<Stack<int>, CannonHandler, int>>();

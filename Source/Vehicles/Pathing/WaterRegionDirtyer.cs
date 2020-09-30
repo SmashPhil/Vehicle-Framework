@@ -40,7 +40,7 @@ namespace Vehicles
 				IntVec3 c2 = c + GenAdj.AdjacentCellsAndInside[i];
 				if (c2.InBounds(map))
 				{
-					WaterRegion regionAt_NoRebuild_InvalidAllowed = map.GetComponent<WaterMap>().getWaterRegionGrid.GetRegionAt_NoRebuild_InvalidAllowed(c2);
+					WaterRegion regionAt_NoRebuild_InvalidAllowed = map.GetCachedMapComponent<WaterMap>().WaterRegionGrid.GetRegionAt_NoRebuild_InvalidAllowed(c2);
 					if (regionAt_NoRebuild_InvalidAllowed != null && regionAt_NoRebuild_InvalidAllowed.valid)
 					{
 						regionsToDirty.Add(regionAt_NoRebuild_InvalidAllowed);
@@ -63,7 +63,7 @@ namespace Vehicles
 			regionsToDirty.Clear();
 			foreach (IntVec3 c in b.OccupiedRect().ExpandedBy(1).ClipInsideMap(b.Map))
 			{
-				WaterRegion validRegionAt_NoRebuild = b.Map.GetComponent<WaterMap>().getWaterRegionGrid.GetValidRegionAt_NoRebuild(c);
+				WaterRegion validRegionAt_NoRebuild = b.Map.GetCachedMapComponent<WaterMap>().WaterRegionGrid.GetValidRegionAt_NoRebuild(c);
 				if (validRegionAt_NoRebuild != null)
 				{
 					regionsToDirty.Add(validRegionAt_NoRebuild);
@@ -79,7 +79,7 @@ namespace Vehicles
 		internal void Notify_ThingAffectingRegionsDespawned(Thing b)
 		{
 			regionsToDirty.Clear();
-			WaterRegion validRegionAt_NoRebuild = map.GetComponent<WaterMap>().getWaterRegionGrid.GetValidRegionAt_NoRebuild(b.Position);
+			WaterRegion validRegionAt_NoRebuild = map.GetCachedMapComponent<WaterMap>().WaterRegionGrid.GetValidRegionAt_NoRebuild(b.Position);
 			if (validRegionAt_NoRebuild != null)
 			{
 				regionsToDirty.Add(validRegionAt_NoRebuild);
@@ -88,7 +88,7 @@ namespace Vehicles
 			{
 				if (c.InBounds(map))
 				{
-					WaterRegion validRegionAt_NoRebuild2 = map.GetComponent<WaterMap>().getWaterRegionGrid.GetValidRegionAt_NoRebuild(c);
+					WaterRegion validRegionAt_NoRebuild2 = map.GetCachedMapComponent<WaterMap>().WaterRegionGrid.GetValidRegionAt_NoRebuild(c);
 					if (validRegionAt_NoRebuild2 != null)
 					{
 						regionsToDirty.Add(validRegionAt_NoRebuild2);
@@ -158,7 +158,7 @@ namespace Vehicles
 			{
 				dirtyCells.Add(item);
 			}
-			foreach (WaterRegion reg in map.GetComponent<WaterMap>().getWaterRegionGrid.AllRegions_NoRebuild_InvalidAllowed)
+			foreach (WaterRegion reg in map.GetCachedMapComponent<WaterMap>().WaterRegionGrid.AllRegions_NoRebuild_InvalidAllowed)
 			{
 				SetRegionDirty(reg, false);
 			}

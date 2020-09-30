@@ -27,13 +27,13 @@ namespace Vehicles
                 Log.Error("Can't start forming caravan with 0 pawns.", false);
                 return;
             }
-            if(!pawns.AnyNullified(x => HelperMethods.IsVehicle(x)))
+            if(!pawns.AnyNullified(x => x is VehiclePawn))
             {
                 Log.Error("Can't start forming vehicle caravan without any vehicles");
                 return;
             }
 
-            if (pawns.AnyNullified(x => HelperMethods.IsBoat(x) && (x.GetComp<CompVehicle>().movementStatus is VehicleMovementStatus.Online)))
+            if (pawns.AnyNullified(x => x is VehiclePawn vehicle && HelperMethods.IsBoat(vehicle) && (vehicle.GetCachedComp<CompVehicle>().movementStatus is VehicleMovementStatus.Online)))
             {
 
                 List<TransferableOneWay> list = transferables;
@@ -48,24 +48,24 @@ namespace Vehicles
                     }
                 }
                 List<VehiclePawn> vehicles = pawns.Where(x => HelperMethods.IsBoat(x)).Cast<VehiclePawn>().ToList();
-                List<Pawn> capablePawns = pawns.Where(x => !HelperMethods.IsVehicle(x) && x.IsColonist && !x.Downed && !x.Dead).ToList();
-                List<Pawn> prisoners = pawns.Where(x => !HelperMethods.IsVehicle(x) && !x.IsColonist && !x.RaceProps.Animal).ToList();
+                List<Pawn> capablePawns = pawns.Where(x => !(x is VehiclePawn) && x.IsColonist && !x.Downed && !x.Dead).ToList();
+                List<Pawn> prisoners = pawns.Where(x => !(x is VehiclePawn) && !x.IsColonist && !x.RaceProps.Animal).ToList();
                 int seats = 0;
-                foreach (Pawn vehicle in vehicles)
+                foreach (VehiclePawn vehicle in vehicles)
                 {
-                    seats += vehicle.GetComp<CompVehicle>().SeatsAvailable;
+                    seats += vehicle.GetCachedComp<CompVehicle>().SeatsAvailable;
                 }
                 if ((pawns.Where(x => !HelperMethods.IsBoat(x)).ToList().Count + downedPawns.Count) > seats)
                 {
                     Log.Error("Can't start forming caravan with vehicles(s) selected and not enough seats to house all pawns. Seats: " + seats + " Pawns boarding: " +
-                        (pawns.Where(x => !HelperMethods.IsVehicle(x)).ToList().Count + downedPawns.Count), false);
+                        (pawns.Where(x => !(x is VehiclePawn)).ToList().Count + downedPawns.Count), false);
                     return;
                 }
 
                 LordJob_FormAndSendVehicles lordJob = new LordJob_FormAndSendVehicles(list, vehicles, capablePawns, downedPawns, prisoners, meetingPoint, exitSpot, startingTile,
                     destinationTile, HelperMethods.assignedSeats, true);
                 LordMaker.MakeNewLord(Faction.OfPlayer, lordJob, pawns[0].MapHeld, pawns);
-                vehicles.ForEach(v => v.GetComp<CompVehicle>().DisembarkAll());
+                vehicles.ForEach(v => v.GetCachedComp<CompVehicle>().DisembarkAll());
 
                 foreach (Pawn p in pawns)
                 {
@@ -75,7 +75,7 @@ namespace Vehicles
                     }
                 }
             }
-            else if(pawns.AnyNullified(x => HelperMethods.IsVehicle(x) && x.GetComp<CompVehicle>().movementStatus is VehicleMovementStatus.Online))
+            else if(pawns.AnyNullified(x => x is VehiclePawn vehicle && vehicle.GetCachedComp<CompVehicle>().movementStatus is VehicleMovementStatus.Online))
             {
                 List<TransferableOneWay> list = transferables;
                 list.RemoveAll((TransferableOneWay x) => x.CountToTransfer <= 0 || !x.HasAnyThing || x.AnyThing is Pawn);
@@ -89,13 +89,13 @@ namespace Vehicles
                     }
                 }
 
-                List<VehiclePawn> vehicles = pawns.Where(x => HelperMethods.IsVehicle(x)).Cast<VehiclePawn>().ToList();
-                List<Pawn> capablePawns = pawns.Where(x => !HelperMethods.IsVehicle(x) && x.IsColonist && !x.Downed && !x.Dead).ToList();
-                List<Pawn> prisoners = pawns.Where(x => !HelperMethods.IsVehicle(x) && !x.IsColonist && !x.RaceProps.Animal).ToList();
+                List<VehiclePawn> vehicles = pawns.Where(x => x is VehiclePawn).Cast<VehiclePawn>().ToList();
+                List<Pawn> capablePawns = pawns.Where(x => !(x is VehiclePawn) && x.IsColonist && !x.Downed && !x.Dead).ToList();
+                List<Pawn> prisoners = pawns.Where(x => !(x is VehiclePawn) && !x.IsColonist && !x.RaceProps.Animal).ToList();
 
                 LordJob_FormAndSendVehicles lordJob = new LordJob_FormAndSendVehicles(list, vehicles, capablePawns, downedPawns, prisoners, meetingPoint, exitSpot, startingTile, destinationTile, HelperMethods.assignedSeats);
                 LordMaker.MakeNewLord(Faction.OfPlayer, lordJob, pawns[0].MapHeld, pawns);
-                vehicles.ForEach(v => v.GetComp<CompVehicle>().DisembarkAll());
+                vehicles.ForEach(v => v.GetCachedComp<CompVehicle>().DisembarkAll());
 
                 foreach (Pawn p in pawns)
                 {
@@ -113,12 +113,12 @@ namespace Vehicles
             bool flag2 = false;
             string text = "";
             string textShip = "";
-            List<Pawn> vehicles = lord.ownedPawns.FindAll(x => HelperMethods.IsVehicle(x));
-            foreach (Pawn ship in vehicles)
+            List<VehiclePawn> vehicles = lord.ownedPawns.FindAll(x => x is VehiclePawn).Cast<VehiclePawn>().ToList();
+            foreach (VehiclePawn vehicle in vehicles)
             {
-                if (ship.GetComp<CompVehicle>().AllPawnsAboard.Contains(pawn))
+                if (vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.Contains(pawn))
                 {
-                    textShip = "MessagePawnBoardedFormingCaravan".Translate(pawn, ship.LabelShort).CapitalizeFirst();
+                    textShip = "MessagePawnBoardedFormingCaravan".Translate(pawn, vehicle.LabelShort).CapitalizeFirst();
                     flag2 = true;
                     break;
                 }

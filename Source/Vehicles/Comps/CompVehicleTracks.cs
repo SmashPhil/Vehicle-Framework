@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Vehicles
 {
-    public class CompVehicleTracks : ThingComp
+    public class CompVehicleTracks : VehicleComp
     {
         public CompProperties_VehicleTracks Props => (CompProperties_VehicleTracks)props;
         public VehiclePawn ParentVehicle => (VehiclePawn)parent;
@@ -16,7 +16,7 @@ namespace Vehicles
         {
             base.CompTick();
 
-            if (ParentVehicle.vPather.MovingNow && !Props.tracks.NullOrEmpty())
+            if (ParentVehicle.Spawned && ParentVehicle.vPather.MovingNow && !Props.tracks.NullOrEmpty())
             {
                 if(ParentVehicle.Position != previousCell)
                 {
@@ -64,6 +64,14 @@ namespace Vehicles
                                 }
                             }
                         }
+                        //foreach (IntVec3 cell in CellRect.FromLimits(first, second).ExpandedBy(1).Cells)
+                        //{
+                        //    IEnumerable<Pawn> pawns = ParentVehicle.Map.thingGrid.ThingsListAt(cell).Where(t => t is Pawn).Cast<Pawn>();
+                        //    foreach (Pawn pawn in pawns)
+                        //    {
+                        //        GenExplosion.NotifyNearbyPawnsOfDangerousExplosive(ParentVehicle, DamageDefOf.Crush);
+                        //    }
+                        //}
                     }
                 }
             }
@@ -71,7 +79,7 @@ namespace Vehicles
 
         internal void DebugVehicleTracksDrawer(IntVec3 c1, IntVec3 c2)
         {
-            if(VehicleMod.mod.settings.debugDrawVehicleTracks)
+            if(VehicleMod.settings.debugDrawVehicleTracks)
             {
                 foreach(VehicleTrack track in Props.tracks)
                 {

@@ -24,14 +24,14 @@ namespace Vehicles.AI
             }
             if(peMode == PathEndMode.ClosestTouch)
             {
-                peMode = GenPathShip.ResolveClosestTouchPathMode(pawn, pawn.Map.GetComponent<WaterMap>(), dest.Cell);
+                peMode = ResolveClosestTouchPathMode(pawn, pawn.Map.GetCachedMapComponent<WaterMap>(), dest.Cell);
             }
             return dest;
         }
 
         public static PathEndMode ResolveClosestTouchPathMode(Pawn pawn, WaterMap mapE, IntVec3 target)
         {
-            if(GenPathShip.ShouldNotEnterCell(pawn, mapE, target))
+            if(ShouldNotEnterCell(pawn, mapE, target))
             {
                 return PathEndMode.Touch;
             }
@@ -40,7 +40,7 @@ namespace Vehicles.AI
 
         private static bool ShouldNotEnterCell(Pawn pawn, WaterMap mapE, IntVec3 dest)
         {
-            if(mapE.getShipPathGrid.PerceivedPathCostAt(dest) > 30)
+            if(mapE.ShipPathGrid.PerceivedPathCostAt(dest) > 30)
             {
                 return true;
             }
@@ -48,7 +48,7 @@ namespace Vehicles.AI
             {
                 return true;
             }
-            if(!(pawn is null) && !(pawn.GetComp<CompVehicle>() is null))
+            if(pawn is VehiclePawn)
             {
                 if(dest.IsForbidden(pawn))
                 {

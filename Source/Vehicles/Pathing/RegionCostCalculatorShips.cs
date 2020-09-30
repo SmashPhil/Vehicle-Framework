@@ -16,7 +16,7 @@ namespace Vehicles.AI
 
         public void Init(CellRect destination, HashSet<WaterRegion> destRegions, TraverseParms parms, int moveTicksCardinal, int moveTicksDiagonal, ByteGrid avoidGrid, Area allowedArea, bool drafted)
         {
-            this.regionGrid = this.mapE.getWaterRegionGrid.DirectGrid;
+            this.regionGrid = this.mapE.WaterRegionGrid.DirectGrid;
             this.traverseParms = parms;
             this.destinationCell = destination.CenterCell;
             this.moveTicksCardinal = moveTicksCardinal;
@@ -179,7 +179,7 @@ namespace Vehicles.AI
 
         private int GetCellCostFast(int index, bool ignoreAllowedAreaCost = false)
         {
-            int num = mapE.getShipPathGrid.pathGrid[index];
+            int num = mapE.ShipPathGrid.pathGrid[index];
             num += !(this.avoidGrid is null) ? (int)(this.avoidGrid[index] * 8) : 0;
             num += (!(this.allowedArea is null) && !ignoreAllowedAreaCost && !this.allowedArea[index]) ? 600 : 0;
             num += this.drafted ? this.map.terrainGrid.topGrid[index].extraDraftedPerceivedPathCost : this.map.terrainGrid.topGrid[index].extraNonDraftedPerceivedPathCost;
@@ -314,7 +314,7 @@ namespace Vehicles.AI
         private List<int> PathableNeighborIndices(int index)
         {
             RegionCostCalculatorShips.tmpPathableNeighborIndices.Clear();
-            ShipPathGrid pathGrid = mapE.getShipPathGrid;
+            ShipPathGrid pathGrid = mapE.ShipPathGrid;
             int x = this.map.Size.x;
             bool flag = index % x > 0;
             bool flag2 = index % x < x - 1;

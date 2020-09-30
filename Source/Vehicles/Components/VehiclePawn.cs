@@ -9,6 +9,8 @@ using UnityEngine;
 using Verse;
 using Verse.AI.Group;
 using Vehicles.AI;
+using HarmonyLib;
+using Vehicles.Components;
 
 namespace Vehicles
 {
@@ -18,10 +20,17 @@ namespace Vehicles
         private Vector3 smoothPos;
 
         public Vehicle_PathFollower vPather;
-        private Vehicle_DrawTracker vDrawer;
+        public Vehicle_DrawTracker vDrawer;
+        public VehicleAI vehicleAI;
+
+        private Color color1 = Color.white;
+        private Color color2 = Color.white;
+
+        public string selectedMask = "Default";
 
         private float angle = 0f; /* -45 is left, 45 is right : relative to Rot4 direction*/
-        private HashSet<ThingComp> cachedComps = new HashSet<ThingComp>();
+
+        private Dictionary<Type, ThingComp> cachedComps = new Dictionary<Type, ThingComp>();
 
         public Vector3 SmoothPos
         {
@@ -35,13 +44,21 @@ namespace Vehicles
             }
         }
 
+        public IEnumerable<IntVec3> InhabitedCells(int expandedBy = 0)
+        {
+            if (Angle == 0)
+            {
+                return CellRect.CenteredOn(Position, def.Size.x, def.Size.z).ExpandedBy(expandedBy).Cells;
+            }
+            return CellRect.CenteredOn(Position, def.Size.x, def.Size.z).ExpandedBy(expandedBy).Cells; //REDO FOR DIAGONALS
+        }
 
         public float CachedAngle { get; set; }
         public float Angle
         {
             get
             {
-                if(!GetCachedComp<CompVehicle>().Props.diagonalRotation)
+                if (!GetCachedComp<CompVehicle>().Props.diagonalRotation)
                     return 0f;
                 return angle;
             }
@@ -57,7 +74,7 @@ namespace Vehicles
         {
             get
             {
-                if(vDrawer is null)
+                if (vDrawer is null)
                 {
                     vDrawer = new Vehicle_DrawTracker(this);
                 }
@@ -65,15 +82,18 @@ namespace Vehicles
             }
         }
 
-        private Graphic_OmniDirectional graphicInt;
-        public Graphic_OmniDirectional VehicleGraphic
+        private Graphic_Vehicle graphicInt;
+        public Graphic_Vehicle VehicleGraphic
         {
             get
             {
-                if(graphicInt is null)
+                if (graphicInt is null)
                 {
-                    Graphic_OmniDirectional graphic = kindDef.lifeStages.LastOrDefault().bodyGraphicData.Graphic as Graphic_OmniDirectional;
-                    graphicInt = kindDef.lifeStages.LastOrDefault().bodyGraphicData.Graphic.GetColoredVersion(graphic.Shader, graphic.Color, graphic.ColorTwo) as Graphic_OmniDirectional;
+                    var graphicData = new GraphicData();
+                    graphicData.CopyFrom(ageTracker.CurKindLifeStage.bodyGraphicData);
+                    graphicData.color = DrawColor;
+                    graphicData.colorTwo = DrawColorTwo;
+                    graphicInt = graphicData.Graphic as Graphic_Vehicle;
                 }
                 return graphicInt;
             }
@@ -81,8 +101,26 @@ namespace Vehicles
 
         public override Color DrawColor //ADD COLORABLE FLAGS
         {
-            get => base.DrawColor;
-            set => base.DrawColor = value;
+            get
+            {
+                return color1;
+            }
+            set
+            {
+                color1 = value;
+            }
+        }
+
+        public new Color DrawColorTwo
+        {
+            get
+            {
+                return color2;
+            }
+            set
+            {
+                color2 = value;
+            }
         }
 
         public override Vector3 DrawPos => Drawer.DrawPos;
@@ -92,6 +130,35 @@ namespace Vehicles
             var drawVehicle = new Task(() => Drawer.DrawAt(drawLoc));
             drawVehicle.RunSynchronously();
             //Drawer.DrawAt(drawLoc);
+        }
+
+        public override void Notify_ColorChanged()
+        {
+            ResetGraphicCache();
+            Drawer.renderer.graphics.ResolveAllGraphics();
+            base.Notify_ColorChanged();
+        }
+
+        internal void ResetGraphicCache()
+        {
+            if(UnityData.IsInMainThread)
+            {
+                ResetMaskCache();
+                var cannonComp = GetCachedComp<CompCannons>();
+                if (cannonComp != null)
+                {
+                    foreach(CannonHandler cannon in cannonComp.Cannons)
+                    {
+                        cannon.ResolveCannonGraphics(this, true);
+                    }
+                }
+            }
+        }
+
+        private void ResetMaskCache()
+        {
+            graphicInt = null;
+            AccessTools.Field(typeof(GraphicData), "cachedGraphic").SetValue(ageTracker.CurKindLifeStage.bodyGraphicData, null);
         }
 
         public void UpdateRotationAndAngle()
@@ -164,7 +231,7 @@ namespace Vehicles
             {
                 yield return gizmo;
             }
-            if(drafter != null)
+            if (/*Faction == Faction.OfPlayer && */drafter != null)
             {
                 IEnumerable<Gizmo> draftGizmos = DraftGizmos(drafter);
                 foreach(Gizmo c in draftGizmos)
@@ -176,16 +243,16 @@ namespace Vehicles
                 {
                     yield return c2;
                 }
-                if(this.FueledVehicle())
+                if (this.FueledVehicle())
                 {
-                    foreach(Gizmo c3 in GetComp<CompFueledTravel>().CompGetGizmosExtra())
+                    foreach(Gizmo c3 in GetCachedComp<CompFueledTravel>().CompGetGizmosExtra())
                     {
                         yield return c3;
                     }
                 }
-                if(this.HasCannons())
+                if (this.HasCannons())
                 {
-                    foreach (Gizmo c4 in GetComp<CompCannons>().CompGetGizmosExtra())
+                    foreach (Gizmo c4 in GetCachedComp<CompCannons>().CompGetGizmosExtra())
                     {
                         yield return c4;
                     }
@@ -258,31 +325,31 @@ namespace Vehicles
             bool customDamage = dinfo.Instigator.def.HasModExtension<CustomVehicleDamageMultiplier>();
 
             float num = dinfo.Amount;
-            float armorPoints = GetComp<CompVehicle>().ArmorPoints;
-            if(!customDamage || !dinfo.Instigator.def.GetModExtension<CustomVehicleDamageMultiplier>().ignoreArmor)
+            float armorPoints = GetCachedComp<CompVehicle>().ArmorPoints;
+            if (!customDamage || !dinfo.Instigator.def.GetModExtension<CustomVehicleDamageMultiplier>().ignoreArmor)
             {
                 num -= num * (float)(1 - Math.Exp(-0.15 * (armorPoints / 10d))); // ( 1-e ^ { -0.15x } ) -> x = armorPoints / 10
                 if (num < 1)
                     num = 0;
             }
             
-            if(customDamage && (dinfo.Instigator.def.GetModExtension<CustomVehicleDamageMultiplier>().vehicleSpecifics.NullOrEmpty() || dinfo.Instigator.def.GetModExtension<CustomVehicleDamageMultiplier>().vehicleSpecifics.Contains(kindDef)))
+            if (customDamage && (dinfo.Instigator.def.GetModExtension<CustomVehicleDamageMultiplier>().vehicleSpecifics.NullOrEmpty() || dinfo.Instigator.def.GetModExtension<CustomVehicleDamageMultiplier>().vehicleSpecifics.Contains(kindDef)))
             {
                 num *= dinfo.Instigator.def.GetModExtension<CustomVehicleDamageMultiplier>().damageMultiplier;
             }
             else
             {
-                if(dinfo.Def.isRanged)
+                if (dinfo.Def.isRanged)
                 {
-                    num *= GetComp<CompVehicle>().Props.vehicleDamageMultipliers.rangedDamageMultiplier;
+                    num *= GetCachedComp<CompVehicle>().Props.vehicleDamageMultipliers.rangedDamageMultiplier;
                 }
-                else if(dinfo.Def.isExplosive)
+                else if (dinfo.Def.isExplosive)
                 {
-                    num *= GetComp<CompVehicle>().Props.vehicleDamageMultipliers.explosiveDamageMultiplier;
+                    num *= GetCachedComp<CompVehicle>().Props.vehicleDamageMultipliers.explosiveDamageMultiplier;
                 }
                 else
                 {
-                    num *= GetComp<CompVehicle>().Props.vehicleDamageMultipliers.meleeDamageMultiplier;
+                    num *= GetCachedComp<CompVehicle>().Props.vehicleDamageMultipliers.meleeDamageMultiplier;
                 }
             }
             
@@ -299,20 +366,20 @@ namespace Vehicles
             bool flag = Spawned;
             bool worldPawn = this.IsWorldPawn();
             Caravan caravan = this.GetCaravan();
-            ThingDef shipDef = GetComp<CompVehicle>().Props.buildDef;
+            ThingDef vehicleDef = GetCachedComp<CompVehicle>().Props.buildDef;
 
-            Thing thing = ThingMaker.MakeThing(shipDef);
+            VehicleBuilding thing = (VehicleBuilding)ThingMaker.MakeThing(vehicleDef);
             thing.SetFactionDirect(Faction);
 
             if (Current.ProgramState == ProgramState.Playing)
             {
                 Find.Storyteller.Notify_PawnEvent(this, AdaptationEvent.Died, null);
             }
-            if(flag && dinfo != null && dinfo.Value.Def.ExternalViolenceFor(this))
+            if (flag && dinfo != null && dinfo.Value.Def.ExternalViolenceFor(this))
             {
                 LifeStageUtility.PlayNearestLifestageSound(this, (LifeStageAge ls) => ls.soundDeath, 1f);
             }
-            if(dinfo != null && dinfo.Value.Instigator != null)
+            if (dinfo != null && dinfo.Value.Instigator != null)
             {
                 Pawn pawn = dinfo.Value.Instigator as Pawn;
                 if(pawn != null)
@@ -321,28 +388,25 @@ namespace Vehicles
                 }
             }
 
-            if(this.GetLord() != null)
+            if (this.GetLord() != null)
             {
                 this.GetLord().Notify_PawnLost(this, PawnLostCondition.IncappedOrKilled, dinfo);
             }
-            if(flag)
+            if (flag)
             {
                 DropAndForbidEverything(false);
             }
 
-            if(thing.TryGetComp<CompSavePawnReference>() != null)
-            {
-                thing.TryGetComp<CompSavePawnReference>().pawnReference = this;
-            }
+            thing.vehicleReference = this;
 
             meleeVerbs.Notify_PawnKilled();
-            if(flag)
+            if (flag)
             {
                 if (map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterOceanDeep || map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterDeep)
                 {
                     IntVec3 lookCell = Position;
                     string textPawnList = "";
-                    foreach (Pawn p in GetComp<CompVehicle>()?.AllPawnsAboard)
+                    foreach (Pawn p in GetCachedComp<CompVehicle>()?.AllPawnsAboard)
                     {
                         textPawnList += p.LabelShort + ". ";
                     }
@@ -353,7 +417,7 @@ namespace Vehicles
                 else
                 {
                     Find.LetterStack.ReceiveLetter("ShipSunkLabel".Translate(), "ShipSunkShallow".Translate(LabelShort), LetterDefOf.NegativeEvent, new TargetInfo(position, map, false), null, null);
-                    GetComp<CompVehicle>().DisembarkAll();
+                    GetCachedComp<CompVehicle>().DisembarkAll();
                     Destroy();
                 }
             }
@@ -364,20 +428,31 @@ namespace Vehicles
         
         public T GetCachedComp<T>() where T : ThingComp
         {
-            if(cachedComps.Any(c => c is T))
+            if (cachedComps.TryGetValue(typeof(T), out ThingComp compMatch))
             {
-                return (T)cachedComps.FirstOrDefault(t => t is T);
+                return (T)compMatch;
             }
             T comp = GetComp<T>();
-            if(comp != null)
-                cachedComps.Add(comp);
-            return (T)cachedComps.FirstOrDefault(t => t is T);
+            if (comp is null)
+            {
+                return default;
+            }
+            cachedComps.Add(typeof(T), comp);
+            return (T)cachedComps[typeof(T)];
         }
 
+        //REDO
+        public IEnumerable<VehicleComp> GetAllAIComps()
+        {
+            foreach (VehicleComp comp in cachedComps.Where(c => c.Key.IsAssignableFrom(typeof(VehicleComp))).Cast<VehicleComp>())
+            {
+                yield return comp;
+            }
+        }
 
         public override void DrawExtraSelectionOverlays()
         {
-            if(vPather.curPath != null)
+            if (vPather.curPath != null)
             {
                 vPather.curPath.DrawPath(this);
             }
@@ -398,20 +473,63 @@ namespace Vehicles
         public override void SpawnSetup(Map map, bool respawningAfterLoad)
         {
             if (cachedComps is null)
-                cachedComps = new HashSet<ThingComp>();
+                cachedComps = new Dictionary<Type, ThingComp>();
             base.SpawnSetup(map, respawningAfterLoad);
-            if(!respawningAfterLoad)
+            if (!respawningAfterLoad)
             {
                 smoothPos = Position.ToVector3Shifted();
                 vPather.ResetToCurrentPosition();
+                if (DrawColor == Color.white)
+                {
+                    DrawColor = ageTracker.CurKindLifeStage.bodyGraphicData.color;
+                }
+                if (DrawColorTwo == Color.white)
+                {
+                    DrawColorTwo = ageTracker.CurKindLifeStage.bodyGraphicData.colorTwo;
+                }
             }
+            if (Faction != Faction.OfPlayer)
+            {
+                drafter.Drafted = true;
+                CompCannons cannonComp = GetCachedComp<CompCannons>();
+                if(cannonComp != null)
+                {
+                    foreach(var cannon in cannonComp.Cannons)
+                    {
+                        cannon.autoTargeting = true;
+                        cannon.AutoTarget = true;
+                    }
+                }
+            }
+            ResetGraphicCache();
             Drawer.Notify_Spawned();
+        }
+
+        public float VehicleMovedPercent()
+        {
+            if (!vPather.Moving)
+			{
+                return 0f;
+			}
+			if (vPather.BuildingBlockingNextPathCell() != null)
+			{
+				return 0f;
+			}
+			if (vPather.NextCellDoorToWaitForOrManuallyOpen() != null)
+			{
+				return 0f;
+			}
+			if (vPather.WillCollideWithPawnOnNextPathCell())
+			{
+				return 0f;
+			}
+			return 1f - vPather.nextCellCostLeft / vPather.nextCellCostTotal;
         }
 
         public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
         {
             base.DeSpawn(mode);
-            if(vPather != null)
+            if (vPather != null)
             {
                 vPather.StopDead();
             }
@@ -420,9 +538,13 @@ namespace Vehicles
         public override void Tick()
         {
             base.Tick();
-            if(Spawned)
+            if (Spawned)
             {
                 vPather.PatherTick();
+            }
+            if (Faction != Faction.OfPlayer)
+            {
+                vehicleAI?.AITick();
             }
         }
 
@@ -434,6 +556,11 @@ namespace Vehicles
             Scribe_Deep.Look(ref vPather, "vPather", new object[] { this });
 
             Scribe_Values.Look(ref angle, "angle");
+
+            Scribe_Values.Look(ref color1, "color1", Color.white);
+            Scribe_Values.Look(ref color2, "color2", Color.white);
+
+            Scribe_Values.Look(ref selectedMask, "selectedMask", "Default");
         }
     }
 }

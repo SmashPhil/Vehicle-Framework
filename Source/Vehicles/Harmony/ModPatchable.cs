@@ -19,7 +19,7 @@ namespace Vehicles
         {
             ModPatchable mod = ConditionalPatchApplier.patchableModActivators.SingleOrDefault(key => key.Key.EqualsIgnoreCase(packageId)).Value;
             if (mod is null)
-                Log.Error($"[Vehicles] Failed to retrieve [{packageId}] for patching.");
+                Log.Error($"{VehicleHarmony.LogLabel} Failed to retrieve [{packageId}] for patching.");
             return mod;
         }
     }

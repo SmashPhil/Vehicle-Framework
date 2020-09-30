@@ -17,7 +17,7 @@ namespace Vehicles
             this.pawns = pawns;
             this.vehicle = vehicle.AnyThing as VehiclePawn;
             trad = vehicle;
-            vehicleTex = ContentFinder<Texture2D>.Get(this.vehicle.kindDef.lifeStages.FirstOrDefault().bodyGraphicData.texPath + "_north", true);
+            vehicleTex = ContentFinder<Texture2D>.Get(this.vehicle.ageTracker.CurKindLifeStage.bodyGraphicData.texPath + "_north", true);
 
             absorbInputAroundWindow = true;
             closeOnCancel = true;
@@ -39,7 +39,8 @@ namespace Vehicles
         public override void DoWindowContents(Rect inRect)
         {
             DrawVehicleMenu(inRect);
-            DrawVehicleTex();
+            Vector2 display = vehicle.GetCachedComp<CompVehicle>().Props.displayUICoord;
+            HelperMethods.DrawVehicleTex(new Rect(display.x, display.y, 1, 1), vehicleTex, vehicle, vehicle.selectedMask, true, vehicle.DrawColor, vehicle.DrawColorTwo);
             DoBottomButtons(inRect);
         }
 
@@ -149,7 +150,7 @@ namespace Vehicles
                     if(Widgets.ButtonText(entryButtonRect, "AddToRole".Translate()))
                     {
                         VehicleHandler firstHandler = vehicle.GetCachedComp<CompVehicle>().handlers.FirstOrDefault(x => assignedSeats.Where(r => r.Value.Second.role == x.role).Select(p => p.Key).Count() < x.role.slots);
-                        if(firstHandler != null)
+                        if(!(firstHandler is null))
                             assignedSeats.Add(pawn, new Pair<VehiclePawn, VehicleHandler>(vehicle, firstHandler));
                     }
                     Widgets.Label(colonistRect, pawn.LabelCap);
@@ -223,18 +224,6 @@ namespace Vehicles
             }
             return true;
         }
-        
-        private void DrawVehicleTex()
-        {
-            Rect displayRect = new Rect(vehicle.GetCachedComp<CompVehicle>().Props.displayUICoord.x, vehicle.GetCachedComp<CompVehicle>().Props.displayUICoord.y, vehicle.GetCachedComp<CompVehicle>().Props.displayUISize.x, vehicle.GetCachedComp<CompVehicle>().Props.displayUISize.y);
-            Material mat = vehicle.VehicleGraphic.MatAt(Rot4.North, vehicle);
-            GenUI.DrawTextureWithMaterial(displayRect, vehicleTex, mat);
-
-            if (vehicle.GetCachedComp<CompCannons>() != null)
-            {
-                vehicle.DrawCannonTextures(displayRect, vehicle.GetCachedComp<CompCannons>().Cannons.OrderBy(x => x.drawLayer));
-            }
-        }
 
         private const float ButtonWidth = 120f;
         private const float ButtonHeight = 30f;
@@ -242,15 +231,15 @@ namespace Vehicles
         private Vector2 pawnsScrollPosition;
         private Vector2 assignedScrollPosition;
 
-        private Dictionary<Pawn, Pair<VehiclePawn, VehicleHandler>> assignedSeats;
+        private readonly Dictionary<Pawn, Pair<VehiclePawn, VehicleHandler>> assignedSeats;
 
         private Pawn draggedPawn;
         private Vector2 draggedItemPosOffset;
         private Vector2 draggedIconPosOffset;
 
-        private List<TransferableOneWay> pawns;
-        private VehiclePawn vehicle;
-        private TransferableOneWay trad;
-        private Texture2D vehicleTex;
+        private readonly List<TransferableOneWay> pawns;
+        private readonly VehiclePawn vehicle;
+        private readonly TransferableOneWay trad;
+        private readonly Texture2D vehicleTex;
     }
 }

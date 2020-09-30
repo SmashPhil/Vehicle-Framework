@@ -10,43 +10,43 @@ namespace Vehicles.AI
             ConstructComponents();
         }
 
-        public ShipPathGrid getShipPathGrid { get; private set; }
+        public ShipPathGrid ShipPathGrid { get; private set; }
 
-        public VehiclePathFinder getShipPathFinder { get; private set; }
+        public VehiclePathFinder ShipPathFinder { get; private set; }
 
-        public VehiclePathFinder threadedPathFinderConstrained { get; private set; }
+        public VehiclePathFinder ThreadedPathFinderConstrained { get; private set; }
 
-        public ShipReachability getShipReachability { get; private set; }
+        public ShipReachability ShipReachability { get; private set; }
 
-        public WaterRegionGrid getWaterRegionGrid { get; private set; }
+        public WaterRegionGrid WaterRegionGrid { get; private set; }
 
-        public WaterRegionMaker getWaterRegionmaker { get; private set; }
+        public WaterRegionMaker WaterRegionmaker { get; private set; }
 
-        public WaterRegionLinkDatabase getWaterRegionLinkDatabase { get; private set; }
+        public WaterRegionLinkDatabase WaterRegionLinkDatabase { get; private set; }
 
-        public WaterRegionAndRoomUpdater getWaterRegionAndRoomUpdater { get; private set; }
+        public WaterRegionAndRoomUpdater WaterRegionAndRoomUpdater { get; private set; }
 
-        public WaterRegionDirtyer getWaterRegionDirtyer { get; private set; }
+        public WaterRegionDirtyer WaterRegionDirtyer { get; private set; }
 
 
         public override void FinalizeInit()
         {
-            getShipPathGrid.RecalculateAllPerceivedPathCosts();
-            getWaterRegionAndRoomUpdater.Enabled = true;
-            getWaterRegionAndRoomUpdater.RebuildAllWaterRegions();
+            ShipPathGrid.RecalculateAllPerceivedPathCosts();
+            WaterRegionAndRoomUpdater.Enabled = true;
+            WaterRegionAndRoomUpdater.RebuildAllWaterRegions();
         }
 
         public void ConstructComponents()
         {
-            getShipPathGrid = new ShipPathGrid(map);
-            getShipPathFinder = new VehiclePathFinder(map);
-            threadedPathFinderConstrained = new VehiclePathFinder(map, false);
-            getShipReachability = new ShipReachability(map);
-            getWaterRegionGrid = new WaterRegionGrid(map);
-            getWaterRegionmaker = new WaterRegionMaker(map);
-            getWaterRegionAndRoomUpdater = new WaterRegionAndRoomUpdater(map);
-            getWaterRegionLinkDatabase = new WaterRegionLinkDatabase();
-            getWaterRegionDirtyer = new WaterRegionDirtyer(map);
+            ShipPathGrid = new ShipPathGrid(map);
+            ShipPathFinder = new VehiclePathFinder(map);
+            ThreadedPathFinderConstrained = new VehiclePathFinder(map, false);
+            ShipReachability = new ShipReachability(map);
+            WaterRegionGrid = new WaterRegionGrid(map);
+            WaterRegionmaker = new WaterRegionMaker(map);
+            WaterRegionAndRoomUpdater = new WaterRegionAndRoomUpdater(map);
+            WaterRegionLinkDatabase = new WaterRegionLinkDatabase();
+            WaterRegionDirtyer = new WaterRegionDirtyer(map);
         }
     }
 }

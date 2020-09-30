@@ -14,7 +14,7 @@ namespace Vehicles.AI
             IntVec3 intVec = new IntVec3(adjCardinal1X, 0, adjCardinal1Z);
             IntVec3 intVec2 = new IntVec3(adjCardinal2X, 0, adjCardinal2Z);
             WaterMap mapE = WaterMapUtility.GetExtensionToMap(map);
-            return (mapE.getShipPathGrid.Walkable(intVec) && intVec.GetDoor(map) is null) || (mapE.getShipPathGrid.Walkable(intVec2) && intVec2.GetDoor(map) is null);
+            return (mapE.ShipPathGrid.Walkable(intVec) && intVec.GetDoor(map) is null) || (mapE.ShipPathGrid.Walkable(intVec2) && intVec2.GetDoor(map) is null);
         }
 
         public static bool MakesOccupiedCellsAlwaysReachableDiagonally(ThingDef def)

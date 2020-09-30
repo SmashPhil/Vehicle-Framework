@@ -18,6 +18,11 @@ namespace Vehicles
 				tweener.PreDrawPosCalculation();
 				Vector3 vector = tweener.TweenedPos;
 				vector.y = vehicle.def.Altitude;
+
+				if (rTracker.Recoil > 0f)
+				{
+					vector = SPTrig.PointFromAngle(vector, rTracker.Recoil, rTracker.Angle);
+				}
 				return vector;
 			}
 		}
@@ -29,6 +34,7 @@ namespace Vehicles
 			renderer = new VehicleRenderer(vehicle);
 			ui = new PawnUIOverlay(vehicle);
 			footprintMaker = new PawnFootprintMaker(vehicle);
+			rTracker = new Vehicle_RecoilTracker();
 		}
 
 		public void VehicleDrawerTick()
@@ -43,6 +49,7 @@ namespace Vehicles
 			}
 			footprintMaker.FootprintMakerTick();
 			renderer.RendererTick();
+			rTracker.RecoilTick();
 		}
 
 		public void DrawAt(Vector3 loc)
@@ -77,6 +84,7 @@ namespace Vehicles
 		public PawnTweener tweener;
 		public VehicleRenderer renderer;
 		public PawnUIOverlay ui;
-		private PawnFootprintMaker footprintMaker;
+		public PawnFootprintMaker footprintMaker;
+		public Vehicle_RecoilTracker rTracker;
     }
 }

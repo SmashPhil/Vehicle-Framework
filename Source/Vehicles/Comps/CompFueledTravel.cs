@@ -7,11 +7,11 @@ using Verse;
 using Verse.AI;
 using UnityEngine;
 using Vehicles.Defs;
-
+using HarmonyLib;
 
 namespace Vehicles
 {
-    public class CompFueledTravel : ThingComp
+    public class CompFueledTravel : VehicleComp
     {
         private float fuel;
         private bool terminateMotes = false;
@@ -26,6 +26,14 @@ namespace Vehicles
         public bool EmptyTank => fuel <= 0f;
         public bool FullTank => fuel == FuelCapacity;
         public int FuelCountToFull => Mathf.CeilToInt(FuelCapacity - fuel);
+
+        private bool Charging => connectedPower != null && !FullTank && connectedPower.PowerNet.CurrentStoredEnergy() > PowerGainRate;
+        private CompPower connectedPower;
+        private bool postLoadReconnect;
+
+        private const float PowerGainRate = 1f;
+        public float dischargeRate;
+
         public VehiclePawn Pawn => parent as VehiclePawn;
         public FuelConsumptionCondition FuelCondition => Props.fuelConsumptionCondition;
 
@@ -66,9 +74,9 @@ namespace Vehicles
         {
             get
             {
-                if(Pawn.IsWorldPawn() && Pawn.GetCaravan() != null)
+                if(Pawn.IsWorldPawn() && Pawn.GetVehicleCaravan() != null)
                 {
-                    if(Pawn.GetCaravan().pather.MovingNow)
+                    if(Pawn.GetVehicleCaravan().vPather.MovingNow)
                     {
                         return true;
                     }
@@ -96,6 +104,10 @@ namespace Vehicles
 
         public Thing ClosestFuelAvailable(Pawn pawn)
         {
+            if (Props.electricPowered)
+            {
+                return null;
+            }
             Predicate<Thing> validator = (Thing x) => !x.IsForbidden(pawn) && pawn.CanReserve(x, 1, -1, null, false) && x.def == Props.fuelType;
             return GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForDef(Props.fuelType), PathEndMode.ClosestTouch, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.ByPawn,
                 false), 9999f, validator, null, 0, -1, false, RegionType.Set_Passable, false);
@@ -106,9 +118,9 @@ namespace Vehicles
             int num = FuelCountToFull;
             while(num > 0 && fuelThings.Count > 0)
             {
-                Thing thing = fuelThings.Pop<Thing>();
+                Thing thing = fuelThings.Pop();
                 int num2 = Mathf.Min(num, thing.stackCount);
-                Refuel((float)num2);
+                Refuel(num2);
                 thing.SplitOff(num2).Destroy(DestroyMode.Vanish);
                 num -= num2;
             }
@@ -116,13 +128,22 @@ namespace Vehicles
 
         public void Refuel(float amount)
         {
-            if(fuel >= Props.fuelCapacity)
+            if(fuel >= FuelCapacity)
                 return;
             fuel += amount;
-            if(fuel >= Props.fuelCapacity)
+            if(fuel >= FuelCapacity)
             {
-                fuel = Props.fuelCapacity;
+                fuel = FuelCapacity;
             }
+        }
+
+        /// <summary>
+        /// Only for Incident spawning / AI spawning. Will randomize fuel levels later (REDO)
+        /// </summary>
+        private void RefuelHalfway()
+        {
+            Log.Message("REFUELING");
+            fuel = FuelCapacity / 2;
         }
 
         public void ConsumeFuel(float amount)
@@ -164,6 +185,30 @@ namespace Vehicles
                     refuelable = this
                 };
             }
+
+            if (Props.electricPowered)
+            {
+                yield return new Command_Toggle
+                {
+                    hotKey = KeyBindingDefOf.Command_TogglePower,
+					icon = VehicleTex.FlickerIcon,
+					defaultLabel = "VehicleElectricFlick".Translate(),
+					defaultDesc = "VehicleElectricFlickDesc".Translate(),
+                    isActive = (() => Charging),
+					toggleAction = delegate()
+					{
+                        if(!Charging)
+                        {
+                            TryConnectPower();
+                        }
+                        else
+                        {
+                            DisconnectPower();
+                        }
+					}
+                };
+            }
+
             if (Prefs.DevMode)
 	        {
 		        yield return new Command_Action
@@ -201,7 +246,7 @@ namespace Vehicles
             yield return new FloatMenuOption("Refuel".Translate().ToString(),
                 delegate ()
                 {
-                    Job job = new Job(JobDefOf_Vehicles.RefuelBoat, this.parent, ClosestFuelAvailable(selPawn));
+                    Job job = new Job(JobDefOf_Vehicles.RefuelVehicle, parent, ClosestFuelAvailable(selPawn));
                     selPawn.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
                 }, MenuOptionPriority.Default, null, null, 0f, null, null);
         }
@@ -209,7 +254,7 @@ namespace Vehicles
         public override void CompTick()
         {
             base.CompTick();
-            if(SatisfiesFuelConsumptionConditional)
+            if (SatisfiesFuelConsumptionConditional)
             {
                 ConsumeFuel(ConsumptionRatePerTick);
                 if(!terminateMotes && !Props.motesGenerated.NullOrEmpty())
@@ -217,11 +262,68 @@ namespace Vehicles
                     if(Find.TickManager.TicksGame % Props.TicksToSpawnMote == 0)
                         DrawMotes();
                 }
-                if(EmptyTank && !VehicleMod.mod.settings.debugDraftAnyShip)
+                if (EmptyTank && !VehicleMod.settings.debugDraftAnyShip)
                 {
                     Pawn.drafter.Drafted = false;
                 }
             }
+            else if (Props.electricPowered && !Charging)
+            {
+                ConsumeFuel(ConsumptionRatePerTick * 0.1f);
+            }
+
+            if (Props.electricPowered && Charging && Find.TickManager.TicksGame % Props.ticksPerCharge == 0)
+            {
+                AccessTools.Method(typeof(PowerNet), "ChangeStoredEnergy").Invoke(connectedPower.PowerNet, new object[] { -PowerGainRate });
+                Refuel(PowerGainRate);
+            }
+        }
+
+        public override void CompTickRare()
+        {
+            base.CompTickRare();
+            if (Pawn.Spawned)
+            {
+                if (!FullTank)
+                {
+                    Pawn.Map.GetCachedMapComponent<VehicleReservationManager>().RegisterLister(Pawn, VehicleRequest.Refuel);
+                }
+                else
+                {
+                    Pawn.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Pawn, VehicleRequest.Refuel);
+                }
+            }
+
+            if (Pawn.vPather.Moving)
+            {
+                DisconnectPower();
+            }
+        }
+
+        public bool TryConnectPower()
+        {
+            if (Props.electricPowered)
+            {
+                foreach (IntVec3 cell in Pawn.InhabitedCells(1))
+                {
+                    Thing building = Pawn.Map.thingGrid.ThingAt(cell, ThingCategory.Building);
+                    if(building != null)
+                    {
+                        CompPower powerSource = building.TryGetComp<CompPower>();
+                        if(powerSource != null && powerSource.TransmitsPowerNow)
+                        {
+                            connectedPower = powerSource;
+                            break;
+                        }
+                    }
+                }
+            }
+            return connectedPower is null;
+        }
+
+        public void DisconnectPower()
+        {
+            connectedPower = null;
         }
 
         public void DrawMotes()
@@ -290,6 +392,15 @@ namespace Vehicles
             if(!respawningAfterLoad)
             {
                 InitializeProperties();
+                dischargeRate = ConsumptionRatePerTick * 0.1f;
+
+                if (Pawn.Faction != Faction.OfPlayer)
+                    RefuelHalfway();
+            }
+
+            if (postLoadReconnect)
+            {
+                TryConnectPower();
             }
         }
 
@@ -306,6 +417,11 @@ namespace Vehicles
             Scribe_Values.Look(ref fuelCost, "fuelCost");
             Scribe_Values.Look(ref fuelCapacity, "fuelCapacity");
             Scribe_Values.Look(ref fuel, "fuel");
+
+            Scribe_Values.Look(ref dischargeRate, "dischargeRate");
+            if(Scribe.mode == LoadSaveMode.Saving)
+                postLoadReconnect = Charging;
+            Scribe_Values.Look(ref postLoadReconnect, "postLoadReconnect", false, true);
         }
     }
 }

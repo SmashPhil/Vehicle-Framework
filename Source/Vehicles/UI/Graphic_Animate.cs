@@ -9,9 +9,7 @@ using RimWorld;
 
 namespace Vehicles
 {
-    public enum AnimationWrapperType { Oscillate, Reset, Off}
-    
-    public class Graphic_Animate : Graphic
+    public class Graphic_Animate : Graphic_Cannon
     {
         public override Material MatSingle
         {
@@ -44,12 +42,14 @@ namespace Vehicles
 			color = req.color;
 			colorTwo = req.colorTwo;
 			drawSize = req.drawSize;
-			List<Texture2D> list = (from x in ContentFinder<Texture2D>.GetAllInFolder(req.path)
-			                        where !x.name.EndsWith(Graphic_Single.MaskSuffix)
+            var files = ContentFinder<Texture2D>.GetAllInFolder(req.path);
+
+			List<Texture2D> list = (from x in files
+			                        where !x.name.EndsWith(MaskSuffix)
 			                        orderby x.name
 			                        select x).ToList();
-            List<Texture2D> listM = (from x in ContentFinder<Texture2D>.GetAllInFolder(req.path)
-                                    where x.name.EndsWith(Graphic_Single.MaskSuffix)
+            List<Texture2D> listM = (from x in files
+                                    where x.name.EndsWith(MaskSuffix)
                                     orderby x.name
                                     select x).ToList();
 			if (list.NullOrEmpty())
@@ -69,7 +69,9 @@ namespace Vehicles
             materials = new Material[list.Count];
             if(list.Count != listM.Count && !listM.NullOrEmpty())
             {
-                Log.Error($"[Vehicles] Could not apply masks for animation classes. Mask and texture count do not match up. Either have a mask for each texture or none at all. \n Graphics: {list.Count} Masks: {listM.Count}");
+                Log.Error($"{VehicleHarmony.LogLabel} Could not apply masks for animation classes at path {req.path}. " +
+                    $"Mask and texture count do not match up." +
+                    $"\n MainTextures: {list.Count} Masks: {listM.Count}");
                 graphicPaths = new string[]
 				{
 					BaseContent.BadGraphic.path
@@ -136,11 +138,6 @@ namespace Vehicles
 		        materials.Length,
 		        ")"
 	        });
-        }
-
-        public static string GetDefaultTexPath(string animationFolder)
-        {
-            return animationFolder + "/" + ContentFinder<Texture2D>.GetAllInFolder(animationFolder).FirstOrDefault().name;
         }
 
         private string[] graphicPaths;

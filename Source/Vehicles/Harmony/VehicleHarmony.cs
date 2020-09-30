@@ -17,6 +17,7 @@ using Vehicles.Defs;
 using Vehicles.Lords;
 using Vehicles.UI;
 using OpCodes = System.Reflection.Emit.OpCodes;
+using Vehicles.Components;
 
 namespace Vehicles
 {
@@ -61,7 +62,7 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Method(typeof(Widgets), nameof(Widgets.InfoCardButton), new Type[] { typeof(float), typeof(float), typeof(Thing) }), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(InfoCardVehiclesTranspiler))); //REDO - change to remove info card button rather than patching the widget
-            harmony.Patch(original: AccessTools.Method(typeof(Verb), nameof(Verb.CanHitTarget)),
+            harmony.Patch(original: AccessTools.Method(typeof(Verb_CastAbility), nameof(Verb_CastAbility.CanHitTarget)),
                 prefix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(VehiclesImmuneToPsycast)));
 
@@ -81,6 +82,9 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Method(typeof(PawnFootprintMaker), nameof(PawnFootprintMaker.FootprintMakerTick)),
                 prefix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(BoatWakesTicker)));
+            harmony.Patch(original: AccessTools.Method(typeof(PawnTweener), "TweenedPosRoot"),
+                prefix: new HarmonyMethod(typeof(VehicleHarmony),
+                nameof(VehicleTweenedPosRoot)));
 
             //Change targeter to transpiler on UIRoot_Play
             harmony.Patch(original: AccessTools.Method(typeof(Targeter), nameof(Targeter.TargeterOnGUI)), prefix: null,
@@ -123,23 +127,12 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), nameof(Pawn_PathFollower.StartPath)),
                 prefix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(StartVehiclePath)));
-            harmony.Patch(original: AccessTools.Method(typeof(PawnTweener), "TweenedPosRoot"), prefix: null,
+            harmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), "NeedNewPath"),
                 postfix: new HarmonyMethod(typeof(VehicleHarmony),
-                nameof(VehicleTweenedPosRoot)));
-            harmony.Patch(original: AccessTools.Method(typeof(PawnDestinationReservationManager), nameof(PawnDestinationReservationManager.Reserve)),
-                prefix: new HarmonyMethod(typeof(VehicleHarmony),
-                nameof(ReserveEntireVehicle)));
-
-            /* Upgrade Stats */
-            harmony.Patch(original: AccessTools.PropertyGetter(typeof(Pawn), nameof(Pawn.TicksPerMoveCardinal)), prefix: null,
-                postfix: new HarmonyMethod(typeof(VehicleHarmony),
-                nameof(VehicleMoveSpeedUpgradeModifierCardinal)));
-            harmony.Patch(original: AccessTools.PropertyGetter(typeof(Pawn), nameof(Pawn.TicksPerMoveDiagonal)), prefix: null,
-                postfix: new HarmonyMethod(typeof(VehicleHarmony),
-                nameof(VehicleMoveSpeedUpgradeModifierDiagonal)));
-            harmony.Patch(original: AccessTools.Method(typeof(MassUtility), nameof(MassUtility.Capacity)), prefix: null,
-                postfix: new HarmonyMethod(typeof(VehicleHarmony),
-                nameof(VehicleCargoCapacity)));
+                nameof(IsVehicleInNextCell)));
+            harmony.Patch(original: AccessTools.Method(typeof(PathFinder), nameof(PathFinder.FindPath), new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) }),
+                transpiler: new HarmonyMethod(typeof(VehicleHarmony),
+                nameof(PathAroundVehicles)));
 
             /* World Pathing */
             harmony.Patch(original: AccessTools.Method(typeof(WorldSelector), "AutoOrderToTileNow"),
@@ -160,6 +153,14 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Method(typeof(WorldRoutePlanner), nameof(WorldRoutePlanner.DoRoutePlannerButton)), prefix: null,
                 postfix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(VehicleRoutePlannerButton)));
+
+            /* Upgrade Stats */
+            harmony.Patch(original: AccessTools.Method(typeof(Pawn), "TicksPerMove"),
+                prefix: new HarmonyMethod(typeof(VehicleHarmony),
+                nameof(VehicleMoveSpeedUpgradeModifier)));
+            harmony.Patch(original: AccessTools.Method(typeof(MassUtility), nameof(MassUtility.Capacity)), prefix: null,
+                postfix: new HarmonyMethod(typeof(VehicleHarmony),
+                nameof(VehicleCargoCapacity)));
 
             /* World Handling */
             harmony.Patch(original: AccessTools.Method(typeof(WorldPawns), nameof(WorldPawns.GetSituation)), prefix: null,
@@ -182,6 +183,9 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Property(typeof(JobDriver_PrepareCaravan_GatherItems), "Transferables").GetGetMethod(nonPublic: true),
                 prefix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(TransferablesVehicle)));
+            harmony.Patch(original: AccessTools.Method(typeof(ThingRequest), nameof(ThingRequest.Accepts)), prefix: null,
+                postfix: new HarmonyMethod(typeof(VehicleHarmony),
+                nameof(AcceptsVehicleRefuelable)));
 
             /* Lords */
             harmony.Patch(original: AccessTools.Method(typeof(LordToil_PrepareCaravan_GatherAnimals), nameof(LordToil_PrepareCaravan_GatherAnimals.UpdateAllDuties)), prefix: null,
@@ -191,7 +195,7 @@ namespace Vehicles
                 prefix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(VehiclesDontParty)));
 
-            /* Forming Caravan */
+            /* Caravan Formation */
             harmony.Patch(original: AccessTools.Method(typeof(CaravanFormingUtility), nameof(CaravanFormingUtility.IsFormingCaravan)),
                 prefix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(IsFormingCaravanVehicle)));
@@ -278,15 +282,15 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Method(typeof(CaravanInventoryUtility), nameof(CaravanInventoryUtility.GiveThing)), prefix: null, postfix: null,
                 transpiler: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(VehicleGiveThingInventoryTranspiler)));
-            harmony.Patch(original: AccessTools.Property(typeof(WITab_Caravan_Health), "Pawns").GetGetMethod(nonPublic: true), prefix: null,
-                postfix: new HarmonyMethod(typeof(VehicleHarmony),
+            harmony.Patch(original: AccessTools.Property(typeof(WITab_Caravan_Health), "Pawns").GetGetMethod(nonPublic: true),
+                prefix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(VehicleHealthTabPawns)));
-            harmony.Patch(original: AccessTools.Property(typeof(WITab_Caravan_Social), "Pawns").GetGetMethod(nonPublic: true), prefix: null,
-                postfix: new HarmonyMethod(typeof(VehicleHarmony),
+            harmony.Patch(original: AccessTools.Property(typeof(WITab_Caravan_Social), "Pawns").GetGetMethod(nonPublic: true),
+                prefix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(VehicleSocialTabPawns)));
             harmony.Patch(original: AccessTools.Method(typeof(BestCaravanPawnUtility), nameof(BestCaravanPawnUtility.FindPawnWithBestStat)),
                 prefix: new HarmonyMethod(typeof(VehicleHarmony),
-                nameof(FindVehicleWithBestStat)));
+                nameof(FindPawnInVehicleWithBestStat)));
             harmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_OfferGifts), nameof(CaravanArrivalAction_OfferGifts.Arrived)),
                 prefix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(UnloadVehicleOfferGifts)));
@@ -303,6 +307,8 @@ namespace Vehicles
                 prefix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(RandomVehicleOwner)));
 
+            /* Raids and AI */
+
             /* Draftable */
             harmony.Patch(original: AccessTools.Property(typeof(Pawn_DraftController), nameof(Pawn_DraftController.Drafted)).GetSetMethod(),
                 prefix: new HarmonyMethod(typeof(VehicleHarmony),
@@ -313,9 +319,9 @@ namespace Vehicles
             harmony.Patch(original: AccessTools.Method(typeof(FloatMenuUtility), nameof(FloatMenuUtility.GetMeleeAttackAction)),
                 prefix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(NoMeleeForVehicles))); //Change..?
-            harmony.Patch(original: AccessTools.Method(typeof(PawnComponentsUtility), nameof(PawnComponentsUtility.AddComponentsForSpawn)), prefix: null,
+            harmony.Patch(original: AccessTools.Method(typeof(PawnComponentsUtility), nameof(PawnComponentsUtility.CreateInitialComponents)), prefix: null,
                 postfix: new HarmonyMethod(typeof(VehicleHarmony),
-                nameof(AddComponentsForVehicleSpawn)));
+                nameof(CreateInitialVehicleComponents)));
             harmony.Patch(original: AccessTools.Method(typeof(PawnComponentsUtility), nameof(PawnComponentsUtility.AddAndRemoveDynamicComponents)), prefix: null,
                 postfix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(AddAndRemoveVehicleComponents)));
@@ -351,7 +357,7 @@ namespace Vehicles
                 prefix: new HarmonyMethod(typeof(VehicleHarmony),
                 nameof(ShellsImpactWater)));
 
-            /* Debug */
+            /* Debug Patches */
             if(debug)
             {
                 harmony.Patch(original: AccessTools.Method(typeof(WorldRoutePlanner), nameof(WorldRoutePlanner.WorldRoutePlannerUpdate)), prefix: null,
@@ -365,7 +371,7 @@ namespace Vehicles
                     nameof(DebugDrawWaterRegion)));
             }
 
-            //harmony.Patch(original: AccessTools.Method(typeof(), nameof()),
+            //harmony.Patch(original: AccessTools.Method(typeof(), ""), 
             //    prefix: new HarmonyMethod(typeof(VehicleHarmony),
             //    nameof(TestDebug)));
 
@@ -384,13 +390,8 @@ namespace Vehicles
         /// Generic patch method for testing
         /// </summary>
         /// <returns></returns>
-        public static bool TestDebug(Pawn pawn, ref bool __result)
+        public static bool TestDebug()
         {
-            //if(pawn.IsVehicle())
-            //{
-            //    __result = true;
-            //    return false;
-            //}
             return true;
         }
 
@@ -412,7 +413,7 @@ namespace Vehicles
         /// <param name="___map"></param>
         public static void DebugDrawWaterRegion(Map ___map)
         {
-            WaterMapUtility.GetExtensionToMap(___map)?.getWaterRegionGrid?.DebugDraw();
+            ___map.GetCachedMapComponent<WaterMap>()?.WaterRegionGrid?.DebugDraw();
         }
 
         /// <summary>
@@ -420,14 +421,17 @@ namespace Vehicles
         /// </summary>
         public static void DebugSettlementPaths()
         {
-            if (VehicleHarmony.drawPaths && (VehicleHarmony.debugLines is null || !VehicleHarmony.debugLines.AnyNullified())) return;
-            if (!VehicleHarmony.drawPaths) goto DrawRings;
-            foreach (WorldPath wp in VehicleHarmony.debugLines)
+            if (drawPaths && !debugLines.AnyNullified()) 
+                return;
+            if (drawPaths)
             {
-                wp.DrawPath(null);
+                foreach (WorldPath wp in debugLines)
+                {
+                    wp.DrawPath(null);
+                }
             }
-        DrawRings:
-            foreach (Pair<int, int> t in VehicleHarmony.tiles)
+
+            foreach (Pair<int, int> t in tiles)
             {
                 GenDraw.DrawWorldRadiusRing(t.First, t.Second);
             }
@@ -496,7 +500,7 @@ namespace Vehicles
         public static void RecalculateShipPathCostUnderThing(Thing t, Map ___map)
         {
             if (t is null) return;
-            ___map.GetComponent<WaterMap>()?.getShipPathGrid?.RecalculatePerceivedPathCostUnderThing(t);
+            ___map.GetCachedMapComponent<WaterMap>()?.ShipPathGrid?.RecalculatePerceivedPathCostUnderThing(t);
         }
 
         #endregion MapGen
@@ -514,33 +518,32 @@ namespace Vehicles
         {
             if (pawn != null)
             {
-                CompVehicle vehicle = pawn.GetComp<CompVehicle>();
-                if(HelperMethods.IsVehicle(pawn))
+                if (pawn is VehiclePawn vehicle)
                 {
-                    if (vehicle.movementStatus == VehicleMovementStatus.Offline && !pawn.Dead)
+                    if (vehicle.GetCachedComp<CompVehicle>().movementStatus == VehicleMovementStatus.Offline && !pawn.Dead)
                     {
-                        if (HelperMethods.IsBoat(pawn) && vehicle.beached)
+                        if (HelperMethods.IsBoat(pawn) && vehicle.GetCachedComp<CompVehicle>().beached)
                         {
-                            __result = vehicle.Props.healthLabel_Beached;
+                            __result = vehicle.GetCachedComp<CompVehicle>().Props.healthLabel_Beached;
                         }
                         else
                         {
-                            __result = vehicle.Props.healthLabel_Immobile;
+                            __result = vehicle.GetCachedComp<CompVehicle>().Props.healthLabel_Immobile;
                         }
 
                         return false;
                     }
                     if (pawn.Dead)
                     {
-                        __result = vehicle.Props.healthLabel_Dead;
+                        __result = vehicle.GetCachedComp<CompVehicle>().Props.healthLabel_Dead;
                         return false;
                     }
                     if (pawn.health.summaryHealth.SummaryHealthPercent < 0.95)
                     {
-                        __result = vehicle.Props.healthLabel_Injured;
+                        __result = vehicle.GetCachedComp<CompVehicle>().Props.healthLabel_Injured;
                         return false;
                     }
-                    __result = vehicle.Props.healthLabel_Healthy;
+                    __result = vehicle.GetCachedComp<CompVehicle>().Props.healthLabel_Healthy;
                     return false;
                 }
             }
@@ -555,9 +558,9 @@ namespace Vehicles
         /// <returns></returns>
         public static bool VehicleShouldBeDowned(ref bool __result, ref Pawn ___pawn)
         {
-            if (___pawn != null && HelperMethods.IsVehicle(___pawn))
+            if (___pawn != null && ___pawn is VehiclePawn vehicle)
             {
-                __result = ___pawn.GetComp<CompVehicle>().Props.downable;
+                __result = vehicle.GetCachedComp<CompVehicle>().Props.downable;
                 return false;
             }
             return true;
@@ -570,7 +573,7 @@ namespace Vehicles
         /// <returns></returns>
         public static bool VehicleShouldWiggle(ref Pawn ___pawn)
         {
-            if (___pawn != null && HelperMethods.IsVehicle(___pawn) && !___pawn.GetComp<CompVehicle>().Props.movesWhenDowned)
+            if (___pawn != null && ___pawn is VehiclePawn vehicle && !vehicle.GetCachedComp<CompVehicle>().Props.movesWhenDowned)
             {
                 return false;
             }
@@ -653,7 +656,11 @@ namespace Vehicles
         /// <returns></returns>
         public static bool VehiclesImmuneToPsycast(LocalTargetInfo targ)
         {
-            Log.Message($"Target: {targ}");
+            if (targ.Pawn is VehiclePawn vehicle)
+            {
+                Log.Message($"Psycast blocked for {vehicle}");
+                return false;
+            }
             return true;
         }
 
@@ -700,37 +707,6 @@ namespace Vehicles
                 return false;
             }
             return true;
-        }
-
-        /// <summary>
-        /// Render Pawn's iconic diagonal rotation if allowed in the def's XML.
-        /// </summary>
-        /// <param name="instructions"></param>
-        /// <param name="ilg"></param>
-        /// <returns></returns>
-        public static IEnumerable<CodeInstruction> RenderPawnRotationTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
-        {
-            List<CodeInstruction> instructionList = instructions.ToList();
-
-            Label label = ilg.DefineLabel();
-
-            ///Check if the pawn being rendered is a vehicle
-            yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-            yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(typeof(PawnRenderer), "pawn"));
-            yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.IsVehicle), new Type[] { typeof(Pawn) }));
-            yield return new CodeInstruction(opcode: OpCodes.Brfalse, operand: label);
-
-            ///Get resulting angle value determined by diagonal movement, store inside angle vector
-            yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-            yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(typeof(PawnRenderer), "pawn"));
-            yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.ShipAngle)));
-            yield return new CodeInstruction(opcode: OpCodes.Starg_S, operand: 2);
-
-            yield return new CodeInstruction(opcode: OpCodes.Nop) { labels = new List<Label> { label } };
-            foreach (CodeInstruction instruction in instructionList)
-            {
-                yield return instruction;
-            }
         }
 
         //REDO (remove flag and implement more concrete transpiler)
@@ -782,7 +758,7 @@ namespace Vehicles
             Vector2 vector = new Vector2(rect.x + 1f, rect.yMax - num - 1f);
 
             Rect rect2 = new Rect(vector.x, vector.y, num, num);
-            GUI.DrawTexture(rect2, TexCommandVehicles.CachedTextureIcons[handler.vehiclePawn.def]);
+            GUI.DrawTexture(rect2, VehicleTex.CachedTextureIcons[handler.vehiclePawn.def]);
             TooltipHandler.TipRegion(rect2, "ActivityIconOnBoardShip".Translate(handler.vehiclePawn.Label)); 
             vector.x += num;
         }
@@ -794,22 +770,27 @@ namespace Vehicles
         /// <returns></returns>
         public static bool DrawSelectionBracketsVehicles(object obj)
         {
-            if(HelperMethods.IsVehicle(obj as VehiclePawn))
+            var vehicle = obj as VehiclePawn;
+            var building = obj as VehicleBuilding;
+            if(vehicle != null || building?.vehicleReference != null)
             {
-                Thing thing = obj as Thing;
+                if (vehicle is null)
+                {
+                    vehicle = building.vehicleReference;
+                }
                 Vector3[] brackets = new Vector3[4];
-                float angle = (thing as VehiclePawn).Angle; //(thing as VehiclePawn).GetComp<CompVehicle>().BearingAngle;
+                float angle = vehicle.Angle;
 
-                Vector3 newDrawPos = (thing as VehiclePawn).DrawPosTransformed((thing as VehiclePawn).GetComp<CompVehicle>().Props.hitboxOffsetX, (thing as VehiclePawn).GetComp<CompVehicle>().Props.hitboxOffsetZ, angle);
+                Vector3 newDrawPos = vehicle.DrawPosTransformed(vehicle.GetCachedComp<CompVehicle>().Props.hitboxOffsetX, vehicle.GetCachedComp<CompVehicle>().Props.hitboxOffsetZ, angle);
 
                 FieldInfo info = AccessTools.Field(typeof(SelectionDrawer), "selectTimes");
                 object o = info.GetValue(null);
-                SPMultiCell.CalculateSelectionBracketPositionsWorldForMultiCellPawns<object>(brackets, thing, newDrawPos, thing.RotatedSize.ToVector2(), (Dictionary<object, float>)o, Vector2.one, angle, 1f);
+                SPMultiCell.CalculateSelectionBracketPositionsWorldForMultiCellPawns(brackets, vehicle, newDrawPos, vehicle.RotatedSize.ToVector2(), (Dictionary<object, float>)o, Vector2.one, angle, 1f);
 
                 int num = (angle != 0) ? (int)angle : 0;
                 for (int i = 0; i < 4; i++)
                 {
-                    Quaternion rotation = Quaternion.AngleAxis((float)num, Vector3.up);
+                    Quaternion rotation = Quaternion.AngleAxis(num, Vector3.up);
                     Graphics.DrawMesh(MeshPool.plane10, brackets[i], rotation, MaterialDefOf.SelectionBracketMat, 0);
                     num -= 90;
                 }
@@ -827,7 +808,7 @@ namespace Vehicles
         /// <returns></returns>
         public static bool BoatWakesTicker(Pawn ___pawn, ref Vector3 ___lastFootprintPlacePos)
         {
-            if(HelperMethods.IsBoat(___pawn))
+            if(___pawn.IsBoat())
             {
                 VehiclePawn boat = ___pawn as VehiclePawn;
                 if ((boat.Drawer.DrawPos - ___lastFootprintPlacePos).MagnitudeHorizontalSquared() > 0.1)
@@ -839,11 +820,11 @@ namespace Vehicles
                         ___lastFootprintPlacePos = drawPos;
                     }
                 }
-                else if(VehicleMod.mod.settings.passiveWaterWaves)
+                else if(VehicleMod.settings.passiveWaterWaves)
                 {
                     if(Find.TickManager.TicksGame % 360 == 0)
                     {
-                        float offset = Mathf.PingPong(Find.TickManager.TicksGame / 10, boat.kindDef.lifeStages.Find(x => x.bodyGraphicData != null).bodyGraphicData.drawSize.y / 4);
+                        float offset = Mathf.PingPong(Find.TickManager.TicksGame / 10, boat.ageTracker.CurKindLifeStage.bodyGraphicData.drawSize.y / 4);
                         MoteMaker.MakeWaterSplash(boat.Drawer.DrawPos - new Vector3(0,0, offset), boat.Map, boat.GetCachedComp<CompVehicle>().Props.wakeMultiplier, boat.GetCachedComp<CompVehicle>().Props.wakeSpeed);
                     }
                 }
@@ -852,6 +833,23 @@ namespace Vehicles
             return true;
         }
 
+        public static bool VehicleTweenedPosRoot(Pawn ___pawn, ref Vector3 __result)
+        {
+            if(___pawn is VehiclePawn vehicle)
+            {
+                if (!vehicle.Spawned)
+                {
+                    __result = vehicle.Position.ToVector3Shifted();
+                    return false;
+                }
+                float num = vehicle.VehicleMovedPercent();
+                __result = vehicle.vPather.nextCell.ToVector3Shifted() * num + vehicle.Position.ToVector3Shifted() * (1f - num); //+ PawnCollisionOffset?
+                return false;
+            }
+            return true;
+        }
+
+        /* ---------------- Hooks onto Targeter calls ---------------- */
         public static void DrawCannonTargeter()
         {
             HelperMethods.CannonTargeter.TargeterOnGUI();
@@ -866,7 +864,15 @@ namespace Vehicles
         {
             HelperMethods.CannonTargeter.TargeterUpdate();
         }
+        /* ----------------------------------------------------------- */
 
+        /// <summary>
+        /// Call associated Vehicle_DrawTracker event for damage taken
+        /// </summary>
+        /// <param name="dinfo"></param>
+        /// <param name="___pawn"></param>
+        /// <param name="__instance"></param>
+        /// <returns></returns>
         public static bool VehiclesDamageTakenWiggler(DamageInfo dinfo, Pawn ___pawn, Pawn_DrawTracker __instance)
         {
             if(___pawn is VehiclePawn vehicle && !vehicle.GetCachedComp<CompVehicle>().Props.movesWhenDowned)
@@ -877,9 +883,16 @@ namespace Vehicles
             return true;
         }
 
+        /// <summary>
+        /// Call associated Vehicle_DrawTracker event for damage deflected
+        /// </summary>
+        /// <param name="dinfo"></param>
+        /// <param name="___pawn"></param>
+        /// <param name="__instance"></param>
+        /// <returns></returns>
         public static bool VehiclesDamageDeflectedWiggler(DamageInfo dinfo, Pawn ___pawn, Pawn_DrawTracker __instance)
         {
-            if(___pawn is VehiclePawn vehicle && !vehicle.GetComp<CompVehicle>().Props.movesWhenDowned)
+            if(___pawn is VehiclePawn vehicle && !vehicle.GetCachedComp<CompVehicle>().Props.movesWhenDowned)
             {
                 (___pawn as VehiclePawn).Drawer.Notify_DamageDeflected(dinfo);
                 return false;
@@ -887,6 +900,12 @@ namespace Vehicles
             return true;
         }
 
+        /// <summary>
+        /// Hook onto Pawn_DrawTracker Tick() method for Vehicle_DrawTracker. Diverts base Pawn class for ticking Pawn_DrawTracker if pawn is a vehicle.
+        /// If both Vehicle_DrawTracker and Pawn_DrawTracker tick, there will be duplicates due to both rendering simultaneously.
+        /// </summary>
+        /// <param name="___pawn"></param>
+        /// <returns></returns>
         public static bool VehiclesDrawTrackerTick(Pawn ___pawn)
         {
             if(___pawn.IsVehicle())
@@ -913,11 +932,11 @@ namespace Vehicles
             {
                 VehiclePawn vehicle = __instance.pawn as VehiclePawn;
 
-                if (VehicleMod.mod.settings.debugDisableWaterPathing && vehicle.GetCachedComp<CompVehicle>().beached)
+                if (VehicleMod.settings.debugDisableWaterPathing && vehicle.GetCachedComp<CompVehicle>().beached)
                     vehicle.GetCachedComp<CompVehicle>().RemoveBeachedStatus();
                 if (value && !__instance.Drafted)
                 {
-                    if(!VehicleMod.mod.settings.debugDraftAnyShip && vehicle.TryGetComp<CompFueledTravel>() != null && vehicle.GetCachedComp<CompFueledTravel>().EmptyTank)
+                    if(!VehicleMod.settings.debugDraftAnyShip && vehicle.TryGetComp<CompFueledTravel>() != null && vehicle.GetCachedComp<CompFueledTravel>().EmptyTank)
                     {
                         Messages.Message("CompShips_OutOfFuel".Translate(), MessageTypeDefOf.RejectInput);
                         return false;
@@ -927,13 +946,13 @@ namespace Vehicles
                         Messages.Message("CompUpgrade_UpgradeInProgress".Translate(), MessageTypeDefOf.RejectInput);
                         return false;
                     }
-                    vehicle.Map.GetComponent<VehicleReservationManager>().ClearReservedFor(vehicle);
+                    vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(vehicle);
                 }
                 else if(!value && vehicle.vPather.curPath != null)
                 {
                     vehicle.vPather.PatherFailed();
                 }
-                if(!VehicleMod.mod.settings.fishingPersists) vehicle.GetCachedComp<CompVehicle>().currentlyFishing = false;
+                if(!VehicleMod.settings.fishingPersists) vehicle.GetCachedComp<CompVehicle>().currentlyFishing = false;
             }
             return true;
         }
@@ -960,7 +979,7 @@ namespace Vehicles
         /// <returns></returns>
         public static bool NoMeleeForVehicles(Pawn pawn, LocalTargetInfo target, out string failStr)
         {
-            if(HelperMethods.IsVehicle(pawn))
+            if(pawn is VehiclePawn)
             {
                 failStr = "IsIncapableOfRamming".Translate(target.Thing.LabelShort);
                 //Add more to string or Action if ramming is implemented
@@ -980,56 +999,20 @@ namespace Vehicles
         {
             Map map = __instance.Map;
             TerrainDef terrainImpact = map.terrainGrid.TerrainAt(__instance.Position);
-            if(__instance.def.projectile.explosionDelay == 0 && terrainImpact.IsWater && !__instance.Position.GetThingList(__instance.Map).AnyNullified(x => HelperMethods.IsVehicle(x as Pawn)))
+            if(__instance.def.projectile.explosionDelay == 0 && terrainImpact.IsWater && !__instance.Position.GetThingList(__instance.Map).AnyNullified(x => x is VehiclePawn vehicle))
             {
-                __instance.Destroy(DestroyMode.Vanish);
-                if (__instance.def.projectile.explosionEffect != null)
-                {
-                    Effecter effecter = __instance.def.projectile.explosionEffect.Spawn();
-                    effecter.Trigger(new TargetInfo(__instance.Position, map, false), new TargetInfo(__instance.Position, map, false));
-                    effecter.Cleanup();
-                }
-                IntVec3 position = __instance.Position;
-                Map map2 = map;
-
-                int waterDepth = map.terrainGrid.TerrainAt(__instance.Position).IsWater ? map.terrainGrid.TerrainAt(__instance.Position) == TerrainDefOf.WaterOceanShallow ||
-                    map.terrainGrid.TerrainAt(__instance.Position) == TerrainDefOf.WaterShallow || map.terrainGrid.TerrainAt(__instance.Position) == TerrainDefOf.WaterMovingShallow ? 1 : 2 : 0;
-                if (waterDepth == 0) Log.Error("Impact Water Depth is 0, but terrain is water.");
-                float explosionRadius = (__instance.def.projectile.explosionRadius / (2f * waterDepth));
-                if (explosionRadius < 1) explosionRadius = 1f;
-                DamageDef damageDef = __instance.def.projectile.damageDef;
-                Thing launcher = null;
-                int damageAmount = __instance.DamageAmount;
-                float armorPenetration = __instance.ArmorPenetration;
-                SoundDef soundExplode;
-                soundExplode = SoundDefOf_Ships.Explode_BombWater; //Changed for current issues
-                SoundStarter.PlayOneShot(soundExplode, new TargetInfo(__instance.Position, map, false));
-                ThingDef equipmentDef = null;
-                ThingDef def = __instance.def;
-                Thing thing = null;
-                ThingDef postExplosionSpawnThingDef = __instance.def.projectile.postExplosionSpawnThingDef;
-                float postExplosionSpawnChance = 0.0f;
-                float chanceToStartFire = __instance.def.projectile.explosionChanceToStartFire * 0.0f;
-                int postExplosionSpawnThingCount = __instance.def.projectile.postExplosionSpawnThingCount;
-                ThingDef preExplosionSpawnThingDef = __instance.def.projectile.preExplosionSpawnThingDef;
-                GenExplosion.DoExplosion(position, map2, explosionRadius, damageDef, launcher, damageAmount, armorPenetration, soundExplode,
-                    equipmentDef, def, thing, postExplosionSpawnThingDef, postExplosionSpawnChance, postExplosionSpawnThingCount,
-                    __instance.def.projectile.applyDamageToExplosionCellsNeighbors, preExplosionSpawnThingDef, __instance.def.projectile.preExplosionSpawnChance,
-                    __instance.def.projectile.preExplosionSpawnThingCount, chanceToStartFire, __instance.def.projectile.explosionDamageFalloff);
-                return false;
+                __instance.Explode();
             }
             return true;
         }
 
-        public static void AddComponentsForVehicleSpawn(Pawn pawn)
+        public static void CreateInitialVehicleComponents(Pawn pawn)
         {
-            if(HelperMethods.IsVehicle(pawn))
-            {
-                if ((pawn as VehiclePawn).vPather == null)
-			    {
-				    (pawn as VehiclePawn).vPather = new Vehicle_PathFollower(pawn as VehiclePawn);
-			    }
-            }
+            if (pawn is VehiclePawn vehicle && vehicle.vPather is null)
+			{
+				vehicle.vPather = new Vehicle_PathFollower(vehicle);
+                vehicle.vehicleAI = new VehicleAI(vehicle);
+			}
         }
 
         /// <summary>
@@ -1051,23 +1034,58 @@ namespace Vehicles
         #endregion Drafting
 
         #region Gizmos
+        /// <summary>
+        /// Disable the ability to attack a settlement when docked there. Breaks immersion and can cause an entry cell error. (Boats Only)
+        /// </summary>
+        /// <param name="caravan"></param>
+        /// <param name="__result"></param>
+        /// <param name="__instance"></param>
+        public static void NoAttackSettlementWhenDocked(Caravan caravan, ref IEnumerable<Gizmo> __result, Settlement __instance)
+        {
+            if(HelperMethods.HasBoat(caravan) && !caravan.pather.Moving)
+            {
+                List<Gizmo> gizmos = __result.ToList();
+                if (caravan.PawnsListForReading.AnyNullified(x => !HelperMethods.IsBoat(x)))
+                {
+                    int index = gizmos.FindIndex(x => (x as Command_Action).icon == Settlement.AttackCommand);
+                    if (index >= 0 && index < gizmos.Count)
+                        gizmos[index].Disable("CommandAttackDockDisable".Translate(__instance.LabelShort));
+                }
+                else
+                {
+                    int index2 = gizmos.FindIndex(x => (x as Command_Action).icon == ContentFinder<Texture2D>.Get("UI/Commands/Trade", false));
+                    if (index2 >= 0 && index2 < gizmos.Count)
+                        gizmos[index2].Disable("CommandTradeDockDisable".Translate(__instance.LabelShort));
+                    int index3 = gizmos.FindIndex(x => (x as Command_Action).icon == ContentFinder<Texture2D>.Get("UI/Commands/OfferGifts", false));
+                    if (index3 >= 0 && index3 < gizmos.Count)
+                        gizmos[index3].Disable("CommandTradeDockDisable".Translate(__instance.LabelShort));
+                }
+                __result = gizmos;
+            }
+        }
 
+        /// <summary>
+        /// Adds FormVehicleCaravan gizmo to settlements, allowing custom dialog menu, seating arrangements, custom RoutePlanner
+        /// </summary>
+        /// <param name="__result"></param>
+        /// <param name="__instance"></param>
+        /// <returns></returns>
         public static IEnumerable<Gizmo> AddVehicleCaravanGizmoPassthrough(IEnumerable<Gizmo> __result, Settlement __instance)
         {
             IEnumerator<Gizmo> enumerator = __result.GetEnumerator();
             if(__instance.Faction == Faction.OfPlayer)
             {
-                yield return new Command_Action()
-                {
-                    defaultLabel = "CommandFormVehicleCaravan".Translate(),
-		            defaultDesc = "CommandFormVehicleCaravanDesc".Translate(),
-		            icon = Settlement.FormCaravanCommand,
-                    action = delegate ()
-                    {
-                        Find.Tutor.learningReadout.TryActivateConcept(ConceptDefOf.FormCaravan);
-                        Find.WindowStack.Add(new Dialog_FormVehicleCaravan(__instance.Map));
-                    }
-                };
+              //  yield return new Command_Action()
+              //  {
+              //      defaultLabel = "CommandFormVehicleCaravan".Translate(),
+		            //defaultDesc = "CommandFormVehicleCaravanDesc".Translate(),
+		            //icon = Settlement.FormCaravanCommand,
+              //      action = delegate ()
+              //      {
+              //          Find.Tutor.learningReadout.TryActivateConcept(ConceptDefOf.FormCaravan);
+              //          Find.WindowStack.Add(new Dialog_FormVehicleCaravan(__instance.Map));
+              //      }
+              //  };
             }
             while(enumerator.MoveNext())
             {
@@ -1076,6 +1094,12 @@ namespace Vehicles
             }
         }
 
+        /// <summary>
+        /// Adds FormVehicleCaravan gizmo to FormCaravanComp, allowing 
+        /// </summary>
+        /// <param name="__result"></param>
+        /// <param name="__instance"></param>
+        /// <returns></returns>
         public static IEnumerable<Gizmo> AddVehicleGizmosPassthrough(IEnumerable<Gizmo> __result, FormCaravanComp __instance)
         {
             IEnumerator<Gizmo> enumerator = __result.GetEnumerator();
@@ -1121,37 +1145,6 @@ namespace Vehicles
                 yield return element;
             }
         }
-
-        /// <summary>
-        /// Disable the ability to attack a settlement when docked there. Breaks immersion and can cause an entry cell error
-        /// </summary>
-        /// <param name="caravan"></param>
-        /// <param name="__result"></param>
-        /// <param name="__instance"></param>
-        public static void NoAttackSettlementWhenDocked(Caravan caravan, ref IEnumerable<Gizmo> __result, Settlement __instance)
-        {
-            if(HelperMethods.HasBoat(caravan) && !caravan.pather.Moving)
-            {
-                List<Gizmo> gizmos = __result.ToList();
-                if (caravan.PawnsListForReading.AnyNullified(x => !HelperMethods.IsBoat(x)))
-                {
-                    int index = gizmos.FindIndex(x => (x as Command_Action).icon == Settlement.AttackCommand);
-                    if (index >= 0 && index < gizmos.Count)
-                        gizmos[index].Disable("CommandAttackDockDisable".Translate(__instance.LabelShort));
-                }
-                else
-                {
-                    int index2 = gizmos.FindIndex(x => (x as Command_Action).icon == ContentFinder<Texture2D>.Get("UI/Commands/Trade", false));
-                    if (index2 >= 0 && index2 < gizmos.Count)
-                        gizmos[index2].Disable("CommandTradeDockDisable".Translate(__instance.LabelShort));
-                    int index3 = gizmos.FindIndex(x => (x as Command_Action).icon == ContentFinder<Texture2D>.Get("UI/Commands/OfferGifts", false));
-                    if (index3 >= 0 && index3 < gizmos.Count)
-                        gizmos[index3].Disable("CommandTradeDockDisable".Translate(__instance.LabelShort));
-                }
-                __result = gizmos;
-            }
-        }
-
 
         /// <summary>
         /// Insert Gizmos from Vehicle caravans which are still forming. Allows for pawns to join the caravan if the Lord Toil has not yet reached LeaveShip
@@ -1228,25 +1221,41 @@ namespace Vehicles
 
         #region Pathing
 
+        /// <summary>
+        /// Intercepts FloatMenuMakerMap call to restrict by size and call through to custom water based pathing requirements
+        /// </summary>
+        /// <param name="clickCell"></param>
+        /// <param name="pawn"></param>
+        /// <param name="__result"></param>
+        /// <returns></returns>
         public static bool GotoLocationShips(IntVec3 clickCell, Pawn pawn, ref FloatMenuOption __result)
         {
-            if (HelperMethods.IsVehicle(pawn))
+            if (pawn is VehiclePawn vehicle)
             {
-                if( (pawn as VehiclePawn).LocationRestrictedBySize(clickCell))
+                if (vehicle.Faction != Faction.OfPlayer)
+                    return false;
+                Log.Message("Goto");
+                if (vehicle.LocationRestrictedBySize(clickCell))
                 {
                     Messages.Message("VehicleCannotFit".Translate(), MessageTypeDefOf.RejectInput);
                     return false;
                 }
 
-                if (DebugSettings.godMode)
+                if (vehicle.GetCachedComp<CompFueledTravel>() != null && vehicle.GetCachedComp<CompFueledTravel>().EmptyTank)
                 {
-                    Log.Message("-> " + clickCell + " | " + pawn.Map.terrainGrid.TerrainAt(clickCell).LabelCap + " | " + WaterMapUtility.GetExtensionToMap(pawn.Map).getShipPathGrid.CalculatedCostAt(clickCell) +
-                        " - " + WaterMapUtility.GetExtensionToMap(pawn.Map).getShipPathGrid.pathGrid[pawn.Map.cellIndices.CellToIndex(clickCell)]);
+                    Messages.Message("VehicleOutOfFuel".Translate(), MessageTypeDefOf.RejectInput);
+                    return false;
                 }
 
-                if (HelperMethods.IsBoat(pawn) && !VehicleMod.mod.settings.debugDisableWaterPathing)
+                if (DebugSettings.godMode)
                 {
-                    //if (!VehicleMod.mod.settings.debugDisableSmoothPathing && pawn.GetComp<CompVehicle>().Props.diagonalRotation)
+                    Log.Message("-> " + clickCell + " | " + vehicle.Map.terrainGrid.TerrainAt(clickCell).LabelCap + " | " + vehicle.Map.GetCachedMapComponent<WaterMap>().ShipPathGrid.CalculatedCostAt(clickCell) +
+                        " - " + vehicle.Map.GetCachedMapComponent<WaterMap>().ShipPathGrid.pathGrid[vehicle.Map.cellIndices.CellToIndex(clickCell)]);
+                }
+
+                if (HelperMethods.IsBoat(vehicle) && !VehicleMod.settings.debugDisableWaterPathing)
+                {
+                    //if (!VehicleMod.settings.debugDisableSmoothPathing && pawn.GetCachedComp<CompVehicle>().Props.diagonalRotation)
                     //{
                     //    if (!(pawn as VehiclePawn).InitiateSmoothPath(clickCell))
                     //    {
@@ -1260,14 +1269,14 @@ namespace Vehicles
                     while (i < num)
                     {
                         curLoc = GenRadial.RadialPattern[i] + clickCell;
-                        if (GenGridShips.Standable(curLoc, pawn.Map))
+                        if (GenGridShips.Standable(curLoc, vehicle.Map))
                         {
-                            if (curLoc == pawn.Position || pawn.GetComp<CompVehicle>().beached)
+                            if (curLoc == vehicle.Position || vehicle.GetCachedComp<CompVehicle>().beached)
                             {
                                 __result = null;
                                 return false;
                             }
-                            if (!ShipReachabilityUtility.CanReachShip(pawn, curLoc, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
+                            if (!ShipReachabilityUtility.CanReachShip(vehicle, curLoc, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
                             {
                                 if (debug) Log.Message("CANT REACH");
                                 __result = new FloatMenuOption("CannotSailToCell".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null);
@@ -1276,27 +1285,27 @@ namespace Vehicles
                             Action action = delegate ()
                             {
                                 Job job = new Job(JobDefOf.Goto, curLoc);
-                                if (pawn.Map.exitMapGrid.IsExitCell(Verse.UI.MouseCell()))
+                                if (vehicle.Map.exitMapGrid.IsExitCell(Verse.UI.MouseCell()))
                                 {
                                     job.exitMapOnArrival = true;
                                 }
-                                else if (!pawn.Map.IsPlayerHome && !pawn.Map.exitMapGrid.MapUsesExitGrid && CellRect.WholeMap(pawn.Map).IsOnEdge(Verse.UI.MouseCell(), 3) &&
-                                    pawn.Map.Parent.GetComponent<FormCaravanComp>() != null && MessagesRepeatAvoider.MessageShowAllowed("MessagePlayerTriedToLeaveMapViaExitGrid-" +
-                                    pawn.Map.uniqueID, 60f))
+                                else if (!vehicle.Map.IsPlayerHome && !vehicle.Map.exitMapGrid.MapUsesExitGrid && CellRect.WholeMap(vehicle.Map).IsOnEdge(Verse.UI.MouseCell(), 3) &&
+                                    vehicle.Map.Parent.GetComponent<FormCaravanComp>() != null && MessagesRepeatAvoider.MessageShowAllowed("MessagePlayerTriedToLeaveMapViaExitGrid-" +
+                                    vehicle.Map.uniqueID, 60f))
                                 {
-                                    FormCaravanComp component = pawn.Map.Parent.GetComponent<FormCaravanComp>();
+                                    FormCaravanComp component = vehicle.Map.Parent.GetComponent<FormCaravanComp>();
                                     if (component.CanFormOrReformCaravanNow)
                                     {
-                                        Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CanReform".Translate(), pawn.Map.Parent, MessageTypeDefOf.RejectInput, false);
+                                        Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CanReform".Translate(), vehicle.Map.Parent, MessageTypeDefOf.RejectInput, false);
                                     }
                                     else
                                     {
-                                        Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CantReform".Translate(), pawn.Map.Parent, MessageTypeDefOf.RejectInput, false);
+                                        Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CantReform".Translate(), vehicle.Map.Parent, MessageTypeDefOf.RejectInput, false);
                                     }
                                 }
-                                if (pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc))
+                                if (vehicle.jobs.TryTakeOrderedJob(job, JobTag.Misc))
                                 {
-                                    MoteMaker.MakeStaticMote(curLoc, pawn.Map, ThingDefOf.Mote_FeedbackGoto, 1f);
+                                    MoteMaker.MakeStaticMote(curLoc, vehicle.Map, ThingDefOf.Mote_FeedbackGoto, 1f);
                                 }
                             };
                             __result = new FloatMenuOption("GoHere".Translate(), action, MenuOptionPriority.GoHere, null, null, 0f, null, null)
@@ -1317,6 +1326,7 @@ namespace Vehicles
                     int num = GenRadial.NumCellsInRadius(2.9f);
                     int i = 0;
                     IntVec3 curLoc;
+                    
                     while (i < num)
                     {
                         curLoc = GenRadial.RadialPattern[i] + clickCell;
@@ -1375,75 +1385,121 @@ namespace Vehicles
                 __result = null;
                 return false;
             }
+            else
+            {
+                if (HelperMethods.VehicleInCell(pawn.Map, clickCell))
+                {
+                    __result = new FloatMenuOption("CannotGoNoPath".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null);
+                    return false;
+                }
+            }
             return true;
         }
 
+        /// <summary>
+        /// Intercept Pawn_PathFollower call to StartPath with VehiclePawn's own Vehicle_PathFollower. Required for custom path values and water based pathing
+        /// </summary>
+        /// <param name="dest"></param>
+        /// <param name="peMode"></param>
+        /// <param name="___pawn"></param>
+        /// <returns></returns>
         public static bool StartVehiclePath(LocalTargetInfo dest, PathEndMode peMode, Pawn ___pawn)
         {
-            if(HelperMethods.IsVehicle(___pawn))
+            if(___pawn is VehiclePawn vehicle)
             {
-                (___pawn as VehiclePawn).vPather.StartPath(dest, peMode);
+                Log.Message("START PATH");
+                vehicle.vPather.StartPath(dest, peMode);
                 return false;
             }
             return true;
         }
 
-        public static void VehicleTweenedPosRoot(ref Vector3 __result, Pawn ___pawn)
-		{
-            if(HelperMethods.IsVehicle(___pawn))
-            {
-                if (!___pawn.Spawned)
-			    {
-				    __result = ___pawn.Position.ToVector3Shifted();
-                    return;
-			    }
-                float num = HelperMethods.MovedPercent(___pawn as VehiclePawn);
-			    __result = (___pawn as VehiclePawn).vPather.nextCell.ToVector3Shifted() * num + ___pawn.Position.ToVector3Shifted() * (1f - num) + PawnCollisionTweenerUtility.PawnCollisionPosOffsetFor(___pawn);
-            }
-		}
-
-        public static bool ReserveEntireVehicle(Pawn p, Job job, IntVec3 loc, PawnDestinationReservationManager __instance)
+        /// <summary>
+        /// Determine if next cell is walkable with final determination if vehicle is in cell or not
+        /// </summary>
+        /// <param name="__result"></param>
+        /// <param name="___pawn"></param>
+        /// <param name="nextCell"></param>
+        public static void IsVehicleInNextCell(ref bool __result, Pawn ___pawn, Pawn_PathFollower __instance)
         {
-            //REDO
-            //if(HelperMethods.IsVehicle(p) && p.GetComp<CompVehicle>().Props.reserveFullHitbox)
-            //{
-            //    foreach(IntVec3 c in CellRect.CenteredOn(loc, p.def.size.x, p.def.size.z))
-            //    {
-            //        if (p.Faction == null)
-	           //     {
-		          //      return false;
-	           //     }
-	           //     Pawn pawn;
-	           //     if (p.Drafted && p.Faction == Faction.OfPlayer && __instance.IsReserved(c, out pawn) && pawn != p && !pawn.HostileTo(p) && pawn.Faction != p.Faction && (pawn.mindState == null || pawn.mindState.mentalStateHandler == null || !pawn.mindState.mentalStateHandler.InMentalState || (pawn.mindState.mentalStateHandler.CurStateDef.category != MentalStateCategory.Aggro && pawn.mindState.mentalStateHandler.CurStateDef.category != MentalStateCategory.Malicious)))
-	           //     {
-		          //      pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, true, true);
-	           //     }
-	           //     __instance.ObsoleteAllClaimedBy(p);
-	           //     __instance.GetPawnDestinationSetFor(p.Faction).list.Add(new PawnDestinationReservationManager.PawnDestinationReservation
-	           //     {
-		          //      target = c,
-		          //      claimant = p,
-		          //      job = job
-	           //     });
-            //    }
-            //    return false;
-            //}
-            return true;
+            if (!__result)
+            {
+                //Peek 2 nodes ahead to avoid collision last second
+                __result = (__instance.curPath.NodesLeftCount > 1 && HelperMethods.VehicleInCell(___pawn.Map, __instance.curPath.Peek(1))) || (__instance.curPath.NodesLeftCount > 2 && HelperMethods.VehicleInCell(___pawn.Map, __instance.curPath.Peek(2)));
+            }
         }
 
+        /// <summary>
+        /// Set cells in which vehicles reside as impassable to other Pawns
+        /// </summary>
+        /// <param name="instructions"></param>
+        /// <param name="ilg"></param>
+        /// <returns></returns>
+        public static IEnumerable<CodeInstruction> PathAroundVehicles(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+        {
+            List<CodeInstruction> instructionList = instructions.ToList();
+            for(int i = 0; i < instructionList.Count; i++)
+            {
+                CodeInstruction instruction = instructionList[i];
+                if (instruction.Calls(AccessTools.Method(typeof(CellIndices), nameof(CellIndices.CellToIndex), new Type[] { typeof(int), typeof(int) })))
+                {
+                    Label label = ilg.DefineLabel();
+                    Label vehicleLabel = ilg.DefineLabel();
+
+                    yield return instruction; //CALLVIRT CELLTOINDEX
+                    instruction = instructionList[++i];
+                    yield return instruction; //STLOC.S 38
+                    instruction = instructionList[++i];
+
+                    yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+                    yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(typeof(PathFinder), "map"));
+                    yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, 36);
+                    yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, 37);
+                    yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(HelperMethods), nameof(HelperMethods.VehicleInCell), new Type[] { typeof(Map), typeof(int), typeof(int) }));
+
+                    yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
+                    yield return new CodeInstruction(opcode: OpCodes.Ldc_I4_0);
+                    yield return new CodeInstruction(opcode: OpCodes.Br, vehicleLabel);
+
+                    for(int j = i; j < instructionList.Count; j++)
+                    {
+                        CodeInstruction instruction2 = instructionList[j];
+                        if (instruction2.opcode == OpCodes.Brfalse || instruction2.opcode == OpCodes.Brfalse_S)
+                        {
+                            instruction2.labels.Add(vehicleLabel);
+                            break;
+                        }
+                    }
+
+                    instruction.labels.Add(label);
+                }
+                yield return instruction;
+            }
+        }
+
+        #endregion Pathing
+        
+        #region WorldPathing
+        /// <summary>
+        /// Intercept AutoOrderToTileNow method to StartPath on VehicleCaravan_PathFollower
+        /// Necessary due to CaravanUtility.BestGotoDestNear returning incorrect positions based on custom tile values for vehicles
+        /// </summary>
+        /// <param name="c"></param>
+        /// <param name="tile"></param>
+        /// <returns></returns>
         public static bool AutoOrderVehicleCaravanPathing(Caravan c, int tile)
         {
-            if(c is VehicleCaravan && c.HasVehicle())
+            if(c is VehicleCaravan caravan && caravan.HasVehicle())
             {
-                if (tile < 0 || (tile == c.Tile && !(c as VehicleCaravan).vPather.Moving))
+                if (tile < 0 || (tile == caravan.Tile && !caravan.vPather.Moving))
 			    {
 				    return false;
 			    }
-                int num = c.BestGotoDestForVehicle(tile);
+                int num = caravan.BestGotoDestForVehicle(tile);
 			    if (num >= 0)
 			    {
-				    (c as VehicleCaravan).vPather.StartPath(num, null, true, true);
-				    c.gotoMote.OrderedToTile(num);
+				    caravan.vPather.StartPath(num, null, true, true);
+				    caravan.gotoMote.OrderedToTile(num);
 				    SoundDefOf.ColonistOrdered.PlayOneShotOnCamera(null);
 			    }
                 return false;
@@ -1451,68 +1507,171 @@ namespace Vehicles
             return true;
         }
 
+        /// <summary>
+        /// Catch-All for Caravan_PathFollower.StartPath, redirect to VehicleCaravan_PathFollower
+        /// </summary>
+        /// <param name="destTile"></param>
+        /// <param name="arrivalAction"></param>
+        /// <param name="___caravan"></param>
+        /// <param name="repathImmediately"></param>
+        /// <param name="resetPauseStatus"></param>
+        /// <returns></returns>
         public static bool StartVehicleCaravanPath(int destTile, CaravanArrivalAction arrivalAction, Caravan ___caravan, bool repathImmediately = false, bool resetPauseStatus = true)
         {
-            if(___caravan.HasVehicle())
+            if(___caravan is VehicleCaravan vehicleCaravan && vehicleCaravan.HasVehicle())
             {
-                (___caravan as VehicleCaravan).vPather.StartPath(destTile, arrivalAction, repathImmediately, resetPauseStatus);
+                vehicleCaravan.vPather.StartPath(destTile, arrivalAction, repathImmediately, resetPauseStatus);
             }
             return true;
         }
 
+        //REDO
+        public static bool ApproxTilesForShips(Caravan caravan, StringBuilder explanation = null)
+        {
+            //Continue here
+            return true;
+        }
+
+        /* --------------- VehicleRoutePlanner Hook --------------- */
         public static void VehicleRoutePlannerUpdateHook()
         {
-            Find.World.GetComponent<VehicleRoutePlanner>().WorldRoutePlannerUpdate();
+            Find.World.GetCachedWorldComponent<VehicleRoutePlanner>().WorldRoutePlannerUpdate();
         }
 
         public static void VehicleRoutePlannerOnGUIHook()
         {
-            Find.World.GetComponent<VehicleRoutePlanner>().WorldRoutePlannerOnGUI();
+            Find.World.GetCachedWorldComponent<VehicleRoutePlanner>().WorldRoutePlannerOnGUI();
         }
 
         public static void VehicleRoutePlannerButton(ref float curBaseY)
         {
-            Find.World.GetComponent<VehicleRoutePlanner>().DoRoutePlannerButton(ref curBaseY);
+            Find.World.GetCachedWorldComponent<VehicleRoutePlanner>().DoRoutePlannerButton(ref curBaseY);
         }
-
-        #endregion Pathing
+        /* ------------------------------------------------------- */
+        #endregion WorldPathing
 
         #region UpgradeStatModifiers
 
-        public static void VehicleMoveSpeedUpgradeModifierCardinal(Pawn __instance, ref int __result)
+        //REDO - Needs implementation of Weight based speed declination
+        /// <summary>
+        /// Apply MoveSpeed upgrade stat to vehicles
+        /// </summary>
+        /// <param name="diagonal"></param>
+        /// <param name="__instance"></param>
+        /// <param name="__result"></param>
+        public static bool VehicleMoveSpeedUpgradeModifier(bool diagonal, Pawn __instance, ref int __result)
         {
             if(__instance is VehiclePawn vehicle)
             {
-                __result += (int)vehicle.GetComp<CompVehicle>().MoveSpeedModifier;
+                float num = vehicle.GetCachedComp<CompVehicle>().ActualMoveSpeed / 60;
+                float num2 = 1 / num;
+                if (vehicle.Spawned && !vehicle.Map.roofGrid.Roofed(vehicle.Position))
+                    num2 /= vehicle.Map.weatherManager.CurMoveSpeedMultiplier;
+                if (diagonal)
+                    num2 *= 1.41421f;
+                __result = Mathf.Clamp(Mathf.RoundToInt(num2), 1, 450);
+                return false;
             }
+            return true;
         }
 
-        public static void VehicleMoveSpeedUpgradeModifierDiagonal(Pawn __instance, ref int __result)
-        {
-            if(__instance is VehiclePawn vehicle)
-            {
-                __result += (int)vehicle.GetComp<CompVehicle>().MoveSpeedModifier;
-            }
-        }
-
+        /// <summary>
+        /// Apply Cargo capacity upgrade stat to vehicles
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="__result"></param>
         public static void VehicleCargoCapacity(Pawn p, ref float __result)
         {
-            if(HelperMethods.IsVehicle(p))
+            if(p is VehiclePawn vehicle)
             {
-                __result = HelperMethods.ExtractUpgradeValue(p, StatUpgradeCategory.CargoCapacity);
+                __result = HelperMethods.ExtractUpgradeValue(vehicle, StatUpgradeCategory.CargoCapacity);
             }
         }
 
-        #endregion
+        #endregion UpgradeStatModifiers
+
+        #region WorldHandling
+        /// <summary>
+        /// Prevent RimWorld Garbage Collection from snatching up VehiclePawn inhabitants and VehicleCaravan's VehiclePawn inhabitants by changing
+        /// the WorldPawnSituation of pawns onboard vehicles
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="__result"></param>
+        public static void SituationBoardedVehicle(Pawn p, ref WorldPawnSituation __result)
+        {
+            if(__result == WorldPawnSituation.Free && p.Faction != null && p.Faction == Faction.OfPlayerSilentFail)
+            {
+                foreach(Map map in Find.Maps)
+                {
+                    foreach(VehiclePawn vehicle in map.mapPawns.AllPawnsSpawned.Where(v => v is VehiclePawn vehicle && v.Faction == Faction.OfPlayer))
+                    {
+                        if(vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.Contains(p))
+                        {
+                            __result = WorldPawnSituation.CaravanMember;
+                            return;
+                        }
+                    }
+                }
+                foreach(Caravan c in Find.WorldObjects.Caravans)
+                {
+                    foreach(VehiclePawn vehicle in c.PawnsListForReading.Where(v => v is VehiclePawn vehicle))
+                    {
+                        if(vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.Contains(p))
+                        {
+                            __result = WorldPawnSituation.CaravanMember;
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Prevent RimWorld Garbage Collection from removing DockedBoats as well as pawns onboard DockedBoat WorldObjects
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
+        public static bool DoNotRemoveDockedBoats(Pawn p)
+        {
+            foreach (DockedBoat obj in Find.WorldObjects.AllWorldObjects.Where(x => x is DockedBoat))
+            {
+                if (obj.dockedBoats.Contains(p))
+                    return false;
+            }
+            foreach(Caravan c in Find.WorldObjects.AllWorldObjects.Where(x => x is Caravan))
+            {
+                foreach(Pawn innerPawn in c.PawnsListForReading)
+                {
+                    if(innerPawn is VehiclePawn vehicle && vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.Contains(p))
+                    {
+                        
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        #endregion WorldHandling
 
         #region Jobs
+        //REDO
+        /// <summary>
+        /// Intercept Error Recover handler of no job, and assign idling for vehicle
+        /// </summary>
+        /// <param name="pawn"></param>
+        /// <param name="message"></param>
+        /// <param name="exception"></param>
+        /// <param name="concreteDriver"></param>
+        /// <returns></returns>
         public static bool VehicleErrorRecoverJob(Pawn pawn, string message, Exception exception = null, JobDriver concreteDriver = null)
         {
-            if(HelperMethods.IsVehicle(pawn))
+            if(pawn.IsVehicle())
             {
-                if (!(pawn.jobs is null))
+                Log.Message("ErrorRecover");
+                if (pawn.jobs != null)
                 {
-                    if (!(pawn.jobs.curJob is null))
+                    if (pawn.jobs.curJob != null)
                     {
                         pawn.jobs.EndCurrentJob(JobCondition.Errored, false);
                     }
@@ -1525,7 +1684,7 @@ namespace Vehicles
                         }
                         else
                         {
-                            pawn.jobs.StartJob(new Job(JobDefOf_Vehicles.IdleShip, 150, false), JobCondition.None, null, false, true, null, null, false);
+                            pawn.jobs.StartJob(new Job(JobDefOf_Vehicles.IdleVehicle, 150, false), JobCondition.None, null, false, true, null, null, false);
                         }  
                     }
                     catch
@@ -1540,9 +1699,10 @@ namespace Vehicles
 
         public static bool VehiclesDontWander(Pawn pawn, ref Job __result)
         {
-            if(HelperMethods.IsVehicle(pawn))
+            if(pawn is VehiclePawn)
             {
-                __result = new Job(JobDefOf_Vehicles.IdleShip);
+                Log.Message("Idle");
+                __result = new Job(JobDefOf_Vehicles.IdleVehicle);
                 return false;
             }
             return true;
@@ -1704,6 +1864,16 @@ namespace Vehicles
             return true;
         }
 
+        public static void AcceptsVehicleRefuelable(Thing t, ref bool __result, ThingRequest __instance)
+        {
+            if(t is VehiclePawn vehicle && __instance.group == ThingRequestGroup.Refuelable)
+            {
+                __result = vehicle.GetCachedComp<CompFueledTravel>() != null;
+            }
+            if (__instance.group == ThingRequestGroup.Refuelable)
+                Log.Message($"Checking {t.LabelShort} Result: {__result}");
+        }
+
         public static IEnumerable<CodeInstruction> AddHumanLikeOrdersLoadVehiclesTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
         {
             List<CodeInstruction> instructionList = instructions.ToList();
@@ -1721,7 +1891,7 @@ namespace Vehicles
                     yield return new CodeInstruction(opcode: OpCodes.Brfalse, jobLabel);
 
                     yield return new CodeInstruction(opcode: OpCodes.Pop);
-                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, AccessTools.Field(typeof(JobDefOf_Vehicles), nameof(JobDefOf_Vehicles.CarryItemToShip)));
+                    yield return new CodeInstruction(opcode: OpCodes.Ldsfld, AccessTools.Field(typeof(JobDefOf_Vehicles), nameof(JobDefOf_Vehicles.CarryItemToVehicle)));
                     int j = i;
                     while(j < instructionList.Count)
                     {
@@ -1772,11 +1942,12 @@ namespace Vehicles
             }
         }
 
+        //REDO
         public static void UpdateDutyOfVehicle(LordToil_PrepareCaravan_GatherAnimals __instance)
         {
             if(__instance.lord.LordJob is LordJob_FormAndSendVehicles)
             {
-                List<Pawn> ships = __instance.lord.ownedPawns.Where(x => !(x.GetComp<CompVehicle>() is null)).ToList();
+                List<Pawn> ships = __instance.lord.ownedPawns.Where(x => x.IsVehicle()).ToList();
                 foreach(Pawn ship in ships)
                 {
                     ship.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_WaitShip);
@@ -1842,19 +2013,19 @@ namespace Vehicles
                             num2++;
                         }
                     }
-                    if(HelperMethods.IsVehicle(pawn))
+                    if(pawn is VehiclePawn vehicle)
                     {
-                        if(pawn.GetComp<CompVehicle>().AllPawnsAboard.AnyNullified())
+                        if(vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.AnyNullified())
                         {
-                            num += pawn.GetComp<CompVehicle>().AllPawnsAboard.FindAll(x => x.IsFreeColonist).Count;
-                            num2 += pawn.GetComp<CompVehicle>().AllPawnsAboard.FindAll(x => x.IsFreeColonist && x.InMentalState).Count;
-                            num3 += pawn.GetComp<CompVehicle>().AllPawnsAboard.FindAll(x => x.IsPrisoner).Count;
-                            num4 += pawn.GetComp<CompVehicle>().AllPawnsAboard.FindAll(x => x.IsPrisoner && x.InMentalState).Count;
-                            num5 += pawn.GetComp<CompVehicle>().AllPawnsAboard.FindAll(x => x.RaceProps.Animal).Count;
-                            num6 += pawn.GetComp<CompVehicle>().AllPawnsAboard.FindAll(x => x.RaceProps.Animal && x.InMentalState).Count;
-                            num7 += pawn.GetComp<CompVehicle>().AllPawnsAboard.FindAll(x => x.RaceProps.Animal && x.RaceProps.packAnimal).Count;
+                            num += vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.FindAll(x => x.IsFreeColonist).Count;
+                            num2 += vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.FindAll(x => x.IsFreeColonist && x.InMentalState).Count;
+                            num3 += vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.FindAll(x => x.IsPrisoner).Count;
+                            num4 += vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.FindAll(x => x.IsPrisoner && x.InMentalState).Count;
+                            num5 += vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.FindAll(x => x.RaceProps.Animal).Count;
+                            num6 += vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.FindAll(x => x.RaceProps.Animal && x.InMentalState).Count;
+                            num7 += vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.FindAll(x => x.RaceProps.Animal && x.RaceProps.packAnimal).Count;
                         }
-                        if(!pawn.GetComp<CompVehicle>().beached)
+                        if(!vehicle.GetCachedComp<CompVehicle>().beached)
                         {
                             numShip++;
                         }
@@ -2132,14 +2303,13 @@ namespace Vehicles
             return true;
         }
 
-        //REDO
         public static bool AllOwnersDownedVehicle(Caravan __instance, ref bool __result)
         {
             if(__instance.PawnsListForReading.AnyNullified(x => HelperMethods.IsVehicle(x)))
             {
-                foreach (Pawn ship in __instance.pawns)
+                foreach (Pawn pawn in __instance.pawns)
                 {
-                    if(HelperMethods.IsVehicle(ship) && (ship?.GetComp<CompVehicle>()?.AllPawnsAboard.All(x => x.Downed) ?? false))
+                    if(pawn is VehiclePawn vehicle && vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.All(x => x.Downed))
                     {
                         __result = true;
                         return false;
@@ -2151,14 +2321,13 @@ namespace Vehicles
             return true;
         }
 
-        //REDO
         public static bool AllOwnersMentalBreakVehicle(Caravan __instance, ref bool __result)
         {
             if(__instance.PawnsListForReading.AnyNullified(x => HelperMethods.IsVehicle(x)))
             {
-                foreach(Pawn ship in __instance.pawns)
+                foreach(Pawn pawn in __instance.pawns)
                 {
-                    if(HelperMethods.IsVehicle(ship) && (ship?.GetComp<CompVehicle>()?.AllPawnsAboard.All(x => x.InMentalState) ?? false))
+                    if(pawn is VehiclePawn vehicle && vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.All(x => x.InMentalState))
                     {
                         __result = true;
                         return false;
@@ -2176,11 +2345,11 @@ namespace Vehicles
         {
             if(__result is false)
             {
-                foreach(Pawn p in __instance.AllPawnsSpawned)
+                foreach(Pawn pawn in __instance.AllPawnsSpawned)
                 {
-                    if(HelperMethods.IsVehicle(p) && p.GetComp<CompVehicle>().AllPawnsAboard.AnyNullified())
+                    if(pawn is VehiclePawn vehicle && vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.AnyNullified())
                     {
-                        foreach (Pawn sailor in p.GetComp<CompVehicle>().AllPawnsAboard)
+                        foreach (Pawn sailor in vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard)
                         {
                             if (!sailor.Downed && sailor.IsColonist)
                             {
@@ -2212,12 +2381,12 @@ namespace Vehicles
             if(HelperMethods.HasVehicle(__instance) && !__instance.PawnsListForReading.AnyNullified(x => !HelperMethods.IsVehicle(x)))
             {
                 __result = false;
-                if(__instance.PawnsListForReading.AnyNullified(x => x.GetComp<CompVehicle>().navigationCategory == NavigationCategory.Manual))
+                if(__instance.PawnsListForReading.AnyNullified(x => x is VehiclePawn vehicle && vehicle.GetCachedComp<CompVehicle>().navigationCategory == NavigationCategory.Manual))
                 {
                     __result = __instance.Spawned && (!__instance.pather.Moving || __instance.pather.nextTile != __instance.pather.Destination || !Caravan_PathFollower.IsValidFinalPushDestination(__instance.pather.Destination) ||
                         Mathf.CeilToInt(__instance.pather.nextTileCostLeft / 1f) > 10000) && CaravanNightRestUtility.RestingNowAt(__instance.Tile);
                 }
-                else if(__instance.PawnsListForReading.AnyNullified(x => x.GetComp<CompVehicle>().navigationCategory == NavigationCategory.Opportunistic))
+                else if(__instance.PawnsListForReading.AnyNullified(x => x is VehiclePawn vehicle && vehicle.GetCachedComp<CompVehicle>().navigationCategory == NavigationCategory.Opportunistic))
                 {
                     __result = __instance.Spawned && (!__instance.pather.Moving || __instance.pather.nextTile != __instance.pather.Destination || !Caravan_PathFollower.IsValidFinalPushDestination(__instance.pather.Destination) ||
                         Mathf.CeilToInt(__instance.pather.nextTileCostLeft / 1f) > 10000) && CaravanNightRestUtility.RestingNowAt(__instance.Tile);
@@ -2298,34 +2467,42 @@ namespace Vehicles
         
         public static void VehicleGearTabPawns(ref List<Pawn> __result)
         {
-            if(HelperMethods.HasVehicle(__result) && __result.All(x => HelperMethods.IsVehicle(x)))
+            if(HelperMethods.HasVehicle(__result))
             {
-                List<Pawn> sailors = new List<Pawn>();
-                foreach(Pawn p in __result)
+                List<Pawn> pawns = new List<Pawn>();
+                foreach(Pawn pawn in __result)
                 {
-                    sailors.AddRange(p.GetComp<CompVehicle>().AllPawnsAboard);
+                    if(pawn is VehiclePawn vehicle)
+                    {
+                        pawns.AddRange(vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard);
+                    }
+                    else
+                    {
+                        pawns.Add(pawn);
+                    }
                 }
-                __result = sailors;
+                __result = pawns;
             }
         }
 
         public static bool VehicleAllInventoryItems(Caravan caravan, ref List<Thing> __result)
         {
-            if(HelperMethods.HasVehicle(caravan) && caravan.PawnsListForReading.All(x => HelperMethods.IsVehicle(x)))
+            if(HelperMethods.HasVehicle(caravan))
             {
                 List<Thing> inventoryItems = new List<Thing>();
-                foreach(Pawn p in caravan.PawnsListForReading)
+                foreach (Pawn pawn in caravan.PawnsListForReading)
                 {
-                    foreach(Thing t in p.inventory.innerContainer)
+                    foreach (Thing t in pawn.inventory.innerContainer)
                     {
                         inventoryItems.Add(t);
                     }
-                    foreach(Pawn sailor in p.GetComp<CompVehicle>().AllPawnsAboard)
+                    if (pawn is VehiclePawn vehicle)
                     {
-                        foreach(Thing t in sailor.inventory.innerContainer)
-                        {
-                            inventoryItems.Add(t);
-                        }
+                        inventoryItems.AddRange(vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.SelectMany(p => p.inventory.innerContainer));
+                    }
+                    else
+                    {
+                        inventoryItems.AddRange(pawn.inventory.innerContainer);
                     }
                 }
                 __result = inventoryItems;
@@ -2356,56 +2533,80 @@ namespace Vehicles
             }
         }
 
-        public static void VehicleHealthTabPawns(ref List<Pawn> __result)
+        public static bool VehicleHealthTabPawns(ref List<Pawn> __result)
         {
-            if(HelperMethods.HasVehicle(__result) && __result.All(x => HelperMethods.IsVehicle(x)))
+            if (Find.WorldSelector.SingleSelectedObject is Caravan caravan && HelperMethods.HasVehicle(caravan))
             {
-                List<Pawn> sailors = new List<Pawn>();
-                foreach (Pawn p in __result)
+                List<Pawn> pawns = new List<Pawn>();
+                foreach (Pawn p in caravan.PawnsListForReading)
                 {
-                    sailors.AddRange(p.GetComp<CompVehicle>().AllPawnsAboard);
-                }
-                __result = sailors;
-            }
-        }
-
-        public static void VehicleSocialTabPawns(ref List<Pawn> __result)
-        {
-            if(HelperMethods.HasVehicle(__result) && __result.AnyNullified(x => HelperMethods.IsVehicle(x)))
-            {
-                List<Pawn> sailors = new List<Pawn>();
-                foreach(Pawn p in __result.Where(x => HelperMethods.IsVehicle(x)))
-                {
-                    sailors.AddRange(p.GetComp<CompVehicle>().AllPawnsAboard.Where(x => x.RaceProps.Humanlike));
-                }
-                sailors.AddRange(__result.Where(x => x.RaceProps.Humanlike));
-                __result = sailors;
-            }
-        }
-
-        public static bool FindVehicleWithBestStat(Caravan caravan, StatDef stat, ref Pawn __result)
-        {
-            if(HelperMethods.HasVehicle(caravan) && caravan.PawnsListForReading.All(x => HelperMethods.IsVehicle(x)))
-            {
-                List<Pawn> pawns = caravan.PawnsListForReading;
-                Pawn pawn = null;
-                float num = -1f;
-                foreach(Pawn s in pawns)
-                {
-                    foreach(Pawn p in s.GetComp<CompVehicle>().AllPawnsAboard.Where(x => !x.Dead && !x.Downed && !x.InMentalState && caravan.IsOwner(x)))
+                    if (p is VehiclePawn vehicle)
                     {
-                        if(!stat.Worker.IsDisabledFor(p))
+                        pawns.AddRange(vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard);
+                    }
+                    else
+                    {
+                        pawns.Add(p);
+                    }
+                }
+                __result = pawns;
+                return false;
+            }
+            return true;
+        }
+
+        public static bool VehicleSocialTabPawns(ref List<Pawn> __result)
+        {
+            if(Find.WorldSelector.SingleSelectedObject is VehicleCaravan caravan && caravan.HasVehicle())
+            {
+                List<Pawn> pawns = new List<Pawn>();
+                foreach(Pawn pawn in caravan.PawnsListForReading)
+                {
+                    if(pawn is VehiclePawn vehicle)
+                    {
+                        pawns.AddRange(vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard);
+                    }
+                    else
+                    {
+                        pawns.Add(pawn);
+                    }
+                }
+                __result = pawns;
+                return false;
+            }
+            return true;
+        }
+
+        public static bool FindPawnInVehicleWithBestStat(Caravan caravan, StatDef stat, ref Pawn __result)
+        {
+            if(HelperMethods.HasVehicle(caravan))
+            {
+                float num = -1f;
+                foreach(Pawn pawn in caravan.PawnsListForReading)
+                {
+                    if(pawn is VehiclePawn vehicle)
+                    {
+                        foreach(Pawn innerPawn in vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.Where(p => !p.Dead && !p.Downed && !p.InMentalState && caravan.IsOwner(p)))
                         {
-                            float statValue = p.GetStatValue(stat, true);
-                            if(pawn is null || statValue > num)
+                            float statValue = innerPawn.GetStatValue(stat, true);
+                            if(__result is null || statValue > num)
                             {
-                                pawn = p;
+                                __result = innerPawn;
                                 num = statValue;
                             }
                         }
                     }
+                    else if(!stat.Worker.IsDisabledFor(pawn))
+                    {
+                        float statValue = pawn.GetStatValue(stat, true);
+                        if(__result is null || statValue > num)
+                        {
+                            __result = pawn;
+                            num = statValue;
+                        }
+                    }
+                    
                 }
-                __result = pawn;
                 return false;
             }
             return true;
@@ -2413,37 +2614,21 @@ namespace Vehicles
 
         public static void ContainsPawnInVehicle(Pawn p, Caravan __instance, ref bool __result)
         {
-            if(__result is false && HelperMethods.HasVehicle(__instance))
+            if(!__result)
             {
-                bool flag = false;
-                List<Pawn> ships = __instance.PawnsListForReading.Where(x => HelperMethods.IsVehicle(x)).ToList();
-                foreach (Pawn ship in ships)
-                {
-                    if(ship.GetComp<CompVehicle>().AllPawnsAboard.Contains(p))
-                    {
-                        flag = true;
-                        break;
-                    }
-                }
-                __result = flag;
+                __result = __instance.PawnsListForReading.Any(v => v is VehiclePawn vehicle && vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.Contains(p));
             }
         }
 
         public static void IsOwnerOfVehicle(Pawn p, Caravan __instance, ref bool __result)
         {
-            if(!__result && HelperMethods.HasVehicle(__instance))
+            if(!__result)
             {
-                foreach(Pawn s in __instance.PawnsListForReading.Where(x => HelperMethods.IsVehicle(x)))
-                {
-                    if(s.GetComp<CompVehicle>().AllPawnsAboard.Contains(p) && CaravanUtility.IsOwner(p, __instance.Faction))
-                    {
-                        __result = true;
-                        return;
-                    }
-                }
+                __result = __instance.PawnsListForReading.Any(v => v is VehiclePawn vehicle && vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.Contains(p) && CaravanUtility.IsOwner(p, __instance.Faction));
             }
         }
 
+        //REDO?
         public static void UnloadVehicleOfferGifts(Caravan caravan)
         {
             if(HelperMethods.HasVehicle(caravan))
@@ -2452,6 +2637,7 @@ namespace Vehicles
             }
         }
 
+        //REDO?
         public static IEnumerable<CodeInstruction> GiveSoldThingToVehicleTranspiler(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> instructionList = instructions.ToList();
@@ -2493,43 +2679,41 @@ namespace Vehicles
             return true;
         }
 
+        //REDO?
         public static bool TrySatisfyVehiclePawnsNeeds(Pawn pawn, Caravan_NeedsTracker __instance)
         {
-            if(HelperMethods.IsVehicle(pawn))
+            if(pawn is VehiclePawn)
             {
                 if (pawn.needs?.AllNeeds.NullOrEmpty() ?? true)
                     return false;
             }
             return true;
         }
-
-        public static bool ApproxTilesForShips(Caravan caravan, StringBuilder explanation = null)
-        {
-            //Continue here
-            return true;
-        }
-
         #endregion Caravan
+
+        #region Raids
+
+        #endregion 
 
         #region Construction
         public static bool CompleteConstructionVehicle(Pawn worker, Frame __instance)
         {
-            if (__instance.def.entityDefToBuild?.GetModExtension<SpawnThingBuilt>()?.thingToSpawn != null)
+            if (__instance.def.entityDefToBuild is VehicleBuildDef def && def.thingToSpawn != null)
             {
-                Pawn ship = PawnGenerator.GeneratePawn(__instance.def.entityDefToBuild.GetModExtension<SpawnThingBuilt>().thingToSpawn);
+                VehiclePawn vehicle = VehicleSpawner.GenerateVehicle(def.thingToSpawn, worker.Faction);
                 __instance.resourceContainer.ClearAndDestroyContents(DestroyMode.Vanish);
                 Map map = __instance.Map;
                 __instance.Destroy(DestroyMode.Vanish);
 
-                if (!(__instance.def.entityDefToBuild.GetModExtension<SpawnThingBuilt>().soundFinished is null))
+                if (def.soundBuilt != null)
                 {
-                    __instance.def.entityDefToBuild.GetModExtension<SpawnThingBuilt>().soundFinished.PlayOneShot(new TargetInfo(__instance.Position, map, false));
+                    def.soundBuilt.PlayOneShot(new TargetInfo(__instance.Position, map, false));
                 }
-                ship.SetFaction(worker.Faction);
-                GenSpawn.Spawn(ship, __instance.Position, map, __instance.Rotation, WipeMode.FullRefund, false);
+                vehicle.SetFaction(worker.Faction);
+                GenSpawn.Spawn(vehicle, __instance.Position, map, __instance.Rotation, WipeMode.FullRefund, false);
                 worker.records.Increment(RecordDefOf.ThingsConstructed);
 
-                ship.GetComp<CompVehicle>().Rename();
+                vehicle.GetCachedComp<CompVehicle>().Rename();
                 //Quality?
                 //Art?
                 //Tale RecordTale LongConstructionProject?
@@ -2540,20 +2724,20 @@ namespace Vehicles
 
         public static bool Notify_RepairedVehicle(Building b, ListerBuildingsRepairable __instance)
         {
-            if (b.def.HasModExtension<SpawnThingBuilt>() && b.def.GetModExtension<SpawnThingBuilt>()?.thingToSpawn != null)
+            if (b is VehicleBuilding building && b.def is VehicleBuildDef vehicleDef && vehicleDef.thingToSpawn != null)
             {
                 if (b.HitPoints < b.MaxHitPoints)
                     return true;
 
-                Pawn ship;
-                if(b.TryGetComp<CompSavePawnReference>()?.pawnReference != null)
+                Pawn vehicle;
+                if(building.vehicleReference != null)
                 {
-                    ship = b.GetComp<CompSavePawnReference>().pawnReference;
-                    ship.health.Reset();
+                    vehicle = building.vehicleReference;
+                    vehicle.health.Reset();
                 }
                 else
                 {
-                    ship = PawnGenerator.GeneratePawn(b.def.GetModExtension<SpawnThingBuilt>().thingToSpawn);
+                    vehicle = PawnGenerator.GeneratePawn(vehicleDef.thingToSpawn);
                 }
                 
                 Map map = b.Map;
@@ -2561,40 +2745,110 @@ namespace Vehicles
                 Rot4 rotation = b.Rotation;
 
                 AccessTools.Method(typeof(ListerBuildingsRepairable), "UpdateBuilding").Invoke(__instance, new object[] { b });
-                if (!(b.def.GetModExtension<SpawnThingBuilt>().soundFinished is null))
+                if (vehicleDef.soundBuilt != null)
                 {
-                    b.def.GetModExtension<SpawnThingBuilt>().soundFinished.PlayOneShot(new TargetInfo(position, map, false));
+                    vehicleDef.soundBuilt.PlayOneShot(new TargetInfo(position, map, false));
                 }
-                if(ship.Faction != Faction.OfPlayer)
+                if(vehicle.Faction != Faction.OfPlayer)
                 {
-                    ship.SetFaction(Faction.OfPlayer);
+                    vehicle.SetFaction(Faction.OfPlayer);
                 }
                 b.Destroy(DestroyMode.Vanish);
-                ship.ForceSetStateToUnspawned();
-                GenSpawn.Spawn(ship, position, map, rotation, WipeMode.FullRefund, false);
+                vehicle.ForceSetStateToUnspawned();
+                GenSpawn.Spawn(vehicle, position, map, rotation, WipeMode.FullRefund, false);
                 return false;
             }
             return true;
         }
 
-        public static bool SpawnVehicleGodMode(Thing newThing, IntVec3 loc, Map map, Rot4 rot, Thing __result, WipeMode wipeMode = WipeMode.Vanish, bool respawningAfterLoad = false)
+        /// <summary>
+        /// Catch All for vehicles spawned in. Handles GodMode placing of vehicle buildings and corrects immovable spawn locations
+        /// </summary>
+        /// <param name="newThing"></param>
+        /// <param name="loc"></param>
+        /// <param name="map"></param>
+        /// <param name="rot"></param>
+        /// <param name="__result"></param>
+        /// <param name="wipeMode"></param>
+        /// <param name="respawningAfterLoad"></param>
+        /// <returns></returns>
+        public static bool SpawnVehicleGodMode(Thing newThing, ref IntVec3 loc, Map map, Rot4 rot, Thing __result, WipeMode wipeMode, bool respawningAfterLoad)
         {
-            if(newThing is VehiclePawn vehicle)
+            if (newThing.def is VehicleBuildDef def)
             {
-                loc = vehicle.ClampToMap(loc, map);
-            }
-            if(!VehicleMod.mod.settings.debugSpawnBoatBuildingGodMode && Prefs.DevMode && DebugSettings.godMode && newThing.def.HasModExtension<SpawnThingBuilt>())
-            {
-                Pawn ship = PawnGenerator.GeneratePawn(newThing.def.GetModExtension<SpawnThingBuilt>().thingToSpawn);
-                if (!(newThing.def.GetModExtension<SpawnThingBuilt>().soundFinished is null))
+                Log.Message("2");
+                if (!VehicleMod.settings.debugSpawnVehicleBuildingGodMode)
                 {
-                    newThing.def.GetModExtension<SpawnThingBuilt>().soundFinished.PlayOneShot(new TargetInfo(loc, map, false));
+                    VehiclePawn vehiclePawn = VehicleSpawner.GenerateVehicle(def.thingToSpawn, newThing.Faction);// (VehiclePawn)PawnGenerator.GeneratePawn(def.thingToSpawn);
+                    
+                    if (def.soundBuilt != null)
+                    {
+                        def.soundBuilt.PlayOneShot(new TargetInfo(loc, map, false));
+                    }
+                    VehiclePawn vehicleSpawned = (VehiclePawn)GenSpawn.Spawn(vehiclePawn, loc, map, rot, WipeMode.FullRefund, false);
+                    vehicleSpawned.GetCachedComp<CompVehicle>().Rename();
+                    __result = vehicleSpawned;
+                    return false;
                 }
-                ship.SetFaction(Faction.OfPlayer);
-                GenSpawn.Spawn(ship, loc, map, rot, WipeMode.FullRefund, false);
-                ship.GetComp<CompVehicle>().Rename();
-                __result = ship;
-                return false;
+            }
+            else if (newThing is VehiclePawn vehicle)
+            {
+                bool standable = true;
+                foreach (IntVec3 c in vehicle.PawnOccupiedCells(loc, rot))
+                {
+                    if (!c.InBounds(map) || (vehicle.IsBoat() ? !GenGridShips.Standable(c, map) : !GenGrid.Standable(c, map)))
+                    {
+                        standable = false;
+                        break;
+                    }
+                }
+                bool validator(IntVec3 c)
+                {
+                    foreach (IntVec3 c2 in vehicle.PawnOccupiedCells(c, rot))
+                    {
+                        if (vehicle.IsBoat() ? !GenGridShips.Standable(c, map) : !GenGrid.Standable(c, map))
+                            return false;
+                    }
+                    return true;
+                }
+                if (standable)
+                    return true;
+                if (!CellFinder.TryFindRandomCellNear(loc, map, 20, validator, out IntVec3 newLoc, 100))
+                {
+                    Log.Error($"Unable to find location to spawn {newThing.LabelShort} after 100 attempts. Aborting spawn.");
+                    return false;
+                }
+                loc = newLoc;
+            }
+            else if (newThing is Pawn pawn && !pawn.Dead)
+            {
+                if (pawn.InsideVehicle(map))
+                {
+                    bool validator(IntVec3 c)
+                    {
+                        return GenGrid.Standable(c, map) && !pawn.InsideVehicle(map);
+                    }
+                    if (CellFinder.TryFindRandomCellNear(loc, map, 10, validator, out IntVec3 newLoc, 100))
+                    {
+                        loc = newLoc;
+                    }
+                }
+            }
+            else
+            {
+                //REDO
+                //var things = map.thingGrid.ThingsListAt(loc);
+                //if (things.AnyNullified(t => t is VehiclePawn))
+                //{
+                //    bool validator(IntVec3 c)
+                //    {
+                //        return GenGrid.Standable(c, map) && !map.thingGrid.ThingsListAt(c).AnyNullified(t => t is VehiclePawn);
+                //    }
+                //    if(CellFinder.TryFindRandomCellNear(loc, map, 20, validator, out IntVec3 newLoc, 100))
+                //    {
+                //        loc = newLoc;
+                //    }
+                //}
             }
             return true;
         }
@@ -2605,12 +2859,12 @@ namespace Vehicles
 
         public static void FreeColonistsInVehiclesTransport(ref int __result, List<Pawn> ___pawnsSpawned)
         {
-            List<Pawn> ships = ___pawnsSpawned.Where(x => HelperMethods.IsVehicle(x) && x.Faction == Faction.OfPlayer).ToList();
+            List<VehiclePawn> vehicles = ___pawnsSpawned.Where(x => x is VehiclePawn vehicle && x.Faction == Faction.OfPlayer).Cast<VehiclePawn>().ToList();
             
-            foreach(Pawn ship in ships)
+            foreach(VehiclePawn vehicle in vehicles)
             {
-                if(ship.GetComp<CompVehicle>().AllPawnsAboard.AnyNullified(x => !x.Dead))
-                    __result += ship.GetComp<CompVehicle>().AllPawnsAboard.Count;
+                if(vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.AnyNullified(x => !x.Dead))
+                    __result += vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.Count;
             }
         }
 
@@ -2641,62 +2895,12 @@ namespace Vehicles
             return true;
         }
 
-        public static void SituationBoardedVehicle(Pawn p, ref WorldPawnSituation __result)
-        {
-            if(__result == WorldPawnSituation.Free && p.Faction != null && p.Faction == Faction.OfPlayerSilentFail)
-            {
-                foreach(Map map in Find.Maps)
-                {
-                    foreach(Pawn ship in map.mapPawns.AllPawnsSpawned.Where(x => HelperMethods.IsVehicle(x) && x.Faction == Faction.OfPlayer))
-                    {
-                        if(ship.GetComp<CompVehicle>().AllPawnsAboard.Contains(p))
-                        {
-                            __result = WorldPawnSituation.CaravanMember;
-                            return;
-                        }
-                    }
-                }
-                foreach(Caravan c in Find.WorldObjects.Caravans)
-                {
-                    foreach(Pawn ship in c.PawnsListForReading.Where(x => HelperMethods.IsVehicle(x)))
-                    {
-                        if(ship.GetComp<CompVehicle>().AllPawnsAboard.Contains(p))
-                        {
-                            __result = WorldPawnSituation.CaravanMember;
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-
         public static bool VehiclesDontParty(Pawn p, ref bool __result)
         {
             if (HelperMethods.IsVehicle(p))
             {
                 __result = false;
                 return false;
-            }
-            return true;
-        }
-
-        public static bool DoNotRemoveDockedBoats(Pawn p)
-        {
-            foreach (DockedBoat obj in Find.WorldObjects.AllWorldObjects.Where(x => x is DockedBoat))
-            {
-                if (obj.dockedBoats.Contains(p))
-                    return false;
-            }
-            foreach(Caravan c in Find.WorldObjects.AllWorldObjects.Where(x => x is Caravan))
-            {
-                foreach(Pawn innerPawn in c.PawnsListForReading)
-                {
-                    if(HelperMethods.IsVehicle(innerPawn) && innerPawn.GetComp<CompVehicle>().AllPawnsAboard.Contains(p))
-                    {
-                        
-                        return false;
-                    }
-                }
             }
             return true;
         }
@@ -2724,5 +2928,6 @@ namespace Vehicles
         internal static List<Pair<int, int>> tiles = new List<Pair<int,int>>(); // Pair -> TileID : Cycle
         internal static readonly bool debug = false;
         internal static readonly bool drawPaths = false;
+        internal const string LogLabel = "[Vehicles]";
     }
 }

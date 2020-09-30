@@ -8,16 +8,8 @@ using Vehicles.Defs;
 
 namespace Vehicles
 {
-    public enum VehiclePermissions {NotAllowed, DriverNeeded, NoDriverNeeded}
-    public enum PowerType { Manual, WindPowered, Steam, Fuel, Nuclear, Archotech}
-    public enum NavigationCategory { Manual, Opportunistic, Automatic }
-    public enum VehicleCategory { Misc, Transport, Trader, Combat, Hybrid }
-    public enum VehicleType { Sea, Air, Land}
-
-    //public enum RiverTraversability { Creek, River, LargeRiver, HugeRiver, Impassable }
     public class CompProperties_Vehicle : CompProperties
     {
-
         public CompProperties_Vehicle()
         {
             compClass = typeof(CompVehicle);
@@ -59,7 +51,7 @@ namespace Vehicles
 
         public bool manhunterTargetsVehicle = false;
 
-        public Vector2 displayUICoord;
+        public Vector2 displayUICoord = Vector2.zero;
         public Vector2 displayUISize;
 
         public string healthLabel_Healthy = "Operational";
@@ -81,6 +73,8 @@ namespace Vehicles
         public float winterPathCostMultiplier = 1f; //Add to guide
         public float worldSpeedMultiplier = 1f;
 
+        public bool controlPathing = true;
+
         public VehiclePermissions vehicleMovementPermissions = VehiclePermissions.DriverNeeded;
         public PowerType vehiclePowerType = PowerType.Fuel;
         public VehicleCategory vehicleCategory = VehicleCategory.Misc;
@@ -88,10 +82,12 @@ namespace Vehicles
         public VehicleType vehicleType = VehicleType.Land;
         public NavigationCategory defaultNavigation = NavigationCategory.Opportunistic;
 
-        public RiverDef riverTraversability = RiverDefOf.HugeRiver;
+        public List<FactionDef> restrictToFactions;
+
+        public RiverDef riverTraversability;
         public List<VehicleRole> roles  = new List<VehicleRole>();
         public SoundDef soundWhileDrafted; //REDO
 
-        public ThingDef buildDef;
+        public VehicleBuildDef buildDef;
     }
 }

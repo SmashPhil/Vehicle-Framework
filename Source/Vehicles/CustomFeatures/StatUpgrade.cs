@@ -11,8 +11,6 @@ using System.Xml;
 
 namespace Vehicles
 {
-    public enum StatUpgradeCategory { Armor, Speed, CargoCapacity, FuelConsumptionRate, FuelCapacity}
-
     public class StatUpgrade : UpgradeNode 
     {
         public Dictionary<StatUpgradeCategory, float> values = new Dictionary<StatUpgradeCategory, float>();
@@ -62,7 +60,7 @@ namespace Vehicles
                 return;
             }
 
-            vehicle.GetCachedComp<CompVehicle>().Props.buildDef.GetModExtension<SpawnThingBuilt>().soundFinished?.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map, false));
+            vehicle.GetCachedComp<CompVehicle>().Props.buildDef.soundBuilt?.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map, false));
         }
 
         public override void Refund(VehiclePawn vehicle)

@@ -22,9 +22,12 @@ namespace Vehicles
         /// Fields relating to ammo
         /// </summary>
         public List<ThingDef> ammoAllowed = new List<ThingDef>();
+
         public int magazineCapacity = 1;
         public int numberCannons = 1;
         public bool genericAmmo = false;
+
+        public float recoil = 0f;
 
         /// <summary>
         /// All fields related to gizmo or cannon related textures
@@ -68,6 +71,7 @@ namespace Vehicles
         /// Fields relating to projectile
         /// </summary>
         public ThingDef projectile;
+        public CustomHitFlags attachProjectileFlag = null;
         public ProjectileHitFlags hitFlags = ProjectileHitFlags.All;
         public float projectileOffset = 0f;
         public List<float> projectileShifting = new List<float>();

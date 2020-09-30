@@ -63,7 +63,7 @@ namespace Vehicles
                 Pawn pawn2 = allPawnsSpawned[i];
                 if (pawn2 != pawn)
                 {
-                    if (pawn2.CurJob != null && pawn2.CurJob.def == JobDefOf_Vehicles.PrepareCaravan_GatheringShip && pawn2.CurJob.lord == lord)
+                    if (pawn2.CurJob != null && pawn2.CurJob.def == JobDefOf_Vehicles.PrepareCaravan_GatheringVehicle && pawn2.CurJob.lord == lord)
                     {
                         Thing toHaul = ((JobDriver_PrepareCaravan_GatheringShip)pawn2.jobs.curDriver).ToHaul;
                         if (transferable.things.Contains(toHaul) || TransferableUtility.TransferAsOne(transferable.AnyThing, toHaul, TransferAsOneMode.PodsOrCaravanPacking))

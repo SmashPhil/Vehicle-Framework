@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <IncidentDef>
+    <defName>RaidEnemy</defName>
+    <label>enemy raid</label>
+    <targetTags>
+      <li>Map_PlayerHome</li>
+    </targetTags>
+    <workerClass>Vehicles.IncidentWorker_ArmoredRaid</workerClass>
+    <baseChance>7.4</baseChance>
+    <category>ThreatBig</category>
+    <pointsScaleable>true</pointsScaleable>
+    <tale>Raid</tale>
+  </IncidentDef>
+</Defs>

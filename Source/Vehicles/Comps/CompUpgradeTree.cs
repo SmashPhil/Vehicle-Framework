@@ -86,7 +86,7 @@ namespace Vehicles
         {
             NodeUnlocking.itemContainer.TryDropAll(Vehicle.Position, Vehicle.Map, ThingPlaceMode.Near);
             NodeUnlocking.ResetNode();
-            Vehicle.Map.GetComponent<VehicleReservationManager>().ClearReservedFor(Vehicle);
+            Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(Vehicle);
         }
 
         public void StartUnlock(UpgradeNode node)
@@ -139,6 +139,32 @@ namespace Vehicles
                 {
                     NodeUnlocking.Upgrade(Vehicle);
                     NodeUnlocking.upgradeActive = true;
+                }
+            }
+        }
+
+        public override void CompTickRare()
+        {
+            base.CompTickRare();
+            if (Vehicle.Spawned)
+            {
+                if (NodeUnlocking != null)
+                {
+                    if (NodeUnlocking.StoredCostSatisfied)
+                    {
+                        Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RegisterLister(Vehicle, VehicleRequest.Upgrade);
+                        Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Vehicle, VehicleRequest.Packing);
+                    }
+                    else
+                    {
+                        Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RegisterLister(Vehicle, VehicleRequest.Packing);
+                        Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Vehicle, VehicleRequest.Upgrade);
+                    }
+                }
+                else
+                {
+                    Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Vehicle, VehicleRequest.Packing);
+                    Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Vehicle, VehicleRequest.Packing);
                 }
             }
         }

@@ -27,7 +27,7 @@ namespace Vehicles
 
         public VehicleHandler(VehiclePawn vehiclePawn)
         {
-            uniqueID = Current.Game.GetComponent<VehicleIdManager>().GetNextHandlerId();
+            uniqueID = Current.Game.GetCachedGameComponent<VehicleIdManager>().GetNextHandlerId();
             this.vehiclePawn = vehiclePawn;
             if(handlers is null)
             {
@@ -38,7 +38,7 @@ namespace Vehicles
         public VehicleHandler(VehiclePawn vehiclePawn, VehicleRole newRole)
         {
             List<Pawn> newHandlers = new List<Pawn>();
-            uniqueID = Current.Game.GetComponent<VehicleIdManager>().GetNextHandlerId();
+            uniqueID = Current.Game.GetCachedGameComponent<VehicleIdManager>().GetNextHandlerId();
             this.vehiclePawn = vehiclePawn;
             role = new VehicleRole(newRole);
             if (handlers is null)
@@ -61,7 +61,7 @@ namespace Vehicles
         {
             get
             {
-                bool reservation = vehiclePawn.Map?.GetComponent<VehicleReservationManager>().CanReserve<VehicleHandler, VehicleHandlerReservation>(vehiclePawn, null, this) ?? true;
+                bool reservation = vehiclePawn.Map?.GetCachedMapComponent<VehicleReservationManager>().CanReserve<VehicleHandler, VehicleHandlerReservation>(vehiclePawn, null, this) ?? true;
                 return role != null &&  reservation && handlers.Count < role.slots;
             }
         }

@@ -11,24 +11,26 @@ namespace Vehicles.UI
     {
         public ITab_Vehicle_Passengers()
         {
-            this.size = new Vector2(520f, 450f);
-            this.labelKey = "TabPassengers";
+            size = new Vector2(520f, 450f);
+            labelKey = "TabPassengers";
         }
+
+        public VehiclePawn SelVehicle => SelPawn as VehiclePawn;
 
         public override bool IsVisible
         {
             get
             {
-                return !(base.SelPawn.Faction is null) && !(base.SelPawn.TryGetComp<CompVehicle>() is null) && !base.SelPawn.GetComp<CompVehicle>().beached;
+                return !SelVehicle.GetCachedComp<CompVehicle>().beached;
             }
         }
 
-        private float SpecificNeedsTabWidth => this.specificNeedsTabForPawn.DestroyedOrNull() ? 0f : NeedsCardUtility.GetSize(this.specificNeedsTabForPawn).x;
+        private float SpecificNeedsTabWidth => specificNeedsTabForPawn.DestroyedOrNull() ? 0f : NeedsCardUtility.GetSize(specificNeedsTabForPawn).x;
         private List<Pawn> Passengers
         {
             get
             {
-                return base.SelPawn.TryGetComp<CompVehicle>() is null ? new List<Pawn>() : base.SelPawn.GetComp<CompVehicle>().Passengers;
+                return SelVehicle.GetCachedComp<CompVehicle>().Passengers;
             }
         }
 
@@ -36,20 +38,21 @@ namespace Vehicles.UI
         {
             get
             {
-                return base.SelPawn.TryGetComp<CompVehicle>() is null ? new List<Pawn>() : base.SelPawn.GetComp<CompVehicle>().AllPawnsAboard;
+                return SelVehicle.GetCachedComp<CompVehicle>().AllPawnsAboard;
             }
         }
+
         private List<VehicleHandler> Handlers
         {
             get
             {
-                return base.SelPawn.TryGetComp<CompVehicle>()?.handlers;
+                return SelVehicle.GetCachedComp<CompVehicle>().handlers;
             }
         }
 
         protected override void FillTab()
         {
-            this.EnsureSpecificNeedsTabForPawnValid();
+            EnsureSpecificNeedsTabForPawnValid();
 
             Text.Font = GameFont.Small;
             Rect rect = new Rect(0f, 0f, size.x, size.y).ContractedBy(10f);
@@ -57,13 +60,12 @@ namespace Vehicles.UI
             Widgets.BeginScrollView(rect, ref scrollPosition, viewRect, true);
             float num = 0f;
             bool flag = false;
+
             foreach(VehicleHandler handler in Handlers)
             {
                 Widgets.ListSeparator(ref num, viewRect.width, handler.role.label);
                 foreach(Pawn pawn in handler.handlers.InnerListForReading)
                 {
-                    if(!pawn.IsColonist)
-                        continue;
                     DoRow(ref num, viewRect, rect, scrollPosition, pawn, ref specificNeedsTabForPawn);
                 }
             }
@@ -123,13 +125,13 @@ namespace Vehicles.UI
             PawnNeedsUIUtility.SortInDisplayOrder(tmpNeeds);
 
             float xMax = bgRect.xMax;
-            foreach(Need need in tmpNeeds)
+            foreach (Need need in tmpNeeds)
             {
                 int maxThresholdMarkers = 0;
                 bool doTooltip = true;
                 Rect rect4 = new Rect(xMax, 0f, 100f, 50f);
                 Need_Mood mood = need as Need_Mood;
-                if(!(mood is null))
+                if (mood != null)
                 {
                     maxThresholdMarkers = 1;
                     doTooltip = false;
@@ -173,11 +175,11 @@ namespace Vehicles.UI
 
         protected override void UpdateSize()
         {
-            this.EnsureSpecificNeedsTabForPawnValid();
+            EnsureSpecificNeedsTabForPawnValid();
             base.UpdateSize();
 
-            this.size = GetSize(AllAboard, this.PaneTopY, true);
-            this.size.y = Mathf.Max(this.size.y, NeedsCardUtility.FullSize.y);
+            size = GetSize(AllAboard, PaneTopY, true);
+            size.y = Mathf.Max(size.y, NeedsCardUtility.FullSize.y);
         }
 
         private static Vector2 GetSize(List<Pawn> pawns, float paneTopY, bool doNeeds = true)
@@ -185,7 +187,7 @@ namespace Vehicles.UI
             float num = 100f;
             if (doNeeds)
             {
-                num += (float)MaxNeedsCount(pawns) * 100f;
+                num += MaxNeedsCount(pawns) * 100f;
             }
             num += 24f;
             Vector2 result;

@@ -21,7 +21,7 @@ namespace Vehicles.Jobs
             {
                 return null;
             }
-            return new Job(JobDefOf_Vehicles.PrepareCaravan_GatheringShip, thing)
+            return new Job(JobDefOf_Vehicles.PrepareCaravan_GatheringVehicle, thing)
             {
                 lord = lord
             };

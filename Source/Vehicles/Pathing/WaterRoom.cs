@@ -126,7 +126,7 @@ namespace Vehicles
             }
             if (this.regions.Count == 1)
             {
-                WaterMapUtility.GetExtensionToMap(this.Map).getWaterRegionGrid.allRooms.Add(this);
+                WaterMapUtility.GetExtensionToMap(this.Map).WaterRegionGrid.allRooms.Add(this);
             }
         }
 
@@ -154,7 +154,7 @@ namespace Vehicles
                 /*this.cachedOpenRoofCount = -1;
                 this.cachedOpenRoofState = null;
                 this.statsAndRoleDirty = true;*/
-                WaterMapUtility.GetExtensionToMap(this.Map).getWaterRegionGrid.allRooms.Remove(this);
+                WaterMapUtility.GetExtensionToMap(this.Map).WaterRegionGrid.allRooms.Remove(this);
             }
         }
 

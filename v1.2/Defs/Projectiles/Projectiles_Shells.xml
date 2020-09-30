@@ -6,25 +6,25 @@
     <label>Mk6A</label>
     <description>Mk6A Capped Common-Pointed shell filled Shellite 70/30</description>
     <graphicData>
-      <texPath>Projectiles/Shells/Mk6A_Shell</texPath>
-      <graphicClass>Graphic_StackCount</graphicClass>
+		<texPath>Projectiles/Shells/Mk6A_Shell</texPath>
+		<graphicClass>Graphic_StackCount</graphicClass>
     </graphicData>
     <comps>
-      <li Class="CompProperties_Explosive">
-        <explosiveRadius>3</explosiveRadius>
-        <explosiveDamageType>Bomb</explosiveDamageType>
-        <explosiveExpandPerStackcount>0.4</explosiveExpandPerStackcount>
-        <startWickHitPointsPercent>0.7</startWickHitPointsPercent>
-        <wickTicks>30~60</wickTicks>
-      </li>
+		<li Class="CompProperties_Explosive">
+			<explosiveRadius>3</explosiveRadius>
+			<explosiveDamageType>Bomb</explosiveDamageType>
+			<explosiveExpandPerStackcount>0.4</explosiveExpandPerStackcount>
+			<startWickHitPointsPercent>0.7</startWickHitPointsPercent>
+			<wickTicks>30~60</wickTicks>
+		</li>
     </comps>
     <projectileWhenLoaded>MarkX_Mk6A</projectileWhenLoaded>
     <costList>
-      <Steel>45</Steel>
-      <Chemfuel>30</Chemfuel>
+		<Steel>45</Steel>
+		<Chemfuel>30</Chemfuel>
     </costList>
     <recipeMaker>
-      <researchPrerequisite>Mortars</researchPrerequisite>
+		<researchPrerequisite>Mortars</researchPrerequisite>
     </recipeMaker>
   </ThingDef>
 
@@ -37,7 +37,7 @@
 			<shaderType>TransparentPostLight</shaderType>
 			<drawSize>(0.3, 1.2)</drawSize>
 		</graphicData>
-		<thingClass>Projectile_Explosive</thingClass>
+		<thingClass>Vehicles.Projectile_Explosive_CustomFlags</thingClass>
 		<projectile>
 			<damageDef>MarkX_Mk6A_Damage</damageDef>
 			<speed>150</speed>
@@ -55,25 +55,25 @@
     <label>MkXA</label>
     <description>MkXA Capped Armor-Piercing shell filled with TNT</description>
     <graphicData>
-      <texPath>Projectiles/Shells/MkXA_Shell</texPath>
-      <graphicClass>Graphic_StackCount</graphicClass>
+		<texPath>Projectiles/Shells/MkXA_Shell</texPath>
+		<graphicClass>Graphic_StackCount</graphicClass>
     </graphicData>
     <comps>
-      <li Class="CompProperties_Explosive">
-        <explosiveRadius>4</explosiveRadius>
-        <explosiveDamageType>Bomb</explosiveDamageType>
-        <explosiveExpandPerStackcount>0.5</explosiveExpandPerStackcount>
-        <startWickHitPointsPercent>0.7</startWickHitPointsPercent>
-        <wickTicks>30~60</wickTicks>
-      </li>
+		<li Class="CompProperties_Explosive">
+			<explosiveRadius>4</explosiveRadius>
+			<explosiveDamageType>Bomb</explosiveDamageType>
+			<explosiveExpandPerStackcount>0.5</explosiveExpandPerStackcount>
+			<startWickHitPointsPercent>0.7</startWickHitPointsPercent>
+			<wickTicks>30~60</wickTicks>
+		</li>
     </comps>
     <projectileWhenLoaded>MarkX_MkXA</projectileWhenLoaded>
     <costList>
-      <Steel>55</Steel>
-      <Chemfuel>20</Chemfuel>
+		<Steel>55</Steel>
+		<Chemfuel>20</Chemfuel>
     </costList>
     <recipeMaker>
-      <researchPrerequisite>Mortars</researchPrerequisite>
+		<researchPrerequisite>Mortars</researchPrerequisite>
     </recipeMaker>
   </ThingDef>
 
@@ -86,10 +86,10 @@
 			<shaderType>TransparentPostLight</shaderType>
 			<drawSize>(0.3, 1.2)</drawSize>
 		</graphicData>
-		<thingClass>Projectile_Explosive</thingClass>
+		<thingClass>Vehicles.Projectile_Explosive_CustomFlags</thingClass>
 		<projectile>
 			<damageDef>MarkX_MkXA_Damage</damageDef>
-			<speed>150</speed>
+			<speed>200</speed>
 			<explosionRadius>4</explosionRadius>
 			<flyOverhead>false</flyOverhead>
 			<soundHitThickRoof>Artillery_HitThickRoof</soundHitThickRoof>

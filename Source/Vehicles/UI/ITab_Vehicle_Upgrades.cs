@@ -39,7 +39,7 @@ namespace Vehicles.UI
             get
             {
                 //if(mainTex is null) //Redo?
-                mainTex = ContentFinder<Texture2D>.Get(SelPawnUpgrade.kindDef.lifeStages.FirstOrDefault().bodyGraphicData.texPath + "_north", true);
+                mainTex = ContentFinder<Texture2D>.Get(SelPawnUpgrade.ageTracker.CurKindLifeStage.bodyGraphicData.texPath + "_north", true);
                 return mainTex;
             }
         }
@@ -66,9 +66,9 @@ namespace Vehicles.UI
 
             Rect upgradeButtonRect = new Rect(screenWidth - BottomDisplayedOffset - 80f, BottomWindowEdge - 30f, 75f, 25f);
             Rect cancelButtonRect = new Rect(LeftWindowEdge + 5f, BottomWindowEdge - 30f, 75f, 25f);
-            Rect displayRect = new Rect(SelPawnUpgrade.GetCachedComp<CompUpgradeTree>().Props.displayUICoord.x, SelPawnUpgrade.GetCachedComp<CompUpgradeTree>().Props.displayUICoord.y, SelPawnUpgrade.GetCachedComp<CompUpgradeTree>().Props.displayUISize.x, SelPawnUpgrade.GetCachedComp<CompUpgradeTree>().Props.displayUISize.y);
+            Rect displayRect = new Rect(SelPawnUpgrade.GetCachedComp<CompUpgradeTree>().Props.displayUICoord.x, SelPawnUpgrade.GetCachedComp<CompUpgradeTree>().Props.displayUICoord.y, SelPawnUpgrade.GetCachedComp<CompVehicle>().Props.displayUISize.x, SelPawnUpgrade.GetCachedComp<CompVehicle>().Props.displayUISize.y);
 
-            if(VehicleMod.mod.settings.debugDrawNodeGrid)
+            if(VehicleMod.settings.debugDrawNodeGrid)
             {
                 DrawBackgroundGrid();
             }
@@ -271,7 +271,7 @@ namespace Vehicles.UI
 
             Rect labelRect = new Rect(0f, 0f, rect2.width - 16f, 20f);
 
-            if(!VehicleMod.mod.settings.debugDrawNodeGrid)
+            if(!VehicleMod.settings.debugDrawNodeGrid)
             {
                 Widgets.Label(labelRect, SelPawnUpgrade.Label);
             }
@@ -286,20 +286,20 @@ namespace Vehicles.UI
             Widgets.DrawLineVertical(0, TopViewPadding, screenHeight);
             Widgets.DrawLineVertical(screenWidth - BottomDisplayedOffset - 1f, TopViewPadding, screenHeight);
             
-            if(VehicleMod.mod.settings.drawUpgradeInformationScreen)
+            if(VehicleMod.settings.drawUpgradeInformationScreen)
                 Widgets.DrawLineVertical(LeftWindowEdge, TopViewPadding, screenHeight);
             GUI.color = lineColor;
 
-            if(VehicleMod.mod.settings.drawUpgradeInformationScreen)
+            if(VehicleMod.settings.drawUpgradeInformationScreen)
             {
                 if(SelPawnUpgrade != null)
                 {
                     try
                     {
-                        Material mat = SelPawnUpgrade.VehicleGraphic.MatAt(Rot4.North, SelPawnUpgrade);
-                        GenUI.DrawTextureWithMaterial(displayRect, VehicleTexture, mat);
+                        Vector2 display = SelPawnUpgrade.GetCachedComp<CompUpgradeTree>().Props.displayUICoord;
+                        HelperMethods.DrawVehicleTex(new Rect(display.x, display.y, 1, 1), VehicleTexture, SelPawnUpgrade, SelPawnUpgrade.selectedMask, true, SelPawnUpgrade.DrawColor, SelPawnUpgrade.DrawColorTwo);
 
-                        if(VehicleMod.mod.settings.debugDrawCannonGrid)
+                        if(VehicleMod.settings.debugDrawCannonGrid)
                         {
                             Widgets.DrawLineHorizontal(displayRect.x, displayRect.y, displayRect.width);
                             Widgets.DrawLineHorizontal(displayRect.x, displayRect.y + displayRect.height, displayRect.width);
@@ -311,7 +311,7 @@ namespace Vehicles.UI
                                 resizeCheck = true;
                             }
                         }
-                        if(VehicleMod.mod.settings.debugDrawNodeGrid)
+                        if(VehicleMod.settings.debugDrawNodeGrid)
                         {
                             Widgets.DrawLineHorizontal(LeftWindowEdge, 70f, screenWidth - LeftWindowEdge);
                             int lineCount = (int)(screenWidth - LeftWindowEdge) / 10;
@@ -324,11 +324,6 @@ namespace Vehicles.UI
                             GUI.color = Color.red;
                             Widgets.DrawLineVertical(LeftWindowEdge + (((screenWidth - BottomDisplayedOffset) - LeftWindowEdge) / 2), 70f, 12f);
                             GUI.color = color;
-                        }
-
-                        if (SelPawnUpgrade.GetCachedComp<CompCannons>() != null)
-                        {
-                            SelPawnUpgrade.DrawCannonTextures(displayRect, SelPawnUpgrade.GetCachedComp<CompCannons>().Cannons.OrderBy(x => x.drawLayer), true); 
                         }
 
                         SelPawnUpgrade.GetCachedComp<CompUpgradeTree>().upgradeList.Where(u => u.upgradePurchased && u.upgradeActive).ForEach(u => u.DrawExtraOnGUI(displayRect));
@@ -355,7 +350,7 @@ namespace Vehicles.UI
                 Rect greyedViewRect = new Rect(0, TopViewPadding, LeftWindowEdge, BottomWindowEdge - TopViewPadding);
                 Widgets.DrawBoxSolid(greyedViewRect, LockScreenColor);
                 Rect greyedLabelRect = new Rect(LeftWindowEdge / 2 - 17f, (BottomWindowEdge - TopViewPadding) / 2, 100f, 100f);
-                string timeFormatted = VehicleMod.mod.settings.useInGameTime ? RimworldTime.TicksToGameTime(SelPawnUpgrade.GetCachedComp<CompUpgradeTree>().TimeLeftUpgrading) : RimworldTime.TicksToRealTime(SelPawnUpgrade.GetCachedComp<CompUpgradeTree>().TimeLeftUpgrading);
+                string timeFormatted = VehicleMod.settings.useInGameTime ? RimworldTime.TicksToGameTime(SelPawnUpgrade.GetCachedComp<CompUpgradeTree>().TimeLeftUpgrading) : RimworldTime.TicksToRealTime(SelPawnUpgrade.GetCachedComp<CompUpgradeTree>().TimeLeftUpgrading);
                 timeFormatted = SelPawnUpgrade.GetCachedComp<CompUpgradeTree>().TimeLeftUpgrading.ToString();
                 Widgets.Label(greyedLabelRect, timeFormatted);
 
@@ -423,7 +418,7 @@ namespace Vehicles.UI
             else
             {
                 Rect timeRect = new Rect(5f, screenHeight - SideDisplayedOffset * 2, LeftWindowEdge, 20f);
-                string timeForUpgrade = VehicleMod.mod.settings.useInGameTime ? RimworldTime.TicksToGameTime(node.UpgradeTimeParsed) : RimworldTime.TicksToRealTime(node.UpgradeTimeParsed);
+                string timeForUpgrade = VehicleMod.settings.useInGameTime ? RimworldTime.TicksToGameTime(node.UpgradeTimeParsed) : RimworldTime.TicksToRealTime(node.UpgradeTimeParsed);
                 Widgets.Label(timeRect, timeForUpgrade);
                 foreach(IngredientFilter ingredient in node.ingredients)
                 {

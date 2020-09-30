@@ -65,12 +65,12 @@ namespace Vehicles.Lords
             {
                 foreach(Pawn pawn in pawns.Where(p => !vehicleAssigned.ContainsKey(p)))
                 {
-                    VehiclePawn nextAvailableVehicle = vehicles.FirstOrDefault(v => v.GetComp<CompVehicle>().SeatsAvailable > 0);
+                    VehiclePawn nextAvailableVehicle = vehicles.FirstOrDefault(v => v.GetCachedComp<CompVehicle>().SeatsAvailable > 0);
                     if(nextAvailableVehicle is null)
                     {
                         return false;
                     }
-                    vehicleAssigned.Add(pawn, new Pair<VehiclePawn, VehicleHandler>(nextAvailableVehicle, nextAvailableVehicle.GetComp<CompVehicle>().NextAvailableHandler()));
+                    vehicleAssigned.Add(pawn, new Pair<VehiclePawn, VehicleHandler>(nextAvailableVehicle, nextAvailableVehicle.GetCachedComp<CompVehicle>().NextAvailableHandler()));
                 }
             }
             else
@@ -91,7 +91,7 @@ namespace Vehicles.Lords
         public bool AssignSeats(VehiclePawn vehicle)
         {
             int iterations = 0;
-            while(vehicleAssigned.Where(k => k.Value.First == vehicle).Select(p => p.Key).Count() < vehicle.GetComp<CompVehicle>().PawnCountToOperateLeft)
+            while(vehicleAssigned.Where(k => k.Value.First == vehicle).Select(p => p.Key).Count() < vehicle.GetCachedComp<CompVehicle>().PawnCountToOperateLeft)
             {
                 if (iterations > 200)
                 {
@@ -105,7 +105,7 @@ namespace Vehicles.Lords
                     return false;
                 }
                 
-                vehicleAssigned.Add(nextToAssign, new Pair<VehiclePawn, VehicleHandler>(vehicle, vehicle.GetComp<CompVehicle>().NextAvailableHandler(HandlingTypeFlags.Movement)));
+                vehicleAssigned.Add(nextToAssign, new Pair<VehiclePawn, VehicleHandler>(vehicle, vehicle.GetCachedComp<CompVehicle>().NextAvailableHandler(HandlingTypeFlags.Movement)));
 
                 iterations++;
             }
@@ -116,7 +116,7 @@ namespace Vehicles.Lords
         {
             foreach(VehiclePawn vehicle in vehicles)
             {
-                if(vehicleAssigned.Where(k => k.Value.First == vehicle).Select(p => p.Key).Count() < vehicle.GetComp<CompVehicle>().PawnCountToOperateLeft)
+                if(vehicleAssigned.Where(k => k.Value.First == vehicle).Select(p => p.Key).Count() < vehicle.GetCachedComp<CompVehicle>().PawnCountToOperateLeft)
                 {
                     if(!AssignSeats(vehicle))
                     {

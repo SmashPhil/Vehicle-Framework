@@ -14,11 +14,11 @@ namespace Vehicles.Jobs
         {
             if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
                 return null;
-            Pawn pawn2 = this.FindPrisoner(pawn);
+            Pawn pawn2 = FindPrisoner(pawn);
             if (pawn2 is null)
                 return null;
-            Pawn ship = this.FindShipToDeposit(pawn, pawn2);
-            VehicleHandler handler = ship.GetComp<CompVehicle>().handlers.Find(x => x.role.handlingTypes.NullOrEmpty());
+            VehiclePawn vehicle = FindShipToDeposit(pawn, pawn2);
+            VehicleHandler handler = vehicle.GetCachedComp<CompVehicle>().handlers.Find(x => x.role.handlingTypes.NullOrEmpty());
             return new Job(JobDefOf.PrepareCaravan_GatherPawns, pawn2)
             {
                 count = 1
@@ -42,10 +42,10 @@ namespace Vehicles.Jobs
             return null;
         }
 
-        private Pawn FindShipToDeposit(Pawn pawn, Pawn downedPawn)
+        private VehiclePawn FindShipToDeposit(Pawn pawn, Pawn downedPawn)
         {
-            List<Pawn> ships = pawn.GetLord().ownedPawns.Where(x => HelperMethods.IsVehicle(x)).ToList();
-            return ships.MaxBy(x => x.GetComp<CompVehicle>().Props.roles.Find(y => y.handlingTypes.NullOrEmpty()).slots);
+            List<VehiclePawn> vehicles = pawn.GetLord().ownedPawns.Where(x => x is VehiclePawn).Cast<VehiclePawn>().ToList();
+            return vehicles.MaxBy(x => x.GetCachedComp<CompVehicle>().Props.roles.Find(y => y.handlingTypes.NullOrEmpty()).slots);
         }
     }
 }

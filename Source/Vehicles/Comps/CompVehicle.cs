@@ -3,20 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using RimWorld.Planet;
-using Vehicles.Build;
 using Vehicles.Defs;
 using Vehicles.Lords;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
-
+using Vehicles.UI;
 
 namespace Vehicles
 {
-    public enum VehicleMovementStatus { Offline, Online }
-
-    public class CompVehicle : ThingComp
+    public class CompVehicle : VehicleComp
     {
         public List<Jobs.Bill_BoardShip> bills = new List<Jobs.Bill_BoardShip>();
 
@@ -27,6 +24,8 @@ namespace Vehicles
         private float bearingAngle;
         private int turnSign;
         public float turnSpeed;
+
+        public int transporterId = -1;
 
         private List<IntVec3> currentTravelCells;
         public List<TransferableOneWay> cargoToLoad;
@@ -44,13 +43,15 @@ namespace Vehicles
         public bool CanMove => (Props.vehicleMovementPermissions > VehiclePermissions.DriverNeeded || MovementHandlerAvailable) && movementStatus == VehicleMovementStatus.Online;
 
         public VehiclePawn Pawn => parent as VehiclePawn;
-        public CompProperties_Vehicle Props => (CompProperties_Vehicle)this.props;
+        public CompProperties_Vehicle Props => (CompProperties_Vehicle)props;
 
         private float cargoCapacity;
         private float armorPoints;
         private float moveSpeedModifier;
 
-        public float ActualMoveSpeed => this.Pawn.GetStatValue(StatDefOf.MoveSpeed, true) + MoveSpeedModifier;
+        public float ActualMoveSpeed => Pawn.def.statBases.FirstOrDefault(m => m.stat == StatDefOf.MoveSpeed).value + MoveSpeedModifier;
+
+        public bool LoadingInProgress => transporterId > 0;
 
         public float ArmorPoints
         {
@@ -338,9 +339,9 @@ namespace Vehicles
             }
         }
         
-        public void Recolor()
+        public void ChangeColor()
         {
-            Log.Message("COLOR");
+            Find.WindowStack.Add(new Dialog_ColorPicker(Pawn));
         }
 
         public void EnqueueCellImmediate(IntVec3 cell)
@@ -386,7 +387,7 @@ namespace Vehicles
                     {
                         Command_Action cancelLoad = new Command_Action();
                         cancelLoad.defaultLabel = "DesignatorCancel".Translate();
-                        cancelLoad.icon = TexCommandVehicles.CancelPackCargoIcon;
+                        cancelLoad.icon = VehicleTex.CancelPackCargoIcon;
                         cancelLoad.action = delegate ()
                         {
                             cargoToLoad.Clear();
@@ -398,7 +399,7 @@ namespace Vehicles
                 {
                     Command_Action loadShip = new Command_Action();
                     loadShip.defaultLabel = "LoadShip".Translate();
-                    loadShip.icon = TexCommandVehicles.PackCargoIcon;
+                    loadShip.icon = VehicleTex.PackCargoIcon;
                     loadShip.action = delegate ()
                     {
                         Find.WindowStack.Add(new Dialog_LoadCargo(Pawn));
@@ -410,7 +411,7 @@ namespace Vehicles
                 {
                     Command_Action unloadAll = new Command_Action();
                     unloadAll.defaultLabel = "Disembark".Translate();
-                    unloadAll.icon = TexCommandVehicles.UnloadAll;
+                    unloadAll.icon = VehicleTex.UnloadAll;
                     unloadAll.action = delegate ()
                     {
                         DisembarkAll();
@@ -426,7 +427,7 @@ namespace Vehicles
                             Pawn currentPawn = handler.handlers.InnerListForReading[i];
                             Command_Action unload = new Command_Action();
                             unload.defaultLabel = "Unload " + currentPawn.LabelShort;
-                            unload.icon = TexCommandVehicles.UnloadPassenger;
+                            unload.icon = VehicleTex.UnloadPassenger;
                             unload.action = delegate ()
                             {
                                 DisembarkPawn(currentPawn);
@@ -434,13 +435,13 @@ namespace Vehicles
                             yield return unload;
                         }
                     }
-                    if(this.Props.fishing && FishingCompatibility.fishingActivated)
+                    if (this.Props.fishing && FishingCompatibility.fishingActivated)
                     {
                         Command_Toggle fishing = new Command_Toggle
                         {
                             defaultLabel = "BoatFishing".Translate(),
                             defaultDesc = "BoatFishingDesc".Translate(),
-                            icon = TexCommandVehicles.FishingIcon,
+                            icon = VehicleTex.FishingIcon,
                             isActive = (() => this.currentlyFishing),
                             toggleAction = delegate ()
                             {
@@ -450,13 +451,13 @@ namespace Vehicles
                         yield return fishing;
                     }
                 }
-                if(this.Pawn.GetLord()?.LordJob is LordJob_FormAndSendVehicles)
+                if (this.Pawn.GetLord()?.LordJob is LordJob_FormAndSendVehicles)
                 {
                     Command_Action forceCaravanLeave = new Command_Action
                     {
                         defaultLabel = "ForceLeaveCaravan".Translate(),
                         defaultDesc = "ForceLeaveCaravanDesc".Translate(),
-                        icon = TexCommandVehicles.CaravanIcon,
+                        icon = VehicleTex.CaravanIcon,
                         action = delegate ()
                         {
                             (this.Pawn.GetLord().LordJob as LordJob_FormAndSendVehicles).ForceCaravanLeave = true;
@@ -464,6 +465,28 @@ namespace Vehicles
                         }
                     };
                     yield return forceCaravanLeave;
+                }
+                if (Props.vehicleType == VehicleType.Air)
+                {
+                    if (LoadingInProgress)
+                    {
+                        Command_Action takeoff = new Command_Action
+                        {
+                            defaultLabel = "VehicleTakeoff".Translate(),
+                            defaultDesc = "VehicleTakeoffDesc".Translate(),
+                            icon = BaseContent.BadTex,
+                            action = delegate()
+                            {
+
+                            }
+                        };
+                    }
+                    else
+                    {
+                        Command_LoadToTransporter command_LoadToTransporter = new Command_LoadToTransporter();
+                        command_LoadToTransporter.defaultLabel = "CommandLoadTransporterSingle".Translate();
+                        command_LoadToTransporter.defaultDesc = "CommandLoadTransporterSingleDesc".Translate();
+                    }
                 }
             }
             yield break;
@@ -477,13 +500,13 @@ namespace Vehicles
                 List<IntVec3> cells = this.Pawn.OccupiedRect().Cells.ToList();
                 foreach (Pawn p in pawns)
                 {
-                    if(cells.Contains(p.Position))
+                    if (cells.Contains(p.Position))
                         continue;
                     Job job = new Job(JobDefOf_Vehicles.Board, this.parent);
                     p.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
                     VehicleHandler handler = p.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(h => h.AreSlotsAvailable && h.role.handlingTypes.NullOrEmpty());
                     GiveLoadJob(p, handler);
-                    this.Pawn.Map.GetComponent<VehicleReservationManager>().Reserve<VehicleHandler, VehicleHandlerReservation>(this.Pawn, p, job, handler, 999);
+                    this.Pawn.Map.GetCachedMapComponent<VehicleReservationManager>().Reserve<VehicleHandler, VehicleHandlerReservation>(this.Pawn, p, job, handler, 999);
                 }
             }, MenuOptionPriority.Default, null, null, 0f, null, null);
             FloatMenuOption opt2 = new FloatMenuOption("BoardShipGroupFail".Translate(this.Pawn.LabelShort), null, MenuOptionPriority.Default, null, null, 0f, null, null);
@@ -491,7 +514,7 @@ namespace Vehicles
             int r = 0;
             foreach(VehicleHandler h in this.handlers)
             {
-                r += this.Pawn.Map.GetComponent<VehicleReservationManager>().GetReservation<VehicleHandlerReservation>(this.Pawn)?.ClaimantsOnHandler(h) ?? 0;
+                r += this.Pawn.Map.GetCachedMapComponent<VehicleReservationManager>().GetReservation<VehicleHandlerReservation>(this.Pawn)?.ClaimantsOnHandler(h) ?? 0;
             }
             options.Add(pawns.Count + r > this.SeatsAvailable ? opt2 : opt1);
             FloatMenuMulti floatMenuMap = new FloatMenuMulti(options, pawns, this.Pawn, pawns[0].LabelCap, Verse.UI.MouseMapPosition())
@@ -522,13 +545,13 @@ namespace Vehicles
                 if(handler.AreSlotsAvailable)
                 {
                     FloatMenuOption opt = new FloatMenuOption("BoardShip".Translate(this.parent.LabelShort, handler.role.label, (handler.role.slots - (handler.handlers.Count + 
-                        this.Pawn.Map.GetComponent<VehicleReservationManager>().GetReservation<VehicleHandlerReservation>(this.Pawn)?.ClaimantsOnHandler(handler) ?? 0)).ToString()), 
+                        this.Pawn.Map.GetCachedMapComponent<VehicleReservationManager>().GetReservation<VehicleHandlerReservation>(this.Pawn)?.ClaimantsOnHandler(handler) ?? 0)).ToString()), 
                     delegate ()
                     {
                         Job job = new Job(JobDefOf_Vehicles.Board, this.parent);
                         pawn.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
                         GiveLoadJob(pawn, handler);
-                        pawn.Map.GetComponent<VehicleReservationManager>().Reserve<VehicleHandler, VehicleHandlerReservation>(this.Pawn, pawn, pawn.CurJob, handler, 999);
+                        pawn.Map.GetCachedMapComponent<VehicleReservationManager>().Reserve<VehicleHandler, VehicleHandlerReservation>(this.Pawn, pawn, pawn.CurJob, handler, 999);
                     }, MenuOptionPriority.Default, null, null, 0f, null, null);
                     yield return opt;
                 }
@@ -538,7 +561,7 @@ namespace Vehicles
                 yield return new FloatMenuOption("RepairShip".Translate(this.Pawn.LabelShort),
                 delegate ()
                 {
-                    Job job = new Job(JobDefOf_Vehicles.RepairShip, this.parent);
+                    Job job = new Job(JobDefOf_Vehicles.RepairVehicle, this.parent);
                     pawn.jobs.TryTakeOrderedJob(job, JobTag.MiscWork);
                 }, MenuOptionPriority.Default, null, null, 0f, null, null);
             }
@@ -596,7 +619,7 @@ namespace Vehicles
                     {
                         if(pawnToBoard != null)
                         {
-                            this.Pawn.Map.GetComponent<VehicleReservationManager>().ReleaseAllClaimedBy(pawnToBoard);
+                            this.Pawn.Map.GetCachedMapComponent<VehicleReservationManager>().ReleaseAllClaimedBy(pawnToBoard);
                             Find.WorldPawns.PassToWorld(pawnToBoard, PawnDiscardDecideMode.Decide);
                         }
                     }
@@ -679,21 +702,21 @@ namespace Vehicles
 
         public void BeachShip()
         {
-            this.movementStatus = VehicleMovementStatus.Offline;
-            this.beached = true;
+            movementStatus = VehicleMovementStatus.Offline;
+            beached = true;
         }
 
         public void RemoveBeachedStatus()
         {
-            this.movementStatus = VehicleMovementStatus.Online;
-            this.beached = false;
+            movementStatus = VehicleMovementStatus.Online;
+            beached = false;
         }
 
         private void TrySatisfyPawnNeeds()
         {
             if(this.Pawn.Spawned || this.Pawn.IsCaravanMember())
             {
-                foreach (Pawn p in this.AllPawnsAboard)
+                foreach (Pawn p in AllPawnsAboard)
                 {
                     TrySatisfyPawnNeeds(p);
                 }
@@ -958,7 +981,7 @@ namespace Vehicles
 
         public void SmoothPatherTick()
         {
-            if(!VehicleMod.mod.settings.debugDisableSmoothPathing && currentTravelCells.AnyNullified())
+            if(!VehicleMod.settings.debugDisableSmoothPathing && currentTravelCells.AnyNullified())
             {
                 float angle = (float)Pawn.DrawPos.Angle180RotationTracker(currentTravelCells.First().ToVector3Shifted());
 
@@ -990,17 +1013,22 @@ namespace Vehicles
             }
         }
 
-        //public override void CompTickRare()
-        //{
-        //    base.CompTickRare();
-        //    if(!VehicleMod.mod.settings.debugDisableSmoothPathing && currentTravelCells.AnyNullified())
-        //    {
-        //        float angle = (float)Pawn.DrawPos.Angle180RotationTracker(currentTravelCells.First().ToVector3Shifted());
-        //        CheckTurnSign(angle);
-        //    }
-        //    if (VehicleMod.mod.settings.debugDisableSmoothPathing)
-        //        Pawn.SmoothPos = Pawn.DrawPos;
-        //}
+        public override void CompTickRare()
+        {
+            base.CompTickRare();
+
+            if (Pawn.Spawned)
+            {
+                if (!cargoToLoad.NullOrEmpty())
+                {
+                    Pawn.Map.GetCachedMapComponent<VehicleReservationManager>().RegisterLister(Pawn, VehicleRequest.Packing);
+                }
+                else
+                {
+                    Pawn.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Pawn, VehicleRequest.Packing);
+                }
+            }
+        }
 
         public override void CompTick()
         {
@@ -1069,6 +1097,8 @@ namespace Vehicles
             Scribe_Values.Look(ref armorPoints, "armorPoints");
             Scribe_Values.Look(ref cargoCapacity, "cargoCapacity");
             Scribe_Values.Look(ref moveSpeedModifier, "moveSpeed");
+
+            Scribe_Values.Look(ref transporterId, "transporterId", -1);
 
             Scribe_Collections.Look(ref handlers, "handlers", LookMode.Deep);
             Scribe_Collections.Look(ref bills, "bills", LookMode.Deep);

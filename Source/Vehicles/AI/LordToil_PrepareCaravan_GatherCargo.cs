@@ -44,7 +44,7 @@ namespace Vehicles.Lords
                 {
                     pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_BoardShip);
                 }
-                else if(!(pawn.GetComp<CompVehicle>() is null))
+                else if(pawn is VehiclePawn)
                 {
                     pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_WaitShip);
                 }

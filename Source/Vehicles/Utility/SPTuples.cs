@@ -71,6 +71,7 @@ namespace Vehicles
     public class SPTuple<T1, T2, T3> : SPTuple<T1, T2>
     {
         public T3 Third { get; set; }
+        public bool Saveable { get; set; }
         public SPTuple(T1 first, T2 second, T3 third) : base(first, second)
         {
             Third = third;
@@ -97,7 +98,7 @@ namespace Vehicles
         public override bool Equals(object o)
         {
             SPTuple<T1, T2, T3> o2 = o as SPTuple<T1, T2, T3>;
-            if (object.ReferenceEquals(o2, null))
+            if (ReferenceEquals(o2, null))
                 return false;
             return FirstComparer.Equals(First, o2.First) && SecondComparer.Equals(Second, o2.Second) && ThirdComparer.Equals(Third, o2.Third);
         }

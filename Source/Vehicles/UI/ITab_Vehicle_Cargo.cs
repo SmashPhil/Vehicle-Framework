@@ -16,15 +16,15 @@ namespace Vehicles.UI
             labelKey = "TabCargo";
         }
 
-        public override bool IsVisible => !SelPawnForCargo.GetComp<CompVehicle>().beached;
+        public override bool IsVisible => !SelPawnForCargo.GetCachedComp<CompVehicle>().beached;
 
         private VehiclePawn SelPawnForCargo
         {
             get
             {
-                if(!(SelPawn is null) && !(SelPawn.TryGetComp<CompVehicle>() is null) )
+                if(SelPawn is VehiclePawn vehicle)
                 {
-                    return SelPawn as VehiclePawn;
+                    return vehicle;
                 }
                 throw new InvalidOperationException("Cargo tab on non-pawn ship " + SelThing);
             }
@@ -50,17 +50,17 @@ namespace Vehicles.UI
                 Rect rectRecolor = new Rect(size.x - 75f - rectRename.width, 0f, 30f, 30f);
                 TooltipHandler.TipRegion(rectRename, "RenameVehicle".Translate(SelPawnForCargo.LabelShort));
                 TooltipHandler.TipRegion(rectRecolor, "RecolorVehicle".Translate(SelPawnForCargo.LabelShort));
-                if (Widgets.ButtonImage(rectRename, TexCommandVehicles.Rename))
+                if (Widgets.ButtonImage(rectRename, VehicleTex.Rename))
                 {
-                    SelPawnForCargo.GetComp<CompVehicle>().Rename();
+                    SelPawnForCargo.GetCachedComp<CompVehicle>().Rename();
                 }
-                if (Widgets.ButtonImage(rectRecolor, TexCommandVehicles.Recolor))
+                if (Widgets.ButtonImage(rectRecolor, VehicleTex.Recolor))
                 {
-                    SelPawnForCargo.GetComp<CompVehicle>().Recolor();
+                    SelPawnForCargo.GetCachedComp<CompVehicle>().ChangeColor();
                 }
                 /*Rect rectRecolor = new Rect(this.size.x - 85f, 0f, 30f, 30f);
                 TooltipHandler.TipRegion(rectRecolor, "RecolorFlags".Translate());
-                if(Widgets.ButtonImage(rectRecolor, TexCommandVehicles.Rename))
+                if(Widgets.ButtonImage(rectRecolor, VehicleTex.Rename))
                 {
 
                 }*/
@@ -76,9 +76,9 @@ namespace Vehicles.UI
                 }
                 workingInvList.Clear();
             }
-            if(IsVisible && !SelPawnForCargo.GetComp<CompVehicle>().cargoToLoad.NullOrEmpty())
+            if(IsVisible && !SelPawnForCargo.GetCachedComp<CompVehicle>().cargoToLoad.NullOrEmpty())
             {
-                foreach (TransferableOneWay transferable in SelPawnForCargo.GetComp<CompVehicle>().cargoToLoad)
+                foreach (TransferableOneWay transferable in SelPawnForCargo.GetCachedComp<CompVehicle>().cargoToLoad)
                 {
                     if (transferable.AnyThing != null && transferable.CountToTransfer > 0 && !SelPawnForCargo.inventory.innerContainer.Contains(transferable.AnyThing))
                     {
@@ -113,7 +113,7 @@ namespace Vehicles.UI
             {
                 Rect rectDrop = new Rect(rect.width - 24f, y, 24f, 24f);
                 TooltipHandler.TipRegion(rectDrop, "DropThing".Translate());
-                if(Widgets.ButtonImage(rectDrop, TexCommandVehicles.Drop))
+                if(Widgets.ButtonImage(rectDrop, VehicleTex.Drop))
                 {
                     SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
                     InterfaceDrop(thing);
@@ -163,13 +163,13 @@ namespace Vehicles.UI
         
         private void TryDrawMassInfo(ref float curY, float width)
         {
-            if (SelPawnForCargo.GetComp<CompVehicle>().beached)
+            if (SelPawnForCargo.GetCachedComp<CompVehicle>().beached)
                 return;
             Rect rect = new Rect(0f, curY, width, 22f);
             float cannonsNum = 0f;
             if(SelPawnForCargo.TryGetComp<CompCannons>() != null)
             {
-                foreach(CannonHandler cannon in SelPawnForCargo.GetComp<CompCannons>().Cannons)
+                foreach(CannonHandler cannon in SelPawnForCargo.GetCachedComp<CompCannons>().Cannons)
                 {
                     cannonsNum += cannon.loadedAmmo is null ? 0f : cannon.loadedAmmo.BaseMass * cannon.shellCount;
                 }

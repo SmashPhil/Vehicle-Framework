@@ -13,8 +13,8 @@ namespace Vehicles.Jobs
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
             int maxWorkers = Vehicle.GetCachedComp<CompVehicle>().TotalAllowedFor(JobDefOf_Vehicles.UpgradeVehicle);
-            LocalTargetInfo target = Vehicle.GetCachedComp<CompVehicle>().SurroundingCells.First(c => pawn.Map.GetComponent<VehicleReservationManager>().CanReserve<LocalTargetInfo, VehicleTargetReservation>(Vehicle, pawn, c));
-            return target.IsValid && pawn.Map.GetComponent<VehicleReservationManager>().Reserve<LocalTargetInfo, VehicleTargetReservation>(Vehicle, pawn, job, target, maxWorkers);
+            LocalTargetInfo target = Vehicle.GetCachedComp<CompVehicle>().SurroundingCells.First(c => pawn.Map.GetCachedMapComponent<VehicleReservationManager>().CanReserve<LocalTargetInfo, VehicleTargetReservation>(Vehicle, pawn, c));
+            return target.IsValid && pawn.Map.GetCachedMapComponent<VehicleReservationManager>().Reserve<LocalTargetInfo, VehicleTargetReservation>(Vehicle, pawn, job, target, maxWorkers);
         }
 
         public VehiclePawn Vehicle

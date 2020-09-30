@@ -53,7 +53,7 @@ namespace Vehicles
         {
             get
             {
-                return boat.GetComp<CompVehicle>().CargoCapacity;
+                return boat.GetCachedComp<CompVehicle>().CargoCapacity;
             }
         }
 
@@ -68,11 +68,11 @@ namespace Vehicles
             DrawCargoNumbers(new Rect(12f, 35f, inRect.width - 24f, 40f));
 
             Rect checkRect = new Rect(inRect.width - 225f, 35f, 225f, 40f);
-            bool checkBox = VehicleMod.mod.settings.showAllCargoItems;
+            bool checkBox = VehicleMod.settings.showAllCargoItems;
             Widgets.Label(checkRect, "ShowAllItemsOnMap".Translate());
             checkRect.x += Text.CalcSize("ShowAllItemsOnMap".Translate()).x + 20f;
-            Widgets.Checkbox(new Vector2(checkRect.x, checkRect.y), ref VehicleMod.mod.settings.showAllCargoItems);
-            if (checkBox != VehicleMod.mod.settings.showAllCargoItems)
+            Widgets.Checkbox(new Vector2(checkRect.x, checkRect.y), ref VehicleMod.settings.showAllCargoItems);
+            if (checkBox != VehicleMod.settings.showAllCargoItems)
             {
                 CalculateAndRecacheTransferables();
             }
@@ -95,7 +95,7 @@ namespace Vehicles
             Rect rect2 = new Rect(rect.width / 2f - BottomButtonSize.x / 2f, rect.height - 55f - 17f, BottomButtonSize.x, BottomButtonSize.y);
 			if (Widgets.ButtonText(rect2, "AcceptButton".Translate(), true, true, true))
 			{
-                boat.GetComp<CompVehicle>().cargoToLoad = transferables;
+                boat.GetCachedComp<CompVehicle>().cargoToLoad = transferables;
                 Close(true);
 			}
 			if (Widgets.ButtonText(new Rect(rect2.x - 10f - BottomButtonSize.x, rect2.y, BottomButtonSize.x, BottomButtonSize.y), "ResetButton".Translate(), true, true, true))
@@ -184,7 +184,7 @@ namespace Vehicles
 
         private void AddItemsToTransferables()
 		{
-			List<Thing> list = CaravanFormingUtility.AllReachableColonyItems(boat.Map, VehicleMod.mod.settings.showAllCargoItems, false, false);
+			List<Thing> list = CaravanFormingUtility.AllReachableColonyItems(boat.Map, VehicleMod.settings.showAllCargoItems, false, false);
 			for (int i = 0; i < list.Count; i++)
 			{
 				AddToTransferables(list[i], false);

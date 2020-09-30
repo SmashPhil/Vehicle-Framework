@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ using Vehicles.AI;
 using Vehicles.Lords;
 using Vehicles.Defs;
 using HarmonyLib;
+using Vehicles.UI;
 
 namespace Vehicles
 {
@@ -22,10 +24,24 @@ namespace Vehicles
     {
         #region Pathing
 
+        public static bool VehicleInCell(Map map, IntVec3 cell)
+        {
+            if (map.thingGrid.ThingsListAt(cell).AnyNullified(t => t is VehiclePawn))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static bool VehicleInCell(Map map, int x, int z)
+        {
+            return VehicleInCell(map, new IntVec3(x, 0, z));
+        }
+
         public static int CostToMoveIntoCellShips(Pawn pawn, IntVec3 c)
         {
             int num = (c.x == pawn.Position.x || c.z == pawn.Position.z) ? pawn.TicksPerMoveCardinal : pawn.TicksPerMoveDiagonal;
-            num += pawn.Map.GetComponent<WaterMap>().getShipPathGrid.CalculatedCostAt(c);
+            num += pawn.Map.GetCachedMapComponent<WaterMap>().ShipPathGrid.CalculatedCostAt(c);
             if (pawn.CurJob != null)
             {
                 Pawn locomotionUrgencySameAs = pawn.jobs.curDriver.locomotionUrgencySameAs;
@@ -105,36 +121,9 @@ namespace Vehicles
                 return false;
             return (pawn.Map.terrainGrid.TerrainAt(pawn.Position) == TerrainDefOf.WaterDeep || pawn.Map.terrainGrid.TerrainAt(pawn.Position) == TerrainDefOf.WaterMovingChestDeep ||
                 pawn.Map.terrainGrid.TerrainAt(pawn.Position) == TerrainDefOf.WaterOceanDeep) && GenGrid.Impassable(pawn.Position, pawn.Map);
-        }
+        }        
 
-        public static float MovedPercent(VehiclePawn pawn)
-		{
-			if (!pawn.vPather.Moving)
-			{
-				return 0f;
-			}
-			if (pawn.stances.FullBodyBusy)
-			{
-				return 0f;
-			}
-			if (pawn.vPather.BuildingBlockingNextPathCell() != null)
-			{
-				return 0f;
-			}
-			if (pawn.vPather.NextCellDoorToWaitForOrManuallyOpen() != null)
-			{
-				return 0f;
-			}
-			if (pawn.vPather.WillCollideWithPawnOnNextPathCell())
-			{
-				return 0f;
-			}
-			return 1f - pawn.vPather.nextCellCostLeft / pawn.vPather.nextCellCostTotal;
-		}
-
-        
-
-        #endregion
+        #endregion Pathing
 
         #region SmoothPathing
 
@@ -144,8 +133,8 @@ namespace Vehicles
                 return false;
             try
             {
-                boat.GetComp<CompVehicle>().EnqueueCellImmediate(cell);
-                boat.GetComp<CompVehicle>().CheckTurnSign();
+                boat.GetCachedComp<CompVehicle>().EnqueueCellImmediate(cell);
+                boat.GetCachedComp<CompVehicle>().CheckTurnSign();
             }
             catch(Exception ex)
             {
@@ -177,20 +166,16 @@ namespace Vehicles
             return turn == 1 ? 1 : -1;
         }
 
-        #endregion
+        #endregion SmoothPathing
 
         #region FeatureChecking
-
-        public static bool IsVehicleDef(this ThingDef td)
-        {
-            return td?.GetCompProperties<CompProperties_Vehicle>() != null;
-        }
-
+        //Thing -> ThingWithComps -> Pawn -> VehiclePawn
         public static bool IsBoat(this Pawn p) //REDO
         {
             return p is VehiclePawn vehicle && vehicle.GetCachedComp<CompVehicle>().Props.vehicleType == VehicleType.Sea;
         }
 
+        [Obsolete("Switch to literal case")]
         public static bool IsVehicle(this Thing t)
         {
             return t is VehiclePawn;
@@ -240,22 +225,28 @@ namespace Vehicles
         public static bool HasEnoughSpacePawns(List<Pawn> pawns)
         {
             int num = 0;
-            foreach (Pawn p in pawns.Where(x => IsVehicle(x)))
+            foreach (Pawn p in pawns)
             {
-                num += p.GetComp<CompVehicle>().TotalSeats;
+                if (p is VehiclePawn vehicle)
+                {
+                    num += vehicle.GetCachedComp<CompVehicle>().TotalSeats;
+                }
             }
-            return pawns.Where(x => !IsVehicle(x)).Count() <= num;
+            return pawns.Where(x => !(x is VehiclePawn)).Count() <= num;
         }
 
         //REDO
         public static bool HasEnoughPawnsToEmbark(List<Pawn> pawns)
         {
             int num = 0;
-            foreach (Pawn p in pawns.Where(x => IsVehicle(x)))
+            foreach (Pawn p in pawns)
             {
-                num += p.GetComp<CompVehicle>().PawnCountToOperate;
+                if (p is VehiclePawn vehicle)
+                {
+                    num += vehicle.GetCachedComp<CompVehicle>().PawnCountToOperate;
+                }
             }
-            return pawns.Where(x => !IsVehicle(x)).Count() >= num;
+            return pawns.Where(x => !(x is VehiclePawn)).Count() >= num;
         }
 
         public static bool AbleToEmbark(List<Pawn> pawns)
@@ -268,9 +259,9 @@ namespace Vehicles
             List<Pawn> pawns = new List<Pawn>();
             foreach (Pawn p in caravan.PawnsListForReading)
             {
-                if (IsVehicle(p))
+                if (p is VehiclePawn vehicle)
                 {
-                    pawns.AddRange(p.GetComp<CompVehicle>().AllPawnsAboard);
+                    pawns.AddRange(vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard);
                 }
                 pawns.Add(p);
             }
@@ -279,7 +270,7 @@ namespace Vehicles
 
         public static bool HasCannons(this Pawn p)
         {
-            return !(p?.TryGetComp<CompCannons>() is null) ? true : false;
+            return p is VehiclePawn vehicle && vehicle.GetCachedComp<CompCannons>() != null;
         }
 
         public static bool HasCannons(List<Pawn> pawns)
@@ -289,14 +280,7 @@ namespace Vehicles
 
         public static bool FueledVehicle(this Pawn p)
         {
-            return IsVehicle(p) && !(p?.TryGetComp<CompFueledTravel>() is null) ? true : false;
-        }
-
-        //Needs case for captured ships?
-
-        public static bool WillAutoJoinIfCaptured(Pawn ship)
-        {
-            return ship.GetComp<CompVehicle>().movementStatus != VehicleMovementStatus.Offline && !ship.GetComp<CompVehicle>().beached;
+            return p is VehiclePawn vehicle && vehicle.GetCachedComp<CompFueledTravel>() != null;
         }
 
         public static void ValidateAllVehicleDefs()
@@ -324,7 +308,7 @@ namespace Vehicles
                 }
             }
         }
-        #endregion
+        #endregion FeatureChecking
 
         #region WorldMap
 
@@ -360,12 +344,8 @@ namespace Vehicles
                 }
                 else
                 {
-                    List<Pawn> ships = caravan.PawnsListForReading.Where(x => IsBoat(x)).ToList();
-                    for (int i = 0; i < ships.Count; i++)
-                    {
-                        Pawn ship = ships[i];
-                        ship?.GetComp<CompVehicle>()?.DisembarkAll();
-                    }
+                    List<VehiclePawn> ships = caravan.PawnsListForReading.Where(x => IsBoat(x)).Cast<VehiclePawn>().ToList();
+                    ships.ForEach(b => b.GetCachedComp<CompVehicle>().DisembarkAll());
                 }
             }
         }
@@ -390,21 +370,20 @@ namespace Vehicles
             }
 
             List<Pawn> sailors = caravan.PawnsListForReading.Where(x => !IsBoat(x)).ToList();
-            List<Pawn> ships = caravan.PawnsListForReading.Where(x => IsBoat(x)).ToList();
-            for (int i = 0; i < ships.Count; i++)
-            {
-                Pawn ship = ships[i];
-                for (int j = 0; j < ship.GetComp<CompVehicle>().PawnCountToOperate; j++)
+            List<VehiclePawn> ships = caravan.PawnsListForReading.Where(x => IsBoat(x)).Cast<VehiclePawn>().ToList();
+            foreach(VehiclePawn ship in ships)
+            { 
+                for (int j = 0; j < ship.GetCachedComp<CompVehicle>().PawnCountToOperate; j++)
                 {
                     if (sailors.Count <= 0)
                     {
                         return;
                     }
-                    foreach (VehicleHandler handler in ship.GetComp<CompVehicle>().handlers)
+                    foreach (VehicleHandler handler in ship.GetCachedComp<CompVehicle>().handlers)
                     {
                         if (handler.AreSlotsAvailable)
                         {
-                            ship.GetComp<CompVehicle>().Notify_BoardedCaravan(sailors.Pop(), handler.handlers);
+                            ship.GetCachedComp<CompVehicle>().Notify_BoardedCaravan(sailors.Pop(), handler.handlers);
                             break;
                         }
                     }
@@ -415,12 +394,12 @@ namespace Vehicles
                 int x = 0;
                 while (sailors.Count > 0)
                 {
-                    Pawn ship = ships[x];
-                    foreach (VehicleHandler handler in ship.GetComp<CompVehicle>().handlers)
+                    VehiclePawn ship = ships[x];
+                    foreach (VehicleHandler handler in ship.GetCachedComp<CompVehicle>().handlers)
                     {
                         if (handler.AreSlotsAvailable)
                         {
-                            ship.GetComp<CompVehicle>().Notify_BoardedCaravan(sailors.Pop(), handler.handlers);
+                            ship.GetCachedComp<CompVehicle>().Notify_BoardedCaravan(sailors.Pop(), handler.handlers);
                             break;
                         }
                     }
@@ -437,7 +416,7 @@ namespace Vehicles
             {
                 if(assignedSeats.ContainsKey(pawn) && vehicles.Contains(assignedSeats[pawn].First))
                 {
-                    assignedSeats[pawn].First.GetComp<CompVehicle>().GiveLoadJob(pawn, assignedSeats[pawn].Second);
+                    assignedSeats[pawn].First.GetCachedComp<CompVehicle>().GiveLoadJob(pawn, assignedSeats[pawn].Second);
                     assignedSeats[pawn].First.GetCachedComp<CompVehicle>().Notify_Boarded(pawn);
                     pawns.Remove(pawn);
                 }
@@ -446,9 +425,9 @@ namespace Vehicles
 
         public static bool RiverIsValid(int tileID, List<Pawn> ships)
         {
-            if (!VehicleMod.mod.settings.riverTravel || ships is null || !ships.AnyNullified(x => IsBoat(x)))
+            if (!VehicleMod.settings.riverTravel || ships is null || !ships.AnyNullified(x => IsBoat(x)))
                 return false;
-            bool flag = VehicleMod.mod.settings.boatSizeMatters ? (!Find.WorldGrid[tileID].Rivers.NullOrEmpty()) ? ShipsFitOnRiver(BiggestRiverOnTile(Find.WorldGrid[tileID]?.Rivers).river, ships) : false : (Find.WorldGrid[tileID].Rivers?.AnyNullified() ?? false);
+            bool flag = VehicleMod.settings.boatSizeMatters ? (!Find.WorldGrid[tileID].Rivers.NullOrEmpty()) ? ShipsFitOnRiver(BiggestRiverOnTile(Find.WorldGrid[tileID]?.Rivers).river, ships) : false : (Find.WorldGrid[tileID].Rivers?.AnyNullified() ?? false);
             return flag;
         }
 
@@ -469,7 +448,7 @@ namespace Vehicles
 
         public static int BestGotoDestForVehicle(this Caravan c, int tile)
         {
-            Predicate<int> predicate = (int t) => c.UniqueVehicleDefsInCaravan().All(v => Find.World.GetComponent<WorldVehiclePathGrid>().Passable(t, v)) && Find.World.GetComponent<WorldVehicleReachability>().CanReach(c, t);
+            Predicate<int> predicate = (int t) => c.UniqueVehicleDefsInCaravan().All(v => Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().Passable(t, v)) && Find.World.GetCachedWorldComponent<WorldVehicleReachability>().CanReach(c, t);
 			if (predicate(tile))
 			{
 				return tile;
@@ -478,7 +457,7 @@ namespace Vehicles
 			return result;
         }
 
-        #endregion
+        #endregion WorldMap
 
         #region CaravanFormation
         public static bool CanStartCaravan(List<Pawn> caravan)
@@ -490,10 +469,10 @@ namespace Vehicles
 
             foreach (Pawn p in caravan)
             {
-                if (IsVehicle(p))
+                if (p is VehiclePawn vehicle)
                 {
-                    seats += p.GetComp<CompVehicle>().SeatsAvailable;
-                    prereq += p.GetComp<CompVehicle>().PawnCountToOperate - p.GetComp<CompVehicle>().AllCrewAboard.Count;
+                    seats += vehicle.GetCachedComp<CompVehicle>().SeatsAvailable;
+                    prereq += vehicle.GetCachedComp<CompVehicle>().PawnCountToOperate - vehicle.GetCachedComp<CompVehicle>().AllCrewAboard.Count;
                 }
                 else if (p.IsColonistPlayerControlled && !p.Downed && !p.Dead)
                 {
@@ -526,7 +505,7 @@ namespace Vehicles
 	        where x.ThingDef.category == ThingCategory.Pawn
 	        select x;
             vehicleWidget.AddSection("VehiclesTab".Translate(), from x in source
-            where !(((Pawn)x.AnyThing).GetComp<CompVehicle>() is null) && !((Pawn)x.AnyThing).OnDeepWater()
+            where x.AnyThing is VehiclePawn vehicle && !vehicle.OnDeepWater()
             select x);
 	        pawnWidget.AddSection("ColonistsSection".Translate(), from x in source
 	        where ((Pawn)x.AnyThing).IsFreeColonist
@@ -601,7 +580,7 @@ namespace Vehicles
                 }
                 else
                 {
-                    foreach(Pawn pawn in (trad.AnyThing as VehiclePawn).GetComp<CompVehicle>().AllPawnsAboard)
+                    foreach(Pawn pawn in (trad.AnyThing as VehiclePawn).GetCachedComp<CompVehicle>().AllPawnsAboard)
                     {
                         if (assignedSeats.ContainsKey(pawn))
                             assignedSeats.Remove(pawn);
@@ -821,29 +800,47 @@ namespace Vehicles
 			return caravan;
 		}
 
-        #endregion
+        #endregion CaravanFormation
 
         #region Data
 
+        public static bool InsideVehicle(this Pawn pawn, Map map)
+        {
+            var vehicles = map.mapPawns.AllPawns.Where(p => p is VehiclePawn);
+            foreach(VehiclePawn vehicle in vehicles)
+            {
+                if (vehicle.PawnOccupiedCells(vehicle.Position, vehicle.Rotation).Contains(pawn.Position))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static VehicleCaravan GetVehicleCaravan(this Pawn pawn)
+        {
+            return pawn.ParentHolder as VehicleCaravan;
+        }
+
         public static List<Pawn> GrabPawnsFromMapPawnsInVehicle(List<Pawn> allPawns)
         {
-            List<Pawn> playerShips = allPawns.Where(x => x.Faction == Faction.OfPlayer && IsVehicle(x)).ToList();
+            List<VehiclePawn> playerShips = allPawns.Where(x => x.Faction == Faction.OfPlayer && x is VehiclePawn).Cast<VehiclePawn>().ToList();
             if (!playerShips.AnyNullified())
                 return allPawns.Where(x => x.Faction == Faction.OfPlayer && x.RaceProps.Humanlike).ToList();
-            return playerShips.RandomElement<Pawn>().GetComp<CompVehicle>()?.AllCapablePawns;
+            return playerShips.RandomElement().GetCachedComp<CompVehicle>()?.AllCapablePawns;
         }
 
         public static List<Pawn> GrabPawnsFromVehicles(List<Pawn> ships)
         {
-            if (!ships.AnyNullified(x => IsVehicle(x)))
+            if (!ships.AnyNullified(x => x is VehiclePawn))
                 return null;
             List<Pawn> pawns = new List<Pawn>();
-            foreach (Pawn p in ships)
+            foreach (Pawn pawn in ships)
             {
-                if (IsVehicle(p))
-                    pawns.AddRange(p.GetComp<CompVehicle>().AllPawnsAboard);
+                if (pawn is VehiclePawn vehicle)
+                    pawns.AddRange(vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard);
                 else
-                    pawns.Add(p);
+                    pawns.Add(pawn);
             }
             return pawns;
         }
@@ -859,8 +856,8 @@ namespace Vehicles
             List<Pawn> ships = new List<Pawn>();
             foreach (Pawn p in pawns)
             {
-                if (IsVehicle(p))
-                    ships.AddRange(p.GetComp<CompVehicle>().AllPawnsAboard);
+                if (p is VehiclePawn vehicle)
+                    ships.AddRange(vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard);
                 else
                     ships.Add(p);
             }
@@ -874,8 +871,8 @@ namespace Vehicles
             List<Pawn> vehicles = new List<Pawn>();
             foreach (Pawn p in caravan.PawnsListForReading)
             {
-                if (IsVehicle(p))
-                    vehicles.AddRange(p.GetComp<CompVehicle>().AllPawnsAboard);
+                if (p is VehiclePawn vehicle)
+                    vehicles.AddRange(vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard);
                 else
                     vehicles.Add(p);
             }
@@ -897,7 +894,7 @@ namespace Vehicles
         public static HashSet<ThingDef> UniqueVehicleDefsInCaravan(this Caravan c)
         {
             var vehicleSet = new HashSet<ThingDef>();
-            foreach(Pawn p in c.PawnsListForReading.Where(v => v.IsVehicle()))
+            foreach(Pawn p in c.PawnsListForReading.Where(v => v is VehiclePawn))
             {
                 vehicleSet.Add(p.def);
             }
@@ -918,11 +915,11 @@ namespace Vehicles
         public static List<Pawn> ExtractPawnsFromCaravan(Caravan caravan)
         {
             List<Pawn> innerPawns = new List<Pawn>();
-            foreach (Pawn vehicle in caravan.PawnsListForReading)
+            foreach (Pawn pawn in caravan.PawnsListForReading)
             {
-                if (vehicle.IsVehicle())
+                if (pawn is VehiclePawn vehicle)
                 {
-                    innerPawns.AddRange(vehicle.GetComp<CompVehicle>().AllPawnsAboard);
+                    innerPawns.AddRange(vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard);
                 }
             }
             return innerPawns;
@@ -943,22 +940,22 @@ namespace Vehicles
             return num2 - num;
         }
 
-        public static float ExtractUpgradeValue(Pawn vehicle, StatUpgradeCategory stat)
+        public static float ExtractUpgradeValue(VehiclePawn vehicle, StatUpgradeCategory stat)
         {
-            if(IsVehicle(vehicle) && HasUpgradeMenu(vehicle))
+            if(HasUpgradeMenu(vehicle))
             {
                 switch(stat)
                 {
                     case StatUpgradeCategory.Armor:
-                        return vehicle.GetComp<CompVehicle>().ArmorPoints;
+                        return vehicle.GetCachedComp<CompVehicle>().ArmorPoints;
                     case StatUpgradeCategory.Speed:
-                        return vehicle.GetComp<CompVehicle>().MoveSpeedModifier;
+                        return vehicle.GetCachedComp<CompVehicle>().MoveSpeedModifier;
                     case StatUpgradeCategory.CargoCapacity:
-                        return vehicle.GetComp<CompVehicle>().CargoCapacity;
+                        return vehicle.GetCachedComp<CompVehicle>().CargoCapacity;
                     case StatUpgradeCategory.FuelConsumptionRate:
-                        return vehicle.GetComp<CompFueledTravel>().FuelEfficiency;
+                        return vehicle.GetCachedComp<CompFueledTravel>()?.FuelEfficiency ?? 0f;
                     case StatUpgradeCategory.FuelCapacity:
-                        return vehicle.GetComp<CompFueledTravel>().FuelCapacity;
+                        return vehicle.GetCachedComp<CompFueledTravel>()?.FuelCapacity ?? 0f;
                 }
             }
             return 0f;
@@ -967,12 +964,12 @@ namespace Vehicles
         public static List<Pawn> GetVehiclesForColonistBar(Map map)
         {
             List<Pawn> vehicles = new List<Pawn>();
-            foreach (Pawn vehicle in map.mapPawns.AllPawnsSpawned)
+            foreach (Pawn pawn in map.mapPawns.AllPawnsSpawned)
             {
-                if (IsVehicle(vehicle))
+                if (pawn is VehiclePawn vehicle)
                 {
                     //ships.Add(ship); /*  Uncomment to add Ships to colonist bar  */
-                    foreach (Pawn p in vehicle.GetComp<CompVehicle>().AllPawnsAboard)
+                    foreach (Pawn p in vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard)
                     {
                         if (p.IsColonist)
                             vehicles.Add(p);
@@ -986,7 +983,7 @@ namespace Vehicles
         {
             IEnumerable<Pawn> candidates = (!pawn.IsFormingCaravan()) ? pawn.Map.mapPawns.SpawnedPawnsInFaction(pawn.Faction) : pawn.GetLord().ownedPawns;
             candidates = from x in candidates
-                         where IsVehicle(x)
+                         where x is VehiclePawn
                          select x;
             return candidates;
         }
@@ -998,7 +995,7 @@ namespace Vehicles
             float num = 0f;
             foreach(Pawn p in UsableCandidatesForCargo(pawn))
             {
-                if(IsVehicle(p) && p != pawn && pawn.CanReach(p, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn))
+                if(p is VehiclePawn && p != pawn && pawn.CanReach(p, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn))
                 {
                     float num2 = MassUtility.FreeSpace(p);
                     if(carrierPawn is null || num2 > num)
@@ -1029,7 +1026,7 @@ namespace Vehicles
             return assignedSeats.Where(a => a.Value.First == vehicle).Select(s => s.Key).Count();
         }
 
-        #endregion
+        #endregion Data
 
         #region Selector
         public static bool MultiSelectClicker(List<object> selectedObjects)
@@ -1051,14 +1048,14 @@ namespace Vehicles
                 {
                     if (IsVehicle(thing))
                     {
-                        (thing as Pawn).GetComp<CompVehicle>().MultiplePawnFloatMenuOptions(selPawns);
+                        (thing as VehiclePawn).GetCachedComp<CompVehicle>().MultiplePawnFloatMenuOptions(selPawns);
                         return true;
                     }
                 }
             }
             return false;
         }
-        #endregion
+        #endregion Selector
 
         #region Rendering
         public static SPTuple2<float,float> ShipDrawOffset(VehiclePawn vehicle, float xOffset, float yOffset, out SPTuple2<float, float> rotationOffset, float turretRotation = 0, CannonHandler attachedTo = null)
@@ -1109,7 +1106,7 @@ namespace Vehicles
         {
             float mapSizeMultiplier = (float)(map.Size.x >= map.Size.z ? map.Size.x : map.Size.z) / 250f;
             float beach = 60f; //Rand.Range(40f, 80f);
-            return (float)(beach + (beach * (VehicleMod.mod.settings.beachMultiplier) / 100f)) * mapSizeMultiplier;
+            return (float)(beach + (beach * (VehicleMod.settings.beachMultiplier) / 100f)) * mapSizeMultiplier;
         }
 
         public static int PushSettlementToCoast(int tileID, Faction faction)
@@ -1130,7 +1127,7 @@ namespace Vehicles
                 return tileID;
             }
 
-            while (searchedRadius < VehicleMod.mod.settings.CoastRadius)
+            while (searchedRadius < VehicleMod.settings.CoastRadius)
             {
                 for (int j = 0; j < stackFull.Count; j++)
                 {
@@ -1185,8 +1182,15 @@ namespace Vehicles
             return mote;
         }
 
+        public static void DrawDefaultCannonMesh(CannonHandler cannon, Vector3 pos, int layer)
+        {
+            SPTuple2<float, float> drawOffset = ShipDrawOffset(cannon.pawn, cannon.cannonRenderLocation.x, cannon.cannonRenderLocation.y, out SPTuple2<float, float> rotOffset1, 0f, cannon.attachedTo);
+            Vector3 posFinal = new Vector3(pos.x + drawOffset.First + rotOffset1.First, pos.y + cannon.drawLayer, pos.z + drawOffset.Second + rotOffset1.Second);
+            Graphics.DrawMesh(cannon.CannonGraphic.MeshAt(Rot4.West), posFinal, Quaternion.identity, cannon.CannonMaterial, layer);
+        }
+
         public static void DrawAttachedThing(Texture2D baseTexture, Graphic baseGraphic, Vector2 baseRenderLocation,Vector2 baseDrawSize,
-            Texture2D texture, Graphic graphic, Vector2 renderLocation, Vector2 renderOffset, Material baseMat, Material mat, float rotation, VehiclePawn parent, int drawLayer, CannonHandler attachedTo = null, Material mat2 = null)
+            Texture2D texture, Graphic graphic, Vector2 renderLocation, Vector2 renderOffset, Material baseMat, Material mat, float rotation, VehiclePawn parent, int drawLayer, CannonHandler attachedTo = null)
         {
             if (texture != null && renderLocation != null)
             {
@@ -1203,7 +1207,7 @@ namespace Vehicles
                     Vector3 topVectorLocation = new Vector3(parent.DrawPos.x + drawOffset.First + rotOffset1.First, parent.DrawPos.y + drawLayer, parent.DrawPos.z + drawOffset.Second + rotOffset1.Second);
                     Mesh cannonMesh = graphic.MeshAt(Rot4.North);
                     
-                    if(VehicleMod.mod.settings.debugDrawCannonGrid)
+                    if(VehicleMod.settings.debugDrawCannonGrid)
                     {
                         Material debugCenterMat = MaterialPool.MatFrom("Debug/cannonCenter");
                         Matrix4x4 debugCenter = default;
@@ -1222,7 +1226,7 @@ namespace Vehicles
                         Graphics.DrawMesh(MeshPool.plane10, baseMatrix, baseMat, 0);
                     }
 
-                    if(VehicleMod.mod.settings.debugDrawCannonGrid)
+                    if(VehicleMod.settings.debugDrawCannonGrid)
                     {
                         Material debugMat = MaterialPool.MatFrom("Debug/cannonAlignment");
                         Matrix4x4 debugGrid = default;
@@ -1240,10 +1244,15 @@ namespace Vehicles
         /// <summary>
         /// Draw cannon textures on GUI given collection of cannons and vehicle GUI is being drawn for
         /// </summary>
+        /// <param name="vehicle"></param>
         /// <param name="displayRect"></param>
         /// <param name="cannons"></param>
+        /// <param name="vehicleMaskName"></param>
+        /// <param name="resolveGraphics"></param>
+        /// <param name="manualColorOne"></param>
+        /// <param name="manualColorTwo"></param>
         /// <remarks>Might possibly want to throw into separate threads</remarks>
-        public static void DrawCannonTextures(this VehiclePawn vehicle, Rect displayRect, IEnumerable<CannonHandler> cannons, bool resolveGraphics = false)
+        public static void DrawCannonTextures(this VehiclePawn vehicle, Rect displayRect, IEnumerable<CannonHandler> cannons, string vehicleMaskName, bool resolveGraphics = false, Color? manualColorOne = null, Color? manualColorTwo = null)
         {
             foreach (CannonHandler cannon in cannons)
             {
@@ -1254,34 +1263,85 @@ namespace Vehicles
 
                 if (cannon.CannonBaseGraphic != null)
                 {
-                    float baseWidth = (vehicle.GetCachedComp<CompUpgradeTree>().Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.baseCannonDrawSize.x;
-                    float baseHeight = (vehicle.GetCachedComp<CompUpgradeTree>().Props.displayUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.baseCannonDrawSize.y;
+                    float baseWidth = (displayRect.width / biggestStage.bodyGraphicData.drawSize.x) * cannon.baseCannonDrawSize.x;
+                    float baseHeight = (displayRect.height / biggestStage.bodyGraphicData.drawSize.y) * cannon.baseCannonDrawSize.y;
 
-                    float xBase = displayRect.x + (displayRect.width / 2) - (baseWidth / 2) + ((vehicle.GetCachedComp<CompUpgradeTree>().Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.baseCannonRenderLocation.x);
-                    float yBase = displayRect.y + (displayRect.height / 2) - (baseHeight / 2) - ((vehicle.GetCachedComp<CompUpgradeTree>().Props.displayUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.baseCannonRenderLocation.y);
+                    float xBase = displayRect.x + (displayRect.width / 2) - (baseWidth / 2) + ((vehicle.GetCachedComp<CompVehicle>().Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.baseCannonRenderLocation.x);
+                    float yBase = displayRect.y + (displayRect.height / 2) - (baseHeight / 2) - ((vehicle.GetCachedComp<CompVehicle>().Props.displayUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.baseCannonRenderLocation.y);
 
                     Rect baseCannonDrawnRect = new Rect(xBase, yBase, baseWidth, baseHeight);
                     GenUI.DrawTextureWithMaterial(baseCannonDrawnRect, cannon.CannonBaseTexture, cannon.CannonBaseGraphic.MatSingle);
                 }
 
-                float cannonWidth = (vehicle.GetCachedComp<CompUpgradeTree>().Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.CannonGraphicData.drawSize.x;
-                float cannonHeight = (vehicle.GetCachedComp<CompUpgradeTree>().Props.displayUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.CannonGraphicData.drawSize.y;
+                float cannonWidth = (displayRect.width / biggestStage.bodyGraphicData.drawSize.x) * cannon.CannonGraphicData.drawSize.x;
+                float cannonHeight = (displayRect.height / biggestStage.bodyGraphicData.drawSize.y) * cannon.CannonGraphicData.drawSize.y;
 
                 /// ( center point of vehicle) + (UI size / drawSize) * cannonPos
                 /// y axis inverted as UI goes top to bottom, but DrawPos goes bottom to top
-                float xCannon = (displayRect.x + (displayRect.width / 2) - (cannonWidth / 2)) + ((vehicle.GetCachedComp<CompUpgradeTree>().Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.cannonRenderLocation.x);
-                float yCannon = (displayRect.y + (displayRect.height / 2) - (cannonHeight / 2)) - ((vehicle.GetCachedComp<CompUpgradeTree>().Props.displayUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.cannonRenderLocation.y);
+                float xCannon = (displayRect.x + (displayRect.width / 2) - (cannonWidth / 2)) + ((vehicle.GetCachedComp<CompVehicle>().Props.displayUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.cannonRenderLocation.x);
+                float yCannon = (displayRect.y + (displayRect.height / 2) - (cannonHeight / 2)) - ((vehicle.GetCachedComp<CompVehicle>().Props.displayUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.cannonRenderLocation.y);
 
                 Rect cannonDrawnRect = new Rect(xCannon, yCannon, cannonWidth, cannonHeight);
-                GenUI.DrawTextureWithMaterial(cannonDrawnRect, cannon.CannonTexture, cannon.CannonGraphic.MatSingle);
-                                
-                if (VehicleMod.mod.settings.debugDrawCannonGrid)
+                Material cannonMat = new Material(cannon.CannonGraphic.MatAt(Rot4.North, vehicle));
+                
+                if (cannon.CannonGraphic.Shader.SupportsMaskTex() && (manualColorOne != null || manualColorTwo != null) && cannon.CannonGraphic.GetType().IsAssignableFrom(typeof(Graphic_Cannon)))
+                {
+                    //REDO
+                    MaterialRequest matReq = default;
+                    matReq.mainTex = cannon.CannonTexture;
+                    matReq.shader = cannon.CannonGraphic.Shader;
+                    matReq.color = manualColorOne != null ? manualColorOne.Value : vehicle.DrawColor;
+                    matReq.colorTwo = manualColorTwo != null ? manualColorTwo.Value : vehicle.DrawColorTwo;
+                    matReq.maskTex = (cannon.CannonGraphic as Graphic_Cannon).maskTexPatterns[vehicleMaskName].Second[(cannon.CannonGraphic as Graphic_Cannon).CurrentIndex()];
+                    cannonMat = MaterialPool.MatFrom(matReq);
+                }
+
+                GenUI.DrawTextureWithMaterial(cannonDrawnRect, cannon.CannonTexture, cannonMat);
+
+                if (VehicleMod.settings.debugDrawCannonGrid)
                 {
                     Widgets.DrawLineHorizontal(cannonDrawnRect.x, cannonDrawnRect.y, cannonDrawnRect.width);
                     Widgets.DrawLineHorizontal(cannonDrawnRect.x, cannonDrawnRect.y + cannonDrawnRect.height, cannonDrawnRect.width);
                     Widgets.DrawLineVertical(cannonDrawnRect.x, cannonDrawnRect.y, cannonDrawnRect.height);
                     Widgets.DrawLineVertical(cannonDrawnRect.x + cannonDrawnRect.width, cannonDrawnRect.y, cannonDrawnRect.height);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Draw Vehicle texture with option to manually apply colors to Material
+        /// </summary>
+        /// <param name="rect"></param>
+        /// <param name="vehicleTex"></param>
+        /// <param name="vehicle"></param>
+        /// <param name="vehicleMaskName"></param>
+        /// <param name="resolveGraphics"></param>
+        /// <param name="manualColorOne"></param>
+        /// <param name="manualColorTwo"></param>
+        public static void DrawVehicleTex(Rect rect, Texture2D vehicleTex, VehiclePawn vehicle, string vehicleMaskName, bool resolveGraphics = false, Color? manualColorOne = null, Color? manualColorTwo = null)
+        {
+            float UISizeX = vehicle.GetCachedComp<CompVehicle>().Props.displayUISize.x * rect.width;
+            float UISizeY = vehicle.GetCachedComp<CompVehicle>().Props.displayUISize.y * rect.height;
+
+            Rect displayRect = new Rect(rect.x, rect.y, UISizeX, UISizeY);
+            Material mat = new Material(vehicle.VehicleGraphic.MatAt(Rot4.North, vehicle));
+            
+            if (vehicle.VehicleGraphic.Shader.SupportsMaskTex() && (manualColorOne != null || manualColorTwo != null))
+            {
+                MaterialRequest matReq = default;
+                matReq.mainTex = vehicleTex;
+                matReq.shader = vehicle.VehicleGraphic.Shader;
+                matReq.color = manualColorOne != null ? manualColorOne.Value : vehicle.DrawColor;
+                matReq.colorTwo = manualColorTwo != null ? manualColorTwo.Value : vehicle.DrawColorTwo;
+                matReq.maskTex = vehicle.VehicleGraphic.maskTexPatterns[vehicleMaskName].Second[0];
+                mat = MaterialPool.MatFrom(matReq);
+            }
+
+            GenUI.DrawTextureWithMaterial(displayRect, vehicleTex, mat);
+
+            if (vehicle.GetCachedComp<CompCannons>() != null)
+            {
+                vehicle.DrawCannonTextures(displayRect, vehicle.GetCachedComp<CompCannons>().Cannons.OrderBy(x => x.drawLayer), vehicleMaskName, resolveGraphics, manualColorOne, manualColorTwo);
             }
         }
 
@@ -1357,12 +1417,12 @@ namespace Vehicles
             Vector3 minTargetPos1 = cannonPos.PointFromAngle(minRange, restrictedAngle.x + additionalAngle);
             Vector3 minTargetPos2 = cannonPos.PointFromAngle(minRange, restrictedAngle.y + additionalAngle);
 
-            Vector3 maxTargetPos1 = cannonPos.PointFromAngle(maxRange - minRange, restrictedAngle.x + additionalAngle);
-            Vector3 maxTargetPos2 = cannonPos.PointFromAngle(maxRange - minRange, restrictedAngle.y + additionalAngle);
+            Vector3 maxTargetPos1 = cannonPos.PointFromAngle(maxRange, restrictedAngle.x + additionalAngle);
+            Vector3 maxTargetPos2 = cannonPos.PointFromAngle(maxRange, restrictedAngle.y + additionalAngle);
 
             GenDraw.DrawLineBetween(minTargetPos1, maxTargetPos1);
             GenDraw.DrawLineBetween(minTargetPos2, maxTargetPos2);
-            if(minRange > 0)
+            if (minRange > 0)
             {
                 GenDraw.DrawLineBetween(cannonPos, minTargetPos1, SimpleColor.Red);
                 GenDraw.DrawLineBetween(cannonPos, minTargetPos2, SimpleColor.Red);
@@ -1372,13 +1432,13 @@ namespace Vehicles
 
             Vector3 lastPointMin = minTargetPos1;
             Vector3 lastPointMax = maxTargetPos1;
-            for(int angle = 0; angle < theta + 1; angle++)
+            for (int angle = 0; angle < theta + 1; angle++)
             {
                 Vector3 targetPointMax = cannonPos.PointFromAngle(maxRange, angleStart + angle + additionalAngle);
                 GenDraw.DrawLineBetween(lastPointMax, targetPointMax);
                 lastPointMax = targetPointMax;
 
-                if(minRange > 0)
+                if (minRange > 0)
                 {
                     Vector3 targetPointMin = cannonPos.PointFromAngle(minRange, angleStart + angle + additionalAngle);
                     GenDraw.DrawLineBetween(lastPointMin, targetPointMin, SimpleColor.Red);
@@ -1387,7 +1447,7 @@ namespace Vehicles
             }
         }
 
-        #endregion
+        #endregion Rendering
 
         #region UI
         public static void LabelStyled(Rect rect, string label, GUIStyle style)
@@ -1622,34 +1682,82 @@ namespace Vehicles
 	        GUI.color = color;
         }
 
-        //public static IEnumerable<Widgets.DropdownMenuElement<FireMode>> DrawFireModeSelection_GenerateMenu(CannonHandler handler)
-        //{
-        //    Log.Message($"Count: {handler.fireModes.Count}");
-        //    using(List<FireMode>.Enumerator enumerator = handler.fireModes.GetEnumerator())
-        //    {
-        //        while(enumerator.MoveNext())
-        //        {
-        //            FireMode current = enumerator.Current;
-        //            yield return new Widgets.DropdownMenuElement<FireMode>
-        //            {
-        //                option = new FloatMenuOption(current.fireModeLabel, delegate ()
-        //                {
-        //                    handler.SelectFireMode(current);
-        //                }, MenuOptionPriority.Default, null, null, 0f, null, null),
-        //                payload = current
-        //            };
-        //        }
-        //    }
-        //    yield break;
-        //}
+        /// <summary>
+        /// Draws ColorPicker (and HuePicker)
+        /// </summary>
+        /// <param name="fullRect"></param>
+        /// <returns></returns>
+        public static float DrawColorPicker(Rect fullRect)
+		{
+			Rect rect = fullRect.ContractedBy(10f);
+			rect.width = 15f;
+            if (Input.GetMouseButtonDown(0) && Mouse.IsOver(rect) && !Dialog_ColorPicker.draggingHue)
+            {
+                Dialog_ColorPicker.draggingHue = true;
+            }
+            if (Dialog_ColorPicker.draggingHue && Event.current.isMouse)
+            {
+                float num = Dialog_ColorPicker.hue;
+                Dialog_ColorPicker.hue = Mathf.InverseLerp(rect.height, 0f, Event.current.mousePosition.y - rect.y);
+                if (Dialog_ColorPicker.hue != num)
+                {
+                    Dialog_ColorPicker.SetColor(Dialog_ColorPicker.hue, Dialog_ColorPicker.saturation, Dialog_ColorPicker.value);
+                }
+            }
+            if (Input.GetMouseButtonUp(0))
+			{
+				Dialog_ColorPicker.draggingHue = false;
+			}
+			Widgets.DrawBoxSolid(rect.ExpandedBy(1f), Color.grey);
+			Widgets.DrawTexturePart(rect, new Rect(0f, 0f, 1f, 1f), Dialog_ColorPicker.HueChart);
+			Rect rect2 = new Rect(0f, 0f, 16f, 16f)
+			{
+				center = new Vector2(rect.center.x, rect.height * (1f - Dialog_ColorPicker.hue) + rect.y).Rounded()
+			};
 
-        #endregion
+			Widgets.DrawTextureRotated(rect2, ColorHue, 0f);
+			rect = fullRect.ContractedBy(10f);
+			rect.x = rect.xMax - rect.height;
+			rect.width = rect.height;
+            if (Input.GetMouseButtonDown(0) && Mouse.IsOver(rect) && !Dialog_ColorPicker.draggingCP)
+            {
+                Dialog_ColorPicker.draggingCP = true;
+            }
+            if (Dialog_ColorPicker.draggingCP)
+            {
+                Dialog_ColorPicker.saturation = Mathf.InverseLerp(0f, rect.width, Event.current.mousePosition.x - rect.x);
+                Dialog_ColorPicker.value = Mathf.InverseLerp(rect.width, 0f, Event.current.mousePosition.y - rect.y);
+                Dialog_ColorPicker.SetColor(Dialog_ColorPicker.hue, Dialog_ColorPicker.saturation, Dialog_ColorPicker.value);
+            }
+            if (Input.GetMouseButtonUp(0))
+			{
+				Dialog_ColorPicker.draggingCP = false;
+			}
+			Widgets.DrawBoxSolid(rect.ExpandedBy(1f), Color.grey);
+			Widgets.DrawBoxSolid(rect, Color.white);
+			GUI.color = Color.HSVToRGB(Dialog_ColorPicker.hue, 1f, 1f);
+			Widgets.DrawTextureFitted(rect, Dialog_ColorPicker.ColorChart, 1f);
+            float centerPoint = rect.x + rect.width / 2;
+			GUI.color = Color.white;
+			GUI.BeginClip(rect);
+			rect2.center = new Vector2(rect.width * Dialog_ColorPicker.saturation, rect.width * (1f - Dialog_ColorPicker.value));
+			if (Dialog_ColorPicker.value >= 0.4f && (Dialog_ColorPicker.hue <= 0.5f || Dialog_ColorPicker.saturation <= 0.5f))
+			{
+				GUI.color = Dialog_ColorPicker.Blackist;
+			}
+			Widgets.DrawTextureFitted(rect2, ColorPicker, 1f);
+			GUI.color = Color.white;
+			GUI.EndClip();
+            return centerPoint;
+		}
+
+        #endregion UI
 
         #region TargetingAndDamage
 
         public static LocalTargetInfo GetCannonTarget(this CannonHandler cannon, float restrictedAngle = 0f, TargetingParameters param = null)
         {
-            if (cannon.pawn.GetComp<CompCannons>() != null && cannon.pawn.GetComp<CompCannons>().WeaponStatusOnline && cannon.pawn.Faction != null) //add fire at will option
+            if (cannon.pawn.GetCachedComp<CompCannons>() != null && cannon.pawn.GetCachedComp<CompCannons>().WeaponStatusOnline && cannon.pawn.Faction != null) //add fire at will option
             {
                 TargetScanFlags targetScanFlags = TargetScanFlags.NeedLOSToPawns | TargetScanFlags.NeedLOSToNonPawns | TargetScanFlags.NeedThreat | TargetScanFlags.NeedAutoTargetable;
                 Thing thing = (Thing)BestAttackTarget(cannon, targetScanFlags, null, 0f, 9999f, default(IntVec3), float.MaxValue, false, false);
@@ -1663,7 +1771,7 @@ namespace Vehicles
 
         public static IAttackTarget BestAttackTarget(CannonHandler cannon, TargetScanFlags flags, Predicate<Thing> validator = null, float minDist = 0f, float maxDist = 9999f, IntVec3 locus = default(IntVec3), float maxTravelRadiusFromLocus = 3.4028235E+38f, bool canBash = false, bool canTakeTargetsCloserThanEffectiveMinRange = true)
 		{
-			VehiclePawn searcherPawn = cannon.pawn as VehiclePawn;
+			VehiclePawn searcherPawn = cannon.pawn;
 
 			float minDistSquared = minDist * minDist;
             float num = maxTravelRadiusFromLocus + cannon.MaxRange;
@@ -1783,7 +1891,7 @@ namespace Vehicles
 			for (int i = 0; i < tmpTargets.Count; i++)
 			{
 				IAttackTarget attackTarget = tmpTargets[i];
-				if (attackTarget.Thing.Position.InHorDistOf(searcherPawn.Position, maxDist) && innerValidator(attackTarget) && cannon.pawn.GetComp<CompCannons>().TryFindShootLineFromTo(searcherPawn.Position, new LocalTargetInfo(attackTarget.Thing), out ShootLine resultingLine))
+				if (attackTarget.Thing.Position.InHorDistOf(searcherPawn.Position, maxDist) && innerValidator(attackTarget) && cannon.pawn.GetCachedComp<CompCannons>().TryFindShootLineFromTo(searcherPawn.Position, new LocalTargetInfo(attackTarget.Thing), out ShootLine resultingLine))
 				{
 					flag = true;
 					break;
@@ -1800,7 +1908,7 @@ namespace Vehicles
 				Predicate<Thing> validator2;
 				if ((flags & TargetScanFlags.NeedReachableIfCantHitFromMyPos) != TargetScanFlags.None && (flags & TargetScanFlags.NeedReachable) == TargetScanFlags.None)
 				{
-					validator2 = ((Thing t) => innerValidator((IAttackTarget)t) && cannon.pawn.GetComp<CompCannons>().TryFindShootLineFromTo(searcherPawn.Position, new LocalTargetInfo(t), out ShootLine resultingLine));
+					validator2 = ((Thing t) => innerValidator((IAttackTarget)t) && cannon.pawn.GetCachedComp<CompCannons>().TryFindShootLineFromTo(searcherPawn.Position, new LocalTargetInfo(t), out ShootLine resultingLine));
 				}
 				else
 				{
@@ -1841,7 +1949,7 @@ namespace Vehicles
 		        tmpCanShootAtTarget.Add(false);
 		        if (rawTargets[i] != searcher)
 		        {
-			        bool flag = searcher.GetComp<CompCannons>().TryFindShootLineFromTo(searcher.Position, new LocalTargetInfo(rawTargets[i].Thing), out ShootLine shootLine);
+			        bool flag = searcher.GetCachedComp<CompCannons>().TryFindShootLineFromTo(searcher.Position, new LocalTargetInfo(rawTargets[i].Thing), out ShootLine shootLine);
 			        tmpCanShootAtTarget[i] = flag;
 			        if (flag)
 			        {
@@ -1903,7 +2011,47 @@ namespace Vehicles
 	        return num * target.TargetPriorityFactor;
         }
 
-        #endregion
+        public static void Explode(this Projectile proj)
+        {
+            TerrainDef terrainImpact = proj.Map.terrainGrid.TerrainAt(proj.Position);
+            Map map = proj.Map;
+            proj.Destroy(DestroyMode.Vanish);
+            if (proj.def.projectile.explosionEffect != null)
+            {
+                Effecter effecter = proj.def.projectile.explosionEffect.Spawn();
+                effecter.Trigger(new TargetInfo(proj.Position, map, false), new TargetInfo(proj.Position, map, false));
+                effecter.Cleanup();
+            }
+            IntVec3 position = proj.Position;
+            Map map2 = map;
+
+            int waterDepth = map.terrainGrid.TerrainAt(proj.Position).IsWater ? map.terrainGrid.TerrainAt(proj.Position) == TerrainDefOf.WaterOceanShallow ||
+                map.terrainGrid.TerrainAt(proj.Position) == TerrainDefOf.WaterShallow || map.terrainGrid.TerrainAt(proj.Position) == TerrainDefOf.WaterMovingShallow ? 1 : 2 : 0;
+            if (waterDepth == 0) Log.Error("Impact Water Depth is 0, but terrain is water.");
+            float explosionRadius = (proj.def.projectile.explosionRadius / (2f * waterDepth));
+            if (explosionRadius < 1) explosionRadius = 1f;
+            DamageDef damageDef = proj.def.projectile.damageDef;
+            Thing launcher = null;
+            int damageAmount = proj.DamageAmount;
+            float armorPenetration = proj.ArmorPenetration;
+            SoundDef soundExplode;
+            soundExplode = SoundDefOf_Ships.Explode_BombWater; //Changed for current issues
+            SoundStarter.PlayOneShot(soundExplode, new TargetInfo(proj.Position, map, false));
+            ThingDef equipmentDef = null;
+            ThingDef def = proj.def;
+            Thing thing = null;
+            ThingDef postExplosionSpawnThingDef = proj.def.projectile.postExplosionSpawnThingDef;
+            float postExplosionSpawnChance = 0.0f;
+            float chanceToStartFire = proj.def.projectile.explosionChanceToStartFire * 0.0f;
+            int postExplosionSpawnThingCount = proj.def.projectile.postExplosionSpawnThingCount;
+            ThingDef preExplosionSpawnThingDef = proj.def.projectile.preExplosionSpawnThingDef;
+            GenExplosion.DoExplosion(position, map2, explosionRadius, damageDef, launcher, damageAmount, armorPenetration, soundExplode,
+                equipmentDef, def, thing, postExplosionSpawnThingDef, postExplosionSpawnChance, postExplosionSpawnThingCount,
+                proj.def.projectile.applyDamageToExplosionCellsNeighbors, preExplosionSpawnThingDef, proj.def.projectile.preExplosionSpawnChance,
+                proj.def.projectile.preExplosionSpawnThingCount, chanceToStartFire, proj.def.projectile.explosionDamageFalloff);
+        }
+
+        #endregion TargetingAndDamage
 
         #region MultithreadingUtils
 
@@ -1980,7 +2128,34 @@ namespace Vehicles
             return null;
 		}
 
-        #endregion
+        #endregion MultithreadingUtils
+
+        #region Textures
+
+        public static List<string> GetAllFolderNamesInFolder(string folderPath)
+        {
+            if (!UnityData.IsInMainThread)
+			{
+				Log.Error("Tried to get all resources in a folder \"" + folderPath + "\" from a different thread. All resources must be loaded in the main thread.", false);
+                return new List<string>();
+			}
+
+            var fullPath = string.Concat(ConditionalPatchApplier.VehicleMMD.RootDir, '/', GenFilePaths.ContentPath<Texture2D>(), folderPath);
+
+            if (!Directory.Exists(fullPath))
+            {
+                return new List<string>();
+            }
+
+            var folders = Directory.GetDirectories(fullPath);
+            for (int i = 0; i < folders.Length; i++)
+            {
+                folders[i] = folders[i].Replace('\\', '/');
+            }
+            return folders.ToList();
+        }
+
+        #endregion Textures
 
         public static CannonTargeter CannonTargeter = new CannonTargeter();
 
@@ -2002,7 +2177,13 @@ namespace Vehicles
         public static Texture2D FuelStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(60, 30, 30).ToColor);
         public static Texture2D FuelAddedStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(60, 30, 30, 120).ToColor);
 
-        public static readonly Texture2D TradeArrow = ContentFinder<Texture2D>.Get("UI/Widgets/TradeArrow", true);
+        public static readonly Texture2D FillableBarTexture = SolidColorMaterials.NewSolidColorTexture(0.5f, 0.5f, 0.5f, 0.5f);
+        public static readonly Texture2D ClearBarTexture = BaseContent.ClearTex;
+
+        public static readonly Texture2D TradeArrow = ContentFinder<Texture2D>.Get("UI/Widgets/TradeArrow");
+
+        public static readonly Texture2D ColorPicker = ContentFinder<Texture2D>.Get("UI/ColorCog");
+        public static readonly Texture2D ColorHue = ContentFinder<Texture2D>.Get("UI/ColorHue");
 
         public static readonly Material RangeCircle_ExtraWide = MaterialPool.MatFrom("UI/RangeField_ExtraWide", ShaderDatabase.MoteGlow);
         public static readonly Material RangeCircle_Wide = MaterialPool.MatFrom("UI/RangeField_Wide", ShaderDatabase.MoteGlow);

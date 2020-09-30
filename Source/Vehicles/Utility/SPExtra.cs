@@ -97,6 +97,45 @@ namespace Vehicles
             private byte quadInt;
         }
 
+        public static int VehicleRot8(this VehiclePawn vehicle)
+        {
+            switch(vehicle.Rotation.AsInt)
+            {
+                case 0:
+                    return 0;
+                case 1:
+                    if (vehicle.Angle == -45)
+                        return 4;
+                    else if (vehicle.Angle == 0)
+                        return 1;
+                    else if (vehicle.Angle == 45)
+                        return 5;
+                    goto default;
+                case 2:
+                    return 2;
+                case 3:
+                    if (vehicle.Angle == -45)
+                        return 6;
+                    else if (vehicle.Angle == 0)
+                        return 3;
+                    else if (vehicle.Angle == 45)
+                        return 7;
+                    goto default;
+                default:
+                    return -1;
+            }
+        }
+        
+        /// <summary>
+        /// Action delegates with pass-by-reference parameters allowed
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="item"></param>
+        public delegate void ActionRef<T>(ref T item);
+        public delegate void ActionRefP1<T1, T2>(ref T1 item1, T2 item2);
+        public delegate void ActionRefP2<T1, T2>(T1 item1, ref T2 item2);
+        public delegate void ActionRef<T1, T2>(ref T1 item1, ref T2 item2);
+
         /// <summary>
         /// Get neighbors of Tile on world map.
         /// </summary>
@@ -130,7 +169,7 @@ namespace Vehicles
         public static T PopRandom<T>(ref List<T> list)
         {
             if (list is null || !list.AnyNullified())
-                return default(T);
+                return default;
             Rand.PushState();
             int index = Rand.Range(0, list.Count);
             T item = list[index];
@@ -410,6 +449,60 @@ namespace Vehicles
         }
 
         /// <summary>
+        /// Translate cell to cell comparison into 8-way direction; [0, 1, 2, 3] = N E S W, [4, 5, 6, 7] = NE, SE, SW, NW
+        /// </summary>
+        /// <param name="c1"></param>
+        /// <param name="c2"></param>
+        /// <returns></returns>
+        public static int DirectionToCell(IntVec3 c1, IntVec3 c2)
+        {
+            int xDiff = c1.x - c2.x;
+            int zDiff = c1.z - c2.z;
+            if (xDiff < 0)
+            {
+                if (zDiff < 0)
+                {
+                    return 4;
+                }
+                else if (zDiff > 0)
+                {
+                    return 5;
+                }
+                else
+                {
+                    return 1;
+                }
+            }
+            else if (xDiff > 0)
+            {
+                if (zDiff < 0)
+                {
+                    return 7;
+                }
+                else if (zDiff > 0)
+                {
+                    return 6;
+                }
+                else
+                {
+                    return 3;
+                }
+            }
+            else
+            {
+                if (zDiff < 0)
+                {
+                    return 0;
+                }
+                else if (zDiff > 0)
+                {
+                    return 2;
+                }
+            }
+            return -1;
+        }
+
+        /// <summary>
         /// Draw vertical fillable bar
         /// </summary>
         /// <param name="rect"></param>
@@ -418,7 +511,7 @@ namespace Vehicles
         /// <returns></returns>
         public static Rect VerticalFillableBar(Rect rect, float fillPercent, bool flip = false)
         {
-            return VerticalFillableBar(rect, fillPercent, FillableBarTexture, flip);
+            return VerticalFillableBar(rect, fillPercent, HelperMethods.FillableBarTexture, flip);
         }
 
         /// <summary>
@@ -432,7 +525,7 @@ namespace Vehicles
         public static Rect VerticalFillableBar(Rect rect, float fillPercent, Texture2D fillTex, bool flip = false)
         {
             bool doBorder = rect.height > 15f && rect.width > 20f;
-            return VerticalFillableBar(rect, fillPercent, fillTex, ClearBarTexture, doBorder, flip);
+            return VerticalFillableBar(rect, fillPercent, fillTex, HelperMethods.ClearBarTexture, doBorder, flip);
         }
 
         /// <summary>
@@ -481,9 +574,6 @@ namespace Vehicles
             tex2d.Apply();
             return tex2d;
         }
-
-        private static readonly Texture2D FillableBarTexture = SolidColorMaterials.NewSolidColorTexture(0.5f, 0.5f, 0.5f, 0.5f);
-        private static readonly Texture2D ClearBarTexture = BaseContent.ClearTex;
     }
 
 }

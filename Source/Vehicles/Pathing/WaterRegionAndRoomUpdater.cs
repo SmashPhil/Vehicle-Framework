@@ -32,7 +32,7 @@ namespace Vehicles
         {
             if (!Enabled)
                 Log.Warning("Called RebuildAllRegions but WaterRegionAndRoomUpdater is disabled. Regions won't be rebuilt.", false);
-            map.GetComponent<WaterMap>().getWaterRegionDirtyer.SetAllDirty();
+            map.GetCachedMapComponent<WaterMap>().WaterRegionDirtyer.SetAllDirty();
             TryRebuildWaterRegions();
         }
 
@@ -43,7 +43,7 @@ namespace Vehicles
             working = true;
             if (!initialized)
                 RebuildAllWaterRegions();
-            if(!map.GetComponent<WaterMap>().getWaterRegionDirtyer.AnyDirty)
+            if(!map.GetCachedMapComponent<WaterMap>().WaterRegionDirtyer.AnyDirty)
             {
                 working = false;
                 return;
@@ -58,7 +58,7 @@ namespace Vehicles
                 Log.Error("Exception while rebuilding water regions: " + exc, false);
             }
             newRegions.Clear();
-            map.GetComponent<WaterMap>().getWaterRegionDirtyer.SetAllClean();
+            map.GetCachedMapComponent<WaterMap>().WaterRegionDirtyer.SetAllClean();
             initialized = true;
             working = false;
         }
@@ -66,13 +66,13 @@ namespace Vehicles
         private void RegenerateNewWaterRegions()
         {
             newRegions.Clear();
-            List<IntVec3> cells = map.GetComponent<WaterMap>().getWaterRegionDirtyer.DirtyCells;
+            List<IntVec3> cells = map.GetCachedMapComponent<WaterMap>().WaterRegionDirtyer.DirtyCells;
 
             foreach(IntVec3 c  in cells)
             {
                 if(WaterGridsUtility.GetRegion(c, map, RegionType.Set_All) is null)
                 {
-                    WaterRegion region = map.GetComponent<WaterMap>().getWaterRegionmaker.TryGenerateRegionFrom(c);
+                    WaterRegion region = map.GetCachedMapComponent<WaterMap>().WaterRegionmaker.TryGenerateRegionFrom(c);
                     
                     if (!(region is null))
                         newRegions.Add(region);

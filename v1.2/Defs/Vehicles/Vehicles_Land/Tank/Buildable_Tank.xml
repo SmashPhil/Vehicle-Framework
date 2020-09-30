@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <Defs>
-	<ThingDef ParentName="VehicleBaseBuildable">
+	<Vehicles.VehicleBuildDef ParentName="VehicleBaseBuildable">
 		<defName>SPVehicles_Tank_Blueprint</defName>
 		<label>Tank</label>
 		<description>A heavily armored combat vehicle.</description>
@@ -13,7 +13,7 @@
 		
 		<statBases>
 			<MaxHitPoints>20000</MaxHitPoints>
-			<WorkToBuild>300000</WorkToBuild>
+			<WorkToBuild>30</WorkToBuild>
 			<Flammability>0.05</Flammability>
 		</statBases>
 		<size>(3,5)</size>
@@ -27,15 +27,7 @@
 		
 		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
 		
-		<modExtensions>
-			<li Class="Vehicles.SpawnThingBuilt">
-				<thingToSpawn>SPVehicles_PawnKind_Tank</thingToSpawn>
-				<soundFinished>ShipBigConstruction</soundFinished>
-			</li>
-		</modExtensions>
-		
-		<comps>
-			<li Class="Vehicles.CompProperties_SavePawnReference"/>
-		</comps>
-	</ThingDef>
+		<thingToSpawn>SPVehicles_PawnKind_Tank</thingToSpawn>
+		<soundBuilt>ShipBigConstruction</soundBuilt>
+	</Vehicles.VehicleBuildDef>
 </Defs>

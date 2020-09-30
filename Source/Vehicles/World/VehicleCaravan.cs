@@ -35,7 +35,7 @@ namespace Vehicles
             DrawQuadTangentialToPlanet(DrawPos, 0.7f * averageTileSize, 0.015f, Material, false, false, null);
         }
 
-        public static void DrawQuadTangentialToPlanet(Vector3 pos, float size, float altOffset, Material material, bool counterClockwise = false, bool useSkyboxLayer = false, MaterialPropertyBlock propertyBlock = null)
+        public void DrawQuadTangentialToPlanet(Vector3 pos, float size, float altOffset, Material material, bool counterClockwise = false, bool useSkyboxLayer = false, MaterialPropertyBlock propertyBlock = null)
 		{
 			if (material == null)
 			{
@@ -60,20 +60,40 @@ namespace Vehicles
 			if (propertyBlock != null)
 			{
 				Graphics.DrawMesh(MeshPool.plane10, matrix, material, layer, null, 0, propertyBlock);
+                //Graphics.DrawMesh(MeshPool.plane10, matrix, LeadVehicle.VehicleGraphic.MatAt(Rot4.West, LeadVehicle), layer, null, 0, propertyBlock);
 				return;
 			}
-			Graphics.DrawMesh(MeshPool.plane10, matrix, material, layer);
+            Graphics.DrawMesh(MeshPool.plane10, matrix, material, layer);
+            //Graphics.DrawMesh(MeshPool.plane10, matrix, LeadVehicle.VehicleGraphic.MatAt(Rot4.West, LeadVehicle), layer);
+            //if (LeadVehicle.GetCachedComp<CompCannons>() != null)
+            //{
+            //    foreach (CannonHandler cannon in LeadVehicle.GetCachedComp<CompCannons>().Cannons)
+            //    {
+            //        HelperMethods.DrawDefaultCannonMesh(cannon, pos, layer);
+            //    }
+            //}
 		}
+
+        private VehiclePawn leadVehicle;
+        public VehiclePawn LeadVehicle
+        {
+            get
+            {
+                if (leadVehicle is null)
+                    leadVehicle = PawnsListForReading.First(v => v is VehiclePawn) as VehiclePawn;
+                return leadVehicle;
+            }
+        }
 
         public override Material Material
         {
             get
             {
-                ThingDef leadVehicleDef = PawnsListForReading.First(v => v.IsVehicle()).def;
+                ThingDef leadVehicleDef = PawnsListForReading.First(v => v is VehiclePawn).def;
                 
                 if(!materials.ContainsKey(leadVehicleDef))
                 {
-                    var texture = TexCommandVehicles.CachedTextureIcons[leadVehicleDef];
+                    var texture = VehicleTex.CachedTextureIcons[leadVehicleDef];
                     var material = MaterialPool.MatFrom(texture, ShaderDatabase.WorldOverlayTransparentLit, Color.white, WorldMaterials.WorldObjectRenderQueue);
                     materials.Add(leadVehicleDef, material);
                 }
@@ -152,7 +172,7 @@ namespace Vehicles
                 if(!vPather.Moving && !PawnsListForReading.AnyNullified(x => !HelperMethods.IsBoat(x)))
                 {
                     Command_Action dock = new Command_Action();
-                    dock.icon = TexCommandVehicles.Anchor;
+                    dock.icon = VehicleTex.Anchor;
                     dock.defaultLabel = Find.WorldObjects.AnySettlementBaseAt(Tile) ? "CommandDockShip".Translate() : "CommandDockShipDisembark".Translate();
                     dock.defaultDesc = Find.WorldObjects.AnySettlementBaseAt(Tile) ? "CommandDockShipDesc".Translate(Find.WorldObjects.SettlementBaseAt(Tile)) : "CommandDockShipObjectDesc".Translate();
                     dock.action = delegate ()
@@ -169,7 +189,7 @@ namespace Vehicles
                 else if (!vPather.Moving && PawnsListForReading.AnyNullified(x => !HelperMethods.IsBoat(x)))
                 {
                     Command_Action undock = new Command_Action();
-                    undock.icon = TexCommandVehicles.UnloadAll;
+                    undock.icon = VehicleTex.UnloadAll;
                     undock.defaultLabel = "CommandUndockShip".Translate();
                     undock.defaultDesc = "CommandUndockShipDesc".Translate(Label);
                     undock.action = delegate ()
@@ -190,11 +210,11 @@ namespace Vehicles
 
         public override void Notify_MemberDied(Pawn member)
         {
-            if(!Spawned)
+            if (!Spawned)
             {
                 Log.Error("Caravan member died in an unspawned caravan. Unspawned caravans shouldn't be kept for more than a single frame.", false);
             }
-            if(!PawnsListForReading.AnyNullified(x => HelperMethods.IsVehicle(x) && !x.Dead && x.GetComp<CompVehicle>().AllPawnsAboard.AnyNullified((Pawn y) => y != member && IsOwner(y))))
+            if (!PawnsListForReading.AnyNullified(x => x is VehiclePawn vehicle && !vehicle.Dead && vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard.AnyNullified((Pawn y) => y != member && IsOwner(y))))
             {
                 RemovePawn(member);
                 if (Faction == Faction.OfPlayer)
@@ -223,10 +243,10 @@ namespace Vehicles
             int num4 = 0;
             int num5 = 0;
             int numS = 0;
-            foreach(Pawn ship in PawnsListForReading.Where(x => HelperMethods.IsVehicle(x)))
+            foreach(VehiclePawn vehicle in PawnsListForReading.Where(x => x is VehiclePawn).Cast<VehiclePawn>())
             {
                 numS++;
-                foreach(Pawn p in ship.GetComp<CompVehicle>().AllPawnsAboard)
+                foreach(Pawn p in vehicle.GetCachedComp<CompVehicle>().AllPawnsAboard)
                 {
                     if(p.IsColonist)
                         num++;
@@ -240,7 +260,7 @@ namespace Vehicles
                         num5++;
                 }
             }
-            foreach(Pawn p in PawnsListForReading.Where(x => !HelperMethods.IsVehicle(x)))
+            foreach(Pawn p in PawnsListForReading.Where(x => !(x is VehiclePawn)))
             {
                 if (p.IsColonist)
                     num++;
@@ -257,7 +277,7 @@ namespace Vehicles
             if (numS > 1)
             {
                 Dictionary<Thing, int> vehicleCounts = new Dictionary<Thing, int>();
-                foreach(Pawn p in PawnsListForReading.Where(x => HelperMethods.IsVehicle(x)))
+                foreach(Pawn p in PawnsListForReading.Where(x => x is VehiclePawn))
                 {
                     if(vehicleCounts.ContainsKey(p))
                     {

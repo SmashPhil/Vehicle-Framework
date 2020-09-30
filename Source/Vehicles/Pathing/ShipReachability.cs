@@ -128,8 +128,8 @@ namespace Vehicles.AI
             bool result;
             try
             {
-                pathGrid = map.GetComponent<WaterMap>().getShipPathGrid;
-                regionGrid = map.GetComponent<WaterMap>().getWaterRegionGrid;
+                pathGrid = map.GetCachedMapComponent<WaterMap>().ShipPathGrid;
+                regionGrid = map.GetCachedMapComponent<WaterMap>().WaterRegionGrid;
                 reachedIndex += 1u;
                 destRegions.Clear();
                 if(peMode == PathEndMode.OnCell)
@@ -303,7 +303,7 @@ namespace Vehicles.AI
         {
             IntVec3 foundCell = IntVec3.Invalid;
             WaterRegion[] directionRegionGrid = this.regionGrid.DirectGrid;
-            ShipPathGrid pathGrid = map.GetComponent<WaterMap>().getShipPathGrid;
+            ShipPathGrid pathGrid = map.GetCachedMapComponent<WaterMap>().ShipPathGrid;
             CellIndices cellIndices = map.cellIndices;
             map.floodFiller.FloodFill(start, delegate (IntVec3 c)
             {

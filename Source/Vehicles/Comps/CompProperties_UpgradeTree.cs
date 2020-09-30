@@ -18,6 +18,5 @@ namespace Vehicles
         public List<UpgradeNode> upgradesAvailable;
 
         public Vector2 displayUICoord;
-        public Vector2 displayUISize;
     }
 }

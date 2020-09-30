@@ -1,0 +1,39 @@
+Added more documentation to the source code
+
+Changed ThinkTreeMain defName for Vehicles from VehicleThinkTree_Simple to Vehicle
+
+(Pending) Changed Vehicle ThinkTree / Job Process to prioritize assigning based on ThinkTree as opposed 
+to hardcoded job assignment
+
+Added ColorPicker dialog
+
+Removed displayUISize from CompUpgradeTree
+Removed displayUICoord from CompVehicle
+
+Folder path for additional mask textures is Textures/.../Color/MaskName/OriginalFileName
+Graphic_Cannon is now the default graphic class for cannons (Can use Graphic_Single)
+Graphic_Animate now inherits Graphic_Cannon
+MaskSuffix for Graphic_Cannon (Cannons) is '_m' not 'm'
+
+Overall Graphics for Cannons have been modified to support multi-texture masks
+
+ThingDef for building is now a VehicleBuildDef
+Removed SpawnThingBuilt DefModExtension
+Removed CompSavePawnReference comp class (replaced with VehicleBuilding thingClass that is defined in Parent xml def)
+
+Added recoil field to CannonDef for recoil on vehicles
+
+Added ComponentCache for World, Game, and Map components (util for C# modders) ( DOUBLE CHECK)
+
+Added electricPowered option to CompFueledTravel
+
+Added VehicleAI for AI control / behavior. If a ThingComp should tick for AI, inherit VehicleComp instead of ThingComp
+
+Added CustomHitFlags Def to attach to CannonDef for custom HitFlags per Cannon (not per Projectile)
+
+VehiclePawn ThingDef now allows 1.0 fillPercent (Pawn AI will now seek cover behind vehicles, bullets are blocked by vehicles w/ 1.0 fillage)
+
+----------- AIR VEHICLES -----------
+VehicleType "Air" now available
+
+Added bool field "controlPathing" to allow for vehicles to be immovable (similar to SRTS / transport pods which are buildings)

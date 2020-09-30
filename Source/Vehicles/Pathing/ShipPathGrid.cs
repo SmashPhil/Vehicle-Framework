@@ -73,16 +73,16 @@ namespace Vehicles.AI
             pathGrid[map.cellIndices.CellToIndex(c)] = CalculatedCostAt(c);
             if (WalkableFast(c) != flag)
             {
-                WaterMapUtility.GetExtensionToMap(map).getShipReachability.ClearCache();
-                map.GetComponent<WaterMap>().getWaterRegionDirtyer.Notify_WalkabilityChanged(c);
+                map.GetCachedMapComponent<WaterMap>().ShipReachability.ClearCache();
+                map.GetCachedMapComponent<WaterMap>().WaterRegionDirtyer.Notify_WalkabilityChanged(c);
             }
         }
 
         public void RecalculateAllPerceivedPathCosts()
         {
-            foreach (IntVec3 c in this.map.AllCells)
+            foreach (IntVec3 c in map.AllCells)
             {
-                this.RecalculatePerceivedPathCostAt(c);
+                RecalculatePerceivedPathCostAt(c);
             }
         }
 

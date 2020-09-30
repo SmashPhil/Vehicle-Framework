@@ -14,14 +14,13 @@ namespace Vehicles
 		public VehicleGraphicSet(VehiclePawn vehicle)
 		{
 			this.vehicle = vehicle;
-			flasher = new DamageFlasher(vehicle);
 		}
 
         public bool AllResolved
 		{
 			get
 			{
-				return nakedGraphic != null;
+				return vehicle.VehicleGraphic != null;
 			}
 		}
 
@@ -38,8 +37,7 @@ namespace Vehicles
 			{
 				cachedMatsBodyBase.Clear();
 				cachedMatsBodyBaseHash = num;
-				
-				cachedMatsBodyBase.Add(nakedGraphic.MatAt(facing, vehicle));
+				cachedMatsBodyBase.Add(vehicle.VehicleGraphic.MatAt(facing, vehicle));
 			}
 			return cachedMatsBodyBase;
 		}
@@ -53,36 +51,13 @@ namespace Vehicles
 		public void ResolveAllGraphics()
 		{
 			ClearCache();
-			if (vehicle.RaceProps.Humanlike)
-			{
-				nakedGraphic = GraphicDatabase.Get<Graphic_OmniDirectional>(vehicle.story.bodyType.bodyNakedGraphicPath, ShaderDatabase.CutoutSkin, Vector2.one, vehicle.story.SkinColor);
-				rottingGraphic = GraphicDatabase.Get<Graphic_OmniDirectional>(vehicle.story.bodyType.bodyNakedGraphicPath, ShaderDatabase.CutoutSkin, Vector2.one, PawnGraphicSet.RottingColor);
-				dessicatedGraphic = GraphicDatabase.Get<Graphic_OmniDirectional>(vehicle.story.bodyType.bodyDessicatedGraphicPath, ShaderDatabase.Cutout);
-				return;
-			}
-			PawnKindLifeStage curKindLifeStage = vehicle.ageTracker.CurKindLifeStage;
-			if (vehicle.gender != Gender.Female || curKindLifeStage.femaleGraphicData == null)
-			{
-				nakedGraphic = curKindLifeStage.bodyGraphicData.Graphic;
-			}
-			else
-			{
-				nakedGraphic = curKindLifeStage.femaleGraphicData.Graphic;
-			}
+
+			//Future content?
 			if (vehicle.RaceProps.packAnimal)
 			{
-				packGraphic = GraphicDatabase.Get<Graphic_OmniDirectional>(nakedGraphic.path + "Pack", ShaderDatabase.Cutout, nakedGraphic.drawSize, Color.white);
+				packGraphic = GraphicDatabase.Get<Graphic_Vehicle>(vehicle.VehicleGraphic.path + "Pack", ShaderDatabase.Cutout, vehicle.VehicleGraphic.drawSize, Color.white);
 			}
-			rottingGraphic = nakedGraphic.GetColoredVersion(ShaderDatabase.CutoutSkin, PawnGraphicSet.RottingColor, PawnGraphicSet.RottingColor);
-			if (!vehicle.kindDef.alternateGraphics.NullOrEmpty())
-			{
-				Rand.PushState(vehicle.thingIDNumber ^ 46101);
-				if (Rand.Value <= vehicle.kindDef.alternateGraphicChance)
-				{
-					nakedGraphic = vehicle.kindDef.alternateGraphics.RandomElementByWeight((AlternateGraphic x) => x.Weight).GetGraphic(nakedGraphic);
-				}
-				Rand.PopState();
-			}
+			rottingGraphic = vehicle.VehicleGraphic.GetColoredVersion(ShaderDatabase.CutoutSkin, PawnGraphicSet.RottingColor, PawnGraphicSet.RottingColor);
 		}
 
 		public void SetAllGraphicsDirty()
@@ -95,15 +70,11 @@ namespace Vehicles
 
 		public VehiclePawn vehicle;
 
-		public Graphic nakedGraphic;
-
 		public Graphic rottingGraphic;
 
 		public Graphic dessicatedGraphic;
 
 		public Graphic packGraphic;
-
-		public DamageFlasher flasher;
 
 		private List<Material> cachedMatsBodyBase = new List<Material>();
 
