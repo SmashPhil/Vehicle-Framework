@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <!-- Rowboat -->
+
+  <SPBoats_RowboatBlueprint.label>手漕ぎボート</SPBoats_RowboatBlueprint.label>
+  <SPBoats_RowboatBlueprint.description>近距離航海用の二人乗りな木製手漕ぎボートです。</SPBoats_RowboatBlueprint.description>
+  <Blueprint_SPBoats_RowboatBlueprint.label>手漕ぎボート (設計)</Blueprint_SPBoats_RowboatBlueprint.label>
+  <Frame_SPBoats_RowboatBlueprint.label>手漕ぎボート (施工)</Frame_SPBoats_RowboatBlueprint.label>
+  <Frame_SPBoats_RowboatBlueprint.description>近距離航海用の二人乗りな木製手漕ぎボートです。</Frame_SPBoats_RowboatBlueprint.description>
+
+
+  <!-- Fishing Boat -->
+
+  <SPBoats_FishingBoatBlueprint.label>釣り船</SPBoats_FishingBoatBlueprint.label>
+  <SPBoats_FishingBoatBlueprint.description>海で魚を釣ることができる小さな釣り船です。（魚を釣るためには互換性のある釣りModが必要です）</SPBoats_FishingBoatBlueprint.description>
+  <Blueprint_SPBoats_FishingBoatBlueprint.label>釣り船 (設計)</Blueprint_SPBoats_FishingBoatBlueprint.label>
+  <Frame_SPBoats_FishingBoatBlueprint.label>釣り船 (施工)</Frame_SPBoats_FishingBoatBlueprint.label>
+  <Frame_SPBoats_FishingBoatBlueprint.description>海で魚を釣ることができる小さな釣り船です。（魚を釣るためには互換性のある釣りModが必要です）</Frame_SPBoats_FishingBoatBlueprint.description>
+
+
+  <!-- Caravel -->
+
+  <SPBoats_CaravelBlueprint.label>カラベル船</SPBoats_CaravelBlueprint.label>
+  <SPBoats_CaravelBlueprint.description>高い速力を持ち多目的に使えるように設計された中型の貿易用帆船です。</SPBoats_CaravelBlueprint.description>
+  <Blueprint_SPBoats_CaravelBlueprint.label>カラベル船 (設計)</Blueprint_SPBoats_CaravelBlueprint.label>
+  <Frame_SPBoats_CaravelBlueprint.label>カラベル船 (施工)</Frame_SPBoats_CaravelBlueprint.label>
+  <Frame_SPBoats_CaravelBlueprint.description>高い速力を持ち多目的に使えるように設計された中型の貿易用帆船です。</Frame_SPBoats_CaravelBlueprint.description>
+
+
+  <!-- Galleon -->
+
+  <SPBoats_GalleonBlueprint.label>ガレオン船</SPBoats_GalleonBlueprint.label>
+  <SPBoats_GalleonBlueprint.description>船を相手に戦う艦として設計された大型の戦闘用帆船です。</SPBoats_GalleonBlueprint.description>
+  <Blueprint_SPBoats_GalleonBlueprint.label>ガレオン船 (設計)</Blueprint_SPBoats_GalleonBlueprint.label>
+  <Frame_SPBoats_GalleonBlueprint.label>ガレオン船 (施工)</Frame_SPBoats_GalleonBlueprint.label>
+  <Frame_SPBoats_GalleonBlueprint.description>船を相手に戦う艦として設計された大型の戦闘用帆船です。</Frame_SPBoats_GalleonBlueprint.description>
+
+
+  <!-- Paddle Steamer -->
+
+  <SPBoats_PaddleSteamerBlueprint.label>外輪船</SPBoats_PaddleSteamerBlueprint.label>
+  <SPBoats_PaddleSteamerBlueprint.description>長距離交易用の汎用大型貨物運搬船で沢山荷物を積み込めます。</SPBoats_PaddleSteamerBlueprint.description>
+  <Blueprint_SPBoats_PaddleSteamerBlueprint.label>外輪船 (設計)</Blueprint_SPBoats_PaddleSteamerBlueprint.label>
+  <Frame_SPBoats_PaddleSteamerBlueprint.label>外輪船 (施工)</Frame_SPBoats_PaddleSteamerBlueprint.label>
+  <Frame_SPBoats_PaddleSteamerBlueprint.description>長距離交易用の汎用大型貨物運搬船で沢山荷物を積み込めます。</Frame_SPBoats_PaddleSteamerBlueprint.description>
+
+</LanguageData>

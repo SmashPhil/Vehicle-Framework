@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<Vehicles.AerialVehicleArrivalModeDef>
+		<defName>EdgeDrop</defName>
+		<workerClass>Vehicles.AerialVehicleArrivalModeWorker_EdgeDrop</workerClass>
+		<selectionWeightCurve>
+			<points>
+				<li>(300, 0)</li>
+				<li>(700, 0.30)</li>
+			</points>
+		</selectionWeightCurve>
+		<textEnemy>A group of {0} from {1} have arrived in a shuttle nearby.</textEnemy>
+		<textFriendly>A group of friendly {0} from {1} have arrived in a shuttle nearby.</textFriendly>
+		<textWillArrive>{0_pawnsPluralDef} will arrive in a shuttle.</textWillArrive>
+	</Vehicles.AerialVehicleArrivalModeDef>
+	
+	<Vehicles.AerialVehicleArrivalModeDef>
+		<defName>CenterDrop</defName>
+		<workerClass>Vehicles.AerialVehicleArrivalModeWorker_CenterDrop</workerClass>
+		<selectionWeightCurve> <!-- not usable in many strategies and by many factions, so this gets boosted -->
+			<points>
+				<li>(300, 0.0)</li>
+				<li>(1000, 3.5)</li>
+			</points>
+		</selectionWeightCurve>
+		<pointsFactorCurve>
+			<points>
+				<li>0, 0.5</li>
+				<li>5000, 0.3</li>
+			</points>
+		</pointsFactorCurve>
+		<textEnemy>A group of {0} from {1} have dropped in right on top of you!</textEnemy>
+		<textFriendly>A group of friendly {0} from {1} have dropped in right on top of you!</textFriendly>
+		<textWillArrive>{0_pawnsPluralDef} will arrive in a shuttle right on top of you.</textWillArrive>
+	</Vehicles.AerialVehicleArrivalModeDef>
+	
+	<Vehicles.AerialVehicleArrivalModeDef>
+		<defName>TargetedLanding</defName>
+		<workerClass>Vehicles.AerialVehicleArrivalModeWorker_TargetedDrop</workerClass>
+	</Vehicles.AerialVehicleArrivalModeDef>
+</Defs>

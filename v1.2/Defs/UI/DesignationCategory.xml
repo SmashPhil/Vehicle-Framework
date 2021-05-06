@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<DesignationCategoryDef>
+		<defName>Vehicles</defName>
+		<label>Vehicles</label>
+		<description>Vehicles for operating.</description>
+		<order>8</order>
+		<specialDesignatorClasses>
+			<li>Designator_Cancel</li>
+			<!--<li>Designator_Disassemble</li>-->
+		</specialDesignatorClasses>
+	</DesignationCategoryDef>
+</Defs>

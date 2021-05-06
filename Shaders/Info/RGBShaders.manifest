@@ -1,0 +1,17 @@
+ManifestFileVersion: 0
+CRC: 3016077533
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 99486d89ef74e63240ed228e58e5dc02
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 677a1d6a6e8c5d2da1d9d0fadde392d8
+HashAppended: 0
+ClassTypes:
+- Class: 48
+  Script: {instanceID: 0}
+Assets:
+- Assets/Shaders/ShaderRGB.shader
+- Assets/Shaders/ShaderRGBPattern.shader
+Dependencies: []

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<Vehicles.VehicleBuildDef ParentName="VehicleBoatBaseBuildable">
+		<defName>RowBoat_Blueprint</defName>
+		<label>Row Boat</label>
+		<description>A heavily armored combat vehicle.</description>
+
+		<graphicData>
+			<texPath>Vehicles/Sea/RowBoat/RowBoat</texPath>
+			<graphicClass>Graphic_Multi</graphicClass>
+			<drawSize>(1, 1.72)</drawSize>
+		</graphicData>
+		
+		<statBases>
+			<MaxHitPoints>10000</MaxHitPoints>
+			<WorkToBuild>30</WorkToBuild>
+			<Flammability>0.05</Flammability>
+		</statBases>
+		<size>(1, 1)</size>
+		
+		<researchPrerequisites/>
+		
+		<costList>
+			<ComponentIndustrial>1</ComponentIndustrial>
+		</costList>
+		
+		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
+		
+		<thingToSpawn>RowBoat</thingToSpawn>
+		<soundBuilt>ShipBigConstruction</soundBuilt>
+	</Vehicles.VehicleBuildDef>
+</Defs>

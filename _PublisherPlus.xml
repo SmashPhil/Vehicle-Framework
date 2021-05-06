@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Configuration>
+  <Excluded>
+    <exclude>D:\Steam\steamapps\common\RimWorld\Mods\Vehicles\.git</exclude>
+    <exclude>D:\Steam\steamapps\common\RimWorld\Mods\Vehicles\.vs</exclude>
+    <exclude>D:\Steam\steamapps\common\RimWorld\Mods\Vehicles\Source</exclude>
+  </Excluded>
+</Configuration>

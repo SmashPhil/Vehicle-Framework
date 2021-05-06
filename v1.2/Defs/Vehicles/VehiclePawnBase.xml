@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<Vehicles.VehicleDef Name="BaseVehiclePawn" Abstract="True">
+		<thingClass>Vehicles.VehiclePawn</thingClass>
+		<category>Pawn</category>
+		<selectable>true</selectable>
+		<tickerType>Normal</tickerType>
+		<altitudeLayer>Pawn</altitudeLayer>
+		<useHitPoints>false</useHitPoints>
+		<hasTooltip>true</hasTooltip>
+		<repairEffect>Repair</repairEffect>
+		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
+		
+		<statBases>
+			<Mass>100</Mass>
+			<PsychicSensitivity>0</PsychicSensitivity>
+			<ToxicSensitivity>0</ToxicSensitivity>
+			<Flammability>0</Flammability>
+			<ComfyTemperatureMin>-200</ComfyTemperatureMin>
+			<ComfyTemperatureMax>200</ComfyTemperatureMax>
+			<MeatAmount>0</MeatAmount>
+		</statBases>
+		
+		<inspectorTabs>
+			<li>Vehicles.UI.ITab_Vehicle_Health</li>
+			<li>Vehicles.UI.ITab_Vehicle_Passengers</li>
+			<li>Vehicles.UI.ITab_Vehicle_Cargo</li>
+			<li>ITab_Pawn_FormingCaravan</li>
+		</inspectorTabs>
+		
+		<race>
+			<body>emptyBody</body>
+		</race>
+		
+		<comps>
+			<li>
+				<compClass>CompAttachBase</compClass>
+			</li>
+		</comps>
+		
+		<drawGUIOverlay>true</drawGUIOverlay>
+	</Vehicles.VehicleDef>
+	
+	<Vehicles.VehicleDef Name="BaseVehiclePawnUpgradeable" Abstract="True">
+		<thingClass>Vehicles.VehiclePawn</thingClass>
+		<category>Pawn</category>
+		<selectable>true</selectable>
+		<tickerType>Normal</tickerType>
+		<altitudeLayer>Pawn</altitudeLayer>
+		<useHitPoints>false</useHitPoints>
+		<hasTooltip>true</hasTooltip>
+		<repairEffect>Repair</repairEffect>
+		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
+		
+		<statBases>
+			<Mass>100</Mass>
+			<PsychicSensitivity>0</PsychicSensitivity>
+			<ToxicSensitivity>0</ToxicSensitivity>
+			<Flammability>0</Flammability>
+			<ComfyTemperatureMin>-200</ComfyTemperatureMin>
+			<ComfyTemperatureMax>200</ComfyTemperatureMax>
+			<MeatAmount>0</MeatAmount>
+		</statBases>
+		
+		<inspectorTabs>
+			<li>Vehicles.UI.ITab_Vehicle_Health</li>
+			<li>Vehicles.UI.ITab_Vehicle_Passengers</li>
+			<li>Vehicles.UI.ITab_Vehicle_Cargo</li>
+			<li>Vehicles.UI.ITab_Vehicle_Upgrades</li>
+			<li>ITab_Pawn_FormingCaravan</li>
+		</inspectorTabs>
+		
+		<race>
+			<body>emptyBody</body>
+		</race>
+		
+		<comps>
+			<li>
+				<compClass>CompAttachBase</compClass>
+			</li>
+		</comps>
+		
+		<drawGUIOverlay>true</drawGUIOverlay>
+	</Vehicles.VehicleDef>
+	
+	<BodyPartDef>
+			<defName>emptyBody</defName>
+			<label>body</label>
+			<hitPoints>1</hitPoints>
+			<skinCovered>false</skinCovered>
+			<solid>true</solid>
+			<bleedRate>0</bleedRate>
+			<alive>false</alive>
+			<frostbiteVulnerability>0.01</frostbiteVulnerability>
+	</BodyPartDef>
+	
+	<BodyDef>
+		<defName>emptyBody</defName>
+		<corePart>
+			<def>emptyBody</def>
+			<height>Middle</height>
+			<depth>Outside</depth>
+		</corePart>
+	</BodyDef>
+</Defs>

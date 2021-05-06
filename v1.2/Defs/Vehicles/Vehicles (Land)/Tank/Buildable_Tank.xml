@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<Vehicles.VehicleBuildDef ParentName="VehicleBaseBuildable">
+		<defName>Tank_Blueprint</defName>
+		<label>Tank</label>
+		<description>A heavily armored combat vehicle.</description>
+		<graphicData>
+			<texPath>Vehicles/Land/Tank/Tank</texPath>
+			<graphicClass>Graphic_Multi</graphicClass>
+			<drawSize>(4,7)</drawSize>
+		</graphicData>
+		
+		<statBases>
+			<MaxHitPoints>20000</MaxHitPoints>
+			<WorkToBuild>30</WorkToBuild>
+			<Flammability>0.05</Flammability>
+		</statBases>
+		<size>(3,5)</size>
+		
+		<researchPrerequisites/>
+		
+		<costList>
+			<ComponentIndustrial>35</ComponentIndustrial>
+			<Steel>3000</Steel>
+		</costList>
+		
+		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
+		
+		<thingToSpawn>Tank</thingToSpawn>
+		<soundBuilt>ShipBigConstruction</soundBuilt>
+	</Vehicles.VehicleBuildDef>
+</Defs>

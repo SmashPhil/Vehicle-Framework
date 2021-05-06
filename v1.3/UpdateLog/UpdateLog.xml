@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <currentVersion>1.2.3.1</currentVersion>
+  <updateOn>GameInit</updateOn>
+  <description>
+[anchor]MiddleCenter[/anchor][b]Vehicles - 1.2.3.1 (Hotfix)[/b][anchor]MiddleLeft[/anchor]
+[title]Bug Fixes[/title][font]Tiny[/font]
+Fixed bug where HEX field in ColorPicker dialog window did not accept any user input.
+
+Fixed bug where vehicle would (rarely) attempt to melee back at a target
+
+[title]New Additions[/title]
+
+[title]Additional Changes[/title]
+Greatly lowered SoundDef volume for cannon firing and water splashing.
+
+Changed how things are ejected from vehicles. Pawns and items will now spawn outside the hitbox, continuing outward in a radial but random pattern.
+[title]Final Notes[/title]
+
+Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.)
+  </description>
+  <actionOnUpdate></actionOnUpdate>
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon.png</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon.png</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon.png</icon>
+      <url>steam://url/CommunityFilePage/2356577528</url>
+    </li>
+  </rightIconBar>
+  <leftIconBar>
+    <li>
+      <name>Support me on Ko-fi</name>
+      <icon>ko-fiIcon.png</icon>
+      <url>https://ko-fi.com/smashphil</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>

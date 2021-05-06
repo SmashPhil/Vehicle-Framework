@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<PawnKindDef>
+		<defName>FishingBoat</defName>
+		<label>Fishing Boat</label>
+		<defaultFactionType>PlayerColony</defaultFactionType>
+		<aiAvoidCover>false</aiAvoidCover>
+		<destroyGearOnDrop>true</destroyGearOnDrop>
+		<race>FishingBoat</race>
+		<backstoryCategories>
+			<li>Industrial</li>
+		</backstoryCategories>
+		<combatPower>200</combatPower>
+		<lifeStages>
+			<li>
+				<bodyGraphicData Class="Vehicles.GraphicDataRGB">
+					<texPath>Vehicles/Sea/FishingBoat/FishingBoat</texPath>
+					<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
+					<drawSize>(4,4)</drawSize>
+					<shaderType>Cutout</shaderType>
+					<color>(120, 120, 120)</color>
+					<colorTwo>(0, 80, 0)</colorTwo>
+					<shadowData>
+						<volume>(0.4,0.1,0.4)</volume>
+					</shadowData>
+				</bodyGraphicData>
+			</li>
+		</lifeStages>
+	</PawnKindDef>
+	
+	<Vehicles.VehicleDef ParentName="BaseVehiclePawn">
+		<defName>FishingBoat</defName>
+		<label>Fishing Boat</label>
+		<description>A heavy warship to rule the seas.</description>
+		
+		<fillPercent>1</fillPercent>
+		
+		<nameable>false</nameable>
+		<buildDef>FishingBoat_Blueprint</buildDef>
+		<repairRate>650</repairRate>
+		
+		<armor>50</armor>
+		<cargoCapacity>250</cargoCapacity>
+		<speed>1.5</speed>
+		
+		<size>(1,3)</size>
+		
+		<vehicleMovementPermissions>DriverNeeded</vehicleMovementPermissions>
+		<vehicleCategory>Transport</vehicleCategory>
+		<vehicleTech>Industrial</vehicleTech>
+		<vehicleType>Sea</vehicleType>
+				
+		<statBases>
+			<Mass>10000</Mass>
+			<ArmorRating_Blunt>1.0</ArmorRating_Blunt>
+			<ArmorRating_Sharp>1.0</ArmorRating_Sharp>
+			<MarketValue>250000</MarketValue>
+			<Flammability>0</Flammability>
+		</statBases>
+		
+		<drawProperties>
+			<upgradeUICoord>(587,50)</upgradeUICoord>
+			<upgradeUISize>(384, 384)</upgradeUISize>
+			
+			<colorPickerUICoord>(0, 40)</colorPickerUICoord>
+			<colorPickerUISize>(384, 384)</colorPickerUISize>
+			
+			<settingsUICoord>(0, 0)</settingsUICoord>
+			<settingsUISize>(150, 150)</settingsUISize>
+		</drawProperties>
+		
+		<properties>
+			<fishing>true</fishing>
+			
+			<wakeMultiplier>1.5</wakeMultiplier>
+			<wakeSpeed>1</wakeSpeed>
+			
+			<healthLabel_Healthy>Operational</healthLabel_Healthy>
+			<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
+			<healthLabel_Immobile>Inoperable</healthLabel_Immobile>
+			
+			<customBiomeCosts/>
+			
+			<worldSpeedMultiplier>5</worldSpeedMultiplier>
+			
+			<roles>
+				<li>
+					<key>driver</key>
+					<label>Driver</label>
+					<handlingTypes>
+						<li>Movement</li>
+					</handlingTypes>
+					<slots>1</slots>
+					<slotsToOperate>1</slotsToOperate>
+					<hitbox>
+						<side>Body</side>
+					</hitbox>
+				</li>
+				<li>
+					<key>passenger</key>
+					<label>Passenger</label>
+					<slots>2</slots>
+					<hitbox>
+						<side>Body</side>
+					</hitbox>
+				</li>
+			</roles>
+			
+			<customTerrainCosts/>
+		</properties>
+		
+		<components>
+			<li>
+				<key>Hull</key>
+				<label>Hull</label>
+				<health>100</health>
+				<armor>.1</armor>
+				<efficiencyWeight>10</efficiencyWeight>
+				
+				<categories>
+					<li>StatCategoryMovement</li>
+				</categories>
+				
+				<hitbox>
+					<side>Body</side>
+				</hitbox>
+			</li>
+			<li>
+				<key>Sail</key>
+				<label>Sail</label>
+				<health>25</health>
+				<armor>0</armor>
+				<efficiencyWeight>1</efficiencyWeight>
+				
+				<categories>
+					<li>StatCategoryMovement</li>
+				</categories>
+				<hitbox>
+					<cells>
+						<li>(0,0)</li>
+					</cells>
+				</hitbox>
+			</li>
+		</components>
+
+		<race>
+			<thinkTreeMain>Vehicle</thinkTreeMain>
+			<intelligence>ToolUser</intelligence>
+			<fleshType>MetalVehicle</fleshType>
+			<needsRest>false</needsRest>
+			<hasGenders>false</hasGenders>
+			<foodType>None</foodType>
+
+			<baseBodySize>1.0</baseBodySize>
+			<baseHealthScale>1.0</baseHealthScale>
+			<lifeStageAges>
+				<li>
+					<def>MechanoidFullyFormed</def>
+					<minAge>0</minAge>
+					<soundWounded>BulletImpact_Metal</soundWounded>
+					<soundDeath>Explosion_Bomb</soundDeath>
+				</li>
+			</lifeStageAges>
+			
+			<soundMeleeHitPawn>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitPawn>
+			<soundMeleeHitBuilding>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitBuilding>
+			<soundMeleeMiss>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeMiss>
+		</race>
+	</Vehicles.VehicleDef>
+</Defs>

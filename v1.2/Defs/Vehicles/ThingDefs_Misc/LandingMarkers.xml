@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <!-- <ThingDef ParentName="BuildingBase"> -->
+    <!-- <defName>LandingMarker</defName> -->
+    <!-- <label>aerial vehicle landing beacon</label> -->
+    <!-- <description>Marks the corner of a landing area. Four of these placed at the corners of a clear area create a landing pad / runway.</description> -->
+    <!-- <graphicData> -->
+      <!-- <texPath>Things/Building/Misc/ShipLandingBeacon</texPath> -->
+      <!-- <graphicClass>Graphic_Single</graphicClass> -->
+      <!-- <shadowData> -->
+        <!-- <volume>(0.3, 0.2, 0.3)</volume> -->
+        <!-- <offset>(0,0,-0.1)</offset> -->
+      <!-- </shadowData> -->
+      <!-- <damageData> -->
+        <!-- <rect>(0.2,0.2,0.6,0.6)</rect> -->
+      <!-- </damageData> -->
+    <!-- </graphicData> -->
+    <!-- <altitudeLayer>Building</altitudeLayer> -->
+    <!-- <minifiedDef>MinifiedThing</minifiedDef> -->
+    <!-- <thingCategories> -->
+      <!-- <li>BuildingsMisc</li> -->
+    <!-- </thingCategories> -->
+    <!-- <statBases> -->
+      <!-- <MaxHitPoints>75</MaxHitPoints> -->
+      <!-- <WorkToBuild>800</WorkToBuild> -->
+      <!-- <Flammability>0.5</Flammability> -->
+      <!-- <Mass>5</Mass> -->
+    <!-- </statBases> -->
+    <!-- <tickerType>Rare</tickerType> -->
+    <!-- <drawerType>MapMeshAndRealTime</drawerType> -->
+    <!-- <fillPercent>0.15</fillPercent> -->
+    <!-- <costList> -->
+      <!-- <Steel>40</Steel> -->
+      <!-- <ComponentIndustrial>1</ComponentIndustrial> -->
+    <!-- </costList> -->
+    <!-- <comps> -->
+      <!-- <li Class="CompProperties_Power"> -->
+        <!-- <compClass>CompPowerTrader</compClass> -->
+        <!-- <basePowerConsumption>50</basePowerConsumption> -->
+      <!-- </li> -->
+      <!-- <li Class="CompProperties_Glower"> -->
+        <!-- <glowRadius>2</glowRadius> -->
+        <!-- <glowColor>(164, 255, 138, 0)</glowColor> -->
+      <!-- </li> -->
+      <!-- <li Class="CompProperties_ShipLandingBeacon"> -->
+        <!-- <edgeLengthRange>9~25</edgeLengthRange> -->
+      <!-- </li> -->
+      <!-- <li Class="CompProperties_Flickable"/> -->
+      <!-- <li Class="CompProperties_Breakdownable"/> -->
+    <!-- </comps> -->
+    <!-- <leaveResourcesWhenKilled>false</leaveResourcesWhenKilled> -->
+    <!-- <displayNumbersBetweenSameDefDistRange>9~25</displayNumbersBetweenSameDefDistRange> -->
+    <!-- <pathCost>14</pathCost> -->
+    <!-- <designationCategory>Misc</designationCategory> -->
+    <!-- <rotatable>false</rotatable> -->
+    <!-- <placeWorkers> -->
+      <!-- <li>PlaceWorker_ShipLandingBeacon</li> -->
+    <!-- </placeWorkers> -->
+    <!-- <designationHotKey>Misc2</designationHotKey> -->
+    <!-- <researchPrerequisites> -->
+      <!-- <li>Electricity</li> -->
+    <!-- </researchPrerequisites> -->
+  <!-- </ThingDef> -->
+</Defs>

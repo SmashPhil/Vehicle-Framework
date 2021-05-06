@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<FleshTypeDef>
+		<defName>WoodenVehicle</defName>
+		<corpseCategory>CorpsesMechanoid</corpseCategory>
+		<!-- Change Later -->
+		<wounds>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechA</texture>
+			</li>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechB</texture>
+			</li>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechC</texture>
+			</li>
+		</wounds>
+	</FleshTypeDef>
+	
+	<FleshTypeDef>
+		<defName>MetalVehicle</defName>
+		<corpseCategory>CorpsesMechanoid</corpseCategory>
+		<!-- Change Later -->
+		<wounds>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechA</texture>
+			</li>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechB</texture>
+			</li>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechC</texture>
+			</li>
+		</wounds>
+	</FleshTypeDef>
+	
+	<FleshTypeDef>
+		<defName>SpacerVehicle</defName>
+		<corpseCategory>CorpsesMechanoid</corpseCategory>
+		<!-- Change Later -->
+		<wounds>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechA</texture>
+			</li>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechB</texture>
+			</li>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechC</texture>
+			</li>
+		</wounds>
+	</FleshTypeDef>
+</Defs>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<LanguageData>
+	<CaravanShips>Boat</CaravanShips>
+	<CaravanSailing>Sailing</CaravanSailing>
+	<CommandDockShip>Dock</CommandDockShip>
+	<CommandDockShipDisembark>Dock and Disembark</CommandDockShipDisembark>
+	<DockCaravan>Items to Take</DockCaravan>
+	<CommandDockShipDesc>Unload all passengers and enable trade with the Settlement of {0}.</CommandDockShipDesc>
+	<CommandDockShipObjectDesc>Dock Boats and go on foot</CommandDockShipObjectDesc>
+	<CommandUndockShip>Board Vehicle</CommandUndockShip>
+	<CommandUndockShipDesc>Load all pawns and items into Boats</CommandUndockShipDesc>
+	<CommandAttackDockDisable>Cannot attack {0} while docked at their Settlement</CommandAttackDockDisable>
+	<CommandTradeDockDisable>Cannot trade with {0}. Must dock boat first</CommandTradeDockDisable>
+	<CaravanMustHaveEnoughSpaceOnShip>Not enough space on ships to house all pawns.</CaravanMustHaveEnoughSpaceOnShip>
+	<CaravanMustHaveEnoughPawnsToOperate>Not enough Pawns selected to set sail. Need {0}</CaravanMustHaveEnoughPawnsToOperate>
+	<CommandFormVehicleCaravan>Form Vehicle Caravan</CommandFormVehicleCaravan>
+	<CommandFormVehicleCaravanDesc>Form caravan with vehicles included.</CommandFormVehicleCaravanDesc>
+	<CommandReformVehicleCaravan>Reform Vehicle Caravan</CommandReformVehicleCaravan>
+</LanguageData>

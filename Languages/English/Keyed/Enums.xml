@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<LanguageData>
+	<NotAllowed>Disabled</NotAllowed>
+	<DriverNeeded>Colonist Driven</DriverNeeded>
+	<NoDriverNeeded>AI Driven</NoDriverNeeded>
+	
+	<Misc>Other</Misc>
+	<Transport>Transport</Transport>
+	<Trader>Trader</Trader>
+	<Combat>Combat</Combat>
+	<Hybrid>Hybrid</Hybrid>
+	
+	<Manual>Manual</Manual>
+	<Opportunistic>Opportunistic</Opportunistic>
+	<Automatic>Automatic</Automatic>
+</LanguageData>

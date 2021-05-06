@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <MoveSpeedShips.label>vitesse de déplacement</MoveSpeedShips.label>
+  <MoveSpeedShips.description>Vitesse en cases par seconde. (Travail en cours)</MoveSpeedShips.description>
+  <MoveSpeedShips.formatString>{0} c/s</MoveSpeedShips.formatString>
+
+  <CarryingCapacityShips.label>capacité d'emport</CarryingCapacityShips.label>
+  <CarryingCapacityShips.description>La limite de poids de ce bateau. (Travail en cours)</CarryingCapacityShips.description>
+
+</LanguageData>

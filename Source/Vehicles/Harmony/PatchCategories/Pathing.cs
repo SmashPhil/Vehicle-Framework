@@ -1,0 +1,362 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Emit;
+using OpCodes = System.Reflection.Emit.OpCodes;
+using HarmonyLib;
+using Verse;
+using Verse.AI;
+using RimWorld;
+using RimWorld.Planet;
+using SmashTools;
+using Vehicles.AI;
+
+namespace Vehicles
+{
+	internal class Pathing : IPatchCategory
+	{
+		public void PatchMethods()
+		{
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(FloatMenuMakerMap), "GotoLocationOption"),
+				prefix: new HarmonyMethod(typeof(Pathing),
+				nameof(GotoLocationShips)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), nameof(Pawn_PathFollower.StartPath)),
+				prefix: new HarmonyMethod(typeof(Pathing),
+				nameof(StartVehiclePath)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), "NeedNewPath"),
+				postfix: new HarmonyMethod(typeof(Pathing),
+				nameof(IsVehicleInNextCell)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathFinder), nameof(PathFinder.FindPath), new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) }),
+				transpiler: new HarmonyMethod(typeof(Pathing),
+				nameof(PathAroundVehicles)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Reachability), nameof(Reachability.CanReach), new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(PathEndMode), typeof(TraverseParms) }),
+				prefix: new HarmonyMethod(typeof(Pathing),
+				nameof(CanReachVehiclePosition)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenGrid), nameof(GenGrid.Impassable)),
+				postfix: new HarmonyMethod(typeof(Pathing),
+				nameof(ImpassableThroughVehicle)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.Walkable)),
+				postfix: new HarmonyMethod(typeof(Pathing),
+				nameof(WalkableThroughVehicle)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.WalkableFast), new Type[] { typeof(IntVec3) }),
+				postfix: new HarmonyMethod(typeof(Pathing),
+				nameof(WalkableFastThroughVehicleIntVec3)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.WalkableFast), new Type[] { typeof(int), typeof(int) }),
+				postfix: new HarmonyMethod(typeof(Pathing),
+				nameof(WalkableFastThroughVehicleInt2)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.WalkableFast), new Type[] { typeof(int) }),
+				postfix: new HarmonyMethod(typeof(Pathing),
+				nameof(WalkableFastThroughVehicleInt)));
+		}
+
+		/// <summary>
+		/// Intercepts FloatMenuMakerMap call to restrict by size and call through to custom water based pathing requirements
+		/// </summary>
+		/// <param name="clickCell"></param>
+		/// <param name="pawn"></param>
+		/// <param name="__result"></param>
+		/// <returns></returns>
+		public static bool GotoLocationShips(IntVec3 clickCell, Pawn pawn, ref FloatMenuOption __result)
+		{
+			if (pawn is VehiclePawn vehicle)
+			{
+				if (vehicle.Faction != Faction.OfPlayer || !vehicle.CanMoveFinal)
+				{
+					return false;
+				}
+				if (VehicleMod.settings.main.fullVehiclePathing && vehicle.LocationRestrictedBySize(clickCell))
+				{
+					Messages.Message("VehicleCannotFit".Translate(), MessageTypeDefOf.RejectInput);
+					return false;
+				}
+
+				if (vehicle.CompFueledTravel != null && vehicle.CompFueledTravel.EmptyTank)
+				{
+					Messages.Message("VehicleOutOfFuel".Translate(), MessageTypeDefOf.RejectInput);
+					return false;
+				}
+
+				Debug.Message("-> " + clickCell + " | " + vehicle.Map.terrainGrid.TerrainAt(clickCell).LabelCap + " | " + vehicle.Map.GetCachedMapComponent<WaterMap>().ShipPathGrid.CalculatedCostAt(clickCell) +
+						" - " + vehicle.Map.GetCachedMapComponent<WaterMap>().ShipPathGrid.pathGrid[vehicle.Map.cellIndices.CellToIndex(clickCell)]);
+
+				if (vehicle.IsBoat() && !VehicleMod.settings.debug.debugDisableWaterPathing)
+				{
+					int num = GenRadial.NumCellsInRadius(2.9f);
+					int i = 0;
+					IntVec3 curLoc;
+					while (i < num)
+					{
+						curLoc = GenRadial.RadialPattern[i] + clickCell;
+						if (GenGridShips.Standable(curLoc, vehicle.Map))
+						{
+							if (curLoc == vehicle.Position || vehicle.beached)
+							{
+								__result = null;
+								return false;
+							}
+							if (!ShipReachabilityUtility.CanReachShip(vehicle, curLoc, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
+							{
+								Debug.Message($"Cant Reach {curLoc} with {vehicle.Label}");
+								__result = new FloatMenuOption("CannotSailToCell".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null);
+								return false;
+							}
+							Action action = delegate ()
+							{
+								Job job = new Job(JobDefOf.Goto, curLoc);
+								if (vehicle.Map.exitMapGrid.IsExitCell(Verse.UI.MouseCell()))
+								{
+									job.exitMapOnArrival = true;
+								}
+								else if (!vehicle.Map.IsPlayerHome && !vehicle.Map.exitMapGrid.MapUsesExitGrid && CellRect.WholeMap(vehicle.Map).IsOnEdge(Verse.UI.MouseCell(), 3) &&
+									vehicle.Map.Parent.GetComponent<FormCaravanComp>() != null && MessagesRepeatAvoider.MessageShowAllowed("MessagePlayerTriedToLeaveMapViaExitGrid-" +
+									vehicle.Map.uniqueID, 60f))
+								{
+									FormCaravanComp component = vehicle.Map.Parent.GetComponent<FormCaravanComp>();
+									if (component.CanFormOrReformCaravanNow)
+									{
+										Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CanReform".Translate(), vehicle.Map.Parent, MessageTypeDefOf.RejectInput, false);
+									}
+									else
+									{
+										Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CantReform".Translate(), vehicle.Map.Parent, MessageTypeDefOf.RejectInput, false);
+									}
+								}
+								if (vehicle.jobs.TryTakeOrderedJob(job, JobTag.Misc))
+								{
+									MoteMaker.MakeStaticMote(curLoc, vehicle.Map, ThingDefOf.Mote_FeedbackGoto, 1f);
+								}
+							};
+							__result = new FloatMenuOption("GoHere".Translate(), action, MenuOptionPriority.GoHere, null, null, 0f, null, null)
+							{
+								autoTakeable = true,
+								autoTakeablePriority = 10f
+							};
+							return false;
+						}
+						else
+						{
+							i++;
+						}
+					}
+				}
+				else
+				{
+					int num = GenRadial.NumCellsInRadius(2.9f);
+					int i = 0;
+					IntVec3 curLoc;
+					
+					while (i < num)
+					{
+						curLoc = GenRadial.RadialPattern[i] + clickCell;
+						if (GenGrid.Standable(curLoc, pawn.Map))
+						{
+							if (curLoc == pawn.Position)
+							{
+								__result = null;
+								return false;
+							}
+							if (!ReachabilityUtility.CanReach(pawn, curLoc, PathEndMode.OnCell, Danger.Deadly, false))
+							{
+								Debug.Message($"Cant Reach {curLoc} with {vehicle.Label}");
+								__result = new FloatMenuOption("CannotSailToCell".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null);
+								return false;
+							}
+							Action action = delegate ()
+							{
+								Job job = new Job(JobDefOf.Goto, curLoc);
+								if (pawn.Map.exitMapGrid.IsExitCell(Verse.UI.MouseCell()))
+								{
+									job.exitMapOnArrival = true;
+								}
+								else if (!pawn.Map.IsPlayerHome && !pawn.Map.exitMapGrid.MapUsesExitGrid && CellRect.WholeMap(pawn.Map).IsOnEdge(Verse.UI.MouseCell(), 3) &&
+									pawn.Map.Parent.GetComponent<FormCaravanComp>() != null && MessagesRepeatAvoider.MessageShowAllowed("MessagePlayerTriedToLeaveMapViaExitGrid-" +
+									pawn.Map.uniqueID, 60f))
+								{
+									FormCaravanComp component = pawn.Map.Parent.GetComponent<FormCaravanComp>();
+									if (component.CanFormOrReformCaravanNow)
+									{
+										Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CanReform".Translate(), pawn.Map.Parent, MessageTypeDefOf.RejectInput, false);
+									}
+									else
+									{
+										Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CantReform".Translate(), pawn.Map.Parent, MessageTypeDefOf.RejectInput, false);
+									}
+								}
+								if (pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc))
+								{
+									MoteMaker.MakeStaticMote(curLoc, pawn.Map, ThingDefOf.Mote_FeedbackGoto, 1f);
+								}
+							};
+							__result = new FloatMenuOption("GoHere".Translate(), action, MenuOptionPriority.GoHere, null, null, 0f, null, null)
+							{
+								autoTakeable = true,
+								autoTakeablePriority = 10f
+							};
+							return false;
+						}
+						else
+						{
+							i++;
+						}
+					}
+				}
+				__result = null;
+				return false;
+			}
+			else
+			{
+				if (PathingHelper.VehicleInCell(pawn.Map, clickCell))
+				{
+					__result = new FloatMenuOption("CannotGoNoPath".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null);
+					return false;
+				}
+			}
+			return true;
+		}
+
+		/// <summary>
+		/// Intercept Pawn_PathFollower call to StartPath with VehiclePawn's own Vehicle_PathFollower. Required for custom path values and water based pathing
+		/// </summary>
+		/// <param name="dest"></param>
+		/// <param name="peMode"></param>
+		/// <param name="___pawn"></param>
+		/// <returns></returns>
+		public static bool StartVehiclePath(LocalTargetInfo dest, PathEndMode peMode, Pawn ___pawn)
+		{
+			if(___pawn is VehiclePawn vehicle)
+			{
+				vehicle.vPather.StartPath(dest, peMode);
+				return false;
+			}
+			return true;
+		}
+
+		/// <summary>
+		/// Determine if next cell is walkable with final determination if vehicle is in cell or not
+		/// </summary>
+		/// <param name="__result"></param>
+		/// <param name="___pawn"></param>
+		/// <param name="nextCell"></param>
+		public static void IsVehicleInNextCell(ref bool __result, Pawn ___pawn, Pawn_PathFollower __instance)
+		{
+			if (!__result)
+			{
+				//Peek 2 nodes ahead to avoid collision last second
+				__result = (__instance.curPath.NodesLeftCount > 1 && PathingHelper.VehicleInCell(___pawn.Map, __instance.curPath.Peek(1))) || 
+					(__instance.curPath.NodesLeftCount > 2 && PathingHelper.VehicleInCell(___pawn.Map, __instance.curPath.Peek(2)));
+			}
+		}
+
+		/// <summary>
+		/// Set cells in which vehicles reside as impassable to other Pawns
+		/// </summary>
+		/// <param name="instructions"></param>
+		/// <param name="ilg"></param>
+		/// <returns></returns>
+		public static IEnumerable<CodeInstruction> PathAroundVehicles(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+		{
+			List<CodeInstruction> instructionList = instructions.ToList();
+			for(int i = 0; i < instructionList.Count; i++)
+			{
+				CodeInstruction instruction = instructionList[i];
+				if (instruction.Calls(AccessTools.Method(typeof(CellIndices), nameof(CellIndices.CellToIndex), new Type[] { typeof(int), typeof(int) })))
+				{
+					Label label = ilg.DefineLabel();
+					Label vehicleLabel = ilg.DefineLabel();
+
+					yield return instruction; //CALLVIRT CELLTOINDEX
+					instruction = instructionList[++i];
+					yield return instruction; //STLOC.S 38
+					instruction = instructionList[++i];
+
+					yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+					yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(typeof(PathFinder), "map"));
+					yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, 36);
+					yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, 37);
+					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(PathingHelper), nameof(PathingHelper.VehicleInCell), new Type[] { typeof(Map), typeof(int), typeof(int) }));
+
+					yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
+					yield return new CodeInstruction(opcode: OpCodes.Ldc_I4_0);
+					yield return new CodeInstruction(opcode: OpCodes.Br, vehicleLabel);
+
+					for(int j = i; j < instructionList.Count; j++)
+					{
+						CodeInstruction instruction2 = instructionList[j];
+						if (instruction2.opcode == OpCodes.Brfalse || instruction2.opcode == OpCodes.Brfalse_S)
+						{
+							instruction2.labels.Add(vehicleLabel);
+							break;
+						}
+					}
+
+					instruction.labels.Add(label);
+				}
+				yield return instruction;
+			}
+		}
+		
+		/// <summary>
+		/// Modify CanReach result if position is claimed by Vehicle in PositionManager
+		/// </summary>
+		/// <param name="start"></param>
+		/// <param name="dest"></param>
+		/// <param name="peMode"></param>
+		/// <param name="traverseParams"></param>
+		/// <param name="__result"></param>
+		/// <returns></returns>
+		public static bool CanReachVehiclePosition(IntVec3 start, LocalTargetInfo dest, PathEndMode peMode, TraverseParms traverseParams, ref bool __result)
+		{
+			if (peMode == PathEndMode.OnCell && !(traverseParams.pawn is VehiclePawn) && (traverseParams.pawn?.Map.GetCachedMapComponent<VehiclePositionManager>().PositionClaimed(dest.Cell) ?? false))
+			{
+				__result = false;
+				return false;
+			}
+			return true;
+		}
+
+		public static void ImpassableThroughVehicle(IntVec3 c, Map map, ref bool __result)
+		{
+			bool regionWorking = (bool)AccessTools.Field(typeof(RegionAndRoomUpdater), "working").GetValue(map.regionAndRoomUpdater);
+			if (!__result && !regionWorking)
+			{
+				__result = map.GetCachedMapComponent<VehiclePositionManager>().PositionClaimed(c);
+			}
+		}
+
+		public static void WalkableThroughVehicle(IntVec3 loc, ref bool __result, Map ___map)
+		{
+			bool regionWorking = (bool)AccessTools.Field(typeof(RegionAndRoomUpdater), "working").GetValue(___map.regionAndRoomUpdater);
+			if (__result && !regionWorking)
+			{
+				__result = !___map.GetCachedMapComponent<VehiclePositionManager>().PositionClaimed(loc);
+			}
+		}
+
+		public static void WalkableFastThroughVehicleIntVec3(IntVec3 loc, ref bool __result, Map ___map)
+		{
+			bool regionWorking = (bool)AccessTools.Field(typeof(RegionAndRoomUpdater), "working").GetValue(___map.regionAndRoomUpdater);
+			if (__result && !regionWorking)
+			{
+				__result = !___map.GetCachedMapComponent<VehiclePositionManager>().PositionClaimed(loc);
+			}
+		}
+
+		public static void WalkableFastThroughVehicleInt2(int x, int z, ref bool __result, Map ___map)
+		{
+			bool regionWorking = (bool)AccessTools.Field(typeof(RegionAndRoomUpdater), "working").GetValue(___map.regionAndRoomUpdater);
+			if (__result && !regionWorking)
+			{
+				__result = !___map.GetCachedMapComponent<VehiclePositionManager>().PositionClaimed(new IntVec3(x, 0, z));
+			}
+		}
+
+		public static void WalkableFastThroughVehicleInt(int index, ref bool __result, Map ___map)
+		{
+			bool regionWorking = (bool)AccessTools.Field(typeof(RegionAndRoomUpdater), "working").GetValue(___map.regionAndRoomUpdater);
+			if (__result && !regionWorking)
+			{
+				__result = !___map.GetCachedMapComponent<VehiclePositionManager>().PositionClaimed(___map.cellIndices.IndexToCell(index));
+			}
+		}
+	}
+}

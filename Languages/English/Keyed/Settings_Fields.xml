@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<LanguageData>
+	<!-- (VehicleDef)-->
+	<VehicleEnabled>Enabled</VehicleEnabled>
+	<VehicleDisabled>Disabled</VehicleDisabled>
+	<CompVehicleStats>Base Stats</CompVehicleStats>
+	<VehicleRaidsEnabled>Raids Can Use</VehicleRaidsEnabled>
+	<VehicleRaidsEnabledTooltip>Raids using Vehicles will be allowed to use this vehicle if points and tech level allow for it.</VehicleRaidsEnabledTooltip>
+	<VehicleBaseArmor>Armor</VehicleBaseArmor>
+	<VehicleBaseArmorTooltip>Base armor value for damage applied to vehicles.</VehicleBaseArmorTooltip>
+	<VehicleBaseCargo>Cargo</VehicleBaseCargo>
+	<VehicleBaseCargoTooltip>Base carry capacity for Vehicles. Unit: (kg)</VehicleBaseCargoTooltip>
+	<VehicleBaseSpeed>Speed</VehicleBaseSpeed>
+	<VehicleBaseSpeedTooltip>Base movement speed for Vehicles</VehicleBaseSpeedTooltip>
+	<VehicleMovementPermissions>Control Type</VehicleMovementPermissions>
+	<VehicleCategory>Category</VehicleCategory>
+	<VehicleNavigationType>Navigation</VehicleNavigationType>
+	<VehicleNavigationTypeTooltip>Navigation category for the World Map. Dictates when the Vehicle may move on the World Map.</VehicleNavigationTypeTooltip>
+	<VehicleTicksBetweenRepair>Repair Rate</VehicleTicksBetweenRepair>
+	<VehicleTicksBetweenRepairTooltip>Amount repaired every 100 ticks.</VehicleTicksBetweenRepairTooltip>
+	<VehicleNameable>Can Assign Name</VehicleNameable>
+	<VehicleNameableTooltip>Allow naming of this vehicle. Name will appear over the vehicle and will replace the displayed label.</VehicleNameableTooltip>
+	<BoatPowerType>Power Type</BoatPowerType>
+	
+	<!-- Disabled Tooltip -->
+	<VehicleSaveableFieldDisabledTooltip>This feature is disabled for this Vehicle Type.</VehicleSaveableFieldDisabledTooltip>
+	<VehicleSaveableFieldLockedTooltip>This setting is locked for this Vehicle.</VehicleSaveableFieldLockedTooltip>
+	<VehicleDebugDisabledTooltip>This feature is disabled for all Vehicles at this time.</VehicleDebugDisabledTooltip>
+	<VehicleGizmoDisabledTooltip>This vehicle is disabled in the mod settings.</VehicleGizmoDisabledTooltip>
+	
+	<!-- (Properties) -->
+	<VehicleProperties>Properties</VehicleProperties>
+	<VehicleFishingEnabled>Can Fish</VehicleFishingEnabled>
+	<VehicleVisibilityWorldMap>Visibility</VehicleVisibilityWorldMap>
+	<VehicleManhunterTargeted>Manhunter Targets Vehicle</VehicleManhunterTargeted>
+	
+	<VehicleDamageMultipliers>Damage Multipliers</VehicleDamageMultipliers>
+	<MeleeDamageMultiplier>Melee</MeleeDamageMultiplier>
+	<RangedDamageMultiplier>Ranged</RangedDamageMultiplier>
+	<ExplosiveDamageMultiplier>Explosive</ExplosiveDamageMultiplier>
+	
+	<VehicleJobLimitations>Vehicle Jobs</VehicleJobLimitations>
+	<VehicleMaxWorkers>Max Workers</VehicleMaxWorkers>
+	
+	<VehicleWinterCostMultiplier>Winter PathCost Multiplier</VehicleWinterCostMultiplier>
+	<VehicleWorldSpeedMultiplier>World Speed Multiplier</VehicleWorldSpeedMultiplier>
+	
+	<VehicleFuelConsumptionRate>Fuel Cost Rate</VehicleFuelConsumptionRate>
+	<VehicleFuelCapacity>Fuel Capacity</VehicleFuelCapacity>
+	
+	<VehicleFuelEfficiencyWorld>Fuel Efficiency (World)</VehicleFuelEfficiencyWorld>
+	<VehicleFlySpeed>Fly Speed</VehicleFlySpeed>
+	<VehicleLaunchFixedMaxDistance>Fixed Max Distance</VehicleLaunchFixedMaxDistance>
+	<VehicleLaunchFixedMaxDistanceDisabled>None</VehicleLaunchFixedMaxDistanceDisabled>
+	<VehicleReconDistance>Recon Distance</VehicleReconDistance>
+	<VehicleReconDistanceTooltip>Distance in tiles the shuttle will be able to perform recon of a site or settlement.</VehicleReconDistanceTooltip>
+	<VehicleControlInFlight>Control in Flight</VehicleControlInFlight>
+	<VehicleControlInFlightTooltip>Control the aerial vehicle while it is in flight. Allows for changing of flight paths midflight, choosing your landing after loading a map, and strafing maps that have not yet been loaded.</VehicleControlInFlightTooltip>
+	
+	<VehicleRateOfClimb>Rate of Climb</VehicleRateOfClimb>
+	<VehicleRateOfClimbTooltip>Amount the vehicle ascends per tick.</VehicleRateOfClimbTooltip>
+	<VehicleMaxAltitude>Max Altitude</VehicleMaxAltitude>
+	<VehicleMaxAltitudeTooltip>Maximum altitude this vehicle can achieve when in flight.</VehicleMaxAltitudeTooltip>
+	<VehicleMaxFallRate>Max Fall Rate</VehicleMaxFallRate>
+	<VehicleMaxFallRateTooltip>Max amount this vehicle will descend when shot down or out of fuel.</VehicleMaxFallRateTooltip>
+	
+	<VehicleFishingEnabled>Can Fish</VehicleFishingEnabled>
+	<VehicleFishingEnabledTooltip>Enables fishing for this Boat</VehicleFishingEnabledTooltip>
+	<ManhunterTargetsVehicle>Manhunter Targets</ManhunterTargetsVehicle>
+	<ManhunterTargetsVehicleTooltip>Manhunter animals will target this vehicle.</ManhunterTargetsVehicleTooltip>
+	
+	<VehicleDamageInvulnerable>Invulnerable</VehicleDamageInvulnerable>
+	<VehicleTeleportation>Teleport</VehicleTeleportation>
+	<VehicleInstant>Instant</VehicleInstant>
+</LanguageData>

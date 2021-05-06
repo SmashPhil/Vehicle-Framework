@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<Vehicles.VehicleTurretDef ParentName="TurretBase">
+		<defName>MountedLaserTurret</defName>
+		<label>Mounted Laser Turret</label>
+		<weaponType>Static</weaponType>
+		<cannonSound>Shot_ChargeRifle</cannonSound>
+
+		<projectile>HeavyLaserRed</projectile>
+		<projectileSpeed>400</projectileSpeed>
+		<reloadTimer>20</reloadTimer>
+		<warmUpTimer>0</warmUpTimer>
+		<magazineCapacity>-1</magazineCapacity>
+		
+		<cooldown>
+			<heatPerShot>10</heatPerShot>
+			<dissipationRate>0.5</dissipationRate>
+		</cooldown>
+		
+		<recoil>0</recoil>
+		<vehicleRecoil>0</vehicleRecoil>
+		
+		<attachProjectileFlag>Tank</attachProjectileFlag>
+		<gizmoIconTexPath></gizmoIconTexPath>
+		
+		<graphicData>
+			<texPath>Vehicles/Turrets/HeavyMachineGun/HeavyMachineGun</texPath>
+			<graphicClass>Vehicles.Graphic_Cannon</graphicClass>
+			<drawSize>(1, 1)</drawSize>
+		</graphicData>
+		
+		<fireModes>
+			<li>
+				<shotsPerBurst>5</shotsPerBurst>
+				<ticksBetweenShots>10</ticksBetweenShots>
+				<ticksBetweenBursts>60</ticksBetweenBursts>
+				<spreadRadius>2</spreadRadius>
+				<label>Burst</label>
+				<texPath>UI/Gizmos/FireRate_Burst</texPath>
+			</li>
+			<li>
+				<shotsPerBurst>5</shotsPerBurst>
+				<ticksBetweenShots>10</ticksBetweenShots>
+				<ticksBetweenBursts>10</ticksBetweenBursts>
+				<spreadRadius>4</spreadRadius>
+				<label>Full-Auto</label>
+				<texPath>UI/Gizmos/FireRate_Auto</texPath>
+			</li>
+		</fireModes>
+		
+		<projectileOffset>1</projectileOffset>
+		<hitFlags>All</hitFlags>
+		<maxRange>-1</maxRange>
+	</Vehicles.VehicleTurretDef>
+</Defs>

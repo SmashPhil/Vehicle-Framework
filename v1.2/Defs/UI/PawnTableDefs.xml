@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<PawnTableDef>
+		<defName>Vehicles</defName>
+		<workerClass>Vehicles.UI.PawnTable_Ships</workerClass>
+		<columns>
+			<li>Label</li>
+			<li>GapTiny</li>
+			<li>RemainingSpace</li>
+		</columns>
+	</PawnTableDef>
+</Defs>

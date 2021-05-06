@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <currentVersion>1.2.3.2</currentVersion>
+  <updateOn>GameInit</updateOn>
+  <description>
+[anchor]MiddleCenter[/anchor][b]Vehicles - 1.2.3.2[/b][anchor]MiddleLeft[/anchor]
+[title]Bug Fixes[/title][font]Tiny[/font]
+Fixed bug where vehicles would not show up in the From Vehicle Caravan dialog window.
+
+Fixed bug where vehicle icons in the Form Vehicle Caravan dialog window would attempt to generate a non-RGB graphic request.
+
+Fixed bug where vehicle icons in the Vehicle Selector dialog window would attempt to generate a non-RGB graphic request.
+
+Fixed bug where custom impassable biome costs would result in -1 path cost and cause weird pathing behavior.
+
+Fixed bug where static turrets would not rotate when the vehicle is turning and the turret is firing.
+
+[title]New Additions[/title]
+Added TextMeshPro rendering for vehicle path costs on the world map. This is an option in the Debug ModSettings tab for visualization of final path costs for a group of vehicles (through the RoutePlanner and FormCaravan window).
+
+Added Attack options for AerialVehicles when targeting settlements.
+
+Added Recon scouting where shuttles may circle a map that has not yet been loaded, and spy on the map. The map is generated and held open which means you can target defenses on the map, perform strafing runs, and even target specific cells for landing.
+
+Added VehicleTurretAlternating class that allows for turrets to be grouped together and alternate shots
+
+Added laser projectiles
+
+[title]Additional Changes[/title]
+Modified vehicle descriptions to better match their role.
+
+[title]Final Notes[/title]
+
+Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.)
+  </description>
+  <actionOnUpdate></actionOnUpdate>
+  <update>false</update>
+  <testing>false</testing>
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon.png</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon.png</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon.png</icon>
+      <url>steam://url/CommunityFilePage/2356577528</url>
+    </li>
+  </rightIconBar>
+  <leftIconBar>
+    <li>
+      <name>Donate</name>
+      <icon>ko-fiIcon.png</icon>
+      <url>https://ko-fi.com/smashphil</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>

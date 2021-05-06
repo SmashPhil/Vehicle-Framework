@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<AchievementsExpanded.AchievementDef>
+		<defName>testAchievement</defName>
+		<label>Vehicle Builder</label>
+		<description>Build a vehicle</description>
+		<!-- <tab>Vehicles</tab> -->
+		
+		<tracker Class="Vehicles.Achievements.VehicleBuilderTracker">
+			<def>Tank_Blueprint</def>
+			<count>1</count>
+		</tracker>
+		
+		<texPath>Achievements/ComfierThanUsual</texPath>
+		<points>10</points>
+	</AchievementsExpanded.AchievementDef>
+</Defs>

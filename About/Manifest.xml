@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Manifest>
+    <identifier>smashphil.vehicles.rimworld</identifier>
+    <version>1.2.3.2</version>
+    <dependencies/>
+    <loadAfter>
+		<li>brrainz.harmony</li>
+		<li>vanillaexpanded.achievements</li>
+	</loadAfter>
+    <showCrossPromotions>true</showCrossPromotions>
+    <manifestUri>https://raw.githubusercontent.com/smashphil/vehicles/master/About/Manifest.xml</manifestUri>
+    <downloadUri>https://github.com/SmashPhil/Vehicles/releases/latest</downloadUri>
+</Manifest>

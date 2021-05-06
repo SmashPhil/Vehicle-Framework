@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <SPBoats_RowBoat.label>手漕ぎボート</SPBoats_RowBoat.label>
+  <SPBoats_RowBoat.description>近距離航海用の二人乗りな木製手漕ぎボートです。</SPBoats_RowBoat.description>
+  <SPBoats_RowBoat.comps.CompShips.roles.0.label>こぎ手</SPBoats_RowBoat.comps.CompShips.roles.0.label>
+  <SPBoats_RowBoat.tools.hull.label>船体</SPBoats_RowBoat.tools.hull.label>
+  <SPBoats_RowBoat.comps.CompShips.healthLabel_Injured>修理が必要</SPBoats_RowBoat.comps.CompShips.healthLabel_Injured>
+  <!-- Leather Amount: 0 -->
+  <!-- Meat Amount: 0 -->
+  <Corpse_SPBoats_RowBoat.label>手漕ぎボートの残骸</Corpse_SPBoats_RowBoat.label>
+  <Corpse_SPBoats_RowBoat.description>手漕ぎボートの残骸</Corpse_SPBoats_RowBoat.description>
+
+</LanguageData>

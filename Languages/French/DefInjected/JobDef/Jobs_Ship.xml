@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <Board.reportString>Embarquement.</Board.reportString>
+
+  <IdleShip.reportString>Attend des ordres.</IdleShip.reportString>
+  <PrepareCaravan_GatheringShip.reportString>Chargement du cargaison.</PrepareCaravan_GatheringShip.reportString>
+  <CarryPawnToShip.reportString>Chargement des pions immobilisés.</CarryPawnToShip.reportString>
+  <RepairShip.reportString>Réparation du bateau.</RepairShip.reportString>
+
+</LanguageData>

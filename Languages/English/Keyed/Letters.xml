@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<LanguageData>
+	<ReinforcementsArrivedLabel>Reinforcements</ReinforcementsArrivedLabel>
+	<ReinforcementsArrived>{0} has arrived with reinforcements to investigate the crash site.</ReinforcementsArrived>
+</LanguageData>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<Vehicles.IncidentCrashedSiteDef>
+		<defName>BlackHawkDown</defName>
+		<label>Shuttle Downed</label>
+		<category>ThreatBig</category>
+		<targetTags>
+			<li>WorldEvent_Forced</li>
+		</targetTags>
+		<workerClass>Vehicles.AI.IncidentWorker_ShuttleDowned</workerClass>
+		<letterLabel>{0} Shot Down</letterLabel>
+		<letterTexts>
+			<li>{0} has been shot down by {1}</li>
+			<li>{0} has been shot down by {1}. Reinforcements will arrive in {2} hours.</li>
+			<li>{0} has been shot down by {1}. It has landed in rough terrain and cannot be recovered, however you may choose what to take with you as your colonists make their way to better terrain.</li>
+		</letterTexts>
+		<letterDef>ThreatBig</letterDef>
+	</Vehicles.IncidentCrashedSiteDef>
+</Defs>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs> 
+	<ThingDef ParentName="VehicleSkyfallerBase">
+		<defName>SparrowIncoming</defName>
+		<label>Sparrow Incoming</label>
+		<thingClass>Vehicles.VehicleSkyfaller_Arriving</thingClass>
+	</ThingDef>
+
+	<ThingDef ParentName="VehicleSkyfallerBase">
+		<defName>SparrowLeaving</defName>
+		<label>Sparrow Leaving</label>
+		<thingClass>Vehicles.VehicleSkyfaller_Leaving</thingClass>
+	</ThingDef>
+	
+	<ThingDef ParentName="VehicleSkyfallerCrashingBase">
+		<defName>SparrowCrashing</defName>
+		<label>Sparrow Crashing</label>
+	</ThingDef>
+</Defs>

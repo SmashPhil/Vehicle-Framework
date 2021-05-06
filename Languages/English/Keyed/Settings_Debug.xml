@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<LanguageData>
+	<DebugDrawBumpers>Draw Vehicle Bumpers</DebugDrawBumpers>
+	<DebugDrawRegions>Draw Regions</DebugDrawRegions>
+	<DebugDrawRegionLinks>Draw RegionLinks</DebugDrawRegionLinks>
+	<DebugDrawRegionThings>Draw Region Things</DebugDrawRegionThings>
+	<DebugDraftAnyVehicle>Draft Any Vehicle</DebugDraftAnyVehicle>
+	<DebugDraftAnyVehicleTooltip>Be able to draft and move any vehicle regardless of passengers. Useful for empty boats in deep water or if you want to expedite testing.</DebugDraftAnyVehicleTooltip>
+	<DebugDisablePathing>Disable Water Pathing</DebugDisablePathing>
+	<DebugDisablePathingTooltip>Disable boats using custom water based pathfinding, and instead use vanilla pathfinding. NOTE: Boats will travel like pawns.</DebugDisablePathingTooltip>
+	<DebugDisableSmoothPathing>Disable Smooth Pathing</DebugDisableSmoothPathing>
+	<DebugSpawnVehiclesGodMode>Spawn Vehicle Buildings (god mode)</DebugSpawnVehiclesGodMode>
+	<DebugSpawnVehiclesGodModeTooltip>Vehicle blueprints being placed in godmode will spawn the Building variant as opposed to generating a VehiclePawn for spawning.</DebugSpawnVehiclesGodModeTooltip>
+	<DebugCannonDrawer>Draw Cannon Grid</DebugCannonDrawer>
+	<DebugDrawNodeGrid>Draw UpgradeTree Grid</DebugDrawNodeGrid>
+	<DebugDrawHitbox>Draw Hitbox</DebugDrawHitbox>
+	<DebugDrawVehicleTracks>Draw VehicleTracks</DebugDrawVehicleTracks>
+	<DebugWriteVehiclePathingCosts>Draw Vehicle PathCosts</DebugWriteVehiclePathingCosts>
+	<DebugLogging>Debug Logging</DebugLogging>
+	<DebugLoggingTooltip>Enable message logging to output specific values and pieces of information useful for debugging Vehicles. Use only if you're making a Vehicle add-on.</DebugLoggingTooltip>
+	<DebugGenerateWorldPathCostTexts>Generate World PathCost TextMeshes</DebugGenerateWorldPathCostTexts>
+	<DebugGenerateWorldPathCostTextsTooltip>Generates and displays text on the world map for each tile's perceived path cost for a specific vehicle / group of vehicles.</DebugGenerateWorldPathCostTextsTooltip>
+</LanguageData>

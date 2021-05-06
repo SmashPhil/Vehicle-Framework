@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <Rowboat.label>手漕ぎボート</Rowboat.label>
+  <Rowboat.description>手漕ぎのボート(カヌー)を造船します。搭載できる貨物量が限られており、小規模なキャラバン用に設計されています。</Rowboat.description>
+
+  <FishingBoat.label>釣り船</FishingBoat.label>
+  <FishingBoat.description>互換性のある釣りModが一緒にロードされている場合、魚を釣ることが可能な釣り船を建設できます。</FishingBoat.description>
+
+  <Caravel.label>カラベル船</Caravel.label>
+  <Caravel.description>カラベル(キャラベル)を造船します。交易用に設計された高速で安価な船です。</Caravel.description>
+
+  <!-- <BoatCannons.label>船舶用の大砲</BoatCannons.label> -->
+  <!-- <BoatCannons.description>船を防衛するために甲板上に大砲を取り付けます。</BoatCannons.description> -->
+
+  <Galleon.label>ガレオン船</Galleon.label>
+  <Galleon.description>海を支配できるように設計された大型帆船を造船します。</Galleon.description>
+
+</LanguageData>

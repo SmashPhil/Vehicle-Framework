@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<ThingDef ParentName="MoteBase">
+		<defName>Mote_ChimneySmoke</defName>
+		<graphicData>
+			<texPath>Things/Mote/Smoke</texPath>
+		</graphicData>
+		<altitudeLayer>MoteOverhead</altitudeLayer>
+		<mote>
+			<fadeInTime>0.25</fadeInTime>
+			<solidTime>1</solidTime>
+			<fadeOutTime>0.25</fadeOutTime>
+			<growthRate>0.02</growthRate>
+		</mote>
+	</ThingDef>
+	
+	<ThingDef ParentName="MoteBase">
+		<defName>Mote_RocketSmoke_Long</defName>
+		<graphicData>
+			<texPath>Things/Mote/DustPuff</texPath>
+		</graphicData>
+		<altitudeLayer>VisEffects</altitudeLayer>
+		<mote>
+			<fadeInTime>0.25</fadeInTime>
+			<solidTime>0.25</solidTime>
+			<fadeOutTime>0.75</fadeOutTime>
+		</mote>
+	</ThingDef>
+	
+	<ThingDef ParentName="MoteBase">
+		<defName>Mote_RocketSmoke_Low</defName>
+		<graphicData>
+			<texPath>Things/Mote/DustPuff</texPath>
+		</graphicData>
+		<altitudeLayer>MoteOverheadLow</altitudeLayer>
+		<mote>
+			<fadeInTime>0.25</fadeInTime>
+			<solidTime>0.25</solidTime>
+			<fadeOutTime>0.75</fadeOutTime>
+		</mote>
+	</ThingDef>
+</Defs>

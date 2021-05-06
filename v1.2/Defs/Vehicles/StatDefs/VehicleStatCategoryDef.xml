@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<!-- StatText | FillableBar -->
+	<Vehicles.VehicleStatCategoryDef>
+		<defName>StatCategoryMovement</defName>
+		<label>Movement</label>
+		<formatString>Speed: {0} c/s</formatString>
+		<operationType>MinValue</operationType>
+		<workerClass>Vehicles.VehicleStatWorker_Movement</workerClass>
+		<priority>0</priority>
+	</Vehicles.VehicleStatCategoryDef>
+	
+	<Vehicles.VehicleStatCategoryDef>
+		<defName>StatCategoryArmor</defName>
+		<label>Fuel Tank</label>
+		<formatString>Armor: {0}%</formatString>
+		<operationType>Average</operationType>
+		<workerClass>Vehicles.VehicleStatWorker_Armor</workerClass>
+	</Vehicles.VehicleStatCategoryDef>
+	
+	<Vehicles.VehicleStatCategoryDef>
+		<defName>StatCategoryCargo</defName>
+		<label>Cargo</label>
+		<formatString>Cargo: {0} kg</formatString>
+		<operationType>Average</operationType>
+		<workerClass>Vehicles.VehicleStatWorker_Cargo</workerClass>
+		<priority>100</priority>
+	</Vehicles.VehicleStatCategoryDef>
+	
+	<Vehicles.VehicleStatCategoryDef>
+		<defName>StatCategoryFuelTankIntegrity</defName>
+		<label>Fuel Tank Integrity</label>
+		<formatString>Fuel: {0}%</formatString>
+		<operationType>Average</operationType>
+		<workerClass>Vehicles.VehicleStatWorker_FuelTankIntegrity</workerClass>
+		<priority>10</priority>
+	</Vehicles.VehicleStatCategoryDef>
+	
+	<Vehicles.VehicleStatCategoryDef>
+		<defName>StatCategoryFlightSpeed</defName>
+		<label>Flight Speed</label>
+		<formatString>V Speed: {0} t/s</formatString>
+		<operationType>Average</operationType>
+		<workerClass>Vehicles.VehicleStatWorker_Movement</workerClass>
+		<priority>5</priority>
+	</Vehicles.VehicleStatCategoryDef>
+	
+	<Vehicles.VehicleStatCategoryDef>
+		<defName>StatCategoryFlightControl</defName>
+		<label>Control</label>
+		<formatString>V Control: {0}%</formatString>
+		<operationType>Average</operationType>
+		<workerClass>Vehicles.VehicleStatWorker_Movement</workerClass>
+		<priority>5</priority>
+	</Vehicles.VehicleStatCategoryDef>
+</Defs>

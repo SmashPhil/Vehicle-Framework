@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <CaravelCannonball.label>Explosion</CaravelCannonball.label>
+  <CaravelCannonball.deathMessage>{0} est mort(e) dans une explosion.</CaravelCannonball.deathMessage>
+
+  <GalleonCannonball.label>Explosion</GalleonCannonball.label>
+  <GalleonCannonball.deathMessage>{0} est mort(e) dans une explosion.</GalleonCannonball.deathMessage>
+
+  <PirateShipCannonball.label>Explosion</PirateShipCannonball.label>
+  <PirateShipCannonball.deathMessage>{0} est mort(e) dans une explosion.</PirateShipCannonball.deathMessage>
+
+</LanguageData>

@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<PawnKindDef>
+		<defName>Car</defName>
+		<label>Car</label>
+		<defaultFactionType>PlayerColony</defaultFactionType>
+		<aiAvoidCover>false</aiAvoidCover>
+		<destroyGearOnDrop>true</destroyGearOnDrop>
+		<race>Car</race>
+		<backstoryCategories>
+			<li>Industrial</li>
+		</backstoryCategories>
+		<combatPower>200</combatPower>
+		<lifeStages>
+			<li>
+				<bodyGraphicData Class="Vehicles.GraphicDataRGB">
+					<texPath>Vehicles/Land/Car/Car</texPath>
+					<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
+					<drawSize>(4,7)</drawSize>
+					<shaderType>CutoutComplexPattern</shaderType>
+					<color>(120, 120, 120)</color>
+					<colorTwo>(0, 80, 0)</colorTwo>
+					<colorThree>(0, 80, 0)</colorThree>
+					<shadowData>
+						<volume>(0.4,0.1,0.4)</volume>
+					</shadowData>
+				</bodyGraphicData>
+			</li>
+		</lifeStages>
+	</PawnKindDef>
+	
+	<Vehicles.VehicleDef ParentName="BaseVehiclePawnUpgradeable">
+		<defName>Car</defName>
+		<label>Car</label>
+		<description>A heavy warship to rule the seas.</description>
+		
+		<fillPercent>1</fillPercent>
+		
+		<nameable>true</nameable>
+		<buildDef>Car_Blueprint</buildDef>
+		<repairRate>650</repairRate>
+		
+		<armor>50</armor>
+		<cargoCapacity>250</cargoCapacity>
+		<speed>4.5</speed>
+
+		<size>(3,5)</size>
+		
+		<vehicleMovementPermissions>DriverNeeded</vehicleMovementPermissions>
+		<vehicleCategory>Transport</vehicleCategory>
+		<vehicleTech>Industrial</vehicleTech>
+		<vehicleType>Land</vehicleType>
+				
+		<statBases>
+			<Mass>10000</Mass>
+			<ArmorRating_Blunt>1.0</ArmorRating_Blunt>
+			<ArmorRating_Sharp>1.0</ArmorRating_Sharp>
+			<MarketValue>250000</MarketValue>
+			<Flammability>0</Flammability>
+		</statBases>
+		
+		<drawProperties>
+			<upgradeUICoord>(587,50)</upgradeUICoord>
+			<upgradeUISize>(256, 384)</upgradeUISize>
+			
+			<colorPickerUICoord>(0, 40)</colorPickerUICoord>
+			<colorPickerUISize>(256, 384)</colorPickerUISize>
+			
+			<settingsUICoord>(0, 0)</settingsUICoord>
+			<settingsUISize>(100, 150)</settingsUISize>
+		</drawProperties>
+		
+		<properties>			
+			<healthLabel_Healthy>Operational</healthLabel_Healthy>
+			<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
+			<healthLabel_Immobile>Inoperable</healthLabel_Immobile>
+			
+			<customBiomeCosts/>
+			
+			<roles>
+				<li>
+					<key>driver</key>
+					<label>Driver</label>
+					<handlingTypes>
+						<li>Movement</li>
+					</handlingTypes>
+					<slots>1</slots>
+					<slotsToOperate>1</slotsToOperate>
+					<hitbox>
+						<cells>
+							<li>(-1, 1)</li>
+						</cells>
+					</hitbox>
+				</li>
+				<li>
+					<key>passengerShotgun</key>
+					<label>Front Seat</label>
+					<slots>1</slots>
+					<hitbox>
+						<cells>
+							<li>(1, 1)</li>
+						</cells>
+					</hitbox>
+				</li>
+				<li>
+					<key>passengerShotgun</key>
+					<label>Passenger</label>
+					<slots>3</slots>
+					<hitbox>
+						<cells>
+							<li>(-1, 0)</li>
+							<li>(-0, 0)</li>
+							<li>(1, 0)</li>
+						</cells>
+					</hitbox>
+				</li>
+			</roles>
+			
+			<customTerrainCosts>
+				<li>
+					<key>Mud</key>
+					<value>250</value>
+				</li>
+				<li>
+					<key>WaterShallow</key>
+					<value>-1</value>
+				</li>
+			</customTerrainCosts>
+		</properties>
+		
+		<components>
+			<li>
+				<key>Body</key>
+				<label>Body</label>
+				<health>100</health>
+				<armor>.25</armor>
+				
+				<hitbox>
+					<side>Body</side>
+				</hitbox>
+			</li>
+			<li>
+				<key>Wheels</key>
+				<label>Wheels</label>
+				<health>25</health>
+				<armor>0</armor>
+				
+				<hitbox>
+					<cells>
+						<li>(-1, 1)</li>
+						<li>(1, 1)</li>
+						<li>(-1, -2)</li>
+						<li>(1, -2)</li>
+					</cells>
+				</hitbox>
+			</li>
+			<li>
+				<key>Engine</key>
+				<label>Engine</label>
+				<health>100</health>
+				<armor>.1</armor>
+				<efficiencyWeight>10</efficiencyWeight>
+				<explosionProperties>
+					<chance>0.25</chance>
+					<radius>3</radius>
+					<damageDef>Bomb</damageDef>
+				</explosionProperties>
+				<hitbox>
+					<cells>
+						<li>(0, 2)</li>
+					</cells>
+				</hitbox>
+				<categories>
+					<li>StatCategoryMovement</li>
+				</categories>
+			</li>
+		</components>
+
+		<race>
+			<thinkTreeMain>Vehicle</thinkTreeMain>
+			<intelligence>ToolUser</intelligence>
+			<fleshType>MetalVehicle</fleshType>
+			<needsRest>false</needsRest>
+			<hasGenders>false</hasGenders>
+			<foodType>None</foodType>
+
+			<baseBodySize>1.0</baseBodySize>
+			<baseHealthScale>1.0</baseHealthScale>
+			<lifeStageAges>
+				<li>
+					<def>MechanoidFullyFormed</def>
+					<minAge>0</minAge>
+					<soundWounded>BulletImpact_Metal</soundWounded>
+					<soundDeath>Explosion_Bomb</soundDeath>
+				</li>
+			</lifeStageAges>
+			
+			<soundMeleeHitPawn>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitPawn>
+			<soundMeleeHitBuilding>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitBuilding>
+			<soundMeleeMiss>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeMiss>
+		</race>
+
+		<comps>
+			<li Class="Vehicles.CompProperties_FueledTravel">
+				<!-- Must Include -->
+				<fuelType>Chemfuel</fuelType>
+				<fuelConsumptionRate>45</fuelConsumptionRate>
+				<fuelCapacity>150</fuelCapacity>
+				<fuelConsumptionCondition>Drafted</fuelConsumptionCondition>
+			</li>
+			<li Class="Vehicles.CompProperties_UpgradeTree">
+				<upgrades/>
+			</li>
+		</comps>
+	</Vehicles.VehicleDef>
+</Defs>

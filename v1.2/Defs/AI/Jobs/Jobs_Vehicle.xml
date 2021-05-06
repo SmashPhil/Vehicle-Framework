@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<JobDef>
+		<defName>Board</defName>
+		<driverClass>Vehicles.JobDriver_Board</driverClass>
+		<reportString>Boarding.</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+	<JobDef>
+		<defName>LoadUpgradeMaterials</defName>
+		<driverClass>Vehicles.JobDriver_GiveToUpgradeContainer</driverClass>
+		<reportString>Loading materials.</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+	<JobDef>
+		<defName>IdleVehicle</defName>
+		<driverClass>Vehicles.JobDriver_IdleVehicle</driverClass>
+		<reportString>Idle.</reportString>
+		<isIdle>true</isIdle>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+	</JobDef>
+	
+	<JobDef>
+		<defName>PrepareCaravan_GatheringVehicle</defName>
+		<driverClass>Vehicles.JobGiver_PrepareVehicleCaravan_GatheringItems</driverClass>
+		<reportString>Loading cargo.</reportString>
+		<suspendable>false</suspendable>
+	</JobDef>
+	
+	<JobDef>
+		<defName>CarryPawnToVehicle</defName>
+		<driverClass>Vehicles.JobDriver_CarryPawnToVehicle</driverClass>
+		<reportString>Loading downed pawns.</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+	
+	<JobDef>
+		<defName>CarryItemToVehicle</defName>
+		<driverClass>Vehicles.JobDriver_GiveToVehicle</driverClass>
+		<reportString>Loading item onto vehicle</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+	
+	<JobDef>
+		<defName>RepairVehicle</defName>
+		<driverClass>Vehicles.JobDriver_RepairVehicle</driverClass>
+		<reportString>Repairing vehicle.</reportString>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+	</JobDef>
+	
+	<JobDef>
+		<defName>UpgradeVehicle</defName>
+		<driverClass>Vehicles.JobDriver_WorkOnUpgrade</driverClass>
+		<reportString>Working on vehicles.</reportString>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+	</JobDef>
+	
+	<JobDef>
+		<defName>RefuelVehicle</defName>
+		<driverClass>Vehicles.JobDriver_RefuelVehicle</driverClass>
+		<reportString>Refueling ship</reportString>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+	
+	<JobDef>
+		<defName>RefuelVehicleAtomic</defName>
+		<driverClass>Vehicles.JobDriver_RefuelVehicleAtomic</driverClass>
+		<reportString>Refueling ship</reportString>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+</Defs>

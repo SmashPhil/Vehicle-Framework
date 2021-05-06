@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<LanguageData>
+	<FormingCaravanStatus_GatheringItems_Ship>Loading cargo onto Ships.</FormingCaravanStatus_GatheringItems_Ship>
+	<FormingCaravanStatus_GatheringItems_Ship_Pause>Loading cargo onto Ships (waiting)</FormingCaravanStatus_GatheringItems_Ship_Pause>
+	<FormingCaravanStatus_GatheringSlaves_Ship>Loading Slaves onto Ships.</FormingCaravanStatus_GatheringSlaves_Ship>
+	<FormingCaravanStatus_GatheringSlaves_Ship_Pause>Loading Slaves onto Ships (waiting)</FormingCaravanStatus_GatheringSlaves_Ship_Pause>
+	<FormingCaravanStatus_GatheringDownedPawns_Ship>Loading downed people onto Ships.</FormingCaravanStatus_GatheringDownedPawns_Ship>
+	<FormingCaravanStatus_GatheringDownedPawns_Ship_Pause>Loading downed people onto Ships.</FormingCaravanStatus_GatheringDownedPawns_Ship_Pause>
+	<FormingCaravanStatus_BoardShip>Boarding Ship.</FormingCaravanStatus_BoardShip>
+	<FormingCaravanStatus_BoardShip_Pause>Boarding Ship (waiting)</FormingCaravanStatus_BoardShip_Pause>
+	<FormingCaravanStatus_Leaving_Ship>Sailing.</FormingCaravanStatus_Leaving_Ship>
+	<FormingCaravanStatus_Leaving_Ship_Pause>Sailing (waiting)</FormingCaravanStatus_Leaving_Ship_Pause>
+	<SpawningVehicles>Spawning Vehicles</SpawningVehicles>
+	
+	<GeneratingMapForCrashEvent>Generating Map For Crash Event</GeneratingMapForCrashEvent>
+	<VehiclesTextMeshBiomeGeneration>Generating TextMesh GameObjects on World Map.</VehiclesTextMeshBiomeGeneration>
+</LanguageData>

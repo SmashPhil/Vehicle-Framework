@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<Vehicles.VehicleBuildDef ParentName="VehicleBaseBuildable">
+		<defName>Sparrow_Blueprint</defName>
+		<label>Sparrow</label>
+		<description>A high speed fighter jet for aerial support.</description>
+		<graphicData>
+			<texPath>Vehicles/Air/Sparrow/Sparrow</texPath>
+			<graphicClass>Graphic_Multi</graphicClass>
+			<drawSize>(5,5)</drawSize>
+		</graphicData>
+		
+		<statBases>
+			<MaxHitPoints>5000</MaxHitPoints>
+			<WorkToBuild>30</WorkToBuild>
+			<Flammability>0.05</Flammability>
+		</statBases>
+		<size>(3,4)</size>
+		
+		<researchPrerequisites/>
+		
+		<costList>
+			<ComponentIndustrial>35</ComponentIndustrial>
+			<Steel>3000</Steel>
+		</costList>
+		
+		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
+		
+		<thingToSpawn>Sparrow</thingToSpawn>
+		<soundBuilt>ShipBigConstruction</soundBuilt>
+	</Vehicles.VehicleBuildDef>
+</Defs>

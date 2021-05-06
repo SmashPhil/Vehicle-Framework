@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<LanguageData>
+	<EnterVehicle>Board {0} as {1}  [{2}]</EnterVehicle>
+	<BoardShipGroup>Board {0}</BoardShipGroup>
+	<BoardShipGroupFail>Board {0} (Too many selected)</BoardShipGroupFail>
+	<ActivityIconOnBoardShip>Onboard {0}</ActivityIconOnBoardShip>
+	<IsIncapableOfRamming>Ram {0}</IsIncapableOfRamming>
+	<CannotSailToCell>Ship cannot reach this area.</CannotSailToCell>
+	<AutoTargeting>AutoTarget: {0}</AutoTargeting>
+	<LandVehicleHere>Land Vehicle Here</LandVehicleHere>
+	<AttackAndTargetLanding>Attack {0}: Choose Landing</AttackAndTargetLanding>
+</LanguageData>

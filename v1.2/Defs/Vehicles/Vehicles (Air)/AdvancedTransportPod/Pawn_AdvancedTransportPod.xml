@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<PawnKindDef>
+		<defName>AdvancedTransportPod</defName>
+		<label>Advanced Transport Pod</label>
+		<defaultFactionType>PlayerColony</defaultFactionType>
+		<aiAvoidCover>false</aiAvoidCover>
+		<destroyGearOnDrop>true</destroyGearOnDrop>
+		<race>AdvancedTransportPod</race>
+		<backstoryCategories>
+			<li>Industrial</li>
+		</backstoryCategories>
+		<combatPower>2000</combatPower>
+		<lifeStages>
+			<li>
+				<bodyGraphicData Class="Vehicles.GraphicDataRGB">
+					<texPath>Vehicles/Air/AdvancedTransportPod/AdvancedTransportPod</texPath>
+					<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
+					<drawSize>(3,3)</drawSize>
+					<shaderType>Cutout</shaderType>
+					<shadowData>
+						<volume>(0.4,0.1,0.4)</volume>
+					</shadowData>
+				</bodyGraphicData>
+			</li>
+		</lifeStages>
+	</PawnKindDef>
+	
+	<Vehicles.VehicleDef ParentName="BaseVehiclePawnUpgradeable">
+		<defName>AdvancedTransportPod</defName>
+		<label>Advanced Transport Pod</label>
+		<description>An upgraded transport pod capable of carrying multiple pawns with enough cargo space for trading. Once it takes off there is no changing course.</description>
+		
+		<fillPercent>1</fillPercent>
+		
+		<nameable>false</nameable>
+		<raidersCanUse LockSetting="True">false</raidersCanUse>
+		
+		<buildDef>AdvancedTransportPod_Blueprint</buildDef>
+		<repairRate>650</repairRate>
+		
+		<armor>15</armor>
+		<cargoCapacity>250</cargoCapacity>
+		<speed LockSetting="True">0</speed>
+		
+		<size>(3,3)</size>
+		
+		<vehicleMovementPermissions LockSetting="True">NotAllowed</vehicleMovementPermissions>
+		<vehicleCategory>Transport</vehicleCategory>
+		<vehicleTech>Industrial</vehicleTech>
+		<vehicleType>Air</vehicleType>
+		
+		<statBases>
+			<Mass>25000</Mass>
+			<ArmorRating_Blunt>1.0</ArmorRating_Blunt>
+			<ArmorRating_Sharp>1.0</ArmorRating_Sharp>
+			<MarketValue>250000</MarketValue>
+			<Flammability>0</Flammability>
+		</statBases>
+		
+		<drawProperties>
+			<upgradeUICoord>(600, 100)</upgradeUICoord>
+			<upgradeUISize>(230, 230)</upgradeUISize>
+			
+			<colorPickerUICoord>(20, 40)</colorPickerUICoord>
+			<colorPickerUISize>(230, 230)</colorPickerUISize>
+			
+			<settingsUICoord>(0, 0)</settingsUICoord>
+			<settingsUISize>(135, 135)</settingsUISize>
+		</drawProperties>
+		
+		<properties>
+			<healthLabel_Healthy>Operational</healthLabel_Healthy>
+			<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
+			<healthLabel_Immobile>Inoperable</healthLabel_Immobile>
+			
+			<roles>
+				<li>
+					<key>Passenger</key>
+					<label>Passenger Seat</label>
+					<slots>3</slots>
+					<hitbox>
+						<cells>
+							<li>(0,0)</li>
+						</cells>
+					</hitbox>
+				</li>
+			</roles>
+		</properties>
+		
+		<components>
+			<li>
+				<key>Body</key>
+				<label>Body</label>
+				<health>400</health>
+				<armor>1.75</armor>
+				
+				<hitbox>
+					<side>Body</side>
+				</hitbox>
+			</li>
+			<li>
+				<key>Engines</key>
+				<label>Engines</label>
+				<health>125</health>
+				<armor>0.15</armor>
+				<explosionProperties>
+					<chance>0.25</chance>
+					<radius>3</radius>
+					<damageDef>Bomb</damageDef>
+				</explosionProperties>
+				<hitbox>
+					<cells>
+						<li>(-1, -1)</li>
+						<li>(1, -1)</li>
+						<li>(0, 1)</li>
+					</cells>
+				</hitbox>
+				<categories>
+					<li>StatCategoryMovement</li>
+					<li>StatCategoryFlightControl</li>
+					<li>StatCategoryFlightSpeed</li>
+				</categories>
+			</li>
+		</components>
+
+		<race>
+			<thinkTreeMain>Vehicle</thinkTreeMain>
+			<intelligence>ToolUser</intelligence>
+			<fleshType>MetalVehicle</fleshType>
+			<needsRest>false</needsRest>
+			<hasGenders>false</hasGenders>
+			<foodType>None</foodType>
+
+			<baseBodySize>1.0</baseBodySize>
+			<baseHealthScale>1.0</baseHealthScale>
+			<lifeStageAges>
+				<li>
+					<def>MechanoidFullyFormed</def>
+					<minAge>0</minAge>
+					<soundWounded>BulletImpact_Metal</soundWounded>
+					<soundDeath>Explosion_Bomb</soundDeath>
+				</li>
+			</lifeStageAges>
+			
+			<soundMeleeHitPawn>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitPawn>
+			<soundMeleeHitBuilding>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitBuilding>
+			<soundMeleeMiss>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeMiss>
+		</race>
+
+		<comps>	
+			
+			<li Class="Vehicles.CompProperties_FueledTravel">
+				<fuelType>Chemfuel</fuelType>
+				<fuelConsumptionRate>200</fuelConsumptionRate>
+				<fuelCapacity>400</fuelCapacity>
+				<fuelConsumptionCondition>FlyingOrDrafted</fuelConsumptionCondition>
+			</li>
+			<li Class="Vehicles.CompProperties_VehicleLauncher">
+				<skyfallerLeaving>ATPLeaving</skyfallerLeaving>
+				<skyfallerIncoming>ATPIncoming</skyfallerIncoming>
+				<skyfallerCrashing>ATPCrashing</skyfallerCrashing>
+				<fuelEfficiencyWorld>0.05</fuelEfficiencyWorld>
+				<flySpeed>10</flySpeed>
+				<rateOfClimb>50</rateOfClimb>
+				<maxFallRate>75</maxFallRate>
+				<maxAltitude>12000</maxAltitude>
+				<landingAltitude>5000</landingAltitude>
+				<controlInFlight>false</controlInFlight>
+				<reconDistance>0</reconDistance>
+				<launchProtocols>
+					<li Class="Vehicles.RocketTakeoff">
+						<movementType>Decelerate</movementType>
+						<rocketTiltRate>0.025</rocketTiltRate>
+						<thrusterSize>1~2</thrusterSize>
+						<dustSize>0.5~1.5</dustSize>
+						<burnRadius>4</burnRadius>
+						<launchProperties>
+							<reversed>true</reversed>
+							<speed>0.1</speed>
+							<maxTicks>500</maxTicks>
+							<additionalLaunchTextures>
+								<li>
+									<texPath>Animations/JetEffect</texPath>
+									<graphicClass>Vehicles.Graphic_Animate</graphicClass>
+									<drawSize>(3, 3)</drawSize>
+									<drawOffset>(-0.9, 0, -2.45)</drawOffset>
+									<shaderType>Transparent</shaderType>
+									<layer>-0.1</layer>
+								</li>
+								<li>
+									<texPath>Animations/JetEffect</texPath>
+									<graphicClass>Vehicles.Graphic_Animate</graphicClass>
+									<drawSize>(3, 3)</drawSize>
+									<drawOffset>(0.9, 0, -2.45)</drawOffset>
+									<shaderType>Transparent</shaderType>
+									<layer>-0.1</layer>
+								</li>
+								<li>
+									<texPath>Animations/JetEffect</texPath>
+									<graphicClass>Vehicles.Graphic_Animate</graphicClass>
+									<drawSize>(3, 3)</drawSize>
+									<drawOffset>(0, 0, -1.5)</drawOffset>
+									<shaderType>Transparent</shaderType>
+									<layer>-0.1</layer>
+								</li>
+							</additionalLaunchTextures>
+						</launchProperties>
+						<landingProperties>
+							<speed>0.3</speed>
+							<maxTicks>500</maxTicks>
+							<delayByTicks>100</delayByTicks>
+							<forcedRotation>North</forcedRotation>
+							<additionalLaunchTextures>
+								<li>
+									<texPath>Animations/JetEffect</texPath>
+									<graphicClass>Vehicles.Graphic_Animate</graphicClass>
+									<drawSize>(3, 3)</drawSize>
+									<drawOffset>(-0.9, 0, -2.45)</drawOffset>
+									<shaderType>Transparent</shaderType>
+									<layer>-0.1</layer>
+								</li>
+								<li>
+									<texPath>Animations/JetEffect</texPath>
+									<graphicClass>Vehicles.Graphic_Animate</graphicClass>
+									<drawSize>(3, 3)</drawSize>
+									<drawOffset>(0.9, 0, -2.45)</drawOffset>
+									<shaderType>Transparent</shaderType>
+									<layer>-0.1</layer>
+								</li>
+								<li>
+									<texPath>Animations/JetEffect</texPath>
+									<graphicClass>Vehicles.Graphic_Animate</graphicClass>
+									<drawSize>(3, 3)</drawSize>
+									<drawOffset>(0, 0, -1.5)</drawOffset>
+									<shaderType>Transparent</shaderType>
+									<layer>-0.1</layer>
+								</li>
+							</additionalLaunchTextures>
+						</landingProperties>
+					</li>
+				</launchProtocols>
+			</li>
+			<li Class="Vehicles.CompProperties_UpgradeTree">
+				<upgrades/>
+			</li>
+		</comps>
+	</Vehicles.VehicleDef>
+</Defs>

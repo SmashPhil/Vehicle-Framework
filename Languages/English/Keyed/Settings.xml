@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<LanguageData>
+	<DevModeResetAll>Reset All Settings</DevModeResetAll>
+	<DevModeResetVehicle>Reset {0}</DevModeResetVehicle>
+	<DevModeResetAllVehicles>Reset All Vehicles</DevModeResetAllVehicles>
+	<DevModeResetPage>Reset Page</DevModeResetPage>
+	
+	<VehiclesReset>Reset</VehiclesReset>
+	<BoatsResetToDefault>Reset to Default</BoatsResetToDefault>
+	<BeachGenMultiplier>Beach Size Multiplier</BeachGenMultiplier>
+	<BeachGenMultiplierTooltip>Increase the amount of water on the coastline.</BeachGenMultiplierTooltip>
+	<BeachGenMultiplierLargeTooltip>Current number is larger than recommended. The ocean can and may take up to as large as 80% of the map.</BeachGenMultiplierLargeTooltip>
+	<ForceSettlementCoastTooltip>Push nearby faction settlements to the coast if within given radius</ForceSettlementCoastTooltip>
+	<ForceSettlementCoast>Push Settlement to Coast</ForceSettlementCoast>
+	<Tiles> Tiles</Tiles>
+	<ResetWaterRegions>Reset Water Regions</ResetWaterRegions>
+	<Disabled>Disabled</Disabled>
+	<EverySettlementToCoast>Every Settlement</EverySettlementToCoast>
+	<PassiveWaterWaves>Passive Water Waves</PassiveWaterWaves>
+	<PassiveWaterWavesTooltip>Generate passive waves for each boat. Purely cosmetic.</PassiveWaterWavesTooltip>
+	<ShowDisabledVehicles>Show Disabled Vehicles</ShowDisabledVehicles>
+	<ShowDisabledVehiclesTooltip>Disabled vehicles from the mod settings will still be shown in the architect menu.</ShowDisabledVehiclesTooltip>
+	<DrawUpgradeInformationScreen>Draw Upgrade Menu Info Screen</DrawUpgradeInformationScreen>
+	<DrawUpgradeInformationScreenTooltip>Draw additional menu on the upgrade menu to display ship stats and ship icon.</DrawUpgradeInformationScreenTooltip>
+	<UseIngameTime>Time Scale: {0}</UseIngameTime>
+	<UseIngameTimeTooltip>Switch the time scale for what is displayed in the upgrade menu.</UseIngameTimeTooltip>
+	<IngameTime>In-game Time</IngameTime>
+	<RealTime>Real time</RealTime>
+	<FullVehiclePathing>Full Vehicle Pathing</FullVehiclePathing>
+	<FullVehiclePathingTooltip>Use the entire hitbox of the vehicle to determine pathing constraints (prevents Vehicles from going through smaller passages than hitbox size).</FullVehiclePathingTooltip>
+	<VehicleRocketsBurnRadius>Rockets Burn</VehicleRocketsBurnRadius>
+	<VehicleDeployOnLanding>Deploy on Landing</VehicleDeployOnLanding>
+	<VehicleDeployOnLandingTooltip>When an aerial vehicle lands all pawns onboard will be unloaded.</VehicleDeployOnLandingTooltip>
+	<VehicleDelayOnLanding>Delay on Landing</VehicleDelayOnLanding>
+	<VehicleDelayOnLandingTooltip>When an aerial vehicle lands the deployment of all pawns will be delayed.</VehicleDelayOnLandingTooltip>
+	<VehiclesModifiableSettings>Modifiable Settings</VehiclesModifiableSettings>
+	<ShowRecentNews>Show Most Recent News</ShowRecentNews>
+	
+	<ShuffledCannonFire>Shuffled Cannons</ShuffledCannonFire>
+	<ShuffledCannonFireTooltip>Randomize the order in which broadside cannons fire.</ShuffledCannonFireTooltip>
+	<RiverTravelAllowed>Travel on Rivers</RiverTravelAllowed>
+	<RiverTravelAllowedTooltip>Allow boats to travel along rivers.</RiverTravelAllowedTooltip>
+	<BoatSizeMattersOnRivers>River Size Matters</BoatSizeMattersOnRivers>
+	<BoatSizeMattersOnRiversTooltip>Restrict boats to only be able to travel on rivers that are large enough to fit it. If disabled, all boats can travel on any river. If you bring a boat into a map with a river that cannot fit the size of the boat, it might spawn on land.</BoatSizeMattersOnRiversTooltip>
+	<FishingMultiplier>Fishing Multiplier</FishingMultiplier>
+	<FishingMultiplierTooltip>Adjust the amount of fish gathered from fishing boat.</FishingMultiplierTooltip>
+	<FishingDelay>Fishing Delay</FishingDelay>
+	<FishingDelayTooltip>Base amount of ticks it takes to gather fish on a fishing boat.</FishingDelayTooltip>
+	<FishingSkill>Fishing Skill</FishingSkill>
+	<FishingSkillTooltip>How much exp is given by fishing on a boat</FishingSkillTooltip>
+	<FishingPersists>Fishing Persists</FishingPersists>
+	<FishingPersistsTooltip>The Fishing Boat fishing selection will not reset upon drafting.</FishingPersistsTooltip>
+	<MatchWaterTerrain>Match Water Terrain</MatchWaterTerrain>
+	<MatchWaterTerrainTooltip>Water tiles that are placed will match the water of adjacent water tiles (Disabled: Still WIP)</MatchWaterTerrainTooltip>
+	<ShowAllItemsOnMap>Show All Items On Map</ShowAllItemsOnMap>
+</LanguageData>

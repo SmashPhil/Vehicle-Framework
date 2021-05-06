@@ -1,0 +1,15 @@
+<anchor>MiddleCenter</anchor><b>Welcome to the Vehicles - Beta Release</b><anchor>MiddleLeft</anchor><font>Tiny</font>
+Despite being beta #2, this marks the first official closed beta. 
+Mechanics should be fully functional but do expect there to be bugs so I really hope you're not using this with precious save files.
+
+Please report any bugs you might have on the <link>https://github.com/SmashPhil/Vehicles/issues</link>(Github Issues Page).<s/>You must provide the <b>full logs</b> (hugslib link is preferable but I'll take pastebin too).
+
+If you have feedback to give regarding balancing for the full release you can drop it in the discord chat.
+If you don't want to wait for me to balance it you can always change the values in the mod settings.
+
+I will not be taking any feature requests at this time for new mechanics or ThingComps (mostly looking at you vehicle modders... don't even think about it)
+I'll be taking requests when mechanics are fully fixed and raiders / traders are nearly complete.
+
+Happy Hunting!
+
+- Smash Phil
