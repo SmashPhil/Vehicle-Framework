@@ -167,20 +167,7 @@ namespace Vehicles
 				PawnKindDef localKindDef = localKindDef2;
 				list.Add(new DebugMenuOption(localKindDef.defName, DebugMenuOptionMode.Tool, delegate ()
 				{
-					Faction faction = FactionUtility.DefaultFactionFrom(localKindDef.defaultFactionType);
-					if (faction is null)
-					{
-						faction = Faction.OfPlayer;
-					}
-					VehiclePawn vehicle = VehicleSpawner.GenerateVehicle(localKindDef, faction);
-					vehicle.CompVehicleLauncher?.InitializeLaunchProtocols(false);
-					AerialVehicleInFlight flyingVehicle = (AerialVehicleInFlight)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.AerialVehicle);
-					flyingVehicle.vehicle = vehicle;
-					flyingVehicle.vehicle.inFlight = true;
-					flyingVehicle.Tile = Find.CurrentMap.Tile;
-					flyingVehicle.SetFaction(vehicle.Faction);
-					flyingVehicle.Initialize();
-					(VehicleIncidentDefOf.BlackHawkDown.Worker as IncidentWorker_ShuttleDowned).TryExecuteEvent(flyingVehicle, null, Verse.UI.MouseCell());
+
 				}));
 			}
 			Find.WindowStack.Add(new Dialog_DebugOptionListLister(list));

@@ -143,6 +143,7 @@
 				<skyfallerIncoming>HotAirBalloonIncoming</skyfallerIncoming>
 				<skyfallerCrashing>HotAirBalloonCrashing</skyfallerCrashing>
 				<faceDirectionOfTravel>false</faceDirectionOfTravel>
+				<circleToLand>true</circleToLand>
 				<fuelEfficiencyWorld>0.15</fuelEfficiencyWorld>
 				<flySpeed>1.1</flySpeed>
 				<launchProtocols>

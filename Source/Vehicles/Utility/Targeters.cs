@@ -8,5 +8,6 @@ namespace Vehicles
 		public static CannonTargeter CannonTargeter { get; } = new CannonTargeter();
 		public static LaunchTargeter LaunchTargeter { get; } = new LaunchTargeter();
 		public static LandingTargeter LandingTargeter { get; } = new LandingTargeter();
+		public static StrafeTargeter StrafeTargeter { get; } = new StrafeTargeter();
 	}
 }

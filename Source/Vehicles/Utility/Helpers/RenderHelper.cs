@@ -293,7 +293,7 @@ namespace Vehicles
 			Material mat = new Material(graphic.MatAt(rot, pattern));
 			GenUI.DrawTextureWithMaterial(displayRect, vehicleTex, mat);
 
-			if (vehicleDef.GetCompProperties<CompProperties_Cannons>() is CompProperties_Cannons props)
+			if (vehicleDef.GetSortedCompProperties<CompProperties_Cannons>() is CompProperties_Cannons props)
 			{
 				DrawCannonTexturesInSettings(displayRect, vehicleDef, props.turrets.OrderBy(x => x.drawLayer), pattern, rot);
 			}
@@ -375,7 +375,7 @@ namespace Vehicles
 					material = new Material(graphic.MatAt(Rot8.North, pattern));
 				}
 				GenUI.DrawTextureWithMaterial(rect, VehicleTex.VehicleTexture(vehicleDef, Rot8.North), material);
-				if (vehicleDef.GetCompProperties<CompProperties_Cannons>() is CompProperties_Cannons props)
+				if (vehicleDef.GetSortedCompProperties<CompProperties_Cannons>() is CompProperties_Cannons props)
 				{
 					DrawCannonTexturesInSettings(rect, vehicleDef, props.turrets.OrderBy(x => x.drawLayer), pattern, Rot8.North);
 				}

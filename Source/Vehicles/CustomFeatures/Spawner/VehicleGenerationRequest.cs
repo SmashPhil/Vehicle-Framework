@@ -50,7 +50,7 @@ namespace Vehicles
 
 			Upgrades = 0;
 			CleanSlate = cleanSlate;
-			if (!CleanSlate && (kindDef.race as VehicleDef).GetCompProperties<CompProperties_UpgradeTree>() is CompProperties_UpgradeTree compProperties_UpgradeTree)
+			if (!CleanSlate && (kindDef.race as VehicleDef).GetSortedCompProperties<CompProperties_UpgradeTree>() is CompProperties_UpgradeTree compProperties_UpgradeTree)
 			{
 				Upgrades = Rand.Range(0, compProperties_UpgradeTree.upgrades.Count);
 			}

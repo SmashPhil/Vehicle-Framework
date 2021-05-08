@@ -164,7 +164,7 @@ namespace Vehicles
 										return;
 									}
 									aerial.arrivalAction = new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, this, target.Cell, rot);
-									aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, this, target.Cell, rot), true);
+									aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, this, target.Cell, rot));
 									vehicle.inFlight = true;
 									CameraJumper.TryShowWorld();
 								};
@@ -172,14 +172,31 @@ namespace Vehicles
 							Targeters.LandingTargeter.BeginTargeting(vehicle, protocol, action, null, null, null, vehicle.VehicleDef.rotatable && protocol.landingProperties.forcedRotation is null);
 						}, MenuOptionPriority.Default, null, null, 0f, null, null);
 					}
-					//if (vehicle.CompVehicleLauncher.)
-					//{
-
-					//}
 				}
 				if (vehicle.CompVehicleLauncher.ControlInFlight)
 				{
 					yield return MapHelper.ReconFloatMenuOption(vehicle, parent);
+				}
+				if (vehicle.CompVehicleLauncher.ControlInFlight && vehicle.CompCannons != null) //REDO - strafe specific properties
+				{
+					foreach (LaunchProtocol protocol in vehicle.CompVehicleLauncher.launchProtocols)
+					{
+						yield return new FloatMenuOption("VehicleStrafeRun".Translate(), delegate ()
+						{
+							Targeters.StrafeTargeter.BeginTargeting(vehicle, protocol, delegate (IntVec3 start, IntVec3 end)
+							{
+								if (vehicle.Spawned)
+								{
+									vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_StrafeMap(vehicle, parent, AerialVehicleArrivalModeDefOf.Strafe, start, end));
+								}
+								else
+								{
+									AerialVehicleInFlight aerial = Find.World.GetCachedWorldComponent<VehicleWorldObjectsHolder>().AerialVehicleObject(vehicle);
+									aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_StrafeMap(vehicle, parent, AerialVehicleArrivalModeDefOf.Strafe, start, end));
+								}
+							});//Add additional fields
+						}, MenuOptionPriority.Default, null, null, 0f, null, null);
+					}
 				}
 			}
 			if (Find.WorldObjects.SettlementAt(tile) is Settlement settlement)
@@ -208,7 +225,15 @@ namespace Vehicles
 			{
 				yield return new FloatMenuOption("FormCaravanHere".Translate(), delegate()
 				{
-					vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_FormVehicleCaravan(vehicle));
+					if (vehicle.Spawned)
+					{
+						vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_FormVehicleCaravan(vehicle));
+					}
+					else
+					{
+						AerialVehicleInFlight aerial = Find.World.GetCachedWorldComponent<VehicleWorldObjectsHolder>().AerialVehicleObject(vehicle);
+						aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_FormVehicleCaravan(vehicle));
+					}
 				}, MenuOptionPriority.Default, null, null, 0f, null, null);
 			}
 		}

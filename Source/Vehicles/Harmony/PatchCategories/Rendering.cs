@@ -10,6 +10,7 @@ using Verse;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using Vehicles.UI;
 
 namespace Vehicles
 {
@@ -239,17 +240,17 @@ namespace Vehicles
 			if (thingDef is VehicleBuildDef def)
 			{
 				VehicleDef vehicleDef = def.thingToSpawn.race as VehicleDef;
-				if (vehicleDef.GetCompProperties<CompProperties_Cannons>() is CompProperties_Cannons props)
+				if (vehicleDef.GetSortedCompProperties<CompProperties_Cannons>() is CompProperties_Cannons props)
 				{
 					Vector3 loc = GenThing.TrueCenter(center, rot, def.Size, drawAltitude.AltitudeFor());
-					//vehicleDef.DrawGhostCannonTextures(loc, rot, ghostCol);
+					vehicleDef.DrawGhostCannonTextures(loc, rot, ghostCol);
 				}
 			}
 		}
 
 		public static void VehicleCannonsBlueprintDraw(ThingDef def, bool isInstallBlueprint, ref ThingDef __result, ThingDef normalBlueprint = null)
 		{
-			if (def is VehicleBuildDef buildDef && (buildDef.thingToSpawn.race as VehicleDef).GetCompProperties<CompProperties_Cannons>() is CompProperties_Cannons props)
+			if (def is VehicleBuildDef buildDef && (buildDef.thingToSpawn.race as VehicleDef).GetSortedCompProperties<CompProperties_Cannons>() is CompProperties_Cannons props)
 			{
 				__result.comps.Add(new CompProperties_Cannons()
 				{

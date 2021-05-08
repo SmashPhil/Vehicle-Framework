@@ -63,6 +63,7 @@ namespace Vehicles
 
 		private void ExitMap()
 		{
+			//Add respawning to AerialVehicleInFlight here
 			Destroy();
 		}
 

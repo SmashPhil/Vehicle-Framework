@@ -15,6 +15,13 @@ Fixed bug where custom impassable biome costs would result in -1 path cost and c
 
 Fixed bug where static turrets would not rotate when the vehicle is turning and the turret is firing.
 
+Fixed bug where launching a shuttle from a local map into another local map would cause the shuttle to not enter the target map, and instead land on the world map.
+
+Fixed bug where Hot Air Balloon would cause RimWorld to freeze upon leaving the map.
+
+Fixed bug where shuttles would occassionally not be able to take additional orders once landing on the world map.
+
+
 [title]New Additions[/title]
 Added TextMeshPro rendering for vehicle path costs on the world map. This is an option in the Debug ModSettings tab for visualization of final path costs for a group of vehicles (through the RoutePlanner and FormCaravan window).
 
@@ -22,7 +29,9 @@ Added Attack options for AerialVehicles when targeting settlements.
 
 Added Recon scouting where shuttles may circle a map that has not yet been loaded, and spy on the map. The map is generated and held open which means you can target defenses on the map, perform strafing runs, and even target specific cells for landing.
 
-Added VehicleTurretAlternating class that allows for turrets to be grouped together and alternate shots
+Added VehicleTurretAlternating class that allows for turrets to alternate shots
+
+Added groupKey field to VehicleTurret to allow grouping of turrets. Will consolodate all turrets sharing this key to use the same gizmo, which will cause them to fire, reload, switch fire rates, and turn auto-target on simultaneously.
 
 Added laser projectiles
 

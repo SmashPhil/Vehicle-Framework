@@ -39,4 +39,9 @@
 		<defName>TargetedLanding</defName>
 		<workerClass>Vehicles.AerialVehicleArrivalModeWorker_TargetedDrop</workerClass>
 	</Vehicles.AerialVehicleArrivalModeDef>
+	
+	<Vehicles.AerialVehicleArrivalModeDef>
+		<defName>Strafe</defName>
+		<workerClass>Vehicles.AerialVehicleArrivalModeWorker_StrafeMap</workerClass>
+	</Vehicles.AerialVehicleArrivalModeDef>
 </Defs>

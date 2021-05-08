@@ -25,6 +25,8 @@ namespace Vehicles
 			this.launchProtocol = launchProtocol;
 		}
 
+		public override bool DestroyOnArrival => true;
+
 		public override void ExposeData()
 		{
 			base.ExposeData();

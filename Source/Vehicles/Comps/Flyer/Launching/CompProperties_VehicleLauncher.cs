@@ -41,6 +41,7 @@ namespace Vehicles
 		public bool controlInFlight = true;
 
 		public bool faceDirectionOfTravel = true;
+		public bool circleToLand = true;
 
 		public BomberProperties bomber;
 

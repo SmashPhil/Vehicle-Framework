@@ -24,6 +24,8 @@ namespace Vehicles
 			this.arrivalModeDef = arrivalModeDef;
 		}
 
+		public override bool DestroyOnArrival => true;
+
 		public override FloatMenuAcceptanceReport StillValid(int destinationTile)
 		{
 			if (settlement != null && settlement.Tile != destinationTile)

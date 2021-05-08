@@ -239,7 +239,7 @@ namespace Vehicles
 
 		public void DequeueTurret(TurretData turretData)
 		{
-			multiFireCannon.Remove(turretData);
+			multiFireCannon.RemoveAll(td => td.turret == turretData.turret);
 		}
 
 		public bool QueuedToFire(VehicleTurret turret)

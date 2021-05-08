@@ -19,19 +19,19 @@ namespace Vehicles
 		public static readonly Texture2D FillableBarBackgroundTex = SolidColorMaterials.NewSolidColorTexture(Color.black);
 		public static readonly Texture2D FillableBarInnerTex = SolidColorMaterials.NewSolidColorTexture(new ColorInt(19, 22, 27).ToColor);
 
-		public static readonly Texture2D BlueStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(35, 50, 185).ToColor);
+		public static readonly Texture2D YellowTex = SolidColorMaterials.NewSolidColorTexture(new ColorInt(255, 210, 45).ToColor);
+		public static readonly Texture2D YellowOrangeTex = SolidColorMaterials.NewSolidColorTexture(new ColorInt(255, 175, 45).ToColor);
+		public static readonly Texture2D OrangeTex = SolidColorMaterials.NewSolidColorTexture(new ColorInt(255, 110, 15).ToColor);
+		public static readonly Texture2D OrangeRedTex = SolidColorMaterials.NewSolidColorTexture(new ColorInt(255, 75, 15).ToColor);
+		public static readonly Texture2D RedTex = SolidColorMaterials.NewSolidColorTexture(new ColorInt(155, 30, 30).ToColor);
+		public static readonly Texture2D MaroonTex = SolidColorMaterials.NewSolidColorTexture(new ColorInt(60, 30, 30).ToColor);
+		public static readonly Texture2D BlueTex = SolidColorMaterials.NewSolidColorTexture(new ColorInt(35, 50, 185).ToColor);
+		public static readonly Texture2D GreenTex = SolidColorMaterials.NewSolidColorTexture(new ColorInt(0, 115, 40).ToColor);
+
 		public static readonly Texture2D BlueAddedStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(35, 50, 185, 120).ToColor);
-
-		public static readonly Texture2D GreenStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(0, 115, 40).ToColor);
 		public static readonly Texture2D GreenAddedStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(0, 115, 40, 120).ToColor);
-
-		public static readonly Texture2D RedStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(155, 30, 30).ToColor);
 		public static readonly Texture2D RedAddedStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(155, 30, 30, 120).ToColor);
-
-		public static readonly Texture2D OrangeStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(185, 110, 15).ToColor);
 		public static readonly Texture2D OrangeAddedStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(185, 110, 15, 120).ToColor);
-
-		public static readonly Texture2D RedBrownStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(60, 30, 30).ToColor);
 		public static readonly Texture2D RedBrownAddedStatBarTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(60, 30, 30, 120).ToColor);
 
 		public static readonly Texture2D FillableBarTexture = SolidColorMaterials.NewSolidColorTexture(0.5f, 0.5f, 0.5f, 0.5f);
@@ -71,6 +71,27 @@ namespace Vehicles
 			{
 				return VehicleTex.RangeCircle_ExtraWide;
 			}
+		}
+
+		public static Texture2D HeatColorPercent(float percent)
+		{
+			if (percent <= 0.25)
+			{
+				return YellowTex;
+			}
+			else if (percent <= 0.5f)
+			{
+				return YellowOrangeTex;
+			}
+			else if (percent <= 0.75f)
+			{
+				return OrangeTex;
+			}
+			else if (percent < 1f)
+			{
+				return OrangeRedTex;
+			}
+			return RedTex;
 		}
 	}
 }

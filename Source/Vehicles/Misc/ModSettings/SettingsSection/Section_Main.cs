@@ -19,6 +19,9 @@ namespace Vehicles
 		public bool fullVehiclePathing = true; //disable if you need every ounce of performance
 		public bool showDisabledVehicles = true;
 
+		/* Turrets */
+		public bool overheatMechanics = true;
+
 		/* Boats */
 		public bool passiveWaterWaves = true;
 		public bool riverTravel = true;
@@ -38,8 +41,6 @@ namespace Vehicles
 		/* Upgrades */
 		public bool drawUpgradeInformationScreen = true;
 		public bool useInGameTime = true;
-		
-		
 
 		public override void ResetSettings()
 		{
@@ -52,6 +53,9 @@ namespace Vehicles
 			modifiableSettings = true;
 			fullVehiclePathing = true; //disable if you need every ounce of performance
 			showDisabledVehicles = true;
+
+			/* Turrets */
+			overheatMechanics = true;
 
 			/* Boats */
 			passiveWaterWaves = true;
@@ -82,6 +86,8 @@ namespace Vehicles
 			Scribe_Values.Look(ref modifiableSettings, "modifiableSettings", true, true);
 			Scribe_Values.Look(ref fullVehiclePathing, "fullVehiclePathing");
 			Scribe_Values.Look(ref showDisabledVehicles, "showDisabledVehicles");
+
+			Scribe_Values.Look(ref overheatMechanics, "overheatMechanics", true);
 
 			Scribe_Values.Look(ref passiveWaterWaves, "passiveWaterWaves", true);
 			Scribe_Values.Look(ref riverTravel, "riverTravel", true);
@@ -123,6 +129,9 @@ namespace Vehicles
 			listingStandard.CheckboxLabeled("VehiclesModifiableSettings".Translate(), ref modifiableSettings, "VehiclesModifiableSettingsTooltip".Translate());
 			listingStandard.CheckboxLabeled("FullVehiclePathing".Translate(), ref fullVehiclePathing, "FullVehiclePathingTooltip".Translate());
 			listingStandard.CheckboxLabeled("ShowDisabledVehicles".Translate(), ref showDisabledVehicles, "ShowDisabledVehiclesTooltip".Translate());
+
+			listingStandard.Header("Turrets", ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
+			listingStandard.CheckboxLabeled("VehicleTurretOverheatMechanics".Translate(), ref overheatMechanics, "VehicleTurretOverheatMechanicsTooltip".Translate());
 
 			listingStandard.Header("Boats", ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 

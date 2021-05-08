@@ -104,7 +104,7 @@ namespace Vehicles
 			Rect fireModeRect = new Rect(reloadRect.x + ammoRect.width, ammoRect.y, gizmoRect.width / 2, gizmoRect.height / 2 - 2);
 			Rect autoTargetRect = new Rect(fireModeRect.x + ammoRect.width, ammoRect.y, gizmoRect.width / 2, gizmoRect.height / 2 - 2);
 
-			UIElements.VerticalFillableBar(cooldownRect, turret.currentHeatRate, TexData.RedStatBarTexture);
+			UIElements.VerticalFillableBar(cooldownRect, turret.currentHeatRate, TexData.RedTex);
 
 			if (Mouse.IsOver(ammoRect))
 			{

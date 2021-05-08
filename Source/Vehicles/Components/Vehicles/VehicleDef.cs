@@ -51,7 +51,7 @@ namespace Vehicles
 
 		public List<VehicleComponentProperties> components;
 
-		private SelfOrderingList<CompProperties> cachedComps = new SelfOrderingList<CompProperties>();
+		private readonly SelfOrderingList<CompProperties> cachedComps = new SelfOrderingList<CompProperties>();
 
 		public override void ResolveReferences()
 		{
@@ -209,6 +209,11 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// Better performant CompProperties retrieval for VehicleDefs
+		/// </summary>
+		/// <remarks>Can only be called after all references have been resolved. If a CompProperties is needed beforehand, use <see cref="GetCompProperties{T}"/></remarks>
+		/// <typeparam name="T"></typeparam>
 		public T GetSortedCompProperties<T>() where T : CompProperties
 		{
 			for (int i = 0; i < cachedComps.Count; i++)
@@ -219,16 +224,7 @@ namespace Vehicles
 					return t;
 				}
 			}
-			T comp = GetCompProperties<T>();
-			if (comp != null)
-			{
-				cachedComps.Add(comp);
-			}
-			else
-			{
-				SmashLog.ErrorOnce($"<type>{typeof(T)}</type> not found in <type>VehicleDef</type> sorted comp list. Use <method>GetCompProperties</method> if you're not sure the comp is not in the comp list.", typeof(T).GetHashCode());
-			}
-			return comp;
+			return default;
 		}
 	}
 }

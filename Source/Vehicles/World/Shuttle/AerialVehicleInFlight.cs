@@ -43,7 +43,6 @@ namespace Vehicles
 		public VehiclePawn vehicle;
 
 		public bool shouldCrash;
-		private bool destroyOnArrival;
 
 		public AerialVehicleArrivalAction arrivalAction;
 
@@ -61,6 +60,7 @@ namespace Vehicles
 		private Vector3 position;
 
 		private Material vehicleMat;
+		private Material vehicleMatLit;
 
 		public override string Label => vehicle.Label;
 
@@ -86,10 +86,30 @@ namespace Vehicles
 				{
 					vehicleMat = new Material(vehicle.VehicleGraphic.MatAt(Rot8.North, vehicle.pattern))
 					{
+						shader = ShaderDatabase.WorldOverlayTransparentLit,
 						renderQueue = WorldMaterials.WorldObjectRenderQueue
 					};
 				}
 				return vehicleMat;
+			}
+		}
+
+		private Material VehicleMatLit
+		{
+			get
+			{
+				if (vehicle is null)
+				{
+					return Material;
+				}
+				if (vehicleMatLit is null)
+				{
+					vehicleMatLit = new Material(vehicle.VehicleGraphic.MatAt(Rot8.North, vehicle.pattern))
+					{
+						renderQueue = WorldMaterials.WorldObjectRenderQueue
+					};
+				}
+				return vehicleMatLit;
 			}
 		}
 
@@ -146,7 +166,7 @@ namespace Vehicles
 					{
 						Verse.UI.RotateAroundPivot(Quaternion.LookRotation(Find.WorldGrid.GetTileCenter(flightPath.First) - position).eulerAngles.y, rect.center);
 					}
-					GenUI.DrawTextureWithMaterial(rect, VehicleTex.VehicleTexture(vehicle.VehicleDef, Rot8.North), VehicleMat);
+					GenUI.DrawTextureWithMaterial(rect, VehicleTex.VehicleTexture(vehicle.VehicleDef, Rot8.North), VehicleMatLit);
 					GUI.matrix = matrix;
 				}
 			}
@@ -249,6 +269,28 @@ namespace Vehicles
 					}
 					yield return commandSettle;
 				}
+				if (Prefs.DevMode)
+				{
+					yield return new Command_Action
+					{
+						defaultLabel = "Debug: Land at Nearest Player Settlement",
+						action = delegate ()
+						{
+							List<Settlement> playerSettlements = Find.WorldObjects.Settlements.Where(s => s.Faction == Faction.OfPlayer).ToList();
+							Settlement nearestSettlement = playerSettlements.MinBy(s => Ext_Math.SphericalDistance(s.DrawPos, DrawPos));
+							
+							LaunchProtocol launchProtocol = vehicle.CompVehicleLauncher.launchProtocols.FirstOrDefault();
+							Rot4 vehicleRotation = launchProtocol.landingProperties.forcedRotation ?? Rot4.Random;
+							IntVec3 cell = CellFinderExtended.RandomCenterCell(nearestSettlement.Map, (IntVec3 cell) => !MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, cell, vehicleRotation));
+							VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
+							skyfaller.vehicle = vehicle;
+							skyfaller.launchProtocol = launchProtocol;
+
+							GenSpawn.Spawn(skyfaller, cell, nearestSettlement.Map, vehicleRotation);
+							Destroy();
+						}
+					};
+				}
 			}
 		}
 
@@ -341,17 +383,17 @@ namespace Vehicles
 					{
 						Messages.Message("VehicleAerialArrived".Translate(vehicle.LabelShort), MessageTypeDefOf.NeutralEvent);
 						Tile = flightPath.First;
-						arrivalAction?.Arrived(flightPath.First);
-						if (destroyOnArrival)
+						if (arrivalAction is AerialVehicleArrivalAction action)
 						{
-							Destroy();
+							action.Arrived(flightPath.First);
+							if (action.DestroyOnArrival)
+							{
+								Destroy();
+							}
 						}
-						else
-						{
-							vehicle.inFlight = false;
-						}
+						vehicle.inFlight = false;
 					}
-					else if (flightPath.Path.Count <= 1)
+					else if (flightPath.Path.Count <= 1 && vehicle.CompVehicleLauncher.Props.circleToLand)
 					{
 						Vector3 newPos = DrawPos;
 						SetCircle(flightPath.First);
@@ -361,7 +403,7 @@ namespace Vehicles
 			}
 		}
 
-		public void OrderFlyToTiles(List<int> tiles, Vector3 origin, AerialVehicleArrivalAction arrivalAction = null, bool destroyOnArrival = false)
+		public void OrderFlyToTiles(List<int> tiles, Vector3 origin, AerialVehicleArrivalAction arrivalAction = null)
 		{
 			if (tiles.NullOrEmpty() || tiles.Any(t => t < 0))
 			{
@@ -372,7 +414,6 @@ namespace Vehicles
 				this.arrivalAction = arrivalAction;
 			}
 			flightPath.NewPath(tiles);
-			this.destroyOnArrival = destroyOnArrival;
 			InitializeNextFlight(origin);
 			settlementsFlyOver = SettlementPositionTracker.CheckNearbySettlements(this, speedPctPerTick)?.ToHashSet() ?? new HashSet<Settlement>();
 		}
@@ -385,6 +426,7 @@ namespace Vehicles
 
 		private void InitializeNextFlight(Vector3 position)
 		{
+			vehicle.inFlight = true;
 			ResetPosition(position);
 			SetSpeed();
 			InitializeFacing();

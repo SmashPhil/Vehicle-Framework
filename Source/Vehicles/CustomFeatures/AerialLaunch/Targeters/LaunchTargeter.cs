@@ -135,10 +135,6 @@ namespace Vehicles
 					Event.current.Use();
 				}
 			}
-			if (Event.current.type == EventType.KeyDown)
-			{
-
-			}
 			if (KeyBindingDefOf.Cancel.KeyDownEvent && IsTargeting)
 			{
 				SoundDefOf.CancelMode.PlayOneShotOnCamera(null);

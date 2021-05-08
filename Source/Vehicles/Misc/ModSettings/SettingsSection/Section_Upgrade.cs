@@ -29,13 +29,6 @@ namespace Vehicles
 				yield return new FloatMenuOption("DevModeResetAll".Translate(), delegate ()
 				{
 					VehicleMod.ResetAllSettings();
-					if (Current.ProgramState == ProgramState.Playing)
-					{
-						foreach (Map map in Find.Maps)
-						{
-							map.GetCachedMapComponent<VehicleReservationManager>().ReleaseAllClaims();
-						}
-					}
 				});
 			}
 		}

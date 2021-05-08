@@ -37,7 +37,7 @@ namespace Vehicles.UI
 
 		public static void DrawGhostCannonTextures(this VehicleDef vehicleDef, Vector3 loc, Rot8 rot, Color ghostCol)
 		{
-			if (vehicleDef.GetCompProperties<CompProperties_Cannons>() is CompProperties_Cannons props)
+			if (vehicleDef.GetSortedCompProperties<CompProperties_Cannons>() is CompProperties_Cannons props)
 			{
 				foreach (VehicleTurret cannon in props.turrets)
 				{

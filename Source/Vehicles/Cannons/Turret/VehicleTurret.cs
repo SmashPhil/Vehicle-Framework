@@ -181,7 +181,7 @@ namespace Vehicles
 
 		public bool HasAmmo => turretDef.ammunition is null || shellCount > 0;
 
-		public bool ReadyToFire => groupKey.NullOrEmpty() ? (burstTicks <= 0 && reloadTicks <= 0 && !CannonDisabled) : GroupTurrets.All(t => t.burstTicks <= 0 && t.reloadTicks <= 0 && !t.CannonDisabled);
+		public bool ReadyToFire => groupKey.NullOrEmpty() ? (burstTicks <= 0 && reloadTicks <= 0 && !CannonDisabled) : GroupTurrets.Any(t => t.burstTicks <= 0 && t.reloadTicks <= 0 && !t.CannonDisabled);
 
 		public Texture2D currentFireIcon;
 
@@ -720,12 +720,10 @@ namespace Vehicles
 				{
 					if (IsTargetable && RotationIsValid && targetPersists && (cannonTarget.Pawn is null || !SetTargetConditionalOnThing(LocalTargetInfo.Invalid)))
 					{
-						Log.Message("PUSH ALL 1");
 						GroupTurrets.ForEach(t => t.PushTurretToQueue());
 					}
 					else if (CurrentFireMode.ticksBetweenShots == CurrentFireMode.ticksBetweenBursts)
 					{
-						Log.Message("PUSH ALL 2");
 						GroupTurrets.ForEach(t => t.PushTurretToQueue());
 					}
 				}
@@ -1333,7 +1331,7 @@ namespace Vehicles
 			{
 				yield return "<field>key</field> must be included for each <type>VehicleTurret</type>".ConvertRichText();
 			}
-			if (vehicleDef.GetSortedCompProperties<CompProperties_Cannons>().turrets.Select(x => x.key).GroupBy(y => y).Where(y => y.Count() > 1).Select(z => z.Key).NotNullAndAny())
+			if (vehicleDef.GetCompProperties<CompProperties_Cannons>().turrets.Select(x => x.key).GroupBy(y => y).Where(y => y.Count() > 1).Select(z => z.Key).NotNullAndAny())
 			{
 				yield return $"Duplicate cannon key {key}";
 			}

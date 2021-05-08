@@ -191,7 +191,7 @@ namespace Vehicles.UI
 				};
 
 				lister.Begin(bottomRect, 1);
-				lister.FillableBarLabeled(inspectedComponent.HealthPercent, "Health", TexData.RedStatBarTexture, TexData.RedAddedStatBarTexture, 
+				lister.FillableBarLabeled(inspectedComponent.HealthPercent, "Health", TexData.RedTex, TexData.RedAddedStatBarTexture, 
 					TexData.FillableBarInnerTex, TexData.FillableBarBackgroundTex, null, 0, 0 , new float[] { 20, 40, 60, 80, 100});
 
 				lister.End();

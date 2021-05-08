@@ -383,7 +383,7 @@
     <Compile Include="Comps\VehicleCompProperties.cs" />
     <Compile Include="Comps\VehicleTracks\VehicleTrack.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_StrafeSettlement.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_StrafeMap.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_CrashSpecificCell.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_LandInMap.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_LandSpecificCell.cs" />
@@ -392,6 +392,7 @@
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_VisitSettlement.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeDef.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeWorker.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeWorker_StrafeMap.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeWorker_TargetedDrop.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeWorker_EdgeDrop.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeWorker_CenterDrop.cs" />
@@ -404,6 +405,7 @@
     <Compile Include="CustomFeatures\AerialLaunch\Launching\LaunchProtocolProperties.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_FlyOver.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_Crashing.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Targeters\StrafeTargeter.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Targeters\LandingTargeter.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\RunwayTakeoff.cs" />
     <Compile Include="Comps\Flyer\Launching\CompProperties_VehicleLauncher.cs" />

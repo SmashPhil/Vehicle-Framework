@@ -251,13 +251,24 @@ namespace Vehicles
 
 		public static void ResetAllSettings()
 		{
-			SoundDefOf.Click.PlayOneShotOnCamera(null);
-			cachedFields.Clear();
-			PopulateCachedFields();
-			settings.main.ResetSettings();
-			settings.vehicles.ResetSettings();
-			settings.upgrades.ResetSettings();
-			settings.debug.ResetSettings();
+			Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("VehicleResetAllConfirmation".Translate(), delegate()
+			{
+				SoundDefOf.Click.PlayOneShotOnCamera(null);
+				cachedFields.Clear();
+				PopulateCachedFields();
+				settings.main.ResetSettings();
+				settings.vehicles.ResetSettings();
+				settings.upgrades.ResetSettings();
+				settings.debug.ResetSettings();
+
+				if (Current.ProgramState == ProgramState.Playing)
+				{
+					foreach (Map map in Find.Maps)
+					{
+						map.GetCachedMapComponent<VehicleReservationManager>().ReleaseAllClaims();
+					}
+				}
+			}, false, null));
 		}
 
 		public static Rect DrawVehicleList(Rect rect, Func<bool, string> tooltipGetter = null, Predicate<VehicleDef> validator = null)

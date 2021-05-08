@@ -131,8 +131,10 @@ namespace Vehicles
 			Rect reloadRect = new Rect(ammoRect.x + ammoRect.width, ammoRect.y, gizmoWidth, gizmoHeight);
 			Rect fireModeRect = new Rect(reloadRect.x + ammoRect.width, ammoRect.y, gizmoWidth, gizmoHeight);
 			Rect autoTargetRect = new Rect(fireModeRect.x + ammoRect.width, ammoRect.y, gizmoWidth, gizmoHeight);
-
-			UIElements.VerticalFillableBar(cooldownRect, turrets.Average(t => t.currentHeatRate) / VehicleTurret.MaxHeatCapacity, TexData.RedStatBarTexture, VehicleTex.EmptyBarTex, true);
+			
+			float heatPoints = turrets.Average(t => t.currentHeatRate);
+			UIElements.VerticalFillableBar(cooldownRect, heatPoints / VehicleTurret.MaxHeatCapacity, 
+				turrets.Any(t => t.OnCooldown) ? TexData.RedTex : TexData.HeatColorPercent(heatPoints / VehicleTurret.MaxHeatCapacity), VehicleTex.EmptyBarTex, true);
 
 			if (canReload && Mouse.IsOver(ammoRect))
 			{

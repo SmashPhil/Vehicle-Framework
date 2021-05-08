@@ -27,6 +27,8 @@ namespace Vehicles
 			this.vehicle = vehicle;
 		}
 
+		public virtual bool DestroyOnArrival => false;
+
 		public virtual FloatMenuAcceptanceReport StillValid(int destinationTile) => true;
 
 		public virtual bool ShouldUseLongEvent(int tile) => false;
