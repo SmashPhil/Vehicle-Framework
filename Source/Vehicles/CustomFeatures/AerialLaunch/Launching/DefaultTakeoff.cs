@@ -145,17 +145,13 @@ namespace Vehicles
 						{
 							Current.Game.CurrentMap = parent.Map;
 							CameraJumper.TryHideWorld();
-							Action<LocalTargetInfo, Rot4> action = null;
-							if (vehicle.Spawned)
+							Targeters.LandingTargeter.BeginTargeting(vehicle, protocol, delegate (LocalTargetInfo target, Rot4 rot)
 							{
-								action = delegate (LocalTargetInfo target, Rot4 rot)
+								if (vehicle.Spawned)
 								{
 									vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, this, target.Cell, rot));
-								};
-							}
-							else
-							{
-								action = delegate (LocalTargetInfo target, Rot4 rot)
+								}
+								else
 								{
 									AerialVehicleInFlight aerial = Find.World.GetCachedWorldComponent<VehicleWorldObjectsHolder>().AerialVehicleObject(vehicle);
 									if (aerial is null)
@@ -167,9 +163,8 @@ namespace Vehicles
 									aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, this, target.Cell, rot));
 									vehicle.inFlight = true;
 									CameraJumper.TryShowWorld();
-								};
-							}
-							Targeters.LandingTargeter.BeginTargeting(vehicle, protocol, action, null, null, null, vehicle.VehicleDef.rotatable && protocol.landingProperties.forcedRotation is null);
+								}
+							}, null, null, null, vehicle.VehicleDef.rotatable && protocol.landingProperties.forcedRotation is null);
 						}, MenuOptionPriority.Default, null, null, 0f, null, null);
 					}
 				}
@@ -183,6 +178,8 @@ namespace Vehicles
 					{
 						yield return new FloatMenuOption("VehicleStrafeRun".Translate(), delegate ()
 						{
+							Current.Game.CurrentMap = parent.Map;
+							CameraJumper.TryHideWorld();
 							Targeters.StrafeTargeter.BeginTargeting(vehicle, protocol, delegate (IntVec3 start, IntVec3 end)
 							{
 								if (vehicle.Spawned)

@@ -212,6 +212,7 @@ namespace Vehicles
 						color = manualColorOne != null ? manualColorOne.Value : vehicle.DrawColor,
 						colorTwo = manualColorTwo != null ? manualColorTwo.Value : vehicle.DrawColorTwo,
 						colorThree = manualColorThree != null ? manualColorThree.Value : vehicle.DrawColorThree,
+						replaceTex = pattern.replaceTex,
 						maskTex = cannon.CannonGraphic.masks[0],
 						patternTex = pattern[Rot8.North]
 					};
@@ -257,6 +258,7 @@ namespace Vehicles
 					color = manualColorOne != null ? manualColorOne.Value : vehicle.DrawColor,
 					colorTwo = manualColorTwo != null ? manualColorTwo.Value : vehicle.DrawColorTwo,
 					colorThree = manualColorThree != null ? manualColorThree.Value : vehicle.DrawColorThree,
+					replaceTex = pattern.replaceTex,
 					maskTex = vehicle.VehicleGraphic.masks[0],
 					patternTex = pattern?[Rot8.North]
 				};

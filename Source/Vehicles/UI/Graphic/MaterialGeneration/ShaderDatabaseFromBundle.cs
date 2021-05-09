@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Verse;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -11,13 +11,29 @@ namespace Vehicles
 	{
 		private static readonly Dictionary<string, Shader> lookup = new Dictionary<string, Shader>();
 
-		private static readonly string AssetBundlePath = $@"{VehicleMod.settings.Mod.Content.RootDir}/Shaders/RGBShaderBundle";
+		private static readonly string AssetBundlePath = $@"{VehicleMod.settings.Mod.Content.RootDir}\Shaders\RGBShaderBundle";
 
-		public static readonly AssetBundle bundle = AssetBundle.LoadFromFile(AssetBundlePath);
+		public static readonly AssetBundle bundle;
 
-		public static readonly Shader CutoutComplexRGB = LoadAssetBundleShader("Assets/Shaders/ShaderRGB.shader");
+		public static readonly Shader CutoutComplexRGB;
 
-		public static readonly Shader CutoutComplexPattern = LoadAssetBundleShader("Assets/Shaders/ShaderRGBPattern.shader");
+		public static readonly Shader CutoutComplexPattern;
+
+		static ShaderDatabaseFromBundle()
+		{
+			try
+			{
+				bundle = AssetBundle.LoadFromFile(AssetBundlePath);
+				if (bundle is null) throw new NullReferenceException();
+
+				CutoutComplexRGB = LoadAssetBundleShader("Assets/Shaders/ShaderRGB.shader");
+				CutoutComplexPattern = LoadAssetBundleShader("Assets/Shaders/ShaderRGBPattern.shader");
+			}
+			catch (Exception)
+			{
+				SmashLog.Error($"Unable to load AssetBundle at <text>{AssetBundlePath}</text>");
+			}
+		}
 
 		public static Shader LoadAssetBundleShader(string path)
 		{

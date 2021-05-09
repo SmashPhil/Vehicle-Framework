@@ -9,11 +9,11 @@ namespace Vehicles
 	[DefOf]
 	public static class PatternDefOf
 	{
+		public static PatternDef Default;
+
 		static PatternDefOf()
 		{
 			DefOfHelper.EnsureInitializedInCtor(typeof(PatternDefOf));
 		}
-
-		public static PatternDef Default;
 	}
 }

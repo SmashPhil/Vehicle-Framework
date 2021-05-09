@@ -13,6 +13,8 @@ namespace Vehicles
 		public Color? colorTwo;
 		public Color? colorThree;
 
+		public bool replaceTex = false;
+
 		public List<VehicleDef> exclusiveFor;
 
 		private Texture2D[] patterns;

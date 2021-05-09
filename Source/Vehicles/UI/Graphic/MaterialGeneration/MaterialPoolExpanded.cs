@@ -107,6 +107,7 @@ namespace Vehicles
 					var patternTex = req.patternTex is null ? req.maskTex : req.patternTex;
 					material.SetTexture(ShaderPropertyIDs.MaskTex, req.maskTex);
 					material.SetTexture(AdditionalShaderPropertyIDs.PatternTex, patternTex);
+					material.SetInt(AdditionalShaderPropertyIDs.ReplaceTexture, req.replaceTex ? 1 : 0);
 					material.SetColor(AdditionalShaderPropertyIDs.ColorOne, req.color);
 					material.SetColor(ShaderPropertyIDs.ColorTwo, req.colorTwo);
 					material.SetColor(AdditionalShaderPropertyIDs.ColorThree, req.colorThree);

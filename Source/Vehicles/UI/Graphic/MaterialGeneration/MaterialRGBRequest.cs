@@ -13,6 +13,7 @@ namespace Vehicles
 		public Color color;
 		public Color colorTwo;
 		public Color colorThree;
+		public bool replaceTex;
 		public Texture2D maskTex;
 		public Texture2D patternTex;
 		public int renderQueue;
@@ -25,6 +26,7 @@ namespace Vehicles
 			color = Color.white;
 			colorTwo = Color.white;
 			colorThree = Color.white;
+			replaceTex = false;
 			maskTex = null;
 			patternTex = null;
 			renderQueue = 0;
@@ -38,6 +40,7 @@ namespace Vehicles
 			color = Color.white;
 			colorTwo = Color.white;
 			colorThree = Color.white;
+			replaceTex = false;
 			maskTex = null;
 			patternTex = null;
 			renderQueue = 0;
@@ -51,6 +54,7 @@ namespace Vehicles
 			this.color = color;
 			colorTwo = Color.white;
 			colorThree = Color.white;
+			replaceTex = false;
 			maskTex = null;
 			patternTex = null;
 			renderQueue = 0;
@@ -64,6 +68,7 @@ namespace Vehicles
 			this.color = color;
 			this.colorTwo = colorTwo;
 			colorThree = Color.white;
+			replaceTex = false;
 			maskTex = null;
 			patternTex = null;
 			renderQueue = 0;
@@ -77,6 +82,7 @@ namespace Vehicles
 			this.color = color;
 			this.colorTwo = colorTwo;
 			this.colorThree = colorThree;
+			replaceTex = false;
 			maskTex = null;
 			patternTex = null;
 			renderQueue = 0;
@@ -91,6 +97,21 @@ namespace Vehicles
 			color = req.color;
 			colorTwo = req.colorTwo;
 			this.colorThree = colorThree;
+			replaceTex = false;
+			this.patternTex = patternTex;
+			renderQueue = req.renderQueue;
+			shaderParameters = req.shaderParameters;
+		}
+
+		public MaterialRequestRGB(MaterialRequest req, Texture2D patternTex, Color colorThree, bool replaceTex)
+		{
+			shader = req.shader;
+			mainTex = req.mainTex;
+			maskTex = req.maskTex;
+			color = req.color;
+			colorTwo = req.colorTwo;
+			this.colorThree = colorThree;
+			this.replaceTex = replaceTex;
 			this.patternTex = patternTex;
 			renderQueue = req.renderQueue;
 			shaderParameters = req.shaderParameters;

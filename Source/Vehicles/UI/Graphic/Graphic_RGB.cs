@@ -185,6 +185,7 @@ namespace Vehicles
 					color = color,
 					colorTwo = colorTwo,
 					colorThree = colorThree,
+					replaceTex = pattern.replaceTex,
 					maskTex = tmpMaskArray[i],
 					patternTex = pattern[new Rot8(i)],
 					shaderParameters = req.shaderParameters

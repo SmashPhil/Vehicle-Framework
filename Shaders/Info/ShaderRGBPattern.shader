@@ -9,9 +9,10 @@ Shader "Custom/ShaderRGBPattern"
 {
 	Properties
 	{
-		_MainTex("Base (RGB)", 2D) = "white" {}
-		_MaskTex("Albedo (RGB)", 2D) = "white" {}
-		_PatternTex("Albedo (RGB)", 2D) = "white" {}
+		_MainTex("Main", 2D) = "white" {}
+		_MaskTex("Mask", 2D) = "white" {}
+		_PatternTex("Pattern", 2D) = "white" {}
+		_Replace("Replace", Float) = 1
 		_ColorOne("ColorOne", Color) = (1,1,1,1)
 		_ColorTwo("ColorTwo", Color) = (1,1,1,1)
 		_ColorThree("ColorThree", Color) = (1,1,1,1)
@@ -32,20 +33,17 @@ Shader "Custom/ShaderRGBPattern"
 			#pragma multi_compile_fwdbase
 			#include "UnityCG.cginc"
 
-			struct appdata
-			{
+			struct appdata {
 				float4 vertex : POSITION;
 				float2 uv : TEXCOORD0;
 			};
 
-			struct v2f
-			{
+			struct v2f {
 				float2 uv : TEXCOORD0;
 				float4 vertex : SV_POSITION;
 			};
 
-			v2f vert(appdata v)
-			{
+			v2f vert(appdata v) {
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
 				o.uv = v.uv;
@@ -56,9 +54,12 @@ Shader "Custom/ShaderRGBPattern"
 			sampler2D _MaskTex;
 			sampler2D _PatternTex;
 
+			float _Replace;
+
 			float4 _MainTexColor;
 			float4 _MaskTexColor;
 			float4 _PatternTexColor;
+			float4 _ReplaceTexColor;
 
 			float redChannel;
 			float3 patternChannels;
@@ -77,25 +78,32 @@ Shader "Custom/ShaderRGBPattern"
 			float4 _ColorTwo : _ColorTwo;
 			float4 _ColorThree : _ColorThree;
 
-			fixed4 frag(v2f i) : SV_Target
-			{
+			fixed4 frag(v2f i) : SV_Target {
 				_MainTexColor = tex2D(_MainTex, i.uv);
 				_MaskTexColor = tex2D(_MaskTex, i.uv);
 				_PatternTexColor = tex2D(_PatternTex, i.uv) * _MaskTexColor.rrrr;
+				_ReplaceTexColor = tex2D(_PatternTex, i.uv);
 
 				// (-R+1)(-G+1)(-B+1)
 				patternChannels.xyz = (-_PatternTexColor.xyz) + float3(1.0, 1.0, 1.0);
 
-				// Pattern.R * _ColorOne + (-R+1)
-				redPattern = (_PatternTexColor.rrrr * _ColorOne + patternChannels.xxxx);
-				// Pattern.G * _ColorTwo + (-G+1)
-				greenPattern = (_PatternTexColor.gggg * _ColorTwo + patternChannels.yyyy);
-				// Pattern.B * _ColorThree + (-B+1)
-				bluePattern = (_PatternTexColor.bbbb * _ColorThree + patternChannels.zzzz);
+				if (_Replace){
+					fixed4 antiMask = _MainTexColor * (1 - _MaskTexColor.r);
+					finalColor = _MainTexColor * _PatternTexColor + antiMask;
+				}
+				else{
+					// Pattern.R * _ColorOne + (-R+1)
+					redPattern = (_PatternTexColor.rrrr * _ColorOne + patternChannels.xxxx);
+					// Pattern.G * _ColorTwo + (-G+1)
+					greenPattern = (_PatternTexColor.gggg * _ColorTwo + patternChannels.yyyy);
+					// Pattern.B * _ColorThree + (-B+1)
+					bluePattern = (_PatternTexColor.bbbb * _ColorThree + patternChannels.zzzz);
 
-				finalColor = _MainTexColor * redPattern;
-				finalColor = finalColor * greenPattern;
-				finalColor = finalColor * bluePattern;
+					finalColor = _MainTexColor * redPattern;
+					finalColor = finalColor * greenPattern;
+					finalColor = finalColor * bluePattern;
+				}
+				
 				return finalColor;
 			}
 			ENDCG

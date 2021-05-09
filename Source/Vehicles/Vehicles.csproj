@@ -522,6 +522,7 @@
     <Compile Include="UI\Beta\OpenBeta_GameComponent.cs" />
     <Compile Include="UI\Dialogs\Dialog_NodeSettings.cs" />
     <Compile Include="UI\Dialogs\Dialog_TradeAerialVehicle.cs" />
+    <Compile Include="UI\Graphic\AssetBundle\ShaderGeneration.cs" />
     <Compile Include="UI\Graphic\GraphicDataRGB.cs" />
     <Compile Include="UI\Graphic\GraphicDataLayered.cs" />
     <Compile Include="UI\Graphic\GraphicGeneration\GraphicDatabaseRGB.cs" />

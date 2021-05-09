@@ -263,7 +263,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return color1;
+				return pattern?.colorOne ?? color1;
 			}
 			set
 			{
@@ -275,7 +275,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return color2;
+				return pattern?.colorTwo ?? color2;
 			}
 			set
 			{
@@ -287,7 +287,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return color3;
+				return pattern?.colorThree ?? color3;
 			}
 			set
 			{

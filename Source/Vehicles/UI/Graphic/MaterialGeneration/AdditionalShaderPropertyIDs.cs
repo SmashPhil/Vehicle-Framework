@@ -10,10 +10,14 @@ namespace Vehicles
 
 		private static readonly string ColorThreeName = "_ColorThree";
 
+		private static readonly string ReplaceTextureName = "_Replace";
+
 		public static int PatternTex = Shader.PropertyToID(PatternTexName);
 
 		public static int ColorOne = Shader.PropertyToID(ColorOneName);
 
 		public static int ColorThree = Shader.PropertyToID(ColorThreeName);
+
+		public static int ReplaceTexture = Shader.PropertyToID(ReplaceTextureName);
 	}
 }

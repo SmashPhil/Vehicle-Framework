@@ -43,6 +43,20 @@
 	</Vehicles.PatternDef>
 	
 	<Vehicles.PatternDef>
+		<defName>Jungle</defName>
+		<label>Jungle</label>
+		<path>Vehicles/Patterns/Jungle/Jungle</path>
+		<replaceTex>true</replaceTex>
+	</Vehicles.PatternDef>
+	
+	<Vehicles.PatternDef>
+		<defName>Pokeball</defName>
+		<label>Pokeball</label>
+		<path>Vehicles/Patterns/Pokeball/Pokeball</path>
+		<replaceTex>true</replaceTex>
+	</Vehicles.PatternDef>
+	
+	<Vehicles.PatternDef>
 		<defName>Polygon</defName>
 		<label>Polygon</label>
 		<path>Vehicles/Patterns/Polygon/Polygon</path>

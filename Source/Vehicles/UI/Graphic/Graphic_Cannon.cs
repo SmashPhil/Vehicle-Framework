@@ -60,6 +60,7 @@ namespace Vehicles
 				color = color,
 				colorTwo = colorTwo,
 				colorThree = colorThree,
+				replaceTex = pattern.replaceTex,
 				maskTex = maskTex,
 				patternTex = pattern?[Rot8.North],
 				shaderParameters = req.shaderParameters
