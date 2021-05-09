@@ -302,9 +302,9 @@ namespace Vehicles
 		{
 			base.CompTick();
 			ResolveCannons();
-			foreach (VehicleTurret cannon in Cannons)
+			foreach (VehicleTurret turret in Cannons)
 			{
-				cannon.Tick();
+				turret.Tick();
 			}
 		}
 

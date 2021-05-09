@@ -117,6 +117,10 @@ namespace Vehicles
 		{
 			if (IsTargeting)
 			{
+				if (start.IsValid)
+				{
+					GenDraw.DrawCircleOutline(start.ToVector3Shifted(), 1);
+				}
 				GenUI.DrawMouseAttachment(mouseAttachment ?? CompLaunchable.TargeterMouseAttachment);
 			}
 		}

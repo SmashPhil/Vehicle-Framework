@@ -155,7 +155,7 @@ namespace Vehicles
 
 		public bool GizmoHighlighted { get; set; }
 
-		public bool TargetLocked { get; set; }
+		public bool TargetLocked { get; private set; }
 
 		public int PrefireTickCount { get; private set; }
 
@@ -574,9 +574,9 @@ namespace Vehicles
 					if (!cannonTarget.IsValid && Targeters.CannonTargeter.Cannon != this && reloadTicks <= 0 && HasAmmo)
 					{
 						LocalTargetInfo autoTarget = this.GetCannonTarget();
-						if(autoTarget.IsValid)
+						if (autoTarget.IsValid)
 						{
-							AlignToAngleRestricted((float)TurretLocation.AngleToPointRelative(autoTarget.Thing.DrawPos));
+							AlignToAngleRestricted(TurretLocation.AngleToPointRelative(autoTarget.Thing.DrawPos));
 							SetTarget(autoTarget);
 						}
 					}
@@ -594,7 +594,7 @@ namespace Vehicles
 
 		protected virtual void TurretRotationTick()
 		{
-			if (rotationTargeted != currentRotation)
+			if (currentRotation != rotationTargeted)
 			{
 				//REDO - SET TO CHECK CANNON HANDLERS COMPONENT HEALTH
 				if (true)
@@ -623,7 +623,7 @@ namespace Vehicles
 					}
 					else
 					{
-						if(relativeCurrentRotation < relativeTargetedRotation)
+						if (relativeCurrentRotation < relativeTargetedRotation)
 						{
 							if (Math.Abs(relativeCurrentRotation - relativeTargetedRotation) < 180)
 							{
@@ -1036,9 +1036,9 @@ namespace Vehicles
 		
 		public void AlignToTargetRestricted()
 		{
-			if(cannonTarget.HasThing)
+			if (cannonTarget.HasThing)
 			{
-				rotationTargeted = (float)TurretLocation.AngleToPointRelative(cannonTarget.Thing.DrawPos);
+				rotationTargeted = TurretLocation.AngleToPointRelative(cannonTarget.Thing.DrawPos);
 				if (attachedTo != null)
 				{
 					rotationTargeted += attachedTo.TurretRotation;
@@ -1046,7 +1046,7 @@ namespace Vehicles
 			}
 			else
 			{
-				rotationTargeted = (float)TurretLocation.ToIntVec3().AngleToCell(cannonTarget.Cell, vehicle.Map);
+				rotationTargeted = TurretLocation.ToIntVec3().AngleToCell(cannonTarget.Cell, vehicle.Map);
 				if (attachedTo != null)
 				{
 					rotationTargeted += attachedTo.TurretRotation;
@@ -1228,11 +1228,6 @@ namespace Vehicles
 			else
 			{
 				CachedPawnTargetStatus = PawnStatusOnTarget.None;
-			}
-
-			if(!target.IsValid)
-			{
-				rotationTargeted = currentRotation;
 			}
 		}
 
