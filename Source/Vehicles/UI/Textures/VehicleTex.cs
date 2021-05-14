@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 using Verse;
 using SmashTools;
@@ -9,6 +11,10 @@ namespace Vehicles
 	[StaticConstructorOnStartup]
 	public static class VehicleTex
 	{
+		public const string DefaultVehicleIconTexPath = "UI/Icons/DefaultVehicleIcon";
+		public const string DefaultShuttleIconTexPath = "UI/Icons/DefaultPlaneIcon";
+		public const string DefaultBoatIconTexPath = "UI/Icons/DefaultBoatIcon";
+
 		public static readonly Texture2D UnloadAll = ContentFinder<Texture2D>.Get("UI/Gizmos/UnloadAll");
 
 		public static readonly Texture2D UnloadPassenger = ContentFinder<Texture2D>.Get("UI/Gizmos/UnloadPawn");
@@ -107,46 +113,62 @@ namespace Vehicles
 
 		static VehicleTex()
 		{
+			StringBuilder tasks = new StringBuilder();
 			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
 			{
-				string iconFilePath = vehicleDef.properties.iconTexPath;
-				if (iconFilePath.NullOrEmpty())
+				tasks.Clear();
+				tasks.AppendLine($"Generating TextureCache for {vehicleDef.defName}");
+				try
 				{
-					switch (vehicleDef.vehicleType)
+					tasks.Append("Creating icon...");
+					string iconFilePath = vehicleDef.properties.iconTexPath;
+					if (iconFilePath.NullOrEmpty())
 					{
-						case VehicleType.Land:
-							iconFilePath = "UI/Icons/DefaultVehicleIcon";
-							break;
-						case VehicleType.Sea:
-							iconFilePath = "UI/Icons/DefaultBoatIcon";
-							break;
-						case VehicleType.Air:
-							iconFilePath = "UI/Icons/DefaultPlaneIcon";
-							break;
+						switch (vehicleDef.vehicleType)
+						{
+							case VehicleType.Land:
+								iconFilePath = DefaultVehicleIconTexPath;
+								break;
+							case VehicleType.Sea:
+								iconFilePath = DefaultBoatIconTexPath;
+								break;
+							case VehicleType.Air:
+								iconFilePath = DefaultShuttleIconTexPath;
+								break;
+						}
 					}
-				}
-				if (vehicleDef.race.AnyPawnKind.lifeStages.Last().bodyGraphicData is GraphicDataRGB bodyGraphicData)
-				{
-					Texture2D tex;
-					var graphicData = new GraphicDataRGB();
-					graphicData.CopyFrom(bodyGraphicData);
-					Graphic_Vehicle graphic = graphicData.Graphic as Graphic_Vehicle;
-					SetTextureCache(vehicleDef, graphicData);
-					if (cachedTextureFilepaths.ContainsKey(iconFilePath))
+					tasks.AppendLine("Icon created");
+					tasks.AppendLine("Creating BodyGraphicData and cached graphics...");
+					if (vehicleDef.race?.AnyPawnKind?.lifeStages?.LastOrDefault()?.bodyGraphicData is GraphicDataRGB bodyGraphicData)
 					{
-						tex = cachedTextureFilepaths[iconFilePath];
+						Texture2D tex;
+						var graphicData = new GraphicDataRGB();
+						graphicData.CopyFrom(bodyGraphicData);
+						Graphic_Vehicle graphic = graphicData.Graphic as Graphic_Vehicle;
+						tasks.AppendLine("Setting TextureCache...");
+						SetTextureCache(vehicleDef, graphicData);
+						tasks.AppendLine("Finalized TextureCache");
+						if (cachedTextureFilepaths.ContainsKey(iconFilePath))
+						{
+							tex = cachedTextureFilepaths[iconFilePath];
+						}
+						else
+						{
+							tex = ContentFinder<Texture2D>.Get(iconFilePath);
+							cachedTextureFilepaths.Add(iconFilePath, tex);
+						}
+						tasks.AppendLine("Finalizing caching");
+						CachedGraphics.Add(vehicleDef, graphic);
+						CachedTextureIcons.Add(vehicleDef, tex);
 					}
 					else
 					{
-						tex = ContentFinder<Texture2D>.Get(iconFilePath);
-						cachedTextureFilepaths.Add(iconFilePath, tex);
+						SmashLog.Error($"Unable to create GraphicData for {vehicleDef.defName}.\n{tasks}");
 					}
-					CachedGraphics.Add(vehicleDef, graphic);
-					CachedTextureIcons.Add(vehicleDef, tex);
 				}
-				else
+				catch (Exception ex)
 				{
-					SmashLog.Error($"Must use <type>GraphicDataRGB</type> for <type>VehicleDef</type>.");
+					Log.Error($"Exception thrown while trying to generate cached textures. Exception=\"{ex.Message}\"\n-----------------Tasks-----------------\n{tasks}");
 				}
 			}
 		}
@@ -160,6 +182,7 @@ namespace Vehicles
 		{
 			var textureArray = new Texture2D[Graphic_RGB.MatCount];
 			textureArray[0] = ContentFinder<Texture2D>.Get(graphicData.texPath + "_north", false);
+			textureArray[0] ??= ContentFinder<Texture2D>.Get(graphicData.texPath, false);
 			textureArray[1] = ContentFinder<Texture2D>.Get(graphicData.texPath + "_east", false);
 			textureArray[2] = ContentFinder<Texture2D>.Get(graphicData.texPath + "_south", false);
 			textureArray[3] = ContentFinder<Texture2D>.Get(graphicData.texPath + "_west", false);
@@ -168,7 +191,7 @@ namespace Vehicles
 			textureArray[6] = ContentFinder<Texture2D>.Get(graphicData.texPath + "_southWest", false);
 			textureArray[7] = ContentFinder<Texture2D>.Get(graphicData.texPath + "_northWest", false);
 			
-			if (textureArray[0] == null)
+			if (textureArray[0] is null)
 			{
 				if (textureArray[2] != null)
 				{
@@ -182,21 +205,17 @@ namespace Vehicles
 				{
 					textureArray[0] = textureArray[3];
 				}
-				else
-				{
-					textureArray[0] = ContentFinder<Texture2D>.Get(graphicData.texPath, false);
-				}
 			}
-			if (textureArray[0] == null)
+			if (textureArray[0] is null)
 			{
 				Log.Error($"Failed to find any textures at {graphicData.texPath} while constructing texture cache.");
 				return;
 			}
-			if (textureArray[2] == null)
+			if (textureArray[2] is null)
 			{
 				textureArray[2] = textureArray[0];
 			}
-			if (textureArray[1] == null)
+			if (textureArray[1] is null)
 			{
 				if (textureArray[3] != null)
 				{
@@ -207,7 +226,7 @@ namespace Vehicles
 					textureArray[1] = textureArray[0];
 				}
 			}
-			if (textureArray[3] == null)
+			if (textureArray[3] is null)
 			{
 				if (textureArray[1] != null)
 				{
@@ -219,49 +238,21 @@ namespace Vehicles
 				}
 			}
 
-			if(textureArray[5] == null)
+			if (textureArray[4] is null)
 			{
-				if(textureArray[4] != null)
-				{
-					textureArray[5] = textureArray[4];
-				}
-				else
-				{
-					textureArray[5] = textureArray[1];
-				}
+				textureArray[4] = textureArray[0];
 			}
-			if(textureArray[6] == null)
+			if (textureArray[5] is null)
 			{
-				if(textureArray[7] != null)
-				{
-					textureArray[6] = textureArray[7];
-				}
-				else
-				{
-					textureArray[6] = textureArray[3];
-				}
+				textureArray[5] = textureArray[2];
 			}
-			if(textureArray[4] == null)
+			if(textureArray[6] is null)
 			{
-				if(textureArray[5] != null)
-				{
-					textureArray[4] = textureArray[5];
-				}
-				else
-				{
-					textureArray[4] = textureArray[1];
-				}
+				textureArray[6] = textureArray[2];
 			}
-			if(textureArray[7] == null)
+			if(textureArray[7] is null)
 			{
-				if(textureArray[6] != null)
-				{
-					textureArray[7] = textureArray[6];
-				}
-				else
-				{
-					textureArray[7] = textureArray[3];
-				}
+				textureArray[7] = textureArray[0];
 			}
 
 			for (int i = 0; i < 8; i++)

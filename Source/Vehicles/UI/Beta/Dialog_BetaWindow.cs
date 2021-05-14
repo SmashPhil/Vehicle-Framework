@@ -31,7 +31,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				throw new IOException($"Failed to read in BetaDescription txt file. Exception={ex.Message}");
+				throw new IOException($"Failed to read in BetaDescription");
 			}
 		}
 

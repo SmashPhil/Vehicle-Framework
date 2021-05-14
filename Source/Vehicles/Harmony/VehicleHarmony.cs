@@ -81,11 +81,12 @@ namespace Vehicles
 			VehicleIncidentSwapper.RegisterLordType(typeof(LordJob_ArmoredAssault));
 		}
 
-		#if BETA
+		
 		public static void OpenBetaDialog()
 		{
+#if BETA
 			Find.WindowStack.Add(new Dialog_BetaWindow());
+#endif
 		}
-		#endif
 	}
 }
