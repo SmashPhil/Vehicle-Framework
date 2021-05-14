@@ -33,7 +33,7 @@ namespace Vehicles
 			this.pawns = pawns;
 			this.vehicle = vehicle.AnyThing as VehiclePawn;
 			trad = vehicle;
-			vehicleTex = ContentFinder<Texture2D>.Get(this.vehicle.ageTracker.CurKindLifeStage.bodyGraphicData.texPath + "_north", true);
+			vehicleTex = this.vehicle.VehicleGraphic.TexAt(Rot8.North);
 
 			absorbInputAroundWindow = true;
 			closeOnCancel = true;
@@ -58,8 +58,11 @@ namespace Vehicles
 		{
 			DrawVehicleMenu(inRect);
 			//REDO - Remove Vehicle tex from assign seat window
-			Vector2 display = vehicle.VehicleDef.drawProperties.colorPickerUICoord;
-			RenderHelper.DrawVehicleTex(new Rect(display.x, display.y, 1, 1), vehicleTex, vehicle, vehicle.pattern, true, vehicle.DrawColor, vehicle.DrawColorTwo, vehicle.DrawColorThree);
+			Vector2 displayRect = vehicle.VehicleDef.drawProperties.colorPickerUICoord;
+			float UISizeX = vehicle.VehicleDef.drawProperties.upgradeUISize.x;
+			float UISizeY = vehicle.VehicleDef.drawProperties.upgradeUISize.y;
+			RenderHelper.DrawVehicleTex(new Rect(displayRect.x, displayRect.y, UISizeX, UISizeY), vehicleTex, vehicle, vehicle.pattern, true, 
+				vehicle.DrawColor, vehicle.DrawColorTwo, vehicle.DrawColorThree);
 			DoBottomButtons(inRect);
 		}
 

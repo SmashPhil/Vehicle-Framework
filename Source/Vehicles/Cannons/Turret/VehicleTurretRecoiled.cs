@@ -175,7 +175,7 @@ namespace Vehicles
 				cannonGraphics = new Graphic_Cannon[AnimationCount];
 				for (int i = 0; i < AnimationCount; i++)
 				{
-					cannonGraphics[i] = (cannonGraphic as Graphic_CannonAnimate).SubGraphicCycle(i, cannonGraphic.Shader, CannonGraphicData.color, CannonGraphicData.colorTwo, CannonGraphicData.colorThree) as Graphic_Cannon;
+					cannonGraphics[i] = (cannonGraphic as Graphic_CannonAnimate).SubGraphicCycle(i, cannonGraphic.Shader, CannonGraphicData.color, CannonGraphicData.colorTwo, CannonGraphicData.colorThree, CannonGraphicData.tiles) as Graphic_Cannon;
 				}
 			}
 			if (cannonMaterials.EnumerableNullOrEmpty() || cannonMaterials.Length != AnimationCount || forceRegen)

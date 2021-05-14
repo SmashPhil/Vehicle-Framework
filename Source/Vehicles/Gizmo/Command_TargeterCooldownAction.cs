@@ -24,7 +24,7 @@ namespace Vehicles
 			{
 				base.ProcessInput(ev);
 				SoundDefOf.Tick_Tiny.PlayOneShotOnCamera(null);
-				Targeters.CannonTargeter.BeginTargeting(targetingParams, delegate(LocalTargetInfo target)
+				CannonTargeter.Instance.BeginTargeting(targetingParams, delegate(LocalTargetInfo target)
 				{
 					turret.SetTarget(target);
 					turret.ResetPrefireTimer();

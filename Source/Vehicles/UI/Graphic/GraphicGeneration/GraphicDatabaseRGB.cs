@@ -14,17 +14,17 @@ namespace Vehicles
 
 		public static Graphic_RGB Get<T>(string path) where T : Graphic_RGB, new()
 		{
-			return GetInner<T>(new GraphicRequestRGB(typeof(T), path, ShaderDatabase.Cutout, Vector2.one, Color.white, Color.white, Color.white, null, 0, null));
+			return GetInner<T>(new GraphicRequestRGB(typeof(T), path, ShaderDatabase.Cutout, Vector2.one, Color.white, Color.white, Color.white, 1, null, 0, null));
 		}
 
-		public static Graphic_RGB Get<T>(string path, Shader shader, Vector2 drawSize, Color color, Color colorTwo, Color colorThree, GraphicDataRGB data = null, List<ShaderParameter> shaderParameters = null)
+		public static Graphic_RGB Get<T>(string path, Shader shader, Vector2 drawSize, Color color, Color colorTwo, Color colorThree, float tiles = 1, GraphicDataRGB data = null, List<ShaderParameter> shaderParameters = null)
 		{
-			return Get(typeof(T), path, shader, drawSize, color, colorTwo, colorThree, data, shaderParameters);
+			return Get(typeof(T), path, shader, drawSize, color, colorTwo, colorThree, tiles, data, shaderParameters);
 		}
 
-		public static Graphic_RGB Get(Type graphicClass, string path, Shader shader, Vector2 drawSize, Color color, Color colorTwo, Color colorThree, GraphicDataRGB data = null, List<ShaderParameter> shaderParameters = null)
+		public static Graphic_RGB Get(Type graphicClass, string path, Shader shader, Vector2 drawSize, Color color, Color colorTwo, Color colorThree, float tiles = 1, GraphicDataRGB data = null, List<ShaderParameter> shaderParameters = null)
 		{
-			GraphicRequestRGB graphicRequest = new GraphicRequestRGB(graphicClass, path, shader, drawSize, color, colorTwo, colorThree, data, 0, shaderParameters);
+			GraphicRequestRGB graphicRequest = new GraphicRequestRGB(graphicClass, path, shader, drawSize, color, colorTwo, colorThree, tiles, data, 0, shaderParameters);
 			if (graphicRequest.graphicClass == typeof(Graphic_Vehicle))
 			{
 				return GetInner<Graphic_Vehicle>(graphicRequest);

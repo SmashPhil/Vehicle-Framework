@@ -100,7 +100,7 @@ namespace Vehicles
 		{
 			if(__result is false)
 			{
-				if (Targeters.LandingTargeter.IsTargeting && Current.Game.CurrentMap == ___map)
+				if (LandingTargeter.Instance.IsTargeting && Current.Game.CurrentMap == ___map)
 				{
 					__result = true;
 					return;

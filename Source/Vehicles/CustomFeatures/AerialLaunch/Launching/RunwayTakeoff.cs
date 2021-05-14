@@ -241,7 +241,7 @@ namespace Vehicles
 					{
 						Current.Game.CurrentMap = parent.Map;
 						CameraJumper.TryHideWorld();
-						Targeters.LandingTargeter.BeginTargeting(vehicle, protocol, delegate (LocalTargetInfo target, Rot4 rot)
+						LandingTargeter.Instance.BeginTargeting(vehicle, protocol, delegate (LocalTargetInfo target, Rot4 rot)
 						{
 							vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, this, target.Cell, rot));
 						}, null, null, null, vehicle.VehicleDef.rotatable && protocol.landingProperties.forcedRotation is null);
@@ -274,7 +274,7 @@ namespace Vehicles
 			CameraJumper.TryJump(CameraJumper.GetWorldTarget(vehicle));
 			Find.WorldSelector.ClearSelection();
 			int tile = vehicle.Map.Tile;
-			Targeters.LaunchTargeter.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseWorldTarget), vehicle.Map.Tile, true, VehicleTex.TargeterMouseAttachment, true, null, 
+			LaunchTargeter.Instance.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseWorldTarget), vehicle.Map.Tile, true, VehicleTex.TargeterMouseAttachment, true, null, 
 				(GlobalTargetInfo target, List<int> path, float fuelCost) => TargetingLabelGetter(target, tile, path, fuelCost));
 		}
 

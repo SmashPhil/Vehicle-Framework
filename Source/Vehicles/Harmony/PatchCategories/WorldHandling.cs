@@ -250,7 +250,7 @@ namespace Vehicles
 
 		public static bool ForcedTargetingDontShowWorld(ref bool __result)
 		{
-			if (Targeters.LandingTargeter.ForcedTargeting)
+			if (LandingTargeter.Instance.ForcedTargeting)
 			{
 				__result = false;
 				return false;
@@ -260,7 +260,7 @@ namespace Vehicles
 
 		public static bool ForcedTargetingDontToggleWorld()
 		{
-			if (Targeters.LandingTargeter.ForcedTargeting)
+			if (LandingTargeter.Instance.ForcedTargeting)
 			{
 				SoundDefOf.ClickReject.PlayOneShotOnCamera(null);
 				Messages.Message("MustTargetLanding".Translate(), MessageTypeDefOf.RejectInput);
@@ -272,17 +272,17 @@ namespace Vehicles
 		/* -------------------- Launch Targeter -------------------- */
 		public static void WorldTargeterUpdate()
 		{
-			Targeters.LaunchTargeter.TargeterUpdate();
+			Targeters.UpdateWorldTargeters();
 		}
 
 		public static void WorldTargeterOnGUI()
 		{
-			Targeters.LaunchTargeter.TargeterOnGUI();
+			Targeters.OnGUIWorldTargeters();
 		}
 
 		public static void WorldTargeterProcessInputEvents()
 		{
-			Targeters.LaunchTargeter.ProcessInputEvents();
+			Targeters.ProcessWorldTargeterInputEvents();
 		}
 
 		/* --------------------------------------------------------- */

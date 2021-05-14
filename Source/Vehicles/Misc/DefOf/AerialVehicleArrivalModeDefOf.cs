@@ -14,8 +14,6 @@ namespace Vehicles
 
 		public static AerialVehicleArrivalModeDef TargetedLanding;
 
-		public static AerialVehicleArrivalModeDef Strafe;
-
 		static AerialVehicleArrivalModeDefOf()
 		{
 			DefOfHelper.EnsureInitializedInCtor(typeof(AerialVehicleArrivalModeDefOf));

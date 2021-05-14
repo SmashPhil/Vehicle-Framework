@@ -382,29 +382,6 @@ namespace Vehicles
 				}
 			} 
 		}
-		
-		public float GetRelativeAngle(float mapDirectionalAngle)
-		{
-			switch(Vehicle.Rotation.AsInt)
-			{
-				case 1:
-					if (Vehicle.CalculateAngle() != 0)
-					{
-						return mapDirectionalAngle - (90 + Vehicle.CalculateAngle());
-					}
-					return mapDirectionalAngle - 90;
-				case 2:
-					return mapDirectionalAngle - 180;
-				case 3:
-					if (Vehicle.CalculateAngle() != 0)
-					{
-						return mapDirectionalAngle - (270 + Vehicle.CalculateAngle());
-					}
-					return mapDirectionalAngle - 270;
-				default:
-					return mapDirectionalAngle;
-			}
-		}
 
 		public override void PostSpawnSetup(bool respawningAfterLoad)
 		{

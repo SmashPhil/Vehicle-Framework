@@ -361,6 +361,15 @@ namespace Vehicles
 		}
 
 		/// <summary>
+		/// Set Tick Count for manual control over skyfaller time
+		/// </summary>
+		/// <param name="ticks"></param>
+		public virtual void SetTickCount(int ticks)
+		{
+			ticksPassed = ticks;
+		}
+
+		/// <summary>
 		/// Initialize variables and setup for animation
 		/// </summary>
 		public virtual void PreAnimationSetup()

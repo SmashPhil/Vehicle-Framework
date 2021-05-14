@@ -19,7 +19,7 @@ namespace Vehicles
 		public override void PreOptionChosen(FloatMenuOption opt)
 		{
 			base.PreOptionChosen(opt);
-			Targeters.LaunchTargeter.StopTargeting();
+			LaunchTargeter.Instance.StopTargeting();
 		}
 	}
 }

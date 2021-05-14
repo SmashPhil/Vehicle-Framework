@@ -69,11 +69,8 @@ namespace Vehicles
 
 		public override void DrawExtraOnGUI(Rect rect)
 		{
-			Rect displayRect = rect;
-			rect.width = 1f;
-			rect.height = 1f;
-			parent.DrawCannonTextures(displayRect, cannonsUnlocked.Keys.OrderBy(c => c.drawLayer), parent.pattern, true, parent.DrawColor, parent.DrawColorTwo, parent.DrawColorThree);
-			parent.DrawCannonTextures(displayRect, parent.CompUpgradeTree.upgradeList.Where(x => x is CannonUpgrade && x.upgradeActive && !cannonsUnlocked.Keys.ToList().NullOrEmpty())
+			parent.DrawCannonTextures(rect, cannonsUnlocked.Keys.OrderBy(c => c.drawLayer), parent.pattern, true, parent.DrawColor, parent.DrawColorTwo, parent.DrawColorThree);
+			parent.DrawCannonTextures(rect, parent.CompUpgradeTree.upgradeList.Where(x => x is CannonUpgrade && x.upgradeActive && !cannonsUnlocked.Keys.ToList().NullOrEmpty())
 				.Cast<CannonUpgrade>().SelectMany(y => y.cannonsUnlocked.Keys).OrderBy(o => o.drawLayer), parent.pattern, true, parent.DrawColor, parent.DrawColorTwo, parent.DrawColorThree);
 		}
 

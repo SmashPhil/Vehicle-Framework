@@ -29,11 +29,10 @@ namespace Vehicles
 		/// Calculate angle of Vehicle
 		/// </summary>
 		/// <param name="pawn"></param>
-		public static float CalculateAngle(this VehiclePawn pawn)
+		public static float CalculateAngle(this VehiclePawn vehicle, out bool northSouthRotation)
 		{
-			if (pawn is null) return 0f;
-			VehiclePawn vehicle = pawn as VehiclePawn;
-
+			northSouthRotation = false;
+			if (vehicle is null) return 0f;
 			if (vehicle.vPather.Moving)
 			{
 				IntVec3 c = vehicle.vPather.nextCell - vehicle.Position;
@@ -57,6 +56,11 @@ namespace Vehicles
 				{
 					vehicle.Angle = 0f;
 				}
+			}
+			if (vehicle.VehicleGraphic.EastDiagonalRotated && (vehicle.FullRotation == Rot8.NorthEast || vehicle.FullRotation == Rot8.SouthEast) ||
+				(vehicle.VehicleGraphic.WestDiagonalRotated && (vehicle.FullRotation == Rot8.NorthWest || vehicle.FullRotation == Rot8.SouthWest)))
+			{
+				northSouthRotation = true;
 			}
 			return vehicle.Angle;
 		}

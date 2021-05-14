@@ -10,18 +10,11 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class LaunchTargeter
+	public class LaunchTargeter : BaseWorldTargeter
 	{
 		private const float BaseFeedbackTexSize = 0.8f;
 
-		private VehiclePawn vehicle;
-		private AerialVehicleInFlight aerialVehicle;
 		private Func<GlobalTargetInfo, float, bool> action;
-		private bool canTargetTiles;
-		private Vector3 originOnMap;
-		private Texture2D mouseAttachment;
-		public bool closeWorldTabWhenFinished;
-		private Action onUpdate;
 		private Func<GlobalTargetInfo, List<int>, float, string> extraLabelGetter;
 
 		public LaunchTargeter()
@@ -29,18 +22,20 @@ namespace Vehicles
 			FlightPath = new List<int>();
 		}
 
+		public static LaunchTargeter Instance { get; private set; }
+
 		public static float TotalDistance { get; private set; }
 		public static float TotalFuelCost { get; private set; }
 		public static List<int> FlightPath { get; private set; }
 
-		public bool IsTargeting => action != null;
+		public override bool IsTargeting => action != null;
 
 		public void BeginTargeting(VehiclePawn vehicle, Func<GlobalTargetInfo, float, bool> action, int origin, bool canTargetTiles, Texture2D mouseAttachment = null, bool closeWorldTabWhenFinished = false, Action onUpdate = null, 
 			Func<GlobalTargetInfo, List<int>, float, string> extraLabelGetter = null)
 		{
 			this.vehicle = vehicle;
 			this.action = action;
-			this.originOnMap = Find.WorldGrid.GetTileCenter(origin);
+			originOnMap = Find.WorldGrid.GetTileCenter(origin);
 			this.canTargetTiles = canTargetTiles;
 			this.mouseAttachment = mouseAttachment;
 			this.closeWorldTabWhenFinished = closeWorldTabWhenFinished;
@@ -67,7 +62,7 @@ namespace Vehicles
 			TotalFuelCost = 0;
 		}
 
-		public void StopTargeting()
+		public override void StopTargeting()
 		{
 			if (closeWorldTabWhenFinished)
 			{
@@ -82,7 +77,7 @@ namespace Vehicles
 			aerialVehicle = null;
 		}
 
-		public void ProcessInputEvents()
+		public override void ProcessInputEvents()
 		{
 			if (Event.current.type == EventType.MouseDown)
 			{
@@ -143,7 +138,7 @@ namespace Vehicles
 			}
 		}
 
-		public void TargeterOnGUI()
+		public override void TargeterOnGUI()
 		{
 			if (IsTargeting)
 			{
@@ -200,7 +195,7 @@ namespace Vehicles
 			}
 		}
 
-		public void TargeterUpdate()
+		public override void TargeterUpdate()
 		{
 			if (IsTargeting)
 			{
@@ -284,27 +279,18 @@ namespace Vehicles
 			return worldObjectsUnderMouse.Any() && o == worldObjectsUnderMouse[0];
 		}
 
-		private GlobalTargetInfo CurrentTargetUnderMouse()
+		public void CostAndDistanceCalculator(out float fuelCost, out float distance)
 		{
-			if (!IsTargeting)
+			fuelCost = 0;
+			distance = 0;
+			Vector3 start = originOnMap;
+			foreach (int tile in FlightPath)
 			{
-				return GlobalTargetInfo.Invalid;
+				float nodeDistance = Ext_Math.SphericalDistance(start, Find.WorldGrid.GetTileCenter(tile));
+				fuelCost += vehicle.CompVehicleLauncher.FuelNeededToLaunchAtDist(nodeDistance);
+				distance += nodeDistance;
+				start = Find.WorldGrid.GetTileCenter(tile);
 			}
-			List<WorldObject> list = GenWorldUI.WorldObjectsUnderMouse(Verse.UI.MousePositionOnUI);
-			if (list.Any())
-			{
-				return list[0];
-			}
-			if (!canTargetTiles)
-			{
-				return GlobalTargetInfo.Invalid;
-			}
-			int num = GenWorld.MouseTile(false);
-			if (num >= 0)
-			{
-				return new GlobalTargetInfo(num);
-			}
-			return GlobalTargetInfo.Invalid;
 		}
 
 		public static void DrawTravelPoint(Vector3 start, Vector3 end, Material material = null)
@@ -329,18 +315,9 @@ namespace Vehicles
 			}
 		}
 
-		public void CostAndDistanceCalculator(out float fuelCost, out float distance)
+		public override void PostInit()
 		{
-			fuelCost = 0;
-			distance = 0;
-			Vector3 start = originOnMap;
-			foreach (int tile in FlightPath)
-			{
-				float nodeDistance = Ext_Math.SphericalDistance(start, Find.WorldGrid.GetTileCenter(tile));
-				fuelCost += vehicle.CompVehicleLauncher.FuelNeededToLaunchAtDist(nodeDistance);
-				distance += nodeDistance;
-				start = Find.WorldGrid.GetTileCenter(tile);
-			}
+			Instance = this;
 		}
 	}
 }

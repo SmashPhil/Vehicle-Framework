@@ -50,6 +50,7 @@ namespace Vehicles
 		public ThingDef skyfallerLeaving;
 		public ThingDef skyfallerIncoming;
 		public ThingDef skyfallerCrashing;
+		public ThingDef skyfallerFlyOver;
 
 		public CompProperties_VehicleLauncher()
 		{

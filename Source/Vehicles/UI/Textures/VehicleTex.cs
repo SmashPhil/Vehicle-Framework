@@ -75,6 +75,8 @@ namespace Vehicles
 
 		public static readonly Texture2D ColorHue = ContentFinder<Texture2D>.Get("UI/ColorTools/ColorHue");
 
+		public static readonly Texture2D BlankPattern = ContentFinder<Texture2D>.Get("Graphics/Patterns/Default/Blank");
+
 		public static readonly Material LandingTargeterMat = MaterialPool.MatFrom("UI/Icons/LandingTargeter", ShaderDatabase.Transparent);
 
 		public static readonly Material RangeCircle_ExtraWide = MaterialPool.MatFrom("UI/RangeField_ExtraWide", ShaderDatabase.MoteGlow);

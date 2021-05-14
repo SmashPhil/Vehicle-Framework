@@ -105,7 +105,7 @@ namespace Vehicles
 			var graphicData = new GraphicDataRGB();
 			graphicData.CopyFrom(bodyGraphicData);
 			graphicInt = graphicData.Graphic as Graphic_Vehicle;
-			selectedVehicleTex = ContentFinder<Texture2D>.Get(bodyGraphicData.texPath + "_north", true);
+			selectedVehicleTex = graphicInt.TexAt(Rot8.North);
 		}
 
 		private static void InitializeSections()

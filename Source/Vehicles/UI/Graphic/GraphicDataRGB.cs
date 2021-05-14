@@ -10,6 +10,7 @@ namespace Vehicles
 {
 	public class GraphicDataRGB : GraphicData
 	{
+		public float tiles = 1;
 		public Color colorThree = Color.white;
 		public PatternDef pattern;
 
@@ -54,7 +55,7 @@ namespace Vehicles
 				cutout = RGBShaderTypeDefOf.CutoutComplexRGB;
 			}
 			Shader shader = cutout.Shader;
-			cachedGraphic = GraphicDatabaseRGB.Get(graphicClass, texPath, shader, drawSize, color, colorTwo, colorThree, this, shaderParameters);
+			cachedGraphic = GraphicDatabaseRGB.Get(graphicClass, texPath, shader, drawSize, color, colorTwo, colorThree, tiles, this, shaderParameters);
 		}
 	}
 }

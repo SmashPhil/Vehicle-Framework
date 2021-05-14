@@ -17,13 +17,14 @@ namespace Vehicles
 		private const float ButtonHeight = 30f;
 
 		private const float SwitchSize = 60f;
-		private const int NumberPerRow = 4;
+		private const int GridDimensionSqr = 3;
 
 		private readonly VehiclePawn vehicle;
 		private readonly Texture2D vehicleTex;
 
 		private int pageNumber;
-		private List<PatternDef> availableMasks;
+		private static List<PatternDef> availableMasks = new List<PatternDef>();
+		private static List<Material> maskMaterials = new List<Material>();
 		private int pageCount;
 		private PatternDef selectedPattern;
 
@@ -50,6 +51,7 @@ namespace Vehicles
 		public static string colorThreeHex;
 
 		public static int colorSelected = 1;
+		public static float additionalTiling = 1;
 
 		public Dialog_ColorPicker() 
 		{ 
@@ -58,7 +60,7 @@ namespace Vehicles
 		public Dialog_ColorPicker(VehiclePawn vehicle)
 		{
 			this.vehicle = vehicle;
-			vehicleTex = ContentFinder<Texture2D>.Get(this.vehicle.ageTracker.CurKindLifeStage.bodyGraphicData.texPath + "_north", true);
+			vehicleTex = vehicle.VehicleGraphic.TexAt(Rot8.North);
 
 			SetColors(vehicle.DrawColor, vehicle.DrawColorTwo, vehicle.DrawColorThree);
 			CurrentSelectedPalette = -1;
@@ -81,7 +83,8 @@ namespace Vehicles
 
 			pageNumber = 1;
 			availableMasks = DefDatabase<PatternDef>.AllDefs.Where(p => p.ValidFor(vehicle.VehicleDef)).ToList();
-			float ratio = (float)availableMasks.Count / (NumberPerRow * 3);
+			RecacheMaterials();
+			float ratio = (float)availableMasks.Count / (GridDimensionSqr * GridDimensionSqr);
 			pageCount = Mathf.CeilToInt(ratio);
 
 			ColorChart.Apply(false);
@@ -140,8 +143,14 @@ namespace Vehicles
 			DrawColorPalette(paletteRect);
 
 			Vector2 display = vehicle.VehicleDef.drawProperties.colorPickerUICoord;
-			Rect vehicleRect = new Rect(display.x, display.y, 1f, 1f);
-			RenderHelper.DrawVehicleTex(vehicleRect, vehicleTex, vehicle, selectedPattern, true, CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor);
+			Rect vehicleRect = new Rect(display.x, display.y, vehicle.VehicleDef.drawProperties.upgradeUISize.x, vehicle.VehicleDef.drawProperties.upgradeUISize.y);
+			RenderHelper.DrawVehicleTexTiled(vehicleRect, vehicleTex, vehicle, selectedPattern, true, CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, additionalTiling);
+
+			if (selectedPattern.properties.dynamicTiling)
+			{
+				Rect sliderRect = new Rect(0f, inRect.height - ButtonHeight * 3, ButtonWidth * 3, ButtonHeight);
+				additionalTiling = Widgets.HorizontalSlider(sliderRect, additionalTiling, 0, 2);
+			}
 
 			Rect buttonRect = new Rect(0f, inRect.height - ButtonHeight, ButtonWidth, ButtonHeight);
 			DoBottomButtons(buttonRect);
@@ -154,12 +163,8 @@ namespace Vehicles
 			Widgets.DrawBoxSolid(paintRect, Greyist);
 
 			Rect viewRect = paintRect;
-			viewRect.width -= 20f;
-			viewRect.x += 10f;
-
-			Vector2 uiSize = vehicle.VehicleDef.drawProperties.colorPickerUISize;
-			float downSize = ((viewRect.width) / NumberPerRow) / uiSize.x;
-			Rect displayRect = new Rect(0f, 0f, downSize, downSize);
+			viewRect = viewRect.ContractedBy(10f);
+			float gridSize = viewRect.width / GridDimensionSqr;
 
 			if (pageCount > 1)
 			{
@@ -192,17 +197,19 @@ namespace Vehicles
 			}
 
 			float num = 0f;
-			int startingIndex = (pageNumber - 1) * (NumberPerRow * 3);
-			int maxIndex = Ext_Numeric.Clamp((pageNumber * (NumberPerRow * 3)), 0, availableMasks.Count);
+			int startingIndex = (pageNumber - 1) * (GridDimensionSqr * GridDimensionSqr);
+			int maxIndex = Ext_Numeric.Clamp((pageNumber * (GridDimensionSqr * GridDimensionSqr)), 0, availableMasks.Count);
 			int iteration = 0;
+			Rect displayRect = new Rect(0, 0, gridSize, gridSize);
+
 			for (int i = startingIndex; i < maxIndex; i++, iteration++)
 			{
-				displayRect.x = viewRect.x + (iteration % NumberPerRow) * (uiSize.x * downSize); // + ((viewRect.width / 3) * (i % 3))  - ((postSize.x / 2) * (i % 3))
-				displayRect.y = viewRect.y + (Mathf.FloorToInt(iteration / NumberPerRow)) * (uiSize.y * downSize);
+				displayRect.x = viewRect.x + (iteration % GridDimensionSqr) * gridSize;
+				displayRect.y = viewRect.y + (Mathf.FloorToInt(iteration / GridDimensionSqr)) * gridSize;
 				
-				RenderHelper.DrawVehicleTex(displayRect, vehicleTex, vehicle, availableMasks[i], true, CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor);
-				Rect imageRect = new Rect(displayRect.x, displayRect.y, downSize * uiSize.x, downSize * uiSize.y);
-				if (iteration % NumberPerRow == 0)
+				GenUI.DrawTextureWithMaterial(displayRect, VehicleTex.BlankPattern, maskMaterials[i]);
+				Rect imageRect = new Rect(displayRect.x, displayRect.y, gridSize, gridSize);
+				if (iteration % GridDimensionSqr == 0)
 				{
 					num += imageRect.height;
 				}
@@ -252,7 +259,7 @@ namespace Vehicles
 			Rect reverseRect = new Rect(colorContainerRect.x + 11f, 20, SwitchSize / 2.75f, SwitchSize / 2.75f);
 			if(Widgets.ButtonImage(reverseRect, VehicleTex.ReverseIcon))
 			{
-				SetColors(CurrentColorThree.ToColor, CurrentColorOne.ToColor, CurrentColorTwo.ToColor);
+				SetColors(CurrentColorTwo.ToColor, CurrentColorThree.ToColor, CurrentColorOne.ToColor);
 			}
 			TooltipHandler.TipRegion(reverseRect, "SwapColors".Translate());
 
@@ -306,7 +313,7 @@ namespace Vehicles
 			inputRect.width = Text.CalcSize(saveText).x + 20f;
 			inputRect.x = colorContainerRect.x + colorContainerRect.width - inputRect.width - 5f;
 			
-			if(Widgets.ButtonText(inputRect, saveText))
+			if (Widgets.ButtonText(inputRect, saveText))
 			{
 				if (CurrentSelectedPalette >= 0 && CurrentSelectedPalette < ColorStorage.PaletteCount)
 				{
@@ -372,6 +379,7 @@ namespace Vehicles
 				vehicle.DrawColorTwo = CurrentColorTwo.ToColor;
 				vehicle.DrawColorThree = CurrentColorThree.ToColor;
 				vehicle.pattern = selectedPattern;
+				vehicle.tiles = additionalTiling;
 				vehicle.Notify_ColorChanged();
 				vehicle.CompCannons?.Cannons.ForEach(c => c.ResolveCannonGraphics(vehicle, true));
 				Close(true);
@@ -386,6 +394,7 @@ namespace Vehicles
 			{
 				SoundDefOf.Click.PlayOneShotOnCamera(null);
 				selectedPattern = vehicle.pattern;
+				additionalTiling = 1;
 				if (CurrentSelectedPalette >= 0)
 				{
 					var palette = VehicleMod.settings.colorStorage.colorPalette[CurrentSelectedPalette];
@@ -396,6 +405,30 @@ namespace Vehicles
 					SetColors(vehicle.DrawColor, vehicle.DrawColorTwo, vehicle.DrawColorThree);
 				}
 				
+			}
+		}
+
+		private static void RecacheMaterials()
+		{
+			maskMaterials.Clear();
+			foreach (PatternDef pattern in availableMasks)
+			{
+				MaterialRequestRGB req = new MaterialRequestRGB()
+				{
+					mainTex = VehicleTex.BlankPattern,
+					shader = RGBShaderTypeDefOf.CutoutComplexPattern.Shader,
+					properties = pattern.properties,
+					color = pattern.properties.colorOne ?? CurrentColorOne.ToColor,
+					colorTwo = pattern.properties.colorTwo ?? CurrentColorTwo.ToColor,
+					colorThree = pattern.properties.colorThree ?? CurrentColorThree.ToColor,
+					tiles = 1,
+					isSkin = pattern is SkinDef,
+					maskTex = PatternDefOf.Default[Rot8.North],
+					patternTex = pattern[Rot8.North],
+					shaderParameters = null
+				};
+				Material patMat = MaterialPoolExpanded.MatFrom(req, true);
+				maskMaterials.Add(patMat);
 			}
 		}
 
@@ -430,6 +463,7 @@ namespace Vehicles
 				Color.RGBToHSV(c.ToColor, out hue, out saturation, out value); 
 				hex = ColorToHex(c.ToColor);
 			});
+			RecacheMaterials();
 		}
 
 		public static void SetColor(Color col)
@@ -440,6 +474,7 @@ namespace Vehicles
 				hex = ColorToHex(c.ToColor);
 			});
 			Color.RGBToHSV(curColor.ToColor, out hue, out saturation, out value);
+			RecacheMaterials();
 		}
 
 		public static bool SetColor(string hex)
@@ -448,6 +483,7 @@ namespace Vehicles
 			{
 				CurrentColorOne = new ColorInt(color);
 				Color.RGBToHSV(CurrentColorOne.ToColor, out hue, out saturation, out value);
+				RecacheMaterials();
 				return true;
 			}
 			return false;
@@ -460,6 +496,7 @@ namespace Vehicles
 				c = new ColorInt(Color.HSVToRGB(h, s, b));
 				hex = ColorToHex(c.ToColor);
 			});
+			RecacheMaterials();
 		}
 	}
 }

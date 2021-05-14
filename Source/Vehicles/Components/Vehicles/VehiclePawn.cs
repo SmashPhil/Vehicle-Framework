@@ -24,6 +24,7 @@ namespace Vehicles
 		public VehicleStatHandler statHandler;
 
 		public PatternDef pattern;
+		public RetextureDef retexture;
 		private Color color1 = Color.white;
 		private Color color2 = Color.white;
 		private Color color3 = Color.white;
@@ -43,6 +44,7 @@ namespace Vehicles
 		private float armorPoints;
 		private float moveSpeedModifier;
 
+		public float tiles = 1;
 		private Graphic_Vehicle graphicInt;
 
 		private SelfOrderingList<ThingComp> cachedComps = new SelfOrderingList<ThingComp>();
@@ -248,10 +250,18 @@ namespace Vehicles
 				if (graphicInt is null)
 				{
 					var graphicData = new GraphicDataRGB();
-					graphicData.CopyFrom(ageTracker.CurKindLifeStage.bodyGraphicData as GraphicDataRGB);
+					if (retexture != null)
+					{
+						graphicData.CopyFrom(retexture.graphicData);
+					}
+					else
+					{
+						graphicData.CopyFrom(ageTracker.CurKindLifeStage.bodyGraphicData as GraphicDataRGB);
+					}
 					graphicData.color = DrawColor;
 					graphicData.colorTwo = DrawColorTwo;
 					graphicData.colorThree = DrawColorThree;
+					graphicData.tiles = tiles;
 					graphicData.pattern = pattern;
 					graphicInt = graphicData.Graphic as Graphic_Vehicle;
 				}
@@ -263,7 +273,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return pattern?.colorOne ?? color1;
+				return pattern.properties.colorOne ?? color1;
 			}
 			set
 			{
@@ -275,7 +285,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return pattern?.colorTwo ?? color2;
+				return pattern.properties.colorTwo ?? color2;
 			}
 			set
 			{
@@ -287,7 +297,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return pattern?.colorThree ?? color3;
+				return pattern.properties.colorThree ?? color3;
 			}
 			set
 			{
@@ -479,7 +489,8 @@ namespace Vehicles
 
 		public void DrawAt(Vector3 drawLoc, float angle, bool flip = false)
 		{
-			var drawVehicle = new Task(() => Drawer.renderer.RenderPawnAt(drawLoc, angle));
+			bool northSouthRotation = VehicleGraphic.EastDiagonalRotated || VehicleGraphic.WestDiagonalRotated;
+			var drawVehicle = new Task(() => Drawer.renderer.RenderPawnAt(drawLoc, angle, northSouthRotation));
 			drawVehicle.RunSynchronously();
 		}
 
@@ -706,6 +717,19 @@ namespace Vehicles
 					};
 					yield return forceCaravanLeave;
 				}
+			}
+
+			if (Prefs.DevMode)
+			{
+				yield return new Command_Action()
+				{
+					defaultLabel = "Set Pattern",
+					action = delegate ()
+					{
+						retexture = DefDatabase<RetextureDef>.GetNamed("AdvancedTransportPod_Old");
+						Notify_ColorChanged();
+					}
+				};
 			}
 		}
 
@@ -1730,8 +1754,11 @@ namespace Vehicles
 
 			Scribe_Values.Look(ref color1, "color1", Color.white);
 			Scribe_Values.Look(ref color2, "color2", Color.white);
+			Scribe_Values.Look(ref color3, "color3", Color.white);
 
+			Scribe_Values.Look(ref tiles, "tiles", 1);
 			Scribe_Defs.Look(ref pattern, "pattern");
+			Scribe_Defs.Look(ref retexture, "retexture");
 
 			Scribe_Values.Look(ref movementStatus, "movingStatus", VehicleMovementStatus.Online);
 			Scribe_Values.Look(ref navigationCategory, "navigationCategory", NavigationCategory.Opportunistic);

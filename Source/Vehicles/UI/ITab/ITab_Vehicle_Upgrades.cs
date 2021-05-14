@@ -67,8 +67,7 @@ namespace Vehicles.UI
 		{
 			get
 			{
-				//if(mainTex is null) //Redo?
-				mainTex = ContentFinder<Texture2D>.Get(SelPawnUpgrade.ageTracker.CurKindLifeStage.bodyGraphicData.texPath + "_north", true);
+				mainTex = SelPawnUpgrade.VehicleGraphic.TexAt(Rot8.North);
 				return mainTex;
 			}
 		}
@@ -313,9 +312,11 @@ namespace Vehicles.UI
 
 			Widgets.DrawLineVertical(0, TopViewPadding, screenHeight);
 			Widgets.DrawLineVertical(screenWidth - BottomDisplayedOffset - 1f, TopViewPadding, screenHeight);
-			
-			if(VehicleMod.settings.main.drawUpgradeInformationScreen)
+
+			if (VehicleMod.settings.main.drawUpgradeInformationScreen)
+			{
 				Widgets.DrawLineVertical(LeftWindowEdge, TopViewPadding, screenHeight);
+			}
 			GUI.color = lineColor;
 
 			if(VehicleMod.settings.main.drawUpgradeInformationScreen)
@@ -325,7 +326,10 @@ namespace Vehicles.UI
 					try
 					{
 						Vector2 display = SelPawnUpgrade.VehicleDef.drawProperties.upgradeUICoord;
-						RenderHelper.DrawVehicleTex(new Rect(display.x, display.y, 1, 1), VehicleTexture, SelPawnUpgrade, SelPawnUpgrade.pattern, true, SelPawnUpgrade.DrawColor, SelPawnUpgrade.DrawColorTwo, SelPawnUpgrade.DrawColorThree);
+						float UISizeX = SelPawnUpgrade.VehicleDef.drawProperties.upgradeUISize.x;
+						float UISizeY = SelPawnUpgrade.VehicleDef.drawProperties.upgradeUISize.y;
+						RenderHelper.DrawVehicleTex(new Rect(display.x, display.y, UISizeX, UISizeY), VehicleTexture, SelPawnUpgrade, 
+							SelPawnUpgrade.pattern, true, SelPawnUpgrade.DrawColor, SelPawnUpgrade.DrawColorTwo, SelPawnUpgrade.DrawColorThree);
 
 						if(VehicleMod.settings.debug.debugDrawCannonGrid)
 						{
@@ -354,11 +358,15 @@ namespace Vehicles.UI
 							GUI.color = color;
 						}
 
-						SelPawnUpgrade.CompUpgradeTree.upgradeList.Where(u => u.upgradePurchased && u.upgradeActive).ForEach(u => u.DrawExtraOnGUI(displayRect));
-						if(selectedNode != null)
-							selectedNode.DrawExtraOnGUI(displayRect);
+						SelPawnUpgrade.CompUpgradeTree.upgradeList.Where(u => u.upgradePurchased && u.upgradeActive).ForEach(u => u.DrawExtraOnGUI(new Rect(display.x, display.y, UISizeX, UISizeY)));
+						if (selectedNode != null)
+						{
+							selectedNode.DrawExtraOnGUI(new Rect(display.x, display.y, UISizeX, UISizeY));
+						}
 						if (highlightedPreMetNode != null)
-							highlightedPreMetNode.DrawExtraOnGUI(displayRect);
+						{
+							highlightedPreMetNode.DrawExtraOnGUI(new Rect(display.x, display.y, UISizeX, UISizeY));
+						}
 					}
 					catch(Exception ex)
 					{

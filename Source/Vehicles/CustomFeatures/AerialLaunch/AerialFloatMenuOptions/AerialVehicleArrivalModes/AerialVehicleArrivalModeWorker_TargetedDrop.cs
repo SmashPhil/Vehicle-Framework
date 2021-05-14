@@ -12,7 +12,7 @@ namespace Vehicles
 		{
 			LaunchProtocol protocol = aerialVehicle.vehicle.CompVehicleLauncher.launchProtocols.FirstOrDefault();
 			CameraJumper.TryJump(map.Center, map);
-			Targeters.LandingTargeter.BeginTargeting(aerialVehicle.vehicle, aerialVehicle.vehicle.CompVehicleLauncher.launchProtocols.FirstOrDefault(), map, delegate (LocalTargetInfo target, Rot4 rot)
+			LandingTargeter.Instance.BeginTargeting(aerialVehicle.vehicle, aerialVehicle.vehicle.CompVehicleLauncher.launchProtocols.FirstOrDefault(), map, delegate (LocalTargetInfo target, Rot4 rot)
 			{
 				VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(aerialVehicle.vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
 				skyfaller.vehicle = aerialVehicle.vehicle;

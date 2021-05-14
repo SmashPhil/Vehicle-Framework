@@ -8,26 +8,25 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class LandingTargeter
+	public class LandingTargeter : BaseTargeter
 	{
 		public const int PingPongTickLength = 100;
 
 		private static float middleMouseDownTime;
 		private static float ticksOpen;
 
-		private VehiclePawn vehicle;
 		private LaunchProtocol launchProtocol;
 		private Action<LocalTargetInfo, Rot4> action;
 		private Rot4 landingRotation;
 		private LocalTargetInfo cachedTarget;
-		private Action actionWhenFinished;
-		private Texture2D mouseAttachment;
 		private Func<LocalTargetInfo, bool> targetValidator;
 		private bool allowRotating;
 
+		public static LandingTargeter Instance { get; private set; }
+
 		public bool ForcedTargeting { get; set; }
 
-		public bool IsTargeting => action != null;
+		public override bool IsTargeting => action != null;
 
 		public void BeginTargeting(VehiclePawn vehicle, LaunchProtocol launchProtocol, Map map, Action<LocalTargetInfo, Rot4> action, Func<LocalTargetInfo, bool> targetValidator = null, Action actionWhenFinished = null, Texture2D mouseAttachment = null, bool allowRotating = false, bool forcedTargeting = false)
 		{
@@ -49,7 +48,7 @@ namespace Vehicles
 			ForcedTargeting = forcedTargeting;
 		}
 
-		public void StopTargeting()
+		public override void StopTargeting()
 		{
 			if (actionWhenFinished != null)
 			{
@@ -62,73 +61,64 @@ namespace Vehicles
 			ForcedTargeting = false;
 		}
 
-		public void ProcessInputEvents()
+		public override void ProcessInputEvents()
 		{
-			if (IsTargeting)
+			HandleRotationShortcuts();
+			if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
 			{
-				HandleRotationShortcuts();
-				if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
+				LocalTargetInfo localTargetInfo = CurrentTargetUnderMouse();
+				if (action != null)
 				{
-					LocalTargetInfo localTargetInfo = CurrentTargetUnderMouse();
-					if (action != null)
+					if (targetValidator != null)
 					{
-						if (targetValidator != null)
-						{
-							if (targetValidator(localTargetInfo) && !MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation))
-							{
-								action(localTargetInfo, landingRotation);
-								StopTargeting();
-							}
-						}
-						else if (localTargetInfo.IsValid)
+						if (targetValidator(localTargetInfo) && !MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation))
 						{
 							action(localTargetInfo, landingRotation);
 							StopTargeting();
 						}
 					}
-					SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
-					Event.current.Use();
-				}
-				if ((Event.current.type == EventType.MouseDown && Event.current.button == 1) || KeyBindingDefOf.Cancel.KeyDownEvent)
-				{
-					if (ForcedTargeting)
+					else if (localTargetInfo.IsValid)
 					{
-						SoundDefOf.ClickReject.PlayOneShotOnCamera(null);
-						Messages.Message("MustTargetLanding".Translate(), MessageTypeDefOf.RejectInput);
-						Event.current.Use();
-						return;
+						action(localTargetInfo, landingRotation);
+						StopTargeting();
 					}
-					SoundDefOf.CancelMode.PlayOneShotOnCamera(null);
-					StopTargeting();
-					Event.current.Use();
 				}
+				SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
+				Event.current.Use();
 			}
-		}
-
-		public void TargeterOnGUI()
-		{
-			if (IsTargeting)
+			if ((Event.current.type == EventType.MouseDown && Event.current.button == 1) || KeyBindingDefOf.Cancel.KeyDownEvent)
 			{
-				DoExtraGuiControls();
-				GenUI.DrawMouseAttachment(mouseAttachment ?? CompLaunchable.TargeterMouseAttachment);
-			}
-		}
-
-		public void TargeterUpdate()
-		{
-			if (IsTargeting && action != null)
-			{
-				ticksOpen++;
-				LocalTargetInfo localTargetInfo = CurrentTargetUnderMouse();
-				if (localTargetInfo.IsValid)
+				if (ForcedTargeting)
 				{
-					IntVec3 cell = localTargetInfo.Cell;
-					Vector3 position = new Vector3(cell.x, AltitudeLayer.Building.AltitudeFor(), cell.z).ToIntVec3().ToVector3Shifted();
-					Color color = MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation) || 
-						(targetValidator != null && !targetValidator(localTargetInfo)) ? Designator_Place.CannotPlaceColor : Designator_Place.CanPlaceColor;
-					color.a = (Mathf.PingPong(ticksOpen, PingPongTickLength / 1.5f) / PingPongTickLength) + 0.25f;
-					GhostDrawer.DrawGhostThing(cell, landingRotation, vehicle.VehicleDef.buildDef, vehicle.VehicleDef.buildDef.graphic, color, AltitudeLayer.Blueprint);
+					SoundDefOf.ClickReject.PlayOneShotOnCamera(null);
+					Messages.Message("MustTargetLanding".Translate(), MessageTypeDefOf.RejectInput);
+					Event.current.Use();
+					return;
 				}
+				SoundDefOf.CancelMode.PlayOneShotOnCamera(null);
+				StopTargeting();
+				Event.current.Use();
+			}
+		}
+
+		public override void TargeterOnGUI()
+		{
+			DoExtraGuiControls();
+			GenUI.DrawMouseAttachment(mouseAttachment ?? CompLaunchable.TargeterMouseAttachment);
+		}
+
+		public override void TargeterUpdate()
+		{
+			ticksOpen++;
+			LocalTargetInfo localTargetInfo = CurrentTargetUnderMouse();
+			if (localTargetInfo.IsValid)
+			{
+				IntVec3 cell = localTargetInfo.Cell;
+				Vector3 position = new Vector3(cell.x, AltitudeLayer.Building.AltitudeFor(), cell.z).ToIntVec3().ToVector3Shifted();
+				Color color = MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation) ||
+					(targetValidator != null && !targetValidator(localTargetInfo)) ? Designator_Place.CannotPlaceColor : Designator_Place.CanPlaceColor;
+				color.a = (Mathf.PingPong(ticksOpen, PingPongTickLength / 1.5f) / PingPongTickLength) + 0.25f;
+				GhostDrawer.DrawGhostThing(cell, landingRotation, vehicle.VehicleDef.buildDef, vehicle.VehicleDef.buildDef.graphic, color, AltitudeLayer.Blueprint);
 			}
 		}
 
@@ -212,18 +202,19 @@ namespace Vehicles
 			}
 		}
 
-		private LocalTargetInfo CurrentTargetUnderMouse()
+		protected override LocalTargetInfo CurrentTargetUnderMouse()
 		{
-			if (!IsTargeting)
-			{
-				return LocalTargetInfo.Invalid;
-			}
-			LocalTargetInfo target = Verse.UI.MouseCell();
+			LocalTargetInfo target = base.CurrentTargetUnderMouse();
 			if (!cachedTarget.IsValid || cachedTarget != target)
 			{
 				RecacheLandingPad(target);
 			}
 			return target;
+		}
+
+		public override void PostInit()
+		{
+			Instance = this;
 		}
 	}
 }

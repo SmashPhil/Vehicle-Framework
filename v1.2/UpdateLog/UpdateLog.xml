@@ -5,7 +5,7 @@
   <description>
 [anchor]MiddleCenter[/anchor][b]Vehicles - 1.2.3.2[/b][anchor]MiddleLeft[/anchor]
 [title]Bug Fixes[/title][font]Tiny[/font]
-Fixed bug where vehicles would not show up in the From Vehicle Caravan dialog window.
+Fixed bug where vehicles would not show up in the Form Vehicle Caravan dialog window.
 
 Fixed bug where vehicle icons in the Form Vehicle Caravan dialog window would attempt to generate a non-RGB graphic request.
 
@@ -21,7 +21,13 @@ Fixed bug where Hot Air Balloon would cause RimWorld to freeze upon leaving the 
 
 Fixed bug where shuttles would occassionally not be able to take additional orders once landing on the world map.
 
+Fixed bug where turrets would not rotate faster with 2-4x tick speed.
 
+Fixed bug where shuttles (when zoomed in) would not use the right shader for sunlight driven lighting
+
+Fixed bug where color3 was not saving for vehicles
+
+Fixed bug where VehicleTurrets would cause an r_LogEntry root error for unresolvable grammar when the projectile hit a target.
 [title]New Additions[/title]
 Added TextMeshPro rendering for vehicle path costs on the world map. This is an option in the Debug ModSettings tab for visualization of final path costs for a group of vehicles (through the RoutePlanner and FormCaravan window).
 
@@ -35,11 +41,14 @@ Added groupKey field to VehicleTurret to allow grouping of turrets. Will consolo
 
 Added laser projectiles
 
+Added SkinDef for patterns that are unaffected by the color picker (essentially an image overlay rather than an RGB mask)
+
+Added RetextureDef to allow for different textures of a vehicle exposed to the ColorPicker for more customization
 [title]Additional Changes[/title]
-Modified vehicle descriptions to better match their role.
+Modified vehicle descriptions
 
+Modified Graphic_RGB, Graphic_Vehicle, and PatternDef to allow for rotating / flipping of non-vanilla rotations in texture generation. This greatly reduces texture files required for vehicles by allowing you to not have to specify NE, SE, NW, SW and only include 1 texture for generic patterns
 [title]Final Notes[/title]
-
 Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.)
   </description>
   <actionOnUpdate></actionOnUpdate>

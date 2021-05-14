@@ -36,6 +36,7 @@ namespace Vehicles
 			color = req.color;
 			colorTwo = req.colorTwo;
 			colorThree = req.colorThree;
+			tiles = req.tiles;
 			drawSize = req.drawSize;
 			var files = ContentFinder<Texture2D>.GetAllInFolder(req.path);
 
@@ -74,7 +75,7 @@ namespace Vehicles
 			{
 				string fullPath = string.Concat(req.path, '/', list[i].name);
 				graphicPaths[i] = fullPath;
-				subGraphics[i] = GraphicDatabaseRGB.Get<Graphic_Cannon>(fullPath, req.shader, req.drawSize, req.color, req.colorTwo, req.colorThree, DataRGB, req.shaderParameters) as Graphic_Cannon;
+				subGraphics[i] = GraphicDatabaseRGB.Get<Graphic_Cannon>(fullPath, req.shader, req.drawSize, req.color, req.colorTwo, req.colorThree, req.tiles, DataRGB, req.shaderParameters) as Graphic_Cannon;
 			}
 		}
 
@@ -88,11 +89,13 @@ namespace Vehicles
 			{
 				mainTex = mainTex,
 				shader = req.shader,
-				color = color,
-				colorTwo = colorTwo,
-				colorThree = colorThree,
-				replaceTex = pattern.replaceTex,
-				maskTex = req.shader.SupportsMaskTex() || req.shader.SupportsRGBMaskTex() ? maskTex : null,
+				properties = pattern.properties,
+				color = pattern.properties.colorOne ?? req.color,
+				colorTwo = pattern.properties.colorTwo ?? req.colorTwo,
+				colorThree = pattern.properties.colorThree ?? req.colorThree,
+				tiles = req.tiles,
+				isSkin = pattern is SkinDef,
+				maskTex = maskTex,
 				patternTex = pattern?[Rot8.North],
 				shaderParameters = req.shaderParameters
 			};
@@ -100,7 +103,7 @@ namespace Vehicles
 			return mats;
 		}
 
-		public Graphic SubGraphicCycle(int index, Shader newShader, Color colorOne, Color colorTwo, Color colorThree)
+		public Graphic SubGraphicCycle(int index, Shader newShader, Color colorOne, Color colorTwo, Color colorThree, float tiles = 1)
 		{
 			if(index > (graphicPaths.Length - 1) )
 			{
@@ -110,7 +113,7 @@ namespace Vehicles
 					index -= (graphicPaths.Length - 1);
 				}
 			}
-			return GraphicDatabaseRGB.Get<Graphic_Cannon>(graphicPaths[index], newShader, drawSize, colorOne, colorTwo, colorThree, DataRGB);
+			return GraphicDatabaseRGB.Get<Graphic_Cannon>(graphicPaths[index], newShader, drawSize, colorOne, colorTwo, colorThree, tiles, DataRGB);
 		}
 
 		public Material SubMaterialCycle(PatternDef pattern, int index)
@@ -131,9 +134,9 @@ namespace Vehicles
 			return GraphicDatabase.Get<Graphic_CannonAnimate>(path, newShader, drawSize, newColor, newColorTwo, data);
 		}
 
-		public override Graphic_RGB GetColoredVersion(Shader shader, Color colorOne, Color colorTwo, Color colorThree)
+		public override Graphic_RGB GetColoredVersion(Shader shader, Color colorOne, Color colorTwo, Color colorThree, float tiles = 1)
 		{
-			return GraphicDatabaseRGB.Get<Graphic_CannonAnimate>(path, shader, drawSize, colorOne, colorTwo, colorThree, DataRGB);
+			return GraphicDatabaseRGB.Get<Graphic_CannonAnimate>(path, shader, drawSize, colorOne, colorTwo, colorThree, tiles, DataRGB);
 		}
 
 		public override string ToString()

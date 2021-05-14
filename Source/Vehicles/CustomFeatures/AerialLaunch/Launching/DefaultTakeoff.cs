@@ -145,7 +145,7 @@ namespace Vehicles
 						{
 							Current.Game.CurrentMap = parent.Map;
 							CameraJumper.TryHideWorld();
-							Targeters.LandingTargeter.BeginTargeting(vehicle, protocol, delegate (LocalTargetInfo target, Rot4 rot)
+							LandingTargeter.Instance.BeginTargeting(vehicle, protocol, delegate (LocalTargetInfo target, Rot4 rot)
 							{
 								if (vehicle.Spawned)
 								{
@@ -180,18 +180,20 @@ namespace Vehicles
 						{
 							Current.Game.CurrentMap = parent.Map;
 							CameraJumper.TryHideWorld();
-							Targeters.StrafeTargeter.BeginTargeting(vehicle, protocol, delegate (IntVec3 start, IntVec3 end)
+							StrafeTargeter.Instance.BeginTargeting(vehicle, protocol, delegate (IntVec3 start, IntVec3 end)
 							{
 								if (vehicle.Spawned)
 								{
-									vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_StrafeMap(vehicle, parent, AerialVehicleArrivalModeDefOf.Strafe, start, end));
+									Current.Game.CurrentMap = vehicle.Map;
+									vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_StrafeMap(vehicle, parent, start, end));
 								}
 								else
 								{
+									CameraJumper.TryShowWorld();
 									AerialVehicleInFlight aerial = Find.World.GetCachedWorldComponent<VehicleWorldObjectsHolder>().AerialVehicleObject(vehicle);
-									aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_StrafeMap(vehicle, parent, AerialVehicleArrivalModeDefOf.Strafe, start, end));
+									aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_StrafeMap(vehicle, parent, start, end));
 								}
-							});//Add additional fields
+							}, null, null, null, false);
 						}, MenuOptionPriority.Default, null, null, 0f, null, null);
 					}
 				}
@@ -241,7 +243,7 @@ namespace Vehicles
 			CameraJumper.TryJump(CameraJumper.GetWorldTarget(vehicle));
 			Find.WorldSelector.ClearSelection();
 			int tile = vehicle.Map.Tile;
-			Targeters.LaunchTargeter.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseWorldTarget), vehicle.Map.Tile, true, VehicleTex.TargeterMouseAttachment, true, null, 
+			LaunchTargeter.Instance.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseWorldTarget), vehicle.Map.Tile, true, VehicleTex.TargeterMouseAttachment, true, null, 
 				(GlobalTargetInfo target, List<int> path, float fuelCost) => TargetingLabelGetter(target, tile, path, fuelCost));
 		}
 

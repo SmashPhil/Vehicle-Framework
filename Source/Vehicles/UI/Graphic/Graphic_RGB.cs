@@ -11,13 +11,19 @@ namespace Vehicles
 
 		protected bool westFlipped;
 		protected bool eastFlipped;
-		protected bool eastDiagonalFlipped;
-		protected bool westDiagonalFlipped;
+		protected bool eastRotated;
+		protected bool southRotated;
+		protected bool eastDiagonalRotated;
+		protected bool westDiagonalRotated;
 
 		protected float drawRotatedExtraAngleOffset;
 
 		public Color colorThree = Color.white;
+		public float tiles = 1;
 
+		/// <summary>
+		/// Needs to be initialized and filled in <see cref="Init(GraphicRequestRGB, bool)"/> before mask data is generated
+		/// </summary>
 		protected Texture2D[] textureArray;
 
 		//folderName : <filePath, texture/mat array>
@@ -28,7 +34,13 @@ namespace Vehicles
 
 		public override bool WestFlipped => westFlipped;
 		public override bool EastFlipped => eastFlipped;
+		public virtual bool EastRotated => eastRotated;
+		public virtual bool SouthRotated => southRotated;
+		public virtual bool EastDiagonalRotated => eastDiagonalRotated;
+		public virtual bool WestDiagonalRotated => westDiagonalRotated;
+
 		public override bool ShouldDrawRotated => (data is null || data.drawRotated) && (MatEast == MatNorth || MatWest == MatNorth);
+
 		public override float DrawRotatedExtraAngleOffset => drawRotatedExtraAngleOffset;
 
 		public virtual GraphicDataRGB DataRGB
@@ -42,6 +54,64 @@ namespace Vehicles
 				SmashLog.ErrorOnce($"Unable to retrieve <field>DataRGB</field> for <type>{GetType()}</type>. GraphicData type = {data?.GetType().ToString() ?? "Null"}", GetHashCode());
 				return null;
 			}
+		}
+
+		public virtual Texture2D TexAt(Rot8 rot)
+		{
+			return textureArray[rot.AsInt];
+		}
+
+		public override Mesh MeshAt(Rot4 rot)
+		{
+			Vector2 vector = drawSize;
+			if (rot.IsHorizontal && !ShouldDrawRotated)
+			{
+				vector = vector.Rotated();
+			}
+			if ((rot == Rot4.West && WestFlipped) || (rot == Rot4.East && EastFlipped))
+			{
+				if (EastRotated)
+				{
+					return RenderHelper.NewPlaneMesh(vector, rot.AsInt);
+				}
+				return MeshPool.GridPlaneFlip(vector);
+			}
+			if ((EastRotated && rot == Rot4.East) || (SouthRotated && rot == Rot4.South))
+			{
+				return RenderHelper.NewPlaneMesh(vector, rot.AsInt);
+			}
+			return MeshPool.GridPlane(vector);
+		}
+
+		public virtual Mesh MeshAtFull(Rot8 rot)
+		{
+			if (!rot.IsDiagonal)
+			{
+				return MeshAt(rot);
+			}
+			if (EastDiagonalRotated)
+			{
+				if (rot == Rot8.NorthEast)
+				{
+					return MeshAt(Rot8.North);
+				}
+				if (rot == Rot8.SouthEast)
+				{
+					return MeshAt(Rot8.South);
+				}
+			}
+			if (WestDiagonalRotated)
+			{
+				if (rot == Rot8.NorthWest)
+				{
+					return MeshAt(Rot8.North);
+				}
+				if (rot == Rot8.SouthWest)
+				{
+					return MeshAt(Rot8.South);
+				}
+			}
+			return MeshAt(rot);
 		}
 
 		public override void Init(GraphicRequest req)
@@ -65,6 +135,7 @@ namespace Vehicles
 			color = req.color;
 			colorTwo = req.colorTwo;
 			colorThree = req.colorThree;
+			tiles = req.tiles;
 			drawSize = req.drawSize;
 		}
 
@@ -73,7 +144,7 @@ namespace Vehicles
 			var tmpMaskArray = new Texture2D[MatCount];
 			if (req.shader.SupportsRGBMaskTex())
 			{
-				tmpMaskArray[0] = ContentFinder<Texture2D>.Get(req.path + "_northm", true);
+				tmpMaskArray[0] = ContentFinder<Texture2D>.Get(req.path + "_northm", false);
 				tmpMaskArray[1] = ContentFinder<Texture2D>.Get(req.path + "_eastm", false);
 				tmpMaskArray[2] = ContentFinder<Texture2D>.Get(req.path + "_southm", false);
 				tmpMaskArray[3] = ContentFinder<Texture2D>.Get(req.path + "_westm", false);
@@ -96,10 +167,20 @@ namespace Vehicles
 					{
 						tmpMaskArray[0] = tmpMaskArray[3];
 					}
+					else
+					{
+						tmpMaskArray[0] = ContentFinder<Texture2D>.Get(req.path, true);
+					}
+				}
+				if (tmpMaskArray[0] is null)
+				{
+					Log.Error("Failed to find any textures at " + req.path + " while constructing " + this.ToStringSafe());
+					return null;
 				}
 				if (tmpMaskArray[2] is null)
 				{
 					tmpMaskArray[2] = tmpMaskArray[0];
+					southRotated = DataAllowsFlip;
 				}
 				if (tmpMaskArray[1] is null)
 				{
@@ -110,6 +191,7 @@ namespace Vehicles
 					else
 					{
 						tmpMaskArray[1] = tmpMaskArray[0];
+						eastRotated = DataAllowsFlip;
 					}
 				}
 				if (tmpMaskArray[3] is null)
@@ -117,6 +199,7 @@ namespace Vehicles
 					if (tmpMaskArray[1] != null)
 					{
 						tmpMaskArray[3] = tmpMaskArray[1];
+						westFlipped = DataAllowsFlip;
 					}
 					else
 					{
@@ -124,53 +207,25 @@ namespace Vehicles
 					}
 				}
 
-				if(tmpMaskArray[5] is null)
+				if (tmpMaskArray[4] is null)
 				{
-					if(tmpMaskArray[4] != null)
-					{
-						tmpMaskArray[5] = tmpMaskArray[4];
-						eastDiagonalFlipped = DataAllowsFlip;
-					}
-					else
-					{
-						tmpMaskArray[5] = tmpMaskArray[1];
-					}
+					tmpMaskArray[4] = tmpMaskArray[0];
+					eastDiagonalRotated = DataAllowsFlip;
 				}
-				if(tmpMaskArray[6] is null)
+				if (tmpMaskArray[5] is null)
 				{
-					if(tmpMaskArray[7] != null)
-					{
-						tmpMaskArray[6] = tmpMaskArray[7];
-						westDiagonalFlipped = DataAllowsFlip;
-					}
-					else
-					{
-						tmpMaskArray[6] = tmpMaskArray[3];
-					}
+					tmpMaskArray[5] = tmpMaskArray[2];
+					eastDiagonalRotated = DataAllowsFlip;
 				}
-				if(tmpMaskArray[4] is null)
+				if (tmpMaskArray[6] is null)
 				{
-					if(tmpMaskArray[5] != null)
-					{
-						tmpMaskArray[4] = tmpMaskArray[5];
-						eastDiagonalFlipped = DataAllowsFlip;
-					}
-					else
-					{
-						tmpMaskArray[4] = tmpMaskArray[1];
-					}
+					tmpMaskArray[6] = tmpMaskArray[2];
+					westDiagonalRotated = DataAllowsFlip;
 				}
-				if(tmpMaskArray[7] is null)
+				if (tmpMaskArray[7] is null)
 				{
-					if(tmpMaskArray[6] != null)
-					{
-						tmpMaskArray[7] = tmpMaskArray[6];
-						westDiagonalFlipped = DataAllowsFlip;
-					}
-					else
-					{
-						tmpMaskArray[7] = tmpMaskArray[3];
-					}
+					tmpMaskArray[7] = tmpMaskArray[0];
+					westDiagonalRotated = DataAllowsFlip;
 				}
 				masks = tmpMaskArray;
 			}
@@ -182,10 +237,12 @@ namespace Vehicles
 				{
 					mainTex = textureArray[i],
 					shader = req.shader,
-					color = color,
-					colorTwo = colorTwo,
-					colorThree = colorThree,
-					replaceTex = pattern.replaceTex,
+					properties = pattern.properties,
+					color = pattern.properties.colorOne ?? req.color,
+					colorTwo = pattern.properties.colorTwo ?? req.colorTwo,
+					colorThree = pattern.properties.colorThree ?? req.colorThree,
+					tiles = req.tiles,
+					isSkin = pattern is SkinDef,
 					maskTex = tmpMaskArray[i],
 					patternTex = pattern[new Rot8(i)],
 					shaderParameters = req.shaderParameters
@@ -195,7 +252,7 @@ namespace Vehicles
 			return mats;
 		}
 
-		public abstract Graphic_RGB GetColoredVersion(Shader shader, Color colorOne, Color colorTwo, Color colorThree);
+		public abstract Graphic_RGB GetColoredVersion(Shader shader, Color colorOne, Color colorTwo, Color colorThree, float tiles = 1);
 
 		public override string ToString()
 		{

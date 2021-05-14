@@ -262,20 +262,17 @@ namespace Vehicles
 		/* ---------------- Hooks onto Targeter calls ---------------- */
 		public static void DrawTargeters()
 		{
-			Targeters.CannonTargeter.TargeterOnGUI();
-			Targeters.LandingTargeter.TargeterOnGUI();
+			Targeters.OnGUITargeters();
 		}
 
 		public static void ProcessTargeterInputEvents()
 		{
-			Targeters.CannonTargeter.ProcessInputEvents();
-			Targeters.LandingTargeter.ProcessInputEvents();
+			Targeters.ProcessTargeterInputEvents();
 		}
 
 		public static void TargeterUpdate()
 		{
-			Targeters.CannonTargeter.TargeterUpdate();
-			Targeters.LandingTargeter.TargeterUpdate();
+			Targeters.UpdateTargeters();
 		}
 		/* ----------------------------------------------------------- */
 	}

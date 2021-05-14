@@ -138,13 +138,17 @@ namespace Vehicles
 				Log.Error("Tried to launch " + Vehicle + ", but it's unspawned.");
 				return;
 			}
-
+			List<int> flightPath = LaunchTargeter.FlightPath;
+			if (flightPath.LastOrDefault() != destinationTile)
+			{
+				flightPath.Add(destinationTile);
+			}
 			Vehicle.inFlight = true;
 			VehicleSkyfaller_Leaving vehicleLeaving = (VehicleSkyfaller_Leaving)ThingMaker.MakeThing(Props.skyfallerLeaving);
 			vehicleLeaving.arrivalAction = arrivalAction;
 			vehicleLeaving.vehicle = Vehicle;
 			vehicleLeaving.launchProtocol = SelectedLaunchProtocol;
-			vehicleLeaving.flightPath = new List<int>(LaunchTargeter.FlightPath);
+			vehicleLeaving.flightPath = new List<int>(flightPath);
 			vehicleLeaving.orderRecon = recon;
 			GenSpawn.Spawn(vehicleLeaving, Vehicle.Position, Vehicle.Map, Vehicle.Rotation, WipeMode.Vanish);
 

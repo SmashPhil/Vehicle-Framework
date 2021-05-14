@@ -392,7 +392,6 @@
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_VisitSettlement.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeDef.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeWorker.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeWorker_StrafeMap.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeWorker_TargetedDrop.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeWorker_EdgeDrop.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeWorker_CenterDrop.cs" />
@@ -403,8 +402,11 @@
     <Compile Include="CustomFeatures\AerialLaunch\Launching\RocketTakeoff.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\DefaultTakeoff.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\LaunchProtocolProperties.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\SkyfallerMaker\VehicleSkyfallerMaker.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_FlyOver.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_Crashing.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Targeters\BaseWorldTargeter.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Targeters\BaseTargeter.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Targeters\StrafeTargeter.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Targeters\LandingTargeter.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\RunwayTakeoff.cs" />
@@ -418,6 +420,7 @@
     <Compile Include="CustomFeatures\AerialLaunch\Targeters\LaunchTargeter.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Bombing\BomberProperties.cs" />
     <Compile Include="CustomFeatures\Misc\Mote_CannonPlume.cs" />
+    <Compile Include="Harmony\StartupTesting.cs" />
     <Compile Include="Misc\DefModExtension\SpawnerPropertiesDefModExtension.cs" />
     <Compile Include="Misc\ModSettings\SettingsCustomizableFields.cs" />
     <Compile Include="CustomFeatures\Reservation\Reservation.cs" />
@@ -533,7 +536,10 @@
     <Compile Include="UI\Graphic\MaterialGeneration\MaterialPoolExpanded.cs" />
     <Compile Include="UI\Graphic\MaterialGeneration\AdditionalShaderPropertyIDs.cs" />
     <Compile Include="UI\Graphic\MaterialGeneration\ShaderDatabaseFromBundle.cs" />
-    <Compile Include="UI\Graphic\PatternDef.cs" />
+    <Compile Include="UI\Graphic\Patterns\PatternProperties.cs" />
+    <Compile Include="UI\Graphic\Patterns\SkinDef.cs" />
+    <Compile Include="UI\Graphic\Patterns\PatternDef.cs" />
+    <Compile Include="UI\Graphic\Retexture\RetextureDef.cs" />
     <Compile Include="UI\Graphic\RGBShaderTypeDef.cs" />
     <Compile Include="UI\Listing\Listing_Settings.cs" />
     <Compile Include="UI\Misc\FloatMenuTargeter.cs" />
@@ -552,6 +558,7 @@
     <Compile Include="Utility\Helpers\SelectionHelper.cs" />
     <Compile Include="Utility\Helpers\GizmoHelper.cs" />
     <Compile Include="Utility\Helpers\MultithreadHelper.cs" />
+    <Compile Include="Utility\Helpers\SkyfallerHelper.cs" />
     <Compile Include="Utility\Helpers\TargetingHelper.cs" />
     <Compile Include="Utility\Helpers\UIHelper.cs" />
     <Compile Include="Utility\Helpers\WorldHelper.cs" />

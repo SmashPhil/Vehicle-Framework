@@ -41,7 +41,7 @@ namespace Vehicles
 			{
 				return base.MatAt(rot, thing);
 			}
-			if(maskMatPatterns.TryGetValue(vehicle.pattern, out var values))
+			if (maskMatPatterns.TryGetValue(vehicle.pattern, out var values))
 			{
 				return values.Second[vehicle.FullRotation.AsInt];
 			}
@@ -68,6 +68,7 @@ namespace Vehicles
 			base.Init(req);
 			textureArray = new Texture2D[MatCount];
 			textureArray[0] = ContentFinder<Texture2D>.Get(req.path + "_north", false);
+			textureArray[0] ??= ContentFinder<Texture2D>.Get(req.path, false);
 			textureArray[1] = ContentFinder<Texture2D>.Get(req.path + "_east", false);
 			textureArray[2] = ContentFinder<Texture2D>.Get(req.path + "_south", false);
 			textureArray[3] = ContentFinder<Texture2D>.Get(req.path + "_west", false);
@@ -76,7 +77,7 @@ namespace Vehicles
 			textureArray[6] = ContentFinder<Texture2D>.Get(req.path + "_southWest", false);
 			textureArray[7] = ContentFinder<Texture2D>.Get(req.path + "_northWest", false);
 			
-			if (textureArray[0] == null)
+			if (textureArray[0] is null)
 			{
 				if (textureArray[2] != null)
 				{
@@ -93,21 +94,17 @@ namespace Vehicles
 					textureArray[0] = textureArray[3];
 					drawRotatedExtraAngleOffset = 90f;
 				}
-				else
-				{
-					textureArray[0] = ContentFinder<Texture2D>.Get(req.path, false);
-				}
 			}
-			if (textureArray[0] == null)
+			if (textureArray[0] is null)
 			{
 				Log.Error("Failed to find any textures at " + req.path + " while constructing " + this.ToStringSafe());
 				return;
 			}
-			if (textureArray[2] == null)
+			if (textureArray[2] is null)
 			{
 				textureArray[2] = textureArray[0];
 			}
-			if (textureArray[1] == null)
+			if (textureArray[1] is null)
 			{
 				if (textureArray[3] != null)
 				{
@@ -119,7 +116,7 @@ namespace Vehicles
 					textureArray[1] = textureArray[0];
 				}
 			}
-			if (textureArray[3] == null)
+			if (textureArray[3] is null)
 			{
 				if (textureArray[1] != null)
 				{
@@ -132,53 +129,25 @@ namespace Vehicles
 				}
 			}
 
-			if(textureArray[5] == null)
+			if (textureArray[4] is null)
 			{
-				if(textureArray[4] != null)
-				{
-					textureArray[5] = textureArray[4];
-					eastDiagonalFlipped = DataAllowsFlip;
-				}
-				else
-				{
-					textureArray[5] = textureArray[1];
-				}
+				textureArray[4] = textureArray[0];
+				eastDiagonalRotated = DataAllowsFlip;
 			}
-			if(textureArray[6] == null)
+			if (textureArray[5] is null)
 			{
-				if(textureArray[7] != null)
-				{
-					textureArray[6] = textureArray[7];
-					westDiagonalFlipped = DataAllowsFlip;
-				}
-				else
-				{
-					textureArray[6] = textureArray[3];
-				}
+				textureArray[5] = textureArray[2];
+				eastDiagonalRotated = DataAllowsFlip;
 			}
-			if(textureArray[4] == null)
+			if (textureArray[6] is null)
 			{
-				if(textureArray[5] != null)
-				{
-					textureArray[4] = textureArray[5];
-					eastDiagonalFlipped = DataAllowsFlip;
-				}
-				else
-				{
-					textureArray[4] = textureArray[1];
-				}
+				textureArray[6] = textureArray[2];
+				westDiagonalRotated = DataAllowsFlip;
 			}
-			if(textureArray[7] == null)
+			if (textureArray[7] is null)
 			{
-				if(textureArray[6] != null)
-				{
-					textureArray[7] = textureArray[6];
-					westDiagonalFlipped = DataAllowsFlip;
-				}
-				else
-				{
-					textureArray[7] = textureArray[3];
-				}
+				textureArray[7] = textureArray[0];
+				westDiagonalRotated = DataAllowsFlip;
 			}
 			
 			foreach (PatternDef pattern in DefDatabase<PatternDef>.AllDefs)
@@ -192,9 +161,9 @@ namespace Vehicles
 			return GraphicDatabase.Get<Graphic_Vehicle>(path, newShader, drawSize, newColor, newColorTwo, DataRGB);
 		}
 
-		public override Graphic_RGB GetColoredVersion(Shader shader, Color colorOne, Color colorTwo, Color colorThree)
+		public override Graphic_RGB GetColoredVersion(Shader shader, Color colorOne, Color colorTwo, Color colorThree, float tiles = 1)
 		{
-			return GraphicDatabaseRGB.Get<Graphic_Vehicle>(path, shader, drawSize, colorOne, colorTwo, colorThree, DataRGB);
+			return GraphicDatabaseRGB.Get<Graphic_Vehicle>(path, shader, drawSize, colorOne, colorTwo, colorThree, tiles, DataRGB);
 		}
 	}
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using Verse.Sound;
 using RimWorld;
 using SmashTools;
 
@@ -10,19 +11,40 @@ namespace Vehicles
 {
 	public class VehicleSkyfaller_FlyOver : VehicleSkyfaller
 	{
-		public const float DefaultAngle = -65;
-		private const int LeaveMapAfterTicks = 220;
+		public override Vector3 DrawPos
+		{
+			get
+			{
+				switch (def.skyfaller.movementType)
+				{
+					case SkyfallerMovementType.Accelerate:
+						return SkyfallerHelper.DrawPos_Accelerate(base.DrawPos, launchProtocol.TicksPassed, angle, CurrentSpeed);
+					case SkyfallerMovementType.ConstantSpeed:
+						return SkyfallerHelper.DrawPos_ConstantSpeed(base.DrawPos, launchProtocol.TicksPassed, angle, CurrentSpeed);
+					case SkyfallerMovementType.Decelerate:
+						return SkyfallerHelper.DrawPos_Decelerate(base.DrawPos, launchProtocol.TicksPassed, angle, CurrentSpeed);
+					default:
+						Log.ErrorOnce("SkyfallerMovementType not handled: " + def.skyfaller.movementType, thingIDNumber);
+						return SkyfallerHelper.DrawPos_Accelerate(base.DrawPos, launchProtocol.TicksPassed, angle, CurrentSpeed);
+				}
+			}
+		}
 
-		public int ticksToImpact = LeaveMapAfterTicks;
-
-		public override Vector3 DrawPos => SkyfallerDrawPosUtility.DrawPos_ConstantSpeed(base.DrawPos, ticksToImpact, angle, CurrentSpeed);
-
-		protected virtual float CurrentSpeed => vehicle.CompVehicleLauncher.FlySpeed;
+		protected virtual float CurrentSpeed
+		{
+			get
+			{
+				if (def.skyfaller.speedCurve is null)
+				{
+					return def.skyfaller.speed;
+				}
+				return def.skyfaller.speedCurve.Evaluate(launchProtocol.TimeInAnimation) * def.skyfaller.speed;
+			}
+		}
 
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Values.Look(ref ticksToImpact, "ticksToImpact");
 		}
 
 		public override void DrawAt(Vector3 drawLoc, bool flip = false)
@@ -49,22 +71,39 @@ namespace Vehicles
 				drawLoc.z += def.skyfaller.zPositionCurve.Evaluate(launchProtocol.TimeInAnimation);
 			}
 			vehicle.DrawAt(drawLoc, num + Rotation.AsInt * 90, flip);
-			DrawDropSpotShadow();
+			//DrawDropSpotShadow(); //Add tracing shadow;
 		}
 
 		public override void Tick()
 		{
-			ticksToImpact--;
-			if (ticksToImpact <= 0)
+			launchProtocol.Tick();
+			if (!DrawPos.InBounds(Map) && launchProtocol.TicksPassed > def.skyfaller.ticksToImpactRange.max)
 			{
-
+				ExitMap();
 			}
 		}
 
-		private void ExitMap()
+		protected virtual void FireTurrets()
 		{
-			//Add respawning to AerialVehicleInFlight here
+
+		}
+
+		protected virtual void ExitMap()
+		{
+			Log.Message("Exit");
 			Destroy();
+		}
+
+		public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
+		{
+			base.DeSpawn(mode);
+			Log.Message("DESPAWNED");
+		}
+
+		public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+		{
+			base.Destroy(mode);
+			Log.Message("DESTROYED");
 		}
 
 		public override void SpawnSetup(Map map, bool respawningAfterLoad)
@@ -72,9 +111,10 @@ namespace Vehicles
 			base.SpawnSetup(map, respawningAfterLoad);
 			if (!respawningAfterLoad)
 			{
-				launchProtocol.SetPositionArriving(new Vector3(DrawPos.x, DrawPos.y + 1, DrawPos.z), Rotation, map);
-				launchProtocol.OrderProtocol(true);
-				ticksToImpact = Mathf.CeilToInt(Ext_Map.Distance(new IntVec3(map.Size.x / 2, map.Size.y, map.Size.z / 2), Position) * 2 / vehicle.CompVehicleLauncher.FlySpeed);
+				launchProtocol = vehicle.CompVehicleLauncher.SelectedLaunchProtocol ?? vehicle.CompVehicleLauncher.launchProtocols.FirstOrDefault();
+				launchProtocol.SetPositionArriving(DrawPos, Rot8.North, Map);
+				launchProtocol.OrderProtocol(false);
+				launchProtocol.SetTickCount(-def.skyfaller.ticksToImpactRange.max);
 			}
 		}
 	}

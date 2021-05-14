@@ -74,12 +74,7 @@ namespace Vehicles
 
 			result.kindDef = request.KindDef;
 			result.SetFactionDirect(request.Faction);
-			if (result.VehicleGraphic.MatSingle.shader.SupportsMaskTex())
-			{
-				result.DrawColor = request.ColorOne;
-				result.DrawColorTwo = request.ColorTwo;
-				result.DrawColorThree = request.ColorThree;
-			}
+			
 			string defaultMask = VehicleMod.settings.vehicles.defaultMasks.TryGetValue(result.VehicleDef.defName, "Default");
 			PatternDef pattern = DefDatabase<PatternDef>.GetNamed(defaultMask);
 			if (pattern is null)
@@ -88,6 +83,13 @@ namespace Vehicles
 				pattern = PatternDefOf.Default;
 			}
 			result.pattern = request.RandomizeMask ? result.VehicleGraphic.maskMatPatterns.RandomElement().Key : pattern;
+			if (result.VehicleGraphic.MatSingle.shader.SupportsRGBMaskTex())
+			{
+				result.DrawColor = request.ColorOne;
+				result.DrawColorTwo = request.ColorTwo;
+				result.DrawColorThree = request.ColorThree;
+			}
+
 			result.PostGenerationSetup();
 			foreach (VehicleComp comp in result.AllComps.Where(c => c is VehicleComp))
 			{

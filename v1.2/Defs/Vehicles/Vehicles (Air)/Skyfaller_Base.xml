@@ -29,4 +29,13 @@
 			</ticksToImpactRange>
 		</skyfaller>
 	</ThingDef>
+	
+	<ThingDef Name="VehicleSkyfallerFlyOver" ParentName="VehicleSkyfallerBase" Abstract="True">
+		<thingClass>Vehicles.VehicleSkyfaller_FlyOver</thingClass>
+		<skyfaller>
+			<movementType>ConstantSpeed</movementType>
+			<shadowSize>(3, 3)</shadowSize>
+			<rotateGraphicTowardsDirection>true</rotateGraphicTowardsDirection>
+		</skyfaller>
+	</ThingDef>
 </Defs>

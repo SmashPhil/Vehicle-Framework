@@ -77,10 +77,10 @@ namespace Vehicles
 			Destroy();
 		}
 
-		protected void DrawDropSpotShadow()
+		protected virtual void DrawDropSpotShadow()
 		{
 			Material shadowMaterial = ShadowMaterial;
-			if (shadowMaterial == null)
+			if (shadowMaterial is null)
 			{
 				return;
 			}

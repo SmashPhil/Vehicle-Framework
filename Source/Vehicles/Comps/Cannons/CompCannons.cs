@@ -267,7 +267,6 @@ namespace Vehicles
 					}
 
 					multiFireCannon[i].turret.AlignToTargetRestricted();
-
 					if (multiFireCannon[i].ticksTillShot <= 0)
 					{
 						turretData.turret.FireTurret();

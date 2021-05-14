@@ -168,6 +168,7 @@
 				<skyfallerLeaving>SparrowLeaving</skyfallerLeaving>
 				<skyfallerIncoming>SparrowIncoming</skyfallerIncoming>
 				<skyfallerCrashing>SparrowCrashing</skyfallerCrashing>
+				<skyfallerFlyOver>SparrowFlyover</skyfallerFlyOver>
 				<fuelEfficiencyWorld>0.1</fuelEfficiencyWorld>
 				<flySpeed>10</flySpeed>
 				<launchProtocols>

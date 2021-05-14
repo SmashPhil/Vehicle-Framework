@@ -109,48 +109,43 @@ namespace Vehicles
 		/// <summary>
 		/// Draw VehicleTurret on vehicle
 		/// </summary>
-		/// <param name="cannon"></param>
-		public static void DrawAttachedThing(VehicleTurret cannon)
+		/// <param name="turret"></param>
+		public static void DrawAttachedThing(VehicleTurret turret)
 		{
 			try
 			{
-				Vector3 topVectorRotation = new Vector3(cannon.turretRenderOffset.x, 1f, cannon.turretRenderOffset.y).RotatedBy(cannon.TurretRotation);
+				Vector3 topVectorRotation = new Vector3(turret.turretRenderOffset.x, 1f, turret.turretRenderOffset.y).RotatedBy(turret.TurretRotation);
 				float locationRotation = 0f;
-				if(cannon.attachedTo != null)
+				if(turret.attachedTo != null)
 				{
-					locationRotation = cannon.attachedTo.TurretRotation;
+					locationRotation = turret.attachedTo.TurretRotation;
 				}
-				Pair<float, float> drawOffset = ShipDrawOffset(cannon.vehicle, cannon.turretRenderLocation.x, cannon.turretRenderLocation.y, out Pair<float, float> rotOffset1, locationRotation, cannon.attachedTo);
+				Pair<float, float> drawOffset = ShipDrawOffset(turret.vehicle, turret.turretRenderLocation.x, turret.turretRenderLocation.y, out Pair<float, float> rotOffset1, locationRotation, turret.attachedTo);
 					
-				Vector3 topVectorLocation = new Vector3(cannon.vehicle.DrawPos.x + drawOffset.First + rotOffset1.First, cannon.vehicle.DrawPos.y + cannon.drawLayer, cannon.vehicle.DrawPos.z + drawOffset.Second + rotOffset1.Second);
-				if (cannon.rTracker.Recoil > 0f)
+				Vector3 topVectorLocation = new Vector3(turret.vehicle.DrawPos.x + drawOffset.First + rotOffset1.First, turret.vehicle.DrawPos.y + turret.drawLayer, turret.vehicle.DrawPos.z + drawOffset.Second + rotOffset1.Second);
+				if (turret.rTracker.Recoil > 0f)
 				{
-					topVectorLocation = Ext_Math.PointFromAngle(topVectorLocation, cannon.rTracker.Recoil, cannon.rTracker.Angle);
+					topVectorLocation = Ext_Math.PointFromAngle(topVectorLocation, turret.rTracker.Recoil, turret.rTracker.Angle);
 				}
-				if (cannon.attachedTo != null && cannon.attachedTo.rTracker.Recoil > 0f)
+				if (turret.attachedTo != null && turret.attachedTo.rTracker.Recoil > 0f)
 				{
-					topVectorLocation = Ext_Math.PointFromAngle(topVectorLocation, cannon.attachedTo.rTracker.Recoil, cannon.attachedTo.rTracker.Angle);
+					topVectorLocation = Ext_Math.PointFromAngle(topVectorLocation, turret.attachedTo.rTracker.Recoil, turret.attachedTo.rTracker.Angle);
 				}
-				Mesh cannonMesh = cannon.CannonGraphic.MeshAt(Rot4.North);
-				Graphics.DrawMesh(cannonMesh, topVectorLocation, cannon.TurretRotation.ToQuat(), cannon.CannonMaterial, 0);
+				Mesh cannonMesh = turret.CannonGraphic.MeshAt(Rot4.North);
+				Graphics.DrawMesh(cannonMesh, topVectorLocation, turret.TurretRotation.ToQuat(), turret.CannonMaterial, 0);
 
-				if(cannon.CannonBaseMaterial != null)
+				if (turret.CannonBaseMaterial != null)
 				{
 					Matrix4x4 baseMatrix = default;
-					Pair<float, float> baseDrawOffset = ShipDrawOffset(cannon.vehicle, cannon.baseCannonRenderLocation.x, cannon.baseCannonRenderLocation.y, out Pair<float, float> rotOffset2);
-					Vector3 baseVectorLocation = new Vector3(cannon.vehicle.DrawPos.x + baseDrawOffset.First, cannon.vehicle.DrawPos.y, cannon.vehicle.DrawPos.z + baseDrawOffset.Second);
-					baseMatrix.SetTRS(baseVectorLocation + Altitudes.AltIncVect, cannon.vehicle.Rotation.AsQuat, new Vector3(cannon.baseCannonDrawSize.x, 1f, cannon.baseCannonDrawSize.y));
-					Graphics.DrawMesh(MeshPool.plane10, baseMatrix, cannon.CannonBaseMaterial, 0);
-				}
-
-				if(VehicleMod.settings.debug.debugDrawCannonGrid)
-				{
-					//REDO
+					Pair<float, float> baseDrawOffset = ShipDrawOffset(turret.vehicle, turret.baseCannonRenderLocation.x, turret.baseCannonRenderLocation.y, out Pair<float, float> rotOffset2);
+					Vector3 baseVectorLocation = new Vector3(turret.vehicle.DrawPos.x + baseDrawOffset.First, turret.vehicle.DrawPos.y, turret.vehicle.DrawPos.z + baseDrawOffset.Second);
+					baseMatrix.SetTRS(baseVectorLocation + Altitudes.AltIncVect, turret.vehicle.Rotation.AsQuat, new Vector3(turret.baseCannonDrawSize.x, 1f, turret.baseCannonDrawSize.y));
+					Graphics.DrawMesh(MeshPool.plane10, baseMatrix, turret.CannonBaseMaterial, 0);
 				}
 			}
 			catch(Exception ex)
 			{
-				Log.Error(string.Format("Error occurred during rendering of attached thing on {0}. Exception: {1}", cannon.vehicle.Label, ex.Message));
+				Log.Error(string.Format("Error occurred during rendering of attached thing on {0}. Exception: {1}", turret.vehicle.Label, ex.Message));
 			}
 		}
 
@@ -212,11 +207,90 @@ namespace Vehicles
 						color = manualColorOne != null ? manualColorOne.Value : vehicle.DrawColor,
 						colorTwo = manualColorTwo != null ? manualColorTwo.Value : vehicle.DrawColorTwo,
 						colorThree = manualColorThree != null ? manualColorThree.Value : vehicle.DrawColorThree,
-						replaceTex = pattern.replaceTex,
+						tiles = vehicle.tiles,
+						properties = pattern.properties,
+						isSkin = pattern is SkinDef,
 						maskTex = cannon.CannonGraphic.masks[0],
 						patternTex = pattern[Rot8.North]
 					};
-					
+					cannonMat = MaterialPoolExpanded.MatFrom(matReq);
+				}
+				GenUI.DrawTextureWithMaterial(cannonDrawnRect, cannon.CannonTexture, cannonMat);
+
+				if (VehicleMod.settings.debug.debugDrawCannonGrid)
+				{
+					Widgets.DrawLineHorizontal(cannonDrawnRect.x, cannonDrawnRect.y, cannonDrawnRect.width);
+					Widgets.DrawLineHorizontal(cannonDrawnRect.x, cannonDrawnRect.y + cannonDrawnRect.height, cannonDrawnRect.width);
+					Widgets.DrawLineVertical(cannonDrawnRect.x, cannonDrawnRect.y, cannonDrawnRect.height);
+					Widgets.DrawLineVertical(cannonDrawnRect.x + cannonDrawnRect.width, cannonDrawnRect.y, cannonDrawnRect.height);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Draw cannon textures on GUI given collection of cannons and vehicle GUI is being drawn for with additional tiling
+		/// </summary>
+		/// <param name="vehicle"></param>
+		/// <param name="displayRect"></param>
+		/// <param name="cannons"></param>
+		/// <param name="vehicleMaskName"></param>
+		/// <param name="resolveGraphics"></param>
+		/// <param name="manualColorOne"></param>
+		/// <param name="manualColorTwo"></param>
+		/// <remarks>Might possibly want to throw into separate threads</remarks>
+		public static void DrawCannonTexturesTiled(this VehiclePawn vehicle, Rect displayRect, IEnumerable<VehicleTurret> cannons, PatternDef pattern, bool resolveGraphics = false, Color? manualColorOne = null, Color? manualColorTwo = null, Color? manualColorThree = null, float tiles = 1)
+		{
+			foreach (VehicleTurret cannon in cannons)
+			{
+				if (cannon.NoGraphic)
+				{
+					continue;
+				}
+				PawnKindLifeStage biggestStage = vehicle.kindDef.lifeStages.MaxBy(x => x.bodyGraphicData?.drawSize ?? Vector2.zero);
+
+				if (resolveGraphics)
+				{
+					cannon.ResolveCannonGraphics(vehicle);
+				}
+
+				if (cannon.CannonBaseGraphic != null)
+				{
+					float baseWidth = (displayRect.width / biggestStage.bodyGraphicData.drawSize.x) * cannon.baseCannonDrawSize.x;
+					float baseHeight = (displayRect.height / biggestStage.bodyGraphicData.drawSize.y) * cannon.baseCannonDrawSize.y;
+
+					float xBase = displayRect.x + (displayRect.width / 2) - (baseWidth / 2) + ((vehicle.VehicleDef.drawProperties.upgradeUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.baseCannonRenderLocation.x);
+					float yBase = displayRect.y + (displayRect.height / 2) - (baseHeight / 2) - ((vehicle.VehicleDef.drawProperties.upgradeUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.baseCannonRenderLocation.y);
+
+					Rect baseCannonDrawnRect = new Rect(xBase, yBase, baseWidth, baseHeight);
+					GenUI.DrawTextureWithMaterial(baseCannonDrawnRect, cannon.CannonBaseTexture, cannon.CannonBaseGraphic.MatSingle);
+				}
+
+				float cannonWidth = (displayRect.width / biggestStage.bodyGraphicData.drawSize.x) * cannon.CannonGraphicData.drawSize.x;
+				float cannonHeight = (displayRect.height / biggestStage.bodyGraphicData.drawSize.y) * cannon.CannonGraphicData.drawSize.y;
+
+				/// ( center point of vehicle) + (UI size / drawSize) * cannonPos
+				/// y axis inverted as UI goes top to bottom, but DrawPos goes bottom to top
+				float xCannon = (displayRect.x + (displayRect.width / 2) - (cannonWidth / 2)) + ((vehicle.VehicleDef.drawProperties.upgradeUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.turretRenderLocation.x);
+				float yCannon = (displayRect.y + (displayRect.height / 2) - (cannonHeight / 2)) - ((vehicle.VehicleDef.drawProperties.upgradeUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.turretRenderLocation.y);
+
+				Rect cannonDrawnRect = new Rect(xCannon, yCannon, cannonWidth, cannonHeight);
+				Material cannonMat = new Material(cannon.CannonGraphic.MatAt(Rot4.North, vehicle));
+
+				if (cannon.CannonGraphic.Shader.SupportsRGBMaskTex() && (manualColorOne != null || manualColorTwo != null || manualColorThree != null) && cannon.CannonGraphic.GetType().IsAssignableFrom(typeof(Graphic_Cannon)))
+				{
+					MaterialRequestRGB matReq = new MaterialRequestRGB()
+					{
+						mainTex = cannon.CannonTexture,
+						shader = cannon.CannonGraphic.Shader,
+						color = manualColorOne != null ? manualColorOne.Value : vehicle.DrawColor,
+						colorTwo = manualColorTwo != null ? manualColorTwo.Value : vehicle.DrawColorTwo,
+						colorThree = manualColorThree != null ? manualColorThree.Value : vehicle.DrawColorThree,
+						tiles = tiles,
+						properties = pattern.properties,
+						isSkin = pattern is SkinDef,
+						maskTex = cannon.CannonGraphic.masks[0],
+						patternTex = pattern[Rot8.North]
+					};
 					cannonMat = MaterialPoolExpanded.MatFrom(matReq);
 				}
 				GenUI.DrawTextureWithMaterial(cannonDrawnRect, cannon.CannonTexture, cannonMat);
@@ -243,10 +317,6 @@ namespace Vehicles
 		/// <param name="manualColorTwo"></param>
 		public static void DrawVehicleTex(Rect rect, Texture2D vehicleTex, VehiclePawn vehicle, PatternDef pattern = null, bool resolveGraphics = false, Color? manualColorOne = null, Color? manualColorTwo = null, Color? manualColorThree = null)
 		{
-			float UISizeX = vehicle.VehicleDef.drawProperties.upgradeUISize.x * rect.width;
-			float UISizeY = vehicle.VehicleDef.drawProperties.upgradeUISize.y * rect.height;
-
-			Rect displayRect = new Rect(rect.x, rect.y, UISizeX, UISizeY);
 			Material mat = new Material(vehicle.VehicleGraphic.MatAt(Rot4.North, vehicle));
 			
 			if (vehicle.VehicleGraphic.Shader.SupportsRGBMaskTex() && (manualColorOne != null || manualColorTwo != null || manualColorThree != null))
@@ -258,19 +328,63 @@ namespace Vehicles
 					color = manualColorOne != null ? manualColorOne.Value : vehicle.DrawColor,
 					colorTwo = manualColorTwo != null ? manualColorTwo.Value : vehicle.DrawColorTwo,
 					colorThree = manualColorThree != null ? manualColorThree.Value : vehicle.DrawColorThree,
-					replaceTex = pattern.replaceTex,
+					tiles = vehicle.tiles,
+					properties = pattern.properties,
+					isSkin = pattern is SkinDef,
 					maskTex = vehicle.VehicleGraphic.masks[0],
 					patternTex = pattern?[Rot8.North]
 				};
-				
 				mat = MaterialPoolExpanded.MatFrom(matReq);
 			}
 
-			GenUI.DrawTextureWithMaterial(displayRect, vehicleTex, mat);
+			GenUI.DrawTextureWithMaterial(rect, vehicleTex, mat);
 
 			if (vehicle.CompCannons != null)
 			{
-				vehicle.DrawCannonTextures(displayRect, vehicle.CompCannons.Cannons.OrderBy(x => x.drawLayer), pattern, resolveGraphics, manualColorOne, manualColorTwo, manualColorThree);
+				vehicle.DrawCannonTextures(rect, vehicle.CompCannons.Cannons.OrderBy(x => x.drawLayer), pattern, resolveGraphics, manualColorOne, manualColorTwo, manualColorThree);
+			}
+		}
+
+		/// <summary>
+		/// Draw Vehicle texture dynamically allowing for tiling and rescaling of patterns
+		/// </summary>
+		/// <param name="rect"></param>
+		/// <param name="vehicleTex"></param>
+		/// <param name="vehicle"></param>
+		/// <param name="pattern"></param>
+		/// <param name="resolveGraphics"></param>
+		/// <param name="manualColorOne"></param>
+		/// <param name="manualColorTwo"></param>
+		/// <param name="manualColorThree"></param>
+		/// <param name="tiles"></param>
+		public static void DrawVehicleTexTiled(Rect rect, Texture2D vehicleTex, VehiclePawn vehicle, PatternDef pattern = null, bool resolveGraphics = false, 
+			Color? manualColorOne = null, Color? manualColorTwo = null, Color? manualColorThree = null, float tiles = 1)
+		{
+			Material mat = new Material(vehicle.VehicleGraphic.MatAt(Rot4.North, vehicle));
+
+			if (vehicle.VehicleGraphic.Shader.SupportsRGBMaskTex() && (manualColorOne != null || manualColorTwo != null || manualColorThree != null))
+			{
+				MaterialRequestRGB matReq = new MaterialRequestRGB()
+				{
+					mainTex = vehicleTex,
+					shader = vehicle.VehicleGraphic.Shader,
+					color = manualColorOne != null ? manualColorOne.Value : vehicle.DrawColor,
+					colorTwo = manualColorTwo != null ? manualColorTwo.Value : vehicle.DrawColorTwo,
+					colorThree = manualColorThree != null ? manualColorThree.Value : vehicle.DrawColorThree,
+					tiles = tiles,
+					properties = pattern.properties,
+					isSkin = pattern is SkinDef,
+					maskTex = vehicle.VehicleGraphic.masks[0],
+					patternTex = pattern?[Rot8.North]
+				};
+				mat = MaterialPoolExpanded.MatFrom(matReq);
+			}
+
+			GenUI.DrawTextureWithMaterial(rect, vehicleTex, mat);
+
+			if (vehicle.CompCannons != null)
+			{
+				vehicle.DrawCannonTexturesTiled(rect, vehicle.CompCannons.Cannons.OrderBy(x => x.drawLayer), pattern, resolveGraphics, manualColorOne, manualColorTwo, manualColorThree, tiles);
 			}
 		}
 
@@ -676,6 +790,63 @@ namespace Vehicles
 				}
 				return new GizmoResult(GizmoState.Clear, null);
 			}
+		}
+
+		/// <summary>
+		/// Create rotated Mesh where <paramref name="rot"/> [1:3] indicates number of 90 degree rotations
+		/// </summary>
+		/// <param name="size"></param>
+		/// <param name="rot"></param>
+		public static Mesh NewPlaneMesh(Vector2 size, int rot)
+		{
+			Vector3[] array = new Vector3[4];
+			Vector2[] array2 = new Vector2[4];
+			int[] array3 = new int[6];
+			array[0] = new Vector3(-0.5f * size.x, 0f, -0.5f * size.y);
+			array[1] = new Vector3(-0.5f * size.x, 0f, 0.5f * size.y);
+			array[2] = new Vector3(0.5f * size.x, 0f, 0.5f * size.y);
+			array[3] = new Vector3(0.5f * size.x, 0f, -0.5f * size.y);
+			switch (rot)
+			{
+				case 1:
+					array2[0] = new Vector2(1f, 0f);
+					array2[1] = new Vector2(0f, 0f);
+					array2[2] = new Vector2(0f, 1f);
+					array2[3] = new Vector2(1f, 1f);
+					break;
+				case 2:
+					array2[0] = new Vector2(1f, 1f);
+					array2[1] = new Vector2(1f, 0f);
+					array2[2] = new Vector2(0f, 0f);
+					array2[3] = new Vector2(0f, 1f);
+					break;
+				case 3:
+					array2[0] = new Vector2(0f, 1f);
+					array2[1] = new Vector2(1f, 1f);
+					array2[2] = new Vector2(1f, 0f);
+					array2[3] = new Vector2(0f, 0f);
+					break;
+				default:
+					array2[0] = new Vector2(0f, 0f);
+					array2[1] = new Vector2(0f, 1f);
+					array2[2] = new Vector2(1f, 1f);
+					array2[3] = new Vector2(1f, 0f);
+					break;
+			}
+			array3[0] = 0;
+			array3[1] = 1;
+			array3[2] = 2;
+			array3[3] = 0;
+			array3[4] = 2;
+			array3[5] = 3;
+			Mesh mesh = new Mesh();
+			mesh.name = "NewPlaneMesh()";
+			mesh.vertices = array;
+			mesh.uv = array2;
+			mesh.SetTriangles(array3, 0);
+			mesh.RecalculateNormals();
+			mesh.RecalculateBounds();
+			return mesh;
 		}
 	}
 }

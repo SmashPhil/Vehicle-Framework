@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Verse;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -33,14 +32,14 @@ namespace Vehicles
 			return MatFrom(new MaterialRequestRGB(srcTex));
 		}
 
-		public static Material MatFrom(Texture2D srcTex, Shader shader, Color color)
+		public static Material MatFrom(Texture2D srcTex, Shader shader, PatternProperties properties)
 		{
-			return MatFrom(new MaterialRequestRGB(srcTex, shader, color));
+			return MatFrom(new MaterialRequestRGB(srcTex, shader, properties));
 		}
 
-		public static Material MatFrom(Texture2D srcTex, Shader shader, Color color, int renderQueue)
+		public static Material MatFrom(Texture2D srcTex, Shader shader, PatternProperties properties, int renderQueue)
 		{
-			return MatFrom(new MaterialRequestRGB(srcTex, shader, color)
+			return MatFrom(new MaterialRequestRGB(srcTex, shader, properties)
 			{
 				renderQueue = renderQueue
 			});
@@ -59,20 +58,20 @@ namespace Vehicles
 			});
 		}
 
-		public static Material MatFrom(string texPath, Shader shader, Color color)
+		public static Material MatFrom(string texPath, Shader shader, PatternProperties properties)
 		{
-			return MatFrom(new MaterialRequestRGB(ContentFinder<Texture2D>.Get(texPath, true), shader, color));
+			return MatFrom(new MaterialRequestRGB(ContentFinder<Texture2D>.Get(texPath, true), shader, properties));
 		}
 
-		public static Material MatFrom(string texPath, Shader shader, Color color, int renderQueue)
+		public static Material MatFrom(string texPath, Shader shader, PatternProperties properties, int renderQueue)
 		{
-			return MatFrom(new MaterialRequestRGB(ContentFinder<Texture2D>.Get(texPath, true), shader, color)
+			return MatFrom(new MaterialRequestRGB(ContentFinder<Texture2D>.Get(texPath, true), shader, properties)
 			{
 				renderQueue = renderQueue
 			});
 		}
 
-		public static Material MatFrom(MaterialRequestRGB req)
+		public static Material MatFrom(MaterialRequestRGB req, bool rescale = false)
 		{
 			if (!UnityData.IsInMainThread)
 			{
@@ -89,7 +88,7 @@ namespace Vehicles
 				Log.Warning("Matfrom with null shader.");
 				return BaseContent.BadMat;
 			}
-			if (req.maskTex != null && !req.shader.SupportsMaskTex() && !req.shader.SupportsRGBMaskTex())
+			if (req.maskTex != null && !req.shader.SupportsRGBMaskTex())
 			{
 				Log.Error("MaterialRequest has maskTex but shader does not support it. req=" + req.ToString());
 				req.maskTex = null;
@@ -104,10 +103,43 @@ namespace Vehicles
 				};
 				if (req.maskTex != null)
 				{
-					var patternTex = req.patternTex is null ? req.maskTex : req.patternTex;
+					var patternTex = req.patternTex is null ? PatternDefOf.Default[Rot8.North] : req.patternTex;
+					if (!req.properties.IsDefault)
+					{
+						patternTex = Ext_Texture.WrapTexture(patternTex, TextureWrapMode.Repeat);
+						float tiles = req.tiles;
+						if (req.properties.tiles.TryGetValue("All", out float allTiles))
+						{
+							tiles *= allTiles;
+						}
+						if (rescale)
+						{
+							tiles *= (float)req.patternTex.width / req.maskTex.width;
+						}
+						if (tiles != 1 && tiles != 0)
+						{
+							material.SetFloat(AdditionalShaderPropertyIDs.TileNum, tiles);
+						}
+						//Add case for vehicle defName
+						if (req.properties.equalize)
+						{
+							float scaleX = 1;
+							float scaleY = 1;
+							if (scaleX > 1)
+							{
+								scaleY = (float)req.mainTex.height / req.mainTex.width;
+							}
+							else
+							{
+								scaleX = (float)req.mainTex.width / req.mainTex.height;
+							}
+							material.SetFloat(AdditionalShaderPropertyIDs.ScaleX, scaleX);
+							material.SetFloat(AdditionalShaderPropertyIDs.ScaleY, scaleY);
+						}
+					}
 					material.SetTexture(ShaderPropertyIDs.MaskTex, req.maskTex);
 					material.SetTexture(AdditionalShaderPropertyIDs.PatternTex, patternTex);
-					material.SetInt(AdditionalShaderPropertyIDs.ReplaceTexture, req.replaceTex ? 1 : 0);
+					material.SetFloat(AdditionalShaderPropertyIDs.ReplaceTexture, req.isSkin ? 1 : 0);
 					material.SetColor(AdditionalShaderPropertyIDs.ColorOne, req.color);
 					material.SetColor(ShaderPropertyIDs.ColorTwo, req.colorTwo);
 					material.SetColor(AdditionalShaderPropertyIDs.ColorThree, req.colorThree);

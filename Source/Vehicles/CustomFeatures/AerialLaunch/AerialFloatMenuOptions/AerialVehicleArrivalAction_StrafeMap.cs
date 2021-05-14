@@ -11,7 +11,6 @@ namespace Vehicles
 	{
 		public LaunchProtocol launchProtocol;
 		public MapParent parent;
-		public AerialVehicleArrivalModeDef arrivalModeDef;
 
 		public IntVec3 start;
 		public IntVec3 end;
@@ -20,11 +19,10 @@ namespace Vehicles
 		{
 		}
 
-		public AerialVehicleArrivalAction_StrafeMap(VehiclePawn vehicle, MapParent parent, AerialVehicleArrivalModeDef arrivalModeDef, IntVec3 start, IntVec3 end) : base(vehicle)
+		public AerialVehicleArrivalAction_StrafeMap(VehiclePawn vehicle, MapParent parent, IntVec3 start, IntVec3 end) : base(vehicle)
 		{
 			launchProtocol = vehicle.CompVehicleLauncher.SelectedLaunchProtocol;
 			this.parent = parent;
-			this.arrivalModeDef = arrivalModeDef;
 			this.start = start;
 			this.end = end;
 		}
@@ -54,8 +52,9 @@ namespace Vehicles
 					Find.TickManager.Notify_GeneratedPotentiallyHostileMap();
 					PawnRelationUtility.Notify_PawnsSeenByPlayer_Letter(map.mapPawns.AllPawns, ref label, ref text, "LetterRelatedPawnsInMapWherePlayerLanded".Translate(Faction.OfPlayer.def.pawnsPlural), true, true);
 				}
+				VehicleSkyfaller_FlyOver skyfaller = VehicleSkyfallerMaker.MakeSkyfallerFlyOver(vehicle.CompVehicleLauncher.Props.skyfallerFlyOver, vehicle, start, end);
+				Thing thing = GenSpawn.Spawn(skyfaller, start, parent.Map, Rot8.North); //REDO - Other rotations?
 				AerialVehicleInFlight aerialVehicle = vehicle.GetAerialVehicle();
-				arrivalModeDef.Worker.VehicleArrived(aerialVehicle, launchProtocol, parent.Map);
 				aerialVehicle.Destroy();
 			}, "GeneratingMap", false, null, true);
 		}
@@ -64,7 +63,6 @@ namespace Vehicles
 		{
 			base.ExposeData();
 			Scribe_References.Look(ref parent, "parent");
-			Scribe_Defs.Look(ref arrivalModeDef, "arrivalModeDef");
 			Scribe_Deep.Look(ref launchProtocol, "launchProtocol");
 			Scribe_Values.Look(ref start, "start");
 			Scribe_Values.Look(ref end, "end");

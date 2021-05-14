@@ -13,6 +13,8 @@
 		<magazineCapacity>50</magazineCapacity>
 		<genericAmmo>true</genericAmmo>
 		
+		<recoil>0.1</recoil>
+		
 		<fireModes>
 			<li>
 				<shotsPerBurst>1</shotsPerBurst>

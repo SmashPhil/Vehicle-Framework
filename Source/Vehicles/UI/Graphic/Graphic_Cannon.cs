@@ -57,10 +57,12 @@ namespace Vehicles
 			{
 				mainTex = mainTex,
 				shader = req.shader,
-				color = color,
-				colorTwo = colorTwo,
-				colorThree = colorThree,
-				replaceTex = pattern.replaceTex,
+				properties = pattern.properties,
+				color = pattern.properties.colorOne ?? req.color,
+				colorTwo = pattern.properties.colorTwo ?? req.colorTwo,
+				colorThree = pattern.properties.colorThree ?? req.colorThree,
+				tiles = req.tiles,
+				isSkin = pattern is SkinDef,
 				maskTex = maskTex,
 				patternTex = pattern?[Rot8.North],
 				shaderParameters = req.shaderParameters
@@ -132,9 +134,9 @@ namespace Vehicles
 			return GraphicDatabase.Get<Graphic_Cannon>(path, newShader, drawSize, newColor, newColorTwo, DataRGB);
 		}
 
-		public override Graphic_RGB GetColoredVersion(Shader shader, Color colorOne, Color colorTwo, Color colorThree)
+		public override Graphic_RGB GetColoredVersion(Shader shader, Color colorOne, Color colorTwo, Color colorThree, float tiles = 1)
 		{
-			return GraphicDatabaseRGB.Get<Graphic_Cannon>(path, shader, drawSize, colorOne, colorTwo, colorThree, DataRGB);
+			return GraphicDatabaseRGB.Get<Graphic_Cannon>(path, shader, drawSize, colorOne, colorTwo, colorThree, tiles, DataRGB);
 		}
 	}
 }

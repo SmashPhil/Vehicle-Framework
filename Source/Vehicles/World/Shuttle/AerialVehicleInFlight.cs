@@ -48,7 +48,7 @@ namespace Vehicles
 
 		protected internal FlightPath flightPath;
 
-		private HashSet<Settlement> settlementsFlyOver;
+		private HashSet<Settlement> settlementsFlyOver = new HashSet<Settlement>();
 
 		private float transition;
 		private float elevation;
@@ -206,7 +206,7 @@ namespace Vehicles
 							action = delegate ()
 							{
 								vehicle.CompVehicleLauncher.SelectedLaunchProtocol = protocol;
-								Targeters.LaunchTargeter.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseTargetOnMap), this, true, VehicleTex.TargeterMouseAttachment, false, null,
+								LaunchTargeter.Instance.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseTargetOnMap), this, true, VehicleTex.TargeterMouseAttachment, false, null,
 									(GlobalTargetInfo target, List<int> path, float fuelCost) => protocol.TargetingLabelGetter(target, Tile, path, fuelCost));
 							}
 						};
@@ -452,7 +452,7 @@ namespace Vehicles
 
 		public void DrawFlightPath()
 		{
-			if (!Targeters.LaunchTargeter.IsTargeting)
+			if (!LaunchTargeter.Instance.IsTargeting)
 			{
 				if (flightPath.Path.Count > 1)
 				{

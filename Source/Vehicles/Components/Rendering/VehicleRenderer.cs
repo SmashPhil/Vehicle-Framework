@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using UnityEngine;
 using Verse;
 using RimWorld;
-using UnityEngine;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -37,14 +37,14 @@ namespace Vehicles
 			effecters = new VehicleStatusEffecters(vehicle);
 		}
 
-		public void RenderPawnAt(Vector3 drawLoc, float angle)
+		public void RenderPawnAt(Vector3 drawLoc, float angle, bool northSouthRotation)
 		{
 			if (!graphics.AllResolved)
 			{
 				graphics.ResolveAllGraphics();
 			}
 
-			RenderPawnInternal(drawLoc, angle);
+			RenderPawnInternal(drawLoc, angle, northSouthRotation);
 
 			if (vehicle.def.race.specialShadowData != null)
 			{
@@ -65,7 +65,7 @@ namespace Vehicles
 			}
 		}
 
-		public void RenderPortrait()
+		public void RenderPortrait(bool northSouthRotation)
 		{
 			Vector3 zero = Vector3.zero;
 			float angle;
@@ -79,27 +79,27 @@ namespace Vehicles
 			{
 				angle = 0f;
 			}
-			RenderPawnInternal(zero, angle, Rot4.South, true);
+			RenderPawnInternal(zero, angle, Rot4.South, northSouthRotation, true);
 		}
 
-		private void RenderPawnInternal(Vector3 rootLoc, float angle)
+		private void RenderPawnInternal(Vector3 rootLoc, float angle, bool northSouthRotation)
 		{
 			vehicle.UpdateRotationAndAngle();
-			RenderPawnInternal(rootLoc, angle, vehicle.Rotation, false);
+			RenderPawnInternal(rootLoc, angle, vehicle.Rotation, northSouthRotation, false);
 		}
 
-		private void RenderPawnInternal(Vector3 rootLoc, float angle, Rot4 bodyFacing, bool portrait)
+		private void RenderPawnInternal(Vector3 rootLoc, float angle, Rot4 bodyFacing, bool northSouthRotation, bool portrait)
 		{
 			if (!graphics.AllResolved)
 			{
 				graphics.ResolveAllGraphics();
 			}
-			Quaternion quaternion = Quaternion.AngleAxis(angle, Vector3.up);
+			Quaternion quaternion = Quaternion.AngleAxis(angle * (northSouthRotation ? -1 : 1), Vector3.up);
 
 			Vector3 loc = rootLoc + vehicle.VehicleGraphic.DrawOffset(bodyFacing);
 			loc.y += YOffset_Body;
-
-			Mesh mesh = graphics.vehicle.VehicleGraphic.MeshAt(bodyFacing);
+			Rot8 vehicleRot = new Rot8(bodyFacing, angle);
+			Mesh mesh = graphics.vehicle.VehicleGraphic.MeshAtFull(vehicleRot);
 			List<Material> list = graphics.MatsBodyBaseAt(bodyFacing, RotDrawMode.Fresh);
 
 			for (int i = 0; i < list.Count; i++)
@@ -134,95 +134,6 @@ namespace Vehicles
 				Vector3 bodyLoc = rootLoc;
 				bodyLoc.y += YOffset_Status;
 				statusOverlays.RenderStatusOverlays(bodyLoc, quaternion, MeshPool.humanlikeHeadSet.MeshAt(bodyFacing));
-			}
-		}
-
-		public Rot4 LayingFacing()
-		{
-			if (vehicle.GetPosture() == PawnPosture.LayingOnGroundFaceUp)
-			{
-				return Rot4.South;
-			}
-			if (vehicle.RaceProps.Humanlike)
-			{
-				switch (vehicle.thingIDNumber % 4)
-				{
-				case 0:
-					return Rot4.South;
-				case 1:
-					return Rot4.South;
-				case 2:
-					return Rot4.East;
-				case 3:
-					return Rot4.West;
-				}
-			}
-			else
-			{
-				switch (vehicle.thingIDNumber % 4)
-				{
-				case 0:
-					return Rot4.South;
-				case 1:
-					return Rot4.East;
-				case 2:
-					return Rot4.West;
-				case 3:
-					return Rot4.West;
-				}
-			}
-			return Rot4.Random;
-		}
-
-		public float BodyAngle()
-		{
-			if (vehicle.GetPosture() == PawnPosture.Standing)
-			{
-				return 0f;
-			}
-			Building_Bed building_Bed = vehicle.CurrentBed();
-			if (building_Bed != null && vehicle.RaceProps.Humanlike)
-			{
-				Rot4 rotation = building_Bed.Rotation;
-				rotation.AsInt += 2;
-				return rotation.AsAngle;
-			}
-			if (vehicle.RaceProps.Humanlike)
-			{
-				return LayingFacing().AsAngle;
-			}
-			Rot4 rot = Rot4.West;
-			int num = vehicle.thingIDNumber % 2;
-			if (num != 0)
-			{
-				if (num == 1)
-				{
-					rot = Rot4.East;
-				}
-			}
-			else
-			{
-				rot = Rot4.West;
-			}
-			return rot.AsAngle;
-		}
-
-		public Vector3 BaseHeadOffsetAt(Rot4 rotation)
-		{
-			Vector2 headOffset = vehicle.story.bodyType.headOffset;
-			switch (rotation.AsInt)
-			{
-			case 0:
-				return new Vector3(0f, 0f, headOffset.y);
-			case 1:
-				return new Vector3(headOffset.x, 0f, headOffset.y);
-			case 2:
-				return new Vector3(0f, 0f, headOffset.y);
-			case 3:
-				return new Vector3(-headOffset.x, 0f, headOffset.y);
-			default:
-				Log.Error("BaseHeadOffsetAt error in " + vehicle);
-				return Vector3.zero;
 			}
 		}
 

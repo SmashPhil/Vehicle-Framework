@@ -571,7 +571,7 @@ namespace Vehicles
 					{
 						return;
 					}
-					if (!cannonTarget.IsValid && Targeters.CannonTargeter.Cannon != this && reloadTicks <= 0 && HasAmmo)
+					if (!cannonTarget.IsValid && CannonTargeter.Instance.Cannon != this && reloadTicks <= 0 && HasAmmo)
 					{
 						LocalTargetInfo autoTarget = this.GetCannonTarget();
 						if (autoTarget.IsValid)
@@ -792,7 +792,7 @@ namespace Vehicles
 				{
 					projectile2.AllComps.Add(new CompTurretProjectileProperties(vehicle, turretDef, projectile2));
 				}
-				projectile2.Launch(vehicle, launchCell, c, cannonTarget, projectile2.HitFlags);
+				projectile2.Launch(vehicle, launchCell, c, cannonTarget, projectile2.HitFlags, vehicle);
 				vehicle.vDrawer.rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
 				rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
 				PostTurretFire();
@@ -863,7 +863,7 @@ namespace Vehicles
 
 		protected virtual void DrawTargeter()
 		{
-			if (GizmoHighlighted || Targeters.CannonTargeter.Cannon == this)
+			if (GizmoHighlighted || CannonTargeter.Instance.Cannon == this)
 			{
 				if (angleRestricted != Vector2.zero)
 				{
@@ -929,6 +929,7 @@ namespace Vehicles
 					cachedGraphicData.color = forPawn.DrawColor;
 					cachedGraphicData.colorTwo = forPawn.DrawColorTwo;
 					cachedGraphicData.colorThree = forPawn.DrawColorThree;
+					cachedGraphicData.tiles = forPawn.tiles;
 				}
 			}
 
@@ -976,6 +977,7 @@ namespace Vehicles
 					cachedGraphicData.color = bodyGraphicData.color;
 					cachedGraphicData.colorTwo = bodyGraphicData.colorTwo;
 					cachedGraphicData.colorThree = bodyGraphicData.colorThree;
+					cachedGraphicData.tiles = bodyGraphicData.tiles;
 				}
 			}
 
@@ -1283,7 +1285,7 @@ namespace Vehicles
 
 		protected void ValidateLockStatus()
 		{
-			if (!cannonTarget.IsValid && Targeters.CannonTargeter.Cannon != this)
+			if (!cannonTarget.IsValid && CannonTargeter.Instance.Cannon != this)
 			{
 				float angleDifference = vehicle.Angle - parentAngleCached;
 				if (attachedTo is null)

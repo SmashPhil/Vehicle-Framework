@@ -21,8 +21,8 @@ namespace Vehicles
 		/// </summary>
 		internal static List<WorldPath> debugLines = new List<WorldPath>();
 		internal static List<Pair<int, int>> tiles = new List<Pair<int, int>>(); // Pair -> TileID : Cycle
-		internal static readonly bool debug = false;
-		internal static readonly bool drawPaths = false;
+		internal const bool debug = false;
+		internal const bool drawPaths = false;
 
 		private static string methodPatching = string.Empty;
 		private static readonly Harmony harmony;

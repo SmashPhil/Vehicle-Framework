@@ -8,23 +8,19 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class StrafeTargeter
+	public class StrafeTargeter : BaseTargeter
 	{
-		private static float middleMouseDownTime;
-		private static float ticksOpen;
-
-		private VehiclePawn vehicle;
 		private LaunchProtocol launchProtocol;
 		private Action<IntVec3, IntVec3> action;
 		private IntVec3 start;
 		private IntVec3 end;
-		private Action actionWhenFinished;
-		private Texture2D mouseAttachment;
 		private Func<LocalTargetInfo, bool> targetValidator;
+
+		public static StrafeTargeter Instance { get; private set; }
 
 		public bool ForcedTargeting { get; set; }
 
-		public bool IsTargeting => action != null;
+		public override bool IsTargeting => action != null;
 
 		public void BeginTargeting(VehiclePawn vehicle, LaunchProtocol launchProtocol, Map map, Action<IntVec3, IntVec3> action, Func<LocalTargetInfo, bool> targetValidator = null, Action actionWhenFinished = null, Texture2D mouseAttachment = null, bool forcedTargeting = false)
 		{
@@ -42,9 +38,12 @@ namespace Vehicles
 			this.mouseAttachment = mouseAttachment;
 			this.targetValidator = targetValidator;
 			ForcedTargeting = forcedTargeting;
+
+			start = IntVec3.Invalid;
+			end = IntVec3.Invalid;
 		}
 
-		public void StopTargeting()
+		public override void StopTargeting()
 		{
 			if (actionWhenFinished != null)
 			{
@@ -53,99 +52,88 @@ namespace Vehicles
 			}
 			action = null;
 			targetValidator = null;
-			ticksOpen = 0;
 			ForcedTargeting = false;
 		}
 
-		public void ProcessInputEvents()
+		public override void ProcessInputEvents()
 		{
-			if (IsTargeting)
+			if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
 			{
-				if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
+				LocalTargetInfo localTargetInfo = CurrentTargetUnderMouse();
+				if (action != null)
 				{
-					LocalTargetInfo localTargetInfo = CurrentTargetUnderMouse();
-					if (action != null)
+					if (localTargetInfo.IsValid && localTargetInfo.Cell != start && (targetValidator is null || targetValidator(localTargetInfo)))
 					{
-						if (targetValidator != null)
+						if (start.IsValid)
 						{
-							if (localTargetInfo.IsValid && targetValidator(localTargetInfo))
-							{
-								if (start.IsValid)
-								{
-									end = localTargetInfo.Cell;
-									action(start, end);
-									StopTargeting();
-								}
-								else
-								{
-									start = localTargetInfo.Cell;
-								}
-							}
-						}
-						else if (localTargetInfo.IsValid)
-						{
+							end = localTargetInfo.Cell;
 							action(start, end);
 							StopTargeting();
 						}
+						else
+						{
+							start = localTargetInfo.Cell;
+						}
 					}
-					SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
-					Event.current.Use();
 				}
-				if ((Event.current.type == EventType.MouseDown && Event.current.button == 1) || KeyBindingDefOf.Cancel.KeyDownEvent)
-				{
-					if (start.IsValid)
-					{
-						start = IntVec3.Invalid;
-						Event.current.Use();
-						return;
-					}
-					if (ForcedTargeting)
-					{
-						SoundDefOf.ClickReject.PlayOneShotOnCamera(null);
-						Messages.Message("MustTargetStrafe".Translate(), MessageTypeDefOf.RejectInput);
-						Event.current.Use();
-						return;
-					}
-					SoundDefOf.CancelMode.PlayOneShotOnCamera(null);
-					StopTargeting();
-					Event.current.Use();
-				}
+				SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
+				Event.current.Use();
 			}
-		}
-
-		public void TargeterOnGUI()
-		{
-			if (IsTargeting)
+			if ((Event.current.type == EventType.MouseDown && Event.current.button == 1) || KeyBindingDefOf.Cancel.KeyDownEvent)
 			{
 				if (start.IsValid)
 				{
-					GenDraw.DrawCircleOutline(start.ToVector3Shifted(), 1);
+					start = IntVec3.Invalid;
+					Event.current.Use();
+					return;
 				}
-				GenUI.DrawMouseAttachment(mouseAttachment ?? CompLaunchable.TargeterMouseAttachment);
-			}
-		}
-
-		public void TargeterUpdate()
-		{
-			if (IsTargeting && action != null)
-			{
-				ticksOpen++;
-				LocalTargetInfo localTargetInfo = CurrentTargetUnderMouse();
-				if (localTargetInfo.IsValid)
+				if (ForcedTargeting)
 				{
-					//Draw Targeting Rect Here
+					SoundDefOf.ClickReject.PlayOneShotOnCamera(null);
+					Messages.Message("MustTargetStrafe".Translate(), MessageTypeDefOf.RejectInput);
+					Event.current.Use();
+					return;
 				}
+				SoundDefOf.CancelMode.PlayOneShotOnCamera(null);
+				StopTargeting();
+				Event.current.Use();
 			}
 		}
 
-		private LocalTargetInfo CurrentTargetUnderMouse()
+		public override void TargeterOnGUI()
 		{
-			if (!IsTargeting)
+			GenUI.DrawMouseAttachment(mouseAttachment ?? CompLaunchable.TargeterMouseAttachment);
+		}
+
+		public override void TargeterUpdate()
+		{
+			IntVec3 cell = CurrentTargetUnderMouse().Cell;
+			if (cell.IsValid && (targetValidator is null || targetValidator(cell)))
 			{
-				return LocalTargetInfo.Invalid;
+				GenDraw.DrawTargetHighlight(cell);
 			}
-			LocalTargetInfo target = Verse.UI.MouseCell();
-			return target;
+			if (start.IsValid && cell != start)
+			{
+				Vector3 startPoint = start.ToVector3Shifted();
+				Vector3 cellPoint = cell.ToVector3Shifted();
+				GenDraw.DrawTargetHighlight(start);
+				GenDraw.DrawLineBetween(startPoint, cellPoint, SimpleColor.Red);
+				Vector3 startToEdge = startPoint.PointToEdge(Current.Game.CurrentMap, cellPoint.AngleToPoint(startPoint));
+				GenDraw.DrawLineBetween(startToEdge, startPoint);
+				Vector3 endToEdge = cellPoint.PointToEdge(Current.Game.CurrentMap, startPoint.AngleToPoint(cellPoint));
+				GenDraw.DrawLineBetween(endToEdge, cellPoint);
+			}
+
+			LocalTargetInfo localTargetInfo = CurrentTargetUnderMouse();
+			if (localTargetInfo.IsValid)
+			{
+				//Draw Targeting Rect Here
+			}
+		}
+
+		public override void PostInit()
+		{
+			Instance = this;
 		}
 	}
 }

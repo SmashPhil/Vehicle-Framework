@@ -30,8 +30,7 @@ namespace Vehicles
 
 		public override void Arrived(int tile)
 		{
-			VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
-			skyfaller.vehicle = vehicle;
+			VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)VehicleSkyfallerMaker.MakeSkyfaller(vehicle.CompVehicleLauncher.Props.skyfallerIncoming, vehicle);
 			skyfaller.launchProtocol = launchProtocol;
 			GenSpawn.Spawn(skyfaller, landingCell, mapParent.Map, landingRot);
 		}

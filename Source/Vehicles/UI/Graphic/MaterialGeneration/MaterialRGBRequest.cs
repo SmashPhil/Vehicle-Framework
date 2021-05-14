@@ -10,111 +10,96 @@ namespace Vehicles
 	{
 		public Shader shader;
 		public Texture2D mainTex;
-		public Color color;
-		public Color colorTwo;
-		public Color colorThree;
-		public bool replaceTex;
+		public PatternProperties properties;
 		public Texture2D maskTex;
 		public Texture2D patternTex;
 		public int renderQueue;
+		public bool isSkin;
 		public List<ShaderParameter> shaderParameters;
+
+		public Color color;
+		public Color colorTwo;
+		public Color colorThree;
+		public float tiles;
 
 		public MaterialRequestRGB(Texture2D tex)
 		{
 			shader = ShaderDatabase.Cutout;
 			mainTex = tex;
+			properties = new PatternProperties();
 			color = Color.white;
 			colorTwo = Color.white;
 			colorThree = Color.white;
-			replaceTex = false;
+			tiles = 1;
 			maskTex = null;
 			patternTex = null;
 			renderQueue = 0;
 			shaderParameters = null;
+			isSkin = false;
 		}
 
 		public MaterialRequestRGB(Texture2D tex, Shader shader)
 		{
 			this.shader = shader;
 			mainTex = tex;
+			maskTex = null;
+			properties = new PatternProperties();
 			color = Color.white;
 			colorTwo = Color.white;
 			colorThree = Color.white;
-			replaceTex = false;
-			maskTex = null;
+			tiles = 1;
 			patternTex = null;
 			renderQueue = 0;
 			shaderParameters = null;
+			isSkin = false;
 		}
 
-		public MaterialRequestRGB(Texture2D tex, Shader shader, Color color)
+		public MaterialRequestRGB(Texture2D tex, Shader shader, PatternProperties properties)
 		{
 			this.shader = shader;
 			mainTex = tex;
-			this.color = color;
-			colorTwo = Color.white;
-			colorThree = Color.white;
-			replaceTex = false;
 			maskTex = null;
+			this.properties = properties;
+			color = properties.colorOne ?? Color.white;
+			colorTwo = properties.colorTwo ?? Color.white;
+			colorThree = properties.colorThree ?? Color.white;
+			tiles = properties.tiles.TryGetValue("All", 1);
 			patternTex = null;
 			renderQueue = 0;
 			shaderParameters = null;
+			isSkin = false;
 		}
 
-		public MaterialRequestRGB(Texture2D tex, Shader shader, Color color, Color colorTwo)
-		{
-			this.shader = shader;
-			mainTex = tex;
-			this.color = color;
-			this.colorTwo = colorTwo;
-			colorThree = Color.white;
-			replaceTex = false;
-			maskTex = null;
-			patternTex = null;
-			renderQueue = 0;
-			shaderParameters = null;
-		}
-
-		public MaterialRequestRGB(Texture2D tex, Shader shader, Color color, Color colorTwo, Color colorThree)
-		{
-			this.shader = shader;
-			mainTex = tex;
-			this.color = color;
-			this.colorTwo = colorTwo;
-			this.colorThree = colorThree;
-			replaceTex = false;
-			maskTex = null;
-			patternTex = null;
-			renderQueue = 0;
-			shaderParameters = null;
-		}
-
-		public MaterialRequestRGB(MaterialRequest req, Texture2D patternTex, Color colorThree)
+		public MaterialRequestRGB(MaterialRequest req, Texture2D patternTex, PatternProperties properties)
 		{
 			shader = req.shader;
 			mainTex = req.mainTex;
 			maskTex = req.maskTex;
-			color = req.color;
-			colorTwo = req.colorTwo;
-			this.colorThree = colorThree;
-			replaceTex = false;
+			this.properties = properties;
+			color = properties.colorOne ?? Color.white;
+			colorTwo = properties.colorTwo ?? Color.white;
+			colorThree = properties.colorThree ?? Color.white;
+			tiles = properties.tiles.TryGetValue("All", 1);
 			this.patternTex = patternTex;
 			renderQueue = req.renderQueue;
 			shaderParameters = req.shaderParameters;
+			isSkin = false;
 		}
 
-		public MaterialRequestRGB(MaterialRequest req, Texture2D patternTex, Color colorThree, bool replaceTex)
+		public MaterialRequestRGB(MaterialRequest req, Texture2D patternTex, PatternProperties properties, bool isSkin)
 		{
 			shader = req.shader;
 			mainTex = req.mainTex;
 			maskTex = req.maskTex;
-			color = req.color;
-			colorTwo = req.colorTwo;
-			this.colorThree = colorThree;
-			this.replaceTex = replaceTex;
+			this.properties = properties;
+			color = properties.colorOne ?? Color.white;
+			colorTwo = properties.colorTwo ?? Color.white;
+			colorThree = properties.colorThree ?? Color.white;
+			tiles = properties.tiles.TryGetValue("All", 1);
 			this.patternTex = patternTex;
 			renderQueue = req.renderQueue;
 			shaderParameters = req.shaderParameters;
+			this.isSkin = isSkin;
 		}
 
 		public string BaseTexPath
@@ -127,7 +112,7 @@ namespace Vehicles
 
 		public override int GetHashCode()
 		{
-			return Gen.HashCombine(Gen.HashCombineInt(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombineStruct(Gen.HashCombineStruct(Gen.HashCombine(0, shader), color), colorTwo), colorThree), mainTex), maskTex), renderQueue), shaderParameters);
+			return Gen.HashCombine(Gen.HashCombineInt(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(0, tiles), isSkin), color), colorTwo), colorThree), mainTex), maskTex), renderQueue), shaderParameters);
 		}
 
 		public override bool Equals(object obj)
@@ -137,8 +122,10 @@ namespace Vehicles
 
 		public bool Equals(MaterialRequestRGB other)
 		{
-			return other.shader == shader && other.mainTex == mainTex && other.color == color && other.colorTwo == colorTwo && other.colorThree == colorThree 
-				&& other.maskTex == maskTex && other.patternTex == patternTex && other.renderQueue == renderQueue && other.shaderParameters == shaderParameters;
+			return other.shader == shader && other.mainTex == mainTex && other.properties.colorOne == properties.colorOne && 
+				other.properties.colorTwo == properties.colorTwo && other.properties.colorThree == properties.colorThree 
+				&& other.maskTex == maskTex && other.patternTex == patternTex && other.renderQueue == renderQueue && 
+				other.shaderParameters == shaderParameters && other.isSkin == isSkin;
 		}
 
 		public static bool operator ==(MaterialRequestRGB lhs, MaterialRequestRGB rhs)
@@ -153,7 +140,7 @@ namespace Vehicles
 
 		public override string ToString()
 		{
-			return $"MaterialPatternedRequest({shader.name}, {mainTex.name}, {color}, {colorTwo}, {colorThree}, {maskTex}, {patternTex}, {renderQueue})";
+			return $"MaterialRGBRequest({shader.name}, {mainTex.name}, {properties}, {maskTex}, {patternTex}, {renderQueue}, {isSkin})";
 		}
 	}
 }

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<Vehicles.SkinDef>
+		<defName>Jungle</defName>
+		<label>Jungle</label>
+		<path>Graphics/Skins/Jungle/Jungle</path>
+	</Vehicles.SkinDef>
+	
+	<Vehicles.SkinDef>
+		<defName>Pokeball</defName>
+		<label>Pokeball</label>
+		<path>Graphics/Skins/Pokeball/Pokeball</path>
+		<properties>
+			<tiles>
+				<li>
+					<key>All</key>
+					<value>4</value>
+				</li>
+			</tiles>
+		</properties>
+	</Vehicles.SkinDef>
+</Defs>
