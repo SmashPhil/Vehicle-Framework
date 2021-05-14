@@ -60,4 +60,13 @@
 			<dynamicTiling>false</dynamicTiling>
 		</properties>
 	</Vehicles.PatternDef>
+	
+	<Vehicles.PatternDef>
+		<defName>Rectangle</defName>
+		<label>Rectangle</label>
+		<path>testing/Rectangle/Rectangle</path>
+		<properties>
+			<dynamicTiling>false</dynamicTiling>
+		</properties>
+	</Vehicles.PatternDef>
 </Defs>

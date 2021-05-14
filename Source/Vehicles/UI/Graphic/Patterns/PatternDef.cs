@@ -2,6 +2,7 @@
 using UnityEngine;
 using Verse;
 using SmashTools;
+using System.IO;
 
 namespace Vehicles
 {
@@ -64,68 +65,32 @@ namespace Vehicles
 
 			if (patterns[1] is null)
 			{
-				if (patterns[3] != null)
-				{
-					patterns[1] = patterns[3].Rotate(180);
-				}
-				else
-				{
-					patterns[1] = patterns[0].Rotate(90);
-				}
+				patterns[1] = patterns[0].Rotate(270);
 			}
 			if (patterns[2] is null)
 			{
-				patterns[2] = patterns[0].Rotate(90);
+				patterns[2] = patterns[0].Rotate(180);
 			}
-
 			if (patterns[3] is null)
 			{
 				patterns[3] = patterns[0].Rotate(90);
 			}
 
+			if (patterns[4] is null)
+			{
+				patterns[4] = patterns[0];
+			}
 			if (patterns[5] is null)
 			{
-				if (patterns[4] != null)
-				{
-					patterns[5] = patterns[4];
-				}
-				else
-				{
-					patterns[5] = patterns[1];
-				}
+				patterns[5] = patterns[2];
 			}
-			if(patterns[6] is null)
+			if (patterns[6] is null)
 			{
-				if(patterns[7] != null)
-				{
-					patterns[6] = patterns[7];
-				}
-				else
-				{
-					patterns[6] = patterns[3];
-				}
+				patterns[6] = patterns[2];
 			}
-			if(patterns[4] is null)
+			if (patterns[7] is null)
 			{
-				if(patterns[5] != null)
-				{
-					patterns[4] = patterns[5];
-				}
-				else
-				{
-					patterns[4] = patterns[1];
-				}
-			}
-			if(patterns[7] is null)
-			{
-				if(patterns[6] != null)
-				{
-					patterns[7] = patterns[6];
-				}
-				else
-				{
-					patterns[7] = patterns[3];
-				}
+				patterns[7] = patterns[2];
 			}
 		}
 
