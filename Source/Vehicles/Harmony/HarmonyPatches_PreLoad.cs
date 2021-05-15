@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using HarmonyLib;
 using Verse;
+using RimWorld;
 using SmashTools;
 using Vehicles.Defs;
 
@@ -27,7 +28,12 @@ namespace Vehicles
 			harmony.Patch(original: AccessTools.PropertyGetter(typeof(ShaderTypeDef), nameof(ShaderTypeDef.Shader)),
 				prefix: new HarmonyMethod(typeof(HarmonyPatches_PreLoad),
 				nameof(ShaderFromAssetBundle)));
-
+			harmony.Patch(original: AccessTools.Method(typeof(DefGenerator), nameof(DefGenerator.GenerateImpliedDefs_PreResolve)),
+				postfix: new HarmonyMethod(typeof(HarmonyPatches_PreLoad),
+				nameof(ImpliedDefGeneratorVehicles)));
+			harmony.Patch(original: AccessTools.Method(typeof(GraphicData), "Init"),
+				prefix: new HarmonyMethod(typeof(HarmonyPatches_PreLoad),
+				nameof(RGBInitRedirect)));
 			/* Debugging Only */
 			//harmony.Patch(original: AccessTools.Method(typeof(), nameof()),
 			//    prefix: new HarmonyMethod(typeof(HarmonyPatches_PreLoad),
@@ -75,12 +81,42 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// Load shader asset for RGB shader types
+		/// </summary>
+		/// <param name="__instance"></param>
+		/// <param name="___shaderInt"></param>
 		public static void ShaderFromAssetBundle(ShaderTypeDef __instance, ref Shader ___shaderInt)
 		{
 			if (__instance is RGBShaderTypeDef)
 			{
 				___shaderInt = ShaderDatabaseFromBundle.LoadAssetBundleShader(__instance.shaderPath);
 			}
+		}
+
+		/// <summary>
+		/// Autogenerate implied PawnKindDefs for VehicleDefs
+		/// </summary>
+		public static void ImpliedDefGeneratorVehicles()
+		{
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+			{
+				DefGenerator.AddImpliedDef(PawnKindDefGenerator_Vehicles.GenerateImpliedPawnKindDef(vehicleDef));
+			}
+		}
+
+		/// <summary>
+		/// Redirect Init calls from GraphicData to GraphicDataRGB
+		/// </summary>
+		/// <param name="__instance"></param>
+		public static bool RGBInitRedirect(GraphicData __instance)
+		{
+			if (__instance is GraphicDataRGB graphicDataRGB)
+			{
+				graphicDataRGB.Init();
+				return false;
+			}
+			return true;
 		}
 	}
 }

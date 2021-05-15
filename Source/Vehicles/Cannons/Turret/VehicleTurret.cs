@@ -973,7 +973,7 @@ namespace Vehicles
 				
 				if(turretDef.matchParentColor)
 				{
-					var bodyGraphicData = alternateDef.race.AnyPawnKind.lifeStages.LastOrDefault().bodyGraphicData as GraphicDataRGB;
+					var bodyGraphicData = alternateDef.graphicData;
 					cachedGraphicData.color = bodyGraphicData.color;
 					cachedGraphicData.colorTwo = bodyGraphicData.colorTwo;
 					cachedGraphicData.colorThree = bodyGraphicData.colorThree;

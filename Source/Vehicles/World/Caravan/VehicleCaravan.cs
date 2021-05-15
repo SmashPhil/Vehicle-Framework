@@ -51,7 +51,7 @@ namespace Vehicles
 			Vector3 normalized = pos.normalized;
 			Vector3 vector;
 
-			Vector2 drawSize = new Vector2(LeadVehicle.ageTracker.CurKindLifeStage.bodyGraphicData.drawSize.x, LeadVehicle.ageTracker.CurKindLifeStage.bodyGraphicData.drawSize.y);
+			Vector2 drawSize = new Vector2(LeadVehicle.VehicleDef.graphicData.drawSize.x, LeadVehicle.VehicleDef.graphicData.drawSize.y);
 
 			if (counterClockwise)
 			{

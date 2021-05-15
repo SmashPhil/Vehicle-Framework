@@ -1,39 +1,22 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <Defs>
-	<PawnKindDef>
-		<defName>RowBoat</defName>
-		<label>Row Boat</label>
-		<defaultFactionType>PlayerColony</defaultFactionType>
-		<aiAvoidCover>false</aiAvoidCover>
-		<destroyGearOnDrop>true</destroyGearOnDrop>
-		<race>RowBoat</race>
-		<backstoryCategories>
-			<li>Industrial</li>
-		</backstoryCategories>
-		<combatPower>200</combatPower>
-		<lifeStages>
-			<li>
-				<bodyGraphicData Class="Vehicles.GraphicDataRGB">
-					<texPath>Vehicles/Sea/RowBoat/RowBoat</texPath>
-					<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
-					<drawSize>(1, 1.72)</drawSize>
-					<shaderType>Cutout</shaderType>
-					<color>(120, 120, 120)</color>
-					<colorTwo>(0, 80, 0)</colorTwo>
-					<shadowData>
-						<volume>(0.4,0.1,0.4)</volume>
-					</shadowData>
-				</bodyGraphicData>
-			</li>
-		</lifeStages>
-	</PawnKindDef>
-	
 	<Vehicles.VehicleDef ParentName="BaseVehiclePawn">
 		<defName>RowBoat</defName>
 		<label>Row Boat</label>
 		<description>A small sturdy boat for short travel across bodies of water.</description>
 		
+		<graphicData>
+			<texPath>Vehicles/Sea/RowBoat/RowBoat</texPath>
+			<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
+			<drawSize>(1, 1.72)</drawSize>
+			<shaderType>Cutout</shaderType>
+			<color>(120, 120, 120)</color>
+			<colorTwo>(0, 80, 0)</colorTwo>
+			<shadowData>
+				<volume>(0.4,0.1,0.4)</volume>
+			</shadowData>
+		</graphicData>
 		<fillPercent>1</fillPercent>
 		
 		<nameable>false</nameable>

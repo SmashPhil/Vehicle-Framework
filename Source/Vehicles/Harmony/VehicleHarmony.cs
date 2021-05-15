@@ -25,11 +25,11 @@ namespace Vehicles
 		internal const bool drawPaths = false;
 
 		private static string methodPatching = string.Empty;
-		private static readonly Harmony harmony;
+
+		internal static Harmony Harmony { get; private set; } = new Harmony(VehiclesUniqueId);
 
 		static VehicleHarmony()
 		{
-			harmony = new Harmony(VehiclesUniqueId);
 			//harmony.PatchAll(Assembly.GetExecutingAssembly());
 			//Harmony.DEBUG = true;
 			Log.Message($"{LogLabel} version {Assembly.GetExecutingAssembly().GetName().Version}");
@@ -48,7 +48,7 @@ namespace Vehicles
 					throw ex;
 				}
 			}
-			SmashLog.Message($"{LogLabel} <success>{harmony.GetPatchedMethods().Count()} patches successfully applied.</success>");
+			SmashLog.Message($"{LogLabel} <success>{Harmony.GetPatchedMethods().Count()} patches successfully applied.</success>");
 
 			ResolveAllReferences();
 			//Will want to be added via xml
@@ -61,7 +61,7 @@ namespace Vehicles
 		public static void Patch(MethodBase original, HarmonyMethod prefix = null, HarmonyMethod postfix = null, HarmonyMethod transpiler = null, HarmonyMethod finalizer = null)
 		{
 			methodPatching = original.Name;
-			harmony.Patch(original, prefix, postfix, transpiler, finalizer);
+			Harmony.Patch(original, prefix, postfix, transpiler, finalizer);
 		}
 
 		public static void ResolveAllReferences()

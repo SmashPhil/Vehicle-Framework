@@ -139,11 +139,11 @@ namespace Vehicles
 					}
 					tasks.AppendLine("Icon created");
 					tasks.AppendLine("Creating BodyGraphicData and cached graphics...");
-					if (vehicleDef.race?.AnyPawnKind?.lifeStages?.LastOrDefault()?.bodyGraphicData is GraphicDataRGB bodyGraphicData)
+					if (vehicleDef.graphicData is GraphicDataRGB graphicDataRGB)
 					{
 						Texture2D tex;
 						var graphicData = new GraphicDataRGB();
-						graphicData.CopyFrom(bodyGraphicData);
+						graphicData.CopyFrom(graphicDataRGB);
 						Graphic_Vehicle graphic = graphicData.Graphic as Graphic_Vehicle;
 						tasks.AppendLine("Setting TextureCache...");
 						SetTextureCache(vehicleDef, graphicData);
@@ -163,7 +163,7 @@ namespace Vehicles
 					}
 					else
 					{
-						SmashLog.Error($"Unable to create GraphicData for {vehicleDef.defName}.\n{tasks}");
+						SmashLog.Error($"Unable to create GraphicData of type <type>{vehicleDef.graphicData?.GetType().ToStringSafe() ?? "Null"} for {vehicleDef.defName}.\n{tasks}");
 					}
 				}
 				catch (Exception ex)

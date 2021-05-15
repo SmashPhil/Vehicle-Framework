@@ -32,6 +32,10 @@ namespace Vehicles
 		[SliderValues(MinValue = 1, MaxValue = 20f)]
 		public float repairRate = 1;
 
+		[PostToSettings(Label = "VehicleCombatPower", Translate = true, Tooltip = "VehicleCombatPowerTooltip", UISettingsType = UISettingsType.FloatBox)]
+		[NumericBoxValues(MinValue = 0, MaxValue = float.MaxValue)]
+		public float combatPower = 0;
+
 		[PostToSettings(Label = "VehicleMovementPermissions", Translate = true, UISettingsType = UISettingsType.SliderEnum)]
 		public VehiclePermissions vehicleMovementPermissions = VehiclePermissions.DriverNeeded;
 
@@ -43,6 +47,7 @@ namespace Vehicles
 		public NavigationCategory defaultNavigation = NavigationCategory.Opportunistic;
 
 		public VehicleBuildDef buildDef;
+		public new GraphicDataRGB graphicData;
 
 		[PostToSettings(Label = "VehicleProperties", Translate = true, ParentHolder = true)]
 		public VehicleProperties properties;
@@ -52,6 +57,8 @@ namespace Vehicles
 		public List<VehicleComponentProperties> components;
 
 		private readonly SelfOrderingList<CompProperties> cachedComps = new SelfOrderingList<CompProperties>();
+
+		public PawnKindDef VehicleKindDef { get; internal set; }
 
 		public override void ResolveReferences()
 		{
@@ -119,13 +126,22 @@ namespace Vehicles
 			}
 		}
 
+		public override void PostLoad()
+		{
+			base.graphicData = graphicData;
+			base.PostLoad();
+		}
+
 		public override IEnumerable<string> ConfigErrors()
 		{
 			foreach (string error in base.ConfigErrors())
 			{
 				yield return error;
 			}
-
+			if (graphicData is null)
+			{
+				yield return "<field>graphicData</field> must be specified in order to properly render the vehicle.".ConvertRichText();
+			}
 			if (vehicleType == VehicleType.Undefined)
 			{
 				yield return "Cannot assign <field>Undefined</field> vehicle type to VehicleDef".ConvertRichText();
@@ -161,7 +177,7 @@ namespace Vehicles
 		{
 			float sizeX = size.x;
 			float sizeY = size.y;
-			Vector2 drawSize = race.AnyPawnKind.lifeStages.LastOrDefault().bodyGraphicData.drawSize;
+			Vector2 drawSize = graphicData.drawSize;
 			if (sizeX < sizeY)
 			{
 				sizeY = sizeX * (drawSize.y / drawSize.x);
@@ -201,6 +217,7 @@ namespace Vehicles
 				//PawnKindDef anyPawnKind = race.AnyPawnKind;
 				//if (anyPawnKind != null)
 				//{
+				//	SWAP LIFESTAGES TO graphicData
 				//	Material material2 = anyPawnKind.lifeStages.Last().bodyGraphicData.Graphic.MatAt(Rot4.East, null);
 				//	uiIcon = (Texture2D)material2.mainTexture;
 				//	uiIconColor = material2.color;

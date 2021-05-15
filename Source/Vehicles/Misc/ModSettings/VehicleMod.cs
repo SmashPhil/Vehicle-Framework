@@ -101,7 +101,7 @@ namespace Vehicles
 				selectedVehicleTex = null;
 				return;
 			}
-			var bodyGraphicData = selectedDef.race.AnyPawnKind.lifeStages.LastOrDefault().bodyGraphicData as GraphicDataRGB;
+			var bodyGraphicData = selectedDef.graphicData;
 			var graphicData = new GraphicDataRGB();
 			graphicData.CopyFrom(bodyGraphicData);
 			graphicInt = graphicData.Graphic as Graphic_Vehicle;

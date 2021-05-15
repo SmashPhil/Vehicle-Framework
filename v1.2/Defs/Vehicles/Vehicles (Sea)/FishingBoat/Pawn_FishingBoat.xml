@@ -1,38 +1,22 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <Defs>
-	<PawnKindDef>
-		<defName>FishingBoat</defName>
-		<label>Fishing Boat</label>
-		<defaultFactionType>PlayerColony</defaultFactionType>
-		<aiAvoidCover>false</aiAvoidCover>
-		<destroyGearOnDrop>true</destroyGearOnDrop>
-		<race>FishingBoat</race>
-		<backstoryCategories>
-			<li>Industrial</li>
-		</backstoryCategories>
-		<combatPower>200</combatPower>
-		<lifeStages>
-			<li>
-				<bodyGraphicData Class="Vehicles.GraphicDataRGB">
-					<texPath>Vehicles/Sea/FishingBoat/FishingBoat</texPath>
-					<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
-					<drawSize>(4,4)</drawSize>
-					<shaderType>Cutout</shaderType>
-					<color>(120, 120, 120)</color>
-					<colorTwo>(0, 80, 0)</colorTwo>
-					<shadowData>
-						<volume>(0.4,0.1,0.4)</volume>
-					</shadowData>
-				</bodyGraphicData>
-			</li>
-		</lifeStages>
-	</PawnKindDef>
-	
 	<Vehicles.VehicleDef ParentName="BaseVehiclePawn">
 		<defName>FishingBoat</defName>
 		<label>Fishing Boat</label>
 		<description>A heavy warship to rule the seas.</description>
+		
+		<graphicData>
+			<texPath>Vehicles/Sea/FishingBoat/FishingBoat</texPath>
+			<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
+			<drawSize>(4,4)</drawSize>
+			<shaderType>Cutout</shaderType>
+			<color>(120, 120, 120)</color>
+			<colorTwo>(0, 80, 0)</colorTwo>
+			<shadowData>
+				<volume>(0.4,0.1,0.4)</volume>
+			</shadowData>
+		</graphicData>
 		
 		<fillPercent>1</fillPercent>
 		

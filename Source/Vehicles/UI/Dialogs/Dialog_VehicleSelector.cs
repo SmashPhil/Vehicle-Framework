@@ -77,7 +77,7 @@ namespace Vehicles
 				if(vehicle.VehicleDef.properties.generateThingIcon)
 				{
 					Rect texCoords = new Rect(0, 0, 1, 1);
-					Vector2 texProportions = vehicle.VehicleDef.race.AnyPawnKind.lifeStages.LastOrDefault().bodyGraphicData.drawSize;
+					Vector2 texProportions = vehicle.VehicleDef.graphicData.drawSize;
 					float x = texProportions.x;
 					texProportions.x = texProportions.y;
 					texProportions.y = x;

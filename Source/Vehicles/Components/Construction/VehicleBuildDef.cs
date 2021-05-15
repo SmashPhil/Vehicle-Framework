@@ -11,7 +11,7 @@ namespace Vehicles
 {
 	public class VehicleBuildDef : ThingDef
 	{
-		public PawnKindDef thingToSpawn;
+		public VehicleDef thingToSpawn;
 		public SoundDef soundBuilt;
 
 		// <offset, angle, velocity> REDO

@@ -101,31 +101,31 @@ namespace Vehicles
 
 		protected virtual List<Pawn> ReplaceWithVehicles(IncidentParms parms, List<Pawn> pawns)
 		{
-			List<PawnKindDef> vehicles = VehicleSpawner.GetAppropriateVehicles(parms.faction, parms.points, parms.generateFightersOnly).ToList();
-			Log.Message($"Total: {parms.points} Group: {parms.raidStrategy} Vehicles: {vehicles.Count}");
-			int countToReplace = pawns.Count / 2;
+			//List<PawnKindDef> vehicles = VehicleSpawner.GetAppropriateVehicles(parms.faction, parms.points, parms.generateFightersOnly).ToList();
+			//Log.Message($"Total: {parms.points} Group: {parms.raidStrategy} Vehicles: {vehicles.Count}");
+			//int countToReplace = pawns.Count / 2;
 
-			List<VehiclePawn> vehicleTmp = new List<VehiclePawn>();
-			foreach (PawnKindDef vehicleKind in vehicles)
-			{
-				if (vehicleKind.race is VehicleDef vehicleDef && vehicleDef.properties.roles.Where(r => !r.handlingTypes.NullOrEmpty()).Count() <= countToReplace)
-				{
-					countToReplace -= vehicleDef.properties.roles.Where(r => !r.handlingTypes.NullOrEmpty()).Count();
-					VehiclePawn vehicle = VehicleSpawner.GenerateVehicle(new VehicleGenerationRequest(vehicleKind, parms.faction, true, true, false));
+			//List<VehiclePawn> vehicleTmp = new List<VehiclePawn>();
+			//foreach (PawnKindDef vehicleKind in vehicles)
+			//{
+			//	if (vehicleKind.race is VehicleDef vehicleDef && vehicleDef.properties.roles.Where(r => !r.handlingTypes.NullOrEmpty()).Count() <= countToReplace)
+			//	{
+			//		countToReplace -= vehicleDef.properties.roles.Where(r => !r.handlingTypes.NullOrEmpty()).Count();
+			//		VehiclePawn vehicle = VehicleSpawner.GenerateVehicle(new VehicleGenerationRequest(vehicleKind, parms.faction, true, true, false));
 
-					for(int i = 0; i < vehicle.GetPriorityHandlers().Count; i++)
-					{
-						Pawn pawn = pawns.Pop();
-						vehicle.GiveLoadJob(pawn, vehicle.NextAvailableHandler(null, true));
-						vehicle.Notify_Boarded(pawn, parms.target as Map);
-					}
-					vehicleTmp.Add(vehicle);
-				}
-				if (countToReplace <= 0)
-					break;
-			}
-			pawns.AddRange(vehicleTmp);
-			pawns.Reverse();
+			//		for(int i = 0; i < vehicle.GetPriorityHandlers().Count; i++)
+			//		{
+			//			Pawn pawn = pawns.Pop();
+			//			vehicle.GiveLoadJob(pawn, vehicle.NextAvailableHandler(null, true));
+			//			vehicle.Notify_Boarded(pawn, parms.target as Map);
+			//		}
+			//		vehicleTmp.Add(vehicle);
+			//	}
+			//	if (countToReplace <= 0)
+			//		break;
+			//}
+			//pawns.AddRange(vehicleTmp);
+			//pawns.Reverse();
 			return pawns;
 		}
 

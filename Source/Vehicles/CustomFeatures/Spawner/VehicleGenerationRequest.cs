@@ -9,7 +9,7 @@ namespace Vehicles
 {
 	public struct VehicleGenerationRequest
 	{
-		public PawnKindDef KindDef { get; set; }
+		public VehicleDef VehicleDef { get; set; }
 		public Faction Faction { get; set; }
 		public Color ColorOne { get; set; }
 		public Color ColorTwo { get; set; }
@@ -18,11 +18,11 @@ namespace Vehicles
 		public int Upgrades { get; set; }
 		public bool CleanSlate { get; set; }
 
-		public VehicleGenerationRequest(PawnKindDef kindDef, Faction faction, bool randomizeColors = false, bool randomizeMask = false, bool cleanSlate = true)
+		public VehicleGenerationRequest(VehicleDef vehicleDef, Faction faction, bool randomizeColors = false, bool randomizeMask = false, bool cleanSlate = true)
 		{
 			Rand.PushState();
 
-			KindDef = kindDef;
+			VehicleDef = vehicleDef;
 			Faction = faction;
 			
 			if (randomizeColors)
@@ -42,15 +42,14 @@ namespace Vehicles
 			}
 			else
 			{
-				var lifeStage = kindDef.lifeStages.MaxBy(l => l.bodyGraphicData.drawSize).bodyGraphicData as GraphicDataRGB;
-				ColorOne = lifeStage.color;
-				ColorTwo = lifeStage.colorTwo;
-				ColorThree = lifeStage.colorThree;
+				ColorOne = vehicleDef.graphicData.color;
+				ColorTwo = vehicleDef.graphicData.colorTwo;
+				ColorThree = vehicleDef.graphicData.colorThree;
 			}
 
 			Upgrades = 0;
 			CleanSlate = cleanSlate;
-			if (!CleanSlate && (kindDef.race as VehicleDef).GetSortedCompProperties<CompProperties_UpgradeTree>() is CompProperties_UpgradeTree compProperties_UpgradeTree)
+			if (!CleanSlate && vehicleDef.GetSortedCompProperties<CompProperties_UpgradeTree>() is CompProperties_UpgradeTree compProperties_UpgradeTree)
 			{
 				Upgrades = Rand.Range(0, compProperties_UpgradeTree.upgrades.Count);
 			}

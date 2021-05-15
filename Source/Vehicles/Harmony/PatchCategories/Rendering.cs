@@ -210,7 +210,7 @@ namespace Vehicles
 				{
 					if(Find.TickManager.TicksGame % 360 == 0)
 					{
-						float offset = Mathf.PingPong(Find.TickManager.TicksGame / 10, vehicle.ageTracker.CurKindLifeStage.bodyGraphicData.drawSize.y / 4);
+						float offset = Mathf.PingPong(Find.TickManager.TicksGame / 10, vehicle.VehicleDef.graphicData.drawSize.y / 4);
 						MoteMaker.MakeWaterSplash(vehicle.Drawer.DrawPos - new Vector3(0,0, offset), vehicle.Map, vehicle.VehicleDef.properties.wakeMultiplier, vehicle.VehicleDef.properties.wakeSpeed);
 					}
 				}
@@ -239,7 +239,7 @@ namespace Vehicles
 		{
 			if (thingDef is VehicleBuildDef def)
 			{
-				VehicleDef vehicleDef = def.thingToSpawn.race as VehicleDef;
+				VehicleDef vehicleDef = def.thingToSpawn;
 				if (vehicleDef.GetSortedCompProperties<CompProperties_Cannons>() is CompProperties_Cannons props)
 				{
 					Vector3 loc = GenThing.TrueCenter(center, rot, def.Size, drawAltitude.AltitudeFor());
@@ -250,7 +250,7 @@ namespace Vehicles
 
 		public static void VehicleCannonsBlueprintDraw(ThingDef def, bool isInstallBlueprint, ref ThingDef __result, ThingDef normalBlueprint = null)
 		{
-			if (def is VehicleBuildDef buildDef && (buildDef.thingToSpawn.race as VehicleDef).GetSortedCompProperties<CompProperties_Cannons>() is CompProperties_Cannons props)
+			if (def is VehicleBuildDef buildDef && buildDef.thingToSpawn.GetSortedCompProperties<CompProperties_Cannons>() is CompProperties_Cannons props)
 			{
 				__result.comps.Add(new CompProperties_Cannons()
 				{

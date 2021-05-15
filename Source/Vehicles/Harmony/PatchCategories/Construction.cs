@@ -71,7 +71,7 @@ namespace Vehicles
 				}
 				else
 				{
-					vehicle = PawnGenerator.GeneratePawn(vehicleDef.thingToSpawn);
+					vehicle = PawnGenerator.GeneratePawn(vehicleDef.thingToSpawn.VehicleKindDef);
 				}
 				
 				Map map = b.Map;
@@ -248,7 +248,7 @@ namespace Vehicles
 			{
 				if (designator is Designator_Build buildDesignator)
 				{
-					if (AccessTools.Field(typeof(Designator_Build), "entDef").GetValue(buildDesignator) is VehicleBuildDef buildDef && buildDef.thingToSpawn.race is VehicleDef vehicleDef)
+					if (AccessTools.Field(typeof(Designator_Build), "entDef").GetValue(buildDesignator) is VehicleBuildDef buildDef && buildDef.thingToSpawn is VehicleDef vehicleDef)
 					{
 						bool enabled = vehicleDef.TryGetValue(typeof(VehicleDef), nameof(VehicleDef.enabled), vehicleDef.enabled);
 						if (!enabled)

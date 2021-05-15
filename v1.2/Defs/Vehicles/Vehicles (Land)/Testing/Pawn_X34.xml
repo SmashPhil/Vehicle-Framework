@@ -1,40 +1,25 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <Defs>
-	<PawnKindDef>
-		<defName>X34_Vehicle</defName>
-		<label>X34</label>
-		<defaultFactionType>PlayerColony</defaultFactionType>
-		<aiAvoidCover>false</aiAvoidCover>
-		<destroyGearOnDrop>true</destroyGearOnDrop>
-		<race>X34_Vehicle</race>
-		<backstoryCategories>
-			<li>Industrial</li>
-		</backstoryCategories>
-		<combatPower>1200</combatPower>
-		<lifeStages>
-			<li>
-				<bodyGraphicData Class="Vehicles.GraphicDataRGB">
-					<texPath>testing/X34/X34</texPath>
-					<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
-					<drawSize>(4,4)</drawSize>
-					<shaderType>CutoutComplexPattern</shaderType>
-					<color>(0, 80, 30)</color>
-					<colorTwo>(0, 45, 10)</colorTwo>
-					<colorThree>(75, 110, 45)</colorThree>
-					<shadowData>
-						<volume>(0.4,0.1,0.4)</volume>
-					</shadowData>
-				</bodyGraphicData>
-			</li>
-		</lifeStages>
-	</PawnKindDef>
-	
 	<Vehicles.VehicleDef ParentName="BaseVehiclePawnUpgradeable">
 		<defName>X34_Vehicle</defName>
 		<label>X34</label>
 		<description>Armored fighting vehicle designed for front-line combat. Provides support and cover to nearby combatants.</description>
 		
+		<graphicData>
+			<texPath>testing/X34/X34</texPath>
+			<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
+			<drawSize>(4,4)</drawSize>
+			<shaderType>CutoutComplexPattern</shaderType>
+			<color>(0, 80, 30)</color>
+			<colorTwo>(0, 45, 10)</colorTwo>
+			<colorThree>(75, 110, 45)</colorThree>
+			<shadowData>
+				<volume>(0.4,0.1,0.4)</volume>
+			</shadowData>
+		</graphicData>
+		
+		<combatPower>1200</combatPower>
 		<fillPercent>1</fillPercent>
 		
 		<nameable>true</nameable>

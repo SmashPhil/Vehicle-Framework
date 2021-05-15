@@ -142,6 +142,7 @@ namespace Vehicles
 		protected virtual Material[] GenerateMasks(GraphicRequestRGB req, PatternDef pattern)
 		{
 			var tmpMaskArray = new Texture2D[MatCount];
+			var patternPointers = new int[MatCount] { 0, 1, 2, 3, 4, 5, 6, 7 };
 			if (req.shader.SupportsRGBMaskTex())
 			{
 				tmpMaskArray[0] = ContentFinder<Texture2D>.Get(req.path + "_northm", false);
@@ -158,14 +159,17 @@ namespace Vehicles
 					if (tmpMaskArray[2] != null)
 					{
 						tmpMaskArray[0] = tmpMaskArray[2];
+						patternPointers[0] = 2;
 					}
 					else if (tmpMaskArray[1] != null)
 					{
 						tmpMaskArray[0] = tmpMaskArray[1];
+						patternPointers[0] = 1;
 					}
 					else if (tmpMaskArray[3] != null)
 					{
 						tmpMaskArray[0] = tmpMaskArray[3];
+						patternPointers[0] = 3;
 					}
 					else
 					{
@@ -180,6 +184,7 @@ namespace Vehicles
 				if (tmpMaskArray[2] is null)
 				{
 					tmpMaskArray[2] = tmpMaskArray[0];
+					patternPointers[2] = 0;
 					southRotated = DataAllowsFlip;
 				}
 				if (tmpMaskArray[1] is null)
@@ -187,10 +192,12 @@ namespace Vehicles
 					if (tmpMaskArray[3] != null)
 					{
 						tmpMaskArray[1] = tmpMaskArray[3];
+						patternPointers[1] = 3;
 					}
 					else
 					{
 						tmpMaskArray[1] = tmpMaskArray[0];
+						patternPointers[1] = 0;
 						eastRotated = DataAllowsFlip;
 					}
 				}
@@ -199,32 +206,38 @@ namespace Vehicles
 					if (tmpMaskArray[1] != null)
 					{
 						tmpMaskArray[3] = tmpMaskArray[1];
+						patternPointers[3] = 0;
 						westFlipped = DataAllowsFlip;
 					}
 					else
 					{
 						tmpMaskArray[3] = tmpMaskArray[0];
+						patternPointers[3] = 0;
 					}
 				}
 
 				if (tmpMaskArray[4] is null)
 				{
 					tmpMaskArray[4] = tmpMaskArray[0];
+					patternPointers[4] = 0;
 					eastDiagonalRotated = DataAllowsFlip;
 				}
 				if (tmpMaskArray[5] is null)
 				{
 					tmpMaskArray[5] = tmpMaskArray[2];
+					patternPointers[5] = 0;
 					eastDiagonalRotated = DataAllowsFlip;
 				}
 				if (tmpMaskArray[6] is null)
 				{
 					tmpMaskArray[6] = tmpMaskArray[2];
+					patternPointers[6] = 0;
 					westDiagonalRotated = DataAllowsFlip;
 				}
 				if (tmpMaskArray[7] is null)
 				{
 					tmpMaskArray[7] = tmpMaskArray[0];
+					patternPointers[7] = 0;
 					westDiagonalRotated = DataAllowsFlip;
 				}
 				masks = tmpMaskArray;
@@ -244,7 +257,7 @@ namespace Vehicles
 					tiles = req.tiles,
 					isSkin = pattern is SkinDef,
 					maskTex = tmpMaskArray[i],
-					patternTex = pattern[new Rot8(i)],
+					patternTex = pattern[new Rot8(patternPointers[i])],
 					shaderParameters = req.shaderParameters
 				};
 				mats[i] = MaterialPoolExpanded.MatFrom(req2);

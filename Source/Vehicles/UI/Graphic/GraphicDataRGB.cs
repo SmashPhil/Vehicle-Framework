@@ -4,7 +4,7 @@ using System.Linq;
 using Verse;
 using RimWorld;
 using UnityEngine;
-using Vehicles.Defs;
+using HarmonyLib;
 
 namespace Vehicles
 {
@@ -14,17 +14,17 @@ namespace Vehicles
 		public Color colorThree = Color.white;
 		public PatternDef pattern;
 
-		private Graphic_RGB cachedGraphic;
+		private Graphic_RGB cachedRGBGraphic;
 
 		public new Graphic_RGB Graphic
 		{
 			get
 			{
-				if (cachedGraphic is null)
+				if (cachedRGBGraphic is null)
 				{
 					Init();
 				}
-				return cachedGraphic;
+				return cachedRGBGraphic;
 			}
 		}
 
@@ -46,7 +46,7 @@ namespace Vehicles
 		{
 			if (graphicClass is null)
 			{
-				cachedGraphic = null;
+				cachedRGBGraphic = null;
 				return;
 			}
 			ShaderTypeDef cutout = shaderType;
@@ -55,7 +55,8 @@ namespace Vehicles
 				cutout = RGBShaderTypeDefOf.CutoutComplexRGB;
 			}
 			Shader shader = cutout.Shader;
-			cachedGraphic = GraphicDatabaseRGB.Get(graphicClass, texPath, shader, drawSize, color, colorTwo, colorThree, tiles, this, shaderParameters);
+			cachedRGBGraphic = GraphicDatabaseRGB.Get(graphicClass, texPath, shader, drawSize, color, colorTwo, colorThree, tiles, this, shaderParameters);
+			AccessTools.Field(typeof(GraphicData), "cachedGraphic").SetValue(this, cachedRGBGraphic);
 		}
 	}
 }

@@ -18,7 +18,7 @@ namespace Vehicles
 		public static VehicleSkyfaller MakeSkyfaller(ThingDef def, VehicleDef vehicleDef, Faction faction, bool randomizeColors = false, bool randomizeMask = false, bool cleanSlate = true)
 		{
 			VehicleSkyfaller skyfaller = (VehicleSkyfaller)ThingMaker.MakeThing(def);
-			skyfaller.vehicle = VehicleSpawner.GenerateVehicle(new VehicleGenerationRequest(vehicleDef.race.AnyPawnKind, faction, randomizeColors, randomizeMask, cleanSlate));
+			skyfaller.vehicle = VehicleSpawner.GenerateVehicle(new VehicleGenerationRequest(vehicleDef, faction, randomizeColors, randomizeMask, cleanSlate));
 			return skyfaller;
 		}
 

@@ -48,9 +48,9 @@ namespace Vehicles
 			}
 		};
 
-		public static VehiclePawn GenerateVehicle(PawnKindDef kindDef, Faction faction)
+		public static VehiclePawn GenerateVehicle(VehicleDef vehicleDef, Faction faction)
 		{
-			return GenerateVehicle(new VehicleGenerationRequest(kindDef, faction));
+			return GenerateVehicle(new VehicleGenerationRequest(vehicleDef, faction));
 		}
 
 		public static VehiclePawn GenerateVehicle(VehicleGenerationRequest request)
@@ -62,17 +62,17 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Error thrown while generating VehiclePawn {request.KindDef.LabelCap} Exception: {ex.Message}");
+				Log.Error($"Error thrown while generating VehiclePawn {request.VehicleDef.LabelCap} Exception: {ex.Message}");
 			}
 			return result;
 		}
 
 		private static VehiclePawn GenerateVehicleInternal(VehicleGenerationRequest request)
 		{
-			VehiclePawn result = (VehiclePawn)ThingMaker.MakeThing(request.KindDef.race);
+			VehiclePawn result = (VehiclePawn)ThingMaker.MakeThing(request.VehicleDef);
 			PawnComponentsUtility.CreateInitialComponents(result);
 
-			result.kindDef = request.KindDef;
+			result.kindDef = request.VehicleDef.VehicleKindDef;
 			result.SetFactionDirect(request.Faction);
 			
 			string defaultMask = VehicleMod.settings.vehicles.defaultMasks.TryGetValue(result.VehicleDef.defName, "Default");
@@ -111,11 +111,11 @@ namespace Vehicles
 			return result;
 		}
 
-		public static void SpawnVehicleRandomized(PawnKindDef kindDef, IntVec3 cell, Map map, Faction faction, Rot4? rot = null, bool autoFill = false)
+		public static void SpawnVehicleRandomized(VehicleDef vehicleDef, IntVec3 cell, Map map, Faction faction, Rot4? rot = null, bool autoFill = false)
 		{
 			if (rot is null)
 				rot = Rot4.Random;
-			VehiclePawn vehicle = GenerateVehicle(new VehicleGenerationRequest(kindDef, faction, true, true));
+			VehiclePawn vehicle = GenerateVehicle(new VehicleGenerationRequest(vehicleDef, faction, true, true));
 			vehicle.CompFueledTravel?.Refuel(vehicle.CompFueledTravel.FuelCapacity);
 			GenSpawn.Spawn(vehicle, cell, map, rot.Value, WipeMode.FullRefund, false);
 

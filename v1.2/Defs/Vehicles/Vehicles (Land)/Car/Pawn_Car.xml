@@ -1,40 +1,25 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <Defs>
-	<PawnKindDef>
-		<defName>Car</defName>
-		<label>Car</label>
-		<defaultFactionType>PlayerColony</defaultFactionType>
-		<aiAvoidCover>false</aiAvoidCover>
-		<destroyGearOnDrop>true</destroyGearOnDrop>
-		<race>Car</race>
-		<backstoryCategories>
-			<li>Industrial</li>
-		</backstoryCategories>
-		<combatPower>200</combatPower>
-		<lifeStages>
-			<li>
-				<bodyGraphicData Class="Vehicles.GraphicDataRGB">
-					<texPath>Vehicles/Land/Car/Car</texPath>
-					<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
-					<drawSize>(4,7)</drawSize>
-					<shaderType>CutoutComplexPattern</shaderType>
-					<color>(120, 120, 120)</color>
-					<colorTwo>(0, 80, 0)</colorTwo>
-					<colorThree>(0, 80, 0)</colorThree>
-					<shadowData>
-						<volume>(0.4,0.1,0.4)</volume>
-					</shadowData>
-				</bodyGraphicData>
-			</li>
-		</lifeStages>
-	</PawnKindDef>
-	
 	<Vehicles.VehicleDef ParentName="BaseVehiclePawnUpgradeable">
 		<defName>Car</defName>
 		<label>Car</label>
 		<description>A heavy warship to rule the seas.</description>
 		
+		<graphicData>
+			<texPath>Vehicles/Land/Car/Car</texPath>
+			<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
+			<drawSize>(4,7)</drawSize>
+			<shaderType>CutoutComplexPattern</shaderType>
+			<color>(120, 120, 120)</color>
+			<colorTwo>(0, 80, 0)</colorTwo>
+			<colorThree>(0, 80, 0)</colorThree>
+			<shadowData>
+				<volume>(0.4,0.1,0.4)</volume>
+			</shadowData>
+		</graphicData>
+		
+		<combatPower>200</combatPower>
 		<fillPercent>1</fillPercent>
 		
 		<nameable>true</nameable>

@@ -168,8 +168,7 @@ namespace Vehicles
 				{
 					continue;
 				}
-				PawnKindLifeStage biggestStage = vehicle.kindDef.lifeStages.MaxBy(x => x.bodyGraphicData?.drawSize ?? Vector2.zero);
-
+				GraphicDataRGB graphicData = vehicle.VehicleDef.graphicData;
 				if (resolveGraphics)
 				{
 					cannon.ResolveCannonGraphics(vehicle);
@@ -177,23 +176,23 @@ namespace Vehicles
 
 				if (cannon.CannonBaseGraphic != null)
 				{
-					float baseWidth = (displayRect.width / biggestStage.bodyGraphicData.drawSize.x) * cannon.baseCannonDrawSize.x;
-					float baseHeight = (displayRect.height / biggestStage.bodyGraphicData.drawSize.y) * cannon.baseCannonDrawSize.y;
+					float baseWidth = (displayRect.width / graphicData.drawSize.x) * cannon.baseCannonDrawSize.x;
+					float baseHeight = (displayRect.height / graphicData.drawSize.y) * cannon.baseCannonDrawSize.y;
 
-					float xBase = displayRect.x + (displayRect.width / 2) - (baseWidth / 2) + ((vehicle.VehicleDef.drawProperties.upgradeUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.baseCannonRenderLocation.x);
-					float yBase = displayRect.y + (displayRect.height / 2) - (baseHeight / 2) - ((vehicle.VehicleDef.drawProperties.upgradeUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.baseCannonRenderLocation.y);
+					float xBase = displayRect.x + (displayRect.width / 2) - (baseWidth / 2) + ((vehicle.VehicleDef.drawProperties.upgradeUISize.x / graphicData.drawSize.x) * cannon.baseCannonRenderLocation.x);
+					float yBase = displayRect.y + (displayRect.height / 2) - (baseHeight / 2) - ((vehicle.VehicleDef.drawProperties.upgradeUISize.y / graphicData.drawSize.y) * cannon.baseCannonRenderLocation.y);
 
 					Rect baseCannonDrawnRect = new Rect(xBase, yBase, baseWidth, baseHeight);
 					GenUI.DrawTextureWithMaterial(baseCannonDrawnRect, cannon.CannonBaseTexture, cannon.CannonBaseGraphic.MatSingle);
 				}
 
-				float cannonWidth = (displayRect.width / biggestStage.bodyGraphicData.drawSize.x) * cannon.CannonGraphicData.drawSize.x;
-				float cannonHeight = (displayRect.height / biggestStage.bodyGraphicData.drawSize.y) * cannon.CannonGraphicData.drawSize.y;
+				float cannonWidth = (displayRect.width / graphicData.drawSize.x) * cannon.CannonGraphicData.drawSize.x;
+				float cannonHeight = (displayRect.height / graphicData.drawSize.y) * cannon.CannonGraphicData.drawSize.y;
 
 				/// ( center point of vehicle) + (UI size / drawSize) * cannonPos
 				/// y axis inverted as UI goes top to bottom, but DrawPos goes bottom to top
-				float xCannon = (displayRect.x + (displayRect.width / 2) - (cannonWidth / 2)) + ((vehicle.VehicleDef.drawProperties.upgradeUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.turretRenderLocation.x);
-				float yCannon = (displayRect.y + (displayRect.height / 2) - (cannonHeight / 2)) - ((vehicle.VehicleDef.drawProperties.upgradeUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.turretRenderLocation.y);
+				float xCannon = (displayRect.x + (displayRect.width / 2) - (cannonWidth / 2)) + ((vehicle.VehicleDef.drawProperties.upgradeUISize.x / graphicData.drawSize.x) * cannon.turretRenderLocation.x);
+				float yCannon = (displayRect.y + (displayRect.height / 2) - (cannonHeight / 2)) - ((vehicle.VehicleDef.drawProperties.upgradeUISize.y / graphicData.drawSize.y) * cannon.turretRenderLocation.y);
 
 				Rect cannonDrawnRect = new Rect(xCannon, yCannon, cannonWidth, cannonHeight);
 				Material cannonMat = new Material(cannon.CannonGraphic.MatAt(Rot4.North, vehicle));
@@ -246,8 +245,7 @@ namespace Vehicles
 				{
 					continue;
 				}
-				PawnKindLifeStage biggestStage = vehicle.kindDef.lifeStages.MaxBy(x => x.bodyGraphicData?.drawSize ?? Vector2.zero);
-
+				GraphicDataRGB graphicData = vehicle.VehicleDef.graphicData;
 				if (resolveGraphics)
 				{
 					cannon.ResolveCannonGraphics(vehicle);
@@ -255,23 +253,23 @@ namespace Vehicles
 
 				if (cannon.CannonBaseGraphic != null)
 				{
-					float baseWidth = (displayRect.width / biggestStage.bodyGraphicData.drawSize.x) * cannon.baseCannonDrawSize.x;
-					float baseHeight = (displayRect.height / biggestStage.bodyGraphicData.drawSize.y) * cannon.baseCannonDrawSize.y;
+					float baseWidth = (displayRect.width / graphicData.drawSize.x) * cannon.baseCannonDrawSize.x;
+					float baseHeight = (displayRect.height / graphicData.drawSize.y) * cannon.baseCannonDrawSize.y;
 
-					float xBase = displayRect.x + (displayRect.width / 2) - (baseWidth / 2) + ((vehicle.VehicleDef.drawProperties.upgradeUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.baseCannonRenderLocation.x);
-					float yBase = displayRect.y + (displayRect.height / 2) - (baseHeight / 2) - ((vehicle.VehicleDef.drawProperties.upgradeUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.baseCannonRenderLocation.y);
+					float xBase = displayRect.x + (displayRect.width / 2) - (baseWidth / 2) + ((vehicle.VehicleDef.drawProperties.upgradeUISize.x / graphicData.drawSize.x) * cannon.baseCannonRenderLocation.x);
+					float yBase = displayRect.y + (displayRect.height / 2) - (baseHeight / 2) - ((vehicle.VehicleDef.drawProperties.upgradeUISize.y / graphicData.drawSize.y) * cannon.baseCannonRenderLocation.y);
 
 					Rect baseCannonDrawnRect = new Rect(xBase, yBase, baseWidth, baseHeight);
 					GenUI.DrawTextureWithMaterial(baseCannonDrawnRect, cannon.CannonBaseTexture, cannon.CannonBaseGraphic.MatSingle);
 				}
 
-				float cannonWidth = (displayRect.width / biggestStage.bodyGraphicData.drawSize.x) * cannon.CannonGraphicData.drawSize.x;
-				float cannonHeight = (displayRect.height / biggestStage.bodyGraphicData.drawSize.y) * cannon.CannonGraphicData.drawSize.y;
+				float cannonWidth = (displayRect.width / graphicData.drawSize.x) * cannon.CannonGraphicData.drawSize.x;
+				float cannonHeight = (displayRect.height / graphicData.drawSize.y) * cannon.CannonGraphicData.drawSize.y;
 
 				/// ( center point of vehicle) + (UI size / drawSize) * cannonPos
 				/// y axis inverted as UI goes top to bottom, but DrawPos goes bottom to top
-				float xCannon = (displayRect.x + (displayRect.width / 2) - (cannonWidth / 2)) + ((vehicle.VehicleDef.drawProperties.upgradeUISize.x / biggestStage.bodyGraphicData.drawSize.x) * cannon.turretRenderLocation.x);
-				float yCannon = (displayRect.y + (displayRect.height / 2) - (cannonHeight / 2)) - ((vehicle.VehicleDef.drawProperties.upgradeUISize.y / biggestStage.bodyGraphicData.drawSize.y) * cannon.turretRenderLocation.y);
+				float xCannon = (displayRect.x + (displayRect.width / 2) - (cannonWidth / 2)) + ((vehicle.VehicleDef.drawProperties.upgradeUISize.x / graphicData.drawSize.x) * cannon.turretRenderLocation.x);
+				float yCannon = (displayRect.y + (displayRect.height / 2) - (cannonHeight / 2)) - ((vehicle.VehicleDef.drawProperties.upgradeUISize.y / graphicData.drawSize.y) * cannon.turretRenderLocation.y);
 
 				Rect cannonDrawnRect = new Rect(xCannon, yCannon, cannonWidth, cannonHeight);
 				Material cannonMat = new Material(cannon.CannonGraphic.MatAt(Rot4.North, vehicle));
@@ -433,7 +431,7 @@ namespace Vehicles
 					continue;
 				}
 
-				GraphicData vehicleGraphicData = vehicleDef.race.AnyPawnKind.lifeStages.LastOrDefault().bodyGraphicData;
+				GraphicDataRGB vehicleGraphicData = vehicleDef.graphicData;
 
 				cannon.ResolveCannonGraphics(vehicleDef);
 
@@ -678,7 +676,7 @@ namespace Vehicles
 		/// <param name="buildDef"></param>
 		public static GizmoResult GizmoOnGUIWithMaterial(Command command, Rect rect, VehicleBuildDef buildDef)
 		{
-			VehicleDef vehicleDef = buildDef.thingToSpawn.race as VehicleDef;
+			VehicleDef vehicleDef = buildDef.thingToSpawn;
 			Text.Font = GameFont.Tiny;
 			bool flag = false;
 			if (Mouse.IsOver(rect))

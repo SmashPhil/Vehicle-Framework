@@ -420,6 +420,7 @@
     <Compile Include="CustomFeatures\AerialLaunch\Targeters\LaunchTargeter.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Bombing\BomberProperties.cs" />
     <Compile Include="CustomFeatures\Misc\Mote_CannonPlume.cs" />
+    <Compile Include="Harmony\PawnKindDefGenerator_Vehicles.cs" />
     <Compile Include="Harmony\StartupTesting.cs" />
     <Compile Include="Misc\DefModExtension\SpawnerPropertiesDefModExtension.cs" />
     <Compile Include="Misc\ModSettings\SettingsCustomizableFields.cs" />

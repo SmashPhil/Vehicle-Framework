@@ -256,7 +256,7 @@ namespace Vehicles
 					}
 					else
 					{
-						graphicData.CopyFrom(ageTracker.CurKindLifeStage.bodyGraphicData as GraphicDataRGB);
+						graphicData.CopyFrom(VehicleDef.graphicData);
 					}
 					graphicData.color = DrawColor;
 					graphicData.colorTwo = DrawColorTwo;
@@ -520,7 +520,7 @@ namespace Vehicles
 		private void ResetMaskCache()
 		{
 			graphicInt = null;
-			AccessTools.Field(typeof(GraphicData), "cachedGraphic").SetValue(ageTracker.CurKindLifeStage.bodyGraphicData, null);
+			VehicleDef.graphicData.Init();
 		}
 
 		public void UpdateRotationAndAngle()
@@ -721,15 +721,15 @@ namespace Vehicles
 
 			if (Prefs.DevMode)
 			{
-				yield return new Command_Action()
-				{
-					defaultLabel = "Set Pattern",
-					action = delegate ()
-					{
-						retexture = DefDatabase<RetextureDef>.GetNamed("AdvancedTransportPod_Old");
-						Notify_ColorChanged();
-					}
-				};
+				//yield return new Command_Action()
+				//{
+				//	defaultLabel = "Set Pattern",
+				//	action = delegate ()
+				//	{
+				//		retexture = DefDatabase<RetextureDef>.GetNamed("AdvancedTransportPod_Old");
+				//		Notify_ColorChanged();
+				//	}
+				//};
 			}
 		}
 
@@ -807,14 +807,9 @@ namespace Vehicles
 			{
 				Find.Storyteller.Notify_PawnEvent(this, AdaptationEvent.Died, null);
 			}
-			if (flag && dinfo != null && dinfo.Value.Def.ExternalViolenceFor(this))
-			{
-				LifeStageUtility.PlayNearestLifestageSound(this, (LifeStageAge ls) => ls.soundDeath, 1f);
-			}
 			if (dinfo != null && dinfo.Value.Instigator != null)
 			{
-				Pawn pawn = dinfo.Value.Instigator as Pawn;
-				if(pawn != null)
+				if(dinfo.Value.Instigator is Pawn pawn)
 				{
 					RecordsUtility.Notify_PawnKilled(this, pawn);
 				}
@@ -1539,21 +1534,22 @@ namespace Vehicles
 
 		public override void SpawnSetup(Map map, bool respawningAfterLoad)
 		{
+			kindDef ??= VehicleDef.VehicleKindDef;
 			base.SpawnSetup(map, respawningAfterLoad);
 			if (!respawningAfterLoad)
 			{
 				vPather.ResetToCurrentPosition();
 				if (DrawColor == Color.white)
 				{
-					DrawColor = ageTracker.CurKindLifeStage.bodyGraphicData.color;
+					DrawColor = VehicleDef.graphicData.color;
 				}
 				if (DrawColorTwo == Color.white)
 				{
-					DrawColorTwo = ageTracker.CurKindLifeStage.bodyGraphicData.colorTwo;
+					DrawColorTwo = VehicleDef.graphicData.colorTwo;
 				}
 				if (DrawColorThree == Color.white)
 				{
-					DrawColorThree = (ageTracker.CurKindLifeStage.bodyGraphicData as GraphicDataRGB).colorThree;
+					DrawColorThree = VehicleDef.graphicData.colorThree;
 				}
 			}
 			else

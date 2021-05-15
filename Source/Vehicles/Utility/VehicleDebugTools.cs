@@ -16,17 +16,12 @@ namespace Vehicles
 		private static void SpawnVehicleRandomized()
 		{
 			List<DebugMenuOption> list = new List<DebugMenuOption>();
-			foreach (PawnKindDef localKindDef2 in from kd in DefDatabase<PawnKindDef>.AllDefs.Where(v => v.race.thingClass == typeof(VehiclePawn))
-			orderby kd.defName
-			select kd)
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs.OrderBy(d => d.defName))
 			{
-				PawnKindDef localKindDef = localKindDef2;
-				list.Add(new DebugMenuOption(localKindDef.defName, DebugMenuOptionMode.Tool, delegate()
+				list.Add(new DebugMenuOption(vehicleDef.defName, DebugMenuOptionMode.Tool, delegate()
 				{
-					Faction faction = FactionUtility.DefaultFactionFrom(localKindDef.defaultFactionType);
-					if (faction is null)
-						faction = Faction.OfPlayer;
-					VehicleSpawner.SpawnVehicleRandomized(localKindDef, Verse.UI.MouseCell(), Find.CurrentMap, faction);
+					Faction faction = Faction.OfPlayer;
+					VehicleSpawner.SpawnVehicleRandomized(vehicleDef, Verse.UI.MouseCell(), Find.CurrentMap, faction);
 				}));
 			}
 			Find.WindowStack.Add(new Dialog_DebugOptionListLister(list));
@@ -38,25 +33,18 @@ namespace Vehicles
 			List<DebugMenuOption> vehicles = new List<DebugMenuOption>();
 			List<DebugMenuOption> factions = new List<DebugMenuOption>();
 			Faction factionLocal = null;
-			foreach (Faction faction in from fd in Find.World.factionManager.GetFactions(true, false, true, TechLevel.Undefined)
-					orderby fd.def.defName
-					select fd)
+			foreach (Faction faction in Find.World.factionManager.GetFactions(true, false, true, TechLevel.Undefined).OrderBy(f => f.def.defName))
 			{
 				factions.Add(new DebugMenuOption(faction.def.defName, DebugMenuOptionMode.Action, delegate ()
 				{
 					factionLocal = faction;
 
-					foreach (PawnKindDef localKindDef2 in from kd in DefDatabase<PawnKindDef>.AllDefs.Where(v => v.race.thingClass == typeof(VehiclePawn))
-						orderby kd.defName
-						select kd)
+					foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs.OrderBy(d => d.defName))
 					{
-						PawnKindDef localKindDef = localKindDef2;
-						vehicles.Add(new DebugMenuOption(localKindDef.defName, DebugMenuOptionMode.Tool, delegate()
+						vehicles.Add(new DebugMenuOption(vehicleDef.defName, DebugMenuOptionMode.Tool, delegate()
 						{
-							Faction factionAssigned = FactionUtility.DefaultFactionFrom(localKindDef.defaultFactionType);
-							if (factionAssigned is null)
-								factionAssigned = Faction.OfPlayer;
-							VehicleSpawner.SpawnVehicleRandomized(localKindDef, Verse.UI.MouseCell(), Find.CurrentMap, factionLocal is null ? factionAssigned : factionLocal, Rot4.North, true);
+							Faction factionAssigned = faction;
+							VehicleSpawner.SpawnVehicleRandomized(vehicleDef, Verse.UI.MouseCell(), Find.CurrentMap, factionLocal is null ? factionAssigned : factionLocal, Rot4.North, true);
 						}));
 					}
 			
@@ -130,19 +118,12 @@ namespace Vehicles
 		private static void SpawnCrashingShuttle()
 		{
 			List<DebugMenuOption> list = new List<DebugMenuOption>();
-			foreach (PawnKindDef localKindDef2 in from kd in DefDatabase<PawnKindDef>.AllDefs.Where(v => v.race.thingClass == typeof(VehiclePawn) && v.race is VehicleDef def && def.vehicleType == VehicleType.Air)
-			orderby kd.defName
-			select kd)
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs.OrderBy(d => d.defName))
 			{
-				PawnKindDef localKindDef = localKindDef2;
-				list.Add(new DebugMenuOption(localKindDef.defName, DebugMenuOptionMode.Tool, delegate()
+				list.Add(new DebugMenuOption(vehicleDef.defName, DebugMenuOptionMode.Tool, delegate()
 				{
-					Faction faction = FactionUtility.DefaultFactionFrom(localKindDef.defaultFactionType);
-					if (faction is null)
-					{
-						faction = Faction.OfPlayer;
-					}
-					VehiclePawn vehicle = VehicleSpawner.GenerateVehicle(localKindDef, faction);
+					Faction faction = Faction.OfPlayer;
+					VehiclePawn vehicle = VehicleSpawner.GenerateVehicle(vehicleDef, faction);
 					vehicle.CompVehicleLauncher?.InitializeLaunchProtocols(false);
 					AerialVehicleInFlight flyingVehicle = (AerialVehicleInFlight)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.AerialVehicle);
 					flyingVehicle.vehicle = vehicle;

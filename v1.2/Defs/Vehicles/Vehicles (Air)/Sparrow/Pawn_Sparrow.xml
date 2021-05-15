@@ -1,38 +1,23 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <Defs>
-	<PawnKindDef>
-		<defName>Sparrow</defName>
-		<label>Sparrow</label>
-		<defaultFactionType>PlayerColony</defaultFactionType>
-		<aiAvoidCover>false</aiAvoidCover>
-		<destroyGearOnDrop>true</destroyGearOnDrop>
-		<race>Sparrow</race>
-		<backstoryCategories>
-			<li>Industrial</li>
-		</backstoryCategories>
-		<combatPower>2000</combatPower>
-		<lifeStages>
-			<li>
-				<bodyGraphicData Class="Vehicles.GraphicDataRGB">
-					<texPath>Vehicles/Air/Sparrow/Sparrow</texPath>
-					<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
-					<drawSize>(5,5)</drawSize>
-					<drawOffset>(0, 0, -0.25)</drawOffset>
-					<shaderType>Cutout</shaderType>
-					<shadowData>
-						<volume>(0.4,0.1,0.4)</volume>
-					</shadowData>
-				</bodyGraphicData>
-			</li>
-		</lifeStages>
-	</PawnKindDef>
-	
 	<Vehicles.VehicleDef ParentName="BaseVehiclePawnUpgradeable">
 		<defName>Sparrow</defName>
 		<label>Sparrow</label>
 		<description>An agile fighter plane capable of recon and offensive operations.</description>
 		
+		<graphicData>
+			<texPath>Vehicles/Air/Sparrow/Sparrow</texPath>
+			<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
+			<drawSize>(5,5)</drawSize>
+			<drawOffset>(0, 0, -0.25)</drawOffset>
+			<shaderType>Cutout</shaderType>
+			<shadowData>
+				<volume>(0.4,0.1,0.4)</volume>
+			</shadowData>
+		</graphicData>
+		
+		<combatPower>2000</combatPower>
 		<fillPercent>1</fillPercent>
 		
 		<nameable>true</nameable>
