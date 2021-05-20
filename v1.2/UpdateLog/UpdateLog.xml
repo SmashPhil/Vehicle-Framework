@@ -4,6 +4,9 @@
   <updateOn>Startup</updateOn>
   <description>
 [anchor]MiddleCenter[/anchor][b]Vehicles - 1.2.3.2[/b][anchor]MiddleLeft[/anchor]
+[title]Notes[/title][font]Tiny[/font]
+A new game is required for this update.
+
 [title]Bug Fixes[/title][font]Tiny[/font]
 Fixed bug where vehicles would not show up in the Form Vehicle Caravan dialog window.
 
@@ -53,7 +56,7 @@ Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/is
   </description>
   <actionOnUpdate>Vehicles.VehicleHarmony.RegisterUpdateVersion</actionOnUpdate>
   <update>true</update>
-  <testing>true</testing>
+  <testing>false</testing>
   <rightIconBar>
     <li>
       <name>Github</name>
@@ -73,7 +76,7 @@ Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/is
   </rightIconBar>
   <leftIconBar>
     <li>
-      <name>Donate</name>
+      <name>Support Vehicles Development</name>
       <icon>ko-fiIcon.png</icon>
       <url>https://ko-fi.com/smashphil</url>
     </li>
