@@ -37,7 +37,10 @@ namespace Vehicles
 		{
 			this.world = world;
 			vehicles = new List<VehiclePawn>();
+			Instance = this;
 		}
+
+		public static VehicleRoutePlanner Instance { get; private set; }
 
 		public bool Active { get; set; }
 
@@ -126,7 +129,7 @@ namespace Vehicles
 
 		public void InitiateRoutePlanner()
 		{
-			Find.World.GetCachedWorldComponent<VehicleRoutePlanner>().Active = true;
+			VehicleRoutePlanner.Instance.Active = true;
 			if (Current.ProgramState == ProgramState.Playing)
 			{
 				Find.World.renderer.wantedMode = WorldRenderMode.Planet;
@@ -403,12 +406,12 @@ namespace Vehicles
 
 		private void TryAddWaypoint(int tile, bool playSound = true)
 		{
-			if (vehicles.NotNullAndAny(v => !Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().Passable(tile, v.VehicleDef)))
+			if (vehicles.NotNullAndAny(v => !WorldVehiclePathGrid.Instance.Passable(tile, v.VehicleDef)))
 			{
 				Messages.Message("MessageCantAddWaypointBecauseImpassable".Translate(), MessageTypeDefOf.RejectInput, false);
 				return;
 			}
-			if (waypoints.NotNullAndAny() && !Find.World.GetCachedWorldComponent<WorldVehicleReachability>().CanReach(vehicles.UniqueVehicleDefsInList().ToList(), waypoints[waypoints.Count - 1].Tile, tile))
+			if (waypoints.NotNullAndAny() && !WorldVehicleReachability.Instance.CanReach(vehicles.UniqueVehicleDefsInList().ToList(), waypoints[waypoints.Count - 1].Tile, tile))
 			{
 				Messages.Message("MessageCantAddWaypointBecauseUnreachable".Translate(), MessageTypeDefOf.RejectInput, false);
 				return;
@@ -468,7 +471,7 @@ namespace Vehicles
 
 			for (int i = 1; i < waypoints.Count; i++)
 			{
-				paths.Add(Find.World.GetCachedWorldComponent<WorldVehiclePathfinder>().FindPath(waypoints[i - 1].Tile, waypoints[i].Tile, vehicles, null));
+				paths.Add(WorldVehiclePathfinder.Instance.FindPath(waypoints[i - 1].Tile, waypoints[i].Tile, vehicles, null));
 			}
 			cachedTicksToWaypoint.Clear();
 			int num = 0;

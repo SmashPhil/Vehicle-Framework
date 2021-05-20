@@ -42,7 +42,7 @@ namespace Vehicles
 			}
 			set
 			{
-				this.enabledInt = value;
+				enabledInt = value;
 			}
 		}
 
@@ -93,10 +93,9 @@ namespace Vehicles
 		{
 			newRegions.Clear();
 			List<IntVec3> cells = map.GetCachedMapComponent<WaterMap>().WaterRegionDirtyer.DirtyCells;
-
-			foreach(IntVec3 c  in cells)
+			foreach (IntVec3 c  in cells)
 			{
-				if(WaterGridsUtility.GetRegion(c, map, RegionType.Set_All) is null)
+				if (WaterGridsUtility.GetRegion(c, map, RegionType.Set_All) is null)
 				{
 					WaterRegion region = map.GetCachedMapComponent<WaterMap>().WaterRegionmaker.TryGenerateRegionFrom(c);
 

@@ -50,14 +50,14 @@ namespace Vehicles
 
 		private HashSet<Settlement> settlementsFlyOver = new HashSet<Settlement>();
 
-		private float transition;
-		private float elevation;
+		internal float transition;
+		public float elevation;
 		public bool recon;
 		private float transitionSize = 0f;
 		private float speedPctPerTick;
 
-		private Vector3 directionFacing;
-		private Vector3 position;
+		public Vector3 directionFacing;
+		public Vector3 position;
 
 		private Material vehicleMat;
 		private Material vehicleMatLit;
@@ -66,9 +66,9 @@ namespace Vehicles
 
 		public virtual bool IsPlayerControlled => vehicle.Faction == Faction.OfPlayer;
 
-		public override Vector3 DrawPos => Vector3.Slerp(position, Find.WorldGrid.GetTileCenter(flightPath.First), transition);
+		public override Vector3 DrawPos => Vector3.Slerp(position, Find.WorldGrid.GetTileCenter(flightPath.First.tile), transition);
 
-		public float Elevation => vehicle.inFlight ? elevation : 0;
+		public float Elevation => vehicle.CompVehicleLauncher.inFlight ? elevation : 0;
 
 		public float Rate => vehicle.CompVehicleLauncher.RateOfClimb * ClimbRateCurve.Evaluate(Elevation / vehicle.CompVehicleLauncher.MaxAltitude);
 
@@ -118,7 +118,7 @@ namespace Vehicles
 			position = base.DrawPos;
 		}
 
-		public virtual Vector3 DrawPosAhead(int ticksAhead) => Vector3.Slerp(position, Find.WorldGrid.GetTileCenter(flightPath.First), transition + speedPctPerTick * ticksAhead);
+		public virtual Vector3 DrawPosAhead(int ticksAhead) => Vector3.Slerp(position, Find.WorldGrid.GetTileCenter(flightPath.First.tile), transition + speedPctPerTick * ticksAhead);
 
 		public override void Draw()
 		{
@@ -164,7 +164,7 @@ namespace Vehicles
 					Matrix4x4 matrix = GUI.matrix;
 					if (rotateTexture)
 					{
-						Verse.UI.RotateAroundPivot(Quaternion.LookRotation(Find.WorldGrid.GetTileCenter(flightPath.First) - position).eulerAngles.y, rect.center);
+						Verse.UI.RotateAroundPivot(Quaternion.LookRotation(Find.WorldGrid.GetTileCenter(flightPath.First.tile) - position).eulerAngles.y, rect.center);
 					}
 					GenUI.DrawTextureWithMaterial(rect, VehicleTex.VehicleTexture(vehicle.VehicleDef, Rot8.North), VehicleMatLit);
 					GUI.matrix = matrix;
@@ -189,37 +189,33 @@ namespace Vehicles
 						yield return fuelGizmo;
 					}
 				}
-				if (!vehicle.inFlight && Find.WorldObjects.SettlementAt(Tile) is Settlement settlement2)
+				if (!vehicle.CompVehicleLauncher.inFlight && Find.WorldObjects.SettlementAt(Tile) is Settlement settlement2)
 				{
 					yield return GizmoHelper.AerialVehicleTradeCommand(this, settlement2.Faction, settlement2.TraderKind);
 				}
-				if (vehicle.CompVehicleLauncher.ControlInFlight || !vehicle.inFlight)
+				if (vehicle.CompVehicleLauncher.ControlInFlight || !vehicle.CompVehicleLauncher.inFlight)
 				{
-					foreach (LaunchProtocol protocol in vehicle.CompVehicleLauncher.launchProtocols)
+					Command_Action launchCommand = new Command_Action()
 					{
-						Command_Action launchCommand = new Command_Action()
+						defaultLabel = "CommandLaunchGroup".Translate(),
+						defaultDesc = "CommandLaunchGroupDesc".Translate(),
+						icon = VehicleTex.LaunchCommandTex,
+						alsoClickIfOtherInGroupClicked = false,
+						action = delegate ()
 						{
-							defaultLabel = "CommandLaunchGroup".Translate(),
-							defaultDesc = "CommandLaunchGroupDesc".Translate(),
-							icon = VehicleTex.LaunchCommandTex,
-							alsoClickIfOtherInGroupClicked = false,
-							action = delegate ()
-							{
-								vehicle.CompVehicleLauncher.SelectedLaunchProtocol = protocol;
-								LaunchTargeter.Instance.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseTargetOnMap), this, true, VehicleTex.TargeterMouseAttachment, false, null,
-									(GlobalTargetInfo target, List<int> path, float fuelCost) => protocol.TargetingLabelGetter(target, Tile, path, fuelCost));
-							}
-						};
-						if (vehicle.CompFueledTravel.EmptyTank)
-						{
-							launchCommand.Disable("VehicleLaunchOutOfFuel".Translate());
+							LaunchTargeter.Instance.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseTargetOnMap), this, true, VehicleTex.TargeterMouseAttachment, false, null,
+								(GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, Tile, path, fuelCost));
 						}
-						yield return launchCommand;
+					};
+					if (vehicle.CompFueledTravel.EmptyTank)
+					{
+						launchCommand.Disable("VehicleLaunchOutOfFuel".Translate());
 					}
+					yield return launchCommand;
 				}
-				if (!vehicle.inFlight)
+				if (!vehicle.CompVehicleLauncher.inFlight)
 				{
-					foreach (Settlement settlement in Find.WorldObjects.ObjectsAt(flightPath.First).Where(o => o is Settlement).Cast<Settlement>())
+					foreach (Settlement settlement in Find.WorldObjects.ObjectsAt(flightPath.First.tile).Where(o => o is Settlement).Cast<Settlement>())
 					{
 						yield return GizmoHelper.ShuttleTradeCommand(this, settlement);
 						if (WorldHelper.CanOfferGiftsTo(this, settlement))
@@ -279,12 +275,11 @@ namespace Vehicles
 							List<Settlement> playerSettlements = Find.WorldObjects.Settlements.Where(s => s.Faction == Faction.OfPlayer).ToList();
 							Settlement nearestSettlement = playerSettlements.MinBy(s => Ext_Math.SphericalDistance(s.DrawPos, DrawPos));
 							
-							LaunchProtocol launchProtocol = vehicle.CompVehicleLauncher.launchProtocols.FirstOrDefault();
+							LaunchProtocol launchProtocol = vehicle.CompVehicleLauncher.launchProtocol;
 							Rot4 vehicleRotation = launchProtocol.landingProperties.forcedRotation ?? Rot4.Random;
 							IntVec3 cell = CellFinderExtended.RandomCenterCell(nearestSettlement.Map, (IntVec3 cell) => !MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, cell, vehicleRotation));
 							VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
 							skyfaller.vehicle = vehicle;
-							skyfaller.launchProtocol = launchProtocol;
 
 							GenSpawn.Spawn(skyfaller, cell, nearestSettlement.Map, vehicleRotation);
 							Destroy();
@@ -296,12 +291,12 @@ namespace Vehicles
 
 		public bool ChoseTargetOnMap(GlobalTargetInfo target, float fuelCost)
 		{
-			return vehicle.CompVehicleLauncher.SelectedLaunchProtocol.ChoseWorldTarget(target, DrawPos, fuelCost, NewDestination);
+			return vehicle.CompVehicleLauncher.launchProtocol.ChoseWorldTarget(target, DrawPos, fuelCost, NewDestination);
 		}
 
 		public void NewDestination(int destinationTile, AerialVehicleArrivalAction arrivalAction, bool recon = false)
 		{
-			vehicle.inFlight = true;
+			vehicle.CompVehicleLauncher.inFlight = true;
 			this.arrivalAction = arrivalAction;
 			this.recon = recon;
 			OrderFlyToTiles(LaunchTargeter.FlightPath, DrawPos, arrivalAction);
@@ -310,7 +305,7 @@ namespace Vehicles
 		public override void Tick()
 		{
 			base.Tick();
-			if (vehicle.inFlight)
+			if (vehicle.CompVehicleLauncher.inFlight)
 			{
 				foreach (Settlement settlement in settlementsFlyOver)
 				{
@@ -357,7 +352,7 @@ namespace Vehicles
 
 		public void InitiateCrashEvent(Settlement settlement)
 		{
-			vehicle.inFlight = false;
+			vehicle.CompVehicleLauncher.inFlight = false;
 			Tile = WorldHelper.GetNearestTile(DrawPos);
 			ResetPosition(Find.WorldGrid.GetTileCenter(Tile));
 			flightPath.ResetPath();
@@ -375,37 +370,40 @@ namespace Vehicles
 					Vector3 newPos = DrawPos;
 					int ticksLeft = Mathf.RoundToInt(1 / speedPctPerTick);
 					flightPath.NodeReached(ticksLeft > TicksTillLandingElevation && !recon);
-					InitializeNextFlight(newPos);
+					if (Spawned)
+					{
+						InitializeNextFlight(newPos);
+					}
 				}
 				else 
 				{
 					if (Elevation <= vehicle.CompVehicleLauncher.LandingAltitude)
 					{
 						Messages.Message("VehicleAerialArrived".Translate(vehicle.LabelShort), MessageTypeDefOf.NeutralEvent);
-						Tile = flightPath.First;
+						Tile = flightPath.First.tile;
 						if (arrivalAction is AerialVehicleArrivalAction action)
 						{
-							action.Arrived(flightPath.First);
+							action.Arrived(flightPath.First.tile);
 							if (action.DestroyOnArrival)
 							{
 								Destroy();
 							}
 						}
-						vehicle.inFlight = false;
+						vehicle.CompVehicleLauncher.inFlight = false;
 					}
 					else if (flightPath.Path.Count <= 1 && vehicle.CompVehicleLauncher.Props.circleToLand)
 					{
 						Vector3 newPos = DrawPos;
-						SetCircle(flightPath.First);
+						SetCircle(flightPath.First.tile);
 						InitializeNextFlight(newPos);
 					}
 				}
 			}
 		}
 
-		public void OrderFlyToTiles(List<int> tiles, Vector3 origin, AerialVehicleArrivalAction arrivalAction = null)
+		public void OrderFlyToTiles(List<FlightNode> flightPath, Vector3 origin, AerialVehicleArrivalAction arrivalAction = null)
 		{
-			if (tiles.NullOrEmpty() || tiles.Any(t => t < 0))
+			if (flightPath.NullOrEmpty() || flightPath.Any(node => node.tile < 0))
 			{
 				return;
 			}
@@ -413,7 +411,7 @@ namespace Vehicles
 			{
 				this.arrivalAction = arrivalAction;
 			}
-			flightPath.NewPath(tiles);
+			this.flightPath.NewPath(flightPath);
 			InitializeNextFlight(origin);
 			settlementsFlyOver = SettlementPositionTracker.CheckNearbySettlements(this, speedPctPerTick)?.ToHashSet() ?? new HashSet<Settlement>();
 		}
@@ -426,7 +424,7 @@ namespace Vehicles
 
 		private void InitializeNextFlight(Vector3 position)
 		{
-			vehicle.inFlight = true;
+			vehicle.CompVehicleLauncher.inFlight = true;
 			ResetPosition(position);
 			SetSpeed();
 			InitializeFacing();
@@ -434,13 +432,13 @@ namespace Vehicles
 
 		private void SetSpeed()
 		{
-			float tileDistance = Ext_Math.SphericalDistance(position, Find.WorldGrid.GetTileCenter(flightPath.First));
+			float tileDistance = Ext_Math.SphericalDistance(position, Find.WorldGrid.GetTileCenter(flightPath.First.tile));
 			speedPctPerTick = (PctPerTick / tileDistance) * vehicle.CompVehicleLauncher.FlySpeed.Clamp(0, 5);
 		}
 
 		private void InitializeFacing()
 		{
-			Vector3 tileLocation = Find.WorldGrid.GetTileCenter(flightPath.First).normalized;
+			Vector3 tileLocation = Find.WorldGrid.GetTileCenter(flightPath.First.tile).normalized;
 			directionFacing = (DrawPos - tileLocation).normalized;
 		}
 
@@ -459,15 +457,15 @@ namespace Vehicles
 					Vector3 nodePosition = DrawPos;
 					for (int i = 0; i < flightPath.Path.Count; i++)
 					{
-						Vector3 nextNodePosition = Find.WorldGrid.GetTileCenter(flightPath[i]);
+						Vector3 nextNodePosition = Find.WorldGrid.GetTileCenter(flightPath[i].tile);
 						LaunchTargeter.DrawTravelPoint(nodePosition, nextNodePosition);
 						nodePosition = nextNodePosition;
 					}
-					LaunchTargeter.DrawTravelPoint(nodePosition, Find.WorldGrid.GetTileCenter(flightPath.Last));
+					LaunchTargeter.DrawTravelPoint(nodePosition, Find.WorldGrid.GetTileCenter(flightPath.Last.tile));
 				}
 				else if (flightPath.Path.Count == 1)
 				{
-					LaunchTargeter.DrawTravelPoint(DrawPos, Find.WorldGrid.GetTileCenter(flightPath.First));
+					LaunchTargeter.DrawTravelPoint(DrawPos, Find.WorldGrid.GetTileCenter(flightPath.First.tile));
 				}
 			}
 		}
@@ -502,6 +500,12 @@ namespace Vehicles
 			}
 		}
 
+		public override void PostMake()
+		{
+			base.PostMake();
+			flightPath = new FlightPath(this);
+		}
+
 		public override void ExposeData()
 		{
 			base.ExposeData();
@@ -519,167 +523,6 @@ namespace Vehicles
 			Scribe_Values.Look(ref recon, "recon");
 			Scribe_Values.Look(ref directionFacing, "directionFacing");
 			Scribe_Values.Look(ref position, "position");
-		}
-
-		public override void PostMake()
-		{
-			base.PostMake();
-			flightPath = new FlightPath(this);
-		}
-
-		public class FlightPath : IExposable
-		{
-			private List<int> nodes = new List<int>();
-			private List<int> reconTiles = new List<int>();
-			private AerialVehicleInFlight aerialVehicle;
-			private bool circling = false;
-			private bool currentlyInRecon = false;
-
-			public FlightPath(AerialVehicleInFlight aerialVehicle)
-			{
-				this.aerialVehicle = aerialVehicle;
-			}
-
-			public List<int> Path => nodes;
-
-			public int First => nodes.FirstOrDefault();
-
-			public int Last => nodes.LastOrDefault();
-
-			public int this[int index] => nodes[index];
-
-			public bool Circling => circling;
-
-			public bool InRecon => currentlyInRecon;
-
-			public float DistanceLeft
-			{
-				get
-				{
-					float distance = 0;
-					Vector3 start = aerialVehicle.DrawPos;
-					foreach (int tile in nodes)
-					{
-						Vector3 nextTile = Find.WorldGrid.GetTileCenter(tile);
-						distance += Ext_Math.SphericalDistance(start, nextTile);
-						start = nextTile;
-					}
-					return distance;
-				}
-			}
-
-			public int AltitudeDirection
-			{
-				get
-				{
-					if (aerialVehicle.recon)
-					{
-						return 1;
-					}
-					int ticksLeft = 0;
-					Vector3 start = aerialVehicle.DrawPos;
-					float transitionPctLeft = (1 - aerialVehicle.transition);
-					if (circling || nodes.Count <= 1)
-					{
-						Vector3 nextTile = Find.WorldGrid.GetTileCenter(Last);
-						float distance = Ext_Math.SphericalDistance(start, nextTile);
-						float speedPctPerTick = (PctPerTick / distance) * aerialVehicle.vehicle.CompVehicleLauncher.FlySpeed;
-						ticksLeft += Mathf.RoundToInt(transitionPctLeft / speedPctPerTick);
-					}
-					else
-					{
-						foreach (int tile in nodes)
-						{
-							Vector3 nextTile = Find.WorldGrid.GetTileCenter(tile);
-							float distance = Ext_Math.SphericalDistance(start, nextTile);
-							start = nextTile;
-
-							float speedPctPerTick = (PctPerTick / distance) * aerialVehicle.vehicle.CompVehicleLauncher.FlySpeed;
-							ticksLeft += Mathf.RoundToInt(transitionPctLeft / speedPctPerTick);
-							transitionPctLeft = 1; //Only first node being traveled to has any progression
-						}
-					}
-					int direction = ticksLeft <= aerialVehicle.TicksTillLandingElevation ? -1 : 1;
-					return direction;
-				}
-			}
-
-			public void AddNode(int tile)
-			{
-				nodes.Add(tile);
-			}
-
-			public void PushCircleAt(int tile)
-			{
-				reconTiles = Ext_World.GetTileNeighbors(tile, aerialVehicle.vehicle.CompVehicleLauncher.ReconDistance);
-				foreach (int neighborTile in reconTiles)
-				{
-					nodes.Insert(0, neighborTile);
-				}
-				circling = true;
-			}
-
-			public void ReconCircleAt(int tile)
-			{
-				if (Last == tile)
-				{
-					nodes.Pop();
-				}
-				reconTiles = Ext_World.GetTileNeighbors(tile, aerialVehicle.vehicle.CompVehicleLauncher.ReconDistance);
-				nodes.AddRange(reconTiles);
-				circling = true;
-				aerialVehicle.recon = true;
-				nodes.Add(tile);
-				aerialVehicle.GenerateMapForRecon(tile);
-			}
-
-			public void NodeReached(bool haltCircle = false)
-			{
-				int currentTile = nodes.PopAt(0);
-				aerialVehicle.Tile = currentTile;
-				currentlyInRecon = reconTiles.Contains(aerialVehicle.Tile);
-				if (circling && haltCircle)
-				{
-					int origin = Last;
-					ResetPath();
-					AddNode(origin);
-				}
-				else if (nodes.Count <= 1 && circling)
-				{
-					if (aerialVehicle.recon)
-					{
-						ReconCircleAt(First);
-					}
-					else
-					{
-						PushCircleAt(First);
-					}
-				}
-			}
-
-			public void ResetPath()
-			{
-				nodes.Clear();
-				reconTiles.Clear();
-				circling = false;
-				aerialVehicle.recon = false;
-				currentlyInRecon = false;
-			}
-
-			public void NewPath(List<int> path)
-			{
-				ResetPath();
-				nodes = new List<int>(path);
-			}
-
-			public void ExposeData()
-			{
-				Scribe_Collections.Look(ref nodes, "nodes");
-				Scribe_Collections.Look(ref reconTiles, "reconTiles");
-				Scribe_References.Look(ref aerialVehicle, "aerialVehicle");
-				Scribe_Values.Look(ref circling, "circling");
-				Scribe_Values.Look(ref currentlyInRecon, "currentlyInRecon");
-			}
 		}
 	}
 }

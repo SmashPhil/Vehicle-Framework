@@ -16,9 +16,12 @@ namespace Vehicles
 		public static Dictionary<Settlement, SettlementAirDefense> airDefenseCache = new Dictionary<Settlement, SettlementAirDefense>();
 		private static Dictionary<int, SettlementAirDefense> airDefenseSaveable = new Dictionary<int, SettlementAirDefense>();
 
+		
 		public SettlementPositionTracker(Game game)
 		{
 		}
+
+		public static SettlementPositionTracker Instance { get; private set; }
 
 		public void FactionStatusChanged(Faction faction)
 		{
@@ -110,7 +113,7 @@ namespace Vehicles
 			int start = aerialVehicle.Tile;
 			for (int i = 0; i < aerialVehicle.flightPath.Path.Count; i++)
 			{
-				int destination = aerialVehicle.flightPath[i];
+				int destination = aerialVehicle.flightPath[i].tile;
 
 				Vector3 position = Find.WorldGrid.GetTileCenter(start);
 				for (float transition = 0; transition < 1; transition += halfTicksPerTileTraveled)

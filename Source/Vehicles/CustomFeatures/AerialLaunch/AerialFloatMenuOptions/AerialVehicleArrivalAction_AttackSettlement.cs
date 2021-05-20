@@ -69,7 +69,7 @@ namespace Vehicles
 			{
 				return false;
 			}
-			if (!Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().Passable(settlement.Tile, vehicle.VehicleDef))
+			if (!WorldVehiclePathGrid.Instance.Passable(settlement.Tile, vehicle.VehicleDef))
 			{
 				return false;
 			}

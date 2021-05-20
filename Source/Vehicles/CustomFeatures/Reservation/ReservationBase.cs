@@ -26,7 +26,7 @@ namespace Vehicles
 			jobDef = job.def.defName;
 			targetA = job.targetA;
 			this.maxClaimants = maxClaimants;
-			uniqueId = Current.Game.GetCachedGameComponent<VehicleIdManager>().GetNextReservationId();
+			uniqueId = VehicleIdManager.Instance.GetNextReservationId();
 		}
 
 		public abstract bool RemoveNow { get; }

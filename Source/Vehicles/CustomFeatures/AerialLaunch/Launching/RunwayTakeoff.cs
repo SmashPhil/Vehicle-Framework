@@ -235,19 +235,16 @@ namespace Vehicles
 		{
 			if (Find.WorldObjects.MapParentAt(tile) is MapParent parent && CanLandInSpecificCell(parent))
 			{
-				foreach (LaunchProtocol protocol in vehicle.CompVehicleLauncher.launchProtocols)
+				yield return new FloatMenuOption("LandInExistingMap".Translate(vehicle.Label), delegate ()
 				{
-					yield return new FloatMenuOption("LandInExistingMap".Translate(vehicle.Label), delegate()
+					Current.Game.CurrentMap = parent.Map;
+					CameraJumper.TryHideWorld();
+					LandingTargeter.Instance.BeginTargeting(vehicle, this, delegate (LocalTargetInfo target, Rot4 rot)
 					{
-						Current.Game.CurrentMap = parent.Map;
-						CameraJumper.TryHideWorld();
-						LandingTargeter.Instance.BeginTargeting(vehicle, protocol, delegate (LocalTargetInfo target, Rot4 rot)
-						{
-							vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, this, target.Cell, rot));
-						}, null, null, null, vehicle.VehicleDef.rotatable && protocol.landingProperties.forcedRotation is null);
-					}, MenuOptionPriority.Default, null, null, 0f, null, null);
-				}
-				
+						vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, this, target.Cell, rot));
+					}, null, null, null, vehicle.VehicleDef.rotatable && landingProperties.forcedRotation is null);
+				}, MenuOptionPriority.Default, null, null, 0f, null, null);
+
 			}
 			else if (Find.WorldObjects.SettlementAt(tile) is Settlement settlement)
 			{
@@ -275,7 +272,7 @@ namespace Vehicles
 			Find.WorldSelector.ClearSelection();
 			int tile = vehicle.Map.Tile;
 			LaunchTargeter.Instance.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseWorldTarget), vehicle.Map.Tile, true, VehicleTex.TargeterMouseAttachment, true, null, 
-				(GlobalTargetInfo target, List<int> path, float fuelCost) => TargetingLabelGetter(target, tile, path, fuelCost));
+				(GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => TargetingLabelGetter(target, tile, path, fuelCost));
 		}
 
 		public override bool ChoseWorldTarget(GlobalTargetInfo target, Vector3 pos, float fuelCost, Action<int, AerialVehicleArrivalAction, bool> launchAction)

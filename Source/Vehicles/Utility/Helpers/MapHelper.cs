@@ -24,9 +24,9 @@ namespace Vehicles
 		/// <param name="map"></param>
 		public static bool AnyAerialVehiclesInRecon(Map map)
 		{
-			foreach (AerialVehicleInFlight aerialVehicle in Find.World.GetCachedWorldComponent<VehicleWorldObjectsHolder>().AerialVehicles)
+			foreach (AerialVehicleInFlight aerialVehicle in VehicleWorldObjectsHolder.Instance.AerialVehicles)
 			{
-				if (aerialVehicle.flightPath.InRecon && aerialVehicle.flightPath.Last == map.Tile)
+				if (aerialVehicle.flightPath.InRecon && aerialVehicle.flightPath.Last.tile == map.Tile)
 				{
 					return true;
 				}
@@ -41,7 +41,20 @@ namespace Vehicles
 		public static bool VehicleBlockedInPosition(VehiclePawn vehicle, Map map, IntVec3 cell, Rot4 rot)
 		{
 			IEnumerable<IntVec3> cells = vehicle.PawnOccupiedCells(cell, rot);
-			return VehicleReservationManager.VehicleInhabitingCells(cells, map) || !vehicle.CellRectStandable(map, cell, rot);
+			return VehicleReservationManager.AnyVehicleInhabitingCells(cells, map) || !vehicle.CellRectStandable(map, cell, rot);
+		}
+
+		/// <summary>
+		/// Vehicle that has reserved <paramref name="cell"/>
+		/// </summary>
+		/// <param name="vehicle"></param>
+		/// <param name="map"></param>
+		/// <param name="cell"></param>
+		/// <param name="rot"></param>
+		public static VehiclePawn VehicleInPosition(VehiclePawn vehicle, Map map, IntVec3 cell, Rot4 rot)
+		{
+			IEnumerable<IntVec3> cells = vehicle.PawnOccupiedCells(cell, rot);
+			return VehicleReservationManager.VehicleInhabitingCells(cells, map);
 		}
 
 		/// <summary>
@@ -63,16 +76,16 @@ namespace Vehicles
 				}
 				else
 				{
-					AerialVehicleInFlight aerial = Find.World.GetCachedWorldComponent<VehicleWorldObjectsHolder>().AerialVehicleObject(vehicle);
+					AerialVehicleInFlight aerial = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
 					if (aerial is null)
 					{
 						Log.Error($"Attempted to launch into existing map where CurrentMap is null and no AerialVehicle with {vehicle.Label} exists.");
 						return;
 					}
-					List<int> flightPath = new List<int>(LaunchTargeter.FlightPath);
+					List<FlightNode> flightPath = new List<FlightNode>(LaunchTargeter.FlightPath);
 					aerial.OrderFlyToTiles(flightPath, aerial.DrawPos);
 					aerial.flightPath.ReconCircleAt(parent.Tile);
-					vehicle.inFlight = true;
+					vehicle.CompVehicleLauncher.inFlight = true;
 				}
 			});
 		}
@@ -96,16 +109,16 @@ namespace Vehicles
 				}
 				else
 				{
-					AerialVehicleInFlight aerial = Find.World.GetCachedWorldComponent<VehicleWorldObjectsHolder>().AerialVehicleObject(vehicle);
+					AerialVehicleInFlight aerial = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
 					if (aerial is null)
 					{
 						Log.Error($"Attempted to launch into existing map where CurrentMap is null and no AerialVehicle with {vehicle.Label} exists.");
 						return;
 					}
-					List<int> flightPath = new List<int>(LaunchTargeter.FlightPath);
+					List<FlightNode> flightPath = new List<FlightNode>(LaunchTargeter.FlightPath);
 					aerial.OrderFlyToTiles(flightPath, aerial.DrawPos);
 					aerial.flightPath.ReconCircleAt(parent.Tile);
-					vehicle.inFlight = true;
+					vehicle.CompVehicleLauncher.inFlight = true;
 				}
 			});
 		}

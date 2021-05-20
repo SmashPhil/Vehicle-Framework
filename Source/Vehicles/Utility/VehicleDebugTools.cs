@@ -127,7 +127,7 @@ namespace Vehicles
 					vehicle.CompVehicleLauncher?.InitializeLaunchProtocols(false);
 					AerialVehicleInFlight flyingVehicle = (AerialVehicleInFlight)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.AerialVehicle);
 					flyingVehicle.vehicle = vehicle;
-					flyingVehicle.vehicle.inFlight = true;
+					flyingVehicle.vehicle.CompVehicleLauncher.inFlight = true;
 					flyingVehicle.Tile = Find.CurrentMap.Tile;
 					flyingVehicle.SetFaction(vehicle.Faction);
 					flyingVehicle.Initialize();

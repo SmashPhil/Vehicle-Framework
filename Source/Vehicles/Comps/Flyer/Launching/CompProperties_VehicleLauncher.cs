@@ -43,14 +43,16 @@ namespace Vehicles
 		public bool faceDirectionOfTravel = true;
 		public bool circleToLand = true;
 
-		public BomberProperties bomber;
+		public BomberProperties bombing;
+		public StrafingProperties strafing;
 
-		public List<LaunchProtocol> launchProtocols;
+		public LaunchProtocol launchProtocol;
 
 		public ThingDef skyfallerLeaving;
 		public ThingDef skyfallerIncoming;
 		public ThingDef skyfallerCrashing;
-		public ThingDef skyfallerFlyOver;
+		public ThingDef skyfallerStrafing;
+		public ThingDef skyfallerbombing;
 
 		public CompProperties_VehicleLauncher()
 		{

@@ -79,8 +79,8 @@ namespace Vehicles
 		/// <param name="tile"></param>
 		public static int BestGotoDestForVehicle(Caravan caravan, int tile)
 		{
-			Predicate<int> predicate = (int t) => caravan.UniqueVehicleDefsInCaravan().All(v => Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().Passable(t, v)) && 
-				Find.World.GetCachedWorldComponent<WorldVehicleReachability>().CanReach(caravan, t);
+			Predicate<int> predicate = (int t) => caravan.UniqueVehicleDefsInCaravan().All(v => WorldVehiclePathGrid.Instance.Passable(t, v)) && 
+				WorldVehicleReachability.Instance.CanReach(caravan, t);
 			if (predicate(tile))
 			{
 				return tile;

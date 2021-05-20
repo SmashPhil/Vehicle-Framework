@@ -134,7 +134,7 @@ namespace Vehicles
 				this.arrivalAction = arrivalAction;
 				return true;
 			}
-			if (!Find.World.GetCachedWorldComponent<WorldVehicleReachability>().CanReach(caravan, destTile))
+			if (!WorldVehicleReachability.Instance.CanReach(caravan, destTile))
 			{
 				PatherFailed();
 				return false;
@@ -212,17 +212,17 @@ namespace Vehicles
 
 		public bool IsPassable(int tile)
 		{
-			return caravan.UniqueVehicleDefsInCaravan().All(v => Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().Passable(tile, v));
+			return caravan.UniqueVehicleDefsInCaravan().All(v => WorldVehiclePathGrid.Instance.Passable(tile, v));
 		}
 
 		public bool IsNextTilePassable()
 		{
-			return caravan.UniqueVehicleDefsInCaravan().All(v => Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().Passable(nextTile, v));
+			return caravan.UniqueVehicleDefsInCaravan().All(v => WorldVehiclePathGrid.Instance.Passable(nextTile, v));
 		}
 
 		private bool TryRecoverFromUnwalkablePosition()
 		{
-			if (GenWorldClosest.TryFindClosestTile(caravan.Tile, (int t) => IsPassable(t) && Find.World.GetCachedWorldComponent<WorldVehicleReachability>().CanReach(caravan, t), out int num, 2147483647, true))
+			if (GenWorldClosest.TryFindClosestTile(caravan.Tile, (int t) => IsPassable(t) && WorldVehicleReachability.Instance.CanReach(caravan, t), out int num, 2147483647, true))
 			{
 				Log.Warning(string.Concat(new object[]
 				{
@@ -480,7 +480,7 @@ namespace Vehicles
 		{
 			int num = (moving && nextTile >= 0 && IsNextTilePassable()) ? nextTile : caravan.Tile;
 			lastPathedTargetTile = destTile;
-			WorldPath worldPath = Find.World.GetCachedWorldComponent<WorldVehiclePathfinder>().FindPath(num, destTile, caravan, null);
+			WorldPath worldPath = WorldVehiclePathfinder.Instance.FindPath(num, destTile, caravan, null);
 
 			if (worldPath.Found && num != caravan.Tile)
 			{

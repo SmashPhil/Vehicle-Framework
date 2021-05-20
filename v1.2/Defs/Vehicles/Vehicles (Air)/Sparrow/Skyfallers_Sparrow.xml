@@ -18,13 +18,14 @@
 		<label>Sparrow Crashing</label>
 	</ThingDef>
 	
-	<ThingDef ParentName="VehicleSkyfallerFlyOver">
-		<defName>SparrowFlyover</defName>
+	<ThingDef ParentName="VehicleSkyfallerStrafe">
+		<defName>SparrowStrafe</defName>
 		<label>Sparrow Flyover</label>
 		<skyfaller>
 			<speed>4</speed>
 			<ticksToImpactRange>
-				<max>100</max> <!-- Only max is used -->
+				<min>30</min> <!-- ticks used in DrawPos to determine projectile distance spawning -->
+				<max>200</max> <!-- ticks used for DrawPos of Skyfaller -->
 			</ticksToImpactRange>
 		</skyfaller>
 	</ThingDef>

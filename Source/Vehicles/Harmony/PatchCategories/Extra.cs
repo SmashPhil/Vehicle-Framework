@@ -124,7 +124,7 @@ namespace Vehicles
 
 		public static void PausedFromVehicles(ref bool __result)
 		{
-			if (LandingTargeter.Instance.ForcedTargeting)
+			if (LandingTargeter.Instance.ForcedTargeting || StrafeTargeter.Instance.ForcedTargeting)
 			{
 				__result = true;
 			}
@@ -132,7 +132,7 @@ namespace Vehicles
 
 		public static void ForcePauseFromVehicles(ref TimeSpeed __result)
 		{
-			if (LandingTargeter.Instance.ForcedTargeting)
+			if (LandingTargeter.Instance.ForcedTargeting || StrafeTargeter.Instance.ForcedTargeting)
 			{
 				__result = TimeSpeed.Paused;
 			}

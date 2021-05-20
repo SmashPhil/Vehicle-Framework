@@ -15,23 +15,25 @@ namespace Vehicles
 		private const float BaseFeedbackTexSize = 0.8f;
 
 		private Func<GlobalTargetInfo, float, bool> action;
-		private Func<GlobalTargetInfo, List<int>, float, string> extraLabelGetter;
+		private Func<GlobalTargetInfo, List<FlightNode>, float, string> extraLabelGetter;
 
 		public LaunchTargeter()
 		{
-			FlightPath = new List<int>();
+			FlightPath = new List<FlightNode>();
 		}
 
 		public static LaunchTargeter Instance { get; private set; }
 
 		public static float TotalDistance { get; private set; }
+
 		public static float TotalFuelCost { get; private set; }
-		public static List<int> FlightPath { get; private set; }
+
+		public static List<FlightNode> FlightPath { get; private set; }
 
 		public override bool IsTargeting => action != null;
 
-		public void BeginTargeting(VehiclePawn vehicle, Func<GlobalTargetInfo, float, bool> action, int origin, bool canTargetTiles, Texture2D mouseAttachment = null, bool closeWorldTabWhenFinished = false, Action onUpdate = null, 
-			Func<GlobalTargetInfo, List<int>, float, string> extraLabelGetter = null)
+		public void BeginTargeting(VehiclePawn vehicle, Func<GlobalTargetInfo, float, bool> action, int origin, bool canTargetTiles, Texture2D mouseAttachment = null, bool closeWorldTabWhenFinished = false, Action onUpdate = null,
+			Func<GlobalTargetInfo, List<FlightNode>, float, string> extraLabelGetter = null)
 		{
 			this.vehicle = vehicle;
 			this.action = action;
@@ -46,8 +48,8 @@ namespace Vehicles
 			TotalFuelCost = 0;
 		}
 
-		public void BeginTargeting(VehiclePawn vehicle, Func<GlobalTargetInfo, float, bool> action, AerialVehicleInFlight aerialVehicle, bool canTargetTiles, Texture2D mouseAttachment = null, bool closeWorldTabWhenFinished = false, Action onUpdate = null, 
-			Func<GlobalTargetInfo, List<int>, float, string> extraLabelGetter = null)
+		public void BeginTargeting(VehiclePawn vehicle, Func<GlobalTargetInfo, float, bool> action, AerialVehicleInFlight aerialVehicle, bool canTargetTiles, Texture2D mouseAttachment = null, bool closeWorldTabWhenFinished = false, Action onUpdate = null,
+			Func<GlobalTargetInfo, List<FlightNode>, float, string> extraLabelGetter = null)
 		{
 			this.vehicle = vehicle;
 			this.action = action;
@@ -60,6 +62,38 @@ namespace Vehicles
 			FlightPath.Clear();
 			TotalDistance = 0;
 			TotalFuelCost = 0;
+		}
+
+		public void ContinueTargeting(VehiclePawn vehicle, Func<GlobalTargetInfo, float, bool> action, int origin, bool canTargetTiles, Texture2D mouseAttachment = null, bool closeWorldTabWhenFinished = false, Action onUpdate = null,
+			Func<GlobalTargetInfo, List<FlightNode>, float, string> extraLabelGetter = null)
+		{
+			this.vehicle = vehicle;
+			this.action = action;
+			originOnMap = Find.WorldGrid.GetTileCenter(origin);
+			this.canTargetTiles = canTargetTiles;
+			this.mouseAttachment = mouseAttachment;
+			this.closeWorldTabWhenFinished = closeWorldTabWhenFinished;
+			this.onUpdate = onUpdate;
+			this.extraLabelGetter = extraLabelGetter;
+		}
+
+		public void ContinueTargeting(VehiclePawn vehicle, Func<GlobalTargetInfo, float, bool> action, AerialVehicleInFlight aerialVehicle, bool canTargetTiles, Texture2D mouseAttachment = null, bool closeWorldTabWhenFinished = false, Action onUpdate = null,
+			Func<GlobalTargetInfo, List<FlightNode>, float, string> extraLabelGetter = null)
+		{
+			this.vehicle = vehicle;
+			this.action = action;
+			this.aerialVehicle = aerialVehicle;
+			this.canTargetTiles = canTargetTiles;
+			this.mouseAttachment = mouseAttachment;
+			this.closeWorldTabWhenFinished = closeWorldTabWhenFinished;
+			this.onUpdate = onUpdate;
+			this.extraLabelGetter = extraLabelGetter;
+		}
+
+		public override void RegisterActionOnTile(int tile, AerialVehicleArrivalAction arrivalAction)
+		{
+			FlightPath.Pop();
+			FlightPath.Add(new FlightNode(tile, arrivalAction));
 		}
 
 		public override void StopTargeting()
@@ -84,14 +118,14 @@ namespace Vehicles
 				if (Event.current.button == 0 && IsTargeting)
 				{
 					GlobalTargetInfo arg = CurrentTargetUnderMouse();
-					bool maxNodesHit = FlightPath.Count == vehicle.CompVehicleLauncher.SelectedLaunchProtocol.MaxFlightNodes;
+					bool maxNodesHit = FlightPath.Count == vehicle.CompVehicleLauncher.launchProtocol.MaxFlightNodes;
 					int sourceTile = aerialVehicle?.Tile ?? vehicle.Map.Tile;
-					bool sameTile = !vehicle.inFlight && (sourceTile == arg.Tile);
+					bool sameTile = !vehicle.CompVehicleLauncher.inFlight && sourceTile == arg.Tile && FlightPath.NullOrEmpty();
 					if (Find.World.worldObjects.AnyWorldObjectAt(arg.Tile) && !maxNodesHit && !sameTile)
 					{
-						FlightPath.Add(arg.Tile);
+						FlightPath.Add(new FlightNode(arg.Tile));
 					}
-					if (FlightPath.LastOrDefault() == arg.Tile)
+					if (FlightPath.LastOrDefault().tile == arg.Tile)
 					{
 						if (action(arg, TotalFuelCost))
 						{
@@ -111,7 +145,7 @@ namespace Vehicles
 					{
 						if (arg.IsValid)
 						{
-							FlightPath.Add(arg.Tile);
+							FlightPath.Add(new FlightNode(arg.Tile));
 						}
 					}
 					Event.current.Use();
@@ -150,13 +184,13 @@ namespace Vehicles
 					Texture2D image = mouseAttachment ?? TexCommand.Attack;
 					Rect position = new Rect(mousePosition.x + 8f, mousePosition.y + 8f, 32f, 32f);
 					GUI.DrawTexture(position, image);
-					
+
 					CostAndDistanceCalculator(out float fuelOnPathCost, out float tileDistance);
-					
+
 					Vector3 flightPathPos = originOnMap;
 					if (!FlightPath.NullOrEmpty())
 					{
-						flightPathPos = Find.WorldGrid.GetTileCenter(FlightPath.LastOrDefault());
+						flightPathPos = Find.WorldGrid.GetTileCenter(FlightPath.LastOrDefault().tile);
 					}
 					float finalFuelCost = fuelOnPathCost;
 					float finalTileDistance = tileDistance;
@@ -172,7 +206,7 @@ namespace Vehicles
 					Rect labelPosition = new Rect(mousePosition.x, mousePosition.y + textSize.y + 20f, textSize.x, textSize.y);
 					float bgWidth = textSize.x * 1.2f;
 					var color = GUI.color;
-					
+
 					if (extraLabelGetter != null)
 					{
 						string text = extraLabelGetter(mouseTarget, FlightPath, TotalFuelCost);
@@ -190,7 +224,7 @@ namespace Vehicles
 
 					GUI.Label(labelPosition, fuelCostLabel);
 					GUI.color = color;
-					
+
 				}
 			}
 		}
@@ -215,14 +249,14 @@ namespace Vehicles
 				}
 				if (arg.IsValid && !Mouse.IsInputBlockedNow)
 				{
-					if (vehicle.CompVehicleLauncher.launchProtocols.Any(l => l.GetFloatMenuOptionsAt(arg.Tile).NotNullAndAny()))
+					if (vehicle.CompVehicleLauncher.launchProtocol.GetFloatMenuOptionsAt(arg.Tile).NotNullAndAny())
 					{
 						WorldRendererUtility.DrawQuadTangentialToPlanet(pos, BaseFeedbackTexSize * Find.WorldGrid.averageTileSize, 0.018f, WorldMaterials.CurTargetingMat);
 					}
 				}
-				
+
 				Vector3 start = originOnMap;
-				var tiles = new List<int>(FlightPath);
+				var tiles = new List<int>(FlightPath.Select(n => n.tile));
 				Material lineMat = null;
 				switch (vehicle.CompVehicleLauncher.GetShuttleStatus(arg, start))
 				{
@@ -257,11 +291,11 @@ namespace Vehicles
 					//GUI.Label(rect, destLabel);
 					WorldRendererUtility.DrawQuadTangentialToPlanet(start, BaseFeedbackTexSize * Find.WorldGrid.averageTileSize, 0.018f, WorldMaterials.CurTargetingMat, false, false, null);
 				}
-				if (FlightPath.Count < vehicle.CompVehicleLauncher.SelectedLaunchProtocol.MaxFlightNodes && arg.IsValid)
+				if (FlightPath.Count < vehicle.CompVehicleLauncher.launchProtocol.MaxFlightNodes && arg.IsValid)
 				{
 					DrawTravelPoint(start, Find.WorldGrid.GetTileCenter(arg.Tile), lineMat);
 				}
-				
+
 				onUpdate?.Invoke();
 			}
 		}
@@ -284,8 +318,9 @@ namespace Vehicles
 			fuelCost = 0;
 			distance = 0;
 			Vector3 start = originOnMap;
-			foreach (int tile in FlightPath)
+			foreach (FlightNode node in FlightPath)
 			{
+				int tile = node.tile;
 				float nodeDistance = Ext_Math.SphericalDistance(start, Find.WorldGrid.GetTileCenter(tile));
 				fuelCost += vehicle.CompVehicleLauncher.FuelNeededToLaunchAtDist(nodeDistance);
 				distance += nodeDistance;
@@ -309,7 +344,7 @@ namespace Vehicles
 			{
 				float t = (float)i / steps;
 				Vector3 midPoint = Vector3.Slerp(start, end, t);
-				
+
 				GenDraw.DrawWorldLineBetween(previous, midPoint, material, 0.5f);
 				previous = midPoint;
 			}

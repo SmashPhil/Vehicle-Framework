@@ -373,7 +373,7 @@ namespace Vehicles
 
 		private void CannonSetup()
 		{
-			foreach(VehicleTurret cannon in Cannons)
+			foreach (VehicleTurret cannon in Cannons)
 			{
 				if(!string.IsNullOrEmpty(cannon.key))
 				{

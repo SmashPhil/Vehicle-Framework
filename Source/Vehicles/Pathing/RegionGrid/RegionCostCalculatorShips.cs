@@ -55,7 +55,7 @@ namespace Vehicles.AI
 		public RegionCostCalculatorShips(Map map)
 		{
 			this.map = map;
-			mapE = map.GetCachedMapComponent<WaterMap>();
+			mapE = map.GetComponent<WaterMap>();
 			preciseRegionLinkDistancesDistanceGetter = new Func<int, int, float>(PreciseRegionLinkDistancesDistanceGetter);
 		}
 

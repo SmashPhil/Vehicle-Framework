@@ -16,7 +16,6 @@ namespace Vehicles
 				!MapHelper.VehicleBlockedInPosition(aerialVehicle.vehicle, Current.Game.CurrentMap, cell, vehicleRotation), vehicleSize.x > vehicleSize.z ? vehicleSize.x : vehicleSize.z);
 			VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(aerialVehicle.vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
 			skyfaller.vehicle = aerialVehicle.vehicle;
-			skyfaller.launchProtocol = launchProtocol;
 			GenSpawn.Spawn(skyfaller, cell, map, vehicleRotation);
 		}
 

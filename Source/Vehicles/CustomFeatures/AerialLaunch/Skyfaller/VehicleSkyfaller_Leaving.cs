@@ -9,11 +9,12 @@ using UnityEngine;
 
 namespace Vehicles
 {
+	//REDO - CACHE LAUNCH PROTOCOL
 	public class VehicleSkyfaller_Leaving : VehicleSkyfaller
 	{
 		public AerialVehicleArrivalAction arrivalAction;
 
-		public List<int> flightPath;
+		public List<FlightNode> flightPath;
 
 		public bool orderRecon;
 
@@ -21,20 +22,10 @@ namespace Vehicles
 
 		private int delayLaunchingTicks;
 
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Deep.Look(ref arrivalAction, "arrivalAction", Array.Empty<object>());
-			Scribe_Collections.Look(ref flightPath, "flightPath");
-			Scribe_Values.Look(ref orderRecon, "orderRecon");
-			Scribe_Values.Look(ref createWorldObject, "createWorldObject", true, false);
-			Scribe_Values.Look(ref delayLaunchingTicks, "delayLaunchingTicks");
-		}
-
 		public override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
-			skyfallerLoc = launchProtocol.AnimateTakeoff(drawLoc.y, flip);
-			launchProtocol.DrawAdditionalLaunchTextures(drawLoc.y);
+			skyfallerLoc = vehicle.CompVehicleLauncher.launchProtocol.AnimateTakeoff(drawLoc.y, flip);
+			vehicle.CompVehicleLauncher.launchProtocol.DrawAdditionalLaunchTextures(drawLoc.y);
 			DrawDropSpotShadow();
 		}
 
@@ -44,7 +35,7 @@ namespace Vehicles
 			if (delayLaunchingTicks <= 0)
 			{
 				base.Tick();
-				if (launchProtocol.FinishedTakeoff(this))
+				if (vehicle.CompVehicleLauncher.launchProtocol.FinishedTakeoff(this))
 				{
 					LeaveMap();
 				}
@@ -58,10 +49,10 @@ namespace Vehicles
 				base.LeaveMap();
 				return;
 			}
-			if (flightPath.Any(p => p < 0))
+			if (flightPath.Any(node => node.tile < 0))
 			{
 				Log.Error("AerialVehicle left the map but has a flight path Tile that is invalid. Removing node from path.");
-				flightPath.RemoveAll(p => p < 0);
+				flightPath.RemoveAll(node => node.tile < 0);
 				if (flightPath.NullOrEmpty())
 				{
 					//REDO - Handle better here
@@ -69,20 +60,16 @@ namespace Vehicles
 				}
 			}
 			Messages.Message($"{vehicle.LabelShort} LEFT", MessageTypeDefOf.PositiveEvent);
-			if (flightPath.LastOrDefault() == Map.Tile)
-			{
-				arrivalAction?.Arrived(flightPath.LastOrDefault());
-			}
-			else if (createWorldObject)
+			if (createWorldObject)
 			{
 				AerialVehicleInFlight flyingVehicle = (AerialVehicleInFlight)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.AerialVehicle);
 				flyingVehicle.vehicle = vehicle;
 				flyingVehicle.Tile = Map.Tile;
 				flyingVehicle.SetFaction(vehicle.Faction);
-				flyingVehicle.OrderFlyToTiles(new List<int>(flightPath), Find.WorldGrid.GetTileCenter(Map.Tile), arrivalAction);
+				flyingVehicle.OrderFlyToTiles(new List<FlightNode>(flightPath), Find.WorldGrid.GetTileCenter(Map.Tile), arrivalAction);
 				if (orderRecon)
 				{
-					flyingVehicle.flightPath.ReconCircleAt(flightPath.LastOrDefault());
+					flyingVehicle.flightPath.ReconCircleAt(flightPath.LastOrDefault().tile);
 				}
 				flyingVehicle.Initialize();
 				Find.WorldObjects.Add(flyingVehicle);
@@ -95,10 +82,20 @@ namespace Vehicles
 			base.SpawnSetup(map, respawningAfterLoad);
 			if (!respawningAfterLoad)
 			{
-				launchProtocol.SetPositionLeaving(new Vector3(DrawPos.x, DrawPos.y + 1, DrawPos.z), Rotation, map);
-				launchProtocol.OrderProtocol(false);
-				delayLaunchingTicks = launchProtocol.launchProperties.delayByTicks;
+				vehicle.CompVehicleLauncher.launchProtocol.SetPositionLeaving(new Vector3(DrawPos.x, DrawPos.y + 1, DrawPos.z), Rotation, map);
+				vehicle.CompVehicleLauncher.launchProtocol.OrderProtocol(false);
+				delayLaunchingTicks = vehicle.CompVehicleLauncher.launchProtocol.launchProperties.delayByTicks;
 			}
+		}
+
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Deep.Look(ref arrivalAction, "arrivalAction", Array.Empty<object>());
+			Scribe_Collections.Look(ref flightPath, "flightPath");
+			Scribe_Values.Look(ref orderRecon, "orderRecon");
+			Scribe_Values.Look(ref createWorldObject, "createWorldObject", true, false);
+			Scribe_Values.Look(ref delayLaunchingTicks, "delayLaunchingTicks");
 		}
 	}
 }

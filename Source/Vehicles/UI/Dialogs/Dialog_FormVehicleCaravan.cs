@@ -542,7 +542,7 @@ namespace Vehicles
 					}
 					else
 					{
-						Find.World.GetCachedWorldComponent<VehicleRoutePlanner>().Start(this);
+						VehicleRoutePlanner.Instance.Start(this);
 					}
 				}
 				if (destinationTile != -1)

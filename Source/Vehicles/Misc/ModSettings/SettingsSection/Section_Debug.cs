@@ -30,6 +30,8 @@ namespace Vehicles
 		public bool debugLogging;
 		public bool debugGenerateWorldPathCostTexts;
 
+		public Dictionary<string, string> updateLogs = new Dictionary<string, string>();
+
 		public override void ResetSettings()
 		{
 			base.ResetSettings();
@@ -73,6 +75,8 @@ namespace Vehicles
 
 			Scribe_Values.Look(ref debugLogging, "debugLogging", false);
 			Scribe_Values.Look(ref debugGenerateWorldPathCostTexts, "debugGenerateWorldPathCostTexts", false);
+
+			Scribe_Collections.Look(ref updateLogs, "updateLogs", LookMode.Value, LookMode.Value);
 		}
 
 		public override void DrawSection(Rect rect)
@@ -135,7 +139,26 @@ namespace Vehicles
 
 			if (listingStandard.ButtonText("ShowRecentNews".Translate()))
 			{
-				Find.WindowStack.Add(new Dialog_NewUpdate(new HashSet<UpdateLog.UpdateLog>() { UpdateHandler.modUpdates.FirstOrDefault(u => u.Mod == ConditionalPatchApplier.VehicleMCP) }));
+				string versionChecking = "Null";
+				try
+				{
+					List<DebugMenuOption> versions = new List<DebugMenuOption>();
+					foreach (string version in updateLogs.Keys)
+					{
+						versionChecking = version;
+						versions.Add(new DebugMenuOption(version, DebugMenuOptionMode.Action, delegate ()
+						{
+							string loadFolder = FileReader.ModFoldersForVersion(ConditionalPatchApplier.VehicleMCP).LastOrDefault();
+							string description = updateLogs[version];
+							Find.WindowStack.Add(new Dialog_NewUpdate(new HashSet<UpdateLog.UpdateLog>() { new UpdateLog.UpdateLog(ConditionalPatchApplier.VehicleMCP, loadFolder, description) }));
+						}));
+					}
+					Find.WindowStack.Add(new Dialog_DebugOptionListLister(versions));
+				}
+				catch (Exception ex)
+				{
+					Log.Error($"{VehicleHarmony.LogLabel} Unable to show update for {versionChecking} Exception = {ex.Message}");
+				}
 			}
 			listingStandard.End();
 		}

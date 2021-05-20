@@ -8,6 +8,7 @@ using UnityEngine;
 
 namespace Vehicles
 {
+	//REDO - CACHE LAUNCH PROTOCOL
 	[StaticConstructorOnStartup]
 	public abstract class VehicleSkyfaller : Thing, IActiveDropPod, IThingHolder
 	{
@@ -22,8 +23,6 @@ namespace Vehicles
 		public VehiclePawn vehicle;
 
 		protected ActiveDropPodInfo contents;
-
-		public LaunchProtocol launchProtocol;
 
 		protected Vector3 skyfallerLoc = Vector3.zero;
 
@@ -69,7 +68,7 @@ namespace Vehicles
 
 		public override void Tick()
 		{
-			launchProtocol.Tick();
+			vehicle.CompVehicleLauncher.launchProtocol.Tick();
 		}
 
 		protected virtual void LeaveMap()
@@ -84,7 +83,7 @@ namespace Vehicles
 			{
 				return;
 			}
-			DrawDropSpotShadow(DrawPos, Rotation, shadowMaterial, def.skyfaller.shadowSize, launchProtocol.TicksPassed);
+			DrawDropSpotShadow(DrawPos, Rotation, shadowMaterial, def.skyfaller.shadowSize, vehicle.CompVehicleLauncher.launchProtocol.TicksPassed);
 		}
 
 		public static void DrawDropSpotShadow(Vector3 center, Rot4 rot, Material material, Vector2 shadowSize, int ticksToLand)
@@ -115,7 +114,6 @@ namespace Vehicles
 			
 			Scribe_Values.Look(ref angle, "angle", 0f, false);
 			Scribe_References.Look(ref vehicle, "vehicle");
-			Scribe_Deep.Look(ref launchProtocol, "launchProtocol");
 			Scribe_Values.Look(ref skyfallerLoc, "skyfallerLoc");
 		}
 
@@ -124,7 +122,7 @@ namespace Vehicles
 			base.SpawnSetup(map, respawningAfterLoad);
 			if (!respawningAfterLoad)
 			{
-				launchProtocol.PreAnimationSetup();
+				vehicle.CompVehicleLauncher.launchProtocol.PreAnimationSetup();
 			}
 		}
 	}

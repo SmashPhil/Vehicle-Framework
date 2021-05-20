@@ -154,9 +154,8 @@
 				<landingAltitude>5000</landingAltitude>
 				<controlInFlight>false</controlInFlight>
 				<reconDistance>0</reconDistance>
-				<launchProtocols>
-					<li Class="Vehicles.RocketTakeoff">
-						<movementType>Decelerate</movementType>
+				<launchProtocol Class="Vehicles.RocketTakeoff">
+					<movementType>Decelerate</movementType>
 						<rocketTiltRate>0.025</rocketTiltRate>
 						<thrusterSize>1~2</thrusterSize>
 						<dustSize>0.5~1.5</dustSize>
@@ -224,8 +223,7 @@
 								</li>
 							</additionalLaunchTextures>
 						</landingProperties>
-					</li>
-				</launchProtocols>
+				</launchProtocol>
 			</li>
 			<li Class="Vehicles.CompProperties_UpgradeTree">
 				<upgrades/>

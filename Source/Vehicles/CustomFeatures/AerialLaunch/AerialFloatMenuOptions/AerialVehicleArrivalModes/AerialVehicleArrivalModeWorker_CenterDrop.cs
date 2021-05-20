@@ -14,7 +14,6 @@ namespace Vehicles
 			IntVec3 cell = CellFinderExtended.RandomCenterCell(map, (IntVec3 cell) => !MapHelper.VehicleBlockedInPosition(aerialVehicle.vehicle, Current.Game.CurrentMap, cell, vehicleRotation));
 			VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(aerialVehicle.vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
 			skyfaller.vehicle = aerialVehicle.vehicle;
-			skyfaller.launchProtocol = launchProtocol;
 			GenSpawn.Spawn(skyfaller, cell, map, vehicleRotation);
 		}
 

@@ -115,7 +115,7 @@ namespace Vehicles
 		public override void Destroy()
 		{
 			bool hit = Rand.Range(0f, 1f) <= AADef.accuracy;
-			if (hit && (target?.vehicle.inFlight ?? false))
+			if (hit && (target?.vehicle.CompVehicleLauncher.inFlight ?? false))
 			{
 				target.TakeDamage(new DamageInfo(DamageDefOf.Bomb, AADef.damage), firedFrom);
 			}

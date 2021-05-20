@@ -48,12 +48,12 @@ namespace Vehicles
 					nameof(DebugDrawWaterRegion)));
 			}
 
-			//harmony.Patch(original: AccessTools.Method(typeof(WindowStack), nameof(WindowStack.TryRemove), new Type[] { typeof(Window), typeof(bool) }),
-			//    postfix: new HarmonyMethod(typeof(Debug),
-			//    nameof(TESTMETHODONLY)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Game), nameof(Game.AddMap)),
+			//	postfix: new HarmonyMethod(typeof(Debug),
+			//	nameof(TestMethod)));
 		}
 
-		public static void TestMethod()
+		public static void TestMethod(Map map)
 		{
 			try
 			{

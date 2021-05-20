@@ -29,7 +29,7 @@ namespace Vehicles
 				{
 					if (uiConfirmationCallback == null)
 					{
-						if (!vehicle.Spawned && Find.World.GetCachedWorldComponent<VehicleWorldObjectsHolder>().AerialVehicleObject(vehicle) is AerialVehicleInFlight aerialVehicle)
+						if (!vehicle.Spawned && VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle) is AerialVehicleInFlight aerialVehicle)
 						{
 							aerialVehicle.OrderFlyToTiles(LaunchTargeter.FlightPath, aerialVehicle.DrawPos, arrivalActionGetter());
 						}
@@ -40,7 +40,7 @@ namespace Vehicles
 					}
 					else
 					{
-						if (!vehicle.Spawned && Find.World.GetCachedWorldComponent<VehicleWorldObjectsHolder>().AerialVehicleObject(vehicle) is AerialVehicleInFlight aerialVehicle)
+						if (!vehicle.Spawned && VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle) is AerialVehicleInFlight aerialVehicle)
 						{
 							uiConfirmationCallback(delegate
 							{

@@ -22,7 +22,10 @@ namespace Vehicles
 
 		public VehicleIdManager(Game game)
 		{
+			Instance = this;
 		}
+
+		public static VehicleIdManager Instance { get; private set; }
 
 		public int GetNextRequestCollectionId()
 		{

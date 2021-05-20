@@ -88,17 +88,17 @@ namespace Vehicles
 		/* --------------- VehicleRoutePlanner Hook --------------- */
 		public static void VehicleRoutePlannerUpdateHook()
 		{
-			Find.World.GetCachedWorldComponent<VehicleRoutePlanner>().WorldRoutePlannerUpdate();
+			VehicleRoutePlanner.Instance.WorldRoutePlannerUpdate();
 		}
 
 		public static void VehicleRoutePlannerOnGUIHook()
 		{
-			Find.World.GetCachedWorldComponent<VehicleRoutePlanner>().WorldRoutePlannerOnGUI();
+			VehicleRoutePlanner.Instance.WorldRoutePlannerOnGUI();
 		}
 
 		public static void VehicleRoutePlannerButton(ref float curBaseY)
 		{
-			Find.World.GetCachedWorldComponent<VehicleRoutePlanner>().DoRoutePlannerButton(ref curBaseY);
+			VehicleRoutePlanner.Instance.DoRoutePlannerButton(ref curBaseY);
 		}
 		/* ------------------------------------------------------- */
 	}

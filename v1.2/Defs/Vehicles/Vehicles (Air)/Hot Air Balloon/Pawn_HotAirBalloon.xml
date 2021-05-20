@@ -131,9 +131,8 @@
 				<circleToLand>true</circleToLand>
 				<fuelEfficiencyWorld>0.15</fuelEfficiencyWorld>
 				<flySpeed>1.1</flySpeed>
-				<launchProtocols>
-					<li Class="Vehicles.RocketTakeoff">
-						<movementType>Decelerate</movementType>
+				<launchProtocol Class="Vehicles.RocketTakeoff">
+					<movementType>Decelerate</movementType>
 						<maxFlightNodes>999</maxFlightNodes>
 						<launchProperties>
 							<reversed>true</reversed>
@@ -144,8 +143,7 @@
 							<speed>0.01</speed>
 							<maxTicks>2500</maxTicks>
 						</landingProperties>
-					</li>
-				</launchProtocols>
+				</launchProtocol>
 			</li>
 			<li Class="Vehicles.CompProperties_UpgradeTree">
 				<upgrades/>

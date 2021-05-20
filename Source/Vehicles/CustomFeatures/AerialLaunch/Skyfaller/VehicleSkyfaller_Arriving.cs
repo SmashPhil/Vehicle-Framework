@@ -5,6 +5,7 @@ using SmashTools;
 
 namespace Vehicles
 {
+	//REDO - CACHE LAUNCH PROTOCOL
 	public class VehicleSkyfaller_Arriving : VehicleSkyfaller
 	{
 		public const int NotificationSquishInterval = 50;
@@ -18,15 +19,15 @@ namespace Vehicles
 
 		public override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
-			skyfallerLoc = launchProtocol.AnimateLanding(drawLoc.y, flip);
-			launchProtocol.DrawAdditionalLandingTextures(drawLoc.y);
+			skyfallerLoc = vehicle.CompVehicleLauncher.launchProtocol.AnimateLanding(drawLoc.y, flip);
+			vehicle.CompVehicleLauncher.launchProtocol.DrawAdditionalLandingTextures(drawLoc.y);
 			DrawDropSpotShadow();
 		}
 
 		public override void Tick()
 		{
 			base.Tick();
-			if (launchProtocol.FinishedLanding(this))
+			if (vehicle.CompVehicleLauncher.launchProtocol.FinishedLanding(this))
 			{
 				delayLandingTicks--;
 				if (delayLandingTicks <= 0 && Position.InBounds(Map))
@@ -46,8 +47,8 @@ namespace Vehicles
 
 		protected virtual void FinalizeLanding()
 		{
-			vehicle.inFlight = false;
-			if (VehicleReservationManager.VehicleInhabitingCells(vehicle.PawnOccupiedCells(Position, Rotation), Map))
+			vehicle.CompVehicleLauncher.inFlight = false;
+			if (VehicleReservationManager.AnyVehicleInhabitingCells(vehicle.PawnOccupiedCells(Position, Rotation), Map))
 			{
 				GenExplosion.DoExplosion(Position, Map, Mathf.Max(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z), DamageDefOf.Bomb, vehicle);
 			}
@@ -67,9 +68,9 @@ namespace Vehicles
 			base.SpawnSetup(map, respawningAfterLoad);
 			if (!respawningAfterLoad)
 			{
-				launchProtocol.SetPositionArriving(new Vector3(DrawPos.x, DrawPos.y + 1, DrawPos.z), Rotation, map);
-				launchProtocol.OrderProtocol(true);
-				delayLandingTicks = launchProtocol.landingProperties?.delayByTicks ?? 0;
+				vehicle.CompVehicleLauncher.launchProtocol.SetPositionArriving(new Vector3(DrawPos.x, DrawPos.y + 1, DrawPos.z), Rotation, map);
+				vehicle.CompVehicleLauncher.launchProtocol.OrderProtocol(true);
+				delayLandingTicks = vehicle.CompVehicleLauncher.launchProtocol.landingProperties?.delayByTicks ?? 0;
 			}
 		}
 	}

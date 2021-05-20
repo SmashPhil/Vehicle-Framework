@@ -33,7 +33,7 @@ namespace Vehicles
 
 		public virtual bool ShouldUseLongEvent(int tile) => false;
 
-		public abstract void Arrived(int tile); //inFlight = false
+		public abstract void Arrived(int tile); //CompVehicleLauncher.inFlight = false
 
 		public virtual void ExposeData()
 		{

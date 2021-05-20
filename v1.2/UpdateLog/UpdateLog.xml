@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <currentVersion>1.2.3.2</currentVersion>
-  <updateOn>GameInit</updateOn>
+  <updateOn>Startup</updateOn>
   <description>
 [anchor]MiddleCenter[/anchor][b]Vehicles - 1.2.3.2[/b][anchor]MiddleLeft[/anchor]
 [title]Bug Fixes[/title][font]Tiny[/font]
@@ -51,9 +51,9 @@ Modified Graphic_RGB, Graphic_Vehicle, and PatternDef to allow for rotating / fl
 [title]Final Notes[/title]
 Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.)
   </description>
-  <actionOnUpdate></actionOnUpdate>
-  <update>false</update>
-  <testing>false</testing>
+  <actionOnUpdate>Vehicles.VehicleHarmony.RegisterUpdateVersion</actionOnUpdate>
+  <update>true</update>
+  <testing>true</testing>
   <rightIconBar>
     <li>
       <name>Github</name>

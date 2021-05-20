@@ -210,17 +210,21 @@ namespace Vehicles
 			return false;
 		}
 
-		//REDO
-		public static bool VehicleInhabitingCells(IEnumerable<IntVec3> cells, Map map)
+		public static VehiclePawn VehicleInhabitingCells(IEnumerable<IntVec3> cells, Map map)
 		{
 			foreach (VehiclePawn vehicle in map.mapPawns.AllPawnsSpawned.Where(p => p is VehiclePawn))
 			{
 				if (vehicle.OccupiedRect().Any(c => cells.Contains(c)))
 				{
-					return true;
+					return vehicle;
 				}
 			}
-			return false;
+			return null;
+		}
+
+		public static bool AnyVehicleInhabitingCells(IEnumerable<IntVec3> cells, Map map)
+		{
+			return VehicleInhabitingCells(cells, map) != null;
 		}
 
 		internal void ClearAllListers()

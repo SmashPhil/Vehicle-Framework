@@ -61,7 +61,7 @@ namespace Vehicles
 		/// <param name="parent"></param>
 		public UpgradeNode(VehiclePawn parent)
 		{
-			nodeID = Current.Game.GetCachedGameComponent<VehicleIdManager>().GetNextUpgradeId();
+			nodeID = VehicleIdManager.Instance.GetNextUpgradeId();
 			this.parent = parent;
 
 			itemContainer = new ThingOwner<Thing>(this, false, LookMode.Deep);
@@ -74,7 +74,7 @@ namespace Vehicles
 		/// <param name="parent"></param>
 		public UpgradeNode(UpgradeNode reference, VehiclePawn parent)
 		{
-			nodeID = Current.Game.GetCachedGameComponent<VehicleIdManager>().GetNextUpgradeId();
+			nodeID = VehicleIdManager.Instance.GetNextUpgradeId();
 			this.parent = parent;
 
 			label = reference.label;

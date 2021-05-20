@@ -49,7 +49,7 @@ namespace Vehicles
 				projectile.PostMake();
 				Find.WorldObjects.Add(projectile);
 
-				if (!target.vehicle.inFlight || Ext_Math.SphericalDistance(settlement.DrawPos, target.DrawPos) > SettlementPositionTracker.airDefenseCache[settlement].radarDistance)
+				if (!target.vehicle.CompVehicleLauncher.inFlight || Ext_Math.SphericalDistance(settlement.DrawPos, target.DrawPos) > SettlementPositionTracker.airDefenseCache[settlement].radarDistance)
 				{
 					RemoveTarget(target);
 					targets.PostItemRemove();

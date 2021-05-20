@@ -36,22 +36,7 @@ namespace Vehicles
 				return;
 			}
 			Current.Game.CurrentMap = targetMap;
-			vehicle.CompVehicleLauncher.SelectedLaunchProtocol = vehicle.CompVehicleLauncher.launchProtocols.FirstOrDefault();
-			StrafeTargeter.Instance.BeginTargeting(vehicle, vehicle.CompVehicleLauncher.SelectedLaunchProtocol, delegate (IntVec3 start, IntVec3 end)
-			{
-				if (vehicle.Spawned)
-				{
-					Current.Game.CurrentMap = vehicle.Map;
-					vehicle.CompVehicleLauncher.TryLaunch(targetMap.Tile, new AerialVehicleArrivalAction_StrafeMap(vehicle, targetMap.Parent, start, end));
-				}
-				else
-				{
-					CameraJumper.TryShowWorld();
-					AerialVehicleInFlight aerial = Find.World.GetCachedWorldComponent<VehicleWorldObjectsHolder>().AerialVehicleObject(vehicle);
-					vehicle.inFlight = true;
-					aerial.OrderFlyToTiles(new List<int>() { targetMap.Tile }, aerial.DrawPos, new AerialVehicleArrivalAction_StrafeMap(vehicle, targetMap.Parent, start, end));
-				}
-			}, null, null, null, false);
+			LaunchTargeter.Instance.RegisterActionOnTile(targetMap.Tile, new AerialVehicleArrivalAction_StrafeMap(vehicle, targetMap.Parent));
 		}
 	}
 }

@@ -25,7 +25,7 @@ namespace Vehicles
 
 		public static bool CanFormCaravanAt(VehiclePawn vehicle, int tile)
 		{
-			return vehicle.AllPawnsAboard.Count > 0 && Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().Passable(tile, vehicle.VehicleDef);
+			return vehicle.AllPawnsAboard.Count > 0 && WorldVehiclePathGrid.Instance.Passable(tile, vehicle.VehicleDef);
 		}
 	}
 }

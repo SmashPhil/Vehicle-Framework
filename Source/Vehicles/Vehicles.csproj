@@ -396,13 +396,19 @@
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeWorker_EdgeDrop.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeWorker_CenterDrop.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\VehicleArrivalActionUtility.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Bombing\StrafingProperties.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\FlightPath.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Landing\LandingArea.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Landing\LandingAreasHandler.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\VTOLTakeoff.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\RocketTakeoff.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\DefaultTakeoff.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\LaunchProtocolProperties.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\Projectiles\StrafeProjectile.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\SkyfallerMaker\ProjectileSkyfallerMaker.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\SkyfallerMaker\VehicleSkyfallerMaker.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_Bomb.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_Strafe.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_FlyOver.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_Crashing.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Targeters\BaseWorldTargeter.cs" />
@@ -712,7 +718,9 @@
     <Compile Include="World\WorldObjectComps\SettlementAirDefense.cs" />
     <Compile Include="World\WorldObjectComps\WorldObjectCompProperties_SettlementAirDefense.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="CustomFeatures\AerialLaunch\Skyfaller\Bombs\" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

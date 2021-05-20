@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 using UnityEngine;
 using Verse;
 using RimWorld;
@@ -398,7 +399,6 @@ namespace Vehicles
 		/// FloatMenuOptions at <paramref name="tile"/> on world map based on launchProtocol
 		/// </summary>
 		/// <param name="tile"></param>
-		/// <returns></returns>
 		public abstract IEnumerable<FloatMenuOption> GetFloatMenuOptionsAt(int tile);
 
 		/// <summary>
@@ -408,7 +408,7 @@ namespace Vehicles
 		/// <param name="path"></param>
 		/// <param name="fuelCost"></param>
 		/// <param name="launchAction"></param>
-		public virtual string TargetingLabelGetter(GlobalTargetInfo target, int tile, List<int> path, float fuelCost)
+		public virtual string TargetingLabelGetter(GlobalTargetInfo target, int tile, List<FlightNode> path, float fuelCost)
 		{
 			if (!target.IsValid)
 			{
@@ -448,10 +448,8 @@ namespace Vehicles
 		/// <summary>
 		/// Begin choosing destination target for aerial vehicle
 		/// </summary>
-		/// <remarks>Must call base method to ensure launch protocol is selected.</remarks>
 		public virtual void StartChoosingDestination()
 		{
-			vehicle.CompVehicleLauncher.SelectedLaunchProtocol = this;
 		}
 
 		/// <summary>
@@ -478,7 +476,7 @@ namespace Vehicles
 			IEnumerable<FloatMenuOption> source = GetFloatMenuOptionsAt(target.Tile);
 			if (!source.Any())
 			{
-				if (!Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().Passable(target.Tile, vehicle.VehicleDef))
+				if (!WorldVehiclePathGrid.Instance.Passable(target.Tile, vehicle.VehicleDef))
 				{
 					Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(), MessageTypeDefOf.RejectInput, false);
 					return false;
@@ -513,6 +511,24 @@ namespace Vehicles
 		protected bool ChoseWorldTarget(GlobalTargetInfo target, float fuelCost)
 		{
 			return ChoseWorldTarget(target, Find.WorldGrid.GetTileCenter(vehicle.Map.Tile), fuelCost, new Action<int, AerialVehicleArrivalAction, bool>(vehicle.CompVehicleLauncher.TryLaunch));
+		}
+
+		public virtual void ResolveProperties(LaunchProtocol reference)
+		{
+			launchProperties = reference.launchProperties;
+			landingProperties = reference.landingProperties;
+		}
+
+		public virtual void ExposeData()
+		{
+			Scribe_References.Look(ref vehicle, "vehicle");
+			Scribe_Values.Look(ref drawPos, "drawPos");
+			Scribe_Values.Look(ref ticksPassed, "ticksPassed");
+
+			Scribe_Values.Look(ref landing, "landing");
+
+			Scribe_References.Look(ref currentMap, "currentMap");
+			Scribe_References.Look(ref targetMap, "targetMap");
 		}
 
 		public static bool CanLandInSpecificCell(MapParent mapParent)
@@ -582,23 +598,10 @@ namespace Vehicles
 			GenSpawn.Spawn(moteThrown, vector.ToIntVec3(), map, WipeMode.Vanish);
 		}
 
-		public virtual void ResolveProperties(LaunchProtocol reference)
-		{
-			launchProperties = reference.launchProperties;
-			landingProperties = reference.landingProperties;
-		}
+		//public static void LoadDataFromXmlCustom(XmlNode xmlRoot)
+		//{
 
-		public virtual void ExposeData()
-		{
-			Scribe_References.Look(ref vehicle, "vehicle");
-			Scribe_Values.Look(ref drawPos, "drawPos");
-			Scribe_Values.Look(ref ticksPassed, "ticksPassed");
-
-			Scribe_Values.Look(ref landing, "landing");
-			
-			Scribe_References.Look(ref currentMap, "currentMap");
-			Scribe_References.Look(ref targetMap, "targetMap");
-		}
+		//}
 
 		public class MoteInfo : IExposable
 		{

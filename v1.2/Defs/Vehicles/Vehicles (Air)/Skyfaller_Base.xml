@@ -30,8 +30,17 @@
 		</skyfaller>
 	</ThingDef>
 	
-	<ThingDef Name="VehicleSkyfallerFlyOver" ParentName="VehicleSkyfallerBase" Abstract="True">
-		<thingClass>Vehicles.VehicleSkyfaller_FlyOver</thingClass>
+	<ThingDef Name="VehicleSkyfallerStrafe" ParentName="VehicleSkyfallerBase" Abstract="True">
+		<thingClass>Vehicles.VehicleSkyfaller_Strafe</thingClass>
+		<skyfaller>
+			<movementType>ConstantSpeed</movementType>
+			<shadowSize>(3, 3)</shadowSize>
+			<rotateGraphicTowardsDirection>true</rotateGraphicTowardsDirection>
+		</skyfaller>
+	</ThingDef>
+	
+	<ThingDef Name="VehicleSkyfallerBomb" ParentName="VehicleSkyfallerBase" Abstract="True">
+		<thingClass>Vehicles.VehicleSkyfaller_Bomb</thingClass>
 		<skyfaller>
 			<movementType>ConstantSpeed</movementType>
 			<shadowSize>(3, 3)</shadowSize>

@@ -46,11 +46,11 @@ namespace Vehicles
 			{
 				if(cannon.Key.uniqueID < 0)
 				{
-					cannon.Key.uniqueID = Current.Game.GetCachedGameComponent<VehicleIdManager>().GetNextCannonId();
+					cannon.Key.uniqueID = VehicleIdManager.Instance.GetNextCannonId();
 				}
 				if(cannon.Value.uniqueID < 0)
 				{
-					cannon.Value.uniqueID = Current.Game.GetCachedGameComponent<VehicleIdManager>().GetNextHandlerId();
+					cannon.Value.uniqueID = VehicleIdManager.Instance.GetNextHandlerId();
 				}
 			}
 		}

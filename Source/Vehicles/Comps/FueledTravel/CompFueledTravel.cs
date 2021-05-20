@@ -350,7 +350,7 @@ namespace Vehicles
 				{
 					try
 					{
-						Pair<float, float> moteOffset = RenderHelper.ShipDrawOffset(Vehicle, offset.xOffset, offset.zOffset, out Pair<float,float> rotationOffset);
+						Pair<float, float> moteOffset = RenderHelper.TurretDrawOffset(Vehicle.Rotation.AsAngle + Vehicle.Angle, offset.xOffset, offset.zOffset, out Pair<float,float> rotationOffset);
 						offsetX = moteOffset.First;
 						offsetZ = moteOffset.Second;
 

@@ -32,7 +32,10 @@ namespace Vehicles
 			aerialVehicles.RemoveAll(a => a is null);
 			vehicleCaravans.RemoveAll(c => c is null);
 			dockedBoats.RemoveAll(b => b is null);
+			Instance = this;
 		}
+
+		public static VehicleWorldObjectsHolder Instance { get; private set; }
 
 		public List<AerialVehicleInFlight> AerialVehicles => aerialVehicles;
 		public List<VehicleCaravan> VehicleCaravans => vehicleCaravans;

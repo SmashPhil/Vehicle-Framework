@@ -10,6 +10,7 @@ using UnityEngine;
 
 namespace Vehicles
 {
+	//REDO - CACHE LAUNCH PROTOCOL
 	public class VehicleSkyfaller_Crashing : VehicleSkyfaller_Arriving
 	{
 		public const float DefaultAngle = -65;
@@ -26,7 +27,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return def.skyfaller.moteSpawnTime != float.MinValue && Mathf.Approximately(def.skyfaller.moteSpawnTime, launchProtocol.TimeInAnimation);
+				return def.skyfaller.moteSpawnTime != float.MinValue && Mathf.Approximately(def.skyfaller.moteSpawnTime, vehicle.CompVehicleLauncher.launchProtocol.TimeInAnimation);
 			}
 		}
 
@@ -57,7 +58,7 @@ namespace Vehicles
 				{
 					return def.skyfaller.speed;
 				}
-				return def.skyfaller.speedCurve.Evaluate(launchProtocol.TimeInAnimation) * def.skyfaller.speed;
+				return def.skyfaller.speedCurve.Evaluate(vehicle.CompVehicleLauncher.launchProtocol.TimeInAnimation) * def.skyfaller.speed;
 			}
 		}
 
@@ -76,19 +77,19 @@ namespace Vehicles
 			}
 			if (def.skyfaller.angleCurve != null)
 			{
-				angle = def.skyfaller.angleCurve.Evaluate(launchProtocol.TimeInAnimation);
+				angle = def.skyfaller.angleCurve.Evaluate(vehicle.CompVehicleLauncher.launchProtocol.TimeInAnimation);
 			}
 			if (def.skyfaller.rotationCurve != null)
 			{
-				num += def.skyfaller.rotationCurve.Evaluate(launchProtocol.TimeInAnimation);
+				num += def.skyfaller.rotationCurve.Evaluate(vehicle.CompVehicleLauncher.launchProtocol.TimeInAnimation);
 			}
 			if (def.skyfaller.xPositionCurve != null)
 			{
-				drawLoc.x += def.skyfaller.xPositionCurve.Evaluate(launchProtocol.TimeInAnimation);
+				drawLoc.x += def.skyfaller.xPositionCurve.Evaluate(vehicle.CompVehicleLauncher.launchProtocol.TimeInAnimation);
 			}
 			if (def.skyfaller.zPositionCurve != null)
 			{
-				drawLoc.z += def.skyfaller.zPositionCurve.Evaluate(launchProtocol.TimeInAnimation);
+				drawLoc.z += def.skyfaller.zPositionCurve.Evaluate(vehicle.CompVehicleLauncher.launchProtocol.TimeInAnimation);
 			}
 			vehicle.DrawAt(drawLoc, num + Rotation.AsInt * 90, flip);
 			DrawDropSpotShadow();
@@ -200,7 +201,7 @@ namespace Vehicles
 
 		protected override void FinalizeLanding()
 		{
-			vehicle.inFlight = false;
+			vehicle.CompVehicleLauncher.inFlight = false;
 			GenSpawn.Spawn(vehicle, Position, Map, Rotation);
 			vehicle.Angle = angle + Rotation.AsAngle;
 			Destroy();
@@ -211,9 +212,9 @@ namespace Vehicles
 			base.SpawnSetup(map, respawningAfterLoad);
 			if (!respawningAfterLoad)
 			{
-				launchProtocol.SetPositionArriving(new Vector3(DrawPos.x, DrawPos.y + 1, DrawPos.z), Rotation, map);
-				launchProtocol.OrderProtocol(true);
-				delayLandingTicks = launchProtocol.landingProperties?.delayByTicks ?? 0;
+				vehicle.CompVehicleLauncher.launchProtocol.SetPositionArriving(new Vector3(DrawPos.x, DrawPos.y + 1, DrawPos.z), Rotation, map);
+				vehicle.CompVehicleLauncher.launchProtocol.OrderProtocol(true);
+				delayLandingTicks = vehicle.CompVehicleLauncher.launchProtocol.landingProperties?.delayByTicks ?? 0;
 
 				ticksToImpact = def.skyfaller.ticksToImpactRange.RandomInRange;
 				if (def.skyfaller.MakesShrapnel)

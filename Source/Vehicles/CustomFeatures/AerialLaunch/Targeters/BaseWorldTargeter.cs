@@ -23,6 +23,8 @@ namespace Vehicles
 
 		public abstract bool IsTargeting { get; }
 
+		public abstract void RegisterActionOnTile(int tile, AerialVehicleArrivalAction arrivalAction);
+
 		public abstract void StopTargeting();
 
 		public abstract void ProcessInputEvents();

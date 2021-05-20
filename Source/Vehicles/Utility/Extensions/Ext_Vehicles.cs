@@ -21,7 +21,7 @@ namespace Vehicles
 		/// <returns><c>null</c> if not currently inside an AerialVehicle</returns>
 		public static AerialVehicleInFlight GetAerialVehicle(this Pawn pawn)
 		{
-			foreach (AerialVehicleInFlight aerial in Find.World.GetCachedWorldComponent<VehicleWorldObjectsHolder>().AerialVehicles)
+			foreach (AerialVehicleInFlight aerial in VehicleWorldObjectsHolder.Instance.AerialVehicles)
 			{
 				if (aerial.vehicle == pawn || aerial.vehicle.AllPawnsAboard.Contains(pawn))
 				{

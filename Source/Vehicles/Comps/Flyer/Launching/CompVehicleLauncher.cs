@@ -12,7 +12,7 @@ namespace Vehicles
 	[StaticConstructorOnStartup]
 	public class CompVehicleLauncher : VehicleComp
 	{
-		public List<LaunchProtocol> launchProtocols;
+		public LaunchProtocol launchProtocol;
 
 		public float fuelEfficiencyWorldModifier;
 		public float flySpeedModifier;
@@ -22,7 +22,7 @@ namespace Vehicles
 
 		private DeploymentTimer timer;
 
-		public LaunchProtocol SelectedLaunchProtocol { get; set; }
+		public bool inFlight = false;
 
 		public bool Roofed => Vehicle.Position.Roofed(Vehicle.Map);
 		public bool AnyLeftToLoad => Vehicle.cargoToLoad.NotNullAndAny();
@@ -37,6 +37,22 @@ namespace Vehicles
 		public int LandingAltitude => landingAltitudeModifier + SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), "landingAltitude", Props.landingAltitude);
 		public bool ControlInFlight => SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), "controlInFlight", Props.controlInFlight);
 		public int ReconDistance => SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), "reconDistance", Props.reconDistance);
+
+		public IEnumerable<VehicleTurret> StrafeTurrets
+		{
+			get
+			{
+				if (Vehicle?.CompCannons is null)
+				{
+					Log.Error($"Cannot retrieve <property>StrafeTurrets</property> with no <type>CompCannons</type> comp.");
+					yield break;
+				}
+				foreach (VehicleTurret turret in Vehicle.CompCannons.Cannons.Where(t => Props.strafing.turrets.Contains(t.key) || Props.strafing.turrets.Contains(t.groupKey)))
+				{
+					yield return turret;
+				}
+			}
+		}
 
 		public int MaxLaunchDistance
 		{
@@ -82,44 +98,41 @@ namespace Vehicles
 				yield return gizmo;
 			}
 
-			if (!launchProtocols.NotNullAndAny())
+			if (launchProtocol is null)
 			{
 				Log.ErrorOnce($"No launch protocols for {Vehicle}. At least 1 must be included in order to initiate takeoff.", Vehicle.thingIDNumber);
 				yield break;
 			}
-			foreach (LaunchProtocol protocol in launchProtocols)
+			var command = launchProtocol.LaunchCommand;
+			if (!launchProtocol.CanLaunchNow)
 			{
-				var command = protocol.LaunchCommand;
-				if (!protocol.CanLaunchNow)
-				{
-					command.Disable(protocol.FailLaunchMessage);
-				}
-				if (FlySpeed <= 0)
-				{
-					command.Disable("Vehicles_NoFlySpeed".Translate());
-				}
-				if (Roofed)
-				{
-					command.Disable("CommandLaunchGroupFailUnderRoof".Translate());
-				}
-				if (Vehicle.vPather.Moving)
-				{
-					command.Disable("Vehicles_CannotLaunchWhileMoving".Translate(Vehicle.LabelShort));
-				}
-				if (SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(VehicleDef), "vehicleMovementPermissions", Vehicle.VehicleDef.vehicleMovementPermissions) > VehiclePermissions.NotAllowed && (!Vehicle.CanMoveFinal || Vehicle.Angle != 0))
-				{
-					command.Disable("Vehicles_CannotMove".Translate(Vehicle.LabelShort));
-				}
-				if (!VehicleMod.settings.debug.debugDraftAnyShip && !Vehicle.PawnCountToOperateFullfilled)
-				{
-					command.Disable("Vehicles_NotEnoughToOperate".Translate());
-				}
-				if (Vehicle.CompFueledTravel != null && Vehicle.CompFueledTravel.EmptyTank)
-				{
-					command.Disable("VehicleLaunchOutOfFuel".Translate());
-				}
-				yield return command;
+				command.Disable(launchProtocol.FailLaunchMessage);
 			}
+			if (FlySpeed <= 0)
+			{
+				command.Disable("Vehicles_NoFlySpeed".Translate());
+			}
+			if (Roofed)
+			{
+				command.Disable("CommandLaunchGroupFailUnderRoof".Translate());
+			}
+			if (Vehicle.vPather.Moving)
+			{
+				command.Disable("Vehicles_CannotLaunchWhileMoving".Translate(Vehicle.LabelShort));
+			}
+			if (SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(VehicleDef), "vehicleMovementPermissions", Vehicle.VehicleDef.vehicleMovementPermissions) > VehiclePermissions.NotAllowed && (!Vehicle.CanMoveFinal || Vehicle.Angle != 0))
+			{
+				command.Disable("Vehicles_CannotMove".Translate(Vehicle.LabelShort));
+			}
+			if (!VehicleMod.settings.debug.debugDraftAnyShip && !Vehicle.PawnCountToOperateFullfilled)
+			{
+				command.Disable("Vehicles_NotEnoughToOperate".Translate());
+			}
+			if (Vehicle.CompFueledTravel != null && Vehicle.CompFueledTravel.EmptyTank)
+			{
+				command.Disable("VehicleLaunchOutOfFuel".Translate());
+			}
+			yield return command;
 		}
 
 		public override string CompInspectStringExtra()
@@ -138,17 +151,16 @@ namespace Vehicles
 				Log.Error("Tried to launch " + Vehicle + ", but it's unspawned.");
 				return;
 			}
-			List<int> flightPath = LaunchTargeter.FlightPath;
-			if (flightPath.LastOrDefault() != destinationTile)
+			List<FlightNode> flightPath = LaunchTargeter.FlightPath;
+			if (flightPath.LastOrDefault().tile != destinationTile)
 			{
-				flightPath.Add(destinationTile);
+				flightPath.Add(new FlightNode(destinationTile, null));
 			}
-			Vehicle.inFlight = true;
+			Vehicle.CompVehicleLauncher.inFlight = true;
 			VehicleSkyfaller_Leaving vehicleLeaving = (VehicleSkyfaller_Leaving)ThingMaker.MakeThing(Props.skyfallerLeaving);
 			vehicleLeaving.arrivalAction = arrivalAction;
 			vehicleLeaving.vehicle = Vehicle;
-			vehicleLeaving.launchProtocol = SelectedLaunchProtocol;
-			vehicleLeaving.flightPath = new List<int>(flightPath);
+			vehicleLeaving.flightPath = new List<FlightNode>(flightPath);
 			vehicleLeaving.orderRecon = recon;
 			GenSpawn.Spawn(vehicleLeaving, Vehicle.Position, Vehicle.Map, Vehicle.Rotation, WipeMode.Vanish);
 
@@ -178,21 +190,9 @@ namespace Vehicles
 		{
 			if (!respawningAfterLoad)
 			{
-				launchProtocols = new List<LaunchProtocol>();
-				if (Props.launchProtocols.NotNullAndAny())
-				{
-					foreach (var protocol in Props.launchProtocols)
-					{
-						LaunchProtocol newProtocol = (LaunchProtocol)Activator.CreateInstance(protocol.GetType(), new object[] { protocol, Vehicle });
-						launchProtocols.Add(newProtocol);
-					}
-				}
+				launchProtocol = (LaunchProtocol)Activator.CreateInstance(Props.launchProtocol.GetType(), new object[] { Props.launchProtocol, Vehicle });
 			}
-			foreach (LaunchProtocol protocol in launchProtocols)
-			{
-				LaunchProtocol matchingProtocol = Props.launchProtocols.FirstOrDefault(l => l.GetType() == protocol.GetType());
-				protocol.ResolveProperties(matchingProtocol);
-			}
+			launchProtocol.ResolveProperties(Props.launchProtocol);
 		}
 
 		public override void CompTick()
@@ -204,6 +204,7 @@ namespace Vehicles
 		public override void PostSpawnSetup(bool respawningAfterLoad)
 		{
 			base.PostSpawnSetup(respawningAfterLoad);
+			inFlight = false;
 			if (!respawningAfterLoad)
 			{
 				fuelEfficiencyWorldModifier = 0;
@@ -214,13 +215,14 @@ namespace Vehicles
 		public override void PostExposeData()
 		{
 			base.PostExposeData();
-			Scribe_Collections.Look(ref launchProtocols, "launchProtocols");
+			Scribe_Deep.Look(ref launchProtocol, "launchProtocol");
 			Scribe_Values.Look(ref flySpeedModifier, "flySpeedModifier");
 			Scribe_Values.Look(ref fuelEfficiencyWorldModifier, "fuelEfficiencyWorldModifier");
 			Scribe_Values.Look(ref rateOfClimbModifier, "rateOfClimbModifier");
 			Scribe_Values.Look(ref maxAltitudeModifier, "maxAltitudeModifier");
 			Scribe_Values.Look(ref landingAltitudeModifier, "landingAltitudeModifier");
 
+			Scribe_Values.Look(ref inFlight, "inFlight");
 			Scribe_Values.Look(ref timer, "timer");
 		}
 

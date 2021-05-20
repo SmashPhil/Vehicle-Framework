@@ -25,18 +25,27 @@ namespace Vehicles
 		public string groupKey;
 
 		public int uniqueID = -1;
-		
+		public string parentKey;
+		public string key;
+
+		[Unsaved]
+		public VehicleTurret attachedTo;
+		[Unsaved]
+		public List<VehicleTurret> childCannons = new List<VehicleTurret>();
+
 		protected float restrictedTheta;
 
 		protected Texture2D cannonTex;
-		protected Texture2D cannonBaseTex;
+		protected Material cannonMaterialCache;
+
+		public Texture2D currentFireIcon;
 
 		protected Texture2D gizmoIcon;
-
 		protected Texture2D mainMaskTex;
-
 		protected Graphic_Cannon cannonGraphic;
-		protected Graphic baseCannonGraphic;
+
+		protected GraphicDataRGB cachedGraphicData;
+		private RotatingList<Texture2D> overheatIcons;
 
 		public VehicleTurretDef turretDef;
 
@@ -50,22 +59,9 @@ namespace Vehicles
 		protected int ticksSinceLastShot;
 
 		protected MaterialPropertyBlock mtb;
-		
-		public VehicleTurret attachedTo;
-		public List<VehicleTurret> childCannons = new List<VehicleTurret>();
-		public string parentKey;
-		public string key;
 
-		public string vehicleComponent;
-
-		protected Material cannonMaterialCache;
 		public Vector2 turretRenderOffset;
 		public Vector2 turretRenderLocation;
-
-		protected Material baseCannonMaterialCache;
-		public Vector2 baseCannonRenderLocation;
-
-		public Vector2 baseCannonDrawSize = Vector2.one;
 
 		public Vector2 aimPieOffset = Vector2.zero;
 
@@ -78,6 +74,7 @@ namespace Vehicles
 		protected float currentRotation = 0f;
 		protected float rotationTargeted = 0f;
 
+		[Unsaved]
 		public VehiclePawn vehicle;
 
 		public ThingDef loadedAmmo;
@@ -85,10 +82,6 @@ namespace Vehicles
 		public int shellCount;
 		public bool ammoWindowOpened;
 		public string gizmoLabel;
-
-		protected GraphicDataRGB cachedGraphicData;
-
-		private RotatingList<Texture2D> overheatIcons;
 
 		protected Rot4 parentRotCached = default;
 		protected float parentAngleCached = 0f;
@@ -116,9 +109,6 @@ namespace Vehicles
 			aimPieOffset = reference.aimPieOffset;
 			angleRestricted = reference.angleRestricted;
 
-			baseCannonRenderLocation = reference.baseCannonRenderLocation;
-
-			baseCannonDrawSize = reference.baseCannonDrawSize;
 			drawLayer = reference.drawLayer;
 
 			gizmoLabel = reference.gizmoLabel;
@@ -183,7 +173,7 @@ namespace Vehicles
 
 		public bool ReadyToFire => groupKey.NullOrEmpty() ? (burstTicks <= 0 && reloadTicks <= 0 && !CannonDisabled) : GroupTurrets.Any(t => t.burstTicks <= 0 && t.reloadTicks <= 0 && !t.CannonDisabled);
 
-		public Texture2D currentFireIcon;
+		public bool FullAuto => CurrentFireMode.ticksBetweenBursts == CurrentFireMode.ticksBetweenShots;
 
 		public Texture2D FireIcon
 		{
@@ -231,9 +221,32 @@ namespace Vehicles
 			{
 				if (groupTurrets is null)
 				{
-					groupTurrets = vehicle.CompCannons.Cannons.Where(t => t.groupKey == groupKey).ToList();
+					if (groupKey.NullOrEmpty())
+					{
+						groupTurrets = new List<VehicleTurret>() { this };
+					}
+					else
+					{
+						groupTurrets = vehicle.CompCannons.Cannons.Where(t => t.groupKey == groupKey).ToList();
+					}
 				}
 				return groupTurrets;
+			}
+		}
+
+		public virtual int MaxShotsCurrentFireMode
+		{
+			get
+			{
+				if (FullAuto)
+				{
+					if (turretDef.cooldown is null)
+					{
+						return CurrentFireMode.shotsPerBurst * 3;
+					}
+					return Mathf.CeilToInt(MaxHeatCapacity / turretDef.cooldown.heatPerShot);
+				}
+				return CurrentFireMode.shotsPerBurst;
 			}
 		}
 
@@ -269,18 +282,6 @@ namespace Vehicles
 			}
 		}
 
-		public virtual Material CannonBaseMaterial
-		{
-			get
-			{
-				if (baseCannonMaterialCache is null)
-				{
-					ResolveCannonGraphics(vehicle);
-				}
-				return baseCannonMaterialCache;
-			}
-		}
-
 		public virtual Texture2D CannonTexture
 		{
 			get
@@ -313,22 +314,6 @@ namespace Vehicles
 			}
 		}
 
-		public virtual Texture2D CannonBaseTexture
-		{
-			get
-			{
-				if (turretDef.baseCannonTexPath.NullOrEmpty())
-				{
-					return null;
-				}
-				if (cannonBaseTex is null)
-				{
-					cannonBaseTex = ContentFinder<Texture2D>.Get(turretDef.baseCannonTexPath, true);
-				}
-				return cannonBaseTex;
-			}
-		}
-
 		public virtual Graphic_Cannon CannonGraphic
 		{
 			get
@@ -338,18 +323,6 @@ namespace Vehicles
 					ResolveCannonGraphics(vehicle);
 				}
 				return cannonGraphic;
-			}
-		}
-
-		public virtual Graphic CannonBaseGraphic
-		{
-			get
-			{
-				if (baseCannonGraphic is null)
-				{
-					ResolveCannonGraphics(vehicle);
-				}
-				return baseCannonGraphic;
 			}
 		}
 
@@ -401,7 +374,7 @@ namespace Vehicles
 				{
 					locationRotation = attachedTo.TurretRotation;
 				}
-				Pair<float, float> turretLoc = RenderHelper.ShipDrawOffset(vehicle, turretRenderLocation.x, turretRenderLocation.y, out Pair<float,float> renderOffsets, locationRotation, attachedTo);
+				Pair<float, float> turretLoc = RenderHelper.TurretDrawOffset(vehicle.Rotation.AsAngle + vehicle.Angle, turretRenderLocation.x, turretRenderLocation.y, out Pair<float,float> renderOffsets, locationRotation, attachedTo);
 				return new Vector3(vehicle.DrawPos.x + turretLoc.First + renderOffsets.First, vehicle.DrawPos.y + drawLayer, vehicle.DrawPos.z + turretLoc.Second + renderOffsets.Second);
 			}
 		}
@@ -722,7 +695,7 @@ namespace Vehicles
 					{
 						GroupTurrets.ForEach(t => t.PushTurretToQueue());
 					}
-					else if (CurrentFireMode.ticksBetweenShots == CurrentFireMode.ticksBetweenBursts)
+					else if (FullAuto)
 					{
 						GroupTurrets.ForEach(t => t.PushTurretToQueue());
 					}
@@ -734,15 +707,20 @@ namespace Vehicles
 			}
 		}
 
-		public virtual void PushTurretToQueue()
+		public virtual CompCannons.TurretData GenerateTurretData()
 		{
-			ActivateBurstTimer();
-			vehicle.CompCannons.QueueTurret(new CompCannons.TurretData()
+			return new CompCannons.TurretData()
 			{
 				shots = CurrentFireMode.shotsPerBurst,
 				ticksTillShot = 0,
 				turret = this
-			});
+			};
+		}
+
+		public virtual void PushTurretToQueue()
+		{
+			ActivateBurstTimer();
+			vehicle.CompCannons.QueueTurret(GenerateTurretData());
 		}
 
 		public static bool TryFindShootLineFromTo(IntVec3 root, LocalTargetInfo targ, out ShootLine resultingLine)
@@ -933,23 +911,6 @@ namespace Vehicles
 				}
 			}
 
-			if (turretDef.baseCannonTexPath.NullOrEmpty())
-			{
-				baseCannonMaterialCache = null;
-			}
-			else if (baseCannonMaterialCache is null || forceRegen)
-			{
-				baseCannonMaterialCache = MaterialPool.MatFrom(turretDef.baseCannonTexPath);
-			}
-
-			if (turretDef.baseCannonTexPath.NullOrEmpty())
-			{
-				baseCannonGraphic = null;
-			}
-			else if (baseCannonGraphic is null || forceRegen)
-			{
-				baseCannonGraphic = GraphicDatabase.Get<Graphic_Single>(turretDef.baseCannonTexPath, ShaderDatabase.DefaultShader);
-			}
 			if (cannonGraphic is null || forceRegen)
 			{
 				cannonGraphic = CannonGraphicData.Graphic as Graphic_Cannon;
@@ -979,24 +940,6 @@ namespace Vehicles
 					cachedGraphicData.colorThree = bodyGraphicData.colorThree;
 					cachedGraphicData.tiles = bodyGraphicData.tiles;
 				}
-			}
-
-			if (turretDef.baseCannonTexPath.NullOrEmpty())
-			{
-				baseCannonMaterialCache = null;
-			}
-			else if (baseCannonMaterialCache is null || forceRegen)
-			{
-				baseCannonMaterialCache = MaterialPool.MatFrom(turretDef.baseCannonTexPath);
-			}
-
-			if (turretDef.baseCannonTexPath.NullOrEmpty())
-			{
-				baseCannonGraphic = null;
-			}
-			else if (baseCannonGraphic is null || forceRegen)
-			{
-				baseCannonGraphic = GraphicDatabase.Get<Graphic_Single>(turretDef.baseCannonTexPath, ShaderDatabase.DefaultShader);
 			}
 
 			if (cannonGraphic is null || forceRegen)
@@ -1081,7 +1024,7 @@ namespace Vehicles
 				shellCount = turretDef.magazineCapacity;
 				return;
 			}
-			if (loadedAmmo is null || (ammo != null && shellCount < turretDef.magazineCapacity) || shellCount <= 0 || ammo != null)
+			if (loadedAmmo is null || (ammo != null && (shellCount < turretDef.magazineCapacity || (turretDef.ammunition != null && ammo != loadedAmmo))))
 			{
 				ReloadInternal(ammo);
 			}
@@ -1240,7 +1183,7 @@ namespace Vehicles
 		/// <returns>true if cannonTarget set to target, false if target is still valid</returns>
 		public virtual bool SetTargetConditionalOnThing(LocalTargetInfo target, bool resetPrefireTimer = true)
 		{
-			if (cannonTarget.IsValid && HasAmmo && !OnCooldown && (cannonTarget.HasThing || CurrentFireMode.ticksBetweenBursts == CurrentFireMode.ticksBetweenShots))
+			if (cannonTarget.IsValid && HasAmmo && !OnCooldown && (cannonTarget.HasThing || FullAuto))
 			{
 				if(cannonTarget.Pawn != null)
 				{
@@ -1337,31 +1280,38 @@ namespace Vehicles
 
 		public virtual void ExposeData()
 		{
-			Scribe_Defs.Look(ref turretDef, "turretDef");
-			Scribe_Values.Look(ref uniqueID, "uniqueID", -1);
+			Scribe_Values.Look(ref autoTargetingActive, "autoTargetingActive");
+
 			Scribe_Values.Look(ref reloadTicks, "reloadTicks");
 			Scribe_Values.Look(ref burstTicks, "burstTicks");
 			Scribe_Values.Look(ref groupKey, "groupKey");
 
-			Scribe_Values.Look(ref turretRenderOffset, "turretRenderOffset");
-			Scribe_Values.Look(ref turretRenderLocation, "turretRenderLocation");
-			Scribe_Values.Look(ref currentRotation, "currentRotation", defaultAngleRotated - 90);
-			Scribe_Values.Look(ref rotationTargeted, "rotationTargeted", defaultAngleRotated - 90);
+			Scribe_Values.Look(ref uniqueID, "uniqueID", -1);
+			Scribe_Values.Look(ref parentKey, "parentKey");
+			Scribe_Values.Look(ref key, "key");
+
+			Scribe_Defs.Look(ref turretDef, "turretDef");
 
 			Scribe_Values.Look(ref targetPersists, "targetPersists");
 			Scribe_Values.Look(ref autoTargeting, "autoTargeting");
 			Scribe_Values.Look(ref manualTargeting, "manualTargeting");
 
+			Scribe_Values.Look(ref currentFireMode, "currentFireMode");
+			Scribe_Values.Look(ref currentHeatRate, "currentHeatRate");
+			Scribe_Values.Look(ref triggeredCooldown, "triggeredCooldown");
+			Scribe_Values.Look(ref ticksSinceLastShot, "ticksSinceLastShot");
+
+			Scribe_Values.Look(ref turretRenderOffset, "turretRenderOffset");
+			Scribe_Values.Look(ref turretRenderLocation, "turretRenderLocation");
+
+			Scribe_Values.Look(ref currentRotation, "currentRotation", defaultAngleRotated - 90);
+			Scribe_Values.Look(ref rotationTargeted, "rotationTargeted", defaultAngleRotated - 90);
 			Scribe_Values.Look(ref aimPieOffset, "aimPieOffset");
 			Scribe_Values.Look(ref angleRestricted, "angleRestricted");
+			Scribe_Values.Look(ref defaultAngleRotated, "defaultAngleRotated");
 			Scribe_Values.Look(ref restrictedTheta, "restrictedTheta", (int)Math.Abs(angleRestricted.x - (angleRestricted.y + 360)).ClampAngle());
 
-			Scribe_Values.Look(ref baseCannonRenderLocation, "baseCannonRenderLocation");
-
 			Scribe_Values.Look(ref drawLayer, "drawLayer");
-
-			Scribe_Values.Look(ref parentKey, "parentKey");
-			Scribe_Values.Look(ref key, "key");
 
 			Scribe_Defs.Look(ref loadedAmmo, "loadedAmmo");
 			Scribe_Defs.Look(ref savedAmmoType, "savedAmmoType");
@@ -1369,13 +1319,6 @@ namespace Vehicles
 			Scribe_Values.Look(ref gizmoLabel, "gizmoLabel");
 
 			Scribe_TargetInfo.Look(ref cannonTarget, "cannonTarget", LocalTargetInfo.Invalid);
-
-			Scribe_Values.Look(ref currentFireMode, "currentFireMode");
-			Scribe_Values.Look(ref currentHeatRate, "currentHeatRate");
-			Scribe_Values.Look(ref triggeredCooldown, "triggeredCooldown");
-			Scribe_Values.Look(ref ticksSinceLastShot, "ticksSinceLastShot");
-
-			Scribe_Values.Look(ref autoTargetingActive, "autoTargetingActive");
 		}
 	}
 }

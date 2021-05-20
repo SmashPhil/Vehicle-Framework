@@ -7,7 +7,6 @@ namespace Vehicles.AI
 	{
 		public WaterMap(Map map) : base(map)
 		{
-			ConstructComponents();
 		}
 
 		public ShipPathGrid ShipPathGrid { get; private set; }
@@ -31,6 +30,7 @@ namespace Vehicles.AI
 
 		public override void FinalizeInit()
 		{
+			ConstructComponents();
 			ShipPathGrid.RecalculateAllPerceivedPathCosts();
 			WaterRegionAndRoomUpdater.Enabled = true;
 			WaterRegionAndRoomUpdater.RebuildAllWaterRegions();

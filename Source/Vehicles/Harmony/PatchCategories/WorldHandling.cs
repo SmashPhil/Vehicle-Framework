@@ -66,7 +66,7 @@ namespace Vehicles
 		{
 			if(__result == WorldPawnSituation.Free && p.Faction != null && p.Faction == Faction.OfPlayerSilentFail)
 			{
-				if (p is VehiclePawn aerialVehicle && aerialVehicle.inFlight)
+				if (p is VehiclePawn aerialVehicle && aerialVehicle.CompVehicleLauncher.inFlight)
 				{
 					__result = WorldPawnSituation.InTravelingTransportPod;
 					return;
@@ -110,7 +110,7 @@ namespace Vehicles
 		/// <param name="p"></param>
 		public static bool DoNotRemoveDockedBoats(Pawn p)
 		{
-			if (p is VehiclePawn vehicleInFlight && vehicleInFlight.inFlight)
+			if (p is VehiclePawn vehicleInFlight && vehicleInFlight.CompVehicleLauncher.inFlight)
 			{
 				return false;
 			}
@@ -235,17 +235,17 @@ namespace Vehicles
 
 		public static void AddVehicleObjectToCache(WorldObject o)
 		{
-			Find.World.GetCachedWorldComponent<VehicleWorldObjectsHolder>().AddToCache(o);
+			VehicleWorldObjectsHolder.Instance.AddToCache(o);
 		}
 		
 		public static void RemoveVehicleObjectToCache(WorldObject o)
 		{
-			Find.World.GetCachedWorldComponent<VehicleWorldObjectsHolder>().RemoveFromCache(o);
+			VehicleWorldObjectsHolder.Instance.RemoveFromCache(o);
 		}
 
 		public static void RecacheVehicleObjectCache()
 		{
-			Find.World.GetCachedWorldComponent<VehicleWorldObjectsHolder>().Recache();
+			VehicleWorldObjectsHolder.Instance.Recache();
 		}
 
 		public static bool ForcedTargetingDontShowWorld(ref bool __result)

@@ -21,48 +21,14 @@ namespace Vehicles
 		/// <param name="rotationOffset"></param>
 		/// <param name="turretRotation"></param>
 		/// <param name="attachedTo"></param>
-		public static Pair<float,float> ShipDrawOffset(VehiclePawn vehicle, float xOffset, float yOffset, out Pair<float, float> rotationOffset, float turretRotation = 0, VehicleTurret attachedTo = null)
+		public static Pair<float,float> TurretDrawOffset(float angle, float xOffset, float yOffset, out Pair<float, float> rotationOffset, float turretRotation = 0, VehicleTurret attachedTo = null)
 		{
 			rotationOffset = new Pair<float, float>(0, 0);
-			if(attachedTo != null)
+			if (attachedTo != null)
 			{
 				return Ext_Math.RotatePointClockwise(attachedTo.turretRenderLocation.x + xOffset, attachedTo.turretRenderLocation.y + yOffset, turretRotation);
 			}
-			
-			switch(vehicle.Rotation.AsInt)
-			{
-				//East
-				case 1:
-					if(vehicle.Angle == 45)
-					{
-						return Ext_Math.RotatePointClockwise(yOffset, -xOffset, 45f);
-					}
-					else if(vehicle.Angle == -45)
-					{
-						return Ext_Math.RotatePointCounterClockwise(yOffset, -xOffset, 45f);
-					}
-					return new Pair<float, float>(yOffset, -xOffset);
-				//South
-				case 2:
-					return new Pair<float, float>(-xOffset, -yOffset);
-				//West
-				case 3:
-					if(vehicle.Angle != 0)
-					{
-						if(vehicle.Angle == 45)
-						{
-							return Ext_Math.RotatePointClockwise(-yOffset, xOffset, 45f);
-						}
-						else if(vehicle.Angle == -45)
-						{
-							return Ext_Math.RotatePointCounterClockwise(-yOffset, xOffset, 45f);
-						}
-					}
-					return new Pair<float, float>(-yOffset, xOffset);
-				//North
-				default:
-					return new Pair<float, float>(xOffset, yOffset);
-			}
+			return Ext_Math.RotatePointClockwise(xOffset, yOffset, angle);
 		}
 
 		/// <summary>
@@ -120,7 +86,7 @@ namespace Vehicles
 				{
 					locationRotation = turret.attachedTo.TurretRotation;
 				}
-				Pair<float, float> drawOffset = ShipDrawOffset(turret.vehicle, turret.turretRenderLocation.x, turret.turretRenderLocation.y, out Pair<float, float> rotOffset1, locationRotation, turret.attachedTo);
+				Pair<float, float> drawOffset = TurretDrawOffset(turret.vehicle.Rotation.AsAngle + turret.vehicle.Angle, turret.turretRenderLocation.x, turret.turretRenderLocation.y, out Pair<float, float> rotOffset1, locationRotation, turret.attachedTo);
 					
 				Vector3 topVectorLocation = new Vector3(turret.vehicle.DrawPos.x + drawOffset.First + rotOffset1.First, turret.vehicle.DrawPos.y + turret.drawLayer, turret.vehicle.DrawPos.z + drawOffset.Second + rotOffset1.Second);
 				if (turret.rTracker.Recoil > 0f)
@@ -133,15 +99,6 @@ namespace Vehicles
 				}
 				Mesh cannonMesh = turret.CannonGraphic.MeshAt(Rot4.North);
 				Graphics.DrawMesh(cannonMesh, topVectorLocation, turret.TurretRotation.ToQuat(), turret.CannonMaterial, 0);
-
-				if (turret.CannonBaseMaterial != null)
-				{
-					Matrix4x4 baseMatrix = default;
-					Pair<float, float> baseDrawOffset = ShipDrawOffset(turret.vehicle, turret.baseCannonRenderLocation.x, turret.baseCannonRenderLocation.y, out Pair<float, float> rotOffset2);
-					Vector3 baseVectorLocation = new Vector3(turret.vehicle.DrawPos.x + baseDrawOffset.First, turret.vehicle.DrawPos.y, turret.vehicle.DrawPos.z + baseDrawOffset.Second);
-					baseMatrix.SetTRS(baseVectorLocation + Altitudes.AltIncVect, turret.vehicle.Rotation.AsQuat, new Vector3(turret.baseCannonDrawSize.x, 1f, turret.baseCannonDrawSize.y));
-					Graphics.DrawMesh(MeshPool.plane10, baseMatrix, turret.CannonBaseMaterial, 0);
-				}
 			}
 			catch(Exception ex)
 			{
@@ -172,18 +129,6 @@ namespace Vehicles
 				if (resolveGraphics)
 				{
 					cannon.ResolveCannonGraphics(vehicle);
-				}
-
-				if (cannon.CannonBaseGraphic != null)
-				{
-					float baseWidth = (displayRect.width / graphicData.drawSize.x) * cannon.baseCannonDrawSize.x;
-					float baseHeight = (displayRect.height / graphicData.drawSize.y) * cannon.baseCannonDrawSize.y;
-
-					float xBase = displayRect.x + (displayRect.width / 2) - (baseWidth / 2) + ((vehicle.VehicleDef.drawProperties.upgradeUISize.x / graphicData.drawSize.x) * cannon.baseCannonRenderLocation.x);
-					float yBase = displayRect.y + (displayRect.height / 2) - (baseHeight / 2) - ((vehicle.VehicleDef.drawProperties.upgradeUISize.y / graphicData.drawSize.y) * cannon.baseCannonRenderLocation.y);
-
-					Rect baseCannonDrawnRect = new Rect(xBase, yBase, baseWidth, baseHeight);
-					GenUI.DrawTextureWithMaterial(baseCannonDrawnRect, cannon.CannonBaseTexture, cannon.CannonBaseGraphic.MatSingle);
 				}
 
 				float cannonWidth = (displayRect.width / graphicData.drawSize.x) * cannon.CannonGraphicData.drawSize.x;
@@ -249,18 +194,6 @@ namespace Vehicles
 				if (resolveGraphics)
 				{
 					cannon.ResolveCannonGraphics(vehicle);
-				}
-
-				if (cannon.CannonBaseGraphic != null)
-				{
-					float baseWidth = (displayRect.width / graphicData.drawSize.x) * cannon.baseCannonDrawSize.x;
-					float baseHeight = (displayRect.height / graphicData.drawSize.y) * cannon.baseCannonDrawSize.y;
-
-					float xBase = displayRect.x + (displayRect.width / 2) - (baseWidth / 2) + ((vehicle.VehicleDef.drawProperties.upgradeUISize.x / graphicData.drawSize.x) * cannon.baseCannonRenderLocation.x);
-					float yBase = displayRect.y + (displayRect.height / 2) - (baseHeight / 2) - ((vehicle.VehicleDef.drawProperties.upgradeUISize.y / graphicData.drawSize.y) * cannon.baseCannonRenderLocation.y);
-
-					Rect baseCannonDrawnRect = new Rect(xBase, yBase, baseWidth, baseHeight);
-					GenUI.DrawTextureWithMaterial(baseCannonDrawnRect, cannon.CannonBaseTexture, cannon.CannonBaseGraphic.MatSingle);
 				}
 
 				float cannonWidth = (displayRect.width / graphicData.drawSize.x) * cannon.CannonGraphicData.drawSize.x;
@@ -434,18 +367,6 @@ namespace Vehicles
 				GraphicDataRGB vehicleGraphicData = vehicleDef.graphicData;
 
 				cannon.ResolveCannonGraphics(vehicleDef);
-
-				if (cannon.CannonBaseGraphic != null)
-				{
-					float baseWidth = (displayRect.width / vehicleGraphicData.drawSize.x) * cannon.baseCannonDrawSize.x;
-					float baseHeight = (displayRect.height / vehicleGraphicData.drawSize.y) * cannon.baseCannonDrawSize.y;
-
-					float xBase = displayRect.x + (displayRect.width / 2) - (baseWidth / 2) + ((vehicleDef.drawProperties.settingsUISize.x / vehicleGraphicData.drawSize.x) * cannon.baseCannonRenderLocation.x);
-					float yBase = displayRect.y + (displayRect.height / 2) - (baseHeight / 2) - ((vehicleDef.drawProperties.settingsUISize.y / vehicleGraphicData.drawSize.y) * cannon.baseCannonRenderLocation.y);
-
-					Rect baseCannonDrawnRect = new Rect(xBase, yBase, baseWidth, baseHeight);
-					GenUI.DrawTextureWithMaterial(baseCannonDrawnRect, cannon.CannonBaseTexture, cannon.CannonBaseGraphic.MatSingle);
-				}
 
 				float cannonWidth = (displayRect.width / vehicleGraphicData.drawSize.x) * cannon.CannonGraphicData.drawSize.x;
 				float cannonHeight = (displayRect.height / vehicleGraphicData.drawSize.y) * cannon.CannonGraphicData.drawSize.y;

@@ -23,7 +23,10 @@ namespace Vehicles
 		{
 			this.world = world;
 			ResetPathGrid();
+			Instance = this;
 		}
+
+		public static WorldVehiclePathGrid Instance { get; private set; }
 
 		private static int DayOfYearAt0Long => GenDate.DayOfYear(GenTicks.TicksAbs, 0f);
 
@@ -87,7 +90,7 @@ namespace Vehicles
 			movementDifficulty[vehicleDef][tile] = CalculatedMovementDifficultyAt(tile, vehicleDef, ticksAbs, null);
 			if (flag != PassableFast(tile, vehicleDef))
 			{
-				Find.World.GetCachedWorldComponent<WorldVehicleReachability>().ClearCache();
+				WorldVehicleReachability.Instance.ClearCache();
 			}
 		}
 

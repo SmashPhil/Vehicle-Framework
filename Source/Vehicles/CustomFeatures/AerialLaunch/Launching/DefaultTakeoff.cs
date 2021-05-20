@@ -135,38 +135,50 @@ namespace Vehicles
 
 		public override IEnumerable<FloatMenuOption> GetFloatMenuOptionsAt(int tile)
 		{
-			if (Find.WorldObjects.MapParentAt(tile) is MapParent parent)
+			if (AerialVehicleArrivalAction_FormVehicleCaravan.CanFormCaravanAt(vehicle, tile) && !Find.WorldObjects.AnySettlementBaseAt(tile) && !Find.WorldObjects.AnySiteAt(tile))
+			{
+				yield return new FloatMenuOption("FormCaravanHere".Translate(), delegate ()
+				{
+					if (vehicle.Spawned)
+					{
+						vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_FormVehicleCaravan(vehicle));
+					}
+					else
+					{
+						AerialVehicleInFlight aerial = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
+						aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_FormVehicleCaravan(vehicle));
+					}
+				}, MenuOptionPriority.Default, null, null, 0f, null, null);
+			}
+			else if (Find.WorldObjects.MapParentAt(tile) is MapParent parent)
 			{
 				if (CanLandInSpecificCell(parent))
 				{
-					foreach (LaunchProtocol protocol in vehicle.CompVehicleLauncher.launchProtocols)
+					yield return new FloatMenuOption("LandInExistingMap".Translate(vehicle.Label), delegate ()
 					{
-						yield return new FloatMenuOption("LandInExistingMap".Translate(vehicle.Label), delegate ()
+						Current.Game.CurrentMap = parent.Map;
+						CameraJumper.TryHideWorld();
+						LandingTargeter.Instance.BeginTargeting(vehicle, this, delegate (LocalTargetInfo target, Rot4 rot)
 						{
-							Current.Game.CurrentMap = parent.Map;
-							CameraJumper.TryHideWorld();
-							LandingTargeter.Instance.BeginTargeting(vehicle, protocol, delegate (LocalTargetInfo target, Rot4 rot)
+							if (vehicle.Spawned)
 							{
-								if (vehicle.Spawned)
+								vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, this, target.Cell, rot));
+							}
+							else
+							{
+								AerialVehicleInFlight aerial = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
+								if (aerial is null)
 								{
-									vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, this, target.Cell, rot));
+									Log.Error($"Attempted to launch into existing map where CurrentMap is null and no AerialVehicle with {vehicle.Label} exists.");
+									return;
 								}
-								else
-								{
-									AerialVehicleInFlight aerial = Find.World.GetCachedWorldComponent<VehicleWorldObjectsHolder>().AerialVehicleObject(vehicle);
-									if (aerial is null)
-									{
-										Log.Error($"Attempted to launch into existing map where CurrentMap is null and no AerialVehicle with {vehicle.Label} exists.");
-										return;
-									}
-									aerial.arrivalAction = new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, this, target.Cell, rot);
-									aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, this, target.Cell, rot));
-									vehicle.inFlight = true;
-									CameraJumper.TryShowWorld();
-								}
-							}, null, null, null, vehicle.VehicleDef.rotatable && protocol.landingProperties.forcedRotation is null);
-						}, MenuOptionPriority.Default, null, null, 0f, null, null);
-					}
+								aerial.arrivalAction = new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, this, target.Cell, rot);
+								aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, this, target.Cell, rot));
+								vehicle.CompVehicleLauncher.inFlight = true;
+								CameraJumper.TryShowWorld();
+							}
+						}, null, null, null, vehicle.VehicleDef.rotatable && landingProperties.forcedRotation is null);
+					}, MenuOptionPriority.Default, null, null, 0f, null, null);
 				}
 				if (vehicle.CompVehicleLauncher.ControlInFlight)
 				{
@@ -174,28 +186,27 @@ namespace Vehicles
 				}
 				if (vehicle.CompVehicleLauncher.ControlInFlight && vehicle.CompCannons != null) //REDO - strafe specific properties
 				{
-					foreach (LaunchProtocol protocol in vehicle.CompVehicleLauncher.launchProtocols)
+					yield return new FloatMenuOption("VehicleStrafeRun".Translate(), delegate ()
 					{
-						yield return new FloatMenuOption("VehicleStrafeRun".Translate(), delegate ()
+						if (vehicle.Spawned)
 						{
-							Current.Game.CurrentMap = parent.Map;
-							CameraJumper.TryHideWorld();
-							StrafeTargeter.Instance.BeginTargeting(vehicle, protocol, delegate (IntVec3 start, IntVec3 end)
+							LaunchTargeter.Instance.ContinueTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseWorldTarget), vehicle.Map.Tile, true, VehicleTex.TargeterMouseAttachment, true, null,
+								(GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => TargetingLabelGetter(target, tile, path, fuelCost));
+						}
+						else
+						{
+							AerialVehicleInFlight aerialVehicle = vehicle.GetAerialVehicle();
+							if (aerialVehicle is null)
 							{
-								if (vehicle.Spawned)
-								{
-									Current.Game.CurrentMap = vehicle.Map;
-									vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_StrafeMap(vehicle, parent, start, end));
-								}
-								else
-								{
-									CameraJumper.TryShowWorld();
-									AerialVehicleInFlight aerial = Find.World.GetCachedWorldComponent<VehicleWorldObjectsHolder>().AerialVehicleObject(vehicle);
-									aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_StrafeMap(vehicle, parent, start, end));
-								}
-							}, null, null, null, false);
-						}, MenuOptionPriority.Default, null, null, 0f, null, null);
-					}
+								Log.Error($"Unable to launch strafe run. AerialVehicle is null and {vehicle.LabelCap} is not spawned.");
+								return;
+							}
+							LaunchTargeter.Instance.ContinueTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(aerialVehicle.ChoseTargetOnMap), aerialVehicle, true, VehicleTex.TargeterMouseAttachment, false, null,
+								(GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, aerialVehicle.Tile, path, fuelCost));
+						}
+						CameraJumper.TryShowWorld();
+						LaunchTargeter.Instance.RegisterActionOnTile(tile, new AerialVehicleArrivalAction_StrafeMap(vehicle, parent));
+					}, MenuOptionPriority.Default, null, null, 0f, null, null);
 				}
 			}
 			if (Find.WorldObjects.SettlementAt(tile) is Settlement settlement)
@@ -210,7 +221,7 @@ namespace Vehicles
 						}
 						else
 						{
-							AerialVehicleInFlight aerial = Find.World.GetCachedWorldComponent<VehicleWorldObjectsHolder>().AerialVehicleObject(vehicle);
+							AerialVehicleInFlight aerial = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
 							aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_VisitSettlement(vehicle, settlement));
 						}
 					}, MenuOptionPriority.Default, null, null, 0f, null, null);
@@ -220,31 +231,15 @@ namespace Vehicles
 					yield return option;
 				}
 			}
-			if (AerialVehicleArrivalAction_FormVehicleCaravan.CanFormCaravanAt(vehicle, tile) && !Find.WorldObjects.AnySettlementBaseAt(tile) && !Find.WorldObjects.AnySiteAt(tile))
-			{
-				yield return new FloatMenuOption("FormCaravanHere".Translate(), delegate()
-				{
-					if (vehicle.Spawned)
-					{
-						vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_FormVehicleCaravan(vehicle));
-					}
-					else
-					{
-						AerialVehicleInFlight aerial = Find.World.GetCachedWorldComponent<VehicleWorldObjectsHolder>().AerialVehicleObject(vehicle);
-						aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_FormVehicleCaravan(vehicle));
-					}
-				}, MenuOptionPriority.Default, null, null, 0f, null, null);
-			}
 		}
 
 		public override void StartChoosingDestination()
 		{
-			base.StartChoosingDestination();
 			CameraJumper.TryJump(CameraJumper.GetWorldTarget(vehicle));
 			Find.WorldSelector.ClearSelection();
 			int tile = vehicle.Map.Tile;
 			LaunchTargeter.Instance.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseWorldTarget), vehicle.Map.Tile, true, VehicleTex.TargeterMouseAttachment, true, null, 
-				(GlobalTargetInfo target, List<int> path, float fuelCost) => TargetingLabelGetter(target, tile, path, fuelCost));
+				(GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => TargetingLabelGetter(target, tile, path, fuelCost));
 		}
 
 		public override void ExposeData()

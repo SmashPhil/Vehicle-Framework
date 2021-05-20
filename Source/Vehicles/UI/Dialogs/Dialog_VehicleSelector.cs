@@ -123,14 +123,14 @@ namespace Vehicles
 					return;
 				}
 
-				Find.World.GetCachedWorldComponent<VehicleRoutePlanner>().vehicles = storedVehicles.ToList();
-				Find.World.GetCachedWorldComponent<VehicleRoutePlanner>().InitiateRoutePlanner();
+				VehicleRoutePlanner.Instance.vehicles = storedVehicles.ToList();
+				VehicleRoutePlanner.Instance.InitiateRoutePlanner();
 				Close();
 			}
 			Rect rect3 = new Rect(rect2.x - BottomButtonSize.x - ButtonPadding, rect2.y, BottomButtonSize.x, BottomButtonSize.y);
 			if(Widgets.ButtonText(rect3, "CancelButton".Translate()))
 			{
-				Find.World.GetCachedWorldComponent<VehicleRoutePlanner>().Stop();
+				VehicleRoutePlanner.Instance.Stop();
 				Close();
 			}
 		}

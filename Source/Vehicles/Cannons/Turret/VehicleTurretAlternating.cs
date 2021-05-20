@@ -16,16 +16,14 @@ namespace Vehicles
 		{
 		}
 
-		public override void PushTurretToQueue()
+		public override CompCannons.TurretData GenerateTurretData()
 		{
-			ActivateBurstTimer();
-			Log.Message("PUSH ALL 3");
-			vehicle.CompCannons.QueueTurret(new CompCannons.TurretData()
+			return new CompCannons.TurretData()
 			{
 				shots = CurrentFireMode.shotsPerBurst,
 				ticksTillShot = (CurrentFireMode.ticksBetweenShots / GroupTurrets.Count) * GroupTurrets.FindIndex(t => t == this),
 				turret = this
-			});
+			};
 		}
 
 		public override IEnumerable<string> ConfigErrors(VehicleDef vehicleDef)

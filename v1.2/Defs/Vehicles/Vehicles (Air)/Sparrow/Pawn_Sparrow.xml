@@ -153,12 +153,16 @@
 				<skyfallerLeaving>SparrowLeaving</skyfallerLeaving>
 				<skyfallerIncoming>SparrowIncoming</skyfallerIncoming>
 				<skyfallerCrashing>SparrowCrashing</skyfallerCrashing>
-				<skyfallerFlyOver>SparrowFlyover</skyfallerFlyOver>
+				<skyfallerStrafing>SparrowStrafe</skyfallerStrafing>
 				<fuelEfficiencyWorld>0.1</fuelEfficiencyWorld>
 				<flySpeed>10</flySpeed>
-				<launchProtocols>
-					<li Class="Vehicles.VTOLTakeoff">
-						<movementType>Decelerate</movementType>
+				<strafing>
+					<turrets>
+						<li>laserTurrets</li>
+					</turrets>
+				</strafing>
+				<launchProtocol Class="Vehicles.VTOLTakeoff">
+					<movementType>Decelerate</movementType>
 						<ticksVertical>150</ticksVertical>
 						<motes>
 							<li>
@@ -245,8 +249,7 @@
 								</points>
 							</speedCurve>
 						</landingProperties>
-					</li>
-				</launchProtocols>
+				</launchProtocol>
 			</li>
 			<li Class="Vehicles.CompProperties_Cannons">
 				<turrets>

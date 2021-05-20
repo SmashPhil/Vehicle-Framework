@@ -64,15 +64,6 @@ namespace Vehicles.UI
 						Mesh cannonMesh = graphic.MeshAt(Rot4.North);
 						
 						Graphics.DrawMesh(cannonMesh, topVectorLocation, locationRotation.ToQuat(), graphic.MatAt(Rot4.North), 0);
-
-						if(cannon.CannonBaseMaterial != null)
-						{
-							Matrix4x4 baseMatrix = default;
-							Pair<float, float> baseDrawOffset = RenderHelper.ShipDrawOffset(Rot8.North, cannon.baseCannonRenderLocation.x, cannon.baseCannonRenderLocation.y, out Pair<float, float> rotOffset2);
-							Vector3 baseVectorLocation = new Vector3(loc.x + baseDrawOffset.First, loc.y, loc.z + baseDrawOffset.Second);
-							baseMatrix.SetTRS(baseVectorLocation + Altitudes.AltIncVect, rot.AsQuat, new Vector3(cannon.baseCannonDrawSize.x, 1f, cannon.baseCannonDrawSize.y));
-							Graphics.DrawMesh(MeshPool.plane10, baseMatrix, cannon.CannonBaseMaterial, 0);
-						}
 					}
 					catch(Exception ex)
 					{

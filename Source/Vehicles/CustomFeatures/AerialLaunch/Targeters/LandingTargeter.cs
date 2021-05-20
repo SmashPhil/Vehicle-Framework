@@ -71,7 +71,8 @@ namespace Vehicles
 				{
 					if (targetValidator != null)
 					{
-						if (targetValidator(localTargetInfo) && !MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation))
+						VehiclePawn vehicleAtPos = MapHelper.VehicleInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation);
+						if (targetValidator(localTargetInfo) && (vehicleAtPos == vehicle || !MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation)))
 						{
 							action(localTargetInfo, landingRotation);
 							StopTargeting();
@@ -115,7 +116,8 @@ namespace Vehicles
 			{
 				IntVec3 cell = localTargetInfo.Cell;
 				Vector3 position = new Vector3(cell.x, AltitudeLayer.Building.AltitudeFor(), cell.z).ToIntVec3().ToVector3Shifted();
-				Color color = MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation) ||
+				VehiclePawn vehicleAtPos = MapHelper.VehicleInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation);
+				Color color = (vehicleAtPos != vehicle && MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation)) ||
 					(targetValidator != null && !targetValidator(localTargetInfo)) ? Designator_Place.CannotPlaceColor : Designator_Place.CanPlaceColor;
 				color.a = (Mathf.PingPong(ticksOpen, PingPongTickLength / 1.5f) / PingPongTickLength) + 0.25f;
 				GhostDrawer.DrawGhostThing(cell, landingRotation, vehicle.VehicleDef.buildDef, vehicle.VehicleDef.buildDef.graphic, color, AltitudeLayer.Blueprint);

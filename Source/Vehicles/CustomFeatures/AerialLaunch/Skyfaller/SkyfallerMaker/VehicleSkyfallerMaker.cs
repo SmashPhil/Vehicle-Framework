@@ -47,9 +47,9 @@ namespace Vehicles
 			try
 			{
 				VehicleSkyfaller_FlyOver skyfaller = (VehicleSkyfaller_FlyOver)MakeSkyfaller(def, vehicle);
-				skyfaller.launchProtocol = vehicle.CompVehicleLauncher.SelectedLaunchProtocol ?? vehicle.CompVehicleLauncher.launchProtocols.FirstOrDefault();
-				float angle = start.AngleToPoint(end);
-				skyfaller.angle = angle;
+				skyfaller.start = start;
+				skyfaller.end = end;
+				skyfaller.angle = start.AngleToPoint(end);
 				return skyfaller;
 			}
 			catch (Exception ex)

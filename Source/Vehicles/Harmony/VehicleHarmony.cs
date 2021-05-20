@@ -7,6 +7,7 @@ using Verse;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using UpdateLog;
 
 namespace Vehicles
 {
@@ -81,6 +82,26 @@ namespace Vehicles
 			VehicleIncidentSwapper.RegisterLordType(typeof(LordJob_ArmoredAssault));
 		}
 
+		public static void RegisterUpdateVersion()
+		{
+			try
+			{
+				UpdateLog.UpdateLog log = UpdateHandler.modUpdates.FirstOrDefault(u => u.Mod == ConditionalPatchApplier.VehicleMCP);
+				VehicleMod.settings.debug.updateLogs ??= new Dictionary<string, string>();
+				if (!VehicleMod.settings.debug.updateLogs.ContainsKey(log.UpdateData.currentVersion))
+				{
+					VehicleMod.settings.debug.updateLogs.Add(log.UpdateData.currentVersion, log.UpdateData.description);
+				}
+				else
+				{
+					VehicleMod.settings.debug.updateLogs[log.UpdateData.currentVersion] = log.UpdateData.description;
+				}
+			}
+			catch (Exception ex)
+			{
+				Log.Warning($"Unable to register update for backtracking. Exception = {ex.Message}");
+			}
+		}
 		
 		public static void OpenBetaDialog()
 		{

@@ -14,7 +14,10 @@ namespace Vehicles
 		public OpenBeta_GameComponent(Game game)
 		{
 			cachedButtonDraw = new Action(DrawButton);
+			Instance = this;
 		}
+
+		public static OpenBeta_GameComponent Instance { get; private set; }
 
 		public override void GameComponentOnGUI()
 		{

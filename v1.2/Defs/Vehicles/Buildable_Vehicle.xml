@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <Defs>
-	
 	<!-- Vehicle base -->
 	<Vehicles.VehicleBuildDef Name="VehicleBaseBuildable" Abstract="True">
 		<thingClass>Vehicles.VehicleBuilding</thingClass>

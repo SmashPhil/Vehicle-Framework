@@ -24,7 +24,10 @@ namespace Vehicles
 			nextFieldID = 1;
 			InvalidateAllFields();
 			ValidateVehicleDefs();
+			Instance = this;
 		}
+
+		public static WorldVehicleReachability Instance { get; private set; }
 
 		public void ClearCache()
 		{
@@ -102,13 +105,13 @@ namespace Vehicles
 				fields.Add(vehicleDef, new int[Find.WorldGrid.TilesCount]);
 			}
 
-			if(!Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().Passable(tile, vehicleDef))
+			if(!WorldVehiclePathGrid.Instance.Passable(tile, vehicleDef))
 			{
 				fields[vehicleDef][tile] = impassableFieldID;
 				return;
 			}
 
-			Find.WorldFloodFiller.FloodFill(tile, (int x) => Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().Passable(x, vehicleDef), delegate (int x)
+			Find.WorldFloodFiller.FloodFill(tile, (int x) => WorldVehiclePathGrid.Instance.Passable(x, vehicleDef), delegate (int x)
 			{
 				fields[vehicleDef][x] = nextFieldID;
 			}, int.MaxValue, null);

@@ -11,7 +11,7 @@ namespace Vehicles
 	{
 		public static Settlement SettlementVisitedNow(AerialVehicleInFlight aerial)
 		{
-			if (!aerial.Spawned || aerial.vehicle.inFlight)
+			if (!aerial.Spawned || aerial.vehicle.CompVehicleLauncher.inFlight)
 			{
 				return null;
 			}
@@ -19,7 +19,7 @@ namespace Vehicles
 			for (int i = 0; i < settlementBases.Count; i++)
 			{
 				Settlement settlement = settlementBases[i];
-				if (settlement.Tile == aerial.flightPath.First && settlement.Faction != aerial.Faction && settlement.Visitable)
+				if (settlement.Tile == aerial.flightPath.First.tile && settlement.Faction != aerial.Faction && settlement.Visitable)
 				{
 					return settlement;
 				}

@@ -38,7 +38,6 @@ namespace Vehicles
 		public bool showAllItemsOnMap = false;
 
 		private float angle = 0f; /* -45 is left, 45 is right : relative to Rot4 direction*/
-		public bool inFlight = false;
 
 		private float cargoCapacity;
 		private float armorPoints;
@@ -503,13 +502,13 @@ namespace Vehicles
 
 		internal void ResetGraphicCache()
 		{
-			if(UnityData.IsInMainThread)
+			if (UnityData.IsInMainThread)
 			{
 				ResetMaskCache();
 				var cannonComp = CompCannons;
 				if (cannonComp != null)
 				{
-					foreach(VehicleTurret cannon in cannonComp.Cannons)
+					foreach (VehicleTurret cannon in cannonComp.Cannons)
 					{
 						cannon.ResolveCannonGraphics(this, true);
 					}
@@ -1577,7 +1576,6 @@ namespace Vehicles
 					}
 				}
 			}
-			inFlight = false;
 			ResetGraphicCache();
 			Drawer.Notify_Spawned();
 			InitializeHitbox();
@@ -1746,7 +1744,6 @@ namespace Vehicles
 			Scribe_Deep.Look(ref statHandler, "statHandler", new object[] { this });
 
 			Scribe_Values.Look(ref angle, "angle");
-			Scribe_Values.Look(ref inFlight, "inFlight");
 
 			Scribe_Values.Look(ref color1, "color1", Color.white);
 			Scribe_Values.Look(ref color2, "color2", Color.white);

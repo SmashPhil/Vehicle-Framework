@@ -22,7 +22,6 @@ namespace Vehicles
 		{
 			VehicleSkyfaller_Crashing skyfaller = (VehicleSkyfaller_Crashing)ThingMaker.MakeThing(vehicle.CompVehicleLauncher.Props.skyfallerCrashing);
 			skyfaller.vehicle = vehicle;
-			skyfaller.launchProtocol = launchProtocol;
 			skyfaller.rotCrashing = Rot4.East;
 			GenSpawn.Spawn(skyfaller, landingCell, mapParent.Map, landingRot);
 		}

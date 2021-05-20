@@ -4,13 +4,30 @@ using System.Linq;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
-using RimWorld;
+using RimWorld.Planet;
 using SmashTools;
+using Vehicles.Defs;
 
 namespace Vehicles
 {
-	public class VehicleSkyfaller_FlyOver : VehicleSkyfaller
+	//REDO - CACHE LAUNCH PROTOCOl
+	public abstract class VehicleSkyfaller_FlyOver : VehicleSkyfaller
 	{
+		public IntVec3 start;
+		public IntVec3 end;
+
+		public AerialVehicleInFlight aerialVehicle;
+
+		public VehicleSkyfaller_FlyOver()
+		{
+
+		}
+
+		public VehicleSkyfaller_FlyOver(AerialVehicleInFlight aerialVehicle)
+		{
+			this.aerialVehicle = aerialVehicle;
+		}
+
 		public override Vector3 DrawPos
 		{
 			get
@@ -18,14 +35,14 @@ namespace Vehicles
 				switch (def.skyfaller.movementType)
 				{
 					case SkyfallerMovementType.Accelerate:
-						return SkyfallerHelper.DrawPos_Accelerate(base.DrawPos, launchProtocol.TicksPassed, angle, CurrentSpeed);
+						return SkyfallerHelper.DrawPos_Accelerate(base.DrawPos, vehicle.CompVehicleLauncher.launchProtocol.TicksPassed, angle, CurrentSpeed);
 					case SkyfallerMovementType.ConstantSpeed:
-						return SkyfallerHelper.DrawPos_ConstantSpeed(base.DrawPos, launchProtocol.TicksPassed, angle, CurrentSpeed);
+						return SkyfallerHelper.DrawPos_ConstantSpeed(base.DrawPos, vehicle.CompVehicleLauncher.launchProtocol.TicksPassed, angle, CurrentSpeed);
 					case SkyfallerMovementType.Decelerate:
-						return SkyfallerHelper.DrawPos_Decelerate(base.DrawPos, launchProtocol.TicksPassed, angle, CurrentSpeed);
+						return SkyfallerHelper.DrawPos_Decelerate(base.DrawPos, vehicle.CompVehicleLauncher.launchProtocol.TicksPassed, angle, CurrentSpeed);
 					default:
 						Log.ErrorOnce("SkyfallerMovementType not handled: " + def.skyfaller.movementType, thingIDNumber);
-						return SkyfallerHelper.DrawPos_Accelerate(base.DrawPos, launchProtocol.TicksPassed, angle, CurrentSpeed);
+						return SkyfallerHelper.DrawPos_Accelerate(base.DrawPos, vehicle.CompVehicleLauncher.launchProtocol.TicksPassed, angle, CurrentSpeed);
 				}
 			}
 		}
@@ -38,13 +55,28 @@ namespace Vehicles
 				{
 					return def.skyfaller.speed;
 				}
-				return def.skyfaller.speedCurve.Evaluate(launchProtocol.TimeInAnimation) * def.skyfaller.speed;
+				return def.skyfaller.speedCurve.Evaluate(TimeInAnimation) * def.skyfaller.speed;
 			}
 		}
 
-		public override void ExposeData()
+		protected virtual float TimeInAnimation
 		{
-			base.ExposeData();
+			get
+			{
+				if (def.skyfaller.reversed)
+				{
+					return (float)vehicle.CompVehicleLauncher.launchProtocol.TicksPassed / def.skyfaller.ticksToImpactRange.max;
+				}
+				return 1f - (float)vehicle.CompVehicleLauncher.launchProtocol.TicksPassed / def.skyfaller.ticksToImpactRange.max;
+			}
+		}
+
+		public Vector3 DistanceAtMin
+		{
+			get
+			{
+				return SkyfallerHelper.DrawPos_ConstantSpeed(base.DrawPos, -def.skyfaller.ticksToImpactRange.min, angle, CurrentSpeed);
+			}
 		}
 
 		public override void DrawAt(Vector3 drawLoc, bool flip = false)
@@ -56,19 +88,19 @@ namespace Vehicles
 			}
 			if (def.skyfaller.angleCurve != null)
 			{
-				angle = def.skyfaller.angleCurve.Evaluate(launchProtocol.TimeInAnimation);
+				angle = def.skyfaller.angleCurve.Evaluate(TimeInAnimation);
 			}
 			if (def.skyfaller.rotationCurve != null)
 			{
-				num += def.skyfaller.rotationCurve.Evaluate(launchProtocol.TimeInAnimation);
+				num += def.skyfaller.rotationCurve.Evaluate(TimeInAnimation);
 			}
 			if (def.skyfaller.xPositionCurve != null)
 			{
-				drawLoc.x += def.skyfaller.xPositionCurve.Evaluate(launchProtocol.TimeInAnimation);
+				drawLoc.x += def.skyfaller.xPositionCurve.Evaluate(TimeInAnimation);
 			}
 			if (def.skyfaller.zPositionCurve != null)
 			{
-				drawLoc.z += def.skyfaller.zPositionCurve.Evaluate(launchProtocol.TimeInAnimation);
+				drawLoc.z += def.skyfaller.zPositionCurve.Evaluate(TimeInAnimation);
 			}
 			vehicle.DrawAt(drawLoc, num + Rotation.AsInt * 90, flip);
 			//DrawDropSpotShadow(); //Add tracing shadow;
@@ -76,34 +108,32 @@ namespace Vehicles
 
 		public override void Tick()
 		{
-			launchProtocol.Tick();
-			if (!DrawPos.InBounds(Map) && launchProtocol.TicksPassed > def.skyfaller.ticksToImpactRange.max)
+			vehicle.CompVehicleLauncher.launchProtocol.Tick();
+			if (!DrawPos.InBounds(Map) && vehicle.CompVehicleLauncher.launchProtocol.TicksPassed > def.skyfaller.ticksToImpactRange.max)
 			{
 				ExitMap();
 			}
 		}
 
-		protected virtual void FireTurrets()
-		{
-
-		}
-
 		protected virtual void ExitMap()
 		{
-			Log.Message("Exit");
+			AerialVehicleInFlight flyingVehicle = (AerialVehicleInFlight)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.AerialVehicle);
+			flyingVehicle.vehicle = vehicle;
+			flyingVehicle.Tile = Map.Tile;
+			flyingVehicle.SetFaction(vehicle.Faction);
+			flyingVehicle.OrderFlyToTiles(aerialVehicle.flightPath.Path, Find.WorldGrid.GetTileCenter(Map.Tile), aerialVehicle.arrivalAction);
+			//Recon edge case?
+			flyingVehicle.Initialize();
+			Find.WorldObjects.Add(flyingVehicle);
 			Destroy();
 		}
 
-		public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
+		public override void ExposeData()
 		{
-			base.DeSpawn(mode);
-			Log.Message("DESPAWNED");
-		}
-
-		public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
-		{
-			base.Destroy(mode);
-			Log.Message("DESTROYED");
+			base.ExposeData();
+			Scribe_Values.Look(ref start, "start");
+			Scribe_Values.Look(ref end, "end");
+			Scribe_References.Look(ref aerialVehicle, "aerialVehicle");
 		}
 
 		public override void SpawnSetup(Map map, bool respawningAfterLoad)
@@ -111,10 +141,9 @@ namespace Vehicles
 			base.SpawnSetup(map, respawningAfterLoad);
 			if (!respawningAfterLoad)
 			{
-				launchProtocol = vehicle.CompVehicleLauncher.SelectedLaunchProtocol ?? vehicle.CompVehicleLauncher.launchProtocols.FirstOrDefault();
-				launchProtocol.SetPositionArriving(DrawPos, Rot8.North, Map);
-				launchProtocol.OrderProtocol(false);
-				launchProtocol.SetTickCount(-def.skyfaller.ticksToImpactRange.max);
+				vehicle.CompVehicleLauncher.launchProtocol.SetPositionArriving(DrawPos, Rot8.North, Map);
+				vehicle.CompVehicleLauncher.launchProtocol.OrderProtocol(false);
+				vehicle.CompVehicleLauncher.launchProtocol.SetTickCount(-def.skyfaller.ticksToImpactRange.max);
 			}
 		}
 	}
