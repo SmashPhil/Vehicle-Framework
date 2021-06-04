@@ -53,7 +53,16 @@ namespace Vehicles
 					}
 					else
 					{
-						airDefense.angle = WorldHelper.TryFindHeading(airDefense.parent.DrawPos, airDefense.CurrentTarget.DrawPos);
+						float headingToTarget = WorldHelper.TryFindHeading(airDefense.parent.DrawPos, airDefense.CurrentTarget.DrawPos);
+						int dirSign = headingToTarget < airDefense.angle ? -1 : 1;
+						if (Mathf.Abs(headingToTarget - airDefense.angle) < 1)
+						{
+							airDefense.angle = headingToTarget;
+						}
+						else
+						{
+							airDefense.angle = (airDefense.angle + RotationRate * dirSign).ClampAndWrap(0, 360);
+						}
 						if (!withinMaxDistance)
 						{
 							airDefense.activeTargets.Remove(aerialVehicleSearchingFor);
