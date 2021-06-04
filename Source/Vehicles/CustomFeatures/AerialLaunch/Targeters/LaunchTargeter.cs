@@ -10,7 +10,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class LaunchTargeter : BaseWorldTargeter
+	public class LaunchTargeter : BaseVehicleWorldTargeter
 	{
 		private const float BaseFeedbackTexSize = 0.8f;
 

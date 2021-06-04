@@ -13,7 +13,11 @@
 		<magazineCapacity>50</magazineCapacity>
 		<genericAmmo>true</genericAmmo>
 		
-		<recoil>0.1</recoil>
+		<recoil>
+			<distanceTotal>0.1</distanceTotal>
+			<distancePerTick>0.05</distancePerTick>
+			<speedMultiplierPostRecoil>0.75</speedMultiplierPostRecoil>
+		</recoil>
 		
 		<fireModes>
 			<li>
@@ -77,6 +81,12 @@
 		<warmUpTimer>1.25</warmUpTimer>
 		<magazineCapacity>35</magazineCapacity>
 		<genericAmmo>true</genericAmmo>
+		
+		<recoil>
+			<distanceTotal>0.1</distanceTotal>
+			<distancePerTick>0.05</distancePerTick>
+			<speedMultiplierPostRecoil>0.75</speedMultiplierPostRecoil>
+		</recoil>
 		
 		<fireModes>
 			<li>

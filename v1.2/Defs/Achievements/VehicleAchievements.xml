@@ -5,7 +5,7 @@
 		<defName>testAchievement</defName>
 		<label>Vehicle Builder</label>
 		<description>Build a vehicle</description>
-		<!-- <tab>Vehicles</tab> -->
+		<tab>Vehicles</tab>
 		
 		<tracker Class="Vehicles.Achievements.VehicleBuilderTracker">
 			<def>Tank_Blueprint</def>

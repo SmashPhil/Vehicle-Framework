@@ -83,7 +83,8 @@
 	<Vehicles.AntiAircraftDef>
 		<defName>FlakProjectile</defName>
 		<label>Flak Projectile</label>
-		<worldObjectClass>Vehicles.AntiAircraft</worldObjectClass>
+		<worldObjectClass>Vehicles.Flak</worldObjectClass>
+		<antiAircraftWorker>Vehicles.FlakWorker</antiAircraftWorker>
 		<texture>Things/Projectile/ShellHighExplosive</texture>
 		<useDynamicDrawer>true</useDynamicDrawer>
 		<expandingIcon>true</expandingIcon>
@@ -97,7 +98,20 @@
 			<drawSize>(1,1)</drawSize>
 		</explosionGraphic>
 		<framesForExplosion>6</framesForExplosion>
-		<damage>50</damage>
-		<accuracy>0.05</accuracy>
+		<damage>80</damage>
+		<accuracy>0.1</accuracy>
+		<ticksBetweenShots>180</ticksBetweenShots>
+		<properties>
+			<distance>5</distance>
+			<arc>30</arc>
+			<altitude>
+				<min>1</min>
+				<max>10000</max>
+			</altitude>
+			<buildings>
+				<min>1</min>
+				<max>4</max>
+			</buildings>
+		</properties>
 	</Vehicles.AntiAircraftDef>
 </Defs>

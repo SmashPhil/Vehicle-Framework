@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <currentVersion>1.2.3.2</currentVersion>
+  <updateOn>Startup</updateOn>
+  <description>
+[anchor]MiddleCenter[/anchor][b]Vehicles - 1.2.3.2[/b][anchor]MiddleLeft[/anchor]
+[title]Notes[/title][font]Tiny[/font]
+A new game is required for this update.
+
+[title]Bug Fixes[/title][font]Tiny[/font]
+Fixed bug where vehicles would not show up in the Form Vehicle Caravan dialog window.
+
+Fixed bug where vehicle icons in the Form Vehicle Caravan dialog window would attempt to generate a non-RGB graphic request.
+
+Fixed bug where vehicle icons in the Vehicle Selector dialog window would attempt to generate a non-RGB graphic request.
+
+Fixed bug where custom impassable biome costs would result in -1 path cost and cause weird pathing behavior.
+
+Fixed bug where static turrets would not rotate when the vehicle is turning and the turret is firing.
+
+Fixed bug where launching a shuttle from a local map into another local map would cause the shuttle to not enter the target map, and instead land on the world map.
+
+Fixed bug where Hot Air Balloon would cause RimWorld to freeze upon leaving the map.
+
+Fixed bug where shuttles would occassionally not be able to take additional orders once landing on the world map.
+
+Fixed bug where turrets would not rotate faster with 2-4x tick speed.
+
+Fixed bug where shuttles (when zoomed in) would not use the right shader for sunlight driven lighting
+
+Fixed bug where color3 was not saving for vehicles
+
+Fixed bug where VehicleTurrets would cause an r_LogEntry root error for unresolvable grammar when the projectile hit a target.
+[title]New Additions[/title]
+Added TextMeshPro rendering for vehicle path costs on the world map. This is an option in the Debug ModSettings tab for visualization of final path costs for a group of vehicles (through the RoutePlanner and FormCaravan window).
+
+Added Attack options for AerialVehicles when targeting settlements.
+
+Added Recon scouting where shuttles may circle a map that has not yet been loaded, and spy on the map. The map is generated and held open which means you can target defenses on the map, perform strafing runs, and even target specific cells for landing.
+
+Added VehicleTurretAlternating class that allows for turrets to alternate shots
+
+Added groupKey field to VehicleTurret to allow grouping of turrets. Will consolodate all turrets sharing this key to use the same gizmo, which will cause them to fire, reload, switch fire rates, and turn auto-target on simultaneously.
+
+Added laser projectiles
+
+Added SkinDef for patterns that are unaffected by the color picker (essentially an image overlay rather than an RGB mask)
+
+Added RetextureDef to allow for different textures of a vehicle exposed to the ColorPicker for more customization
+[title]Additional Changes[/title]
+Modified vehicle descriptions
+
+Modified Graphic_RGB, Graphic_Vehicle, and PatternDef to allow for rotating / flipping of non-vanilla rotations in texture generation. This greatly reduces texture files required for vehicles by allowing you to not have to specify NE, SE, NW, SW and only include 1 texture for generic patterns
+[title]Final Notes[/title]
+Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.)
+  </description>
+  <actionOnUpdate>Vehicles.VehicleHarmony.RegisterUpdateVersion</actionOnUpdate>
+  <update>true</update>
+  <testing>false</testing>
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon.png</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon.png</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon.png</icon>
+      <url>steam://url/CommunityFilePage/2356577528</url>
+    </li>
+  </rightIconBar>
+  <leftIconBar>
+    <li>
+      <name>Support Vehicles Development</name>
+      <icon>ko-fiIcon.png</icon>
+      <url>https://ko-fi.com/smashphil</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>

@@ -12,27 +12,12 @@ namespace Vehicles
 	{
 		public void PatchMethods()
 		{
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldObjectDef), nameof(WorldObjectDef.ConfigErrors)), prefix: null,
-				postfix: new HarmonyMethod(typeof(WorldObjects),
-				nameof(SettlementAirDefenseConfigError)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(InspectPaneFiller), nameof(InspectPaneFiller.DoPaneContentsFor)),
 				postfix: new HarmonyMethod(typeof(WorldObjects),
 				nameof(AerialVehicleInFlightAltimeter)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(World), nameof(World.WorldUpdate)),
 				postfix: new HarmonyMethod(typeof(WorldObjects),
 				nameof(TextMeshWorldUpdate)));
-		}
-
-		public static IEnumerable<string> SettlementAirDefenseConfigError(IEnumerable<string> __result, WorldObjectDef __instance)
-		{
-			foreach (string prevError in __result)
-			{
-				yield return prevError;
-			}
-			if (__instance.comps.NotNullAndAny(c => c is WorldObjectCompProperties_SettlementAirDefense) && (__instance.worldObjectClass is null || !__instance.worldObjectClass.SameOrSubclass(typeof(Settlement))))
-			{
-				yield return "cannot assign \"SettlementAirDefense\" WorldObjectComp to WorldObject not using or inheriting from Settlement class.";
-			}
 		}
 
 		public static void AerialVehicleInFlightAltimeter(ISelectable sel, Rect rect)

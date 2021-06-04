@@ -122,7 +122,7 @@ namespace Vehicles
 			int currentTile = currentNode.tile;
 			aerialVehicle.Tile = currentTile;
 			currentlyInRecon = reconTiles.Contains(aerialVehicle.Tile);
-			currentNode.arrivalAction.Arrived(aerialVehicle.Tile);
+			currentNode.arrivalAction?.Arrived(aerialVehicle.Tile);
 			if (circling && haltCircle)
 			{
 				int origin = Last.tile;

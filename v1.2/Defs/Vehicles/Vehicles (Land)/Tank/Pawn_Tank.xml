@@ -298,7 +298,7 @@
 			</li>
 			<li Class="Vehicles.CompProperties_Cannons">
 				<turrets>
-					<li Class="Vehicles.VehicleTurretRecoiled">
+					<li>
 						<turretDef>TankMainTurret</turretDef>
 						<turretRenderLocation>(0, 0)</turretRenderLocation>
 						<turretRenderOffset>(0, 0)</turretRenderOffset>

@@ -113,7 +113,13 @@ namespace Vehicles
 			}
 			try
 			{
-				StrafeProjectile projectile2 = ProjectileSkyfallerMaker.WrapProjectile(projectile, this, launchPos, target.ToVector3Shifted()); //RANDOMIZE TARGETED CELLS
+				float speedTicksPerTile = projectile.projectile.SpeedTilesPerTick;
+				if (turret.turretDef.projectileSpeed > 0)
+				{
+					speedTicksPerTile = turret.turretDef.projectileSpeed;
+				}
+				ProjectileSkyfaller projectile2 = ProjectileSkyfallerMaker.WrapProjectile(ProjectileSkyfallerDefOf.ProjectileSkyfaller, 
+					projectile, this, launchPos, target.ToVector3Shifted(), speedTicksPerTile); //REDO - RANDOMIZE TARGETED CELLS
 				GenSpawn.Spawn(projectile2, target.ClampInsideMap(Map), Map);
 				if (turret.turretDef.ammunition != null)
 				{

@@ -12,8 +12,6 @@ namespace Vehicles
 {
 	internal class WorldHandling : IPatchCategory
 	{
-		public static bool DynamicTexturesEnabled => true;// VehicleMod.settings.dynamicWorldDrawing;
-
 		public void PatchMethods()
 		{
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldPawns), nameof(WorldPawns.GetSituation)), prefix: null,
@@ -157,30 +155,19 @@ namespace Vehicles
 					Label label = ilg.DefineLabel();
 					Label brlabel = ilg.DefineLabel();
 
-					///Check if TravelingTransportPod is SRTS Instance
 					yield return new CodeInstruction(opcode: OpCodes.Ldloc_1);
-					yield return new CodeInstruction(opcode: OpCodes.Isinst, operand: typeof(AerialVehicleInFlight));
+					yield return new CodeInstruction(opcode: OpCodes.Call, AccessTools.Method(typeof(RenderHelper), nameof(RenderHelper.RenderDynamicWorldObjects)));
 					yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
-					///Check if dynamic textures mod setting is enabled
-					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Property(type: typeof(WorldHandling), name: nameof(DynamicTexturesEnabled)).GetGetMethod());
-					yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
-
-					///Hook onto SRTS Draw method
-					yield return new CodeInstruction(opcode: OpCodes.Ldloc_1);
-					yield return new CodeInstruction(opcode: OpCodes.Castclass, operand: typeof(AerialVehicleInFlight));
-					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(AerialVehicleInFlight), name: nameof(AerialVehicleInFlight.Draw)));
 					yield return new CodeInstruction(opcode: OpCodes.Leave, brlabel);
 
-					int j = i;
-					while (j < instructionList.Count)
+					for (int j = i; j < instructionList.Count; j++)
 					{
 						if (instructionList[j].opcode == OpCodes.Ldloca_S)
 						{
 							instructionList[j].labels.Add(brlabel);
 							break;
 						}
-						j++;
 					}
 					instruction.labels.Add(label);
 				}
@@ -204,27 +191,18 @@ namespace Vehicles
 
 				if (instruction.opcode == OpCodes.Ldloc_2 && instructionList[i + 1].opcode == OpCodes.Ldc_I4_1)
 				{
-					///Jump label, for loop
+					//Jump label, for loop
 					instruction.labels.Add(jumpLabel);
 				}
 				if (instruction.Calls(AccessTools.Property(type: typeof(WorldObject), name: nameof(WorldObject.ExpandingIconColor)).GetGetMethod()))
 				{
 					Label label = ilg.DefineLabel();
 
-					///Check if WorldObject is AerialVehicle Instance
 					yield return new CodeInstruction(opcode: OpCodes.Ldloc_3);
-					yield return new CodeInstruction(opcode: OpCodes.Isinst, operand: typeof(AerialVehicleInFlight));
+					yield return new CodeInstruction(opcode: OpCodes.Call, AccessTools.Method(typeof(RenderHelper), nameof(RenderHelper.RenderDynamicWorldObjects)));
 					yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 
-					///Check if dynamic textures mod setting is enabled
-					yield return new CodeInstruction(opcode: OpCodes.Pop);
-					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Property(type: typeof(WorldHandling), name: nameof(DynamicTexturesEnabled)).GetGetMethod());
-					yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
-
-					///Hook onto AerialVehicle Draw method and continue
-					yield return new CodeInstruction(opcode: OpCodes.Ldloc_3);
-					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(type: typeof(AerialVehicleInFlight), name: nameof(AerialVehicleInFlight.Draw)));
-					yield return new CodeInstruction(opcode: OpCodes.Br, jumpLabel);
+					yield return new CodeInstruction(opcode: OpCodes.Leave, jumpLabel);
 
 					instruction.labels.Add(label);
 				}

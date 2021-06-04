@@ -92,7 +92,7 @@ namespace Vehicles
 
 		public VehicleTurret()
 		{
-			rTracker = new Turret_RecoilTracker();
+			rTracker = new Turret_RecoilTracker(this);
 		}
 
 		public VehicleTurret(VehiclePawn vehicle, VehicleTurret reference)
@@ -136,7 +136,7 @@ namespace Vehicles
 			}
 
 			ResolveCannonGraphics(vehicle);
-			rTracker = new Turret_RecoilTracker();
+			rTracker = new Turret_RecoilTracker(this);
 
 			restrictedTheta = (int)Math.Abs(angleRestricted.x - (angleRestricted.y + 360)).ClampAngle();
 
@@ -166,6 +166,8 @@ namespace Vehicles
 		public int WarmupTicks => Mathf.CeilToInt(turretDef.warmUpTimer * 60f);
 
 		public bool OnCooldown => triggeredCooldown;
+
+		public bool Recoils => turretDef.recoil != null;
 
 		public List<VehicleHandler> RelatedHandlers => vehicle.handlers.FindAll(h => !h.role.cannonIds.NullOrEmpty() && h.role.cannonIds.Contains(key));
 
@@ -531,7 +533,10 @@ namespace Vehicles
 			TurretAutoTick();
 			TurretRotationTick();
 			TurretTargeterTick();
-			rTracker.RecoilTick();
+			if (Recoils)
+			{
+				rTracker.RecoilTick();
+			}
 		}
 
 		protected virtual void TurretAutoTick()
@@ -731,6 +736,10 @@ namespace Vehicles
 
 		public virtual void FireTurret()
 		{
+			if (!vehicle.Spawned)
+			{
+				return;
+			}
 			TryFindShootLineFromTo(TurretLocation.ToIntVec3(), cannonTarget, out ShootLine shootLine);
 			
 			float range = Vector3.Distance(TurretLocation, cannonTarget.CenterVector3);
@@ -768,7 +777,12 @@ namespace Vehicles
 				}
 				if (turretDef.projectileSpeed > 0)
 				{
-					projectile2.AllComps.Add(new CompTurretProjectileProperties(vehicle, turretDef, projectile2));
+					projectile2.AllComps.Add(new CompTurretProjectileProperties(vehicle)
+					{
+						speed = turretDef.projectileSpeed > 0 ? turretDef.projectileSpeed : projectile2.def.projectile.speed,
+						hitflag = turretDef.hitFlags,
+						hitflags = turretDef.attachProjectileFlag
+					});
 				}
 				projectile2.Launch(vehicle, launchCell, c, cannonTarget, projectile2.HitFlags, vehicle);
 				vehicle.vDrawer.rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
@@ -795,31 +809,43 @@ namespace Vehicles
 		{
 			if (!turretDef.motes.NullOrEmpty())
 			{
-				foreach (VehicleTurretDef.AnimationProperties moteProps in turretDef.motes)
+				foreach (AnimationProperties moteProps in turretDef.motes)
 				{
+					Vector3 moteLoc = loc;
 					if (loc.ShouldSpawnMotesAt(vehicle.Map))
 					{
 						try
 						{
+							float altitudeLayer = Altitudes.AltitudeFor(moteProps.moteDef.altitudeLayer);
+							moteLoc += new Vector3(moteProps.offset.x, altitudeLayer + moteProps.offset.y, moteProps.offset.z);
 							Mote mote = (Mote)ThingMaker.MakeThing(moteProps.moteDef);
-							mote.exactPosition = loc;
-							mote.exactRotation = moteProps.extraRotation;
+							mote.exactPosition = moteLoc;
+							mote.exactRotation = moteProps.exactRotation.RandomInRange;
 							mote.instanceColor = moteProps.color;
 							mote.rotationRate = moteProps.rotationRate;
 							mote.Scale = moteProps.scale;
 							if (mote is MoteThrown thrownMote)
 							{
-								thrownMote.SetVelocity(TurretRotation + moteProps.angleThrown, moteProps.speedThrown);
+								float thrownAngle = TurretRotation + moteProps.angleThrown.RandomInRange;
+								if (thrownMote is MoteThrownExpand expandMote)
+								{
+									if (expandMote is MoteThrownSlowToSpeed accelMote)
+									{
+										accelMote.SetDecelerationRate(moteProps.deceleration.RandomInRange, moteProps.fixedAcceleration, thrownAngle);
+									}
+									expandMote.growthRate = moteProps.growthRate.RandomInRange;
+								}
+								thrownMote.SetVelocity(thrownAngle, moteProps.speedThrown.RandomInRange);
 							}
 							if (mote is Mote_CannonPlume cannonMote)
 							{
 								cannonMote.cyclesLeft = moteProps.cycles;
 								cannonMote.animationType = moteProps.animationType;
-								cannonMote.turret = this;
+								cannonMote.angle = TurretRotation;
 							}
 							mote.def = moteProps.moteDef;
 							mote.PostMake();
-							GenSpawn.Spawn(mote, loc.ToIntVec3(), vehicle.Map, WipeMode.Vanish);
+							GenSpawn.Spawn(mote, moteLoc.ToIntVec3(), vehicle.Map, WipeMode.Vanish);
 						}
 						catch (Exception ex)
 						{

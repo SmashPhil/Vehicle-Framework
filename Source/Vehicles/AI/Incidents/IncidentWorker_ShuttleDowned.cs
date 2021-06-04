@@ -13,7 +13,7 @@ namespace Vehicles.AI
 	{
 		public IncidentCrashedSiteDef CrashSiteDef => def as IncidentCrashedSiteDef;
 
-		public virtual bool TryExecuteEvent(AerialVehicleInFlight aerialVehicle, Settlement shotDownBy, IntVec3? precalculatedCell = null)
+		public virtual bool TryExecuteEvent(AerialVehicleInFlight aerialVehicle, WorldObject shotDownBy, IntVec3? precalculatedCell = null)
 		{
 			try
 			{
@@ -27,9 +27,9 @@ namespace Vehicles.AI
 				{
 					int num = CaravanIncidentUtility.CalculateIncidentMapSize(aerialVehicle.vehicle.AllPawnsAboard, aerialVehicle.vehicle.AllPawnsAboard);
 					crashSite = GetOrGenerateMapUtility.GetOrGenerateMap(aerialVehicle.Tile, new IntVec3(num, 1, num), WorldObjectDefOfVehicles.CrashedShipSite);
-					if (shotDownBy != null)
+					if (shotDownBy is Settlement settlement)
 					{
-						ticksTillArrival = (crashSite.Parent as CrashSite).InitiateReinforcementsRequest(shotDownBy);
+						ticksTillArrival = (crashSite.Parent as CrashSite).InitiateReinforcementsRequest(settlement);
 					}
 				}
 				bool validator(IntVec3 c)
@@ -70,7 +70,7 @@ namespace Vehicles.AI
 			}
 		}
 
-		protected virtual void SendCrashSiteLetter(Settlement shotDownBy, MapParent crashSite, TaggedString baseLetterLabel, TaggedString baseLetterText, LetterDef letterDef, LookTargets lookTargets, params NamedArgument[] textArgs)
+		protected virtual void SendCrashSiteLetter(WorldObject shotDownBy, MapParent crashSite, TaggedString baseLetterLabel, TaggedString baseLetterText, LetterDef letterDef, LookTargets lookTargets, params NamedArgument[] textArgs)
 		{
 			if (baseLetterLabel.NullOrEmpty() || baseLetterText.NullOrEmpty())
 			{

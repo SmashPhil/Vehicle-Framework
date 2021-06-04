@@ -9,12 +9,11 @@ namespace Vehicles
 {
 	public class Vehicle_RecoilTracker
 	{
-		private const float RecoilDeteriorationRate = 0.5f;
-
 		public float curRecoil;
 		private float targetRecoil;
 		private float recoilStep;
 		private bool recoilingBack;
+		private float speedMultiplierPostRecoil;
 
 		public float Angle { get; private set; }
 
@@ -27,23 +26,36 @@ namespace Vehicles
 				if (recoilingBack)
 				{
 					curRecoil += recoilStep;
+					if (curRecoil >= targetRecoil)
+					{
+						curRecoil = targetRecoil;
+					}
 				}
 				else
 				{
-					curRecoil -= recoilStep * RecoilDeteriorationRate;
+					curRecoil -= recoilStep * speedMultiplierPostRecoil;
+					if (curRecoil <= 0)
+					{
+						ResetRecoilVars();
+					}
 				}
 
-				if (Mathf.Abs(curRecoil - targetRecoil) < recoilStep)
+				if (curRecoil >= targetRecoil)
 				{
-					ResetRecoilVars();
+					recoilingBack = false;
 				}
 			}
 		}
 
-		public void Notify_TurretRecoil(VehicleTurret cannonHandler, float angle)
+		public void Notify_TurretRecoil(VehicleTurret turret, float angle)
 		{
-			targetRecoil = cannonHandler.turretDef.vehicleRecoil;
-			recoilStep = targetRecoil / 5;
+			if (turret.turretDef.vehicleRecoil is null)
+			{
+				return;
+			}
+			targetRecoil = turret.turretDef.vehicleRecoil.distanceTotal;
+			recoilStep = turret.turretDef.vehicleRecoil.distancePerTick;
+			speedMultiplierPostRecoil = turret.turretDef.vehicleRecoil.speedMultiplierPostRecoil;
 			curRecoil = 0;
 			recoilingBack = true;
 			Angle = angle;
@@ -51,10 +63,10 @@ namespace Vehicles
 		
 		private void ResetRecoilVars()
 		{
-			curRecoil = 0;
 			targetRecoil = 0;
 			recoilStep = 0;
-			recoilingBack = false;
+			speedMultiplierPostRecoil = 0;
+			curRecoil = 0;
 			Angle = 0;
 		}
 	}

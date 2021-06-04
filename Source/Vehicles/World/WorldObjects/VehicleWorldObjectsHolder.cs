@@ -16,19 +16,10 @@ namespace Vehicles
 		private static List<DockedBoat> dockedBoats = new List<DockedBoat>();
 
 		public VehicleWorldObjectsHolder(World world) : base(world)
-		{ 
-			if (aerialVehicles is null)
-			{
-				aerialVehicles = new List<AerialVehicleInFlight>();
-			}
-			if (vehicleCaravans is null)
-			{
-				vehicleCaravans = new List<VehicleCaravan>();
-			}
-			if (dockedBoats is null)
-			{
-				dockedBoats = new List<DockedBoat>();
-			}
+		{
+			aerialVehicles ??= new List<AerialVehicleInFlight>();
+			vehicleCaravans ??= new List<VehicleCaravan>();
+			dockedBoats ??= new List<DockedBoat>();
 			aerialVehicles.RemoveAll(a => a is null);
 			vehicleCaravans.RemoveAll(c => c is null);
 			dockedBoats.RemoveAll(b => b is null);
@@ -38,7 +29,9 @@ namespace Vehicles
 		public static VehicleWorldObjectsHolder Instance { get; private set; }
 
 		public List<AerialVehicleInFlight> AerialVehicles => aerialVehicles;
+
 		public List<VehicleCaravan> VehicleCaravans => vehicleCaravans;
+
 		public List<DockedBoat> DockedBoats => dockedBoats;
 
 		public AerialVehicleInFlight AerialVehicleObject(VehiclePawn vehicle)
@@ -63,36 +56,52 @@ namespace Vehicles
 			dockedBoats.Clear();
 		}
 
-		public void AddToCache(WorldObject o)
+		public void AddToCache(WorldObject obj)
 		{ 
-			if (o is AerialVehicleInFlight aerial)
+			if (obj is AerialVehicleInFlight aerial)
 			{
 				aerialVehicles.Add(aerial);
 			}
-			else if (o is VehicleCaravan caravan)
+			else if (obj is VehicleCaravan caravan)
 			{
 				vehicleCaravans.Add(caravan);
 			}
-			else if (o is DockedBoat dockedBoat)
+			else if (obj is DockedBoat dockedBoat)
 			{
 				dockedBoats.Add(dockedBoat);
 			}
+			if (obj is Settlement) //REDO - Temp check for allowing air defenses
+			{
+				foreach (AntiAircraftDef antiAircraft in DefDatabase<AntiAircraftDef>.AllDefs)
+				{
+					if (!AirDefensePositionTracker.airDefenseCache.ContainsKey(obj))
+					{
+						AirDefense airDefense = new AirDefense(obj)
+						{
+							defenseBuildings = antiAircraft.properties.buildings.RandomInRange
+						};
+						AirDefensePositionTracker.airDefenseCache.Add(obj, airDefense);
+					}
+				}
+			}
 		}
 
-		public void RemoveFromCache(WorldObject o)
+		public void RemoveFromCache(WorldObject obj)
 		{
-			if (o is AerialVehicleInFlight aerial)
+			if (obj is AerialVehicleInFlight aerial)
 			{
 				aerialVehicles.Remove(aerial);
 			}
-			else if (o is VehicleCaravan caravan)
+			else if (obj is VehicleCaravan caravan)
 			{
 				vehicleCaravans.Remove(caravan);
 			}
-			else if (o is DockedBoat dockedBoat)
+			else if (obj is DockedBoat dockedBoat)
 			{
 				dockedBoats.Remove(dockedBoat);
 			}
+
+			AirDefensePositionTracker.airDefenseCache.Remove(obj);
 		}
 
 		public override void ExposeData()

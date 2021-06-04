@@ -23,7 +23,7 @@ namespace Vehicles
 				nameof(Notify_RepairedVehicle)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenSpawn), name: nameof(GenSpawn.Spawn), new Type[] { typeof(Thing), typeof(IntVec3), typeof(Map), typeof(Rot4), typeof(WipeMode), typeof(bool) }),
 				prefix: new HarmonyMethod(typeof(Construction),
-				nameof(SpawnVehicleGodMode)));
+				nameof(RegisterThingSpawned)));
 			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(DesignationCategoryDef), nameof(DesignationCategoryDef.ResolvedAllowedDesignators)),
 				postfix: new HarmonyMethod(typeof(Construction),
 				nameof(RemoveDisabledVehicles)));
@@ -96,7 +96,7 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Catch All for vehicles spawned in. Handles GodMode placing of vehicle buildings and corrects immovable spawn locations
+		/// Catch All for vehicle related Things spawned in. Handles GodMode placing of vehicle buildings, corrects immovable spawn locations, and registers air defenses
 		/// </summary>
 		/// <param name="newThing"></param>
 		/// <param name="loc"></param>
@@ -106,7 +106,7 @@ namespace Vehicles
 		/// <param name="wipeMode"></param>
 		/// <param name="respawningAfterLoad"></param>
 		/// <returns></returns>
-		public static bool SpawnVehicleGodMode(Thing newThing, ref IntVec3 loc, Map map, Rot4 rot, Thing __result, WipeMode wipeMode, bool respawningAfterLoad)
+		public static bool RegisterThingSpawned(Thing newThing, ref IntVec3 loc, Map map, Rot4 rot, Thing __result, WipeMode wipeMode, bool respawningAfterLoad)
 		{
 			if (newThing.def is VehicleBuildDef def)
 			{
@@ -155,88 +155,102 @@ namespace Vehicles
 			}
 			else if (newThing is Pawn pawn && !pawn.Dead)
 			{
-				var positionManager = map.GetCachedMapComponent<VehiclePositionManager>();
-				if (positionManager.PositionClaimed(loc))
+				try
 				{
-					VehiclePawn inPlaceVehicle = positionManager.ClaimedBy(loc);
-					CellRect occupiedRect = inPlaceVehicle.OccupiedRect().ExpandedBy(1);
-					Rand.PushState();
-					for (int i = 0; i < 3; i++)
+					var positionManager = map.GetCachedMapComponent<VehiclePositionManager>();
+					if (positionManager.PositionClaimed(loc))
 					{
-						IntVec3 newLoc = occupiedRect.EdgeCells.Where(c => GenGrid.InBounds(c, map) && GenGrid.Standable(c, map)).RandomElementWithFallback(inPlaceVehicle.Position);
-						if (occupiedRect.EdgeCells.Contains(newLoc))
+						VehiclePawn inPlaceVehicle = positionManager.ClaimedBy(loc);
+						CellRect occupiedRect = inPlaceVehicle.OccupiedRect().ExpandedBy(1);
+						Rand.PushState();
+						for (int i = 0; i < 3; i++)
 						{
-							loc = newLoc;
-							break;
+							IntVec3 newLoc = occupiedRect.EdgeCells.Where(c => GenGrid.InBounds(c, map) && GenGrid.Standable(c, map)).RandomElementWithFallback(inPlaceVehicle.Position);
+							if (occupiedRect.EdgeCells.Contains(newLoc))
+							{
+								loc = newLoc;
+								break;
+							}
+							occupiedRect = occupiedRect.ExpandedBy(1);
 						}
-						occupiedRect = occupiedRect.ExpandedBy(1);
+						Rand.PopState();
 					}
-					Rand.PopState();
+				}
+				catch (Exception ex)
+				{
+					Log.Error($"Pawn {newThing.Label} could not be readjusted for spawn location. Exception={ex.Message}");
 				}
 			}
 			else
 			{
-				var positionManager = map.GetCachedMapComponent<VehiclePositionManager>();
-				if (positionManager.PositionClaimed(loc))
+				try
 				{
-					VehiclePawn inPlaceVehicle = positionManager.ClaimedBy(loc);
-					CellRect occupiedRect = inPlaceVehicle.OccupiedRect().ExpandedBy(1);
-					for (int i = 0; i < 3; i++)
+					var positionManager = map.GetCachedMapComponent<VehiclePositionManager>();
+					if (positionManager.PositionClaimed(loc))
 					{
-						IntVec3 newLoc = IntVec3.Invalid;
-						//foreach (IntVec3 cell in occupiedRect.EdgeCells.Where(c => GenGrid.InBounds(c, map)))
-						//{
-						//	Thing thing2 = thing;
-						//	bool flag = false;
-						//	if (thing.stackCount > thing.def.stackLimit)
-						//	{
-						//		thing = thing.SplitOff(thing.def.stackLimit);
-						//		flag = true;
-						//	}
-						//	if (thing.def.stackLimit > 1)
-						//	{
-						//		List<Thing> thingList = loc.GetThingList(map);
-						//		int i = 0;
-						//		while (i < thingList.Count)
-						//		{
-						//			Thing thing3 = thingList[i];
-						//			if (thing3.CanStackWith(thing))
-						//			{
-						//				int stackCount = thing.stackCount;
-						//				if (thing3.TryAbsorbStack(thing, true))
-						//				{
-						//					resultingThing = thing3;
-						//					if (placedAction != null)
-						//					{
-						//						placedAction(thing3, stackCount);
-						//					}
-						//					return !flag;
-						//				}
-						//				resultingThing = null;
-						//				if (placedAction != null && stackCount != thing.stackCount)
-						//				{
-						//					placedAction(thing3, stackCount - thing.stackCount);
-						//				}
-						//				if (thing2 != thing)
-						//				{
-						//					thing2.TryAbsorbStack(thing, false);
-						//				}
-						//				return false;
-						//			}
-						//			else
-						//			{
-						//				i++;
-						//			}
-						//		}
-						//	}
-						//}
-						//if (newLoc.IsValid)
-						//{
-						//	loc = newLoc;
-						//	break;
-						//}
-						occupiedRect = occupiedRect.ExpandedBy(1);
+						VehiclePawn inPlaceVehicle = positionManager.ClaimedBy(loc);
+						CellRect occupiedRect = inPlaceVehicle.OccupiedRect().ExpandedBy(1);
+						for (int i = 0; i < 3; i++)
+						{
+							IntVec3 newLoc = IntVec3.Invalid;
+							//foreach (IntVec3 cell in occupiedRect.EdgeCells.Where(c => GenGrid.InBounds(c, map)))
+							//{
+							//	Thing thing2 = thing;
+							//	bool flag = false;
+							//	if (thing.stackCount > thing.def.stackLimit)
+							//	{
+							//		thing = thing.SplitOff(thing.def.stackLimit);
+							//		flag = true;
+							//	}
+							//	if (thing.def.stackLimit > 1)
+							//	{
+							//		List<Thing> thingList = loc.GetThingList(map);
+							//		int i = 0;
+							//		while (i < thingList.Count)
+							//		{
+							//			Thing thing3 = thingList[i];
+							//			if (thing3.CanStackWith(thing))
+							//			{
+							//				int stackCount = thing.stackCount;
+							//				if (thing3.TryAbsorbStack(thing, true))
+							//				{
+							//					resultingThing = thing3;
+							//					if (placedAction != null)
+							//					{
+							//						placedAction(thing3, stackCount);
+							//					}
+							//					return !flag;
+							//				}
+							//				resultingThing = null;
+							//				if (placedAction != null && stackCount != thing.stackCount)
+							//				{
+							//					placedAction(thing3, stackCount - thing.stackCount);
+							//				}
+							//				if (thing2 != thing)
+							//				{
+							//					thing2.TryAbsorbStack(thing, false);
+							//				}
+							//				return false;
+							//			}
+							//			else
+							//			{
+							//				i++;
+							//			}
+							//		}
+							//	}
+							//}
+							//if (newLoc.IsValid)
+							//{
+							//	loc = newLoc;
+							//	break;
+							//}
+							occupiedRect = occupiedRect.ExpandedBy(1);
+						}
 					}
+				}
+				catch (Exception ex)
+				{
+					Log.Error($"Thing {newThing.Label} could not be readjusted for spawn location. Exception={ex.Message}");
 				}
 			}
 			return true;

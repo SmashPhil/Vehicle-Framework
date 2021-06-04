@@ -32,8 +32,8 @@ namespace Vehicles
 		/// <summary>
 		/// Fields related to recoil
 		/// </summary>
-		public float recoil = 0f;
-		public float vehicleRecoil = 0f;
+		public RecoilProperties recoil;
+		public RecoilProperties vehicleRecoil;
 
 		/// <summary>
 		/// All fields related to gizmo or cannon related textures
@@ -129,24 +129,6 @@ namespace Vehicles
 			{
 				yield return "Setting <field>ticksBetweenBursts</field> with a lower tick count than <field>ticksBetweenShots</field> will produce odd shooting behavior. Please set to either the same amount (fully automatic) or greater than.".ConvertRichText();
 			}
-		}
-
-		public class AnimationProperties
-		{
-			/* Customizable but not required */
-			public int cycles = 1;
-			public float extraRotation;
-			public float rotationRate;
-			public float scale = 1;
-			public Color color = Color.white;
-
-			/* MoteThrown exclusive */
-			public float speedThrown;
-			public float angleThrown;
-
-			/* Required */
-			public ThingDef moteDef;
-			public AnimationWrapperType animationType;
 		}
 	}
 }

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Linq;
 using UnityEngine;
 using HarmonyLib;
@@ -26,6 +28,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(DamageWorker), "ExplosionDamageThing"),
 				postfix: new HarmonyMethod(typeof(Projectiles),
 				nameof(ExplosionDamageVehicle)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Thing), nameof(Thing.Destroy)),
+				prefix: new HarmonyMethod(typeof(Projectiles),
+				nameof(ProjectileMapToWorld)));
 		}
 
 		public static void StartingTicksFromTurret(Projectile __instance, ref float __result, Vector3 ___origin, Vector3 ___destination)
@@ -71,7 +76,8 @@ namespace Vehicles
 					bool flag2 = false;
 					for (int i = 0; i < thingList.Count; i++)
 					{
-						if (thingList[i] != thing && thingList[i].def.fillPercent >= comp.hitflags.minFillPercent && thingList[i].def.Altitude >= thing.def.Altitude)
+						if (thingList[i] != thing && ((comp.hitflags != null && thingList[i].def.fillPercent >= comp.hitflags.minFillPercent) ||
+							(comp.hitflags is null && thingList[i].def.Fillage == FillCategory.Full))&& thingList[i].def.Altitude >= thing.def.Altitude)
 						{
 							flag2 = true;
 							break;
@@ -104,7 +110,7 @@ namespace Vehicles
 							__result = true;
 							return false;
 						}
-						if (comp.hitflags.hitThroughPawns && !pawn.Dead && !pawn.Downed)
+						if (comp.hitflags != null && comp.hitflags.hitThroughPawns && !pawn.Dead && !pawn.Downed)
 						{
 							thing.TakeDamage(new DamageInfo(DamageDefOf.Blunt, comp.speed * 2, 0, -1, __instance));
 						}
@@ -116,12 +122,12 @@ namespace Vehicles
 					}
 				}
 				bool flewPast = false;
-				if (flewPast || comp.hitflags.minFillPercent > 0)
+				if (flewPast || (comp.hitflags != null && comp.hitflags.minFillPercent > 0))
 				{
-					__result = thing.def.fillPercent >= comp.hitflags.minFillPercent;
+					__result = thing.def.fillPercent >= comp.hitflags?.minFillPercent;
 					return false;
 				}
-				__result = thing == __instance.intendedTarget && thing.def.fillPercent >= comp.hitflags.minFillPercent;;
+				__result = thing == __instance.intendedTarget && thing.def.fillPercent >= comp.hitflags?.minFillPercent;;
 				return false;
 			}
 			return true;
@@ -146,6 +152,14 @@ namespace Vehicles
 					explosion.weapon, DamageInfo.SourceCategory.ThingOrUnknown, explosion.intendedTarget);
 				vehicle.statHandler.TakeDamage(dinfo, cell, true);
 				vehicle.statHandler.explosionsAffectingVehicle.Add(explosion);
+			}
+		}
+
+		public static void ProjectileMapToWorld(Thing __instance, DestroyMode mode = DestroyMode.Vanish)
+		{
+			if (__instance is Projectile projectile && projectile.GetComp<CompProjectileExitMap>() is CompProjectileExitMap exitMap)
+			{
+				exitMap.LeaveMap();
 			}
 		}
 	}

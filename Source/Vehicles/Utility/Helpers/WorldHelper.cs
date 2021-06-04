@@ -193,5 +193,16 @@ namespace Vehicles
 			}
 			return tileID;
 		}
+
+		/// <summary>
+		/// Get Heading between 2 points on World
+		/// </summary>
+		/// <param name="map"></param>
+		/// <param name="target"></param>
+		public static float TryFindHeading(Vector3 source, Vector3 target)
+		{
+			float heading = Find.WorldGrid.GetHeadingFromTo(source, target);
+			return heading;
+		}
 	}
 }

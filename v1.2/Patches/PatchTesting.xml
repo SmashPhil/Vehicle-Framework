@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+	<Operation Class="SmashTools.PatchOperationTrace">
+		<run>false</run>
+		<xpath>Defs/WorldObjectDef[worldObjectClass = "Settlement"]/comps</xpath>
+	</Operation>
+	
+	<Operation Class="SmashTools.PatchOperationTestOperation">
+		<run>false</run>
+		<xpath>Defs/WorldObjectDef[worldObjectClass = "Settlement"]/comps</xpath>
+		<Operation Class="PatchOperationConditional">
+			<xpath>Defs/WorldObjectDef[worldObjectClass = "Settlement"]/comps</xpath>
+			<match Class="PatchOperationInsert">
+				<xpath>Defs/WorldObjectDef[worldObjectClass = "Settlement"]/comps</xpath>
+				<value>
+					<li Class="Vehicles.WorldObjectCompProperties_SettlementAirDefense">
+						<defenseRadius>5</defenseRadius>
+						<defenseBuildings>0~4</defenseBuildings>
+					</li>
+				</value>
+			</match>
+			<nomatch Class="PatchOperationAdd">
+				<xpath>Defs/WorldObjectDef[worldObjectClass = "Settlement"]</xpath>
+				<value>
+					<comps>
+						<li Class="Vehicles.WorldObjectCompProperties_SettlementAirDefense">
+							<defenseRadius>5</defenseRadius>
+							<defenseBuildings>0~4</defenseBuildings>
+						</li>
+					</comps>
+				</value>
+			</nomatch>
+		</Operation>
+	</Operation>
+</Patch>

@@ -10,4 +10,7 @@
 	<AutoTargeting>AutoTarget: {0}</AutoTargeting>
 	<LandVehicleHere>Land Vehicle Here</LandVehicleHere>
 	<AttackAndTargetLanding>Attack {0}: Choose Landing</AttackAndTargetLanding>
+	
+	<VehicleStrafeRun>Strafe Run</VehicleStrafeRun>
+	<AerialReconSite>Recon</AerialReconSite>
 </LanguageData>

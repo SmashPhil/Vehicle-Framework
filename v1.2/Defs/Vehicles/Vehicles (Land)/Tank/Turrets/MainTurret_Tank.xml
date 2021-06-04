@@ -13,8 +13,16 @@
 		<warmUpTimer>2</warmUpTimer>
 		<magazineCapacity>1</magazineCapacity>
 		
-		<recoil>0.75</recoil>
-		<vehicleRecoil>0.35</vehicleRecoil>
+		<recoil>
+			<distanceTotal>0.7</distanceTotal>
+			<distancePerTick>0.15</distancePerTick>
+			<speedMultiplierPostRecoil>0.35</speedMultiplierPostRecoil>
+		</recoil>
+		<vehicleRecoil>
+			<distanceTotal>0.35</distanceTotal>
+			<distancePerTick>0.15</distancePerTick>
+			<speedMultiplierPostRecoil>0.75</speedMultiplierPostRecoil>
+		</vehicleRecoil>
 		
 		<attachProjectileFlag>Tank</attachProjectileFlag>
 		
@@ -32,8 +40,8 @@
 		<rotationSpeed>0.5</rotationSpeed>
 
 		<graphicData>
-			<texPath>Vehicles/Land/Tank/TankCannonTop</texPath>
-			<graphicClass>Vehicles.Graphic_CannonAnimate</graphicClass>
+			<texPath>Vehicles/Land/Tank/TankCannonTop/TankCannonTop_a</texPath>
+			<graphicClass>Vehicles.Graphic_Cannon</graphicClass>
 			<shaderType>CutoutComplexPattern</shaderType>
 			<drawSize>(7, 7)</drawSize>
 		</graphicData>

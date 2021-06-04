@@ -10,7 +10,7 @@ namespace Vehicles
 		protected bool reverse = false;
 
 		public int cyclesLeft;
-		public VehicleTurret turret;
+		public float angle;
 		public AnimationWrapperType animationType;
 
 		public new Graphic_Animate Graphic => base.Graphic as Graphic_Animate;
@@ -19,7 +19,7 @@ namespace Vehicles
 		public override void Draw()
 		{
 			exactPosition.y = def.altitudeLayer.AltitudeFor();
-			Graphic.DrawWorkerAnimated(this, frame, (turret.TurretRotation - 90).ClampAndWrap(0, 360));
+			Graphic.DrawWorkerAnimated(this, frame, angle.ClampAndWrap(0, 360));
 		}
 
 		public override void Tick()
@@ -97,7 +97,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref reverse, "reverse");
 
 			Scribe_Values.Look(ref cyclesLeft, "cyclesLeft");
-			Scribe_References.Look(ref turret, "turret");
+			Scribe_Values.Look(ref angle, "angle");
 			Scribe_Values.Look(ref animationType, "animationType");
 		}
 	}

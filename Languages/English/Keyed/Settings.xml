@@ -30,6 +30,8 @@
 	<FullVehiclePathing>Full Vehicle Pathing</FullVehiclePathing>
 	<FullVehiclePathingTooltip>Use the entire hitbox of the vehicle to determine pathing constraints (prevents Vehicles from going through smaller passages than hitbox size).</FullVehiclePathingTooltip>
 	<VehicleRocketsBurnRadius>Rockets Burn</VehicleRocketsBurnRadius>
+	<VehicleDynamicDrawing>Dynamic Drawing</VehicleDynamicDrawing>
+	<VehicleDynamicDrawingTooltip>Certain vehicle related world objects will be dynamically drawn to orient them in the direction of travel and render them with their parent's texture if given one.</VehicleDynamicDrawingTooltip>
 	<VehicleDeployOnLanding>Deploy on Landing</VehicleDeployOnLanding>
 	<VehicleDeployOnLandingTooltip>When an aerial vehicle lands all pawns onboard will be unloaded.</VehicleDeployOnLandingTooltip>
 	<VehicleDelayOnLanding>Delay on Landing</VehicleDelayOnLanding>

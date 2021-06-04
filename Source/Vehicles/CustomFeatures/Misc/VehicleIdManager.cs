@@ -10,15 +10,17 @@ namespace Vehicles
 {
 	public class VehicleIdManager : GameComponent
 	{
-		public int nextUpgradeId;
+		private int nextUpgradeId;
 
-		public int nextCannonId;
+		private int nextCannonId;
 
-		public int nextVehicleHandlerId;
+		private int nextVehicleHandlerId;
 
-		public int nextReservationId;
+		private int nextReservationId;
 
-		public int nextRequestCollectionId;
+		private int nextRequestCollectionId;
+
+		private int nextAirDefenseId;
 
 		public VehicleIdManager(Game game)
 		{
@@ -52,6 +54,11 @@ namespace Vehicles
 			return GetNextId(ref nextVehicleHandlerId);
 		}
 
+		public int GetNextAirDefenseId()
+		{
+			return GetNextId(ref nextAirDefenseId);
+		}
+
 		private int GetNextId(ref int id)
 		{
 			id++;
@@ -66,6 +73,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref nextVehicleHandlerId, "nextVehicleHandlerId", 0);
 			Scribe_Values.Look(ref nextReservationId, "nextReservationId", 0);
 			Scribe_Values.Look(ref nextRequestCollectionId, "nextRequestCollectionId", 0);
+			Scribe_Values.Look(ref nextAirDefenseId, "nextAirDefenseId", 0);
 		}
 	}
 }

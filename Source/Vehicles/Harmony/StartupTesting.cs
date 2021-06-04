@@ -11,7 +11,7 @@ namespace Vehicles
 {
 	public static class StartupTesting
 	{
-		[UnitTest(Active = true)]
+		[UnitTest(Active = false)]
 		private static void UnitTestStrafing()
 		{
 			Map sourceMap = null;

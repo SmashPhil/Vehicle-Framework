@@ -6,6 +6,7 @@ using Verse;
 using Verse.AI;
 using Verse.Sound;
 using RimWorld;
+using RimWorld.Planet;
 using SmashTools;
 
 namespace Vehicles
@@ -718,54 +719,138 @@ namespace Vehicles
 		/// <param name="rot"></param>
 		public static Mesh NewPlaneMesh(Vector2 size, int rot)
 		{
-			Vector3[] array = new Vector3[4];
-			Vector2[] array2 = new Vector2[4];
-			int[] array3 = new int[6];
-			array[0] = new Vector3(-0.5f * size.x, 0f, -0.5f * size.y);
-			array[1] = new Vector3(-0.5f * size.x, 0f, 0.5f * size.y);
-			array[2] = new Vector3(0.5f * size.x, 0f, 0.5f * size.y);
-			array[3] = new Vector3(0.5f * size.x, 0f, -0.5f * size.y);
+			Vector3[] vertices = new Vector3[4];
+			Vector2[] uv = new Vector2[4];
+			int[] triangles = new int[6];
+			vertices[0] = new Vector3(-0.5f * size.x, 0f, -0.5f * size.y);
+			vertices[1] = new Vector3(-0.5f * size.x, 0f, 0.5f * size.y);
+			vertices[2] = new Vector3(0.5f * size.x, 0f, 0.5f * size.y);
+			vertices[3] = new Vector3(0.5f * size.x, 0f, -0.5f * size.y);
 			switch (rot)
 			{
 				case 1:
-					array2[0] = new Vector2(1f, 0f);
-					array2[1] = new Vector2(0f, 0f);
-					array2[2] = new Vector2(0f, 1f);
-					array2[3] = new Vector2(1f, 1f);
+					uv[0] = new Vector2(1f, 0f);
+					uv[1] = new Vector2(0f, 0f);
+					uv[2] = new Vector2(0f, 1f);
+					uv[3] = new Vector2(1f, 1f);
 					break;
 				case 2:
-					array2[0] = new Vector2(1f, 1f);
-					array2[1] = new Vector2(1f, 0f);
-					array2[2] = new Vector2(0f, 0f);
-					array2[3] = new Vector2(0f, 1f);
+					uv[0] = new Vector2(1f, 1f);
+					uv[1] = new Vector2(1f, 0f);
+					uv[2] = new Vector2(0f, 0f);
+					uv[3] = new Vector2(0f, 1f);
 					break;
 				case 3:
-					array2[0] = new Vector2(0f, 1f);
-					array2[1] = new Vector2(1f, 1f);
-					array2[2] = new Vector2(1f, 0f);
-					array2[3] = new Vector2(0f, 0f);
+					uv[0] = new Vector2(0f, 1f);
+					uv[1] = new Vector2(1f, 1f);
+					uv[2] = new Vector2(1f, 0f);
+					uv[3] = new Vector2(0f, 0f);
 					break;
 				default:
-					array2[0] = new Vector2(0f, 0f);
-					array2[1] = new Vector2(0f, 1f);
-					array2[2] = new Vector2(1f, 1f);
-					array2[3] = new Vector2(1f, 0f);
+					uv[0] = new Vector2(0f, 0f);
+					uv[1] = new Vector2(0f, 1f);
+					uv[2] = new Vector2(1f, 1f);
+					uv[3] = new Vector2(1f, 0f);
 					break;
 			}
-			array3[0] = 0;
-			array3[1] = 1;
-			array3[2] = 2;
-			array3[3] = 0;
-			array3[4] = 2;
-			array3[5] = 3;
+			triangles[0] = 0;
+			triangles[1] = 1;
+			triangles[2] = 2;
+			triangles[3] = 0;
+			triangles[4] = 2;
+			triangles[5] = 3;
 			Mesh mesh = new Mesh();
 			mesh.name = "NewPlaneMesh()";
-			mesh.vertices = array;
-			mesh.uv = array2;
-			mesh.SetTriangles(array3, 0);
+			mesh.vertices = vertices;
+			mesh.uv = uv;
+			mesh.SetTriangles(triangles, 0);
 			mesh.RecalculateNormals();
 			mesh.RecalculateBounds();
 			return mesh;
+		}
+
+		/// <summary>
+		/// Create mesh with varying length of vertices rather than being restricted to 4
+		/// </summary>
+		/// <param name="size"></param>
+		public static Mesh NewTriangleMesh(Vector2 size)
+		{
+			Vector3[] vertices = new Vector3[3];
+			Vector2[] uv = new Vector2[3];
+			int[] triangles = new int[3];
+
+			vertices[0] = new Vector3(-0.5f * size.x, 0, 1 * size.y);
+			vertices[1] = new Vector3(0.5f * size.x, 0, 1 * size.y);
+			vertices[2] = new Vector3(0, 0, 0);
+
+			uv[0] = vertices[0];
+			uv[1] = vertices[1];
+			uv[2] = vertices[2];
+
+			triangles[0] = 0;
+			triangles[1] = 1;
+			triangles[2] = 2;
+
+			Mesh mesh = new Mesh();
+			mesh.name = "TriangleMesh";
+			mesh.vertices = vertices;
+			mesh.uv = uv;
+			mesh.SetTriangles(triangles, 0);
+			mesh.RecalculateNormals();
+			mesh.RecalculateBounds();
+			return mesh;
+		}
+		
+		/// <summary>
+		/// Create triangle mesh with a cone like arc for an FOV effect
+		/// </summary>
+		/// <remarks><paramref name="arc"/> should be within [0:360]</remarks>
+		/// <param name="size"></param>
+		/// <param name="arc"></param>
+		public static Mesh NewConeMesh(float distance, int arc)
+		{
+			float currentAngle = arc / -2f;
+			Vector3[] vertices = new Vector3[arc + 2];
+			Vector2[] uv = new Vector2[vertices.Length];
+			int[] triangles = new int[arc * 3];
+
+			vertices[0] = Vector3.zero;
+			uv[0] = Vector3.zero;
+			int t = 0;
+			for (int i = 1; i <= arc; i++)
+			{
+				vertices[i] = vertices[0].PointFromAngle(distance, currentAngle);
+				uv[i] = vertices[i];
+				currentAngle += 1;
+
+				triangles[t] = 0;
+				triangles[t + 1] = i;
+				triangles[t + 2] = i + 1;
+				t += 3;
+			}
+
+			Mesh mesh = new Mesh();
+			mesh.name = "ConeMesh";
+			mesh.vertices = vertices;
+			mesh.uv = uv;
+			mesh.SetTriangles(triangles, 0);
+			mesh.RecalculateNormals();
+			mesh.RecalculateBounds();
+			return mesh;
+		}
+
+		/// <summary>
+		/// Reroute Draw method call to dynamic object's Draw method
+		/// </summary>
+		/// <param name="worldObject"></param>
+		public static bool RenderDynamicWorldObjects(WorldObject worldObject)
+		{
+			if (VehicleMod.settings.main.dynamicWorldDrawing && worldObject is DynamicDrawnWorldObject dynamicObject)
+			{
+				dynamicObject.Draw();
+				return true;
+			}
+			return false;
 		}
 	}
 }

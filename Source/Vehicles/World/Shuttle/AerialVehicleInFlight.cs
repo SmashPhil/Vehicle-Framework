@@ -12,7 +12,7 @@ using Vehicles.AI;
 
 namespace Vehicles
 {
-	public class AerialVehicleInFlight : WorldObject
+	public class AerialVehicleInFlight : DynamicDrawnWorldObject
 	{
 		public const float ExpandingResize = 35f;
 		public const float TransitionTakeoff = 0.025f;
@@ -48,8 +48,6 @@ namespace Vehicles
 
 		protected internal FlightPath flightPath;
 
-		private HashSet<Settlement> settlementsFlyOver = new HashSet<Settlement>();
-
 		internal float transition;
 		public float elevation;
 		public bool recon;
@@ -82,14 +80,11 @@ namespace Vehicles
 				{
 					return Material;
 				}
-				if(vehicleMat is null)
+				vehicleMat ??= new Material(vehicle.VehicleGraphic.MatAt(Rot8.North, vehicle.pattern))
 				{
-					vehicleMat = new Material(vehicle.VehicleGraphic.MatAt(Rot8.North, vehicle.pattern))
-					{
-						shader = ShaderDatabase.WorldOverlayTransparentLit,
-						renderQueue = WorldMaterials.WorldObjectRenderQueue
-					};
-				}
+					shader = ShaderDatabase.WorldOverlayTransparentLit,
+					renderQueue = WorldMaterials.WorldObjectRenderQueue
+				};
 				return vehicleMat;
 			}
 		}
@@ -102,13 +97,10 @@ namespace Vehicles
 				{
 					return Material;
 				}
-				if (vehicleMatLit is null)
+				vehicleMatLit ??= new Material(vehicle.VehicleGraphic.MatAt(Rot8.North, vehicle.pattern))
 				{
-					vehicleMatLit = new Material(vehicle.VehicleGraphic.MatAt(Rot8.North, vehicle.pattern))
-					{
-						renderQueue = WorldMaterials.WorldObjectRenderQueue
-					};
-				}
+					renderQueue = WorldMaterials.WorldObjectRenderQueue
+				};
 				return vehicleMatLit;
 			}
 		}
@@ -285,6 +277,14 @@ namespace Vehicles
 							Destroy();
 						}
 					};
+					yield return new Command_Action
+					{
+						defaultLabel = "Debug: Initiate Crash Event",
+						action = delegate ()
+						{
+							InitiateCrashEvent(null);
+						}
+					};
 				}
 			}
 		}
@@ -307,14 +307,6 @@ namespace Vehicles
 			base.Tick();
 			if (vehicle.CompVehicleLauncher.inFlight)
 			{
-				foreach (Settlement settlement in settlementsFlyOver)
-				{
-					float dist = SettlementPositionTracker.airDefenseCache[settlement].radarDistance;
-					if (Ext_Math.SphericalDistance(DrawPos, settlement.DrawPos) <= dist)
-					{
-						SettlementPositionTracker.airDefenseCache[settlement].PushTarget(this);
-					}
-				}
 				MoveForward();
 				SpendFuel();
 				ChangeElevation();
@@ -341,7 +333,7 @@ namespace Vehicles
 			}
 		}
 
-		public void TakeDamage(DamageInfo damageInfo, Settlement firedFrom)
+		public void TakeDamage(DamageInfo damageInfo, WorldObject firedFrom)
 		{
 			vehicle.TakeDamage(damageInfo);
 			if (shouldCrash)
@@ -350,14 +342,14 @@ namespace Vehicles
 			}
 		}
 
-		public void InitiateCrashEvent(Settlement settlement)
+		public void InitiateCrashEvent(WorldObject worldObject)
 		{
 			vehicle.CompVehicleLauncher.inFlight = false;
 			Tile = WorldHelper.GetNearestTile(DrawPos);
 			ResetPosition(Find.WorldGrid.GetTileCenter(Tile));
 			flightPath.ResetPath();
-			settlementsFlyOver.ForEach(s => SettlementPositionTracker.airDefenseCache[s].RemoveTarget(this));
-			(VehicleIncidentDefOf.BlackHawkDown.Worker as IncidentWorker_ShuttleDowned).TryExecuteEvent(this, settlement);
+			AirDefensePositionTracker.DeregisterAerialVehicle(this);
+			(VehicleIncidentDefOf.BlackHawkDown.Worker as IncidentWorker_ShuttleDowned).TryExecuteEvent(this, worldObject);
 		}
 
 		public virtual void MoveForward()
@@ -390,6 +382,7 @@ namespace Vehicles
 							}
 						}
 						vehicle.CompVehicleLauncher.inFlight = false;
+						AirDefensePositionTracker.DeregisterAerialVehicle(this);
 					}
 					else if (flightPath.Path.Count <= 1 && vehicle.CompVehicleLauncher.Props.circleToLand)
 					{
@@ -413,7 +406,8 @@ namespace Vehicles
 			}
 			this.flightPath.NewPath(flightPath);
 			InitializeNextFlight(origin);
-			settlementsFlyOver = SettlementPositionTracker.CheckNearbySettlements(this, speedPctPerTick)?.ToHashSet() ?? new HashSet<Settlement>();
+			var flyoverDefenses = AirDefensePositionTracker.CheckNearbyObjects(this, speedPctPerTick)?.ToHashSet() ?? new HashSet<AirDefense>();
+			AirDefensePositionTracker.RegisterAerialVehicle(this, flyoverDefenses);
 		}
 
 		private void ResetPosition(Vector3 position)

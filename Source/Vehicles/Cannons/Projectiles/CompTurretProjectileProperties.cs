@@ -12,12 +12,9 @@ namespace Vehicles
 		public ProjectileHitFlags? hitflag;
 		public CustomHitFlags hitflags;
 
-		public CompTurretProjectileProperties(VehiclePawn vehicle, VehicleTurretDef turretDef, Projectile projectile)
+		public CompTurretProjectileProperties(ThingWithComps parent)
 		{
-			parent = vehicle;
-			speed = turretDef.projectileSpeed > 0 ? turretDef.projectileSpeed : projectile.def.projectile.speed;
-			hitflag = turretDef.hitFlags;
-			hitflags = turretDef.attachProjectileFlag;
+			this.parent = parent;
 		}
 
 		public override void PostExposeData()

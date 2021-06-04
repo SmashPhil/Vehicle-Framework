@@ -36,6 +36,7 @@ namespace Vehicles
 		/* Aerial */
 		public bool burnRadiusOnRockets = true;
 		public bool deployOnLanding = true;
+		public bool dynamicWorldDrawing = true;
 		public float delayDeployOnLanding = 0;
 
 		/* Upgrades */
@@ -71,6 +72,7 @@ namespace Vehicles
 			/* Aerial */
 			burnRadiusOnRockets = true;
 			deployOnLanding = true;
+			dynamicWorldDrawing = true;
 			delayDeployOnLanding = 0;
 
 			/* Upgrades */
@@ -100,6 +102,7 @@ namespace Vehicles
 
 			Scribe_Values.Look(ref burnRadiusOnRockets, "burnRadiusOnRockets", true);
 			Scribe_Values.Look(ref deployOnLanding, "deployOnLanding", true);
+			Scribe_Values.Look(ref dynamicWorldDrawing, "dynamicWorldDrawing", true);
 			Scribe_Values.Look(ref delayDeployOnLanding, "delayDeployOnLanding", 0);
 
 			Scribe_Values.Look(ref drawUpgradeInformationScreen, "drawUpgradeInformationScreen", true);
@@ -172,6 +175,7 @@ namespace Vehicles
 				listingStandard.Gap(16);
 				listingStandard.SliderLabeled("VehicleDelayOnLanding".Translate(), "VehicleDelayOnLandingTooltip".Translate(), "seconds", ref delayDeployOnLanding, 0, 3, 1, 1);
 			}
+			listingStandard.CheckboxLabeled("VehicleDynamicDrawing".Translate(), ref dynamicWorldDrawing, "VehicleDynamicDrawingTooltip".Translate());
 			listingStandard.Gap();
 
 			listingStandard.Header("Upgrades", ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);

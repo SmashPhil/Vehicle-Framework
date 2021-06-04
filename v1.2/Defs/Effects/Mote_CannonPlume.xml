@@ -7,7 +7,7 @@
 		<graphicData>
 			<texPath>Animations/CannonPlume</texPath>
 			<graphicClass>Vehicles.Graphic_Animate</graphicClass>
-			<drawSize>(3,3)</drawSize>
+			<drawSize>(5,5)</drawSize>
 		</graphicData>
 		<altitudeLayer>MoteOverhead</altitudeLayer>
 		<mote>

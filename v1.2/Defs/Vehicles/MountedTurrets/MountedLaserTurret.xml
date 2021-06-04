@@ -18,9 +18,6 @@
 			<dissipationRate>0.5</dissipationRate>
 		</cooldown>
 		
-		<recoil>0</recoil>
-		<vehicleRecoil>0</vehicleRecoil>
-		
 		<attachProjectileFlag>Tank</attachProjectileFlag>
 		<gizmoIconTexPath></gizmoIconTexPath>
 		
