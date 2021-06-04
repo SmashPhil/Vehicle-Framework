@@ -4,16 +4,16 @@ using Verse;
 
 namespace Vehicles
 {
-	public delegate bool WaterRegionEntryPredicate(WaterRegion from, WaterRegion to);
+	public delegate bool WaterRegionEntryPredicate(VehicleRegion from, VehicleRegion to);
 
-	public delegate bool WaterRegionProcessor(WaterRegion reg);
+	public delegate bool WaterRegionProcessor(VehicleRegion reg);
 	public static class WaterRegionTraverser
 	{
 		private static Queue<BFSWorker> freeWorkers = new Queue<BFSWorker>();
 
 		public static int NumWorkers = 8;
 
-		public static readonly WaterRegionEntryPredicate PassAll = (WaterRegion from, WaterRegion to) => true;
+		public static readonly WaterRegionEntryPredicate PassAll = (VehicleRegion from, VehicleRegion to) => true;
 
 		static WaterRegionTraverser()
 		{
@@ -26,14 +26,14 @@ namespace Vehicles
 
 		public static bool WithinRegions(this IntVec3 A, IntVec3 B, Map map, int regionLookCount, TraverseParms traverseParams, RegionType traversableRegionTypes = RegionType.Set_Passable)
 		{
-			WaterRegion region = WaterGridsUtility.GetRegion(A, map, traversableRegionTypes);
+			VehicleRegion region = VehicleGridsUtility.GetRegion(A, map, traversableRegionTypes);
 			if (region is null) return false;
-			WaterRegion regB = WaterGridsUtility.GetRegion(B, map, traversableRegionTypes);
+			VehicleRegion regB = VehicleGridsUtility.GetRegion(B, map, traversableRegionTypes);
 			if (regB is null) return false;
 			if (region == regB) return true;
-			bool entryCondition(WaterRegion from, WaterRegion r) => r.Allows(traverseParams, false);
+			bool entryCondition(VehicleRegion from, VehicleRegion r) => r.Allows(traverseParams, false);
 			bool found = false;
-			bool regionProcessor(WaterRegion r)
+			bool regionProcessor(VehicleRegion r)
 			{
 				if (r == regB)
 				{
@@ -46,16 +46,16 @@ namespace Vehicles
 			return found;
 		}
 
-		public static void MarkRegionsBFS(WaterRegion root, WaterRegionEntryPredicate entryCondition, int maxRegions, int inRadiusMark, RegionType traversableRegionTypes = RegionType.Set_Passable)
+		public static void MarkRegionsBFS(VehicleRegion root, WaterRegionEntryPredicate entryCondition, int maxRegions, int inRadiusMark, RegionType traversableRegionTypes = RegionType.Set_Passable)
 		{
-			BreadthFirstTraverse(root, entryCondition, delegate (WaterRegion r)
+			BreadthFirstTraverse(root, entryCondition, delegate (VehicleRegion r)
 			{
 				r.mark = inRadiusMark;
 				return false;
 			}, maxRegions, traversableRegionTypes);
 		}
 
-		public static bool ShouldCountRegion(WaterRegion r)
+		public static bool ShouldCountRegion(VehicleRegion r)
 		{
 			return !r.IsDoorway;
 		}
@@ -71,12 +71,12 @@ namespace Vehicles
 
 		public static void BreadthFirstTraverse(IntVec3 start, Map map, WaterRegionEntryPredicate entryCondition, WaterRegionProcessor regionProcessor, int maxRegions = 999999, RegionType traversableRegionTypes = RegionType.Set_Passable)
 		{
-			WaterRegion region = WaterGridsUtility.GetRegion(start, map, traversableRegionTypes);
+			VehicleRegion region = VehicleGridsUtility.GetRegion(start, map, traversableRegionTypes);
 			if (region is null) return;
 			BreadthFirstTraverse(region, entryCondition, regionProcessor, maxRegions, traversableRegionTypes);
 		}
 
-		public static void BreadthFirstTraverse(WaterRegion root, WaterRegionEntryPredicate entryCondition, WaterRegionProcessor regionProcessor, int maxRegions = 999999, RegionType traversableRegionTypes = RegionType.Set_Passable)
+		public static void BreadthFirstTraverse(VehicleRegion root, WaterRegionEntryPredicate entryCondition, WaterRegionProcessor regionProcessor, int maxRegions = 999999, RegionType traversableRegionTypes = RegionType.Set_Passable)
 		{
 			if (freeWorkers.Count == 0)
 			{
@@ -104,12 +104,12 @@ namespace Vehicles
 			}
 		}
 
-		public static WaterRoom FloodAndSetRooms(WaterRegion root, Map map, WaterRoom existingRoom)
+		public static VehicleRoom FloodAndSetRooms(VehicleRegion root, Map map, VehicleRoom existingRoom)
 		{
-			WaterRoom floodingRoom;
+			VehicleRoom floodingRoom;
 			if (existingRoom == null)
 			{
-				floodingRoom = WaterRoom.MakeNew(map);
+				floodingRoom = VehicleRoom.MakeNew(map);
 			}
 			else
 			{
@@ -120,8 +120,8 @@ namespace Vehicles
 			{
 				return floodingRoom;
 			}
-			bool entryCondition(WaterRegion from, WaterRegion r) => r.type == root.type && r.Room != floodingRoom;
-			bool regionProcessor(WaterRegion r)
+			bool entryCondition(VehicleRegion from, VehicleRegion r) => r.type == root.type && r.Room != floodingRoom;
+			bool regionProcessor(VehicleRegion r)
 			{
 				r.Room = floodingRoom;
 				return false;
@@ -130,15 +130,15 @@ namespace Vehicles
 			return floodingRoom;
 		}
 
-		public static void FloodAndSetNewRegionIndex(WaterRegion root, int newRegionGroupIndex)
+		public static void FloodAndSetNewRegionIndex(VehicleRegion root, int newRegionGroupIndex)
 		{
 			root.newRegionGroupIndex = newRegionGroupIndex;
 			if (!root.type.AllowsMultipleRegionsPerRoom())
 			{
 				return;
 			}
-			bool entryCondition(WaterRegion from, WaterRegion r) => r.type == root.type && r.newRegionGroupIndex < 0;
-			bool regionProcessor(WaterRegion r)
+			bool entryCondition(VehicleRegion from, VehicleRegion r) => r.type == root.type && r.newRegionGroupIndex < 0;
+			bool regionProcessor(VehicleRegion r)
 			{
 				r.newRegionGroupIndex = newRegionGroupIndex;
 				return false;
@@ -148,7 +148,7 @@ namespace Vehicles
 
 		private class BFSWorker
 		{
-			private Queue<WaterRegion> open = new Queue<WaterRegion>();
+			private Queue<VehicleRegion> open = new Queue<VehicleRegion>();
 
 			private int numRegionsProcessed;
 			private uint closedIndex = 1u;
@@ -164,7 +164,7 @@ namespace Vehicles
 				open.Clear();
 			}
 
-			private void QueueNewOpenRegion(WaterRegion region)
+			private void QueueNewOpenRegion(VehicleRegion region)
 			{
 				if (region.closedIndex[closedArrayPos] == closedIndex)
 				{
@@ -176,7 +176,7 @@ namespace Vehicles
 
 			private void FinalizeSearch() { }
 
-			public void BreadthFirstTraverseWork(WaterRegion root, WaterRegionEntryPredicate entryCondition, WaterRegionProcessor regionProcessor, int maxRegions, RegionType traversableRegionTypes)
+			public void BreadthFirstTraverseWork(VehicleRegion root, WaterRegionEntryPredicate entryCondition, WaterRegionProcessor regionProcessor, int maxRegions, RegionType traversableRegionTypes)
 			{
 				if ((root.type & traversableRegionTypes) == RegionType.None) return;
 				closedIndex += 1u;
@@ -185,7 +185,7 @@ namespace Vehicles
 				QueueNewOpenRegion(root);
 				while (open.Count > 0)
 				{
-					WaterRegion region = open.Dequeue();
+					VehicleRegion region = open.Dequeue();
 					if(VehicleHarmony.debug)
 					{
 						region.Debug_Notify_Traversed();
@@ -206,10 +206,10 @@ namespace Vehicles
 					}
 					for(int i = 0; i < region.links.Count; i++)
 					{
-						WaterRegionLink regionLink = region.links[i];
+						VehicleRegionLink regionLink = region.links[i];
 						for(int j = 0; j < 2; j++)
 						{
-							WaterRegion region2 = regionLink.regions[j];
+							VehicleRegion region2 = regionLink.regions[j];
 							if(!(region2 is null) && region2.closedIndex[closedArrayPos] != closedIndex && (region2.type & traversableRegionTypes) != RegionType.None &&
 								(entryCondition is null || entryCondition(region, region2)))
 							{

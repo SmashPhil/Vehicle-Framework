@@ -5,13 +5,13 @@ using Vehicles.AI;
 
 namespace Vehicles
 {
-	public class WaterRegionLink
+	public class VehicleRegionLink
 	{
-		public WaterRegion[] regions = new WaterRegion[2];
+		public VehicleRegion[] regions = new VehicleRegion[2];
 
 		public EdgeSpan span;
 
-		public WaterRegion RegionA
+		public VehicleRegion RegionA
 		{
 			get
 			{
@@ -23,7 +23,7 @@ namespace Vehicles
 			}
 		}
 
-		public WaterRegion RegionB
+		public VehicleRegion RegionB
 		{
 			get
 			{
@@ -35,7 +35,7 @@ namespace Vehicles
 			}
 		}
 
-		public void Register(WaterRegion reg)
+		public void Register(VehicleRegion reg)
 		{
 			if (regions[0] == reg || regions[1] == reg)
 			{
@@ -66,14 +66,14 @@ namespace Vehicles
 			}
 		}
 
-		public void Deregister(WaterRegion reg)
+		public void Deregister(VehicleRegion reg)
 		{
 			if(RegionA == reg)
 			{
 				RegionA = null;
 				if(RegionB is null)
 				{
-					reg.Map.GetCachedMapComponent<WaterMap>().WaterRegionLinkDatabase.Notify_LinkHasNoRegions(this);
+					reg.Map.GetCachedMapComponent<VehicleMapping>().VehicleRegionLinkDatabase.Notify_LinkHasNoRegions(this);
 				}
 			}
 			else if (RegionB == reg)
@@ -81,12 +81,12 @@ namespace Vehicles
 				RegionB = null;
 				if(RegionA is null)
 				{
-					reg.Map.GetCachedMapComponent<WaterMap>().WaterRegionLinkDatabase.Notify_LinkHasNoRegions(this);
+					reg.Map.GetCachedMapComponent<VehicleMapping>().VehicleRegionLinkDatabase.Notify_LinkHasNoRegions(this);
 				}
 			}
 		}
 
-		public WaterRegion GetOtherRegion(WaterRegion reg)
+		public VehicleRegion GetOtherRegion(VehicleRegion reg)
 		{
 			return (reg != RegionA) ? RegionA : RegionB;
 		}

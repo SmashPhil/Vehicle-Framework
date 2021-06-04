@@ -8,7 +8,7 @@ namespace Vehicles
 {
 	public static class WaterRegionListersUpdater
 	{
-		private static readonly List<WaterRegion> tmpRegions = new List<WaterRegion>();
+		private static readonly List<VehicleRegion> tmpRegions = new List<VehicleRegion>();
 
 		public static void DeregisterInRegions(Thing thing, Map map)
 		{
@@ -56,7 +56,7 @@ namespace Vehicles
 			}
 		}
 
-		public static void GetTouchableRegions(Thing thing, Map map, List<WaterRegion> outRegions, bool allowAdjacenttEvenIfCantTouch = false)
+		public static void GetTouchableRegions(Thing thing, Map map, List<VehicleRegion> outRegions, bool allowAdjacenttEvenIfCantTouch = false)
 		{
 			outRegions.Clear();
 			CellRect cellRect = thing.OccupiedRect();
@@ -69,14 +69,14 @@ namespace Vehicles
 			{
 				if (intVec.InBoundsShip(map))
 				{
-					WaterRegion validRegionAt_NoRebuild = map.GetCachedMapComponent<WaterMap>().WaterRegionGrid.GetValidRegionAt_NoRebuild(intVec);
+					VehicleRegion validRegionAt_NoRebuild = map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid.GetValidRegionAt_NoRebuild(intVec);
 					if (!(validRegionAt_NoRebuild is null) && validRegionAt_NoRebuild.type.Passable() && !outRegions.Contains(validRegionAt_NoRebuild))
 					{
 						if (cellRect.Contains(intVec))
 						{
 							outRegions.Add(validRegionAt_NoRebuild);
 						}
-						else if (allowAdjacenttEvenIfCantTouch || ShipReachabilityImmediate.CanReachImmediateShip(intVec, thing, map, PathEndMode.Touch, null))
+						else if (allowAdjacenttEvenIfCantTouch || VehicleReachabilityImmediate.CanReachImmediateShip(intVec, thing, map, PathEndMode.Touch, null))
 						{
 							outRegions.Add(validRegionAt_NoRebuild);
 						}

@@ -144,7 +144,7 @@ namespace Vehicles.AI
 
 			if(pawn.IsBoat())
 			{
-				dest = (LocalTargetInfo)GenPathShip.ResolvePathMode(pawn, dest.ToTargetInfo(pawn.Map), ref peMode);
+				dest = (LocalTargetInfo)GenPathVehicles.ResolvePathMode(pawn, dest.ToTargetInfo(pawn.Map), ref peMode);
 				if (dest.HasThing && dest.ThingDestroyed)
 				{
 					Log.Error(pawn + " pathing to destroyed thing " + dest.Thing);
@@ -152,7 +152,7 @@ namespace Vehicles.AI
 					return;
 				}
 				//Add Building and Position Recoverable extras
-				if (!GenGridShips.Walkable(pawn.Position, pawn.Map.GetCachedMapComponent<WaterMap>()))
+				if (!GenGridVehicles.Walkable(pawn.Position, pawn.Map.GetCachedMapComponent<VehicleMapping>()))
 				{
 					return;
 				}
@@ -160,14 +160,14 @@ namespace Vehicles.AI
 				{
 					return;
 				}
-				if (!pawn.Map.GetCachedMapComponent<WaterMap>().ShipReachability?.CanReachShip(pawn.Position, dest, peMode, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false)) ?? false)
+				if (!pawn.Map.GetCachedMapComponent<VehicleMapping>().VehicleReachability?.CanReachShip(pawn.Position, dest, peMode, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false)) ?? false)
 				{
 					PatherFailed();
 					return;
 				}
 				this.peMode = peMode;
 				destination = dest;
-				if ((GenGridShips.Walkable(nextCell, pawn.Map.GetCachedMapComponent<WaterMap>()) || WillCollideWithPawnOnNextPathCell()) || nextCellCostLeft == nextCellCostTotal)
+				if ((GenGridVehicles.Walkable(nextCell, pawn.Map.GetCachedMapComponent<VehicleMapping>()) || WillCollideWithPawnOnNextPathCell()) || nextCellCostLeft == nextCellCostTotal)
 				{
 					ResetToCurrentPosition();
 				}
@@ -178,7 +178,7 @@ namespace Vehicles.AI
 				{
 					pawn.Map.pawnDestinationReservationManager.ObsoleteAllClaimedBy(pawn);
 				}
-				if (ShipReachabilityImmediate.CanReachImmediateShip(pawn, dest, peMode))
+				if (VehicleReachabilityImmediate.CanReachImmediateShip(pawn, dest, peMode))
 				{
 					PatherArrived();
 					return;
@@ -548,7 +548,7 @@ namespace Vehicles.AI
 				{
 					return;
 				}
-				if(ShipReachabilityImmediate.CanReachImmediateShip(pawn, destination, peMode))
+				if(VehicleReachabilityImmediate.CanReachImmediateShip(pawn, destination, peMode))
 				{
 					PatherArrived();
 				}
@@ -653,7 +653,7 @@ namespace Vehicles.AI
 			{
 				num = pawn.TicksPerMoveDiagonal;
 			}
-			num += pawn.IsBoat() ? pawn.Map.GetCachedMapComponent<WaterMap>().ShipPathGrid.CalculatedCostAt(c) : pawn.Map.pathGrid.CalculatedCostAt(c, false, pawn.Position);
+			num += pawn.IsBoat() ? pawn.Map.GetCachedMapComponent<VehicleMapping>().VehiclePathGrid.CalculatedCostAt(c) : pawn.Map.pathGrid.CalculatedCostAt(c, false, pawn.Position);
 			Building edifice = c.GetEdifice(pawn.Map);
 			if (edifice != null)
 			{
@@ -799,7 +799,7 @@ namespace Vehicles.AI
 		internal Tuple<PawnPath, bool> GenerateNewPath(CancellationToken token)
 		{
 			lastPathedTargetPosition = destination.Cell;
-			var pathResult = pawn.Map.GetCachedMapComponent<WaterMap>().ShipPathFinder.FindVehiclePath(pawn.Position, destination, pawn, token, peMode);
+			var pathResult = pawn.Map.GetCachedMapComponent<VehicleMapping>().ShipPathFinder.FindVehiclePath(pawn.Position, destination, pawn, token, peMode);
 			if ( (!pathResult.path.Found && !pathResult.found) && Prefs.DevMode && VehicleMod.settings.debug.debugDrawVehiclePathCosts) 
 				Log.Warning("Path Not Found");
 			return new Tuple<PawnPath, bool>(pathResult.path, pathResult.found);
@@ -808,7 +808,7 @@ namespace Vehicles.AI
 		internal Tuple<PawnPath, bool> GenerateReversePath(CancellationToken token)
 		{
 			lastPathedTargetPosition = destination.Cell;
-			var pathResult = pawn.Map.GetCachedMapComponent<WaterMap>().ThreadedPathFinderConstrained.FindVehiclePath(destination.Cell, new LocalTargetInfo(pawn.Position), pawn, token, peMode);
+			var pathResult = pawn.Map.GetCachedMapComponent<VehicleMapping>().ThreadedPathFinderConstrained.FindVehiclePath(destination.Cell, new LocalTargetInfo(pawn.Position), pawn, token, peMode);
 			return new Tuple<PawnPath, bool>(PawnPath.NotFound, pathResult.found);
 		}
 
@@ -829,7 +829,7 @@ namespace Vehicles.AI
 				{
 					return true;
 				}
-				if ((pawn.Position.InHorDistOf(curPath.LastNode, 15f) || pawn.Position.InHorDistOf(destination.Cell, 15f)) && !ShipReachabilityImmediate.CanReachImmediateShip(
+				if ((pawn.Position.InHorDistOf(curPath.LastNode, 15f) || pawn.Position.InHorDistOf(destination.Cell, 15f)) && !VehicleReachabilityImmediate.CanReachImmediateShip(
 					curPath.LastNode, destination, pawn.Map, peMode, pawn))
 				{
 					return true;
@@ -875,7 +875,7 @@ namespace Vehicles.AI
 				while (num3 < MaxCheckAheadNodes && num3 < curPath.NodesLeftCount)
 				{
 					intVec = curPath.Peek(num3);
-					if (!GenGridShips.Walkable(intVec, pawn.Map.GetCachedMapComponent<WaterMap>()))
+					if (!GenGridVehicles.Walkable(intVec, pawn.Map.GetCachedMapComponent<VehicleMapping>()))
 					{
 						return true;
 					}

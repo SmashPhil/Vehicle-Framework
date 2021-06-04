@@ -88,7 +88,7 @@ namespace Vehicles
 		public static void RecalculateShipPathCostUnderThing(Thing t, Map ___map)
 		{
 			if (t is null) return;
-			___map.GetCachedMapComponent<WaterMap>()?.ShipPathGrid?.RecalculatePerceivedPathCostUnderThing(t);
+			___map.GetCachedMapComponent<VehicleMapping>()?.VehiclePathGrid?.RecalculatePerceivedPathCostUnderThing(t);
 		}
 
 		/// <summary>

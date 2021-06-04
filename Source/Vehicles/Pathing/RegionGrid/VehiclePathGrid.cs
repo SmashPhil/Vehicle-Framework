@@ -5,7 +5,7 @@ using SmashTools;
 
 namespace Vehicles.AI
 {
-	public sealed class ShipPathGrid
+	public sealed class VehiclePathGrid
 	{
 		public const int ImpassableCost = 10000;
 		public const int WaterCost = 2;
@@ -13,7 +13,7 @@ namespace Vehicles.AI
 		private readonly Map map;
 		public int[] pathGrid;
 
-		public ShipPathGrid(Map map)
+		public VehiclePathGrid(Map map)
 		{
 			this.map = map;
 			ResetPathGrid();
@@ -79,8 +79,8 @@ namespace Vehicles.AI
 			pathGrid[map.cellIndices.CellToIndex(c)] = CalculatedCostAt(c);
 			if (WalkableFast(c) != flag)
 			{
-				map.GetCachedMapComponent<WaterMap>().ShipReachability.ClearCache();
-				map.GetCachedMapComponent<WaterMap>().WaterRegionDirtyer.Notify_WalkabilityChanged(c);
+				map.GetCachedMapComponent<VehicleMapping>().VehicleReachability.ClearCache();
+				map.GetCachedMapComponent<VehicleMapping>().VehicleRegionDirtyer.Notify_WalkabilityChanged(c);
 			}
 		}
 

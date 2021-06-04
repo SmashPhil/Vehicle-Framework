@@ -5,17 +5,17 @@ using Vehicles.AI;
 
 namespace Vehicles
 {
-	public class WaterRegionMaker
+	public class VehicleRegionMaker
 	{
 		private Map map;
 
-		private WaterRegion newReg;
+		private VehicleRegion newReg;
 
 		private List<IntVec3> newRegCells = new List<IntVec3>();
 
 		private bool working;
 
-		private WaterRegionGrid regionGrid;
+		private VehicleRegionGrid regionGrid;
 
 		private static HashSet<Thing> tmpProcessedThings = new HashSet<Thing>();
 
@@ -27,12 +27,12 @@ namespace Vehicles
 			new HashSet<IntVec3>()
 		};
 
-		public WaterRegionMaker(Map map)
+		public VehicleRegionMaker(Map map)
 		{
 			this.map = map;
 		}
 
-		public WaterRegion TryGenerateRegionFrom(IntVec3 root)
+		public VehicleRegion TryGenerateRegionFrom(IntVec3 root)
 		{
 			RegionType expectedRegionType = WaterRegionTypeUtility.GetExpectedRegionType(root, this.map);
 			if (expectedRegionType == RegionType.None)
@@ -45,11 +45,11 @@ namespace Vehicles
 				return null;
 			}
 			working = true;
-			WaterRegion result;
+			VehicleRegion result;
 			try
 			{
-				regionGrid = map.GetCachedMapComponent<WaterMap>().WaterRegionGrid;
-				newReg = WaterRegion.MakeNewUnfilled(root, map);
+				regionGrid = map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid;
+				newReg = VehicleRegion.MakeNewUnfilled(root, map);
 				newReg.type = expectedRegionType;
 				//Add portal type?
 				FloodFillAndAddCells(root);
@@ -64,7 +64,7 @@ namespace Vehicles
 			return result;
 		}
 
-		public void TryRegenerateRegionFrom(WaterRegion region, IntVec3 root)
+		public void TryRegenerateRegionFrom(VehicleRegion region, IntVec3 root)
 		{
 			if (working)
 			{
@@ -207,7 +207,7 @@ namespace Vehicles
 				root = c - rot.FacingCell * num2;
 			}
 			EdgeSpan span = new EdgeSpan(root, dir, length);
-			WaterRegionLink regionLink = map.GetCachedMapComponent<WaterMap>().WaterRegionLinkDatabase.LinkFrom(span);
+			VehicleRegionLink regionLink = map.GetCachedMapComponent<VehicleMapping>().VehicleRegionLinkDatabase.LinkFrom(span);
 			regionLink.Register(newReg);
 			newReg.links.Add(regionLink);
 		}

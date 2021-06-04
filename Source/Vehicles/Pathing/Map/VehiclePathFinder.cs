@@ -30,13 +30,13 @@ namespace Vehicles.AI
 		private ushort statusOpenValue = 1;
 		private ushort statusClosedValue = 2;
 
-		private RegionCostCalculatorWrapperShips regionCostCalculatorSea;
-		private RegionCostCalculatorWrapper regionCostCalculatorLand;
+		private VehicleRegionCostCalculatorWrapper regionCostCalculatorSea;
+		private RegionCostCalculatorWrapper regionCostCalculatorLand; //REDO - Remove 
 
 		private int mapSizeX;
 		private int mapSizeZ;
 
-		private ShipPathGrid shipPathGrid;
+		private VehiclePathGrid VehiclePathGrid;
 		private PathGrid pathGrid;
 
 		private Building[] edificeGrid;
@@ -108,7 +108,7 @@ namespace Vehicles.AI
 			mapSizeZ = map.Size.z;
 			calcGrid = new VehiclePathFinderNodeFast[mapSizeX * mapSizeZ];
 			openList = new FastPriorityQueue<CostNode>(new CostNodeComparer());
-			regionCostCalculatorSea = new RegionCostCalculatorWrapperShips(map);
+			regionCostCalculatorSea = new VehicleRegionCostCalculatorWrapper(map);
 			regionCostCalculatorLand = new RegionCostCalculatorWrapper(map);
 			postCalculatedCells = new Dictionary<IntVec3, int>();
 			this.report = report;
@@ -133,7 +133,7 @@ namespace Vehicles.AI
 			}
 
 			postCalculatedCells.Clear();
-			WaterMap WaterMap = map.GetCachedMapComponent<WaterMap>();
+			VehicleMapping VehicleMapping = map.GetCachedMapComponent<VehicleMapping>();
 			if(DebugSettings.pathThroughWalls)
 			{
 				traverseParms.mode = TraverseMode.PassAllDestroyableThings;
@@ -198,7 +198,7 @@ namespace Vehicles.AI
 			{
 				if (waterPathing)
 				{
-					if(!WaterMap.ShipReachability.CanReachShip(start, dest, peMode, traverseParms))
+					if(!VehicleMapping.VehicleReachability.CanReachShip(start, dest, peMode, traverseParms))
 					{
 						return (PawnPath.NotFound, false);
 					}
@@ -213,7 +213,7 @@ namespace Vehicles.AI
 			}
 			cellIndices = map.cellIndices;
 
-			shipPathGrid = WaterMap.ShipPathGrid;
+			VehiclePathGrid = VehicleMapping.VehiclePathGrid;
 			pathGrid = map.pathGrid;
 			this.edificeGrid = map.edificeGrid.InnerArray;
 			blueprintGrid = map.blueprintGrid.InnerArray;
@@ -227,7 +227,7 @@ namespace Vehicles.AI
 			bool flag3 = !flag;
 			CellRect cellRect = CalculateDestinationRect(dest, peMode);
 			bool flag4 = cellRect.Width == 1 && cellRect.Height == 1;
-			int[] boatsArray = shipPathGrid.pathGrid;
+			int[] boatsArray = VehiclePathGrid.pathGrid;
 			int[] vehicleArray = pathGrid.pathGrid;
 			TerrainDef[] topGrid = map.terrainGrid.topGrid;
 			EdificeGrid edificeGrid = map.edificeGrid;
@@ -236,7 +236,7 @@ namespace Vehicles.AI
 			Area allowedArea = GetAllowedArea(pawn);
 			bool flag5 = !(pawn is null) && PawnUtility.ShouldCollideWithPawns(pawn);
 			bool flag6 = true && DebugViewSettings.drawPaths;
-			bool flag7 = !flag && !(WaterGridsUtility.GetRegion(start, map, RegionType.Set_Passable) is null) && flag2;
+			bool flag7 = !flag && !(VehicleGridsUtility.GetRegion(start, map, RegionType.Set_Passable) is null) && flag2;
 			bool flag8 = !flag || !flag3;
 			bool flag9 = false;
 			bool flag10 = !(pawn is null) && pawn.Drafted;
@@ -784,7 +784,7 @@ namespace Vehicles.AI
 
 		public static bool BlocksDiagonalMovement(Map map, int index)
 		{
-			return map.GetCachedMapComponent<WaterMap>().ShipPathGrid.WalkableFast(index) || map.edificeGrid[index] is Building_Door;
+			return map.GetCachedMapComponent<VehicleMapping>().VehiclePathGrid.WalkableFast(index) || map.edificeGrid[index] is Building_Door;
 		}
 
 		public static bool BlocksDiagonalMovement(VehiclePawn vehicle, int x, int z)

@@ -87,7 +87,7 @@ namespace Vehicles
 		/// <param name="___map"></param>
 		public static void DebugDrawWaterRegion(Map ___map)
 		{
-			___map.GetCachedMapComponent<WaterMap>()?.WaterRegionGrid?.DebugDraw();
+			___map.GetCachedMapComponent<VehicleMapping>()?.VehicleRegionGrid?.DebugDraw();
 		}
 
 		/// <summary>

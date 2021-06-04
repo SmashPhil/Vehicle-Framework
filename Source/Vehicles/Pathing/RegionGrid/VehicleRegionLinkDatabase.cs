@@ -4,23 +4,23 @@ using Verse;
 
 namespace Vehicles
 {
-	public class WaterRegionLinkDatabase
+	public class VehicleRegionLinkDatabase
 	{
-		private Dictionary<ulong, WaterRegionLink> links = new Dictionary<ulong, WaterRegionLink>();
+		private Dictionary<ulong, VehicleRegionLink> links = new Dictionary<ulong, VehicleRegionLink>();
 
-		public WaterRegionLink LinkFrom(EdgeSpan span)
+		public VehicleRegionLink LinkFrom(EdgeSpan span)
 		{
 			ulong key = span.UniqueHashCode();
-			if(!links.TryGetValue(key, out WaterRegionLink regionLink))
+			if(!links.TryGetValue(key, out VehicleRegionLink regionLink))
 			{
-				regionLink = new WaterRegionLink();
+				regionLink = new VehicleRegionLink();
 				regionLink.span = span;
 				links.Add(key, regionLink);
 			}
 			return regionLink;
 		}
 
-		public void Notify_LinkHasNoRegions(WaterRegionLink link)
+		public void Notify_LinkHasNoRegions(VehicleRegionLink link)
 		{
 			links.Remove(link.UniqueHashCode());
 		}
@@ -28,7 +28,7 @@ namespace Vehicles
 		public void DebugLog()
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			foreach(KeyValuePair<ulong, WaterRegionLink> keyValuePair in links)
+			foreach(KeyValuePair<ulong, VehicleRegionLink> keyValuePair in links)
 			{
 				stringBuilder.AppendLine(keyValuePair.ToString());
 			}

@@ -76,8 +76,8 @@ namespace Vehicles
 					return false;
 				}
 
-				Debug.Message("-> " + clickCell + " | " + vehicle.Map.terrainGrid.TerrainAt(clickCell).LabelCap + " | " + vehicle.Map.GetCachedMapComponent<WaterMap>().ShipPathGrid.CalculatedCostAt(clickCell) +
-						" - " + vehicle.Map.GetCachedMapComponent<WaterMap>().ShipPathGrid.pathGrid[vehicle.Map.cellIndices.CellToIndex(clickCell)]);
+				Debug.Message("-> " + clickCell + " | " + vehicle.Map.terrainGrid.TerrainAt(clickCell).LabelCap + " | " + vehicle.Map.GetCachedMapComponent<VehicleMapping>().VehiclePathGrid.CalculatedCostAt(clickCell) +
+						" - " + vehicle.Map.GetCachedMapComponent<VehicleMapping>().VehiclePathGrid.pathGrid[vehicle.Map.cellIndices.CellToIndex(clickCell)]);
 
 				if (vehicle.IsBoat() && !VehicleMod.settings.debug.debugDisableWaterPathing)
 				{
@@ -87,7 +87,7 @@ namespace Vehicles
 					while (i < num)
 					{
 						curLoc = GenRadial.RadialPattern[i] + clickCell;
-						if (GenGridShips.Standable(curLoc, vehicle.Map))
+						if (GenGridVehicles.Standable(curLoc, vehicle.Map))
 						{
 							if (curLoc == vehicle.Position || vehicle.beached)
 							{

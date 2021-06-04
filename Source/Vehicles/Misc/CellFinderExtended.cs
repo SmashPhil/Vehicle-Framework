@@ -136,7 +136,7 @@ namespace Vehicles
 			return pawn.ClampToMap(CellFinder.RandomEdgeCell(dir, map), map, padding);
 		}
 
-		public static bool TryFindRandomReachableCellNear(IntVec3 root, Map map, float radius, TraverseParms traverseParms, Predicate<IntVec3> validator, Predicate<WaterRegion> regionValidator, out IntVec3 result,
+		public static bool TryFindRandomReachableCellNear(IntVec3 root, Map map, float radius, TraverseParms traverseParms, Predicate<IntVec3> validator, Predicate<VehicleRegion> regionValidator, out IntVec3 result,
 			int maxRegions = 999999)
 		{
 			if(map is null)
@@ -145,18 +145,18 @@ namespace Vehicles
 				result = IntVec3.Invalid;
 				return false;
 			}
-			WaterRegion region = WaterGridsUtility.GetRegion(root, map, RegionType.Set_Passable);
+			VehicleRegion region = VehicleGridsUtility.GetRegion(root, map, RegionType.Set_Passable);
 			if(region is null)
 			{
 				result = IntVec3.Invalid;
 				return false;
 			}
 			Rot4 dir = Find.World.CoastDirectionAt(map.Tile).IsValid ? Find.World.CoastDirectionAt(map.Tile) : !Find.WorldGrid[map.Tile].Rivers.NullOrEmpty() ? Ext_Map.RiverDirection(map) : Rot4.Invalid;
-			result = RandomEdgeCell(dir, map, (IntVec3 c) => GenGridShips.Standable(c, map) && !c.Fogged(map), 0);
+			result = RandomEdgeCell(dir, map, (IntVec3 c) => GenGridVehicles.Standable(c, map) && !c.Fogged(map), 0);
 			return true;
 		}
 
-		public static bool TryFindRandomCellInWaterRegion(this WaterRegion reg, Predicate<IntVec3> validator, out IntVec3 result)
+		public static bool TryFindRandomCellInWaterRegion(this VehicleRegion reg, Predicate<IntVec3> validator, out IntVec3 result)
 		{
 			for(int i = 0; i < 10; i++)
 			{

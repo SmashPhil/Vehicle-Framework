@@ -5,15 +5,15 @@ using Vehicles.AI;
 
 namespace Vehicles
 {
-	public class WaterRegionDirtyer
+	public class VehicleRegionDirtyer
 	{
 		private readonly Map map;
 
 		private readonly List<IntVec3> dirtyCells = new List<IntVec3>();
 
-		private readonly List<WaterRegion> regionsToDirty = new List<WaterRegion>();
+		private readonly List<VehicleRegion> regionsToDirty = new List<VehicleRegion>();
 
-		public WaterRegionDirtyer(Map map)
+		public VehicleRegionDirtyer(Map map)
 		{
 			this.map = map;
 		}
@@ -42,7 +42,7 @@ namespace Vehicles
 				IntVec3 c2 = c + GenAdj.AdjacentCellsAndInside[i];
 				if (c2.InBounds(map))
 				{
-					WaterRegion regionAt_NoRebuild_InvalidAllowed = map.GetCachedMapComponent<WaterMap>().WaterRegionGrid.GetRegionAt_NoRebuild_InvalidAllowed(c2);
+					VehicleRegion regionAt_NoRebuild_InvalidAllowed = map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid.GetRegionAt_NoRebuild_InvalidAllowed(c2);
 					if (regionAt_NoRebuild_InvalidAllowed != null && regionAt_NoRebuild_InvalidAllowed.valid)
 					{
 						regionsToDirty.Add(regionAt_NoRebuild_InvalidAllowed);
@@ -65,7 +65,7 @@ namespace Vehicles
 			regionsToDirty.Clear();
 			foreach (IntVec3 c in b.OccupiedRect().ExpandedBy(1).ClipInsideMap(b.Map))
 			{
-				WaterRegion validRegionAt_NoRebuild = b.Map.GetCachedMapComponent<WaterMap>().WaterRegionGrid.GetValidRegionAt_NoRebuild(c);
+				VehicleRegion validRegionAt_NoRebuild = b.Map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid.GetValidRegionAt_NoRebuild(c);
 				if (validRegionAt_NoRebuild != null)
 				{
 					regionsToDirty.Add(validRegionAt_NoRebuild);
@@ -81,7 +81,7 @@ namespace Vehicles
 		internal void Notify_ThingAffectingRegionsDespawned(Thing b)
 		{
 			regionsToDirty.Clear();
-			WaterRegion validRegionAt_NoRebuild = map.GetCachedMapComponent<WaterMap>().WaterRegionGrid.GetValidRegionAt_NoRebuild(b.Position);
+			VehicleRegion validRegionAt_NoRebuild = map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid.GetValidRegionAt_NoRebuild(b.Position);
 			if (validRegionAt_NoRebuild != null)
 			{
 				regionsToDirty.Add(validRegionAt_NoRebuild);
@@ -90,7 +90,7 @@ namespace Vehicles
 			{
 				if (c.InBounds(map))
 				{
-					WaterRegion validRegionAt_NoRebuild2 = map.GetCachedMapComponent<WaterMap>().WaterRegionGrid.GetValidRegionAt_NoRebuild(c);
+					VehicleRegion validRegionAt_NoRebuild2 = map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid.GetValidRegionAt_NoRebuild(c);
 					if (validRegionAt_NoRebuild2 != null)
 					{
 						regionsToDirty.Add(validRegionAt_NoRebuild2);
@@ -127,7 +127,7 @@ namespace Vehicles
 			dirtyCells.Clear();
 		}
 
-		private void SetRegionDirty(WaterRegion reg, bool addCellsToDirtyCells = true)
+		private void SetRegionDirty(VehicleRegion reg, bool addCellsToDirtyCells = true)
 		{
 			if (!reg.valid)
 			{
@@ -160,7 +160,7 @@ namespace Vehicles
 			{
 				dirtyCells.Add(item);
 			}
-			foreach (WaterRegion reg in map.GetCachedMapComponent<WaterMap>().WaterRegionGrid.AllRegions_NoRebuild_InvalidAllowed)
+			foreach (VehicleRegion reg in map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid.AllRegions_NoRebuild_InvalidAllowed)
 			{
 				SetRegionDirty(reg, false);
 			}

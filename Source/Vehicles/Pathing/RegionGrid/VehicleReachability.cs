@@ -8,15 +8,15 @@ using SmashTools;
 
 namespace Vehicles.AI
 {
-	public class ShipReachability
+	public class VehicleReachability
 	{
 		private Map map;
 
-		private Queue<WaterRegion> openQueue = new Queue<WaterRegion>();
+		private Queue<VehicleRegion> openQueue = new Queue<VehicleRegion>();
 
-		private List<WaterRegion> startingRegions = new List<WaterRegion>();
+		private List<VehicleRegion> startingRegions = new List<VehicleRegion>();
 
-		private List<WaterRegion> destRegions = new List<WaterRegion>();
+		private List<VehicleRegion> destRegions = new List<VehicleRegion>();
 
 		private uint reachedIndex = 1u;
 
@@ -24,13 +24,13 @@ namespace Vehicles.AI
 
 		private bool working;
 
-		private ShipReachabilityCache cache = new ShipReachabilityCache();
+		private VehicleReachabilityCache cache = new VehicleReachabilityCache();
 
-		private ShipPathGrid pathGrid;
+		private VehiclePathGrid pathGrid;
 
-		private WaterRegionGrid regionGrid;
+		private VehicleRegionGrid regionGrid;
 
-		public ShipReachability(Map map)
+		public VehicleReachability(Map map)
 		{
 			this.map = map;
 		}
@@ -50,7 +50,7 @@ namespace Vehicles.AI
 			cache.ClearForHostile(hostileTo);
 		}
 
-		private void QueueNewOpenRegion(WaterRegion region)
+		private void QueueNewOpenRegion(VehicleRegion region)
 		{
 			if(region is null)
 			{
@@ -59,7 +59,7 @@ namespace Vehicles.AI
 			}
 			if(region.reachedIndex == reachedIndex)
 			{
-				Log.ErrorOnce("WaterRegion is already reached; you can't open it. WaterRegion: " + region.ToString(), 719991);
+				Log.ErrorOnce("VehicleRegion is already reached; you can't open it. VehicleRegion: " + region.ToString(), 719991);
 				return;
 			}
 			openQueue.Enqueue(region);
@@ -131,8 +131,8 @@ namespace Vehicles.AI
 			if((peMode == PathEndMode.OnCell || peMode == PathEndMode.Touch || peMode == PathEndMode.ClosestTouch) && traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater &&
 				traverseParms.mode != TraverseMode.PassAllDestroyableThingsNotWater)
 			{
-				WaterRoom room = WaterRegionAndRoomQuery.RoomAtFast(start, map, RegionType.Set_Passable);
-				if (!(room is null) && room == WaterRegionAndRoomQuery.RoomAtFast(dest.Cell, map, RegionType.Set_Passable))
+				VehicleRoom room = VehicleRegionAndRoomQuery.RoomAtFast(start, map, RegionType.Set_Passable);
+				if (!(room is null) && room == VehicleRegionAndRoomQuery.RoomAtFast(dest.Cell, map, RegionType.Set_Passable))
 					return true;
 			}
 			if(traverseParms.mode == TraverseMode.PassAllDestroyableThings)
@@ -144,18 +144,18 @@ namespace Vehicles.AI
 					return true;
 				}
 			}
-			dest = (LocalTargetInfo)GenPathShip.ResolvePathMode(traverseParms.pawn, dest.ToTargetInfo(map), ref peMode);
+			dest = (LocalTargetInfo)GenPathVehicles.ResolvePathMode(traverseParms.pawn, dest.ToTargetInfo(map), ref peMode);
 			working = true;
 			bool result;
 			try
 			{
-				pathGrid = map.GetCachedMapComponent<WaterMap>().ShipPathGrid;
-				regionGrid = map.GetCachedMapComponent<WaterMap>().WaterRegionGrid;
+				pathGrid = map.GetCachedMapComponent<VehicleMapping>().VehiclePathGrid;
+				regionGrid = map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid;
 				reachedIndex += 1u;
 				destRegions.Clear();
 				if(peMode == PathEndMode.OnCell)
 				{
-					WaterRegion region = WaterGridsUtility.GetRegion(dest.Cell, map, RegionType.Set_Passable);
+					VehicleRegion region = VehicleGridsUtility.GetRegion(dest.Cell, map, RegionType.Set_Passable);
 					if(!(region is null) && region.Allows(traverseParms, true))
 					{
 						destRegions.Add(region);
@@ -163,7 +163,7 @@ namespace Vehicles.AI
 				}
 				else if(peMode == PathEndMode.Touch)
 				{
-					TouchPathEndModeUtilityShips.AddAllowedAdjacentRegions(dest, traverseParms, map, destRegions);
+					TouchPathEndModeUtilityVehicles.AddAllowedAdjacentRegions(dest, traverseParms, map, destRegions);
 				}
 				if(destRegions.Count == 0 && traverseParms.mode != TraverseMode.PassAllDestroyableThings && traverseParms.mode !=
 					TraverseMode.PassAllDestroyableThingsNotWater)
@@ -228,7 +228,7 @@ namespace Vehicles.AI
 			startingRegions.Clear();
 			if(pathGrid.WalkableFast(start))
 			{
-				WaterRegion validRegionAt = regionGrid.GetValidRegionAt(start);
+				VehicleRegion validRegionAt = regionGrid.GetValidRegionAt(start);
 				QueueNewOpenRegion(validRegionAt);
 				startingRegions.Add(validRegionAt);
 			}
@@ -241,7 +241,7 @@ namespace Vehicles.AI
 					{
 						if(pathGrid.WalkableFast(c))
 						{
-							WaterRegion validRegionAt2 = regionGrid.GetValidRegionAt(c);
+							VehicleRegion validRegionAt2 = regionGrid.GetValidRegionAt(c);
 							if(!(validRegionAt2 is null) && validRegionAt2.reachedIndex != reachedIndex)
 							{
 								QueueNewOpenRegion(validRegionAt2);
@@ -286,19 +286,19 @@ namespace Vehicles.AI
 		{
 			while(openQueue.Count > 0)
 			{
-				WaterRegion region = openQueue.Dequeue();
-				foreach(WaterRegionLink regionLink in region.links)
+				VehicleRegion region = openQueue.Dequeue();
+				foreach(VehicleRegionLink regionLink in region.links)
 				{
 					for(int i = 0; i < 2; i++)
 					{
-						WaterRegion region2 = regionLink.regions[i];
+						VehicleRegion region2 = regionLink.regions[i];
 						if(!(region2 is null) && region2.reachedIndex != reachedIndex && region2.type.Passable())
 						{
 							if(region2.Allows(traverseParms, false))
 							{
 								if(destRegions.Contains(region2))
 								{
-									foreach(WaterRegion startRegion in startingRegions)
+									foreach(VehicleRegion startRegion in startingRegions)
 									{
 										cache.AddCachedResult(startRegion.Room, region2.Room, traverseParms, true);
 									}
@@ -310,9 +310,9 @@ namespace Vehicles.AI
 					}
 				}
 			}
-			foreach(WaterRegion startRegion in startingRegions)
+			foreach(VehicleRegion startRegion in startingRegions)
 			{
-				foreach(WaterRegion destRegion in destRegions)
+				foreach(VehicleRegion destRegion in destRegions)
 				{
 					cache.AddCachedResult(startRegion.Room, destRegion.Room, traverseParms, false);
 				}
@@ -323,8 +323,8 @@ namespace Vehicles.AI
 		private bool CheckCellBasedReachability(IntVec3 start, LocalTargetInfo dest, PathEndMode peMode, TraverseParms traverseParms)
 		{
 			IntVec3 foundCell = IntVec3.Invalid;
-			WaterRegion[] directionRegionGrid = regionGrid.DirectGrid;
-			ShipPathGrid pathGrid = map.GetCachedMapComponent<WaterMap>().ShipPathGrid;
+			VehicleRegion[] directionRegionGrid = regionGrid.DirectGrid;
+			VehiclePathGrid pathGrid = map.GetCachedMapComponent<VehicleMapping>().VehiclePathGrid;
 			CellIndices cellIndices = map.cellIndices;
 			map.floodFiller.FloodFill(start, delegate (IntVec3 c)
 			{
@@ -353,11 +353,11 @@ namespace Vehicles.AI
 						return false;
 					}
 				}
-				WaterRegion region = directionRegionGrid[num];
+				VehicleRegion region = directionRegionGrid[num];
 				return region is null || region.Allows(traverseParms, false);
 			}, delegate (IntVec3 c)
 			{
-				if (ShipReachabilityImmediate.CanReachImmediateShip(c, dest, map, peMode, traverseParms.pawn))
+				if (VehicleReachabilityImmediate.CanReachImmediateShip(c, dest, map, peMode, traverseParms.pawn))
 				{
 					foundCell = c;
 					return true;
@@ -369,10 +369,10 @@ namespace Vehicles.AI
 			{
 				if(CanUseCache(traverseParms.mode))
 				{
-					WaterRegion validRegionAt = regionGrid.GetValidRegionAt(foundCell);
+					VehicleRegion validRegionAt = regionGrid.GetValidRegionAt(foundCell);
 					if( !(validRegionAt is null) )
 					{
-						foreach(WaterRegion startRegion in startingRegions)
+						foreach(VehicleRegion startRegion in startingRegions)
 						{
 							cache.AddCachedResult(startRegion.Room, validRegionAt.Room, traverseParms, true);
 						}
@@ -382,9 +382,9 @@ namespace Vehicles.AI
 			}
 			if(CanUseCache(traverseParms.mode))
 			{
-				foreach(WaterRegion startRegion in startingRegions)
+				foreach(VehicleRegion startRegion in startingRegions)
 				{
-					foreach(WaterRegion destRegion in destRegions)
+					foreach(VehicleRegion destRegion in destRegions)
 					{
 						cache.AddCachedResult(startRegion.Room, destRegion.Room, traverseParms, false);
 					}
@@ -484,14 +484,14 @@ namespace Vehicles.AI
 					return false;
 				}
 			}
-			WaterRegion region = WaterGridsUtility.GetRegion(c, map, RegionType.Set_Passable);
+			VehicleRegion region = VehicleGridsUtility.GetRegion(c, map, RegionType.Set_Passable);
 			if (region is null)
 				return false;
 			if (region.Room.TouchesMapEdge)
 				return true;
-			bool entryCondition(WaterRegion from, WaterRegion r) => r.Allows(traverseParms, false);
+			bool entryCondition(VehicleRegion from, VehicleRegion r) => r.Allows(traverseParms, false);
 			bool foundReg = false;
-			bool regionProcessor(WaterRegion r)
+			bool regionProcessor(VehicleRegion r)
 			{
 				if (r.Room.TouchesMapEdge)
 				{
@@ -534,14 +534,14 @@ namespace Vehicles.AI
 			{
 				return true;
 			}
-			WaterRegion region = WaterGridsUtility.GetRegion(c, map, RegionType.Set_Passable);
+			VehicleRegion region = VehicleGridsUtility.GetRegion(c, map, RegionType.Set_Passable);
 			if (region == null)
 			{
 				return false;
 			}
-			bool entryCondition(WaterRegion from, WaterRegion r) => r.Allows(traverseParms, false);
+			bool entryCondition(VehicleRegion from, VehicleRegion r) => r.Allows(traverseParms, false);
 			bool foundReg = false;
-			bool regionProcessor(WaterRegion r)
+			bool regionProcessor(VehicleRegion r)
 			{
 				if (!r.AnyCell.Fogged(map))
 				{

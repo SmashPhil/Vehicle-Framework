@@ -5,7 +5,7 @@ using SmashTools;
 
 namespace Vehicles.AI
 {
-	public static class TouchPathEndModeUtilityShips
+	public static class TouchPathEndModeUtilityVehicles
 	{
 		public static bool IsCornerTouchAllowed(int cornerX, int cornerZ, int adjCardinal1X, int adjCardinal1Z, int adjCardinal2X, int adjCardinal2Z, Map map)
 		{
@@ -14,8 +14,8 @@ namespace Vehicles.AI
 				return true;
 			IntVec3 intVec = new IntVec3(adjCardinal1X, 0, adjCardinal1Z);
 			IntVec3 intVec2 = new IntVec3(adjCardinal2X, 0, adjCardinal2Z);
-			WaterMap mapE = map.GetCachedMapComponent<WaterMap>();
-			return (mapE.ShipPathGrid.Walkable(intVec) && intVec.GetDoor(map) is null) || (mapE.ShipPathGrid.Walkable(intVec2) && intVec2.GetDoor(map) is null);
+			VehicleMapping mapE = map.GetCachedMapComponent<VehicleMapping>();
+			return (mapE.VehiclePathGrid.Walkable(intVec) && intVec.GetDoor(map) is null) || (mapE.VehiclePathGrid.Walkable(intVec2) && intVec2.GetDoor(map) is null);
 		}
 
 		public static bool MakesOccupiedCellsAlwaysReachableDiagonally(ThingDef def)
@@ -32,7 +32,7 @@ namespace Vehicles.AI
 				(cell == BR && !IsCornerTouchAllowed(BR.x - 1, BR.z + 1, BR.x - 1, BR.z, BR.x, BR.z + 1, map));
 		}
 
-		public static void AddAllowedAdjacentRegions(LocalTargetInfo dest, TraverseParms traverseParams, Map map, List<WaterRegion> regions)
+		public static void AddAllowedAdjacentRegions(LocalTargetInfo dest, TraverseParms traverseParams, Map map, List<VehicleRegion> regions)
 		{
 			GenAdj.GetAdjacentCorners(dest, out IntVec3 bl, out IntVec3 tl, out IntVec3 tr, out IntVec3 br);
 			if (!dest.HasThing || (dest.Thing.def.size.x == 1 && dest.Thing.def.size.z == 1))
@@ -43,7 +43,7 @@ namespace Vehicles.AI
 					IntVec3 intVec = GenAdj.AdjacentCells[i] + cell;
 					if (intVec.InBoundsShip(map) && !TouchPathEndModeUtility.IsAdjacentCornerAndNotAllowed(intVec, bl, tl, tr, br, map))
 					{
-						WaterRegion region = WaterGridsUtility.GetRegion(intVec, map, RegionType.Set_Passable);
+						VehicleRegion region = VehicleGridsUtility.GetRegion(intVec, map, RegionType.Set_Passable);
 						if (region != null && region.Allows(traverseParams, true))
 						{
 							regions.Add(region);
@@ -58,7 +58,7 @@ namespace Vehicles.AI
 				{
 					if (list[j].InBoundsShip(map) && !TouchPathEndModeUtility.IsAdjacentCornerAndNotAllowed(list[j], bl, tl, tr, br, map))
 					{
-						WaterRegion region2 = WaterGridsUtility.GetRegion(list[j], map, RegionType.Set_Passable);
+						VehicleRegion region2 = VehicleGridsUtility.GetRegion(list[j], map, RegionType.Set_Passable);
 						if (region2 != null && region2.Allows(traverseParams, true))
 						{
 							regions.Add(region2);

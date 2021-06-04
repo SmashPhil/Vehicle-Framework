@@ -5,7 +5,7 @@ using SmashTools;
 
 namespace Vehicles.AI
 {
-	public static class GenPathShip
+	public static class GenPathVehicles
 	{
 		public static TargetInfo ResolvePathMode(Pawn pawn, TargetInfo dest, ref PathEndMode peMode)
 		{
@@ -25,12 +25,12 @@ namespace Vehicles.AI
 			}
 			if(peMode == PathEndMode.ClosestTouch)
 			{
-				peMode = ResolveClosestTouchPathMode(pawn, pawn.Map.GetCachedMapComponent<WaterMap>(), dest.Cell);
+				peMode = ResolveClosestTouchPathMode(pawn, pawn.Map.GetCachedMapComponent<VehicleMapping>(), dest.Cell);
 			}
 			return dest;
 		}
 
-		public static PathEndMode ResolveClosestTouchPathMode(Pawn pawn, WaterMap mapE, IntVec3 target)
+		public static PathEndMode ResolveClosestTouchPathMode(Pawn pawn, VehicleMapping mapE, IntVec3 target)
 		{
 			if(ShouldNotEnterCell(pawn, mapE, target))
 			{
@@ -39,13 +39,13 @@ namespace Vehicles.AI
 			return PathEndMode.OnCell;
 		}
 
-		private static bool ShouldNotEnterCell(Pawn pawn, WaterMap mapE, IntVec3 dest)
+		private static bool ShouldNotEnterCell(Pawn pawn, VehicleMapping mapE, IntVec3 dest)
 		{
-			if(mapE.ShipPathGrid.PerceivedPathCostAt(dest) > 30)
+			if(mapE.VehiclePathGrid.PerceivedPathCostAt(dest) > 30)
 			{
 				return true;
 			}
-			if(!GenGridShips.Walkable(dest, mapE))
+			if(!GenGridVehicles.Walkable(dest, mapE))
 			{
 				return true;
 			}

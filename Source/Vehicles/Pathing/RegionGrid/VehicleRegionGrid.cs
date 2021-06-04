@@ -5,27 +5,27 @@ using Vehicles.AI;
 
 namespace Vehicles
 {
-	public sealed class WaterRegionGrid
+	public sealed class VehicleRegionGrid
 	{
 		private const int CleanSquaresPerFrame = 16;
 
-		public static HashSet<WaterRegion> allRegionsYielded = new HashSet<WaterRegion>();
+		public static HashSet<VehicleRegion> allRegionsYielded = new HashSet<VehicleRegion>();
 
 		private readonly Map map;
 
-		private WaterRegion[] regionGrid;
+		private VehicleRegion[] regionGrid;
 		private int curCleanIndex;
 
-		public List<WaterRoom> allRooms = new List<WaterRoom>();
-		public HashSet<WaterRegion> drawnRegions = new HashSet<WaterRegion>();
+		public List<VehicleRoom> allRooms = new List<VehicleRoom>();
+		public HashSet<VehicleRegion> drawnRegions = new HashSet<VehicleRegion>();
 
-		public WaterRegionGrid(Map map)
+		public VehicleRegionGrid(Map map)
 		{
 			this.map = map;
-			regionGrid = new WaterRegion[map.cellIndices.NumGridCells];
+			regionGrid = new VehicleRegion[map.cellIndices.NumGridCells];
 		}
 
-		public WaterRegion[] DirectGrid
+		public VehicleRegion[] DirectGrid
 		{
 			get
 			{
@@ -33,7 +33,7 @@ namespace Vehicles
 			}
 		}
 
-		public IEnumerable<WaterRegion> AllRegions_NoRebuild_InvalidAllowed
+		public IEnumerable<VehicleRegion> AllRegions_NoRebuild_InvalidAllowed
 		{
 			get
 			{
@@ -58,7 +58,7 @@ namespace Vehicles
 			}
 		}
 
-		public IEnumerable<WaterRegion> AllRegions
+		public IEnumerable<VehicleRegion> AllRegions
 		{
 			get
 			{
@@ -84,38 +84,38 @@ namespace Vehicles
 			}
 		}
 
-		public WaterRegion GetValidRegionAt(IntVec3 c)
+		public VehicleRegion GetValidRegionAt(IntVec3 c)
 		{
 			if(!c.InBoundsShip(map))
 			{
 				Log.Error("Tried to get valid water region out of bounds at " + c);
 			}
-			if(!map.GetCachedMapComponent<WaterMap>().WaterRegionAndRoomUpdater.Enabled && map.GetCachedMapComponent<WaterMap>().WaterRegionAndRoomUpdater.AnythingToRebuild)
+			if(!map.GetCachedMapComponent<VehicleMapping>().VehicleRegionAndRoomUpdater.Enabled && map.GetCachedMapComponent<VehicleMapping>().VehicleRegionAndRoomUpdater.AnythingToRebuild)
 			{
 				Log.Warning("Trying to get valid water region at " + c + " but RegionAndRoomUpdater is disabled. The result may be incorrect.");
 			}
-			map.GetCachedMapComponent<WaterMap>().WaterRegionAndRoomUpdater.TryRebuildWaterRegions();
-			WaterRegion region = regionGrid[map.cellIndices.CellToIndex(c)];
+			map.GetCachedMapComponent<VehicleMapping>().VehicleRegionAndRoomUpdater.TryRebuildWaterRegions();
+			VehicleRegion region = regionGrid[map.cellIndices.CellToIndex(c)];
 			
 			return !(region is null) && region.valid ? region : null;
 		}
 
-		public WaterRegion GetValidRegionAt_NoRebuild(IntVec3 c)
+		public VehicleRegion GetValidRegionAt_NoRebuild(IntVec3 c)
 		{
 			if(!c.InBoundsShip(map))
 			{
 				Log.Error("Tried to get valid region out of bounds at " + c);
 			}
-			WaterRegion region = regionGrid[map.cellIndices.CellToIndex(c)];
+			VehicleRegion region = regionGrid[map.cellIndices.CellToIndex(c)];
 			return !(region is null) && region.valid ? region : null;
 		}
 
-		public WaterRegion GetRegionAt_NoRebuild_InvalidAllowed(IntVec3 c)
+		public VehicleRegion GetRegionAt_NoRebuild_InvalidAllowed(IntVec3 c)
 		{
 			return regionGrid[map.cellIndices.CellToIndex(c)];
 		}
 
-		public void SetRegionAt(IntVec3 c, WaterRegion reg)
+		public void SetRegionAt(IntVec3 c, VehicleRegion reg)
 		{
 			regionGrid[map.cellIndices.CellToIndex(c)] = reg;
 		}
@@ -128,7 +128,7 @@ namespace Vehicles
 				{
 					curCleanIndex = 0;
 				}
-				WaterRegion region = regionGrid[curCleanIndex];
+				VehicleRegion region = regionGrid[curCleanIndex];
 				if(!(region is null) && !region.valid)
 				{
 					regionGrid[curCleanIndex] = null;
@@ -151,7 +151,7 @@ namespace Vehicles
 				currentViewRect.ClipInsideMap(map);
 				foreach(IntVec3 c in currentViewRect)
 				{
-					WaterRegion validRegionAt = GetValidRegionAt(c);
+					VehicleRegion validRegionAt = GetValidRegionAt(c);
 					if(!(validRegionAt is null) && !drawnRegions.Contains(validRegionAt))
 					{
 						validRegionAt.DebugDraw();
@@ -165,7 +165,7 @@ namespace Vehicles
 			{
 				//Room?
 				//Room Group?
-				WaterRegion regionAt_NoRebuild_InvalidAllowed = GetRegionAt_NoRebuild_InvalidAllowed(intVec);
+				VehicleRegion regionAt_NoRebuild_InvalidAllowed = GetRegionAt_NoRebuild_InvalidAllowed(intVec);
 				if (!(regionAt_NoRebuild_InvalidAllowed is null))
 				{
 					regionAt_NoRebuild_InvalidAllowed.DebugDrawMouseover();

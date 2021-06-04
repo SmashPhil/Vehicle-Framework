@@ -4,12 +4,12 @@ using Verse.AI;
 
 namespace Vehicles.AI
 {
-	public static class ShipReachabilityImmediate
+	public static class VehicleReachabilityImmediate
 	{
 		public static bool CanReachImmediateShip(IntVec3 start, LocalTargetInfo target, Map map, PathEndMode peMode, Pawn pawn)
 		{
 			if (!target.IsValid) return false;
-			target = (LocalTargetInfo)GenPathShip.ResolvePathMode(pawn, target.ToTargetInfo(map), ref peMode);
+			target = (LocalTargetInfo)GenPathVehicles.ResolvePathMode(pawn, target.ToTargetInfo(map), ref peMode);
 			if(target.HasThing)
 			{
 				Thing thing = target.Thing;
@@ -49,7 +49,7 @@ namespace Vehicles.AI
 			{
 				return true;
 			}
-			return peMode == PathEndMode.Touch && TouchPathEndModeUtilityShips.IsAdjacentOrInsideAndAllowedToTouch(start, target, map);
+			return peMode == PathEndMode.Touch && TouchPathEndModeUtilityVehicles.IsAdjacentOrInsideAndAllowedToTouch(start, target, map);
 		}
 
 		public static bool CanReachImmediateShip(this Pawn pawn, LocalTargetInfo target, PathEndMode peMode)

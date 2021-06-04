@@ -9,17 +9,17 @@ namespace Vehicles.AI
 	{
 		public static bool CanReachShip(this Pawn pawn, LocalTargetInfo dest, PathEndMode peMode, Danger maxDanger, bool canBash = false, TraverseMode mode = TraverseMode.ByPawn)
 		{
-			return pawn.Spawned && pawn.Map.GetCachedMapComponent<WaterMap>().ShipReachability.CanReachShip(pawn.Position, dest, peMode, TraverseParms.For(pawn, maxDanger, mode, canBash));
+			return pawn.Spawned && pawn.Map.GetCachedMapComponent<VehicleMapping>().VehicleReachability.CanReachShip(pawn.Position, dest, peMode, TraverseParms.For(pawn, maxDanger, mode, canBash));
 		}
 
 		public static bool CanReachShipNonLocal(this Pawn pawn, TargetInfo dest, PathEndMode peMode, Danger maxDanger, bool canBash = false, TraverseMode mode = TraverseMode.ByPawn)
 		{
-			return pawn.Spawned && pawn.Map.GetCachedMapComponent<WaterMap>().ShipReachability.CanReachShipNonLocal(pawn.Position, dest, peMode, TraverseParms.For(pawn, maxDanger, mode, canBash));
+			return pawn.Spawned && pawn.Map.GetCachedMapComponent<VehicleMapping>().VehicleReachability.CanReachShipNonLocal(pawn.Position, dest, peMode, TraverseParms.For(pawn, maxDanger, mode, canBash));
 		}
 
 		public static bool CanReachShipMapEdge(this Pawn pawn)
 		{
-			return pawn.Spawned && pawn.Map.GetCachedMapComponent<WaterMap>().ShipReachability.CanReachMapEdge(pawn.Position, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.ByPawn, false));
+			return pawn.Spawned && pawn.Map.GetCachedMapComponent<VehicleMapping>().VehicleReachability.CanReachMapEdge(pawn.Position, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.ByPawn, false));
 		}
 
 		public static void ClearCache()
@@ -28,7 +28,7 @@ namespace Vehicles.AI
 			for (int i = 0; i < maps.Count; i++)
 			{
 				maps[i].reachability.ClearCache();
-				maps[i].GetCachedMapComponent<WaterMap>().ShipReachability.ClearCache();
+				maps[i].GetCachedMapComponent<VehicleMapping>().VehicleReachability.ClearCache();
 			}
 		}
 
@@ -38,7 +38,7 @@ namespace Vehicles.AI
 			for (int i = 0; i < maps.Count; i++)
 			{
 				maps[i].reachability.ClearCacheFor(pawn);
-				maps[i].GetCachedMapComponent<WaterMap>().ShipReachability.ClearCacheFor(pawn);
+				maps[i].GetCachedMapComponent<VehicleMapping>().VehicleReachability.ClearCacheFor(pawn);
 			}
 		}
 	}

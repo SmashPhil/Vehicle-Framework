@@ -10,7 +10,7 @@ using Vehicles.AI;
 
 namespace Vehicles
 {
-	public sealed class WaterRegion
+	public sealed class VehicleRegion
 	{
 		public const int GridSize = 12;
 
@@ -20,9 +20,9 @@ namespace Vehicles
 
 		public sbyte mapIndex = -1;
 
-		private WaterRoom roomInt;
+		private VehicleRoom roomInt;
 
-		public List<WaterRegionLink> links = new List<WaterRegionLink>();
+		public List<VehicleRegionLink> links = new List<VehicleRegionLink>();
 
 		public CellRect extentsClose;
 
@@ -64,7 +64,7 @@ namespace Vehicles
 
 		private static int nextId = 1;
 
-		private WaterRegion() 
+		private VehicleRegion() 
 		{ 
 		}
 
@@ -74,7 +74,7 @@ namespace Vehicles
 		{
 			get
 			{
-				WaterRegionGrid regions = Map.GetCachedMapComponent<WaterMap>().WaterRegionGrid;
+				VehicleRegionGrid regions = Map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid;
 				for(int z = extentsClose.minZ; z <= extentsClose.maxX; z++)
 				{
 					for(int x = extentsClose.minX; x <= extentsClose.maxX; x++)
@@ -102,13 +102,13 @@ namespace Vehicles
 			}
 		}
 
-		public IEnumerable<WaterRegion> Neighbors
+		public IEnumerable<VehicleRegion> Neighbors
 		{
 			get
 			{
 				for (int li = 0; li < links.Count; li++)
 				{
-					WaterRegionLink link = links[li];
+					VehicleRegionLink link = links[li];
 					for (int ri = 0; ri < 2; ri++)
 					{
 						if (link.regions[ri] != null && link.regions[ri] != this && link.regions[ri].valid)
@@ -121,13 +121,13 @@ namespace Vehicles
 			}
 		}
 
-		public IEnumerable<WaterRegion> NeighborsOfSameType
+		public IEnumerable<VehicleRegion> NeighborsOfSameType
 		{
 			get
 			{
 				for (int li = 0; li < links.Count; li++)
 				{
-					WaterRegionLink link = links[li];
+					VehicleRegionLink link = links[li];
 					for (int ri = 0; ri < 2; ri++)
 					{
 						if (link.regions[ri] != null && link.regions[ri] != this && link.regions[ri].type == type && link.regions[ri].valid)
@@ -140,7 +140,7 @@ namespace Vehicles
 			}
 		}
 
-		public WaterRoom Room
+		public VehicleRoom Room
 		{
 			get
 			{
@@ -167,7 +167,7 @@ namespace Vehicles
 			{
 				Map map = Map;
 				CellIndices cellIndices = map.cellIndices;
-				WaterRegion[] directGrid = map.GetCachedMapComponent<WaterMap>().WaterRegionGrid.DirectGrid;
+				VehicleRegion[] directGrid = map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid.DirectGrid;
 				for (int i = 0; i < 1000; i++)
 				{
 					IntVec3 randomCell = extentsClose.RandomCell;
@@ -186,7 +186,7 @@ namespace Vehicles
 			{
 				Map map = Map;
 				CellIndices cellIndices = map.cellIndices;
-				WaterRegion[] directGrid = map.GetCachedMapComponent<WaterMap>().WaterRegionGrid.DirectGrid;
+				VehicleRegion[] directGrid = map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid.DirectGrid;
 				foreach (IntVec3 intVec in extentsClose)
 				{
 					if (directGrid[cellIndices.CellToIndex(intVec)] == this)
@@ -207,7 +207,7 @@ namespace Vehicles
 				stringBuilder.AppendLine("id: " + id);
 				stringBuilder.AppendLine("mapIndex: " + mapIndex);
 				stringBuilder.AppendLine("links count: " + links.Count);
-				foreach (WaterRegionLink regionLink in links)
+				foreach (VehicleRegionLink regionLink in links)
 				{
 					stringBuilder.AppendLine("  --" + regionLink.ToString());
 				}
@@ -251,9 +251,9 @@ namespace Vehicles
 			}
 		}
 
-		public static WaterRegion MakeNewUnfilled(IntVec3 root, Map map)
+		public static VehicleRegion MakeNewUnfilled(IntVec3 root, Map map)
 		{
-			WaterRegion region = new WaterRegion();
+			VehicleRegion region = new VehicleRegion();
 			region.debug_makeTick = Find.TickManager.TicksGame;
 			region.id = nextId;
 			nextId++;
@@ -282,7 +282,7 @@ namespace Vehicles
 				Danger danger = DangerFor(tp.pawn);
 				if (isDestination || danger == Danger.Deadly)
 				{
-					WaterRegion region = WaterRegionAndRoomQuery.GetRegion(tp.pawn, RegionType.Set_All);
+					VehicleRegion region = VehicleRegionAndRoomQuery.GetRegion(tp.pawn, RegionType.Set_All);
 					if ((region == null || danger > region.DangerFor(tp.pawn)) && danger > tp.maxDanger)
 					{
 						return false;
@@ -492,14 +492,14 @@ namespace Vehicles
 				}
 
 				GenDraw.DrawFieldEdges(Cells.ToList(), color);
-				foreach(WaterRegion region in Neighbors)
+				foreach(VehicleRegion region in Neighbors)
 				{
 					GenDraw.DrawFieldEdges(region.Cells.ToList(), Color.grey);
 				}
 
 				if(VehicleMod.settings.debug.debugDrawRegionLinks)
 				{
-					foreach (WaterRegionLink regionLink in links)
+					foreach (VehicleRegionLink regionLink in links)
 					{
 						if (num == 1)
 						{
@@ -532,7 +532,7 @@ namespace Vehicles
 
 		public override bool Equals(object obj)
 		{
-			return obj is WaterRegion region && region.id == id;
+			return obj is VehicleRegion region && region.id == id;
 		}
 	}
 }

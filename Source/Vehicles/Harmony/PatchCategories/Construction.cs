@@ -130,7 +130,7 @@ namespace Vehicles
 				bool standable = true;
 				foreach (IntVec3 c in vehicle.PawnOccupiedCells(loc, rot))
 				{
-					if (!c.InBounds(map) || (vehicle.IsBoat() ? GenGridShips.Impassable(c, map) : GenGrid.Impassable(c, map)))
+					if (!c.InBounds(map) || (vehicle.IsBoat() ? GenGridVehicles.Impassable(c, map) : GenGrid.Impassable(c, map)))
 					{
 						standable = false;
 						break;
@@ -140,7 +140,7 @@ namespace Vehicles
 				{
 					foreach (IntVec3 c2 in vehicle.PawnOccupiedCells(c, rot))
 					{
-						if (vehicle.IsBoat() ? GenGridShips.Impassable(c, map) : GenGrid.Impassable(c, map))
+						if (vehicle.IsBoat() ? GenGridVehicles.Impassable(c, map) : GenGrid.Impassable(c, map))
 							return false;
 					}
 					return true;

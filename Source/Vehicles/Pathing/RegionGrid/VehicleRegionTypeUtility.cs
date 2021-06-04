@@ -20,7 +20,7 @@ namespace Vehicles
 		{
 			if(!c.InBoundsShip(map)) return RegionType.None;
 			if(!(c.GetDoor(map) is null)) return RegionType.Portal;
-			if(GenGridShips.Walkable(c, map.GetCachedMapComponent<WaterMap>())) return RegionType.Normal;
+			if(GenGridVehicles.Walkable(c, map.GetCachedMapComponent<VehicleMapping>())) return RegionType.Normal;
 			return RegionType.ImpassableFreeAirExchange;
 		}
 

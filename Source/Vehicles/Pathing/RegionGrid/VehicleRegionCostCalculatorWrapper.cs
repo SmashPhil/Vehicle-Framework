@@ -5,29 +5,29 @@ using SmashTools;
 
 namespace Vehicles.AI
 {
-	public class RegionCostCalculatorWrapperShips
+	public class VehicleRegionCostCalculatorWrapper
 	{
 		private Map map;
 		private IntVec3 endCell;
-		private HashSet<WaterRegion> destRegions = new HashSet<WaterRegion>();
+		private HashSet<VehicleRegion> destRegions = new HashSet<VehicleRegion>();
 
 		private int moveTicksCardinal;
 		private int moveTicksDiagonal;
 
-		private RegionCostCalculatorShips regionCostCalculatorShips;
-		private WaterRegion cachedRegion;
-		private WaterRegionLink cachedBestLink;
-		private WaterRegionLink cachedSecondBestLink;
+		private VehicleRegionCostCalculator vehicleRegionCostCalculator;
+		private VehicleRegion cachedRegion;
+		private VehicleRegionLink cachedBestLink;
+		private VehicleRegionLink cachedSecondBestLink;
 
 		private int cachedBestLinkCost;
 		private int cachedSecondBestLinkCost;
 		private bool cachedRegionIsDestination;
-		private WaterRegion[] regionGrid;
+		private VehicleRegion[] regionGrid;
 
-		public RegionCostCalculatorWrapperShips(Map map)
+		public VehicleRegionCostCalculatorWrapper(Map map)
 		{
 			this.map = map;
-			regionCostCalculatorShips = new RegionCostCalculatorShips(map);
+			vehicleRegionCostCalculator = new VehicleRegionCostCalculator(map);
 		}
 
 		public void Init(CellRect end, TraverseParms traverseParms, int moveTicksCardinal, int moveTicksDiagonal, ByteGrid avoidGrid, Area allowedArea, bool drafted, List<int> disallowedCorners)
@@ -41,11 +41,11 @@ namespace Vehicles.AI
 			cachedBestLinkCost = 0;
 			cachedSecondBestLinkCost = 0;
 			cachedRegionIsDestination = false;
-			regionGrid = map.GetCachedMapComponent<WaterMap>().WaterRegionGrid.DirectGrid;
+			regionGrid = map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid.DirectGrid;
 			destRegions.Clear();
 			if (end.Width == 1 && end.Height == 1)
 			{
-				WaterRegion region = WaterGridsUtility.GetRegion(endCell, map, RegionType.Set_Passable);
+				VehicleRegion region = VehicleGridsUtility.GetRegion(endCell, map, RegionType.Set_Passable);
 				if (region != null)
 				{
 					destRegions.Add(region);
@@ -57,7 +57,7 @@ namespace Vehicles.AI
 				{
 					if (intVec.InBoundsShip(map) && !disallowedCorners.Contains(map.cellIndices.CellToIndex(intVec)))
 					{
-						WaterRegion region2 = WaterGridsUtility.GetRegion(intVec, map, RegionType.Set_Passable);
+						VehicleRegion region2 = VehicleGridsUtility.GetRegion(intVec, map, RegionType.Set_Passable);
 						if (region2 != null)
 						{
 							if (region2.Allows(traverseParms, true))
@@ -72,12 +72,12 @@ namespace Vehicles.AI
 			{
 				Log.Error("Couldn't find any destination regions. This shouldn't ever happen because we've checked reachability.");
 			}
-			regionCostCalculatorShips.Init(end, destRegions, traverseParms, moveTicksCardinal, moveTicksDiagonal, avoidGrid, allowedArea, drafted);
+			vehicleRegionCostCalculator.Init(end, destRegions, traverseParms, moveTicksCardinal, moveTicksDiagonal, avoidGrid, allowedArea, drafted);
 		}
 
 		public int GetPathCostFromDestToRegion(int cellIndex)
 		{
-			WaterRegion region = regionGrid[cellIndex];
+			VehicleRegion region = regionGrid[cellIndex];
 			IntVec3 cell = map.cellIndices.IndexToCell(cellIndex);
 			if (region != cachedRegion)
 			{
@@ -86,7 +86,7 @@ namespace Vehicles.AI
 				{
 					return OctileDistanceToEnd(cell);
 				}
-				cachedBestLinkCost = regionCostCalculatorShips.GetRegionBestDistances(region, out cachedBestLink, out cachedSecondBestLink, out cachedSecondBestLinkCost);
+				cachedBestLinkCost = vehicleRegionCostCalculator.GetRegionBestDistances(region, out cachedBestLink, out cachedSecondBestLink, out cachedSecondBestLinkCost);
 				cachedRegion = region;
 			}
 			else if (cachedRegionIsDestination)
@@ -95,11 +95,11 @@ namespace Vehicles.AI
 			}
 			if (cachedBestLink != null)
 			{
-				int num = regionCostCalculatorShips.RegionLinkDistance(cell, cachedBestLink, 1);
+				int num = vehicleRegionCostCalculator.RegionLinkDistance(cell, cachedBestLink, 1);
 				int num3;
 				if (cachedSecondBestLink != null)
 				{
-					int num2 = regionCostCalculatorShips.RegionLinkDistance(cell, cachedSecondBestLink, 1);
+					int num2 = vehicleRegionCostCalculator.RegionLinkDistance(cell, cachedSecondBestLink, 1);
 					num3 = Mathf.Min(cachedSecondBestLinkCost + num2, cachedBestLinkCost + num);
 				}
 				else

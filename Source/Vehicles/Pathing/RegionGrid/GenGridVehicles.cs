@@ -6,7 +6,7 @@ using SmashTools;
 
 namespace Vehicles.AI
 {
-	public static class GenGridShips
+	public static class GenGridVehicles
 	{
 		public const int NoBuildEdgeWidth = 10;
 		public const int NoZoneEdgeWidth = 5;
@@ -67,14 +67,14 @@ namespace Vehicles.AI
 			return v.x >= 0f && v.z >= 0f && v.x < (float)size.x && v.z < (float)size.z;
 		}
 
-		public static bool Walkable(this IntVec3 c, WaterMap mapE)
+		public static bool Walkable(this IntVec3 c, VehicleMapping mapE)
 		{
-			return mapE.ShipPathGrid.Walkable(c);
+			return mapE.VehiclePathGrid.Walkable(c);
 		}
 
 		public static bool Standable(this IntVec3 c, Map map)
 		{
-			if(!map.GetCachedMapComponent<WaterMap>().ShipPathGrid.Walkable(c))
+			if(!map.GetCachedMapComponent<VehicleMapping>().VehiclePathGrid.Walkable(c))
 			{
 				return false;
 			}

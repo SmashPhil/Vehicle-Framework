@@ -7,7 +7,7 @@ using Verse;
 
 namespace Vehicles.AI
 {
-	public class ShipReachabilityCache
+	public class VehicleReachabilityCache
 	{
 		private Dictionary<CachedEntry, bool> cacheDict = new Dictionary<CachedEntry, bool>();
 
@@ -21,7 +21,7 @@ namespace Vehicles.AI
 			}
 		}
 
-		public BoolUnknown CachedResultFor(WaterRoom A, WaterRoom B, TraverseParms traverseParms)
+		public BoolUnknown CachedResultFor(VehicleRoom A, VehicleRoom B, TraverseParms traverseParms)
 		{
 			bool flag;
 			if (cacheDict.TryGetValue(new CachedEntry(A.ID, B.ID, traverseParms), out flag))
@@ -29,7 +29,7 @@ namespace Vehicles.AI
 			return BoolUnknown.Unknown;
 		}
 
-		public void AddCachedResult(WaterRoom A, WaterRoom B, TraverseParms traverseParams, bool reachable)
+		public void AddCachedResult(VehicleRoom A, VehicleRoom B, TraverseParms traverseParams, bool reachable)
 		{
 			CachedEntry key = new CachedEntry(A.ID, B.ID, traverseParams);
 			if (!cacheDict.ContainsKey(key))

@@ -806,10 +806,10 @@ namespace Vehicles
 				else
 				{
 					Log.Warning("No Coastline or River detected on map: " + map.uniqueID + ". Selecting edge of map with most water cells.");
-					int n = CellRect.WholeMap(map).GetEdgeCells(Rot4.North).Where(x => GenGridShips.Standable(x, map)).Count();
-					int e = CellRect.WholeMap(map).GetEdgeCells(Rot4.East).Where(x => GenGridShips.Standable(x, map)).Count();
-					int s = CellRect.WholeMap(map).GetEdgeCells(Rot4.South).Where(x => GenGridShips.Standable(x, map)).Count();
-					int w = CellRect.WholeMap(map).GetEdgeCells(Rot4.West).Where(x => GenGridShips.Standable(x, map)).Count();
+					int n = CellRect.WholeMap(map).GetEdgeCells(Rot4.North).Where(x => GenGridVehicles.Standable(x, map)).Count();
+					int e = CellRect.WholeMap(map).GetEdgeCells(Rot4.East).Where(x => GenGridVehicles.Standable(x, map)).Count();
+					int s = CellRect.WholeMap(map).GetEdgeCells(Rot4.South).Where(x => GenGridVehicles.Standable(x, map)).Count();
+					int w = CellRect.WholeMap(map).GetEdgeCells(Rot4.West).Where(x => GenGridVehicles.Standable(x, map)).Count();
 					rotFromTo = Ext_Map.Max4IntToRot(n, e, s, w);
 				}
 				result = TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo, out spot) || TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo.Rotated(RotationDirection.Clockwise),
@@ -892,7 +892,7 @@ namespace Vehicles
 				return false;
 			}
 			Pawn leadShip = pawns.Where(p => p.IsBoat()).MaxBy(y => y.def.size.z);
-			bool validator(IntVec3 x) => !x.Fogged(map) && GenGridShips.Standable(x, map);
+			bool validator(IntVec3 x) => !x.Fogged(map) && GenGridVehicles.Standable(x, map);
 			List<IntVec3> cells = CellRect.WholeMap(map).GetEdgeCells(exitDirection).ToList();
 			Dictionary<IntVec3, float> cellDist = new Dictionary<IntVec3, float>();
 

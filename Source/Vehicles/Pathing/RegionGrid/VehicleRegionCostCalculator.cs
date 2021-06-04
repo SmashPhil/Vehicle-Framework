@@ -6,7 +6,7 @@ using SmashTools;
 
 namespace Vehicles.AI
 {
-	public class RegionCostCalculatorShips
+	public class VehicleRegionCostCalculator
 	{
 		private const int SampleCount = 11;
 
@@ -20,9 +20,9 @@ namespace Vehicles.AI
 
 		private Map map;
 
-		private WaterMap mapE;
+		private VehicleMapping mapE;
 
-		private WaterRegion[] regionGrid;
+		private VehicleRegion[] regionGrid;
 
 		private TraverseParms traverseParms;
 
@@ -40,28 +40,28 @@ namespace Vehicles.AI
 
 		private Func<int, int, float> preciseRegionLinkDistancesDistanceGetter;
 
-		private Dictionary<int, WaterRegionLink> regionMinLink = new Dictionary<int, WaterRegionLink>();
+		private Dictionary<int, VehicleRegionLink> regionMinLink = new Dictionary<int, VehicleRegionLink>();
 
-		private Dictionary<WaterRegionLink, int> distances = new Dictionary<WaterRegionLink, int>();
+		private Dictionary<VehicleRegionLink, int> distances = new Dictionary<VehicleRegionLink, int>();
 
 		private FastPriorityQueue<RegionLinkQueueEntry> queue = new FastPriorityQueue<RegionLinkQueueEntry>(new DistanceComparer());
 
-		private Dictionary<WaterRegion, int> minPathCosts = new Dictionary<WaterRegion, int>();
+		private Dictionary<VehicleRegion, int> minPathCosts = new Dictionary<VehicleRegion, int>();
 
-		private List<Pair<WaterRegionLink, int>> preciseRegionLinkDistances = new List<Pair<WaterRegionLink, int>>();
+		private List<Pair<VehicleRegionLink, int>> preciseRegionLinkDistances = new List<Pair<VehicleRegionLink, int>>();
 
-		private Dictionary<WaterRegionLink, IntVec3> linkTargetCells = new Dictionary<WaterRegionLink, IntVec3>();
+		private Dictionary<VehicleRegionLink, IntVec3> linkTargetCells = new Dictionary<VehicleRegionLink, IntVec3>();
 
-		public RegionCostCalculatorShips(Map map)
+		public VehicleRegionCostCalculator(Map map)
 		{
 			this.map = map;
-			mapE = map.GetComponent<WaterMap>();
+			mapE = map.GetComponent<VehicleMapping>();
 			preciseRegionLinkDistancesDistanceGetter = new Func<int, int, float>(PreciseRegionLinkDistancesDistanceGetter);
 		}
 
-		public void Init(CellRect destination, HashSet<WaterRegion> destRegions, TraverseParms parms, int moveTicksCardinal, int moveTicksDiagonal, ByteGrid avoidGrid, Area allowedArea, bool drafted)
+		public void Init(CellRect destination, HashSet<VehicleRegion> destRegions, TraverseParms parms, int moveTicksCardinal, int moveTicksDiagonal, ByteGrid avoidGrid, Area allowedArea, bool drafted)
 		{
-			regionGrid = mapE.WaterRegionGrid.DirectGrid;
+			regionGrid = mapE.VehicleRegionGrid.DirectGrid;
 			traverseParms = parms;
 			destinationCell = destination.CenterCell;
 			this.moveTicksCardinal = moveTicksCardinal;
@@ -75,10 +75,10 @@ namespace Vehicles.AI
 			queue.Clear();
 			minPathCosts.Clear();
 
-			foreach(WaterRegion region in destRegions)
+			foreach (VehicleRegion region in destRegions)
 			{
 				int minPathCost = RegionMedianPathCost(region);
-				foreach(WaterRegionLink regionLink in region.links)
+				foreach (VehicleRegionLink regionLink in region.links)
 				{
 					if (regionLink.GetOtherRegion(region).Allows(traverseParms, false))
 					{
@@ -101,8 +101,8 @@ namespace Vehicles.AI
 				GetPreciseRegionLinkDistances(region, destination, preciseRegionLinkDistances);
 				for(int i = 0; i < preciseRegionLinkDistances.Count; i++)
 				{
-					Pair<WaterRegionLink, int> pair = preciseRegionLinkDistances[i];
-					WaterRegionLink first = pair.First;
+					Pair<VehicleRegionLink, int> pair = preciseRegionLinkDistances[i];
+					VehicleRegionLink first = pair.First;
 					int num3 = distances[first];
 					int num4;
 					if(pair.Second > num3)
@@ -119,7 +119,7 @@ namespace Vehicles.AI
 			}
 		}
 
-		public int GetRegionDistance(WaterRegion region, out WaterRegionLink minLink)
+		public int GetRegionDistance(VehicleRegion region, out VehicleRegionLink minLink)
 		{
 			if (regionMinLink.TryGetValue(region.id, out minLink))
 			{
@@ -131,7 +131,7 @@ namespace Vehicles.AI
 				int num = distances[regionLinkQueueEntry.Link];
 				if(regionLinkQueueEntry.Cost == num)
 				{
-					WaterRegion otherRegion = regionLinkQueueEntry.Link.GetOtherRegion(regionLinkQueueEntry.From);
+					VehicleRegion otherRegion = regionLinkQueueEntry.Link.GetOtherRegion(regionLinkQueueEntry.From);
 					if(!(otherRegion is null) && otherRegion.valid)
 					{
 						int num2 = 0;
@@ -142,7 +142,7 @@ namespace Vehicles.AI
 							num2 += OctileDistance(1, 0);
 						}
 						int minPathCost = RegionMedianPathCost(otherRegion);
-						foreach(WaterRegionLink regionLink in otherRegion.links)
+						foreach(VehicleRegionLink regionLink in otherRegion.links)
 						{
 							if(regionLink != regionLinkQueueEntry.Link && regionLink.GetOtherRegion(otherRegion).type.Passable())
 							{
@@ -180,12 +180,12 @@ namespace Vehicles.AI
 			return 10000;
 		}
 
-		public int GetRegionBestDistances(WaterRegion region, out WaterRegionLink bestLink, out WaterRegionLink secondBestLink, out int secondBestCost)
+		public int GetRegionBestDistances(VehicleRegion region, out VehicleRegionLink bestLink, out VehicleRegionLink secondBestLink, out int secondBestCost)
 		{
 			int regionDistance = GetRegionDistance(region, out bestLink);
 			secondBestLink = null;
 			secondBestCost = int.MaxValue;
-			foreach(WaterRegionLink regionLink in region.links)
+			foreach (VehicleRegionLink regionLink in region.links)
 			{
 				if(regionLink != bestLink && regionLink.GetOtherRegion(region).type.Passable())
 				{
@@ -199,7 +199,7 @@ namespace Vehicles.AI
 			return regionDistance;
 		}
 
-		public int RegionMedianPathCost(WaterRegion region)
+		public int RegionMedianPathCost(VehicleRegion region)
 		{
 			if (minPathCosts.TryGetValue(region, out int result))
 			{
@@ -222,14 +222,14 @@ namespace Vehicles.AI
 
 		private int GetCellCostFast(int index, bool ignoreAllowedAreaCost = false)
 		{
-			int num = mapE.ShipPathGrid.pathGrid[index];
+			int num = mapE.VehiclePathGrid.pathGrid[index];
 			num += !(avoidGrid is null) ? (avoidGrid[index] * 8) : 0;
 			num += (!(allowedArea is null) && !ignoreAllowedAreaCost && !allowedArea[index]) ? 600 : 0;
 			num += drafted ? map.terrainGrid.topGrid[index].extraDraftedPerceivedPathCost : map.terrainGrid.topGrid[index].extraNonDraftedPerceivedPathCost;
 			return num;
 		}
 
-		private int RegionLinkDistance(WaterRegionLink a, WaterRegionLink b, int minPathCost)
+		private int RegionLinkDistance(VehicleRegionLink a, VehicleRegionLink b, int minPathCost)
 		{
 			IntVec3 a2 = (!linkTargetCells.ContainsKey(a)) ? RegionLinkCenter(a) : linkTargetCells[a];
 			IntVec3 b2 = (!linkTargetCells.ContainsKey(b)) ? RegionLinkCenter(b) : linkTargetCells[b];
@@ -239,7 +239,7 @@ namespace Vehicles.AI
 			return OctileDistance(num, num2) + (minPathCost * Math.Max(num, num2)) + (minPathCost * Math.Min(num, num2));
 		}
 
-		public int RegionLinkDistance(IntVec3 cell, WaterRegionLink link, int minPathCost)
+		public int RegionLinkDistance(IntVec3 cell, VehicleRegionLink link, int minPathCost)
 		{
 			IntVec3 linkTargetCell = GetLinkTargetCell(cell, link);
 			IntVec3 intVec = cell - linkTargetCell;
@@ -258,12 +258,12 @@ namespace Vehicles.AI
 			return e.root.z + ((e.dir != SpanDirection.North) ? 0 : (e.length / 2));
 		}
 
-		private static IntVec3 RegionLinkCenter(WaterRegionLink link)
+		private static IntVec3 RegionLinkCenter(VehicleRegionLink link)
 		{
-			return new IntVec3(RegionCostCalculatorShips.SpanCenterX(link.span), 0, RegionCostCalculatorShips.SpanCenterZ(link.span));
+			return new IntVec3(SpanCenterX(link.span), 0, SpanCenterZ(link.span));
 		}
 
-		private int MinimumRegionLinkDistance(IntVec3 cell, WaterRegionLink link)
+		private int MinimumRegionLinkDistance(IntVec3 cell, VehicleRegionLink link)
 		{
 			IntVec3 intVec = cell - LinkClosestCell(cell, link);
 			return OctileDistance(Math.Abs(intVec.x), Math.Abs(intVec.z));
@@ -274,12 +274,12 @@ namespace Vehicles.AI
 			return GenMath.OctileDistance(dx, dz, moveTicksCardinal, moveTicksDiagonal);
 		}
 
-		private IntVec3 GetLinkTargetCell(IntVec3 cell,  WaterRegionLink link)
+		private IntVec3 GetLinkTargetCell(IntVec3 cell, VehicleRegionLink link)
 		{
 			return LinkClosestCell(cell, link);
 		}
 
-		private static IntVec3 LinkClosestCell(IntVec3 cell, WaterRegionLink link)
+		private static IntVec3 LinkClosestCell(IntVec3 cell, VehicleRegionLink link)
 		{
 			EdgeSpan span = link.span;
 			int num = 0;
@@ -297,7 +297,7 @@ namespace Vehicles.AI
 			return new IntVec3(Mathf.Clamp(cell.x, root.x, root.x + num), 0, Mathf.Clamp(cell.z, root.z, root.z + num2));
 		}
 
-		private void GetPreciseRegionLinkDistances(WaterRegion region, CellRect destination, List<Pair<WaterRegionLink, int>> outDistances)
+		private void GetPreciseRegionLinkDistances(VehicleRegion region, CellRect destination, List<Pair<VehicleRegionLink, int>> outDistances)
 		{
 			outDistances.Clear();
 			tmpCellIndices.Clear();
@@ -317,9 +317,9 @@ namespace Vehicles.AI
 			}
 			Dijkstra<int>.Run(tmpCellIndices, (int x) => PreciseRegionLinkDistancesNeighborsGetter(x, region),
 				preciseRegionLinkDistancesDistanceGetter, tmpDistances, null);
-			foreach(WaterRegionLink regionLink in region.links)
+			foreach (VehicleRegionLink regionLink in region.links)
 			{
-				if(regionLink.GetOtherRegion(region).Allows(traverseParms, false))
+				if (regionLink.GetOtherRegion(region).Allows(traverseParms, false))
 				{
 					if(!tmpDistances.TryGetValue(map.cellIndices.CellToIndex(linkTargetCells[regionLink]), out float num))
 					{
@@ -327,12 +327,12 @@ namespace Vehicles.AI
 							"neighbor nodes getter. Error occurred in ShipPathFinder of Vehicles", 1938471531);
 						num = 100f;
 					}
-					outDistances.Add(new Pair<WaterRegionLink, int>(regionLink, (int)num));
+					outDistances.Add(new Pair<VehicleRegionLink, int>(regionLink, (int)num));
 				}
 			}
 		}
 
-		private IEnumerable<int> PreciseRegionLinkDistancesNeighborsGetter(int node, WaterRegion region)
+		private IEnumerable<int> PreciseRegionLinkDistancesNeighborsGetter(int node, VehicleRegion region)
 		{
 			if (regionGrid[node] is null || regionGrid[node] != region)
 				return null;
@@ -353,7 +353,7 @@ namespace Vehicles.AI
 		private List<int> PathableNeighborIndices(int index)
 		{
 			tmpPathableNeighborIndices.Clear();
-			ShipPathGrid pathGrid = mapE.ShipPathGrid;
+			VehiclePathGrid pathGrid = mapE.VehiclePathGrid;
 			int x = map.Size.x;
 			bool flag = index % x > 0;
 			bool flag2 = index % x < x - 1;
@@ -404,15 +404,15 @@ namespace Vehicles.AI
 
 		private struct RegionLinkQueueEntry
 		{
-			private readonly WaterRegion from;
+			private readonly VehicleRegion from;
 
-			private readonly WaterRegionLink link;
+			private readonly VehicleRegionLink link;
 
 			private readonly int cost;
 
 			private readonly int estimatedPathCost;
 
-			public RegionLinkQueueEntry(WaterRegion from, WaterRegionLink link, int cost, int estimatedPathCost)
+			public RegionLinkQueueEntry(VehicleRegion from, VehicleRegionLink link, int cost, int estimatedPathCost)
 			{
 				this.from = from;
 				this.link = link;
@@ -420,9 +420,9 @@ namespace Vehicles.AI
 				this.estimatedPathCost = estimatedPathCost;
 			}
 
-			public WaterRegion From => from;
+			public VehicleRegion From => from;
 
-			public WaterRegionLink Link => link;
+			public VehicleRegionLink Link => link;
 
 			public int Cost => cost;
 
