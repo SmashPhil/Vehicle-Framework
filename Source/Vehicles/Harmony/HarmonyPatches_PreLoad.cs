@@ -90,7 +90,7 @@ namespace Vehicles
 		{
 			if (__instance is RGBShaderTypeDef)
 			{
-				___shaderInt = ShaderDatabaseFromBundle.LoadAssetBundleShader(__instance.shaderPath);
+				___shaderInt = AssetBundleDatabase.LoadAssetBundleShader(__instance.shaderPath);
 			}
 		}
 

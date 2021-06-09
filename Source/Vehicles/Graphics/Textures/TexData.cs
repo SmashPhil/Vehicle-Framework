@@ -45,6 +45,9 @@ namespace Vehicles
 		public static readonly Material WorldLineMatYellow = MaterialPool.MatFrom(GenDraw.LineTexPath, ShaderDatabase.WorldOverlayTransparent, Color.yellow, WorldMaterials.WorldLineRenderQueue);
 		public static readonly Material WorldLineMatRed = MaterialPool.MatFrom(GenDraw.LineTexPath, ShaderDatabase.WorldOverlayTransparent, Color.red, WorldMaterials.WorldLineRenderQueue);
 
+		public static readonly Material OneSidedWorldLineMatWhite = MaterialPool.MatFrom(GenDraw.OneSidedLineTexPath, ShaderDatabase.WorldOverlayTransparent, Color.white, WorldMaterials.WorldLineRenderQueue);
+		public static readonly Material OneSidedWorldLineMatRed = MaterialPool.MatFrom(GenDraw.OneSidedLineTexPath, ShaderDatabase.WorldOverlayTransparent, Color.red, WorldMaterials.WorldLineRenderQueue);
+
 		public static readonly Material WorldFullMatRed = MaterialPool.MatFrom(SearchLightTex, ShaderDatabase.WorldOverlayTransparent, Color.white, WorldMaterials.WorldLineRenderQueue);
 
 		/// <summary>

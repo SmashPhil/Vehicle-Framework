@@ -12,7 +12,9 @@ namespace Vehicles
 	public static class VehicleTex
 	{
 		public const string DefaultVehicleIconTexPath = "UI/Icons/DefaultVehicleIcon";
+
 		public const string DefaultShuttleIconTexPath = "UI/Icons/DefaultPlaneIcon";
+
 		public const string DefaultBoatIconTexPath = "UI/Icons/DefaultBoatIcon";
 
 		public static readonly Texture2D UnloadAll = ContentFinder<Texture2D>.Get("UI/Gizmos/UnloadAll");
@@ -82,6 +84,10 @@ namespace Vehicles
 		public static readonly Texture2D ColorHue = ContentFinder<Texture2D>.Get("UI/ColorTools/ColorHue");
 
 		public static readonly Texture2D BlankPattern = ContentFinder<Texture2D>.Get("Graphics/Patterns/Default/Blank");
+
+		public static readonly Texture2D LeftArrow = ContentFinder<Texture2D>.Get("UI/Icons/ArrowLeft");
+
+		public static readonly Texture2D RightArrow = ContentFinder<Texture2D>.Get("UI/Icons/ArrowRight");
 
 		public static readonly Material LandingTargeterMat = MaterialPool.MatFrom("UI/Icons/LandingTargeter", ShaderDatabase.Transparent);
 

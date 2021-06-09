@@ -71,7 +71,7 @@ namespace Vehicles
 			});
 		}
 
-		public static Material MatFrom(MaterialRequestRGB req, bool rescale = false)
+		public static Material MatFrom(MaterialRequestRGB req)
 		{
 			if (!UnityData.IsInMainThread)
 			{
@@ -112,11 +112,7 @@ namespace Vehicles
 						{
 							tiles *= allTiles;
 						}
-						if (rescale)
-						{
-							tiles *= (float)req.patternTex.width / req.maskTex.width;
-						}
-						if (tiles != 1 && tiles != 0)
+						if (tiles != 0)
 						{
 							material.SetFloat(AdditionalShaderPropertyIDs.TileNum, tiles);
 						}
@@ -125,7 +121,7 @@ namespace Vehicles
 						{
 							float scaleX = 1;
 							float scaleY = 1;
-							if (scaleX > 1)
+							if (req.mainTex.width > req.mainTex.height)
 							{
 								scaleY = (float)req.mainTex.height / req.mainTex.width;
 							}
@@ -135,6 +131,11 @@ namespace Vehicles
 							}
 							material.SetFloat(AdditionalShaderPropertyIDs.ScaleX, scaleX);
 							material.SetFloat(AdditionalShaderPropertyIDs.ScaleY, scaleY);
+						}
+						if (req.properties.dynamicTiling)
+						{
+							material.SetFloat(AdditionalShaderPropertyIDs.DisplacementX, req.displacement.x);
+							material.SetFloat(AdditionalShaderPropertyIDs.DisplacementY, req.displacement.y);
 						}
 					}
 					material.SetTexture(ShaderPropertyIDs.MaskTex, req.maskTex);

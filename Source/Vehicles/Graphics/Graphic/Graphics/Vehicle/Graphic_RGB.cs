@@ -20,6 +20,7 @@ namespace Vehicles
 
 		public Color colorThree = Color.white;
 		public float tiles = 1;
+		public Vector2 displacement = Vector2.zero;
 
 		/// <summary>
 		/// Needs to be initialized and filled in <see cref="Init(GraphicRequestRGB, bool)"/> before mask data is generated
@@ -136,6 +137,7 @@ namespace Vehicles
 			colorTwo = req.colorTwo;
 			colorThree = req.colorThree;
 			tiles = req.tiles;
+			displacement = req.displacement;
 			drawSize = req.drawSize;
 		}
 
@@ -255,6 +257,7 @@ namespace Vehicles
 					colorTwo = pattern.properties.colorTwo ?? req.colorTwo,
 					colorThree = pattern.properties.colorThree ?? req.colorThree,
 					tiles = req.tiles,
+					displacement = req.displacement,
 					isSkin = pattern is SkinDef,
 					maskTex = tmpMaskArray[i],
 					patternTex = pattern[new Rot8(patternPointers[i])],
@@ -265,7 +268,7 @@ namespace Vehicles
 			return mats;
 		}
 
-		public abstract Graphic_RGB GetColoredVersion(Shader shader, Color colorOne, Color colorTwo, Color colorThree, float tiles = 1);
+		public abstract Graphic_RGB GetColoredVersion(Shader shader, Color colorOne, Color colorTwo, Color colorThree, float tiles = 1, float displacementX = 0, float displacementY = 0);
 
 		public override string ToString()
 		{

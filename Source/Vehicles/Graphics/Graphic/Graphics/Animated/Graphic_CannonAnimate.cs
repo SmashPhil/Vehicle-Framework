@@ -75,7 +75,8 @@ namespace Vehicles
 			{
 				string fullPath = string.Concat(req.path, '/', list[i].name);
 				graphicPaths[i] = fullPath;
-				subGraphics[i] = GraphicDatabaseRGB.Get<Graphic_Cannon>(fullPath, req.shader, req.drawSize, req.color, req.colorTwo, req.colorThree, req.tiles, DataRGB, req.shaderParameters) as Graphic_Cannon;
+				subGraphics[i] = GraphicDatabaseRGB.Get<Graphic_Cannon>(fullPath, req.shader, req.drawSize, req.color, req.colorTwo, req.colorThree, req.tiles, 
+					req.displacement.x, req.displacement.y, DataRGB, req.shaderParameters) as Graphic_Cannon;
 			}
 		}
 
@@ -103,7 +104,7 @@ namespace Vehicles
 			return mats;
 		}
 
-		public Graphic SubGraphicCycle(int index, Shader newShader, Color colorOne, Color colorTwo, Color colorThree, float tiles = 1)
+		public Graphic SubGraphicCycle(int index, Shader newShader, Color colorOne, Color colorTwo, Color colorThree, float tiles = 1, float displacementX = 0, float displacementY = 0)
 		{
 			if(index > (graphicPaths.Length - 1) )
 			{
@@ -113,7 +114,7 @@ namespace Vehicles
 					index -= (graphicPaths.Length - 1);
 				}
 			}
-			return GraphicDatabaseRGB.Get<Graphic_Cannon>(graphicPaths[index], newShader, drawSize, colorOne, colorTwo, colorThree, tiles, DataRGB);
+			return GraphicDatabaseRGB.Get<Graphic_Cannon>(graphicPaths[index], newShader, drawSize, colorOne, colorTwo, colorThree, tiles, displacementX, displacementY, DataRGB);
 		}
 
 		public Material SubMaterialCycle(PatternDef pattern, int index)
@@ -134,9 +135,9 @@ namespace Vehicles
 			return GraphicDatabase.Get<Graphic_CannonAnimate>(path, newShader, drawSize, newColor, newColorTwo, data);
 		}
 
-		public override Graphic_RGB GetColoredVersion(Shader shader, Color colorOne, Color colorTwo, Color colorThree, float tiles = 1)
+		public override Graphic_RGB GetColoredVersion(Shader shader, Color colorOne, Color colorTwo, Color colorThree, float tiles = 1, float displacementX = 0, float displacementY = 0)
 		{
-			return GraphicDatabaseRGB.Get<Graphic_CannonAnimate>(path, shader, drawSize, colorOne, colorTwo, colorThree, tiles, DataRGB);
+			return GraphicDatabaseRGB.Get<Graphic_CannonAnimate>(path, shader, drawSize, colorOne, colorTwo, colorThree, tiles, displacementX, displacementY, DataRGB);
 		}
 
 		public override string ToString()

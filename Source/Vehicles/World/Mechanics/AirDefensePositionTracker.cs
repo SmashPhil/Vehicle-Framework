@@ -46,7 +46,7 @@ namespace Vehicles
 					{
 						airDefense.angle = (airDefense.angle + RotationRate * airDefense.searchDirection).ClampAndWrap(0, 360);
 						float angleToTarget = airDefense.parent.DrawPos.AngleToPoint(aerialVehicleSearchingFor.DrawPos);
-						if (withinMaxDistance && Mathf.Abs(angleToTarget - airDefense.angle) <= airDefense.Arc)
+						if (withinMaxDistance && Mathf.Abs(angleToTarget - airDefense.angle) <= (airDefense.Arc / 2))
 						{
 							airDefense.activeTargets.Add(aerialVehicleSearchingFor);
 						}
@@ -54,14 +54,15 @@ namespace Vehicles
 					else
 					{
 						float headingToTarget = WorldHelper.TryFindHeading(airDefense.parent.DrawPos, airDefense.CurrentTarget.DrawPos);
-						int dirSign = headingToTarget < airDefense.angle ? -1 : 1;
-						if (Mathf.Abs(headingToTarget - airDefense.angle) < 1)
+						int dirSignMultiplier = headingToTarget < airDefense.angle ? -2 : 2;
+						if (Mathf.Abs(headingToTarget - airDefense.angle) < 1 || Mathf.Abs(headingToTarget - airDefense.angle) > 359)
 						{
 							airDefense.angle = headingToTarget;
+							airDefense.Attack();
 						}
 						else
 						{
-							airDefense.angle = (airDefense.angle + RotationRate * dirSign).ClampAndWrap(0, 360);
+							airDefense.angle = (airDefense.angle + RotationRate * dirSignMultiplier).ClampAndWrap(0, 360);
 						}
 						if (!withinMaxDistance)
 						{
@@ -116,17 +117,6 @@ namespace Vehicles
 				{
 					defensesToDraw.Add(airDefense);
 				}
-			}
-		}
-
-		public static void HighlightEnemySettlements()
-		{
-			if (WorldRendererUtility.WorldRenderedNow)
-			{
-				//foreach (AirDefense airDefense in activeSettlementDefenses)
-				//{
-				//	GenDraw.DrawWorldRadiusRing(airDefense.parent.Tile, Mathf.CeilToInt(airDefense.antiAircraft.properties.distance));
-				//}
 			}
 		}
 

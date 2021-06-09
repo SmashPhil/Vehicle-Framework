@@ -924,16 +924,17 @@ namespace Vehicles
 			{
 				return;
 			}
-			if(cachedGraphicData is null || forceRegen)
+			if (cachedGraphicData is null || forceRegen)
 			{
 				cachedGraphicData = new GraphicDataRGB();
 				cachedGraphicData.CopyFrom(turretDef.graphicData);
-				if(turretDef.matchParentColor)
+				if (turretDef.matchParentColor)
 				{
 					cachedGraphicData.color = forPawn.DrawColor;
 					cachedGraphicData.colorTwo = forPawn.DrawColorTwo;
 					cachedGraphicData.colorThree = forPawn.DrawColorThree;
 					cachedGraphicData.tiles = forPawn.tiles;
+					cachedGraphicData.displacement = forPawn.displacement;
 				}
 			}
 
@@ -958,13 +959,14 @@ namespace Vehicles
 				cachedGraphicData = new GraphicDataRGB();
 				cachedGraphicData.CopyFrom(turretDef.graphicData);
 				
-				if(turretDef.matchParentColor)
+				if (turretDef.matchParentColor)
 				{
 					var bodyGraphicData = alternateDef.graphicData;
 					cachedGraphicData.color = bodyGraphicData.color;
 					cachedGraphicData.colorTwo = bodyGraphicData.colorTwo;
 					cachedGraphicData.colorThree = bodyGraphicData.colorThree;
 					cachedGraphicData.tiles = bodyGraphicData.tiles;
+					cachedGraphicData.displacement = bodyGraphicData.displacement;
 				}
 			}
 

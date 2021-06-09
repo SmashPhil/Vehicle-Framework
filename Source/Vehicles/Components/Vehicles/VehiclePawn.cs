@@ -44,6 +44,7 @@ namespace Vehicles
 		private float moveSpeedModifier;
 
 		public float tiles = 1;
+		public Vector2 displacement = Vector2.zero;
 		private Graphic_Vehicle graphicInt;
 
 		private SelfOrderingList<ThingComp> cachedComps = new SelfOrderingList<ThingComp>();
@@ -261,6 +262,7 @@ namespace Vehicles
 					graphicData.colorTwo = DrawColorTwo;
 					graphicData.colorThree = DrawColorThree;
 					graphicData.tiles = tiles;
+					graphicData.displacement = displacement;
 					graphicData.pattern = pattern;
 					graphicInt = graphicData.Graphic as Graphic_Vehicle;
 				}
@@ -272,7 +274,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return pattern.properties.colorOne ?? color1;
+				return pattern?.properties?.colorOne ?? color1;
 			}
 			set
 			{
@@ -284,7 +286,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return pattern.properties.colorTwo ?? color2;
+				return pattern?.properties?.colorTwo ?? color2;
 			}
 			set
 			{
@@ -296,7 +298,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return pattern.properties.colorThree ?? color3;
+				return pattern?.properties?.colorThree ?? color3;
 			}
 			set
 			{
@@ -362,11 +364,14 @@ namespace Vehicles
 			get
 			{
 				List<Pawn> pawnsOnShip = new List<Pawn>();
-				if (!(handlers is null) && handlers.Count > 0)
+				if (handlers != null && handlers.Count > 0)
 				{
 					foreach (VehicleHandler handler in handlers)
 					{
-						if (!(handler.handlers is null) && handler.handlers.Count > 0) pawnsOnShip.AddRange(handler.handlers);
+						if (handler.handlers != null && handler.handlers.Count > 0)
+						{
+							pawnsOnShip.AddRange(handler.handlers);
+						}
 					}
 				}
 
@@ -1750,6 +1755,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref color3, "color3", Color.white);
 
 			Scribe_Values.Look(ref tiles, "tiles", 1);
+			Scribe_Values.Look(ref displacement, "displacement", Vector2.zero);
 			Scribe_Defs.Look(ref pattern, "pattern");
 			Scribe_Defs.Look(ref retexture, "retexture");
 

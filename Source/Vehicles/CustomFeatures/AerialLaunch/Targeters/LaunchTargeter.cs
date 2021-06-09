@@ -224,7 +224,17 @@ namespace Vehicles
 
 					GUI.Label(labelPosition, fuelCostLabel);
 					GUI.color = color;
+				}
+			}
+		}
 
+		public virtual void DrawAirDefenseGrid()
+		{
+			foreach (AirDefense airDefense in AirDefensePositionTracker.airDefenseCache.Values)
+			{
+				if (airDefense.parent.Faction.HostileTo(Faction.OfPlayer))
+				{
+					RenderHelper.DrawWorldRadiusRing(airDefense.parent.Tile, Mathf.CeilToInt(airDefense.MaxDistance), TexData.OneSidedWorldLineMatRed);
 				}
 			}
 		}
@@ -233,6 +243,7 @@ namespace Vehicles
 		{
 			if (IsTargeting)
 			{
+				DrawAirDefenseGrid();
 				if (aerialVehicle != null)
 				{
 					originOnMap = aerialVehicle.DrawPos;

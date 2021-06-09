@@ -11,8 +11,14 @@ using SmashTools;
 
 namespace Vehicles
 {
+	[StaticConstructorOnStartup]
 	public static class RenderHelper
 	{
+		private static List<int> cachedEdgeTiles = new List<int>();
+		private static int cachedEdgeTilesForCenter = -1;
+		private static int cachedEdgeTilesForRadius = -1;
+		private static int cachedEdgeTilesForWorldSeed = -1;
+
 		/// <summary>
 		/// Calculate VehicleTurret draw offset
 		/// </summary>
@@ -183,7 +189,8 @@ namespace Vehicles
 		/// <param name="manualColorOne"></param>
 		/// <param name="manualColorTwo"></param>
 		/// <remarks>Might possibly want to throw into separate threads</remarks>
-		public static void DrawCannonTexturesTiled(this VehiclePawn vehicle, Rect displayRect, IEnumerable<VehicleTurret> cannons, PatternDef pattern, bool resolveGraphics = false, Color? manualColorOne = null, Color? manualColorTwo = null, Color? manualColorThree = null, float tiles = 1)
+		public static void DrawCannonTexturesTiled(this VehiclePawn vehicle, Rect displayRect, IEnumerable<VehicleTurret> cannons, PatternDef pattern, bool resolveGraphics = false, 
+			Color? manualColorOne = null, Color? manualColorTwo = null, Color? manualColorThree = null, float tiles = 1, float displacementX = 0, float displacementY = 0)
 		{
 			foreach (VehicleTurret cannon in cannons)
 			{
@@ -218,6 +225,7 @@ namespace Vehicles
 						colorTwo = manualColorTwo != null ? manualColorTwo.Value : vehicle.DrawColorTwo,
 						colorThree = manualColorThree != null ? manualColorThree.Value : vehicle.DrawColorThree,
 						tiles = tiles,
+						displacement = new Vector2(displacementX, displacementY),
 						properties = pattern.properties,
 						isSkin = pattern is SkinDef,
 						maskTex = cannon.CannonGraphic.masks[0],
@@ -290,7 +298,7 @@ namespace Vehicles
 		/// <param name="manualColorThree"></param>
 		/// <param name="tiles"></param>
 		public static void DrawVehicleTexTiled(Rect rect, Texture2D vehicleTex, VehiclePawn vehicle, PatternDef pattern = null, bool resolveGraphics = false, 
-			Color? manualColorOne = null, Color? manualColorTwo = null, Color? manualColorThree = null, float tiles = 1)
+			Color? manualColorOne = null, Color? manualColorTwo = null, Color? manualColorThree = null, float tiles = 1, float displacementX = 0, float displacementY = 0)
 		{
 			Material mat = new Material(vehicle.VehicleGraphic.MatAt(Rot4.North, vehicle));
 
@@ -304,6 +312,7 @@ namespace Vehicles
 					colorTwo = manualColorTwo != null ? manualColorTwo.Value : vehicle.DrawColorTwo,
 					colorThree = manualColorThree != null ? manualColorThree.Value : vehicle.DrawColorThree,
 					tiles = tiles,
+					displacement = new Vector2(displacementX, displacementY),
 					properties = pattern.properties,
 					isSkin = pattern is SkinDef,
 					maskTex = vehicle.VehicleGraphic.masks[0],
@@ -316,7 +325,7 @@ namespace Vehicles
 
 			if (vehicle.CompCannons != null)
 			{
-				vehicle.DrawCannonTexturesTiled(rect, vehicle.CompCannons.Cannons.OrderBy(x => x.drawLayer), pattern, resolveGraphics, manualColorOne, manualColorTwo, manualColorThree, tiles);
+				vehicle.DrawCannonTexturesTiled(rect, vehicle.CompCannons.Cannons.OrderBy(x => x.drawLayer), pattern, resolveGraphics, manualColorOne, manualColorTwo, manualColorThree, tiles, displacementX, displacementY);
 			}
 		}
 
@@ -541,7 +550,7 @@ namespace Vehicles
 				Dialog_ColorPicker.hue = Mathf.InverseLerp(rect.height, 0f, Event.current.mousePosition.y - rect.y);
 				if (Dialog_ColorPicker.hue != num)
 				{
-					Dialog_ColorPicker.SetColor(Dialog_ColorPicker.hue, Dialog_ColorPicker.saturation, Dialog_ColorPicker.value);
+					Dialog_ColorPicker.Instance.SetColor(Dialog_ColorPicker.hue, Dialog_ColorPicker.saturation, Dialog_ColorPicker.value);
 				}
 			}
 			if (Input.GetMouseButtonUp(0))
@@ -567,7 +576,7 @@ namespace Vehicles
 			{
 				Dialog_ColorPicker.saturation = Mathf.InverseLerp(0f, rect.width, Event.current.mousePosition.x - rect.x);
 				Dialog_ColorPicker.value = Mathf.InverseLerp(rect.width, 0f, Event.current.mousePosition.y - rect.y);
-				Dialog_ColorPicker.SetColor(Dialog_ColorPicker.hue, Dialog_ColorPicker.saturation, Dialog_ColorPicker.value);
+				Dialog_ColorPicker.Instance.SetColor(Dialog_ColorPicker.hue, Dialog_ColorPicker.saturation, Dialog_ColorPicker.value);
 			}
 			if (Input.GetMouseButtonUp(0))
 			{
@@ -851,6 +860,50 @@ namespace Vehicles
 				return true;
 			}
 			return false;
+		}
+
+		public static void DrawWorldRadiusRing(int center, int radius, Material material)
+		{
+			if (radius < 0)
+			{
+				return;
+			}
+			if (cachedEdgeTilesForCenter != center || cachedEdgeTilesForRadius != radius || cachedEdgeTilesForWorldSeed != Find.World.info.Seed)
+			{
+				cachedEdgeTilesForCenter = center;
+				cachedEdgeTilesForRadius = radius;
+				cachedEdgeTilesForWorldSeed = Find.World.info.Seed;
+				cachedEdgeTiles.Clear();
+				Find.WorldFloodFiller.FloodFill(center, (int tile) => true, delegate (int tile, int dist)
+				{
+					if (dist > radius + 1)
+					{
+						return true;
+					}
+					if (dist == radius + 1)
+					{
+						cachedEdgeTiles.Add(tile);
+					}
+					return false;
+				}, int.MaxValue, null);
+				WorldGrid worldGrid = Find.WorldGrid;
+				Vector3 c = worldGrid.GetTileCenter(center);
+				Vector3 n = c.normalized;
+				cachedEdgeTiles.Sort(delegate (int a, int b)
+				{
+					float num = Vector3.Dot(n, Vector3.Cross(worldGrid.GetTileCenter(a) - c, worldGrid.GetTileCenter(b) - c));
+					if (Mathf.Abs(num) < 0.0001f)
+					{
+						return 0;
+					}
+					if (num < 0f)
+					{
+						return -1;
+					}
+					return 1;
+				});
+			}
+			GenDraw.DrawWorldLineStrip(cachedEdgeTiles, material, 5f);
 		}
 	}
 }

@@ -82,6 +82,7 @@ namespace Vehicles
 				Log.Error($"Unable to retrieve saved default pattern {defaultMask}. Defaulting to original Default mask.");
 				pattern = PatternDefOf.Default;
 			}
+
 			result.pattern = request.RandomizeMask ? result.VehicleGraphic.maskMatPatterns.RandomElement().Key : pattern;
 			if (result.VehicleGraphic.MatSingle.shader.SupportsRGBMaskTex())
 			{
@@ -89,18 +90,20 @@ namespace Vehicles
 				result.DrawColorTwo = request.ColorTwo;
 				result.DrawColorThree = request.ColorThree;
 			}
-
+			
 			result.PostGenerationSetup();
 			foreach (VehicleComp comp in result.AllComps.Where(c => c is VehicleComp))
 			{
 				comp.PostGenerationSetup();
 			}
+			
 			//REDO - Allow other modders to add setup for non clean-slate items
 			if (!request.CleanSlate)
 			{
 				UpgradeAtRandom(result, request.Upgrades);
 				DistributeAmmunition(result);
 			}
+			
 			float num = Rand.ByCurve(DefaultAgeGenerationCurve);
 			result.ageTracker.AgeBiologicalTicks = (long)(num * BiologicalAgeTicksMultiplier) + Rand.Range(0, 3600000);
 			result.needs.SetInitialLevels();
@@ -111,10 +114,13 @@ namespace Vehicles
 			return result;
 		}
 
-		public static void SpawnVehicleRandomized(VehicleDef vehicleDef, IntVec3 cell, Map map, Faction faction, Rot4? rot = null, bool autoFill = false)
+		public static VehiclePawn SpawnVehicleRandomized(VehicleDef vehicleDef, IntVec3 cell, Map map, Faction faction, Rot4? rot = null, bool autoFill = false)
 		{
 			if (rot is null)
+			{
 				rot = Rot4.Random;
+			}
+
 			VehiclePawn vehicle = GenerateVehicle(new VehicleGenerationRequest(vehicleDef, faction, true, true));
 			vehicle.CompFueledTravel?.Refuel(vehicle.CompFueledTravel.FuelCapacity);
 			GenSpawn.Spawn(vehicle, cell, map, rot.Value, WipeMode.FullRefund, false);
@@ -129,6 +135,7 @@ namespace Vehicles
 					vehicle.Notify_Boarded(pawn);
 				}
 			}
+			return vehicle;
 		}
 
 		public static IEnumerable<PawnKindDef> GetAppropriateVehicles(Faction faction, float points, bool combatFocused)

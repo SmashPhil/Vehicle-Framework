@@ -161,9 +161,9 @@ namespace Vehicles
 			return GraphicDatabase.Get<Graphic_Vehicle>(path, newShader, drawSize, newColor, newColorTwo, DataRGB);
 		}
 
-		public override Graphic_RGB GetColoredVersion(Shader shader, Color colorOne, Color colorTwo, Color colorThree, float tiles = 1)
+		public override Graphic_RGB GetColoredVersion(Shader shader, Color colorOne, Color colorTwo, Color colorThree, float tiles = 1, float displacementX = 0, float displacementY = 0)
 		{
-			return GraphicDatabaseRGB.Get<Graphic_Vehicle>(path, shader, drawSize, colorOne, colorTwo, colorThree, tiles, DataRGB);
+			return GraphicDatabaseRGB.Get<Graphic_Vehicle>(path, shader, drawSize, colorOne, colorTwo, colorThree, tiles, displacementX, displacementY, DataRGB);
 		}
 	}
 }

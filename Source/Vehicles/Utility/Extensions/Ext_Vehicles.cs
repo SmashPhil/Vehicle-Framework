@@ -41,12 +41,22 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Checking if thing is a boat
+		/// Check if <paramref name="thing"/> is a boat
 		/// </summary>
 		/// <param name="thing"></param>
 		public static bool IsBoat(this Thing thing)
 		{
 			return thing is VehiclePawn vehicle && vehicle.VehicleDef.vehicleType == VehicleType.Sea;
+		}
+
+		/// <summary>
+		/// Check if <paramref name="thingDef"/> is a boat
+		/// </summary>
+		/// <param name="thingDef"></param>
+		/// <returns></returns>
+		public static bool IsBoat(this ThingDef thingDef)
+		{
+			return thingDef is VehicleDef vehicleDef && vehicleDef.vehicleType == VehicleType.Sea;
 		}
 
 		/// <summary>
@@ -194,6 +204,34 @@ namespace Vehicles
 					return false;
 				}
 				else if(!GenGrid.Standable(cell, map))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		/// <summary>
+		/// Ensures the cellrect inhabited by <paramref name="vehicleDef"/> contains no Things that will block pathing and movement at <paramref name="cell"/>.
+		/// </summary>
+		/// <param name="pawn"></param>
+		/// <param name="c"></param>
+		public static bool CellRectStandable(this VehicleDef vehicleDef, Map map, IntVec3 cell, Rot4? rot = null)
+		{
+			IntVec2 dimensions = vehicleDef.Size;
+			if (rot?.IsHorizontal ?? false)
+			{
+				int x = dimensions.x;
+				dimensions.x = dimensions.z;
+				dimensions.z = x;
+			}
+			foreach (IntVec3 cell2 in CellRect.CenteredOn(cell, dimensions.x, dimensions.z))
+			{
+				if (vehicleDef.IsBoat() && !GenGridVehicles.Standable(cell2, map))
+				{
+					return false;
+				}
+				else if (!GenGrid.Standable(cell2, map))
 				{
 					return false;
 				}

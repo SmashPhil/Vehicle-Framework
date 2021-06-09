@@ -7,7 +7,7 @@ namespace Vehicles
 	public class PatternProperties
 	{
 		//All = Apply to all vehicles
-		public Dictionary<string, float> tiles = new Dictionary<string, float>();
+		public Dictionary<string, float> tiles = new Dictionary<string, float>(); //REDO - disable Dialog_ColorPicker zoom slider for this condition
 		public bool equalize = true;
 		public bool dynamicTiling = true;
 

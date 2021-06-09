@@ -11,6 +11,7 @@ namespace Vehicles
 	public class GraphicDataRGB : GraphicData
 	{
 		public float tiles = 1;
+		public Vector2 displacement = Vector2.zero;
 		public Color colorThree = Color.white;
 		public PatternDef pattern;
 
@@ -55,7 +56,7 @@ namespace Vehicles
 				cutout = RGBShaderTypeDefOf.CutoutComplexRGB;
 			}
 			Shader shader = cutout.Shader;
-			cachedRGBGraphic = GraphicDatabaseRGB.Get(graphicClass, texPath, shader, drawSize, color, colorTwo, colorThree, tiles, this, shaderParameters);
+			cachedRGBGraphic = GraphicDatabaseRGB.Get(graphicClass, texPath, shader, drawSize, color, colorTwo, colorThree, tiles, displacement.x, displacement.y, this, shaderParameters);
 			AccessTools.Field(typeof(GraphicData), "cachedGraphic").SetValue(this, cachedRGBGraphic);
 		}
 	}

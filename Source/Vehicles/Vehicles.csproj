@@ -566,7 +566,7 @@
     <Compile Include="Graphics\Graphic\MaterialGeneration\MaterialRGBRequest.cs" />
     <Compile Include="Graphics\Graphic\MaterialGeneration\MaterialPoolExpanded.cs" />
     <Compile Include="Graphics\Graphic\MaterialGeneration\AdditionalShaderPropertyIDs.cs" />
-    <Compile Include="Graphics\Graphic\MaterialGeneration\ShaderDatabaseFromBundle.cs" />
+    <Compile Include="Graphics\Graphic\AssetBundle\AssetBundleDatabase.cs" />
     <Compile Include="Graphics\Graphic\Patterns\PatternProperties.cs" />
     <Compile Include="Graphics\Graphic\Patterns\SkinDef.cs" />
     <Compile Include="Graphics\Graphic\Patterns\PatternDef.cs" />

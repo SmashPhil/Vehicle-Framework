@@ -27,11 +27,10 @@ namespace Vehicles
 		public int maxAltitude = 10000;
 		[PostToSettings(Label = "VehicleLandingAltitude", Translate = true, Tooltip = "VehicleLandingAltitudeTooltip", UISettingsType = UISettingsType.IntegerBox, VehicleType = VehicleType.Air)]
 		[NumericBoxValues(MinValue = AltitudeMeter.MinimumAltitude, MaxValue = AltitudeMeter.MaximumAltitude)]
-		public int landingAltitude = 200;
+		public int landingAltitude = 1000;
 
 		[PostToSettings(Label = "VehicleReconDistance", Translate = true, Tooltip = "VehicleReconDistanceTooltip", UISettingsType = UISettingsType.SliderInt, VehicleType = VehicleType.Air)]
 		[SliderValues(MinValue = 1, MaxValue = 8)]
-		[DisableSetting]
 		public int reconDistance = 1;
 		[PostToSettings(Label = "VehicleLaunchFixedMaxDistance", Translate = true, Tooltip = "VehicleLaunchFixedMaxDistanceTooltip", UISettingsType = UISettingsType.SliderInt, VehicleType = VehicleType.Air)]
 		[SliderValues(MinValue = 0, MaxValue = 100, MinValueDisplay = "VehicleLaunchFixedMaxDistanceDisabled")]

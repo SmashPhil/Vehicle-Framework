@@ -50,8 +50,8 @@ namespace Vehicles
 				new Tuple<Color, Color, Color>(new Color32(140, 120, 0, 255), new Color32(78, 78, 78, 255), new Color32(210, 210, 210, 255)),
 				new Tuple<Color, Color, Color>(new Color32(135, 135, 135, 255), new Color32(0, 75, 85, 255), new Color32(210, 210, 210, 255)),
 				new Tuple<Color, Color, Color>(new Color32(120, 135, 140, 255), new Color32(191, 191, 191, 255), new Color32(210, 210, 210, 255)),
-				new Tuple<Color, Color, Color>(new Color32(120, 135, 140, 255), new Color32(191, 191, 191, 255), new Color32(210, 210, 210, 255)),
-				new Tuple<Color, Color, Color>(new Color32(120, 135, 140, 255), new Color32(191, 191, 191, 255), new Color32(210, 210, 210, 255)),
+				new Tuple<Color, Color, Color>(new Color32(190, 110, 185, 255), new Color32(125, 80, 155, 255), new Color32(50, 35, 90, 255)),
+				new Tuple<Color, Color, Color>(new Color32(60, 115, 110, 255), new Color32(255, 190, 120, 255), new Color32(250, 110, 0, 255)),
 			};
 		}
 

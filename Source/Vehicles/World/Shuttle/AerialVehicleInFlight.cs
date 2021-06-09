@@ -70,7 +70,7 @@ namespace Vehicles
 
 		public float Rate => vehicle.CompVehicleLauncher.RateOfClimb * ClimbRateCurve.Evaluate(Elevation / vehicle.CompVehicleLauncher.MaxAltitude);
 
-		public int TicksTillLandingElevation => Mathf.RoundToInt((Elevation - vehicle.CompVehicleLauncher.LandingAltitude) / Rate);
+		public int TicksTillLandingElevation => Mathf.RoundToInt((Elevation - (vehicle.CompVehicleLauncher.LandingAltitude / 2)) / Rate);
 
 		private Material VehicleMat
 		{

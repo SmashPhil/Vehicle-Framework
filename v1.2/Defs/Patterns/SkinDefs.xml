@@ -5,6 +5,9 @@
 		<defName>Jungle</defName>
 		<label>Jungle</label>
 		<path>Graphics/Skins/Jungle/Jungle</path>
+		<properties>
+			<dynamicTiling>false</dynamicTiling>
+		</properties>
 	</Vehicles.SkinDef>
 	
 	<Vehicles.SkinDef>

@@ -9,8 +9,11 @@
 [title]Bug Fixes[/title][font]Tiny[/font]
 Fixed bug where WorldObjects in a loaded game would not reregister valid air defenses.
 
+Fixed bug where aerial vehicle would be pushed to circle destination due to landing altitude being slightly under mark.
+
+Fixed bug where strafe run would not allow targeting.
 [title]New Additions[/title]
-Changed the way Settlement Air Defenses are cached
+Changed the way Settlement Air Defenses are cached.
 
 Air Defenses can now be attached to any world objects as a WorldComp.
 
@@ -18,7 +21,11 @@ Added VerbProperties_Recoil, Verb_ShootRecoiled, Building_RecoiledTurret, and Tu
 
 Added 88mm Flak 36 artillery for Flak type air defense.
 
-Added new verb for recoile
+Added new verb for recoiled turrets.
+
+Added spotlight targeters for air defenses.
+
+Added dragging for patterns. Allows the player to move the pattern applied to the vehicle for desired effect.
 [title]Additional Changes[/title]
 Cleaned up AntiAircraft world objects for more field settings.
 

@@ -91,7 +91,7 @@ namespace Vehicles
 
 		public void PushCircleAt(int tile)
 		{
-			reconTiles = Ext_World.GetTileNeighbors(tile, aerialVehicle.vehicle.CompVehicleLauncher.ReconDistance);
+			reconTiles = Ext_World.GetTileNeighbors(tile, aerialVehicle.vehicle.CompVehicleLauncher.ReconDistance, aerialVehicle.DrawPos);
 			foreach (int neighborTile in reconTiles)
 			{
 				nodes.Insert(0, new FlightNode(neighborTile));
@@ -105,7 +105,7 @@ namespace Vehicles
 			{
 				nodes.Pop();
 			}
-			reconTiles = Ext_World.GetTileNeighbors(tile, aerialVehicle.vehicle.CompVehicleLauncher.ReconDistance);
+			reconTiles = Ext_World.GetTileNeighbors(tile, aerialVehicle.vehicle.CompVehicleLauncher.ReconDistance, aerialVehicle.DrawPos);
 			foreach (int rTile in reconTiles)
 			{
 				nodes.Add(new FlightNode(rTile));

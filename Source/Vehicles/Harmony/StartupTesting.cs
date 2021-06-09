@@ -5,7 +5,6 @@ using Verse;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
-using SmashTools.Debugging;
 
 namespace Vehicles
 {
@@ -37,6 +36,22 @@ namespace Vehicles
 			}
 			Current.Game.CurrentMap = targetMap;
 			LaunchTargeter.Instance.RegisterActionOnTile(targetMap.Tile, new AerialVehicleArrivalAction_StrafeMap(vehicle, targetMap.Parent));
+		}
+
+		[UnitTest(Active = false)]
+		private static void UnitTestColorDialog()
+		{
+			Map map = Current.Game.CurrentMap;
+			if (map is null)
+			{
+				SmashLog.Error($"Unable to execute unit test <method>UnitTestColorDialog</method> post load.");
+				return;
+			}
+			VehicleDef vehicleDef = DefDatabase<VehicleDef>.GetNamed("Tank");
+			VehiclePawn vehicle = VehicleSpawner.GenerateVehicle(vehicleDef, Faction.OfPlayer);
+			GenSpawn.Spawn(vehicle, CellFinderExtended.RandomCenterCell(map,
+				(IntVec3 c) => !c.Roofed(map) && c.InBounds(map) && vehicleDef.CellRectStandable(map, c)), map);
+			vehicle.ChangeColor();
 		}
 	}
 }

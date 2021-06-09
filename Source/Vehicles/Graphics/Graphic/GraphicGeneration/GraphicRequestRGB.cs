@@ -17,11 +17,12 @@ namespace Vehicles
 		public Color colorTwo;
 		public Color colorThree;
 		public float tiles;
+		public Vector2 displacement;
 		public GraphicDataRGB graphicData;
 		public int renderQueue;
 		public List<ShaderParameter> shaderParameters;
 
-		public GraphicRequestRGB(Type graphicClass, string path, Shader shader, Vector2 drawSize, Color color, Color colorTwo, Color colorThree, float tiles, GraphicDataRGB graphicData, int renderQueue, List<ShaderParameter> shaderParameters)
+		public GraphicRequestRGB(Type graphicClass, string path, Shader shader, Vector2 drawSize, Color color, Color colorTwo, Color colorThree, float tiles, Vector2 displacement, GraphicDataRGB graphicData, int renderQueue, List<ShaderParameter> shaderParameters)
 		{
 			this.graphicClass = graphicClass;
 			this.path = path;
@@ -31,6 +32,7 @@ namespace Vehicles
 			this.colorTwo = colorTwo;
 			this.colorThree = colorThree;
 			this.tiles = tiles;
+			this.displacement = displacement;
 			this.graphicData = graphicData;
 			this.renderQueue = renderQueue;
 			this.shaderParameters = (shaderParameters.NullOrEmpty() ? null : shaderParameters);
@@ -46,6 +48,7 @@ namespace Vehicles
 			colorTwo = req.colorTwo;
 			colorThree = Color.blue;
 			tiles = 1;
+			displacement = Vector2.zero;
 			graphicData = req.graphicData as GraphicDataRGB;
 			renderQueue = req.renderQueue;
 			shaderParameters = req.shaderParameters;
@@ -60,8 +63,8 @@ namespace Vehicles
 				path = BaseContent.BadTexPath;
 			}
 			return Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombineStruct(
-				Gen.HashCombineStruct(Gen.HashCombineStruct(Gen.HashCombineStruct(Gen.HashCombine(Gen.HashCombine(
-					Gen.HashCombine(Gen.HashCombine(0, tiles), graphicClass), path), shader), drawSize), color), colorTwo), colorThree), graphicData), renderQueue), shaderParameters);
+				Gen.HashCombineStruct(Gen.HashCombineStruct(Gen.HashCombineStruct(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(
+					Gen.HashCombine(0, displacement), tiles), graphicClass), path), shader), drawSize), color), colorTwo), colorThree), graphicData), renderQueue), shaderParameters);
 		}
 
 		public override bool Equals(object obj)
@@ -72,7 +75,7 @@ namespace Vehicles
 		public bool Equals(GraphicRequestRGB other)
 		{
 			return graphicClass == other.graphicClass && path == other.path && shader == other.shader && drawSize == other.drawSize && 
-				color == other.color && colorTwo == other.colorTwo && colorThree == other.colorThree && tiles == other.tiles && 
+				color == other.color && colorTwo == other.colorTwo && colorThree == other.colorThree && tiles == other.tiles && displacement == other.displacement &&
 				graphicData == other.graphicData && renderQueue == other.renderQueue && shaderParameters == other.shaderParameters;
 		}
 

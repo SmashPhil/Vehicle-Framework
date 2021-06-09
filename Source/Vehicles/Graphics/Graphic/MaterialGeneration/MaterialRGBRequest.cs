@@ -21,6 +21,7 @@ namespace Vehicles
 		public Color colorTwo;
 		public Color colorThree;
 		public float tiles;
+		public Vector2 displacement;
 
 		public MaterialRequestRGB(Texture2D tex)
 		{
@@ -31,6 +32,7 @@ namespace Vehicles
 			colorTwo = Color.white;
 			colorThree = Color.white;
 			tiles = 1;
+			displacement = Vector2.zero;
 			maskTex = null;
 			patternTex = null;
 			renderQueue = 0;
@@ -48,6 +50,7 @@ namespace Vehicles
 			colorTwo = Color.white;
 			colorThree = Color.white;
 			tiles = 1;
+			displacement = Vector2.zero;
 			patternTex = null;
 			renderQueue = 0;
 			shaderParameters = null;
@@ -64,6 +67,7 @@ namespace Vehicles
 			colorTwo = properties.colorTwo ?? Color.white;
 			colorThree = properties.colorThree ?? Color.white;
 			tiles = properties.tiles.TryGetValue("All", 1);
+			displacement = Vector2.zero;
 			patternTex = null;
 			renderQueue = 0;
 			shaderParameters = null;
@@ -80,6 +84,7 @@ namespace Vehicles
 			colorTwo = properties.colorTwo ?? Color.white;
 			colorThree = properties.colorThree ?? Color.white;
 			tiles = properties.tiles.TryGetValue("All", 1);
+			displacement = Vector2.zero;
 			this.patternTex = patternTex;
 			renderQueue = req.renderQueue;
 			shaderParameters = req.shaderParameters;
@@ -96,6 +101,7 @@ namespace Vehicles
 			colorTwo = properties.colorTwo ?? Color.white;
 			colorThree = properties.colorThree ?? Color.white;
 			tiles = properties.tiles.TryGetValue("All", 1);
+			displacement = Vector2.zero;
 			this.patternTex = patternTex;
 			renderQueue = req.renderQueue;
 			shaderParameters = req.shaderParameters;
@@ -112,7 +118,8 @@ namespace Vehicles
 
 		public override int GetHashCode()
 		{
-			return Gen.HashCombine(Gen.HashCombineInt(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(0, tiles), isSkin), color), colorTwo), colorThree), mainTex), maskTex), renderQueue), shaderParameters);
+			return Gen.HashCombine(Gen.HashCombineInt(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(
+				Gen.HashCombine(Gen.HashCombine(0, displacement), tiles), isSkin), color), colorTwo), colorThree), mainTex), maskTex), renderQueue), shaderParameters);
 		}
 
 		public override bool Equals(object obj)
@@ -125,7 +132,7 @@ namespace Vehicles
 			return other.shader == shader && other.mainTex == mainTex && other.properties.colorOne == properties.colorOne && 
 				other.properties.colorTwo == properties.colorTwo && other.properties.colorThree == properties.colorThree 
 				&& other.maskTex == maskTex && other.patternTex == patternTex && other.renderQueue == renderQueue && 
-				other.shaderParameters == shaderParameters && other.isSkin == isSkin;
+				other.shaderParameters == shaderParameters && other.isSkin == isSkin && other.tiles == tiles && other.displacement == displacement;
 		}
 
 		public static bool operator ==(MaterialRequestRGB lhs, MaterialRequestRGB rhs)

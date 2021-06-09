@@ -253,5 +253,53 @@ namespace Vehicles
 				}, localTrad.GetHashCode()));
 			}
 		}
+
+		public static void DrawPagination(Rect rect, ref int pageNumber, int pageCount)
+		{
+			Rect leftButtonRect = new Rect(rect.x, rect.y, rect.height, rect.height);
+			Rect rightButtonRect = new Rect(rect.x + rect.width - rect.height, rect.y, rect.height, rect.height);
+			if (Widgets.ButtonImage(leftButtonRect, VehicleTex.LeftArrow))
+			{
+				pageNumber = (--pageNumber).Clamp(1, pageCount);
+			}
+			if (Widgets.ButtonImage(rightButtonRect, VehicleTex.RightArrow))
+			{
+				pageNumber = (++pageNumber).Clamp(1, pageCount);
+			}
+			float numbersLength = rect.width - rect.height * 2f;
+			int pageNumbersDisplayedTotal = Mathf.CeilToInt((numbersLength / 1.5f) / rect.height);
+			int pageNumbersDisplayedHalf = Mathf.FloorToInt(pageNumbersDisplayedTotal / 2f);
+
+			var font = Text.Font;
+			var anchor = Text.Anchor;
+			Text.Font = GameFont.Small;
+			Text.Anchor = TextAnchor.MiddleCenter;
+			float pageNumberingOrigin = rect.x + rect.height + numbersLength / 2;
+			Rect pageRect = new Rect(pageNumberingOrigin, rect.y, rect.height, rect.height);
+			Widgets.ButtonText(pageRect, pageNumber.ToString(), false);
+
+			Text.Font = GameFont.Tiny;
+			int offsetRight = 1;
+			for (int pageLeftDisplayNum = pageNumber + 1; pageLeftDisplayNum <= (pageNumber + pageNumbersDisplayedHalf) && pageLeftDisplayNum <= pageCount; pageLeftDisplayNum++, offsetRight++)
+			{
+				pageRect.x = pageNumberingOrigin + (numbersLength / pageNumbersDisplayedTotal * offsetRight);
+				if (Widgets.ButtonText(pageRect, pageLeftDisplayNum.ToString(), false))
+				{
+					pageNumber = pageLeftDisplayNum;
+				}
+			}
+			int offsetLeft = 1;
+			for (int pageRightDisplayNum = pageNumber - 1; pageRightDisplayNum >= (pageNumber - pageNumbersDisplayedHalf) && pageRightDisplayNum >= 1; pageRightDisplayNum--, offsetLeft++)
+			{
+				pageRect.x = pageNumberingOrigin - (numbersLength / pageNumbersDisplayedTotal * offsetLeft);
+				if (Widgets.ButtonText(pageRect, pageRightDisplayNum.ToString(), false))
+				{
+					pageNumber = pageRightDisplayNum;
+				}
+			}
+
+			Text.Font = font;
+			Text.Anchor = anchor;
+		}
 	}
 }
