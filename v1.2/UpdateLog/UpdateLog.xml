@@ -12,6 +12,8 @@ Fixed bug where WorldObjects in a loaded game would not reregister valid air def
 Fixed bug where aerial vehicle would be pushed to circle destination due to landing altitude being slightly under mark.
 
 Fixed bug where strafe run would not allow targeting.
+
+Fixed bug where TurretTop_Recoiled would only tick recoil when manned.
 [title]New Additions[/title]
 Changed the way Settlement Air Defenses are cached.
 
@@ -34,6 +36,8 @@ Flak now fire from an offset and in intervals.
 Air Defenses can now be generated for WorldObjects with varying amounts and with specific anti aircraft defs.
 
 AntiAircraftDef now defines both a minimum and maximum striking altitude.
+
+UI Enhancements to Dialog_ColorPicker
 [title]Final Notes[/title]
 Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.)
   </description>

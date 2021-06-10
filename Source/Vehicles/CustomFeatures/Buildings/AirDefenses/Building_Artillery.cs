@@ -166,6 +166,10 @@ namespace Vehicles
 		public override void Tick()
 		{
 			base.Tick();
+			if (TopArtillery is TurretTop_Recoiled topRecoiled)
+			{
+				topRecoiled.RecoilTick();
+			}
 			if (Active && (mannableComp is null || mannableComp.MannedNow) && !stunner.Stunned && Spawned && AttackVerb.state != VerbState.Bursting)
 			{
 				TopArtillery.Tick();

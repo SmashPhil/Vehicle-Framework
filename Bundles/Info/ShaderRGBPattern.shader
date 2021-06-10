@@ -112,6 +112,10 @@ Shader "Custom/ShaderRGBPattern"
 					finalColor = finalColor * greenPattern;
 					finalColor = finalColor * bluePattern;
 				}
+				if (finalColor.a <= 0.05)
+				{
+					finalColor.a = 0;
+				}
 				
 				return finalColor;
 			}

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
@@ -18,13 +20,13 @@ namespace Vehicles
 		private static readonly Dictionary<string, Shader> shaderLookup = new Dictionary<string, Shader>();
 		private static readonly Dictionary<string, Texture2D> textureLookup = new Dictionary<string, Texture2D>();
 
-		private static readonly string ShaderAssetBundlePath = $@"{VehicleMod.settings.Mod.Content.RootDir}\Bundles\RGBShaderBundle";
+		private static readonly string ShaderAssetBundlePath = @"Bundles\RGBShaderBundle";
 
-		private static readonly string CursorAssetBundlePath = $@"{VehicleMod.settings.Mod.Content.RootDir}\Bundles\CustomCursor";
+		private static readonly string CursorAssetBundlePath = @"Bundles\CustomCursor";
 
-		public static readonly AssetBundle shaderBundle;
+		public static readonly AssetBundle ShaderBundle;
 
-		public static readonly AssetBundle cursorBundle;
+		public static readonly AssetBundle CursorBundle;
 
 		public static readonly Shader CutoutComplexRGB;
 
@@ -44,26 +46,46 @@ namespace Vehicles
 					Log.Warning($"{VehicleHarmony.LogLabel} Unity Version {Application.unityVersion} does not match registered version for AssetBundles being loaded. You may encounter problems.");
 				}
 			}
+			string folderChecking = "default";
+			List<string> loadFolders = FilePaths.LoadFolderLocalFilePath(VehicleMod.settings.Mod.Content);
 			try
 			{
-				shaderBundle = AssetBundle.LoadFromFile(ShaderAssetBundlePath);
-				if (shaderBundle is null) throw new NullReferenceException();
+				foreach (string folder in loadFolders)
+				{
+					string versionFilePath = Path.Combine(VehicleMod.settings.Mod.Content.RootDir, folder, ShaderAssetBundlePath);
+					folderChecking = versionFilePath;
+					if (File.Exists(versionFilePath))
+					{
+						ShaderBundle = AssetBundle.LoadFromFile(versionFilePath);
+						if (ShaderBundle is null) throw new NullReferenceException();
 
-				CutoutComplexRGB = LoadAssetBundleShader("Assets/Shaders/ShaderRGB.shader");
-				CutoutComplexPattern = LoadAssetBundleShader("Assets/Shaders/ShaderRGBPattern.shader");
+						CutoutComplexRGB = LoadAssetBundleShader("Assets/Shaders/ShaderRGB.shader");
+						CutoutComplexPattern = LoadAssetBundleShader("Assets/Shaders/ShaderRGBPattern.shader");
+					}
+					goto CursorLoading;
+				}
+				throw new IOException();
 			}
 			catch (Exception ex)
 			{
-				SmashLog.Error($"Unable to load AssetBundle at <text>{ShaderAssetBundlePath}</text>\nException = {ex.Message}");
+				SmashLog.Error($"Unable to load AssetBundle at <text>{folderChecking}</text>\nException = {ex.Message}");
 			}
-
+			CursorLoading:;
 			try
 			{
-				cursorBundle = AssetBundle.LoadFromFile(CursorAssetBundlePath);
-				if (cursorBundle is null) throw new NullReferenceException();
+				foreach (string folder in loadFolders)
+				{
+					string versionFilePath = Path.Combine(VehicleMod.settings.Mod.Content.RootDir, folder, CursorAssetBundlePath);
+					folderChecking = versionFilePath;
+					if (File.Exists(versionFilePath))
+					{
+						CursorBundle = AssetBundle.LoadFromFile(versionFilePath);
+						if (CursorBundle is null) throw new NullReferenceException();
 
-				MouseHandOpen = LoadAssetBundleTexture("Assets/Textures/MouseHandOpen.png");
-				MouseHandClosed = LoadAssetBundleTexture("Assets/Textures/MouseHandClosed.png");
+						MouseHandOpen = LoadAssetBundleTexture("Assets/Textures/MouseHandOpen.png");
+						MouseHandClosed = LoadAssetBundleTexture("Assets/Textures/MouseHandClosed.png");
+					}
+				}
 			}
 			catch (Exception ex)
 			{
@@ -77,7 +99,7 @@ namespace Vehicles
 			{
 				return shader;
 			}
-			return (Shader)shaderBundle.LoadAsset(path);
+			return (Shader)ShaderBundle.LoadAsset(path);
 		}
 
 		public static Texture2D LoadAssetBundleTexture(string path)
@@ -86,12 +108,12 @@ namespace Vehicles
 			{
 				return texture;
 			}
-			return (Texture2D)cursorBundle.LoadAsset(path);
+			return (Texture2D)CursorBundle.LoadAsset(path);
 		}
 
 		public static bool SupportsRGBMaskTex(this Shader shader)
 		{
-			return shader == CutoutComplexPattern || shader == CutoutComplexRGB;
+			return shader == CutoutComplexPattern;
 		}
 	}
 }

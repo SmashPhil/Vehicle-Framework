@@ -87,6 +87,12 @@ Shader "Custom/ShaderRGB"
 				finalColor = _MainTexColor * redMask;
 				finalColor = finalColor * greenMask;
 				finalColor = finalColor * blueMask;
+
+				if (finalColor.a <= 0.05)
+				{
+					finalColor.a = 0;
+				}
+
 				return finalColor;
 			}
 			ENDCG

@@ -48,9 +48,8 @@ namespace Vehicles
 			}
 		}
 
-		public override void Tick()
+		public virtual void RecoilTick()
 		{
-			base.Tick();
 			if (targetRecoil > 0f)
 			{
 				if (recoilingBack)

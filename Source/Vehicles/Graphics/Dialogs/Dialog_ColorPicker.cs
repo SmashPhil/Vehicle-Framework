@@ -58,7 +58,6 @@ namespace Vehicles
 		public static float initialDragDifferenceX = 0;
 		public static float initialDragDifferenceY = 0;
 
-		private static Vector2 scrollPosition;
 		private static bool mouseOver = false;
 
 		public Dialog_ColorPicker() 
