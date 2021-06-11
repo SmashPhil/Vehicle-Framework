@@ -140,16 +140,16 @@ namespace Vehicles
 					VehicleMod.settings.colorStorage.ResetPalettes();
 				}
 			}
-
-			Rect colorContainerRect = new Rect(inRect.width / 1.5f, 5f, inRect.width / 3, inRect.height / 2 + SwitchSize);
+			float topBoxHeight = inRect.height / 2 + SwitchSize;
+			Rect colorContainerRect = new Rect(inRect.width / 1.5f, 15f, inRect.width / 3, topBoxHeight);
 			DrawColorSelection(colorContainerRect);
 
-			Rect paintRect = new Rect(inRect.width / 3f - 5f, 5f, inRect.width / 3, inRect.height / 2 + SwitchSize);
+			Rect paintRect = new Rect(inRect.width / 3f - 5f, colorContainerRect.y, inRect.width / 3, topBoxHeight);
 			DrawPaintSelection(paintRect);
 
 			//palette height = 157
 			float panelWidth = inRect.width * 2 / 3 + 5f;
-			float panelHeight = (panelWidth - 5 - (ColorStorage.PaletteCount / ColorStorage.PaletteRowCount - 1) * 5f) / (ColorStorage.PaletteCountPerRow * 3) * (ColorStorage.PaletteRowCount + 1);
+			float panelHeight = inRect.height - topBoxHeight - 20;
 			Rect paletteRect = new Rect(inRect.width / 3f - 5f, inRect.height - panelHeight, panelWidth, panelHeight);
 			DrawColorPalette(paletteRect);
 
@@ -227,7 +227,6 @@ namespace Vehicles
 
 		private void DrawPaintSelection(Rect paintRect)
 		{
-			paintRect = paintRect.ContractedBy(1);
 			Widgets.DrawBoxSolid(paintRect, Greyist);
 
 			Rect outRect = paintRect;

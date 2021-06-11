@@ -157,7 +157,7 @@ namespace Vehicles
 
 		public bool RotationIsValid => currentRotation == rotationTargeted;
 
-		public virtual bool CannonDisabled => RelatedHandlers.NotNullAndAny(h => h.handlers.Count < h.role.slotsToOperate);
+		public virtual bool CannonDisabled => RelatedHandlers.NotNullAndAny(h => h.handlers.Count < h.role.slotsToOperate) && !DebugSettings.godMode;
 
 		public bool NoGraphic => turretDef.graphicData is null;
 
@@ -1052,7 +1052,7 @@ namespace Vehicles
 				shellCount = turretDef.magazineCapacity;
 				return;
 			}
-			if (loadedAmmo is null || (ammo != null && (shellCount < turretDef.magazineCapacity || (turretDef.ammunition != null && ammo != loadedAmmo))))
+			if (loadedAmmo is null || (savedAmmoType != null && (shellCount < turretDef.magazineCapacity || (turretDef.ammunition != null && ammo != loadedAmmo))))
 			{
 				ReloadInternal(ammo);
 			}
@@ -1113,16 +1113,17 @@ namespace Vehicles
 							{
 								additionalCount = t.stackCount >= turretDef.magazineCapacity - (shellCount + countToTake) ? turretDef.magazineCapacity - (shellCount + countToTake) : t.stackCount;
 								Thing additionalItem = vehicle.inventory.innerContainer.Take(t, additionalCount);
-								if (additionalCount + countToTake >= turretDef.magazineCapacity)
-									break;
+								if (additionalCount + countToTake >= turretDef.magazineCapacity) break;
 							}    
 						}
 					}
 						
 					loadedAmmo = loadedThing.def;
 					shellCount = loadedThing.stackCount + additionalCount;
-					if(turretDef.reloadSound != null)
+					if (turretDef.reloadSound != null)
+					{
 						turretDef.reloadSound.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map, false));
+					}
 				}
 			}
 			catch (Exception ex)
@@ -1144,7 +1145,7 @@ namespace Vehicles
 
 		public virtual void TryRemoveShell()
 		{
-			if(loadedAmmo != null && shellCount > 0)
+			if (loadedAmmo != null && shellCount > 0)
 			{
 				Thing thing = ThingMaker.MakeThing(loadedAmmo);
 				thing.stackCount = shellCount;
