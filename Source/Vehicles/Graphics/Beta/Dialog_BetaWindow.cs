@@ -4,7 +4,7 @@ using System.Linq;
 using System.IO;
 using Verse;
 using UnityEngine;
-using UpdateLog;
+using UpdateLogTool;
 
 namespace Vehicles
 {
@@ -29,7 +29,7 @@ namespace Vehicles
 				betaDescription = File.ReadAllText(Path.Combine(VehicleHarmony.VehicleMMD.RootDir.FullName, "About", "BetaDescription.txt"));
 				segments = EnhancedText.ParseDescriptionData(betaDescription).ToList();
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 				throw new IOException($"Failed to read in BetaDescription");
 			}

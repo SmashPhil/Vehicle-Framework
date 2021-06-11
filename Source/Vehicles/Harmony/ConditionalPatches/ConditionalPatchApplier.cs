@@ -14,7 +14,7 @@ namespace Vehicles
 		{
 			var harmony = new Harmony("conditional_patches.rimworld.smashphil");
 
-			(VehicleHarmony.VehicleMMD, VehicleHarmony.VehicleMCP) = ConditionalPatches.PatchAllActiveMods(harmony, VehicleHarmony.VehiclesUniqueId);
+			ConditionalPatches.PatchAllActiveMods(harmony, VehicleHarmony.VehiclesUniqueId);
 		}
 	}
 }

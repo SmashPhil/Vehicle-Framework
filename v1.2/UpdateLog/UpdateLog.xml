@@ -5,7 +5,7 @@
   <description>
 [anchor]MiddleCenter[/anchor][b]Vehicles - 1.2.3100[/b][anchor]MiddleLeft[/anchor]
 [title]Notes[/title][font]Tiny[/font]
-
+A new save game is recommended for this update.
 [title]Bug Fixes[/title][font]Tiny[/font]
 Fixed bug where WorldObjects in a loaded game would not reregister valid air defenses.
 
@@ -41,11 +41,12 @@ Air Defenses can now be generated for WorldObjects with varying amounts and with
 
 AntiAircraftDef now defines both a minimum and maximum striking altitude.
 
-UI clean up in Dialog_ColorPicker
+UI clean up in Dialog_ColorPicker.
+
+Changed how updates are cached. Previous version updates may now be accessed in the DevMode tab in the Mod Settings.
 [title]Final Notes[/title]
 Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.)
   </description>
-  <actionOnUpdate>Vehicles.VehicleHarmony.RegisterUpdateVersion</actionOnUpdate>
   <update>false</update>
   <testing>false</testing>
   <rightIconBar>

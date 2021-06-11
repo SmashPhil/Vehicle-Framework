@@ -7,7 +7,7 @@ using Verse;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
-using UpdateLog;
+using UpdateLogTool;
 
 namespace Vehicles
 {
@@ -30,13 +30,21 @@ namespace Vehicles
 
 		private static string methodPatching = string.Empty;
 
+		internal static List<UpdateLog> updates = new List<UpdateLog>();
+
+		internal static string LatestVersion { get; private set; }
+
 		internal static Harmony Harmony { get; private set; } = new Harmony(VehiclesUniqueId);
 
 		static VehicleHarmony()
 		{
 			//harmony.PatchAll(Assembly.GetExecutingAssembly());
 			//Harmony.DEBUG = true;
-			UpdateLog.UpdateLog.UpdateLogData logData = UpdateHandler.UpdateLogData(VehicleMod.settings.Mod.Content).UpdateData;
+
+			VehicleMCP = VehicleMod.settings.Mod.Content;
+			VehicleMMD = ModLister.GetActiveModWithIdentifier(VehiclesUniqueId);
+			UpdateLog.UpdateLogData logData = UpdateHandler.UpdateLogData(VehicleMCP).UpdateData;
+			LatestVersion = logData.currentVersion;
 			Log.Message($"{LogLabel} version {logData.currentVersion}");
 
 			IEnumerable<Type> patchCategories = GenTypes.AllTypes.Where(t => t.GetInterfaces().Contains(typeof(IPatchCategory)));
@@ -84,27 +92,6 @@ namespace Vehicles
 		public static void FillVehicleLordJobTypes()
 		{
 			VehicleIncidentSwapper.RegisterLordType(typeof(LordJob_ArmoredAssault));
-		}
-
-		public static void RegisterUpdateVersion()
-		{
-			try
-			{
-				UpdateLog.UpdateLog log = UpdateHandler.modUpdates.FirstOrDefault(u => u.Mod == VehicleMCP);
-				VehicleMod.settings.debug.updateLogs ??= new Dictionary<string, string>();
-				if (!VehicleMod.settings.debug.updateLogs.ContainsKey(log.UpdateData.currentVersion))
-				{
-					VehicleMod.settings.debug.updateLogs.Add(log.UpdateData.currentVersion, log.UpdateData.description);
-				}
-				else
-				{
-					VehicleMod.settings.debug.updateLogs[log.UpdateData.currentVersion] = log.UpdateData.description;
-				}
-			}
-			catch (Exception ex)
-			{
-				Log.Warning($"Unable to register update for backtracking. Exception = {ex.Message}");
-			}
 		}
 		
 		public static void OpenBetaDialog()

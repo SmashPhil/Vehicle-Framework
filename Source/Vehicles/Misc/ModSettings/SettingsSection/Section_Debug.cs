@@ -5,7 +5,7 @@ using UnityEngine;
 using Verse;
 using RimWorld;
 using SmashTools;
-using UpdateLog;
+using UpdateLogTool;
 
 namespace Vehicles
 {
@@ -29,8 +29,6 @@ namespace Vehicles
 
 		public bool debugLogging;
 		public bool debugGenerateWorldPathCostTexts;
-
-		public Dictionary<string, string> updateLogs = new Dictionary<string, string>();
 
 		public override void ResetSettings()
 		{
@@ -75,8 +73,6 @@ namespace Vehicles
 
 			Scribe_Values.Look(ref debugLogging, "debugLogging", false);
 			Scribe_Values.Look(ref debugGenerateWorldPathCostTexts, "debugGenerateWorldPathCostTexts", false);
-
-			Scribe_Collections.Look(ref updateLogs, "updateLogs", LookMode.Value, LookMode.Value);
 		}
 
 		public override void DrawSection(Rect rect)
@@ -140,17 +136,25 @@ namespace Vehicles
 			if (listingStandard.ButtonText("ShowRecentNews".Translate()))
 			{
 				string versionChecking = "Null";
+				VehicleHarmony.updates.Clear();
+				foreach (UpdateLog log in FileReader.ReadPreviousFiles(VehicleHarmony.VehicleMCP).OrderBy(log => Ext_Settings.CombineVersionString(log.UpdateData.currentVersion)))
+				{
+					VehicleHarmony.updates.Add(log);
+				}
 				try
 				{
 					List<DebugMenuOption> versions = new List<DebugMenuOption>();
-					foreach (string version in updateLogs.Keys)
+					foreach (UpdateLog update in VehicleHarmony.updates)
 					{
-						versionChecking = version;
-						versions.Add(new DebugMenuOption(version, DebugMenuOptionMode.Action, delegate ()
+						versionChecking = update.UpdateData.currentVersion;
+						string label = versionChecking;
+						if (versionChecking == VehicleHarmony.LatestVersion)
 						{
-							string loadFolder = FileReader.ModFoldersForVersion(VehicleHarmony.VehicleMCP).LastOrDefault();
-							string description = updateLogs[version];
-							Find.WindowStack.Add(new Dialog_NewUpdate(new HashSet<UpdateLog.UpdateLog>() { new UpdateLog.UpdateLog(VehicleHarmony.VehicleMCP, loadFolder, description) }));
+							label = "Latest Version";
+						}
+						versions.Add(new DebugMenuOption(label, DebugMenuOptionMode.Action, delegate ()
+						{
+							Find.WindowStack.Add(new Dialog_NewUpdate(new HashSet<UpdateLog>() { update }));
 						}));
 					}
 					Find.WindowStack.Add(new Dialog_DebugOptionListLister(versions));
