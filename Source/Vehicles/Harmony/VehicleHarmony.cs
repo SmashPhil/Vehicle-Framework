@@ -15,7 +15,10 @@ namespace Vehicles
 	internal static class VehicleHarmony
 	{
 		public const string VehiclesUniqueId = "smashphil.vehicles";
-		internal const string LogLabel = "[Vehicles]";
+		internal const string LogLabel = "[VehicleFramework]";
+
+		internal static ModMetaData VehicleMMD;
+		internal static ModContentPack VehicleMCP;
 
 		/// <summary>
 		/// Debugging
@@ -33,7 +36,8 @@ namespace Vehicles
 		{
 			//harmony.PatchAll(Assembly.GetExecutingAssembly());
 			//Harmony.DEBUG = true;
-			Log.Message($"{LogLabel} version {Assembly.GetExecutingAssembly().GetName().Version}");
+			UpdateLog.UpdateLog.UpdateLogData logData = UpdateHandler.UpdateLogData(VehicleMod.settings.Mod.Content).UpdateData;
+			Log.Message($"{LogLabel} version {logData.currentVersion}");
 
 			IEnumerable<Type> patchCategories = GenTypes.AllTypes.Where(t => t.GetInterfaces().Contains(typeof(IPatchCategory)));
 			foreach (Type patchCategory in patchCategories)
@@ -86,7 +90,7 @@ namespace Vehicles
 		{
 			try
 			{
-				UpdateLog.UpdateLog log = UpdateHandler.modUpdates.FirstOrDefault(u => u.Mod == ConditionalPatchApplier.VehicleMCP);
+				UpdateLog.UpdateLog log = UpdateHandler.modUpdates.FirstOrDefault(u => u.Mod == VehicleMCP);
 				VehicleMod.settings.debug.updateLogs ??= new Dictionary<string, string>();
 				if (!VehicleMod.settings.debug.updateLogs.ContainsKey(log.UpdateData.currentVersion))
 				{

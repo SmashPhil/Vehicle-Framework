@@ -26,7 +26,7 @@ namespace Vehicles
 			absorbInputAroundWindow = true;
 			try
 			{
-				betaDescription = File.ReadAllText(Path.Combine(ConditionalPatchApplier.VehicleMMD.RootDir.FullName, "About", "BetaDescription.txt"));
+				betaDescription = File.ReadAllText(Path.Combine(VehicleHarmony.VehicleMMD.RootDir.FullName, "About", "BetaDescription.txt"));
 				segments = EnhancedText.ParseDescriptionData(betaDescription).ToList();
 			}
 			catch (Exception ex)
@@ -45,7 +45,7 @@ namespace Vehicles
 			var font = Text.Font;
 			Text.Font = GameFont.Medium;
 
-			Texture2D previewImage = ConditionalPatchApplier.VehicleMMD.PreviewImage;
+			Texture2D previewImage = VehicleHarmony.VehicleMMD.PreviewImage;
 
 			float pWidth = previewImage?.width ?? 0;
 			float pHeight = previewImage?.height ?? 0;
@@ -64,9 +64,9 @@ namespace Vehicles
 			Rect modLabelRect = new Rect(inRect)
 			{
 				y = previewRect.y + previewRect.height + 5,
-				height = Text.CalcHeight(ConditionalPatchApplier.VehicleMMD.Name, inRect.width)
+				height = Text.CalcHeight(VehicleHarmony.VehicleMMD.Name, inRect.width)
 			};
-			Widgets.Label(modLabelRect, ConditionalPatchApplier.VehicleMMD.Name);
+			Widgets.Label(modLabelRect, VehicleHarmony.VehicleMMD.Name);
 
 			Widgets.DrawLineHorizontal(0, modLabelRect.y + modLabelRect.height, modLabelRect.width);
 

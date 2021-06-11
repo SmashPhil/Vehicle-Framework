@@ -10,15 +10,11 @@ namespace Vehicles
 	[StaticConstructorOnStartup]
 	public static class ConditionalPatchApplier
 	{
-		internal static ModMetaData VehicleMMD;
-
-		internal static ModContentPack VehicleMCP;
-
 		static ConditionalPatchApplier()
 		{
 			var harmony = new Harmony("conditional_patches.rimworld.smashphil");
 
-			(VehicleMMD, VehicleMCP) = ConditionalPatches.PatchAllActiveMods(harmony, VehicleHarmony.VehiclesUniqueId);
+			(VehicleHarmony.VehicleMMD, VehicleHarmony.VehicleMCP) = ConditionalPatches.PatchAllActiveMods(harmony, VehicleHarmony.VehiclesUniqueId);
 		}
 	}
 }

@@ -148,9 +148,9 @@ namespace Vehicles
 						versionChecking = version;
 						versions.Add(new DebugMenuOption(version, DebugMenuOptionMode.Action, delegate ()
 						{
-							string loadFolder = FileReader.ModFoldersForVersion(ConditionalPatchApplier.VehicleMCP).LastOrDefault();
+							string loadFolder = FileReader.ModFoldersForVersion(VehicleHarmony.VehicleMCP).LastOrDefault();
 							string description = updateLogs[version];
-							Find.WindowStack.Add(new Dialog_NewUpdate(new HashSet<UpdateLog.UpdateLog>() { new UpdateLog.UpdateLog(ConditionalPatchApplier.VehicleMCP, loadFolder, description) }));
+							Find.WindowStack.Add(new Dialog_NewUpdate(new HashSet<UpdateLog.UpdateLog>() { new UpdateLog.UpdateLog(VehicleHarmony.VehicleMCP, loadFolder, description) }));
 						}));
 					}
 					Find.WindowStack.Add(new Dialog_DebugOptionListLister(versions));
