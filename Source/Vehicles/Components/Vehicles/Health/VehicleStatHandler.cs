@@ -14,7 +14,7 @@ namespace Vehicles
 		private VehiclePawn vehicle;
 		public List<VehicleComponent> components = new List<VehicleComponent>();
 		private readonly Dictionary<IntVec2, List<VehicleComponent>> componentLocations = new Dictionary<IntVec2, List<VehicleComponent>>();
-		private readonly Dictionary<VehicleStatCategoryDef, List<VehicleComponent>> statComponents = new Dictionary<VehicleStatCategoryDef, List<VehicleComponent>>();
+		public readonly Dictionary<VehicleStatCategoryDef, List<VehicleComponent>> statComponents = new Dictionary<VehicleStatCategoryDef, List<VehicleComponent>>();
 
 		private readonly List<Pair<IntVec2, int>> debugCellHighlight = new List<Pair<IntVec2, int>>();
 		public readonly HashSet<Explosion> explosionsAffectingVehicle = new HashSet<Explosion>();
@@ -103,7 +103,8 @@ namespace Vehicles
 		public void TakeDamage(DamageInfo dinfo, IntVec3 hitCell, bool explosive = false)
 		{
 			ApplyDamageToComponent(dinfo, new IntVec2(hitCell.x - vehicle.Position.x, hitCell.z - vehicle.Position.z), explosive);
-			if (vehicle.ActualMoveSpeed <= 0.1f)
+
+			if (vehicle.ActualMoveSpeed <= 0.1f && vehicle.Spawned)
 			{
 				vehicle.drafter.Drafted = false;
 			}
@@ -113,6 +114,7 @@ namespace Vehicles
 		{
 			float damage = dinfo.Amount;
 			DamageDef defApplied = dinfo.Def;
+
 			if (vehicle.VehicleDef.damageMultipliers?.FirstOrDefault(d => d.damageDef == defApplied) is DamageMultiplier dMultiplier)
 			{
 				dinfo.SetAmount(dMultiplier.multiplier);
@@ -168,7 +170,7 @@ namespace Vehicles
 						dinfo.SetAmount(stepDamage);
 						DamageRoles(dinfo, cellOffset);
 						lastDamage = component.TakeDamage(vehicle, dinfo, new IntVec3(vehicle.Position.x + hitCell.x, 0, vehicle.Position.z + hitCell.z));
-						if (Rand.Range(0, 1) < component.props.explosionProperties.chance)
+						if (vehicle.Spawned && Rand.Range(0, 1) < component.props.explosionProperties.chance)
 						{
 							GenExplosion.DoExplosion(new IntVec3(vehicle.Position.x + cellOffset.x, 0, vehicle.Position.z + cellOffset.z), vehicle.Map, component.props.explosionProperties.radius, component.props.explosionProperties.Def, dinfo.Instigator,
 								component.props.explosionProperties.Def.defaultDamage, component.props.explosionProperties.Def.defaultArmorPenetration);
@@ -239,7 +241,7 @@ namespace Vehicles
 					dinfo.SetAmount(damage);
 					DamageRoles(dinfo, cell);
 					damage = component.TakeDamage(vehicle, dinfo, new IntVec3(vehicle.Position.x + hitCell.x, 0, vehicle.Position.z + hitCell.z));
-					if (Rand.Range(0, 1) < component.props.explosionProperties.chance)
+					if (vehicle.Spawned && Rand.Range(0, 1) < component.props.explosionProperties.chance)
 					{
 						GenExplosion.DoExplosion(new IntVec3(vehicle.Position.x + cell.x, 0, vehicle.Position.z + cell.z), vehicle.Map, component.props.explosionProperties.radius, component.props.explosionProperties.Def, dinfo.Instigator,
 							component.props.explosionProperties.Def.defaultDamage, component.props.explosionProperties.Def.defaultArmorPenetration);
@@ -268,7 +270,7 @@ namespace Vehicles
 					}
 				}
 			}
-			vehicle.Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleTookDamage(vehicle);
+			vehicle.Map?.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleTookDamage(vehicle);
 		}
 
 		private void DamageRoles(DamageInfo dinfo, IntVec2 cell)

@@ -50,7 +50,7 @@
 		<defName>StatCategoryFlightControl</defName>
 		<label>Control</label>
 		<formatString>V Control: {0}%</formatString>
-		<operationType>Average</operationType>
+		<operationType>MinValue</operationType>
 		<workerClass>Vehicles.VehicleStatWorker_Movement</workerClass>
 		<priority>5</priority>
 	</Vehicles.VehicleStatCategoryDef>

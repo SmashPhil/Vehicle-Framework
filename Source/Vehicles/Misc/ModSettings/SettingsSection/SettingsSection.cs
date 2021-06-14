@@ -27,6 +27,8 @@ namespace Vehicles
 			}
 		}
 
+		public virtual Rect ButtonRect(Rect rect) => new Rect(rect.x + 2.5f, rect.y - 2.5f, rect.width, rect.height);
+
 		public virtual void ResetSettings()
 		{
 			SoundDefOf.Click.PlayOneShotOnCamera(null);

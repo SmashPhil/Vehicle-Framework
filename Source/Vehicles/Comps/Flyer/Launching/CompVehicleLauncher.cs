@@ -6,12 +6,27 @@ using UnityEngine;
 using Verse;
 using RimWorld.Planet;
 using SmashTools;
+using Vehicles.Defs;
 
 namespace Vehicles
 {
 	[StaticConstructorOnStartup]
 	public class CompVehicleLauncher : VehicleComp
 	{
+		public static SimpleCurve ClimbRateCurve = new SimpleCurve()
+		{
+			new CurvePoint(0, -5),
+			new CurvePoint(0.15f, -2.5f),
+			new CurvePoint(0.25f, -1f),
+			new CurvePoint(0.35f, -0.25f),
+			new CurvePoint(0.45f, 0),
+			new CurvePoint(0.5f, 0.25f),
+			new CurvePoint(0.75f, 0.45f),
+			new CurvePoint(0.8f, 0.75f),
+			new CurvePoint(0.9f, 0.95f),
+			new CurvePoint(1, 1)
+		};
+
 		public LaunchProtocol launchProtocol;
 
 		public float fuelEfficiencyWorldModifier;
@@ -37,6 +52,26 @@ namespace Vehicles
 		public int LandingAltitude => landingAltitudeModifier + SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), "landingAltitude", Props.landingAltitude);
 		public bool ControlInFlight => SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), "controlInFlight", Props.controlInFlight);
 		public int ReconDistance => SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), "reconDistance", Props.reconDistance);
+
+		public virtual bool ControlledDescent => ClimbRateStat >= 0;
+
+		public virtual bool AnyFlightControl { get; private set; }
+
+		public virtual float ClimbRateStat
+		{
+			get
+			{
+				bool flight = launchProtocol.CanLaunchNow && FlySpeed > 0 && (!Vehicle.CompFueledTravel?.EmptyTank ?? true);
+				if (!flight)
+				{
+					return ClimbRateCurve.Evaluate(0);
+				}
+				float flightControl = Vehicle.statHandler.StatEfficiency(VehicleStatCategoryDefOf.StatCategoryFlightControl);
+				AnyFlightControl = flightControl > 0;
+				float flightSpeed = Vehicle.statHandler.StatEfficiency(VehicleStatCategoryDefOf.StatCategoryFlightSpeed);
+				return ClimbRateCurve.Evaluate(Mathf.Min(flightControl, flightSpeed)) * RateOfClimb;
+			}
+		}
 
 		public IEnumerable<VehicleTurret> StrafeTurrets
 		{

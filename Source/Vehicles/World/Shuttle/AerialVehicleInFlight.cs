@@ -42,8 +42,6 @@ namespace Vehicles
 
 		public VehiclePawn vehicle;
 
-		public bool shouldCrash;
-
 		public AerialVehicleArrivalAction arrivalAction;
 
 		protected internal FlightPath flightPath;
@@ -68,7 +66,9 @@ namespace Vehicles
 
 		public float Elevation => vehicle.CompVehicleLauncher.inFlight ? elevation : 0;
 
-		public float Rate => vehicle.CompVehicleLauncher.RateOfClimb * ClimbRateCurve.Evaluate(Elevation / vehicle.CompVehicleLauncher.MaxAltitude);
+		public float ElevationChange { get; protected set; }
+
+		public float Rate => vehicle.CompVehicleLauncher.ClimbRateStat * ClimbRateCurve.Evaluate(Elevation / vehicle.CompVehicleLauncher.MaxAltitude);
 
 		public int TicksTillLandingElevation => Mathf.RoundToInt((Elevation - (vehicle.CompVehicleLauncher.LandingAltitude / 2)) / Rate);
 
@@ -187,23 +187,38 @@ namespace Vehicles
 				}
 				if (vehicle.CompVehicleLauncher.ControlInFlight || !vehicle.CompVehicleLauncher.inFlight)
 				{
-					Command_Action launchCommand = new Command_Action()
-					{
-						defaultLabel = "CommandLaunchGroup".Translate(),
-						defaultDesc = "CommandLaunchGroupDesc".Translate(),
-						icon = VehicleTex.LaunchCommandTex,
-						alsoClickIfOtherInGroupClicked = false,
-						action = delegate ()
-						{
-							LaunchTargeter.Instance.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseTargetOnMap), this, true, VehicleTex.TargeterMouseAttachment, false, null,
-								(GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, Tile, path, fuelCost));
-						}
-					};
 					if (vehicle.CompFueledTravel.EmptyTank)
 					{
-						launchCommand.Disable("VehicleLaunchOutOfFuel".Translate());
+						Command_Action glideCommand = new Command_Action()
+						{
+							defaultLabel = "CommandGlideLand".Translate(),
+							defaultDesc = "CommandGlidLandDesc".Translate(),
+							icon = VehicleTex.TradeCommandTex,
+							alsoClickIfOtherInGroupClicked = false,
+							action = delegate ()
+							{
+								LaunchTargeter.Instance.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(GlideToTargetOnMap), this, true, VehicleTex.TargeterMouseAttachment, false, null,
+									(GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, Tile, path, fuelCost));
+							}
+						};
+						yield return glideCommand;
 					}
-					yield return launchCommand;
+					else
+					{
+						Command_Action launchCommand = new Command_Action()
+						{
+							defaultLabel = "CommandLaunchGroup".Translate(),
+							defaultDesc = "CommandLaunchGroupDesc".Translate(),
+							icon = VehicleTex.LaunchCommandTex,
+							alsoClickIfOtherInGroupClicked = false,
+							action = delegate ()
+							{
+								LaunchTargeter.Instance.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseTargetOnMap), this, true, VehicleTex.TargeterMouseAttachment, false, null,
+									(GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, Tile, path, fuelCost));
+							}
+						};
+						yield return launchCommand;
+					}
 				}
 				if (!vehicle.CompVehicleLauncher.inFlight)
 				{
@@ -289,9 +304,92 @@ namespace Vehicles
 			}
 		}
 
-		public bool ChoseTargetOnMap(GlobalTargetInfo target, float fuelCost)
+		public virtual bool ChoseTargetOnMap(GlobalTargetInfo target, float fuelCost)
 		{
-			return vehicle.CompVehicleLauncher.launchProtocol.ChoseWorldTarget(target, DrawPos, fuelCost, NewDestination);
+			bool Validator(GlobalTargetInfo target, Vector3 pos, Action<int, AerialVehicleArrivalAction, bool> launchAction)
+			{
+				if (!target.IsValid)
+				{
+					Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(), MessageTypeDefOf.RejectInput, false);
+					return false;
+				}
+				else if (Ext_Math.SphericalDistance(pos, Find.WorldGrid.GetTileCenter(target.Tile)) > vehicle.CompVehicleLauncher.MaxLaunchDistance || fuelCost > vehicle.CompFueledTravel.Fuel)
+				{
+					Messages.Message("TransportPodDestinationBeyondMaximumRange".Translate(), MessageTypeDefOf.RejectInput, false);
+					return false;
+				}
+				IEnumerable<FloatMenuOption> source = vehicle.CompVehicleLauncher.launchProtocol.GetFloatMenuOptionsAt(target.Tile);
+				if (!source.Any())
+				{
+					if (!WorldVehiclePathGrid.Instance.Passable(target.Tile, vehicle.VehicleDef))
+					{
+						Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(), MessageTypeDefOf.RejectInput, false);
+						return false;
+					}
+					launchAction(target.Tile, null, false);
+					return true;
+				}
+				else
+				{
+					if (source.Count() != 1)
+					{
+						Find.WindowStack.Add(new FloatMenuTargeter(source.ToList()));
+						return false;
+					}
+					if (!source.First().Disabled)
+					{
+						source.First().action();
+						return true;
+					}
+					return false;
+				}
+			};
+			return vehicle.CompVehicleLauncher.launchProtocol.ChoseWorldTarget(target, DrawPos, Validator, NewDestination);
+		}
+
+		public virtual bool GlideToTargetOnMap(GlobalTargetInfo target, float fuelCost)
+		{
+			bool Validator(GlobalTargetInfo target, Vector3 pos, Action<int, AerialVehicleArrivalAction, bool> launchAction)
+			{
+				float maxGlideDistance = Mathf.Abs(Elevation / ElevationChange) * PctPerTick * vehicle.CompVehicleLauncher.FlySpeed.Clamp(0, 5);
+				float sphericalDistance = Ext_Math.SphericalDistance(pos, Find.WorldGrid.GetTileCenter(target.Tile));
+				if (!target.IsValid)
+				{
+					Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(), MessageTypeDefOf.RejectInput, false);
+					return false;
+				}
+				else if (sphericalDistance > vehicle.CompVehicleLauncher.MaxLaunchDistance || sphericalDistance > maxGlideDistance)
+				{
+					Messages.Message("TransportPodDestinationBeyondMaximumRange".Translate(), MessageTypeDefOf.RejectInput, false);
+					return false;
+				}
+				IEnumerable<FloatMenuOption> source = vehicle.CompVehicleLauncher.launchProtocol.GetFloatMenuOptionsAt(target.Tile);
+				if (!source.Any())
+				{
+					if (!WorldVehiclePathGrid.Instance.Passable(target.Tile, vehicle.VehicleDef))
+					{
+						Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(), MessageTypeDefOf.RejectInput, false);
+						return false;
+					}
+					launchAction(target.Tile, null, false);
+					return true;
+				}
+				else
+				{
+					if (source.Count() != 1)
+					{
+						Find.WindowStack.Add(new FloatMenuTargeter(source.ToList()));
+						return false;
+					}
+					if (!source.First().Disabled)
+					{
+						source.First().action();
+						return true;
+					}
+					return false;
+				}
+			};
+			return vehicle.CompVehicleLauncher.launchProtocol.ChoseWorldTarget(target, DrawPos, Validator, NewDestination);
 		}
 
 		public void NewDestination(int destinationTile, AerialVehicleArrivalAction arrivalAction, bool recon = false)
@@ -315,8 +413,23 @@ namespace Vehicles
 
 		protected void ChangeElevation()
 		{
-			elevation += flightPath.AltitudeDirection * vehicle.CompVehicleLauncher.RateOfClimb * ClimbRateCurve.Evaluate(elevation / vehicle.CompVehicleLauncher.MaxAltitude);
+			int altSign = flightPath.AltitudeDirection;
+			float elevationChange = vehicle.CompVehicleLauncher.ClimbRateStat * ClimbRateCurve.Evaluate(elevation / vehicle.CompVehicleLauncher.MaxAltitude);
+			ElevationChange = elevationChange;
+			if (elevationChange < 0)
+			{
+				altSign = 1;
+			}
+			elevation += elevationChange * altSign;
 			elevation = elevation.Clamp(AltitudeMeter.MinimumAltitude, AltitudeMeter.MaximumAltitude);
+			if (!vehicle.CompVehicleLauncher.AnyFlightControl)
+			{
+				InitiateCrashEvent(null);
+			}
+			else if (elevation <= AltitudeMeter.MinimumAltitude && !vehicle.CompVehicleLauncher.ControlledDescent)
+			{
+				InitiateCrashEvent(null);
+			}
 		}
 
 		public virtual void SpendFuel()
@@ -325,21 +438,12 @@ namespace Vehicles
 			{
 				float amount = vehicle.CompFueledTravel.ConsumptionRatePerTick / vehicle.CompVehicleLauncher.FuelEfficiencyWorld;
 				vehicle.CompFueledTravel.ConsumeFuel(amount);
-				
-				if (vehicle.CompFueledTravel.EmptyTank)
-				{
-					InitiateCrashEvent(null);
-				}
 			}
 		}
 
-		public void TakeDamage(DamageInfo damageInfo, WorldObject firedFrom)
+		public virtual void TakeDamage(DamageInfo damageInfo, IntVec3 cell, bool explosive)
 		{
-			vehicle.TakeDamage(damageInfo);
-			if (shouldCrash)
-			{
-				InitiateCrashEvent(firedFrom);
-			}
+			vehicle.TakeDamage(damageInfo, cell, explosive);
 		}
 
 		public void InitiateCrashEvent(WorldObject worldObject)
@@ -509,8 +613,6 @@ namespace Vehicles
 
 			Scribe_Deep.Look(ref arrivalAction, "arrivalAction");
 			Scribe_Values.Look(ref speedPctPerTick, "speedPctPerTick");
-
-			Scribe_Values.Look(ref shouldCrash, "shouldCrash");
 
 			Scribe_Values.Look(ref transition, "transition");
 			Scribe_Values.Look(ref elevation, "elevation");

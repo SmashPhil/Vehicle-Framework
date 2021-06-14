@@ -166,7 +166,7 @@ namespace Vehicles
 				GUI.color = UIElements.InactiveColor;
 			}
 			Rect sliderRect = new Rect(0f, inRect.height - ButtonHeight * 3, ButtonWidth * 3, ButtonHeight);
-			UIElements.SliderLabeled(sliderRect, "VehiclePatternZoom".Translate(), "VehiclePatternZoomTooltip".Translate(), string.Empty, ref additionalTiling, 0, 2);
+			//UIElements.SliderLabeled(sliderRect, "VehiclePatternZoom".Translate(), "VehiclePatternZoomTooltip".Translate(), string.Empty, ref additionalTiling, 0, 2);
 			Rect positionLeftBox = new Rect(sliderRect)
 			{
 				y = sliderRect.y + sliderRect.height,
@@ -177,8 +177,8 @@ namespace Vehicles
 				x = positionLeftBox.x + (sliderRect.width / 2) * 1.05f
 			};
 			
-			UIElements.SliderLabeled(positionLeftBox, "VehiclePatternDisplacementX".Translate(), string.Empty, string.Empty, ref displacementX, -1.5f, 1.5f);
-			UIElements.SliderLabeled(positionRightBox, "VehiclePatternDisplacementY".Translate(), string.Empty, string.Empty, ref displacementY, -1.5f, 1.5f);
+			//UIElements.SliderLabeled(positionLeftBox, "VehiclePatternDisplacementX".Translate(), string.Empty, string.Empty, ref displacementX, -1.5f, 1.5f);
+			//UIElements.SliderLabeled(positionRightBox, "VehiclePatternDisplacementY".Translate(), string.Empty, string.Empty, ref displacementY, -1.5f, 1.5f);
 			GUI.enabled = true;
 			GUI.color = color;
 

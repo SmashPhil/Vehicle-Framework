@@ -375,6 +375,7 @@
     <Compile Include="CustomFeatures\Buildings\AirDefenses\Verb_ShootWorldRecoiled.cs" />
     <Compile Include="CustomFeatures\Misc\MoteThrownSlowToSpeed.cs" />
     <Compile Include="CustomFeatures\Misc\MoteThrownExpand.cs" />
+    <Compile Include="Graphics\ITab\WITab_Vehicle_Health.cs" />
     <Compile Include="Misc\DefModExtension\ProjectilePropertiesDefModExtension.cs" />
     <Compile Include="Cannons\Projectiles\Laser.cs" />
     <Compile Include="Cannons\Turret\VehicleTurretAlternating.cs" />
@@ -431,7 +432,6 @@
     <Compile Include="CustomFeatures\AerialLaunch\Targeters\Base\BaseTargeter.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Targeters\StrafeTargeter.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Targeters\LandingTargeter.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Launching\RunwayTakeoff.cs" />
     <Compile Include="Comps\Flyer\Launching\CompProperties_VehicleLauncher.cs" />
     <Compile Include="Comps\Flyer\Launching\CompVehicleLauncher.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\LaunchProtocol.cs" />

@@ -88,7 +88,7 @@ namespace Vehicles
 			{
 				if (vehicleDefs.NullOrEmpty())
 				{
-					vehicleDefs = DefDatabase<VehicleDef>.AllDefs.OrderBy(d => Utilities.MatchingPackage(d.modContentPack.PackageId, VehicleHarmony.VehiclesUniqueId)).ThenBy(d2 => d2.modContentPack.PackageId).ToList();
+					vehicleDefs = DefDatabase<VehicleDef>.AllDefs.OrderBy(d => d.modContentPack.PackageId.Contains(VehicleHarmony.VehiclesUniqueId)).ThenBy(d2 => d2.modContentPack.PackageId).ToList();
 				}
 				return vehicleDefs;
 			}
@@ -214,7 +214,6 @@ namespace Vehicles
 		public override void DoSettingsWindowContents(Rect inRect)
 		{
 			base.DoSettingsWindowContents(inRect);
-			Listing_Standard listingStandard = new Listing_Standard();
 
 			Rect menuRect = inRect.ContractedBy(10f);
 			menuRect.y += 20f;
@@ -229,9 +228,8 @@ namespace Vehicles
 			float padding = ResetImageSize + 5;
 			Rect resetAllButton = new Rect(menuRect.width - padding, menuRect.y + 15, ResetImageSize, ResetImageSize);
 			Rect resetButton = new Rect(resetAllButton.x - padding, resetAllButton.y, ResetImageSize, ResetImageSize);
-
-			listingStandard.Begin(resetAllButton);
-			if (listingStandard.ButtonImage(VehicleTex.ResetPage, ResetImageSize, ResetImageSize))
+			
+			if (Widgets.ButtonImage(CurrentSection.ButtonRect(resetAllButton), VehicleTex.ResetPage))
 			{
 				List<FloatMenuOption> options = CurrentSection.ResetOptions.ToList();
 				FloatMenu floatMenu = new FloatMenu(options)
@@ -241,7 +239,6 @@ namespace Vehicles
 				//floatMenu.onCloseCallback...
 				Find.WindowStack.Add(floatMenu);
 			}
-			listingStandard.End();
 		}
 
 		public override string SettingsCategory()

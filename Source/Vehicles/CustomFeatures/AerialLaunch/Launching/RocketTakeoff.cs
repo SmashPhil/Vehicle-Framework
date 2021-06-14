@@ -60,7 +60,8 @@ namespace Vehicles
 			}
 		}
 
-		public override bool ChoseWorldTarget(GlobalTargetInfo target, Vector3 pos, float fuelCost, Action<int, AerialVehicleArrivalAction, bool> launchAction)
+		public override bool ChoseWorldTarget(GlobalTargetInfo target, Vector3 pos, Func<GlobalTargetInfo, Vector3, Action<int, AerialVehicleArrivalAction, bool>, bool> validator, 
+			Action<int, AerialVehicleArrivalAction, bool> launchAction)
 		{
 			if (vehicle.Map != null)
 			{
@@ -83,7 +84,7 @@ namespace Vehicles
 						break;
 				}
 			}
-			return base.ChoseWorldTarget(target, pos, fuelCost, launchAction);
+			return base.ChoseWorldTarget(target, pos, validator, launchAction);
 		}
 
 		public override Vector3 AnimateLanding(float layer, bool flip)

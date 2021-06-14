@@ -37,6 +37,7 @@
 	<VehicleElectricFlick>Charge Battery</VehicleElectricFlick>
 	<VehicleElectricFlickDesc>Connect to PowerNet below vehicle.</VehicleElectricFlickDesc>
 	<VehicleOutOfFuel>Cannot Move. Out of Fuel.</VehicleOutOfFuel>
+	<CommandGlideLand>Glide</CommandGlideLand>
 	
 	<AssignSeats>Assign Seats</AssignSeats>
 	<Assign>Assign</Assign>

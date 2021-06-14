@@ -95,9 +95,9 @@ namespace Vehicles
 			defensesToDraw.RemoveWhere(d => oldDefenses.Contains(d));
 			foreach (AirDefense airDefense in newDefenses)
 			{
-				if (defensesToDraw.Add(airDefense))
+				if (defensesToDraw.Add(airDefense) && !oldDefenses.Contains(airDefense))
 				{
-					airDefense.angle = Rand.RangeInclusive(0, 360);
+					airDefense.angle = ((Find.TickManager.TicksGame + airDefense.parent.GetHashCode()) * RotationRate) % 360;
 				}
 			}
 		}

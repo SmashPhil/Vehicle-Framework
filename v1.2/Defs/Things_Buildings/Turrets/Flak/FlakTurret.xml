@@ -105,7 +105,9 @@
 		<researchPrerequisites>
 			<li>Mortars</li>
 		</researchPrerequisites>
-		
+		<placeWorkers>
+			<li>PlaceWorker_TurretTop</li>
+		</placeWorkers>
 		<modExtensions>
 			<li Class="Vehicles.ProjectilePropertiesDefModExtension">
 				<speed>200</speed>

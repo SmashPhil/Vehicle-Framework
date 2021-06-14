@@ -6,6 +6,7 @@ using UnityEngine;
 using Verse;
 using RimWorld;
 using SmashTools;
+using SmashTools.Xml;
 
 namespace Vehicles
 {
@@ -47,7 +48,7 @@ namespace Vehicles
 				}
 			}
 			string folderChecking = "default";
-			List<string> loadFolders = FilePaths.LoadFolderLocalFilePath(VehicleMod.settings.Mod.Content);
+			List<string> loadFolders = FilePaths.ModFoldersForVersion(VehicleMod.settings.Mod.Content);
 			try
 			{
 				foreach (string folder in loadFolders)

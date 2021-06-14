@@ -101,10 +101,10 @@ namespace Vehicles
 
 		public override void Destroy()
 		{
-			bool hit = Rand.Range(0f, 1f) <= AADef.accuracy;
-			if (hit && (target?.vehicle.CompVehicleLauncher.inFlight ?? false))
+			if (Rand.Chance(AADef.accuracy) && (target?.vehicle.CompVehicleLauncher.inFlight ?? false))
 			{
-				target.TakeDamage(new DamageInfo(DamageDefOf.Bomb, AADef.damage), firedFrom);
+				IntVec3 randomHit = target.vehicle.OccupiedRect().RandomCell;
+				target.TakeDamage(new DamageInfo(DamageDefOf.Bomb, AADef.damage), randomHit, AADef.explosive);
 			}
 			base.Destroy();
 		}

@@ -64,7 +64,9 @@
 		<IncidentTargetTags>
 			<li>Caravan</li>
 		</IncidentTargetTags>
-		<inspectorTabs/>
+		<inspectorTabs>
+			<li>Vehicles.WITab_Vehicle_Health</li>
+		</inspectorTabs>
 	</WorldObjectDef>
 	
 	<WorldObjectDef>

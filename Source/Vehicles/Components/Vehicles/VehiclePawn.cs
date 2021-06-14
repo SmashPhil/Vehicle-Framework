@@ -787,6 +787,23 @@ namespace Vehicles
 			}
 		}
 
+		public virtual void TakeDamage(DamageInfo dinfo, IntVec3 cell, bool explosive = false)
+		{
+			statHandler.TakeDamage(dinfo, cell, explosive);
+			if (statHandler.components.All(c => c.HealthPercent <= 0))
+			{
+				if (Spawned)
+				{
+					Destroy(DestroyMode.Deconstruct);
+				}
+				else if (this.GetAerialVehicle() is AerialVehicleInFlight aerialVehicle)
+				{
+					aerialVehicle.Destroy();
+					Messages.Message("VEHICLE EXPLODED", MessageTypeDefOf.NegativeHealthEvent); //REDO - change to letter
+				}
+			}
+		}
+
 		public override void PreApplyDamage(ref DamageInfo dinfo, out bool absorbed)
 		{
 			absorbed = true;
@@ -852,10 +869,6 @@ namespace Vehicles
 					Destroy();
 				}
 				Thing t = GenSpawn.Spawn(thing, position, map, rotation, WipeMode.FullRefund, false);
-			}
-			if (this.GetAerialVehicle() is AerialVehicleInFlight aerialVehicle)
-			{
-				aerialVehicle.shouldCrash = true;
 			}
 			return;
 		}
@@ -1613,6 +1626,10 @@ namespace Vehicles
 		{
 			Map.GetCachedMapComponent<VehiclePositionManager>().ReleaseClaimed(this);
 			Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(this);
+			if (mode == DestroyMode.KillFinalize)
+			{
+				//REDO - refund
+			}
 			base.DeSpawn(mode);
 			if (vPather != null)
 			{

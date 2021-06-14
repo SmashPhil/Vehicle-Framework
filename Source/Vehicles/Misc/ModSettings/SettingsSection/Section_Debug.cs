@@ -30,6 +30,11 @@ namespace Vehicles
 		public bool debugLogging;
 		public bool debugGenerateWorldPathCostTexts;
 
+		public override Rect ButtonRect(Rect rect)
+		{
+			return new Rect(rect.x - 5, rect.y + 7.5f, rect.width, rect.height);
+		}
+
 		public override void ResetSettings()
 		{
 			base.ResetSettings();
@@ -77,8 +82,7 @@ namespace Vehicles
 
 		public override void DrawSection(Rect rect)
 		{
-			float width = rect.width / 1.5f;
-			Rect devMode = new Rect((rect.width - width) / 2, rect.y + 20, width, rect.height);
+			Rect devMode = rect.ContractedBy(20);
 			var color = GUI.color;
 			
 			if (!Prefs.DevMode)

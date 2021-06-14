@@ -18,6 +18,10 @@ Fixed bug where TurretTop_Recoiled would only tick recoil when manned.
 Fixed bug where VehicleTurrets would not fire with godMode enabled.
 
 Fixed bug where VehicleTurret would not auto-reload after running out of ammo.
+
+Fixed bug where choosing new FlightPath would re-randomize the angle of active AirDefense search lights.
+
+Fixed bug where AerialVehicles would not take damage from air defense projectiles.
 [title]New Additions[/title]
 Changed the way Settlement Air Defenses are cached.
 
@@ -44,6 +48,8 @@ AntiAircraftDef now defines both a minimum and maximum striking altitude.
 UI clean up in Dialog_ColorPicker.
 
 Changed how updates are cached. Previous version updates may now be accessed in the DevMode tab in the Mod Settings.
+
+Crash Landings will now trigger when the altitude meter hits 0 and the descent is uncontrolled.  Running out of fuel and losing flight control will both result in an uncontrollable descent. You may now glide to try to get closer to an easier to rescue tile.
 [title]Final Notes[/title]
 Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.)
   </description>

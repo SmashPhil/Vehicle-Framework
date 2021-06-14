@@ -459,58 +459,63 @@ namespace Vehicles
 		/// <param name="tile"></param>
 		/// <param name="maxLaunchDistance"></param>
 		/// <param name="launchAction"></param>
-		public virtual bool ChoseWorldTarget(GlobalTargetInfo target, Vector3 pos, float fuelCost, Action<int, AerialVehicleArrivalAction, bool> launchAction)
+		public virtual bool ChoseWorldTarget(GlobalTargetInfo target, Vector3 pos, Func<GlobalTargetInfo, Vector3, Action<int, AerialVehicleArrivalAction, bool>, bool> validator, 
+			Action<int, AerialVehicleArrivalAction, bool> launchAction)
 		{
 			currentMap = vehicle.Map;
 			targetMap = Find.WorldObjects.MapParentAt(target.Tile)?.Map;
-			if (!target.IsValid)
+			return validator(target, pos, launchAction);
+		}
+
+		protected bool ChoseWorldTarget(GlobalTargetInfo target, float fuelCost)
+		{
+			bool Validator(GlobalTargetInfo target, Vector3 pos, Action<int, AerialVehicleArrivalAction, bool> launchAction)
 			{
-				Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(), MessageTypeDefOf.RejectInput, false);
-				return false;
-			}
-			else if (Ext_Math.SphericalDistance(pos, Find.WorldGrid.GetTileCenter(target.Tile)) > vehicle.CompVehicleLauncher.MaxLaunchDistance || fuelCost > vehicle.CompFueledTravel.Fuel)
-			{
-				Messages.Message("TransportPodDestinationBeyondMaximumRange".Translate(), MessageTypeDefOf.RejectInput, false);
-				return false;
-			}
-			IEnumerable<FloatMenuOption> source = GetFloatMenuOptionsAt(target.Tile);
-			if (!source.Any())
-			{
-				if (!WorldVehiclePathGrid.Instance.Passable(target.Tile, vehicle.VehicleDef))
+				if (!target.IsValid)
 				{
 					Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(), MessageTypeDefOf.RejectInput, false);
 					return false;
 				}
-				launchAction(target.Tile, null, false);
-				if (landingProperties.forcedRotation.HasValue && !landing)
+				else if (Ext_Math.SphericalDistance(pos, Find.WorldGrid.GetTileCenter(target.Tile)) > vehicle.CompVehicleLauncher.MaxLaunchDistance || fuelCost > vehicle.CompFueledTravel.Fuel)
 				{
-					vehicle.Rotation = landingProperties.forcedRotation.Value;
-				}
-				return true;
-			}
-			else
-			{
-				if (source.Count() != 1)
-				{
-					Find.WindowStack.Add(new FloatMenuTargeter(source.ToList()));
+					Messages.Message("TransportPodDestinationBeyondMaximumRange".Translate(), MessageTypeDefOf.RejectInput, false);
 					return false;
 				}
-				if (!source.First().Disabled)
+				IEnumerable<FloatMenuOption> source = GetFloatMenuOptionsAt(target.Tile);
+				if (!source.Any())
 				{
-					source.First().action();
+					if (!WorldVehiclePathGrid.Instance.Passable(target.Tile, vehicle.VehicleDef))
+					{
+						Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(), MessageTypeDefOf.RejectInput, false);
+						return false;
+					}
+					launchAction(target.Tile, null, false);
 					if (landingProperties.forcedRotation.HasValue && !landing)
 					{
 						vehicle.Rotation = landingProperties.forcedRotation.Value;
 					}
 					return true;
 				}
-				return false;
-			}
-		}
-
-		protected bool ChoseWorldTarget(GlobalTargetInfo target, float fuelCost)
-		{
-			return ChoseWorldTarget(target, Find.WorldGrid.GetTileCenter(vehicle.Map.Tile), fuelCost, new Action<int, AerialVehicleArrivalAction, bool>(vehicle.CompVehicleLauncher.TryLaunch));
+				else
+				{
+					if (source.Count() != 1)
+					{
+						Find.WindowStack.Add(new FloatMenuTargeter(source.ToList()));
+						return false;
+					}
+					if (!source.First().Disabled)
+					{
+						source.First().action();
+						if (landingProperties.forcedRotation.HasValue && !landing)
+						{
+							vehicle.Rotation = landingProperties.forcedRotation.Value;
+						}
+						return true;
+					}
+					return false;
+				}
+			};
+			return ChoseWorldTarget(target, Find.WorldGrid.GetTileCenter(vehicle.Map.Tile), Validator, new Action<int, AerialVehicleArrivalAction, bool>(vehicle.CompVehicleLauncher.TryLaunch));
 		}
 
 		public virtual void ResolveProperties(LaunchProtocol reference)

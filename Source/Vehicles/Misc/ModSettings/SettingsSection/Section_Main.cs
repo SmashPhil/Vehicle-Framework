@@ -112,9 +112,11 @@ namespace Vehicles
 		//REDO - TRANSLATIONS
 		public override void DrawSection(Rect rect)
 		{
+			listingStandard = new Listing_Standard();
+
 			Rect mainSettings = new Rect(rect.x + 20f, rect.y + 40f, rect.width - 40f, rect.height);
 			var color = GUI.color;
-			listingStandard = new Listing_Standard();
+			
 			listingStandard.ColumnWidth = mainSettings.width / 3;
 			listingStandard.Begin(mainSettings);
 

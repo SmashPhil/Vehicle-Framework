@@ -46,7 +46,7 @@ namespace Vehicles
 				return false;
 			}
 			this.heading = heading;
-			IntVec3 exitTarget = caster.Position.CellFromDistAngle(Building_Artillery.MaxMapDistance, this.heading);
+			IntVec3 exitTarget = caster.Position.PointFromAngle(Building_Artillery.MaxMapDistance, this.heading);
 			if (CausesTimeSlowdown(castTarg))
 			{
 				Find.TickManager.slower.SignalForceNormalSpeed();
@@ -70,7 +70,7 @@ namespace Vehicles
 
 		protected override (bool success, Vector3 launchPos, float angle) TryCastShotInternal()
 		{
-			IntVec3 exitTarget = caster.Position.CellFromDistAngle(Building_Artillery.MaxMapDistance, heading);
+			IntVec3 exitTarget = caster.Position.PointFromAngle(Building_Artillery.MaxMapDistance, heading);
 			if (!target.HasWorldObject && !target.HasThing)
 			{
 				return (false, Vector3.zero, 0);
