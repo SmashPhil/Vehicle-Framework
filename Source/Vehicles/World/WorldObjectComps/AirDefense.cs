@@ -31,6 +31,10 @@ namespace Vehicles
 		public int searchDirection = 1;
 		protected float spotlightAlpha = 1;
 
+		public AirDefense()
+		{
+		}
+
 		public AirDefense(WorldObject parent)
 		{
 			this.parent = parent;

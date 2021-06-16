@@ -340,9 +340,8 @@
       <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.XRModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UpdateLog, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\UpdateLog\Source\UpdateLog\UpdateLog\bin\Release\UpdateLog.dll</HintPath>
+    <Reference Include="UpdateLogTool">
+      <HintPath>..\..\..\UpdateLog\Assemblies\UpdateLogTool.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -359,6 +358,7 @@
     <Compile Include="AI\Work\WorkGiver_RepairVehicle.cs" />
     <Compile Include="Cannons\Projectiles\CompProjectileExitMap.cs" />
     <Compile Include="Components\Construction\ListerAirDefenses.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_Strafe.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Targeters\AntiAirTargeter.cs" />
     <Compile Include="Cannons\Components\TurretCooldownProperties.cs" />
     <Compile Include="Cannons\Components\Turret_RecoilTracker.cs" />
@@ -425,7 +425,7 @@
     <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\SkyfallerMaker\ProjectileSkyfallerMaker.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\SkyfallerMaker\VehicleSkyfallerMaker.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_Bomb.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_Strafe.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_Bombing.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_FlyOver.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_Crashing.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Targeters\Base\BaseWorldTargeter.cs" />
@@ -746,6 +746,7 @@
     <Compile Include="World\WorldObjectComps\AirDefense.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Cannons\Turret\GizmoHandler\" />
     <Folder Include="CustomFeatures\AerialLaunch\Skyfaller\Bombs\" />
   </ItemGroup>
   <ItemGroup>

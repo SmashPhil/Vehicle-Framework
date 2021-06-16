@@ -19,12 +19,14 @@
 		</li>
 	</modDependencies>
 	<packageId>smashphil.vehicles</packageId>
-	<description>
-Welcome to the official &lt;color=cyan&gt;Closed Beta&lt;/color&gt; for Vehicles.
+	<description>&lt;b&gt;&lt;color=orange&gt;The Vehicle Framework&lt;/color&gt;&lt;/b&gt;
+Welcome to the official Closed Beta for my work in progress framework.
 
-This marks an official turning point for Vehicles as this mod will remain on the workshop until a full-release is in order. I will use this mod for testing purposes in order to iron out the bugs before I create a full release. 
+I am using this steam upload to allow for quick and easy updates to a larger audience of testers.
 
-This is a limited access beta with certain features disabled until they receive further work such as incidents, raiders, trader caravans, air defenses, and fishing compatibility.
+If you are not already part of the discord, please join us! It is much easier for me to communicate future plans, bugfixes, and changes to the framework as I make progress.
+
+This mod is explicitly for &lt;b&gt;testing only&lt;/b&gt; so if you are attempting to use this in your own save file to play with, it's at your own risk. I frequently make game breaking updates due to new features and changes to existing core mechanics. You've been warned.
 
 If you have ideas, feedback, or a bug to report, please head on over to the GitHub Issues page (link is provided in the steam workshop description) and make an appropriate ticket there.
 	</description>

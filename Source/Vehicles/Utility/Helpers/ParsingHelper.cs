@@ -24,6 +24,7 @@ namespace Vehicles
 		{
 			XmlParseHelper.RegisterAttribute("LockSetting", CheckFieldLocked);
 			XmlParseHelper.RegisterAttribute("DisableSettings", CheckDisabledSettings);
+			XmlParseHelper.RegisterAttribute("TurretAllowedFor", CheckTurretStatus);
 		}
 
 		private static void CheckFieldLocked(XmlNode node, string value, FieldInfo field)
@@ -61,11 +62,40 @@ namespace Vehicles
 				XmlNode defNode = node.SelectSingleNode("defName");
 				if (defNode is null)
 				{
-					Log.Error($"Cannot use DisableSetting attribute on non-ThingDef XmlNodes.");
+					Log.Error($"Cannot use DisableSetting attribute on non-VehicleDef XmlNodes.");
 					return;
 				}
 				string defName = defNode.InnerText;
 				VehicleMod.settingsDisabledFor.Add(defName);
+			}
+		}
+
+		private static void CheckTurretStatus(XmlNode node, string value, FieldInfo field)
+		{
+			if (value.ToUpperInvariant().Contains("STRAFING"))
+			{
+				XmlNode defNode = node.SelectSingleNode("defName");
+				while (defNode is null)
+				{
+					XmlNode parentNode = node.ParentNode;
+					if (parentNode is null)
+					{
+						Log.Error($"Cannot use TurretAllowedFor attribute on non-VehicleDef XmlNodes.");
+						return;
+					}
+					defNode = parentNode.SelectSingleNode("defName");
+				}
+				string defName = defNode.InnerText;
+				foreach (XmlNode childNode in node.ChildNodes)
+				{
+					XmlNode keyNode = childNode.SelectSingleNode("key");
+					if (keyNode is null)
+					{
+						Log.Error($"Unable to locate <text>key</text> for VehicleTurret.");
+					}
+					string key = keyNode.InnerText;
+					CompCannons.conditionalTurrets.Add(new Pair<string, string>(defName, key));
+				}
 			}
 		}
 	}

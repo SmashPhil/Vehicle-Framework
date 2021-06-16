@@ -5,6 +5,8 @@
   <description>
 [anchor]MiddleCenter[/anchor][b]Vehicles - 1.2.3100[/b][anchor]MiddleLeft[/anchor]
 [title]Notes[/title][font]Tiny[/font]
+Hey everyone, another update for the framework is out! This update brings along many bugfixes to turrets and shuttle mechanics as well as new additions regarding air defenses and turret animation.  Be sure to check out the new Flak turret.
+
 A new save game is recommended for this update.
 [title]Bug Fixes[/title][font]Tiny[/font]
 Fixed bug where WorldObjects in a loaded game would not reregister valid air defenses.
@@ -30,7 +32,7 @@ Air Defenses can now be attached to any world objects as a WorldComp.
 Added VerbProperties_Recoil, Verb_ShootRecoiled, Building_RecoiledTurret, and TurretTop_Recoiled classes for recoil animation.
 
 Added 88mm Flak 36 artillery for Flak type air defense.
-
+[gif delay=25 height=400 fps=35]FlakDemo[/gif]
 Added new verb for recoiled turrets.
 
 Added spotlight targeters for air defenses.
@@ -53,6 +55,7 @@ Crash Landings will now trigger when the altitude meter hits 0 and the descent i
 [title]Final Notes[/title]
 Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.)
   </description>
+  <actionOnUpdate></actionOnUpdate>
   <update>false</update>
   <testing>false</testing>
   <rightIconBar>

@@ -44,7 +44,7 @@ namespace Vehicles
 			Text.Anchor = TextAnchor.MiddleCenter;
 			var font = Text.Font;
 			Text.Font = GameFont.Medium;
-
+			
 			Texture2D previewImage = VehicleHarmony.VehicleMMD.PreviewImage;
 
 			float pWidth = previewImage?.width ?? 0;

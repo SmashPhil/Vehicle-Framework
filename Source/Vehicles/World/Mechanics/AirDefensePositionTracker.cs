@@ -16,7 +16,9 @@ namespace Vehicles
 		private static HashSet<AirDefense> defensesToDraw = new HashSet<AirDefense>();
 
 		public static Dictionary<WorldObject, AirDefense> airDefenseCache = new Dictionary<WorldObject, AirDefense>();
-		//private Dictionary<WorldObject, AirDefense> airDefenseCacheSaveable = new Dictionary<WorldObject, AirDefense>();
+
+		private static List<WorldObject> saveableWorldObjects;
+		private static List<AirDefense> saveableAirDefenses;
 		
 		public AirDefensePositionTracker(World world) : base(world)
 		{
@@ -148,7 +150,7 @@ namespace Vehicles
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Collections.Look(ref airDefenseCache, "airDefenseCache", LookMode.Reference);
+			Scribe_Collections.Look(ref airDefenseCache, "airDefenseCache", LookMode.Reference, LookMode.Deep, ref saveableWorldObjects, ref saveableAirDefenses);
 		}
 	}
 }
