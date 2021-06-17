@@ -57,7 +57,7 @@ Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/is
   </description>
   <actionOnUpdate></actionOnUpdate>
   <update>true</update>
-  <testing>true</testing>
+  <testing>false</testing>
   <rightIconBar>
     <li>
       <name>Github</name>
