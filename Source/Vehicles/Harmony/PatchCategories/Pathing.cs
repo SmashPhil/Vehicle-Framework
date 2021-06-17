@@ -268,7 +268,7 @@ namespace Vehicles
 					instruction = instructionList[++i];
 					yield return instruction; //STLOC.S 38
 					instruction = instructionList[++i];
-
+					
 					yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
 					yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(typeof(PathFinder), "map"));
 					yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, 36);
