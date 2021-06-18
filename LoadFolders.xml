@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <loadFolders>
-	<v1.2>
-		<li>/</li>
-		<li>v1.2</li>
-	</v1.2>
 	<v1.3>
 		<li>/</li>
-		<li>v1.2</li>
 		<li>v1.3</li>
 	</v1.3>
 </loadFolders>

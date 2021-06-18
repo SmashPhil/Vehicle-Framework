@@ -93,8 +93,11 @@ namespace Vehicles
 					{
 						Log.Error($"Unable to locate <text>key</text> for VehicleTurret.");
 					}
-					string key = keyNode.InnerText;
-					CompCannons.conditionalTurrets.Add(new Pair<string, string>(defName, key));
+					if (!Enum.TryParse(keyNode.InnerText, out TurretDisableType enableType))
+					{
+
+					}
+					VehicleTurret.conditionalTurrets.Add(new Pair<string, TurretDisableType>(defName, enableType));
 				}
 			}
 		}

@@ -12,8 +12,6 @@ namespace Vehicles
 {
 	public class CompCannons : VehicleAIComp
 	{
-		public static HashSet<Pair<string, string>> conditionalTurrets = new HashSet<Pair<string, string>>();
-
 		/// PARAMS => (# Shots Fired, VehicleTurret, tickCount}
 		private List<TurretData> multiFireCannon = new List<TurretData>();
 
@@ -135,7 +133,7 @@ namespace Vehicles
 							{
 								turretCannons.Disable("CannotOrderNonControlled".Translate());
 							}
-							//(bool disabled, string reason) = turret.DisableGizmo;
+							//(bool enabled = turret.TurretEnabled(Vehicle.VehicleDef, TurretDisableType.Always);
 							//if (disabled)
 							//{
 							//	turretCannons.Disable(reason);

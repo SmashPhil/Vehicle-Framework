@@ -18,6 +18,8 @@ namespace Vehicles
 		protected const int TicksTillBeginCooldown = 60;
 		public const float MaxHeatCapacity = 100;
 
+		public static HashSet<Pair<string, TurretDisableType>> conditionalTurrets = new HashSet<Pair<string, TurretDisableType>>();
+
 		protected bool autoTargetingActive;
 
 		public int reloadTicks;
@@ -482,6 +484,15 @@ namespace Vehicles
 			{
 				return turretDef.minRange;
 			}
+		}
+
+		public virtual bool TurretEnabled(VehicleDef vehicleDef, TurretDisableType turretKey)
+		{
+			if (conditionalTurrets.Contains(new Pair<string, TurretDisableType>(vehicleDef.defName, turretKey)))
+			{
+
+			}
+			return false;
 		}
 
 		public virtual bool ActivateTimer(bool ignoreTimer = false)
@@ -1305,6 +1316,17 @@ namespace Vehicles
 				yield return $"Duplicate cannon key {key}";
 			}
 			//REDO - Add groupKeys for validation so vehicle turrets all match
+		}
+
+		public static string TurretEnableTypeDisableReason(TurretDisableType currentType)
+		{
+			return currentType switch
+			{
+				TurretDisableType.InFlight => "TurretDisableType_Always".Translate().ToString(),
+				TurretDisableType.Strafing => "TurretDisableType_Always".Translate().ToString(),
+				TurretDisableType.Grounded => "TurretDisableType_Always".Translate().ToString(),
+				_ => "TurretDisableType_Always".Translate().ToString(),
+			};
 		}
 
 		public virtual void ExposeData()

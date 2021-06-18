@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\v1.2\Assemblies\</OutputPath>
+    <OutputPath>..\..\v1.3\Assemblies\</OutputPath>
     <DefineConstants>TRACE;DEBUG;BETA</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -452,6 +452,7 @@
     <Compile Include="Harmony\StartupTesting.cs" />
     <Compile Include="Misc\DefModExtension\SpawnerPropertiesDefModExtension.cs" />
     <Compile Include="Misc\DefOf\ProjectileSkyfallerDefOf.cs" />
+    <Compile Include="Misc\Enums\Turret\TurretDisableType.cs" />
     <Compile Include="Misc\ModSettings\SettingsCustomizableFields.cs" />
     <Compile Include="CustomFeatures\Reservation\Reservation.cs" />
     <Compile Include="CustomFeatures\Reservation\ReservationBase.cs" />
