@@ -57,8 +57,34 @@ namespace Vehicles
 		public List<VehicleComponentProperties> components;
 
 		private readonly SelfOrderingList<CompProperties> cachedComps = new SelfOrderingList<CompProperties>();
+		private Texture2D resolvedLoadCargoTexture;
+		private Texture2D resolvedCancelCargoTexture;
 
 		public PawnKindDef VehicleKindDef { get; internal set; }
+
+		public Texture2D LoadCargoIcon
+		{
+			get
+			{
+				if (resolvedLoadCargoTexture is null)
+				{
+					resolvedLoadCargoTexture = ContentFinder<Texture2D>.Get(drawProperties.loadCargoTexPath, false) ?? VehicleTex.PackCargoIcon[(uint)vehicleType];
+				}
+				return resolvedLoadCargoTexture;
+			}
+		}
+
+		public Texture2D CancelCargoIcon
+		{
+			get
+			{
+				if (resolvedCancelCargoTexture is null)
+				{
+					resolvedCancelCargoTexture = ContentFinder<Texture2D>.Get(drawProperties.cancelCargoTexPath, false) ?? VehicleTex.CancelPackCargoIcon[(uint)vehicleType];
+				}
+				return resolvedCancelCargoTexture;
+			}
+		}
 
 		public override void ResolveReferences()
 		{
@@ -87,37 +113,24 @@ namespace Vehicles
 			{
 				VehicleMod.settings.vehicles.defaultMasks.Add(defName, "Default");
 			}
-			if (properties.customBiomeCosts is null)
-			{
-				properties.customBiomeCosts = new Dictionary<BiomeDef, float>();
-			}
-			if (properties.customHillinessCosts is null)
-			{
-				properties.customHillinessCosts = new Dictionary<Hilliness, float>();
-			}
-			if (properties.customRoadCosts is null)
-			{
-				properties.customRoadCosts = new Dictionary<RoadDef, float>();
-			}
-			if (properties.customTerrainCosts is null)
-			{
-				properties.customTerrainCosts = new Dictionary<TerrainDef, int>();
-			}
-			if (properties.customThingCosts is null)
-			{
-				properties.customThingCosts = new Dictionary<ThingDef, int>();
-			}
+			properties.customBiomeCosts ??= new Dictionary<BiomeDef, float>();
+			properties.customHillinessCosts ??= new Dictionary<Hilliness, float>();
+			properties.customRoadCosts ??= new Dictionary<RoadDef, float>();
+			properties.customTerrainCosts ??= new Dictionary<TerrainDef, int>();
+			properties.customThingCosts ??= new Dictionary<ThingDef, int>();
 
 			if (vehicleType == VehicleType.Sea)
 			{
-				if (!properties.customBiomeCosts.ContainsKey(BiomeDefOf.Ocean))
+				if (!properties.customBiomeCosts.TryGetValue(BiomeDefOf.Ocean, out _))
 				{
 					properties.customBiomeCosts.Add(BiomeDefOf.Ocean, 1);
 				}
-				if (!properties.customBiomeCosts.ContainsKey(BiomeDefOf.Lake))
+				properties.customBiomeCosts[BiomeDefOf.Ocean] = 1;
+				if (!properties.customBiomeCosts.TryGetValue(BiomeDefOf.Lake, out _))
 				{
 					properties.customBiomeCosts.Add(BiomeDefOf.Lake, 1);
 				}
+				properties.customBiomeCosts[BiomeDefOf.Lake] = 1;
 			}
 
 			if (!comps.NullOrEmpty())
@@ -141,10 +154,6 @@ namespace Vehicles
 			if (graphicData is null)
 			{
 				yield return "<field>graphicData</field> must be specified in order to properly render the vehicle.".ConvertRichText();
-			}
-			if (vehicleType == VehicleType.Undefined)
-			{
-				yield return "Cannot assign <field>Undefined</field> vehicle type to VehicleDef".ConvertRichText();
 			}
 			if (properties.vehicleJobLimitations.NullOrEmpty())
 			{

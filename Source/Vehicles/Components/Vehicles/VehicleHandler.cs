@@ -44,13 +44,22 @@ namespace Vehicles
 			{
 				handlers = new ThingOwner<Pawn>(this, false, LookMode.Reference);
 			}
-			if((newHandlers?.Count ?? 0) > 0)
+			if ((newHandlers?.Count ?? 0) > 0)
 			{
-				foreach(Pawn p in newHandlers)
+				foreach (Pawn p in newHandlers)
 				{
-					if(p.Spawned) { p.DeSpawn(); }
-					if(p.holdingOwner != null) { p.holdingOwner = null; }
-					if (!p.IsWorldPawn()) { Find.WorldPawns.PassToWorld(p, PawnDiscardDecideMode.Decide); }
+					if (p.Spawned) 
+					{ 
+						p.DeSpawn(); 
+					}
+					if (p.holdingOwner != null) 
+					{ 
+						p.holdingOwner = null; 
+					}
+					if (!p.IsWorldPawn()) 
+					{ 
+						Find.WorldPawns.PassToWorld(p, PawnDiscardDecideMode.Decide); 
+					}
 				}
 				handlers.TryAddRangeOrTransfer(newHandlers);
 			}

@@ -7,19 +7,20 @@ namespace Vehicles
 {
 	public class VehicleRegionMaker
 	{
-		private Map map;
+		private static readonly HashSet<Thing> tmpProcessedThings = new HashSet<Thing>();
 
-		private VehicleRegion newReg;
+		private readonly Map map;
+		private readonly VehicleDef vehicleDef;
+
+		private VehicleRegion newRegion;
+		private VehicleRegionGrid regionGrid;
 
 		private List<IntVec3> newRegCells = new List<IntVec3>();
 
-		private bool working;
-
-		private VehicleRegionGrid regionGrid;
-
-		private static HashSet<Thing> tmpProcessedThings = new HashSet<Thing>();
-
-		private HashSet<IntVec3>[] linksProcessedAt = new HashSet<IntVec3>[]
+		/// <summary>
+		/// Contains hashset for 4 rotations
+		/// </summary>
+		private readonly HashSet<IntVec3>[] linksProcessedAt = new HashSet<IntVec3>[]
 		{
 			new HashSet<IntVec3>(),
 			new HashSet<IntVec3>(),
@@ -27,51 +28,61 @@ namespace Vehicles
 			new HashSet<IntVec3>()
 		};
 
-		public VehicleRegionMaker(Map map)
+		public VehicleRegionMaker(Map map, VehicleDef vehicleDef)
 		{
 			this.map = map;
+			this.vehicleDef = vehicleDef;
 		}
 
+		public bool CreatingRegions { get; private set; }
+
+		/// <summary>
+		/// Generate region at <paramref name="root"/>
+		/// </summary>
+		/// <param name="root"></param>
 		public VehicleRegion TryGenerateRegionFrom(IntVec3 root)
 		{
-			RegionType expectedRegionType = WaterRegionTypeUtility.GetExpectedRegionType(root, this.map);
+			RegionType expectedRegionType = VehicleRegionTypeUtility.GetExpectedRegionType(root, map, vehicleDef);
 			if (expectedRegionType == RegionType.None)
 			{
 				return null;
 			}
-			if (working)
+			if (CreatingRegions)
 			{
 				Log.Error("Trying to generate a new water region but we are currently generating one. Nested calls are not allowed.");
 				return null;
 			}
-			working = true;
+			CreatingRegions = true;
 			VehicleRegion result;
 			try
 			{
-				regionGrid = map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid;
-				newReg = VehicleRegion.MakeNewUnfilled(root, map);
-				newReg.type = expectedRegionType;
-				//Add portal type?
+				regionGrid = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid;
+				newRegion = VehicleRegion.MakeNewUnfilled(root, map, vehicleDef);
+				newRegion.type = expectedRegionType;
 				FloodFillAndAddCells(root);
 				CreateLinks();
 				RegisterThingsInRegionListers();
-				result = newReg;
+				result = newRegion;
 			}
 			finally
 			{
-				working = false;
+				CreatingRegions = false;
 			}
 			return result;
 		}
 
-		public void TryRegenerateRegionFrom(VehicleRegion region, IntVec3 root)
+		/// <summary>
+		/// Regenerate region at <paramref name="root"/>
+		/// </summary>
+		/// <param name="root"></param>
+		public void TryRegenerateRegionFrom(IntVec3 root)
 		{
-			if (working)
+			if (CreatingRegions)
 			{
 				Log.Error("Trying to regenerate a current water region but we are currently generating one. Nested calls are not allowed.");
 				return;
 			}
-			working = true;
+			CreatingRegions = true;
 			try
 			{
 				FloodFillAndAddCells(root);
@@ -80,52 +91,64 @@ namespace Vehicles
 			}
 			finally
 			{
-				working = false;
+				CreatingRegions = false;
 			}
 		}
 
+		/// <summary>
+		/// Floodfill from <paramref name="root"/> and calculate valid neighboring cells to form a new region
+		/// </summary>
+		/// <param name="root"></param>
 		private void FloodFillAndAddCells(IntVec3 root)
 		{
 			newRegCells.Clear();
-			if (newReg.type.IsOneCellRegion())
+			if (newRegion.type.IsOneCellRegion())
 			{
 				AddCell(root);
 			}
 			else
 			{
-				map.floodFiller.FloodFill(root, (IntVec3 x) => newReg.extentsLimit.Contains(x) && WaterRegionTypeUtility.GetExpectedRegionType(x, map) == newReg.type, delegate (IntVec3 x)
-				{
-					AddCell(x);
-				}, int.MaxValue, false, null);
+				map.floodFiller.FloodFill(root, (IntVec3 x) => newRegion.extentsLimit.Contains(x) && VehicleRegionTypeUtility.GetExpectedRegionType(x, map, vehicleDef) == newRegion.type, 
+					delegate (IntVec3 x)
+					{
+						AddCell(x);
+					}, int.MaxValue, false, null);
 			}
 		}
 
-		private void AddCell(IntVec3 c)
+		/// <summary>
+		/// Add cell to region currently being created
+		/// </summary>
+		/// <param name="cell"></param>
+		private void AddCell(IntVec3 cell)
 		{
-			regionGrid.SetRegionAt(c, newReg);
-			newRegCells.Add(c);
-			if (newReg.extentsClose.minX > c.x)
+			regionGrid.SetRegionAt(cell, newRegion);
+			newRegCells.Add(cell);
+			if (newRegion.extentsClose.minX > cell.x)
 			{
-				newReg.extentsClose.minX = c.x;
+				newRegion.extentsClose.minX = cell.x;
 			}
-			if (newReg.extentsClose.maxX < c.x)
+			if (newRegion.extentsClose.maxX < cell.x)
 			{
-				newReg.extentsClose.maxX = c.x;
+				newRegion.extentsClose.maxX = cell.x;
 			}
-			if (newReg.extentsClose.minZ > c.z)
+			if (newRegion.extentsClose.minZ > cell.z)
 			{
-				newReg.extentsClose.minZ = c.z;
+				newRegion.extentsClose.minZ = cell.z;
 			}
-			if (newReg.extentsClose.maxZ < c.z)
+			if (newRegion.extentsClose.maxZ < cell.z)
 			{
-				newReg.extentsClose.maxZ = c.z;
+				newRegion.extentsClose.maxZ = cell.z;
 			}
-			if (c.x == 0 || c.x == map.Size.x - 1 || c.z == 0 || c.z == map.Size.z - 1)
+			if (cell.x == 0 || cell.x == map.Size.x - 1 || cell.z == 0 || cell.z == map.Size.z - 1)
 			{
-				newReg.touchesMapEdge = true;
+				newRegion.touchesMapEdge = true;
 			}
 		}
 
+		/// <summary>
+		/// Generate region links for region currently being created
+		/// </summary>
 		private void CreateLinks()
 		{
 			for(int i = 0; i <  linksProcessedAt.Length; i++)
@@ -142,27 +165,51 @@ namespace Vehicles
 			}
 		}
 
-		private void SweepInTwoDirectionsAndTryToCreateLink(Rot4 potentialOtherRegionDir, IntVec3 c)
+		/// <summary>
+		/// Try to make region link with neighboring rotations as fallback
+		/// </summary>
+		/// <param name="potentialOtherRegionDir"></param>
+		/// <param name="c"></param>
+		private void SweepInTwoDirectionsAndTryToCreateLink(Rot4 potentialOtherRegionDir, IntVec3 cell)
 		{
-			if (!potentialOtherRegionDir.IsValid) return;
+			if (!potentialOtherRegionDir.IsValid)
+			{
+				return;
+			}
+
 			HashSet<IntVec3> hashSet = linksProcessedAt[potentialOtherRegionDir.AsInt];
-			if (hashSet.Contains(c)) return;
-			IntVec3 c2 = c + potentialOtherRegionDir.FacingCell;
-			if (c2.InBoundsShip(map) && regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(c2) == newReg) return;
-			RegionType expectedRegionType = WaterRegionTypeUtility.GetExpectedRegionType(c2, map);
-			if (expectedRegionType == RegionType.None) return;
+			if (hashSet.Contains(cell))
+			{
+				return;
+			}
+
+			IntVec3 c2 = cell + potentialOtherRegionDir.FacingCell;
+			if (c2.InBounds(map) && regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(c2) == newRegion)
+			{
+				return;
+			}
+
+			RegionType expectedRegionType = VehicleRegionTypeUtility.GetExpectedRegionType(c2, map, vehicleDef);
+			if (expectedRegionType == RegionType.None)
+			{
+				return;
+			}
+
 			Rot4 rot = potentialOtherRegionDir;
 			rot.Rotate(RotationDirection.Clockwise);
 			int num = 0;
 			int num2 = 0;
-			hashSet.Add(c);
-			if(!WaterRegionTypeUtility.IsOneCellRegion(expectedRegionType))
+			hashSet.Add(cell);
+			if (!RegionTypeUtility.IsOneCellRegion(expectedRegionType))
 			{
 				for(;;)
 				{
-					IntVec3 intVec = c + rot.FacingCell * (num + 1);
-					if (!intVec.InBoundsShip(map) || regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(intVec) != newReg ||
-						WaterRegionTypeUtility.GetExpectedRegionType(intVec + potentialOtherRegionDir.FacingCell, map) != expectedRegionType) break;
+					IntVec3 intVec = cell + rot.FacingCell * (num + 1);
+					if (!intVec.InBounds(map) || regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(intVec) != newRegion ||
+						VehicleRegionTypeUtility.GetExpectedRegionType(intVec + potentialOtherRegionDir.FacingCell, map, vehicleDef) != expectedRegionType)
+					{
+						break;
+					}
 					if (!hashSet.Add(intVec))
 					{
 						Log.Error("We've processed the same cell twice.");
@@ -171,9 +218,12 @@ namespace Vehicles
 				}
 				for(; ;)
 				{
-					IntVec3 intVec2 = c - rot.FacingCell * (num2 + 1);
-					if (!intVec2.InBoundsShip(map) || regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(intVec2) != newReg ||
-						WaterRegionTypeUtility.GetExpectedRegionType(intVec2 + potentialOtherRegionDir.FacingCell, map) != expectedRegionType) break;
+					IntVec3 intVec2 = cell - rot.FacingCell * (num2 + 1);
+					if (!intVec2.InBounds(map) || regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(intVec2) != newRegion ||
+						VehicleRegionTypeUtility.GetExpectedRegionType(intVec2 + potentialOtherRegionDir.FacingCell, map, vehicleDef) != expectedRegionType)
+					{
+						break;
+					}
 					if (!hashSet.Add(intVec2))
 					{
 						Log.Error("We've processed the same cell twice.");
@@ -187,34 +237,37 @@ namespace Vehicles
 			if (potentialOtherRegionDir == Rot4.North)
 			{
 				dir = SpanDirection.East;
-				root = c - rot.FacingCell * num2;
+				root = cell - rot.FacingCell * num2;
 				root.z++;
 			}
 			else if (potentialOtherRegionDir == Rot4.South)
 			{
 				dir = SpanDirection.East;
-				root = c + rot.FacingCell * num;
+				root = cell + rot.FacingCell * num;
 			}
 			else if (potentialOtherRegionDir == Rot4.East)
 			{
 				dir = SpanDirection.North;
-				root = c + rot.FacingCell * num;
+				root = cell + rot.FacingCell * num;
 				root.x++;
 			}
 			else
 			{
 				dir = SpanDirection.North;
-				root = c - rot.FacingCell * num2;
+				root = cell - rot.FacingCell * num2;
 			}
 			EdgeSpan span = new EdgeSpan(root, dir, length);
-			VehicleRegionLink regionLink = map.GetCachedMapComponent<VehicleMapping>().VehicleRegionLinkDatabase.LinkFrom(span);
-			regionLink.Register(newReg);
-			newReg.links.Add(regionLink);
+			VehicleRegionLink regionLink = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionLinkDatabase.LinkFrom(span);
+			regionLink.Register(newRegion);
+			newRegion.links.Add(regionLink);
 		}
 
+		/// <summary>
+		/// Register all Things inside region currently being generated
+		/// </summary>
 		private void RegisterThingsInRegionListers()
 		{
-			CellRect cellRect = newReg.extentsClose;
+			CellRect cellRect = newRegion.extentsClose;
 			cellRect = cellRect.ExpandedBy(1);
 			cellRect.ClipInsideMap(map);
 			tmpProcessedThings.Clear();
@@ -224,9 +277,9 @@ namespace Vehicles
 				for (int i = 0; i < 9; i++)
 				{
 					IntVec3 c = intVec + GenAdj.AdjacentCellsAndInside[i];
-					if (c.InBoundsShip(map))
+					if (c.InBounds(map))
 					{
-						if (regionGrid.GetValidRegionAt(c) == newReg)
+						if (regionGrid.GetValidRegionAt(c) == newRegion)
 						{
 							flag = true;
 							break;
@@ -235,7 +288,7 @@ namespace Vehicles
 				}
 				if (flag)
 				{
-					WaterRegionListersUpdater.RegisterAllAt(intVec, map, tmpProcessedThings);
+					VehicleRegionListersUpdater.RegisterAllAt(intVec, map, vehicleDef, tmpProcessedThings);
 				}
 			}
 			tmpProcessedThings.Clear();

@@ -38,7 +38,7 @@ namespace Vehicles
 		/// <remarks>
 		/// If left blank, field will be available to all vehicle types
 		/// </remarks>
-		public VehicleType VehicleType { get; set; }
+		public VehicleType VehicleType { get; set; } = VehicleType.Universal;
 		/// <summary>
 		/// Class type field that contains saveable fields within
 		/// </summary>
@@ -56,7 +56,7 @@ namespace Vehicles
 			string tooltip = Translate ? Tooltip.Translate().ToString() : Tooltip;
 			SaveableField saveable = new SaveableField(def, field);
 			string disabledTooltip = string.Empty;
-			if (VehicleType != VehicleType.Undefined && VehicleType != def.vehicleType)
+			if (VehicleType != VehicleType.Universal && VehicleType != def.vehicleType)
 			{
 				disabledTooltip = "VehicleSaveableFieldDisabledTooltip".Translate();
 			}

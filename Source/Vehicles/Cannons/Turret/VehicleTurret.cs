@@ -795,7 +795,7 @@ namespace Vehicles
 						hitflags = turretDef.attachProjectileFlag
 					});
 				}
-				projectile2.Launch(vehicle, launchCell, c, cannonTarget, projectile2.HitFlags, vehicle);
+				projectile2.Launch(vehicle, launchCell, c, cannonTarget, projectile2.HitFlags, false, vehicle);
 				vehicle.vDrawer.rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
 				rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
 				PostTurretFire();

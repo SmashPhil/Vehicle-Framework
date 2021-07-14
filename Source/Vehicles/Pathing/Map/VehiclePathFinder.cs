@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using HarmonyLib;
 using Verse;
 using Verse.AI;
 using RimWorld;
@@ -11,40 +12,43 @@ using SmashTools;
 
 namespace Vehicles.AI
 {
+	/// <summary>
+	/// Kept similar to vanilla pathfinding for consistency
+	/// </summary>
 	public class VehiclePathFinder
 	{
 		public const int Cost_OutsideAllowedArea = 600;
-		private const int Cost_PawnCollision = 200; //175
-		private const int NodesToOpenBeforeRegionbasedPathing_NonShip = 2000; //Needed?
-		private const int NodesToOpenBeforeRegionBasedPathing_Ship = 100000; //Needed
+		private const int Cost_PawnCollision = 200;
+		private const int NodesToOpenBeforeRegionBasedPathing = 100000;
 		public const int DefaultMoveTicksCardinal = 13;
-		private const int DefaultMoveTicksDiagonal = 18;
+		public const int DefaultMoveTicksDiagonal = 18;
 		private const int SearchLimit = 160000;
 
 		internal Dictionary<IntVec3, int> postCalculatedCells = new Dictionary<IntVec3, int>();
+		internal Dictionary<IntVec3, int> postCalculatedTurns = new Dictionary<IntVec3, int>();
 		private Map map;
-		internal bool report;
+		private VehicleDef vehicleDef;
 		private FastPriorityQueue<CostNode> openList;
 		private VehiclePathFinderNodeFast[] calcGrid;
 
 		private ushort statusOpenValue = 1;
 		private ushort statusClosedValue = 2;
 
-		private VehicleRegionCostCalculatorWrapper regionCostCalculatorSea;
-		private RegionCostCalculatorWrapper regionCostCalculatorLand; //REDO - Remove 
-
 		private int mapSizeX;
 		private int mapSizeZ;
 
-		private VehiclePathGrid VehiclePathGrid;
-		private PathGrid pathGrid;
+		private VehiclePathGrid vehiclePathGrid;
+		private VehicleRegionCostCalculatorWrapper regionCostCalculator;
 
-		private Building[] edificeGrid;
+		private Building[] edificeGrid; //REDO - allow vehicles to have custom edifice costs?
 		private List<Blueprint>[] blueprintGrid;
 
 		private CellIndices cellIndices;
 		private List<int> disallowedCornerIndices = new List<int>(4);
 
+		/// <summary>
+		/// 8 directional x,y adjacent offsets
+		/// </summary>
 		private static readonly int[] Directions = new int[]
 		{
 			0,
@@ -65,7 +69,7 @@ namespace Vehicles.AI
 			-1
 		};
 
-		private static readonly SimpleCurve NonRegionBasedHeuristicStrengthHuman_DistanceCurve = new SimpleCurve
+		private static readonly SimpleCurve NonRegionBasedHeuristicStrength_DistanceCurve = new SimpleCurve
 		{
 			{
 				new CurvePoint(40f, 1f),
@@ -77,7 +81,7 @@ namespace Vehicles.AI
 			}
 		};
 
-		private static readonly SimpleCurve RegionheuristicWeighByNodesOpened = new SimpleCurve
+		private static readonly SimpleCurve RegionHeuristicWeightByNodesOpened = new SimpleCurve
 		{
 			{
 				new CurvePoint(0f, 1f),
@@ -101,159 +105,124 @@ namespace Vehicles.AI
 			}
 		};
 
-		public VehiclePathFinder(Map map, bool report = true)
+		public VehiclePathFinder(Map map, VehicleDef vehicleDef)
 		{
 			this.map = map;
+			this.vehicleDef = vehicleDef;
 			mapSizeX = map.Size.x;
 			mapSizeZ = map.Size.z;
 			calcGrid = new VehiclePathFinderNodeFast[mapSizeX * mapSizeZ];
 			openList = new FastPriorityQueue<CostNode>(new CostNodeComparer());
-			regionCostCalculatorSea = new VehicleRegionCostCalculatorWrapper(map);
-			regionCostCalculatorLand = new RegionCostCalculatorWrapper(map);
+			regionCostCalculator = new VehicleRegionCostCalculatorWrapper(map, vehicleDef);
 			postCalculatedCells = new Dictionary<IntVec3, int>();
-			this.report = report;
+			postCalculatedTurns = new Dictionary<IntVec3, int>();
 		}
 
-		public (PawnPath path, bool found) FindVehiclePath(IntVec3 start, LocalTargetInfo dest, VehiclePawn pawn, CancellationToken token, PathEndMode peMode = PathEndMode.OnCell)
+		/// <summary>
+		/// Find path from <paramref name="start"/> to <paramref name="start"/>
+		/// </summary>
+		/// <param name="start"></param>
+		/// <param name="dest"></param>
+		/// <param name="vehicle"></param>
+		/// <param name="token"></param>
+		/// <param name="peMode"></param>
+		public (PawnPath path, bool found) FindVehiclePath(IntVec3 start, LocalTargetInfo dest, VehiclePawn vehicle, CancellationToken token, PathEndMode peMode = PathEndMode.OnCell)
 		{
-			if(pawn.LocationRestrictedBySize(dest.Cell))
+			if (vehicle.LocationRestrictedBySize(dest.Cell))
 			{
 				Messages.Message("VehicleCannotFit".Translate(), MessageTypeDefOf.RejectInput);
 				return (PawnPath.NotFound, false);
 			}
 			Danger maxDanger = Danger.Deadly;
-			return FindVehiclePath(start, dest, TraverseParms.For(pawn, maxDanger, TraverseMode.ByPawn, false), token, peMode, pawn.IsBoat());
+			return FindVehiclePath(start, dest, TraverseParms.For(vehicle, maxDanger, TraverseMode.ByPawn, false), token, peMode);
 		}
 
-		public (PawnPath path, bool found) FindVehiclePath(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms,  CancellationToken token, PathEndMode peMode = PathEndMode.OnCell, bool waterPathing = false)
+		/// <summary>
+		/// Find path from <paramref name="start"/> to <paramref name="start"/> internal algorithm call
+		/// </summary>
+		/// <param name="start"></param>
+		/// <param name="dest"></param>
+		/// <param name="traverseParms"></param>
+		/// <param name="token"></param>
+		/// <param name="peMode"></param>
+		public (PawnPath path, bool found) FindVehiclePath(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms,  CancellationToken token, PathEndMode peMode = PathEndMode.OnCell)
 		{
-			if (report)
-			{
-				Debug.Message($"{VehicleHarmony.LogLabel} MainPath for {traverseParms.pawn.LabelShort} - ThreadId: [{Thread.CurrentThread.ManagedThreadId}] TaskId: [{Task.CurrentId}]");
-			}
+			Debug.Message($"{VehicleHarmony.LogLabel} MainPath for {traverseParms.pawn.LabelShort} - ThreadId: [{Thread.CurrentThread.ManagedThreadId}] TaskId: [{Task.CurrentId}]");
 
 			postCalculatedCells.Clear();
-			VehicleMapping VehicleMapping = map.GetCachedMapComponent<VehicleMapping>();
+			postCalculatedTurns.Clear();
+			VehicleMapping vehicleMapping = map.GetCachedMapComponent<VehicleMapping>();
 			if(DebugSettings.pathThroughWalls)
 			{
 				traverseParms.mode = TraverseMode.PassAllDestroyableThings;
 			}
-			VehiclePawn pawn = traverseParms.pawn as VehiclePawn;
-			if(!pawn.IsBoat() && waterPathing)
+			VehiclePawn vehicle = traverseParms.pawn as VehiclePawn;
+			if (vehicle is null)
 			{
-				Log.Error($"Set to waterPathing but {pawn.LabelShort} is not registered as a Boat. Self Correcting...");
-				waterPathing = false;
+				Log.Message($"Tried to FindVehiclePath for non-vehicle pawn {traverseParms.pawn}");
 			}
-			if (!(pawn is null) && pawn.Map != map)
+			else if (vehicle.Map != map)
 			{
-				Log.Error(string.Concat(new object[]
-				{
-					"Tried to FindVehiclePath for pawn which is spawned in another map. Their map PathFinder should  have been used, not this one. " +
-					"pawn=", pawn,
-					" pawn.Map=", pawn.Map,
-					" map=", map
-				}));
+				Log.Error($"Tried to FindVehiclePath for vehicle which is spawned in another map. Their map PathFinder should  have been used, not this one. vehicle={vehicle} vehicle's map={vehicle.Map} map={map}");
 				return (PawnPath.NotFound, false);
 			}
 			if(!start.IsValid)
 			{
-				Log.Error(string.Concat(new object[]
-				{
-					"Tried to FindShipPath with invalid start ",
-					start,
-					", pawn=", pawn
-				}));
+				Log.Error($"Tried to FindVehiclePath with invalid start {start}. vehicle={vehicle}");
 				return (PawnPath.NotFound, false);
 			}
 			if (!dest.IsValid)
 			{
-				Log.Error(string.Concat(new object[]
-				{
-					"Tried to FindPath with invalid dest ",
-					dest,
-					", pawn= ",
-					pawn
-				}));
+				Log.Error($"Tried to FindVehiclePath with invalid destination {dest}. vehicle={vehicle}");
 				return (PawnPath.NotFound, false);
 			}
-			if(traverseParms.mode == TraverseMode.ByPawn)
+			if (traverseParms.mode == TraverseMode.ByPawn)
 			{
-				if(waterPathing)
+				if (!VehicleReachabilityUtility.CanReachVehicle(vehicle, dest, peMode, Danger.Deadly, false, traverseParms.mode))
 				{
-					if(!ShipReachabilityUtility.CanReachShip(pawn, dest, peMode, Danger.Deadly, false, traverseParms.mode))
-					{
-						return (PawnPath.NotFound, false);
-					}
+					return (PawnPath.NotFound, false);
 				}
-				else
-				{
-					if(!ReachabilityUtility.CanReach(pawn, dest, peMode, Danger.Deadly, false, traverseParms.mode))
-					{
-						return (PawnPath.NotFound, false);
-					}
-				}
-				
 			}
 			else
 			{
-				if (waterPathing)
+				if (!vehicleMapping[vehicleDef].VehicleReachability.CanReachVehicle(start, dest, peMode, traverseParms))
 				{
-					if(!VehicleMapping.VehicleReachability.CanReachShip(start, dest, peMode, traverseParms))
-					{
-						return (PawnPath.NotFound, false);
-					}
-				}
-				else
-				{
-					if(!map.reachability.CanReach(start, dest, peMode, traverseParms))
-					{
-						return (PawnPath.NotFound, false);
-					}
+					return (PawnPath.NotFound, false);
 				}
 			}
 			cellIndices = map.cellIndices;
 
-			VehiclePathGrid = VehicleMapping.VehiclePathGrid;
-			pathGrid = map.pathGrid;
+			vehiclePathGrid = vehicleMapping[vehicleDef].VehiclePathGrid;
 			this.edificeGrid = map.edificeGrid.InnerArray;
 			blueprintGrid = map.blueprintGrid.InnerArray;
 			int x = dest.Cell.x;
 			int z = dest.Cell.z;
-			int num = cellIndices.CellToIndex(start);
-			int num2 = cellIndices.CellToIndex(dest.Cell);
-			ByteGrid byteGrid = (pawn is null) ? null : pawn.GetAvoidGrid(true);
-			bool flag = traverseParms.mode == TraverseMode.PassAllDestroyableThings || traverseParms.mode == TraverseMode.PassAllDestroyableThingsNotWater;
-			bool flag2 = traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater && traverseParms.mode != TraverseMode.PassAllDestroyableThingsNotWater;
-			bool flag3 = !flag;
+			int startIndex = cellIndices.CellToIndex(start);
+			int destIndex = cellIndices.CellToIndex(dest.Cell);
+			ByteGrid byteGrid = vehicle.GetAvoidGrid(true);
+			bool passAllDestroyableThings = traverseParms.mode == TraverseMode.PassAllDestroyableThings || traverseParms.mode == TraverseMode.PassAllDestroyableThingsNotWater;
+			bool freeTraversal = traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater && traverseParms.mode != TraverseMode.PassAllDestroyableThingsNotWater;
 			CellRect cellRect = CalculateDestinationRect(dest, peMode);
-			bool flag4 = cellRect.Width == 1 && cellRect.Height == 1;
-			int[] boatsArray = VehiclePathGrid.pathGrid;
-			int[] vehicleArray = pathGrid.pathGrid;
+			bool singleRect = cellRect.Width == 1 && cellRect.Height == 1;
+			int[] vehicleArray = vehiclePathGrid.pathGrid;
 			TerrainDef[] topGrid = map.terrainGrid.topGrid;
 			EdificeGrid edificeGrid = map.edificeGrid;
-			int num3 = 0;
-			int num4 = 0;
-			Area allowedArea = GetAllowedArea(pawn);
-			bool flag5 = !(pawn is null) && PawnUtility.ShouldCollideWithPawns(pawn);
-			bool flag6 = true && DebugViewSettings.drawPaths;
-			bool flag7 = !flag && !(VehicleGridsUtility.GetRegion(start, map, RegionType.Set_Passable) is null) && flag2;
-			bool flag8 = !flag || !flag3;
-			bool flag9 = false;
-			bool flag10 = !(pawn is null) && pawn.Drafted;
-			bool flag11 = !(pawn is null) && !(pawn is null);
+			int searchCount = 0;
+			int nodesOpened = 0;
+			bool collideWithVehicles = PawnUtility.ShouldCollideWithPawns(vehicle) && false; //REDO - permanent false until vehicle collision implemented
+			bool drawPaths = DebugViewSettings.drawPaths;
+			bool allowedRegionTraversal = !passAllDestroyableThings && VehicleGridsUtility.GetRegion(start, map, vehicleDef, RegionType.Set_Passable) != null && freeTraversal;
+			bool weightedHeuristics = false;
+			bool drafted = vehicle.Drafted;
 
-			int num5 = (!flag11) ? NodesToOpenBeforeRegionbasedPathing_NonShip : NodesToOpenBeforeRegionBasedPathing_Ship;
-			int num6 = 0;
-			int num7 = 0;
-			float num8 = DetermineHeuristicStrength(pawn, start, dest);
-			int num9 = !(pawn is null) ? pawn.TicksPerMoveCardinal : DefaultMoveTicksCardinal;
-			int num10 = !(pawn is null) ? pawn.TicksPerMoveDiagonal : DefaultMoveTicksDiagonal;
+			float heuristicStrength = DetermineHeuristicStrength(vehicle, start, dest);
+			int ticksCardinal = vehicle.TicksPerMoveCardinal;
+			int ticksDiagonal = vehicle.TicksPerMoveDiagonal;
 
 			CalculateAndAddDisallowedCorners(traverseParms, peMode, cellRect);
-			InitStatusesAndPushStartNode(ref num, start);
-			Rot8 rot = pawn.FullRotation;
+			InitStatusesAndPushStartNode(ref startIndex, start);
 			int iterations = 0;
-			for(;;)
+			for (;;)
 			{
 				if (token.IsCancellationRequested)
 				{
@@ -261,297 +230,235 @@ namespace Vehicles.AI
 				}
 
 				iterations++;
-				if(openList.Count <= 0)
+				if (openList.Count <= 0)
 				{
 					break;
 				}
-				num6 += openList.Count;
-				num7++;
 				CostNode costNode = openList.Pop();
-				num = costNode.index;
-				if(costNode.cost == calcGrid[num].costNodeCost && calcGrid[num].status != statusClosedValue)
+				startIndex = costNode.index;
+				if (costNode.cost == calcGrid[startIndex].costNodeCost && calcGrid[startIndex].status != statusClosedValue)
 				{
-					IntVec3 c = cellIndices.IndexToCell(num);
-					IntVec3 prevCell = c;
-					int x2 = c.x;
-					int z2 = c.z;
-					if(flag6)
+					IntVec3 prevCell = cellIndices.IndexToCell(startIndex);
+					int x2 = prevCell.x;
+					int z2 = prevCell.z;
+					if (drawPaths)
 					{
-						DebugFlash(c, calcGrid[num].knownCost / 1500f, calcGrid[num].knownCost.ToString());
+						DebugFlash(prevCell, calcGrid[startIndex].knownCost / 1500f, calcGrid[startIndex].knownCost.ToString());
 					}
-					if(flag4)
+					if (singleRect)
 					{
-						if(num == num2)
+						if(startIndex == destIndex)
 						{
 							goto Block_32;
 						}
 					}
-					else if(cellRect.Contains(c) && !disallowedCornerIndices.Contains(num))
+					else if (cellRect.Contains(prevCell) && !disallowedCornerIndices.Contains(startIndex))
 					{
 						goto Block_32;
 					}
-					if(num3 > SearchLimit)
+					if (searchCount > SearchLimit)
 					{
 						goto Block_33;
 					}
 
-					List<IntVec3> fullRectCells = CellRect.CenteredOn(c, pawn.def.size.x, pawn.def.size.z).Where(cl2 => cl2 != c).ToList();
+					List<IntVec3> fullRectCells = CellRect.CenteredOn(prevCell, vehicle.def.size.x, vehicle.def.size.z).Where(cl2 => cl2 != prevCell).ToList();
 
 					for(int i = 0; i < 8; i++)
 					{
-						uint num11 = (uint)(x2 + Directions[i]);   //x
-						uint num12 = (uint)(z2 + Directions[i + 8]); //y
+						uint cellX = (uint)(x2 + Directions[i]);   //x
+						uint cellY = (uint)(z2 + Directions[i + 8]); //y
 
-						if(num11 < ((ulong)mapSizeX) && num12 < (ulong)(mapSizeZ))
+						if (cellX < ((ulong)mapSizeX) && cellY < (ulong)(mapSizeZ))
 						{
-							int num13 = (int)num11;
-							int num14 = (int)num12;
-							int num15 = cellIndices.CellToIndex(num13, num14);
+							int cellIntX = (int)cellX;
+							int cellIntY = (int)cellY;
+							int cellIndex = cellIndices.CellToIndex(cellIntX, cellIntY);
 							
-							IntVec3 cellToCheck = cellIndices.IndexToCell(num15);
-							if (VehicleMod.settings.main.fullVehiclePathing && pawn.LocationRestrictedBySize(cellToCheck))
+							IntVec3 cellToCheck = cellIndices.IndexToCell(cellIndex);
+							if (VehicleMod.settings.main.fullVehiclePathing && vehicle.LocationRestrictedBySize(cellToCheck))
 							{
 								goto EndPathing;
 							}
-
-							if(calcGrid[num15].status != statusClosedValue || flag9)
+							Rot8 newDirection = Rot8.DirectionFromCells(prevCell, cellToCheck);
+							if (calcGrid[cellIndex].status != statusClosedValue || weightedHeuristics)
 							{
-								int num16 = 0;
-								bool flag12 = false; //Extra cost for traversing water
-
-								if(flag2 || !new IntVec3(num13, 0 ,num14).GetTerrain(map).HasTag("Water"))
+								int initialCost = 0;
+								if (freeTraversal || !new IntVec3(cellIntX, 0 , cellIntY).GetTerrain(map).HasTag("Water"))
 								{
-									if(waterPathing)
+									if (!vehicle.DrivableFast(cellIndex))
 									{
-										if(!pawn.DrivableFast(num15))
+										if (!passAllDestroyableThings)
 										{
-											if(!flag)
+											if (drawPaths)
 											{
-												if(flag6)
-												{
-													DebugFlash(new IntVec3(num13, 0, num14), 0.22f, "walk");
-												}
-												goto EndPathing;
+												DebugFlash(new IntVec3(cellIntX, 0, cellIntY), 0.22f, "walk");
 											}
-											
-											num16 += 70;
-											Building building = edificeGrid[num15];
-											if (building is null)
-											{
-												goto EndPathing;
-											}
-											if(!IsDestroyable(building))
-											{
-												goto EndPathing;
-											}
-											num16 += (int)(building.HitPoints * 0.2f);
+											goto EndPathing;
 										}
-									}
-									else
-									{
-										if(!pawn.DrivableFast(num15))
+
+										initialCost += 70;
+										Building building = edificeGrid[cellIndex];
+										if (building is null)
 										{
-											if(!flag)
-											{
-												if(flag6)
-												{
-													DebugFlash(new IntVec3(num13, 0, num14), 0.22f, "walk");
-												}
-												goto EndPathing;
-											}
-											flag12 = true;
-											num16 += 70;
-											Building building = edificeGrid[num15];
-											if (building is null)
-											{
-												goto EndPathing;
-											}
-											if(!IsDestroyable(building))
-											{
-												goto EndPathing;
-											}
-											num16 += (int)(building.HitPoints * 0.2f);
+											goto EndPathing;
 										}
+										if (!IsDestroyable(building))
+										{
+											goto EndPathing;
+										}
+										initialCost += (int)(building.HitPoints * 0.2f);
 									}
-									
-									if(i > 3)
+
+									if (i > 3)
 									{
 										switch(i)
 										{
 											case 4:
-												if(BlocksDiagonalMovement(pawn, num - mapSizeX))
+												if (BlocksDiagonalMovement(vehicle, startIndex - mapSizeX))
 												{
-													if(flag8)
+													if (drawPaths)
 													{
-														if(flag6)
-														{
-															DebugFlash(new IntVec3(x2, 0, z2 - 1), 0.9f, "ships");
-														}
-														goto EndPathing;
+														DebugFlash(new IntVec3(x2, 0, z2 - 1), 0.9f, "vehicles");
 													}
-													num16 += 70;
+													initialCost += 70;
 												}
-												if(BlocksDiagonalMovement(pawn, num + 1))
+												if (BlocksDiagonalMovement(vehicle, startIndex + 1))
 												{
-													if(flag8)
+													if (drawPaths)
 													{
-														if(flag6)
-														{
-															DebugFlash(new IntVec3(x2 + 1, 0, z2), 0.9f, "ships");
-														}
-														goto EndPathing;
+														DebugFlash(new IntVec3(x2 + 1, 0, z2), 0.9f, "vehicles");
 													}
-													num16 += 70;
+													initialCost += 70;
 												}
 												break;
 											case 5:
-												if(BlocksDiagonalMovement(pawn, num + mapSizeX))
+												if (BlocksDiagonalMovement(vehicle, startIndex + mapSizeX))
 												{
-													if(flag8)
+													if (drawPaths)
 													{
-														if(flag6)
-														{
-															DebugFlash(new IntVec3(x2, 0, z2 + 1), 0.9f, "ships");
-														}
-														goto EndPathing;
+														DebugFlash(new IntVec3(x2, 0, z2 + 1), 0.9f, "vehicles");
 													}
-													num16 += 70;
+													initialCost += 70;
 												}
-												if(BlocksDiagonalMovement(pawn, num + 1))
+												if (BlocksDiagonalMovement(vehicle, startIndex + 1))
 												{
-													if(flag8)
+													if (drawPaths)
 													{
-														if(flag6)
-														{
-															DebugFlash(new IntVec3(x2 + 1, 0, z2), 0.9f, "ships");
-														}
-														goto EndPathing;
+														DebugFlash(new IntVec3(x2 + 1, 0, z2), 0.9f, "vehicles");
 													}
-													num16 += 70;
+													initialCost += 70;
 												}
 												break;
 											case 6:
-												if(BlocksDiagonalMovement(pawn, num + mapSizeX))
+												if (BlocksDiagonalMovement(vehicle, startIndex + mapSizeX))
 												{
-													if(flag8)
+													if (drawPaths)
 													{
-														if(flag6)
-														{
-															DebugFlash(new IntVec3(x2, 0, z2 + 1), 0.9f, "ships");
-														}
-														goto EndPathing;
+														DebugFlash(new IntVec3(x2 + 1, 0, z2), 0.9f, "vehicles");
 													}
-													num16 += 70;
+													initialCost += 70;
 												}
-												if(BlocksDiagonalMovement(pawn, num - 1))
+												if (BlocksDiagonalMovement(vehicle, startIndex - 1))
 												{
-													if(flag8)
+													if (drawPaths)
 													{
-														if(flag6)
-														{
-															DebugFlash(new IntVec3(x2 - 1, 0, z2), 0.9f, "ships");
-														}
-														goto EndPathing;
+														DebugFlash(new IntVec3(x2 + 1, 0, z2), 0.9f, "vehicles");
 													}
-													num16 += 70;
+													initialCost += 70;
 												}
 												break;
 											case 7:
-												if(BlocksDiagonalMovement(pawn, num - mapSizeX))
+												if (BlocksDiagonalMovement(vehicle, startIndex - mapSizeX))
 												{
-													if(flag8)
+													if (drawPaths)
 													{
-														if(flag6)
-														{
-															DebugFlash(new IntVec3(x2, 0, z2 - 1), 0.9f, "ships");
-														}
-														goto EndPathing;
+														DebugFlash(new IntVec3(x2, 0, z2 - 1), 0.9f, "vehicles");
 													}
-													num16 += 70;
+													initialCost += 70;
 												}
-												if(BlocksDiagonalMovement(pawn, num - 1))
+												if (BlocksDiagonalMovement(vehicle, startIndex - 1))
 												{
-													if(flag8)
+													if (drawPaths)
 													{
-														if(flag6)
-														{
-															DebugFlash(new IntVec3(x2 - 1, 0, z2), 0.9f, "ships");
-														}
-														goto EndPathing;
+														DebugFlash(new IntVec3(x2 - 1, 0, z2), 0.9f, "vehicles");
 													}
-													num16 += 70;
+													initialCost += 70;
 												}
 												break;
 										}
 									}
-									int num17 = (i <= 3) ? num9 : num10;
-									num17 += num16;
-									//if (Rot8.DirectionFromCells(prevCell, cellToCheck) != rot)
-									//{
-									//    Log.Message("Additional Cost");
-									//    num17 += ChangeDirectionAdditionalCost;
-									//}
-									if (!flag12 && !waterPathing)
+									int tickCost = ((i <= 3) ? ticksCardinal : ticksDiagonal) + initialCost;
+									if (newDirection != costNode.direction)
 									{
-										//Extra Terrain costs
-										if (pawn.VehicleDef.properties.customTerrainCosts?.NotNullAndAny() ?? false)
+										int rotWeight = costNode.direction.Difference(newDirection);
+										int turnCost = vehicle.VehicleDef.properties.pathTurnCost * rotWeight;
+										tickCost += turnCost;
+										if (postCalculatedTurns.ContainsKey(cellToCheck))
 										{
-											TerrainDef currentTerrain = map.terrainGrid.TerrainAt(num15);
-											if (pawn.VehicleDef.properties.customTerrainCosts.ContainsKey(currentTerrain))
-											{
-												int customCost = pawn.VehicleDef.properties.customTerrainCosts[currentTerrain];
-												if(customCost < 0)
-												{
-													goto EndPathing;
-												}
-												num17 += customCost;
-											}
-											else
-											{
-												num17 += vehicleArray[num15];
-											}
+											postCalculatedTurns[cellToCheck] = turnCost;
 										}
 										else
 										{
-											num17 += vehicleArray[num15];
+											postCalculatedTurns.Add(cellToCheck, turnCost);
 										}
-										num17 += flag10 ? topGrid[num15].extraDraftedPerceivedPathCost : topGrid[num15].extraNonDraftedPerceivedPathCost;
 									}
+									if (vehicle.VehicleDef.properties.customTerrainCosts?.NotNullAndAny() ?? false)
+									{
+										TerrainDef currentTerrain = map.terrainGrid.TerrainAt(cellIndex);
+										if (vehicle.VehicleDef.properties.customTerrainCosts.ContainsKey(currentTerrain))
+										{
+											int customCost = vehicle.VehicleDef.properties.customTerrainCosts[currentTerrain];
+											if (customCost < 0)
+											{
+												goto EndPathing;
+											}
+											tickCost += customCost;
+										}
+										else
+										{
+											tickCost += vehicleArray[cellIndex];
+										}
+									}
+									else
+									{
+										tickCost += vehicleArray[cellIndex];
+									}
+									tickCost += drafted ? topGrid[cellIndex].extraDraftedPerceivedPathCost : topGrid[cellIndex].extraNonDraftedPerceivedPathCost;
 									if (byteGrid != null)
 									{
-										num17 += (byteGrid[num15] * 8);
+										tickCost += (byteGrid[cellIndex] * 8);
 									}
-									//Allowed area cost?
-									if(flag5 && MultithreadHelper.AnyVehicleBlockingPathAt(new IntVec3(num13, 0, num14), pawn, false, false, true) != null)
+									//REDO - collisions?
+									if (collideWithVehicles && MultithreadHelper.AnyVehicleBlockingPathAt(new IntVec3(cellIntX, 0, cellIntY), vehicle, false, false, true) != null)
 									{
-										num17 += Cost_PawnCollision;
+										tickCost += Cost_PawnCollision;
 									}
-									Building building2 = edificeGrid[num15];
-									if(!(building2 is null))
+									Building building2 = edificeGrid[cellIndex];
+									if (building2 != null)
 									{
-										//Building Costs Here
+										//REDO - Building Costs Here
 									}
-									if(blueprintGrid[num15] != null)
+									if (blueprintGrid[cellIndex] != null)
 									{
-										List<Blueprint> list = new List<Blueprint>(blueprintGrid[num15]);
+										List<Blueprint> list = new List<Blueprint>(blueprintGrid[cellIndex]);
 										if(!list.NullOrEmpty())
 										{
 											int num18 = 0;
 											foreach(Blueprint bp in list)
 											{
-												num18 = Mathf.Max(num18, GetBlueprintCost(bp, pawn));
+												num18 = Mathf.Max(num18, GetBlueprintCost(bp, vehicle));
 											}
 											if(num18 == int.MaxValue)
 											{
 												goto EndPathing;
 											}
-											num17 += num18;
+											tickCost += num18;
 										}
 									}
 									
-									int num19 = num17 + calcGrid[num].knownCost;
-									ushort status = calcGrid[num15].status;
-									
+									int calculatedCost = tickCost + calcGrid[startIndex].knownCost;
+									ushort status = calcGrid[cellIndex].status;
+
 									//if(pawn.Props.useFullHitboxPathing)
 									//{
 									//    foreach(IntVec3 fullRect in fullRectCells)
@@ -573,260 +480,288 @@ namespace Vehicles.AI
 									//}
 
 									//Only generate path costs for linear non-reverse pathing check
-									if(report)
+									if (postCalculatedCells.ContainsKey(cellToCheck))
 									{
-										if(postCalculatedCells.ContainsKey(cellToCheck))
-										{
-											postCalculatedCells[cellToCheck] = num19;
-										}
-										else
-										{
-											postCalculatedCells.Add(cellToCheck, num19);
-										}
+										postCalculatedCells[cellToCheck] = calculatedCost;
+									}
+									else
+									{
+										postCalculatedCells.Add(cellToCheck, calculatedCost);
 									}
 
-									if (waterPathing && !map.terrainGrid.TerrainAt(num15).IsWater)
-										num19 += 10000;
 									if (status == statusClosedValue || status == statusOpenValue)
 									{
-										int num20 = 0;
-										if(status == statusClosedValue)
+										int closedValueCost = 0;
+										if (status == statusClosedValue)
 										{
-											num20 = num9;
+											closedValueCost = ticksCardinal;
 										}
-										if(calcGrid[num15].knownCost <= num19 + num20)
+										if(calcGrid[cellIndex].knownCost <= calculatedCost + closedValueCost)
 										{
 											goto EndPathing;
 										}
 									}
-									if (flag9)
+									if (weightedHeuristics)
 									{
-										calcGrid[num15].heuristicCost = waterPathing ? Mathf.RoundToInt(regionCostCalculatorSea.GetPathCostFromDestToRegion(num15) *
-											RegionheuristicWeighByNodesOpened.Evaluate(num4)) : Mathf.RoundToInt(regionCostCalculatorLand.GetPathCostFromDestToRegion(num15) *
-											RegionheuristicWeighByNodesOpened.Evaluate(num4));
-										if(calcGrid[num15].heuristicCost < 0)
+										calcGrid[cellIndex].heuristicCost = Mathf.RoundToInt(regionCostCalculator.GetPathCostFromDestToRegion(cellIndex) * RegionHeuristicWeightByNodesOpened.Evaluate(nodesOpened));
+										if (calcGrid[cellIndex].heuristicCost < 0)
 										{
-											Log.ErrorOnce(string.Concat(new object[]
-											{
-												"Heuristic cost overflow for vehicle ", pawn.ToStringSafe<Pawn>(),
-												" pathing from ", start,
-												" to ", dest, "."
-											}), pawn.GetHashCode() ^ 193840009);
-											calcGrid[num15].heuristicCost = 0;
+											Log.ErrorOnce($"Heuristic cost overflow for vehicle {vehicle} pathing from {start} to {dest}.", vehicle.GetHashCode() ^ "FVPHeuristicCostOverflow".GetHashCode());
+											calcGrid[cellIndex].heuristicCost = 0;
 										}
 									}
 									else if(status != statusClosedValue && status != statusOpenValue)
 									{
-										int dx = Math.Abs(num13 - x);
-										int dz = Math.Abs(num14 - z);
-										int num21 = GenMath.OctileDistance(dx, dz, num9, num10);
-										calcGrid[num15].heuristicCost = Mathf.RoundToInt((float)num21 * num8);
+										int dx = Math.Abs(cellIntX - x);
+										int dz = Math.Abs(cellIntY - z);
+										int num21 = GenMath.OctileDistance(dx, dz, ticksCardinal, ticksDiagonal);
+										calcGrid[cellIndex].heuristicCost = Mathf.RoundToInt(num21 * heuristicStrength);
 									}
-									int num22 = num19 + calcGrid[num15].heuristicCost;
-									if(num22 < 0)
+									int costWithHeuristic = calculatedCost + calcGrid[cellIndex].heuristicCost;
+									if (costWithHeuristic < 0)
 									{
-										Log.ErrorOnce(string.Concat(new object[]
-										{
-											"Node cost overflow for ship ", pawn.ToStringSafe<Pawn>(),
-											" pathing from ", start,
-											" to ", dest, "."
-										}), pawn.GetHashCode() ^ 87865822);
-										num22 = 0;
+										Log.ErrorOnce($"Node cost overflow for vehicle {vehicle} pathing from {start} to {dest}.", vehicle.GetHashCode() ^ "FVPNodeCostOverflow".GetHashCode());
+										costWithHeuristic = 0;
 									}
-									calcGrid[num15].parentIndex = num;
-									calcGrid[num15].knownCost = num19;
-									calcGrid[num15].status = statusOpenValue;
-									calcGrid[num15].costNodeCost = num22;
-									num4++;
-									rot = Rot8.DirectionFromCells(prevCell, cellToCheck);
-									openList.Push(new CostNode(num15, num22));
+									calcGrid[cellIndex].parentIndex = startIndex;
+									calcGrid[cellIndex].knownCost = calculatedCost;
+									calcGrid[cellIndex].status = statusOpenValue;
+									calcGrid[cellIndex].costNodeCost = costWithHeuristic;
+									nodesOpened++;
+									Rot8 rot = Rot8.DirectionFromCells(prevCell, cellToCheck);
+									openList.Push(new CostNode(cellIndex, costWithHeuristic, rot));
 								}
 							}
 						}
 						EndPathing:;
 					}
-					num3++;
-					calcGrid[num].status = statusClosedValue;
-					if(num4 >= num5 && flag7 && !flag9)
+					searchCount++;
+					calcGrid[startIndex].status = statusClosedValue;
+					if (nodesOpened >= NodesToOpenBeforeRegionBasedPathing && allowedRegionTraversal && !weightedHeuristics)
 					{
-						flag9 = true;
-						if (waterPathing)
-							regionCostCalculatorSea.Init(cellRect, traverseParms, num9, num10, byteGrid, allowedArea, flag10, disallowedCornerIndices);
-						else
-							regionCostCalculatorLand.Init(cellRect, traverseParms, num9, num10, byteGrid, allowedArea, flag10, disallowedCornerIndices);
-
-						InitStatusesAndPushStartNode(ref num, start);
-						num4 = 0;
-						num3 = 0;
+						weightedHeuristics = true;
+						regionCostCalculator.Init(cellRect, traverseParms, ticksCardinal, ticksDiagonal, byteGrid, drafted, disallowedCornerIndices);
+						InitStatusesAndPushStartNode(ref startIndex, start);
+						nodesOpened = 0;
+						searchCount = 0;
 					}
 				}
 			}
-			string text = ((pawn is null) || pawn.CurJob is null) ? "null" : pawn.CurJob.ToString();
-			string text2 = ((pawn is null) || pawn.Faction is null) ? "null" : pawn.Faction.ToString();
-			if(report)
-			{
-				Log.Warning(string.Concat(new object[]
-				{
-					"ship pawn: ", pawn, " pathing from ", start,
-					" to ", dest, " ran out of cells to process.\nJob:", text,
-					"\nFaction: ", text2,
-					"\niterations: ", iterations
-				}));
-			}
+			string curJob = vehicle.CurJob?.ToString() ?? "null";
+			string curFaction = vehicle.Faction?.ToString() ?? "null";
+			Log.Warning($"Vehicle {vehicle} pathing from {start} to {dest} ran out of cells to process. Job={curJob} Faction={curFaction} iterations={iterations}");
 			DebugDrawRichData();
 			return (PawnPath.NotFound, false);
 			Block_32:
 			PawnPath result = PawnPath.NotFound;
-			if (report)
-			{
-				result = FinalizedPath(num, flag9);
-			}
+			result = FinalizedPath(startIndex, weightedHeuristics);
 			DebugDrawPathCost();
 			return (result, true);
 			Block_33:
-			Log.Warning(string.Concat(new object[]
-			{
-				"Ship ", pawn, " pathing from ", start,
-				" to ", dest, " hit search limit of ", SearchLimit, " cells."
-			}));
+			Log.Warning($"Vehicle {vehicle} pathing from {start} to {dest} hit search limit of {SearchLimit}.");
 			DebugDrawRichData();
 			return (PawnPath.NotFound, false);
 		}
 
-		public static int GetBuildingCost(Building b, TraverseParms traverseParms, Pawn pawn)
+		/// <summary>
+		/// Retrieve cost to path through <paramref name="building"/>
+		/// </summary>
+		/// <remarks>
+		/// Currently unused as vehicles cannot open doors
+		/// </remarks>
+		/// <param name="building"></param>
+		/// <param name="traverseParms"></param>
+		/// <param name="pawn"></param>
+		public static int GetBuildingCost(Building building, TraverseParms traverseParms, Pawn pawn)
 		{
-			Building_Door building_Door = b as Building_Door;
-			if (building_Door != null)
+			if (building is Building_Door door)
 			{
 				switch (traverseParms.mode)
 				{
 					case TraverseMode.ByPawn:
-						if (!traverseParms.canBash && building_Door.IsForbiddenToPass(pawn))
+						if (!traverseParms.canBashDoors && door.IsForbiddenToPass(pawn))
 						{
 							if (DebugViewSettings.drawPaths)
 							{
-								DebugFlash(b.Position, b.Map, 0.77f, "forbid");
+								DebugFlash(building.Position, building.Map, 0.77f, "forbid");
 							}
 							return int.MaxValue;
 						}
-						if (building_Door.PawnCanOpen(pawn) && !building_Door.FreePassage)
+						if (door.PawnCanOpen(pawn) && !door.FreePassage)
 						{
-							return building_Door.TicksToOpenNow;
+							return door.TicksToOpenNow;
 						}
-						if (building_Door.CanPhysicallyPass(pawn))
+						if (door.CanPhysicallyPass(pawn))
 						{
 							return 0;
 						}
-						if (traverseParms.canBash)
+						if (traverseParms.canBashDoors)
 						{
 							return 300;
 						}
 						if (DebugViewSettings.drawPaths)
 						{
-							DebugFlash(b.Position, b.Map, 0.34f, "cant pass");
+							DebugFlash(building.Position, building.Map, 0.34f, "cant pass");
 						}
 						return int.MaxValue;
 					case TraverseMode.PassDoors:
-						if (pawn != null && building_Door.PawnCanOpen(pawn) && !building_Door.IsForbiddenToPass(pawn) && !building_Door.FreePassage)
+						if (pawn != null && door.PawnCanOpen(pawn) && !door.IsForbiddenToPass(pawn) && !door.FreePassage)
 						{
-							return building_Door.TicksToOpenNow;
+							return door.TicksToOpenNow;
 						}
-						if ((pawn != null && building_Door.CanPhysicallyPass(pawn)) || building_Door.FreePassage)
+						if ((pawn != null && door.CanPhysicallyPass(pawn)) || door.FreePassage)
 						{
 							return 0;
 						}
 						return 150;
 					case TraverseMode.NoPassClosedDoors:
 					case TraverseMode.NoPassClosedDoorsOrWater:
-						if (building_Door.FreePassage)
+						if (door.FreePassage)
 						{
 							return 0;
 						}
 						return int.MaxValue;
 					case TraverseMode.PassAllDestroyableThings:
 					case TraverseMode.PassAllDestroyableThingsNotWater:
-						if (pawn != null && building_Door.PawnCanOpen(pawn) && !building_Door.IsForbiddenToPass(pawn) && !building_Door.FreePassage)
+						if (pawn != null && door.PawnCanOpen(pawn) && !door.IsForbiddenToPass(pawn) && !door.FreePassage)
 						{
-							return building_Door.TicksToOpenNow;
+							return door.TicksToOpenNow;
 						}
-						if ((pawn != null && building_Door.CanPhysicallyPass(pawn)) || building_Door.FreePassage)
+						if ((pawn != null && door.CanPhysicallyPass(pawn)) || door.FreePassage)
 						{
 							return 0;
 						}
-						return 50 + (int)((float)building_Door.HitPoints * 0.2f);
+						return 50 + (int)(door.HitPoints * 0.2f);
 				}
 			}
 			else if (pawn != null)
 			{
-				return (int)b.PathFindCostFor(pawn);
+				return building.PathFindCostFor(pawn);
 			}
 			return 0;
 		}
 
-		public static int GetBlueprintCost(Blueprint b, Pawn pawn)
+		/// <summary>
+		/// Cost to path over blueprint
+		/// </summary>
+		/// <param name="b"></param>
+		/// <param name="pawn"></param>
+		public static int GetBlueprintCost(Blueprint blueprint, VehiclePawn vehicle)
 		{
-			if(pawn != null)
+			if (vehicle != null)
 			{
-				return (int)b.PathFindCostFor(pawn);
+				return VehiclePathGrid.ImpassableCost; //blueprint.PathFindCostFor(vehicle) (need implementation for vehicles that should path over blueprints)
 			}
 			return 0;
 		}
 
-		public static bool IsDestroyable(Thing t)
+		/// <summary>
+		/// Can path through <paramref name="thing"/> by destroying
+		/// </summary>
+		/// <param name="thing"></param>
+		/// <returns></returns>
+		public static bool IsDestroyable(Thing thing)
 		{
-			return t.def.useHitPoints && t.def.destroyable;
+			return thing.def.useHitPoints && thing.def.destroyable;
 		}
 
-		public static bool BlocksDiagonalMovement(Map map, int x, int z)
+		/// <summary>
+		/// Diagonal movement is blocked
+		/// </summary>
+		/// <param name="map"></param>
+		/// <param name="vehicle"></param>
+		/// <param name="x"></param>
+		/// <param name="z"></param>
+		public static bool BlocksDiagonalMovement(Map map, VehicleDef vehicleDef, int x, int z)
 		{
-			return BlocksDiagonalMovement(map, map.cellIndices.CellToIndex(x, z));
+			return BlocksDiagonalMovement(map, vehicleDef, map.cellIndices.CellToIndex(x, z));
 		}
 
-		public static bool BlocksDiagonalMovement(Map map, int index)
+		/// <summary>
+		/// Diagonal movement is blocked
+		/// </summary>
+		/// <param name="map"></param>
+		/// <param name="vehicle"></param>
+		/// <param name="index"></param>
+		public static bool BlocksDiagonalMovement(Map map, VehicleDef vehicleDef, int index)
 		{
-			return map.GetCachedMapComponent<VehicleMapping>().VehiclePathGrid.WalkableFast(index) || map.edificeGrid[index] is Building_Door;
+			return map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehiclePathGrid.WalkableFast(index) || map.edificeGrid[index] is Building_Door;
 		}
 
+		/// <summary>
+		/// Diagonal movement is blocked
+		/// </summary>
+		/// <param name="vehicle"></param>
+		/// <param name="x"></param>
+		/// <param name="z"></param>
 		public static bool BlocksDiagonalMovement(VehiclePawn vehicle, int x, int z)
 		{
 			return BlocksDiagonalMovement(vehicle, vehicle.Map.cellIndices.CellToIndex(x, z));
 		}
 
+		/// <summary>
+		/// Diagonal movement is blocked
+		/// </summary>
+		/// <param name="vehicle"></param>
+		/// <param name="index"></param>
 		public static bool BlocksDiagonalMovement(VehiclePawn vehicle, int index)
 		{
 			return !vehicle.DrivableFast(index) || vehicle.Map.edificeGrid[index] is Building_Door;
 		}
 
+		/// <summary>
+		/// Flash <paramref name="str"/> for debugging
+		/// </summary>
+		/// <param name="c"></param>
+		/// <param name="colorPct"></param>
+		/// <param name="str"></param>
 		private void DebugFlash(IntVec3 c, float colorPct, string str)
 		{
 			DebugFlash(c, map, colorPct, str);
 		}
 
+		/// <summary>
+		/// Flash <paramref name="str"/> on <paramref name="map"/> for debugging
+		/// </summary>
+		/// <param name="c"></param>
+		/// <param name="map"></param>
+		/// <param name="colorPct"></param>
+		/// <param name="str"></param>
 		private static void DebugFlash(IntVec3 c, Map map, float colorPct, string str)
 		{
 			map.debugDrawer.FlashCell(c, colorPct, str, 50);
 		}
 
+		/// <summary>
+		/// Finalize path results from internal algorithm call
+		/// </summary>
+		/// <param name="finalIndex"></param>
+		/// <param name="usedRegionHeuristics"></param>
 		private PawnPath FinalizedPath(int finalIndex, bool usedRegionHeuristics)
 		{
-			PawnPath emptyPawnPath = map.pawnPathPool.GetEmptyPawnPath();
+			PawnPath newPath = map.pawnPathPool.GetEmptyPawnPath();
 			int num = finalIndex;
-			for(; ;)
+			for (;;)
 			{
 				VehiclePathFinderNodeFast shipPathFinderNodeFast = calcGrid[num];
 				int parentIndex = shipPathFinderNodeFast.parentIndex;
 				IntVec3 cell = map.cellIndices.IndexToCell(num);
-				emptyPawnPath.AddNode(cell);
-				if(num == parentIndex)
+				newPath.AddNode(cell);
+				if (num == parentIndex)
 				{
 					break;
 				}
 				num = parentIndex;
 			}
-			emptyPawnPath.SetupFound(calcGrid[finalIndex].knownCost, usedRegionHeuristics);
-			return emptyPawnPath;
+			newPath.SetupFound(calcGrid[finalIndex].knownCost, usedRegionHeuristics);
+			return newPath;
 		}
 
+		/// <summary>
+		/// Push <paramref name="start"/> onto node list and reset associated <paramref name="curIndex"/> costs
+		/// </summary>
+		/// <param name="curIndex"></param>
+		/// <param name="start"></param>
 		private void InitStatusesAndPushStartNode(ref int curIndex, IntVec3 start)
 		{
 			statusOpenValue += 2;
@@ -842,9 +777,12 @@ namespace Vehicles.AI
 			calcGrid[curIndex].parentIndex = curIndex;
 			calcGrid[curIndex].status = statusOpenValue;
 			openList.Clear();
-			openList.Push(new CostNode(curIndex, 0));
+			openList.Push(new CostNode(curIndex, 0, Rot8.Invalid));
 		}
 
+		/// <summary>
+		/// Reset all node statuses
+		/// </summary>
 		private void ResetStatuses()
 		{
 			for(int i = 0; i < calcGrid.Length; i++)
@@ -855,6 +793,9 @@ namespace Vehicles.AI
 			statusClosedValue = 2;
 		}
 
+		/// <summary>
+		/// Draw all open cells
+		/// </summary>
 		internal void DebugDrawRichData()
 		{
 			if (VehicleMod.settings.debug.debugDrawVehiclePathCosts)
@@ -868,6 +809,11 @@ namespace Vehicles.AI
 			}
 		}
 
+		/// <summary>
+		/// Draw all calculated path costs
+		/// </summary>
+		/// <param name="colorPct"></param>
+		/// <param name="duration"></param>
 		internal void DebugDrawPathCost(float colorPct = 0f, int duration = 50)
 		{
 			if (VehicleMod.settings.debug.debugDrawVehiclePathCosts)
@@ -879,31 +825,24 @@ namespace Vehicles.AI
 			}
 		}
 
-		private float DetermineHeuristicStrength(Pawn pawn, IntVec3 start, LocalTargetInfo dest)
+		//REDO - Allow player to modify weighted heuristic or spin into seperate thread for long distance traversal with accurate pathing
+		/// <summary>
+		/// Heuristic strength to use for A* algorithm
+		/// </summary>
+		/// <param name="vehicle"></param>
+		/// <param name="start"></param>
+		/// <param name="dest"></param>
+		private float DetermineHeuristicStrength(VehiclePawn vehicle, IntVec3 start, LocalTargetInfo dest)
 		{
-			if(!(pawn is VehiclePawn))
-			{
-				Log.Error("Called method for pawn " + pawn + " in ShipPathFinder which should never occur. Contact mod author.");
-			}
-
 			float lengthHorizontal = (start - dest.Cell).LengthHorizontal;
-			return (float)Mathf.RoundToInt(NonRegionBasedHeuristicStrengthHuman_DistanceCurve.Evaluate(lengthHorizontal));
+			return Mathf.RoundToInt(NonRegionBasedHeuristicStrength_DistanceCurve.Evaluate(lengthHorizontal));
 		}
 
-		private Area GetAllowedArea(Pawn pawn)
-		{
-			if(pawn != null && pawn.playerSettings != null && !pawn.Drafted && ForbidUtility.CaresAboutForbidden(pawn, true))
-			{
-				Area area = pawn.playerSettings.EffectiveAreaRestrictionInPawnCurrentMap;
-				if(!(area is null) && area.TrueCount <= 0)
-				{
-					area = null;
-				}
-				return area;
-			}
-			return null;
-		}
-
+		/// <summary>
+		/// Calculate rect on <paramref name="dest"/> target
+		/// </summary>
+		/// <param name="dest"></param>
+		/// <param name="peMode"></param>
 		private CellRect CalculateDestinationRect(LocalTargetInfo dest, PathEndMode peMode)
 		{
 			CellRect result;
@@ -912,50 +851,73 @@ namespace Vehicles.AI
 			return result;
 		}
 
+		/// <summary>
+		/// Calculate disallowed corners at <paramref name="destinationRect"/>
+		/// </summary>
+		/// <param name="traverseParms"></param>
+		/// <param name="peMode"></param>
+		/// <param name="destinationRect"></param>
 		private void CalculateAndAddDisallowedCorners(TraverseParms traverseParms, PathEndMode peMode, CellRect destinationRect)
 		{
-			this.disallowedCornerIndices.Clear();
+			disallowedCornerIndices.Clear();
 			if (peMode == PathEndMode.Touch)
 			{
 				int minX = destinationRect.minX;
 				int minZ = destinationRect.minZ;
 				int maxX = destinationRect.maxX;
 				int maxZ = destinationRect.maxZ;
-				if (!this.IsCornerTouchAllowed(minX + 1, minZ + 1, minX + 1, minZ, minX, minZ + 1))
+				if (!IsCornerTouchAllowed(minX + 1, minZ + 1, minX + 1, minZ, minX, minZ + 1))
 				{
-					this.disallowedCornerIndices.Add(this.map.cellIndices.CellToIndex(minX, minZ));
+					disallowedCornerIndices.Add(map.cellIndices.CellToIndex(minX, minZ));
 				}
-				if (!this.IsCornerTouchAllowed(minX + 1, maxZ - 1, minX + 1, maxZ, minX, maxZ - 1))
+				if (!IsCornerTouchAllowed(minX + 1, maxZ - 1, minX + 1, maxZ, minX, maxZ - 1))
 				{
-					this.disallowedCornerIndices.Add(this.map.cellIndices.CellToIndex(minX, maxZ));
+					disallowedCornerIndices.Add(map.cellIndices.CellToIndex(minX, maxZ));
 				}
-				if (!this.IsCornerTouchAllowed(maxX - 1, maxZ - 1, maxX - 1, maxZ, maxX, maxZ - 1))
+				if (!IsCornerTouchAllowed(maxX - 1, maxZ - 1, maxX - 1, maxZ, maxX, maxZ - 1))
 				{
-					this.disallowedCornerIndices.Add(this.map.cellIndices.CellToIndex(maxX, maxZ));
+					disallowedCornerIndices.Add(map.cellIndices.CellToIndex(maxX, maxZ));
 				}
-				if (!this.IsCornerTouchAllowed(maxX - 1, minZ + 1, maxX - 1, minZ, maxX, minZ + 1))
+				if (!IsCornerTouchAllowed(maxX - 1, minZ + 1, maxX - 1, minZ, maxX, minZ + 1))
 				{
-					this.disallowedCornerIndices.Add(this.map.cellIndices.CellToIndex(maxX, minZ));
+					disallowedCornerIndices.Add(map.cellIndices.CellToIndex(maxX, minZ));
 				}
 			}
 		}
 
+		/// <summary>
+		/// Corner touching is allowed at relevant coordinates
+		/// </summary>
+		/// <param name="cornerX"></param>
+		/// <param name="cornerZ"></param>
+		/// <param name="adjCardinal1X"></param>
+		/// <param name="adjCardinal1Z"></param>
+		/// <param name="adjCardinal2X"></param>
+		/// <param name="adjCardinal2Z"></param>
 		private bool IsCornerTouchAllowed(int cornerX, int cornerZ, int adjCardinal1X, int adjCardinal1Z, int adjCardinal2X, int adjCardinal2Z)
 		{
-			return TouchPathEndModeUtility.IsCornerTouchAllowed(cornerX, cornerZ, adjCardinal1X, adjCardinal1Z, adjCardinal2X, adjCardinal2Z, map);
+			return TouchPathEndModeUtility.IsCornerTouchAllowed(cornerX, cornerZ, adjCardinal1X, adjCardinal1Z, adjCardinal2X, adjCardinal2Z, null); //REDO - PathingContext
 		}
 
+		/// <summary>
+		/// Node data
+		/// </summary>
 		internal struct CostNode
 		{
-			public CostNode(int index, int cost)
+			public CostNode(int index, int cost, Rot8 direction)
 			{
 				this.index = index;
 				this.cost = cost;
+				this.direction = direction;
 			}
 			public int index;
 			public int cost;
+			public Rot8 direction;
 		}
 
+		/// <summary>
+		/// Node data pre-calculation
+		/// </summary>
 		private struct VehiclePathFinderNodeFast
 		{
 			public int knownCost;
@@ -965,6 +927,9 @@ namespace Vehicles.AI
 			public ushort status;
 		}
 
+		/// <summary>
+		/// Node cost comparer for path determination
+		/// </summary>
 		internal class CostNodeComparer : IComparer<CostNode>
 		{
 			public int Compare(CostNode a, CostNode b)

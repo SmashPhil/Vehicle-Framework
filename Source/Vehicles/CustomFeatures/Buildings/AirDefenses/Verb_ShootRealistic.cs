@@ -113,9 +113,9 @@ namespace Vehicles
 					hitflags = projectileProps.hitFlagDef
 				});
 			}
-			if (verbProps.forcedMissRadius > 0.5f)
+			if (verbProps.ForcedMissRadius > 0.5f)
 			{
-				float num = VerbUtility.CalculateAdjustedForcedMiss(verbProps.forcedMissRadius, currentTarget.Cell - caster.Position);
+				float num = VerbUtility.CalculateAdjustedForcedMiss(verbProps.ForcedMissRadius, currentTarget.Cell - caster.Position);
 				if (num > 0.5f)
 				{
 					int max = GenRadial.NumCellsInRadius(num);
@@ -135,7 +135,7 @@ namespace Vehicles
 						{
 							projectileHitFlags &= ~ProjectileHitFlags.NonTargetPawns;
 						}
-						projectile2.Launch(launcher, launchPos, c, currentTarget, projectileHitFlags, equipment, null);
+						projectile2.Launch(launcher, launchPos, c, currentTarget, projectileHitFlags, false, equipment);
 						return (true, launchPos, angle);
 					}
 				}
@@ -154,7 +154,7 @@ namespace Vehicles
 					projectileHitFlags2 |= ProjectileHitFlags.NonTargetPawns;
 				}
 				launchPos += new Vector3(VerbProps.shootOffset.x, 0, VerbProps.shootOffset.y).RotatedBy(angle);
-				projectile2.Launch(launcher, launchPos, shootLine.Dest, currentTarget, projectileHitFlags2, equipment, targetCoverDef);
+				projectile2.Launch(launcher, launchPos, shootLine.Dest, currentTarget, projectileHitFlags2, false, equipment, targetCoverDef);
 				return (true, launchPos, angle);
 			}
 			if (currentTarget.Thing != null && currentTarget.Thing.def.category == ThingCategory.Pawn && !Rand.Chance(shotReport.PassCoverChance))
@@ -167,7 +167,7 @@ namespace Vehicles
 					projectileHitFlags3 |= ProjectileHitFlags.NonTargetPawns;
 				}
 				launchPos += new Vector3(VerbProps.shootOffset.x, 0, VerbProps.shootOffset.y).RotatedBy(angle);
-				projectile2.Launch(launcher, launchPos, randomCoverToMissInto, currentTarget, projectileHitFlags3, equipment, targetCoverDef);
+				projectile2.Launch(launcher, launchPos, randomCoverToMissInto, currentTarget, projectileHitFlags3, false, equipment, targetCoverDef);
 				return (true, launchPos, angle);
 			}
 			ProjectileHitFlags projectileHitFlags4 = ProjectileHitFlags.IntendedTarget;
@@ -185,14 +185,14 @@ namespace Vehicles
 			{
 				angle = launchPos.AngleToPoint(currentTarget.CenterVector3);
 				launchPos += new Vector3(VerbProps.shootOffset.x, 0, VerbProps.shootOffset.y).RotatedBy(angle);
-				projectile2.Launch(launcher, launchPos, currentTarget, currentTarget, projectileHitFlags4, equipment, targetCoverDef);
+				projectile2.Launch(launcher, launchPos, currentTarget, currentTarget, projectileHitFlags4, false, equipment, targetCoverDef);
 				ThrowDebugText("Hit\nDest", currentTarget.Cell);
 			}
 			else
 			{
 				angle = launchPos.AngleToPoint(shootLine.Dest.ToVector3Shifted());
 				launchPos += new Vector3(VerbProps.shootOffset.x, 0, VerbProps.shootOffset.y).RotatedBy(angle);
-				projectile2.Launch(launcher, launchPos, shootLine.Dest, currentTarget, projectileHitFlags4, equipment, targetCoverDef);
+				projectile2.Launch(launcher, launchPos, shootLine.Dest, currentTarget, projectileHitFlags4, false, equipment, targetCoverDef);
 				ThrowDebugText("Hit\nDest", shootLine.Dest);
 			}
 			return (true, launchPos, angle);

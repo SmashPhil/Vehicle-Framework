@@ -7,28 +7,56 @@ using Verse;
 
 namespace Vehicles.AI
 {
+	/// <summary>
+	/// Cache results from reachability calculations for faster retrieval
+	/// </summary>
 	public class VehicleReachabilityCache
 	{
 		private Dictionary<CachedEntry, bool> cacheDict = new Dictionary<CachedEntry, bool>();
 
 		private static List<CachedEntry> tmpCachedEntries = new List<CachedEntry>();
 
+		/// <summary>
+		/// Cache count
+		/// </summary>
 		public int Count
 		{
 			get
 			{
-				return this.cacheDict.Count;
+				return cacheDict.Count;
 			}
 		}
 
+		/// <summary>
+		/// Clear reachability cache
+		/// </summary>
+		public void Clear()
+		{
+			cacheDict.Clear();
+		}
+
+		/// <summary>
+		/// Retrieve cached result for reachability from <paramref name="A"/> to <paramref name="B"/>
+		/// </summary>
+		/// <param name="A"></param>
+		/// <param name="B"></param>
+		/// <param name="traverseParms"></param>
 		public BoolUnknown CachedResultFor(VehicleRoom A, VehicleRoom B, TraverseParms traverseParms)
 		{
-			bool flag;
-			if (cacheDict.TryGetValue(new CachedEntry(A.ID, B.ID, traverseParms), out flag))
-				return (!flag) ? BoolUnknown.False : BoolUnknown.True;
+			if (cacheDict.TryGetValue(new CachedEntry(A.ID, B.ID, traverseParms), out bool reachable))
+			{
+				return reachable ? BoolUnknown.True : BoolUnknown.False;
+			}
 			return BoolUnknown.Unknown;
 		}
 
+		/// <summary>
+		/// Add cached result for reachability from <paramref name="A"/> to <paramref name="B"/>
+		/// </summary>
+		/// <param name="A"></param>
+		/// <param name="B"></param>
+		/// <param name="traverseParams"></param>
+		/// <param name="reachable"></param>
 		public void AddCachedResult(VehicleRoom A, VehicleRoom B, TraverseParms traverseParams, bool reachable)
 		{
 			CachedEntry key = new CachedEntry(A.ID, B.ID, traverseParams);
@@ -36,38 +64,51 @@ namespace Vehicles.AI
 				cacheDict.Add(key, reachable);
 		}
 
-		public void Clear()
-		{
-			cacheDict.Clear();
-		}
-
-		public void ClearFor(Pawn p)
+		/// <summary>
+		/// Clear all results for <paramref name="vehicle"/>
+		/// </summary>
+		/// <param name="vehicle"></param>
+		public void ClearFor(VehiclePawn vehicle)
 		{
 			tmpCachedEntries.Clear();
-			foreach(KeyValuePair<CachedEntry, bool> keyValuePair in this.cacheDict)
+			foreach(KeyValuePair<CachedEntry, bool> keyValuePair in cacheDict)
 			{
-				if (keyValuePair.Key.TraverseParms.pawn == p)
+				if (keyValuePair.Key.TraverseParms.pawn == vehicle)
+				{
 					tmpCachedEntries.Add(keyValuePair.Key);
+				}
 			}
-			foreach (CachedEntry ce in tmpCachedEntries)
-				cacheDict.Remove(ce);
+			foreach (CachedEntry cachedEntry in tmpCachedEntries)
+			{
+				cacheDict.Remove(cachedEntry);
+			}
 			tmpCachedEntries.Clear();
 		}
 
+		/// <summary>
+		/// Clear all results containing results targeting <paramref name="hostileTo"/>
+		/// </summary>
+		/// <param name="hostileTo"></param>
 		public void ClearForHostile(Thing hostileTo)
 		{
 			tmpCachedEntries.Clear();
 			foreach(KeyValuePair<CachedEntry, bool> keyValuePair in cacheDict)
 			{
-				Pawn p = keyValuePair.Key.TraverseParms.pawn;
-				if (!(p is null) && p.HostileTo(hostileTo))
+				if (keyValuePair.Key.TraverseParms.pawn is Pawn pawn && pawn.HostileTo(hostileTo))
+				{
 					tmpCachedEntries.Add(keyValuePair.Key);
+				}
 			}
-			foreach (CachedEntry ce in tmpCachedEntries)
-				cacheDict.Remove(ce);
+			foreach (CachedEntry cachedEntry in tmpCachedEntries)
+			{
+				cacheDict.Remove(cachedEntry);
+			}
 			tmpCachedEntries.Clear();
 		}
 
+		/// <summary>
+		/// Cached result data for reachability between two <see cref="VehicleRoom"/>
+		/// </summary>
 		[StructLayout(LayoutKind.Sequential, Size = 1)]
 		private struct CachedEntry : IEquatable<CachedEntry>
 		{

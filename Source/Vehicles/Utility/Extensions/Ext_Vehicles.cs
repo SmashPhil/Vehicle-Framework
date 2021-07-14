@@ -124,22 +124,6 @@ namespace Vehicles
 				Find.World.CoastDirectionAt(tile).IsValid;
 		}
 
-		/// <summary>
-		/// <paramref name="vehicle"/>
-		/// </summary>
-		/// <param name="vehicle"></param>
-		/// <returns></returns>
-		public static bool OnDeepWater(this VehiclePawn vehicle)
-		{
-			//Splitting Caravan?
-			if (vehicle?.Map is null && vehicle.IsWorldPawn())
-			{
-				return false;
-			}
-			return (vehicle.Map.terrainGrid.TerrainAt(vehicle.Position) == TerrainDefOf.WaterDeep || vehicle.Map.terrainGrid.TerrainAt(vehicle.Position) == TerrainDefOf.WaterMovingChestDeep ||
-				vehicle.Map.terrainGrid.TerrainAt(vehicle.Position) == TerrainDefOf.WaterOceanDeep) && GenGrid.Impassable(vehicle.Position, vehicle.Map);
-		}
-
 		/// <see cref="DrivableFast(VehiclePawn, IntVec3)"/>
 		public static bool Drivable(this VehiclePawn vehicle, IntVec3 cell)
 		{
@@ -168,18 +152,16 @@ namespace Vehicles
 		public static bool DrivableFast(this VehiclePawn vehicle, IntVec3 cell)
 		{
 			VehiclePawn claimedBy = vehicle.Map.GetCachedMapComponent<VehiclePositionManager>().ClaimedBy(cell);
-			bool passable = (claimedBy is null || claimedBy == vehicle) && (vehicle.VehicleDef.vehicleType == VehicleType.Sea ?
-				vehicle.Map.GetCachedMapComponent<VehicleMapping>().VehiclePathGrid.WalkableFast(cell) : (vehicle.Map.pathGrid.pathGrid[vehicle.Map.cellIndices.CellToIndex(cell)] < 10000));
+			bool passable = (claimedBy is null || claimedBy == vehicle) &&
+				vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathGrid.WalkableFast(cell);
 			return passable;
 		}
 
-		public static bool LocationRestrictedBySize(this VehiclePawn pawn, IntVec3 dest)
+		public static bool LocationRestrictedBySize(this VehiclePawn vehicle, IntVec3 dest)
 		{
-			return CellRect.CenteredOn(dest, pawn.def.Size.x, pawn.def.Size.z).NotNullAndAny(c2 => pawn.IsBoat() ? (!c2.InBoundsShip(pawn.Map) || GenGridVehicles.Impassable(c2, pawn.Map)) : 
-																												   (!c2.InBounds(pawn.Map) || MultithreadHelper.ImpassableReverseThreaded(c2, pawn.Map, pawn))) && 
-																								   CellRect.CenteredOn(dest, pawn.def.Size.z, pawn.def.Size.x).NotNullAndAny(c2 => pawn.IsBoat() 
-																												 ? (!c2.InBoundsShip(pawn.Map) || GenGridVehicles.Impassable(c2, pawn.Map)) : 
-																												   (!c2.InBounds(pawn.Map) || MultithreadHelper.ImpassableReverseThreaded(c2, pawn.Map, pawn)));
+			return CellRect.CenteredOn(dest, vehicle.def.Size.x, vehicle.def.Size.z).NotNullAndAny(c2 => !c2.InBounds(vehicle.Map) || GenGridVehicles.Impassable(c2, vehicle.Map, vehicle.VehicleDef) &&
+																								   CellRect.CenteredOn(dest, vehicle.def.Size.z, vehicle.def.Size.x).NotNullAndAny(c2 => !c2.InBounds(vehicle.Map) ||
+																								   GenGridVehicles.Impassable(c2, vehicle.Map, vehicle.VehicleDef)));
 		}
 
 		/// <summary>
@@ -197,13 +179,9 @@ namespace Vehicles
 				dimensions.x = dimensions.z;
 				dimensions.z = x;
 			}
-			foreach(IntVec3 cell in CellRect.CenteredOn(loc, dimensions.x, dimensions.z))
+			foreach (IntVec3 cell in CellRect.CenteredOn(loc, dimensions.x, dimensions.z))
 			{
-				if(vehicle.IsBoat() && !GenGridVehicles.Standable(cell, map))
-				{
-					return false;
-				}
-				else if(!GenGrid.Standable(cell, map))
+				if (!GenGridVehicles.Standable(cell, vehicle.VehicleDef, map))
 				{
 					return false;
 				}
@@ -227,11 +205,7 @@ namespace Vehicles
 			}
 			foreach (IntVec3 cell2 in CellRect.CenteredOn(cell, dimensions.x, dimensions.z))
 			{
-				if (vehicleDef.IsBoat() && !GenGridVehicles.Standable(cell2, map))
-				{
-					return false;
-				}
-				else if (!GenGrid.Standable(cell2, map))
+				if (!GenGridVehicles.Standable(cell2, vehicleDef, map))
 				{
 					return false;
 				}

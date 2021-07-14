@@ -3,11 +3,21 @@ using Verse;
 
 namespace Vehicles
 {
+	/// <summary>
+	/// Region grid related helper methods
+	/// </summary>
 	public static class VehicleGridsUtility
 	{
-		public static VehicleRegion GetRegion(this IntVec3 loc, Map map, RegionType allowedRegionTypes = RegionType.Set_Passable)
+		/// <summary>
+		/// Retrieve region at <paramref name="loc"/>
+		/// </summary>
+		/// <param name="loc"></param>
+		/// <param name="map"></param>
+		/// <param name="vehicleDef"></param>
+		/// <param name="allowedRegionTypes"></param>
+		public static VehicleRegion GetRegion(this IntVec3 loc, Map map, VehicleDef vehicleDef, RegionType allowedRegionTypes = RegionType.Set_Passable)
 		{
-			return VehicleRegionAndRoomQuery.RegionAt(loc, map, allowedRegionTypes);
+			return VehicleRegionAndRoomQuery.RegionAt(loc, map, vehicleDef, allowedRegionTypes);
 		}
 	}
 }

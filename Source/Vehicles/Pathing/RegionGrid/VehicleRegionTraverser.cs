@@ -4,62 +4,95 @@ using Verse;
 
 namespace Vehicles
 {
-	public delegate bool WaterRegionEntryPredicate(VehicleRegion from, VehicleRegion to);
-
-	public delegate bool WaterRegionProcessor(VehicleRegion reg);
-	public static class WaterRegionTraverser
+	/// <summary>
+	/// Traverser utility methods for traversing between 2 regions
+	/// </summary>
+	public static class VehicleRegionTraverser
 	{
+		public delegate bool VehicleRegionEntry(VehicleRegion from, VehicleRegion to);
+		public delegate bool VehicleRegionProcessor(VehicleRegion reg);
+
 		private static Queue<BFSWorker> freeWorkers = new Queue<BFSWorker>();
 
 		public static int NumWorkers = 8;
 
-		public static readonly WaterRegionEntryPredicate PassAll = (VehicleRegion from, VehicleRegion to) => true;
+		public static readonly VehicleRegionEntry PassAll = (VehicleRegion from, VehicleRegion to) => true;
 
-		static WaterRegionTraverser()
+		static VehicleRegionTraverser()
 		{
 			RecreateWorkers();
 		}
 
-		//FloodAndSetRooms
-
-		//FloodAndSetNewRegionIndex
-
-		public static bool WithinRegions(this IntVec3 A, IntVec3 B, Map map, int regionLookCount, TraverseParms traverseParams, RegionType traversableRegionTypes = RegionType.Set_Passable)
+		/// <summary>
+		/// <paramref name="A"/> and <paramref name="B"/> are contained within the same region or can traverse between regions
+		/// </summary>
+		/// <param name="A"></param>
+		/// <param name="B"></param>
+		/// <param name="map"></param>
+		/// <param name="vehicleDef"></param>
+		/// <param name="regionLookCount"></param>
+		/// <param name="traverseParams"></param>
+		/// <param name="traversableRegionTypes"></param>
+		public static bool WithinRegions(this IntVec3 A, IntVec3 B, Map map, VehicleDef vehicleDef, int regionLookCount, TraverseParms traverseParams, RegionType traversableRegionTypes = RegionType.Set_Passable)
 		{
-			VehicleRegion region = VehicleGridsUtility.GetRegion(A, map, traversableRegionTypes);
-			if (region is null) return false;
-			VehicleRegion regB = VehicleGridsUtility.GetRegion(B, map, traversableRegionTypes);
-			if (regB is null) return false;
-			if (region == regB) return true;
-			bool entryCondition(VehicleRegion from, VehicleRegion r) => r.Allows(traverseParams, false);
-			bool found = false;
-			bool regionProcessor(VehicleRegion r)
+			VehicleRegion regionA = VehicleGridsUtility.GetRegion(A, map, vehicleDef, traversableRegionTypes);
+			if (regionA is null)
 			{
-				if (r == regB)
+				return false;
+			}
+			VehicleRegion regionB = VehicleGridsUtility.GetRegion(B, map, vehicleDef, traversableRegionTypes);
+			if (regionB is null)
+			{
+				return false;
+			}
+			if (regionA == regionB)
+			{
+				return true;
+			}
+			bool entryCondition(VehicleRegion from, VehicleRegion to) => to.Allows(traverseParams, false);
+			bool found = false;
+			bool regionProcessor(VehicleRegion region)
+			{
+				if (region == regionB)
 				{
 					found = true;
 					return true;
 				}
 				return false;
 			}
-			BreadthFirstTraverse(region, entryCondition, regionProcessor, regionLookCount, traversableRegionTypes);
+			BreadthFirstTraverse(regionA, entryCondition, regionProcessor, regionLookCount, traversableRegionTypes);
 			return found;
 		}
 
-		public static void MarkRegionsBFS(VehicleRegion root, WaterRegionEntryPredicate entryCondition, int maxRegions, int inRadiusMark, RegionType traversableRegionTypes = RegionType.Set_Passable)
+		/// <summary>
+		/// Perform BFS with <paramref name="region"/>
+		/// </summary>
+		/// <param name="region"></param>
+		/// <param name="entryCondition"></param>
+		/// <param name="maxRegions"></param>
+		/// <param name="inRadiusMark"></param>
+		/// <param name="traversableRegionTypes"></param>
+		public static void MarkRegionsBFS(VehicleRegion region, VehicleRegionEntry entryCondition, int maxRegions, int inRadiusMark, RegionType traversableRegionTypes = RegionType.Set_Passable)
 		{
-			BreadthFirstTraverse(root, entryCondition, delegate (VehicleRegion r)
+			BreadthFirstTraverse(region, entryCondition, delegate (VehicleRegion r)
 			{
 				r.mark = inRadiusMark;
 				return false;
 			}, maxRegions, traversableRegionTypes);
 		}
 
-		public static bool ShouldCountRegion(VehicleRegion r)
+		/// <summary>
+		/// Region is a doorway
+		/// </summary>
+		/// <param name="region"></param>
+		public static bool ShouldCountRegion(VehicleRegion region)
 		{
-			return !r.IsDoorway;
+			return !region.IsDoorway;
 		}
 
+		/// <summary>
+		/// Requeue <see cref="BFSWorker"/> workers
+		/// </summary>
 		public static void RecreateWorkers()
 		{
 			freeWorkers.Clear();
@@ -69,14 +102,32 @@ namespace Vehicles
 			}
 		}
 
-		public static void BreadthFirstTraverse(IntVec3 start, Map map, WaterRegionEntryPredicate entryCondition, WaterRegionProcessor regionProcessor, int maxRegions = 999999, RegionType traversableRegionTypes = RegionType.Set_Passable)
+		/// <summary>
+		/// BreadthFirstSearch from <paramref name="start"/> and <paramref name="regionProcessor"/>
+		/// </summary>
+		/// <param name="start"></param>
+		/// <param name="map"></param>
+		/// <param name="vehicleDef"></param>
+		/// <param name="entryCondition"></param>
+		/// <param name="regionProcessor"></param>
+		/// <param name="maxRegions"></param>
+		/// <param name="traversableRegionTypes"></param>
+		public static void BreadthFirstTraverse(IntVec3 start, Map map, VehicleDef vehicleDef, VehicleRegionEntry entryCondition, VehicleRegionProcessor regionProcessor, int maxRegions = 999999, RegionType traversableRegionTypes = RegionType.Set_Passable)
 		{
-			VehicleRegion region = VehicleGridsUtility.GetRegion(start, map, traversableRegionTypes);
+			VehicleRegion region = VehicleGridsUtility.GetRegion(start, map, vehicleDef, traversableRegionTypes);
 			if (region is null) return;
 			BreadthFirstTraverse(region, entryCondition, regionProcessor, maxRegions, traversableRegionTypes);
 		}
 
-		public static void BreadthFirstTraverse(VehicleRegion root, WaterRegionEntryPredicate entryCondition, WaterRegionProcessor regionProcessor, int maxRegions = 999999, RegionType traversableRegionTypes = RegionType.Set_Passable)
+		/// <summary>
+		/// BreadthFirstSearch from <paramref name="root"/> and <paramref name="regionProcessor"/>
+		/// </summary>
+		/// <param name="root"></param>
+		/// <param name="entryCondition"></param>
+		/// <param name="regionProcessor"></param>
+		/// <param name="maxRegions"></param>
+		/// <param name="traversableRegionTypes"></param>
+		public static void BreadthFirstTraverse(VehicleRegion root, VehicleRegionEntry entryCondition, VehicleRegionProcessor regionProcessor, int maxRegions = 999999, RegionType traversableRegionTypes = RegionType.Set_Passable)
 		{
 			if (freeWorkers.Count == 0)
 			{
@@ -104,36 +155,47 @@ namespace Vehicles
 			}
 		}
 
-		public static VehicleRoom FloodAndSetRooms(VehicleRegion root, Map map, VehicleRoom existingRoom)
+		/// <summary>
+		/// Breadth First Search to fill room based on <paramref name="region"/>
+		/// </summary>
+		/// <param name="root"></param>
+		/// <param name="map"></param>
+		/// <param name="existingRoom"></param>
+		public static VehicleRoom FloodAndSetRooms(VehicleRegion region, Map map, VehicleDef vehicleDef, VehicleRoom existingRoom)
 		{
 			VehicleRoom floodingRoom;
 			if (existingRoom == null)
 			{
-				floodingRoom = VehicleRoom.MakeNew(map);
+				floodingRoom = VehicleRoom.MakeNew(map, vehicleDef);
 			}
 			else
 			{
 				floodingRoom = existingRoom;
 			}
-			root.Room = floodingRoom;
-			if (!root.type.AllowsMultipleRegionsPerRoom())
+			region.Room = floodingRoom;
+			if (!region.type.AllowsMultipleRegionsPerDistrict())
 			{
 				return floodingRoom;
 			}
-			bool entryCondition(VehicleRegion from, VehicleRegion r) => r.type == root.type && r.Room != floodingRoom;
+			bool entryCondition(VehicleRegion from, VehicleRegion r) => r.type == region.type && r.Room != floodingRoom;
 			bool regionProcessor(VehicleRegion r)
 			{
 				r.Room = floodingRoom;
 				return false;
 			}
-			BreadthFirstTraverse(root, entryCondition, regionProcessor, 999999, RegionType.Set_All);
+			BreadthFirstTraverse(region, entryCondition, regionProcessor, 999999, RegionType.Set_All);
 			return floodingRoom;
 		}
 
+		/// <summary>
+		/// Breadth First Search to assign new region group indices for <paramref name="root"/>
+		/// </summary>
+		/// <param name="root"></param>
+		/// <param name="newRegionGroupIndex"></param>
 		public static void FloodAndSetNewRegionIndex(VehicleRegion root, int newRegionGroupIndex)
 		{
 			root.newRegionGroupIndex = newRegionGroupIndex;
-			if (!root.type.AllowsMultipleRegionsPerRoom())
+			if (!root.type.AllowsMultipleRegionsPerDistrict())
 			{
 				return;
 			}
@@ -146,37 +208,53 @@ namespace Vehicles
 			BreadthFirstTraverse(root, entryCondition, regionProcessor, 999999, RegionType.Set_All);
 		}
 
+		/// <summary>
+		/// Breadth First Search worker class
+		/// </summary>
 		private class BFSWorker
 		{
-			private Queue<VehicleRegion> open = new Queue<VehicleRegion>();
+			private readonly Queue<VehicleRegion> open = new Queue<VehicleRegion>();
 
 			private int numRegionsProcessed;
 			private uint closedIndex = 1u;
-			private int closedArrayPos;
+			private readonly int closedArrayPos;
 
 			public BFSWorker(int closedArrayPos)
 			{
 				this.closedArrayPos = closedArrayPos;
 			}
 
+			/// <summary>
+			/// Clear region queue
+			/// </summary>
 			public void Clear()
 			{
 				open.Clear();
 			}
 
+			/// <summary>
+			/// Queue region available for traversal
+			/// </summary>
+			/// <param name="region"></param>
 			private void QueueNewOpenRegion(VehicleRegion region)
 			{
 				if (region.closedIndex[closedArrayPos] == closedIndex)
 				{
-					throw new InvalidOperationException("Region is already closed; you can't open it. Region: " + region.ToString());
+					throw new InvalidOperationException($"Region is already closed; you can't open it. Region={region}");
 				}
 				open.Enqueue(region);
 				region.closedIndex[closedArrayPos] = closedIndex;
 			}
 
-			private void FinalizeSearch() { }
-
-			public void BreadthFirstTraverseWork(VehicleRegion root, WaterRegionEntryPredicate entryCondition, WaterRegionProcessor regionProcessor, int maxRegions, RegionType traversableRegionTypes)
+			/// <summary>
+			/// Breadth First Traversal search algorithm
+			/// </summary>
+			/// <param name="root"></param>
+			/// <param name="entryCondition"></param>
+			/// <param name="regionProcessor"></param>
+			/// <param name="maxRegions"></param>
+			/// <param name="traversableRegionTypes"></param>
+			public void BreadthFirstTraverseWork(VehicleRegion root, VehicleRegionEntry entryCondition, VehicleRegionProcessor regionProcessor, int maxRegions, RegionType traversableRegionTypes)
 			{
 				if ((root.type & traversableRegionTypes) == RegionType.None) return;
 				closedIndex += 1u;
@@ -186,31 +264,29 @@ namespace Vehicles
 				while (open.Count > 0)
 				{
 					VehicleRegion region = open.Dequeue();
-					if(VehicleHarmony.debug)
+					if (VehicleHarmony.debug)
 					{
 						region.Debug_Notify_Traversed();
 					}
-					if(!(regionProcessor is null) && regionProcessor(region))
+					if (regionProcessor != null && regionProcessor(region))
 					{
-						FinalizeSearch();
 						return;
 					}
 					if (ShouldCountRegion(region))
 					{
 						numRegionsProcessed++;
 					}
-					if(numRegionsProcessed >= maxRegions)
+					if (numRegionsProcessed >= maxRegions)
 					{
-						FinalizeSearch();
 						return;
 					}
-					for(int i = 0; i < region.links.Count; i++)
+					for (int i = 0; i < region.links.Count; i++)
 					{
 						VehicleRegionLink regionLink = region.links[i];
-						for(int j = 0; j < 2; j++)
+						for (int j = 0; j < 2; j++)
 						{
 							VehicleRegion region2 = regionLink.regions[j];
-							if(!(region2 is null) && region2.closedIndex[closedArrayPos] != closedIndex && (region2.type & traversableRegionTypes) != RegionType.None &&
+							if (region2 != null && region2.closedIndex[closedArrayPos] != closedIndex && (region2.type & traversableRegionTypes) != RegionType.None &&
 								(entryCondition is null || entryCondition(region, region2)))
 							{
 								QueueNewOpenRegion(region2);
@@ -218,7 +294,6 @@ namespace Vehicles
 						}
 					}
 				}
-				FinalizeSearch();
 			}
 		}
 	}

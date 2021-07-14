@@ -4,68 +4,68 @@ using Verse.AI;
 
 namespace Vehicles.AI
 {
+	/// <summary>
+	/// Quick check reachability methods
+	/// </summary>
 	public static class VehicleReachabilityImmediate
 	{
-		public static bool CanReachImmediateShip(IntVec3 start, LocalTargetInfo target, Map map, PathEndMode peMode, Pawn pawn)
+		/// <summary>
+		/// Quick check for <paramref name="vehicle"/> reachability between <paramref name="start"/> and <paramref name="target"/>
+		/// </summary>
+		/// <param name="start"></param>
+		/// <param name="target"></param>
+		/// <param name="map"></param>
+		/// <param name="peMode"></param>
+		/// <param name="vehicle"></param>
+		public static bool CanReachImmediateVehicle(IntVec3 start, LocalTargetInfo target, Map map, VehicleDef vehicleDef, PathEndMode peMode)
 		{
 			if (!target.IsValid) return false;
-			target = (LocalTargetInfo)GenPathVehicles.ResolvePathMode(pawn, target.ToTargetInfo(map), ref peMode);
-			if(target.HasThing)
-			{
-				Thing thing = target.Thing;
-				if(!thing.Spawned)
-				{
-					if(!(pawn is null))
-					{
-						if (pawn.carryTracker.innerContainer.Contains(thing))
-						{
-							return true;
-						}
-						if (pawn.inventory.innerContainer.Contains(thing))
-						{
-							return true;
-						}
-						if (pawn.apparel != null && pawn.apparel.Contains(thing))
-						{
-							return true;
-						}
-						if (pawn.equipment != null && pawn.equipment.Contains(thing))
-						{
-							return true;
-						}
-					}
-					return false;
-				}
-				if(thing.Map != map)
-				{
-					return false;
-				}
-			}
-			if(!target.HasThing || target.Thing.def.size.x == 1 && target.Thing.def.size.z == 1)
+			target = (LocalTargetInfo)GenPathVehicles.ResolvePathMode(vehicleDef, map, target.ToTargetInfo(map), ref peMode);
+			if (!target.HasThing || target.Thing.def.size.x == 1 && target.Thing.def.size.z == 1)
 			{
 				if (start == target.Cell) return true;
 			}
-			else if(start.IsInside(target.Thing))
+			else if (start.IsInside(target.Thing))
 			{
 				return true;
 			}
-			return peMode == PathEndMode.Touch && TouchPathEndModeUtilityVehicles.IsAdjacentOrInsideAndAllowedToTouch(start, target, map);
+			return peMode == PathEndMode.Touch && TouchPathEndModeUtilityVehicles.IsAdjacentOrInsideAndAllowedToTouch(start, target, map, vehicleDef);
 		}
 
-		public static bool CanReachImmediateShip(this Pawn pawn, LocalTargetInfo target, PathEndMode peMode)
+		/// <summary>
+		/// Quick check for <paramref name="vehicle"/> reachability
+		/// </summary>
+		/// <param name="vehicle"></param>
+		/// <param name="target"></param>
+		/// <param name="peMode"></param>
+		public static bool CanReachImmediateVehicle(this VehiclePawn vehicle, LocalTargetInfo target, PathEndMode peMode)
 		{
-			return pawn.Spawned && CanReachImmediateShip(pawn.Position, target, pawn.Map, peMode, pawn);
+			return vehicle.Spawned && CanReachImmediateVehicle(vehicle.Position, target, vehicle.Map, vehicle.VehicleDef, peMode);
 		}
 
-		public static bool CanReachImmediateNonLocalShip(this Pawn pawn, TargetInfo target, PathEndMode peMode)
+		/// <summary>
+		/// Quick check for <paramref name="vehicle"/> reachability with non-local constraints
+		/// </summary>
+		/// <param name="vehicle"></param>
+		/// <param name="target"></param>
+		/// <param name="peMode"></param>
+		public static bool CanReachImmediateNonLocalVehicle(this VehiclePawn vehicle, TargetInfo target, PathEndMode peMode)
 		{
-			return pawn.Spawned && (target.Map is null || target.Map == pawn.Map) && pawn.CanReachImmediateShip((LocalTargetInfo)target, peMode);
+			return vehicle.Spawned && (target.Map is null || target.Map == vehicle.Map) && vehicle.CanReachImmediateVehicle((LocalTargetInfo)target, peMode);
 		}
 
-		public static bool CanReachImmediateShip(IntVec3 start, CellRect rect, Map map, PathEndMode peMode, Pawn pawn)
+		/// <summary>
+		/// Quick check for <paramref name="vehicle"/> reachability with destination <paramref name="rect"/>
+		/// </summary>
+		/// <param name="start"></param>
+		/// <param name="rect"></param>
+		/// <param name="map"></param>
+		/// <param name="peMode"></param>
+		/// <param name="vehicle"></param>
+		public static bool CanReachImmediateVehicle(IntVec3 start, CellRect rect, Map map, PathEndMode peMode, VehiclePawn vehicle)
 		{
 			IntVec3 c = rect.ClosestCellTo(start);
-			return CanReachImmediateShip(start, c, map, peMode, pawn);
+			return CanReachImmediateVehicle(start, c, map, vehicle.VehicleDef, peMode);
 		}
 	}
 }

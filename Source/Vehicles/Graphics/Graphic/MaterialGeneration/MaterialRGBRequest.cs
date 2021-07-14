@@ -77,7 +77,7 @@ namespace Vehicles
 		public MaterialRequestRGB(MaterialRequest req, Texture2D patternTex, PatternProperties properties)
 		{
 			shader = req.shader;
-			mainTex = req.mainTex;
+			mainTex = req.mainTex as Texture2D;
 			maskTex = req.maskTex;
 			this.properties = properties;
 			color = properties.colorOne ?? Color.white;
@@ -94,7 +94,7 @@ namespace Vehicles
 		public MaterialRequestRGB(MaterialRequest req, Texture2D patternTex, PatternProperties properties, bool isSkin)
 		{
 			shader = req.shader;
-			mainTex = req.mainTex;
+			mainTex = req.mainTex as Texture2D;
 			maskTex = req.maskTex;
 			this.properties = properties;
 			color = properties.colorOne ?? Color.white;

@@ -13,39 +13,39 @@ using Vehicles.AI;
 
 namespace Vehicles
 {
-	internal class Pathing : IPatchCategory
+	internal class VehiclePathing : IPatchCategory
 	{
 		public void PatchMethods()
 		{
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(FloatMenuMakerMap), "GotoLocationOption"),
-				prefix: new HarmonyMethod(typeof(Pathing),
-				nameof(GotoLocationShips)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), nameof(Pawn_PathFollower.StartPath)),
-				prefix: new HarmonyMethod(typeof(Pathing),
-				nameof(StartVehiclePath)));
+				prefix: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(GotoLocationVehicles)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), "NeedNewPath"),
-				postfix: new HarmonyMethod(typeof(Pathing),
+				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(IsVehicleInNextCell)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathFinder), nameof(PathFinder.FindPath), new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) }),
-				transpiler: new HarmonyMethod(typeof(Pathing),
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), nameof(Pawn_PathFollower.StartPath)),
+				prefix: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(StartVehiclePath)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathFinder), nameof(PathFinder.FindPath), new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode), typeof(PathFinderCostTuning)}),
+				transpiler: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(PathAroundVehicles)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Reachability), nameof(Reachability.CanReach), new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(PathEndMode), typeof(TraverseParms) }),
-				prefix: new HarmonyMethod(typeof(Pathing),
+				prefix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(CanReachVehiclePosition)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenGrid), nameof(GenGrid.Impassable)),
-				postfix: new HarmonyMethod(typeof(Pathing),
+				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(ImpassableThroughVehicle)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.Walkable)),
-				postfix: new HarmonyMethod(typeof(Pathing),
+				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(WalkableThroughVehicle)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.WalkableFast), new Type[] { typeof(IntVec3) }),
-				postfix: new HarmonyMethod(typeof(Pathing),
+				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(WalkableFastThroughVehicleIntVec3)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.WalkableFast), new Type[] { typeof(int), typeof(int) }),
-				postfix: new HarmonyMethod(typeof(Pathing),
+				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(WalkableFastThroughVehicleInt2)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.WalkableFast), new Type[] { typeof(int) }),
-				postfix: new HarmonyMethod(typeof(Pathing),
+				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(WalkableFastThroughVehicleInt)));
 		}
 
@@ -56,7 +56,7 @@ namespace Vehicles
 		/// <param name="pawn"></param>
 		/// <param name="__result"></param>
 		/// <returns></returns>
-		public static bool GotoLocationShips(IntVec3 clickCell, Pawn pawn, ref FloatMenuOption __result)
+		public static bool GotoLocationVehicles(IntVec3 clickCell, Pawn pawn, ref FloatMenuOption __result)
 		{
 			if (pawn is VehiclePawn vehicle)
 			{
@@ -76,128 +76,63 @@ namespace Vehicles
 					return false;
 				}
 
-				Debug.Message("-> " + clickCell + " | " + vehicle.Map.terrainGrid.TerrainAt(clickCell).LabelCap + " | " + vehicle.Map.GetCachedMapComponent<VehicleMapping>().VehiclePathGrid.CalculatedCostAt(clickCell) +
-						" - " + vehicle.Map.GetCachedMapComponent<VehicleMapping>().VehiclePathGrid.pathGrid[vehicle.Map.cellIndices.CellToIndex(clickCell)]);
+				Debug.Message("-> " + clickCell + " | " + vehicle.Map.terrainGrid.TerrainAt(clickCell).LabelCap + " | " + vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathGrid.CalculatedCostAt(clickCell) +
+						" - " + vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathGrid.pathGrid[vehicle.Map.cellIndices.CellToIndex(clickCell)]);
 
-				if (vehicle.IsBoat() && !VehicleMod.settings.debug.debugDisableWaterPathing)
+				int num = GenRadial.NumCellsInRadius(2.9f);
+				int i = 0;
+				IntVec3 curLoc;
+				while (i < num)
 				{
-					int num = GenRadial.NumCellsInRadius(2.9f);
-					int i = 0;
-					IntVec3 curLoc;
-					while (i < num)
+					curLoc = GenRadial.RadialPattern[i] + clickCell;
+					if (GenGridVehicles.Standable(curLoc, vehicle.VehicleDef, vehicle.Map))
 					{
-						curLoc = GenRadial.RadialPattern[i] + clickCell;
-						if (GenGridVehicles.Standable(curLoc, vehicle.Map))
+						if (curLoc == vehicle.Position || vehicle.beached)
 						{
-							if (curLoc == vehicle.Position || vehicle.beached)
-							{
-								__result = null;
-								return false;
-							}
-							if (!ShipReachabilityUtility.CanReachShip(vehicle, curLoc, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
-							{
-								Debug.Message($"Cant Reach {curLoc} with {vehicle.Label}");
-								__result = new FloatMenuOption("CannotSailToCell".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null);
-								return false;
-							}
-							Action action = delegate ()
-							{
-								Job job = new Job(JobDefOf.Goto, curLoc);
-								if (vehicle.Map.exitMapGrid.IsExitCell(Verse.UI.MouseCell()))
-								{
-									job.exitMapOnArrival = true;
-								}
-								else if (!vehicle.Map.IsPlayerHome && !vehicle.Map.exitMapGrid.MapUsesExitGrid && CellRect.WholeMap(vehicle.Map).IsOnEdge(Verse.UI.MouseCell(), 3) &&
-									vehicle.Map.Parent.GetComponent<FormCaravanComp>() != null && MessagesRepeatAvoider.MessageShowAllowed("MessagePlayerTriedToLeaveMapViaExitGrid-" +
-									vehicle.Map.uniqueID, 60f))
-								{
-									FormCaravanComp component = vehicle.Map.Parent.GetComponent<FormCaravanComp>();
-									if (component.CanFormOrReformCaravanNow)
-									{
-										Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CanReform".Translate(), vehicle.Map.Parent, MessageTypeDefOf.RejectInput, false);
-									}
-									else
-									{
-										Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CantReform".Translate(), vehicle.Map.Parent, MessageTypeDefOf.RejectInput, false);
-									}
-								}
-								if (vehicle.jobs.TryTakeOrderedJob(job, JobTag.Misc))
-								{
-									MoteMaker.MakeStaticMote(curLoc, vehicle.Map, ThingDefOf.Mote_FeedbackGoto, 1f);
-								}
-							};
-							__result = new FloatMenuOption("GoHere".Translate(), action, MenuOptionPriority.GoHere, null, null, 0f, null, null)
-							{
-								autoTakeable = true,
-								autoTakeablePriority = 10f
-							};
+							__result = null;
 							return false;
 						}
-						else
+						if (!VehicleReachabilityUtility.CanReachVehicle(vehicle, curLoc, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
 						{
-							i++;
+							Debug.Message($"Cant Reach {curLoc} with {vehicle.Label}");
+							__result = new FloatMenuOption("VehicleCannotMoveToCell".Translate(vehicle.LabelCap), null, MenuOptionPriority.Default, null, null, 0f, null, null);
+							return false;
 						}
+						__result = new FloatMenuOption("GoHere".Translate(), delegate ()
+						{
+							Job job = new Job(JobDefOf.Goto, curLoc);
+							bool isOnEdge = CellRect.WholeMap(vehicle.Map).IsOnEdge(Verse.UI.MouseCell(), 3);
+							if (vehicle.Map.exitMapGrid.IsExitCell(Verse.UI.MouseCell()))
+							{
+								job.exitMapOnArrival = true;
+							}
+							else if (!vehicle.Map.IsPlayerHome && !vehicle.Map.exitMapGrid.MapUsesExitGrid && isOnEdge && vehicle.Map.Parent.GetComponent<FormCaravanComp>() is FormCaravanComp formCaravanComp
+								 && MessagesRepeatAvoider.MessageShowAllowed("MessagePlayerTriedToLeaveMapViaExitGrid-" +
+								vehicle.Map.uniqueID, 60f))
+							{
+								if (formCaravanComp.CanFormOrReformCaravanNow)
+								{
+									Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CanReform".Translate(), vehicle.Map.Parent, MessageTypeDefOf.RejectInput, false);
+								}
+								else
+								{
+									Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CantReform".Translate(), vehicle.Map.Parent, MessageTypeDefOf.RejectInput, false);
+								}
+							}
+							if (vehicle.jobs.TryTakeOrderedJob(job, JobTag.Misc))
+							{
+								FleckMaker.Static(curLoc, vehicle.Map, FleckDefOf.FeedbackGoto, 1f);
+							}
+						}, MenuOptionPriority.GoHere, null, null, 0f, null, null)
+						{
+							autoTakeable = true,
+							autoTakeablePriority = 10f
+						};
+						return false;
 					}
-				}
-				else
-				{
-					int num = GenRadial.NumCellsInRadius(2.9f);
-					int i = 0;
-					IntVec3 curLoc;
-					
-					while (i < num)
+					else
 					{
-						curLoc = GenRadial.RadialPattern[i] + clickCell;
-						if (GenGrid.Standable(curLoc, pawn.Map))
-						{
-							if (curLoc == pawn.Position)
-							{
-								__result = null;
-								return false;
-							}
-							if (!ReachabilityUtility.CanReach(pawn, curLoc, PathEndMode.OnCell, Danger.Deadly, false))
-							{
-								Debug.Message($"Cant Reach {curLoc} with {vehicle.Label}");
-								__result = new FloatMenuOption("CannotSailToCell".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null);
-								return false;
-							}
-							Action action = delegate ()
-							{
-								Job job = new Job(JobDefOf.Goto, curLoc);
-								if (pawn.Map.exitMapGrid.IsExitCell(Verse.UI.MouseCell()))
-								{
-									job.exitMapOnArrival = true;
-								}
-								else if (!pawn.Map.IsPlayerHome && !pawn.Map.exitMapGrid.MapUsesExitGrid && CellRect.WholeMap(pawn.Map).IsOnEdge(Verse.UI.MouseCell(), 3) &&
-									pawn.Map.Parent.GetComponent<FormCaravanComp>() != null && MessagesRepeatAvoider.MessageShowAllowed("MessagePlayerTriedToLeaveMapViaExitGrid-" +
-									pawn.Map.uniqueID, 60f))
-								{
-									FormCaravanComp component = pawn.Map.Parent.GetComponent<FormCaravanComp>();
-									if (component.CanFormOrReformCaravanNow)
-									{
-										Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CanReform".Translate(), pawn.Map.Parent, MessageTypeDefOf.RejectInput, false);
-									}
-									else
-									{
-										Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CantReform".Translate(), pawn.Map.Parent, MessageTypeDefOf.RejectInput, false);
-									}
-								}
-								if (pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc))
-								{
-									MoteMaker.MakeStaticMote(curLoc, pawn.Map, ThingDefOf.Mote_FeedbackGoto, 1f);
-								}
-							};
-							__result = new FloatMenuOption("GoHere".Translate(), action, MenuOptionPriority.GoHere, null, null, 0f, null, null)
-							{
-								autoTakeable = true,
-								autoTakeablePriority = 10f
-							};
-							return false;
-						}
-						else
-						{
-							i++;
-						}
+						i++;
 					}
 				}
 				__result = null;
@@ -210,23 +145,6 @@ namespace Vehicles
 					__result = new FloatMenuOption("CannotGoNoPath".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null);
 					return false;
 				}
-			}
-			return true;
-		}
-
-		/// <summary>
-		/// Intercept Pawn_PathFollower call to StartPath with VehiclePawn's own Vehicle_PathFollower. Required for custom path values and water based pathing
-		/// </summary>
-		/// <param name="dest"></param>
-		/// <param name="peMode"></param>
-		/// <param name="___pawn"></param>
-		/// <returns></returns>
-		public static bool StartVehiclePath(LocalTargetInfo dest, PathEndMode peMode, Pawn ___pawn)
-		{
-			if(___pawn is VehiclePawn vehicle)
-			{
-				vehicle.vPather.StartPath(dest, peMode);
-				return false;
 			}
 			return true;
 		}
@@ -248,11 +166,27 @@ namespace Vehicles
 		}
 
 		/// <summary>
+		/// StartPath hook to divert to vehicle related pather
+		/// </summary>
+		/// <param name="dest"></param>
+		/// <param name="peMode"></param>
+		/// <param name="___pawn"></param>
+		public static bool StartVehiclePath(LocalTargetInfo dest, PathEndMode peMode, Pawn ___pawn)
+		{
+			if (___pawn is VehiclePawn vehicle)
+			{
+				vehicle.vPather.StartPath(dest, peMode);
+				return false;
+			}
+			return true;
+		}
+
+		//REDO - Reimplement
+		/// <summary>
 		/// Set cells in which vehicles reside as impassable to other Pawns
 		/// </summary>
 		/// <param name="instructions"></param>
 		/// <param name="ilg"></param>
-		/// <returns></returns>
 		public static IEnumerable<CodeInstruction> PathAroundVehicles(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
 		{
 			List<CodeInstruction> instructionList = instructions.ToList();
@@ -261,6 +195,7 @@ namespace Vehicles
 				CodeInstruction instruction = instructionList[i];
 				if (instruction.Calls(AccessTools.Method(typeof(CellIndices), nameof(CellIndices.CellToIndex), new Type[] { typeof(int), typeof(int) })))
 				{
+					/*
 					Label label = ilg.DefineLabel();
 					Label vehicleLabel = ilg.DefineLabel();
 
@@ -290,6 +225,7 @@ namespace Vehicles
 					}
 
 					instruction.labels.Add(label);
+					*/
 				}
 				yield return instruction;
 			}

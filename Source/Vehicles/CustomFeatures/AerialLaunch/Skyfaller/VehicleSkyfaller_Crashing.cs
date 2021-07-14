@@ -102,7 +102,7 @@ namespace Vehicles
 				CellRect cellRect = this.OccupiedRect();
 				for (int i = 0; i < cellRect.Area * def.skyfaller.motesPerCell; i++)
 				{
-					MoteMaker.ThrowDustPuff(cellRect.RandomVector3, Map, 2f);
+					FleckMaker.ThrowDustPuff(cellRect.RandomVector3, Map, 2f);
 				}
 			}
 			ticksToImpact--;
@@ -139,7 +139,7 @@ namespace Vehicles
 			CellRect cellRect = this.OccupiedRect();
 			for (int i = 0; i < cellRect.Area * def.skyfaller.motesPerCell; i++)
 			{
-				MoteMaker.ThrowDustPuff(cellRect.RandomVector3, Map, 2f);
+				FleckMaker.ThrowDustPuff(cellRect.RandomVector3, Map, 2f);
 			}
 			if (def.skyfaller.MakesShrapnel)
 			{

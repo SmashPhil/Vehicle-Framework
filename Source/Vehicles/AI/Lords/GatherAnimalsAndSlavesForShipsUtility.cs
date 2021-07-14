@@ -26,13 +26,13 @@ namespace Vehicles
 			Predicate<Pawn> extraValidator = null)
 		{
 			bool flag = true;
-			foreach(Pawn p in pawnsToCheck)
+			foreach (Pawn p in pawnsToCheck)
 			{
 				VehiclePawn leadShip = ((LordJob_FormAndSendVehicles)lord.LordJob).LeadVehicle;
 				if (waterPathing)
 				{
 					if (!p.Spawned || !p.Position.InHorDistOf(((LordJob_FormAndSendVehicles)lord.LordJob).LeadVehicle.Position, 5f) || !(leadShip.Position.InHorDistOf(meetingPoint, leadShip.def.size.z > 5 ? (float)leadShip.def.size.z/2 : 3f) || leadShip.Position.WithinDistanceToEdge(leadShip.def.size.z, leadShip.Map)) ||
-					!ShipReachabilityUtility.CanReachShip(p, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, TraverseMode.ByPawn) || (extraValidator != null && !extraValidator(p)))
+					!VehicleReachabilityUtility.CanReachVehicle(p as VehiclePawn, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, TraverseMode.ByPawn) || (extraValidator != null && !extraValidator(p)))
 					{
 						flag = false;
 						break;

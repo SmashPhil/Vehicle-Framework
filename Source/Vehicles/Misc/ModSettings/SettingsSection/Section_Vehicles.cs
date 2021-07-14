@@ -166,7 +166,7 @@ namespace Vehicles
 					foreach (var saveableObject in VehicleMod.VehicleCompFields)
 					{
 						if (saveableObject.Value.NullOrEmpty() || saveableObject.Value.All(f => f.TryGetAttribute<PostToSettingsAttribute>(out var settings) 
-						&& settings.VehicleType != VehicleType.Undefined && settings.VehicleType != VehicleMod.selectedDef.vehicleType))
+						&& settings.VehicleType != VehicleType.Universal && settings.VehicleType != VehicleMod.selectedDef.vehicleType))
 						{
 							continue;
 						}

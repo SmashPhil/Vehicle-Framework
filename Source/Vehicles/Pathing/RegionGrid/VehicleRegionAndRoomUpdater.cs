@@ -7,99 +7,112 @@ using Vehicles.AI;
 
 namespace Vehicles
 {
+	/// <summary>
+	/// Region and room update handler
+	/// </summary>
 	public class VehicleRegionAndRoomUpdater
 	{
-		private Map map;
+		private readonly Map map;
+		private readonly VehicleDef vehicleDef;
 
-		private List<VehicleRegion> newRegions = new List<VehicleRegion>();
+		private readonly List<VehicleRegion> newRegions = new List<VehicleRegion>();
+		private readonly List<VehicleRoom> newRooms = new List<VehicleRoom>();
+		private readonly HashSet<VehicleRoom> reusedOldRooms = new HashSet<VehicleRoom>();
 
-		private List<VehicleRoom> newRooms = new List<VehicleRoom>();
+		private readonly List<VehicleRegion> currentRegionGroup = new List<VehicleRegion>();
+		private readonly List<VehicleRoom> currentRoomGroup = new List<VehicleRoom>();
 
-		private HashSet<VehicleRoom> reusedOldRooms = new HashSet<VehicleRoom>();
+		private readonly Stack<VehicleRoom> tmpRoomStack = new Stack<VehicleRoom>();
 
-		private List<VehicleRegion> currentRegionGroup = new List<VehicleRegion>();
-
-		private List<VehicleRoom> currentRoomGroup = new List<VehicleRoom>();
-
-		private Stack<VehicleRoom> tmpRoomStack = new Stack<VehicleRoom>();
-
-		private bool initialized;
-
-		private bool working;
-
-		private bool enabledInt = true;
-
-		public VehicleRegionAndRoomUpdater(Map map)
+		public VehicleRegionAndRoomUpdater(Map map, VehicleDef vehicleDef)
 		{
 			this.map = map;
+			this.vehicleDef = vehicleDef;
 		}
 
-		public bool Enabled
-		{
-			get
-			{
-				return enabledInt;
-			}
-			set
-			{
-				enabledInt = value;
-			}
-		}
+		/// <summary>
+		/// Updater has been initialized
+		/// </summary>
+		public bool Initialized { get; private set; }
 
-		public bool AnythingToRebuild => !initialized;
+		/// <summary>
+		/// Currently updating regions
+		/// </summary>
+		public bool UpdatingRegion { get; private set; }
 
-		public void RebuildAllWaterRegions()
+		/// <summary>
+		/// Anything in RegionGrid that needs to be rebuilt
+		/// </summary>
+		public bool AnythingToRebuild => !Initialized;
+
+		/// <summary>
+		/// Updater has finished initial build
+		/// </summary>
+		public bool Enabled { get; internal set; }
+
+		/// <summary>
+		/// Rebuild all regions
+		/// </summary>
+		public void RebuildAllVehicleRegions()
 		{
 			if (!Enabled)
 			{
 				Log.Warning("Called RebuildAllRegions but VehicleRegionAndRoomUpdater is disabled. Regions won't be rebuilt.");
 			}
-			map.GetCachedMapComponent<VehicleMapping>().VehicleRegionDirtyer.SetAllDirty();
-			TryRebuildWaterRegions();
+			map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionDirtyer.SetAllDirty();
+			TryRebuildVehicleRegions();
 		}
 
-		public void TryRebuildWaterRegions()
+		/// <summary>
+		/// Rebuild all regions on the map and generate associated rooms
+		/// </summary>
+		public void TryRebuildVehicleRegions()
 		{
-			if (working || !Enabled)
+			if (UpdatingRegion || !Enabled)
 			{
 				return;
 			}
-			working = true;
-			if (!initialized)
+			string updateStep = "Initializing";
+			UpdatingRegion = true;
+			if (!Initialized)
 			{
-				RebuildAllWaterRegions();
+				RebuildAllVehicleRegions();
 			}
-			if(!map.GetCachedMapComponent<VehicleMapping>().VehicleRegionDirtyer.AnyDirty)
+			if (!map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionDirtyer.AnyDirty)
 			{
-				working = false;
+				UpdatingRegion = false;
 				return;
 			}
 			try
 			{
-				RegenerateNewWaterRegions();
-				CreateOrUpdateWaterRooms();
+				updateStep = "Regenerating new regions";
+				RegenerateNewVehicleRegions();
+				updateStep = "Creating or updating rooms";
+				CreateOrUpdateVehicleRooms();
 			}
-			catch(Exception exc)
+			catch(Exception ex)
 			{
-				Log.Error("Exception while rebuilding water regions: " + exc);
+				Log.Error($"Exception while rebuilding vehicle regions for {vehicleDef}. Last step: {updateStep} Exception={ex.Message}");
 			}
 			newRegions.Clear();
-			map.GetCachedMapComponent<VehicleMapping>().VehicleRegionDirtyer.SetAllClean();
-			initialized = true;
-			working = false;
+			map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionDirtyer.SetAllClean();
+			Initialized = true;
+			UpdatingRegion = false;
 		}
 
-		private void RegenerateNewWaterRegions()
+		/// <summary>
+		/// Generate regions with dirty cells
+		/// </summary>
+		private void RegenerateNewVehicleRegions()
 		{
 			newRegions.Clear();
-			List<IntVec3> cells = map.GetCachedMapComponent<VehicleMapping>().VehicleRegionDirtyer.DirtyCells;
-			foreach (IntVec3 c  in cells)
+			List <IntVec3> cells = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionDirtyer.DirtyCells;
+			foreach (IntVec3 cell  in cells)
 			{
-				if (VehicleGridsUtility.GetRegion(c, map, RegionType.Set_All) is null)
+				if (VehicleGridsUtility.GetRegion(cell, map, vehicleDef, RegionType.Set_All) is null)
 				{
-					VehicleRegion region = map.GetCachedMapComponent<VehicleMapping>().VehicleRegionMaker.TryGenerateRegionFrom(c);
-
-					if (!(region is null))
+					VehicleRegion region = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionMaker.TryGenerateRegionFrom(cell);
+					if (region != null)
 					{
 						newRegions.Add(region);
 					}
@@ -107,56 +120,42 @@ namespace Vehicles
 			}
 		}
 
-		private void CreateOrUpdateWaterRooms()
+		/// <summary>
+		/// Update procedure for Rooms associated with Vehicle based regions
+		/// </summary>
+		private void CreateOrUpdateVehicleRooms()
 		{
 			newRooms.Clear();
 			reusedOldRooms.Clear();
-			//newRoomGroups.Clear();
-			//reusedOldRoomGroups.Clear();
 			int numRegionGroups = CombineNewRegionsIntoContiguousGroups();
 			CreateOrAttachToExistingRooms(numRegionGroups);
-			int numRoomGroups = CombineNewAndReusedRoomsIntoContiguousGroups();
-			//CreateOrAttachToExistingRoomGroups(numRoomGroups);
-			//NotifyAffectedRoomsAndRoomGroupsAndUpdateTemperature();
+			CombineNewAndReusedRoomsIntoContiguousGroups();
 			newRooms.Clear();
 			reusedOldRooms.Clear();
-			//newRoomGroups.Clear();
-			//reusedOldRoomGroups.Clear();
 		}
 
+		/// <summary>
+		/// Combine rooms together with room group criteria met
+		/// </summary>
 		private int CombineNewAndReusedRoomsIntoContiguousGroups()
 		{
 			int num = 0;
-			foreach (VehicleRoom room in reusedOldRooms)
+			for (int i = 0; i < newRegions.Count; i++)
 			{
-				room.newOrReusedRoomGroupIndex = -1;
-			}
-			foreach (VehicleRoom room2 in reusedOldRooms.Concat(newRooms))
-			{
-				if (room2.newOrReusedRoomGroupIndex < 0)
+				if (newRegions[i].newRegionGroupIndex < 0)
 				{
-					tmpRoomStack.Clear();
-					tmpRoomStack.Push(room2);
-					room2.newOrReusedRoomGroupIndex = num;
-					while (tmpRoomStack.Count != 0)
-					{
-						VehicleRoom room3 = tmpRoomStack.Pop();
-						foreach (VehicleRoom room4 in room3.Neighbors)
-						{
-							if (room4.newOrReusedRoomGroupIndex < 0 && ShouldBeInTheSameRoomGroup(room3, room4))
-							{
-								room4.newOrReusedRoomGroupIndex = num;
-								tmpRoomStack.Push(room4);
-							}
-						}
-					}
-					tmpRoomStack.Clear();
+					VehicleRegionTraverser.FloodAndSetNewRegionIndex(newRegions[i], num);
 					num++;
 				}
 			}
 			return num;
 		}
 
+		/// <summary>
+		/// <paramref name="a"/> and <paramref name="b"/> should belong to the same room
+		/// </summary>
+		/// <param name="a"></param>
+		/// <param name="b"></param>
 		private bool ShouldBeInTheSameRoomGroup(VehicleRoom a, VehicleRoom b)
 		{
 			RegionType regionType = a.RegionType;
@@ -164,6 +163,10 @@ namespace Vehicles
 			return (regionType == RegionType.Normal || regionType == RegionType.ImpassableFreeAirExchange) && (regionType2 == RegionType.Normal || regionType2 == RegionType.ImpassableFreeAirExchange);
 		}
 
+		/// <summary>
+		/// Create new room or attach to existing room with predetermined number of region groups
+		/// </summary>
+		/// <param name="numRegionGroups"></param>
 		private void CreateOrAttachToExistingRooms(int numRegionGroups)
 		{
 			for (int i = 0; i < numRegionGroups; i++)
@@ -176,13 +179,13 @@ namespace Vehicles
 						currentRegionGroup.Add(newRegions[j]);
 					}
 				}
-				if (!currentRegionGroup[0].type.AllowsMultipleRegionsPerRoom())
+				if (!currentRegionGroup[0].type.AllowsMultipleRegionsPerDistrict())
 				{
 					if (currentRegionGroup.Count != 1)
 					{
 						Log.Error("Region type doesn't allow multiple regions per room but there are >1 regions in this group.");
 					}
-					VehicleRoom room = VehicleRoom.MakeNew(map);
+					VehicleRoom room = VehicleRoom.MakeNew(map, vehicleDef);
 					currentRegionGroup[0].Room = room;
 					newRooms.Add(room);
 				}
@@ -191,7 +194,7 @@ namespace Vehicles
 					VehicleRoom room2 = FindCurrentRegionGroupNeighborWithMostRegions(out bool flag);
 					if (room2 is null)
 					{
-						VehicleRoom item = WaterRegionTraverser.FloodAndSetRooms(currentRegionGroup[0], map, null);
+						VehicleRoom item = VehicleRegionTraverser.FloodAndSetRooms(currentRegionGroup[0], map, vehicleDef, null);
 						newRooms.Add(item);
 					}
 					else if (!flag)
@@ -204,13 +207,16 @@ namespace Vehicles
 					}
 					else
 					{
-						WaterRegionTraverser.FloodAndSetRooms(currentRegionGroup[0], map, room2);
+						VehicleRegionTraverser.FloodAndSetRooms(currentRegionGroup[0], map, vehicleDef, room2);
 						reusedOldRooms.Add(room2);
 					}
 				}
 			}
 		}
 
+		/// <summary>
+		/// Combine regions that meet region group criteria
+		/// </summary>
 		private int CombineNewRegionsIntoContiguousGroups()
 		{
 			int num = 0;
@@ -218,13 +224,17 @@ namespace Vehicles
 			{
 				if (newRegions[i].newRegionGroupIndex < 0)
 				{
-					WaterRegionTraverser.FloodAndSetNewRegionIndex(newRegions[i], num);
+					VehicleRegionTraverser.FloodAndSetNewRegionIndex(newRegions[i], num);
 					num++;
 				}
 			}
 			return num;
 		}
 
+		/// <summary>
+		/// Find neighboring region group with most regions
+		/// </summary>
+		/// <param name="multipleOldNeighborRooms"></param>
 		private VehicleRoom FindCurrentRegionGroupNeighborWithMostRegions(out bool multipleOldNeighborRooms)
 		{
 			multipleOldNeighborRooms = false;

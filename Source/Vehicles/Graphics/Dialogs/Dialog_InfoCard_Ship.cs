@@ -139,14 +139,14 @@ namespace Vehicles.UI
 					Widgets.ListSeparator(ref num, viewRect.width, stat.category.LabelCap);
 					b = stat.category.LabelCap;
 				}
-				num += stat.Draw(8f, num, viewRect.width - 8f, selectedEntry == stat, delegate
-				{
-					selectedEntry = stat;
-					SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
-				}, delegate
-				{
-					mousedOverEntry = stat;
-				}, scrollPosition, rect2);
+				//num += stat.Draw(8f, num, viewRect.width - 8f, selectedEntry == stat, delegate
+				//{
+				//	selectedEntry = stat;
+				//	SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
+				//}, delegate
+				//{
+				//	mousedOverEntry = stat;
+				//}, scrollPosition, rect2);
 			}
 			listHeight = num + 100f;
 			Widgets.EndScrollView();

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.IO;
 using HarmonyLib;
 using Verse;
 using RimWorld;
@@ -25,16 +26,18 @@ namespace Vehicles
 		/// </summary>
 		internal static List<WorldPath> debugLines = new List<WorldPath>();
 		internal static List<Pair<int, int>> tiles = new List<Pair<int, int>>(); // Pair -> TileID : Cycle
-		internal const bool debug = false;
-		internal const bool drawPaths = false;
+		internal static readonly bool debug = false;
+		internal static readonly bool drawPaths = false;
 
 		private static string methodPatching = string.Empty;
 
 		internal static List<UpdateLog> updates = new List<UpdateLog>();
 
-		internal static string LatestVersion { get; private set; }
+		public static string CurrentVersion { get; private set; }
 
 		internal static Harmony Harmony { get; private set; } = new Harmony(VehiclesUniqueId);
+
+		internal static string VersionDir => Path.Combine(VehicleMMD.RootDir.FullName, "Version.txt");
 
 		static VehicleHarmony()
 		{
@@ -43,11 +46,14 @@ namespace Vehicles
 
 			VehicleMCP = VehicleMod.settings.Mod.Content;
 			VehicleMMD = ModLister.GetActiveModWithIdentifier(VehiclesUniqueId);
-			UpdateLog.UpdateLogData logData = UpdateHandler.UpdateLogData(VehicleMCP).UpdateData;
-			LatestVersion = logData.currentVersion;
-			Log.Message($"{LogLabel} version {logData.currentVersion}");
 
-			IEnumerable<Type> patchCategories = GenTypes.AllTypes.Where(t => t.GetInterfaces().Contains(typeof(IPatchCategory)));
+			Version version = Assembly.GetExecutingAssembly().GetName().Version;
+			CurrentVersion = $"{version.Major}.{version.Minor}.{version.Build}";
+			Log.Message($"{LogLabel} version {CurrentVersion}");
+
+			File.WriteAllText(VersionDir, CurrentVersion);
+
+			IEnumerable <Type> patchCategories = GenTypes.AllTypes.Where(t => t.GetInterfaces().Contains(typeof(IPatchCategory)));
 			foreach (Type patchCategory in patchCategories)
 			{
 				IPatchCategory patch = (IPatchCategory)Activator.CreateInstance(patchCategory, null);

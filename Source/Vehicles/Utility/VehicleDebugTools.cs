@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Verse;
 using RimWorld;
 using RimWorld.Planet;
@@ -12,8 +13,40 @@ namespace Vehicles
 {
 	public static class VehicleDebugTools
 	{
-		[DebugAction("Vehicles", null, allowedGameStates = AllowedGameStates.PlayingOnMap)]
-		private static void SpawnVehicleRandomized()
+		[DebugAction(category = "Vehicles", name = null, allowedGameStates = AllowedGameStates.Playing)]
+		public static void ShowRegions()
+		{
+			List<DebugMenuOption> list = new List<DebugMenuOption>()
+			{
+				new DebugMenuOption("Clear", DebugMenuOptionMode.Action, () => DebugHelper.drawRegionsFor = null)
+			};
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs.OrderBy(d => d.defName))
+			{
+				list.Add(new DebugMenuOption(vehicleDef.defName, DebugMenuOptionMode.Action, delegate ()
+				{
+					DebugHelper.drawRegionsFor = vehicleDef;
+					List<Dialog_DebugCheckboxLister.DebugCheckboxLister> listCheckbox = new List<Dialog_DebugCheckboxLister.DebugCheckboxLister>();
+					foreach (DebugRegionType regionType in Enum.GetValues(typeof(DebugRegionType)))
+					{
+						if (regionType != DebugRegionType.None)
+						{
+							listCheckbox.Add(new Dialog_DebugCheckboxLister.DebugCheckboxLister(regionType.ToString(), delegate()
+							{
+								return (DebugHelper.debugRegionType & regionType) == regionType;
+							}, delegate ()
+							{
+								DebugHelper.debugRegionType ^= regionType;
+							}));
+						}
+					}
+					Find.WindowStack.Add(new Dialog_DebugCheckboxLister(listCheckbox));
+				}));
+			}
+			Find.WindowStack.Add(new Dialog_DebugOptionListLister(list));
+		}
+
+		[DebugAction(category = "Vehicles", name = null, requiresRoyalty = false, requiresIdeology = false, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+		public static void SpawnVehicleRandomized()
 		{
 			List<DebugMenuOption> list = new List<DebugMenuOption>();
 			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs.OrderBy(d => d.defName))
@@ -27,8 +60,8 @@ namespace Vehicles
 			Find.WindowStack.Add(new Dialog_DebugOptionListLister(list));
 		}
 
-		[DebugAction("Vehicles", null, allowedGameStates = AllowedGameStates.PlayingOnMap)]
-		private static void SpawnVehicleWithFaction()
+		[DebugAction(category = "Vehicles", name = null, requiresRoyalty = false, requiresIdeology = false, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+		public static void SpawnVehicleWithFaction()
 		{
 			List<DebugMenuOption> vehicles = new List<DebugMenuOption>();
 			List<DebugMenuOption> factions = new List<DebugMenuOption>();
@@ -54,8 +87,8 @@ namespace Vehicles
 			Find.WindowStack.Add(new Dialog_DebugOptionListLister(factions));
 		}
 
-		[DebugAction("Vehicles", "Execute Raid with Vehicles", allowedGameStates = AllowedGameStates.PlayingOnMap)]
-		private static void ExecuteRaidWithFaction()
+		[DebugAction(category = "Vehicles", name = "Execute Raid with Vehicles", requiresRoyalty = false, requiresIdeology = false, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+		public static void ExecuteRaidWithFaction()
 		{
 			StorytellerComp storytellerComp = Find.Storyteller.storytellerComps.First((StorytellerComp x) => x is StorytellerComp_OnOffCycle || x is StorytellerComp_RandomMain);
 			IncidentParms parms = storytellerComp.GenerateParms(IncidentCategoryDefOf.ThreatBig, Find.CurrentMap);
@@ -105,8 +138,8 @@ namespace Vehicles
 			Find.WindowStack.Add(new Dialog_DebugOptionListLister(list));
 		}
 
-		[DebugAction("Vehicles", allowedGameStates = AllowedGameStates.Playing)]
-		private static void ClearAllListers()
+		[DebugAction(category = "Vehicles", name = null, requiresRoyalty = false, requiresIdeology = false, allowedGameStates = AllowedGameStates.Playing)]
+		public static void ClearAllListers()
 		{
 			foreach (Map map in Find.Maps)
 			{
@@ -114,8 +147,8 @@ namespace Vehicles
 			}
 		}
 
-		[DebugAction("Vehicles", allowedGameStates = AllowedGameStates.PlayingOnMap)]
-		private static void SpawnCrashingShuttle()
+		[DebugAction(category = "Vehicles", name = null, requiresRoyalty = false, requiresIdeology = false, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+		public static void SpawnCrashingShuttle()
 		{
 			List<DebugMenuOption> list = new List<DebugMenuOption>();
 			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs.OrderBy(d => d.defName))
@@ -137,8 +170,8 @@ namespace Vehicles
 			Find.WindowStack.Add(new Dialog_DebugOptionListLister(list));
 		}
 
-		[DebugAction("Vehicles", allowedGameStates = AllowedGameStates.PlayingOnMap)]
-		private static void SpawnStrafeRun()
+		[DebugAction(category = "Vehicles", name = null, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+		public static void SpawnStrafeRun()
 		{
 			List<DebugMenuOption> list = new List<DebugMenuOption>();
 			foreach (PawnKindDef localKindDef2 in from kd in DefDatabase<PawnKindDef>.AllDefs.Where(v => v.race.thingClass == typeof(VehiclePawn) && v.race is VehicleDef def && def.vehicleType == VehicleType.Air)

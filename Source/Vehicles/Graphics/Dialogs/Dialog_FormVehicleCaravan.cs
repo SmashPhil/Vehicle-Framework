@@ -766,7 +766,7 @@ namespace Vehicles
 		private bool TryFindExitSpot(List<Pawn> pawns, bool reachableForEveryColonist, out IntVec3 spot)
 		{
 			bool result;
-			if(pawns.NotNullAndAny(p => p.IsBoat()))
+			if (pawns.NotNullAndAny(p => p.IsBoat()))
 			{
 				//Rot4 rotFromTo = Find.WorldGrid.GetRotFromTo(__instance.CurrentTile, ___startingTile); WHEN WORLD GRID IS ESTABLISHED
 				Rot4 rotFromTo;
@@ -779,9 +779,7 @@ namespace Vehicles
 					List<Tile.RiverLink> rivers = Find.WorldGrid[map.Tile].Rivers;
 					Tile.RiverLink river = WorldHelper.BiggestRiverOnTile(Find.WorldGrid[map.Tile].Rivers);
 
-					float angle = Find.WorldGrid.GetHeadingFromTo(map.Tile, (from r1 in rivers
-																				orderby -r1.river.degradeThreshold
-																				select r1).First<Tile.RiverLink>().neighbor);
+					float angle = Find.WorldGrid.GetHeadingFromTo(map.Tile, rivers.OrderBy(r => r.river.degradeThreshold).FirstOrDefault().neighbor);
 					if (angle < 45)
 					{
 						rotFromTo = Rot4.South;
@@ -806,10 +804,10 @@ namespace Vehicles
 				else
 				{
 					Log.Warning("No Coastline or River detected on map: " + map.uniqueID + ". Selecting edge of map with most water cells.");
-					int n = CellRect.WholeMap(map).GetEdgeCells(Rot4.North).Where(x => GenGridVehicles.Standable(x, map)).Count();
-					int e = CellRect.WholeMap(map).GetEdgeCells(Rot4.East).Where(x => GenGridVehicles.Standable(x, map)).Count();
-					int s = CellRect.WholeMap(map).GetEdgeCells(Rot4.South).Where(x => GenGridVehicles.Standable(x, map)).Count();
-					int w = CellRect.WholeMap(map).GetEdgeCells(Rot4.West).Where(x => GenGridVehicles.Standable(x, map)).Count();
+					int n = CellRect.WholeMap(map).GetEdgeCells(Rot4.North).Where(x => pawns.Where(p => p is VehiclePawn).Cast<VehiclePawn>().All(v => GenGridVehicles.Standable(x, v.VehicleDef, map))).Count();
+					int e = CellRect.WholeMap(map).GetEdgeCells(Rot4.East).Where(x => pawns.Where(p => p is VehiclePawn).Cast<VehiclePawn>().All(v => GenGridVehicles.Standable(x, v.VehicleDef, map))).Count();
+					int s = CellRect.WholeMap(map).GetEdgeCells(Rot4.South).Where(x => pawns.Where(p => p is VehiclePawn).Cast<VehiclePawn>().All(v => GenGridVehicles.Standable(x, v.VehicleDef, map))).Count();
+					int w = CellRect.WholeMap(map).GetEdgeCells(Rot4.West).Where(x => pawns.Where(p => p is VehiclePawn).Cast<VehiclePawn>().All(v => GenGridVehicles.Standable(x, v.VehicleDef, map))).Count();
 					rotFromTo = Ext_Map.Max4IntToRot(n, e, s, w);
 				}
 				result = TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo, out spot) || TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo.Rotated(RotationDirection.Clockwise),
@@ -891,8 +889,8 @@ namespace Vehicles
 				spot = IntVec3.Invalid;
 				return false;
 			}
-			Pawn leadShip = pawns.Where(p => p.IsBoat()).MaxBy(y => y.def.size.z);
-			bool validator(IntVec3 x) => !x.Fogged(map) && GenGridVehicles.Standable(x, map);
+			VehiclePawn leadShip = pawns.Where(p => p.IsBoat()).Cast<VehiclePawn>().MaxBy(y => y.def.size.z);
+			bool validator(IntVec3 x) => !x.Fogged(map) && GenGridVehicles.Standable(x, leadShip.VehicleDef, map);
 			List<IntVec3> cells = CellRect.WholeMap(map).GetEdgeCells(exitDirection).ToList();
 			Dictionary<IntVec3, float> cellDist = new Dictionary<IntVec3, float>();
 
@@ -902,14 +900,14 @@ namespace Vehicles
 				cellDist.Add(c, dist);
 			}
 			cellDist = cellDist.OrderBy(x => x.Value).ToDictionary(z => z.Key, y => y.Value);
-			List<Pawn> ships = pawns.Where(p => p.IsBoat()).ToList();
+			List<VehiclePawn> ships = pawns.Where(p => p.IsBoat()).Cast<VehiclePawn>().ToList();
 
 			for(int i = 0; i < cells.Count; i++)
 			{
 				IntVec3 iV2 = cellDist.Keys.ElementAt(i);
 				if(validator(iV2))
 				{
-					if(ships.All(x => ShipReachabilityUtility.CanReachShip(x, iV2, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn)))
+					if (ships.All(v => VehicleReachabilityUtility.CanReachVehicle(v, iV2, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn)))
 					{
 						IntVec2 v2 = new IntVec2(iV2.x, iV2.z);
 						int halfSize = leadShip.def.size.z + 1;

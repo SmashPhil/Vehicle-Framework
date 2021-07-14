@@ -32,7 +32,7 @@ namespace Vehicles
 			}
 		}
 
-		public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth)
+		public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth, GizmoRenderParms parms)
 		{
 			Text.Font = GameFont.Tiny;
 			bool flag = false;

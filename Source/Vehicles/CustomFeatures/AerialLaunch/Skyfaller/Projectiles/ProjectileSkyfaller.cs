@@ -72,7 +72,7 @@ namespace Vehicles
 			if (Position.InBounds(Map))
 			{
 				Projectile quickProj = (Projectile)GenSpawn.Spawn(projectileDef, Position, Map);
-				quickProj.Launch(caster, destination.ToIntVec3().ToVector3Shifted(), destination.ToIntVec3(), destination.ToIntVec3(), quickProj.HitFlags, caster);
+				quickProj.Launch(caster, destination.ToIntVec3().ToVector3Shifted(), destination.ToIntVec3(), destination.ToIntVec3(), quickProj.HitFlags, false, caster);
 			}
 			Destroy();
 		}

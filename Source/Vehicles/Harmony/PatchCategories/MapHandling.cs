@@ -21,12 +21,21 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(TileFinder), nameof(TileFinder.RandomSettlementTileFor)), prefix: null, postfix: null,
 				transpiler: new HarmonyMethod(typeof(MapHandling),
 				nameof(PushSettlementToCoastTranspiler)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.RecalculatePerceivedPathCostUnderThing)), prefix: null,
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pathing), nameof(Pathing.RecalculatePerceivedPathCostUnderThing)), prefix: null,
 				postfix: new HarmonyMethod(typeof(MapHandling),
-				nameof(RecalculateShipPathCostUnderThing)));
+				nameof(RecalculateVehiclePathCostUnderThing)));
 			VehicleHarmony.Patch(original: AccessTools.Property(typeof(MapPawns), nameof(MapPawns.AnyPawnBlockingMapRemoval)).GetGetMethod(), prefix: null,
 				postfix: new HarmonyMethod(typeof(MapHandling),
 				nameof(AnyVehicleBlockingMapRemoval)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MapDeiniter), "NotifyEverythingWhichUsesMapReference"),
+				postfix: new HarmonyMethod(typeof(MapHandling),
+				nameof(NotifyEverythingWhichUsesMapReferencePost)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MapInterface), nameof(MapInterface.MapInterfaceUpdate)),
+				postfix: new HarmonyMethod(typeof(MapHandling),
+				nameof(DebugUpdateVehicleRegions)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MapInterface), nameof(MapInterface.MapInterfaceOnGUI_AfterMainTabs)),
+				postfix: new HarmonyMethod(typeof(MapHandling),
+				nameof(DebugOnGUIVehicleRegions)));
 		}
 
 		/// <summary>
@@ -85,10 +94,12 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="t"></param>
 		/// <param name="___map"></param>
-		public static void RecalculateShipPathCostUnderThing(Thing t, Map ___map)
+		public static void RecalculateVehiclePathCostUnderThing(Thing thing)
 		{
-			if (t is null) return;
-			___map.GetCachedMapComponent<VehicleMapping>()?.VehiclePathGrid?.RecalculatePerceivedPathCostUnderThing(t);
+			if (thing is VehiclePawn vehicle)
+			{
+				vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderThing(vehicle);
+			}
 		}
 
 		/// <summary>
@@ -143,6 +154,46 @@ namespace Vehicles
 						}
 					}
 				}
+			}
+		}
+
+		public static void NotifyEverythingWhichUsesMapReferencePost(Map map)
+		{
+			List<Map> maps = Find.Maps;
+			int mapIndex = maps.IndexOf(map);
+			for (int i = mapIndex; i < maps.Count; i++)
+			{
+				Map searchMap = maps[i];
+				foreach (VehicleMapping.VehiclePathData pathData in searchMap.GetCachedMapComponent<VehicleMapping>().AllPathData)
+				{
+					foreach (VehicleRegion region in pathData.VehicleRegionGrid.AllRegions_NoRebuild_InvalidAllowed)
+					{
+						if (i == mapIndex)
+						{
+							region.Notify_MyMapRemoved();
+						}
+						else
+						{
+							region.DecrementMapIndex();
+						}
+					}
+				}
+			}
+		}
+
+		public static void DebugUpdateVehicleRegions()
+		{
+			if (Find.CurrentMap != null && !WorldRendererUtility.WorldRenderedNow)
+			{
+				DebugHelper.DebugDrawVehicleRegion(Find.CurrentMap);
+			}
+		}
+
+		public static void DebugOnGUIVehicleRegions()
+		{
+			if (Find.CurrentMap != null && !WorldRendererUtility.WorldRenderedNow)
+			{
+				DebugHelper.DebugDrawVehiclePathCostsOverlay(Find.CurrentMap);
 			}
 		}
 	}

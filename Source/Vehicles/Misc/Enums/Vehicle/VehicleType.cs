@@ -1,11 +1,11 @@
 ﻿
 namespace Vehicles
 {
-	public enum VehicleType 
+	public enum VehicleType : uint
 	{ 
-		Undefined = 0,
-		Sea = 1, 
-		Air = 2, 
-		Land = 3
+		Sea = 0, 
+		Air = 1, 
+		Land = 2,
+		Universal = 3
 	}
 }

@@ -454,7 +454,7 @@ namespace Vehicles
 			GUI.color = Color.white;
 			if (Mouse.IsOver(rect))
 			{
-				TooltipHandler.TipRegion(rect, () => RaceProperties.NutritionEatenPerDayExplanation_NewTemp(p, true, true, false), trad.GetHashCode() ^ 385968958);
+				TooltipHandler.TipRegion(rect, () => RaceProperties.NutritionEatenPerDayExplanation(p, true, true, false), trad.GetHashCode() ^ 385968958);
 			}
 		}
 
@@ -505,7 +505,7 @@ namespace Vehicles
 				}
 				if (mass > availableMass)
 				{
-					GUI.color = ColoredText.RedReadable;
+					GUI.color = ColorLibrary.RedReadable;
 				}
 				else
 				{
@@ -525,7 +525,7 @@ namespace Vehicles
 				}
 				else if (num < 0f)
 				{
-					GUI.color = ColoredText.RedReadable;
+					GUI.color = ColorLibrary.RedReadable;
 				}
 				else
 				{

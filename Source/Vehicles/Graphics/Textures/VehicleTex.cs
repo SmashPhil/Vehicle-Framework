@@ -33,9 +33,15 @@ namespace Vehicles
 
 		public static readonly Texture2D CaravanIcon = ContentFinder<Texture2D>.Get("UI/Commands/FormCaravan");
 
-		public static readonly Texture2D PackCargoIcon = ContentFinder<Texture2D>.Get("UI/Gizmos/StartLoad");
+		public static readonly Texture2D[] PackCargoIcon = new Texture2D[] { ContentFinder<Texture2D>.Get("UI/Gizmos/StartLoadBoat"),
+																			 ContentFinder<Texture2D>.Get("UI/Gizmos/StartLoadAerial"),
+																			 ContentFinder<Texture2D>.Get("UI/Gizmos/StartLoadVehicle"),
+																			 BaseContent.BadTex};
 
-		public static readonly Texture2D CancelPackCargoIcon = ContentFinder<Texture2D>.Get("UI/Gizmos/CancelLoad");
+		public static readonly Texture2D[] CancelPackCargoIcon = new Texture2D[] { ContentFinder<Texture2D>.Get("UI/Gizmos/CancelLoadBoat"),
+																				   ContentFinder<Texture2D>.Get("UI/Gizmos/CancelLoadAerial"),
+																				   ContentFinder<Texture2D>.Get("UI/Gizmos/CancelLoadVehicle"),
+																				   BaseContent.BadTex};
 
 		public static readonly Texture2D AmmoBG = ContentFinder<Texture2D>.Get("UI/Gizmos/AmmoBoxBG");
 

@@ -7,95 +7,63 @@ using Vehicles.AI;
 
 namespace Vehicles
 {
+	/// <summary>
+	/// Vehicle specific room handler
+	/// </summary>
 	public sealed class VehicleRoom
 	{
+		private static int nextRoomID;
+
 		public sbyte mapIndex = -1;
 		public int ID = -16161616;
 
+		private readonly VehicleDef vehicleDef;
+
 		public int lastChangeTick = -1;
-
 		private int numRegionsTouchingMapEdge;
-
-		public bool isPrisonCell;
-
 		private int cachedCellCount = -1;
 
-		public int newOrReusedRoomGroupIndex = -1;
-
-		private static int nextRoomID;
-
 		private readonly HashSet<VehicleRoom> uniqueNeighborsSet = new HashSet<VehicleRoom>();
-
 		private readonly List<VehicleRoom> uniqueNeighbors = new List<VehicleRoom>();
 
+		public VehicleRoom(VehicleDef vehicleDef)
+		{
+			this.vehicleDef = vehicleDef;
+		}
+
+		/// <summary>
+		/// Map getter with fallback
+		/// </summary>
 		public Map Map => (mapIndex >= 0) ? Find.Maps[mapIndex] : null;
 
-		public RegionType RegionType => (!Regions.Any()) ? RegionType.None : Regions[0].type;
+		/// <summary>
+		/// Region type with fallback
+		/// </summary>
+		public RegionType RegionType => Regions.NullOrEmpty() ? RegionType.None : Regions[0].type;
 
+		/// <summary>
+		/// Region getter for regions contained within room
+		/// </summary>
 		public List<VehicleRegion> Regions { get; } = new List<VehicleRegion>();
 
+		/// <summary>
+		/// Region count
+		/// </summary>
 		public int RegionCount => Regions.Count;
 
-		public bool IsHuge => Regions.Count > 60;
-
-		public bool Dereferenced => Regions.Count == 0;
-
+		/// <summary>
+		/// Room touches map edge
+		/// </summary>
 		public bool TouchesMapEdge => numRegionsTouchingMapEdge > 0;
-
-		public int CellCount
-		{
-			get
-			{
-				if (cachedCellCount == -1)
-				{
-					cachedCellCount = 0;
-					foreach (VehicleRegion region in Regions)
-					{
-						cachedCellCount += region.CellCount;
-					}
-				}
-				return cachedCellCount;
-			}
-		}
-
-		public List<VehicleRoom> Neighbors
-		{
-			get
-			{
-				uniqueNeighborsSet.Clear();
-				uniqueNeighbors.Clear();
-				foreach(VehicleRegion region in Regions)
-				{
-					foreach (VehicleRegion _ in region.Neighbors)
-					{
-						if (uniqueNeighborsSet.Add(region.Room) && region.Room != this)
-						{
-							uniqueNeighbors.Add(region.Room);
-						}
-					}
-				}
-				uniqueNeighborsSet.Clear();
-				return uniqueNeighbors;
-			}
-		}
-
-		public IEnumerable<IntVec3> Cells
-		{
-			get
-			{
-				foreach(VehicleRegion region in Regions)
-				{
-					foreach(IntVec3 c in region.Cells)
-					{
-						yield return c;
-					}
-				}
-			}
-		}
 		
-		public static VehicleRoom MakeNew(Map map)
+		/// <summary>
+		/// Create new room for <paramref name="vehicleDef"/>
+		/// </summary>
+		/// <param name="map"></param>
+		/// <param name="vehicleDef"></param>
+		public static VehicleRoom MakeNew(Map map, VehicleDef vehicleDef)
 		{
-			VehicleRoom room = new VehicleRoom
+			VehicleRoom room = new VehicleRoom(vehicleDef)
 			{
 				mapIndex = (sbyte)map.Index,
 				ID = nextRoomID
@@ -104,6 +72,10 @@ namespace Vehicles
 			return room;
 		}
 
+		/// <summary>
+		/// Add region to room
+		/// </summary>
+		/// <param name="region"></param>
 		public void AddRegion(VehicleRegion region)
 		{
 			if (Regions.Contains(region))
@@ -124,10 +96,14 @@ namespace Vehicles
 			}
 			if (Regions.Count == 1)
 			{
-				Map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid.allRooms.Add(this);
+				Map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid.allRooms.Add(this);
 			}
 		}
 
+		/// <summary>
+		/// Remove region from room
+		/// </summary>
+		/// <param name="r"></param>
 		public void RemoveRegion(VehicleRegion r)
 		{
 			if (!Regions.Contains(r))
@@ -148,13 +124,17 @@ namespace Vehicles
 			}
 			if (Regions.Count == 0)
 			{
-				Map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid.allRooms.Remove(this);
+				Map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid.allRooms.Remove(this);
 			}
 		}
 
+		/// <summary>
+		/// ID based hashcode
+		/// </summary>
+		/// <returns></returns>
 		public override int GetHashCode()
 		{
-			return Gen.HashCombineInt(ID, 1538478890);
+			return Gen.HashCombineInt(ID, vehicleDef.GetHashCode());
 		}
 	}
 }

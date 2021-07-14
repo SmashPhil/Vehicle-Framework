@@ -1,9 +1,9 @@
 ﻿using System;
 using HarmonyLib;
 using Verse;
+using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
-using Vehicles.AI;
 
 namespace Vehicles
 {
@@ -35,7 +35,7 @@ namespace Vehicles
 
 		public void PatchMethods()
 		{
-			if(VehicleHarmony.debug)
+			if (VehicleHarmony.debug)
 			{
 				VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldRoutePlanner), nameof(WorldRoutePlanner.WorldRoutePlannerUpdate)), prefix: null,
 					postfix: new HarmonyMethod(typeof(Debug),
@@ -43,21 +43,21 @@ namespace Vehicles
 				VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldObjectsHolder), nameof(WorldObjectsHolder.Add)),
 					prefix: new HarmonyMethod(typeof(Debug),
 					nameof(DebugWorldObjects)));
-				VehicleHarmony.Patch(original: AccessTools.Method(typeof(RegionGrid), nameof(RegionGrid.DebugDraw)), prefix: null,
-					postfix: new HarmonyMethod(typeof(Debug),
-					nameof(DebugDrawWaterRegion)));
 			}
 
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Game), nameof(Game.AddMap)),
-			//	postfix: new HarmonyMethod(typeof(Debug),
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Designator_Build), nameof(Designator_Build.DesignateSingleCell)),
+			//	prefix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestMethod)));
+			//VehicleHarmony.Patch(original: AccessTools.PropertySetter(typeof(Thing), nameof(Thing.StyleDef)),
+			//	finalizer: new HarmonyMethod(typeof(Debug),
+			//	nameof(ExceptionCatcher)));
 		}
 
-		public static void TestMethod(Map map)
+		public static bool TestMethod()
 		{
 			try
 			{
-
+				
 			}
 			catch (Exception ex)
 			{
@@ -67,6 +67,16 @@ namespace Vehicles
 			{
 
 			}
+			return false;
+		}
+
+		public static Exception ExceptionCatcher(Exception __exception)
+		{
+			if (__exception != null)
+			{
+				SmashLog.Message($"Exception caught! <error>Ex={__exception.Message}</error>");
+			}
+			return __exception;
 		}
 
 		/// <summary>
@@ -79,15 +89,6 @@ namespace Vehicles
 			{
 				VehicleHarmony.tiles.Add(new Pair<int, int>(o.Tile, 0));
 			}
-		}
-
-		/// <summary>
-		/// Draw water regions to show if they are valid and initialized
-		/// </summary>
-		/// <param name="___map"></param>
-		public static void DebugDrawWaterRegion(Map ___map)
-		{
-			___map.GetCachedMapComponent<VehicleMapping>()?.VehicleRegionGrid?.DebugDraw();
 		}
 
 		/// <summary>

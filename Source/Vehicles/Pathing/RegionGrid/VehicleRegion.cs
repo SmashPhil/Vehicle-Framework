@@ -10,6 +10,9 @@ using Vehicles.AI;
 
 namespace Vehicles
 {
+	/// <summary>
+	/// Vehicle specific region for improved pathing
+	/// </summary>
 	public sealed class VehicleRegion
 	{
 		public const int GridSize = 12;
@@ -17,72 +20,67 @@ namespace Vehicles
 		public RegionType type = RegionType.Normal;
 
 		public int id = -1;
-
 		public sbyte mapIndex = -1;
-
-		private VehicleRoom roomInt;
-
-		public List<VehicleRegionLink> links = new List<VehicleRegionLink>();
-
-		public CellRect extentsClose;
-
-		public CellRect extentsLimit;
-
-		public Building_Door door;
-
-		private int precalculatedHashCode;
-
-		public bool touchesMapEdge;
-
-		private int cachedCellCount = -1;
-
-		public bool valid = true;
-
-		private ListerThings listerThings = new ListerThings(ListerThingsUse.Region);
-
-		public uint[] closedIndex = new uint[WaterRegionTraverser.NumWorkers];
-
-		public uint reachedIndex;
-
-		public int newRegionGroupIndex = -1;
-
-		private Dictionary<Area, AreaOverlap> cachedAreaOverlaps;
+		private static int nextId = 1;
 
 		public int mark;
 
-		private List<KeyValuePair<Pawn, Danger>> cachedDangers = new List<KeyValuePair<Pawn, Danger>>();
+		private readonly VehicleDef vehicleDef;
+
+		private VehicleRoom room;
+		public Building_Door door;
+
+		public readonly List<VehicleRegionLink> links = new List<VehicleRegionLink>();
+		private readonly Dictionary<Area, AreaOverlap> cachedAreaOverlaps;
+		private readonly List<KeyValuePair<Pawn, Danger>> cachedDangers = new List<KeyValuePair<Pawn, Danger>>();
+
+		public uint[] closedIndex = new uint[VehicleRegionTraverser.NumWorkers];
+
+		private readonly ListerThings listerThings = new ListerThings(ListerThingsUse.Region);
+
+		public CellRect extentsClose;
+		public CellRect extentsLimit;
+
+		private int precalculatedHashCode;
+		private int cachedCellCount = -1;
+
+		public bool touchesMapEdge;
+		public bool valid = true;
+
+		public uint reachedIndex;
+		public int newRegionGroupIndex = -1;
 
 		private int cachedDangersForFrame;
 
-		private float cachedBaseDesiredPlantsCount;
-
-		private int cachedBaseDesiredPlantsCountForTick = -999999;
-
 		private int debug_makeTick = -1000;
-
 		private int debug_lastTraverseTick = -1000;
 
-		private static int nextId = 1;
-
-		private VehicleRegion() 
-		{ 
+		private VehicleRegion(VehicleDef vehicleDef) 
+		{
+			this.vehicleDef = vehicleDef;
 		}
 
+		/// <summary>
+		/// Map getter with fallback
+		/// </summary>
 		public Map Map => (mapIndex >= 0) ? Find.Maps[mapIndex] : null;
 
+		/// <summary>
+		/// Yield all cells on the map
+		/// </summary>
 		public IEnumerable<IntVec3> Cells
 		{
 			get
 			{
-				VehicleRegionGrid regions = Map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid;
-				for(int z = extentsClose.minZ; z <= extentsClose.maxX; z++)
+				VehicleRegionGrid regions = Map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid;
+				for (int z = extentsClose.minZ; z <= extentsClose.maxZ; z++)
 				{
-					for(int x = extentsClose.minX; x <= extentsClose.maxX; x++)
+					for (int x = extentsClose.minX; x <= extentsClose.maxX; x++)
 					{
-						IntVec3 c = new IntVec3(x, 0, z);
-						if (regions.GetRegionAt_NoRebuild_InvalidAllowed(c) == this)
+						IntVec3 cell = new IntVec3(x, 0, z);
+						if (regions.GetRegionAt_NoRebuild_InvalidAllowed(cell) == this)
 						{
-							yield return c;
+							yield return cell;
 						}
 					}
 				}
@@ -90,6 +88,9 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// Get total cached cell count in this region
+		/// </summary>
 		public int CellCount
 		{
 			get
@@ -102,6 +103,9 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// Get neighboring regions
+		/// </summary>
 		public IEnumerable<VehicleRegion> Neighbors
 		{
 			get
@@ -121,6 +125,9 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// Get neighboring regions of the same region type
+		/// </summary>
 		public IEnumerable<VehicleRegion> NeighborsOfSameType
 		{
 			get
@@ -140,34 +147,40 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// Get room associated with this region
+		/// </summary>
 		public VehicleRoom Room
 		{
 			get
 			{
-				return roomInt;
+				return room;
 			}
 			set
 			{
-				if (value == roomInt) return;
-				if (!(roomInt is null))
+				if (value == room) return;
+				if (room != null)
 				{
-					roomInt.RemoveRegion(this);
+					room.RemoveRegion(this);
 				}
-				roomInt = value;
-				if (!(roomInt is null))
+				room = value;
+				if (room != null)
 				{
-					roomInt.AddRegion(this);
+					room.AddRegion(this);
 				}
 			}
 		}
 
+		/// <summary>
+		/// Get random cell in this region
+		/// </summary>
 		public IntVec3 RandomCell
 		{
 			get
 			{
 				Map map = Map;
 				CellIndices cellIndices = map.cellIndices;
-				VehicleRegion[] directGrid = map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid.DirectGrid;
+				VehicleRegion[] directGrid = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid.DirectGrid;
 				for (int i = 0; i < 1000; i++)
 				{
 					IntVec3 randomCell = extentsClose.RandomCell;
@@ -180,13 +193,16 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// Get any cell in this region
+		/// </summary>
 		public IntVec3 AnyCell
 		{
 			get
 			{
 				Map map = Map;
 				CellIndices cellIndices = map.cellIndices;
-				VehicleRegion[] directGrid = map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid.DirectGrid;
+				VehicleRegion[] directGrid = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid.DirectGrid;
 				foreach (IntVec3 intVec in extentsClose)
 				{
 					if (directGrid[cellIndices.CellToIndex(intVec)] == this)
@@ -199,6 +215,9 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// Output debug string for region and region link debugging
+		/// </summary>
 		public string DebugString
 		{
 			get
@@ -227,6 +246,9 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// Debug draw is < 1 second old
+		/// </summary>
 		public bool DebugIsNew
 		{
 			get
@@ -235,6 +257,9 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// Get lister things
+		/// </summary>
 		public ListerThings ListerThings
 		{
 			get
@@ -243,6 +268,9 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// Door is valid
+		/// </summary>
 		public bool IsDoorway
 		{
 			get
@@ -251,71 +279,79 @@ namespace Vehicles
 			}
 		}
 
-		public static VehicleRegion MakeNewUnfilled(IntVec3 root, Map map)
+		/// <summary>
+		/// Create new region for <paramref name="vehicleDef"/>
+		/// </summary>
+		/// <param name="root"></param>
+		/// <param name="map"></param>
+		/// <param name="vehicleDef"></param>
+		public static VehicleRegion MakeNewUnfilled(IntVec3 root, Map map, VehicleDef vehicleDef)
 		{
-			VehicleRegion region = new VehicleRegion();
-			region.debug_makeTick = Find.TickManager.TicksGame;
-			region.id = nextId;
+			VehicleRegion region = new VehicleRegion(vehicleDef)
+			{
+				debug_makeTick = Find.TickManager.TicksGame,
+				id = nextId,
+				mapIndex = (sbyte)map.Index,
+				precalculatedHashCode = Gen.HashCombineInt(nextId, vehicleDef.GetHashCode()),
+				extentsClose = new CellRect()
+				{
+					minX = root.x,
+					maxX = root.x,
+					minZ = root.z,
+					maxZ = root.z
+				},
+				extentsLimit = new CellRect()
+				{
+					minX = root.x - root.x % GridSize,
+					maxX = root.x + GridSize - (root.x + GridSize) % GridSize - 1,
+					minZ = root.z - root.z % GridSize,
+					maxZ = root.z + GridSize - (root.z + GridSize) % GridSize - 1
+				}.ClipInsideMap(map),
+			};
 			nextId++;
-			region.mapIndex = (sbyte)map.Index;
-			region.precalculatedHashCode = Gen.HashCombineInt(region.id, 1295813358);
-			region.extentsClose.minX = root.x;
-			region.extentsClose.maxX = root.x;
-			region.extentsClose.minZ = root.z;
-			region.extentsClose.maxZ = root.z;
-			region.extentsLimit.minX = root.x - root.x % GridSize;
-			region.extentsLimit.maxX = root.x + GridSize - (root.x + GridSize) % GridSize - 1;
-			region.extentsLimit.minZ = root.z - root.z % GridSize;
-			region.extentsLimit.maxZ = root.z + GridSize - (root.z + GridSize) % GridSize - 1;
-			region.extentsLimit.ClipInsideMap(map);
 			return region;
 		}
 
-		public bool Allows(TraverseParms tp, bool isDestination)
+		/// <summary>
+		/// <paramref name="traverseParms"/> allows this region
+		/// </summary>
+		/// <param name="traverseParms"></param>
+		/// <param name="isDestination"></param>
+		public bool Allows(TraverseParms traverseParms, bool isDestination)
 		{
-			if (tp.mode != TraverseMode.PassAllDestroyableThings && tp.mode != TraverseMode.PassAllDestroyableThingsNotWater && !type.Passable())
+			if (traverseParms.mode != TraverseMode.PassAllDestroyableThings && traverseParms.mode != TraverseMode.PassAllDestroyableThingsNotWater && !type.Passable())
 			{
 				return false;
 			}
-			if (tp.maxDanger < Danger.Deadly && tp.pawn != null)
+			if (traverseParms.maxDanger < Danger.Deadly && traverseParms.pawn is VehiclePawn vehicle)
 			{
-				Danger danger = DangerFor(tp.pawn);
+				Danger danger = DangerFor(traverseParms.pawn);
 				if (isDestination || danger == Danger.Deadly)
 				{
-					VehicleRegion region = VehicleRegionAndRoomQuery.GetRegion(tp.pawn, RegionType.Set_All);
-					if ((region == null || danger > region.DangerFor(tp.pawn)) && danger > tp.maxDanger)
+					VehicleRegion region = VehicleRegionAndRoomQuery.GetRegion(traverseParms.pawn, vehicle.VehicleDef, RegionType.Set_All);
+					if ((region == null || danger > region.DangerFor(traverseParms.pawn)) && danger > traverseParms.maxDanger)
 					{
 						return false;
 					}
 				}
 			}
-			switch (tp.mode)
+			switch (traverseParms.mode)
 			{
 				case TraverseMode.ByPawn:
 					{
-						if (door == null)
+						if (door is null)
 						{
 							return true;
 						}
-						ByteGrid avoidGrid = tp.pawn.GetAvoidGrid(true);
-						if (avoidGrid != null && avoidGrid[door.Position] == 255)
-						{
-							return false;
-						}
-						if (tp.pawn.HostileTo(door))
-						{
-							return door.CanPhysicallyPass(tp.pawn) || tp.canBash;
-						}
-						return door.CanPhysicallyPass(tp.pawn) && !door.IsForbiddenToPass(tp.pawn);
+						return false; //Vehicles cannot path through doors for now
 					}
 				case TraverseMode.PassDoors:
 					return true;
+				case TraverseMode.NoPassClosedDoorsOrWater:
 				case TraverseMode.NoPassClosedDoors:
-					return door == null || door.FreePassage;
+					return door is null;
 				case TraverseMode.PassAllDestroyableThings:
 					return true;
-				case TraverseMode.NoPassClosedDoorsOrWater:
-					return door == null || door.FreePassage;
 				case TraverseMode.PassAllDestroyableThingsNotWater:
 					return true;
 				default:
@@ -323,9 +359,13 @@ namespace Vehicles
 			}
 		}
 
-		public Danger DangerFor(Pawn p)
+		/// <summary>
+		/// Danger path constraint for <paramref name="pawn"/>
+		/// </summary>
+		/// <param name="pawn"></param>
+		public Danger DangerFor(Pawn pawn)
 		{
-			if(Current.ProgramState == ProgramState.Playing)
+			if (Current.ProgramState == ProgramState.Playing)
 			{
 				if(cachedDangersForFrame != Time.frameCount)
 				{
@@ -336,85 +376,19 @@ namespace Vehicles
 				{
 					for(int i = 0; i < cachedDangers.Count; i++)
 					{
-						if(cachedDangers[i].Key == p)
+						if(cachedDangers[i].Key == pawn)
 						{
 							return cachedDangers[i].Value;
 						}
 					}
 				}
 			}
-			return Danger.None; //Vehicles don't need danger detection
+			return Danger.None; //Vehicles don't need danger detection right now
 		}
 
-		public float GetBaseDesiredPlantsCount(bool allowCache = true)
-		{
-			int ticksGame = Find.TickManager.TicksGame;
-			if(allowCache && ticksGame - cachedBaseDesiredPlantsCountForTick < 2500)
-			{
-				return cachedBaseDesiredPlantsCount;
-			}
-			cachedBaseDesiredPlantsCount = 0f;
-			Map map = Map;
-			foreach(IntVec3 c in Cells)
-			{
-				cachedBaseDesiredPlantsCount += map.wildPlantSpawner.GetBaseDesiredPlantsCountAt(c);
-			}
-			cachedBaseDesiredPlantsCountForTick = ticksGame;
-			return cachedBaseDesiredPlantsCount;
-		}
-
-		public AreaOverlap OverlapWith(Area a)
-		{
-			if (a.TrueCount == 0)
-			{
-				return AreaOverlap.None;
-			}
-			if (Map != a.Map)
-			{
-				return AreaOverlap.None;
-			}
-			if (cachedAreaOverlaps == null)
-			{
-				cachedAreaOverlaps = new Dictionary<Area, AreaOverlap>();
-			}
-			if(!cachedAreaOverlaps.TryGetValue(a, out AreaOverlap areaOverlap))
-			{
-				int num = 0;
-				int num2 = 0;
-				foreach(IntVec3 c in Cells)
-				{
-					num2++;
-					if (a[c])
-					{
-						num++;
-					}
-				}
-				if (num == 0)
-				{
-					areaOverlap = AreaOverlap.None;
-				}
-				else if (num == num2)
-				{
-					areaOverlap = AreaOverlap.Entire;
-				}
-				else
-				{
-					areaOverlap = AreaOverlap.Partial;
-				}
-				cachedAreaOverlaps.Add(a, areaOverlap);
-			}
-			return areaOverlap;
-		}
-
-		public void Notify_AreaChanged(Area a)
-		{
-			if (cachedAreaOverlaps is null) return;
-			if (cachedAreaOverlaps.ContainsKey(a))
-			{
-				cachedAreaOverlaps.Remove(a);
-			}
-		}
-
+		/// <summary>
+		/// Decrement map index when other map has been removed
+		/// </summary>
 		public void DecrementMapIndex()
 		{
 			if(mapIndex <= 0)
@@ -429,107 +403,116 @@ namespace Vehicles
 			mapIndex = (sbyte)(mapIndex - 1);
 		}
 
+		/// <summary>
+		/// Clean up data after map has been removed
+		/// </summary>
 		public void Notify_MyMapRemoved()
 		{
 			listerThings.Clear();
 			mapIndex = -1;
 		}
 
+		/// <summary>
+		/// String output
+		/// </summary>
 		public override string ToString()
 		{
-			string str;
-			if (door != null)
+			string portal = door != null ? door.ToString() : "Null";
+			return $"VehicleRegion[id={id} mapIndex={mapIndex} center={extentsClose.CenterCell} links={links.Count} cells={CellCount} portal={portal}]";
+		}
+
+		/// <summary>
+		/// Debug draw field edges of this region
+		/// </summary>
+		public void DebugDraw()
+		{
+			GenDraw.DrawFieldEdges(Cells.ToList(), new Color(0f, 0f, 1f, 0.5f));
+		}
+
+		/// <summary>
+		/// Debug draw region when mouse is over
+		/// </summary>
+		public void DebugDrawMouseover(DebugRegionType debugRegionType)
+		{
+			Color color;
+			if (!valid)
 			{
-				str = door.ToString();
+				color = Color.red;
+			}
+			else if (DebugIsNew)
+			{
+				color = Color.yellow;
 			}
 			else
 			{
-				str = "null";
+				color = Color.green;
 			}
-			return string.Concat(new object[]
+			if ((debugRegionType & DebugRegionType.Regions) == DebugRegionType.Regions)
 			{
-				"Water Region(id=",
-				id,
-				", mapIndex=",
-				mapIndex,
-				", center=",
-				extentsClose.CenterCell,
-				", links=",
-				links.Count,
-				", cells=",
-				CellCount,
-				(door == null) ? null : (", portal=" + str),
-				")"
-			});
-		}
-
-		public void DebugDraw()
-		{
-			if(VehicleHarmony.debug && Find.TickManager.TicksGame < debug_lastTraverseTick + 60)
-			{
-				float a = 1f - (Find.TickManager.TicksGame - debug_lastTraverseTick) / 60f;
-				GenDraw.DrawFieldEdges(Cells.ToList(), new Color(0f, 0f, 1f, a));
-			}
-		}
-
-		public void DebugDrawMouseover()
-		{
-			int num = Mathf.RoundToInt(Time.realtimeSinceStartup * 2f) % 2;
-			if(VehicleMod.settings.debug.debugDrawRegions)
-			{
-				Color color;
-				if (!valid)
-				{
-					color = Color.red;
-				}
-				else if (DebugIsNew)
-				{
-					color = Color.yellow;
-				}
-				else
-				{
-					color = Color.green;
-				}
-
 				GenDraw.DrawFieldEdges(Cells.ToList(), color);
-				foreach(VehicleRegion region in Neighbors)
+				foreach (VehicleRegion region in Neighbors)
 				{
 					GenDraw.DrawFieldEdges(region.Cells.ToList(), Color.grey);
 				}
-
-				if(VehicleMod.settings.debug.debugDrawRegionLinks)
+			}
+			if ((debugRegionType & DebugRegionType.Links) == DebugRegionType.Links)
+			{
+				foreach (VehicleRegionLink regionLink in links)
 				{
-					foreach (VehicleRegionLink regionLink in links)
+					//Flash every other second
+					if (Mathf.RoundToInt(Time.realtimeSinceStartup * 2f) % 2 == 1)
 					{
-						if (num == 1)
+						foreach (IntVec3 c in regionLink.span.Cells)
 						{
-							foreach (IntVec3 c in regionLink.span.Cells)
-							{
-								CellRenderer.RenderCell(c, DebugSolidColorMats.MaterialOf(Color.magenta));
-							}
+							CellRenderer.RenderCell(c, DebugSolidColorMats.MaterialOf(Color.magenta));
 						}
-					}
-				}
-				if(VehicleMod.settings.debug.debugDrawRegionThings)
-				{
-					foreach (Thing thing in listerThings.AllThings)
-					{
-						CellRenderer.RenderSpot(thing.TrueCenter(), (thing.thingIDNumber % 256) / 256f);
 					}
 				}
 			}
 		}
 
+		/// <summary>
+		/// Debug draw region path costs when mouse is over
+		/// </summary>
+		public void DebugOnGUIMouseover(DebugRegionType debugRegionType)
+		{
+			if ((debugRegionType & DebugRegionType.PathCosts) == DebugRegionType.PathCosts)
+			{
+				if (Find.CameraDriver.CurrentZoom <= CameraZoomRange.Close)
+				{
+					foreach (IntVec3 intVec in Cells)
+					{
+						Vector2 vector = intVec.ToUIPosition();
+						Rect rect = new Rect(vector.x - 20f, vector.y - 20f, 40f, 40f);
+						if (new Rect(0f, 0f, Verse.UI.screenWidth, Verse.UI.screenHeight).Overlaps(rect))
+						{
+							Widgets.Label(rect, Map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehiclePathGrid.PerceivedPathCostAt(intVec).ToString());
+						}
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Set last traversal tick
+		/// </summary>
 		public void Debug_Notify_Traversed()
 		{
 			debug_lastTraverseTick = Find.TickManager.TicksGame;
 		}
 
+		/// <summary>
+		/// Hashcode
+		/// </summary>
 		public override int GetHashCode()
 		{
 			return precalculatedHashCode;
 		}
 
+		/// <summary>
+		/// Equate regions by id
+		/// </summary>
+		/// <param name="obj"></param>
 		public override bool Equals(object obj)
 		{
 			return obj is VehicleRegion region && region.id == id;

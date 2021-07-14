@@ -1,122 +1,205 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 using Verse;
+using RimWorld;
 using SmashTools;
 
 namespace Vehicles.AI
 {
+	/// <summary>
+	/// Vehicle specific path grid
+	/// </summary>
 	public sealed class VehiclePathGrid
 	{
 		public const int ImpassableCost = 10000;
-		public const int WaterCost = 2;
 
 		private readonly Map map;
+		private readonly VehicleDef vehicleDef;
+		
 		public int[] pathGrid;
 
-		public VehiclePathGrid(Map map)
+		public VehiclePathGrid(Map map, VehicleDef vehicleDef)
 		{
 			this.map = map;
+			this.vehicleDef = vehicleDef;
 			ResetPathGrid();
 		}
 
+		/// <summary>
+		/// Clear path grid of all costs
+		/// </summary>
 		public void ResetPathGrid()
 		{
 			pathGrid = new int[map.cellIndices.NumGridCells];
 		}
 
+		/// <summary>
+		/// <paramref name="loc"/> is not impassable for <see cref="vehicleDef"/>
+		/// </summary>
+		/// <param name="loc"></param>
 		public bool Walkable(IntVec3 loc)
 		{
-			return loc.InBoundsShip(map) && pathGrid[map.cellIndices.CellToIndex(loc)] < 10000;
+			return loc.InBounds(map) && pathGrid[map.cellIndices.CellToIndex(loc)] < ImpassableCost;
 		}
 
+		/// <summary>
+		/// <see cref="Walkable(IntVec3)"/> with no <see cref="GenGrid.InBounds(IntVec3, Map)"/> validation.
+		/// </summary>
+		/// <param name="loc"></param>
 		public bool WalkableFast(IntVec3 loc)
 		{
-			return pathGrid[map.cellIndices.CellToIndex(loc)] < 10000;
+			return pathGrid[map.cellIndices.CellToIndex(loc)] < ImpassableCost;
 		}
 
+		/// <summary>
+		/// <seealso cref="WalkableFast(IntVec3)"/> given (<paramref name="x"/>,<paramref name="z"/>) coordinates
+		/// </summary>
+		/// <param name="x"></param>
+		/// <param name="z"></param>
 		public bool WalkableFast(int x, int z)
 		{
-			return pathGrid[map.cellIndices.CellToIndex(x, z)] < 10000;
+			return pathGrid[map.cellIndices.CellToIndex(x, z)] < ImpassableCost;
 		}
 
+		/// <summary>
+		/// <seealso cref="WalkableFast(IntVec3)"/> given cell <paramref name="index"/>
+		/// </summary>
+		/// <param name="index"></param>
 		public bool WalkableFast(int index)
 		{
-			return pathGrid[index] < 10000;
+			return pathGrid[index] < ImpassableCost;
 		}
 
+		/// <summary>
+		/// Cached path cost at <paramref name="loc"/>
+		/// </summary>
+		/// <param name="loc"></param>
 		public int PerceivedPathCostAt(IntVec3 loc)
 		{
 			return pathGrid[map.cellIndices.CellToIndex(loc)];
 		}
 
-		public void RecalculatePerceivedPathCostUnderThing(Thing t)
+		/// <summary>
+		/// Recalculate path cost for tile <paramref name="vehicle"/> is registered on
+		/// </summary>
+		/// <param name="vehicle"></param>
+		public void RecalculatePerceivedPathCostUnderThing(VehiclePawn vehicle)
 		{
-			if (t.def.size == IntVec2.One)
+			if (vehicle.def.size == IntVec2.One)
 			{
-				RecalculatePerceivedPathCostAt(t.Position);
+				RecalculatePerceivedPathCostAt(vehicle.Position);
+				return;
 			}
-			else
+			CellRect cellRect = vehicle.OccupiedRect();
+			for (int i = cellRect.minZ; i <= cellRect.maxZ; i++)
 			{
-				CellRect cellRect = t.OccupiedRect();
-				for (int i = cellRect.minZ; i <= cellRect.maxZ; i++)
+				for (int j = cellRect.minX; j <= cellRect.maxX; j++)
 				{
-					for (int j = cellRect.minX; j <= cellRect.maxX; j++)
-					{
-						IntVec3 c = new IntVec3(j, 0, i);
-						RecalculatePerceivedPathCostAt(c);
-					}
+					IntVec3 c = new IntVec3(j, 0, i);
+					RecalculatePerceivedPathCostAt(c);
 				}
-			} 
+			}
 		}
 
-		public void RecalculatePerceivedPathCostAt(IntVec3 c)
+		/// <summary>
+		/// Recalculate and recache path cost at <paramref name="cell"/>
+		/// </summary>
+		/// <param name="cell"></param>
+		public void RecalculatePerceivedPathCostAt(IntVec3 cell)
 		{
-			if(!c.InBoundsShip(map))
+			if (!cell.InBounds(map))
 			{
 				return;
 			}
-			bool flag = WalkableFast(c);
-			pathGrid[map.cellIndices.CellToIndex(c)] = CalculatedCostAt(c);
-			if (WalkableFast(c) != flag)
+			bool walkable = WalkableFast(cell);
+			pathGrid[map.cellIndices.CellToIndex(cell)] = CalculatedCostAt(cell);
+			if (WalkableFast(cell) != walkable)
 			{
-				map.GetCachedMapComponent<VehicleMapping>().VehicleReachability.ClearCache();
-				map.GetCachedMapComponent<VehicleMapping>().VehicleRegionDirtyer.Notify_WalkabilityChanged(c);
+				map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleReachability.ClearCache();
+				map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionDirtyer.Notify_WalkabilityChanged(cell);
 			}
 		}
 
+		/// <summary>
+		/// Recalculate all cells in the map
+		/// </summary>
 		public void RecalculateAllPerceivedPathCosts()
 		{
-			foreach (IntVec3 c in map.AllCells)
+			foreach (IntVec3 cell in map.AllCells)
 			{
-				RecalculatePerceivedPathCostAt(c);
+				RecalculatePerceivedPathCostAt(cell);
 			}
 		}
 
-		public int CalculatedCostAt(IntVec3 c)
+		/// <summary>
+		/// Calculate cost for <see cref="VehicleDef"/> at <paramref name="cell"/>
+		/// </summary>
+		/// <param name="cell"></param>
+		public int CalculatedCostAt(IntVec3 cell)
 		{
-			TerrainDef terrainDef = map.terrainGrid.TerrainAt(c);
-			if (terrainDef is null || (terrainDef.passability == Traversability.Impassable && !terrainDef.IsWater) || !terrainDef.IsWater)
+			TerrainDef terrainDef = map.terrainGrid.TerrainAt(cell);
+			if (terrainDef is null)
 			{
 				return ImpassableCost;
 			}
-			List<Thing> list = map.thingGrid.ThingsListAt(c);
-			foreach(Thing t in list)
+			int pathCost = terrainDef.pathCost;
+			if (vehicleDef.properties.customTerrainCosts.TryGetValue(terrainDef, out int customPathCost))
 			{
-				if(t.def.passability == Traversability.Impassable)
+				pathCost = customPathCost;
+			}
+			else if (terrainDef.passability == Traversability.Impassable)
+			{
+				return ImpassableCost;
+			}
+			else if (vehicleDef.properties.defaultTerrainImpassable)
+			{
+				return ImpassableCost;
+			}
+			List<Thing> list = map.thingGrid.ThingsListAt(cell);
+			int thingCost = 0;
+			foreach (Thing thing in list)
+			{
+				if (vehicleDef.properties.customThingCosts.TryGetValue(thing.def, out int thingPathCost))
+				{
+					if (thingPathCost < 0 || thingPathCost >= ImpassableCost)
+					{
+						return ImpassableCost;
+					}
+					if (thingPathCost > thingCost)
+					{
+						thingCost = thingPathCost;
+					}
+				}
+				else if (thing.def.passability == Traversability.Impassable)
 				{
 					return ImpassableCost;
 				}
+				thingPathCost = thing.def.pathCost;
+				if (thingPathCost > thingCost)
+				{
+					thingCost = thingPathCost;
+				}
 			}
-			//Need More?
-			return WaterCost;
+			pathCost += thingCost;
+			pathCost += Mathf.RoundToInt(SnowUtility.MovementTicksAddOn(map.snowGrid.GetCategory(cell)) * vehicleDef.properties.snowPathingMultiplier);
+			if (pathCost < 0)
+			{
+				pathCost = ImpassableCost;
+			}
+			return pathCost;
 		}
 
-		private bool ContainsPathCostIgnoreRepeater(IntVec3 c)
+		/// <summary>
+		/// Contains ignore path cost repeater
+		/// </summary>
+		/// <param name="c"></param>
+		private bool ContainsPathCostIgnoreRepeater(IntVec3 cell)
 		{
-			List<Thing> list = map.thingGrid.ThingsListAt(c);
-			foreach(Thing t in list)
+			List<Thing> list = map.thingGrid.ThingsListAt(cell);
+			for (int i = 0; i < list.Count; i++)
 			{
-				if(IsPathCostIgnoreRepeater(t.def))
+				if (IsPathCostIgnoreRepeater(list[i].def))
 				{
 					return true;
 				}
@@ -124,31 +207,43 @@ namespace Vehicles.AI
 			return false;
 		}
 
+		/// <summary>
+		/// ThingDef ignores repeat path costs
+		/// </summary>
+		/// <param name="def"></param>
 		private static bool IsPathCostIgnoreRepeater(ThingDef def)
 		{
 			return def.pathCost >= 25 && def.pathCostIgnoreRepeat;
 		}
 
+		/// <summary>
+		/// Output all terrain path costs for each <see cref="VehicleDef"/> 
+		/// </summary>
 		[DebugOutput]
-		public static void ThingPathCostsIgnoreRepeaters()
+		private static void OutputAllPathcostsFor()
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.AppendLine("===============SHIP PATH COST IGNORE REPEATERS==============");
-			foreach (ThingDef thingDef in DefDatabase<ThingDef>.AllDefs)
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
-				if (IsPathCostIgnoreRepeater(thingDef) && thingDef.passability != Traversability.Impassable)
+				stringBuilder.AppendLine($"------------- {vehicleDef.defName} -------------");
+
+				foreach (TerrainDef terrainDef in DefDatabase<TerrainDef>.AllDefsListForReading)
 				{
-					stringBuilder.AppendLine(thingDef.defName + " " + thingDef.pathCost);
+					int pathCost = terrainDef.pathCost;
+					if (vehicleDef.properties.customTerrainCosts.TryGetValue(terrainDef, out int customPathCost))
+					{
+						pathCost = customPathCost;
+					}
+					else if (vehicleDef.properties.defaultTerrainImpassable)
+					{
+						pathCost = ImpassableCost;
+					}
+					stringBuilder.AppendLine($"{terrainDef.defName} = {pathCost}");
 				}
+
+				stringBuilder.AppendLine($"--------------  End of Path Costs  --------------");
 			}
-			stringBuilder.AppendLine("===============NON-SHIPPATH COST IGNORE REPEATERS that are buildings with >0 pathCost ==============");
-			foreach (ThingDef thingDef2 in DefDatabase<ThingDef>.AllDefs)
-			{
-				if (!IsPathCostIgnoreRepeater(thingDef2) && thingDef2.passability != Traversability.Impassable && thingDef2.category == ThingCategory.Building && thingDef2.pathCost > 0)
-				{
-					stringBuilder.AppendLine(thingDef2.defName + " " + thingDef2.pathCost);
-				}
-			}
+			Log.Message(stringBuilder.ToString());
 		}
 	}
 }

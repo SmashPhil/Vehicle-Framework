@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using Verse;
 using UnityEngine;
 
 namespace Vehicles
@@ -22,5 +22,8 @@ namespace Vehicles
 		//Same concept as display coord and size. Fit to settings window
 		public Vector2 settingsUICoord;
 		public Vector2 settingsUISize;
+
+		public string loadCargoTexPath = string.Empty;
+		public string cancelCargoTexPath = string.Empty;
 	}
 }

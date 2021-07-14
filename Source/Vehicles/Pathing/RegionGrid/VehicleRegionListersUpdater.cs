@@ -6,15 +6,25 @@ using Vehicles.AI;
 
 namespace Vehicles
 {
-	public static class WaterRegionListersUpdater
+	/// <summary>
+	/// Region Lister utility class
+	/// </summary>
+	public static class VehicleRegionListersUpdater
 	{
 		private static readonly List<VehicleRegion> tmpRegions = new List<VehicleRegion>();
 
-		public static void DeregisterInRegions(Thing thing, Map map)
+		/// <summary>
+		/// Deregister <paramref name="thing"/> from nearby region
+		/// </summary>
+		/// <param name="thing"></param>
+		/// <param name="map"></param>
+		public static void DeregisterInRegions(Thing thing, Map map, VehicleDef vehicleDef)
 		{
-			ThingDef def = thing.def;
-			if (!ListerThings.EverListable(def, ListerThingsUse.Region)) return;
-			GetTouchableRegions(thing, map, tmpRegions, true);
+			if (!ListerThings.EverListable(thing.def, ListerThingsUse.Region))
+			{
+				return;
+			}
+			GetTouchableRegions(thing, map, vehicleDef, tmpRegions, true);
 			for(int i = 0; i < tmpRegions.Count; i++)
 			{
 				ListerThings listerThings = tmpRegions[i].ListerThings;
@@ -26,15 +36,22 @@ namespace Vehicles
 			tmpRegions.Clear();
 		}
 
-		public static void RegisterInRegions(Thing thing, Map map)
+		/// <summary>
+		/// Register <paramref name="thing"/> in nearby region
+		/// </summary>
+		/// <param name="thing"></param>
+		/// <param name="map"></param>
+		public static void RegisterInRegions(Thing thing, Map map, VehicleDef vehicleDef)
 		{
-			ThingDef def = thing.def;
-			if (!ListerThings.EverListable(def, ListerThingsUse.Region)) return;
-			GetTouchableRegions(thing, map, tmpRegions, false);
-			for(int i = 0; i < tmpRegions.Count; i++)
+			if (!ListerThings.EverListable(thing.def, ListerThingsUse.Region))
+			{
+				return;
+			}
+			GetTouchableRegions(thing, map, vehicleDef, tmpRegions, false);
+			for (int i = 0; i < tmpRegions.Count; i++)
 			{
 				ListerThings listerThings = tmpRegions[i].ListerThings;
-				if(!listerThings.Contains(thing))
+				if (!listerThings.Contains(thing))
 				{
 					listerThings.Add(thing);
 				}
@@ -42,41 +59,54 @@ namespace Vehicles
 			tmpRegions.Clear();
 		}
 
-		public static void RegisterAllAt(IntVec3 c, Map map, HashSet<Thing> processedThings = null)
+		/// <summary>
+		/// Register all things at <paramref name="cell"/>
+		/// </summary>
+		/// <param name="c"></param>
+		/// <param name="map"></param>
+		/// <param name="processedThings"></param>
+		public static void RegisterAllAt(IntVec3 cell, Map map, VehicleDef vehicleDef, HashSet<Thing> processedThings = null)
 		{
-			List<Thing> thingList = c.GetThingList(map);
+			List<Thing> thingList = cell.GetThingList(map);
 			int count = thingList.Count;
 			for(int i = 0; i < count; i++)
 			{
 				Thing thing = thingList[i];
-				if(processedThings is null || processedThings.Add(thing))
+				if (processedThings is null || processedThings.Add(thing))
 				{
-					RegisterInRegions(thing, map);
+					RegisterInRegions(thing, map, vehicleDef);
 				}
 			}
 		}
 
-		public static void GetTouchableRegions(Thing thing, Map map, List<VehicleRegion> outRegions, bool allowAdjacenttEvenIfCantTouch = false)
+		/// <summary>
+		/// Get all touchable regions for <paramref name="thing"/> on region grid associated with <paramref name="vehicleDef"/>
+		/// </summary>
+		/// <param name="thing"></param>
+		/// <param name="map"></param>
+		/// <param name="outRegions"></param>
+		/// <param name="allowAdjacenttEvenIfCantTouch"></param>
+		public static void GetTouchableRegions(Thing thing, Map map, VehicleDef vehicleDef, List<VehicleRegion> outRegions, bool allowAdjacenttEvenIfCantTouch = false)
 		{
 			outRegions.Clear();
 			CellRect cellRect = thing.OccupiedRect();
 			CellRect cellRect2 = cellRect;
-			if(CanRegisterInAdjacentRegions(thing))
+			if (CanRegisterInAdjacentRegions(thing))
 			{
 				cellRect2 = cellRect2.ExpandedBy(1);
 			}
 			foreach (IntVec3 intVec in cellRect2)
 			{
-				if (intVec.InBoundsShip(map))
+				if (intVec.InBounds(map))
 				{
-					VehicleRegion validRegionAt_NoRebuild = map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid.GetValidRegionAt_NoRebuild(intVec);
-					if (!(validRegionAt_NoRebuild is null) && validRegionAt_NoRebuild.type.Passable() && !outRegions.Contains(validRegionAt_NoRebuild))
+					VehicleRegion validRegionAt_NoRebuild = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid.GetValidRegionAt_NoRebuild(intVec);
+					if (validRegionAt_NoRebuild != null && validRegionAt_NoRebuild.type.Passable() && !outRegions.Contains(validRegionAt_NoRebuild))
 					{
 						if (cellRect.Contains(intVec))
 						{
 							outRegions.Add(validRegionAt_NoRebuild);
 						}
-						else if (allowAdjacenttEvenIfCantTouch || VehicleReachabilityImmediate.CanReachImmediateShip(intVec, thing, map, PathEndMode.Touch, null))
+						else if (allowAdjacenttEvenIfCantTouch || VehicleReachabilityImmediate.CanReachImmediateVehicle(intVec, thing, map, vehicleDef, PathEndMode.Touch))
 						{
 							outRegions.Add(validRegionAt_NoRebuild);
 						}
@@ -85,6 +115,11 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// Tmp method in case vanilla ever modifies this behavior to be specific to ThingDefs
+		/// </summary>
+		/// <param name="thing"></param>
+		/// <returns></returns>
 		private static bool CanRegisterInAdjacentRegions(Thing thing)
 		{
 			return true;

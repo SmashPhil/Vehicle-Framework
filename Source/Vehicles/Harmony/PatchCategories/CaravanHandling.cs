@@ -629,7 +629,7 @@ namespace Vehicles
 				yield return instruction;
 			}
 		}
-		
+
 		//REDO
 		public static bool ConcernNullThing(Thing th, Tale_DoublePawn __instance, ref bool __result)
 		{

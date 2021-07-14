@@ -53,7 +53,7 @@ namespace Vehicles
 			return turrets.All(t => t.turretDef.cooldown != null) ? 279 : 210f;
 		}
 
-		public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth)
+		public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth, GizmoRenderParms parms)
 		{
 			Text.Font = GameFont.Tiny;
 			bool flag = false;

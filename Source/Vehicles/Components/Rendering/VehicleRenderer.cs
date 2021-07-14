@@ -7,7 +7,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class VehicleRenderer
+	public sealed class VehicleRenderer
 	{
 		private const float SubInterval = 0.003787879f;
 		private const float YOffset_Body = 0.007575758f;
@@ -37,6 +37,19 @@ namespace Vehicles
 			effecters = new VehicleStatusEffecters(vehicle);
 		}
 
+		private PawnRenderFlags DefaultRenderFlags
+		{
+			get
+			{
+				PawnRenderFlags pawnRenderFlags = PawnRenderFlags.None;
+				if (vehicle.IsInvisible())
+				{
+					pawnRenderFlags |= PawnRenderFlags.Invisible;
+				}
+				return pawnRenderFlags;
+			}
+		}
+
 		public void RenderPawnAt(Vector3 drawLoc, float angle, bool northSouthRotation)
 		{
 			if (!graphics.AllResolved)
@@ -44,8 +57,8 @@ namespace Vehicles
 				graphics.ResolveAllGraphics();
 			}
 
-			RenderPawnInternal(drawLoc, angle, northSouthRotation);
-
+			RenderPawnInternal(drawLoc, angle, northSouthRotation, DefaultRenderFlags);
+			
 			if (vehicle.def.race.specialShadowData != null)
 			{
 				if (shadowGraphic == null)
@@ -65,35 +78,20 @@ namespace Vehicles
 			}
 		}
 
-		public void RenderPortrait(bool northSouthRotation)
-		{
-			Vector3 zero = Vector3.zero;
-			float angle;
-			if (vehicle.Dead || vehicle.Downed)
-			{
-				angle = 85f;
-				zero.x -= 0.18f;
-				zero.z -= 0.18f;
-			}
-			else
-			{
-				angle = 0f;
-			}
-			RenderPawnInternal(zero, angle, Rot4.South, northSouthRotation, true);
-		}
-
-		private void RenderPawnInternal(Vector3 rootLoc, float angle, bool northSouthRotation)
+		private void RenderPawnInternal(Vector3 rootLoc, float angle, bool northSouthRotation, PawnRenderFlags flags)
 		{
 			vehicle.UpdateRotationAndAngle();
-			RenderPawnInternal(rootLoc, angle, vehicle.Rotation, northSouthRotation, false);
+			RenderPawnInternal(rootLoc, angle, vehicle.Rotation, northSouthRotation, flags);
 		}
 
-		private void RenderPawnInternal(Vector3 rootLoc, float angle, Rot4 bodyFacing, bool northSouthRotation, bool portrait)
+		private void RenderPawnInternal(Vector3 rootLoc, float angle, Rot4 bodyFacing, bool northSouthRotation, PawnRenderFlags flags)
 		{
 			if (!graphics.AllResolved)
 			{
 				graphics.ResolveAllGraphics();
 			}
+			bool portraitDraw = !flags.FlagSet(PawnRenderFlags.Portrait) && !flags.FlagSet(PawnRenderFlags.Cache);
+
 			Quaternion quaternion = Quaternion.AngleAxis(angle * (northSouthRotation ? -1 : 1), Vector3.up);
 
 			Vector3 loc = rootLoc + vehicle.VehicleGraphic.DrawOffset(bodyFacing);
@@ -104,13 +102,13 @@ namespace Vehicles
 
 			for (int i = 0; i < list.Count; i++)
 			{
-				GenDraw.DrawMeshNowOrLater(mesh, loc, quaternion, list[i], portrait);
+				GenDraw.DrawMeshNowOrLater(mesh, loc, quaternion, list[i], flags.FlagSet(PawnRenderFlags.DrawNow));
 				loc.y += SubInterval;
 			}
 
 			Vector3 drawLoc = rootLoc;
 			drawLoc.y += YOffset_Wounds;
-			woundOverlays.RenderOverBody(drawLoc, mesh, quaternion, portrait);
+			woundOverlays.RenderOverBody(drawLoc, mesh, quaternion, flags.FlagSet(PawnRenderFlags.DrawNow), BodyTypeDef.WoundLayer.Body, bodyFacing);
 
 			Vector3 vector = rootLoc;
 			Vector3 a = rootLoc;
@@ -124,12 +122,12 @@ namespace Vehicles
 				a.y += YOffset_Shell;
 				vector.y += YOffset_Head;
 			}
-			//REDO
-			if (!portrait && vehicle.RaceProps.Animal && vehicle.inventory != null && vehicle.inventory.innerContainer.Count > 0 && graphics.packGraphic != null)
+			//REDO - will pack graphics be allowed?
+			if (!portraitDraw && vehicle.inventory != null && vehicle.inventory.innerContainer.Count > 0 && graphics.packGraphic != null)
 			{
 				Graphics.DrawMesh(mesh, vector, quaternion, graphics.packGraphic.MatAt(bodyFacing, null), 0);
 			}
-			if (!portrait)
+			if (!portraitDraw)
 			{
 				Vector3 bodyLoc = rootLoc;
 				bodyLoc.y += YOffset_Status;

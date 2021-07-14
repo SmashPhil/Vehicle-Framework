@@ -27,7 +27,7 @@ namespace Vehicles
 
 		public virtual bool CanHitTarget(GlobalTargetInfo target)
 		{
-			return caster != null && caster.Spawned && !ApparelPreventsShooting(caster.Position, currentTarget);
+			return caster != null && caster.Spawned && !ApparelPreventsShooting();
 		}
 
 		public virtual bool TryStartCastOn(GlobalTargetInfo castTarg, float heading, bool surpriseAttack = false, bool canHitNonTargetPawns = true)
@@ -130,7 +130,7 @@ namespace Vehicles
 			}
 			ThrowDebugText("ToHit" + (canHitNonTargetPawnsNow ? "\nchntp" : ""));
 			launchPos += new Vector3(VerbProps.shootOffset.x, 0, VerbProps.shootOffset.y).RotatedBy(heading);
-			projectile2.Launch(launcher, launchPos, exitTarget, exitTarget, ProjectileHitFlags.IntendedTarget, equipment);
+			projectile2.Launch(launcher, launchPos, exitTarget, exitTarget, ProjectileHitFlags.IntendedTarget, false, equipment);
 			ThrowDebugText("Hit\nDest", shootLine.Dest);
 			return (true, launchPos, heading);
 		}

@@ -5,11 +5,14 @@ using SmashTools;
 
 namespace Vehicles.AI
 {
+	/// <summary>
+	/// Region cost calculator inner data
+	/// </summary>
 	public class VehicleRegionCostCalculatorWrapper
 	{
-		private Map map;
+		private readonly Map map;
+		private readonly VehicleDef vehicleDef;
 		private IntVec3 endCell;
-		private HashSet<VehicleRegion> destRegions = new HashSet<VehicleRegion>();
 
 		private int moveTicksCardinal;
 		private int moveTicksDiagonal;
@@ -19,18 +22,31 @@ namespace Vehicles.AI
 		private VehicleRegionLink cachedBestLink;
 		private VehicleRegionLink cachedSecondBestLink;
 
+		private readonly HashSet<VehicleRegion> destRegions = new HashSet<VehicleRegion>();
+		private VehicleRegion[] regionGrid;
+		
 		private int cachedBestLinkCost;
 		private int cachedSecondBestLinkCost;
 		private bool cachedRegionIsDestination;
-		private VehicleRegion[] regionGrid;
 
-		public VehicleRegionCostCalculatorWrapper(Map map)
+		public VehicleRegionCostCalculatorWrapper(Map map, VehicleDef vehicleDef)
 		{
 			this.map = map;
-			vehicleRegionCostCalculator = new VehicleRegionCostCalculator(map);
+			this.vehicleDef = vehicleDef;
+			vehicleRegionCostCalculator = new VehicleRegionCostCalculator(map, this.vehicleDef);
 		}
 
-		public void Init(CellRect end, TraverseParms traverseParms, int moveTicksCardinal, int moveTicksDiagonal, ByteGrid avoidGrid, Area allowedArea, bool drafted, List<int> disallowedCorners)
+		/// <summary>
+		/// Initialize cost calculator for region link traversal
+		/// </summary>
+		/// <param name="end"></param>
+		/// <param name="traverseParms"></param>
+		/// <param name="moveTicksCardinal"></param>
+		/// <param name="moveTicksDiagonal"></param>
+		/// <param name="avoidGrid"></param>
+		/// <param name="drafted"></param>
+		/// <param name="disallowedCorners"></param>
+		public void Init(CellRect end, TraverseParms traverseParms, int moveTicksCardinal, int moveTicksDiagonal, ByteGrid avoidGrid, bool drafted, List<int> disallowedCorners)
 		{
 			this.moveTicksCardinal = moveTicksCardinal;
 			this.moveTicksDiagonal = moveTicksDiagonal;
@@ -41,11 +57,11 @@ namespace Vehicles.AI
 			cachedBestLinkCost = 0;
 			cachedSecondBestLinkCost = 0;
 			cachedRegionIsDestination = false;
-			regionGrid = map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid.DirectGrid;
+			regionGrid = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid.DirectGrid;
 			destRegions.Clear();
 			if (end.Width == 1 && end.Height == 1)
 			{
-				VehicleRegion region = VehicleGridsUtility.GetRegion(endCell, map, RegionType.Set_Passable);
+				VehicleRegion region = VehicleGridsUtility.GetRegion(endCell, map, vehicleDef, RegionType.Set_Passable);
 				if (region != null)
 				{
 					destRegions.Add(region);
@@ -55,9 +71,9 @@ namespace Vehicles.AI
 			{
 				foreach (IntVec3 intVec in end)
 				{
-					if (intVec.InBoundsShip(map) && !disallowedCorners.Contains(map.cellIndices.CellToIndex(intVec)))
+					if (intVec.InBounds(map) && !disallowedCorners.Contains(map.cellIndices.CellToIndex(intVec)))
 					{
-						VehicleRegion region2 = VehicleGridsUtility.GetRegion(intVec, map, RegionType.Set_Passable);
+						VehicleRegion region2 = VehicleGridsUtility.GetRegion(intVec, map, vehicleDef, RegionType.Set_Passable);
 						if (region2 != null)
 						{
 							if (region2.Allows(traverseParms, true))
@@ -72,9 +88,13 @@ namespace Vehicles.AI
 			{
 				Log.Error("Couldn't find any destination regions. This shouldn't ever happen because we've checked reachability.");
 			}
-			vehicleRegionCostCalculator.Init(end, destRegions, traverseParms, moveTicksCardinal, moveTicksDiagonal, avoidGrid, allowedArea, drafted);
+			vehicleRegionCostCalculator.Init(end, destRegions, traverseParms, moveTicksCardinal, moveTicksDiagonal, avoidGrid, drafted);
 		}
 
+		/// <summary>
+		/// Calculate approximate total path cost through regions from <paramref name="cellIndex"/> to <see cref="endCell"/>
+		/// </summary>
+		/// <param name="cellIndex"></param>
 		public int GetPathCostFromDestToRegion(int cellIndex)
 		{
 			VehicleRegion region = regionGrid[cellIndex];
@@ -96,21 +116,21 @@ namespace Vehicles.AI
 			if (cachedBestLink != null)
 			{
 				int num = vehicleRegionCostCalculator.RegionLinkDistance(cell, cachedBestLink, 1);
-				int num3;
 				if (cachedSecondBestLink != null)
 				{
 					int num2 = vehicleRegionCostCalculator.RegionLinkDistance(cell, cachedSecondBestLink, 1);
-					num3 = Mathf.Min(cachedSecondBestLinkCost + num2, cachedBestLinkCost + num);
+					return Mathf.Min(cachedSecondBestLinkCost + num2, cachedBestLinkCost + num) + OctileDistanceToEndEps(cell);
 				}
-				else
-				{
-					num3 = cachedBestLinkCost + num;
-				}
-				return num3 + OctileDistanceToEndEps(cell);
+				return cachedBestLinkCost + num + OctileDistanceToEndEps(cell);
 			}
-			return 10000;
+			return VehiclePathGrid.ImpassableCost;
 		}
 
+		/// <summary>
+		/// Octile distance from <paramref name="cell"/> to <see cref="endCell"/>
+		/// </summary>
+		/// <param name="cell"></param>
+		/// <returns></returns>
 		private int OctileDistanceToEnd(IntVec3 cell)
 		{
 			int dx = Mathf.Abs(cell.x - endCell.x);
@@ -118,6 +138,10 @@ namespace Vehicles.AI
 			return GenMath.OctileDistance(dx, dz, moveTicksCardinal, moveTicksDiagonal);
 		}
 
+		/// <summary>
+		/// Octile distance from <paramref name="cell"/> to <see cref="endCell"/> estimate
+		/// </summary>
+		/// <param name="cell"></param>
 		private int OctileDistanceToEndEps(IntVec3 cell)
 		{
 			int dx = Mathf.Abs(cell.x - endCell.x);

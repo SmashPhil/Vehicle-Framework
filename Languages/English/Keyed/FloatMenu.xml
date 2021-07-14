@@ -6,7 +6,7 @@
 	<BoardShipGroupFail>Board {0} (Too many selected)</BoardShipGroupFail>
 	<ActivityIconOnBoardShip>Onboard {0}</ActivityIconOnBoardShip>
 	<IsIncapableOfRamming>Ram {0}</IsIncapableOfRamming>
-	<CannotSailToCell>Ship cannot reach this area.</CannotSailToCell>
+	<VehicleCannotMoveToCell>{0} cannot reach this area.</VehicleCannotMoveToCell>
 	<AutoTargeting>AutoTarget: {0}</AutoTargeting>
 	<LandVehicleHere>Land Vehicle Here</LandVehicleHere>
 	<AttackAndTargetLanding>Attack {0}: Choose Landing</AttackAndTargetLanding>

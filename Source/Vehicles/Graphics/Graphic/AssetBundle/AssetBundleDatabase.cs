@@ -10,24 +10,28 @@ using SmashTools.Xml;
 
 namespace Vehicles
 {
+	/// <summary>
+	/// AssetBundle loader
+	/// </summary>
 	[StaticConstructorOnStartup]
 	public static class AssetBundleDatabase
 	{
+		/// <summary>
+		/// AssetBundle version loader
+		/// </summary>
 		private static readonly Dictionary<string, string> bundleBuildVersionManifest = new Dictionary<string, string>()
 		{
-			{"1.2", "2019.2.17f1"}
+			{"1.3", "2019.4.26f1"}
 		};
 
 		private static readonly Dictionary<string, Shader> shaderLookup = new Dictionary<string, Shader>();
 		private static readonly Dictionary<string, Texture2D> textureLookup = new Dictionary<string, Texture2D>();
 
-		private static readonly string ShaderAssetBundlePath = @"Bundles\RGBShaderBundle";
+		private static readonly List<string> loadFoldersChecked = new List<string>();
 
-		private static readonly string CursorAssetBundlePath = @"Bundles\CustomCursor";
+		private static readonly string VehicleAssetBundlePath = @"Bundles\VehicleAssets";
 
-		public static readonly AssetBundle ShaderBundle;
-
-		public static readonly AssetBundle CursorBundle;
+		public static readonly AssetBundle VehicleAssetBundle;
 
 		public static readonly Shader CutoutComplexRGB;
 
@@ -47,71 +51,79 @@ namespace Vehicles
 					Log.Warning($"{VehicleHarmony.LogLabel} Unity Version {Application.unityVersion} does not match registered version for AssetBundles being loaded. You may encounter problems.");
 				}
 			}
-			string folderChecking = "default";
+			
 			List<string> loadFolders = FilePaths.ModFoldersForVersion(VehicleMod.settings.Mod.Content);
 			try
 			{
+				loadFoldersChecked.Clear();
 				foreach (string folder in loadFolders)
 				{
-					string versionFilePath = Path.Combine(VehicleMod.settings.Mod.Content.RootDir, folder, ShaderAssetBundlePath);
-					folderChecking = versionFilePath;
+					loadFoldersChecked.Add(folder);
+					string versionFilePath = Path.Combine(VehicleMod.settings.Mod.Content.RootDir, folder, VehicleAssetBundlePath);
 					if (File.Exists(versionFilePath))
 					{
-						ShaderBundle = AssetBundle.LoadFromFile(versionFilePath);
-						if (ShaderBundle is null) throw new NullReferenceException();
+						VehicleAssetBundle = AssetBundle.LoadFromFile(versionFilePath);
+						if (VehicleAssetBundle is null)
+						{
+							SmashLog.Error($"Unable to load <type>VehicleAssetBundle</type> asset at {versionFilePath}");
+							throw new IOException();
+						}
 
 						CutoutComplexRGB = LoadAssetBundleShader("Assets/Shaders/ShaderRGB.shader");
 						CutoutComplexPattern = LoadAssetBundleShader("Assets/Shaders/ShaderRGBPattern.shader");
+						return;
 					}
-					goto CursorLoading;
 				}
-				throw new IOException();
+				throw new IOException("Unable to find ShaderBundle asset in any load folder.");
 			}
 			catch (Exception ex)
 			{
-				SmashLog.Error($"Unable to load AssetBundle at <text>{folderChecking}</text>\nException = {ex.Message}");
+				SmashLog.Error($"Unable to load AssetBundle.\nException = {ex.Message}\nFoldersSearched={loadFoldersChecked.ToCommaList()}");
 			}
-			CursorLoading:;
-			try
+			finally
 			{
-				foreach (string folder in loadFolders)
-				{
-					string versionFilePath = Path.Combine(VehicleMod.settings.Mod.Content.RootDir, folder, CursorAssetBundlePath);
-					folderChecking = versionFilePath;
-					if (File.Exists(versionFilePath))
-					{
-						CursorBundle = AssetBundle.LoadFromFile(versionFilePath);
-						if (CursorBundle is null) throw new NullReferenceException();
-
-						MouseHandOpen = LoadAssetBundleTexture("Assets/Textures/MouseHandOpen.png");
-						MouseHandClosed = LoadAssetBundleTexture("Assets/Textures/MouseHandClosed.png");
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				SmashLog.Error($"Unable to load AssetBundle at <text>{CursorAssetBundlePath}</text>\nException = {ex.Message}");
+				SmashLog.Message($"{VehicleHarmony.LogLabel} Loading additional assets. UnityVersion={Application.unityVersion} Status: {AssetBundleLoadMessage(VehicleAssetBundle)}");
 			}
 		}
 
+		/// <summary>
+		/// Status message
+		/// </summary>
+		/// <param name="assetBundle"></param>
+		private static string AssetBundleLoadMessage(AssetBundle assetBundle) => assetBundle != null ? "<success>successfully loaded.</success>" : "<error>failed to load.</error>";
+
+		/// <summary>
+		/// Shader load from AssetBundle
+		/// </summary>
+		/// <param name="path"></param>
 		public static Shader LoadAssetBundleShader(string path)
 		{
 			if (shaderLookup.TryGetValue(path, out Shader shader))
 			{
 				return shader;
 			}
-			return (Shader)ShaderBundle.LoadAsset(path);
+			return (Shader)VehicleAssetBundle.LoadAsset(path);
 		}
 
+		/// <summary>
+		/// Texture load from AssetBundle
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns></returns>
 		public static Texture2D LoadAssetBundleTexture(string path)
 		{
 			if (textureLookup.TryGetValue(path, out Texture2D texture))
 			{
 				return texture;
 			}
-			return (Texture2D)CursorBundle.LoadAsset(path);
+			return (Texture2D)VehicleAssetBundle.LoadAsset(path);
 		}
 
+		/// <summary>
+		/// <paramref name="shader"/> supports AssetBundle shaders implementing RGB or RGB Pattern masks
+		/// </summary>
+		/// <param name="shader"></param>
+		/// <returns></returns>
 		public static bool SupportsRGBMaskTex(this Shader shader)
 		{
 			return shader == CutoutComplexPattern;

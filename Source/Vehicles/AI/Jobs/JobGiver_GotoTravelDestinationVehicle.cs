@@ -32,25 +32,25 @@ namespace Vehicles
 		{
 			pawn.drafter.Drafted = true;
 
-			IntVec3 cell = pawn.mindState.duty.focus.Cell;
-			if (pawn.IsBoat() && !ShipReachabilityUtility.CanReachShip(pawn, cell, PathEndMode.OnCell, PawnUtility.ResolveMaxDanger(pawn, maxDanger), false, TraverseMode.ByPawn))
+			if (pawn is VehiclePawn vehicle)
 			{
-				return null;
-			}
-			else if (!pawn.IsBoat() && pawn is VehiclePawn vehicle && !ReachabilityUtility.CanReach(vehicle, cell, PathEndMode.OnCell, PawnUtility.ResolveMaxDanger(vehicle, maxDanger), false))
-			{
-				return null;
-			}
-			if (exactCell && pawn.Position == cell)
-			{
-				return null;
-			}
+				IntVec3 cell = pawn.mindState.duty.focus.Cell;
+				if (!VehicleReachabilityUtility.CanReachVehicle(vehicle, cell, PathEndMode.OnCell, PawnUtility.ResolveMaxDanger(pawn, maxDanger), false, TraverseMode.ByPawn))
+				{
+					return null;
+				}
+				if (exactCell && pawn.Position == cell)
+				{
+					return null;
+				}
 
-			return new Job(JobDefOf.Goto, cell)
-			{
-				locomotionUrgency = PawnUtility.ResolveLocomotion(pawn, locomotionUrgency),
-				expiryInterval = jobMaxDuration
-			};
+				return new Job(JobDefOf.Goto, cell)
+				{
+					locomotionUrgency = PawnUtility.ResolveLocomotion(pawn, locomotionUrgency),
+					expiryInterval = jobMaxDuration
+				};
+			}
+			return null;
 		}
 	}
 }

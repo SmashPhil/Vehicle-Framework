@@ -5,7 +5,7 @@
 		<defName>WoodenVehicle</defName>
 		<corpseCategory>CorpsesMechanoid</corpseCategory>
 		<!-- Change Later -->
-		<wounds>
+		<genericWounds>
 			<li>
 				<texture>Things/Pawn/Wounds/WoundMechA</texture>
 			</li>
@@ -15,14 +15,14 @@
 			<li>
 				<texture>Things/Pawn/Wounds/WoundMechC</texture>
 			</li>
-		</wounds>
+		</genericWounds>
 	</FleshTypeDef>
 	
 	<FleshTypeDef>
 		<defName>MetalVehicle</defName>
 		<corpseCategory>CorpsesMechanoid</corpseCategory>
 		<!-- Change Later -->
-		<wounds>
+		<genericWounds>
 			<li>
 				<texture>Things/Pawn/Wounds/WoundMechA</texture>
 			</li>
@@ -32,14 +32,14 @@
 			<li>
 				<texture>Things/Pawn/Wounds/WoundMechC</texture>
 			</li>
-		</wounds>
+		</genericWounds>
 	</FleshTypeDef>
 	
 	<FleshTypeDef>
 		<defName>SpacerVehicle</defName>
 		<corpseCategory>CorpsesMechanoid</corpseCategory>
 		<!-- Change Later -->
-		<wounds>
+		<genericWounds>
 			<li>
 				<texture>Things/Pawn/Wounds/WoundMechA</texture>
 			</li>
@@ -49,6 +49,6 @@
 			<li>
 				<texture>Things/Pawn/Wounds/WoundMechC</texture>
 			</li>
-		</wounds>
+		</genericWounds>
 	</FleshTypeDef>
 </Defs>

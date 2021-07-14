@@ -343,7 +343,7 @@ namespace Vehicles
 			float propertySectionHeight = 5; //Buffer for bottom scrollable
 			foreach (var saveableObject in VehicleCompFields)
 			{
-				if (saveableObject.Value.NullOrEmpty() || saveableObject.Value.All(f => f.TryGetAttribute<PostToSettingsAttribute>(out var settings) && settings.VehicleType != VehicleType.Undefined && settings.VehicleType != def.vehicleType))
+				if (saveableObject.Value.NullOrEmpty() || saveableObject.Value.All(f => f.TryGetAttribute<PostToSettingsAttribute>(out var settings) && settings.VehicleType != VehicleType.Universal && settings.VehicleType != def.vehicleType))
 				{
 					continue;
 				}

@@ -5,40 +5,62 @@ using SmashTools;
 
 namespace Vehicles.AI
 {
-	public static class ShipReachabilityUtility
+	/// <summary>
+	/// Reachability utility methods
+	/// </summary>
+	public static class VehicleReachabilityUtility
 	{
-		public static bool CanReachShip(this Pawn pawn, LocalTargetInfo dest, PathEndMode peMode, Danger maxDanger, bool canBash = false, TraverseMode mode = TraverseMode.ByPawn)
+		/// <summary>
+		/// <paramref name="vehicle"/> can reach <paramref name="dest"/> given parameters
+		/// </summary>
+		/// <param name="vehicle"></param>
+		/// <param name="dest"></param>
+		/// <param name="peMode"></param>
+		/// <param name="maxDanger"></param>
+		/// <param name="canBash"></param>
+		/// <param name="mode"></param>
+		public static bool CanReachVehicle(this VehiclePawn vehicle, LocalTargetInfo dest, PathEndMode peMode, Danger maxDanger, bool canBash = false, TraverseMode mode = TraverseMode.ByPawn)
 		{
-			return pawn.Spawned && pawn.Map.GetCachedMapComponent<VehicleMapping>().VehicleReachability.CanReachShip(pawn.Position, dest, peMode, TraverseParms.For(pawn, maxDanger, mode, canBash));
+			return vehicle.Spawned && vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehicleReachability.CanReachVehicle(vehicle.Position, dest, peMode, 
+				TraverseParms.For(vehicle, maxDanger, mode, canBash));
 		}
 
-		public static bool CanReachShipNonLocal(this Pawn pawn, TargetInfo dest, PathEndMode peMode, Danger maxDanger, bool canBash = false, TraverseMode mode = TraverseMode.ByPawn)
+		/// <summary>
+		/// <paramref name="vehicle"/> can reach <paramref name="dest"/> given parameters
+		/// </summary>
+		/// <param name="vehicle"></param>
+		/// <param name="dest"></param>
+		/// <param name="peMode"></param>
+		/// <param name="maxDanger"></param>
+		/// <param name="canBash"></param>
+		/// <param name="mode"></param>
+		public static bool CanReachVehicleNonLocal(this VehiclePawn vehicle, TargetInfo dest, PathEndMode peMode, Danger maxDanger, bool canBash = false, TraverseMode mode = TraverseMode.ByPawn)
 		{
-			return pawn.Spawned && pawn.Map.GetCachedMapComponent<VehicleMapping>().VehicleReachability.CanReachShipNonLocal(pawn.Position, dest, peMode, TraverseParms.For(pawn, maxDanger, mode, canBash));
+			return vehicle.Spawned && vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehicleReachability.CanReachVehicleNonLocal(vehicle.Position, dest, peMode, 
+				TraverseParms.For(vehicle, maxDanger, mode, canBash));
 		}
 
-		public static bool CanReachShipMapEdge(this Pawn pawn)
+		/// <summary>
+		/// <paramref name="vehicle"/> can reach any map edge
+		/// </summary>
+		/// <param name="vehicle"></param>
+		public static bool CanReachVehicleMapEdge(this VehiclePawn vehicle)
 		{
-			return pawn.Spawned && pawn.Map.GetCachedMapComponent<VehicleMapping>().VehicleReachability.CanReachMapEdge(pawn.Position, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.ByPawn, false));
+			return vehicle.Spawned && vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehicleReachability.CanReachMapEdge(vehicle.Position, 
+				TraverseParms.For(vehicle, Danger.Deadly, TraverseMode.ByPawn, false));
 		}
 
-		public static void ClearCache()
+		/// <summary>
+		/// Clear cache for <paramref name="vehicle"/>
+		/// </summary>
+		/// <param name="vehicle"></param>
+		public static void ClearCacheFor(VehiclePawn vehicle)
 		{
 			List<Map> maps = Find.Maps;
 			for (int i = 0; i < maps.Count; i++)
 			{
-				maps[i].reachability.ClearCache();
-				maps[i].GetCachedMapComponent<VehicleMapping>().VehicleReachability.ClearCache();
-			}
-		}
-
-		public static void ClearCacheFor(Pawn pawn)
-		{
-			List<Map> maps = Find.Maps;
-			for (int i = 0; i < maps.Count; i++)
-			{
-				maps[i].reachability.ClearCacheFor(pawn);
-				maps[i].GetCachedMapComponent<VehicleMapping>().VehicleReachability.ClearCacheFor(pawn);
+				maps[i].reachability.ClearCacheFor(vehicle);
+				maps[i].GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehicleReachability.ClearCacheFor(vehicle);
 			}
 		}
 	}

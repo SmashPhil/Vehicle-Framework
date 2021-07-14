@@ -23,10 +23,6 @@ namespace Vehicles
 		public bool debugDrawVehiclePathCosts;
 		public bool debugDrawBumpers;
 
-		public bool debugDrawRegions;
-		public bool debugDrawRegionLinks;
-		public bool debugDrawRegionThings;
-
 		public bool debugLogging;
 		public bool debugGenerateWorldPathCostTexts;
 
@@ -50,10 +46,6 @@ namespace Vehicles
 			debugDrawVehiclePathCosts = false;
 			debugDrawBumpers = false;
 
-			debugDrawRegions = false;
-			debugDrawRegionLinks = false;
-			debugDrawRegionThings = false;
-
 			debugLogging = false;
 			debugGenerateWorldPathCostTexts = false;
 		}
@@ -71,10 +63,6 @@ namespace Vehicles
 			Scribe_Values.Look(ref debugDrawVehicleTracks, "debugDrawVehicleTracks", false);
 			Scribe_Values.Look(ref debugDrawVehiclePathCosts, "debugDrawVehiclePathCosts", false);
 			Scribe_Values.Look(ref debugDrawBumpers, "debugDrawBumpers", false);
-
-			Scribe_Values.Look(ref debugDrawRegions, "debugDrawRegions", false);
-			Scribe_Values.Look(ref debugDrawRegionLinks, "debugDrawRegionLinks", false);
-			Scribe_Values.Look(ref debugDrawRegionThings, "debugDrawRegionThings", false);
 
 			Scribe_Values.Look(ref debugLogging, "debugLogging", false);
 			Scribe_Values.Look(ref debugGenerateWorldPathCostTexts, "debugGenerateWorldPathCostTexts", false);
@@ -131,12 +119,6 @@ namespace Vehicles
 
 			listingStandard.GapLine(16);
 
-			listingStandard.CheckboxLabeled("DebugDrawRegions".Translate(), ref debugDrawRegions, "DebugDrawRegionsTooltip".Translate());
-			listingStandard.CheckboxLabeled("DebugDrawRegionLinks".Translate(), ref debugDrawRegionLinks, "DebugDrawRegionLinksTooltip".Translate());
-			listingStandard.CheckboxLabeled("DebugDrawRegionThings".Translate(), ref debugDrawRegionThings, "DebugDrawRegionThingsTooltip".Translate());
-
-			listingStandard.GapLine(16);
-
 			if (listingStandard.ButtonText("ShowRecentNews".Translate()))
 			{
 				string versionChecking = "Null";
@@ -152,9 +134,9 @@ namespace Vehicles
 					{
 						versionChecking = update.UpdateData.currentVersion;
 						string label = versionChecking;
-						if (versionChecking == VehicleHarmony.LatestVersion)
+						if (versionChecking == VehicleHarmony.CurrentVersion)
 						{
-							label = "Latest Version";
+							label = "Current Version";
 						}
 						versions.Add(new DebugMenuOption(label, DebugMenuOptionMode.Action, delegate ()
 						{

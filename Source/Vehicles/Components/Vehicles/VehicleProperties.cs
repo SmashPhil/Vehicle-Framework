@@ -49,12 +49,16 @@ namespace Vehicles
 		public string iconTexPath;
 		public bool generateThingIcon = true;
 
+		public bool defaultTerrainImpassable = false;
+		public int pathTurnCost = 10;
+		public float snowPathingMultiplier = 0.5f;
 		public Dictionary<TerrainDef, int> customTerrainCosts;
-		public Dictionary<ThingDef, int> customThingCosts; //implement
+		public Dictionary<ThingDef, int> customThingCosts;
 
 		public Dictionary<BiomeDef, float> customBiomeCosts = new Dictionary<BiomeDef, float>();
 		public Dictionary<Hilliness, float> customHillinessCosts = new Dictionary<Hilliness, float>();
 		public Dictionary<RoadDef, float> customRoadCosts = new Dictionary<RoadDef, float>();
+
 		[PostToSettings(Label = "VehicleWinterCostMultiplier", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(MinValue = 0, MaxValue = 10, RoundDecimalPlaces = 1)]
 		public float winterPathCostMultiplier = 1f;

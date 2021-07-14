@@ -4,64 +4,65 @@ using SmashTools;
 
 namespace Vehicles
 {
+	/// <summary>
+	/// Region and room retrieval helper methods
+	/// </summary>
 	public static class VehicleRegionAndRoomQuery
 	{
-		public static VehicleRegion RegionAt(IntVec3 c, Map map, RegionType allowedRegionTypes = RegionType.Set_Passable)
+		/// <summary>
+		/// Retrieve region at <paramref name="c"/> for <paramref name="vehicleDef"/>
+		/// </summary>
+		/// <param name="c"></param>
+		/// <param name="map"></param>
+		/// <param name="vehicleDef"></param>
+		/// <param name="allowedRegionTypes"></param>
+		public static VehicleRegion RegionAt(IntVec3 cell, Map map, VehicleDef vehicleDef, RegionType allowedRegionTypes = RegionType.Set_Passable)
 		{
-			if (!c.InBoundsShip(map)) return null;
-			VehicleRegion validRegionAt = map.GetCachedMapComponent<VehicleMapping>().VehicleRegionGrid.GetValidRegionAt(c);
+			if (!cell.InBounds(map)) return null;
+			VehicleRegion validRegionAt = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid.GetValidRegionAt(cell);
 			return !(validRegionAt is null) && (validRegionAt.type & allowedRegionTypes) != RegionType.None ? validRegionAt : null;
 		}
 
-		public static VehicleRegion GetRegion(this Thing thing, RegionType allowedRegiontypes = RegionType.Set_Passable)
+		/// <summary>
+		/// Get region at <paramref name="thing"/>'s position for <paramref name="vehicleDef"/>
+		/// </summary>
+		/// <param name="thing"></param>
+		/// <param name="vehicleDef"></param>
+		/// <param name="allowedRegiontypes"></param>
+		public static VehicleRegion GetRegion(this Thing thing, VehicleDef vehicleDef, RegionType allowedRegiontypes = RegionType.Set_Passable)
 		{
 			if (!thing.Spawned) return null;
-			return !thing.Spawned ? null : RegionAt(thing.Position, thing.Map, allowedRegiontypes);
+			return !thing.Spawned ? null : RegionAt(thing.Position, thing.Map, vehicleDef, allowedRegiontypes);
 		}
 
-		public static VehicleRoom RoomAt(IntVec3 c, Map map, RegionType allowedRegionTypes = RegionType.Set_Passable)
+		/// <summary>
+		/// Get room at <paramref name="cell"/> for <paramref name="vehicleDef"/>
+		/// </summary>
+		/// <param name="cell"></param>
+		/// <param name="map"></param>
+		/// <param name="vehicleDef"></param>
+		/// <param name="allowedRegionTypes"></param>
+		public static VehicleRoom RoomAt(IntVec3 cell, Map map, VehicleDef vehicleDef, RegionType allowedRegionTypes = RegionType.Set_Passable)
 		{
-			VehicleRegion region = RegionAt(c, map, allowedRegionTypes);
+			VehicleRegion region = RegionAt(cell, map, vehicleDef, allowedRegionTypes);
 			return region?.Room;
 		}
 
-		//RoomGroup
-
-		public static VehicleRoom GetRoom(this Thing thing, RegionType allowedRegionTypes = RegionType.Set_Passable)
+		/// <summary>
+		/// Quick retrieval of room at <paramref name="cell"/> for <paramref name="vehicleDef"/>
+		/// </summary>
+		/// <param name="cell"></param>
+		/// <param name="map"></param>
+		/// <param name="vehicleDef"></param>
+		/// <param name="allowedRegionTypes"></param>
+		public static VehicleRoom RoomAtFast(IntVec3 cell, Map map, VehicleDef vehicleDef, RegionType allowedRegionTypes = RegionType.Set_Passable)
 		{
-			if (!thing.Spawned) return null;
-			return RoomAt(thing.Position, thing.Map, allowedRegionTypes);
-		}
-
-		//GetRoomGroup
-
-		public static VehicleRoom RoomAtFast(IntVec3 c, Map map, RegionType allowedRegionTypes = RegionType.Set_Passable)
-		{
-			VehicleRegion validRegionAt = map.GetCachedMapComponent<VehicleMapping>()?.VehicleRegionGrid?.GetValidRegionAt(c);
-			if (!(validRegionAt is null) && (validRegionAt.type & allowedRegionTypes) != RegionType.None)
+			VehicleRegion validRegionAt = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid?.GetValidRegionAt(cell);
+			if (validRegionAt != null && (validRegionAt.type & allowedRegionTypes) != RegionType.None)
 			{
 				return validRegionAt.Room;
 			}
 			return null;
-		}
-
-		public static VehicleRoom RoomAtOrAdjacent(IntVec3 c, Map map, RegionType allowedRegionTypes = RegionType.Set_Passable)
-		{
-			VehicleRoom room = RoomAt(c, map, allowedRegionTypes);
-			if (!(room is null))
-			{
-				return room;
-			}
-			for(int i = 0; i < 8; i++)
-			{
-				IntVec3 c2 = c + GenAdj.AdjacentCells[i];
-				room = RoomAt(c2, map, allowedRegionTypes);
-				if (!(room is null))
-				{
-					return room;
-				}
-			}
-			return room;
 		}
 	}
 }

@@ -90,7 +90,7 @@ namespace Vehicles
 			}
 			if (req.maskTex != null && !req.shader.SupportsRGBMaskTex())
 			{
-				Log.Error("MaterialRequest has maskTex but shader does not support it. req=" + req.ToString());
+				Log.Error($"MaterialRequest has maskTex but shader does not support it. req={req}");
 				req.maskTex = null;
 			}
 			if (!matDictionary.TryGetValue(req, out Material material))

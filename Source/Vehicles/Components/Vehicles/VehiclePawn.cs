@@ -602,7 +602,7 @@ namespace Vehicles
 			}
 			if (!Dead)
 			{
-				if(!cargoToLoad.NullOrEmpty())
+				if (!cargoToLoad.NullOrEmpty())
 				{
 					if (!cargoToLoad.NotNullAndAny(x => x.AnyThing != null && x.CountToTransfer > 0 && !inventory.innerContainer.Contains(x.AnyThing)))
 					{
@@ -613,7 +613,7 @@ namespace Vehicles
 						Command_Action cancelLoad = new Command_Action
 						{
 							defaultLabel = "DesignatorCancel".Translate(),
-							icon = VehicleTex.CancelPackCargoIcon,
+							icon = VehicleDef.CancelCargoIcon,
 							action = delegate ()
 							{
 								Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(this, ReservationType.LoadVehicle);
@@ -628,7 +628,7 @@ namespace Vehicles
 					Command_Action loadShip = new Command_Action
 					{
 						defaultLabel = "LoadShip".Translate(),
-						icon = VehicleTex.PackCargoIcon,
+						icon = VehicleDef.LoadCargoIcon,
 						action = delegate ()
 						{
 							Find.WindowStack.Add(new Dialog_LoadCargo(this));

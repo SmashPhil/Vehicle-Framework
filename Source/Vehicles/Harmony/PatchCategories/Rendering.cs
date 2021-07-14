@@ -36,9 +36,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnTweener), "TweenedPosRoot"),
 				prefix: new HarmonyMethod(typeof(Rendering),
 				nameof(VehicleTweenedPosRoot)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GhostDrawer), nameof(GhostDrawer.DrawGhostThing)),
-				postfix: new HarmonyMethod(typeof(Rendering),
-				nameof(DrawGhostVehicle)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(GhostDrawer), nameof(GhostDrawer.DrawGhostThing)),
+			//	postfix: new HarmonyMethod(typeof(Rendering),
+			//	nameof(DrawGhostVehicle)));
 			//harmony.Patch(original: AccessTools.Method(typeof(ThingDefGenerator_Buildings), "NewBlueprintDef_Thing"),
 			//    postfix: new HarmonyMethod(typeof(Rendering),
 			//    nameof(VehicleCannonsBlueprintDraw)));
@@ -202,7 +202,7 @@ namespace Vehicles
 					Vector3 drawPos = vehicle.Drawer.DrawPos;
 					if (drawPos.ToIntVec3().InBounds(vehicle.Map) && !vehicle.beached)
 					{
-						MoteMaker.MakeWaterSplash(drawPos, vehicle.Map, 7 * vehicle.VehicleDef.properties.wakeMultiplier, vehicle.VehicleDef.properties.wakeSpeed);
+						FleckMaker.WaterSplash(drawPos, vehicle.Map, 7 * vehicle.VehicleDef.properties.wakeMultiplier, vehicle.VehicleDef.properties.wakeSpeed);
 						___lastFootprintPlacePos = drawPos;
 					}
 				}
@@ -211,7 +211,7 @@ namespace Vehicles
 					if(Find.TickManager.TicksGame % 360 == 0)
 					{
 						float offset = Mathf.PingPong(Find.TickManager.TicksGame / 10, vehicle.VehicleDef.graphicData.drawSize.y / 4);
-						MoteMaker.MakeWaterSplash(vehicle.Drawer.DrawPos - new Vector3(0,0, offset), vehicle.Map, vehicle.VehicleDef.properties.wakeMultiplier, vehicle.VehicleDef.properties.wakeSpeed);
+						FleckMaker.WaterSplash(vehicle.Drawer.DrawPos - new Vector3(0,0, offset), vehicle.Map, vehicle.VehicleDef.properties.wakeMultiplier, vehicle.VehicleDef.properties.wakeSpeed);
 					}
 				}
 				return false;
