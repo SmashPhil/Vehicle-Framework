@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Verse;
+using SmashTools;
 using Vehicles.AI;
 
 namespace Vehicles
@@ -29,7 +30,7 @@ namespace Vehicles
 			{
 				return RegionType.Fence;
 			}
-			if (GenGridVehicles.Walkable(cell, vehicleDef, map))
+			if (GenGridVehicles.Walkable(cell, vehicleDef, map) && vehicleDef.WidthStandable(map, cell))
 			{
 				return RegionType.Normal;
 			}

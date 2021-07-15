@@ -13,6 +13,11 @@ namespace Vehicles
 		public static VehicleDef drawRegionsFor;
 		public static DebugRegionType debugRegionType;
 
+		/// <summary>
+		/// Draw settlement debug lines that show original locations before settlement was pushed to the coastline
+		/// </summary>
+		/// <param name="from"></param>
+		/// <param name="to"></param>
 		public static void DebugDrawSettlement(int from, int to)
 		{
 			PeaceTalks o = (PeaceTalks)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.DebugSettlement);
@@ -37,6 +42,10 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// Draw path costs overlay on GUI
+		/// </summary>
+		/// <param name="map"></param>
 		public static void DebugDrawVehiclePathCostsOverlay(Map map)
 		{
 			if (drawRegionsFor != null)

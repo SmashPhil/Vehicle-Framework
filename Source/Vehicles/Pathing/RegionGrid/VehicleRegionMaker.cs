@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Verse;
 using SmashTools;
 using Vehicles.AI;
@@ -53,16 +54,27 @@ namespace Vehicles
 				return null;
 			}
 			CreatingRegions = true;
-			VehicleRegion result;
+			VehicleRegion result = null;
+			string lastRegionProcess = $"Beginning region creation at {root}";
 			try
 			{
+				lastRegionProcess = "Retrieving region grid";
 				regionGrid = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid;
+				lastRegionProcess = "Creating new unfilled region";
 				newRegion = VehicleRegion.MakeNewUnfilled(root, map, vehicleDef);
 				newRegion.type = expectedRegionType;
+				lastRegionProcess = "Flood filling all valid cells";
 				FloodFillAndAddCells(root);
+				lastRegionProcess = "Creating links";
 				CreateLinks();
+				lastRegionProcess = "Registering things to region lister";
 				RegisterThingsInRegionListers();
+				lastRegionProcess = "Finalizing region";
 				result = newRegion;
+			}
+			catch (Exception ex)
+			{
+				SmashLog.ErrorLabel(VehicleHarmony.LogLabel, $"Exception thrown while generating region at {root}. Step={lastRegionProcess} Ex ={ex.Message}");
 			}
 			finally
 			{

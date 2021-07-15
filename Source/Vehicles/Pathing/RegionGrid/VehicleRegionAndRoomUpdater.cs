@@ -85,7 +85,7 @@ namespace Vehicles
 			}
 			try
 			{
-				updateStep = "Regenerating new regions";
+				updateStep = "Generating new regions";
 				RegenerateNewVehicleRegions();
 				updateStep = "Creating or updating rooms";
 				CreateOrUpdateVehicleRooms();

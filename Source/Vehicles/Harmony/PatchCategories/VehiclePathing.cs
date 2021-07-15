@@ -47,6 +47,13 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.WalkableFast), new Type[] { typeof(int) }),
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(WalkableFastThroughVehicleInt)));
+
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Thing), nameof(Thing.SpawnSetup)),
+				postfix: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(Notify_ThingAffectingVehicleRegionsSpawned)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Thing), nameof(Thing.DeSpawn)),
+				prefix: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(Notify_ThingAffectingVehicleRegionsDespawned)));
 		}
 
 		/// <summary>
@@ -293,6 +300,16 @@ namespace Vehicles
 			{
 				__result = !___map.GetCachedMapComponent<VehiclePositionManager>().PositionClaimed(___map.cellIndices.IndexToCell(index));
 			}
+		}
+
+		public static void Notify_ThingAffectingVehicleRegionsSpawned(Map map, bool respawningAfterLoad, Thing __instance)
+		{
+			PathingHelper.ThingAffectingRegionsSpawned(__instance, map);
+		}
+
+		public static void Notify_ThingAffectingVehicleRegionsDespawned(Thing __instance, DestroyMode mode = DestroyMode.Vanish)
+		{
+			PathingHelper.ThingAffectingRegionsDeSpawned(__instance, __instance.Map);
 		}
 	}
 }

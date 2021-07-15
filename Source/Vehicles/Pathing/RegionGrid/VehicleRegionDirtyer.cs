@@ -48,6 +48,22 @@ namespace Vehicles
 		}
 
 		/// <summary>
+		/// Set all cells and regions to dirty status
+		/// </summary>
+		internal void SetAllDirty()
+		{
+			dirtyCells.Clear();
+			foreach (IntVec3 cell in map)
+			{
+				dirtyCells.Add(cell);
+			}
+			foreach (VehicleRegion region in map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid.AllRegions_NoRebuild_InvalidAllowed)
+			{
+				SetRegionDirty(region, false);
+			}
+		}
+
+		/// <summary>
 		/// Notify that the walkable status at <paramref name="cell"/> has changed
 		/// </summary>
 		/// <param name="cell"></param>
@@ -171,22 +187,6 @@ namespace Vehicles
 						map.debugDrawer.FlashCell(intVec, 0f, null, 50);
 					}
 				}
-			}
-		}
-
-		/// <summary>
-		/// Set all cells and regions to dirty status
-		/// </summary>
-		internal void SetAllDirty()
-		{
-			dirtyCells.Clear();
-			foreach (IntVec3 cell in map)
-			{
-				dirtyCells.Add(cell);
-			}
-			foreach (VehicleRegion region in map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid.AllRegions_NoRebuild_InvalidAllowed)
-			{
-				SetRegionDirty(region, false);
 			}
 		}
 	}

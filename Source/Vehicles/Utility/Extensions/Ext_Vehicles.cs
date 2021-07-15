@@ -157,6 +157,11 @@ namespace Vehicles
 			return passable;
 		}
 
+		/// <summary>
+		/// Determine if <paramref name="dest"/> is not large enough to fit <paramref name="vehicle"/>'s size
+		/// </summary>
+		/// <param name="vehicle"></param>
+		/// <param name="dest"></param>
 		public static bool LocationRestrictedBySize(this VehiclePawn vehicle, IntVec3 dest)
 		{
 			return CellRect.CenteredOn(dest, vehicle.def.Size.x, vehicle.def.Size.z).NotNullAndAny(c2 => !c2.InBounds(vehicle.Map) || GenGridVehicles.Impassable(c2, vehicle.Map, vehicle.VehicleDef) &&
@@ -206,6 +211,25 @@ namespace Vehicles
 			foreach (IntVec3 cell2 in CellRect.CenteredOn(cell, dimensions.x, dimensions.z))
 			{
 				if (!GenGridVehicles.Standable(cell2, vehicleDef, map))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		/// <summary>
+		/// Determine if <paramref name="cell"/> is able to fit the width of <paramref name="vehicleDef"/>
+		/// </summary>
+		/// <param name="vehicleDef"></param>
+		/// <param name="cell"></param>
+		/// <param name="dir"></param>
+		public static bool WidthStandable(this VehicleDef vehicleDef, Map map, IntVec3 cell)
+		{
+			CellRect cellRect = CellRect.CenteredOn(cell, vehicleDef.Size.x / 2);
+			foreach (IntVec3 cellCheck in cellRect)
+			{
+				if (!cellCheck.InBounds(map) || GenGridVehicles.Impassable(cellCheck, map, vehicleDef))
 				{
 					return false;
 				}

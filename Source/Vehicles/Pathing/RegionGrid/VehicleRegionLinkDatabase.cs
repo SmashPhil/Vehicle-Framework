@@ -20,8 +20,10 @@ namespace Vehicles
 			ulong key = span.UniqueHashCode();
 			if (!links.TryGetValue(key, out VehicleRegionLink regionLink))
 			{
-				regionLink = new VehicleRegionLink();
-				regionLink.span = span;
+				regionLink = new VehicleRegionLink()
+				{
+					span = span
+				};
 				links.Add(key, regionLink);
 			}
 			return regionLink;

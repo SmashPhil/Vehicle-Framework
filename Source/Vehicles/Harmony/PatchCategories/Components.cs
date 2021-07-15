@@ -18,7 +18,7 @@ namespace Vehicles
 				nameof(CanVehicleTakeOrder)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(FloatMenuUtility), nameof(FloatMenuUtility.GetMeleeAttackAction)),
 				prefix: new HarmonyMethod(typeof(Components),
-				nameof(NoMeleeForVehicles))); //Change..?
+				nameof(NoMeleeForVehicles)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnComponentsUtility), nameof(PawnComponentsUtility.CreateInitialComponents)), prefix: null,
 				postfix: new HarmonyMethod(typeof(Components),
 				nameof(CreateInitialVehicleComponents)));
@@ -124,16 +124,20 @@ namespace Vehicles
 		/// <param name="actAsIfSpawned"></param>
 		public static void AddAndRemoveVehicleComponents(Pawn pawn, bool actAsIfSpawned = false)
 		{
-			if(pawn is VehiclePawn && (pawn.Spawned || actAsIfSpawned) && pawn.drafter is null)
+			if (pawn is VehiclePawn && (pawn.Spawned || actAsIfSpawned) && pawn.drafter is null)
 			{
 				pawn.drafter = new Pawn_DraftController(pawn);
 				pawn.trader = new Pawn_TraderTracker(pawn);
-				pawn.training = new Pawn_TrainingTracker(pawn);
 				pawn.story = new Pawn_StoryTracker(pawn);
 				pawn.playerSettings = new Pawn_PlayerSettings(pawn);
 			}
 		}
 
+		/// <summary>
+		/// Ensure that vehicles do not perform melee jobs
+		/// </summary>
+		/// <param name="target"></param>
+		/// <param name="___pawn"></param>
 		public static bool VehiclesDontMeleeThings(Thing target, Pawn ___pawn)
 		{
 			if (___pawn is VehiclePawn)

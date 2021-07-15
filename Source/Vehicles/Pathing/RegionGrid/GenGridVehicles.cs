@@ -28,7 +28,6 @@ namespace Vehicles.AI
 		/// <param name="cell"></param>
 		/// <param name="vehicleDef"></param>
 		/// <param name="map"></param>
-		/// <returns></returns>
 		public static bool Standable(this IntVec3 cell, VehicleDef vehicleDef, Map map)
 		{
 			if (!map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehiclePathGrid.Walkable(cell))
@@ -46,7 +45,6 @@ namespace Vehicles.AI
 			return true;
 		}
 
-		//REDO - implement passability based on vehicleDef's customThingCost list
 		/// <summary>
 		/// <paramref name="cell"/> is impassable for <paramref name="vehicleDef"/>
 		/// </summary>
@@ -57,7 +55,11 @@ namespace Vehicles.AI
 			List<Thing> list = map.thingGrid.ThingsListAt(cell);
 			foreach (Thing t in list)
 			{
-				if(t.def.passability is Traversability.Impassable)
+				if (vehicleDef.properties.customThingCosts.TryGetValue(t.def, out int value) && (value >= VehiclePathGrid.ImpassableCost || value < 0))
+				{
+					return true;
+				}
+				else if (t.def.passability is Traversability.Impassable)
 				{
 					return true;
 				}

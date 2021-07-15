@@ -72,6 +72,7 @@ namespace Vehicles
 			ResolveAllReferences();
 			//Will want to be added via xml
 			FillVehicleLordJobTypes();
+			CacheVehicleRegionEffecters();
 
 			LoadedModManager.GetMod<VehicleMod>().InitializeTabs();
 			VehicleMod.settings.Write();
@@ -99,7 +100,16 @@ namespace Vehicles
 		{
 			VehicleIncidentSwapper.RegisterLordType(typeof(LordJob_ArmoredAssault));
 		}
-		
+
+		public static void CacheVehicleRegionEffecters()
+		{
+			foreach (ThingDef thingDef in DefDatabase<ThingDef>.AllDefs)
+			{
+				PathingHelper.RegisterRegionEffecter(thingDef);
+			}
+		}
+
+
 		public static void OpenBetaDialog()
 		{
 #if BETA

@@ -13,6 +13,7 @@ namespace Vehicles.AI
 		public VehicleMapping(Map map) : base(map)
 		{
 			vehicleData ??= new Dictionary<VehicleDef, VehiclePathData>();
+			ConstructComponents();
 		}
 
 		/// <summary>
@@ -52,7 +53,13 @@ namespace Vehicles.AI
 		/// </summary>
 		public override void FinalizeInit()
 		{
-			ConstructComponents();
+			//ConstructComponents();
+			foreach (VehiclePathData data in vehicleData.Values)
+			{
+				data.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
+				data.VehicleRegionAndRoomUpdater.Enabled = true;
+				data.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
+			}
 		}
 
 		/// <summary>
@@ -84,9 +91,6 @@ namespace Vehicles.AI
 				VehicleRegionDirtyer = new VehicleRegionDirtyer(map, vehicleDef)
 			};
 			vehicleData.Add(vehicleDef, data);
-			data.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
-			data.VehicleRegionAndRoomUpdater.Enabled = true;
-			data.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
 			return data;
 		}
 

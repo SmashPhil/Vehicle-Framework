@@ -1,4 +1,5 @@
-﻿using Verse;
+﻿using System.Collections.Generic;
+using Verse;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
@@ -9,6 +10,65 @@ namespace Vehicles
 {
 	public static class PathingHelper
 	{
+		private static readonly Dictionary<ThingDef, List<VehicleDef>> regionEffecters = new Dictionary<ThingDef, List<VehicleDef>>();
+
+		/// <summary>
+		/// Register <paramref name="thingDef"/> as a potential object that will effect vehicle regions
+		/// </summary>
+		/// <param name="thingDef"></param>
+		public static void RegisterRegionEffecter(ThingDef thingDef)
+		{
+			regionEffecters.Add(thingDef, new List<VehicleDef>());
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+			{
+				if (vehicleDef.properties.customThingCosts.TryGetValue(thingDef, out int value))
+				{
+					if (value < 0 || value >= VehiclePathGrid.ImpassableCost)
+					{
+						regionEffecters[thingDef].Add(vehicleDef);
+					}
+				}
+				else if (thingDef.AffectsRegions)
+				{
+					regionEffecters[thingDef].Add(vehicleDef);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Notify <paramref name="thing"/> has been spawned. Mark regions dirty if <paramref name="thing"/> affects passability
+		/// </summary>
+		/// <param name="thing"></param>
+		/// <param name="map"></param>
+		public static void ThingAffectingRegionsSpawned(Thing thing, Map map)
+		{
+			if (regionEffecters.TryGetValue(thing.def, out List<VehicleDef> vehicleDefs))
+			{
+				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+				foreach (VehicleDef vehicleDef in vehicleDefs)
+				{
+					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsSpawned(thing);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Notify <paramref name="thing"/> has been despawned. Mark regions dirty if <paramref name="thing"/> affects passability
+		/// </summary>
+		/// <param name="thing"></param>
+		/// <param name="map"></param>
+		public static void ThingAffectingRegionsDeSpawned(Thing thing, Map map)
+		{
+			if (regionEffecters.TryGetValue(thing.def, out List<VehicleDef> vehicleDefs))
+			{
+				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+				foreach (VehicleDef vehicleDef in vehicleDefs)
+				{
+					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsDespawned(thing);
+				}
+			}
+		}
+
 		/// <summary>
 		/// Check if cell is currently claimed by a vehicle
 		/// </summary>
