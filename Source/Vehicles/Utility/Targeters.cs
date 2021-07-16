@@ -26,8 +26,6 @@ namespace Vehicles
 				worldTargeters.Add(targeter);
 				targeter.PostInit();
 			}
-			Debug.Message($"{VehicleHarmony.LogLabel} {targeters.Count} <type>Targeters</type> initialized.");
-			Debug.Message($"{VehicleHarmony.LogLabel} {worldTargeters.Count} <type>WorldTargeters</type> initialized.");
 		}
 
 		public static void OnGUITargeters()

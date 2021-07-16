@@ -373,6 +373,7 @@
     <Compile Include="CustomFeatures\Buildings\AirDefenses\Verb_ShootWorldRecoiled.cs" />
     <Compile Include="CustomFeatures\Misc\MoteThrownSlowToSpeed.cs" />
     <Compile Include="CustomFeatures\Misc\MoteThrownExpand.cs" />
+    <Compile Include="Gizmo\Command_ActionVehicleDrawn.cs" />
     <Compile Include="Graphics\ITab\WITab_Vehicle_Health.cs" />
     <Compile Include="Misc\DefModExtension\ProjectilePropertiesDefModExtension.cs" />
     <Compile Include="Cannons\Projectiles\Laser.cs" />

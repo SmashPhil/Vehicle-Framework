@@ -31,9 +31,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Designator_Build), nameof(Designator_Build.GizmoOnGUI)),
 				prefix: new HarmonyMethod(typeof(Gizmos),
 				nameof(VehicleMaterialOnBuildGizmo)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Command), nameof(Command.GizmoOnGUI)),
-			//    prefix: new HarmonyMethod(typeof(Gizmos),
-			//    nameof(VehicleMaterialOnCopyBuildGizmo)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(BuildCopyCommandUtility), nameof(BuildCopyCommandUtility.BuildCopyCommand)),
+				prefix: new HarmonyMethod(typeof(Gizmos),
+				nameof(VehicleMaterialOnCopyBuildGizmo)));
 		}
 
 		/// <summary>
@@ -222,7 +222,7 @@ namespace Vehicles
 
 		public static bool VehicleMaterialOnBuildGizmo(Vector2 topLeft, float maxWidth, BuildableDef ___entDef, ref GizmoResult __result, Designator_Build __instance)
 		{
-			if (___entDef is VehicleBuildDef def)
+			if (___entDef is VehicleBuildDef def && def.thingToSpawn.graphicData.Graphic.Shader.SupportsRGBMaskTex())
 			{
 				__result = RenderHelper.GizmoOnGUIWithMaterial(__instance, new Rect(topLeft.x, topLeft.y, __instance.GetWidth(maxWidth), 75f), def);
 				if (def.MadeFromStuff)
@@ -234,15 +234,51 @@ namespace Vehicles
 			return true;
 		}
 
-		public static bool VehicleMaterialOnCopyBuildGizmo(Vector2 topLeft, float maxWidth, BuildableDef ___entDef, ref GizmoResult __result, Command __instance)
+		public static bool VehicleMaterialOnCopyBuildGizmo(BuildableDef buildable, ThingDef stuff, ref Command __result)
 		{
-			if (___entDef is VehicleBuildDef def)
+			if (buildable is VehicleBuildDef buildDef)
 			{
-				__result = RenderHelper.GizmoOnGUIWithMaterial(__instance, new Rect(topLeft.x, topLeft.y, __instance.GetWidth(maxWidth), 75f), def);
-				if (def.MadeFromStuff)
+				Designator_Build des = BuildCopyCommandUtility.FindAllowedDesignator(buildable, true);
+				if (des == null)
 				{
-					Designator_Dropdown.DrawExtraOptionsIcon(topLeft, __instance.GetWidth(maxWidth));
+					__result = null;
 				}
+				if (buildable.MadeFromStuff && stuff == null)
+				{
+					__result = des;
+				}
+				Command_ActionVehicleDrawn command_Action = new Command_ActionVehicleDrawn();
+				command_Action.action = delegate ()
+				{
+					SoundDefOf.Tick_Tiny.PlayOneShotOnCamera(null);
+					Find.DesignatorManager.Select(des);
+					des.SetStuffDefTemporary(stuff);
+				};
+				command_Action.defaultLabel = "CommandBuildCopy".Translate();
+				command_Action.defaultDesc = "CommandBuildCopyDesc".Translate();
+				ThingDef stuffDefRaw = des.StuffDefRaw;
+				des.SetStuffDef(stuff);
+				command_Action.icon = des.ResolvedIcon();
+				command_Action.iconProportions = des.iconProportions;
+				command_Action.iconDrawScale = des.iconDrawScale;
+				command_Action.iconTexCoords = des.iconTexCoords;
+				command_Action.iconAngle = des.iconAngle;
+				command_Action.iconOffset = des.iconOffset;
+				command_Action.order = 10f;
+				command_Action.buildDef = buildDef;
+				command_Action.SetColorOverride(des.IconDrawColor);
+				des.SetStuffDef(stuffDefRaw);
+				if (stuff != null)
+				{
+					command_Action.defaultIconColor = buildable.GetColorForStuff(stuff);
+				}
+				else
+				{
+					command_Action.defaultIconColor = buildable.uiIconColor;
+				}
+				command_Action.hotKey = KeyBindingDefOf.Misc11;
+
+				__result = command_Action;
 				return false;
 			}
 			return true;

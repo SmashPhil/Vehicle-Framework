@@ -53,24 +53,43 @@ namespace Vehicles
 			Texture2D maskTex = ContentFinder<Texture2D>.Get(req.path + MaskSuffix, false);
 			masks = Enumerable.Repeat(maskTex, MatCount).ToArray();
 			var mats = new Material[MatCount];
-			MaterialRequestRGB mReq = new MaterialRequestRGB()
+			if (maskTex != null && !req.shader.SupportsRGBMaskTex())
 			{
-				mainTex = mainTex,
-				shader = req.shader,
-				properties = pattern.properties,
-				color = pattern.properties.colorOne ?? req.color,
-				colorTwo = pattern.properties.colorTwo ?? req.colorTwo,
-				colorThree = pattern.properties.colorThree ?? req.colorThree,
-				tiles = req.tiles,
-				displacement = req.displacement,
-				isSkin = pattern is SkinDef,
-				maskTex = maskTex,
-				patternTex = pattern?[Rot8.North],
-				shaderParameters = req.shaderParameters
-			};
-			for (int i = 0; i < 8; i++)
+				MaterialRequest mReq = new MaterialRequest()
+				{
+					mainTex = mainTex,
+					shader = req.shader,
+					color = pattern.properties.colorOne ?? req.color,
+					colorTwo = pattern.properties.colorTwo ?? req.colorTwo,
+					maskTex = req.shader.SupportsMaskTex() ? maskTex : null,
+					shaderParameters = req.shaderParameters
+				};
+				for (int i = 0; i < 8; i++)
+				{
+					mats[i] = MaterialPool.MatFrom(mReq);
+				}
+			}
+			else
 			{
-				mats[i] = MaterialPoolExpanded.MatFrom(mReq);
+				MaterialRequestRGB mReq = new MaterialRequestRGB()
+				{
+					mainTex = mainTex,
+					shader = req.shader,
+					properties = pattern.properties,
+					color = pattern.properties.colorOne ?? req.color,
+					colorTwo = pattern.properties.colorTwo ?? req.colorTwo,
+					colorThree = pattern.properties.colorThree ?? req.colorThree,
+					tiles = req.tiles,
+					displacement = req.displacement,
+					isSkin = pattern is SkinDef,
+					maskTex = maskTex,
+					patternTex = pattern?[Rot8.North],
+					shaderParameters = req.shaderParameters
+				};
+				for (int i = 0; i < 8; i++)
+				{
+					mats[i] = MaterialPoolExpanded.MatFrom(mReq);
+				}
 			}
 			return mats;
 		}

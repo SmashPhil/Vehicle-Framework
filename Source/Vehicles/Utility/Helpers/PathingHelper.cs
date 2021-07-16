@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Verse;
 using RimWorld;
 using RimWorld.Planet;
@@ -11,6 +12,12 @@ namespace Vehicles
 	public static class PathingHelper
 	{
 		private static readonly Dictionary<ThingDef, List<VehicleDef>> regionEffecters = new Dictionary<ThingDef, List<VehicleDef>>();
+
+		/// <summary>
+		/// VehicleDef , &lt;TerrainDef,pathCost&gt;
+		/// </summary>
+		public static readonly Dictionary<string, Tuple<string, int>> allTerrainCostsByTag = new Dictionary<string, Tuple<string, int>>();
+
 
 		/// <summary>
 		/// Register <paramref name="thingDef"/> as a potential object that will effect vehicle regions

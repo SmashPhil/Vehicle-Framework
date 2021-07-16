@@ -73,6 +73,7 @@ namespace Vehicles
 			//Will want to be added via xml
 			FillVehicleLordJobTypes();
 			CacheVehicleRegionEffecters();
+			PostLoadVehicleTerrainCosts();
 
 			LoadedModManager.GetMod<VehicleMod>().InitializeTabs();
 			VehicleMod.settings.Write();
@@ -109,6 +110,26 @@ namespace Vehicles
 			}
 		}
 
+		public static void PostLoadVehicleTerrainCosts()
+		{
+			List<TerrainDef> terrainDefs = DefDatabase<TerrainDef>.AllDefsListForReading;
+			foreach (KeyValuePair<string, Tuple<string,int>> terrainCostFlipper in PathingHelper.allTerrainCostsByTag)
+			{
+				VehicleDef vehicleDef = DefDatabase<VehicleDef>.GetNamed(terrainCostFlipper.Key);
+				string terrainTag = terrainCostFlipper.Value.Item1;
+				int pathCost = terrainCostFlipper.Value.Item2;
+
+				List<TerrainDef> terrainDefsWithTag = terrainDefs.Where(td => td.tags.NotNullAndAny(tag => tag == terrainTag)).ToList();
+				foreach (TerrainDef terrainDef in terrainDefsWithTag)
+				{
+					if (!vehicleDef.properties.customTerrainCosts.TryGetValue(terrainDef, out _))
+					{
+						vehicleDef.properties.customTerrainCosts.Add(terrainDef, pathCost);
+					}
+					vehicleDef.properties.customTerrainCosts[terrainDef] = pathCost;
+				}
+			}
+		}
 
 		public static void OpenBetaDialog()
 		{

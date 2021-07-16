@@ -36,14 +36,10 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnTweener), "TweenedPosRoot"),
 				prefix: new HarmonyMethod(typeof(Rendering),
 				nameof(VehicleTweenedPosRoot)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(GhostDrawer), nameof(GhostDrawer.DrawGhostThing)),
-			//	postfix: new HarmonyMethod(typeof(Rendering),
-			//	nameof(DrawGhostVehicle)));
-			//harmony.Patch(original: AccessTools.Method(typeof(ThingDefGenerator_Buildings), "NewBlueprintDef_Thing"),
-			//    postfix: new HarmonyMethod(typeof(Rendering),
-			//    nameof(VehicleCannonsBlueprintDraw)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GhostDrawer), nameof(GhostDrawer.DrawGhostThing)),
+				postfix: new HarmonyMethod(typeof(Rendering),
+				nameof(DrawGhostVehicle)));
 
-			//Change targeter to transpiler on UIRoot_Play
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Targeter), nameof(Targeter.TargeterOnGUI)),
 				postfix: new HarmonyMethod(typeof(Rendering),
 				nameof(DrawTargeters)));
@@ -245,17 +241,6 @@ namespace Vehicles
 					Vector3 loc = GenThing.TrueCenter(center, rot, def.Size, drawAltitude.AltitudeFor());
 					vehicleDef.DrawGhostCannonTextures(loc, rot, ghostCol);
 				}
-			}
-		}
-
-		public static void VehicleCannonsBlueprintDraw(ThingDef def, bool isInstallBlueprint, ref ThingDef __result, ThingDef normalBlueprint = null)
-		{
-			if (def is VehicleBuildDef buildDef && buildDef.thingToSpawn.GetSortedCompProperties<CompProperties_Cannons>() is CompProperties_Cannons props)
-			{
-				__result.comps.Add(new CompProperties_Cannons()
-				{
-					turrets = new List<VehicleTurret>(props.turrets)
-				});
 			}
 		}
 

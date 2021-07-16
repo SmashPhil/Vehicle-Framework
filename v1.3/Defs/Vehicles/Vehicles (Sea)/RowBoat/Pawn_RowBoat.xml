@@ -87,7 +87,8 @@
 				</li>
 			</roles>
 			
-			<customTerrainCosts/>
+			<defaultTerrainImpassable>true</defaultTerrainImpassable>
+			<customTerrainCosts AllowTerrainWithTag="Water" PathCost="1"/>
 		</properties>
 		
 		<components>

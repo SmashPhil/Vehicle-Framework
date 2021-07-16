@@ -77,13 +77,9 @@
 				</li>
 			</roles>
 			
-			<customTerrainCosts>
+			<customTerrainCosts DisallowTerrainWithTag="Water">
 				<li>
 					<key>Mud</key>
-					<value>-1</value>
-				</li>
-				<li>
-					<key>WaterShallow</key>
 					<value>-1</value>
 				</li>
 			</customTerrainCosts>

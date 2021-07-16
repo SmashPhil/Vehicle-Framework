@@ -60,6 +60,8 @@
 			<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
 			<healthLabel_Immobile>Inoperable</healthLabel_Immobile>
 			
+			<defaultTerrainImpassable>true</defaultTerrainImpassable>
+			
 			<roles>
 				<li>
 					<key>navigator</key>
