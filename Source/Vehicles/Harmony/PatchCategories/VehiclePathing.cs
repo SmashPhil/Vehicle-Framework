@@ -83,9 +83,10 @@ namespace Vehicles
 					return false;
 				}
 
-				Debug.Message("-> " + clickCell + " | " + vehicle.Map.terrainGrid.TerrainAt(clickCell).LabelCap + " | " + vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathGrid.CalculatedCostAt(clickCell) +
-						" - " + vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathGrid.pathGrid[vehicle.Map.cellIndices.CellToIndex(clickCell)]);
-
+				VehicleMapping mapping = vehicle.Map.GetCachedMapComponent<VehicleMapping>();
+				Debug.Message($"Click: {clickCell} Terrain={vehicle.Map.terrainGrid.TerrainAt(clickCell).LabelCap} CalculatedCost={mapping[vehicle.VehicleDef].VehiclePathGrid.CalculatedCostAt(clickCell)}" +
+					$" GridCost={mapping[vehicle.VehicleDef].VehiclePathGrid.pathGrid[vehicle.Map.cellIndices.CellToIndex(clickCell)]} VanillaCost={vehicle.Map.terrainGrid.TerrainAt(clickCell).pathCost} VanillaCalcCost={vehicle.Map.pathing.Normal.pathGrid.CalculatedCostAt(clickCell, true, IntVec3.Invalid)}");
+				
 				int num = GenRadial.NumCellsInRadius(2.9f);
 				int i = 0;
 				IntVec3 curLoc;

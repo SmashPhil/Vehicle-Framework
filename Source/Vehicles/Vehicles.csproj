@@ -584,6 +584,7 @@
     <Compile Include="Utility\Helpers\CaravanHelper.cs" />
     <Compile Include="Utility\Helpers\DamageHelper.cs" />
     <Compile Include="Utility\Helpers\DebugHelper.cs" />
+    <Compile Include="Utility\Helpers\Debug\VehicleDebugOutputs.cs" />
     <Compile Include="Utility\Helpers\MapHelper.cs" />
     <Compile Include="Utility\Helpers\ModSettingsHelper.cs" />
     <Compile Include="Utility\Helpers\RenderHelper.cs" />
@@ -597,7 +598,7 @@
     <Compile Include="Utility\Helpers\PathingHelper.cs" />
     <Compile Include="Utility\VehicleIncidentSwapper.cs" />
     <Compile Include="Utility\Targeters.cs" />
-    <Compile Include="Utility\VehicleDebugTools.cs" />
+    <Compile Include="Utility\Helpers\Debug\VehicleDebugTools.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_ColorPicker.cs" />
     <Compile Include="Graphics\Graphic\Graphics\Vehicle\Graphic_Cannon.cs" />
     <Compile Include="Utility\Helpers\ParsingHelper.cs" />

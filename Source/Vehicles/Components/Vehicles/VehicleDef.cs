@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
@@ -118,6 +119,7 @@ namespace Vehicles
 			properties.customRoadCosts ??= new Dictionary<RoadDef, float>();
 			properties.customTerrainCosts ??= new Dictionary<TerrainDef, int>();
 			properties.customThingCosts ??= new Dictionary<ThingDef, int>();
+			properties.customSnowCosts ??= new Dictionary<SnowCategory, int>();
 
 			if (vehicleType == VehicleType.Sea)
 			{

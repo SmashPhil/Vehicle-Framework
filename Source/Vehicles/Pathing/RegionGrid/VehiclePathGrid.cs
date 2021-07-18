@@ -133,27 +133,46 @@ namespace Vehicles.AI
 		}
 
 		/// <summary>
-		/// Calculate cost for <see cref="VehicleDef"/> at <paramref name="cell"/>
+		/// Calculate cost for <see cref="vehicleDef"/> at <paramref name="cell"/>
 		/// </summary>
 		/// <param name="cell"></param>
 		public int CalculatedCostAt(IntVec3 cell)
 		{
+			return CalculatePathCostFor(vehicleDef, map, cell);
+		}
+
+		/// <summary>
+		/// Static calculation that allows for pseudo-calculations outside real-time pathgrids
+		/// </summary>
+		/// <param name="vehicleDef"></param>
+		/// <param name="map"></param>
+		/// <param name="cell"></param>
+		public static int CalculatePathCostFor(VehicleDef vehicleDef, Map map, IntVec3 cell, StringBuilder stringBuilder = null)
+		{
+			stringBuilder ??= new StringBuilder();
+			stringBuilder.Clear();
+			stringBuilder.AppendLine($"Starting calculation for {vehicleDef} at {cell}.");
 			TerrainDef terrainDef = map.terrainGrid.TerrainAt(cell);
 			if (terrainDef is null)
 			{
+				stringBuilder.AppendLine($"Unable to retrieve terrain at {cell}.");
 				return ImpassableCost;
 			}
 			int pathCost = terrainDef.pathCost;
+			stringBuilder.AppendLine($"def pathCost = {pathCost}");
 			if (vehicleDef.properties.customTerrainCosts.TryGetValue(terrainDef, out int customPathCost))
 			{
+				stringBuilder.AppendLine($"custom turrain cost: {customPathCost}");
 				pathCost = customPathCost;
 			}
 			else if (terrainDef.passability == Traversability.Impassable)
 			{
+				stringBuilder.AppendLine($"terrainDef impassable: {ImpassableCost}");
 				return ImpassableCost;
 			}
 			else if (vehicleDef.properties.defaultTerrainImpassable)
 			{
+				stringBuilder.AppendLine($"defaultTerrain is impassable and no custom pathCost was found.");
 				return ImpassableCost;
 			}
 			List<Thing> list = map.thingGrid.ThingsListAt(cell);
@@ -164,6 +183,7 @@ namespace Vehicles.AI
 				{
 					if (thingPathCost < 0 || thingPathCost >= ImpassableCost)
 					{
+						stringBuilder.AppendLine($"thingPathCost is impassable: {thingPathCost}");
 						return ImpassableCost;
 					}
 					if (thingPathCost > thingCost)
@@ -173,77 +193,71 @@ namespace Vehicles.AI
 				}
 				else if (thing.def.passability == Traversability.Impassable)
 				{
+					stringBuilder.AppendLine($"thingDef is impassable: {thingPathCost}");
 					return ImpassableCost;
 				}
-				thingPathCost = thing.def.pathCost;
+				else
+				{
+					thingPathCost = thing.def.pathCost;
+				}
+				stringBuilder.AppendLine($"thingPathCost: {thingPathCost}");
 				if (thingPathCost > thingCost)
 				{
 					thingCost = thingPathCost;
 				}
 			}
 			pathCost += thingCost;
-			pathCost += Mathf.RoundToInt(SnowUtility.MovementTicksAddOn(map.snowGrid.GetCategory(cell)) * vehicleDef.properties.snowPathingMultiplier);
+			SnowCategory snowCategory = map.snowGrid.GetCategory(cell);
+			if (!vehicleDef.properties.customSnowCosts.TryGetValue(snowCategory, out int snowPathCost))
+			{
+				snowPathCost = SnowUtility.MovementTicksAddOn(snowCategory).Clamp(0, 450);
+			}
+			stringBuilder.AppendLine($"snowPathCost: {snowPathCost}");
+			pathCost += snowPathCost;
 			if (pathCost < 0)
 			{
+				stringBuilder.AppendLine($"pathCost < 0. Setting to {ImpassableCost}");
 				pathCost = ImpassableCost;
 			}
+			stringBuilder.AppendLine($"final cost: {pathCost}");
 			return pathCost;
 		}
 
 		/// <summary>
-		/// Contains ignore path cost repeater
+		/// Calculate cost for <paramref name="vehicleDef"/> on <paramref name="terrainDef"/>
 		/// </summary>
-		/// <param name="c"></param>
-		private bool ContainsPathCostIgnoreRepeater(IntVec3 cell)
+		/// <param name="vehicleDef"></param>
+		/// <param name="terrainDef"></param>
+		/// <param name="stringBuilder"></param>
+		public static int CalculatePathCostForTerrain(VehicleDef vehicleDef, TerrainDef terrainDef, StringBuilder stringBuilder = null)
 		{
-			List<Thing> list = map.thingGrid.ThingsListAt(cell);
-			for (int i = 0; i < list.Count; i++)
+			stringBuilder ??= new StringBuilder();
+			stringBuilder.Clear();
+			stringBuilder.Append($"Starting calculation for {vehicleDef} and {terrainDef.defName}.");
+			int pathCost = terrainDef.pathCost;
+			stringBuilder.AppendLine($"def pathCost = {pathCost}");
+			if (vehicleDef.properties.customTerrainCosts.TryGetValue(terrainDef, out int customPathCost))
 			{
-				if (IsPathCostIgnoreRepeater(list[i].def))
-				{
-					return true;
-				}
+				stringBuilder.AppendLine($"custom turrain cost: {customPathCost}");
+				pathCost = customPathCost;
 			}
-			return false;
-		}
-
-		/// <summary>
-		/// ThingDef ignores repeat path costs
-		/// </summary>
-		/// <param name="def"></param>
-		private static bool IsPathCostIgnoreRepeater(ThingDef def)
-		{
-			return def.pathCost >= 25 && def.pathCostIgnoreRepeat;
-		}
-
-		/// <summary>
-		/// Output all terrain path costs for each <see cref="VehicleDef"/> 
-		/// </summary>
-		[DebugOutput]
-		private static void OutputAllPathcostsFor()
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
+			else if (terrainDef.passability == Traversability.Impassable)
 			{
-				stringBuilder.AppendLine($"------------- {vehicleDef.defName} -------------");
-
-				foreach (TerrainDef terrainDef in DefDatabase<TerrainDef>.AllDefsListForReading)
-				{
-					int pathCost = terrainDef.pathCost;
-					if (vehicleDef.properties.customTerrainCosts.TryGetValue(terrainDef, out int customPathCost))
-					{
-						pathCost = customPathCost;
-					}
-					else if (vehicleDef.properties.defaultTerrainImpassable)
-					{
-						pathCost = ImpassableCost;
-					}
-					stringBuilder.AppendLine($"{terrainDef.defName} = {pathCost}");
-				}
-
-				stringBuilder.AppendLine($"--------------  End of Path Costs  --------------");
+				stringBuilder.AppendLine($"terrainDef impassable: {ImpassableCost}");
+				return ImpassableCost;
 			}
-			Log.Message(stringBuilder.ToString());
+			else if (vehicleDef.properties.defaultTerrainImpassable)
+			{
+				stringBuilder.AppendLine($"defaultTerrain is impassable and no custom pathCost was found.");
+				return ImpassableCost;
+			}
+			if (pathCost < 0)
+			{
+				stringBuilder.AppendLine($"pathCost < 0. Setting to {ImpassableCost}");
+				pathCost = ImpassableCost;
+			}
+			stringBuilder.AppendLine($"final cost: {pathCost}");
+			return pathCost;
 		}
 	}
 }

@@ -118,13 +118,13 @@ namespace Vehicles.UI
 				GUI.DrawTexture(selectedRect, BaseContent.WhiteTex);
 			}
 
-			if(Widgets.ButtonText(upgradeButtonRect, "Upgrade".Translate()) && selectedNode != null && !selectedNode.upgradeActive)
+			if (Widgets.ButtonText(upgradeButtonRect, "Upgrade".Translate()) && selectedNode != null && !selectedNode.upgradeActive)
 			{
-				if(SelPawnUpgrade.CompUpgradeTree.Disabled(selectedNode))
+				if (SelPawnUpgrade.CompUpgradeTree.Disabled(selectedNode))
 				{
 					Messages.Message("DisabledFromOtherNode".Translate(), MessageTypeDefOf.RejectInput, false);
 				}
-				else if(SelPawnUpgrade.CompUpgradeTree.PrerequisitesMet(selectedNode))
+				else if (SelPawnUpgrade.CompUpgradeTree.PrerequisitesMet(selectedNode))
 				{
 					SoundDefOf.ExecuteTrade.PlayOneShotOnCamera(SelPawnUpgrade.Map);
 					SoundDefOf.Building_Complete.PlayOneShot(SelPawnUpgrade);

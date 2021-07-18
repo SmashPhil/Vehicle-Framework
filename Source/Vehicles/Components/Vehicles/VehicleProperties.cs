@@ -51,7 +51,7 @@ namespace Vehicles
 
 		public bool defaultTerrainImpassable = false;
 		public int pathTurnCost = 10;
-		public float snowPathingMultiplier = 0.5f;
+		public Dictionary<SnowCategory, int> customSnowCosts;
 		public Dictionary<TerrainDef, int> customTerrainCosts;
 		public Dictionary<ThingDef, int> customThingCosts;
 
