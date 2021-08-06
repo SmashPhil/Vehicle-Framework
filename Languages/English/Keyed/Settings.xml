@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <LanguageData>
+	<VehicleListSearchText>Search...</VehicleListSearchText>
+
 	<DevModeResetAll>Reset All Settings</DevModeResetAll>
 	<DevModeResetVehicle>Reset {0}</DevModeResetVehicle>
 	<DevModeResetAllVehicles>Reset All Vehicles</DevModeResetAllVehicles>
@@ -23,10 +25,8 @@
 	<ShowDisabledVehiclesTooltip>Disabled vehicles from the mod settings will still be shown in the architect menu.</ShowDisabledVehiclesTooltip>
 	<DrawUpgradeInformationScreen>Draw Upgrade Menu Info Screen</DrawUpgradeInformationScreen>
 	<DrawUpgradeInformationScreenTooltip>Draw additional menu on the upgrade menu to display ship stats and ship icon.</DrawUpgradeInformationScreenTooltip>
-	<UseIngameTime>Time Scale: {0}</UseIngameTime>
-	<UseIngameTimeTooltip>Switch the time scale for what is displayed in the upgrade menu.</UseIngameTimeTooltip>
-	<IngameTime>In-game Time</IngameTime>
-	<RealTime>Real time</RealTime>
+	<VehicleOverrideDrawColor>Override Draw Color</VehicleOverrideDrawColor>
+	<VehicleOverrideDrawColorTooltip>When any upgrade is applied that comes with a pattern or draw color, the previous paint job will be overridden.</VehicleOverrideDrawColorTooltip>
 	<FullVehiclePathing>Full Vehicle Pathing</FullVehiclePathing>
 	<FullVehiclePathingTooltip>Use the entire hitbox of the vehicle to determine pathing constraints (prevents Vehicles from going through smaller passages than hitbox size).</FullVehiclePathingTooltip>
 	<VehicleRocketsBurnRadius>Rockets Burn</VehicleRocketsBurnRadius>
@@ -36,6 +36,8 @@
 	<VehicleDeployOnLandingTooltip>When an aerial vehicle lands all pawns onboard will be unloaded.</VehicleDeployOnLandingTooltip>
 	<VehicleDelayOnLanding>Delay on Landing</VehicleDelayOnLanding>
 	<VehicleDelayOnLandingTooltip>When an aerial vehicle lands the deployment of all pawns will be delayed.</VehicleDelayOnLandingTooltip>
+	<VehicleAirDefensesActive>Air Defenses</VehicleAirDefensesActive>
+	<VehicleAirDefensesActiveTooltip>Certain world objects are able to utilize air defenses to shoot down nearby aircraft.</VehicleAirDefensesActiveTooltip>
 	<VehiclesModifiableSettings>Modifiable Settings</VehiclesModifiableSettings>
 	<ShowRecentNews>Show Most Recent News</ShowRecentNews>
 	

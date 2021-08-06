@@ -116,14 +116,11 @@ namespace Vehicles
 							imageWidth, imageHeight);
 						Widgets.DrawTextureFitted(upgradeRect, upgradeNode.UpgradeImage, 1);
 
-						if (!upgradeNode.prerequisiteNodes.NotNullAndAny())
+						if (upgradeNode.displayLabel)
 						{
-							if (!string.IsNullOrEmpty(upgradeNode.rootNodeLabel))
-							{
-								float textWidth = Text.CalcSize(upgradeNode.rootNodeLabel).x;
-								Rect nodeLabelRect = new Rect(upgradeRect.x - (textWidth - upgradeRect.width) / 2, upgradeRect.y - 20f, 10f * upgradeNode.rootNodeLabel.Length, 25f);
-								Widgets.Label(nodeLabelRect, upgradeNode.rootNodeLabel);
-							}
+							float textWidth = Text.CalcSize(upgradeNode.label).x;
+							Rect nodeLabelRect = new Rect(upgradeRect.x - (textWidth - upgradeRect.width) / 2, upgradeRect.y - 20f, 10f * upgradeNode.label.Length, 25f);
+							Widgets.Label(nodeLabelRect, upgradeNode.label);
 						}
 						Rect buttonRect = new Rect(vehicleDetailsContainer.x + ITab_Vehicle_Upgrades.GridOrigin.x + (ITab_Vehicle_Upgrades.GridSpacing.x * upgradeNode.GridCoordinate.x) - (imageWidth / 2),
 							vehicleDetailsContainer.y + ITab_Vehicle_Upgrades.GridOrigin.y + (ITab_Vehicle_Upgrades.GridSpacing.y * upgradeNode.GridCoordinate.z) - (imageHeight / 2) + (ITab_Vehicle_Upgrades.TopPadding * 2),

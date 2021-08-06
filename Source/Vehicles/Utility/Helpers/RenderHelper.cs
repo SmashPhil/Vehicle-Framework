@@ -14,7 +14,7 @@ namespace Vehicles
 	[StaticConstructorOnStartup]
 	public static class RenderHelper
 	{
-		private static List<int> cachedEdgeTiles = new List<int>();
+		private static readonly List<int> cachedEdgeTiles = new List<int>();
 		private static int cachedEdgeTilesForCenter = -1;
 		private static int cachedEdgeTilesForRadius = -1;
 		private static int cachedEdgeTilesForWorldSeed = -1;
@@ -22,61 +22,33 @@ namespace Vehicles
 		/// <summary>
 		/// Calculate VehicleTurret draw offset
 		/// </summary>
-		/// <param name="vehicle"></param>
-		/// <param name="xOffset"></param>
-		/// <param name="yOffset"></param>
-		/// <param name="rotationOffset"></param>
+		/// <param name="rot"></param>
+		/// <param name="renderProps"></param>
 		/// <param name="turretRotation"></param>
 		/// <param name="attachedTo"></param>
-		public static Pair<float,float> TurretDrawOffset(float angle, float xOffset, float yOffset, out Pair<float, float> rotationOffset, float turretRotation = 0, VehicleTurret attachedTo = null)
+		public static Pair<float,float> TurretDrawOffset(Rot8 rot, VehicleTurretRender renderProps, float extraRotation = 0, VehicleTurret attachedTo = null)
 		{
-			rotationOffset = new Pair<float, float>(0, 0);
+			var turretOffset = renderProps.OffsetFor(rot);
 			if (attachedTo != null)
 			{
-				return Ext_Math.RotatePointClockwise(attachedTo.turretRenderLocation.x + xOffset, attachedTo.turretRenderLocation.y + yOffset, turretRotation);
+				var parentOffset = attachedTo.renderProperties.OffsetFor(rot);
+				Pair<float, float> rootLoc = Ext_Math.RotatePointClockwise(turretOffset.Offset.x, turretOffset.Offset.y, extraRotation);
+				return new Pair<float, float>(rootLoc.First + parentOffset.Offset.x, rootLoc.Second + parentOffset.Offset.y);
 			}
-			return Ext_Math.RotatePointClockwise(xOffset, yOffset, angle);
+			return new Pair<float, float>(turretOffset.Offset.x, turretOffset.Offset.y);
 		}
 
 		/// <summary>
-		/// Calculate VehicleTurret draw offset given <paramref name="rot"/>
+		/// Calculate draw offset given offsets from center rotated alongside <paramref name="rot"/>
 		/// </summary>
 		/// <param name="rot"></param>
-		/// <param name="xOffset"></param>
-		/// <param name="yOffset"></param>
-		/// <param name="rotationOffset"></param>
+		/// <param name="offsetX"></param>
+		/// <param name="offsetY"></param>
 		/// <param name="turretRotation"></param>
 		/// <param name="attachedTo"></param>
-		/// <returns></returns>
-		public static Pair<float,float> ShipDrawOffset(Rot8 rot, float xOffset, float yOffset, out Pair<float, float> rotationOffset, float turretRotation = 0, VehicleTurret attachedTo = null)
+		public static Pair<float, float> VehicleDrawOffset(Rot8 rot, float offsetX, float offsetY, float additionalRotation = 0)
 		{
-			rotationOffset = new Pair<float, float>(0, 0);
-			if(attachedTo != null)
-			{
-				return Ext_Math.RotatePointClockwise(attachedTo.turretRenderLocation.x + xOffset, attachedTo.turretRenderLocation.y + yOffset, turretRotation);
-			}
-
-			return rot.AsInt switch
-			{
-				//North
-				0 => new Pair<float, float>(xOffset, yOffset),
-				//East
-				1 => new Pair<float, float>(yOffset, -xOffset),
-				//South
-				2 => new Pair<float, float>(-xOffset, -yOffset),
-				//West
-				3 => new Pair<float, float>(-yOffset, xOffset),
-				//NorthEast
-				4 => Ext_Math.RotatePointClockwise(yOffset, -xOffset, 45f),
-				//SouthEast
-				5 => Ext_Math.RotatePointCounterClockwise(yOffset, -xOffset, 45f),
-				//SouthWest
-				6 => Ext_Math.RotatePointClockwise(-yOffset, xOffset, 45f),
-				//NorthWest
-				7 => Ext_Math.RotatePointCounterClockwise(-yOffset, xOffset, 45f),
-				//Default
-				_ => throw new ArgumentOutOfRangeException("VehicleRotation is not within bounds. RotationInt must be between 0 and 7 for each lateral, longitudinal, and diagonal direction.")
-			};
+			return Ext_Math.RotatePointClockwise(offsetX, offsetY, rot.AsAngle + additionalRotation);
 		}
 
 		/// <summary>
@@ -87,15 +59,7 @@ namespace Vehicles
 		{
 			try
 			{
-				Vector3 topVectorRotation = new Vector3(turret.turretRenderOffset.x, 1f, turret.turretRenderOffset.y).RotatedBy(turret.TurretRotation);
-				float locationRotation = 0f;
-				if(turret.attachedTo != null)
-				{
-					locationRotation = turret.attachedTo.TurretRotation;
-				}
-				Pair<float, float> drawOffset = TurretDrawOffset(turret.vehicle.Rotation.AsAngle + turret.vehicle.Angle, turret.turretRenderLocation.x, turret.turretRenderLocation.y, out Pair<float, float> rotOffset1, locationRotation, turret.attachedTo);
-					
-				Vector3 topVectorLocation = new Vector3(turret.vehicle.DrawPos.x + drawOffset.First + rotOffset1.First, turret.vehicle.DrawPos.y + turret.drawLayer, turret.vehicle.DrawPos.z + drawOffset.Second + rotOffset1.Second);
+				Vector3 topVectorLocation = turret.TurretLocation;
 				if (turret.rTracker.Recoil > 0f)
 				{
 					topVectorLocation = Ext_Math.PointFromAngle(topVectorLocation, turret.rTracker.Recoil, turret.rTracker.Angle);
@@ -123,50 +87,56 @@ namespace Vehicles
 		/// <param name="resolveGraphics"></param>
 		/// <param name="manualColorOne"></param>
 		/// <param name="manualColorTwo"></param>
-		/// <remarks>Might possibly want to throw into separate threads</remarks>
-		public static void DrawCannonTextures(this VehiclePawn vehicle, Rect displayRect, IEnumerable<VehicleTurret> cannons, PatternDef pattern, bool resolveGraphics = false, Color? manualColorOne = null, Color? manualColorTwo = null, Color? manualColorThree = null)
+		/// <remarks>Might want to research into optimization practices for rendering</remarks>
+		public static void DrawCannonTextures(this VehiclePawn vehicle, Rect displayRect, IEnumerable<VehicleTurret> cannons, PatternDef pattern, bool resolveGraphics = false, Color? manualColorOne = null, Color? manualColorTwo = null, Color? manualColorThree = null, Rot8? rot = null)
 		{
-			foreach (VehicleTurret cannon in cannons)
+			Rot8 rotDrawn = rot ?? Rot8.North;
+			foreach (VehicleTurret turret in cannons)
 			{
-				if (cannon.NoGraphic)
+				if (turret.NoGraphic)
 				{
 					continue;
 				}
 				GraphicDataRGB graphicData = vehicle.VehicleDef.graphicData;
 				if (resolveGraphics)
 				{
-					cannon.ResolveCannonGraphics(vehicle);
+					turret.ResolveCannonGraphics(vehicle);
 				}
 
-				float cannonWidth = (displayRect.width / graphicData.drawSize.x) * cannon.CannonGraphicData.drawSize.x;
-				float cannonHeight = (displayRect.height / graphicData.drawSize.y) * cannon.CannonGraphicData.drawSize.y;
+				float cannonWidth = (displayRect.width / graphicData.drawSize.x) * turret.CannonGraphicData.drawSize.x;
+				float cannonHeight = (displayRect.height / graphicData.drawSize.y) * turret.CannonGraphicData.drawSize.y;
 
+				var offset = turret.DefaultOffsetLocFor(rotDrawn);
 				/// ( center point of vehicle) + (UI size / drawSize) * cannonPos
 				/// y axis inverted as UI goes top to bottom, but DrawPos goes bottom to top
-				float xCannon = (displayRect.x + (displayRect.width / 2) - (cannonWidth / 2)) + ((vehicle.VehicleDef.drawProperties.upgradeUISize.x / graphicData.drawSize.x) * cannon.turretRenderLocation.x);
-				float yCannon = (displayRect.y + (displayRect.height / 2) - (cannonHeight / 2)) - ((vehicle.VehicleDef.drawProperties.upgradeUISize.y / graphicData.drawSize.y) * cannon.turretRenderLocation.y);
+				float xCannon = (displayRect.x + (displayRect.width / 2) - (cannonWidth / 2)) + ((vehicle.VehicleDef.drawProperties.upgradeUISize.x / graphicData.drawSize.x) * offset.x);
+				float yCannon = (displayRect.y + (displayRect.height / 2) - (cannonHeight / 2)) - ((vehicle.VehicleDef.drawProperties.upgradeUISize.y / graphicData.drawSize.y) * offset.z);
 
 				Rect cannonDrawnRect = new Rect(xCannon, yCannon, cannonWidth, cannonHeight);
-				Material cannonMat = new Material(cannon.CannonGraphic.MatAt(Rot4.North, vehicle));
+				Material cannonMat = null;
 				
-				if (cannon.CannonGraphic.Shader.SupportsRGBMaskTex() && (manualColorOne != null || manualColorTwo != null || manualColorThree != null) && cannon.CannonGraphic.GetType().IsAssignableFrom(typeof(Graphic_Cannon)))
+				if (turret.CannonGraphic.Shader.SupportsRGBMaskTex())
 				{
-					MaterialRequestRGB matReq = new MaterialRequestRGB()
+					cannonMat = new Material(turret.CannonGraphic.MatAt(Rot4.North, vehicle));
+					if ((manualColorOne != null || manualColorTwo != null || manualColorThree != null) && turret.CannonGraphic.GetType().IsAssignableFrom(typeof(Graphic_Cannon)))
 					{
-						mainTex = cannon.CannonTexture,
-						shader = cannon.CannonGraphic.Shader,
-						color = manualColorOne != null ? manualColorOne.Value : vehicle.DrawColor,
-						colorTwo = manualColorTwo != null ? manualColorTwo.Value : vehicle.DrawColorTwo,
-						colorThree = manualColorThree != null ? manualColorThree.Value : vehicle.DrawColorThree,
-						tiles = vehicle.tiles,
-						properties = pattern.properties,
-						isSkin = pattern is SkinDef,
-						maskTex = cannon.CannonGraphic.masks[0],
-						patternTex = pattern[Rot8.North]
-					};
-					cannonMat = MaterialPoolExpanded.MatFrom(matReq);
+						MaterialRequestRGB matReq = new MaterialRequestRGB()
+						{
+							mainTex = turret.CannonTexture,
+							shader = turret.CannonGraphic.Shader,
+							color = manualColorOne != null ? manualColorOne.Value : vehicle.DrawColor,
+							colorTwo = manualColorTwo != null ? manualColorTwo.Value : vehicle.DrawColorTwo,
+							colorThree = manualColorThree != null ? manualColorThree.Value : vehicle.DrawColorThree,
+							tiles = vehicle.tiles,
+							properties = pattern.properties,
+							isSkin = pattern is SkinDef,
+							maskTex = turret.CannonGraphic.masks[0],
+							patternTex = pattern[Rot8.North]
+						};
+						cannonMat = MaterialPoolExpanded.MatFrom(matReq);
+					}
 				}
-				GenUI.DrawTextureWithMaterial(cannonDrawnRect, cannon.CannonTexture, cannonMat);
+				GenUI.DrawTextureWithMaterial(cannonDrawnRect, turret.CannonTexture, cannonMat);
 
 				if (VehicleMod.settings.debug.debugDrawCannonGrid)
 				{
@@ -192,48 +162,54 @@ namespace Vehicles
 		public static void DrawCannonTexturesTiled(this VehiclePawn vehicle, Rect displayRect, IEnumerable<VehicleTurret> cannons, PatternDef pattern, bool resolveGraphics = false, 
 			Color? manualColorOne = null, Color? manualColorTwo = null, Color? manualColorThree = null, float tiles = 1, float displacementX = 0, float displacementY = 0)
 		{
-			foreach (VehicleTurret cannon in cannons)
+			foreach (VehicleTurret turret in cannons)
 			{
-				if (cannon.NoGraphic)
+				if (turret.NoGraphic)
 				{
 					continue;
 				}
 				GraphicDataRGB graphicData = vehicle.VehicleDef.graphicData;
 				if (resolveGraphics)
 				{
-					cannon.ResolveCannonGraphics(vehicle);
+					turret.ResolveCannonGraphics(vehicle);
 				}
 
-				float cannonWidth = (displayRect.width / graphicData.drawSize.x) * cannon.CannonGraphicData.drawSize.x;
-				float cannonHeight = (displayRect.height / graphicData.drawSize.y) * cannon.CannonGraphicData.drawSize.y;
+				float cannonWidth = (displayRect.width / graphicData.drawSize.x) * turret.CannonGraphicData.drawSize.x;
+				float cannonHeight = (displayRect.height / graphicData.drawSize.y) * turret.CannonGraphicData.drawSize.y;
+
+				var offset = turret.renderProperties.OffsetFor(vehicle.FullRotation);
 
 				/// ( center point of vehicle) + (UI size / drawSize) * cannonPos
 				/// y axis inverted as UI goes top to bottom, but DrawPos goes bottom to top
-				float xCannon = (displayRect.x + (displayRect.width / 2) - (cannonWidth / 2)) + ((vehicle.VehicleDef.drawProperties.upgradeUISize.x / graphicData.drawSize.x) * cannon.turretRenderLocation.x);
-				float yCannon = (displayRect.y + (displayRect.height / 2) - (cannonHeight / 2)) - ((vehicle.VehicleDef.drawProperties.upgradeUISize.y / graphicData.drawSize.y) * cannon.turretRenderLocation.y);
+				float xCannon = (displayRect.x + (displayRect.width / 2) - (cannonWidth / 2)) + ((vehicle.VehicleDef.drawProperties.upgradeUISize.x / graphicData.drawSize.x) * offset.Offset.x);
+				float yCannon = (displayRect.y + (displayRect.height / 2) - (cannonHeight / 2)) - ((vehicle.VehicleDef.drawProperties.upgradeUISize.y / graphicData.drawSize.y) * offset.Offset.y);
 
 				Rect cannonDrawnRect = new Rect(xCannon, yCannon, cannonWidth, cannonHeight);
-				Material cannonMat = new Material(cannon.CannonGraphic.MatAt(Rot4.North, vehicle));
-
-				if (cannon.CannonGraphic.Shader.SupportsRGBMaskTex() && (manualColorOne != null || manualColorTwo != null || manualColorThree != null) && cannon.CannonGraphic.GetType().IsAssignableFrom(typeof(Graphic_Cannon)))
+				Material cannonMat = null;
+				if (turret.CannonGraphic.Shader.SupportsRGBMaskTex())
 				{
-					MaterialRequestRGB matReq = new MaterialRequestRGB()
+					cannonMat = new Material(turret.CannonGraphic.MatAt(Rot4.North, vehicle));
+					if ((manualColorOne != null || manualColorTwo != null || manualColorThree != null) && turret.CannonGraphic.GetType().IsAssignableFrom(typeof(Graphic_Cannon)))
 					{
-						mainTex = cannon.CannonTexture,
-						shader = cannon.CannonGraphic.Shader,
-						color = manualColorOne != null ? manualColorOne.Value : vehicle.DrawColor,
-						colorTwo = manualColorTwo != null ? manualColorTwo.Value : vehicle.DrawColorTwo,
-						colorThree = manualColorThree != null ? manualColorThree.Value : vehicle.DrawColorThree,
-						tiles = tiles,
-						displacement = new Vector2(displacementX, displacementY),
-						properties = pattern.properties,
-						isSkin = pattern is SkinDef,
-						maskTex = cannon.CannonGraphic.masks[0],
-						patternTex = pattern[Rot8.North]
-					};
-					cannonMat = MaterialPoolExpanded.MatFrom(matReq);
+						MaterialRequestRGB matReq = new MaterialRequestRGB()
+						{
+							mainTex = turret.CannonTexture,
+							shader = turret.CannonGraphic.Shader,
+							color = manualColorOne != null ? manualColorOne.Value : vehicle.DrawColor,
+							colorTwo = manualColorTwo != null ? manualColorTwo.Value : vehicle.DrawColorTwo,
+							colorThree = manualColorThree != null ? manualColorThree.Value : vehicle.DrawColorThree,
+							tiles = tiles,
+							displacement = new Vector2(displacementX, displacementY),
+							properties = pattern.properties,
+							isSkin = pattern is SkinDef,
+							maskTex = turret.CannonGraphic.masks[0],
+							patternTex = pattern[Rot8.North]
+						};
+						cannonMat = MaterialPoolExpanded.MatFrom(matReq);
+					}
 				}
-				GenUI.DrawTextureWithMaterial(cannonDrawnRect, cannon.CannonTexture, cannonMat);
+				
+				GenUI.DrawTextureWithMaterial(cannonDrawnRect, turret.CannonTexture, cannonMat);
 
 				if (VehicleMod.settings.debug.debugDrawCannonGrid)
 				{
@@ -255,33 +231,37 @@ namespace Vehicles
 		/// <param name="resolveGraphics"></param>
 		/// <param name="manualColorOne"></param>
 		/// <param name="manualColorTwo"></param>
-		public static void DrawVehicleTex(Rect rect, Texture2D vehicleTex, VehiclePawn vehicle, PatternDef pattern = null, bool resolveGraphics = false, Color? manualColorOne = null, Color? manualColorTwo = null, Color? manualColorThree = null)
+		public static void DrawVehicleTex(Rect rect, Texture2D vehicleTex, VehiclePawn vehicle, PatternDef pattern = null, bool resolveGraphics = false, Color? manualColorOne = null, Color? manualColorTwo = null, Color? manualColorThree = null, Rot8? rot = null)
 		{
-			Material mat = new Material(vehicle.VehicleGraphic.MatAt(Rot4.North, vehicle));
-			
-			if (vehicle.VehicleGraphic.Shader.SupportsRGBMaskTex() && (manualColorOne != null || manualColorTwo != null || manualColorThree != null))
+			Rot8 rotDrawn = rot ?? Rot8.North;
+			Material mat = null;
+			if (vehicle.VehicleGraphic.Shader.SupportsRGBMaskTex())
 			{
-				MaterialRequestRGB matReq = new MaterialRequestRGB()
+				mat = new Material(vehicle.VehicleGraphic.MatAt(Rot4.North, vehicle));
+				if (manualColorOne != null || manualColorTwo != null || manualColorThree != null)
 				{
-					mainTex = vehicleTex,
-					shader = vehicle.VehicleGraphic.Shader,
-					color = manualColorOne != null ? manualColorOne.Value : vehicle.DrawColor,
-					colorTwo = manualColorTwo != null ? manualColorTwo.Value : vehicle.DrawColorTwo,
-					colorThree = manualColorThree != null ? manualColorThree.Value : vehicle.DrawColorThree,
-					tiles = vehicle.tiles,
-					properties = pattern.properties,
-					isSkin = pattern is SkinDef,
-					maskTex = vehicle.VehicleGraphic.masks[0],
-					patternTex = pattern?[Rot8.North]
-				};
-				mat = MaterialPoolExpanded.MatFrom(matReq);
+					MaterialRequestRGB matReq = new MaterialRequestRGB()
+					{
+						mainTex = vehicleTex,
+						shader = vehicle.VehicleGraphic.Shader,
+						color = manualColorOne != null ? manualColorOne.Value : vehicle.DrawColor,
+						colorTwo = manualColorTwo != null ? manualColorTwo.Value : vehicle.DrawColorTwo,
+						colorThree = manualColorThree != null ? manualColorThree.Value : vehicle.DrawColorThree,
+						tiles = vehicle.tiles,
+						properties = pattern.properties,
+						isSkin = pattern is SkinDef,
+						maskTex = vehicle.VehicleGraphic.masks[rotDrawn.AsInt],
+						patternTex = pattern?[rotDrawn]
+					};
+					mat = MaterialPoolExpanded.MatFrom(matReq);
+				}
 			}
 
 			GenUI.DrawTextureWithMaterial(rect, vehicleTex, mat);
 
 			if (vehicle.CompCannons != null)
 			{
-				vehicle.DrawCannonTextures(rect, vehicle.CompCannons.Cannons.OrderBy(x => x.drawLayer), pattern, resolveGraphics, manualColorOne, manualColorTwo, manualColorThree);
+				vehicle.DrawCannonTextures(rect, vehicle.CompCannons.Cannons.Where(t => !t.isUpgrade).OrderBy(x => x.drawLayer), pattern, resolveGraphics, manualColorOne, manualColorTwo, manualColorThree, rotDrawn);
 			}
 		}
 
@@ -300,25 +280,30 @@ namespace Vehicles
 		public static void DrawVehicleTexTiled(Rect rect, Texture2D vehicleTex, VehiclePawn vehicle, PatternDef pattern = null, bool resolveGraphics = false, 
 			Color? manualColorOne = null, Color? manualColorTwo = null, Color? manualColorThree = null, float tiles = 1, float displacementX = 0, float displacementY = 0)
 		{
-			Material mat = new Material(vehicle.VehicleGraphic.MatAt(Rot4.North, vehicle));
+			Material mat = null; 
 
-			if (vehicle.VehicleGraphic.Shader.SupportsRGBMaskTex() && (manualColorOne != null || manualColorTwo != null || manualColorThree != null))
+			if (vehicle.VehicleGraphic.Shader.SupportsRGBMaskTex())
 			{
-				MaterialRequestRGB matReq = new MaterialRequestRGB()
+				mat = new Material(vehicle.VehicleGraphic.MatAt(Rot4.North, vehicle));
+				if (manualColorOne != null || manualColorTwo != null || manualColorThree != null)
 				{
-					mainTex = vehicleTex,
-					shader = vehicle.VehicleGraphic.Shader,
-					color = manualColorOne != null ? manualColorOne.Value : vehicle.DrawColor,
-					colorTwo = manualColorTwo != null ? manualColorTwo.Value : vehicle.DrawColorTwo,
-					colorThree = manualColorThree != null ? manualColorThree.Value : vehicle.DrawColorThree,
-					tiles = tiles,
-					displacement = new Vector2(displacementX, displacementY),
-					properties = pattern.properties,
-					isSkin = pattern is SkinDef,
-					maskTex = vehicle.VehicleGraphic.masks[0],
-					patternTex = pattern?[Rot8.North]
-				};
-				mat = MaterialPoolExpanded.MatFrom(matReq);
+
+					MaterialRequestRGB matReq = new MaterialRequestRGB()
+					{
+						mainTex = vehicleTex,
+						shader = vehicle.VehicleGraphic.Shader,
+						color = manualColorOne != null ? manualColorOne.Value : vehicle.DrawColor,
+						colorTwo = manualColorTwo != null ? manualColorTwo.Value : vehicle.DrawColorTwo,
+						colorThree = manualColorThree != null ? manualColorThree.Value : vehicle.DrawColorThree,
+						tiles = tiles,
+						displacement = new Vector2(displacementX, displacementY),
+						properties = pattern.properties,
+						isSkin = pattern is SkinDef,
+						maskTex = vehicle.VehicleGraphic.masks[0],
+						patternTex = pattern?[Rot8.North]
+					};
+					mat = MaterialPoolExpanded.MatFrom(matReq);
+				}
 			}
 
 			GenUI.DrawTextureWithMaterial(rect, vehicleTex, mat);
@@ -347,12 +332,16 @@ namespace Vehicles
 			float centeredY = rect.y + (rect.height / 2) - (UISizeY / 2);
 
 			Rect displayRect = new Rect(centeredX + UIMoveX, centeredY + UIMoveY, UISizeX, UISizeY);
-			Material mat = new Material(graphic.MatAt(rot, pattern));
+			Material mat = null;
+			if (graphic.Shader.SupportsRGBMaskTex())
+			{
+				mat = new Material(graphic.MatAt(rot, pattern));
+			}
 			GenUI.DrawTextureWithMaterial(displayRect, vehicleTex, mat);
 
 			if (vehicleDef.GetSortedCompProperties<CompProperties_Cannons>() is CompProperties_Cannons props)
 			{
-				DrawCannonTexturesInSettings(displayRect, vehicleDef, props.turrets.OrderBy(x => x.drawLayer), pattern, rot);
+				DrawCannonTexturesInSettings(displayRect, vehicleDef, props.turrets.OrderBy(x => x.drawLayer), pattern, null, null, null, rot);
 			}
 		}
 
@@ -365,32 +354,51 @@ namespace Vehicles
 		/// <param name="cannons"></param>
 		/// <param name="pattern"></param>
 		/// <param name="rot"></param>
-		public static void DrawCannonTexturesInSettings(Rect displayRect, VehicleDef vehicleDef, IEnumerable<VehicleTurret> cannons, PatternDef pattern, Rot8 rot)
+		public static void DrawCannonTexturesInSettings(Rect displayRect, VehicleDef vehicleDef, IEnumerable<VehicleTurret> cannons, PatternDef pattern, Color? colorOne = null, Color? colorTwo = null, Color? colorThree = null, Rot8? rot = null)
 		{
-			foreach (VehicleTurret cannon in cannons)
+			foreach (VehicleTurret turret in cannons)
 			{
-				if (cannon.NoGraphic)
+				if (turret.NoGraphic)
 				{
 					continue;
 				}
 
 				GraphicDataRGB vehicleGraphicData = vehicleDef.graphicData;
+				Rot8 rotDrawn = rot ?? Rot8.North;
 
-				cannon.ResolveCannonGraphics(vehicleDef);
+				turret.ResolveCannonGraphics(vehicleDef);
 
-				float cannonWidth = (displayRect.width / vehicleGraphicData.drawSize.x) * cannon.CannonGraphicData.drawSize.x;
-				float cannonHeight = (displayRect.height / vehicleGraphicData.drawSize.y) * cannon.CannonGraphicData.drawSize.y;
+				float cannonWidth = (displayRect.width / vehicleGraphicData.drawSize.x) * turret.CannonGraphicData.drawSize.x;
+				float cannonHeight = (displayRect.height / vehicleGraphicData.drawSize.y) * turret.CannonGraphicData.drawSize.y;
 
+				var offset = turret.renderProperties.OffsetFor(rotDrawn);
 				/// ( center point of vehicle) + (UI size / drawSize) * cannonPos
 				/// y axis inverted as UI goes top to bottom, but DrawPos goes bottom to top
-				float xCannon = (displayRect.x + (displayRect.width / 2) - (cannonWidth / 2)) + ((vehicleDef.drawProperties.settingsUISize.x / vehicleGraphicData.drawSize.x) * cannon.turretRenderLocation.x);
-				float yCannon = (displayRect.y + (displayRect.height / 2) - (cannonHeight / 2)) - ((vehicleDef.drawProperties.settingsUISize.y / vehicleGraphicData.drawSize.y) * cannon.turretRenderLocation.y);
+				float xCannon = (displayRect.x + (displayRect.width / 2) - (cannonWidth / 2)) + ((vehicleDef.drawProperties.settingsUISize.x / vehicleGraphicData.drawSize.x) * offset.Offset.x);
+				float yCannon = (displayRect.y + (displayRect.height / 2) - (cannonHeight / 2)) - ((vehicleDef.drawProperties.settingsUISize.y / vehicleGraphicData.drawSize.y) * offset.Offset.y);
 
 				Rect cannonDrawnRect = new Rect(xCannon, yCannon, cannonWidth, cannonHeight);
 
-				Material cannonMat = cannon.CannonGraphic.Shader.SupportsRGBMaskTex() ? new Material(cannon.CannonGraphic.MatAt(pattern)) : cannon.CannonGraphic.MatSingle;
-
-				GenUI.DrawTextureWithMaterial(cannonDrawnRect, cannon.CannonTexture, cannonMat);
+				Material cannonMat = turret.CannonGraphic.Shader.SupportsRGBMaskTex() ? new Material(turret.CannonGraphic.MatAt(pattern)) : null;
+				if (colorOne != null || colorTwo != null || colorThree != null)
+				{
+					MaterialRequestRGB matReq = new MaterialRequestRGB()
+					{
+						mainTex = turret.CannonTexture,
+						shader = turret.CannonGraphic.Shader,
+						color = colorOne != null ? colorOne.Value : vehicleDef.graphicData.color,
+						colorTwo = colorTwo != null ? colorTwo.Value : vehicleDef.graphicData.colorTwo,
+						colorThree = colorThree != null ? colorThree.Value : vehicleDef.graphicData.colorThree,
+						tiles = turret.CannonGraphicData.tiles,
+						displacement = turret.CannonGraphicData.displacement,
+						properties = pattern.properties,
+						isSkin = pattern is SkinDef,
+						maskTex = turret.CannonGraphic.masks[0],
+						patternTex = pattern?[rotDrawn]
+					};
+					cannonMat = MaterialPoolExpanded.MatFrom(matReq);
+				}
+				GenUI.DrawTextureWithMaterial(cannonDrawnRect, turret.CannonTexture, cannonMat);
 
 				if (VehicleMod.settings.debug.debugDrawCannonGrid)
 				{
@@ -409,20 +417,35 @@ namespace Vehicles
 		/// <param name="rect"></param>
 		/// <param name="vehicleDef"></param>
 		/// <param name="material"></param>
-		public static void DrawVehicleDef(Rect rect, VehicleDef vehicleDef, Material material = null)
+		public static void DrawVehicleDef(Rect rect, VehicleDef vehicleDef, Material material = null, Color? colorOne = null, Color? colorTwo = null, Color? colorThree = null, Rot8? rot = null)
 		{
 			if (VehicleMod.settings.vehicles.defaultMasks.TryGetValue(vehicleDef.defName, out var maskName))
 			{
+				Rot8 rotDrawn = rot ?? Rot8.North;
 				var graphic = VehicleTex.CachedGraphics[vehicleDef];
 				PatternDef pattern = DefDatabase<PatternDef>.GetNamed(maskName);
 				if (material is null)
 				{
-					material = new Material(graphic.MatAt(Rot8.North, pattern));
+					MaterialRequestRGB matReq = new MaterialRequestRGB()
+					{
+						mainTex = VehicleTex.VehicleTexture(vehicleDef, rotDrawn),
+						shader = vehicleDef.graphic.Shader,
+						color = colorOne != null ? colorOne.Value : vehicleDef.graphicData.color,
+						colorTwo = colorTwo != null ? colorTwo.Value : vehicleDef.graphicData.colorTwo,
+						colorThree = colorThree != null ? colorThree.Value : vehicleDef.graphicData.colorThree,
+						tiles = vehicleDef.graphicData.tiles,
+						displacement = vehicleDef.graphicData.displacement,
+						properties = pattern.properties,
+						isSkin = pattern is SkinDef,
+						maskTex = (vehicleDef.graphic as Graphic_Vehicle).masks[0],
+						patternTex = pattern?[Rot8.North]
+					};
+					material = MaterialPoolExpanded.MatFrom(matReq);
 				}
-				GenUI.DrawTextureWithMaterial(rect, VehicleTex.VehicleTexture(vehicleDef, Rot8.North), material);
+				GenUI.DrawTextureWithMaterial(rect, VehicleTex.VehicleTexture(vehicleDef, rotDrawn), material);
 				if (vehicleDef.GetSortedCompProperties<CompProperties_Cannons>() is CompProperties_Cannons props)
 				{
-					DrawCannonTexturesInSettings(rect, vehicleDef, props.turrets.OrderBy(x => x.drawLayer), pattern, Rot8.North);
+					DrawCannonTexturesInSettings(rect, vehicleDef, props.turrets.OrderBy(x => x.drawLayer), pattern, colorOne, colorTwo, colorThree, rotDrawn);
 				}
 			}
 		}
@@ -608,6 +631,7 @@ namespace Vehicles
 		public static GizmoResult GizmoOnGUIWithMaterial(Command command, Rect rect, VehicleBuildDef buildDef)
 		{
 			VehicleDef vehicleDef = buildDef.thingToSpawn;
+			var font = Text.Font;
 			Text.Font = GameFont.Tiny;
 			bool flag = false;
 			if (Mouse.IsOver(rect))
@@ -625,7 +649,14 @@ namespace Vehicles
 			Vector2 rectSize = vehicleDef.ScaleDrawRatio(new Vector2(rect.width * 0.95f, rect.height * 0.95f));
 			float newX = (rect.width / 2) - (rectSize.x / 2);
 			float newY = (rect.height / 2) - (rectSize.y / 2);
-			DrawVehicleDef(new Rect(rect.x + newX, rect.y + newY, rectSize.x, rectSize.y), vehicleDef, material);
+			(Color colorOne, Color colorTwo, Color colorThree) = (vehicleDef.graphicData.color, vehicleDef.graphicData.colorTwo, vehicleDef.graphicData.colorThree);
+			if (command.disabled)
+			{
+				colorOne = vehicleDef.graphicData.color.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
+				colorTwo = vehicleDef.graphicData.colorTwo.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
+				colorThree = vehicleDef.graphicData.colorThree.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
+			}
+			DrawVehicleDef(new Rect(rect.x + newX, rect.y + newY, rectSize.x, rectSize.y), vehicleDef, null, colorOne, colorTwo, colorThree, Rot8.North);
 
 			bool flag2 = false;
 			KeyCode keyCode = (command.hotKey == null) ? KeyCode.None : command.hotKey.MainKey;
@@ -685,39 +716,46 @@ namespace Vehicles
 				UIHighlighter.HighlightOpportunity(rect, command.HighlightTag);
 			}
 			Text.Font = GameFont.Small;
-			if (flag2)
+			try
 			{
-				if (command.disabled)
+				if (flag2)
 				{
-					if (!command.disabledReason.NullOrEmpty())
+					if (command.disabled)
 					{
-						Messages.Message(command.disabledReason, MessageTypeDefOf.RejectInput, false);
+						if (!command.disabledReason.NullOrEmpty())
+						{
+							Messages.Message(command.disabledReason, MessageTypeDefOf.RejectInput, false);
+						}
+						return new GizmoResult(GizmoState.Mouseover, null);
 					}
-					return new GizmoResult(GizmoState.Mouseover, null);
-				}
-				GizmoResult result;
-				if (Event.current.button == 1)
-				{
-					result = new GizmoResult(GizmoState.OpenedFloatMenu, Event.current);
+					GizmoResult result;
+					if (Event.current.button == 1)
+					{
+						result = new GizmoResult(GizmoState.OpenedFloatMenu, Event.current);
+					}
+					else
+					{
+						if (!TutorSystem.AllowAction(command.TutorTagSelect))
+						{
+							return new GizmoResult(GizmoState.Mouseover, null);
+						}
+						result = new GizmoResult(GizmoState.Interacted, Event.current);
+						TutorSystem.Notify_Event(command.TutorTagSelect);
+					}
+					return result;
 				}
 				else
 				{
-					if (!TutorSystem.AllowAction(command.TutorTagSelect))
+					if (flag)
 					{
 						return new GizmoResult(GizmoState.Mouseover, null);
 					}
-					result = new GizmoResult(GizmoState.Interacted, Event.current);
-					TutorSystem.Notify_Event(command.TutorTagSelect);
+					return new GizmoResult(GizmoState.Clear, null);
 				}
-				return result;
 			}
-			else
+			finally
 			{
-				if (flag)
-				{
-					return new GizmoResult(GizmoState.Mouseover, null);
-				}
-				return new GizmoResult(GizmoState.Clear, null);
+				Text.Font = font;
 			}
 		}
 
@@ -862,6 +900,12 @@ namespace Vehicles
 			return false;
 		}
 
+		/// <summary>
+		/// Draw ring around edge tile cells given <paramref name="center"/> and <paramref name="radius"/>
+		/// </summary>
+		/// <param name="center"></param>
+		/// <param name="radius"></param>
+		/// <param name="material"></param>
 		public static void DrawWorldRadiusRing(int center, int radius, Material material)
 		{
 			if (radius < 0)

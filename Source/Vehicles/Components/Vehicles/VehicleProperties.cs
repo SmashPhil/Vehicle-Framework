@@ -1,9 +1,10 @@
 ﻿using System.Reflection;
 using System.Collections.Generic;
-using RimWorld.Planet;
-using UnityEngine;
+using System.Linq;
 using Verse;
 using RimWorld;
+using RimWorld.Planet;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -38,33 +39,36 @@ namespace Vehicles
 		[PostToSettings(Label = "ManhunterTargetsVehicle", Tooltip = "ManhunterTargetsVehicleTooltip", Translate = true, UISettingsType = UISettingsType.Checkbox)]
 		public bool manhunterTargetsVehicle = false;
 
-		//REDO - Add Translation
-		public string healthLabel_Healthy = "Operational";
-		public string healthLabel_Injured = "Needs Repairs";
-		public string healthLabel_Immobile = "Inoperable";
-		public string healthLabel_Dead = "Broken Down";
-
-		public string healthLabel_Beached = "Beached";
+		public string healthLabel_Healthy = "MissingHealthyLabel";
+		public string healthLabel_Injured = "MissingInjuredLabel";
+		public string healthLabel_Immobile = "MissingImmobileLabel";
+		public string healthLabel_Dead = "MissingDeadLabel";
+		public string healthLabel_Beached = "MissingBeachedLabel";
 
 		public string iconTexPath;
 		public bool generateThingIcon = true;
 
+		//---------------   Pathing   ---------------
 		public bool defaultTerrainImpassable = false;
 		public int pathTurnCost = 10;
+
 		public Dictionary<SnowCategory, int> customSnowCosts;
 		public Dictionary<TerrainDef, int> customTerrainCosts;
 		public Dictionary<ThingDef, int> customThingCosts;
 
+		public bool defaultBiomesImpassable = false;
+		public Dictionary<RiverDef, float> customRiverCosts = new Dictionary<RiverDef, float>();
 		public Dictionary<BiomeDef, float> customBiomeCosts = new Dictionary<BiomeDef, float>();
 		public Dictionary<Hilliness, float> customHillinessCosts = new Dictionary<Hilliness, float>();
 		public Dictionary<RoadDef, float> customRoadCosts = new Dictionary<RoadDef, float>();
+		//-------------------------------------------
 
 		[PostToSettings(Label = "VehicleWinterCostMultiplier", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(MinValue = 0, MaxValue = 10, RoundDecimalPlaces = 1)]
-		public float winterPathCostMultiplier = 1f;
+		public float winterPathCostMultiplier = 2.5f;
 		[PostToSettings(Label = "VehicleWorldSpeedMultiplier", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(MinValue = 0, MaxValue = 10, RoundDecimalPlaces = 1)]
-		public float worldSpeedMultiplier = 1f;
+		public float worldSpeedMultiplier = 0;
 
 		public SimpleCurve overweightSpeedCurve;
 
@@ -72,6 +76,40 @@ namespace Vehicles
 
 		public RiverDef riverTraversability;
 		public List<VehicleRole> roles  = new List<VehicleRole>();
+
 		public SoundDef soundWhileDrafted; //REDO
+		public SoundDef soundWhileMoving; //REDO
+
+		public IEnumerable<string> ConfigErrors()
+		{
+			if (vehicleJobLimitations.NullOrEmpty())
+			{
+				yield return "<field>vehicleJobLimitations</field> list must be populated".ConvertRichText();
+			}
+		}
+
+		public void ResolveReferences(VehicleDef vehicleDef)
+		{
+			customBiomeCosts ??= new Dictionary<BiomeDef, float>();
+			customHillinessCosts ??= new Dictionary<Hilliness, float>();
+			customRoadCosts ??= new Dictionary<RoadDef, float>();
+			customTerrainCosts ??= new Dictionary<TerrainDef, int>();
+			customThingCosts ??= new Dictionary<ThingDef, int>();
+			customSnowCosts ??= new Dictionary<SnowCategory, int>();
+
+			roles.OrderBy(c => c.hitbox.side == VehicleComponentPosition.BodyNoOverlap).ForEach(c => c.hitbox.Initialize(vehicleDef));
+
+			if (overweightSpeedCurve is null)
+			{
+				overweightSpeedCurve = new SimpleCurve()
+				{
+					new CurvePoint(0, 1),
+					new CurvePoint(0.65f, 1),
+					new CurvePoint(0.85f, 0.9f),
+					new CurvePoint(1.05f, 0.35f),
+					new CurvePoint(1.25f, 0)
+				};
+			}
+		}
 	}
 }

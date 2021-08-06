@@ -21,7 +21,7 @@ namespace Vehicles
 
 			harmony.Patch(original: AccessTools.Property(type: typeof(RaceProperties), name: nameof(RaceProperties.IsFlesh)).GetGetMethod(),
 				prefix: new HarmonyMethod(typeof(HarmonyPatches_PreLoad),
-				nameof(BoatsNotFlesh)));
+				nameof(VehiclesDontHaveFlesh)));
 			harmony.Patch(original: AccessTools.Method(typeof(ThingDef), nameof(ThingDef.ConfigErrors)), prefix: null,
 				postfix: new HarmonyMethod(typeof(HarmonyPatches_PreLoad),
 				nameof(VehiclesAllowFullFillage)));
@@ -43,7 +43,6 @@ namespace Vehicles
 		/// <summary>
 		/// Generic patch method for testing
 		/// </summary>
-		/// <returns></returns>
 		public static bool TestDebug()
 		{
 			return true;
@@ -54,8 +53,7 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="__result"></param>
 		/// <param name="__instance"></param>
-		/// <returns></returns>
-		public static bool BoatsNotFlesh(ref bool __result, RaceProperties __instance)
+		public static bool VehiclesDontHaveFlesh(ref bool __result, RaceProperties __instance)
 		{
 			if (__instance.FleshType == FleshTypeDefOf_Ships.MetalVehicle || __instance.FleshType == FleshTypeDefOf_Ships.SpacerVehicle || __instance.FleshType == FleshTypeDefOf_Ships.WoodenVehicle)
 			{

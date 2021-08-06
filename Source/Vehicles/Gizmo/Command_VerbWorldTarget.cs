@@ -47,7 +47,7 @@ namespace Vehicles
 			Command_VerbWorldTarget command_VerbWorldTarget = other as Command_VerbWorldTarget;
 			if (command_VerbWorldTarget == null)
 			{
-				Log.ErrorOnce("Tried to merge Command_VerbTarget with unexpected type", 73406263, false);
+				Log.ErrorOnce("Tried to merge Command_VerbTarget with unexpected type", 73406263);
 				return;
 			}
 			if (groupedVerbs == null)

@@ -20,11 +20,10 @@ namespace Vehicles
 		public bool debugDrawNodeGrid;
 		public bool debugDrawHitbox;
 		public bool debugDrawVehicleTracks;
-		public bool debugDrawVehiclePathCosts;
 		public bool debugDrawBumpers;
 
 		public bool debugLogging;
-		public bool debugGenerateWorldPathCostTexts;
+		public bool debugDrawVehiclePathCosts;
 
 		public override Rect ButtonRect(Rect rect)
 		{
@@ -47,7 +46,6 @@ namespace Vehicles
 			debugDrawBumpers = false;
 
 			debugLogging = false;
-			debugGenerateWorldPathCostTexts = false;
 		}
 
 		public override void ExposeData()
@@ -61,11 +59,10 @@ namespace Vehicles
 			Scribe_Values.Look(ref debugDrawNodeGrid, "debugDrawNodeGrid", false);
 			Scribe_Values.Look(ref debugDrawHitbox, "debugDrawHitbox", false);
 			Scribe_Values.Look(ref debugDrawVehicleTracks, "debugDrawVehicleTracks", false);
-			Scribe_Values.Look(ref debugDrawVehiclePathCosts, "debugDrawVehiclePathCosts", false);
 			Scribe_Values.Look(ref debugDrawBumpers, "debugDrawBumpers", false);
 
 			Scribe_Values.Look(ref debugLogging, "debugLogging", false);
-			Scribe_Values.Look(ref debugGenerateWorldPathCostTexts, "debugGenerateWorldPathCostTexts", false);
+			Scribe_Values.Look(ref debugDrawVehiclePathCosts, "debugDrawVehiclePathCosts", false);
 		}
 
 		public override void DrawSection(Rect rect)
@@ -83,24 +80,8 @@ namespace Vehicles
 			listingStandard.Header("DevModeVehicles".Translate(), ListingExtension.BannerColor, GameFont.Medium, TextAnchor.MiddleCenter);
 
 			listingStandard.GapLine(16);
+
 			listingStandard.CheckboxLabeled("DebugLogging".Translate(), ref debugLogging, "DebugLoggingTooltip".Translate());
-			if (listingStandard.CheckboxLabeledReturned("DebugGenerateWorldPathCostTexts".Translate(), ref debugGenerateWorldPathCostTexts, "DebugGenerateWorldPathCostTextsTooltip".Translate()))
-			{
-				if (Find.World != null)
-				{
-					LongEventHandler.QueueLongEvent(delegate ()
-					{
-						if (debugGenerateWorldPathCostTexts)
-						{
-							WorldPathTextMeshGenerator.GenerateTextMeshObjects();
-						}
-						else
-						{
-							WorldPathTextMeshGenerator.DestroyTextMeshObjects();
-						}
-					}, "VehiclesTextMeshBiomeGeneration", false, (Exception ex) => Log.Error($"{VehicleHarmony.LogLabel} Exception thrown while trying to generate TextMesh GameObjects for world map debugging. Please report to mod page."));
-				}
-			}
 			listingStandard.CheckboxLabeled("DebugDraftAnyVehicle".Translate(), ref debugDraftAnyShip, "DebugDraftAnyVehicleTooltip".Translate());
 			listingStandard.CheckboxLabeled("DebugDisablePathing".Translate(), ref debugDisableWaterPathing, "DebugDisablePathingTooltip".Translate());
 
@@ -118,39 +99,50 @@ namespace Vehicles
 			listingStandard.CheckboxLabeled("DebugDrawBumpers".Translate(), ref debugDrawBumpers, "DebugDrawBumpersTooltip".Translate());
 
 			listingStandard.GapLine(16);
-
 			if (listingStandard.ButtonText("ShowRecentNews".Translate()))
 			{
-				string versionChecking = "Null";
-				VehicleHarmony.updates.Clear();
-				foreach (UpdateLog log in FileReader.ReadPreviousFiles(VehicleHarmony.VehicleMCP).OrderBy(log => Ext_Settings.CombineVersionString(log.UpdateData.currentVersion)))
+				ShowAllUpdates();
+			}
+			listingStandard.End();
+		}
+
+		internal void ShowAllUpdates()
+		{
+			string versionChecking = "Null";
+			VehicleHarmony.updates.Clear();
+			foreach (UpdateLog log in FileReader.ReadPreviousFiles(VehicleHarmony.VehicleMCP).OrderBy(log => Ext_Settings.CombineVersionString(log.UpdateData.currentVersion)))
+			{
+				VehicleHarmony.updates.Add(log);
+			}
+			try
+			{
+				List<DebugMenuOption> versions = new List<DebugMenuOption>();
+				foreach (UpdateLog update in VehicleHarmony.updates)
 				{
-					VehicleHarmony.updates.Add(log);
-				}
-				try
-				{
-					List<DebugMenuOption> versions = new List<DebugMenuOption>();
-					foreach (UpdateLog update in VehicleHarmony.updates)
+					versionChecking = update.UpdateData.currentVersion;
+					string label = versionChecking;
+					if (versionChecking == VehicleHarmony.CurrentVersion)
 					{
-						versionChecking = update.UpdateData.currentVersion;
-						string label = versionChecking;
-						if (versionChecking == VehicleHarmony.CurrentVersion)
+						label = "Current Version";
+						versions.Insert(0, new DebugMenuOption(label, DebugMenuOptionMode.Action, delegate ()
 						{
-							label = "Current Version";
-						}
+							Find.WindowStack.Add(new Dialog_NewUpdate(new HashSet<UpdateLog>() { update }));
+						}));
+					}
+					else
+					{
 						versions.Add(new DebugMenuOption(label, DebugMenuOptionMode.Action, delegate ()
 						{
 							Find.WindowStack.Add(new Dialog_NewUpdate(new HashSet<UpdateLog>() { update }));
 						}));
 					}
-					Find.WindowStack.Add(new Dialog_DebugOptionListLister(versions));
 				}
-				catch (Exception ex)
-				{
-					Log.Error($"{VehicleHarmony.LogLabel} Unable to show update for {versionChecking} Exception = {ex.Message}");
-				}
+				Find.WindowStack.Add(new Dialog_DebugOptionListLister(versions));
 			}
-			listingStandard.End();
+			catch (Exception ex)
+			{
+				Log.Error($"{VehicleHarmony.LogLabel} Unable to show update for {versionChecking} Exception = {ex.Message}");
+			}
 		}
 	}
 }

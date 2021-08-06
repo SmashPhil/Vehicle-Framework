@@ -21,7 +21,6 @@ namespace Vehicles
 
 		public int lastChangeTick = -1;
 		private int numRegionsTouchingMapEdge;
-		private int cachedCellCount = -1;
 
 		private readonly HashSet<VehicleRoom> uniqueNeighborsSet = new HashSet<VehicleRoom>();
 		private readonly List<VehicleRoom> uniqueNeighbors = new List<VehicleRoom>();

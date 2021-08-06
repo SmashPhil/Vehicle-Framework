@@ -11,13 +11,21 @@ namespace Vehicles
 	[LoadedEarly]
 	public static class ParsingHelper
 	{
+		/// <summary>
+		/// VehicleDef, HashSet of fields
+		/// </summary>
 		public static readonly Dictionary<string, HashSet<FieldInfo>> lockedFields = new Dictionary<string, HashSet<FieldInfo>>();
+		/// <summary>
+		/// VehicleDef, XmlNodes
+		/// </summary>
+		public static readonly Dictionary<string, HashSet<string>> overriddenVehicleNodes = new Dictionary<string, HashSet<string>>();
 
 		internal static void RegisterParsers()
 		{
 			ParseHelper.Parsers<VehicleJobLimitations>.Register(new Func<string, VehicleJobLimitations>(VehicleJobLimitations.FromString));
 			ParseHelper.Parsers<VehicleDamageMultipliers>.Register(new Func<string, VehicleDamageMultipliers>(VehicleDamageMultipliers.FromString));
 			ParseHelper.Parsers<CompVehicleLauncher.DeploymentTimer>.Register(new Func<string, CompVehicleLauncher.DeploymentTimer>(CompVehicleLauncher.DeploymentTimer.FromString));
+			ParseHelper.Parsers<VehicleTurretRender.RotationalOffset>.Register(new Func<string, VehicleTurretRender.RotationalOffset>(VehicleTurretRender.RotationalOffset.FromString));
 		}
 
 		internal static void RegisterAttributes()
@@ -25,30 +33,23 @@ namespace Vehicles
 			XmlParseHelper.RegisterAttribute("LockSetting", CheckFieldLocked);
 			XmlParseHelper.RegisterAttribute("DisableSettings", CheckDisabledSettings);
 			XmlParseHelper.RegisterAttribute("TurretAllowedFor", CheckTurretStatus);
-			XmlParseHelper.RegisterAttribute("AllowTerrainWithTag", AllowTerrainCosts);
-			XmlParseHelper.RegisterAttribute("DisallowTerrainWithTag", DisallowTerrainCosts);
+			XmlParseHelper.RegisterAttribute("AllowTerrainWithTag", AllowTerrainCosts, "customTerrainCosts");
+			XmlParseHelper.RegisterAttribute("DisallowTerrainWithTag", DisallowTerrainCosts, "customTerrainCosts");
 		}
 
 		private static void CheckFieldLocked(XmlNode node, string value, FieldInfo field)
 		{
 			if (value.ToUpperInvariant() == "TRUE")
 			{
-				XmlNode defNode = node.SelectSingleNode("defName");
-				XmlNode parentNode = node;
-				while (defNode is null)
+				string defName = XmlParseHelper.BackSearchDefName(node);
+				if (string.IsNullOrEmpty(defName))
 				{
-					parentNode = parentNode.ParentNode;
-					if (parentNode is null)
-					{
-						Log.Error($"Cannot use LockSetting attribute on {field.Name} since it is not nested within a Def.");
-						return;
-					}
-					defNode = parentNode.SelectSingleNode("defName");
+					SmashLog.Error($"Cannot use <attribute>LockSetting</attribute> on {field.Name} since it is not nested within a Def.");
+					return;
 				}
-				string defName = defNode.InnerText;
 				if (!field.HasAttribute<PostToSettingsAttribute>())
 				{
-					SmashLog.Error($"Cannont use LockSetting attribute on <field>{field.Name}</field> since related field does not have PostToSettings attribute in <type>{field.DeclaringType}</type>");
+					SmashLog.Error($"Cannont use <attribute>LockSetting</attribute> on <field>{field.Name}</field> since related field does not have PostToSettings attribute in <type>{field.DeclaringType}</type>");
 				}
 				if (!lockedFields.ContainsKey(defName))
 				{
@@ -65,7 +66,7 @@ namespace Vehicles
 				XmlNode defNode = node.SelectSingleNode("defName");
 				if (defNode is null)
 				{
-					Log.Error($"Cannot use DisableSetting attribute on non-VehicleDef XmlNodes.");
+					SmashLog.Error($"Cannot use <attribute>DisableSetting</attribute> on non-VehicleDef XmlNodes.");
 					return;
 				}
 				string defName = defNode.InnerText;
@@ -77,25 +78,18 @@ namespace Vehicles
 		{
 			if (value.ToUpperInvariant().Contains("STRAFING"))
 			{
-				XmlNode defNode = node.SelectSingleNode("defName");
-				XmlNode parentNode = node;
-				while (defNode is null)
+				string defName = XmlParseHelper.BackSearchDefName(node);
+				if (string.IsNullOrEmpty(defName))
 				{
-					parentNode = parentNode.ParentNode;
-					if (parentNode is null)
-					{
-						Log.Error($"Cannot use TurretAllowedFor attribute on non-VehicleDef XmlNodes.");
-						return;
-					}
-					defNode = parentNode.SelectSingleNode("defName");
+					SmashLog.Error($"Cannot use <attribute>TurretAllowedFor</attribute> on non-VehicleDef XmlNodes.");
+					return;
 				}
-				string defName = defNode.InnerText;
 				foreach (XmlNode childNode in node.ChildNodes)
 				{
 					XmlNode keyNode = childNode.SelectSingleNode("key");
 					if (keyNode is null)
 					{
-						Log.Error($"Unable to locate <text>key</text> for VehicleTurret.");
+						SmashLog.Error($"Unable to locate <text>key</text> for VehicleTurret.");
 					}
 					if (!Enum.TryParse(keyNode.InnerText, out TurretDisableType enableType))
 					{
@@ -108,47 +102,57 @@ namespace Vehicles
 
 		private static void AllowTerrainCosts(XmlNode node, string value, FieldInfo field)
 		{
-			XmlNode defNode = node.SelectSingleNode("defName");
-			XmlNode parentNode = node;
-			while (defNode is null)
+			string defName = XmlParseHelper.BackSearchDefName(node);
+			if (string.IsNullOrEmpty(defName))
 			{
-				parentNode = parentNode.ParentNode;
-				if (parentNode is null)
-				{
-					Log.Error($"Cannot use AllowTerrainWithTag attribute on non-VehicleDef XmlNodes.");
-					return;
-				}
-				defNode = parentNode.SelectSingleNode("defName");
+				SmashLog.Error($"Could not find <xml>defName</xml> node for {node.Name}.");
+				return;
 			}
-			string defName = defNode.InnerText;
 			int pathCost = 1;
 			if (node.Attributes["PathCost"] is XmlAttribute pathCostAttribute)
 			{
 				if (!int.TryParse(pathCostAttribute.Value, out pathCost))
 				{
-					Log.Warning($"Unable to parse PathCost attribute for {defName}");
+					SmashLog.Warning($"Unable to parse <attribute>PathCost</attribute> attribute for {defName}");
 					pathCost = 1;
 				}
 			}
-			PathingHelper.allTerrainCostsByTag.Add(defName, new Tuple<string, int>(value, pathCost));
+			if (!PathingHelper.allTerrainCostsByTag.TryGetValue(defName, out var terrainDict))
+			{
+				terrainDict = new Dictionary<string, int>();
+				PathingHelper.allTerrainCostsByTag.Add(defName, terrainDict);
+			}
+			terrainDict.AddOrReplace(value, pathCost);
 		}
 
 		private static void DisallowTerrainCosts(XmlNode node, string value, FieldInfo field)
 		{
-			XmlNode defNode = node.SelectSingleNode("defName");
-			XmlNode parentNode = node;
-			while (defNode is null)
+			string defName = XmlParseHelper.BackSearchDefName(node);
+			if (string.IsNullOrEmpty(defName))
 			{
-				parentNode = parentNode.ParentNode;
-				if (parentNode is null)
+				SmashLog.Error($"Could not find <xml>defName</xml> node for {node.Name}.");
+				return;
+			}
+			if (!PathingHelper.allTerrainCostsByTag.TryGetValue(defName, out var terrainDict))
+			{
+				terrainDict = new Dictionary<string, int>();
+				PathingHelper.allTerrainCostsByTag.Add(defName, terrainDict);
+			}
+			terrainDict.AddOrReplace(value, -1);
+		}
+
+		private static void MarkAsOverride(XmlNode node, string value, FieldInfo field)
+		{
+			if (value.EqualsIgnoreCase("true"))
+			{
+				string defName = XmlParseHelper.BackSearchDefName(node);
+				if (string.IsNullOrEmpty(defName))
 				{
-					Log.Error($"Cannot use AllowTerrainWithTag attribute on non-VehicleDef XmlNodes.");
+					SmashLog.Error($"Could not find <xml>defName</xml> node for {node.Name}.");
 					return;
 				}
-				defNode = parentNode.SelectSingleNode("defName");
+				overriddenVehicleNodes.AddOrInsert(defName, node.Name);
 			}
-			string defName = defNode.InnerText;
-			PathingHelper.allTerrainCostsByTag.Add(defName, new Tuple<string, int>(value, -1));
 		}
 	}
 }

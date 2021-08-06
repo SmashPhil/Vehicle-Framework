@@ -104,7 +104,7 @@
 			
 			<customTerrainCosts>
 				<li>
-					<key>Mud</key>
+					<key>Sand</key>
 					<value>250</value>
 				</li>
 				<li>

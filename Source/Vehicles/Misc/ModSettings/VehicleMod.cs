@@ -18,6 +18,7 @@ namespace Vehicles
 		public const float ResetImageSize = 25f;
 
 		public static VehiclesModSettings settings;
+		public static VehicleMod mod;
 		public static VehicleDef selectedDef;
 
 		internal static Texture2D selectedVehicleTex;
@@ -37,6 +38,8 @@ namespace Vehicles
 		private static List<TabRecord> tabs = new List<TabRecord>();
 		private static List<VehicleDef> vehicleDefs;
 
+		private static QuickSearchFilter vehicleFilter = new QuickSearchFilter();
+
 		public static List<FieldInfo> vehicleDefFields = new List<FieldInfo>();
 		private static Dictionary<Type, List<FieldInfo>> vehicleCompFields = new Dictionary<Type, List<FieldInfo>>();
 		public static readonly Dictionary<Type, List<FieldInfo>> cachedFields = new Dictionary<Type, List<FieldInfo>>();
@@ -45,6 +48,7 @@ namespace Vehicles
 
 		public VehicleMod(ModContentPack content) : base(content)
 		{
+			mod = this;
 			settings = GetSettings<VehiclesModSettings>();
 			InitializeSections();
 
@@ -92,6 +96,25 @@ namespace Vehicles
 				}
 				return vehicleDefs;
 			}
+		}
+
+		private static void SelectVehicle(VehicleDef vehicleDef)
+		{
+			selectedDef = vehicleDef;
+			ClearSelectedDefCache();
+			selectedPatterns = DefDatabase<PatternDef>.AllDefs.Where(d => d.ValidFor(selectedDef)).ToList();
+			selectedDefUpgradeComp = vehicleDef.GetSortedCompProperties<CompProperties_UpgradeTree>();
+			RecalculateHeight(selectedDef);
+			SetVehicleTex(selectedDef);
+		}
+
+		private static void DeselectVehicle()
+		{
+			selectedDef = null;
+			selectedPatterns.Clear();
+			selectedDefUpgradeComp = null;
+			selectedNode = null;
+			SetVehicleTex(null);
 		}
 		
 		public static void SetVehicleTex(VehicleDef selectedDef)
@@ -250,40 +273,83 @@ namespace Vehicles
 		{
 			Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("VehicleResetAllConfirmation".Translate(), delegate()
 			{
-				SoundDefOf.Click.PlayOneShotOnCamera(null);
-				cachedFields.Clear();
-				PopulateCachedFields();
-				settings.main.ResetSettings();
-				settings.vehicles.ResetSettings();
-				settings.upgrades.ResetSettings();
-				settings.debug.ResetSettings();
-
-				if (Current.ProgramState == ProgramState.Playing)
-				{
-					foreach (Map map in Find.Maps)
-					{
-						map.GetCachedMapComponent<VehicleReservationManager>().ReleaseAllClaims();
-					}
-				}
+				ResetAllSettingsConfirmed();
 			}, false, null));
+		}
+
+		internal static void ResetAllSettingsConfirmed()
+		{
+			SoundDefOf.Click.PlayOneShotOnCamera(null);
+			cachedFields.Clear();
+			PopulateCachedFields();
+			settings.main.ResetSettings();
+			settings.vehicles.ResetSettings();
+			settings.upgrades.ResetSettings();
+			settings.debug.ResetSettings();
+
+			if (Current.ProgramState == ProgramState.Playing)
+			{
+				foreach (Map map in Find.Maps)
+				{
+					map.GetCachedMapComponent<VehicleReservationManager>().ReleaseAllClaims();
+				}
+			}
 		}
 
 		public static Rect DrawVehicleList(Rect rect, Func<bool, string> tooltipGetter = null, Predicate<VehicleDef> validator = null)
 		{
+			var font = Text.Font;
 			Rect scrollContainer = rect.ContractedBy(10);
 			scrollContainer.width /= 4;
 			Widgets.DrawBoxSolid(scrollContainer, Color.grey);
 			Rect innerContainer = scrollContainer.ContractedBy(1);
 			Widgets.DrawBoxSolid(innerContainer, ListingExtension.MenuSectionBGFillColor);
-			Rect scrollList = innerContainer.ContractedBy(1);
+
+			Rect searchBoxRect = new Rect(innerContainer)
+			{
+				height = 22f
+			};
+			Text.Font = GameFont.Small;
+			Widgets.Label(searchBoxRect, "VehicleListSearchText".Translate());
+			searchBoxRect.y += searchBoxRect.height;
+			vehicleFilter.Text = Widgets.TextField(searchBoxRect, vehicleFilter.Text);
+			Text.Font = font;
+
+			Rect scrollList = new Rect(innerContainer.ContractedBy(1))
+			{
+				y = innerContainer.y + searchBoxRect.height * 2.15f
+			};
 			Rect scrollView = scrollList;
 			scrollView.height = VehicleDefs.Count * 22f;
 
+			List<VehicleDef> vehicleDefsFiltered = VehicleDefs.Where(v => vehicleFilter.Text.NullOrEmpty() || vehicleFilter.Matches(v.defName) || vehicleFilter.Matches(v.label) || vehicleFilter.Matches(v.modContentPack.Name)).ToList();
+			if (selectedDef != null)
+			{
+				if (KeyBindingDefOf.MapDolly_Up.KeyDownEvent)
+				{
+					int index = vehicleDefsFiltered.IndexOf(selectedDef) - 1;
+					if (index < 0)
+					{
+						index = vehicleDefsFiltered.Count - 1;
+					}
+					SelectVehicle(vehicleDefsFiltered[index]);
+				}
+				if (KeyBindingDefOf.MapDolly_Down.KeyDownEvent)
+				{
+					int index = vehicleDefsFiltered.IndexOf(selectedDef) + 1;
+					if (index >= vehicleDefsFiltered.Count)
+					{
+						index = 0;
+					}
+					SelectVehicle(vehicleDefsFiltered[index]);
+				}
+			}
+			
 			Widgets.BeginScrollView(scrollList, ref vehicleDefsScrollPosition, scrollView);
 			Listing_Standard listingStandard = new Listing_Standard();
 			listingStandard.Begin(scrollList);
 			string currentModTitle = string.Empty;
-			foreach (VehicleDef vehicle in VehicleDefs)
+			foreach (VehicleDef vehicle in vehicleDefsFiltered)
 			{
 				try
 				{
@@ -298,20 +364,11 @@ namespace Vehicles
 					{
 						if (selectedDef == vehicle)
 						{
-							selectedDef = null;
-							selectedPatterns.Clear();
-							selectedDefUpgradeComp = null;
-							selectedNode = null;
-							SetVehicleTex(null);
+							DeselectVehicle();
 						}
 						else
 						{
-							selectedDef = vehicle;
-							ClearSelectedDefCache();
-							selectedPatterns = DefDatabase<PatternDef>.AllDefs.Where(d => d.ValidFor(selectedDef)).ToList();
-							selectedDefUpgradeComp = vehicle.GetSortedCompProperties<CompProperties_UpgradeTree>();
-							RecalculateHeight(selectedDef);
-							SetVehicleTex(selectedDef);
+							SelectVehicle(vehicle);
 						}
 					}
 				}
@@ -328,6 +385,7 @@ namespace Vehicles
 			}
 			listingStandard.End();
 			Widgets.EndScrollView();
+			Text.Font = font;
 			return scrollContainer;
 		}
 

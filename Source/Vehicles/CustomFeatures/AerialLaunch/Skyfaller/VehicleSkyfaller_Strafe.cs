@@ -26,8 +26,8 @@ namespace Vehicles
 			float distFromStart = StrafeAreaDistance * shots / turret.MaxShotsCurrentFireMode;
 			Vector3 target = start.ToVector3Shifted().PointFromAngle(distFromStart, angle);
 
-			Pair<float, float> turretLoc = RenderHelper.TurretDrawOffset(angle, turret.turretRenderLocation.x, turret.turretRenderLocation.y, out Pair<float, float> renderOffsets, 0, turret.attachedTo);
-			return new Vector3(target.x + turretLoc.First + renderOffsets.First, target.y + turret.drawLayer, target.z + turretLoc.Second + renderOffsets.Second);
+			Pair<float, float> turretLoc = RenderHelper.TurretDrawOffset(turret.vehicle.FullRotation, turret.renderProperties, 0, turret.attachedTo);
+			return new Vector3(target.x + turretLoc.First, target.y + turret.drawLayer, target.z + turretLoc.Second);
 		}
 
 		protected virtual Vector3 TurretLocation(VehicleTurret turret)
@@ -38,8 +38,8 @@ namespace Vehicles
 				locationRotation = turret.attachedTo.TurretRotation;
 			}
 			Vector3 calcPosition = DistanceAtMin;
-			Pair<float, float> turretLoc = RenderHelper.TurretDrawOffset(angle, turret.turretRenderLocation.x, turret.turretRenderLocation.y, out Pair<float, float> renderOffsets, locationRotation, turret.attachedTo);
-			return new Vector3(calcPosition.x + turretLoc.First + renderOffsets.First, calcPosition.y + turret.drawLayer, calcPosition.z + turretLoc.Second + renderOffsets.Second);
+			Pair<float, float> turretLoc = RenderHelper.TurretDrawOffset(turret.vehicle.FullRotation, turret.renderProperties, locationRotation, turret.attachedTo);
+			return new Vector3(calcPosition.x + turretLoc.First, calcPosition.y + turret.drawLayer, calcPosition.z + turretLoc.Second);
 		}
 
 		protected virtual void TurretTick()

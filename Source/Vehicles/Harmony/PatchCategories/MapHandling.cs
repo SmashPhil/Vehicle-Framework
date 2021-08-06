@@ -21,9 +21,6 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(TileFinder), nameof(TileFinder.RandomSettlementTileFor)), prefix: null, postfix: null,
 				transpiler: new HarmonyMethod(typeof(MapHandling),
 				nameof(PushSettlementToCoastTranspiler)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pathing), nameof(Pathing.RecalculatePerceivedPathCostUnderThing)), prefix: null,
-				postfix: new HarmonyMethod(typeof(MapHandling),
-				nameof(RecalculateVehiclePathCostUnderThing)));
 			VehicleHarmony.Patch(original: AccessTools.Property(typeof(MapPawns), nameof(MapPawns.AnyPawnBlockingMapRemoval)).GetGetMethod(), prefix: null,
 				postfix: new HarmonyMethod(typeof(MapHandling),
 				nameof(AnyVehicleBlockingMapRemoval)));
@@ -86,19 +83,6 @@ namespace Vehicles
 					yield return new CodeInstruction(opcode: OpCodes.Ldloc_1);
 				}
 				yield return instruction;
-			}
-		}
-
-		/// <summary>
-		/// Hook on recalculating pathgrid that recalculates the path cost under Things (with additional path costs) for water based pathgrid
-		/// </summary>
-		/// <param name="t"></param>
-		/// <param name="___map"></param>
-		public static void RecalculateVehiclePathCostUnderThing(Thing thing)
-		{
-			if (thing is VehiclePawn vehicle)
-			{
-				vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderThing(vehicle);
 			}
 		}
 

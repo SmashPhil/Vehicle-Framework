@@ -106,8 +106,8 @@ namespace Vehicles
 		private void RegenerateNewVehicleRegions()
 		{
 			newRegions.Clear();
-			List <IntVec3> cells = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionDirtyer.DirtyCells;
-			foreach (IntVec3 cell  in cells)
+			HashSet<IntVec3> cells = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionDirtyer.DirtyCells;
+			foreach (IntVec3 cell in cells)
 			{
 				if (VehicleGridsUtility.GetRegion(cell, map, vehicleDef, RegionType.Set_All) is null)
 				{
@@ -149,18 +149,6 @@ namespace Vehicles
 				}
 			}
 			return num;
-		}
-
-		/// <summary>
-		/// <paramref name="a"/> and <paramref name="b"/> should belong to the same room
-		/// </summary>
-		/// <param name="a"></param>
-		/// <param name="b"></param>
-		private bool ShouldBeInTheSameRoomGroup(VehicleRoom a, VehicleRoom b)
-		{
-			RegionType regionType = a.RegionType;
-			RegionType regionType2 = b.RegionType;
-			return (regionType == RegionType.Normal || regionType == RegionType.ImpassableFreeAirExchange) && (regionType2 == RegionType.Normal || regionType2 == RegionType.ImpassableFreeAirExchange);
 		}
 
 		/// <summary>

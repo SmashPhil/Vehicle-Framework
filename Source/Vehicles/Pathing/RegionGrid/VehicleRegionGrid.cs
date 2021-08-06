@@ -10,9 +10,10 @@ namespace Vehicles
 	/// </summary>
 	public sealed class VehicleRegionGrid
 	{
-		private const int CleanSquaresPerFrame = 16;
+		public const int CleanSquaresPerFrame = 16;
 
 		public static readonly HashSet<VehicleRegion> allRegionsYielded = new HashSet<VehicleRegion>();
+		public static int vehicleRegionGridIndexChecking = 0;
 
 		private readonly Map map;
 		private readonly VehicleDef vehicleDef;
@@ -128,7 +129,7 @@ namespace Vehicles
 				Log.Error("Tried to get valid region out of bounds at " + cell);
 			}
 			VehicleRegion region = regionGrid[map.cellIndices.CellToIndex(cell)];
-			return !(region is null) && region.valid ? region : null;
+			return region != null && region.valid ? region : null;
 		}
 
 		/// <summary>
@@ -162,11 +163,16 @@ namespace Vehicles
 					curCleanIndex = 0;
 				}
 				VehicleRegion region = regionGrid[curCleanIndex];
-				if(region != null && !region.valid)
+				if (region != null && !region.valid)
 				{
 					regionGrid[curCleanIndex] = null;
 				}
 				curCleanIndex++;
+			}
+			vehicleRegionGridIndexChecking++;
+			if (vehicleRegionGridIndexChecking >= VehicleHarmony.AllMoveableVehicleDefsCount)
+			{
+				vehicleRegionGridIndexChecking = 0;
 			}
 		}
 

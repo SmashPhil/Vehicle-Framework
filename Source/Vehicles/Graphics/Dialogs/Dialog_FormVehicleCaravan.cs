@@ -425,11 +425,11 @@ namespace Vehicles
 					Find.WorldGrid.GetTileNeighbors(map.Tile, neighboringCells);
 					foreach(int neighbor in neighboringCells)
 					{
-						if(WorldHelper.WaterCovered(neighbor))
-						{
-							startingTile = neighbor;
-							return;
-						}
+						//if (WorldHelper.WaterCovered(neighbor))
+						//{
+						//	startingTile = neighbor;
+						//	return;
+						//}
 					}
 				}
 			}

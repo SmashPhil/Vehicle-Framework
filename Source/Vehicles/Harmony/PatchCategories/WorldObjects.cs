@@ -15,9 +15,6 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(InspectPaneFiller), nameof(InspectPaneFiller.DoPaneContentsFor)),
 				postfix: new HarmonyMethod(typeof(WorldObjects),
 				nameof(AerialVehicleInFlightAltimeter)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(World), nameof(World.WorldUpdate)),
-				postfix: new HarmonyMethod(typeof(WorldObjects),
-				nameof(TextMeshWorldUpdate)));
 		}
 
 		public static void AerialVehicleInFlightAltimeter(ISelectable sel, Rect rect)
@@ -25,14 +22,6 @@ namespace Vehicles
 			if (sel is AerialVehicleInFlight aerialVehicle)
 			{
 				AltitudeMeter.DrawAltitudeMeter(aerialVehicle);
-			}
-		}
-
-		public static void TextMeshWorldUpdate()
-		{
-			if (VehicleMod.settings.debug.debugGenerateWorldPathCostTexts)
-			{
-				WorldPathTextMeshGenerator.UpdateVisibility();
 			}
 		}
 	}

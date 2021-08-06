@@ -16,7 +16,7 @@ namespace Vehicles
 		public static Dictionary<ThingDef, int> fishDictionaryTropicalBiomeFreshWater = new Dictionary<ThingDef, int>();
 		public static Dictionary<ThingDef, int> fishDictionaryColdBiomeFreshWater = new Dictionary<ThingDef, int>();
 		public static Dictionary<ThingDef, int> fishDictionarySaltWater = new Dictionary<ThingDef, int>();
-		public static bool fishingActivated;
+		public static bool fishingActivated = false;
 
 		static FishingCompatibility()
 		{

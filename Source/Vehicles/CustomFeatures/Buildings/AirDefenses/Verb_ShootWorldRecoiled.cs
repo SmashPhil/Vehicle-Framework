@@ -34,7 +34,7 @@ namespace Vehicles
 		{
 			if (caster is null)
 			{
-				Log.Error("Verb " + GetUniqueLoadID() + " needs caster to work (possibly lost during saving/loading).", false);
+				Log.Error("Verb " + GetUniqueLoadID() + " needs caster to work (possibly lost during saving/loading).");
 				return false;
 			}
 			if (!caster.Spawned)

@@ -7,58 +7,90 @@ using SmashTools;
 
 namespace Vehicles
 {
+	/// <summary>
+	/// Reachability grid
+	/// </summary>
 	public class WorldVehicleReachability : WorldComponent
 	{
-		private Dictionary<ThingDef, int[]> fields;
+		private readonly Dictionary<VehicleDef, int[]> reachabilityGrid;
 
 		private int nextFieldID;
-
 		private int impassableFieldID;
-
 		private int minValidFieldID;
 
 		public WorldVehicleReachability(World world) : base(world)
 		{
 			this.world = world;
-			fields = new Dictionary<ThingDef, int[]>();
+			reachabilityGrid = new Dictionary<VehicleDef, int[]>();
 			nextFieldID = 1;
 			InvalidateAllFields();
-			ValidateVehicleDefs();
+			InitReachabilityGrid();
 			Instance = this;
 		}
 
+		/// <summary>
+		/// Singleton getter
+		/// </summary>
 		public static WorldVehicleReachability Instance { get; private set; }
 
+		/// <summary>
+		/// Clear reachability cache
+		/// </summary>
 		public void ClearCache()
 		{
 			InvalidateAllFields();
 		}
 
-		public bool CanReach(Caravan c, int destTile)
+		/// <summary>
+		/// Validate all VehicleDefs in reachability cache
+		/// </summary>
+		private void InitReachabilityGrid()
 		{
-			int startTile = c.Tile;
-			List<VehicleDef> vehicleDefs = c.UniqueVehicleDefsInCaravan().ToList();
-			return CanReach(vehicleDefs, startTile, destTile);
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+			{
+				reachabilityGrid.Add(vehicleDef, new int[Find.WorldGrid.TilesCount]);
+			}
 		}
 
-		public bool CanReach(List<VehicleDef> vehicleDefs, int startTile, int destTile)
+		/// <summary>
+		/// <paramref name="caravan"/> can reach <paramref name="destTile"/>
+		/// </summary>
+		/// <param name="c"></param>
+		/// <param name="destTile"></param>
+		public bool CanReach(VehicleCaravan caravan, int destTile)
+		{
+			int startTile = caravan.Tile;
+			List<VehicleDef> vehicleDefs = caravan.UniqueVehicleDefsInCaravan().ToList();
+			return vehicleDefs.All(v => CanReach(v, startTile, destTile));
+		}
+
+		/// <summary>
+		/// <paramref name="vehicleDef"/> can reach <paramref name="destTile"/> from <paramref name="startTile"/>
+		/// </summary>
+		/// <param name="vehicleDef"></param>
+		/// <param name="startTile"></param>
+		/// <param name="destTile"></param>
+		public bool CanReach(VehicleDef vehicleDef, int startTile, int destTile)
 		{
 			if (startTile < 0 || startTile >= Find.WorldGrid.TilesCount || destTile < 0 || destTile >= Find.WorldGrid.TilesCount)
 			{
 				return false;
 			}
-			if (vehicleDefs.All(v => fields[v][startTile] == impassableFieldID) || vehicleDefs.All(v => fields[v][destTile] == impassableFieldID))
+			if (reachabilityGrid[vehicleDef][startTile] == impassableFieldID || reachabilityGrid[vehicleDef][destTile] == impassableFieldID)
 			{
 				return false;
 			}
-			if (vehicleDefs.All(v => IsValidField(fields[v][startTile]))  || vehicleDefs.All(v => IsValidField(fields[v][destTile])))
+			if (IsValidField(reachabilityGrid[vehicleDef][startTile])  || IsValidField(reachabilityGrid[vehicleDef][destTile]))
 			{
-				return vehicleDefs.All(v => fields[v][startTile] == fields[v][destTile]);
+				return reachabilityGrid[vehicleDef][startTile] == reachabilityGrid[vehicleDef][destTile];
 			}
-			vehicleDefs.ForEach(v => FloodFillAt(startTile, v));
-			return vehicleDefs.All(v => fields[v][startTile] != impassableFieldID && fields[v][startTile] == fields[v][destTile]);
+			FloodFillAt(startTile, vehicleDef);
+			return reachabilityGrid[vehicleDef][startTile] != impassableFieldID && reachabilityGrid[vehicleDef][startTile] == reachabilityGrid[vehicleDef][destTile];
 		}
 
+		/// <summary>
+		/// Invalidate all field IDs
+		/// </summary>
 		private void InvalidateAllFields()
 		{
 			if (nextFieldID == int.MaxValue)
@@ -70,50 +102,36 @@ namespace Vehicles
 			nextFieldID++;
 		}
 
-		private void ValidateVehicleDefs()
-		{
-			foreach(VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
-			{
-				fields.Add(vehicleDef, new int[Find.WorldGrid.TilesCount]);
-				if (vehicleDef.properties.customBiomeCosts is null)
-				{
-					vehicleDef.properties.customBiomeCosts = new Dictionary<BiomeDef, float>();
-				}
-				if(vehicleDef.vehicleType == VehicleType.Sea)
-				{
-					if (!vehicleDef.properties.customBiomeCosts.ContainsKey(BiomeDefOf.Ocean))
-					{
-						vehicleDef.properties.customBiomeCosts.Add(BiomeDefOf.Ocean, 1);
-					}
-					if (!vehicleDef.properties.customBiomeCosts.ContainsKey(BiomeDefOf.Lake))
-					{
-						vehicleDef.properties.customBiomeCosts.Add(BiomeDefOf.Lake, 1);
-					}
-				}
-			}
-		}
-
+		/// <summary>
+		/// <paramref name="fieldID"/> is valid
+		/// </summary>
+		/// <param name="fieldID"></param>
 		private bool IsValidField(int fieldID)
 		{
 			return fieldID >= minValidFieldID;
 		}
 
+		/// <summary>
+		/// FloodFill reachability cache at <paramref name="tile"/> for <paramref name="vehicleDef"/>
+		/// </summary>
+		/// <param name="tile"></param>
+		/// <param name="vehicleDef"></param>
 		private void FloodFillAt(int tile, VehicleDef vehicleDef)
 		{
-			if(!fields.ContainsKey(vehicleDef))
+			if (!reachabilityGrid.ContainsKey(vehicleDef))
 			{
-				fields.Add(vehicleDef, new int[Find.WorldGrid.TilesCount]);
+				reachabilityGrid.Add(vehicleDef, new int[Find.WorldGrid.TilesCount]);
 			}
 
-			if(!WorldVehiclePathGrid.Instance.Passable(tile, vehicleDef))
+			if (!WorldVehiclePathGrid.Instance.Passable(tile, vehicleDef))
 			{
-				fields[vehicleDef][tile] = impassableFieldID;
+				reachabilityGrid[vehicleDef][tile] = impassableFieldID;
 				return;
 			}
 
 			Find.WorldFloodFiller.FloodFill(tile, (int x) => WorldVehiclePathGrid.Instance.Passable(x, vehicleDef), delegate (int x)
 			{
-				fields[vehicleDef][x] = nextFieldID;
+				reachabilityGrid[vehicleDef][x] = nextFieldID;
 			}, int.MaxValue, null);
 			nextFieldID++;
 		}

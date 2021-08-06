@@ -14,9 +14,6 @@ namespace Vehicles
 		private const float ButtonWidth = 120f;
 		private const float ButtonHeight = 30f;
 
-		private Vector2 pawnsScrollPosition;
-		private Vector2 assignedScrollPosition;
-
 		private Pawn draggedPawn;
 		private Vector2 draggedItemPosOffset;
 		private Vector2 draggedIconPosOffset;

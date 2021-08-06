@@ -6,6 +6,7 @@
 		<label>Advanced Transport Pod</label>
 		<description>An upgraded transport pod capable of carrying multiple pawns with enough cargo space for trading. Once it takes off there is no changing course.</description>
 		
+		<uiIconScale>0.85</uiIconScale>
 		<graphicData>
 			<texPath>Vehicles/Air/AdvancedTransportPod/AdvancedTransportPod</texPath>
 			<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
@@ -20,14 +21,14 @@
 		<fillPercent>1</fillPercent>
 		
 		<nameable>false</nameable>
-		<raidersCanUse LockSetting="True">false</raidersCanUse>
-		
+
 		<buildDef>AdvancedTransportPod_Blueprint</buildDef>
 		<repairRate>650</repairRate>
 		
 		<armor>15</armor>
 		<cargoCapacity>250</cargoCapacity>
 		<speed LockSetting="True">0</speed>
+		<canCaravan LockSetting="True">false</canCaravan>
 		
 		<size>(3,3)</size>
 		

@@ -1,5 +1,6 @@
-﻿using Verse;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Verse;
+using SmashTools;
 
 namespace Vehicles.AI
 {
@@ -71,6 +72,20 @@ namespace Vehicles.AI
 			{
 				GeneratePathData(vehicleDef);
 			}
+		}
+
+		/// <summary>
+		/// Update vehicle regions sequentially
+		/// </summary>
+		/// <remarks>
+		/// Only one VehicleDef's RegionGrid updates per frame so performance doesn't scale with vehicle count
+		/// </remarks>
+		public override void MapComponentUpdate()
+		{
+			VehicleDef vehicleDef = VehicleHarmony.AllMoveableVehicleDefs[VehicleRegionGrid.vehicleRegionGridIndexChecking];
+			VehiclePathData vehiclePathData = this[vehicleDef];
+			vehiclePathData.VehicleRegionGrid.UpdateClean();
+			vehiclePathData.VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
 		}
 
 		/// <summary>

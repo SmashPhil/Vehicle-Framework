@@ -934,7 +934,7 @@ namespace Vehicles
 				VehicleHandler existingHandler = handlers.FirstOrDefault(h => h == handler);
 				if(existingHandler != null)
 				{
-					existingHandler.role.cannonIds.AddRange(handler.role.cannonIds);
+					existingHandler.role.turretIds.AddRange(handler.role.turretIds);
 				}
 				else
 				{
@@ -969,7 +969,7 @@ namespace Vehicles
 			{
 				return handlers.Where(h => h.role.handlingTypes.NullOrEmpty()).ToList();
 			}
-			return handlers.FindAll(x => x.role.handlingTypes.NotNullAndAny(h => h == handlingTypeFlag) && (handlingTypeFlag != HandlingTypeFlags.Cannon || (!x.role.cannonIds.NullOrEmpty() && x.role.cannonIds.Contains(cannonKey))));
+			return handlers.FindAll(x => x.role.handlingTypes.NotNullAndAny(h => h == handlingTypeFlag) && (handlingTypeFlag != HandlingTypeFlags.Cannon || (!x.role.turretIds.NullOrEmpty() && x.role.turretIds.Contains(cannonKey))));
 		}
 
 		public List<VehicleHandler> GetPriorityHandlers(HandlingTypeFlags? handlingTypeFlag = null)
@@ -1514,6 +1514,7 @@ namespace Vehicles
 
 		public override void DrawExtraSelectionOverlays()
 		{
+			base.DrawExtraSelectionOverlays();
 			if (vPather.curPath != null)
 			{
 				vPather.curPath.DrawPath(this);

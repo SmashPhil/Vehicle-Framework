@@ -39,20 +39,19 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="c"></param>
 		/// <param name="tile"></param>
-		/// <returns></returns>
 		public static bool AutoOrderVehicleCaravanPathing(Caravan c, int tile)
 		{
-			if(c is VehicleCaravan caravan && caravan.HasVehicle())
+			if (c is VehicleCaravan vehicleCaravan && vehicleCaravan.HasVehicle())
 			{
-				if (tile < 0 || (tile == caravan.Tile && !caravan.vPather.Moving))
+				if (tile < 0 || (tile == vehicleCaravan.Tile && !vehicleCaravan.vPather.Moving))
 				{
 					return false;
 				}
-				int num = WorldHelper.BestGotoDestForVehicle(caravan, tile);
+				int num = WorldHelper.BestGotoDestForVehicle(vehicleCaravan, tile);
 				if (num >= 0)
 				{
-					caravan.vPather.StartPath(num, null, true, true);
-					caravan.gotoMote.OrderedToTile(num);
+					vehicleCaravan.vPather.StartPath(num, null, true, true);
+					vehicleCaravan.gotoMote.OrderedToTile(num);
 					SoundDefOf.ColonistOrdered.PlayOneShotOnCamera(null);
 				}
 				return false;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <Defs>
-	<Vehicles.VehicleDef ParentName="BaseVehiclePawn">
+	<Vehicles.VehicleDef ParentName="BaseSeaVehicle">
 		<defName>FishingBoat</defName>
 		<label>Fishing Boat</label>
 		<description>A heavy warship to rule the seas.</description>
@@ -64,8 +64,6 @@
 			<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
 			<healthLabel_Immobile>Inoperable</healthLabel_Immobile>
 			
-			<customBiomeCosts/>
-			
 			<worldSpeedMultiplier>5</worldSpeedMultiplier>
 			
 			<roles>
@@ -90,9 +88,6 @@
 					</hitbox>
 				</li>
 			</roles>
-			
-			<defaultTerrainImpassable>true</defaultTerrainImpassable>
-			<customTerrainCosts AllowTerrainWithTag="Water" PathCost="1"/>
 		</properties>
 		
 		<components>

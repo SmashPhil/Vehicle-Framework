@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using HarmonyLib;
 using Verse;
 using RimWorld;
 using RimWorld.Planet;
@@ -145,6 +146,15 @@ namespace Vehicles
 				};
 			}
 			yield break;
+		}
+
+		/// <summary>
+		/// Resolve designators when changes have been made to <paramref name="designationCategoryDef"/>
+		/// </summary>
+		/// <param name="designationCategoryDef"></param>
+		public static void DesignatorsChanged(DesignationCategoryDef designationCategoryDef)
+		{
+			AccessTools.Method(typeof(DesignationCategoryDef), "ResolveDesignators").Invoke(designationCategoryDef, new object[] { });
 		}
 	}
 }

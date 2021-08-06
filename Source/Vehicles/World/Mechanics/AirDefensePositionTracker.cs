@@ -28,47 +28,53 @@ namespace Vehicles
 
 		public override void WorldComponentUpdate()
 		{
-			foreach (AirDefense airDefense in defensesToDraw)
+			if (VehicleMod.settings.main.airDefenses)
 			{
-				airDefense.DrawSpotlightOverlay();
+				foreach (AirDefense airDefense in defensesToDraw)
+				{
+					airDefense.DrawSpotlightOverlay();
+				}
 			}
 		}
 
 		public override void WorldComponentTick()
 		{
-			foreach (var defense in searchingDefenses)
+			if (VehicleMod.settings.main.airDefenses)
 			{
-				AerialVehicleInFlight aerialVehicleSearchingFor = defense.Key;
-				for (int j = defense.Value.Count - 1; j >= 0; j--)
+				foreach (var defense in searchingDefenses)
 				{
-					AirDefense airDefense = defense.Value.ElementAt(j);
-					float distance = Ext_Math.SphericalDistance(airDefense.parent.DrawPos, aerialVehicleSearchingFor.DrawPos);
-					bool withinMaxDistance = distance <= airDefense.MaxDistance;
-					if (airDefense.CurrentTarget != aerialVehicleSearchingFor)
+					AerialVehicleInFlight aerialVehicleSearchingFor = defense.Key;
+					for (int j = defense.Value.Count - 1; j >= 0; j--)
 					{
-						airDefense.angle = (airDefense.angle + RotationRate * airDefense.searchDirection).ClampAndWrap(0, 360);
-						float angleToTarget = airDefense.parent.DrawPos.AngleToPoint(aerialVehicleSearchingFor.DrawPos);
-						if (withinMaxDistance && Mathf.Abs(angleToTarget - airDefense.angle) <= (airDefense.Arc / 2))
+						AirDefense airDefense = defense.Value.ElementAt(j);
+						float distance = Ext_Math.SphericalDistance(airDefense.parent.DrawPos, aerialVehicleSearchingFor.DrawPos);
+						bool withinMaxDistance = distance <= airDefense.MaxDistance;
+						if (airDefense.CurrentTarget != aerialVehicleSearchingFor)
 						{
-							airDefense.activeTargets.Add(aerialVehicleSearchingFor);
-						}
-					}
-					else
-					{
-						float headingToTarget = WorldHelper.TryFindHeading(airDefense.parent.DrawPos, airDefense.CurrentTarget.DrawPos);
-						int dirSignMultiplier = headingToTarget < airDefense.angle ? -2 : 2;
-						if (Mathf.Abs(headingToTarget - airDefense.angle) < 1 || Mathf.Abs(headingToTarget - airDefense.angle) > 359)
-						{
-							airDefense.angle = headingToTarget;
-							airDefense.Attack();
+							airDefense.angle = (airDefense.angle + RotationRate * airDefense.searchDirection).ClampAndWrap(0, 360);
+							float angleToTarget = airDefense.parent.DrawPos.AngleToPoint(aerialVehicleSearchingFor.DrawPos);
+							if (withinMaxDistance && Mathf.Abs(angleToTarget - airDefense.angle) <= (airDefense.Arc / 2))
+							{
+								airDefense.activeTargets.Add(aerialVehicleSearchingFor);
+							}
 						}
 						else
 						{
-							airDefense.angle = (airDefense.angle + RotationRate * dirSignMultiplier).ClampAndWrap(0, 360);
-						}
-						if (!withinMaxDistance)
-						{
-							airDefense.activeTargets.Remove(aerialVehicleSearchingFor);
+							float headingToTarget = WorldHelper.TryFindHeading(airDefense.parent.DrawPos, airDefense.CurrentTarget.DrawPos);
+							int dirSignMultiplier = headingToTarget < airDefense.angle ? -2 : 2;
+							if (Mathf.Abs(headingToTarget - airDefense.angle) < 1 || Mathf.Abs(headingToTarget - airDefense.angle) > 359)
+							{
+								airDefense.angle = headingToTarget;
+								airDefense.Attack();
+							}
+							else
+							{
+								airDefense.angle = (airDefense.angle + RotationRate * dirSignMultiplier).ClampAndWrap(0, 360);
+							}
+							if (!withinMaxDistance)
+							{
+								airDefense.activeTargets.Remove(aerialVehicleSearchingFor);
+							}
 						}
 					}
 				}

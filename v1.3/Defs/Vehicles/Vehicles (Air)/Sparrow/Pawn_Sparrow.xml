@@ -6,6 +6,7 @@
 		<label>Sparrow</label>
 		<description>An agile fighter plane capable of recon and offensive operations.</description>
 		
+		<uiIconScale>0.9</uiIconScale>
 		<graphicData>
 			<texPath>Vehicles/Air/Sparrow/Sparrow</texPath>
 			<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
@@ -27,6 +28,7 @@
 		<armor>15</armor>
 		<cargoCapacity>250</cargoCapacity>
 		<speed>0.5</speed>
+		<canCaravan>false</canCaravan>
 		
 		<size>(3,3)</size>
 		
@@ -296,9 +298,12 @@
 				<turrets>
 					<li Class="Vehicles.VehicleTurretAlternating">
 						<turretDef>MountedLaserTurret</turretDef>
-						<turretRenderLocation>(-1.25, -0.35)</turretRenderLocation>
-						<turretRenderOffset>(0, 0)</turretRenderOffset>
-
+						<renderProperties>
+							<north>
+								<offset>(-1.25, -0.35)</offset>
+							</north>
+						</renderProperties>
+						
 						<gizmoLabel>Laser Turret</gizmoLabel>
 						<autoTargeting>false</autoTargeting>
 						
@@ -311,8 +316,11 @@
 					</li>
 					<li Class="Vehicles.VehicleTurretAlternating">
 						<turretDef>MountedLaserTurret</turretDef>
-						<turretRenderLocation>(1.25, -0.35)</turretRenderLocation>
-						<turretRenderOffset>(0, 0)</turretRenderOffset>
+						<renderProperties>
+							<north>
+								<offset>(1.25, -0.35)</offset>
+							</north>
+						</renderProperties>
 
 						<gizmoLabel>Laser Turret</gizmoLabel>
 						<autoTargeting>false</autoTargeting>

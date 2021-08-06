@@ -1,23 +1,124 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Verse;
 using RimWorld;
-using RimWorld.Planet;
 using SmashTools;
 using Vehicles.AI;
-
 
 namespace Vehicles
 {
 	public static class PathingHelper
 	{
+		public const string AllowTerrainWithTag = "PassableVehicles";
+		public const string DisallowTerrainWithTag = "ImpassableVehicles";
+
 		private static readonly Dictionary<ThingDef, List<VehicleDef>> regionEffecters = new Dictionary<ThingDef, List<VehicleDef>>();
 
 		/// <summary>
-		/// VehicleDef , &lt;TerrainDef,pathCost&gt;
+		/// VehicleDef , &lt;TerrainDef Tag,pathCost&gt;
 		/// </summary>
-		public static readonly Dictionary<string, Tuple<string, int>> allTerrainCostsByTag = new Dictionary<string, Tuple<string, int>>();
+		public static readonly Dictionary<string, Dictionary<string, int>> allTerrainCostsByTag = new Dictionary<string, Dictionary<string, int>>();
 
+		/// <summary>
+		/// Register any <seealso cref="TerrainDef"/>s with tags "PassableVehicles" or "ImpassableVehicles"
+		/// </summary>
+		public static void LoadTerrainDefaults()
+		{
+			foreach (TerrainDef terrainDef in DefDatabase<TerrainDef>.AllDefs)
+			{
+				if (terrainDef.tags.NotNullAndAny())
+				{
+					if (terrainDef.tags.Contains(AllowTerrainWithTag))
+					{
+						int pathCost = 1;
+						foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+						{
+							vehicleDef.properties.customTerrainCosts.TryAdd(terrainDef, pathCost);
+						}
+					}
+					else if (terrainDef.tags.Contains(DisallowTerrainWithTag))
+					{
+						int pathCost = -1;
+						foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+						{
+							vehicleDef.properties.customTerrainCosts.TryAdd(terrainDef, pathCost);
+						}
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Parse TerrainDef costs from registry for custom path costs in <seealso cref="VehicleDef"/>
+		/// </summary>
+		public static void LoadTerrainTagCosts()
+		{
+			List<TerrainDef> terrainDefs = DefDatabase<TerrainDef>.AllDefsListForReading;
+			foreach (var terrainCostFlipper in allTerrainCostsByTag)
+			{
+				VehicleDef vehicleDef = DefDatabase<VehicleDef>.GetNamed(terrainCostFlipper.Key);
+
+				foreach (var terrainFlip in terrainCostFlipper.Value)
+				{
+					string terrainTag = terrainFlip.Key;
+					int pathCost = terrainFlip.Value;
+
+					List<TerrainDef> terrainDefsWithTag = terrainDefs.Where(td => td.tags.NotNullAndAny(tag => tag == terrainTag)).ToList();
+					foreach (TerrainDef terrainDef in terrainDefsWithTag)
+					{
+						vehicleDef.properties.customTerrainCosts.TryAdd(terrainDef, pathCost);
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Load custom path costs from <see cref="CustomCostDefModExtension"/>
+		/// </summary>
+		public static void LoadDefModExtensionCosts()
+		{
+			foreach (Def def in DefDatabase<Def>.AllDefs)
+			{
+				if (def.GetModExtension<CustomCostDefModExtension>() is CustomCostDefModExtension customCost)
+				{
+					foreach (VehicleDef vehicleDef in customCost.vehicles)
+					{
+						if (def is TerrainDef terrainDef)
+						{
+							vehicleDef.properties.customTerrainCosts.TryAdd(terrainDef, customCost.pathCost);
+						}
+						if (def is ThingDef thingDef)
+						{
+							vehicleDef.properties.customThingCosts.TryAdd(thingDef, customCost.pathCost);
+						}
+						if (def is BiomeDef biomeDef)
+						{
+							vehicleDef.properties.customBiomeCosts.TryAdd(biomeDef, customCost.pathCost);
+						}
+						if (def is RiverDef riverDef)
+						{
+							vehicleDef.properties.customRiverCosts.TryAdd(riverDef, customCost.pathCost);
+						}
+						if (def is RoadDef roadDef)
+						{
+							vehicleDef.properties.customRoadCosts.TryAdd(roadDef, customCost.pathCost);
+						}
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Register <seealso cref="ThingDef"/> region effectors for all <seealso cref="VehicleDef"/>s
+		/// </summary>
+		public static void CacheVehicleRegionEffecters()
+		{
+			foreach (ThingDef thingDef in DefDatabase<ThingDef>.AllDefs)
+			{
+				RegisterRegionEffecter(thingDef);
+			}
+		}
 
 		/// <summary>
 		/// Register <paramref name="thingDef"/> as a potential object that will effect vehicle regions
@@ -55,6 +156,7 @@ namespace Vehicles
 				foreach (VehicleDef vehicleDef in vehicleDefs)
 				{
 					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsSpawned(thing);
+					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderThing(thing);
 				}
 			}
 		}
@@ -69,9 +171,10 @@ namespace Vehicles
 			if (regionEffecters.TryGetValue(thing.def, out List<VehicleDef> vehicleDefs))
 			{
 				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-				foreach (VehicleDef vehicleDef in vehicleDefs)
+				foreach (VehicleDef vehicleDef in vehicleDefs.Where(v => v.defName == "Tank"))
 				{
 					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsDespawned(thing);
+					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderThing(thing);
 				}
 			}
 		}

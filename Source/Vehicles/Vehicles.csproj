@@ -344,7 +344,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Achievements\VehicleBuilderTracker.cs" />
-    <Compile Include="AI\Incidents\IncidentWorker_ArmoredRaid.cs" />
     <Compile Include="AI\Incidents\IncidentWorker_ShuttleDowned.cs" />
     <Compile Include="AI\Jobs\JobDriver_RefuelVehicleAtomic.cs" />
     <Compile Include="AI\Jobs\JobDriver_WorkOnUpgrade.cs" />
@@ -352,9 +351,9 @@
     <Compile Include="AI\Lords\LordJob_VehicleNPC.cs" />
     <Compile Include="AI\Lords\LordToil_AssaultColonyArmored.cs" />
     <Compile Include="AI\Lords\LordToil_AssaultColonyWithArmor.cs" />
-    <Compile Include="AI\Incidents\RaidStrategyWorker_ArmoredRaid.cs" />
     <Compile Include="AI\Work\WorkGiver_RepairVehicle.cs" />
     <Compile Include="Cannons\Projectiles\CompProjectileExitMap.cs" />
+    <Compile Include="Cannons\Turret\VehicleTurretRender.cs" />
     <Compile Include="Components\Construction\ListerAirDefenses.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_Strafe.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Targeters\AntiAirTargeter.cs" />
@@ -375,6 +374,7 @@
     <Compile Include="CustomFeatures\Misc\MoteThrownExpand.cs" />
     <Compile Include="Gizmo\Command_ActionVehicleDrawn.cs" />
     <Compile Include="Graphics\ITab\WITab_Vehicle_Health.cs" />
+    <Compile Include="Misc\DefModExtension\CustomCostDefModExtension.cs" />
     <Compile Include="Misc\DefModExtension\ProjectilePropertiesDefModExtension.cs" />
     <Compile Include="Cannons\Projectiles\Laser.cs" />
     <Compile Include="Cannons\Turret\VehicleTurretAlternating.cs" />
@@ -453,6 +453,7 @@
     <Compile Include="Misc\DefOf\ProjectileSkyfallerDefOf.cs" />
     <Compile Include="Misc\Enums\Turret\TurretDisableType.cs" />
     <Compile Include="Misc\Enums\UI\DebugRegionType.cs" />
+    <Compile Include="Misc\Enums\Vehicle\VehicleEnabledFor.cs" />
     <Compile Include="Misc\ModSettings\SettingsCustomizableFields.cs" />
     <Compile Include="CustomFeatures\Reservation\Reservation.cs" />
     <Compile Include="CustomFeatures\Reservation\ReservationBase.cs" />
@@ -522,7 +523,6 @@
     <Compile Include="Misc\Attributes\SliderValuesAttribute.cs" />
     <Compile Include="Misc\DefOf\MoteDefOf.cs" />
     <Compile Include="Misc\DefOf\VehicleIncidentDefOf.cs" />
-    <Compile Include="Misc\DefOf\RaidStrategyDefOf.cs" />
     <Compile Include="Misc\Enums\Vehicle\ShuttleLaunchStatus.cs" />
     <Compile Include="Misc\Enums\UI\UISettingsType.cs" />
     <Compile Include="Misc\Interfaces\IPatchCategory.cs" />
@@ -541,7 +541,7 @@
     <Compile Include="AI\Work\WorkGiver_WorkOnUpgrade.cs" />
     <Compile Include="CustomFeatures\Damage\VehicleDamageMultipliers.cs" />
     <Compile Include="CustomFeatures\Reservation\VehicleJobLimitations.cs" />
-    <Compile Include="CustomFeatures\Upgrades\CannonUpgrade\CannonUpgrade.cs" />
+    <Compile Include="CustomFeatures\Upgrades\TurretUpgrade\TurretUpgrade.cs" />
     <Compile Include="CustomFeatures\Misc\IngredientFilter.cs" />
     <Compile Include="CustomFeatures\Misc\VehicleIdManager.cs" />
     <Compile Include="Components\Construction\VehicleBuildDef.cs" />
@@ -607,7 +607,6 @@
     <Compile Include="World\Defs\IncidentCrashedSiteDef.cs" />
     <Compile Include="World\Mechanics\AirDefensePositionTracker.cs" />
     <Compile Include="World\Mechanics\SettlementVehicleUtility.cs" />
-    <Compile Include="World\Mechanics\WorldPathTextMeshGenerator.cs" />
     <Compile Include="World\Shuttle\AerialVehicleUtility.cs" />
     <Compile Include="World\Caravan\VehicleCaravan.cs" />
     <Compile Include="Components\Vehicles\VehicleHandler.cs" />
@@ -748,6 +747,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Cannons\Turret\GizmoHandler\" />
+    <Folder Include="Comps\Fishing\" />
     <Folder Include="CustomFeatures\AerialLaunch\Skyfaller\Bombs\" />
   </ItemGroup>
   <ItemGroup>

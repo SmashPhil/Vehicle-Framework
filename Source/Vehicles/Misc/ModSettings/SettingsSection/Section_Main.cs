@@ -24,8 +24,6 @@ namespace Vehicles
 
 		/* Boats */
 		public bool passiveWaterWaves = true;
-		public bool riverTravel = true;
-		public bool boatSizeMatters = true;
 
 		/* Fishing */
 		public float fishingMultiplier = 1f;
@@ -36,12 +34,14 @@ namespace Vehicles
 		/* Aerial */
 		public bool burnRadiusOnRockets = true;
 		public bool deployOnLanding = true;
+		public bool airDefenses = true;
 		public bool dynamicWorldDrawing = true;
 		public float delayDeployOnLanding = 0;
 
 		/* Upgrades */
 		public bool drawUpgradeInformationScreen = true;
-		public bool useInGameTime = true;
+		public bool overrideDrawColors = true;
+		//REDO - Add hover over option for displaying info window?
 
 		public override void ResetSettings()
 		{
@@ -60,8 +60,6 @@ namespace Vehicles
 
 			/* Boats */
 			passiveWaterWaves = true;
-			riverTravel = true;
-			boatSizeMatters = true;
 
 			/* Fishing */
 			fishingMultiplier = 1f;
@@ -72,12 +70,13 @@ namespace Vehicles
 			/* Aerial */
 			burnRadiusOnRockets = true;
 			deployOnLanding = true;
+			airDefenses = true;
 			dynamicWorldDrawing = true;
 			delayDeployOnLanding = 0;
 
 			/* Upgrades */
 			drawUpgradeInformationScreen = true;
-			useInGameTime = true;
+			overrideDrawColors = true;
 		}
 
 		public override void ExposeData()
@@ -92,8 +91,6 @@ namespace Vehicles
 			Scribe_Values.Look(ref overheatMechanics, "overheatMechanics", true);
 
 			Scribe_Values.Look(ref passiveWaterWaves, "passiveWaterWaves", true);
-			Scribe_Values.Look(ref riverTravel, "riverTravel", true);
-			Scribe_Values.Look(ref boatSizeMatters, "boatSizeMatters", true);
 
 			Scribe_Values.Look(ref fishingMultiplier, "fishingMultiplier", 1f);
 			Scribe_Values.Look(ref fishingDelay, "fishingDelay", 10000);
@@ -102,11 +99,12 @@ namespace Vehicles
 
 			Scribe_Values.Look(ref burnRadiusOnRockets, "burnRadiusOnRockets", true);
 			Scribe_Values.Look(ref deployOnLanding, "deployOnLanding", true);
+			Scribe_Values.Look(ref airDefenses, "airDefenses", true);
 			Scribe_Values.Look(ref dynamicWorldDrawing, "dynamicWorldDrawing", true);
 			Scribe_Values.Look(ref delayDeployOnLanding, "delayDeployOnLanding", 0);
 
 			Scribe_Values.Look(ref drawUpgradeInformationScreen, "drawUpgradeInformationScreen", true);
-			Scribe_Values.Look(ref useInGameTime, "useInGameTime", true);
+			Scribe_Values.Look(ref overrideDrawColors, "overrideDrawColors", true);
 		}
 
 		//REDO - TRANSLATIONS
@@ -133,7 +131,12 @@ namespace Vehicles
 
 			listingStandard.CheckboxLabeled("VehiclesModifiableSettings".Translate(), ref modifiableSettings, "VehiclesModifiableSettingsTooltip".Translate());
 			listingStandard.CheckboxLabeled("FullVehiclePathing".Translate(), ref fullVehiclePathing, "FullVehiclePathingTooltip".Translate());
+			bool checkBefore = showDisabledVehicles;
 			listingStandard.CheckboxLabeled("ShowDisabledVehicles".Translate(), ref showDisabledVehicles, "ShowDisabledVehiclesTooltip".Translate());
+			if (checkBefore != showDisabledVehicles)
+			{
+				GizmoHelper.DesignatorsChanged(DesignationCategoryDefOf.Structure);
+			}
 
 			listingStandard.Header("Turrets", ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 			listingStandard.CheckboxLabeled("VehicleTurretOverheatMechanics".Translate(), ref overheatMechanics, "VehicleTurretOverheatMechanicsTooltip".Translate());
@@ -141,11 +144,6 @@ namespace Vehicles
 			listingStandard.Header("Boats", ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 
 			listingStandard.CheckboxLabeled("PassiveWaterWaves".Translate(), ref passiveWaterWaves, "PassiveWaterWavesTooltip".Translate());
-			listingStandard.CheckboxLabeled("RiverTravelAllowed".Translate(), ref riverTravel, "RiverTravelAllowedTooltip".Translate());
-			if (riverTravel)
-			{
-				listingStandard.CheckboxLabeled("BoatSizeMattersOnRivers".Translate(), ref boatSizeMatters, "BoatSizeMattersOnRiversTooltip".Translate());
-			}
 
 			listingStandard.NewColumn();
 			string fishingHeader = "Fishing";
@@ -170,6 +168,7 @@ namespace Vehicles
 
 			listingStandard.Header("Aerial", ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 			listingStandard.CheckboxLabeled("VehicleRocketsBurnRadius".Translate(), ref burnRadiusOnRockets, "VehicleRocketsBurnRadiusTooltip".Translate());
+			listingStandard.CheckboxLabeled("VehicleAirDefensesActive".Translate(), ref airDefenses, "VehicleAirDefensesActiveTooltip".Translate());
 			listingStandard.CheckboxLabeled("VehicleDeployOnLanding".Translate(), ref deployOnLanding, "VehicleDeployOnLandingTooltip".Translate());
 			if (deployOnLanding)
 			{
@@ -182,7 +181,7 @@ namespace Vehicles
 
 			listingStandard.Header("Upgrades", ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 			listingStandard.CheckboxLabeled("DrawUpgradeInformationScreen".Translate(), ref drawUpgradeInformationScreen, "DrawUpgradeInformationScreenTooltip".Translate());
-			listingStandard.CheckboxLabeled("UseIngameTime".Translate(useInGameTime ? "IngameTime".Translate() : "RealTime".Translate()), ref useInGameTime, "UseIngameTimeTooltip".Translate());
+			listingStandard.CheckboxLabeled("VehicleOverrideDrawColor".Translate(), ref overrideDrawColors, "VehicleOverrideDrawColorTooltip".Translate());
 
 			listingStandard.End();
 		}

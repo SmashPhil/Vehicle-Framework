@@ -19,7 +19,7 @@ namespace Vehicles
 				nameof(SituationBoardedVehicle)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldPawns), nameof(WorldPawns.RemoveAndDiscardPawnViaGC)),
 				prefix: new HarmonyMethod(typeof(WorldHandling),
-				nameof(DoNotRemoveDockedBoats)));
+				nameof(DoNotRemoveVehicleObjects)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldDynamicDrawManager), name: nameof(WorldDynamicDrawManager.DrawDynamicWorldObjects)),
 				transpiler: new HarmonyMethod(typeof(WorldHandling),
 				nameof(DrawDynamicAerialVehiclesTranspiler)));
@@ -62,25 +62,25 @@ namespace Vehicles
 		/// <param name="__result"></param>
 		public static void SituationBoardedVehicle(Pawn p, ref WorldPawnSituation __result)
 		{
-			if(__result == WorldPawnSituation.Free && p.Faction != null && p.Faction == Faction.OfPlayerSilentFail)
+			if (__result == WorldPawnSituation.Free && p.Faction != null && p.Faction == Faction.OfPlayerSilentFail)
 			{
-				if (p is VehiclePawn aerialVehicle && aerialVehicle.CompVehicleLauncher.inFlight)
+				if (p is VehiclePawn aerialVehicle && (aerialVehicle.CompVehicleLauncher?.inFlight ?? false))
 				{
 					__result = WorldPawnSituation.InTravelingTransportPod;
 					return;
 				}
-				foreach(Map map in Find.Maps)
+				foreach (Map map in Find.Maps)
 				{
-					foreach(VehiclePawn vehicle in map.mapPawns.AllPawnsSpawned.Where(v => v is VehiclePawn vehicle && v.Faction == Faction.OfPlayer))
+					foreach (VehiclePawn vehicle in map.mapPawns.AllPawnsSpawned.Where(v => v is VehiclePawn vehicle && v.Faction == Faction.OfPlayer))
 					{
-						if(vehicle.AllPawnsAboard.Contains(p))
+						if (vehicle.AllPawnsAboard.Contains(p))
 						{
 							__result = WorldPawnSituation.CaravanMember;
 							return;
 						}
 					}
 				}
-				foreach(Caravan c in Find.WorldObjects.Caravans)
+				foreach (Caravan c in Find.WorldObjects.Caravans)
 				{
 					foreach(VehiclePawn vehicle in c.PawnsListForReading.Where(v => v is VehiclePawn vehicle))
 					{
@@ -106,9 +106,9 @@ namespace Vehicles
 		/// Prevent RimWorld Garbage Collection from removing DockedBoats as well as pawns onboard DockedBoat WorldObjects
 		/// </summary>
 		/// <param name="p"></param>
-		public static bool DoNotRemoveDockedBoats(Pawn p)
+		public static bool DoNotRemoveVehicleObjects(Pawn p)
 		{
-			if (p is VehiclePawn vehicleInFlight && vehicleInFlight.CompVehicleLauncher.inFlight)
+			if (p is VehiclePawn vehicleInFlight && (vehicleInFlight.CompVehicleLauncher?.inFlight ?? false))
 			{
 				return false;
 			}

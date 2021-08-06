@@ -35,9 +35,9 @@ namespace Vehicles
 		/// Get all unique Vehicles in <paramref name="vehicles"/>
 		/// </summary>
 		/// <param name="vehicles"></param>
-		public static HashSet<VehicleDef> UniqueVehicleDefsInList(this List<VehiclePawn> vehicles)
+		public static List<VehicleDef> UniqueVehicleDefsInList(this IEnumerable<VehiclePawn> vehicles)
 		{
-			return vehicles.Select(v => v.VehicleDef).Distinct().ToHashSet();
+			return vehicles.Select(v => v.VehicleDef).Distinct().ToList();
 		}
 
 		/// <summary>
@@ -119,8 +119,7 @@ namespace Vehicles
 		/// <param name="tile"></param>
 		public static bool CoastalTravel(this VehicleDef vehicleDef, int tile)
 		{
-			return (vehicleDef.vehicleType == VehicleType.Sea || 
-				(vehicleDef.properties.customBiomeCosts.ContainsKey(BiomeDefOf.Ocean) && vehicleDef.properties.customBiomeCosts[BiomeDefOf.Ocean] <= WorldVehiclePathGrid.ImpassableMovementDifficulty) ) &&
+			return vehicleDef.properties.customBiomeCosts.ContainsKey(BiomeDefOf.Ocean) && vehicleDef.properties.customBiomeCosts[BiomeDefOf.Ocean] <= WorldVehiclePathGrid.ImpassableMovementDifficulty &&
 				Find.World.CoastDirectionAt(tile).IsValid;
 		}
 

@@ -13,7 +13,7 @@ namespace Vehicles
 		private readonly Map map;
 		private readonly VehicleDef vehicleDef;
 
-		private readonly List<IntVec3> dirtyCells = new List<IntVec3>();
+		private readonly HashSet<IntVec3> dirtyCells = new HashSet<IntVec3>();
 
 		private readonly List<VehicleRegion> regionsToDirty = new List<VehicleRegion>();
 
@@ -26,7 +26,7 @@ namespace Vehicles
 		/// <summary>
 		/// <see cref="dirtyCells"/> getter
 		/// </summary>
-		public List<IntVec3> DirtyCells => dirtyCells;
+		public HashSet<IntVec3> DirtyCells => dirtyCells;
 
 		/// <summary>
 		/// Any dirty cells registered
@@ -87,7 +87,7 @@ namespace Vehicles
 				SetRegionDirty(regionsToDirty[j], true);
 			}
 			regionsToDirty.Clear();
-			if (GenGridVehicles.Walkable(cell, vehicleDef, map) && !dirtyCells.Contains(cell))
+			if (GenGridVehicles.Walkable(cell, vehicleDef, map))
 			{
 				dirtyCells.Add(cell);
 			}

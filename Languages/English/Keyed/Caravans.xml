@@ -17,4 +17,7 @@
 	<CommandFormVehicleCaravan>Form Vehicle Caravan</CommandFormVehicleCaravan>
 	<CommandFormVehicleCaravanDesc>Form caravan with vehicles included.</CommandFormVehicleCaravanDesc>
 	<CommandReformVehicleCaravan>Reform Vehicle Caravan</CommandReformVehicleCaravan>
+	
+	<VehicleRoutePlannerToggleVehicleDefs>VehicleDefs</VehicleRoutePlannerToggleVehicleDefs>
+	<VehicleRoutePlannerToggleVehicles>Vehicles</VehicleRoutePlannerToggleVehicles>
 </LanguageData>

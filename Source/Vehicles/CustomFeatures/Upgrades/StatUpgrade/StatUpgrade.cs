@@ -17,12 +17,12 @@ namespace Vehicles
 		{
 		}
 
-		public StatUpgrade(VehiclePawn parent) : base(parent)
+		public StatUpgrade(VehiclePawn vehicle) : base(vehicle)
 		{
 
 		}
 
-		public StatUpgrade(StatUpgrade reference, VehiclePawn parent) : base(reference, parent)
+		public StatUpgrade(StatUpgrade reference, VehiclePawn vehicle) : base(reference, vehicle)
 		{
 			values = reference.values;
 		}
@@ -31,7 +31,7 @@ namespace Vehicles
 
 		public override int ListerCount => values.Count;
 
-		public override void Upgrade(VehiclePawn vehicle)
+		public override void Upgrade()
 		{
 			try
 			{
@@ -49,7 +49,7 @@ namespace Vehicles
 			vehicle.VehicleDef.buildDef.soundBuilt?.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map, false));
 		}
 
-		public override void Refund(VehiclePawn vehicle)
+		public override void Refund()
 		{
 			foreach(KeyValuePair<StatUpgradeCategoryDef, float> stat in values)
 			{

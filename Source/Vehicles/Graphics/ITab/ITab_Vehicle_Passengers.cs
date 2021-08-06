@@ -23,14 +23,15 @@ namespace Vehicles.UI
 			labelKey = "TabPassengers";
 		}
 
-		public VehiclePawn SelVehicle => SelPawn as VehiclePawn;
+		public VehiclePawn Vehicle => SelPawn as VehiclePawn;
+
 		private float SpecificNeedsTabWidth => specificNeedsTabForPawn.DestroyedOrNull() ? 0f : NeedsCardUtility.GetSize(specificNeedsTabForPawn).x;
 
 		public override bool IsVisible
 		{
 			get
 			{
-				return !SelVehicle.beached;
+				return !Vehicle.beached;
 			}
 		}
 
@@ -38,7 +39,7 @@ namespace Vehicles.UI
 		{
 			get
 			{
-				return SelVehicle.Passengers;
+				return Vehicle.Passengers;
 			}
 		}
 
@@ -46,7 +47,7 @@ namespace Vehicles.UI
 		{
 			get
 			{
-				return SelVehicle.AllPawnsAboard;
+				return Vehicle.AllPawnsAboard;
 			}
 		}
 
@@ -54,7 +55,7 @@ namespace Vehicles.UI
 		{
 			get
 			{
-				return SelVehicle.handlers;
+				return Vehicle.handlers;
 			}
 		}
 
@@ -65,11 +66,12 @@ namespace Vehicles.UI
 			Text.Font = GameFont.Small;
 			Rect rect = new Rect(0f, 0f, size.x, size.y).ContractedBy(10f);
 			Rect viewRect = new Rect(0f, 0f, rect.width - 16f, scrollViewHeight);
+
 			Widgets.BeginScrollView(rect, ref scrollPosition, viewRect, true);
 			float num = 0f;
 			bool flag = false;
 
-			foreach(VehicleHandler handler in Handlers)
+			foreach (VehicleHandler handler in Handlers)
 			{
 				Widgets.ListSeparator(ref num, viewRect.width, handler.role.label);
 				foreach(Pawn pawn in handler.handlers.InnerListForReading)

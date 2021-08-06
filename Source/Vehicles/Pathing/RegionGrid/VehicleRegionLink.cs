@@ -57,15 +57,11 @@ namespace Vehicles
 			}
 			if (RegionA is null || !RegionA.valid)
 			{
-				RegionA = reg;
+				RegionA = reg;	
 			}
 			else if (RegionB is null || !RegionB.valid)
 			{
 				RegionB = reg;
-			}
-			else
-			{
-				Log.Error($"Cannot register vehicle region {reg} in link {this}: > 2 vehicle regions on link.\nRegionA={RegionA.DebugString} RegionB: {RegionB.DebugString}");
 			}
 		}
 
@@ -75,7 +71,7 @@ namespace Vehicles
 		/// <param name="reg"></param>
 		public void Deregister(VehicleRegion region, VehicleDef vehicleDef)
 		{
-			if(RegionA == region)
+			if (RegionA == region)
 			{
 				RegionA = null;
 				if (RegionB is null)

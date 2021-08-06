@@ -9,7 +9,9 @@ namespace Vehicles
 	{
 		public GraphicDataRGB graphicData;
 
-		private VehicleDef vehicle;
+#pragma warning disable IDE0044 // Add readonly modifier
+		private VehicleDef vehicle = null;
+#pragma warning restore IDE0044 // Add readonly modifier
 
 		public List<FactionDef> factions = new List<FactionDef>();
 

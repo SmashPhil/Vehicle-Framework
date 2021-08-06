@@ -48,11 +48,11 @@ namespace Vehicles
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(WalkableFastThroughVehicleInt)));
 
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Thing), nameof(Thing.SpawnSetup)),
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(RegionDirtyer), "Notify_ThingAffectingRegionsSpawned"),
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(Notify_ThingAffectingVehicleRegionsSpawned)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Thing), nameof(Thing.DeSpawn)),
-				prefix: new HarmonyMethod(typeof(VehiclePathing),
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(RegionDirtyer), "Notify_ThingAffectingRegionsDespawned"),
+				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(Notify_ThingAffectingVehicleRegionsDespawned)));
 		}
 
@@ -303,14 +303,14 @@ namespace Vehicles
 			}
 		}
 
-		public static void Notify_ThingAffectingVehicleRegionsSpawned(Map map, bool respawningAfterLoad, Thing __instance)
+		public static void Notify_ThingAffectingVehicleRegionsSpawned(Thing b)
 		{
-			PathingHelper.ThingAffectingRegionsSpawned(__instance, map);
+			PathingHelper.ThingAffectingRegionsSpawned(b, b.Map);
 		}
 
-		public static void Notify_ThingAffectingVehicleRegionsDespawned(Thing __instance, DestroyMode mode = DestroyMode.Vanish)
+		public static void Notify_ThingAffectingVehicleRegionsDespawned(Thing b)
 		{
-			PathingHelper.ThingAffectingRegionsDeSpawned(__instance, __instance.Map);
+			PathingHelper.ThingAffectingRegionsDeSpawned(b, b.Map);
 		}
 	}
 }

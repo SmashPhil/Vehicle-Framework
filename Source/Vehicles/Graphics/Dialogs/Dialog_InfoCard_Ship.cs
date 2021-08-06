@@ -28,6 +28,8 @@ namespace Vehicles.UI
 
 		private List<StatDrawEntry> cachedDrawEntries;
 
+		private static QuickSearchWidget quickSearchWidget = new QuickSearchWidget();
+
 		//Only used for transpiler
 		public Dialog_InfoCard_Vehicle(Thing thing)
 		{
@@ -132,28 +134,41 @@ namespace Vehicles.UI
 			cachedDrawEntries = StatsToDraw(vehicle).ToList();
 			FinalizeCachedDrawEntries();
 			mousedOverEntry = null;
-			foreach(StatDrawEntry stat in cachedDrawEntries)
+			foreach (StatDrawEntry stat in cachedDrawEntries)
 			{
-				if(stat.category.LabelCap != b)
+				if (stat.category.LabelCap != b)
 				{
 					Widgets.ListSeparator(ref num, viewRect.width, stat.category.LabelCap);
 					b = stat.category.LabelCap;
 				}
-				//num += stat.Draw(8f, num, viewRect.width - 8f, selectedEntry == stat, delegate
-				//{
-				//	selectedEntry = stat;
-				//	SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
-				//}, delegate
-				//{
-				//	mousedOverEntry = stat;
-				//}, scrollPosition, rect2);
+				bool highlightLabel = false;
+				bool lowlightLabel = false;
+				if (quickSearchWidget.filter.Active)
+				{
+					if (quickSearchWidget.filter.Matches(stat.LabelCap))
+					{
+						highlightLabel = true;
+					}
+					else
+					{
+						lowlightLabel = true;
+					}
+				}
+				num += stat.Draw(8f, num, viewRect.width - 8f, selectedEntry == stat, highlightLabel, lowlightLabel, delegate
+				{
+					selectedEntry = stat;
+					SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
+				}, delegate
+				{
+					mousedOverEntry = stat;
+				}, scrollPosition, rect2);
 			}
 			listHeight = num + 100f;
 			Widgets.EndScrollView();
 			Rect rect4 = rect3.ContractedBy(10f);
 			GUI.BeginGroup(rect4);
 			StatDrawEntry statDrawEntry;
-			if((statDrawEntry = selectedEntry) is null)
+			if ((statDrawEntry = selectedEntry) is null)
 			{
 				statDrawEntry = mousedOverEntry ?? cachedDrawEntries.FirstOrDefault();
 			}

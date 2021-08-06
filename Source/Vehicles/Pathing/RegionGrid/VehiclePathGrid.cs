@@ -84,14 +84,14 @@ namespace Vehicles.AI
 		/// Recalculate path cost for tile <paramref name="vehicle"/> is registered on
 		/// </summary>
 		/// <param name="vehicle"></param>
-		public void RecalculatePerceivedPathCostUnderThing(VehiclePawn vehicle)
+		public void RecalculatePerceivedPathCostUnderThing(Thing thing)
 		{
-			if (vehicle.def.size == IntVec2.One)
+			if (thing.def.Size == IntVec2.One)
 			{
-				RecalculatePerceivedPathCostAt(vehicle.Position);
+				RecalculatePerceivedPathCostAt(thing.Position);
 				return;
 			}
-			CellRect cellRect = vehicle.OccupiedRect();
+			CellRect cellRect = thing.OccupiedRect();
 			for (int i = cellRect.minZ; i <= cellRect.maxZ; i++)
 			{
 				for (int j = cellRect.minX; j <= cellRect.maxX; j++)

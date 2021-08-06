@@ -39,6 +39,9 @@ namespace Vehicles
 
 		internal static string VersionDir => Path.Combine(VehicleMMD.RootDir.FullName, "Version.txt");
 
+		public static List<VehicleDef> AllMoveableVehicleDefs { get; internal set; }
+		public static int AllMoveableVehicleDefsCount { get; internal set; }
+
 		static VehicleHarmony()
 		{
 			//harmony.PatchAll(Assembly.GetExecutingAssembly());
@@ -69,14 +72,20 @@ namespace Vehicles
 			}
 			SmashLog.Message($"{LogLabel} <success>{Harmony.GetPatchedMethods().Count()} patches successfully applied.</success>");
 
-			ResolveAllReferences();
-			//Will want to be added via xml
-			FillVehicleLordJobTypes();
-			CacheVehicleRegionEffecters();
-			PostLoadVehicleTerrainCosts();
+			Utilities.InvokeWithLogging(ResolveAllReferences);
 
-			LoadedModManager.GetMod<VehicleMod>().InitializeTabs();
-			VehicleMod.settings.Write();
+			//Will want to be added via xml
+			Utilities.InvokeWithLogging(FillVehicleLordJobTypes);
+
+			Utilities.InvokeWithLogging(PathingHelper.LoadDefModExtensionCosts);
+			Utilities.InvokeWithLogging(PathingHelper.LoadTerrainTagCosts);
+			Utilities.InvokeWithLogging(PathingHelper.LoadTerrainDefaults);
+			Utilities.InvokeWithLogging(PathingHelper.CacheVehicleRegionEffecters);
+
+			Utilities.InvokeWithLogging(RecacheMoveableVehicleDefs);
+
+			Utilities.InvokeWithLogging(LoadedModManager.GetMod<VehicleMod>().InitializeTabs);
+			Utilities.InvokeWithLogging(VehicleMod.settings.Write);
 		}
 		
 		public static void Patch(MethodBase original, HarmonyMethod prefix = null, HarmonyMethod postfix = null, HarmonyMethod transpiler = null, HarmonyMethod finalizer = null)
@@ -102,33 +111,15 @@ namespace Vehicles
 			VehicleIncidentSwapper.RegisterLordType(typeof(LordJob_ArmoredAssault));
 		}
 
-		public static void CacheVehicleRegionEffecters()
+		internal static void ClearModConfig()
 		{
-			foreach (ThingDef thingDef in DefDatabase<ThingDef>.AllDefs)
-			{
-				PathingHelper.RegisterRegionEffecter(thingDef);
-			}
+			Utilities.DeleteConfig(VehicleMod.mod);
 		}
 
-		public static void PostLoadVehicleTerrainCosts()
+		internal static void RecacheMoveableVehicleDefs()
 		{
-			List<TerrainDef> terrainDefs = DefDatabase<TerrainDef>.AllDefsListForReading;
-			foreach (KeyValuePair<string, Tuple<string,int>> terrainCostFlipper in PathingHelper.allTerrainCostsByTag)
-			{
-				VehicleDef vehicleDef = DefDatabase<VehicleDef>.GetNamed(terrainCostFlipper.Key);
-				string terrainTag = terrainCostFlipper.Value.Item1;
-				int pathCost = terrainCostFlipper.Value.Item2;
-
-				List<TerrainDef> terrainDefsWithTag = terrainDefs.Where(td => td.tags.NotNullAndAny(tag => tag == terrainTag)).ToList();
-				foreach (TerrainDef terrainDef in terrainDefsWithTag)
-				{
-					if (!vehicleDef.properties.customTerrainCosts.TryGetValue(terrainDef, out _))
-					{
-						vehicleDef.properties.customTerrainCosts.Add(terrainDef, pathCost);
-					}
-					vehicleDef.properties.customTerrainCosts[terrainDef] = pathCost;
-				}
-			}
+			AllMoveableVehicleDefs = DefDatabase<VehicleDef>.AllDefs.Where(v => v.vehicleMovementPermissions != VehiclePermissions.NotAllowed).ToList();
+			AllMoveableVehicleDefsCount = AllMoveableVehicleDefs.Count;
 		}
 
 		public static void OpenBetaDialog()

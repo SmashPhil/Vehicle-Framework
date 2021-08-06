@@ -21,7 +21,7 @@ namespace Vehicles
 
 		public VehiclePawn Vehicle => parent as VehiclePawn;
 
-		public bool WeaponStatusOnline => !Vehicle.Downed && !Vehicle.Dead && Vehicle.Drafted;
+		public bool WeaponStatusOnline => !Vehicle.Downed && !Vehicle.Dead; //REDO - Add vehicle component health as check
 
 		public float MinRange => Cannons.Max(x => x.turretDef.minRange);
 
@@ -56,14 +56,10 @@ namespace Vehicles
 			{
 				return;
 			}
-			foreach (VehicleTurret cannon in cannonList)
+			foreach (VehicleTurret turret in cannonList)
 			{
-				VehicleTurret newTurret = CreateTurret(Vehicle, cannon);
-				if(cannons.NotNullAndAny(x => x.turretRenderLocation == newTurret.turretRenderLocation && newTurret.attachedTo != x && x.attachedTo != newTurret))
-				{
-					cannons.FindAll(x => x.turretRenderLocation == newTurret.turretRenderLocation).ForEach(y => y.TryRemoveShell());
-					cannons.RemoveAll(x => x.turretRenderLocation == newTurret.turretRenderLocation);
-				}
+				VehicleTurret newTurret = CreateTurret(Vehicle, turret);
+				cannons.RemoveAll(t => t.key == newTurret.key);
 				cannons.Add(newTurret);
 			}
 		}

@@ -9,30 +9,20 @@ using SmashTools;
 
 namespace Vehicles
 {
+	//REDO - Rivers
 	public static class WorldHelper
 	{
-		/// <summary>
-		/// Tile is completely water covered
-		/// </summary>
-		/// <param name="tile"></param>
-		public static bool WaterCovered(int tile)
-		{
-			return Find.WorldGrid[tile].biome == BiomeDefOf.Ocean || Find.WorldGrid[tile].biome == BiomeDefOf.Lake;
-		}
+		public static bool RiverIsValid(int tile, List<Pawn> vehicles) => true;
 
-		/// <summary>
-		/// <paramref name="ships"/> are able to travel on the River located in <paramref name="tile"/> on the World Map
-		/// </summary>
-		/// <param name="tile"></param>
-		/// <param name="ships"></param>
-		public static bool RiverIsValid(int tile, List<Pawn> ships)
+		public static float RiverCostAt(int tile, VehiclePawn vehicle)
 		{
-			if (!VehicleMod.settings.main.riverTravel || ships is null || !ships.NotNullAndAny(p => p.IsBoat()))
+			BiomeDef biome = Find.WorldGrid[tile].biome;
+			RiverDef river = Find.WorldGrid[tile].Rivers.MaxBy(r => r.river.widthOnWorld).river;
+			if (vehicle.VehicleDef.properties.customRiverCosts.TryGetValue(river, out float cost))
 			{
-				return false;
+				return cost;
 			}
-			bool flag = VehicleMod.settings.main.boatSizeMatters ? (!Find.WorldGrid[tile].Rivers.NullOrEmpty()) ? ShipsFitOnRiver(BiggestRiverOnTile(Find.WorldGrid[tile]?.Rivers).river, ships) : false : (Find.WorldGrid[tile].Rivers?.NotNullAndAny() ?? false);
-			return flag;
+			return WorldVehiclePathGrid.ImpassableMovementDifficulty;
 		}
 
 		/// <summary>
@@ -62,6 +52,17 @@ namespace Vehicles
 		}
 
 		/// <summary>
+		/// Get Heading between 2 points on World
+		/// </summary>
+		/// <param name="map"></param>
+		/// <param name="target"></param>
+		public static float TryFindHeading(Vector3 source, Vector3 target)
+		{
+			float heading = Find.WorldGrid.GetHeadingFromTo(source, target);
+			return heading;
+		}
+
+		/// <summary>
 		/// AerialVehicle <paramref name="vehicle"/> can offer gifts to <paramref name="settlement"/>
 		/// </summary>
 		/// <param name="vehicle"></param>
@@ -75,17 +76,17 @@ namespace Vehicles
 		/// <summary>
 		/// Find best tile to snap to when ordering a caravan
 		/// </summary>
-		/// <param name="c"></param>
+		/// <param name="caravan"></param>
 		/// <param name="tile"></param>
-		public static int BestGotoDestForVehicle(Caravan caravan, int tile)
+		public static int BestGotoDestForVehicle(VehicleCaravan caravan, int tile)
 		{
-			Predicate<int> predicate = (int t) => caravan.UniqueVehicleDefsInCaravan().All(v => WorldVehiclePathGrid.Instance.Passable(t, v)) && 
+			bool CaravanReachable(int t) => caravan.UniqueVehicleDefsInCaravan().All(v => WorldVehiclePathGrid.Instance.Passable(t, v)) &&
 				WorldVehicleReachability.Instance.CanReach(caravan, t);
-			if (predicate(tile))
+			if (CaravanReachable(tile))
 			{
 				return tile;
 			}
-			GenWorldClosest.TryFindClosestTile(tile, predicate, out int result, 50, true);
+			GenWorldClosest.TryFindClosestTile(tile, CaravanReachable, out int result, 50, true);
 			return result;
 		}
 
@@ -195,14 +196,29 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Get Heading between 2 points on World
+		/// Convert <paramref name="pos"/> to matrix in World space
 		/// </summary>
-		/// <param name="map"></param>
-		/// <param name="target"></param>
-		public static float TryFindHeading(Vector3 source, Vector3 target)
+		/// <param name="pos"></param>
+		/// <param name="size"></param>
+		/// <param name="altOffset"></param>
+		/// <param name="counterClockwise"></param>
+		public static Matrix4x4 GetWorldQuadAt(Vector3 pos, float size, float altOffset, bool counterClockwise = false)
 		{
-			float heading = Find.WorldGrid.GetHeadingFromTo(source, target);
-			return heading;
+			Vector3 normalized = pos.normalized;
+			Vector3 vector;
+			if (counterClockwise)
+			{
+				vector = -normalized;
+			}
+			else
+			{
+				vector = normalized;
+			}
+			Quaternion q = Quaternion.LookRotation(Vector3.Cross(vector, Vector3.up), vector);
+			Vector3 s = new Vector3(size, 1f, size);
+			Matrix4x4 matrix = default(Matrix4x4);
+			matrix.SetTRS(pos + normalized * altOffset, q, s);
+			return matrix;
 		}
 	}
 }

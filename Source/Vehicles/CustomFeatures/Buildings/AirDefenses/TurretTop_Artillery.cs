@@ -34,7 +34,7 @@ namespace Vehicles
 			this.parentTurret = parentTurret;
 		}
 
-		public virtual float CurRotation { get => curRotationInt; set => curRotationInt = value.ClampAndWrap(0, 360); }
+		public virtual new float CurRotation { get => curRotationInt; set => curRotationInt = value.ClampAndWrap(0, 360); }
 
 		public CompDrawLayerTurret DrawLayer
 		{
@@ -81,7 +81,7 @@ namespace Vehicles
 			CurRotation = parentTurret.Rotation.AsAngle;
 		}
 
-		public new virtual void DrawTurret()
+		public virtual void DrawTurret()
 		{
 			Vector3 offset = new Vector3(parentTurret.def.building.turretTopOffset.x, 0f, parentTurret.def.building.turretTopOffset.y).RotatedBy(CurRotation);
 			float drawSize = parentTurret.def.building.turretTopDrawSize;

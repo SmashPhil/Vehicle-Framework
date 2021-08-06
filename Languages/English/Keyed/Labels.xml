@@ -61,7 +61,7 @@
 	<TabCargo>Cargo</TabCargo>
 	<TabPassengers>Pawns</TabPassengers>
 	<TabComponents>Health</TabComponents>
-	<TabUpgrades>Upgrade</TabUpgrades>
+	<TabUpgrades>Customize</TabUpgrades>
 	<Cargo>Cargo</Cargo>
 	
 	<VehicleComponentHealth>Health</VehicleComponentHealth>

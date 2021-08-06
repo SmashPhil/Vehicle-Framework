@@ -25,7 +25,7 @@ namespace Vehicles
 
 		private Dialog_FormVehicleCaravan currentFormCaravanDialog;
 
-		public List<VehiclePawn> vehicles = new List<VehiclePawn>();
+		public List<VehicleDef> vehicleDefs = new List<VehicleDef>();
 		private VehicleCaravanTicksPerMoveUtility.VehicleInfo? caravanInfoFromFormCaravanDialog;
 		private List<WorldPath> paths = new List<WorldPath>();
 		private List<int> cachedTicksToWaypoint = new List<int>();
@@ -36,7 +36,7 @@ namespace Vehicles
 		public VehicleRoutePlanner(World world) : base(world)
 		{
 			this.world = world;
-			vehicles = new List<VehiclePawn>();
+			vehicleDefs = new List<VehicleDef>();
 			Instance = this;
 		}
 
@@ -56,7 +56,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return !Active || !WorldRendererUtility.WorldRenderedNow || (Current.ProgramState == ProgramState.Playing && Find.TickManager.CurTimeSpeed != TimeSpeed.Paused);
+				return !Active || !WorldRendererUtility.WorldRenderedNow || (Current.ProgramState == ProgramState.Playing && Find.TickManager.CurTimeSpeed != TimeSpeed.Paused && !Prefs.DevMode);
 			}
 		}
 
@@ -121,7 +121,7 @@ namespace Vehicles
 			caravanInfoFromFormCaravanDialog = new VehicleCaravanTicksPerMoveUtility.VehicleInfo(formCaravanDialog);
 			formCaravanDialog.choosingRoute = true;
 			Find.WindowStack.TryRemove(formCaravanDialog, true);
-			vehicles = caravanInfoFromFormCaravanDialog.Value.vehicles.Where(v => v is VehiclePawn).ToList();
+			vehicleDefs = caravanInfoFromFormCaravanDialog.Value.vehicles.UniqueVehicleDefsInList();
 			InitiateRoutePlanner();
 			TryAddWaypoint(formCaravanDialog.CurrentTile, true);
 			cantRemoveFirstWaypoint = true;
@@ -129,13 +129,12 @@ namespace Vehicles
 
 		public void InitiateRoutePlanner()
 		{
-			VehicleRoutePlanner.Instance.Active = true;
+			Instance.Active = true;
 			if (Current.ProgramState == ProgramState.Playing)
 			{
 				Find.World.renderer.wantedMode = WorldRenderMode.Planet;
 				Find.TickManager.Pause();
 			}
-			WorldPathTextMeshGenerator.UpdateTextMeshObjectsFor(vehicles);
 		}
 
 		public void Stop()
@@ -147,7 +146,7 @@ namespace Vehicles
 			}
 			waypoints.Clear();
 			cachedTicksToWaypoint.Clear();
-			vehicles.Clear();
+			vehicleDefs.Clear();
 			if (currentFormCaravanDialog != null)
 			{
 				currentFormCaravanDialog.Notify_NoLongerChoosingRoute();
@@ -156,7 +155,6 @@ namespace Vehicles
 			currentFormCaravanDialog = null;
 			cantRemoveFirstWaypoint = false;
 			ReleasePaths();
-			WorldPathTextMeshGenerator.ResetAllTextMeshObjects();
 		}
 
 		public void WorldRoutePlannerUpdate()
@@ -406,12 +404,12 @@ namespace Vehicles
 
 		private void TryAddWaypoint(int tile, bool playSound = true)
 		{
-			if (vehicles.NotNullAndAny(v => !WorldVehiclePathGrid.Instance.Passable(tile, v.VehicleDef)))
+			if (vehicleDefs.NotNullAndAny(v => !WorldVehiclePathGrid.Instance.Passable(tile, v)))
 			{
 				Messages.Message("MessageCantAddWaypointBecauseImpassable".Translate(), MessageTypeDefOf.RejectInput, false);
 				return;
 			}
-			if (waypoints.NotNullAndAny() && !WorldVehicleReachability.Instance.CanReach(vehicles.UniqueVehicleDefsInList().ToList(), waypoints[waypoints.Count - 1].Tile, tile))
+			if (waypoints.NotNullAndAny() && !vehicleDefs.All(vehicle => WorldVehicleReachability.Instance.CanReach(vehicle, waypoints[waypoints.Count - 1].Tile, tile)))
 			{
 				Messages.Message("MessageCantAddWaypointBecauseUnreachable".Translate(), MessageTypeDefOf.RejectInput, false);
 				return;
@@ -471,7 +469,14 @@ namespace Vehicles
 
 			for (int i = 1; i < waypoints.Count; i++)
 			{
-				paths.Add(WorldVehiclePathfinder.Instance.FindPath(waypoints[i - 1].Tile, waypoints[i].Tile, vehicles, null));
+				List<string> explanations = new List<string>();
+				paths.Add(WorldVehiclePathfinder.Instance.FindPath(waypoints[i - 1].Tile, waypoints[i].Tile, vehicleDefs, null, explanations));
+				if (VehicleMod.settings.debug.debugLogging)
+				{
+					Log.Message($"------ RoutePlanner ------");
+					explanations.ForEach(expl => Log.Message(expl));
+					Log.Message($"--------------------------");
+				}
 			}
 			cachedTicksToWaypoint.Clear();
 			int num = 0;

@@ -163,7 +163,7 @@ namespace Vehicles
 			TooltipHandler.TipRegion(fireModeRect, turret.CurrentFireMode.label);
 
 			GUI.color = autoTargetColor;
-			if (!turret.autoTargeting)
+			if (!turret.CanAutoTarget)
 			{
 				GUI.color = GenUI.MouseoverColor;
 			}

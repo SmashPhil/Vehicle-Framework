@@ -307,7 +307,7 @@ namespace Vehicles
 				}
 				catch (Exception ex)
 				{
-					Log.Error($"{entry} is not a valid <struct>DeploymentTimer</struct> format. Exception: {ex}");
+					SmashLog.Error($"{entry} is not a valid <struct>DeploymentTimer</struct> format. Exception: {ex}");
 					return Default;
 				}
 			}

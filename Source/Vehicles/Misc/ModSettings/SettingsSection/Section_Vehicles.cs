@@ -5,12 +5,14 @@ using System.Reflection;
 using UnityEngine;
 using HarmonyLib;
 using Verse;
+using RimWorld;
 using SmashTools;
 
 namespace Vehicles
 {
 	public class Section_Vehicles : SettingsSection
 	{
+		private static string drawStatusMessage = string.Empty;
 		public Dictionary<string, Dictionary<SaveableField, SavedField<object>>> fieldSettings = new Dictionary<string, Dictionary<SaveableField, SavedField<object>>>();
 
 		/// <summary>
@@ -101,12 +103,14 @@ namespace Vehicles
 			{
 				try
 				{
+					drawStatusMessage = $"Drawing {VehicleMod.selectedDef}";
 					Rect iconRect = menuRect.ContractedBy(10);
 					iconRect.width /= 5;
 					iconRect.height = iconRect.width;
 					iconRect.x += menuRect.width / 4;
 					iconRect.y += 30;
 
+					drawStatusMessage = $"Creating Paintbrush. Pattern={VehicleMod.selectedPatterns.Count}";
 					if (VehicleMod.selectedPatterns.Count > 1)
 					{
 						Rect paintBrushRect = new Rect(iconRect.x + iconRect.width, iconRect.y, 24, 24);
@@ -130,9 +134,11 @@ namespace Vehicles
 							Find.WindowStack.Add(floatMenu);
 						}
 					}
+					drawStatusMessage = $"Drawing VehicleTex in settings";
 					PatternDef curPattern = DefDatabase<PatternDef>.GetNamed(defaultMasks[VehicleMod.selectedDef.defName]);
 					RenderHelper.DrawVehicleTexInSettings(iconRect, VehicleMod.selectedDef, VehicleMod.graphicInt, VehicleMod.selectedVehicleTex, curPattern, Rot8.North);
 
+					drawStatusMessage = $"Drawing enable button";
 					Rect enableButtonRect = menuRect.ContractedBy(10);
 					enableButtonRect.x += enableButtonRect.width / 4 + 5;
 					EnableButton(enableButtonRect);
@@ -141,12 +147,12 @@ namespace Vehicles
 					compVehicleRect.x += vehicleIconContainer.width * 2 - 10;
 					compVehicleRect.y += 30;
 					compVehicleRect.width -= vehicleIconContainer.width * 2;
-					compVehicleRect.height -= (30 + menuRect.height * 0.45f);
+					compVehicleRect.height -= 30 + menuRect.height * 0.45f;
 
 					listingSplit.Begin(compVehicleRect, 2);
-
+					drawStatusMessage = $"Drawing main settings.";
 					listingSplit.Header("CompVehicleStats".Translate(), Color.clear, GameFont.Small, TextAnchor.MiddleCenter);
-
+					
 					foreach (FieldInfo field in VehicleMod.vehicleDefFields)
 					{
 						if (field.TryGetAttribute(out PostToSettingsAttribute post))
@@ -161,7 +167,10 @@ namespace Vehicles
 					Rect scrollableFieldsRect = new Rect(vehicleDetailsContainer.x + 1, menuRect.y + scrollableFieldY, vehicleDetailsContainer.width - 2, menuRect.height - scrollableFieldY - 10);
 
 					Rect scrollableFieldsViewRect = new Rect(scrollableFieldsRect.x, scrollableFieldsRect.y, scrollableFieldsRect.width - 20, VehicleMod.scrollableViewHeight);
+					//UIElements.DrawLineVerticalGrey(iconRect.x + iconRect.width + 24, iconRect.y, VehicleMod.scrollableViewHeight - 10);
 					UIElements.DrawLineHorizontalGrey(scrollableFieldsRect.x, scrollableFieldsRect.y - 1, scrollableFieldsRect.width);
+
+					drawStatusMessage = $"Drawing sub settings";
 					listingSplit.BeginScrollView(scrollableFieldsRect, ref VehicleMod.saveableFieldsScrollPosition, ref scrollableFieldsViewRect, 3);
 					foreach (var saveableObject in VehicleMod.VehicleCompFields)
 					{
@@ -188,7 +197,7 @@ namespace Vehicles
 				}
 				catch (Exception ex)
 				{
-					Log.Error($"Exception thrown while trying to select {VehicleMod.selectedDef.defName}. Disabling vehicle to preserve mod settings.\nException={ex.Message}");
+					Log.Error($"Exception thrown while trying to select {VehicleMod.selectedDef.defName}. LastTask={drawStatusMessage} Disabling vehicle to preserve mod settings.\nException={ex.Message}");
 					VehicleMod.settingsDisabledFor.Add(VehicleMod.selectedDef.defName);
 					VehicleMod.selectedDef = null;
 					VehicleMod.selectedPatterns.Clear();
@@ -210,17 +219,33 @@ namespace Vehicles
 			Text.Font = GameFont.Medium;
 			FieldInfo enabledField = AccessTools.Field(typeof(VehicleDef), nameof(VehicleDef.enabled));
 			SaveableField saveableField = new SaveableField(VehicleMod.selectedDef, enabledField);
-			bool enabled = (bool)fieldSettings[VehicleMod.selectedDef.defName][saveableField].First;
-			string text = enabled ? "VehicleEnabled".Translate() : "VehicleDisabled".Translate();
+			VehicleEnabledFor enabledFor = (VehicleEnabledFor)fieldSettings[VehicleMod.selectedDef.defName][saveableField].First;
+			(string text, Color color) = EnabledStatus(enabledFor);
 			Vector2 size = Text.CalcSize(text);
-			Color textColor = enabled ? Color.green : Color.red;
 			Rect enabledButtonRect = new Rect(rect.x, rect.y, size.x, size.y);
 			TooltipHandler.TipRegion(enabledButtonRect, "VehicleEnableButtonTooltip".Translate());
-			if (UIElements.ClickableLabel(enabledButtonRect, text, Color.yellow, textColor, GameFont.Medium))
+
+			Color highlightedColor = new Color(color.r + 0.25f, color.g + 0.25f, color.b + 0.25f);
+			if (UIElements.ClickableLabel(enabledButtonRect, text, highlightedColor, color, GameFont.Medium, TextAnchor.MiddleLeft, new Color(color.r - 0.15f, color.g - 0.15f, color.b - 0.15f)))
 			{
-				fieldSettings[VehicleMod.selectedDef.defName][saveableField] = new SavedField<object>(!enabled);
+				List<VehicleEnabledFor> enabledForValues = Enum.GetValues(typeof(VehicleEnabledFor)).Cast<VehicleEnabledFor>().ToList();
+				enabledFor = enabledForValues.Next(enabledFor);
+				fieldSettings[VehicleMod.selectedDef.defName][saveableField] = new SavedField<object>(enabledFor);
+				GizmoHelper.DesignatorsChanged(DesignationCategoryDefOf.Structure);
 			}
 			Text.Font = gameFont;
+		}
+
+		private (string text, Color color) EnabledStatus(VehicleEnabledFor status)
+		{
+			return status switch
+			{
+				VehicleEnabledFor.Everyone => ("VehicleEnabled".Translate(), Color.green),
+				VehicleEnabledFor.None => ("VehicleDisabled".Translate(), Color.red),
+				VehicleEnabledFor.Player => ("VehiclePlayerOnly".Translate(), new Color(0.1f, 0.85f, 0.85f)),
+				VehicleEnabledFor.Raiders => ("VehicleRaiderOnly".Translate(), new Color(0.9f, 0.53f, 0.1f)),
+				_ => ("[Err] Uncaught Status", Color.red)
+			};
 		}
 	}
 }

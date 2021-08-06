@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <Defs>
-	<Vehicles.VehicleDef ParentName="BaseVehiclePawn">
+	<Vehicles.VehicleDef ParentName="BaseSeaVehicle">
 		<defName>RowBoat</defName>
 		<label>Row Boat</label>
 		<description>A small sturdy boat for short travel across bodies of water.</description>
@@ -44,13 +44,13 @@
 		
 		<drawProperties>
 			<upgradeUICoord>(587,50)</upgradeUICoord>
-			<upgradeUISize>(384, 384)</upgradeUISize>
+			<upgradeUISize>(223, 384)</upgradeUISize>
 			
 			<colorPickerUICoord>(0, 40)</colorPickerUICoord>
-			<colorPickerUISize>(384, 384)</colorPickerUISize>
+			<colorPickerUISize>(223, 384)</colorPickerUISize>
 			
 			<settingsUICoord>(0, 0)</settingsUICoord>
-			<settingsUISize>(150, 150)</settingsUISize>
+			<settingsUISize>(87, 150)</settingsUISize>
 		</drawProperties>
 		
 		<properties>
@@ -61,9 +61,7 @@
 			<healthLabel_Healthy>Operational</healthLabel_Healthy>
 			<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
 			<healthLabel_Immobile>Inoperable</healthLabel_Immobile>
-			
-			<customBiomeCosts/>
-			
+
 			<roles>
 				<li>
 					<key>driver</key>
@@ -86,9 +84,6 @@
 					</hitbox>
 				</li>
 			</roles>
-			
-			<defaultTerrainImpassable>true</defaultTerrainImpassable>
-			<customTerrainCosts AllowTerrainWithTag="Water" PathCost="1"/>
 		</properties>
 		
 		<components>

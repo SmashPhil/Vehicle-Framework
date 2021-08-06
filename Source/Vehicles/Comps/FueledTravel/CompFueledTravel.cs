@@ -344,13 +344,13 @@ namespace Vehicles
 
 		public void DrawMotes()
 		{
-			foreach(OffsetMote offset in Props.motesGenerated)
+			foreach (OffsetMote offset in Props.motesGenerated)
 			{
 				for(int i = 0; i < offset.NumTimesSpawned; i++)
 				{
 					try
 					{
-						Pair<float, float> moteOffset = RenderHelper.TurretDrawOffset(Vehicle.Rotation.AsAngle + Vehicle.Angle, offset.xOffset, offset.zOffset, out Pair<float,float> rotationOffset);
+						Pair<float, float> moteOffset = RenderHelper.VehicleDrawOffset(Vehicle.FullRotation, offset.xOffset, offset.zOffset);
 						offsetX = moteOffset.First;
 						offsetZ = moteOffset.Second;
 

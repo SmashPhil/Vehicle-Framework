@@ -632,7 +632,7 @@ namespace Vehicles.AI
 				building_Door.Notify_PawnApproaching(vehicle, num);
 			}
 			SetBumperCells();
-			bool flag = bumperCells.Any(c => c.InBounds(vehicle.Map) && c.GetThingList(vehicle.Map).NotNullAndAny(t => t is VehiclePawn vehicle && vehicle != vehicle));
+			bool flag = bumperCells.Any(c => c.InBounds(vehicle.Map) && c.GetThingList(vehicle.Map).NotNullAndAny(t => t is VehiclePawn vehicle && vehicle != this.vehicle));
 
 			if (vehicle.ClampHitboxToMap(nextCell, vehicle.Map) || flag)
 			{

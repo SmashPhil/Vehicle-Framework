@@ -46,13 +46,15 @@ namespace Vehicles
 				actor.skills.Learn(SkillDefOf.Construction, 0.08f, false);
 				float statValue = actor.GetStatValue(StatDefOf.ConstructionSpeed, true);
 				if (statValue < 1)
+				{
 					statValue = 1;
-				Vehicle.CompUpgradeTree.NodeUnlocking.Ticks -= (int)statValue;
+				}
+				Vehicle.CompUpgradeTree.NodeUnlocking.WorkLeft -= statValue;
 			};
 			work.FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
 			work.WithEffect(TargetThingA.def.repairEffect, TargetIndex.A);
 			work.defaultCompleteMode = ToilCompleteMode.Never;
-			work.activeSkill = (() => SkillDefOf.Construction);
+			work.activeSkill = () => SkillDefOf.Construction;
 			yield return work;
 		}
 	}

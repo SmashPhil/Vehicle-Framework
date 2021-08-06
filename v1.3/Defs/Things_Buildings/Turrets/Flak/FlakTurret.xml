@@ -2,7 +2,7 @@
 <Defs>
 	<ThingDef ParentName="BaseArtilleryBuilding">
 		<defName>Turret_Flak</defName>
-		<label>88mm Flak 36</label>
+		<label>Flak Cannon</label>
 		<description>A manned artillery that launches all kinds of shells. Capable of inflicting devastating damage to both enemy forces and structures, this military machinery excels at laying down fire support for soldiers in the field.\n\nCapable of targeting other areas of the world within a medium radius.</description>
 		<thingClass>Vehicles.Building_RecoiledTurret</thingClass>
 		<graphicData>

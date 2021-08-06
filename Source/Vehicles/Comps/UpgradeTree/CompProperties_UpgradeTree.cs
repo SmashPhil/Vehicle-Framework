@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Verse;
-using RimWorld;
-using UnityEngine;
+using SmashTools;
+using Vehicles.UI;
 
 namespace Vehicles
 {
@@ -25,7 +25,17 @@ namespace Vehicles
 			}
 			if (upgrades is null)
 			{
-				yield return "null upgrades. Consider removing CompProperties_UpgradeTree if you don't plan on using upgrades.";
+				yield return "<field>upgrades</field> is null. Consider removing CompProperties_UpgradeTree if you don't plan on using upgrades.".ConvertRichText();
+			}
+			else
+			{
+				foreach (UpgradeNode node in upgrades)
+				{
+					if (node.GridCoordinate.x < 0 || node.GridCoordinate.x >= ITab_Vehicle_Upgrades.TotalLinesAcross)
+					{
+						yield return $"Maximum grid coordinate width={ITab_Vehicle_Upgrades.TotalLinesAcross - 1}. Larger coordinates are not supported, consider going downward. Coord=({node.GridCoordinate.x},{node.GridCoordinate.z})".ConvertRichText();
+					}
+				}
 			}
 		}
 	}

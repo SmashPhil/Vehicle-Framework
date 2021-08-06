@@ -20,7 +20,7 @@ namespace Vehicles
 			this.settings = settings;
 		}
 
-		public Listing_Settings() : base(GameFont.Tiny)
+		public Listing_Settings() : base()
 		{
 			settings = SettingsPage.Vehicles;
 		}

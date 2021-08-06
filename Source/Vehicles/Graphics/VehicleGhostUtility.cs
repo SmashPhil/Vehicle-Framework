@@ -39,35 +39,35 @@ namespace Vehicles.UI
 		{
 			if (vehicleDef.GetSortedCompProperties<CompProperties_Cannons>() is CompProperties_Cannons props)
 			{
-				foreach (VehicleTurret cannon in props.turrets)
+				foreach (VehicleTurret turret in props.turrets)
 				{
-					if (cannon.NoGraphic)
+					if (turret.NoGraphic)
 					{
 						continue;
 					}
 
-					cannon.ResolveCannonGraphics(vehicleDef);
+					turret.ResolveCannonGraphics(vehicleDef);
 
 					try
 					{
-						Graphic graphic = vehicleDef.GhostGraphicFor(cannon, ghostCol);
+						Graphic graphic = vehicleDef.GhostGraphicFor(turret, ghostCol);
 						
 						Vector3 topVectorRotation = new Vector3(loc.x, 1f, loc.y).RotatedBy(0f);
-						float locationRotation = cannon.defaultAngleRotated + rot.AsAngle;
-						if(cannon.attachedTo != null)
+						float locationRotation = turret.defaultAngleRotated + rot.AsAngle;
+						if (turret.attachedTo != null)
 						{
-							locationRotation += cannon.attachedTo.defaultAngleRotated + rot.AsAngle;
+							locationRotation += turret.attachedTo.defaultAngleRotated + rot.AsAngle;
 						}
-						Pair<float, float> drawOffset = RenderHelper.ShipDrawOffset(Rot8.North, cannon.turretRenderLocation.x, cannon.turretRenderLocation.y, out Pair<float, float> rotOffset1, locationRotation, cannon.attachedTo);
+						Pair<float, float> drawOffset = RenderHelper.TurretDrawOffset(rot, turret.renderProperties, locationRotation, turret.attachedTo);
 
-						Vector3 topVectorLocation = new Vector3(loc.x + drawOffset.First + rotOffset1.First, loc.y + cannon.drawLayer, loc.z + drawOffset.Second + rotOffset1.Second);
+						Vector3 topVectorLocation = new Vector3(loc.x + drawOffset.First, loc.y + turret.drawLayer, loc.z + drawOffset.Second);
 						Mesh cannonMesh = graphic.MeshAt(Rot4.North);
 						
 						Graphics.DrawMesh(cannonMesh, topVectorLocation, locationRotation.ToQuat(), graphic.MatAt(Rot4.North), 0);
 					}
 					catch(Exception ex)
 					{
-						Log.Error($"Failed to render Cannon=\"{cannon.turretDef.defName}\" for VehicleDef=\"{vehicleDef.defName}\", Exception: {ex.Message}");
+						Log.Error($"Failed to render Cannon=\"{turret.turretDef.defName}\" for VehicleDef=\"{vehicleDef.defName}\", Exception: {ex.Message}");
 					}
 				}
 			}

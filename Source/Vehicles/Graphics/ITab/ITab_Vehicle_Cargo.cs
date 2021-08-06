@@ -59,27 +59,7 @@ namespace Vehicles.UI
 			Widgets.BeginScrollView(outRect, ref scrollPosition, viewRect, true);
 			float num = 0f;
 			TryDrawMassInfo(ref num, viewRect.width);
-			if(SelPawnForCargo.StatNameable)
-			{
-				Rect rectRename = new Rect(size.x - 75f, 0f, 30f, 30f);
-				Rect rectRecolor = new Rect(size.x - 75f - rectRename.width, 0f, 30f, 30f);
-				TooltipHandler.TipRegion(rectRename, "RenameVehicle".Translate(SelPawnForCargo.LabelShort));
-				TooltipHandler.TipRegion(rectRecolor, "RecolorVehicle".Translate(SelPawnForCargo.LabelShort));
-				if (Widgets.ButtonImage(rectRename, VehicleTex.Rename))
-				{
-					SelPawnForCargo.Rename();
-				}
-				if (Widgets.ButtonImage(rectRecolor, VehicleTex.Recolor))
-				{
-					SelPawnForCargo.ChangeColor();
-				}
-				/*Rect rectRecolor = new Rect(this.size.x - 85f, 0f, 30f, 30f);
-				TooltipHandler.TipRegion(rectRecolor, "RecolorFlags".Translate());
-				if(Widgets.ButtonImage(rectRecolor, VehicleTex.Rename))
-				{
-
-				}*/
-			}
+			
 			if(IsVisible)
 			{
 				Widgets.ListSeparator(ref num, viewRect.width, "Cargo".Translate());

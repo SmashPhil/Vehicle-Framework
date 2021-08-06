@@ -49,7 +49,6 @@ namespace Vehicles
 			if (canceled && Cannon != null)
 			{
 				Cannon.AlignToAngleRestricted(Cannon.TurretRotationUncorrected);
-				//cannon.TurretRotation = cannon.currentRotation;
 			}
 			StopTargeting();
 		}
@@ -109,14 +108,20 @@ namespace Vehicles
 				{
 					GenDraw.DrawTargetHighlight(CurrentTargetUnderMouse());
 
-					if(CurrentTargetUnderMouse() != Cannon.vehicle)
+					if (CurrentTargetUnderMouse() != Cannon.vehicle)
+					{
 						Cannon.AlignToAngleRestricted((float)Cannon.TurretLocation.ToIntVec3().AngleToCell(CurrentTargetUnderMouse().Cell, map));
+					}
 				}
 				//REDO Radius Circle
-				//if(cannon.MinRange > 0)
-				//    GenDraw.DrawRadiusRing(cannon.TurretLocation.ToIntVec3(), cannon.turretDef.minRange, Color.red);
-				//if(cannon.turretDef.maxRange <= GenRadial.MaxRadialPatternRadius)
-				//    GenDraw.DrawRadiusRing(cannon.TurretLocation.ToIntVec3(), cannon.MaxRange, Color.white);
+				//if (Cannon.MinRange > 0)
+				//{
+				//	GenDraw.DrawRadiusRing(Cannon.TurretLocation.ToIntVec3(), Cannon.turretDef.minRange, Color.red);
+				//}
+				//if (Cannon.turretDef.maxRange <= GenRadial.MaxRadialPatternRadius)
+				//{
+				//	GenDraw.DrawRadiusRing(Cannon.TurretLocation.ToIntVec3(), Cannon.MaxRange, Color.white);
+				//}
 			}
 		}
 

@@ -11,7 +11,7 @@ namespace Vehicles
 		public List<HandlingTypeFlags> handlingTypes;
 		public int slots;
 		public int slotsToOperate;
-		public List<string> cannonIds;
+		public List<string> turretIds;
 		public ComponentHitbox hitbox = new ComponentHitbox();
 
 		public VehicleRole()
@@ -34,8 +34,8 @@ namespace Vehicles
 			}
 			slots = group.role.slots;
 			slotsToOperate = group.role.slotsToOperate;
-			cannonIds = new List<string>();
-			cannonIds.AddRange(group.role.cannonIds);
+			turretIds = new List<string>();
+			turretIds.AddRange(group.role.turretIds);
 		}
 
 		public VehicleRole(VehicleRole reference)
@@ -53,7 +53,7 @@ namespace Vehicles
 			}
 			slots = reference.slots;
 			slotsToOperate = reference.slotsToOperate;
-			cannonIds = reference.cannonIds;
+			turretIds = reference.turretIds;
 			hitbox = reference.hitbox;
 		}
 
@@ -66,7 +66,7 @@ namespace Vehicles
 			Scribe_Collections.Look(ref handlingTypes, "handlingTypes");
 			Scribe_Values.Look(ref slots, "slots", 1);
 			Scribe_Values.Look(ref slotsToOperate, "slotsToOperate", 1);
-			Scribe_Collections.Look(ref cannonIds, "cannonIds");
+			Scribe_Collections.Look(ref turretIds, "turretIds");
 		}
 	}
 }

@@ -31,7 +31,6 @@ namespace Vehicles
 		public Building_Door door;
 
 		public readonly List<VehicleRegionLink> links = new List<VehicleRegionLink>();
-		private readonly Dictionary<Area, AreaOverlap> cachedAreaOverlaps;
 		private readonly List<KeyValuePair<Pawn, Danger>> cachedDangers = new List<KeyValuePair<Pawn, Danger>>();
 
 		public uint[] closedIndex = new uint[VehicleRegionTraverser.NumWorkers];
@@ -442,6 +441,10 @@ namespace Vehicles
 			else if (DebugIsNew)
 			{
 				color = Color.yellow;
+			}
+			else if (!type.Passable())
+			{
+				color = ColorLibrary.Orange;
 			}
 			else
 			{

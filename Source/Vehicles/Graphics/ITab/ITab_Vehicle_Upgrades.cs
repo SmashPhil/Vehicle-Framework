@@ -11,34 +11,43 @@ namespace Vehicles.UI
 {
 	public class ITab_Vehicle_Upgrades : ITab
 	{
-		private const float MaxArmorValueDisplayed = 120;
-		private const float MaxSpeedValueDisplayed = 10;
-		private const float MaxCargoValueDisplayed = 10000;
-		private const float MaxFuelEffValueDisplayed = 100;
-		private const float MaxFuelCapValueDisplayed = 2000;
-		public const float TopPadding = 20f;
+		public const float IconBarDim = 30;
+		public const float UpgradeNodeDim = 30;
+
+		public const float TopPadding = 20;
 		public const float EdgePadding = 5f;
 		public const float SideDisplayedOffset = 40f;
 		public const float BottomDisplayedOffset = 20f;
-		public const float TopViewPadding = 20f;
-		public const float LeftWindowEdge = 600;
+
+		public const float LeftWindowEdge = screenWidth - 250;
+
 		public const float screenWidth = 850f;
-		public const float screenHeight = 700f;
-		public const float BottomWindowEdge = screenHeight - 200f;
+		public const float screenHeight = 520f;
+
+		public const float infoScreenHeight = 200;
+		public const float infoScreenWidth = 400;
+
+		public const float BottomWindowEdge = screenHeight - TopPadding * 2;
 		public const float TotalIconSizeScalar = 6000f;
+
+		public static int TotalLinesAcross = Mathf.FloorToInt(LeftWindowEdge / UpgradeNodeDim) - 1;
+		public int TotalLinesDown => Vehicle.CompUpgradeTree.upgradeList.NullOrEmpty() ? 0 : Vehicle.CompUpgradeTree.upgradeList.Max(u => u.GridCoordinate.z);
 
 		public static readonly Color ThingLabelColor = new Color(0.9f, 0.9f, 0.9f, 1f);
 		public static readonly Color HighlightColor = new Color(0.5f, 0.5f, 0.5f, 1f);
 		public static readonly Color NotUpgradedColor = new Color(0, 0, 0, 0.5f);
 		public static readonly Color PrerequisitesNotMetColor = new Color(0, 0, 0, 0.8f);
 		public static readonly Color LockScreenColor = new Color(0, 0, 0, 0.6f);
-		public static readonly Vector2 GridSpacing = new Vector2(20f, 20f);
-		public static readonly Vector2 GridOrigin = new Vector2(20f, -20f);
+		public static readonly Vector2 GridSpacing = new Vector2(UpgradeNodeDim, UpgradeNodeDim);
+		public static readonly Vector2 GridOrigin = new Vector2(UpgradeNodeDim, UpgradeNodeDim);
 
-		private UpgradeNode selectedNode;
+		public static readonly List<string> replaceNodes = new List<string>();
+
+		private SelectedNode selectedNode;
 		private Texture2D mainTex;
 
-		private static Vector2 Resize;
+		private static Vector2 scrollPosition;
+		private static Vector2 resize;
 		private bool resizeCheck;
 
 		public ITab_Vehicle_Upgrades()
@@ -47,11 +56,11 @@ namespace Vehicles.UI
 			labelKey = "TabUpgrades";
 		}
 
-		private VehiclePawn SelPawnUpgrade
+		private VehiclePawn Vehicle
 		{
 			get
 			{
-				if(SelPawn is VehiclePawn vehicle && vehicle.CompUpgradeTree != null)
+				if (SelPawn is VehiclePawn vehicle && vehicle.CompUpgradeTree != null)
 				{
 					return SelPawn as VehiclePawn;
 				}
@@ -67,7 +76,7 @@ namespace Vehicles.UI
 		{
 			get
 			{
-				mainTex = SelPawnUpgrade.VehicleGraphic.TexAt(Rot8.North);
+				mainTex = Vehicle.VehicleGraphic.TexAt(Rot8.North);
 				return mainTex;
 			}
 		}
@@ -78,7 +87,12 @@ namespace Vehicles.UI
 			selectedNode = null;
 			resizeCheck = false;
 			mainTex = null;
+			scrollPosition = Vector2.zero;
 		}
+
+		private float GridCoordinateToScreenPosX(int node) => GridOrigin.x + (GridSpacing.x * node) - (UpgradeNodeDim / 2);
+
+		private float GridCoordinateToScreenPosY(int node) => GridOrigin.y + (GridSpacing.y * node) - (UpgradeNodeDim / 2) + TopPadding;
 
 		protected override void FillTab()
 		{
@@ -94,51 +108,46 @@ namespace Vehicles.UI
 
 			Rect upgradeButtonRect = new Rect(screenWidth - BottomDisplayedOffset - 80f, BottomWindowEdge - 30f, 75f, 25f);
 			Rect cancelButtonRect = new Rect(LeftWindowEdge + 5f, BottomWindowEdge - 30f, 75f, 25f);
-			Rect displayRect = new Rect(SelPawnUpgrade.VehicleDef.drawProperties.upgradeUICoord.x, SelPawnUpgrade.VehicleDef.drawProperties.upgradeUICoord.y, SelPawnUpgrade.VehicleDef.drawProperties.upgradeUISize.x, SelPawnUpgrade.VehicleDef.drawProperties.upgradeUISize.y);
+			Rect displayRect = new Rect(Vehicle.VehicleDef.drawProperties.upgradeUICoord.x, Vehicle.VehicleDef.drawProperties.upgradeUICoord.y, Vehicle.VehicleDef.drawProperties.upgradeUISize.x, Vehicle.VehicleDef.drawProperties.upgradeUISize.y);
 
-			if(VehicleMod.settings.debug.debugDrawNodeGrid)
+			if (Vehicle.StatNameable)
 			{
-				DrawBackgroundGrid();
-			}
-			if(Prefs.DevMode)
-			{
-				var font = Text.Font;
-				Text.Font = GameFont.Tiny;
-				Rect screenInfo = new Rect(LeftWindowEdge + 5f, GridSpacing.y + 3f, screenWidth - LeftWindowEdge - 10f, 50f);
-				Widgets.Label(screenInfo, $"Screen Size: ({size.x},{size.y}) \nBottomEdge: {BottomWindowEdge}px \nLeftWindowEdge: {LeftWindowEdge}px");
-				Text.Font = font;
-			}
-
-			if (selectedNode != null && !SelPawnUpgrade.CompUpgradeTree.CurrentlyUpgrading)
-			{
-				float imageWidth = TotalIconSizeScalar / selectedNode.UpgradeImage.width;
-				float imageHeight = TotalIconSizeScalar / selectedNode.UpgradeImage.height;
-				Rect selectedRect = new Rect(GridOrigin.x + (GridSpacing.x * selectedNode.GridCoordinate.x) - (imageWidth / 2), GridOrigin.y + (GridSpacing.y * selectedNode.GridCoordinate.z) - (imageHeight / 2) + (TopPadding * 2), imageWidth, imageHeight);
-				selectedRect = selectedRect.ExpandedBy(2f);
-				GUI.DrawTexture(selectedRect, BaseContent.WhiteTex);
+				Rect rectRename = new Rect(size.x - IconBarDim * 1.5f - EdgePadding, -5, IconBarDim, IconBarDim);
+				Rect rectRecolor = new Rect(rectRename.x - IconBarDim, rectRename.y, IconBarDim, IconBarDim);
+				TooltipHandler.TipRegion(rectRename, "RenameVehicle".Translate(Vehicle.LabelShort));
+				TooltipHandler.TipRegion(rectRecolor, "RecolorVehicle".Translate(Vehicle.LabelShort));
+				if (Widgets.ButtonImage(rectRename, VehicleTex.Rename))
+				{
+					Vehicle.Rename();
+				}
+				if (Widgets.ButtonImage(rectRecolor, VehicleTex.Recolor))
+				{
+					Vehicle.ChangeColor();
+				}
 			}
 
-			if (Widgets.ButtonText(upgradeButtonRect, "Upgrade".Translate()) && selectedNode != null && !selectedNode.upgradeActive)
+			GUI.enabled = selectedNode != null && Vehicle.CompUpgradeTree.PrerequisitesMet(selectedNode.node);
+			if (Widgets.ButtonText(upgradeButtonRect, "Upgrade".Translate()) && !selectedNode.node.upgradeActive)
 			{
-				if (SelPawnUpgrade.CompUpgradeTree.Disabled(selectedNode))
+				if (Vehicle.CompUpgradeTree.Disabled(selectedNode.node))
 				{
 					Messages.Message("DisabledFromOtherNode".Translate(), MessageTypeDefOf.RejectInput, false);
 				}
-				else if (SelPawnUpgrade.CompUpgradeTree.PrerequisitesMet(selectedNode))
+				else if (Vehicle.CompUpgradeTree.PrerequisitesMet(selectedNode.node))
 				{
-					SoundDefOf.ExecuteTrade.PlayOneShotOnCamera(SelPawnUpgrade.Map);
-					SoundDefOf.Building_Complete.PlayOneShot(SelPawnUpgrade);
+					SoundDefOf.ExecuteTrade.PlayOneShotOnCamera(Vehicle.Map);
+					SoundDefOf.Building_Complete.PlayOneShot(Vehicle);
 
-					SelPawnUpgrade.drafter.Drafted = false;
+					Vehicle.drafter.Drafted = false;
 					if (DebugSettings.godMode)
 					{
-						SelPawnUpgrade.CompUpgradeTree.FinishUnlock(selectedNode);
+						Vehicle.CompUpgradeTree.FinishUnlock(selectedNode.node);
 					}
 					else
 					{
-						SelPawnUpgrade.CompUpgradeTree.StartUnlock(selectedNode);
+						Vehicle.CompUpgradeTree.StartUnlock(selectedNode.node);
 					}
-					selectedNode.upgradePurchased = true;
+					selectedNode.node.upgradePurchased = true;
 					selectedNode = null;
 				}
 				else
@@ -146,17 +155,19 @@ namespace Vehicles.UI
 					Messages.Message("MissingPrerequisiteUpgrade".Translate(), MessageTypeDefOf.RejectInput, false);
 				}
 			}
-			
-			if(SelPawnUpgrade.CompUpgradeTree.CurrentlyUpgrading)
+			GUI.enabled = true;
+			if (Vehicle.CompUpgradeTree.CurrentlyUpgrading)
 			{
-				if(Widgets.ButtonText(cancelButtonRect, "CancelUpgrade".Translate()))
-					SelPawnUpgrade.CompUpgradeTree.CancelUpgrade();
+				if (Widgets.ButtonText(cancelButtonRect, "CancelUpgrade".Translate()))
+				{
+					Vehicle.CompUpgradeTree.CancelUpgrade();
+				}
 			}
-			else if(selectedNode != null && SelPawnUpgrade.CompUpgradeTree.NodeListed(selectedNode).upgradeActive && SelPawnUpgrade.CompUpgradeTree.LastNodeUnlocked(selectedNode))
+			else if (selectedNode != null && Vehicle.CompUpgradeTree.NodeListed(selectedNode.node).upgradeActive && Vehicle.CompUpgradeTree.LastNodeUnlocked(selectedNode.node))
 			{
 				if (Widgets.ButtonText(cancelButtonRect, "RefundUpgrade".Translate()))
 				{
-					SelPawnUpgrade.CompUpgradeTree.RefundUnlock(SelPawnUpgrade.CompUpgradeTree.NodeListed(selectedNode));
+					Vehicle.CompUpgradeTree.RefundUnlock(Vehicle.CompUpgradeTree.NodeListed(selectedNode.node));
 					selectedNode = null;
 				}
 			}
@@ -164,35 +175,59 @@ namespace Vehicles.UI
 			{
 				Widgets.ButtonText(cancelButtonRect, string.Empty);
 			}
+			float startY = TopPadding + GridSpacing.y;
+			Rect outRect = new Rect(0, startY, LeftWindowEdge, screenHeight - startY);
+			Rect viewRect = new Rect(outRect.x, outRect.y, outRect.width, outRect.y + TotalLinesDown * UpgradeNodeDim + UpgradeNodeDim / 2);
 
-			foreach(UpgradeNode upgradeNode in SelPawnUpgrade.CompUpgradeTree.upgradeList)
+			var colorGrid = GUI.color;
+			GUI.color = new Color(0.3f, 0.3f, 0.3f, 1f);
+			if (VehicleMod.settings.debug.debugDrawNodeGrid)
 			{
-				if(!upgradeNode.prerequisiteNodes.NullOrEmpty())
+				DrawBackgroundGridTop();
+			}
+			GUI.color = colorGrid;
+			Widgets.BeginScrollView(outRect, ref scrollPosition, viewRect);
+			GUI.color = new Color(0.3f, 0.3f, 0.3f, 1f);
+			if (VehicleMod.settings.debug.debugDrawNodeGrid)
+			{
+				DrawBackgroundGridLeft();
+			}
+			GUI.color = colorGrid;
+
+			if (selectedNode != null && !Vehicle.CompUpgradeTree.CurrentlyUpgrading)
+			{
+				Rect selectedRect = new Rect(GridCoordinateToScreenPosX(selectedNode.node.GridCoordinate.x), GridCoordinateToScreenPosY(selectedNode.node.GridCoordinate.z), UpgradeNodeDim, UpgradeNodeDim);
+				selectedRect = selectedRect.ExpandedBy(2f);
+				GUI.DrawTexture(selectedRect, BaseContent.WhiteTex);
+			}
+			foreach (UpgradeNode upgradeNode in Vehicle.CompUpgradeTree.upgradeList)
+			{
+				if (!upgradeNode.prerequisiteNodes.NullOrEmpty())
 				{
-					foreach(UpgradeNode prerequisite in SelPawnUpgrade.CompUpgradeTree.upgradeList.FindAll(x => upgradeNode.prerequisiteNodes.Contains(x.upgradeID)))
+					foreach (UpgradeNode prerequisite in Vehicle.CompUpgradeTree.upgradeList.FindAll(x => upgradeNode.prerequisiteNodes.Contains(x.upgradeID)))
 					{
-						Vector2 start = new Vector2(GridOrigin.x + (GridSpacing.x * prerequisite.GridCoordinate.x), GridOrigin.y + (GridSpacing.y * prerequisite.GridCoordinate.z) + (TopPadding*2));
-						Vector2 end = new Vector2(GridOrigin.x + (GridSpacing.x * upgradeNode.GridCoordinate.x), GridOrigin.y + (GridSpacing.y * upgradeNode.GridCoordinate.z) + (TopPadding*2));
+						Vector2 start = new Vector2(GridOrigin.x + (GridSpacing.x * prerequisite.GridCoordinate.x), GridOrigin.y + (GridSpacing.y * prerequisite.GridCoordinate.z) + TopPadding);
+						Vector2 end = new Vector2(GridOrigin.x + (GridSpacing.x * upgradeNode.GridCoordinate.x), GridOrigin.y + (GridSpacing.y * upgradeNode.GridCoordinate.z) + TopPadding);
 						Color color = Color.grey;
-						if(upgradeNode.upgradeActive)
+						if (upgradeNode.upgradeActive)
 						{
 							color = Color.white;
 						}
-						else if(!string.IsNullOrEmpty(upgradeNode.disableIfUpgradeNodeEnabled))
+						else if (!string.IsNullOrEmpty(upgradeNode.disableIfUpgradeNodeEnabled))
 						{
 							try
 							{
-								UpgradeNode preUpgrade = SelPawnUpgrade.CompUpgradeTree.NodeListed(upgradeNode.disableIfUpgradeNodeEnabled);
+								UpgradeNode preUpgrade = Vehicle.CompUpgradeTree.NodeListed(upgradeNode.disableIfUpgradeNodeEnabled);
 								float imageWidth = TotalIconSizeScalar / preUpgrade.UpgradeImage.width;
 								float imageHeight = TotalIconSizeScalar / preUpgrade.UpgradeImage.height;
 								Rect preUpgradeRect = new Rect(GridOrigin.x + (GridSpacing.x * preUpgrade.GridCoordinate.x) - (imageWidth/2), GridOrigin.y + (GridSpacing.y * preUpgrade.GridCoordinate.z) - (imageHeight/2) + (TopPadding*2), imageWidth, imageHeight);
-								if(!SelPawnUpgrade.CompUpgradeTree.CurrentlyUpgrading)
+								if (!Vehicle.CompUpgradeTree.CurrentlyUpgrading)
 								{
 									if (preUpgrade.upgradePurchased)
 									{
 										color = Color.black;
 									}
-									else if(Mouse.IsOver(preUpgradeRect))
+									else if (Mouse.IsOver(preUpgradeRect))
 									{
 										color = Color.red;
 									}
@@ -207,48 +242,41 @@ namespace Vehicles.UI
 					}
 				}
 			}
-
+			
 			bool preDrawingDescriptions = false;
-			for(int i = 0; i < SelPawnUpgrade.CompUpgradeTree.upgradeList.Count; i++)
+			for(int i = 0; i < Vehicle.CompUpgradeTree.upgradeList.Count; i++)
 			{
-				UpgradeNode upgradeNode = SelPawnUpgrade.CompUpgradeTree.upgradeList[i];
-				float imageWidth = TotalIconSizeScalar / upgradeNode.UpgradeImage.width;
-				float imageHeight = TotalIconSizeScalar / upgradeNode.UpgradeImage.height;
+				UpgradeNode upgradeNode = Vehicle.CompUpgradeTree.upgradeList[i];
 
-				Rect upgradeRect = new Rect(GridOrigin.x + (GridSpacing.x * upgradeNode.GridCoordinate.x) - (imageWidth/2), GridOrigin.y + (GridSpacing.y * upgradeNode.GridCoordinate.z) - (imageHeight/2) + (TopPadding*2), imageWidth, imageHeight);
+				Rect upgradeRect = new Rect(GridCoordinateToScreenPosX(upgradeNode.GridCoordinate.x), GridCoordinateToScreenPosY(upgradeNode.GridCoordinate.z), UpgradeNodeDim, UpgradeNodeDim);
 				Widgets.DrawTextureFitted(upgradeRect, upgradeNode.UpgradeImage, 1);
 				
-				if(!SelPawnUpgrade.CompUpgradeTree.PrerequisitesMet(upgradeNode))
+				if (!Vehicle.CompUpgradeTree.PrerequisitesMet(upgradeNode))
 				{
 					Widgets.DrawBoxSolid(upgradeRect, PrerequisitesNotMetColor);
 				}
-				else if(!upgradeNode.upgradeActive || !upgradeNode.upgradePurchased)
+				else if (!upgradeNode.upgradeActive || !upgradeNode.upgradePurchased)
 				{
 					Widgets.DrawBoxSolid(upgradeRect, NotUpgradedColor);
 				}
 
-				if(!upgradeNode.prerequisiteNodes.NotNullAndAny())
+				if (upgradeNode.displayLabel)
 				{
-					if(!string.IsNullOrEmpty(upgradeNode.rootNodeLabel))
-					{
-						float textWidth = Text.CalcSize(upgradeNode.rootNodeLabel).x;
-						Rect nodeLabelRect = new Rect(upgradeRect.x - (textWidth - upgradeRect.width) / 2, upgradeRect.y - 20f, 10f * upgradeNode.rootNodeLabel.Length, 25f);
-						Widgets.Label(nodeLabelRect, upgradeNode.rootNodeLabel);
-					}
+					float textWidth = Text.CalcSize(upgradeNode.label).x;
+					Rect nodeLabelRect = new Rect(upgradeRect.x - (textWidth - upgradeRect.width) / 2, upgradeRect.y - 20f, 10f * upgradeNode.label.Length, 25f);
+					Widgets.Label(nodeLabelRect, upgradeNode.label);
 				}
-				Rect buttonRect = new Rect(GridOrigin.x + (GridSpacing.x * upgradeNode.GridCoordinate.x) - (imageWidth/2), GridOrigin.y + (GridSpacing.y * upgradeNode.GridCoordinate.z) - (imageHeight/2) + (TopPadding*2), imageWidth, imageHeight);
-
 				Rect infoLabelRect = new Rect(5f, BottomWindowEdge, LeftWindowEdge, 150f);
 				GUIStyle infoLabelFont = new GUIStyle(Text.CurFontStyle);
 				infoLabelFont.fontStyle = FontStyle.Bold;
 				
-				if(!SelPawnUpgrade.CompUpgradeTree.CurrentlyUpgrading)
+				if (!Vehicle.CompUpgradeTree.CurrentlyUpgrading)
 				{
-					if(Mouse.IsOver(upgradeRect))
+					if (Mouse.IsOver(upgradeRect))
 					{
 						preDrawingDescriptions = true;
 
-						if(!upgradeNode.upgradePurchased)
+						if (!upgradeNode.upgradePurchased)
 						{
 							additionalStatNode = upgradeNode;
 							highlightedPreMetNode = upgradeNode;
@@ -258,26 +286,35 @@ namespace Vehicles.UI
 						Widgets.Label(new Rect(infoLabelRect.x, infoLabelRect.y + 20f, infoLabelRect.width, 140f), upgradeNode.informationHighlighted);
 					}
 
-					if((Mouse.IsOver(upgradeRect)) && SelPawnUpgrade.CompUpgradeTree.PrerequisitesMet(upgradeNode) && !upgradeNode.upgradeActive)
+					if (Mouse.IsOver(upgradeRect) && Vehicle.CompUpgradeTree.PrerequisitesMet(upgradeNode) && !upgradeNode.upgradeActive)
 					{
 						GUI.DrawTexture(upgradeRect, TexUI.HighlightTex);
 					}
 
-					if(SelPawnUpgrade.CompUpgradeTree.PrerequisitesMet(upgradeNode))
+					if (Widgets.ButtonInvisible(upgradeRect, true))
 					{
-						if(Widgets.ButtonInvisible(buttonRect,true))
-						{
 
-							if (selectedNode != upgradeNode)
+						if (selectedNode?.node != upgradeNode)
+						{
+							float textHeight = Text.CalcHeight(upgradeNode.label, infoScreenWidth) + Text.CalcHeight(upgradeNode.informationHighlighted, infoScreenWidth);
+							float maxedInfoScreenHeight = Mathf.Max(infoScreenHeight, textHeight);
+							Rect infoPanelRect = new Rect(upgradeRect.x, upgradeRect.y + upgradeRect.height + 10f, infoScreenWidth, maxedInfoScreenHeight);
+							float leftPanelEnd = LeftWindowEdge - 10;
+							if (infoPanelRect.x + infoPanelRect.width > leftPanelEnd)
 							{
-								selectedNode = upgradeNode;
-								SoundDefOf.Checkbox_TurnedOn.PlayOneShotOnCamera();
+								infoPanelRect.x -= infoPanelRect.x + infoPanelRect.width - leftPanelEnd;
 							}
-							else
+							if (infoPanelRect.y + infoPanelRect.height + TopPadding > screenHeight - TopPadding)
 							{
-								selectedNode = null;
-								SoundDefOf.Checkbox_TurnedOff.PlayOneShotOnCamera();
+								infoPanelRect.y -= infoPanelRect.height + 20f + UpgradeNodeDim;
 							}
+							selectedNode = new SelectedNode(upgradeNode, infoPanelRect);
+							SoundDefOf.Checkbox_TurnedOn.PlayOneShotOnCamera();
+						}
+						else
+						{
+							selectedNode = null;
+							SoundDefOf.Checkbox_TurnedOff.PlayOneShotOnCamera();
 						}
 					}
 				}
@@ -286,52 +323,92 @@ namespace Vehicles.UI
 			GUIStyle selectedLabelFont = new GUIStyle(Text.CurFontStyle);
 			selectedLabelFont.fontStyle = FontStyle.Bold;
 
-			if(selectedNode != null && !preDrawingDescriptions)
+			if (selectedNode != null)
 			{
-				if(!selectedNode.upgradePurchased)
-					additionalStatNode = selectedNode;
-					
-				UIElements.LabelStyled(selectedLabelRect, selectedNode.label, selectedLabelFont);
+				UpgradeNode detailNode = selectedNode.node;
+				Rect detailRect = selectedNode.detailRect;
+				Widgets.DrawMenuSection(detailRect);
+				detailRect = detailRect.ContractedBy(5);
 
-				Widgets.Label(new Rect(selectedLabelRect.x, selectedLabelRect.y + 20f, selectedLabelRect.width, 140f), selectedNode.informationHighlighted);
+				Widgets.Label(detailRect, $"<b>{selectedNode.node.label}</b>");
+				float textHeight = Text.CalcHeight(selectedNode.node.label, detailRect.width) + 2;
+				detailRect.y += textHeight;
+				detailRect.height -= textHeight;
+				Widgets.Label(detailRect, selectedNode.node.informationHighlighted);
+				DrawCostItems(selectedNode);
 			}
 
+			Widgets.EndScrollView();
+
+			if (selectedNode != null && !preDrawingDescriptions)
+			{
+				if (!selectedNode.node.upgradePurchased)
+				{
+					additionalStatNode = selectedNode.node;
+				}
+					
+				UIElements.LabelStyled(selectedLabelRect, selectedNode.node.label, selectedLabelFont);
+
+				Widgets.Label(new Rect(selectedLabelRect.x, selectedLabelRect.y + 20f, selectedLabelRect.width, 140f), selectedNode.node.informationHighlighted);
+			}
+			
 			Rect labelRect = new Rect(0f, 0f, rect2.width - 16f, 20f);
 
-			if(!VehicleMod.settings.debug.debugDrawNodeGrid)
+			if (!VehicleMod.settings.debug.debugDrawNodeGrid)
 			{
-				Widgets.Label(labelRect, SelPawnUpgrade.Label);
+				Widgets.Label(labelRect, Vehicle.Label);
 			}
 			
 			Color lineColor = GUI.color;
 			GUI.color = new Color(0.3f, 0.3f, 0.3f, 1f);
 
-			Widgets.DrawLineHorizontal(0, TopViewPadding, screenWidth);
-			Widgets.DrawLineHorizontal(0, BottomWindowEdge, screenWidth);
+			Widgets.DrawLineHorizontal(0, TopPadding, screenWidth);
 			Widgets.DrawLineHorizontal(0, screenHeight - SideDisplayedOffset - 1f, screenWidth);
 
-			Widgets.DrawLineVertical(0, TopViewPadding, screenHeight);
-			Widgets.DrawLineVertical(screenWidth - BottomDisplayedOffset - 1f, TopViewPadding, screenHeight);
+			Widgets.DrawLineVertical(0, TopPadding, screenHeight);
+			Widgets.DrawLineVertical(screenWidth - BottomDisplayedOffset - 1f, TopPadding, screenHeight);
 
 			if (VehicleMod.settings.main.drawUpgradeInformationScreen)
 			{
-				Widgets.DrawLineVertical(LeftWindowEdge, TopViewPadding, screenHeight);
+				Widgets.DrawLineVertical(LeftWindowEdge, TopPadding, screenHeight);
 			}
 			GUI.color = lineColor;
 
-			if(VehicleMod.settings.main.drawUpgradeInformationScreen)
+			if (VehicleMod.settings.main.drawUpgradeInformationScreen)
 			{
-				if(SelPawnUpgrade != null)
+				if(Vehicle != null)
 				{
 					try
 					{
-						Vector2 display = SelPawnUpgrade.VehicleDef.drawProperties.upgradeUICoord;
-						float UISizeX = SelPawnUpgrade.VehicleDef.drawProperties.upgradeUISize.x;
-						float UISizeY = SelPawnUpgrade.VehicleDef.drawProperties.upgradeUISize.y;
-						RenderHelper.DrawVehicleTex(new Rect(display.x, display.y, UISizeX, UISizeY), VehicleTexture, SelPawnUpgrade, 
-							SelPawnUpgrade.pattern, true, SelPawnUpgrade.DrawColor, SelPawnUpgrade.DrawColorTwo, SelPawnUpgrade.DrawColorThree);
+						Vector2 display = Vehicle.VehicleDef.drawProperties.upgradeUICoord;
+						float UISizeX = Vehicle.VehicleDef.drawProperties.upgradeUISize.x;
+						float UISizeY = Vehicle.VehicleDef.drawProperties.upgradeUISize.y;
 
-						if(VehicleMod.settings.debug.debugDrawCannonGrid)
+						replaceNodes.Clear();
+						if (selectedNode != null && !selectedNode.node.replaces.NullOrEmpty())
+						{
+							replaceNodes.AddRange(selectedNode.node.replaces);
+						}
+						else if (highlightedPreMetNode != null && !highlightedPreMetNode.replaces.NullOrEmpty())
+						{
+							replaceNodes.AddRange(highlightedPreMetNode.replaces);
+						}
+
+						RenderHelper.DrawVehicleTex(new Rect(display.x, display.y, UISizeX, UISizeY), VehicleTexture, Vehicle, 
+							Vehicle.pattern, true, Vehicle.DrawColor, Vehicle.DrawColorTwo, Vehicle.DrawColorThree);
+
+						Rect extraDisplayRect = new Rect(display.x, display.y, UISizeX, UISizeY);
+						if (selectedNode != null)
+						{
+							selectedNode.node.DrawExtraOnGUI(extraDisplayRect);
+						}
+						else if (highlightedPreMetNode != null)
+						{
+							highlightedPreMetNode.DrawExtraOnGUI(extraDisplayRect);
+						}
+						Vehicle.CompUpgradeTree.upgradeList.Where(u => u.upgradeActive && u.upgradePurchased && !replaceNodes.Contains(u.upgradeID)).ForEach(u => u.DrawExtraOnGUI(extraDisplayRect));
+
+						if (VehicleMod.settings.debug.debugDrawCannonGrid)
 						{
 							Widgets.DrawLineHorizontal(displayRect.x, displayRect.y, displayRect.width);
 							Widgets.DrawLineHorizontal(displayRect.x, displayRect.y + displayRect.height, displayRect.width);
@@ -339,60 +416,33 @@ namespace Vehicles.UI
 							Widgets.DrawLineVertical(displayRect.x + displayRect.width, displayRect.y, displayRect.height);
 							if(screenWidth - (displayRect.x + displayRect.width) < 0)
 							{
-								Resize = new Vector2(screenWidth + displayRect.x, screenHeight);
+								resize = new Vector2(screenWidth + displayRect.x, screenHeight);
 								resizeCheck = true;
 							}
 						}
-						if(VehicleMod.settings.debug.debugDrawNodeGrid)
+						if (VehicleMod.settings.debug.debugDrawNodeGrid)
 						{
-							Widgets.DrawLineHorizontal(LeftWindowEdge, 70f, screenWidth - LeftWindowEdge);
+							float topLineStart = TopPadding + 2;
+							Widgets.DrawLineHorizontal(LeftWindowEdge, topLineStart, screenWidth - LeftWindowEdge);
 							int lineCount = (int)(screenWidth - LeftWindowEdge) / 10;
-							
+
 							for(int i = 1; i <= lineCount; i++)
 							{
-								Widgets.DrawLineVertical(LeftWindowEdge + 10 * i, 70f, (i % 5 == 0) ? 10 : 5);
+								Widgets.DrawLineVertical(LeftWindowEdge + 10 * i, topLineStart, (i % 5 == 0) ? 10 : 5);
 							}
 							var color = GUI.color;
 							GUI.color = Color.red;
-							Widgets.DrawLineVertical(LeftWindowEdge + (((screenWidth - BottomDisplayedOffset) - LeftWindowEdge) / 2), 70f, 12f);
+							Widgets.DrawLineVertical(LeftWindowEdge + (((screenWidth - BottomDisplayedOffset) - LeftWindowEdge) / 2), topLineStart, 12f);
 							GUI.color = color;
-						}
-
-						SelPawnUpgrade.CompUpgradeTree.upgradeList.Where(u => u.upgradePurchased && u.upgradeActive).ForEach(u => u.DrawExtraOnGUI(new Rect(display.x, display.y, UISizeX, UISizeY)));
-						if (selectedNode != null)
-						{
-							selectedNode.DrawExtraOnGUI(new Rect(display.x, display.y, UISizeX, UISizeY));
-						}
-						if (highlightedPreMetNode != null)
-						{
-							highlightedPreMetNode.DrawExtraOnGUI(new Rect(display.x, display.y, UISizeX, UISizeY));
 						}
 					}
 					catch(Exception ex)
 					{
-						Log.ErrorOnce($"Unable to display {SelPawnUpgrade.def.LabelCap} Texture on Upgrade Screen. Error: {ex.Message} \n StackTrace: {ex.StackTrace}", SelPawnUpgrade.thingIDNumber);
+						Log.ErrorOnce($"Unable to display {Vehicle.def.LabelCap} Texture on Upgrade Screen. Error: {ex.Message} \n StackTrace: {ex.StackTrace}", Vehicle.thingIDNumber);
 					}
 				}
 			}
-			if (additionalStatNode != null)
-				DrawCostItems(additionalStatNode);
-			else if (selectedNode != null)
-				DrawCostItems(selectedNode);
-
-			DrawStats(additionalStatNode as StatUpgrade);
 			
-			if(SelPawnUpgrade.CompUpgradeTree.CurrentlyUpgrading)
-			{
-				Rect greyedViewRect = new Rect(0, TopViewPadding, LeftWindowEdge, BottomWindowEdge - TopViewPadding);
-				Widgets.DrawBoxSolid(greyedViewRect, LockScreenColor);
-				Rect greyedLabelRect = new Rect(LeftWindowEdge / 2 - 17f, (BottomWindowEdge - TopViewPadding) / 2, 100f, 100f);
-				string timeFormatted = VehicleMod.settings.main.useInGameTime ? RimWorldTime.TicksToGameTime(SelPawnUpgrade.CompUpgradeTree.TimeLeftUpgrading) : RimWorldTime.TicksToRealTime(SelPawnUpgrade.CompUpgradeTree.TimeLeftUpgrading);
-				timeFormatted = SelPawnUpgrade.CompUpgradeTree.TimeLeftUpgrading.ToString();
-				Widgets.Label(greyedLabelRect, timeFormatted);
-
-				DrawCostItems(null);
-			}
-
 			GUI.EndGroup();
 
 			GUI.color = Color.white;
@@ -402,9 +452,9 @@ namespace Vehicles.UI
 		protected override void UpdateSize()
 		{
 			base.UpdateSize();
-			if(resizeCheck )
+			if (resizeCheck )
 			{
-				size = Resize;
+				size = resize;
 			}
 			else if(size.x != screenWidth || size.y != screenHeight)
 			{
@@ -412,101 +462,50 @@ namespace Vehicles.UI
 			}
 		}
 
-		private void DrawBackgroundGrid()
+		private void DrawBackgroundGridTop()
 		{
-			var color = GUI.color;
-			GUI.color = new Color(0.3f, 0.3f, 0.3f, 1f);
-			for(int i = 0; i < 29; i++)
+			for (int i = 0; i < TotalLinesAcross; i++)
 			{
-				if (i < 25)
-				{
-					Widgets.DrawLineHorizontal(GridSpacing.x, GridSpacing.y + GridSpacing.y * i, LeftWindowEdge - 1 - GridSpacing.x);
-					Widgets.Label(new Rect(GridSpacing.x - 20f, GridSpacing.y + GridSpacing.y * i - 10f, 20f, 20f), i.ToString());
-				}
-				Widgets.DrawLineVertical(GridSpacing.x + GridSpacing.x * i, GridSpacing.y, BottomWindowEdge - 1 - GridSpacing.y);
-				Widgets.Label(new Rect(GridSpacing.x + GridSpacing.x * i  - 5f, GridSpacing.y - 20f, 20f, 20f), i.ToString());
+				Widgets.DrawLineVertical(GridSpacing.x + GridSpacing.x * i, TopPadding + GridSpacing.y, TotalLinesDown * UpgradeNodeDim);
+				Widgets.Label(new Rect(GridSpacing.x + GridSpacing.x * i - 5f, TopPadding + GridSpacing.y - 20f, 20f, 20f), i.ToString());
 			}
-			GUI.color = color;
 		}
 
-		private void DrawCostItems(UpgradeNode node = null)
+		private void DrawBackgroundGridLeft()
+		{
+			for (int i = 0; i < TotalLinesDown; i++)
+			{
+				Widgets.DrawLineHorizontal(GridSpacing.x, TopPadding + GridSpacing.y + GridSpacing.y * i, LeftWindowEdge - 1 - GridSpacing.x);
+				Widgets.Label(new Rect(GridSpacing.x - 20f, TopPadding + GridSpacing.y + GridSpacing.y * i - 10f, 20f, 20f), i.ToString());
+			}
+		}
+
+		private void DrawCostItems(SelectedNode selectedNode)
 		{
 			int i = 0;
 			float offset = 0;
-
-			if(node is null)
+			float height = 20;
+			float contract = 5;
+			Rect nodeRect = selectedNode.detailRect;
+			Rect timeRect = new Rect(nodeRect.x + contract, nodeRect.y + nodeRect.height - height * 2, nodeRect.width, height);
+			Widgets.Label(timeRect, $"{StatDefOf.WorkToBuild.LabelCap}: {Mathf.CeilToInt(selectedNode.node.Work)}");
+			foreach (IngredientFilter ingredient in selectedNode.node.ingredients)
 			{
-				offset = 25f;
-				foreach(IngredientFilter ingredient in SelPawnUpgrade.CompUpgradeTree.NodeUnlocking.ingredients.Where(i => i.IsFixedIngredient))
+				Rect itemCostRect = new Rect(timeRect)
 				{
-					string itemCount = $"{SelPawnUpgrade.CompUpgradeTree.NodeUnlocking.itemContainer.TotalStackCountOfDef(ingredient.FixedIngredient)}/{ingredient.count}";
-					Vector2 textSize = Text.CalcSize(itemCount);
-
-					Rect itemCostRect = new Rect( (LeftWindowEdge / 2) - (textSize.x / 2), ((BottomWindowEdge - TopViewPadding) / 2) + offset, 20f, 20f);
-					GUI.DrawTexture(itemCostRect, ingredient.FixedIngredient.uiIcon);
-					
-					Rect itemLabelRect = new Rect(itemCostRect.x + 25f, itemCostRect.y, textSize.x, 20f);
-					Widgets.Label(itemLabelRect, itemCount);
-					i++;
-					offset += textSize.y + 5;
-				}
-			}
-			else
-			{
-				Rect timeRect = new Rect(5f, screenHeight - SideDisplayedOffset * 2, LeftWindowEdge, 20f);
-				string timeForUpgrade = VehicleMod.settings.main.useInGameTime ? RimWorldTime.TicksToGameTime(node.UpgradeTimeParsed) : RimWorldTime.TicksToRealTime(node.UpgradeTimeParsed);
-				Widgets.Label(timeRect, timeForUpgrade);
-				foreach(IngredientFilter ingredient in node.ingredients)
-				{
-					Rect itemCostRect = new Rect(5f + offset, screenHeight - SideDisplayedOffset - 23f, 20f, 20f);
-					GUI.DrawTexture(itemCostRect, ingredient.FixedIngredient.uiIcon);
-					string itemCount = "x" + ingredient.count;
-					Vector2 textSize = Text.CalcSize(itemCount);
-					Rect itemLabelRect = new Rect(25f + offset, itemCostRect.y, textSize.x, 20f);
-					Widgets.Label(itemLabelRect, itemCount);
-					i++;
-					offset += textSize.x + 30f;
-				}
-			}
-		}
-
-		private void DrawStats(StatUpgrade node)
-		{
-			float barWidth = screenWidth - LeftWindowEdge - EdgePadding * 2 - BottomDisplayedOffset - 1f; //219
-
-			foreach (StatUpgradeCategoryDef statUpgrade in ValidCategories())
-			{
-				float hoveredValue = 0f;
-
-				if (node != null && node.values.TryGetValue(statUpgrade, out float value))
-				{
-					hoveredValue = value;
-				}
-
-				//Rect armorStatRect = new Rect(LeftWindowEdge + EdgePadding, BottomWindowEdge + EdgePadding, barWidth, 20f);
-				//HelperMethods.FillableBarLabeled(armorStatRect, SelPawnUpgrade.ArmorPoints / MaxArmorValueDisplayed, "VehicleMaxArmor".Translate(), StatUpgradeCategory.Armor,
-				//    HelperMethods.FillableBarInnerTex, HelperMethods.FillableBarBackgroundTex, SelPawnUpgrade.ArmorPoints, armorAdded, armorAdded / MaxArmorValueDisplayed);
-
-				//Rect speedStatRect = new Rect(LeftWindowEdge + EdgePadding, armorStatRect.y + 25f, barWidth, 20f);
-				//HelperMethods.FillableBarLabeled(speedStatRect, SelPawnUpgrade.ActualMoveSpeed / MaxSpeedValueDisplayed, "VehicleMaxSpeed".Translate(), StatUpgradeCategory.Speed,
-				//    HelperMethods.FillableBarInnerTex, HelperMethods.FillableBarBackgroundTex, SelPawnUpgrade.ActualMoveSpeed, speedAdded, speedAdded / MaxSpeedValueDisplayed);
-
-				//Rect cargoCapacityStatRect = new Rect(LeftWindowEdge + EdgePadding, speedStatRect.y + 25f, barWidth, 20f);
-				//HelperMethods.FillableBarLabeled(cargoCapacityStatRect, SelPawnUpgrade.CargoCapacity / MaxCargoValueDisplayed, "VehicleCargoCapacity".Translate(), StatUpgradeCategory.CargoCapacity,
-				//    HelperMethods.FillableBarInnerTex, HelperMethods.FillableBarBackgroundTex, SelPawnUpgrade.CargoCapacity, cargoAdded, cargoAdded / MaxCargoValueDisplayed);
-
-				//if (SelPawnUpgrade.CompFueledTravel != null)
-				//{
-				//    Rect fuelEfficiencyStatRect = new Rect(LeftWindowEdge + EdgePadding, cargoCapacityStatRect.y + 25f, barWidth, 20f);
-				//    HelperMethods.FillableBarLabeled(fuelEfficiencyStatRect, SelPawnUpgrade.CompFueledTravel.FuelEfficiency / MaxFuelEffValueDisplayed,
-				//        "VehicleFuelCost".Translate(), StatUpgradeCategory.FuelConsumptionRate, HelperMethods.FillableBarInnerTex, HelperMethods.FillableBarBackgroundTex,
-				//        SelPawnUpgrade.CompFueledTravel.FuelEfficiency, fuelEffAdded, fuelEffAdded / MaxFuelEffValueDisplayed);
-
-				//    Rect fuelCapacityStatRect = new Rect(LeftWindowEdge + EdgePadding, fuelEfficiencyStatRect.y + 25f, barWidth, 20f);
-				//    HelperMethods.FillableBarLabeled(fuelCapacityStatRect, SelPawnUpgrade.CompFueledTravel.FuelCapacity / MaxFuelCapValueDisplayed,
-				//        "VehicleFuelCapacity".Translate(), StatUpgradeCategory.FuelCapacity, HelperMethods.FillableBarInnerTex, HelperMethods.FillableBarBackgroundTex,
-				//        SelPawnUpgrade.CompFueledTravel.FuelCapacity, fuelCapAdded, fuelCapAdded / MaxFuelCapValueDisplayed);
-				//}
+					x = timeRect.x + offset,
+					y = timeRect.y + height - contract,
+					width = height
+				};
+				GUI.DrawTexture(itemCostRect, ingredient.FixedIngredient.uiIcon);
+				TooltipHandler.TipRegion(itemCostRect, ingredient.FixedIngredient.LabelCap);
+				offset += itemCostRect.width;
+				string itemCount = "x" + ingredient.count;
+				Vector2 textSize = Text.CalcSize(itemCount);
+				Rect itemLabelRect = new Rect(nodeRect.x + offset + contract, itemCostRect.y, textSize.x, height);
+				Widgets.Label(itemLabelRect, itemCount);
+				i++;
+				offset += textSize.x + contract * 2;
 			}
 		}
 		
@@ -514,10 +513,22 @@ namespace Vehicles.UI
 		{
 			foreach (StatUpgradeCategoryDef statUpgrade in DefDatabase<StatUpgradeCategoryDef>.AllDefs)
 			{
-				if (statUpgrade.AppliesToVehicle(SelPawnUpgrade.VehicleDef))
+				if (statUpgrade.AppliesToVehicle(Vehicle.VehicleDef))
 				{
 					yield return statUpgrade;
 				}
+			}
+		}
+
+		private class SelectedNode
+		{
+			public readonly UpgradeNode node;
+			public readonly Rect detailRect;
+
+			public SelectedNode(UpgradeNode node, Rect detailRect)
+			{
+				this.node = node;
+				this.detailRect = detailRect;
 			}
 		}
 	}

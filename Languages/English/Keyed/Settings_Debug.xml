@@ -19,6 +19,6 @@
 	<DebugWriteVehiclePathingCosts>Draw Vehicle PathCosts</DebugWriteVehiclePathingCosts>
 	<DebugLogging>Debug Logging</DebugLogging>
 	<DebugLoggingTooltip>Enable message logging to output specific values and pieces of information useful for debugging Vehicles. Use only if you're making a Vehicle add-on.</DebugLoggingTooltip>
-	<DebugGenerateWorldPathCostTexts>Generate World PathCost TextMeshes</DebugGenerateWorldPathCostTexts>
-	<DebugGenerateWorldPathCostTextsTooltip>Generates and displays text on the world map for each tile's perceived path cost for a specific vehicle / group of vehicles.</DebugGenerateWorldPathCostTextsTooltip>
+	<DebugDisplayWorldPathCosts>Draw World PathCosts</DebugDisplayWorldPathCosts>
+	<DebugDisplayWorldPathCostsTooltip>Select vehicle to show all world pathcosts for. Displays on GUI so zooming in is recommended.</DebugDisplayWorldPathCostsTooltip>
 </LanguageData>

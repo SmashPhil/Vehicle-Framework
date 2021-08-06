@@ -4,6 +4,9 @@
 	<!-- (VehicleDef)-->
 	<VehicleEnabled>Enabled</VehicleEnabled>
 	<VehicleDisabled>Disabled</VehicleDisabled>
+	<VehiclePlayerOnly>Player</VehiclePlayerOnly>
+	<VehicleRaiderOnly>NPC</VehicleRaiderOnly>
+	
 	<CompVehicleStats>Base Stats</CompVehicleStats>
 	<VehicleRaidsEnabled>Raids Can Use</VehicleRaidsEnabled>
 	<VehicleRaidsEnabledTooltip>Raids using Vehicles will be allowed to use this vehicle if points and tech level allow for it.</VehicleRaidsEnabledTooltip>
@@ -22,6 +25,13 @@
 	<VehicleNameable>Can Assign Name</VehicleNameable>
 	<VehicleNameableTooltip>Allow naming of this vehicle. Name will appear over the vehicle and will replace the displayed label.</VehicleNameableTooltip>
 	<BoatPowerType>Power Type</BoatPowerType>
+	<VehicleTurretOverheatMechanics>Turret Overheating</VehicleTurretOverheatMechanics>
+	<VehicleTurretOverheatMechanicsTooltip>Some turrets have overheat mechanics to prevent nonstop firing without consequences. Keep this enabled?</VehicleTurretOverheatMechanicsTooltip>
+	<VehicleCombatPower>Combat Power</VehicleCombatPower>
+	<VehicleCombatPowerTooltip>Combat points vehicle costs in order to generate in an event.</VehicleCombatPowerTooltip>
+	
+	<VehicleCanCaravan>Caravan</VehicleCanCaravan>
+	<VehicleCanCaravanTooltip>Vehicle is able to be taken on caravans.</VehicleCanCaravanTooltip>
 	
 	<!-- Disabled Tooltip -->
 	<VehicleSaveableFieldDisabledTooltip>This feature is disabled for this Vehicle Type.</VehicleSaveableFieldDisabledTooltip>

@@ -7,7 +7,7 @@ namespace Vehicles
 {
 	internal class CompatibilityPatch_DualWield : IConditionalPatch
 	{
-		public void PatchAll(ModPatchable mod, Harmony harmony)
+		public void PatchAll(ModMetaData mod, Harmony harmony)
 		{
 			harmony.Patch(original: AccessTools.Method(typeof(Pawn_RotationTracker), "UpdateRotation"), prefix: null, postfix: null, transpiler: null,
 				finalizer: new HarmonyMethod(typeof(CompatibilityPatch_DualWield),
@@ -25,7 +25,7 @@ namespace Vehicles
 		/// <returns></returns>
 		private static Exception NoRotationCallForVehicles(Pawn ___pawn, Exception __exception)
 		{
-			if(___pawn is VehiclePawn && __exception != null)
+			if (___pawn is VehiclePawn && __exception != null)
 			{
 				return null;
 			}

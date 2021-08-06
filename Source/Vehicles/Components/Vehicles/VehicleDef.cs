@@ -13,13 +13,10 @@ namespace Vehicles
 	public class VehicleDef : ThingDef
 	{
 		[PostToSettings]
-		internal bool enabled = true;
+		internal VehicleEnabledFor enabled = VehicleEnabledFor.Everyone;
 
 		[PostToSettings(Label = "VehicleNameable", Translate = true, Tooltip = "VehicleNameableTooltip", UISettingsType = UISettingsType.Checkbox)]
 		public bool nameable = false;
-		[DisableSetting]
-		[PostToSettings(Label = "VehicleRaidsEnabled", Translate = true, Tooltip = "VehicleRaidsEnabledTooltip", UISettingsType = UISettingsType.Checkbox)]
-		public bool raidersCanUse = true;
 
 		public float armor;
 		[PostToSettings(Label = "VehicleBaseSpeed", Translate = true, Tooltip ="VehicleBaseSpeedTooltip", UISettingsType = UISettingsType.SliderFloat)]
@@ -39,6 +36,9 @@ namespace Vehicles
 
 		[PostToSettings(Label = "VehicleMovementPermissions", Translate = true, UISettingsType = UISettingsType.SliderEnum)]
 		public VehiclePermissions vehicleMovementPermissions = VehiclePermissions.DriverNeeded;
+
+		[PostToSettings(Label = "VehicleCanCaravan", Translate = true, Tooltip = "VehicleCanCaravanTooltip", UISettingsType = UISettingsType.Checkbox)]
+		public bool canCaravan = true;
 
 		public VehicleCategory vehicleCategory = VehicleCategory.Misc;
 		public TechLevel vehicleTech = TechLevel.Industrial;
@@ -61,8 +61,14 @@ namespace Vehicles
 		private Texture2D resolvedLoadCargoTexture;
 		private Texture2D resolvedCancelCargoTexture;
 
+		/// <summary>
+		/// Auto-generated <c>PawnKindDef</c> that has been assigned for this VehicleDef
+		/// </summary>
 		public PawnKindDef VehicleKindDef { get; internal set; }
 
+		/// <summary>
+		/// Icon used for LoadCargo gizmo
+		/// </summary>
 		public Texture2D LoadCargoIcon
 		{
 			get
@@ -75,6 +81,9 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// Icon used for CancelCargo gizmo
+		/// </summary>
 		public Texture2D CancelCargoIcon
 		{
 			get
@@ -87,25 +96,21 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// Resolve all references related to this VehicleDef
+		/// </summary>
+		/// <remarks>
+		/// Ensures no lists are left null in order to avoid null-reference exceptions
+		/// </remarks>
 		public override void ResolveReferences()
 		{
 			base.ResolveReferences();
 			if (!components.NullOrEmpty())
 			{
 				components.OrderBy(c => c.hitbox.side == VehicleComponentPosition.BodyNoOverlap).ForEach(c => c.ResolveReferences(this));
-				properties.roles.OrderBy(c => c.hitbox.side == VehicleComponentPosition.BodyNoOverlap).ForEach(c => c.hitbox.Initialize(this));
 			}
-			if (properties.overweightSpeedCurve is null)
-			{
-				properties.overweightSpeedCurve = new SimpleCurve()
-				{
-					new CurvePoint(0, 1),
-					new CurvePoint(0.65f, 1),
-					new CurvePoint(0.85f, 0.9f),
-					new CurvePoint(1.05f, 0.35f),
-					new CurvePoint(1.25f, 0)
-				};
-			}
+			properties.ResolveReferences(this);
+
 			if (VehicleMod.settings.vehicles.defaultMasks.EnumerableNullOrEmpty())
 			{
 				VehicleMod.settings.vehicles.defaultMasks = new Dictionary<string, string>();
@@ -114,26 +119,6 @@ namespace Vehicles
 			{
 				VehicleMod.settings.vehicles.defaultMasks.Add(defName, "Default");
 			}
-			properties.customBiomeCosts ??= new Dictionary<BiomeDef, float>();
-			properties.customHillinessCosts ??= new Dictionary<Hilliness, float>();
-			properties.customRoadCosts ??= new Dictionary<RoadDef, float>();
-			properties.customTerrainCosts ??= new Dictionary<TerrainDef, int>();
-			properties.customThingCosts ??= new Dictionary<ThingDef, int>();
-			properties.customSnowCosts ??= new Dictionary<SnowCategory, int>();
-
-			if (vehicleType == VehicleType.Sea)
-			{
-				if (!properties.customBiomeCosts.TryGetValue(BiomeDefOf.Ocean, out _))
-				{
-					properties.customBiomeCosts.Add(BiomeDefOf.Ocean, 1);
-				}
-				properties.customBiomeCosts[BiomeDefOf.Ocean] = 1;
-				if (!properties.customBiomeCosts.TryGetValue(BiomeDefOf.Lake, out _))
-				{
-					properties.customBiomeCosts.Add(BiomeDefOf.Lake, 1);
-				}
-				properties.customBiomeCosts[BiomeDefOf.Lake] = 1;
-			}
 
 			if (!comps.NullOrEmpty())
 			{
@@ -141,15 +126,25 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// Vanilla-compatibility with graphicData
+		/// </summary>
 		public override void PostLoad()
 		{
 			base.graphicData = graphicData;
 			base.PostLoad();
 		}
 
+		/// <summary>
+		/// Config errors to ensure all required data has been filled in
+		/// </summary>
 		public override IEnumerable<string> ConfigErrors()
 		{
 			foreach (string error in base.ConfigErrors())
+			{
+				yield return error;
+			}
+			foreach (string error in properties.ConfigErrors())
 			{
 				yield return error;
 			}
@@ -157,33 +152,30 @@ namespace Vehicles
 			{
 				yield return "<field>graphicData</field> must be specified in order to properly render the vehicle.".ConvertRichText();
 			}
-			if (properties.vehicleJobLimitations.NullOrEmpty())
+			if (components.NullOrEmpty())
 			{
-				yield return "<field>vehicleJobLimitations</field> list must be populated".ConvertRichText();
+				yield return "<field>components</field> must include at least 1 VehicleComponent".ConvertRichText();
 			}
-			else
+			if (!components.NullOrEmpty())
 			{
-				if (components.NullOrEmpty())
+				if (components.Select(c => c.key).GroupBy(s => s).Where(g => g.Count() > 1).Any())
 				{
-					yield return "<field>components</field> must include at least 1 VehicleComponent".ConvertRichText();
+					yield return "<field>components</field> must not contain duplicate keys".ConvertRichText();
 				}
-				if (!components.NullOrEmpty())
+				foreach (VehicleComponentProperties props in components)
 				{
-					if (components.Select(c => c.key).GroupBy(s => s).Where(g => g.Count() > 1).Any())
+					foreach (string error in props.ConfigErrors())
 					{
-						yield return "<field>components</field> must not contain duplicate keys".ConvertRichText();
-					}
-					foreach (VehicleComponentProperties props in components)
-					{
-						foreach (string error in props.ConfigErrors())
-						{
-							yield return error;
-						}
+						yield return error;
 					}
 				}
 			}
 		}
 
+		/// <summary>
+		/// Scale the drawSize appropriately for this VehicleDef
+		/// </summary>
+		/// <param name="size"></param>
 		public Vector2 ScaleDrawRatio(Vector2 size)
 		{
 			float sizeX = size.x;
@@ -200,6 +192,10 @@ namespace Vehicles
 			return new Vector2(sizeX, sizeY);
 		}
 
+		/// <summary>
+		/// Retrieve all <see cref="VehicleStatCategoryDef"/>'s for this VehicleDef
+		/// </summary>
+		/// <returns></returns>
 		public IEnumerable<VehicleStatCategoryDef> StatCategoryDefs()
 		{
 			if (speed > 0)
@@ -217,6 +213,12 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// Resolve icon for VehicleDef
+		/// </summary>
+		/// <remarks>
+		/// Removed icon based on lifeStages, vehicles don't have lifeStages
+		/// </remarks>
 		protected override void ResolveIcon()
 		{
 			if (graphic != null && graphic != BaseContent.BadGraphic)
@@ -224,16 +226,6 @@ namespace Vehicles
 				Material material = graphic.ExtractInnerGraphicFor(null).MatAt(defaultPlacingRot, null);
 				uiIcon = (Texture2D)material.mainTexture;
 				uiIconColor = material.color;
-
-				//PawnKindDef anyPawnKind = race.AnyPawnKind;
-				//if (anyPawnKind != null)
-				//{
-				//	SWAP LIFESTAGES TO graphicData
-				//	Material material2 = anyPawnKind.lifeStages.Last().bodyGraphicData.Graphic.MatAt(Rot4.East, null);
-				//	uiIcon = (Texture2D)material2.mainTexture;
-				//	uiIconColor = material2.color;
-				//	return;
-				//}
 			}
 		}
 

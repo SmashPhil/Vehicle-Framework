@@ -5,48 +5,42 @@ using UnityEngine;
 using Verse;
 using RimWorld;
 using SmashTools;
+using Vehicles.UI;
 
 namespace Vehicles
 {
 	public abstract class UpgradeNode : IExposable, ILoadReferenceable, IThingHolder
 	{
 		public string label;
+		public bool displayLabel = false;
+		public string icon;
+		private float work = 1;
+		public IntVec2 gridCoordinate;
+		public Color? drawColorOne;
+		public Color? drawColorTwo;
+		public Color? drawColorThree;
+		//TODO - Add texture overlays from upgrade
 
 		public string upgradeID;
+		public int nodeID;
 
-		public string rootNodeLabel;
+		public List<string> replaces;
 
 		public string informationHighlighted;
-
 		public string disableIfUpgradeNodeEnabled;
 
 		public List<ResearchProjectDef> researchPrerequisites = new List<ResearchProjectDef>();
-
 		public List<string> prerequisiteNodes = new List<string>();
-
 		public List<IngredientFilter> ingredients = new List<IngredientFilter>();
 
-		public string imageFilePath;
+		public VehiclePawn vehicle;
 
-		public IntVec2 gridCoordinate;
-
-		public RimWorldTime upgradeTime;
-
-		public VehiclePawn parent;
-
-		protected int upgradeTicksLeft; //Post-purchase
-
-		public ThingOwner<Thing> itemContainer; //Post-purchase
-
-		protected bool cachedStoredCostSatisfied = false;
-
-		public bool upgradeActive;
-
-		public bool upgradePurchased;
-
-		public int nodeID;
-
+		protected float workLeft;
+		public ThingOwner<Thing> itemContainer;
 		protected Texture2D upgradeImage;
+		protected bool cachedStoredCostSatisfied = false;
+		public bool upgradeActive;
+		public bool upgradePurchased;
 
 		/// <summary>
 		/// Only use for XML parse step. Must include w/ child classes
@@ -59,10 +53,10 @@ namespace Vehicles
 		/// Self-assign values, may encounter bugs if certain fields not populated
 		/// </summary>
 		/// <param name="parent"></param>
-		public UpgradeNode(VehiclePawn parent)
+		public UpgradeNode(VehiclePawn vehicle)
 		{
 			nodeID = VehicleIdManager.Instance.GetNextUpgradeId();
-			this.parent = parent;
+			this.vehicle = vehicle;
 
 			itemContainer = new ThingOwner<Thing>(this, false, LookMode.Deep);
 		}
@@ -72,28 +66,30 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="reference"></param>
 		/// <param name="parent"></param>
-		public UpgradeNode(UpgradeNode reference, VehiclePawn parent)
+		public UpgradeNode(UpgradeNode reference, VehiclePawn vehicle)
 		{
 			nodeID = VehicleIdManager.Instance.GetNextUpgradeId();
-			this.parent = parent;
+			this.vehicle = vehicle;
 
 			label = reference.label;
 			upgradeID = reference.upgradeID;
-			rootNodeLabel = reference.rootNodeLabel;
+			displayLabel = reference.displayLabel;
 			informationHighlighted = reference.informationHighlighted;
 			disableIfUpgradeNodeEnabled = reference.disableIfUpgradeNodeEnabled;
+			replaces = reference.replaces;
 
 			ingredients = reference.ingredients;
 			researchPrerequisites = reference.researchPrerequisites;
 			prerequisiteNodes = reference.prerequisiteNodes;
-			imageFilePath = reference.imageFilePath;
+			icon = reference.icon;
 			gridCoordinate = reference.gridCoordinate;
-			upgradeTime = reference.upgradeTime;
+			work = reference.work;
+			drawColorOne = reference.drawColorOne;
+			drawColorTwo = reference.drawColorTwo;
+			drawColorThree = reference.drawColorThree;
 
 			itemContainer = new ThingOwner<Thing>(this, false, LookMode.Deep);
 		}
-
-		public bool NodeUpgrading => upgradePurchased && !upgradeActive;
 
 		/// <summary>
 		/// Id of Upgrade applied to front of UniqueLoadId. Should represent unique name of class
@@ -102,30 +98,21 @@ namespace Vehicles
 
 		public virtual int ListerCount { get; }
 
-		public int Ticks
+		public bool NodeUpgrading => upgradePurchased && !upgradeActive;
+
+		public float Work => work;
+
+		public virtual IntVec2 GridCoordinate => gridCoordinate;
+
+		public float WorkLeft
 		{
 			get
 			{
-				return upgradeTicksLeft;
+				return workLeft;
 			}
 			set
 			{
-				if (upgradeTicksLeft - value < 0)
-				{
-					upgradeTicksLeft = 0;
-				}
-				else
-				{
-					upgradeTicksLeft = value;
-				}
-			}
-		}
-
-		public int UpgradeTimeParsed
-		{
-			get
-			{
-				return upgradeTime.ticks;
+				workLeft = value;
 			}
 		}
 
@@ -147,62 +134,78 @@ namespace Vehicles
 			}
 		}
 
-		public virtual IntVec2 GridCoordinate
-		{
-			get
-			{
-				if (gridCoordinate.x > 29 || gridCoordinate.z > 25)
-				{
-					throw new NotSupportedException($"Maximum grid coordinate size is 29x25. Larger coordinates are not supported. GridCoord: ({gridCoordinate.x},{gridCoordinate.z})");
-				}
-				return gridCoordinate;
-			}
-		}
-
 		public virtual Texture2D UpgradeImage
 		{
 			get
 			{
-				if (string.IsNullOrEmpty(imageFilePath))
+				if (string.IsNullOrEmpty(icon))
 				{
 					return BaseContent.BadTex;
 				}
 				if (upgradeImage is null)
 				{
-					upgradeImage = ContentFinder<Texture2D>.Get(imageFilePath, true);
+					upgradeImage = ContentFinder<Texture2D>.Get(icon, true);
 				}
 				return upgradeImage;
 			}
 		}
 
-		public static StatUpgrade BlankUpgrade(UpgradeNode failedNode, VehiclePawn parent) => new StatUpgrade(parent)
+		public static StatUpgrade BlankUpgrade(UpgradeNode failedNode, VehiclePawn vehicle) => new StatUpgrade(vehicle)
 		{
 			values = new Dictionary<StatUpgradeCategoryDef, float>(),
 			label = failedNode.label,
 			upgradeID = failedNode.upgradeID + "_FAILED",
-			rootNodeLabel = string.Empty,
+			displayLabel = true,
 			informationHighlighted = failedNode.informationHighlighted,
 			disableIfUpgradeNodeEnabled = string.Empty,
 
 			ingredients = new List<IngredientFilter>(),
 			researchPrerequisites = new List<ResearchProjectDef>(),
 			prerequisiteNodes = new List<string>(),
-			imageFilePath = BaseContent.BadTexPath,
+			icon = BaseContent.BadTexPath,
 			gridCoordinate = failedNode.gridCoordinate,
-			upgradeTime = new RimWorldTime("999y")
+			workLeft = RimWorldTime.ParseToTicks("999y")
 		};
 
 		/// <summary>
 		/// Called when node has upgraded fully, after upgrade build ticks hits 0 or triggered by god mode
 		/// </summary>
-		/// <param name="vehicle"></param>
-		public abstract void Upgrade(VehiclePawn vehicle);
+		public abstract void Upgrade();
 
 		/// <summary>
 		/// Undo Upgrade action. Should be polar opposite of Upgrade functionality to revert changes
 		/// </summary>
-		/// <param name="vehicle"></param>
-		public abstract void Refund(VehiclePawn vehicle);
+		public abstract void Refund();
+
+		/// <summary>
+		/// Apply texture overlays and colors
+		/// </summary>
+		public virtual void TextureAndColor()
+		{
+			if (VehicleMod.settings.main.overrideDrawColors && vehicle.pattern == PatternDefOf.Default)
+			{
+				bool colorChanged = false;
+				if (drawColorOne != null)
+				{
+					vehicle.DrawColor = drawColorOne.Value;
+					colorChanged = true;
+				}
+				if (drawColorTwo != null)
+				{
+					vehicle.DrawColorTwo = drawColorTwo.Value;
+					colorChanged = true;
+				}
+				if (drawColorThree != null)
+				{
+					vehicle.DrawColorThree = drawColorThree.Value;
+					colorChanged = true;
+				}
+				if (colorChanged)
+				{
+					vehicle.Notify_ColorChanged();
+				}
+			}
+		}
 
 		/// <summary>
 		/// Called when Node is first initialized (when Vehicle is initially spawned / created)
@@ -295,7 +298,7 @@ namespace Vehicles
 
 		public void ResetTimer()
 		{
-			upgradeTicksLeft = UpgradeTimeParsed;
+			workLeft = work;
 		}
 
 		public virtual void ResetNode()
@@ -381,15 +384,18 @@ namespace Vehicles
 		{
 			Scribe_Values.Look(ref label, "label");
 			Scribe_Values.Look(ref upgradeID, "upgradeID");
-			Scribe_Values.Look(ref rootNodeLabel, "rootNodeLabel");
+			Scribe_Values.Look(ref displayLabel, "displayLabel");
 			Scribe_Values.Look(ref informationHighlighted, "informationHighlighted");
 			Scribe_Values.Look(ref disableIfUpgradeNodeEnabled, "disableIfUpgradeNodeEnabled");
-			Scribe_References.Look(ref parent, "parent");
-			Scribe_Values.Look(ref upgradeTime, "upgradeTime");
+			Scribe_References.Look(ref vehicle, "vehicle");
+			Scribe_Values.Look(ref work, "work");
 			Scribe_Values.Look(ref cachedStoredCostSatisfied, "cachedStoredCostSatisfied");
+			Scribe_Values.Look(ref drawColorOne, "drawColorOne");
+			Scribe_Values.Look(ref drawColorOne, "drawColorTwo");
+			Scribe_Values.Look(ref drawColorOne, "drawColorThree");
 
 			/* Post-purchase */
-			Scribe_Values.Look(ref upgradeTicksLeft, "upgradeTicksLeft");
+			Scribe_Values.Look(ref workLeft, "workLeft");
 			Scribe_Deep.Look(ref itemContainer, "itemContainer");
 
 			Scribe_Values.Look(ref upgradeActive, "upgradeActive");
@@ -400,7 +406,7 @@ namespace Vehicles
 			Scribe_Collections.Look(ref researchPrerequisites, "researchPrerequisites", LookMode.Def);
 
 			Scribe_Collections.Look(ref prerequisiteNodes, "prerequisiteNodes", LookMode.Value);
-			Scribe_Values.Look(ref imageFilePath, "imageFilePath");
+			Scribe_Values.Look(ref icon, "icon");
 			Scribe_Values.Look(ref gridCoordinate, "gridCoordinate");
 			Scribe_Values.Look(ref nodeID, "nodeID");
 		}
@@ -414,7 +420,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return parent;
+				return vehicle;
 			}
 		}
 

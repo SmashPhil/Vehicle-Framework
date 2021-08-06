@@ -45,6 +45,15 @@ namespace Vehicles
 		}
 
 		/// <summary>
+		/// Get all VehiclePawns in <paramref name="vehicleCaravan"/>
+		/// </summary>
+		/// <param name="vehicleCaravan"></param>
+		public static List<VehiclePawn> AllVehicles(this VehicleCaravan vehicleCaravan)
+		{
+			return vehicleCaravan.PawnsListForReading.Where(p => p is VehiclePawn).Cast<VehiclePawn>().ToList();
+		}
+
+		/// <summary>
 		/// Get all pawns from Caravan inside vehicles
 		/// </summary>
 		/// <param name="caravan"></param>

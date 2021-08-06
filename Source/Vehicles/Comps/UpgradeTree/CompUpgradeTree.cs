@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Verse;
 using SmashTools;
 
@@ -10,12 +11,14 @@ namespace Vehicles
 	{
 		public CompProperties_UpgradeTree Props => (CompProperties_UpgradeTree)props;
 
-		public VehiclePawn Vehicle => parent as VehiclePawn;
-
 		public List<UpgradeNode> upgradeList = new List<UpgradeNode>();
 
-		public int TimeLeftUpgrading => CurrentlyUpgrading ? NodeUnlocking.Ticks : 0;
+		public int WorkLeftUpgrading => CurrentlyUpgrading ? Mathf.CeilToInt(NodeUnlocking.WorkLeft) : 0;
+
+		public VehiclePawn Vehicle => parent as VehiclePawn;
+
 		public bool CurrentlyUpgrading => NodeUnlocking != null && NodeUnlocking.upgradePurchased && !NodeUnlocking.upgradeActive;
+
 		public UpgradeNode NodeUnlocking { get; set; }
 
 		public UpgradeNode RootNode(UpgradeNode child)
@@ -41,7 +44,7 @@ namespace Vehicles
 		public UpgradeNode NodeListed(UpgradeNode node)
 		{
 			UpgradeNode matchedNode = upgradeList.Find(x => x == node);
-			if(matchedNode is null)
+			if (matchedNode is null)
 			{
 				Log.Error($"Unable to locate node {node.upgradeID} in upgrade list. Cross referencing comp upgrades?");
 				return null;
@@ -52,7 +55,7 @@ namespace Vehicles
 		public UpgradeNode NodeListed(string upgradeID)
 		{
 			UpgradeNode matchedNode = upgradeList.Find(x => x.upgradeID == upgradeID);
-			if(matchedNode is null)
+			if (matchedNode is null)
 			{
 				Log.Error($"Unable to locate node {upgradeID} in upgrade list. Cross referencing comp upgrades?");
 				return null;
@@ -69,12 +72,9 @@ namespace Vehicles
 
 		public void RefundUnlock(UpgradeNode node)
 		{
-			if (node is null)
-				return;
-			if (!node.upgradeActive)
-				return;
+			if (node is null || !node.upgradeActive) return;
 			node.itemContainer.TryDropAll(Vehicle.Position, Vehicle.Map, ThingPlaceMode.Near);
-			node.Refund(Vehicle);
+			node.Refund();
 			node.ResetNode();
 		}
 
@@ -94,7 +94,19 @@ namespace Vehicles
 		public void FinishUnlock(UpgradeNode node)
 		{
 			var actualNode = NodeListed(node);
-			actualNode.Upgrade(Vehicle);
+			if (!actualNode.replaces.NullOrEmpty())
+			{
+				actualNode.replaces.ForEach(u =>
+				{
+					UpgradeNode node = NodeListed(u);
+					if (node.upgradeActive)
+					{
+						RefundUnlock(node);
+					}
+				});
+			}
+			actualNode.Upgrade();
+			actualNode.TextureAndColor();
 			actualNode.upgradeActive = true;
 			actualNode.upgradePurchased = true;
 		}
@@ -145,13 +157,12 @@ namespace Vehicles
 			}
 		}
 
-		public override void CompTick()
+		public void DoWork()
 		{
-			base.CompTick();
-			if(NodeUnlocking != null && !NodeUnlocking.upgradeActive && NodeUnlocking.StoredCostSatisfied)
+			if (NodeUnlocking != null && !NodeUnlocking.upgradeActive && NodeUnlocking.StoredCostSatisfied)
 			{
-				//NodeUnlocking.Ticks--;
-				if(NodeUnlocking.Ticks <= 0)
+				NodeUnlocking.WorkLeft--;
+				if (NodeUnlocking.WorkLeft <= 0)
 				{
 					FinishUnlock(NodeUnlocking);
 				}

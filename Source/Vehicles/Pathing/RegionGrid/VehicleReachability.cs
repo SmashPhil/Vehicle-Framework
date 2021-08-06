@@ -335,7 +335,7 @@ namespace Vehicles.AI
 					for(int i = 0; i < 2; i++)
 					{
 						VehicleRegion linkedRegion = regionLink.regions[i];
-						if(linkedRegion != null && linkedRegion.reachedIndex != reachedIndex && linkedRegion.type.Passable())
+						if (linkedRegion != null && linkedRegion.reachedIndex != reachedIndex && linkedRegion.type.Passable())
 						{
 							if (linkedRegion.Allows(traverseParms, false))
 							{
