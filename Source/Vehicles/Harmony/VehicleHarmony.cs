@@ -40,6 +40,7 @@ namespace Vehicles
 		internal static string VersionDir => Path.Combine(VehicleMMD.RootDir.FullName, "Version.txt");
 
 		public static List<VehicleDef> AllMoveableVehicleDefs { get; internal set; }
+
 		public static int AllMoveableVehicleDefsCount { get; internal set; }
 
 		static VehicleHarmony()

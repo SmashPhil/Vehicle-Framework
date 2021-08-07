@@ -6,66 +6,18 @@
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>[title]Notes[/title][font]Tiny[/font]
-This update will clear your config file for Vehicles. I've made some changes for vehicle statuses. If you are still getting an error when attempting to modify a Vehicle in the mod settings, delete your Vehicles config file again.
+
 [title]Bug Fixes[/title]
-Fixed compatibility issue where RIMMSqol would set all non-snow costs to -2147483648 and cause all vehicle PathGrids to register as Impassable.
 
-Fixed bug with AerialVehicles rendering incorrectly when vehicle is non-maskable.
-
-Fixed bug with previous versions not showing up properly in the cached logs.
-
-Fixed bug where vehicle WorldPathGrid would not take coastal direction into account when finding a path over the ocean.
-
-Fixed bug where uiIconScale would not apply correctly to VehicleDef icons.
-
-Fixed bug where disabled vehicles would not render with the proper color, mask, and pattern on the build designator.
-
-Fixed bug where toggling settings that affect vehicle designators would not update the designators, leaving vehicles disabled / enabled or still in the gizmo bar.
-
-Fixed bug where burst turrets would reload automatically after finishing their burst and remove a significant portion of ammo as well.
-
-Fixed bug where turret with restricted angle would not wrap correctly when rotating, resulting in offset restricted angles.
-
-Fixed bug where vehicle RegionGrid would not update dirty regions properly. I also optimized this so that there is only 1 VehicleDef's RegionGrid updating per frame (as opposed to all of them).
-
-Fixed bug where vehicle RegionLinks would not update properly, resulting in more than 2 regions per link.
-
-Fixed bug where WorldPawn garbage collection would attempt to pull the CompVehicleLauncher component from non aerial vehicles, throwing an exception any time garbage collection pulls the WorldPawn's situation.
-
-Fixed bug where pawns would attempt to path through vehicles which are supposed to be Impassable.
 [title]New Additions[/title]
-Search bar added to mod settings to more easily navigate the vehicle list (both "Vehicles" and "Upgrades" tab)
 
-ThingComps can now utilize DrawExtraSelectionOverlays for vehicles.
-
-Added TerrainDef tags [color=#3CBEF0]ImpassableVehicles[/color] and [color=#3CBEF0]PassableVehicles[/color] for universal disallowing or allowing of TerrainDefs for all vehicles. This value for terrain will be overwritten by any VehicleDefs implementing custom terrain path costs. So if you made Water universally disallowed for vehicles, boats would still be able to path over water due to having their own path costs for it.
-
-Added DefModExtension "[color=#3CBEF0]CustomCostDefModExtension[/color]" that can be attached to any ThingDef, TerrainDef, BiomeDef, RiverDef, and RoadDef to specify a pathCost for certain vehicles. Allows patching onto parent ThingDef nodes for giving path costs en masse.
-eg.
-[color=#4AA0F6]All trees are now impassable for the Car because I added CustomCostDefModExtension to the parent def that all trees inherit from and set the path cost to -1.[/color]
-
-UpgradeNodes can now override the DrawColors of the vehicle. (only if the pattern is set to default, don't wanna piss anyone off after they applied their custom pattern)
-
-Added scrollable view for UpgradeTree UI, allowing for virtually unlimited space for upgrade nodes. Max width still applies however, so expand downward!
-
-Added 'new' passability field to VehicleDef to hide BuildableDef's passability.  Allows for vehicles to be Impassable, PassThroughOnly, and Standable [b]just for Pawns[/b] without actually registering as such in the regions. This is mostly just an enhancement to Pawn AI and how they path nearby vehicles.
 [title]Additional Changes[/title]
-Merged raidersCanUse field with enabled field. VehicleDefs can now be set to fully enabled, fully disabled, only available to raiders, or only available to the player.
 
-Remade VehicleWorldPathGrid to take VehicleDef into account.  Vehicles are now entirely independent of each other for pathing on the world map. Vehicle Caravans will still consider all vehicles in the caravan when choosing a path.
-
-Renamed 88mm flak to Flak Cannon
-
-VehicleTurrets can now have rotation based offsets (good for turrets attached to vehicles that are not always top down). I will introduce rotations to VehicleTurrets (based on angle of turret) later down the road.
-
-Renovated the UpgradeTree UI to now accommodate all screen resolutions. Added additional description input in the UpgradeNode's class to better indicate what the upgrade is changing.
-
-Upgrades for turrets can now link to another turret via a key, such that turret upgrades can be mutually exclusive (can have one or the other, not both. Upgrading the other will replace the current turret)
 [title]Final Notes[/title][font]Tiny[/font]
 Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.)
   </description>
   <!--Static parameterless method to execute when update log is executed-->
-  <actionOnUpdate>Vehicles.VehicleHarmony.ClearModConfig</actionOnUpdate>
+  <actionOnUpdate />
   <!--Show update log on next startup.-->
   <update>false</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
