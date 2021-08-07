@@ -297,12 +297,18 @@ namespace Vehicles
 
 		public static void Notify_ThingAffectingVehicleRegionsSpawned(Thing b)
 		{
-			PathingHelper.ThingAffectingRegionsSpawned(b, b.Map);
+			if (b.Spawned) //For some reason other mods love to patch the SpawnSetup method and despawn the object. Extra check is necessary
+			{
+				PathingHelper.ThingAffectingRegionsSpawned(b, b.Map);
+			}
 		}
 
 		public static void Notify_ThingAffectingVehicleRegionsDespawned(Thing b)
 		{
-			PathingHelper.ThingAffectingRegionsDeSpawned(b, b.Map);
+			if (b.Spawned) //For some reason other mods love to patch the SpawnSetup method and despawn the object. Extra check is necessary
+			{
+				PathingHelper.ThingAffectingRegionsDeSpawned(b, b.Map);
+			}
 		}
 	}
 }

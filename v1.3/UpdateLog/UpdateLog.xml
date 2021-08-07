@@ -8,7 +8,7 @@
   <description>[title]Notes[/title][font]Tiny[/font]
 
 [title]Bug Fixes[/title]
-
+Fixed compatibility issue with Nature's Pretty Sweet from immediately despawned objects that spawned on lava while still triggering an update for VehicleRegions.
 [title]New Additions[/title]
 
 [title]Additional Changes[/title]
