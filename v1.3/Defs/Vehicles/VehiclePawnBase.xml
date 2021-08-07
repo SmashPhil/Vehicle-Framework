@@ -10,6 +10,7 @@
 		<useHitPoints>false</useHitPoints>
 		<hasTooltip>true</hasTooltip>
 		<repairEffect>Repair</repairEffect>
+		<passability>Impassable</passability>
 		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
 		
 		<statBases>

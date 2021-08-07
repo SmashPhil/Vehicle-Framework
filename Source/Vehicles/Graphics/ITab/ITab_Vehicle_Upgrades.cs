@@ -325,17 +325,28 @@ namespace Vehicles.UI
 
 			if (selectedNode != null)
 			{
-				UpgradeNode detailNode = selectedNode.node;
-				Rect detailRect = selectedNode.detailRect;
-				Widgets.DrawMenuSection(detailRect);
-				detailRect = detailRect.ContractedBy(5);
+				Rect detailRect = new Rect(selectedNode.detailRect)
+				{
+					y = selectedNode.detailRect.y + TabRect.y + UpgradeNodeDim
+				};
+				Find.WindowStack.ImmediateWindow(selectedNode.node.nodeID ^ selectedNode.node.GetHashCode(), detailRect, WindowLayer.SubSuper, delegate()
+				{
+					Log.Message("Drawing");
+					if (selectedNode != null)
+					{
+						UpgradeNode detailNode = selectedNode.node;
+						Rect rect = new Rect(0, 0, detailRect.width, detailRect.height);
+						Widgets.DrawMenuSection(rect);
+						rect = rect.ContractedBy(5);
 
-				Widgets.Label(detailRect, $"<b>{selectedNode.node.label}</b>");
-				float textHeight = Text.CalcHeight(selectedNode.node.label, detailRect.width) + 2;
-				detailRect.y += textHeight;
-				detailRect.height -= textHeight;
-				Widgets.Label(detailRect, selectedNode.node.informationHighlighted);
-				DrawCostItems(selectedNode);
+						Widgets.Label(rect, $"<b>{selectedNode.node.label}</b>");
+						float textHeight = Text.CalcHeight(selectedNode.node.label, rect.width) + 2;
+						rect.y += textHeight;
+						rect.height -= textHeight;
+						Widgets.Label(rect, selectedNode.node.informationHighlighted);
+						DrawCostItems(selectedNode);
+					}
+				});
 			}
 
 			Widgets.EndScrollView();

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
-using OpCodes = System.Reflection.Emit.OpCodes;
 using HarmonyLib;
 using Verse;
 using Verse.AI;
@@ -148,7 +147,7 @@ namespace Vehicles
 			}
 			else
 			{
-				if (PathingHelper.VehicleInCell(pawn.Map, clickCell))
+				if (PathingHelper.VehicleImpassableInCell(pawn.Map, clickCell))
 				{
 					__result = new FloatMenuOption("CannotGoNoPath".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null);
 					return false;
@@ -168,8 +167,8 @@ namespace Vehicles
 			if (!__result)
 			{
 				//Peek 2 nodes ahead to avoid collision last second
-				__result = (__instance.curPath.NodesLeftCount > 1 && PathingHelper.VehicleInCell(___pawn.Map, __instance.curPath.Peek(1))) || 
-					(__instance.curPath.NodesLeftCount > 2 && PathingHelper.VehicleInCell(___pawn.Map, __instance.curPath.Peek(2)));
+				__result = (__instance.curPath.NodesLeftCount > 1 && PathingHelper.VehicleImpassableInCell(___pawn.Map, __instance.curPath.Peek(1))) || 
+					(__instance.curPath.NodesLeftCount > 2 && PathingHelper.VehicleImpassableInCell(___pawn.Map, __instance.curPath.Peek(2)));
 			}
 		}
 
@@ -189,7 +188,6 @@ namespace Vehicles
 			return true;
 		}
 
-		//REDO - Reimplement
 		/// <summary>
 		/// Set cells in which vehicles reside as impassable to other Pawns
 		/// </summary>
@@ -203,26 +201,25 @@ namespace Vehicles
 				CodeInstruction instruction = instructionList[i];
 				if (instruction.Calls(AccessTools.Method(typeof(CellIndices), nameof(CellIndices.CellToIndex), new Type[] { typeof(int), typeof(int) })))
 				{
-					/*
 					Label label = ilg.DefineLabel();
 					Label vehicleLabel = ilg.DefineLabel();
 
 					yield return instruction; //CALLVIRT CELLTOINDEX
 					instruction = instructionList[++i];
-					yield return instruction; //STLOC.S 38
+					yield return instruction; //STLOC.S 43
 					instruction = instructionList[++i];
-					
+
 					yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
 					yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(typeof(PathFinder), "map"));
-					yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, 36);
-					yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, 37);
-					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(PathingHelper), nameof(PathingHelper.VehicleInCell), new Type[] { typeof(Map), typeof(int), typeof(int) }));
+					yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, 41);
+					yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, 42);
+					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(PathingHelper), nameof(PathingHelper.VehicleImpassableInCell), new Type[] { typeof(Map), typeof(int), typeof(int) }));
 
 					yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
 					yield return new CodeInstruction(opcode: OpCodes.Ldc_I4_0);
 					yield return new CodeInstruction(opcode: OpCodes.Br, vehicleLabel);
 
-					for(int j = i; j < instructionList.Count; j++)
+					for (int j = i; j < instructionList.Count; j++)
 					{
 						CodeInstruction instruction2 = instructionList[j];
 						if (instruction2.opcode == OpCodes.Brfalse || instruction2.opcode == OpCodes.Brfalse_S)
@@ -233,7 +230,7 @@ namespace Vehicles
 					}
 
 					instruction.labels.Add(label);
-					*/
+
 				}
 				yield return instruction;
 			}
@@ -247,10 +244,10 @@ namespace Vehicles
 		/// <param name="peMode"></param>
 		/// <param name="traverseParams"></param>
 		/// <param name="__result"></param>
-		/// <returns></returns>
 		public static bool CanReachVehiclePosition(IntVec3 start, LocalTargetInfo dest, PathEndMode peMode, TraverseParms traverseParams, ref bool __result)
 		{
-			if (peMode == PathEndMode.OnCell && !(traverseParams.pawn is VehiclePawn) && (traverseParams.pawn?.Map.GetCachedMapComponent<VehiclePositionManager>().PositionClaimed(dest.Cell) ?? false))
+			if (peMode == PathEndMode.OnCell && !(traverseParams.pawn is VehiclePawn) && traverseParams.pawn?.Map.GetCachedMapComponent<VehiclePositionManager>().ClaimedBy(dest.Cell) is VehiclePawn vehicle &&
+				vehicle.VehicleDef.passability != Traversability.Standable)
 			{
 				__result = false;
 				return false;
@@ -260,46 +257,41 @@ namespace Vehicles
 
 		public static void ImpassableThroughVehicle(IntVec3 c, Map map, ref bool __result)
 		{
-			bool regionWorking = (bool)AccessTools.Field(typeof(RegionAndRoomUpdater), "working").GetValue(map.regionAndRoomUpdater);
-			if (!__result && !regionWorking)
+			if (!__result && !PathingHelper.RegionWorking(map))
 			{
-				__result = map.GetCachedMapComponent<VehiclePositionManager>().PositionClaimed(c);
+				__result = PathingHelper.VehicleImpassableInCell(map, c);
 			}
 		}
 
 		public static void WalkableThroughVehicle(IntVec3 loc, ref bool __result, Map ___map)
 		{
-			bool regionWorking = (bool)AccessTools.Field(typeof(RegionAndRoomUpdater), "working").GetValue(___map.regionAndRoomUpdater);
-			if (__result && !regionWorking)
+			if (__result && !PathingHelper.RegionWorking(___map))
 			{
-				__result = !___map.GetCachedMapComponent<VehiclePositionManager>().PositionClaimed(loc);
+				__result = !PathingHelper.VehicleImpassableInCell(___map, loc);
 			}
 		}
 
 		public static void WalkableFastThroughVehicleIntVec3(IntVec3 loc, ref bool __result, Map ___map)
 		{
-			bool regionWorking = (bool)AccessTools.Field(typeof(RegionAndRoomUpdater), "working").GetValue(___map.regionAndRoomUpdater);
-			if (__result && !regionWorking)
+			if (__result && !PathingHelper.RegionWorking(___map))
 			{
-				__result = !___map.GetCachedMapComponent<VehiclePositionManager>().PositionClaimed(loc);
+				__result = !PathingHelper.VehicleImpassableInCell(___map, loc);
 			}
 		}
 
 		public static void WalkableFastThroughVehicleInt2(int x, int z, ref bool __result, Map ___map)
 		{
-			bool regionWorking = (bool)AccessTools.Field(typeof(RegionAndRoomUpdater), "working").GetValue(___map.regionAndRoomUpdater);
-			if (__result && !regionWorking)
+			if (__result && !PathingHelper.RegionWorking(___map))
 			{
-				__result = !___map.GetCachedMapComponent<VehiclePositionManager>().PositionClaimed(new IntVec3(x, 0, z));
+				__result = !PathingHelper.VehicleImpassableInCell(___map, new IntVec3(x, 0, z));
 			}
 		}
 
 		public static void WalkableFastThroughVehicleInt(int index, ref bool __result, Map ___map)
 		{
-			bool regionWorking = (bool)AccessTools.Field(typeof(RegionAndRoomUpdater), "working").GetValue(___map.regionAndRoomUpdater);
-			if (__result && !regionWorking)
+			if (__result && !PathingHelper.RegionWorking(___map))
 			{
-				__result = !___map.GetCachedMapComponent<VehiclePositionManager>().PositionClaimed(___map.cellIndices.IndexToCell(index));
+				__result = !PathingHelper.VehicleImpassableInCell(___map, ___map.cellIndices.IndexToCell(index));
 			}
 		}
 

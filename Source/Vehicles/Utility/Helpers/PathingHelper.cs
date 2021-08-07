@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using HarmonyLib;
 using Verse;
 using RimWorld;
 using SmashTools;
@@ -19,6 +20,13 @@ namespace Vehicles
 		/// VehicleDef , &lt;TerrainDef Tag,pathCost&gt;
 		/// </summary>
 		public static readonly Dictionary<string, Dictionary<string, int>> allTerrainCostsByTag = new Dictionary<string, Dictionary<string, int>>();
+
+		/// <summary>
+		/// Quick retrieval of region updating status
+		/// </summary>
+		/// <param name="map"></param>
+		/// <returns></returns>
+		public static bool RegionWorking(Map map) => (bool)AccessTools.Field(typeof(RegionAndRoomUpdater), "working").GetValue(map.regionAndRoomUpdater);
 
 		/// <summary>
 		/// Register any <seealso cref="TerrainDef"/>s with tags "PassableVehicles" or "ImpassableVehicles"
@@ -184,15 +192,15 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="map"></param>
 		/// <param name="cell"></param>
-		public static bool VehicleInCell(Map map, IntVec3 cell)
+		public static bool VehicleImpassableInCell(Map map, IntVec3 cell)
 		{
-			return map.GetCachedMapComponent<VehiclePositionManager>().PositionClaimed(cell);
+			return map.GetCachedMapComponent<VehiclePositionManager>().ClaimedBy(cell) is VehiclePawn vehicle && vehicle.VehicleDef.passability == Traversability.Impassable;
 		}
 
-		/// <see cref="VehicleInCell(Map, IntVec3)"/>
-		public static bool VehicleInCell(Map map, int x, int z)
+		/// <see cref="VehicleImpassableInCell(Map, IntVec3)"/>
+		public static bool VehicleImpassableInCell(Map map, int x, int z)
 		{
-			return VehicleInCell(map, new IntVec3(x, 0, z));
+			return VehicleImpassableInCell(map, new IntVec3(x, 0, z));
 		}
 
 		/// <summary>

@@ -5,6 +5,8 @@
 		<defName>RowBoat</defName>
 		<label>Row Boat</label>
 		<description>A small sturdy boat for short travel across bodies of water.</description>
+		<altitudeLayer>LayingPawn</altitudeLayer>
+		<passability>PassThroughOnly</passability>
 		
 		<graphicData>
 			<texPath>Vehicles/Sea/RowBoat/RowBoat</texPath>

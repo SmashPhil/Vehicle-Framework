@@ -43,7 +43,7 @@ namespace Vehicles
 		public FuelConsumptionCondition FuelCondition => Props.fuelConsumptionCondition;
 		public Gizmo FuelCountGizmo => new Gizmo_RefuelableFuelTravel { refuelable = this };
 
-		public float FuelEfficiency
+		public virtual float FuelEfficiency
 		{
 			get
 			{
@@ -59,7 +59,7 @@ namespace Vehicles
 			}
 		}
 
-		public float FuelCapacity
+		public virtual float FuelCapacity
 		{
 			get
 			{
@@ -80,7 +80,7 @@ namespace Vehicles
 			}
 		}
 
-		public bool SatisfiesFuelConsumptionConditional
+		public virtual bool SatisfiesFuelConsumptionConditional
 		{
 			get
 			{
@@ -98,7 +98,7 @@ namespace Vehicles
 			}
 		}
 
-		public Thing ClosestFuelAvailable(Pawn pawn)
+		public virtual Thing ClosestFuelAvailable(Pawn pawn)
 		{
 			if (Props.electricPowered)
 			{
@@ -109,7 +109,7 @@ namespace Vehicles
 				false), 9999f, validator, null, 0, -1, false, RegionType.Set_Passable, false);
 		}
 
-		public void Refuel(List<Thing> fuelThings)
+		public virtual void Refuel(List<Thing> fuelThings)
 		{
 			int num = FuelCountToFull;
 			while(num > 0 && fuelThings.Count > 0)
@@ -122,12 +122,12 @@ namespace Vehicles
 			}
 		}
 
-		public void Refuel(float amount)
+		public virtual void Refuel(float amount)
 		{
-			if(fuel >= FuelCapacity)
+			if (fuel >= FuelCapacity)
 				return;
 			fuel += amount;
-			if(fuel >= FuelCapacity)
+			if (fuel >= FuelCapacity)
 			{
 				fuel = FuelCapacity;
 			}
@@ -141,14 +141,14 @@ namespace Vehicles
 			fuel = FuelCapacity / 2;
 		}
 
-		public void ConsumeFuel(float amount)
+		public virtual void ConsumeFuel(float amount)
 		{
 			if (fuel <= 0f)
 			{
 				return;
 			}
 			fuel -= amount;
-			if(fuel <= 0f)
+			if (fuel <= 0f)
 			{
 				fuel = 0f;
 				parent.BroadcastCompSignal("RanOutOfFuel");
@@ -214,7 +214,7 @@ namespace Vehicles
 			}
 		}
 
-		public IEnumerable<Gizmo> DevModeGizmos()
+		public virtual IEnumerable<Gizmo> DevModeGizmos()
 		{
 			if (Prefs.DevMode)
 			{
@@ -316,7 +316,7 @@ namespace Vehicles
 			}
 		}
 
-		public bool TryConnectPower()
+		public virtual bool TryConnectPower()
 		{
 			if (Props.electricPowered)
 			{
@@ -337,12 +337,12 @@ namespace Vehicles
 			return connectedPower is null;
 		}
 
-		public void DisconnectPower()
+		public virtual void DisconnectPower()
 		{
 			connectedPower = null;
 		}
 
-		public void DrawMotes()
+		public virtual void DrawMotes()
 		{
 			foreach (OffsetMote offset in Props.motesGenerated)
 			{
@@ -403,7 +403,7 @@ namespace Vehicles
 			}
 		}
 
-		public void InitializeProperties()
+		public virtual void InitializeProperties()
 		{
 			fuelCost = Props.fuelConsumptionRate;
 			fuelCapacity = Props.fuelCapacity;
@@ -418,8 +418,10 @@ namespace Vehicles
 			Scribe_Values.Look(ref fuel, "fuel");
 
 			Scribe_Values.Look(ref dischargeRate, "dischargeRate");
-			if(Scribe.mode == LoadSaveMode.Saving)
+			if (Scribe.mode == LoadSaveMode.Saving)
+			{
 				postLoadReconnect = Charging;
+			}
 			Scribe_Values.Look(ref postLoadReconnect, "postLoadReconnect", false, true);
 		}
 	}

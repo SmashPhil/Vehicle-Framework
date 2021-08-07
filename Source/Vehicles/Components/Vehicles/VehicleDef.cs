@@ -49,6 +49,7 @@ namespace Vehicles
 
 		public VehicleBuildDef buildDef;
 		public new GraphicDataRGB graphicData;
+		public new Traversability passability = Traversability.Impassable;
 
 		[PostToSettings(Label = "VehicleProperties", Translate = true, ParentHolder = true)]
 		public VehicleProperties properties;
@@ -132,6 +133,7 @@ namespace Vehicles
 		public override void PostLoad()
 		{
 			base.graphicData = graphicData;
+			base.passability = Traversability.PassThroughOnly;
 			base.PostLoad();
 		}
 

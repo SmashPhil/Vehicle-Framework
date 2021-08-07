@@ -31,6 +31,8 @@ Fixed bug where vehicle RegionGrid would not update dirty regions properly. I al
 Fixed bug where vehicle RegionLinks would not update properly, resulting in more than 2 regions per link.
 
 Fixed bug where WorldPawn garbage collection would attempt to pull the CompVehicleLauncher component from non aerial vehicles, throwing an exception any time garbage collection pulls the WorldPawn's situation.
+
+Fixed bug where pawns would attempt to path through vehicles which are supposed to be Impassable.
 [title]New Additions[/title]
 Search bar added to mod settings to more easily navigate the vehicle list (both "Vehicles" and "Upgrades" tab)
 
@@ -38,13 +40,15 @@ ThingComps can now utilize DrawExtraSelectionOverlays for vehicles.
 
 Added TerrainDef tags [color=#3CBEF0]ImpassableVehicles[/color] and [color=#3CBEF0]PassableVehicles[/color] for universal disallowing or allowing of TerrainDefs for all vehicles. This value for terrain will be overwritten by any VehicleDefs implementing custom terrain path costs. So if you made Water universally disallowed for vehicles, boats would still be able to path over water due to having their own path costs for it.
 
-Added DefModExtension "[color=#3CBEF0]CustomCostDefModExtension[/color]" that can be attached to any ThingDef to specify a pathCost for certain vehicles. Allows patching onto parent ThingDef nodes for giving path costs en masse.
-		eg.
-			All trees are now impassable for the Car.
+Added DefModExtension "[color=#3CBEF0]CustomCostDefModExtension[/color]" that can be attached to any ThingDef, TerrainDef, BiomeDef, RiverDef, and RoadDef to specify a pathCost for certain vehicles. Allows patching onto parent ThingDef nodes for giving path costs en masse.
+eg.
+[color=#4AA0F6]All trees are now impassable for the Car because I added CustomCostDefModExtension to the parent def that all trees inherit from and set the path cost to -1.[/color]
 
 UpgradeNodes can now override the DrawColors of the vehicle. (only if the pattern is set to default, don't wanna piss anyone off after they applied their custom pattern)
 
 Added scrollable view for UpgradeTree UI, allowing for virtually unlimited space for upgrade nodes. Max width still applies however, so expand downward!
+
+Added 'new' passability field to VehicleDef to hide BuildableDef's passability.  Allows for vehicles to be Impassable, PassThroughOnly, and Standable [b]just for Pawns[/b] without actually registering as such in the regions. This is mostly just an enhancement to Pawn AI and how they path nearby vehicles.
 [title]Additional Changes[/title]
 Merged raidersCanUse field with enabled field. VehicleDefs can now be set to fully enabled, fully disabled, only available to raiders, or only available to the player.
 

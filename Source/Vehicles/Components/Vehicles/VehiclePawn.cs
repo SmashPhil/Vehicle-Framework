@@ -872,6 +872,16 @@ namespace Vehicles
 			}
 			return;
 		}
+
+		public void AddComp(ThingComp comp)
+		{
+			cachedComps.Add(comp);
+		}
+
+		public void RemoveComp(ThingComp comp)
+		{
+			cachedComps.Remove(comp);
+		}
 		
 		public T GetSortedComp<T>() where T : ThingComp
 		{
