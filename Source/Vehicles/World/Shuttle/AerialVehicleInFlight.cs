@@ -56,6 +56,7 @@ namespace Vehicles
 		public Vector3 position;
 
 		private Material vehicleMat;
+		private Material vehicleMatNonLit;
 
 		public override string Label => vehicle.Label;
 
@@ -85,6 +86,23 @@ namespace Vehicles
 					renderQueue = WorldMaterials.WorldObjectRenderQueue
 				};
 				return vehicleMat;
+			}
+		}
+
+		private Material VehicleMatNonLit
+		{
+			get
+			{
+				if (vehicle is null)
+				{
+					return Material;
+				}
+				vehicleMatNonLit ??= new Material(vehicle.VehicleGraphic.MatAt(Rot8.North, vehicle.pattern))
+				{
+					shader = ShaderDatabase.WorldOverlayTransparent,
+					renderQueue = WorldMaterials.WorldObjectRenderQueue
+				};
+				return vehicleMatNonLit;
 			}
 		}
 
@@ -141,7 +159,7 @@ namespace Vehicles
 					{
 						Verse.UI.RotateAroundPivot(Quaternion.LookRotation(Find.WorldGrid.GetTileCenter(flightPath.First.tile) - position).eulerAngles.y, rect.center);
 					}
-					GenUI.DrawTextureWithMaterial(rect, VehicleTex.VehicleTexture(vehicle.VehicleDef, Rot8.North), VehicleMat);
+					GenUI.DrawTextureWithMaterial(rect, VehicleTex.VehicleTexture(vehicle.VehicleDef, Rot8.North), VehicleMatNonLit);
 					GUI.matrix = matrix;
 				}
 			}

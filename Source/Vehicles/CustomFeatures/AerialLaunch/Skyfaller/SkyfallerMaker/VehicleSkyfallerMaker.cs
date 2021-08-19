@@ -41,7 +41,6 @@ namespace Vehicles
 		/// <param name="vehicle"></param>
 		/// <param name="start"></param>
 		/// <param name="end"></param>
-		/// <returns></returns>
 		public static VehicleSkyfaller_FlyOver MakeSkyfallerFlyOver(ThingDef def, VehiclePawn vehicle, IntVec3 start, IntVec3 end)
 		{
 			try
