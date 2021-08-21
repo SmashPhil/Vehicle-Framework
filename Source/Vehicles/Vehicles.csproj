@@ -338,8 +338,9 @@
       <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.XRModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UpdateLogTool">
-      <HintPath>..\..\..\UpdateLog\Assemblies\UpdateLogTool.dll</HintPath>
+    <Reference Include="UpdateLogTool, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\UpdateLog\Source\UpdateLog\UpdateLog\bin\Debug\UpdateLogTool.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

@@ -1,18 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.3.7899</currentVersion>
+  <currentVersion>1.3.7902</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
-  <description>[title]Notes[/title][font]Small[/font]
+  <description>[title]Recent News[/title][font]Small[/font]
 I've started a [link]https://www.patreon.com/smashphil[/link](Patreon) for Vehicles development.
 
-I've decided to quit my full-time job as a Software Engineer to pursue my dream job of being a game developer. This is actually something I've been thinking about for many months. I'll be switching from part-time work to full-time work on [link]https://discord.gg/vU4NDmsfpw[/link](Cursed Crew) (my own game I'm making with Oskar and Roolo whom you all probably know) which means I'll have an extra allotted 20 hours per week to work on whatever else.
+I've decided to quit my full-time job as a Software Engineer to pursue my dream job of being a game developer. This is actually something I've been thinking about for many months. I'll be switching from part-time work to full-time work on [link]https://discord.gg/vU4NDmsfpw[/link](Cursed Crew) (my own game I'm making with Oskar and Roolo whom you all probably know) which means I'll have an extra allotted 20-30 hours per week to work on whatever else.
 
-Now this could mean I pick up contract work as a Software Engineer, or it could mean I spend those 20 hours on Vehicles. I'd like to spend it on Vehicles, so I set up a patreon for those that would like to support the additional work on it. This is entirely optional and I'm grateful for anyone who decides they would like to support the project.
-
-This is only to help me afford living expenses while I work extra hours on Vehicles vs. doing contract work. I understand it will likely not amount to nearly as much, but I'd like to finish this monumental project I've already burnt 2000+ hours into while still giving you all high quality content.
+Now this could mean I pick up contract work as a Software Engineer, or it could mean I spend those 30 hours on Vehicles. I'd like to spend it on Vehicles, so I set up a patreon for those that would like to support the additional work on it. This is entirely optional and I'm grateful for anyone who decides they would like to support the project.
 
 Thank you in advance to those of you that choose to support me on this journey :)
 [font]Tiny[/font][title]Bug Fixes[/title]
@@ -22,9 +20,9 @@ Fixed bug where AerialVehicles on the world map would still render with lighting
 [title]New Additions[/title]
 
 [title]Additional Changes[/title]
-
+Changed the UpdateLog to now allow multiple mods to throw update notifications, allowing the user to page through all updates. I'll release this modder tool at a later time for other modders.
 [title]Final Notes[/title][font]Tiny[/font]
-Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.)
+Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
   </description>
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>
@@ -53,9 +51,9 @@ Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/is
   <!--Icon bar shown to the left of the mod's name-->
   <leftIconBar>
     <li>
-      <name>Support Vehicles Development</name>
-      <icon>ko-fiIcon.png</icon>
-      <url>https://ko-fi.com/smashphil</url>
+      <name>Patreon</name>
+      <icon>patreonIcon.png</icon>
+      <url>https://www.patreon.com/smashphil</url>
     </li>
   </leftIconBar>
 </UpdateLog>
