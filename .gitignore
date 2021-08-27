@@ -13,6 +13,9 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+# TEMP Vehicle Textures and Data
+[Tt][Ee][Mm][Pp]/
+
 # Mono auto generated files
 mono_crash.*
 
