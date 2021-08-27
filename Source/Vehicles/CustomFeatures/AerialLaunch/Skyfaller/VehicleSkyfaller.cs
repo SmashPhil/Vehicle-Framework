@@ -116,14 +116,5 @@ namespace Vehicles
 			Scribe_References.Look(ref vehicle, "vehicle");
 			Scribe_Values.Look(ref skyfallerLoc, "skyfallerLoc");
 		}
-
-		public override void SpawnSetup(Map map, bool respawningAfterLoad)
-		{
-			base.SpawnSetup(map, respawningAfterLoad);
-			if (!respawningAfterLoad)
-			{
-				vehicle.CompVehicleLauncher.launchProtocol.PreAnimationSetup();
-			}
-		}
 	}
 }

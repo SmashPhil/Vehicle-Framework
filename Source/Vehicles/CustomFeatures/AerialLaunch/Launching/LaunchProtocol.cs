@@ -78,19 +78,11 @@ namespace Vehicles
 			{
 				if (landing)
 				{
-					if (landingProperties.reversed)
-					{
-						return (float)ticksPassed / landingProperties.maxTicks;
-					}
-					return 1f - (float)ticksPassed / landingProperties.maxTicks;
+					return (float)ticksPassed / landingProperties.maxTicks;
 				}
 				else
 				{
-					if (launchProperties.reversed)
-					{
-						return (float)ticksPassed / launchProperties.maxTicks;
-					}
-					return 1f - (float)ticksPassed / launchProperties.maxTicks;
+					return (float)ticksPassed / launchProperties.maxTicks;
 				}
 			}
 		}
@@ -172,51 +164,25 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Time of skyfaller in animation
-		/// </summary>
-		protected float TimeInLaunchAnimation
-		{
-			get
-			{
-				if (launchProperties?.reversed ?? false)
-				{
-					return ticksPassed / launchProperties.maxTicks;
-				}
-				return 1f - (float)ticksPassed / launchProperties.maxTicks;
-			}
-		}
-
-		/// <summary>
 		/// Speed of skyfaller upon launching
 		/// </summary>
-		protected float LaunchSpeed
+		protected virtual float CurrentSpeed
 		{
 			get
 			{
-				if (launchProperties is null)
+				if (landing)
 				{
-					return 0.5f;
+					if (landingProperties?.speedCurve is null)
+					{
+						return landingProperties?.speed ?? 0.5f;
+					}
+					return landingProperties.speedCurve.Evaluate(ticksPassed) * landingProperties.speed;
 				}
-				else if (launchProperties.speedCurve is null)
+				if (launchProperties?.speedCurve is null)
 				{
-					return launchProperties.speed;
+					return launchProperties?.speed ?? 0.5f;
 				}
 				return launchProperties.speedCurve.Evaluate(ticksPassed) * launchProperties.speed;
-			}
-		}
-		
-		/// <summary>
-		/// Speed of skyfaller upon landing
-		/// </summary>
-		protected float LandingSpeed
-		{
-			get
-			{
-				if (landingProperties?.speedCurve is null)
-				{
-					return landingProperties?.speed ?? 0.5f;
-				}
-				return landingProperties.speedCurve.Evaluate(ticksPassed) * landingProperties.speed;
 			}
 		}
 
@@ -362,7 +328,7 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Set Tick Count for manual control over skyfaller time
+		/// Set Tick Count for manual control over skyfaller time. Needs to be called after <seealso cref="OrderProtocol(bool)"/>
 		/// </summary>
 		/// <param name="ticks"></param>
 		public virtual void SetTickCount(int ticks)
@@ -373,8 +339,9 @@ namespace Vehicles
 		/// <summary>
 		/// Initialize variables and setup for animation
 		/// </summary>
-		public virtual void PreAnimationSetup()
+		protected virtual void PreAnimationSetup()
 		{
+			ticksPassed = landing ? landingProperties.maxTicks : 0;
 		}
 
 		/// <summary>
@@ -384,6 +351,7 @@ namespace Vehicles
 		public virtual void OrderProtocol(bool landing)
 		{
 			this.landing = landing;
+			PreAnimationSetup();
 		}
 
 		/// <summary>
@@ -602,11 +570,6 @@ namespace Vehicles
 			moteThrown.SetVelocity(angle, speed);
 			GenSpawn.Spawn(moteThrown, vector.ToIntVec3(), map, WipeMode.Vanish);
 		}
-
-		//public static void LoadDataFromXmlCustom(XmlNode xmlRoot)
-		//{
-
-		//}
 
 		public class MoteInfo : IExposable
 		{

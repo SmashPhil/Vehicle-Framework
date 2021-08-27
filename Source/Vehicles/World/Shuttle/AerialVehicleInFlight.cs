@@ -58,6 +58,8 @@ namespace Vehicles
 		private Material vehicleMat;
 		private Material vehicleMatNonLit;
 
+		protected List<Graphic_Rotator> rotatorGraphics = new List<Graphic_Rotator>();
+
 		public override string Label => vehicle.Label;
 
 		public virtual bool IsPlayerControlled => vehicle.Faction == Faction.OfPlayer;
@@ -72,6 +74,10 @@ namespace Vehicles
 
 		public int TicksTillLandingElevation => Mathf.RoundToInt((Elevation - (vehicle.CompVehicleLauncher.LandingAltitude / 2)) / Rate);
 
+		protected virtual Rot8 FullRotation => Rot8.North;
+
+		protected virtual float RotatorSpeeds => 59;
+
 		private Material VehicleMat
 		{
 			get
@@ -80,7 +86,7 @@ namespace Vehicles
 				{
 					return Material;
 				}
-				vehicleMat ??= new Material(vehicle.VehicleGraphic.MatAt(Rot8.North, vehicle.pattern))
+				vehicleMat ??= new Material(vehicle.VehicleGraphic.MatAt(FullRotation, vehicle.pattern))
 				{
 					shader = ShaderDatabase.WorldOverlayTransparentLit,
 					renderQueue = WorldMaterials.WorldObjectRenderQueue
@@ -97,7 +103,7 @@ namespace Vehicles
 				{
 					return Material;
 				}
-				vehicleMatNonLit ??= new Material(vehicle.VehicleGraphic.MatAt(Rot8.North, vehicle.pattern))
+				vehicleMatNonLit ??= new Material(vehicle.VehicleGraphic.MatAt(FullRotation, vehicle.pattern))
 				{
 					shader = ShaderDatabase.WorldOverlayTransparent,
 					renderQueue = WorldMaterials.WorldObjectRenderQueue
@@ -109,6 +115,7 @@ namespace Vehicles
 		public virtual void Initialize()
 		{
 			position = base.DrawPos;
+			rotatorGraphics = vehicle.graphicOverlay.graphics.Where(g => g is Graphic_Rotator).Cast<Graphic_Rotator>().ToList();
 		}
 
 		public virtual Vector3 DrawPosAhead(int ticksAhead) => Vector3.Slerp(position, Find.WorldGrid.GetTileCenter(flightPath.First.tile), transition + speedPctPerTick * ticksAhead);
@@ -135,12 +142,12 @@ namespace Vehicles
 					Vector3 normalized = DrawPos.normalized;
 					Vector3 direction = Vector3.Cross(normalized, rotateTexture ? directionFacing : Vector3.down);
 					Quaternion quat = Quaternion.LookRotation(direction, normalized) * Quaternion.Euler(0f, 90f, 0f);
-					Vector3 s = new Vector3(averageTileSize * 0.7f * drawPct, 1, averageTileSize * 0.7f * drawPct);
+					Vector3 size = new Vector3(averageTileSize * 0.7f * drawPct, 1, averageTileSize * 0.7f * drawPct);
 
 					Matrix4x4 matrix = default;
-					matrix.SetTRS(DrawPos + normalized * TransitionTakeoff, quat, s);
-					int layer = WorldCameraManager.WorldLayer;
-					Graphics.DrawMesh(MeshPool.plane10, matrix, VehicleMat, layer);
+					matrix.SetTRS(DrawPos + normalized * TransitionTakeoff, quat, size);
+					Graphics.DrawMesh(MeshPool.plane10, matrix, VehicleMat, WorldCameraManager.WorldLayer);
+					RenderGraphicOverlays(normalized, direction, size);
 				}
 				else
 				{
@@ -162,6 +169,23 @@ namespace Vehicles
 					GenUI.DrawTextureWithMaterial(rect, VehicleTex.VehicleTexture(vehicle.VehicleDef, Rot8.North), VehicleMatNonLit);
 					GUI.matrix = matrix;
 				}
+			}
+		}
+
+		protected virtual void RenderGraphicOverlays(Vector3 normalized, Vector3 direction, Vector3 size)
+		{
+			foreach (Graphic graphic in vehicle.graphicOverlay.graphics)
+			{
+				Material material = graphic.MatAt(FullRotation);
+				float quatRotation = 90;
+				if (graphic is Graphic_Rotator rotator)
+				{
+					quatRotation += vehicle.graphicOverlay.rotationRegistry[rotator.RegistryKey];
+				}
+				Quaternion quat = Quaternion.LookRotation(direction, normalized) * Quaternion.Euler(0, quatRotation, 0);
+				Matrix4x4 matrix = default;
+				matrix.SetTRS(DrawPos + normalized * TransitionTakeoff, quat, size);
+				Graphics.DrawMesh(MeshPool.plane10, matrix, material, WorldCameraManager.WorldLayer);
 			}
 		}
 
@@ -407,6 +431,7 @@ namespace Vehicles
 			if (vehicle.CompVehicleLauncher.inFlight)
 			{
 				MoveForward();
+				TickRotators();
 				SpendFuel();
 				ChangeElevation();
 			}
@@ -496,6 +521,14 @@ namespace Vehicles
 						InitializeNextFlight(newPos);
 					}
 				}
+			}
+		}
+
+		public virtual void TickRotators()
+		{
+			foreach (Graphic_Rotator rotator in rotatorGraphics)
+			{
+				vehicle.graphicOverlay.rotationRegistry[rotator.RegistryKey] += rotator.MaxRotationSpeed;
 			}
 		}
 

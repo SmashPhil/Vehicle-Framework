@@ -192,7 +192,7 @@ namespace Vehicles
 				flightPath.Add(new FlightNode(destinationTile, null));
 			}
 			Vehicle.CompVehicleLauncher.inFlight = true;
-			VehicleSkyfaller_Leaving vehicleLeaving = (VehicleSkyfaller_Leaving)ThingMaker.MakeThing(Props.skyfallerLeaving);
+			VehicleSkyfaller_Leaving vehicleLeaving = (VehicleSkyfaller_Leaving)VehicleSkyfallerMaker.MakeSkyfaller(Props.skyfallerLeaving, Vehicle);
 			vehicleLeaving.arrivalAction = arrivalAction;
 			vehicleLeaving.vehicle = Vehicle;
 			vehicleLeaving.flightPath = new List<FlightNode>(flightPath);

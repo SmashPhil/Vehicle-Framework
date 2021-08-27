@@ -8,7 +8,10 @@
   <description>[title]Recent News[/title][font]Small[/font]
 I've started a [link]https://www.patreon.com/smashphil[/link](Patreon) for Vehicles development.
 
-I've decided to quit my full-time job as a Software Engineer to pursue my dream job of being a game developer. This is actually something I've been thinking about for many months. I'll be switching from part-time work to full-time work on [link]https://discord.gg/vU4NDmsfpw[/link](Cursed Crew) (my own game I'm making with Oskar and Roolo whom you all probably know) which means I'll have an extra allotted 20-30 hours per week to work on whatever else.
+I've decided to quit my full-time job as a Software Engineer to pursue my dream job of being a game developer. This is actually something I've been thinking about for many months. I'll be switching from part-time work to full-time work on my own game that I am making with Oskar and Roolo. Here is a small screenshot:
+[anchor]MiddleCenter[/anchor][b]Cursed Crew[/b][img]CursedCrewShip[/img][anchor]MiddleLeft[/anchor]
+You can join the [link]https://discord.gg/NNe2VxAU7Z[/link](discord server) for updates on that.
+This means I'll have an extra allotted 20-30 hours per week to work on whatever else.
 
 Now this could mean I pick up contract work as a Software Engineer, or it could mean I spend those 30 hours on Vehicles. I'd like to spend it on Vehicles, so I set up a patreon for those that would like to support the additional work on it. This is entirely optional and I'm grateful for anyone who decides they would like to support the project.
 
@@ -17,34 +20,54 @@ Thank you in advance to those of you that choose to support me on this journey :
 Fixed compatibility issue with Nature's Pretty Sweet, despawning objects immediately after spawning on lava while still triggering VehicleRegions to generate.
 
 Fixed bug where AerialVehicles on the world map would still render with lighting when zoomed out.
-[title]New Additions[/title]
 
+Fixed bug where AirDefenses would not serialize properly resulting in Load issues.
+
+Fixed bug where other materials would not render on top of materials using ShaderRGB or ShaderRGBPattern, causing obfuscation of the other material.
+
+Fixed bug where VTOLTakeoff would not properly tick the vertical animation, resulting in only the main landing sequence animating.
+
+Fixed bug where launch protocols for landing animations would instead set to maxTicks of launchProperties.
+[title]New Additions[/title]
+Added ExtraRotationRegistry class which handles extra rotation for overlays.
+
+Added Graphic_Rotator class to register extra rotation key in the ExtraRotationRegistry for any graphic class inheriting Graphic_Rotator.
+
+Added PropellerTakeoff launch protocol for a VTOL based takeoff where the propellers first wind up.
 [title]Additional Changes[/title]
 Changed the UpdateLog to now allow multiple mods to throw update notifications, allowing the user to page through all updates. I'll release this modder tool at a later time for other modders.
+
+Added rotation SimpleCurves for VTOLTakeoff to handle rotation of the vehicle while it is being vertically lifted before switching to using the launch or landing rotation simple curve.
+
+Lowered OpenGL build to allow better support of the custom pattern shaders for lower end GPUs. This should fix the issues on Linux as well but please report that if any of you linux users are still encountering a problem.
+
+Added fallbacks to the custom pattern shaders so that if the shaders fail, the game is still playable and the vehicles will render with fallback shaders. The custom pattern and colors dialogue will not work however apart from changing ColorOne and ColorTwo.
+
+Removed "reversed" field in launch protocol launching and landing properties.
 [title]Final Notes[/title][font]Tiny[/font]
 Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
   </description>
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>
   <!--Show update log on next startup.-->
-  <update>true</update>
+  <update>false</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
   <testing>true</testing>
   <!--Icon bar shown to the right of the mod's name-->
   <rightIconBar>
     <li>
       <name>Github</name>
-      <icon>githubIcon.png</icon>
+      <icon>githubIcon</icon>
       <url>https://github.com/SmashPhil/Vehicles</url>
     </li>
     <li>
       <name>Discord</name>
-      <icon>discordIcon.png</icon>
+      <icon>discordIcon</icon>
       <url>https://discord.gg/zXDyfWQ</url>
     </li>
     <li>
       <name>Steam</name>
-      <icon>steamIcon.png</icon>
+      <icon>steamIcon</icon>
       <url>steam://url/CommunityFilePage/2356577528</url>
     </li>
   </rightIconBar>
@@ -52,8 +75,13 @@ Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/is
   <leftIconBar>
     <li>
       <name>Patreon</name>
-      <icon>patreonIcon.png</icon>
+      <icon>patreonIcon</icon>
       <url>https://www.patreon.com/smashphil</url>
     </li>
+	<li>
+	  <name>Cursed Crew</name>
+	  <icon>cursedCrewIcon</icon>
+	  <url>https://discord.gg/NNe2VxAU7Z</url>
+	</li>
   </leftIconBar>
 </UpdateLog>

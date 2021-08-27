@@ -41,7 +41,6 @@
 	
 	<!-- (Properties) -->
 	<VehicleProperties>Properties</VehicleProperties>
-	<VehicleFishingEnabled>Can Fish</VehicleFishingEnabled>
 	<VehicleVisibilityWorldMap>Visibility</VehicleVisibilityWorldMap>
 	<VehicleManhunterTargeted>Manhunter Targets Vehicle</VehicleManhunterTargeted>
 	

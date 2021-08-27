@@ -139,7 +139,6 @@
 					<movementType>Decelerate</movementType>
 						<maxFlightNodes>999</maxFlightNodes>
 						<launchProperties>
-							<reversed>true</reversed>
 							<speed>0.0035</speed>
 							<maxTicks>2500</maxTicks>
 						</launchProperties>

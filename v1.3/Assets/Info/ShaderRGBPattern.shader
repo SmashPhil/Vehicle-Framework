@@ -24,13 +24,18 @@ Shader "Custom/ShaderRGBPattern"
 	}
 	SubShader
 	{
-		Tags { "IGNOREPROJECTOR" = "true" "QUEUE" = "Transparent-100" "RenderType" = "Transparent" }
-		Blend SrcAlpha OneMinusSrcAlpha, SrcAlpha OneMinusSrcAlpha
+		Tags 
+		{ 
+			"IgnoreProjector" = "true" 
+			"Queue" = "Transparent-100" 
+			"RenderType" = "Transparent"
+			"PreviewType" = "Plane"
+		}
+		ZWrite Off
 		Pass
 		{
-			Tags { "IGNOREPROJECTOR" = "true" "QUEUE" = "Transparent-100" "RenderType" = "Transparent" }
+			Blend SrcAlpha OneMinusSrcAlpha
 			CGPROGRAM
-			#pragma target 4.0
 			#pragma vertex vert
 			#pragma fragment frag
 			#include "UnityCG.cginc"
@@ -122,4 +127,5 @@ Shader "Custom/ShaderRGBPattern"
 			ENDCG
 		}
 	}
+	Fallback "Custom/ShaderRGB"
 }

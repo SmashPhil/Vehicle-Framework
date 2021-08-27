@@ -2,27 +2,25 @@
 
 <Defs>
 	<Vehicles.VehicleDef ParentName="BaseVehiclePawnUpgradeable">
-		<defName>Sparrow</defName>
-		<label>Sparrow</label>
+		<defName>Helicopter</defName>
+		<label>Helicopter</label>
 		<description>An agile fighter plane capable of recon and offensive operations.</description>
 		
 		<uiIconScale>0.9</uiIconScale>
 		<graphicData>
-			<texPath>Vehicles/Air/Sparrow/Sparrow</texPath>
+			<texPath>Vehicles/TEMP/Helicopter/Helicopter</texPath>
 			<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
-			<drawSize>(5,5)</drawSize>
-			<drawOffset>(0, 0, -0.25)</drawOffset>
-			<shaderType>Cutout</shaderType>
-			<shadowData>
-				<volume>(0.4,0.1,0.4)</volume>
-			</shadowData>
+			<drawSize>(8,8)</drawSize>
+			<drawOffset>(0, 0, 0.25)</drawOffset>
+			<shaderType>CutoutComplexPattern</shaderType>
+			<color>(75, 75, 75)</color>
 		</graphicData>
 		
 		<combatPower>2000</combatPower>
 		<fillPercent>1</fillPercent>
 		
 		<nameable>true</nameable>
-		<buildDef>Sparrow_Blueprint</buildDef>
+		<buildDef>Helicopter_Blueprint</buildDef>
 		<repairRate>650</repairRate>
 		
 		<armor>15</armor>
@@ -30,7 +28,7 @@
 		<speed>0.5</speed>
 		<canCaravan>false</canCaravan>
 		
-		<size>(3,3)</size>
+		<size>(2,5)</size>
 		
 		<vehicleMovementPermissions>DriverNeeded</vehicleMovementPermissions>
 		<vehicleCategory>Combat</vehicleCategory>
@@ -54,6 +52,16 @@
 			
 			<settingsUICoord>(0, 25)</settingsUICoord>
 			<settingsUISize>(145, 145)</settingsUISize>
+			
+			<graphicOverlays>
+				<li>
+					<texPath>Vehicles/TEMP/Helicopter/HelicopterRotor</texPath>
+					<graphicClass>Vehicles.Graphic_Propeller</graphicClass>
+					<drawSize>(8,8)</drawSize>
+					<drawOffset>(0, 0, 0.25)</drawOffset>
+					<shaderType>Cutout</shaderType>
+				</li>
+			</graphicOverlays>
 		</drawProperties>
 		<properties>
 			<healthLabel_Healthy>Operational</healthLabel_Healthy>
@@ -102,63 +110,6 @@
 					<li>StatCategoryCargo</li>
 				</categories>
 			</li>
-			<li>
-				<key>LeftWing</key>
-				<label>Left Wing</label>
-				<health>50</health>
-				<armor>0.75</armor>
-				<efficiencyWeight>10</efficiencyWeight>
-				
-				<categories>
-					<li>StatCategoryFlightControl</li>
-				</categories>
-				<hitbox>
-					<cells>
-						<li>(-1,0)</li>
-						<li>(-1,-1)</li>
-					</cells>
-				</hitbox>
-			</li>
-			<li>
-				<key>RightWing</key>
-				<label>Right Wing</label>
-				<health>50</health>
-				<armor>0.75</armor>
-				<efficiencyWeight>10</efficiencyWeight>
-				
-				<categories>
-					<li>StatCategoryFlightControl</li>
-				</categories>
-				
-				<hitbox>
-					<cells>
-						<li>(1,0)</li>
-						<li>(1,-1)</li>
-					</cells>
-				</hitbox>
-			</li>
-			<li>
-				<key>Engine</key>
-				<label>Engine</label>
-				<health>100</health>
-				<armor>0.1</armor>
-				<efficiencyWeight>10</efficiencyWeight>
-				
-				<categories>
-					<li>StatCategoryMovement</li>
-					<li>StatCategoryFlightSpeed</li>
-				</categories>
-				<explosionProperties>
-					<chance>0.25</chance>
-					<radius>6</radius>
-					<damageDef>Bomb</damageDef>
-				</explosionProperties>
-				<hitbox>
-					<cells>
-						<li>(0,-1)</li>
-					</cells>
-				</hitbox>
-			</li>
 		</components>
 		
 		<race>
@@ -187,16 +138,16 @@
 
 		<comps>	
 			<li Class="Vehicles.CompProperties_FueledTravel">
-				<fuelType>Uranium</fuelType> <!-- Must Include -->
+				<fuelType>Chemfuel</fuelType> <!-- Must Include -->
 				<fuelConsumptionRate>200</fuelConsumptionRate>
 				<fuelCapacity>400</fuelCapacity>
 				<fuelConsumptionCondition>FlyingOrDrafted</fuelConsumptionCondition>
 			</li>
 			<li Class="Vehicles.CompProperties_VehicleLauncher">
-				<skyfallerLeaving>SparrowLeaving</skyfallerLeaving>
-				<skyfallerIncoming>SparrowIncoming</skyfallerIncoming>
-				<skyfallerCrashing>SparrowCrashing</skyfallerCrashing>
-				<skyfallerStrafing>SparrowStrafe</skyfallerStrafing>
+				<skyfallerLeaving>HelicopterLeaving</skyfallerLeaving>
+				<skyfallerIncoming>HelicopterIncoming</skyfallerIncoming>
+				<skyfallerCrashing>HelicopterCrashing</skyfallerCrashing>
+				<skyfallerStrafing>HelicopterStrafe</skyfallerStrafing>
 				<fuelEfficiencyWorld>0.1</fuelEfficiencyWorld>
 				<flySpeed>10</flySpeed>
 				<strafing>
@@ -204,9 +155,15 @@
 						<li>laserTurrets</li>
 					</turrets>
 				</strafing>
-				<launchProtocol Class="Vehicles.VTOLTakeoff">
+				<launchProtocol Class="Vehicles.PropellerTakeoff">
+					<angle>85</angle>
+					<accelerationRate>0.75</accelerationRate>
+					<rotationalAcceleration>
+						<min>0</min>
+						<max>250</max>
+					</rotationalAcceleration>
 					<movementType>Decelerate</movementType>
-						<ticksVertical>150</ticksVertical>
+						<ticksVertical>300</ticksVertical>
 						<motes>
 							<li>
 								<moteDef>Mote_RocketSmoke_Low</moteDef>
@@ -218,120 +175,107 @@
 						<verticalLaunchCurve>
 							<points>
 								<li>(0, 0)</li>
-								<li>(0.35, 5)</li>
-								<li>(1, 20)</li>
+								<li>(0.1, 0.25)</li>
+								<li>(0.25, 1)</li>
+								<li>(0.4, 2)</li>
+								<li>(0.5, 3)</li>
+								<li>(0.7, 5)</li>
+								<li>(0.9, 7)</li>
+								<li>(0.95, 7.45)</li>
+								<li>(1, 7.75)</li>
 							</points>
 						</verticalLaunchCurve>
+						<verticalLaunchRotationCurve>
+							<points>
+								<li>(0, 0)</li>
+								<li>(0.25, 3)</li>
+								<li>(0.75, -3)</li>
+								<li>(1, -5)</li>
+							</points>
+						</verticalLaunchRotationCurve>
 						<verticalLandingCurve>
 							<points>
-								<li>(0, 12)</li>
+								<li>(0, 0)</li>
+								<li>(0.1, 0.25)</li>
 								<li>(0.25, 1)</li>
-								<li>(1, 0)</li>
+								<li>(0.4, 2)</li>
+								<li>(0.5, 3)</li>
+								<li>(0.7, 5)</li>
+								<li>(0.9, 7)</li>
+								<li>(0.95, 7.45)</li>
+								<li>(1, 7.75)</li>
 							</points>
 						</verticalLandingCurve>
+						<verticalLandingRotationCurve>
+							<points>
+								<li>(0, 0)</li>
+								<li>(0.65, -5)</li>
+								<li>(1, 12)</li>
+							</points>
+						</verticalLandingRotationCurve>
 						<launchProperties>
 							<maxTicks>500</maxTicks>
 							<forcedRotation>East</forcedRotation>
-							<angleCurve>
-								<points>
-									<li>(0,90)</li>
-									<li>(1,60)</li>
-								</points>
-							</angleCurve>
 							<rotationCurve>
 								<points>
-									<li>(0,0)</li>
-									<li>(0.15,-2)</li>
-									<li>(0.5,-20)</li>
+									<li>(0,-5)</li>
+									<li>(0.025,-7)</li>
+									<li>(0.2,-15)</li>
+									<li>(1,-30)</li>
 								</points>
 							</rotationCurve>
 							<zPositionCurve>
 								<points>
 									<li>(0,0)</li>
 									<li>(0.1,0.25)</li>
-									<li>0.5,2</li>
+									<li>(0.5,0.35)</li>
+									<li>(0.55,0.4)</li>
 								</points>
 							</zPositionCurve>
 							<speedCurve>
 								<points>
 									<li>(0, 0)</li>
-									<li>(0.6, 0.15)</li>
-									<li>(1, 1.25)</li>
+									<li>(0.3, 0.02)</li>
+									<li>(0.65, 0.1)</li>
+									<li>(1, 0.15)</li>
 								</points>
 							</speedCurve>
 						</launchProperties>
 						<landingProperties>
-							<maxTicks>900</maxTicks>
+							<maxTicks>500</maxTicks>
 							<forcedRotation>East</forcedRotation>
 							<angleCurve>
 								<points>
-									<li>(0,-60)</li>
-									<li>(1,-90)</li>
+									<li>(1,-85)</li>
 								</points>
 							</angleCurve>
 							<rotationCurve>
 								<points>
-									<li>(0,30)</li>
-									<li>(0.5,5)</li>
-									<li>(0.9,-5)</li>
-									<li>(0.95,0)</li>
+									<li>(0.1,12)</li>
+									<li>(0.3,15)</li>
+									<li>(0.5,-10)</li>
+									<li>(0.9,-15)</li>
+									<li>(1,-5)</li>
 								</points>
 							</rotationCurve>
 							<zPositionCurve>
 								<points>
-									<li>(0.8,2.5)</li>
-									<li>(0.9, 1.5)</li>
-									<li>(1,0)</li>
+									<li>(0,0)</li>
+									<li>(0.1,0.25)</li>
+									<li>(0.5,0.35)</li>
+									<li>(0.55,0.4)</li>
 								</points>
 							</zPositionCurve>
 							<speedCurve>
 								<points>
-									<li>(0.6,0.6)</li>
+									<li>(0,1.25)</li>
+									<li>(0.8,1)</li>
+									<li>(0.9,0.5)</li>
 									<li>(0.95,0.1)</li>
 								</points>
 							</speedCurve>
 						</landingProperties>
 				</launchProtocol>
-			</li>
-			<li Class="Vehicles.CompProperties_Cannons">
-				<turrets>
-					<li Class="Vehicles.VehicleTurretAlternating">
-						<turretDef>MountedLaserTurret</turretDef>
-						<renderProperties>
-							<north>
-								<offset>(-1.25, -0.35)</offset>
-							</north>
-						</renderProperties>
-						
-						<gizmoLabel>Laser Turret</gizmoLabel>
-						<autoTargeting>false</autoTargeting>
-						
-						<defaultAngleRotated>0</defaultAngleRotated>
-						<angleRestricted/>
-						<drawLayer>-1</drawLayer>
-						
-						<key>laserGunLeft</key>
-						<groupKey>laserTurrets</groupKey>
-					</li>
-					<li Class="Vehicles.VehicleTurretAlternating">
-						<turretDef>MountedLaserTurret</turretDef>
-						<renderProperties>
-							<north>
-								<offset>(1.25, -0.35)</offset>
-							</north>
-						</renderProperties>
-
-						<gizmoLabel>Laser Turret</gizmoLabel>
-						<autoTargeting>false</autoTargeting>
-						
-						<defaultAngleRotated>0</defaultAngleRotated>
-						<angleRestricted/>
-						<drawLayer>-1</drawLayer>
-						
-						<key>laserGunRight</key>
-						<groupKey>laserTurrets</groupKey>
-					</li>
-				</turrets>
 			</li>
 			<li Class="Vehicles.CompProperties_UpgradeTree">
 				<upgrades/>

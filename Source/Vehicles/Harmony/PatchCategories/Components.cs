@@ -97,7 +97,7 @@ namespace Vehicles
 		/// <returns></returns>
 		public static bool NoMeleeForVehicles(Pawn pawn, LocalTargetInfo target, out string failStr)
 		{
-			if(pawn is VehiclePawn)
+			if (pawn is VehiclePawn)
 			{
 				failStr = "IsIncapableOfRamming".Translate(target.Thing.LabelShort);
 				//Add more to string or Action if ramming is implemented
@@ -107,6 +107,10 @@ namespace Vehicles
 			return true;
 		}
 
+		/// <summary>
+		/// Initialize vehicle specific components
+		/// </summary>
+		/// <param name="pawn"></param>
 		public static void CreateInitialVehicleComponents(Pawn pawn)
 		{
 			if (pawn is VehiclePawn vehicle && vehicle.vPather is null)
@@ -114,6 +118,7 @@ namespace Vehicles
 				vehicle.vPather = new Vehicle_PathFollower(vehicle);
 				vehicle.vehicleAI = new VehicleAI(vehicle);
 				vehicle.statHandler = new VehicleStatHandler(vehicle);
+				vehicle.graphicOverlay = new VehicleGraphicOverlay(vehicle);
 			}
 		}
 
@@ -124,12 +129,13 @@ namespace Vehicles
 		/// <param name="actAsIfSpawned"></param>
 		public static void AddAndRemoveVehicleComponents(Pawn pawn, bool actAsIfSpawned = false)
 		{
-			if (pawn is VehiclePawn && (pawn.Spawned || actAsIfSpawned) && pawn.drafter is null)
+			if (pawn is VehiclePawn vehicle && (vehicle.Spawned || actAsIfSpawned) && vehicle.drafter is null)
 			{
-				pawn.drafter = new Pawn_DraftController(pawn);
-				pawn.trader = new Pawn_TraderTracker(pawn);
-				pawn.story = new Pawn_StoryTracker(pawn);
-				pawn.playerSettings = new Pawn_PlayerSettings(pawn);
+				vehicle.drafter = new Pawn_DraftController(pawn);
+				vehicle.trader = new Pawn_TraderTracker(pawn);
+				vehicle.story = new Pawn_StoryTracker(pawn);
+				vehicle.playerSettings = new Pawn_PlayerSettings(pawn);
+				vehicle.training = null;
 			}
 		}
 

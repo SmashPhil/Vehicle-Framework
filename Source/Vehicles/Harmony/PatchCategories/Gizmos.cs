@@ -102,7 +102,6 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="__result"></param>
 		/// <param name="__instance"></param>
-		/// <returns></returns>
 		public static IEnumerable<Gizmo> AddVehicleGizmosPassthrough(IEnumerable<Gizmo> __result, FormCaravanComp __instance)
 		{
 			IEnumerator<Gizmo> enumerator = __result.GetEnumerator();

@@ -22,6 +22,7 @@ namespace Vehicles
 		public Vehicle_DrawTracker vDrawer;
 		public VehicleAI vehicleAI;
 		public VehicleStatHandler statHandler;
+		public VehicleGraphicOverlay graphicOverlay;
 
 		public PatternDef pattern;
 		public RetextureDef retexture;
@@ -776,7 +777,7 @@ namespace Vehicles
 					yield return opt;
 				}
 			}
-			if(statHandler.NeedsRepairs)
+			if (statHandler.NeedsRepairs)
 			{
 				yield return new FloatMenuOption("RepairVehicle".Translate(LabelShort),
 				delegate ()

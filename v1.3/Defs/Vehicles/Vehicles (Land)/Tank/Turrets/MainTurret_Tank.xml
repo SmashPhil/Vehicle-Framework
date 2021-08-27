@@ -42,7 +42,7 @@
 		<graphicData>
 			<texPath>Vehicles/Land/Tank/TankCannonTop/TankCannonTop_a</texPath>
 			<graphicClass>Vehicles.Graphic_Cannon</graphicClass>
-			<shaderType>CutoutComplexPattern</shaderType>
+			<shaderType>CutoutComplexRGB</shaderType>
 			<drawSize>(7, 7)</drawSize>
 		</graphicData>
 		

@@ -16,8 +16,6 @@ namespace Vehicles
 
 		public int delayByTicks;
 
-		public bool reversed;
-
 		public List<GraphicDataLayered> additionalLaunchTextures;
 
 		public List<GraphicDataLayered> additionalLandingTextures;

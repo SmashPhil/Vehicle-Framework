@@ -1,6 +1,5 @@
 ﻿// Created By: SmashPhil
 // Date: 3 FEB 2021
-// Credit: liQd
 /*
    CutoutComplex mask support from RimWorld with 3 supported masking colors
    Red | Green | Blue
@@ -17,18 +16,20 @@ Shader "Custom/ShaderRGB"
 	}
 	SubShader
 	{
-		Tags { "IGNOREPROJECTOR" = "true" "QUEUE" = "Transparent-100" "RenderType" = "Transparent" }
-		Blend SrcAlpha OneMinusSrcAlpha, SrcAlpha OneMinusSrcAlpha
+		Tags 
+		{ 
+			"IgnoreProjector" = "true" 
+			"Queue" = "Transparent-100" 
+			"RenderType" = "Transparent"
+			"PreviewType" = "Plane"
+		}
+		ZWrite Off
 		Pass
 		{
-			Tags { "IGNOREPROJECTOR" = "true" "QUEUE" = "Transparent-100" "RenderType" = "Transparent" }
+			Blend SrcAlpha OneMinusSrcAlpha
 			CGPROGRAM
-			#pragma target 4.0
 			#pragma vertex vert
 			#pragma fragment frag
-			#pragma multi_compile_fog
-			#pragma multi_compile_fwdadd
-			#pragma multi_compile_fwdbase
 			#include "UnityCG.cginc"
 
 			struct appdata
@@ -98,4 +99,5 @@ Shader "Custom/ShaderRGB"
 			ENDCG
 		}
 	}
+	Fallback "Custom/CutoutComplex"
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using RimWorld;
@@ -12,7 +13,7 @@ namespace Vehicles
 {
 	public class WorkGiver_BringUpgradeMaterial : WorkGiver_Scanner
 	{
-		public static List<Thing> resourcesAvailable = new List<Thing>();
+		[ThreadStatic] public static List<Thing> tmpResourcesAvailable = new List<Thing>();
 
 		public override PathEndMode PathEndMode
 		{
@@ -47,7 +48,7 @@ namespace Vehicles
 			bool flag = false;
 			ThingDefCountClass thingDefCountClass = null;
 			var reservationManager = vehicle.Map.GetCachedMapComponent<VehicleReservationManager>();
-			for(int i = 0; i < count; i++)
+			for (int i = 0; i < count; i++)
 			{
 				ThingDefCountClass materialRequired = materials[i];
 
@@ -76,7 +77,7 @@ namespace Vehicles
 				}
 			}
 
-			if(flag)
+			if (flag)
 			{
 				JobFailReason.Is(string.Format($"{"MissingMaterials".Translate()}: {thingDefCountClass.thingDef.label}"), null);
 			}
@@ -87,8 +88,8 @@ namespace Vehicles
 		{
 			int num = Mathf.Min(firstFoundResource.def.stackLimit, pawn.carryTracker.MaxStackSpaceEver(firstFoundResource.def));
 			resTotalAvailable = 0;
-			resourcesAvailable.Clear();
-			resourcesAvailable.Add(firstFoundResource);
+			tmpResourcesAvailable.Clear();
+			tmpResourcesAvailable.Add(firstFoundResource);
 			resTotalAvailable += firstFoundResource.stackCount;
 			if (resTotalAvailable < num)
 			{
@@ -100,7 +101,7 @@ namespace Vehicles
 					}
 					if (thing.def == firstFoundResource.def && GenAI.CanUseItemForWork(pawn, thing))
 					{
-						resourcesAvailable.Add(thing);
+						tmpResourcesAvailable.Add(thing);
 						resTotalAvailable += thing.stackCount;
 					}
 				}

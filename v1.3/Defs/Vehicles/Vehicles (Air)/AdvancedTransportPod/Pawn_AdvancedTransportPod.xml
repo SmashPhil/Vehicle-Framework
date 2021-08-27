@@ -164,7 +164,6 @@
 						<dustSize>0.5~1.5</dustSize>
 						<burnRadius>4</burnRadius>
 						<launchProperties>
-							<reversed>true</reversed>
 							<speed>0.1</speed>
 							<maxTicks>500</maxTicks>
 							<additionalLaunchTextures>

@@ -128,11 +128,13 @@ namespace Vehicles
 
 		public virtual void ExposeData()
 		{
+			Scribe_References.Look(ref parent, "parent");
+			Scribe_Values.Look(ref uniqueId, "uniqueId");
+
 			Scribe_Values.Look(ref cooldownTimer, "cooldownTimer");
 			Scribe_Values.Look(ref defenseBuildings, "defenseBuildings");
 			Scribe_Defs.Look(ref antiAircraftDef, "antiAircraftDef");
 			Scribe_Collections.Look(ref activeTargets, "activeTargets", LookMode.Reference);
-			Scribe_References.Look(ref parent, "parent");
 
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{

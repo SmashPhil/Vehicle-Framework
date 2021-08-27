@@ -30,24 +30,24 @@ Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/is
   <rightIconBar>
     <li>
       <name>Github</name>
-      <icon>githubIcon.png</icon>
+      <icon>githubIcon</icon>
       <url>https://github.com/SmashPhil/Vehicles</url>
     </li>
     <li>
       <name>Discord</name>
-      <icon>discordIcon.png</icon>
+      <icon>discordIcon</icon>
       <url>https://discord.gg/zXDyfWQ</url>
     </li>
     <li>
       <name>Steam</name>
-      <icon>steamIcon.png</icon>
+      <icon>steamIcon</icon>
       <url>steam://url/CommunityFilePage/2356577528</url>
     </li>
   </rightIconBar>
   <leftIconBar>
     <li>
       <name>Support Vehicles Development</name>
-      <icon>ko-fiIcon.png</icon>
+      <icon>ko-fiIcon</icon>
       <url>https://ko-fi.com/smashphil</url>
     </li>
   </leftIconBar>

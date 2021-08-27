@@ -81,10 +81,11 @@ namespace Vehicles
 		private void RenderPawnInternal(Vector3 rootLoc, float angle, bool northSouthRotation, PawnRenderFlags flags)
 		{
 			vehicle.UpdateRotationAndAngle();
-			RenderPawnInternal(rootLoc, angle, vehicle.Rotation, northSouthRotation, flags);
+			Vector3 aboveBodyLoc = RenderPawnInternal(rootLoc, angle, vehicle.Rotation, northSouthRotation, flags);
+			vehicle.graphicOverlay.RenderGraphicOverlays(aboveBodyLoc, vehicle.Rotation);
 		}
 
-		private void RenderPawnInternal(Vector3 rootLoc, float angle, Rot4 bodyFacing, bool northSouthRotation, PawnRenderFlags flags)
+		private Vector3 RenderPawnInternal(Vector3 rootLoc, float angle, Rot4 bodyFacing, bool northSouthRotation, PawnRenderFlags flags)
 		{
 			if (!graphics.AllResolved)
 			{
@@ -133,6 +134,7 @@ namespace Vehicles
 				bodyLoc.y += YOffset_Status;
 				statusOverlays.RenderStatusOverlays(bodyLoc, quaternion, MeshPool.humanlikeHeadSet.MeshAt(bodyFacing));
 			}
+			return loc;
 		}
 
 		public void RendererTick()

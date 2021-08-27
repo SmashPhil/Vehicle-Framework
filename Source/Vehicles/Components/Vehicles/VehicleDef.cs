@@ -13,7 +13,7 @@ namespace Vehicles
 	public class VehicleDef : ThingDef
 	{
 		[PostToSettings]
-		internal VehicleEnabledFor enabled = VehicleEnabledFor.Everyone;
+		public VehicleEnabledFor enabled = VehicleEnabledFor.Everyone;
 
 		[PostToSettings(Label = "VehicleNameable", Translate = true, Tooltip = "VehicleNameableTooltip", UISettingsType = UISettingsType.Checkbox)]
 		public bool nameable = false;
@@ -138,6 +138,14 @@ namespace Vehicles
 		}
 
 		/// <summary>
+		/// Initialize fields or properties that are reliant on the entire <see cref="DefDatabase{T}"/> being populated
+		/// </summary>
+		public void PostDefDatabase()
+		{
+			drawProperties.PostDefDatabase();
+		}
+
+		/// <summary>
 		/// Config errors to ensure all required data has been filled in
 		/// </summary>
 		public override IEnumerable<string> ConfigErrors()
@@ -157,6 +165,10 @@ namespace Vehicles
 			if (components.NullOrEmpty())
 			{
 				yield return "<field>components</field> must include at least 1 VehicleComponent".ConvertRichText();
+			}
+			if (drawProperties is null)
+			{
+				yield return "<field>drawProperties</field> must be specified in order to properly render vehicle in GUIs.".ConvertRichText();
 			}
 			if (!components.NullOrEmpty())
 			{

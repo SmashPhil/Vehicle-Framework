@@ -74,7 +74,7 @@ namespace Vehicles
 			SmashLog.Message($"{LogLabel} <success>{Harmony.GetPatchedMethods().Count()} patches successfully applied.</success>");
 
 			Utilities.InvokeWithLogging(ResolveAllReferences);
-
+			Utilities.InvokeWithLogging(PostDefDatabaseCalls);
 			//Will want to be added via xml
 			Utilities.InvokeWithLogging(FillVehicleLordJobTypes);
 
@@ -103,6 +103,14 @@ namespace Vehicles
 				{
 					field.ResolveReferences();
 				}
+			}
+		}
+
+		public static void PostDefDatabaseCalls()
+		{
+			foreach (VehicleDef def in DefDatabase<VehicleDef>.AllDefs)
+			{
+				def.PostDefDatabase();
 			}
 		}
 

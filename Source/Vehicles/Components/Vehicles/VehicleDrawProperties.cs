@@ -25,5 +25,23 @@ namespace Vehicles
 
 		public string loadCargoTexPath = string.Empty;
 		public string cancelCargoTexPath = string.Empty;
+
+		public List<GraphicData> graphicOverlays = new List<GraphicData>();
+
+		public List<Graphic> OverlayGraphics { get; set; } = new List<Graphic>();
+
+		public void PostDefDatabase()
+		{
+			foreach (GraphicData graphicData in graphicOverlays)
+			{
+				Graphic graphic = graphicData.Graphic;
+				OverlayGraphics.Add(graphic);
+			}
+		}
+
+		public class GraphicOverlay
+		{
+			public GraphicDataLayered graphicData;
+		}
 	}
 }

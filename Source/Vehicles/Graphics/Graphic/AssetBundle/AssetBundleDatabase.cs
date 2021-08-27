@@ -29,7 +29,7 @@ namespace Vehicles
 
 		private static readonly List<string> loadFoldersChecked = new List<string>();
 
-		private static readonly string VehicleAssetBundlePath = @"Bundles\VehicleAssets";
+		private static readonly string VehicleAssetBundlePath = @"Assets\vehicleassets";
 
 		public static readonly AssetBundle VehicleAssetBundle;
 
@@ -48,8 +48,12 @@ namespace Vehicles
 			{
 				if (currentVersion != Application.unityVersion)
 				{
-					Log.Warning($"{VehicleHarmony.LogLabel} Unity Version {Application.unityVersion} does not match registered version for AssetBundles being loaded. You may encounter problems.");
+					Log.Warning($"{VehicleHarmony.LogLabel} Unity Version {Application.unityVersion} does not match registered version for AssetBundles being loaded. You may encounter problems. Please notify report it on the workshop page so that I may update the UnityVersion supported for this AssetBundle.");
 				}
+			}
+			else
+			{
+				SmashLog.Warning($"{VehicleHarmony.LogLabel} Unable to locate cached UnityVersion: {version}. This mod might not support this version.");
 			}
 			
 			List<string> loadFolders = FilePaths.ModFoldersForVersion(VehicleMod.settings.Mod.Content);
@@ -82,7 +86,7 @@ namespace Vehicles
 			}
 			finally
 			{
-				SmashLog.Message($"{VehicleHarmony.LogLabel} Loading additional assets. UnityVersion={Application.unityVersion} Status: {AssetBundleLoadMessage(VehicleAssetBundle)}");
+				SmashLog.Message($"{VehicleHarmony.LogLabel} Importing additional assets. UnityVersion={Application.unityVersion} Status: {AssetBundleLoadMessage(VehicleAssetBundle)}");
 			}
 		}
 
@@ -126,7 +130,7 @@ namespace Vehicles
 		/// <returns></returns>
 		public static bool SupportsRGBMaskTex(this Shader shader)
 		{
-			return shader == CutoutComplexPattern;
+			return shader == CutoutComplexPattern || shader == CutoutComplexRGB;
 		}
 	}
 }

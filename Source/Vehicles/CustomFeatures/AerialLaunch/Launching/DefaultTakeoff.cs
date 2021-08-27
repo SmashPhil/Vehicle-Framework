@@ -49,14 +49,14 @@ namespace Vehicles
 				switch (movementType)
 				{
 					case SkyfallerMovementType.Accelerate:
-						return SkyfallerDrawPosUtility.DrawPos_Accelerate(drawPos, ticksPassed, angle, LaunchSpeed);
+						return SkyfallerDrawPosUtility.DrawPos_Accelerate(drawPos, ticksPassed, angle, CurrentSpeed);
 					case SkyfallerMovementType.ConstantSpeed:
-						return SkyfallerDrawPosUtility.DrawPos_ConstantSpeed(drawPos, ticksPassed, angle, LaunchSpeed);
+						return SkyfallerDrawPosUtility.DrawPos_ConstantSpeed(drawPos, ticksPassed, angle, CurrentSpeed);
 					case SkyfallerMovementType.Decelerate:
-						return SkyfallerDrawPosUtility.DrawPos_Decelerate(drawPos, ticksPassed, angle, LaunchSpeed);
+						return SkyfallerDrawPosUtility.DrawPos_Decelerate(drawPos, ticksPassed, angle, CurrentSpeed);
 					default:
 						Log.ErrorOnce("SkyfallerMovementType not handled: " + movementType, vehicle.thingIDNumber ^ 1948576711);
-						return SkyfallerDrawPosUtility.DrawPos_Accelerate(drawPos, ticksPassed, angle, LaunchSpeed);
+						return SkyfallerDrawPosUtility.DrawPos_Accelerate(drawPos, ticksPassed, angle, CurrentSpeed);
 				}
 			}
 		}

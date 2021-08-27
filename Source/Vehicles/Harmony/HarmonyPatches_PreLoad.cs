@@ -55,7 +55,7 @@ namespace Vehicles
 		/// <param name="__instance"></param>
 		public static bool VehiclesDontHaveFlesh(ref bool __result, RaceProperties __instance)
 		{
-			if (__instance.FleshType == FleshTypeDefOf_Ships.MetalVehicle || __instance.FleshType == FleshTypeDefOf_Ships.SpacerVehicle || __instance.FleshType == FleshTypeDefOf_Ships.WoodenVehicle)
+			if (__instance.FleshType is VehicleFleshTypeDef)
 			{
 				__result = false;
 				return false;

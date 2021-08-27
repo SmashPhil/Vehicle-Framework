@@ -14,9 +14,6 @@
 			<color>(0, 80, 30)</color>
 			<colorTwo>(0, 45, 10)</colorTwo>
 			<colorThree>(75, 110, 45)</colorThree>
-			<shadowData>
-				<volume>(0.4,0.1,0.4)</volume>
-			</shadowData>
 		</graphicData>
 		
 		<combatPower>200</combatPower>
