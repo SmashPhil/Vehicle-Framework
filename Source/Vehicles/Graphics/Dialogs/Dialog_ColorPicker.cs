@@ -19,14 +19,11 @@ namespace Vehicles
 		private const float SwitchSize = 60f;
 		private const int GridDimensionSqr = 3;
 
-		private readonly VehiclePawn vehicle;
-		private readonly Texture2D vehicleTex;
-
 		private int pageNumber;
-		private static List<PatternDef> availableMasks = new List<PatternDef>();
-		private static List<Material> maskMaterials = new List<Material>();
+		private static Dictionary<PatternDef, Material> maskMaterials = new Dictionary<PatternDef, Material>();
+		
 		private int pageCount;
-		private PatternDef selectedPattern;
+		private static PatternDef selectedPattern;
 
 		public static Texture2D ColorChart = new Texture2D(255, 255);
 		public static Texture2D HueChart = new Texture2D(1, 255);
@@ -60,18 +57,79 @@ namespace Vehicles
 
 		private static bool mouseOver = false;
 
-		public Dialog_ColorPicker() 
+		private Dialog_ColorPicker() 
 		{
-			Instance = this;
 		}
 
-		public Dialog_ColorPicker(VehiclePawn vehicle)
-		{
-			Instance = this;
-			this.vehicle = vehicle;
-			vehicleTex = vehicle.VehicleGraphic.TexAt(Rot8.North);
+		public static Dialog_ColorPicker Instance { get; private set; }
 
-			SetColors(vehicle.DrawColor, vehicle.DrawColorTwo, vehicle.DrawColorThree);
+		private static VehicleDef VehicleDef { get; set; }
+
+		private static Graphic_Vehicle VehicleGraphic { get; set; }
+
+		private static PatternData PatternData { get; set; }
+
+		private static List<VehicleTurret> Turrets { get; set; }
+
+		private static List<GraphicOverlay> GraphicOverlays { get; set; }
+
+		/// <summary>
+		/// ColorOne, ColorTwo, ColorThree, PatternDef, Displacement, Tiles
+		/// </summary>
+		private static Action<Color, Color, Color, PatternDef, Vector2, float> OnSave { get; set; }
+
+		public static int CurrentSelectedPalette { get; set; }
+
+		public override Vector2 InitialSize => new Vector2(900f, 540f);
+
+		public static string ColorToHex(Color col) => ColorUtility.ToHtmlStringRGB(col);
+
+		public static bool HexToColor(string hexColor, out Color color) => ColorUtility.TryParseHtmlString("#" + hexColor, out color);
+
+		/// <summary>
+		/// Open ColorPicker for <paramref name="vehicle"/> and apply changes via <paramref name="onSave"/>
+		/// </summary>
+		/// <param name="vehicle"></param>
+		/// <param name="onSave"></param>
+		public static void OpenColorPicker(VehiclePawn vehicle, Action<Color, Color, Color, PatternDef, Vector2, float> onSave)
+		{
+			Instance = new Dialog_ColorPicker();
+			VehicleDef = vehicle.VehicleDef;
+			VehicleGraphic = vehicle.VehicleGraphic;
+			OnSave = onSave;
+			PatternData = new PatternData(vehicle);
+			Instance.SetColors(vehicle.DrawColor, vehicle.DrawColorTwo, vehicle.DrawColorThree);
+			additionalTiling = PatternData.tiles;
+			displacementX = PatternData.displacement.x;
+			displacementY = PatternData.displacement.y;
+			Turrets = vehicle.CompCannons?.Cannons ?? new List<VehicleTurret>();
+			GraphicOverlays = vehicle.graphicOverlay.graphics ?? new List<GraphicOverlay>();
+			Instance.Init();
+		}
+
+		/// <summary>
+		/// Open ColorPicker for <paramref name="vehicleDef"/> and apply changes via <paramref name="onSave"/>
+		/// </summary>
+		/// <param name="vehicleDef"></param>
+		/// <param name="onSave"></param>
+		public static void OpenColorPicker(VehicleDef vehicleDef, Action<Color, Color, Color, PatternDef, Vector2, float> onSave)
+		{
+			Instance = new Dialog_ColorPicker();
+			VehicleDef = vehicleDef;
+			VehicleGraphic = vehicleDef.graphicData.Graphic as Graphic_Vehicle;
+			OnSave = onSave;
+			PatternData = new PatternData(VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData));
+			Instance.SetColors(PatternData.color, PatternData.colorTwo, PatternData.colorThree);
+			additionalTiling = PatternData.tiles;
+			displacementX = PatternData.displacement.x;
+			displacementY = PatternData.displacement.y;
+			Turrets = vehicleDef.GetCompProperties<CompProperties_Cannons>()?.turrets ?? new List<VehicleTurret>();
+			GraphicOverlays = vehicleDef.drawProperties.OverlayGraphics ?? new List<GraphicOverlay>();
+			Instance.Init();	
+		}
+
+		private void Init()
+		{
 			CurrentSelectedPalette = -1;
 
 			for (int i = 0; i < 255; i++)
@@ -91,27 +149,19 @@ namespace Vehicles
 			}
 
 			pageNumber = 1;
-			availableMasks = DefDatabase<PatternDef>.AllDefs.Where(p => p.ValidFor(vehicle.VehicleDef)).ToList();
-			RecacheMaterials();
-			float ratio = (float)availableMasks.Count / (GridDimensionSqr * GridDimensionSqr);
-			pageCount = Mathf.CeilToInt(ratio);
+			List<PatternDef> availablePatterns = DefDatabase<PatternDef>.AllDefs.Where(p => p.ValidFor(VehicleDef)).ToList();
+			maskMaterials.AddRangeDefault(availablePatterns, null);
+			Instance.RecacheMaterials();
+			float ratio = (float)maskMaterials.Count / (GridDimensionSqr * GridDimensionSqr);
+			Instance.pageCount = Mathf.CeilToInt(ratio);
 
 			ColorChart.Apply(false);
 			doCloseX = true;
 			forcePause = true;
 			absorbInputAroundWindow = true;
-			selectedPattern = vehicle.pattern;
+			selectedPattern = maskMaterials.ContainsKey(PatternData.pattern) ? PatternData.pattern ?? PatternDefOf.Default : PatternDefOf.Default;
+			Find.WindowStack.Add(Instance);
 		}
-
-		public static Dialog_ColorPicker Instance { get; private set; }
-
-		public static int CurrentSelectedPalette { get; set; }
-
-		public override Vector2 InitialSize => new Vector2(900f, 540f);
-
-		public static string ColorToHex(Color col) => ColorUtility.ToHtmlStringRGB(col);
-
-		public static bool HexToColor(string hexColor, out Color color) => ColorUtility.TryParseHtmlString("#" + hexColor, out color);
 
 		public override void PostClose()
 		{
@@ -133,7 +183,7 @@ namespace Vehicles
 			var font = Text.Font;
 			Text.Font = GameFont.Small;
 
-			if(Prefs.DevMode)
+			if (Prefs.DevMode)
 			{
 				if(Widgets.ButtonText(new Rect(0f, 0f, ButtonWidth * 1.5f, ButtonHeight), "Reset Palettes"))
 				{
@@ -153,10 +203,10 @@ namespace Vehicles
 			Rect paletteRect = new Rect(inRect.width / 3f - 5f, inRect.height - panelHeight, panelWidth, panelHeight);
 			DrawColorPalette(paletteRect);
 
-			Vector2 display = vehicle.VehicleDef.drawProperties.colorPickerUICoord;
-			Rect vehicleRect = new Rect(display.x, display.y, vehicle.VehicleDef.drawProperties.upgradeUISize.x, vehicle.VehicleDef.drawProperties.upgradeUISize.y);
-			RenderHelper.DrawVehicleTexTiled(vehicleRect, vehicleTex, vehicle, selectedPattern, true, CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, 
-				additionalTiling, displacementX, displacementY);
+			Vector2 display = VehicleDef.drawProperties.colorPickerUICoord;
+			Rect vehicleRect = new Rect(display.x, display.y, VehicleDef.drawProperties.upgradeUISize.x, VehicleDef.drawProperties.upgradeUISize.y);
+			VehicleDef.DrawVehicleTexTiled(vehicleRect, new PatternData(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, selectedPattern, new Vector2(displacementX, displacementY), additionalTiling), 
+				Rot8.North, Turrets, GraphicOverlays);
 			Rect dragBoxRect = new Rect(0f, ButtonHeight * 1.5f, ButtonWidth * 3, inRect.height - ButtonHeight * 5);
 			HandleDisplacementDrag(dragBoxRect);
 			var color = GUI.color;
@@ -166,7 +216,7 @@ namespace Vehicles
 				GUI.color = UIElements.InactiveColor;
 			}
 			Rect sliderRect = new Rect(0f, inRect.height - ButtonHeight * 3, ButtonWidth * 3, ButtonHeight);
-			//UIElements.SliderLabeled(sliderRect, "VehiclePatternZoom".Translate(), "VehiclePatternZoomTooltip".Translate(), string.Empty, ref additionalTiling, 0, 2);
+			UIElements.SliderLabeled(sliderRect, "VehiclePatternZoom".Translate(), "VehiclePatternZoomTooltip".Translate(), string.Empty, ref additionalTiling, 0, 2);
 			Rect positionLeftBox = new Rect(sliderRect)
 			{
 				y = sliderRect.y + sliderRect.height,
@@ -236,16 +286,17 @@ namespace Vehicles
 			float gridSizeY = sqrGridSize;
 
 			/* Scale down if dimensions are not equal */
-			if (vehicleTex.width < vehicleTex.height)
+			Texture2D displayTex = VehicleGraphic.TexAt(Rot8.North);
+			if (displayTex.width < displayTex.height)
 			{
-				gridSizeX *= (float)vehicleTex.width / vehicleTex.height;
+				gridSizeX *= (float)displayTex.width / displayTex.height;
 				outRect.x += (sqrGridSize - gridSizeX) / 2;
 			}
 			/* -------------------------------------- */
 
 			float num = 0f;
 			int startingIndex = (pageNumber - 1) * (GridDimensionSqr * GridDimensionSqr);
-			int maxIndex = Ext_Numeric.Clamp((pageNumber * (GridDimensionSqr * GridDimensionSqr)), 0, availableMasks.Count);
+			int maxIndex = Ext_Numeric.Clamp(pageNumber * (GridDimensionSqr * GridDimensionSqr), 0, maskMaterials.Count);
 			int iteration = 0;
 			Rect displayRect = new Rect(0, 0, gridSizeX, gridSizeY);
 			Rect paginationRect = new Rect(paintRect.x + 5, paintRect.y + paintRect.height - ButtonHeight, paintRect.width - 10, ButtonHeight * 0.75f);
@@ -253,24 +304,23 @@ namespace Vehicles
 			{
 				UIHelper.DrawPagination(paginationRect, ref pageNumber, pageCount);
 			}
+			List<PatternDef> availablePatterns = maskMaterials.Keys.ToList();
 			for (int i = startingIndex; i < maxIndex; i++, iteration++)
 			{
+				PatternDef pattern = availablePatterns[i];
 				displayRect.x = outRect.x + (iteration % GridDimensionSqr) * sqrGridSize;
 				displayRect.y = outRect.y + (Mathf.FloorToInt(iteration / GridDimensionSqr)) * gridSizeY;
-
-				RenderHelper.DrawVehicleTexTiled(displayRect, vehicleTex, vehicle, availableMasks[i], true, CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor);
+				PatternData patternData = new PatternData(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, pattern, new Vector2(displacementX, displacementY), additionalTiling);
+				VehicleDef.DrawVehicleTexTiled(displayRect, patternData, Rot8.North, Turrets, GraphicOverlays);
 				Rect imageRect = new Rect(displayRect.x, displayRect.y, gridSizeX, gridSizeY);
 				if (iteration % GridDimensionSqr == 0)
 				{
 					num += imageRect.height;
 				}
-				TooltipHandler.TipRegion(imageRect, availableMasks[i].LabelCap);
+				TooltipHandler.TipRegion(imageRect, pattern.LabelCap);
 				if (Widgets.ButtonInvisible(imageRect))
 				{
-					selectedPattern = availableMasks[i];
-					displacementX = 0;
-					displacementY = 0;
-					additionalTiling = 1;
+					selectedPattern = pattern;
 				}
 			}
 		}
@@ -428,14 +478,7 @@ namespace Vehicles
 		{
 			if (Widgets.ButtonText(buttonRect, "Apply".Translate()))
 			{
-				vehicle.DrawColor = CurrentColorOne.ToColor;
-				vehicle.DrawColorTwo = CurrentColorTwo.ToColor;
-				vehicle.DrawColorThree = CurrentColorThree.ToColor;
-				vehicle.pattern = selectedPattern;
-				vehicle.tiles = additionalTiling;
-				vehicle.displacement = new Vector2(displacementX, displacementY);
-				vehicle.Notify_ColorChanged();
-				vehicle.CompCannons?.Cannons.ForEach(c => c.ResolveCannonGraphics(vehicle, true));
+				OnSave(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, selectedPattern, new Vector2(displacementX, displacementY), additionalTiling);
 				Close(true);
 			}
 			buttonRect.x += ButtonWidth;
@@ -447,10 +490,10 @@ namespace Vehicles
 			if (Widgets.ButtonText(buttonRect, "VehiclesReset".Translate()))
 			{
 				SoundDefOf.Click.PlayOneShotOnCamera(null);
-				selectedPattern = vehicle.pattern;
-				additionalTiling = vehicle.tiles;
-				displacementX = vehicle.displacement.x;
-				displacementY = vehicle.displacement.y;
+				selectedPattern = PatternData.pattern;
+				additionalTiling = PatternData.tiles;
+				displacementX = PatternData.displacement.x;
+				displacementY = PatternData.displacement.y;
 				if (CurrentSelectedPalette >= 0)
 				{
 					var palette = VehicleMod.settings.colorStorage.colorPalette[CurrentSelectedPalette];
@@ -458,7 +501,7 @@ namespace Vehicles
 				}
 				else
 				{
-					SetColors(vehicle.DrawColor, vehicle.DrawColorTwo, vehicle.DrawColorThree);
+					SetColors(PatternData.color, PatternData.colorTwo, PatternData.colorThree);
 				}
 				
 			}
@@ -466,12 +509,11 @@ namespace Vehicles
 
 		private void RecacheMaterials()
 		{
-			maskMaterials.Clear();
-			foreach (PatternDef pattern in availableMasks)
+			foreach (PatternDef pattern in maskMaterials.Keys.ToList())
 			{
 				MaterialRequestRGB req = new MaterialRequestRGB()
 				{
-					mainTex = vehicle.VehicleGraphic.TexAt(Rot8.North),
+					mainTex = VehicleGraphic.TexAt(Rot8.North),
 					shader = RGBShaderTypeDefOf.CutoutComplexPattern.Shader,
 					properties = pattern.properties,
 					color = pattern.properties.colorOne ?? CurrentColorOne.ToColor,
@@ -479,12 +521,12 @@ namespace Vehicles
 					colorThree = pattern.properties.colorThree ?? CurrentColorThree.ToColor,
 					tiles = 1,
 					isSkin = pattern is SkinDef,
-					maskTex = vehicle.VehicleGraphic.masks[Rot8.North.AsInt],
+					maskTex = VehicleGraphic.masks[Rot8.North.AsInt],
 					patternTex = pattern[Rot8.North],
 					shaderParameters = null
 				};
 				Material patMat = MaterialPoolExpanded.MatFrom(req);
-				maskMaterials.Add(patMat);
+				maskMaterials[pattern] = patMat;
 			}
 		}
 

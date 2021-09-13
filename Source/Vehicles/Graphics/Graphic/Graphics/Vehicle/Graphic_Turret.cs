@@ -6,7 +6,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class Graphic_Cannon : Graphic_RGB
+	public class Graphic_Turret : Graphic_RGB
 	{
 		public static string MaskSuffix = "_m";
 
@@ -31,10 +31,9 @@ namespace Vehicles
 				throw new ArgumentNullException("shader");
 			}
 			mainTex = ContentFinder<Texture2D>.Get(req.path);
-
 			if (mainTex is null)
 			{
-				Log.Error($"{VehicleHarmony.LogLabel} Graphic_Cannon cannot init: No texture found at path " + req.path);
+				Log.Error($"{VehicleHarmony.LogLabel} Graphic_Turret cannot init: No texture found at path " + req.path);
 				graphicPath = BaseContent.BadGraphic.path;
 				material = BaseContent.BadMat;
 				return;
@@ -94,23 +93,48 @@ namespace Vehicles
 			return mats;
 		}
 
+		public virtual Material MatAt(Rot8 rot, PatternDef pattern)
+		{
+			if (!Shader.SupportsRGBMaskTex() || pattern is null)
+			{
+				return maskMatPatterns[PatternDefOf.Default].Second[0];
+			}
+			if (maskMatPatterns.TryGetValue(pattern, out var values))
+			{
+				return values.Second[0];
+			}
+			else
+			{
+				Log.Error($"{VehicleHarmony.LogLabel} Key {pattern.defName} not found in {GetType()}.");
+				string folders = string.Empty;
+				foreach (var item in maskMatPatterns)
+				{
+					folders += $"Item: {item.Key} Destination: {item.Value.First}\n";
+				}
+				Debug.Message($"{VehicleHarmony.LogLabel} Additional Information:\n" +
+					$"MatCount: {maskMatPatterns.Count}\n" +
+					$"{folders}");
+			}
+			return BaseContent.BadMat;
+		}
+
 		public override Material MatAt(Rot4 rot, Thing thing = null)
 		{
 			if (thing is null || !(thing is VehiclePawn vehicle))
 			{
 				return base.MatAt(rot, thing);
 			}
-			if (!Shader.SupportsRGBMaskTex() || vehicle.pattern is null)
+			if (!Shader.SupportsRGBMaskTex() || vehicle.Pattern is null)
 			{
 				return maskMatPatterns[PatternDefOf.Default].Second[0];
 			}
-			if (maskMatPatterns.TryGetValue(vehicle.pattern, out var values))
+			if (maskMatPatterns.TryGetValue(vehicle.Pattern, out var values))
 			{
 				return values.Second[0];
 			}
 			else
 			{
-				Log.Error($"{VehicleHarmony.LogLabel} Key {vehicle.pattern.defName} not found in {GetType()} for {vehicle}.");
+				Log.Error($"{VehicleHarmony.LogLabel} Key {vehicle.Pattern.defName} not found in {GetType()} for {vehicle}.");
 				string folders = string.Empty;
 				foreach(var item in maskMatPatterns)
 				{
@@ -130,7 +154,7 @@ namespace Vehicles
 
 		public virtual Material MatAt(PatternDef pattern, int index = 0)
 		{
-			if(pattern != null && maskMatPatterns.TryGetValue(pattern, out var values))
+			if (pattern != null && maskMatPatterns.TryGetValue(pattern, out var values))
 			{
 				return values.Second[index];
 			}
@@ -151,12 +175,12 @@ namespace Vehicles
 
 		public override Graphic GetColoredVersion(Shader newShader, Color newColor, Color newColorTwo)
 		{
-			return GraphicDatabase.Get<Graphic_Cannon>(path, newShader, drawSize, newColor, newColorTwo, DataRGB);
+			return GraphicDatabase.Get<Graphic_Turret>(path, newShader, drawSize, newColor, newColorTwo, DataRGB);
 		}
 
 		public override Graphic_RGB GetColoredVersion(Shader shader, Color colorOne, Color colorTwo, Color colorThree, float tiles = 1, float displacementX = 0, float displacementY = 0)
 		{
-			return GraphicDatabaseRGB.Get<Graphic_Cannon>(path, shader, drawSize, colorOne, colorTwo, colorThree, tiles, displacementX, displacementY, DataRGB);
+			return GraphicDatabaseRGB.Get<Graphic_Turret>(path, shader, drawSize, colorOne, colorTwo, colorThree, tiles, displacementX, displacementY, DataRGB);
 		}
 	}
 }

@@ -143,8 +143,7 @@ namespace Vehicles
 				for (int i = 0; i < LaunchGraphics.Count; i++)
 				{
 					Graphic graphic = LaunchGraphics[i];
-					GraphicDataLayered graphicData = LaunchGraphicDatas[i];
-					Vector3 texPosition = new Vector3(DrawPos.x, layer + graphicData.DrawLayer, DrawPos.z);
+					Vector3 texPosition = new Vector3(DrawPos.x, layer, DrawPos.z);
 					if (graphic is Graphic_Animate animationGraphic)
 					{
 						animationGraphic.DrawWorkerAnimated(texPosition, Rot4.North, ticksPassed, rotation, true);
@@ -166,8 +165,7 @@ namespace Vehicles
 				for (int i = 0; i < LaunchGraphics.Count; i++)
 				{
 					Graphic graphic = LaunchGraphics[i];
-					GraphicDataLayered graphicData = LaunchGraphicDatas[i];
-					Vector3 texPosition = new Vector3(DrawPos.x, layer + graphicData.DrawLayer, DrawPos.z);
+					Vector3 texPosition = new Vector3(DrawPos.x, layer, DrawPos.z);
 					if (graphic is Graphic_Animate animationGraphic)
 					{
 						animationGraphic.DrawWorkerAnimated(texPosition, Rot4.North, ticksPassed, rotation, true);

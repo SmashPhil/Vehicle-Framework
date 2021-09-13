@@ -191,7 +191,7 @@ namespace Vehicles
 		/// <returns></returns>
 		public static bool BoatWakesTicker(Pawn ___pawn, ref Vector3 ___lastFootprintPlacePos)
 		{
-			if(___pawn is VehiclePawn vehicle && vehicle.IsBoat())
+			if (___pawn is VehiclePawn vehicle && vehicle.IsBoat())
 			{
 				if ((vehicle.Drawer.DrawPos - ___lastFootprintPlacePos).MagnitudeHorizontalSquared() > 0.1)
 				{
@@ -202,13 +202,10 @@ namespace Vehicles
 						___lastFootprintPlacePos = drawPos;
 					}
 				}
-				else if(VehicleMod.settings.main.passiveWaterWaves)
+				else if (VehicleMod.settings.main.passiveWaterWaves && Find.TickManager.TicksGame % 360 == 0)
 				{
-					if(Find.TickManager.TicksGame % 360 == 0)
-					{
-						float offset = Mathf.PingPong(Find.TickManager.TicksGame / 10, vehicle.VehicleDef.graphicData.drawSize.y / 4);
-						FleckMaker.WaterSplash(vehicle.Drawer.DrawPos - new Vector3(0,0, offset), vehicle.Map, vehicle.VehicleDef.properties.wakeMultiplier, vehicle.VehicleDef.properties.wakeSpeed);
-					}
+					float offset = Mathf.PingPong(Find.TickManager.TicksGame / 10, vehicle.VehicleDef.graphicData.drawSize.y / 4);
+					FleckMaker.WaterSplash(vehicle.Drawer.DrawPos - new Vector3(0, 0, offset), vehicle.Map, vehicle.VehicleDef.properties.wakeMultiplier, vehicle.VehicleDef.properties.wakeSpeed);
 				}
 				return false;
 			}
@@ -217,7 +214,7 @@ namespace Vehicles
 
 		public static bool VehicleTweenedPosRoot(Pawn ___pawn, ref Vector3 __result)
 		{
-			if(___pawn is VehiclePawn vehicle)
+			if (___pawn is VehiclePawn vehicle)
 			{
 				if (!vehicle.Spawned)
 				{
@@ -236,10 +233,16 @@ namespace Vehicles
 			if (thingDef is VehicleBuildDef def)
 			{
 				VehicleDef vehicleDef = def.thingToSpawn;
-				if (vehicleDef.GetSortedCompProperties<CompProperties_Cannons>() is CompProperties_Cannons props)
+				Vector3 loc = GenThing.TrueCenter(center, rot, def.Size, drawAltitude.AltitudeFor());
+				float extraAngle;
+				foreach (GraphicOverlay graphicOverlay in vehicleDef.GhostGraphicOverlaysFor(ghostCol))
 				{
-					Vector3 loc = GenThing.TrueCenter(center, rot, def.Size, drawAltitude.AltitudeFor());
-					vehicleDef.DrawGhostCannonTextures(loc, rot, ghostCol);
+					extraAngle = graphicOverlay.rotation;
+					graphicOverlay.graphic.DrawWorker(loc + baseGraphic.DrawOffsetFull(rot), rot, def, thing, rot.AsAngle + extraAngle);
+				}
+				if (vehicleDef.GetSortedCompProperties<CompProperties_Cannons>() is CompProperties_Cannons)
+				{
+					vehicleDef.DrawGhostTurretTextures(loc, rot, ghostCol);
 				}
 			}
 		}

@@ -8,7 +8,7 @@ namespace Vehicles
 {
 	public class VehicleGraphicOverlay
 	{
-		public List<Graphic> graphics = new List<Graphic>();
+		public List<GraphicOverlay> graphics = new List<GraphicOverlay>();
 
 		public VehiclePawn vehicle;
 
@@ -17,20 +17,20 @@ namespace Vehicles
 		public VehicleGraphicOverlay(VehiclePawn vehicle)
 		{
 			this.vehicle = vehicle;
-			graphics.AddRange(vehicle.VehicleDef.drawProperties.OverlayGraphics);
+			graphics = new List<GraphicOverlay>(vehicle.VehicleDef.drawProperties.OverlayGraphics);
 		}
 
 		public virtual void RenderGraphicOverlays(Vector3 drawPos, Rot4 rot)
 		{
 			float extraAngle;
-			foreach (Graphic graphic in graphics)
+			foreach (GraphicOverlay graphicOverlay in graphics)
 			{
-				extraAngle = 0;
-				if (graphic is Graphic_Rotator rotator)
+				extraAngle = graphicOverlay.rotation;
+				if (graphicOverlay.graphic is Graphic_Rotator rotator)
 				{
-					extraAngle = rotationRegistry[rotator.RegistryKey].ClampAndWrap(0, 359);
+					extraAngle += rotationRegistry[rotator.RegistryKey].ClampAndWrap(0, 359);
 				}
-				graphic.DrawWorker(drawPos, rot, null, null, vehicle.Angle + extraAngle);
+				graphicOverlay.graphic.DrawWorker(drawPos, rot, null, null, vehicle.Angle + extraAngle);
 			}
 		}
 	}

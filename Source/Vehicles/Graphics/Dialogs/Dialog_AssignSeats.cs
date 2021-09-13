@@ -58,7 +58,7 @@ namespace Vehicles
 			Vector2 displayRect = vehicle.VehicleDef.drawProperties.colorPickerUICoord;
 			float UISizeX = vehicle.VehicleDef.drawProperties.upgradeUISize.x;
 			float UISizeY = vehicle.VehicleDef.drawProperties.upgradeUISize.y;
-			RenderHelper.DrawVehicleTex(new Rect(displayRect.x, displayRect.y, UISizeX, UISizeY), vehicleTex, vehicle, vehicle.pattern, true, 
+			RenderHelper.DrawVehicleTex(new Rect(displayRect.x, displayRect.y, UISizeX, UISizeY), vehicleTex, vehicle, vehicle.Pattern, true, 
 				vehicle.DrawColor, vehicle.DrawColorTwo, vehicle.DrawColorThree);
 			DoBottomButtons(inRect);
 		}

@@ -24,11 +24,8 @@ namespace Vehicles
 		public VehicleStatHandler statHandler;
 		public VehicleGraphicOverlay graphicOverlay;
 
-		public PatternDef pattern;
+		public PatternData patternData;
 		public RetextureDef retexture;
-		private Color color1 = Color.white;
-		private Color color2 = Color.white;
-		private Color color3 = Color.white;
 
 		public List<Bill_BoardShip> bills = new List<Bill_BoardShip>();
 		public List<VehicleHandler> handlers = new List<VehicleHandler>();
@@ -44,8 +41,6 @@ namespace Vehicles
 		private float armorPoints;
 		private float moveSpeedModifier;
 
-		public float tiles = 1;
-		public Vector2 displacement = Vector2.zero;
 		private Graphic_Vehicle graphicInt;
 
 		private SelfOrderingList<ThingComp> cachedComps = new SelfOrderingList<ThingComp>();
@@ -259,12 +254,12 @@ namespace Vehicles
 					{
 						graphicData.CopyFrom(VehicleDef.graphicData);
 					}
-					graphicData.color = DrawColor;
-					graphicData.colorTwo = DrawColorTwo;
-					graphicData.colorThree = DrawColorThree;
-					graphicData.tiles = tiles;
-					graphicData.displacement = displacement;
-					graphicData.pattern = pattern;
+					graphicData.color = patternData.color;
+					graphicData.colorTwo = patternData.colorTwo;
+					graphicData.colorThree = patternData.colorThree;
+					graphicData.tiles = patternData.tiles;
+					graphicData.displacement = patternData.displacement;
+					graphicData.pattern = patternData.pattern;
 					graphicInt = graphicData.Graphic as Graphic_Vehicle;
 				}
 				return graphicInt;
@@ -275,11 +270,11 @@ namespace Vehicles
 		{
 			get
 			{
-				return pattern?.properties?.colorOne ?? color1;
+				return Pattern?.properties?.colorOne ?? patternData.color;
 			}
 			set
 			{
-				color1 = value;
+				patternData.color = value;
 			}
 		}
 
@@ -287,11 +282,11 @@ namespace Vehicles
 		{
 			get
 			{
-				return pattern?.properties?.colorTwo ?? color2;
+				return Pattern?.properties?.colorTwo ?? patternData.colorTwo;
 			}
 			set
 			{
-				color2 = value;
+				patternData.colorTwo = value;
 			}
 		}
 
@@ -299,11 +294,47 @@ namespace Vehicles
 		{
 			get
 			{
-				return pattern?.properties?.colorThree ?? color3;
+				return Pattern?.properties?.colorThree ?? patternData.colorThree;
 			}
 			set
 			{
-				color3 = value;
+				patternData.colorThree = value;
+			}
+		}
+
+		public Vector2 Displacement
+		{
+			get
+			{
+				return patternData.displacement;
+			}
+			set
+			{
+				patternData.displacement = value;
+			}
+		}
+
+		public float Tiles
+		{
+			get
+			{
+				return patternData.tiles;
+			}
+			set
+			{
+				patternData.tiles = value;
+			}
+		}
+
+		public PatternDef Pattern
+		{
+			get
+			{
+				return patternData.pattern ?? VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(VehicleDef.defName, VehicleGraphic.DataRGB)?.pattern ?? PatternDefOf.Default;
+			}
+			set
+			{
+				patternData.pattern = value;
 			}
 		}
 
@@ -516,7 +547,7 @@ namespace Vehicles
 				{
 					foreach (VehicleTurret cannon in cannonComp.Cannons)
 					{
-						cannon.ResolveCannonGraphics(this, true);
+						cannon.ResolveCannonGraphics(patternData, true);
 					}
 				}
 			}
@@ -1017,7 +1048,17 @@ namespace Vehicles
 		
 		public void ChangeColor()
 		{
-			Find.WindowStack.Add(new Dialog_ColorPicker(this));
+			Dialog_ColorPicker.OpenColorPicker(this, delegate (Color colorOne, Color colorTwo, Color colorThree, PatternDef pattern, Vector2 displacement, float tiles)
+			{
+				DrawColor = colorOne;
+				DrawColorTwo = colorTwo;
+				DrawColorThree = colorThree;
+				patternData.pattern = pattern;
+				patternData.tiles = tiles;
+				patternData.displacement = displacement;
+				Notify_ColorChanged();
+				CompCannons?.Cannons.ForEach(c => c.ResolveCannonGraphics(patternData, true));
+			});
 		}
 
 		public void MultiplePawnFloatMenuOptions(List<Pawn> pawns)
@@ -1568,18 +1609,6 @@ namespace Vehicles
 			if (!respawningAfterLoad)
 			{
 				vPather.ResetToCurrentPosition();
-				if (DrawColor == Color.white)
-				{
-					DrawColor = VehicleDef.graphicData.color;
-				}
-				if (DrawColorTwo == Color.white)
-				{
-					DrawColorTwo = VehicleDef.graphicData.colorTwo;
-				}
-				if (DrawColorThree == Color.white)
-				{
-					DrawColorThree = VehicleDef.graphicData.colorThree;
-				}
 			}
 			else
 			{
@@ -1779,13 +1808,7 @@ namespace Vehicles
 
 			Scribe_Values.Look(ref angle, "angle");
 
-			Scribe_Values.Look(ref color1, "color1", Color.white);
-			Scribe_Values.Look(ref color2, "color2", Color.white);
-			Scribe_Values.Look(ref color3, "color3", Color.white);
-
-			Scribe_Values.Look(ref tiles, "tiles", 1);
-			Scribe_Values.Look(ref displacement, "displacement", Vector2.zero);
-			Scribe_Defs.Look(ref pattern, "pattern");
+			Scribe_Deep.Look(ref patternData, "patternData");
 			Scribe_Defs.Look(ref retexture, "retexture");
 
 			Scribe_Values.Look(ref movementStatus, "movingStatus", VehicleMovementStatus.Online);

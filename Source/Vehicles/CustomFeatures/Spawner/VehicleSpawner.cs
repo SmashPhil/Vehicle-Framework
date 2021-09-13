@@ -55,61 +55,62 @@ namespace Vehicles
 
 		public static VehiclePawn GenerateVehicle(VehicleGenerationRequest request)
 		{
+			string lastStep = "Beginning vehicle generation";
 			VehiclePawn result = null;
 			try
 			{
-				result = GenerateVehicleInternal(request);
-			}
-			catch (Exception ex)
-			{
-				Log.Error($"Error thrown while generating VehiclePawn {request.VehicleDef.LabelCap} Exception: {ex.Message}");
-			}
-			return result;
-		}
+				result = (VehiclePawn)ThingMaker.MakeThing(request.VehicleDef);
+				lastStep = "Initializing components";
+				PawnComponentsUtility.CreateInitialComponents(result);
 
-		private static VehiclePawn GenerateVehicleInternal(VehicleGenerationRequest request)
-		{
-			VehiclePawn result = (VehiclePawn)ThingMaker.MakeThing(request.VehicleDef);
-			PawnComponentsUtility.CreateInitialComponents(result);
+				lastStep = "Setting faction and kindDef";
+				result.kindDef = request.VehicleDef.VehicleKindDef;
+				result.SetFactionDirect(request.Faction);
 
-			result.kindDef = request.VehicleDef.VehicleKindDef;
-			result.SetFactionDirect(request.Faction);
-			
-			string defaultMask = VehicleMod.settings.vehicles.defaultMasks.TryGetValue(result.VehicleDef.defName, "Default");
-			PatternDef pattern = DefDatabase<PatternDef>.GetNamed(defaultMask);
-			if (pattern is null)
-			{
-				Log.Error($"Unable to retrieve saved default pattern {defaultMask}. Defaulting to original Default mask.");
-				pattern = PatternDefOf.Default;
-			}
+				lastStep = "Retrieving pattern";
+				PatternDef pattern = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(result.VehicleDef.defName, result.VehicleDef.graphicData)?.pattern ?? PatternDefOf.Default;
 
-			result.pattern = request.RandomizeMask ? result.VehicleGraphic.maskMatPatterns.RandomElement().Key : pattern;
-			if (result.VehicleGraphic.MatSingle.shader.SupportsRGBMaskTex())
-			{
+				lastStep = "Randomized pattern check";
+				result.Pattern = request.RandomizeMask ? result.VehicleGraphic.maskMatPatterns.RandomElement().Key : pattern;
+
+				lastStep = "Initializing colors";
 				result.DrawColor = request.ColorOne;
 				result.DrawColorTwo = request.ColorTwo;
 				result.DrawColorThree = request.ColorThree;
+				result.Displacement = request.Displacement;
+				result.Tiles = request.Tiling;
+
+				lastStep = "Post Generation Setup";
+				result.PostGenerationSetup();
+				lastStep = "Component Post Generation Setup";
+				foreach (VehicleComp comp in result.AllComps.Where(c => c is VehicleComp))
+				{
+					comp.PostGenerationSetup();
+				}
+
+				//REDO - Allow other modders to add setup for non clean-slate items
+				if (!request.CleanSlate)
+				{
+					lastStep = "Randomizing upgrades";
+					UpgradeAtRandom(result, request.Upgrades);
+					lastStep = "Distributing ammo";
+					DistributeAmmunition(result);
+				}
+
+				lastStep = "Setting age and needs";
+				float num = Rand.ByCurve(DefaultAgeGenerationCurve);
+				result.ageTracker.AgeBiologicalTicks = (long)(num * BiologicalAgeTicksMultiplier) + Rand.Range(0, 3600000);
+				result.needs.SetInitialLevels();
+				if (Find.Scenario != null)
+				{
+					lastStep = "Notifying Pawn Generated";
+					Find.Scenario.Notify_NewPawnGenerating(result, PawnGenerationContext.NonPlayer);
+				}
+				lastStep = "VehiclePawn fully generated";
 			}
-			
-			result.PostGenerationSetup();
-			foreach (VehicleComp comp in result.AllComps.Where(c => c is VehicleComp))
+			catch (Exception ex)
 			{
-				comp.PostGenerationSetup();
-			}
-			
-			//REDO - Allow other modders to add setup for non clean-slate items
-			if (!request.CleanSlate)
-			{
-				UpgradeAtRandom(result, request.Upgrades);
-				DistributeAmmunition(result);
-			}
-			
-			float num = Rand.ByCurve(DefaultAgeGenerationCurve);
-			result.ageTracker.AgeBiologicalTicks = (long)(num * BiologicalAgeTicksMultiplier) + Rand.Range(0, 3600000);
-			result.needs.SetInitialLevels();
-			if (Find.Scenario != null)
-			{
-				Find.Scenario.Notify_NewPawnGenerating(result, PawnGenerationContext.NonPlayer);
+				SmashLog.ErrorLabel(VehicleHarmony.LogLabel, $"Exception thrown while generating vehicle. Last Step: {lastStep}. Exception: {ex.Message}");
 			}
 			return result;
 		}

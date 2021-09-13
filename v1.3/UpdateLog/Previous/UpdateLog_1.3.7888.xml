@@ -91,9 +91,14 @@ Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/is
   <!--Icon bar shown to the left of the mod's name-->
   <leftIconBar>
     <li>
-      <name>Support Vehicles Development</name>
-      <icon>ko-fiIcon</icon>
-      <url>https://ko-fi.com/smashphil</url>
+      <name>Patreon</name>
+      <icon>patreonIcon</icon>
+      <url>https://www.patreon.com/smashphil</url>
     </li>
+	<li>
+	  <name>Cursed Crew</name>
+	  <icon>cursedCrewIcon</icon>
+	  <url>https://discord.gg/NNe2VxAU7Z</url>
+	</li>
   </leftIconBar>
 </UpdateLog>

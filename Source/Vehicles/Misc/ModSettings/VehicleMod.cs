@@ -21,9 +21,6 @@ namespace Vehicles
 		public static VehicleMod mod;
 		public static VehicleDef selectedDef;
 
-		internal static Texture2D selectedVehicleTex;
-		internal static Graphic_Vehicle graphicInt;
-
 		public static Color SemiLightGrey = new Color(0.1f, 0.1f, 0.1f);
 
 		public static Vector2 saveableFieldsScrollPosition;
@@ -121,14 +118,11 @@ namespace Vehicles
 		{
 			if (selectedDef is null)
 			{
-				selectedVehicleTex = null;
 				return;
 			}
 			var bodyGraphicData = selectedDef.graphicData;
 			var graphicData = new GraphicDataRGB();
 			graphicData.CopyFrom(bodyGraphicData);
-			graphicInt = graphicData.Graphic as Graphic_Vehicle;
-			selectedVehicleTex = graphicInt.TexAt(Rot8.North);
 		}
 
 		private static void InitializeSections()
@@ -168,7 +162,6 @@ namespace Vehicles
 					}
 				}
 			}
-			
 		}
 
 		private static void IterateTypeFields(Type containingType, FieldInfo field)

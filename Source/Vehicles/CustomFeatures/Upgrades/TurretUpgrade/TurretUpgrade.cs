@@ -70,7 +70,7 @@ namespace Vehicles
 
 		public override void DrawExtraOnGUI(Rect rect)
 		{
-			vehicle.DrawCannonTextures(rect, turretsUnlocked.Keys.OrderBy(c => c.drawLayer), vehicle.pattern, true, vehicle.DrawColor, vehicle.DrawColorTwo, vehicle.DrawColorThree);
+			vehicle.DrawCannonTextures(rect, turretsUnlocked.Keys.OrderBy(c => c.drawLayer), vehicle.Pattern, true, vehicle.DrawColor, vehicle.DrawColorTwo, vehicle.DrawColorThree);
 		}
 
 		public override void ExposeData()

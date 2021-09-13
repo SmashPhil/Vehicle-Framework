@@ -35,7 +35,31 @@ namespace Vehicles.UI
 			return graphic;
 		}
 
-		public static void DrawGhostCannonTextures(this VehicleDef vehicleDef, Vector3 loc, Rot8 rot, Color ghostCol)
+		public static IEnumerable<GraphicOverlay> GhostGraphicOverlaysFor(this VehicleDef vehicleDef, Color ghostColor)
+		{
+			int num = 0;
+			num = Gen.HashCombine(num, vehicleDef);
+			num = Gen.HashCombineStruct(num, ghostColor);
+			foreach (GraphicOverlay graphicOverlay in vehicleDef.drawProperties.OverlayGraphics)
+			{
+				int hash = Gen.HashCombine(num, graphicOverlay.graphic.data.texPath);
+				if (!cachedGhostGraphics.TryGetValue(hash, out Graphic graphic))
+				{
+					graphic = graphicOverlay.graphic;
+					GraphicData graphicData = new GraphicData();
+					AccessTools.Method(typeof(GraphicData), "Init").Invoke(graphicData, new object[] { });
+					graphicData.CopyFrom(graphic.data);
+					graphicData.shadowData = null;
+
+					graphic = GraphicDatabase.Get(graphic.GetType(), graphic.path, ShaderTypeDefOf.EdgeDetect.Shader, graphic.drawSize, ghostColor, Color.white, graphicData, null);
+
+					cachedGhostGraphics.Add(hash, graphic);
+				}
+				yield return new GraphicOverlay(graphic, graphicOverlay.rotation);
+			}
+		}
+
+		public static void DrawGhostTurretTextures(this VehicleDef vehicleDef, Vector3 loc, Rot8 rot, Color ghostCol)
 		{
 			if (vehicleDef.GetSortedCompProperties<CompProperties_Cannons>() is CompProperties_Cannons props)
 			{

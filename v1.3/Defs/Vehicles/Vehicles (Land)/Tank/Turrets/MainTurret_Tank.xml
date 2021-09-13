@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <Defs>
-	<Vehicles.VehicleTurretDef ParentName="TurretBase">
-		<defName>TankMainTurret</defName>
-		<label>Tank Gun</label>
+	<Vehicles.VehicleTurretDef Name="TankMainTurret" ParentName="TurretBase">
+		<defName>TankMainTurret_Medium</defName>
+		<label>Main Turret</label>
 		<weaponType>Rotatable</weaponType>
 		<cannonSound>Explosion_PirateCannon</cannonSound>
 		<reloadSound>Artillery_ShellLoaded</reloadSound>
 		
 		<projectileSpeed>150</projectileSpeed>
 		<reloadTimer>5</reloadTimer>
-		<warmUpTimer>2</warmUpTimer>
+		<warmUpTimer>1.65</warmUpTimer>
 		<magazineCapacity>1</magazineCapacity>
 		
 		<recoil>
@@ -18,6 +18,7 @@
 			<distancePerTick>0.15</distancePerTick>
 			<speedMultiplierPostRecoil>0.35</speedMultiplierPostRecoil>
 		</recoil>
+		
 		<vehicleRecoil>
 			<distanceTotal>0.35</distanceTotal>
 			<distancePerTick>0.15</distancePerTick>
@@ -30,7 +31,7 @@
 			<li>
 				<shotsPerBurst>1</shotsPerBurst>
 				<ticksBetweenBursts>1</ticksBetweenBursts>
-				<spreadRadius>3</spreadRadius>
+				<spreadRadius>6</spreadRadius>
 				<label>Single</label>
 				<texPath>UI/Gizmos/FireRate_Single</texPath>
 			</li>
@@ -40,9 +41,9 @@
 		<rotationSpeed>0.5</rotationSpeed>
 
 		<graphicData>
-			<texPath>Vehicles/Land/Tank/TankCannonTop/TankCannonTop_a</texPath>
-			<graphicClass>Vehicles.Graphic_Cannon</graphicClass>
-			<shaderType>CutoutComplexRGB</shaderType>
+			<texPath>Vehicles/Land/Tank/TankTurret/TankTurret_medium</texPath>
+			<graphicClass>Vehicles.Graphic_Turret</graphicClass>
+			<shaderType>CutoutComplexPattern</shaderType>
 			<drawSize>(7, 7)</drawSize>
 		</graphicData>
 		
@@ -63,6 +64,6 @@
 		<projectileOffset>4.75</projectileOffset>
 		<hitFlags>IntendedTarget</hitFlags>
 		<maxRange>-1</maxRange>
-		<minRange>15</minRange>
+		<minRange>13</minRange>
 	</Vehicles.VehicleTurretDef>
 </Defs>

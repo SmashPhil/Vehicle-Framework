@@ -406,7 +406,7 @@ namespace Vehicles.UI
 						}
 
 						RenderHelper.DrawVehicleTex(new Rect(display.x, display.y, UISizeX, UISizeY), VehicleTexture, Vehicle, 
-							Vehicle.pattern, true, Vehicle.DrawColor, Vehicle.DrawColorTwo, Vehicle.DrawColorThree);
+							Vehicle.Pattern, true, Vehicle.DrawColor, Vehicle.DrawColorTwo, Vehicle.DrawColorThree);
 
 						Rect extraDisplayRect = new Rect(display.x, display.y, UISizeX, UISizeY);
 						if (selectedNode != null)

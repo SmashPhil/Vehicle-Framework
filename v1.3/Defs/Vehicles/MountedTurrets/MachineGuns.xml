@@ -54,7 +54,7 @@
 		
 		<graphicData>
 			<texPath>Vehicles/Turrets/50cal/50cal</texPath>
-			<graphicClass>Vehicles.Graphic_Cannon</graphicClass>
+			<graphicClass>Vehicles.Graphic_Turret</graphicClass>
 			<drawSize>(6, 6)</drawSize>
 		</graphicData>
 
@@ -123,7 +123,7 @@
 		
 		<graphicData>
 			<texPath>Vehicles/Turrets/HeavyMachineGun/HeavyMachineGun</texPath>
-			<graphicClass>Vehicles.Graphic_Cannon</graphicClass>
+			<graphicClass>Vehicles.Graphic_Turret</graphicClass>
 			<drawSize>(1.25, 1.25)</drawSize>
 		</graphicData>
 

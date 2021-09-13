@@ -119,6 +119,8 @@ namespace Vehicles
 				vehicle.vehicleAI = new VehicleAI(vehicle);
 				vehicle.statHandler = new VehicleStatHandler(vehicle);
 				vehicle.graphicOverlay = new VehicleGraphicOverlay(vehicle);
+				PatternData defaultPatternData = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicle.VehicleDef.defName, vehicle.VehicleDef.graphicData);
+				vehicle.patternData = new PatternData(defaultPatternData);
 			}
 		}
 

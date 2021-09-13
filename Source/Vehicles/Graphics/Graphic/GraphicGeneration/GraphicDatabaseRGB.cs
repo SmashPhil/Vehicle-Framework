@@ -25,20 +25,20 @@ namespace Vehicles
 		public static Graphic_RGB Get(Type graphicClass, string path, Shader shader, Vector2 drawSize, Color color, Color colorTwo, Color colorThree, float tiles = 1, float displacementX = 0, float displacementY = 0, GraphicDataRGB data = null, List<ShaderParameter> shaderParameters = null)
 		{
 			GraphicRequestRGB graphicRequest = new GraphicRequestRGB(graphicClass, path, shader, drawSize, color, colorTwo, colorThree, tiles, new Vector2(displacementX, displacementY), data, 0, shaderParameters);
-			if (graphicRequest.graphicClass == typeof(Graphic_Vehicle))
-			{
-				return GetInner<Graphic_Vehicle>(graphicRequest);
-			}
-			if (graphicRequest.graphicClass == typeof(Graphic_Cannon))
-			{
-				return GetInner<Graphic_Cannon>(graphicRequest);
-			}
-			if (graphicRequest.graphicClass == typeof(Graphic_CannonAnimate))
-			{
-				return GetInner<Graphic_CannonAnimate>(graphicRequest);
-			}
 			try
 			{
+				if (graphicRequest.graphicClass == typeof(Graphic_Vehicle))
+				{
+					return GetInner<Graphic_Vehicle>(graphicRequest);
+				}
+				if (graphicRequest.graphicClass == typeof(Graphic_Turret))
+				{
+					return GetInner<Graphic_Turret>(graphicRequest);
+				}
+				if (graphicRequest.graphicClass == typeof(Graphic_TurretAnimate))
+				{
+					return GetInner<Graphic_TurretAnimate>(graphicRequest);
+				}
 				return (Graphic_RGB)GenGeneric.InvokeStaticGenericMethod(typeof(GraphicDatabaseRGB), graphicRequest.graphicClass, "GetInner", new object[]
 				{
 					graphicRequest
@@ -46,15 +46,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error(string.Concat(new object[]
-				{
-					"Exception getting ",
-					graphicClass,
-					" at ",
-					path,
-					": ",
-					ex.ToString()
-				}));
+				Log.Error($"Exception getting {graphicClass} at {path}. Exception=\"{ex.Message}\"");
 			}
 			return null;
 		}

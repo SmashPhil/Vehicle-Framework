@@ -108,6 +108,10 @@ namespace Vehicles
 
 		public static void PostDefDatabaseCalls()
 		{
+			VehicleMod.settings.main.PostDefDatabase();
+			VehicleMod.settings.vehicles.PostDefDatabase();
+			VehicleMod.settings.upgrades.PostDefDatabase();
+			VehicleMod.settings.debug.PostDefDatabase();
 			foreach (VehicleDef def in DefDatabase<VehicleDef>.AllDefs)
 			{
 				def.PostDefDatabase();

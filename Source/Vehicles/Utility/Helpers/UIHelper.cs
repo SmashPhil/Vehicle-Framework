@@ -201,7 +201,7 @@ namespace Vehicles
 					texProportions.x = texProportions.y;
 					texProportions.y = x;
 					Widgets.DrawTextureFitted(rect, vehicleIcon, GenUI.IconDrawScale(vehicle.VehicleDef), texProportions, 
-						texCoords, 0, vehicle.VehicleGraphic.MatAt(Rot8.East, vehicle.pattern));
+						texCoords, 0, vehicle.VehicleGraphic.MatAt(Rot8.East, vehicle.Pattern));
 					if (vehicle.CompCannons is CompCannons comp)
 					{
 						//REDO

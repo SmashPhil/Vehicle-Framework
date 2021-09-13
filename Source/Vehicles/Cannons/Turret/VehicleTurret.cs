@@ -44,7 +44,7 @@ namespace Vehicles
 
 		protected Texture2D gizmoIcon;
 		protected Texture2D mainMaskTex;
-		protected Graphic_Cannon cannonGraphic;
+		protected Graphic_Turret cannonGraphic;
 
 		protected GraphicDataRGB cachedGraphicData;
 		private RotatingList<Texture2D> overheatIcons;
@@ -131,7 +131,7 @@ namespace Vehicles
 			ticksSinceLastShot = 0;
 
 			childCannons = new List<VehicleTurret>();
-			if(!string.IsNullOrEmpty(parentKey))
+			if (!string.IsNullOrEmpty(parentKey))
 			{
 				foreach (VehicleTurret cannon in vehicle.CompCannons.Cannons.Where(c => c.key == parentKey))
 				{
@@ -139,7 +139,6 @@ namespace Vehicles
 					cannon.childCannons.Add(this);
 				}
 			}
-
 			ResolveCannonGraphics(vehicle);
 			rTracker = new Turret_RecoilTracker(this);
 
@@ -317,13 +316,13 @@ namespace Vehicles
 				}
 				if (mainMaskTex is null)
 				{
-					mainMaskTex = ContentFinder<Texture2D>.Get(CannonGraphicData.texPath + Graphic_Cannon.MaskSuffix);
+					mainMaskTex = ContentFinder<Texture2D>.Get(CannonGraphicData.texPath + Graphic_Turret.MaskSuffix);
 				}
 				return mainMaskTex;
 			}
 		}
 
-		public virtual Graphic_Cannon CannonGraphic
+		public virtual Graphic_Turret CannonGraphic
 		{
 			get
 			{
@@ -947,7 +946,12 @@ namespace Vehicles
 			}
 		}
 
-		public virtual void ResolveCannonGraphics(VehiclePawn forPawn, bool forceRegen = false)
+		public virtual void ResolveCannonGraphics(VehiclePawn vehicle, bool forceRegen = false)
+		{
+			ResolveCannonGraphics(vehicle.patternData, forceRegen);
+		}
+
+		public virtual void ResolveCannonGraphics(PatternData patternData, bool forceRegen = false)
 		{
 			if (NoGraphic)
 			{
@@ -959,17 +963,17 @@ namespace Vehicles
 				cachedGraphicData.CopyFrom(turretDef.graphicData);
 				if (turretDef.matchParentColor)
 				{
-					cachedGraphicData.color = forPawn.DrawColor;
-					cachedGraphicData.colorTwo = forPawn.DrawColorTwo;
-					cachedGraphicData.colorThree = forPawn.DrawColorThree;
-					cachedGraphicData.tiles = forPawn.tiles;
-					cachedGraphicData.displacement = forPawn.displacement;
+					cachedGraphicData.color = patternData.color;
+					cachedGraphicData.colorTwo = patternData.colorTwo;
+					cachedGraphicData.colorThree = patternData.colorThree;
+					cachedGraphicData.tiles = patternData.tiles;
+					cachedGraphicData.displacement = patternData.displacement;
 				}
 			}
 
 			if (cannonGraphic is null || forceRegen)
 			{
-				cannonGraphic = CannonGraphicData.Graphic as Graphic_Cannon;
+				cannonGraphic = CannonGraphicData.Graphic as Graphic_Turret;
 			}
 			if (cannonMaterialCache is null || forceRegen)
 			{
@@ -983,14 +987,15 @@ namespace Vehicles
 			{
 				return;
 			}
+			GraphicDataRGB defaultDrawData = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(alternateDef.defName, alternateDef.graphicData);
 			if (cachedGraphicData is null || forceRegen)
 			{
 				cachedGraphicData = new GraphicDataRGB();
 				cachedGraphicData.CopyFrom(turretDef.graphicData);
-				
+				cachedGraphicData.CopyDrawData(defaultDrawData);
 				if (turretDef.matchParentColor)
 				{
-					var bodyGraphicData = alternateDef.graphicData;
+					var bodyGraphicData = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(alternateDef.defName, alternateDef.graphicData);
 					cachedGraphicData.color = bodyGraphicData.color;
 					cachedGraphicData.colorTwo = bodyGraphicData.colorTwo;
 					cachedGraphicData.colorThree = bodyGraphicData.colorThree;
@@ -998,14 +1003,13 @@ namespace Vehicles
 					cachedGraphicData.displacement = bodyGraphicData.displacement;
 				}
 			}
-
 			if (cannonGraphic is null || forceRegen)
 			{
-				cannonGraphic = CannonGraphicData.Graphic as Graphic_Cannon;
+				cannonGraphic = CannonGraphicData.Graphic as Graphic_Turret;
 			}
-			if(cannonMaterialCache is null || forceRegen)
+			if (cannonMaterialCache is null || forceRegen)
 			{
-				cannonMaterialCache = CannonGraphic.MatAt(Rot4.North, vehicle);
+				cannonMaterialCache = CannonGraphic.MatAt(Rot8.North, vehicle);
 			}
 		}
 

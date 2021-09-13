@@ -23,7 +23,7 @@
 		
 		<graphicData>
 			<texPath>Vehicles/Turrets/HeavyMachineGun/HeavyMachineGun</texPath>
-			<graphicClass>Vehicles.Graphic_Cannon</graphicClass>
+			<graphicClass>Vehicles.Graphic_Turret</graphicClass>
 			<drawSize>(1, 1)</drawSize>
 		</graphicData>
 		

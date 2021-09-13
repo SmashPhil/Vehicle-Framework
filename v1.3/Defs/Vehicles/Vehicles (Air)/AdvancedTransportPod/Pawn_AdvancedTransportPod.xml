@@ -173,7 +173,7 @@
 									<drawSize>(3, 3)</drawSize>
 									<drawOffset>(-0.9, 0, -2.45)</drawOffset>
 									<shaderType>Transparent</shaderType>
-									<layer>-0.1</layer>
+									<layer>-1</layer>
 								</li>
 								<li>
 									<texPath>Animations/JetEffect</texPath>
@@ -181,7 +181,7 @@
 									<drawSize>(3, 3)</drawSize>
 									<drawOffset>(0.9, 0, -2.45)</drawOffset>
 									<shaderType>Transparent</shaderType>
-									<layer>-0.1</layer>
+									<layer>-1</layer>
 								</li>
 								<li>
 									<texPath>Animations/JetEffect</texPath>
@@ -189,7 +189,7 @@
 									<drawSize>(3, 3)</drawSize>
 									<drawOffset>(0, 0, -1.5)</drawOffset>
 									<shaderType>Transparent</shaderType>
-									<layer>-0.1</layer>
+									<layer>-1</layer>
 								</li>
 							</additionalLaunchTextures>
 						</launchProperties>
@@ -205,7 +205,7 @@
 									<drawSize>(3, 3)</drawSize>
 									<drawOffset>(-0.9, 0, -2.45)</drawOffset>
 									<shaderType>Transparent</shaderType>
-									<layer>-0.1</layer>
+									<layer>-1</layer>
 								</li>
 								<li>
 									<texPath>Animations/JetEffect</texPath>
@@ -213,7 +213,7 @@
 									<drawSize>(3, 3)</drawSize>
 									<drawOffset>(0.9, 0, -2.45)</drawOffset>
 									<shaderType>Transparent</shaderType>
-									<layer>-0.1</layer>
+									<layer>-1</layer>
 								</li>
 								<li>
 									<texPath>Animations/JetEffect</texPath>
@@ -221,7 +221,7 @@
 									<drawSize>(3, 3)</drawSize>
 									<drawOffset>(0, 0, -1.5)</drawOffset>
 									<shaderType>Transparent</shaderType>
-									<layer>-0.1</layer>
+									<layer>-1</layer>
 								</li>
 							</additionalLaunchTextures>
 						</landingProperties>

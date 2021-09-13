@@ -41,13 +41,13 @@ namespace Vehicles
 			{
 				return base.MatAt(rot, thing);
 			}
-			if (maskMatPatterns.TryGetValue(vehicle.pattern, out var values))
+			if (maskMatPatterns.TryGetValue(vehicle.Pattern, out var values))
 			{
 				return values.Second[vehicle.FullRotation.AsInt];
 			}
 			else
 			{
-				Log.Error($"[{VehicleHarmony.LogLabel}] Key {vehicle.pattern.defName} not found in {GetType()} for {vehicle}. Make sure there is an individual folder for each additional mask.");
+				Log.Error($"[{VehicleHarmony.LogLabel}] Key {vehicle.Pattern.defName} not found in {GetType()} for {vehicle}. Make sure there is an individual folder for each additional mask.");
 				if(Prefs.DevMode)
 				{
 					string folders = string.Empty;

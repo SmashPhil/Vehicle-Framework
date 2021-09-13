@@ -31,7 +31,8 @@ namespace Vehicles
 		public override void Arrived(int tile)
 		{
 			VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)VehicleSkyfallerMaker.MakeSkyfaller(vehicle.CompVehicleLauncher.Props.skyfallerIncoming, vehicle);
-			GenSpawn.Spawn(skyfaller, landingCell, mapParent.Map, landingRot);
+			Rot4 vehicleRotation = launchProtocol.landingProperties.forcedRotation ?? landingRot;
+			GenSpawn.Spawn(skyfaller, landingCell, mapParent.Map, vehicleRotation);
 		}
 
 		public override void ExposeData()

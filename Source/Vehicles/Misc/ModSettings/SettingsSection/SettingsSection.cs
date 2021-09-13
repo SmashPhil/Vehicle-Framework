@@ -43,5 +43,9 @@ namespace Vehicles
 		public virtual void ExposeData()
 		{
 		}
+
+		public virtual void PostDefDatabase()
+		{
+		}
 	}
 }

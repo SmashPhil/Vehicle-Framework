@@ -112,13 +112,9 @@ namespace Vehicles
 			}
 			properties.ResolveReferences(this);
 
-			if (VehicleMod.settings.vehicles.defaultMasks.EnumerableNullOrEmpty())
+			if (VehicleMod.settings.vehicles.defaultGraphics.EnumerableNullOrEmpty())
 			{
-				VehicleMod.settings.vehicles.defaultMasks = new Dictionary<string, string>();
-			}
-			if (!VehicleMod.settings.vehicles.defaultMasks.ContainsKey(defName))
-			{
-				VehicleMod.settings.vehicles.defaultMasks.Add(defName, "Default");
+				VehicleMod.settings.vehicles.defaultGraphics = new Dictionary<string, PatternData>();
 			}
 
 			if (!comps.NullOrEmpty())
@@ -143,6 +139,7 @@ namespace Vehicles
 		public void PostDefDatabase()
 		{
 			drawProperties.PostDefDatabase();
+			graphicData.pattern ??= PatternDefOf.Default;
 		}
 
 		/// <summary>

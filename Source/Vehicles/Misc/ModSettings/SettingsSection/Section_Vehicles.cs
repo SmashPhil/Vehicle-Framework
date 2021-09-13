@@ -18,7 +18,7 @@ namespace Vehicles
 		/// <summary>
 		/// <defName, maskName>
 		/// </summary>
-		public Dictionary<string, string> defaultMasks = new Dictionary<string, string>();
+		public Dictionary<string, PatternData> defaultGraphics = new Dictionary<string, PatternData>();
 
 		public override IEnumerable<FloatMenuOption> ResetOptions
 		{
@@ -60,10 +60,18 @@ namespace Vehicles
 			}
 		}
 
+		public override void PostDefDatabase()
+		{
+			foreach (PatternData patternData in defaultGraphics.Values)
+			{
+				patternData.ExposeDataPostDefDatabase();
+			}
+		}
+
 		public override void ExposeData()
 		{
 			Scribe_NestedCollections.Look(ref fieldSettings, "fieldSettings", LookMode.Value, LookMode.Deep, LookMode.Undefined, true);
-			Scribe_Collections.Look(ref defaultMasks, "defaultMask", LookMode.Value, LookMode.Value);
+			Scribe_Collections.Look(ref defaultGraphics, "defaultGraphics", LookMode.Value, LookMode.Deep);
 		}
 
 		public override void DrawSection(Rect rect)
@@ -121,22 +129,25 @@ namespace Vehicles
 						}
 						if (Widgets.ButtonInvisible(paintBrushRect))
 						{
-							List<FloatMenuOption> list = new List<FloatMenuOption>();
-							foreach (PatternDef pattern in VehicleMod.selectedPatterns)
+							Dialog_ColorPicker.OpenColorPicker(VehicleMod.selectedDef, 
+							delegate (Color colorOne, Color colorTwo, Color colorThree, PatternDef pattern, Vector2 displacement, float tiles)
 							{
-								list.Add(new FloatMenuOption(pattern.LabelCap, () => defaultMasks[VehicleMod.selectedDef.defName] = pattern.defName));
-							}
-							FloatMenu floatMenu = new FloatMenu(list)
-							{
-								vanishIfMouseDistant = true
-							};
-							//floatMenu.onCloseCallback...
-							Find.WindowStack.Add(floatMenu);
+								defaultGraphics[VehicleMod.selectedDef.defName] = new PatternData(colorOne, colorTwo, colorThree, pattern, displacement, tiles);
+							});
 						}
 					}
+					drawStatusMessage = $"Fetching PatternData from defaultMasks";
+					PatternData patternData = defaultGraphics.TryGetValue(VehicleMod.selectedDef.defName, VehicleMod.selectedDef.graphicData);
+
 					drawStatusMessage = $"Drawing VehicleTex in settings";
-					PatternDef curPattern = DefDatabase<PatternDef>.GetNamed(defaultMasks[VehicleMod.selectedDef.defName]);
-					RenderHelper.DrawVehicleTexInSettings(iconRect, VehicleMod.selectedDef, VehicleMod.graphicInt, VehicleMod.selectedVehicleTex, curPattern, Rot8.North);
+					GUI.BeginGroup(iconRect);
+					Rect vehicleTexRect = new Rect(Vector2.zero, iconRect.size);
+					drawStatusMessage = RenderHelper.DrawVehicleDef(vehicleTexRect, VehicleMod.selectedDef, null, patternData, Rot8.North);
+					if (!drawStatusMessage.NullOrEmpty())
+					{
+						throw new Exception();
+					}
+					GUI.EndGroup();
 
 					drawStatusMessage = $"Drawing enable button";
 					Rect enableButtonRect = menuRect.ContractedBy(10);

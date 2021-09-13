@@ -86,7 +86,7 @@ namespace Vehicles
 				{
 					return Material;
 				}
-				vehicleMat ??= new Material(vehicle.VehicleGraphic.MatAt(FullRotation, vehicle.pattern))
+				vehicleMat ??= new Material(vehicle.VehicleGraphic.MatAt(FullRotation, vehicle.Pattern))
 				{
 					shader = ShaderDatabase.WorldOverlayTransparentLit,
 					renderQueue = WorldMaterials.WorldObjectRenderQueue
@@ -103,7 +103,7 @@ namespace Vehicles
 				{
 					return Material;
 				}
-				vehicleMatNonLit ??= new Material(vehicle.VehicleGraphic.MatAt(FullRotation, vehicle.pattern))
+				vehicleMatNonLit ??= new Material(vehicle.VehicleGraphic.MatAt(FullRotation, vehicle.Pattern))
 				{
 					shader = ShaderDatabase.WorldOverlayTransparent,
 					renderQueue = WorldMaterials.WorldObjectRenderQueue
@@ -174,11 +174,11 @@ namespace Vehicles
 
 		protected virtual void RenderGraphicOverlays(Vector3 normalized, Vector3 direction, Vector3 size)
 		{
-			foreach (Graphic graphic in vehicle.graphicOverlay.graphics)
+			foreach (GraphicOverlay graphicOverlay in vehicle.graphicOverlay.graphics)
 			{
-				Material material = graphic.MatAt(FullRotation);
+				Material material = graphicOverlay.graphic.MatAt(FullRotation);
 				float quatRotation = 90;
-				if (graphic is Graphic_Rotator rotator)
+				if (graphicOverlay.graphic is Graphic_Rotator rotator)
 				{
 					quatRotation += vehicle.graphicOverlay.rotationRegistry[rotator.RegistryKey];
 				}

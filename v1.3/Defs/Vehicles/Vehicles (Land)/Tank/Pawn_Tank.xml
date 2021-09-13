@@ -50,7 +50,7 @@
 			<colorPickerUISize>(256, 384)</colorPickerUISize>
 			
 			<settingsUICoord>(0, 0)</settingsUICoord>
-			<settingsUISize>(100, 150)</settingsUISize>
+			<settingsUISize>(150, 225)</settingsUISize>
 		</drawProperties>
 		
 		<properties>
@@ -291,7 +291,7 @@
 			<li Class="Vehicles.CompProperties_Cannons">
 				<turrets>
 					<li>
-						<turretDef>TankMainTurret</turretDef>
+						<turretDef>TankMainTurret_Short</turretDef>
 						<renderProperties>
 							<north>
 								<offset>(0, 0)</offset>

@@ -106,7 +106,7 @@ namespace Vehicles
 					Material mat = null;
 					if (vehicle.VehicleGraphic.Shader.SupportsRGBMaskTex())
 					{
-						mat = vehicle.VehicleGraphic.MatAt(Rot8.East, vehicle.pattern);
+						mat = vehicle.VehicleGraphic.MatAt(Rot8.East, vehicle.Pattern);
 					}
 					Widgets.DrawTextureFitted(iconRect, VehicleTex.VehicleTexture(vehicle.VehicleDef, Rot8.East), GenUI.IconDrawScale(vehicle.VehicleDef), texProportions, texCoords, 0, mat);
 				}

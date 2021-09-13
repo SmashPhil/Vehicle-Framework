@@ -6,10 +6,10 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class Graphic_CannonAnimate : Graphic_Cannon
+	public class Graphic_TurretAnimate : Graphic_Turret
 	{
 		protected string[] graphicPaths;
-		protected Graphic_Cannon[] subGraphics;
+		protected Graphic_Turret[] subGraphics;
 		protected Texture2D[] subTextures;
 
 		public Texture2D[] SubTextures => subTextures;
@@ -58,7 +58,7 @@ namespace Vehicles
 				return;
 			}
 			graphicPaths = new string[list.Count];
-			subGraphics = new Graphic_Cannon[list.Count];
+			subGraphics = new Graphic_Turret[list.Count];
 			subTextures = list.ToArray();
 			if(list.Count != listM.Count && !listM.NullOrEmpty())
 			{
@@ -75,8 +75,8 @@ namespace Vehicles
 			{
 				string fullPath = string.Concat(req.path, '/', list[i].name);
 				graphicPaths[i] = fullPath;
-				subGraphics[i] = GraphicDatabaseRGB.Get<Graphic_Cannon>(fullPath, req.shader, req.drawSize, req.color, req.colorTwo, req.colorThree, req.tiles, 
-					req.displacement.x, req.displacement.y, DataRGB, req.shaderParameters) as Graphic_Cannon;
+				subGraphics[i] = GraphicDatabaseRGB.Get<Graphic_Turret>(fullPath, req.shader, req.drawSize, req.color, req.colorTwo, req.colorThree, req.tiles, 
+					req.displacement.x, req.displacement.y, DataRGB, req.shaderParameters) as Graphic_Turret;
 			}
 		}
 
@@ -108,20 +108,20 @@ namespace Vehicles
 		{
 			if(index > (graphicPaths.Length - 1) )
 			{
-				Log.Warning($"Graphic Retrieval for Graphic_CannonAnimate indexed past maximum length of {graphicPaths.Length}. Self correcting.");
+				Log.Warning($"Graphic Retrieval for Graphic_TurretAnimate indexed past maximum length of {graphicPaths.Length}. Self correcting.");
 				while (index > (graphicPaths.Length - 1))
 				{
 					index -= (graphicPaths.Length - 1);
 				}
 			}
-			return GraphicDatabaseRGB.Get<Graphic_Cannon>(graphicPaths[index], newShader, drawSize, colorOne, colorTwo, colorThree, tiles, displacementX, displacementY, DataRGB);
+			return GraphicDatabaseRGB.Get<Graphic_Turret>(graphicPaths[index], newShader, drawSize, colorOne, colorTwo, colorThree, tiles, displacementX, displacementY, DataRGB);
 		}
 
 		public Material SubMaterialCycle(PatternDef pattern, int index)
 		{
 			if(index > (subGraphics.Length - 1) )
 			{
-				Log.Warning($"Graphic Retrieval for Graphic_CannonAnimate indexed past maximum length of {subGraphics.Length}. Self correcting.");
+				Log.Warning($"Graphic Retrieval for Graphic_TurretAnimate indexed past maximum length of {subGraphics.Length}. Self correcting.");
 				while (index > (subGraphics.Length - 1))
 				{
 					index -= (subGraphics.Length - 1);
@@ -132,12 +132,12 @@ namespace Vehicles
 
 		public override Graphic GetColoredVersion(Shader newShader, Color newColor, Color newColorTwo)
 		{
-			return GraphicDatabase.Get<Graphic_CannonAnimate>(path, newShader, drawSize, newColor, newColorTwo, data);
+			return GraphicDatabase.Get<Graphic_TurretAnimate>(path, newShader, drawSize, newColor, newColorTwo, data);
 		}
 
 		public override Graphic_RGB GetColoredVersion(Shader shader, Color colorOne, Color colorTwo, Color colorThree, float tiles = 1, float displacementX = 0, float displacementY = 0)
 		{
-			return GraphicDatabaseRGB.Get<Graphic_CannonAnimate>(path, shader, drawSize, colorOne, colorTwo, colorThree, tiles, displacementX, displacementY, DataRGB);
+			return GraphicDatabaseRGB.Get<Graphic_TurretAnimate>(path, shader, drawSize, colorOne, colorTwo, colorThree, tiles, displacementX, displacementY, DataRGB);
 		}
 
 		public override string ToString()

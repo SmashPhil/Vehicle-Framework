@@ -33,7 +33,7 @@ namespace Vehicles
 				nameof(ImpliedDefGeneratorVehicles)));
 			harmony.Patch(original: AccessTools.Method(typeof(GraphicData), "Init"),
 				prefix: new HarmonyMethod(typeof(HarmonyPatches_PreLoad),
-				nameof(RGBInitRedirect)));
+				nameof(GraphicPreInit)));
 			/* Debugging Only */
 			//harmony.Patch(original: AccessTools.Method(typeof(), nameof()),
 			//    prefix: new HarmonyMethod(typeof(HarmonyPatches_PreLoad),
@@ -107,8 +107,12 @@ namespace Vehicles
 		/// Redirect Init calls from GraphicData to GraphicDataRGB
 		/// </summary>
 		/// <param name="__instance"></param>
-		public static bool RGBInitRedirect(GraphicData __instance)
+		public static bool GraphicPreInit(GraphicData __instance)
 		{
+			if (__instance is GraphicDataLayered graphicDataLayered)
+			{
+				graphicDataLayered.PreInit();
+			}
 			if (__instance is GraphicDataRGB graphicDataRGB)
 			{
 				graphicDataRGB.Init();

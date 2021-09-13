@@ -182,7 +182,7 @@ namespace Vehicles
 		/// </summary>
 		public virtual void TextureAndColor()
 		{
-			if (VehicleMod.settings.main.overrideDrawColors && vehicle.pattern == PatternDefOf.Default)
+			if (VehicleMod.settings.main.overrideDrawColors && vehicle.Pattern == PatternDefOf.Default)
 			{
 				bool colorChanged = false;
 				if (drawColorOne != null)

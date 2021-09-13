@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\v1.3\Assemblies\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;BETA</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -355,7 +355,10 @@
     <Compile Include="Cannons\Projectiles\CompProjectileExitMap.cs" />
     <Compile Include="Cannons\Turret\VehicleTurretRender.cs" />
     <Compile Include="Components\Construction\ListerAirDefenses.cs" />
-    <Compile Include="Components\Rendering\VehicleGraphicOverlay.cs" />
+    <Compile Include="Components\Rendering\Overlays\GraphicDataOverlay.cs" />
+    <Compile Include="Components\Rendering\Overlays\GraphicOverlay.cs" />
+    <Compile Include="Components\Rendering\Overlays\VehicleGraphicOverlay.cs" />
+    <Compile Include="Components\Vehicles\PatternData.cs" />
     <Compile Include="Components\Vehicles\VehicleFleshTypeDef.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\PropellerTakeoff.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_Strafe.cs" />
@@ -380,6 +383,7 @@
     <Compile Include="Graphics\Graphic\Graphics\Animated\Graphic_Rotator.cs" />
     <Compile Include="Graphics\Graphic\Graphics\ExtraRotationRegistry.cs" />
     <Compile Include="Graphics\ITab\WITab_Vehicle_Health.cs" />
+    <Compile Include="Graphics\Textures\TextureCache.cs" />
     <Compile Include="Misc\DefModExtension\CustomCostDefModExtension.cs" />
     <Compile Include="Misc\DefModExtension\ProjectilePropertiesDefModExtension.cs" />
     <Compile Include="Cannons\Projectiles\Laser.cs" />
@@ -564,12 +568,12 @@
     <Compile Include="Graphics\Dialogs\Dialog_TradeAerialVehicle.cs" />
     <Compile Include="Graphics\Graphic\Animations\AnimationProperties.cs" />
     <Compile Include="Graphics\Graphic\AssetBundle\ShaderGeneration.cs" />
-    <Compile Include="Graphics\Graphic\GraphicDataRGB.cs" />
-    <Compile Include="Graphics\Graphic\GraphicDataLayered.cs" />
+    <Compile Include="Graphics\Graphic\GraphicData\GraphicDataRGB.cs" />
+    <Compile Include="Graphics\Graphic\GraphicData\GraphicDataLayered.cs" />
     <Compile Include="Graphics\Graphic\GraphicGeneration\GraphicDatabaseRGB.cs" />
     <Compile Include="Graphics\Graphic\GraphicGeneration\GraphicRequestRGB.cs" />
     <Compile Include="Graphics\Graphic\Graphics\Animated\Graphic_Animate.cs" />
-    <Compile Include="Graphics\Graphic\Graphics\Vehicle\Graphic_RGB.cs" />
+    <Compile Include="Graphics\Graphic\Graphics\VanillaSupported\Graphic_RGB.cs" />
     <Compile Include="Graphics\Graphic\MaterialGeneration\MaterialRGBRequest.cs" />
     <Compile Include="Graphics\Graphic\MaterialGeneration\MaterialPoolExpanded.cs" />
     <Compile Include="Graphics\Graphic\MaterialGeneration\AdditionalShaderPropertyIDs.cs" />
@@ -606,7 +610,7 @@
     <Compile Include="Utility\Targeters.cs" />
     <Compile Include="Utility\Helpers\Debug\VehicleDebugTools.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_ColorPicker.cs" />
-    <Compile Include="Graphics\Graphic\Graphics\Vehicle\Graphic_Cannon.cs" />
+    <Compile Include="Graphics\Graphic\Graphics\Vehicle\Graphic_Turret.cs" />
     <Compile Include="Utility\Helpers\ParsingHelper.cs" />
     <Compile Include="CustomFeatures\Spawner\VehicleGenerationRequest.cs" />
     <Compile Include="CustomFeatures\Spawner\VehicleSpawner.cs" />

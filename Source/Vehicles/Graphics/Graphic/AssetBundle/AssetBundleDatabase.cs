@@ -21,7 +21,7 @@ namespace Vehicles
 		/// </summary>
 		private static readonly Dictionary<string, string> bundleBuildVersionManifest = new Dictionary<string, string>()
 		{
-			{"1.3", "2019.4.26f1"}
+			{"1.3", "2019.4.30f1"}
 		};
 
 		private static readonly Dictionary<string, Shader> shaderLookup = new Dictionary<string, Shader>();
@@ -48,7 +48,7 @@ namespace Vehicles
 			{
 				if (currentVersion != Application.unityVersion)
 				{
-					Log.Warning($"{VehicleHarmony.LogLabel} Unity Version {Application.unityVersion} does not match registered version for AssetBundles being loaded. You may encounter problems. Please notify report it on the workshop page so that I may update the UnityVersion supported for this AssetBundle.");
+					Log.Warning($"{VehicleHarmony.LogLabel} Unity Version {Application.unityVersion} does not match registered version for AssetBundles being loaded. Please report it on the workshop page so that I may update the UnityVersion supported for this AssetBundle.");
 				}
 			}
 			else

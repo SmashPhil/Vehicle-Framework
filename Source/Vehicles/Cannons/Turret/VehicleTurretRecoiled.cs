@@ -19,7 +19,7 @@ namespace Vehicles
 		protected bool reverseAnimate;
 		protected AnimationWrapperType wrapperType;
 
-		protected Graphic_Cannon[] cannonGraphics;
+		protected Graphic_Turret[] cannonGraphics;
 		protected Material[] cannonMaterials;
 		protected Texture2D[] cannonTextures;
 
@@ -36,7 +36,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return (cannonGraphic as Graphic_CannonAnimate).AnimationFrameCount;
+				return (cannonGraphic as Graphic_TurretAnimate).AnimationFrameCount;
 			}
 		}
 
@@ -76,7 +76,7 @@ namespace Vehicles
 			}
 		}
 
-		public override Graphic_Cannon CannonGraphic
+		public override Graphic_Turret CannonGraphic
 		{
 			get
 			{
@@ -159,9 +159,18 @@ namespace Vehicles
 			wrapperType = AnimationWrapperType.Off;
 		}
 
-		public override void ResolveCannonGraphics(VehiclePawn forPawn, bool forceRegen = false)
+		public override void ResolveCannonGraphics(VehiclePawn vehicle, bool forceRegen = false)
 		{
-			base.ResolveCannonGraphics(forPawn, forceRegen);
+			base.ResolveCannonGraphics(vehicle, forceRegen);
+			if (forceRegen)
+			{
+				ResolveCache(forceRegen);
+			}
+		}
+
+		public override void ResolveCannonGraphics(PatternData patternData, bool forceRegen = false)
+		{
+			base.ResolveCannonGraphics(patternData, forceRegen);
 			if (forceRegen)
 			{
 				ResolveCache(forceRegen);
@@ -172,10 +181,10 @@ namespace Vehicles
 		{
 			if (cannonGraphics.EnumerableNullOrEmpty() || cannonGraphics.Length != AnimationCount || forceRegen)
 			{
-				cannonGraphics = new Graphic_Cannon[AnimationCount];
+				cannonGraphics = new Graphic_Turret[AnimationCount];
 				for (int i = 0; i < AnimationCount; i++)
 				{
-					cannonGraphics[i] = (cannonGraphic as Graphic_CannonAnimate).SubGraphicCycle(i, cannonGraphic.Shader, CannonGraphicData.color, CannonGraphicData.colorTwo, CannonGraphicData.colorThree, CannonGraphicData.tiles) as Graphic_Cannon;
+					cannonGraphics[i] = (cannonGraphic as Graphic_TurretAnimate).SubGraphicCycle(i, cannonGraphic.Shader, CannonGraphicData.color, CannonGraphicData.colorTwo, CannonGraphicData.colorThree, CannonGraphicData.tiles) as Graphic_Turret;
 				}
 			}
 			if (cannonMaterials.EnumerableNullOrEmpty() || cannonMaterials.Length != AnimationCount || forceRegen)
@@ -183,12 +192,12 @@ namespace Vehicles
 				cannonMaterials = new Material[AnimationCount];
 				for (int i = 0; i < AnimationCount; i++)
 				{
-					cannonMaterials[i] = (cannonGraphic as Graphic_CannonAnimate).SubMaterialCycle(vehicle?.pattern ?? PatternDefOf.Default, i);
+					cannonMaterials[i] = (cannonGraphic as Graphic_TurretAnimate).SubMaterialCycle(vehicle?.patternData?.pattern ?? PatternDefOf.Default, i);
 				}
 			}
 			if (cannonTextures.EnumerableNullOrEmpty() || cannonTextures.Length != AnimationCount || forceRegen)
 			{
-				cannonTextures = (cannonGraphic as Graphic_CannonAnimate).SubTextures;
+				cannonTextures = (cannonGraphic as Graphic_TurretAnimate).SubTextures;
 			}
 		}
 	}

@@ -197,7 +197,7 @@ namespace Vehicles
 			vehicleLeaving.vehicle = Vehicle;
 			vehicleLeaving.flightPath = new List<FlightNode>(flightPath);
 			vehicleLeaving.orderRecon = recon;
-			GenSpawn.Spawn(vehicleLeaving, Vehicle.Position, Vehicle.Map, Vehicle.Rotation, WipeMode.Vanish);
+			GenSpawn.Spawn(vehicleLeaving, Vehicle.Position, Vehicle.Map, Vehicle.CompVehicleLauncher.launchProtocol.landingProperties.forcedRotation ?? Vehicle.Rotation, WipeMode.Vanish);
 
 			if (Vehicle.Spawned)
 			{
