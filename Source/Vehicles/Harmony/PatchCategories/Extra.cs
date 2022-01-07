@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using UnityEngine;
 using HarmonyLib;
 using Verse;
@@ -42,6 +43,8 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(TickManager), nameof(TickManager.CurTimeSpeed)),
 				postfix: new HarmonyMethod(typeof(Extra),
 				nameof(ForcePauseFromVehicles)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn), nameof(Pawn.Kill)), transpiler: new HarmonyMethod(typeof(Extra), nameof(CorpseInVehicle)));
+
 		}
 
 		public static void FreeColonistsInVehiclesTransport(ref int __result, List<Pawn> ___pawnsSpawned)
@@ -137,5 +140,48 @@ namespace Vehicles
 				__result = TimeSpeed.Paused;
 			}
 		}
+
+        public static IEnumerable<CodeInstruction> CorpseInVehicle(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+        {
+            var list = instructions.ToList();
+            var idx1 = list.FindIndex(ins => ins.opcode == OpCodes.Ldloc_S && ins.operand is LocalBuilder {LocalIndex: 12});
+            var idx2 = list.FindIndex(idx1 + 1, ins => ins.opcode == OpCodes.Ldloc_S && ins.operand is LocalBuilder {LocalIndex: 12});
+            var falseLabel = generator.DefineLabel();
+            var trueLabel = (Label) list[idx2 - 1].operand;
+            var vehicleHandler = generator.DeclareLocal(typeof(VehicleHandler));
+			list[idx2].labels.Add(falseLabel);
+			list.InsertRange(idx2, new []
+            {
+				new CodeInstruction(OpCodes.Ldloc, 11),
+                new CodeInstruction(OpCodes.Brfalse, falseLabel),
+				new CodeInstruction(OpCodes.Ldloc, 11),
+				CodeInstruction.Call(typeof(ThingOwner), "get_Owner"),
+                new CodeInstruction(OpCodes.Isinst, typeof(VehicleHandler)),
+				new CodeInstruction(OpCodes.Stloc, vehicleHandler),
+				new CodeInstruction(OpCodes.Ldloc, vehicleHandler),
+				new CodeInstruction(OpCodes.Brfalse, falseLabel),
+				new CodeInstruction(OpCodes.Ldarg_0),
+				new CodeInstruction(OpCodes.Ldloc, 8),
+				new CodeInstruction(OpCodes.Ldloc, 9),
+				new CodeInstruction(OpCodes.Ldloc, 10),
+				CodeInstruction.Call(typeof(Pawn), nameof(Pawn.MakeCorpse)),
+				new CodeInstruction(OpCodes.Stloc, 21),
+                new CodeInstruction(OpCodes.Ldloc, vehicleHandler),
+				CodeInstruction.LoadField(typeof(VehicleHandler), nameof(VehicleHandler.vehiclePawn)), 
+                CodeInstruction.LoadField(typeof(Pawn), nameof(Pawn.inventory)),
+                CodeInstruction.LoadField(typeof(Pawn_InventoryTracker), nameof(Pawn_InventoryTracker.innerContainer)),
+                new CodeInstruction(OpCodes.Ldloc, 21),
+				new CodeInstruction(OpCodes.Ldc_I4_1),
+				new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(ThingOwner), nameof(ThingOwner.TryAdd), new []{typeof(Thing), typeof(bool)})),
+				new CodeInstruction(OpCodes.Brtrue, trueLabel),
+				new CodeInstruction(OpCodes.Ldloc, 21),
+				new CodeInstruction(OpCodes.Ldc_I4_0),
+				new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(Thing), nameof(Thing.Destroy))),
+				new CodeInstruction(OpCodes.Ldnull),
+				new CodeInstruction(OpCodes.Stloc, 21),
+				new CodeInstruction(OpCodes.Br, trueLabel)
+            });
+            return list;
+        }
 	}
 }
