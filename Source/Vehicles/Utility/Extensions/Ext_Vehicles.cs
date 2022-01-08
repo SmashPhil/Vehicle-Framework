@@ -244,5 +244,25 @@ namespace Vehicles
 		{
 			return CaravanHelper.assignedSeats.Where(a => a.Value.First == vehicle).Select(s => s.Key).Count();
 		}
+
+		/// <summary>
+		/// Gets the vehicle that <paramref name="pawn"/> is in.
+		/// </summary>
+		/// <param name="pawn">Pawn to check</param>
+		/// <returns>VehiclePawn <paramref name="pawn"/> is in, or null if they aren't in a vehicle.</returns>
+        public static VehiclePawn GetVehicle(this Pawn pawn)
+        {
+            return (pawn.ParentHolder as VehicleHandler)?.vehiclePawn;
+        }
+
+		/// <summary>
+		/// Returns true if <paramref name="pawn"/> is in a vehicle.
+		/// </summary>
+		/// <param name="pawn">Pawn to check</param>
+		/// <returns>true if <paramref name="pawn"/> is in a vehicle, false otherwise</returns>
+        public static bool IsInVehicle(this Pawn pawn)
+        {
+            return pawn.ParentHolder is VehicleHandler;
+        }
 	}
 }

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using UnityEngine;
 using HarmonyLib;
 using Verse;
 using Verse.AI;
 using RimWorld;
+using RimWorld.Planet;
 using SmashTools;
 using Vehicles.UI;
 
@@ -42,6 +44,11 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(TickManager), nameof(TickManager.CurTimeSpeed)),
 				postfix: new HarmonyMethod(typeof(Extra),
 				nameof(ForcePauseFromVehicles)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn), nameof(Pawn.Kill)),
+                prefix:new HarmonyMethod(typeof(Extra), nameof(MoveOnDeath)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnUtility), nameof(PawnUtility.ShouldSendNotificationAbout)),
+                postfix: new HarmonyMethod(typeof(Extra), nameof(SendNotificationsVehicle)));
+
 		}
 
 		public static void FreeColonistsInVehiclesTransport(ref int __result, List<Pawn> ___pawnsSpawned)
@@ -137,5 +144,29 @@ namespace Vehicles
 				__result = TimeSpeed.Paused;
 			}
 		}
+
+        public static void MoveOnDeath(Pawn __instance)
+        {
+            if (__instance.IsInVehicle())
+            {
+                var vehicle = __instance.GetVehicle();
+                vehicle.inventory.innerContainer.TryAddOrTransfer(__instance);
+				Find.WorldPawns.RemovePawn(__instance);
+            }
+        }
+
+        public static void SendNotificationsVehicle(Pawn p, ref bool __result)
+        {
+            if (!__result && p.Faction is {IsPlayer: true} && (p.ParentHolder is VehicleHandler || p.ParentHolder is Pawn_InventoryTracker {pawn: VehiclePawn { }}))
+            {
+                __result = true;
+            }
+        }
+
+		[DebugAction("Vehicles", "Kill Someone", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+        public static void KillPawn()
+        {
+			Find.CurrentMap.mapPawns.FreeColonists.RandomElement().Kill(null);
+        }
 	}
 }
