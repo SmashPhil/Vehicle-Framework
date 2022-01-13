@@ -252,7 +252,7 @@ namespace Vehicles
 		/// <returns>VehiclePawn <paramref name="pawn"/> is in, or null if they aren't in a vehicle.</returns>
         public static VehiclePawn GetVehicle(this Pawn pawn)
         {
-            return (pawn.ParentHolder as VehicleHandler)?.vehiclePawn;
+            return (pawn.ParentHolder as VehicleHandler)?.vehicle;
         }
 
 		/// <summary>
