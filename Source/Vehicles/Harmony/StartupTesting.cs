@@ -110,5 +110,20 @@ namespace Vehicles
 			}
 			Find.WindowStack.Add(new Dialog_DebugOptionListLister(listCheckbox));
 		}
+
+		[UnitTest(Category = "Vehicles", Name = "Vehicle Area Manager", GameState = GameState.Playing)]
+		private static void UnitTestVehicleAreaManager()
+		{
+			Prefs.DevMode = true;
+			CameraJumper.TryHideWorld();
+			if (Find.CurrentMap is Map map)
+			{
+				Find.WindowStack.Add(new Dialog_ManageAreas(map));
+			}
+			else
+			{
+				SmashLog.Error($"Tried to unit test <type>VehicleAreaManager</type> with null current map.");
+			}
+		}
 	}
 }

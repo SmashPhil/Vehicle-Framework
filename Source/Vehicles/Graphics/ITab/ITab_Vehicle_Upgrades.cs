@@ -11,7 +11,6 @@ namespace Vehicles.UI
 {
 	public class ITab_Vehicle_Upgrades : ITab
 	{
-		public const float IconBarDim = 30;
 		public const float UpgradeNodeDim = 30;
 
 		public const float TopPadding = 20;
@@ -19,11 +18,12 @@ namespace Vehicles.UI
 		public const float SideDisplayedOffset = 40f;
 		public const float BottomDisplayedOffset = 20f;
 
-		public const float LeftWindowEdge = screenWidth - 250;
+		public const float LeftWindowEdge = screenWidth - leftWindowWidth;
 
 		public const float screenWidth = 850f;
 		public const float screenHeight = 520f;
 
+		public const float leftWindowWidth = 250;
 		public const float infoScreenHeight = 200;
 		public const float infoScreenWidth = 400;
 
@@ -44,7 +44,6 @@ namespace Vehicles.UI
 		public static readonly List<string> replaceNodes = new List<string>();
 
 		private SelectedNode selectedNode;
-		private Texture2D mainTex;
 
 		private static Vector2 scrollPosition;
 		private static Vector2 resize;
@@ -72,21 +71,11 @@ namespace Vehicles.UI
 			}
 		}
 
-		private Texture2D VehicleTexture
-		{
-			get
-			{
-				mainTex = Vehicle.VehicleGraphic.TexAt(Rot8.North);
-				return mainTex;
-			}
-		}
-
 		public override void OnOpen()
 		{
 			base.OnOpen();
 			selectedNode = null;
 			resizeCheck = false;
-			mainTex = null;
 			scrollPosition = Vector2.zero;
 		}
 
@@ -108,23 +97,6 @@ namespace Vehicles.UI
 
 			Rect upgradeButtonRect = new Rect(screenWidth - BottomDisplayedOffset - 80f, BottomWindowEdge - 30f, 75f, 25f);
 			Rect cancelButtonRect = new Rect(LeftWindowEdge + 5f, BottomWindowEdge - 30f, 75f, 25f);
-			Rect displayRect = new Rect(Vehicle.VehicleDef.drawProperties.upgradeUICoord.x, Vehicle.VehicleDef.drawProperties.upgradeUICoord.y, Vehicle.VehicleDef.drawProperties.upgradeUISize.x, Vehicle.VehicleDef.drawProperties.upgradeUISize.y);
-
-			if (Vehicle.StatNameable)
-			{
-				Rect rectRename = new Rect(size.x - IconBarDim * 1.5f - EdgePadding, -5, IconBarDim, IconBarDim);
-				Rect rectRecolor = new Rect(rectRename.x - IconBarDim, rectRename.y, IconBarDim, IconBarDim);
-				TooltipHandler.TipRegion(rectRename, "RenameVehicle".Translate(Vehicle.LabelShort));
-				TooltipHandler.TipRegion(rectRecolor, "RecolorVehicle".Translate(Vehicle.LabelShort));
-				if (Widgets.ButtonImage(rectRename, VehicleTex.Rename))
-				{
-					Vehicle.Rename();
-				}
-				if (Widgets.ButtonImage(rectRecolor, VehicleTex.Recolor))
-				{
-					Vehicle.ChangeColor();
-				}
-			}
 
 			GUI.enabled = selectedNode != null && Vehicle.CompUpgradeTree.PrerequisitesMet(selectedNode.node);
 			if (Widgets.ButtonText(upgradeButtonRect, "Upgrade".Translate()) && !selectedNode.node.upgradeActive)
@@ -391,10 +363,6 @@ namespace Vehicles.UI
 				{
 					try
 					{
-						Vector2 display = Vehicle.VehicleDef.drawProperties.upgradeUICoord;
-						float UISizeX = Vehicle.VehicleDef.drawProperties.upgradeUISize.x;
-						float UISizeY = Vehicle.VehicleDef.drawProperties.upgradeUISize.y;
-
 						replaceNodes.Clear();
 						if (selectedNode != null && !selectedNode.node.replaces.NullOrEmpty())
 						{
@@ -405,19 +373,24 @@ namespace Vehicles.UI
 							replaceNodes.AddRange(highlightedPreMetNode.replaces);
 						}
 
-						RenderHelper.DrawVehicleTex(new Rect(display.x, display.y, UISizeX, UISizeY), VehicleTexture, Vehicle, 
+						Rect vehicleDisplayRect = new Rect();
+						GUI.BeginGroup(vehicleDisplayRect);
+
+						Rect displayRect = new Rect(0, 0, leftWindowWidth - 5, leftWindowWidth - 5);
+						RenderHelper.DrawVehicle(displayRect, Vehicle, 
 							Vehicle.Pattern, true, Vehicle.DrawColor, Vehicle.DrawColorTwo, Vehicle.DrawColorThree);
 
-						Rect extraDisplayRect = new Rect(display.x, display.y, UISizeX, UISizeY);
 						if (selectedNode != null)
 						{
-							selectedNode.node.DrawExtraOnGUI(extraDisplayRect);
+							selectedNode.node.DrawExtraOnGUI(displayRect);
 						}
 						else if (highlightedPreMetNode != null)
 						{
-							highlightedPreMetNode.DrawExtraOnGUI(extraDisplayRect);
+							highlightedPreMetNode.DrawExtraOnGUI(displayRect);
 						}
-						Vehicle.CompUpgradeTree.upgradeList.Where(u => u.upgradeActive && u.upgradePurchased && !replaceNodes.Contains(u.upgradeID)).ForEach(u => u.DrawExtraOnGUI(extraDisplayRect));
+						Vehicle.CompUpgradeTree.upgradeList.Where(u => u.upgradeActive && u.upgradePurchased && !replaceNodes.Contains(u.upgradeID)).ForEach(u => u.DrawExtraOnGUI(displayRect));
+
+						GUI.EndGroup();
 
 						if (VehicleMod.settings.debug.debugDrawCannonGrid)
 						{
@@ -425,7 +398,7 @@ namespace Vehicles.UI
 							Widgets.DrawLineHorizontal(displayRect.x, displayRect.y + displayRect.height, displayRect.width);
 							Widgets.DrawLineVertical(displayRect.x, displayRect.y, displayRect.height);
 							Widgets.DrawLineVertical(displayRect.x + displayRect.width, displayRect.y, displayRect.height);
-							if(screenWidth - (displayRect.x + displayRect.width) < 0)
+							if (screenWidth - (displayRect.x + displayRect.width) < 0)
 							{
 								resize = new Vector2(screenWidth + displayRect.x, screenHeight);
 								resizeCheck = true;

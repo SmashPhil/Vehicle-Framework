@@ -357,6 +357,7 @@
     <Compile Include="Components\Construction\ListerAirDefenses.cs" />
     <Compile Include="Components\Rendering\Overlays\GraphicDataOverlay.cs" />
     <Compile Include="Components\Rendering\Overlays\GraphicOverlay.cs" />
+    <Compile Include="Components\Rendering\Overlays\PawnOverlayRenderer.cs" />
     <Compile Include="Components\Rendering\Overlays\VehicleGraphicOverlay.cs" />
     <Compile Include="Components\Vehicles\PatternData.cs" />
     <Compile Include="Components\Vehicles\VehicleFleshTypeDef.cs" />
@@ -378,7 +379,10 @@
     <Compile Include="CustomFeatures\Buildings\AirDefenses\Verb_ShootWorldRecoiled.cs" />
     <Compile Include="CustomFeatures\Misc\MoteThrownSlowToSpeed.cs" />
     <Compile Include="CustomFeatures\Misc\MoteThrownExpand.cs" />
+    <Compile Include="Components\Vehicles\VehicleAreaManager.cs" />
     <Compile Include="Gizmo\Command_ActionVehicleDrawn.cs" />
+    <Compile Include="Graphics\Dialogs\Dialog_ColorWheel.cs" />
+    <Compile Include="Graphics\Dialogs\Dialog_ConfigureVehicleAreas.cs" />
     <Compile Include="Graphics\Graphic\Graphics\Animated\Graphic_Propeller.cs" />
     <Compile Include="Graphics\Graphic\Graphics\Animated\Graphic_Rotator.cs" />
     <Compile Include="Graphics\Graphic\Graphics\ExtraRotationRegistry.cs" />
@@ -692,7 +696,7 @@
     <Compile Include="Harmony\ConditionalPatches\CompatibilityPatch_DualWield.cs" />
     <Compile Include="Harmony\ConditionalPatches\ConditionalPatchApplier.cs" />
     <Compile Include="Harmony\ConditionalPatches\FishingCompatibility.cs" />
-    <Compile Include="Harmony\HarmonyPatches_PreLoad.cs" />
+    <Compile Include="Harmony\VehicleHarmonyOnMod.cs" />
     <Compile Include="Harmony\VehicleHarmony.cs" />
     <Compile Include="CustomFeatures\Upgrades\UpgradeNode.cs" />
     <Compile Include="Misc\CellFinderExtended.cs" />

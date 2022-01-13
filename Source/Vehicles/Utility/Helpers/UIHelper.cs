@@ -127,7 +127,7 @@ namespace Vehicles
 				Find.WindowStack.Add(new Dialog_AssignSeats(pawns, transferableOneWay));
 			}
 			Rect checkboxRect = new Rect(buttonRect.x + buttonRect.width + 5f, buttonRect.y, 24f, 24f);
-			if(Widgets.ButtonImage(checkboxRect, flag4 ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex))
+			if (Widgets.ButtonImage(checkboxRect, flag4 ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex))
 			{
 				if (!flag4)
 				{

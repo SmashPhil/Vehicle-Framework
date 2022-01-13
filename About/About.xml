@@ -1,8 +1,7 @@
-
-
 <ModMetaData>
 	<name>The Vehicle Framework</name>
 	<author>Smash Phil</author>
+	<packageId>smashphil.vehicles</packageId>
 	<supportedVersions>
 		<li>1.3</li>
 	</supportedVersions>
@@ -18,7 +17,6 @@
 			<downloadUrl>https://github.com/pardeike/HarmonyRimWorld/releases/latest</downloadUrl>
 		</li>
 	</modDependencies>
-	<packageId>smashphil.vehicles</packageId>
 	<description>&lt;b&gt;&lt;color=orange&gt;The Vehicle Framework&lt;/color&gt;&lt;/b&gt;
 Welcome to the official Closed Beta for my work in progress framework.
 

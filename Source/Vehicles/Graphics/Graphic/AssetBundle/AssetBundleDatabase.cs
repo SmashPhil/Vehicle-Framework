@@ -13,7 +13,14 @@ namespace Vehicles
 	/// <summary>
 	/// AssetBundle loader
 	/// </summary>
-	[StaticConstructorOnStartup]
+	/// <remarks>
+	/// Q: "Why don't you just use RimWorld's content loader to load the asset bundle? It's supported right?"
+	/// A: Yes, but it does not support versioning.. meaning if a later version of Unity is used in a future update that requires a rebuild of all asset bundles,
+	/// I may not be able to support that previous version. AssetBundles on older versions of Unity might not load properly and vice verse. When Ludeon decides to
+	/// support versioning for AssetBundles, I can move to using that instead.
+	/// </remarks>
+	[LoadedEarly]
+	[IsMainThread]
 	public static class AssetBundleDatabase
 	{
 		/// <summary>
@@ -24,25 +31,32 @@ namespace Vehicles
 			{"1.3", "2019.4.30f1"}
 		};
 
-		private static readonly Dictionary<string, Shader> shaderLookup = new Dictionary<string, Shader>();
-		private static readonly Dictionary<string, Texture2D> textureLookup = new Dictionary<string, Texture2D>();
+		private static readonly Dictionary<string, UnityEngine.Object> assetLookup = new Dictionary<string, UnityEngine.Object>();
 
 		private static readonly List<string> loadFoldersChecked = new List<string>();
 
 		private static readonly string VehicleAssetBundlePath = @"Assets\vehicleassets";
 
+		private static readonly string CutoutComplexRGBPath = "Assets/Shaders/ShaderRGB.shader";
+		private static readonly string CutoutComplexPatternPath = "Assets/Shaders/ShaderRGBPattern.shader";
+
+		private static readonly string MouseHandOpenPath = "Assets/Textures/MouseHandOpen.png";
+		private static readonly string MouseHandClosedPath = "Assets/Textures/MouseHandClosed.png";
+
 		public static readonly AssetBundle VehicleAssetBundle;
 
 		public static readonly Shader CutoutComplexRGB;
-
 		public static readonly Shader CutoutComplexPattern;
 
 		public static readonly Texture2D MouseHandOpen;
-
 		public static readonly Texture2D MouseHandClosed;
 
 		static AssetBundleDatabase()
 		{
+			if (!UnityData.IsInMainThread)
+			{
+				SmashLog.Error($"Static Constructor was not called on main thread for type <type>AssetBundleDatabase</type> which has attribute <attribute>IsMainThread</attribute>. Use <attribute>StaticConstructorOnStartup</attribute instead.");
+			}
 			string version = $"{VersionControl.CurrentMajor}.{VersionControl.CurrentMinor}";
 			if (bundleBuildVersionManifest.TryGetValue(version, out string currentVersion))
 			{
@@ -73,8 +87,10 @@ namespace Vehicles
 							throw new IOException();
 						}
 
-						CutoutComplexRGB = LoadAssetBundleShader("Assets/Shaders/ShaderRGB.shader");
-						CutoutComplexPattern = LoadAssetBundleShader("Assets/Shaders/ShaderRGBPattern.shader");
+						CutoutComplexRGB = LoadAsset<Shader>(CutoutComplexRGBPath);
+						CutoutComplexPattern = LoadAsset<Shader>(CutoutComplexPatternPath);
+						MouseHandOpen = LoadAsset<Texture2D>(MouseHandOpenPath);
+						MouseHandClosed = LoadAsset<Texture2D>(MouseHandClosedPath);
 						return;
 					}
 				}
@@ -100,27 +116,25 @@ namespace Vehicles
 		/// Shader load from AssetBundle
 		/// </summary>
 		/// <param name="path"></param>
-		public static Shader LoadAssetBundleShader(string path)
+		public static T LoadAsset<T>(string path) where T : UnityEngine.Object
 		{
-			if (shaderLookup.TryGetValue(path, out Shader shader))
+			if (assetLookup.TryGetValue(path, out var asset))
 			{
-				return shader;
+				return (T)asset;
 			}
-			return (Shader)VehicleAssetBundle.LoadAsset(path);
-		}
-
-		/// <summary>
-		/// Texture load from AssetBundle
-		/// </summary>
-		/// <param name="path"></param>
-		/// <returns></returns>
-		public static Texture2D LoadAssetBundleTexture(string path)
-		{
-			if (textureLookup.TryGetValue(path, out Texture2D texture))
+			var unityObject = VehicleAssetBundle.LoadAsset(path);
+			if (unityObject is null)
 			{
-				return texture;
+				SmashLog.Error($"Unable to load asset of type <type>{typeof(T)}</type> from path=<text>\"{path}\"</text>");
+				return null;
 			}
-			return (Texture2D)VehicleAssetBundle.LoadAsset(path);
+			if (!(unityObject is T))
+			{
+				SmashLog.Error($"Asset has loaded successfully from path=<text>\"{path}\"</text> but is not of type <type>{typeof(T)}</type>. Actual type is <type>{unityObject.GetType()}</type>.");
+				return null;
+			}
+			assetLookup.Add(path, unityObject);
+			return (T)unityObject;
 		}
 
 		/// <summary>

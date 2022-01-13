@@ -25,19 +25,9 @@ namespace Vehicles
 		private int pageCount;
 		private static PatternDef selectedPattern;
 
-		public static Texture2D ColorChart = new Texture2D(255, 255);
-		public static Texture2D HueChart = new Texture2D(1, 255);
-
 		public static float hue;
 		public static float saturation;
 		public static float value;
-
-		public static bool draggingCP;
-		public static bool draggingHue;
-		public static bool draggingDisplacement;
-
-		public static Color Blackist = new Color(0.06f, 0.06f, 0.06f);
-		public static Color Greyist = new Color(0.2f, 0.2f, 0.2f);
 
 		//must keep as fields for pass-by-ref
 		public static ColorInt CurrentColorOne;
@@ -132,22 +122,6 @@ namespace Vehicles
 		{
 			CurrentSelectedPalette = -1;
 
-			for (int i = 0; i < 255; i++)
-			{
-				HueChart.SetPixel(0, i, Color.HSVToRGB(Mathf.InverseLerp(0f, 255f, i), 1f, 1f));
-			}
-			HueChart.Apply(false);
-			for (int j = 0; j < 255; j++)
-			{
-				for (int k = 0; k < 255; k++)
-				{
-					Color color = Color.clear;
-					Color c = Color.Lerp(color, Color.white, Mathf.InverseLerp(0f, 255f, j));
-					color = Color32.Lerp(Color.black, c, Mathf.InverseLerp(0f, 255f, k));
-					ColorChart.SetPixel(j, k, color);
-				}
-			}
-
 			pageNumber = 1;
 			List<PatternDef> availablePatterns = DefDatabase<PatternDef>.AllDefs.Where(p => p.ValidFor(VehicleDef)).ToList();
 			maskMaterials.AddRangeDefault(availablePatterns, null);
@@ -155,7 +129,6 @@ namespace Vehicles
 			float ratio = (float)maskMaterials.Count / (GridDimensionSqr * GridDimensionSqr);
 			Instance.pageCount = Mathf.CeilToInt(ratio);
 
-			ColorChart.Apply(false);
 			doCloseX = true;
 			forcePause = true;
 			absorbInputAroundWindow = true;
@@ -166,8 +139,8 @@ namespace Vehicles
 		public override void PostClose()
 		{
 			base.PostClose();
-			draggingCP = false;
-			draggingHue = false;
+			RenderHelper.draggingCP = false;
+			RenderHelper.draggingHue = false;
 		}
 
 		public override void PostOpen()
@@ -203,10 +176,9 @@ namespace Vehicles
 			Rect paletteRect = new Rect(inRect.width / 3f - 5f, inRect.height - panelHeight, panelWidth, panelHeight);
 			DrawColorPalette(paletteRect);
 
-			Vector2 display = VehicleDef.drawProperties.colorPickerUICoord;
-			Rect vehicleRect = new Rect(display.x, display.y, VehicleDef.drawProperties.upgradeUISize.x, VehicleDef.drawProperties.upgradeUISize.y);
-			VehicleDef.DrawVehicleTexTiled(vehicleRect, new PatternData(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, selectedPattern, new Vector2(displacementX, displacementY), additionalTiling), 
-				Rot8.North, Turrets, GraphicOverlays);
+			Rect displayRect = new Rect(0, paintRect.y + ((paintRect.height / 2) - ((paintRect.width - 15) / 2)), paintRect.width - 15, paintRect.width - 15);
+			VehicleDef.DrawVehicleTexTiled(displayRect, new PatternData(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, selectedPattern, 
+				new Vector2(displacementX, displacementY), additionalTiling), null, Turrets, GraphicOverlays);
 			Rect dragBoxRect = new Rect(0f, ButtonHeight * 1.5f, ButtonWidth * 3, inRect.height - ButtonHeight * 5);
 			HandleDisplacementDrag(dragBoxRect);
 			var color = GUI.color;
@@ -227,8 +199,8 @@ namespace Vehicles
 				x = positionLeftBox.x + (sliderRect.width / 2) * 1.05f
 			};
 			
-			//UIElements.SliderLabeled(positionLeftBox, "VehiclePatternDisplacementX".Translate(), string.Empty, string.Empty, ref displacementX, -1.5f, 1.5f);
-			//UIElements.SliderLabeled(positionRightBox, "VehiclePatternDisplacementY".Translate(), string.Empty, string.Empty, ref displacementY, -1.5f, 1.5f);
+			UIElements.SliderLabeled(positionLeftBox, "VehiclePatternDisplacementX".Translate(), string.Empty, string.Empty, ref displacementX, -1.5f, 1.5f);
+			UIElements.SliderLabeled(positionRightBox, "VehiclePatternDisplacementY".Translate(), string.Empty, string.Empty, ref displacementY, -1.5f, 1.5f);
 			GUI.enabled = true;
 			GUI.color = color;
 
@@ -246,21 +218,21 @@ namespace Vehicles
 					mouseOver = true;
 					Cursor.SetCursor(AssetBundleDatabase.MouseHandOpen, new Vector2(3, 3), CursorMode.Auto);
 				}
-				if (Input.GetMouseButtonDown(0) && !draggingDisplacement)
+				if (Input.GetMouseButtonDown(0) && !RenderHelper.draggingDisplacement)
 				{
-					draggingDisplacement = true;
+					RenderHelper.draggingDisplacement = true;
 					initialDragDifferenceX = Mathf.InverseLerp(0f, rect.width, Event.current.mousePosition.x - rect.x) * 2 - 1 - displacementX;
 					initialDragDifferenceY = Mathf.InverseLerp(rect.height, 0f, Event.current.mousePosition.y - rect.y) * 2 - 1 - displacementY;
 					Cursor.SetCursor(AssetBundleDatabase.MouseHandClosed, new Vector2(3, 3), CursorMode.Auto);
 				}
-				if (draggingDisplacement && Event.current.isMouse)
+				if (RenderHelper.draggingDisplacement && Event.current.isMouse)
 				{
 					displacementX = (Mathf.InverseLerp(0f, rect.width, Event.current.mousePosition.x - rect.x) * 2 - 1 - initialDragDifferenceX).Clamp(-1.5f, 1.5f);
 					displacementY = (Mathf.InverseLerp(rect.height, 0f, Event.current.mousePosition.y - rect.y) * 2 - 1 - initialDragDifferenceY).Clamp(-1.5f, 1.5f);
 				}
 				if (Input.GetMouseButtonUp(0))
 				{
-					draggingDisplacement = false;
+					RenderHelper.draggingDisplacement = false;
 					Cursor.SetCursor(AssetBundleDatabase.MouseHandOpen, new Vector2(3, 3), CursorMode.Auto);
 				}
 			}
@@ -269,7 +241,7 @@ namespace Vehicles
 				if (mouseOver)
 				{
 					mouseOver = false;
-					draggingDisplacement = false;
+					RenderHelper.draggingDisplacement = false;
 					CustomCursor.Activate();
 				}
 			}
@@ -277,7 +249,7 @@ namespace Vehicles
 
 		private void DrawPaintSelection(Rect paintRect)
 		{
-			Widgets.DrawBoxSolid(paintRect, Greyist);
+			Widgets.DrawBoxSolid(paintRect, RenderHelper.Greyist);
 
 			Rect outRect = paintRect;
 			outRect = outRect.ContractedBy(10f);
@@ -332,7 +304,7 @@ namespace Vehicles
 			colorRect.y = SwitchSize / 2 + 5f;
 			colorRect.height = colorContainerRect.height - SwitchSize;
 			
-			Widgets.DrawBoxSolid(colorContainerRect, Greyist);
+			Widgets.DrawBoxSolid(colorContainerRect, RenderHelper.Greyist);
 
 			string c1Text = "ColorOne".Translate().ToString();
 			string c2Text = "ColorTwo".Translate().ToString();
@@ -342,7 +314,7 @@ namespace Vehicles
 			float c2Width = Text.CalcSize(c2Text).x;
 			float c3Width = Text.CalcSize(c2Text).x;
 
-			Rect colorPickerRect = RenderHelper.DrawColorPicker(colorRect);
+			Rect colorPickerRect = RenderHelper.DrawColorPicker(colorRect, ref hue, ref saturation, ref value, SetColor);
 			Rect buttonRect = new Rect(colorPickerRect.x, cHeight - 2, colorPickerRect.width, cHeight);
 
 			Rect c1Rect = new Rect(buttonRect)
@@ -361,7 +333,7 @@ namespace Vehicles
 			};
 
 			Rect reverseRect = new Rect(colorContainerRect.x + 11f, 20, SwitchSize / 2.75f, SwitchSize / 2.75f);
-			if(Widgets.ButtonImage(reverseRect, VehicleTex.ReverseIcon))
+			if (Widgets.ButtonImage(reverseRect, VehicleTex.ReverseIcon))
 			{
 				SetColors(CurrentColorTwo.ToColor, CurrentColorThree.ToColor, CurrentColorOne.ToColor);
 			}
@@ -433,7 +405,7 @@ namespace Vehicles
 		private void DrawColorPalette(Rect rect)
 		{
 			var palettes = VehicleMod.settings.colorStorage.colorPalette; 
-			Widgets.DrawBoxSolid(rect, Greyist);
+			Widgets.DrawBoxSolid(rect, RenderHelper.Greyist);
 
 			rect = rect.ContractedBy(5);
 
@@ -503,7 +475,6 @@ namespace Vehicles
 				{
 					SetColors(PatternData.color, PatternData.colorTwo, PatternData.colorThree);
 				}
-				
 			}
 		}
 

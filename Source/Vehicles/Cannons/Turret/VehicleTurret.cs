@@ -161,7 +161,9 @@ namespace Vehicles
 
 		public bool RotationIsValid => currentRotation == rotationTargeted;
 
-		public virtual bool CannonDisabled => RelatedHandlers.NotNullAndAny(h => h.handlers.Count < h.role.slotsToOperate) && !DebugSettings.godMode;
+		public virtual bool TurretDisabled => RelatedHandlers.NotNullAndAny(h => h.handlers.Count < h.role.slotsToOperate) && !DebugSettings.godMode;
+
+		protected virtual bool TurretTargetValid => cannonTarget.Cell.IsValid && !TurretDisabled;
 
 		public bool NoGraphic => turretDef.graphicData is null;
 
@@ -179,7 +181,7 @@ namespace Vehicles
 
 		public bool HasAmmo => turretDef.ammunition is null || shellCount > 0;
 
-		public bool ReadyToFire => groupKey.NullOrEmpty() ? (burstTicks <= 0 && reloadTicks <= 0 && !CannonDisabled) : GroupTurrets.Any(t => t.burstTicks <= 0 && t.reloadTicks <= 0 && !t.CannonDisabled);
+		public bool ReadyToFire => groupKey.NullOrEmpty() ? (burstTicks <= 0 && reloadTicks <= 0 && !TurretDisabled) : GroupTurrets.Any(t => t.burstTicks <= 0 && t.reloadTicks <= 0 && !t.TurretDisabled);
 
 		public bool FullAuto => CurrentFireMode.ticksBetweenBursts == CurrentFireMode.ticksBetweenShots;
 
@@ -492,7 +494,7 @@ namespace Vehicles
 				locationRotation = TurretRotationFor(rot, attachedTo.currentRotation);
 			}
 			Pair<float, float> turretLoc = RenderHelper.TurretDrawOffset(rot, renderProperties, locationRotation, attachedTo);
-			return new Vector3(vehicle.DrawPos.x + turretLoc.First, vehicle.DrawPos.y + drawLayer, vehicle.DrawPos.z + turretLoc.Second);
+			return new Vector3(vehicle.DrawPos.x + turretLoc.First, vehicle.DrawPos.y + drawLayer * Altitudes.AltInc, vehicle.DrawPos.z + turretLoc.Second);
 		}
 
 		public Vector3 DefaultOffsetLocFor(Rot8 rot)
@@ -503,7 +505,7 @@ namespace Vehicles
 				locationRotation = TurretRotationFor(rot, attachedTo.defaultAngleRotated - 90);
 			}
 			Pair<float, float> turretLoc = RenderHelper.TurretDrawOffset(rot, renderProperties, locationRotation, attachedTo);
-			return new Vector3(turretLoc.First, drawLayer, turretLoc.Second);
+			return new Vector3(turretLoc.First, drawLayer * Altitudes.AltInc, turretLoc.Second);
 		}
 
 		public static float TurretRotationFor(Rot8 rot, float currentRotation)
@@ -583,7 +585,7 @@ namespace Vehicles
 			{
 				if (AutoTarget && Find.TickManager.TicksGame % AutoTargetInterval == 0)
 				{
-					if (CannonDisabled)
+					if (TurretDisabled)
 					{
 						return;
 					}
@@ -683,7 +685,11 @@ namespace Vehicles
 				TargetLocked = true;
 				ResetPrefireTimer();
 			}
-			if (cannonTarget.Cell.IsValid)
+			if (!TurretTargetValid && cannonTarget.IsValid)
+			{
+				SetTarget(LocalTargetInfo.Invalid);
+			}
+			if (TurretTargetValid)
 			{
 				if (IsTargetable && !CannonTargeter.TargetMeetsRequirements(this, cannonTarget))
 				{

@@ -26,9 +26,9 @@ namespace Vehicles.Lords
 
 		public override void UpdateAllDuties()
 		{
-			foreach(Pawn p in lord.ownedPawns)
+			foreach (Pawn p in lord.ownedPawns)
 			{
-				if(p is VehiclePawn)
+				if (p is VehiclePawn)
 				{
 					p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.TravelOrWaitVehicle, exitSpot, -1f)
 					{
@@ -41,7 +41,7 @@ namespace Vehicles.Lords
 
 		public override void LordToilTick()
 		{
-			if(Find.TickManager.TicksGame % 100 == 0)
+			if (Find.TickManager.TicksGame % 100 == 0)
 			{
 				GatherAnimalsAndSlavesForShipsUtility.CheckArrived(lord, lord.ownedPawns.Where(p => p is VehiclePawn).ToList(), exitSpot, "ReadyToExitMap", (Pawn p) => true, lord.ownedPawns.NotNullAndAny(b => b.IsBoat()), null);
 			}

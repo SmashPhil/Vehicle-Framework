@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using UnityEngine;
 using HarmonyLib;
 using Verse;
@@ -13,6 +14,8 @@ namespace Vehicles
 {
 	internal class Extra : IPatchCategory
 	{
+		public const float IconBarDim = 30;
+
 		public void PatchMethods()
 		{
 			VehicleHarmony.Patch(original: AccessTools.Property(typeof(MapPawns), nameof(MapPawns.FreeColonistsSpawnedOrInPlayerEjectablePodsCount)).GetGetMethod(), prefix: null,
@@ -42,6 +45,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(TickManager), nameof(TickManager.CurTimeSpeed)),
 				postfix: new HarmonyMethod(typeof(Extra),
 				nameof(ForcePauseFromVehicles)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Dialog_ManageAreas), "DoAreaRow"),
+				transpiler: new HarmonyMethod(typeof(Extra),
+				nameof(VehicleAreaRowTranspiler)));
 		}
 
 		public static void FreeColonistsInVehiclesTransport(ref int __result, List<Pawn> ___pawnsSpawned)
@@ -135,6 +141,70 @@ namespace Vehicles
 			if (LandingTargeter.Instance.ForcedTargeting || StrafeTargeter.Instance.ForcedTargeting)
 			{
 				__result = TimeSpeed.Paused;
+			}
+		}
+
+		public static IEnumerable<CodeInstruction> VehicleAreaRowTranspiler(IEnumerable<CodeInstruction> instructions)
+		{
+			List<CodeInstruction> instructionList = instructions.ToList();
+
+			for (int i = 0; i < instructionList.Count; i++)
+			{
+				CodeInstruction instruction = instructionList[i];
+
+				if (instruction.Calls(AccessTools.Method(typeof(WidgetRow), nameof(WidgetRow.Icon))))
+				{
+					yield return instruction; //WidgetRow.Icon
+					i += 2; //Skip Pop
+					instruction = instructionList[i];
+					yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
+					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(Extra), nameof(ChangeAreaColor)));
+				}
+				if (instruction.opcode == OpCodes.Stloc_1)
+				{
+					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.PropertyGetter(typeof(Extra), nameof(VehiclesButtonWidth)));
+					yield return new CodeInstruction(opcode: OpCodes.Add);
+				}
+				if (instruction.Calls(AccessTools.Method(typeof(WidgetRow), nameof(WidgetRow.Label))))
+				{
+					yield return instruction; //Call WidgetRow.Label
+					instruction = instructionList[++i];
+					yield return instruction; //Pop
+					instruction = instructionList[++i];
+
+					yield return new CodeInstruction(opcode: OpCodes.Ldloc_0);
+					yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
+					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(Extra), nameof(ConfigureVehicleArea)));
+				}
+				yield return instruction;
+			}
+		}
+
+		private static float VehiclesButtonWidth => -(Text.CalcSize("Vehicles".Translate()).x + 20);
+
+		private static void ChangeAreaColor(Rect rect, Area area)
+		{
+			if (area is Area_Allowed && Widgets.ButtonInvisible(rect))
+			{
+				Find.WindowStack.Add(new Dialog_ColorWheel(area.Color, delegate (Color color)
+				{
+					AccessTools.Field(typeof(Area_Allowed), "colorInt").SetValue(area, color);
+					AccessTools.Field(typeof(Area), "colorTextureInt").SetValue(area, null);
+					AccessTools.Field(typeof(Area), "drawer").SetValue(area, null);
+				}));
+			}
+		}
+
+		private static void ConfigureVehicleArea(WidgetRow widgetRow, Area area)
+		{
+			if (widgetRow.ButtonText("Vehicles".Translate(), "VehiclesConfigurationAreaTooltip".Translate()))
+			{
+				if (Find.CurrentMap is null)
+				{
+					Messages.Message("Map must be loaded in order to configure areas for vehicles.", MessageTypeDefOf.RejectInput);
+					return;
+				}
+				Find.WindowStack.Add(new Dialog_ConfigureVehicleAreas(Find.CurrentMap, area));
 			}
 		}
 	}

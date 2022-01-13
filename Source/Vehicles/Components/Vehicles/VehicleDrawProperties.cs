@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Verse;
 using UnityEngine;
+using Verse;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -10,18 +11,13 @@ namespace Vehicles
 	/// </summary>
 	public class VehicleDrawProperties
 	{
+		public Rot8 displayRotation = Rot8.North;
+
 		public Vector2 selectionBracketsOffset;
 
-		//Dialog ColorPicker coord
-		public Vector2 upgradeUICoord;
-		public Vector2 upgradeUISize;
-
-		public Vector2 colorPickerUICoord;
-		public Vector2 colorPickerUISize;
-
 		//Same concept as display coord and size. Fit to settings window
-		public Vector2 settingsUICoord;
-		public Vector2 settingsUISize;
+		public Vector2 displayOffset = Vector2.zero;
+		public float displaySizeMultiplier = 1;
 
 		public string loadCargoTexPath = string.Empty;
 		public string cancelCargoTexPath = string.Empty;

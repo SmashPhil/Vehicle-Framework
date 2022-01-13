@@ -19,6 +19,36 @@ namespace Vehicles
 		private static int cachedEdgeTilesForRadius = -1;
 		private static int cachedEdgeTilesForWorldSeed = -1;
 
+		public static bool draggingCP;
+		public static bool draggingHue;
+		public static bool draggingDisplacement;
+
+		public static Texture2D ColorChart = new Texture2D(255, 255);
+		public static Texture2D HueChart = new Texture2D(1, 255);
+
+		public static Color Blackist = new Color(0.06f, 0.06f, 0.06f);
+		public static Color Greyist = new Color(0.2f, 0.2f, 0.2f);
+
+		static RenderHelper()
+		{
+			for (int i = 0; i < 255; i++)
+			{
+				HueChart.SetPixel(0, i, Color.HSVToRGB(Mathf.InverseLerp(0f, 255f, i), 1f, 1f));
+			}
+			HueChart.Apply(false);
+			for (int j = 0; j < 255; j++)
+			{
+				for (int k = 0; k < 255; k++)
+				{
+					Color color = Color.clear;
+					Color c = Color.Lerp(color, Color.white, Mathf.InverseLerp(0f, 255f, j));
+					color = Color32.Lerp(Color.black, c, Mathf.InverseLerp(0f, 255f, k));
+					ColorChart.SetPixel(j, k, color);
+				}
+			}
+			ColorChart.Apply(false);
+		}
+
 		/// <summary>
 		/// DrawOffset for full rotation <paramref name="rot"/>
 		/// </summary>
@@ -111,7 +141,7 @@ namespace Vehicles
 		/// <remarks>Might want to research into optimization practices for rendering</remarks>
 		public static void DrawCannonTextures(this VehiclePawn vehicle, Rect displayRect, IEnumerable<VehicleTurret> cannons, PatternDef pattern, bool resolveGraphics = false, Color? manualColorOne = null, Color? manualColorTwo = null, Color? manualColorThree = null, Rot8? rot = null)
 		{
-			Rot8 rotDrawn = rot ?? Rot8.North;
+			Rot8 rotDrawn = rot ?? vehicle.VehicleDef.drawProperties.displayRotation;
 			foreach (VehicleTurret turret in cannons)
 			{
 				if (turret.NoGraphic)
@@ -127,11 +157,15 @@ namespace Vehicles
 				float cannonWidth = (displayRect.width / graphicData.drawSize.x) * turret.CannonGraphicData.drawSize.x;
 				float cannonHeight = (displayRect.height / graphicData.drawSize.y) * turret.CannonGraphicData.drawSize.y;
 
-				var offset = turret.DefaultOffsetLocFor(rotDrawn);
+				Vector3 offset = turret.DefaultOffsetLocFor(rotDrawn);
+				Vector2 rectSize = vehicle.VehicleDef.ScaleDrawRatio(new Vector2(displayRect.width, displayRect.height));
+				float newX = (displayRect.width / 2) - (rectSize.x / 2) + (vehicle.VehicleDef.drawProperties.displayOffset.x * rectSize.x / displayRect.width);
+				float newY = (displayRect.height / 2) - (rectSize.y / 2) + (vehicle.VehicleDef.drawProperties.displayOffset.y * rectSize.y / displayRect.height);
+				Rect adjustedRect = new Rect(displayRect.x + newX, displayRect.y + newY, rectSize.x, rectSize.y);
 				/// ( center point of vehicle) + (UI size / drawSize) * cannonPos
 				/// y axis inverted as UI goes top to bottom, but DrawPos goes bottom to top
-				float xCannon = (displayRect.x + (displayRect.width / 2) - (cannonWidth / 2)) + ((vehicle.VehicleDef.drawProperties.upgradeUISize.x / graphicData.drawSize.x) * offset.x);
-				float yCannon = (displayRect.y + (displayRect.height / 2) - (cannonHeight / 2)) - ((vehicle.VehicleDef.drawProperties.upgradeUISize.y / graphicData.drawSize.y) * offset.z);
+				float xCannon = (adjustedRect.x + (adjustedRect.width / 2) - (cannonWidth / 2)) + (rectSize.x / graphicData.drawSize.x * offset.x);
+				float yCannon = (adjustedRect.y + (adjustedRect.height / 2) - (cannonHeight / 2)) - (rectSize.y / graphicData.drawSize.y * offset.z);
 
 				Rect cannonDrawnRect = new Rect(xCannon, yCannon, cannonWidth, cannonHeight);
 				Material cannonMat = null;
@@ -152,7 +186,7 @@ namespace Vehicles
 							properties = pattern.properties,
 							isSkin = pattern is SkinDef,
 							maskTex = turret.CannonGraphic.masks[0],
-							patternTex = pattern[Rot8.North]
+							patternTex = pattern[rotDrawn]
 						};
 						cannonMat = MaterialPoolExpanded.MatFrom(matReq);
 					}
@@ -179,18 +213,19 @@ namespace Vehicles
 		/// <param name="resolveGraphics"></param>
 		/// <param name="manualColorOne"></param>
 		/// <param name="manualColorTwo"></param>
-		public static void DrawVehicleTex(Rect rect, Texture2D vehicleTex, VehiclePawn vehicle, PatternDef pattern = null, bool resolveGraphics = false, Color? manualColorOne = null, Color? manualColorTwo = null, Color? manualColorThree = null, Rot8? rot = null)
+		public static void DrawVehicle(Rect rect, VehiclePawn vehicle, PatternDef pattern = null, bool resolveGraphics = false, Color? manualColorOne = null, Color? manualColorTwo = null, Color? manualColorThree = null, Rot8? rot = null)
 		{
-			Rot8 rotDrawn = rot ?? Rot8.North;
-			Material mat = null;
+			Rot8 rotDrawn = rot ?? vehicle.VehicleDef.drawProperties.displayRotation;
+			Texture2D mainTex = vehicle.VehicleGraphic.TexAt(rotDrawn);
+			Material mat = vehicle.VehicleGraphic.MatAt(rotDrawn, pattern, vehicle);
 			if (vehicle.VehicleGraphic.Shader.SupportsRGBMaskTex())
 			{
-				mat = new Material(vehicle.VehicleGraphic.MatAt(Rot4.North, vehicle));
+				mat = new Material(vehicle.VehicleGraphic.MatAt(rotDrawn, vehicle));
 				if (manualColorOne != null || manualColorTwo != null || manualColorThree != null)
 				{
 					MaterialRequestRGB matReq = new MaterialRequestRGB()
 					{
-						mainTex = vehicleTex,
+						mainTex = mainTex,
 						shader = vehicle.VehicleGraphic.Shader,
 						color = manualColorOne != null ? manualColorOne.Value : vehicle.DrawColor,
 						colorTwo = manualColorTwo != null ? manualColorTwo.Value : vehicle.DrawColorTwo,
@@ -205,7 +240,7 @@ namespace Vehicles
 				}
 			}
 
-			GenUI.DrawTextureWithMaterial(rect, vehicleTex, mat);
+			GenUI.DrawTextureWithMaterial(rect, mainTex, mat);
 
 			if (vehicle.CompCannons != null)
 			{
@@ -225,7 +260,12 @@ namespace Vehicles
 		/// <param name="turrets"></param>
 		public static void DrawVehicleTexTiled(this VehicleDef vehicleDef, Rect rect, PatternData patternData, Rot8? rot = null, List<VehicleTurret> turrets = null, List<GraphicOverlay> graphicOverlays = null)
 		{
-			Rot8 rotDrawn = rot ?? Rot8.North;
+			Vector2 rectSize = vehicleDef.ScaleDrawRatio(new Vector2(rect.width * 0.95f, rect.height * 0.95f));
+			float newX = (rect.width / 2) - (rectSize.x / 2) + (vehicleDef.drawProperties.displayOffset.x * rectSize.x / rect.width);
+			float newY = (rect.height / 2) - (rectSize.y / 2) + (vehicleDef.drawProperties.displayOffset.y * rectSize.y / rect.height);
+			Rect adjustedRect = new Rect(rect.x + newX, rect.y + newY, rectSize.x, rectSize.y);
+
+			Rot8 rotDrawn = rot ?? vehicleDef.drawProperties.displayRotation;
 
 			Graphic_Vehicle graphic = VehicleTex.CachedGraphics[vehicleDef];
 
@@ -260,15 +300,15 @@ namespace Vehicles
 			}
 
 			var drawOverlays = new List<ValueTuple<Rect, Texture, Material, float, float>>();
-			drawOverlays.AddRange(RetrieveOverlaySettingsDrawProperties(rect, vehicleDef, rotDrawn, graphicOverlays));
-			drawOverlays.AddRange(RetrieveTurretSettingsDrawProperties(rect, vehicleDef, turrets, patternData, rotDrawn));
+			drawOverlays.AddRange(RetrieveOverlaySettingsDrawProperties(adjustedRect, vehicleDef, rotDrawn, graphicOverlays));
+			drawOverlays.AddRange(RetrieveTurretSettingsDrawProperties(adjustedRect, vehicleDef, turrets, patternData, rotDrawn));
 
 			foreach (var overlay in drawOverlays.Where(o => o.Item4 < 0).OrderBy(o => o.Item4))
 			{
 				UIElements.DrawTextureWithMaterialOnGUI(overlay.Item1, overlay.Item2, overlay.Item3, overlay.Item5);
 			}
 
-			GenUI.DrawTextureWithMaterial(rect, VehicleTex.VehicleTexture(vehicleDef, rotDrawn), material);
+			GenUI.DrawTextureWithMaterial(adjustedRect, VehicleTex.VehicleTexture(vehicleDef, rotDrawn), material);
 
 			foreach (var overlay in drawOverlays.Where(o => o.Item4 >= 0).OrderBy(o => o.Item4))
 			{
@@ -299,16 +339,19 @@ namespace Vehicles
 				{
 					turret.ResolveCannonGraphics(patternData);
 				}
-				Rot8 rotDrawn = rot ?? Rot8.North;
+				Rot8 rotDrawn = rot ?? vehicleDef.drawProperties.displayRotation;
 				float cannonWidth = (displayRect.width / graphicData.drawSize.x) * turret.CannonGraphicData.drawSize.x;
 				float cannonHeight = (displayRect.height / graphicData.drawSize.y) * turret.CannonGraphicData.drawSize.y;
 
-				var offset = turret.renderProperties.OffsetFor(rotDrawn);
-
+				Vector3 offset = turret.DefaultOffsetLocFor(rotDrawn);
+				Vector2 rectSize = vehicleDef.ScaleDrawRatio(new Vector2(displayRect.width, displayRect.height));
+				float newX = (displayRect.width / 2) - (rectSize.x / 2) + (vehicleDef.drawProperties.displayOffset.x * rectSize.x / displayRect.width);
+				float newY = (displayRect.height / 2) - (rectSize.y / 2) + (vehicleDef.drawProperties.displayOffset.y * rectSize.y / displayRect.height);
+				Rect adjustedRect = new Rect(displayRect.x + newX, displayRect.y + newY, rectSize.x, rectSize.y);
 				/// ( center point of vehicle) + (UI size / drawSize) * cannonPos
 				/// y axis inverted as UI goes top to bottom, but DrawPos goes bottom to top
-				float xCannon = (displayRect.x + (displayRect.width / 2) - (cannonWidth / 2)) + (vehicleDef.drawProperties.upgradeUISize.x / graphicData.drawSize.x * offset.Offset.x);
-				float yCannon = (displayRect.y + (displayRect.height / 2) - (cannonHeight / 2)) - (vehicleDef.drawProperties.upgradeUISize.y / graphicData.drawSize.y * offset.Offset.y);
+				float xCannon = (adjustedRect.x + (adjustedRect.width / 2) - (cannonWidth / 2)) + (rectSize.x / graphicData.drawSize.x * offset.x);
+				float yCannon = (adjustedRect.y + (adjustedRect.height / 2) - (cannonHeight / 2)) - (rectSize.y / graphicData.drawSize.y * offset.z);
 
 				Rect cannonDrawnRect = new Rect(xCannon, yCannon, cannonWidth, cannonHeight);
 				Material cannonMat = null;
@@ -329,7 +372,7 @@ namespace Vehicles
 							properties = patternData.pattern.properties,
 							isSkin = patternData.pattern is SkinDef,
 							maskTex = turret.CannonGraphic.masks[0],
-							patternTex = patternData.pattern[Rot8.North]
+							patternTex = patternData.pattern[rotDrawn]
 						};
 						cannonMat = MaterialPoolExpanded.MatFrom(matReq);
 					}
@@ -364,12 +407,13 @@ namespace Vehicles
 				float overlayWidth = rect.width / vehicleGraphicData.drawSize.x * overlayDrawSize.x;
 				float overlayHeight = rect.height / vehicleGraphicData.drawSize.y * overlayDrawSize.y;
 
-				float xOverlay = rect.x + (rect.width / 2) - (overlayWidth / 2) + (vehicleDef.drawProperties.settingsUISize.x / vehicleGraphicData.drawSize.x * graphicOverlay.graphic.DrawOffsetFull(rot).x);
-				float yOverlay = rect.y + (rect.height / 2) - (overlayHeight / 2) - (vehicleDef.drawProperties.settingsUISize.x / vehicleGraphicData.drawSize.x * graphicOverlay.graphic.DrawOffsetFull(rot).y);
+				float xOverlay = rect.x + (rect.width / 2) - (overlayWidth / 2) + (vehicleGraphicData.drawSize.x * graphicOverlay.graphic.DrawOffsetFull(rot).x);
+				float yOverlay = rect.y + (rect.height / 2) - (overlayHeight / 2) - (vehicleGraphicData.drawSize.x * graphicOverlay.graphic.DrawOffsetFull(rot).y);
 
 				Rect overlayRect = new Rect(xOverlay, yOverlay, overlayWidth, overlayHeight);
 				Texture2D texture = TextureCache.Get(graphicOverlay.graphic.data.texPath);
-				yield return new ValueTuple<Rect, Texture, Material, float, float>(overlayRect, texture, graphicOverlay.graphic.MatAt(rot), graphicOverlay.graphic.data.DrawOffsetFull(rot).y, graphicOverlay.rotation);
+				Material material = graphicOverlay.graphic.Shader.SupportsMaskTex() ? graphicOverlay.graphic.MatAt(rot) : null;
+				yield return new ValueTuple<Rect, Texture, Material, float, float>(overlayRect, texture, material, graphicOverlay.graphic.data.DrawOffsetFull(rot).y, graphicOverlay.rotation);
 			}
 		}
 
@@ -391,17 +435,17 @@ namespace Vehicles
 				}
 
 				GraphicDataRGB vehicleGraphicData = vehicleDef.graphicData;
-				Rot8 rotDrawn = rot ?? Rot8.North;
+				Rot8 rotDrawn = rot ?? vehicleDef.drawProperties.displayRotation;
 				turret.ResolveCannonGraphics(vehicleDef);
 
-				float cannonWidth = displayRect.width / vehicleGraphicData.drawSize.x * turret.CannonGraphicData.drawSize.x;
-				float cannonHeight = displayRect.height / vehicleGraphicData.drawSize.y * turret.CannonGraphicData.drawSize.y;
+				float cannonWidth = displayRect.width / vehicleGraphicData.drawSize.x * turret.CannonGraphicData.drawSize.x * vehicleDef.drawProperties.displaySizeMultiplier;
+				float cannonHeight = displayRect.height / vehicleGraphicData.drawSize.y * turret.CannonGraphicData.drawSize.y * vehicleDef.drawProperties.displaySizeMultiplier;
 
 				var offset = turret.renderProperties.OffsetFor(rotDrawn);
 				/// ( center point of vehicle) + (UI size / drawSize) * cannonPos
 				/// y axis inverted as UI goes top to bottom, but DrawPos goes bottom to top
-				float xCannon = displayRect.x + (displayRect.width / 2) - (cannonWidth / 2) + ((vehicleDef.drawProperties.settingsUISize.x / vehicleGraphicData.drawSize.x) * offset.Offset.x);
-				float yCannon = displayRect.y + (displayRect.height / 2) - (cannonHeight / 2) - ((vehicleDef.drawProperties.settingsUISize.y / vehicleGraphicData.drawSize.y) * offset.Offset.y);
+				float xCannon = displayRect.x + (vehicleDef.drawProperties.displaySizeMultiplier / displayRect.width * vehicleDef.drawProperties.displayOffset.x) + (displayRect.width / 2) - (cannonWidth / 2) + (vehicleDef.drawProperties.displaySizeMultiplier / vehicleGraphicData.drawSize.x * offset.Offset.x);
+				float yCannon = displayRect.y + (vehicleDef.drawProperties.displaySizeMultiplier / displayRect.height * vehicleDef.drawProperties.displayOffset.y) + (displayRect.height / 2) - (cannonHeight / 2) - (vehicleDef.drawProperties.displaySizeMultiplier / vehicleGraphicData.drawSize.y * offset.Offset.y);
 
 				Rect cannonDrawnRect = new Rect(xCannon, yCannon, cannonWidth, cannonHeight);
 
@@ -442,10 +486,10 @@ namespace Vehicles
 			{
 				drawStep = "Setting rect and adjusted positioning.";
 				Vector2 rectSize = vehicleDef.ScaleDrawRatio(new Vector2(rect.width * 0.95f, rect.height * 0.95f));
-				float newX = (rect.width / 2) - (rectSize.x / 2);
-				float newY = (rect.height / 2) - (rectSize.y / 2);
+				float newX = (rect.width / 2) - (rectSize.x / 2) + (vehicleDef.drawProperties.displayOffset.x * rect.width);
+				float newY = (rect.height / 2) - (rectSize.y / 2) + (vehicleDef.drawProperties.displayOffset.y * rect.height);
 				Rect adjustedRect = new Rect(rect.x + newX, rect.y + newY, rectSize.x, rectSize.y);
-				Rot8 rotDrawn = rot ?? Rot8.North;
+				Rot8 rotDrawn = rot ?? vehicleDef.drawProperties.displayRotation;
 
 				drawStep = "Retrieving cached graphic and pattern";
 				Graphic_Vehicle graphic = VehicleTex.CachedGraphics[vehicleDef];
@@ -475,8 +519,8 @@ namespace Vehicles
 						displacement = displacement,
 						properties = pattern.properties,
 						isSkin = pattern is SkinDef,
-						maskTex = (vehicleDef.graphic as Graphic_Vehicle).masks[0],
-						patternTex = pattern?[Rot8.North]
+						maskTex = (vehicleDef.graphic as Graphic_Vehicle).masks[rotDrawn.AsInt],
+						patternTex = pattern?[rotDrawn]
 					};
 					material = MaterialPoolExpanded.MatFrom(matReq);
 				}
@@ -620,62 +664,66 @@ namespace Vehicles
 		/// Draw ColorPicker and HuePicker
 		/// </summary>
 		/// <param name="fullRect"></param>
-		public static Rect DrawColorPicker(Rect fullRect)
+		public static Rect DrawColorPicker(Rect fullRect, ref float hue, ref float saturation, ref float value, Action<float, float, float> colorSetter)
 		{
 			Rect rect = fullRect.ContractedBy(10f);
 			rect.width = 15f;
-			if (Input.GetMouseButtonDown(0) && Mouse.IsOver(rect) && !Dialog_ColorPicker.draggingHue)
+			if (fullRect.width != fullRect.height + 25)
 			{
-				Dialog_ColorPicker.draggingHue = true;
+				SmashLog.WarningOnce($"ColorPicker fullRect dimensions are not correct. Width should be exactly 25 larger than the height.", "VehiclesColorPicker".GetHashCode());
 			}
-			if (Dialog_ColorPicker.draggingHue && Event.current.isMouse)
+			if (Input.GetMouseButtonDown(0) && Mouse.IsOver(rect) && !draggingHue)
 			{
-				float num = Dialog_ColorPicker.hue;
-				Dialog_ColorPicker.hue = Mathf.InverseLerp(rect.height, 0f, Event.current.mousePosition.y - rect.y);
-				if (Dialog_ColorPicker.hue != num)
+				draggingHue = true;
+			}
+			if (draggingHue && Event.current.isMouse)
+			{
+				float num = hue;
+				hue = Mathf.InverseLerp(rect.height, 0f, Event.current.mousePosition.y - rect.y);
+				if (hue != num)
 				{
-					Dialog_ColorPicker.Instance.SetColor(Dialog_ColorPicker.hue, Dialog_ColorPicker.saturation, Dialog_ColorPicker.value);
+					colorSetter(hue, saturation, value);
 				}
 			}
 			if (Input.GetMouseButtonUp(0))
 			{
-				Dialog_ColorPicker.draggingHue = false;
+				draggingHue = false;
 			}
 			Widgets.DrawBoxSolid(rect.ExpandedBy(1f), Color.grey);
-			Widgets.DrawTexturePart(rect, new Rect(0f, 0f, 1f, 1f), Dialog_ColorPicker.HueChart);
+			Widgets.DrawTexturePart(rect, new Rect(0f, 0f, 1f, 1f), HueChart);
 			Rect rect2 = new Rect(0f, 0f, 16f, 16f)
 			{
-				center = new Vector2(rect.center.x, rect.height * (1f - Dialog_ColorPicker.hue) + rect.y).Rounded()
+				center = new Vector2(rect.center.x, rect.height * (1f - hue) + rect.y).Rounded()
 			};
 
 			Widgets.DrawTextureRotated(rect2, VehicleTex.ColorHue, 0f);
 			rect = fullRect.ContractedBy(10f);
 			rect.x = rect.xMax - rect.height;
 			rect.width = rect.height;
-			if (Input.GetMouseButtonDown(0) && Mouse.IsOver(rect) && !Dialog_ColorPicker.draggingCP)
+			if (Input.GetMouseButtonDown(0) && Mouse.IsOver(rect) && !draggingCP)
 			{
-				Dialog_ColorPicker.draggingCP = true;
+				draggingCP = true;
 			}
-			if (Dialog_ColorPicker.draggingCP)
+			if (draggingCP)
 			{
-				Dialog_ColorPicker.saturation = Mathf.InverseLerp(0f, rect.width, Event.current.mousePosition.x - rect.x);
-				Dialog_ColorPicker.value = Mathf.InverseLerp(rect.width, 0f, Event.current.mousePosition.y - rect.y);
-				Dialog_ColorPicker.Instance.SetColor(Dialog_ColorPicker.hue, Dialog_ColorPicker.saturation, Dialog_ColorPicker.value);
+				saturation = Mathf.InverseLerp(0f, rect.width, Event.current.mousePosition.x - rect.x);
+				value = Mathf.InverseLerp(rect.width, 0f, Event.current.mousePosition.y - rect.y);
+				colorSetter(hue, saturation, value);
 			}
 			if (Input.GetMouseButtonUp(0))
 			{
-				Dialog_ColorPicker.draggingCP = false;
+				draggingCP = false;
 			}
 			Widgets.DrawBoxSolid(rect.ExpandedBy(1f), Color.grey);
 			Widgets.DrawBoxSolid(rect, Color.white);
-			GUI.color = Color.HSVToRGB(Dialog_ColorPicker.hue, 1f, 1f);
-			Widgets.DrawTextureFitted(rect, Dialog_ColorPicker.ColorChart, 1f);
+			GUI.color = Color.HSVToRGB(hue, 1f, 1f);
+			Widgets.DrawTextureFitted(rect, ColorChart, 1f);
 			GUI.color = Color.white;
 			GUI.BeginClip(rect);
-			rect2.center = new Vector2(rect.width * Dialog_ColorPicker.saturation, rect.width * (1f - Dialog_ColorPicker.value));
-			if (Dialog_ColorPicker.value >= 0.4f && (Dialog_ColorPicker.hue <= 0.5f || Dialog_ColorPicker.saturation <= 0.5f))
+			rect2.center = new Vector2(rect.width * saturation, rect.width * (1f - value));
+			if (value >= 0.4f && (hue <= 0.5f || saturation <= 0.5f))
 			{
-				GUI.color = Dialog_ColorPicker.Blackist;
+				GUI.color = Blackist;
 			}
 			Widgets.DrawTextureFitted(rect2, VehicleTex.ColorPicker, 1f);
 			GUI.color = Color.white;
@@ -714,7 +762,7 @@ namespace Vehicles
 				defaultPatternData.colorTwo = vehicleDef.graphicData.colorTwo.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
 				defaultPatternData.colorThree = vehicleDef.graphicData.colorThree.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
 			}
-			DrawVehicleDef(rect, vehicleDef, null, defaultPatternData, Rot8.North);
+			DrawVehicleDef(rect, vehicleDef, null, defaultPatternData);
 
 			bool flag2 = false;
 			KeyCode keyCode = (command.hotKey == null) ? KeyCode.None : command.hotKey.MainKey;

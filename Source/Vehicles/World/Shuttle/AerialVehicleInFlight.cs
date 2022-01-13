@@ -115,7 +115,7 @@ namespace Vehicles
 		public virtual void Initialize()
 		{
 			position = base.DrawPos;
-			rotatorGraphics = vehicle.graphicOverlay.graphics.Where(g => g is Graphic_Rotator).Cast<Graphic_Rotator>().ToList();
+			rotatorGraphics = vehicle.graphicOverlay.graphics.Where(g => g.graphic is Graphic_Rotator).Select(g => g.graphic).Cast<Graphic_Rotator>().ToList();
 		}
 
 		public virtual Vector3 DrawPosAhead(int ticksAhead) => Vector3.Slerp(position, Find.WorldGrid.GetTileCenter(flightPath.First.tile), transition + speedPctPerTick * ticksAhead);

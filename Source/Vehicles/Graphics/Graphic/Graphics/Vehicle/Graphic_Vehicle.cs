@@ -13,11 +13,11 @@ namespace Vehicles
 		public override Material MatWest => maskMatPatterns[PatternDefOf.Default].Second[3];
 
 
-		public Material MatAt(Rot8 rot, PatternDef pattern)
+		public Material MatAt(Rot8 rot, PatternDef pattern, VehiclePawn vehicle = null)
 		{
 			if (pattern is null)
 			{
-				return MatAt(rot);
+				return MatAt(rot, vehicle);
 			}
 			if (maskMatPatterns.TryGetValue(pattern, out var values))
 			{
@@ -131,22 +131,60 @@ namespace Vehicles
 
 			if (textureArray[4] is null)
 			{
-				textureArray[4] = textureArray[0];
+				if (textureArray[7] != null)
+				{
+					textureArray[4] = textureArray[7];
+				}
+				else
+				{
+					textureArray[4] = textureArray[0];
+				}
 				eastDiagonalRotated = DataAllowsFlip;
 			}
 			if (textureArray[5] is null)
 			{
-				textureArray[5] = textureArray[2];
-				eastDiagonalRotated = DataAllowsFlip;
+				if (textureArray[4] != null)
+				{
+					textureArray[5] = textureArray[4];
+				}
+				else if (textureArray[6] != null)
+				{
+					textureArray[5] = textureArray[6];
+					eastDiagonalRotated = DataAllowsFlip;
+				}
+				else
+				{
+					textureArray[5] = textureArray[2];
+					eastDiagonalRotated = DataAllowsFlip;
+				}
 			}
 			if (textureArray[6] is null)
 			{
-				textureArray[6] = textureArray[2];
-				westDiagonalRotated = DataAllowsFlip;
+				if (textureArray[7] != null)
+				{
+					textureArray[6] = textureArray[7];
+				}
+				if (textureArray[5] != null)
+				{
+					textureArray[6] = textureArray[5];
+					westDiagonalRotated = DataAllowsFlip;
+				}
+				else
+				{
+					textureArray[6] = textureArray[2];
+					westDiagonalRotated = DataAllowsFlip;
+				}
 			}
 			if (textureArray[7] is null)
 			{
-				textureArray[7] = textureArray[0];
+				if (textureArray[4] != null)
+				{
+					textureArray[7] = textureArray[4];
+				}
+				else
+				{
+					textureArray[7] = textureArray[0];
+				}
 				westDiagonalRotated = DataAllowsFlip;
 			}
 			

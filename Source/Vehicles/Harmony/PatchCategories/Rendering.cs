@@ -141,8 +141,8 @@ namespace Vehicles
 			Vector2 vector = new Vector2(rect.x + 1f, rect.yMax - num - 1f);
 
 			Rect rect2 = new Rect(vector.x, vector.y, num, num);
-			GUI.DrawTexture(rect2, VehicleTex.CachedTextureIcons[handler.vehiclePawn.VehicleDef]);
-			TooltipHandler.TipRegion(rect2, "ActivityIconOnBoardShip".Translate(handler.vehiclePawn.Label)); 
+			GUI.DrawTexture(rect2, VehicleTex.CachedTextureIcons[handler.vehicle.VehicleDef]);
+			TooltipHandler.TipRegion(rect2, "ActivityIconOnBoardShip".Translate(handler.vehicle.Label)); 
 			vector.x += num;
 		}
 
@@ -155,7 +155,7 @@ namespace Vehicles
 		{
 			var vehicle = obj as VehiclePawn;
 			var building = obj as VehicleBuilding;
-			if(vehicle != null || building?.vehicleReference != null)
+			if (vehicle != null || building?.vehicleReference != null)
 			{
 				if (vehicle is null)
 				{
@@ -169,8 +169,8 @@ namespace Vehicles
 				FieldInfo info = AccessTools.Field(typeof(SelectionDrawer), "selectTimes");
 				object o = info.GetValue(null);
 				Ext_Pawn.CalculateSelectionBracketPositionsWorldForMultiCellPawns(brackets, vehicle, newDrawPos, vehicle.RotatedSize.ToVector2(), (Dictionary<object, float>)o, Vector2.one, angle, 1f);
-
-				int num = (angle != 0) ? (int)angle : 0;
+				
+				int num = Mathf.CeilToInt(angle);
 				for (int i = 0; i < 4; i++)
 				{
 					Quaternion rotation = Quaternion.AngleAxis(num, Vector3.up);

@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 using HarmonyLib;
 using Verse;
 using RimWorld;
@@ -45,19 +46,26 @@ namespace Vehicles
 					nameof(DebugWorldObjects)));
 			}
 
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Designator_Build), nameof(Designator_Build.DesignateSingleCell)),
-			//	prefix: new HarmonyMethod(typeof(Debug),
-			//	nameof(TestMethod)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn), "Kill"),
+				prefix: new HarmonyMethod(typeof(Debug),
+				nameof(TestMethod)));
 			//VehicleHarmony.Patch(original: AccessTools.PropertySetter(typeof(Thing), nameof(Thing.StyleDef)),
 			//	finalizer: new HarmonyMethod(typeof(Debug),
 			//	nameof(ExceptionCatcher)));
 		}
 
-		public static bool TestMethod()
+		public static void TestMethod(DamageInfo? dinfo, Pawn __instance, Hediff exactCulprit = null)
 		{
 			try
 			{
-				
+				VehiclePawn vehicle = (__instance.ParentHolder as VehicleHandler)?.vehicle;
+				if (vehicle != null)
+				{
+					Log.Message($"Container: {__instance.InContainerEnclosed}");
+					Log.Message($"Generating: {PawnGenerator.IsBeingGenerated(__instance)}");
+					Log.Message($"Owner: {__instance.holdingOwner}");
+					__instance.holdingOwner = vehicle.inventory.innerContainer;
+				}
 			}
 			catch (Exception ex)
 			{
@@ -67,7 +75,6 @@ namespace Vehicles
 			{
 
 			}
-			return false;
 		}
 
 		public static Exception ExceptionCatcher(Exception __exception)

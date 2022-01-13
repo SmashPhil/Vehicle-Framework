@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using Verse;
+using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 
 namespace Vehicles
 {
-	public class VehicleHandler : IExposable, ILoadReferenceable, IThingHolder
+	public class VehicleHandler : IExposable, ILoadReferenceable, IThingHolderPawnOverlayer
 	{
 		public ThingOwner<Pawn> handlers;
 
@@ -14,7 +15,7 @@ namespace Vehicles
 		private List<Pawn> tempSavedPawns = new List<Pawn>();
 
 		public int uniqueID = -1;
-		public VehiclePawn vehiclePawn;
+		public VehiclePawn vehicle;
 		
 		public VehicleHandler()
 		{
@@ -24,21 +25,21 @@ namespace Vehicles
 			}
 		}
 
-		public VehicleHandler(VehiclePawn vehiclePawn)
+		public VehicleHandler(VehiclePawn vehicle)
 		{
 			uniqueID = VehicleIdManager.Instance.GetNextHandlerId();
-			this.vehiclePawn = vehiclePawn;
+			this.vehicle = vehicle;
 			if(handlers is null)
 			{
 				handlers = new ThingOwner<Pawn>(this, false, LookMode.Reference);
 			}
 		}
 
-		public VehicleHandler(VehiclePawn vehiclePawn, VehicleRole newRole)
+		public VehicleHandler(VehiclePawn vehicle, VehicleRole newRole)
 		{
 			List<Pawn> newHandlers = new List<Pawn>();
 			uniqueID = VehicleIdManager.Instance.GetNextHandlerId();
-			this.vehiclePawn = vehiclePawn;
+			this.vehicle = vehicle;
 			role = new VehicleRole(newRole);
 			if (handlers is null)
 			{
@@ -65,11 +66,17 @@ namespace Vehicles
 			}
 		}
 
+		public IThingHolder ParentHolder => vehicle;
+
+		public float OverlayPawnBodyAngle => role.pawnRenderer.AngleFor(vehicle.FullRotation);
+
+		public Rot4 PawnRotation => role.pawnRenderer?.RotFor(vehicle.FullRotation) ?? Rot4.South;
+
 		public bool AreSlotsAvailable
 		{
 			get
 			{
-				bool reservation = vehiclePawn.Map?.GetCachedMapComponent<VehicleReservationManager>().CanReserve<VehicleHandler, VehicleHandlerReservation>(vehiclePawn, null, this) ?? true;
+				bool reservation = vehicle.Map?.GetCachedMapComponent<VehicleReservationManager>().CanReserve<VehicleHandler, VehicleHandlerReservation>(vehicle, null, this) ?? true;
 				return role != null &&  reservation && handlers.Count < role.slots;
 			}
 		}
@@ -77,6 +84,17 @@ namespace Vehicles
 		public static bool operator ==(VehicleHandler obj1, VehicleHandler obj2) => obj1.Equals(obj2);
 
 		public static bool operator !=(VehicleHandler obj1, VehicleHandler obj2) => !(obj1 == obj2);
+
+		public void RenderPawns()
+		{
+			if (role.pawnRenderer != null)
+			{
+				foreach (Pawn pawn in handlers)
+				{
+					pawn.Drawer.renderer.RenderPawnAt(vehicle.DrawPos + role.pawnRenderer.DrawOffsetFor(vehicle.FullRotation), role.pawnRenderer.RotFor(vehicle.FullRotation));
+				}
+			}
+		}
 
 		public override bool Equals(object obj)
 		{
@@ -98,10 +116,25 @@ namespace Vehicles
 			return base.GetHashCode();
 		}
 
+		public string GetUniqueLoadID()
+		{
+			return $"VehicleHandler_{uniqueID}";
+		}
+
+		public void GetChildHolders(List<IThingHolder> outChildren)
+		{
+			ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, GetDirectlyHeldThings());
+		}
+
+		public ThingOwner GetDirectlyHeldThings()
+		{
+			return handlers;
+		}
+
 		public void ExposeData()
 		{
 			Scribe_Values.Look(ref uniqueID, "uniqueID", -1);
-			Scribe_References.Look(ref vehiclePawn, "vehiclePawn");
+			Scribe_References.Look(ref vehicle, "vehicle");
 			Scribe_Deep.Look(ref role, "role");
 
 			if (Scribe.mode == LoadSaveMode.Saving)
@@ -126,23 +159,6 @@ namespace Vehicles
 				}
 				tempSavedPawns.Clear();
 			}
-		}
-
-		public string GetUniqueLoadID()
-		{
-			return $"VehicleHandler_{uniqueID}";
-		}
-
-		public IThingHolder ParentHolder => vehiclePawn;
-
-		public void GetChildHolders(List<IThingHolder> outChildren)
-		{
-			ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, GetDirectlyHeldThings());
-		}
-
-		public ThingOwner GetDirectlyHeldThings()
-		{
-			return handlers;
 		}
 	}
 }

@@ -124,7 +124,7 @@ namespace Vehicles
 			listingStandard.SliderLabeled("BeachGenMultiplier".Translate(), "BeachGenMultiplierTooltip".Translate(), "%", ref beachMultiplier, 0f, 2f, 100, 0);
 			listingStandard.Gap(16);
 			listingStandard.SliderLabeled("ForceSettlementCoast".Translate(), "ForceSettlementCoastTooltip".Translate(), "Tiles".Translate(), ref forceFactionCoastRadius, 0, 
-				VehicleMod.MaxCoastalSettlementPush, "EverySettlementToCoast".Translate());
+				VehicleMod.MaxCoastalSettlementPush, 1, "EverySettlementToCoast".Translate());
 			listingStandard.Gap(12);
 
 			listingStandard.Header("General", ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);

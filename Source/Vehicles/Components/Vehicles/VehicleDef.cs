@@ -110,6 +110,8 @@ namespace Vehicles
 			{
 				components.OrderBy(c => c.hitbox.side == VehicleComponentPosition.BodyNoOverlap).ForEach(c => c.ResolveReferences(this));
 			}
+			drawProperties ??= new VehicleDrawProperties();
+			properties ??= new VehicleProperties();
 			properties.ResolveReferences(this);
 
 			if (VehicleMod.settings.vehicles.defaultGraphics.EnumerableNullOrEmpty())
@@ -163,10 +165,6 @@ namespace Vehicles
 			{
 				yield return "<field>components</field> must include at least 1 VehicleComponent".ConvertRichText();
 			}
-			if (drawProperties is null)
-			{
-				yield return "<field>drawProperties</field> must be specified in order to properly render vehicle in GUIs.".ConvertRichText();
-			}
 			if (!components.NullOrEmpty())
 			{
 				if (components.Select(c => c.key).GroupBy(s => s).Where(g => g.Count() > 1).Any())
@@ -189,18 +187,18 @@ namespace Vehicles
 		/// <param name="size"></param>
 		public Vector2 ScaleDrawRatio(Vector2 size)
 		{
-			float sizeX = size.x;
-			float sizeY = size.y;
+			float width = size.x * drawProperties.displaySizeMultiplier;
+			float height = size.y * drawProperties.displaySizeMultiplier;
 			Vector2 drawSize = graphicData.drawSize;
-			if (sizeX < sizeY)
+			if (width < height)
 			{
-				sizeY = sizeX * (drawSize.y / drawSize.x);
+				height = width * (drawSize.y / drawSize.x);
 			}
 			else
 			{
-				sizeX = sizeY * (drawSize.x / drawSize.y);
+				width = height * (drawSize.x / drawSize.y);
 			}
-			return new Vector2(sizeX, sizeY);
+			return new Vector2(width, height);
 		}
 
 		/// <summary>

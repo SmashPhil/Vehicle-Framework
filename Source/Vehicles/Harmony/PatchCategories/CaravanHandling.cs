@@ -927,9 +927,9 @@ namespace Vehicles
 
 		public static void IsParentCaravanMember(Pawn pawn, ref bool __result)
 		{
-			if(pawn.ParentHolder is VehicleHandler handler && handler.vehiclePawn != null)
+			if (pawn.ParentHolder is VehicleHandler handler && handler.vehicle != null)
 			{
-				__result = handler.vehiclePawn.IsCaravanMember();
+				__result = handler.vehicle.IsCaravanMember();
 			}
 		}
 

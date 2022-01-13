@@ -44,17 +44,6 @@
 			<Flammability>0</Flammability>
 		</statBases>
 		
-		<drawProperties>
-			<upgradeUICoord>(587,50)</upgradeUICoord>
-			<upgradeUISize>(223, 384)</upgradeUISize>
-			
-			<colorPickerUICoord>(0, 40)</colorPickerUICoord>
-			<colorPickerUISize>(223, 384)</colorPickerUISize>
-			
-			<settingsUICoord>(0, 0)</settingsUICoord>
-			<settingsUISize>(87, 150)</settingsUISize>
-		</drawProperties>
-		
 		<properties>
 			<fishing>true</fishing>
 			<wakeMultiplier>1.5</wakeMultiplier>

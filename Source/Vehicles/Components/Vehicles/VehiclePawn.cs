@@ -16,7 +16,7 @@ using Vehicles.Defs;
 
 namespace Vehicles
 {
-	public class VehiclePawn : Pawn
+	public class VehiclePawn : Pawn, IInspectable
 	{
 		public Vehicle_PathFollower vPather;
 		public Vehicle_DrawTracker vDrawer;
@@ -60,6 +60,8 @@ namespace Vehicles
 		internal VehicleComponent HighlightedComponent { get; set; }
 		public CellRect Hitbox { get; private set; }
 		public float CachedAngle { get; set; }
+
+		private List<VehicleHandler> HandlersWithPawnRenderer { get; set; }
 
 		public bool CanMove => ActualMoveSpeed > 0.1f && SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), "vehicleMovementPermissions", VehicleDef.vehicleMovementPermissions) >= VehiclePermissions.DriverNeeded && movementStatus == VehicleMovementStatus.Online;
 		public bool CanMoveFinal => CanMove && (PawnCountToOperateFullfilled || VehicleMod.settings.debug.debugDraftAnyShip);
@@ -196,15 +198,6 @@ namespace Vehicles
 			{
 				return new Rot8(Rotation, Angle);
 			}
-		}
-
-		public IEnumerable<IntVec3> InhabitedCells(int expandedBy = 0)
-		{
-			if (Angle == 0)
-			{
-				return CellRect.CenteredOn(Position, def.Size.x, def.Size.z).ExpandedBy(expandedBy).Cells;
-			}
-			return CellRect.CenteredOn(Position, def.Size.x, def.Size.z).ExpandedBy(expandedBy).Cells; //REDO FOR DIAGONALS
 		}
 
 		public float Angle
@@ -516,9 +509,25 @@ namespace Vehicles
 			}
 		}
 
+		public IEnumerable<IntVec3> InhabitedCells(int expandedBy = 0)
+		{
+			if (Angle == 0)
+			{
+				return CellRect.CenteredOn(Position, def.Size.x, def.Size.z).ExpandedBy(expandedBy).Cells;
+			}
+			return CellRect.CenteredOn(Position, def.Size.x, def.Size.z).ExpandedBy(expandedBy).Cells; //REDO FOR DIAGONALS
+		}
+
 		public override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
-			var drawVehicle = new Task(() => Drawer.DrawAt(drawLoc));
+			var drawVehicle = new Task( delegate()
+			{
+				Drawer.DrawAt(drawLoc);
+				foreach (VehicleHandler handler in HandlersWithPawnRenderer)
+				{
+					handler.RenderPawns();
+				}
+			});
 			drawVehicle.RunSynchronously();
 			statHandler.DrawHitbox(HighlightedComponent);
 		}
@@ -526,8 +535,20 @@ namespace Vehicles
 		public void DrawAt(Vector3 drawLoc, float angle, bool flip = false)
 		{
 			bool northSouthRotation = VehicleGraphic.EastDiagonalRotated || VehicleGraphic.WestDiagonalRotated;
-			var drawVehicle = new Task(() => Drawer.renderer.RenderPawnAt(drawLoc, angle, northSouthRotation));
+			var drawVehicle = new Task( delegate()
+			{
+				Drawer.renderer.RenderPawnAt(drawLoc, angle, northSouthRotation);
+				foreach (VehicleHandler handler in HandlersWithPawnRenderer)
+				{
+					handler.RenderPawns();
+				}
+			});
 			drawVehicle.RunSynchronously();
+		}
+
+		public void ResetRenderStatus()
+		{
+			HandlersWithPawnRenderer = handlers.Where(h => h.role.pawnRenderer != null).ToList();
 		}
 
 		public override void Notify_ColorChanged()
@@ -1059,6 +1080,36 @@ namespace Vehicles
 				Notify_ColorChanged();
 				CompCannons?.Cannons.ForEach(c => c.ResolveCannonGraphics(patternData, true));
 			});
+		}
+
+		public virtual void DrawInspectDialog(Rect rect)
+		{
+
+		}
+
+		public virtual void DoInspectPaneButtons(float x)
+		{
+			float curX = x;
+			if (StatNameable)
+			{
+				Rect rectRename = new Rect(curX, 0f, Extra.IconBarDim, Extra.IconBarDim);
+				curX -= rectRename.width;
+				TooltipHandler.TipRegion(rectRename, "RenameVehicle".Translate(LabelShort));
+				if (Widgets.ButtonImage(rectRename, VehicleTex.Rename))
+				{
+					Rename();
+				}
+
+			}
+			Rect rectRecolor = new Rect(curX, 0, Extra.IconBarDim, Extra.IconBarDim);
+			if (VehicleGraphic.Shader.SupportsRGBMaskTex())
+			{
+				TooltipHandler.TipRegion(rectRecolor, "RecolorVehicle".Translate(LabelShort));
+				if (Widgets.ButtonImage(rectRecolor, VehicleTex.Recolor))
+				{
+					ChangeColor();
+				}
+			}
 		}
 
 		public void MultiplePawnFloatMenuOptions(List<Pawn> pawns)
@@ -1640,6 +1691,7 @@ namespace Vehicles
 			InitializeHitbox();
 			Map.GetCachedMapComponent<VehiclePositionManager>().ClaimPosition(this);
 			Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleSpawned(this);
+			ResetRenderStatus();
 		}
 
 		public float VehicleMovedPercent()

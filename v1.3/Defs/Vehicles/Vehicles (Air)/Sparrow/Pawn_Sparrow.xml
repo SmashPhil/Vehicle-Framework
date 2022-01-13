@@ -46,15 +46,9 @@
 		</statBases>
 		
 		<drawProperties>
-			<upgradeUICoord>(600, 100)</upgradeUICoord>
-			<upgradeUISize>(230, 230)</upgradeUISize>
-			
-			<colorPickerUICoord>(20, 40)</colorPickerUICoord>
-			<colorPickerUISize>(230, 230)</colorPickerUISize>
-			
-			<settingsUICoord>(0, 25)</settingsUICoord>
-			<settingsUISize>(145, 145)</settingsUISize>
+			<displayOffset>(0, 0.1)</displayOffset>
 		</drawProperties>
+		
 		<properties>
 			<healthLabel_Healthy>Operational</healthLabel_Healthy>
 			<healthLabel_Injured>Needs Repairs</healthLabel_Injured>

@@ -4,5 +4,8 @@
     <exclude>D:\Steam\steamapps\common\RimWorld\Mods\Vehicles\.git</exclude>
     <exclude>D:\Steam\steamapps\common\RimWorld\Mods\Vehicles\.vs</exclude>
     <exclude>D:\Steam\steamapps\common\RimWorld\Mods\Vehicles\Source</exclude>
+    <exclude>D:\Steam\steamapps\common\RimWorld\Mods\Vehicles\Textures\Graphics\Skins\Ignore</exclude>
+    <exclude>D:\Steam\steamapps\common\RimWorld\Mods\Vehicles\Textures\Vehicles\Ignore</exclude>
+    <exclude>D:\Steam\steamapps\common\RimWorld\Mods\Vehicles\v1.3\Defs\Vehicles\Ignore</exclude>
   </Excluded>
 </Configuration>

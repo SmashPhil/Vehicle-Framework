@@ -13,6 +13,7 @@ namespace Vehicles
 		public int slotsToOperate;
 		public List<string> turretIds;
 		public ComponentHitbox hitbox = new ComponentHitbox();
+		public PawnOverlayRenderer pawnRenderer;
 
 		public VehicleRole()
 		{
@@ -36,6 +37,7 @@ namespace Vehicles
 			slotsToOperate = group.role.slotsToOperate;
 			turretIds = new List<string>();
 			turretIds.AddRange(group.role.turretIds);
+			pawnRenderer = group.role.pawnRenderer;
 		}
 
 		public VehicleRole(VehicleRole reference)
@@ -55,6 +57,7 @@ namespace Vehicles
 			slotsToOperate = reference.slotsToOperate;
 			turretIds = reference.turretIds;
 			hitbox = reference.hitbox;
+			pawnRenderer = reference.pawnRenderer;
 		}
 
 		public bool RequiredForCaravan => slotsToOperate > 0 && handlingTypes.NotNullAndAny(h => h == HandlingTypeFlags.Movement);

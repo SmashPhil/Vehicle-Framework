@@ -5,6 +5,7 @@ using System.Reflection;
 using UnityEngine;
 using HarmonyLib;
 using Verse;
+using Verse.Sound;
 using RimWorld;
 using SmashTools;
 
@@ -19,6 +20,9 @@ namespace Vehicles
 		/// <defName, maskName>
 		/// </summary>
 		public Dictionary<string, PatternData> defaultGraphics = new Dictionary<string, PatternData>();
+
+		private Dictionary<VehicleDef, Rot8> directionFacing = new Dictionary<VehicleDef, Rot8>();
+		private Rot8 currentVehicleFacing;
 
 		public override IEnumerable<FloatMenuOption> ResetOptions
 		{
@@ -116,7 +120,7 @@ namespace Vehicles
 					iconRect.width /= 5;
 					iconRect.height = iconRect.width;
 					iconRect.x += menuRect.width / 4;
-					iconRect.y += 30;
+					iconRect.y += 35;
 
 					drawStatusMessage = $"Creating Paintbrush. Pattern={VehicleMod.selectedPatterns.Count}";
 					if (VehicleMod.selectedPatterns.Count > 1)
@@ -136,13 +140,29 @@ namespace Vehicles
 							});
 						}
 					}
+					drawStatusMessage = $"Creating RotationHandle. Pattern={VehicleMod.selectedPatterns.Count}";
+					Rect rotationHandleRect = new Rect(iconRect.x + iconRect.width, iconRect.y + 24, 24, 24);
+					/*
+					Widgets.DrawTextureFitted(rotationHandleRect, VehicleTex.ReverseIcon, 1);
+					if (Mouse.IsOver(rotationHandleRect))
+					{
+						TooltipHandler.TipRegion(rotationHandleRect, directionFacing.TryGetValue(VehicleMod.selectedDef, VehicleMod.selectedDef.drawProperties.displayRotation).ToString());
+						if (Widgets.ButtonInvisible(rotationHandleRect))
+						{
+							SoundDefOf.Click.PlayOneShotOnCamera();
+							directionFacing[VehicleMod.selectedDef] = directionFacing.TryGetValue(VehicleMod.selectedDef, VehicleMod.selectedDef.drawProperties.displayRotation)
+								.Rotated(RotationDirection.Clockwise, VehicleMod.selectedDef.graphicData.Graphic.EastDiagonalRotated && VehicleMod.selectedDef.graphicData.Graphic.WestDiagonalRotated);
+						}
+					}
+					*/
+
 					drawStatusMessage = $"Fetching PatternData from defaultMasks";
 					PatternData patternData = defaultGraphics.TryGetValue(VehicleMod.selectedDef.defName, VehicleMod.selectedDef.graphicData);
 
 					drawStatusMessage = $"Drawing VehicleTex in settings";
 					GUI.BeginGroup(iconRect);
 					Rect vehicleTexRect = new Rect(Vector2.zero, iconRect.size);
-					drawStatusMessage = RenderHelper.DrawVehicleDef(vehicleTexRect, VehicleMod.selectedDef, null, patternData, Rot8.North);
+					drawStatusMessage = RenderHelper.DrawVehicleDef(vehicleTexRect, VehicleMod.selectedDef, null, patternData, directionFacing.TryGetValue(VehicleMod.selectedDef, VehicleMod.selectedDef.drawProperties.displayRotation));
 					if (!drawStatusMessage.NullOrEmpty())
 					{
 						throw new Exception();

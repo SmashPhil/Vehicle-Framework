@@ -10,9 +10,10 @@ using Vehicles.Defs;
 namespace Vehicles
 {
 	[LoadedEarly]
-	public class HarmonyPatches_PreLoad : Mod
+	[StaticConstructorOnModInit]
+	public static class VehicleHarmonyOnMod
 	{
-		public HarmonyPatches_PreLoad(ModContentPack content) : base(content)
+		static VehicleHarmonyOnMod()
 		{
 			ParsingHelper.RegisterParsers();
 			ParsingHelper.RegisterAttributes();
@@ -20,23 +21,23 @@ namespace Vehicles
 			var harmony = new Harmony($"{VehicleHarmony.VehiclesUniqueId}_preload");
 
 			harmony.Patch(original: AccessTools.Property(type: typeof(RaceProperties), name: nameof(RaceProperties.IsFlesh)).GetGetMethod(),
-				prefix: new HarmonyMethod(typeof(HarmonyPatches_PreLoad),
+				prefix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
 				nameof(VehiclesDontHaveFlesh)));
 			harmony.Patch(original: AccessTools.Method(typeof(ThingDef), nameof(ThingDef.ConfigErrors)), prefix: null,
-				postfix: new HarmonyMethod(typeof(HarmonyPatches_PreLoad),
+				postfix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
 				nameof(VehiclesAllowFullFillage)));
 			harmony.Patch(original: AccessTools.PropertyGetter(typeof(ShaderTypeDef), nameof(ShaderTypeDef.Shader)),
-				prefix: new HarmonyMethod(typeof(HarmonyPatches_PreLoad),
+				prefix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
 				nameof(ShaderFromAssetBundle)));
 			harmony.Patch(original: AccessTools.Method(typeof(DefGenerator), nameof(DefGenerator.GenerateImpliedDefs_PreResolve)),
-				postfix: new HarmonyMethod(typeof(HarmonyPatches_PreLoad),
+				postfix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
 				nameof(ImpliedDefGeneratorVehicles)));
 			harmony.Patch(original: AccessTools.Method(typeof(GraphicData), "Init"),
-				prefix: new HarmonyMethod(typeof(HarmonyPatches_PreLoad),
+				prefix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
 				nameof(GraphicPreInit)));
 			/* Debugging Only */
 			//harmony.Patch(original: AccessTools.Method(typeof(), nameof()),
-			//    prefix: new HarmonyMethod(typeof(HarmonyPatches_PreLoad),
+			//    prefix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
 			//    nameof(TestDebug)));
 		}
 
@@ -88,7 +89,11 @@ namespace Vehicles
 		{
 			if (__instance is RGBShaderTypeDef)
 			{
-				___shaderInt = AssetBundleDatabase.LoadAssetBundleShader(__instance.shaderPath);
+				___shaderInt = AssetBundleDatabase.LoadAsset<Shader>(__instance.shaderPath);
+				if (___shaderInt is null)
+				{
+					SmashLog.Error($"Failed to load Shader from path <text>\"{__instance.shaderPath}\"</text>");
+				}
 			}
 		}
 

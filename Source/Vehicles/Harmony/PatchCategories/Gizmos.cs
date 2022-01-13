@@ -223,7 +223,8 @@ namespace Vehicles
 		{
 			if (___entDef is VehicleBuildDef def && def.thingToSpawn.graphicData.Graphic.Shader.SupportsRGBMaskTex())
 			{
-				__result = RenderHelper.GizmoOnGUIWithMaterial(__instance, new Rect(topLeft.x, topLeft.y, __instance.GetWidth(maxWidth), 75f), def);
+				float width = __instance.GetWidth(maxWidth);
+				__result = RenderHelper.GizmoOnGUIWithMaterial(__instance, new Rect(topLeft.x, topLeft.y, width, width), def);
 				if (def.MadeFromStuff)
 				{
 					Designator_Dropdown.DrawExtraOptionsIcon(topLeft, __instance.GetWidth(maxWidth));

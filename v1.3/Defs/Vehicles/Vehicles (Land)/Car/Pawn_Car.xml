@@ -45,18 +45,7 @@
 			<Flammability>0</Flammability>
 		</statBases>
 		
-		<drawProperties>
-			<upgradeUICoord>(587,50)</upgradeUICoord>
-			<upgradeUISize>(256, 384)</upgradeUISize>
-			
-			<colorPickerUICoord>(0, 40)</colorPickerUICoord>
-			<colorPickerUISize>(256, 384)</colorPickerUISize>
-			
-			<settingsUICoord>(0, 0)</settingsUICoord>
-			<settingsUISize>(100, 150)</settingsUISize>
-		</drawProperties>
-		
-		<properties>			
+		<properties>
 			<healthLabel_Healthy>Operational</healthLabel_Healthy>
 			<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
 			<healthLabel_Immobile>Inoperable</healthLabel_Immobile>
