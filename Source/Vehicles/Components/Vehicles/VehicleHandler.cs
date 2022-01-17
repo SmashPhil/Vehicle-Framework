@@ -19,7 +19,7 @@ namespace Vehicles
 		
 		public VehicleHandler()
 		{
-			if(handlers is null)
+			if (handlers is null)
 			{
 				handlers = new ThingOwner<Pawn>(this, false, LookMode.Reference);
 			}
@@ -29,7 +29,7 @@ namespace Vehicles
 		{
 			uniqueID = VehicleIdManager.Instance.GetNextHandlerId();
 			this.vehicle = vehicle;
-			if(handlers is null)
+			if (handlers is null)
 			{
 				handlers = new ThingOwner<Pawn>(this, false, LookMode.Reference);
 			}
@@ -81,7 +81,7 @@ namespace Vehicles
 			}
 		}
 
-		public static bool operator ==(VehicleHandler obj1, VehicleHandler obj2) => obj1.Equals(obj2);
+		public static bool operator ==(VehicleHandler obj1, VehicleHandler obj2) => obj1?.Equals(obj2) ?? (obj1 is null && obj2 is null);
 
 		public static bool operator !=(VehicleHandler obj1, VehicleHandler obj2) => !(obj1 == obj2);
 
@@ -108,7 +108,7 @@ namespace Vehicles
 
 		public override string ToString()
 		{
-			return $"{role.label}: {handlers.Count}/{role.slots}";
+			return role.label;
 		}
 
 		public override int GetHashCode()
