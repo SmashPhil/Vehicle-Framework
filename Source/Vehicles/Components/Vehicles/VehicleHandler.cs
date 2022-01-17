@@ -81,7 +81,7 @@ namespace Vehicles
 			}
 		}
 
-		public static bool operator ==(VehicleHandler obj1, VehicleHandler obj2) => obj1.Equals(obj2);
+		public static bool operator ==(VehicleHandler obj1, VehicleHandler obj2) => !(obj1 is null) && obj1.Equals(obj2);
 
 		public static bool operator !=(VehicleHandler obj1, VehicleHandler obj2) => !(obj1 == obj2);
 
