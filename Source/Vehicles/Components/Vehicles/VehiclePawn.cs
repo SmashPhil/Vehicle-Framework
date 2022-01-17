@@ -1087,29 +1087,30 @@ namespace Vehicles
 
 		}
 
-		public virtual void DoInspectPaneButtons(float x)
+		public virtual float DoInspectPaneButtons(float x)
 		{
-			float curX = x;
+			Rect rect = new Rect(x, 0f, Extra.IconBarDim, Extra.IconBarDim);
+			float usedWidth = 0;
 			if (StatNameable)
 			{
-				Rect rectRename = new Rect(curX, 0f, Extra.IconBarDim, Extra.IconBarDim);
-				curX -= rectRename.width;
-				TooltipHandler.TipRegion(rectRename, "RenameVehicle".Translate(LabelShort));
-				if (Widgets.ButtonImage(rectRename, VehicleTex.Rename))
+				usedWidth += rect.width;
+				TooltipHandler.TipRegion(rect, "RenameVehicle".Translate(LabelShort));
+				if (Widgets.ButtonImage(rect, VehicleTex.Rename))
 				{
 					Rename();
 				}
-
+				rect.x -= rect.width;
 			}
-			Rect rectRecolor = new Rect(curX, 0, Extra.IconBarDim, Extra.IconBarDim);
 			if (VehicleGraphic.Shader.SupportsRGBMaskTex())
 			{
-				TooltipHandler.TipRegion(rectRecolor, "RecolorVehicle".Translate(LabelShort));
-				if (Widgets.ButtonImage(rectRecolor, VehicleTex.Recolor))
+				usedWidth += rect.width;
+				TooltipHandler.TipRegion(rect, "RecolorVehicle".Translate(LabelShort));
+				if (Widgets.ButtonImage(rect, VehicleTex.Recolor))
 				{
 					ChangeColor();
 				}
 			}
+			return usedWidth;
 		}
 
 		public void MultiplePawnFloatMenuOptions(List<Pawn> pawns)
