@@ -240,6 +240,7 @@ namespace Vehicles
 
 		public void QueueTurret(TurretData turretData)
 		{
+			multiFireCannon ??= new List<TurretData>();
 			multiFireCannon.Add(turretData);
 		}
 
@@ -250,7 +251,7 @@ namespace Vehicles
 
 		public bool QueuedToFire(VehicleTurret turret)
 		{
-			return multiFireCannon.Any(mf => mf.turret == turret);
+			return multiFireCannon.NotNullAndAny(mf => mf.turret == turret);
 		}
 
 		private void ResolveCannons()
@@ -332,18 +333,8 @@ namespace Vehicles
 		public override void PostGenerationSetup()
 		{
 			base.PostGenerationSetup();
-			InitializeCannons();
-			CannonSetup();
-		}
-
-		public override void PostSpawnSetup(bool respawningAfterLoad)
-		{
-			base.PostSpawnSetup(respawningAfterLoad);
-
-			if (respawningAfterLoad)
-			{
-				CannonSetup();
-			}
+			InitializeTurrets();
+			TurretSetup();
 		}
 
 		public static VehicleTurret CreateTurret(VehiclePawn vehicle, VehicleTurret reference)
@@ -354,7 +345,7 @@ namespace Vehicles
 			return newTurret;
 		}
 
-		private void InitializeCannons()
+		private void InitializeTurrets()
 		{
 			if (Props.turrets.NotNullAndAny())
 			{
@@ -377,7 +368,7 @@ namespace Vehicles
 			}
 		}
 
-		private void CannonSetup()
+		public void TurretSetup()
 		{
 			foreach (VehicleTurret cannon in Cannons)
 			{
@@ -403,6 +394,10 @@ namespace Vehicles
 			base.PostExposeData();
 			Scribe_Collections.Look(ref cannons, "cannons", LookMode.Deep);
 			Scribe_Collections.Look(ref multiFireCannon, "multiFireCannon", LookMode.Reference);
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				TurretSetup();
+			}
 		}
 
 		public struct TurretData : IExposable

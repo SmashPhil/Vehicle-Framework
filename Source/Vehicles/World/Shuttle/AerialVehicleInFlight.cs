@@ -641,7 +641,7 @@ namespace Vehicles
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_References.Look(ref vehicle, "vehicle");
+			Scribe_References.Look(ref vehicle, "vehicle", true);
 
 			Scribe_Deep.Look(ref flightPath, "flightPath", new object[] { this });
 

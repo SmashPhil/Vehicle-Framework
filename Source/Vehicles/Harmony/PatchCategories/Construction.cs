@@ -64,9 +64,9 @@ namespace Vehicles
 					return true;
 
 				Pawn vehicle;
-				if(building.vehicleReference != null)
+				if(building.vehicle != null)
 				{
-					vehicle = building.vehicleReference;
+					vehicle = building.vehicle;
 					vehicle.health.Reset();
 				}
 				else

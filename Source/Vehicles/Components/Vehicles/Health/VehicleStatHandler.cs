@@ -382,7 +382,7 @@ namespace Vehicles
 
 		public void ExposeData()
 		{
-			Scribe_References.Look(ref vehicle, "vehicle");
+			Scribe_References.Look(ref vehicle, "vehicle", true);
 			Scribe_Collections.Look(ref components, "components", LookMode.Deep);
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{

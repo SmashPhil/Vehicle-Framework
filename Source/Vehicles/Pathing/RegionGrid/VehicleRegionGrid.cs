@@ -2,6 +2,7 @@
 using Verse;
 using SmashTools;
 using Vehicles.AI;
+using System.Threading;
 
 namespace Vehicles
 {
@@ -127,6 +128,11 @@ namespace Vehicles
 			if (map is null)
 			{
 				Log.Error($"Tried to get valid region with null map.");
+				return null;
+			}
+			if (map.info is null)
+			{
+				Log.Error($"Tried to get map info with null info. Map = {map.uniqueID}");
 				return null;
 			}
 			if (regionGrid is null)

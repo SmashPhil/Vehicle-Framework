@@ -155,11 +155,11 @@ namespace Vehicles
 		{
 			var vehicle = obj as VehiclePawn;
 			var building = obj as VehicleBuilding;
-			if (vehicle != null || building?.vehicleReference != null)
+			if (vehicle != null || building?.vehicle != null)
 			{
 				if (vehicle is null)
 				{
-					vehicle = building.vehicleReference;
+					vehicle = building.vehicle;
 				}
 				Vector3[] brackets = new Vector3[4];
 				float angle = vehicle.Angle;

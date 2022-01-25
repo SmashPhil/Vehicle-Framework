@@ -492,7 +492,7 @@ namespace Vehicles
 
 		public virtual void ExposeData()
 		{
-			Scribe_References.Look(ref vehicle, "vehicle");
+			Scribe_References.Look(ref vehicle, "vehicle", true);
 			Scribe_Values.Look(ref drawPos, "drawPos");
 			Scribe_Values.Look(ref ticksPassed, "ticksPassed");
 
@@ -500,6 +500,13 @@ namespace Vehicles
 
 			Scribe_References.Look(ref currentMap, "currentMap");
 			Scribe_References.Look(ref targetMap, "targetMap");
+
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				LaunchProtocol defProtocol = vehicle.GetComp<CompVehicleLauncher>().Props.launchProtocol;
+				launchProperties = defProtocol.launchProperties;
+				landingProperties = defProtocol.landingProperties;
+			}
 		}
 
 		public static bool CanLandInSpecificCell(MapParent mapParent)

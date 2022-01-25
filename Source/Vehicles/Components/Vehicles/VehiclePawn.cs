@@ -18,10 +18,15 @@ namespace Vehicles
 {
 	public class VehiclePawn : Pawn, IInspectable
 	{
+		//Saved components
 		public Vehicle_PathFollower vPather;
-		public Vehicle_DrawTracker vDrawer;
-		public VehicleAI vehicleAI;
 		public VehicleStatHandler statHandler;
+
+		[Unsaved]
+		public Vehicle_DrawTracker vDrawer;
+		[Unsaved]
+		public VehicleAI vehicleAI;
+		[Unsaved]
 		public VehicleGraphicOverlay graphicOverlay;
 
 		public PatternData patternData;
@@ -898,7 +903,7 @@ namespace Vehicles
 				DropAndForbidEverything(false);
 			}
 
-			thing.vehicleReference = this;
+			thing.vehicle = this;
 			thing.HitPoints = thing.MaxHitPoints / 10;
 			meleeVerbs.Notify_PawnKilled();
 			if (flag)
@@ -1598,6 +1603,11 @@ namespace Vehicles
 				}
 			}
 
+			RecacheComponents();
+		}
+
+		protected virtual void RecacheComponents()
+		{
 			cachedComps = new SelfOrderingList<ThingComp>(AllComps);
 			compTickers.Clear();
 			foreach (ThingComp comp in AllComps)
@@ -1607,6 +1617,13 @@ namespace Vehicles
 					compTickers.Add(comp);
 				}
 			}
+		}
+
+		protected virtual void RegenerateUnsavedComponents()
+		{
+			vehicleAI = new VehicleAI(this);
+			vDrawer = new Vehicle_DrawTracker(this);
+			graphicOverlay = new VehicleGraphicOverlay(this);
 		}
 
 		private void InitializeStats()
@@ -1648,6 +1665,20 @@ namespace Vehicles
 			statHandler.InitializeComponents();
 		}
 
+		/// <summary>
+		/// Executes after vehicle has been loaded into the game
+		/// </summary>
+		/// <remarks>Called regardless if vehicle is spawned or unspawned. Responsible for important vars being set that may be called even for unspawned vehicles</remarks>
+		protected virtual void PostLoad()
+		{
+			RegenerateUnsavedComponents();
+			RecacheComponents();
+			foreach (VehicleComp comp in AllComps.Where(t => t is VehicleComp))
+			{
+				comp.PostLoad();
+			}
+		}
+
 		private void InitializeHitbox()
 		{
 			Hitbox = CellRect.CenteredOn(IntVec3.Zero, VehicleDef.Size.x, VehicleDef.Size.z);
@@ -1661,18 +1692,6 @@ namespace Vehicles
 			if (!respawningAfterLoad)
 			{
 				vPather.ResetToCurrentPosition();
-			}
-			else
-			{
-				cachedComps = new SelfOrderingList<ThingComp>(AllComps);
-				compTickers.Clear();
-				foreach (ThingComp comp in AllComps)
-				{
-					if (comp.GetType().GetMethod("CompTick").MethodImplemented())
-					{
-						compTickers.Add(comp);
-					}
-				}
 			}
 			if (Faction != Faction.OfPlayer)
 			{
@@ -1877,6 +1896,11 @@ namespace Vehicles
 
 			Scribe_Collections.Look(ref handlers, "handlers", LookMode.Deep);
 			Scribe_Collections.Look(ref bills, "bills", LookMode.Deep);
+
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				PostLoad();
+			}
 		}
 	}
 }

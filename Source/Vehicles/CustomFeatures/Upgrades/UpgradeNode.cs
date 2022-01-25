@@ -387,7 +387,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref displayLabel, "displayLabel");
 			Scribe_Values.Look(ref informationHighlighted, "informationHighlighted");
 			Scribe_Values.Look(ref disableIfUpgradeNodeEnabled, "disableIfUpgradeNodeEnabled");
-			Scribe_References.Look(ref vehicle, "vehicle");
+			Scribe_References.Look(ref vehicle, "vehicle", true);
 			Scribe_Values.Look(ref work, "work");
 			Scribe_Values.Look(ref cachedStoredCostSatisfied, "cachedStoredCostSatisfied");
 			Scribe_Values.Look(ref drawColorOne, "drawColorOne");
