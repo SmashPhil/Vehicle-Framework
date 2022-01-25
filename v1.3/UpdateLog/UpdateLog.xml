@@ -6,7 +6,12 @@
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>[title]Recent News[/title][font]Small[/font]
+Hey everyone! It's been awhile. Apart from working on my own game with Oskar and Roel, there hasn't been a whole lot going on.  I took a "short" 2 month break due to burn out and then caught Covid over Christmas break. Woo hoo :) 
 
+I'm back working on the mod now and have been making some great progress on getting it relatively functional. Once vehicle caravans work again I'll make it public on the steam workshop and start releasing the rest of the content in chunks. 
+I would rather have a functional mod with the basic mechanics than a huge ass mod that will take another year to finish.  That being said, I have most of those extra features partially completed so those add-ons won't take nearly as long. My biggest fear is bugs.
+
+So, with that being said.. please do report bugs you encounter so that I may fix them.  I also brought on one more person to help out so that should speed things up as well.
 [font]Tiny[/font][title]Bug Fixes[/title]
 Fixed bug where pawns previously assigned seats in dialog for a specific vehicle would also be able to be reassigned for the same caravan in another vehicle.
 
@@ -14,7 +19,21 @@ Fixed bug where vehicle turrets could auto target without turret roles satisfied
 
 Fixed bug where vehicle material would render the North mask but the texture would be the default displayed rotation.
 
-Fixed bug where overlays with non-mask graphics would render semi-transparent
+Fixed bug where overlays with non-mask graphics would render semi-transparent.
+
+Fixed bug where pawns dying inside a vehicle would not spawn any corpse. (Now spawns inside the vehicle's cargo)
+
+Fixed bug where UI set to a scale larger than 1x would cause architect menu gizmos to flip.
+
+Fixed bug where the info card for vehicles would not properly align the rename and recolor icons.
+
+Fixed bug where loading a save file after already having cached components from a previous game would cause maps to not load correctly.
+
+Fixed bug where launch protocols would not properly load the launching and landing properties.
+
+Fixed bug where unspawned vehicles (shuttles in flight, caravans, and wreckage) would not save their references in other classes such as turrets, handlers, etc.
+
+Fixed bug where VehicleTurret ticking on world map after saving and loading would throw exceptions.
 [title]New Additions[/title]
 VehicleDefs can now accept a display rotation in the drawProperties to specify which rotation of the vehicle to show when rendering for certain icons like the build gizmo or in the upgrade tree. The ColorPicker and ModSettings will also now allow you to rotate the vehicle to see how each rotation looks.
 
@@ -33,7 +52,7 @@ Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/is
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>
   <!--Show update log on next startup.-->
-  <update>false</update>
+  <update>true</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
   <testing>true</testing>
   <!--Icon bar shown to the right of the mod's name-->
