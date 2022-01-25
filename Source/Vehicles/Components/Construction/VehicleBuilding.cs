@@ -10,16 +10,16 @@ namespace Vehicles
 {
 	public class VehicleBuilding : Building
 	{
-		public VehiclePawn vehicleReference;
+		public VehiclePawn vehicle;
 
 		public override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
-			if (vehicleReference != null)
+			if (vehicle != null)
 			{
-				vehicleReference.DrawAt(drawLoc, flip);
-				if (vehicleReference.CompCannons != null)
+				vehicle.DrawAt(drawLoc, flip);
+				if (vehicle.CompCannons != null)
 				{
-					vehicleReference.CompCannons.PostDraw();
+					vehicle.CompCannons.PostDraw();
 				}
 			}
 			else
@@ -29,10 +29,19 @@ namespace Vehicles
 			}
 		}
 
+		public override void SpawnSetup(Map map, bool respawningAfterLoad)
+		{
+			base.SpawnSetup(map, respawningAfterLoad);
+			if (vehicle?.CompCannons != null)
+			{
+				vehicle.CompCannons.TurretSetup();
+			}
+		}
+
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_References.Look(ref vehicleReference, "vehicleReference");
+			Scribe_References.Look(ref vehicle, "vehicle", true);
 		}
 	}
 }

@@ -221,13 +221,18 @@ namespace Vehicles
 			return amount * (1f / speedPctPerTick);
 		}
 
-		public virtual void InitializeLaunchProtocols(bool respawningAfterLoad)
+		public virtual void InitializeLaunchProtocols(bool regenerateProtocols)
 		{
-			if (!respawningAfterLoad)
+			if (regenerateProtocols)
 			{
 				launchProtocol = (LaunchProtocol)Activator.CreateInstance(Props.launchProtocol.GetType(), new object[] { Props.launchProtocol, Vehicle });
 			}
 			launchProtocol.ResolveProperties(Props.launchProtocol);
+		}
+
+		public override void PostLoad()
+		{
+			InitializeLaunchProtocols(false);
 		}
 
 		public override void CompTick()
@@ -244,7 +249,7 @@ namespace Vehicles
 			{
 				fuelEfficiencyWorldModifier = 0;
 			}
-			InitializeLaunchProtocols(respawningAfterLoad);
+			InitializeLaunchProtocols(!respawningAfterLoad);
 		}
 
 		public override void PostExposeData()

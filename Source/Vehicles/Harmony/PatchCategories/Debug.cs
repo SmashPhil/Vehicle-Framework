@@ -46,26 +46,19 @@ namespace Vehicles
 					nameof(DebugWorldObjects)));
 			}
 
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn), "Kill"),
-				prefix: new HarmonyMethod(typeof(Debug),
-				nameof(TestMethod)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Map), nameof(Map.ExposeData)),
+			//	postfix: new HarmonyMethod(typeof(Debug),
+			//	nameof(TestMethod)));
 			//VehicleHarmony.Patch(original: AccessTools.PropertySetter(typeof(Thing), nameof(Thing.StyleDef)),
 			//	finalizer: new HarmonyMethod(typeof(Debug),
 			//	nameof(ExceptionCatcher)));
 		}
 
-		public static void TestMethod(DamageInfo? dinfo, Pawn __instance, Hediff exactCulprit = null)
+		public static void TestMethod(Map __instance)
 		{
 			try
 			{
-				VehiclePawn vehicle = (__instance.ParentHolder as VehicleHandler)?.vehicle;
-				if (vehicle != null)
-				{
-					Log.Message($"Container: {__instance.InContainerEnclosed}");
-					Log.Message($"Generating: {PawnGenerator.IsBeingGenerated(__instance)}");
-					Log.Message($"Owner: {__instance.holdingOwner}");
-					__instance.holdingOwner = vehicle.inventory.innerContainer;
-				}
+				Log.Message($"Finished loading Map data for {__instance.uniqueID} Mapinfo: {__instance.info is null}");
 			}
 			catch (Exception ex)
 			{

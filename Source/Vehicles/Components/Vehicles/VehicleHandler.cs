@@ -134,7 +134,7 @@ namespace Vehicles
 		public void ExposeData()
 		{
 			Scribe_Values.Look(ref uniqueID, "uniqueID", -1);
-			Scribe_References.Look(ref vehicle, "vehicle");
+			Scribe_References.Look(ref vehicle, "vehicle", true);
 			Scribe_Deep.Look(ref role, "role");
 
 			if (Scribe.mode == LoadSaveMode.Saving)

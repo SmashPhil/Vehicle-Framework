@@ -37,7 +37,7 @@ namespace Vehicles
 
 		public virtual void ExposeData()
 		{
-			Scribe_References.Look(ref vehicle, "vehicle");
+			Scribe_References.Look(ref vehicle, "vehicle", true);
 		}
 	}
 }
