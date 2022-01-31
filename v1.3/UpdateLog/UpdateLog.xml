@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.3.7928</currentVersion>
+  <currentVersion>1.3.8066</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
@@ -67,9 +67,9 @@ Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/is
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>
   <!--Show update log on next startup.-->
-  <update>false</update>
+  <update>true</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
-  <testing>true</testing>
+  <testing>false</testing>
   <!--Icon bar shown to the right of the mod's name-->
   <rightIconBar>
     <li>
