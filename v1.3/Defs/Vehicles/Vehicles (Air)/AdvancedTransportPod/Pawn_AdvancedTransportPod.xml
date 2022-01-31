@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <Defs>
-	<Vehicles.VehicleDef ParentName="BaseVehiclePawnUpgradeable">
+	<Vehicles.VehicleDef ParentName="BaseVehiclePawn">
 		<defName>AdvancedTransportPod</defName>
 		<label>Advanced Transport Pod</label>
 		<description>An upgraded transport pod capable of carrying multiple pawns with enough cargo space for trading. Once it takes off there is no changing course.</description>

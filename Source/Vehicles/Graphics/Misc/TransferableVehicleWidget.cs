@@ -147,7 +147,7 @@ namespace Vehicles
 			{
 				List<TransferableOneWay> cachedTransferables = sections[i].cachedTransferables;
 				cachedTransferables.Clear();
-				cachedTransferables.AddRange(sections[i].transferables.OrderBy((TransferableOneWay tr) => tr, sorter1.Comparer).ThenBy((TransferableOneWay tr) => tr, sorter2.Comparer).ThenBy((TransferableOneWay tr) => TransferableUIUtility.DefaultListOrderPriority(tr)).ToList<TransferableOneWay>());
+				cachedTransferables.AddRange(sections[i].transferables.OrderBy((TransferableOneWay tr) => tr, sorter1.Comparer).ThenBy((TransferableOneWay tr) => tr, sorter2.Comparer).ThenBy((TransferableOneWay tr) => TransferableUIUtility.DefaultListOrderPriority(tr)).ToList());
 			}
 		}
 

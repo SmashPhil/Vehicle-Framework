@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <Defs>	
-	<Vehicles.VehicleDef ParentName="BaseVehiclePawnUpgradeable">
+	<Vehicles.VehicleDef ParentName="BaseVehiclePawn">
 		<defName>Tank</defName>
 		<label>Tank</label>
 		<description>Armored fighting vehicle designed for front-line combat. Provides support and cover to nearby combatants.</description>

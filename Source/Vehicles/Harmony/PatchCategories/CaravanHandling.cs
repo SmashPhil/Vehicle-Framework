@@ -36,9 +36,13 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(ITab_Pawn_FormingCaravan), "DoPeopleAndAnimals"), 
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(DoPeopleAnimalsAndVehicle)));
+			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(Alert_CaravanIdle), "IdleCaravans"),
+				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(IdleVehicleCaravans)));
+
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_Enter), nameof(CaravanArrivalAction_Enter.Arrived)), prefix: null, postfix: null,
-			//    transpiler: new HarmonyMethod(typeof(CaravanHandling),
-			//    nameof(VehiclesArrivedTranspiler)));
+			//	transpiler: new HarmonyMethod(typeof(CaravanHandling),
+			//	nameof(VehiclesArrivedTranspiler)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_VisitEscapeShip), "DoArrivalAction"), prefix: null, postfix: null,
 				transpiler: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(ShipsVisitEscapeShipTranspiler)));
@@ -54,6 +58,7 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanEnterMapUtility), nameof(CaravanEnterMapUtility.Enter), new Type[] { typeof(Caravan), typeof(Map), typeof(Func<Pawn, IntVec3>), typeof(CaravanDropInventoryMode), typeof(bool) }),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(EnterMapVehiclesCatchAll2)));
+
 			VehicleHarmony.Patch(original: AccessTools.Property(typeof(Caravan), nameof(Caravan.AllOwnersDowned)).GetGetMethod(),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(AllOwnersDownedVehicle)));
@@ -72,6 +77,7 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(SettlementDefeatUtility), nameof(SettlementDefeatUtility.CheckDefeated)), prefix: null, postfix: null,
 				transpiler: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(CheckDefeatedWithVehiclesTranspiler)));
+
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Tale_DoublePawn), nameof(Tale_DoublePawn.Concerns)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(ConcernNullThing)));
@@ -110,6 +116,7 @@ namespace Vehicles
 				nameof(GiveSoldThingToAerialVehicle)),
 				transpiler: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(GiveSoldThingToVehicleTranspiler)));
+
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan_NeedsTracker), "TrySatisfyPawnNeeds"),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(TrySatisfyVehiclePawnsNeeds)));
@@ -410,6 +417,14 @@ namespace Vehicles
 			return true;
 		}
 
+		public static void IdleVehicleCaravans(ref List<Caravan> __result)
+		{
+			if (!__result.NullOrEmpty())
+			{
+				__result.RemoveAll(c => c is VehicleCaravan vehicleCaravan && vehicleCaravan.vPather.MovingNow);
+			}
+		}
+
 		public static IEnumerable<CodeInstruction> VehiclesArrivedTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
 		{
 			List<CodeInstruction> instructionList = instructions.ToList();
@@ -537,9 +552,9 @@ namespace Vehicles
 		public static bool EnterMapVehiclesCatchAll1(Caravan caravan, Map map, CaravanEnterMode enterMode, CaravanDropInventoryMode dropInventoryMode = CaravanDropInventoryMode.DoNotDrop, 
 			bool draftColonists = false, Predicate<IntVec3> extraCellValidator = null)
 		{
-			if(caravan.HasVehicle())
+			if (caravan is VehicleCaravan vehicleCaravan)
 			{
-				EnterMapUtilityVehicles.EnterAndSpawn(caravan, map, enterMode, dropInventoryMode, draftColonists, extraCellValidator);
+				EnterMapUtilityVehicles.EnterAndSpawn(vehicleCaravan, map, enterMode, dropInventoryMode, draftColonists, extraCellValidator);
 				return false;
 			}
 			return true;
@@ -547,9 +562,9 @@ namespace Vehicles
 
 		public static bool EnterMapVehiclesCatchAll2(Caravan caravan, Map map, Func<Pawn, IntVec3> spawnCellGetter, CaravanDropInventoryMode dropInventoryMode = CaravanDropInventoryMode.DoNotDrop, bool draftColonists = false)
 		{
-			if(caravan.HasVehicle())
+			if (caravan is VehicleCaravan vehicleCaravan)
 			{
-				EnterMapUtilityVehicles.EnterAndSpawn(caravan, map, CaravanEnterMode.Edge, dropInventoryMode, draftColonists, null);
+				EnterMapUtilityVehicles.EnterAndSpawn(vehicleCaravan, map, CaravanEnterMode.Edge, dropInventoryMode, draftColonists, null);
 				return false;
 			}
 			return true;

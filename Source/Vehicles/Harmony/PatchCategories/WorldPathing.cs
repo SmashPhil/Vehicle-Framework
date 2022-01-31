@@ -41,7 +41,7 @@ namespace Vehicles
 		/// <param name="tile"></param>
 		public static bool AutoOrderVehicleCaravanPathing(Caravan c, int tile)
 		{
-			if (c is VehicleCaravan vehicleCaravan && vehicleCaravan.HasVehicle())
+			if (c is VehicleCaravan vehicleCaravan)
 			{
 				if (tile < 0 || (tile == vehicleCaravan.Tile && !vehicleCaravan.vPather.Moving))
 				{
@@ -67,12 +67,12 @@ namespace Vehicles
 		/// <param name="___caravan"></param>
 		/// <param name="repathImmediately"></param>
 		/// <param name="resetPauseStatus"></param>
-		/// <returns></returns>
 		public static bool StartVehicleCaravanPath(int destTile, CaravanArrivalAction arrivalAction, Caravan ___caravan, bool repathImmediately = false, bool resetPauseStatus = true)
 		{
-			if(___caravan is VehicleCaravan vehicleCaravan && vehicleCaravan.HasVehicle())
+			if(___caravan is VehicleCaravan vehicleCaravan)
 			{
 				vehicleCaravan.vPather.StartPath(destTile, arrivalAction, repathImmediately, resetPauseStatus);
+				return false;
 			}
 			return true;
 		}

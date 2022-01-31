@@ -419,7 +419,7 @@ namespace Vehicles
 			if(!reform && startingTile < 0)
 			{
 				List<Pawn> pawns = TransferableUtility.GetPawnsFromTransferables(transferables);
-				if(pawns.HasBoat())
+				if (pawns.HasBoat())
 				{
 					List<int> neighboringCells = new List<int>();
 					Find.WorldGrid.GetTileNeighbors(map.Tile, neighboringCells);
@@ -497,14 +497,14 @@ namespace Vehicles
 							select str + "\n\n").ToArray()) + "CaravanAreYouSure".Translate();
 							Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(str2, delegate
 							{
-								if (TryFormAndSendCaravan())
+								if (DebugTryFormCaravanInstantly()/*TryFormAndSendCaravan()*/)
 								{
 									Close(false);
 								}
 							}, false, null));
 						}
 					}
-					else if (TryFormAndSendCaravan())
+					else if (DebugTryFormCaravanInstantly()/*TryFormAndSendCaravan()*/)
 					{
 						SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
 						Close(false);

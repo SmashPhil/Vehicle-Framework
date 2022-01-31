@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <Defs>
-	<Vehicles.VehicleDef ParentName="BaseVehiclePawnUpgradeable">
+	<Vehicles.VehicleDef ParentName="BaseVehiclePawn">
 		<defName>Car</defName>
 		<label>Car</label>
 		<description>A heavy warship to rule the seas.</description>

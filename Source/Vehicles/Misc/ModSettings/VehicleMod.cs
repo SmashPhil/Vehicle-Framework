@@ -216,10 +216,12 @@ namespace Vehicles
 				{
 					CurrentSection = settings.vehicles;
 				}, () => CurrentSection == settings.vehicles));
+				/*
 				tabs.Add(new TabRecord("VehicleUpgrades".Translate(), delegate()
 				{
 					CurrentSection = settings.upgrades;
 				}, () => CurrentSection == settings.upgrades));
+				*/
 			}
 			tabs.Add(new TabRecord("DevModeVehicles".Translate(), delegate()
 			{

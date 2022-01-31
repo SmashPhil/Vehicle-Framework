@@ -621,6 +621,7 @@
     <Compile Include="World\Defs\IncidentCrashedSiteDef.cs" />
     <Compile Include="World\Mechanics\AirDefensePositionTracker.cs" />
     <Compile Include="World\Mechanics\SettlementVehicleUtility.cs" />
+    <Compile Include="World\Mechanics\WorldComponentTemp.cs" />
     <Compile Include="World\Shuttle\AerialVehicleUtility.cs" />
     <Compile Include="World\Caravan\VehicleCaravan.cs" />
     <Compile Include="Components\Vehicles\VehicleHandler.cs" />

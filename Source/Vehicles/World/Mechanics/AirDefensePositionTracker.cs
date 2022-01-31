@@ -8,7 +8,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class AirDefensePositionTracker : WorldComponent 
+	public class AirDefensePositionTracker : WorldComponentTemp //Reimplement as world comp
 	{
 		public const float RotationRate = 0.35f;
 
@@ -23,8 +23,6 @@ namespace Vehicles
 		public AirDefensePositionTracker(World world) : base(world)
 		{
 		}
-
-		public static AirDefensePositionTracker Instance { get; private set; }
 
 		public override void WorldComponentUpdate()
 		{

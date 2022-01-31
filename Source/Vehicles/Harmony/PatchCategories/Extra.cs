@@ -166,6 +166,7 @@ namespace Vehicles
 					yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
 					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(Extra), nameof(ChangeAreaColor)));
 				}
+				/*
 				if (instruction.opcode == OpCodes.Stloc_1)
 				{
 					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.PropertyGetter(typeof(Extra), nameof(VehiclesButtonWidth)));
@@ -182,6 +183,7 @@ namespace Vehicles
 					yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
 					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(Extra), nameof(ConfigureVehicleArea)));
 				}
+				*/
 				yield return instruction;
 			}
 		}

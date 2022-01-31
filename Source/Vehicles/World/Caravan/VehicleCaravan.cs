@@ -12,17 +12,49 @@ namespace Vehicles
 	[StaticConstructorOnStartup]
 	public class VehicleCaravan : Caravan
 	{
-		public VehicleCaravan_PathFollower vPather;
-		public VehicleCaravan_Tweener vTweener;
-
 		private static MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock();
 		private static readonly Texture2D SplitCommand = ContentFinder<Texture2D>.Get("UI/Commands/SplitCaravan", true);
 		private static Dictionary<ThingDef, Material> materials = new Dictionary<ThingDef, Material>();
+
+		public VehicleCaravan_PathFollower vPather;
+		public VehicleCaravan_Tweener vTweener;
+
+		private VehiclePawn leadVehicle;
 
 		public VehicleCaravan() : base()
 		{
 			vPather = new VehicleCaravan_PathFollower(this);
 			vTweener = new VehicleCaravan_Tweener(this);
+		}
+
+		public override Vector3 DrawPos => vTweener.TweenedPos;
+
+		public VehiclePawn LeadVehicle
+		{
+			get
+			{
+				if (leadVehicle is null)
+				{
+					leadVehicle = PawnsListForReading.First(v => v is VehiclePawn) as VehiclePawn;
+				}
+				return leadVehicle;
+			}
+		}
+
+		public override Material Material
+		{
+			get
+			{
+				VehicleDef leadVehicleDef = (PawnsListForReading.First(v => v is VehiclePawn) as VehiclePawn).VehicleDef;
+				
+				if(!materials.ContainsKey(leadVehicleDef))
+				{
+					var texture = VehicleTex.CachedTextureIcons[leadVehicleDef];
+					var material = MaterialPool.MatFrom(texture, ShaderDatabase.WorldOverlayTransparentLit, Color.white, WorldMaterials.WorldObjectRenderQueue);
+					materials.Add(leadVehicleDef, material);
+				}
+				return materials[leadVehicleDef];
+			}
 		}
 
 		//REDO : Implement custom caravan icons
@@ -85,7 +117,7 @@ namespace Vehicles
 			Quaternion q = Quaternion.LookRotation(Vector3.Cross(vector, Vector3.up), vector) * Quaternion.Euler(0, -90f, 0);
 			//Swapped X and Y due to using Rot4.West
 			//Vector3 s = new Vector3(vehicleSizeY, 1f, vehicleSizeX); 
-			Vector3 s = new Vector3(size, 1f, size); 
+			Vector3 s = new Vector3(size, 1f, size);
 			Matrix4x4 matrix = default;
 			matrix.SetTRS(pos + normalized * altOffset, q, s);
 			int layer = useSkyboxLayer ? WorldCameraManager.WorldSkyboxLayer : WorldCameraManager.WorldLayer;
@@ -100,7 +132,7 @@ namespace Vehicles
 			//if (LeadVehicle.CompCannons != null)
 			//{
 			//    Vector3 cPos = pos;
-				
+
 			//    foreach (VehicleTurret cannon in LeadVehicle.CompCannons.Cannons)
 			//    {
 			//        cPos.y += 0.1f;
@@ -111,35 +143,6 @@ namespace Vehicles
 			//    }
 			//}
 		}
-
-		private VehiclePawn leadVehicle;
-		public VehiclePawn LeadVehicle
-		{
-			get
-			{
-				if (leadVehicle is null)
-					leadVehicle = PawnsListForReading.First(v => v is VehiclePawn) as VehiclePawn;
-				return leadVehicle;
-			}
-		}
-
-		public override Material Material
-		{
-			get
-			{
-				VehicleDef leadVehicleDef = (PawnsListForReading.First(v => v is VehiclePawn) as VehiclePawn).VehicleDef;
-				
-				if(!materials.ContainsKey(leadVehicleDef))
-				{
-					var texture = VehicleTex.CachedTextureIcons[leadVehicleDef];
-					var material = MaterialPool.MatFrom(texture, ShaderDatabase.WorldOverlayTransparentLit, Color.white, WorldMaterials.WorldObjectRenderQueue);
-					materials.Add(leadVehicleDef, material);
-				}
-				return materials[leadVehicleDef];
-			}
-		}
-
-		public override Vector3 DrawPos => vTweener.TweenedPos;
 
 		public override IEnumerable<Gizmo> GetGizmos()
 		{
@@ -205,7 +208,7 @@ namespace Vehicles
 					}
 				};
 			}
-			if(this.HasBoat() && (Find.World.CoastDirectionAt(Tile).IsValid || WorldHelper.RiverIsValid(Tile, PawnsListForReading.Where(p => p.IsBoat()).ToList())))
+			if (this.HasBoat() && (Find.World.CoastDirectionAt(Tile).IsValid || WorldHelper.RiverIsValid(Tile, PawnsListForReading.Where(p => p.IsBoat()).ToList())))
 			{
 				if(!vPather.Moving && !PawnsListForReading.NotNullAndAny(p => !p.IsBoat()))
 				{
@@ -279,51 +282,39 @@ namespace Vehicles
 		{
 			StringBuilder stringBuilder = new StringBuilder();
 
-			if (stringBuilder.Length != 0)
-				stringBuilder.AppendLine();
-			int num = 0;
-			int num2 = 0;
-			int num3 = 0;
-			int num4 = 0;
-			int num5 = 0;
-			int numS = 0;
+			int colonists = 0;
+			int animals = 0;
+			int prisoners = 0;
+			int downed = 0;
+			int mentalState = 0;
+			int vehicles = 0;
 			foreach(VehiclePawn vehicle in PawnsListForReading.Where(x => x is VehiclePawn).Cast<VehiclePawn>())
 			{
-				numS++;
+				vehicles++;
 				foreach(Pawn p in vehicle.AllPawnsAboard)
 				{
-					if(p.IsColonist)
-						num++;
-					if(p.RaceProps.Animal)
-						num2++;
-					if(p.IsPrisoner)
-						num3++;
-					if(p.Downed)
-						num4++;
-					if(p.InMentalState)
-						num5++;
+					if (p.IsColonist) colonists++;
+					if (p.RaceProps.Animal) animals++;
+					if (p.IsPrisoner) prisoners++;
+					if (p.Downed) downed++;
+					if (p.InMentalState) mentalState++;
 				}
 			}
 			foreach(Pawn p in PawnsListForReading.Where(x => !(x is VehiclePawn)))
 			{
-				if (p.IsColonist)
-					num++;
-				if (p.RaceProps.Animal)
-					num2++;
-				if (p.IsPrisoner)
-					num3++;
-				if (p.Downed)
-					num4++;
-				if (p.InMentalState)
-					num5++;
+				if (p.IsColonist) colonists++;
+				if (p.RaceProps.Animal) animals++;
+				if (p.IsPrisoner) prisoners++;
+				if (p.Downed) downed++;
+				if (p.InMentalState) mentalState++;
 			}
 
-			if (numS > 1)
+			if (vehicles >= 1)
 			{
 				Dictionary<Thing, int> vehicleCounts = new Dictionary<Thing, int>();
-				foreach(Pawn p in PawnsListForReading.Where(x => x is VehiclePawn))
+				foreach (Pawn p in PawnsListForReading.Where(x => x is VehiclePawn))
 				{
-					if(vehicleCounts.ContainsKey(p))
+					if (vehicleCounts.ContainsKey(p))
 					{
 						vehicleCounts[p]++;
 					}
@@ -333,32 +324,42 @@ namespace Vehicles
 					}
 				}
 
-				foreach(KeyValuePair<Thing, int> vehicles in vehicleCounts)
+				foreach (KeyValuePair<Thing, int> vehiclePair in vehicleCounts)
 				{
-					stringBuilder.Append($"{vehicles.Value} {vehicles.Key.LabelCap}");
+					stringBuilder.Append($"{vehiclePair.Value} {vehiclePair.Key.LabelCap}");
 				}
 			}
-			stringBuilder.Append(", " + "CaravanColonistsCount".Translate(num, (num != 1) ? Faction.OfPlayer.def.pawnsPlural : Faction.OfPlayer.def.pawnSingular));
-			if (num2 == 1)
-				stringBuilder.Append(", " + "CaravanAnimal".Translate());
-			else if (num2 > 1)
-				stringBuilder.Append(", " + "CaravanAnimalsCount".Translate(num2));
-			if (num3 == 1)
-				stringBuilder.Append(", " + "CaravanPrisoner".Translate());
-			else if (num3 > 1)
-				stringBuilder.Append(", " + "CaravanPrisonersCount".Translate(num3));
-			stringBuilder.AppendLine();
-			if (num5 > 0)
-				stringBuilder.Append("CaravanPawnsInMentalState".Translate(num5));
-			if (num4 > 0)
+			stringBuilder.Append(", " + "CaravanColonistsCount".Translate(colonists, (colonists != 1) ? Faction.OfPlayer.def.pawnsPlural : Faction.OfPlayer.def.pawnSingular));
+			if (animals == 1)
 			{
-				if (num5 > 0)
+				stringBuilder.Append(", " + "CaravanAnimal".Translate());
+			}
+			else if (animals > 1)
+			{
+				stringBuilder.Append(", " + "CaravanAnimalsCount".Translate(animals));
+			}
+			if (prisoners == 1)
+			{
+				stringBuilder.Append(", " + "CaravanPrisoner".Translate());
+			}
+			else if (prisoners > 1)
+			{
+				stringBuilder.Append(", " + "CaravanPrisonersCount".Translate(prisoners));
+			}
+			stringBuilder.AppendLine();
+			if (mentalState > 0)
+			{
+				stringBuilder.Append("CaravanPawnsInMentalState".Translate(mentalState));
+			}
+			if (downed > 0)
+			{
+				if (mentalState > 0)
 				{
 					stringBuilder.Append(", ");
 				}
-				stringBuilder.Append("CaravanPawnsDowned".Translate(num4));
+				stringBuilder.Append("CaravanPawnsDowned".Translate(downed));
 			}
-			if (num5 > 0 || num4 > 0)
+			if (mentalState > 0 || downed > 0)
 			{
 				stringBuilder.AppendLine();
 			}
@@ -366,19 +367,29 @@ namespace Vehicles
 			if(vPather.Moving)
 			{
 				if (vPather.ArrivalAction != null)
+				{
 					stringBuilder.Append(vPather.ArrivalAction.ReportString);
+				}
 				else if (this.HasBoat())
+				{
 					stringBuilder.Append("CaravanSailing".Translate());
+				}
 				else
+				{
 					stringBuilder.Append("CaravanTraveling".Translate());
+				}
 			}
 			else
 			{
 				Settlement settlementBase = CaravanVisitUtility.SettlementVisitedNow(this);
 				if (!(settlementBase is null))
+				{
 					stringBuilder.Append("CaravanVisiting".Translate(settlementBase.Label));
+				}
 				else
+				{
 					stringBuilder.Append("CaravanWaiting".Translate());
+				}
 			}
 			if (vPather.Moving)
 			{
@@ -462,6 +473,12 @@ namespace Vehicles
 			base.Tick();
 			vPather.PatherTick();
 			vTweener.TweenerTick();
+		}
+
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Deep.Look(ref vPather, "vehiclePather", new object[] { this });
 		}
 	}
 }

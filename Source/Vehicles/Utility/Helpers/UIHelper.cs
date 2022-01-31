@@ -122,10 +122,10 @@ namespace Vehicles
 			bool flag4 = flag3;
 
 			Rect buttonRect = new Rect(rect2.x, rect2.y, 120f, rect.height);
-			if(Widgets.ButtonText(buttonRect, "AssignSeats".Translate()))
-			{
-				Find.WindowStack.Add(new Dialog_AssignSeats(pawns, transferableOneWay));
-			}
+			//if (Widgets.ButtonText(buttonRect, "AssignSeats".Translate()))
+			//{
+			//	Find.WindowStack.Add(new Dialog_AssignSeats(pawns, transferableOneWay));
+			//}
 			Rect checkboxRect = new Rect(buttonRect.x + buttonRect.width + 5f, buttonRect.y, 24f, 24f);
 			if (Widgets.ButtonImage(checkboxRect, flag4 ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex))
 			{
@@ -135,7 +135,7 @@ namespace Vehicles
 				}
 				else
 				{
-					foreach(Pawn pawn in (trad.AnyThing as VehiclePawn).AllPawnsAboard)
+					foreach (Pawn pawn in (trad.AnyThing as VehiclePawn).AllPawnsAboard)
 					{
 						if (CaravanHelper.assignedSeats.ContainsKey(pawn))
 						{

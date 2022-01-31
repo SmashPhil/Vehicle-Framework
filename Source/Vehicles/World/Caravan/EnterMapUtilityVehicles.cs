@@ -11,8 +11,7 @@ namespace Vehicles
 {
 	public static class EnterMapUtilityVehicles
 	{
-		//REDO - NEEDS SPAWN IMPLEMENTATION
-		public static void EnterAndSpawn(Caravan caravan, Map map, CaravanEnterMode enterMode, CaravanDropInventoryMode dropInventoryMode = CaravanDropInventoryMode.DoNotDrop,
+		public static void EnterAndSpawn(VehicleCaravan caravan, Map map, CaravanEnterMode enterMode, CaravanDropInventoryMode dropInventoryMode = CaravanDropInventoryMode.DoNotDrop,
 			bool draftColonists = false, Predicate<IntVec3> extraValidator = null)
 		{
 			bool coastalSpawn = caravan.HasBoat();
@@ -28,12 +27,12 @@ namespace Vehicles
 
 			IntVec3 enterCell = GetEnterCellVehicle(caravan, map, enterMode, extraValidator);
 			Rot4 edge = enterMode == CaravanEnterMode.Edge ? CellRect.WholeMap(map).GetClosestEdge(enterCell) : Rot4.North;
-			//SpawnVehicles(caravan, pawns, map, (VehiclePawn vehicle) => CellFinderExtended.RandomSpawnCellForPawnNear(enterCell, map, p, (IntVec3 c) => GenGridVehicles.Standable(c, map, p)), edge, draftColonists);
+			SpawnVehicles(caravan, pawns, map, (Pawn pawn) => CellFinderExtended.RandomSpawnCellForPawnNear(enterCell, map, pawn, (IntVec3 c) => GenGridVehicles.StandableUnknown(c, pawn, map), coastalSpawn), edge, draftColonists);
 		}
 
 		private static void SpawnVehicles(Caravan caravan, List<Pawn> pawns, Map map, Func<Pawn, IntVec3> spawnCellGetter, Rot4 edge, bool draftColonists)
 		{
-			for(int i = 0; i < pawns.Count; i++)
+			for (int i = 0; i < pawns.Count; i++)
 			{
 				IntVec3 loc = pawns[i].ClampToMap(spawnCellGetter(pawns[i]), map, 2);
 				
@@ -45,7 +44,7 @@ namespace Vehicles
 				}
 			}
 			caravan.RemoveAllPawns();
-			if(caravan.Spawned)
+			if (caravan.Spawned)
 			{
 				Find.WorldObjects.Remove(caravan);
 			}

@@ -23,6 +23,22 @@ namespace Vehicles.AI
 		}
 
 		/// <summary>
+		/// Check if <paramref name="cell"/> is standable on <paramref name="map"/> for <paramref name="pawn"/> unknown to be a <see cref="VehiclePawn"/> or not
+		/// </summary>
+		/// <param name="cell"></param>
+		/// <param name="pawn"></param>
+		/// <param name="map"></param>
+		/// <returns></returns>
+		public static bool StandableUnknown(this IntVec3 cell, Pawn pawn, Map map)
+		{
+			if (pawn is VehiclePawn vehicle)
+			{
+				return Standable(cell, vehicle.VehicleDef, map);
+			}
+			return GenGrid.Standable(cell, map);
+		}
+
+		/// <summary>
 		/// <paramref name="cell"/> is able to be stood on for <paramref name="vehicleDef"/>
 		/// </summary>
 		/// <param name="cell"></param>
