@@ -200,7 +200,7 @@ namespace Vehicles.Lords
 		public bool AssignSeats(VehiclePawn vehicle)
 		{
 			int iterations = 0;
-			while(vehicleAssigned.Where(k => k.Value.First == vehicle).Select(p => p.Key).Count() < vehicle.PawnCountToOperateLeft)
+			while (vehicleAssigned.Where(k => k.Value.First == vehicle).Select(p => p.Key).Count() < vehicle.PawnCountToOperateLeft)
 			{
 				if (iterations > 200)
 				{
@@ -208,7 +208,7 @@ namespace Vehicles.Lords
 				}
 
 				Pawn nextToAssign = pawns.FirstOrDefault(x => !vehicleAssigned.ContainsKey(x));
-				if(nextToAssign is null)
+				if (nextToAssign is null)
 				{
 					//Cannot finalize caravan
 					return false;
@@ -223,11 +223,11 @@ namespace Vehicles.Lords
 
 		public void ResolveSeatingAssignments()
 		{
-			foreach(VehiclePawn vehicle in vehicles)
+			foreach (VehiclePawn vehicle in vehicles)
 			{
-				if(vehicleAssigned.Where(k => k.Value.First == vehicle).Select(p => p.Key).Count() < vehicle.PawnCountToOperateLeft)
+				if (vehicleAssigned.Where(k => k.Value.First == vehicle).Select(p => p.Key).Count() < vehicle.PawnCountToOperateLeft)
 				{
-					if(!AssignSeats(vehicle))
+					if (!AssignSeats(vehicle))
 					{
 						Messages.Message("VehicleCaravanCanceled".Translate(), MessageTypeDefOf.NeutralEvent);
 						CaravanFormingUtility.StopFormingCaravan(lord);

@@ -326,10 +326,10 @@ namespace Vehicles
 
 				foreach (KeyValuePair<Thing, int> vehiclePair in vehicleCounts)
 				{
-					stringBuilder.Append($"{vehiclePair.Value} {vehiclePair.Key.LabelCap}");
+					stringBuilder.Append($"{vehiclePair.Value} {vehiclePair.Key.LabelCap}, ");
 				}
 			}
-			stringBuilder.Append(", " + "CaravanColonistsCount".Translate(colonists, (colonists != 1) ? Faction.OfPlayer.def.pawnsPlural : Faction.OfPlayer.def.pawnSingular));
+			stringBuilder.Append("CaravanColonistsCount".Translate(colonists, (colonists != 1) ? Faction.OfPlayer.def.pawnsPlural : Faction.OfPlayer.def.pawnSingular));
 			if (animals == 1)
 			{
 				stringBuilder.Append(", " + "CaravanAnimal".Translate());

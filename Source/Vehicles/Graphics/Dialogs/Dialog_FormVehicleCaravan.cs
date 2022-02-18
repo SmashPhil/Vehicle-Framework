@@ -497,14 +497,14 @@ namespace Vehicles
 							select str + "\n\n").ToArray()) + "CaravanAreYouSure".Translate();
 							Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(str2, delegate
 							{
-								if (DebugTryFormCaravanInstantly()/*TryFormAndSendCaravan()*/)
+								if (TryFormAndSendCaravan())
 								{
 									Close(false);
 								}
 							}, false, null));
 						}
 					}
-					else if (DebugTryFormCaravanInstantly()/*TryFormAndSendCaravan()*/)
+					else if (TryFormAndSendCaravan())
 					{
 						SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
 						Close(false);
@@ -831,13 +831,13 @@ namespace Vehicles
 		private bool TryFindExitSpotLand(List<Pawn> pawns, bool reachableForEveryColonist, Rot4 exitDirection, out IntVec3 spot)
 		{
 			spot = IntVec3.Invalid;
-			if(startingTile < 0)
+			if (startingTile < 0)
 			{
 				Log.Error("Can't find exit spot because startingTile is not set.");
 				return spot.IsValid;
 			}
-
-			bool landValidator(IntVec3 x) => !x.Fogged(map) && GenGrid.Standable(x, map);
+			List<VehiclePawn> vehicles = pawns.Where(p => p is VehiclePawn).Cast<VehiclePawn>().ToList();
+			bool landValidator(IntVec3 x) => !x.Fogged(map) && vehicles.All(v => VehicleReachabilityUtility.CanReachVehicle(v, x, PathEndMode.ClosestTouch, Danger.Deadly));
 			if (reachableForEveryColonist)
 			{
 				return CellFinder.TryFindRandomEdgeCellWith(delegate(IntVec3 x)
