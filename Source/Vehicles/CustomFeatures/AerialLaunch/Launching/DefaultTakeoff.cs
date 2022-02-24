@@ -226,6 +226,22 @@ namespace Vehicles
 						}
 					}, MenuOptionPriority.Default, null, null, 0f, null, null);
 				}
+
+                if (AerialVehicleArrivalAction_Trade.CanTradeWith(vehicle, settlement))
+                {
+                    yield return new FloatMenuOption("TradeWith".Translate(settlement.Label), delegate()
+                    {
+                        if (vehicle.Spawned)
+                        {
+                            vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_Trade(vehicle, settlement));
+                        }
+                        else
+                        {
+                            AerialVehicleInFlight aerial = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
+                            aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_Trade(vehicle, settlement));
+                        }
+                    });
+                }
 				foreach (FloatMenuOption option in AerialVehicleArrivalAction_AttackSettlement.GetFloatMenuOptions(vehicle, this, settlement))
 				{
 					yield return option;
