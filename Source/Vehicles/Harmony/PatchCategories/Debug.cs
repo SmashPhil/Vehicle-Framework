@@ -2,6 +2,7 @@
 using UnityEngine;
 using HarmonyLib;
 using Verse;
+using Verse.AI;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
@@ -46,19 +47,19 @@ namespace Vehicles
 					nameof(DebugWorldObjects)));
 			}
 
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Map), nameof(Map.ExposeData)),
-			//	postfix: new HarmonyMethod(typeof(Debug),
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Job), nameof(Job.MakeDriver)),
+			//	prefix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestMethod)));
 			//VehicleHarmony.Patch(original: AccessTools.PropertySetter(typeof(Thing), nameof(Thing.StyleDef)),
 			//	finalizer: new HarmonyMethod(typeof(Debug),
 			//	nameof(ExceptionCatcher)));
 		}
 
-		public static void TestMethod(Map __instance)
+		public static void TestMethod(Pawn driverPawn, Job __instance)
 		{
 			try
 			{
-				Log.Message($"Finished loading Map data for {__instance.uniqueID} Mapinfo: {__instance.info is null}");
+				Log.Message($"Pawn {driverPawn} Job: {__instance} Driver: {__instance?.def.driverClass} IsDriver: {__instance?.def.driverClass.SameOrSubclass(typeof(JobDriver))}");
 			}
 			catch (Exception ex)
 			{

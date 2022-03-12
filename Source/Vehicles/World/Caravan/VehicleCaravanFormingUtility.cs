@@ -25,7 +25,7 @@ namespace Vehicles
 				Log.Error("Can't start forming caravan with 0 pawns.");
 				return;
 			}
-			if(!pawns.NotNullAndAny(x => x is VehiclePawn))
+			if (!pawns.NotNullAndAny(x => x is VehiclePawn))
 			{
 				Log.Error("Can't start forming vehicle caravan without any vehicles");
 				return;
@@ -73,7 +73,7 @@ namespace Vehicles
 					}
 				}
 			}
-			else if(pawns.NotNullAndAny(x => x is VehiclePawn vehicle && vehicle.movementStatus is VehicleMovementStatus.Online))
+			else if (pawns.NotNullAndAny(x => x is VehiclePawn vehicle && vehicle.movementStatus is VehicleMovementStatus.Online))
 			{
 				List<TransferableOneWay> list = transferables;
 				list.RemoveAll((TransferableOneWay x) => x.CountToTransfer <= 0 || !x.HasAnyThing || x.AnyThing is Pawn);

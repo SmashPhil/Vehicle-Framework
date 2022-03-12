@@ -6,11 +6,15 @@
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>[title]Recent News[/title][font]Small[/font]
+Fixed bug where vehicle caravans did not properly display the vehicles in it.
 
+Fixed bug where VehicleTurret would rotate 90 degrees upon loading a game.
+
+Fixed bug where caravan formation for Vehicles would break on gather items.
 [font]Tiny[/font][title]Bug Fixes[/title]
 
 [title]New Additions[/title]
-
+Float menu option added for shuttles and trading with friendly settlements.
 [title]Additional Changes[/title]
 
 [title]Final Notes[/title][font]Tiny[/font]

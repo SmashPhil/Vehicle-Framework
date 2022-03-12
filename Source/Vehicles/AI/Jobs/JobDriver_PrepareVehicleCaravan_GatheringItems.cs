@@ -62,21 +62,21 @@ namespace Vehicles
 		protected override IEnumerable<Toil> MakeNewToils()
 		{
 			this.FailOn(() => !Map.lordManager.lords.Contains(job.lord));
-			//Toil reserve = Toils_Reserve.Reserve(TargetIndex.A, 1, -1, null).FailOnDespawnedOrNull(TargetIndex.A);
-			//yield return reserve;
+			Toil reserve = Toils_Reserve.Reserve(TargetIndex.A, 1, -1, null).FailOnDespawnedOrNull(TargetIndex.A);
+			yield return reserve;
 			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
-			//yield return DetermineNumToHaul();
-			//yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, true, false);
-			//yield return AddCarriedThingToTransferables();
-			//yield return Toils_Haul.CheckForGetOpportunityDuplicate(reserve, TargetIndex.A, TargetIndex.None, true, (Thing x) =>
-			//    Transferable.things.Contains(x));
-			//Toil findCarrier = FindCarrier();
-			//yield return findCarrier;
-			//yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).JumpIf(() => !IsUsableCarrier(Carrier, pawn),
-			//    findCarrier);
-			//yield return Toils_General.Wait(25, TargetIndex.None).JumpIf(() => !IsUsableCarrier(Carrier, pawn),
-			//    findCarrier).WithProgressBarToilDelay(TargetIndex.B, false, -0.5f);
-			//yield return PlaceTargetInCarrierInventory();
+			yield return DetermineNumToHaul();
+			yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, true, false);
+			yield return AddCarriedThingToTransferables();
+			yield return Toils_Haul.CheckForGetOpportunityDuplicate(reserve, TargetIndex.A, TargetIndex.None, true, (Thing x) =>
+				Transferable.things.Contains(x));
+			Toil findCarrier = FindCarrier();
+			yield return findCarrier;
+			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).JumpIf(() => !IsUsableCarrier(Carrier, pawn),
+				findCarrier);
+			yield return Toils_General.Wait(25, TargetIndex.None).JumpIf(() => !IsUsableCarrier(Carrier, pawn),
+				findCarrier).WithProgressBarToilDelay(TargetIndex.B, false, -0.5f);
+			yield return PlaceTargetInCarrierInventory();
 		}
 
 		private Toil DetermineNumToHaul()

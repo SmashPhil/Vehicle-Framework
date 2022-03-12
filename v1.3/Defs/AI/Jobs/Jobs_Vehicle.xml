@@ -7,12 +7,14 @@
 		<reportString>Boarding.</reportString>
 		<casualInterruptible>false</casualInterruptible>
 	</JobDef>
+	
 	<JobDef>
 		<defName>LoadUpgradeMaterials</defName>
 		<driverClass>Vehicles.JobDriver_GiveToUpgradeContainer</driverClass>
 		<reportString>Loading materials.</reportString>
 		<casualInterruptible>false</casualInterruptible>
 	</JobDef>
+	
 	<JobDef>
 		<defName>IdleVehicle</defName>
 		<driverClass>Vehicles.JobDriver_IdleVehicle</driverClass>
@@ -23,7 +25,7 @@
 	
 	<JobDef>
 		<defName>PrepareCaravan_GatheringVehicle</defName>
-		<driverClass>Vehicles.JobGiver_PrepareVehicleCaravan_GatheringItems</driverClass>
+		<driverClass>Vehicles.JobDriver_PrepareVehicleCaravan_GatheringItems</driverClass>
 		<reportString>Loading cargo.</reportString>
 		<suspendable>false</suspendable>
 	</JobDef>

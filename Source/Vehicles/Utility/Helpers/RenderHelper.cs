@@ -215,13 +215,18 @@ namespace Vehicles
 		/// <param name="manualColorTwo"></param>
 		public static void DrawVehicle(Rect rect, VehiclePawn vehicle, PatternDef pattern = null, bool resolveGraphics = false, Color? manualColorOne = null, Color? manualColorTwo = null, Color? manualColorThree = null, Rot8? rot = null)
 		{
+			Vector2 rectSize = vehicle.VehicleDef.ScaleDrawRatio(new Vector2(rect.width * 0.95f, rect.height * 0.95f));
+			float newX = (rect.width / 2) - (rectSize.x / 2) + (vehicle.VehicleDef.drawProperties.displayOffset.x * rectSize.x / rect.width);
+			float newY = (rect.height / 2) - (rectSize.y / 2) + (vehicle.VehicleDef.drawProperties.displayOffset.y * rectSize.y / rect.height);
+			Rect adjustedRect = new Rect(rect.x + newX, rect.y + newY, rectSize.x, rectSize.y);
+
 			Rot8 rotDrawn = rot ?? vehicle.VehicleDef.drawProperties.displayRotation;
 			Texture2D mainTex = vehicle.VehicleGraphic.TexAt(rotDrawn);
 			Material mat = vehicle.VehicleGraphic.MatAt(rotDrawn, pattern, vehicle);
 			if (vehicle.VehicleGraphic.Shader.SupportsRGBMaskTex())
 			{
 				mat = new Material(vehicle.VehicleGraphic.MatAt(rotDrawn, vehicle));
-				if (manualColorOne != null || manualColorTwo != null || manualColorThree != null)
+				if (vehicle.VehicleGraphic.Shader.SupportsRGBMaskTex() && manualColorOne != null || manualColorTwo != null || manualColorThree != null)
 				{
 					MaterialRequestRGB matReq = new MaterialRequestRGB()
 					{
@@ -240,11 +245,11 @@ namespace Vehicles
 				}
 			}
 
-			GenUI.DrawTextureWithMaterial(rect, mainTex, mat);
+			GenUI.DrawTextureWithMaterial(adjustedRect, mainTex, mat);
 
 			if (vehicle.CompCannons != null)
 			{
-				vehicle.DrawCannonTextures(rect, vehicle.CompCannons.Cannons.Where(t => !t.isUpgrade).OrderBy(x => x.drawLayer), pattern, resolveGraphics, manualColorOne, manualColorTwo, manualColorThree, rotDrawn);
+				vehicle.DrawCannonTextures(adjustedRect, vehicle.CompCannons.Cannons.Where(t => !t.isUpgrade).OrderBy(x => x.drawLayer), pattern, resolveGraphics, manualColorOne, manualColorTwo, manualColorThree, rotDrawn);
 			}
 		}
 

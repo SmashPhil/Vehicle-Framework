@@ -55,12 +55,13 @@ namespace Vehicles
 
 		public override Vector2 InitialSize => new Vector2(1024f, (float)Verse.UI.screenHeight / 2);
 
-		public override void DoWindowContents(Rect inRect)
+		public override void DoWindowContents(Rect rect)
 		{
-			DrawVehicleMenu(inRect);
-			Rect displayRect = new Rect(0, 0, inRect.width / 3, inRect.width / 3);
+			DrawVehicleMenu(rect);
+			//y = assignedMenu.y
+			Rect displayRect = new Rect(0, 35, rect.width / 3, rect.height - ButtonHeight).ContractedBy(ButtonHeight);
 			RenderHelper.DrawVehicle(displayRect, Vehicle, Vehicle.Pattern, true, Vehicle.DrawColor, Vehicle.DrawColorTwo, Vehicle.DrawColorThree);
-			DoBottomButtons(inRect);
+			DoBottomButtons(rect);
 		}
 
 		private void DrawVehicleMenu(Rect rect)
