@@ -403,7 +403,7 @@ namespace Vehicles
 					currentRotation += 360;
 				}
 
-				float rotation = 270 - currentRotation;
+                float rotation = 270 - currentRotation;
 				if (rotation < 0)
 				{
 					rotation += 360;
@@ -1296,8 +1296,10 @@ namespace Vehicles
 
 		protected void ValidateLockStatus()
 		{
-			if (!cannonTarget.IsValid && CannonTargeter.Instance.Cannon != this)
-			{
+            parentRotCached = vehicle.Rotation;
+            parentAngleCached = vehicle.Angle;
+			if (!cannonTarget.IsValid && CannonTargeter.Instance.Cannon != this) 
+            {
 				float angleDifference = vehicle.Angle - parentAngleCached;
 				if (attachedTo is null)
 				{
@@ -1305,8 +1307,6 @@ namespace Vehicles
 				}
 				rotationTargeted = currentRotation;
 			}
-			parentRotCached = vehicle.Rotation;
-			parentAngleCached = vehicle.Angle;
 		}
 
 		public virtual string GetUniqueLoadID()
