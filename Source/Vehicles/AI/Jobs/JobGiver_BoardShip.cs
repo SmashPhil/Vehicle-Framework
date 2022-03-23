@@ -17,13 +17,13 @@ namespace Vehicles
 			if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Moving)) return null;
 			if(pawn.GetLord().LordJob is LordJob_FormAndSendVehicles)
 			{
-				Pair<VehiclePawn, VehicleHandler> vehicle = ((LordJob_FormAndSendVehicles)pawn.GetLord().LordJob).GetVehicleAssigned(pawn);
+				(VehiclePawn vehicle, VehicleHandler handler) vehicleMapping = ((LordJob_FormAndSendVehicles)pawn.GetLord().LordJob).GetVehicleAssigned(pawn);
 
-				if(vehicle.Second is null)
+				if (vehicleMapping.handler is null)
 				{
-					if (!JobDriver_FollowClose.FarEnoughAndPossibleToStartJob(pawn, vehicle.First, FollowRadius))
+					if (!JobDriver_FollowClose.FarEnoughAndPossibleToStartJob(pawn, vehicleMapping.vehicle, FollowRadius))
 						return null;
-					return new Job(JobDefOf.FollowClose, vehicle.First)
+					return new Job(JobDefOf.FollowClose, vehicleMapping.vehicle)
 					{
 						lord = pawn.GetLord(),
 						expiryInterval = 140,
@@ -31,7 +31,7 @@ namespace Vehicles
 						followRadius = FollowRadius
 					};
 				}
-				return new Job(JobDefOf_Vehicles.Board, vehicle.First);
+				return new Job(JobDefOf_Vehicles.Board, vehicleMapping.vehicle);
 			}
 			return null;
 		}

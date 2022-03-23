@@ -47,7 +47,7 @@ namespace Vehicles
 					nameof(DebugWorldObjects)));
 			}
 
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Job), nameof(Job.MakeDriver)),
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(StatWorker), nameof(StatWorker.IsDisabledFor)),
 			//	prefix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestMethod)));
 			//VehicleHarmony.Patch(original: AccessTools.PropertySetter(typeof(Thing), nameof(Thing.StyleDef)),
@@ -55,11 +55,11 @@ namespace Vehicles
 			//	nameof(ExceptionCatcher)));
 		}
 
-		public static void TestMethod(Pawn driverPawn, Job __instance)
+		public static void TestMethod(Thing thing, StatWorker __instance)
 		{
 			try
 			{
-				Log.Message($"Pawn {driverPawn} Job: {__instance} Driver: {__instance?.def.driverClass} IsDriver: {__instance?.def.driverClass.SameOrSubclass(typeof(JobDriver))}");
+				//Log.Message($"Thing: {thing} Type: {__instance.GetType()} Disabled: {");
 			}
 			catch (Exception ex)
 			{

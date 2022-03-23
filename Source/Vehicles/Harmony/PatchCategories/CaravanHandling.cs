@@ -24,9 +24,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Dialog_FormCaravan), "TryReformCaravan"),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(ConfirmLeaveVehiclesOnReform)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CollectionsMassCalculator), nameof(CollectionsMassCalculator.Capacity), new Type[] { typeof(List<ThingCount>), typeof(StringBuilder) }),
-				prefix: new HarmonyMethod(typeof(CaravanHandling),
-				nameof(CapacityWithVehicle)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MassUtility), nameof(MassUtility.Capacity)),
+				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(CapacityOfVehicle)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MassUtility), nameof(MassUtility.CanEverCarryAnything)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(CanCarryIfVehicle)));
@@ -177,25 +177,12 @@ namespace Vehicles
 		/// <param name="thingCounts"></param>
 		/// <param name="__result"></param>
 		/// <param name="explanation"></param>
-		public static bool CapacityWithVehicle(List<ThingCount> thingCounts, ref float __result, StringBuilder explanation = null)
+		public static void CapacityOfVehicle(Pawn p, ref float __result, StringBuilder explanation = null)
 		{
-			if(thingCounts.NotNullAndAny(x => x.Thing is VehiclePawn))
+			if (p is VehiclePawn vehicle)
 			{
-				float num = 0f;
-				foreach(ThingCount tc in thingCounts)
-				{
-					if(tc.Count > 0)
-					{
-						if (tc.Thing is VehiclePawn)
-						{
-							num += MassUtility.Capacity(tc.Thing as Pawn, explanation) * (float)tc.Count;
-						}
-					}
-				}
-				__result = Mathf.Max(num, 0f);
-				return false;
+				__result = Mathf.Max(vehicle.CargoCapacity, 0f);
 			}
-			return true;
 		}
 
 		/// <summary>
@@ -838,27 +825,27 @@ namespace Vehicles
 
 		public static bool FindPawnInVehicleWithBestStat(Caravan caravan, StatDef stat, ref Pawn __result)
 		{
-			if(caravan.HasVehicle())
+			if (caravan.HasVehicle())
 			{
 				float num = -1f;
-				foreach(Pawn pawn in caravan.PawnsListForReading)
+				foreach (Pawn pawn in caravan.PawnsListForReading)
 				{
-					if(pawn is VehiclePawn vehicle)
+					if (pawn is VehiclePawn vehicle)
 					{
-						foreach(Pawn innerPawn in vehicle.AllPawnsAboard.Where(p => !p.Dead && !p.Downed && !p.InMentalState && caravan.IsOwner(p)))
+						foreach (Pawn innerPawn in vehicle.AllPawnsAboard.Where(p => !p.Dead && !p.Downed && !p.InMentalState && !stat.Worker.IsDisabledFor(p)))
 						{
 							float statValue = innerPawn.GetStatValue(stat, true);
-							if(__result is null || statValue > num)
+							if (__result is null || statValue > num)
 							{
 								__result = innerPawn;
 								num = statValue;
 							}
 						}
 					}
-					else if(!stat.Worker.IsDisabledFor(pawn))
+					else if (!stat.Worker.IsDisabledFor(pawn))
 					{
 						float statValue = pawn.GetStatValue(stat, true);
-						if(__result is null || statValue > num)
+						if (__result is null || statValue > num)
 						{
 							__result = pawn;
 							num = statValue;

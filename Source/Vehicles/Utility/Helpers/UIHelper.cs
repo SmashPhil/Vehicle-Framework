@@ -109,7 +109,6 @@ namespace Vehicles
 		/// <param name="readOnly"></param>
 		private static void DoCountAdjustInterfaceInternal(Rect rect, Transferable trad, List<TransferableOneWay> pawns, List<TransferableCountToTransferStoppingPoint> stoppingPoints, int index, int min, int max, bool flash, bool readOnly)
 		{
-			
 			rect = rect.Rounded();
 			Rect rect2 = new Rect(rect.center.x - 45f, rect.center.y - 12.5f, 90f, 25f).Rounded();
 			if (flash)
@@ -121,12 +120,7 @@ namespace Vehicles
 			bool flag3 = trad.CountToTransfer != 0;
 			bool flag4 = flag3;
 
-			Rect buttonRect = new Rect(rect2.x, rect2.y, 120f, rect.height);
-			//if (Widgets.ButtonText(buttonRect, "AssignSeats".Translate()))
-			//{
-			//	Find.WindowStack.Add(new Dialog_AssignSeats(pawns, transferableOneWay));
-			//}
-			Rect checkboxRect = new Rect(buttonRect.x + buttonRect.width + 5f, buttonRect.y, 24f, 24f);
+			Rect checkboxRect = new Rect(rect2.x + 125f, rect2.y, 24f, 24f);
 			if (Widgets.ButtonImage(checkboxRect, flag4 ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex))
 			{
 				if (!flag4)
@@ -146,7 +140,7 @@ namespace Vehicles
 					flag4 = !flag4;
 				}
 			}
-
+			
 			if (flag4 != flag3)
 			{
 				if (flag4)
@@ -155,8 +149,10 @@ namespace Vehicles
 				}
 				else
 				{
+					CaravanHelper.ClearAssignedSeats(trad.AnyThing as VehiclePawn, (Pawn pawn) => pawns.FirstOrDefault(p => (p.AnyThing as Pawn) == pawn)?.ForceTo(0));
 					trad.AdjustTo(trad.GetMinimumToTransfer());
 				}
+				Dialog_FormVehicleCaravan.MarkDirty();
 			}
 			if (trad.CountToTransfer != 0)
 			{
@@ -168,7 +164,6 @@ namespace Vehicles
 					position.x += position.width;
 					position.width *= -1f;
 				}
-				//GUI.DrawTexture(position, TradeArrow); //REDO?
 			}
 		}
 

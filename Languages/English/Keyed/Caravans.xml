@@ -14,6 +14,7 @@
 	<CommandTradeDockDisable>Cannot trade with {0}. Must dock boat first</CommandTradeDockDisable>
 	<CaravanMustHaveEnoughSpaceOnShip>Not enough space on ships to house all pawns.</CaravanMustHaveEnoughSpaceOnShip>
 	<CaravanMustHaveEnoughPawnsToOperate>Not enough Pawns selected to set sail. Need {0}</CaravanMustHaveEnoughPawnsToOperate>
+	<CaravanMustHaveAtLeastOneVehicle>Must have at least 1 vehicle selected in order to choose a route.</CaravanMustHaveAtLeastOneVehicle>
 	<CommandFormVehicleCaravan>Form Vehicle Caravan</CommandFormVehicleCaravan>
 	<CommandFormVehicleCaravanDesc>Form caravan with vehicles included.</CommandFormVehicleCaravanDesc>
 	<CommandReformVehicleCaravan>Reform Vehicle Caravan</CommandReformVehicleCaravan>

@@ -53,8 +53,10 @@ namespace Vehicles
 		private bool ticksToArriveDirty = true;
 		private int cachedTicksToArrive;
 		private readonly Vector2 BottomButtonSize = new Vector2(160f, 40f);
+
 		private static List<TabRecord> tabsList = new List<TabRecord>();
 		private static List<Thing> tmpPackingSpots = new List<Thing>();
+		private static bool cacheDirty;
 
 		public Dialog_FormVehicleCaravan(Map map, bool reform = false, Action onClosed = null, bool mapAboutToBeRemoved = false)
 		{
@@ -314,6 +316,11 @@ namespace Vehicles
 			}
 		}
 
+		public static void MarkDirty()
+		{
+			cacheDirty = true;
+		}
+
 		public override void PostOpen()
 		{
 			base.PostOpen();
@@ -388,21 +395,20 @@ namespace Vehicles
 			DoBottomButtons(rect2);
 			Rect inRect2 = rect2;
 			inRect2.yMax -= 76f;
-			bool flag = false;
 			Tab tab = this.tab;
 			if (tab == Tab.Items)
 			{
-				itemsTransfer.OnGUI(inRect2, out flag);
+				itemsTransfer.OnGUI(inRect2, out cacheDirty);
 			}
-			else if(tab == Tab.Vehicles)
+			else if (tab == Tab.Vehicles)
 			{
-				vehiclesTransfer.OnGUI(inRect2, out flag);
+				vehiclesTransfer.OnGUI(inRect2);
 			}
 			else
 			{
-				pawnsTransfer.OnGUI(inRect2, out flag);
+				pawnsTransfer.OnGUI(inRect2, out cacheDirty);
 			}
-			if (flag)
+			if (cacheDirty)
 			{
 				CountToTransferChanged();
 			}
@@ -528,7 +534,7 @@ namespace Vehicles
 					List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables);
 					List<Pawn> innerPawns = pawnsFromTransferables.Where(v => v is VehiclePawn).SelectMany(v => (v as VehiclePawn).AllPawnsAboard).ToList();
 
-					if(pawnsFromTransferables.NotNullAndAny(v => v is VehiclePawn vehicle && vehicle.VehicleDef.vehicleType == VehicleType.Sea) 
+					if (pawnsFromTransferables.NotNullAndAny(v => v is VehiclePawn vehicle && vehicle.VehicleDef.vehicleType == VehicleType.Sea) 
 						&& pawnsFromTransferables.NotNullAndAny(v => v is VehiclePawn vehicle && vehicle.VehicleDef.vehicleType == VehicleType.Land))
 					{
 						Messages.Message("LandAndSeaRoutePlannerRestriction".Translate(), MessageTypeDefOf.RejectInput);
@@ -539,6 +545,10 @@ namespace Vehicles
 					if (!pawnsFromTransferables.Concat(innerPawns).NotNullAndAny((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer) && !x.Downed))
 					{
 						Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, false);
+					}
+					else if (!pawnsFromTransferables.Where(p => p is VehiclePawn).Any())
+					{
+						Messages.Message("CaravanMustHaveAtLeastOneVehicle".Translate(), MessageTypeDefOf.RejectInput, false);
 					}
 					else
 					{

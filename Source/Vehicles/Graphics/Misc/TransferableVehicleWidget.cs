@@ -151,7 +151,7 @@ namespace Vehicles
 			}
 		}
 
-		public void OnGUI(Rect inRect, out bool anythingChanged)
+		public void OnGUI(Rect inRect)
 		{
 			if (!transferablesCached)
 			{
@@ -189,12 +189,11 @@ namespace Vehicles
 				GUI.EndGroup();
 			}
 			Rect mainRect = new Rect(inRect.x, inRect.y + 37f + extraHeaderSpace, inRect.width, inRect.height - 37f - extraHeaderSpace);
-			FillMainRect(mainRect, out anythingChanged);
+			FillMainRect(mainRect);
 		}
 
-		private void FillMainRect(Rect mainRect, out bool anythingChanged)
+		private void FillMainRect(Rect mainRect)
 		{
-			anythingChanged = false;
 			Text.Font = GameFont.Small;
 			if (AnyTransferable)
 			{
@@ -228,12 +227,7 @@ namespace Vehicles
 							if (num2 > num3 && num2 < num4)
 							{
 								Rect rect = new Rect(0f, num2, viewRect.width, 30f);
-								int countToTransfer = cachedTransferables[k].CountToTransfer;
 								DoRow(rect, cachedTransferables[k], k, availableMass);
-								if (countToTransfer != cachedTransferables[k].CountToTransfer)
-								{
-									anythingChanged = true;
-								}
 							}
 							num2 += 30f;
 						}
@@ -263,7 +257,7 @@ namespace Vehicles
 			stoppingPoints.Clear();
 			if (availableMassGetter != null && (!(trad.AnyThing is Pawn) || includePawnsMassInMassUsage))
 			{
-				float num2 = availableMass + GetMass(trad.AnyThing) * (float)trad.CountToTransfer;
+				float num2 = availableMass + GetMass(trad.AnyThing) * trad.CountToTransfer;
 				int threshold = (num2 <= 0f) ? 0 : Mathf.FloorToInt(num2 / GetMass(trad.AnyThing));
 				stoppingPoints.Add(new TransferableCountToTransferStoppingPoint(threshold, "M<", ">M"));
 			}

@@ -11,6 +11,12 @@ Fixed bug where vehicle caravans did not properly display the vehicles in it.
 Fixed bug where VehicleTurret would rotate 90 degrees upon loading a game.
 
 Fixed bug where caravan formation for Vehicles would break on gather items.
+
+Fixed bug where pawns with disabled stat for trading would trigger an error in StatWorker for attempting to calculate a disabled stat.
+
+Fixed bug where adding a vehicle in the dialog window would not dirty caravan max capacity.
+
+Fixed bug where FormCaravan dialog of vehicles would throw exception when choosing a route with pawns but no vehicles.
 [font]Tiny[/font][title]Bug Fixes[/title]
 
 [title]New Additions[/title]

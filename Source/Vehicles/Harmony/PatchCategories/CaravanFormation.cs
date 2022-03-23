@@ -24,6 +24,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(TransferableUtility), nameof(TransferableUtility.CanStack)), prefix: null, postfix: null,
 				transpiler: new HarmonyMethod(typeof(CaravanFormation),
 				nameof(CanStackVehicleTranspiler)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(TransferableUIUtility), "DoCountAdjustInterfaceInternal"),
+				prefix: new HarmonyMethod(typeof(CaravanFormation),
+				nameof(CanAdjustPawnTransferable)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GiveToPackAnimalUtility), nameof(GiveToPackAnimalUtility.UsablePackAnimalWithTheMostFreeSpace)),
 				prefix: new HarmonyMethod(typeof(CaravanFormation),
 				nameof(UsableVehicleWithMostFreeSpace)));
@@ -76,6 +79,14 @@ namespace Vehicles
 					instruction.labels.Add(label);
 				}
 				yield return instruction;
+			}
+		}
+
+		public static void CanAdjustPawnTransferable(Transferable trad, ref bool readOnly)
+		{
+			if (trad.AnyThing is Pawn pawn)
+			{
+				readOnly = CaravanHelper.assignedSeats.ContainsKey(pawn);
 			}
 		}
 

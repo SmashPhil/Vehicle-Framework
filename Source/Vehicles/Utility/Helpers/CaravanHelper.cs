@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -16,7 +17,27 @@ namespace Vehicles
 {
 	public static class CaravanHelper
 	{
-		public static Dictionary<Pawn, Pair<VehiclePawn, VehicleHandler>> assignedSeats = new Dictionary<Pawn, Pair<VehiclePawn, VehicleHandler>>();
+		public static Dictionary<Pawn, (VehiclePawn vehicle, VehicleHandler handler)> assignedSeats = new Dictionary<Pawn, (VehiclePawn vehicle, VehicleHandler handler)>();
+
+		/// <summary>
+		/// Remove all pawns from <see cref="assignedSeats"/> for this vehicle
+		/// </summary>
+		/// <param name="vehicle"></param>
+		/// <param name="onRemoval">Function call for every pawn removed from assigned seating</param>
+		public static void ClearAssignedSeats(VehiclePawn vehicle, Action<Pawn> onRemoval)
+		{
+			List<KeyValuePair<Pawn, (VehiclePawn vehicle, VehicleHandler handler)>> vehicleMapping = assignedSeats.Where(kvp => kvp.Value.vehicle == vehicle).ToList();
+
+			if (!vehicleMapping.NullOrEmpty())
+			{
+				foreach (var pawnToVehicleMapping in vehicleMapping)
+				{
+					Pawn pawn = pawnToVehicleMapping.Key;
+					assignedSeats.Remove(pawn);
+					onRemoval(pawn);
+				}
+			}
+		}
 
 		/// <summary>
 		/// VehicleCaravan is able to be created and embark given list of pawns
@@ -181,12 +202,12 @@ namespace Vehicles
 		{
 			List<VehiclePawn> vehicles = pawns.Where(p => p is VehiclePawn).Cast<VehiclePawn>().ToList();
 			List<Pawn> nonVehicles = pawns.Where(p => !(p is VehiclePawn)).ToList();
-			foreach(Pawn pawn in nonVehicles)
+			foreach (Pawn pawn in nonVehicles)
 			{
-				if(assignedSeats.ContainsKey(pawn) && vehicles.Contains(assignedSeats[pawn].First))
+				if (assignedSeats.ContainsKey(pawn) && vehicles.Contains(assignedSeats[pawn].vehicle))
 				{
-					assignedSeats[pawn].First.GiveLoadJob(pawn, assignedSeats[pawn].Second);
-					assignedSeats[pawn].First.Notify_Boarded(pawn);
+					assignedSeats[pawn].vehicle.GiveLoadJob(pawn, assignedSeats[pawn].handler);
+					assignedSeats[pawn].vehicle.Notify_Boarded(pawn);
 					pawns.Remove(pawn);
 				}
 			}

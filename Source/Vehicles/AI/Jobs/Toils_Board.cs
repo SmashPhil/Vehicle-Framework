@@ -15,8 +15,8 @@ namespace Vehicles
 			toil.initAction = delegate ()
 			{
 				VehiclePawn vehicle = toil.actor.jobs.curJob.GetTarget(TargetIndex.A).Thing as VehiclePawn;
-				Pair<VehiclePawn, VehicleHandler> assignedSeat;
-				if(pawnBoarding.GetLord()?.LordJob is LordJob_FormAndSendVehicles lordJob)
+				(VehiclePawn vehicle, VehicleHandler handler) assignedSeat;
+				if (pawnBoarding.GetLord()?.LordJob is LordJob_FormAndSendVehicles lordJob)
 				{
 					assignedSeat = lordJob.GetVehicleAssigned(pawnBoarding);
 				}
@@ -32,16 +32,16 @@ namespace Vehicles
 							return;
 						}
 					}
-					assignedSeat = new Pair<VehiclePawn, VehicleHandler>(vehicle, handler);
+					assignedSeat = (vehicle, handler);
 				}
 
 				//REDO - place nonhumanlike in cargo area
-				if (assignedSeat.Second is null)
+				if (assignedSeat.handler is null)
 				{
 					Log.Error($"{VehicleHarmony.LogLabel} VehicleHandler is null. This should never happen as assigned seating either handles arrangements or instructs pawns to follow rather than board.");
 				}
-				assignedSeat.First.GiveLoadJob(pawnBoarding, assignedSeat.Second);
-				assignedSeat.First.Notify_Boarded(pawnBoarding);
+				assignedSeat.vehicle.GiveLoadJob(pawnBoarding, assignedSeat.handler);
+				assignedSeat.vehicle.Notify_Boarded(pawnBoarding);
 			};
 			toil.defaultCompleteMode = ToilCompleteMode.Instant;
 			return toil;

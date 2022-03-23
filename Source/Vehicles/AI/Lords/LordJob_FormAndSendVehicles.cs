@@ -18,7 +18,7 @@ namespace Vehicles.Lords
 		public List<Pawn> prisoners = new List<Pawn>();
 		public List<VehiclePawn> vehicles = new List<VehiclePawn>();
 		public List<Pawn> pawns = new List<Pawn>();
-		protected Dictionary<Pawn, Pair<VehiclePawn, VehicleHandler>> vehicleAssigned = new Dictionary<Pawn, Pair<VehiclePawn, VehicleHandler>>();
+		protected Dictionary<Pawn, (VehiclePawn vehicle, VehicleHandler handler)> vehicleAssigned = new Dictionary<Pawn, (VehiclePawn, VehicleHandler)>();
 		protected IntVec3 meetingPoint;
 		protected IntVec3 exitPoint;
 		protected int startingTile;
@@ -56,7 +56,7 @@ namespace Vehicles.Lords
 			this.pawns = pawns;
 			this.prisoners = prisoners;
 			this.requireAllSeated = requireAllSeated;
-			vehicleAssigned = new Dictionary<Pawn, Pair<VehiclePawn, VehicleHandler>>(CaravanHelper.assignedSeats);
+			vehicleAssigned = new Dictionary<Pawn, (VehiclePawn, VehicleHandler)>(CaravanHelper.assignedSeats);
 			forceCaravan = false;
 		}
 
@@ -161,11 +161,13 @@ namespace Vehicles.Lords
 			}
 		}
 
-		public Pair<VehiclePawn, VehicleHandler> GetVehicleAssigned(Pawn p)
+		public (VehiclePawn vehicle, VehicleHandler handler) GetVehicleAssigned(Pawn p)
 		{
 			if (vehicleAssigned.ContainsKey(p))
+			{
 				return vehicleAssigned[p];
-			return new Pair<VehiclePawn, VehicleHandler>(vehicles.FirstOrDefault(), null);
+			}
+			return (vehicles.FirstOrDefault(), null);
 		}
 
 		public bool AssignRemainingPawns()
@@ -179,7 +181,7 @@ namespace Vehicles.Lords
 					{
 						return false;
 					}
-					vehicleAssigned.Add(pawn, new Pair<VehiclePawn, VehicleHandler>(nextAvailableVehicle, nextAvailableVehicle.NextAvailableHandler()));
+					vehicleAssigned.Add(pawn, (nextAvailableVehicle, nextAvailableVehicle.NextAvailableHandler()));
 				}
 			}
 			else
@@ -188,7 +190,7 @@ namespace Vehicles.Lords
 				foreach(Pawn pawn in pawns.Where(p => !vehicleAssigned.ContainsKey(p)))
 				{
 					VehiclePawn nextAvailableVehicle = vehicles[nextVehicleIndex];
-					vehicleAssigned.Add(pawn, new Pair<VehiclePawn, VehicleHandler>(nextAvailableVehicle, null));
+					vehicleAssigned.Add(pawn, (nextAvailableVehicle, null));
 					nextVehicleIndex++;
 					if (nextVehicleIndex >= vehicles.Count)
 						nextVehicleIndex = 0;
@@ -200,7 +202,7 @@ namespace Vehicles.Lords
 		public bool AssignSeats(VehiclePawn vehicle)
 		{
 			int iterations = 0;
-			while (vehicleAssigned.Where(k => k.Value.First == vehicle).Select(p => p.Key).Count() < vehicle.PawnCountToOperateLeft)
+			while (vehicleAssigned.Where(k => k.Value.vehicle == vehicle).Select(p => p.Key).Count() < vehicle.PawnCountToOperateLeft)
 			{
 				if (iterations > 200)
 				{
@@ -214,7 +216,7 @@ namespace Vehicles.Lords
 					return false;
 				}
 				
-				vehicleAssigned.Add(nextToAssign, new Pair<VehiclePawn, VehicleHandler>(vehicle, vehicle.NextAvailableHandler(h => h == HandlingTypeFlags.Movement)));
+				vehicleAssigned.Add(nextToAssign, (vehicle, vehicle.NextAvailableHandler(h => h == HandlingTypeFlags.Movement)));
 
 				iterations++;
 			}
@@ -225,7 +227,7 @@ namespace Vehicles.Lords
 		{
 			foreach (VehiclePawn vehicle in vehicles)
 			{
-				if (vehicleAssigned.Where(k => k.Value.First == vehicle).Select(p => p.Key).Count() < vehicle.PawnCountToOperateLeft)
+				if (vehicleAssigned.Where(k => k.Value.vehicle == vehicle).Select(p => p.Key).Count() < vehicle.PawnCountToOperateLeft)
 				{
 					if (!AssignSeats(vehicle))
 					{

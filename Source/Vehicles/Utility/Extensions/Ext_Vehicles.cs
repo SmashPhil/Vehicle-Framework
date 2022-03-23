@@ -242,7 +242,7 @@ namespace Vehicles
 		/// <param name="vehicle"></param>
 		public static int CountAssignedToVehicle(this VehiclePawn vehicle)
 		{
-			return CaravanHelper.assignedSeats.Where(a => a.Value.First == vehicle).Select(s => s.Key).Count();
+			return CaravanHelper.assignedSeats.Where(a => a.Value.vehicle == vehicle).Select(s => s.Key).Count();
 		}
 
 		/// <summary>

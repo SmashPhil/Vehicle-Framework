@@ -56,12 +56,12 @@ namespace Vehicles.Lords
 			{
 				bool flag = true;
 				List<Pawn> pawns = new List<Pawn>(lord.ownedPawns.Where(p => !(p is VehiclePawn)));
-				foreach(Pawn pawn in pawns)
+				foreach (Pawn pawn in pawns)
 				{
 					var vehicle = (lord.LordJob as LordJob_FormAndSendVehicles).GetVehicleAssigned(pawn);
-					if(vehicle.Second != null)
+					if (vehicle.handler != null)
 					{
-						if(vehicle.First.AllPawnsAboard.Contains(pawn))
+						if(vehicle.vehicle.AllPawnsAboard.Contains(pawn))
 						{
 							lord.ownedPawns.Remove(pawn);
 						}
