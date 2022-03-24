@@ -208,7 +208,7 @@ namespace Vehicles
 				}
 				if (!vehicle.CompVehicleLauncher.inFlight && Find.WorldObjects.SettlementAt(Tile) is Settlement settlement2)
 				{
-					yield return GizmoHelper.AerialVehicleTradeCommand(this, settlement2.Faction, settlement2.TraderKind);
+					yield return this.AerialVehicleTradeCommand(settlement2.Faction, settlement2.TraderKind);
 				}
 				if (vehicle.CompVehicleLauncher.ControlInFlight || !vehicle.CompVehicleLauncher.inFlight)
 				{
@@ -280,6 +280,7 @@ namespace Vehicles
 							SettlementProximityGoodwillUtility.CheckConfirmSettle(Tile, settleHere);
 						}
 					};
+                    tmpSettleFailReason.Clear();
 					if (!TileFinder.IsValidTileForNewSettlement(Tile, tmpSettleFailReason))
 					{
 						commandSettle.Disable(tmpSettleFailReason.ToString());

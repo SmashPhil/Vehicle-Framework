@@ -5,6 +5,7 @@ using Verse;
 using Verse.AI;
 using RimWorld;
 using HarmonyLib;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -78,7 +79,11 @@ namespace Vehicles
 					else
 					{
 						pawn.carryTracker.innerContainer.TryTransferToContainer(Item, Vehicle.inventory.innerContainer, Item.stackCount, true);
-						TransferableOneWay transferable = Vehicle.cargoToLoad.FirstOrDefault(t => t.AnyThing.def == Item.def);
+						TransferableOneWay transferable = Vehicle.cargoToLoad.FirstOrDefault(t => t.AnyThing is {def: var def} && def == Item.def);
+                        if (transferable is null)
+                        {
+							pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true);
+                        }
 						AccessTools.Field(typeof(TransferableOneWay), "countToTransfer").SetValue(transferable, transferable.CountToTransfer - job.count);
 					}
 				}

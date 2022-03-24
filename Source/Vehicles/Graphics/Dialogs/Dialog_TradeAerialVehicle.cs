@@ -11,7 +11,7 @@ using UnityEngine;
 namespace Vehicles
 {
 	[StaticConstructorOnStartup]
-	public class Dialog_TradeAerialVehicle : Window
+	public class Dialog_TradeAerialVehicle : Dialog_Trade
 	{
 		private const float TopAreaHeight = 58f;
 		private const float FirstCommodityY = 6f;
@@ -25,7 +25,6 @@ namespace Vehicles
 
 		private bool giftsOnly;
 		private Vector2 scrollPosition = Vector2.zero;
-		public static float lastCurrencyFlashTime = -100f;
 
 		private List<Tradeable> cachedTradeables;
 		private Tradeable cachedCurrencyTradeable;
@@ -45,7 +44,7 @@ namespace Vehicles
 		private static readonly Texture2D GiftModeIcon = ContentFinder<Texture2D>.Get("UI/Buttons/GiftMode", true);
 		private static readonly Texture2D TradeModeIcon = ContentFinder<Texture2D>.Get("UI/Buttons/TradeMode", true);
 
-		public Dialog_TradeAerialVehicle(AerialVehicleInFlight aerialVehicle, Pawn playerNegotiator, ITrader trader, bool giftsOnly = false)
+		public Dialog_TradeAerialVehicle(AerialVehicleInFlight aerialVehicle, Pawn playerNegotiator, ITrader trader, bool giftsOnly = false) : base(playerNegotiator, trader, giftsOnly)
 		{
 			this.aerialVehicle = aerialVehicle;
 			this.giftsOnly = giftsOnly;
@@ -339,12 +338,7 @@ namespace Vehicles
 			Widgets.EndScrollView();
 		}
 
-		public void FlashSilver()
-		{
-			lastCurrencyFlashTime = Time.time;
-		}
-
-		public override bool CausesMessageBackground()
+        public override bool CausesMessageBackground()
 		{
 			return true;
 		}

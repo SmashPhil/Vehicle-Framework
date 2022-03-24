@@ -120,12 +120,15 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan_NeedsTracker), "TrySatisfyPawnNeeds"),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(TrySatisfyVehiclePawnsNeeds)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanUtility), nameof(CaravanUtility.IsCaravanMember)), prefix: null,
-				postfix: new HarmonyMethod(typeof(CaravanHandling),
-				nameof(IsParentCaravanMember)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanUtility), nameof(CaravanUtility.GetCaravan)),
+				prefix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(GetParentCaravan)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanUtility), nameof(CaravanUtility.RandomOwner)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(RandomVehicleOwner)));
+
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_Trade), nameof(CaravanArrivalAction_Trade.CanTradeWith)),
+                postfix: new HarmonyMethod(typeof(CaravanHandling), nameof(NoTradingUndocked)));
 		}
 
 		/// <summary>
@@ -710,10 +713,6 @@ namespace Vehicles
 				List<Thing> inventoryItems = new List<Thing>();
 				foreach (Pawn pawn in caravan.PawnsListForReading)
 				{
-					foreach (Thing t in pawn.inventory.innerContainer)
-					{
-						inventoryItems.Add(t);
-					}
 					if (pawn is VehiclePawn vehicle)
 					{
 						inventoryItems.AddRange(vehicle.AllPawnsAboard.SelectMany(p => p.inventory.innerContainer));
@@ -927,13 +926,16 @@ namespace Vehicles
 			}
 		}
 
-		public static void IsParentCaravanMember(Pawn pawn, ref bool __result)
+		public static bool GetParentCaravan(Pawn pawn, ref Caravan __result)
 		{
-			if (pawn.ParentHolder is VehicleHandler handler && handler.vehicle != null)
+			if (pawn.ParentHolder is VehicleHandler {vehicle:{ParentHolder:Caravan caravan}})
 			{
-				__result = handler.vehicle.IsCaravanMember();
-			}
-		}
+				__result = caravan;
+                return false;
+            }
+
+            return true;
+        }
 
 		public static bool RandomVehicleOwner(Caravan caravan, ref Pawn __result)
 		{
@@ -958,5 +960,13 @@ namespace Vehicles
 			}
 			return true;
 		}
-	}
+
+        public static void NoTradingUndocked(Caravan caravan, Settlement settlement, ref FloatMenuAcceptanceReport __result)
+        {
+            if (__result.Accepted && caravan.HasBoat() && !caravan.PawnsListForReading.NotNullAndAny(p => !p.IsBoat()))
+            {
+                __result = false;
+            }
+        }
+    }
 }

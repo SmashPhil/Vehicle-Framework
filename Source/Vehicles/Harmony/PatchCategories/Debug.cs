@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using HarmonyLib;
 using Verse;
@@ -55,20 +57,16 @@ namespace Vehicles
 			//	nameof(ExceptionCatcher)));
 		}
 
-		public static void TestMethod(Thing thing, StatWorker __instance)
+		public static void TestMethod()
 		{
-			try
-			{
-				//Log.Message($"Thing: {thing} Type: {__instance.GetType()} Disabled: {");
-			}
-			catch (Exception ex)
-			{
-				Log.Error($"[Test Method] Exception Thrown.\n{ex.Message}\n{ex.InnerException}\n{ex.StackTrace}");
-			}
-			finally
-			{
-
-			}
+            try
+            {
+                Log.Message("");
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"[Test Method] Exception Thrown.\n{ex.Message}\n{ex.InnerException}\n{ex.StackTrace}");
+            }
 		}
 
 		public static Exception ExceptionCatcher(Exception __exception)
