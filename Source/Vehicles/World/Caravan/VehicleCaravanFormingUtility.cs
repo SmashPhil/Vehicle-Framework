@@ -31,23 +31,25 @@ namespace Vehicles
 				return;
 			}
 
+			List<TransferableOneWay> list = transferables;
+			list.RemoveAll((TransferableOneWay x) => x.CountToTransfer <= 0 || !x.HasAnyThing || x.AnyThing is Pawn);
+
+			foreach (Pawn p in pawns)
+			{
+				Lord lord = p.GetLord();
+				if (lord != null)
+				{
+					lord.Notify_PawnLost(p, PawnLostCondition.ForcedToJoinOtherLord, null);
+				}
+			}
+
+			List<VehiclePawn> vehicles = pawns.Where(p => p.IsBoat()).Cast<VehiclePawn>().ToList();
+			List<Pawn> capablePawns = pawns.Where(x => !(x is VehiclePawn) && x.IsColonist && !x.Downed && !x.Dead).ToList();
+			List<Pawn> prisoners = pawns.Where(x => !(x is VehiclePawn) && !x.IsColonist && !x.RaceProps.Animal).ToList();
+
+			bool waterTravel = false;
 			if (pawns.NotNullAndAny(x => x is VehiclePawn vehicle && vehicle.IsBoat() && (vehicle.movementStatus is VehicleMovementStatus.Online)))
 			{
-
-				List<TransferableOneWay> list = transferables;
-				list.RemoveAll((TransferableOneWay x) => x.CountToTransfer <= 0 || !x.HasAnyThing || x.AnyThing is Pawn);
-
-				foreach (Pawn p in pawns)
-				{
-					Lord pLord = p.GetLord();
-					if (pLord != null)
-					{
-						pLord.Notify_PawnLost(p, PawnLostCondition.ForcedToJoinOtherLord, null);
-					}
-				}
-				List<VehiclePawn> vehicles = pawns.Where(p => p.IsBoat()).Cast<VehiclePawn>().ToList();
-				List<Pawn> capablePawns = pawns.Where(x => !(x is VehiclePawn) && x.IsColonist && !x.Downed && !x.Dead).ToList();
-				List<Pawn> prisoners = pawns.Where(x => !(x is VehiclePawn) && !x.IsColonist && !x.RaceProps.Animal).ToList();
 				int seats = 0;
 				foreach (VehiclePawn vehicle in vehicles)
 				{
@@ -55,52 +57,20 @@ namespace Vehicles
 				}
 				if ((pawns.Where(p => !p.IsBoat()).ToList().Count + downedPawns.Count) > seats)
 				{
-					Log.Error("Can't start forming caravan with vehicles(s) selected and not enough seats to house all pawns. Seats: " + seats + " Pawns boarding: " +
-						(pawns.Where(x => !(x is VehiclePawn)).ToList().Count + downedPawns.Count));
+					Log.Error($"Can't start forming caravan with vehicles(s) selected and not enough seats to house all pawns. Seats: {seats} Pawns boarding: {pawns.Where(x => !(x is VehiclePawn)).ToList().Count + downedPawns.Count}");
 					return;
 				}
-
-				LordJob_FormAndSendVehicles lordJob = new LordJob_FormAndSendVehicles(list, vehicles, capablePawns, downedPawns, prisoners, meetingPoint, exitSpot, startingTile,
-					destinationTile, true);
-				LordMaker.MakeNewLord(Faction.OfPlayer, lordJob, pawns[0].MapHeld, pawns);
-				vehicles.ForEach(v => v.DisembarkAll());
-
-				foreach (Pawn p in pawns)
-				{
-					if (p.Spawned)
-					{
-						p.jobs.EndCurrentJob(JobCondition.InterruptForced, true);
-					}
-				}
+				waterTravel = true;
 			}
-			else if (pawns.NotNullAndAny(x => x is VehiclePawn vehicle && vehicle.movementStatus is VehicleMovementStatus.Online))
+			LordJob_FormAndSendVehicles lordJob = new LordJob_FormAndSendVehicles(list, vehicles, capablePawns, downedPawns, prisoners, meetingPoint, exitSpot, startingTile, destinationTile, waterTravel);
+			LordMaker.MakeNewLord(Faction.OfPlayer, lordJob, pawns[0].MapHeld, pawns);
+			vehicles.ForEach(v => v.DisembarkAll());
+
+			foreach (Pawn p in pawns)
 			{
-				List<TransferableOneWay> list = transferables;
-				list.RemoveAll((TransferableOneWay x) => x.CountToTransfer <= 0 || !x.HasAnyThing || x.AnyThing is Pawn);
-
-				foreach (Pawn p in pawns)
+				if (p.Spawned)
 				{
-					Lord lord = p.GetLord();
-					if (lord != null)
-					{
-						lord.Notify_PawnLost(p, PawnLostCondition.ForcedToJoinOtherLord, null);
-					}
-				}
-
-				List<VehiclePawn> vehicles = pawns.Where(x => x is VehiclePawn).Cast<VehiclePawn>().ToList();
-				List<Pawn> capablePawns = pawns.Where(x => !(x is VehiclePawn) && x.IsColonist && !x.Downed && !x.Dead).ToList();
-				List<Pawn> prisoners = pawns.Where(x => !(x is VehiclePawn) && !x.IsColonist && !x.RaceProps.Animal).ToList();
-
-				LordJob_FormAndSendVehicles lordJob = new LordJob_FormAndSendVehicles(list, vehicles, capablePawns, downedPawns, prisoners, meetingPoint, exitSpot, startingTile, destinationTile);
-				LordMaker.MakeNewLord(Faction.OfPlayer, lordJob, pawns[0].MapHeld, pawns);
-				vehicles.ForEach(v => v.DisembarkAll());
-
-				foreach (Pawn p in pawns)
-				{
-					if (p.Spawned)
-					{
-						p.jobs.EndCurrentJob(JobCondition.InterruptForced, true);
-					}
+					p.jobs.EndCurrentJob(JobCondition.InterruptForced, true);
 				}
 			}
 		}

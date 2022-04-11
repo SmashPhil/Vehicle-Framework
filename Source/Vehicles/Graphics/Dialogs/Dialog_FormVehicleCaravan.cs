@@ -217,17 +217,20 @@ namespace Vehicles
 					float second;
 					if (destinationTile != -1)
 					{
-						using (WorldPath worldPath = Find.WorldPathFinder.FindPath(CurrentTile, destinationTile, null, null))
+						List<Pawn> pawns = TransferableUtility.GetPawnsFromTransferables(transferables);
+						List<VehiclePawn> vehicles = pawns.Where(v => v is VehiclePawn).Cast<VehiclePawn>().ToList();
+						using (WorldPath worldPath = WorldVehiclePathfinder.Instance.FindPath(CurrentTile, destinationTile, vehicles))
 						{
-							int ticksPerMove = 1;// CaravanTicksPerMoveUtility.GetTicksPerMove(new CaravanTicksPerMoveUtility.CaravanInfo(this), null); REDO
+							int ticksPerMove = VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(new VehicleCaravanTicksPerMoveUtility.VehicleInfo(this), null);
 							first = DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(transferables, CurrentTile, IgnoreInventoryMode, Faction.OfPlayer, worldPath, 0f, ticksPerMove);
 							second = DaysUntilRotCalculator.ApproxDaysUntilRot(transferables, CurrentTile, IgnoreInventoryMode, worldPath, 0f, ticksPerMove);
-							goto IL_DB;
 						}
 					}
-					first = DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(transferables, CurrentTile, IgnoreInventoryMode, Faction.OfPlayer, null, 0f, 3300);
-					second = DaysUntilRotCalculator.ApproxDaysUntilRot(transferables, CurrentTile, IgnoreInventoryMode, null, 0f, 3300);
-					IL_DB:
+					else
+					{
+						first = DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(transferables, CurrentTile, IgnoreInventoryMode, Faction.OfPlayer);
+						second = DaysUntilRotCalculator.ApproxDaysUntilRot(transferables, CurrentTile, IgnoreInventoryMode, null);
+					}
 					cachedDaysWorthOfFood = new Pair<float, float>(first, second);
 				}
 				return cachedDaysWorthOfFood;
@@ -776,7 +779,7 @@ namespace Vehicles
 		private bool TryFindExitSpot(List<Pawn> pawns, bool reachableForEveryColonist, out IntVec3 spot)
 		{
 			bool result;
-			if (pawns.NotNullAndAny(p => p.IsBoat()))
+			if (pawns.HasBoat())
 			{
 				//Rot4 rotFromTo = Find.WorldGrid.GetRotFromTo(__instance.CurrentTile, ___startingTile); WHEN WORLD GRID IS ESTABLISHED
 				Rot4 rotFromTo;
@@ -917,7 +920,7 @@ namespace Vehicles
 				IntVec3 iV2 = cellDist.Keys.ElementAt(i);
 				if(validator(iV2))
 				{
-					if (ships.All(v => VehicleReachabilityUtility.CanReachVehicle(v, iV2, PathEndMode.Touch, Danger.Deadly, false, TraverseMode.ByPawn)))
+					if (ships.All(v => VehicleReachabilityUtility.CanReachVehicle(v, iV2, PathEndMode.Touch, Danger.Deadly, TraverseMode.ByPawn)))
 					{
 						IntVec2 v2 = new IntVec2(iV2.x, iV2.z);
 						int halfSize = leadShip.def.size.z + 1;

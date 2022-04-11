@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
-using Vehicles.Defs;
-using Vehicles;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
@@ -38,17 +36,17 @@ namespace Vehicles.Lords
 		{
 			foreach(Pawn pawn in lord.ownedPawns)
 			{
-				if(pawn.IsColonist)
+				if (pawn.IsColonist)
 				{
 					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareVehicleCaravan_GatherItems);
 				}
 				else if(pawn.RaceProps.Animal)
 				{
-					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_BoardShip);
+					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_BoardVehicle);
 				}
-				else if(pawn is VehiclePawn)
+				else if (pawn is VehiclePawn)
 				{
-					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_WaitShip);
+					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_WaitVehicle);
 				}
 				else
 				{

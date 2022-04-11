@@ -172,12 +172,12 @@ namespace Vehicles.Lords
 
 		public bool AssignRemainingPawns()
 		{
-			if(requireAllSeated)
+			if (requireAllSeated)
 			{
-				foreach(Pawn pawn in pawns.Where(p => !vehicleAssigned.ContainsKey(p)))
+				foreach (Pawn pawn in pawns.Where(p => !vehicleAssigned.ContainsKey(p)))
 				{
 					VehiclePawn nextAvailableVehicle = vehicles.FirstOrDefault(v => v.SeatsAvailable > 0);
-					if(nextAvailableVehicle is null)
+					if (nextAvailableVehicle is null)
 					{
 						return false;
 					}
@@ -187,13 +187,15 @@ namespace Vehicles.Lords
 			else
 			{
 				int nextVehicleIndex = 0;
-				foreach(Pawn pawn in pawns.Where(p => !vehicleAssigned.ContainsKey(p)))
+				foreach (Pawn pawn in pawns.Where(p => !vehicleAssigned.ContainsKey(p)))
 				{
 					VehiclePawn nextAvailableVehicle = vehicles[nextVehicleIndex];
 					vehicleAssigned.Add(pawn, (nextAvailableVehicle, null));
 					nextVehicleIndex++;
 					if (nextVehicleIndex >= vehicles.Count)
+					{
 						nextVehicleIndex = 0;
+					}
 				}
 			}
 			return true;
@@ -314,90 +316,108 @@ namespace Vehicles.Lords
 		private void SendCaravan()
 		{
 			caravanSent = true;
-			CaravanHelper.ExitMapAndCreateVehicleCaravan(lord.ownedPawns.Concat(
-				from x in downedPawns
-				where JobGiver_PrepareCaravan_GatherDownedPawns.IsDownedPawnNearExitPoint(x, exitPoint)
-				select x), lord.faction, Map.Tile, startingTile, destinationTile);
+			CaravanHelper.ExitMapAndCreateVehicleCaravan(lord.ownedPawns.Concat(downedPawns.Where(pawn => 
+				JobGiver_PrepareCaravan_GatherDownedPawns.IsDownedPawnNearExitPoint(pawn, exitPoint))), lord.faction, Map.Tile, startingTile, destinationTile);
 		}
 		
 		public override StateGraph CreateGraph()
 		{
 			StateGraph stateGraph = new StateGraph();
+
+			gatherAnimals = new LordToil_PrepareCaravan_GatherAnimals(meetingPoint);
+			stateGraph.AddToil(gatherAnimals);
+			gatherAnimals_pause = new LordToil_PrepareCaravan_Pause();
+			stateGraph.AddToil(gatherAnimals_pause);
+
 			gatherItems = new LordToil_PrepareCaravan_GatherCargo(meetingPoint);
 			stateGraph.AddToil(gatherItems);
 			gatherItems_pause = new LordToil_PrepareCaravan_Pause();
 			stateGraph.AddToil(gatherItems_pause);
-			gatherSlaves = new LordToil_PrepareCaravan_GatherSlavesVehicle(meetingPoint);
-			stateGraph.AddToil(gatherSlaves);
-			gatherSlaves_pause = new LordToil_PrepareCaravan_Pause();
-			stateGraph.AddToil(gatherSlaves_pause);
-			gatherDownedPawns = new LordToil_PrepareCaravan_GatherDownedPawnsVehicle(meetingPoint, exitPoint);
-			stateGraph.AddToil(gatherDownedPawns);
-			gatherDownedPawns_pause = new LordToil_PrepareCaravan_Pause();
-			stateGraph.AddToil(gatherDownedPawns_pause);
+
+			//DISABLED BECAUSE VANILLA NO LONGER GATHERS SLAVES (Maybe I'll add unique mechanics in the future, idk we'll see)
+			//gatherSlaves = new LordToil_PrepareCaravan_GatherSlavesVehicle(meetingPoint);
+			//stateGraph.AddToil(gatherSlaves);
+			//gatherSlaves_pause = new LordToil_PrepareCaravan_Pause();
+			//stateGraph.AddToil(gatherSlaves_pause);
+
+			//gatherDownedPawns = new LordToil_PrepareCaravan_GatherDownedPawnsVehicle(meetingPoint, exitPoint);
+			//stateGraph.AddToil(gatherDownedPawns);
+			//gatherDownedPawns_pause = new LordToil_PrepareCaravan_Pause();
+			//stateGraph.AddToil(gatherDownedPawns_pause);
+
 			ResolveSeatingAssignments();
+
 			boardVehicle = new LordToil_PrepareCaravan_BoardVehicles(exitPoint);
 			stateGraph.AddToil(boardVehicle);
 			boardVehicle_pause = new LordToil_PrepareCaravan_Pause();
 			stateGraph.AddToil(boardVehicle_pause);
-			//LordToil_PrepareCaravan_Wait lordToil_PrepareCaravan_Wait = new LordToil_PrepareCaravan_Wait(meetingPoint);
-			//stateGraph.AddToil(lordToil_PrepareCaravan_Wait);
-			//LordToil_PrepareCaravan_Pause lordToil_PrepareCaravan_Pause = new LordToil_PrepareCaravan_Pause();
-			//stateGraph.AddToil(lordToil_PrepareCaravan_Pause);
+
 			leave = new LordToil_PrepareCaravan_LeaveWithVehicles(exitPoint);
 			stateGraph.AddToil(leave);
 			leave_pause = new LordToil_PrepareCaravan_Pause();
 			stateGraph.AddToil(leave_pause);
 			LordToil_End lordToil_End = new LordToil_End();
 			stateGraph.AddToil(lordToil_End);
-			
-			Transition transition2 = new Transition(gatherItems, gatherSlaves, false, true); //gatherDownedPawns
+
+			Transition transition1 = new Transition(gatherAnimals, gatherItems);
+			transition1.AddTrigger(new Trigger_Memo("AllItemsGathered"));
+			transition1.AddPostAction(new TransitionAction_EndAllJobs());
+			stateGraph.AddTransition(transition1, false);
+
+			Transition transition2 = new Transition(gatherItems, gatherDownedPawns);
 			transition2.AddTrigger(new Trigger_Memo("AllItemsGathered"));
 			transition2.AddPostAction(new TransitionAction_EndAllJobs());
 			stateGraph.AddTransition(transition2, false);
-			Transition transition3 = new Transition(gatherDownedPawns, gatherSlaves, false, true);
+
+			Transition transition3 = new Transition(gatherDownedPawns, boardVehicle); //gatherSlaves
 			transition3.AddTrigger(new Trigger_Memo("AllDownedPawnsGathered"));
 			stateGraph.AddTransition(transition3, false);
-			Transition transition4 = new Transition(gatherSlaves, boardVehicle, false, true); //lordToil_PrepareCaravan_Wait
+
+			Transition transition4 = new Transition(gatherSlaves, boardVehicle);
 			transition4.AddTrigger(new Trigger_Memo("AllSlavesGathered"));
 			transition4.AddPostAction(new TransitionAction_EndAllJobs());
 			stateGraph.AddTransition(transition4, false);
-			//Transition transition5 = new Transition(lordToil_PrepareCaravan_Wait, boardVehicle, false, true);
-			//transition5.AddTrigger(new Trigger_NoPawnsVeryTiredAndSleeping(0f));
-			//transition5.AddPostAction(new TransitionAction_WakeAll());
-			//stateGraph.AddTransition(transition5, false);
-			Transition transitionB = new Transition(boardVehicle, leave, false, true);
+
+			Transition transitionB = new Transition(boardVehicle, leave);
 			transitionB.AddTrigger(new Trigger_Memo("AllPawnsOnboard"));
 			transitionB.AddPostAction(new TransitionAction_EndAllJobs());
 			stateGraph.AddTransition(transitionB, false);
-			Transition transition6 = new Transition(leave, lordToil_End, false, true);
+
+			Transition transition6 = new Transition(leave, lordToil_End);
 			transition6.AddTrigger(new Trigger_Memo("ReadyToExitMap"));
-			transition6.AddPreAction(new TransitionAction_Custom(new Action(SendCaravan)));
+			transition6.AddPreAction(new TransitionAction_Custom(SendCaravan));
 			stateGraph.AddTransition(transition6, false);
+
 			Transition transition9 = PauseTransition(gatherItems, gatherItems_pause);
 			stateGraph.AddTransition(transition9, false);
+
 			Transition transition10 = UnpauseTransition(gatherItems_pause, gatherItems);
 			stateGraph.AddTransition(transition10, false);
+
 			Transition transition11 = PauseTransition(gatherDownedPawns, gatherDownedPawns_pause);
 			stateGraph.AddTransition(transition11, false);
+
 			Transition transition12 = UnpauseTransition(gatherDownedPawns_pause, gatherDownedPawns);
 			stateGraph.AddTransition(transition12, false);
-			Transition transition13 = PauseTransition(gatherSlaves, gatherSlaves_pause);
-			stateGraph.AddTransition(transition13, false);
-			Transition transition14 = UnpauseTransition(gatherSlaves_pause, gatherSlaves);
-			stateGraph.AddTransition(transition14, false);
+
+			//Transition transition13 = PauseTransition(gatherSlaves, gatherSlaves_pause);
+			//stateGraph.AddTransition(transition13, false);
+
+			//Transition transition14 = UnpauseTransition(gatherSlaves_pause, gatherSlaves);
+			//stateGraph.AddTransition(transition14, false);
+
 			Transition transition15 = PauseTransition(boardVehicle, boardVehicle_pause);
 			stateGraph.AddTransition(transition15, false);
+
 			Transition transition16 = UnpauseTransition(boardVehicle_pause, boardVehicle);
 			stateGraph.AddTransition(transition16, false);
+
 			Transition transition17 = PauseTransition(leave, leave_pause);
 			stateGraph.AddTransition(transition17, false);
+
 			Transition transition18 = UnpauseTransition(leave_pause, leave);
 			stateGraph.AddTransition(transition18, false);
-			//Transition transition19 = PauseTransition(lordToil_PrepareCaravan_Wait, lordToil_PrepareCaravan_Pause);
-			//stateGraph.AddTransition(transition19, false);
-			//Transition transition20 = UnpauseTransition(lordToil_PrepareCaravan_Pause, lordToil_PrepareCaravan_Wait);
-			//stateGraph.AddTransition(transition20, false);
+
 			return stateGraph;
 		}
 

@@ -31,14 +31,13 @@ namespace Vehicles
 				z = tmp;
 			}
 			CellRect newRect = CellRect.CenteredOn(vehicle.Position, x, z);
-			var hash = newRect.Cells.ToHashSet();
-			if (occupiedRect.TryGetValue(vehicle, out HashSet<IntVec3> _))
+			HashSet<IntVec3> hash = newRect.Cells.ToHashSet();
+			occupiedRect[vehicle] = hash;
+
+			vehicle.RecalculateFollowerCell();
+			if (ClaimedBy(vehicle.FollowerCell) is VehiclePawn blockedVehicle)
 			{
-				occupiedRect[vehicle] = hash;
-			}
-			else
-			{
-				occupiedRect.Add(vehicle, hash);
+				blockedVehicle.RecalculateFollowerCell();
 			}
 		}
 

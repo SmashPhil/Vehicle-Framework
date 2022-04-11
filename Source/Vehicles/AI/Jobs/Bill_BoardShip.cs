@@ -2,17 +2,17 @@
 
 namespace Vehicles
 {
-	public class Bill_BoardShip : IExposable
+	public class Bill_BoardVehicle : IExposable
 	{
 		public VehicleHandler handler;
 		public Pawn pawnToBoard;
 
-		public Bill_BoardShip()
+		public Bill_BoardVehicle()
 		{
 
 		}
 
-		public Bill_BoardShip(Pawn newBoard, VehicleHandler newHandler)
+		public Bill_BoardVehicle(Pawn newBoard, VehicleHandler newHandler)
 		{
 			pawnToBoard = newBoard;
 			handler = newHandler;

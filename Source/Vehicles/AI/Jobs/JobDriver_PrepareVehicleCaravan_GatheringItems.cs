@@ -85,7 +85,7 @@ namespace Vehicles
 			{
 				initAction = delegate ()
 				{
-					int num = GatherItemsForShipCaravanUtility.CountLeftToTransfer(pawn, Transferable, job.lord);
+					int num = GatherItemsForVehicleCaravanUtility.CountLeftToTransfer(pawn, Transferable, job.lord);
 					if (pawn.carryTracker.CarriedThing != null)
 					{
 						num -= pawn.carryTracker.CarriedThing.stackCount;

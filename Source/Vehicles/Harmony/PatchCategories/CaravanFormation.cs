@@ -8,9 +8,8 @@ using Verse.Sound;
 using Verse.AI.Group;
 using RimWorld;
 using RimWorld.Planet;
-using UnityEngine;
+using SmashTools;
 using Vehicles.Lords;
-using Vehicles.Defs;
 
 namespace Vehicles
 {
@@ -21,7 +20,7 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanFormingUtility), nameof(CaravanFormingUtility.IsFormingCaravan)),
 				prefix: new HarmonyMethod(typeof(CaravanFormation),
 				nameof(IsFormingCaravanVehicle)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(TransferableUtility), nameof(TransferableUtility.CanStack)), prefix: null, postfix: null,
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(TransferableUtility), nameof(TransferableUtility.CanStack)),
 				transpiler: new HarmonyMethod(typeof(CaravanFormation),
 				nameof(CanStackVehicleTranspiler)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(TransferableUIUtility), "DoCountAdjustInterfaceInternal"),
@@ -33,6 +32,12 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(FloatMenuMakerMap), "AddHumanlikeOrders"), prefix: null, postfix: null,
 				transpiler: new HarmonyMethod(typeof(CaravanFormation),
 				nameof(AddHumanLikeOrdersLoadVehiclesTranspiler)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanExitMapUtility), nameof(CaravanExitMapUtility.CanExitMapAndJoinOrCreateCaravanNow)),
+				postfix: new HarmonyMethod(typeof(CaravanFormation),
+				nameof(CanVehicleExitMapAndJoinOrCreateCaravanNow)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanExitMapUtility), nameof(CaravanExitMapUtility.ExitMapAndJoinOrCreateCaravan)),
+				prefix: new HarmonyMethod(typeof(CaravanFormation),
+				nameof(ExitMapAndJoinOrCreateVehicleCaravan)));
 		}
 
 		/// <summary>
@@ -176,6 +181,60 @@ namespace Vehicles
 				}
 				yield return instruction;
 			}
+		}
+
+		public static void CanVehicleExitMapAndJoinOrCreateCaravanNow(Pawn pawn, ref bool __result)
+		{
+			if (pawn is VehiclePawn vehicle)
+			{
+				__result = vehicle.Spawned && vehicle.Map.exitMapGrid.MapUsesExitGrid && (vehicle.AllPawnsAboard.NotNullAndAny(p => p.IsColonist) || CaravanExitMapUtility.FindCaravanToJoinFor(vehicle) != null);
+			}
+		}
+
+		public static bool ExitMapAndJoinOrCreateVehicleCaravan(Pawn pawn, Rot4 exitDir)
+		{
+			return true;
+			//VehiclePawn vehicle = pawn as VehiclePawn;
+			//Caravan caravan = CaravanExitMapUtility.FindCaravanToJoinFor(pawn);
+			//if (caravan is VehicleCaravan vehicleCaravan)
+			//{
+			//	CaravanHelper.AddVehicleCaravanExitTaleIfShould(pawn);
+			//	vehicleCaravan.AddPawn(vehicle, true);
+			//	vehicle.ExitMap(false, exitDir);
+			//	return false;
+			//}
+			//else if (vehicle != null)
+			//{
+			//	if (vehicle != null && vehicleCaravan is null)
+			//	{
+			//		vehicleCaravan = CaravanHelper.MakeVehicleCaravan(caravan.PawnsListForReading, caravan.Faction, caravan.Tile, true);
+			//	}
+			//}
+			//Map map = pawn.Map;
+			//int directionTile = CaravanExitMapUtility.FindRandomStartingTileBasedOnExitDir(map.Tile, exitDir);
+			//Caravan caravan2 = CaravanExitMapUtility.ExitMapAndCreateCaravan(Gen.YieldSingle<Pawn>(pawn), pawn.Faction, map.Tile, directionTile, -1, false);
+			//caravan2.autoJoinable = true;
+			//bool flag = false;
+			//List<Pawn> allPawnsSpawned = map.mapPawns.AllPawnsSpawned;
+			//for (int i = 0; i < allPawnsSpawned.Count; i++)
+			//{
+			//	if (CaravanExitMapUtility.FindCaravanToJoinFor(allPawnsSpawned[i]) != null && !allPawnsSpawned[i].Downed && !allPawnsSpawned[i].Drafted)
+			//	{
+			//		if (allPawnsSpawned[i].RaceProps.Animal)
+			//		{
+			//			flag = true;
+			//		}
+			//		RestUtility.WakeUp(allPawnsSpawned[i]);
+			//		allPawnsSpawned[i].jobs.CheckForJobOverride();
+			//	}
+			//}
+			//TaggedString taggedString = "MessagePawnLeftMapAndCreatedCaravan".Translate(pawn.LabelShort, pawn).CapitalizeFirst();
+			//if (flag)
+			//{
+			//	taggedString += " " + "MessagePawnLeftMapAndCreatedCaravan_AnimalsWantToJoin".Translate();
+			//}
+			//Messages.Message(taggedString, caravan2, MessageTypeDefOf.TaskCompletion, true);
+			return true;
 		}
 	}
 }

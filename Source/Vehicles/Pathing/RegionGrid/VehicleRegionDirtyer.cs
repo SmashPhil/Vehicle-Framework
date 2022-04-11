@@ -67,7 +67,7 @@ namespace Vehicles
 		/// Notify that the walkable status at <paramref name="cell"/> has changed
 		/// </summary>
 		/// <param name="cell"></param>
-		internal void Notify_WalkabilityChanged(IntVec3 cell)
+		public void Notify_WalkabilityChanged(IntVec3 cell)
 		{
 			regionsToDirty.Clear();
 			for (int i = 0; i < 9; i++)
@@ -97,7 +97,7 @@ namespace Vehicles
 		/// Notify that <paramref name="thing"/> has spawned, potentially affecting cell status for its occupied rect
 		/// </summary>
 		/// <param name="thing"></param>
-		internal void Notify_ThingAffectingRegionsSpawned(Thing thing)
+		public void Notify_ThingAffectingRegionsSpawned(Thing thing)
 		{
 			regionsToDirty.Clear();
 			foreach (IntVec3 c in thing.OccupiedRect().ExpandedBy(1).ClipInsideMap(thing.Map))
@@ -119,7 +119,7 @@ namespace Vehicles
 		/// Notify that <paramref name="thing"/> has despawned, potentially affecting cell status for its previously occupied rect
 		/// </summary>
 		/// <param name="thing"></param>
-		internal void Notify_ThingAffectingRegionsDespawned(Thing thing)
+		public void Notify_ThingAffectingRegionsDespawned(Thing thing)
 		{
 			regionsToDirty.Clear();
 			VehicleRegion validRegionAt_NoRebuild = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid.GetValidRegionAt_NoRebuild(thing.Position);

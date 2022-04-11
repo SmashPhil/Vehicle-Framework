@@ -17,6 +17,8 @@ namespace Vehicles
 	{
 		public const float IconBarDim = 30;
 
+		public static bool GenStepsActive = false;
+
 		public void PatchMethods()
 		{
 			VehicleHarmony.Patch(original: AccessTools.Property(typeof(MapPawns), nameof(MapPawns.FreeColonistsSpawnedOrInPlayerEjectablePodsCount)).GetGetMethod(), prefix: null,
@@ -49,10 +51,18 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Dialog_ManageAreas), "DoAreaRow"),
 				transpiler: new HarmonyMethod(typeof(Extra),
 				nameof(VehicleAreaRowTranspiler)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenStep_RocksFromGrid), nameof(GenStep_RocksFromGrid.Generate)),
+				prefix: new HarmonyMethod(typeof(Extra),
+				nameof(GenStepsActivate)),
+				postfix: new HarmonyMethod(typeof(Extra),
+				nameof(GenStepsInactivate)));
+
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn), nameof(Pawn.Kill)),
-                prefix:new HarmonyMethod(typeof(Extra), nameof(MoveOnDeath)));
+                prefix: new HarmonyMethod(typeof(Extra), 
+				nameof(MoveOnDeath)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnUtility), nameof(PawnUtility.ShouldSendNotificationAbout)),
-                postfix: new HarmonyMethod(typeof(Extra), nameof(SendNotificationsVehicle)));
+                postfix: new HarmonyMethod(typeof(Extra), 
+				nameof(SendNotificationsVehicle)));
 
 		}
 
@@ -216,7 +226,17 @@ namespace Vehicles
 			}
 		}
 
-        public static void MoveOnDeath(Pawn __instance)
+		public static void GenStepsActivate(Map map, GenStepParams parms)
+		{
+			GenStepsActive = true;
+		}
+
+		public static void GenStepsInactivate(Map map, GenStepParams parms)
+		{
+			GenStepsActive = false;
+		}
+
+		public static void MoveOnDeath(Pawn __instance)
         {
             if (__instance.IsInVehicle())
             {
@@ -234,7 +254,7 @@ namespace Vehicles
             }
         }
 
-		[DebugAction("Vehicles", "Kill Someone", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+		[DebugAction(VehicleHarmony.VehiclesLabel, "Kill Someone", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.PlayingOnMap)]
         public static void KillPawn()
         {
 			Find.CurrentMap.mapPawns.FreeColonists.RandomElement().Kill(null);

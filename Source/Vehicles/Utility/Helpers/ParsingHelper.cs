@@ -120,9 +120,9 @@ namespace Vehicles
 			if (!PathingHelper.allTerrainCostsByTag.TryGetValue(defName, out var terrainDict))
 			{
 				terrainDict = new Dictionary<string, int>();
-				PathingHelper.allTerrainCostsByTag.Add(defName, terrainDict);
+				PathingHelper.allTerrainCostsByTag[defName] = terrainDict;
 			}
-			terrainDict.AddOrReplace(value, pathCost);
+			terrainDict[value] = pathCost;
 		}
 
 		private static void DisallowTerrainCosts(XmlNode node, string value, FieldInfo field)
@@ -136,9 +136,9 @@ namespace Vehicles
 			if (!PathingHelper.allTerrainCostsByTag.TryGetValue(defName, out var terrainDict))
 			{
 				terrainDict = new Dictionary<string, int>();
-				PathingHelper.allTerrainCostsByTag.Add(defName, terrainDict);
+				PathingHelper.allTerrainCostsByTag[defName] = terrainDict;
 			}
-			terrainDict.AddOrReplace(value, -1);
+			terrainDict[value] = -1;
 		}
 
 		private static void MarkAsOverride(XmlNode node, string value, FieldInfo field)

@@ -105,15 +105,15 @@ namespace Vehicles
 		public static IEnumerable<Gizmo> AddVehicleGizmosPassthrough(IEnumerable<Gizmo> __result, FormCaravanComp __instance)
 		{
 			IEnumerator<Gizmo> enumerator = __result.GetEnumerator();
-			if(__instance.parent is MapParent mapParent && __instance.ParentHasMap)
+			if (__instance.parent is MapParent mapParent && __instance.ParentHasMap)
 			{
-				if(!__instance.Reform)
+				if (!__instance.Reform)
 				{
 					yield return new Command_Action()
 					{
 						defaultLabel = "CommandFormVehicleCaravan".Translate(),
 						defaultDesc = "CommandFormVehicleCaravanDesc".Translate(),
-						icon = Settlement.FormCaravanCommand,
+						icon = VehicleTex.FormCaravanVehicle,
 						action = delegate ()
 						{
 							Find.Tutor.learningReadout.TryActivateConcept(ConceptDefOf.FormCaravan);
@@ -121,20 +121,20 @@ namespace Vehicles
 						}
 					};
 				}
-				else if(mapParent.Map.mapPawns.AllPawnsSpawned.Where(p => p is VehiclePawn).Count() > 0)
+				else if (mapParent.Map.mapPawns.AllPawnsSpawned.HasVehicle())
 				{
 					Command_Action command_Action = new Command_Action
 					{
 						defaultLabel = "CommandReformVehicleCaravan".Translate(),
 						defaultDesc = "CommandReformVehicleCaravanDesc".Translate(),
-						icon = FormCaravanComp.FormCaravanCommand,
+						icon = VehicleTex.FormCaravanVehicle,
 						hotKey = KeyBindingDefOf.Misc2,
 						action = delegate ()
 						{
 							Find.WindowStack.Add(new Dialog_FormVehicleCaravan(mapParent.Map, true));
 						}
 					};
-					if (GenHostility.AnyHostileActiveThreatToPlayer(mapParent.Map, true))
+					if (GenHostility.AnyHostileActiveThreatToPlayer(mapParent.Map))
 					{
 						command_Action.Disable("CommandReformCaravanFailHostilePawns".Translate());
 					}

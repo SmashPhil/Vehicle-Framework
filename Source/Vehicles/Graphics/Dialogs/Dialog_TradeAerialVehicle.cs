@@ -38,8 +38,6 @@ namespace Vehicles
 		private float cachedMassCapacity;
 		private string cachedMassCapacityExplanation;
 
-		protected static readonly Vector2 AcceptButtonSize = new Vector2(160f, 40f);
-		protected static readonly Vector2 OtherBottomButtonSize = new Vector2(160f, 40f);
 		private static readonly Texture2D ShowSellableItemsIcon = ContentFinder<Texture2D>.Get("UI/Commands/SellableItems", true);
 		private static readonly Texture2D GiftModeIcon = ContentFinder<Texture2D>.Get("UI/Buttons/GiftMode", true);
 		private static readonly Texture2D TradeModeIcon = ContentFinder<Texture2D>.Get("UI/Buttons/TradeMode", true);

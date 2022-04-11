@@ -73,4 +73,18 @@
 		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
 		<casualInterruptible>false</casualInterruptible>
 	</JobDef>
+	
+	<JobDef>
+		<defName>FollowVehicle</defName>
+		<driverClass>Vehicles.AI.JobDriver_FollowVehicle</driverClass>
+		<reportString>Following.</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+	
+	<JobDef>
+		<defName>EscortVehicle</defName>
+		<driverClass>Vehicles.AI.JobDriver_FollowVehicle</driverClass>
+		<reportString>Escorting.</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
 </Defs>

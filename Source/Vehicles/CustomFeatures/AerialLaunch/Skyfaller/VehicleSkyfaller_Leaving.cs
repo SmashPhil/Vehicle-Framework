@@ -4,7 +4,6 @@ using System.Linq;
 using RimWorld;
 using RimWorld.Planet;
 using Verse;
-using Vehicles.Defs;
 using UnityEngine;
 
 namespace Vehicles

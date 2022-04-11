@@ -5,7 +5,6 @@ using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 using SmashTools;
-using Vehicles.Defs;
 
 namespace Vehicles.Lords
 {
@@ -40,11 +39,11 @@ namespace Vehicles.Lords
 			{
 				if(p is VehiclePawn)
 				{
-					p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_WaitShip);
+					p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_WaitVehicle);
 				}
 				else if (!p.RaceProps.Animal && !p.IsColonist)
 				{
-					p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_SendSlavesToShip, meetingPoint, -1f);
+					p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_SendSlavesToVehicle, meetingPoint, -1f);
 				}
 				else
 				{
@@ -55,11 +54,11 @@ namespace Vehicles.Lords
 
 		public override void LordToilTick()
 		{
-			if(Find.TickManager.TicksGame % 100 == 0)
+			if (Find.TickManager.TicksGame % 100 == 0)
 			{
 				List<Pawn> pawns = lord.ownedPawns.Where(v => !(v is VehiclePawn)).ToList();
 
-				if (!pawns.NotNullAndAny(x => !x.IsColonist && !x.RaceProps.Animal && x.Spawned))
+				if (!pawns.NotNullAndAny(x => !x.IsColonist && x.RaceProps.Humanlike && x.Spawned))
 				{
 					lord.ReceiveMemo("AllSlavesGathered");
 				}

@@ -533,8 +533,8 @@ namespace Vehicles.AI
 					}
 					StopDead();
 				}
-
-				if (vehicle.beached || !nextCell.GetTerrain(vehicle.Map).IsWater)
+				//Temporarily remove beached flagging for user testing
+				if (vehicle.beached/* || !nextCell.GetTerrain(vehicle.Map).IsWater*/)
 				{
 					vehicle.BeachShip();
 					vehicle.Position = nextCell;
@@ -544,11 +544,11 @@ namespace Vehicles.AI
 
 				lastCell = vehicle.Position;
 				vehicle.Position = nextCell;
-				if(NeedNewPath() && !TrySetNewPath())
+				if (NeedNewPath() && !TrySetNewPath())
 				{
 					return;
 				}
-				if(VehicleReachabilityImmediate.CanReachImmediateVehicle(vehicle, destination, peMode))
+				if (VehicleReachabilityImmediate.CanReachImmediateVehicle(vehicle, destination, peMode))
 				{
 					PatherArrived();
 				}

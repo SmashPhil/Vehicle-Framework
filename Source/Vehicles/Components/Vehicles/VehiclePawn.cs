@@ -12,7 +12,7 @@ using Verse.AI.Group;
 using SmashTools;
 using Vehicles.AI;
 using Vehicles.Lords;
-using Vehicles.Defs;
+using Vehicles;
 
 namespace Vehicles
 {
@@ -32,7 +32,7 @@ namespace Vehicles
 		public PatternData patternData;
 		public RetextureDef retexture;
 
-		public List<Bill_BoardShip> bills = new List<Bill_BoardShip>();
+		public List<Bill_BoardVehicle> bills = new List<Bill_BoardVehicle>();
 		public List<VehicleHandler> handlers = new List<VehicleHandler>();
 
 		public bool currentlyFishing = false;
@@ -67,6 +67,8 @@ namespace Vehicles
 		public float CachedAngle { get; set; }
 
 		private List<VehicleHandler> HandlersWithPawnRenderer { get; set; }
+
+		public IntVec3 FollowerCell { get; protected set; }
 
 		public bool CanMove => ActualMoveSpeed > 0.1f && SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), "vehicleMovementPermissions", VehicleDef.vehicleMovementPermissions) >= VehiclePermissions.DriverNeeded && movementStatus == VehicleMovementStatus.Online;
 		public bool CanMoveFinal => CanMove && (PawnCountToOperateFullfilled || VehicleMod.settings.debug.debugDraftAnyShip);
@@ -516,11 +518,65 @@ namespace Vehicles
 
 		public IEnumerable<IntVec3> InhabitedCells(int expandedBy = 0)
 		{
-			if (Angle == 0)
+			return InhabitedCellsProjected(Position, FullRotation, def.Size, expandedBy);
+		}
+
+		public IEnumerable<IntVec3> InhabitedCellsProjected(IntVec3 projectedCell, Rot8 rot, IntVec2? size = null, int expandedBy = 0)
+		{
+			size ??= def.Size;
+			int sizeX = size.Value.x;
+			int sizeZ = size.Value.z;
+			if (!rot.IsValid)
 			{
-				return CellRect.CenteredOn(Position, def.Size.x, def.Size.z).ExpandedBy(expandedBy).Cells;
+				int largestSize = Mathf.Max(sizeX, sizeZ);
+				sizeX = largestSize;
+				sizeZ = largestSize;
 			}
-			return CellRect.CenteredOn(Position, def.Size.x, def.Size.z).ExpandedBy(expandedBy).Cells; //REDO FOR DIAGONALS
+			else if (rot.IsHorizontal)
+			{
+				sizeX = size.Value.z;
+				sizeZ = size.Value.x;
+			}
+			return CellRect.CenteredOn(projectedCell, sizeX, sizeZ).ExpandedBy(expandedBy).Cells; //REDO FOR DIAGONALS
+		}
+
+		protected IntVec3 CalculateOffset(Rot8 rot)
+		{
+			int offset = VehicleDef.Size.z; //Not reduced by half to avoid overlaps with vehicle tracks
+			int offsetX = Mathf.CeilToInt(offset * Mathf.Cos(Mathf.Deg2Rad * 45));
+			int offsetZ = Mathf.CeilToInt(offset * Mathf.Sin(Mathf.Deg2Rad * 45));
+			IntVec3 root = PositionHeld;
+			return rot.AsByte switch
+			{
+				Rot8.NorthInt => new IntVec3(root.x, root.y, root.z - offset),
+				Rot8.EastInt => new IntVec3(root.x - offset, root.y, root.z),
+				Rot8.SouthInt => new IntVec3(root.x, root.y, root.z + offset),
+				Rot8.WestInt => new IntVec3(root.x + offset, root.y, root.z),
+				Rot8.NorthEastInt => new IntVec3(root.x - offsetX, root.y, root.z - offsetZ),
+				Rot8.SouthEastInt => new IntVec3(root.x - offsetX, root.y, root.z + offsetZ),
+				Rot8.SouthWestInt => new IntVec3(root.x + offsetX, root.y, root.z + offsetZ),
+				Rot8.NorthWestInt => new IntVec3(root.x + offsetX, root.y, root.z - offsetZ),
+				_ => throw new NotImplementedException()
+			};
+		}
+
+		public void RecalculateFollowerCell()
+		{
+			IntVec3 result = IntVec3.Invalid;
+			if (Map != null)
+			{
+				Rot8 rot = FullRotation;
+				for (int i = 0; i < 8; i++)
+				{
+					result = CalculateOffset(rot);
+					if (result.InBounds(Map))
+					{
+						break;
+					}
+					rot.Rotate(RotationDirection.Clockwise);
+				}
+			}
+			FollowerCell = result;
 		}
 
 		public override void DrawAt(Vector3 drawLoc, bool flip = false)
@@ -845,6 +901,11 @@ namespace Vehicles
 			}
 		}
 
+		public bool HasPawn(Pawn pawn)
+		{
+			return AllPawnsAboard.Contains(pawn);
+		}
+
 		public virtual void TakeDamage(DamageInfo dinfo, IntVec3 cell, bool explosive = false)
 		{
 			statHandler.TakeDamage(dinfo, cell, explosive);
@@ -1158,14 +1219,14 @@ namespace Vehicles
 		{
 			if (bills != null && bills.Count > 0)
 			{
-				Bill_BoardShip bill = bills.FirstOrDefault(x => x.pawnToBoard == pawn);
+				Bill_BoardVehicle bill = bills.FirstOrDefault(x => x.pawnToBoard == pawn);
 				if (!(bill is null))
 				{
 					bill.handler = handler;
 					return;
 				}
 			}
-			bills.Add(new Bill_BoardShip(pawn, handler));
+			bills.Add(new Bill_BoardVehicle(pawn, handler));
 		}
 
 		public void Notify_BoardedCaravan(Pawn pawnToBoard, ThingOwner handler)
@@ -1189,7 +1250,7 @@ namespace Vehicles
 		{
 			if(bills != null && bills.Count > 0)
 			{
-				Bill_BoardShip bill = bills.FirstOrDefault(x => x.pawnToBoard == pawnToBoard);
+				Bill_BoardVehicle bill = bills.FirstOrDefault(x => x.pawnToBoard == pawnToBoard);
 				if(bill != null)
 				{
 					if(pawnToBoard.IsWorldPawn())
@@ -1288,19 +1349,6 @@ namespace Vehicles
 					return;
 				}
 			}
-		}
-
-		//REDO
-		public void DeadPawnReplace(Pawn pawn)
-		{
-			//NEEDS IMPLEMENTATION
-			/*foreach(ShipHandler h in handlers)
-			{
-				if(h.handlers.InnerListForReading.Contains(pawn))
-				{
-					
-				}
-			}*/
 		}
 
 		public void BeachShip()
@@ -1590,7 +1638,7 @@ namespace Vehicles
 			}
 			if (bills is null)
 			{
-				bills = new List<Bill_BoardShip>();
+				bills = new List<Bill_BoardVehicle>();
 			}
 
 			navigationCategory = VehicleDef.defaultNavigation;
@@ -1697,7 +1745,7 @@ namespace Vehicles
 			{
 				drafter.Drafted = true;
 				CompCannons cannonComp = CompCannons;
-				if(cannonComp != null)
+				if (cannonComp != null)
 				{
 					foreach(var cannon in cannonComp.Cannons)
 					{
@@ -1818,15 +1866,8 @@ namespace Vehicles
 					Drawer.VehicleDrawerTick();
 					rotationTracker.RotationTrackerTick();
 				}
-				health.HealthTick();
-				if (!Dead)
-				{
-					//mindState.MindStateTick();
-					//carryTracker.CarryHandsTick();
-				}
-			}
-			if (!suspended)
-			{
+				health.HealthTick(); //REDO
+
 				if (equipment != null)
 				{
 					equipment.EquipmentTrackerTick();

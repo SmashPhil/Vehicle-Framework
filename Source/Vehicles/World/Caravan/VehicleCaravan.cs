@@ -183,7 +183,7 @@ namespace Vehicles
 				{
 					yield return CaravanMergeUtility.MergeCommand(this);
 				}
-				foreach (Gizmo gizmo2 in this.forage.GetGizmos())
+				foreach (Gizmo gizmo2 in forage.GetGizmos())
 				{
 					yield return gizmo2;
 				}

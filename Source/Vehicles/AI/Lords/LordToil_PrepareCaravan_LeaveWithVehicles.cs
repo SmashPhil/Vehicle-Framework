@@ -2,8 +2,9 @@
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
+using RimWorld;
 using SmashTools;
-using Vehicles.Defs;
+using Vehicles;
 
 namespace Vehicles.Lords
 {
@@ -26,15 +27,25 @@ namespace Vehicles.Lords
 
 		public override void UpdateAllDuties()
 		{
-			foreach (Pawn p in lord.ownedPawns)
+			RotatingList<VehiclePawn> vehicles = lord.ownedPawns.Where(p => p is VehiclePawn).Cast<VehiclePawn>().ToRotatingList();
+
+			foreach (Pawn pawn in lord.ownedPawns)
 			{
-				if (p is VehiclePawn)
+				if (pawn is VehiclePawn)
 				{
-					p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.TravelOrWaitVehicle, exitSpot, -1f)
+					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.TravelOrWaitVehicle, exitSpot, -1f)
 					{
 						locomotion = LocomotionUrgency.Jog
 					};
-					p.drafter.Drafted = true;
+					pawn.drafter.Drafted = true;
+				}
+				else
+				{
+					VehiclePawn vehicle = vehicles.Next;
+					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.FollowVehicle, vehicle, vehicle.VehicleDef.Size.z * 1.5f)
+					{
+						locomotion = LocomotionUrgency.Jog
+					};
 				}
 			}
 		}
@@ -43,7 +54,7 @@ namespace Vehicles.Lords
 		{
 			if (Find.TickManager.TicksGame % 100 == 0)
 			{
-				GatherAnimalsAndSlavesForShipsUtility.CheckArrived(lord, lord.ownedPawns.Where(p => p is VehiclePawn).ToList(), exitSpot, "ReadyToExitMap", (Pawn p) => true, lord.ownedPawns.NotNullAndAny(b => b.IsBoat()), null);
+				ExitMapUtility.CheckArrived(lord, lord.ownedPawns, exitSpot, "ReadyToExitMap", (Pawn p) => true, lord.ownedPawns.NotNullAndAny(b => b.IsBoat()), null);
 			}
 		}
 	}

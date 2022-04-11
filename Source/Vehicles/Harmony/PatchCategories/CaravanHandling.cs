@@ -715,6 +715,7 @@ namespace Vehicles
 				{
 					if (pawn is VehiclePawn vehicle)
 					{
+						inventoryItems.AddRange(vehicle.inventory.innerContainer);
 						inventoryItems.AddRange(vehicle.AllPawnsAboard.SelectMany(p => p.inventory.innerContainer));
 					}
 					else

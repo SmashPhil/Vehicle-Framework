@@ -33,6 +33,44 @@
 	<!-- Defend -->
 
 	<!-- Follow -->
+	<DutyDef>
+		<defName>FollowVehicle</defName>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="Vehicles.AI.JobGiver_FollowVehicle" />
+				<li Class="ThinkNode_ForbidOutsideFlagRadius">
+					<maxDistToSquadFlag>16</maxDistToSquadFlag>
+				</li>
+				<li Class="JobGiver_WanderNearDutyLocation">
+					<wanderRadius>3</wanderRadius>
+				</li>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+	
+	<!-- TODO - Modify for following vehicles in column -->
+	<DutyDef>
+		<defName>EscortVehicle</defName>
+		<alwaysShowWeapon>true</alwaysShowWeapon>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="JobGiver_TakeCombatEnhancingDrug">
+					<onlyIfInDanger>true</onlyIfInDanger>
+				</li>
+				<li Class="JobGiver_AIDefendEscortee">
+					<targetAcquireRadius>65</targetAcquireRadius>
+					<targetKeepRadius>72</targetKeepRadius>
+				</li>
+				<li Class="JobGiver_AIFollowEscortee"/>
+				<li Class="ThinkNode_Subtree">
+					<treeDef>SatisfyVeryUrgentNeeds</treeDef>
+				</li> 
+				<li Class="JobGiver_WanderNearDutyLocation">
+					<wanderRadius>8</wanderRadius>
+				</li>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
 
 	<!-- AssaultColony -->
 	<DutyDef>

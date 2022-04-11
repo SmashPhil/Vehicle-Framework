@@ -13,6 +13,8 @@
 		<passability>Impassable</passability>
 		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
 		
+		<tradeability>None</tradeability> <!-- Temporary until icons are fixed and vehicle prices are balanced -->
+		
 		<statBases>
 			<Mass>100</Mass>
 			<PsychicSensitivity>0</PsychicSensitivity>

@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using RimWorld;
-using Vehicles.Defs;
 using Vehicles.Lords;
 using Verse;
 using Verse.AI;
@@ -8,7 +7,7 @@ using Verse.AI.Group;
 
 namespace Vehicles
 {
-	public class  JobGiver_BoardShip : ThinkNode_JobGiver
+	public class JobGiver_BoardVehicle : ThinkNode_JobGiver
 	{
 		public const float FollowRadius = 5;
 

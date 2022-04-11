@@ -178,7 +178,7 @@ namespace Vehicles.AI
 			}
 			if (traverseParms.mode == TraverseMode.ByPawn)
 			{
-				if (!VehicleReachabilityUtility.CanReachVehicle(vehicle, dest, peMode, Danger.Deadly, false, traverseParms.mode))
+				if (!VehicleReachabilityUtility.CanReachVehicle(vehicle, dest, peMode, Danger.Deadly, traverseParms.mode))
 				{
 					return (PawnPath.NotFound, false);
 				}

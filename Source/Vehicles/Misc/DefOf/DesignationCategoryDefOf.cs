@@ -3,7 +3,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace Vehicles.Defs
+namespace Vehicles
 {
 	[DefOf]
 	public static class DesignationCategoryDefOf_Vehicles

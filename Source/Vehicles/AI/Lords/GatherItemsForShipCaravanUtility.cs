@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
-using Vehicles.Defs;
 using Vehicles.Lords;
-using Vehicles;
 using UnityEngine;
 using Verse;
 using Verse.AI;
@@ -11,7 +9,7 @@ using Verse.AI.Group;
 
 namespace Vehicles
 {
-	public static class GatherItemsForShipCaravanUtility
+	public static class GatherItemsForVehicleCaravanUtility
 	{
 		private static HashSet<Thing> neededItems = new HashSet<Thing>();
 

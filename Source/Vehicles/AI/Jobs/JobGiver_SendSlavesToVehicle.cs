@@ -8,7 +8,7 @@ using Verse.AI.Group;
 
 namespace Vehicles
 {
-	public class JobGiver_SendSlavesToShip : ThinkNode_JobGiver
+	public class JobGiver_SendSlavesToVehicle : ThinkNode_JobGiver
 	{
 		protected override Job TryGiveJob(Pawn pawn)
 		{

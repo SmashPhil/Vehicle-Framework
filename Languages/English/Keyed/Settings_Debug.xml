@@ -18,6 +18,8 @@
 	<DebugDrawVehicleTracks>Draw VehicleTracks</DebugDrawVehicleTracks>
 	<DebugWriteVehiclePathingCosts>Draw Vehicle PathCosts</DebugWriteVehiclePathingCosts>
 	<DebugLogging>Debug Logging</DebugLogging>
+	<DebugPathCostRecalculationLogging>Debug PathCost Recalculation Logging</DebugPathCostRecalculationLogging>
+	<DebugPathCostRecalculationLoggingTooltip>Log summary of path cost change for all vehicles affected by region dirtying.</DebugPathCostRecalculationLoggingTooltip>
 	<DebugLoggingTooltip>Enable message logging to output specific values and pieces of information useful for debugging Vehicles. Use only if you're making a Vehicle add-on.</DebugLoggingTooltip>
 	<DebugDisplayWorldPathCosts>Draw World PathCosts</DebugDisplayWorldPathCosts>
 	<DebugDisplayWorldPathCostsTooltip>Select vehicle to show all world pathcosts for. Displays on GUI so zooming in is recommended.</DebugDisplayWorldPathCostsTooltip>

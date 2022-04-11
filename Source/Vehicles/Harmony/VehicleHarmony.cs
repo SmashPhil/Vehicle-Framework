@@ -16,8 +16,9 @@ namespace Vehicles
 	internal static class VehicleHarmony
 	{
 		public const string VehiclesUniqueId = "smashphil.vehicles";
+		public const string VehiclesLabel = "Vehicle Framework";
 		internal const string LogLabel = "[VehicleFramework]";
-
+		
 		internal static ModMetaData VehicleMMD;
 		internal static ModContentPack VehicleMCP;
 

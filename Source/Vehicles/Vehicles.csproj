@@ -345,8 +345,10 @@
   <ItemGroup>
     <Compile Include="Achievements\VehicleBuilderTracker.cs" />
     <Compile Include="AI\Incidents\IncidentWorker_ShuttleDowned.cs" />
+    <Compile Include="AI\Jobs\JobDriver_FollowVehicle.cs" />
     <Compile Include="AI\Jobs\JobDriver_RefuelVehicleAtomic.cs" />
     <Compile Include="AI\Jobs\JobDriver_WorkOnUpgrade.cs" />
+    <Compile Include="AI\Jobs\JobGiver_FollowVehicle.cs" />
     <Compile Include="AI\Lords\LordJob_ArmoredAssault.cs" />
     <Compile Include="AI\Lords\LordJob_VehicleNPC.cs" />
     <Compile Include="AI\Lords\LordToil_AssaultColonyArmored.cs" />
@@ -648,7 +650,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AI\Jobs\Bill_BoardShip.cs" />
     <Compile Include="Misc\DefOf\DutyDefOf_Vehicles.cs" />
-    <Compile Include="AI\Lords\GatherAnimalsAndSlavesForShipsUtility.cs" />
+    <Compile Include="AI\Lords\ExitMapUtility.cs" />
     <Compile Include="AI\Lords\GatherItemsForShipCaravanUtility.cs" />
     <Compile Include="Misc\DefOf\JobDefOf_Vehicles.cs" />
     <Compile Include="AI\Jobs\JobDriver_Board.cs" />
@@ -660,11 +662,11 @@
     <Compile Include="AI\Jobs\JobDriver_RefuelVehicle.cs" />
     <Compile Include="AI\Jobs\JobDriver_RepairVehicle.cs" />
     <Compile Include="AI\Jobs\JobGiver_AwaitOrders.cs" />
-    <Compile Include="AI\Jobs\JobGiver_BoardShip.cs" />
-    <Compile Include="AI\Jobs\JobGiver_CarryPawnToShip.cs" />
+    <Compile Include="AI\Jobs\JobGiver_BoardVehicle.cs" />
+    <Compile Include="AI\Jobs\JobGiver_CarryPawnToVehicle.cs" />
     <Compile Include="AI\Jobs\JobGiver_GotoTravelDestinationVehicle.cs" />
     <Compile Include="AI\Jobs\JobGiver_PrepareVehicleCaravan_GatheringItems.cs" />
-    <Compile Include="AI\Jobs\JobGiver_SendSlavesToShip.cs" />
+    <Compile Include="AI\Jobs\JobGiver_SendSlavesToVehicle.cs" />
     <Compile Include="AI\Lords\LordJob_FormAndSendVehicles.cs" />
     <Compile Include="AI\Lords\LordToil_PrepareCaravan_BoardVehicles.cs" />
     <Compile Include="AI\Lords\LordToil_PrepareCaravan_GatherCargo.cs" />

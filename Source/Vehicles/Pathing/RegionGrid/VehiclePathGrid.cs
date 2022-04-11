@@ -113,8 +113,19 @@ namespace Vehicles.AI
 				return;
 			}
 			bool walkable = WalkableFast(cell);
-			pathGrid[map.cellIndices.CellToIndex(cell)] = CalculatedCostAt(cell);
-			if (WalkableFast(cell) != walkable)
+			StringBuilder debugString = null;
+			if (VehicleMod.settings.debug.debugPathCostChanges)
+			{
+				debugString = new StringBuilder();
+			}
+			pathGrid[map.cellIndices.CellToIndex(cell)] = CalculatedCostAt(cell, debugString);
+			debugString?.Append($"WalkableNew: {WalkableFast(cell)} WalkableOld: {walkable}");
+			bool walkabilityChanged = WalkableFast(cell) != walkable;
+			if (VehicleMod.settings.debug.debugPathCostChanges)
+			{
+				Debug.Message(debugString.ToStringSafe());
+			}
+			if (walkabilityChanged)
 			{
 				map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleReachability.ClearCache();
 				map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionDirtyer.Notify_WalkabilityChanged(cell);
@@ -136,9 +147,9 @@ namespace Vehicles.AI
 		/// Calculate cost for <see cref="vehicleDef"/> at <paramref name="cell"/>
 		/// </summary>
 		/// <param name="cell"></param>
-		public int CalculatedCostAt(IntVec3 cell)
+		public int CalculatedCostAt(IntVec3 cell, StringBuilder stringBuilder = null)
 		{
-			return CalculatePathCostFor(vehicleDef, map, cell);
+			return CalculatePathCostFor(vehicleDef, map, cell, stringBuilder);
 		}
 
 		/// <summary>
@@ -214,43 +225,6 @@ namespace Vehicles.AI
 			}
 			stringBuilder.AppendLine($"snowPathCost: {snowPathCost}");
 			pathCost += snowPathCost;
-			if (pathCost < 0)
-			{
-				stringBuilder.AppendLine($"pathCost < 0. Setting to {ImpassableCost}");
-				pathCost = ImpassableCost;
-			}
-			stringBuilder.AppendLine($"final cost: {pathCost}");
-			return pathCost;
-		}
-
-		/// <summary>
-		/// Calculate cost for <paramref name="vehicleDef"/> on <paramref name="terrainDef"/>
-		/// </summary>
-		/// <param name="vehicleDef"></param>
-		/// <param name="terrainDef"></param>
-		/// <param name="stringBuilder"></param>
-		public static int CalculatePathCostForTerrain(VehicleDef vehicleDef, TerrainDef terrainDef, StringBuilder stringBuilder = null)
-		{
-			stringBuilder ??= new StringBuilder();
-			stringBuilder.Clear();
-			stringBuilder.Append($"Starting calculation for {vehicleDef} and {terrainDef.defName}.");
-			int pathCost = terrainDef.pathCost;
-			stringBuilder.AppendLine($"def pathCost = {pathCost}");
-			if (vehicleDef.properties.customTerrainCosts.TryGetValue(terrainDef, out int customPathCost))
-			{
-				stringBuilder.AppendLine($"custom turrain cost: {customPathCost}");
-				pathCost = customPathCost;
-			}
-			else if (terrainDef.passability == Traversability.Impassable)
-			{
-				stringBuilder.AppendLine($"terrainDef impassable: {ImpassableCost}");
-				return ImpassableCost;
-			}
-			else if (vehicleDef.properties.defaultTerrainImpassable)
-			{
-				stringBuilder.AppendLine($"defaultTerrain is impassable and no custom pathCost was found.");
-				return ImpassableCost;
-			}
 			if (pathCost < 0)
 			{
 				stringBuilder.AppendLine($"pathCost < 0. Setting to {ImpassableCost}");

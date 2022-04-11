@@ -1,5 +1,4 @@
-﻿using Vehicles.Defs;
-using Verse;
+﻿using Verse;
 using Verse.AI;
 
 namespace Vehicles

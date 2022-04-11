@@ -34,11 +34,11 @@ namespace Vehicles
 			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch);
 			yield return Toils_General.Wait(250, TargetIndex.None).FailOnCannotTouch(TargetIndex.B, PathEndMode.Touch).WithProgressBarToilDelay(TargetIndex.B, false, -0.5f);
 			
-			yield return PutPawnOnShip(PawnToBoard, VehicleToEnter);
+			yield return PutPawnOnVehicle(PawnToBoard, VehicleToEnter);
 			yield break;
 		}
 
-		public static Toil PutPawnOnShip(Pawn pawnToBoard, VehiclePawn vehicle)
+		public static Toil PutPawnOnVehicle(Pawn pawnToBoard, VehiclePawn vehicle)
 		{
 			Toil toil = new Toil();
 			toil.initAction = delegate ()

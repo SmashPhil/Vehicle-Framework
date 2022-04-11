@@ -43,6 +43,18 @@ namespace Vehicles
 																				   ContentFinder<Texture2D>.Get("UI/Gizmos/CancelLoadVehicle"),
 																				   BaseContent.BadTex};
 
+		public static readonly Texture2D FormCaravanVehicle = ContentFinder<Texture2D>.Get("UI/Gizmos/FormCaravanVehicle");
+
+		/// <summary>
+		/// Unused - Use it if you want
+		/// </summary>
+		public static readonly Texture2D FormCaravanBoat = ContentFinder<Texture2D>.Get("UI/Gizmos/FormCaravanBoat");
+
+		/// <summary>
+		/// Unused - Use it if you want
+		/// </summary>
+		public static readonly Texture2D FormCaravanAerial = ContentFinder<Texture2D>.Get("UI/Gizmos/FormCaravanAerial");
+
 		public static readonly Texture2D AmmoBG = ContentFinder<Texture2D>.Get("UI/Gizmos/AmmoBoxBG");
 
 		public static readonly Texture2D ReloadIcon = ContentFinder<Texture2D>.Get("UI/Gizmos/Reload");

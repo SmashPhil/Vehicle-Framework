@@ -49,10 +49,10 @@ namespace Vehicles
 					nameof(DebugWorldObjects)));
 			}
 
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(StatWorker), nameof(StatWorker.IsDisabledFor)),
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalTimeEstimator), nameof(CaravanArrivalTimeEstimator.EstimatedTicksToArriveToEvery)),
 			//	prefix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestMethod)));
-			//VehicleHarmony.Patch(original: AccessTools.PropertySetter(typeof(Thing), nameof(Thing.StyleDef)),
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldGrid), nameof(WorldGrid.GetTileCenter)),
 			//	finalizer: new HarmonyMethod(typeof(Debug),
 			//	nameof(ExceptionCatcher)));
 		}
@@ -61,7 +61,7 @@ namespace Vehicles
 		{
             try
             {
-                Log.Message("");
+                Log.Message($"");
             }
             catch (Exception ex)
             {

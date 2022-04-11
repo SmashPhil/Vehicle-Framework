@@ -5,7 +5,6 @@ using RimWorld;
 using RimWorld.Planet;
 using Verse;
 using Verse.Sound;
-using Vehicles.Defs;
 using UnityEngine;
 
 namespace Vehicles

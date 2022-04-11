@@ -23,6 +23,7 @@ namespace Vehicles
 		public bool debugDrawBumpers;
 
 		public bool debugLogging;
+		public bool debugPathCostChanges;
 		public bool debugDrawVehiclePathCosts;
 
 		public override Rect ButtonRect(Rect rect)
@@ -46,23 +47,25 @@ namespace Vehicles
 			debugDrawBumpers = false;
 
 			debugLogging = false;
+			debugPathCostChanges = false;
 		}
 
 		public override void ExposeData()
 		{
-			Scribe_Values.Look(ref debugDraftAnyShip, "debugDraftAnyShip", false);
-			Scribe_Values.Look(ref debugDisableWaterPathing, "debugDisableWaterPathing", false);
+			Scribe_Values.Look(ref debugDraftAnyShip, "debugDraftAnyShip");
+			Scribe_Values.Look(ref debugDisableWaterPathing, "debugDisableWaterPathing");
 
-			Scribe_Values.Look(ref debugSpawnVehicleBuildingGodMode, "debugSpawnVehicleBuildingGodMode", false);
+			Scribe_Values.Look(ref debugSpawnVehicleBuildingGodMode, "debugSpawnVehicleBuildingGodMode");
 
-			Scribe_Values.Look(ref debugDrawCannonGrid, "debugDrawCannonGrid", false);
-			Scribe_Values.Look(ref debugDrawNodeGrid, "debugDrawNodeGrid", false);
-			Scribe_Values.Look(ref debugDrawHitbox, "debugDrawHitbox", false);
-			Scribe_Values.Look(ref debugDrawVehicleTracks, "debugDrawVehicleTracks", false);
-			Scribe_Values.Look(ref debugDrawBumpers, "debugDrawBumpers", false);
+			Scribe_Values.Look(ref debugDrawCannonGrid, "debugDrawCannonGrid");
+			Scribe_Values.Look(ref debugDrawNodeGrid, "debugDrawNodeGrid");
+			Scribe_Values.Look(ref debugDrawHitbox, "debugDrawHitbox");
+			Scribe_Values.Look(ref debugDrawVehicleTracks, "debugDrawVehicleTracks");
+			Scribe_Values.Look(ref debugDrawBumpers, "debugDrawBumpers");
 
-			Scribe_Values.Look(ref debugLogging, "debugLogging", false);
-			Scribe_Values.Look(ref debugDrawVehiclePathCosts, "debugDrawVehiclePathCosts", false);
+			Scribe_Values.Look(ref debugLogging, "debugLogging");
+			Scribe_Values.Look(ref debugPathCostChanges, "debugPathCostChanges");
+			Scribe_Values.Look(ref debugDrawVehiclePathCosts, "debugDrawVehiclePathCosts");
 		}
 
 		public override void DrawSection(Rect rect)
@@ -82,6 +85,7 @@ namespace Vehicles
 			listingStandard.GapLine(16);
 
 			listingStandard.CheckboxLabeled("DebugLogging".Translate(), ref debugLogging, "DebugLoggingTooltip".Translate());
+			listingStandard.CheckboxLabeled("DebugPathCostRecalculationLogging".Translate(), ref debugPathCostChanges, "DebugPathCostRecalculationLoggingTooltip".Translate());
 			listingStandard.CheckboxLabeled("DebugDraftAnyVehicle".Translate(), ref debugDraftAnyShip, "DebugDraftAnyVehicleTooltip".Translate());
 			listingStandard.CheckboxLabeled("DebugDisablePathing".Translate(), ref debugDisableWaterPathing, "DebugDisablePathingTooltip".Translate());
 

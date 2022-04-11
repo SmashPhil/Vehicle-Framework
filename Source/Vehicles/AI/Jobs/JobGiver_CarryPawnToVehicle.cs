@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Vehicles.Defs;
 using Vehicles.Lords;
 using RimWorld;
 using Verse;
@@ -9,7 +8,7 @@ using Verse.AI.Group;
 
 namespace Vehicles
 {
-	public class JobGiver_CarryPawnToShip : ThinkNode_JobGiver
+	public class JobGiver_CarryPawnToVehicle : ThinkNode_JobGiver
 	{
 		protected override Job TryGiveJob(Pawn pawn)
 		{

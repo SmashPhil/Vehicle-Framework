@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <Defs>
-	
 	<DutyDef>
-		<defName>PrepareCaravan_BoardShip</defName>
+		<defName>PrepareCaravan_BoardVehicle</defName>
 		<thinkNode Class="ThinkNode_Priority">
 			<subNodes>
 				<li Class="ThinkNode_Subtree">
 					<treeDef>SatisfyVeryUrgentNeeds</treeDef>
 				</li>
 				
-				<li Class="Vehicles.JobGiver_BoardShip"/>
+				<li Class="Vehicles.JobGiver_BoardVehicle"/>
 				
 				<li Class="JobGiver_WanderAnywhere"/>
 			</subNodes>
@@ -25,7 +24,7 @@
 					<treeDef>SatisfyVeryUrgentNeeds</treeDef>
 				</li>
 				
-				<li Class="Vehicles.JobGiver_CarryPawnToShip"/>
+				<li Class="Vehicles.JobGiver_CarryPawnToVehicle"/>
 				
 				<li Class="JobGiver_WanderAnywhere"/>
 			</subNodes>
@@ -33,14 +32,14 @@
 	</DutyDef>
 	
 	<DutyDef>
-		<defName>PrepareCaravan_SendSlavesToShip</defName>
+		<defName>PrepareCaravan_SendSlavesToVehicle</defName>
 		<thinkNode Class="ThinkNode_Priority">
 			<subNodes>
 				<li Class="ThinkNode_Subtree">
 					<treeDef>SatisfyVeryUrgentNeeds</treeDef>
 				</li>
 				
-				<li Class="Vehicles.JobGiver_BoardShip"/>
+				<li Class="Vehicles.JobGiver_BoardVehicle"/>
 				
 				<li Class="JobGiver_WanderAnywhere"/>
 			</subNodes>
@@ -79,7 +78,7 @@
 	</DutyDef>
   
 	<DutyDef>
-		<defName>PrepareCaravan_WaitShip</defName>
+		<defName>PrepareCaravan_WaitVehicle</defName>
 		<thinkNode Class="ThinkNode_Priority">
 			<subNodes>
 				<li Class="Vehicles.JobGiver_AwaitOrders"/>

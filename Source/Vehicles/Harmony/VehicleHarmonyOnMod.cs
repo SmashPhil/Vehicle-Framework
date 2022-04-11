@@ -5,7 +5,6 @@ using HarmonyLib;
 using Verse;
 using RimWorld;
 using SmashTools;
-using Vehicles.Defs;
 
 namespace Vehicles
 {

@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using Verse;
 using SmashTools;
+using Vehicles.AI;
 
-namespace Vehicles.AI
+namespace Vehicles
 {
 	/// <summary>
 	/// MapComponent container for all pathing related sub-components for vehicles
@@ -54,7 +55,6 @@ namespace Vehicles.AI
 		/// </summary>
 		public override void FinalizeInit()
 		{
-			//ConstructComponents();
 			foreach (VehiclePathData data in vehicleData.Values)
 			{
 				data.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
@@ -107,6 +107,15 @@ namespace Vehicles.AI
 			};
 			vehicleData.Add(vehicleDef, data);
 			return data;
+		}
+
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			if (Scribe.mode == LoadSaveMode.LoadingVars)
+			{
+				//this.regionAndRoomUpdater.Enabled = false;
+			}
 		}
 
 		/// <summary>

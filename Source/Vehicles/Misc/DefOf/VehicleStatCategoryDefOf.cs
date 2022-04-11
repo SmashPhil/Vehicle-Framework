@@ -1,6 +1,6 @@
 ﻿using RimWorld;
 
-namespace Vehicles.Defs
+namespace Vehicles
 {
 	[DefOf]
 	public static class VehicleStatCategoryDefOf

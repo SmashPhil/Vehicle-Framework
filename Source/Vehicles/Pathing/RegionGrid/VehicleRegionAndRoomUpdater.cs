@@ -57,7 +57,7 @@ namespace Vehicles
 		{
 			if (!Enabled)
 			{
-				Log.Warning("Called RebuildAllRegions but VehicleRegionAndRoomUpdater is disabled. Regions won't be rebuilt.");
+				Log.Warning("Called RebuildAllVehicleRegions but VehicleRegionAndRoomUpdater is disabled. VehicleRegions won't be rebuilt.");
 			}
 			map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionDirtyer.SetAllDirty();
 			TryRebuildVehicleRegions();

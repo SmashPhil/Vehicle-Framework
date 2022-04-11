@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
-using Vehicles.Defs;
+using Vehicles;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
@@ -38,37 +38,35 @@ namespace Vehicles.Lords
 
 		public override void UpdateAllDuties()
 		{
-			foreach(Pawn p in lord.ownedPawns)
+			foreach (Pawn pawn in lord.ownedPawns)
 			{
-				if(p.IsColonist)
+				if (pawn.IsColonist)
 				{
-					p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_GatherDownedPawns, meetingPoint, exitSpot, -1f);
+					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_GatherDownedPawns, meetingPoint, exitSpot, -1f);
 				}
 				else
 				{
-					p.mindState.duty = new PawnDuty(DutyDefOf.PrepareCaravan_Wait, meetingPoint, -1f);
+					pawn.mindState.duty = new PawnDuty(DutyDefOf.PrepareCaravan_Wait, meetingPoint, -1f);
 				}
 			}
 		}
 
 		public override void LordToilTick()
 		{
-			if(Find.TickManager.TicksGame % 100 == 0)
+			if (Find.TickManager.TicksGame % 100 == 0)
 			{
 				List<Pawn> downedPawns = ((LordJob_FormAndSendVehicles)lord.LordJob).downedPawns;
 				List<VehiclePawn> vehicles = ((LordJob_FormAndSendVehicles)lord.LordJob).vehicles;
-				List<Pawn> pawnsOnShips = new List<Pawn>();
 
-				foreach(VehiclePawn p in vehicles)
+				foreach (VehiclePawn vehicle in vehicles)
 				{
-					pawnsOnShips.AddRange(p.AllPawnsAboard);
+					downedPawns.RemoveAll(pawn => vehicle.HasPawn(pawn));
 				}
 
-				if(pawnsOnShips.Intersect(downedPawns).Count() == downedPawns.Count())
+				if (downedPawns.NullOrEmpty())
 				{ 
 					lord.ReceiveMemo("AllDownedPawnsGathered");
 				}
-
 			}
 		}
 	}

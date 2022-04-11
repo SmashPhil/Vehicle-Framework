@@ -1,6 +1,7 @@
 ﻿using RimWorld;
 using Verse;
-namespace Vehicles.Defs
+
+namespace Vehicles
 {
 	[DefOf]
 	public static class SoundDefOf_Ships

@@ -52,8 +52,17 @@ namespace Vehicles
 		public bool defaultTerrainImpassable = false;
 		public int pathTurnCost = 10;
 
+		/// <summary>
+		/// Do not use snow costs to try and set impassable terrain based on snow depth. It is not designed for that, and if it was it would lag
+		/// </summary>
 		public Dictionary<SnowCategory, int> customSnowCosts;
+		/// <summary>
+		/// Set to -1 or >= to 10000 for impassable terrain
+		/// </summary>
 		public Dictionary<TerrainDef, int> customTerrainCosts;
+		/// <summary>
+		/// Set to -1 or >= to 10000 for impassable thing
+		/// </summary>
 		public Dictionary<ThingDef, int> customThingCosts;
 
 		public bool defaultBiomesImpassable = false;

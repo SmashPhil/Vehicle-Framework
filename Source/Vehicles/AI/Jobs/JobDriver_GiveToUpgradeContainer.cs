@@ -4,7 +4,6 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 using SmashTools;
-using Vehicles.Defs;
 
 namespace Vehicles
 {

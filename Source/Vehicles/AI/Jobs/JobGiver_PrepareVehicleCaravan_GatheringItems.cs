@@ -1,5 +1,4 @@
-﻿using Vehicles.Defs;
-using RimWorld;
+﻿using RimWorld;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
@@ -16,7 +15,7 @@ namespace Vehicles
 				return null;
 			}
 			Lord lord = pawn.GetLord();
-			Thing thing = GatherItemsForShipCaravanUtility.FindThingToHaul(pawn, lord);
+			Thing thing = GatherItemsForVehicleCaravanUtility.FindThingToHaul(pawn, lord);
 			if (thing is null)
 			{
 				return null;

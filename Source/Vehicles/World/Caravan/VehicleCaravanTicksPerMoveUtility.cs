@@ -46,7 +46,7 @@ namespace Vehicles
 				float num = 0f;
 				for (int i = 0; i < pawns.Count; i++)
 				{
-					float num2 = (float)((pawns[i].Downed || pawns[i].CarriedByCaravan()) ? DownedPawnMoveTicks : pawns[i].TicksPerMoveCardinal);
+					float num2 = ((pawns[i].Downed || pawns[i].CarriedByCaravan()) ? DownedPawnMoveTicks : pawns[i].TicksPerMoveCardinal);
 					num2 = Mathf.Min(num2, MaxPawnTicksPerMove) * 340f;
 					float num3 = 60000f / num2;
 					if (explanation != null)

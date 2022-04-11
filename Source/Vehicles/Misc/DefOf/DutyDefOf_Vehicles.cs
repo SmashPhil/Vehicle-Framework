@@ -1,7 +1,7 @@
 ﻿using RimWorld;
 using Verse.AI;
 
-namespace Vehicles.Defs
+namespace Vehicles
 {
 	[DefOf]
 	public static class DutyDefOf_Vehicles
@@ -11,15 +11,15 @@ namespace Vehicles.Defs
 			DefOfHelper.EnsureInitializedInCtor(typeof(DutyDefOf_Vehicles));
 		}
 
-		public static DutyDef PrepareCaravan_BoardShip;
+		public static DutyDef PrepareCaravan_BoardVehicle;
 
 		public static DutyDef PrepareVehicleCaravan_GatherItems;
 
-		public static DutyDef PrepareCaravan_WaitShip;
+		public static DutyDef PrepareCaravan_WaitVehicle;
 
 		public static DutyDef PrepareCaravan_GatherDownedPawns;
 
-		public static DutyDef PrepareCaravan_SendSlavesToShip;
+		public static DutyDef PrepareCaravan_SendSlavesToVehicle;
 
 		public static DutyDef TravelOrWaitVehicle;
 
@@ -27,6 +27,10 @@ namespace Vehicles.Defs
 
 		/* AI Duties */
 		public static DutyDef ArmoredAssault;
+
+		public static DutyDef FollowVehicle;
+
+		public static DutyDef EscortVehicle;
 	}
 
 }

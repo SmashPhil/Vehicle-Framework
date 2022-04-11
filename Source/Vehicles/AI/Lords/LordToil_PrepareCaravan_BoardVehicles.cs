@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Vehicles.Defs;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
@@ -38,11 +37,11 @@ namespace Vehicles.Lords
 			{
 				if(p is VehiclePawn)
 				{
-					p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_WaitShip);
+					p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_WaitVehicle);
 				}
 				else
 				{
-					p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_BoardShip)
+					p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_BoardVehicle)
 					{
 						locomotion = LocomotionUrgency.Jog
 					};

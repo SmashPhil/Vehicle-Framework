@@ -6,7 +6,6 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using SmashTools;
-using Vehicles.Defs;
 
 
 namespace Vehicles

@@ -10,7 +10,6 @@ using Verse.AI.Group;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
-using Vehicles.Defs;
 using Vehicles.Lords;
 
 namespace Vehicles
@@ -288,7 +287,7 @@ namespace Vehicles
 			Map map = null;
 			for (int i = 0; i < tmpPawns.Count; i++)
 			{
-				AddCaravanExitTaleIfShould(tmpPawns[i]);
+				AddVehicleCaravanExitTaleIfShould(tmpPawns[i]);
 				map = tmpPawns[i].MapHeld;
 				if (map != null)
 				{
@@ -390,32 +389,6 @@ namespace Vehicles
 			caravan.Name = CaravanNameGenerator.GenerateCaravanName(caravan);
 			caravan.SetUniqueId(Find.UniqueIDsManager.GetNextCaravanID());
 			return caravan;
-		}
-
-		/// <summary>
-		/// Create Tale for VehicleCaravan
-		/// </summary>
-		/// <param name="pawn"></param>
-		public static void AddCaravanExitTaleIfShould(Pawn pawn)
-		{
-			if (pawn.Spawned && pawn.IsFreeColonist)
-			{
-				if (pawn.Map.IsPlayerHome)
-				{
-					TaleRecorder.RecordTale(TaleDefOf.CaravanFormed, new object[]
-					{
-						pawn
-					});
-					return;
-				}
-				if (GenHostility.AnyHostileActiveThreatToPlayer(pawn.Map, false))
-				{
-					TaleRecorder.RecordTale(TaleDefOf.CaravanFled, new object[]
-					{
-						pawn
-					});
-				}
-			}
 		}
 
 		/// <summary>
@@ -593,6 +566,31 @@ namespace Vehicles
 			}
 			GUI.EndGroup();
 			curY += Mathf.Max(a, b);
+		}
+
+		/// <summary>
+		/// Create Tale for VehicleCaravan
+		/// </summary>
+		/// <param name="pawn"></param>
+		public static void AddVehicleCaravanExitTaleIfShould(Pawn pawn)
+		{
+			Pawn author = pawn;
+			if (pawn is VehiclePawn vehicle)
+			{
+				author = vehicle.AllPawnsAboard.FirstOrFallback(pawn);
+			}
+			if (author.Spawned && author.IsFreeColonist)
+			{
+				if (author.Map.IsPlayerHome)
+				{
+					TaleRecorder.RecordTale(TaleDefOf.CaravanFormed, author);
+					return;
+				}
+				if (GenHostility.AnyHostileActiveThreatToPlayer_NewTemp(author.Map, false))
+				{
+					TaleRecorder.RecordTale(TaleDefOf.CaravanFled, author);
+				}
+			}
 		}
 	}
 }

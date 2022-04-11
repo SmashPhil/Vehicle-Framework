@@ -2,10 +2,9 @@
 using System.Linq;
 using RimWorld;
 using RimWorld.Planet;
-using Vehicles.Defs;
 using Verse;
 
-namespace Vehicles.UI
+namespace Vehicles
 {
 	public class MainTabWindow_Ships : MainTabWindow_PawnTable
 	{

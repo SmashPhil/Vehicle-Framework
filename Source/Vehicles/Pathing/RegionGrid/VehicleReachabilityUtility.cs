@@ -17,12 +17,11 @@ namespace Vehicles.AI
 		/// <param name="dest"></param>
 		/// <param name="peMode"></param>
 		/// <param name="maxDanger"></param>
-		/// <param name="canBash"></param>
 		/// <param name="mode"></param>
-		public static bool CanReachVehicle(this VehiclePawn vehicle, LocalTargetInfo dest, PathEndMode peMode, Danger maxDanger, bool canBash = false, TraverseMode mode = TraverseMode.ByPawn)
+		public static bool CanReachVehicle(this VehiclePawn vehicle, LocalTargetInfo dest, PathEndMode peMode, Danger maxDanger, TraverseMode mode = TraverseMode.ByPawn)
 		{
 			return vehicle.Spawned && vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehicleReachability.CanReachVehicle(vehicle.Position, dest, peMode, 
-				TraverseParms.For(vehicle, maxDanger, mode, canBash));
+				TraverseParms.For(vehicle, maxDanger, mode));
 		}
 
 		/// <summary>
@@ -32,12 +31,11 @@ namespace Vehicles.AI
 		/// <param name="dest"></param>
 		/// <param name="peMode"></param>
 		/// <param name="maxDanger"></param>
-		/// <param name="canBash"></param>
 		/// <param name="mode"></param>
-		public static bool CanReachVehicleNonLocal(this VehiclePawn vehicle, TargetInfo dest, PathEndMode peMode, Danger maxDanger, bool canBash = false, TraverseMode mode = TraverseMode.ByPawn)
+		public static bool CanReachVehicleNonLocal(this VehiclePawn vehicle, TargetInfo dest, PathEndMode peMode, Danger maxDanger, TraverseMode mode = TraverseMode.ByPawn)
 		{
 			return vehicle.Spawned && vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehicleReachability.CanReachVehicleNonLocal(vehicle.Position, dest, peMode, 
-				TraverseParms.For(vehicle, maxDanger, mode, canBash));
+				TraverseParms.For(vehicle, maxDanger, mode));
 		}
 
 		/// <summary>
@@ -47,7 +45,7 @@ namespace Vehicles.AI
 		public static bool CanReachVehicleMapEdge(this VehiclePawn vehicle)
 		{
 			return vehicle.Spawned && vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehicleReachability.CanReachMapEdge(vehicle.Position, 
-				TraverseParms.For(vehicle, Danger.Deadly, TraverseMode.ByPawn, false));
+				TraverseParms.For(vehicle, Danger.Deadly, TraverseMode.ByPawn));
 		}
 
 		/// <summary>

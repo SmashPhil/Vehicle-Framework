@@ -1,8 +1,8 @@
 ﻿using RimWorld;
-using Vehicles.Defs;
 using Vehicles.AI;
 using Verse;
 using Verse.AI;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -35,7 +35,7 @@ namespace Vehicles
 			if (pawn is VehiclePawn vehicle)
 			{
 				IntVec3 cell = pawn.mindState.duty.focus.Cell;
-				if (!VehicleReachabilityUtility.CanReachVehicle(vehicle, cell, PathEndMode.OnCell, PawnUtility.ResolveMaxDanger(pawn, maxDanger), false, TraverseMode.ByPawn))
+				if (!VehicleReachabilityUtility.CanReachVehicle(vehicle, cell, PathEndMode.OnCell, PawnUtility.ResolveMaxDanger(pawn, maxDanger), TraverseMode.ByPawn))
 				{
 					return null;
 				}
@@ -43,12 +43,16 @@ namespace Vehicles
 				{
 					return null;
 				}
-
-				return new Job(JobDefOf.Goto, cell)
+				Job job = new Job(JobDefOf.Goto, cell)
 				{
 					locomotionUrgency = PawnUtility.ResolveLocomotion(pawn, locomotionUrgency),
 					expiryInterval = jobMaxDuration
 				};
+				if (vehicle.InhabitedCellsProjected(cell, Rot8.Invalid).NotNullAndAny(cell => pawn.Map.exitMapGrid.IsExitCell(cell))) 
+				{
+					job.exitMapOnArrival = true;
+				}
+				return job;
 			}
 			return null;
 		}

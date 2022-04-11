@@ -1,7 +1,7 @@
 ﻿using RimWorld;
 using Verse;
 
-namespace Vehicles.Defs
+namespace Vehicles
 {
 	[DefOf]
 	public static class JobDefOf_Vehicles
@@ -30,5 +30,10 @@ namespace Vehicles.Defs
 		public static JobDef RefuelVehicleAtomic;
 
 		public static JobDef UpgradeVehicle;
+
+
+		public static JobDef FollowVehicle;
+
+		public static JobDef EscortVehicle;
 	}
 }

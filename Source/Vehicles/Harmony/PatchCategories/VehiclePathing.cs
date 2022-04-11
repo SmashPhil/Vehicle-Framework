@@ -19,6 +19,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(FloatMenuMakerMap), "GotoLocationOption"),
 				prefix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(GotoLocationVehicles)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(JobDriver_Goto), "MakeNewToils"),
+				postfix: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(GotoToilsPassthrough)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), "NeedNewPath"),
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(IsVehicleInNextCell)));
@@ -47,12 +50,22 @@ namespace Vehicles
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(WalkableFastThroughVehicleInt)));
 
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pathing), nameof(Pathing.RecalculatePerceivedPathCostAt)),
+				postfix: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(RecalculatePerceivedPathCostForVehicle)));
+
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(RegionDirtyer), "Notify_ThingAffectingRegionsSpawned"),
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(Notify_ThingAffectingVehicleRegionsSpawned)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(RegionDirtyer), "Notify_ThingAffectingRegionsDespawned"),
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(Notify_ThingAffectingVehicleRegionsDespawned)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(RegionListersUpdater), nameof(RegionListersUpdater.RegisterInRegions)),
+				postfix: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(RegisterInVehicleRegions)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(RegionListersUpdater), nameof(RegionListersUpdater.DeregisterInRegions)),
+				postfix: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(DeregisterInVehicleRegions)));
 		}
 
 		/// <summary>
@@ -99,7 +112,7 @@ namespace Vehicles
 							__result = null;
 							return false;
 						}
-						if (!VehicleReachabilityUtility.CanReachVehicle(vehicle, curLoc, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
+						if (!VehicleReachabilityUtility.CanReachVehicle(vehicle, curLoc, PathEndMode.OnCell, Danger.Deadly, TraverseMode.ByPawn))
 						{
 							Debug.Message($"Cant Reach {curLoc} with {vehicle.Label}");
 							__result = new FloatMenuOption("VehicleCannotMoveToCell".Translate(vehicle.LabelCap), null, MenuOptionPriority.Default, null, null, 0f, null, null);
@@ -108,8 +121,11 @@ namespace Vehicles
 						__result = new FloatMenuOption("GoHere".Translate(), delegate ()
 						{
 							Job job = new Job(JobDefOf.Goto, curLoc);
-							bool isOnEdge = CellRect.WholeMap(vehicle.Map).IsOnEdge(Verse.UI.MouseCell(), 3);
-							if (vehicle.Map.exitMapGrid.IsExitCell(Verse.UI.MouseCell()))
+							bool isOnEdge = CellRect.WholeMap(vehicle.Map).IsOnEdge(clickCell, 3);
+							bool exitCell = vehicle.Map.exitMapGrid.IsExitCell(clickCell);
+							bool vehicleCellsOverlapExit = vehicle.InhabitedCellsProjected(clickCell, Rot8.Invalid).NotNullAndAny(cell => pawn.Map.exitMapGrid.IsExitCell(cell));
+							Debug.Message($"Exit Map? CellOnEdge={isOnEdge} ExitCell={exitCell} VehicleCellsOverlap={vehicleCellsOverlapExit}");
+							if (exitCell || vehicleCellsOverlapExit)
 							{
 								job.exitMapOnArrival = true;
 							}
@@ -154,6 +170,26 @@ namespace Vehicles
 				}
 			}
 			return true;
+		}
+
+		public static IEnumerable<Toil> GotoToilsPassthrough(IEnumerable<Toil> __result, Job ___job, Pawn ___pawn)
+		{
+			bool first = true;
+			foreach (Toil toil in __result)
+			{
+				if (first)
+				{
+					first = false;
+					toil.AddPreTickAction(delegate ()
+					{
+						if (___pawn is VehiclePawn vehicle && ___job.exitMapOnArrival && vehicle.InhabitedCells(1).NotNullAndAny(cell => ___pawn.Map.exitMapGrid.IsExitCell(cell)))
+						{
+							PathingHelper.ExitMapForVehicle(vehicle, ___job);
+						}
+					});
+				}
+				yield return toil;
+			}
 		}
 
 		/// <summary>
@@ -295,6 +331,14 @@ namespace Vehicles
 			}
 		}
 
+		public static void RecalculatePerceivedPathCostForVehicle(IntVec3 c, PathingContext ___normal)
+		{
+			if (!Extra.GenStepsActive)
+			{
+				PathingHelper.RecalculatePerceivedPathCostAt(c, ___normal.map);
+			}
+		}
+
 		public static void Notify_ThingAffectingVehicleRegionsSpawned(Thing b)
 		{
 			if (b.Spawned) //For some reason other mods love to patch the SpawnSetup method and despawn the object. Extra check is necessary
@@ -309,6 +353,51 @@ namespace Vehicles
 			{
 				PathingHelper.ThingAffectingRegionsDeSpawned(b, b.Map);
 			}
+		}
+
+		public static void RegisterInVehicleRegions(Thing thing, Map map)
+		{
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+			{
+				VehicleRegionListersUpdater.RegisterInRegions(thing, map, vehicleDef);
+			}
+		}
+
+		public static void DeregisterInVehicleRegions(Thing thing, Map map)
+		{
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+			{
+				VehicleRegionListersUpdater.DeregisterInRegions(thing, map, vehicleDef);
+			}
+		}
+
+		[DebugAction(category = VehicleHarmony.VehiclesLabel, name = "Draw Regions", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+		private static void DebugDrawRegions()
+		{
+			List<DebugMenuOption> listCheckbox = new List<DebugMenuOption>();
+			listCheckbox.Add(new DebugMenuOption("Clear", DebugMenuOptionMode.Action, delegate ()
+			{
+				DebugHelper.drawRegionsFor = null;
+				DebugHelper.debugRegionType = DebugRegionType.None;
+			}));
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs.OrderBy(d => d.defName))
+			{
+				listCheckbox.Add(new DebugMenuOption(vehicleDef.defName, DebugMenuOptionMode.Action, delegate ()
+				{
+					List<DebugMenuOption> listCheckbox2 = new List<DebugMenuOption>();
+
+					foreach (string name in Enum.GetNames(typeof(DebugRegionType)))
+					{
+						listCheckbox2.Add(new DebugMenuOption(name, DebugMenuOptionMode.Action, delegate ()
+						{
+							DebugHelper.drawRegionsFor = vehicleDef;
+							DebugHelper.debugRegionType = (DebugRegionType)Enum.Parse(typeof(DebugRegionType), name);
+						}));
+					}
+					Find.WindowStack.Add(new Dialog_DebugOptionListLister(listCheckbox2));
+				}));
+			}
+			Find.WindowStack.Add(new Dialog_DebugOptionListLister(listCheckbox));
 		}
 	}
 }
