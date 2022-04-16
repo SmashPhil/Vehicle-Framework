@@ -170,7 +170,7 @@ namespace Vehicles
 			{
 				float num = inRect.width - 515f;
 				Rect position = new Rect(inRect.x + num, inRect.y, inRect.width - num, 37f);
-				GUI.BeginGroup(position);
+				Widgets.BeginGroup(position);
 				Text.Font = GameFont.Medium;
 				if (!sourceLabel.NullOrEmpty())
 				{
@@ -186,7 +186,7 @@ namespace Vehicles
 				}
 				Text.Font = GameFont.Small;
 				Text.Anchor = TextAnchor.UpperLeft;
-				GUI.EndGroup();
+				Widgets.EndGroup();
 			}
 			Rect mainRect = new Rect(inRect.x, inRect.y + 37f + extraHeaderSpace, inRect.width, inRect.height - 37f - extraHeaderSpace);
 			FillMainRect(mainRect);
@@ -250,7 +250,7 @@ namespace Vehicles
 				Widgets.DrawLightHighlight(rect);
 			}
 			Text.Font = GameFont.Small;
-			GUI.BeginGroup(rect);
+			Widgets.BeginGroup(rect);
 			float num = rect.width;
 			int maxCount = trad.MaxCount;
 			Rect rect2 = new Rect(num - 240f, 0f, 240f, rect.height);
@@ -304,7 +304,7 @@ namespace Vehicles
 			Rect idRect = new Rect(0f, 0f, num, rect.height);
 			UIHelper.DrawVehicleTransferableInfo(trad, idRect, Color.white);
 			GenUI.ResetLabelAlign();
-			GUI.EndGroup();
+			Widgets.EndGroup();
 		}
 
 		private bool ShouldShowCount(TransferableOneWay trad)

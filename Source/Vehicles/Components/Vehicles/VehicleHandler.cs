@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Verse;
 using RimWorld;
 using RimWorld.Planet;
@@ -72,6 +73,8 @@ namespace Vehicles
 
 		public Rot4 PawnRotation => role.pawnRenderer?.RotFor(vehicle.FullRotation) ?? Rot4.South;
 
+		public bool RequiredForMovement => role.handlingTypes.NotNullAndAny(h => h.HasFlag(HandlingTypeFlags.Movement));
+
 		public bool AreSlotsAvailable
 		{
 			get
@@ -84,6 +87,18 @@ namespace Vehicles
 		public static bool operator ==(VehicleHandler obj1, VehicleHandler obj2) => obj1?.Equals(obj2) ?? (obj1 is null && obj2 is null);
 
 		public static bool operator !=(VehicleHandler obj1, VehicleHandler obj2) => !(obj1 == obj2);
+
+		public bool CanOperateRole(Pawn pawn)
+		{
+			if (!role.handlingTypes.NullOrEmpty())
+			{
+				bool manipulation = pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation);
+				bool downed = pawn.Downed;
+				bool dead = pawn.Dead;
+				return manipulation && !downed && !dead;
+			}
+			return true;
+		}
 
 		public void RenderPawns()
 		{

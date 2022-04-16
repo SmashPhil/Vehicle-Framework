@@ -342,7 +342,7 @@ namespace Vehicles
 			Widgets.DrawMenuSection(inRect);
 			TabDrawer.DrawTabs(inRect, new List<TabRecord>() { new TabRecord("ItemsTab".Translate(), null, true) }, 200f);
 			inRect = inRect.ContractedBy(17f);
-			GUI.BeginGroup(inRect);
+			Widgets.BeginGroup(inRect);
 			Rect rect2 = inRect.AtZero();
 			DoBottomButtons(rect2);
 			Rect inRect2 = rect2;
@@ -352,7 +352,7 @@ namespace Vehicles
 			{
 				CountToTransferChanged();
 			}
-			GUI.EndGroup();
+			Widgets.EndGroup();
 		}
 
 		private void AddToTransferables(Thing t)

@@ -110,7 +110,7 @@ namespace Vehicles.UI
 
 		private static void DoRow(Rect rect, Pawn pawn, ref Pawn specificNeedsTabForPawn)
 		{
-			GUI.BeginGroup(rect);
+			Widgets.BeginGroup(rect);
 			Rect rect2 = rect.AtZero();
 			Widgets.InfoCardButton(rect2.width - 24f, (rect.height - 24f) / 2f, pawn);
 			rect2.width -= 24f;
@@ -157,7 +157,7 @@ namespace Vehicles.UI
 				Widgets.DrawLineHorizontal(0f, rect.height / 2f, rect.width);
 				GUI.color = Color.white;
 			}
-			GUI.EndGroup();
+			Widgets.EndGroup();
 		}
 
 		private static void OpenSpecificTabButton(Rect rowRect, Pawn p, ref Pawn specificTabForPawn)

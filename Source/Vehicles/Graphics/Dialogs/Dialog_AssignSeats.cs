@@ -96,13 +96,21 @@ namespace Vehicles
 				Rect roleRect = new Rect(assignedRect.x, assignedRect.y, assignedRect.width, 30f + 30f * assignedSeats.Where(r => r.Value.handler.role == handler.role).Select(p => p.Key).Count());
 				//Widgets.DrawBoxSolid(roleRect, Color.red); //Draw drop area
 				bool slotsAvailable = assignedSeats.Where(r => r.Value.handler.role == handler.role).Select(p => p.Key).Count() < handler.role.slots;
-				if(slotsAvailable && Mouse.IsOver(roleRect) && draggedPawn != null)
+				if (slotsAvailable && Mouse.IsOver(roleRect) && draggedPawn != null)
 				{
-					if(Event.current.type == EventType.MouseUp && Event.current.button == 0)
+					if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
 					{
-						if(!handler.role.handlingTypes.NullOrEmpty() && (!draggedPawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) || draggedPawn.Downed || draggedPawn.Dead) )
+						if (!handler.role.handlingTypes.NullOrEmpty() && !draggedPawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) || draggedPawn.Downed || draggedPawn.Dead)
 						{
-							Messages.Message("IncapableStatusForRole".Translate(draggedPawn.LabelShortCap), MessageTypeDefOf.RejectInput);
+							if (handler.role.handlingTypes.NotNullAndAny(h => h == HandlingTypeFlags.Movement))
+							{
+								Messages.Message("IncapableStatusForRole".Translate(draggedPawn.LabelShortCap), MessageTypeDefOf.RejectInput);
+							}
+							else
+							{
+								Messages.Message("IncapableStatusForRole".Translate(draggedPawn.LabelShortCap), MessageTypeDefOf.CautionInput);
+								assignedSeats.Add(draggedPawn, (Vehicle, handler));
+							}
 						}
 						else
 						{
@@ -124,16 +132,16 @@ namespace Vehicles
 					assignedPawnRect.y += 30f;
 					assignedPawnIconRect.y += 30f;
 				}
-				foreach(Pawn p in removalList)
+				foreach (Pawn pawn in removalList)
 				{
-					 assignedSeats.Remove(p);
+					 assignedSeats.Remove(pawn);
 				}
 				if (!slotsAvailable)
 				{
 					assignedRect.y -= 15f;
 				}
 			}
-			if(Event.current.type == EventType.MouseUp && Event.current.button == 0)
+			if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
 			{
 				draggedPawn = null;
 			}
@@ -174,10 +182,27 @@ namespace Vehicles
 				{
 					if (Widgets.ButtonText(entryButtonRect, "AddToRole".Translate()))
 					{
-						VehicleHandler firstHandler = Vehicle.handlers.FirstOrDefault(x => assignedSeats.Where(r => r.Value.handler.role == x.role).Select(p => p.Key).Count() < x.role.slots);
+						bool Validate(VehicleHandler handler) => assignedSeats.Where(seat => seat.Value.handler.role == handler.role).Select(p => p.Key).Count() < handler.role.slots;
+						VehicleHandler firstHandler = Vehicle.handlers.FirstOrDefault(handler => handler.CanOperateRole(pawn) && Validate(handler));
+						firstHandler ??= Vehicle.handlers.FirstOrDefault(handler => !handler.RequiredForMovement && Validate(handler));
 						if (firstHandler != null)
 						{
-							assignedSeats.Add(pawn, (Vehicle, firstHandler));
+							if (!firstHandler.CanOperateRole(pawn))
+							{
+								if (firstHandler.role.handlingTypes.NotNullAndAny(h => h == HandlingTypeFlags.Movement))
+								{
+									Messages.Message("IncapableStatusForRole".Translate(pawn.LabelShortCap), MessageTypeDefOf.RejectInput);
+								}
+								else
+								{
+									Messages.Message("IncapableStatusForRole".Translate(pawn.LabelShortCap), MessageTypeDefOf.CautionInput);
+									assignedSeats.Add(pawn, (Vehicle, firstHandler));
+								}
+							}
+							else
+							{
+								assignedSeats.Add(pawn, (Vehicle, firstHandler));
+							}
 						}
 					}
 					Widgets.Label(colonistRect, pawn.LabelCap);

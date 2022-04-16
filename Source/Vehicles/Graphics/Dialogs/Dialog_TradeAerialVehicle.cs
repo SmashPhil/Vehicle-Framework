@@ -166,7 +166,7 @@ namespace Vehicles
 		public override void DoWindowContents(Rect inRect)
 		{
 			TradeSession.deal.UpdateCurrencyCount();
-			GUI.BeginGroup(inRect);
+			Widgets.BeginGroup(inRect);
 			inRect = inRect.AtZero();
 			TransferableUIUtility.DoTransferableSorters(sorter1, sorter2, delegate(TransferableSorterDef x)
 			{
@@ -182,7 +182,7 @@ namespace Vehicles
 			Widgets.Label(new Rect(0f, SpaceBetweenTraderNameAndTraderKind, inRect.width / 2f, inRect.height / 2f), "NegotiatorTradeDialogInfo".Translate(TradeSession.playerNegotiator.Name.ToStringFull, TradeSession.playerNegotiator.GetStatValue(StatDefOf.TradePriceImprovement, true).ToStringPercent()));
 			float num = inRect.width - 590f;
 			Rect position = new Rect(num, 0f, inRect.width - num, TopAreaHeight);
-			GUI.BeginGroup(position);
+			Widgets.BeginGroup(position);
 			Text.Font = GameFont.Medium;
 			Rect rect = new Rect(0f, 0f, position.width / 2f, position.height);
 			Text.Anchor = TextAnchor.UpperLeft;
@@ -210,7 +210,7 @@ namespace Vehicles
 				Text.Anchor = TextAnchor.UpperLeft;
 				GUI.color = Color.white;
 			}
-			GUI.EndGroup();
+			Widgets.EndGroup();
 			float num2 = 0f;
 			if (cachedCurrencyTradeable != null)
 			{
@@ -299,7 +299,7 @@ namespace Vehicles
 					TooltipHandler.TipRegionByKey(rect6, "GiftModeTip", faction.Name);
 				}
 			}
-			GUI.EndGroup();
+			Widgets.EndGroup();
 		}
 
 		public override void Close(bool doCloseSound = true)

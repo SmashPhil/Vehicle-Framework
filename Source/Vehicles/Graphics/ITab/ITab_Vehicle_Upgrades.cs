@@ -88,7 +88,7 @@ namespace Vehicles.UI
 			Rect rect = new Rect(0f, TopPadding, size.x, size.y - TopPadding);
 			Rect rect2 = rect.ContractedBy(10f);
 
-			GUI.BeginGroup(rect2);
+			Widgets.BeginGroup(rect2);
 			Text.Font = GameFont.Small;
 			GUI.color = Color.white;
 
@@ -374,7 +374,7 @@ namespace Vehicles.UI
 						}
 
 						Rect vehicleDisplayRect = new Rect();
-						GUI.BeginGroup(vehicleDisplayRect);
+						Widgets.BeginGroup(vehicleDisplayRect);
 
 						Rect displayRect = new Rect(0, 0, leftWindowWidth - 5, leftWindowWidth - 5);
 						RenderHelper.DrawVehicle(displayRect, Vehicle, 
@@ -390,7 +390,7 @@ namespace Vehicles.UI
 						}
 						Vehicle.CompUpgradeTree.upgradeList.Where(u => u.upgradeActive && u.upgradePurchased && !replaceNodes.Contains(u.upgradeID)).ForEach(u => u.DrawExtraOnGUI(displayRect));
 
-						GUI.EndGroup();
+						Widgets.EndGroup();
 
 						if (VehicleMod.settings.debug.debugDrawCannonGrid)
 						{
@@ -427,7 +427,7 @@ namespace Vehicles.UI
 				}
 			}
 			
-			GUI.EndGroup();
+			Widgets.EndGroup();
 
 			GUI.color = Color.white;
 			Text.Anchor = TextAnchor.UpperLeft;

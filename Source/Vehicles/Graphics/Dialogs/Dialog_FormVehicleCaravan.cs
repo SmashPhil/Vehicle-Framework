@@ -393,7 +393,7 @@ namespace Vehicles
 			tabsList.Clear();
 			inRect = inRect.ContractedBy(17f);
 			inRect.height += 17f;
-			GUI.BeginGroup(inRect);
+			Widgets.BeginGroup(inRect);
 			Rect rect2 = inRect.AtZero();
 			DoBottomButtons(rect2);
 			Rect inRect2 = rect2;
@@ -415,7 +415,7 @@ namespace Vehicles
 			{
 				CountToTransferChanged();
 			}
-			GUI.EndGroup();
+			Widgets.EndGroup();
 		}
 
 		public override bool CausesMessageBackground()
@@ -641,11 +641,8 @@ namespace Vehicles
 				Messages.Message("CaravanCouldNotFindPackingSpot".Translate(direction8WayFromTo.LabelShort()), new GlobalTargetInfo(intVec, map, false), MessageTypeDefOf.RejectInput, false);
 				return false;
 			}
-			VehicleCaravanFormingUtility.StartFormingCaravan((from x in pawnsFromTransferables
-			where !x.Downed
-			select x).ToList(), (from x in pawnsFromTransferables
-			where x.Downed
-			select x).ToList(), Faction.OfPlayer, transferables, meetingPoint, intVec, startingTile, destinationTile);
+			VehicleCaravanFormingUtility.StartFormingCaravan(pawnsFromTransferables.Where(pawn => !pawn.Downed).ToList(), pawnsFromTransferables.Where(pawn => pawn.Downed).ToList(), 
+				Faction.OfPlayer, transferables, meetingPoint, intVec, startingTile, destinationTile);
 			Messages.Message("CaravanFormationProcessStarted".Translate(), pawnsFromTransferables[0], MessageTypeDefOf.PositiveEvent, false);
 			return true;
 		}

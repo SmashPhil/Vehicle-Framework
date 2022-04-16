@@ -62,16 +62,14 @@ namespace Vehicles
 				}
 				waterTravel = true;
 			}
+
 			LordJob_FormAndSendVehicles lordJob = new LordJob_FormAndSendVehicles(list, vehicles, capablePawns, downedPawns, prisoners, meetingPoint, exitSpot, startingTile, destinationTile, waterTravel);
 			LordMaker.MakeNewLord(Faction.OfPlayer, lordJob, pawns[0].MapHeld, pawns);
 			vehicles.ForEach(v => v.DisembarkAll());
 
-			foreach (Pawn p in pawns)
+			foreach (Pawn pawn in pawns.Where(pawn => pawn.Spawned && !(pawn is VehiclePawn)))
 			{
-				if (p.Spawned)
-				{
-					p.jobs.EndCurrentJob(JobCondition.InterruptForced, true);
-				}
+				pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, true);
 			}
 		}
 

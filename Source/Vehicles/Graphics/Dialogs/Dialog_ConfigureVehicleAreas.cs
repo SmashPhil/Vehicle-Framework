@@ -116,7 +116,7 @@ namespace Vehicles
 				height = rect.height / 3
 			};
 			
-			GUI.BeginGroup(topRect);
+			Widgets.BeginGroup(topRect);
 			Rect iconRect = new Rect(0, 0, topRect.height, topRect.height);
 
 			//UIElements.DrawLineHorizontalGrey(0, 0, topRect.width);
@@ -154,7 +154,7 @@ namespace Vehicles
 			bool changeInCost = costBefore != cost;
 			listingStandard.End();
 			GUI.enabled = enabled;
-			GUI.EndGroup();
+			Widgets.EndGroup();
 
 			switch (CurrentTab)
 			{
@@ -192,7 +192,7 @@ namespace Vehicles
 			Widgets.BeginScrollView(outRect, ref scrollPosition, viewRect);
 			Widgets.DrawMenuSection(bottomRect);
 			bottomRect.width -= 16; //Scrollbar handle
-			GUI.BeginGroup(bottomRect);
+			Widgets.BeginGroup(bottomRect);
 			float rowY = 0;
 			switch (CurrentTab)
 			{
@@ -220,7 +220,7 @@ namespace Vehicles
 					}
 					break;
 			}
-			GUI.EndGroup();
+			Widgets.EndGroup();
 			Widgets.EndScrollView();
 		}
 

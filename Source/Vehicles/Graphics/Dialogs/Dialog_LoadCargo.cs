@@ -95,7 +95,7 @@ namespace Vehicles
 			inRect.yMin += 60;
 			Widgets.DrawMenuSection(inRect);
 			inRect = inRect.ContractedBy(17f);
-			GUI.BeginGroup(inRect);
+			Widgets.BeginGroup(inRect);
 			Rect bottomRect = inRect.AtZero();
 			BottomButtons(bottomRect);
 			Rect inRect2 = bottomRect;
@@ -103,7 +103,7 @@ namespace Vehicles
 			itemsTransfer.OnGUI(inRect2, out bool flag);
 			if (flag)
 				CountToTransferChanged();
-			GUI.EndGroup();
+			Widgets.EndGroup();
 		}
 
 		public void BottomButtons(Rect rect)

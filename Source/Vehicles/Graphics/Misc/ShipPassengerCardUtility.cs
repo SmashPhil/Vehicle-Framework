@@ -11,7 +11,7 @@ namespace Vehicles.UI
 		{
 			GUI.color = Color.white;
 
-			GUI.BeginGroup(rect);
+			Widgets.BeginGroup(rect);
 			float lineHeight = Text.LineHeight;
 			Rect outRect = new Rect(0f, 0f, rect.width, rect.height - lineHeight);
 			//Rect viewRect = new Rect(0f, 0f, rect.width - 16f, HealthCardUtility.scrollViewHeight);

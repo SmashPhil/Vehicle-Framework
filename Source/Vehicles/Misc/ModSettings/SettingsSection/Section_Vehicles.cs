@@ -160,14 +160,14 @@ namespace Vehicles
 					PatternData patternData = defaultGraphics.TryGetValue(VehicleMod.selectedDef.defName, VehicleMod.selectedDef.graphicData);
 
 					drawStatusMessage = $"Drawing VehicleTex in settings";
-					GUI.BeginGroup(iconRect);
+					Widgets.BeginGroup(iconRect);
 					Rect vehicleTexRect = new Rect(Vector2.zero, iconRect.size);
 					drawStatusMessage = RenderHelper.DrawVehicleDef(vehicleTexRect, VehicleMod.selectedDef, null, patternData, directionFacing.TryGetValue(VehicleMod.selectedDef, VehicleMod.selectedDef.drawProperties.displayRotation));
 					if (!drawStatusMessage.NullOrEmpty())
 					{
 						throw new Exception();
 					}
-					GUI.EndGroup();
+					Widgets.EndGroup();
 
 					drawStatusMessage = $"Drawing enable button";
 					Rect enableButtonRect = menuRect.ContractedBy(10);

@@ -51,7 +51,7 @@ namespace Vehicles.UI
 			Rect rect = new Rect(0f, TopPadding, size.x, size.y - TopPadding);
 			Rect rect2 = rect.ContractedBy(10f);
 			Rect position = new Rect(rect2.x, rect2.y, rect2.width, rect2.height);
-			GUI.BeginGroup(position);
+			Widgets.BeginGroup(position);
 			Text.Font = GameFont.Small;
 			GUI.color = Color.white;
 			Rect outRect = new Rect(0f, 0f, position.width, position.height);
@@ -87,7 +87,7 @@ namespace Vehicles.UI
 				scrollViewHeight = num + 30f;
 			}
 			Widgets.EndScrollView();
-			GUI.EndGroup();
+			Widgets.EndGroup();
 			GUI.color = Color.white;
 			Text.Anchor = TextAnchor.UpperLeft;
 		}

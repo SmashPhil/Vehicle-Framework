@@ -43,24 +43,12 @@ namespace Vehicles
 		/// <param name="transferables"></param>
 		public static void AddVehicleAndPawnSections(TransferableOneWayWidget pawnWidget, TransferableVehicleWidget vehicleWidget, List<TransferableOneWay> transferables)
 		{
-			IEnumerable<TransferableOneWay> source = from x in transferables
-			where x.ThingDef.category == ThingCategory.Pawn
-			select x;
-			vehicleWidget.AddSection("VehiclesTab".Translate(), from x in source
-			where x.AnyThing is VehiclePawn vehicle && vehicle.CanMove
-			select x);
-			pawnWidget.AddSection("ColonistsSection".Translate(), from x in source
-			where ((Pawn)x.AnyThing).IsFreeColonist
-			select x);
-			pawnWidget.AddSection("PrisonersSection".Translate(), from x in source
-			where ((Pawn)x.AnyThing).IsPrisoner
-			select x);
-			pawnWidget.AddSection("CaptureSection".Translate(), from x in source
-			where ((Pawn)x.AnyThing).Downed && CaravanUtility.ShouldAutoCapture((Pawn)x.AnyThing, Faction.OfPlayer)
-			select x);
-			pawnWidget.AddSection("AnimalsSection".Translate(), from x in source
-			where ((Pawn)x.AnyThing).RaceProps.Animal
-			select x);
+			IEnumerable<TransferableOneWay> source = transferables.Where(t => t.ThingDef.category == ThingCategory.Pawn);
+			vehicleWidget.AddSection("VehiclesTab".Translate(), source.Where(t => t.AnyThing is VehiclePawn vehicle && vehicle.CanMove));
+			pawnWidget.AddSection("ColonistsSection".Translate(), source.Where(t => t.AnyThing is Pawn pawn && pawn.IsFreeColonist));
+			pawnWidget.AddSection("PrisonersSection".Translate(), source.Where(t => t.AnyThing is Pawn pawn && pawn.IsPrisoner));
+			pawnWidget.AddSection("CaptureSection".Translate(), source.Where(t => t.AnyThing is Pawn pawn && pawn.Downed && CaravanUtility.ShouldAutoCapture(pawn, Faction.OfPlayer)));
+			pawnWidget.AddSection("AnimalsSection".Translate(), source.Where(t => t.AnyThing is Pawn pawn && pawn.RaceProps.Animal));
 			vehicleWidget.AvailablePawns = source.Where(x => x.AnyThing is Pawn pawn && !(pawn is VehiclePawn) && pawn.IsColonistPlayerControlled).ToList();
 		}
 

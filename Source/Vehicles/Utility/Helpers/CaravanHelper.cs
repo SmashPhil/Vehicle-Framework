@@ -11,6 +11,7 @@ using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 using Vehicles.Lords;
+using Vehicles.AI;
 
 namespace Vehicles
 {
@@ -281,24 +282,24 @@ namespace Vehicles
 				directionTile = exitFromTile;
 			}
 
-			List<Pawn> tmpPawns = new List<Pawn>();
-			tmpPawns.AddRange(pawns);
+			List<Pawn> pawnList = new List<Pawn>();
+			pawnList.AddRange(pawns);
 
 			Map map = null;
-			for (int i = 0; i < tmpPawns.Count; i++)
+			foreach (Pawn pawn in pawnList)
 			{
-				AddVehicleCaravanExitTaleIfShould(tmpPawns[i]);
-				map = tmpPawns[i].MapHeld;
+				AddVehicleCaravanExitTaleIfShould(pawn);
+				map = pawn.MapHeld;
 				if (map != null)
 				{
 					break;
 				}
 			}
-			VehicleCaravan caravan = MakeVehicleCaravan(tmpPawns, faction, exitFromTile, false);
+			VehicleCaravan caravan = MakeVehicleCaravan(pawnList, faction, exitFromTile, false);
 			Rot4 exitDir = (map != null) ? Find.WorldGrid.GetRotFromTo(exitFromTile, directionTile) : Rot4.Invalid;
-			for (int j = 0; j < tmpPawns.Count; j++)
+			foreach (Pawn pawn in pawnList)
 			{
-				tmpPawns[j].ExitMap(false, exitDir);
+				pawn.ExitMap(false, exitDir);
 			}
 			List<Pawn> pawnsListForReading = caravan.PawnsListForReading;
 			for (int k = 0; k < pawnsListForReading.Count; k++)
@@ -341,6 +342,48 @@ namespace Vehicles
 				Messages.Message(taggedString, caravan, MessageTypeDefOf.TaskCompletion, true);
 			}
 			return caravan;
+		}
+
+		/// <summary>
+		/// Find random starting tile for VehicleCaravan
+		/// </summary>
+		/// <param name="tileID"></param>
+		/// <param name="exitDir"></param>
+		public static int FindRandomStartingTileBasedOnExitDir(VehiclePawn vehicle, int tileID, Rot4 exitDir)
+		{
+			List<int> tileCandidates = new List<int>();
+			List<int> neighbors = new List<int>();
+			WorldVehiclePathGrid vehiclePathGrid = WorldVehiclePathGrid.Instance;
+			Find.WorldGrid.GetTileNeighbors(tileID, neighbors);
+			for (int i = 0; i < neighbors.Count; i++)
+			{
+				int num = neighbors[i];
+				if (vehiclePathGrid.Passable(num, vehicle.VehicleDef) && (!exitDir.IsValid || !(Find.WorldGrid.GetRotFromTo(tileID, num) != exitDir)))
+				{
+					tileCandidates.Add(num);
+				}
+			}
+			if (tileCandidates.TryRandomElement(out int result))
+			{
+				return result;
+			}
+			if (neighbors.Where((int x) =>
+				{
+					if (!vehiclePathGrid.Passable(x, vehicle.VehicleDef))
+					{
+						return false;
+					}
+					Rot4 rotFromTo = Find.WorldGrid.GetRotFromTo(tileID, x);
+					return ((exitDir == Rot4.North || exitDir == Rot4.South) && (rotFromTo == Rot4.East || rotFromTo == Rot4.West)) || ((exitDir == Rot4.East || exitDir == Rot4.West) && (rotFromTo == Rot4.North || rotFromTo == Rot4.South));
+				}).TryRandomElement(out result))
+			{
+				return result;
+			}
+			if (neighbors.Where(tile => vehiclePathGrid.Passable(tile, vehicle.VehicleDef)).TryRandomElement(out result))
+			{
+				return result;
+			}
+			return tileID;
 		}
 
 		/// <summary>
@@ -520,7 +563,7 @@ namespace Vehicles
 			LordJob_FormAndSendVehicles lordJob_FormAndSendCaravanVehicle = (LordJob_FormAndSendVehicles)(Find.Selector.SingleSelectedThing as Pawn).GetLord().LordJob;
 			Rect position = new Rect(0f, curY, (inRect.width - 10f) / 2f, inRect.height);
 			float a = 0f;
-			GUI.BeginGroup(position);
+			Widgets.BeginGroup(position);
 			Widgets.ListSeparator(ref a, position.width, "ItemsToLoad".Translate());
 			bool flag = false;
 			foreach (TransferableOneWay transferableOneWay in lordJob_FormAndSendCaravanVehicle.transferables)
@@ -538,10 +581,10 @@ namespace Vehicles
 			{
 				Widgets.NoneLabel(ref a, position.width, null);
 			}
-			GUI.EndGroup();
+			Widgets.EndGroup();
 			Rect position2 = new Rect((inRect.width + 10f) / 2f, curY, (inRect.width - 10f) / 2f, inRect.height);
 			float b = 0f;
-			GUI.BeginGroup(position2);
+			Widgets.BeginGroup(position2);
 			Widgets.ListSeparator(ref b, position2.width, "LoadedItems".Translate());
 			bool flag2 = false;
 			foreach (Pawn pawn in lordJob_FormAndSendCaravanVehicle.lord.ownedPawns)
@@ -564,7 +607,7 @@ namespace Vehicles
 			{
 				Widgets.NoneLabel(ref b, position.width, null);
 			}
-			GUI.EndGroup();
+			Widgets.EndGroup();
 			curY += Mathf.Max(a, b);
 		}
 
@@ -591,6 +634,50 @@ namespace Vehicles
 					TaleRecorder.RecordTale(TaleDefOf.CaravanFled, author);
 				}
 			}
+		}
+
+		public static Caravan FindCaravanToJoinForAllowingVehicles(Pawn pawn)
+		{
+			if (pawn.Faction != Faction.OfPlayer && pawn.HostFaction != Faction.OfPlayer)
+			{
+				return null;
+			}
+			if (!pawn.Spawned)
+			{
+				return null;
+			}
+			if (pawn is VehiclePawn vehicle && !vehicle.CanReachVehicleMapEdge())
+			{
+				return null;
+			}
+			if (!(pawn is VehiclePawn) && !pawn.CanReachMapEdge())
+			{
+				return null;
+			}
+			List<int> neighbors = new List<int>();
+			int tile = pawn.Map.Tile;
+			Find.WorldGrid.GetTileNeighbors(tile, neighbors);
+			neighbors.Add(tile);
+			List<Caravan> caravans = Find.WorldObjects.Caravans;
+			for (int i = 0; i < caravans.Count; i++)
+			{
+				Caravan caravan = caravans[i];
+				if (neighbors.Contains(caravan.Tile) && caravan.autoJoinable)
+				{
+					if (pawn.HostFaction == null)
+					{
+						if (caravan.Faction == pawn.Faction)
+						{
+							return caravan;
+						}
+					}
+					else if (caravan.Faction == pawn.HostFaction)
+					{
+						return caravan;
+					}
+				}
+			}
+			return null;
 		}
 	}
 }

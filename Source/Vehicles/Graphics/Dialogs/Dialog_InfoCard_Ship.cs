@@ -165,7 +165,7 @@ namespace Vehicles.UI
 			listHeight = num + 100f;
 			Widgets.EndScrollView();
 			Rect rect4 = rect3.ContractedBy(10f);
-			GUI.BeginGroup(rect4);
+			Widgets.BeginGroup(rect4);
 			StatDrawEntry statDrawEntry;
 			if ((statDrawEntry = selectedEntry) is null)
 			{
@@ -191,7 +191,7 @@ namespace Vehicles.UI
 				Rect rect5 = rect4.AtZero();
 				Widgets.Label(rect5, explanation);
 			}
-			GUI.EndGroup();
+			Widgets.EndGroup();
 		}
 		
 		private IEnumerable<StatDrawEntry> StatsToDraw(Thing thing)

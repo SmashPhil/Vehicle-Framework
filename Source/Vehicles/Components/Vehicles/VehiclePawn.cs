@@ -1789,7 +1789,7 @@ namespace Vehicles
 			Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(this);
 			if (mode == DestroyMode.KillFinalize)
 			{
-				//REDO - refund
+				//REDO - refund some materials back
 			}
 			base.DeSpawn(mode);
 			if (vPather != null)

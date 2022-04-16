@@ -91,7 +91,7 @@ namespace Vehicles
 		{
 			if (trad.AnyThing is Pawn pawn)
 			{
-				readOnly = CaravanHelper.assignedSeats.ContainsKey(pawn);
+				readOnly = CaravanHelper.assignedSeats.ContainsKey(pawn) || pawn.Downed;
 			}
 		}
 
@@ -187,53 +187,56 @@ namespace Vehicles
 		{
 			if (pawn is VehiclePawn vehicle)
 			{
-				__result = vehicle.Spawned && vehicle.Map.exitMapGrid.MapUsesExitGrid && (vehicle.AllPawnsAboard.NotNullAndAny(p => p.IsColonist) || CaravanExitMapUtility.FindCaravanToJoinFor(vehicle) != null);
+				__result = vehicle.Spawned && vehicle.Map.exitMapGrid.MapUsesExitGrid && (vehicle.AllPawnsAboard.NotNullAndAny(p => p.IsColonist) || CaravanHelper.FindCaravanToJoinForAllowingVehicles(vehicle) != null);
 			}
 		}
 
 		public static bool ExitMapAndJoinOrCreateVehicleCaravan(Pawn pawn, Rot4 exitDir)
 		{
-			return true;
-			//VehiclePawn vehicle = pawn as VehiclePawn;
-			//Caravan caravan = CaravanExitMapUtility.FindCaravanToJoinFor(pawn);
-			//if (caravan is VehicleCaravan vehicleCaravan)
-			//{
-			//	CaravanHelper.AddVehicleCaravanExitTaleIfShould(pawn);
-			//	vehicleCaravan.AddPawn(vehicle, true);
-			//	vehicle.ExitMap(false, exitDir);
-			//	return false;
-			//}
-			//else if (vehicle != null)
-			//{
-			//	if (vehicle != null && vehicleCaravan is null)
-			//	{
-			//		vehicleCaravan = CaravanHelper.MakeVehicleCaravan(caravan.PawnsListForReading, caravan.Faction, caravan.Tile, true);
-			//	}
-			//}
-			//Map map = pawn.Map;
-			//int directionTile = CaravanExitMapUtility.FindRandomStartingTileBasedOnExitDir(map.Tile, exitDir);
-			//Caravan caravan2 = CaravanExitMapUtility.ExitMapAndCreateCaravan(Gen.YieldSingle<Pawn>(pawn), pawn.Faction, map.Tile, directionTile, -1, false);
-			//caravan2.autoJoinable = true;
-			//bool flag = false;
-			//List<Pawn> allPawnsSpawned = map.mapPawns.AllPawnsSpawned;
-			//for (int i = 0; i < allPawnsSpawned.Count; i++)
-			//{
-			//	if (CaravanExitMapUtility.FindCaravanToJoinFor(allPawnsSpawned[i]) != null && !allPawnsSpawned[i].Downed && !allPawnsSpawned[i].Drafted)
-			//	{
-			//		if (allPawnsSpawned[i].RaceProps.Animal)
-			//		{
-			//			flag = true;
-			//		}
-			//		RestUtility.WakeUp(allPawnsSpawned[i]);
-			//		allPawnsSpawned[i].jobs.CheckForJobOverride();
-			//	}
-			//}
-			//TaggedString taggedString = "MessagePawnLeftMapAndCreatedCaravan".Translate(pawn.LabelShort, pawn).CapitalizeFirst();
-			//if (flag)
-			//{
-			//	taggedString += " " + "MessagePawnLeftMapAndCreatedCaravan_AnimalsWantToJoin".Translate();
-			//}
-			//Messages.Message(taggedString, caravan2, MessageTypeDefOf.TaskCompletion, true);
+			VehiclePawn vehicle = pawn as VehiclePawn;
+			Caravan caravan = CaravanHelper.FindCaravanToJoinForAllowingVehicles(pawn);
+			if (caravan is VehicleCaravan vehicleCaravan && (vehicle is null || vehicle.IsBoat() == vehicleCaravan.LeadVehicle.IsBoat()))
+			{
+				CaravanHelper.AddVehicleCaravanExitTaleIfShould(pawn);
+				vehicleCaravan.AddPawn(pawn, true);
+				pawn.ExitMap(false, exitDir);
+				return false;
+			}
+			else if (vehicle != null)
+			{
+				Map map = pawn.Map;
+				int directionTile = CaravanHelper.FindRandomStartingTileBasedOnExitDir(vehicle, map.Tile, exitDir);
+				VehicleCaravan vehicleCaravan2 = CaravanHelper.ExitMapAndCreateVehicleCaravan(Gen.YieldSingle(pawn), pawn.Faction, map.Tile, directionTile, -1);
+				vehicleCaravan2.autoJoinable = true;
+
+				if (caravan != null)
+				{
+					caravan.pawns.TryTransferAllToContainer(vehicleCaravan2.pawns);
+					caravan.Destroy();
+					vehicleCaravan2.Notify_Merged(new List<Caravan>() { caravan });
+				}
+				bool animalWantsToJoin = false;
+				foreach (Pawn mapPawn in map.mapPawns.AllPawnsSpawned)
+				{
+					if (CaravanHelper.FindCaravanToJoinForAllowingVehicles(mapPawn) != null && !mapPawn.Downed && !mapPawn.Drafted)
+					{
+						if (mapPawn.RaceProps.Animal)
+						{
+							animalWantsToJoin = true;
+						}
+						RestUtility.WakeUp(mapPawn);
+						mapPawn.jobs.CheckForJobOverride();
+					}
+				}
+
+				TaggedString taggedString = "MessagePawnLeftMapAndCreatedCaravan".Translate(pawn.LabelShort, pawn).CapitalizeFirst();
+				if (animalWantsToJoin)
+				{
+					taggedString += " " + "MessagePawnLeftMapAndCreatedCaravan_AnimalsWantToJoin".Translate();
+				}
+				Messages.Message(taggedString, caravan, MessageTypeDefOf.TaskCompletion, true);
+				return false;
+			}
 			return true;
 		}
 	}

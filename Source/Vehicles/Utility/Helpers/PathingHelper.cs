@@ -4,6 +4,7 @@ using System.Linq;
 using HarmonyLib;
 using Verse;
 using Verse.AI;
+using Verse.AI.Group;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
@@ -288,7 +289,83 @@ namespace Vehicles
 			{
 				return;
 			}
-			vehicle.ExitMap(true, CellRect.WholeMap(vehicle.Map).GetClosestEdge(vehicle.Position));
+			ExitMap(vehicle, true, CellRect.WholeMap(vehicle.Map).GetClosestEdge(vehicle.Position));
+		}
+
+		public static void ExitMap(VehiclePawn vehicle, bool allowedToJoinOrCreateCaravan, Rot4 exitDir)
+		{
+			if (vehicle.IsWorldPawn())
+			{
+				Log.Warning($"Called ExitMap() on world pawn {vehicle}");
+				return;
+			}
+			Ideo ideo = vehicle.Ideo;
+			if (ideo != null)
+			{
+				ideo.Notify_MemberLost(vehicle, vehicle.Map);
+			}
+			if (allowedToJoinOrCreateCaravan && CaravanExitMapUtility.CanExitMapAndJoinOrCreateCaravanNow(vehicle))
+			{
+				CaravanExitMapUtility.ExitMapAndJoinOrCreateCaravan(vehicle, exitDir);
+				return;
+			}
+			Lord lord = vehicle.GetLord();
+			if (lord != null)
+			{
+				lord.Notify_PawnLost(vehicle, PawnLostCondition.ExitedMap, null);
+			}
+			if (vehicle.carryTracker != null && vehicle.carryTracker.CarriedThing != null)
+			{
+				Pawn pawn = vehicle.carryTracker.CarriedThing as Pawn;
+				if (pawn != null)
+				{
+					if (vehicle.Faction != null && vehicle.Faction != pawn.Faction)
+					{
+						vehicle.Faction.kidnapped.Kidnap(pawn, vehicle);
+					}
+					else
+					{
+						if (!vehicle.teleporting)
+						{
+							vehicle.carryTracker.innerContainer.Remove(pawn);
+						}
+						pawn.ExitMap(false, exitDir);
+					}
+				}
+				else
+				{
+					vehicle.carryTracker.CarriedThing.Destroy(DestroyMode.Vanish);
+				}
+				if (!vehicle.teleporting || pawn == null)
+				{
+					vehicle.carryTracker.innerContainer.Clear();
+				}
+			}
+			bool flag = !vehicle.IsCaravanMember() && !vehicle.teleporting && !PawnUtility.IsTravelingInTransportPodWorldObject(vehicle) && (!vehicle.IsPrisoner || vehicle.ParentHolder == null || vehicle.ParentHolder is CompShuttle || (vehicle.guest != null && vehicle.guest.Released));
+
+			if (vehicle.Faction != null)
+			{
+				vehicle.Faction.Notify_MemberExitedMap(vehicle, flag);
+			}
+			if (vehicle.Faction == Faction.OfPlayer && vehicle.IsSlave && vehicle.SlaveFaction != null && vehicle.SlaveFaction != Faction.OfPlayer && vehicle.guest.Released)
+			{
+				vehicle.SlaveFaction.Notify_MemberExitedMap(vehicle, flag);
+			}
+			if (vehicle.Spawned)
+			{
+				vehicle.DeSpawn(DestroyMode.Vanish);
+			}
+			vehicle.inventory.UnloadEverything = false;
+			if (flag)
+			{
+				vehicle.vPather.StopDead();
+				vehicle.jobs.StopAll(false, true);
+				vehicle.VerifyReservations();
+			}
+			Find.WorldPawns.PassToWorld(vehicle, PawnDiscardDecideMode.Decide);
+			QuestUtility.SendQuestTargetSignals(vehicle.questTags, "LeftMap", vehicle.Named("SUBJECT"));
+			Find.FactionManager.Notify_PawnLeftMap(vehicle);
+			Find.IdeoManager.Notify_PawnLeftMap(vehicle);
 		}
 	}
 }
