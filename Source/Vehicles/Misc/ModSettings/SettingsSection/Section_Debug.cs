@@ -114,7 +114,7 @@ namespace Vehicles
 		{
 			string versionChecking = "Null";
 			VehicleHarmony.updates.Clear();
-			foreach (UpdateLog log in FileReader.ReadPreviousFiles(VehicleHarmony.VehicleMCP).OrderBy(log => Ext_Settings.CombineVersionString(log.UpdateData.currentVersion)))
+			foreach (UpdateLog log in FileReader.ReadPreviousFiles(VehicleHarmony.VehicleMCP).OrderByDescending(log => Ext_Settings.CombineVersionString(log.UpdateData.currentVersion)))
 			{
 				VehicleHarmony.updates.Add(log);
 			}
@@ -127,19 +127,12 @@ namespace Vehicles
 					string label = versionChecking;
 					if (versionChecking == VehicleHarmony.CurrentVersion)
 					{
-						label = "Current Version";
-						versions.Insert(0, new DebugMenuOption(label, DebugMenuOptionMode.Action, delegate ()
-						{
-							Find.WindowStack.Add(new Dialog_NewUpdate(new HashSet<UpdateLog>() { update }));
-						}));
+						label += " (Current)";
 					}
-					else
+					versions.Add(new DebugMenuOption(label, DebugMenuOptionMode.Action, delegate ()
 					{
-						versions.Add(new DebugMenuOption(label, DebugMenuOptionMode.Action, delegate ()
-						{
-							Find.WindowStack.Add(new Dialog_NewUpdate(new HashSet<UpdateLog>() { update }));
-						}));
-					}
+						Find.WindowStack.Add(new Dialog_NewUpdate(new HashSet<UpdateLog>() { update }));
+					}));
 				}
 				Find.WindowStack.Add(new Dialog_DebugOptionListLister(versions));
 			}

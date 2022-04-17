@@ -9,6 +9,7 @@
 	<DevModeResetPage>Reset Page</DevModeResetPage>
 	
 	<VehiclesReset>Reset</VehiclesReset>
+	<VehicleResetAllConfirmation>Are you sure you want to reset all settings to original values? If you were locked out of the Mod Settings from an exception, you will need to restart after the reset.</VehicleResetAllConfirmation>
 	<BoatsResetToDefault>Reset to Default</BoatsResetToDefault>
 	<BeachGenMultiplier>Beach Size Multiplier</BeachGenMultiplier>
 	<BeachGenMultiplierTooltip>Increase the amount of water on the coastline.</BeachGenMultiplierTooltip>

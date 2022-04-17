@@ -36,8 +36,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony, Version=2.1.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\Lib.Harmony.2.1.1\lib\net472\0Harmony.dll</HintPath>
+    <Reference Include="0Harmony, Version=2.2.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Lib.Harmony.2.2.1\lib\net472\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="AchievementsExpanded, Version=1.3.7862.41411, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\AchievementsExpanded.1.3.7862\lib\net472\AchievementsExpanded.dll</HintPath>
@@ -339,7 +339,9 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="UpdateLogTool, Version=1.3.7904.21336, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\UpdateLog.1.3.1000\lib\net472\UpdateLogTool.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\UpdateLog\Assemblies\UpdateLogTool.dll</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>

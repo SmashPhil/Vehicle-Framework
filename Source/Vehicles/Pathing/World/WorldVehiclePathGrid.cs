@@ -57,10 +57,7 @@ namespace Vehicles
 			movementDifficulty = new Dictionary<VehicleDef, float[]>();
 			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
 			{
-				if (!movementDifficulty.ContainsKey(vehicleDef))
-				{
-					movementDifficulty.Add(vehicleDef, new float[Find.WorldGrid.TilesCount]);
-				}
+				movementDifficulty[vehicleDef] = new float[Find.WorldGrid.TilesCount];
 			}
 		}
 

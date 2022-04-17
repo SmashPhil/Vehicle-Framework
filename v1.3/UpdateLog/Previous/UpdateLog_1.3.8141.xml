@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <!--Can utilize Version.txt file placed in mod's root directory-->
+  <currentVersion>1.3.8142</currentVersion>
+  <!--Startup,GameInit,LoadedGame,NewGame-->
+  <updateOn>Startup</updateOn>
+  <!--Full description shown in update page-->
+  <description>[title]Recent News[/title][font]Small[/font]
+Hey everyone, it's time for some major testing. With caravans and their formations working, we are now in the testing phase.
+
+If you aren't already, please join the discord! If you're in the VE testing server, that works too. Once the remaining bugs are stomped out, I'll be prepping it for a steam release.
+
+It's very important that all major bugs are found, because once the mod releases, I'm going to have to deal with not breaking save games in subsequent updates.
+
+Thanks again for sticking around for over 2 years of development!
+[title]Bug Fixes[/title][font]Tiny[/font]
+Fixed bug where vehicle caravans did not properly display the vehicles in it.
+
+Fixed bug where VehicleTurret would rotate 90 degrees upon loading a game.
+
+Fixed bug where caravan formation for Vehicles would break on gather items.
+
+Fixed bug where caravans would mistakenly assign an exit point that was unreachable for vehicles
+
+Fixed display issue with caravans not showing details for vehicles or items within them
+
+Fixed bug where UI would break from an exception when no vehicles were selected.
+
+Fixed bug where formation LordJob would not contain any land vehicles.
+
+Fixed bug where assigned seating of caravan formation would not update.
+
+Fixed bug with giving items to a vehicle would throw an exception.
+
+Fixed bug where settling in a map with a vehicle would boot you back to main menu.
+
+Fixed bug where you could not trade with settlements.
+
+Fixed bug where boats would path over bridges.
+
+Fixed bug where vehicle caravans were unable to form on non-colony maps.
+
+Fixed bug where pawns with disabled stat for trading would trigger an error in StatWorker for attempting to calculate a disabled stat.
+
+Fixed bug where adding a vehicle in the dialog window would not dirty caravan max capacity.
+
+Fixed bug where FormCaravan dialog of vehicles would throw exception when choosing a route with pawns but no vehicles.
+
+Fixed bug where removing vehicle from caravan dialog would not update assigned seating.
+
+Fixed bug where you could remove pawns from caravan dialog but leave them assigned to vehicles.  Pawns will now be readonly if assigned to a vehicle in caravan formation dialog. Removing the vehicle from the caravan dialog will remove all assigned pawns as well.
+
+Fixed bug where removing and readding a vehicle that was recently given changed seating would revert to old seating assignments.
+[title]New Additions[/title][font]Small[/font]
+Float menu option added for shuttles and trading with friendly settlements.
+
+Vehicles can now exit event maps if there is an exit border.
+
+[title]Additional Changes[/title][font]Small[/font]
+-
+[title]Final Notes[/title][font]Small[/font]
+Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
+</description>
+  <!--Static parameterless method to execute when update log is executed-->
+  <actionOnUpdate></actionOnUpdate>
+  <!--Show update log on next startup.-->
+  <update>false</update>
+  <!--Testing mode prevents the update from saving over the UpdateLog file-->
+  <testing>false</testing>
+  <!--Icon bar shown to the right of the mod's name-->
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon</icon>
+      <url>steam://url/CommunityFilePage/2356577528</url>
+    </li>
+  </rightIconBar>
+  <!--Icon bar shown to the left of the mod's name-->
+  <leftIconBar>
+    <li>
+      <name>Patreon</name>
+      <icon>patreonIcon</icon>
+      <url>https://www.patreon.com/smashphil</url>
+    </li>
+    <li>
+      <name>Cursed Crew</name>
+      <icon>cursedCrewIcon</icon>
+      <url>https://discord.gg/NNe2VxAU7Z</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>

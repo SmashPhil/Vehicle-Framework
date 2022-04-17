@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
+using Verse;
 
 namespace Vehicles
 {
@@ -22,13 +23,13 @@ namespace Vehicles
 		/// <param name="version"></param>
 		public static int CombineVersionString(string version)
 		{
-			int[] ints = version.Split('.').Select(int.Parse).ToArray();
-			int value = 0;
-			foreach (int digit in ints)
+			string rawVersion = new string(version.Where(c => char.IsDigit(c)).ToArray());
+			if (int.TryParse(rawVersion, out int order))
 			{
-				value = Convert.ToInt32($"{value}{digit}");
+				return order;
 			}
-			return value;
+			Log.Error($"Unable to parse {version} as raw value following Major.Minor.Revision sequence.");
+			return 0;
 		}
 	}
 }
