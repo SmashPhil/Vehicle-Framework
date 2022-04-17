@@ -8,7 +8,7 @@ using Verse.Sound;
 using RimWorld;
 using HarmonyLib;
 
-namespace Vehicles.UI
+namespace Vehicles
 {
 	//REDO
 	public class Dialog_InfoCard_Vehicle : Window

@@ -8,7 +8,7 @@
 		<targetTags>
 			<li>WorldEvent_Forced</li>
 		</targetTags>
-		<workerClass>Vehicles.AI.IncidentWorker_ShuttleDowned</workerClass>
+		<workerClass>Vehicles.IncidentWorker_ShuttleDowned</workerClass>
 		<letterLabel>{0} Shot Down</letterLabel>
 		<letterTexts>
 			<li>{0} has been shot down by {1}</li>

@@ -10,8 +10,6 @@ using Verse.AI.Group;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
-using Vehicles.Lords;
-using Vehicles.AI;
 
 namespace Vehicles
 {

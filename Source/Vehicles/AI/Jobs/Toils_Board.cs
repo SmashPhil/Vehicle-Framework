@@ -3,7 +3,6 @@ using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 using SmashTools;
-using Vehicles.Lords;
 
 namespace Vehicles
 {

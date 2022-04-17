@@ -6,7 +6,7 @@ using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace Vehicles.UI
+namespace Vehicles
 {
 	public class ITab_Vehicle_Cargo : ITab
 	{

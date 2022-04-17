@@ -6,7 +6,7 @@ using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 
-namespace Vehicles.AI
+namespace Vehicles
 {
 	public class IncidentWorker_ShuttleDowned : IncidentWorker
 	{

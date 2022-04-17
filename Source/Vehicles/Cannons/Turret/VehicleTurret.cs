@@ -1295,8 +1295,6 @@ namespace Vehicles
 
 		protected void ValidateLockStatus()
 		{
-            parentRotCached = vehicle.Rotation;
-            parentAngleCached = vehicle.Angle;
 			if (!cannonTarget.IsValid && CannonTargeter.Instance.Cannon != this) 
             {
 				float angleDifference = vehicle.Angle - parentAngleCached;
@@ -1306,6 +1304,8 @@ namespace Vehicles
 				}
 				rotationTargeted = currentRotation;
 			}
+			parentRotCached = vehicle.Rotation;
+			parentAngleCached = vehicle.Angle;
 		}
 
 		public virtual string GetUniqueLoadID()

@@ -7,7 +7,7 @@ using Verse.Sound;
 using RimWorld;
 using SmashTools;
 
-namespace Vehicles.UI
+namespace Vehicles
 {
 	public class ITab_Vehicle_Upgrades : ITab
 	{

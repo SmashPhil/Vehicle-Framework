@@ -5,8 +5,6 @@ using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 using SmashTools;
-using Vehicles.AI;
-using Vehicles.Lords;
 
 namespace Vehicles
 {
@@ -23,21 +21,34 @@ namespace Vehicles
 			p.mindState.duty.radius = 10f;
 		}
 
-		public static void CheckArrived(Lord lord, List<Pawn> pawnsToCheck, IntVec3 meetingPoint, string memo, Predicate<Pawn> shouldCheckIfArrived, bool waterPathing, Predicate<Pawn> extraValidator = null)
+		public static void CheckArrived(Lord lord, List<Pawn> pawnsToCheck, IntVec3 meetingPoint, string memo, Predicate<Pawn> shouldCheckIfArrived, Predicate<Pawn> extraValidator = null)
 		{
 			bool flag = true;
 			VehiclePawn leadVehicle = ((LordJob_FormAndSendVehicles)lord.LordJob).LeadVehicle;
 			foreach (Pawn pawn in pawnsToCheck)
 			{
-				bool unspawned = !pawn.Spawned;
-				bool pawnTooFar = !pawn.Position.InHorDistOf(leadVehicle.Position, 5f);
-				bool cantReachExit = pawn is VehiclePawn ? !VehicleReachabilityUtility.CanReachVehicle(pawn as VehiclePawn, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly) :
-																!ReachabilityUtility.CanReach(pawn, leadVehicle.Position, PathEndMode.ClosestTouch, Danger.Deadly);
-				bool failedValidation = extraValidator != null && !extraValidator(pawn);
-				if (unspawned || pawnTooFar || cantReachExit || failedValidation)
+				if (shouldCheckIfArrived(pawn))
 				{
-					flag = false;
-					break;
+					bool unspawned = !pawn.Spawned;
+
+					bool pawnTooFar;
+					bool cantReachExit;
+					if (pawn is VehiclePawn vehicle)
+					{
+						pawnTooFar = !vehicle.Position.InHorDistOf(meetingPoint, 1);
+						cantReachExit = !VehicleReachabilityUtility.CanReachVehicle(pawn as VehiclePawn, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly);
+					}
+					else
+					{
+						pawnTooFar = !pawn.Position.InHorDistOf(leadVehicle.Position, 5f);
+						cantReachExit = !ReachabilityUtility.CanReach(pawn, leadVehicle.Position, PathEndMode.ClosestTouch, Danger.Deadly);
+					}
+					bool failedValidation = extraValidator != null && !extraValidator(pawn);
+					if (unspawned || pawnTooFar || cantReachExit || failedValidation)
+					{
+						flag = false;
+						break;
+					}
 				}
 			}
 			if (flag)

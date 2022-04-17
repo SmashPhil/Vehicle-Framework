@@ -3,7 +3,7 @@
 <Defs>
 	<PawnTableDef>
 		<defName>Vehicles</defName>
-		<workerClass>Vehicles.UI.PawnTable_Ships</workerClass>
+		<workerClass>Vehicles.PawnTable_Ships</workerClass>
 		<columns>
 			<li>Label</li>
 			<li>GapTiny</li>

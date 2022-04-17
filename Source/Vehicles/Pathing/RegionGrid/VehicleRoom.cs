@@ -3,7 +3,6 @@ using System.Linq;
 using UnityEngine;
 using Verse;
 using SmashTools;
-using Vehicles.AI;
 
 namespace Vehicles
 {

@@ -5,7 +5,6 @@ using UnityEngine;
 using Verse;
 using RimWorld;
 using SmashTools;
-using Vehicles.UI;
 
 namespace Vehicles
 {

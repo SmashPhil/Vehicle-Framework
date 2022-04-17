@@ -349,6 +349,7 @@
     <Compile Include="AI\Jobs\JobDriver_RefuelVehicleAtomic.cs" />
     <Compile Include="AI\Jobs\JobDriver_WorkOnUpgrade.cs" />
     <Compile Include="AI\Jobs\JobGiver_FollowVehicle.cs" />
+    <Compile Include="AI\Jobs\Job_Vehicle.cs" />
     <Compile Include="AI\Lords\LordJob_ArmoredAssault.cs" />
     <Compile Include="AI\Lords\LordJob_VehicleNPC.cs" />
     <Compile Include="AI\Lords\LordToil_AssaultColonyArmored.cs" />

@@ -7,8 +7,6 @@ using Verse.AI.Group;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
-using Vehicles.AI;
-using Vehicles.Lords;
 
 namespace Vehicles
 {

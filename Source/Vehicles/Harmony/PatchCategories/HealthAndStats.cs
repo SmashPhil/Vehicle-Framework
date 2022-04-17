@@ -5,7 +5,6 @@ using System.Reflection.Emit;
 using HarmonyLib;
 using Verse;
 using RimWorld;
-using Vehicles.UI;
 
 namespace Vehicles
 {

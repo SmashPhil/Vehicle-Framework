@@ -6,7 +6,7 @@ using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 
-namespace Vehicles.AI
+namespace Vehicles
 {
 	/// <summary>
 	/// Reachability calculator for quick result path finding before running the algorithm

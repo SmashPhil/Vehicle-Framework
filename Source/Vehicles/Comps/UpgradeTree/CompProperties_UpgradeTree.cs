@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Verse;
 using SmashTools;
-using Vehicles.UI;
 
 namespace Vehicles
 {

@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
-using Vehicles;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace Vehicles.Lords
+namespace Vehicles
 {
 	public class LordToil_PrepareCaravan_GatherDownedPawnsVehicle : LordToil
 	{
@@ -57,12 +56,10 @@ namespace Vehicles.Lords
 			{
 				List<Pawn> downedPawns = ((LordJob_FormAndSendVehicles)lord.LordJob).downedPawns;
 				List<VehiclePawn> vehicles = ((LordJob_FormAndSendVehicles)lord.LordJob).vehicles;
-
 				foreach (VehiclePawn vehicle in vehicles)
 				{
 					downedPawns.RemoveAll(pawn => vehicle.HasPawn(pawn));
 				}
-
 				if (downedPawns.NullOrEmpty())
 				{ 
 					lord.ReceiveMemo("AllDownedPawnsGathered");

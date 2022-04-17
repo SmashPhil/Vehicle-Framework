@@ -5,7 +5,7 @@ using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace Vehicles.Lords
+namespace Vehicles
 {
 	public class LordToil_PrepareCaravan_GatherCargo : LordToil
 	{

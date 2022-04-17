@@ -2,7 +2,6 @@
 using Verse;
 using Verse.AI;
 using SmashTools;
-using Vehicles.AI;
 
 namespace Vehicles
 {

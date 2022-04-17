@@ -6,7 +6,6 @@ using Verse;
 using Verse.Sound;
 using RimWorld;
 using SmashTools;
-using Vehicles.AI;
 using Vehicles.Achievements;
 
 namespace Vehicles

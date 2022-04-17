@@ -5,7 +5,7 @@ using RimWorld;
 using Verse;
 
 
-namespace Vehicles.AI
+namespace Vehicles
 {
 	/// <summary>
 	/// Cache results from reachability calculations for faster retrieval

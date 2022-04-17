@@ -1,12 +1,12 @@
 ﻿using System.Linq;
+using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 using RimWorld;
 using SmashTools;
-using Vehicles;
 
-namespace Vehicles.Lords
+namespace Vehicles
 {
 	public class LordToil_PrepareCaravan_LeaveWithVehicles : LordToil
 	{
@@ -54,7 +54,7 @@ namespace Vehicles.Lords
 		{
 			if (Find.TickManager.TicksGame % 100 == 0)
 			{
-				ExitMapUtility.CheckArrived(lord, lord.ownedPawns, exitSpot, "ReadyToExitMap", (Pawn p) => true, lord.ownedPawns.NotNullAndAny(b => b.IsBoat()), null);
+				ExitMapUtility.CheckArrived(lord, lord.ownedPawns, exitSpot, "ReadyToExitMap", (Pawn _) => true, (Pawn pawn) => !(pawn is VehiclePawn vehicle) || vehicle.CanMoveFinal);
 			}
 		}
 	}

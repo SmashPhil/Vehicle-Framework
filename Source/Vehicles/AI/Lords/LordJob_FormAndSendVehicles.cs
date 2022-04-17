@@ -6,9 +6,8 @@ using Verse.AI.Group;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
-using Vehicles.AI;
 
-namespace Vehicles.Lords
+namespace Vehicles
 {
 	public class LordJob_FormAndSendVehicles : LordJob
 	{
@@ -177,7 +176,24 @@ namespace Vehicles.Lords
 			{
 				return vehicleAssigned[p];
 			}
-			return (vehicles.FirstOrDefault(), null);
+			return (null, null);
+		}
+
+		public bool SeatAssigned(VehiclePawn vehicle, VehicleHandler handler)
+		{
+			foreach (var assignment in vehicleAssigned.Values)
+			{
+				if (assignment.vehicle == vehicle && assignment.handler == handler)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public bool AssignSeat(Pawn pawn, VehiclePawn vehicle, VehicleHandler handler)
+		{
+			return vehicleAssigned.TryAdd(pawn, (vehicle, handler));
 		}
 
 		public bool AssignRemainingPawns()
@@ -362,15 +378,21 @@ namespace Vehicles.Lords
 			boardVehicle_pause = new LordToil_PrepareCaravan_Pause();
 			leave = new LordToil_PrepareCaravan_LeaveWithVehicles(exitPoint);
 			leave_pause = new LordToil_PrepareCaravan_Pause();
-			LordToil_End lordToil_End = new LordToil_End();
-
+			
 			AddToStateGraph(stateGraph, GatherAnimals, "AllAnimalsGathered", postActions: new TransitionAction[] { new TransitionAction_EndAllJobs() });
 			AddToStateGraph(stateGraph, GatherItems, "AllItemsGathered", postActions: new TransitionAction[] { new TransitionAction_EndAllJobs() });
 			AddToStateGraph(stateGraph, GatherDowned, "AllDownedPawnsGathered");
 			AddToStateGraph(stateGraph, GatherSlaves, "AllSlavesGathered");
 			AddToStateGraph(stateGraph, Board, "AllPawnsOnboard", postActions: new TransitionAction[] { new TransitionAction_EndAllJobs() });
-			AddToStateGraph(stateGraph, Leave, "ReadyToExitMap", preActions: new TransitionAction[] { new TransitionAction_Custom(SendCaravan) });
+			AddToStateGraph(stateGraph, Leave);
+
+			LordToil_End lordToil_End = new LordToil_End();
+			Transition leaveTransition = new Transition(Leave.source, lordToil_End);
+			leaveTransition.AddTrigger(new Trigger_Memo("ReadyToExitMap"));
+			leaveTransition.AddPreAction(new TransitionAction_Custom(SendCaravan));
+
 			stateGraph.AddToil(lordToil_End);
+			stateGraph.AddTransition(leaveTransition);
 
 			//Transition transition1 = new Transition(gatherAnimals, gatherItems);
 			//transition1.AddTrigger(new Trigger_Memo());
@@ -434,7 +456,7 @@ namespace Vehicles.Lords
 			return stateGraph;
 		}
 
-		public void AddToStateGraph(StateGraph stateGraph, (LordToil source, LordToil pause) toil, string memo, TransitionAction[] preActions = null, TransitionAction[] postActions = null)
+		public void AddToStateGraph(StateGraph stateGraph, (LordToil source, LordToil pause) toil, string memo = null, TransitionAction[] preActions = null, TransitionAction[] postActions = null)
 		{
 			stateGraph.AddToil(toil.source);
 			stateGraph.AddToil(toil.pause);
@@ -442,7 +464,10 @@ namespace Vehicles.Lords
 			if (prevState.toil != null)
 			{
 				Transition transition = new Transition(prevState.toil, toil.source);
-				transition.AddTrigger(new Trigger_Memo(prevState.memo));
+				if (!prevState.memo.NullOrEmpty())
+				{
+					transition.AddTrigger(new Trigger_Memo(prevState.memo));
+				}
 				if (!preActions.NullOrEmpty())
 				{
 					foreach (TransitionAction action in preActions)

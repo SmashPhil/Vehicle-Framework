@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using Verse;
 using SmashTools;
-using Vehicles.AI;
-using System.Threading;
 
 namespace Vehicles
 {

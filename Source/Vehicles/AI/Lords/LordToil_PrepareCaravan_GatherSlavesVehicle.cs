@@ -6,7 +6,7 @@ using Verse.AI;
 using Verse.AI.Group;
 using SmashTools;
 
-namespace Vehicles.Lords
+namespace Vehicles
 {
 	public class LordToil_PrepareCaravan_GatherSlavesVehicle : LordToil
 	{

@@ -6,7 +6,7 @@ using Verse;
 using RimWorld;
 using SmashTools;
 
-namespace Vehicles.UI
+namespace Vehicles
 {
 	public static class VehicleGhostUtility
 	{

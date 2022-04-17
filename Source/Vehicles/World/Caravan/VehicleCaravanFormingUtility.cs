@@ -6,7 +6,6 @@ using Verse.AI.Group;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
-using Vehicles.Lords;
 
 namespace Vehicles
 {
@@ -43,7 +42,7 @@ namespace Vehicles
 				}
 			}
 
-			List<VehiclePawn> vehicles = pawns.Where(p => p.IsBoat()).Cast<VehiclePawn>().ToList();
+			List<VehiclePawn> vehicles = pawns.Where(p => p is VehiclePawn).Cast<VehiclePawn>().ToList();
 			List<Pawn> capablePawns = pawns.Where(x => !(x is VehiclePawn) && x.IsColonist && !x.Downed && !x.Dead).ToList();
 			List<Pawn> prisoners = pawns.Where(x => !(x is VehiclePawn) && !x.IsColonist && !x.RaceProps.Animal).ToList();
 

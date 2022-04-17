@@ -4,7 +4,7 @@ using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace Vehicles.Lords
+namespace Vehicles
 {
 	public class LordToil_PrepareCaravan_BoardVehicles : LordToil
 	{
@@ -51,7 +51,7 @@ namespace Vehicles.Lords
 
 		public override void LordToilTick()
 		{
-			if(Find.TickManager.TicksGame % 200 == 0)
+			if (Find.TickManager.TicksGame % 200 == 0)
 			{
 				bool flag = true;
 				List<Pawn> pawns = new List<Pawn>(lord.ownedPawns.Where(p => !(p is VehiclePawn)));

@@ -5,7 +5,7 @@ using Verse;
 using Verse.AI;
 using RimWorld;
 
-namespace Vehicles.AI
+namespace Vehicles
 {
 	public class JobGiver_FollowVehicle : JobGiver_AIFollowPawn
 	{

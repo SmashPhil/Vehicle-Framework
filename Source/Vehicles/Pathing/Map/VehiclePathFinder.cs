@@ -10,7 +10,7 @@ using Verse.AI;
 using RimWorld;
 using SmashTools;
 
-namespace Vehicles.AI
+namespace Vehicles
 {
 	/// <summary>
 	/// Kept similar to vanilla pathfinding for consistency

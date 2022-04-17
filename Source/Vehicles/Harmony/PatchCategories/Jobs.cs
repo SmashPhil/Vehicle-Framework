@@ -10,7 +10,6 @@ using RimWorld;
 using RimWorld.Planet;
 using OpCodes = System.Reflection.Emit.OpCodes;
 using UnityEngine;
-using Vehicles.Lords;
 
 namespace Vehicles
 {

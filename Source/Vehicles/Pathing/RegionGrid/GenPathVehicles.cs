@@ -3,7 +3,7 @@ using Verse;
 using Verse.AI;
 using SmashTools;
 
-namespace Vehicles.AI
+namespace Vehicles
 {
 	/// <summary>
 	/// Path related utility methods for vehicle

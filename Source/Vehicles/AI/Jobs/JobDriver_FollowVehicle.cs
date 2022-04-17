@@ -6,7 +6,7 @@ using Verse.AI;
 using RimWorld;
 using UnityEngine;
 
-namespace Vehicles.AI
+namespace Vehicles
 {
 	public class JobDriver_FollowVehicle : JobDriver
 	{

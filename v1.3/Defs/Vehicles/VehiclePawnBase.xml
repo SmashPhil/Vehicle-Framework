@@ -26,9 +26,9 @@
 		</statBases>
 		
 		<inspectorTabs>
-			<li>Vehicles.UI.ITab_Vehicle_Health</li>
-			<li>Vehicles.UI.ITab_Vehicle_Passengers</li>
-			<li>Vehicles.UI.ITab_Vehicle_Cargo</li>
+			<li>Vehicles.ITab_Vehicle_Health</li>
+			<li>Vehicles.ITab_Vehicle_Passengers</li>
+			<li>Vehicles.ITab_Vehicle_Cargo</li>
 			<li>ITab_Pawn_FormingCaravan</li>
 		</inspectorTabs>
 		
@@ -88,7 +88,7 @@
 	
 	<Vehicles.VehicleDef Name="BaseVehiclePawnUpgradeable" ParentName="BaseVehiclePawn" Abstract="True">
 		<inspectorTabs>
-			<li>Vehicles.UI.ITab_Vehicle_Upgrades</li>
+			<li>Vehicles.ITab_Vehicle_Upgrades</li>
 		</inspectorTabs>
 	</Vehicles.VehicleDef>
 </Defs>

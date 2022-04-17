@@ -2,7 +2,7 @@
 using Verse.AI;
 
 
-namespace Vehicles.AI
+namespace Vehicles
 {
 	/// <summary>
 	/// Quick check reachability methods

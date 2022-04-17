@@ -8,7 +8,6 @@ using Verse.AI;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
-using Vehicles.AI;
 
 namespace Vehicles
 {

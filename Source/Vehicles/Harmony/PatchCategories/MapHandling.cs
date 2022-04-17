@@ -7,7 +7,6 @@ using RimWorld;
 using RimWorld.Planet;
 using OpCodes = System.Reflection.Emit.OpCodes;
 using SmashTools;
-using Vehicles.AI;
 
 namespace Vehicles
 {

@@ -3,7 +3,7 @@ using UnityEngine;
 using Verse;
 using SmashTools;
 
-namespace Vehicles.AI
+namespace Vehicles
 {
 	/// <summary>
 	/// Region cost calculator inner data

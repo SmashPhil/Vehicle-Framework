@@ -9,7 +9,7 @@ using Verse;
 using Verse.AI;
 using SmashTools;
 
-namespace Vehicles.AI
+namespace Vehicles
 {
 	public class Vehicle_PathFollower : IExposable
 	{

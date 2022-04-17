@@ -2,7 +2,7 @@
 using UnityEngine;
 using Verse;
 
-namespace Vehicles.UI
+namespace Vehicles
 {
 	[StaticConstructorOnStartup]
 	public static class ShipPassengerCardUtility

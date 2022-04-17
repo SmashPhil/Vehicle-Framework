@@ -4,7 +4,7 @@ using Verse;
 using RimWorld;
 using SmashTools;
 
-namespace Vehicles.AI
+namespace Vehicles
 {
 	/// <summary>
 	/// Grid related method helpers

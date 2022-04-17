@@ -37,7 +37,7 @@
 		<defName>FollowVehicle</defName>
 		<thinkNode Class="ThinkNode_Priority">
 			<subNodes>
-				<li Class="Vehicles.AI.JobGiver_FollowVehicle" />
+				<li Class="Vehicles.JobGiver_FollowVehicle" />
 				<li Class="ThinkNode_ForbidOutsideFlagRadius">
 					<maxDistToSquadFlag>16</maxDistToSquadFlag>
 				</li>

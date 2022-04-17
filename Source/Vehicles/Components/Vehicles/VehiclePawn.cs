@@ -10,9 +10,6 @@ using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 using SmashTools;
-using Vehicles.AI;
-using Vehicles.Lords;
-using Vehicles;
 
 namespace Vehicles
 {
@@ -1248,10 +1245,10 @@ namespace Vehicles
 
 		public void Notify_Boarded(Pawn pawnToBoard, Map map = null)
 		{
-			if(bills != null && bills.Count > 0)
+			if (bills != null && bills.Count > 0)
 			{
 				Bill_BoardVehicle bill = bills.FirstOrDefault(x => x.pawnToBoard == pawnToBoard);
-				if(bill != null)
+				if (bill != null)
 				{
 					if(pawnToBoard.IsWorldPawn())
 					{
@@ -1262,7 +1259,7 @@ namespace Vehicles
 					{
 						pawnToBoard.DeSpawn(DestroyMode.Vanish);
 					}
-					if (bill.handler.handlers.TryAdd(pawnToBoard, true))
+					if (bill.handler.handlers.TryAddOrTransfer(pawnToBoard, true))
 					{
 						if(pawnToBoard != null)
 						{
@@ -1277,7 +1274,7 @@ namespace Vehicles
 							Find.WorldPawns.PassToWorld(pawnToBoard, PawnDiscardDecideMode.Decide);
 						}
 					}
-					else if(pawnToBoard.holdingOwner != null)
+					else if (pawnToBoard.holdingOwner != null)
 					{
 						pawnToBoard.holdingOwner.TryTransferToContainer(pawnToBoard, bill.handler.handlers);
 					}

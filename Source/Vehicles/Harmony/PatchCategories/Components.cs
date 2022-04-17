@@ -2,7 +2,6 @@
 using Verse;
 using RimWorld;
 using SmashTools;
-using Vehicles.AI;
 
 namespace Vehicles
 {
