@@ -192,7 +192,7 @@ namespace Vehicles
 				cannonMaterials = new Material[AnimationCount];
 				for (int i = 0; i < AnimationCount; i++)
 				{
-					cannonMaterials[i] = (cannonGraphic as Graphic_TurretAnimate).SubMaterialCycle(vehicle?.patternData?.pattern ?? PatternDefOf.Default, i);
+					cannonMaterials[i] = (cannonGraphic as Graphic_TurretAnimate).SubMaterialCycle(vehicle?.patternData?.patternDef ?? PatternDefOf.Default, i);
 				}
 			}
 			if (cannonTextures.EnumerableNullOrEmpty() || cannonTextures.Length != AnimationCount || forceRegen)

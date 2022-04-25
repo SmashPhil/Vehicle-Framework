@@ -142,7 +142,7 @@ namespace Vehicles
 				return;
 			}
 
-			if(vehicle.IsBoat())
+			if (vehicle.IsBoat())
 			{
 				dest = (LocalTargetInfo)GenPathVehicles.ResolvePathMode(vehicle.VehicleDef, vehicle.Map, dest.ToTargetInfo(vehicle.Map), ref peMode);
 				if (dest.HasThing && dest.ThingDestroyed)
@@ -210,7 +210,7 @@ namespace Vehicles
 				{
 					return;
 				}
-				if (!vehicle.Map.reachability.CanReach(vehicle.Position, dest, peMode, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false)))
+				if (!vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehicleReachability.CanReachVehicle(vehicle.Position, dest, peMode, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false)))
 				{
 					PatherFailed();
 					return;
@@ -753,6 +753,8 @@ namespace Vehicles
 		private PawnPath GenerateNewPathThreaded()
 		{
 			var cts = new CancellationTokenSource();
+			//Single threaded pathing for now, REDO later for dedicated pathfinding thread
+			return GenerateNewPath(CancellationToken.None).Item1;
 			try
 			{
 				var tasks = new[]
@@ -804,7 +806,7 @@ namespace Vehicles
 
 		private bool AtDestinationPosition()
 		{
-			return vehicle.CanReachImmediate(destination, peMode);
+			return VehicleReachabilityImmediate.CanReachImmediateVehicle(vehicle, destination, peMode);
 		}
 
 		private bool NeedNewPath()

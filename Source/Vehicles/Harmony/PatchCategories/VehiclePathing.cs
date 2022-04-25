@@ -104,7 +104,7 @@ namespace Vehicles
 				while (i < num)
 				{
 					curLoc = GenRadial.RadialPattern[i] + clickCell;
-					if (GenGridVehicles.Standable(curLoc, vehicle.VehicleDef, vehicle.Map))
+					if (GenGridVehicles.Standable(curLoc, vehicle, vehicle.Map))
 					{
 						if (curLoc == vehicle.Position || vehicle.beached)
 						{

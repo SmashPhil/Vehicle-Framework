@@ -132,7 +132,7 @@ namespace Vehicles
 			doCloseX = true;
 			forcePause = true;
 			absorbInputAroundWindow = true;
-			selectedPattern = maskMaterials.ContainsKey(PatternData.pattern) ? PatternData.pattern ?? PatternDefOf.Default : PatternDefOf.Default;
+			selectedPattern = maskMaterials.ContainsKey(PatternData.patternDef) ? PatternData.patternDef ?? PatternDefOf.Default : PatternDefOf.Default;
 			Find.WindowStack.Add(Instance);
 		}
 
@@ -462,7 +462,7 @@ namespace Vehicles
 			if (Widgets.ButtonText(buttonRect, "VehiclesReset".Translate()))
 			{
 				SoundDefOf.Click.PlayOneShotOnCamera(null);
-				selectedPattern = PatternData.pattern;
+				selectedPattern = PatternData.patternDef;
 				additionalTiling = PatternData.tiles;
 				displacementX = PatternData.displacement.x;
 				displacementY = PatternData.displacement.y;

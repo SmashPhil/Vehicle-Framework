@@ -253,30 +253,6 @@
 				<fuelCapacity>2000</fuelCapacity>
 				<fuelConsumptionCondition>Drafted</fuelConsumptionCondition>
 			</li>
-			<li Class="Vehicles.CompProperties_VehicleTracks">
-				<tracks>
-					<li>
-						<trackPoint>
-							<first>-1,-2</first>
-							<second>-1,2</second>
-						</trackPoint>
-						<destroyableCategories>
-							<li>Plant</li>
-							<li>Pawn</li>
-						</destroyableCategories>
-					</li>
-					<li>
-						<trackPoint>
-							<first>1,-2</first>
-							<second>1,2</second>
-						</trackPoint>
-						<destroyableCategories>
-							<li>Plant</li>
-							<li>Pawn</li>
-						</destroyableCategories>
-					</li>
-				</tracks>
-			</li>
 			<li Class="Vehicles.CompProperties_Cannons">
 				<turrets>
 					<li>

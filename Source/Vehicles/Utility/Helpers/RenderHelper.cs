@@ -274,8 +274,8 @@ namespace Vehicles
 
 			Graphic_Vehicle graphic = VehicleTex.CachedGraphics[vehicleDef];
 
-			PatternDef pattern = patternData?.pattern;
-			pattern ??= VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData)?.pattern ?? PatternDefOf.Default;
+			PatternDef pattern = patternData?.patternDef;
+			pattern ??= VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData)?.patternDef ?? PatternDefOf.Default;
 
 			Color color1 = patternData?.color ?? vehicleDef.graphicData.color;
 			Color color2 = patternData?.colorTwo ?? vehicleDef.graphicData.color;
@@ -362,7 +362,7 @@ namespace Vehicles
 				Material cannonMat = null;
 				if (turret.CannonGraphic.Shader.SupportsRGBMaskTex())
 				{
-					cannonMat = new Material(turret.CannonGraphic.MatAt(rotDrawn, patternData.pattern));
+					cannonMat = new Material(turret.CannonGraphic.MatAt(rotDrawn, patternData.patternDef));
 					if (turret.CannonGraphic.GetType().IsAssignableFrom(typeof(Graphic_Turret)))
 					{
 						MaterialRequestRGB matReq = new MaterialRequestRGB()
@@ -374,10 +374,10 @@ namespace Vehicles
 							colorThree = patternData.colorThree,
 							tiles = patternData.tiles,
 							displacement = patternData.displacement,
-							properties = patternData.pattern.properties,
-							isSkin = patternData.pattern is SkinDef,
+							properties = patternData.patternDef.properties,
+							isSkin = patternData.patternDef is SkinDef,
 							maskTex = turret.CannonGraphic.masks[0],
-							patternTex = patternData.pattern[rotDrawn]
+							patternTex = patternData.patternDef[rotDrawn]
 						};
 						cannonMat = MaterialPoolExpanded.MatFrom(matReq);
 					}
@@ -454,7 +454,7 @@ namespace Vehicles
 
 				Rect cannonDrawnRect = new Rect(xCannon, yCannon, cannonWidth, cannonHeight);
 
-				Material cannonMat = turret.CannonGraphic.Shader.SupportsRGBMaskTex() ? new Material(turret.CannonGraphic.MatAt(patternData.pattern)) : null;
+				Material cannonMat = turret.CannonGraphic.Shader.SupportsRGBMaskTex() ? new Material(turret.CannonGraphic.MatAt(patternData.patternDef)) : null;
 				if (patternData != VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData))
 				{
 					MaterialRequestRGB matReq = new MaterialRequestRGB()
@@ -466,10 +466,10 @@ namespace Vehicles
 						colorThree = patternData.colorThree,
 						tiles = patternData.tiles,
 						displacement = patternData.displacement,
-						properties = patternData.pattern.properties,
-						isSkin = patternData.pattern is SkinDef,
+						properties = patternData.patternDef.properties,
+						isSkin = patternData.patternDef is SkinDef,
 						maskTex = turret.CannonGraphic.masks[0],
-						patternTex = patternData.pattern?[rotDrawn]
+						patternTex = patternData.patternDef?[rotDrawn]
 					};
 					cannonMat = MaterialPoolExpanded.MatFrom(matReq);
 				}
@@ -499,8 +499,8 @@ namespace Vehicles
 				drawStep = "Retrieving cached graphic and pattern";
 				Graphic_Vehicle graphic = VehicleTex.CachedGraphics[vehicleDef];
 
-				PatternDef pattern = patternData?.pattern;
-				pattern ??= VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData)?.pattern ?? PatternDefOf.Default;
+				PatternDef pattern = patternData?.patternDef;
+				pattern ??= VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData)?.patternDef ?? PatternDefOf.Default;
 
 				drawStep = "Setting default color";
 				Color color1 = patternData?.color ?? vehicleDef.graphicData.color;

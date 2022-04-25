@@ -40,7 +40,7 @@ namespace Vehicles
 		/// <param name="loc"></param>
 		public bool Walkable(IntVec3 loc)
 		{
-			return loc.InBounds(map) && pathGrid[map.cellIndices.CellToIndex(loc)] < ImpassableCost;
+			return loc.InBounds(map) && WalkableFast(loc);
 		}
 
 		/// <summary>
@@ -49,7 +49,7 @@ namespace Vehicles
 		/// <param name="loc"></param>
 		public bool WalkableFast(IntVec3 loc)
 		{
-			return pathGrid[map.cellIndices.CellToIndex(loc)] < ImpassableCost;
+			return WalkableFast(map.cellIndices.CellToIndex(loc));
 		}
 
 		/// <summary>
@@ -59,7 +59,7 @@ namespace Vehicles
 		/// <param name="z"></param>
 		public bool WalkableFast(int x, int z)
 		{
-			return pathGrid[map.cellIndices.CellToIndex(x, z)] < ImpassableCost;
+			return WalkableFast(map.cellIndices.CellToIndex(x, z));
 		}
 
 		/// <summary>
@@ -190,6 +190,10 @@ namespace Vehicles
 			int thingCost = 0;
 			foreach (Thing thing in list)
 			{
+				if (thing is VehiclePawn)
+				{
+					continue;
+				}
 				if (vehicleDef.properties.customThingCosts.TryGetValue(thing.def, out int thingPathCost))
 				{
 					if (thingPathCost < 0 || thingPathCost >= ImpassableCost)

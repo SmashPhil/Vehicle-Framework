@@ -359,7 +359,7 @@ namespace Vehicles
 			CaravanHelper.ExitMapAndCreateVehicleCaravan(lord.ownedPawns.Concat(downedPawns.Where(pawn => 
 				JobGiver_PrepareCaravan_GatherDownedPawns.IsDownedPawnNearExitPoint(pawn, exitPoint))), lord.faction, Map.Tile, startingTile, destinationTile);
 		}
-		
+
 		public override StateGraph CreateGraph()
 		{
 			StateGraph stateGraph = new StateGraph();
@@ -378,7 +378,7 @@ namespace Vehicles
 			boardVehicle_pause = new LordToil_PrepareCaravan_Pause();
 			leave = new LordToil_PrepareCaravan_LeaveWithVehicles(exitPoint);
 			leave_pause = new LordToil_PrepareCaravan_Pause();
-			
+
 			AddToStateGraph(stateGraph, GatherAnimals, "AllAnimalsGathered", postActions: new TransitionAction[] { new TransitionAction_EndAllJobs() });
 			AddToStateGraph(stateGraph, GatherItems, "AllItemsGathered", postActions: new TransitionAction[] { new TransitionAction_EndAllJobs() });
 			AddToStateGraph(stateGraph, GatherDowned, "AllDownedPawnsGathered");
@@ -387,71 +387,13 @@ namespace Vehicles
 			AddToStateGraph(stateGraph, Leave);
 
 			LordToil_End lordToil_End = new LordToil_End();
+			stateGraph.AddToil(lordToil_End);
+
 			Transition leaveTransition = new Transition(Leave.source, lordToil_End);
 			leaveTransition.AddTrigger(new Trigger_Memo("ReadyToExitMap"));
 			leaveTransition.AddPreAction(new TransitionAction_Custom(SendCaravan));
 
-			stateGraph.AddToil(lordToil_End);
 			stateGraph.AddTransition(leaveTransition);
-
-			//Transition transition1 = new Transition(gatherAnimals, gatherItems);
-			//transition1.AddTrigger(new Trigger_Memo());
-			//transition1.AddPostAction();
-			//stateGraph.AddTransition(transition1, false);
-
-			//Transition transition2 = new Transition(gatherItems, boardVehicle);
-			//transition2.AddTrigger(new Trigger_Memo());
-			//transition2.AddPostAction(new TransitionAction_EndAllJobs());
-			//stateGraph.AddTransition(transition2, false);
-
-			//Transition transition3 = new Transition(gatherDownedPawns, boardVehicle); //gatherSlaves
-			//transition3.AddTrigger(new Trigger_Memo(""));
-			//stateGraph.AddTransition(transition3, false);
-
-			//Transition transition4 = new Transition(gatherSlaves, boardVehicle);
-			//transition4.AddTrigger(new Trigger_Memo(""));
-			//transition4.AddPostAction(new TransitionAction_EndAllJobs());
-			//stateGraph.AddTransition(transition4, false);
-
-			//Transition transitionB = new Transition(boardVehicle, leave);
-			//transitionB.AddTrigger(new Trigger_Memo("AllPawnsOnboard"));
-			//transitionB.AddPostAction(new TransitionAction_EndAllJobs());
-			//stateGraph.AddTransition(transitionB, false);
-
-			//Transition transition6 = new Transition(leave, lordToil_End);
-			//transition6.AddTrigger(new Trigger_Memo("ReadyToExitMap"));
-			//transition6.AddPreAction(new TransitionAction_Custom(SendCaravan));
-			//stateGraph.AddTransition(transition6, false);
-
-			//Transition transition9 = PauseTransition(gatherItems, gatherItems_pause);
-			//stateGraph.AddTransition(transition9, false);
-
-			//Transition transition10 = UnpauseTransition(gatherItems_pause, gatherItems);
-			//stateGraph.AddTransition(transition10, false);
-
-			//Transition transition11 = PauseTransition(gatherDownedPawns, gatherDownedPawns_pause);
-			//stateGraph.AddTransition(transition11, false);
-
-			//Transition transition12 = UnpauseTransition(gatherDownedPawns_pause, gatherDownedPawns);
-			//stateGraph.AddTransition(transition12, false);
-
-			//Transition transition13 = PauseTransition(gatherSlaves, gatherSlaves_pause);
-			//stateGraph.AddTransition(transition13, false);
-
-			//Transition transition14 = UnpauseTransition(gatherSlaves_pause, gatherSlaves);
-			//stateGraph.AddTransition(transition14, false);
-
-			//Transition transition15 = PauseTransition(boardVehicle, boardVehicle_pause);
-			//stateGraph.AddTransition(transition15, false);
-
-			//Transition transition16 = UnpauseTransition(boardVehicle_pause, boardVehicle);
-			//stateGraph.AddTransition(transition16, false);
-
-			//Transition transition17 = PauseTransition(leave, leave_pause);
-			//stateGraph.AddTransition(transition17, false);
-
-			//Transition transition18 = UnpauseTransition(leave_pause, leave);
-			//stateGraph.AddTransition(transition18, false);
 
 			return stateGraph;
 		}

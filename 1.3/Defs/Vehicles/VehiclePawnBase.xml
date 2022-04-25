@@ -10,7 +10,8 @@
 		<useHitPoints>false</useHitPoints>
 		<hasTooltip>true</hasTooltip>
 		<repairEffect>Repair</repairEffect>
-		<passability>Impassable</passability>
+		<passability>PassThroughOnly</passability>
+		<pathCost>250</pathCost>
 		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
 		
 		<tradeability>None</tradeability> <!-- Temporary until icons are fixed and vehicle prices are balanced -->

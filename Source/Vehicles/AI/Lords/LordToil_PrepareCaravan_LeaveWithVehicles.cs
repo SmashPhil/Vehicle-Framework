@@ -25,6 +25,18 @@ namespace Vehicles
 
 		public override bool AllowSelfTend => false;
 
+		public override void Init()
+		{
+			base.Init();
+			foreach (Pawn pawn in lord.ownedPawns)
+			{
+				if (pawn is VehiclePawn vehicle)
+				{
+					vehicle.drafter.Drafted = true;
+				}
+			}
+		}
+
 		public override void UpdateAllDuties()
 		{
 			RotatingList<VehiclePawn> vehicles = lord.ownedPawns.Where(p => p is VehiclePawn).Cast<VehiclePawn>().ToRotatingList();
@@ -33,11 +45,10 @@ namespace Vehicles
 			{
 				if (pawn is VehiclePawn)
 				{
-					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.TravelOrWaitVehicle, exitSpot, -1f)
+					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.TravelOrWaitVehicle, exitSpot)
 					{
 						locomotion = LocomotionUrgency.Jog
 					};
-					pawn.drafter.Drafted = true;
 				}
 				else
 				{
@@ -54,7 +65,7 @@ namespace Vehicles
 		{
 			if (Find.TickManager.TicksGame % 100 == 0)
 			{
-				ExitMapUtility.CheckArrived(lord, lord.ownedPawns, exitSpot, "ReadyToExitMap", (Pawn _) => true, (Pawn pawn) => !(pawn is VehiclePawn vehicle) || vehicle.CanMoveFinal);
+				ExitMapUtility.CheckArrived(lord, lord.ownedPawns, exitSpot, "ReadyToExitMap", (_) => true, (Pawn pawn) => !(pawn is VehiclePawn vehicle) || vehicle.CanMoveFinal);
 			}
 		}
 	}

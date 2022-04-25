@@ -1,14 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.3.8142</currentVersion>
+  <currentVersion>1.3.8149</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
-  <description>[title]Hot Fix[/title][font]Small[/font]
-I believe I found what was causing the CTD issue, if you're still getting it after this patch please report it to me on discord. This one is top priority as it is likely caused by a memory leak.
+  <description>[title]Recent News[/title][font]Small[/font]
+Okay, so I think I finally fixed the [b]second[/b] Crash To Desktop bug. It was a bit of a pain in the ass but it's okay cause I finally found it.
 
-A few changes to WorldPathFinder caching were made as well.
+Thanks to everyone that has been testing the mod for me, your bug reports are invaluable to me! They really help find all those edge cases, and boy have there been a few.
+
+Thankfully they're all pretty mild so apart from another map generation edge case exception, the rest don't affect gameplay in a huge way.
+
+[title]Bug Fixes[/title][font]Small[/font]
+- Fixed bug where game crashes when updating Duty to path to the cell currently occupied.
+
+- Fixed bug where an empty sequence would be used when pulling a tile path cost on the world map
+
+- Fixed bug where vehicle patternData and retextureData would not save or load correctly
+
+- Fixed bug where vehicles would render with North texture in SouthEast and SouthWest rotations for vehicles without diagonal textures.
+
+- Fix to translation in mod settings when resetting all settings.
 [title]Final Notes[/title][font]Small[/font]
 Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
 </description>

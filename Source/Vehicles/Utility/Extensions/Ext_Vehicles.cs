@@ -183,7 +183,7 @@ namespace Vehicles
 			}
 			foreach (IntVec3 cell in CellRect.CenteredOn(loc, dimensions.x, dimensions.z))
 			{
-				if (!GenGridVehicles.Standable(cell, vehicle.VehicleDef, map))
+				if (!GenGridVehicles.Standable(cell, vehicle, map))
 				{
 					return false;
 				}

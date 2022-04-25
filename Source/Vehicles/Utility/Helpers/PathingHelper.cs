@@ -86,6 +86,11 @@ namespace Vehicles
 		{
 			foreach (Def def in DefDatabase<Def>.AllDefs)
 			{
+				if (def is VehicleDef)
+				{
+					Debug.Warning($"Attempting to set custom path cost for {def.defName} when vehicles should not be pathing over other vehicles to begin with. Please do not add this DefModExtension to VehicleDefs.");
+					continue;
+				}
 				if (def.GetModExtension<CustomCostDefModExtension>() is CustomCostDefModExtension customCost)
 				{
 					foreach (VehicleDef vehicleDef in customCost.vehicles)

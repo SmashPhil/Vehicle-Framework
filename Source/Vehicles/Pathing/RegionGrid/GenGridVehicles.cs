@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Verse;
 using RimWorld;
@@ -33,9 +34,32 @@ namespace Vehicles
 		{
 			if (pawn is VehiclePawn vehicle)
 			{
-				return Standable(cell, vehicle.VehicleDef, map);
+				return Standable(cell, vehicle, map);
 			}
 			return GenGrid.Standable(cell, map);
+		}
+
+		/// <summary>
+		/// <paramref name="cell"/> is able to be stood on for <paramref name="vehicle"/>
+		/// </summary>
+		/// <param name="cell"></param>
+		/// <param name="vehicle"></param>
+		/// <param name="map"></param>
+		public static bool Standable(this IntVec3 cell, VehiclePawn vehicle, Map map)
+		{
+			if (!map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathGrid.Walkable(cell))
+			{
+				return false;
+			}
+			List<Thing> list = map.thingGrid.ThingsListAt(cell);
+			foreach (Thing thing in list)
+			{
+				if (thing != vehicle && thing.def.passability != Traversability.Standable)
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 
 		/// <summary>

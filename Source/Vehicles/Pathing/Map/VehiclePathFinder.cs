@@ -147,12 +147,12 @@ namespace Vehicles
 		/// <param name="peMode"></param>
 		public (PawnPath path, bool found) FindVehiclePath(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms,  CancellationToken token, PathEndMode peMode = PathEndMode.OnCell)
 		{
-			Debug.Message($"{VehicleHarmony.LogLabel} MainPath for {traverseParms.pawn.LabelShort} - ThreadId: [{Thread.CurrentThread.ManagedThreadId}] TaskId: [{Task.CurrentId}]");
+			Debug.Message($"{VehicleHarmony.LogLabel} From={start} To={dest} MainPath for {traverseParms.pawn.LabelShort} - ThreadId: [{Thread.CurrentThread.ManagedThreadId}] TaskId: [{Task.CurrentId}]");
 
 			postCalculatedCells.Clear();
 			postCalculatedTurns.Clear();
 			VehicleMapping vehicleMapping = map.GetCachedMapComponent<VehicleMapping>();
-			if(DebugSettings.pathThroughWalls)
+			if (DebugSettings.pathThroughWalls)
 			{
 				traverseParms.mode = TraverseMode.PassAllDestroyableThings;
 			}
@@ -247,7 +247,7 @@ namespace Vehicles
 					}
 					if (singleRect)
 					{
-						if(startIndex == destIndex)
+						if (startIndex == destIndex)
 						{
 							goto Block_32;
 						}

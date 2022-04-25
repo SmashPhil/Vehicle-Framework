@@ -20,6 +20,10 @@ namespace Vehicles
 		/// <param name="mode"></param>
 		public static bool CanReachVehicle(this VehiclePawn vehicle, LocalTargetInfo dest, PathEndMode peMode, Danger maxDanger, TraverseMode mode = TraverseMode.ByPawn)
 		{
+			if (dest.Cell == vehicle.Position)
+			{
+				return true;
+			}
 			return vehicle.Spawned && vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehicleReachability.CanReachVehicle(vehicle.Position, dest, peMode, 
 				TraverseParms.For(vehicle, maxDanger, mode));
 		}
@@ -34,6 +38,10 @@ namespace Vehicles
 		/// <param name="mode"></param>
 		public static bool CanReachVehicleNonLocal(this VehiclePawn vehicle, TargetInfo dest, PathEndMode peMode, Danger maxDanger, TraverseMode mode = TraverseMode.ByPawn)
 		{
+			if (dest.Cell == vehicle.Position)
+			{
+				return true;
+			}
 			return vehicle.Spawned && vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehicleReachability.CanReachVehicleNonLocal(vehicle.Position, dest, peMode, 
 				TraverseParms.For(vehicle, maxDanger, mode));
 		}

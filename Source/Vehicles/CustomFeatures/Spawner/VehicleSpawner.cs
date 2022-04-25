@@ -68,7 +68,7 @@ namespace Vehicles
 				result.SetFactionDirect(request.Faction);
 
 				lastStep = "Retrieving pattern";
-				PatternDef pattern = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(result.VehicleDef.defName, result.VehicleDef.graphicData)?.pattern ?? PatternDefOf.Default;
+				PatternDef pattern = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(result.VehicleDef.defName, result.VehicleDef.graphicData)?.patternDef ?? PatternDefOf.Default;
 
 				lastStep = "Randomized pattern check";
 				result.Pattern = request.RandomizeMask ? result.VehicleGraphic.maskMatPatterns.RandomElement().Key : pattern;

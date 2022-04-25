@@ -25,6 +25,7 @@ namespace Vehicles
 		{
 			bool flag = true;
 			VehiclePawn leadVehicle = ((LordJob_FormAndSendVehicles)lord.LordJob).LeadVehicle;
+			
 			foreach (Pawn pawn in pawnsToCheck)
 			{
 				if (shouldCheckIfArrived(pawn))

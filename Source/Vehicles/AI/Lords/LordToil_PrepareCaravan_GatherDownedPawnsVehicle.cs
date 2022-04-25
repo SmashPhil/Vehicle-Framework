@@ -55,16 +55,27 @@ namespace Vehicles
 			if (Find.TickManager.TicksGame % 100 == 0)
 			{
 				List<Pawn> downedPawns = ((LordJob_FormAndSendVehicles)lord.LordJob).downedPawns;
+				if (CheckMemo(downedPawns))
+				{
+					return;
+				}
 				List<VehiclePawn> vehicles = ((LordJob_FormAndSendVehicles)lord.LordJob).vehicles;
 				foreach (VehiclePawn vehicle in vehicles)
 				{
 					downedPawns.RemoveAll(pawn => vehicle.HasPawn(pawn));
 				}
-				if (downedPawns.NullOrEmpty())
-				{ 
-					lord.ReceiveMemo("AllDownedPawnsGathered");
-				}
+				CheckMemo(downedPawns);
 			}
+		}
+
+		private bool CheckMemo(List<Pawn> pawns)
+		{
+			if (pawns.NullOrEmpty())
+			{
+				lord.ReceiveMemo("AllDownedPawnsGathered");
+				return true;
+			}
+			return false;
 		}
 	}
 }

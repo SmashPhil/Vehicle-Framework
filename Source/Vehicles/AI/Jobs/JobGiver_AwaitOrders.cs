@@ -16,9 +16,15 @@ namespace Vehicles
 
 		protected override Job TryGiveJob(Pawn pawn)
 		{
-			if((pawn as VehiclePawn).vPather.Moving)
-				return null;
-			return new Job(JobDefOf_Vehicles.IdleVehicle, pawn);
+			if (pawn is VehiclePawn vehicle)
+			{
+				if (vehicle.vPather.Moving)
+				{
+					return null;
+				}
+				return new Job(JobDefOf_Vehicles.IdleVehicle, pawn);
+			}
+			return null;
 		}
 	}
 }

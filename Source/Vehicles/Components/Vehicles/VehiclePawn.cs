@@ -256,7 +256,7 @@ namespace Vehicles
 					graphicData.colorThree = patternData.colorThree;
 					graphicData.tiles = patternData.tiles;
 					graphicData.displacement = patternData.displacement;
-					graphicData.pattern = patternData.pattern;
+					graphicData.pattern = patternData.patternDef;
 					graphicInt = graphicData.Graphic as Graphic_Vehicle;
 				}
 				return graphicInt;
@@ -327,11 +327,11 @@ namespace Vehicles
 		{
 			get
 			{
-				return patternData.pattern ?? VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(VehicleDef.defName, VehicleGraphic.DataRGB)?.pattern ?? PatternDefOf.Default;
+				return patternData.patternDef ?? VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(VehicleDef.defName, VehicleGraphic.DataRGB)?.patternDef ?? PatternDefOf.Default;
 			}
 			set
 			{
-				patternData.pattern = value;
+				patternData.patternDef = value;
 			}
 		}
 
@@ -759,6 +759,12 @@ namespace Vehicles
 						statHandler.components.ForEach(c => c.HealComponent(float.MaxValue));
 					}
 				};
+
+				yield return new Command_Action
+				{
+					defaultLabel = "Path To Position",
+					action = () => vPather.StartPath(Position, PathEndMode.OnCell)
+				};
 			}
 
 			foreach (ThingComp comp in AllComps)
@@ -1132,12 +1138,12 @@ namespace Vehicles
 		
 		public void ChangeColor()
 		{
-			Dialog_ColorPicker.OpenColorPicker(this, delegate (Color colorOne, Color colorTwo, Color colorThree, PatternDef pattern, Vector2 displacement, float tiles)
+			Dialog_ColorPicker.OpenColorPicker(this, delegate (Color colorOne, Color colorTwo, Color colorThree, PatternDef patternDef, Vector2 displacement, float tiles)
 			{
 				DrawColor = colorOne;
 				DrawColorTwo = colorTwo;
 				DrawColorThree = colorThree;
-				patternData.pattern = pattern;
+				patternData.patternDef = patternDef;
 				patternData.tiles = tiles;
 				patternData.displacement = displacement;
 				Notify_ColorChanged();

@@ -15,9 +15,9 @@ namespace Vehicles
 		public float tiles = 1;
 		public Vector2 displacement = Vector2.zero;
 		
-		public PatternDef pattern;
+		public PatternDef patternDef;
 
-		private string patternDef = "Default";
+		private string patternId = "Default";
 
 		public PatternData()
 		{
@@ -31,12 +31,12 @@ namespace Vehicles
 		{
 		}
 
-		public PatternData(Color color, Color colorTwo, Color colorThree, PatternDef pattern, Vector2 displacement, float tiles)
+		public PatternData(Color color, Color colorTwo, Color colorThree, PatternDef patternDef, Vector2 displacement, float tiles)
 		{
 			this.color = color;
 			this.colorTwo = colorTwo;
 			this.colorThree = colorThree;
-			this.pattern = pattern;
+			this.patternDef = patternDef;
 			this.displacement = displacement;
 			this.tiles = tiles;
 		}
@@ -50,7 +50,7 @@ namespace Vehicles
 				colorThree = patternData.colorThree,
 				tiles = patternData.tiles,
 				displacement = patternData.displacement,
-				pattern = patternData.pattern
+				pattern = patternData.patternDef
 			};
 		}
 
@@ -63,16 +63,16 @@ namespace Vehicles
 				colorThree = graphicDataRGB.colorThree,
 				tiles = graphicDataRGB.tiles,
 				displacement = graphicDataRGB.displacement,
-				pattern = graphicDataRGB.pattern
+				patternDef = graphicDataRGB.pattern
 			};
 		}
 
 		public virtual void ExposeDataPostDefDatabase()
 		{
-			if (!patternDef.NullOrEmpty())
+			if (!patternId.NullOrEmpty())
 			{
-				pattern = DefDatabase<PatternDef>.GetNamed(patternDef);
-				pattern ??= PatternDefOf.Default;
+				patternDef = DefDatabase<PatternDef>.GetNamed(patternId);
+				patternDef ??= PatternDefOf.Default;
 			}
 		}
 
@@ -85,14 +85,18 @@ namespace Vehicles
 		{
 			if (Scribe.mode == LoadSaveMode.Saving)
 			{
-				patternDef = pattern?.defName ?? "Default";
+				patternId = patternDef?.defName ?? "Default";
 			}
 			Scribe_Values.Look(ref tiles, "tiles", 1);
 			Scribe_Values.Look(ref displacement, "displacement", Vector2.zero);
 			Scribe_Values.Look(ref color, "color", Color.white);
 			Scribe_Values.Look(ref colorTwo, "colorTwo", Color.white);
 			Scribe_Values.Look(ref colorThree, "colorThree", Color.white);
-			Scribe_Values.Look(ref patternDef, "patternDef");
+			Scribe_Values.Look(ref patternId, "patternId");
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				patternDef = !patternId.NullOrEmpty() ? DefDatabase<PatternDef>.GetNamedSilentFail(patternId) : PatternDefOf.Default;
+			}
 		}
 	}
 }

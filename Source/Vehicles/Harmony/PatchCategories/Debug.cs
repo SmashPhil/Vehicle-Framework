@@ -50,22 +50,36 @@ namespace Vehicles
 			}
 
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalTimeEstimator), nameof(CaravanArrivalTimeEstimator.EstimatedTicksToArriveToEvery)),
-			//	prefix: new HarmonyMethod(typeof(Debug),
-			//	nameof(TestMethod)));
+			//	prefix: new HarmonyMethod(typeof(Debug), 
+			//	nameof(TestPrefix)),
+			//	postfix: new HarmonyMethod(typeof(Debug),
+			//	nameof(TestPostfix)));
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldGrid), nameof(WorldGrid.GetTileCenter)),
 			//	finalizer: new HarmonyMethod(typeof(Debug),
 			//	nameof(ExceptionCatcher)));
 		}
 
-		public static void TestMethod()
+		public static void TestPrefix()
+		{
+			try
+			{
+				Log.Message($"START");
+			}
+			catch (Exception ex)
+			{
+				Log.Error($"[Test Test Prefix] Exception Thrown.\n{ex.Message}\n{ex.InnerException}\n{ex.StackTrace}");
+			}
+		}
+
+		public static void TestPostfix()
 		{
             try
             {
-                Log.Message($"");
+                Log.Message($"END");
             }
             catch (Exception ex)
             {
-                Log.Error($"[Test Method] Exception Thrown.\n{ex.Message}\n{ex.InnerException}\n{ex.StackTrace}");
+                Log.Error($"[Test Postfix] Exception Thrown.\n{ex.Message}\n{ex.InnerException}\n{ex.StackTrace}");
             }
 		}
 

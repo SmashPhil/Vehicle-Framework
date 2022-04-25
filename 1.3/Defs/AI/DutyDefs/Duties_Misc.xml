@@ -22,10 +22,7 @@
 				<!-- Goto travel destination if reachable -->
 				<li Class="Vehicles.JobGiver_GotoTravelDestinationVehicle" />
 
-				<!-- Basic needs -->
-				<li Class="ThinkNode_Subtree">
-					<treeDef>SatisfyVeryUrgentNeeds</treeDef>
-				</li>
+				<li Class="Vehicles.JobGiver_AwaitOrders"/>
 			</subNodes>
 		</thinkNode>
 	</DutyDef>

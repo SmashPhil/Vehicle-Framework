@@ -143,37 +143,27 @@ namespace Vehicles
 			}
 			if (textureArray[5] is null)
 			{
-				if (textureArray[4] != null)
-				{
-					textureArray[5] = textureArray[4];
-				}
-				else if (textureArray[6] != null)
+				if (textureArray[6] != null)
 				{
 					textureArray[5] = textureArray[6];
-					eastDiagonalRotated = DataAllowsFlip;
 				}
 				else
 				{
 					textureArray[5] = textureArray[2];
-					eastDiagonalRotated = DataAllowsFlip;
 				}
+				eastDiagonalRotated = DataAllowsFlip;
 			}
 			if (textureArray[6] is null)
 			{
-				if (textureArray[7] != null)
-				{
-					textureArray[6] = textureArray[7];
-				}
 				if (textureArray[5] != null)
 				{
 					textureArray[6] = textureArray[5];
-					westDiagonalRotated = DataAllowsFlip;
 				}
 				else
 				{
 					textureArray[6] = textureArray[2];
-					westDiagonalRotated = DataAllowsFlip;
 				}
+				westDiagonalRotated = DataAllowsFlip;
 			}
 			if (textureArray[7] is null)
 			{
