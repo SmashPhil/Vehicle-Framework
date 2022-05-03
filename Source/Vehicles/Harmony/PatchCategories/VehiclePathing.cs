@@ -27,7 +27,7 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), nameof(Pawn_PathFollower.StartPath)),
 				prefix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(StartVehiclePath)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathFinder), nameof(PathFinder.FindPath), new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode), typeof(PathFinderCostTuning)}),
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathFinder), nameof(PathFinder.FindPath), new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode), typeof(PathFinderCostTuning) }),
 				transpiler: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(PathAroundVehicles)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Reachability), nameof(Reachability.CanReach), new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(PathEndMode), typeof(TraverseParms) }),

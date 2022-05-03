@@ -823,20 +823,35 @@ namespace Vehicles
 						yield return fishing;
 					}
 				}
-				if (this.GetLord()?.LordJob is LordJob_FormAndSendVehicles)
+				if (this.GetLord()?.LordJob is LordJob_FormAndSendVehicles formCaravanLordJob)
 				{
 					Command_Action forceCaravanLeave = new Command_Action
 					{
 						defaultLabel = "ForceLeaveCaravan".Translate(),
 						defaultDesc = "ForceLeaveCaravanDesc".Translate(),
 						icon = VehicleTex.CaravanIcon,
+						activateSound = SoundDefOf.Tick_Low,
 						action = delegate ()
 						{
-							(this.GetLord().LordJob as LordJob_FormAndSendVehicles).ForceCaravanLeave = true;
+							formCaravanLordJob.ForceCaravanLeave();
 							Messages.Message("ForceLeaveConfirmation".Translate(), MessageTypeDefOf.TaskCompletion);
 						}
 					};
 					yield return forceCaravanLeave;
+
+					Command_Action cancelCaravan = new Command_Action
+					{
+						defaultLabel = "CommandCancelFormingCaravan".Translate(),
+						defaultDesc = "CommandCancelFormingCaravanDesc".Translate(),
+						icon = TexCommand.ClearPrioritizedWork,
+						activateSound = SoundDefOf.Tick_Low,
+						action = delegate ()
+						{
+							CaravanFormingUtility.StopFormingCaravan(formCaravanLordJob.lord);
+						},
+						hotKey = KeyBindingDefOf.Designator_Cancel
+					};
+					yield return cancelCaravan;
 				}
 			}
 
@@ -1310,6 +1325,10 @@ namespace Vehicles
 				GenSpawn.Spawn(pawn, loc, MapHeld);
 				if (this.GetLord() is Lord lord)
 				{
+					if (pawn.GetLord() is Lord otherLord)
+					{
+						otherLord.Notify_PawnLost(pawn, PawnLostCondition.ForcedToJoinOtherLord);
+					}
 					lord.AddPawn(pawn);
 				}
 			}
@@ -1701,7 +1720,6 @@ namespace Vehicles
 
 		public override void PostMapInit()
 		{
-			base.PostMapInit();
 			vPather.TryResumePathingAfterLoading();
 		}
 
@@ -1767,6 +1785,10 @@ namespace Vehicles
 
 		public float VehicleMovedPercent()
 		{
+			if (vPather is null)
+			{
+				return 0f;
+			}
 			if (!vPather.Moving)
 			{
 				return 0f;

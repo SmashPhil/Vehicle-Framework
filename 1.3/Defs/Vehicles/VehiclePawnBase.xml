@@ -10,7 +10,7 @@
 		<useHitPoints>false</useHitPoints>
 		<hasTooltip>true</hasTooltip>
 		<repairEffect>Repair</repairEffect>
-		<passability>PassThroughOnly</passability>
+		<passability>Standable</passability>
 		<pathCost>250</pathCost>
 		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
 		
@@ -76,6 +76,18 @@
 		<race>
 			<body>emptyBody</body>
 			<trainability>None</trainability>
+			<thinkTreeMain>Vehicle</thinkTreeMain>
+			<intelligence>ToolUser</intelligence>
+			<fleshType>MetalVehicle</fleshType>
+			<needsRest>false</needsRest>
+			<hasGenders>false</hasGenders>
+			<foodType>None</foodType>
+
+			<baseBodySize>1.0</baseBodySize>
+			<baseHealthScale>1.0</baseHealthScale>
+			<soundMeleeHitPawn>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitPawn>
+			<soundMeleeHitBuilding>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitBuilding>
+			<soundMeleeMiss>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeMiss>
 		</race>
 		
 		<comps>

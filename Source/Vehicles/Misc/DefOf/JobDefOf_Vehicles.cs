@@ -17,6 +17,8 @@ namespace Vehicles
 
 		public static JobDef PrepareCaravan_GatheringVehicle;
 
+		public static JobDef RopeAnimalToVehicle;
+
 		public static JobDef CarryPawnToVehicle;
 
 		public static JobDef RepairVehicle;

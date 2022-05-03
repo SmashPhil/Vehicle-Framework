@@ -288,45 +288,36 @@ namespace Vehicles
 			int downed = 0;
 			int mentalState = 0;
 			int vehicles = 0;
-			foreach(VehiclePawn vehicle in PawnsListForReading.Where(x => x is VehiclePawn).Cast<VehiclePawn>())
+
+			vehicles++;
+			foreach (Pawn pawn in PawnsListForReading)
 			{
-				vehicles++;
-				foreach(Pawn p in vehicle.AllPawnsAboard)
-				{
-					if (p.IsColonist) colonists++;
-					if (p.RaceProps.Animal) animals++;
-					if (p.IsPrisoner) prisoners++;
-					if (p.Downed) downed++;
-					if (p.InMentalState) mentalState++;
-				}
-			}
-			foreach(Pawn p in PawnsListForReading.Where(x => !(x is VehiclePawn)))
-			{
-				if (p.IsColonist) colonists++;
-				if (p.RaceProps.Animal) animals++;
-				if (p.IsPrisoner) prisoners++;
-				if (p.Downed) downed++;
-				if (p.InMentalState) mentalState++;
+				if (pawn is VehiclePawn) vehicles++;
+				if (pawn.IsColonist) colonists++;
+				if (pawn.RaceProps.Animal) animals++;
+				if (pawn.IsPrisoner) prisoners++;
+				if (pawn.Downed) downed++;
+				if (pawn.InMentalState) mentalState++;
 			}
 
 			if (vehicles >= 1)
 			{
-				Dictionary<Thing, int> vehicleCounts = new Dictionary<Thing, int>();
-				foreach (Pawn p in PawnsListForReading.Where(x => x is VehiclePawn))
+				Dictionary<VehicleDef, int> vehicleCounts = new Dictionary<VehicleDef, int>();
+				foreach (VehiclePawn vehicle in PawnsListForReading.Where(x => x is VehiclePawn))
 				{
-					if (vehicleCounts.ContainsKey(p))
+					if (vehicleCounts.ContainsKey(vehicle.VehicleDef))
 					{
-						vehicleCounts[p]++;
+						vehicleCounts[vehicle.VehicleDef]++;
 					}
 					else
 					{
-						vehicleCounts.Add(p, 1);
+						vehicleCounts[vehicle.VehicleDef] = 1;
 					}
 				}
 
-				foreach (KeyValuePair<Thing, int> vehiclePair in vehicleCounts)
+				foreach ((VehicleDef def, int count) in vehicleCounts)
 				{
-					stringBuilder.Append($"{vehiclePair.Value} {vehiclePair.Key.LabelCap}, ");
+					stringBuilder.Append($"{count} {def.LabelCap}, ");
 				}
 			}
 			stringBuilder.Append("CaravanColonistsCount".Translate(colonists, (colonists != 1) ? Faction.OfPlayer.def.pawnsPlural : Faction.OfPlayer.def.pawnSingular));
@@ -364,7 +355,7 @@ namespace Vehicles
 				stringBuilder.AppendLine();
 			}
 
-			if(vPather.Moving)
+			if (vPather.Moving)
 			{
 				if (vPather.ArrivalAction != null)
 				{

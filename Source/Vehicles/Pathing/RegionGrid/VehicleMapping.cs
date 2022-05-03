@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Verse;
-using SmashTools;
 
 namespace Vehicles
 {
@@ -52,7 +52,7 @@ namespace Vehicles
 		/// <summary>
 		/// Finalize initialization for map component
 		/// </summary>
-		public override void FinalizeInit()
+		public void RebuildVehiclePathData()
 		{
 			foreach (VehiclePathData data in vehicleData.Values)
 			{

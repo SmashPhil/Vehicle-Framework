@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
+using UnityEngine;
 using SmashTools;
 
 namespace Vehicles
@@ -56,7 +57,7 @@ namespace Vehicles
 		{
 			if (!Enabled)
 			{
-				Log.Warning("Called RebuildAllVehicleRegions but VehicleRegionAndRoomUpdater is disabled. VehicleRegions won't be rebuilt.");
+				Log.Warning($"Called RebuildAllVehicleRegions but VehicleRegionAndRoomUpdater is disabled. VehicleRegions won't be rebuilt. StackTrace: {StackTraceUtility.ExtractStackTrace()}");
 			}
 			map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionDirtyer.SetAllDirty();
 			TryRebuildVehicleRegions();

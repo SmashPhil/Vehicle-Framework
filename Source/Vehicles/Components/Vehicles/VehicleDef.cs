@@ -112,7 +112,7 @@ namespace Vehicles
 			properties ??= new VehicleProperties();
 			properties.ResolveReferences(this);
 
-			if (VehicleMod.settings.vehicles.defaultGraphics.EnumerableNullOrEmpty())
+			if (VehicleMod.settings.vehicles.defaultGraphics.NullOrEmpty())
 			{
 				VehicleMod.settings.vehicles.defaultGraphics = new Dictionary<string, PatternData>();
 			}

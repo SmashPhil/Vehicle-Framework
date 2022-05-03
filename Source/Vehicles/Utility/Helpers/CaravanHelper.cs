@@ -447,53 +447,6 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Get all pawns onboard vehicles from list of pawns
-		/// </summary>
-		/// <param name="pawns"></param>
-		/// <returns></returns>
-		public static List<Pawn> GrabPawnsIfVehicles(List<Pawn> pawns)
-		{
-			if (pawns is null)
-			{
-				return null;
-			}
-			if (!pawns.HasVehicle())
-			{
-				return pawns;
-			}
-			List<Pawn> ships = new List<Pawn>();
-			foreach (Pawn pawn in pawns)
-			{
-				if (pawn is VehiclePawn vehicle)
-				{
-					ships.AddRange(vehicle.AllPawnsAboard);
-				}
-				else
-				{
-					ships.Add(pawn);
-				}
-			}
-			return ships;
-		}
-
-		/// <summary>
-		/// Get all pawns inside vehicles in <paramref name="caravan"/>
-		/// </summary>
-		/// <param name="caravan"></param>
-		public static List<Pawn> ExtractPawnsFromCaravan(Caravan caravan)
-		{
-			List<Pawn> innerPawns = new List<Pawn>();
-			foreach (Pawn pawn in caravan.PawnsListForReading)
-			{
-				if (pawn is VehiclePawn vehicle)
-				{
-					innerPawns.AddRange(vehicle.AllPawnsAboard);
-				}
-			}
-			return innerPawns;
-		}
-
-		/// <summary>
 		/// Total capacity left for VehicleCaravan currently forming
 		/// </summary>
 		/// <param name="lordJob"></param>

@@ -23,9 +23,8 @@
 		<buildDef>Tank_Blueprint</buildDef>
 		<repairRate>1.5</repairRate>
 		
-		<armor>50</armor>
-		<cargoCapacity>300</cargoCapacity>
-		<speed>2.25</speed>
+		<cargoCapacity>200</cargoCapacity>
+		<speed>3.75</speed>
 		
 		<size>(3,5)</size>
 		
@@ -33,12 +32,12 @@
 		<vehicleCategory>Combat</vehicleCategory>
 		<vehicleTech>Industrial</vehicleTech>
 		<vehicleType>Land</vehicleType>
-				
+		
 		<statBases>
 			<Mass>60000</Mass>
 			<ArmorRating_Blunt>1.0</ArmorRating_Blunt>
 			<ArmorRating_Sharp>1.0</ArmorRating_Sharp>
-			<MarketValue>250000</MarketValue>
+			<MarketValue>75000</MarketValue>
 			<Flammability>0</Flammability>
 		</statBases>
 		
@@ -50,23 +49,19 @@
 			<customBiomeCosts>
 				<li>
 					<key>TropicalRainforest</key>
-					<value>-1</value>
+					<value>2</value>
 				</li>
 				<li>
 					<key>TropicalSwamp</key>
-					<value>-1</value>
+					<value>12</value>
 				</li>
 				<li>
 					<key>TemperateSwamp</key>
-					<value>-1</value>
+					<value>12</value>
 				</li>
 				<li>
 					<key>ColdBog</key>
-					<value>-1</value>
-				</li>
-				<li>
-					<key>TemperateForest</key>
-					<value>4</value>
+					<value>8</value>
 				</li>
 			</customBiomeCosts>
 			
@@ -223,15 +218,6 @@
 		</components>
 
 		<race>
-			<thinkTreeMain>Vehicle</thinkTreeMain>
-			<intelligence>ToolUser</intelligence>
-			<fleshType>MetalVehicle</fleshType>
-			<needsRest>false</needsRest>
-			<hasGenders>false</hasGenders>
-			<foodType>None</foodType>
-
-			<baseBodySize>1.0</baseBodySize>
-			<baseHealthScale>1.0</baseHealthScale>
 			<lifeStageAges>
 				<li>
 					<def>MechanoidFullyFormed</def>
@@ -240,10 +226,6 @@
 					<soundDeath>Explosion_Bomb</soundDeath>
 				</li>
 			</lifeStageAges>
-			
-			<soundMeleeHitPawn>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitPawn>
-			<soundMeleeHitBuilding>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitBuilding>
-			<soundMeleeMiss>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeMiss>
 		</race>
 
 		<comps>
@@ -257,11 +239,7 @@
 				<turrets>
 					<li>
 						<turretDef>TankMainTurret_Short</turretDef>
-						<renderProperties>
-							<north>
-								<offset>(0, 0)</offset>
-							</north>
-						</renderProperties>
+						<renderProperties/>
 
 						<gizmoLabel>Main Turret</gizmoLabel>
 						<autoTargeting>false</autoTargeting>
@@ -271,6 +249,23 @@
 						<drawLayer>1</drawLayer>
 						
 						<key>mainTurret</key>
+					</li>
+					<li>
+						<turretDef>HeavyMachineGunMounted</turretDef>
+						<renderProperties>
+							<north>
+								<offset>(-.44, .38)</offset>
+							</north>
+						</renderProperties>
+						
+						<gizmoLabel>Heavy Machine Gun</gizmoLabel>
+						
+						<angleRestricted>(300,60)</angleRestricted>
+						<aimPieOffset/>
+						<drawLayer>2</drawLayer>
+						
+						<key>mountedMachineGun</key>
+						<parentKey>mainTurret</parentKey>
 					</li>
 				</turrets>
 			</li>

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Linq;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
@@ -32,17 +32,18 @@ namespace Vehicles
 				{
 					bool unspawned = !pawn.Spawned;
 
-					bool pawnTooFar;
-					bool cantReachExit;
+					bool pawnTooFar = false;
+					bool cantReachExit = false;
 					if (pawn is VehiclePawn vehicle)
 					{
-						pawnTooFar = !vehicle.Position.InHorDistOf(meetingPoint, 1);
+						pawnTooFar = vehicle == leadVehicle ? !vehicle.Position.InHorDistOf(meetingPoint, leadVehicle.VehicleDef.Size.z) : false;
 						cantReachExit = !VehicleReachabilityUtility.CanReachVehicle(pawn as VehiclePawn, meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly);
 					}
 					else
 					{
-						pawnTooFar = !pawn.Position.InHorDistOf(leadVehicle.Position, 5f);
-						cantReachExit = !ReachabilityUtility.CanReach(pawn, leadVehicle.Position, PathEndMode.ClosestTouch, Danger.Deadly);
+						//Needs support for multi-vehicle caravans where pawns may follow non-lead vehicles
+						//pawnTooFar = !pawn.Position.InHorDistOf(leadVehicle.Position, leadVehicle.VehicleDef.Size.z * 1.5f);
+						//cantReachExit = !ReachabilityUtility.CanReach(pawn, leadVehicle.Position, PathEndMode.ClosestTouch, Danger.Deadly);
 					}
 					bool failedValidation = extraValidator != null && !extraValidator(pawn);
 					if (unspawned || pawnTooFar || cantReachExit || failedValidation)

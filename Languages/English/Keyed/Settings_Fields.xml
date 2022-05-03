@@ -4,8 +4,8 @@
 	<!-- (VehicleDef)-->
 	<VehicleEnabled>Enabled</VehicleEnabled>
 	<VehicleDisabled>Disabled</VehicleDisabled>
-	<VehiclePlayerOnly>Player</VehiclePlayerOnly>
-	<VehicleRaiderOnly>NPC</VehicleRaiderOnly>
+	<VehiclePlayerOnly>Player Only</VehiclePlayerOnly>
+	<VehicleRaiderOnly>NPC Only</VehicleRaiderOnly>
 	
 	<CompVehicleStats>Base Stats</CompVehicleStats>
 	<VehicleRaidsEnabled>Raids Can Use</VehicleRaidsEnabled>

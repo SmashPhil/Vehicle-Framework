@@ -9,8 +9,6 @@ namespace Vehicles
 	{
 		protected override Job TryGiveJob(Pawn pawn)
 		{
-			pawn.drafter.Drafted = true;
-			
 			if (pawn is VehiclePawn vehicle)
 			{
 				IntVec3 cell = pawn.mindState.duty.focus.Cell;

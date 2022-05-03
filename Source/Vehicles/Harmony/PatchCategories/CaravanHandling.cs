@@ -39,9 +39,6 @@ namespace Vehicles
 				postfix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(IdleVehicleCaravans)));
 
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_Enter), nameof(CaravanArrivalAction_Enter.Arrived)), prefix: null, postfix: null,
-			//	transpiler: new HarmonyMethod(typeof(CaravanHandling),
-			//	nameof(VehiclesArrivedTranspiler)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_VisitEscapeShip), "DoArrivalAction"), prefix: null, postfix: null,
 				transpiler: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(ShipsVisitEscapeShipTranspiler)));
@@ -67,6 +64,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Property(typeof(Caravan), nameof(Caravan.NightResting)).GetGetMethod(),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(NoRestForVehicles)));
+			VehicleHarmony.Patch(original: AccessTools.Property(typeof(Caravan), nameof(Caravan.PawnsListForReading)).GetGetMethod(),
+				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(InternalPawnsIncludedInList)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.ContainsPawn)), prefix: null,
 				postfix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(ContainsPawnInVehicle)));
@@ -80,30 +80,24 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Tale_DoublePawn), nameof(Tale_DoublePawn.Concerns)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(ConcernNullThing)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WITab_Caravan_Needs), "FillTab"), prefix: null, postfix: null,
-				transpiler: new HarmonyMethod(typeof(CaravanHandling),
-				nameof(VehicleNeedsFillTabTranspiler)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WITab_Caravan_Needs), "UpdateSize"), prefix: null, postfix: null,
-				transpiler: new HarmonyMethod(typeof(CaravanHandling),
-				nameof(VehicleNeedsUpdateSizeTranspiler)));
-			VehicleHarmony.Patch(original: AccessTools.Property(typeof(WITab_Caravan_Gear), "Pawns").GetGetMethod(nonPublic: true), prefix: null,
-				postfix: new HarmonyMethod(typeof(CaravanHandling),
-				nameof(VehicleGearTabPawns)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanInventoryUtility), nameof(CaravanInventoryUtility.AllInventoryItems)),
-				prefix: new HarmonyMethod(typeof(CaravanHandling),
-				nameof(VehicleAllInventoryItems)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Settlement_TraderTracker), nameof(Settlement_TraderTracker.ColonyThingsWillingToBuy)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(AerialVehicleInventoryItems)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanInventoryUtility), nameof(CaravanInventoryUtility.GiveThing)), prefix: null, postfix: null,
-				transpiler: new HarmonyMethod(typeof(CaravanHandling),
-				nameof(VehicleGiveThingInventoryTranspiler)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanInventoryUtility), nameof(CaravanInventoryUtility.FindPawnToMoveInventoryTo)),
+				prefix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(FindVehicleToMoveInventoryTo)));
 			VehicleHarmony.Patch(original: AccessTools.Property(typeof(WITab_Caravan_Health), "Pawns").GetGetMethod(nonPublic: true),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(VehicleHealthTabPawns)));
 			VehicleHarmony.Patch(original: AccessTools.Property(typeof(WITab_Caravan_Social), "Pawns").GetGetMethod(nonPublic: true),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(VehicleSocialTabPawns)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanNeedsTabUtility), nameof(CaravanNeedsTabUtility.DoRows)),
+				prefix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(NoVehiclesNeedNeeds)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanNeedsTabUtility), nameof(CaravanNeedsTabUtility.GetSize)),
+				prefix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(NoVehiclesNeedNeeds)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(BestCaravanPawnUtility), nameof(BestCaravanPawnUtility.FindPawnWithBestStat)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(FindPawnInVehicleWithBestStat)));
@@ -414,37 +408,6 @@ namespace Vehicles
 			}
 		}
 
-		public static IEnumerable<CodeInstruction> VehiclesArrivedTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
-		{
-			List<CodeInstruction> instructionList = instructions.ToList();
-
-			for (int i = 0; i < instructionList.Count; i++)
-			{
-				CodeInstruction instruction = instructionList[i];
-
-				if(instruction.Calls(AccessTools.Method(typeof(CaravanEnterMapUtility), nameof(CaravanEnterMapUtility.Enter), new Type[]{typeof(Caravan), typeof(Map),
-					typeof(CaravanEnterMode), typeof(CaravanDropInventoryMode), typeof(bool), typeof(Predicate<IntVec3>) })))
-				{
-					Label label = ilg.DefineLabel();
-					Label brlabel = ilg.DefineLabel();
-
-					yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
-					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(Ext_Caravan), nameof(Ext_Caravan.HasVehicle), new Type[] { typeof(Caravan) }));
-					yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
-
-					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(EnterMapUtilityVehicles), nameof(EnterMapUtilityVehicles.EnterAndSpawn)));
-					yield return new CodeInstruction(opcode: OpCodes.Br, brlabel);
-
-					instruction.labels.Add(label);
-					yield return instruction; //CALL : CaravanEnterMapUtility::Enter
-					instruction = instructionList[++i];
-
-					instruction.labels.Add(brlabel);
-				}
-				yield return instruction;
-			}
-		}
-
 		public static IEnumerable<CodeInstruction> ShipsVisitEscapeShipTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
 		{
 			List<CodeInstruction> instructionList = instructions.ToList();
@@ -561,17 +524,28 @@ namespace Vehicles
 
 		public static bool AllOwnersDownedVehicle(Caravan __instance, ref bool __result)
 		{
-			if(__instance.PawnsListForReading.NotNullAndAny(x => x is VehiclePawn))
+			if (__instance is VehicleCaravan caravan)
 			{
-				foreach (Pawn pawn in __instance.pawns)
+				foreach (Pawn pawn in caravan.pawns)
 				{
-					if(pawn is VehiclePawn vehicle && vehicle.AllPawnsAboard.All(x => x.Downed))
+					if (caravan.IsOwner(pawn) && !pawn.Downed)
 					{
-						__result = true;
+						__result = false;
 						return false;
 					}
+					if (pawn is VehiclePawn vehicle)
+					{
+						foreach (Pawn innerPawn in vehicle.AllPawnsAboard)
+						{
+							if (__instance.IsOwner(innerPawn) && !innerPawn.Downed)
+							{
+								__result = false;
+								return false;
+							}
+						}
+					}
 				}
-				__result = false;
+				__result = true;
 				return false;
 			}
 			return true;
@@ -579,17 +553,28 @@ namespace Vehicles
 
 		public static bool AllOwnersMentalBreakVehicle(Caravan __instance, ref bool __result)
 		{
-			if(__instance.PawnsListForReading.NotNullAndAny(x => x is VehiclePawn))
+			if (__instance is VehicleCaravan caravan)
 			{
-				foreach(Pawn pawn in __instance.pawns)
+				foreach (Pawn pawn in caravan.pawns)
 				{
-					if(pawn is VehiclePawn vehicle && vehicle.AllPawnsAboard.All(x => x.InMentalState))
+					if (caravan.IsOwner(pawn) && !pawn.InMentalState)
 					{
-						__result = true;
+						__result = false;
 						return false;
 					}
+					if (pawn is VehiclePawn vehicle)
+					{
+						foreach (Pawn innerPawn in vehicle.AllPawnsAboard)
+						{
+							if (__instance.IsOwner(innerPawn) && !innerPawn.InMentalState)
+							{
+								__result = false;
+								return false;
+							}
+						}
+					}
 				}
-				__result = false;
+				__result = true;
 				return false;
 			}
 			return true;
@@ -597,15 +582,10 @@ namespace Vehicles
 
 		public static bool NoRestForVehicles(Caravan __instance, ref bool __result)
 		{
-			if(__instance.HasVehicle() && !__instance.PawnsListForReading.NotNullAndAny(x => !(x is VehiclePawn)))
+			if (__instance.HasVehicle() && !__instance.PawnsListForReading.NotNullAndAny(x => !(x is VehiclePawn)))
 			{
 				__result = false;
-				if(__instance.PawnsListForReading.NotNullAndAny(x => x is VehiclePawn vehicle && vehicle.navigationCategory == NavigationCategory.Manual))
-				{
-					__result = __instance.Spawned && (!__instance.pather.Moving || __instance.pather.nextTile != __instance.pather.Destination || !Caravan_PathFollower.IsValidFinalPushDestination(__instance.pather.Destination) ||
-						Mathf.CeilToInt(__instance.pather.nextTileCostLeft / 1f) > 10000) && CaravanNightRestUtility.RestingNowAt(__instance.Tile);
-				}
-				else if(__instance.PawnsListForReading.NotNullAndAny(x => x is VehiclePawn vehicle && vehicle.navigationCategory == NavigationCategory.Opportunistic))
+				if(__instance.PawnsListForReading.NotNullAndAny(x => x is VehiclePawn vehicle && (vehicle.navigationCategory == NavigationCategory.Manual || vehicle.navigationCategory == NavigationCategory.Opportunistic)))
 				{
 					__result = __instance.Spawned && (!__instance.pather.Moving || __instance.pather.nextTile != __instance.pather.Destination || !Caravan_PathFollower.IsValidFinalPushDestination(__instance.pather.Destination) ||
 						Mathf.CeilToInt(__instance.pather.nextTileCostLeft / 1f) > 10000) && CaravanNightRestUtility.RestingNowAt(__instance.Tile);
@@ -613,6 +593,23 @@ namespace Vehicles
 				return false;
 			}
 			return true;
+		}
+
+		public static List<Pawn> InternalPawnsIncludedInList(List<Pawn> __result, Caravan __instance)
+		{
+			if (__instance is VehicleCaravan vehicleCaravan)
+			{
+				var vehicles = __result.Where(p => p is VehiclePawn).ToList();
+				foreach (VehiclePawn vehicle in __result.Where(p => p is VehiclePawn))
+				{
+					foreach (Pawn pawn in vehicle.AllPawnsAboard)
+					{
+						vehicles.Add(pawn);
+					}
+				}
+				return vehicles;
+			}
+			return __result;
 		}
 
 		//REDO - Need better transpiler to retrieve all map pawns
@@ -640,89 +637,6 @@ namespace Vehicles
 			if(th is null || __instance is null || __instance.secondPawnData is null || __instance.firstPawnData is null)
 			{
 				__result = false;
-				return false;
-			}
-			return true;
-		}
-
-		public static IEnumerable<CodeInstruction> VehicleNeedsFillTabTranspiler(IEnumerable<CodeInstruction> instructions)
-		{
-			List<CodeInstruction> instructionList = instructions.ToList();
-
-			for (int i = 0; i < instructionList.Count; i++)
-			{
-				CodeInstruction instruction = instructionList[i];
-
-				if (instruction.Calls(AccessTools.Property(typeof(Caravan), nameof(Caravan.PawnsListForReading)).GetGetMethod()))
-				{
-					yield return instruction;
-					instruction = instructionList[++i];
-
-					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(CaravanHelper), nameof(CaravanHelper.GrabPawnsIfVehicles)));
-				}
-
-				yield return instruction;
-			}
-		}
-
-		public static IEnumerable<CodeInstruction> VehicleNeedsUpdateSizeTranspiler(IEnumerable<CodeInstruction> instructions)
-		{
-			List<CodeInstruction> instructionList = instructions.ToList();
-
-			for(int i = 0; i < instructionList.Count; i++)
-			{
-				CodeInstruction instruction = instructionList[i];
-
-				if(instruction.Calls(AccessTools.Property(typeof(Caravan), nameof(Caravan.PawnsListForReading)).GetGetMethod()))
-				{
-					yield return instruction;
-					instruction = instructionList[++i];
-
-					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(CaravanHelper), nameof(CaravanHelper.GrabPawnsIfVehicles)));
-				}
-
-				yield return instruction;
-			}
-		}
-		
-		public static void VehicleGearTabPawns(ref List<Pawn> __result)
-		{
-			if(__result.HasVehicle())
-			{
-				List<Pawn> pawns = new List<Pawn>();
-				foreach(Pawn pawn in __result)
-				{
-					if(pawn is VehiclePawn vehicle)
-					{
-						pawns.AddRange(vehicle.AllPawnsAboard);
-					}
-					else
-					{
-						pawns.Add(pawn);
-					}
-				}
-				__result = pawns;
-			}
-		}
-
-		public static bool VehicleAllInventoryItems(Caravan caravan, ref List<Thing> __result)
-		{
-			if(caravan.HasVehicle())
-			{
-				List<Thing> inventoryItems = new List<Thing>();
-				foreach (Pawn pawn in caravan.PawnsListForReading)
-				{
-					if (pawn is VehiclePawn vehicle)
-					{
-						inventoryItems.AddRange(vehicle.inventory.innerContainer);
-						inventoryItems.AddRange(vehicle.AllPawnsAboard.SelectMany(p => p.inventory.innerContainer));
-					}
-					else
-					{
-						inventoryItems.AddRange(pawn.inventory.innerContainer);
-					}
-				}
-				__result = inventoryItems;
 				return false;
 			}
 			return true;
@@ -756,26 +670,17 @@ namespace Vehicles
 			return true;
 		}
 
-		public static IEnumerable<CodeInstruction> VehicleGiveThingInventoryTranspiler(IEnumerable<CodeInstruction> instructions)
+		public static bool FindVehicleToMoveInventoryTo(ref Pawn __result, Thing item, List<Pawn> candidates, List<Pawn> ignoreCandidates, Pawn currentItemOwner = null)
 		{
-			List<CodeInstruction> instructionList = instructions.ToList();
-
-			for (int i = 0; i < instructionList.Count; i++)
+			if (candidates.HasVehicle())
 			{
-				CodeInstruction instruction = instructionList[i];
-
-				if(instruction.Calls(AccessTools.Property(typeof(Caravan), nameof(Caravan.PawnsListForReading)).GetGetMethod()))
+				if (candidates.Where(pawn => pawn is VehiclePawn && (ignoreCandidates == null || !ignoreCandidates.Contains(pawn)) 
+					&& currentItemOwner != pawn && !MassUtility.IsOverEncumbered(pawn)).TryRandomElement(out __result))
 				{
-					yield return instruction;
-					i += 2;
-					instruction = instructionList[i];
-
-					yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(Ext_Caravan), nameof(Ext_Caravan.GrabPawnsFromVehicleCaravanSilentFail)));
+					return false;
 				}
-
-				yield return instruction;
 			}
+			return true;
 		}
 
 		public static bool VehicleHealthTabPawns(ref List<Pawn> __result)
@@ -785,11 +690,7 @@ namespace Vehicles
 				List<Pawn> pawns = new List<Pawn>();
 				foreach (Pawn p in caravan.PawnsListForReading)
 				{
-					if (p is VehiclePawn vehicle)
-					{
-						pawns.AddRange(vehicle.AllPawnsAboard);
-					}
-					else
+					if (!(p is VehiclePawn))
 					{
 						pawns.Add(p);
 					}
@@ -805,21 +706,22 @@ namespace Vehicles
 			if(Find.WorldSelector.SingleSelectedObject is VehicleCaravan caravan && caravan.HasVehicle())
 			{
 				List<Pawn> pawns = new List<Pawn>();
-				foreach(Pawn pawn in caravan.PawnsListForReading)
+				foreach (Pawn p in caravan.PawnsListForReading)
 				{
-					if(pawn is VehiclePawn vehicle)
+					if (!(p is VehiclePawn))
 					{
-						pawns.AddRange(vehicle.AllPawnsAboard);
-					}
-					else
-					{
-						pawns.Add(pawn);
+						pawns.Add(p);
 					}
 				}
 				__result = pawns;
 				return false;
 			}
 			return true;
+		}
+
+		public static void NoVehiclesNeedNeeds(ref List<Pawn> pawns)
+		{
+			pawns.RemoveAll(pawn => pawn is VehiclePawn);
 		}
 
 		public static bool FindPawnInVehicleWithBestStat(Caravan caravan, StatDef stat, ref Pawn __result)
@@ -859,7 +761,7 @@ namespace Vehicles
 
 		public static void ContainsPawnInVehicle(Pawn p, Caravan __instance, ref bool __result)
 		{
-			if(!__result)
+			if (!__result)
 			{
 				__result = __instance.PawnsListForReading.Any(v => v is VehiclePawn vehicle && vehicle.AllPawnsAboard.Contains(p));
 			}
@@ -867,7 +769,7 @@ namespace Vehicles
 
 		public static void IsOwnerOfVehicle(Pawn p, Caravan __instance, ref bool __result)
 		{
-			if(!__result)
+			if (!__result)
 			{
 				__result = __instance.PawnsListForReading.Any(v => v is VehiclePawn vehicle && vehicle.AllPawnsAboard.Contains(p) && CaravanUtility.IsOwner(p, __instance.Faction));
 			}
@@ -933,7 +835,6 @@ namespace Vehicles
 				__result = caravan;
                 return false;
             }
-
             return true;
         }
 
@@ -941,10 +842,7 @@ namespace Vehicles
 		{
 			if(caravan.HasVehicle())
 			{
-				
-				__result = (from p in caravan.GrabPawnsFromVehicleCaravanSilentFail()
-							where caravan.IsOwner(p)
-							select p).RandomElement();
+				__result = caravan.GrabPawnsFromVehicleCaravanSilentFail().Where(p => caravan.IsOwner(p)).RandomElement();
 				return false;
 			}
 			return true;

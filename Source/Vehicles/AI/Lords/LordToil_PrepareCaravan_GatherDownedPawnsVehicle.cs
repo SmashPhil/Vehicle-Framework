@@ -41,7 +41,7 @@ namespace Vehicles
 			{
 				if (pawn.IsColonist)
 				{
-					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_GatherDownedPawns, meetingPoint, exitSpot, -1f);
+					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareVehicleCaravan_GatherDownedPawns, meetingPoint, exitSpot, -1f);
 				}
 				else
 				{
@@ -72,7 +72,7 @@ namespace Vehicles
 		{
 			if (pawns.NullOrEmpty())
 			{
-				lord.ReceiveMemo("AllDownedPawnsGathered");
+				lord.ReceiveMemo(MemoTrigger.DownedPawnsGathered);
 				return true;
 			}
 			return false;

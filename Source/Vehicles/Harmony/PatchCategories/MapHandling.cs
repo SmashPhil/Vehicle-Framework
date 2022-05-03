@@ -14,13 +14,13 @@ namespace Vehicles
 	{
 		public void PatchMethods()
 		{
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(BeachMaker), nameof(BeachMaker.Init)), prefix: null, postfix: null,
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(BeachMaker), nameof(BeachMaker.Init)),
 				transpiler: new HarmonyMethod(typeof(MapHandling),
 				nameof(BeachMakerTranspiler)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(TileFinder), nameof(TileFinder.RandomSettlementTileFor)), prefix: null, postfix: null,
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(TileFinder), nameof(TileFinder.RandomSettlementTileFor)),
 				transpiler: new HarmonyMethod(typeof(MapHandling),
 				nameof(PushSettlementToCoastTranspiler)));
-			VehicleHarmony.Patch(original: AccessTools.Property(typeof(MapPawns), nameof(MapPawns.AnyPawnBlockingMapRemoval)).GetGetMethod(), prefix: null,
+			VehicleHarmony.Patch(original: AccessTools.Property(typeof(MapPawns), nameof(MapPawns.AnyPawnBlockingMapRemoval)).GetGetMethod(),
 				postfix: new HarmonyMethod(typeof(MapHandling),
 				nameof(AnyVehicleBlockingMapRemoval)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MapDeiniter), "NotifyEverythingWhichUsesMapReference"),
@@ -32,6 +32,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MapInterface), nameof(MapInterface.MapInterfaceOnGUI_AfterMainTabs)),
 				postfix: new HarmonyMethod(typeof(MapHandling),
 				nameof(DebugOnGUIVehicleRegions)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Map), nameof(Map.FinalizeInit)),
+				prefix: new HarmonyMethod(typeof(MapHandling),
+				nameof(PreFinalizeInitRegionBuilding)));
 		}
 
 		/// <summary>
@@ -178,6 +181,11 @@ namespace Vehicles
 			{
 				DebugHelper.DebugDrawVehiclePathCostsOverlay(Find.CurrentMap);
 			}
+		}
+
+		private static void PreFinalizeInitRegionBuilding(Map __instance)
+		{
+			__instance.GetCachedMapComponent<VehicleMapping>().RebuildVehiclePathData();
 		}
 	}
 }

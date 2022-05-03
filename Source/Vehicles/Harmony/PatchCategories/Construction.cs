@@ -104,14 +104,13 @@ namespace Vehicles
 		/// <param name="__result"></param>
 		/// <param name="wipeMode"></param>
 		/// <param name="respawningAfterLoad"></param>
-		/// <returns></returns>
 		public static bool RegisterThingSpawned(Thing newThing, ref IntVec3 loc, Map map, Rot4 rot, ref Thing __result, WipeMode wipeMode, bool respawningAfterLoad)
 		{
 			if (newThing.def is VehicleBuildDef def)
 			{
 				if (!VehicleMod.settings.debug.debugSpawnVehicleBuildingGodMode && newThing.HitPoints == newThing.MaxHitPoints)
 				{
-					VehiclePawn vehiclePawn = VehicleSpawner.GenerateVehicle(def.thingToSpawn, newThing.Faction);// (VehiclePawn)PawnGenerator.GeneratePawn(def.thingToSpawn);
+					VehiclePawn vehiclePawn = VehicleSpawner.GenerateVehicle(def.thingToSpawn, newThing.Faction);
 					
 					if (def.soundBuilt != null)
 					{

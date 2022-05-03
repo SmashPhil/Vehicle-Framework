@@ -89,7 +89,7 @@ Shader "Custom/ShaderRGB"
 				finalColor = finalColor * greenMask;
 				finalColor = finalColor * blueMask;
 
-				if (finalColor.a <= 0.05)
+				if (finalColor.a <= 0.5)
 				{
 					finalColor.a = 0;
 				}

@@ -49,8 +49,8 @@ namespace Vehicles
 					nameof(DebugWorldObjects)));
 			}
 
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalTimeEstimator), nameof(CaravanArrivalTimeEstimator.EstimatedTicksToArriveToEvery)),
-			//	prefix: new HarmonyMethod(typeof(Debug), 
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_RopeTracker), "BreakAllRopes"),
+			//	prefix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestPrefix)),
 			//	postfix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestPostfix)));
@@ -63,7 +63,7 @@ namespace Vehicles
 		{
 			try
 			{
-				Log.Message($"START");
+				Log.Message($"DROP");
 			}
 			catch (Exception ex)
 			{
@@ -75,7 +75,7 @@ namespace Vehicles
 		{
             try
             {
-                Log.Message($"END");
+                //Log.Message($"END");
             }
             catch (Exception ex)
             {

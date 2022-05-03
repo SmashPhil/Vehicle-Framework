@@ -965,7 +965,7 @@ namespace Vehicles
 		{
 			tmpPackingSpots.Clear();
 			List<Thing> list = map.listerThings.ThingsOfDef(ThingDefOf.CaravanPackingSpot);
-			if(transferables.NotNullAndAny(x => x.ThingDef.category is ThingCategory.Pawn && x.AnyThing.IsBoat()))
+			if (transferables.NotNullAndAny(x => x.ThingDef.category is ThingCategory.Pawn && x.AnyThing.IsBoat()))
 			{
 				TraverseParms traverseParms = TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false);
 				List<Pawn> ships = new List<Pawn>();
@@ -976,7 +976,7 @@ namespace Vehicles
 						ships.Add(t.AnyThing as Pawn);
 					}
 				}
-				foreach(Thing t in list)
+				foreach (Thing t in list)
 				{
 					foreach(Pawn p in ships)
 					{
@@ -986,16 +986,16 @@ namespace Vehicles
 						}
 					}
 				}
-				if(tmpPackingSpots.Any<Thing>())
+				if (tmpPackingSpots.Any())
 				{
-					Thing thing = tmpPackingSpots.RandomElement<Thing>();
+					Thing thing = tmpPackingSpots.RandomElement();
 					tmpPackingSpots.Clear();
 					packingSpot = thing.Position;
 					return true;
 				}
-
-				bool flag = CellFinder.TryFindRandomCellNear(ships.First().Position, map, 15, (IntVec3 c) => c.InBounds(map) && GenGrid.Standable(c, map) && !map.terrainGrid.TerrainAt(c).IsWater, out packingSpot);
-				if(!flag)
+				bool notUnderVehicle(IntVec3 cell) => !cell.GetThingList(map).NotNullAndAny(t => t is VehiclePawn);
+				bool flag = CellFinder.TryFindRandomCellNear(ships.First().Position, map, 15, (IntVec3 c) => c.InBounds(map) && GenGrid.Standable(c, map) && notUnderVehicle(c) && !map.terrainGrid.TerrainAt(c).IsWater, out packingSpot);
+				if (!flag)
 				{
 					flag = CellFinder.TryFindRandomCellNear(ships.First().Position, map, 20, (IntVec3 c) => c.InBounds(map) && GenGrid.Standable(c, map), out packingSpot);
 				}

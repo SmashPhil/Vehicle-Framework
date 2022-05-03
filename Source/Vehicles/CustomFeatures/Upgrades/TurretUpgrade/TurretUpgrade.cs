@@ -26,7 +26,6 @@ namespace Vehicles
 			foreach(KeyValuePair<VehicleTurret, VehicleRole> cu in turretUpgrades)
 			{
 				VehicleTurret newTurret = CompCannons.CreateTurret(parent, cu.Key);
-				newTurret.isUpgrade = true;
 				VehicleHandler handler = new VehicleHandler(parent, cu.Value);
 				turretsUnlocked.Add(newTurret, handler);
 			}

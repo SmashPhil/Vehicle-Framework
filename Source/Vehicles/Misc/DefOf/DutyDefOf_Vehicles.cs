@@ -11,15 +11,17 @@ namespace Vehicles
 			DefOfHelper.EnsureInitializedInCtor(typeof(DutyDefOf_Vehicles));
 		}
 
-		public static DutyDef PrepareCaravan_BoardVehicle;
+		public static DutyDef PrepareVehicleCaravan_BoardVehicle;
 
 		public static DutyDef PrepareVehicleCaravan_GatherItems;
 
-		public static DutyDef PrepareCaravan_WaitVehicle;
+		public static DutyDef PrepareVehicleCaravan_WaitVehicle;
 
-		public static DutyDef PrepareCaravan_GatherDownedPawns;
+		public static DutyDef PrepareVehicleCaravan_GatherDownedPawns;
 
-		public static DutyDef PrepareCaravan_SendSlavesToVehicle;
+		public static DutyDef PrepareVehicleCaravan_SendSlavesToVehicle;
+
+		public static DutyDef PrepareVehicleCaravan_RopeAnimalsToVehicle;
 
 		public static DutyDef TravelOrWaitVehicle;
 

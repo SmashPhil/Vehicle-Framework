@@ -201,7 +201,7 @@ namespace Vehicles
 			}
 
 			RegionType expectedRegionType = VehicleRegionTypeUtility.GetExpectedRegionType(c2, map, vehicleDef);
-			if (expectedRegionType == RegionType.None)
+			if (expectedRegionType == RegionType.None || expectedRegionType == RegionType.Portal)
 			{
 				return;
 			}
@@ -211,37 +211,36 @@ namespace Vehicles
 			int num = 0;
 			int num2 = 0;
 			hashSet.Add(cell);
-			if (!RegionTypeUtility.IsOneCellRegion(expectedRegionType))
+
+			for (;;)
 			{
-				for(;;)
+				IntVec3 intVec = cell + rot.FacingCell * (num + 1);
+				if (!intVec.InBounds(map) || regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(intVec) != newRegion ||
+					VehicleRegionTypeUtility.GetExpectedRegionType(intVec + potentialOtherRegionDir.FacingCell, map, vehicleDef) != expectedRegionType)
 				{
-					IntVec3 intVec = cell + rot.FacingCell * (num + 1);
-					if (!intVec.InBounds(map) || regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(intVec) != newRegion ||
-						VehicleRegionTypeUtility.GetExpectedRegionType(intVec + potentialOtherRegionDir.FacingCell, map, vehicleDef) != expectedRegionType)
-					{
-						break;
-					}
-					if (!hashSet.Add(intVec))
-					{
-						Log.Error("We've processed the same cell twice.");
-					}
-					num++;
+					break;
 				}
-				for(; ;)
+				if (!hashSet.Add(intVec))
 				{
-					IntVec3 intVec2 = cell - rot.FacingCell * (num2 + 1);
-					if (!intVec2.InBounds(map) || regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(intVec2) != newRegion ||
-						VehicleRegionTypeUtility.GetExpectedRegionType(intVec2 + potentialOtherRegionDir.FacingCell, map, vehicleDef) != expectedRegionType)
-					{
-						break;
-					}
-					if (!hashSet.Add(intVec2))
-					{
-						Log.Error("We've processed the same cell twice.");
-					}
-					num2++;
+					Log.Error("We've processed the same cell twice.");
 				}
+				num++;
 			}
+			for (;;)
+			{
+				IntVec3 intVec2 = cell - rot.FacingCell * (num2 + 1);
+				if (!intVec2.InBounds(map) || regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(intVec2) != newRegion ||
+					VehicleRegionTypeUtility.GetExpectedRegionType(intVec2 + potentialOtherRegionDir.FacingCell, map, vehicleDef) != expectedRegionType)
+				{
+					break;
+				}
+				if (!hashSet.Add(intVec2))
+				{
+					Log.Error("We've processed the same cell twice.");
+				}
+				num2++;
+			}
+
 			int length = num + num2 + 1;
 			SpanDirection dir;
 			IntVec3 root;

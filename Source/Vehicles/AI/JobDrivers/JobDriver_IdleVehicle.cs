@@ -29,18 +29,18 @@ namespace Vehicles
 			{
 				initAction = delegate ()
 				{
-					base.Map.pawnDestinationReservationManager.Reserve(Vehicle, job, Vehicle.Position);
+					Map.pawnDestinationReservationManager.Reserve(Vehicle, job, Vehicle.Position);
 					Vehicle.vPather.StopDead();
 				},
 				tickAction = delegate()
 				{
-					if(Vehicle.currentlyFishing && Vehicle.CanMoveFinal)
+					if (Vehicle.currentlyFishing && Vehicle.CanMoveFinal)
 					{
-						foreach(Pawn p in Vehicle.AllPawnsAboard)
+						foreach (Pawn pawn in Vehicle.AllPawnsAboard)
 						{
-							p.skills.Learn(SkillDefOf.Animals, VehicleMod.FishingSkillValue, false);
+							pawn.skills.Learn(SkillDefOf.Animals, VehicleMod.FishingSkillValue, false);
 						}
-						if(Find.TickManager.TicksGame % (VehicleMod.settings.main.fishingDelay - (Vehicle.AverageSkillOfCapablePawns(SkillDefOf.Animals) * (VehicleMod.settings.main.fishingDelay/100)))  == 0)
+						if (Find.TickManager.TicksGame % (VehicleMod.settings.main.fishingDelay - (Vehicle.AverageSkillOfCapablePawns(SkillDefOf.Animals) * (VehicleMod.settings.main.fishingDelay/100)))  == 0)
 						{
 							KeyValuePair<ThingDef, int> fishStats;
 							bool shallowMultiplier = false;

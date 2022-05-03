@@ -249,7 +249,7 @@ namespace Vehicles
 
 			if (vehicle.CompCannons != null)
 			{
-				vehicle.DrawCannonTextures(adjustedRect, vehicle.CompCannons.Cannons.Where(t => !t.isUpgrade).OrderBy(x => x.drawLayer), pattern, resolveGraphics, manualColorOne, manualColorTwo, manualColorThree, rotDrawn);
+				vehicle.DrawCannonTextures(adjustedRect, vehicle.CompCannons.Cannons.OrderBy(x => x.drawLayer), pattern, resolveGraphics, manualColorOne, manualColorTwo, manualColorThree, rotDrawn);
 			}
 		}
 

@@ -174,7 +174,7 @@ namespace Vehicles
 			{
 				//REDO - ADD TOOLTIP TRANSLATION
 				listingStandard.Gap(16);
-				listingStandard.SliderLabeled("VehicleDelayOnLanding".Translate(), "VehicleDelayOnLandingTooltip".Translate(), "seconds", ref delayDeployOnLanding, 0, 3, 1, 1);
+				listingStandard.SliderLabeled("VehicleDelayOnLanding".Translate(), "VehicleDelayOnLandingTooltip".Translate(), "seconds", ref delayDeployOnLanding, 0, 5, 1, 1);
 			}
 			listingStandard.CheckboxLabeled("VehicleDynamicDrawing".Translate(), ref dynamicWorldDrawing, "VehicleDynamicDrawingTooltip".Translate());
 			listingStandard.Gap();

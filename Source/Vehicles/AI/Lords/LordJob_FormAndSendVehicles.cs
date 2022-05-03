@@ -34,11 +34,12 @@ namespace Vehicles
 		protected LordToil gatherSlaves_pause;
 		protected LordToil gatherDownedPawns;
 		protected LordToil gatherDownedPawns_pause;
+		protected LordToil tieAnimals;
+		protected LordToil tieAnimals_pause;
 		protected LordToil boardVehicle;
 		protected LordToil boardVehicle_pause;
 		protected LordToil leave;
 		protected LordToil leave_pause;
-		protected bool forceCaravan;
 		protected bool requireAllSeated;
 
 		public LordJob_FormAndSendVehicles()
@@ -59,13 +60,13 @@ namespace Vehicles
 			this.prisoners = prisoners;
 			this.requireAllSeated = requireAllSeated;
 			vehicleAssigned = new Dictionary<Pawn, (VehiclePawn, VehicleHandler)>(CaravanHelper.assignedSeats);
-			forceCaravan = false;
 		}
 
 		public (LordToil source, LordToil pause) GatherAnimals => (gatherAnimals, gatherAnimals_pause);
 		public (LordToil source, LordToil pause) GatherItems => (gatherItems, gatherItems_pause);
 		public (LordToil source, LordToil pause) GatherSlaves => (gatherSlaves, gatherSlaves_pause);
 		public (LordToil source, LordToil pause) GatherDowned => (gatherDownedPawns, gatherDownedPawns_pause);
+		public (LordToil source, LordToil pause) TieAnimals => (tieAnimals, tieAnimals_pause);
 		public (LordToil source, LordToil pause) Board => (boardVehicle, boardVehicle_pause);
 		public (LordToil source, LordToil pause) Leave => (leave, leave_pause);
 
@@ -74,18 +75,6 @@ namespace Vehicles
 			get
 			{
 				return vehicles.First(x => x is VehiclePawn && x.RaceProps.baseBodySize == vehicles.Max(y => y.RaceProps.baseBodySize));
-			}
-		}
-
-		public bool ForceCaravanLeave
-		{
-			get
-			{
-				return forceCaravan;
-			}
-			set
-			{
-				forceCaravan = value;
 			}
 		}
 
@@ -128,46 +117,59 @@ namespace Vehicles
 				}
 				if (curLordToil == gatherItems)
 				{
-					return "FormingCaravanStatus_GatheringItems_Ship".Translate();
+					return "FormingCaravanStatus_GatheringItems".Translate();
 				}
 				if (curLordToil == gatherItems_pause)
 				{
-					return "FormingCaravanStatus_GatheringItems_Ship_Pause".Translate();
+					return "FormingCaravanStatus_GatheringItems_Pause".Translate();
 				}
 				if (curLordToil == gatherSlaves)
 				{
-					return "FormingCaravanStatus_GatheringSlaves_Ship".Translate();
+					return "FormingCaravanStatus_GatheringSlaves_Vehicles".Translate();
 				}
 				if (curLordToil == gatherSlaves_pause)
 				{
-					return "FormingCaravanStatus_GatheringSlaves_Ship_Pause".Translate();
+					return "FormingCaravanStatus_GatheringSlaves_Vehicles_Pause".Translate();
 				}
 				if (curLordToil == gatherDownedPawns)
 				{
-					return "FormingCaravanStatus_GatheringDownedPawns_Ship".Translate();
+					return "FormingCaravanStatus_GatheringDownedPawns".Translate();
 				}
 				if (curLordToil == gatherDownedPawns_pause)
 				{
-					return "FormingCaravanStatus_GatheringDownedPawns_Ship_Pause".Translate();
+					return "FormingCaravanStatus_GatheringDownedPawns_Pause".Translate();
+				}
+				if (curLordToil == tieAnimals)
+				{
+					return "FormingCaravanStatus_RopingAnimals".Translate();
+				}
+				if (curLordToil == tieAnimals_pause)
+				{
+					return "FormingCaravanStatus_RopingAnimals_Pause".Translate();
 				}
 				if (curLordToil == boardVehicle)
 				{
-					return "FormingCaravanStatus_BoardShip".Translate();
+					return "FormingCaravanStatus_BoardVehicles".Translate();
 				}
 				if (curLordToil == boardVehicle_pause)
 				{
-					return "FormingCaravanStatus_BoardShip_Pause".Translate();
+					return "FormingCaravanStatus_BoardVehicles_Pause".Translate();
 				}
 				if (curLordToil == leave)
 				{
-					return "FormingCaravanStatus_Leaving_Ship".Translate();
+					return "FormingCaravanStatus_Leaving".Translate();
 				}
 				if (curLordToil == leave_pause)
 				{
-					return "FormingCaravanStatus_Leaving_Ship_Pause".Translate();
+					return "FormingCaravanStatus_Leaving_Pause".Translate();
 				}
 				return "FormingCaravanStatus_Waiting".Translate();
 			}
+		}
+
+		public void ForceCaravanLeave()
+		{
+			lord.GotoToil(Board.source);
 		}
 
 		public (VehiclePawn vehicle, VehicleHandler handler) GetVehicleAssigned(Pawn p)
@@ -300,24 +302,25 @@ namespace Vehicles
 			}
 		}
 
-		public override void Notify_PawnLost(Pawn p, PawnLostCondition condition)
+		public override void Notify_PawnLost(Pawn pawn, PawnLostCondition condition)
 		{
-			base.Notify_PawnLost(p, condition);
-			if (p is VehiclePawn vehicle)
+			base.Notify_PawnLost(pawn, condition);
+			if (pawn is VehiclePawn vehicle)
 			{
 				VehicleReachabilityUtility.ClearCacheFor(vehicle);
 			}
 			else
 			{
-				ReachabilityUtility.ClearCacheFor(p);
+				ReachabilityUtility.ClearCacheFor(pawn);
 			}
 			if (!caravanSent)
 			{
-				if (condition == PawnLostCondition.IncappedOrKilled && p.Downed)
+				if (condition == PawnLostCondition.IncappedOrKilled && pawn.Downed)
 				{
-					downedPawns.Add(p);
+					downedPawns.Add(pawn);
 				}
-				CaravanFormingUtility.RemovePawnFromCaravan(p, lord, false);
+				VehicleCaravanFormingUtility.RemovePawnFromVehicleCaravan(pawn, lord, condition, false);
+				lord.ReceiveMemo(MemoTrigger.RemovedPawn);
 			}
 		}
 
@@ -374,23 +377,26 @@ namespace Vehicles
 			gatherSlaves_pause = new LordToil_PrepareCaravan_Pause();
 			gatherDownedPawns = new LordToil_PrepareCaravan_GatherDownedPawnsVehicle(meetingPoint, exitPoint);
 			gatherDownedPawns_pause = new LordToil_PrepareCaravan_Pause();
+			tieAnimals = new LordToil_PrepareCaravan_TieAnimalsToVehicle(meetingPoint);
+			tieAnimals_pause = new LordToil_PrepareCaravan_Pause();
 			boardVehicle = new LordToil_PrepareCaravan_BoardVehicles(exitPoint);
 			boardVehicle_pause = new LordToil_PrepareCaravan_Pause();
 			leave = new LordToil_PrepareCaravan_LeaveWithVehicles(exitPoint);
 			leave_pause = new LordToil_PrepareCaravan_Pause();
 
-			AddToStateGraph(stateGraph, GatherAnimals, "AllAnimalsGathered", postActions: new TransitionAction[] { new TransitionAction_EndAllJobs() });
-			AddToStateGraph(stateGraph, GatherItems, "AllItemsGathered", postActions: new TransitionAction[] { new TransitionAction_EndAllJobs() });
-			AddToStateGraph(stateGraph, GatherDowned, "AllDownedPawnsGathered");
-			AddToStateGraph(stateGraph, GatherSlaves, "AllSlavesGathered");
-			AddToStateGraph(stateGraph, Board, "AllPawnsOnboard", postActions: new TransitionAction[] { new TransitionAction_EndAllJobs() });
+			AddToStateGraph(stateGraph, GatherAnimals, MemoTrigger.AnimalsGathered, postActions: new TransitionAction[] { new TransitionAction_EndAllJobs() });
+			//AddToStateGraph(stateGraph, TieAnimals, MemoTrigger.AnimalsTied, postActions: new TransitionAction[] { new TransitionAction_EndAllJobs() });
+			AddToStateGraph(stateGraph, GatherItems, MemoTrigger.ItemsGathered, postActions: new TransitionAction[] { new TransitionAction_EndAllJobs() });
+			AddToStateGraph(stateGraph, GatherDowned, MemoTrigger.DownedPawnsGathered);
+			AddToStateGraph(stateGraph, GatherSlaves, MemoTrigger.SlavesGathered);
+			AddToStateGraph(stateGraph, Board, MemoTrigger.PawnsOnboard, preActions: new TransitionAction[] { new TransitionAction_EndAllJobs() }, postActions: new TransitionAction[] { new TransitionAction_EndAllJobs() });
 			AddToStateGraph(stateGraph, Leave);
 
 			LordToil_End lordToil_End = new LordToil_End();
 			stateGraph.AddToil(lordToil_End);
 
 			Transition leaveTransition = new Transition(Leave.source, lordToil_End);
-			leaveTransition.AddTrigger(new Trigger_Memo("ReadyToExitMap"));
+			leaveTransition.AddTrigger(new Trigger_Memo(MemoTrigger.ExitMap));
 			leaveTransition.AddPreAction(new TransitionAction_Custom(SendCaravan));
 
 			stateGraph.AddTransition(leaveTransition);

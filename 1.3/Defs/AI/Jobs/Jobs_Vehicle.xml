@@ -31,6 +31,12 @@
 	</JobDef>
 	
 	<JobDef>
+		<defName>RopeAnimalToVehicle</defName>
+		<driverClass>Vehicles.JobDriver_RopeAnimalToVehicle</driverClass>
+		<reportString>Roping {0} to {1}.</reportString>
+	</JobDef>
+	
+	<JobDef>
 		<defName>CarryPawnToVehicle</defName>
 		<driverClass>Vehicles.JobDriver_CarryPawnToVehicle</driverClass>
 		<reportString>Loading downed pawns.</reportString>

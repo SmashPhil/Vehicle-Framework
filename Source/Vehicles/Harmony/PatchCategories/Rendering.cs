@@ -20,9 +20,6 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_RotationTracker), nameof(Pawn_RotationTracker.UpdateRotation)),
 				prefix: new HarmonyMethod(typeof(Rendering),
 				nameof(UpdateVehicleRotation)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(ColonistBar), "CheckRecacheEntries"), prefix: null, postfix: null,
-				transpiler: new HarmonyMethod(typeof(Rendering),
-				nameof(CheckRecacheEntriesTranspiler)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(ColonistBarColonistDrawer), "DrawIcons"), prefix: null,
 				postfix: new HarmonyMethod(typeof(Rendering),
 				nameof(DrawIconsVehicles)));
@@ -71,58 +68,9 @@ namespace Vehicles
 					}
 					vehicle.UpdateRotationAndAngle();
 				}
-				else
-				{
-					//Stance busy code here
-
-					if (vehicle.jobs.curJob != null)
-					{
-						//LocalTargetInfo target = shipPawn.CurJob.GetTarget(shipPawn.jobs.curDriver.rotateToFace);
-						//Face Target here
-					}
-					if (vehicle.Drafted)
-					{
-						//Ship Pawn Rotation stays the same
-					}
-
-				}
 				return false;
 			}
 			return true;
-		}
-
-		//REDO (remove flag and implement more concrete transpiler)
-		/// <summary>
-		/// Draw pawns onboard vehicles and in vehicle caravans onto the colonist bar
-		/// </summary>
-		/// <param name="instructions"></param>
-		/// <returns></returns>
-		public static IEnumerable<CodeInstruction> CheckRecacheEntriesTranspiler(IEnumerable<CodeInstruction> instructions)
-		{
-			List<CodeInstruction> instructionList = instructions.ToList();
-			bool flag = false;
-			for (int i = 0; i < instructionList.Count; i++)
-			{
-				CodeInstruction instruction = instructionList[i];
-
-				if(instruction.opcode == OpCodes.Stloc_S && ((LocalBuilder)instruction.operand).LocalIndex == 9)
-				{
-					flag = true;
-				}    
-				if (flag && instruction.Calls(AccessTools.Method(typeof(PlayerPawnsDisplayOrderUtility), nameof(PlayerPawnsDisplayOrderUtility.Sort))))
-				{
-					///grab pawns from vehicle caravan and store inside list to be rendered on colonist bar
-					yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(typeof(ColonistBar), "tmpCaravans"));
-					yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, 9);
-					yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Property(typeof(List<Caravan>), "Item").GetGetMethod());
-					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(CaravanHelper), nameof(CaravanHelper.ExtractPawnsFromCaravan)));
-
-					yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Method(typeof(List<Pawn>), nameof(List<Pawn>.AddRange)));
-					yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(typeof(ColonistBar), "tmpPawns"));
-				}
-
-				yield return instruction;
-			}
 		}
 
 		/// <summary>
@@ -132,7 +80,7 @@ namespace Vehicles
 		/// <param name="colonist"></param>
 		public static void DrawIconsVehicles(Rect rect, Pawn colonist)
 		{
-			if(colonist.Dead || !(colonist.ParentHolder is VehicleHandler handler))
+			if (colonist.Dead || !(colonist.ParentHolder is VehicleHandler handler))
 			{
 				return;
 			}
@@ -215,7 +163,7 @@ namespace Vehicles
 		{
 			if (___pawn is VehiclePawn vehicle)
 			{
-				if (!vehicle.Spawned)
+				if (!vehicle.Spawned || vehicle.vPather == null)
 				{
 					__result = vehicle.Position.ToVector3Shifted();
 					return false;

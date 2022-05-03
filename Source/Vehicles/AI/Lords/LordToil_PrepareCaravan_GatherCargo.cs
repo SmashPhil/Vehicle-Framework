@@ -40,13 +40,9 @@ namespace Vehicles
 				{
 					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareVehicleCaravan_GatherItems);
 				}
-				else if(pawn.RaceProps.Animal)
-				{
-					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_BoardVehicle);
-				}
 				else if (pawn is VehiclePawn)
 				{
-					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_WaitVehicle);
+					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareVehicleCaravan_WaitVehicle);
 				}
 				else
 				{
@@ -81,9 +77,9 @@ namespace Vehicles
 						}
 					}
 				}
-				if(flag || (lord.LordJob as LordJob_FormAndSendVehicles).ForceCaravanLeave)
+				if (flag)
 				{
-					lord.ReceiveMemo("AllItemsGathered");
+					lord.ReceiveMemo(MemoTrigger.ItemsGathered);
 				}
 			}
 		}

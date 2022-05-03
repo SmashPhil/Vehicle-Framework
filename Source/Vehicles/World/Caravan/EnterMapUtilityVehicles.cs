@@ -19,13 +19,11 @@ namespace Vehicles
 				Log.Error($"VehicleCaravan {caravan} tried to enter map {map} with no enter mode. Defaulting to edge.");
 				enterMode = CaravanEnterMode.Edge;
 			}
-			List<Pawn> pawns = new List<Pawn>(caravan.PawnsListForReading).ToList();
-
 			IntVec3 enterCell = GetEnterCellVehicle(caravan, map, enterMode, extraValidator);
 			Rot4 edge = enterMode == CaravanEnterMode.Edge ? CellRect.WholeMap(map).GetClosestEdge(enterCell) : Rot4.North;
 			Func<Pawn, IntVec3> spawnCellGetter = (Pawn pawn) => CellFinderExtended.RandomSpawnCellForPawnNear(enterCell, map, pawn, 
 				(IntVec3 c) => GenGridVehicles.StandableUnknown(c, pawn, map), coastalSpawn);
-			SpawnVehicles(caravan, pawns, map, spawnCellGetter, edge, draftColonists);
+			SpawnVehicles(caravan, caravan.PawnsListForReading.Where(p => !p.IsInVehicle()).ToList(), map, spawnCellGetter, edge, draftColonists);
 		}
 
 		private static void SpawnVehicles(VehicleCaravan caravan, List<Pawn> pawns, Map map, Func<Pawn, IntVec3> spawnCellGetter, Rot4 edge, bool draftColonists)

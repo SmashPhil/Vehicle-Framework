@@ -54,8 +54,6 @@ namespace Vehicles
 		public bool autoTargeting = true;
 		public bool manualTargeting = true;
 
-		public bool isUpgrade = false;
-
 		protected int currentFireMode;
 		public float currentHeatRate;
 		protected bool triggeredCooldown;
@@ -103,8 +101,6 @@ namespace Vehicles
 
 			uniqueID = Find.UniqueIDsManager.GetNextThingID();
 			turretDef = reference.turretDef;
-
-			isUpgrade = reference.isUpgrade;
 
 			renderProperties = new VehicleTurretRender(reference.renderProperties);
 
@@ -904,7 +900,7 @@ namespace Vehicles
 			{
 				if (angleRestricted != Vector2.zero)
 				{
-					var drawLinesTask = new Task(() => { RenderHelper.DrawAngleLines(TurretLocation, angleRestricted, MinRange, MaxRange, restrictedTheta, attachedTo?.TurretRotation ?? 0f); });
+					var drawLinesTask = new Task(() => { RenderHelper.DrawAngleLines(TurretLocation, angleRestricted, MinRange, MaxRange, restrictedTheta, attachedTo?.TurretRotation ?? vehicle.FullRotation.AsAngle); });
 					drawLinesTask.RunSynchronously();
 				}
 				else if (turretDef.weaponType == TurretType.Static)
@@ -1367,8 +1363,6 @@ namespace Vehicles
 			Scribe_Values.Look(ref uniqueID, "uniqueID", -1);
 			Scribe_Values.Look(ref parentKey, "parentKey");
 			Scribe_Values.Look(ref key, "key");
-
-			Scribe_Values.Look(ref isUpgrade, "isUpgrade");
 
 			Scribe_Defs.Look(ref turretDef, "turretDef");
 

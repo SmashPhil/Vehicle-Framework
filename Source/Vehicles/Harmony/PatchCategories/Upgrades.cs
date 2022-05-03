@@ -34,14 +34,18 @@ namespace Vehicles
 		/// <param name="__result"></param>
 		public static bool VehicleMoveSpeedUpgradeModifier(bool diagonal, Pawn __instance, ref int __result)
 		{
-			if(__instance is VehiclePawn vehicle)
+			if (__instance is VehiclePawn vehicle)
 			{
 				float num = vehicle.ActualMoveSpeed / 60;
 				float num2 = 1 / num;
 				if (vehicle.Spawned && !vehicle.Map.roofGrid.Roofed(vehicle.Position))
+				{
 					num2 /= vehicle.Map.weatherManager.CurMoveSpeedMultiplier;
+				}
 				if (diagonal)
+				{
 					num2 *= 1.41421f;
+				}
 				__result = Mathf.Clamp(Mathf.RoundToInt(num2), 1, 450);
 				return false;
 			}
@@ -55,7 +59,7 @@ namespace Vehicles
 		/// <param name="__result"></param>
 		public static void VehicleCargoCapacity(Pawn p, ref float __result)
 		{
-			if(p is VehiclePawn vehicle)
+			if (p is VehiclePawn vehicle)
 			{
 				__result = vehicle.StatCargo + vehicle.CargoCapacity;
 			}

@@ -72,52 +72,63 @@ namespace Vehicles
 			}
 		}
 
-		public static void RemovePawnFromCaravan(Pawn pawn, Lord lord, bool removeFromDowned = true)
+		public static void RemovePawnFromVehicleCaravan(Pawn pawn, Lord lord, PawnLostCondition condition, bool removeFromDowned = true)
 		{
-			bool flag = false;
-			bool flag2 = false;
+			bool isOwner = false;
+			bool forcedToJoinOtherLord = condition == PawnLostCondition.ForcedToJoinOtherLord;
 			string text = "";
 			string textShip = "";
-			List<VehiclePawn> vehicles = lord.ownedPawns.FindAll(x => x is VehiclePawn).Cast<VehiclePawn>().ToList();
-			foreach (VehiclePawn vehicle in vehicles)
+			List<VehiclePawn> vehicles = lord.ownedPawns.Where(x => x is VehiclePawn).Cast<VehiclePawn>().ToList();
+			foreach (Pawn lordPawn in lord.ownedPawns)
 			{
-				if (vehicle.AllPawnsAboard.Contains(pawn))
+				if (lordPawn is VehiclePawn vehicle)
 				{
-					textShip = "MessagePawnBoardedFormingCaravan".Translate(pawn, vehicle.LabelShort).CapitalizeFirst();
-					flag2 = true;
-					break;
+					if (vehicle.AllPawnsAboard.Contains(pawn))
+					{
+						textShip = "MessagePawnBoardedFormingCaravan".Translate(pawn, vehicle.LabelShort).CapitalizeFirst();
+						forcedToJoinOtherLord = true;
+						break;
+					}
 				}
 			}
-			if (!flag2)
+			if (!forcedToJoinOtherLord)
 			{
 				foreach (Pawn p in lord.ownedPawns)
 				{
 					if (p != pawn && CaravanUtility.IsOwner(p, Faction.OfPlayer))
 					{
-						flag = true;
+						isOwner = true;
 						break;
 					}
 				}
 			}
-			text += flag ? "MessagePawnLostWhileFormingCaravan".Translate(pawn).CapitalizeFirst().ToString() : flag2 ? textShip :
-				("MessagePawnLostWhileFormingCaravan".Translate(pawn).CapitalizeFirst().ToString() + "MessagePawnLostWhileFormingCaravan_AllLost".Translate().ToString());
-			bool flag3 = true;
-			if (!flag2 && !flag)
+			if (isOwner)
+			{
+				text += "MessagePawnLostWhileFormingCaravan".Translate(pawn).CapitalizeFirst().ToString();
+			}
+			else
+			{
+				text += forcedToJoinOtherLord ? textShip : ("MessagePawnLostWhileFormingCaravan".Translate(pawn).CapitalizeFirst().ToString() + "MessagePawnLostWhileFormingCaravan_AllLost".Translate().ToString());
+			}
+			bool stillInLord = true;
+			if (!forcedToJoinOtherLord && !isOwner)
+			{
 				CaravanFormingUtility.StopFormingCaravan(lord);
-			if (flag)
+			}
+			if (isOwner)
 			{
 				pawn.inventory.UnloadEverything = true;
 				if (lord.ownedPawns.Contains(pawn))
 				{
 					lord.Notify_PawnLost(pawn, PawnLostCondition.ForcedByPlayerAction, null);
-					flag3 = false;
+					stillInLord = false;
 				}
 				LordJob_FormAndSendVehicles lordJob_FormAndSendCaravanVehicle = lord.LordJob as LordJob_FormAndSendVehicles;
 				if (lordJob_FormAndSendCaravanVehicle != null && lordJob_FormAndSendCaravanVehicle.downedPawns.Contains(pawn))
 				{
 					if (!removeFromDowned)
 					{
-						flag3 = false;
+						stillInLord = false;
 					}
 					else
 					{
@@ -125,9 +136,9 @@ namespace Vehicles
 					}
 				}
 			}
-			if (flag3)
+			if (stillInLord)
 			{
-				MessageTypeDef msg = flag2 ? MessageTypeDefOf.SilentInput : MessageTypeDefOf.NegativeEvent;
+				MessageTypeDef msg = forcedToJoinOtherLord ? MessageTypeDefOf.SilentInput : MessageTypeDefOf.NegativeEvent;
 				Messages.Message(text, pawn, msg, true);
 			}
 		}

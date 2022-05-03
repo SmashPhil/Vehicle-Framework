@@ -47,6 +47,7 @@ namespace Vehicles
 		public override void Initialize()
 		{
 			fieldSettings ??= new Dictionary<string, Dictionary<SaveableField, SavedField<object>>>();
+			defaultGraphics ??= new Dictionary<string, PatternData>();
 		}
 
 		public override void ResetSettings()
@@ -55,6 +56,7 @@ namespace Vehicles
 			VehicleMod.cachedFields.Clear();
 			VehicleMod.PopulateCachedFields();
 			fieldSettings.Clear();
+			defaultGraphics.Clear();
 			if (VehicleMod.ModifiableSettings)
 			{
 				foreach (VehicleDef def in DefDatabase<VehicleDef>.AllDefs)

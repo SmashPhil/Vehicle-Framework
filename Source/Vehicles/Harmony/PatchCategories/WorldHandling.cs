@@ -71,22 +71,11 @@ namespace Vehicles
 				}
 				foreach (Map map in Find.Maps)
 				{
-					foreach (VehiclePawn vehicle in map.mapPawns.AllPawnsSpawned.Where(v => v is VehiclePawn vehicle && v.Faction == Faction.OfPlayer))
+					foreach (VehiclePawn vehicle in map.mapPawns.AllPawnsSpawned.Where(v => v is VehiclePawn vehicle && vehicle.Faction == Faction.OfPlayer))
 					{
 						if (vehicle.AllPawnsAboard.Contains(p))
 						{
-							__result = WorldPawnSituation.CaravanMember;
-							return;
-						}
-					}
-				}
-				foreach (Caravan c in Find.WorldObjects.Caravans)
-				{
-					foreach(VehiclePawn vehicle in c.PawnsListForReading.Where(v => v is VehiclePawn vehicle))
-					{
-						if(vehicle.AllPawnsAboard.Contains(p))
-						{
-							__result = WorldPawnSituation.CaravanMember;
+							__result = WorldPawnSituation.InTravelingTransportPod;
 							return;
 						}
 					}
@@ -115,11 +104,13 @@ namespace Vehicles
 			foreach (DockedBoat obj in Find.WorldObjects.AllWorldObjects.Where(x => x is DockedBoat))
 			{
 				if (obj.dockedBoats.Contains(p))
+				{
 					return false;
+				}
 			}
-			foreach (Caravan c in Find.WorldObjects.AllWorldObjects.Where(x => x is Caravan))
+			foreach (Caravan caravan in Find.WorldObjects.AllWorldObjects.Where(x => x is Caravan))
 			{
-				foreach(Pawn innerPawn in c.PawnsListForReading)
+				foreach (Pawn innerPawn in caravan.PawnsListForReading)
 				{
 					if (innerPawn is VehiclePawn vehicle && (vehicle == p || vehicle.AllPawnsAboard.Contains(p)))
 					{

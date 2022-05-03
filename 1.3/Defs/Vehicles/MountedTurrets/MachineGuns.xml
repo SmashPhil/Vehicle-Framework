@@ -79,7 +79,7 @@
 		
 		<reloadTimer>12</reloadTimer>
 		<warmUpTimer>1.25</warmUpTimer>
-		<magazineCapacity>35</magazineCapacity>
+		<magazineCapacity>40</magazineCapacity>
 		<genericAmmo>true</genericAmmo>
 		
 		<recoil>

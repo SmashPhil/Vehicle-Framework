@@ -37,11 +37,11 @@ namespace Vehicles
 			{
 				if(p is VehiclePawn)
 				{
-					p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_WaitVehicle);
+					p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareVehicleCaravan_WaitVehicle);
 				}
 				else
 				{
-					p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareCaravan_BoardVehicle)
+					p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareVehicleCaravan_BoardVehicle)
 					{
 						locomotion = LocomotionUrgency.Jog
 					};
@@ -72,7 +72,7 @@ namespace Vehicles
 				}
 				if(flag)
 				{
-					lord.ReceiveMemo("AllPawnsOnboard");
+					lord.ReceiveMemo(MemoTrigger.PawnsOnboard);
 				}
 			}
 		}
