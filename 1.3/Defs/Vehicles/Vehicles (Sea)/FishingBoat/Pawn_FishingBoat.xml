@@ -24,7 +24,6 @@
 		<buildDef>FishingBoat_Blueprint</buildDef>
 		<repairRate>650</repairRate>
 		
-		<armor>50</armor>
 		<cargoCapacity>250</cargoCapacity>
 		<speed>1.5</speed>
 		
@@ -36,23 +35,17 @@
 		<vehicleType>Sea</vehicleType>
 				
 		<statBases>
-			<Mass>10000</Mass>
+			<Mass>200</Mass>
 			<ArmorRating_Blunt>1.0</ArmorRating_Blunt>
 			<ArmorRating_Sharp>1.0</ArmorRating_Sharp>
-			<MarketValue>250000</MarketValue>
-			<Flammability>0</Flammability>
+			<MarketValue>250</MarketValue>
+			<Flammability>0.65</Flammability>
 		</statBases>
 		
 		<properties>
 			<fishing>true</fishing>
-			
 			<wakeMultiplier>1.5</wakeMultiplier>
 			<wakeSpeed>1</wakeSpeed>
-			
-			<healthLabel_Healthy>Operational</healthLabel_Healthy>
-			<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
-			<healthLabel_Immobile>Inoperable</healthLabel_Immobile>
-			
 			<worldSpeedMultiplier>5</worldSpeedMultiplier>
 			
 			<roles>
@@ -114,27 +107,13 @@
 		</components>
 
 		<race>
-			<thinkTreeMain>Vehicle</thinkTreeMain>
-			<intelligence>ToolUser</intelligence>
-			<fleshType>MetalVehicle</fleshType>
-			<needsRest>false</needsRest>
-			<hasGenders>false</hasGenders>
-			<foodType>None</foodType>
-
-			<baseBodySize>1.0</baseBodySize>
-			<baseHealthScale>1.0</baseHealthScale>
 			<lifeStageAges>
 				<li>
 					<def>MechanoidFullyFormed</def>
 					<minAge>0</minAge>
-					<soundWounded>BulletImpact_Metal</soundWounded>
-					<soundDeath>Explosion_Bomb</soundDeath>
+					<soundWounded>BulletImpact_Wood</soundWounded>
 				</li>
 			</lifeStageAges>
-			
-			<soundMeleeHitPawn>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitPawn>
-			<soundMeleeHitBuilding>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitBuilding>
-			<soundMeleeMiss>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeMiss>
 		</race>
 	</Vehicles.VehicleDef>
 </Defs>

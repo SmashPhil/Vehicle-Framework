@@ -239,18 +239,14 @@ namespace Vehicles
 
 		public void QueueTurret(TurretData turretData)
 		{
-			multiFireCannon ??= new List<TurretData>();
+			turretData.turret.queuedToFire = true;
 			multiFireCannon.Add(turretData);
 		}
 
 		public void DequeueTurret(TurretData turretData)
 		{
+			turretData.turret.queuedToFire = false;
 			multiFireCannon.RemoveAll(td => td.turret == turretData.turret);
-		}
-
-		public bool QueuedToFire(VehicleTurret turret)
-		{
-			return multiFireCannon.NotNullAndAny(mf => mf.turret == turret);
 		}
 
 		private void ResolveCannons()
@@ -382,10 +378,7 @@ namespace Vehicles
 				}
 				cannon.vehicle = Vehicle;
 			}
-			if (multiFireCannon.NullOrEmpty())
-			{
-				multiFireCannon = new List<TurretData>();
-			}
+			multiFireCannon ??= new List<TurretData>();
 		}
 
 		public override void PostExposeData()

@@ -25,8 +25,7 @@
 		<buildDef>RowBoat_Blueprint</buildDef>
 		<repairRate>650</repairRate>
 		
-		<armor>50</armor>
-		<cargoCapacity>250</cargoCapacity>
+		<cargoCapacity>75</cargoCapacity>
 		<speed>1.5</speed>
 		
 		<size>(1, 1)</size>
@@ -37,11 +36,11 @@
 		<vehicleType>Sea</vehicleType>
 				
 		<statBases>
-			<Mass>10000</Mass>
+			<Mass>35</Mass>
 			<ArmorRating_Blunt>1.0</ArmorRating_Blunt>
 			<ArmorRating_Sharp>1.0</ArmorRating_Sharp>
-			<MarketValue>250000</MarketValue>
-			<Flammability>0</Flammability>
+			<MarketValue>85</MarketValue>
+			<Flammability>0.65</Flammability>
 		</statBases>
 		
 		<properties>
@@ -95,27 +94,13 @@
 		</components>
 
 		<race>
-			<thinkTreeMain>Vehicle</thinkTreeMain>
-			<intelligence>ToolUser</intelligence>
-			<fleshType>MetalVehicle</fleshType>
-			<needsRest>false</needsRest>
-			<hasGenders>false</hasGenders>
-			<foodType>None</foodType>
-
-			<baseBodySize>1.0</baseBodySize>
-			<baseHealthScale>1.0</baseHealthScale>
 			<lifeStageAges>
 				<li>
 					<def>MechanoidFullyFormed</def>
 					<minAge>0</minAge>
-					<soundWounded>BulletImpact_Metal</soundWounded>
-					<soundDeath>Explosion_Bomb</soundDeath>
+					<soundWounded>BulletImpact_Wood</soundWounded>
 				</li>
 			</lifeStageAges>
-			
-			<soundMeleeHitPawn>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitPawn>
-			<soundMeleeHitBuilding>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitBuilding>
-			<soundMeleeMiss>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeMiss>
 		</race>
 	</Vehicles.VehicleDef>
 </Defs>

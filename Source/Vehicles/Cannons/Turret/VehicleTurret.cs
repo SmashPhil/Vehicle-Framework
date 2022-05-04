@@ -59,6 +59,8 @@ namespace Vehicles
 		protected bool triggeredCooldown;
 		protected int ticksSinceLastShot;
 
+		public bool queuedToFire = false;
+
 		protected MaterialPropertyBlock mtb;
 
 		public VehicleTurretRender renderProperties;
@@ -576,7 +578,7 @@ namespace Vehicles
 
 		protected virtual void TurretAutoTick()
 		{
-			if (vehicle != null && !vehicle.CompCannons.QueuedToFire(this))
+			if (vehicle != null && !queuedToFire)
 			{
 				if (AutoTarget && Find.TickManager.TicksGame % AutoTargetInterval == 0)
 				{
@@ -1356,40 +1358,41 @@ namespace Vehicles
 		{
 			Scribe_Values.Look(ref autoTargetingActive, "autoTargetingActive");
 
-			Scribe_Values.Look(ref reloadTicks, "reloadTicks");
-			Scribe_Values.Look(ref burstTicks, "burstTicks");
-			Scribe_Values.Look(ref groupKey, "groupKey");
+			Scribe_Values.Look(ref reloadTicks, nameof(reloadTicks));
+			Scribe_Values.Look(ref burstTicks, nameof(burstTicks));
+			Scribe_Values.Look(ref groupKey, nameof(groupKey));
 
-			Scribe_Values.Look(ref uniqueID, "uniqueID", -1);
-			Scribe_Values.Look(ref parentKey, "parentKey");
-			Scribe_Values.Look(ref key, "key");
+			Scribe_Values.Look(ref uniqueID, nameof(uniqueID), -1);
+			Scribe_Values.Look(ref parentKey, nameof(parentKey));
+			Scribe_Values.Look(ref key, nameof(key));
 
-			Scribe_Defs.Look(ref turretDef, "turretDef");
+			Scribe_Defs.Look(ref turretDef, nameof(turretDef));
 
-			Scribe_Values.Look(ref targetPersists, "targetPersists");
-			Scribe_Values.Look(ref autoTargeting, "autoTargeting");
-			Scribe_Values.Look(ref manualTargeting, "manualTargeting");
+			Scribe_Values.Look(ref targetPersists, nameof(targetPersists));
+			Scribe_Values.Look(ref autoTargeting, nameof(autoTargeting));
+			Scribe_Values.Look(ref manualTargeting, nameof(manualTargeting));
 
-			Scribe_Values.Look(ref currentFireMode, "currentFireMode");
-			Scribe_Values.Look(ref currentHeatRate, "currentHeatRate");
-			Scribe_Values.Look(ref triggeredCooldown, "triggeredCooldown");
-			Scribe_Values.Look(ref ticksSinceLastShot, "ticksSinceLastShot");
+			Scribe_Values.Look(ref queuedToFire, nameof(queuedToFire));
+			Scribe_Values.Look(ref currentFireMode, nameof(currentFireMode));
+			Scribe_Values.Look(ref currentHeatRate, nameof(currentHeatRate));
+			Scribe_Values.Look(ref triggeredCooldown, nameof(triggeredCooldown));
+			Scribe_Values.Look(ref ticksSinceLastShot, nameof(ticksSinceLastShot));
 
-			Scribe_Deep.Look(ref renderProperties, "renderProperties");
+			Scribe_Deep.Look(ref renderProperties, nameof(renderProperties));
 
-			Scribe_Values.Look(ref currentRotation, "currentRotation", defaultAngleRotated - 90);
-			Scribe_Values.Look(ref rotationTargeted, "rotationTargeted", defaultAngleRotated - 90);
-			Scribe_Values.Look(ref aimPieOffset, "aimPieOffset");
-			Scribe_Values.Look(ref angleRestricted, "angleRestricted");
-			Scribe_Values.Look(ref defaultAngleRotated, "defaultAngleRotated");
-			Scribe_Values.Look(ref restrictedTheta, "restrictedTheta", (int)Mathf.Abs(angleRestricted.x - (angleRestricted.y + 360)).ClampAngle());
+			Scribe_Values.Look(ref currentRotation, nameof(currentRotation), defaultAngleRotated - 90);
+			Scribe_Values.Look(ref rotationTargeted, nameof(rotationTargeted), defaultAngleRotated - 90);
+			Scribe_Values.Look(ref aimPieOffset, nameof(aimPieOffset));
+			Scribe_Values.Look(ref angleRestricted, nameof(angleRestricted));
+			Scribe_Values.Look(ref defaultAngleRotated, nameof(defaultAngleRotated));
+			Scribe_Values.Look(ref restrictedTheta, nameof(restrictedTheta), (int)Mathf.Abs(angleRestricted.x - (angleRestricted.y + 360)).ClampAngle());
 
-			Scribe_Values.Look(ref drawLayer, "drawLayer");
+			Scribe_Values.Look(ref drawLayer, nameof(drawLayer));
 
-			Scribe_Defs.Look(ref loadedAmmo, "loadedAmmo");
-			Scribe_Defs.Look(ref savedAmmoType, "savedAmmoType");
-			Scribe_Values.Look(ref shellCount, "shellCount");
-			Scribe_Values.Look(ref gizmoLabel, "gizmoLabel");
+			Scribe_Defs.Look(ref loadedAmmo, nameof(loadedAmmo));
+			Scribe_Defs.Look(ref savedAmmoType, nameof(savedAmmoType));
+			Scribe_Values.Look(ref shellCount, nameof(shellCount));
+			Scribe_Values.Look(ref gizmoLabel, nameof(gizmoLabel));
 
 			Scribe_TargetInfo.Look(ref cannonTarget, "cannonTarget", LocalTargetInfo.Invalid);
 		}

@@ -1737,7 +1737,7 @@ namespace Vehicles
 		/// <summary>
 		/// Executes after vehicle has been loaded into the game
 		/// </summary>
-		/// <remarks>Called regardless if vehicle is spawned or unspawned. Responsible for important vars being set that may be called even for unspawned vehicles</remarks>
+		/// <remarks>Called regardless if vehicle is spawned or unspawned. Responsible for important variables being set that may be called even for unspawned vehicles</remarks>
 		protected virtual void PostLoad()
 		{
 			RegenerateUnsavedComponents();

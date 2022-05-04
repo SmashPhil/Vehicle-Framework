@@ -1,18 +1,39 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.3.8157</currentVersion>
+  <currentVersion>1.3.8158</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>[title]Recent News[/title][font]Small[/font]
 
 [title]Balance Changes[/title][font]Small[/font]
+[b]Rowboat (Buildable)[/b]
+- Reduced MaxHitPoints from 10000 to 50
+- Increased WorkToBuild from 30 to 200
+- Changed costList from 1 ComponentIndustrial to 35 WoodLog
+- Increased Flammability from 0.05 to 0.65
+[b]Rowboat (Vehicle)[/b]
+- Decreased CargoCapacity from 300 to 75
+- Decreased MarketValue from 250000 to 85
+- Increased Flammability from 0 to 0.65
+- Decreased Mass from 10000 to 35
 
+[b]Fishing Boat (Buildable)[/b]
+- Reduced MaxHitPoints from 10000 to 250
+- Increased WorkToBuild from 30 to 1500
+- Changed costList from 35 ComponentIndustrial and 3000 Steel to 140 WoodLog
+- Increased Flammability from 0.05 to 0.65
+[b]Fishing Boat (Vehicle)[/b]
+- Decreased MarketValue from 250000 to 250
+- Increased Flammability from 0 to 0.65
+- Decreased Mass from 10000 to 200
 [title]Bug Fixes[/title][font]Small[/font]
-
+- Fixed bug where GenSteps would attempt to recalculate vehicle path cost when regions had not been built yet. (Fixes compatibility with Biomes Core mods)
 [title]Additional Changes[/title][font]Small[/font]
+- Removed irrelevant ResearchProjectDefs
 
+- Added 2 ResearchProjectDefs for Rowboat and FishingBoat. More will follow later when the mod is closer to releasing.
 [title]Final Notes[/title][font]Small[/font]
 Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
 </description>
@@ -21,7 +42,7 @@ Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/is
   <!--Show update log on next startup.-->
   <update>false</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
-  <testing>false</testing>
+  <testing>true</testing>
   <!--Icon bar shown to the right of the mod's name-->
   <rightIconBar>
     <li>

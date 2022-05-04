@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>	
+	<ResearchProjectDef>
+		<defName>Rowboat</defName>
+		<label>Rowboat</label>
+		<tab>Vehicles</tab>
+		<description>Craft and sail on a small open boat powered by oars.</description>
+		<baseCost>500</baseCost>
+		<techLevel>Neolithic</techLevel>
+		<tags>
+			<li>ClassicStart</li>
+		</tags>
+		<researchViewX>0</researchViewX>
+		<researchViewY>2.5</researchViewY>
+	</ResearchProjectDef>
+	
+	<ResearchProjectDef>
+		<defName>FishingBoat</defName>
+		<label>Fishing Boat</label>
+		<tab>Vehicles</tab>
+		<description>Craft and sail on a small sail-powered boat large enough to fit a few people. Capable of fishing on open waters if a compatible fishing mod is active.</description>
+		<baseCost>750</baseCost>
+		<techLevel>Neolithic</techLevel>
+		
+		<prerequisites>
+			<li>Rowboat</li>
+		</prerequisites>
+		
+		<researchViewX>1</researchViewX>
+		<researchViewY>2.5</researchViewY>
+	</ResearchProjectDef>
+</Defs>

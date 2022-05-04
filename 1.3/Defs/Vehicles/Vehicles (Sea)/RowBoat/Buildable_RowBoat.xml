@@ -13,19 +13,19 @@
 		</graphicData>
 		
 		<statBases>
-			<MaxHitPoints>10000</MaxHitPoints>
-			<WorkToBuild>30</WorkToBuild>
-			<Flammability>0.05</Flammability>
+			<MaxHitPoints>50</MaxHitPoints>
+			<WorkToBuild>200</WorkToBuild>
+			<Flammability>0.65</Flammability>
 		</statBases>
 		<size>(1, 1)</size>
 		
 		<researchPrerequisites/>
 		
 		<costList>
-			<ComponentIndustrial>1</ComponentIndustrial>
+			<WoodLog>35</WoodLog>
 		</costList>
 		
-		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
+		<soundImpactDefault>BulletImpact_Wood</soundImpactDefault>
 		
 		<thingToSpawn>RowBoat</thingToSpawn>
 		<soundBuilt>ShipBigConstruction</soundBuilt>

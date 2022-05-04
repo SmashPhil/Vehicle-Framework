@@ -332,10 +332,7 @@ namespace Vehicles
 
 		public static void RecalculatePerceivedPathCostForVehicle(IntVec3 c, PathingContext ___normal)
 		{
-			if (!Extra.GenStepsActive)
-			{
-				PathingHelper.RecalculatePerceivedPathCostAt(c, ___normal.map);
-			}
+			PathingHelper.RecalculatePerceivedPathCostAt(c, ___normal.map);
 		}
 
 		public static void Notify_ThingAffectingVehicleRegionsSpawned(Thing b)

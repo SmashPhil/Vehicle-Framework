@@ -218,10 +218,16 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// Recalculate perceived path cost for all vehicles at <paramref name="cell"/>
+		/// </summary>
+		/// <remarks>Requires null check on TerrainDef in case region grid has not been initialized</remarks>
+		/// <param name="cell"></param>
+		/// <param name="map"></param>
 		public static void RecalculatePerceivedPathCostAt(IntVec3 cell, Map map)
 		{
 			TerrainDef terrainDef = map.terrainGrid.TerrainAt(cell);
-			if (terrainEffecters.TryGetValue(terrainDef, out List<VehicleDef> vehicleDefs))
+			if (terrainDef != null && terrainEffecters.TryGetValue(terrainDef, out List<VehicleDef> vehicleDefs))
 			{
 				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
 				foreach (VehicleDef vehicleDef in vehicleDefs)
