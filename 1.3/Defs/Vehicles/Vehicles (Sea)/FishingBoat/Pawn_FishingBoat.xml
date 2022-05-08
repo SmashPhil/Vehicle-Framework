@@ -4,7 +4,7 @@
 	<Vehicles.VehicleDef ParentName="BaseSeaVehicle">
 		<defName>FishingBoat</defName>
 		<label>Fishing Boat</label>
-		<description>A heavy warship to rule the seas.</description>
+		<description>A light fishing boat capable of travel across seas with a few sailors onboard.</description>
 		
 		<graphicData>
 			<texPath>Vehicles/Sea/FishingBoat/FishingBoat</texPath>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using HarmonyLib;
@@ -35,9 +36,9 @@ namespace Vehicles
 				prefix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
 				nameof(GraphicPreInit)));
 			/* Debugging Only */
-			//harmony.Patch(original: AccessTools.Method(typeof(), nameof()),
-			//    prefix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
-			//    nameof(TestDebug)));
+			//harmony.Patch(original: AccessTools.Method(typeof(DirectXmlToObject), "GetFieldInfoForType"),
+			//	prefix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
+			//	nameof(TestDebug)));
 		}
 
 		/// <summary>

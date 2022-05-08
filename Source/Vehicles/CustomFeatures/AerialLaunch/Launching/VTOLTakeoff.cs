@@ -11,7 +11,6 @@ namespace Vehicles
 {
 	public class VTOLTakeoff : DefaultTakeoff
 	{
-		public int ticksVertical;
 		public SimpleCurve verticalLaunchCurve;
 		public SimpleCurve verticalLandingCurve;
 		public SimpleCurve verticalLaunchRotationCurve;
@@ -24,16 +23,20 @@ namespace Vehicles
 
 		public VTOLTakeoff(VTOLTakeoff reference, VehiclePawn vehicle) : base(reference, vehicle)
 		{
-			ticksVertical = reference.ticksVertical;
 			verticalLaunchCurve = reference.verticalLaunchCurve;
 			verticalLandingCurve = reference.verticalLandingCurve;
 			verticalLaunchRotationCurve = reference.verticalLaunchRotationCurve;
 			verticalLandingRotationCurve = reference.verticalLandingRotationCurve;
 		}
 
+		public VerticalProtocolProperties VerticalLaunchProperties => launchProperties as VerticalProtocolProperties;
+		public VerticalProtocolProperties VerticalLandingProperties => landingProperties as VerticalProtocolProperties;
+
 		public override string FailLaunchMessage => "SkyfallerLaunchNotValid".Translate();
 
-		public virtual float TimeInVTOL => (float)ticksPassedVertical / ticksVertical;
+		public virtual float TimeInLaunchVTOL => (float)ticksPassedVertical / VerticalLaunchProperties.ticksVertical;
+
+		public virtual float TimeInLandingVTOL => (float)ticksPassedVertical / VerticalLandingProperties.ticksVertical;
 
 		public override Vector3 DrawPos
 		{
@@ -42,11 +45,11 @@ namespace Vehicles
 				Vector3 vDrawPos = drawPos;
 				if (landing && verticalLandingCurve != null)
 				{
-					vDrawPos.z += verticalLandingCurve.Evaluate(TimeInVTOL);
+					vDrawPos.z += verticalLandingCurve.Evaluate(TimeInLandingVTOL);
 				}
 				else if (verticalLaunchCurve != null)
 				{
-					vDrawPos.z += verticalLaunchCurve.Evaluate(TimeInVTOL);
+					vDrawPos.z += verticalLaunchCurve.Evaluate(TimeInLaunchVTOL);
 				}
 				switch (movementType)
 				{
@@ -94,7 +97,7 @@ namespace Vehicles
 
 		public override bool FinishedTakeoff(VehicleSkyfaller skyfaller)
 		{
-			return ticksPassedVertical >= ticksVertical && base.FinishedTakeoff(skyfaller);
+			return ticksPassedVertical >= VerticalLaunchProperties.ticksVertical && base.FinishedTakeoff(skyfaller);
 		}
 
 		public override Vector3 AnimateLanding(float layer, bool flip)
@@ -117,9 +120,9 @@ namespace Vehicles
 				adjustedDrawPos.z += landingProperties.zPositionCurve.Evaluate(TimeInAnimation);
 			}
 
-			if (ticksPassedVertical < ticksVertical && verticalLandingRotationCurve != null)
+			if (ticksPassedVertical < VerticalLandingProperties.ticksVertical && verticalLandingRotationCurve != null)
 			{
-				rotation = verticalLandingRotationCurve.Evaluate(TimeInVTOL);
+				rotation = verticalLandingRotationCurve.Evaluate(TimeInLandingVTOL);
 			}
 
 			adjustedDrawPos.y = layer;
@@ -147,9 +150,9 @@ namespace Vehicles
 				adjustedDrawPos.z += launchProperties.zPositionCurve.Evaluate(TimeInAnimation);
 			}
 
-			if (ticksPassedVertical < ticksVertical && verticalLaunchRotationCurve != null)
+			if (ticksPassedVertical < VerticalLaunchProperties.ticksVertical && verticalLaunchRotationCurve != null)
 			{
-				rotation = verticalLaunchRotationCurve.Evaluate(TimeInVTOL);
+				rotation = verticalLaunchRotationCurve.Evaluate(TimeInLaunchVTOL);
 			}
 
 			adjustedDrawPos.y = layer;
@@ -171,7 +174,7 @@ namespace Vehicles
 
 		protected override void TickTakeoff()
 		{
-			if (ticksPassedVertical >= ticksVertical)
+			if (ticksPassedVertical >= VerticalLaunchProperties.ticksVertical)
 			{
 				base.TickTakeoff();
 			}
@@ -196,7 +199,7 @@ namespace Vehicles
 		protected override void PreAnimationSetup()
 		{
 			base.PreAnimationSetup();
-			ticksPassedVertical = landing ? ticksVertical : 0;
+			ticksPassedVertical = landing ? VerticalLandingProperties.ticksVertical : 0;
 		}
 
 		public override void ResolveProperties(LaunchProtocol reference)
@@ -207,7 +210,6 @@ namespace Vehicles
 			verticalLandingCurve = vtolReference.verticalLandingCurve;
 			verticalLaunchRotationCurve = vtolReference.verticalLaunchRotationCurve;
 			verticalLandingRotationCurve = vtolReference.verticalLandingRotationCurve;
-			ticksVertical = vtolReference.ticksVertical;
 		}
 
 		public override void ExposeData()

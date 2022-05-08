@@ -12,8 +12,8 @@
 		</graphicData>
 		
 		<statBases>
-			<MaxHitPoints>5000</MaxHitPoints>
-			<WorkToBuild>30</WorkToBuild>
+			<MaxHitPoints>750</MaxHitPoints>
+			<WorkToBuild>85000</WorkToBuild>
 			<Flammability>0.05</Flammability>
 		</statBases>
 		<size>(3,4)</size>
@@ -21,8 +21,9 @@
 		<researchPrerequisites/>
 		
 		<costList>
-			<ComponentIndustrial>35</ComponentIndustrial>
-			<Steel>3000</Steel>
+			<ComponentSpacer>12</ComponentSpacer>
+			<Steel>500</Steel>
+			<Plasteel>250</Plasteel>
 		</costList>
 		
 		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>

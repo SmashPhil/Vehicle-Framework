@@ -38,10 +38,10 @@
 		<vehicleType>Air</vehicleType>
 				
 		<statBases>
-			<Mass>25000</Mass>
+			<Mass>6200</Mass>
 			<ArmorRating_Blunt>1.0</ArmorRating_Blunt>
 			<ArmorRating_Sharp>1.0</ArmorRating_Sharp>
-			<MarketValue>250000</MarketValue>
+			<MarketValue>175000</MarketValue>
 			<Flammability>0</Flammability>
 		</statBases>
 		
@@ -200,132 +200,122 @@
 				</strafing>
 				<launchProtocol Class="Vehicles.VTOLTakeoff">
 					<movementType>Decelerate</movementType>
-						<ticksVertical>150</ticksVertical>
-						<motes>
-							<li>
-								<moteDef>Mote_RocketSmoke_Low</moteDef>
-								<angle>0~360</angle>
-								<speed>5~8</speed>
-								<size>0.35~0.5</size>
-							</li>
-						</motes>
-						<verticalLaunchCurve>
+					<motes>
+						<li>
+							<moteDef>Mote_RocketSmoke_Low</moteDef>
+							<angle>0~360</angle>
+							<speed>5~8</speed>
+							<size>0.35~0.5</size>
+						</li>
+					</motes>
+					<verticalLaunchCurve>
+						<points>
+							<li>(0, 0)</li>
+							<li>(0.1, 0.336)</li>
+							<li>(0.2, 0.919)</li>
+							<li>(0.3, 1.733)</li>
+							<li>(0.4, 2.705)</li>
+							<li>(0.5, 3.748)</li>
+							<li>(0.6, 4.768)</li>
+							<li>(0.7, 5.676)</li>
+							<li>(0.8, 6.389)</li>
+							<li>(0.9, 6.844)</li>
+							<li>(1, 7)</li>
+						</points>
+					</verticalLaunchCurve>
+					<verticalLaunchRotationCurve>
+						<points>
+							<li>(0, 0)</li>
+							<li>(0.75, 0.5)</li>
+							<li>(1, -5)</li>
+						</points>
+					</verticalLaunchRotationCurve>
+					<verticalLandingCurve>
+						<points>
+							<li>(0, 0)</li>
+							<li>(0.1, 0.048)</li>
+							<li>(0.2, 0.131)</li>
+							<li>(0.3, 0.248)</li>
+							<li>(0.4, 0.386)</li>
+							<li>(0.5, 0.535)</li>
+							<li>(0.6, 0.681)</li>
+							<li>(0.7, 0.811)</li>
+							<li>(0.8, 0.913)</li>
+							<li>(0.9, 0.978)</li>
+							<li>(1, 1)</li>
+						</points>
+					</verticalLandingCurve>
+					<verticalLandingRotationCurve>
+						<points>
+							<li>(0, 0)</li>
+							<li>(0.1, -1)</li>
+							<li>(1, -2)</li>
+						</points>
+					</verticalLandingRotationCurve>
+					<launchProperties Class = "Vehicles.VerticalProtocolProperties">
+						<maxTicks>350</maxTicks>
+						<ticksVertical>300</ticksVertical>
+						<forcedRotation>East</forcedRotation>
+						<angleCurve>
+							<points>
+								<li>(0,90)</li>
+								<li>(1,60)</li>
+							</points>
+						</angleCurve>
+						<rotationCurve>
+							<points>
+								<li>(0,-5)</li>
+								<li>(1,-10)</li>
+							</points>
+						</rotationCurve>
+						<zPositionCurve>
+							<points>
+								<li>(0,0)</li>
+								<li>(0.25,0.25)</li>
+								<li>1,2</li>
+							</points>
+						</zPositionCurve>
+						<speedCurve>
 							<points>
 								<li>(0, 0)</li>
-								<li>(0.35, 5)</li>
-								<li>(1, 20)</li>
+								<li>(0.75, 0.1)</li>
+								<li>(1, 1.5)</li>
 							</points>
-						</verticalLaunchCurve>
-						<verticalLandingCurve>
+						</speedCurve>
+					</launchProperties>
+					<landingProperties Class = "Vehicles.VerticalProtocolProperties">
+						<maxTicks>250</maxTicks>
+						<ticksVertical>75</ticksVertical>
+						<forcedRotation>East</forcedRotation>
+						<angleCurve>
 							<points>
-								<li>(0, 12)</li>
-								<li>(0.25, 1)</li>
-								<li>(1, 0)</li>
+								<li>(1,-85)</li>
 							</points>
-						</verticalLandingCurve>
-						<launchProperties>
-							<maxTicks>500</maxTicks>
-							<forcedRotation>East</forcedRotation>
-							<angleCurve>
-								<points>
-									<li>(0,90)</li>
-									<li>(1,60)</li>
-								</points>
-							</angleCurve>
-							<rotationCurve>
-								<points>
-									<li>(0,0)</li>
-									<li>(0.15,-2)</li>
-									<li>(0.5,-20)</li>
-								</points>
-							</rotationCurve>
-							<zPositionCurve>
-								<points>
-									<li>(0,0)</li>
-									<li>(0.1,0.25)</li>
-									<li>0.5,2</li>
-								</points>
-							</zPositionCurve>
-							<speedCurve>
-								<points>
-									<li>(0, 0)</li>
-									<li>(0.6, 0.15)</li>
-									<li>(1, 1.25)</li>
-								</points>
-							</speedCurve>
-						</launchProperties>
-						<landingProperties>
-							<maxTicks>900</maxTicks>
-							<forcedRotation>East</forcedRotation>
-							<angleCurve>
-								<points>
-									<li>(0,-60)</li>
-									<li>(1,-90)</li>
-								</points>
-							</angleCurve>
-							<rotationCurve>
-								<points>
-									<li>(0,30)</li>
-									<li>(0.5,5)</li>
-									<li>(0.9,-5)</li>
-									<li>(0.95,0)</li>
-								</points>
-							</rotationCurve>
-							<zPositionCurve>
-								<points>
-									<li>(0.8,2.5)</li>
-									<li>(0.9, 1.5)</li>
-									<li>(1,0)</li>
-								</points>
-							</zPositionCurve>
-							<speedCurve>
-								<points>
-									<li>(0.6,0.6)</li>
-									<li>(0.95,0.1)</li>
-								</points>
-							</speedCurve>
-						</landingProperties>
+						</angleCurve>
+						<rotationCurve>
+							<points>
+								<li>(0,-2)</li>
+								<li>(1,10)</li>
+							</points>
+						</rotationCurve>
+						<zPositionCurve>
+							<points>
+								<li>(0,0)</li>
+								<li>(0.1,0.25)</li>
+								<li>(0.5,0.35)</li>
+								<li>(0.55,0.4)</li>
+							</points>
+						</zPositionCurve>
+						<speedCurve>
+							<points>
+								<li>(0,0)</li>
+								<li>(0.1,0.25)</li>
+								<li>(0.25,0.45)</li>
+								<li>(1,0.5)</li>
+							</points>
+						</speedCurve>
+					</landingProperties>
 				</launchProtocol>
-			</li>
-			<li Class="Vehicles.CompProperties_Cannons">
-				<turrets>
-					<li Class="Vehicles.VehicleTurretAlternating">
-						<turretDef>MountedLaserTurret</turretDef>
-						<renderProperties>
-							<north>
-								<offset>(-1.25, -0.35)</offset>
-							</north>
-						</renderProperties>
-						
-						<gizmoLabel>Laser Turret</gizmoLabel>
-						<autoTargeting>false</autoTargeting>
-						
-						<defaultAngleRotated>0</defaultAngleRotated>
-						<angleRestricted/>
-						<drawLayer>-1</drawLayer>
-						
-						<key>laserGunLeft</key>
-						<groupKey>laserTurrets</groupKey>
-					</li>
-					<li Class="Vehicles.VehicleTurretAlternating">
-						<turretDef>MountedLaserTurret</turretDef>
-						<renderProperties>
-							<north>
-								<offset>(1.25, -0.35)</offset>
-							</north>
-						</renderProperties>
-
-						<gizmoLabel>Laser Turret</gizmoLabel>
-						<autoTargeting>false</autoTargeting>
-						
-						<defaultAngleRotated>0</defaultAngleRotated>
-						<angleRestricted/>
-						<drawLayer>-1</drawLayer>
-						
-						<key>laserGunRight</key>
-						<groupKey>laserTurrets</groupKey>
-					</li>
-				</turrets>
 			</li>
 			<li Class="Vehicles.CompProperties_UpgradeTree">
 				<upgrades/>

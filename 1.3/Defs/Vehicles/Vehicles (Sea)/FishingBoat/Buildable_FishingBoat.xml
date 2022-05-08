@@ -4,7 +4,7 @@
 	<Vehicles.VehicleBuildDef ParentName="VehicleBoatBaseBuildable">
 		<defName>FishingBoat_Blueprint</defName>
 		<label>Fishing Boat</label>
-		<description>A heavily armored combat vehicle.</description>
+		<description>A light fishing boat capable of travel across seas with a few sailors onboard.</description>
 
 		<graphicData>
 			<texPath>Vehicles/Sea/FishingBoat/FishingBoat</texPath>

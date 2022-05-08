@@ -28,12 +28,30 @@
 - Decreased MarketValue from 250000 to 250
 - Increased Flammability from 0 to 0.65
 - Decreased Mass from 10000 to 200
+
+[b]Sparrow (Buildable)[/b]
+- Reduced MaxHitPoints from 5000 to 750
+- Increased WorkToBuild from 30 to 85000
+- Changed costList from 35 ComponentIndustrial and 3000 Steel to 12 ComponentSpacer, 500 Steel, and 250 Plasteel
+[b]Sparrow (Vehicle)[/b]
+- Decreased MarketValue from 250000 to 175000
+- Decreased Mass from 25000 to 6200
+
+- Removed VehicleTurrets, they were for testing only and the main focus for now will just be normal flying (not strafing or bombing runs)
 [title]Bug Fixes[/title][font]Small[/font]
 - Fixed bug where GenSteps would attempt to recalculate vehicle path cost when regions had not been built yet. (Fixes compatibility with Biomes Core mods)
+
+- Fixed bug where arriving skyfallers would attempt to notify VehicleTracks comp a tick after its removal.
 [title]Additional Changes[/title][font]Small[/font]
 - Removed irrelevant ResearchProjectDefs
 
+- Performance improvements to VehicleTurrets.
+
 - Added 2 ResearchProjectDefs for Rowboat and FishingBoat. More will follow later when the mod is closer to releasing.
+
+- Improved VTOL animation of Sparrow
+
+- Changed vertical ticks to instead be a property of individual launch or land properties, allowing you to designate different tick counts for landing and launching vertical animations.
 [title]Final Notes[/title][font]Small[/font]
 Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
 </description>

@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Verse;
 
 namespace Vehicles
 {
@@ -17,11 +16,7 @@ namespace Vehicles
 		{
 			get
 			{
-				if (innerLookup.TryGetValue(key.ToUpperInvariant(), out float value))
-				{
-					return value;
-				}
-				return 0;
+				return innerLookup.TryGetValue(key.ToUpperInvariant(), 0);
 			}
 			set
 			{

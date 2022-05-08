@@ -49,9 +49,7 @@ namespace Vehicles
 					PawnRelationUtility.Notify_PawnsSeenByPlayer_Letter(map.mapPawns.AllPawns, ref label, ref text, "LetterRelatedPawnsInMapWherePlayerLanded".Translate(Faction.OfPlayer.def.pawnsPlural), true, true);
 				}
 				Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.NeutralEvent, vehicle, settlement.Faction, null, null, null);
-				AerialVehicleInFlight aerialVehicle = vehicle.GetAerialVehicle();
-				arrivalModeDef.Worker.VehicleArrived(aerialVehicle, launchProtocol, settlement.Map);
-				aerialVehicle.Destroy();
+				arrivalModeDef.Worker.VehicleArrived(vehicle, launchProtocol, settlement.Map);
 			}, "GeneratingMap", false, null, true);
 		}
 

@@ -8,14 +8,14 @@ namespace Vehicles
 {
 	public class AerialVehicleArrivalModeWorker_EdgeDrop : AerialVehicleArrivalModeWorker
 	{
-		public override void VehicleArrived(AerialVehicleInFlight aerialVehicle, LaunchProtocol launchProtocol, Map map)
+		public override void VehicleArrived(VehiclePawn vehicle, LaunchProtocol launchProtocol, Map map)
 		{
 			Rot4 vehicleRotation = launchProtocol.landingProperties.forcedRotation ?? Rot4.Random;
-			IntVec2 vehicleSize = aerialVehicle.vehicle.VehicleDef.Size;
+			IntVec2 vehicleSize = vehicle.VehicleDef.Size;
 			IntVec3 cell = CellFinderExtended.RandomEdgeCell(vehicleRotation.Opposite, map, (IntVec3 cell) => 
-				!MapHelper.VehicleBlockedInPosition(aerialVehicle.vehicle, Current.Game.CurrentMap, cell, vehicleRotation), vehicleSize.x > vehicleSize.z ? vehicleSize.x : vehicleSize.z);
-			VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(aerialVehicle.vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
-			skyfaller.vehicle = aerialVehicle.vehicle;
+				!MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, cell, vehicleRotation), vehicleSize.x > vehicleSize.z ? vehicleSize.x : vehicleSize.z);
+			VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
+			skyfaller.vehicle = vehicle;
 			GenSpawn.Spawn(skyfaller, cell, map, vehicleRotation);
 		}
 

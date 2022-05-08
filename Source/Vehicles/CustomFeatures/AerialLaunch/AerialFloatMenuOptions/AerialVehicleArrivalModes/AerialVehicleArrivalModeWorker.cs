@@ -10,7 +10,7 @@ namespace Vehicles
 	{
 		public AerialVehicleArrivalModeDef def;
 
-		public abstract void VehicleArrived(AerialVehicleInFlight aerialVehicle, LaunchProtocol protocol, Map map);
+		public abstract void VehicleArrived(VehiclePawn vehicle, LaunchProtocol protocol, Map map);
 
 		public abstract bool TryResolveRaidSpawnCenter(IncidentParms parms);
 

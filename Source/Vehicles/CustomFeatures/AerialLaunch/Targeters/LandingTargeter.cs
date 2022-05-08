@@ -67,7 +67,7 @@ namespace Vehicles
 			if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
 			{
 				LocalTargetInfo localTargetInfo = CurrentTargetUnderMouse();
-				if (action != null)
+				if (action != null && localTargetInfo.Cell.InBounds(Current.Game.CurrentMap))
 				{
 					if (targetValidator != null)
 					{

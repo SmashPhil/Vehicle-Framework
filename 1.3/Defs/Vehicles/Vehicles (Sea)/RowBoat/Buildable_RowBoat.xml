@@ -4,7 +4,7 @@
 	<Vehicles.VehicleBuildDef ParentName="VehicleBoatBaseBuildable">
 		<defName>RowBoat_Blueprint</defName>
 		<label>Row Boat</label>
-		<description>A heavily armored combat vehicle.</description>
+		<description>A small sturdy boat for short travel across bodies of water.</description>
 
 		<graphicData>
 			<texPath>Vehicles/Sea/RowBoat/RowBoat</texPath>

@@ -562,8 +562,6 @@ namespace Vehicles
 			curY += Mathf.Max(a, b);
 		}
 
-		//public static float MassUsageWithVehicles()
-
 		/// <summary>
 		/// Create Tale for VehicleCaravan
 		/// </summary>

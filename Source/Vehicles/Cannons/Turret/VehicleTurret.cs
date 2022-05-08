@@ -677,14 +677,17 @@ namespace Vehicles
 
 		protected virtual void TurretTargeterTick()
 		{
-			if (cannonTarget.IsValid && currentRotation == rotationTargeted && !TargetLocked)
+			if (cannonTarget.IsValid)
 			{
-				TargetLocked = true;
-				ResetPrefireTimer();
-			}
-			if (!TurretTargetValid && cannonTarget.IsValid)
-			{
-				SetTarget(LocalTargetInfo.Invalid);
+				if (currentRotation == rotationTargeted && !TargetLocked)
+				{
+					TargetLocked = true;
+					ResetPrefireTimer();
+				}
+				else if (!TurretTargetValid)
+				{
+					SetTarget(LocalTargetInfo.Invalid);
+				}
 			}
 			if (TurretTargetValid)
 			{

@@ -8,15 +8,15 @@ namespace Vehicles
 {
 	public class AerialVehicleArrivalModeWorker_TargetedDrop : AerialVehicleArrivalModeWorker
 	{
-		public override void VehicleArrived(AerialVehicleInFlight aerialVehicle, LaunchProtocol launchProtocol, Map map)
+		public override void VehicleArrived(VehiclePawn vehicle, LaunchProtocol launchProtocol, Map map)
 		{
 			CameraJumper.TryJump(map.Center, map);
-			LandingTargeter.Instance.BeginTargeting(aerialVehicle.vehicle, aerialVehicle.vehicle.CompVehicleLauncher.launchProtocol, map, delegate (LocalTargetInfo target, Rot4 rot)
+			LandingTargeter.Instance.BeginTargeting(vehicle, vehicle.CompVehicleLauncher.launchProtocol, map, delegate (LocalTargetInfo target, Rot4 rot)
 			{
-				VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(aerialVehicle.vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
-				skyfaller.vehicle = aerialVehicle.vehicle;
+				VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
+				skyfaller.vehicle = vehicle;
 				GenSpawn.Spawn(skyfaller, target.Cell, map, rot);
-			}, null, null, null, aerialVehicle.vehicle.VehicleDef.rotatable && aerialVehicle.vehicle.CompVehicleLauncher.launchProtocol.landingProperties.forcedRotation is null, true);
+			}, null, null, null, vehicle.VehicleDef.rotatable && vehicle.CompVehicleLauncher.launchProtocol.landingProperties.forcedRotation is null, true);
 		}
 
 		public override bool TryResolveRaidSpawnCenter(IncidentParms parms)

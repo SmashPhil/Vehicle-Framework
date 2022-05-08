@@ -387,6 +387,7 @@
     <Compile Include="Components\Vehicles\VehicleFleshTypeDef.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_Trade.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\PropellerTakeoff.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Launching\VerticalProtocolProperties.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_Strafe.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Targeters\AntiAirTargeter.cs" />
     <Compile Include="Cannons\Components\TurretCooldownProperties.cs" />
