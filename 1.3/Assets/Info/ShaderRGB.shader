@@ -1,4 +1,4 @@
-﻿// Created By: SmashPhil
+// Created By: SmashPhil
 // Date: 3 FEB 2021
 /*
    CutoutComplex mask support from RimWorld with 3 supported masking colors
@@ -74,26 +74,15 @@ Shader "Custom/ShaderRGB"
 			{
 				_MainTexColor = tex2D(_MainTex, i.uv);
 				_MaskTexColor = tex2D(_MaskTex, i.uv);
+				finalColor = _MainTexColor;
 
-				// (-R+1)(-G+1)(-B+1)
-				maskChannels.xyz = (-_MaskTexColor.xyz) + float3(1.0, 1.0, 1.0);
+				float u = _MaskTexColor.r;
+				float v = _MaskTexColor.g;
+				float w = _MaskTexColor.b;
+				float x = 1 - u - v - w;
 
-				// Mask.R * _ColorOne + (-R+1)
-				redMask = (_MaskTexColor.xxxx * _ColorOne + maskChannels.xxxx);
-				// Mask.G * _ColorTwo + (-G+1)
-				greenMask = (_MaskTexColor.yyyy * _ColorTwo + maskChannels.yyyy);
-				// Mask.B * _ColorThree + (-B+1)
-				blueMask = (_MaskTexColor.zzzz * _ColorThree + maskChannels.zzzz);
-
-				finalColor = _MainTexColor * redMask;
-				finalColor = finalColor * greenMask;
-				finalColor = finalColor * blueMask;
-
-				if (finalColor.a <= 0.5)
-				{
-					finalColor.a = 0;
-				}
-
+				finalColor *= _ColorOne * u + _ColorTwo * v + _ColorThree * w + float4(1,1,1,1) * x;
+				clip( finalColor.a - 0.5f );
 				return finalColor;
 			}
 			ENDCG
