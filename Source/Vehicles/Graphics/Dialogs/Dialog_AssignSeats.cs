@@ -247,12 +247,11 @@ namespace Vehicles
 			failReason = string.Empty;
 			foreach (VehicleHandler handler in Vehicle.handlers.Where(x => x.role.RequiredForCaravan))
 			{
-				if (assignedSeats.Where(r => r.Value.handler.role == handler.role).Select(k => k.Key).Count() >= handler.role.slotsToOperate)
+				if (assignedSeats.Where(r => r.Value.handler.role == handler.role).Select(k => k.Key).Count() < handler.role.slotsToOperate)
 				{
-					continue;
+					failReason = "CantAssignVehicle".Translate(Vehicle.LabelCap);
+					return false;
 				}
-				failReason = "CantAssignVehicle".Translate(Vehicle.LabelCap);
-				return false;
 			}
 			try
 			{
@@ -261,17 +260,18 @@ namespace Vehicles
 				//Update all current pawns being assigned to this vehicle in Pawns tab
 				foreach (Pawn assignedPawn in assignedSeats.Keys)
 				{
+					Log.Message($"Checking {assignedPawn} Exists? {pawns.FirstOrDefault(p => (p.AnyThing as Pawn) == assignedPawn)}");
 					pawns.FirstOrDefault(p => (p.AnyThing as Pawn) == assignedPawn)?.ForceTo(1);
 				}
 
 				//Add all pawns to assigned seating registry and refresh caravan dialog
-				foreach (KeyValuePair<Pawn, (VehiclePawn, VehicleHandler)> seating in assignedSeats)
+				foreach ((Pawn pawn, (VehiclePawn vehicle, VehicleHandler handler) assignment) in assignedSeats)
 				{
-					if (CaravanHelper.assignedSeats.ContainsKey(seating.Key))
+					if (CaravanHelper.assignedSeats.ContainsKey(pawn))
 					{
-						CaravanHelper.assignedSeats.Remove(seating.Key);
+						CaravanHelper.assignedSeats.Remove(pawn);
 					}
-					CaravanHelper.assignedSeats.Add(seating.Key, seating.Value);
+					CaravanHelper.assignedSeats.Add(pawn, assignment);
 				}
 				transferable.AdjustTo(transferable.GetMaximumToTransfer());
 				Dialog_FormVehicleCaravan.MarkDirty();

@@ -650,7 +650,7 @@ namespace Vehicles
 		{
 			List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables);
 
-			CaravanHelper.BoardAllAssignedPawns(ref pawnsFromTransferables);
+			CaravanHelper.BoardAllAssignedPawns(ref pawnsFromTransferables, true);
 
 			if (!CheckForErrors(pawnsFromTransferables))
 			{
@@ -1172,7 +1172,9 @@ namespace Vehicles
 
 		public static List<Pawn> AllSendablePawns(Map map, bool reform)
 		{
-			return CaravanFormingUtility.AllSendablePawns(map, true, reform, reform, reform);
+			List<Pawn> pawns = CaravanFormingUtility.AllSendablePawns(map, true, reform, reform, reform);
+			pawns.AddRange(CaravanHelper.AllSendablePawnsInVehicles(map, true, reform, reform, reform));
+			return pawns;
 		}
 
 		private enum Tab

@@ -148,72 +148,72 @@
 				<reconDistance>0</reconDistance>
 				<launchProtocol Class="Vehicles.RocketTakeoff">
 					<movementType>Decelerate</movementType>
-						<rocketTiltRate>0.025</rocketTiltRate>
-						<thrusterSize>1~2</thrusterSize>
-						<dustSize>0.5~1.5</dustSize>
-						<burnRadius>4</burnRadius>
-						<launchProperties>
-							<speed>0.1</speed>
-							<maxTicks>500</maxTicks>
-							<additionalLaunchTextures>
-								<li>
-									<texPath>Animations/JetEffect</texPath>
-									<graphicClass>Vehicles.Graphic_Animate</graphicClass>
-									<drawSize>(3, 3)</drawSize>
-									<drawOffset>(-0.9, 0, -2.45)</drawOffset>
-									<shaderType>Transparent</shaderType>
-									<layer>-1</layer>
-								</li>
-								<li>
-									<texPath>Animations/JetEffect</texPath>
-									<graphicClass>Vehicles.Graphic_Animate</graphicClass>
-									<drawSize>(3, 3)</drawSize>
-									<drawOffset>(0.9, 0, -2.45)</drawOffset>
-									<shaderType>Transparent</shaderType>
-									<layer>-1</layer>
-								</li>
-								<li>
-									<texPath>Animations/JetEffect</texPath>
-									<graphicClass>Vehicles.Graphic_Animate</graphicClass>
-									<drawSize>(3, 3)</drawSize>
-									<drawOffset>(0, 0, -1.5)</drawOffset>
-									<shaderType>Transparent</shaderType>
-									<layer>-1</layer>
-								</li>
-							</additionalLaunchTextures>
-						</launchProperties>
-						<landingProperties>
-							<speed>0.3</speed>
-							<maxTicks>500</maxTicks>
-							<delayByTicks>100</delayByTicks>
-							<forcedRotation>North</forcedRotation>
-							<additionalLaunchTextures>
-								<li>
-									<texPath>Animations/JetEffect</texPath>
-									<graphicClass>Vehicles.Graphic_Animate</graphicClass>
-									<drawSize>(3, 3)</drawSize>
-									<drawOffset>(-0.9, 0, -2.45)</drawOffset>
-									<shaderType>Transparent</shaderType>
-									<layer>-1</layer>
-								</li>
-								<li>
-									<texPath>Animations/JetEffect</texPath>
-									<graphicClass>Vehicles.Graphic_Animate</graphicClass>
-									<drawSize>(3, 3)</drawSize>
-									<drawOffset>(0.9, 0, -2.45)</drawOffset>
-									<shaderType>Transparent</shaderType>
-									<layer>-1</layer>
-								</li>
-								<li>
-									<texPath>Animations/JetEffect</texPath>
-									<graphicClass>Vehicles.Graphic_Animate</graphicClass>
-									<drawSize>(3, 3)</drawSize>
-									<drawOffset>(0, 0, -1.5)</drawOffset>
-									<shaderType>Transparent</shaderType>
-									<layer>-1</layer>
-								</li>
-							</additionalLaunchTextures>
-						</landingProperties>
+					<rocketTiltRate>0.025</rocketTiltRate>
+					<thrusterSize>1~2</thrusterSize>
+					<dustSize>0.5~1.5</dustSize>
+					<burnRadius>4</burnRadius>
+					<launchProperties>
+						<speed>0.1</speed>
+						<maxTicks>500</maxTicks>
+						<additionalLaunchTextures>
+							<li>
+								<texPath>Animations/JetEffect</texPath>
+								<graphicClass>Vehicles.Graphic_Animate</graphicClass>
+								<drawSize>(3, 3)</drawSize>
+								<drawOffset>(-0.9, 0, -2.45)</drawOffset>
+								<shaderType>Transparent</shaderType>
+								<layer>-1</layer>
+							</li>
+							<li>
+								<texPath>Animations/JetEffect</texPath>
+								<graphicClass>Vehicles.Graphic_Animate</graphicClass>
+								<drawSize>(3, 3)</drawSize>
+								<drawOffset>(0.9, 0, -2.45)</drawOffset>
+								<shaderType>Transparent</shaderType>
+								<layer>-1</layer>
+							</li>
+							<li>
+								<texPath>Animations/JetEffect</texPath>
+								<graphicClass>Vehicles.Graphic_Animate</graphicClass>
+								<drawSize>(3, 3)</drawSize>
+								<drawOffset>(0, 0, -1.5)</drawOffset>
+								<shaderType>Transparent</shaderType>
+								<layer>-1</layer>
+							</li>
+						</additionalLaunchTextures>
+					</launchProperties>
+					<landingProperties>
+						<speed>0.3</speed>
+						<maxTicks>500</maxTicks>
+						<delayByTicks>100</delayByTicks>
+						<forcedRotation>North</forcedRotation>
+						<additionalLaunchTextures>
+							<li>
+								<texPath>Animations/JetEffect</texPath>
+								<graphicClass>Vehicles.Graphic_Animate</graphicClass>
+								<drawSize>(3, 3)</drawSize>
+								<drawOffset>(-0.9, 0, -2.45)</drawOffset>
+								<shaderType>Transparent</shaderType>
+								<layer>-1</layer>
+							</li>
+							<li>
+								<texPath>Animations/JetEffect</texPath>
+								<graphicClass>Vehicles.Graphic_Animate</graphicClass>
+								<drawSize>(3, 3)</drawSize>
+								<drawOffset>(0.9, 0, -2.45)</drawOffset>
+								<shaderType>Transparent</shaderType>
+								<layer>-1</layer>
+							</li>
+							<li>
+								<texPath>Animations/JetEffect</texPath>
+								<graphicClass>Vehicles.Graphic_Animate</graphicClass>
+								<drawSize>(3, 3)</drawSize>
+								<drawOffset>(0, 0, -1.5)</drawOffset>
+								<shaderType>Transparent</shaderType>
+								<layer>-1</layer>
+							</li>
+						</additionalLaunchTextures>
+					</landingProperties>
 				</launchProtocol>
 			</li>
 			<li Class="Vehicles.CompProperties_UpgradeTree">

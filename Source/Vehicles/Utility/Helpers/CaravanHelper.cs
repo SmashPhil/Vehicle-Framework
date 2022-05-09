@@ -102,6 +102,27 @@ namespace Vehicles
 			return pawns.Where(x => !(x is VehiclePawn)).Count() >= num;
 		}
 
+		public static IEnumerable<Pawn> AllSendablePawnsInVehicles(Map map, bool allowEvenIfDowned = false, bool allowEvenIfInMentalState = false, bool allowEvenIfPrisonerNotSecure = false, 
+			bool allowCapturableDownedPawns = false, bool allowLodgers = false)
+		{
+			foreach (VehiclePawn vehicle in map.mapPawns.AllPawnsSpawned.Where(pawn => pawn is VehiclePawn && pawn.Faction == Faction.OfPlayer))
+			{
+				foreach (Pawn pawn in vehicle.AllPawnsAboard)
+				{
+					bool allowDowned = allowEvenIfDowned || !pawn.Downed;
+					bool allowMentalState = allowEvenIfInMentalState || !pawn.InMentalState;
+					bool allowFaction = pawn.Faction == Faction.OfPlayer || pawn.IsPrisonerOfColony || (allowCapturableDownedPawns && pawn.Downed && !pawn.mindState.WillJoinColonyIfRescued && CaravanUtility.ShouldAutoCapture(pawn, Faction.OfPlayer));
+					bool allowQuestLodger = !pawn.IsQuestLodger() || allowLodgers;
+					bool allowPrisoner = allowEvenIfPrisonerNotSecure || !pawn.IsPrisoner || pawn.guest.PrisonerIsSecure;
+					bool allowLordAssignment = pawn.GetLord() == null || pawn.GetLord().LordJob is LordJob_VoluntarilyJoinable || pawn.GetLord().LordJob.IsCaravanSendable;
+					if (allowDowned && allowMentalState && allowFaction && pawn.RaceProps.allowedOnCaravan && !pawn.IsQuestHelper() && allowQuestLodger && allowPrisoner && allowLordAssignment)
+					{
+						yield return pawn;
+					}
+				}
+			}
+		}
+
 		/// <summary>
 		/// Toggle state of caravan between land and sea
 		/// </summary>
@@ -196,7 +217,7 @@ namespace Vehicles
 		/// Board all pawns automatically into assigned seats
 		/// </summary>
 		/// <param name="pawns"></param>
-		public static void BoardAllAssignedPawns(ref List<Pawn> pawns)
+		public static void BoardAllAssignedPawns(ref List<Pawn> pawns, bool reform = false)
 		{
 			List<VehiclePawn> vehicles = pawns.Where(p => p is VehiclePawn).Cast<VehiclePawn>().ToList();
 			List<Pawn> nonVehicles = pawns.Where(p => !(p is VehiclePawn)).ToList();
@@ -204,8 +225,15 @@ namespace Vehicles
 			{
 				if (assignedSeats.ContainsKey(pawn) && vehicles.Contains(assignedSeats[pawn].vehicle))
 				{
-					assignedSeats[pawn].vehicle.GiveLoadJob(pawn, assignedSeats[pawn].handler);
-					assignedSeats[pawn].vehicle.Notify_Boarded(pawn);
+					if (reform)
+					{
+						assignedSeats[pawn].vehicle.Notify_BoardedCaravan(pawn, assignedSeats[pawn].handler.handlers);
+					}
+					else
+					{
+						assignedSeats[pawn].vehicle.GiveLoadJob(pawn, assignedSeats[pawn].handler);
+						assignedSeats[pawn].vehicle.Notify_Boarded(pawn);
+					}
 					pawns.Remove(pawn);
 				}
 			}

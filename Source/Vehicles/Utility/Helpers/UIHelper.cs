@@ -30,9 +30,7 @@ namespace Vehicles
 			pawnsTransfer = new TransferableOneWayWidget(null, null, null, thingCountTip, true, ignorePawnInventoryMass, false, availableMassGetter, 0f, ignoreSpawnedCorpsesGearAndInventoryMass, tile, true, true, true, false, true, false, playerPawnsReadOnly);
 			vehiclesTransfer = new TransferableVehicleWidget(null, null, null, thingCountTip, true, ignorePawnInventoryMass, false, availableMassGetter, 0f, ignoreSpawnedCorpsesGearAndInventoryMass, tile, true, false, false, playerPawnsReadOnly);
 			AddVehicleAndPawnSections(pawnsTransfer, vehiclesTransfer, transferables);
-			itemsTransfer = new TransferableOneWayWidget(from x in transferables
-			where x.ThingDef.category != ThingCategory.Pawn
-			select x, null, null, thingCountTip, true, ignorePawnInventoryMass, false, availableMassGetter, 0f, ignoreSpawnedCorpsesGearAndInventoryMass, tile, true, false, false, true, false, true, false);
+			itemsTransfer = new TransferableOneWayWidget(transferables.Where(t => t.ThingDef.category != ThingCategory.Pawn), null, null, thingCountTip, true, ignorePawnInventoryMass, false, availableMassGetter, 0f, ignoreSpawnedCorpsesGearAndInventoryMass, tile, true, false, false, true, false, true, false);
 		}
 
 		/// <summary>
@@ -49,7 +47,8 @@ namespace Vehicles
 			pawnWidget.AddSection("PrisonersSection".Translate(), source.Where(t => t.AnyThing is Pawn pawn && pawn.IsPrisoner));
 			pawnWidget.AddSection("CaptureSection".Translate(), source.Where(t => t.AnyThing is Pawn pawn && pawn.Downed && CaravanUtility.ShouldAutoCapture(pawn, Faction.OfPlayer)));
 			pawnWidget.AddSection("AnimalsSection".Translate(), source.Where(t => t.AnyThing is Pawn pawn && pawn.RaceProps.Animal));
-			vehicleWidget.AvailablePawns = source.Where(x => x.AnyThing is Pawn pawn && !(pawn is VehiclePawn) && pawn.IsColonistPlayerControlled).ToList();
+			vehicleWidget.AvailablePawns = source.Where(x => x.AnyThing is Pawn pawn && !(pawn is VehiclePawn) && 
+				(pawn.IsColonistPlayerControlled || (pawn.IsColonist && pawn.MentalStateDef == null && (pawn.HostFaction == null || pawn.IsSlave) && pawn.IsInVehicle()))).ToList();
 		}
 
 		/// <seealso cref="DoCountAdjustInterfaceInternal(Rect, Transferable, List{TransferableOneWay}, List{TransferableCountToTransferStoppingPoint}, int, int, int, bool, bool)"/>
