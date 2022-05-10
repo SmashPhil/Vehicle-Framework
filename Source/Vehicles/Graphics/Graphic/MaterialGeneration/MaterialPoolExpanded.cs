@@ -5,7 +5,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	class MaterialPoolExpanded
+	public class MaterialPoolExpanded
 	{
 		private static readonly Dictionary<MaterialRequestRGB, Material> matDictionary = new Dictionary<MaterialRequestRGB, Material>();
 
@@ -138,9 +138,17 @@ namespace Vehicles
 							material.SetFloat(AdditionalShaderPropertyIDs.DisplacementY, req.displacement.y);
 						}
 					}
+					if (req.shader == RGBShaderTypeDefOf.CutoutComplexSkin.Shader)
+					{
+						//Null reverts to original tex. Default would calculate to red
+						material.SetTexture(AdditionalShaderPropertyIDs.SkinTex, req.patternTex);
+					}
+					else if (req.shader == RGBShaderTypeDefOf.CutoutComplexPattern.Shader)
+					{
+						//Default to full red mask for full ColorOne pattern
+						material.SetTexture(AdditionalShaderPropertyIDs.PatternTex, patternTex);
+					}
 					material.SetTexture(ShaderPropertyIDs.MaskTex, req.maskTex);
-					material.SetTexture(AdditionalShaderPropertyIDs.PatternTex, patternTex);
-					material.SetFloat(AdditionalShaderPropertyIDs.ReplaceTexture, req.isSkin ? 1 : 0);
 					material.SetColor(AdditionalShaderPropertyIDs.ColorOne, req.color);
 					material.SetColor(ShaderPropertyIDs.ColorTwo, req.colorTwo);
 					material.SetColor(AdditionalShaderPropertyIDs.ColorThree, req.colorThree);

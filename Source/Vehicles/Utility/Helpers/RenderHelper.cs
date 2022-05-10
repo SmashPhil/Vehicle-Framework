@@ -178,13 +178,12 @@ namespace Vehicles
 						MaterialRequestRGB matReq = new MaterialRequestRGB()
 						{
 							mainTex = turret.CannonTexture,
-							shader = turret.CannonGraphic.Shader,
+							shader = pattern is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin.Shader : turret.CannonGraphic.Shader,
 							color = manualColorOne != null ? manualColorOne.Value : vehicle.DrawColor,
 							colorTwo = manualColorTwo != null ? manualColorTwo.Value : vehicle.DrawColorTwo,
 							colorThree = manualColorThree != null ? manualColorThree.Value : vehicle.DrawColorThree,
 							tiles = vehicle.Tiles,
 							properties = pattern.properties,
-							isSkin = pattern is SkinDef,
 							maskTex = turret.CannonGraphic.masks[0],
 							patternTex = pattern[rotDrawn]
 						};
@@ -237,7 +236,6 @@ namespace Vehicles
 						colorThree = manualColorThree != null ? manualColorThree.Value : vehicle.DrawColorThree,
 						tiles = vehicle.Tiles,
 						properties = pattern.properties,
-						isSkin = pattern is SkinDef,
 						maskTex = vehicle.VehicleGraphic.masks[rotDrawn.AsInt],
 						patternTex = pattern?[rotDrawn]
 					};
@@ -290,14 +288,13 @@ namespace Vehicles
 				MaterialRequestRGB matReq = new MaterialRequestRGB()
 				{
 					mainTex = VehicleTex.VehicleTexture(vehicleDef, rotDrawn),
-					shader = vehicleDef.graphic.Shader,
+					shader = patternData?.patternDef is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin.Shader : vehicleDef.graphic.Shader,
 					color = color1,
 					colorTwo = color2,
 					colorThree = color3,
 					tiles = tiling,
 					displacement = displacement,
 					properties = pattern.properties,
-					isSkin = pattern is SkinDef,
 					maskTex = (vehicleDef.graphic as Graphic_Vehicle).masks[rotDrawn.AsInt],
 					patternTex = pattern?[rotDrawn]
 				};
@@ -308,16 +305,16 @@ namespace Vehicles
 			drawOverlays.AddRange(RetrieveOverlaySettingsDrawProperties(adjustedRect, vehicleDef, rotDrawn, graphicOverlays));
 			drawOverlays.AddRange(RetrieveTurretSettingsDrawProperties(adjustedRect, vehicleDef, turrets, patternData, rotDrawn));
 
-			foreach (var overlay in drawOverlays.Where(o => o.Item4 < 0).OrderBy(o => o.Item4))
+			foreach ((Rect overlayRect, Texture tex, Material mat, float yOffset, float angle) in drawOverlays.Where(o => o.Item4 < 0).OrderBy(o => o.Item4))
 			{
-				UIElements.DrawTextureWithMaterialOnGUI(overlay.Item1, overlay.Item2, overlay.Item3, overlay.Item5);
+				UIElements.DrawTextureWithMaterialOnGUI(overlayRect, tex, mat, angle);
 			}
 
 			GenUI.DrawTextureWithMaterial(adjustedRect, VehicleTex.VehicleTexture(vehicleDef, rotDrawn), material);
 
-			foreach (var overlay in drawOverlays.Where(o => o.Item4 >= 0).OrderBy(o => o.Item4))
+			foreach ((Rect overlayRect, Texture tex, Material mat, float yOffset, float angle) in drawOverlays.Where(o => o.Item4 >= 0).OrderBy(o => o.Item4))
 			{
-				UIElements.DrawTextureWithMaterialOnGUI(overlay.Item1, overlay.Item2, overlay.Item3, overlay.Item5);
+				UIElements.DrawTextureWithMaterialOnGUI(overlayRect, tex, mat, angle);
 			}
 		}
 
@@ -368,14 +365,13 @@ namespace Vehicles
 						MaterialRequestRGB matReq = new MaterialRequestRGB()
 						{
 							mainTex = turret.CannonTexture,
-							shader = turret.CannonGraphic.Shader,
+							shader = patternData?.patternDef is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin.Shader : turret.CannonGraphic.Shader,
 							color = patternData.color,
 							colorTwo = patternData.colorTwo,
 							colorThree = patternData.colorThree,
 							tiles = patternData.tiles,
 							displacement = patternData.displacement,
 							properties = patternData.patternDef.properties,
-							isSkin = patternData.patternDef is SkinDef,
 							maskTex = turret.CannonGraphic.masks[0],
 							patternTex = patternData.patternDef[rotDrawn]
 						};
@@ -460,14 +456,13 @@ namespace Vehicles
 					MaterialRequestRGB matReq = new MaterialRequestRGB()
 					{
 						mainTex = turret.CannonTexture,
-						shader = turret.CannonGraphic.Shader,
+						shader = patternData?.patternDef is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin.Shader : turret.CannonGraphic.Shader,
 						color = patternData.color,
 						colorTwo = patternData.colorTwo,
 						colorThree = patternData.colorThree,
 						tiles = patternData.tiles,
 						displacement = patternData.displacement,
 						properties = patternData.patternDef.properties,
-						isSkin = patternData.patternDef is SkinDef,
 						maskTex = turret.CannonGraphic.masks[0],
 						patternTex = patternData.patternDef?[rotDrawn]
 					};
@@ -516,14 +511,13 @@ namespace Vehicles
 					MaterialRequestRGB matReq = new MaterialRequestRGB()
 					{
 						mainTex = VehicleTex.VehicleTexture(vehicleDef, rotDrawn),
-						shader = vehicleDef.graphic.Shader,
+						shader = pattern is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin.Shader : vehicleDef.graphic.Shader,
 						color = color1,
 						colorTwo = color2,
 						colorThree = color3,
 						tiles = tiling,
 						displacement = displacement,
 						properties = pattern.properties,
-						isSkin = pattern is SkinDef,
 						maskTex = (vehicleDef.graphic as Graphic_Vehicle).masks[rotDrawn.AsInt],
 						patternTex = pattern?[rotDrawn]
 					};
@@ -673,10 +667,6 @@ namespace Vehicles
 		{
 			Rect rect = fullRect.ContractedBy(10f);
 			rect.width = 15f;
-			if (fullRect.width != fullRect.height + 25)
-			{
-				SmashLog.WarningOnce($"ColorPicker fullRect dimensions are not correct. Width should be exactly 25 larger than the height.", "VehiclesColorPicker".GetHashCode());
-			}
 			if (Input.GetMouseButtonDown(0) && Mouse.IsOver(rect) && !draggingHue)
 			{
 				draggingHue = true;

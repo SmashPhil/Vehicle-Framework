@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 2108012111
+CRC: 1637621295
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: e75c75dcc85a65102fc8ace2537dac3a
+    Hash: a132601947fb3e79d65a0377794f97b6
   TypeTreeHash:
     serializedVersion: 2
     Hash: d6e7163f47d5a48446b5a08965f94164
@@ -17,6 +17,7 @@ SerializeReferenceClassIdentifiers: []
 Assets:
 - Assets/Textures/MouseHandOpen.png
 - Assets/Textures/MouseHandClosed.png
+- Assets/Shaders/ShaderRGBSkin.shader
 - Assets/Shaders/ShaderRGB.shader
 - Assets/Shaders/ShaderRGBPattern.shader
 Dependencies: []

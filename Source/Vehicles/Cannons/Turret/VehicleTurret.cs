@@ -578,7 +578,7 @@ namespace Vehicles
 
 		protected virtual void TurretAutoTick()
 		{
-			if (vehicle != null && !queuedToFire)
+			if (vehicle.Spawned && !queuedToFire)
 			{
 				if (AutoTarget && Find.TickManager.TicksGame % AutoTargetInterval == 0)
 				{

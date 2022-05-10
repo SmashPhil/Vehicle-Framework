@@ -17,5 +17,7 @@ namespace Vehicles
 		public static RGBShaderTypeDef CutoutComplexRGB;
 
 		public static RGBShaderTypeDef CutoutComplexPattern;
+
+		public static RGBShaderTypeDef CutoutComplexSkin;
 	}
 }

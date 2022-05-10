@@ -485,13 +485,12 @@ namespace Vehicles
 				MaterialRequestRGB req = new MaterialRequestRGB()
 				{
 					mainTex = VehicleGraphic.TexAt(Rot8.North),
-					shader = RGBShaderTypeDefOf.CutoutComplexPattern.Shader,
+					shader = pattern is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin.Shader : RGBShaderTypeDefOf.CutoutComplexPattern.Shader,
 					properties = pattern.properties,
 					color = pattern.properties.colorOne ?? CurrentColorOne.ToColor,
 					colorTwo = pattern.properties.colorTwo ?? CurrentColorTwo.ToColor,
 					colorThree = pattern.properties.colorThree ?? CurrentColorThree.ToColor,
 					tiles = 1,
-					isSkin = pattern is SkinDef,
 					maskTex = VehicleGraphic.masks[Rot8.North.AsInt],
 					patternTex = pattern[Rot8.North],
 					shaderParameters = null

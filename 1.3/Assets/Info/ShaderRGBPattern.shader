@@ -1,18 +1,10 @@
-﻿// Created By: SmashPhil
-// Date: 3 FEB 2021
-/*
-   Multi-mask shader providing support for overlaying masks to create pattern like effects without
-   needing to create additional masks with the patterns built in. Simplifies the pattern creation
-   process while also adding support for an additional 3rd color (BLUE) for masking.
-*/
-Shader "Custom/ShaderRGBPattern"
+﻿Shader "Custom/ShaderRGBPattern"
 {
 	Properties
 	{
 		_MainTex("Main", 2D) = "white" {}
 		_MaskTex("Mask", 2D) = "white" {}
 		_PatternTex("Pattern", 2D) = "white" {}
-		_Replace("Replace", Float) = 0
 		_TileNum("TileNum", Float) = 1
 		_ScaleX("ScaleX", Float) = 1
 		_ScaleY("ScaleY", Float) = 1
@@ -62,7 +54,6 @@ Shader "Custom/ShaderRGBPattern"
 			sampler2D _PatternTex;
 			float4 _PatternTex_ST;
 
-			float _Replace;
 			float _TileNum;
 			float _ScaleX;
 			float _ScaleY;
@@ -72,18 +63,6 @@ Shader "Custom/ShaderRGBPattern"
 			float4 _MainTexColor;
 			float4 _MaskTexColor;
 			float4 _PatternTexColor;
-			float4 _ReplaceTexColor;
-
-			float redChannel;
-			float3 patternChannels;
-
-			float4 redMask;
-			float4 greenMask;
-			float4 blueMask;
-
-			float4 redPattern;
-			float4 greenPattern;
-			float4 bluePattern;
 
 			float4 finalColor;
 
@@ -94,34 +73,19 @@ Shader "Custom/ShaderRGBPattern"
 			fixed4 frag(v2f i) : SV_Target {
 				_MainTexColor = tex2D(_MainTex, i.uv);
 				_MaskTexColor = tex2D(_MaskTex, i.uv);
-				
+				finalColor = _MainTexColor;
+
 				float2 newUV = TRANSFORM_TEX(float2((i.uv.x + _DisplacementX) * _TileNum * _ScaleX, (i.uv.y + _DisplacementY) * _TileNum * _ScaleY), _PatternTex);
 				_PatternTexColor = tex2D(_PatternTex, newUV) * _MaskTexColor.rrrr;
-				_ReplaceTexColor = tex2D(_PatternTex, newUV);
-				// (-R+1)(-G+1)(-B+1)
-				patternChannels.xyz = (-_PatternTexColor.xyz) + float3(1.0, 1.0, 1.0);
 
-				if (_Replace == 1){
-					fixed4 antiMask = _MainTexColor * (1 - _MaskTexColor.r);
-					finalColor = _MainTexColor * _PatternTexColor + antiMask;
-				}
-				else{
-					// Pattern.R * _ColorOne + (-R+1)
-					redPattern = (_PatternTexColor.rrrr * _ColorOne + patternChannels.xxxx);
-					// Pattern.G * _ColorTwo + (-G+1)
-					greenPattern = (_PatternTexColor.gggg * _ColorTwo + patternChannels.yyyy);
-					// Pattern.B * _ColorThree + (-B+1)
-					bluePattern = (_PatternTexColor.bbbb * _ColorThree + patternChannels.zzzz);
+				float u = _PatternTexColor.r;
+				float v = _PatternTexColor.g;
+				float w = _PatternTexColor.b;
+				float x = 1 - u - v - w;
 
-					finalColor = _MainTexColor * redPattern;
-					finalColor = finalColor * greenPattern;
-					finalColor = finalColor * bluePattern;
-				}
-				if (finalColor.a <= 0.5)
-				{
-					finalColor.a = 0;
-				}
-				
+				finalColor *= _ColorOne * u + _ColorTwo * v + _ColorThree * w + float4(1,1,1,1) * x;
+
+				clip(finalColor.a - 0.5f);
 				return finalColor;
 			}
 			ENDCG

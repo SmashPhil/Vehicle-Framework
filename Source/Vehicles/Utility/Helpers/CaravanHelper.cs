@@ -217,7 +217,7 @@ namespace Vehicles
 		/// Board all pawns automatically into assigned seats
 		/// </summary>
 		/// <param name="pawns"></param>
-		public static void BoardAllAssignedPawns(ref List<Pawn> pawns, bool reform = false)
+		public static void BoardAllAssignedPawns(List<Pawn> pawns)
 		{
 			List<VehiclePawn> vehicles = pawns.Where(p => p is VehiclePawn).Cast<VehiclePawn>().ToList();
 			List<Pawn> nonVehicles = pawns.Where(p => !(p is VehiclePawn)).ToList();
@@ -225,14 +225,14 @@ namespace Vehicles
 			{
 				if (assignedSeats.ContainsKey(pawn) && vehicles.Contains(assignedSeats[pawn].vehicle))
 				{
-					if (reform)
-					{
-						assignedSeats[pawn].vehicle.Notify_BoardedCaravan(pawn, assignedSeats[pawn].handler.handlers);
-					}
-					else
+					if (pawn.Spawned)
 					{
 						assignedSeats[pawn].vehicle.GiveLoadJob(pawn, assignedSeats[pawn].handler);
 						assignedSeats[pawn].vehicle.Notify_Boarded(pawn);
+					}
+					else if (!pawn.IsInVehicle())
+					{
+						assignedSeats[pawn].vehicle.Notify_BoardedCaravan(pawn, assignedSeats[pawn].handler.handlers);
 					}
 					pawns.Remove(pawn);
 				}
@@ -308,8 +308,7 @@ namespace Vehicles
 				directionTile = exitFromTile;
 			}
 
-			List<Pawn> pawnList = new List<Pawn>();
-			pawnList.AddRange(pawns);
+			List<Pawn> pawnList = pawns.ToList();
 
 			Map map = null;
 			foreach (Pawn pawn in pawnList)
@@ -328,11 +327,11 @@ namespace Vehicles
 				pawn.ExitMap(false, exitDir);
 			}
 			List<Pawn> pawnsListForReading = caravan.PawnsListForReading;
-			for (int k = 0; k < pawnsListForReading.Count; k++)
+			foreach (Pawn pawn in caravan.pawns)
 			{
-				if (!pawnsListForReading[k].IsWorldPawn())
+				if (!pawn.IsWorldPawn())
 				{
-					Find.WorldPawns.PassToWorld(pawnsListForReading[k], PawnDiscardDecideMode.Decide);
+					Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.Decide);
 				}
 			}
 			if (map != null)
@@ -426,8 +425,7 @@ namespace Vehicles
 			{
 				Log.Warning("Tried to create a caravan but chose not to spawn a caravan but pass pawns to world. This can cause bugs because pawns can be discarded.");
 			}
-			List<Pawn> tmpPawns = new List<Pawn>();
-			tmpPawns.AddRange(pawns);
+			List<Pawn> pawnsList = pawns.ToList();
 
 			VehicleCaravan caravan = (VehicleCaravan)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.VehicleCaravan);
 			if (startingTile >= 0)
@@ -439,9 +437,9 @@ namespace Vehicles
 			{
 				Find.WorldObjects.Add(caravan);
 			}
-			for (int i = 0; i < tmpPawns.Count; i++)
+			for (int i = 0; i < pawnsList.Count; i++)
 			{
-				Pawn pawn = tmpPawns[i];
+				Pawn pawn = pawnsList[i];
 				if (pawn.Dead)
 				{
 					Log.Warning("Tried to form a caravan with a dead pawn " + pawn);

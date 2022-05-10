@@ -37,8 +37,9 @@ namespace Vehicles
 
 		private static readonly string VehicleAssetBundlePath = @"Assets\vehicleassets";
 
-		private static readonly string CutoutComplexRGBPath = "Assets/Shaders/ShaderRGB.shader";
-		private static readonly string CutoutComplexPatternPath = "Assets/Shaders/ShaderRGBPattern.shader";
+		private static readonly string CutoutComplexRGBPath = Path.Combine("Assets", "Shaders", "ShaderRGB.shader");
+		private static readonly string CutoutComplexPatternPath = Path.Combine("Assets", "Shaders", "ShaderRGBPattern.shader");
+		private static readonly string CutoutComplexSkinPath = Path.Combine("Assets", "Shaders", "ShaderRGBSkin.shader");
 
 		private static readonly string MouseHandOpenPath = "Assets/Textures/MouseHandOpen.png";
 		private static readonly string MouseHandClosedPath = "Assets/Textures/MouseHandClosed.png";
@@ -47,6 +48,7 @@ namespace Vehicles
 
 		public static readonly Shader CutoutComplexRGB;
 		public static readonly Shader CutoutComplexPattern;
+		public static readonly Shader CutoutComplexSkin;
 
 		public static readonly Texture2D MouseHandOpen;
 		public static readonly Texture2D MouseHandClosed;
@@ -89,6 +91,7 @@ namespace Vehicles
 
 						CutoutComplexRGB = LoadAsset<Shader>(CutoutComplexRGBPath);
 						CutoutComplexPattern = LoadAsset<Shader>(CutoutComplexPatternPath);
+						CutoutComplexSkin = LoadAsset<Shader>(CutoutComplexSkinPath);
 						MouseHandOpen = LoadAsset<Texture2D>(MouseHandOpenPath);
 						MouseHandClosed = LoadAsset<Texture2D>(MouseHandClosedPath);
 						return;
@@ -141,10 +144,9 @@ namespace Vehicles
 		/// <paramref name="shader"/> supports AssetBundle shaders implementing RGB or RGB Pattern masks
 		/// </summary>
 		/// <param name="shader"></param>
-		/// <returns></returns>
 		public static bool SupportsRGBMaskTex(this Shader shader)
 		{
-			return shader == CutoutComplexPattern || shader == CutoutComplexRGB;
+			return shader == CutoutComplexPattern || shader == CutoutComplexSkin || shader == CutoutComplexRGB;
 		}
 	}
 }

@@ -598,7 +598,6 @@
     <Compile Include="Graphics\Dialogs\Dialog_NodeSettings.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_TradeAerialVehicle.cs" />
     <Compile Include="Graphics\Graphic\Animations\AnimationProperties.cs" />
-    <Compile Include="Graphics\Graphic\AssetBundle\ShaderGeneration.cs" />
     <Compile Include="Graphics\Graphic\GraphicData\GraphicDataRGB.cs" />
     <Compile Include="Graphics\Graphic\GraphicData\GraphicDataLayered.cs" />
     <Compile Include="Graphics\Graphic\GraphicGeneration\GraphicDatabaseRGB.cs" />

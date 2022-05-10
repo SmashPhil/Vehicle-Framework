@@ -16,6 +16,7 @@ namespace Vehicles
 
 		private List<VehiclePawn> vehicleReservations = new List<VehiclePawn>();
 		private List<ReservationBase> reservationSets = new List<ReservationBase>();
+
 		private List<VehiclePawn> vehicleListerPawns = new List<VehiclePawn>();
 		private List<VehicleRequestCollection> vehicleListerRequests = new List<VehicleRequestCollection>();
 
@@ -190,12 +191,12 @@ namespace Vehicles
 			{
 				if (!request.requests.NotNullAndAny())
 				{
-					vehicleListers[vehicle] = new VehicleRequestCollection(map, req);
+					vehicleListers[vehicle] = new VehicleRequestCollection(req);
 					return true;
 				}
 				return request.requests.Add(req);
 			}
-			vehicleListers.Add(vehicle, new VehicleRequestCollection(map, req));
+			vehicleListers.Add(vehicle, new VehicleRequestCollection(req));
 			return true;
 		}
 
@@ -239,36 +240,26 @@ namespace Vehicles
 		{
 			base.ExposeData();
 			Scribe_Collections.Look(ref reservations, "reservations", LookMode.Reference, LookMode.Reference, ref vehicleReservations, ref reservationSets);
-			Scribe_Collections.Look(ref vehicleListers, "vehicleListers", LookMode.Reference, LookMode.Reference, ref vehicleListerPawns, ref vehicleListerRequests);
+			Scribe_Collections.Look(ref vehicleListers, "vehicleListers", LookMode.Reference, LookMode.Deep, ref vehicleListerPawns, ref vehicleListerRequests);
 		}
 
-		public class VehicleRequestCollection : IExposable, ILoadReferenceable
+		public class VehicleRequestCollection : IExposable
 		{
 			public HashSet<string> requests = new HashSet<string>();
-			private int uniqueId = -1;
-			private Map map;
 
-			public VehicleRequestCollection(Map map)
+			public VehicleRequestCollection()
 			{
 				requests = new HashSet<string>();
-				uniqueId = Current.Game.GetCachedGameComponent<VehicleIdManager>().GetNextRequestCollectionId();
 			}
 
-			public VehicleRequestCollection(Map map, string req)
+			public VehicleRequestCollection(string req)
 			{
 				requests = new HashSet<string>() { req };
-				uniqueId = Current.Game.GetCachedGameComponent<VehicleIdManager>().GetNextRequestCollectionId();
-			}
-
-			public string GetUniqueLoadID()
-			{
-				return $"Map{map.uniqueID}_Request_{uniqueId}";
 			}
 
 			public void ExposeData()
 			{
 				Scribe_Collections.Look(ref requests, "requests", LookMode.Value);
-				Scribe_Values.Look(ref uniqueId, nameof(uniqueId), -1);
 			}
 		}
 	}

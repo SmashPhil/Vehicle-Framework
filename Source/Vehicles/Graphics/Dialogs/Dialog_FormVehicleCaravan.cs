@@ -68,6 +68,11 @@ namespace Vehicles
 			closeOnCancel = !reform;
 			forcePause = true;
 			absorbInputAroundWindow = true;
+
+			if (reform)
+			{
+
+			}
 		}
 
 		public static Dialog_FormVehicleCaravan CurrentFormingCaravan { get; private set; }
@@ -424,23 +429,6 @@ namespace Vehicles
 
 		public void Notify_ChoseRoute(int destinationTile)
 		{
-			if(!reform && startingTile < 0)
-			{
-				List<Pawn> pawns = TransferableUtility.GetPawnsFromTransferables(transferables);
-				if (pawns.HasBoat())
-				{
-					List<int> neighboringCells = new List<int>();
-					Find.WorldGrid.GetTileNeighbors(map.Tile, neighboringCells);
-					foreach(int neighbor in neighboringCells)
-					{
-						//if (WorldHelper.WaterCovered(neighbor))
-						//{
-						//	startingTile = neighbor;
-						//	return;
-						//}
-					}
-				}
-			}
 			this.destinationTile = destinationTile;
 			startingTile = CaravanExitMapUtility.BestExitTileToGoTo(destinationTile, map);
 			ticksToArriveDirty = true;
@@ -603,7 +591,7 @@ namespace Vehicles
 				Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, false);
 				return false;
 			}
-			CaravanHelper.BoardAllAssignedPawns(ref pawnsFromTransferables);
+			CaravanHelper.BoardAllAssignedPawns(pawnsFromTransferables);
 			AddItemsFromTransferablesToRandomInventories(pawnsFromTransferables);
 			int num = startingTile;
 			if (num < 0)
@@ -650,12 +638,12 @@ namespace Vehicles
 		{
 			List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables);
 
-			CaravanHelper.BoardAllAssignedPawns(ref pawnsFromTransferables, true);
-
 			if (!CheckForErrors(pawnsFromTransferables))
 			{
 				return false;
 			}
+
+			CaravanHelper.BoardAllAssignedPawns(pawnsFromTransferables);
 			AddItemsFromTransferablesToRandomInventories(pawnsFromTransferables);
 			VehicleCaravan caravan = CaravanHelper.ExitMapAndCreateVehicleCaravan(pawnsFromTransferables, Faction.OfPlayer, CurrentTile, CurrentTile, destinationTile, false);
 			map.Parent.CheckRemoveMapNow();
@@ -1027,11 +1015,15 @@ namespace Vehicles
 
 		private void AddPawnsToTransferables()
 		{
-			List<Pawn> list = AllSendablePawns(map, reform);
-			for (int i = 0; i < list.Count; i++)
+			List<Pawn> pawns = AllSendablePawns(map, reform);
+			foreach (Pawn pawn in pawns)
 			{
-				bool setToTransferMax = (reform || mapAboutToBeRemoved) && !CaravanUtility.ShouldAutoCapture(list[i], Faction.OfPlayer);
-				AddToTransferables(list[i], setToTransferMax);
+				bool setToTransferMax = (reform || mapAboutToBeRemoved) && !CaravanUtility.ShouldAutoCapture(pawn, Faction.OfPlayer);
+				AddToTransferables(pawn, setToTransferMax);
+				if (pawn.ParentHolder is VehicleHandler handler)
+				{
+					CaravanHelper.assignedSeats[pawn] = (handler.vehicle, handler);
+				}
 			}
 		}
 

@@ -40,14 +40,8 @@ namespace Vehicles
 			drawSize = req.drawSize;
 			var files = ContentFinder<Texture2D>.GetAllInFolder(req.path);
 
-			List<Texture2D> list = (from x in files
-									where !x.name.EndsWith(MaskSuffix)
-									orderby x.name
-									select x).ToList();
-			List<Texture2D> listM = (from x in files
-									where x.name.EndsWith(MaskSuffix)
-									orderby x.name
-									select x).ToList();
+			List<Texture2D> list = files.Where(f => !f.name.EndsWith(MaskSuffix)).OrderBy(f => f.name).ToList();
+			List<Texture2D> listM = files.Where(f => f.name.EndsWith(MaskSuffix)).OrderBy(f => f.name).ToList();
 			if (list.NullOrEmpty())
 			{
 				Log.Error("Collection cannot init: No textures found at path " + req.path);
@@ -89,13 +83,12 @@ namespace Vehicles
 			MaterialRequestRGB mReq = new MaterialRequestRGB()
 			{
 				mainTex = mainTex,
-				shader = req.shader,
+				shader = pattern is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin.Shader : req.shader,
 				properties = pattern.properties,
 				color = pattern.properties.colorOne ?? req.color,
 				colorTwo = pattern.properties.colorTwo ?? req.colorTwo,
 				colorThree = pattern.properties.colorThree ?? req.colorThree,
 				tiles = req.tiles,
-				isSkin = pattern is SkinDef,
 				maskTex = maskTex,
 				patternTex = pattern?[Rot8.North],
 				shaderParameters = req.shaderParameters

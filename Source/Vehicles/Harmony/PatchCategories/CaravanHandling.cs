@@ -599,15 +599,19 @@ namespace Vehicles
 		{
 			if (__instance is VehicleCaravan vehicleCaravan)
 			{
-				var vehicles = __result.Where(p => p is VehiclePawn).ToList();
-				foreach (VehiclePawn vehicle in __result.Where(p => p is VehiclePawn))
+				List<Pawn> allPawns = new List<Pawn>();
+				foreach (Pawn pawn in __result)
 				{
-					foreach (Pawn pawn in vehicle.AllPawnsAboard)
+					if (pawn is VehiclePawn vehicle)
 					{
-						vehicles.Add(pawn);
+						foreach (Pawn innerPawn in vehicle.AllPawnsAboard)
+						{
+							allPawns.Add(innerPawn);
+						}
 					}
+					allPawns.Add(pawn);
 				}
-				return vehicles;
+				return allPawns;
 			}
 			return __result;
 		}

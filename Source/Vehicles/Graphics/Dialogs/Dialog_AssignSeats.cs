@@ -260,7 +260,6 @@ namespace Vehicles
 				//Update all current pawns being assigned to this vehicle in Pawns tab
 				foreach (Pawn assignedPawn in assignedSeats.Keys)
 				{
-					Log.Message($"Checking {assignedPawn} Exists? {pawns.FirstOrDefault(p => (p.AnyThing as Pawn) == assignedPawn)}");
 					pawns.FirstOrDefault(p => (p.AnyThing as Pawn) == assignedPawn)?.ForceTo(1);
 				}
 

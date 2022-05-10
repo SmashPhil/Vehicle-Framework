@@ -14,7 +14,6 @@ namespace Vehicles
 		public Texture2D maskTex;
 		public Texture2D patternTex;
 		public int renderQueue;
-		public bool isSkin;
 		public List<ShaderParameter> shaderParameters;
 
 		public Color color;
@@ -37,7 +36,6 @@ namespace Vehicles
 			patternTex = null;
 			renderQueue = 0;
 			shaderParameters = null;
-			isSkin = false;
 		}
 
 		public MaterialRequestRGB(Texture2D tex, Shader shader)
@@ -54,7 +52,6 @@ namespace Vehicles
 			patternTex = null;
 			renderQueue = 0;
 			shaderParameters = null;
-			isSkin = false;
 		}
 
 		public MaterialRequestRGB(Texture2D tex, Shader shader, PatternProperties properties)
@@ -71,7 +68,6 @@ namespace Vehicles
 			patternTex = null;
 			renderQueue = 0;
 			shaderParameters = null;
-			isSkin = false;
 		}
 
 		public MaterialRequestRGB(MaterialRequest req, Texture2D patternTex, PatternProperties properties)
@@ -88,24 +84,6 @@ namespace Vehicles
 			this.patternTex = patternTex;
 			renderQueue = req.renderQueue;
 			shaderParameters = req.shaderParameters;
-			isSkin = false;
-		}
-
-		public MaterialRequestRGB(MaterialRequest req, Texture2D patternTex, PatternProperties properties, bool isSkin)
-		{
-			shader = req.shader;
-			mainTex = req.mainTex as Texture2D;
-			maskTex = req.maskTex;
-			this.properties = properties;
-			color = properties.colorOne ?? Color.white;
-			colorTwo = properties.colorTwo ?? Color.white;
-			colorThree = properties.colorThree ?? Color.white;
-			tiles = properties.tiles.TryGetValue("All", 1);
-			displacement = Vector2.zero;
-			this.patternTex = patternTex;
-			renderQueue = req.renderQueue;
-			shaderParameters = req.shaderParameters;
-			this.isSkin = isSkin;
 		}
 
 		public string BaseTexPath
@@ -118,8 +96,8 @@ namespace Vehicles
 
 		public override int GetHashCode()
 		{
-			return Gen.HashCombine(Gen.HashCombineInt(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(
-				Gen.HashCombine(Gen.HashCombine(0, displacement), tiles), isSkin), color), colorTwo), colorThree), mainTex), maskTex), renderQueue), shaderParameters);
+			return Gen.HashCombine(Gen.HashCombineInt(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(
+				Gen.HashCombine(Gen.HashCombine(0, displacement), tiles), color), colorTwo), colorThree), mainTex), maskTex), renderQueue), shaderParameters);
 		}
 
 		public override bool Equals(object obj)
@@ -132,7 +110,7 @@ namespace Vehicles
 			return other.shader == shader && other.mainTex == mainTex && other.properties.colorOne == properties.colorOne && 
 				other.properties.colorTwo == properties.colorTwo && other.properties.colorThree == properties.colorThree 
 				&& other.maskTex == maskTex && other.patternTex == patternTex && other.renderQueue == renderQueue && 
-				other.shaderParameters == shaderParameters && other.isSkin == isSkin && other.tiles == tiles && other.displacement == displacement;
+				other.shaderParameters == shaderParameters && other.tiles == tiles && other.displacement == displacement;
 		}
 
 		public static bool operator ==(MaterialRequestRGB lhs, MaterialRequestRGB rhs)
@@ -147,7 +125,7 @@ namespace Vehicles
 
 		public override string ToString()
 		{
-			return $"MaterialRGBRequest({shader.name}, {mainTex.name}, {properties}, {maskTex}, {patternTex}, {renderQueue}, {isSkin})";
+			return $"MaterialRGBRequest({shader.name}, {mainTex.name}, {properties}, {maskTex}, {patternTex}, {renderQueue})";
 		}
 	}
 }

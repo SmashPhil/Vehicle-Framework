@@ -251,14 +251,13 @@ namespace Vehicles
 				MaterialRequestRGB req2 = new MaterialRequestRGB()
 				{
 					mainTex = textureArray[i],
-					shader = req.shader,
+					shader = pattern is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin.Shader : req.shader,
 					properties = pattern.properties,
 					color = pattern.properties.colorOne ?? req.color,
 					colorTwo = pattern.properties.colorTwo ?? req.colorTwo,
 					colorThree = pattern.properties.colorThree ?? req.colorThree,
 					tiles = req.tiles,
 					displacement = req.displacement,
-					isSkin = pattern is SkinDef,
 					maskTex = tmpMaskArray[i],
 					patternTex = pattern[new Rot8(patternPointers[i])],
 					shaderParameters = req.shaderParameters

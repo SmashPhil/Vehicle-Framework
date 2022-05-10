@@ -134,19 +134,18 @@ namespace Vehicles
 						break;
 					}
 				}
-				bool validator(IntVec3 c)
+				if (standable) return true;
+				if (!CellFinder.TryFindRandomCellNear(loc, map, 20, (IntVec3 cell) =>
 				{
-					foreach (IntVec3 c2 in vehicle.PawnOccupiedCells(c, rot))
+					foreach (IntVec3 c2 in vehicle.PawnOccupiedCells(cell, rot))
 					{
-						if (GenGridVehicles.Impassable(c, map, vehicle.VehicleDef))
+						if (GenGridVehicles.Impassable(cell, map, vehicle.VehicleDef))
 						{
 							return false;
 						}
 					}
 					return true;
-				}
-				if (standable) return true;
-				if (!CellFinder.TryFindRandomCellNear(loc, map, 20, validator, out IntVec3 newLoc, 100))
+				}, out IntVec3 newLoc, 100))
 				{
 					Log.Error($"Unable to find location to spawn {newThing.LabelShort} after 100 attempts. Aborting spawn.");
 					return false;

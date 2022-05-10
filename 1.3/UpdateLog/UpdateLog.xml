@@ -42,12 +42,26 @@
 - Fixed bug where GenSteps would attempt to recalculate vehicle path cost when regions had not been built yet. (Fixes compatibility with Biomes Core mods)
 
 - Fixed bug where arriving skyfallers would attempt to notify VehicleTracks comp a tick after its removal.
+
+- Fixed bug with shaders where the color math would result in artifacting at the borders of the color channels.
+
+- Fixed bug where VehiclePawn would occasionally spawn inside stone chunks in an event map.
+
+- Fixed bug where AerialVehicle could be selected to drop out of bounds, resulting in the loss of the vehicle and its crew.
+
+- Fixed bug where auto-targeting VehicleTurrets' targeter would still be active even after vehicle has been despawned.
+
+- Fixed event map VehicleCaravan reformations
 [title]Additional Changes[/title][font]Small[/font]
 - Removed irrelevant ResearchProjectDefs
 
 - Performance improvements to VehicleTurrets.
 
+- Split Patterns and Skins to separate shaders to remove all branching logic from shader files.
+
 - Added 2 ResearchProjectDefs for Rowboat and FishingBoat. More will follow later when the mod is closer to releasing.
+
+- Added SkinDefs back into the mod for testing
 
 - Improved VTOL animation of Sparrow
 

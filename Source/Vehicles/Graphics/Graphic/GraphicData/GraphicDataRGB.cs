@@ -74,7 +74,7 @@ namespace Vehicles
 				cachedRGBGraphic = null;
 				return;
 			}
-			ShaderTypeDef cutout = shaderType;
+			ShaderTypeDef cutout = pattern is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin : shaderType;
 			if (cutout == null)
 			{
 				cutout = RGBShaderTypeDefOf.CutoutComplexRGB;
