@@ -30,10 +30,5 @@ namespace Vehicles
 		{
 			compClass = typeof(CompFueledTravel);
 		}
-
-		public override IEnumerable<VehicleStatCategoryDef> StatCategoryDefs()
-		{
-			yield return VehicleStatCategoryDefOf.StatCategoryFuelTankIntegrity;
-		}
 	}
 }

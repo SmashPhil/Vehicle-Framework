@@ -5,6 +5,7 @@
 		<defName>HotAirBalloon_Blueprint</defName>
 		<label>Hot Air Balloon</label>
 		<description>A simple design which uses wood to generate the heat needed for flight. Due to being slow moving, not being able to carry much weight, and easy to shoot down, it is best used for nearby voyages with limited cargo.</description>
+		
 		<graphicData>
 			<texPath>Vehicles/Air/HotAirBalloon/HotAirBalloon_north</texPath>
 			<graphicClass>Graphic_Single</graphicClass>
@@ -18,6 +19,7 @@
 			<WorkToBuild>175</WorkToBuild>
 			<Flammability>0.75</Flammability>
 		</statBases>
+		
 		<size>(1,1)</size>
 		
 		<researchPrerequisites/>
@@ -27,7 +29,7 @@
 			<WoodLog>150</WoodLog>
 		</costList>
 		
-		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
+		<soundImpactDefault>BulletImpact_Wood</soundImpactDefault>
 		
 		<thingToSpawn>HotAirBalloon</thingToSpawn>
 		<soundBuilt>ShipBigConstruction</soundBuilt>

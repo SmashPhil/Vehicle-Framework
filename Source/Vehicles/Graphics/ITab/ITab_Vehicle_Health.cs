@@ -177,9 +177,9 @@ namespace Vehicles
 
 			lister.Begin(topRect, 1);
 			Text.Anchor = TextAnchor.MiddleLeft;
-			foreach (VehicleStatCategoryDef statCategoryDef in SelVehicle.VehicleDef.StatCategoryDefs())
+			foreach (VehicleStatDef statDef in SelVehicle.VehicleDef.StatCategoryDefs())
 			{
-				statCategoryDef.Worker.DrawVehicleStat(lister, SelVehicle);
+				statDef.Worker.DrawVehicleStat(lister, SelVehicle);
 			}
 			lister.End();
 			Widgets.DrawLineHorizontal(rect.x, topRect.y + topRect.height, topRect.width);

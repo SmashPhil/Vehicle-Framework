@@ -261,7 +261,7 @@ namespace Vehicles
 						DequeueTurret(turretData);
 						continue;
 					}
-					if (turretData.turret.OnCooldown)
+					if (turretData.turret.OnCooldown || !turretData.turret.IsManned)
 					{
 						turretData.turret.SetTarget(LocalTargetInfo.Invalid);
 						DequeueTurret(turretData);

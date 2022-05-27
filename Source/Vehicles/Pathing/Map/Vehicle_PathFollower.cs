@@ -260,7 +260,7 @@ namespace Vehicles
 
 		public void PatherTick()
 		{
-			if(!vehicle.Drafted)
+			if (!vehicle.Drafted || !vehicle.CanMoveFinal)
 			{
 				return;
 			}
@@ -299,22 +299,20 @@ namespace Vehicles
 			if (moving && WillCollideWithPawnOnNextPathCell())
 			{
 				nextCellCostLeft = nextCellCostTotal;
-				if (((curPath != null && curPath.NodesLeftCount < CheckForMovingCollidingPawnsIfCloserToTargetThanX) || PawnUtility.AnyPawnBlockingPathAt(nextCell, vehicle, false, true, false)) && !BestPathHadPawnsInTheWayRecently() && TrySetNewPath())
+				if (((curPath != null && curPath.NodesLeftCount < CheckForMovingCollidingPawnsIfCloserToTargetThanX) || PawnUtility.AnyPawnBlockingPathAt(nextCell, vehicle, collideOnlyWithStandingPawns: true)) && !BestPathHadPawnsInTheWayRecently() && TrySetNewPath())
 				{
 					ResetToCurrentPosition();
 					TryEnterNextPathCell();
-					return;
 				}
-				if (Find.TickManager.TicksGame - lastMovedTick >= AttackBlockingHostilePawnAfterTicks)
+				else if (Find.TickManager.TicksGame - lastMovedTick >= AttackBlockingHostilePawnAfterTicks)
 				{
-					Pawn pawn = PawnUtility.PawnBlockingPathAt(nextCell, this.vehicle, false, false, false);
-					if (pawn != null && this.vehicle.HostileTo(pawn) && this.vehicle.TryGetAttackVerb(pawn, false) != null)
+					Pawn pawn = PawnUtility.PawnBlockingPathAt(nextCell, vehicle, false, false, false);
+					if (pawn != null && vehicle.HostileTo(pawn) && vehicle.TryGetAttackVerb(pawn, false) != null)
 					{
 						Job job = JobMaker.MakeJob(JobDefOf.AttackMelee, pawn);
 						job.maxNumMeleeAttacks = 1;
 						job.expiryInterval = 300;
-						this.vehicle.jobs.StartJob(job, JobCondition.Incompletable, null, false, true, null, null, false, false);
-						return;
+						vehicle.jobs.StartJob(job, JobCondition.Incompletable, null, false, true, null, null, false, false);
 					}
 				}
 				return;
@@ -399,7 +397,6 @@ namespace Vehicles
 			return PawnUtility.ShouldCollideWithPawns(vehicle) && PawnUtility.AnyPawnBlockingPathAt(c, vehicle, false, false, false);
 		}
 
-
 		public Building_Door NextCellDoorToWaitForOrManuallyOpen()
 		{
 			Building_Door building_Door = vehicle.Map.thingGrid.ThingAt<Building_Door>(nextCell);
@@ -409,7 +406,6 @@ namespace Vehicles
 			}
 			return null;
 		}
-
 
 		public void PatherDraw()
 		{
@@ -752,9 +748,9 @@ namespace Vehicles
 
 		private PawnPath GenerateNewPathThreaded()
 		{
-			var cts = new CancellationTokenSource();
 			//Single threaded pathing for now, REDO later for dedicated pathfinding thread
 			return GenerateNewPath(CancellationToken.None).Item1;
+			var cts = new CancellationTokenSource();
 			try
 			{
 				var tasks = new[]

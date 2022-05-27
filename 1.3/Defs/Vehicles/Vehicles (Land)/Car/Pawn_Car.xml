@@ -24,11 +24,6 @@
 		
 		<nameable>true</nameable>
 		<buildDef>Car_Blueprint</buildDef>
-		<repairRate>650</repairRate>
-		
-		<armor>50</armor>
-		<cargoCapacity>250</cargoCapacity>
-		<speed>4.5</speed>
 
 		<size>(3,5)</size>
 		
@@ -44,6 +39,12 @@
 			<MarketValue>250000</MarketValue>
 			<Flammability>0</Flammability>
 		</statBases>
+		
+		<vehicleStats>
+			<MoveSpeed>4.5</MoveSpeed>
+			<CargoCapacity>250</CargoCapacity>
+			<RepairRate>3.25</RepairRate>
+		</vehicleStats>
 		
 		<properties>
 			<healthLabel_Healthy>Operational</healthLabel_Healthy>
@@ -113,6 +114,10 @@
 				<hitbox>
 					<side>Body</side>
 				</hitbox>
+				
+				<categories>
+					<li>BodyIntegrity</li>
+				</categories>
 			</li>
 			<li>
 				<key>Wheels</key>
@@ -146,7 +151,7 @@
 					</cells>
 				</hitbox>
 				<categories>
-					<li>StatCategoryMovement</li>
+					<li>MoveSpeed</li>
 				</categories>
 			</li>
 		</components>

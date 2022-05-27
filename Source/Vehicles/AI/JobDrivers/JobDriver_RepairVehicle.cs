@@ -61,7 +61,7 @@ namespace Vehicles
 					}
 					ticksToNextRepair = TicksForRepair;
 					var component = Vehicle.statHandler.ComponentsPrioritized.FirstOrDefault(c => c.HealthPercent < 1);
-					component.HealComponent(SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(VehicleDef), "repairRate", Vehicle.VehicleDef.repairRate));
+					component.HealComponent(Vehicle.GetStatValue(VehicleStatDefOf.RepairRate));
 				}
 			};
 			repair.FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);

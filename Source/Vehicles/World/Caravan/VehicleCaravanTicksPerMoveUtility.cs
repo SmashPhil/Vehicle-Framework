@@ -120,7 +120,7 @@ namespace Vehicles
 			{
 				this.vehicles = vehicles;
 				massUsage = vehicles.Sum(v => MassUtility.GearAndInventoryMass(v));
-				massCapacity = vehicles.Sum(v => v.CargoCapacity);
+				massCapacity = vehicles.Sum(v => v.GetStatValue(VehicleStatDefOf.CargoCapacity));
 			}
 
 			public VehicleInfo(Caravan caravan)

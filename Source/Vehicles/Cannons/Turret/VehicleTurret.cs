@@ -176,6 +176,8 @@ namespace Vehicles
 
 		public List<VehicleHandler> RelatedHandlers => vehicle.handlers.FindAll(h => !h.role.turretIds.NullOrEmpty() && h.role.turretIds.Contains(key));
 
+		public bool IsManned => RelatedHandlers?.All(handler => handler.RoleFulfilled) ?? true;
+
 		public bool HasAmmo => turretDef.ammunition is null || shellCount > 0;
 
 		public bool ReadyToFire => groupKey.NullOrEmpty() ? (burstTicks <= 0 && reloadTicks <= 0 && !TurretDisabled) : GroupTurrets.Any(t => t.burstTicks <= 0 && t.reloadTicks <= 0 && !t.TurretDisabled);

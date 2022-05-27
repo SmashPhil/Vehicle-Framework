@@ -383,6 +383,9 @@
     <Compile Include="Components\Rendering\Overlays\GraphicOverlay.cs" />
     <Compile Include="Components\Rendering\Overlays\PawnOverlayRenderer.cs" />
     <Compile Include="Components\Rendering\Overlays\VehicleGraphicOverlay.cs" />
+    <Compile Include="Components\Vehicles\Health\StatParts\VehicleStatPart_WeightUsage.cs" />
+    <Compile Include="Components\Vehicles\Health\VehicleStatModifier.cs" />
+    <Compile Include="Components\Vehicles\Health\StatParts\VehicleStatPart.cs" />
     <Compile Include="Components\Vehicles\PatternData.cs" />
     <Compile Include="Components\Vehicles\VehicleFleshTypeDef.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_Trade.cs" />
@@ -422,15 +425,9 @@
     <Compile Include="Cannons\Turret\VehicleTurretRecoiled.cs" />
     <Compile Include="Components\Construction\ListerVehiclesRepairable.cs" />
     <Compile Include="Components\Vehicles\Health\ComponentHitbox.cs" />
-    <Compile Include="Components\Vehicles\Health\StatWorkers\VehicleStatWorker_Cargo.cs" />
-    <Compile Include="Components\Vehicles\Health\StatWorkers\VehicleStatWorker_Armor.cs" />
-    <Compile Include="Components\Vehicles\Health\StatWorkers\VehicleStatWorker_FlySpeed.cs" />
-    <Compile Include="Components\Vehicles\Health\StatWorkers\VehicleStatWorker_FlightControl.cs" />
-    <Compile Include="Components\Vehicles\Health\StatWorkers\VehicleStatWorker_FuelTankIntegrity.cs" />
-    <Compile Include="Components\Vehicles\Health\StatWorkers\VehicleStatWorker_Movement.cs" />
     <Compile Include="Components\Vehicles\Health\VehicleComponent.cs" />
     <Compile Include="Components\Vehicles\Health\VehicleComponentProperties.cs" />
-    <Compile Include="Components\Vehicles\Health\VehicleStatCategoryDef.cs" />
+    <Compile Include="Components\Vehicles\Health\VehicleStatDef.cs" />
     <Compile Include="Components\Vehicles\Health\VehicleStatHandler.cs" />
     <Compile Include="Components\Vehicles\Health\StatWorkers\VehicleStatWorker.cs" />
     <Compile Include="Components\Vehicles\VehicleDef.cs" />
@@ -495,6 +492,7 @@
     <Compile Include="Misc\Enums\Turret\TurretDisableType.cs" />
     <Compile Include="Misc\Enums\UI\DebugRegionType.cs" />
     <Compile Include="Misc\Enums\Vehicle\VehicleEnabledFor.cs" />
+    <Compile Include="Misc\Interfaces\ICustomSettingsDrawer.cs" />
     <Compile Include="Misc\ModSettings\SettingsCustomizableFields.cs" />
     <Compile Include="CustomFeatures\Reservation\Reservation.cs" />
     <Compile Include="CustomFeatures\Reservation\ReservationBase.cs" />
@@ -530,7 +528,7 @@
     <Compile Include="Misc\DefOf\AntiAircraftDefOf.cs" />
     <Compile Include="Misc\DefOf\RGBShaderTypeDefOf.cs" />
     <Compile Include="Misc\DefOf\PatternDefOf.cs" />
-    <Compile Include="Misc\DefOf\VehicleStatCategoryDefOf.cs" />
+    <Compile Include="Misc\DefOf\VehicleStatDefOf.cs" />
     <Compile Include="Misc\DefOf\VehicleIncidentTargetTypeDefOf.cs" />
     <Compile Include="Misc\Enums\UI\EfficiencyOperationType.cs" />
     <Compile Include="Misc\Enums\Vehicle\VehicleComponentPosition.cs" />
@@ -540,6 +538,7 @@
     <Compile Include="Misc\ModSettings\SettingsSection\Section_Vehicles.cs" />
     <Compile Include="Misc\ModSettings\SettingsSection\Section_Debug.cs" />
     <Compile Include="Misc\ModSettings\SettingsSection\SettingsSection.cs" />
+    <Compile Include="Misc\ModSettings\SettingsValueInfo.cs" />
     <Compile Include="Misc\ModSettings\VehicleMod.cs" />
     <Compile Include="Graphics\Beta\Dialog_BetaWindow.cs" />
     <Compile Include="Harmony\PatchCategories\Debug.cs" />
@@ -550,7 +549,6 @@
     <Compile Include="Harmony\PatchCategories\CaravanFormation.cs" />
     <Compile Include="Harmony\PatchCategories\LordAI.cs" />
     <Compile Include="Harmony\PatchCategories\Jobs.cs" />
-    <Compile Include="Harmony\PatchCategories\Upgrades.cs" />
     <Compile Include="Harmony\PatchCategories\WorldHandling.cs" />
     <Compile Include="Harmony\PatchCategories\WorldPathing.cs" />
     <Compile Include="Harmony\PatchCategories\VehiclePathing.cs" />

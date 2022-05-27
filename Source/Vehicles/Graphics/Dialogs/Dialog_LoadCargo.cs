@@ -57,7 +57,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return vehicle.CargoCapacity;
+				return vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
 			}
 		}
 

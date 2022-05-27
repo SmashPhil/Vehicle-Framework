@@ -50,18 +50,17 @@ namespace Vehicles
 		/// <param name="lister"></param>
 		/// <param name="def"></param>
 		/// <param name="field"></param>
-		public void DrawLister(Listing_Settings lister, VehicleDef def, FieldInfo field)
+		public void DrawLister(Listing_Settings lister, VehicleDef vehicleDef, FieldInfo field)
 		{
 			string label = Translate ? Label.Translate().ToString() : Label;
 			string tooltip = Translate ? Tooltip.Translate().ToString() : Tooltip;
-			SaveableField saveable = new SaveableField(def, field);
 			string disabledTooltip = string.Empty;
-			if (VehicleType != VehicleType.Universal && VehicleType != def.vehicleType)
+			if (VehicleType != VehicleType.Universal && VehicleType != vehicleDef.vehicleType)
 			{
 				disabledTooltip = "VehicleSaveableFieldDisabledTooltip".Translate();
 			}
 			bool locked = false;
-			if (ParsingHelper.lockedFields.TryGetValue(def.defName, out HashSet<FieldInfo> lockedFields))
+			if (ParsingHelper.lockedFields.TryGetValue(vehicleDef.defName, out HashSet<FieldInfo> lockedFields))
 			{
 				if (lockedFields.Contains(field))
 				{
@@ -73,23 +72,35 @@ namespace Vehicles
 			{
 				disabledTooltip = "VehicleDebugDisabledTooltip".Translate();
 			}
-			
-			switch (UISettingsType)
+			if (field.FieldType.GetInterface(nameof(ICustomSettingsDrawer)) is ICustomSettingsDrawer settingsDrawer)
+			{
+				settingsDrawer.DrawSetting(lister, vehicleDef, field, label, tooltip, disabledTooltip, locked, Translate);
+			}
+			else
+			{
+				DrawSetting(lister, vehicleDef, field, UISettingsType, label, tooltip, disabledTooltip, locked, Translate);
+			}
+		}
+
+		public static void DrawSetting(Listing_Settings lister, VehicleDef vehicleDef, FieldInfo field, UISettingsType settingsType, string label, string tooltip, string disabledTooltip, bool locked, bool translate)
+		{
+			SaveableField saveable = new SaveableField(vehicleDef, field);
+			switch (settingsType)
 			{
 				case UISettingsType.None:
 					return;
 				case UISettingsType.Checkbox:
-					lister.CheckboxLabeled(def, saveable, label, tooltip, disabledTooltip, locked);
+					lister.CheckboxLabeled(vehicleDef, saveable, label, tooltip, disabledTooltip, locked);
 					break;
 				case UISettingsType.IntegerBox:
 					{
 						if (field.TryGetAttribute<NumericBoxValuesAttribute>(out var inputBox))
 						{
-							lister.IntegerBox(def, saveable, label, tooltip, disabledTooltip, Mathf.RoundToInt(inputBox.MinValue), Mathf.RoundToInt(inputBox.MaxValue));
+							lister.IntegerBox(vehicleDef, saveable, label, tooltip, disabledTooltip, Mathf.RoundToInt(inputBox.MinValue), Mathf.RoundToInt(inputBox.MaxValue));
 						}
 						else
 						{
-							lister.IntegerBox(def, saveable, label, tooltip, disabledTooltip, 0, int.MaxValue);
+							lister.IntegerBox(vehicleDef, saveable, label, tooltip, disabledTooltip, 0, int.MaxValue);
 						}
 						break;
 					}
@@ -97,29 +108,29 @@ namespace Vehicles
 					{
 						if (field.TryGetAttribute<NumericBoxValuesAttribute>(out var inputBox))
 						{
-							lister.FloatBox(def, saveable, label, tooltip, disabledTooltip, inputBox.MinValue, inputBox.MaxValue);
+							lister.FloatBox(vehicleDef, saveable, label, tooltip, disabledTooltip, inputBox.MinValue, inputBox.MaxValue);
 						}
 						else
 						{
-							lister.FloatBox(def, saveable, label, tooltip, disabledTooltip, 0, float.MaxValue);
+							lister.FloatBox(vehicleDef, saveable, label, tooltip, disabledTooltip, 0, float.MaxValue);
 						}
 						break;
 					}
 				case UISettingsType.ToggleLabel:
 					break;
 				case UISettingsType.SliderEnum:
-					lister.EnumSliderLabeled(def, saveable, label, tooltip, disabledTooltip, field.FieldType, Translate);
+					lister.EnumSliderLabeled(vehicleDef, saveable, label, tooltip, disabledTooltip, field.FieldType, translate);
 					break;
 				case UISettingsType.SliderInt:
 					{
 						if (field.TryGetAttribute<SliderValuesAttribute>(out var slider))
 						{
-							lister.SliderLabeled(def, saveable, label, tooltip, disabledTooltip, slider.EndSymbol, (int)slider.MinValue, (int)slider.MaxValue, (int)slider.EndValue, slider.MaxValueDisplay, slider.MinValueDisplay, Translate);
+							lister.SliderLabeled(vehicleDef, saveable, label, tooltip, disabledTooltip, slider.EndSymbol, (int)slider.MinValue, (int)slider.MaxValue, (int)slider.EndValue, slider.MaxValueDisplay, slider.MinValueDisplay, translate);
 						}
 						else
 						{
 							SmashLog.WarningOnce($"Slider declared for SaveableField {field.Name} in {field.DeclaringType} with no SliderValues attribute. Slider will use default values instead.", field.GetHashCode());
-							lister.SliderLabeled(def, saveable, label, tooltip, disabledTooltip, string.Empty, 0, 100, -1, string.Empty, string.Empty, Translate);
+							lister.SliderLabeled(vehicleDef, saveable, label, tooltip, disabledTooltip, string.Empty, 0, 100, -1, string.Empty, string.Empty, translate);
 						}
 					}
 					break;
@@ -127,12 +138,12 @@ namespace Vehicles
 					{
 						if (field.TryGetAttribute<SliderValuesAttribute>(out var slider))
 						{
-							lister.SliderLabeled(def, saveable, label, tooltip, disabledTooltip, slider.EndSymbol, slider.MinValue, slider.MaxValue, slider.RoundDecimalPlaces, slider.EndValue, slider.Increment, slider.MaxValueDisplay, Translate);
+							lister.SliderLabeled(vehicleDef, saveable, label, tooltip, disabledTooltip, slider.EndSymbol, slider.MinValue, slider.MaxValue, slider.RoundDecimalPlaces, slider.EndValue, slider.Increment, slider.MaxValueDisplay, translate);
 						}
 						else
 						{
 							SmashLog.WarningOnce($"Slider declared for SaveableField {field.Name} in {field.DeclaringType} with no SliderValues attribute. Slider will use default values instead.", field.GetHashCode());
-							lister.SliderLabeled(def, saveable, label, tooltip, disabledTooltip, string.Empty, 0f, 100f, 0, -1, -1, string.Empty, Translate);
+							lister.SliderLabeled(vehicleDef, saveable, label, tooltip, disabledTooltip, string.Empty, 0f, 100f, 0, -1, -1, string.Empty, translate);
 						}
 					}
 					break;
@@ -140,17 +151,61 @@ namespace Vehicles
 					{
 						if (field.TryGetAttribute<SliderValuesAttribute>(out var slider))
 						{
-							lister.SliderPercentLabeled(def, saveable, label, tooltip, disabledTooltip, slider.EndSymbol, slider.MinValue, slider.MaxValue, slider.RoundDecimalPlaces, slider.EndValue, slider.MaxValueDisplay, Translate);
+							lister.SliderPercentLabeled(vehicleDef, saveable, label, tooltip, disabledTooltip, slider.EndSymbol, slider.MinValue, slider.MaxValue, slider.RoundDecimalPlaces, slider.EndValue, slider.MaxValueDisplay, translate);
 						}
 						else
 						{
 							SmashLog.WarningOnce($"Slider declared for SaveableField {field.Name} in {field.DeclaringType} with no SliderValues attribute. Slider will use default values instead.", field.GetHashCode());
-							lister.SliderPercentLabeled(def, saveable, label, tooltip, disabledTooltip, string.Empty, 0f, 100f, 0, -1, string.Empty, Translate);
+							lister.SliderPercentLabeled(vehicleDef, saveable, label, tooltip, disabledTooltip, string.Empty, 0f, 100f, 0, -1, string.Empty, translate);
 						}
 					}
 					break;
 				default:
-					Log.ErrorOnce($"{VehicleHarmony.LogLabel} {UISettingsType} has not yet been implemented for PostToSettings.DrawLister. Please notify mod author.", UISettingsType.ToString().GetHashCode());
+					Log.ErrorOnce($"{VehicleHarmony.LogLabel} {settingsType} has not yet been implemented for PostToSettings.DrawLister. Please notify mod author.", settingsType.ToString().GetHashCode());
+					break;
+			}
+		}
+
+		public static void DrawSetting(Listing_Settings lister, VehicleDef vehicleDef, FieldInfo field, SettingsValueInfo settingsInfo, string label, string tooltip, string disabledTooltip, bool locked, bool translate)
+		{
+			SaveableField saveable = new SaveableField(vehicleDef, field);
+			switch (settingsInfo.settingsType)
+			{
+				case UISettingsType.None:
+					return;
+				case UISettingsType.Checkbox:
+					lister.CheckboxLabeled(vehicleDef, saveable, label, tooltip, disabledTooltip, locked);
+					break;
+				case UISettingsType.IntegerBox:
+					{
+						lister.IntegerBox(vehicleDef, saveable, label, tooltip, disabledTooltip, Mathf.RoundToInt(settingsInfo.minValue), Mathf.RoundToInt(settingsInfo.maxValue));
+						break;
+					}
+				case UISettingsType.FloatBox:
+					{
+						lister.FloatBox(vehicleDef, saveable, label, tooltip, disabledTooltip, settingsInfo.minValue, settingsInfo.maxValue);
+						break;
+					}
+				case UISettingsType.SliderEnum:
+					lister.EnumSliderLabeled(vehicleDef, saveable, label, tooltip, disabledTooltip, field.FieldType, translate);
+					break;
+				case UISettingsType.SliderInt:
+					{
+						lister.SliderLabeled(vehicleDef, saveable, label, tooltip, disabledTooltip, settingsInfo.endSymbol, (int)settingsInfo.minValue, (int)settingsInfo.maxValue, (int)settingsInfo.endValue, settingsInfo.maxValueDisplay, settingsInfo.minValueDisplay, translate);
+					}
+					break;
+				case UISettingsType.SliderFloat:
+					{
+						lister.SliderLabeled(vehicleDef, saveable, label, tooltip, disabledTooltip, settingsInfo.endSymbol, settingsInfo.minValue, settingsInfo.maxValue, settingsInfo.roundDecimalPlaces, settingsInfo.endValue, settingsInfo.increment, settingsInfo.maxValueDisplay, translate);
+					}
+					break;
+				case UISettingsType.SliderPercent:
+					{
+						lister.SliderPercentLabeled(vehicleDef, saveable, label, tooltip, disabledTooltip, settingsInfo.endSymbol, settingsInfo.minValue, settingsInfo.maxValue, settingsInfo.roundDecimalPlaces, settingsInfo.endValue, settingsInfo.maxValueDisplay, translate);
+					}
+					break;
+				default:
+					Log.ErrorOnce($"{VehicleHarmony.LogLabel} {settingsInfo.settingsType} has not yet been implemented for PostToSettings.DrawLister. Please notify mod author.", settingsInfo.settingsType.ToString().GetHashCode());
 					break;
 			}
 		}

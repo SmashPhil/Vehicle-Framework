@@ -17,21 +17,12 @@ namespace Vehicles
 		[PostToSettings(Label = "VehicleNameable", Translate = true, Tooltip = "VehicleNameableTooltip", UISettingsType = UISettingsType.Checkbox)]
 		public bool nameable = false;
 
-		public float armor;
-		[PostToSettings(Label = "VehicleBaseSpeed", Translate = true, Tooltip ="VehicleBaseSpeedTooltip", UISettingsType = UISettingsType.SliderFloat)]
-		[SliderValues(MinValue = 0, MaxValue = 8, RoundDecimalPlaces = 2, Increment = 0.25f)]
-		public float speed;
-
-		[PostToSettings(Label = "VehicleBaseCargo", Translate = true, Tooltip ="VehicleBaseCargoTooltip", UISettingsType = UISettingsType.IntegerBox)]
-		public float cargoCapacity;
-
-		[PostToSettings(Label = "VehicleTicksBetweenRepair", Translate = true, Tooltip = "VehicleTicksBetweenRepairTooltip", UISettingsType = UISettingsType.SliderFloat)]
-		[SliderValues(MinValue = 1, MaxValue = 20f)]
-		public float repairRate = 1;
-
 		[PostToSettings(Label = "VehicleCombatPower", Translate = true, Tooltip = "VehicleCombatPowerTooltip", UISettingsType = UISettingsType.FloatBox)]
 		[NumericBoxValues(MinValue = 0, MaxValue = float.MaxValue)]
 		public float combatPower = 0;
+
+		//[PostToSettings(Label = "VehicleStats", Translate = true, Tooltip = "VehicleStatsTooltip")]
+		public List<VehicleStatModifier> vehicleStats;
 
 		[PostToSettings(Label = "VehicleMovementPermissions", Translate = true, UISettingsType = UISettingsType.SliderEnum)]
 		public VehiclePermissions vehicleMovementPermissions = VehiclePermissions.DriverNeeded;
@@ -202,17 +193,16 @@ namespace Vehicles
 		/// Retrieve all <see cref="VehicleStatCategoryDef"/>'s for this VehicleDef
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<VehicleStatCategoryDef> StatCategoryDefs()
+		public IEnumerable<VehicleStatDef> StatCategoryDefs()
 		{
-			if (speed > 0)
+			foreach (VehicleStatModifier statModifier in vehicleStats)
 			{
-				yield return VehicleStatCategoryDefOf.StatCategoryMovement;
+				yield return statModifier.statDef;
 			}
-			yield return VehicleStatCategoryDefOf.StatCategoryArmor;
 
 			foreach (VehicleCompProperties props in comps.Where(c => c is VehicleCompProperties))
 			{
-				foreach (VehicleStatCategoryDef statCategoryDef in props.StatCategoryDefs())
+				foreach (VehicleStatDef statCategoryDef in props.StatCategoryDefs())
 				{
 					yield return statCategoryDef;
 				}

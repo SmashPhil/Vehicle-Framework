@@ -8,7 +8,7 @@ namespace Vehicles
 {
 	public abstract class VehicleCompProperties : CompProperties
 	{
-		public virtual IEnumerable<VehicleStatCategoryDef> StatCategoryDefs()
+		public virtual IEnumerable<VehicleStatDef> StatCategoryDefs()
 		{
 			yield break;
 		}

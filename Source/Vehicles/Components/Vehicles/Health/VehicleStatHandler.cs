@@ -14,7 +14,7 @@ namespace Vehicles
 		private VehiclePawn vehicle;
 		public List<VehicleComponent> components = new List<VehicleComponent>();
 		private readonly Dictionary<IntVec2, List<VehicleComponent>> componentLocations = new Dictionary<IntVec2, List<VehicleComponent>>();
-		public readonly Dictionary<VehicleStatCategoryDef, List<VehicleComponent>> statComponents = new Dictionary<VehicleStatCategoryDef, List<VehicleComponent>>();
+		public readonly Dictionary<VehicleStatDef, List<VehicleComponent>> statComponents = new Dictionary<VehicleStatDef, List<VehicleComponent>>();
 
 		private readonly List<Pair<IntVec2, int>> debugCellHighlight = new List<Pair<IntVec2, int>>();
 		public readonly HashSet<Explosion> explosionsAffectingVehicle = new HashSet<Explosion>();
@@ -23,7 +23,7 @@ namespace Vehicles
 		{
 			this.vehicle = vehicle;
 			components = new List<VehicleComponent>();
-			statComponents = new Dictionary<VehicleStatCategoryDef, List<VehicleComponent>>();
+			statComponents = new Dictionary<VehicleStatDef, List<VehicleComponent>>();
 			debugCellHighlight = new List<Pair<IntVec2, int>>();
 			componentLocations = new Dictionary<IntVec2, List<VehicleComponent>>();
 		}
@@ -49,7 +49,7 @@ namespace Vehicles
 		{
 			if (!comp.props.categories.NullOrEmpty())
 			{
-				foreach (VehicleStatCategoryDef category in comp.props.categories)
+				foreach (VehicleStatDef category in comp.props.categories)
 				{
 					if (statComponents.TryGetValue(category, out var list))
 					{
@@ -63,11 +63,13 @@ namespace Vehicles
 			}
 		}
 
-		public float StatEfficiency(VehicleStatCategoryDef category)
+		/// <param name="statDef"></param>
+		/// <returns>% efficiency of <paramref name="statDef"/> given <see cref="VehicleComponent"/> calculation.</returns>
+		public float StatEfficiency(VehicleStatDef statDef)
 		{
-			if (statComponents.TryGetValue(category, out var categories))
+			if (statComponents.TryGetValue(statDef, out var categories))
 			{
-				return category.operationType switch
+				return statDef.operationType switch
 				{
 					EfficiencyOperationType.MinValue => categories.Min(c => c.Efficiency),
 					EfficiencyOperationType.MaxValue => categories.Max(c => c.Efficiency),
@@ -104,7 +106,7 @@ namespace Vehicles
 		{
 			ApplyDamageToComponent(dinfo, new IntVec2(hitCell.x - vehicle.Position.x, hitCell.z - vehicle.Position.z), explosive);
 
-			if (vehicle.ActualMoveSpeed <= 0.1f && vehicle.Spawned)
+			if (vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed) <= 0.1f)
 			{
 				vehicle.drafter.Drafted = false;
 			}

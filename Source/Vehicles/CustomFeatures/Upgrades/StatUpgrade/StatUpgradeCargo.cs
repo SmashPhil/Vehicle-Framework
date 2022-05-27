@@ -17,7 +17,7 @@ namespace Vehicles
 
 		public override void ApplyStatUpgrade(VehiclePawn vehicle, float value)
 		{
-			vehicle.CargoCapacity += value;
+			//vehicle.CargoCapacity += value;
 		}
 
 		public override void DrawStatLister(VehicleDef def, Listing_Settings lister, SaveableField field, float value)

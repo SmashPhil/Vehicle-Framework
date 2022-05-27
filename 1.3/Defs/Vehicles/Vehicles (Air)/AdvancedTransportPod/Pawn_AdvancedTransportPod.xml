@@ -23,11 +23,7 @@
 		<nameable>false</nameable>
 
 		<buildDef>AdvancedTransportPod_Blueprint</buildDef>
-		<repairRate>650</repairRate>
-		
-		<armor>15</armor>
-		<cargoCapacity>250</cargoCapacity>
-		<speed LockSetting="True">0</speed>
+
 		<canCaravan LockSetting="True">false</canCaravan>
 		
 		<size>(3,3)</size>
@@ -44,6 +40,12 @@
 			<MarketValue>250000</MarketValue>
 			<Flammability>0</Flammability>
 		</statBases>
+		
+		<vehicleStats>
+			<MoveSpeed LockSetting="True">0</MoveSpeed>
+			<CargoCapacity>250</CargoCapacity>
+			<RepairRate>3.25</RepairRate>
+		</vehicleStats>
 		
 		<properties>
 			<healthLabel_Healthy>Operational</healthLabel_Healthy>
@@ -76,17 +78,23 @@
 				<hitbox>
 					<side>Body</side>
 				</hitbox>
+				
+				<categories>
+					<li>BodyIntegrity</li>
+				</categories>
 			</li>
 			<li>
 				<key>Engines</key>
 				<label>Engines</label>
 				<health>125</health>
 				<armor>0.15</armor>
+				
 				<explosionProperties>
 					<chance>0.25</chance>
 					<radius>3</radius>
 					<damageDef>Bomb</damageDef>
 				</explosionProperties>
+				
 				<hitbox>
 					<cells>
 						<li>(-1, -1)</li>
@@ -94,10 +102,11 @@
 						<li>(0, 1)</li>
 					</cells>
 				</hitbox>
+				
 				<categories>
-					<li>StatCategoryMovement</li>
-					<li>StatCategoryFlightControl</li>
-					<li>StatCategoryFlightSpeed</li>
+					<li>MoveSpeed</li>
+					<li>FlightControl</li>
+					<li>FlightSpeed</li>
 				</categories>
 			</li>
 		</components>

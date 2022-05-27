@@ -23,11 +23,7 @@
 		
 		<nameable>true</nameable>
 		<buildDef>Sparrow_Blueprint</buildDef>
-		<repairRate>650</repairRate>
-		
-		<armor>15</armor>
-		<cargoCapacity>250</cargoCapacity>
-		<speed>0.5</speed>
+
 		<canCaravan>false</canCaravan>
 		
 		<size>(3,3)</size>
@@ -44,6 +40,12 @@
 			<MarketValue>175000</MarketValue>
 			<Flammability>0</Flammability>
 		</statBases>
+		
+		<vehicleStats>
+			<MoveSpeed>0.5</MoveSpeed>
+			<CargoCapacity>250</CargoCapacity>
+			<RepairRate>1.75</RepairRate>
+		</vehicleStats>
 		
 		<drawProperties>
 			<displayOffset>(0, 0.1)</displayOffset>
@@ -93,7 +95,7 @@
 				</hitbox>
 				
 				<categories>
-					<li>StatCategoryCargo</li>
+					<li>BodyIntegrity</li>
 				</categories>
 			</li>
 			<li>
@@ -104,8 +106,9 @@
 				<efficiencyWeight>10</efficiencyWeight>
 				
 				<categories>
-					<li>StatCategoryFlightControl</li>
+					<li>FlightControl</li>
 				</categories>
+				
 				<hitbox>
 					<cells>
 						<li>(-1,0)</li>
@@ -121,7 +124,7 @@
 				<efficiencyWeight>10</efficiencyWeight>
 				
 				<categories>
-					<li>StatCategoryFlightControl</li>
+					<li>FlightControl</li>
 				</categories>
 				
 				<hitbox>
@@ -139,14 +142,16 @@
 				<efficiencyWeight>10</efficiencyWeight>
 				
 				<categories>
-					<li>StatCategoryMovement</li>
-					<li>StatCategoryFlightSpeed</li>
+					<li>MoveSpeed</li>
+					<li>FlightSpeed</li>
 				</categories>
+				
 				<explosionProperties>
 					<chance>0.25</chance>
 					<radius>6</radius>
 					<damageDef>Bomb</damageDef>
 				</explosionProperties>
+				
 				<hitbox>
 					<cells>
 						<li>(0,-1)</li>
@@ -165,6 +170,7 @@
 
 			<baseBodySize>1.0</baseBodySize>
 			<baseHealthScale>1.0</baseHealthScale>
+			
 			<lifeStageAges>
 				<li>
 					<def>MechanoidFullyFormed</def>

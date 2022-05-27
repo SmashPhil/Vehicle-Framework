@@ -1,71 +1,48 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.3.8158</currentVersion>
+  <currentVersion>1.3.8174</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>[title]Recent News[/title][font]Small[/font]
 
 [title]Balance Changes[/title][font]Small[/font]
-[b]Rowboat (Buildable)[/b]
-- Reduced MaxHitPoints from 10000 to 50
-- Increased WorkToBuild from 30 to 200
-- Changed costList from 1 ComponentIndustrial to 35 WoodLog
-- Increased Flammability from 0.05 to 0.65
+[b]Tank (Vehicle)[/b]
+- Increased RepairRate from 1.5 to 2.5
+- Decreased MoveSpeed from 3.75 to 3.25
+
+[b]Car (Vehicle)[/b]
+- Decreased RepairRate from 650 to 3.25
+
 [b]Rowboat (Vehicle)[/b]
-- Decreased CargoCapacity from 300 to 75
-- Decreased MarketValue from 250000 to 85
-- Increased Flammability from 0 to 0.65
-- Decreased Mass from 10000 to 35
+- Decreased RepairRate from 650 to 5
 
-[b]Fishing Boat (Buildable)[/b]
-- Reduced MaxHitPoints from 10000 to 250
-- Increased WorkToBuild from 30 to 1500
-- Changed costList from 35 ComponentIndustrial and 3000 Steel to 140 WoodLog
-- Increased Flammability from 0.05 to 0.65
 [b]Fishing Boat (Vehicle)[/b]
-- Decreased MarketValue from 250000 to 250
-- Increased Flammability from 0 to 0.65
-- Decreased Mass from 10000 to 200
+- Decreased RepairRate from 650 to 4.25
 
-[b]Sparrow (Buildable)[/b]
-- Reduced MaxHitPoints from 5000 to 750
-- Increased WorkToBuild from 30 to 85000
-- Changed costList from 35 ComponentIndustrial and 3000 Steel to 12 ComponentSpacer, 500 Steel, and 250 Plasteel
 [b]Sparrow (Vehicle)[/b]
-- Decreased MarketValue from 250000 to 175000
-- Decreased Mass from 25000 to 6200
+- Decreased RepairRate from 650 to 1.75
 
-- Removed VehicleTurrets, they were for testing only and the main focus for now will just be normal flying (not strafing or bombing runs)
+[b]Hot Air Balloon (Vehicle)[/b]
+- Decreased RepairRate from 650 to 4.5
+
+[b] Advanced Transport Pod (Buildable)[/b]
+- Decreased MaxHitPoints from 5000 to 450
+- Increased WorkToBuild from 30 to 45000
+- Changed CostList from 35 ComponentIndustrial + 3000 Steel to 12 ComponentIndustrial + 4 ComponentSpacer + 450 Steel + 75 Plasteel
+
+[b]Advanced Transport Pod (Vehicle)[/b]
+- Decreased RepairRate from 650 to 3.25
+
 [title]Bug Fixes[/title][font]Small[/font]
-- Fixed bug where GenSteps would attempt to recalculate vehicle path cost when regions had not been built yet. (Fixes compatibility with Biomes Core mods)
+- Fixed bug where vehicles would continue to path to their destination even after roles are no longer fulfilled (pawn dies while driving)
 
-- Fixed bug where arriving skyfallers would attempt to notify VehicleTracks comp a tick after its removal.
+- Fixed bug where vehicle turrets continue to fire even after roles are no longer fulfilled (same as above)
 
-- Fixed bug with shaders where the color math would result in artifacting at the borders of the color channels.
-
-- Fixed bug where VehiclePawn would occasionally spawn inside stone chunks in an event map.
-
-- Fixed bug where AerialVehicle could be selected to drop out of bounds, resulting in the loss of the vehicle and its crew.
-
-- Fixed bug where auto-targeting VehicleTurrets' targeter would still be active even after vehicle has been despawned.
-
-- Fixed event map VehicleCaravan reformations
 [title]Additional Changes[/title][font]Small[/font]
-- Removed irrelevant ResearchProjectDefs
+- Reworked health mechanics of Vehicles to use similar (but stripped down) version of StatModifiers, StatParts, and StatDefs. This will allow defining of new stats with less effort, as well as allowing other modders to create StatParts to modify the final value.
 
-- Performance improvements to VehicleTurrets.
-
-- Split Patterns and Skins to separate shaders to remove all branching logic from shader files.
-
-- Added 2 ResearchProjectDefs for Rowboat and FishingBoat. More will follow later when the mod is closer to releasing.
-
-- Added SkinDefs back into the mod for testing
-
-- Improved VTOL animation of Sparrow
-
-- Changed vertical ticks to instead be a property of individual launch or land properties, allowing you to designate different tick counts for landing and launching vertical animations.
 [title]Final Notes[/title][font]Small[/font]
 Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
 </description>

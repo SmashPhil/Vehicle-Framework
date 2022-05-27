@@ -184,7 +184,6 @@ namespace Vehicles
 
 					listingSplit.Begin(compVehicleRect, 2);
 					drawStatusMessage = $"Drawing main settings.";
-					listingSplit.Header("CompVehicleStats".Translate(), Color.clear, GameFont.Small, TextAnchor.MiddleCenter);
 					
 					foreach (FieldInfo field in VehicleMod.vehicleDefFields)
 					{
@@ -205,20 +204,20 @@ namespace Vehicles
 
 					drawStatusMessage = $"Drawing sub settings";
 					listingSplit.BeginScrollView(scrollableFieldsRect, ref VehicleMod.saveableFieldsScrollPosition, ref scrollableFieldsViewRect, 3);
-					foreach (var saveableObject in VehicleMod.VehicleCompFields)
+					foreach ((Type type, List<FieldInfo> fields) in VehicleMod.VehicleCompFields)
 					{
-						if (saveableObject.Value.NullOrEmpty() || saveableObject.Value.All(f => f.TryGetAttribute<PostToSettingsAttribute>(out var settings) 
+						if (fields.NullOrEmpty() || fields.All(f => f.TryGetAttribute<PostToSettingsAttribute>(out var settings) 
 						&& settings.VehicleType != VehicleType.Universal && settings.VehicleType != VehicleMod.selectedDef.vehicleType))
 						{
 							continue;
 						}
 						string header = string.Empty;
-						if (saveableObject.Key.TryGetAttribute(out HeaderTitleAttribute title))
+						if (type.TryGetAttribute(out HeaderTitleAttribute title))
 						{
 							header = title.Translate ? title.Label.Translate().ToString() : title.Label;
 						}
 						listingSplit.Header(header, ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-						foreach (FieldInfo field in saveableObject.Value)
+						foreach (FieldInfo field in fields)
 						{
 							if (field.TryGetAttribute(out PostToSettingsAttribute post))
 							{

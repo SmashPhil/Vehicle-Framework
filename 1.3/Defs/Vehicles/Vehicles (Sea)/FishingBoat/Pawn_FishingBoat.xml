@@ -22,10 +22,6 @@
 		
 		<nameable>false</nameable>
 		<buildDef>FishingBoat_Blueprint</buildDef>
-		<repairRate>650</repairRate>
-		
-		<cargoCapacity>250</cargoCapacity>
-		<speed>1.5</speed>
 		
 		<size>(1,3)</size>
 		
@@ -41,6 +37,12 @@
 			<MarketValue>250</MarketValue>
 			<Flammability>0.65</Flammability>
 		</statBases>
+		
+		<vehicleStats>
+			<MoveSpeed>1.5</MoveSpeed>
+			<CargoCapacity>250</CargoCapacity>
+			<RepairRate>4.25</RepairRate>
+		</vehicleStats>
 		
 		<properties>
 			<fishing>true</fishing>
@@ -81,7 +83,7 @@
 				<efficiencyWeight>10</efficiencyWeight>
 				
 				<categories>
-					<li>StatCategoryMovement</li>
+					<li>MoveSpeed</li>
 				</categories>
 				
 				<hitbox>
@@ -96,8 +98,9 @@
 				<efficiencyWeight>1</efficiencyWeight>
 				
 				<categories>
-					<li>StatCategoryMovement</li>
+					<li>MoveSpeed</li>
 				</categories>
+				
 				<hitbox>
 					<cells>
 						<li>(0,0)</li>

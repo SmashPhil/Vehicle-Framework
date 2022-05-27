@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 using SmashTools;
@@ -73,6 +75,90 @@ namespace Vehicles
 			}
 		}
 
+		public void ListLabeled(VehicleDef def, SaveableField field, string label, string tooltip, string disabledTooltip, SettingsValueInfo settingsInfo, Func<int, string> subLabelGetter,
+			Func<int, string> subTooltipGetter, Func<int, string> subDisabledTooltipGetter)
+		{
+			this.Header(label, ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
+
+			Shift();
+			Rect rect = GetSplitRect(Text.LineHeight);
+			rect.y -= rect.height / 2;
+
+			Color color = GUI.color;
+			if (!disabledTooltip.NullOrEmpty())
+			{
+				GUI.color = UIElements.InactiveColor;
+				GUI.enabled = false;
+				UIElements.DoTooltipRegion(rect, disabledTooltip);
+			}
+			else if (!tooltip.NullOrEmpty())
+			{
+				UIElements.DoTooltipRegion(rect, tooltip);
+			}
+
+			IList iList = GetSettingsValue(def, field) as IList;
+			
+			for (int i = 0; i < iList.Count; i++)
+			{
+				Shift();
+				Rect itemRect = GetSplitRect(Text.LineHeight);
+				itemRect.y -= itemRect.height / 2;
+				object value = iList[i];
+				string subLabel = subLabelGetter?.Invoke(i) ?? i.ToString();
+				string subTooltip = subTooltipGetter?.Invoke(i);
+				string subDisabledTooltip = subDisabledTooltipGetter?.Invoke(i);
+				switch (settingsInfo.settingsType)
+				{
+					case UISettingsType.None:
+						break;
+					case UISettingsType.Checkbox:
+						{
+							bool refValue = (bool)value;
+							CheckboxLabeled(subLabel, ref refValue, subTooltip, subDisabledTooltip, false);
+							iList[i] = refValue;
+						}
+						break;
+					case UISettingsType.IntegerBox:
+						{
+							int refValue = (int)value;
+							IntegerBox(subLabel, ref refValue, subTooltip, subDisabledTooltip, Mathf.RoundToInt(settingsInfo.minValue), Mathf.RoundToInt(settingsInfo.maxValue));
+							iList[i] = refValue;
+						}
+						break;
+					case UISettingsType.FloatBox:
+						{
+							float refValue = (float)value;
+							FloatBox(subLabel, ref refValue, subTooltip, subDisabledTooltip, settingsInfo.minValue, settingsInfo.maxValue);
+							iList[i] = refValue;
+						}
+						break;
+					case UISettingsType.ToggleLabel:
+						break;
+					case UISettingsType.SliderEnum:
+						break;
+					case UISettingsType.SliderInt:
+						break;
+					case UISettingsType.SliderFloat:
+						{
+							float refValue = (float)value;
+							SliderLabeled(subLabel, ref refValue, subTooltip, subDisabledTooltip, settingsInfo.endSymbol, settingsInfo.minValue, settingsInfo.maxValue, settingsInfo.roundDecimalPlaces,
+								settingsInfo.endValue, settingsInfo.increment);
+							iList[i] = refValue;
+						}
+						break;
+					case UISettingsType.SliderPercent:
+						break;
+					default:
+						throw new NotImplementedException();
+				}
+			}
+
+			GUI.color = color;
+			GUI.enabled = true;
+
+			SetSettingsValue(def, field, iList);
+		}
+
 		public void CheckboxLabeled(VehicleDef def, SaveableField field, string label, string tooltip, string disabledTooltip, bool locked)
 		{
 			Shift();
@@ -96,7 +182,7 @@ namespace Vehicles
 			{
 				checkState = false;
 			}
-			UIElements.CheckboxLabeled(rect, label, ref checkState, disabled, null, null, false);
+			UIElements.CheckboxLabeled(rect, label, ref checkState, disabled);
 			SetSettingsValue(def, field, checkState);
 		}
 

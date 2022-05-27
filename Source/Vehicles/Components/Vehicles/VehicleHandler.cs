@@ -75,12 +75,14 @@ namespace Vehicles
 
 		public bool RequiredForMovement => role.handlingTypes.NotNullAndAny(h => h.HasFlag(HandlingTypeFlags.Movement));
 
+		public bool RoleFulfilled => role != null && handlers.Count >= role.slotsToOperate;
+
 		public bool AreSlotsAvailable
 		{
 			get
 			{
 				bool reservation = vehicle.Map?.GetCachedMapComponent<VehicleReservationManager>().CanReserve<VehicleHandler, VehicleHandlerReservation>(vehicle, null, this) ?? true;
-				return role != null &&  reservation && handlers.Count < role.slots;
+				return role != null && reservation && handlers.Count < role.slots;
 			}
 		}
 

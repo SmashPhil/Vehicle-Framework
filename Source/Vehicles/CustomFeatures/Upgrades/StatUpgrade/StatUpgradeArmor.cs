@@ -17,7 +17,7 @@ namespace Vehicles
 
 		public override void ApplyStatUpgrade(VehiclePawn vehicle, float value)
 		{
-			vehicle.ArmorPoints += value;
+			//vehicle.ArmorPoints += value;
 		}
 
 		public override void DrawStatLister(VehicleDef def, Listing_Settings lister, SaveableField field, float value)

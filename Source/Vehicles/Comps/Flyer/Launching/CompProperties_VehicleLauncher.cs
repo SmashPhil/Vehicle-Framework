@@ -57,10 +57,10 @@ namespace Vehicles
 			compClass = typeof(CompVehicleLauncher);
 		}
 
-		public override IEnumerable<VehicleStatCategoryDef> StatCategoryDefs()
+		public override IEnumerable<VehicleStatDef> StatCategoryDefs()
 		{
-			yield return VehicleStatCategoryDefOf.StatCategoryFlightSpeed;
-			yield return VehicleStatCategoryDefOf.StatCategoryFlightControl;
+			yield return VehicleStatDefOf.FlightSpeed;
+			yield return VehicleStatDefOf.FlightControl;
 		}
 
 		public override IEnumerable<string> ConfigErrors(ThingDef parentDef)

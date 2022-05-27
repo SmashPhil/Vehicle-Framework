@@ -25,10 +25,7 @@
 		
 		<nameable>true</nameable>
 		<buildDef>HotAirBalloon_Blueprint</buildDef>
-		<repairRate>250</repairRate>
-		
-		<cargoCapacity>150</cargoCapacity>
-		<speed LockSetting="True">0</speed>
+
 		<canCaravan LockSetting="True">false</canCaravan>
 		
 		<size>(1,1)</size>
@@ -45,6 +42,12 @@
 			<MarketValue>8000</MarketValue>
 			<Flammability>0</Flammability>
 		</statBases>
+		
+		<vehicleStats>
+			<MoveSpeed LockSetting="True">0</MoveSpeed>
+			<CargoCapacity>150</CargoCapacity>
+			<RepairRate>4.5</RepairRate>
+		</vehicleStats>
 		
 		<properties>
 			<healthLabel_Healthy>Operational</healthLabel_Healthy>
@@ -63,6 +66,7 @@
 					<slots>1</slots>
 					<slotsToOperate>1</slotsToOperate>
 				</li>
+				
 				<li>
 					<key>passenger</key>
 					<label>Passenger</label>
@@ -81,6 +85,10 @@
 				<hitbox>
 					<side>Body</side>
 				</hitbox>
+				
+				<categories>
+					<li>BodyIntegrity</li>
+				</categories>
 			</li>
 		</components>
 		

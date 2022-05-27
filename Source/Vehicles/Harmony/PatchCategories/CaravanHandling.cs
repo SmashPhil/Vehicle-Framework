@@ -24,7 +24,7 @@ namespace Vehicles
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(ConfirmLeaveVehiclesOnReform)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MassUtility), nameof(MassUtility.Capacity)),
-				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(CapacityOfVehicle)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MassUtility), nameof(MassUtility.CanEverCarryAnything)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
@@ -173,12 +173,14 @@ namespace Vehicles
 		/// <param name="thingCounts"></param>
 		/// <param name="__result"></param>
 		/// <param name="explanation"></param>
-		public static void CapacityOfVehicle(Pawn p, ref float __result, StringBuilder explanation = null)
+		public static bool CapacityOfVehicle(Pawn p, ref float __result, StringBuilder explanation = null)
 		{
 			if (p is VehiclePawn vehicle)
 			{
-				__result = Mathf.Max(vehicle.CargoCapacity, 0f);
+				__result = vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
+				return false;
 			}
+			return true;
 		}
 
 		/// <summary>

@@ -5,6 +5,8 @@ using System.Reflection.Emit;
 using HarmonyLib;
 using Verse;
 using RimWorld;
+using UnityEngine;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -12,6 +14,9 @@ namespace Vehicles
 	{
 		public void PatchMethods()
 		{
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn), "TicksPerMove"),
+				prefix: new HarmonyMethod(typeof(HealthAndStats),
+				nameof(VehicleMoveSpeed)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(HealthUtility), nameof(HealthUtility.GetGeneralConditionLabel)),
 				prefix: new HarmonyMethod(typeof(HealthAndStats),
 				nameof(ReplaceConditionLabel)));
@@ -36,12 +41,37 @@ namespace Vehicles
 		}
 
 		/// <summary>
+		/// Apply MoveSpeed upgrade stat to vehicles
+		/// </summary>
+		/// <param name="diagonal"></param>
+		/// <param name="__instance"></param>
+		/// <param name="__result"></param>
+		public static bool VehicleMoveSpeed(bool diagonal, Pawn __instance, ref int __result)
+		{
+			if (__instance is VehiclePawn vehicle)
+			{
+				float num = vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed) / 60;
+				float num2 = 1 / num;
+				if (vehicle.Spawned && !vehicle.Map.roofGrid.Roofed(vehicle.Position))
+				{
+					num2 /= vehicle.Map.weatherManager.CurMoveSpeedMultiplier;
+				}
+				if (diagonal)
+				{
+					num2 *= Mathf.Sqrt(2);
+				}
+				__result = Mathf.RoundToInt(num2).Clamp(1, 450);
+				return false;
+			}
+			return true;
+		}
+
+		/// <summary>
 		/// Replace vanilla labels on Boats to instead show custom ones which are modifiable in the XML defs
 		/// </summary>
 		/// <param name="__result"></param>
 		/// <param name="pawn"></param>
 		/// <param name="shortVersion"></param>
-		/// <returns></returns>
 		public static bool ReplaceConditionLabel(ref string __result, Pawn pawn, bool shortVersion = false)
 		{
 			if (pawn != null)

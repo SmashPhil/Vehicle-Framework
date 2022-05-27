@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<!-- Simplified version of StatDefs without the extra overhead-->
+	<Vehicles.VehicleStatDef>
+		<defName>MoveSpeed</defName>
+		<label>Move Speed</label>
+		<description>Base movement speed.</description>
+		<defaultBaseValue>3.5</defaultBaseValue>
+		<minValue>0.5</minValue>
+		<maxValue>10</maxValue>
+		
+		<modSettingsInfo>
+			<settingsType>SliderFloat</settingsType>
+			<roundDecimalPlaces>2</roundDecimalPlaces>
+			<increment>0.25</increment>
+		</modSettingsInfo>
+		
+		<parts>
+			<li Class = "Vehicles.VehicleStatPart_WeightUsage">
+				<overweightSpeedCurve>
+					<points>
+						<li>(0, 1)</li>
+						<li>(0.65, 1)</li>
+						<li>(0.85, 0.9)</li>
+						<li>(1.05, 0.35)</li>
+						<li>(1.25, 0)</li>
+					</points>
+				</overweightSpeedCurve>
+			</li>
+		</parts>
+		
+		<formatString>Speed: {0} c/s</formatString>
+		<operationType>MinValue</operationType>
+		<priority>0</priority>
+	</Vehicles.VehicleStatDef>
+	
+	<Vehicles.VehicleStatDef>
+		<defName>BodyIntegrity</defName>
+		<label>Body Integrity</label>
+		<defaultBaseValue>1</defaultBaseValue>
+		<minValue>0</minValue>
+		<maxValue>1</maxValue>
+		<formatString>Integrity: {0}%</formatString>
+		<operationType>Average</operationType>
+		<priority>10</priority>
+	</Vehicles.VehicleStatDef>
+	
+	<Vehicles.VehicleStatDef>
+		<defName>CargoCapacity</defName>
+		<label>Cargo</label>
+		<defaultBaseValue>100</defaultBaseValue>
+		<minValue>0</minValue>
+		
+		<modSettingsInfo>
+			<settingsType>IntegerBox</settingsType>
+		</modSettingsInfo>
+		
+		<formatString>Cargo: {0} kg</formatString>
+		<operationType>Average</operationType>
+		<priority>20</priority>
+	</Vehicles.VehicleStatDef>
+	
+	<Vehicles.VehicleStatDef>
+		<defName>RepairRate</defName>
+		<label>Repair Rate</label>
+		<defaultBaseValue>3</defaultBaseValue>
+		<minValue>0</minValue>
+		<maxValue>20</maxValue>
+		
+		<modSettingsInfo>
+			<settingsType>SliderFloat</settingsType>
+			<roundDecimalPlaces>1</roundDecimalPlaces>
+			<increment>0.1</increment>
+		</modSettingsInfo>
+		
+		<formatString>Repair Rate: {0} kg</formatString>
+		<operationType>Average</operationType>
+		<priority>30</priority>
+	</Vehicles.VehicleStatDef>
+	
+	<Vehicles.VehicleStatDef>
+		<defName>FlightSpeed</defName>
+		<label>Flight Speed</label>
+		<defaultBaseValue>1</defaultBaseValue>
+		<minValue>0</minValue>
+		
+		<modSettingsInfo>
+			<settingsType>FloatBox</settingsType>
+		</modSettingsInfo>
+		
+		<formatString>Flight Speed: {0} t/s</formatString>
+		<operationType>Average</operationType>
+		<priority>40</priority>
+	</Vehicles.VehicleStatDef>
+	
+	<Vehicles.VehicleStatDef>
+		<defName>FlightControl</defName>
+		<label>Control</label>
+		<defaultBaseValue>1</defaultBaseValue>
+		<minValue>0</minValue>
+		<maxValue>1</maxValue>
+		
+		<formatString>Flight Control: {0}%</formatString>
+		<operationType>MinValue</operationType>
+		<priority>50</priority>
+	</Vehicles.VehicleStatDef>
+</Defs>

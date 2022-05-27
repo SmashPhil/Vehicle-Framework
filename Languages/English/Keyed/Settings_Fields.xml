@@ -7,15 +7,8 @@
 	<VehiclePlayerOnly>Player Only</VehiclePlayerOnly>
 	<VehicleRaiderOnly>NPC Only</VehicleRaiderOnly>
 	
-	<CompVehicleStats>Base Stats</CompVehicleStats>
 	<VehicleRaidsEnabled>Raids Can Use</VehicleRaidsEnabled>
 	<VehicleRaidsEnabledTooltip>Raids using Vehicles will be allowed to use this vehicle if points and tech level allow for it.</VehicleRaidsEnabledTooltip>
-	<VehicleBaseArmor>Armor</VehicleBaseArmor>
-	<VehicleBaseArmorTooltip>Base armor value for damage applied to vehicles.</VehicleBaseArmorTooltip>
-	<VehicleBaseCargo>Cargo</VehicleBaseCargo>
-	<VehicleBaseCargoTooltip>Base carry capacity for Vehicles. Unit: (kg)</VehicleBaseCargoTooltip>
-	<VehicleBaseSpeed>Speed</VehicleBaseSpeed>
-	<VehicleBaseSpeedTooltip>Base movement speed for Vehicles</VehicleBaseSpeedTooltip>
 	<VehicleMovementPermissions>Control Type</VehicleMovementPermissions>
 	<VehicleCategory>Category</VehicleCategory>
 	<VehicleNavigationType>Navigation</VehicleNavigationType>

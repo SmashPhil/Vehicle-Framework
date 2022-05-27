@@ -21,10 +21,6 @@
 		
 		<nameable>true</nameable>
 		<buildDef>Tank_Blueprint</buildDef>
-		<repairRate>1.5</repairRate>
-		
-		<cargoCapacity>200</cargoCapacity>
-		<speed>3.75</speed>
 		
 		<size>(3,5)</size>
 		
@@ -41,11 +37,13 @@
 			<Flammability>0</Flammability>
 		</statBases>
 		
+		<vehicleStats>
+			<MoveSpeed>3.25</MoveSpeed>
+			<CargoCapacity>100</CargoCapacity>
+			<RepairRate>2.5</RepairRate>
+		</vehicleStats>
+		
 		<properties>
-			<healthLabel_Healthy>Operational</healthLabel_Healthy>
-			<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
-			<healthLabel_Immobile>Inoperable</healthLabel_Immobile>
-			
 			<customBiomeCosts>
 				<li>
 					<key>TropicalRainforest</key>
@@ -154,6 +152,10 @@
 						<li>Back</li>
 					</noOverlapWith>
 				</hitbox>
+				
+				<categories>
+					<li>BodyIntegrity</li>
+				</categories>
 			</li>
 			<li>
 				<key>RearBody</key>
@@ -171,18 +173,21 @@
 				<health>50</health>
 				<armor>0.25</armor>
 				<efficiencyWeight>10</efficiencyWeight>
+				
 				<explosionProperties>
 					<chance>0.25</chance>
 					<radius>3</radius>
 					<damageDef>Bomb</damageDef>
 				</explosionProperties>
+				
 				<hitbox>
 					<cells>
 						<li>(0, -1)</li>
 					</cells>
 				</hitbox>
+				
 				<categories>
-					<li>StatCategoryMovement</li>
+					<li>MoveSpeed</li>
 				</categories>
 			</li>
 			<li>
@@ -197,7 +202,7 @@
 					<side>Left</side>
 				</hitbox>
 				<categories>
-					<li>StatCategoryMovement</li>
+					<li>MoveSpeed</li>
 				</categories>
 			</li>
 			<li>
@@ -212,7 +217,7 @@
 					<side>Right</side>
 				</hitbox>
 				<categories>
-					<li>StatCategoryMovement</li>
+					<li>MoveSpeed</li>
 				</categories>
 			</li>
 		</components>

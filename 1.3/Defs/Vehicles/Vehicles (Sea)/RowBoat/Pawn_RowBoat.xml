@@ -23,10 +23,6 @@
 		
 		<nameable>false</nameable>
 		<buildDef>RowBoat_Blueprint</buildDef>
-		<repairRate>650</repairRate>
-		
-		<cargoCapacity>75</cargoCapacity>
-		<speed>1.5</speed>
 		
 		<size>(1, 1)</size>
 		
@@ -42,6 +38,12 @@
 			<MarketValue>85</MarketValue>
 			<Flammability>0.65</Flammability>
 		</statBases>
+		
+		<vehicleStats>
+			<MoveSpeed>1.5</MoveSpeed>
+			<CargoCapacity>75</CargoCapacity>
+			<RepairRate>5</RepairRate>
+		</vehicleStats>
 		
 		<properties>
 			<fishing>true</fishing>
@@ -85,7 +87,8 @@
 				<efficiencyWeight>10</efficiencyWeight>
 				
 				<categories>
-					<li>StatCategoryMovement</li>
+					<li>MoveSpeed</li>
+					<li>BodyIntegrity</li>
 				</categories>
 				<hitbox>
 					<side>Body</side>

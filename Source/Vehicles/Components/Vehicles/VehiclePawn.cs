@@ -39,10 +39,6 @@ namespace Vehicles
 
 		private float angle = 0f; /* -45 is left, 45 is right : relative to Rot4 direction*/
 
-		private float cargoCapacity;
-		private float armorPoints;
-		private float moveSpeedModifier;
-
 		private Graphic_Vehicle graphicInt;
 
 		private SelfOrderingList<ThingComp> cachedComps = new SelfOrderingList<ThingComp>();
@@ -67,16 +63,13 @@ namespace Vehicles
 
 		public IntVec3 FollowerCell { get; protected set; }
 
-		public bool CanMove => ActualMoveSpeed > 0.1f && SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), "vehicleMovementPermissions", VehicleDef.vehicleMovementPermissions) >= VehiclePermissions.DriverNeeded && movementStatus == VehicleMovementStatus.Online;
+		public bool CanMove => GetStatValue(VehicleStatDefOf.MoveSpeed) > 0.1f && SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), "vehicleMovementPermissions", VehicleDef.vehicleMovementPermissions) >= VehiclePermissions.DriverNeeded && movementStatus == VehicleMovementStatus.Online;
 		public bool CanMoveFinal => CanMove && (PawnCountToOperateFullfilled || VehicleMod.settings.debug.debugDraftAnyShip);
 		public bool PawnCountToOperateFullfilled => PawnCountToOperateLeft <= 0;
 
 		public VehicleDef VehicleDef => def as VehicleDef;
 
-		public float StatMoveSpeed => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), "speed", VehicleDef.speed);
-		public float StatArmor => 1;// SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), "armor", VehicleDef.armor);
-		public float StatCargo => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), "cargoCapacity", VehicleDef.cargoCapacity);
-		public bool StatNameable => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), "nameable", VehicleDef.nameable);
+		public bool Nameable => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), "nameable", VehicleDef.nameable);
 
 		public override Vector3 DrawPos => Drawer.DrawPos;
 
@@ -125,74 +118,6 @@ namespace Vehicles
 					compVehicleLauncher = GetSortedComp<CompVehicleLauncher>();
 				}
 				return compVehicleLauncher;
-			}
-		}
-
-		public float ActualMoveSpeed
-		{
-			get
-			{
-				float baseSpeed = (StatMoveSpeed + MoveSpeedModifier);
-				baseSpeed *= VehicleDef.properties.overweightSpeedCurve.Evaluate(MassUtility.InventoryMass(this) / CargoCapacity); //Weight decrease
-				baseSpeed *= statHandler.StatEfficiency(VehicleStatCategoryDefOf.StatCategoryMovement); //Component Efficiency
-				baseSpeed *= (this.SlowSpeed() ? 0.5f : 1f); //Lord jobs
-				return baseSpeed;
-			}
-		}
-
-		public string ActualMoveSpeedCalcString
-		{
-			get
-			{
-				return $"Speed of movement in cells per second.\n\n{"StatsReport_BaseValue".Translate()}: {StatMoveSpeed + MoveSpeedModifier}";
-			}
-		}
-
-		public float ArmorPoints
-		{
-			get
-			{
-				return armorPoints + StatArmor;
-			}
-			set
-			{
-				armorPoints = value;
-				if (armorPoints < 0)
-				{
-					armorPoints = 0f;
-				}
-			}
-		}
-
-		public float CargoCapacity
-		{
-			get
-			{
-				return cargoCapacity;
-			}
-			set
-			{
-				cargoCapacity = value;
-				if (cargoCapacity < 0)
-				{
-					cargoCapacity = 0f;
-				}
-			}
-		}
-
-		public float MoveSpeedModifier
-		{
-			get
-			{
-				return moveSpeedModifier;
-			}
-			set
-			{
-				moveSpeedModifier = value;
-				if (moveSpeedModifier < 0)
-				{
-					moveSpeedModifier = 0;
-				}
 			}
 		}
 
@@ -576,6 +501,17 @@ namespace Vehicles
 			FollowerCell = result;
 		}
 
+		public float GetStatValue(VehicleStatDef statDef)
+		{
+			//Needs caching in VehicleStatHandler
+			return statDef.Worker.GetValue(this);
+		}
+
+		public void MarkForRecache(VehicleStatDef statDef)
+		{
+			throw new NotImplementedException();
+		}
+
 		public override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
 			var drawVehicle = new Task( delegate()
@@ -866,6 +802,16 @@ namespace Vehicles
 				//		Notify_ColorChanged();
 				//	}
 				//};
+
+				yield return new Command_Action()
+				{
+					defaultLabel = "Kill Random Pawn",
+					action = delegate ()
+					{
+						Pawn pawn = AllPawnsAboard.RandomElementWithFallback(null);
+						pawn?.Kill(null);
+					}
+				};
 			}
 		}
 
@@ -1145,7 +1091,7 @@ namespace Vehicles
 
 		public void Rename()
 		{
-			if(StatNameable)
+			if (Nameable)
 			{
 				Find.WindowStack.Add(new Dialog_GiveVehicleName(this));
 			}
@@ -1175,7 +1121,7 @@ namespace Vehicles
 		{
 			Rect rect = new Rect(x, 0f, Extra.IconBarDim, Extra.IconBarDim);
 			float usedWidth = 0;
-			if (StatNameable)
+			if (Nameable)
 			{
 				usedWidth += rect.width;
 				TooltipHandler.TipRegion(rect, "RenameVehicle".Translate(LabelShort));
@@ -1696,13 +1642,6 @@ namespace Vehicles
 			graphicOverlay = new VehicleGraphicOverlay(this);
 		}
 
-		private void InitializeStats()
-		{
-			armorPoints = StatArmor;
-			cargoCapacity = StatCargo;
-			moveSpeedModifier = 0f;
-		}
-
 		public override void DrawExtraSelectionOverlays()
 		{
 			base.DrawExtraSelectionOverlays();
@@ -1726,7 +1665,6 @@ namespace Vehicles
 		public virtual void PostGenerationSetup()
 		{
 			InitializeVehicle();
-			InitializeStats();
 			ageTracker.AgeBiologicalTicks = 0;
 			ageTracker.AgeChronologicalTicks = 0;
 			ageTracker.BirthAbsTicks = 0;
@@ -1955,10 +1893,6 @@ namespace Vehicles
 			Scribe_Values.Look(ref showAllItemsOnMap, "showAllItemsOnMap");
 
 			Scribe_Collections.Look(ref cargoToLoad, "cargoToLoad");
-
-			Scribe_Values.Look(ref armorPoints, "armorPoints");
-			Scribe_Values.Look(ref cargoCapacity, "cargoCapacity");
-			Scribe_Values.Look(ref moveSpeedModifier, "moveSpeed");
 
 			Scribe_Collections.Look(ref handlers, "handlers", LookMode.Deep);
 			Scribe_Collections.Look(ref bills, "bills", LookMode.Deep);

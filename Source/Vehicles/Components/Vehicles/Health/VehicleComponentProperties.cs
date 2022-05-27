@@ -19,7 +19,7 @@ namespace Vehicles
 		public int efficiencyWeight;
 
 		public ComponentHitbox hitbox = new ComponentHitbox();
-		public List<VehicleStatCategoryDef> categories;
+		public List<VehicleStatDef> categories;
 
 		public SimpleCurve efficiency;
 
@@ -38,7 +38,7 @@ namespace Vehicles
 			}
 			if (categories is null)
 			{
-				categories = new List<VehicleStatCategoryDef>();
+				categories = new List<VehicleStatDef>();
 			}
 			if (compClass is null)
 			{

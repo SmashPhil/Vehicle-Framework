@@ -65,9 +65,9 @@ namespace Vehicles
 				{
 					return ClimbRateCurve.Evaluate(0);
 				}
-				float flightControl = Vehicle.statHandler.StatEfficiency(VehicleStatCategoryDefOf.StatCategoryFlightControl);
+				float flightControl = Vehicle.statHandler.StatEfficiency(VehicleStatDefOf.FlightControl);
 				AnyFlightControl = flightControl > 0;
-				float flightSpeed = Vehicle.statHandler.StatEfficiency(VehicleStatCategoryDefOf.StatCategoryFlightSpeed);
+				float flightSpeed = Vehicle.statHandler.StatEfficiency(VehicleStatDefOf.FlightSpeed);
 				return ClimbRateCurve.Evaluate(Mathf.Min(flightControl, flightSpeed)) * RateOfClimb;
 			}
 		}

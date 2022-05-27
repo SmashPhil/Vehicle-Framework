@@ -27,6 +27,7 @@ namespace Vehicles
 			rangedDamageMultiplier = 0.1f,
 			explosiveDamageMultiplier = 2.5f
 		};
+
 		//[PostToSettings(Label = "VehicleJobLimitations", Translate = true)]
 		public List<VehicleJobLimitations> vehicleJobLimitations = new List<VehicleJobLimitations>()
 		{
@@ -79,8 +80,6 @@ namespace Vehicles
 		[SliderValues(MinValue = 0, MaxValue = 10, RoundDecimalPlaces = 1)]
 		public float worldSpeedMultiplier = 0;
 
-		public SimpleCurve overweightSpeedCurve;
-
 		public List<FactionDef> restrictToFactions;
 
 		public RiverDef riverTraversability;
@@ -107,18 +106,6 @@ namespace Vehicles
 			customSnowCosts ??= new Dictionary<SnowCategory, int>();
 
 			roles.OrderBy(c => c.hitbox.side == VehicleComponentPosition.BodyNoOverlap).ForEach(c => c.hitbox.Initialize(vehicleDef));
-
-			if (overweightSpeedCurve is null)
-			{
-				overweightSpeedCurve = new SimpleCurve()
-				{
-					new CurvePoint(0, 1),
-					new CurvePoint(0.65f, 1),
-					new CurvePoint(0.85f, 0.9f),
-					new CurvePoint(1.05f, 0.35f),
-					new CurvePoint(1.25f, 0)
-				};
-			}
 		}
 	}
 }
