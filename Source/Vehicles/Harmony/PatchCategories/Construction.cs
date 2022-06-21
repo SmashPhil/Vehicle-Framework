@@ -70,7 +70,7 @@ namespace Vehicles
 				}
 				else
 				{
-					vehicle = PawnGenerator.GeneratePawn(vehicleDef.thingToSpawn.VehicleKindDef);
+					vehicle = PawnGenerator.GeneratePawn(vehicleDef.thingToSpawn.kindDef);
 				}
 				
 				Map map = b.Map;

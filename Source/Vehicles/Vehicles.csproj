@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\1.3\Assemblies\</OutputPath>
+    <OutputPath>..\..\Versions\1.3\Assemblies\</OutputPath>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -488,6 +488,7 @@
     <Compile Include="Harmony\PawnKindDefGenerator_Vehicles.cs" />
     <Compile Include="Harmony\StartupTesting.cs" />
     <Compile Include="Misc\DefModExtension\SpawnerPropertiesDefModExtension.cs" />
+    <Compile Include="Misc\DefModExtension\VehicleDamageMultiplierDefModExtension.cs" />
     <Compile Include="Misc\DefOf\ProjectileSkyfallerDefOf.cs" />
     <Compile Include="Misc\Enums\Turret\TurretDisableType.cs" />
     <Compile Include="Misc\Enums\UI\DebugRegionType.cs" />
@@ -520,7 +521,7 @@
     <Compile Include="Gizmo\Landing\Command_HighlightRadius.cs" />
     <Compile Include="Gizmo\Landing\Command_Highlight.cs" />
     <Compile Include="Gizmo\Landing\Zone_Runway.cs" />
-    <Compile Include="Harmony\PatchCategories\Projectiles.cs" />
+    <Compile Include="Harmony\PatchCategories\Combat.cs" />
     <Compile Include="Harmony\PatchCategories\WorldObjects.cs" />
     <Compile Include="Misc\Attributes\LoadedEarlyAttribute.cs" />
     <Compile Include="Misc\Attributes\NumericBoxValuesAttribute.cs" />
@@ -578,7 +579,6 @@
     <Compile Include="CustomFeatures\Reservation\VehicleTargetReservation.cs" />
     <Compile Include="CustomFeatures\Reservation\VehicleReservationManager.cs" />
     <Compile Include="AI\WorkGiver\WorkGiver_WorkOnUpgrade.cs" />
-    <Compile Include="CustomFeatures\Damage\VehicleDamageMultipliers.cs" />
     <Compile Include="CustomFeatures\Reservation\VehicleJobLimitations.cs" />
     <Compile Include="CustomFeatures\Upgrades\TurretUpgrade\TurretUpgrade.cs" />
     <Compile Include="CustomFeatures\Misc\IngredientFilter.cs" />

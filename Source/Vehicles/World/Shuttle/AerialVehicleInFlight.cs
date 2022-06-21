@@ -467,7 +467,7 @@ namespace Vehicles
 			}
 		}
 
-		public virtual void TakeDamage(DamageInfo damageInfo, IntVec3 cell, bool explosive)
+		public virtual void TakeDamage(DamageInfo damageInfo, IntVec2 cell, bool explosive)
 		{
 			vehicle.TakeDamage(damageInfo, cell, explosive);
 		}

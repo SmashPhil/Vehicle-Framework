@@ -23,7 +23,6 @@ namespace Vehicles
 		internal static void RegisterParsers()
 		{
 			ParseHelper.Parsers<VehicleJobLimitations>.Register(new Func<string, VehicleJobLimitations>(VehicleJobLimitations.FromString));
-			ParseHelper.Parsers<VehicleDamageMultipliers>.Register(new Func<string, VehicleDamageMultipliers>(VehicleDamageMultipliers.FromString));
 			ParseHelper.Parsers<CompVehicleLauncher.DeploymentTimer>.Register(new Func<string, CompVehicleLauncher.DeploymentTimer>(CompVehicleLauncher.DeploymentTimer.FromString));
 			ParseHelper.Parsers<VehicleTurretRender.RotationalOffset>.Register(new Func<string, VehicleTurretRender.RotationalOffset>(VehicleTurretRender.RotationalOffset.FromString));
 		}

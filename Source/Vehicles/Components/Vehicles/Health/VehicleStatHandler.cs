@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 using Verse;
+using RimWorld;
 using SmashTools;
 
 namespace Vehicles
@@ -18,6 +20,8 @@ namespace Vehicles
 
 		private readonly List<Pair<IntVec2, int>> debugCellHighlight = new List<Pair<IntVec2, int>>();
 		public readonly HashSet<Explosion> explosionsAffectingVehicle = new HashSet<Explosion>();
+
+		public Dictionary<Thing, IntVec3> impacter = new Dictionary<Thing, IntVec3>();
 
 		public VehicleStatHandler(VehiclePawn vehicle)
 		{
@@ -102,40 +106,135 @@ namespace Vehicles
 			}
 		}
 
-		public void TakeDamage(DamageInfo dinfo, IntVec3 hitCell, bool explosive = false)
+		public void RegisterImpacter(DamageInfo dinfo, IntVec3 cell)
 		{
-			ApplyDamageToComponent(dinfo, new IntVec2(hitCell.x - vehicle.Position.x, hitCell.z - vehicle.Position.z), explosive);
+			if (dinfo.Instigator != null)
+			{
+				RegisterImpacter(dinfo.Instigator, cell);
+			}
+		}
+
+		public void RegisterImpacter(Thing launcher, IntVec3 cell)
+		{
+			CellRect occupiedRect = vehicle.OccupiedRect();
+			if (!occupiedRect.Contains(cell))
+			{
+				cell = occupiedRect.MinBy(c => Ext_Map.Distance(c, cell));
+			}
+			impacter[launcher] = cell;
+		}
+
+		private IntVec2 AdjustFromVehiclePosition(IntVec2 cell)
+		{
+			if (!vehicle.Spawned)
+			{
+				return cell;
+			}
+			int x = cell.x - vehicle.Position.x;
+			int z = cell.z - vehicle.Position.z;
+			IntVec2 hitCell = new IntVec2(x, z);
+			switch (vehicle.FullRotation.AsInt)
+			{
+				case 0: //North
+					break;
+				case 4: //NorthEast
+				case 5: //SouthEast
+				case 1: //East
+					hitCell.x = -z;
+					hitCell.z = x;
+					break;
+				case 2: //South
+					hitCell.x = -x;
+					hitCell.z = -z;
+					break;
+				case 6: //SouthWest
+				case 7: //NorthWest
+				case 3: //West
+					hitCell.x = z;
+					hitCell.z = -x;
+					break;
+			}
+			return hitCell;
+		}
+
+		public void TakeDamage(DamageInfo dinfo, bool explosive = false)
+		{
+			if (!impacter.TryGetValue(dinfo.Instigator, out IntVec3 cell))
+			{
+				if (dinfo.Instigator != null)
+				{
+					cell = vehicle.OccupiedRect().MinBy(cell => Ext_Map.Distance(dinfo.Instigator.Position, vehicle.Position));
+				}
+				else
+				{
+					cell = vehicle.OccupiedRect().RandomCell; //TODO - randomize based on coverage
+				}
+			}
+			IntVec2 hitCell = AdjustFromVehiclePosition(cell.ToIntVec2);
+			TakeDamage(dinfo, hitCell, explosive);
+		}
+
+		public void TakeDamage(DamageInfo dinfo, IntVec2 hitCell, bool explosive = false)
+		{
+			StringBuilder report = VehicleMod.settings.debug.debugLogging ? new StringBuilder() : null;
+
+			ApplyDamageToComponent(dinfo, hitCell, explosive, report);
+
+			if (dinfo.Instigator != null)
+			{
+				impacter.Remove(dinfo.Instigator);
+			}
+
+			Debug.Message(report.ToStringSafe());
 
 			if (vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed) <= 0.1f)
 			{
 				vehicle.drafter.Drafted = false;
 			}
+
+			if (vehicle.Spawned && (vehicle.GetStatValue(VehicleStatDefOf.BodyIntegrity) <= 0 || components.All(c => c.health <= 0)))
+			{
+				vehicle.Kill(dinfo);
+			}
 		}
 
-		private void ApplyDamageToComponent(DamageInfo dinfo, IntVec2 hitCell, bool explosive = false)
+		private void ApplyDamageToComponent(DamageInfo dinfo, IntVec2 hitCell, bool explosive = false, StringBuilder report = null)
 		{
-			float damage = dinfo.Amount;
 			DamageDef defApplied = dinfo.Def;
+			float damage = dinfo.Amount;
 
-			if (vehicle.VehicleDef.damageMultipliers?.FirstOrDefault(d => d.damageDef == defApplied) is DamageMultiplier dMultiplier)
+			report?.AppendLine("-- DAMAGE REPORT --");
+			report?.AppendLine($"Base Damage: {damage}");
+			report?.AppendLine($"HitCell: {hitCell}");
+
+			if (dinfo.Weapon != null && dinfo.Weapon.GetModExtension<VehicleDamageMultiplierDefModExtension>() is VehicleDamageMultiplierDefModExtension extMultiplier)
 			{
-				dinfo.SetAmount(dMultiplier.multiplier);
+				damage *= extMultiplier.multiplier;
+				report?.AppendLine($"ModExtension Multiplier: {extMultiplier.multiplier} Result: {damage}");
+			}
+			
+			if (dinfo.Def.isRanged)
+			{
+				damage *= VehicleMod.settings.main.rangedDamageMultiplier;
+				report?.AppendLine($"Settings Multiplier: {VehicleMod.settings.main.rangedDamageMultiplier} Result: {damage}");
+			}
+			else if (dinfo.Def.isExplosive)
+			{
+				damage *= VehicleMod.settings.main.explosiveDamageMultiplier;
+				report?.AppendLine($"Settings Multiplier: {VehicleMod.settings.main.explosiveDamageMultiplier} Result: {damage}");
 			}
 			else
 			{
-				if (dinfo.Def.isRanged)
-				{
-					damage *= SettingsCache.TryGetValue(vehicle.VehicleDef, typeof(VehicleDamageMultipliers), nameof(VehicleDamageMultipliers.rangedDamageMultiplier), vehicle.VehicleDef.properties.vehicleDamageMultipliers.rangedDamageMultiplier);
-				}
-				else if (dinfo.Def.isExplosive)
-				{
-					damage *= SettingsCache.TryGetValue(vehicle.VehicleDef, typeof(VehicleDamageMultipliers), nameof(VehicleDamageMultipliers.explosiveDamageMultiplier), vehicle.VehicleDef.properties.vehicleDamageMultipliers.explosiveDamageMultiplier);
-				}
-				else
-				{
-					damage *= SettingsCache.TryGetValue(vehicle.VehicleDef, typeof(VehicleDamageMultipliers), nameof(VehicleDamageMultipliers.meleeDamageMultiplier), vehicle.VehicleDef.properties.vehicleDamageMultipliers.meleeDamageMultiplier);
-				}
+				damage *= VehicleMod.settings.main.meleeDamageMultiplier;
+				report?.AppendLine($"Settings Multiplier: {VehicleMod.settings.main.meleeDamageMultiplier} Result: {damage}");
 			}
+
+			if (damage <= 0)
+			{
+				report?.AppendLine($"Final Damage = {damage}. Exiting.");
+				return;
+			}
+			
 			if (explosive)
 			{
 				IntVec2 cell = new IntVec2(hitCell.x, hitCell.z);
@@ -205,11 +304,11 @@ namespace Vehicles
 			}
 			else
 			{
-				IntVec2 cell = new IntVec2(hitCell.x, hitCell.z);
+				IntVec2 cell = hitCell;
 				Rot4 direction = DirectionFromAngle(dinfo.Angle);
 				for (int i = 0; i < Mathf.Max(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z); i++)
 				{
-					VehicleComponent component = componentLocations.TryGetValue(cell, componentLocations[new IntVec2(0, 0)]).Where(c => c.HealthPercent > 0).RandomElementWithFallback();
+					VehicleComponent component = componentLocations.TryGetValue(cell, componentLocations[IntVec2.Zero]).Where(c => c.HealthPercent > 0).RandomElementWithFallback();
 					if (component is null)
 					{
 						if (damage > 0 && direction.IsValid)
@@ -241,8 +340,10 @@ namespace Vehicles
 						debugCellHighlight.Add(new Pair<IntVec2, int>(new IntVec2(cell.x, cell.z), TicksHighlighted));
 					}
 					dinfo.SetAmount(damage);
+					report?.AppendLine($"Applying Damage = {damage} to {component.props.key}");
 					DamageRoles(dinfo, cell);
 					damage = component.TakeDamage(vehicle, dinfo, new IntVec3(vehicle.Position.x + hitCell.x, 0, vehicle.Position.z + hitCell.z));
+					report?.AppendLine($"Recycled Damage = {damage}");
 					if (vehicle.Spawned && Rand.Range(0, 1) < component.props.explosionProperties.chance)
 					{
 						GenExplosion.DoExplosion(new IntVec3(vehicle.Position.x + cell.x, 0, vehicle.Position.z + cell.z), vehicle.Map, component.props.explosionProperties.radius, component.props.explosionProperties.Def, dinfo.Instigator,
@@ -386,6 +487,7 @@ namespace Vehicles
 		{
 			Scribe_References.Look(ref vehicle, "vehicle", true);
 			Scribe_Collections.Look(ref components, "components", LookMode.Deep);
+			
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
 				if (!components.NullOrEmpty())

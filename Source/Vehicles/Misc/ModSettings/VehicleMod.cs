@@ -73,7 +73,6 @@ namespace Vehicles
 					vehicleCompFields.RemoveAll(d => d.Value.NullOrEmpty() || d.Value.All(f => f.TryGetAttribute<PostToSettingsAttribute>(out var settings) && settings.UISettingsType == UISettingsType.None));
 					vehicleCompFields = vehicleCompFields.OrderByDescending(d => d.Key == typeof(List<VehicleStatModifier>))
 														 .ThenByDescending(d => d.Key.SameOrSubclass(typeof(VehicleProperties)))
-														 .ThenByDescending(d => d.Key.SameOrSubclass(typeof(VehicleDamageMultipliers)))
 														 .ThenByDescending(d => d.Key.SameOrSubclass(typeof(VehicleJobLimitations)))
 														 .ThenByDescending(d => d.Key.IsAssignableFrom(typeof(CompProperties)))
 														 .ThenByDescending(d => d.Key.IsClass)

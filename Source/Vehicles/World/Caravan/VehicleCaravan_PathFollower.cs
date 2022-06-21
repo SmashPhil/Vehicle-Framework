@@ -415,7 +415,7 @@ namespace Vehicles
 				if (roads[i].neighbor == toTile)
 				{
 					float movementCostMultiplier = roads[i].road.movementCostMultiplier;
-					if(vehicleDefs.NotNullAndAny(v => !v.properties.customRoadCosts.EnumerableNullOrEmpty()))
+					if (vehicleDefs.NotNullAndAny(v => !v.properties.customRoadCosts.EnumerableNullOrEmpty()))
 					{
 						movementCostMultiplier = vehicleDefs.Min(v => v.properties.customRoadCosts[roads[i].road]);
 					}

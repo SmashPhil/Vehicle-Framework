@@ -64,7 +64,7 @@ namespace Vehicles
 				PawnComponentsUtility.CreateInitialComponents(result);
 
 				lastStep = "Setting faction and kindDef";
-				result.kindDef = request.VehicleDef.VehicleKindDef;
+				result.kindDef = request.VehicleDef.kindDef;
 				result.SetFactionDirect(request.Faction);
 
 				lastStep = "Retrieving pattern";
@@ -144,7 +144,9 @@ namespace Vehicles
 			List<PawnKindDef> vehicles = DefDatabase<PawnKindDef>.AllDefs.Where(p => p.race.thingClass.SameOrSubclass(typeof(VehiclePawn))).ToList();
 			foreach (PawnKindDef vehicleKind in vehicles)
 			{
-				if ( ((vehicleKind.race as VehicleDef).properties.restrictToFactions.NullOrEmpty() || (vehicleKind.race as VehicleDef).properties.restrictToFactions.Contains(faction.def)) && (vehicleKind.race as VehicleDef).vehicleTech <= faction.def.techLevel && vehicleKind.combatPower <= points)
+				bool restrictToFactions = (vehicleKind.race as VehicleDef).properties.restrictToFactions.NullOrEmpty() || (vehicleKind.race as VehicleDef).properties.restrictToFactions.Contains(faction.def);
+				bool techLevelSatisfied = (vehicleKind.race as VehicleDef).techLevel <= faction.def.techLevel;
+				if (restrictToFactions && techLevelSatisfied && vehicleKind.combatPower <= points)
 				{
 					if (combatFocused)
 					{

@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <!--Can utilize Version.txt file placed in mod's root directory-->
+  <currentVersion>1.3.8174</currentVersion>
+  <!--Startup,GameInit,LoadedGame,NewGame-->
+  <updateOn>Startup</updateOn>
+  <!--Full description shown in update page-->
+  <description>[title]Recent News[/title][font]Small[/font]
+
+[title]Balance Changes[/title][font]Small[/font]
+[b]Tank (Vehicle)[/b]
+- Increased RepairRate from 1.5 to 2.5
+- Decreased MoveSpeed from 3.75 to 3.25
+
+[b]Car (Vehicle)[/b]
+- Decreased RepairRate from 650 to 3.25
+
+[b]Rowboat (Vehicle)[/b]
+- Decreased RepairRate from 650 to 5
+
+[b]Fishing Boat (Vehicle)[/b]
+- Decreased RepairRate from 650 to 4.25
+
+[b]Sparrow (Vehicle)[/b]
+- Decreased RepairRate from 650 to 1.75
+
+[b]Hot Air Balloon (Vehicle)[/b]
+- Decreased RepairRate from 650 to 4.5
+
+[b] Advanced Transport Pod (Buildable)[/b]
+- Decreased MaxHitPoints from 5000 to 450
+- Increased WorkToBuild from 30 to 45000
+- Changed CostList from 35 ComponentIndustrial + 3000 Steel to 12 ComponentIndustrial + 4 ComponentSpacer + 450 Steel + 75 Plasteel
+
+[b]Advanced Transport Pod (Vehicle)[/b]
+- Decreased RepairRate from 650 to 3.25
+
+[title]Bug Fixes[/title][font]Small[/font]
+- Fixed bug where vehicles would continue to path to their destination even after roles are no longer fulfilled (pawn dies while driving)
+
+- Fixed bug where vehicle turrets continue to fire even after roles are no longer fulfilled (same as above)
+
+- Fixed bug where vehicle caravan could be instant sent on a tile that was impassable for a vehicle in the caravan, causing the caravan to despawn. Same issue would bug out the route planner.
+[title]Additional Changes[/title][font]Small[/font]
+- Reworked health mechanics of Vehicles to use similar (but stripped down) version of StatModifiers, StatParts, and StatDefs. This will allow defining of new stats with less effort, as well as allowing other modders to create StatParts to modify the final value.
+
+- Reworked damage modifiers to instead use vanilla DamageDef multipliers, rather than melee, ranged, and explosive multipliers.
+
+- Vehicles that reach 0% body integrity or 0% in every vehicle component will be destroyed, rather than spawning a building variant. Partial refund related to the cost of building is included.
+
+- Vehicles that are impassable on the map's tile will be disabled in the caravan formation dialog
+[title]Final Notes[/title][font]Small[/font]
+Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
+</description>
+  <!--Static parameterless method to execute when update log is executed-->
+  <actionOnUpdate></actionOnUpdate>
+  <!--Show update log on next startup.-->
+  <update>false</update>
+  <!--Testing mode prevents the update from saving over the UpdateLog file-->
+  <testing>true</testing>
+  <!--Icon bar shown to the right of the mod's name-->
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon</icon>
+      <url>steam://url/CommunityFilePage/2356577528</url>
+    </li>
+  </rightIconBar>
+  <!--Icon bar shown to the left of the mod's name-->
+  <leftIconBar>
+    <li>
+      <name>Patreon</name>
+      <icon>patreonIcon</icon>
+      <url>https://www.patreon.com/smashphil</url>
+    </li>
+    <li>
+      <name>Cursed Crew</name>
+      <icon>cursedCrewIcon</icon>
+      <url>https://discord.gg/NNe2VxAU7Z</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>

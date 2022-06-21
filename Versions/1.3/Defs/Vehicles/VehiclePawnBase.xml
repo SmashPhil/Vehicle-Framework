@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<Vehicles.VehicleDef Name="BaseVehiclePawn" Abstract="True">
+		<thingClass>Vehicles.VehiclePawn</thingClass>
+		<category>Pawn</category>
+		<selectable>true</selectable>
+		<tickerType>Normal</tickerType>
+		<altitudeLayer>Pawn</altitudeLayer>
+		<useHitPoints>false</useHitPoints>
+		<hasTooltip>true</hasTooltip>
+		<repairEffect>Repair</repairEffect>
+		<passability>Standable</passability>
+		<pathCost>250</pathCost>
+		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
+		
+		<tradeability>None</tradeability> <!-- Temporary until icons are fixed and vehicle prices are balanced -->
+		
+		<vehicleStats>
+			<MoveSpeed>3.75</MoveSpeed>
+			<CargoCapacity>200</CargoCapacity>
+			<RepairRate>1.5</RepairRate>
+		</vehicleStats>
+		
+		<statBases>
+			<Mass>100</Mass>
+			<PsychicSensitivity>0</PsychicSensitivity>
+			<ToxicSensitivity>0</ToxicSensitivity>
+			<Flammability>0</Flammability>
+			<ComfyTemperatureMin>-200</ComfyTemperatureMin>
+			<ComfyTemperatureMax>200</ComfyTemperatureMax>
+			<!-- Redundant value, vehicles don't have meat anyways. Serves as a final stop-gap so no vehicle meat is ever spawned -->
+			<MeatAmount>0</MeatAmount> 
+		</statBases>
+		
+		<inspectorTabs>
+			<li>Vehicles.ITab_Vehicle_Health</li>
+			<li>Vehicles.ITab_Vehicle_Passengers</li>
+			<li>Vehicles.ITab_Vehicle_Cargo</li>
+			<li>ITab_Pawn_FormingCaravan</li>
+		</inspectorTabs>
+		
+		<properties>
+			<visibility>0.5</visibility>
+			<diagonalRotation>true</diagonalRotation>
+			<manhunterTargetsVehicle>false</manhunterTargetsVehicle>
+		
+			<vehicleJobLimitations>
+				<li>
+					<defName>UpgradeVehicle</defName>
+					<maxWorkers>3</maxWorkers>
+				</li>
+				<li>
+					<defName>RepairVehicle</defName>
+					<maxWorkers>2</maxWorkers>
+				</li>
+				<li>
+					<defName>LoadUpgradeMaterials</defName>
+					<maxWorkers>2</maxWorkers>
+				</li>
+			</vehicleJobLimitations>
+			
+			<healthLabel_Healthy>Operational</healthLabel_Healthy>
+			<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
+			<healthLabel_Immobile>Inoperable</healthLabel_Immobile>
+			<healthLabel_Dead>Ruined</healthLabel_Dead>
+			<healthLabel_Beached>Beached</healthLabel_Beached>
+			
+			<customThingCosts>
+				<li>
+					<key>Column</key>
+					<value>-1</value>
+				</li>
+			</customThingCosts>
+		</properties>
+		
+		<race>
+			<body>emptyBody</body>
+			<trainability>None</trainability>
+			<thinkTreeMain>Vehicle</thinkTreeMain>
+			<intelligence>ToolUser</intelligence>
+			<fleshType>MetalVehicle</fleshType>
+			<needsRest>false</needsRest>
+			<hasGenders>false</hasGenders>
+			<foodType>None</foodType>
+
+			<baseBodySize>1.0</baseBodySize>
+			<baseHealthScale>1.0</baseHealthScale>
+			
+			<!-- These sounds will never trigger, vehicles can't melee -->
+			<soundMeleeHitPawn>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitPawn>
+			<soundMeleeHitBuilding>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeHitBuilding>
+			<soundMeleeMiss>Pawn_Melee_MechanoidSlash_HitPawn</soundMeleeMiss>
+			
+			<lifeStageAges>
+				<li>
+					<def>MechanoidFullyFormed</def>
+					<minAge>0</minAge>
+					<soundWounded>BulletImpact_Metal</soundWounded>
+				</li>
+			</lifeStageAges>
+		</race>
+		
+		<comps>
+			<li>
+				<compClass>CompAttachBase</compClass>
+			</li>
+		</comps>
+		
+		<drawGUIOverlay>true</drawGUIOverlay>
+	</Vehicles.VehicleDef>
+	
+	<Vehicles.VehicleDef Name="BaseVehiclePawnUpgradeable" ParentName="BaseVehiclePawn" Abstract="True">
+		<inspectorTabs>
+			<li>Vehicles.ITab_Vehicle_Upgrades</li>
+		</inspectorTabs>
+	</Vehicles.VehicleDef>
+</Defs>

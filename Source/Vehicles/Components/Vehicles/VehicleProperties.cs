@@ -20,13 +20,8 @@ namespace Vehicles
 		public float wakeMultiplier = 1.6f;
 		public float wakeSpeed = 1.6f;
 
-		[PostToSettings(Label = "VehicleDamageMultipliers", Translate = true, ParentHolder = true)]
-		public VehicleDamageMultipliers vehicleDamageMultipliers = new VehicleDamageMultipliers()
-		{
-			meleeDamageMultiplier = 0.01f,
-			rangedDamageMultiplier = 0.1f,
-			explosiveDamageMultiplier = 2.5f
-		};
+		//[PostToSettings(Label = "VehicleDamageMultipliers", Tooltip = "VehicleTechLevelDamageMultipliersTooltip", Translate = true, ParentHolder = true)]
+		//public VehicleDamageMultipliers techLevelDamageMultipliers = new VehicleDamageMultipliers();
 
 		//[PostToSettings(Label = "VehicleJobLimitations", Translate = true)]
 		public List<VehicleJobLimitations> vehicleJobLimitations = new List<VehicleJobLimitations>()
@@ -78,7 +73,7 @@ namespace Vehicles
 		public float winterPathCostMultiplier = 2.5f;
 		[PostToSettings(Label = "VehicleWorldSpeedMultiplier", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(MinValue = 0, MaxValue = 10, RoundDecimalPlaces = 1)]
-		public float worldSpeedMultiplier = 0;
+		public float worldSpeedMultiplier = 1;
 
 		public List<FactionDef> restrictToFactions;
 
@@ -104,6 +99,8 @@ namespace Vehicles
 			customTerrainCosts ??= new Dictionary<TerrainDef, int>();
 			customThingCosts ??= new Dictionary<ThingDef, int>();
 			customSnowCosts ??= new Dictionary<SnowCategory, int>();
+
+			//vehicleDamageMultipliers ??= new VehicleDamageMultipliers();
 
 			roles.OrderBy(c => c.hitbox.side == VehicleComponentPosition.BodyNoOverlap).ForEach(c => c.hitbox.Initialize(vehicleDef));
 		}

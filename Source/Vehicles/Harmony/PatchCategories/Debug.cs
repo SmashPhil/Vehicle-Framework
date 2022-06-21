@@ -125,5 +125,31 @@ namespace Vehicles
 				GenDraw.DrawWorldRadiusRing(t.First, t.Second);
 			}
 		}
+
+		[DebugAction(VehicleHarmony.VehiclesLabel, "Draw Hitbox Size", allowedGameStates = AllowedGameStates.PlayingOnMap)]
+		public static void DebugDrawHitbox()
+		{
+			DebugTool tool = null;
+			IntVec3 first;
+			tool = new DebugTool("first corner...", delegate ()
+			{
+				first = UI.MouseCell();
+				string label = "second corner...";
+				Action action = delegate ()
+				{
+					IntVec3 second = UI.MouseCell();
+					CellRect cellRect = CellRect.FromLimits(first, second).ClipInsideMap(Find.CurrentMap);
+					IntVec3 center = cellRect.CenterCell;
+					foreach (IntVec3 cell in cellRect)
+					{
+						IntVec3 diff = cell - center;
+						Current.Game.CurrentMap.debugDrawer.FlashCell(cell, 0.75f, diff.ToIntVec2.ToString(), 3600);
+					}
+					DebugTools.curTool = tool;
+				};
+				DebugTools.curTool = new DebugTool(label, action, first);
+			});
+			DebugTools.curTool = tool;
+		}
 	}
 }

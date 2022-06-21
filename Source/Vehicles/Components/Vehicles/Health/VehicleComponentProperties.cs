@@ -16,7 +16,7 @@ namespace Vehicles
 		public int health;
 		public float armor;
 		public ExplosionProperties explosionProperties;
-		public int efficiencyWeight;
+		public int efficiencyWeight = 1;
 
 		public ComponentHitbox hitbox = new ComponentHitbox();
 		public List<VehicleStatDef> categories;
@@ -67,7 +67,11 @@ namespace Vehicles
 			}
 			if (hitbox is null)
 			{
-				yield return $"<field>hitbox</field> must be specified.".ConvertRichText();
+				yield return $"{key}: <field>hitbox</field> must be specified.".ConvertRichText();
+			}
+			if (efficiencyWeight == 0)
+			{
+				yield return $"{key}: <field>efficiencyWeight</field> cannot = 0. If average weight = 0, resulting damage will be NaN, causing an instant-kill on the vehicle.";
 			}
 		}
 

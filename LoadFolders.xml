@@ -2,6 +2,8 @@
 <loadFolders>
 	<v1.3>
 		<li>/</li>
-		<li>1.3</li>
+		<li>Versions/1.3</li>
+		<li IfModActive = "Ludeon.RimWorld.Royalty">Versions/Royalty</li>
+		<li IfModActive = "Ludeon.RimWorld.Ideology">Versions/Ideology</li>
 	</v1.3>
 </loadFolders>

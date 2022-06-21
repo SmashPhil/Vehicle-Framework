@@ -42,6 +42,11 @@
 	<VehiclesModifiableSettings>Modifiable Settings</VehiclesModifiableSettings>
 	<ShowRecentNews>Show Most Recent News</ShowRecentNews>
 	
+	<VehicleDamageMultipliers>Damage on Vehicles</VehicleDamageMultipliers>
+	<MeleeDamageMultiplier>Melee Damage Multiplier</MeleeDamageMultiplier>
+	<RangedDamageMultiplier>Ranged Damage Multiplier</RangedDamageMultiplier>
+	<ExplosiveDamageMultiplier>Explosive Damage Multiplier</ExplosiveDamageMultiplier>
+	
 	<ShuffledCannonFire>Shuffled Cannons</ShuffledCannonFire>
 	<ShuffledCannonFireTooltip>Randomize the order in which broadside cannons fire.</ShuffledCannonFireTooltip>
 	<RiverTravelAllowed>Travel on Rivers</RiverTravelAllowed>

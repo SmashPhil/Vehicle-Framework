@@ -93,27 +93,32 @@ namespace Vehicles
 				}
 				if (def.GetModExtension<CustomCostDefModExtension>() is CustomCostDefModExtension customCost)
 				{
-					foreach (VehicleDef vehicleDef in customCost.vehicles)
+					List<VehicleDef> vehicles = customCost.vehicles;
+					if (vehicles.NullOrEmpty()) //If no vehicles are specified, apply to all
+					{
+						vehicles = DefDatabase<VehicleDef>.AllDefsListForReading;
+					}
+					foreach (VehicleDef vehicleDef in vehicles)
 					{
 						if (def is TerrainDef terrainDef)
 						{
-							vehicleDef.properties.customTerrainCosts[terrainDef] = customCost.pathCost;
+							vehicleDef.properties.customTerrainCosts[terrainDef] = customCost.cost;
 						}
 						if (def is ThingDef thingDef)
 						{
-							vehicleDef.properties.customThingCosts[thingDef] = customCost.pathCost;
+							vehicleDef.properties.customThingCosts[thingDef] = customCost.cost;
 						}
 						if (def is BiomeDef biomeDef)
 						{
-							vehicleDef.properties.customBiomeCosts[biomeDef] = customCost.pathCost;
+							vehicleDef.properties.customBiomeCosts[biomeDef] = customCost.cost;
 						}
 						if (def is RiverDef riverDef)
 						{
-							vehicleDef.properties.customRiverCosts[riverDef] = customCost.pathCost;
+							vehicleDef.properties.customRiverCosts[riverDef] = customCost.cost;
 						}
 						if (def is RoadDef roadDef)
 						{
-							vehicleDef.properties.customRoadCosts[roadDef] = customCost.pathCost;
+							vehicleDef.properties.customRoadCosts[roadDef] = customCost.cost;
 						}
 					}
 				}

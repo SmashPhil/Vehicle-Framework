@@ -7,6 +7,7 @@ using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
 using Verse;
+using Verse.Sound;
 using Verse.AI;
 using Verse.AI.Group;
 using SmashTools;
@@ -870,42 +871,34 @@ namespace Vehicles
 			return AllPawnsAboard.Contains(pawn);
 		}
 
-		public virtual void TakeDamage(DamageInfo dinfo, IntVec3 cell, bool explosive = false)
+		public virtual void TakeDamage(DamageInfo dinfo, IntVec2 cell, bool explosive = false)
 		{
 			statHandler.TakeDamage(dinfo, cell, explosive);
-			if (statHandler.components.All(c => c.HealthPercent <= 0))
-			{
-				if (Spawned)
-				{
-					Destroy(DestroyMode.Deconstruct);
-				}
-				else if (this.GetAerialVehicle() is AerialVehicleInFlight aerialVehicle)
-				{
-					aerialVehicle.Destroy();
-					Messages.Message("VEHICLE EXPLODED", MessageTypeDefOf.NegativeHealthEvent); //REDO - change to letter
-				}
-			}
 		}
 
+		///Divert damage calculations to <see cref="VehicleStatHandler"/>
 		public override void PreApplyDamage(ref DamageInfo dinfo, out bool absorbed)
 		{
+			statHandler.TakeDamage(dinfo);
 			absorbed = true;
 		}
 
 		public override void Kill(DamageInfo? dinfo, Hediff exactCulprit = null)
+		{
+			Kill(dinfo, spawnWreckage: false);
+		}
+
+		public virtual void Kill(DamageInfo? dinfo, DestroyMode destroyMode = DestroyMode.KillFinalize, bool spawnWreckage = false)
 		{
 			IntVec3 position = PositionHeld;
 			Rot4 rotation = Rotation;
 
 			Map map = Map;
 			Map mapHeld = MapHeld;
-			bool flag = Spawned;
+			bool spawned = Spawned;
 			bool worldPawn = this.IsWorldPawn();
 			Caravan caravan = this.GetCaravan();
 			ThingDef vehicleDef = VehicleDef.buildDef;
-
-			VehicleBuilding thing = (VehicleBuilding)ThingMaker.MakeThing(vehicleDef);
-			thing.SetFactionDirect(Faction);
 
 			if (Current.ProgramState == ProgramState.Playing)
 			{
@@ -913,7 +906,7 @@ namespace Vehicles
 			}
 			if (dinfo != null && dinfo.Value.Instigator != null)
 			{
-				if(dinfo.Value.Instigator is Pawn pawn)
+				if (dinfo.Value.Instigator is Pawn pawn)
 				{
 					RecordsUtility.Notify_PawnKilled(this, pawn);
 				}
@@ -923,16 +916,28 @@ namespace Vehicles
 			{
 				this.GetLord().Notify_PawnLost(this, PawnLostCondition.IncappedOrKilled, dinfo);
 			}
-			if (flag)
+			if (spawned)
 			{
 				DropAndForbidEverything(false);
+				if (destroyMode == DestroyMode.Deconstruct)
+				{
+					SoundDefOf.Building_Deconstructed.PlayOneShot(new TargetInfo(Position, map, false));
+				}
+				else if (destroyMode == DestroyMode.KillFinalize)
+				{
+					DoDestroyEffects(map);
+				}
 			}
 
-			thing.vehicle = this;
-			thing.HitPoints = thing.MaxHitPoints / 10;
+			VehicleBuilding wreckage = (VehicleBuilding)ThingMaker.MakeThing(vehicleDef);
+			wreckage.SetFactionDirect(Faction);
+			wreckage.vehicle = this;
+			wreckage.HitPoints = wreckage.MaxHitPoints / 10;
+
 			meleeVerbs.Notify_PawnKilled();
-			if (flag)
+			if (spawned)
 			{
+				CellRect cellRect = this.OccupiedRect();
 				if (map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterOceanDeep || map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterDeep)
 				{
 					IntVec3 lookCell = Position;
@@ -947,13 +952,112 @@ namespace Vehicles
 				}
 				else
 				{
-					Find.LetterStack.ReceiveLetter("ShipSunkLabel".Translate(), "ShipSunkShallow".Translate(LabelShort), LetterDefOf.NegativeEvent, new TargetInfo(position, map, false), null, null);
+					//Find.LetterStack.ReceiveLetter("ShipSunkLabel".Translate(), "ShipSunkShallow".Translate(LabelShort), LetterDefOf.NegativeEvent, new TargetInfo(position, map, false), null, null);
 					DisembarkAll();
 					Destroy();
 				}
-				Thing t = GenSpawn.Spawn(thing, position, map, rotation, WipeMode.FullRefund, false);
+
+				if (spawnWreckage)
+				{
+					GenSpawn.Spawn(wreckage, position, map, rotation, WipeMode.FullRefund);
+				}
+				else
+				{
+					GenLeaving.DoLeavingsFor(wreckage, map, DestroyMode.KillFinalize, cellRect);
+				}
 			}
 			return;
+		}
+
+		protected virtual void DoDestroyEffects(Map map)
+		{
+			if (VehicleDef.buildDef.building.destroyEffecter != null)
+			{
+				Effecter effecter = VehicleDef.buildDef.building.destroyEffecter.Spawn(Position, map, 1f);
+				effecter.Trigger(new TargetInfo(Position, map), TargetInfo.Invalid);
+				effecter.Cleanup();
+				return;
+			}
+			SoundDef destroySound = GetDestroySound();
+			if (destroySound != null)
+			{
+				destroySound.PlayOneShot(new TargetInfo(Position, map));
+			}
+			foreach (IntVec3 intVec in this.OccupiedRect())
+			{
+				int num = VehicleDef.buildDef.building.isNaturalRock ? 1 : Rand.RangeInclusive(3, 5);
+				for (int i = 0; i < num; i++)
+				{
+					FleckMaker.ThrowDustPuffThick(intVec.ToVector3Shifted(), map, Rand.Range(1.5f, 2f), Color.white);
+				}
+			}
+			if (Find.CurrentMap == map)
+			{
+				float num2 = VehicleDef.buildDef.building.destroyShakeAmount;
+				if (num2 < 0f)
+				{
+					num2 = VehicleDef.buildDef.shakeAmountPerAreaCurve?.Evaluate(VehicleDef.buildDef.Size.Area) ?? 0;
+				}
+				CompLifespan compLifespan = GetSortedComp<CompLifespan>();
+				if (compLifespan == null || compLifespan.age < compLifespan.Props.lifespanTicks)
+				{
+					Find.CameraDriver.shaker.DoShake(num2);
+				}
+			}
+		}
+
+		public virtual SoundDef GetDestroySound()
+		{
+			if (!VehicleDef.buildDef.building.destroySound.NullOrUndefined())
+			{
+				return VehicleDef.buildDef.building.destroySound;
+			}
+			
+			if (VehicleDef.buildDef.CostList.NullOrEmpty() || !VehicleDef.buildDef.CostList[0].thingDef.IsStuff || VehicleDef.buildDef.CostList[0].thingDef.stuffProps.categories.NullOrEmpty())
+			{
+				return null;
+			}
+			StuffCategoryDef stuffCategoryDef = VehicleDef.buildDef.CostList[0].thingDef.stuffProps.categories[0];
+
+			switch (VehicleDef.buildDef.building.buildingSizeCategory)
+			{
+				case BuildingSizeCategory.None:
+					{
+						int area = VehicleDef.buildDef.Size.Area;
+						if (area <= 1 && !stuffCategoryDef.destroySoundSmall.NullOrUndefined())
+						{
+							return stuffCategoryDef.destroySoundSmall;
+						}
+						if (area <= 4 && !stuffCategoryDef.destroySoundMedium.NullOrUndefined())
+						{
+							return stuffCategoryDef.destroySoundMedium;
+						}
+						if (!stuffCategoryDef.destroySoundLarge.NullOrUndefined())
+						{
+							return stuffCategoryDef.destroySoundLarge;
+						}
+						break;
+					}
+				case BuildingSizeCategory.Small:
+					if (!stuffCategoryDef.destroySoundSmall.NullOrUndefined())
+					{
+						return stuffCategoryDef.destroySoundSmall;
+					}
+					break;
+				case BuildingSizeCategory.Medium:
+					if (!stuffCategoryDef.destroySoundMedium.NullOrUndefined())
+					{
+						return stuffCategoryDef.destroySoundMedium;
+					}
+					break;
+				case BuildingSizeCategory.Large:
+					if (!stuffCategoryDef.destroySoundLarge.NullOrUndefined())
+					{
+						return stuffCategoryDef.destroySoundLarge;
+					}
+					break;
+			}
+			return null;
 		}
 
 		public void AddComp(ThingComp comp)
@@ -1694,7 +1798,7 @@ namespace Vehicles
 
 		public override void SpawnSetup(Map map, bool respawningAfterLoad)
 		{
-			kindDef ??= VehicleDef.VehicleKindDef;
+			kindDef = VehicleDef.kindDef;
 			base.SpawnSetup(map, respawningAfterLoad);
 			if (!respawningAfterLoad)
 			{

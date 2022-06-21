@@ -12,6 +12,15 @@ namespace Vehicles
 	{
 		public VehiclePawn vehicle;
 
+		public VehicleDef VehicleDef
+		{
+			get
+			{
+				VehicleBuildDef buildDef = def as VehicleBuildDef;
+				return buildDef.thingToSpawn;
+			}
+		}
+
 		public override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
 			if (vehicle != null)

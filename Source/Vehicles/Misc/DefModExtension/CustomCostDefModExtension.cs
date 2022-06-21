@@ -9,7 +9,7 @@ namespace Vehicles
 	public class CustomCostDefModExtension : DefModExtension
 	{
 		public List<VehicleDef> vehicles = new List<VehicleDef>();
-		public int pathCost;
+		public int cost;
 
 		public override IEnumerable<string> ConfigErrors()
 		{

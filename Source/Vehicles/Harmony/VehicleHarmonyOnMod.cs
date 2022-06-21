@@ -104,7 +104,10 @@ namespace Vehicles
 		{
 			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
 			{
-				DefGenerator.AddImpliedDef(PawnKindDefGenerator_Vehicles.GenerateImpliedPawnKindDef(vehicleDef));
+				if (PawnKindDefGenerator_Vehicles.GenerateImpliedPawnKindDef(vehicleDef, out PawnKindDef kindDef))
+				{
+					DefGenerator.AddImpliedDef(kindDef);
+				}
 			}
 		}
 

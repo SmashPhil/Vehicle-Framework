@@ -542,6 +542,12 @@ namespace Vehicles
 					}
 					else
 					{
+						List<VehiclePawn> vehiclesFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables).Where(pawn => pawn is VehiclePawn).Cast<VehiclePawn>().ToList();
+						if (vehiclesFromTransferables.Any(vehicle => !Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().PassableFast(map.Tile, vehicle.VehicleDef)))
+						{
+							Messages.Message("MessageNoValidExitTile".Translate(), MessageTypeDefOf.RejectInput, false);
+							return;
+						}
 						VehicleRoutePlanner.Instance.Start(this);
 					}
 				}
@@ -584,6 +590,12 @@ namespace Vehicles
 
 		private bool DebugTryFormCaravanInstantly()
 		{
+			List<VehiclePawn> vehiclesFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables).Where(pawn => pawn is VehiclePawn).Cast<VehiclePawn>().ToList();
+			if (vehiclesFromTransferables.Any(vehicle => !Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().PassableFast(map.Tile, vehicle.VehicleDef)))
+			{
+				Messages.Message("MessageNoValidExitTile".Translate(), MessageTypeDefOf.RejectInput, false);
+				return false;
+			}
 			List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables);
 			List<Pawn> innerPawns = pawnsFromTransferables.Where(v => v is VehiclePawn).SelectMany(v => (v as VehiclePawn).AllPawnsAboard).ToList();
 			if (!pawnsFromTransferables.Concat(innerPawns).NotNullAndAny((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer)) && !pawnsFromTransferables.NotNullAndAny(v => v is VehiclePawn))

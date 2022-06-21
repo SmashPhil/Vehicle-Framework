@@ -37,11 +37,6 @@
 	<VehicleVisibilityWorldMap>Visibility</VehicleVisibilityWorldMap>
 	<VehicleManhunterTargeted>Manhunter Targets Vehicle</VehicleManhunterTargeted>
 	
-	<VehicleDamageMultipliers>Damage Multipliers</VehicleDamageMultipliers>
-	<MeleeDamageMultiplier>Melee</MeleeDamageMultiplier>
-	<RangedDamageMultiplier>Ranged</RangedDamageMultiplier>
-	<ExplosiveDamageMultiplier>Explosive</ExplosiveDamageMultiplier>
-	
 	<VehicleJobLimitations>Vehicle Jobs</VehicleJobLimitations>
 	<VehicleMaxWorkers>Max Workers</VehicleMaxWorkers>
 	

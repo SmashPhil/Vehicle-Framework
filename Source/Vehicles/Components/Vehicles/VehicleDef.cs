@@ -31,7 +31,6 @@ namespace Vehicles
 		public bool canCaravan = true;
 
 		public VehicleCategory vehicleCategory = VehicleCategory.Misc;
-		public TechLevel vehicleTech = TechLevel.Industrial;
 		public VehicleType vehicleType = VehicleType.Land;
 
 		[PostToSettings(Label = "VehicleNavigationType", Translate = true, UISettingsType = UISettingsType.SliderEnum)]
@@ -45,16 +44,17 @@ namespace Vehicles
 		
 		public VehicleDrawProperties drawProperties;
 
+		/// <summary>
+		/// Auto-generated <c>PawnKindDef</c> that has been assigned for this VehicleDef.
+		/// </summary>
+		/// <remarks>If kindDef is set in VehicleDef, it will be overridden and the implied PawnKindDef will not be assigned.</remarks>
+		public PawnKindDef kindDef;
+
 		public List<VehicleComponentProperties> components;
 
 		private readonly SelfOrderingList<CompProperties> cachedComps = new SelfOrderingList<CompProperties>();
 		private Texture2D resolvedLoadCargoTexture;
 		private Texture2D resolvedCancelCargoTexture;
-
-		/// <summary>
-		/// Auto-generated <c>PawnKindDef</c> that has been assigned for this VehicleDef
-		/// </summary>
-		public PawnKindDef VehicleKindDef { get; internal set; }
 
 		/// <summary>
 		/// Icon used for LoadCargo gizmo

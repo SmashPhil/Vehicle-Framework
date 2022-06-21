@@ -8,22 +8,27 @@ namespace Vehicles
 {
 	public static class PawnKindDefGenerator_Vehicles
 	{
-		public static PawnKindDef GenerateImpliedPawnKindDef(VehicleDef vehicleDef)
+		public static bool GenerateImpliedPawnKindDef(VehicleDef vehicleDef, out PawnKindDef kindDef)
 		{
-			PawnKindDef kindDef = new PawnKindDef()
+			kindDef = vehicleDef.kindDef;
+			if (kindDef == null)
 			{
-				defName = vehicleDef.defName + "_PawnKind",
-				label = vehicleDef.label,
-				description = vehicleDef.description,
-				combatPower = vehicleDef.combatPower,
-				race = vehicleDef,
-				lifeStages = new List<PawnKindLifeStage>()
+				kindDef = new PawnKindDef()
 				{
-					new PawnKindLifeStage()
-				}
-			};
-			vehicleDef.VehicleKindDef = kindDef;
-			return kindDef;
+					defName = vehicleDef.defName + "_PawnKind",
+					label = vehicleDef.label,
+					description = vehicleDef.description,
+					combatPower = vehicleDef.combatPower,
+					race = vehicleDef,
+					lifeStages = new List<PawnKindLifeStage>()
+					{
+						new PawnKindLifeStage()
+					}
+				};
+				vehicleDef.kindDef = kindDef;
+				return true;
+			}
+			return false;
 		}
 	}
 }

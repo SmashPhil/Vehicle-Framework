@@ -25,7 +25,6 @@ namespace Vehicles
 		public ThingFilter ammunition;
 
 		public int magazineCapacity = 1;
-		public int numberCannons = 1;
 		public bool genericAmmo = false;
 		public TurretCooldownProperties cooldown;
 
@@ -40,8 +39,6 @@ namespace Vehicles
 		/// baseCannonTexPath is for base plate only (static texture below cannon that represents the floor or attaching point of the cannon)
 		/// </summary>
 		public GraphicDataRGB graphicData;
-
-		public string baseCannonTexPath;
 
 		public string gizmoDescription;
 		public string gizmoIconTexPath;

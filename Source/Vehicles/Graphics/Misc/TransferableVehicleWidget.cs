@@ -7,6 +7,7 @@ using Verse;
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -52,6 +53,7 @@ namespace Vehicles
 
 		private Dictionary<TransferableOneWay, int> cachedTicksUntilRot = new Dictionary<TransferableOneWay, int>();
 		private static List<TransferableCountToTransferStoppingPoint> stoppingPoints = new List<TransferableCountToTransferStoppingPoint>();
+		private Dictionary<VehiclePawn, bool> impassableOnTile = new Dictionary<VehiclePawn, bool>();
 
 		private Vector2 scrollPosition;
 
@@ -106,7 +108,7 @@ namespace Vehicles
 		public TransferableVehicleWidget(IEnumerable<TransferableOneWay> transferables, string sourceLabel, string destinationLabel, string sourceCountDesc, bool drawMass = false, 
 			IgnorePawnsInventoryMode ignorePawnInventoryMass = IgnorePawnsInventoryMode.DontIgnore, bool includePawnsMassInMassUsage = false, Func<float> availableMassGetter = null, 
 			float extraHeaderSpace = 0f, bool ignoreSpawnedCorpseGearAndInventoryMass = false, int tile = -1, bool drawMarketValue = false, bool drawNutritionEatenPerDay = false, 
-			bool drawFishPerDay = false, bool playerPawnsReadOnly = false)
+			bool drawFishPerDay = false)
 		{
 			if (transferables != null)
 			{
@@ -125,7 +127,6 @@ namespace Vehicles
 			this.drawMarketValue = drawMarketValue;
 			this.drawNutritionEatenPerDay = drawNutritionEatenPerDay;
 			this.drawFishPerDay = drawFishPerDay;
-			this.playerPawnsReadOnly = playerPawnsReadOnly;
 			sorter1 = TransferableSorterDefOf.Category;
 			sorter2 = TransferableSorterDefOf.MarketValue;
 		}
@@ -138,6 +139,18 @@ namespace Vehicles
 			item.cachedTransferables = new List<TransferableOneWay>();
 			sections.Add(item);
 			transferablesCached = false;
+
+			if (!transferables.EnumerableNullOrEmpty())
+			{
+				WorldVehiclePathGrid worldVehiclePathGrid = Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>();
+				foreach (TransferableOneWay transferable in transferables)
+				{
+					if (transferable.AnyThing is VehiclePawn vehicle)
+					{
+						impassableOnTile[vehicle] = !worldVehiclePathGrid.Passable(tile, vehicle.VehicleDef);
+					}
+				}
+			}
 		}
 
 		private void CacheTransferables()
@@ -261,9 +274,8 @@ namespace Vehicles
 				int threshold = (num2 <= 0f) ? 0 : Mathf.FloorToInt(num2 / GetMass(trad.AnyThing));
 				stoppingPoints.Add(new TransferableCountToTransferStoppingPoint(threshold, "M<", ">M"));
 			}
-			VehiclePawn pawn = trad.AnyThing as VehiclePawn;
-			bool flag = pawn != null && (pawn.IsColonist || pawn.IsPrisonerOfColony);
-			UIHelper.DoCountAdjustInterface(rect2, trad, AvailablePawns, index, 0, maxCount, false, stoppingPoints, playerPawnsReadOnly && flag);
+			VehiclePawn vehicle = trad.AnyThing as VehiclePawn;
+			UIHelper.DoCountAdjustInterface(rect2, trad, AvailablePawns, index, 0, maxCount, false, stoppingPoints, impassableOnTile.TryGetValue(vehicle, false));
 			num -= 240f;
 			if (drawMarketValue)
 			{

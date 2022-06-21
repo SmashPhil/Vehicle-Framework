@@ -84,7 +84,7 @@ namespace Vehicles
 			{
 				damage = 0;
 			}
-			//Debug.Message($"Damaging: {props.label}\nArmor: {props.armor}\nPenetration: {armorPenetration}\nDamage: {damage}\nFallthrough: {penetrate}");
+			Debug.Message($"Damaging: {props.label}\nArmor: {props.armor}\nPenetration: {armorPenetration}\nDamage: {damage}\nFallthrough: {penetrate}");
 		}
 
 		public void PostCreate()

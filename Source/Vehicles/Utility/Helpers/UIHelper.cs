@@ -28,7 +28,7 @@ namespace Vehicles
 		public static void CreateVehicleCaravanTransferableWidgets(List<TransferableOneWay> transferables, out TransferableOneWayWidget pawnsTransfer, out TransferableVehicleWidget vehiclesTransfer, out TransferableOneWayWidget itemsTransfer, string thingCountTip, IgnorePawnsInventoryMode ignorePawnInventoryMass, Func<float> availableMassGetter, bool ignoreSpawnedCorpsesGearAndInventoryMass, int tile, bool playerPawnsReadOnly = false)
 		{
 			pawnsTransfer = new TransferableOneWayWidget(null, null, null, thingCountTip, true, ignorePawnInventoryMass, false, availableMassGetter, 0f, ignoreSpawnedCorpsesGearAndInventoryMass, tile, true, true, true, false, true, false, playerPawnsReadOnly);
-			vehiclesTransfer = new TransferableVehicleWidget(null, null, null, thingCountTip, true, ignorePawnInventoryMass, false, availableMassGetter, 0f, ignoreSpawnedCorpsesGearAndInventoryMass, tile, true, false, false, playerPawnsReadOnly);
+			vehiclesTransfer = new TransferableVehicleWidget(null, null, null, thingCountTip, true, ignorePawnInventoryMass, false, availableMassGetter, 0f, ignoreSpawnedCorpsesGearAndInventoryMass, tile, true, false, false);
 			AddVehicleAndPawnSections(pawnsTransfer, vehiclesTransfer, transferables);
 			itemsTransfer = new TransferableOneWayWidget(transferables.Where(t => t.ThingDef.category != ThingCategory.Pawn), null, null, thingCountTip, true, ignorePawnInventoryMass, false, availableMassGetter, 0f, ignoreSpawnedCorpsesGearAndInventoryMass, tile, true, false, false, true, false, true, false);
 		}
@@ -103,14 +103,17 @@ namespace Vehicles
 				GUI.DrawTexture(rect2, TransferableUIUtility.FlashTex);
 			}
 			TransferableOneWay transferableOneWay = trad as TransferableOneWay;
+			Color color = GUI.color;
 
-			bool flag3 = trad.CountToTransfer != 0;
-			bool flag4 = flag3;
+			bool hasCount = trad.CountToTransfer != 0;
+			bool checkOn = hasCount;
 
 			Rect checkboxRect = new Rect(rect2.x + 125f, rect2.y, 24f, 24f);
-			if (Widgets.ButtonImage(checkboxRect, flag4 ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex))
+			Widgets.Checkbox(rect.x + 125, rect.y, ref checkOn, disabled: readOnly);
+			
+			if (checkOn != hasCount)
 			{
-				if (!flag4)
+				if (!checkOn)
 				{
 					Find.WindowStack.Add(new Dialog_AssignSeats(pawns, transferableOneWay));
 				}
@@ -124,13 +127,10 @@ namespace Vehicles
 						}
 					}
 					SoundDefOf.Click.PlayOneShotOnCamera();
-					flag4 = !flag4;
+					checkOn = !checkOn;
 				}
-			}
-			
-			if (flag4 != flag3)
-			{
-				if (flag4)
+
+				if (checkOn)
 				{
 					trad.AdjustTo(trad.GetMaximumToTransfer());
 				}
