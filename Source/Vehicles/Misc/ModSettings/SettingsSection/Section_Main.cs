@@ -131,20 +131,18 @@ namespace Vehicles
 			listingStandard.Begin(mainSettings);
 
 			listingStandard.Header("World/Map Generation", ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-
-			listingStandard.Gap(16);
+			listingStandard.Gap(4);
 			listingStandard.SliderLabeled("BeachGenMultiplier".Translate(), "BeachGenMultiplierTooltip".Translate(), "%", ref beachMultiplier, 0f, 2f, 100, 0);
-			listingStandard.Gap(16);
 			listingStandard.SliderLabeled("ForceSettlementCoast".Translate(), "ForceSettlementCoastTooltip".Translate(), "Tiles".Translate(), ref forceFactionCoastRadius, 0, 
 				VehicleMod.MaxCoastalSettlementPush, 1, "EverySettlementToCoast".Translate());
-			listingStandard.Gap(12);
-
+			
 			listingStandard.Header("General".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-
+			listingStandard.Gap(4);
 			listingStandard.CheckboxLabeled("VehiclesModifiableSettings".Translate(), ref modifiableSettings, "VehiclesModifiableSettingsTooltip".Translate());
 			listingStandard.CheckboxLabeled("FullVehiclePathing".Translate(), ref fullVehiclePathing, "FullVehiclePathingTooltip".Translate());
 			bool checkBefore = showDisabledVehicles;
 			listingStandard.CheckboxLabeled("ShowDisabledVehicles".Translate(), ref showDisabledVehicles, "ShowDisabledVehiclesTooltip".Translate());
+			listingStandard.Gap(4);
 
 			if (checkBefore != showDisabledVehicles)
 			{
@@ -152,6 +150,7 @@ namespace Vehicles
 			}
 
 			listingStandard.Header("VehicleDamageMultipliers".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
+			listingStandard.Gap(4);
 			listingStandard.SliderLabeled("MeleeDamageMultiplier".Translate(), string.Empty, "%", ref meleeDamageMultiplier, 0, 2, multiplier: 100);
 			listingStandard.SliderLabeled("RangedDamageMultiplier".Translate(), string.Empty, "%", ref rangedDamageMultiplier, 0, 2, multiplier: 100);
 			listingStandard.SliderLabeled("ExplosiveDamageMultiplier".Translate(), string.Empty, "%", ref explosiveDamageMultiplier, 0, 2, multiplier: 100);
@@ -172,19 +171,20 @@ namespace Vehicles
 				fishingHeader = "Fishing (Not Active)";
 			}
 			listingStandard.Header(fishingHeader, ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-			listingStandard.Gap(16);
+			listingStandard.Gap(4);
 			listingStandard.SliderLabeled("FishingMultiplier".Translate(), "FishingMultiplierTooltip".Translate(), "%", ref fishingMultiplier, 0.1f, 3, 100, 1);
-			listingStandard.Gap();
 			listingStandard.IntegerBox("FishingDelay".Translate(), "FishingDelayTooltip".Translate(), ref fishingDelay, listingStandard.ColumnWidth * 0.5f, 0, 0);
-			listingStandard.Gap();
+			listingStandard.Gap(8);
 			listingStandard.IntegerBox("FishingSkill".Translate(), "FishingSkillTooltip".Translate(), ref fishingSkillIncrease, listingStandard.ColumnWidth * 0.5f, 0, 0);
-			listingStandard.Gap();
+			listingStandard.Gap(8);
 			listingStandard.CheckboxLabeled("FishingPersists".Translate(), ref fishingPersists, "FishingPersistsTooltip".Translate());
+			listingStandard.Gap(4);
 
 			GUI.enabled = true;
 			GUI.color = color;
 
 			listingStandard.Header("Aerial", ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
+			listingStandard.Gap(4);
 			listingStandard.CheckboxLabeled("VehicleRocketsBurnRadius".Translate(), ref burnRadiusOnRockets, "VehicleRocketsBurnRadiusTooltip".Translate());
 			listingStandard.CheckboxLabeled("VehicleAirDefensesActive".Translate(), ref airDefenses, "VehicleAirDefensesActiveTooltip".Translate());
 			listingStandard.CheckboxLabeled("VehicleDeployOnLanding".Translate(), ref deployOnLanding, "VehicleDeployOnLandingTooltip".Translate());
@@ -195,7 +195,7 @@ namespace Vehicles
 				listingStandard.SliderLabeled("VehicleDelayOnLanding".Translate(), "VehicleDelayOnLandingTooltip".Translate(), "seconds", ref delayDeployOnLanding, 0, 5, 1, 1);
 			}
 			listingStandard.CheckboxLabeled("VehicleDynamicDrawing".Translate(), ref dynamicWorldDrawing, "VehicleDynamicDrawingTooltip".Translate());
-			listingStandard.Gap();
+			listingStandard.Gap(8);
 
 			GUI.enabled = false; //Upgrades disabled for now
 			GUI.color = UIElements.InactiveColor;

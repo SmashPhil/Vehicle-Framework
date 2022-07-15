@@ -20,7 +20,7 @@ namespace Vehicles
 				foreach (VehicleDef def in DefDatabase<VehicleDef>.AllDefs)
 				{
 					bool fields = PopulateSaveableFields(def);
-					bool upgrades = PopulateSaveableUpgrades(def);
+					bool upgrades = true;// PopulateSaveableUpgrades(def);
 					successfulGenerations.Add(fields);
 					successfulGenerations.Add(upgrades);
 					if (!fields || !upgrades)
@@ -45,9 +45,10 @@ namespace Vehicles
 				}
 				if (!VehicleMod.settings.vehicles.fieldSettings.TryGetValue(def.defName, out var currentDict))
 				{
-					VehicleMod.settings.vehicles.fieldSettings.Add(def.defName, new Dictionary<SaveableField, SavedField<object>>());
+					VehicleMod.settings.vehicles.fieldSettings[def.defName] = new Dictionary<SaveableField, SavedField<object>>();
 					currentDict = VehicleMod.settings.vehicles.fieldSettings[def.defName];
 				}
+				VehicleMod.settings.vehicles.defaultValues[def.defName] = new Dictionary<SaveableField, object>();
 				IterateTypeFields(def, def.GetType(), def, ref currentDict);
 				foreach (CompProperties props in def.comps)
 				{
@@ -97,9 +98,11 @@ namespace Vehicles
 
 		public static void IterateTypeFields(VehicleDef def, Type type, object obj, ref Dictionary<SaveableField, SavedField<object>> currentDict)
 		{
-			if (VehicleMod.cachedFields.TryGetValue(type, out var fields))
+			if (VehicleMod.cachedFields.TryGetValue(type, out List<FieldInfo> fields))
 			{
 				var dict = VehicleMod.settings.vehicles.fieldSettings[def.defName];
+				var defaultValuesDict = VehicleMod.settings.vehicles.defaultValues[def.defName];
+
 				foreach (FieldInfo field in fields)
 				{
 					if (field.TryGetAttribute<PostToSettingsAttribute>(out var settings) && settings.ParentHolder)
@@ -127,10 +130,11 @@ namespace Vehicles
 					else
 					{
 						SaveableField saveField = new SaveableField(def, field);
-						if (!dict.TryGetValue(saveField, out var _))
-						{
-							dict.Add(saveField, new SavedField<object>(field.GetValue(obj)));
-						}
+						defaultValuesDict[saveField] = field.GetValue(obj);
+						//if (!dict.ContainsKey(saveField))
+						//{
+						//	dict.Add(saveField, new SavedField<object>(field.GetValue(obj)));
+						//}
 					}
 				}
 				//Redundancy sake.

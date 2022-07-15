@@ -105,19 +105,15 @@ namespace Vehicles
 			TransferableOneWay transferableOneWay = trad as TransferableOneWay;
 			Color color = GUI.color;
 
-			bool hasCount = trad.CountToTransfer != 0;
-			bool checkOn = hasCount;
+			bool setToTransfer = trad.CountToTransfer != 0;
+			bool checkOn = setToTransfer;
 
 			Rect checkboxRect = new Rect(rect2.x + 125f, rect2.y, 24f, 24f);
 			Widgets.Checkbox(rect.x + 125, rect.y, ref checkOn, disabled: readOnly);
 			
-			if (checkOn != hasCount)
+			if (checkOn != setToTransfer)
 			{
-				if (!checkOn)
-				{
-					Find.WindowStack.Add(new Dialog_AssignSeats(pawns, transferableOneWay));
-				}
-				else
+				if (setToTransfer)
 				{
 					foreach (Pawn pawn in (trad.AnyThing as VehiclePawn).AllPawnsAboard)
 					{
@@ -127,14 +123,13 @@ namespace Vehicles
 						}
 					}
 					SoundDefOf.Click.PlayOneShotOnCamera();
-					checkOn = !checkOn;
-				}
-
-				if (checkOn)
-				{
 					trad.AdjustTo(trad.GetMaximumToTransfer());
 				}
 				else
+				{
+					Find.WindowStack.Add(new Dialog_AssignSeats(pawns, transferableOneWay));
+				}
+				if (!checkOn)
 				{
 					CaravanHelper.ClearAssignedSeats(trad.AnyThing as VehiclePawn, (Pawn pawn) => pawns.FirstOrDefault(p => (p.AnyThing as Pawn) == pawn)?.ForceTo(0));
 					trad.AdjustTo(trad.GetMinimumToTransfer());

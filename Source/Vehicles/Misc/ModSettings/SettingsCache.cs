@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
 using Verse;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -22,17 +23,21 @@ namespace Vehicles
 			return field;
 		}
 
-		public static object TryGetValue(this VehicleDef def, FieldInfo field)
+		public static bool TryGetValue<T>(this VehicleDef def, FieldInfo field, out T value)
 		{
+			value = default;
 			if (VehicleMod.settings.vehicles.fieldSettings.TryGetValue(def.defName, out var dict))
 			{
-				if (dict.TryGetValue(new SaveableField(def, field), out var result))
+				SaveableField saveableField = new SaveableField(def, field);
+				if (dict.TryGetValue(saveableField, out SavedField<object> result))
 				{
-					return result.Second;
+					value = (T)result.EndValue;
+					return true;
 				}
+				return false;
 			}
 			Log.Error($"Unable to retrieve {field.Name} for {def.defName} in ModSettings. Is this field posted to settings?");
-			return default;
+			return false;
 		}
 
 		public static T TryGetValue<T>(this VehicleDef def, Type containingType, string fieldName, T fallback = default)
@@ -47,22 +52,26 @@ namespace Vehicles
 			{
 				return fallback;
 			}
-			object value = def.TryGetValue(fieldInfo);
-			if (value is T castedValue)
-			{
-				return castedValue;
-			}
+			Type objType = null;
 			try
 			{
-				if (typeof(T).IsEnum)
+				if (def.TryGetValue(fieldInfo, out object value))
 				{
+					objType = value.GetType();
+					if (objType != typeof(T))
+					{
+						if (typeof(T).IsEnum)
+						{
+							return (T)value;
+						}
+						return (T)Convert.ChangeType(value, typeof(T), CultureInfo.InstalledUICulture.NumberFormat);
+					}
 					return (T)value;
 				}
-				return (T)Convert.ChangeType(value, typeof(T), CultureInfo.InstalledUICulture.NumberFormat);
 			}
 			catch (InvalidCastException ex)
 			{
-				Log.Error($"Cannot cast {fieldName} from {value.GetType()} to {typeof(T)}.\nException=\"{ex.Message}\"");
+				Log.Error($"Cannot cast {fieldName} from {objType?.GetType().ToString() ?? "[Null]"} to {typeof(T)}.\nException=\"{ex.Message}\"");
 			}
 			return fallback;
 		}

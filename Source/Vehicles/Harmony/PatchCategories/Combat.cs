@@ -25,9 +25,6 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Projectile), "Impact"),
 				prefix: new HarmonyMethod(typeof(Combat),
 				nameof(RegisterImpactCell)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(DamageWorker), "ExplosionDamageThing"),
-				postfix: new HarmonyMethod(typeof(Combat),
-				nameof(ExplosionDamageVehicle)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Thing), nameof(Thing.Destroy)),
 				prefix: new HarmonyMethod(typeof(Combat),
 				nameof(ProjectileMapToWorld)));
@@ -138,18 +135,6 @@ namespace Vehicles
 			if (hitThing is VehiclePawn vehicle)
 			{
 				vehicle.statHandler.RegisterImpacter(___launcher, __instance.Position);
-			}
-		}
-
-		public static void ExplosionDamageVehicle(Explosion explosion, Thing t, List<Thing> damagedThings, List<Thing> ignoredThings, IntVec3 cell, DamageWorker __instance, ref List<Thing> ___thingsToAffect)
-		{
-			if (t is VehiclePawn vehicle && !vehicle.statHandler.explosionsAffectingVehicle.Contains(explosion))
-			{
-				//DamageInfo dinfo = new DamageInfo(__instance.def, explosion.GetDamageAmountAt(cell), explosion.GetArmorPenetrationAt(cell), 
-				//	Quaternion.LookRotation((vehicle.Position - explosion.Position).ToVector3()).eulerAngles.y, explosion.instigator, null, 
-				//	explosion.weapon, DamageInfo.SourceCategory.ThingOrUnknown, explosion.intendedTarget);
-				//vehicle.statHandler.TakeDamage(dinfo, cell, true);
-				//vehicle.statHandler.explosionsAffectingVehicle.Add(explosion);
 			}
 		}
 

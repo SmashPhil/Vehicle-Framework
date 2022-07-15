@@ -44,7 +44,7 @@ namespace Vehicles
 				vehicle.SetFaction(worker.Faction);
 				GenSpawn.Spawn(vehicle, __instance.Position, map, __instance.Rotation, WipeMode.FullRefund, false);
 				worker.records.Increment(RecordDefOf.ThingsConstructed);
-
+				
 				vehicle.Rename();
 				//Quality?
 				//Art?

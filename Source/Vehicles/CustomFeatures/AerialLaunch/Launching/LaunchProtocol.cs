@@ -385,7 +385,7 @@ namespace Vehicles
 				GUI.color = TexData.RedReadable;
 				return "VehicleNotEnoughFuel".Translate();
 			}
-			else if (target.IsValid && vehicle.CompVehicleLauncher.FuelNeededToLaunchAtDist(Find.WorldGrid.GetTileCenter(tile), target.Tile)  > (vehicle.CompFueledTravel.Fuel - fuelCost))
+			else if (target.IsValid && vehicle.CompVehicleLauncher.FuelNeededToLaunchAtDist(WorldHelper.GetTilePos(tile), target.Tile)  > (vehicle.CompFueledTravel.Fuel - fuelCost))
 			{
 				GUI.color = TexData.YellowReadable;
 				return "VehicleNoFuelReturnTrip".Translate();
@@ -442,7 +442,7 @@ namespace Vehicles
 					Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(), MessageTypeDefOf.RejectInput, false);
 					return false;
 				}
-				else if (Ext_Math.SphericalDistance(pos, Find.WorldGrid.GetTileCenter(target.Tile)) > vehicle.CompVehicleLauncher.MaxLaunchDistance || fuelCost > vehicle.CompFueledTravel.Fuel)
+				else if (Ext_Math.SphericalDistance(pos, WorldHelper.GetTilePos(target.Tile)) > vehicle.CompVehicleLauncher.MaxLaunchDistance || fuelCost > vehicle.CompFueledTravel.Fuel)
 				{
 					Messages.Message("TransportPodDestinationBeyondMaximumRange".Translate(), MessageTypeDefOf.RejectInput, false);
 					return false;
@@ -481,7 +481,7 @@ namespace Vehicles
 					return false;
 				}
 			};
-			return ChoseWorldTarget(target, Find.WorldGrid.GetTileCenter(vehicle.Map.Tile), Validator, new Action<int, AerialVehicleArrivalAction, bool>(vehicle.CompVehicleLauncher.TryLaunch));
+			return ChoseWorldTarget(target, WorldHelper.GetTilePos(vehicle.Map.Tile), Validator, new Action<int, AerialVehicleArrivalAction, bool>(vehicle.CompVehicleLauncher.TryLaunch));
 		}
 
 		public virtual void ResolveProperties(LaunchProtocol reference)

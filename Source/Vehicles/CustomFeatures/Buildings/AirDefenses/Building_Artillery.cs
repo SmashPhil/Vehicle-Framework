@@ -362,11 +362,13 @@ namespace Vehicles
 		{
 			var neighborTiles = new List<int>();
 			Find.WorldGrid.GetTileNeighbors(tile, neighborTiles);
+			WorldObject tileObject = WorldHelper.WorldObjectAt(tile);
 			for (int i = 0; i < numPositions; i++)
 			{
 				int neighborTile = neighborTiles.RandomElement();
 				float offset = Rand.Range(0, WorldObjectOffsetPercent);
-				Vector3 pos = Vector3.Slerp(Find.WorldGrid.GetTileCenter(tile), Find.WorldGrid.GetTileCenter(neighborTile), offset);
+				WorldObject neighborObject = WorldHelper.WorldObjectAt(tile);
+				Vector3 pos = Vector3.Slerp(WorldHelper.GetTilePos(tile, tileObject, out _), WorldHelper.GetTilePos(neighborTile, neighborObject, out _), offset);
 				yield return pos;
 			}
 		}

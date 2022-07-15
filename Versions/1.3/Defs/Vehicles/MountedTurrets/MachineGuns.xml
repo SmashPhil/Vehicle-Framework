@@ -4,8 +4,8 @@
 	<Vehicles.VehicleTurretDef ParentName="TurretBase">
 		<defName>50CalMounted</defName>
 		<label>.50 cal</label>
-		<weaponType>Rotatable</weaponType>
-		<cannonSound>Shot_Minigun</cannonSound>
+		<turretType>Rotatable</turretType>
+		<shotSound>Shot_Minigun</shotSound>
 		<projectile>Bullet_50CalMounted</projectile>
 		
 		<reloadTimer>8</reloadTimer>
@@ -73,9 +73,11 @@
 	<Vehicles.VehicleTurretDef ParentName="TurretBase">
 		<defName>HeavyMachineGunMounted</defName>
 		<label>Heavy Machine Gun</label>
-		<weaponType>Rotatable</weaponType>
-		<cannonSound>Shot_Minigun</cannonSound>
+		<turretType>Rotatable</turretType>
+		<shotSound>Shot_Minigun</shotSound>
 		<projectile>Bullet_HeavyMachineGun</projectile>
+		
+		<ammoCountPerCharge>2</ammoCountPerCharge>
 		
 		<reloadTimer>12</reloadTimer>
 		<warmUpTimer>1.25</warmUpTimer>

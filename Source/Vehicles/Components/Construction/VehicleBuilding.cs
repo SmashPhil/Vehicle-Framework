@@ -43,7 +43,7 @@ namespace Vehicles
 			base.SpawnSetup(map, respawningAfterLoad);
 			if (vehicle?.CompCannons != null)
 			{
-				vehicle.CompCannons.TurretSetup();
+				vehicle.CompCannons.ResolveChildTurrets();
 			}
 		}
 

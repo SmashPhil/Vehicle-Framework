@@ -11,7 +11,7 @@ namespace Vehicles
 	/// </summary>
 	public class VehicleDrawProperties
 	{
-		public Rot8 displayRotation = Rot8.North;
+		public Rot8 displayRotation = Rot8.East;
 
 		public Vector2 selectionBracketsOffset;
 

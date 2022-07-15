@@ -62,6 +62,74 @@ namespace Vehicles
 			return heading;
 		}
 
+		public static WorldObject WorldObjectAt(int tile)
+		{
+			List<WorldObject> worldObjects = Find.WorldObjects.AllWorldObjects;
+			for (int i = 0; i < worldObjects.Count; i++)
+			{
+				WorldObject worldObject = worldObjects[i];
+				if (worldObject.Tile == tile)
+				{
+					return worldObject;
+				}
+			}
+			return null;
+		}
+
+		public static (WorldObject sourceObject, WorldObject destObject) WorldObjectsAt(int source, int destination)
+		{
+			WorldObject sourceObject = null;
+			WorldObject destObject = null;
+			List<WorldObject> worldObjects = Find.WorldObjects.AllWorldObjects;
+			for (int i = 0; i < worldObjects.Count && (sourceObject == null || destObject == null); i++)
+			{
+				WorldObject worldObject = worldObjects[i];
+				if (worldObject.Tile == source)
+				{
+					sourceObject = worldObject;
+				}
+				if (worldObject.Tile == destination)
+				{
+					destObject = worldObject;
+				}
+			}
+			return (sourceObject, destObject);
+		}
+
+		public static Vector3 GetTilePos(int tile)
+		{
+			WorldObject worldObject = WorldObjectAt(tile);
+			return GetTilePos(tile, worldObject, out _);
+		}
+
+		public static Vector3 GetTilePos(int tile, out bool spaceObject)
+		{
+			WorldObject worldObject = WorldObjectAt(tile);
+			return GetTilePos(tile, worldObject, out spaceObject);
+		}
+
+		public static Vector3 GetTilePos(int tile, WorldObject worldObject, out bool spaceObject)
+		{
+			Vector3 pos = Find.WorldGrid.GetTileCenter(tile);
+			spaceObject = false;
+			if (worldObject != null && worldObject.def.HasModExtension<SpaceObjectDefModExtension>())
+			{
+				spaceObject = true;
+				pos = worldObject.DrawPos;
+			}
+			return pos;
+		}
+
+		public static float GetTileDistance(int source, int destination)
+		{
+			(WorldObject sourceObject, WorldObject destObject) = WorldObjectsAt(source, destination);
+
+			Vector3 sourcePos = GetTilePos(source, sourceObject, out _);
+			Vector3 destPos = GetTilePos(destination, destObject, out _);
+
+			return Ext_Math.SphericalDistance(sourcePos, destPos);
+		}
+
 		/// <summary>
 		/// AerialVehicle <paramref name="vehicle"/> can offer gifts to <paramref name="settlement"/>
 		/// </summary>

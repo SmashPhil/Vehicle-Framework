@@ -13,7 +13,7 @@ namespace Vehicles
 	{
 		[PostToSettings(Label = "VehicleVisibilityWorldMap", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(MinValue = 0, MaxValue = 1, MinValueDisplay = "Invisible", MaxValueDisplay = "FullyVisible", RoundDecimalPlaces = 1)]
-		public float visibility = 0.5f;
+		public float visibility = 2.5f;
 
 		[PostToSettings(Label = "VehicleFishingEnabled", Translate = true, UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Sea)]
 		public bool fishing = false;
@@ -23,13 +23,16 @@ namespace Vehicles
 		//[PostToSettings(Label = "VehicleDamageMultipliers", Tooltip = "VehicleTechLevelDamageMultipliersTooltip", Translate = true, ParentHolder = true)]
 		//public VehicleDamageMultipliers techLevelDamageMultipliers = new VehicleDamageMultipliers();
 
-		//[PostToSettings(Label = "VehicleJobLimitations", Translate = true)]
 		public List<VehicleJobLimitations> vehicleJobLimitations = new List<VehicleJobLimitations>()
 		{
-			new VehicleJobLimitations("UpgradeVehicle", 3),
-			new VehicleJobLimitations("RepairVehicle", 2),
-			new VehicleJobLimitations("LoadUpgradeMaterials", 2),
+			new VehicleJobLimitations("RepairVehicle", 1),
+			new VehicleJobLimitations("LoadUpgradeMaterials", 1),
+			new VehicleJobLimitations("UpgradeVehicle", 1),
 		};
+
+		public Dictionary<VehicleEventDef, SoundDef> soundOneShotsOnEvent = new Dictionary<VehicleEventDef, SoundDef>();
+		//<Start Sustainer, Stop Sustainer>
+		public Dictionary<Pair<VehicleEventDef, VehicleEventDef>, SoundDef> soundSustainersOnEvent = new Dictionary<Pair<VehicleEventDef, VehicleEventDef>, SoundDef>();
 
 		public bool diagonalRotation = true;
 		[PostToSettings(Label = "ManhunterTargetsVehicle", Tooltip = "ManhunterTargetsVehicleTooltip", Translate = true, UISettingsType = UISettingsType.Checkbox)]

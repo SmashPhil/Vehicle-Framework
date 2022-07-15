@@ -32,12 +32,12 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(HediffUtility), nameof(HediffUtility.CanHealFromTending)),
 				prefix: new HarmonyMethod(typeof(HealthAndStats),
 				nameof(VehiclesDontHealTended)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Widgets), nameof(Widgets.InfoCardButton), new Type[] { typeof(float), typeof(float), typeof(Thing) }),
-				transpiler: new HarmonyMethod(typeof(HealthAndStats),
-				nameof(InfoCardVehiclesTranspiler))); //REDO - change to remove info card button rather than patching the widget
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Verb_CastAbility), nameof(Verb_CastAbility.CanHitTarget)),
 				prefix: new HarmonyMethod(typeof(HealthAndStats),
 				nameof(VehiclesImmuneToPsycast)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(StatWorker), nameof(StatWorker.IsDisabledFor)),
+				prefix: new HarmonyMethod(typeof(HealthAndStats),
+				nameof(StatDisabledForVehicle)));
 		}
 
 		/// <summary>
@@ -171,43 +171,6 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Remove and replace Vehicle's info cards. Info Card is currently Work In Progress
-		/// </summary>
-		/// <param name="instructions"></param>
-		/// <param name="ilg"></param>
-		/// <returns></returns>
-		public static IEnumerable<CodeInstruction> InfoCardVehiclesTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
-		{
-			List<CodeInstruction> instructionList = instructions.ToList();
-
-			for(int i = 0; i < instructionList.Count; i++)
-			{
-				CodeInstruction instruction = instructionList[i];
-
-				if (instruction.Calls(AccessTools.Property(typeof(Find), nameof(Find.WindowStack)).GetGetMethod()))
-				{
-					Label label = ilg.DefineLabel();
-					///Check if pawn in question is a Boat
-					yield return new CodeInstruction(opcode: OpCodes.Ldarg_2);
-					yield return new CodeInstruction(opcode: OpCodes.Isinst, operand: typeof(VehiclePawn));
-					yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
-
-					///Load a new object of type Dialog_InfoCard_Ship and load onto the WindowStack. Return after
-					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Property(typeof(Find), nameof(Find.WindowStack)).GetGetMethod());
-					yield return new CodeInstruction(opcode: OpCodes.Ldarg_2);
-					yield return new CodeInstruction(opcode: OpCodes.Newobj, operand: AccessTools.Constructor(typeof(Dialog_InfoCard_Vehicle), new Type[] { typeof(Thing) }));
-					yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Method(typeof(WindowStack), nameof(WindowStack.Add)));
-					yield return new CodeInstruction(opcode: OpCodes.Ldc_I4_1);
-					yield return new CodeInstruction(opcode: OpCodes.Ret);
-
-					instruction.labels.Add(label);
-				}
-
-				yield return instruction;
-			}
-		}
-
-		/// <summary>
 		/// Block vehicles from receiving psycast effects
 		/// </summary>
 		/// <param name="targ"></param>
@@ -216,6 +179,16 @@ namespace Vehicles
 			if (targ.Pawn is VehiclePawn vehicle)
 			{
 				Debug.Message($"<type>Psycast</type> blocked for {vehicle}");
+				return false;
+			}
+			return true;
+		}
+
+		public static bool StatDisabledForVehicle(Thing thing, ref bool __result)
+		{
+			if (thing is VehiclePawn)
+			{
+				__result = false;
 				return false;
 			}
 			return true;

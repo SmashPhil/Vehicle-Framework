@@ -15,7 +15,7 @@ namespace Vehicles
 	[StaticConstructorOnStartup]
 	internal static class VehicleHarmony
 	{
-		public const string VehiclesUniqueId = "smashphil.vehicles";
+		public const string VehiclesUniqueId = "SmashPhil.VehicleFramework";
 		public const string VehiclesLabel = "Vehicle Framework";
 		internal const string LogLabel = "[VehicleFramework]";
 		
@@ -76,6 +76,8 @@ namespace Vehicles
 
 			Utilities.InvokeWithLogging(ResolveAllReferences);
 			Utilities.InvokeWithLogging(PostDefDatabaseCalls);
+			Utilities.InvokeWithLogging(RegisterDisplayStats);
+
 			//Will want to be added via xml
 			Utilities.InvokeWithLogging(FillVehicleLordJobTypes);
 
@@ -119,7 +121,23 @@ namespace Vehicles
 			}
 		}
 
-		//REDO
+		public static void RegisterDisplayStats()
+		{
+			VehicleInfoCard.RegisterStatDef(StatDefOf.ArmorRating_Blunt);
+			VehicleInfoCard.RegisterStatDef(StatDefOf.ArmorRating_Sharp);
+			VehicleInfoCard.RegisterStatDef(StatDefOf.ArmorRating_Heat);
+
+			VehicleInfoCard.RegisterStatDef(StatDefOf.MarketValue);
+			VehicleInfoCard.RegisterStatDef(StatDefOf.Mass);
+			VehicleInfoCard.RegisterStatDef(StatDefOf.Flammability);
+
+			//VehicleInfoCard.RegisterStatDef(StatDefOf.RestRateMultiplier);
+			//VehicleInfoCard.RegisterStatDef(StatDefOf.Comfort);
+			//VehicleInfoCard.RegisterStatDef(StatDefOf.Insulation_Cold);
+			//VehicleInfoCard.RegisterStatDef(StatDefOf.Insulation_Heat);
+			//VehicleInfoCard.RegisterStatDef(StatDefOf.SellPriceFactor);
+		}
+
 		public static void FillVehicleLordJobTypes()
 		{
 			VehicleIncidentSwapper.RegisterLordType(typeof(LordJob_ArmoredAssault));

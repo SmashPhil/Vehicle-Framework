@@ -14,7 +14,7 @@ namespace Vehicles
 		public string name;
 		public Type classType;
 
-		private int uniqueId;
+		private int defHashCode;
 
 		public SaveableField()
 		{
@@ -24,12 +24,13 @@ namespace Vehicles
 		{
 			name = field.Name;
 			classType = field.DeclaringType;
-			uniqueId = def.GetHashCode();
+			defHashCode = def.GetHashCode();
 		}
+
+		public FieldInfo FieldInfo => SettingsCache.GetCachedField(classType, name);
 
 		public virtual void ResolveReferences()
 		{
-
 		}
 
 		public static SaveableField SaveableFieldFor(Def def, FieldInfo field)
@@ -39,7 +40,7 @@ namespace Vehicles
 
 		public static implicit operator FieldInfo(SaveableField field)
 		{
-			return SettingsCache.GetCachedField(field.classType, field.name);
+			return field.FieldInfo;
 		}
 
 		public override bool Equals(object obj)
@@ -54,14 +55,14 @@ namespace Vehicles
 
 		public override int GetHashCode()
 		{
-			return Gen.HashCombine(uniqueId, Gen.HashCombine(Gen.HashCombine(0, classType.FullName), name));
+			return Gen.HashCombine(defHashCode, Gen.HashCombine(Gen.HashCombine(0, classType.FullName), name));
 		}
 
 		public virtual void ExposeData()
 		{
 			Scribe_Values.Look(ref name, "name");
 			Scribe_Values.Look(ref classType, "classType");
-			Scribe_Values.Look(ref uniqueId, "uniqueId", -1);
+			Scribe_Values.Look(ref defHashCode, "defHashCode", -1);
 		}
 	}
 }

@@ -77,16 +77,17 @@ namespace Vehicles
 		/// <param name="renderProps"></param>
 		/// <param name="turretRotation"></param>
 		/// <param name="attachedTo"></param>
-		public static Pair<float,float> TurretDrawOffset(Rot8 rot, VehicleTurretRender renderProps, float extraRotation = 0, VehicleTurret attachedTo = null)
+		public static Vector2 TurretDrawOffset(Rot8 rot, VehicleTurretRender renderProps, float extraRotation = 0, VehicleTurret attachedTo = null)
 		{
-			var turretOffset = renderProps.OffsetFor(rot);
+			VehicleTurretRender.RotationalOffset turretOffset = renderProps.OffsetFor(rot);
+			Log.Message($"Offset: {turretOffset}");
 			if (attachedTo != null)
 			{
 				var parentOffset = attachedTo.renderProperties.OffsetFor(rot);
 				Pair<float, float> rootLoc = Ext_Math.RotatePointClockwise(turretOffset.Offset.x, turretOffset.Offset.y, extraRotation);
-				return new Pair<float, float>(rootLoc.First + parentOffset.Offset.x, rootLoc.Second + parentOffset.Offset.y);
+				return new Vector2(rootLoc.First + parentOffset.Offset.x, rootLoc.Second + parentOffset.Offset.y);
 			}
-			return new Pair<float, float>(turretOffset.Offset.x, turretOffset.Offset.y);
+			return turretOffset.Offset;
 		}
 
 		/// <summary>
@@ -442,7 +443,7 @@ namespace Vehicles
 				float cannonWidth = displayRect.width / vehicleGraphicData.drawSize.x * turret.CannonGraphicData.drawSize.x * vehicleDef.drawProperties.displaySizeMultiplier;
 				float cannonHeight = displayRect.height / vehicleGraphicData.drawSize.y * turret.CannonGraphicData.drawSize.y * vehicleDef.drawProperties.displaySizeMultiplier;
 
-				var offset = turret.renderProperties.OffsetFor(rotDrawn);
+				VehicleTurretRender.RotationalOffset offset = turret.renderProperties.OffsetFor(rotDrawn);
 				/// ( center point of vehicle) + (UI size / drawSize) * cannonPos
 				/// y axis inverted as UI goes top to bottom, but DrawPos goes bottom to top
 				float xCannon = displayRect.x + (vehicleDef.drawProperties.displaySizeMultiplier / displayRect.width * vehicleDef.drawProperties.displayOffset.x) + (displayRect.width / 2) - (cannonWidth / 2) + (vehicleDef.drawProperties.displaySizeMultiplier / vehicleGraphicData.drawSize.x * offset.Offset.x);
@@ -468,7 +469,7 @@ namespace Vehicles
 					};
 					cannonMat = MaterialPoolExpanded.MatFrom(matReq);
 				}
-				yield return new ValueTuple<Rect, Texture, Material, float, float>(cannonDrawnRect, turret.CannonTexture, cannonMat, turret.CannonGraphicData.drawOffset.y, turret.defaultAngleRotated);
+				yield return new ValueTuple<Rect, Texture, Material, float, float>(cannonDrawnRect, turret.CannonTexture, cannonMat, turret.CannonGraphicData.drawOffset.y, turret.defaultAngleRotated + rotDrawn.AsAngle);
 			}
 		}
 
@@ -486,10 +487,24 @@ namespace Vehicles
 			{
 				drawStep = "Setting rect and adjusted positioning.";
 				Vector2 rectSize = vehicleDef.ScaleDrawRatio(new Vector2(rect.width * 0.95f, rect.height * 0.95f));
-				float newX = (rect.width / 2) - (rectSize.x / 2) + (vehicleDef.drawProperties.displayOffset.x * rect.width);
-				float newY = (rect.height / 2) - (rectSize.y / 2) + (vehicleDef.drawProperties.displayOffset.y * rect.height);
-				Rect adjustedRect = new Rect(rect.x + newX, rect.y + newY, rectSize.x, rectSize.y);
 				Rot8 rotDrawn = rot ?? vehicleDef.drawProperties.displayRotation;
+
+				bool elongated = rotDrawn.IsHorizontal || rotDrawn.IsDiagonal;
+
+				float offsetX = (rectSize.x / 2) + (vehicleDef.drawProperties.displayOffset.x * rect.width);
+				float offsetY = (rectSize.y / 2) + (vehicleDef.drawProperties.displayOffset.y * rect.height);
+				float newX = (rect.width / 2) - (elongated ? offsetY : offsetX); 
+				float newY = (rect.height / 2) - (elongated ? offsetX : offsetY);
+
+				float width = rectSize.x;
+				float height = rectSize.y;
+
+				Rect adjustedRect = new Rect(rect.x + newX, rect.y + newY, width, height);
+				if (elongated)
+				{
+					adjustedRect.width = height;
+					adjustedRect.height = width;
+				}
 
 				drawStep = "Retrieving cached graphic and pattern";
 				Graphic_Vehicle graphic = VehicleTex.CachedGraphics[vehicleDef];

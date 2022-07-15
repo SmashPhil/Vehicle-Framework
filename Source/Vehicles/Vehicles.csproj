@@ -406,6 +406,7 @@
     <Compile Include="CustomFeatures\Buildings\AirDefenses\VerbProperties\RecoilProperties.cs" />
     <Compile Include="CustomFeatures\Buildings\AirDefenses\VerbProperties\VerbProperties_Animated.cs" />
     <Compile Include="CustomFeatures\Buildings\AirDefenses\Verb_ShootWorldRecoiled.cs" />
+    <Compile Include="CustomFeatures\EventDefs\VehicleEventDef.cs" />
     <Compile Include="CustomFeatures\Misc\MoteThrownSlowToSpeed.cs" />
     <Compile Include="CustomFeatures\Misc\MoteThrownExpand.cs" />
     <Compile Include="Components\Vehicles\VehicleAreaManager.cs" />
@@ -418,6 +419,7 @@
     <Compile Include="Graphics\ITab\WITab_Vehicle_Health.cs" />
     <Compile Include="Graphics\Textures\TextureCache.cs" />
     <Compile Include="Harmony\PatchCategories\PawnAI.cs" />
+    <Compile Include="Harmony\ThingDefGenerator_Skyfallers.cs" />
     <Compile Include="Misc\DefModExtension\CustomCostDefModExtension.cs" />
     <Compile Include="Misc\DefModExtension\ProjectilePropertiesDefModExtension.cs" />
     <Compile Include="Cannons\Projectiles\Laser.cs" />
@@ -487,13 +489,17 @@
     <Compile Include="Gizmo\Command_VerbWorldTarget.cs" />
     <Compile Include="Harmony\PawnKindDefGenerator_Vehicles.cs" />
     <Compile Include="Harmony\StartupTesting.cs" />
+    <Compile Include="Misc\DefModExtension\SpaceObjectDefModExtension.cs" />
     <Compile Include="Misc\DefModExtension\SpawnerPropertiesDefModExtension.cs" />
     <Compile Include="Misc\DefModExtension\VehicleDamageMultiplierDefModExtension.cs" />
     <Compile Include="Misc\DefOf\ProjectileSkyfallerDefOf.cs" />
+    <Compile Include="Misc\DefOf\VehicleEventDefOf.cs" />
     <Compile Include="Misc\Enums\Turret\TurretDisableType.cs" />
     <Compile Include="Misc\Enums\UI\DebugRegionType.cs" />
     <Compile Include="Misc\Enums\Vehicle\VehicleEnabledFor.cs" />
     <Compile Include="Misc\Interfaces\ICustomSettingsDrawer.cs" />
+    <Compile Include="Misc\ModSettings\SavedSettings\SavedSettings.cs" />
+    <Compile Include="Misc\ModSettings\SavedSettings\SettingsExporter.cs" />
     <Compile Include="Misc\ModSettings\SettingsCustomizableFields.cs" />
     <Compile Include="CustomFeatures\Reservation\Reservation.cs" />
     <Compile Include="CustomFeatures\Reservation\ReservationBase.cs" />
@@ -758,7 +764,7 @@
     <Compile Include="Graphics\Dialogs\Dialog_DockBoat.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_FormVehicleCaravan.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_GiveVehicleName.cs" />
-    <Compile Include="Graphics\Dialogs\Dialog_InfoCard_Ship.cs" />
+    <Compile Include="Utility\VehicleInfoCard.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_LoadCargo.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_VehicleSelector.cs" />
     <Compile Include="Graphics\Misc\FloatMenuMulti.cs" />

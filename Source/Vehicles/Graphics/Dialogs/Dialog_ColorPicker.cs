@@ -283,7 +283,7 @@ namespace Vehicles
 				displayRect.x = outRect.x + (iteration % GridDimensionSqr) * sqrGridSize;
 				displayRect.y = outRect.y + (Mathf.FloorToInt(iteration / GridDimensionSqr)) * gridSizeY;
 				PatternData patternData = new PatternData(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, pattern, new Vector2(displacementX, displacementY), additionalTiling);
-				VehicleDef.DrawVehicleTexTiled(displayRect, patternData, Rot8.North, Turrets, GraphicOverlays);
+				VehicleDef.DrawVehicleTexTiled(displayRect, patternData, null, Turrets, GraphicOverlays);
 				Rect imageRect = new Rect(displayRect.x, displayRect.y, gridSizeX, gridSizeY);
 				if (iteration % GridDimensionSqr == 0)
 				{

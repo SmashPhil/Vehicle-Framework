@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<!-- Movement -->
+	<Vehicles.VehicleEventDef>
+		<defName>DraftOn</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>DraftOff</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>MoveStart</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>MoveStop</defName>
+	</Vehicles.VehicleEventDef>
+	
+	
+	<!-- Health -->
+	<Vehicles.VehicleEventDef>
+		<defName>DamageTaken</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>Immobilized</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>Spawned</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>Despawned</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>Destroyed</defName>
+	</Vehicles.VehicleEventDef>
+	
+	
+	<!-- Pawns -->
+	<Vehicles.VehicleEventDef>
+		<defName>PawnEntered</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>PawnExited</defName>
+	</Vehicles.VehicleEventDef>
+</Defs>

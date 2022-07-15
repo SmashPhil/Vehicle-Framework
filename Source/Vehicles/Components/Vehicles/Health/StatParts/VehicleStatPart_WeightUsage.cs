@@ -12,7 +12,13 @@ namespace Vehicles
 
 		public override float TransformValue(VehiclePawn vehicle, float value)
 		{
-			return value * overweightSpeedCurve.Evaluate(MassUtility.InventoryMass(vehicle) / vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity));
+			float capacity = vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
+			float usage = 0;
+			if (capacity > 0)
+			{
+				usage = MassUtility.InventoryMass(vehicle) / capacity;
+			}
+			return value * overweightSpeedCurve.Evaluate(usage);
 		}
 
 		public override string ExplanationPart(VehiclePawn vehicle)

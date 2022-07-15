@@ -120,7 +120,7 @@ namespace Vehicles
 			flyingVehicle.vehicle = vehicle;
 			flyingVehicle.Tile = Map.Tile;
 			flyingVehicle.SetFaction(vehicle.Faction);
-			flyingVehicle.OrderFlyToTiles(aerialVehicle.flightPath.Path, Find.WorldGrid.GetTileCenter(Map.Tile), aerialVehicle.arrivalAction);
+			flyingVehicle.OrderFlyToTiles(aerialVehicle.flightPath.Path, WorldHelper.GetTilePos(Map.Tile), aerialVehicle.arrivalAction);
 			//Recon edge case?
 			flyingVehicle.Initialize();
 			Find.WorldObjects.Add(flyingVehicle);

@@ -108,6 +108,21 @@ namespace Vehicles
 				{
 					DefGenerator.AddImpliedDef(kindDef);
 				}
+				if (ThingDefGenerator_Skyfallers.GenerateImpliedSkyfallerDef(vehicleDef, out ThingDef skyfallerLeaving, out ThingDef skyfallerIncoming, out ThingDef skyfallerCrashing))
+				{
+					if (skyfallerLeaving != null)
+					{
+						DefGenerator.AddImpliedDef(skyfallerLeaving);
+					}
+					if (skyfallerIncoming != null)
+					{
+						DefGenerator.AddImpliedDef(skyfallerIncoming);
+					}
+					if (skyfallerCrashing != null)
+					{
+						DefGenerator.AddImpliedDef(skyfallerCrashing);
+					}
+				}
 			}
 		}
 

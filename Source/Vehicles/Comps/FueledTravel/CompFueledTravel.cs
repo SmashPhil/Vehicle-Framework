@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using HarmonyLib;
 using Verse;
@@ -16,6 +17,8 @@ namespace Vehicles
 		private const float EfficiencyTickMultiplier = 1 / 60000f;
 		private const float CellOffsetIntVec3ToVector3 = 0.5f;
 		private const float PowerGainRate = 1f;
+
+		private static MethodInfo powerNetMethod;
 
 		private float fuel;
 		private bool terminateMotes = false;
@@ -41,6 +44,18 @@ namespace Vehicles
 		public VehiclePawn Vehicle => parent as VehiclePawn;
 		public FuelConsumptionCondition FuelCondition => Props.fuelConsumptionCondition;
 		public Gizmo FuelCountGizmo => new Gizmo_RefuelableFuelTravel { refuelable = this };
+
+		public static MethodInfo PowerNetMethod
+		{
+			get
+			{
+				if (powerNetMethod is null)
+				{
+					powerNetMethod = AccessTools.Method(typeof(PowerNet), "ChangeStoredEnergy");
+				}
+				return powerNetMethod;
+			}
+		}
 
 		public virtual float FuelEfficiency
 		{
@@ -289,7 +304,7 @@ namespace Vehicles
 
 			if (Props.electricPowered && Charging && Find.TickManager.TicksGame % Props.ticksPerCharge == 0)
 			{
-				AccessTools.Method(typeof(PowerNet), "ChangeStoredEnergy").Invoke(connectedPower.PowerNet, new object[] { -PowerGainRate });
+				PowerNetMethod.Invoke(connectedPower.PowerNet, new object[] { -PowerGainRate });
 				Refuel(PowerGainRate);
 			}
 		}

@@ -16,6 +16,7 @@ namespace Vehicles
 		public const float ExpandingResize = 35f;
 		public const float TransitionTakeoff = 0.025f;
 		public const float PctPerTick = 0.001f;
+		public const int TicksPerValidateFlightPath = 60;
 
 		private static StringBuilder tmpSettleFailReason = new StringBuilder();
 
@@ -63,9 +64,9 @@ namespace Vehicles
 
 		public virtual bool IsPlayerControlled => vehicle.Faction == Faction.OfPlayer;
 
-		public override Vector3 DrawPos => Vector3.Slerp(position, Find.WorldGrid.GetTileCenter(flightPath.First.tile), transition);
+		public override Vector3 DrawPos => Vector3.Slerp(position, flightPath.First.center, transition);
 
-		public float Elevation => vehicle.CompVehicleLauncher.inFlight ? elevation : 0;
+		public float Elevation => 0;// vehicle.CompVehicleLauncher.inFlight ? elevation : 0;
 
 		public float ElevationChange { get; protected set; }
 
@@ -117,7 +118,7 @@ namespace Vehicles
 			rotatorGraphics = vehicle.graphicOverlay.graphics.Where(g => g.graphic is Graphic_Rotator).Select(g => g.graphic).Cast<Graphic_Rotator>().ToList();
 		}
 
-		public virtual Vector3 DrawPosAhead(int ticksAhead) => Vector3.Slerp(position, Find.WorldGrid.GetTileCenter(flightPath.First.tile), transition + speedPctPerTick * ticksAhead);
+		public virtual Vector3 DrawPosAhead(int ticksAhead) => Vector3.Slerp(position, flightPath.First.center, transition + speedPctPerTick * ticksAhead);
 
 		public override void Draw()
 		{
@@ -163,7 +164,7 @@ namespace Vehicles
 					Matrix4x4 matrix = GUI.matrix;
 					if (rotateTexture)
 					{
-						Verse.UI.RotateAroundPivot(Quaternion.LookRotation(Find.WorldGrid.GetTileCenter(flightPath.First.tile) - position).eulerAngles.y, rect.center);
+						UI.RotateAroundPivot(Quaternion.LookRotation(flightPath.First.center - position).eulerAngles.y, rect.center);
 					}
 					GenUI.DrawTextureWithMaterial(rect, VehicleTex.VehicleTexture(vehicle.VehicleDef, Rot8.North), VehicleMatNonLit);
 					GUI.matrix = matrix;
@@ -211,7 +212,7 @@ namespace Vehicles
 				}
 				if (vehicle.CompVehicleLauncher.ControlInFlight || !vehicle.CompVehicleLauncher.inFlight)
 				{
-					if (vehicle.CompFueledTravel.EmptyTank)
+					if (false /*vehicle.CompFueledTravel.EmptyTank*/) //Temporary unreachable
 					{
 						Command_Action glideCommand = new Command_Action()
 						{
@@ -338,7 +339,7 @@ namespace Vehicles
 					Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(), MessageTypeDefOf.RejectInput, false);
 					return false;
 				}
-				else if (Ext_Math.SphericalDistance(pos, Find.WorldGrid.GetTileCenter(target.Tile)) > vehicle.CompVehicleLauncher.MaxLaunchDistance || fuelCost > vehicle.CompFueledTravel.Fuel)
+				else if (Ext_Math.SphericalDistance(pos, WorldHelper.GetTilePos(target.Tile)) > vehicle.CompVehicleLauncher.MaxLaunchDistance || fuelCost > vehicle.CompFueledTravel.Fuel)
 				{
 					Messages.Message("TransportPodDestinationBeyondMaximumRange".Translate(), MessageTypeDefOf.RejectInput, false);
 					return false;
@@ -377,7 +378,7 @@ namespace Vehicles
 			bool Validator(GlobalTargetInfo target, Vector3 pos, Action<int, AerialVehicleArrivalAction, bool> launchAction)
 			{
 				float maxGlideDistance = Mathf.Abs(Elevation / ElevationChange) * PctPerTick * vehicle.CompVehicleLauncher.FlySpeed.Clamp(0, 5);
-				float sphericalDistance = Ext_Math.SphericalDistance(pos, Find.WorldGrid.GetTileCenter(target.Tile));
+				float sphericalDistance = Ext_Math.SphericalDistance(pos, WorldHelper.GetTilePos(target.Tile));
 				if (!target.IsValid)
 				{
 					Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(), MessageTypeDefOf.RejectInput, false);
@@ -433,8 +434,12 @@ namespace Vehicles
 				MoveForward();
 				TickRotators();
 				SpendFuel();
-				ChangeElevation();
+				//ChangeElevation();
 			}
+			//if (Find.TickManager.TicksGame % TicksPerValidateFlightPath == 0)
+			//{
+			//	flightPath.VerifyFlightPath();
+			//}
 		}
 
 		protected void ChangeElevation()
@@ -476,7 +481,7 @@ namespace Vehicles
 		{
 			vehicle.CompVehicleLauncher.inFlight = false;
 			Tile = WorldHelper.GetNearestTile(DrawPos);
-			ResetPosition(Find.WorldGrid.GetTileCenter(Tile));
+			ResetPosition(WorldHelper.GetTilePos(Tile));
 			flightPath.ResetPath();
 			AirDefensePositionTracker.DeregisterAerialVehicle(this);
 			(VehicleIncidentDefOf.BlackHawkDown.Worker as IncidentWorker_ShuttleDowned).TryExecuteEvent(this, worldObject);
@@ -499,27 +504,29 @@ namespace Vehicles
 				}
 				else 
 				{
-					if (Elevation <= vehicle.CompVehicleLauncher.LandingAltitude)
+					Messages.Message("VehicleAerialArrived".Translate(vehicle.LabelShort), MessageTypeDefOf.NeutralEvent);
+					Tile = flightPath.First.tile;
+					if (arrivalAction is AerialVehicleArrivalAction action)
 					{
-						Messages.Message("VehicleAerialArrived".Translate(vehicle.LabelShort), MessageTypeDefOf.NeutralEvent);
-						Tile = flightPath.First.tile;
-						if (arrivalAction is AerialVehicleArrivalAction action)
+						action.Arrived(flightPath.First.tile);
+						if (action.DestroyOnArrival)
 						{
-							action.Arrived(flightPath.First.tile);
-							if (action.DestroyOnArrival)
-							{
-								Destroy();
-							}
+							Destroy();
 						}
-						vehicle.CompVehicleLauncher.inFlight = false;
-						AirDefensePositionTracker.DeregisterAerialVehicle(this);
 					}
-					else if (flightPath.Path.Count <= 1 && vehicle.CompVehicleLauncher.Props.circleToLand)
-					{
-						Vector3 newPos = DrawPos;
-						SetCircle(flightPath.First.tile);
-						InitializeNextFlight(newPos);
-					}
+					vehicle.CompVehicleLauncher.inFlight = false;
+					AirDefensePositionTracker.DeregisterAerialVehicle(this);
+
+					//if (Elevation <= vehicle.CompVehicleLauncher.LandingAltitude)
+					//{
+						
+					//}
+					//else if (flightPath.Path.Count <= 1 && vehicle.CompVehicleLauncher.Props.circleToLand)
+					//{
+					//	Vector3 newPos = DrawPos;
+					//	SetCircle(flightPath.First.tile);
+					//	InitializeNextFlight(newPos);
+					//}
 				}
 			}
 		}
@@ -564,13 +571,13 @@ namespace Vehicles
 
 		private void SetSpeed()
 		{
-			float tileDistance = Ext_Math.SphericalDistance(position, Find.WorldGrid.GetTileCenter(flightPath.First.tile));
+			float tileDistance = Ext_Math.SphericalDistance(position, flightPath.First.center);
 			speedPctPerTick = (PctPerTick / tileDistance) * vehicle.CompVehicleLauncher.FlySpeed.Clamp(0, 5);
 		}
 
 		private void InitializeFacing()
 		{
-			Vector3 tileLocation = Find.WorldGrid.GetTileCenter(flightPath.First.tile).normalized;
+			Vector3 tileLocation = flightPath.First.center.normalized;
 			directionFacing = (DrawPos - tileLocation).normalized;
 		}
 
@@ -589,15 +596,15 @@ namespace Vehicles
 					Vector3 nodePosition = DrawPos;
 					for (int i = 0; i < flightPath.Path.Count; i++)
 					{
-						Vector3 nextNodePosition = Find.WorldGrid.GetTileCenter(flightPath[i].tile);
+						Vector3 nextNodePosition = flightPath[i].center;
 						LaunchTargeter.DrawTravelPoint(nodePosition, nextNodePosition);
 						nodePosition = nextNodePosition;
 					}
-					LaunchTargeter.DrawTravelPoint(nodePosition, Find.WorldGrid.GetTileCenter(flightPath.Last.tile));
+					LaunchTargeter.DrawTravelPoint(nodePosition, flightPath.Last.center);
 				}
 				else if (flightPath.Path.Count == 1)
 				{
-					LaunchTargeter.DrawTravelPoint(DrawPos, Find.WorldGrid.GetTileCenter(flightPath.First.tile));
+					LaunchTargeter.DrawTravelPoint(DrawPos, flightPath.First.center);
 				}
 			}
 		}
@@ -641,18 +648,18 @@ namespace Vehicles
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_References.Look(ref vehicle, "vehicle", true);
+			Scribe_References.Look(ref vehicle, nameof(vehicle), true);
 
-			Scribe_Deep.Look(ref flightPath, "flightPath", new object[] { this });
+			Scribe_Deep.Look(ref flightPath, nameof(flightPath), new object[] { this });
 
-			Scribe_Deep.Look(ref arrivalAction, "arrivalAction");
-			Scribe_Values.Look(ref speedPctPerTick, "speedPctPerTick");
+			Scribe_Deep.Look(ref arrivalAction, nameof(arrivalAction));
+			Scribe_Values.Look(ref speedPctPerTick, nameof(speedPctPerTick));
 
-			Scribe_Values.Look(ref transition, "transition");
-			Scribe_Values.Look(ref elevation, "elevation");
-			Scribe_Values.Look(ref recon, "recon");
-			Scribe_Values.Look(ref directionFacing, "directionFacing");
-			Scribe_Values.Look(ref position, "position");
+			Scribe_Values.Look(ref transition, nameof(transition));
+			//Scribe_Values.Look(ref elevation, "elevation");
+			Scribe_Values.Look(ref recon, nameof(recon));
+			Scribe_Values.Look(ref directionFacing, nameof(directionFacing));
+			Scribe_Values.Look(ref position, nameof(position));
 		}
 	}
 }

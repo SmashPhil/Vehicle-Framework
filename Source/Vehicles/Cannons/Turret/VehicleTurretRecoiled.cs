@@ -23,7 +23,7 @@ namespace Vehicles
 		protected Material[] cannonMaterials;
 		protected Texture2D[] cannonTextures;
 
-		public VehicleTurretRecoiled() : base()
+		public VehicleTurretRecoiled(VehiclePawn vehicle) : base(vehicle)
 		{
 		}
 

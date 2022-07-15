@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Verse;
 using RimWorld;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -12,11 +13,15 @@ namespace Vehicles
 		{
 			Rot4 vehicleRotation = launchProtocol.landingProperties.forcedRotation ?? Rot4.Random;
 			IntVec2 vehicleSize = vehicle.VehicleDef.Size;
-			IntVec3 cell = CellFinderExtended.RandomEdgeCell(vehicleRotation.Opposite, map, (IntVec3 cell) => 
-				!MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, cell, vehicleRotation), vehicleSize.x > vehicleSize.z ? vehicleSize.x : vehicleSize.z);
+			IntVec3 cell = CellFinderExtended.RandomEdgeCell(vehicleRotation.Opposite, map, delegate(IntVec3 cell)
+			{
+				IntVec3 clampedCell = vehicle.ClampToMap(cell, map, 1);
+				return !MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, cell, vehicleRotation);
+			}, vehicleSize.x > vehicleSize.z ? vehicleSize.x : vehicleSize.z);
+			IntVec3 clampedCell = vehicle.ClampToMap(cell, map, 1);
 			VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
 			skyfaller.vehicle = vehicle;
-			GenSpawn.Spawn(skyfaller, cell, map, vehicleRotation);
+			GenSpawn.Spawn(skyfaller, clampedCell, map, vehicleRotation);
 		}
 
 		public override bool TryResolveRaidSpawnCenter(IncidentParms parms)

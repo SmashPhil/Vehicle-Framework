@@ -12,9 +12,9 @@ namespace Vehicles
 	{
 		public void PatchMethods()
 		{
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(InspectPaneFiller), nameof(InspectPaneFiller.DoPaneContentsFor)),
-				postfix: new HarmonyMethod(typeof(WorldObjects),
-				nameof(AerialVehicleInFlightAltimeter)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(InspectPaneFiller), nameof(InspectPaneFiller.DoPaneContentsFor)),
+			//	postfix: new HarmonyMethod(typeof(WorldObjects),
+			//	nameof(AerialVehicleInFlightAltimeter)));
 		}
 
 		public static void AerialVehicleInFlightAltimeter(ISelectable sel, Rect rect)

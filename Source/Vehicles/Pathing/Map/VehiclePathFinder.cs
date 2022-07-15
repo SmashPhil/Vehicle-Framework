@@ -178,7 +178,7 @@ namespace Vehicles
 			}
 			if (traverseParms.mode == TraverseMode.ByPawn)
 			{
-				if (!VehicleReachabilityUtility.CanReachVehicle(vehicle, dest, peMode, Danger.Deadly, traverseParms.mode))
+				if (!vehicle.CanReachVehicle(dest, peMode, Danger.Deadly, traverseParms.mode))
 				{
 					return (PawnPath.NotFound, false);
 				}

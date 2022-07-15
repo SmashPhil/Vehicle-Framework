@@ -4,8 +4,8 @@
 	<Vehicles.VehicleTurretDef Name="TankMainTurret" ParentName="TurretBase">
 		<defName>TankMainTurret_Medium</defName>
 		<label>Main Turret</label>
-		<weaponType>Rotatable</weaponType>
-		<cannonSound>Explosion_PirateCannon</cannonSound>
+		<turretType>Rotatable</turretType>
+		<shotSound>Explosion_PirateCannon</shotSound>
 		<reloadSound>Artillery_ShellLoaded</reloadSound>
 		
 		<projectileSpeed>150</projectileSpeed>

@@ -8,7 +8,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class VehicleTurretRender : IExposable
+	public class VehicleTurretRender //: IExposable
 	{
 		public RotationalOffset north = RotationalOffset.Default;
 		public RotationalOffset east = RotationalOffset.Default;
@@ -18,11 +18,6 @@ namespace Vehicles
 		public RotationalOffset southEast = RotationalOffset.Default;
 		public RotationalOffset southWest = RotationalOffset.Default;
 		public RotationalOffset northWest = RotationalOffset.Default;
-
-		public VehicleTurretRender()
-		{
-			PostInit();
-		}
 
 		public VehicleTurretRender(VehicleTurretRender reference)
 		{
@@ -59,7 +54,7 @@ namespace Vehicles
 			{
 				if (west.IsValid)
 				{
-					east = west.Rotate(180);
+					east = west.Flip(true, false);
 				}
 				else
 				{
@@ -68,7 +63,7 @@ namespace Vehicles
 			}
 			if (!west.IsValid)
 			{
-				west = east.Rotate(180);
+				west = east.Flip(true, false);
 			}
 			if (!northEast.IsValid)
 			{
@@ -114,6 +109,10 @@ namespace Vehicles
 			Scribe_Values.Look(ref southEast, "southEast");
 			Scribe_Values.Look(ref southWest, "southWest");
 			Scribe_Values.Look(ref northWest, "northWest");
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				PostInit();
+			}
 		}
 
 		public override string ToString()
@@ -148,8 +147,25 @@ namespace Vehicles
 				}
 				return new RotationalOffset()
 				{
-					offset = Offset.RotatedBy(angle),
+					offset = offset.RotatedBy(angle),
 					Rot = angle < 0 ? Rot.Rotated(Mathf.Abs(angle), RotationDirection.Counterclockwise) : Rot.Rotated(angle, RotationDirection.Clockwise)
+				};
+			}
+
+			public RotationalOffset Flip(bool flipX, bool flipY)
+			{
+				Vector2 newOffset = offset;
+				if (flipX)
+				{
+					newOffset.x *= -1;
+				}
+				if (flipY)
+				{
+					newOffset.y *= -1;
+				}
+				return new RotationalOffset()
+				{
+					offset = newOffset
 				};
 			}
 
@@ -157,6 +173,10 @@ namespace Vehicles
 			{
 				entry = entry.TrimStart(new char[] { '(' }).TrimEnd(new char[] { ')' });
 				string[] data = entry.Split(new char[] { ',' });
+				if (data.Length != 2)
+				{
+					Log.Warning($"RotationalOffset parses into Vector2. xml = {entry}");
+				}
 				try
 				{
 					CultureInfo invariantCulture = CultureInfo.InvariantCulture;

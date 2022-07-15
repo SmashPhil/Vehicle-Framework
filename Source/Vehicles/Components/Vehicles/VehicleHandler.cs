@@ -97,7 +97,9 @@ namespace Vehicles
 				bool manipulation = pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation);
 				bool downed = pawn.Downed;
 				bool dead = pawn.Dead;
-				return manipulation && !downed && !dead;
+				bool isCrazy = pawn.InMentalState;
+				bool prisoner = pawn.IsPrisoner;
+				return manipulation && !downed && !dead && !isCrazy && !prisoner;
 			}
 			return true;
 		}

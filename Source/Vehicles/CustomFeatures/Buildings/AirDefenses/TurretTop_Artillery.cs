@@ -107,7 +107,7 @@ namespace Vehicles
 			}
 			if (worldTarget.IsValid)
 			{
-				Vector3 source = Find.WorldGrid.GetTileCenter(parentTurret.Map.Tile);
+				Vector3 source = WorldHelper.GetTilePos(parentTurret.Map.Tile);
 				Vector3 target = worldTarget.WorldObject is null ? Find.WorldGrid.GetTileCenter(worldTarget.Tile) : worldTarget.WorldObject.DrawPos;
 				CurRotation = WorldHelper.TryFindHeading(source, target);
 				ticksUntilIdleTurn = Rand.RangeInclusive(IdleTurnIntervalMin, IdleTurnIntervalMax);

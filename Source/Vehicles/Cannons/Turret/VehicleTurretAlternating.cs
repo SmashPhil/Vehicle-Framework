@@ -8,7 +8,7 @@ namespace Vehicles
 {
 	public class VehicleTurretAlternating : VehicleTurret
 	{
-		public VehicleTurretAlternating() : base()
+		public VehicleTurretAlternating(VehiclePawn vehicle) : base(vehicle)
 		{
 		}
 

@@ -7,11 +7,53 @@ namespace Vehicles
 {
 	public class Graphic_Vehicle : Graphic_RGB
 	{
-		public override Material MatNorth => maskMatPatterns[PatternDefOf.Default].Second[0];
-		public override Material MatEast => maskMatPatterns[PatternDefOf.Default].Second[1];
-		public override Material MatSouth => maskMatPatterns[PatternDefOf.Default].Second[2];
-		public override Material MatWest => maskMatPatterns[PatternDefOf.Default].Second[3];
+		public override Material MatNorth
+		{
+			get
+			{
+				if (maskMatPatterns.TryGetValue(PatternDefOf.Default, out var maskMat))
+				{
+					return maskMat.Second?[0];
+				}
+				return null;
+			}
+		}
 
+		public override Material MatEast
+		{
+			get
+			{
+				if (maskMatPatterns.TryGetValue(PatternDefOf.Default, out var maskMat))
+				{
+					return maskMat.Second?[1];
+				}
+				return null;
+			}
+		}
+
+		public override Material MatSouth
+		{
+			get
+			{
+				if (maskMatPatterns.TryGetValue(PatternDefOf.Default, out var maskMat))
+				{
+					return maskMat.Second?[2];
+				}
+				return null;
+			}
+		}
+
+		public override Material MatWest
+		{
+			get
+			{
+				if (maskMatPatterns.TryGetValue(PatternDefOf.Default, out var maskMat))
+				{
+					return maskMat.Second?[3];
+				}
+				return null;
+			}
+		}
 
 		public Material MatAt(Rot8 rot, PatternDef pattern, VehiclePawn vehicle = null)
 		{

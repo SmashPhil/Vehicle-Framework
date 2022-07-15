@@ -4,12 +4,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
+using RimWorld;
 using SmashTools;
 
 namespace Vehicles
 {
 	public class Listing_Settings : Listing_SplitColumns
 	{
+		public static readonly Color modifiedColor = new Color(0.4f, 0.4f, 1);
 		public SettingsPage settings;
 
 		public Listing_Settings(SettingsPage settings, GameFont font) : base(font)
@@ -31,11 +33,22 @@ namespace Vehicles
 		{
 			try
 			{
-				return settings switch
+				switch (settings)
 				{
-					SettingsPage.Vehicles => VehicleMod.settings.vehicles.fieldSettings[def.defName][field].First,
-					SettingsPage.Upgrades => VehicleMod.settings.upgrades.upgradeSettings[def.defName][field].First,
-					_ => throw new NotSupportedException($"Cannot use Listing_Settings with settings set to {settings}")
+					case SettingsPage.Vehicles:
+						{
+							if (VehicleMod.settings.vehicles.fieldSettings[def.defName].TryGetValue(field, out var value))
+							{
+								return value.EndValue;
+							}
+							return VehicleMod.settings.vehicles.defaultValues[def.defName][field];
+						}
+					case SettingsPage.Upgrades:
+						{
+							throw new NotImplementedException();
+						}
+					default:
+						throw new NotSupportedException($"Cannot use Listing_Settings with settings set to {settings}");
 				};
 			}
 			catch (Exception ex)
@@ -60,130 +73,74 @@ namespace Vehicles
 			}
 		}
 
-		private void SetSettingsValue<T>(VehicleDef def, SaveableField field, T valueDup)
+		private void SetSettingsValue<T>(VehicleDef def, SaveableField field, T value)
 		{
 			switch (settings)
 			{
 				case SettingsPage.Vehicles:
-					VehicleMod.settings.vehicles.fieldSettings[def.defName][field] = new SavedField<object>(valueDup);
+					VehicleMod.settings.vehicles.fieldSettings[def.defName][field] = new SavedField<object>(value);
 					break;
 				case SettingsPage.Upgrades:
-					VehicleMod.settings.upgrades.upgradeSettings[def.defName][field] = new SavedField<object>(valueDup);
+					VehicleMod.settings.upgrades.upgradeSettings[def.defName][field] = new SavedField<object>(value);
 					break;
 				default:
 					throw new NotSupportedException($"Cannot use Listing_SplitColumns with settings set to {settings}");
 			}
 		}
 
-		public void ListLabeled(VehicleDef def, SaveableField field, string label, string tooltip, string disabledTooltip, SettingsValueInfo settingsInfo, Func<int, string> subLabelGetter,
-			Func<int, string> subTooltipGetter, Func<int, string> subDisabledTooltipGetter)
+		private bool FieldModified(VehicleDef def, SaveableField field)
 		{
-			this.Header(label, ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-
-			Shift();
-			Rect rect = GetSplitRect(Text.LineHeight);
-			rect.y -= rect.height / 2;
-
-			Color color = GUI.color;
-			if (!disabledTooltip.NullOrEmpty())
-			{
-				GUI.color = UIElements.InactiveColor;
-				GUI.enabled = false;
-				UIElements.DoTooltipRegion(rect, disabledTooltip);
-			}
-			else if (!tooltip.NullOrEmpty())
-			{
-				UIElements.DoTooltipRegion(rect, tooltip);
-			}
-
-			IList iList = GetSettingsValue(def, field) as IList;
-			
-			for (int i = 0; i < iList.Count; i++)
-			{
-				Shift();
-				Rect itemRect = GetSplitRect(Text.LineHeight);
-				itemRect.y -= itemRect.height / 2;
-				object value = iList[i];
-				string subLabel = subLabelGetter?.Invoke(i) ?? i.ToString();
-				string subTooltip = subTooltipGetter?.Invoke(i);
-				string subDisabledTooltip = subDisabledTooltipGetter?.Invoke(i);
-				switch (settingsInfo.settingsType)
-				{
-					case UISettingsType.None:
-						break;
-					case UISettingsType.Checkbox:
-						{
-							bool refValue = (bool)value;
-							CheckboxLabeled(subLabel, ref refValue, subTooltip, subDisabledTooltip, false);
-							iList[i] = refValue;
-						}
-						break;
-					case UISettingsType.IntegerBox:
-						{
-							int refValue = (int)value;
-							IntegerBox(subLabel, ref refValue, subTooltip, subDisabledTooltip, Mathf.RoundToInt(settingsInfo.minValue), Mathf.RoundToInt(settingsInfo.maxValue));
-							iList[i] = refValue;
-						}
-						break;
-					case UISettingsType.FloatBox:
-						{
-							float refValue = (float)value;
-							FloatBox(subLabel, ref refValue, subTooltip, subDisabledTooltip, settingsInfo.minValue, settingsInfo.maxValue);
-							iList[i] = refValue;
-						}
-						break;
-					case UISettingsType.ToggleLabel:
-						break;
-					case UISettingsType.SliderEnum:
-						break;
-					case UISettingsType.SliderInt:
-						break;
-					case UISettingsType.SliderFloat:
-						{
-							float refValue = (float)value;
-							SliderLabeled(subLabel, ref refValue, subTooltip, subDisabledTooltip, settingsInfo.endSymbol, settingsInfo.minValue, settingsInfo.maxValue, settingsInfo.roundDecimalPlaces,
-								settingsInfo.endValue, settingsInfo.increment);
-							iList[i] = refValue;
-						}
-						break;
-					case UISettingsType.SliderPercent:
-						break;
-					default:
-						throw new NotImplementedException();
-				}
-			}
-
-			GUI.color = color;
-			GUI.enabled = true;
-
-			SetSettingsValue(def, field, iList);
+			return VehicleMod.settings.vehicles.fieldSettings[def.defName].ContainsKey(field);
 		}
 
 		public void CheckboxLabeled(VehicleDef def, SaveableField field, string label, string tooltip, string disabledTooltip, bool locked)
 		{
 			Shift();
-			Rect rect = GetSplitRect(Text.LineHeight);
-			rect.y -= rect.height / 2;
+			Rect rect = GetSplitRect(24);
 			bool disabled = !disabledTooltip.NullOrEmpty();
+			bool mouseOver = Mouse.IsOver(rect);
 			if (disabled)
 			{
 				UIElements.DoTooltipRegion(rect, disabledTooltip);
 			}
 			else if (!tooltip.NullOrEmpty())
 			{
-				if (Mouse.IsOver(rect))
+				if (mouseOver)
 				{
 					Widgets.DrawHighlight(rect);
 				}
 				UIElements.DoTooltipRegion(rect, tooltip);
+			}
+			if (mouseOver)
+			{
+				if (Event.current.type == EventType.MouseDown && Event.current.button == 1)
+				{
+					Event.current.Use();
+					List<FloatMenuOption> options = new List<FloatMenuOption>();
+					options.Add(new FloatMenuOption("ResetButton".Translate(), delegate ()
+					{
+						VehicleMod.settings.vehicles.fieldSettings[def.defName].Remove(field);
+					}));
+					FloatMenu floatMenu = new FloatMenu(options)
+					{
+						vanishIfMouseDistant = true
+					};
+					Find.WindowStack.Add(floatMenu);
+				}
 			}
 			bool checkState = (bool)GetSettingsValue(def, field);
 			if (locked)
 			{
 				checkState = false;
 			}
-			UIElements.CheckboxLabeled(rect, label, ref checkState, disabled);
-			SetSettingsValue(def, field, checkState);
+			if (FieldModified(def, field))
+			{
+				label = label.Colorize(modifiedColor);
+			}
+			if (UIElements.CheckboxLabeled(rect, label, ref checkState, disabled))
+			{
+				SetSettingsValue(def, field, checkState);
+			}
 		}
 
 		public void IntegerBox(VehicleDef def, SaveableField field, string label, string tooltip, string disabledTooltip, int min = int.MinValue, int max = int.MaxValue)
@@ -191,13 +148,14 @@ namespace Vehicles
 			Shift();
 			int value = Convert.ToInt32(GetSettingsValue(def, field));
 			
-			Rect rect = GetSplitRect(Text.LineHeight);
-			float centerY = rect.y - rect.height / 2;
+			Rect rect = GetSplitRect(24);
+			float centerY = rect.y + (rect.height - Text.LineHeight) / 2;
 			float length = rect.width * 0.45f;
 			Rect rectLeft = new Rect(rect.x, centerY, length, rect.height);
-			Rect rectRight = new Rect(rect.x + (rect.width - length), centerY, length, rect.height);
+			Rect rectRight = new Rect(rect.x + (rect.width - length), centerY, length, Text.LineHeight);
 
 			Color color = GUI.color;
+			bool mouseOver = Mouse.IsOver(rect);
 			if (!disabledTooltip.NullOrEmpty())
 			{
 				GUI.color = UIElements.InactiveColor;
@@ -206,33 +164,61 @@ namespace Vehicles
 			}
 			else if (!tooltip.NullOrEmpty())
 			{
+				if (mouseOver)
+				{
+					Widgets.DrawHighlight(rect);
+				}
 				UIElements.DoTooltipRegion(rect, tooltip);
+			}
+			if (mouseOver)
+			{
+				if (Event.current.type == EventType.MouseDown && Event.current.button == 1)
+				{
+					Event.current.Use();
+					List<FloatMenuOption> options = new List<FloatMenuOption>();
+					options.Add(new FloatMenuOption("ResetButton".Translate(), delegate ()
+					{
+						VehicleMod.settings.vehicles.fieldSettings[def.defName].Remove(field);
+					}));
+					FloatMenu floatMenu = new FloatMenu(options)
+					{
+						vanishIfMouseDistant = true
+					};
+					Find.WindowStack.Add(floatMenu);
+				}
+			}
+			if (FieldModified(def, field))
+			{
+				label = label.Colorize(modifiedColor);
 			}
 			Widgets.Label(rectLeft, label);
 
 			var align = Text.CurTextFieldStyle.alignment;
 			Text.CurTextFieldStyle.alignment = TextAnchor.MiddleRight;
 			string buffer = value.ToString();
+			int valueBefore = value;
 			Widgets.TextFieldNumeric(rectRight, ref value, ref buffer, min, max);
-
+			if (valueBefore != value)
+			{
+				SetSettingsValue(def, field, value);
+			}
 			Text.CurTextFieldStyle.alignment = align;
 			GUI.color = color;
 			GUI.enabled = true;
-
-			SetSettingsValue(def, field, value);
 		}
 
 		public void FloatBox(VehicleDef def, SaveableField field, string label, string tooltip, string disabledTooltip, float min = int.MinValue, float max = int.MaxValue)
 		{
 			Shift();
 			float value = Convert.ToSingle(GetSettingsValue(def, field));
-			Rect rect = GetSplitRect(Text.LineHeight);
-			float centerY = rect.y - rect.height / 2;
+			Rect rect = GetSplitRect(24);
+			float centerY = rect.y + (rect.height - Text.LineHeight) / 2;
 			float length = rect.width * 0.45f;
 			Rect rectLeft = new Rect(rect.x, centerY, length, rect.height);
-			Rect rectRight = new Rect(rect.x + (rect.width - length), centerY, length, rect.height);
+			Rect rectRight = new Rect(rect.x + (rect.width - length), centerY, length, Text.LineHeight);
 
 			Color color = GUI.color;
+			bool mouseOver = Mouse.IsOver(rect);
 			if (!disabledTooltip.NullOrEmpty())
 			{
 				GUI.color = UIElements.InactiveColor;
@@ -241,20 +227,47 @@ namespace Vehicles
 			}
 			else if (!tooltip.NullOrEmpty())
 			{
+				if (mouseOver)
+				{
+					Widgets.DrawHighlight(rect);
+				}
 				UIElements.DoTooltipRegion(rect, tooltip);
+			}
+			if (mouseOver)
+			{
+				if (Event.current.type == EventType.MouseDown && Event.current.button == 1)
+				{
+					Event.current.Use();
+					List<FloatMenuOption> options = new List<FloatMenuOption>();
+					options.Add(new FloatMenuOption("ResetButton".Translate(), delegate ()
+					{
+						VehicleMod.settings.vehicles.fieldSettings[def.defName].Remove(field);
+					}));
+					FloatMenu floatMenu = new FloatMenu(options)
+					{
+						vanishIfMouseDistant = true
+					};
+					Find.WindowStack.Add(floatMenu);
+				}
+			}
+			if (FieldModified(def, field))
+			{
+				label = label.Colorize(modifiedColor);
 			}
 			Widgets.Label(rectLeft, label);
 
 			var align = Text.CurTextFieldStyle.alignment;
 			Text.CurTextFieldStyle.alignment = TextAnchor.MiddleRight;
 			string buffer = value.ToString();
-
+			float valueBefore = value;
 			Widgets.TextFieldNumeric(rectRight, ref value, ref buffer, min, max);
-
+			if (valueBefore != value)
+			{
+				SetSettingsValue(def, field, value);
+			}
 			Text.CurTextFieldStyle.alignment = align;
 			GUI.color = color;
 			GUI.enabled = true;
-			SetSettingsValue(def, field, value);
 		}
 
 		public void SliderPercentLabeled(VehicleDef def, SaveableField field, string label, string tooltip, string disabledTooltip, string endSymbol, float min, float max, int decimalPlaces = 2, 
@@ -265,7 +278,9 @@ namespace Vehicles
 			{
 				float value = Convert.ToSingle(GetSettingsValue(def, field));
 				Rect rect = GetSplitRect(24f);
+				rect.y += rect.height / 2;
 				string format = $"{Math.Round(value * 100, decimalPlaces)}" + endSymbol;
+				
 				if (!endValueDisplay.NullOrEmpty() && endValue > 0)
 				{
 					if (value >= endValue)
@@ -278,6 +293,7 @@ namespace Vehicles
 					}
 				}
 				Color color = GUI.color;
+				bool mouseOver = Mouse.IsOver(rect);
 				if (!disabledTooltip.NullOrEmpty())
 				{
 					GUI.color = UIElements.InactiveColor;
@@ -286,17 +302,46 @@ namespace Vehicles
 				}
 				else if (!tooltip.NullOrEmpty())
 				{
+					if (mouseOver)
+					{
+						Widgets.DrawHighlight(rect);
+					}
 					UIElements.DoTooltipRegion(rect, tooltip, true);
 				}
+				if (mouseOver)
+				{
+					if (Event.current.type == EventType.MouseDown && Event.current.button == 1)
+					{
+						Event.current.Use();
+						List<FloatMenuOption> options = new List<FloatMenuOption>();
+						options.Add(new FloatMenuOption("ResetButton".Translate(), delegate ()
+						{
+							VehicleMod.settings.vehicles.fieldSettings[def.defName].Remove(field);
+						}));
+						FloatMenu floatMenu = new FloatMenu(options)
+						{
+							vanishIfMouseDistant = true
+						};
+						Find.WindowStack.Add(floatMenu);
+					}
+				}
+				if (FieldModified(def, field))
+				{
+					label = label.Colorize(modifiedColor);
+				}
+				float valueBefore = value;
 				value = Widgets.HorizontalSlider(rect, value, min, max, false, null, label, format);
 				float value2 = value;
 				if (endValue > 0 && value2 >= max)
 				{
 					value2 = endValue;
 				}
+				if (valueBefore != value)
+				{
+					SetSettingsValue(def, field, value, value2);
+				}
 				GUI.enabled = true;
 				GUI.color = color;
-				SetSettingsValue(def, field, value, value2);
 			}
 			catch(Exception ex)
 			{
@@ -313,6 +358,7 @@ namespace Vehicles
 			{
 				float value = Convert.ToSingle(GetSettingsValue(def, field));
 				Rect rect = GetSplitRect(24f);
+				rect.y += rect.height / 2;
 				string format = $"{Math.Round(value, decimalPlaces)}" + endSymbol;
 				if (!endValueDisplay.NullOrEmpty())
 				{
@@ -326,6 +372,7 @@ namespace Vehicles
 					}
 				}
 				Color color = GUI.color;
+				bool mouseOver = Mouse.IsOver(rect);
 				if (!disabledTooltip.NullOrEmpty())
 				{
 					GUI.color = UIElements.InactiveColor;
@@ -334,8 +381,34 @@ namespace Vehicles
 				}
 				else if (!tooltip.NullOrEmpty())
 				{
+					if (mouseOver)
+					{
+						Widgets.DrawHighlight(rect);
+					}
 					UIElements.DoTooltipRegion(rect, tooltip, true);
 				}
+				if (mouseOver)
+				{
+					if (Event.current.type == EventType.MouseDown && Event.current.button == 1)
+					{
+						Event.current.Use();
+						List<FloatMenuOption> options = new List<FloatMenuOption>();
+						options.Add(new FloatMenuOption("ResetButton".Translate(), delegate ()
+						{
+							VehicleMod.settings.vehicles.fieldSettings[def.defName].Remove(field);
+						}));
+						FloatMenu floatMenu = new FloatMenu(options)
+						{
+							vanishIfMouseDistant = true
+						};
+						Find.WindowStack.Add(floatMenu);
+					}
+				}
+				if (FieldModified(def, field))
+				{
+					label = label.Colorize(modifiedColor);
+				}
+				float valueBefore = value;
 				value = Widgets.HorizontalSlider(rect, value, min, max, false, null, label, format);
 				float value2 = value;
 				if (increment > 0)
@@ -347,9 +420,12 @@ namespace Vehicles
 				{
 					value2 = endValue;
 				}
+				if (valueBefore != value)
+				{
+					SetSettingsValue(def, field, value, value2);
+				}
 				GUI.color = color;
 				GUI.enabled = true;
-				SetSettingsValue(def, field, value, value2);
 			}
 			catch(Exception ex)
 			{
@@ -365,8 +441,8 @@ namespace Vehicles
 			try
 			{
 				int value = Convert.ToInt32(GetSettingsValue(def, field));
-				
 				Rect rect = GetSplitRect(24f);
+				rect.y += rect.height / 2;
 				string format = string.Format("{0}" + endSymbol, value);
 				if (!maxValueDisplay.NullOrEmpty())
 				{
@@ -391,6 +467,7 @@ namespace Vehicles
 					}
 				}
 				Color color = GUI.color;
+				bool mouseOver = Mouse.IsOver(rect);
 				if (!disabledTooltip.NullOrEmpty())
 				{
 					GUI.color = UIElements.InactiveColor;
@@ -399,15 +476,44 @@ namespace Vehicles
 				}
 				else if (!tooltip.NullOrEmpty())
 				{
+					if (mouseOver)
+					{
+						Widgets.DrawHighlight(rect);
+					}
 					UIElements.DoTooltipRegion(rect, tooltip, true);
 				}
+				if (mouseOver)
+				{
+					if (Event.current.type == EventType.MouseDown && Event.current.button == 1)
+					{
+						Event.current.Use();
+						List<FloatMenuOption> options = new List<FloatMenuOption>();
+						options.Add(new FloatMenuOption("ResetButton".Translate(), delegate ()
+						{
+							VehicleMod.settings.vehicles.fieldSettings[def.defName].Remove(field);
+						}));
+						FloatMenu floatMenu = new FloatMenu(options)
+						{
+							vanishIfMouseDistant = true
+						};
+						Find.WindowStack.Add(floatMenu);
+					}
+				}
+				if (FieldModified(def, field))
+				{
+					label = label.Colorize(modifiedColor);
+				}
+				int valueBefore = value;
 				value = (int)Widgets.HorizontalSlider(rect, value, min, max, false, null, label, format);
 				int value2 = value;
 				if (value2 >= max && endValue > 0)
 				{
 					value2 = endValue;
 				}
-				SetSettingsValue(def, field, value, value2);
+				if (valueBefore != value)
+				{
+					SetSettingsValue(def, field, value, value2);
+				}
 				GUI.color = color;
 				GUI.enabled = true;
 			}
@@ -429,12 +535,14 @@ namespace Vehicles
 				int min = enumValues[0];
 				int max = enumValues.Last();
 				Rect rect = GetSplitRect(24f);
+				rect.y += rect.height / 2;
 				string format = Enum.GetName(enumType, value);
 				if (translate)
 				{
 					format = format.Translate();
 				}
 				Color color = GUI.color;
+				bool mouseOver = Mouse.IsOver(rect);
 				if (!disabledTooltip.NullOrEmpty())
 				{
 					GUI.color = UIElements.InactiveColor;
@@ -443,10 +551,39 @@ namespace Vehicles
 				}
 				else if (!tooltip.NullOrEmpty())
 				{
+					if (mouseOver)
+					{
+						Widgets.DrawHighlight(rect);
+					}
 					UIElements.DoTooltipRegion(rect, tooltip, true);
 				}
+				if (mouseOver)
+				{
+					if (Event.current.type == EventType.MouseDown && Event.current.button == 1)
+					{
+						Event.current.Use();
+						List<FloatMenuOption> options = new List<FloatMenuOption>();
+						options.Add(new FloatMenuOption("ResetButton".Translate(), delegate ()
+						{
+							VehicleMod.settings.vehicles.fieldSettings[def.defName].Remove(field);
+						}));
+						FloatMenu floatMenu = new FloatMenu(options)
+						{
+							vanishIfMouseDistant = true
+						};
+						Find.WindowStack.Add(floatMenu);
+					}
+				}
+				if (FieldModified(def, field))
+				{
+					label = label.Colorize(modifiedColor);
+				}
+				int valueBefore = value;
 				value = (int)Widgets.HorizontalSlider(rect, value, min, max, false, null, label, format);
-				SetSettingsValue(def, field, value);
+				if (valueBefore != value)
+				{
+					SetSettingsValue(def, field, value);
+				}
 				GUI.color = color;
 				GUI.enabled = true;
 			}

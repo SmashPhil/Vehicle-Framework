@@ -43,14 +43,15 @@ namespace Vehicles
 		public VehiclePawn Vehicle => parent as VehiclePawn;
 		public CompProperties_VehicleLauncher Props => props as CompProperties_VehicleLauncher;
 
-		public float FlySpeed => flySpeedModifier + SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), "flySpeed", Props.flySpeed);
-		public float FuelEfficiencyWorld => fuelEfficiencyWorldModifier + SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), "fuelEfficiencyWorld", Props.fuelEfficiencyWorld);
-		public int FixedMaxDistance => SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), "fixedLaunchDistanceMax",  Props.fixedLaunchDistanceMax);
-		public float RateOfClimb => rateOfClimbModifier + SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), "rateOfClimb", Props.rateOfClimb);
-		public int MaxAltitude => maxAltitudeModifier + SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), "maxAltitude", Props.maxAltitude);
-		public int LandingAltitude => landingAltitudeModifier + SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), "landingAltitude", Props.landingAltitude);
-		public bool ControlInFlight => SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), "controlInFlight", Props.controlInFlight);
-		public int ReconDistance => SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), "reconDistance", Props.reconDistance);
+		public float FlySpeed => flySpeedModifier + SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.flySpeed), Props.flySpeed);
+		public float FuelEfficiencyWorld => fuelEfficiencyWorldModifier + SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.fuelEfficiencyWorld), Props.fuelEfficiencyWorld);
+		public int FixedMaxDistance => SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.fixedLaunchDistanceMax), Props.fixedLaunchDistanceMax);
+		public bool SpaceFlight => SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.spaceFlight), Props.spaceFlight);
+		public float RateOfClimb => rateOfClimbModifier + SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.rateOfClimb), Props.rateOfClimb);
+		public int MaxAltitude => maxAltitudeModifier + SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.maxAltitude), Props.maxAltitude);
+		public int LandingAltitude => landingAltitudeModifier + SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.landingAltitude), Props.landingAltitude);
+		public bool ControlInFlight => SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.controlInFlight), Props.controlInFlight);
+		public int ReconDistance => SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.reconDistance), Props.reconDistance);
 
 		public virtual bool ControlledDescent => ClimbRateStat >= 0;
 
@@ -209,7 +210,7 @@ namespace Vehicles
 
 		public float FuelNeededToLaunchAtDist(Vector3 origin, int destination)
 		{
-			float tileDistance = Ext_Math.SphericalDistance(origin, Find.WorldGrid.GetTileCenter(destination));
+			float tileDistance = Ext_Math.SphericalDistance(origin, WorldHelper.GetTilePos(destination));
 			return FuelNeededToLaunchAtDist(tileDistance);
 		}
 

@@ -245,7 +245,7 @@ namespace Vehicles
 			/* Reset Buttons */
 			float padding = ResetImageSize + 5;
 			Rect resetAllButton = new Rect(menuRect.width - padding, menuRect.y + 15, ResetImageSize, ResetImageSize);
-			Rect resetButton = new Rect(resetAllButton.x - padding, resetAllButton.y, ResetImageSize, ResetImageSize);
+			Rect settingsButton = new Rect(resetAllButton.x - padding, resetAllButton.y, ResetImageSize, ResetImageSize);
 			
 			if (Widgets.ButtonImage(CurrentSection.ButtonRect(resetAllButton), VehicleTex.ResetPage))
 			{
@@ -256,6 +256,10 @@ namespace Vehicles
 				};
 				//floatMenu.onCloseCallback...
 				Find.WindowStack.Add(floatMenu);
+			}
+			if (Widgets.ButtonImage(CurrentSection.ButtonRect(settingsButton), VehicleTex.ExportSettings))
+			{
+
 			}
 		}
 

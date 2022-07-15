@@ -90,8 +90,8 @@ namespace Vehicles
 			if (Cannons.Count > 0)
 			{
 				int turretNumber = 0;
-				var rotatables = Cannons.Where(x => x.turretDef.weaponType == TurretType.Rotatable);
-				var statics = Cannons.Where(x => x.turretDef.weaponType == TurretType.Static);
+				var rotatables = Cannons.Where(x => x.turretDef.turretType == TurretType.Rotatable);
+				var statics = Cannons.Where(x => x.turretDef.turretType == TurretType.Static);
 				if (rotatables.NotNullAndAny())
 				{
 					foreach (VehicleTurret turret in rotatables)
@@ -329,7 +329,7 @@ namespace Vehicles
 		{
 			base.PostGenerationSetup();
 			InitializeTurrets();
-			TurretSetup();
+			ResolveChildTurrets();
 		}
 
 		public static VehicleTurret CreateTurret(VehiclePawn vehicle, VehicleTurret reference)
@@ -363,32 +363,36 @@ namespace Vehicles
 			}
 		}
 
-		public void TurretSetup()
+		public void ResolveChildTurrets()
 		{
-			foreach (VehicleTurret cannon in Cannons)
+			foreach (VehicleTurret turret in Cannons)
 			{
-				if(!string.IsNullOrEmpty(cannon.key))
+				turret.childCannons = new List<VehicleTurret>();
+				foreach (VehicleTurret cannon2 in Cannons.Where(c => c.parentKey == turret.key))
 				{
-					cannon.childCannons = new List<VehicleTurret>();
-					foreach (VehicleTurret cannon2 in Cannons.Where(c => c.parentKey == cannon.key))
-					{
-						cannon2.attachedTo = cannon;
-						cannon.childCannons.Add(cannon2);
-					}
+					cannon2.attachedTo = turret;
+					turret.childCannons.Add(cannon2);
 				}
-				cannon.vehicle = Vehicle;
 			}
 			multiFireCannon ??= new List<TurretData>();
+		}
+
+		public void InitTurrets()
+		{
+			foreach (VehicleTurret turret in Props.turrets)
+			{
+
+			}
 		}
 
 		public override void PostExposeData()
 		{
 			base.PostExposeData();
-			Scribe_Collections.Look(ref cannons, "cannons", LookMode.Deep);
+			Scribe_Collections.Look(ref cannons, "cannons", LookMode.Deep, ctorArgs: Vehicle);
 			Scribe_Collections.Look(ref multiFireCannon, "multiFireCannon", LookMode.Reference);
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
-				TurretSetup();
+				ResolveChildTurrets();
 			}
 		}
 

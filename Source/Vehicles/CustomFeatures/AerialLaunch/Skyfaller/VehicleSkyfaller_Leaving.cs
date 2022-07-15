@@ -65,7 +65,7 @@ namespace Vehicles
 				flyingVehicle.vehicle = vehicle;
 				flyingVehicle.Tile = Map.Tile;
 				flyingVehicle.SetFaction(vehicle.Faction);
-				flyingVehicle.OrderFlyToTiles(new List<FlightNode>(flightPath), Find.WorldGrid.GetTileCenter(Map.Tile), arrivalAction);
+				flyingVehicle.OrderFlyToTiles(new List<FlightNode>(flightPath), WorldHelper.GetTilePos(Map.Tile), arrivalAction);
 				if (orderRecon)
 				{
 					flyingVehicle.flightPath.ReconCircleAt(flightPath.LastOrDefault().tile);

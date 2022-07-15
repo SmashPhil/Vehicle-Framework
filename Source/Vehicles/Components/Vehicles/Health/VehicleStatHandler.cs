@@ -19,7 +19,6 @@ namespace Vehicles
 		public readonly Dictionary<VehicleStatDef, List<VehicleComponent>> statComponents = new Dictionary<VehicleStatDef, List<VehicleComponent>>();
 
 		private readonly List<Pair<IntVec2, int>> debugCellHighlight = new List<Pair<IntVec2, int>>();
-		public readonly HashSet<Explosion> explosionsAffectingVehicle = new HashSet<Explosion>();
 
 		public Dictionary<Thing, IntVec3> impacter = new Dictionary<Thing, IntVec3>();
 
@@ -98,7 +97,7 @@ namespace Vehicles
 				{
 					if (!componentLocations.TryGetValue(cell, out var list))
 					{
-						SmashLog.Error($"Unable to add to internal component list for <field>{cell}</field>");
+						SmashLog.Error($"Unable to add to internal component list for <field>{cell}</field>. Component = {component.props.key}");
 						continue;
 					}
 					list.Add(component);
@@ -207,12 +206,18 @@ namespace Vehicles
 			report?.AppendLine($"Base Damage: {damage}");
 			report?.AppendLine($"HitCell: {hitCell}");
 
-			if (dinfo.Weapon != null && dinfo.Weapon.GetModExtension<VehicleDamageMultiplierDefModExtension>() is VehicleDamageMultiplierDefModExtension extMultiplier)
+			if (dinfo.Weapon?.GetModExtension<VehicleDamageMultiplierDefModExtension>() is VehicleDamageMultiplierDefModExtension weaponMultiplier)
 			{
-				damage *= extMultiplier.multiplier;
-				report?.AppendLine($"ModExtension Multiplier: {extMultiplier.multiplier} Result: {damage}");
+				damage *= weaponMultiplier.multiplier;
+				report?.AppendLine($"ModExtension Multiplier: {weaponMultiplier.multiplier} Result: {damage}");
 			}
-			
+
+			if (dinfo.Instigator?.def.GetModExtension<VehicleDamageMultiplierDefModExtension>() is VehicleDamageMultiplierDefModExtension defMultiplier)
+			{
+				damage *= defMultiplier.multiplier;
+				report?.AppendLine($"ModExtension Multiplier: {defMultiplier.multiplier} Result: {damage}");
+			}
+
 			if (dinfo.Def.isRanged)
 			{
 				damage *= VehicleMod.settings.main.rangedDamageMultiplier;
@@ -234,7 +239,7 @@ namespace Vehicles
 				report?.AppendLine($"Final Damage = {damage}. Exiting.");
 				return;
 			}
-			
+			vehicle.EventRegistry[VehicleEventDefOf.DamageTaken].ExecuteEvents();
 			if (explosive)
 			{
 				IntVec2 cell = new IntVec2(hitCell.x, hitCell.z);

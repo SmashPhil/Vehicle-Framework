@@ -287,7 +287,7 @@ namespace Vehicles
 			Rect ammoWindowRect = new Rect(rect);
 			ammoWindowRect.height = AmmoWindowOffset * 2;
 			ammoWindowRect.width = ammoRect.height * 6 + AmmoWindowOffset * 2;
-			if (turret.ammoWindowOpened)
+			if (turret.AmmoWindowOpened)
 			{
 				List<ThingDef> allVehicleTurretDefs = turret.vehicle.inventory.innerContainer.Where(d => turret.ContainsAmmoDefOrShell(d.def)).Select(t => t.def).Distinct().ToList();
 				ammoWindowRect.height += ammoRect.height + Mathf.CeilToInt(allVehicleTurretDefs.Count / 6) * ammoRect.height;
@@ -304,7 +304,7 @@ namespace Vehicles
 					}
 					if (Widgets.ButtonInvisible(potentialAmmoRect))
 					{
-						turret.ammoWindowOpened = false;
+						turret.AmmoWindowOpened = false;
 						turret.ReloadCannon(allVehicleTurretDefs[i], true);
 						break;
 					}
@@ -319,7 +319,7 @@ namespace Vehicles
 			rect.y -= (ammoWindowRect.height + AmmoWindowOffset);
 			if (!Mouse.IsOver(rect))
 			{
-				turret.ammoWindowOpened = false;
+				turret.AmmoWindowOpened = false;
 			}
 
 			Text.Font = GameFont.Small;
@@ -368,7 +368,7 @@ namespace Vehicles
 				}
 				else
 				{
-					turret.ammoWindowOpened = !turret.ammoWindowOpened;
+					turret.AmmoWindowOpened = !turret.AmmoWindowOpened;
 				}
 			}
 			if (flag4)

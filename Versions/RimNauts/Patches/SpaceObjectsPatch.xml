@@ -1,0 +1,9 @@
+
+<Patch>
+	<Operation Class = "PatchOperationAddModExtension">
+		<xpath>Defs/WorldObjectDef[defName = "HotMoon" or defName = "RockMoon" or defName = "GasMoon" or defName = "BrokenMoon" or defName = "AsteroidSatellite" or defName = "SatelliteCore"]</xpath>
+		<value>
+			<li Class = "Vehicles.SpaceObjectDefModExtension"/>
+		</value>
+	</Operation>
+</Patch>

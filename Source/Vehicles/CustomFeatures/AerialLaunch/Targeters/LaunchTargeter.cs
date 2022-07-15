@@ -13,6 +13,7 @@ namespace Vehicles
 	public class LaunchTargeter : BaseVehicleWorldTargeter
 	{
 		private const float BaseFeedbackTexSize = 0.8f;
+		private int origin;
 
 		private Func<GlobalTargetInfo, float, bool> action;
 		private Func<GlobalTargetInfo, List<FlightNode>, float, string> extraLabelGetter;
@@ -37,7 +38,7 @@ namespace Vehicles
 		{
 			this.vehicle = vehicle;
 			this.action = action;
-			originOnMap = Find.WorldGrid.GetTileCenter(origin);
+			originOnMap = WorldHelper.GetTilePos(origin);
 			this.canTargetTiles = canTargetTiles;
 			this.mouseAttachment = mouseAttachment;
 			this.closeWorldTabWhenFinished = closeWorldTabWhenFinished;
@@ -69,7 +70,7 @@ namespace Vehicles
 		{
 			this.vehicle = vehicle;
 			this.action = action;
-			originOnMap = Find.WorldGrid.GetTileCenter(origin);
+			originOnMap = WorldHelper.GetTilePos(origin);
 			this.canTargetTiles = canTargetTiles;
 			this.mouseAttachment = mouseAttachment;
 			this.closeWorldTabWhenFinished = closeWorldTabWhenFinished;
@@ -121,7 +122,7 @@ namespace Vehicles
 					bool maxNodesHit = FlightPath.Count == vehicle.CompVehicleLauncher.launchProtocol.MaxFlightNodes;
 					int sourceTile = aerialVehicle?.Tile ?? vehicle.Map.Tile;
 					bool sameTile = !vehicle.CompVehicleLauncher.inFlight && sourceTile == arg.Tile && FlightPath.NullOrEmpty();
-					if (Find.World.worldObjects.AnyWorldObjectAt(arg.Tile) && !maxNodesHit && !sameTile)
+					if (WorldHelper.WorldObjectAt(arg.Tile) is WorldObject && vehicle.CompVehicleLauncher.SpaceFlight && !maxNodesHit && !sameTile)
 					{
 						FlightPath.Add(new FlightNode(arg.Tile));
 					}
@@ -190,14 +191,14 @@ namespace Vehicles
 					Vector3 flightPathPos = originOnMap;
 					if (!FlightPath.NullOrEmpty())
 					{
-						flightPathPos = Find.WorldGrid.GetTileCenter(FlightPath.LastOrDefault().tile);
+						flightPathPos = WorldHelper.GetTilePos(FlightPath.LastOrDefault().tile);
 					}
 					float finalFuelCost = fuelOnPathCost;
 					float finalTileDistance = tileDistance;
-					if (mouseTarget.IsValid && Find.WorldGrid.GetTileCenter(mouseTarget.Tile) != flightPathPos)
+					if (mouseTarget.IsValid && WorldHelper.GetTilePos(mouseTarget.Tile) != flightPathPos)
 					{
 						finalFuelCost += vehicle.CompVehicleLauncher.FuelNeededToLaunchAtDist(flightPathPos, mouseTarget.Tile);
-						finalTileDistance += Ext_Math.SphericalDistance(flightPathPos, Find.WorldGrid.GetTileCenter(mouseTarget.Tile));
+						finalTileDistance += Ext_Math.SphericalDistance(flightPathPos, WorldHelper.GetTilePos(mouseTarget.Tile));
 					}
 					TotalFuelCost = (float)Math.Round(finalFuelCost, 0);
 					TotalDistance = finalTileDistance;
@@ -256,7 +257,7 @@ namespace Vehicles
 				}
 				else if (arg.Tile >= 0)
 				{
-					pos = Find.WorldGrid.GetTileCenter(arg.Tile);
+					pos = WorldHelper.GetTilePos(arg.Tile);
 				}
 				if (arg.IsValid && !Mouse.IsInputBlockedNow)
 				{
@@ -284,7 +285,7 @@ namespace Vehicles
 				for (int n = 0; n < FlightPath.Count; n++)
 				{
 					int curTile = tiles.PopAt(0);
-					Vector3 end = Find.WorldGrid.GetTileCenter(curTile);
+					Vector3 end = WorldHelper.GetTilePos(curTile);
 					DrawTravelPoint(start, end, lineMat);
 					start = end;
 				}
@@ -304,14 +305,14 @@ namespace Vehicles
 				}
 				if (FlightPath.Count < vehicle.CompVehicleLauncher.launchProtocol.MaxFlightNodes && arg.IsValid)
 				{
-					DrawTravelPoint(start, Find.WorldGrid.GetTileCenter(arg.Tile), lineMat);
+					DrawTravelPoint(start, WorldHelper.GetTilePos(arg.Tile), lineMat);
 				}
 
 				onUpdate?.Invoke();
 			}
 		}
 
-		public bool IsTargetedNow(WorldObject o, List<WorldObject> worldObjectsUnderMouse = null)
+		public bool IsTargetedNow(WorldObject worldObject, List<WorldObject> worldObjectsUnderMouse = null)
 		{
 			if (!IsTargeting)
 			{
@@ -319,23 +320,23 @@ namespace Vehicles
 			}
 			if (worldObjectsUnderMouse == null)
 			{
-				worldObjectsUnderMouse = GenWorldUI.WorldObjectsUnderMouse(Verse.UI.MousePositionOnUI);
+				worldObjectsUnderMouse = GenWorldUI.WorldObjectsUnderMouse(UI.MousePositionOnUI);
 			}
-			return worldObjectsUnderMouse.Any() && o == worldObjectsUnderMouse[0];
+			return worldObjectsUnderMouse.Any() && worldObject == worldObjectsUnderMouse[0];
 		}
 
 		public void CostAndDistanceCalculator(out float fuelCost, out float distance)
 		{
 			fuelCost = 0;
 			distance = 0;
-			Vector3 start = originOnMap;
+			int source = origin;
 			foreach (FlightNode node in FlightPath)
 			{
 				int tile = node.tile;
-				float nodeDistance = Ext_Math.SphericalDistance(start, Find.WorldGrid.GetTileCenter(tile));
+				float nodeDistance = WorldHelper.GetTileDistance(source, tile);//Ext_Math.SphericalDistance(start, Find.WorldGrid.GetTileCenter(tile));
 				fuelCost += vehicle.CompVehicleLauncher.FuelNeededToLaunchAtDist(nodeDistance);
 				distance += nodeDistance;
-				start = Find.WorldGrid.GetTileCenter(tile);
+				source = tile;
 			}
 		}
 

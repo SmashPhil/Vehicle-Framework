@@ -173,14 +173,10 @@ namespace Vehicles
 						tmpMaskArray[0] = tmpMaskArray[3];
 						patternPointers[0] = 3;
 					}
-					else
-					{
-						tmpMaskArray[0] = ContentFinder<Texture2D>.Get(req.path, true);
-					}
 				}
 				if (tmpMaskArray[0] is null)
 				{
-					Log.Error("Failed to find any textures at " + req.path + " while constructing " + this.ToStringSafe());
+					Log.Error("Failed to find any mask textures at " + req.path + " while constructing " + this.ToStringSafe());
 					return null;
 				}
 				if (tmpMaskArray[2] is null)

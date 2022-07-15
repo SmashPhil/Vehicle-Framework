@@ -12,7 +12,7 @@ namespace Vehicles
 	{
 		public static Dictionary<int, Graphic> cachedGhostGraphics = new Dictionary<int, Graphic>();
 
-		public static Graphic GhostGraphicFor(this VehicleDef vehicleDef, VehicleTurret cannon, Color ghostColor)
+		public static Graphic_Turret GhostGraphicFor(this VehicleDef vehicleDef, VehicleTurret cannon, Color ghostColor)
 		{
 			int num = 0;
 			num = Gen.HashCombine(num, vehicleDef);
@@ -28,11 +28,11 @@ namespace Vehicles
 				graphicData.CopyFrom(graphic.data);
 				graphicData.shadowData = null;
 
-				graphic = GraphicDatabase.Get(graphic.GetType(), graphic.path, ShaderTypeDefOf.EdgeDetect.Shader, graphic.drawSize, ghostColor, Color.white, graphicData, null);
+				graphic = (Graphic_Turret)GraphicDatabase.Get(graphic.GetType(), graphic.path, ShaderTypeDefOf.EdgeDetect.Shader, graphic.drawSize, ghostColor, Color.white, graphicData, null);
 				
 				cachedGhostGraphics.Add(num, graphic);
 			}
-			return graphic;
+			return (Graphic_Turret)graphic;
 		}
 
 		public static IEnumerable<GraphicOverlay> GhostGraphicOverlaysFor(this VehicleDef vehicleDef, Color ghostColor)
@@ -75,19 +75,14 @@ namespace Vehicles
 					try
 					{
 						Graphic graphic = vehicleDef.GhostGraphicFor(turret, ghostCol);
-						
-						Vector3 topVectorRotation = new Vector3(loc.x, 1f, loc.y).RotatedBy(0f);
 						float locationRotation = turret.defaultAngleRotated + rot.AsAngle;
 						if (turret.attachedTo != null)
 						{
 							locationRotation += turret.attachedTo.defaultAngleRotated + rot.AsAngle;
 						}
-						Pair<float, float> drawOffset = RenderHelper.TurretDrawOffset(rot, turret.renderProperties, locationRotation, turret.attachedTo);
-
-						Vector3 topVectorLocation = new Vector3(loc.x + drawOffset.First, loc.y + turret.drawLayer, loc.z + drawOffset.Second);
-						Mesh cannonMesh = graphic.MeshAt(Rot4.North);
-						
-						Graphics.DrawMesh(cannonMesh, topVectorLocation, locationRotation.ToQuat(), graphic.MatAt(Rot4.North), 0);
+						Vector3 turretLoc = turret.TurretDrawLocFor(rot, loc);
+						Mesh cannonMesh = graphic.MeshAt(rot);
+						Graphics.DrawMesh(cannonMesh, turretLoc, locationRotation.ToQuat(), graphic.MatAt(rot), 0);
 					}
 					catch(Exception ex)
 					{

@@ -16,7 +16,7 @@ namespace Vehicles
 				{
 					return null;
 				}
-				if (!VehicleReachabilityUtility.CanReachVehicle(vehicle, cell, PathEndMode.OnCell, PawnUtility.ResolveMaxDanger(pawn, maxDanger), TraverseMode.ByPawn))
+				if (!vehicle.CanReachVehicle(cell, PathEndMode.OnCell, PawnUtility.ResolveMaxDanger(pawn, maxDanger), TraverseMode.ByPawn))
 				{
 					return null;
 				}

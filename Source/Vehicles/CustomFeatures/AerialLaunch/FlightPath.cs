@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using RimWorld.Planet;
 using SmashTools;
 
 namespace Vehicles
@@ -40,7 +41,7 @@ namespace Vehicles
 				Vector3 start = aerialVehicle.DrawPos;
 				foreach (FlightNode node in nodes)
 				{
-					Vector3 nextTile = Find.WorldGrid.GetTileCenter(node.tile);
+					Vector3 nextTile = WorldHelper.GetTilePos(node.tile);
 					distance += Ext_Math.SphericalDistance(start, nextTile);
 					start = nextTile;
 				}
@@ -82,6 +83,11 @@ namespace Vehicles
 				int direction = ticksLeft <= aerialVehicle.TicksTillLandingElevation ? -1 : 1;
 				return direction;
 			}
+		}
+
+		public void VerifyFlightPath()
+		{
+			First.RecalculateCenter();
 		}
 
 		public void AddNode(int tile, AerialVehicleArrivalAction arrivalAction = null)
@@ -176,24 +182,47 @@ namespace Vehicles
 	public struct FlightNode : IExposable
 	{
 		public int tile;
+		public Vector3 center;
 		public AerialVehicleArrivalAction arrivalAction;
+
+		public bool spaceObject;
+		public WorldObject WorldObject { get; private set; }
 
 		public FlightNode(int tile)
 		{
 			this.tile = tile;
 			arrivalAction = null;
+
+			WorldObject = WorldHelper.WorldObjectAt(tile);
+			center = WorldHelper.GetTilePos(tile, WorldObject, out spaceObject);
 		}
 
 		public FlightNode(int tile, AerialVehicleArrivalAction arrivalAction)
 		{
 			this.tile = tile;
 			this.arrivalAction = arrivalAction;
+
+			WorldObject = WorldHelper.WorldObjectAt(tile);
+			center = WorldHelper.GetTilePos(tile, WorldObject, out spaceObject);
+		}
+
+		public void RecalculateCenter()
+		{
+			if (spaceObject)
+			{
+				center = WorldHelper.GetTilePos(tile, WorldObject, out _);
+			}
 		}
 
 		public void ExposeData()
 		{
 			Scribe_Values.Look(ref tile, "tile");
 			Scribe_Deep.Look(ref arrivalAction, "arrivalAction");
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				WorldObject = WorldHelper.WorldObjectAt(tile);
+				center = WorldHelper.GetTilePos(tile, WorldObject, out spaceObject);
+			}
 		}
 	}
 }

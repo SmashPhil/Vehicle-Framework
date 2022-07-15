@@ -180,7 +180,7 @@
 			<li Class="Vehicles.CompProperties_FueledTravel">
 				<fuelType>Uranium</fuelType> <!-- Must Include -->
 				<fuelConsumptionRate>200</fuelConsumptionRate>
-				<fuelCapacity>400</fuelCapacity>
+				<fuelCapacity>99999</fuelCapacity>
 				<fuelConsumptionCondition>FlyingOrDrafted</fuelConsumptionCondition>
 			</li>
 			<li Class="Vehicles.CompProperties_VehicleLauncher">
@@ -313,9 +313,6 @@
 						</speedCurve>
 					</landingProperties>
 				</launchProtocol>
-			</li>
-			<li Class="Vehicles.CompProperties_UpgradeTree">
-				<upgrades/>
 			</li>
 		</comps>
 	</Vehicles.VehicleDef>

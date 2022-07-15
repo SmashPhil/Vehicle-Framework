@@ -14,7 +14,7 @@ namespace Vehicles
 	/// AssetBundle loader
 	/// </summary>
 	/// <remarks>
-	/// Q: "Why don't you just use RimWorld's content loader to load the asset bundle? It's supported right?"
+	/// Q: Why don't you just use RimWorld's content loader to load the asset bundle? It's supported right? <br/>
 	/// A: Yes, but it does not support versioning.. meaning if a later version of Unity is used in a future update that requires a rebuild of all asset bundles,
 	/// I may not be able to support that previous version. AssetBundles on older versions of Unity might not load properly and vice verse. When Ludeon decides to
 	/// support versioning for AssetBundles, I can move to using that instead.

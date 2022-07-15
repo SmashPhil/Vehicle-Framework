@@ -7,7 +7,7 @@ namespace Vehicles
 {
 	public class VehiclesModSettings : ModSettings
 	{
-		/* Not displayed in ModSettings */
+		// Not displayed in ModSettings
 		public bool showAllCargoItems;
 
 		public Section_Main main = new Section_Main();
@@ -15,9 +15,8 @@ namespace Vehicles
 		public Section_Upgrade upgrades = new Section_Upgrade();
 		public Section_Debug debug = new Section_Debug();
 
+		//Color Palettes
 		public ColorStorage colorStorage = new ColorStorage();
-
-		/* ---------------------------------- */
 
 		public override void ExposeData()
 		{
@@ -25,7 +24,7 @@ namespace Vehicles
 			{
 				Scribe_Deep.Look(ref main, "main");
 				Scribe_Deep.Look(ref vehicles, "vehicles");
-				Scribe_Deep.Look(ref upgrades, "upgrades");
+				//Scribe_Deep.Look(ref upgrades, "upgrades");
 				Scribe_Deep.Look(ref debug, "debug");
 
 				Scribe_Values.Look(ref showAllCargoItems, "showAllCargoItems");

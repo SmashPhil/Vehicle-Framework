@@ -9,7 +9,7 @@ namespace Vehicles
 {
 	public class JobDriver_RepairVehicle : JobDriver
 	{
-		private const float TicksForRepair = 100f;
+		private const float TicksForRepair = 60;
 
 		protected float ticksToNextRepair;
 

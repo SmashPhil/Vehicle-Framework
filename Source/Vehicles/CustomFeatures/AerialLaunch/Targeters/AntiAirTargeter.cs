@@ -30,7 +30,7 @@ namespace Vehicles
 		{
 			this.caster = caster;
 			this.action = action;
-			originOnMap = Find.WorldGrid.GetTileCenter(origin);
+			originOnMap = WorldHelper.GetTilePos(origin);
 			this.canTargetTiles = canTargetTiles;
 			this.mouseAttachment = mouseAttachment;
 			this.closeWorldTabWhenFinished = closeWorldTabWhenFinished;

@@ -18,11 +18,11 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(FloatMenuUtility), nameof(FloatMenuUtility.GetMeleeAttackAction)),
 				prefix: new HarmonyMethod(typeof(Components),
 				nameof(NoMeleeForVehicles)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnComponentsUtility), nameof(PawnComponentsUtility.CreateInitialComponents)), prefix: null,
-				postfix: new HarmonyMethod(typeof(Components),
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnComponentsUtility), nameof(PawnComponentsUtility.CreateInitialComponents)),
+				prefix: new HarmonyMethod(typeof(Components),
 				nameof(CreateInitialVehicleComponents)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnComponentsUtility), nameof(PawnComponentsUtility.AddAndRemoveDynamicComponents)), prefix: null,
-				postfix: new HarmonyMethod(typeof(Components),
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnComponentsUtility), nameof(PawnComponentsUtility.AddAndRemoveDynamicComponents)),
+				prefix: new HarmonyMethod(typeof(Components),
 				nameof(AddAndRemoveVehicleComponents)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_MeleeVerbs), "ChooseMeleeVerb"),
 				prefix: new HarmonyMethod(typeof(Components),
@@ -69,6 +69,15 @@ namespace Vehicles
 				if (!VehicleMod.settings.main.fishingPersists)
 				{
 					vehicle.currentlyFishing = false;
+				}
+
+				if (value)
+				{
+					vehicle.EventRegistry[VehicleEventDefOf.DraftOn].ExecuteEvents();
+				}
+				else
+				{
+					vehicle.EventRegistry[VehicleEventDefOf.DraftOff].ExecuteEvents();
 				}
 			}
 			return true;

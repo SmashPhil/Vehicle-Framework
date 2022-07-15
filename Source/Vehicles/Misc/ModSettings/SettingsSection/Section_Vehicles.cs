@@ -15,6 +15,7 @@ namespace Vehicles
 	{
 		private static string drawStatusMessage = string.Empty;
 		public Dictionary<string, Dictionary<SaveableField, SavedField<object>>> fieldSettings = new Dictionary<string, Dictionary<SaveableField, SavedField<object>>>();
+		public Dictionary<string, Dictionary<SaveableField, object>> defaultValues = new Dictionary<string, Dictionary<SaveableField, object>>();
 
 		/// <summary>
 		/// <defName, maskName>
@@ -76,7 +77,7 @@ namespace Vehicles
 
 		public override void ExposeData()
 		{
-			Scribe_NestedCollections.Look(ref fieldSettings, "fieldSettings", LookMode.Value, LookMode.Deep, LookMode.Undefined, true);
+			Scribe_NestedCollections.Look(ref fieldSettings, "fieldSettings", LookMode.Value, LookMode.Deep, LookMode.Undefined);
 			Scribe_Collections.Look(ref defaultGraphics, "defaultGraphics", LookMode.Value, LookMode.Deep);
 		}
 
@@ -125,7 +126,7 @@ namespace Vehicles
 					iconRect.y += 35;
 
 					drawStatusMessage = $"Creating Paintbrush. Pattern={VehicleMod.selectedPatterns.Count}";
-					if (VehicleMod.selectedPatterns.Count > 1)
+					if (VehicleMod.selectedPatterns.Count > 1 && VehicleMod.selectedDef.graphicData.shaderType.Shader.SupportsRGBMaskTex())
 					{
 						Rect paintBrushRect = new Rect(iconRect.x + iconRect.width, iconRect.y, 24, 24);
 						Widgets.DrawTextureFitted(paintBrushRect, VehicleTex.Recolor, 1);
@@ -178,13 +179,13 @@ namespace Vehicles
 
 					Rect compVehicleRect = menuRect.ContractedBy(10);
 					compVehicleRect.x += vehicleIconContainer.width * 2 - 10;
-					compVehicleRect.y += 30;
+					compVehicleRect.y = iconRect.y;
 					compVehicleRect.width -= vehicleIconContainer.width * 2;
-					compVehicleRect.height -= 30 + menuRect.height * 0.45f;
-
+					compVehicleRect.height = iconRect.height;
+					
 					listingSplit.Begin(compVehicleRect, 2);
 					drawStatusMessage = $"Drawing main settings.";
-					
+
 					foreach (FieldInfo field in VehicleMod.vehicleDefFields)
 					{
 						if (field.TryGetAttribute(out PostToSettingsAttribute post))
@@ -216,7 +217,7 @@ namespace Vehicles
 						{
 							header = title.Translate ? title.Label.Translate().ToString() : title.Label;
 						}
-						listingSplit.Header(header, ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
+						listingSplit.Header(header, ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter, 24);
 						foreach (FieldInfo field in fields)
 						{
 							if (field.TryGetAttribute(out PostToSettingsAttribute post))
@@ -251,7 +252,11 @@ namespace Vehicles
 			Text.Font = GameFont.Medium;
 			FieldInfo enabledField = AccessTools.Field(typeof(VehicleDef), nameof(VehicleDef.enabled));
 			SaveableField saveableField = new SaveableField(VehicleMod.selectedDef, enabledField);
-			VehicleEnabledFor enabledFor = (VehicleEnabledFor)fieldSettings[VehicleMod.selectedDef.defName][saveableField].First;
+			VehicleEnabledFor enabledFor = VehicleEnabledFor.Everyone;
+			if (fieldSettings[VehicleMod.selectedDef.defName].TryGetValue(saveableField, out var modifiedValue))
+			{
+				enabledFor = (VehicleEnabledFor)modifiedValue.EndValue;
+			}
 			(string text, Color color) = EnabledStatus(enabledFor);
 			Vector2 size = Text.CalcSize(text);
 			Rect enabledButtonRect = new Rect(rect.x, rect.y, size.x, size.y);
@@ -263,6 +268,10 @@ namespace Vehicles
 				List<VehicleEnabledFor> enabledForValues = Enum.GetValues(typeof(VehicleEnabledFor)).Cast<VehicleEnabledFor>().ToList();
 				enabledFor = enabledForValues.Next(enabledFor);
 				fieldSettings[VehicleMod.selectedDef.defName][saveableField] = new SavedField<object>(enabledFor);
+				if (enabledFor == (VehicleEnabledFor)enabledField.GetValue(VehicleMod.selectedDef))
+				{
+					fieldSettings[VehicleMod.selectedDef.defName].Remove(saveableField);
+				}
 				GizmoHelper.DesignatorsChanged(DesignationCategoryDefOf.Structure);
 			}
 			Text.Font = gameFont;

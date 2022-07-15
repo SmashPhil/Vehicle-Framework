@@ -14,7 +14,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class VehiclePawn : Pawn, IInspectable
+	public class VehiclePawn : Pawn, IInspectable, IEventManager<VehicleEventDef>
 	{
 		//Saved components
 		public Vehicle_PathFollower vPather;
@@ -64,15 +64,23 @@ namespace Vehicles
 
 		public IntVec3 FollowerCell { get; protected set; }
 
-		public bool CanMove => GetStatValue(VehicleStatDefOf.MoveSpeed) > 0.1f && SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), "vehicleMovementPermissions", VehicleDef.vehicleMovementPermissions) >= VehiclePermissions.DriverNeeded && movementStatus == VehicleMovementStatus.Online;
+		public Dictionary<VehicleEventDef, EventTrigger> EventRegistry { get; set; }
+		public List<Sustainer> ActiveSustainers { get; set; } = new List<Sustainer>();
+
+		public bool CanMove => GetStatValue(VehicleStatDefOf.MoveSpeed) > 0.1f && SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), nameof(VehicleDef.vehicleMovementPermissions), VehicleDef.vehicleMovementPermissions) >= VehiclePermissions.DriverNeeded && movementStatus == VehicleMovementStatus.Online;
 		public bool CanMoveFinal => CanMove && (PawnCountToOperateFullfilled || VehicleMod.settings.debug.debugDraftAnyShip);
 		public bool PawnCountToOperateFullfilled => PawnCountToOperateLeft <= 0;
 
 		public VehicleDef VehicleDef => def as VehicleDef;
 
-		public bool Nameable => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), "nameable", VehicleDef.nameable);
+		public bool Nameable => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), nameof(VehicleDef.nameable), VehicleDef.nameable);
 
 		public override Vector3 DrawPos => Drawer.DrawPos;
+
+		public VehiclePawn()
+		{
+			this.FillEvents_Def();
+		}
 
 		public CompCannons CompCannons
 		{
@@ -803,7 +811,17 @@ namespace Vehicles
 				//		Notify_ColorChanged();
 				//	}
 				//};
-
+				yield return new Command_Action()
+				{
+					defaultLabel = "Give Random Pawn MentalState",
+					action = delegate()
+					{
+						if (AllPawnsAboard.TryRandomElement(out Pawn result))
+						{
+							result.mindState.mentalStateHandler.TryStartMentalState(MentalStateDefOf.Wander_Psychotic);
+						}
+					}
+				};
 				yield return new Command_Action()
 				{
 					defaultLabel = "Kill Random Pawn",
@@ -1115,9 +1133,12 @@ namespace Vehicles
 
 		public int TotalAllowedFor(JobDef jobDef)
 		{
-			if(VehicleDef.properties.vehicleJobLimitations.NotNullAndAny(v => v.defName == jobDef.defName))
+			foreach (VehicleJobLimitations jobLimit in VehicleDef.properties.vehicleJobLimitations)
 			{
-				return VehicleDef.properties.vehicleJobLimitations.Find(v => v.defName == jobDef.defName).maxWorkers;
+				if (jobLimit.defName == jobDef.defName)
+				{
+					return jobLimit.maxWorkers;
+				}
 			}
 			return 1;
 		}
@@ -1216,9 +1237,19 @@ namespace Vehicles
 			});
 		}
 
+		public virtual void InspectOpen()
+		{
+			VehicleInfoCard.Init(this);
+		}
+
+		public virtual void InspectClose()
+		{
+			VehicleInfoCard.Clear();
+		}
+
 		public virtual void DrawInspectDialog(Rect rect)
 		{
-
+			VehicleInfoCard.Draw(rect);
 		}
 
 		public virtual float DoInspectPaneButtons(float x)
@@ -1321,7 +1352,7 @@ namespace Vehicles
 				Bill_BoardVehicle bill = bills.FirstOrDefault(x => x.pawnToBoard == pawnToBoard);
 				if (bill != null)
 				{
-					if(pawnToBoard.IsWorldPawn())
+					if (pawnToBoard.IsWorldPawn())
 					{
 						Log.Error("Tried boarding ship with world pawn. Use Notify_BoardedCaravan instead.");
 						return;
@@ -1330,9 +1361,10 @@ namespace Vehicles
 					{
 						pawnToBoard.DeSpawn(DestroyMode.Vanish);
 					}
+					EventRegistry[VehicleEventDefOf.PawnEntered].ExecuteEvents();
 					if (bill.handler.handlers.TryAddOrTransfer(pawnToBoard, true))
 					{
-						if(pawnToBoard != null)
+						if (pawnToBoard != null)
 						{
 							if (map != null)
 							{
@@ -1356,7 +1388,7 @@ namespace Vehicles
 
 		public void DisembarkPawn(Pawn pawn)
 		{
-			if(!pawn.Spawned)
+			if (!pawn.Spawned)
 			{
 				CellRect occupiedRect = this.OccupiedRect().ExpandedBy(1);
 				IntVec3 loc = Position;
@@ -1372,6 +1404,7 @@ namespace Vehicles
 					Messages.Message("RejectDisembarkInvalidTile".Translate(), MessageTypeDefOf.RejectInput, false);
 					return;
 				}
+				EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
 				GenSpawn.Spawn(pawn, loc, MapHeld);
 				if (this.GetLord() is Lord lord)
 				{
@@ -1798,8 +1831,8 @@ namespace Vehicles
 
 		public override void SpawnSetup(Map map, bool respawningAfterLoad)
 		{
-			kindDef = VehicleDef.kindDef;
 			base.SpawnSetup(map, respawningAfterLoad);
+			EventRegistry[VehicleEventDefOf.Spawned].ExecuteEvents();
 			if (!respawningAfterLoad)
 			{
 				vPather.ResetToCurrentPosition();
@@ -1858,6 +1891,7 @@ namespace Vehicles
 			{
 				//REDO - refund some materials back
 			}
+			EventRegistry[VehicleEventDefOf.Despawned].ExecuteEvents();
 			base.DeSpawn(mode);
 			if (vPather != null)
 			{
@@ -1873,6 +1907,7 @@ namespace Vehicles
 				Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(this);
 				Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleDespawned(this);
 			}
+			EventRegistry[VehicleEventDefOf.Destroyed].ExecuteEvents();
 			base.Destroy(mode);
 		}
 
@@ -1883,6 +1918,7 @@ namespace Vehicles
 			if (Spawned)
 			{
 				vPather.PatherTick();
+				SustainerTick();
 			}
 			if (Faction != Faction.OfPlayer)
 			{
@@ -1910,7 +1946,6 @@ namespace Vehicles
 			if (Find.TickManager.TicksGame % 250 == 0)
 			{
 				TickRare();
-				statHandler.explosionsAffectingVehicle.Clear();
 			}
 			bool suspended = Suspended;
 			if (!suspended)
@@ -1919,64 +1954,45 @@ namespace Vehicles
 				{
 					stances.StanceTrackerTick();
 					verbTracker.VerbsTick();
-				}
-				if (Spawned)
-				{
 					natives.NativeVerbsTick();
-				}
-				if (Spawned)
-				{
 					jobs.JobTrackerTick();
-				}
-				if (Spawned)
-				{
 					Drawer.VehicleDrawerTick();
 					rotationTracker.RotationTrackerTick();
+					interactions?.InteractionsTrackerTick();
 				}
-				health.HealthTick(); //REDO
+				equipment?.EquipmentTrackerTick();
+				apparel?.ApparelTrackerTick();
 
-				if (equipment != null)
+				caller?.CallTrackerTick();
+				skills?.SkillsTick();
+				abilities?.AbilitiesTick();
+				inventory?.InventoryTrackerTick();
+				drafter?.DraftControllerTick();
+				relations?.RelationsTrackerTick();
+
+				if (ModsConfig.RoyaltyActive)
 				{
-					equipment.EquipmentTrackerTick();
-				}
-				if (apparel != null)
-				{
-					apparel.ApparelTrackerTick();
-				}
-				if (interactions != null && Spawned)
-				{
-					interactions.InteractionsTrackerTick();
-				}
-				if (caller != null)
-				{
-					caller.CallTrackerTick();
-				}
-				if (skills != null)
-				{
-					skills.SkillsTick();
-				}
-				if (abilities != null)
-				{
-					abilities.AbilitiesTick();
-				}
-				if (inventory != null)
-				{
-					inventory.InventoryTrackerTick();
-				}
-				if (drafter != null)
-				{
-					drafter.DraftControllerTick();
-				}
-				if (relations != null)
-				{
-					relations.RelationsTrackerTick();
-				}
-				if (royalty != null && ModsConfig.RoyaltyActive)
-				{
-					royalty.RoyaltyTrackerTick();
+					royalty?.RoyaltyTrackerTick();
 				}
 				ageTracker.AgeTick();
 				records.RecordsTick();
+			}
+		}
+
+		public void SustainerTick()
+		{
+			for (int i = ActiveSustainers.Count - 1; i >= 0; i--)
+			{
+				Sustainer sustainer = ActiveSustainers[i];
+				
+				if (sustainer == null || sustainer.Ended)
+				{
+					ActiveSustainers.Remove(sustainer);
+				}
+				else
+				{
+					sustainer.Maintain();
+				}
 			}
 		}
 

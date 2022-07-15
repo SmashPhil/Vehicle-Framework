@@ -142,109 +142,53 @@ namespace Vehicles
 				return;
 			}
 
-			if (vehicle.IsBoat())
+			dest = (LocalTargetInfo)GenPathVehicles.ResolvePathMode(vehicle.VehicleDef, vehicle.Map, dest.ToTargetInfo(vehicle.Map), ref peMode);
+			if (dest.HasThing && dest.ThingDestroyed)
 			{
-				dest = (LocalTargetInfo)GenPathVehicles.ResolvePathMode(vehicle.VehicleDef, vehicle.Map, dest.ToTargetInfo(vehicle.Map), ref peMode);
-				if (dest.HasThing && dest.ThingDestroyed)
-				{
-					Log.Error(vehicle + " pathing to destroyed thing " + dest.Thing);
-					PatherFailed();
-					return;
-				}
-				//Add Building and Position Recoverable extras
-				if (!GenGridVehicles.Walkable(vehicle.Position, vehicle.VehicleDef, vehicle.Map))
-				{
-					return;
-				}
-				if (Moving && curPath != null && destination == dest && this.peMode == peMode)
-				{
-					return;
-				}
-				if (!vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehicleReachability.CanReachVehicle(vehicle.Position, dest, peMode, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false)))
-				{
-					PatherFailed();
-					return;
-				}
-				this.peMode = peMode;
-				destination = dest;
-				if ((GenGridVehicles.Walkable(nextCell, vehicle.VehicleDef, vehicle.Map) || WillCollideWithPawnOnNextPathCell()) || nextCellCostLeft == nextCellCostTotal)
-				{
-					ResetToCurrentPosition();
-				}
-				PawnDestinationReservationManager.PawnDestinationReservation pawnDestinationReservation = vehicle.Map.pawnDestinationReservationManager.
-					MostRecentReservationFor(vehicle);
-				if (!(pawnDestinationReservation is null) && ((Destination.HasThing && pawnDestinationReservation.target != Destination.Cell)
-					|| (pawnDestinationReservation.job != vehicle.CurJob && pawnDestinationReservation.target != Destination.Cell)))
-				{
-					vehicle.Map.pawnDestinationReservationManager.ObsoleteAllClaimedBy(vehicle);
-				}
-				if (VehicleReachabilityImmediate.CanReachImmediateVehicle(vehicle, dest, peMode))
-				{
-					PatherArrived();
-					return;
-				}
-				if (curPath != null)
-				{
-					curPath.ReleaseToPool();
-				}
-				curPath = null;
-				moving = true;
-				vehicle.jobs.posture = PawnPosture.Standing;
-
+				Log.Error(vehicle + " pathing to destroyed thing " + dest.Thing);
+				PatherFailed();
 				return;
 			}
-			else
+			//Add Building and Position Recoverable extras
+			if (!GenGridVehicles.Walkable(vehicle.Position, vehicle.VehicleDef, vehicle.Map))
 			{
-				dest = (LocalTargetInfo)GenPath.ResolvePathMode(vehicle, dest.ToTargetInfo(vehicle.Map), ref peMode);
-				if (dest.HasThing && dest.ThingDestroyed)
-				{
-					Log.Error(vehicle + " pathing to destroyed thing " + dest.Thing);
-					PatherFailed();
-					return;
-				}
-				if (!PawnCanOccupy(vehicle.Position) && !TryRecoverFromUnwalkablePosition(true))
-				{
-					return;
-				}
-				if (moving && curPath != null && destination == dest && this.peMode == peMode)
-				{
-					return;
-				}
-				if (!vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehicleReachability.CanReachVehicle(vehicle.Position, dest, peMode, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false)))
-				{
-					PatherFailed();
-					return;
-				}
-				this.peMode = peMode;
-				destination = dest;
-				if (!IsNextCellWalkable() || NextCellDoorToWaitForOrManuallyOpen() != null || nextCellCostLeft == nextCellCostTotal)
-				{
-					ResetToCurrentPosition();
-				}
-				PawnDestinationReservationManager.PawnDestinationReservation pawnDestinationReservation = vehicle.Map.pawnDestinationReservationManager.MostRecentReservationFor(vehicle);
-				if (pawnDestinationReservation != null && ((destination.HasThing && pawnDestinationReservation.target != destination.Cell) || (pawnDestinationReservation.job != vehicle.CurJob && pawnDestinationReservation.target != destination.Cell)))
-				{
-					vehicle.Map.pawnDestinationReservationManager.ObsoleteAllClaimedBy(vehicle);
-				}
-				if (AtDestinationPosition())
-				{
-					PatherArrived();
-					return;
-				}
-				if (vehicle.Downed)
-				{
-					Log.Error(vehicle.LabelCap + " tried to path while downed. This should never happen. curJob=" + vehicle.CurJob.ToStringSafe());
-					PatherFailed();
-					return;
-				}
-				if (curPath != null)
-				{
-					curPath.ReleaseToPool();
-				}
-				curPath = null;
-				moving = true;
-				vehicle.jobs.posture = PawnPosture.Standing;
+				return;
 			}
+			if (Moving && curPath != null && destination == dest && this.peMode == peMode)
+			{
+				return;
+			}
+			if (!vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehicleReachability.CanReachVehicle(vehicle.Position, dest, peMode, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false)))
+			{
+				PatherFailed();
+				return;
+			}
+			this.peMode = peMode;
+			destination = dest;
+			if ((GenGridVehicles.Walkable(nextCell, vehicle.VehicleDef, vehicle.Map) || WillCollideWithPawnOnNextPathCell()) || nextCellCostLeft == nextCellCostTotal)
+			{
+				ResetToCurrentPosition();
+			}
+			PawnDestinationReservationManager.PawnDestinationReservation pawnDestinationReservation = vehicle.Map.pawnDestinationReservationManager.
+				MostRecentReservationFor(vehicle);
+			if (!(pawnDestinationReservation is null) && ((Destination.HasThing && pawnDestinationReservation.target != Destination.Cell)
+				|| (pawnDestinationReservation.job != vehicle.CurJob && pawnDestinationReservation.target != Destination.Cell)))
+			{
+				vehicle.Map.pawnDestinationReservationManager.ObsoleteAllClaimedBy(vehicle);
+			}
+			if (VehicleReachabilityImmediate.CanReachImmediateVehicle(vehicle, dest, peMode))
+			{
+				PatherArrived();
+				return;
+			}
+			if (curPath != null)
+			{
+				curPath.ReleaseToPool();
+			}
+			curPath = null;
+			moving = true;
+			vehicle.jobs.posture = PawnPosture.Standing;
+			vehicle.EventRegistry[VehicleEventDefOf.MoveStart].ExecuteEvents();
 		}
 
 		public void StopDead()
@@ -256,6 +200,7 @@ namespace Vehicles
 			curPath = null;
 			moving = false;
 			nextCell = vehicle.Position;
+			vehicle.EventRegistry[VehicleEventDefOf.MoveStop].ExecuteEvents();
 		}
 
 		public void PatherTick()
@@ -630,7 +575,7 @@ namespace Vehicles
 			SetBumperCells();
 			bool flag = bumperCells.Any(c => c.InBounds(vehicle.Map) && c.GetThingList(vehicle.Map).NotNullAndAny(t => t is VehiclePawn vehicle && vehicle != this.vehicle));
 
-			if (vehicle.ClampHitboxToMap(nextCell, vehicle.Map) || flag)
+			if (vehicle.InsideMap(nextCell, vehicle.Map) || flag)
 			{
 				vehicle.jobs.curDriver.Notify_PatherFailed();
 				StopDead();
@@ -711,7 +656,7 @@ namespace Vehicles
 
 		private bool TrySetNewPath()
 		{
-			PawnPath pawnPath = GenerateNewPathThreaded(); // GenerateNewPath();
+			PawnPath pawnPath = GenerateNewPath(CancellationToken.None).Item1;
 			if (pawnPath is null || !pawnPath.Found)
 			{
 				PatherFailed();
@@ -746,10 +691,9 @@ namespace Vehicles
 			return true;
 		}
 
-		private PawnPath GenerateNewPathThreaded()
+		[Obsolete]
+		public PawnPath GenerateNewPathAsync()
 		{
-			//Single threaded pathing for now, REDO later for dedicated pathfinding thread
-			return GenerateNewPath(CancellationToken.None).Item1;
 			var cts = new CancellationTokenSource();
 			try
 			{
@@ -758,7 +702,6 @@ namespace Vehicles
 					Task<Tuple<PawnPath, bool>>.Factory.StartNew( () => GenerateNewPath(cts.Token), cts.Token)
 				};
 				int taskIndex = Task.WaitAny(tasks, cts.Token);
-
 				if (tasks[taskIndex].Result?.Item1 != null && !tasks[taskIndex].Result.Item1.Found && !tasks[taskIndex].Result.Item2)
 				{ 
 					try

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using Verse.Sound;
 using RimWorld;
 using SmashTools;
 
@@ -60,8 +61,43 @@ namespace Vehicles
 			try
 			{
 				result = (VehiclePawn)ThingMaker.MakeThing(request.VehicleDef);
+				result.kindDef = request.VehicleDef.kindDef;
+
 				lastStep = "Initializing components";
 				PawnComponentsUtility.CreateInitialComponents(result);
+
+				result.ActiveSustainers = new List<Sustainer>();
+
+				lastStep = "Adding OneShot Events";
+				if (!request.VehicleDef.properties.soundOneShotsOnEvent.NullOrEmpty())
+				{
+					foreach ((VehicleEventDef eventDef, SoundDef soundDef) in request.VehicleDef.properties.soundOneShotsOnEvent)
+					{
+						result.AddEvent(eventDef, () => soundDef.PlayOneShot(result));
+					}
+				}
+
+				lastStep = "Adding Sustainer Events";
+				if (!request.VehicleDef.properties.soundSustainersOnEvent.NullOrEmpty())
+				{
+					foreach ((Pair<VehicleEventDef, VehicleEventDef> eventStartStop, SoundDef soundDef) in request.VehicleDef.properties.soundSustainersOnEvent)
+					{
+						result.AddEvent(eventStartStop.First, delegate ()
+						{
+							SoundInfo soundInfo = SoundInfo.InMap(result, MaintenanceType.PerTick);
+							Sustainer sustainer = soundDef.TrySpawnSustainer(result);
+							result.ActiveSustainers.Add(sustainer);
+						});
+						result.AddEvent(eventStartStop.Second, delegate ()
+						{
+							Sustainer sustainer = result.ActiveSustainers.FirstOrDefault(sustainer => sustainer.def == soundDef);
+							if (sustainer != null)
+							{
+								sustainer.End();
+							}
+						});
+					}
+				}
 
 				lastStep = "Setting faction and kindDef";
 				result.kindDef = request.VehicleDef.kindDef;
@@ -110,7 +146,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				SmashLog.ErrorLabel(VehicleHarmony.LogLabel, $"Exception thrown while generating vehicle. Last Step: {lastStep}. Exception: {ex.Message}");
+				SmashLog.ErrorLabel(VehicleHarmony.LogLabel, $"Exception thrown while generating vehicle. Last Step: {lastStep}. Exception: {ex.Message}\nStackTrace: {ex.StackTrace}");
 			}
 			return result;
 		}

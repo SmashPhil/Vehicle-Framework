@@ -12,7 +12,7 @@ namespace Vehicles
 		/// <summary>
 		/// Turret Type
 		/// </summary>
-		public TurretType weaponType;
+		public TurretType turretType = TurretType.Rotatable;
 
 		/// <summary>
 		/// Motes spawned after firing VehicleTurret
@@ -25,6 +25,7 @@ namespace Vehicles
 		public ThingFilter ammunition;
 
 		public int magazineCapacity = 1;
+		public int ammoCountPerCharge = 1;
 		public bool genericAmmo = false;
 		public TurretCooldownProperties cooldown;
 
@@ -60,7 +61,7 @@ namespace Vehicles
 		/// <summary>
 		/// Sounds
 		/// </summary>
-		public SoundDef cannonSound;
+		public SoundDef shotSound;
 		public SoundDef reloadSound;
 		
 		/// <summary>
@@ -99,6 +100,10 @@ namespace Vehicles
 			if (ammunition is null && projectile is null)
 			{
 				yield return $"Must include either <field>ammunition</field> or a default <field>projectile</field>.".ConvertRichText();
+			}
+			if (ammoCountPerCharge <= 0)
+			{
+				yield return $"<field>ammoCountPerCharge</field> must be greater than 1.".ConvertRichText();
 			}
 			if (ammunition != null)
 			{
