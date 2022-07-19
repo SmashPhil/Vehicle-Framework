@@ -8,7 +8,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class VehicleTurretRender //: IExposable
+	public class VehicleTurretRender
 	{
 		public RotationalOffset north = RotationalOffset.Default;
 		public RotationalOffset east = RotationalOffset.Default;
@@ -18,6 +18,13 @@ namespace Vehicles
 		public RotationalOffset southEast = RotationalOffset.Default;
 		public RotationalOffset southWest = RotationalOffset.Default;
 		public RotationalOffset northWest = RotationalOffset.Default;
+
+		/// <summary>
+		/// Init from CompProperties
+		/// </summary>
+		public VehicleTurretRender()
+		{
+		}
 
 		public VehicleTurretRender(VehicleTurretRender reference)
 		{
@@ -97,22 +104,6 @@ namespace Vehicles
 				7 => northWest,
 				_ => RotationalOffset.Default,
 			};
-		}
-
-		public void ExposeData()
-		{
-			Scribe_Values.Look(ref north, "north");
-			Scribe_Values.Look(ref east, "east");
-			Scribe_Values.Look(ref south, "south");
-			Scribe_Values.Look(ref west, "west");
-			Scribe_Values.Look(ref northEast, "northEast");
-			Scribe_Values.Look(ref southEast, "southEast");
-			Scribe_Values.Look(ref southWest, "southWest");
-			Scribe_Values.Look(ref northWest, "northWest");
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				PostInit();
-			}
 		}
 
 		public override string ToString()

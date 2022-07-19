@@ -12,7 +12,7 @@ namespace Vehicles
 	public class VehicleSkyfaller_Strafe : VehicleSkyfaller_FlyOver
 	{
 		protected bool shotsFired = false;
-		protected List<CompCannons.TurretData> turrets = new List<CompCannons.TurretData>();
+		protected List<CompVehicleTurrets.TurretData> turrets = new List<CompVehicleTurrets.TurretData>();
 		protected Dictionary<VehicleTurret, int> shotsFromTurret = new Dictionary<VehicleTurret, int>();
 
 		private List<VehicleTurret> turretsTmp;
@@ -48,7 +48,7 @@ namespace Vehicles
 			{
 				for (int i = 0; i < turrets.Count; i++)
 				{
-					CompCannons.TurretData turretData = turrets[i];
+					CompVehicleTurrets.TurretData turretData = turrets[i];
 					VehicleTurret turret = turretData.turret;
 					if (!turret.HasAmmo && !DebugSettings.godMode)
 					{

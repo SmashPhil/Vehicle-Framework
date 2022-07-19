@@ -712,9 +712,9 @@
     <Compile Include="World\Caravan\VehicleCaravan_Tweener.cs" />
     <Compile Include="Components\Rendering\Vehicle_DrawTracker.cs" />
     <Compile Include="Pathing\Map\Vehicle_PathFollower.cs" />
-    <Compile Include="Comps\Cannons\CompCannons.cs" />
+    <Compile Include="Comps\Cannons\CompVehicleTurrets.cs" />
     <Compile Include="Comps\FueledTravel\CompFueledTravel.cs" />
-    <Compile Include="Comps\Cannons\CompProperties_Cannons.cs" />
+    <Compile Include="Comps\Cannons\CompProperties_VehicleTurrets.cs" />
     <Compile Include="Comps\FueledTravel\CompProperties_FueledTravel.cs" />
     <Compile Include="Comps\UpgradeTree\CompProperties_UpgradeTree.cs" />
     <Compile Include="Components\Vehicles\VehicleProperties.cs" />

@@ -219,10 +219,10 @@ namespace Vehicles
 		
 		private static void DistributeAmmunition(VehiclePawn vehicle)
 		{
-			if (vehicle.CompCannons != null)
+			if (vehicle.CompVehicleTurrets != null)
 			{
 				Rand.PushState();
-				foreach (VehicleTurret cannon in vehicle.CompCannons.Cannons)
+				foreach (VehicleTurret cannon in vehicle.CompVehicleTurrets.turrets)
 				{
 					if (cannon.turretDef.ammunition != null)
 					{

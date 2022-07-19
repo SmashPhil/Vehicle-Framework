@@ -16,9 +16,9 @@ namespace Vehicles
 		{
 		}
 
-		public override CompCannons.TurretData GenerateTurretData()
+		public override CompVehicleTurrets.TurretData GenerateTurretData()
 		{
-			return new CompCannons.TurretData()
+			return new CompVehicleTurrets.TurretData()
 			{
 				shots = CurrentFireMode.shotsPerBurst,
 				ticksTillShot = (CurrentFireMode.ticksBetweenShots / GroupTurrets.Count) * GroupTurrets.FindIndex(t => t == this),

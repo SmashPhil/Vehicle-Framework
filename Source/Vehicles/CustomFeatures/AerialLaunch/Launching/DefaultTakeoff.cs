@@ -184,7 +184,7 @@ namespace Vehicles
 				{
 					yield return MapHelper.ReconFloatMenuOption(vehicle, parent);
 				}
-				if (vehicle.CompVehicleLauncher.ControlInFlight && vehicle.CompCannons != null) //REDO - strafe specific properties
+				if (vehicle.CompVehicleLauncher.ControlInFlight && vehicle.CompVehicleTurrets != null) //REDO - strafe specific properties
 				{
 					yield return new FloatMenuOption("VehicleStrafeRun".Translate(), delegate ()
 					{

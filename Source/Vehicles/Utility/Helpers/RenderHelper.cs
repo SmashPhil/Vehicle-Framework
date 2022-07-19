@@ -80,7 +80,6 @@ namespace Vehicles
 		public static Vector2 TurretDrawOffset(Rot8 rot, VehicleTurretRender renderProps, float extraRotation = 0, VehicleTurret attachedTo = null)
 		{
 			VehicleTurretRender.RotationalOffset turretOffset = renderProps.OffsetFor(rot);
-			Log.Message($"Offset: {turretOffset}");
 			if (attachedTo != null)
 			{
 				var parentOffset = attachedTo.renderProperties.OffsetFor(rot);
@@ -246,9 +245,9 @@ namespace Vehicles
 
 			GenUI.DrawTextureWithMaterial(adjustedRect, mainTex, mat);
 
-			if (vehicle.CompCannons != null)
+			if (vehicle.CompVehicleTurrets != null)
 			{
-				vehicle.DrawCannonTextures(adjustedRect, vehicle.CompCannons.Cannons.OrderBy(x => x.drawLayer), pattern, resolveGraphics, manualColorOne, manualColorTwo, manualColorThree, rotDrawn);
+				vehicle.DrawCannonTextures(adjustedRect, vehicle.CompVehicleTurrets.turrets.OrderBy(x => x.drawLayer), pattern, resolveGraphics, manualColorOne, manualColorTwo, manualColorThree, rotDrawn);
 			}
 		}
 
@@ -540,7 +539,7 @@ namespace Vehicles
 				}
 				drawStep = "Attempting to retrieve turret overlays";
 				List<ValueTuple<Rect, Texture, Material, float, float>> overlays = new List<(Rect, Texture, Material, float, float)>();
-				if (vehicleDef.GetSortedCompProperties<CompProperties_Cannons>() is CompProperties_Cannons props)
+				if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets props)
 				{
 					overlays.AddRange(RetrieveTurretSettingsDrawProperties(adjustedRect, vehicleDef, props.turrets.OrderBy(x => x.drawLayer),
 						new PatternData(color1, color2, color3, pattern, displacement, tiling), rotDrawn));

@@ -77,12 +77,12 @@ namespace Vehicles
 		{
 			get
 			{
-				if (Vehicle?.CompCannons is null)
+				if (Vehicle?.CompVehicleTurrets is null)
 				{
 					Log.Error($"Cannot retrieve <property>StrafeTurrets</property> with no <type>CompCannons</type> comp.");
 					yield break;
 				}
-				foreach (VehicleTurret turret in Vehicle.CompCannons.Cannons.Where(t => Props.strafing.turrets.Contains(t.key) || Props.strafing.turrets.Contains(t.groupKey)))
+				foreach (VehicleTurret turret in Vehicle.CompVehicleTurrets.turrets.Where(t => Props.strafing.turrets.Contains(t.key) || Props.strafing.turrets.Contains(t.groupKey)))
 				{
 					yield return turret;
 				}

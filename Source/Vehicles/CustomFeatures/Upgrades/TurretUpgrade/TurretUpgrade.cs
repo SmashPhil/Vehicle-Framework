@@ -25,7 +25,7 @@ namespace Vehicles
 			turretUpgrades = reference.turretUpgrades;
 			foreach(KeyValuePair<VehicleTurret, VehicleRole> cu in turretUpgrades)
 			{
-				VehicleTurret newTurret = CompCannons.CreateTurret(parent, cu.Key);
+				VehicleTurret newTurret = CompVehicleTurrets.CreateTurret(parent, cu.Key);
 				VehicleHandler handler = new VehicleHandler(parent, cu.Value);
 				turretsUnlocked.Add(newTurret, handler);
 			}
@@ -56,13 +56,13 @@ namespace Vehicles
 
 		public override void Upgrade()
 		{
-			vehicle.CompCannons.AddCannons(turretsUnlocked.Keys.ToList());
+			vehicle.CompVehicleTurrets.AddCannons(turretsUnlocked.Keys.ToList());
 			vehicle.AddHandlers(turretsUnlocked.Values.ToList());
 		}
 
 		public override void Refund()
 		{
-			vehicle.CompCannons.RemoveCannons(turretsUnlocked.Keys.ToList());
+			vehicle.CompVehicleTurrets.RemoveCannons(turretsUnlocked.Keys.ToList());
 			vehicle.RemoveHandlers(turretsUnlocked.Values.ToList());
 		}
 

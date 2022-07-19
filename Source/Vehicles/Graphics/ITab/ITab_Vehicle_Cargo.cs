@@ -170,11 +170,11 @@ namespace Vehicles
 				return;
 			Rect rect = new Rect(0f, curY, width, StandardLineHeight);
 			float cannonsNum = 0f;
-			if(SelPawnForCargo.TryGetComp<CompCannons>() != null)
+			if(SelPawnForCargo.TryGetComp<CompVehicleTurrets>() != null)
 			{
-				foreach(VehicleTurret cannon in SelPawnForCargo.CompCannons.Cannons)
+				foreach (VehicleTurret turret in SelPawnForCargo.CompVehicleTurrets.turrets)
 				{
-					cannonsNum += cannon.loadedAmmo is null ? 0f : cannon.loadedAmmo.BaseMass * cannon.shellCount;
+					cannonsNum += turret.loadedAmmo is null ? 0f : turret.loadedAmmo.BaseMass * turret.shellCount;
 				}
 			}
 			float num = MassUtility.GearAndInventoryMass(SelPawnForCargo) + cannonsNum;

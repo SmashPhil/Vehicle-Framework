@@ -5,13 +5,13 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class CompProperties_Cannons : CompProperties
+	public class CompProperties_VehicleTurrets : CompProperties
 	{
 		public List<VehicleTurret> turrets = new List<VehicleTurret>();
 
-		public CompProperties_Cannons()
+		public CompProperties_VehicleTurrets()
 		{
-			compClass = typeof(CompCannons);
+			compClass = typeof(CompVehicleTurrets);
 		}
 
 		public override void ResolveReferences(ThingDef parentDef)

@@ -26,9 +26,9 @@ namespace Vehicles
 			if (vehicle != null)
 			{
 				vehicle.DrawAt(drawLoc, flip);
-				if (vehicle.CompCannons != null)
+				if (vehicle.CompVehicleTurrets != null)
 				{
-					vehicle.CompCannons.PostDraw();
+					vehicle.CompVehicleTurrets.PostDraw();
 				}
 			}
 			else
@@ -41,10 +41,7 @@ namespace Vehicles
 		public override void SpawnSetup(Map map, bool respawningAfterLoad)
 		{
 			base.SpawnSetup(map, respawningAfterLoad);
-			if (vehicle?.CompCannons != null)
-			{
-				vehicle.CompCannons.ResolveChildTurrets();
-			}
+			vehicle.CompVehicleTurrets?.RevalidateTurrets();
 		}
 
 		public override void ExposeData()

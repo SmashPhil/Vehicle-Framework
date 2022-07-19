@@ -187,7 +187,7 @@ namespace Vehicles
 					extraAngle = graphicOverlay.rotation;
 					graphicOverlay.graphic.DrawWorker(loc + baseGraphic.DrawOffsetFull(rot), rot, def, thing, rot.AsAngle + extraAngle);
 				}
-				if (vehicleDef.GetSortedCompProperties<CompProperties_Cannons>() is CompProperties_Cannons)
+				if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets)
 				{
 					vehicleDef.DrawGhostTurretTextures(loc, rot, ghostCol);
 				}

@@ -45,7 +45,7 @@ namespace Vehicles
 		private SelfOrderingList<ThingComp> cachedComps = new SelfOrderingList<ThingComp>();
 		private List<ThingComp> compTickers = new List<ThingComp>();
 
-		private CompCannons compCannons;
+		private CompVehicleTurrets compVehicleTurrets;
 		private CompFueledTravel compFuel;
 		private CompUpgradeTree compUpgradeTree;
 		private CompVehicleLauncher compVehicleLauncher;
@@ -82,15 +82,15 @@ namespace Vehicles
 			this.FillEvents_Def();
 		}
 
-		public CompCannons CompCannons
+		public CompVehicleTurrets CompVehicleTurrets
 		{
 			get
 			{
-				if (compCannons is null)
+				if (compVehicleTurrets is null)
 				{
-					compCannons = GetSortedComp<CompCannons>();
+					compVehicleTurrets = GetSortedComp<CompVehicleTurrets>();
 				}
-				return compCannons;
+				return compVehicleTurrets;
 			}
 		}
 
@@ -566,10 +566,10 @@ namespace Vehicles
 			if (UnityData.IsInMainThread)
 			{
 				ResetMaskCache();
-				var cannonComp = CompCannons;
+				var cannonComp = CompVehicleTurrets;
 				if (cannonComp != null)
 				{
-					foreach (VehicleTurret cannon in cannonComp.Cannons)
+					foreach (VehicleTurret cannon in cannonComp.turrets)
 					{
 						cannon.ResolveCannonGraphics(patternData, true);
 					}
@@ -1233,7 +1233,7 @@ namespace Vehicles
 				patternData.tiles = tiles;
 				patternData.displacement = displacement;
 				Notify_ColorChanged();
-				CompCannons?.Cannons.ForEach(c => c.ResolveCannonGraphics(patternData, true));
+				CompVehicleTurrets?.turrets.ForEach(c => c.ResolveCannonGraphics(patternData, true));
 			});
 		}
 
@@ -1840,13 +1840,13 @@ namespace Vehicles
 			if (Faction != Faction.OfPlayer)
 			{
 				drafter.Drafted = true;
-				CompCannons cannonComp = CompCannons;
-				if (cannonComp != null)
+				CompVehicleTurrets turretComp = CompVehicleTurrets;
+				if (turretComp != null)
 				{
-					foreach(var cannon in cannonComp.Cannons)
+					foreach (VehicleTurret turret in turretComp.turrets)
 					{
-						cannon.autoTargeting = true;
-						cannon.AutoTarget = true;
+						turret.autoTargeting = true;
+						turret.AutoTarget = true;
 					}
 				}
 			}

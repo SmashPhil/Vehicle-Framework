@@ -230,7 +230,7 @@
 				<fuelCapacity>2000</fuelCapacity>
 				<fuelConsumptionCondition>Drafted</fuelConsumptionCondition>
 			</li>
-			<li Class="Vehicles.CompProperties_Cannons">
+			<li Class="Vehicles.CompProperties_VehicleTurrets">
 				<turrets>
 					<li>
 						<turretDef>TankMainTurret_Short</turretDef>

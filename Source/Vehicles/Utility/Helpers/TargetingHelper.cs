@@ -19,7 +19,7 @@ namespace Vehicles
 		/// <param name="param"></param>
 		public static LocalTargetInfo GetCannonTarget(this VehicleTurret cannon, float restrictedAngle = 0f, TargetingParameters param = null)
 		{
-			if (cannon.vehicle.CompCannons != null && cannon.vehicle.CompCannons.WeaponStatusOnline && cannon.vehicle.Faction != null) //add fire at will option
+			if (cannon.vehicle.CompVehicleTurrets != null && cannon.vehicle.CompVehicleTurrets.WeaponStatusOnline && cannon.vehicle.Faction != null) //add fire at will option
 			{
 				TargetScanFlags targetScanFlags = TargetScanFlags.NeedLOSToPawns | TargetScanFlags.NeedLOSToNonPawns | TargetScanFlags.NeedThreat | TargetScanFlags.NeedAutoTargetable;
 				Thing thing = (Thing)BestAttackTarget(cannon, targetScanFlags, null, 0f, 9999f, default(IntVec3), float.MaxValue, false, false);

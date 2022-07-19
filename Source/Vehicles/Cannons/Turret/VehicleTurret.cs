@@ -60,21 +60,17 @@ namespace Vehicles
 
 		[Unsaved]
 		public VehiclePawn vehicle;
-
 		[Unsaved]
 		public VehicleTurret attachedTo;
 		[Unsaved]
 		public List<VehicleTurret> childCannons = new List<VehicleTurret>();
+		[Unsaved]
+		private List<VehicleTurret> groupTurrets;
 
-		[Unsaved]
 		public VehicleTurretRender renderProperties;
-		[Unsaved]
 		public Vector2 aimPieOffset = Vector2.zero;
-		[Unsaved]
 		public Vector2 angleRestricted = Vector2.zero;
-		[Unsaved]
 		public float defaultAngleRotated = 0f;
-		[Unsaved]
 		public int drawLayer = 1;
 
 		protected Texture2D cannonTex;
@@ -92,10 +88,15 @@ namespace Vehicles
 
 		public Turret_RecoilTracker rTracker;
 
-		private List<VehicleTurret> groupTurrets;
+		/// <summary>
+		/// Init from CompProperties
+		/// </summary>
+		public VehicleTurret()
+		{
+		}
 
 		/// <summary>
-		/// Loaded from save file
+		/// Init from save file
 		/// </summary>
 		public VehicleTurret(VehiclePawn vehicle)
 		{
@@ -132,7 +133,7 @@ namespace Vehicles
 			childCannons = new List<VehicleTurret>();
 			if (!string.IsNullOrEmpty(parentKey))
 			{
-				foreach (VehicleTurret cannon in vehicle.CompCannons.Cannons.Where(c => c.key == parentKey))
+				foreach (VehicleTurret cannon in vehicle.CompVehicleTurrets.turrets.Where(c => c.key == parentKey))
 				{
 					attachedTo = cannon;
 					cannon.childCannons.Add(this);
@@ -240,7 +241,7 @@ namespace Vehicles
 					}
 					else
 					{
-						groupTurrets = vehicle.CompCannons.Cannons.Where(t => t.groupKey == groupKey).ToList();
+						groupTurrets = vehicle.CompVehicleTurrets.turrets.Where(t => t.groupKey == groupKey).ToList();
 					}
 				}
 				return groupTurrets;
@@ -776,9 +777,9 @@ namespace Vehicles
 			}
 		}
 
-		public virtual CompCannons.TurretData GenerateTurretData()
+		public virtual CompVehicleTurrets.TurretData GenerateTurretData()
 		{
-			return new CompCannons.TurretData()
+			return new CompVehicleTurrets.TurretData()
 			{
 				shots = CurrentFireMode.shotsPerBurst,
 				ticksTillShot = 0,
@@ -789,7 +790,7 @@ namespace Vehicles
 		public virtual void PushTurretToQueue()
 		{
 			ActivateBurstTimer();
-			vehicle.CompCannons.QueueTurret(GenerateTurretData());
+			vehicle.CompVehicleTurrets.QueueTurret(GenerateTurretData());
 		}
 
 		public static bool TryFindShootLineFromTo(IntVec3 root, LocalTargetInfo targ, out ShootLine resultingLine)
@@ -1372,7 +1373,7 @@ namespace Vehicles
 			{
 				yield return "<field>key</field> must be included for each <type>VehicleTurret</type>".ConvertRichText();
 			}
-			if (vehicleDef.GetCompProperties<CompProperties_Cannons>().turrets.Select(x => x.key).GroupBy(y => y).Where(y => y.Count() > 1).Select(z => z.Key).NotNullAndAny())
+			if (vehicleDef.GetCompProperties<CompProperties_VehicleTurrets>().turrets.Select(x => x.key).GroupBy(y => y).Where(y => y.Count() > 1).Select(z => z.Key).NotNullAndAny())
 			{
 				yield return $"Duplicate cannon key {key}";
 			}
@@ -1392,7 +1393,7 @@ namespace Vehicles
 
 		public virtual void ExposeData()
 		{
-			Scribe_Values.Look(ref autoTargetingActive, "autoTargetingActive");
+			Scribe_Values.Look(ref autoTargetingActive, nameof(autoTargetingActive));
 
 			Scribe_Values.Look(ref reloadTicks, nameof(reloadTicks));
 			Scribe_Values.Look(ref burstTicks, nameof(burstTicks));
@@ -1423,7 +1424,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref shellCount, nameof(shellCount));
 			Scribe_Values.Look(ref gizmoLabel, nameof(gizmoLabel));
 
-			Scribe_TargetInfo.Look(ref cannonTarget, "cannonTarget", LocalTargetInfo.Invalid);
+			Scribe_TargetInfo.Look(ref cannonTarget, nameof(cannonTarget), LocalTargetInfo.Invalid);
 		}
 	}
 }

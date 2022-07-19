@@ -92,7 +92,7 @@ namespace Vehicles
 			additionalTiling = PatternData.tiles;
 			displacementX = PatternData.displacement.x;
 			displacementY = PatternData.displacement.y;
-			Turrets = vehicle.CompCannons?.Cannons ?? new List<VehicleTurret>();
+			Turrets = vehicle.CompVehicleTurrets?.turrets ?? new List<VehicleTurret>();
 			GraphicOverlays = vehicle.graphicOverlay.graphics ?? new List<GraphicOverlay>();
 			Instance.Init();
 		}
@@ -113,7 +113,7 @@ namespace Vehicles
 			additionalTiling = PatternData.tiles;
 			displacementX = PatternData.displacement.x;
 			displacementY = PatternData.displacement.y;
-			Turrets = vehicleDef.GetCompProperties<CompProperties_Cannons>()?.turrets ?? new List<VehicleTurret>();
+			Turrets = vehicleDef.GetCompProperties<CompProperties_VehicleTurrets>()?.turrets ?? new List<VehicleTurret>();
 			GraphicOverlays = vehicleDef.drawProperties.OverlayGraphics ?? new List<GraphicOverlay>();
 			Instance.Init();	
 		}
