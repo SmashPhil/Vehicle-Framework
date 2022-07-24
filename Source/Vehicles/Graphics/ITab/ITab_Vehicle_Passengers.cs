@@ -4,11 +4,14 @@ using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
+using SmashTools;
 
 namespace Vehicles
 {
 	public class ITab_Vehicle_Passengers : ITab
 	{
+		public const float PawnRowHeight = 50;
+
 		private static List<Need> tmpNeeds = new List<Need>();
 
 		private Vector2 scrollPosition;
@@ -16,6 +19,9 @@ namespace Vehicles
 		private float scrollViewHeight;
 
 		private Pawn specificNeedsTabForPawn;
+		private Pawn draggedPawn;
+		private VehicleHandler transferToHandler;
+		private Pawn hoveringOverPawn;
 
 		public ITab_Vehicle_Passengers()
 		{
@@ -71,55 +77,135 @@ namespace Vehicles
 			float num = 0f;
 			bool flag = false;
 
-			foreach (VehicleHandler handler in Handlers)
+			//if (slotsAvailable && Mouse.IsOver(roleRect) && draggedPawn != null)
+			//{
+			//	if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
+			//	{
+			//		if (!handler.role.handlingTypes.NullOrEmpty() && !draggedPawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) || draggedPawn.Downed || draggedPawn.Dead)
+			//		{
+			//			if (handler.role.handlingTypes.NotNullAndAny(h => h == HandlingTypeFlags.Movement))
+			//			{
+			//				Messages.Message("IncapableStatusForRole".Translate(draggedPawn.LabelShortCap), MessageTypeDefOf.RejectInput);
+			//			}
+			//			else
+			//			{
+			//				Messages.Message("IncapableStatusForRole".Translate(draggedPawn.LabelShortCap), MessageTypeDefOf.CautionInput);
+			//				assignedSeats.Add(draggedPawn, (Vehicle, handler));
+			//			}
+			//		}
+			//		else
+			//		{
+			//			assignedSeats.Add(draggedPawn, (Vehicle, handler));
+			//		}
+			//	}
+			//}
+			bool overHandler = false;
+			for (int i = 0; i < Handlers.Count; i++)
 			{
-				Widgets.ListSeparator(ref num, viewRect.width, handler.role.label);
-				foreach(Pawn pawn in handler.handlers.InnerListForReading)
+				VehicleHandler handler = Handlers[i];
+				List<Pawn> pawns = handler.handlers.InnerListForReading;
+				Rect handlerRect = new Rect(0, num, viewRect.width, 25f + (PawnRowHeight * pawns.Count));
+				if (draggedPawn != null && Mouse.IsOver(handlerRect))
 				{
-					DoRow(ref num, viewRect, rect, scrollPosition, pawn, ref specificNeedsTabForPawn);
+					transferToHandler = handler;
+					overHandler = true;
+					Widgets.DrawHighlight(handlerRect);
+				}
+				Widgets.ListSeparator(ref num, viewRect.width, handler.role.label);
+				foreach (Pawn pawn in pawns)
+				{
+					if (DoRow(num, viewRect, rect, pawn, ref specificNeedsTabForPawn, draggedPawn == null))
+					{
+						hoveringOverPawn = pawn;
+					}
+					num += PawnRowHeight;
 				}
 			}
 
-			foreach(Pawn pawn in Passengers)
+			if (!overHandler)
 			{
-				if(!pawn.IsColonist)
+				transferToHandler = null;
+			}
+
+			if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
+			{
+				if (draggedPawn != null && transferToHandler != null)
 				{
-					if(!flag)
+					if (!transferToHandler.AreSlotsAvailable)
+					{
+						if (hoveringOverPawn != null && draggedPawn.ParentHolder is VehicleHandler curHandler && transferToHandler.CanOperateRole(draggedPawn) && curHandler.CanOperateRole(hoveringOverPawn))
+						{
+							curHandler.handlers.Swap(transferToHandler.handlers, draggedPawn, hoveringOverPawn);
+						}
+						else
+						{
+							Messages.Message(TranslatorFormattedStringExtensions.Translate("Vehicles_HandlerNotEnoughRoom", transferToHandler.role.label, draggedPawn), MessageTypeDefOf.RejectInput);
+						}
+					}
+					else if (!transferToHandler.handlers.TryAddOrTransfer(draggedPawn, false))
+					{
+						Messages.Message($"Unable to add {draggedPawn} to {transferToHandler.role.label}.", MessageTypeDefOf.RejectInput);
+					}
+				}
+				draggedPawn = null;
+			}
+			
+			foreach (Pawn pawn in Passengers)
+			{
+				if (!pawn.IsColonist)
+				{
+					if (!flag)
 					{
 						Widgets.ListSeparator(ref num, viewRect.width, "CaravanPrisonersAndAnimals".Translate());
 						flag = true;
 					}
-					DoRow(ref num, viewRect, rect, scrollPosition, pawn, ref specificNeedsTabForPawn);
+					if (DoRow(num, viewRect, rect, pawn, ref specificNeedsTabForPawn, true))
+					{
+						hoveringOverPawn = pawn;
+					}
+					num += PawnRowHeight;
 				}
 			}
-			if(Event.current.type is EventType.Layout)
+			if (Event.current.type is EventType.Layout)
+			{
 				scrollViewHeight = num + 30f;
+			}
 			Widgets.EndScrollView();
 		}
 
-		private static void DoRow(ref float curY, Rect viewRect, Rect scrollOutRect, Vector2 scrollPosition, Pawn pawn, ref Pawn specificNeedsTabForPawn)
+		private bool DoRow(float curY, Rect viewRect, Rect scrollOutRect, Pawn pawn, ref Pawn specificNeedsTabForPawn, bool highlight)
 		{
-			float num = scrollPosition.y - 50f;
-			float num2 = scrollPosition.y + scrollOutRect.height;
-			if(curY > num && curY < num2)
+			float minY = scrollPosition.y - PawnRowHeight;
+			float maxY = scrollPosition.y + scrollOutRect.height;
+			bool isDraggingPawn = pawn == draggedPawn;
+			if (!isDraggingPawn && (curY <= minY || curY >= maxY))
 			{
-				DoRow(new Rect(0f, curY, viewRect.width, 50f), pawn, ref specificNeedsTabForPawn);
+				return false;
 			}
-			curY += 50f;
-		}
 
-		private static void DoRow(Rect rect, Pawn pawn, ref Pawn specificNeedsTabForPawn)
-		{
+			float nonRefY = isDraggingPawn ? (Event.current.mousePosition.y - PawnRowHeight / 2) : curY;
+			Rect rect = new Rect(0f, nonRefY, viewRect.width, PawnRowHeight);
+
 			Widgets.BeginGroup(rect);
 			Rect rect2 = rect.AtZero();
+			bool mouseOver = Mouse.IsOver(rect2);
+			if (draggedPawn == null && mouseOver && Event.current.type == EventType.MouseDown && Event.current.button == 0)
+			{
+				draggedPawn = pawn;
+				Event.current.Use();
+				SoundDefOf.Click.PlayOneShotOnCamera(null);
+			}
 			Widgets.InfoCardButton(rect2.width - 24f, (rect.height - 24f) / 2f, pawn);
 			rect2.width -= 24f;
-			if(!pawn.Dead)
+			if (!pawn.Dead)
 			{
 				OpenSpecificTabButton(rect2, pawn, ref specificNeedsTabForPawn);
 				rect2.width -= 24f;
 			}
-			Widgets.DrawHighlightIfMouseover(rect2);
+			if (highlight)
+			{
+				Widgets.DrawHighlightIfMouseover(rect2);
+			}
 			Rect rect3 = new Rect(4f, (rect.height - 27f) / 2f, 27f, 27f);
 			Widgets.ThingIcon(rect3, pawn, 1f);
 			Rect bgRect = new Rect(rect3.xMax + 4f, 16f, 100f, 18f);
@@ -130,7 +216,9 @@ namespace Vehicles
 			foreach (Need n in allNeeds)
 			{
 				if (n.def.showForCaravanMembers) // Change for all needs?
+				{
 					tmpNeeds.Add(n);
+				}
 			}
 			PawnNeedsUIUtility.SortInDisplayOrder(tmpNeeds);
 
@@ -139,9 +227,8 @@ namespace Vehicles
 			{
 				int maxThresholdMarkers = 0;
 				bool doTooltip = true;
-				Rect rect4 = new Rect(xMax, 0f, 100f, 50f);
-				Need_Mood mood = need as Need_Mood;
-				if (mood != null)
+				Rect rect4 = new Rect(xMax, 0f, 100f, PawnRowHeight);
+				if (need is Need_Mood mood)
 				{
 					maxThresholdMarkers = 1;
 					doTooltip = false;
@@ -158,6 +245,7 @@ namespace Vehicles
 				GUI.color = Color.white;
 			}
 			Widgets.EndGroup();
+			return mouseOver && !isDraggingPawn;
 		}
 
 		private static void OpenSpecificTabButton(Rect rowRect, Pawn p, ref Pawn specificTabForPawn)
@@ -229,7 +317,7 @@ namespace Vehicles
 			EnsureSpecificNeedsTabForPawnValid();
 			base.ExtraOnGUI();
 			Pawn localSpecificNeedsTabForPawn = specificNeedsTabForPawn;
-			if(!(localSpecificNeedsTabForPawn is null))
+			if (localSpecificNeedsTabForPawn != null)
 			{
 				Rect tabRect = TabRect;
 				float specificNeedsTabWidth = SpecificNeedsTabWidth;
@@ -237,7 +325,9 @@ namespace Vehicles
 				Find.WindowStack.ImmediateWindow(1439870015, rect, WindowLayer.GameUI, delegate
 				{
 					if (localSpecificNeedsTabForPawn.DestroyedOrNull())
+					{
 						return;
+					}
 					NeedsCardUtility.DoNeedsMoodAndThoughts(rect.AtZero(), localSpecificNeedsTabForPawn, ref thoughtScrollPosition);
 					if (Widgets.CloseButtonFor(rect.AtZero()))
 					{

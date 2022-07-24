@@ -381,18 +381,18 @@ namespace Vehicles
 		{
 			get
 			{
-				List<Pawn> passengersOnShip = new List<Pawn>();
-				if(!(handlers is null))
+				List<Pawn> passengers = new List<Pawn>();
+				if (!handlers.NullOrEmpty())
 				{
-					foreach(VehicleHandler handler in handlers)
+					foreach (VehicleHandler handler in handlers)
 					{
 						if(handler.role.handlingTypes.NullOrEmpty())
 						{
-							passengersOnShip.AddRange(handler.handlers);
+							passengers.AddRange(handler.handlers);
 						}
 					}
 				}
-				return passengersOnShip;
+				return passengers;
 			}
 		}
 
@@ -818,7 +818,17 @@ namespace Vehicles
 					{
 						if (AllPawnsAboard.TryRandomElement(out Pawn result))
 						{
-							result.mindState.mentalStateHandler.TryStartMentalState(MentalStateDefOf.Wander_Psychotic);
+							foreach (MentalStateDef mentalState in DefDatabase<MentalStateDef>.AllDefs)
+							{
+								if (result.mindState.mentalStateHandler.TryStartMentalState(mentalState, "testing"))
+								{
+									break;
+								}
+								else
+								{
+									Log.Warning($"Failed to execute {mentalState} inside vehicles.");
+								}
+							}
 						}
 					}
 				};
