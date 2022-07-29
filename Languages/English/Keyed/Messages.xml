@@ -5,6 +5,7 @@
 	<Vehicles_OutOfFuel>Cannot draft. Vehicle needs more fuel.</Vehicles_OutOfFuel>
 	<Vehicles_UpgradeInProgress>Cannot draft while Vehicle is upgrading.</Vehicles_UpgradeInProgress>
 	<Vehicles_HandlerNotEnoughRoom>Failed to add {1} to {0}. No more slots available.</Vehicles_HandlerNotEnoughRoom>
+	<Vehicles_VehicleCaravanMentalBreakMovementRole>{0} is no longer able to operate their role for the vehicle caravan.</Vehicles_VehicleCaravanMentalBreakMovementRole>
 	<RunwayNotValid>Runway not valid</RunwayNotValid>
 	<NotEnoughCannonCrew>Not enough colonists in {0} to operate {1}.</NotEnoughCannonCrew>
 	<NameIsInvalid>Name invalid for Vehicle.</NameIsInvalid>

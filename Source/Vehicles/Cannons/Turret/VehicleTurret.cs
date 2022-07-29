@@ -539,7 +539,7 @@ namespace Vehicles
 		public static float TurretRotationFor(Rot8 rot, float currentRotation)
 		{
 			float zeroAngle = 270 - currentRotation;
-			return zeroAngle - 45 * rot.AsIntCompass;
+			return zeroAngle - 45 * rot.AsIntClockwise;
 		}
 
 		//REDO - disable type implementation

@@ -11,12 +11,19 @@ namespace Vehicles
 		public ThingDef fuelType;
 
 		public bool electricPowered;
-		public float ticksPerCharge = 50f;
+
+		[PostToSettings(Label = "VehicleDischargePerTick", Translate = true, UISettingsType = UISettingsType.FloatBox)]
+		public float dischargeRate = 2;
+		[PostToSettings(Label = "VehicleTicksPerCharge", Translate = true, UISettingsType = UISettingsType.FloatBox)]
+		public float chargeRate;
 
 		[PostToSettings(Label = "VehicleFuelConsumptionRate", Translate = true, UISettingsType = UISettingsType.FloatBox)]
 		public float fuelConsumptionRate;
 		[PostToSettings(Label = "VehicleFuelCapacity", Translate = true, UISettingsType = UISettingsType.IntegerBox)]
 		public int fuelCapacity;
+		[PostToSettings(Label = "VehicleFuelConsumptionRateWorldMultiplier", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
+		[SliderValues(Increment = 0.1f, MinValue = 0, MaxValue = 2)]
+		public float worldMultiplierConsumptionRate = 1;
 
 		public FuelConsumptionCondition fuelConsumptionCondition;
 
@@ -24,7 +31,7 @@ namespace Vehicles
 
 		public ThingDef MoteDisplayed;
 
-		public int TicksToSpawnMote;
+		public int ticksToSpawnMote;
 
 		public CompProperties_FueledTravel()
 		{

@@ -464,6 +464,16 @@ namespace Vehicles
 			base.Tick();
 			vPather.PatherTick();
 			vTweener.TweenerTick();
+			if (vPather.MovingNow)
+			{
+				foreach (Pawn pawn in pawns)
+				{
+					if (pawn is VehiclePawn vehicle)
+					{
+						vehicle.CompFueledTravel?.ConsumeFuelWorld();
+					}
+				}
+			}
 		}
 
 		public override void ExposeData()

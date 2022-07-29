@@ -20,9 +20,6 @@ namespace Vehicles
 		public float wakeMultiplier = 1.6f;
 		public float wakeSpeed = 1.6f;
 
-		//[PostToSettings(Label = "VehicleDamageMultipliers", Tooltip = "VehicleTechLevelDamageMultipliersTooltip", Translate = true, ParentHolder = true)]
-		//public VehicleDamageMultipliers techLevelDamageMultipliers = new VehicleDamageMultipliers();
-
 		public List<VehicleJobLimitations> vehicleJobLimitations = new List<VehicleJobLimitations>()
 		{
 			new VehicleJobLimitations("RepairVehicle", 1),
@@ -83,9 +80,6 @@ namespace Vehicles
 		public RiverDef riverTraversability;
 		public List<VehicleRole> roles  = new List<VehicleRole>();
 
-		public SoundDef soundWhileDrafted; //REDO
-		public SoundDef soundWhileMoving; //REDO
-
 		public IEnumerable<string> ConfigErrors()
 		{
 			if (vehicleJobLimitations.NullOrEmpty())
@@ -103,9 +97,21 @@ namespace Vehicles
 			customThingCosts ??= new Dictionary<ThingDef, int>();
 			customSnowCosts ??= new Dictionary<SnowCategory, int>();
 
-			//vehicleDamageMultipliers ??= new VehicleDamageMultipliers();
-
 			roles.OrderBy(c => c.hitbox.side == VehicleComponentPosition.BodyNoOverlap).ForEach(c => c.hitbox.Initialize(vehicleDef));
+		}
+
+		public void PostVehicleDefLoad(VehicleDef vehicleDef)
+		{
+			string defName = vehicleDef.defName;
+
+			XmlHelper.FillDefaults_Enum(defName, nameof(customSnowCosts), customSnowCosts);
+			XmlHelper.FillDefaults_Def(defName, nameof(customTerrainCosts), customTerrainCosts);
+			XmlHelper.FillDefaults_Def(defName, nameof(customThingCosts), customThingCosts);
+
+			XmlHelper.FillDefaults_Def(defName, nameof(customRiverCosts), customRiverCosts);
+			XmlHelper.FillDefaults_Def(defName, nameof(customBiomeCosts), customBiomeCosts);
+			XmlHelper.FillDefaults_Enum(defName, nameof(customHillinessCosts), customHillinessCosts);
+			XmlHelper.FillDefaults_Def(defName, nameof(customRoadCosts), customRoadCosts);
 		}
 	}
 }

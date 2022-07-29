@@ -19,6 +19,10 @@ namespace Vehicles
 		/// VehicleDef, XmlNodes
 		/// </summary>
 		public static readonly Dictionary<string, HashSet<string>> overriddenVehicleNodes = new Dictionary<string, HashSet<string>>();
+		/// <summary>
+		/// VehicleDef, (fieldName, defaultValue)
+		/// </summary>
+		public static readonly Dictionary<string, Dictionary<string, string>> setDefaultValues = new Dictionary<string, Dictionary<string, string>>();
 
 		internal static void RegisterParsers()
 		{
@@ -30,6 +34,7 @@ namespace Vehicles
 		internal static void RegisterAttributes()
 		{
 			XmlParseHelper.RegisterAttribute("LockSetting", CheckFieldLocked);
+			XmlParseHelper.RegisterAttribute("AssignDefaults", AssignDefaults);
 			XmlParseHelper.RegisterAttribute("DisableSettings", CheckDisabledSettings);
 			XmlParseHelper.RegisterAttribute("TurretAllowedFor", CheckTurretStatus);
 			XmlParseHelper.RegisterAttribute("AllowTerrainWithTag", AllowTerrainCosts, "customTerrainCosts");
@@ -56,6 +61,21 @@ namespace Vehicles
 				}
 				lockedFields[defName].Add(field);
 			}
+		}
+
+		private static void AssignDefaults(XmlNode node, string value, FieldInfo field)
+		{
+			string defName = XmlParseHelper.BackSearchDefName(node);
+			if (string.IsNullOrEmpty(defName))
+			{
+				SmashLog.Error($"Cannot use <attribute>AssignAllDefault</attribute> on {field.Name}. This attribute cannot be used in abstract defs.");
+				return;
+			}
+			if (!setDefaultValues.ContainsKey(defName))
+			{
+				setDefaultValues.Add(defName, new Dictionary<string, string>());
+			}
+			setDefaultValues[defName].Add(node.Name, value);
 		}
 
 		private static void CheckDisabledSettings(XmlNode node, string value, FieldInfo field)

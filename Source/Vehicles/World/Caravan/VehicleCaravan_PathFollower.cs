@@ -415,9 +415,13 @@ namespace Vehicles
 				if (roads[i].neighbor == toTile)
 				{
 					float movementCostMultiplier = roads[i].road.movementCostMultiplier;
-					if (vehicleDefs.NotNullAndAny(v => !v.properties.customRoadCosts.EnumerableNullOrEmpty()))
+					foreach (VehicleDef vehicleDef in vehicleDefs)
 					{
-						movementCostMultiplier = vehicleDefs.Min(v => v.properties.customRoadCosts[roads[i].road]);
+						//Take slowest multiplier (caravan is limited by slowest vehicle)
+						if (vehicleDef.properties.customRoadCosts.TryGetValue(roads[i].road, out float value) && value > movementCostMultiplier)
+						{
+							movementCostMultiplier = value;
+						}
 					}
 					if (explanation != null)
 					{

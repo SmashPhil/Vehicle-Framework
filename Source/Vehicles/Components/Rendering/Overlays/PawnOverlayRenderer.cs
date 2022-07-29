@@ -72,13 +72,13 @@ namespace Vehicles
 			return rot.AsInt switch
 			{
 				0 => angleNorth ?? angleSouth + 180 ?? angle,
-				1 => angleEast ?? -angleWest ?? (angle + 45 * rot.AsIntCompass),
-				2 => angleSouth ?? -angleNorth ?? (angle + 45 * rot.AsIntCompass),
-				3 => angleWest ?? -angleEast ?? (angle + 45 * rot.AsIntCompass),
-				4 => angleNorthEast ?? -angleNorthWest ?? (angle + 45 * rot.AsIntCompass),
-				5 => angleSouthEast ?? -angleSouthWest ?? (angle + 45 * rot.AsIntCompass),
-				6 => angleSouthWest ?? -angleSouthEast ?? (angle + 45 * rot.AsIntCompass),
-				7 => angleNorthWest ?? -angleNorthEast ?? (angle + 45 * rot.AsIntCompass),
+				1 => angleEast ?? -angleWest ?? (angle + 45 * rot.AsIntClockwise),
+				2 => angleSouth ?? -angleNorth ?? (angle + 45 * rot.AsIntClockwise),
+				3 => angleWest ?? -angleEast ?? (angle + 45 * rot.AsIntClockwise),
+				4 => angleNorthEast ?? -angleNorthWest ?? (angle + 45 * rot.AsIntClockwise),
+				5 => angleSouthEast ?? -angleSouthWest ?? (angle + 45 * rot.AsIntClockwise),
+				6 => angleSouthWest ?? -angleSouthEast ?? (angle + 45 * rot.AsIntClockwise),
+				7 => angleNorthWest ?? -angleNorthEast ?? (angle + 45 * rot.AsIntClockwise),
 				_ => throw new NotImplementedException(),
 			};
 		}

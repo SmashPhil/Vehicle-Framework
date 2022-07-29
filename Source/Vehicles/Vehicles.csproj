@@ -634,6 +634,7 @@
     <Compile Include="Utility\Helpers\SelectionHelper.cs" />
     <Compile Include="Utility\Helpers\GizmoHelper.cs" />
     <Compile Include="Utility\Helpers\MultithreadHelper.cs" />
+    <Compile Include="Utility\Helpers\XmlHelper.cs" />
     <Compile Include="Utility\Helpers\SkyfallerHelper.cs" />
     <Compile Include="Utility\Helpers\TargetingHelper.cs" />
     <Compile Include="Utility\Helpers\UIHelper.cs" />

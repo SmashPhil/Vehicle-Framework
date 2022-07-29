@@ -92,7 +92,7 @@ namespace Vehicles
 
 		public RotationalOffset OffsetFor(Rot8 rot)
 		{
-			return rot.AsIntCompass switch
+			return rot.AsIntClockwise switch
 			{
 				0 => north,
 				1 => northEast,

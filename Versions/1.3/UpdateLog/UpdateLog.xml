@@ -64,7 +64,11 @@ I changed the PackageId of the framework to better match the name of the mod, so
 
 - Removed Smoke Launcher Turret
 
-- Added EventManager for hooking onto vehicle related events without requiring patches or new classes.
+- Added EventManager for hooking onto vehicle related events without requiring patches or new classes. Also allows for adding sounds during or after certain events.
+
+- Vehicles will now consume fuel on the world map equal to their consumption rate x world multiplier
+
+- Reworked Dialog_AssignSeats for more space and scroll rect
 [title]Final Notes[/title][font]Small[/font]
 Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
 </description>

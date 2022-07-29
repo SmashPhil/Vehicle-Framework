@@ -68,7 +68,7 @@
 				<li>
 					<key>commander</key>
 					<label>Commander</label>
-					<slots>100</slots>
+					<slots>1</slots>
 					<slotsToOperate>1</slotsToOperate>
 					<handlingTypes>
 						<li>Cannon</li>

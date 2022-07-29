@@ -14,9 +14,9 @@ namespace Vehicles
 {
 	public class CompFueledTravel : VehicleAIComp
 	{
-		private const float EfficiencyTickMultiplier = 1 / 60000f;
+		private const float EfficiencyTickMultiplier = 1 / GenDate.TicksPerDay;
 		private const float CellOffsetIntVec3ToVector3 = 0.5f;
-		private const float PowerGainRate = 1f;
+		private const float TicksToCharge = 120;
 
 		private static MethodInfo powerNetMethod;
 
@@ -29,8 +29,9 @@ namespace Vehicles
 		private CompPower connectedPower;
 		private bool postLoadReconnect;
 		public float dischargeRate;
-		private float fuelCost;
-		private float fuelCapacity;
+
+		private float fuelConsumptionRateOffset;
+		private float fuelCapacityOffset;
 
 		public CompProperties_FueledTravel Props => (CompProperties_FueledTravel)props;
 		public float ConsumptionRatePerTick => FuelEfficiency * EfficiencyTickMultiplier;
@@ -40,7 +41,7 @@ namespace Vehicles
 		public bool FullTank => fuel == FuelCapacity;
 		public int FuelCountToFull => Mathf.CeilToInt(FuelCapacity - Fuel);
 
-		private bool Charging => connectedPower != null && !FullTank && connectedPower.PowerNet.CurrentStoredEnergy() > PowerGainRate;
+		private bool Charging => connectedPower != null && !FullTank && connectedPower.PowerNet.CurrentStoredEnergy() > Props.chargeRate;
 		public VehiclePawn Vehicle => parent as VehiclePawn;
 		public FuelConsumptionCondition FuelCondition => Props.fuelConsumptionCondition;
 		public Gizmo FuelCountGizmo => new Gizmo_RefuelableFuelTravel { refuelable = this };
@@ -61,15 +62,11 @@ namespace Vehicles
 		{
 			get
 			{
-				return fuelCost;
+				return Props.fuelConsumptionRate + fuelConsumptionRateOffset;
 			}
 			set
 			{
-				fuelCost = value;
-				if (fuelCost < 0)
-				{
-					fuelCost = 0f;
-				}
+				fuelConsumptionRateOffset = value;
 			}
 		}
 
@@ -77,19 +74,19 @@ namespace Vehicles
 		{
 			get
 			{
-				return fuelCapacity;
+				return Props.fuelCapacity + fuelCapacityOffset;
 			}
 			set
 			{
-				fuelCapacity = value;
-				if (fuelCapacity < 0)
+				fuelCapacityOffset = value;
+				if (fuelCapacityOffset < 0)
 				{
-					fuelCapacity = 0f;
+					fuelCapacityOffset = 0f;
 				}
 
-				if (fuel > fuelCapacity)
+				if (fuel > fuelCapacityOffset)
 				{
-					fuel = fuelCapacity;
+					fuel = fuelCapacityOffset;
 				}
 			}
 		}
@@ -139,7 +136,9 @@ namespace Vehicles
 		public virtual void Refuel(float amount)
 		{
 			if (fuel >= FuelCapacity)
+			{
 				return;
+			}
 			fuel += amount;
 			if (fuel >= FuelCapacity)
 			{
@@ -162,6 +161,20 @@ namespace Vehicles
 				return;
 			}
 			fuel -= amount;
+			if (fuel <= 0f)
+			{
+				fuel = 0f;
+				parent.BroadcastCompSignal("RanOutOfFuel");
+			}
+		}
+
+		public virtual void ConsumeFuelWorld()
+		{
+			if (fuel <= 0f)
+			{
+				return;
+			}
+			fuel -= ConsumptionRatePerTick * Props.worldMultiplierConsumptionRate;
 			if (fuel <= 0f)
 			{
 				fuel = 0f;
@@ -287,10 +300,12 @@ namespace Vehicles
 			if (SatisfiesFuelConsumptionConditional)
 			{
 				ConsumeFuel(ConsumptionRatePerTick);
-				if(!terminateMotes && !Props.motesGenerated.NullOrEmpty())
+				if (!terminateMotes && !Props.motesGenerated.NullOrEmpty())
 				{
-					if(Find.TickManager.TicksGame % Props.TicksToSpawnMote == 0)
+					if (Find.TickManager.TicksGame % Props.ticksToSpawnMote == 0)
+					{
 						DrawMotes();
+					}
 				}
 				if (EmptyTank && !VehicleMod.settings.debug.debugDraftAnyShip)
 				{
@@ -299,13 +314,13 @@ namespace Vehicles
 			}
 			else if (Props.electricPowered && !Charging)
 			{
-				ConsumeFuel(ConsumptionRatePerTick * 0.1f);
+				ConsumeFuel(Mathf.Min(Props.dischargeRate * EfficiencyTickMultiplier, Fuel));
 			}
 
-			if (Props.electricPowered && Charging && Find.TickManager.TicksGame % Props.ticksPerCharge == 0)
+			if (Props.electricPowered && Charging && Find.TickManager.TicksGame % TicksToCharge == 0)
 			{
-				PowerNetMethod.Invoke(connectedPower.PowerNet, new object[] { -PowerGainRate });
-				Refuel(PowerGainRate);
+				PowerNetMethod.Invoke(connectedPower.PowerNet, new object[] { -Props.chargeRate });
+				Refuel(Props.chargeRate);
 			}
 		}
 
@@ -402,7 +417,6 @@ namespace Vehicles
 			base.PostSpawnSetup(respawningAfterLoad);
 			if(!respawningAfterLoad)
 			{
-				InitializeProperties();
 				dischargeRate = ConsumptionRatePerTick * 0.1f;
 
 				if (Vehicle.Faction != Faction.OfPlayer)
@@ -417,21 +431,18 @@ namespace Vehicles
 			}
 		}
 
-		public virtual void InitializeProperties()
-		{
-			fuelCost = Props.fuelConsumptionRate;
-			fuelCapacity = Props.fuelCapacity;
-		}
-
 		public override void PostExposeData()
 		{
 			base.PostExposeData();
 
-			Scribe_Values.Look(ref fuelCost, "fuelCost");
-			Scribe_Values.Look(ref fuelCapacity, "fuelCapacity");
-			Scribe_Values.Look(ref fuel, "fuel");
+			//Upgrades
+			Scribe_Values.Look(ref fuelConsumptionRateOffset, "fuelConsumptionRateOffset");
+			Scribe_Values.Look(ref fuelCapacityOffset, "fuelCapacityOffset");
 
+			//CurValues
+			Scribe_Values.Look(ref fuel, "fuel");
 			Scribe_Values.Look(ref dischargeRate, "dischargeRate");
+
 			if (Scribe.mode == LoadSaveMode.Saving)
 			{
 				postLoadReconnect = Charging;

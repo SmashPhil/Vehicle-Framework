@@ -121,6 +121,7 @@ namespace Vehicles
 		{
 			base.graphicData = graphicData;
 			base.PostLoad();
+			properties.PostVehicleDefLoad(this);
 		}
 
 		/// <summary>

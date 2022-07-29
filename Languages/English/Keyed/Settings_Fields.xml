@@ -43,8 +43,11 @@
 	<VehicleWinterCostMultiplier>Winter PathCost Multiplier</VehicleWinterCostMultiplier>
 	<VehicleWorldSpeedMultiplier>World Speed Multiplier</VehicleWorldSpeedMultiplier>
 	
+	<VehicleDischargePerTick>Discharge Rate</VehicleDischargePerTick>
+	<VehicleTicksPerCharge>Charge Rate</VehicleTicksPerCharge>
 	<VehicleFuelConsumptionRate>Fuel Cost Rate</VehicleFuelConsumptionRate>
 	<VehicleFuelCapacity>Fuel Capacity</VehicleFuelCapacity>
+	<VehicleFuelConsumptionRateWorldMultiplier>World Multiplier</VehicleFuelConsumptionRateWorldMultiplier>
 	
 	<VehicleFuelEfficiencyWorld>Fuel Efficiency (World)</VehicleFuelEfficiencyWorld>
 	<VehicleFlySpeed>Fly Speed</VehicleFlySpeed>
