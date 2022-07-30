@@ -139,7 +139,7 @@
 				<skyfallerLeaving>ATPLeaving</skyfallerLeaving>
 				<skyfallerIncoming>ATPIncoming</skyfallerIncoming>
 				<skyfallerCrashing>ATPCrashing</skyfallerCrashing>
-				<fuelEfficiencyWorld>0.05</fuelEfficiencyWorld>
+				<fuelConsumptionWorldMultiplier>2</fuelConsumptionWorldMultiplier>
 				<flySpeed>10</flySpeed>
 				<rateOfClimb>50</rateOfClimb>
 				<maxFallRate>75</maxFallRate>

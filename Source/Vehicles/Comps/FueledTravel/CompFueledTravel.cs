@@ -174,7 +174,7 @@ namespace Vehicles
 			{
 				return;
 			}
-			fuel -= ConsumptionRatePerTick * Props.worldMultiplierConsumptionRate;
+			fuel -= ConsumptionRatePerTick * Props.fuelConsumptionWorldMultiplier;
 			if (fuel <= 0f)
 			{
 				fuel = 0f;

@@ -467,7 +467,7 @@ namespace Vehicles
 		{
 			if (vehicle.CompFueledTravel != null)
 			{
-				float amount = vehicle.CompFueledTravel.ConsumptionRatePerTick / vehicle.CompVehicleLauncher.FuelEfficiencyWorld;
+				float amount = vehicle.CompFueledTravel.ConsumptionRatePerTick * vehicle.CompVehicleLauncher.FuelConsumptionWorldMultiplier;
 				vehicle.CompFueledTravel.ConsumeFuel(amount);
 			}
 		}

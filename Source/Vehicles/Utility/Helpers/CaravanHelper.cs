@@ -24,14 +24,17 @@ namespace Vehicles
 		/// <param name="onRemoval">Function call for every pawn removed from assigned seating</param>
 		public static void ClearAssignedSeats(VehiclePawn vehicle, Action<Pawn> onRemoval)
 		{
-			List<KeyValuePair<Pawn, (VehiclePawn vehicle, VehicleHandler handler)>> vehicleMapping = assignedSeats.Where(kvp => kvp.Value.vehicle == vehicle).ToList();
+			List<Pawn> assignedPawns = assignedSeats.Where(kvp => kvp.Value.vehicle == vehicle).Select(kvp => kvp.Key).ToList();
 
-			if (!vehicleMapping.NullOrEmpty())
+			if (!assignedPawns.NullOrEmpty())
 			{
-				foreach (var pawnToVehicleMapping in vehicleMapping)
+				foreach (Pawn pawn in assignedPawns)
 				{
-					Pawn pawn = pawnToVehicleMapping.Key;
 					assignedSeats.Remove(pawn);
+					onRemoval(pawn);
+				}
+				foreach (Pawn pawn in vehicle.AllPawnsAboard)
+				{
 					onRemoval(pawn);
 				}
 			}

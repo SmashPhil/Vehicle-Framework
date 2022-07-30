@@ -188,7 +188,7 @@
 				<skyfallerIncoming>SparrowIncoming</skyfallerIncoming>
 				<skyfallerCrashing>SparrowCrashing</skyfallerCrashing>
 				<skyfallerStrafing>SparrowStrafe</skyfallerStrafing>
-				<fuelEfficiencyWorld>0.1</fuelEfficiencyWorld>
+				<fuelConsumptionWorldMultiplier>1.5</fuelConsumptionWorldMultiplier>
 				<flySpeed>10</flySpeed>
 				<strafing>
 					<turrets>

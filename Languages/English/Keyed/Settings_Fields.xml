@@ -45,11 +45,11 @@
 	
 	<VehicleDischargePerTick>Discharge Rate</VehicleDischargePerTick>
 	<VehicleTicksPerCharge>Charge Rate</VehicleTicksPerCharge>
-	<VehicleFuelConsumptionRate>Fuel Cost Rate</VehicleFuelConsumptionRate>
+	<VehicleFuelConsumptionRate>Fuel Consumption Rate</VehicleFuelConsumptionRate>
 	<VehicleFuelCapacity>Fuel Capacity</VehicleFuelCapacity>
 	<VehicleFuelConsumptionRateWorldMultiplier>World Multiplier</VehicleFuelConsumptionRateWorldMultiplier>
 	
-	<VehicleFuelEfficiencyWorld>Fuel Efficiency (World)</VehicleFuelEfficiencyWorld>
+	<VehicleFuelConsumptionWorld>Fuel Consumption Multiplier (World)</VehicleFuelConsumptionWorld>
 	<VehicleFlySpeed>Fly Speed</VehicleFlySpeed>
 	<VehicleLaunchFixedMaxDistance>Fixed Max Distance</VehicleLaunchFixedMaxDistance>
 	<VehicleLaunchFixedMaxDistanceDisabled>None</VehicleLaunchFixedMaxDistanceDisabled>

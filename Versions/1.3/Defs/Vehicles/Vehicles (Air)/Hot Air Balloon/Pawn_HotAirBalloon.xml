@@ -122,7 +122,7 @@
 				<skyfallerCrashing>HotAirBalloonCrashing</skyfallerCrashing>
 				<faceDirectionOfTravel>false</faceDirectionOfTravel>
 				<circleToLand>true</circleToLand>
-				<fuelEfficiencyWorld>0.15</fuelEfficiencyWorld>
+				<fuelConsumptionWorldMultiplier>3</fuelConsumptionWorldMultiplier>
 				<flySpeed>1.1</flySpeed>
 				<launchProtocol Class="Vehicles.RocketTakeoff">
 					<movementType>Decelerate</movementType>

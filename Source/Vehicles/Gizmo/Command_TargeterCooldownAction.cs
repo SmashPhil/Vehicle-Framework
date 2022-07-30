@@ -148,7 +148,7 @@ namespace Vehicles
 				}
 			}
 			Graphics.DrawTexture(reloadRect, VehicleTex.ReloadIcon, material);
-			TooltipHandler.TipRegion(reloadRect, "ReloadVehicleTurret".Translate());
+			TooltipHandler.TipRegion(reloadRect, "VehicleReloadVehicleTurret".Translate());
 
 			GUI.color = fireModeColor;
 			if (Mouse.IsOver(fireModeRect))

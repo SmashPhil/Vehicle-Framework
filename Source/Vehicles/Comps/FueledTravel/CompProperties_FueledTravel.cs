@@ -23,7 +23,7 @@ namespace Vehicles
 		public int fuelCapacity;
 		[PostToSettings(Label = "VehicleFuelConsumptionRateWorldMultiplier", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(Increment = 0.1f, MinValue = 0, MaxValue = 2)]
-		public float worldMultiplierConsumptionRate = 1;
+		public float fuelConsumptionWorldMultiplier = 1;
 
 		public FuelConsumptionCondition fuelConsumptionCondition;
 

@@ -13,30 +13,34 @@ namespace Vehicles
 	{
 		private const float ButtonWidth = 120f;
 		private const float ButtonHeight = 30f;
+		private const float RowHeight = 30f;
 
 		private Pawn draggedPawn;
 		private Vector2 draggedItemPosOffset;
 		private Vector2 draggedIconPosOffset;
-		private static Vector2 dialogAssignSeatsScrollPos;
+		private static Vector2 dialogPawnsScrollPos;
+		private static Vector2 dialogPawnsAssignedScrollPos;
 
 		private readonly Dictionary<Pawn, (VehiclePawn vehicle, VehicleHandler handler)> assignedSeats = new Dictionary<Pawn, (VehiclePawn, VehicleHandler)>();
 
-		private readonly List<TransferableOneWay> pawns;
-		
+		private readonly List<TransferableOneWay> transferablePawns;
+		private readonly List<Pawn> pawns;
+
 		private readonly TransferableOneWay transferable;
 
 		public Dialog_AssignSeats(List<TransferableOneWay> pawns, TransferableOneWay transferable)
 		{
 			this.transferable = transferable;
-			this.pawns = pawns.Where(p => p.AnyThing is Pawn pawn && (Vehicle.handlers.NotNullAndAny(handler => handler.handlers.Contains(pawn)) ||
+			this.transferablePawns = pawns.Where(p => p.AnyThing is Pawn pawn && (Vehicle.handlers.NotNullAndAny(handler => handler.handlers.Contains(pawn)) ||
 				!CaravanHelper.assignedSeats.ContainsKey(pawn) || (CaravanHelper.assignedSeats.ContainsKey(pawn) && CaravanHelper.assignedSeats[pawn].vehicle == Vehicle))).ToList();
+			this.pawns = transferablePawns.Select(pawn => pawn.AnyThing as Pawn).ToList();
 
 			absorbInputAroundWindow = true;
 			closeOnCancel = true;
 
 			assignedSeats ??= new Dictionary<Pawn, (VehiclePawn, VehicleHandler)>();
-			dialogAssignSeatsScrollPos = Vector2.zero;
-
+			dialogPawnsScrollPos = Vector2.zero;
+			dialogPawnsAssignedScrollPos = Vector2.zero;
 			foreach (VehicleHandler handler in Vehicle.handlers)
 			{
 				foreach (Pawn pawn in handler.handlers)
@@ -55,7 +59,7 @@ namespace Vehicles
 
 		private VehiclePawn Vehicle => transferable.AnyThing as VehiclePawn;
 
-		public override Vector2 InitialSize => new Vector2(800, (float)UI.screenHeight / 2);
+		public override Vector2 InitialSize => new Vector2(900, (float)UI.screenHeight / 1.85f);
 
 		public override void DoWindowContents(Rect rect)
 		{
@@ -73,155 +77,188 @@ namespace Vehicles
 
 			Widgets.DrawMenuSection(vehicleRect);
 
-			Rect pawnsRect = new Rect(rect.x, rect.y, rect.width / 2, rect.height - ButtonHeight * 3);
+			float windowSectionWidth = rect.width / 2 - 5;
+			Rect pawnsRect = new Rect(rect.x, rect.y, windowSectionWidth, vehicleRect.height - 15);
 			Rect assignedRect = new Rect(pawnsRect)
 			{
-				x = pawnsRect.x + pawnsRect.width
+				x = pawnsRect.x + pawnsRect.width + 10
 			};
 
+			if (draggedPawn != null)
+			{
+				float mousePosX = Event.current.mousePosition.x - draggedItemPosOffset.x;
+				float mousePosY = Event.current.mousePosition.y - draggedItemPosOffset.y;
+				float width = pawnsRect.width - 1;
+				Rect draggedRect = new Rect(mousePosX, mousePosY, width, RowHeight);
+				DrawPawnRow(draggedRect, draggedPawn, (0, "[ERR]", null));
+			}
 			DrawPawns(pawnsRect);
-
+			UIElements.DrawLineVerticalGrey(pawnsRect.x + pawnsRect.width + 5, vehicleRect.y, vehicleRect.height);
+			DrawAssignees(assignedRect);
 			if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
 			{
 				draggedPawn = null;
 			}
+		}
 
-			DrawAssignees(assignedRect);
+		private void DrawPawnRow(Rect rect, Pawn pawn, (float width, string label, Action onClick) button)
+		{
+			Rect colonistIconRect = new Rect(rect.x, rect.y, RowHeight, RowHeight);
+			Rect colonistRect = new Rect(colonistIconRect.x + RowHeight, rect.y + 5, rect.width - 1, RowHeight);
+			Widgets.Label(colonistRect, pawn.LabelCap);
+			Widgets.ThingIcon(colonistIconRect, pawn);
+
+			Rect buttonRect = new Rect(rect.x + colonistRect.width - 100, rect.y + 5, button.width, ButtonHeight - 10);
+			if (button.onClick != null && Widgets.ButtonText(buttonRect, button.label))
+			{
+				button.onClick();
+			}
 		}
 
 		private void DrawPawns(Rect rect)
 		{
 			Widgets.Label(rect, "Colonists".Translate());
-			Rect colonistIconRect = new Rect(rect.x, rect.y + 30f, 30f, 30f);
-			Rect colonistRect = new Rect(colonistIconRect.x + 30f, rect.y + 35f, rect.width, 30f);
-			foreach (Pawn pawn in pawns.Select(p => p.AnyThing as Pawn).Where(a => !assignedSeats.ContainsKey(a)))
+			Rect pawnRowRect = new Rect(rect.x, rect.y + RowHeight + 5, rect.width - 1, RowHeight);
+			Rect outRect = new Rect(pawnRowRect)
 			{
-				Rect entryButtonRect = new Rect(colonistIconRect.x + colonistRect.width - 100f, colonistRect.y, 90f, 20f);
-				Rect fullColonistBarRect = new Rect(colonistRect)
+				x = rect.x,
+				height = rect.height
+			};
+			Rect viewRect = new Rect(outRect)
+			{
+				width = outRect.width - 17,
+				height = RowHeight * pawns.Count
+			};
+			Widgets.BeginScrollView(outRect, ref dialogPawnsScrollPos, viewRect);
+			{
+				foreach (Pawn pawn in pawns.Where(a => !assignedSeats.ContainsKey(a)))
 				{
-					x = colonistIconRect.x
-				};
-				if (Mouse.IsOver(fullColonistBarRect) && !Mouse.IsOver(entryButtonRect))
-				{
-					Widgets.DrawHighlight(fullColonistBarRect);
-					if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
+					float buttonWidth = ButtonHeight * 3;
+					Rect entryButtonRect = new Rect(pawnRowRect.x + pawnRowRect.width - (buttonWidth + 10), pawnRowRect.y + 5, buttonWidth, ButtonHeight - 10);
+					if (Mouse.IsOver(pawnRowRect) && !Mouse.IsOver(entryButtonRect))
 					{
-						draggedPawn = pawn;
-						draggedItemPosOffset = Event.current.mousePosition - colonistRect.position;
-						draggedIconPosOffset = Event.current.mousePosition - colonistIconRect.position;
-						Event.current.Use();
-						SoundDefOf.Click.PlayOneShotOnCamera(null);
-					}
-				}
-
-				if (draggedPawn == pawn)
-				{
-					Rect draggedRect = new Rect(Event.current.mousePosition.x - draggedItemPosOffset.x, Event.current.mousePosition.y - draggedItemPosOffset.y, colonistRect.width, colonistRect.height);
-					Rect draggedIconRect = new Rect(Event.current.mousePosition.x - draggedIconPosOffset.x, Event.current.mousePosition.y - draggedIconPosOffset.y, colonistIconRect.width, colonistIconRect.height);
-
-					Widgets.Label(draggedRect, pawn.LabelCap);
-					Widgets.ThingIcon(draggedIconRect, pawn);
-				}
-				else
-				{
-					if (Widgets.ButtonText(entryButtonRect, "AddToRole".Translate()))
-					{
-						bool Validate(VehicleHandler handler) => assignedSeats.Where(seat => seat.Value.handler.role == handler.role).Select(p => p.Key).Count() < handler.role.slots;
-						VehicleHandler firstHandler = Vehicle.handlers.FirstOrDefault(handler => handler.CanOperateRole(pawn) && Validate(handler));
-						firstHandler ??= Vehicle.handlers.FirstOrDefault(handler => !handler.RequiredForMovement && Validate(handler));
-						if (firstHandler != null)
+						Widgets.DrawHighlight(pawnRowRect);
+						if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
 						{
-							if (!firstHandler.CanOperateRole(pawn))
+							draggedPawn = pawn;
+							draggedItemPosOffset = Event.current.mousePosition - (pawnRowRect.position +  new Vector2(ButtonHeight, 0));
+							draggedIconPosOffset = Event.current.mousePosition - pawnRowRect.position;
+							Event.current.Use();
+							SoundDefOf.Click.PlayOneShotOnCamera(null);
+						}
+					}
+
+					if (draggedPawn != pawn)
+					{
+						DrawPawnRow(pawnRowRect, pawn, (ButtonHeight * 3, "AddToRole".Translate(), delegate()
+						{
+							bool Validate(VehicleHandler handler) => assignedSeats.Where(seat => seat.Value.handler.role == handler.role).Select(p => p.Key).Count() < handler.role.slots;
+							VehicleHandler firstHandler = Vehicle.handlers.FirstOrDefault(handler => handler.CanOperateRole(pawn) && Validate(handler));
+							firstHandler ??= Vehicle.handlers.FirstOrDefault(handler => !handler.RequiredForMovement && Validate(handler));
+							if (firstHandler != null)
 							{
-								if (firstHandler.role.handlingTypes.NotNullAndAny(h => h == HandlingTypeFlags.Movement))
+								if (!firstHandler.CanOperateRole(pawn))
 								{
-									Messages.Message("IncapableStatusForRole".Translate(pawn.LabelShortCap), MessageTypeDefOf.RejectInput);
+									if (firstHandler.role.handlingTypes.NotNullAndAny(h => h == HandlingTypeFlags.Movement))
+									{
+										Messages.Message("IncapableStatusForRole".Translate(pawn.LabelShortCap), MessageTypeDefOf.RejectInput);
+									}
+									else
+									{
+										Messages.Message("IncapableStatusForRole".Translate(pawn.LabelShortCap), MessageTypeDefOf.CautionInput);
+										assignedSeats.Add(pawn, (Vehicle, firstHandler));
+									}
 								}
 								else
 								{
-									Messages.Message("IncapableStatusForRole".Translate(pawn.LabelShortCap), MessageTypeDefOf.CautionInput);
 									assignedSeats.Add(pawn, (Vehicle, firstHandler));
 								}
 							}
-							else
-							{
-								assignedSeats.Add(pawn, (Vehicle, firstHandler));
-							}
 						}
+						));
 					}
-					Widgets.Label(colonistRect, pawn.LabelCap);
-					Widgets.ThingIcon(colonistIconRect, pawn);
+					pawnRowRect.y += RowHeight + 5;
 				}
-				colonistIconRect.y += 35f;
-				colonistRect.y += 35f;
 			}
+			Widgets.EndScrollView();
 		}
 
 		private void DrawAssignees(Rect rect)
 		{
 			Widgets.Label(rect, "Assigned".Translate());
-			rect.y += 30f;
-			foreach (VehicleHandler handler in Vehicle.handlers)
+			Predicate<VehicleHandler> seatsAvailable = (handler) => assignedSeats.Where(seat => seat.Value.handler.role == handler.role).Select(p => p.Key).Count() < handler.role.slots;
+			Rect pawnRowRect = new Rect(rect.x, rect.y + RowHeight + 5, rect.width - 1, RowHeight);
+			Rect outRect = new Rect(pawnRowRect)
 			{
-				int seatsOccupied = assignedSeats.Where(r => r.Value.handler.role == handler.role).Select(p => p.Key).Count();
-				Color countColor = handler.role.RequiredForCaravan ? seatsOccupied < handler.role.slotsToOperate ? Color.red : seatsOccupied == handler.role.slots ? Color.grey : Color.white : seatsOccupied == handler.role.slots ? Color.grey : Color.white;
-				UIElements.LabelUnderlined(rect, handler.role.label, $"({handler.role.slots - assignedSeats.Where(r => r.Value.handler.role == handler.role).Select(p => p.Key).Count()})", Color.white, countColor, Color.white);
-				Rect assignedPawnIconRect = new Rect(rect.x, rect.y, 30f, 30f);
-				Rect assignedPawnRect = new Rect(assignedPawnIconRect.x + 30f, rect.y, rect.width, 30f);
-
-				rect.y += 30f;
-				assignedPawnRect.y += 30f;
-				assignedPawnIconRect.y += 35f;
-
-				Rect roleRect = new Rect(rect.x, rect.y, rect.width, 30f + 30f * assignedSeats.Where(r => r.Value.handler.role == handler.role).Select(p => p.Key).Count());
-
-				bool slotsAvailable = assignedSeats.Where(r => r.Value.handler.role == handler.role).Select(p => p.Key).Count() < handler.role.slots;
-				if (slotsAvailable && Mouse.IsOver(roleRect) && draggedPawn != null)
+				x = rect.x,
+				height = rect.height
+			};
+			Rect viewRect = new Rect(outRect)
+			{
+				width = outRect.width - 17,
+				height = (Vehicle.handlers.Count + assignedSeats.Count) * RowHeight + Vehicle.handlers.Where(handler => seatsAvailable(handler)).Count() * RowHeight + 5
+			};
+			Widgets.BeginScrollView(outRect, ref dialogPawnsAssignedScrollPos, viewRect);
+			{
+				foreach (VehicleHandler handler in Vehicle.handlers)
 				{
-					if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
+					int seatsOccupied = assignedSeats.Where(r => r.Value.handler.role == handler.role).Select(p => p.Key).Count();
+					Color countColor = handler.role.RequiredForCaravan ? seatsOccupied < handler.role.slotsToOperate ? Color.red : seatsOccupied == handler.role.slots ? Color.grey : Color.white : seatsOccupied == handler.role.slots ? Color.grey : Color.white;
+					
+					UIElements.LabelUnderlined(pawnRowRect, handler.role.label, $"({handler.role.slots - assignedSeats.Where(r => r.Value.handler.role == handler.role).Select(p => p.Key).Count()})", Color.white, countColor, Color.white);
+					pawnRowRect.y += RowHeight;
+
+					Rect roleRect = new Rect(pawnRowRect.x, pawnRowRect.y, pawnRowRect.width, RowHeight + RowHeight * assignedSeats.Where(r => r.Value.handler.role == handler.role).Select(p => p.Key).Count());
+
+					bool open = seatsAvailable(handler);
+					if (open && Mouse.IsOver(roleRect) && draggedPawn != null)
 					{
-						if (!handler.role.handlingTypes.NullOrEmpty() && !draggedPawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) || draggedPawn.Downed || draggedPawn.Dead)
+						if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
 						{
-							if (handler.role.handlingTypes.NotNullAndAny(h => h == HandlingTypeFlags.Movement))
+							if (!handler.role.handlingTypes.NullOrEmpty() && !draggedPawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) || draggedPawn.Downed || draggedPawn.Dead)
 							{
-								Messages.Message("IncapableStatusForRole".Translate(draggedPawn.LabelShortCap), MessageTypeDefOf.RejectInput);
+								if (handler.role.handlingTypes.NotNullAndAny(h => h == HandlingTypeFlags.Movement))
+								{
+									Messages.Message("IncapableStatusForRole".Translate(draggedPawn.LabelShortCap), MessageTypeDefOf.RejectInput);
+								}
+								else
+								{
+									Messages.Message("IncapableStatusForRole".Translate(draggedPawn.LabelShortCap), MessageTypeDefOf.CautionInput);
+									assignedSeats.Add(draggedPawn, (Vehicle, handler));
+								}
 							}
 							else
 							{
-								Messages.Message("IncapableStatusForRole".Translate(draggedPawn.LabelShortCap), MessageTypeDefOf.CautionInput);
 								assignedSeats.Add(draggedPawn, (Vehicle, handler));
 							}
 						}
-						else
-						{
-							assignedSeats.Add(draggedPawn, (Vehicle, handler));
-						}
 					}
-				}
-				var removalList = new List<Pawn>();
-				foreach (KeyValuePair<Pawn, (VehiclePawn vehicle, VehicleHandler handler)> assignedKVP in assignedSeats.Where(r => r.Value.handler.role == handler.role))
-				{
-					Widgets.Label(assignedPawnRect, assignedKVP.Key.LabelCap);
-					Widgets.ThingIcon(assignedPawnIconRect, assignedKVP.Key);
-					Rect removalButtonRect = new Rect(roleRect.x + roleRect.width - 100f, assignedPawnRect.y, 90f, 20f);
-					if (!assignedKVP.Value.vehicle.AllPawnsAboard.Contains(assignedKVP.Key) && Widgets.ButtonText(removalButtonRect, "RemoveFromRole".Translate()))
+					List<Pawn> removalList = new List<Pawn>();
+					foreach ((Pawn pawn, (VehiclePawn vehicle, VehicleHandler assignedHandler)) in assignedSeats.Where(r => r.Value.handler.role == handler.role))
 					{
-						removalList.Add(assignedKVP.Key);
+						Action onClick = null;
+						if (!vehicle.AllPawnsAboard.Contains(pawn))
+						{
+							onClick = () => removalList.Add(pawn);
+						}
+						DrawPawnRow(pawnRowRect, pawn, (ButtonHeight * 3, "RemoveFromRole".Translate(), onClick));
+						pawnRowRect.y += RowHeight;
 					}
-					rect.y += 30f;
-					assignedPawnRect.y += 30f;
-					assignedPawnIconRect.y += 30f;
+					foreach (Pawn pawn in removalList)
+					{
+						assignedSeats.Remove(pawn);
+					}
+					if (open)
+					{
+						if (draggedPawn != null && Mouse.IsOver(pawnRowRect))
+						{
+							Widgets.DrawHighlight(pawnRowRect);
+						}
+						pawnRowRect.y += RowHeight;
+					}
 				}
-				foreach (Pawn pawn in removalList)
-				{
-					assignedSeats.Remove(pawn);
-				}
-				if (!slotsAvailable)
-				{
-					rect.y -= 15f;
-				}
-				rect.y += 30f;
 			}
+			Widgets.EndScrollView();
 		}
 
 		private void DoBottomButtons(Rect rect)
@@ -245,11 +282,7 @@ namespace Vehicles
 			if (Widgets.ButtonText(buttonRect, "ClearSeats".Translate()))
 			{
 				SoundDefOf.Click.PlayOneShotOnCamera(null);
-				foreach (Pawn pawn in assignedSeats.Keys)
-				{
-					if (pawns.Select(p => p.AnyThing as Pawn).Contains(pawn) && assignedSeats.ContainsKey(pawn))
-						assignedSeats.Remove(pawn);
-				}
+				assignedSeats.RemoveAll(kvp => pawns.Contains(kvp.Key) && !Vehicle.AllPawnsAboard.Contains(kvp.Key));
 			}
 		}
 
@@ -266,12 +299,12 @@ namespace Vehicles
 			}
 			try
 			{
-				CaravanHelper.ClearAssignedSeats(Vehicle, (Pawn pawn) => pawns.FirstOrDefault(p => (p.AnyThing as Pawn) == pawn)?.ForceTo(0));
+				CaravanHelper.ClearAssignedSeats(Vehicle, (Pawn pawn) => transferablePawns.FirstOrDefault(p => (p.AnyThing as Pawn) == pawn)?.ForceTo(0));
 
 				//Update all current pawns being assigned to this vehicle in Pawns tab
 				foreach (Pawn assignedPawn in assignedSeats.Keys)
 				{
-					pawns.FirstOrDefault(p => (p.AnyThing as Pawn) == assignedPawn)?.ForceTo(1);
+					transferablePawns.FirstOrDefault(p => (p.AnyThing as Pawn) == assignedPawn)?.ForceTo(1);
 				}
 
 				//Add all pawns to assigned seating registry and refresh caravan dialog

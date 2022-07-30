@@ -1173,7 +1173,8 @@ namespace Vehicles
 						return;
 					}
 					int countToRefill = storedAmmo.stackCount >= turretDef.magazineCapacity - shellCount ? turretDef.magazineCapacity - shellCount : storedAmmo.stackCount;
-					int countToTake = Mathf.CeilToInt(countToRefill / (float)turretDef.ammoCountPerCharge);
+					int countToTake = Mathf.CeilToInt(countToRefill * (float)turretDef.ammoCountPerCharge);
+					Debug.Message($"StackCount: {storedAmmo.stackCount} Taking: {countToTake}");
 					vehicle.inventory.innerContainer.Take(storedAmmo, countToTake);
 					int additionalCount = 0;
 					int additionalCountToTake = 0;

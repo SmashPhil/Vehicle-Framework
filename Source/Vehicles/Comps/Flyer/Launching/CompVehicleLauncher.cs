@@ -44,7 +44,7 @@ namespace Vehicles
 		public CompProperties_VehicleLauncher Props => props as CompProperties_VehicleLauncher;
 
 		public float FlySpeed => flySpeedModifier + SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.flySpeed), Props.flySpeed);
-		public float FuelEfficiencyWorld => fuelEfficiencyWorldModifier + SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.fuelEfficiencyWorld), Props.fuelEfficiencyWorld);
+		public float FuelConsumptionWorldMultiplier => fuelEfficiencyWorldModifier + SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.fuelConsumptionWorldMultiplier), Props.fuelConsumptionWorldMultiplier);
 		public int FixedMaxDistance => SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.fixedLaunchDistanceMax), Props.fixedLaunchDistanceMax);
 		public bool SpaceFlight => SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.spaceFlight), Props.spaceFlight);
 		public float RateOfClimb => rateOfClimbModifier + SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.rateOfClimb), Props.rateOfClimb);
@@ -217,7 +217,7 @@ namespace Vehicles
 		public float FuelNeededToLaunchAtDist(float tileDistance)
 		{
 			float speedPctPerTick = (AerialVehicleInFlight.PctPerTick / tileDistance) * FlySpeed;
-			float amount = Vehicle.CompFueledTravel.ConsumptionRatePerTick / FuelEfficiencyWorld;
+			float amount = Vehicle.CompFueledTravel.ConsumptionRatePerTick * FuelConsumptionWorldMultiplier;
 			return amount * (1f / speedPctPerTick);
 		}
 
