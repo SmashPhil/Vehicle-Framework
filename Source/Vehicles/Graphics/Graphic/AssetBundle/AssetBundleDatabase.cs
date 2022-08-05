@@ -23,6 +23,15 @@ namespace Vehicles
 	[IsMainThread]
 	public static class AssetBundleDatabase
 	{
+		private const string VehicleAssetFolder = "Assets";
+
+		private static readonly string CutoutComplexRGBPath = Path.Combine("Assets", "Shaders", "ShaderRGB.shader");
+		private static readonly string CutoutComplexPatternPath = Path.Combine("Assets", "Shaders", "ShaderRGBPattern.shader");
+		private static readonly string CutoutComplexSkinPath = Path.Combine("Assets", "Shaders", "ShaderRGBSkin.shader");
+
+		private static readonly string MouseHandOpenPath = Path.Combine("Assets", "Textures", "MouseHandOpen.png");
+		private static readonly string MouseHandClosedPath = Path.Combine("Assets", "Textures", "MouseHandClosed.png");
+
 		/// <summary>
 		/// AssetBundle version loader
 		/// </summary>
@@ -35,16 +44,7 @@ namespace Vehicles
 
 		private static readonly List<string> loadFoldersChecked = new List<string>();
 
-		private static readonly string VehicleAssetBundlePath = @"Assets\vehicleassets";
-
-		private static readonly string CutoutComplexRGBPath = Path.Combine("Assets", "Shaders", "ShaderRGB.shader");
-		private static readonly string CutoutComplexPatternPath = Path.Combine("Assets", "Shaders", "ShaderRGBPattern.shader");
-		private static readonly string CutoutComplexSkinPath = Path.Combine("Assets", "Shaders", "ShaderRGBSkin.shader");
-
-		private static readonly string MouseHandOpenPath = "Assets/Textures/MouseHandOpen.png";
-		private static readonly string MouseHandClosedPath = "Assets/Textures/MouseHandClosed.png";
-
-		public static readonly AssetBundle VehicleAssetBundle;
+		public static readonly List<AssetBundle> vehicleAssets = new List<AssetBundle>();
 
 		public static readonly Shader CutoutComplexRGB;
 		public static readonly Shader CutoutComplexPattern;
@@ -79,25 +79,25 @@ namespace Vehicles
 				foreach (string folder in loadFolders)
 				{
 					loadFoldersChecked.Add(folder);
-					string versionFilePath = Path.Combine(VehicleMod.settings.Mod.Content.RootDir, folder, VehicleAssetBundlePath);
-					if (File.Exists(versionFilePath))
+					string assetDirectory = Path.Combine(VehicleMod.settings.Mod.Content.RootDir, folder, VehicleAssetFolder);
+					DirectoryInfo directoryInfo = new DirectoryInfo(assetDirectory);
+					if (directoryInfo.Exists)
 					{
-						VehicleAssetBundle = AssetBundle.LoadFromFile(versionFilePath);
-						if (VehicleAssetBundle is null)
+						foreach (FileInfo fileInfo in directoryInfo.GetFiles("*", SearchOption.AllDirectories))
 						{
-							SmashLog.Error($"Unable to load <type>VehicleAssetBundle</type> asset at {versionFilePath}");
-							throw new IOException();
+							if (fileInfo.Extension.NullOrEmpty())
+							{
+								AssetBundle assetBundle = AssetBundle.LoadFromFile(fileInfo.FullName);
+								if (assetBundle is null)
+								{
+									SmashLog.Error($"Unable to load <type>AssetBundle</type> at {assetDirectory}");
+									throw new IOException();
+								}
+								vehicleAssets.Add(assetBundle);
+							}
 						}
-
-						CutoutComplexRGB = LoadAsset<Shader>(CutoutComplexRGBPath);
-						CutoutComplexPattern = LoadAsset<Shader>(CutoutComplexPatternPath);
-						CutoutComplexSkin = LoadAsset<Shader>(CutoutComplexSkinPath);
-						MouseHandOpen = LoadAsset<Texture2D>(MouseHandOpenPath);
-						MouseHandClosed = LoadAsset<Texture2D>(MouseHandClosedPath);
-						return;
 					}
 				}
-				throw new IOException("Unable to find ShaderBundle asset in any load folder.");
 			}
 			catch (Exception ex)
 			{
@@ -105,8 +105,20 @@ namespace Vehicles
 			}
 			finally
 			{
-				SmashLog.Message($"{VehicleHarmony.LogLabel} Importing additional assets. UnityVersion={Application.unityVersion} Status: {AssetBundleLoadMessage(VehicleAssetBundle)}");
+				if (Prefs.DevMode)
+				{
+					foreach (AssetBundle assetBundle in vehicleAssets)
+					{
+						SmashLog.Message($"{VehicleHarmony.LogLabel} Importing additional assets from {assetBundle.name}. UnityVersion={Application.unityVersion} Status: {AssetBundleLoadMessage(assetBundle)}");
+					}
+				}
 			}
+
+			CutoutComplexRGB = LoadAsset<Shader>(CutoutComplexRGBPath);
+			CutoutComplexPattern = LoadAsset<Shader>(CutoutComplexPatternPath);
+			CutoutComplexSkin = LoadAsset<Shader>(CutoutComplexSkinPath);
+			MouseHandOpen = LoadAsset<Texture2D>(MouseHandOpenPath);
+			MouseHandClosed = LoadAsset<Texture2D>(MouseHandClosedPath);
 		}
 
 		/// <summary>
@@ -125,19 +137,22 @@ namespace Vehicles
 			{
 				return (T)asset;
 			}
-			var unityObject = VehicleAssetBundle.LoadAsset(path);
-			if (unityObject is null)
+			foreach (AssetBundle assetBundle in vehicleAssets)
 			{
-				SmashLog.Error($"Unable to load asset of type <type>{typeof(T)}</type> from path=<text>\"{path}\"</text>");
-				return null;
+				UnityEngine.Object unityObject = assetBundle.LoadAsset(path);
+				if (unityObject != null)
+				{
+					if (!(unityObject is T))
+					{
+						SmashLog.Error($"Asset has loaded successfully from path=<text>\"{path}\"</text> but is not of type <type>{typeof(T)}</type>. Actual type is <type>{unityObject.GetType()}</type>.");
+						return null;
+					}
+					assetLookup.Add(path, unityObject);
+					return (T)unityObject;
+				}
 			}
-			if (!(unityObject is T))
-			{
-				SmashLog.Error($"Asset has loaded successfully from path=<text>\"{path}\"</text> but is not of type <type>{typeof(T)}</type>. Actual type is <type>{unityObject.GetType()}</type>.");
-				return null;
-			}
-			assetLookup.Add(path, unityObject);
-			return (T)unityObject;
+			SmashLog.Error($"Unable to locate asset at path=\"{path}\".");
+			return null;
 		}
 
 		/// <summary>
