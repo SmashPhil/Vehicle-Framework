@@ -214,7 +214,6 @@ namespace Vehicles
 				}
 				Rand.PopState();
 			}
-			
 		}
 
 		protected override void TickTakeoff()
@@ -250,7 +249,6 @@ namespace Vehicles
 				}
 				Rand.PopState();
 			}
-			
 		}
 
 		private void BurnCells(Map map)
@@ -344,14 +342,15 @@ namespace Vehicles
 			}
 		}
 
-		public override void ExposeData()
+		public override void ResolveProperties(LaunchProtocol reference)
 		{
-			base.ExposeData();
-			Scribe_Values.Look(ref finalAngle, "finalAngle");
-			Scribe_Values.Look(ref rocketTiltRate, "rocketTiltRate");
-			Scribe_Values.Look(ref thrusterSize, "thrusterSize");
-			Scribe_Values.Look(ref dustSize, "dustSize");
-			Scribe_Values.Look(ref burnRadius, "burnRadius");
+			base.ResolveProperties(reference);
+			RocketTakeoff rocketTakeoff = reference as RocketTakeoff;
+			finalAngle = rocketTakeoff.finalAngle;
+			rocketTiltRate = rocketTakeoff.rocketTiltRate;
+			thrusterSize = rocketTakeoff.thrusterSize;
+			dustSize = rocketTakeoff.dustSize;
+			burnRadius = rocketTakeoff.burnRadius;
 		}
 	}
 }

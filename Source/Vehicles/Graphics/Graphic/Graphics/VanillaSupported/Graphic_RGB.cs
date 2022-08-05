@@ -7,6 +7,7 @@ namespace Vehicles
 {
 	public abstract class Graphic_RGB : Graphic
 	{
+		public const string MaskSuffix = "m";
 		public const int MatCount = 8;
 
 		protected bool westFlipped;
@@ -147,14 +148,15 @@ namespace Vehicles
 			var patternPointers = new int[MatCount] { 0, 1, 2, 3, 4, 5, 6, 7 };
 			if (req.shader.SupportsRGBMaskTex())
 			{
-				tmpMaskArray[0] = ContentFinder<Texture2D>.Get(req.path + "_northm", false);
-				tmpMaskArray[1] = ContentFinder<Texture2D>.Get(req.path + "_eastm", false);
-				tmpMaskArray[2] = ContentFinder<Texture2D>.Get(req.path + "_southm", false);
-				tmpMaskArray[3] = ContentFinder<Texture2D>.Get(req.path + "_westm", false);
-				tmpMaskArray[4] = ContentFinder<Texture2D>.Get(req.path + "_northEastm", false);
-				tmpMaskArray[5] = ContentFinder<Texture2D>.Get(req.path + "_southEastm", false);
-				tmpMaskArray[6] = ContentFinder<Texture2D>.Get(req.path + "_southWestm", false);
-				tmpMaskArray[7] = ContentFinder<Texture2D>.Get(req.path + "_northWestm", false);
+				tmpMaskArray[0] = ContentFinder<Texture2D>.Get(req.path + "_north" + MaskSuffix, false);
+				tmpMaskArray[0] ??= ContentFinder<Texture2D>.Get(req.path + Graphic_Single.MaskSuffix, false); // _m for single texture to remain consistent with vanilla
+				tmpMaskArray[1] = ContentFinder<Texture2D>.Get(req.path + "_east" + MaskSuffix, false);
+				tmpMaskArray[2] = ContentFinder<Texture2D>.Get(req.path + "_south" + MaskSuffix, false);
+				tmpMaskArray[3] = ContentFinder<Texture2D>.Get(req.path + "_west" + MaskSuffix, false);
+				tmpMaskArray[4] = ContentFinder<Texture2D>.Get(req.path + "_northEast" + MaskSuffix, false);
+				tmpMaskArray[5] = ContentFinder<Texture2D>.Get(req.path + "_southEast" + MaskSuffix, false);
+				tmpMaskArray[6] = ContentFinder<Texture2D>.Get(req.path + "_southWest" + MaskSuffix, false);
+				tmpMaskArray[7] = ContentFinder<Texture2D>.Get(req.path + "_northWest" + MaskSuffix, false);
 
 				if (tmpMaskArray[0] is null)
 				{

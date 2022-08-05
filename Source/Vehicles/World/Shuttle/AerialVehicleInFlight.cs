@@ -572,7 +572,7 @@ namespace Vehicles
 		private void SetSpeed()
 		{
 			float tileDistance = Ext_Math.SphericalDistance(position, flightPath.First.center);
-			speedPctPerTick = (PctPerTick / tileDistance) * vehicle.CompVehicleLauncher.FlySpeed.Clamp(0, 5);
+			speedPctPerTick = (PctPerTick / tileDistance) * vehicle.CompVehicleLauncher.FlySpeed.Clamp(0, 99999);
 		}
 
 		private void InitializeFacing()

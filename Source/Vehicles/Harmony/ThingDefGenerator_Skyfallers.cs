@@ -14,7 +14,7 @@ namespace Vehicles
 			skyfallerLeavingImpliedDef = null;
 			skyfallerIncomingImpliedDef = null;
 			skyfallerCrashingImpliedDef = null;
-			if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleLauncher>() is CompProperties_VehicleLauncher comp)
+			if (vehicleDef.GetCompProperties<CompProperties_VehicleLauncher>() is CompProperties_VehicleLauncher comp)
 			{
 				if (comp.skyfallerLeaving == null)
 				{

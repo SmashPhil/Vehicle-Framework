@@ -52,7 +52,7 @@ namespace Vehicles
 		public ThingDef skyfallerIncoming;
 		public ThingDef skyfallerCrashing;
 		public ThingDef skyfallerStrafing;
-		public ThingDef skyfallerbombing;
+		public ThingDef skyfallerBombing;
 
 		public CompProperties_VehicleLauncher()
 		{
@@ -70,19 +70,6 @@ namespace Vehicles
 			foreach (string error in base.ConfigErrors(parentDef))
 			{
 				yield return error;
-			}
-
-			if (skyfallerLeaving is null)
-			{
-				yield return "Must populate <field>skyfallerLeaving</field>".ConvertRichText();
-			}
-			if (skyfallerIncoming is null)
-			{
-				yield return "Must populate <field>skyfallerIncoming</field>".ConvertRichText();
-			}
-			if (skyfallerCrashing is null)
-			{
-				yield return "Must populate <field>skyfallerCrashing</field>".ConvertRichText();
 			}
 		}
 	}
