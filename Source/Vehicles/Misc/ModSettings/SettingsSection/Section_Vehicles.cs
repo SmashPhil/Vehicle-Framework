@@ -13,6 +13,8 @@ namespace Vehicles
 {
 	public class Section_Vehicles : SettingsSection
 	{
+		private const float SmallIconSize = 24;
+
 		private static string drawStatusMessage = string.Empty;
 		public Dictionary<string, Dictionary<SaveableField, SavedField<object>>> fieldSettings = new Dictionary<string, Dictionary<SaveableField, SavedField<object>>>();
 		public Dictionary<string, Dictionary<SaveableField, object>> defaultValues = new Dictionary<string, Dictionary<SaveableField, object>>();
@@ -88,6 +90,11 @@ namespace Vehicles
 				(VehicleDef def) => !VehicleMod.settingsDisabledFor.Contains(def.defName));
 		}
 
+		public override void VehicleSelected()
+		{
+			currentVehicleFacing = VehicleMod.selectedDef.drawProperties.displayRotation;
+		}
+
 		private void DrawVehicleOptions(Rect menuRect)
 		{
 			listingSplit = new Listing_Settings()
@@ -128,7 +135,8 @@ namespace Vehicles
 					drawStatusMessage = $"Creating Paintbrush. Pattern={VehicleMod.selectedPatterns.Count}";
 					if (VehicleMod.selectedPatterns.Count > 1 && VehicleMod.selectedDef.graphicData.shaderType.Shader.SupportsRGBMaskTex())
 					{
-						Rect paintBrushRect = new Rect(iconRect.x + iconRect.width, iconRect.y, 24, 24);
+						Rect paintBrushRect = new Rect(iconRect.x + iconRect.width, iconRect.y, SmallIconSize, SmallIconSize);
+						Widgets.DrawHighlightIfMouseover(paintBrushRect);
 						Widgets.DrawTextureFitted(paintBrushRect, VehicleTex.Recolor, 1);
 						if (Mouse.IsOver(paintBrushRect))
 						{
@@ -136,6 +144,7 @@ namespace Vehicles
 						}
 						if (Widgets.ButtonInvisible(paintBrushRect))
 						{
+							SoundDefOf.Click.PlayOneShotOnCamera();
 							Dialog_ColorPicker.OpenColorPicker(VehicleMod.selectedDef, 
 							delegate (Color colorOne, Color colorTwo, Color colorThree, PatternDef pattern, Vector2 displacement, float tiles)
 							{
@@ -144,20 +153,18 @@ namespace Vehicles
 						}
 					}
 					drawStatusMessage = $"Creating RotationHandle. Pattern={VehicleMod.selectedPatterns.Count}";
-					Rect rotationHandleRect = new Rect(iconRect.x + iconRect.width, iconRect.y + 24, 24, 24);
-					/*
-					Widgets.DrawTextureFitted(rotationHandleRect, VehicleTex.ReverseIcon, 1);
-					if (Mouse.IsOver(rotationHandleRect))
+
+					if (Prefs.DevMode)
 					{
-						TooltipHandler.TipRegion(rotationHandleRect, directionFacing.TryGetValue(VehicleMod.selectedDef, VehicleMod.selectedDef.drawProperties.displayRotation).ToString());
-						if (Widgets.ButtonInvisible(rotationHandleRect))
+						Rect rotateVehicleRect = new Rect(iconRect.x + iconRect.width, iconRect.y + SmallIconSize, SmallIconSize, SmallIconSize);
+						Widgets.DrawHighlightIfMouseover(rotateVehicleRect);
+						Widgets.DrawTextureFitted(rotateVehicleRect, VehicleTex.ReverseIcon, 1);
+						if (Widgets.ButtonInvisible(rotateVehicleRect))
 						{
 							SoundDefOf.Click.PlayOneShotOnCamera();
-							directionFacing[VehicleMod.selectedDef] = directionFacing.TryGetValue(VehicleMod.selectedDef, VehicleMod.selectedDef.drawProperties.displayRotation)
-								.Rotated(RotationDirection.Clockwise, VehicleMod.selectedDef.graphicData.Graphic.EastDiagonalRotated && VehicleMod.selectedDef.graphicData.Graphic.WestDiagonalRotated);
+							currentVehicleFacing.Rotate(RotationDirection.Clockwise, false);
 						}
 					}
-					*/
 
 					drawStatusMessage = $"Fetching PatternData from defaultMasks";
 					PatternData patternData = defaultGraphics.TryGetValue(VehicleMod.selectedDef.defName, VehicleMod.selectedDef.graphicData);
@@ -165,7 +172,7 @@ namespace Vehicles
 					drawStatusMessage = $"Drawing VehicleTex in settings";
 					Widgets.BeginGroup(iconRect);
 					Rect vehicleTexRect = new Rect(Vector2.zero, iconRect.size);
-					drawStatusMessage = RenderHelper.DrawVehicleDef(vehicleTexRect, VehicleMod.selectedDef, null, patternData, directionFacing.TryGetValue(VehicleMod.selectedDef, VehicleMod.selectedDef.drawProperties.displayRotation));
+					drawStatusMessage = RenderHelper.DrawVehicleDef(vehicleTexRect, VehicleMod.selectedDef, null, patternData, directionFacing.TryGetValue(VehicleMod.selectedDef, currentVehicleFacing));
 					if (!drawStatusMessage.NullOrEmpty())
 					{
 						throw new Exception();

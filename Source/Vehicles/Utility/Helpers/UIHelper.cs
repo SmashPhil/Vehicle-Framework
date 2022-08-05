@@ -171,14 +171,14 @@ namespace Vehicles
 			{
 				try
 				{
-					Texture2D vehicleIcon = VehicleTex.VehicleTexture(vehicle.VehicleDef, Rot8.East);
+					Texture2D vehicleIcon = VehicleTex.VehicleTexture(vehicle.VehicleDef, Rot8.East, out float angle);
 					Rect texCoords = new Rect(0, 0, 1, 1);
 					Vector2 texProportions = vehicle.VehicleDef.graphicData.drawSize;
 					float x = texProportions.x;
 					texProportions.x = texProportions.y;
 					texProportions.y = x;
 					Widgets.DrawTextureFitted(rect, vehicleIcon, GenUI.IconDrawScale(vehicle.VehicleDef), texProportions, 
-						texCoords, 0, vehicle.VehicleGraphic.MatAt(Rot8.East, vehicle.Pattern));
+						texCoords, angle, vehicle.VehicleGraphic.MatAt(Rot8.East, vehicle.Pattern));
 					if (vehicle.CompVehicleTurrets is CompVehicleTurrets comp)
 					{
 						//REDO

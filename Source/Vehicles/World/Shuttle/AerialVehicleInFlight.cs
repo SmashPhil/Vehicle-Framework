@@ -166,7 +166,7 @@ namespace Vehicles
 					{
 						UI.RotateAroundPivot(Quaternion.LookRotation(flightPath.First.center - position).eulerAngles.y, rect.center);
 					}
-					GenUI.DrawTextureWithMaterial(rect, VehicleTex.VehicleTexture(vehicle.VehicleDef, Rot8.North), VehicleMatNonLit);
+					GenUI.DrawTextureWithMaterial(rect, VehicleTex.VehicleTexture(vehicle.VehicleDef, Rot4.North, out _), VehicleMatNonLit);
 					GUI.matrix = matrix;
 				}
 			}

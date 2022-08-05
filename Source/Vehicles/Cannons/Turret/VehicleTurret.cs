@@ -67,7 +67,8 @@ namespace Vehicles
 		[Unsaved]
 		private List<VehicleTurret> groupTurrets;
 
-		public VehicleTurretRender renderProperties;
+		public VehicleTurretRender renderProperties = new VehicleTurretRender();
+		public VehicleTurretRender uiRenderProperties = new VehicleTurretRender();
 		public Vector2 aimPieOffset = Vector2.zero;
 		public Vector2 angleRestricted = Vector2.zero;
 		public float defaultAngleRotated = 0f;
@@ -493,7 +494,7 @@ namespace Vehicles
 		public void Init(VehicleTurret reference)
 		{
 			renderProperties = new VehicleTurretRender(reference.renderProperties);
-
+			uiRenderProperties = new VehicleTurretRender(reference.uiRenderProperties);
 			aimPieOffset = reference.aimPieOffset;
 			angleRestricted = reference.angleRestricted;
 			defaultAngleRotated = reference.defaultAngleRotated;
@@ -521,6 +522,18 @@ namespace Vehicles
 				locationRotation = TurretRotationFor(rot, attachedTo.currentRotation);
 			}
 			Vector2 turretLoc = RenderHelper.TurretDrawOffset(rot, renderProperties, locationRotation, attachedTo);
+			Vector3 graphicOffset = CannonGraphic.DrawOffset(rot);
+			return new Vector3(pos.x + graphicOffset.x + turretLoc.x, pos.y + graphicOffset.y + drawLayer * Altitudes.AltInc, pos.z + graphicOffset.z + turretLoc.y);
+		}
+
+		public Vector3 TurretDrawLocUI(Rot8 rot, Vector3 pos)
+		{
+			float locationRotation = 0f;
+			if (attachedTo != null)
+			{
+				locationRotation = TurretRotationFor(rot, attachedTo.currentRotation);
+			}
+			Vector2 turretLoc = RenderHelper.TurretDrawOffset(rot, uiRenderProperties, locationRotation, attachedTo);
 			Vector3 graphicOffset = CannonGraphic.DrawOffset(rot);
 			return new Vector3(pos.x + graphicOffset.x + turretLoc.x, pos.y + graphicOffset.y + drawLayer * Altitudes.AltInc, pos.z + graphicOffset.z + turretLoc.y);
 		}
@@ -925,7 +938,7 @@ namespace Vehicles
 		{
 			if (!NoGraphic)
 			{
-				RenderHelper.DrawAttachedThing(this);
+				RenderHelper.DrawTurret(this, Rot8.North);
 				DrawTargeter();
 			}
 		}

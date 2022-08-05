@@ -108,7 +108,8 @@ namespace Vehicles
 					{
 						mat = vehicle.VehicleGraphic.MatAt(Rot8.East, vehicle.Pattern);
 					}
-					Widgets.DrawTextureFitted(iconRect, VehicleTex.VehicleTexture(vehicle.VehicleDef, Rot8.East), GenUI.IconDrawScale(vehicle.VehicleDef), texProportions, texCoords, 0, mat);
+					RenderHelper.DrawVehicleFitted(iconRect, vehicle.VehicleDef, Rot4.East, mat);
+					//Widgets.DrawTextureFitted(iconRect, VehicleTex.VehicleTexture(vehicle.VehicleDef, Rot8.East), GenUI.IconDrawScale(vehicle.VehicleDef), texProportions, texCoords, 0, mat);
 				}
 				else
 				{
@@ -162,7 +163,8 @@ namespace Vehicles
 					{
 						mat = graphicVehicle.MatAt(Rot8.East, PatternDefOf.Default);
 					}
-					Widgets.DrawTextureFitted(iconRect, VehicleTex.VehicleTexture(vehicleDef, Rot8.East), vehicleDef.uiIconScale, texProportions, texCoords, 0, mat);
+					RenderHelper.DrawVehicleFitted(iconRect, vehicleDef, Rot4.East, mat);
+					//Widgets.DrawTextureFitted(iconRect, VehicleTex.VehicleTexture(vehicleDef, Rot8.East), vehicleDef.uiIconScale, texProportions, texCoords, 0, mat);
 				}
 				else
 				{

@@ -101,6 +101,7 @@ namespace Vehicles
 			ClearSelectedDefCache();
 			selectedPatterns = DefDatabase<PatternDef>.AllDefs.Where(d => d.ValidFor(selectedDef)).ToList();
 			selectedDefUpgradeComp = vehicleDef.GetSortedCompProperties<CompProperties_UpgradeTree>();
+			CurrentSection.VehicleSelected();
 			RecalculateHeight(selectedDef);
 			SetVehicleTex(selectedDef);
 		}

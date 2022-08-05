@@ -11,13 +11,15 @@ namespace Vehicles
 	/// </summary>
 	public class VehicleDrawProperties
 	{
+		public Vector2 selectionBracketsOffset = Vector2.zero;
+
 		public Rot8 displayRotation = Rot8.East;
-
-		public Vector2 selectionBracketsOffset;
-
 		//Same concept as display coord and size. Fit to settings window
 		public Vector2 displayOffset = Vector2.zero;
-		public float displaySizeMultiplier = 1;
+		public Vector2? displayOffsetNorth;
+		public Vector2? displayOffsetEast;
+		public Vector2? displayOffsetSouth;
+		public Vector2? displayOffsetWest;
 
 		public string loadCargoTexPath = string.Empty;
 		public string cancelCargoTexPath = string.Empty;
@@ -32,6 +34,51 @@ namespace Vehicles
 			{
 				Graphic graphic = graphicOverlay.graphicData.Graphic;
 				OverlayGraphics.Add(new GraphicOverlay(graphic, graphicOverlay.rotation));
+			}
+		}
+
+		public Vector3 DisplayOffsetForRot(Rot4 rot)
+		{
+			switch (rot.AsInt)
+			{
+				case 0:
+					{
+						Vector3? vector = displayOffsetNorth;
+						if (vector == null)
+						{
+							return displayOffset;
+						}
+						return vector.GetValueOrDefault();
+					}
+				case 1:
+					{
+						Vector3? vector = displayOffsetEast;
+						if (vector == null)
+						{
+							return displayOffset;
+						}
+						return vector.GetValueOrDefault();
+					}
+				case 2:
+					{
+						Vector3? vector = displayOffsetSouth;
+						if (vector == null)
+						{
+							return displayOffset;
+						}
+						return vector.GetValueOrDefault();
+					}
+				case 3:
+					{
+						Vector3? vector = displayOffsetWest;
+						if (vector == null)
+						{
+							return displayOffset;
+						}
+						return vector.GetValueOrDefault();
+					}
+				default:
+					return displayOffset;
 			}
 		}
 	}

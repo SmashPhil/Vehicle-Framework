@@ -47,5 +47,9 @@ namespace Vehicles
 		public virtual void PostDefDatabase()
 		{
 		}
+
+		public virtual void VehicleSelected()
+		{
+		}
 	}
 }

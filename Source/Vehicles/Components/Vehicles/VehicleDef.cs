@@ -176,8 +176,8 @@ namespace Vehicles
 		/// <param name="size"></param>
 		public Vector2 ScaleDrawRatio(Vector2 size)
 		{
-			float width = size.x * drawProperties.displaySizeMultiplier;
-			float height = size.y * drawProperties.displaySizeMultiplier;
+			float width = size.x * uiIconScale;
+			float height = size.y * uiIconScale;
 			Vector2 drawSize = graphicData.drawSize;
 			if (width < height)
 			{

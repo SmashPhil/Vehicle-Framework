@@ -8,32 +8,7 @@
   <description>[title]Recent News[/title][font]Small[/font]
 I changed the PackageId of the framework to better match the name of the mod, so for anyone who has made a Vehicle add-on and specified a dependency in the About.xml or Manifest.xml files, you'll want to update it.
 [title]Balance Changes[/title][font]Small[/font]
-[b]Tank (Vehicle)[/b]
-- Increased RepairRate from 1.5 to 2.5
-- Decreased MoveSpeed from 3.75 to 3.25
-
-[b]Car (Vehicle)[/b]
-- Decreased RepairRate from 650 to 3.25
-
-[b]Rowboat (Vehicle)[/b]
-- Decreased RepairRate from 650 to 5
-
-[b]Fishing Boat (Vehicle)[/b]
-- Decreased RepairRate from 650 to 4.25
-
-[b]Sparrow (Vehicle)[/b]
-- Decreased RepairRate from 650 to 1.75
-
-[b]Hot Air Balloon (Vehicle)[/b]
-- Decreased RepairRate from 650 to 4.5
-
-[b] Advanced Transport Pod (Buildable)[/b]
-- Decreased MaxHitPoints from 5000 to 450
-- Increased WorkToBuild from 30 to 45000
-- Changed CostList from 35 ComponentIndustrial + 3000 Steel to 12 ComponentIndustrial + 4 ComponentSpacer + 450 Steel + 75 Plasteel
-
-[b]Advanced Transport Pod (Vehicle)[/b]
-- Decreased RepairRate from 650 to 3.25
+- Removed all vehicles implemented for testing.  Going forward, the framework will not contain any vehicles itself.
 
 [title]Bug Fixes[/title][font]Small[/font]
 - Fixed bug where vehicles would continue to path to their destination even after roles are no longer fulfilled (pawn dies while driving)
@@ -47,6 +22,8 @@ I changed the PackageId of the framework to better match the name of the mod, so
 - Fixed bug where AerialVehicles upon edge dropping for a settlement attack, would attempt to spawn at an edge cell clipping the edge of the map, causing a forced despawn.
 
 - Fixed issue where non-sea vehicles would use vanilla path resolve modes when starting a new path.
+
+- Fixed offset and scaling issues with vehicle UI rendering
 [title]Additional Changes[/title][font]Small[/font]
 - Reworked health mechanics of Vehicles to use similar (but stripped down) version of StatModifiers, StatParts, and StatDefs. This will allow defining of new stats with less effort, as well as allowing other modders to create StatParts to modify the final value.
 
@@ -69,6 +46,8 @@ I changed the PackageId of the framework to better match the name of the mod, so
 - Vehicles will now consume fuel on the world map equal to their consumption rate x world multiplier
 
 - Reworked Dialog_AssignSeats for more space and scroll rect
+
+- Reworked Vehicle icon rendering to accommodate fixed sizes given only 1 offset / scaling input in the xml.
 [title]Final Notes[/title][font]Small[/font]
 Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
 </description>

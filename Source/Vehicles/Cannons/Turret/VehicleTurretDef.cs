@@ -132,5 +132,24 @@ namespace Vehicles
 				yield return "Setting <field>ticksBetweenBursts</field> with a lower tick count than <field>ticksBetweenShots</field> will produce odd shooting behavior. Please set to either the same amount (fully automatic) or greater than.".ConvertRichText();
 			}
 		}
+
+		public Vector2 ScaleDrawRatio(VehicleDef vehicleDef, Vector2 size)
+		{
+			Vector2 drawSize = graphicData.drawSize;
+			Vector2 scalar = drawSize / vehicleDef.graphicData.drawSize;
+
+			float width = size.x * vehicleDef.uiIconScale * scalar.x;
+			float height = size.y * vehicleDef.uiIconScale * scalar.y;
+			
+			if (width < height)
+			{
+				height = width * (drawSize.y / drawSize.x);
+			}
+			else
+			{
+				width = height * (drawSize.x / drawSize.y);
+			}
+			return new Vector2(width, height);
+		}
 	}
 }

@@ -36,10 +36,13 @@ namespace Vehicles
 			southEast = reference.southEast;
 			southWest = reference.southWest;
 			northWest = reference.northWest;
-			PostInit();
+			PostLoad();
 		}
 
-		public void PostInit()
+		/// <summary>
+		/// Reflection call from vanilla
+		/// </summary>
+		public void PostLoad()
 		{
 			north.Rot = Rot8.North;
 			east.Rot = Rot8.East;

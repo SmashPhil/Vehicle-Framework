@@ -121,21 +121,11 @@ namespace Vehicles
 
 		public static readonly Dictionary<VehicleDef, Texture2D> CachedTextureIcons = new Dictionary<VehicleDef, Texture2D>();
 
-		public static readonly Dictionary<Pair<VehicleDef, Rot8>, Texture2D> CachedVehicleTextures = new Dictionary<Pair<VehicleDef, Rot8>, Texture2D>();
+		public static readonly Dictionary<(VehicleDef, Rot4), Texture2D> CachedVehicleTextures = new Dictionary<(VehicleDef, Rot4), Texture2D>();
 
 		public static readonly Dictionary<VehicleDef, Graphic_Vehicle> CachedGraphics = new Dictionary<VehicleDef, Graphic_Vehicle>();
 
 		private static readonly Dictionary<string, Texture2D> cachedTextureFilepaths = new Dictionary<string, Texture2D>();
-
-		#if BETA
-		internal static readonly Texture2D BetaButtonIcon = ContentFinder<Texture2D>.Get("Beta/BetaButton");
-
-		internal static readonly Texture2D DiscordIcon = ContentFinder<Texture2D>.Get("Beta/discordIcon");
-
-		internal static readonly Texture2D GithubIcon = ContentFinder<Texture2D>.Get("Beta/githubIcon");
-
-		internal static readonly Texture2D SteamIcon = ContentFinder<Texture2D>.Get("Beta/steamIcon");
-		#endif
 
 		static VehicleTex()
 		{
@@ -199,91 +189,41 @@ namespace Vehicles
 			}
 		}
 
-		public static Texture2D VehicleTexture(VehicleDef def, Rot8 rot)
+		public static Texture2D VehicleTexture(VehicleDef def, Rot4 rot, out float rotate)
 		{
-			return CachedVehicleTextures.TryGetValue(new Pair<VehicleDef, Rot8>(def, rot), CachedVehicleTextures[new Pair<VehicleDef, Rot8>(def, Rot8.North)]);
+			rotate = 0;
+			if (CachedVehicleTextures.TryGetValue((def, rot), out Texture2D texture))
+			{
+				return texture;
+			}
+			rotate = rot.AsAngle;
+			return CachedVehicleTextures[(def, Rot4.North)];
 		}
 
 		private static void SetTextureCache(VehicleDef vehicleDef, GraphicDataRGB graphicData)
 		{
-			var textureArray = new Texture2D[Graphic_RGB.MatCount];
-			textureArray[0] = ContentFinder<Texture2D>.Get(graphicData.texPath + "_north", false);
-			textureArray[0] ??= ContentFinder<Texture2D>.Get(graphicData.texPath, false);
-			textureArray[1] = ContentFinder<Texture2D>.Get(graphicData.texPath + "_east", false);
-			textureArray[2] = ContentFinder<Texture2D>.Get(graphicData.texPath + "_south", false);
-			textureArray[3] = ContentFinder<Texture2D>.Get(graphicData.texPath + "_west", false);
-			textureArray[4] = ContentFinder<Texture2D>.Get(graphicData.texPath + "_northEast", false);
-			textureArray[5] = ContentFinder<Texture2D>.Get(graphicData.texPath + "_southEast", false);
-			textureArray[6] = ContentFinder<Texture2D>.Get(graphicData.texPath + "_southWest", false);
-			textureArray[7] = ContentFinder<Texture2D>.Get(graphicData.texPath + "_northWest", false);
-			
-			if (textureArray[0] is null)
+			Texture2D texNorth = ContentFinder<Texture2D>.Get(graphicData.texPath + "_north", false);
+			texNorth ??= ContentFinder<Texture2D>.Get(graphicData.texPath, true);
+			if (!texNorth)
 			{
-				if (textureArray[2] != null)
-				{
-					textureArray[0] = textureArray[2];
-				}
-				else if (textureArray[1] != null)
-				{
-					textureArray[0] = textureArray[1];
-				}
-				else if (textureArray[3] != null)
-				{
-					textureArray[0] = textureArray[3];
-				}
+				throw new Exception($"Unable to locate north texture for {vehicleDef}");
 			}
-			if (textureArray[0] is null)
-			{
-				Log.Error($"Failed to find any textures at {graphicData.texPath} while constructing texture cache.");
-				return;
-			}
-			if (textureArray[2] is null)
-			{
-				textureArray[2] = textureArray[0];
-			}
-			if (textureArray[1] is null)
-			{
-				if (textureArray[3] != null)
-				{
-					textureArray[1] = textureArray[3];
-				}
-				else
-				{
-					textureArray[1] = textureArray[0];
-				}
-			}
-			if (textureArray[3] is null)
-			{
-				if (textureArray[1] != null)
-				{
-					textureArray[3] = textureArray[1];
-				}
-				else
-				{
-					textureArray[3] = textureArray[0];
-				}
-			}
+			Texture2D texEast = ContentFinder<Texture2D>.Get(graphicData.texPath + "_east", false);
+			Texture2D texSouth = ContentFinder<Texture2D>.Get(graphicData.texPath + "_south", false);
+			Texture2D texWest = ContentFinder<Texture2D>.Get(graphicData.texPath + "_west", false);
 
-			if (textureArray[4] is null)
+			CachedVehicleTextures[(vehicleDef, Rot4.North)] = texNorth;
+			if (texEast != null)
 			{
-				textureArray[4] = textureArray[0];
+				CachedVehicleTextures[(vehicleDef, Rot4.East)] = texEast;
 			}
-			if (textureArray[5] is null)
+			if (texSouth != null)
 			{
-				textureArray[5] = textureArray[2];
+				CachedVehicleTextures[(vehicleDef, Rot4.South)] = texSouth;
 			}
-			if(textureArray[6] is null)
+			if (texWest != null)
 			{
-				textureArray[6] = textureArray[2];
-			}
-			if(textureArray[7] is null)
-			{
-				textureArray[7] = textureArray[0];
-			}
-
-			for (int i = 0; i < 8; i++)
-			{
-				CachedVehicleTextures.Add(new Pair<VehicleDef, Rot8>(vehicleDef, new Rot8(i)), textureArray[i]);
+				CachedVehicleTextures[(vehicleDef, Rot4.West)] = texWest;
 			}
 		}
 	}
