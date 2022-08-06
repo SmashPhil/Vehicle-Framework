@@ -20,6 +20,23 @@ namespace Vehicles
 		//WIP - may be removed in the future
 		public static HashSet<Pair<string, TurretDisableType>> conditionalTurrets = new HashSet<Pair<string, TurretDisableType>>();
 
+		public static Func<
+			ThingDef /*projectileDef*/,
+			Vector3 /*origin*/,
+			VehiclePawn /*launcher*/,
+			float /*shotAngle*/,
+			float/*shotRotation*/,
+			float /*shotHeight*/,
+			float/*shotSpeed*/, object /*projectileCE*/> LaunchProjectileCE = null;
+
+		public static Func<
+			float/*velocity*/,
+			float/*range*/,
+			float/*heightDifference*/,
+			bool/*flyOverhead*/,
+			float/*gravityModifier*/,
+			float/*angle*/> ProjectileAngleCE = null;
+
 		/* --- Saveables --- */
 		protected bool autoTargetingActive;
 
@@ -840,29 +857,40 @@ namespace Vehicles
 			}
 			try
 			{
-				Projectile projectile2 = (Projectile)GenSpawn.Spawn(projectile, vehicle.Position, vehicle.Map, WipeMode.Vanish);
-				if (turretDef.ammunition != null)
+				if (LaunchProjectileCE == null)
 				{
-					ConsumeShellChambered();
-				}
-				if (turretDef.shotSound is null)
-				{
-					SoundDefOf_Ships.Explosion_PirateCannon.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map, false));
+					Projectile projectile2 = (Projectile)GenSpawn.Spawn(projectile, vehicle.Position, vehicle.Map, WipeMode.Vanish);
+					if (turretDef.ammunition != null)
+					{
+						ConsumeShellChambered();
+					}
+					if (turretDef.shotSound is null)
+					{
+						SoundDefOf_Ships.Explosion_PirateCannon.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map, false));
+					}
+					else
+					{
+						turretDef.shotSound.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map, false));
+					}
+					if (turretDef.projectileSpeed > 0)
+					{
+						projectile2.AllComps.Add(new CompTurretProjectileProperties(vehicle)
+								{
+									speed = turretDef.projectileSpeed > 0 ? turretDef.projectileSpeed : projectile2.def.projectile.speed,
+									hitflag = turretDef.hitFlags,
+									hitflags = turretDef.attachProjectileFlag
+								});
+					}
+					projectile2.Launch(vehicle, launchCell, c, cannonTarget, projectile2.HitFlags, false, vehicle);
+					
 				}
 				else
 				{
-					turretDef.shotSound.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map, false));
+					//TODO: use correct speed
+					float speed = 150f;
+					float distance = (launchCell - cannonTarget.CenterVector3).magnitude;
+					LaunchProjectileCE(projectile, launchCell, vehicle, ProjectileAngleCE(speed, distance, -0.5f, false, 1f), TurretRotation, 1f, speed);
 				}
-				if (turretDef.projectileSpeed > 0)
-				{
-					projectile2.AllComps.Add(new CompTurretProjectileProperties(vehicle)
-					{
-						speed = turretDef.projectileSpeed > 0 ? turretDef.projectileSpeed : projectile2.def.projectile.speed,
-						hitflag = turretDef.hitFlags,
-						hitflags = turretDef.attachProjectileFlag
-					});
-				}
-				projectile2.Launch(vehicle, launchCell, c, cannonTarget, projectile2.HitFlags, false, vehicle);
 				vehicle.vDrawer.rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
 				rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
 				PostTurretFire();
