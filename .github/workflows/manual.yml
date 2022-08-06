@@ -13,4 +13,4 @@ jobs:
     - uses: actions/checkout@v2
     - name: build core
       run: |
-        TEMP=${{ runner.temp }}/ python Make.py --csproj --csproj Source/Vehicles/Vehicles.csproj  --output /tmp/vehicles.dll --download-libs --all-libs
+        TEMP=${{ runner.temp }}/ python Make.py --csproj Source/Vehicles/Vehicles.csproj  --output /tmp/vehicles.dll --download-libs --all-libs
