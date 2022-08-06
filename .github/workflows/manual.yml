@@ -1,0 +1,16 @@
+name: Build Branch
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master, Development ]
+    
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: build core
+      run: |
+        TEMP=${{ runner.temp }}/ python Make.py --csproj --csproj Source/Vehicles/Vehicles.csproj  --output /tmp/vehicles.dll --download-libs --all-libs
