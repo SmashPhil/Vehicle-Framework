@@ -35,13 +35,10 @@ namespace Vehicles
 			{
 				onTab = ITab_Vehicle_Health.VehicleHealthTab.Overview;
 			}, onTab == ITab_Vehicle_Health.VehicleHealthTab.Overview));
-			if (vehicle.CompUpgradeTree != null)
+			list.Add(new TabRecord("VF_JobSettings".Translate(), delegate ()
 			{
-				list.Add(new TabRecord("VF_JobSettings".Translate(), delegate ()
-				{
-					onTab = ITab_Vehicle_Health.VehicleHealthTab.JobSettings;
-				}, onTab == ITab_Vehicle_Health.VehicleHealthTab.JobSettings));
-			}
+				onTab = ITab_Vehicle_Health.VehicleHealthTab.JobSettings;
+			}, onTab == ITab_Vehicle_Health.VehicleHealthTab.JobSettings));
 			TabDrawer.DrawTabs(rect, list);
 
 			rect = rect.ContractedBy(9f);
@@ -57,10 +54,16 @@ namespace Vehicles
 						DrawVehicleInformation(rect, vehicle);
 						break;
 					case ITab_Vehicle_Health.VehicleHealthTab.JobSettings:
+						DrawJobSettings(rect, vehicle);
 						break;
 				}
 			}
 			Widgets.EndGroup();
+		}
+
+		public static void DrawJobSettings(Rect leftRect, VehiclePawn vehicle)
+		{
+
 		}
 
 		public static void DrawVehicleInformation(Rect leftRect, VehiclePawn vehicle)
@@ -106,10 +109,21 @@ namespace Vehicles
 			topLabelRect.x += topLabelRect.width;
 
 			GUI.color = TexData.MenuBGColor;
-			Widgets.DrawLineHorizontal(0, topLabelRect.y + textHeight / 1.25f, rect.width);
+			Widgets.DrawLineHorizontal(rect.x, topLabelRect.y + textHeight / 1.25f, rect.width);
 			GUI.color = Color.white;
 
 			rect.y += textHeight / 1.25f;
+			rect.x += 2.5f;
+			rect.width -= 5;
+
+			float totalHeight = 0;
+			foreach (VehicleComponent component in vehicle.statHandler.components)
+			{
+				//float textHeight = Text.CalcHeight(component.props.label, labelWidth);
+				//float labelHeight = Mathf.Max(rect.height, textHeight);
+				//vehicle.statHandler.components.Count* ComponentRowHeight
+			}
+
 			Rect scrollView = new Rect(rect.x, topLabelRect.y + topLabelRect.height * 2, rect.width, vehicle.statHandler.components.Count * ComponentRowHeight);
 
 			Widgets.BeginScrollView(rect, ref componentTabScrollPos, scrollView);
@@ -127,11 +141,10 @@ namespace Vehicles
 						highlightedComponent = component;
 						Rect highlightRect = new Rect(compRect)
 						{
-							x = 0,
 							width = rect.width
 						};
 						Widgets.DrawBoxSolid(highlightRect, MouseOverColor);
-						/* For Debug Drawing */
+						//For debug drawing of component hitbox
 						vehicle.HighlightedComponent = component;
 						highlighted = true;
 					}
@@ -162,9 +175,12 @@ namespace Vehicles
 			Widgets.EndScrollView();
 		}
 
-		private static void DrawCompRow(Rect rect, VehicleComponent component)
+		private static float DrawCompRow(Rect rect, VehicleComponent component)
 		{
-			Rect labelRect = new Rect(rect.x, rect.y, rect.width / 4, rect.height);
+			float labelWidth = rect.width / 4;
+			float textHeight = Text.CalcHeight(component.props.label, labelWidth);
+			float labelHeight = Mathf.Max(rect.height, textHeight);
+			Rect labelRect = new Rect(rect.x, rect.y, labelWidth, labelHeight);
 
 			Text.Anchor = TextAnchor.MiddleLeft;
 			Widgets.Label(labelRect, component.props.label);
@@ -176,6 +192,8 @@ namespace Vehicles
 			Widgets.Label(labelRect, component.EfficiencyPercent);
 			labelRect.x += labelRect.width;
 			Widgets.Label(labelRect, component.ArmorPercent);
+
+			return labelHeight;
 		}
 	}
 }

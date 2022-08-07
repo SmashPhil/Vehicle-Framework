@@ -74,15 +74,36 @@
 		<defName>HeavyMachineGunMounted</defName>
 		<label>Heavy Machine Gun</label>
 		<turretType>Rotatable</turretType>
+		
+		<matchParentColor>false</matchParentColor>
+		<gizmoIconScale>1</gizmoIconScale>
+		
+		<graphicData>
+			<texPath>Vehicles/Turrets/HeavyMachineGun/HeavyMachineGun</texPath>
+			<graphicClass>Vehicles.Graphic_Turret</graphicClass>
+			<drawSize>(1.25, 1.25)</drawSize>
+		</graphicData>
+		
 		<shotSound>Shot_Minigun</shotSound>
 		<projectile>Bullet_HeavyMachineGun</projectile>
-		
+		<genericAmmo>true</genericAmmo>
 		<ammoCountPerCharge>2</ammoCountPerCharge>
 		
+		<projectileOffset>1</projectileOffset>
+		<hitFlags>All</hitFlags>
+		<maxRange>50</maxRange>
+		<minRange>9</minRange>
 		<reloadTimer>12</reloadTimer>
 		<warmUpTimer>1.25</warmUpTimer>
 		<magazineCapacity>40</magazineCapacity>
-		<genericAmmo>true</genericAmmo>
+		<autoSnapTargeting>false</autoSnapTargeting>
+		<rotationSpeed>1.25</rotationSpeed>
+		
+		<ammunition>
+			<thingDefs>
+				<li>Steel</li>
+			</thingDefs>
+		</ammunition>
 		
 		<recoil>
 			<distanceTotal>0.1</distanceTotal>
@@ -116,28 +137,5 @@
 				<texPath>UI/Gizmos/FireRate_Auto</texPath>
 			</li>
 		</fireModes>
-		
-		<autoSnapTargeting>false</autoSnapTargeting>
-		<rotationSpeed>1.25</rotationSpeed>
-		<matchParentColor>false</matchParentColor>
-		
-		<gizmoIconScale>1</gizmoIconScale>
-		
-		<graphicData>
-			<texPath>Vehicles/Turrets/HeavyMachineGun/HeavyMachineGun</texPath>
-			<graphicClass>Vehicles.Graphic_Turret</graphicClass>
-			<drawSize>(1.25, 1.25)</drawSize>
-		</graphicData>
-
-		<ammunition>
-			<thingDefs>
-				<li>Steel</li>
-			</thingDefs>
-		</ammunition>
-		
-		<projectileOffset>1</projectileOffset>
-		<hitFlags>All</hitFlags>
-		<maxRange>50</maxRange>
-		<minRange>9</minRange>
 	</Vehicles.VehicleTurretDef>
 </Defs>

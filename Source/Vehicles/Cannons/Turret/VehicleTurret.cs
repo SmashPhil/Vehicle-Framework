@@ -841,14 +841,10 @@ namespace Vehicles
 			float horizontalOffset = turretDef.projectileShifting.NotNullAndAny() ? turretDef.projectileShifting[CurrentTurretFiring] : 0;
 			Vector3 launchCell = TurretLocation + new Vector3(horizontalOffset, 1f, turretDef.projectileOffset).RotatedBy(TurretRotation);
 
-			ThingDef projectile;
+			ThingDef projectile = turretDef.projectile;
 			if (turretDef.ammunition != null && !turretDef.genericAmmo)
 			{
-				projectile = loadedAmmo?.projectileWhenLoaded;
-			}
-			else
-			{
-				projectile = turretDef.projectile;
+				projectile = loadedAmmo?.projectileWhenLoaded ?? loadedAmmo; //nc to loaded ammo for CE handling
 			}
 			try
 			{
@@ -870,10 +866,6 @@ namespace Vehicles
 						});
 					}
 					projectile2.Launch(vehicle, launchCell, cell, cannonTarget, projectile2.HitFlags, false, vehicle);
-					vehicle.vDrawer.rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
-					rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
-					PostTurretFire();
-					InitTurretMotes(launchCell);
 				}
 				else
 				{
@@ -898,15 +890,15 @@ namespace Vehicles
 					}
 					float distance = (launchCell - cannonTarget.CenterVector3).magnitude;
 					LaunchProjectileCE(projectile, new Vector2(launchCell.x, launchCell.z), cannonTarget, vehicle, ProjectileAngleCE(speed, distance, -0.5f, false, 1f), -TurretRotation, 1f, speed);
-					vehicle.vDrawer.rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
-					rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
-					PostTurretFire();
-					InitTurretMotes(launchCell);
 				}
+				vehicle.vDrawer.rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
+				rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
+				PostTurretFire();
+				InitTurretMotes(launchCell);
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Exception when firing Cannon: {turretDef.LabelCap} on Pawn: {vehicle.LabelCap}. Exception: {ex.Message}");
+				Log.Error($"Exception when firing VehicleTurret: {turretDef.defName} on vehicle: {vehicle}.\nException: {ex.Message}\nStackTrace {ex.StackTrace}");
 			}
 		}
 
