@@ -3,13 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using Verse.Sound;
+using RimWorld;
 
 namespace Vehicles
 {
 	public static class VehicleHealthTabHelper
 	{
+		public const float ComponentRowHeight = 20;
+
+		private static readonly Color MouseOverColor = new Color(0.75f, 0.75f, 0.75f, 0.1f);
+		private static readonly Color SelectedCompColor = new Color(0.5f, 0.5f, 0.5f, 0.1f);
+
 		private static ITab_Vehicle_Health.VehicleHealthTab onTab;
 		private static Vector2 componentTabScrollPos;
+		private static VehicleComponent selectedComponent;
+		private static VehicleComponent highlightedComponent;
+
+		public static void InitHealthITab()
+		{
+			componentTabScrollPos = Vector2.zero;
+			selectedComponent = null;
+			highlightedComponent = null;
+		}
 
 		public static void DrawHealthInfo(Rect rect, VehiclePawn vehicle)
 		{
@@ -76,52 +92,90 @@ namespace Vehicles
 
 		public static void DrawComponentsInfo(Rect rect, VehiclePawn vehicle)
 		{
-			//Widgets.BeginScrollView(rect, ref scrollViewPosition, scrollView);
-			//highlightedComponent = null;
-			//float buttonY = scrollView.y;
-			//bool highlighted = false;
-			//foreach (VehicleComponent component in Vehicle.statHandler.components)
-			//{
-			//	Rect compRect = new Rect(componentPanelRect.x, buttonY, componentPanelRect.width, ComponentRowHeight);
-			//	DrawCompRow(compRect, component);
-			//	TooltipHandler.TipRegion(compRect, "VehicleComponentClickMoreInfo".Translate());
-			//	if (Mouse.IsOver(compRect))
-			//	{
-			//		highlightedComponent = component;
-			//		Rect highlightRect = new Rect(compRect)
-			//		{
-			//			x = 0,
-			//			width = 0/*InfoPanelWidth*/
-			//		};
-			//		Widgets.DrawBoxSolid(highlightRect, MouseOverColor);
-			//		/* For Debug Drawing */
-			//		Vehicle.HighlightedComponent = component;
-			//		highlighted = true;
-			//	}
-			//	else if (selectedComponent == component)
-			//	{
-			//		Widgets.DrawBoxSolid(compRect, SelectedCompColor);
-			//		highlighted = true;
-			//	}
-			//	if (Widgets.ButtonInvisible(compRect))
-			//	{
-			//		SoundDefOf.Click.PlayOneShotOnCamera(null);
-			//		if (selectedComponent != component)
-			//		{
-			//			selectedComponent = component;
-			//		}
-			//		else
-			//		{
-			//			selectedComponent = null;
-			//		}
-			//	}
-			//	buttonY += ComponentRowHeight;
-			//}
-			//if (!highlighted)
-			//{
-			//	Vehicle.HighlightedComponent = null;
-			//}
+			Text.Font = GameFont.Small;
+			float textHeight = Text.CalcSize("VehicleComponentHealth".Translate()).y;
+			Rect topLabelRect = new Rect(rect.x, rect.y, rect.width / 4, textHeight);
+
+			topLabelRect.x += topLabelRect.width;
+			Text.Anchor = TextAnchor.MiddleCenter;
+			Widgets.Label(topLabelRect, "VehicleComponentHealth".Translate());
+			topLabelRect.x += topLabelRect.width;
+			Widgets.Label(topLabelRect, "VehicleComponentEfficiency".Translate());
+			topLabelRect.x += topLabelRect.width;
+			Widgets.Label(topLabelRect, "VehicleComponentArmor".Translate());
+			topLabelRect.x += topLabelRect.width;
+
+			GUI.color = TexData.MenuBGColor;
+			Widgets.DrawLineHorizontal(0, topLabelRect.y + textHeight / 1.25f, rect.width);
+			GUI.color = Color.white;
+
+			rect.y += textHeight / 1.25f;
+			Rect scrollView = new Rect(rect.x, topLabelRect.y + topLabelRect.height * 2, rect.width, vehicle.statHandler.components.Count * ComponentRowHeight);
+
+			Widgets.BeginScrollView(rect, ref componentTabScrollPos, scrollView);
+			{
+				highlightedComponent = null;
+				float buttonY = scrollView.y;
+				bool highlighted = false;
+				foreach (VehicleComponent component in vehicle.statHandler.components)
+				{
+					Rect compRect = new Rect(rect.x, buttonY, rect.width, textHeight);
+					DrawCompRow(compRect, component);
+					TooltipHandler.TipRegion(compRect, "VehicleComponentClickMoreInfo".Translate());
+					if (Mouse.IsOver(compRect))
+					{
+						highlightedComponent = component;
+						Rect highlightRect = new Rect(compRect)
+						{
+							x = 0,
+							width = rect.width
+						};
+						Widgets.DrawBoxSolid(highlightRect, MouseOverColor);
+						/* For Debug Drawing */
+						vehicle.HighlightedComponent = component;
+						highlighted = true;
+					}
+					else if (selectedComponent == component)
+					{
+						Widgets.DrawBoxSolid(compRect, SelectedCompColor);
+						highlighted = true;
+					}
+					if (Widgets.ButtonInvisible(compRect))
+					{
+						SoundDefOf.Click.PlayOneShotOnCamera(null);
+						if (selectedComponent != component)
+						{
+							selectedComponent = component;
+						}
+						else
+						{
+							selectedComponent = null;
+						}
+					}
+					buttonY += ComponentRowHeight;
+				}
+				if (!highlighted)
+				{
+					vehicle.HighlightedComponent = null;
+				}
+			}
 			Widgets.EndScrollView();
+		}
+
+		private static void DrawCompRow(Rect rect, VehicleComponent component)
+		{
+			Rect labelRect = new Rect(rect.x, rect.y, rect.width / 4, rect.height);
+
+			Text.Anchor = TextAnchor.MiddleLeft;
+			Widgets.Label(labelRect, component.props.label);
+			labelRect.x += labelRect.width;
+
+			Text.Anchor = TextAnchor.MiddleCenter;
+			Widgets.Label(labelRect, component.HealthPercentStringified);
+			labelRect.x += labelRect.width;
+			Widgets.Label(labelRect, component.EfficiencyPercent);
+			labelRect.x += labelRect.width;
+			Widgets.Label(labelRect, component.ArmorPercent);
 		}
 	}
 }

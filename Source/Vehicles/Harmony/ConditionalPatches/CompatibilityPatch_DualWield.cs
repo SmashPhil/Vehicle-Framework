@@ -14,7 +14,7 @@ namespace Vehicles
 				nameof(NoRotationCallForVehicles)));
 		}
 
-		public string PackageId => "Roolo.DualWield";
+		public string PackageId => ConditionalPatchApplier.DualWield;
 
 		/// <summary>
 		/// Suppress DualWield errors for vehicles. Should not be applied regardless, disabling the vehicle

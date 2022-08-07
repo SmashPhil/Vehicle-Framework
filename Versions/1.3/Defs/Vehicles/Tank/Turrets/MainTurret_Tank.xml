@@ -8,8 +8,6 @@
 		<shotSound>Explosion_PirateCannon</shotSound>
 		<reloadSound>Artillery_ShellLoaded</reloadSound>
 		
-		<projectile>Bullet_81mmMortarShell_HE</projectile>
-		<genericAmmo>true</genericAmmo>
 		<projectileSpeed>150</projectileSpeed>
 		<reloadTimer>5</reloadTimer>
 		<warmUpTimer>1.65</warmUpTimer>

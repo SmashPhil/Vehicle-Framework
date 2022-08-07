@@ -107,7 +107,7 @@ namespace Vehicles
 			}
 			if (ammunition != null)
 			{
-				if (!genericAmmo && !ammunition.AllowedThingDefs.Any(c => c.projectile != null || c.projectileWhenLoaded != null))
+				if (ModLister.GetActiveModWithIdentifier(ConditionalPatchApplier.CombatExtended) == null && !genericAmmo && !ammunition.AllowedThingDefs.Any(c => c.projectile != null || c.projectileWhenLoaded != null))
 				{
 					yield return "Non-generic ammo must be a <type>ThingDef</type> with projectile properties.".ConvertRichText();
 				}
