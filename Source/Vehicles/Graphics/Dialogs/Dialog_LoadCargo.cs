@@ -85,8 +85,9 @@ namespace Vehicles
 
 			Rect checkRect = new Rect(inRect.width - 225f, 35f, 225f, 40f);
 			bool checkBox = VehicleMod.settings.showAllCargoItems;
-			Widgets.Label(checkRect, "ShowAllItemsOnMap".Translate());
-			checkRect.x += Text.CalcSize("ShowAllItemsOnMap".Translate()).x + 20f;
+			string showAllItemsLabel = "VF_ShowAllItemsOnMap".Translate();
+			Widgets.Label(checkRect, showAllItemsLabel);
+			checkRect.x += Text.CalcSize(showAllItemsLabel).x + 20f;
 			Widgets.Checkbox(new Vector2(checkRect.x, checkRect.y), ref VehicleMod.settings.showAllCargoItems);
 			if (checkBox != VehicleMod.settings.showAllCargoItems)
 			{
@@ -102,7 +103,9 @@ namespace Vehicles
 			inRect2.yMax -= 76f;
 			itemsTransfer.OnGUI(inRect2, out bool flag);
 			if (flag)
+			{
 				CountToTransferChanged();
+			}
 			Widgets.EndGroup();
 		}
 

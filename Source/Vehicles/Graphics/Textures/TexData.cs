@@ -58,6 +58,14 @@ namespace Vehicles
 		public static readonly Color YellowReadable = new Color(1f, 1f, 0.2f);
 		public static readonly Color MenuBGColor = new ColorInt(135, 135, 135).ToColor;
 
+		public static readonly Color HighlightColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+		public static readonly Color StaticHighlightColor = new Color(0.75f, 0.75f, 0.85f, 1f);
+
+		public static readonly Color SevereDamage = new Color(0.75f, 0.45f, 0.45f);
+		public static readonly Color ModerateDamage = new Color(0.55f, 0.55f, 0.55f);
+		public static readonly Color MinorDamage = new Color(0.7f, 0.7f, 0.7f);
+		public static readonly Color WorkingCondition = new Color(0.6f, 0.8f, 0.65f);
+		public static readonly Color Enhanced = new Color(0.5f, 0.5f, 0.9f);
 
 		public static Material RangeMat(int radius)
 		{

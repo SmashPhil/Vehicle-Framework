@@ -2,29 +2,37 @@
 
 <LanguageData>
 	<!-- Labels and Titles -->
-	<Vehicles>Vehicles</Vehicles>
-	<CannonLabel>{0} Cannons</CannonLabel>
-	<RepairVehicle>Repair {0}</RepairVehicle>
-	<DisembarkAll>Unload All Pawns</DisembarkAll>
-	<DisembarkSingle>Unload {0}</DisembarkSingle>
-	<LoadShip>Load Cargo</LoadShip>
-	<SetRange>Set Range</SetRange>
-	<CannonRange>{0} Tiles</CannonRange>
-	<RenameVehicle>Rename {0}</RenameVehicle>
-	<RecolorVehicle>Change Color</RecolorVehicle>
+	<VF_Vehicles>Vehicles</VF_Vehicles>
+	
+	<!-- Gizmos / Float Menus -->
+	<VF_LoadCargo>Load Cargo</VF_LoadCargo>
+	<VF_RepairVehicle>Repair {0}</VF_RepairVehicle>
+	<VF_DisembarkAllPawns>Unload All Pawns</VF_DisembarkAllPawns>
+	<VF_DisembarkSinglePawn>Unload {0}</VF_DisembarkSinglePawn>
+	
+	<!-- UI / Buttons -->
+	<RefundButton>Uninstall</RefundButton>
+	<VF_ShowAllItemsOnMap>Show All Items On Map</VF_ShowAllItemsOnMap>
+	<VF_ResetColorPalettes>Reset All Palettes</VF_ResetColorPalettes>
+	<VF_ResetColorPalettesConfirmation>Are you sure you want to reset all saved palettes back to default settings? This action cannot be undone.</VF_ResetColorPalettesConfirmation>
+	<VF_RotateVehicleRendering>Rotate vehicle</VF_RotateVehicleRendering>
+	<VF_SaveColorPalette>Save Palette</VF_SaveColorPalette>
+	<VF_JobSettings>Job Settings</VF_JobSettings>
+	
 	<ColorOne>ColorOne</ColorOne>
 	<ColorTwo>ColorTwo</ColorTwo>
 	<ColorThree>ColorThree</ColorThree>
-	<VehicleSave>Save</VehicleSave>
-	<PaletteText>Palette</PaletteText>
-	<SwapColors>Cycle colors between each other.\nColorOne -> ColorTwo -> ColorThree</SwapColors>
 	<ColorPickerHex>Hex</ColorPickerHex>
-	<RecolorFlags>Recolor Flags</RecolorFlags>
-	<OceanPassable>Ocean: +0.5</OceanPassable>
-	<BoatFishing>Fish</BoatFishing>
-	<BoatFishingDesc>Gather fish. Depth of water affects fishing chances.</BoatFishingDesc>
-	<BaseSpeed>Base Speed</BaseSpeed>
-	<VehicleDoubleClickShuttleTarget>Click to Confirm Destination</VehicleDoubleClickShuttleTarget>
+	
+	<!-- Tooltips -->
+	<VF_RenameVehicleTooltip>Assign or clear name.</VF_RenameVehicleTooltip>
+	<VF_RecolorTooltip>Change colors or pattern.</VF_RecolorTooltip>
+	<VF_DoubleClickShuttleTarget>Click to Confirm Destination</VF_DoubleClickShuttleTarget>
+	<VF_SwapColors>Cycle colors between each other.\nColorOne -> ColorTwo -> ColorThree</VF_SwapColors>
+	<VF_StartFishing>Fish</VF_StartFishing>
+	<VF_StartFishingDesc>Gather fish. Depth of water affects fishing chances.</VF_StartFishingDesc>
+	
+	
 	
 	<VehicleStatPercent>{0}%</VehicleStatPercent>
 	
@@ -42,9 +50,8 @@
 	<AssignSeats>Assign Seats</AssignSeats>
 	<Assign>Assign</Assign>
 	<Assigned>Assigned</Assigned>
-	<Apply>Apply</Apply>
+	<ApplyButton>Apply</ApplyButton>
 	<Colonists>Colonists</Colonists>
-	<CancelAssigning>Cancel</CancelAssigning>
 	<ClearSeats>Clear</ClearSeats>
 	<RemoveFromRole>Remove</RemoveFromRole>
 	<AddToRole>Add</AddToRole>
@@ -80,14 +87,13 @@
 	<VehicleJobLimitations>Max Workers per Job</VehicleJobLimitations>
 
 	<!-- Upgrades -->
-	<Upgrade>Upgrade</Upgrade>
+	<VF_Upgrade>Upgrade</VF_Upgrade>
 	<DisabledFromOtherNode>Cannot upgrade. Node is now inaccessible from previous unlock.</DisabledFromOtherNode>
 	<MissingPrerequisiteUpgrade>Missing prerequisite node</MissingPrerequisiteUpgrade>
 	<VehicleMaxArmor>Armor</VehicleMaxArmor>
 	<VehicleMaxSpeed>Speed</VehicleMaxSpeed>
 	<VehicleCargoCapacity>Cargo Capacity</VehicleCargoCapacity>
-	<VehicleFuelCost>Fuel Cost</VehicleFuelCost>
-	<VehicleFuelCapacity>Fuel Capacity</VehicleFuelCapacity>
-	<CancelUpgrade>Cancel</CancelUpgrade>
-	<RefundUpgrade>Uninstall</RefundUpgrade>
+	<VF_VehicleFuelCost>Fuel Cost: {0}</VF_VehicleFuelCost>
+	<VF_VehicleFuelCapacity>Fuel Capacity</VF_VehicleFuelCapacity>
+	
 </LanguageData>

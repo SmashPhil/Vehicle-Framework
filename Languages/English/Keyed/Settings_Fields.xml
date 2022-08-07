@@ -18,8 +18,7 @@
 	<VehicleNameable>Can Assign Name</VehicleNameable>
 	<VehicleNameableTooltip>Allow naming of this vehicle. Name will appear over the vehicle and will replace the displayed label.</VehicleNameableTooltip>
 	<BoatPowerType>Power Type</BoatPowerType>
-	<VehicleTurretOverheatMechanics>Turret Overheating</VehicleTurretOverheatMechanics>
-	<VehicleTurretOverheatMechanicsTooltip>Some turrets have overheat mechanics to prevent nonstop firing without consequences. Keep this enabled?</VehicleTurretOverheatMechanicsTooltip>
+	
 	<VehicleCombatPower>Combat Power</VehicleCombatPower>
 	<VehicleCombatPowerTooltip>Combat points vehicle costs in order to generate in an event.</VehicleCombatPowerTooltip>
 	

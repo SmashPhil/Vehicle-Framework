@@ -190,7 +190,7 @@ namespace Vehicles
 			}
 		}
 
-		private static float VehiclesButtonWidth => -(Text.CalcSize("Vehicles".Translate()).x + 20);
+		private static float VehiclesButtonWidth => -(Text.CalcSize("VF_Vehicles".Translate()).x + 20);
 
 		private static void ChangeAreaColor(Rect rect, Area area)
 		{
@@ -207,7 +207,7 @@ namespace Vehicles
 
 		private static void ConfigureVehicleArea(WidgetRow widgetRow, Area area)
 		{
-			if (widgetRow.ButtonText("Vehicles".Translate(), "VehiclesConfigurationAreaTooltip".Translate()))
+			if (widgetRow.ButtonText("VF_Vehicles".Translate(), "VehiclesConfigurationAreaTooltip".Translate()))
 			{
 				if (Find.CurrentMap is null)
 				{

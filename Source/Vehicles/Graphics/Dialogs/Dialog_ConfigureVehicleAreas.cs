@@ -35,7 +35,7 @@ namespace Vehicles
 			this.area = area;
 			tabs = new List<TabRecord>()
 			{
-				new TabRecord("Vehicles".Translate(), delegate()
+				new TabRecord("VF_Vehicles".Translate(), delegate()
 				{
 					CurrentTab = VehicleConfigTab.Vehicles;
 				}, () => CurrentTab == VehicleConfigTab.Vehicles),

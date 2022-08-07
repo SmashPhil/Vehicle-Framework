@@ -81,10 +81,13 @@ namespace Vehicles
 		/// </remarks>
 		public override void MapComponentUpdate()
 		{
-			VehicleDef vehicleDef = VehicleHarmony.AllMoveableVehicleDefs[VehicleRegionGrid.vehicleRegionGridIndexChecking];
-			VehiclePathData vehiclePathData = this[vehicleDef];
-			vehiclePathData.VehicleRegionGrid.UpdateClean();
-			vehiclePathData.VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
+			if (VehicleHarmony.AllMoveableVehicleDefsCount <= VehicleRegionGrid.vehicleRegionGridIndexChecking)
+			{
+				VehicleDef vehicleDef = VehicleHarmony.AllMoveableVehicleDefs[VehicleRegionGrid.vehicleRegionGridIndexChecking];
+				VehiclePathData vehiclePathData = this[vehicleDef];
+				vehiclePathData.VehicleRegionGrid.UpdateClean();
+				vehiclePathData.VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
+			}
 		}
 
 		/// <summary>

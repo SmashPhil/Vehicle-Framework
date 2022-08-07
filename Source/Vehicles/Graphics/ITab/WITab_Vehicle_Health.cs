@@ -179,7 +179,7 @@ namespace Vehicles
 			Text.Anchor = TextAnchor.MiddleLeft;
 			foreach (VehicleStatDef statDef in Vehicle.VehicleDef.StatCategoryDefs())
 			{
-				statDef.Worker.DrawVehicleStat(lister, Vehicle);
+				//statDef.Worker.DrawVehicleStat(lister, Vehicle);
 			}
 			lister.End();
 			Widgets.DrawLineHorizontal(rect.x, topRect.y + topRect.height, topRect.width);

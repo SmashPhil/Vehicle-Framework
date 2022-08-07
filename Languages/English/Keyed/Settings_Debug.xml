@@ -1,26 +1,41 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <LanguageData>
-	<DebugDrawBumpers>Draw Vehicle Bumpers</DebugDrawBumpers>
-	<DebugDrawRegions>Draw Regions</DebugDrawRegions>
-	<DebugDrawRegionLinks>Draw RegionLinks</DebugDrawRegionLinks>
-	<DebugDrawRegionThings>Draw Region Things</DebugDrawRegionThings>
+	<!-- Headers / Labels -->
+	<DevModeVehicles>DevMode</DevModeVehicles>
+	<ShowRecentNews>Show Most Recent News</ShowRecentNews>
+	<OpenQuickTestSettings>Quick Test Menu</OpenQuickTestSettings>
+	
+	<!-- Reset Popup Labels -->
+	<DevModeResetAll>Reset All Settings</DevModeResetAll>
+	<DevModeResetVehicle>Reset {0}</DevModeResetVehicle>
+	<DevModeResetAllVehicles>Reset All Vehicles</DevModeResetAllVehicles>
+	<DevModeResetPage>Reset Page</DevModeResetPage>
+	<DevModeResetAllConfirmation>Are you sure you want to reset all settings to original values? If you were locked out of the Mod Settings from an exception, you will need to restart after the reset.</DevModeResetAllConfirmation>
+	
+	<!-- Additional Logging -->
+	<DebugLogging>Debug Logging</DebugLogging>
+	<DebugLoggingTooltip>Enable message logging to output specific values and pieces of information useful for debugging Vehicles. Use only if you're making a Vehicle add-on.</DebugLoggingTooltip>
+	<DebugPathCostRecalculationLogging>Debug PathCost Recalculation Logging</DebugPathCostRecalculationLogging>
+	<DebugPathCostRecalculationLoggingTooltip>Log summary of path cost change for all vehicles affected by region dirtying.</DebugPathCostRecalculationLoggingTooltip>
+	<DebugWriteVehiclePathingCosts>Draw Vehicle PathCosts</DebugWriteVehiclePathingCosts>
+	<DebugWriteVehiclePathingCostsTooltip>Draw path costs calculated from pathfinder on the map, highlighting every cell searched as well as the accumulated path cost.</DebugWriteVehiclePathingCostsTooltip>
+	
+	<!-- Bypass Mechanics -->
 	<DebugDraftAnyVehicle>Draft Any Vehicle</DebugDraftAnyVehicle>
 	<DebugDraftAnyVehicleTooltip>Be able to draft and move any vehicle regardless of passengers. Useful for empty boats in deep water or if you want to expedite testing.</DebugDraftAnyVehicleTooltip>
 	<DebugDisablePathing>Disable Water Pathing</DebugDisablePathing>
 	<DebugDisablePathingTooltip>Disable boats using custom water based pathfinding, and instead use vanilla pathfinding. NOTE: Boats will travel like pawns.</DebugDisablePathingTooltip>
-	<DebugDisableSmoothPathing>Disable Smooth Pathing</DebugDisableSmoothPathing>
 	<DebugSpawnVehiclesGodMode>Spawn Vehicle Buildings (god mode)</DebugSpawnVehiclesGodMode>
 	<DebugSpawnVehiclesGodModeTooltip>Vehicle blueprints being placed in godmode will spawn the Building variant as opposed to generating a VehiclePawn for spawning.</DebugSpawnVehiclesGodModeTooltip>
-	<DebugCannonDrawer>Draw Cannon Grid</DebugCannonDrawer>
-	<DebugDrawNodeGrid>Draw UpgradeTree Grid</DebugDrawNodeGrid>
+	
+	<!-- Additional Info -->
+	<DebugDrawUpgradeNodeGrid>Draw UpgradeTree Grid</DebugDrawUpgradeNodeGrid>
+	<DebugDrawUpgradeNodeGridTooltip>Draw UpgradeTree grid for placement on (x,y) axis.</DebugDrawUpgradeNodeGridTooltip>
 	<DebugDrawHitbox>Draw Hitbox</DebugDrawHitbox>
+	<DebugDrawHitboxTooltip>Draw vehicle's hitbox by highlighting the map cells the vehicle occupies.</DebugDrawHitboxTooltip>
 	<DebugDrawVehicleTracks>Draw VehicleTracks</DebugDrawVehicleTracks>
-	<DebugWriteVehiclePathingCosts>Draw Vehicle PathCosts</DebugWriteVehiclePathingCosts>
-	<DebugLogging>Debug Logging</DebugLogging>
-	<DebugPathCostRecalculationLogging>Debug PathCost Recalculation Logging</DebugPathCostRecalculationLogging>
-	<DebugPathCostRecalculationLoggingTooltip>Log summary of path cost change for all vehicles affected by region dirtying.</DebugPathCostRecalculationLoggingTooltip>
-	<DebugLoggingTooltip>Enable message logging to output specific values and pieces of information useful for debugging Vehicles. Use only if you're making a Vehicle add-on.</DebugLoggingTooltip>
-	<DebugDisplayWorldPathCosts>Draw World PathCosts</DebugDisplayWorldPathCosts>
-	<DebugDisplayWorldPathCostsTooltip>Select vehicle to show all world pathcosts for. Displays on GUI so zooming in is recommended.</DebugDisplayWorldPathCostsTooltip>
+	<DebugDrawVehicleTracksTooltip>Draw cells occupied by vehicle's "VehicleTracks" which mark what cells will end up being damaged per move action.</DebugDrawVehicleTracksTooltip>
+	<DebugDrawBumpers>Draw Vehicle Bumpers</DebugDrawBumpers>
+	<DebugDrawBumpersTooltip>Draw cells immediately in front of vehicle that will indicate when the vehicle "bumps" into something and halts pathing.</DebugDrawBumpersTooltip>
 </LanguageData>

@@ -61,6 +61,14 @@ namespace Vehicles
 			ForcedTargeting = false;
 		}
 
+		public bool InvalidAtPos(LocalTargetInfo localTargetInfo)
+		{
+			IntVec3 cell = localTargetInfo.Cell;
+			Vector3 position = new Vector3(cell.x, AltitudeLayer.Building.AltitudeFor(), cell.z).ToIntVec3().ToVector3Shifted();
+			VehiclePawn vehicleAtPos = MapHelper.VehicleInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation);
+			return !localTargetInfo.IsValid || (vehicleAtPos != vehicle && MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation)) || (targetValidator != null && !targetValidator(localTargetInfo));
+		}
+
 		public override void ProcessInputEvents()
 		{
 			HandleRotationShortcuts();
@@ -69,22 +77,17 @@ namespace Vehicles
 				LocalTargetInfo localTargetInfo = CurrentTargetUnderMouse();
 				if (action != null && localTargetInfo.Cell.InBounds(Current.Game.CurrentMap))
 				{
-					if (targetValidator != null)
+					if (!InvalidAtPos(localTargetInfo))
 					{
-						VehiclePawn vehicleAtPos = MapHelper.VehicleInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation);
-						if (targetValidator(localTargetInfo) && (vehicleAtPos == vehicle || !MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation)))
-						{
-							action(localTargetInfo, landingRotation);
-							StopTargeting();
-						}
-					}
-					else if (localTargetInfo.IsValid)
-					{
+						SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
 						action(localTargetInfo, landingRotation);
 						StopTargeting();
 					}
+					else
+					{
+						SoundDefOf.ClickReject.PlayOneShotOnCamera(null);
+					}
 				}
-				SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
 				Event.current.Use();
 			}
 			if ((Event.current.type == EventType.MouseDown && Event.current.button == 1) || KeyBindingDefOf.Cancel.KeyDownEvent)
@@ -92,7 +95,7 @@ namespace Vehicles
 				if (ForcedTargeting)
 				{
 					SoundDefOf.ClickReject.PlayOneShotOnCamera(null);
-					Messages.Message("MustTargetLanding".Translate(), MessageTypeDefOf.RejectInput);
+					Messages.Message("VF_MustTargetLanding".Translate(), MessageTypeDefOf.RejectInput);
 					Event.current.Use();
 					return;
 				}
@@ -114,13 +117,9 @@ namespace Vehicles
 			LocalTargetInfo localTargetInfo = CurrentTargetUnderMouse();
 			if (localTargetInfo.IsValid)
 			{
-				IntVec3 cell = localTargetInfo.Cell;
-				Vector3 position = new Vector3(cell.x, AltitudeLayer.Building.AltitudeFor(), cell.z).ToIntVec3().ToVector3Shifted();
-				VehiclePawn vehicleAtPos = MapHelper.VehicleInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation);
-				Color color = (vehicleAtPos != vehicle && MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation)) ||
-					(targetValidator != null && !targetValidator(localTargetInfo)) ? Designator_Place.CannotPlaceColor : Designator_Place.CanPlaceColor;
+				Color color = InvalidAtPos(localTargetInfo) ? Designator_Place.CannotPlaceColor : Designator_Place.CanPlaceColor;
 				color.a = (Mathf.PingPong(ticksOpen, PingPongTickLength / 1.5f) / PingPongTickLength) + 0.25f;
-				GhostDrawer.DrawGhostThing(cell, landingRotation, vehicle.VehicleDef.buildDef, vehicle.VehicleDef.buildDef.graphic, color, AltitudeLayer.Blueprint);
+				GhostDrawer.DrawGhostThing(localTargetInfo.Cell, landingRotation, vehicle.VehicleDef.buildDef, vehicle.VehicleDef.buildDef.graphic, color, AltitudeLayer.Blueprint);
 			}
 		}
 

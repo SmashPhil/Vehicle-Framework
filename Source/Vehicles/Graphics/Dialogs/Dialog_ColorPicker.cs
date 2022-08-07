@@ -17,10 +17,13 @@ namespace Vehicles
 		private const float ButtonHeight = 30f;
 
 		private const float SwitchSize = 60f;
-		private const int GridDimensionSqr = 3;
+
+		private static readonly IntRange VehicleCountPerColumn = new IntRange(1, 3);
+		private static readonly IntRange VehicleCountPerRow = new IntRange(2, 3);
+		private const int GridDimensionColumns = 2;
+		private const int GridDimensionRows = 2;
 
 		private int pageNumber;
-		private static Dictionary<PatternDef, Material> maskMaterials = new Dictionary<PatternDef, Material>();
 		
 		private int pageCount;
 		private static PatternDef selectedPattern;
@@ -55,13 +58,13 @@ namespace Vehicles
 
 		private static VehicleDef VehicleDef { get; set; }
 
+		private static Rot8? DisplayRotation { get; set; }
+
 		private static Graphic_Vehicle VehicleGraphic { get; set; }
 
 		private static PatternData PatternData { get; set; }
 
-		private static List<VehicleTurret> Turrets { get; set; }
-
-		private static List<GraphicOverlay> GraphicOverlays { get; set; }
+		private static List<PatternDef> AvailablePatterns { get; set; }
 
 		/// <summary>
 		/// ColorOne, ColorTwo, ColorThree, PatternDef, Displacement, Tiles
@@ -92,8 +95,6 @@ namespace Vehicles
 			additionalTiling = PatternData.tiles;
 			displacementX = PatternData.displacement.x;
 			displacementY = PatternData.displacement.y;
-			Turrets = vehicle.CompVehicleTurrets?.turrets ?? new List<VehicleTurret>();
-			GraphicOverlays = vehicle.graphicOverlay.graphics ?? new List<GraphicOverlay>();
 			Instance.Init();
 		}
 
@@ -113,8 +114,6 @@ namespace Vehicles
 			additionalTiling = PatternData.tiles;
 			displacementX = PatternData.displacement.x;
 			displacementY = PatternData.displacement.y;
-			Turrets = vehicleDef.GetCompProperties<CompProperties_VehicleTurrets>()?.turrets ?? new List<VehicleTurret>();
-			GraphicOverlays = vehicleDef.drawProperties.OverlayGraphics ?? new List<GraphicOverlay>();
 			Instance.Init();	
 		}
 
@@ -123,16 +122,14 @@ namespace Vehicles
 			CurrentSelectedPalette = -1;
 
 			pageNumber = 1;
-			List<PatternDef> availablePatterns = DefDatabase<PatternDef>.AllDefs.Where(p => p.ValidFor(VehicleDef)).ToList();
-			maskMaterials.AddRangeDefault(availablePatterns, null);
-			Instance.RecacheMaterials();
-			float ratio = (float)maskMaterials.Count / (GridDimensionSqr * GridDimensionSqr);
+			AvailablePatterns = DefDatabase<PatternDef>.AllDefs.Where(p => p.ValidFor(VehicleDef)).ToList();
+			float ratio = (float)AvailablePatterns.Count / (GridDimensionColumns * GridDimensionRows);
 			Instance.pageCount = Mathf.CeilToInt(ratio);
 
 			doCloseX = true;
 			forcePause = true;
 			absorbInputAroundWindow = true;
-			selectedPattern = maskMaterials.ContainsKey(PatternData.patternDef) ? PatternData.patternDef ?? PatternDefOf.Default : PatternDefOf.Default;
+			selectedPattern = AvailablePatterns.Contains(PatternData.patternDef) ? PatternData.patternDef ?? PatternDefOf.Default : PatternDefOf.Default;
 			Find.WindowStack.Add(Instance);
 		}
 
@@ -156,11 +153,29 @@ namespace Vehicles
 			var font = Text.Font;
 			Text.Font = GameFont.Small;
 
-			if (Prefs.DevMode)
+			if (Widgets.ButtonText(new Rect(0f, 0f, ButtonWidth * 1.5f, ButtonHeight), "VF_ResetColorPalettes".Translate()))
 			{
-				if(Widgets.ButtonText(new Rect(0f, 0f, ButtonWidth * 1.5f, ButtonHeight), "Reset Palettes"))
+				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("VF_ResetColorPalettesConfirmation".Translate(), delegate ()
 				{
 					VehicleMod.settings.colorStorage.ResetPalettes();
+				}, false, null));
+			}
+			if (VehicleDef.graphicData.drawRotated && VehicleDef.graphicData.Graphic is Graphic_Vehicle graphicVehicle)
+			{
+				Rect rotateVehicleRect = new Rect(inRect.width / 3 - 10 - ButtonHeight, 0, ButtonHeight, ButtonHeight);
+				Widgets.DrawHighlightIfMouseover(rotateVehicleRect);
+				TooltipHandler.TipRegionByKey(rotateVehicleRect, "VF_RotateVehicleRendering");
+				Widgets.DrawTextureFitted(rotateVehicleRect, VehicleTex.ReverseIcon, 1);
+				if (Widgets.ButtonInvisible(rotateVehicleRect))
+				{
+					SoundDefOf.Click.PlayOneShotOnCamera();
+					DisplayRotation ??= VehicleDef.drawProperties.displayRotation;
+					List<Rot8> validRotations = graphicVehicle.RotationsRenderableByUI.ToList();
+					for (int i = 0; i < 4; i++)
+					{
+						DisplayRotation = DisplayRotation.Value.Rotated(RotationDirection.Clockwise, false);
+						if (validRotations.Contains(DisplayRotation.Value)) { break; }
+					}
 				}
 			}
 			float topBoxHeight = inRect.height / 2 + SwitchSize;
@@ -177,8 +192,8 @@ namespace Vehicles
 			DrawColorPalette(paletteRect);
 
 			Rect displayRect = new Rect(0, paintRect.y + ((paintRect.height / 2) - ((paintRect.width - 15) / 2)), paintRect.width - 15, paintRect.width - 15);
-			VehicleDef.DrawVehicleTexTiled(displayRect, new PatternData(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, selectedPattern, 
-				new Vector2(displacementX, displacementY), additionalTiling), null, Turrets, GraphicOverlays);
+			RenderHelper.DrawVehicleDef(displayRect, VehicleDef, material: null, new PatternData(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, selectedPattern, 
+				new Vector2(displacementX, displacementY), additionalTiling), DisplayRotation);
 			Rect dragBoxRect = new Rect(0f, ButtonHeight * 1.5f, ButtonWidth * 3, inRect.height - ButtonHeight * 5);
 			HandleDisplacementDrag(dragBoxRect);
 			var color = GUI.color;
@@ -253,7 +268,7 @@ namespace Vehicles
 
 			Rect outRect = paintRect;
 			outRect = outRect.ContractedBy(10f);
-			float sqrGridSize = outRect.width / GridDimensionSqr;
+			float sqrGridSize = outRect.width / GridDimensionColumns;
 			float gridSizeX = sqrGridSize;
 			float gridSizeY = sqrGridSize;
 
@@ -267,8 +282,8 @@ namespace Vehicles
 			/* -------------------------------------- */
 
 			float num = 0f;
-			int startingIndex = (pageNumber - 1) * (GridDimensionSqr * GridDimensionSqr);
-			int maxIndex = Ext_Numeric.Clamp(pageNumber * (GridDimensionSqr * GridDimensionSqr), 0, maskMaterials.Count);
+			int startingIndex = (pageNumber - 1) * (GridDimensionColumns * GridDimensionRows);
+			int maxIndex = Ext_Numeric.Clamp(pageNumber * (GridDimensionColumns * GridDimensionRows), 0, AvailablePatterns.Count);
 			int iteration = 0;
 			Rect displayRect = new Rect(0, 0, gridSizeX, gridSizeY);
 			Rect paginationRect = new Rect(paintRect.x + 5, paintRect.y + paintRect.height - ButtonHeight, paintRect.width - 10, ButtonHeight * 0.75f);
@@ -276,16 +291,15 @@ namespace Vehicles
 			{
 				UIHelper.DrawPagination(paginationRect, ref pageNumber, pageCount);
 			}
-			List<PatternDef> availablePatterns = maskMaterials.Keys.ToList();
 			for (int i = startingIndex; i < maxIndex; i++, iteration++)
 			{
-				PatternDef pattern = availablePatterns[i];
-				displayRect.x = outRect.x + (iteration % GridDimensionSqr) * sqrGridSize;
-				displayRect.y = outRect.y + (Mathf.FloorToInt(iteration / GridDimensionSqr)) * gridSizeY;
+				PatternDef pattern = AvailablePatterns[i];
+				displayRect.x = outRect.x + (iteration % GridDimensionColumns) * sqrGridSize;
+				displayRect.y = outRect.y + (Mathf.FloorToInt(iteration / GridDimensionRows)) * gridSizeY;
 				PatternData patternData = new PatternData(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, pattern, new Vector2(displacementX, displacementY), additionalTiling);
-				VehicleDef.DrawVehicleTexTiled(displayRect, patternData, null, Turrets, GraphicOverlays);
+				RenderHelper.DrawVehicleDef(displayRect, VehicleDef, material: null, patternData, DisplayRotation);
 				Rect imageRect = new Rect(displayRect.x, displayRect.y, gridSizeX, gridSizeY);
-				if (iteration % GridDimensionSqr == 0)
+				if (iteration % GridDimensionColumns == 0)
 				{
 					num += imageRect.height;
 				}
@@ -337,7 +351,7 @@ namespace Vehicles
 			{
 				SetColors(CurrentColorTwo.ToColor, CurrentColorThree.ToColor, CurrentColorOne.ToColor);
 			}
-			TooltipHandler.TipRegion(reverseRect, "SwapColors".Translate());
+			TooltipHandler.TipRegion(reverseRect, "VF_SwapColors".Translate());
 
 			Color c1Color = colorSelected == 1 ? Color.white : Color.gray;
 			Color c2Color = colorSelected == 2 ? Color.white : Color.gray;
@@ -385,10 +399,9 @@ namespace Vehicles
 				}
 			});
 
-			var saveText = string.Concat("VehicleSave".Translate(), " ", "PaletteText".Translate());
+			string saveText = "VF_SaveColorPalette".Translate();
 			inputRect.width = Text.CalcSize(saveText).x + 20f;
 			inputRect.x = colorContainerRect.x + colorContainerRect.width - inputRect.width - 5f;
-			
 			if (Widgets.ButtonText(inputRect, saveText))
 			{
 				if (CurrentSelectedPalette >= 0 && CurrentSelectedPalette < ColorStorage.PaletteCount)
@@ -448,18 +461,18 @@ namespace Vehicles
 
 		private void DoBottomButtons(Rect buttonRect)
 		{
-			if (Widgets.ButtonText(buttonRect, "Apply".Translate()))
+			if (Widgets.ButtonText(buttonRect, "ApplyButton".Translate()))
 			{
 				OnSave(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, selectedPattern, new Vector2(displacementX, displacementY), additionalTiling);
 				Close(true);
 			}
 			buttonRect.x += ButtonWidth;
-			if (Widgets.ButtonText(buttonRect, "CancelAssigning".Translate()))
+			if (Widgets.ButtonText(buttonRect, "CancelButton".Translate()))
 			{
 				Close(true);
 			}
 			buttonRect.x += ButtonWidth;
-			if (Widgets.ButtonText(buttonRect, "VehiclesReset".Translate()))
+			if (Widgets.ButtonText(buttonRect, "ResetButton".Translate()))
 			{
 				SoundDefOf.Click.PlayOneShotOnCamera(null);
 				selectedPattern = PatternData.patternDef;
@@ -475,28 +488,6 @@ namespace Vehicles
 				{
 					SetColors(PatternData.color, PatternData.colorTwo, PatternData.colorThree);
 				}
-			}
-		}
-
-		private void RecacheMaterials()
-		{
-			foreach (PatternDef pattern in maskMaterials.Keys.ToList())
-			{
-				MaterialRequestRGB req = new MaterialRequestRGB()
-				{
-					mainTex = VehicleGraphic.TexAt(Rot8.North),
-					shader = pattern is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin.Shader : RGBShaderTypeDefOf.CutoutComplexPattern.Shader,
-					properties = pattern.properties,
-					color = pattern.properties.colorOne ?? CurrentColorOne.ToColor,
-					colorTwo = pattern.properties.colorTwo ?? CurrentColorTwo.ToColor,
-					colorThree = pattern.properties.colorThree ?? CurrentColorThree.ToColor,
-					tiles = 1,
-					maskTex = VehicleGraphic.masks[Rot8.North.AsInt],
-					patternTex = pattern[Rot8.North],
-					shaderParameters = null
-				};
-				Material patMat = MaterialPoolExpanded.MatFrom(req);
-				maskMaterials[pattern] = patMat;
 			}
 		}
 
@@ -531,7 +522,6 @@ namespace Vehicles
 				Color.RGBToHSV(c.ToColor, out hue, out saturation, out value); 
 				hex = ColorToHex(c.ToColor);
 			});
-			RecacheMaterials();
 		}
 
 		public void SetColor(Color col)
@@ -542,7 +532,6 @@ namespace Vehicles
 				hex = ColorToHex(c.ToColor);
 			});
 			Color.RGBToHSV(curColor.ToColor, out hue, out saturation, out value);
-			RecacheMaterials();
 		}
 
 		public bool SetColor(string hex)
@@ -551,7 +540,6 @@ namespace Vehicles
 			{
 				CurrentColorOne = new ColorInt(color);
 				Color.RGBToHSV(CurrentColorOne.ToColor, out hue, out saturation, out value);
-				RecacheMaterials();
 				return true;
 			}
 			return false;
@@ -564,7 +552,6 @@ namespace Vehicles
 				c = new ColorInt(Color.HSVToRGB(h, s, b));
 				hex = ColorToHex(c.ToColor);
 			});
-			RecacheMaterials();
 		}
 	}
 }

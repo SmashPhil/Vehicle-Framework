@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>	
+	<Vehicles.VehicleDef ParentName="BaseVehiclePawn">
+		<defName>Tank</defName>
+		<label>Tank</label>
+		<description>Armored fighting vehicle designed for front-line combat. Provides support and cover to nearby combatants.</description>
+		
+		<graphicData>
+			<texPath>Vehicles/Land/Tank/Tank</texPath>
+			<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
+			<drawSize>(4,7)</drawSize>
+			<shaderType>CutoutComplexPattern</shaderType>
+			<color>(0, 80, 30)</color>
+			<colorTwo>(0, 45, 10)</colorTwo>
+			<colorThree>(75, 110, 45)</colorThree>
+		</graphicData>
+		
+		<combatPower>200</combatPower>
+		<fillPercent>1</fillPercent>
+		
+		<nameable>true</nameable>
+		<buildDef>Tank_Blueprint</buildDef>
+		
+		<size>(3,5)</size>
+		
+		<vehicleMovementPermissions>DriverNeeded</vehicleMovementPermissions>
+		<vehicleCategory>Combat</vehicleCategory>
+		<techLevel>Industrial</techLevel>
+		<vehicleType>Land</vehicleType>
+		
+		<statBases>
+			<Mass>60000</Mass>
+			<ArmorRating_Blunt>1.0</ArmorRating_Blunt>
+			<ArmorRating_Sharp>1.0</ArmorRating_Sharp>
+			<MarketValue>75000</MarketValue>
+			<Flammability>0</Flammability>
+		</statBases>
+		
+		<vehicleStats>
+			<MoveSpeed>3.25</MoveSpeed>
+			<CargoCapacity>100</CargoCapacity>
+			<RepairRate>2.5</RepairRate>
+		</vehicleStats>
+		
+		<properties>
+			<customBiomeCosts>
+				<li>
+					<key>TropicalRainforest</key>
+					<value>-1</value>
+					<!-- <value>2</value> -->
+				</li>
+				<li>
+					<key>TropicalSwamp</key>
+					<value>12</value>
+				</li>
+				<li>
+					<key>TemperateSwamp</key>
+					<value>12</value>
+				</li>
+				<li>
+					<key>ColdBog</key>
+					<value>8</value>
+				</li>
+			</customBiomeCosts>
+			
+			<roles>
+				<li>
+					<key>commander</key>
+					<label>Commander</label>
+					<slots>1</slots>
+					<slotsToOperate>1</slotsToOperate>
+					<handlingTypes>
+						<li>Cannon</li>
+					</handlingTypes>
+					<turretIds>
+						<li>mountedMachineGun</li>
+					</turretIds>
+					<hitbox>
+						<cells>
+							<li>(0,0)</li>
+						</cells>
+					</hitbox>
+				</li>
+				<li>
+					<key>driver</key>
+					<label>Driver</label>
+					<slots>1</slots>
+					<slotsToOperate>1</slotsToOperate>
+					<handlingTypes>
+						<li>Movement</li>
+					</handlingTypes>
+					<hitbox>
+						<cells>
+							<li>(0,1)</li>
+						</cells>
+					</hitbox>
+				</li>
+				<li>
+					<key>gunner</key>
+					<label>Gunner</label>
+					<slots>1</slots>
+					<slotsToOperate>1</slotsToOperate>
+					<handlingTypes>
+						<li>Cannon</li>
+					</handlingTypes>
+					<turretIds>
+						<li>mainTurret</li>
+					</turretIds>
+					<hitbox>
+						<cells>
+							<li>(0,0)</li>
+						</cells>
+					</hitbox>
+				</li>
+				<li>
+					<key>loader</key>
+					<label>Loader</label>
+					<slots>1</slots>
+					<slotsToOperate>1</slotsToOperate>
+					<handlingTypes>
+						<li>Cannon</li>
+					</handlingTypes>
+					<turretIds>
+						<li>mainTurret</li>
+					</turretIds>
+					<hitbox>
+						<cells>
+							<li>(0,0)</li>
+						</cells>
+					</hitbox>
+				</li>
+			</roles>
+			
+			<customTerrainCosts DisallowTerrainWithTag="Water">
+				<li>
+					<key>Mud</key>
+					<value>250</value>
+				</li>
+			</customTerrainCosts>
+		</properties>
+		
+		<components>
+			<li>
+				<key>Body</key>
+				<label>Body</label>
+				<health>250</health>
+				<armor>4</armor>
+				
+				<hitbox>
+					<side>BodyNoOverlap</side>
+					<noOverlapWith>
+						<li>Back</li>
+					</noOverlapWith>
+				</hitbox>
+				
+				<categories>
+					<li>BodyIntegrity</li>
+				</categories>
+			</li>
+			<li>
+				<key>RearBody</key>
+				<label>Rear Armor</label>
+				<health>200</health>
+				<armor>2.5</armor>
+				
+				<hitbox>
+					<side>Back</side>
+				</hitbox>
+			</li>
+			<li>
+				<key>Engine</key>
+				<label>Engine</label>
+				<health>50</health>
+				<armor>0.25</armor>
+				<efficiencyWeight>10</efficiencyWeight>
+				
+				<explosionProperties>
+					<chance>0.25</chance>
+					<radius>3</radius>
+					<damageDef>Bomb</damageDef>
+				</explosionProperties>
+				
+				<hitbox>
+					<cells>
+						<li>(0, -1)</li>
+					</cells>
+				</hitbox>
+				
+				<categories>
+					<li>MoveSpeed</li>
+				</categories>
+			</li>
+			<li>
+				<key>LeftTrack</key>
+				<label>Left Track</label>
+				<health>135</health>
+				<armor>0.5</armor>
+				<efficiencyWeight>80</efficiencyWeight>
+				
+				<hitbox>
+					<fallthrough>false</fallthrough>
+					<side>Left</side>
+				</hitbox>
+				<categories>
+					<li>MoveSpeed</li>
+				</categories>
+			</li>
+			<li>
+				<key>RightTrack</key>
+				<label>Right Track</label>
+				<health>135</health>
+				<armor>0.5</armor>
+				<efficiencyWeight>80</efficiencyWeight>
+				
+				<hitbox>
+					<fallthrough>false</fallthrough>
+					<side>Right</side>
+				</hitbox>
+				<categories>
+					<li>MoveSpeed</li>
+				</categories>
+			</li>
+		</components>
+
+		<comps>
+			<li Class="Vehicles.CompProperties_FueledTravel">
+				<fuelType>Chemfuel</fuelType>
+				<fuelConsumptionRate>80</fuelConsumptionRate>
+				<fuelCapacity>2000</fuelCapacity>
+				<fuelConsumptionCondition>Drafted</fuelConsumptionCondition>
+			</li>
+			<li Class="Vehicles.CompProperties_VehicleTurrets">
+				<turrets>
+					<li>
+						<turretDef>TankMainTurret_Short</turretDef>
+						
+						<gizmoLabel>Main Turret</gizmoLabel>
+						<autoTargeting>false</autoTargeting>
+						
+						<angleRestricted/>
+						<aimPieOffset>(.075, 2.75)</aimPieOffset>
+						<drawLayer>1</drawLayer>
+						
+						<key>mainTurret</key>
+					</li>
+					<li>
+						<turretDef>HeavyMachineGunMounted</turretDef>
+						
+						<renderProperties>
+							<north>(-.44, .38)</north>
+						</renderProperties>
+						
+						<uiRenderProperties>
+							<north>(-12, -18)</north>
+							<east>(11, -13)</east>
+						</uiRenderProperties>
+						
+						<gizmoLabel>Heavy Machine Gun</gizmoLabel>
+						
+						<angleRestricted>(300,60)</angleRestricted>
+						<aimPieOffset/>
+						<drawLayer>2</drawLayer>
+						
+						<key>mountedMachineGun</key>
+						<parentKey>mainTurret</parentKey>
+					</li>
+				</turrets>
+			</li>
+		</comps>
+	</Vehicles.VehicleDef>
+</Defs>

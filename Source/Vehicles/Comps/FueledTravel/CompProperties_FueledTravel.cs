@@ -19,7 +19,7 @@ namespace Vehicles
 
 		[PostToSettings(Label = "VehicleFuelConsumptionRate", Translate = true, UISettingsType = UISettingsType.FloatBox)]
 		public float fuelConsumptionRate;
-		[PostToSettings(Label = "VehicleFuelCapacity", Translate = true, UISettingsType = UISettingsType.IntegerBox)]
+		[PostToSettings(Label = "VF_VehicleFuelCapacity", Translate = true, UISettingsType = UISettingsType.IntegerBox)]
 		public int fuelCapacity;
 		[PostToSettings(Label = "VehicleFuelConsumptionRateWorldMultiplier", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(Increment = 0.1f, MinValue = 0, MaxValue = 2)]

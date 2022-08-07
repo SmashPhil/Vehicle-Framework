@@ -1,67 +1,76 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <LanguageData>
+	<!-- Misc. ModSettings labels -->
 	<VehicleListSearchText>Search...</VehicleListSearchText>
-
-	<DevModeResetAll>Reset All Settings</DevModeResetAll>
-	<DevModeResetVehicle>Reset {0}</DevModeResetVehicle>
-	<DevModeResetAllVehicles>Reset All Vehicles</DevModeResetAllVehicles>
-	<DevModeResetPage>Reset Page</DevModeResetPage>
+	<VF_MainSettings>Main</VF_MainSettings>
 	
-	<VehiclesReset>Reset</VehiclesReset>
-	<VehicleResetAllConfirmation>Are you sure you want to reset all settings to original values? If you were locked out of the Mod Settings from an exception, you will need to restart after the reset.</VehicleResetAllConfirmation>
-	<BoatsResetToDefault>Reset to Default</BoatsResetToDefault>
-	<BeachGenMultiplier>Beach Size Multiplier</BeachGenMultiplier>
-	<BeachGenMultiplierTooltip>Increase the amount of water on the coastline.</BeachGenMultiplierTooltip>
-	<BeachGenMultiplierLargeTooltip>Current number is larger than recommended. The ocean can and may take up to as large as 80% of the map.</BeachGenMultiplierLargeTooltip>
-	<ForceSettlementCoastTooltip>Push nearby faction settlements to the coast if within given radius</ForceSettlementCoastTooltip>
-	<ForceSettlementCoast>Push Settlement to Coast</ForceSettlementCoast>
-	<Tiles> Tiles</Tiles>
-	<ResetWaterRegions>Reset Water Regions</ResetWaterRegions>
-	<Disabled>Disabled</Disabled>
-	<EverySettlementToCoast>Every Settlement</EverySettlementToCoast>
-	<PassiveWaterWaves>Passive Water Waves</PassiveWaterWaves>
-	<PassiveWaterWavesTooltip>Generate passive waves for each boat. Purely cosmetic.</PassiveWaterWavesTooltip>
-	<ShowDisabledVehicles>Show Disabled Vehicles</ShowDisabledVehicles>
-	<ShowDisabledVehiclesTooltip>Disabled vehicles from the mod settings will still be shown in the architect menu.</ShowDisabledVehiclesTooltip>
-	<DrawUpgradeInformationScreen>Draw Upgrade Menu Info Screen</DrawUpgradeInformationScreen>
-	<DrawUpgradeInformationScreenTooltip>Draw additional menu on the upgrade menu to display ship stats and ship icon.</DrawUpgradeInformationScreenTooltip>
-	<VehicleOverrideDrawColor>Override Draw Color</VehicleOverrideDrawColor>
-	<VehicleOverrideDrawColorTooltip>When any upgrade is applied that comes with a pattern or draw color, the previous paint job will be overridden.</VehicleOverrideDrawColorTooltip>
-	<FullVehiclePathing>Full Vehicle Pathing</FullVehiclePathing>
-	<FullVehiclePathingTooltip>Use the entire hitbox of the vehicle to determine pathing constraints (prevents Vehicles from going through smaller passages than hitbox size).</FullVehiclePathingTooltip>
-	<VehicleRocketsBurnRadius>Rockets Burn</VehicleRocketsBurnRadius>
-	<VehicleDynamicDrawing>Dynamic Drawing</VehicleDynamicDrawing>
-	<VehicleDynamicDrawingTooltip>Certain vehicle related world objects will be dynamically drawn to orient them in the direction of travel and render them with their parent's texture if given one.</VehicleDynamicDrawingTooltip>
-	<VehicleDeployOnLanding>Deploy on Landing</VehicleDeployOnLanding>
-	<VehicleDeployOnLandingTooltip>When an aerial vehicle lands all pawns onboard will be unloaded.</VehicleDeployOnLandingTooltip>
-	<VehicleDelayOnLanding>Delay on Landing</VehicleDelayOnLanding>
-	<VehicleDelayOnLandingTooltip>When an aerial vehicle lands the deployment of all pawns will be delayed.</VehicleDelayOnLandingTooltip>
-	<VehicleAirDefensesActive>Air Defenses</VehicleAirDefensesActive>
-	<VehicleAirDefensesActiveTooltip>Certain world objects are able to utilize air defenses to shoot down nearby aircraft.</VehicleAirDefensesActiveTooltip>
-	<VehiclesModifiableSettings>Modifiable Settings</VehiclesModifiableSettings>
-	<ShowRecentNews>Show Most Recent News</ShowRecentNews>
+	<!-- World & Map Generation -->
+	<VF_WorldMapGen>World/Map Generation</VF_WorldMapGen>
+	<VF_BeachGenMultiplier>Beach Size Multiplier</VF_BeachGenMultiplier>
+	<VF_BeachGenMultiplierTooltip>Increase the amount of water on the coastline.</VF_BeachGenMultiplierTooltip>
+	<VF_BeachGenMultiplierLargeTooltip>Current number is larger than recommended. The ocean can and may take up to as large as 80% of the map.</VF_BeachGenMultiplierLargeTooltip>
+	<VF_ForceSettlementCoast>Push Settlement to Coast</VF_ForceSettlementCoast>
+	<VF_ForceSettlementCoastTooltip>Push nearby faction settlements to the coast if within given radius</VF_ForceSettlementCoastTooltip>
+	<VF_EverySettlementToCoast>Every Settlement</VF_EverySettlementToCoast>
+	<VF_WorldTiles>tiles</VF_WorldTiles>
 	
-	<VehicleDamageMultipliers>Damage on Vehicles</VehicleDamageMultipliers>
-	<MeleeDamageMultiplier>Melee Damage Multiplier</MeleeDamageMultiplier>
-	<RangedDamageMultiplier>Ranged Damage Multiplier</RangedDamageMultiplier>
-	<ExplosiveDamageMultiplier>Explosive Damage Multiplier</ExplosiveDamageMultiplier>
+	<!-- General Settings -->
+	<VF_SettingsGeneral>General</VF_SettingsGeneral>
+	<VF_ModifiableSettings>Modifiable Settings</VF_ModifiableSettings>
+	<VF_FullVehiclePathing>Full Vehicle Pathing</VF_FullVehiclePathing>
+	<VF_FullVehiclePathingTooltip>Use the entire hitbox of the vehicle to determine pathing constraints (prevents Vehicles from going through smaller passages than hitbox size).</VF_FullVehiclePathingTooltip>
+	<VF_ShowDisabledVehicles>Show Disabled Vehicles</VF_ShowDisabledVehicles>
+	<VF_ShowDisabledVehiclesTooltip>Disabled vehicles from the mod settings will still be shown in the architect menu.</VF_ShowDisabledVehiclesTooltip>
 	
-	<ShuffledCannonFire>Shuffled Cannons</ShuffledCannonFire>
-	<ShuffledCannonFireTooltip>Randomize the order in which broadside cannons fire.</ShuffledCannonFireTooltip>
-	<RiverTravelAllowed>Travel on Rivers</RiverTravelAllowed>
-	<RiverTravelAllowedTooltip>Allow boats to travel along rivers.</RiverTravelAllowedTooltip>
-	<BoatSizeMattersOnRivers>River Size Matters</BoatSizeMattersOnRivers>
-	<BoatSizeMattersOnRiversTooltip>Restrict boats to only be able to travel on rivers that are large enough to fit it. If disabled, all boats can travel on any river. If you bring a boat into a map with a river that cannot fit the size of the boat, it might spawn on land.</BoatSizeMattersOnRiversTooltip>
-	<FishingMultiplier>Fishing Multiplier</FishingMultiplier>
-	<FishingMultiplierTooltip>Adjust the amount of fish gathered from fishing boat.</FishingMultiplierTooltip>
-	<FishingDelay>Fishing Delay</FishingDelay>
-	<FishingDelayTooltip>Base amount of ticks it takes to gather fish on a fishing boat.</FishingDelayTooltip>
-	<FishingSkill>Fishing Skill</FishingSkill>
-	<FishingSkillTooltip>How much exp is given by fishing on a boat</FishingSkillTooltip>
-	<FishingPersists>Fishing Persists</FishingPersists>
-	<FishingPersistsTooltip>The Fishing Boat fishing selection will not reset upon drafting.</FishingPersistsTooltip>
-	<MatchWaterTerrain>Match Water Terrain</MatchWaterTerrain>
-	<MatchWaterTerrainTooltip>Water tiles that are placed will match the water of adjacent water tiles (Disabled: Still WIP)</MatchWaterTerrainTooltip>
-	<ShowAllItemsOnMap>Show All Items On Map</ShowAllItemsOnMap>
+	<!-- Multipliers -->
+	<VF_VehicleDamageMultipliers>Vehicle Damage</VF_VehicleDamageMultipliers>
+	<VF_MeleeDamageMultiplier>Melee Damage Multiplier</VF_MeleeDamageMultiplier>
+	<VF_RangedDamageMultiplier>Ranged Damage Multiplier</VF_RangedDamageMultiplier>
+	<VF_ExplosiveDamageMultiplier>Explosive Damage Multiplier</VF_ExplosiveDamageMultiplier>
+	
+	<!-- VehicleTurrets -->
+	<VF_VehicleTurrets>Vehicle Turrets</VF_VehicleTurrets>
+	<VF_TurretOverheatMechanics>Turret Overheating</VF_TurretOverheatMechanics>
+	<VF_TurretOverheatMechanicsTooltip>Some turrets have overheat mechanics to prevent nonstop firing without consequences. Keep this enabled?</VF_TurretOverheatMechanicsTooltip>
+	
+	<!-- Land Vehicles (none right now)-->
+	
+	<!-- Sea Vehicles -->
+	<VF_SeaVehicles>Sea</VF_SeaVehicles>
+	<VF_PassiveWaterWaves>Passive Water Waves</VF_PassiveWaterWaves>
+	<VF_PassiveWaterWavesTooltip>Generate passive waves for each boat. Purely cosmetic.</VF_PassiveWaterWavesTooltip>
+	<VF_Fishing>Fishing</VF_Fishing>
+	<VF_FishingInactive>Fishing (Inactive)</VF_FishingInactive>
+	<VF_FishingMultiplier>Fishing Multiplier</VF_FishingMultiplier>
+	<VF_FishingMultiplierTooltip>Adjust the amount of fish gathered from fishing boat.</VF_FishingMultiplierTooltip>
+	<VF_FishingDelay>Fishing Delay</VF_FishingDelay>
+	<VF_FishingDelayTooltip>Base amount of ticks it takes to gather fish on a fishing boat.</VF_FishingDelayTooltip>
+	<VF_FishingSkill>Fishing Skill</VF_FishingSkill>
+	<VF_FishingSkillTooltip>How much exp is given by fishing on a boat</VF_FishingSkillTooltip>
+	<VF_FishingPersists>Fishing Persists</VF_FishingPersists>
+	<VF_FishingPersistsTooltip>The Fishing Boat fishing selection will not reset upon drafting.</VF_FishingPersistsTooltip>
+	
+	<!-- Aerial Vehicles -->
+	<VF_AerialVehicles>Air</VF_AerialVehicles>
+	<VF_RocketsBurnRadius>Rockets Burn</VF_RocketsBurnRadius>
+	<VF_DynamicDrawing>Dynamic Drawing</VF_DynamicDrawing>
+	<VF_DynamicDrawingTooltip>Certain vehicle related world objects will be dynamically drawn to orient them in the direction of travel and render them with their parent's texture if given one.</VF_DynamicDrawingTooltip>
+	<VF_DeployOnLanding>Deploy on Landing</VF_DeployOnLanding>
+	<VF_DeployOnLandingTooltip>When an aerial vehicle lands all pawns onboard will be unloaded.</VF_DeployOnLandingTooltip>
+	<VF_DelayOnLanding>Delay on Landing</VF_DelayOnLanding>
+	<VF_DelayOnLandingTooltip>When an aerial vehicle lands the deployment of all pawns will be delayed.</VF_DelayOnLandingTooltip>
+	<VF_DelaySeconds>seconds</VF_DelaySeconds>
+	<VF_AirDefensesActive>Air Defenses</VF_AirDefensesActive>
+	<VF_AirDefensesActiveTooltip>Certain world objects are able to utilize air defenses to shoot down nearby aircraft.</VF_AirDefensesActiveTooltip>
+	
+	<!-- Vehicle Stats -->
+	<VF_VehicleStats>Stats</VF_VehicleStats>
+	
+	<!-- Upgrade Menu Settings -->
+	<VF_Upgrades>Upgrades</VF_Upgrades>
+	<VF_DrawUpgradeInformationScreen>Draw Upgrade Menu Info Screen</VF_DrawUpgradeInformationScreen>
+	<VF_DrawUpgradeInformationScreenTooltip>Draw additional menu on the upgrade menu to display ship stats and ship icon.</VF_DrawUpgradeInformationScreenTooltip>
+	<VF_OverrideDrawColor>Override Draw Color</VF_OverrideDrawColor>
+	<VF_OverrideDrawColorTooltip>When any upgrade is applied that comes with a pattern or draw color, the previous paint job will be overridden.</VF_OverrideDrawColorTooltip>
 </LanguageData>

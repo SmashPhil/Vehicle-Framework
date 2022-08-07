@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <LanguageData>
+	<!-- UI Responses -->
+	<VF_MustSelectColorPalette>Must have a palette selected to save over.</VF_MustSelectColorPalette>
+
+	<!-- Game Mechanics -->
+
+	<!-- Misc. Info -->
+	
+	
 	<Vehicles_NotEnoughToOperate>Needs more crew in order to operate.</Vehicles_NotEnoughToOperate>
 	<Vehicles_OutOfFuel>Cannot draft. Vehicle needs more fuel.</Vehicles_OutOfFuel>
 	<Vehicles_UpgradeInProgress>Cannot draft while Vehicle is upgrading.</Vehicles_UpgradeInProgress>
@@ -37,7 +45,7 @@
 	<AutoTargetingDisabled>AutoTargeting is not allowed for this turret.</AutoTargetingDisabled>
 	<LeaveVehicleBehindCaravan>Are you sure you want to leave Vehicles behind? Vehicles left behind: {0}</LeaveVehicleBehindCaravan>
 	<MessageMustAssignEnoughToVehicle>Must assign enough colonists to man vehicle.</MessageMustAssignEnoughToVehicle>
-	<MustSelectPalette>Must have a palette selected to save over.</MustSelectPalette>
+	
 	<VehicleAerialArrived>{0} has arrived at their destination.</VehicleAerialArrived>
 	<VehicleLaunchOutOfFuel>Cannot launch. Out of Fuel.</VehicleLaunchOutOfFuel>
 	<VehicleRunwayCannotLand>Cannot land here.</VehicleRunwayCannotLand>
@@ -45,5 +53,5 @@
 	<VehicleRunwayCannotLandTechLevel>Cannot land at settlement. No runway available.</VehicleRunwayCannotLandTechLevel>
 	<VehicleFlightPathMaxNodes>Maximum nodes for {0}'s flight path has been reached.</VehicleFlightPathMaxNodes>
 	<AerialVehicleTargetedAA>{0} is under attack.</AerialVehicleTargetedAA>
-	<MustTargetLanding>A landing destination must be chosen.</MustTargetLanding>
+	<VF_MustTargetLanding>A landing destination must be chosen.</VF_MustTargetLanding>
 </LanguageData>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<Vehicles.VehicleTurretDef Name="TankMainTurret" ParentName="TurretBase">
+		<defName>TankMainTurret_Medium</defName>
+		<label>Main Turret</label>
+		<turretType>Rotatable</turretType>
+		<shotSound>Explosion_PirateCannon</shotSound>
+		<reloadSound>Artillery_ShellLoaded</reloadSound>
+		
+		<projectileSpeed>150</projectileSpeed>
+		<reloadTimer>5</reloadTimer>
+		<warmUpTimer>1.65</warmUpTimer>
+		<magazineCapacity>1</magazineCapacity>
+		
+		<recoil>
+			<distanceTotal>0.7</distanceTotal>
+			<distancePerTick>0.15</distancePerTick>
+			<speedMultiplierPostRecoil>0.35</speedMultiplierPostRecoil>
+		</recoil>
+		
+		<vehicleRecoil>
+			<distanceTotal>0.35</distanceTotal>
+			<distancePerTick>0.15</distancePerTick>
+			<speedMultiplierPostRecoil>0.75</speedMultiplierPostRecoil>
+		</vehicleRecoil>
+		
+		<attachProjectileFlag>Tank</attachProjectileFlag>
+		
+		<fireModes>
+			<li>
+				<shotsPerBurst>1</shotsPerBurst>
+				<ticksBetweenBursts>1</ticksBetweenBursts>
+				<spreadRadius>6</spreadRadius>
+				<label>Single</label>
+				<texPath>UI/Gizmos/FireRate_Single</texPath>
+			</li>
+		</fireModes>
+		
+		<autoSnapTargeting>false</autoSnapTargeting>
+		<rotationSpeed>0.5</rotationSpeed>
+
+		<graphicData>
+			<texPath>Vehicles/Land/Tank/TankTurret/TankTurret_medium</texPath>
+			<graphicClass>Vehicles.Graphic_Turret</graphicClass>
+			<shaderType>CutoutComplexPattern</shaderType>
+			<drawSize>(7, 7)</drawSize>
+		</graphicData>
+		
+		<ammunition>
+			<categories>
+				<li>MortarShells</li>
+			</categories>
+		</ammunition>
+		
+		<motes>
+			<li>
+				<cycles>1</cycles>
+				<moteDef>Mote_CannonPlume</moteDef>
+				<animationType>Reset</animationType>
+			</li>
+		</motes>
+		
+		<projectileOffset>4.75</projectileOffset>
+		<hitFlags>IntendedTarget</hitFlags>
+		<maxRange>-1</maxRange>
+		<minRange>13</minRange>
+	</Vehicles.VehicleTurretDef>
+</Defs>

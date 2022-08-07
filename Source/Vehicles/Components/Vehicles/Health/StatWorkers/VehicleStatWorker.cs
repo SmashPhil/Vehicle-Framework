@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 using Verse;
 using SmashTools;
 
@@ -69,9 +70,26 @@ namespace Vehicles
 			return vehicle.statHandler.StatEfficiency(statDef);
 		}
 
-		public virtual void DrawVehicleStat(Listing_SplitColumns lister, VehiclePawn vehicle)
+		public virtual float DrawVehicleStat(Rect leftRect, float curY, VehiclePawn vehicle)
 		{
-			lister.Label(StatValueFormatted(vehicle));
+			Rect rect = new Rect(0f, curY, leftRect.width, 20f);
+			if (Mouse.IsOver(rect))
+			{
+				GUI.color = TexData.HighlightColor;
+				GUI.DrawTexture(rect, TexUI.HighlightTex);
+			}
+			GUI.color = Color.white;
+			Widgets.Label(new Rect(0f, curY, leftRect.width * 0.55f, 30f), statDef.LabelCap);
+			float baseValue = GetBaseValue(vehicle.VehicleDef);
+			Color effColor = baseValue == 0 ? TexData.WorkingCondition : VehicleComponent.gradient.Evaluate(GetValue(vehicle) / baseValue);
+			Widgets.Label(new Rect(leftRect.width * 0.65f, curY, leftRect.width * 0.45f, 30f), StatValueFormatted(vehicle).Colorize(effColor));
+			Rect rect2 = new Rect(0f, curY, leftRect.width, 20f);
+			if (Mouse.IsOver(rect2))
+			{
+				TooltipHandler.TipRegion(rect2, new TipSignal(TipSignal(vehicle), vehicle.thingIDNumber ^ statDef.index));
+			}
+			curY += 20f;
+			return curY;
 		}
 
 		public virtual string StatValueFormatted(VehiclePawn vehicle)
@@ -82,6 +100,11 @@ namespace Vehicles
 				output = string.Format(statDef.formatString, output);
 			}
 			return output;
+		}
+
+		public virtual string TipSignal(VehiclePawn vehicle)
+		{
+			return string.Empty;
 		}
 
 		public virtual string StatBuilderExplanation(VehiclePawn vehicle)

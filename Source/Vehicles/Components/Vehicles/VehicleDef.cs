@@ -21,7 +21,7 @@ namespace Vehicles
 		[NumericBoxValues(MinValue = 0, MaxValue = float.MaxValue)]
 		public float combatPower = 0;
 
-		//[PostToSettings(Label = "VehicleStats", Translate = true, Tooltip = "VehicleStatsTooltip")]
+		//[PostToSettings(Label = "VF_VehicleStats", Translate = true, Tooltip = "VF_VehicleStatsTooltip")]
 		public List<VehicleStatModifier> vehicleStats;
 
 		[PostToSettings(Label = "VehicleMovementPermissions", Translate = true, UISettingsType = UISettingsType.SliderEnum)]
@@ -198,6 +198,10 @@ namespace Vehicles
 		{
 			foreach (VehicleStatModifier statModifier in vehicleStats)
 			{
+				if (statModifier.statDef == VehicleStatDefOf.MoveSpeed && vehicleMovementPermissions == VehiclePermissions.NotAllowed)
+				{
+					continue;
+				}
 				yield return statModifier.statDef;
 			}
 

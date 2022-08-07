@@ -378,7 +378,7 @@ namespace Vehicles
 				(destinationTile == -1) ? null : ("\n" + "DaysWorthOfFoodTooltip_OnlyFirstWaypoint".Translate()), false);
 			tabsList.Clear();
 
-			tabsList.Add(new TabRecord("VehiclesTab".Translate(), delegate ()
+			tabsList.Add(new TabRecord("VF_Vehicles".Translate(), delegate ()
 			{
 				this.tab = Tab.Vehicles;
 			}, this.tab == Tab.Vehicles));

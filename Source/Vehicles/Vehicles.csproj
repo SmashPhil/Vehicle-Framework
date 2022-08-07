@@ -420,6 +420,7 @@
     <Compile Include="Graphics\Textures\TextureCache.cs" />
     <Compile Include="Harmony\PatchCategories\PawnAI.cs" />
     <Compile Include="Harmony\ThingDefGenerator_Skyfallers.cs" />
+    <Compile Include="Misc\DefModExtension\CETurretDataDefModExtension.cs" />
     <Compile Include="Misc\DefModExtension\CustomCostDefModExtension.cs" />
     <Compile Include="Misc\DefModExtension\ProjectilePropertiesDefModExtension.cs" />
     <Compile Include="Cannons\Projectiles\Laser.cs" />
@@ -547,7 +548,6 @@
     <Compile Include="Misc\ModSettings\SettingsSection\SettingsSection.cs" />
     <Compile Include="Misc\ModSettings\SettingsValueInfo.cs" />
     <Compile Include="Misc\ModSettings\VehicleMod.cs" />
-    <Compile Include="Graphics\Beta\Dialog_BetaWindow.cs" />
     <Compile Include="Harmony\PatchCategories\Debug.cs" />
     <Compile Include="Harmony\PatchCategories\Extra.cs" />
     <Compile Include="Harmony\PatchCategories\Construction.cs" />
@@ -598,7 +598,6 @@
     <Compile Include="Misc\Saving\SaveablePair.cs" />
     <Compile Include="Misc\Saving\SaveableField.cs" />
     <Compile Include="Misc\Saving\SaveableListEntry.cs" />
-    <Compile Include="Graphics\Beta\OpenBeta_GameComponent.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_NodeSettings.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_TradeAerialVehicle.cs" />
     <Compile Include="Graphics\Graphic\Animations\AnimationProperties.cs" />
@@ -634,6 +633,7 @@
     <Compile Include="Utility\Helpers\SelectionHelper.cs" />
     <Compile Include="Utility\Helpers\GizmoHelper.cs" />
     <Compile Include="Utility\Helpers\MultithreadHelper.cs" />
+    <Compile Include="Utility\Helpers\VehicleHealthTabHelper.cs" />
     <Compile Include="Utility\Helpers\XmlHelper.cs" />
     <Compile Include="Utility\Helpers\SkyfallerHelper.cs" />
     <Compile Include="Utility\Helpers\TargetingHelper.cs" />

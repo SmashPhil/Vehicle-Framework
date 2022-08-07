@@ -9,7 +9,7 @@ namespace Vehicles
 	{
 		[PostToSettings(Label = "VehicleFuelConsumptionWorld", Translate = true, Tooltip = "VehicleFuelEfficiencyWorldTooltip", UISettingsType = UISettingsType.SliderPercent, VehicleType = VehicleType.Air)]
 		[SliderValues(MinValue = 0.05f, MaxValue = 1f, Increment = 0.05f, RoundDecimalPlaces = 2, EndSymbol = "%")]
-		public float fuelConsumptionWorldMultiplier = 0.1f;
+		public float fuelConsumptionWorldMultiplier = 10;
 		[PostToSettings(Label = "VehicleFlySpeed", Translate = true, Tooltip = "VehicleFlySpeedTooltip", UISettingsType = UISettingsType.SliderFloat, VehicleType = VehicleType.Air)]
 		[SliderValues(MinValue = 0.5f, MaxValue = 20.5f, EndValue = 999999f, RoundDecimalPlaces = 1, Increment = 0.5f, MaxValueDisplay = "VehicleTeleportation")]
 		public float flySpeed = 1.5f;

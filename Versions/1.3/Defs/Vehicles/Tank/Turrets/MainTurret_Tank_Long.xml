@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<Vehicles.VehicleTurretDef ParentName="TankMainTurret">
+		<defName>TankMainTurret_Long</defName>
+		<label>Main Turret</label>
+		
+		<projectileSpeed>150</projectileSpeed>
+		<reloadTimer>5</reloadTimer>
+		<warmUpTimer>2.5</warmUpTimer>
+		<magazineCapacity>1</magazineCapacity>
+		
+		<rotationSpeed>0.65</rotationSpeed>
+
+		<graphicData>
+			<texPath>Vehicles/Land/Tank/TankTurret/TankTurret_long</texPath>
+		</graphicData>
+		
+		<projectileOffset>4.75</projectileOffset>
+		<hitFlags>IntendedTarget</hitFlags>
+		<maxRange>-1</maxRange>
+		<minRange>15</minRange>
+	</Vehicles.VehicleTurretDef>
+</Defs>

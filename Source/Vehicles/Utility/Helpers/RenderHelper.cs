@@ -138,9 +138,9 @@ namespace Vehicles
 		/// <param name="resolveGraphics"></param>
 		/// <param name="manualColorOne"></param>
 		/// <param name="manualColorTwo"></param>
-		/// <remarks>Might want to research into optimization practices for rendering</remarks>
 		public static void DrawCannonTextures(this VehiclePawn vehicle, Rect displayRect, IEnumerable<VehicleTurret> cannons, PatternDef pattern, bool resolveGraphics = false, Color? manualColorOne = null, Color? manualColorTwo = null, Color? manualColorThree = null, Rot8? rot = null)
 		{
+			//Might need to research into optimization practices for rendering
 			Rot8 rotDrawn = rot ?? vehicle.VehicleDef.drawProperties.displayRotation;
 			foreach (VehicleTurret turret in cannons)
 			{
@@ -170,7 +170,6 @@ namespace Vehicles
 
 				Rect cannonDrawnRect = new Rect(xCannon, yCannon, cannonWidth, cannonHeight);
 				Material cannonMat = null;
-				
 				if (turret.CannonGraphic.Shader.SupportsRGBMaskTex())
 				{
 					cannonMat = new Material(turret.CannonGraphic.MatAt(Rot4.North, vehicle));
@@ -185,8 +184,8 @@ namespace Vehicles
 							colorThree = manualColorThree != null ? manualColorThree.Value : vehicle.DrawColorThree,
 							tiles = vehicle.Tiles,
 							properties = pattern.properties,
-							maskTex = turret.CannonGraphic.masks[0],
-							patternTex = pattern[rotDrawn]
+							maskTex = turret.CannonGraphic.masks[Rot8.North.AsInt],
+							patternTex = pattern[Rot8.North]
 						};
 						cannonMat = MaterialPoolExpanded.MatFrom(matReq);
 					}
@@ -265,81 +264,120 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Draw Vehicle texture dynamically allowing for tiling and rescaling of patterns
+		/// Draw <paramref name="vehicleDef"/>
 		/// </summary>
-		/// <param name="vehicleDef"></param>
+		/// <remarks><paramref name="material"/> may overwrite material used for vehicle</remarks>
 		/// <param name="rect"></param>
-		/// <param name="vehicleTex"></param>
-		/// <param name="vehicleGraphic"></param>
-		/// <param name="patternData"></param>
-		/// <param name="resolveGraphics"></param>
-		/// <param name="turrets"></param>
-		public static void DrawVehicleTexTiled(this VehicleDef vehicleDef, Rect rect, PatternData patternData, Rot8? rot = null, List<VehicleTurret> turrets = null, List<GraphicOverlay> graphicOverlays = null)
+		/// <param name="vehicleDef"></param>
+		/// <param name="material"></param>
+		public static string DrawVehicleDef(Rect rect, VehicleDef vehicleDef, Material material = null, PatternData patternData = null, Rot8? rot = null)
 		{
-			Rot8 rotDrawn = rot ?? vehicleDef.drawProperties.displayRotation;
-			Vector2 rectSize = vehicleDef.ScaleDrawRatio(new Vector2(rect.width * 0.95f, rect.height * 0.95f));
-			bool elongated = rotDrawn.IsHorizontal || rotDrawn.IsDiagonal;
-
-			Vector2 displayOffset = vehicleDef.drawProperties.DisplayOffsetForRot(rotDrawn);
-			float scaledWidth = rectSize.x;
-			float scaledHeight = rectSize.y;
-			if (elongated)
+			string drawStep = string.Empty;
+			try
 			{
-				scaledWidth = rectSize.y;
-				scaledHeight = rectSize.x;
-			}
-			float offsetX = (rect.width - scaledWidth) / 2 + (displayOffset.x * rect.width);
-			float offsetY = (rect.height - scaledHeight) / 2 + (displayOffset.y * rect.height);
-			Rect adjustedRect = new Rect(rect.x + offsetX, rect.y + offsetY, rectSize.x, rectSize.y);
+				drawStep = "Setting rect and adjusted positioning.";
+				Vector2 rectSize = vehicleDef.ScaleDrawRatio(rect.size);
+				Rot8 rotDrawn = rot ?? vehicleDef.drawProperties.displayRotation;
 
-			Graphic_Vehicle graphic = VehicleTex.CachedGraphics[vehicleDef];
+				bool elongated = rotDrawn.IsHorizontal || rotDrawn.IsDiagonal;
 
-			PatternDef pattern = patternData?.patternDef;
-			pattern ??= VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData)?.patternDef ?? PatternDefOf.Default;
-
-			Color color1 = patternData?.color ?? vehicleDef.graphicData.color;
-			Color color2 = patternData?.colorTwo ?? vehicleDef.graphicData.color;
-			Color color3 = patternData?.colorThree ?? vehicleDef.graphicData.color;
-
-			float tiling = patternData?.tiles ?? vehicleDef.graphicData.tiles;
-			Vector2 displacement = patternData?.displacement ?? vehicleDef.graphicData.displacement;
-
-			Material material = null;
-			Texture2D mainTex = VehicleTex.VehicleTexture(vehicleDef, rotDrawn, out float texAngle);
-			if (pattern != null && graphic.Shader.SupportsRGBMaskTex())
-			{
-				MaterialRequestRGB matReq = new MaterialRequestRGB()
+				Vector2 displayOffset = vehicleDef.drawProperties.DisplayOffsetForRot(rotDrawn);
+				float scaledWidth = rectSize.x;
+				float scaledHeight = rectSize.y;
+				if (elongated)
 				{
-					mainTex = mainTex,
-					shader = patternData?.patternDef is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin.Shader : vehicleDef.graphic.Shader,
-					color = color1,
-					colorTwo = color2,
-					colorThree = color3,
-					tiles = tiling,
-					displacement = displacement,
-					properties = pattern.properties,
-					maskTex = (vehicleDef.graphic as Graphic_Vehicle).masks[rotDrawn.AsInt],
-					patternTex = pattern?[rotDrawn]
-				};
-				material = MaterialPoolExpanded.MatFrom(matReq);
+					scaledWidth = rectSize.y;
+					scaledHeight = rectSize.x;
+				}
+				float offsetX = (rect.width - scaledWidth) / 2 + (displayOffset.x * rect.width);
+				float offsetY = (rect.height - scaledHeight) / 2 + (displayOffset.y * rect.height);
+
+				Rect adjustedRect = new Rect(rect.x + offsetX, rect.y + offsetY, scaledWidth, scaledHeight);
+
+				drawStep = "Retrieving cached graphic and pattern";
+				Graphic_Vehicle graphic = VehicleTex.CachedGraphics[vehicleDef];
+
+				PatternDef pattern = patternData?.patternDef;
+				pattern ??= VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData)?.patternDef ?? PatternDefOf.Default;
+
+				drawStep = "Setting default color";
+				Color color1 = patternData?.color ?? vehicleDef.graphicData.color;
+				Color color2 = patternData?.colorTwo ?? vehicleDef.graphicData.color;
+				Color color3 = patternData?.colorThree ?? vehicleDef.graphicData.color;
+
+				float tiling = patternData?.tiles ?? vehicleDef.graphicData.tiles;
+				Vector2 displacement = patternData?.displacement ?? vehicleDef.graphicData.displacement;
+
+				Texture2D mainTex = VehicleTex.VehicleTexture(vehicleDef, rotDrawn, out float angle);
+				if (material is null && pattern != null && graphic.Shader.SupportsRGBMaskTex())
+				{
+					drawStep = $"Regenerating material for pattern={pattern.defName}";
+
+					MaterialRequestRGB matReq = new MaterialRequestRGB()
+					{
+						mainTex = mainTex,
+						shader = pattern is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin.Shader : vehicleDef.graphic.Shader,
+						color = color1,
+						colorTwo = color2,
+						colorThree = color3,
+						tiles = tiling,
+						displacement = displacement,
+						properties = pattern.properties,
+						maskTex = (vehicleDef.graphic as Graphic_Vehicle).masks[rotDrawn.AsInt],
+						patternTex = pattern?[rotDrawn]
+					};
+					material = MaterialPoolExpanded.MatFrom(matReq);
+				}
+				drawStep = "Attempting to retrieve turret overlays";
+				List<ValueTuple<Rect, Texture, Material, float, float>> overlays = new List<(Rect, Texture, Material, float, float)>();
+				if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets props)
+				{
+					overlays.AddRange(RetrieveTurretSettingsDrawProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer),
+						new PatternData(color1, color2, color3, pattern, displacement, tiling)));
+				}
+				drawStep = "Retrieving graphic overlays";
+				overlays.AddRange(RetrieveOverlaySettingsDrawProperties(rect, vehicleDef, rotDrawn));
+
+				drawStep = "Rendering overlays with layer < 0";
+				foreach (var overlay in overlays.Where(o => o.Item4 < 0).OrderBy(o => o.Item4))
+				{
+					UIElements.DrawTextureWithMaterialOnGUI(overlay.Item1, overlay.Item2, overlay.Item3, overlay.Item5);
+				}
+
+				drawStep = "Rendering main texture";
+				DrawVehicleFitted(adjustedRect, angle, mainTex, material);
+				
+				drawStep = "Rendering overlays with layer >= 0";
+				foreach (var overlay in overlays.Where(o => o.Item4 >= 0).OrderBy(o => o.Item4))
+				{
+					UIElements.DrawTextureWithMaterialOnGUI(overlay.Item1, overlay.Item2, overlay.Item3, overlay.Item5);
+				}
+				return string.Empty;
 			}
-
-			var drawOverlays = new List<ValueTuple<Rect, Texture, Material, float, float>>();
-			drawOverlays.AddRange(RetrieveOverlaySettingsDrawProperties(adjustedRect, vehicleDef, rotDrawn, graphicOverlays));
-			drawOverlays.AddRange(RetrieveTurretSettingsDrawProperties(adjustedRect, vehicleDef, rotDrawn, turrets, patternData));
-
-			foreach ((Rect overlayRect, Texture tex, Material mat, float yOffset, float angle) in drawOverlays.Where(o => o.Item4 < 0).OrderBy(o => o.Item4))
+			catch (Exception ex)
 			{
-				UIElements.DrawTextureWithMaterialOnGUI(overlayRect, tex, mat, angle);
+				SmashLog.Error($"Exception thrown while trying to draw <type>VehicleDef</type>=\"{vehicleDef?.defName ?? "Null"}\" Exception={ex.Message}");
 			}
+			return drawStep;
+		}
 
-			DrawVehicleFitted(adjustedRect, texAngle, mainTex, material);
-			//GenUI.DrawTextureWithMaterial(adjustedRect, VehicleTex.VehicleTexture(vehicleDef, rotDrawn), material);
-
-			foreach ((Rect overlayRect, Texture tex, Material mat, float yOffset, float angle) in drawOverlays.Where(o => o.Item4 >= 0).OrderBy(o => o.Item4))
+		public static void DrawVehicleFitted(Rect rect, VehicleDef vehicleDef, Rot4 rot, Material material)
+		{
+			Texture2D vehicleIcon = VehicleTex.VehicleTexture(vehicleDef, rot, out float angle);
+			Rect texCoords = new Rect(0, 0, 1, 1);
+			Vector2 texProportions = vehicleDef.graphicData.drawSize;
+			if (rot.IsHorizontal)
 			{
-				UIElements.DrawTextureWithMaterialOnGUI(overlayRect, tex, mat, angle);
+				float x = texProportions.x;
+				texProportions.x = texProportions.y;
+				texProportions.y = x;
 			}
+			Widgets.DrawTextureFitted(rect, vehicleIcon, GenUI.IconDrawScale(vehicleDef), texProportions, texCoords, angle, material);
+		}
+
+		public static void DrawVehicleFitted(Rect rect, float angle, Texture2D texture, Material material)
+		{
+			Widgets.DrawTextureFitted(rect, texture, 1, new Vector2(texture.width, texture.height), new Rect(0f, 0f, 1f, 1f), angle, material);
 		}
 
 		/// <summary>
@@ -422,129 +460,13 @@ namespace Vehicles
 						tiles = patternData.tiles,
 						displacement = patternData.displacement,
 						properties = patternData.patternDef.properties,
-						maskTex = turret.CannonGraphic.masks[0],
-						patternTex = patternData.patternDef?[rot]
+						maskTex = turret.CannonGraphic.masks[Rot8.North.AsInt],
+						patternTex = patternData.patternDef?[Rot8.North]
 					};
 					cannonMat = MaterialPoolExpanded.MatFrom(matReq);
 				}
 				yield return new ValueTuple<Rect, Texture, Material, float, float>(adjustedRect, turret.CannonTexture, cannonMat, turret.CannonGraphicData.drawOffset.y, turret.defaultAngleRotated + rot.AsAngle);
 			}
-		}
-
-		/// <summary>
-		/// Draw <paramref name="vehicleDef"/>
-		/// </summary>
-		/// <remarks><paramref name="material"/> may overwrite material used for vehicle</remarks>
-		/// <param name="rect"></param>
-		/// <param name="vehicleDef"></param>
-		/// <param name="material"></param>
-		public static string DrawVehicleDef(Rect rect, VehicleDef vehicleDef, Material material = null, PatternData patternData = null, Rot8? rot = null)
-		{
-			string drawStep = string.Empty;
-			try
-			{
-				drawStep = "Setting rect and adjusted positioning.";
-				Vector2 rectSize = vehicleDef.ScaleDrawRatio(rect.size);
-				Rot8 rotDrawn = rot ?? vehicleDef.drawProperties.displayRotation;
-
-				bool elongated = rotDrawn.IsHorizontal || rotDrawn.IsDiagonal;
-
-				Vector2 displayOffset = vehicleDef.drawProperties.DisplayOffsetForRot(rotDrawn);
-				float scaledWidth = rectSize.x;
-				float scaledHeight = rectSize.y;
-				if (elongated)
-				{
-					scaledWidth = rectSize.y;
-					scaledHeight = rectSize.x;
-				}
-				float offsetX = (rect.width - scaledWidth) / 2 + (displayOffset.x * rect.width);
-				float offsetY = (rect.height - scaledHeight) / 2 + (displayOffset.y * rect.height);
-
-				Rect adjustedRect = new Rect(rect.x + offsetX, rect.y + offsetY, scaledWidth, scaledHeight);
-				
-				drawStep = "Retrieving cached graphic and pattern";
-				Graphic_Vehicle graphic = VehicleTex.CachedGraphics[vehicleDef];
-
-				PatternDef pattern = patternData?.patternDef;
-				pattern ??= VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData)?.patternDef ?? PatternDefOf.Default;
-
-				drawStep = "Setting default color";
-				Color color1 = patternData?.color ?? vehicleDef.graphicData.color;
-				Color color2 = patternData?.colorTwo ?? vehicleDef.graphicData.color;
-				Color color3 = patternData?.colorThree ?? vehicleDef.graphicData.color;
-
-				float tiling = patternData?.tiles ?? vehicleDef.graphicData.tiles;
-				Vector2 displacement = patternData?.displacement ?? vehicleDef.graphicData.displacement;
-
-				Texture2D mainTex = VehicleTex.VehicleTexture(vehicleDef, rotDrawn, out float angle);
-				if (material is null && pattern != null && graphic.Shader.SupportsRGBMaskTex())
-				{
-					drawStep = $"Regenerating material for pattern={pattern.defName}";
-					
-					MaterialRequestRGB matReq = new MaterialRequestRGB()
-					{
-						mainTex = mainTex,
-						shader = pattern is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin.Shader : vehicleDef.graphic.Shader,
-						color = color1,
-						colorTwo = color2,
-						colorThree = color3,
-						tiles = tiling,
-						displacement = displacement,
-						properties = pattern.properties,
-						maskTex = (vehicleDef.graphic as Graphic_Vehicle).masks[rotDrawn.AsInt],
-						patternTex = pattern?[rotDrawn]
-					};
-					material = MaterialPoolExpanded.MatFrom(matReq);
-				}
-				drawStep = "Attempting to retrieve turret overlays";
-				List<ValueTuple<Rect, Texture, Material, float, float>> overlays = new List<(Rect, Texture, Material, float, float)>();
-				if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets props)
-				{
-					overlays.AddRange(RetrieveTurretSettingsDrawProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer),
-						new PatternData(color1, color2, color3, pattern, displacement, tiling)));
-				}
-				drawStep = "Retrieving graphic overlays";
-				overlays.AddRange(RetrieveOverlaySettingsDrawProperties(rect, vehicleDef, rotDrawn));
-
-				drawStep = "Rendering overlays with layer < 0";
-				foreach (var overlay in overlays.Where(o => o.Item4 < 0).OrderBy(o => o.Item4))
-				{
-					UIElements.DrawTextureWithMaterialOnGUI(overlay.Item1, overlay.Item2, overlay.Item3, overlay.Item5);
-				}
-				drawStep = "Rendering main texture";
-				DrawVehicleFitted(adjustedRect, angle, mainTex, material);
-				//GenUI.DrawTextureWithMaterial(adjustedRect, VehicleTex.VehicleTexture(vehicleDef, rotDrawn), material);
-				drawStep = "Rendering overlays with layer >= 0";
-				foreach (var overlay in overlays.Where(o => o.Item4 >= 0).OrderBy(o => o.Item4))
-				{
-					UIElements.DrawTextureWithMaterialOnGUI(overlay.Item1, overlay.Item2, overlay.Item3, overlay.Item5);
-				}
-				return string.Empty;
-			}
-			catch (Exception ex)
-			{
-				SmashLog.Error($"Exception thrown while trying to draw <type>VehicleDef</type>=\"{vehicleDef?.defName ?? "Null"}\" Exception={ex.Message}");
-			}
-			return drawStep;
-		}
-
-		public static void DrawVehicleFitted(Rect rect, VehicleDef vehicleDef, Rot4 rot, Material material)
-		{
-			Texture2D vehicleIcon = VehicleTex.VehicleTexture(vehicleDef, rot, out float angle);
-			Rect texCoords = new Rect(0, 0, 1, 1);
-			Vector2 texProportions = vehicleDef.graphicData.drawSize;
-			if (rot.IsHorizontal)
-			{
-				float x = texProportions.x;
-				texProportions.x = texProportions.y;
-				texProportions.y = x;
-			}
-			Widgets.DrawTextureFitted(rect, vehicleIcon, GenUI.IconDrawScale(vehicleDef), texProportions, texCoords, angle, material);
-		}
-
-		public static void DrawVehicleFitted(Rect rect, float angle, Texture2D texture, Material material)
-		{
-			Widgets.DrawTextureFitted(rect, texture, 1, new Vector2((float)texture.width, (float)texture.height), new Rect(0f, 0f, 1f, 1f), angle, material);
 		}
 
 		public static void DrawLinesBetweenTargets(VehiclePawn pawn, Job curJob, JobQueue jobQueue)

@@ -14,7 +14,7 @@ namespace Vehicles
 {
 	public class CompFueledTravel : VehicleAIComp
 	{
-		private const float EfficiencyTickMultiplier = 1 / GenDate.TicksPerDay;
+		private const float EfficiencyTickMultiplier = 1f / GenDate.TicksPerDay;
 		private const float CellOffsetIntVec3ToVector3 = 0.5f;
 		private const float TicksToCharge = 120;
 

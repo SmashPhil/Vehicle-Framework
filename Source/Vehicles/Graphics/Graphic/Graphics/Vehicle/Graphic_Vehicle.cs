@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using Verse;
 using RimWorld;
 using SmashTools;
@@ -52,6 +53,23 @@ namespace Vehicles
 					return maskMat.Second?[3];
 				}
 				return null;
+			}
+		}
+
+		public IEnumerable<Rot8> RotationsRenderableByUI
+		{
+			get
+			{
+				yield return Rot8.North;
+				yield return Rot8.South; //Can be rotated in UI if necessary
+				if (!eastFlipped)
+				{
+					yield return Rot8.East;
+				}
+				if (!westFlipped)
+				{
+					yield return Rot8.West;
+				}
 			}
 		}
 

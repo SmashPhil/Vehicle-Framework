@@ -6,11 +6,6 @@ namespace Vehicles
 {
 	public class VehicleComponent : IExposable
 	{
-		public static Color NeedsReplacement = new Color(0.75f, 0.45f, 0.45f);
-		public static Color ModerateDamage = new Color(0.55f, 0.55f, 0.55f);
-		public static Color MinorDamage = new Color(0.7f, 0.7f, 0.7f);
-		public static Color WorkingCondition = new Color(0.6f, 0.8f, 0.65f);
-
 		public static Gradient gradient;
 
 		public VehicleComponentProperties props;
@@ -92,17 +87,19 @@ namespace Vehicles
 			health = props.health;
 		}
 
-		public void Initialize(VehicleComponentProperties props)
+		public virtual void Initialize(VehicleComponentProperties props)
 		{
 			this.props = props;
 			
 			gradient = new Gradient()
 			{
 				colorKeys = new[] { new GradientColorKey(TexData.RedReadable, props.efficiency[0].x),
-									new GradientColorKey(NeedsReplacement, props.efficiency[1].x),
-									new GradientColorKey(ModerateDamage, props.efficiency[2].x),
-									new GradientColorKey(MinorDamage, props.efficiency[3].x),
-									new GradientColorKey(WorkingCondition, props.efficiency[4].x) }
+									new GradientColorKey(TexData.SevereDamage, props.efficiency[1].x),
+									new GradientColorKey(TexData.ModerateDamage, props.efficiency[2].x),
+									new GradientColorKey(TexData.MinorDamage, props.efficiency[3].x),
+									new GradientColorKey(TexData.WorkingCondition, props.efficiency[4].x),
+									new GradientColorKey(TexData.Enhanced, props.efficiency[4].x + 0.01f) //greater than 101% max efficiency
+				}
 			};
 		}
 

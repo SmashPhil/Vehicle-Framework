@@ -62,6 +62,20 @@ namespace Vehicles
 			Find.Selector.Select(vehicle);
 		}
 
+		[UnitTest(Category = "Vehicles", Name = "Color Dialog", GameState = GameState.Playing)]
+		private static void UnitTestColorDialog()
+		{
+			Map map = Find.CurrentMap ?? Find.Maps.FirstOrDefault();
+			VehiclePawn vehicle = (VehiclePawn)map.mapPawns.AllPawns.FirstOrDefault(p => p is VehiclePawn vehicle && vehicle.VehicleGraphic.Shader.SupportsRGBMaskTex());
+			if (map is null || vehicle is null)
+			{
+				SmashLog.Error($"Unable to execute unit test <method>UnitTestColorDialog</method> post load.");
+				return;
+			}
+			CameraJumper.TryJump(vehicle);
+			Find.Selector.Select(vehicle);
+		}
+
 		/// <summary>
 		/// Load up game, open update menu for all previous versions
 		/// </summary>

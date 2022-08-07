@@ -683,7 +683,7 @@ namespace Vehicles
 				{
 					Command_Action loadShip = new Command_Action
 					{
-						defaultLabel = "LoadShip".Translate(),
+						defaultLabel = "VF_LoadCargo".Translate(),
 						icon = VehicleDef.LoadCargoIcon,
 						action = delegate ()
 						{
@@ -726,7 +726,7 @@ namespace Vehicles
 				{
 					Command_Action unloadAll = new Command_Action
 					{
-						defaultLabel = "DisembarkAll".Translate(),
+						defaultLabel = "VF_DisembarkAllPawns".Translate(),
 						icon = VehicleTex.UnloadAll,
 						action = delegate ()
 						{
@@ -743,7 +743,7 @@ namespace Vehicles
 						{
 							Pawn currentPawn = handler.handlers.InnerListForReading[i];
 							Command_Action unload = new Command_Action();
-							unload.defaultLabel = "DisembarkSingle".Translate(currentPawn.LabelShort);
+							unload.defaultLabel = "VF_DisembarkSinglePawn".Translate(currentPawn.LabelShort);
 							unload.icon = VehicleTex.UnloadPassenger;
 							unload.action = delegate ()
 							{
@@ -752,12 +752,12 @@ namespace Vehicles
 							yield return unload;
 						}
 					}
-					if (SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), "fishing", VehicleDef.properties.fishing) && FishingCompatibility.fishingActivated)
+					if (SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.fishing), VehicleDef.properties.fishing) && FishingCompatibility.fishingActivated)
 					{
 						Command_Toggle fishing = new Command_Toggle
 						{
-							defaultLabel = "BoatFishing".Translate(),
-							defaultDesc = "BoatFishingDesc".Translate(),
+							defaultLabel = "VF_StartFishing".Translate(),
+							defaultDesc = "VF_StartFishingDesc".Translate(),
 							icon = VehicleTex.FishingIcon,
 							isActive = (() => currentlyFishing),
 							toggleAction = delegate ()
@@ -885,7 +885,7 @@ namespace Vehicles
 			}
 			if (statHandler.NeedsRepairs)
 			{
-				yield return new FloatMenuOption("RepairVehicle".Translate(LabelShort),
+				yield return new FloatMenuOption("VF_RepairVehicle".Translate(LabelShort),
 				delegate ()
 				{
 					Job job = new Job(JobDefOf_Vehicles.RepairVehicle, this);
@@ -1269,7 +1269,7 @@ namespace Vehicles
 			if (Nameable)
 			{
 				usedWidth += rect.width;
-				TooltipHandler.TipRegion(rect, "RenameVehicle".Translate(LabelShort));
+				TooltipHandler.TipRegionByKey(rect, "VF_RenameVehicleTooltip");
 				if (Widgets.ButtonImage(rect, VehicleTex.Rename))
 				{
 					Rename();
@@ -1279,7 +1279,7 @@ namespace Vehicles
 			if (VehicleGraphic.Shader.SupportsRGBMaskTex())
 			{
 				usedWidth += rect.width;
-				TooltipHandler.TipRegion(rect, "RecolorVehicle".Translate(LabelShort));
+				TooltipHandler.TipRegionByKey(rect, "VF_RecolorTooltip");
 				if (Widgets.ButtonImage(rect, VehicleTex.Recolor))
 				{
 					ChangeColor();

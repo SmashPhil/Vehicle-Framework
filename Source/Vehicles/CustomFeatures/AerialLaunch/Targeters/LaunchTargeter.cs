@@ -202,7 +202,7 @@ namespace Vehicles
 					}
 					TotalFuelCost = (float)Math.Round(finalFuelCost, 0);
 					TotalDistance = finalTileDistance;
-					string fuelCostLabel = $"{"VehicleFuelCost".Translate()}: {TotalFuelCost}";
+					string fuelCostLabel = "VF_VehicleFuelCost".Translate(TotalFuelCost);
 					Vector2 textSize = Text.CalcSize(fuelCostLabel);
 					Rect labelPosition = new Rect(mousePosition.x, mousePosition.y + textSize.y + 20f, textSize.x, textSize.y);
 					float bgWidth = textSize.x * 1.2f;
@@ -291,7 +291,7 @@ namespace Vehicles
 				}
 				if (FlightPath.Count > 0)
 				{
-					string destLabel = "VehicleDoubleClickShuttleTarget".Translate();
+					string destLabel = "VF_DoubleClickShuttleTarget".Translate();
 					Vector2 labelGetterText = Text.CalcSize(destLabel);
 					Rect destPosition = new Rect(start.x, start.y, 32f, 32f);
 					Rect rect = new Rect(destPosition.xMax, destPosition.y, 9999f, 100f);
@@ -301,7 +301,7 @@ namespace Vehicles
 					Graphics.DrawTexture(bgRect, TexUI.GrayTextBG);
 					GUI.color = textColor;
 					//GUI.Label(rect, destLabel);
-					WorldRendererUtility.DrawQuadTangentialToPlanet(start, BaseFeedbackTexSize * Find.WorldGrid.averageTileSize, 0.018f, WorldMaterials.CurTargetingMat, false, false, null);
+					WorldRendererUtility.DrawQuadTangentialToPlanet(start, BaseFeedbackTexSize * Find.WorldGrid.averageTileSize, 0.018f, WorldMaterials.CurTargetingMat);
 				}
 				if (FlightPath.Count < vehicle.CompVehicleLauncher.launchProtocol.MaxFlightNodes && arg.IsValid)
 				{
@@ -333,7 +333,7 @@ namespace Vehicles
 			foreach (FlightNode node in FlightPath)
 			{
 				int tile = node.tile;
-				float nodeDistance = WorldHelper.GetTileDistance(source, tile);//Ext_Math.SphericalDistance(start, Find.WorldGrid.GetTileCenter(tile));
+				float nodeDistance = WorldHelper.GetTileDistance(source, tile);
 				fuelCost += vehicle.CompVehicleLauncher.FuelNeededToLaunchAtDist(nodeDistance);
 				distance += nodeDistance;
 				source = tile;

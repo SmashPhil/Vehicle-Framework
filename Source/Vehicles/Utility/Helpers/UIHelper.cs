@@ -42,7 +42,7 @@ namespace Vehicles
 		public static void AddVehicleAndPawnSections(TransferableOneWayWidget pawnWidget, TransferableVehicleWidget vehicleWidget, List<TransferableOneWay> transferables)
 		{
 			IEnumerable<TransferableOneWay> source = transferables.Where(t => t.ThingDef.category == ThingCategory.Pawn);
-			vehicleWidget.AddSection("VehiclesTab".Translate(), source.Where(t => t.AnyThing is VehiclePawn vehicle && vehicle.CanMove));
+			vehicleWidget.AddSection("VF_Vehicles".Translate(), source.Where(t => t.AnyThing is VehiclePawn vehicle && vehicle.CanMove));
 			pawnWidget.AddSection("ColonistsSection".Translate(), source.Where(t => t.AnyThing is Pawn pawn && pawn.IsFreeColonist));
 			pawnWidget.AddSection("PrisonersSection".Translate(), source.Where(t => t.AnyThing is Pawn pawn && pawn.IsPrisoner));
 			pawnWidget.AddSection("CaptureSection".Translate(), source.Where(t => t.AnyThing is Pawn pawn && pawn.Downed && CaravanUtility.ShouldAutoCapture(pawn, Faction.OfPlayer)));

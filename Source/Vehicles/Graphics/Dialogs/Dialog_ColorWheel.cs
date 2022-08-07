@@ -42,13 +42,13 @@ namespace Vehicles
 
 		private void DoBottomButtons(Rect rect)
 		{
-			if (Widgets.ButtonText(rect, "Apply".Translate()))
+			if (Widgets.ButtonText(rect, "ApplyButton".Translate()))
 			{
 				onComplete(color);
 				Close(true);
 			}
 			rect.x += ButtonWidth;
-			if (Widgets.ButtonText(rect, "CancelAssigning".Translate()))
+			if (Widgets.ButtonText(rect, "CancelButton".Translate()))
 			{
 				Close(true);
 			}

@@ -99,7 +99,7 @@ namespace Vehicles
 			Rect cancelButtonRect = new Rect(LeftWindowEdge + 5f, BottomWindowEdge - 30f, 75f, 25f);
 
 			GUI.enabled = selectedNode != null && Vehicle.CompUpgradeTree.PrerequisitesMet(selectedNode.node);
-			if (Widgets.ButtonText(upgradeButtonRect, "Upgrade".Translate()) && !selectedNode.node.upgradeActive)
+			if (Widgets.ButtonText(upgradeButtonRect, "VF_Upgrade".Translate()) && !selectedNode.node.upgradeActive)
 			{
 				if (Vehicle.CompUpgradeTree.Disabled(selectedNode.node))
 				{
@@ -130,7 +130,7 @@ namespace Vehicles
 			GUI.enabled = true;
 			if (Vehicle.CompUpgradeTree.CurrentlyUpgrading)
 			{
-				if (Widgets.ButtonText(cancelButtonRect, "CancelUpgrade".Translate()))
+				if (Widgets.ButtonText(cancelButtonRect, "CancelButton".Translate()))
 				{
 					Vehicle.CompUpgradeTree.CancelUpgrade();
 				}

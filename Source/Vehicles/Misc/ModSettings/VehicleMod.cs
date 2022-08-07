@@ -207,18 +207,18 @@ namespace Vehicles
 		public void InitializeTabs()
 		{
 			tabs = new List<TabRecord>();
-			tabs.Add(new TabRecord("MainSettings".Translate(), delegate ()
+			tabs.Add(new TabRecord("VF_MainSettings".Translate(), delegate ()
 			{
 				CurrentSection = settings.main;
 			}, () => CurrentSection == settings.main));
 			if (ModifiableSettings)
 			{
-				tabs.Add(new TabRecord("Vehicles".Translate(), delegate()
+				tabs.Add(new TabRecord("VF_Vehicles".Translate(), delegate()
 				{
 					CurrentSection = settings.vehicles;
 				}, () => CurrentSection == settings.vehicles));
 				/*
-				tabs.Add(new TabRecord("VehicleUpgrades".Translate(), delegate()
+				tabs.Add(new TabRecord("VF_Upgrades".Translate(), delegate()
 				{
 					CurrentSection = settings.upgrades;
 				}, () => CurrentSection == settings.upgrades));
@@ -266,12 +266,12 @@ namespace Vehicles
 
 		public override string SettingsCategory()
 		{
-			return "Vehicles".Translate();
+			return "VF_Vehicles".Translate();
 		}
 
 		public static void ResetAllSettings()
 		{
-			Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("VehicleResetAllConfirmation".Translate(), delegate()
+			Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("DevModeResetAllConfirmation".Translate(), delegate()
 			{
 				ResetAllSettingsConfirmed();
 			}, false, null));

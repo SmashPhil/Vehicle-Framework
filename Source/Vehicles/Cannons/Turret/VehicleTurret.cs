@@ -89,6 +89,18 @@ namespace Vehicles
 
 		public Turret_RecoilTracker rTracker;
 
+		/* --------- CE hooks for compatibility --------- */
+		/// <summary>
+		/// (projectileDef, origin, launcher, shotAngle, shotRotation, shotHeight, shotSpeed, CE projectile)
+		/// </summary>
+		public static Func<ThingDef, Vector3, VehiclePawn, float, float, float, float, object> LaunchProjectileCE = null;
+
+		/// <summary>
+		/// (velocity, range, heightDiff, flyOverhead, gravityModifier, angle
+		/// </summary>
+		public static Func<float, float, float, bool, float, float> ProjectileAngleCE = null;
+		/* ---------------------------------------------- */
+
 		/// <summary>
 		/// Init from CompProperties
 		/// </summary>
@@ -821,7 +833,7 @@ namespace Vehicles
 			TryFindShootLineFromTo(TurretLocation.ToIntVec3(), cannonTarget, out ShootLine shootLine);
 			
 			float range = Vector3.Distance(TurretLocation, cannonTarget.CenterVector3);
-			IntVec3 c = cannonTarget.Cell + GenRadial.RadialPattern[Rand.Range(0, GenRadial.NumCellsInRadius(CurrentFireMode.spreadRadius * (range / turretDef.maxRange)))];
+			IntVec3 cell = cannonTarget.Cell + GenRadial.RadialPattern[Rand.Range(0, GenRadial.NumCellsInRadius(CurrentFireMode.spreadRadius * (range / turretDef.maxRange)))];
 			if (CurrentTurretFiring >= turretDef.projectileShifting.Count)
 			{
 				CurrentTurretFiring = 0;
@@ -840,33 +852,60 @@ namespace Vehicles
 			}
 			try
 			{
-				Projectile projectile2 = (Projectile)GenSpawn.Spawn(projectile, vehicle.Position, vehicle.Map, WipeMode.Vanish);
-				if (turretDef.ammunition != null)
+				if (LaunchProjectileCE is null)
 				{
-					ConsumeShellChambered();
-				}
-				if (turretDef.shotSound is null)
-				{
-					SoundDefOf_Ships.Explosion_PirateCannon.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map, false));
+					Projectile projectile2 = (Projectile)GenSpawn.Spawn(projectile, vehicle.Position, vehicle.Map, WipeMode.Vanish);
+					if (turretDef.ammunition != null)
+					{
+						ConsumeShellChambered();
+					}
+					if (turretDef.shotSound is null)
+					{
+						SoundDefOf_Ships.Explosion_PirateCannon.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map, false));
+					}
+					else
+					{
+						turretDef.shotSound.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map, false));
+					}
+					if (turretDef.projectileSpeed > 0)
+					{
+						projectile2.AllComps.Add(new CompTurretProjectileProperties(vehicle)
+						{
+							speed = turretDef.projectileSpeed > 0 ? turretDef.projectileSpeed : projectile2.def.projectile.speed,
+							hitflag = turretDef.hitFlags,
+							hitflags = turretDef.attachProjectileFlag
+						});
+					}
+					projectile2.Launch(vehicle, launchCell, cell, cannonTarget, projectile2.HitFlags, false, vehicle);
+					vehicle.vDrawer.rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
+					rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
+					PostTurretFire();
+					InitTurretMotes(launchCell);
 				}
 				else
 				{
-					turretDef.shotSound.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map, false));
-				}
-				if (turretDef.projectileSpeed > 0)
-				{
-					projectile2.AllComps.Add(new CompTurretProjectileProperties(vehicle)
+					float speed = turretDef.projectileSpeed > 0 ? turretDef.projectileSpeed : projectile.projectile.speed;
+					float swayAndSpread = Mathf.Atan2(CurrentFireMode.spreadRadius, MaxRange) * Mathf.Rad2Deg;
+					float sway = swayAndSpread * 0.84f;
+					float spread = swayAndSpread * 0.16f;
+					if (turretDef.GetModExtension<CETurretDataDefModExtension>() is CETurretDataDefModExtension turretData)
 					{
-						speed = turretDef.projectileSpeed > 0 ? turretDef.projectileSpeed : projectile2.def.projectile.speed,
-						hitflag = turretDef.hitFlags,
-						hitflags = turretDef.attachProjectileFlag
-					});
+						if (turretData.speed > 0)
+						{
+							speed = turretData.speed;
+						}
+						if (turretData.sway >= 0)
+						{
+							sway = turretData.sway;
+						}
+						if (turretData.spread >= 0)
+						{
+							spread = turretData.spread;
+						}
+					}
+					float distance = (launchCell - cannonTarget.CenterVector3).magnitude;
+					LaunchProjectileCE(projectile, launchCell, vehicle, ProjectileAngleCE(speed, distance, -0.5f, false, 1f), TurretRotation, 1f, speed);
 				}
-				projectile2.Launch(vehicle, launchCell, c, cannonTarget, projectile2.HitFlags, false, vehicle);
-				vehicle.vDrawer.rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
-				rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
-				PostTurretFire();
-				InitTurretMotes(launchCell);
 			}
 			catch (Exception ex)
 			{
@@ -1185,8 +1224,13 @@ namespace Vehicles
 						Log.Error("No saved or specified shell upon reload");
 						return;
 					}
-					int countToRefill = storedAmmo.stackCount >= turretDef.magazineCapacity - shellCount ? turretDef.magazineCapacity - shellCount : storedAmmo.stackCount;
+					int countToRefill = turretDef.magazineCapacity - shellCount; //storedAmmo.stackCount >= turretDef.magazineCapacity - shellCount ?  : storedAmmo.stackCount;
 					int countToTake = Mathf.CeilToInt(countToRefill * (float)turretDef.ammoCountPerCharge);
+					if (countToTake > storedAmmo.stackCount)
+					{
+						countToTake = storedAmmo.stackCount;
+						countToRefill = Mathf.CeilToInt(countToTake / (float)turretDef.ammoCountPerCharge);
+					}
 					Debug.Message($"StackCount: {storedAmmo.stackCount} Taking: {countToTake}");
 					vehicle.inventory.innerContainer.Take(storedAmmo, countToTake);
 					int additionalCount = 0;
