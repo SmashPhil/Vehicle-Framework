@@ -91,9 +91,9 @@ namespace Vehicles
 
 		/* --------- CE hooks for compatibility --------- */
 		/// <summary>
-		/// (projectileDef, origin, launcher, shotAngle, shotRotation, shotHeight, shotSpeed, CE projectile)
+		/// (projectileDef, origin, intendedTarget, launcher, shotAngle, shotRotation, shotHeight, shotSpeed, CE projectile)
 		/// </summary>
-		public static Func<ThingDef, Vector2, VehiclePawn, float, float, float, float, object> LaunchProjectileCE = null;
+		public static Func<ThingDef, Vector2, LocalTargetInfo, VehiclePawn, float, float, float, float, object> LaunchProjectileCE = null;
 
 		/// <summary>
 		/// (velocity, range, heightDiff, flyOverhead, gravityModifier, angle
@@ -897,7 +897,7 @@ namespace Vehicles
 						}
 					}
 					float distance = (launchCell - cannonTarget.CenterVector3).magnitude;
-					LaunchProjectileCE(projectile, new Vector2(launchCell.x, launchCell.z), vehicle, ProjectileAngleCE(speed, distance, -0.5f, false, 1f), -TurretRotation, 1f, speed);
+					LaunchProjectileCE(projectile, new Vector2(launchCell.x, launchCell.z), cannonTarget, vehicle, ProjectileAngleCE(speed, distance, -0.5f, false, 1f), -TurretRotation, 1f, speed);
 					vehicle.vDrawer.rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
 					rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
 					PostTurretFire();
