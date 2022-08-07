@@ -143,7 +143,7 @@ namespace Vehicles
 			VehicleIncidentSwapper.RegisterLordType(typeof(LordJob_ArmoredAssault));
 		}
 
-		internal static void ClearModConfig()
+		public static void ClearModConfig()
 		{
 			Utilities.DeleteConfig(VehicleMod.mod);
 		}
@@ -152,13 +152,6 @@ namespace Vehicles
 		{
 			AllMoveableVehicleDefs = DefDatabase<VehicleDef>.AllDefs.Where(v => v.vehicleMovementPermissions != VehiclePermissions.NotAllowed).ToList();
 			AllMoveableVehicleDefsCount = AllMoveableVehicleDefs.Count;
-		}
-
-		public static void OpenBetaDialog()
-		{
-#if BETA
-			Find.WindowStack.Add(new Dialog_BetaWindow());
-#endif
 		}
 	}
 }

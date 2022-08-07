@@ -7,52 +7,17 @@
   <!--Full description shown in update page-->
   <description>[title]Recent News[/title][font]Small[/font]
 I changed the PackageId of the framework to better match the name of the mod, so for anyone who has made a Vehicle add-on and specified a dependency in the About.xml or Manifest.xml files, you'll want to update it.
-[title]Bug Fixes[/title][font]Small[/font]
-This was a very big update with tons of changes. For a full list of all bugfixes, please visit the discord server #announcements channel
-- Fixed bug where vehicles would continue to path to their destination even after roles are no longer fulfilled (pawn dies while driving)
+[title]Bug Fixes &amp; Additional Changes[/title][font]Small[/font]
+This was a very big update with tons of changes. For a full list of all bugfixes, please visit the discord server #announcements channel.
 
-- Fixed bug where vehicle turrets continue to fire even after roles are no longer fulfilled (same as above)
-
-- Fixed bug where vehicle caravan could be instant sent on a tile that was impassable for a vehicle in the caravan, causing the caravan to despawn. Same issue would bug out the route planner.
-
-- Fixed bug where vehicle caravan FormCaravan dialog would not open AssignSeat dialog to put the vehicle in the caravan.
-
-- Fixed bug where AerialVehicles upon edge dropping for a settlement attack, would attempt to spawn at an edge cell clipping the edge of the map, causing a forced despawn.
-
-- Fixed issue where non-sea vehicles would use vanilla path resolve modes when starting a new path.
-
-- Fixed offset and scaling issues with vehicle UI rendering
-[title]Additional Changes[/title][font]Small[/font]
-- Reworked health mechanics of Vehicles to use similar (but stripped down) version of StatModifiers, StatParts, and StatDefs. This will allow defining of new stats with less effort, as well as allowing other modders to create StatParts to modify the final value.
-
-- Reworked damage modifiers to instead use vanilla DamageDef multipliers, rather than melee, ranged, and explosive multipliers.
-
-- Vehicles that reach 0% body integrity or 0% in every vehicle component will be destroyed, rather than spawning a building variant. Partial refund related to the cost of building is included.
-
-- Vehicles that are impassable on the map's tile will be disabled in the caravan formation dialog
-
-- Renamed VehicleTurretDef weaponType to turretType
-
-- Renamed VehicleTurretDef cannonSound to shotSound
-
-- Removed Mounted Laser Turret
-
-- Removed Smoke Launcher Turret
-
-- Added EventManager for hooking onto vehicle related events without requiring patches or new classes. Also allows for adding sounds during or after certain events.
-
-- Vehicles will now consume fuel on the world map equal to their consumption rate x world multiplier
-
-- Reworked Dialog_AssignSeats for more space and scroll rect
-
-- Reworked Vehicle icon rendering to accommodate fixed sizes given only 1 offset / scaling input in the xml.
+A small heads up, I've applied a hard reset of all VehicleFramework mod configs to ensure you pick up future changes after the bugfix where all fields were saving despite them not being modified.
 [title]Final Notes[/title][font]Small[/font]
 Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
 </description>
   <!--Static parameterless method to execute when update log is executed-->
-  <actionOnUpdate>VehicleHarmony.ClearModConfig</actionOnUpdate>
+  <actionOnUpdate>Vehicles.VehicleHarmony.ClearModConfig</actionOnUpdate>
   <!--Show update log on next startup.-->
-  <update>false</update>
+  <update>true</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
   <testing>false</testing>
   <!--Icon bar shown to the right of the mod's name-->
