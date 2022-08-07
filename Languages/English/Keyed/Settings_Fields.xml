@@ -49,7 +49,6 @@
 	<VehicleFuelConsumptionRateWorldMultiplier>World Multiplier</VehicleFuelConsumptionRateWorldMultiplier>
 	
 	<VehicleFuelConsumptionWorld>Fuel Consumption Multiplier (World)</VehicleFuelConsumptionWorld>
-	<VehicleFlySpeed>Fly Speed</VehicleFlySpeed>
 	<VehicleLaunchFixedMaxDistance>Fixed Max Distance</VehicleLaunchFixedMaxDistance>
 	<VehicleLaunchFixedMaxDistanceDisabled>None</VehicleLaunchFixedMaxDistanceDisabled>
 	<VehicleReconDistance>Recon Distance</VehicleReconDistance>
@@ -70,6 +69,5 @@
 	<ManhunterTargetsVehicleTooltip>Manhunter animals will target this vehicle.</ManhunterTargetsVehicleTooltip>
 	
 	<VehicleDamageInvulnerable>Invulnerable</VehicleDamageInvulnerable>
-	<VehicleTeleportation>Teleport</VehicleTeleportation>
 	<VehicleInstant>Instant</VehicleInstant>
 </LanguageData>

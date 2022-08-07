@@ -14,6 +14,7 @@ namespace Vehicles
 		public SettingsValueInfo modSettingsInfo;
 
 		public string formatString;
+		public ToStringStyle toStringStyle = ToStringStyle.Integer;
 		public EfficiencyOperationType operationType;
 
 		public Type workerClass = typeof(VehicleStatWorker);

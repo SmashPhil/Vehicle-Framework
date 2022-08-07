@@ -89,9 +89,7 @@ namespace Vehicles
 			{
 				folders += $"Item: {item.Key} Destination: {item.Value.First}\n";
 			}
-			Debug.Warning($"{VehicleHarmony.LogLabel} Additional Information:\n" +
-				$"MatCount: {maskMatPatterns.Count}\n" +
-				$"{folders}");
+			Debug.Warning($"{VehicleHarmony.LogLabel} Additional Information:\nMatCount: {maskMatPatterns.Count}\n{folders}");
 			return BaseContent.BadMat;
 		}
 

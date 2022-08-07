@@ -43,7 +43,7 @@ namespace Vehicles
 		public VehiclePawn Vehicle => parent as VehiclePawn;
 		public CompProperties_VehicleLauncher Props => props as CompProperties_VehicleLauncher;
 
-		public float FlySpeed => flySpeedModifier + SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.flySpeed), Props.flySpeed);
+		public float FlySpeed => flySpeedModifier + Vehicle.GetStatValue(VehicleStatDefOf.FlightSpeed);
 		public float FuelConsumptionWorldMultiplier => fuelEfficiencyWorldModifier + SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.fuelConsumptionWorldMultiplier), Props.fuelConsumptionWorldMultiplier);
 		public int FixedMaxDistance => SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.fixedLaunchDistanceMax), Props.fixedLaunchDistanceMax);
 		public bool SpaceFlight => SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.spaceFlight), Props.spaceFlight);

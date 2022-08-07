@@ -93,7 +93,7 @@ namespace Vehicles
 		/// <summary>
 		/// (projectileDef, origin, launcher, shotAngle, shotRotation, shotHeight, shotSpeed, CE projectile)
 		/// </summary>
-		public static Func<ThingDef, Vector3, VehiclePawn, float, float, float, float, object> LaunchProjectileCE = null;
+		public static Func<ThingDef, Vector2, VehiclePawn, float, float, float, float, object> LaunchProjectileCE = null;
 
 		/// <summary>
 		/// (velocity, range, heightDiff, flyOverhead, gravityModifier, angle
@@ -852,21 +852,14 @@ namespace Vehicles
 			}
 			try
 			{
+				if (turretDef.ammunition != null)
+				{
+					ConsumeShellChambered();
+				}
+				turretDef.shotSound?.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map));
 				if (LaunchProjectileCE is null)
 				{
 					Projectile projectile2 = (Projectile)GenSpawn.Spawn(projectile, vehicle.Position, vehicle.Map, WipeMode.Vanish);
-					if (turretDef.ammunition != null)
-					{
-						ConsumeShellChambered();
-					}
-					if (turretDef.shotSound is null)
-					{
-						SoundDefOf_Ships.Explosion_PirateCannon.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map, false));
-					}
-					else
-					{
-						turretDef.shotSound.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map, false));
-					}
 					if (turretDef.projectileSpeed > 0)
 					{
 						projectile2.AllComps.Add(new CompTurretProjectileProperties(vehicle)
@@ -904,7 +897,11 @@ namespace Vehicles
 						}
 					}
 					float distance = (launchCell - cannonTarget.CenterVector3).magnitude;
-					LaunchProjectileCE(projectile, launchCell, vehicle, ProjectileAngleCE(speed, distance, -0.5f, false, 1f), TurretRotation, 1f, speed);
+					LaunchProjectileCE(projectile, new Vector2(launchCell.x, launchCell.z), vehicle, ProjectileAngleCE(speed, distance, -0.5f, false, 1f), -TurretRotation, 1f, speed);
+					vehicle.vDrawer.rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
+					rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
+					PostTurretFire();
+					InitTurretMotes(launchCell);
 				}
 			}
 			catch (Exception ex)

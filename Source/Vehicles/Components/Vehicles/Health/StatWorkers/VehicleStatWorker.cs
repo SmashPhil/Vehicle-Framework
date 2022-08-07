@@ -79,10 +79,10 @@ namespace Vehicles
 				GUI.DrawTexture(rect, TexUI.HighlightTex);
 			}
 			GUI.color = Color.white;
-			Widgets.Label(new Rect(0f, curY, leftRect.width * 0.55f, 30f), statDef.LabelCap);
+			Widgets.Label(new Rect(0f, curY, leftRect.width * 0.65f, 30f), statDef.LabelCap);
 			float baseValue = GetBaseValue(vehicle.VehicleDef);
 			Color effColor = baseValue == 0 ? TexData.WorkingCondition : VehicleComponent.gradient.Evaluate(GetValue(vehicle) / baseValue);
-			Widgets.Label(new Rect(leftRect.width * 0.65f, curY, leftRect.width * 0.45f, 30f), StatValueFormatted(vehicle).Colorize(effColor));
+			Widgets.Label(new Rect(leftRect.width * 0.65f, curY, leftRect.width * 0.35f, 30f), StatValueFormatted(vehicle).Colorize(effColor));
 			Rect rect2 = new Rect(0f, curY, leftRect.width, 20f);
 			if (Mouse.IsOver(rect2))
 			{
@@ -94,7 +94,7 @@ namespace Vehicles
 
 		public virtual string StatValueFormatted(VehiclePawn vehicle)
 		{
-			string output = GetValue(vehicle).ToString();
+			string output = GetValue(vehicle).ToStringByStyle(statDef.toStringStyle);
 			if (!statDef.formatString.NullOrEmpty())
 			{
 				output = string.Format(statDef.formatString, output);

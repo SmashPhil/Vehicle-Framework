@@ -77,7 +77,7 @@ namespace Vehicles
 			ShaderTypeDef cutout = pattern is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin : shaderType;
 			if (cutout == null)
 			{
-				cutout = RGBShaderTypeDefOf.CutoutComplexRGB;
+				cutout = ShaderTypeDefOf.Cutout;
 			}
 			Shader shader = cutout.Shader;
 			cachedRGBGraphic = GraphicDatabaseRGB.Get(graphicClass, texPath, shader, drawSize, color, colorTwo, colorThree, tiles, displacement.x, displacement.y, this, shaderParameters);

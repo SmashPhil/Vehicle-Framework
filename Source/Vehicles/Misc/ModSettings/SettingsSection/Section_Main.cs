@@ -16,6 +16,7 @@ namespace Vehicles
 
 		/* General */
 		public bool modifiableSettings = true;
+		public bool useCustomShaders = true;
 		public bool fullVehiclePathing = true; //disable if you need every ounce of performance
 		public bool showDisabledVehicles = true;
 
@@ -56,6 +57,7 @@ namespace Vehicles
 
 			/* General */
 			modifiableSettings = true;
+			useCustomShaders = true;
 			fullVehiclePathing = true; //disable if you need every ounce of performance
 			showDisabledVehicles = true;
 
@@ -92,7 +94,8 @@ namespace Vehicles
 			Scribe_Values.Look(ref beachMultiplier, nameof(beachMultiplier), 0f);
 			Scribe_Values.Look(ref forceFactionCoastRadius, nameof(forceFactionCoastRadius), 1);
 
-			Scribe_Values.Look(ref modifiableSettings, nameof(modifiableSettings), true, true);
+			Scribe_Values.Look(ref modifiableSettings, nameof(modifiableSettings), true);
+			Scribe_Values.Look(ref useCustomShaders, nameof(useCustomShaders), true);
 			Scribe_Values.Look(ref fullVehiclePathing, nameof(fullVehiclePathing));
 			Scribe_Values.Look(ref showDisabledVehicles, nameof(showDisabledVehicles));
 
@@ -119,7 +122,6 @@ namespace Vehicles
 			Scribe_Values.Look(ref overrideDrawColors, nameof(overrideDrawColors), true);
 		}
 
-		//REDO - TRANSLATIONS
 		public override void DrawSection(Rect rect)
 		{
 			listingStandard = new Listing_Standard();
@@ -138,7 +140,8 @@ namespace Vehicles
 			
 			listingStandard.Header("VF_SettingsGeneral".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 			listingStandard.Gap(4);
-			listingStandard.CheckboxLabeled("VF_ModifiableSettings".Translate(), ref modifiableSettings, "VehiclesModifiableSettingsTooltip".Translate());
+			listingStandard.CheckboxLabeled("VF_ModifiableSettings".Translate(), ref modifiableSettings, "VF_ModifiableSettingsTooltip".Translate());
+			listingStandard.CheckboxLabeled("VF_CustomShaders".Translate(), ref useCustomShaders, "VF_CustomShadersTooltip".Translate());
 			listingStandard.CheckboxLabeled("VF_FullVehiclePathing".Translate(), ref fullVehiclePathing, "FullVehiclePathingTooltip".Translate());
 			bool checkBefore = showDisabledVehicles;
 			listingStandard.CheckboxLabeled("VF_ShowDisabledVehicles".Translate(), ref showDisabledVehicles, "VF_ShowDisabledVehiclesTooltip".Translate());
