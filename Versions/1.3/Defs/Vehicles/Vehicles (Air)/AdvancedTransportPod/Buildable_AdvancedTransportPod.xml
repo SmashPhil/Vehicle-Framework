@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<Vehicles.VehicleBuildDef ParentName="VehicleBaseBuildable">
+		<defName>AdvancedTransportPod_Blueprint</defName>
+		<label>Advanced Transport Pod</label>
+		<description>A high speed fighter jet for aerial support.</description>
+		
+		<graphicData>
+			<texPath>Vehicles/Air/AdvancedTransportPod/AdvancedTransportPod_north</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+			<drawSize>(3,3)</drawSize>
+			<drawRotated>false</drawRotated>
+		</graphicData>
+		
+		<rotatable>false</rotatable>
+
+		<statBases>
+			<MaxHitPoints>450</MaxHitPoints>
+			<WorkToBuild>45000</WorkToBuild>
+			<Flammability>0.05</Flammability>
+		</statBases>
+		
+		<size>(3,3)</size>
+		
+		<researchPrerequisites/>
+		
+		<costList>
+			<ComponentIndustrial>12</ComponentIndustrial>
+			<ComponentSpacer>4</ComponentSpacer>
+			<Steel>450</Steel>
+			<Plasteel>75</Plasteel>
+		</costList>
+		
+		<soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
+		
+		<thingToSpawn>AdvancedTransportPod</thingToSpawn>
+		<soundBuilt>ShipBigConstruction</soundBuilt>
+	</Vehicles.VehicleBuildDef>
+</Defs>

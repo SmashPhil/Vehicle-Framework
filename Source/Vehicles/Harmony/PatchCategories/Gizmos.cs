@@ -220,7 +220,7 @@ namespace Vehicles
 
 		public static bool VehicleMaterialOnBuildGizmo(Vector2 topLeft, float maxWidth, BuildableDef ___entDef, ref GizmoResult __result, Designator_Build __instance)
 		{
-			if (___entDef is VehicleBuildDef def && def.thingToSpawn.graphicData.Graphic.Shader.SupportsRGBMaskTex())
+			if (___entDef is VehicleBuildDef def)
 			{
 				float width = __instance.GetWidth(maxWidth);
 				__result = RenderHelper.GizmoOnGUIWithMaterial(__instance, new Rect(topLeft.x, topLeft.y, width, width), def);

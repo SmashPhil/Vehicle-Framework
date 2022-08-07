@@ -74,12 +74,19 @@ namespace Vehicles
 				cachedRGBGraphic = null;
 				return;
 			}
-			ShaderTypeDef cutout = pattern is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin : shaderType;
-			if (cutout == null)
+			ShaderTypeDef shaderTypeDef = pattern is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin : shaderType;
+			if (shaderTypeDef == null)
 			{
-				cutout = ShaderTypeDefOf.Cutout;
+				color = Color.white;
+				colorTwo = Color.white;
+				colorThree = Color.white;
+				shaderTypeDef = ShaderTypeDefOf.Cutout;
 			}
-			Shader shader = cutout.Shader;
+			if (!VehicleMod.settings.main.useCustomShaders)
+			{
+				shaderTypeDef = shaderTypeDef.Shader.SupportsMaskTex() ? ShaderTypeDefOf.CutoutComplex : ShaderTypeDefOf.Cutout;
+			}
+			Shader shader = shaderTypeDef.Shader;
 			cachedRGBGraphic = GraphicDatabaseRGB.Get(graphicClass, texPath, shader, drawSize, color, colorTwo, colorThree, tiles, displacement.x, displacement.y, this, shaderParameters);
 			AccessTools.Field(typeof(GraphicData), "cachedGraphic").SetValue(this, cachedRGBGraphic);
 		}

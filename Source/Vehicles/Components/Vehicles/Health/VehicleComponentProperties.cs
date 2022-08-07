@@ -29,9 +29,10 @@ namespace Vehicles
 			{
 				efficiency = new SimpleCurve()
 				{
-					new CurvePoint(0.25f, 0),
-					new CurvePoint(0.35f, 0.35f),
-					new CurvePoint(0.75f, 0.75f),
+					new CurvePoint(0, 0),
+					new CurvePoint(0.25f, 0f),
+					new CurvePoint(0.4f, 0.4f),
+					new CurvePoint(0.7f, 0.7f),
 					new CurvePoint(0.85f, 1),
 					new CurvePoint(1, 1)
 				};

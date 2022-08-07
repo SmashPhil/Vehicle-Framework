@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<Vehicles.VehicleBuildDef ParentName="VehicleBaseBuildable">
+		<defName>HotAirBalloon_Blueprint</defName>
+		<label>Hot Air Balloon</label>
+		<description>A simple design which uses wood to generate the heat needed for flight. Due to being slow moving, not being able to carry much weight, and easy to shoot down, it is best used for nearby voyages with limited cargo.</description>
+		
+		<graphicData>
+			<texPath>Vehicles/Air/HotAirBalloon/HotAirBalloon_north</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+			<drawSize>(7,7)</drawSize>
+			<drawOffset>(0, 0, 3)</drawOffset>
+			<drawRotated>false</drawRotated>
+		</graphicData>
+		
+		<statBases>
+			<MaxHitPoints>500</MaxHitPoints>
+			<WorkToBuild>175</WorkToBuild>
+			<Flammability>0.75</Flammability>
+		</statBases>
+		
+		<size>(1,1)</size>
+		
+		<researchPrerequisites/>
+		
+		<costList>
+			<Cloth>350</Cloth>
+			<WoodLog>150</WoodLog>
+		</costList>
+		
+		<soundImpactDefault>BulletImpact_Wood</soundImpactDefault>
+		
+		<thingToSpawn>HotAirBalloon</thingToSpawn>
+		<soundBuilt>ShipBigConstruction</soundBuilt>
+	</Vehicles.VehicleBuildDef>
+</Defs>

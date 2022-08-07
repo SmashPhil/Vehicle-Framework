@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<Vehicles.VehicleDef ParentName="BaseSeaVehicle">
+		<defName>RowBoat</defName>
+		<label>Row Boat</label>
+		<description>A small sturdy boat for short travel across bodies of water.</description>
+		<altitudeLayer>LayingPawn</altitudeLayer>
+		<passability>PassThroughOnly</passability>
+		
+		<graphicData>
+			<texPath>Vehicles/Sea/RowBoat/RowBoat</texPath>
+			<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
+			<drawSize>(1, 1.72)</drawSize>
+			<shaderType>Cutout</shaderType>
+			<color>(120, 120, 120)</color>
+			<colorTwo>(0, 80, 0)</colorTwo>
+			<shadowData>
+				<volume>(0.4,0.1,0.4)</volume>
+			</shadowData>
+		</graphicData>
+		<fillPercent>1</fillPercent>
+		
+		<nameable>false</nameable>
+		<buildDef>RowBoat_Blueprint</buildDef>
+		
+		<size>(1, 1)</size>
+		
+		<vehicleMovementPermissions>DriverNeeded</vehicleMovementPermissions>
+		<vehicleCategory>Transport</vehicleCategory>
+		<techLevel>Industrial</techLevel>
+		<vehicleType>Sea</vehicleType>
+				
+		<statBases>
+			<Mass>35</Mass>
+			<ArmorRating_Blunt>1.0</ArmorRating_Blunt>
+			<ArmorRating_Sharp>1.0</ArmorRating_Sharp>
+			<MarketValue>85</MarketValue>
+			<Flammability>0.65</Flammability>
+		</statBases>
+		
+		<vehicleStats>
+			<MoveSpeed>1.5</MoveSpeed>
+			<CargoCapacity>75</CargoCapacity>
+			<RepairRate>5</RepairRate>
+		</vehicleStats>
+		
+		<properties>
+			<fishing>true</fishing>
+			<wakeMultiplier>1.5</wakeMultiplier>
+			<wakeSpeed>1</wakeSpeed>
+			
+			<healthLabel_Healthy>Operational</healthLabel_Healthy>
+			<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
+			<healthLabel_Immobile>Inoperable</healthLabel_Immobile>
+
+			<roles>
+				<li>
+					<key>driver</key>
+					<label>Driver</label>
+					<handlingTypes>
+						<li>Movement</li>
+					</handlingTypes>
+					<slots>1</slots>
+					<slotsToOperate>1</slotsToOperate>
+					<hitbox>
+						<side>Body</side>
+					</hitbox>
+				</li>
+				<li>
+					<key>passenger</key>
+					<label>Passenger</label>
+					<slots>1</slots>
+					<hitbox>
+						<side>Body</side>
+					</hitbox>
+				</li>
+			</roles>
+		</properties>
+		
+		<components>
+			<li>
+				<key>Hull</key>
+				<label>Hull</label>
+				<health>100</health>
+				<armor>0</armor>
+				<efficiencyWeight>10</efficiencyWeight>
+				
+				<categories>
+					<li>MoveSpeed</li>
+					<li>BodyIntegrity</li>
+				</categories>
+				<hitbox>
+					<side>Body</side>
+				</hitbox>
+			</li>
+		</components>
+	</Vehicles.VehicleDef>
+</Defs>

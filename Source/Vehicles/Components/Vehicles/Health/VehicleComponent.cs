@@ -17,17 +17,21 @@ namespace Vehicles
 
 		public float HealthPercent => Ext_Math.RoundTo(health / props.health, 0.01f);
 
-		public float Efficiency => props.efficiency.Evaluate(HealthPercent);
+		public float Efficiency => props.efficiency.Evaluate(HealthPercent); //Allow evaluating beyond 100% via stat parts
 
-		public string EfficiencyPercent => "VehicleStatPercent".Translate(Ext_Math.RoundTo(Efficiency * 100, 0.01f).ToString()).ToString().Colorize(EfficiencyColor);
-
-		public string ArmorPercent => "VehicleStatPercent".Translate(Ext_Math.RoundTo(props.armor * 100, 0.1f).ToString());
-
-		public string HealthPercentStringified => "VehicleStatPercent".Translate(HealthPercent * 100).ToString().Colorize(EfficiencyColor);
+		public float ArmorRating => Ext_Math.RoundTo(props.armor, 0.1f);
 
 		public Color EfficiencyColor => gradient.Evaluate(Efficiency);
 
-		public float TakeDamage(VehiclePawn vehicle, DamageInfo dinfo, IntVec3 cell)
+		public virtual bool ComponentIndicator => !props.explosionProperties.Empty;
+
+		public virtual void DrawIcon(Rect rect)
+		{
+			Widgets.DrawTextureFitted(rect, VehicleTex.WarningIcon, 1);
+			TooltipHandler.TipRegionByKey(rect, "VF_ExplosiveComponent");
+		}
+
+		public virtual float TakeDamage(VehiclePawn vehicle, DamageInfo dinfo, IntVec3 cell)
 		{
 			float damage = dinfo.Amount;
 			ReduceDamageFromArmor(ref damage, dinfo.ArmorPenetrationInt, out bool penetrated);
@@ -49,7 +53,7 @@ namespace Vehicles
 			return health > (props.health / 2) ? 0 : damage / 2;
 		}
 
-		public void HealComponent(float amount)
+		public virtual void HealComponent(float amount)
 		{
 			health += amount;
 			if (health > props.health)
@@ -58,7 +62,7 @@ namespace Vehicles
 			}
 		}
 
-		public void ReduceDamageFromArmor(ref float damage, float armorPenetration, out bool penetrate)
+		public virtual void ReduceDamageFromArmor(ref float damage, float armorPenetration, out bool penetrate)
 		{
 			float armorRating = props.armor - armorPenetration; 
 			penetrate = props.hitbox.fallthrough;
@@ -82,7 +86,7 @@ namespace Vehicles
 			Debug.Message($"Damaging: {props.label}\nArmor: {props.armor}\nPenetration: {armorPenetration}\nDamage: {damage}\nFallthrough: {penetrate}");
 		}
 
-		public void PostCreate()
+		public virtual void PostCreate()
 		{
 			health = props.health;
 		}
@@ -93,17 +97,18 @@ namespace Vehicles
 			
 			gradient = new Gradient()
 			{
-				colorKeys = new[] { new GradientColorKey(TexData.RedReadable, props.efficiency[0].x),
-									new GradientColorKey(TexData.SevereDamage, props.efficiency[1].x),
-									new GradientColorKey(TexData.ModerateDamage, props.efficiency[2].x),
-									new GradientColorKey(TexData.MinorDamage, props.efficiency[3].x),
-									new GradientColorKey(TexData.WorkingCondition, props.efficiency[4].x),
-									new GradientColorKey(TexData.Enhanced, props.efficiency[4].x + 0.01f) //greater than 101% max efficiency
+				colorKeys = new[] { new GradientColorKey(Color.gray, props.efficiency[0].x),
+									new GradientColorKey(TexData.RedReadable, props.efficiency[1].x),
+									new GradientColorKey(TexData.SevereDamage, props.efficiency[2].x),
+									new GradientColorKey(TexData.ModerateDamage, props.efficiency[3].x),
+									new GradientColorKey(TexData.MinorDamage, props.efficiency[4].x),
+									new GradientColorKey(TexData.WorkingCondition, props.efficiency[5].x),
+									new GradientColorKey(TexData.Enhanced, props.efficiency[5].x + 0.01f) //greater than 101% max efficiency
 				}
 			};
 		}
 
-		public void ExposeData()
+		public virtual void ExposeData()
 		{
 			Scribe_Values.Look(ref health, "health");
 		}

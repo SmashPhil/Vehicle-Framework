@@ -65,6 +65,8 @@ namespace Vehicles
 
 		public static readonly List<Texture2D> FireIcons = ContentFinder<Texture2D>.GetAllInFolder("Things/Special/Fire").ToList();
 
+		public static readonly Texture2D WarningIcon = ContentFinder<Texture2D>.Get("UI/Icons/WarningIcon");
+
 		public static readonly Texture2D FullBarTex = SolidColorMaterials.NewSolidColorTexture(new Color(0.35f, 0.35f, 0.2f));
 
 		public static readonly Texture2D EmptyBarTex = SolidColorMaterials.NewSolidColorTexture(Color.black);

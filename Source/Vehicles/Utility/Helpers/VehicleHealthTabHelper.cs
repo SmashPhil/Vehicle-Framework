@@ -10,10 +10,11 @@ namespace Vehicles
 {
 	public static class VehicleHealthTabHelper
 	{
-		public const float ComponentRowHeight = 20;
+		public const float ComponentRowHeight = 20f;
+		public const float ComponentIndicatorIconSize = 20f;
 
-		private static readonly Color MouseOverColor = new Color(0.75f, 0.75f, 0.75f, 0.1f);
-		private static readonly Color SelectedCompColor = new Color(0.5f, 0.5f, 0.5f, 0.1f);
+		private static readonly Color MouseOverColor = new Color(0.85f, 0.85f, 0.85f, 0.1f);
+		private static readonly Color AlternatingColor = new Color(0.75f, 0.75f, 0.75f, 0.1f);
 
 		private static ITab_Vehicle_Health.VehicleHealthTab onTab;
 		private static Vector2 componentTabScrollPos;
@@ -93,13 +94,21 @@ namespace Vehicles
 			}
 		}
 
-		public static void DrawComponentsInfo(Rect rect, VehiclePawn vehicle)
+		/// <summary>
+		/// Draw component list with health, efficiency, and armor values
+		/// </summary>
+		/// <param name="rect"></param>
+		/// <param name="vehicle"></param>
+		/// <param name="componentViewHeight">Cached height of full component list, taking into account extra space of longer labels</param>
+		public static void DrawComponentsInfo(Rect rect, VehiclePawn vehicle, float componentViewHeight)
 		{
 			Text.Font = GameFont.Small;
 			float textHeight = Text.CalcSize("VehicleComponentHealth".Translate()).y;
-			Rect topLabelRect = new Rect(rect.x, rect.y, rect.width / 4, textHeight);
+			float columnWidth = 75 - (ComponentIndicatorIconSize / 3f);
+			float labelWidth = rect.width - (columnWidth * 3) - ComponentIndicatorIconSize * 2;
+			//Skip header for component name column
+			Rect topLabelRect = new Rect(rect.x + labelWidth, rect.y, columnWidth, textHeight);
 
-			topLabelRect.x += topLabelRect.width;
 			Text.Anchor = TextAnchor.MiddleCenter;
 			Widgets.Label(topLabelRect, "VehicleComponentHealth".Translate());
 			topLabelRect.x += topLabelRect.width;
@@ -112,45 +121,37 @@ namespace Vehicles
 			Widgets.DrawLineHorizontal(rect.x, topLabelRect.y + textHeight / 1.25f, rect.width);
 			GUI.color = Color.white;
 
-			rect.y += textHeight / 1.25f;
+			rect.y += textHeight / 1.25f + 1; //+1 for H. line
 			rect.x += 2.5f;
 			rect.width -= 5;
 
-			float totalHeight = 0;
-			foreach (VehicleComponent component in vehicle.statHandler.components)
-			{
-				//float textHeight = Text.CalcHeight(component.props.label, labelWidth);
-				//float labelHeight = Mathf.Max(rect.height, textHeight);
-				//vehicle.statHandler.components.Count* ComponentRowHeight
-			}
-
-			Rect scrollView = new Rect(rect.x, topLabelRect.y + topLabelRect.height * 2, rect.width, vehicle.statHandler.components.Count * ComponentRowHeight);
-
+			Rect scrollView = new Rect(rect.x, rect.y + topLabelRect.height * 2, rect.width, componentViewHeight);
+			bool alternatingRow = false;
 			Widgets.BeginScrollView(rect, ref componentTabScrollPos, scrollView);
 			{
 				highlightedComponent = null;
-				float buttonY = scrollView.y;
+				float curY = scrollView.y;
 				bool highlighted = false;
 				foreach (VehicleComponent component in vehicle.statHandler.components)
 				{
-					Rect compRect = new Rect(rect.x, buttonY, rect.width, textHeight);
-					DrawCompRow(compRect, component);
+					Rect compRect = new Rect(rect.x, curY, rect.width - 16, ComponentRowHeight);
+					float usedHeight = DrawCompRow(compRect, component, labelWidth, columnWidth, alternatingRow);
 					TooltipHandler.TipRegion(compRect, "VehicleComponentClickMoreInfo".Translate());
-					if (Mouse.IsOver(compRect))
+					Rect highlightingRect = new Rect(compRect)
+					{
+						height = usedHeight
+					};
+					if (Mouse.IsOver(highlightingRect))
 					{
 						highlightedComponent = component;
-						Rect highlightRect = new Rect(compRect)
-						{
-							width = rect.width
-						};
-						Widgets.DrawBoxSolid(highlightRect, MouseOverColor);
+						Widgets.DrawBoxSolid(highlightingRect, MouseOverColor);
 						//For debug drawing of component hitbox
 						vehicle.HighlightedComponent = component;
 						highlighted = true;
 					}
 					else if (selectedComponent == component)
 					{
-						Widgets.DrawBoxSolid(compRect, SelectedCompColor);
+						Widgets.DrawBoxSolid(highlightingRect, MouseOverColor);
 						highlighted = true;
 					}
 					if (Widgets.ButtonInvisible(compRect))
@@ -165,7 +166,8 @@ namespace Vehicles
 							selectedComponent = null;
 						}
 					}
-					buttonY += ComponentRowHeight;
+					curY += usedHeight;
+					alternatingRow = !alternatingRow;
 				}
 				if (!highlighted)
 				{
@@ -175,25 +177,61 @@ namespace Vehicles
 			Widgets.EndScrollView();
 		}
 
-		private static float DrawCompRow(Rect rect, VehicleComponent component)
+		private static float DrawCompRow(Rect rect, VehicleComponent component, float labelWidth, float columnWidth, bool highlighted)
 		{
-			float labelWidth = rect.width / 4;
 			float textHeight = Text.CalcHeight(component.props.label, labelWidth);
 			float labelHeight = Mathf.Max(rect.height, textHeight);
 			Rect labelRect = new Rect(rect.x, rect.y, labelWidth, labelHeight);
+
+			if (highlighted)
+			{
+				//+16 for full coverage even if scrollbar is hidden
+				Widgets.DrawBoxSolid(new Rect(rect.x, rect.y, rect.width + 16, labelHeight), AlternatingColor);
+			}
 
 			Text.Anchor = TextAnchor.MiddleLeft;
 			Widgets.Label(labelRect, component.props.label);
 			labelRect.x += labelRect.width;
 
+			labelRect.width = columnWidth;
 			Text.Anchor = TextAnchor.MiddleCenter;
-			Widgets.Label(labelRect, component.HealthPercentStringified);
-			labelRect.x += labelRect.width;
-			Widgets.Label(labelRect, component.EfficiencyPercent);
-			labelRect.x += labelRect.width;
-			Widgets.Label(labelRect, component.ArmorPercent);
+			Widgets.Label(labelRect, component.HealthPercent.ToStringPercent().Colorize(component.ComponentEfficiencyColor()));
+			labelRect.x += columnWidth;
+			Widgets.Label(labelRect, component.Efficiency.ToStringPercent().Colorize(component.ComponentEfficiencyColor()));
+			labelRect.x += columnWidth;
+			Widgets.Label(labelRect, component.ArmorRating.ToStringPercent());
+			labelRect.x += columnWidth;
+
+			if (component.ComponentIndicator)
+			{
+				Rect iconRect = new Rect(labelRect.x, labelRect.y, ComponentIndicatorIconSize, ComponentIndicatorIconSize);
+				component.DrawIcon(iconRect);
+			}
 
 			return labelHeight;
+		}
+
+		public static Color ComponentEfficiencyColor(this VehicleComponent component)
+		{
+			float efficiency = component.Efficiency;
+
+			if (efficiency <= 0)
+			{
+				return Color.gray;
+			}
+			else if (efficiency < 0.4f)
+			{
+				return HealthUtility.RedColor;
+			}
+			else if (efficiency < 0.7f)
+			{
+				return HealthUtility.ImpairedColor;
+			}
+			else if (efficiency < 0.999f)
+			{
+				return HealthUtility.SlightlyImpairedColor;
+			}
+			return HealthUtility.GoodConditionColor;
 		}
 	}
 }

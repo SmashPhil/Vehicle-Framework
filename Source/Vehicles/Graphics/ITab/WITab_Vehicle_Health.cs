@@ -160,11 +160,11 @@ namespace Vehicles
 			labelRect.x += labelRect.width;
 
 			Text.Anchor = TextAnchor.MiddleCenter;
-			Widgets.Label(labelRect, component.HealthPercentStringified);
+			//Widgets.Label(labelRect, component.HealthPercentStringified);
 			labelRect.x += labelRect.width;
-			Widgets.Label(labelRect, component.EfficiencyPercent);
+			//Widgets.Label(labelRect, component.EfficiencyPercent);
 			labelRect.x += labelRect.width;
-			Widgets.Label(labelRect, component.ArmorPercent);
+			//Widgets.Label(labelRect, component.ArmorPercent);
 		}
 
 		private void DrawDetailedComponents(Rect rect)

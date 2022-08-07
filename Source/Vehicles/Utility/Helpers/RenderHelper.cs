@@ -448,7 +448,7 @@ namespace Vehicles
 					adjustedRect.height = rectSize.x;
 				}
 				Material cannonMat = turret.CannonGraphic.Shader.SupportsRGBMaskTex() ? new Material(turret.CannonGraphic.MatAt(patternData.patternDef)) : null;
-				if (patternData != VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData))
+				if (turret.CannonGraphic.Shader.SupportsRGBMaskTex() && patternData != VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData))
 				{
 					MaterialRequestRGB matReq = new MaterialRequestRGB()
 					{

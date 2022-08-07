@@ -22,7 +22,7 @@
 	
 Determines whether Vehicles should use values from the mod settings or Defs</VF_ModifiableSettingsTooltip>
 	<VF_CustomShaders>Use RGB Shaders</VF_CustomShaders>
-	<VF_CustomShaders>Enable use of custom shaders provided by the framework.</VF_CustomShaders>
+	<VF_CustomShadersTooltip>Enable use of custom shaders provided by the framework.</VF_CustomShadersTooltip>
 	<VF_FullVehiclePathing>Full Vehicle Pathing</VF_FullVehiclePathing>
 	<VF_FullVehiclePathingTooltip>Use the entire hitbox of the vehicle to determine pathing constraints (prevents Vehicles from going through smaller passages than hitbox size).</VF_FullVehiclePathingTooltip>
 	<VF_ShowDisabledVehicles>Show Disabled Vehicles</VF_ShowDisabledVehicles>

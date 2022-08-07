@@ -31,10 +31,8 @@
 	<VF_SwapColors>Cycle colors between each other.\nColorOne -> ColorTwo -> ColorThree</VF_SwapColors>
 	<VF_StartFishing>Fish</VF_StartFishing>
 	<VF_StartFishingDesc>Gather fish. Depth of water affects fishing chances.</VF_StartFishingDesc>
+	<VF_ExplosiveComponent>Explosive</VF_ExplosiveComponent>
 	
-	
-	
-	<VehicleStatPercent>{0}%</VehicleStatPercent>
 	
 	<VehiclePatternZoom>Zoom</VehiclePatternZoom>
 	<VehiclePatternZoomTooltip>Scale the pattern up or down.</VehiclePatternZoomTooltip>
