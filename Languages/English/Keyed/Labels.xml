@@ -2,6 +2,7 @@
 
 <LanguageData>
 	<!-- Labels and Titles -->
+	<VehicleFramework>Vehicle Framework</VehicleFramework>
 	<VF_Vehicles>Vehicles</VF_Vehicles>
 	
 	<!-- Gizmos / Float Menus -->

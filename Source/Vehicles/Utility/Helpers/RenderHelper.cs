@@ -908,10 +908,11 @@ namespace Vehicles
 		/// <param name="worldObject"></param>
 		public static bool RenderDynamicWorldObjects(WorldObject worldObject)
 		{
+			//Doesn't guarantee preventing dynamic drawing if def doesn't have expanding icon, second check required in DynamicDrawnWorldObject.Draw
 			if (VehicleMod.settings.main.dynamicWorldDrawing && worldObject is DynamicDrawnWorldObject dynamicObject)
-			{
-				dynamicObject.Draw();
-				return true;
+			{ 
+				//dynamicObject.Draw();
+				//return true;
 			}
 			return false;
 		}

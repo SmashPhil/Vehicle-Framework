@@ -46,8 +46,7 @@ namespace Vehicles
 			get
 			{
 				VehicleDef leadVehicleDef = (PawnsListForReading.First(v => v is VehiclePawn) as VehiclePawn).VehicleDef;
-				
-				if(!materials.ContainsKey(leadVehicleDef))
+				if (!materials.ContainsKey(leadVehicleDef))
 				{
 					var texture = VehicleTex.CachedTextureIcons[leadVehicleDef];
 					var material = MaterialPool.MatFrom(texture, ShaderDatabase.WorldOverlayTransparentLit, Color.white, WorldMaterials.WorldObjectRenderQueue);
@@ -57,7 +56,6 @@ namespace Vehicles
 			}
 		}
 
-		//REDO : Implement custom caravan icons
 		public override void Draw()
 		{
 			float averageTileSize = Find.WorldGrid.averageTileSize;

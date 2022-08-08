@@ -70,7 +70,8 @@ namespace Vehicles
 			{
 				dockedBoats.Add(dockedBoat);
 			}
-			if (obj is Settlement) //REDO - Temp check for allowing air defenses
+			return; //air defenses disabled for now
+			if (obj is Settlement) //TODO - Add check for what settlements can implement air defenses
 			{
 				foreach (AntiAircraftDef antiAircraft in DefDatabase<AntiAircraftDef>.AllDefs)
 				{

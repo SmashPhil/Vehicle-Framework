@@ -16,7 +16,6 @@ namespace Vehicles
 		public const int ButtonRows = 3;
 
 		public bool debugDraftAnyShip;
-		public bool debugDisableWaterPathing;
 
 		public bool debugSpawnVehicleBuildingGodMode;
 
@@ -30,17 +29,10 @@ namespace Vehicles
 		public bool debugPathCostChanges;
 		public bool debugDrawVehiclePathCosts;
 
-		public override Rect ButtonRect(Rect rect)
-		{
-			return new Rect(rect.x - 5, rect.y + 7.5f, rect.width, rect.height);
-		}
-
 		public override void ResetSettings()
 		{
 			base.ResetSettings();
 			debugDraftAnyShip = false;
-			debugDisableWaterPathing = false;
-
 			debugSpawnVehicleBuildingGodMode = false;
 
 			debugDrawCannonGrid = false;
@@ -57,8 +49,6 @@ namespace Vehicles
 		public override void ExposeData()
 		{
 			Scribe_Values.Look(ref debugDraftAnyShip, "debugDraftAnyShip");
-			Scribe_Values.Look(ref debugDisableWaterPathing, "debugDisableWaterPathing");
-
 			Scribe_Values.Look(ref debugSpawnVehicleBuildingGodMode, "debugSpawnVehicleBuildingGodMode");
 
 			Scribe_Values.Look(ref debugDrawCannonGrid, "debugDrawCannonGrid");
@@ -74,65 +64,50 @@ namespace Vehicles
 
 		public override void DrawSection(Rect rect)
 		{
-			Rect devMode = rect.ContractedBy(20);
+			Rect devModeRect = rect.ContractedBy(20);
 			float buttonRowHeight = (ButtonHeight * ButtonRows + VerticalGap * (ButtonRows - 1));
-			devMode.height = devMode.height - buttonRowHeight;
-
-			var color = GUI.color;
+			devModeRect.height = devModeRect.height - buttonRowHeight;
 			
-			if (!Prefs.DevMode)
-			{
-				GUI.enabled = false;
-				GUI.color = UIElements.InactiveColor;
-			}
 			listingStandard = new Listing_Standard();
-			listingStandard.ColumnWidth = devMode.width / 2;
-			listingStandard.Begin(devMode);
+			listingStandard.ColumnWidth = devModeRect.width / 2;
+			listingStandard.Begin(devModeRect);
 			{
-				listingStandard.Header("DevModeVehicles".Translate(), ListingExtension.BannerColor, GameFont.Medium, TextAnchor.MiddleCenter);
+				listingStandard.Header("VF_DevMode_Logging".Translate(), ListingExtension.BannerColor, GameFont.Medium, TextAnchor.MiddleCenter);
+				listingStandard.CheckboxLabeled("VF_DevMode_DebugLogging".Translate(), ref debugLogging, "VF_DevMode_DebugLoggingTooltip".Translate());
+				listingStandard.CheckboxLabeled("VF_DevMode_DebugPathCostRecalculationLogging".Translate(), ref debugPathCostChanges, "VF_DevMode_DebugPathCostRecalculationLoggingTooltip".Translate());
+				listingStandard.CheckboxLabeled("VF_DevMode_DebugWriteVehiclePathingCosts".Translate(), ref debugDrawVehiclePathCosts, "VF_DevMode_DebugWriteVehiclePathingCostsTooltip".Translate());
 
-				listingStandard.GapLine(16);
+				listingStandard.Header("VF_DevMode_Troubleshooting".Translate(), ListingExtension.BannerColor, GameFont.Medium, TextAnchor.MiddleCenter);
+				listingStandard.CheckboxLabeled("VF_DevMode_DebugDraftAnyVehicle".Translate(), ref debugDraftAnyShip, "VF_DevMode_DebugDraftAnyVehicleTooltip".Translate());
+				listingStandard.CheckboxLabeled("VF_DevMode_DebugSpawnVehiclesGodMode".Translate(), ref debugSpawnVehicleBuildingGodMode, "VF_DevMode_DebugSpawnVehiclesGodModeTooltip".Translate());
 
-				listingStandard.CheckboxLabeled("DebugLogging".Translate(), ref debugLogging, "DebugLoggingTooltip".Translate());
-				listingStandard.CheckboxLabeled("DebugPathCostRecalculationLogging".Translate(), ref debugPathCostChanges, "DebugPathCostRecalculationLoggingTooltip".Translate());
-				listingStandard.CheckboxLabeled("DebugWriteVehiclePathingCosts".Translate(), ref debugDrawVehiclePathCosts, "DebugWriteVehiclePathingCostsTooltip".Translate());
+				listingStandard.Header("VF_DevMode_Drawers".Translate(), ListingExtension.BannerColor, GameFont.Medium, TextAnchor.MiddleCenter);
+				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawUpgradeNodeGrid".Translate(), ref debugDrawNodeGrid, "VF_DevMode_DebugDrawUpgradeNodeGridTooltip".Translate());
+				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawHitbox".Translate(), ref debugDrawHitbox, "VF_DevMode_DebugDrawHitboxTooltip".Translate());
+				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawVehicleTracks".Translate(), ref debugDrawVehicleTracks, "VF_DevMode_DebugDrawVehicleTracksTooltip".Translate());
+				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawBumpers".Translate(), ref debugDrawBumpers, "VF_DevMode_DebugDrawBumpersTooltip".Translate());
 
-				listingStandard.GapLine(16);
-
-				listingStandard.CheckboxLabeled("DebugDraftAnyVehicle".Translate(), ref debugDraftAnyShip, "DebugDraftAnyVehicleTooltip".Translate());
-				listingStandard.CheckboxLabeled("DebugDisablePathing".Translate(), ref debugDisableWaterPathing, "DebugDisablePathingTooltip".Translate());
-				listingStandard.CheckboxLabeled("DebugSpawnVehiclesGodMode".Translate(), ref debugSpawnVehicleBuildingGodMode, "DebugSpawnVehiclesGodModeTooltip".Translate());
-
-				listingStandard.GapLine(16);
-
-				listingStandard.CheckboxLabeled("DebugDrawUpgradeNodeGrid".Translate(), ref debugDrawNodeGrid, "DebugDrawUpgradeNodeGridTooltip".Translate());
-				listingStandard.CheckboxLabeled("DebugDrawHitbox".Translate(), ref debugDrawHitbox, "DebugDrawHitboxTooltip".Translate());
-				listingStandard.CheckboxLabeled("DebugDrawVehicleTracks".Translate(), ref debugDrawVehicleTracks, "DebugDrawVehicleTracksTooltip".Translate());
-				listingStandard.CheckboxLabeled("DebugDrawBumpers".Translate(), ref debugDrawBumpers, "DebugDrawBumpersTooltip".Translate());
-
-				listingStandard.GapLine(16);
+				//listingStandard.GapLine(16);
 			}
 			listingStandard.End();
 
-			Rect devModeButtonsRect = new Rect(devMode);
-			devModeButtonsRect.y = devMode.yMax;
+			Rect devModeButtonsRect = new Rect(devModeRect);
+			devModeButtonsRect.y = devModeRect.yMax;
 			devModeButtonsRect.height = buttonRowHeight;
 
-			listingStandard.ColumnWidth = devMode.width / 3;
+			listingStandard.ColumnWidth = devModeRect.width / 3;
 			listingStandard.Begin(devModeButtonsRect);
 			{
-				if (listingStandard.ButtonText("ShowRecentNews".Translate()))
+				if (listingStandard.ButtonText("VF_DevMode_ShowRecentNews".Translate()))
 				{
 					ShowAllUpdates();
 				}
-				if (listingStandard.ButtonText("OpenQuickTestSettings".Translate()))
+				if (listingStandard.ButtonText("VF_DevMode_OpenQuickTestSettings".Translate()))
 				{
 					Find.WindowStack.Add(new Dialog_UnitTesting());
 				}
 			}
 			listingStandard.End();
-
-			GUI.color = color;
 		}
 
 		internal void ShowAllUpdates()

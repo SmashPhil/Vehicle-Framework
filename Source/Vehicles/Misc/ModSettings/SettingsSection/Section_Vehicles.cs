@@ -33,14 +33,14 @@ namespace Vehicles
 			{
 				if (VehicleMod.selectedDef != null)
 				{
-					yield return new FloatMenuOption("DevModeResetVehicle".Translate(VehicleMod.selectedDef.LabelCap), delegate ()
+					yield return new FloatMenuOption("VF_DevMode_ResetVehicle".Translate(VehicleMod.selectedDef.LabelCap), delegate ()
 					{
 						SettingsCustomizableFields.PopulateSaveableFields(VehicleMod.selectedDef, true);
 					});
 				}
-				yield return new FloatMenuOption("DevModeResetAllVehicles".Translate(), () => ResetSettings());
+				yield return new FloatMenuOption("VF_DevMode_ResetAllVehicles".Translate(), () => ResetSettings());
 
-				yield return new FloatMenuOption("DevModeResetAll".Translate(), delegate ()
+				yield return new FloatMenuOption("VF_DevMode_ResetAll".Translate(), delegate ()
 				{
 					VehicleMod.ResetAllSettings();
 				});

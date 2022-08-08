@@ -274,7 +274,7 @@ namespace Vehicles
 				Close(true);
 			}
 			buttonRect.x += ButtonWidth;
-			if (Widgets.ButtonText(buttonRect, "CancelAssigning".Translate()))
+			if (Widgets.ButtonText(buttonRect, "CancelButton".Translate()))
 			{
 				Close(true);
 			}

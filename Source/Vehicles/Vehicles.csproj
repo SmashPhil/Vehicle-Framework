@@ -621,6 +621,7 @@
     <Compile Include="Graphics\Textures\TexData.cs" />
     <Compile Include="Graphics\VehicleGhostUtility.cs" />
     <Compile Include="Utility\Extensions\Ext_Caravan.cs" />
+    <Compile Include="Utility\Extensions\GUIUtility.cs" />
     <Compile Include="Utility\Extensions\Ext_Settings.cs" />
     <Compile Include="Utility\Extensions\Ext_Vehicles.cs" />
     <Compile Include="Utility\Helpers\AchievementsHelper.cs" />

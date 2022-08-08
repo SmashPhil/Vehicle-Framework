@@ -57,6 +57,7 @@ namespace Vehicles
 
 		private Material vehicleMat;
 		private Material vehicleMatNonLit;
+		private Material material;
 
 		protected List<Graphic_Rotator> rotatorGraphics = new List<Graphic_Rotator>();
 
@@ -78,7 +79,7 @@ namespace Vehicles
 
 		protected virtual float RotatorSpeeds => 59;
 
-		private Material VehicleMat
+		public virtual Material VehicleMat
 		{
 			get
 			{
@@ -95,7 +96,7 @@ namespace Vehicles
 			}
 		}
 
-		private Material VehicleMatNonLit
+		public virtual Material VehicleMatNonLit
 		{
 			get
 			{
@@ -109,6 +110,18 @@ namespace Vehicles
 					renderQueue = WorldMaterials.WorldObjectRenderQueue
 				};
 				return vehicleMatNonLit;
+			}
+		}
+
+		public override Material Material
+		{
+			get
+			{
+				if (material == null)
+				{
+					material = MaterialPool.MatFrom(VehicleTex.CachedTextureIconPaths.TryGetValue(vehicle.VehicleDef, VehicleTex.DefaultVehicleIconTexPath), ShaderDatabase.WorldOverlayTransparentLit, WorldMaterials.WorldObjectRenderQueue);
+				}
+				return material;
 			}
 		}
 
@@ -137,7 +150,7 @@ namespace Vehicles
 					InitializeFacing();
 				}
 				bool rotateTexture = vehicle.CompVehicleLauncher.Props.faceDirectionOfTravel;
-				if (transitionPct <= 0)
+				if (VehicleMod.settings.main.dynamicWorldDrawing && transitionPct <= 0)
 				{
 					Vector3 normalized = DrawPos.normalized;
 					Vector3 direction = Vector3.Cross(normalized, rotateTexture ? directionFacing : Vector3.down);
@@ -151,23 +164,7 @@ namespace Vehicles
 				}
 				else
 				{
-					Rect rect = ExpandableWorldObjectsUtility.ExpandedIconScreenRect(this);
-					if (ExpandingIconFlipHorizontal)
-					{
-						rect.x = rect.xMax;
-						rect.width *= -1f;
-					}
-					if (Event.current.type != EventType.Repaint)
-					{
-						return;
-					}
-					Matrix4x4 matrix = GUI.matrix;
-					if (rotateTexture)
-					{
-						UI.RotateAroundPivot(Quaternion.LookRotation(flightPath.First.center - position).eulerAngles.y, rect.center);
-					}
-					GenUI.DrawTextureWithMaterial(rect, VehicleTex.VehicleTexture(vehicle.VehicleDef, Rot4.North, out _), VehicleMatNonLit);
-					GUI.matrix = matrix;
+					WorldRendererUtility.DrawQuadTangentialToPlanet(DrawPos, 0.7f * averageTileSize, 0.015f, Material);
 				}
 			}
 		}
@@ -212,38 +209,19 @@ namespace Vehicles
 				}
 				if (vehicle.CompVehicleLauncher.ControlInFlight || !vehicle.CompVehicleLauncher.inFlight)
 				{
-					if (false /*vehicle.CompFueledTravel.EmptyTank*/) //Temporary unreachable
+					Command_Action launchCommand = new Command_Action()
 					{
-						Command_Action glideCommand = new Command_Action()
+						defaultLabel = "CommandLaunchGroup".Translate(),
+						defaultDesc = "CommandLaunchGroupDesc".Translate(),
+						icon = VehicleTex.LaunchCommandTex,
+						alsoClickIfOtherInGroupClicked = false,
+						action = delegate ()
 						{
-							defaultLabel = "CommandGlideLand".Translate(),
-							defaultDesc = "CommandGlidLandDesc".Translate(),
-							icon = VehicleTex.TradeCommandTex,
-							alsoClickIfOtherInGroupClicked = false,
-							action = delegate ()
-							{
-								LaunchTargeter.Instance.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(GlideToTargetOnMap), this, true, VehicleTex.TargeterMouseAttachment, false, null,
-									(GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, Tile, path, fuelCost));
-							}
-						};
-						yield return glideCommand;
-					}
-					else
-					{
-						Command_Action launchCommand = new Command_Action()
-						{
-							defaultLabel = "CommandLaunchGroup".Translate(),
-							defaultDesc = "CommandLaunchGroupDesc".Translate(),
-							icon = VehicleTex.LaunchCommandTex,
-							alsoClickIfOtherInGroupClicked = false,
-							action = delegate ()
-							{
-								LaunchTargeter.Instance.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseTargetOnMap), this, true, VehicleTex.TargeterMouseAttachment, false, null,
-									(GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, Tile, path, fuelCost));
-							}
-						};
-						yield return launchCommand;
-					}
+							LaunchTargeter.Instance.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseTargetOnMap), this, true, VehicleTex.TargeterMouseAttachment, false, null,
+								(GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, Tile, path, fuelCost));
+						}
+					};
+					yield return launchCommand;
 				}
 				if (!vehicle.CompVehicleLauncher.inFlight)
 				{

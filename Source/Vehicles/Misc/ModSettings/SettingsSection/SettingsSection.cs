@@ -18,9 +18,9 @@ namespace Vehicles
 		{
 			get
 			{
-				yield return new FloatMenuOption("DevModeResetPage".Translate(), () => ResetSettings());
+				yield return new FloatMenuOption("VF_DevMode_ResetPage".Translate(), () => ResetSettings());
 
-				yield return new FloatMenuOption("DevModeResetAll".Translate(), delegate ()
+				yield return new FloatMenuOption("VF_DevMode_ResetAll".Translate(), delegate ()
 				{
 					VehicleMod.ResetAllSettings();
 				});

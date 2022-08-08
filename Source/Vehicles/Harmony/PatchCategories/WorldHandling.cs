@@ -20,12 +20,12 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldPawns), nameof(WorldPawns.RemoveAndDiscardPawnViaGC)),
 				prefix: new HarmonyMethod(typeof(WorldHandling),
 				nameof(DoNotRemoveVehicleObjects)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldDynamicDrawManager), name: nameof(WorldDynamicDrawManager.DrawDynamicWorldObjects)),
-				transpiler: new HarmonyMethod(typeof(WorldHandling),
-				nameof(DrawDynamicAerialVehiclesTranspiler)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(ExpandableWorldObjectsUtility), name: nameof(ExpandableWorldObjectsUtility.ExpandableWorldObjectsOnGUI)),
-				transpiler: new HarmonyMethod(typeof(WorldHandling),
-				nameof(ExpandableIconDetourAerialVehicleTranspiler)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldDynamicDrawManager), name: nameof(WorldDynamicDrawManager.DrawDynamicWorldObjects)),
+			//	transpiler: new HarmonyMethod(typeof(WorldHandling),
+			//	nameof(DrawDynamicAerialVehiclesTranspiler)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(ExpandableWorldObjectsUtility), name: nameof(ExpandableWorldObjectsUtility.ExpandableWorldObjectsOnGUI)),
+			//	transpiler: new HarmonyMethod(typeof(WorldHandling),
+			//	nameof(ExpandableIconDetourAerialVehicleTranspiler)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldObjectsHolder), "AddToCache"),
 				postfix: new HarmonyMethod(typeof(WorldHandling),
 				nameof(AddVehicleObjectToCache)));

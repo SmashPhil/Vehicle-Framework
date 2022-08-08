@@ -43,20 +43,6 @@ namespace Vehicles
 			Vehicle.HighlightedComponent = null;
 		}
 
-		private void PushGUIStatus()
-		{
-			originalFont = Text.Font;
-			originalAnchor = Text.Anchor;
-			originalGUIColor = GUI.color;
-		}
-		
-		private void ResetGUI()
-		{
-			Text.Font = originalFont;
-			Text.Anchor = originalAnchor;
-			GUI.color = originalGUIColor;
-		}
-
 		private void RecacheComponentListHeight(float width, float lineHeight = VehicleHealthTabHelper.ComponentRowHeight)
 		{
 			componentListHeight = 0;
@@ -69,7 +55,7 @@ namespace Vehicles
 
 		protected override void FillTab()
 		{
-			PushGUIStatus();
+			GUIUtility.PushGUIState();
 			
 			try
 			{
@@ -85,12 +71,12 @@ namespace Vehicles
 				infoPanelRect.yMin += 11f; //Extra space for tab, excluded from componentPanelRect for top options
 
 				VehicleHealthTabHelper.DrawHealthInfo(infoPanelRect, vehicle: Vehicle);
-				ResetGUI();
+				GUIUtility.ResetGUIState();
 				VehicleHealthTabHelper.DrawComponentsInfo(componentPanelRect, vehicle: Vehicle, componentViewHeight: componentListHeight);
 			}
 			finally
 			{
-				ResetGUI();
+				GUIUtility.Close();
 			}
 		}
 

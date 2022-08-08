@@ -121,7 +121,11 @@ namespace Vehicles
 
 		public static readonly Material RangeCircle_Close = MaterialPool.MatFrom("UI/RangeField_Close", ShaderDatabase.MoteGlow);
 
+		public static readonly Texture2D DefaultVehicleIcon = ContentFinder<Texture2D>.Get(DefaultVehicleIconTexPath);
+
 		public static readonly Dictionary<VehicleDef, Texture2D> CachedTextureIcons = new Dictionary<VehicleDef, Texture2D>();
+
+		public static readonly Dictionary<VehicleDef, string> CachedTextureIconPaths = new Dictionary<VehicleDef, string>();
 
 		public static readonly Dictionary<(VehicleDef, Rot4), Texture2D> CachedVehicleTextures = new Dictionary<(VehicleDef, Rot4), Texture2D>();
 
@@ -173,11 +177,12 @@ namespace Vehicles
 						else
 						{
 							tex = ContentFinder<Texture2D>.Get(iconFilePath);
-							cachedTextureFilepaths.Add(iconFilePath, tex);
+							cachedTextureFilepaths[iconFilePath] = tex;
 						}
 						tasks.AppendLine("Finalizing caching");
-						CachedGraphics.Add(vehicleDef, graphic);
-						CachedTextureIcons.Add(vehicleDef, tex);
+						CachedGraphics[vehicleDef] = graphic;
+						CachedTextureIcons[vehicleDef] = tex;
+						CachedTextureIconPaths[vehicleDef] = iconFilePath;
 					}
 					else
 					{

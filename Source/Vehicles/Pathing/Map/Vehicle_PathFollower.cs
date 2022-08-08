@@ -449,16 +449,7 @@ namespace Vehicles
 
 		private void TryEnterNextPathCell()
 		{
-			if (VehicleMod.settings.debug.debugDisableWaterPathing)
-			{
-				if (vehicle.IsBoat() && vehicle.beached)
-				{
-					vehicle.RemoveBeachedStatus();
-				}
-				return;
-			}
-
-			var vehicleTrack = vehicle.GetSortedComp<CompVehicleTracks>();
+			CompVehicleTracks vehicleTrack = vehicle.GetSortedComp<CompVehicleTracks>();
 			if (vehicleTrack != null)
 			{
 				vehicleTrack.TakeStep();

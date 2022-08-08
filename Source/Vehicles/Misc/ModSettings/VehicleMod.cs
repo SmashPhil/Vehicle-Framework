@@ -224,7 +224,7 @@ namespace Vehicles
 				}, () => CurrentSection == settings.upgrades));
 				*/
 			}
-			tabs.Add(new TabRecord("DevModeVehicles".Translate(), delegate()
+			tabs.Add(new TabRecord("VF_DevMode".Translate(), delegate()
 			{
 				CurrentSection = settings.debug;
 			}, () => CurrentSection == settings.debug));
@@ -266,12 +266,12 @@ namespace Vehicles
 
 		public override string SettingsCategory()
 		{
-			return "VF_Vehicles".Translate();
+			return "VehicleFramework".Translate();
 		}
 
 		public static void ResetAllSettings()
 		{
-			Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("DevModeResetAllConfirmation".Translate(), delegate()
+			Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("VF_DevMode_ResetAllConfirmation".Translate(), delegate()
 			{
 				ResetAllSettingsConfirmed();
 			}, false, null));

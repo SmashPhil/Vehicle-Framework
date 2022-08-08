@@ -34,15 +34,10 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="__instance"></param>
 		/// <param name="value"></param>
-		/// <returns></returns>
 		public static bool DraftedVehiclesCanMove(Pawn_DraftController __instance, bool value)
 		{
 			if(__instance.pawn is VehiclePawn vehicle)
 			{
-				if (VehicleMod.settings.debug.debugDisableWaterPathing && vehicle.beached)
-				{
-					vehicle.RemoveBeachedStatus();
-				}
 				if (value && !__instance.Drafted)
 				{
 					if (!VehicleMod.settings.debug.debugDraftAnyShip && (vehicle.CompFueledTravel?.EmptyTank ?? false))
