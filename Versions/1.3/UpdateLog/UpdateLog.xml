@@ -11,6 +11,8 @@
 - Fixed issue with DynamicDrawnWorldObjects on the world map where the mod setting wasn't properly applied
 
 - Fixed bug where air defenses were still drawing their perimeter radius despite being disabled.
+
+- Fixed compatibility issue with XmlExtensions, which would cause a fatal error and CTD.
 [title]Additional Changes[/title][font]Small[/font]
 
 [title]Final Notes[/title][font]Small[/font]
