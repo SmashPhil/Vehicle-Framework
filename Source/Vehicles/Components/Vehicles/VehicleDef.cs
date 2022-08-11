@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
+using HarmonyLib;
 using Verse;
 using RimWorld;
 using RimWorld.Planet;
@@ -25,6 +27,7 @@ namespace Vehicles
 		public List<VehicleStatModifier> vehicleStats;
 
 		[PostToSettings(Label = "VehicleMovementPermissions", Translate = true, UISettingsType = UISettingsType.SliderEnum)]
+		[ActionOnSettingsInput(typeof(VehicleHarmony), nameof(VehicleHarmony.RecacheMoveableVehicleDefs))]
 		public VehiclePermissions vehicleMovementPermissions = VehiclePermissions.DriverNeeded;
 
 		[PostToSettings(Label = "VehicleCanCaravan", Translate = true, Tooltip = "VehicleCanCaravanTooltip", UISettingsType = UISettingsType.Checkbox)]
@@ -44,6 +47,13 @@ namespace Vehicles
 		
 		public VehicleDrawProperties drawProperties;
 
+		public Dictionary<VehicleEventDef, SoundDef> soundOneShotsOnEvent = new Dictionary<VehicleEventDef, SoundDef>();
+		//<Start Sustainer, Stop Sustainer>
+		public Dictionary<Pair<VehicleEventDef, VehicleEventDef>, SoundDef> soundSustainersOnEvent = new Dictionary<Pair<VehicleEventDef, VehicleEventDef>, SoundDef>();
+
+		public List<Type> designatorTypes = new List<Type>();
+
+		public string draftLabel = "[MISSING]";
 		/// <summary>
 		/// Auto-generated <c>PawnKindDef</c> that has been assigned for this VehicleDef.
 		/// </summary>
@@ -99,10 +109,11 @@ namespace Vehicles
 			{
 				components.OrderBy(c => c.hitbox.side == VehicleComponentPosition.BodyNoOverlap).ForEach(c => c.ResolveReferences(this));
 			}
+			designatorTypes ??= new List<Type>();
 			drawProperties ??= new VehicleDrawProperties();
 			properties ??= new VehicleProperties();
 			properties.ResolveReferences(this);
-
+			
 			if (VehicleMod.settings.vehicles.defaultGraphics.NullOrEmpty())
 			{
 				VehicleMod.settings.vehicles.defaultGraphics = new Dictionary<string, PatternData>();

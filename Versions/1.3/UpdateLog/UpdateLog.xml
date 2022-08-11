@@ -13,8 +13,12 @@
 - Fixed bug where air defenses were still drawing their perimeter radius despite being disabled.
 
 - Fixed compatibility issue with XmlExtensions, which would cause a fatal error and CTD.
-[title]Additional Changes[/title][font]Small[/font]
 
+- Fixed bug where changing a vehicle's movement permissions would not update cached moveable defs, requiring a restart.
+[title]Additional Changes[/title][font]Small[/font]
+- Modified chance of instant death when boat sinks over deep water
+
+- Added Drowning hediff that applies to pawns in sinking ship (proportional to manipulation / movement capacities average)
 [title]Final Notes[/title][font]Small[/font]
 Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
 </description>

@@ -74,6 +74,8 @@ namespace Vehicles
 		public float projectileSpeed = -1;
 		public List<float> projectileShifting = new List<float>();
 
+		public Type restrictionType;
+
 		public override void ResolveReferences()
 		{
 			base.ResolveReferences();

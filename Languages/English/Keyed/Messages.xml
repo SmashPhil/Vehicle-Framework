@@ -18,9 +18,6 @@
 	<NotEnoughCannonCrew>Not enough colonists in {0} to operate {1}.</NotEnoughCannonCrew>
 	<NameIsInvalid>Name invalid for Vehicle.</NameIsInvalid>
 	<VehicleGainsName>{0} has been named {1}</VehicleGainsName>
-	<ShipSunkLabel>Boat Sunk</ShipSunkLabel>
-	<ShipSunkDeep>{0} has sunk to the depths of the ocean and has taken with it: {1}</ShipSunkDeep>
-	<ShipSunkShallow>{0} has sunk but is still salvageable.</ShipSunkShallow>
 	<ShipOutOfFood>No food in {0} with Pawns onboard</ShipOutOfFood>
 	<MessagePawnBoardedFormingCaravan>{0} has boarded the {1} and is ready for departure.</MessagePawnBoardedFormingCaravan>
 	<MessageCantAddWaypointBecauseNoShip>Must have a boat in order to travel across {0}</MessageCantAddWaypointBecauseNoShip>

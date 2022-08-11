@@ -16,12 +16,7 @@
 		
 		<!-- Temporary until icons are fixed and vehicle prices are balanced -->
 		<tradeability>None</tradeability>
-		
-		<vehicleStats>
-			<MoveSpeed>3.75</MoveSpeed>
-			<CargoCapacity>200</CargoCapacity>
-			<RepairRate>1.5</RepairRate>
-		</vehicleStats>
+		<draftLabel>Start Engine</draftLabel>
 		
 		<statBases>
 			<Mass>100</Mass>
@@ -33,6 +28,23 @@
 			<!-- Redundant value, vehicles don't have meat anyways. Serves as a final stop-gap so no vehicle meat is ever spawned -->
 			<MeatAmount>0</MeatAmount> 
 		</statBases>
+		
+		<vehicleStats>
+			<MoveSpeed>3.75</MoveSpeed>
+			<CargoCapacity>200</CargoCapacity>
+			<RepairRate>1.5</RepairRate>
+		</vehicleStats>
+		
+		<soundOneShotsOnEvent>
+			<li>
+				<key>DraftOn</key>
+				<value>DraftOn</value>
+			</li>
+			<li>
+				<key>DraftOff</key>
+				<value>DraftOff</value>
+			</li>
+		</soundOneShotsOnEvent>
 		
 		<inspectorTabs>
 			<li>Vehicles.ITab_Vehicle_Health</li>

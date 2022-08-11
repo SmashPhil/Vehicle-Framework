@@ -150,7 +150,7 @@ namespace Vehicles
 
 		internal static void RecacheMoveableVehicleDefs()
 		{
-			AllMoveableVehicleDefs = DefDatabase<VehicleDef>.AllDefs.Where(v => v.vehicleMovementPermissions != VehiclePermissions.NotAllowed).ToList();
+			AllMoveableVehicleDefs = DefDatabase<VehicleDef>.AllDefs.Where(vehicleDef => SettingsCache.TryGetValue(vehicleDef, typeof(VehicleDef), nameof(vehicleDef.vehicleMovementPermissions), vehicleDef.vehicleMovementPermissions) > VehiclePermissions.NotAllowed).ToList();
 			AllMoveableVehicleDefsCount = AllMoveableVehicleDefs.Count;
 		}
 	}

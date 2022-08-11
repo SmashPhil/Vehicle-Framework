@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 using HarmonyLib;
 using Verse;
 using Verse.Sound;
@@ -26,6 +27,15 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(DesignationCategoryDef), nameof(DesignationCategoryDef.ResolvedAllowedDesignators)),
 				postfix: new HarmonyMethod(typeof(Construction),
 				nameof(RemoveDisabledVehicles)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Designator_Deconstruct), nameof(Designator.CanDesignateThing)),
+				postfix: new HarmonyMethod(typeof(Construction),
+				nameof(AllowDeconstructVehicle)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenLeaving), nameof(GenLeaving.DoLeavingsFor), new Type[] { typeof(Thing), typeof(Map), typeof(DestroyMode), typeof(List<Thing>) }),
+				prefix: new HarmonyMethod(typeof(Construction),
+				nameof(DoUnsupportedVehicleRefunds)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn), nameof(Pawn.Destroy)),
+				transpiler: new HarmonyMethod(typeof(Construction),
+				nameof(ValidDestroyModeForVehicles)));
 		}
 
 		public static bool CompleteConstructionVehicle(Pawn worker, Frame __instance)
@@ -279,6 +289,53 @@ namespace Vehicles
 				}
 				yield return designator;
 			}
+		}
+
+		public static void AllowDeconstructVehicle(Thing t, ref AcceptanceReport __result)
+		{
+			if (t is VehiclePawn vehicle && vehicle.DeconstructibleBy(Faction.OfPlayer))
+			{
+				__result = true;
+			}
+		}
+
+		public static bool DoUnsupportedVehicleRefunds(Thing diedThing, Map map, DestroyMode mode, List<Thing> listOfLeavingsOut = null)
+		{
+			if (diedThing is VehiclePawn vehicle)
+			{
+				vehicle.RefundMaterials(map, mode, listOfLeavingsOut);
+				return false;
+			}
+			return true;
+		}
+
+		public static IEnumerable<CodeInstruction> ValidDestroyModeForVehicles(IEnumerable<CodeInstruction> instructions)
+		{
+			List<CodeInstruction> instructionList = instructions.ToList();
+
+			for (int i = 0; i < instructionList.Count; i++)
+			{
+				CodeInstruction instruction = instructionList[i];
+
+				if ((instruction.opcode == OpCodes.Brfalse || instruction.opcode == OpCodes.Brfalse_S) && !instructionList.OutOfBounds(i - 1) && instructionList[i - 1].opcode == OpCodes.Ldarg_1)
+				{
+					List<Label> labels = instruction.labels;
+					yield return instruction;
+					instruction = instructionList[++i];
+
+					yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+					yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
+					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(Construction), nameof(VehicleValidDestroyMode)));
+					yield return new CodeInstruction(opcode: OpCodes.Brtrue, operand: labels.FirstOrDefault());
+				}
+
+				yield return instruction;
+			}
+		}
+
+		public static bool VehicleValidDestroyMode(Pawn pawn, DestroyMode destroyMode)
+		{
+			return pawn is VehiclePawn && destroyMode != DestroyMode.QuestLogic && destroyMode != DestroyMode.FailConstruction && destroyMode != DestroyMode.WillReplace;
 		}
 	}
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text;
 using UnityEngine;
 using HarmonyLib;
 using RimWorld;
@@ -26,6 +27,8 @@ namespace Vehicles
 		public VehicleAI vehicleAI;
 		[Unsaved]
 		public VehicleGraphicOverlay graphicOverlay;
+		[Unsaved]
+		public VehicleSustainers sustainers;
 
 		public PatternData patternData;
 		public RetextureDef retexture;
@@ -56,6 +59,8 @@ namespace Vehicles
 		public VehicleMovementStatus movementStatus = VehicleMovementStatus.Online;
 		public NavigationCategory navigationCategory = NavigationCategory.Opportunistic;
 
+		public PatternData patternToPaint;
+
 		internal VehicleComponent HighlightedComponent { get; set; }
 		public CellRect Hitbox { get; private set; }
 		public float CachedAngle { get; set; }
@@ -65,15 +70,17 @@ namespace Vehicles
 		public IntVec3 FollowerCell { get; protected set; }
 
 		public Dictionary<VehicleEventDef, EventTrigger> EventRegistry { get; set; }
-		public List<Sustainer> ActiveSustainers { get; set; } = new List<Sustainer>();
 
-		public bool CanMove => GetStatValue(VehicleStatDefOf.MoveSpeed) > 0.1f && SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), nameof(VehicleDef.vehicleMovementPermissions), VehicleDef.vehicleMovementPermissions) >= VehiclePermissions.DriverNeeded && movementStatus == VehicleMovementStatus.Online;
+		public VehiclePermissions MovementPermissions => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), nameof(VehicleDef.vehicleMovementPermissions), VehicleDef.vehicleMovementPermissions);
+		public bool CanMove => GetStatValue(VehicleStatDefOf.MoveSpeed) > 0.1f && MovementPermissions > VehiclePermissions.NotAllowed && movementStatus == VehicleMovementStatus.Online;
 		public bool CanMoveFinal => CanMove && (PawnCountToOperateFullfilled || VehicleMod.settings.debug.debugDraftAnyShip);
 		public bool PawnCountToOperateFullfilled => PawnCountToOperateLeft <= 0;
 
 		public VehicleDef VehicleDef => def as VehicleDef;
 
 		public bool Nameable => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), nameof(VehicleDef.nameable), VehicleDef.nameable);
+
+		public bool CanPaintNow => patternToPaint != null;
 
 		public override Vector3 DrawPos => Drawer.DrawPos;
 
@@ -649,48 +656,141 @@ namespace Vehicles
 
 		public override IEnumerable<Gizmo> GetGizmos()
 		{
-			if (CanMove)
+			if (MovementPermissions > VehiclePermissions.NotAllowed)
 			{
-				foreach (Gizmo gizmo in GizmoHelper.DraftGizmos(drafter))
+				foreach (Gizmo gizmo in this.VehicleGizmos())
 				{
 					yield return gizmo;
 				}
 			}
-			if (!Dead)
+
+			foreach (Type type in VehicleDef.designatorTypes)
 			{
-				if (!cargoToLoad.NullOrEmpty())
+				Designator designator = DesignatorCache.Get(type);
+				if (designator != null)
 				{
-					if (!cargoToLoad.NotNullAndAny(x => x.AnyThing != null && x.CountToTransfer > 0 && !inventory.innerContainer.Contains(x.AnyThing)))
-					{
-						cargoToLoad.Clear();
-					}
-					else
-					{
-						Command_Action cancelLoad = new Command_Action
-						{
-							defaultLabel = "DesignatorCancel".Translate(),
-							icon = VehicleDef.CancelCargoIcon,
-							action = delegate ()
-							{
-								Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(this, ReservationType.LoadVehicle);
-								cargoToLoad.Clear();
-							}
-						};
-						yield return cancelLoad;
-					}
+					yield return designator;
+				}
+			}
+
+			if (!cargoToLoad.NullOrEmpty())
+			{
+				if (!cargoToLoad.NotNullAndAny(x => x.AnyThing != null && x.CountToTransfer > 0 && !inventory.innerContainer.Contains(x.AnyThing)))
+				{
+					cargoToLoad.Clear();
 				}
 				else
 				{
-					Command_Action loadShip = new Command_Action
+					Command_Action cancelLoad = new Command_Action
 					{
-						defaultLabel = "VF_LoadCargo".Translate(),
-						icon = VehicleDef.LoadCargoIcon,
+						defaultLabel = "DesignatorCancel".Translate(),
+						icon = VehicleDef.CancelCargoIcon,
 						action = delegate ()
 						{
-							Find.WindowStack.Add(new Dialog_LoadCargo(this));
+							Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(this, ReservationType.LoadVehicle);
+							cargoToLoad.Clear();
 						}
 					};
-					yield return loadShip;
+					yield return cancelLoad;
+				}
+			}
+			else
+			{
+				Command_Action loadShip = new Command_Action
+				{
+					defaultLabel = "VF_LoadCargo".Translate(),
+					icon = VehicleDef.LoadCargoIcon,
+					action = delegate ()
+					{
+						Find.WindowStack.Add(new Dialog_LoadCargo(this));
+					}
+				};
+				yield return loadShip;
+			}
+
+			if (!Drafted)
+			{
+				Command_Action unloadAll = new Command_Action
+				{
+					defaultLabel = "VF_DisembarkAllPawns".Translate(),
+					icon = VehicleTex.UnloadAll,
+					action = delegate ()
+					{
+						DisembarkAll();
+						drafter.Drafted = false;
+					},
+					hotKey = KeyBindingDefOf.Misc2
+				};
+				yield return unloadAll;
+
+				foreach (VehicleHandler handler in handlers)
+				{
+					for (int i = 0; i < handler.handlers.Count; i++)
+					{
+
+						Pawn currentPawn = handler.handlers.InnerListForReading[i];
+						Command_Action_PawnDrawer unloadAction = new Command_Action_PawnDrawer();
+						unloadAction.defaultLabel = "VF_DisembarkSinglePawn".Translate(currentPawn.LabelShort);
+						unloadAction.pawn = currentPawn;
+						unloadAction.action = delegate ()
+						{
+							DisembarkPawn(currentPawn);
+						};
+						yield return unloadAction;
+					}
+				}
+				if (SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.fishing), VehicleDef.properties.fishing) && FishingCompatibility.fishingActivated)
+				{
+					Command_Toggle fishing = new Command_Toggle
+					{
+						defaultLabel = "VF_StartFishing".Translate(),
+						defaultDesc = "VF_StartFishingDesc".Translate(),
+						icon = VehicleTex.FishingIcon,
+						isActive = (() => currentlyFishing),
+						toggleAction = delegate ()
+						{
+							currentlyFishing = !currentlyFishing;
+						}
+					};
+					yield return fishing;
+				}
+			}
+			if (this.GetLord()?.LordJob is LordJob_FormAndSendVehicles formCaravanLordJob)
+			{
+				Command_Action forceCaravanLeave = new Command_Action
+				{
+					defaultLabel = "ForceLeaveCaravan".Translate(),
+					defaultDesc = "ForceLeaveCaravanDesc".Translate(),
+					icon = VehicleTex.CaravanIcon,
+					activateSound = SoundDefOf.Tick_Low,
+					action = delegate ()
+					{
+						formCaravanLordJob.ForceCaravanLeave();
+						Messages.Message("ForceLeaveConfirmation".Translate(), MessageTypeDefOf.TaskCompletion);
+					}
+				};
+				yield return forceCaravanLeave;
+
+				Command_Action cancelCaravan = new Command_Action
+				{
+					defaultLabel = "CommandCancelFormingCaravan".Translate(),
+					defaultDesc = "CommandCancelFormingCaravanDesc".Translate(),
+					icon = TexCommand.ClearPrioritizedWork,
+					activateSound = SoundDefOf.Tick_Low,
+					action = delegate ()
+					{
+						CaravanFormingUtility.StopFormingCaravan(formCaravanLordJob.lord);
+					},
+					hotKey = KeyBindingDefOf.Designator_Cancel
+				};
+				yield return cancelCaravan;
+			}
+
+			foreach (ThingComp comp in AllComps)
+			{
+				foreach (Gizmo gizmo in comp.CompGetGizmosExtra())
+				{
+					yield return gizmo;
 				}
 			}
 
@@ -704,113 +804,6 @@ namespace Vehicles
 						statHandler.components.ForEach(c => c.HealComponent(float.MaxValue));
 					}
 				};
-
-				yield return new Command_Action
-				{
-					defaultLabel = "Path To Position",
-					action = () => vPather.StartPath(Position, PathEndMode.OnCell)
-				};
-			}
-
-			foreach (ThingComp comp in AllComps)
-			{
-				foreach (Gizmo gizmo in comp.CompGetGizmosExtra())
-				{
-					yield return gizmo;
-				}
-			}
-
-			if(!Dead)
-			{
-				if (!Drafted)
-				{
-					Command_Action unloadAll = new Command_Action
-					{
-						defaultLabel = "VF_DisembarkAllPawns".Translate(),
-						icon = VehicleTex.UnloadAll,
-						action = delegate ()
-						{
-							DisembarkAll();
-							drafter.Drafted = false;
-						},
-						hotKey = KeyBindingDefOf.Misc2
-					};
-					yield return unloadAll;
-				
-					foreach (VehicleHandler handler in handlers)
-					{
-						for (int i = 0; i < handler.handlers.Count; i++)
-						{
-							Pawn currentPawn = handler.handlers.InnerListForReading[i];
-							Command_Action unload = new Command_Action();
-							unload.defaultLabel = "VF_DisembarkSinglePawn".Translate(currentPawn.LabelShort);
-							unload.icon = VehicleTex.UnloadPassenger;
-							unload.action = delegate ()
-							{
-								DisembarkPawn(currentPawn);
-							};
-							yield return unload;
-						}
-					}
-					if (SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.fishing), VehicleDef.properties.fishing) && FishingCompatibility.fishingActivated)
-					{
-						Command_Toggle fishing = new Command_Toggle
-						{
-							defaultLabel = "VF_StartFishing".Translate(),
-							defaultDesc = "VF_StartFishingDesc".Translate(),
-							icon = VehicleTex.FishingIcon,
-							isActive = (() => currentlyFishing),
-							toggleAction = delegate ()
-							{
-								currentlyFishing = !currentlyFishing;
-							}
-						};
-						yield return fishing;
-					}
-				}
-				if (this.GetLord()?.LordJob is LordJob_FormAndSendVehicles formCaravanLordJob)
-				{
-					Command_Action forceCaravanLeave = new Command_Action
-					{
-						defaultLabel = "ForceLeaveCaravan".Translate(),
-						defaultDesc = "ForceLeaveCaravanDesc".Translate(),
-						icon = VehicleTex.CaravanIcon,
-						activateSound = SoundDefOf.Tick_Low,
-						action = delegate ()
-						{
-							formCaravanLordJob.ForceCaravanLeave();
-							Messages.Message("ForceLeaveConfirmation".Translate(), MessageTypeDefOf.TaskCompletion);
-						}
-					};
-					yield return forceCaravanLeave;
-
-					Command_Action cancelCaravan = new Command_Action
-					{
-						defaultLabel = "CommandCancelFormingCaravan".Translate(),
-						defaultDesc = "CommandCancelFormingCaravanDesc".Translate(),
-						icon = TexCommand.ClearPrioritizedWork,
-						activateSound = SoundDefOf.Tick_Low,
-						action = delegate ()
-						{
-							CaravanFormingUtility.StopFormingCaravan(formCaravanLordJob.lord);
-						},
-						hotKey = KeyBindingDefOf.Designator_Cancel
-					};
-					yield return cancelCaravan;
-				}
-			}
-
-			if (Prefs.DevMode)
-			{
-				//yield return new Command_Action()
-				//{
-				//	defaultLabel = "Set Pattern",
-				//	action = delegate ()
-				//	{
-				//		retexture = DefDatabase<RetextureDef>.GetNamed("AdvancedTransportPod_Old");
-				//		Notify_ColorChanged();
-				//	}
-				//};
 				yield return new Command_Action()
 				{
 					defaultLabel = "Give Random Pawn MentalState",
@@ -890,7 +883,75 @@ namespace Vehicles
 				{
 					Job job = new Job(JobDefOf_Vehicles.RepairVehicle, this);
 					selPawn.jobs.TryTakeOrderedJob(job, JobTag.MiscWork);
-				}, MenuOptionPriority.Default, null, null, 0f, null, null);
+				});
+			}
+			if (patternToPaint != null)
+			{
+				yield return new FloatMenuOption("VF_PaintVehicle".Translate(LabelShort),
+				delegate ()
+				{
+					Job job = new Job(JobDefOf_Vehicles.PaintVehicle, this);
+					selPawn.jobs.TryTakeOrderedJob(job, JobTag.MiscWork);
+				});
+			}
+		}
+
+		//Todo - clean up
+		public virtual bool ClaimableBy(Faction faction)
+		{
+			if (!def.Claimable)
+			{
+				return false;
+			}
+			if (Faction != null)
+			{
+				if (Faction == faction)
+				{
+					return false;
+				}
+				if (faction == Faction.OfPlayer)
+				{
+					if (Faction == Faction.OfInsects)
+					{
+						if (HiveUtility.AnyHivePreventsClaiming(this))
+						{
+							return false;
+						}
+					}
+					else
+					{
+						if (Faction == Faction.OfMechanoids)
+						{
+							return false;
+						}
+						if (Spawned && AnyHostileToolUserOfFaction(Faction))
+						{
+							return false;
+						}
+					}
+				}
+			}
+			else if (Spawned && Map.ParentFaction != null && Map.ParentFaction != Faction.OfPlayer && Map.ParentFaction.def.humanlikeFaction && AnyHostileToolUserOfFaction(Map.ParentFaction))
+			{
+				return false;
+			}
+			return true;
+
+			bool AnyHostileToolUserOfFaction(Faction faction)
+			{
+				if (!Spawned)
+				{
+					return false;
+				}
+				List<Pawn> list = Map.mapPawns.SpawnedPawnsInFaction(faction);
+				for (int i = 0; i < list.Count; i++)
+				{
+					if (list[i].RaceProps.ToolUser && GenHostility.IsPotentialThreat(list[i]))
+					{
+						return true;
+					}
+				}
+				return false;
 			}
 		}
 
@@ -965,33 +1026,36 @@ namespace Vehicles
 			meleeVerbs.Notify_PawnKilled();
 			if (spawned)
 			{
-				CellRect cellRect = this.OccupiedRect();
 				if (map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterOceanDeep || map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterDeep)
 				{
-					IntVec3 lookCell = Position;
-					string textPawnList = "";
-					foreach (Pawn p in AllPawnsAboard)
+					StringBuilder downWithShipString = new StringBuilder();
+					bool pawnsLostAtSea = false;
+					foreach (Pawn pawn in AllPawnsAboard)
 					{
-						textPawnList += p.LabelShort + ". ";
+						if (HediffHelper.AttemptToDrown(pawn))
+						{
+							pawnsLostAtSea = true;
+							downWithShipString.AppendLine(pawn.LabelCap);
+							//pawn.Destroy(DestroyMode.Vanish);
+						}
+						else
+						{
+							DisembarkPawn(pawn);
+						}
 					}
-					Find.LetterStack.ReceiveLetter("ShipSunkLabel".Translate(), "ShipSunkDeep".Translate(LabelShort, textPawnList), LetterDefOf.NegativeEvent, new TargetInfo(lookCell, map, false), null, null);
-					Destroy();
+					string desc = pawnsLostAtSea ? "VF_BoatSunkDesc".Translate(LabelShort) : "VF_BoatSunkWithPawnsDesc".Translate(LabelShort, downWithShipString.ToString());
+					Find.LetterStack.ReceiveLetter("VF_BoatSunk".Translate(), desc, LetterDefOf.NegativeEvent, new TargetInfo(Position, map, false), null, null);
+					Destroy(DestroyMode.KillFinalize);
 					return;
 				}
 				else
 				{
-					//Find.LetterStack.ReceiveLetter("ShipSunkLabel".Translate(), "ShipSunkShallow".Translate(LabelShort), LetterDefOf.NegativeEvent, new TargetInfo(position, map, false), null, null);
-					DisembarkAll();
-					Destroy();
+					Destroy(DestroyMode.KillFinalize);
 				}
 
 				if (spawnWreckage)
 				{
 					GenSpawn.Spawn(wreckage, position, map, rotation, WipeMode.FullRefund);
-				}
-				else
-				{
-					GenLeaving.DoLeavingsFor(wreckage, map, DestroyMode.KillFinalize, cellRect);
 				}
 			}
 			return;
@@ -1236,15 +1300,26 @@ namespace Vehicles
 		{
 			Dialog_ColorPicker.OpenColorPicker(this, delegate (Color colorOne, Color colorTwo, Color colorThree, PatternDef patternDef, Vector2 displacement, float tiles)
 			{
-				DrawColor = colorOne;
-				DrawColorTwo = colorTwo;
-				DrawColorThree = colorThree;
-				patternData.patternDef = patternDef;
-				patternData.tiles = tiles;
-				patternData.displacement = displacement;
-				Notify_ColorChanged();
-				CompVehicleTurrets?.turrets.ForEach(c => c.ResolveCannonGraphics(patternData, true));
+				patternToPaint = new PatternData(colorOne, colorTwo, colorThree, patternDef, displacement, tiles);
 			});
+		}
+
+		public void SetColor()
+		{
+			if (!CanPaintNow)
+			{
+				return;
+			}
+
+			patternData.Copy(patternToPaint);
+
+			DrawColor = patternData.color;
+			DrawColorTwo = patternData.colorTwo;
+			DrawColorThree = patternData.colorThree;
+			Notify_ColorChanged();
+			CompVehicleTurrets?.turrets.ForEach(c => c.ResolveCannonGraphics(patternData, true));
+			
+			patternToPaint = null;
 		}
 
 		public virtual void InspectOpen()
@@ -1364,7 +1439,7 @@ namespace Vehicles
 				{
 					if (pawnToBoard.IsWorldPawn())
 					{
-						Log.Error("Tried boarding ship with world pawn. Use Notify_BoardedCaravan instead.");
+						Log.Error("Tried boarding vehicle with world pawn. Use Notify_BoardedCaravan instead.");
 						return;
 					}
 					if (pawnToBoard.Spawned)
@@ -1402,20 +1477,16 @@ namespace Vehicles
 			{
 				CellRect occupiedRect = this.OccupiedRect().ExpandedBy(1);
 				IntVec3 loc = Position;
-				Rand.PushState();
-				IntVec3 newLoc = occupiedRect.EdgeCells.Where(c => GenGrid.InBounds(c, Map) && GenGrid.Standable(c, Map) && !c.GetThingList(Map).NotNullAndAny(t => t is Pawn)).RandomElementWithFallback(Position);
-				Rand.PopState();
-				if (occupiedRect.EdgeCells.Contains(newLoc))
+				if (occupiedRect.EdgeCells.Where(c => GenGrid.InBounds(c, Map) && GenGrid.Standable(c, Map) && !c.GetThingList(Map).NotNullAndAny(t => t is Pawn)).TryRandomElement(out IntVec3 newLoc))
 				{
 					loc = newLoc;
 				}
-				else if(!GenGrid.Standable(Position, Map))
-				{
-					Messages.Message("RejectDisembarkInvalidTile".Translate(), MessageTypeDefOf.RejectInput, false);
-					return;
-				}
 				EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
 				GenSpawn.Spawn(pawn, loc, MapHeld);
+				if (!GenGrid.Standable(loc, Map))
+				{
+					pawn.pather.TryRecoverFromUnwalkablePosition(false);
+				}
 				if (this.GetLord() is Lord lord)
 				{
 					if (pawn.GetLord() is Lord otherLord)
@@ -1787,6 +1858,7 @@ namespace Vehicles
 			vehicleAI = new VehicleAI(this);
 			vDrawer = new Vehicle_DrawTracker(this);
 			graphicOverlay = new VehicleGraphicOverlay(this);
+			sustainers ??= new VehicleSustainers(this);
 		}
 
 		public override void DrawExtraSelectionOverlays()
@@ -1797,6 +1869,11 @@ namespace Vehicles
 				vPather.curPath.DrawPath(this);
 			}
 			RenderHelper.DrawLinesBetweenTargets(this, jobs.curJob, jobs.jobQueue);
+		}
+
+		public virtual bool DeconstructibleBy(Faction faction)
+		{
+			return DebugSettings.godMode || Faction == faction;
 		}
 
 		public override TipSignal GetTooltip()
@@ -1897,10 +1974,6 @@ namespace Vehicles
 		{
 			Map.GetCachedMapComponent<VehiclePositionManager>().ReleaseClaimed(this);
 			Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(this);
-			if (mode == DestroyMode.KillFinalize)
-			{
-				//REDO - refund some materials back
-			}
 			EventRegistry[VehicleEventDefOf.Despawned].ExecuteEvents();
 			base.DeSpawn(mode);
 			if (vPather != null)
@@ -1917,6 +1990,8 @@ namespace Vehicles
 				Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(this);
 				Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleDespawned(this);
 			}
+			DisembarkAll();
+			sustainers.Cleanup();
 			EventRegistry[VehicleEventDefOf.Destroyed].ExecuteEvents();
 			base.Destroy(mode);
 		}
@@ -1928,7 +2003,7 @@ namespace Vehicles
 			if (Spawned)
 			{
 				vPather.PatherTick();
-				SustainerTick();
+				sustainers.Tick();
 			}
 			if (Faction != Faction.OfPlayer)
 			{
@@ -1989,43 +2064,27 @@ namespace Vehicles
 			}
 		}
 
-		public void SustainerTick()
-		{
-			for (int i = ActiveSustainers.Count - 1; i >= 0; i--)
-			{
-				Sustainer sustainer = ActiveSustainers[i];
-				
-				if (sustainer == null || sustainer.Ended)
-				{
-					ActiveSustainers.Remove(sustainer);
-				}
-				else
-				{
-					sustainer.Maintain();
-				}
-			}
-		}
-
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Deep.Look(ref vPather, "vPather", new object[] { this });
-			Scribe_Deep.Look(ref statHandler, "statHandler", new object[] { this });
+			Scribe_Deep.Look(ref vPather, nameof(vPather), new object[] { this });
+			Scribe_Deep.Look(ref statHandler, nameof(statHandler), new object[] { this });
 
-			Scribe_Values.Look(ref angle, "angle");
+			Scribe_Values.Look(ref angle, nameof(angle));
 
-			Scribe_Deep.Look(ref patternData, "patternData");
-			Scribe_Defs.Look(ref retexture, "retexture");
+			Scribe_Deep.Look(ref patternData, nameof(patternData));
+			Scribe_Defs.Look(ref retexture, nameof(retexture));
+			Scribe_Deep.Look(ref patternToPaint, nameof(patternToPaint));
 
-			Scribe_Values.Look(ref movementStatus, "movingStatus", VehicleMovementStatus.Online);
-			Scribe_Values.Look(ref navigationCategory, "navigationCategory", NavigationCategory.Opportunistic);
-			Scribe_Values.Look(ref currentlyFishing, "currentlyFishing", false);
-			Scribe_Values.Look(ref showAllItemsOnMap, "showAllItemsOnMap");
+			Scribe_Values.Look(ref movementStatus, nameof(movementStatus), VehicleMovementStatus.Online);
+			Scribe_Values.Look(ref navigationCategory, nameof(navigationCategory), NavigationCategory.Opportunistic);
+			Scribe_Values.Look(ref currentlyFishing, nameof(currentlyFishing), false);
+			Scribe_Values.Look(ref showAllItemsOnMap, nameof(showAllItemsOnMap));
 
-			Scribe_Collections.Look(ref cargoToLoad, "cargoToLoad");
+			Scribe_Collections.Look(ref cargoToLoad, nameof(cargoToLoad));
 
-			Scribe_Collections.Look(ref handlers, "handlers", LookMode.Deep);
-			Scribe_Collections.Look(ref bills, "bills", LookMode.Deep);
+			Scribe_Collections.Look(ref handlers, nameof(handlers), LookMode.Deep);
+			Scribe_Collections.Look(ref bills, nameof(bills), LookMode.Deep);
 
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{

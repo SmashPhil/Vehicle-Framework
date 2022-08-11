@@ -65,7 +65,9 @@ namespace Vehicles
 		[Unsaved]
 		public List<VehicleTurret> childCannons = new List<VehicleTurret>();
 		[Unsaved]
-		private List<VehicleTurret> groupTurrets;
+		public List<VehicleTurret> groupTurrets;
+		[Unsaved]
+		public TurretRestrictions restrictions;
 
 		public VehicleTurretRender renderProperties = new VehicleTurretRender();
 		public VehicleTurretRender uiRenderProperties = new VehicleTurretRender();
@@ -176,7 +178,11 @@ namespace Vehicles
 
 		public bool RotationIsValid => currentRotation == rotationTargeted;
 
-		public virtual bool TurretDisabled => RelatedHandlers.NotNullAndAny(h => h.handlers.Count < h.role.slotsToOperate) && !DebugSettings.godMode;
+		public bool TurretRestricted => restrictions?.Disabled ?? false;
+
+		public virtual bool TurretDisabled => TurretRestricted || MissingOperators;
+
+		public virtual bool MissingOperators => RelatedHandlers.NotNullAndAny(h => h.handlers.Count < h.role.slotsToOperate) && !DebugSettings.godMode;
 
 		protected virtual bool TurretTargetValid => cannonTarget.Cell.IsValid && !TurretDisabled;
 
@@ -512,6 +518,11 @@ namespace Vehicles
 			defaultAngleRotated = reference.defaultAngleRotated;
 
 			drawLayer = reference.drawLayer;
+			if (reference.turretDef.restrictionType != null)
+			{
+				restrictions = (TurretRestrictions)Activator.CreateInstance(reference.turretDef.restrictionType);
+				restrictions.Init(vehicle, this);
+			}
 		}
 
 		public Vector3 TurretDrawLocFor(Rot8 rot)

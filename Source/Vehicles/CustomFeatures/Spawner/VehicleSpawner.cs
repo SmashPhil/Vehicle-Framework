@@ -66,35 +66,29 @@ namespace Vehicles
 				lastStep = "Initializing components";
 				PawnComponentsUtility.CreateInitialComponents(result);
 
-				result.ActiveSustainers = new List<Sustainer>();
+				result.sustainers = new VehicleSustainers(result);
 
 				lastStep = "Adding OneShot Events";
-				if (!request.VehicleDef.properties.soundOneShotsOnEvent.NullOrEmpty())
+				if (!request.VehicleDef.soundOneShotsOnEvent.NullOrEmpty())
 				{
-					foreach ((VehicleEventDef eventDef, SoundDef soundDef) in request.VehicleDef.properties.soundOneShotsOnEvent)
+					foreach ((VehicleEventDef eventDef, SoundDef soundDef) in request.VehicleDef.soundOneShotsOnEvent)
 					{
 						result.AddEvent(eventDef, () => soundDef.PlayOneShot(result));
 					}
 				}
 
 				lastStep = "Adding Sustainer Events";
-				if (!request.VehicleDef.properties.soundSustainersOnEvent.NullOrEmpty())
+				if (!request.VehicleDef.soundSustainersOnEvent.NullOrEmpty())
 				{
-					foreach ((Pair<VehicleEventDef, VehicleEventDef> eventStartStop, SoundDef soundDef) in request.VehicleDef.properties.soundSustainersOnEvent)
+					foreach ((Pair<VehicleEventDef, VehicleEventDef> eventStartStop, SoundDef soundDef) in request.VehicleDef.soundSustainersOnEvent)
 					{
 						result.AddEvent(eventStartStop.First, delegate ()
 						{
-							SoundInfo soundInfo = SoundInfo.InMap(result, MaintenanceType.PerTick);
-							Sustainer sustainer = soundDef.TrySpawnSustainer(result);
-							result.ActiveSustainers.Add(sustainer);
+							result.sustainers.Spawn(soundDef, MaintenanceType.PerTick);
 						});
 						result.AddEvent(eventStartStop.Second, delegate ()
 						{
-							Sustainer sustainer = result.ActiveSustainers.FirstOrDefault(sustainer => sustainer.def == soundDef);
-							if (sustainer != null)
-							{
-								sustainer.End();
-							}
+							result.sustainers.EndAll(soundDef);
 						});
 					}
 				}

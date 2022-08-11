@@ -94,58 +94,42 @@ namespace Vehicles
 		/// Draft gizmos for VehiclePawn
 		/// </summary>
 		/// <param name="drafter"></param>
-		public static IEnumerable<Gizmo> DraftGizmos(Pawn_DraftController drafter)
+		public static IEnumerable<Gizmo> VehicleGizmos(this VehiclePawn vehicle)
 		{
-			Command_Toggle command_Toggle = new Command_Toggle();
-			command_Toggle.hotKey = KeyBindingDefOf.Command_ColonistDraft;
-			command_Toggle.isActive = (() => drafter.Drafted);
-			command_Toggle.toggleAction = delegate()
+			Pawn_DraftController drafter = vehicle.drafter;
+			Command draftCommand = new Command_Toggle()
 			{
-				drafter.Drafted = !drafter.Drafted;
-				PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Drafting, KnowledgeAmount.SpecificInteraction);
-				if (drafter.Drafted)
+				hotKey = KeyBindingDefOf.Command_ColonistDraft,
+				isActive = () => drafter.Drafted,
+				toggleAction = delegate ()
 				{
-					LessonAutoActivator.TeachOpportunity(ConceptDefOf.QueueOrders, OpportunityType.GoodToKnow);
-				}
+					drafter.Drafted = !drafter.Drafted;
+					PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Drafting, KnowledgeAmount.SpecificInteraction);
+					if (drafter.Drafted)
+					{
+						LessonAutoActivator.TeachOpportunity(ConceptDefOf.QueueOrders, OpportunityType.GoodToKnow);
+					}
+				},
+				defaultDesc = "VF_DraftVehicleDesc".Translate(),
+				icon = VehicleTex.DraftVehicle
 			};
-			command_Toggle.defaultDesc = "CommandToggleDraftDesc".Translate();
-			command_Toggle.icon = TexCommand.Draft;
-			command_Toggle.turnOnSound = SoundDefOf.DraftOn;
-			command_Toggle.turnOffSound = SoundDefOf.DraftOff;
 			if (!drafter.Drafted)
 			{
-				command_Toggle.defaultLabel = "CommandDraftLabel".Translate();
+				draftCommand.defaultLabel = vehicle.VehicleDef.draftLabel;
 			}
-			if (drafter.pawn.Downed)
+			if (!vehicle.CanMove)
 			{
-				command_Toggle.Disable("IsIncapped".Translate(drafter.pawn.LabelShort, drafter.pawn));
+				draftCommand.Disable("IsIncapped".Translate(vehicle.LabelShort, vehicle));
 			}
 			if (!drafter.Drafted)
 			{
-				command_Toggle.tutorTag = "Draft";
+				draftCommand.tutorTag = "Draft";
 			}
 			else
 			{
-				command_Toggle.tutorTag = "Undraft";
+				draftCommand.tutorTag = "Undraft";
 			}
-			yield return command_Toggle;
-			if (drafter.Drafted && drafter.pawn.equipment.Primary != null && drafter.pawn.equipment.Primary.def.IsRangedWeapon)
-			{
-				yield return new Command_Toggle
-				{
-					hotKey = KeyBindingDefOf.Misc6,
-					isActive = (() => drafter.FireAtWill),
-					toggleAction = delegate()
-					{
-						drafter.FireAtWill = !drafter.FireAtWill;
-					},
-					icon = TexCommand.FireAtWill,
-					defaultLabel = "CommandFireAtWillLabel".Translate(),
-					defaultDesc = "CommandFireAtWillDesc".Translate(),
-					tutorTag = "FireAtWillToggle"
-				};
-			}
-			yield break;
+			yield return draftCommand;
 		}
 
 		/// <summary>

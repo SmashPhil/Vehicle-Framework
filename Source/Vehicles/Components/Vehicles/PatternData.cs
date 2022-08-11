@@ -41,6 +41,16 @@ namespace Vehicles
 			this.tiles = tiles;
 		}
 
+		public void Copy(PatternData reference)
+		{
+			color = reference.color;
+			colorTwo = reference.colorTwo;
+			colorThree = reference.colorThree;
+			patternDef = reference.patternDef;
+			displacement = reference.displacement;
+			tiles = reference.tiles;
+		}
+
 		public static implicit operator GraphicDataRGB(PatternData patternData)
 		{
 			return new GraphicDataRGB()

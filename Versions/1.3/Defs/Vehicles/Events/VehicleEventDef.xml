@@ -18,7 +18,6 @@
 		<defName>MoveStop</defName>
 	</Vehicles.VehicleEventDef>
 	
-	
 	<!-- Health -->
 	<Vehicles.VehicleEventDef>
 		<defName>DamageTaken</defName>

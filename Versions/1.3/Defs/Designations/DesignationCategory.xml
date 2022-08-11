@@ -7,7 +7,7 @@
 		<order>8</order>
 		<specialDesignatorClasses>
 			<li>Designator_Cancel</li>
-			<!--<li>Designator_Disassemble</li>-->
+			<li>Vehicles.Designator_DisassembleVehicle</li>
 		</specialDesignatorClasses>
 	</DesignationCategoryDef>
 </Defs>

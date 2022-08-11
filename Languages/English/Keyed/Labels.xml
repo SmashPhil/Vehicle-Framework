@@ -7,9 +7,14 @@
 	
 	<!-- Gizmos / Float Menus -->
 	<VF_LoadCargo>Load Cargo</VF_LoadCargo>
-	<VF_RepairVehicle>Repair {0}</VF_RepairVehicle>
+	<VF_RepairVehicle>Repair</VF_RepairVehicle>
+	<VF_PaintVehicle>Apply Paint</VF_PaintVehicle>
 	<VF_DisembarkAllPawns>Unload All Pawns</VF_DisembarkAllPawns>
 	<VF_DisembarkSinglePawn>Unload {0}</VF_DisembarkSinglePawn>
+	<VF_DraftVehicleDesc>Draft Vehicle
+
+Drafted vehicles can be moved, but restrict the unloading of pawns.
+</VF_DraftVehicleDesc>
 	
 	<!-- UI / Buttons -->
 	<RefundButton>Uninstall</RefundButton>
@@ -25,6 +30,10 @@
 	<ColorThree>ColorThree</ColorThree>
 	<ColorPickerHex>Hex</ColorPickerHex>
 	
+	<!-- Designators -->
+	<VF_DesignatorDisassemble>Disassemble</VF_DesignatorDisassemble>
+	<VF_DesignatorDisassembleDesc>Disassemble vehicle into parts.</VF_DesignatorDisassembleDesc>
+	
 	<!-- Tooltips -->
 	<VF_RenameVehicleTooltip>Assign or clear name.</VF_RenameVehicleTooltip>
 	<VF_RecolorTooltip>Change colors or pattern.</VF_RecolorTooltip>
@@ -34,6 +43,8 @@
 	<VF_StartFishingDesc>Gather fish. Depth of water affects fishing chances.</VF_StartFishingDesc>
 	<VF_ExplosiveComponent>Explosive</VF_ExplosiveComponent>
 	
+	<!-- Turret Restrictions -->
+	<VF_VehicleRestriction_Stationary>Cannot fire while moving.</VF_VehicleRestriction_Stationary>
 	
 	<VehiclePatternZoom>Zoom</VehiclePatternZoom>
 	<VehiclePatternZoomTooltip>Scale the pattern up or down.</VehiclePatternZoomTooltip>

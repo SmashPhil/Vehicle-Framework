@@ -12,7 +12,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class CompFueledTravel : VehicleAIComp
+	public class CompFueledTravel : VehicleAIComp, IRefundable
 	{
 		private const float EfficiencyTickMultiplier = 1f / GenDate.TicksPerDay;
 		private const float CellOffsetIntVec3ToVector3 = 0.5f;
@@ -45,6 +45,14 @@ namespace Vehicles
 		public VehiclePawn Vehicle => parent as VehiclePawn;
 		public FuelConsumptionCondition FuelCondition => Props.fuelConsumptionCondition;
 		public Gizmo FuelCountGizmo => new Gizmo_RefuelableFuelTravel { refuelable = this };
+
+		public IEnumerable<(ThingDef thingDef, float count)> Refunds
+		{
+			get
+			{
+				yield return (Props.fuelType, Fuel);
+			}
+		}
 
 		public static MethodInfo PowerNetMethod
 		{

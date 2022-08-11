@@ -9,7 +9,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class CompVehicleTurrets : VehicleAIComp
+	public class CompVehicleTurrets : VehicleAIComp, IRefundable
 	{
 		/// PARAMS => (# Shots Fired, VehicleTurret, tickCount}
 		private List<TurretData> turretQueue = new List<TurretData>();
@@ -23,6 +23,17 @@ namespace Vehicles
 		public bool WeaponStatusOnline => !Vehicle.Downed && !Vehicle.Dead; //REDO - Add vehicle component health as check
 
 		public float MinRange => turrets.Max(x => x.turretDef.minRange);
+
+		public IEnumerable<(ThingDef thingDef, float count)> Refunds
+		{
+			get
+			{
+				foreach (VehicleTurret turret in turrets)
+				{
+					yield return (turret.loadedAmmo, turret.shellCount / (float)turret.turretDef.ammoCountPerCharge);
+				}
+			}
+		}
 
 		public float MaxRangeGrouped
 		{
@@ -91,7 +102,7 @@ namespace Vehicles
 					{
 						if (turret.manualTargeting)
 						{
-							Command_TargeterCooldownAction turretCannons = new Command_TargeterCooldownAction
+							Command_TargeterCooldownAction turretTargeterGizmo = new Command_TargeterCooldownAction
 							{
 								turret = turret,
 								defaultLabel = !string.IsNullOrEmpty(turret.gizmoLabel) ? turret.gizmoLabel : $"{turret.turretDef.LabelCap} {turretNumber}",
@@ -100,9 +111,9 @@ namespace Vehicles
 							};
 							if (!string.IsNullOrEmpty(turret.turretDef.gizmoDescription))
 							{
-								turretCannons.defaultDesc = turret.turretDef.gizmoDescription;
+								turretTargeterGizmo.defaultDesc = turret.turretDef.gizmoDescription;
 							}
-							turretCannons.targetingParams = new TargetingParameters
+							turretTargeterGizmo.targetingParams = new TargetingParameters
 							{
 								//Buildings, Things, Animals, Humans, and Mechs default to targetable
 								canTargetLocations = true
@@ -112,20 +123,19 @@ namespace Vehicles
 							{
 								if (relatedHandler.handlers.Count < relatedHandler.role.slotsToOperate && !DebugSettings.godMode)
 								{
-									turretCannons.Disable("NotEnoughCannonCrew".Translate(Vehicle.LabelShort, relatedHandler.role.label));
+									turretTargeterGizmo.Disable("NotEnoughCannonCrew".Translate(Vehicle.LabelShort, relatedHandler.role.label));
 									break;
 								}
 							}
-							yield return turretCannons;
 							if (Vehicle.Faction != Faction.OfPlayer)
 							{
-								turretCannons.Disable("CannotOrderNonControlled".Translate());
+								turretTargeterGizmo.Disable("CannotOrderNonControlled".Translate());
 							}
-							//(bool enabled = turret.TurretEnabled(Vehicle.VehicleDef, TurretDisableType.Always);
-							//if (disabled)
-							//{
-							//	turretCannons.Disable(reason);
-							//}
+							if (turret.TurretRestricted)
+							{
+								turretTargeterGizmo.Disable(turret.restrictions.DisableReason);
+							}
+							yield return turretTargeterGizmo;
 						}
 						if (Prefs.DevMode)
 						{
@@ -242,60 +252,57 @@ namespace Vehicles
 			turretQueue.RemoveAll(td => td.turret == turretData.turret);
 		}
 
-		private void ResolveCannons()
+		private void ResolveTurretQueue()
 		{
-			if (turretQueue?.Count > 0)
+			for (int i = 0; i < turretQueue.Count; i++)
 			{
-				for (int i = 0; i < turretQueue.Count; i++)
+				TurretData turretData = turretQueue[i];
+				if (!turretData.turret.cannonTarget.IsValid || (turretData.turret.shellCount <= 0 && !DebugSettings.godMode))
 				{
-					TurretData turretData = turretQueue[i];
-					if (!turretData.turret.cannonTarget.IsValid || (turretData.turret.shellCount <= 0 && !DebugSettings.godMode))
-					{
-						DequeueTurret(turretData);
-						continue;
-					}
-					if (turretData.turret.OnCooldown || !turretData.turret.IsManned)
-					{
-						turretData.turret.SetTarget(LocalTargetInfo.Invalid);
-						DequeueTurret(turretData);
-						continue;
-					}
-
-					turretQueue[i].turret.AlignToTargetRestricted();
-					if (turretQueue[i].ticksTillShot <= 0)
-					{
-						turretData.turret.FireTurret();
-						turretData.turret.CurrentTurretFiring++;
-						turretData.shots--;
-						turretData.ticksTillShot = turretData.turret.TicksPerShot;
-						if (turretData.turret.OnCooldown || turretData.shots == 0 || (turretData.turret.turretDef.ammunition != null && turretData.turret.shellCount <= 0))
-						{
-							if (turretData.turret.targetPersists)
-							{
-								turretData.turret.SetTargetConditionalOnThing(LocalTargetInfo.Invalid);
-							}
-							else
-							{
-								turretData.turret.SetTarget(LocalTargetInfo.Invalid);
-							}
-							turretData.turret.ReloadCannon();
-							DequeueTurret(turretData);
-							continue;
-						}
-					}
-					else
-					{
-						turretData.ticksTillShot--;
-					}
-					turretQueue[i] = turretData;
+					DequeueTurret(turretData);
+					continue;
 				}
+				if (turretData.turret.TurretDisabled || turretData.turret.OnCooldown || !turretData.turret.IsManned)
+				{
+					turretData.turret.SetTarget(LocalTargetInfo.Invalid);
+					DequeueTurret(turretData);
+					continue;
+				}
+
+				turretQueue[i].turret.AlignToTargetRestricted();
+				if (turretQueue[i].ticksTillShot <= 0)
+				{
+					turretData.turret.FireTurret();
+					turretData.turret.CurrentTurretFiring++;
+					turretData.shots--;
+					turretData.ticksTillShot = turretData.turret.TicksPerShot;
+					if (turretData.turret.OnCooldown || turretData.shots == 0 || (turretData.turret.turretDef.ammunition != null && turretData.turret.shellCount <= 0))
+					{
+						if (turretData.turret.targetPersists)
+						{
+							turretData.turret.SetTargetConditionalOnThing(LocalTargetInfo.Invalid);
+						}
+						else
+						{
+							turretData.turret.SetTarget(LocalTargetInfo.Invalid);
+						}
+						turretData.turret.ReloadCannon();
+						DequeueTurret(turretData);
+						continue;
+					}
+				}
+				else
+				{
+					turretData.ticksTillShot--;
+				}
+				turretQueue[i] = turretData;
 			}
 		}
 
 		public override void CompTick()
 		{
 			base.CompTick();
-			ResolveCannons();
+			ResolveTurretQueue();
 			foreach (VehicleTurret turret in turrets)
 			{
 				turret.Tick();

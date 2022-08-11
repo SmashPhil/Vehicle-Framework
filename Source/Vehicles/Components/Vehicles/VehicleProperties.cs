@@ -27,10 +27,6 @@ namespace Vehicles
 			new VehicleJobLimitations("UpgradeVehicle", 1),
 		};
 
-		public Dictionary<VehicleEventDef, SoundDef> soundOneShotsOnEvent = new Dictionary<VehicleEventDef, SoundDef>();
-		//<Start Sustainer, Stop Sustainer>
-		public Dictionary<Pair<VehicleEventDef, VehicleEventDef>, SoundDef> soundSustainersOnEvent = new Dictionary<Pair<VehicleEventDef, VehicleEventDef>, SoundDef>();
-
 		public bool diagonalRotation = true;
 		[PostToSettings(Label = "ManhunterTargetsVehicle", Tooltip = "ManhunterTargetsVehicleTooltip", Translate = true, UISettingsType = UISettingsType.Checkbox)]
 		public bool manhunterTargetsVehicle = false;

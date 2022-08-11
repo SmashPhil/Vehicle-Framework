@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using RimWorld;
 using Verse;
 using Verse.AI;
+using RimWorld;
 using SmashTools;
 
 namespace Vehicles
@@ -18,7 +18,7 @@ namespace Vehicles
 			{
 				return null;
 			}
-			if(t is VehiclePawn vehicle && vehicle.statHandler.NeedsRepairs && pawn.Map.GetCachedMapComponent<VehicleReservationManager>().CanReserve<LocalTargetInfo, VehicleTargetReservation>(vehicle, pawn, null) &&
+			if (t is VehiclePawn vehicle && vehicle.statHandler.NeedsRepairs && pawn.Map.GetCachedMapComponent<VehicleReservationManager>().CanReserve<LocalTargetInfo, VehicleTargetReservation>(vehicle, pawn, null) &&
 				pawn.CanReach(new LocalTargetInfo(t.Position), PathEndMode.Touch, Danger.Deadly))
 			{
 				return JobMaker.MakeJob(JobDefOf_Vehicles.RepairVehicle, vehicle);

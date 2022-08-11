@@ -58,6 +58,13 @@
 	</JobDef>
 	
 	<JobDef>
+		<defName>PaintVehicle</defName>
+		<driverClass>Vehicles.JobDriver_PaintVehicle</driverClass>
+		<reportString>Painting.</reportString>
+		<casualInterruptible>true</casualInterruptible>
+	</JobDef>
+	
+	<JobDef>
 		<defName>UpgradeVehicle</defName>
 		<driverClass>Vehicles.JobDriver_WorkOnUpgrade</driverClass>
 		<reportString>Working on vehicles.</reportString>

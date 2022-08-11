@@ -361,8 +361,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Achievements\VehicleBuilderTracker.cs" />
+    <Compile Include="Components\Vehicles\VehicleSustainers.cs" />
+    <Compile Include="Misc\Attributes\ActionOnSettingsInputAttribute.cs" />
+    <Compile Include="Misc\DefOf\HediffDefOf_Vehicles.cs" />
+    <Compile Include="Utility\DesignatorCache.cs" />
+    <Compile Include="AI\Designators\Designator_DisassembleVehicle.cs" />
     <Compile Include="AI\Incidents\IncidentWorker_ShuttleDowned.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_FollowVehicle.cs" />
+    <Compile Include="AI\JobDrivers\JobDriver_PaintVehicle.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_RefuelVehicleAtomic.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_RopeAnimalToVehicle.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_WorkOnUpgrade.cs" />
@@ -375,8 +381,11 @@
     <Compile Include="AI\Lords\LordToil_AssaultColonyWithArmor.cs" />
     <Compile Include="AI\Lords\LordToil_PrepareCaravan_TieAnimalsToVehicle.cs" />
     <Compile Include="AI\Lords\MemoTrigger.cs" />
+    <Compile Include="AI\WorkGiver\WorkGiver_PaintVehicle.cs" />
     <Compile Include="AI\WorkGiver\WorkGiver_RepairVehicle.cs" />
     <Compile Include="Cannons\Projectiles\CompProjectileExitMap.cs" />
+    <Compile Include="Cannons\Turret\Restrictions\TurretRestrictions.cs" />
+    <Compile Include="Cannons\Turret\Restrictions\TurretRestrictions_Stationary.cs" />
     <Compile Include="Cannons\Turret\VehicleTurretRender.cs" />
     <Compile Include="Components\Construction\ListerAirDefenses.cs" />
     <Compile Include="Components\Rendering\Overlays\GraphicDataOverlay.cs" />
@@ -411,6 +420,7 @@
     <Compile Include="CustomFeatures\Misc\MoteThrownExpand.cs" />
     <Compile Include="Components\Vehicles\VehicleAreaManager.cs" />
     <Compile Include="Gizmo\Command_ActionVehicleDrawn.cs" />
+    <Compile Include="Gizmo\Command_Action_PawnDrawer.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_ColorWheel.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_ConfigureVehicleAreas.cs" />
     <Compile Include="Graphics\Graphic\Graphics\Animated\Graphic_Propeller.cs" />
@@ -493,12 +503,15 @@
     <Compile Include="Misc\DefModExtension\SpaceObjectDefModExtension.cs" />
     <Compile Include="Misc\DefModExtension\SpawnerPropertiesDefModExtension.cs" />
     <Compile Include="Misc\DefModExtension\VehicleDamageMultiplierDefModExtension.cs" />
+    <Compile Include="Misc\DefOf\DesignationDefOf_Vehicles.cs" />
     <Compile Include="Misc\DefOf\ProjectileSkyfallerDefOf.cs" />
+    <Compile Include="Misc\DefOf\VehicleClamorDefOf.cs" />
     <Compile Include="Misc\DefOf\VehicleEventDefOf.cs" />
     <Compile Include="Misc\Enums\Turret\TurretDisableType.cs" />
     <Compile Include="Misc\Enums\UI\DebugRegionType.cs" />
     <Compile Include="Misc\Enums\Vehicle\VehicleEnabledFor.cs" />
     <Compile Include="Misc\Interfaces\ICustomSettingsDrawer.cs" />
+    <Compile Include="Misc\Interfaces\IRefundable.cs" />
     <Compile Include="Misc\ModSettings\SavedSettings\SavedSettings.cs" />
     <Compile Include="Misc\ModSettings\SavedSettings\SettingsExporter.cs" />
     <Compile Include="Misc\ModSettings\SettingsCustomizableFields.cs" />
@@ -621,6 +634,7 @@
     <Compile Include="Graphics\Textures\TexData.cs" />
     <Compile Include="Graphics\VehicleGhostUtility.cs" />
     <Compile Include="Utility\Extensions\Ext_Caravan.cs" />
+    <Compile Include="Utility\Extensions\Ext_Toils.cs" />
     <Compile Include="Utility\Extensions\GUIUtility.cs" />
     <Compile Include="Utility\Extensions\Ext_Settings.cs" />
     <Compile Include="Utility\Extensions\Ext_Vehicles.cs" />
@@ -628,6 +642,7 @@
     <Compile Include="Utility\Helpers\CaravanHelper.cs" />
     <Compile Include="Utility\Helpers\DamageHelper.cs" />
     <Compile Include="Utility\Helpers\DebugHelper.cs" />
+    <Compile Include="Utility\Helpers\HediffHelper.cs" />
     <Compile Include="Utility\Helpers\MapHelper.cs" />
     <Compile Include="Utility\Helpers\ModSettingsHelper.cs" />
     <Compile Include="Utility\Helpers\RenderHelper.cs" />
@@ -731,10 +746,10 @@
     <Compile Include="Harmony\VehicleHarmony.cs" />
     <Compile Include="CustomFeatures\Upgrades\UpgradeNode.cs" />
     <Compile Include="Misc\CellFinderExtended.cs" />
-    <Compile Include="Misc\DefOf\DesignationCategoryDefOf.cs" />
-    <Compile Include="Misc\DefOf\MaterialDefOf.cs" />
+    <Compile Include="Misc\DefOf\DesignationCategoryDefOf_Vehicles.cs" />
+    <Compile Include="Graphics\Graphic\MaterialGeneration\MaterialPresets.cs" />
     <Compile Include="Misc\DefOf\RiverDefOf.cs" />
-    <Compile Include="Misc\DefOf\SoundDefOf_Ships.cs" />
+    <Compile Include="Misc\DefOf\SoundDefOf_Vehicles.cs" />
     <Compile Include="Pathing\RegionGrid\GenGridVehicles.cs" />
     <Compile Include="Pathing\RegionGrid\GenPathVehicles.cs" />
     <Compile Include="Pathing\RegionGrid\VehicleRegionCostCalculator.cs" />
@@ -776,9 +791,6 @@
     <Compile Include="Graphics\ITab\ITab_Vehicle_Health.cs" />
     <Compile Include="Graphics\ITab\ITab_Vehicle_Passengers.cs" />
     <Compile Include="Graphics\ITab\ITab_Vehicle_Upgrades.cs" />
-    <Compile Include="Graphics\MainTabWindow_Ships.cs" />
-    <Compile Include="Misc\DefOf\PawnTableDefOf_Ships.cs" />
-    <Compile Include="Graphics\PawnTable_Ships.cs" />
     <Compile Include="Graphics\Misc\ShipPassengerCardUtility.cs" />
     <Compile Include="Graphics\Textures\VehicleTex.cs" />
     <Compile Include="Graphics\Misc\TransferableVehicleWidget.cs" />
@@ -790,7 +802,6 @@
     <Compile Include="World\WorldObjectComps\AirDefense.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Cannons\Turret\GizmoHandler\" />
     <Folder Include="Comps\Fishing\" />
     <Folder Include="CustomFeatures\AerialLaunch\Skyfaller\Bombs\" />
   </ItemGroup>

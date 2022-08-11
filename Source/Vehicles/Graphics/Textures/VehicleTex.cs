@@ -17,9 +17,13 @@ namespace Vehicles
 
 		public const string DefaultBoatIconTexPath = "UI/Icons/DefaultBoatIcon";
 
+		public static readonly Texture2D DraftVehicle = ContentFinder<Texture2D>.Get("UI/Gizmos/DraftVehicle");
+
 		public static readonly Texture2D UnloadAll = ContentFinder<Texture2D>.Get("UI/Gizmos/UnloadAll");
 
 		public static readonly Texture2D UnloadPassenger = ContentFinder<Texture2D>.Get("UI/Gizmos/UnloadPawn");
+
+		public static readonly Texture2D UnloadIcon = ContentFinder<Texture2D>.Get("UI/Gizmos/UnloadArrow");
 
 		public static readonly Texture2D Anchor = ContentFinder<Texture2D>.Get("UI/Gizmos/Anchor");
 

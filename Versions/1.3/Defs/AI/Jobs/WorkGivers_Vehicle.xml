@@ -64,4 +64,17 @@
 			<li>Manipulation</li>
 		</requiredCapacities>
 	</WorkGiverDef>
+	
+	<WorkGiverDef>
+		<defName>PaintVehicle</defName>
+		<label>paint vehicle</label>
+		<giverClass>Vehicles.WorkGiver_PaintVehicle</giverClass>
+		<workType>Construction</workType>
+		<verb>painting</verb>
+		<gerund>painting</gerund>
+		<priorityInType>100</priorityInType>
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+	</WorkGiverDef>
 </Defs>

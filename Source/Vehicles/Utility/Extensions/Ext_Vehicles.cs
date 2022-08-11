@@ -12,6 +12,105 @@ namespace Vehicles
 {
 	public static class Ext_Vehicles
 	{
+		public static bool DeconstructibleBy(this VehiclePawn vehicle, Faction faction)
+		{
+			return DebugSettings.godMode || (vehicle.Faction == faction || vehicle.ClaimableBy(faction));
+		}
+
+		public static void RefundMaterials(this VehiclePawn vehicle, Map map, DestroyMode mode, List<Thing> listOfLeavingsOut = null)
+		{
+			switch (mode)
+			{
+				case DestroyMode.Deconstruct:
+					vehicle.RefundMaterials(map, mode, multiplier: vehicle.VehicleDef.resourcesFractionWhenDeconstructed);
+					break;
+				case DestroyMode.Cancel:
+				case DestroyMode.Refund:
+					vehicle.RefundMaterials(map, mode, 1);
+					break;
+				default:
+					GenLeaving.DoLeavingsFor(vehicle, map, mode, vehicle.OccupiedRect(), null, listOfLeavingsOut);
+					break;
+			}
+		}
+
+		public static void RefundMaterials(this VehiclePawn vehicle, Map map, DestroyMode mode, float multiplier, Predicate<IntVec3> nearPlaceValidator = null)
+		{
+			List<ThingDefCountClass> thingDefs = vehicle.VehicleDef.buildDef.CostListAdjusted(vehicle.Stuff);
+			ThingOwner<Thing> thingOwner = new ThingOwner<Thing>();
+			foreach (ThingDefCountClass thingDefCountClass in thingDefs)
+			{
+				if (thingDefCountClass.thingDef == ThingDefOf.ReinforcedBarrel && !Find.Storyteller.difficulty.classicMortars)
+				{
+					continue;
+				}
+
+				if (mode == DestroyMode.KillFinalize && vehicle.def.killedLeavings != null)
+				{
+					for (int k = 0; k < vehicle.def.killedLeavings.Count; k++)
+					{
+						Thing thing = ThingMaker.MakeThing(vehicle.def.killedLeavings[k].thingDef, null);
+						thing.stackCount = vehicle.def.killedLeavings[k].count;
+						thingOwner.TryAdd(thing, true);
+					}
+				}
+
+				int refundCount = GenMath.RoundRandom(multiplier * thingDefCountClass.count);
+				if (refundCount > 0 && mode == DestroyMode.KillFinalize && thingDefCountClass.thingDef.slagDef != null)
+				{
+					int count = thingDefCountClass.thingDef.slagDef.smeltProducts.First((ThingDefCountClass pro) => pro.thingDef == ThingDefOf.Steel).count;
+					int proportionalCount = refundCount / count;
+					proportionalCount = Mathf.Min(proportionalCount, vehicle.def.Size.Area / 2);
+					for (int n = 0; n < proportionalCount; n++)
+					{
+						thingOwner.TryAdd(ThingMaker.MakeThing(thingDefCountClass.thingDef.slagDef, null), true);
+					}
+					refundCount -= proportionalCount * count;
+				}
+				if (refundCount > 0)
+				{
+					Thing thing2 = ThingMaker.MakeThing(thingDefCountClass.thingDef);
+					thing2.stackCount = refundCount;
+					thingOwner.TryAdd(thing2, true);
+				}
+			}
+			for (int i = vehicle.inventory.innerContainer.Count - 1; i >= 0; i--)
+			{
+				Thing thing = vehicle.inventory.innerContainer[i];
+				thingOwner.TryAddOrTransfer(thing);
+			}
+			foreach (IRefundable refundable in vehicle.AllComps.Where(comp => comp is IRefundable))
+			{
+				foreach ((ThingDef refundDef, float count) in refundable.Refunds)
+				{
+					if (refundDef != null)
+					{
+						int countRounded = GenMath.RoundRandom(count);
+						if (countRounded > 0)
+						{
+							Thing thing2 = ThingMaker.MakeThing(refundDef);
+							thing2.stackCount = countRounded;
+							thingOwner.TryAdd(thing2);
+						}
+					}
+				}
+			}
+			RotatingList<IntVec3> occupiedCells = vehicle.OccupiedRect().Cells.InRandomOrder(null).ToRotatingList();
+			while (thingOwner.Count > 0)
+			{
+				IntVec3 cell = occupiedCells.Next;
+				if (mode == DestroyMode.KillFinalize && !map.areaManager.Home[cell])
+				{
+					thingOwner[0].SetForbidden(true, false);
+				}
+				if (!thingOwner.TryDrop(thingOwner[0], cell, map, ThingPlaceMode.Near, out _, null, nearPlaceValidator))
+				{
+					Log.Warning($"Failing to place all leavings for destroyed vehicle {vehicle} at {vehicle.OccupiedRect().CenterCell}");
+					return;
+				}
+			}
+		}
+
 		/// <summary>
 		/// Get AerialVehicle pawn is currently inside
 		/// </summary>

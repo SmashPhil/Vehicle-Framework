@@ -121,7 +121,7 @@ namespace Vehicles
 				for (int i = 0; i < 4; i++)
 				{
 					Quaternion rotation = Quaternion.AngleAxis(num, Vector3.up);
-					Graphics.DrawMesh(MeshPool.plane10, brackets[i], rotation, MaterialDefOf.SelectionBracketMat, 0);
+					Graphics.DrawMesh(MeshPool.plane10, brackets[i], rotation, MaterialPresets.SelectionBracketMat, 0);
 					num -= 90;
 				}
 				return false;

@@ -29,6 +29,25 @@ namespace Vehicles
 			ParseHelper.Parsers<VehicleJobLimitations>.Register(new Func<string, VehicleJobLimitations>(VehicleJobLimitations.FromString));
 			ParseHelper.Parsers<CompVehicleLauncher.DeploymentTimer>.Register(new Func<string, CompVehicleLauncher.DeploymentTimer>(CompVehicleLauncher.DeploymentTimer.FromString));
 			ParseHelper.Parsers<VehicleTurretRender.RotationalOffset>.Register(new Func<string, VehicleTurretRender.RotationalOffset>(VehicleTurretRender.RotationalOffset.FromString));
+			ParseHelper.Parsers<Pair<VehicleEventDef, VehicleEventDef>>.Register(new Func<string, Pair<VehicleEventDef, VehicleEventDef>>(VehicleEventDefPairFromString));
+		}
+
+		private static Pair<VehicleEventDef, VehicleEventDef> VehicleEventDefPairFromString(string entry)
+		{
+			entry = entry.TrimStart(new char[] { '(' }).TrimEnd(new char[] { ')' });
+			string[] data = entry.Split(new char[] { ',' });
+
+			try
+			{
+				VehicleEventDef eventDef1 = DefDatabase<VehicleEventDef>.GetNamed(data[0].Trim());
+				VehicleEventDef eventDef2 = DefDatabase<VehicleEventDef>.GetNamed(data[1].Trim());
+				return new Pair<VehicleEventDef, VehicleEventDef>(eventDef1, eventDef2);
+			}
+			catch (Exception ex)
+			{
+				SmashLog.Error($"{entry} is not a valid <struct>Pair<VehicleEventDef, VehicleEventDef></struct> format. Exception: {ex}");
+				return new Pair<VehicleEventDef, VehicleEventDef>();
+			}
 		}
 
 		internal static void RegisterAttributes()
