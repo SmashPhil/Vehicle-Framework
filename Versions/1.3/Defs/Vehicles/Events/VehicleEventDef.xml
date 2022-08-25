@@ -48,4 +48,8 @@
 	<Vehicles.VehicleEventDef>
 		<defName>PawnExited</defName>
 	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>PawnChangedSeats</defName>
+	</Vehicles.VehicleEventDef>
 </Defs>

@@ -23,6 +23,8 @@ namespace Vehicles
 
 		public static JobDef RepairVehicle;
 
+		public static JobDef DisassembleVehicle;
+
 		public static JobDef PaintVehicle;
 
 		public static JobDef CarryItemToVehicle;

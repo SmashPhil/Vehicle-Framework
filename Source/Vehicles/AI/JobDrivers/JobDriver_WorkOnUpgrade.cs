@@ -24,9 +24,8 @@ namespace Vehicles
 
 		public override bool TryMakePreToilReservations(bool errorOnFailed)
 		{
-			int maxWorkers = Vehicle.TotalAllowedFor(JobDefOf_Vehicles.UpgradeVehicle);
 			LocalTargetInfo target = Vehicle.SurroundingCells.FirstOrDefault(c => pawn.Map.GetCachedMapComponent<VehicleReservationManager>().CanReserve<LocalTargetInfo, VehicleTargetReservation>(Vehicle, pawn, c));
-			return target.IsValid && pawn.Map.GetCachedMapComponent<VehicleReservationManager>().Reserve<LocalTargetInfo, VehicleTargetReservation>(Vehicle, pawn, job, target, maxWorkers);
+			return target.IsValid && pawn.Map.GetCachedMapComponent<VehicleReservationManager>().Reserve<LocalTargetInfo, VehicleTargetReservation>(Vehicle, pawn, job, target);
 		}
 
 		protected override IEnumerable<Toil> MakeNewToils()

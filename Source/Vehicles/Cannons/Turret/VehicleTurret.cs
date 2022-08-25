@@ -180,9 +180,7 @@ namespace Vehicles
 
 		public bool TurretRestricted => restrictions?.Disabled ?? false;
 
-		public virtual bool TurretDisabled => TurretRestricted || MissingOperators;
-
-		public virtual bool MissingOperators => RelatedHandlers.NotNullAndAny(h => h.handlers.Count < h.role.slotsToOperate) && !DebugSettings.godMode;
+		public virtual bool TurretDisabled => TurretRestricted || !IsManned;
 
 		protected virtual bool TurretTargetValid => cannonTarget.Cell.IsValid && !TurretDisabled;
 
@@ -200,7 +198,7 @@ namespace Vehicles
 
 		public List<VehicleHandler> RelatedHandlers => vehicle.handlers.FindAll(h => !h.role.turretIds.NullOrEmpty() && h.role.turretIds.Contains(key));
 
-		public bool IsManned => RelatedHandlers?.All(handler => handler.RoleFulfilled) ?? true;
+		public bool IsManned => (RelatedHandlers?.All(handler => handler.RoleFulfilled) ?? true) || DebugSettings.godMode;
 
 		public bool HasAmmo => turretDef.ammunition is null || shellCount > 0;
 

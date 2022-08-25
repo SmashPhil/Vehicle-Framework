@@ -57,7 +57,7 @@ namespace Vehicles
 					}
 					vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(vehicle);
 				}
-				else if(!value && vehicle.vPather.curPath != null)
+				else if (!value && vehicle.vPather.curPath != null)
 				{
 					vehicle.vPather.PatherFailed();
 				}
@@ -66,13 +66,16 @@ namespace Vehicles
 					vehicle.currentlyFishing = false;
 				}
 
-				if (value)
+				if (__instance.Drafted != value)
 				{
-					vehicle.EventRegistry[VehicleEventDefOf.DraftOn].ExecuteEvents();
-				}
-				else
-				{
-					vehicle.EventRegistry[VehicleEventDefOf.DraftOff].ExecuteEvents();
+					if (value)
+					{
+						vehicle.EventRegistry[VehicleEventDefOf.DraftOn].ExecuteEvents();
+					}
+					else
+					{
+						vehicle.EventRegistry[VehicleEventDefOf.DraftOff].ExecuteEvents();
+					}
 				}
 			}
 			return true;
@@ -121,6 +124,7 @@ namespace Vehicles
 				vehicle.vPather = new Vehicle_PathFollower(vehicle);
 				vehicle.vehicleAI = new VehicleAI(vehicle);
 				vehicle.statHandler = new VehicleStatHandler(vehicle);
+				vehicle.sharedJob = new SharedJob();
 				vehicle.graphicOverlay = new VehicleGraphicOverlay(vehicle);
 				PatternData defaultPatternData = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicle.VehicleDef.defName, vehicle.VehicleDef.graphicData);
 				vehicle.patternData = new PatternData(defaultPatternData);

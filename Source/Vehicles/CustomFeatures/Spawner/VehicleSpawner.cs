@@ -66,32 +66,8 @@ namespace Vehicles
 				lastStep = "Initializing components";
 				PawnComponentsUtility.CreateInitialComponents(result);
 
+				lastStep = "Setting up sound events";
 				result.sustainers = new VehicleSustainers(result);
-
-				lastStep = "Adding OneShot Events";
-				if (!request.VehicleDef.soundOneShotsOnEvent.NullOrEmpty())
-				{
-					foreach ((VehicleEventDef eventDef, SoundDef soundDef) in request.VehicleDef.soundOneShotsOnEvent)
-					{
-						result.AddEvent(eventDef, () => soundDef.PlayOneShot(result));
-					}
-				}
-
-				lastStep = "Adding Sustainer Events";
-				if (!request.VehicleDef.soundSustainersOnEvent.NullOrEmpty())
-				{
-					foreach ((Pair<VehicleEventDef, VehicleEventDef> eventStartStop, SoundDef soundDef) in request.VehicleDef.soundSustainersOnEvent)
-					{
-						result.AddEvent(eventStartStop.First, delegate ()
-						{
-							result.sustainers.Spawn(soundDef, MaintenanceType.PerTick);
-						});
-						result.AddEvent(eventStartStop.Second, delegate ()
-						{
-							result.sustainers.EndAll(soundDef);
-						});
-					}
-				}
 
 				lastStep = "Setting faction and kindDef";
 				result.kindDef = request.VehicleDef.kindDef;

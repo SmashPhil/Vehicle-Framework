@@ -11,6 +11,7 @@
 			<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
 			<drawSize>(7,7)</drawSize>
 			<drawOffset>(0, 0, 3)</drawOffset>
+			<drawRotated>false</drawRotated>
 			<shaderType>CutoutComplexPattern</shaderType>
 			<color>(130, 30, 30)</color>
 			<colorTwo>(130, 30, 30)</colorTwo>

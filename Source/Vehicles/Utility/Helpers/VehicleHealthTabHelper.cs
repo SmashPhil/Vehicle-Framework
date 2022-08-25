@@ -202,11 +202,8 @@ namespace Vehicles
 			Widgets.Label(labelRect, component.ArmorRating.ToStringPercent());
 			labelRect.x += columnWidth;
 
-			if (component.ComponentIndicator)
-			{
-				Rect iconRect = new Rect(labelRect.x, labelRect.y, ComponentIndicatorIconSize, ComponentIndicatorIconSize);
-				component.DrawIcon(iconRect);
-			}
+			Rect iconRect = new Rect(labelRect.x, labelRect.y, ComponentIndicatorIconSize, ComponentIndicatorIconSize);
+			component.DrawIcon(iconRect);
 
 			return labelHeight;
 		}

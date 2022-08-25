@@ -30,9 +30,7 @@ namespace Vehicles
 
 		public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
 		{
-			// Assigned to flag for debugging
-			bool flag = t is VehiclePawn vehicle && vehicle.CompFueledTravel != null && CanRefuel(pawn, vehicle, forced) && !vehicle.vPather.Moving;
-			return flag;
+			return t is VehiclePawn vehicle && vehicle.CompFueledTravel != null && CanRefuel(pawn, vehicle, forced) && !vehicle.vPather.Moving;
 		}
 
 		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
@@ -40,10 +38,12 @@ namespace Vehicles
 			Job job = null;
 			if (t is VehiclePawn vehicle && vehicle.CompFueledTravel != null)
 			{
-				Thing t2 = vehicle.CompFueledTravel.ClosestFuelAvailable(pawn);
-				if (t2 is null)
+				Thing closestFuel = vehicle.CompFueledTravel.ClosestFuelAvailable(pawn);
+				if (closestFuel is null)
+				{
 					return null;
-				return JobMaker.MakeJob(JobDefOf_Vehicles.RefuelVehicle, vehicle, t2);
+				}
+				return JobMaker.MakeJob(JobDefOf_Vehicles.RefuelVehicle, vehicle, closestFuel);
 			}
 			
 			return job;

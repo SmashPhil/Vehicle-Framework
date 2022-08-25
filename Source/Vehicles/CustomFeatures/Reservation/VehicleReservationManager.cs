@@ -9,7 +9,7 @@ namespace Vehicles
 {
 	public class VehicleReservationManager : MapComponent
 	{
-		private const int ReservationVerificationInterval = 50;
+		private const int ReservationVerificationInterval = 60;
 
 		private Dictionary<VehiclePawn, ReservationBase> reservations = new Dictionary<VehiclePawn, ReservationBase>();
 		private Dictionary<VehiclePawn, VehicleRequestCollection> vehicleListers = new Dictionary<VehiclePawn, VehicleRequestCollection>();
@@ -24,24 +24,24 @@ namespace Vehicles
 		{
 		}
 
-		public bool Reserve<T1, T2>(VehiclePawn vehicle, Pawn pawn, Job job, T1 target, int maxClaimantsIfNew = 1) where T2 : Reservation<T1>
+		public bool Reserve<T1, T2>(VehiclePawn vehicle, Pawn pawn, Job job, T1 target) where T2 : Reservation<T1>
 		{
-			if(vehicle is null || pawn is null || job is null)
+			if (vehicle is null || pawn is null || job is null)
 			{
 				return false;
 			}
+
 			try
 			{
 				ReleaseAllClaimedBy(pawn);
-				
-				if(reservations.ContainsKey(vehicle) && reservations[vehicle].GetType() != typeof(T2))
+				if (reservations.ContainsKey(vehicle) && reservations[vehicle].GetType() != typeof(T2))
 				{
 					ClearReservedFor(vehicle);
 				}
 				
 				if (reservations.ContainsKey(vehicle))
 				{
-					if(CanReserve<T1, T2>(vehicle, pawn, target))
+					if (CanReserve<T1, T2>(vehicle, pawn, target))
 					{
 						(reservations[vehicle] as T2).AddClaimant(pawn, target);
 					}
@@ -52,7 +52,8 @@ namespace Vehicles
 				}
 				else
 				{
-					reservations.Add(vehicle, (ReservationBase)Activator.CreateInstance(typeof(T2), new object[] { vehicle, job, maxClaimantsIfNew }));
+					int maxClaimaints = vehicle.TotalAllowedFor(job.def);
+					reservations.Add(vehicle, (ReservationBase)Activator.CreateInstance(typeof(T2), new object[] { vehicle, job, maxClaimaints }));
 					(reservations[vehicle] as T2).AddClaimant(pawn, target);
 				}
 			}
@@ -83,7 +84,7 @@ namespace Vehicles
 
 		public void ReleaseAllClaimedBy(Pawn pawn)
 		{
-			foreach(ReservationBase reservation in reservations.Values)
+			foreach (ReservationBase reservation in reservations.Values)
 			{
 				reservation.ReleaseReservationBy(pawn);
 			}
@@ -98,9 +99,18 @@ namespace Vehicles
 			}
 		}
 
+		public bool CanReserve(VehiclePawn vehicle, Pawn pawn, JobDef jobDef)
+		{
+			if (reservations.TryGetValue(vehicle, out ReservationBase reservation))
+			{
+				return vehicle.TotalAllowedFor(jobDef) > reservation.TotalClaimants;
+			}
+			return true;
+		}
+
 		public bool CanReserve<T1, T2>(VehiclePawn vehicle, Pawn pawn, T1 target) where T2 : Reservation<T1>
 		{
-			if (reservations.TryGetValue(vehicle, out var reservation))
+			if (reservations.TryGetValue(vehicle, out ReservationBase reservation))
 			{
 				return reservation is T2 type && type.CanReserve(pawn, target);
 			}
@@ -118,13 +128,13 @@ namespace Vehicles
 
 		public override void MapComponentTick()
 		{
-			if(Find.TickManager.TicksGame % ReservationVerificationInterval == 0)
+			if (Find.TickManager.TicksGame % ReservationVerificationInterval == 0)
 			{
 				for(int i = reservations.Count - 1; i >= 0; i--)
 				{
 					KeyValuePair<VehiclePawn, ReservationBase> reservation = reservations.ElementAt(i);
 					reservation.Value.VerifyAndValidateClaimants();
-					if(reservation.Value.RemoveNow)
+					if (reservation.Value.RemoveNow)
 					{
 						reservations.Remove(reservation.Key);
 					}
@@ -239,8 +249,8 @@ namespace Vehicles
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Collections.Look(ref reservations, "reservations", LookMode.Reference, LookMode.Reference, ref vehicleReservations, ref reservationSets);
-			Scribe_Collections.Look(ref vehicleListers, "vehicleListers", LookMode.Reference, LookMode.Deep, ref vehicleListerPawns, ref vehicleListerRequests);
+			Scribe_Collections.Look(ref reservations, nameof(reservations), LookMode.Reference, LookMode.Deep, ref vehicleReservations, ref reservationSets);
+			Scribe_Collections.Look(ref vehicleListers, nameof(vehicleListers), LookMode.Reference, LookMode.Deep, ref vehicleListerPawns, ref vehicleListerRequests);
 		}
 
 		public class VehicleRequestCollection : IExposable
@@ -259,7 +269,7 @@ namespace Vehicles
 
 			public void ExposeData()
 			{
-				Scribe_Collections.Look(ref requests, "requests", LookMode.Value);
+				Scribe_Collections.Look(ref requests, nameof(requests), LookMode.Value);
 			}
 		}
 	}

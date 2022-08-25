@@ -119,15 +119,23 @@ namespace Vehicles
 			}
 		}
 
+		public void RecalculatePermissions()
+		{
+			if (Moving && (!vehicle.CanMoveFinal || !vehicle.Drafted))
+			{
+				PatherFailed();
+			}
+		}
+
 		public void ExposeData()
 		{
-			Scribe_Values.Look(ref moving, "moving", true, false);
-			Scribe_Values.Look(ref nextCell, "nextCell", default(IntVec3), false);
-			Scribe_Values.Look(ref nextCellCostLeft, "nextCellCostLeft", 0f, false);
-			Scribe_Values.Look(ref nextCellCostTotal, "nextCellCostInitial", 0f, false);
-			Scribe_Values.Look(ref peMode, "peMode", PathEndMode.None, false);
-			Scribe_Values.Look(ref cellsUntilClamor, "cellsUntilClamor", 0, false);
-			Scribe_Values.Look(ref lastMovedTick, "lastMovedTick", -999999, false);
+			Scribe_Values.Look(ref moving, nameof(moving));
+			Scribe_Values.Look(ref nextCell, nameof(nextCell));
+			Scribe_Values.Look(ref nextCellCostLeft, nameof(nextCellCostLeft));
+			Scribe_Values.Look(ref nextCellCostTotal, nameof(nextCellCostTotal));
+			Scribe_Values.Look(ref peMode, nameof(peMode));
+			Scribe_Values.Look(ref cellsUntilClamor, nameof(cellsUntilClamor));
+			Scribe_Values.Look(ref lastMovedTick, nameof(lastMovedTick), -999999);
 			if (moving)
 			{
 				Scribe_TargetInfo.Look(ref destination, "destination");
@@ -207,6 +215,7 @@ namespace Vehicles
 		{
 			if (!vehicle.Drafted || !vehicle.CanMoveFinal)
 			{
+				PatherFailed();
 				return;
 			}
 
@@ -568,9 +577,7 @@ namespace Vehicles
 
 			if (vehicle.InsideMap(nextCell, vehicle.Map) || flag)
 			{
-				vehicle.jobs.curDriver.Notify_PatherFailed();
-				StopDead();
-				return;
+				PatherFailed();
 			}
 		}
 

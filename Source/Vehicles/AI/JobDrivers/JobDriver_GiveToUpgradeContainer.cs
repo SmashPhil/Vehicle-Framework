@@ -13,8 +13,7 @@ namespace Vehicles
 
 		public override bool TryMakePreToilReservations(bool errorOnFailed)
 		{
-			int maxWorkers = Vehicle.TotalAllowedFor(JobDefOf_Vehicles.LoadUpgradeMaterials);
-			return base.TryMakePreToilReservations(errorOnFailed) && pawn.Map.GetCachedMapComponent<VehicleReservationManager>().Reserve<ThingDefCountClass, VehicleNodeReservation>(Vehicle, pawn, job, ThingDef, maxWorkers);
+			return base.TryMakePreToilReservations(errorOnFailed) && pawn.Map.GetCachedMapComponent<VehicleReservationManager>().Reserve<ThingDefCountClass, VehicleNodeReservation>(Vehicle, pawn, job, ThingDef);
 		}
 
 		protected override IEnumerable<Toil> MakeNewToils()

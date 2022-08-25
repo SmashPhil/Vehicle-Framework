@@ -11,6 +11,9 @@ namespace Vehicles
 	{
 		private Dictionary<Pawn, LocalTargetInfo> claimants;
 
+		private List<Pawn> pawnClaimants;
+		private List<LocalTargetInfo> pawnTargets;
+
 		public VehicleTargetReservation()
 		{
 		}
@@ -24,15 +27,14 @@ namespace Vehicles
 
 		public override bool RemoveNow => !claimants.Any();
 
-		//REDO : Add better reservation for target positions around vehicle when working on job
 		public override bool AddClaimant(Pawn pawn, LocalTargetInfo target)
 		{
-			if(claimants.ContainsKey(pawn))
+			if (claimants.ContainsKey(pawn))
 			{
 				Log.Error($"Attempting to reserve Vehicle with {pawn.LabelShort}. Target {target} is already reserved.");
 				return false;
 			}
-			claimants.Add(pawn, target);
+			claimants[pawn] = target;
 			return true;
 		}
 
@@ -43,7 +45,7 @@ namespace Vehicles
 
 		public override void ReleaseAllReservations()
 		{
-			foreach(Pawn p in claimants.Keys)
+			foreach (Pawn p in claimants.Keys)
 			{
 				p.jobs.EndCurrentJob(JobCondition.InterruptForced);
 				p.ClearMind();
@@ -53,16 +55,18 @@ namespace Vehicles
 		public override void ReleaseReservationBy(Pawn pawn)
 		{
 			if (claimants.ContainsKey(pawn))
+			{
 				claimants.Remove(pawn);
+			}
 		}
 
 		public override void VerifyAndValidateClaimants()
 		{
 			List<Pawn> actors = new List<Pawn>(claimants.Keys);
-			foreach(Pawn actor in actors)
+			foreach (Pawn actor in actors)
 			{
 				//Fail if job def changes, vehicle target changes, targetInfo is no longer valid, or vehicle gets drafted
-				if(actor.CurJob.def.defName != jobDef || actor.CurJob.targetA != targetA || !claimants[actor].IsValid || actor.Drafted || vehicle.Drafted)
+				if (actor == null || !actor.Spawned || actor.Dead || actor.CurJob.def.defName != jobDef || actor.CurJob.targetA != targetA || !claimants[actor].IsValid || actor.Drafted || vehicle.Drafted)
 				{
 					claimants.Remove(actor);
 				}
@@ -72,7 +76,7 @@ namespace Vehicles
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Collections.Look(ref claimants, "claimants", LookMode.Reference, LookMode.LocalTargetInfo);
+			Scribe_Collections.Look(ref claimants, nameof(claimants), LookMode.Reference, LookMode.LocalTargetInfo, ref pawnClaimants, ref pawnTargets);
 		}
 	}
 }

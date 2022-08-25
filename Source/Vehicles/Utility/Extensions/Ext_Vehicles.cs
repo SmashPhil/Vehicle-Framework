@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using Verse;
 using Verse.AI.Group;
+using Verse.Sound;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
@@ -12,6 +13,47 @@ namespace Vehicles
 {
 	public static class Ext_Vehicles
 	{
+		public static void RegenerateEvents(this VehiclePawn vehicle)
+		{
+			vehicle.EventRegistry?.Clear();
+			vehicle.RegisterEvents();
+		}
+
+		public static void RegisterEvents(this VehiclePawn vehicle)
+		{
+			if (vehicle.EventRegistry.NullOrEmpty())
+			{
+				vehicle.FillEvents_Def();
+				vehicle.AddEvent(VehicleEventDefOf.DraftOff, vehicle.vPather.RecalculatePermissions);
+				vehicle.AddEvent(VehicleEventDefOf.Immobilized, vehicle.vPather.RecalculatePermissions);
+				vehicle.AddEvent(VehicleEventDefOf.PawnExited, vehicle.vPather.RecalculatePermissions);
+				vehicle.AddEvent(VehicleEventDefOf.PawnChangedSeats, vehicle.vPather.RecalculatePermissions);
+				//One Shots
+				if (!vehicle.VehicleDef.soundOneShotsOnEvent.NullOrEmpty())
+				{
+					foreach ((VehicleEventDef eventDef, SoundDef soundDef) in vehicle.VehicleDef.soundOneShotsOnEvent)
+					{
+						vehicle.AddEvent(eventDef, () => soundDef.PlayOneShot(vehicle));
+					}
+				}
+				//Sustainers
+				if (!vehicle.VehicleDef.soundSustainersOnEvent.NullOrEmpty())
+				{
+					foreach ((Pair<VehicleEventDef, VehicleEventDef> eventStartStop, SoundDef soundDef) in vehicle.VehicleDef.soundSustainersOnEvent)
+					{
+						vehicle.AddEvent(eventStartStop.First, delegate ()
+						{
+							vehicle.sustainers.Spawn(soundDef, MaintenanceType.PerTick);
+						});
+						vehicle.AddEvent(eventStartStop.Second, delegate ()
+						{
+							vehicle.sustainers.EndAll(soundDef);
+						});
+					}
+				}
+			}
+		}
+
 		public static bool DeconstructibleBy(this VehiclePawn vehicle, Faction faction)
 		{
 			return DebugSettings.godMode || (vehicle.Faction == faction || vehicle.ClaimableBy(faction));

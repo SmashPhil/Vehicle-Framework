@@ -135,6 +135,7 @@ namespace Vehicles
 					{
 						if (hoveringOverPawn != null && draggedPawn.ParentHolder is VehicleHandler curHandler && transferToHandler.CanOperateRole(draggedPawn) && curHandler.CanOperateRole(hoveringOverPawn))
 						{
+							Vehicle.EventRegistry[VehicleEventDefOf.PawnChangedSeats].ExecuteEvents();
 							curHandler.handlers.Swap(transferToHandler.handlers, draggedPawn, hoveringOverPawn);
 						}
 						else
@@ -142,9 +143,16 @@ namespace Vehicles
 							Messages.Message(TranslatorFormattedStringExtensions.Translate("Vehicles_HandlerNotEnoughRoom", transferToHandler.role.label, draggedPawn), MessageTypeDefOf.RejectInput);
 						}
 					}
-					else if (!transferToHandler.handlers.TryAddOrTransfer(draggedPawn, false))
+					else
 					{
-						Messages.Message($"Unable to add {draggedPawn} to {transferToHandler.role.label}.", MessageTypeDefOf.RejectInput);
+						if (transferToHandler.handlers.TryAddOrTransfer(draggedPawn, false))
+						{
+							Vehicle.EventRegistry[VehicleEventDefOf.PawnChangedSeats].ExecuteEvents();
+						}
+						else
+						{
+							Messages.Message($"Unable to add {draggedPawn} to {transferToHandler.role.label}.", MessageTypeDefOf.RejectInput);
+						}
 					}
 				}
 				draggedPawn = null;

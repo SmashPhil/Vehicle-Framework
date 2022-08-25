@@ -11,6 +11,7 @@
 			<texPath>Vehicles/Air/AdvancedTransportPod/AdvancedTransportPod</texPath>
 			<graphicClass>Vehicles.Graphic_Vehicle</graphicClass>
 			<drawSize>(3,3)</drawSize>
+			<drawRotated>false</drawRotated>
 			<shaderType>Cutout</shaderType>
 			<shadowData>
 				<volume>(0.4,0.1,0.4)</volume>
@@ -92,11 +93,15 @@
 				<health>125</health>
 				<armor>0.15</armor>
 				
-				<explosionProperties>
-					<chance>0.25</chance>
-					<radius>3</radius>
-					<damageDef>Bomb</damageDef>
-				</explosionProperties>
+				<reactors>
+					<li Class = "Vehicles.Reactor_Explosive">
+						<indicator>VF_Explosive</indicator>
+						<chance>0.25</chance>
+						<radius>3</radius>
+						<damageDef>Bomb</damageDef>
+					</li>
+					<li Class = "Vehicles.Reactor_FuelLeak"/>
+				</reactors>
 				
 				<hitbox>
 					<cells>

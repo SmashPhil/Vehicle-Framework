@@ -13,5 +13,15 @@ namespace Vehicles
 		public abstract float TransformValue(VehiclePawn vehicle, float value);
 
 		public abstract string ExplanationPart(VehiclePawn vehicle);
+
+		public virtual IEnumerable<Dialog_InfoCard.Hyperlink> GetInfoCardHyperlinks(VehiclePawn vehicle)
+		{
+			yield break;
+		}
+
+		public virtual bool Disabled(VehiclePawn vehicle)
+		{
+			return false;
+		}
 	}
 }

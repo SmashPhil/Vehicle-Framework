@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 using Verse;
 using SmashTools;
 
@@ -10,6 +11,9 @@ namespace Vehicles
 
 		public VehicleComponentProperties props;
 		public float health;
+
+		public IndicatorDef indicator;
+		public Color highlightColor = Color.white;
 
 		public VehicleComponent()
 		{
@@ -23,12 +27,13 @@ namespace Vehicles
 
 		public Color EfficiencyColor => gradient.Evaluate(Efficiency);
 
-		public virtual bool ComponentIndicator => !props.explosionProperties.Empty;
-
 		public virtual void DrawIcon(Rect rect)
 		{
-			Widgets.DrawTextureFitted(rect, VehicleTex.WarningIcon, 1);
-			TooltipHandler.TipRegionByKey(rect, "VF_ExplosiveComponent");
+			if (indicator != null)
+			{
+				Widgets.DrawTextureFitted(rect, indicator.Icon, 1);
+				TooltipHandler.TipRegion(rect, indicator.label);
+			}
 		}
 
 		public virtual float TakeDamage(VehiclePawn vehicle, DamageInfo dinfo, IntVec3 cell)
@@ -38,6 +43,13 @@ namespace Vehicles
 			if (damage <= 0 || !penetrated)
 			{
 				vehicle.Drawer.Notify_DamageDeflected(cell);
+			}
+			if (!props.reactors.NullOrEmpty())
+			{
+				foreach (Reactor reactor in props.reactors)
+				{
+					reactor.Hit(vehicle, this, damage, penetrated);
+				}
 			}
 			health -= damage;
 			float remainingDamage = -health;
@@ -94,7 +106,8 @@ namespace Vehicles
 		public virtual void Initialize(VehicleComponentProperties props)
 		{
 			this.props = props;
-			
+			indicator = props.reactors?.FirstOrDefault(reactor => reactor.indicator != null)?.indicator;
+			highlightColor = props.reactors?.FirstOrDefault()?.highlightColor ?? Color.white;
 			gradient = new Gradient()
 			{
 				colorKeys = new[] { new GradientColorKey(Color.gray, props.efficiency[0].x),

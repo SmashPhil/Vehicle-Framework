@@ -31,7 +31,7 @@ namespace Vehicles
 			componentLocations = new Dictionary<IntVec2, List<VehicleComponent>>();
 		}
 
-		public List<VehicleComponent> ComponentsPrioritized => components.OrderBy(c => !c.props.categories.NullOrEmpty() ? c.props.categories.Min(ctg => ctg.priority) : 999).ThenBy(c => c.HealthPercent).ToList();
+		public List<VehicleComponent> ComponentsPrioritized => components.OrderBy(c => !c.props.categories.NullOrEmpty() ? c.props.categories.Min(ctg => ctg.displayPriorityInCategory) : 9999).ThenBy(c => c.HealthPercent).ToList();
 
 		public bool NeedsRepairs => components.Any(c => c.HealthPercent < 1);
 
@@ -74,6 +74,7 @@ namespace Vehicles
 			{
 				return statDef.operationType switch
 				{
+					EfficiencyOperationType.None => 1,
 					EfficiencyOperationType.MinValue => categories.Min(c => c.Efficiency),
 					EfficiencyOperationType.MaxValue => categories.Max(c => c.Efficiency),
 					EfficiencyOperationType.Sum => categories.Sum(c => c.Efficiency).Clamp(0, 1),
@@ -276,11 +277,6 @@ namespace Vehicles
 						dinfo.SetAmount(stepDamage);
 						DamageRoles(dinfo, cellOffset);
 						lastDamage = component.TakeDamage(vehicle, dinfo, new IntVec3(vehicle.Position.x + hitCell.x, 0, vehicle.Position.z + hitCell.z));
-						if (vehicle.Spawned && Rand.Range(0, 1) < component.props.explosionProperties.chance)
-						{
-							GenExplosion.DoExplosion(new IntVec3(vehicle.Position.x + cellOffset.x, 0, vehicle.Position.z + cellOffset.z), vehicle.Map, component.props.explosionProperties.radius, component.props.explosionProperties.Def, dinfo.Instigator,
-								component.props.explosionProperties.Def.defaultDamage, component.props.explosionProperties.Def.defaultArmorPenetration);
-						}
 					}
 					damage = lastDamage;
 					if (damage > 0 && direction.IsValid)
@@ -349,11 +345,6 @@ namespace Vehicles
 					DamageRoles(dinfo, cell);
 					damage = component.TakeDamage(vehicle, dinfo, new IntVec3(vehicle.Position.x + hitCell.x, 0, vehicle.Position.z + hitCell.z));
 					report?.AppendLine($"Recycled Damage = {damage}");
-					if (vehicle.Spawned && Rand.Range(0, 1) < component.props.explosionProperties.chance)
-					{
-						GenExplosion.DoExplosion(new IntVec3(vehicle.Position.x + cell.x, 0, vehicle.Position.z + cell.z), vehicle.Map, component.props.explosionProperties.radius, component.props.explosionProperties.Def, dinfo.Instigator,
-							component.props.explosionProperties.Def.defaultDamage, component.props.explosionProperties.Def.defaultArmorPenetration);
-					}
 					if (damage > 0 && direction.IsValid)
 					{
 						switch (direction.AsInt)
@@ -464,7 +455,7 @@ namespace Vehicles
 					}
 					hitboxCells.Add(new IntVec3(x, 0, z));
 				}
-				GenDraw.DrawFieldEdges(hitboxCells, component.props.explosionProperties.Empty ? Color.white : new Color(1, 0.5f, 0));
+				GenDraw.DrawFieldEdges(hitboxCells, component.highlightColor);
 			}
 			
 			if (VehicleMod.settings.debug.debugDrawHitbox)
@@ -490,8 +481,8 @@ namespace Vehicles
 
 		public void ExposeData()
 		{
-			Scribe_References.Look(ref vehicle, "vehicle", true);
-			Scribe_Collections.Look(ref components, "components", LookMode.Deep);
+			Scribe_References.Look(ref vehicle, nameof(vehicle), true);
+			Scribe_Collections.Look(ref components, nameof(components), LookMode.Deep);
 			
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{

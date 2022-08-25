@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using Verse;
 using Verse.Sound;
+using SmashTools;
 
 namespace Vehicles
 {
 	public class VehicleSustainers
 	{
 		private VehiclePawn vehicle;
-
-		public List<Sustainer> activeSustainers;
+		private List<Sustainer> activeSustainers;
 
 		public VehicleSustainers(VehiclePawn vehicle)
 		{

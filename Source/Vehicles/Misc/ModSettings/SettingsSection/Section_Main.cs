@@ -17,7 +17,8 @@ namespace Vehicles
 		/* General */
 		public bool modifiableSettings = true;
 		public bool useCustomShaders = true;
-		public bool fullVehiclePathing = true; //disable if you need every ounce of performance
+		public bool fullVehiclePathing = true;
+		public bool multiplePawnsPerJob = true;
 		public bool showDisabledVehicles = false;
 
 		public float meleeDamageMultiplier = 1;
@@ -58,7 +59,8 @@ namespace Vehicles
 			/* General */
 			modifiableSettings = true;
 			useCustomShaders = true;
-			fullVehiclePathing = true; //disable if you need every ounce of performance
+			fullVehiclePathing = true;
+			multiplePawnsPerJob = true;
 			showDisabledVehicles = false;
 
 			meleeDamageMultiplier = 1;
@@ -91,35 +93,36 @@ namespace Vehicles
 
 		public override void ExposeData()
 		{
-			Scribe_Values.Look(ref beachMultiplier, nameof(beachMultiplier), 0f);
-			Scribe_Values.Look(ref forceFactionCoastRadius, nameof(forceFactionCoastRadius), 1);
+			Scribe_Values.Look(ref beachMultiplier, nameof(beachMultiplier), defaultValue: 0f);
+			Scribe_Values.Look(ref forceFactionCoastRadius, nameof(forceFactionCoastRadius), defaultValue: 1);
 
-			Scribe_Values.Look(ref modifiableSettings, nameof(modifiableSettings), true);
-			Scribe_Values.Look(ref useCustomShaders, nameof(useCustomShaders), true);
-			Scribe_Values.Look(ref fullVehiclePathing, nameof(fullVehiclePathing));
-			Scribe_Values.Look(ref showDisabledVehicles, nameof(showDisabledVehicles), false);
+			Scribe_Values.Look(ref modifiableSettings, nameof(modifiableSettings), defaultValue: true);
+			Scribe_Values.Look(ref useCustomShaders, nameof(useCustomShaders), defaultValue: true);
+			Scribe_Values.Look(ref fullVehiclePathing, nameof(fullVehiclePathing), defaultValue: true);
+			Scribe_Values.Look(ref multiplePawnsPerJob, nameof(multiplePawnsPerJob), defaultValue: true);
+			Scribe_Values.Look(ref showDisabledVehicles, nameof(showDisabledVehicles), defaultValue: false);
 
-			Scribe_Values.Look(ref meleeDamageMultiplier, nameof(meleeDamageMultiplier), 1);
-			Scribe_Values.Look(ref rangedDamageMultiplier, nameof(rangedDamageMultiplier), 1);
-			Scribe_Values.Look(ref explosiveDamageMultiplier, nameof(explosiveDamageMultiplier), 1);
+			Scribe_Values.Look(ref meleeDamageMultiplier, nameof(meleeDamageMultiplier), defaultValue: 1);
+			Scribe_Values.Look(ref rangedDamageMultiplier, nameof(rangedDamageMultiplier), defaultValue: 1);
+			Scribe_Values.Look(ref explosiveDamageMultiplier, nameof(explosiveDamageMultiplier), defaultValue: 1);
 
-			Scribe_Values.Look(ref overheatMechanics, nameof(overheatMechanics), true);
+			Scribe_Values.Look(ref overheatMechanics, nameof(overheatMechanics), defaultValue: true);
 
-			Scribe_Values.Look(ref passiveWaterWaves, nameof(passiveWaterWaves), true);
+			Scribe_Values.Look(ref passiveWaterWaves, nameof(passiveWaterWaves), defaultValue: true);
 
-			Scribe_Values.Look(ref fishingMultiplier, nameof(fishingMultiplier), 1f);
-			Scribe_Values.Look(ref fishingDelay, nameof(fishingDelay), 10000);
-			Scribe_Values.Look(ref fishingSkillIncrease, nameof(fishingSkillIncrease), 5);
-			Scribe_Values.Look(ref fishingPersists, nameof(fishingPersists), true);
+			Scribe_Values.Look(ref fishingMultiplier, nameof(fishingMultiplier), defaultValue: 1f);
+			Scribe_Values.Look(ref fishingDelay, nameof(fishingDelay), defaultValue: 10000);
+			Scribe_Values.Look(ref fishingSkillIncrease, nameof(fishingSkillIncrease), defaultValue: 5);
+			Scribe_Values.Look(ref fishingPersists, nameof(fishingPersists), defaultValue: true);
 
-			Scribe_Values.Look(ref burnRadiusOnRockets, nameof(burnRadiusOnRockets), true);
-			Scribe_Values.Look(ref deployOnLanding, nameof(deployOnLanding), true);
-			Scribe_Values.Look(ref airDefenses, nameof(airDefenses), true);
-			Scribe_Values.Look(ref dynamicWorldDrawing, nameof(dynamicWorldDrawing), true);
-			Scribe_Values.Look(ref delayDeployOnLanding, nameof(delayDeployOnLanding), 0);
+			Scribe_Values.Look(ref burnRadiusOnRockets, nameof(burnRadiusOnRockets), defaultValue: true);
+			Scribe_Values.Look(ref deployOnLanding, nameof(deployOnLanding), defaultValue: true);
+			Scribe_Values.Look(ref airDefenses, nameof(airDefenses), defaultValue: true);
+			Scribe_Values.Look(ref dynamicWorldDrawing, nameof(dynamicWorldDrawing), defaultValue: true);
+			Scribe_Values.Look(ref delayDeployOnLanding, nameof(delayDeployOnLanding), defaultValue: 0);
 
-			Scribe_Values.Look(ref drawUpgradeInformationScreen, nameof(drawUpgradeInformationScreen), true);
-			Scribe_Values.Look(ref overrideDrawColors, nameof(overrideDrawColors), true);
+			Scribe_Values.Look(ref drawUpgradeInformationScreen, nameof(drawUpgradeInformationScreen), defaultValue: true);
+			Scribe_Values.Look(ref overrideDrawColors, nameof(overrideDrawColors), defaultValue: true);
 		}
 
 		public override void DrawSection(Rect rect)
@@ -143,7 +146,8 @@ namespace Vehicles
 				listingStandard.Gap(4);
 				listingStandard.CheckboxLabeled("VF_ModifiableSettings".Translate(), ref modifiableSettings, "VF_ModifiableSettingsTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_CustomShaders".Translate(), ref useCustomShaders, "VF_CustomShadersTooltip".Translate());
-				listingStandard.CheckboxLabeled("VF_FullVehiclePathing".Translate(), ref fullVehiclePathing, "FullVehiclePathingTooltip".Translate());
+				listingStandard.CheckboxLabeled("VF_FullVehiclePathing".Translate(), ref fullVehiclePathing, "VF_FullVehiclePathingTooltip".Translate());
+				listingStandard.CheckboxLabeled("VF_MultiplePawnsPerJob".Translate(), ref multiplePawnsPerJob, "VF_MultiplePawnsPerJobTooltip".Translate());
 				bool checkBefore = showDisabledVehicles;
 				listingStandard.CheckboxLabeled("VF_ShowDisabledVehicles".Translate(), ref showDisabledVehicles, "VF_ShowDisabledVehiclesTooltip".Translate());
 				listingStandard.Gap(4);

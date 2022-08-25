@@ -29,6 +29,8 @@ namespace Vehicles
 		public VehicleGraphicOverlay graphicOverlay;
 		[Unsaved]
 		public VehicleSustainers sustainers;
+		
+		public SharedJob sharedJob;
 
 		public PatternData patternData;
 		public RetextureDef retexture;
@@ -86,7 +88,6 @@ namespace Vehicles
 
 		public VehiclePawn()
 		{
-			this.FillEvents_Def();
 		}
 
 		public CompVehicleTurrets CompVehicleTurrets
@@ -794,14 +795,36 @@ namespace Vehicles
 				}
 			}
 
-			if (Prefs.DevMode)
+			if (Prefs.DevMode && Spawned)
 			{
+				yield return new Command_Action
+				{
+					defaultLabel = "Destroy Random Component",
+					action = delegate ()
+					{
+						VehicleComponent component = statHandler.components.Where(component => !component.props.categories.Contains(VehicleStatDefOf.BodyIntegrity)).RandomOrDefault();
+						component ??= statHandler.components.RandomElement();
+						component.TakeDamage(this, new DamageInfo(DamageDefOf.Bite, float.MaxValue), Position);
+						Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleTookDamage(this);
+					}
+				};
+				yield return new Command_Action
+				{
+					defaultLabel = "Damage Random Component",
+					action = delegate ()
+					{
+						VehicleComponent component = statHandler.components.RandomElement();
+						component.TakeDamage(this, new DamageInfo(DamageDefOf.Bite, component.health * 0.5f), Position);
+						Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleTookDamage(this);
+					}
+				};
 				yield return new Command_Action
 				{
 					defaultLabel = "Heal All Components",
 					action = delegate ()
 					{
 						statHandler.components.ForEach(c => c.HealComponent(float.MaxValue));
+						Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleRepaired(this);
 					}
 				};
 				yield return new Command_Action()
@@ -858,11 +881,11 @@ namespace Vehicles
 			}
 			foreach (VehicleHandler handler in handlers)
 			{
-				if(handler.AreSlotsAvailable)
+				if (handler.AreSlotsAvailable)
 				{
-					FloatMenuOption opt = new FloatMenuOption("EnterVehicle".Translate(LabelShort, handler.role.label, (handler.role.slots - (handler.handlers.Count + 
-						Map.GetCachedMapComponent<VehicleReservationManager>().GetReservation<VehicleHandlerReservation>(this)?.ClaimantsOnHandler(handler) ?? 0)).ToString()), 
-					delegate ()
+					VehicleReservationManager reservationManager = Map.GetCachedMapComponent<VehicleReservationManager>();
+					FloatMenuOption opt = new FloatMenuOption("EnterVehicle".Translate(LabelShort, handler.role.label, (handler.role.slots - (handler.handlers.Count +
+						reservationManager.GetReservation<VehicleHandlerReservation>(this)?.ClaimantsOnHandler(handler) ?? 0)).ToString()), delegate ()
 					{
 						Job job = new Job(JobDefOf_Vehicles.Board, this);
 						GiveLoadJob(selPawn, handler);
@@ -871,27 +894,25 @@ namespace Vehicles
 						{
 							return;
 						}
-						selPawn.Map.GetCachedMapComponent<VehicleReservationManager>().Reserve<VehicleHandler, VehicleHandlerReservation>(this, selPawn, selPawn.CurJob, handler, 999);
-					}, MenuOptionPriority.Default, null, null, 0f, null, null);
+						reservationManager.Reserve<VehicleHandler, VehicleHandlerReservation>(this, selPawn, selPawn.CurJob, handler);
+					});
 					yield return opt;
 				}
 			}
 			if (statHandler.NeedsRepairs)
 			{
-				yield return new FloatMenuOption("VF_RepairVehicle".Translate(LabelShort),
-				delegate ()
+				yield return new FloatMenuOption("VF_RepairVehicle".Translate(LabelShort), delegate ()
 				{
 					Job job = new Job(JobDefOf_Vehicles.RepairVehicle, this);
-					selPawn.jobs.TryTakeOrderedJob(job, JobTag.MiscWork);
+					selPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
 				});
 			}
 			if (patternToPaint != null)
 			{
-				yield return new FloatMenuOption("VF_PaintVehicle".Translate(LabelShort),
-				delegate ()
+				yield return new FloatMenuOption("VF_PaintVehicle".Translate(LabelShort), delegate ()
 				{
 					Job job = new Job(JobDefOf_Vehicles.PaintVehicle, this);
-					selPawn.jobs.TryTakeOrderedJob(job, JobTag.MiscWork);
+					selPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
 				});
 			}
 		}
@@ -1207,6 +1228,10 @@ namespace Vehicles
 
 		public int TotalAllowedFor(JobDef jobDef)
 		{
+			if (!VehicleMod.settings.main.multiplePawnsPerJob)
+			{
+				return 1;
+			}
 			foreach (VehicleJobLimitations jobLimit in VehicleDef.properties.vehicleJobLimitations)
 			{
 				if (jobLimit.defName == jobDef.defName)
@@ -1366,6 +1391,7 @@ namespace Vehicles
 		public void MultiplePawnFloatMenuOptions(List<Pawn> pawns)
 		{
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
+			VehicleReservationManager reservationManager = Map.GetCachedMapComponent<VehicleReservationManager>();
 			FloatMenuOption opt1 = new FloatMenuOption("BoardShipGroup".Translate(LabelShort), delegate ()
 			{
 				List<IntVec3> cells = this.OccupiedRect().Cells.ToList();
@@ -1378,7 +1404,7 @@ namespace Vehicles
 					Job job = new Job(JobDefOf_Vehicles.Board, this);
 					VehicleHandler handler = p.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(h => h.AreSlotsAvailable && h.role.handlingTypes.NullOrEmpty());
 					GiveLoadJob(p, handler);
-					Map.GetCachedMapComponent<VehicleReservationManager>().Reserve<VehicleHandler, VehicleHandlerReservation>(this, p, job, handler, 999);
+					reservationManager.Reserve<VehicleHandler, VehicleHandlerReservation>(this, p, job, handler);
 					p.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
 				}
 			}, MenuOptionPriority.Default, null, null, 0f, null, null);
@@ -1389,7 +1415,7 @@ namespace Vehicles
 			int r = 0;
 			foreach(VehicleHandler h in handlers)
 			{
-				r += Map.GetCachedMapComponent<VehicleReservationManager>().GetReservation<VehicleHandlerReservation>(this)?.ClaimantsOnHandler(h) ?? 0;
+				r += reservationManager.GetReservation<VehicleHandlerReservation>(this)?.ClaimantsOnHandler(h) ?? 0;
 			}
 			options.Add(pawns.Count + r > SeatsAvailable ? opt2 : opt1);
 			FloatMenuMulti floatMenuMap = new FloatMenuMulti(options, pawns, this, pawns[0].LabelCap, Verse.UI.MouseMapPosition())
@@ -1919,7 +1945,9 @@ namespace Vehicles
 		public override void SpawnSetup(Map map, bool respawningAfterLoad)
 		{
 			base.SpawnSetup(map, respawningAfterLoad);
+			this.RegisterEvents();
 			EventRegistry[VehicleEventDefOf.Spawned].ExecuteEvents();
+			sharedJob ??= new SharedJob();
 			if (!respawningAfterLoad)
 			{
 				vPather.ResetToCurrentPosition();
@@ -2026,6 +2054,14 @@ namespace Vehicles
 			}
 		}
 
+		protected override void ReceiveCompSignal(string signal)
+		{
+			if (signal == CompSignals.RanOutOfFuel)
+			{
+				vPather.StopDead();
+			}
+		}
+
 		protected virtual void BaseTickOptimized()
 		{
 			if (Find.TickManager.TicksGame % 250 == 0)
@@ -2069,6 +2105,7 @@ namespace Vehicles
 			base.ExposeData();
 			Scribe_Deep.Look(ref vPather, nameof(vPather), new object[] { this });
 			Scribe_Deep.Look(ref statHandler, nameof(statHandler), new object[] { this });
+			Scribe_Deep.Look(ref sharedJob, nameof(sharedJob));
 
 			Scribe_Values.Look(ref angle, nameof(angle));
 

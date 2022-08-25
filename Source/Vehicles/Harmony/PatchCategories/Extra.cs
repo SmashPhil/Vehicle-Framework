@@ -222,7 +222,8 @@ namespace Vehicles
         {
             if (__instance.IsInVehicle())
             {
-                var vehicle = __instance.GetVehicle();
+                VehiclePawn vehicle = __instance.GetVehicle();
+				vehicle.EventRegistry[VehicleEventDefOf.PawnChangedSeats].ExecuteEvents();
                 vehicle.inventory.innerContainer.TryAddOrTransfer(__instance);
 				Find.WorldPawns.RemovePawn(__instance);
             }

@@ -123,12 +123,7 @@ namespace Vehicles
 
 		public static void RegisterDisplayStats()
 		{
-			VehicleInfoCard.RegisterStatDef(StatDefOf.ArmorRating_Blunt);
-			VehicleInfoCard.RegisterStatDef(StatDefOf.ArmorRating_Sharp);
-			VehicleInfoCard.RegisterStatDef(StatDefOf.ArmorRating_Heat);
-
-			VehicleInfoCard.RegisterStatDef(StatDefOf.MarketValue);
-			VehicleInfoCard.RegisterStatDef(StatDefOf.Mass);
+			//VehicleInfoCard.RegisterStatDef(StatDefOf.MarketValue);
 			VehicleInfoCard.RegisterStatDef(StatDefOf.Flammability);
 
 			//VehicleInfoCard.RegisterStatDef(StatDefOf.RestRateMultiplier);

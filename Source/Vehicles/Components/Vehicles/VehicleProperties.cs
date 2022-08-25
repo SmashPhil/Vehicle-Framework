@@ -20,12 +20,7 @@ namespace Vehicles
 		public float wakeMultiplier = 1.6f;
 		public float wakeSpeed = 1.6f;
 
-		public List<VehicleJobLimitations> vehicleJobLimitations = new List<VehicleJobLimitations>()
-		{
-			new VehicleJobLimitations("RepairVehicle", 1),
-			new VehicleJobLimitations("LoadUpgradeMaterials", 1),
-			new VehicleJobLimitations("UpgradeVehicle", 1),
-		};
+		public List<VehicleJobLimitations> vehicleJobLimitations = new List<VehicleJobLimitations>();
 
 		public bool diagonalRotation = true;
 		[PostToSettings(Label = "ManhunterTargetsVehicle", Tooltip = "ManhunterTargetsVehicleTooltip", Translate = true, UISettingsType = UISettingsType.Checkbox)]
@@ -78,14 +73,13 @@ namespace Vehicles
 
 		public IEnumerable<string> ConfigErrors()
 		{
-			if (vehicleJobLimitations.NullOrEmpty())
-			{
-				yield return "<field>vehicleJobLimitations</field> list must be populated".ConvertRichText();
-			}
+			yield break;
 		}
 
 		public void ResolveReferences(VehicleDef vehicleDef)
 		{
+			vehicleJobLimitations ??= new List<VehicleJobLimitations>();
+
 			customBiomeCosts ??= new Dictionary<BiomeDef, float>();
 			customHillinessCosts ??= new Dictionary<Hilliness, float>();
 			customRoadCosts ??= new Dictionary<RoadDef, float>();

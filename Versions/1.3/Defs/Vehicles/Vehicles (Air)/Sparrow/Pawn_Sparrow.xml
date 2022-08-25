@@ -142,16 +142,20 @@
 				<armor>0.1</armor>
 				<efficiencyWeight>10</efficiencyWeight>
 				
+				<reactors>
+					<li Class = "Vehicles.Reactor_Explosive">
+						<indicator>VF_Explosive</indicator>
+						<chance>0.25</chance>
+						<radius>3</radius>
+						<damageDef>Bomb</damageDef>
+					</li>
+					<li Class = "Vehicles.Reactor_FuelLeak"/>
+				</reactors>
+				
 				<categories>
 					<li>MoveSpeed</li>
 					<li>FlightSpeed</li>
 				</categories>
-				
-				<explosionProperties>
-					<chance>0.25</chance>
-					<radius>6</radius>
-					<damageDef>Bomb</damageDef>
-				</explosionProperties>
 				
 				<hitbox>
 					<cells>

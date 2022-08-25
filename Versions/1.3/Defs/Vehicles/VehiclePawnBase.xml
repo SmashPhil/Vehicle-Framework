@@ -19,7 +19,6 @@
 		<draftLabel>Start Engine</draftLabel>
 		
 		<statBases>
-			<Mass>100</Mass>
 			<PsychicSensitivity>0</PsychicSensitivity>
 			<ToxicSensitivity>0</ToxicSensitivity>
 			<Flammability>0</Flammability>
@@ -30,6 +29,7 @@
 		</statBases>
 		
 		<vehicleStats>
+			<Mass>100</Mass>
 			<MoveSpeed>3.75</MoveSpeed>
 			<CargoCapacity>200</CargoCapacity>
 			<RepairRate>1.5</RepairRate>

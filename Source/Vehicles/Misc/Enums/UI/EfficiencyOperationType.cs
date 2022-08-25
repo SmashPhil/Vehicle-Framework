@@ -8,6 +8,7 @@ namespace Vehicles
 {
 	public enum EfficiencyOperationType
 	{
+		None,
 		Average,
 		Sum,
 		MinValue,

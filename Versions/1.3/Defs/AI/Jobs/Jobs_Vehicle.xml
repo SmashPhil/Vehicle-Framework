@@ -58,23 +58,30 @@
 	</JobDef>
 	
 	<JobDef>
+		<defName>DisassembleVehicle</defName>
+		<driverClass>Vehicles.JobDriver_DisassembleVehicle</driverClass>
+		<reportString>Disassembling vehicle.</reportString>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+	</JobDef>
+	
+	<JobDef>
 		<defName>PaintVehicle</defName>
 		<driverClass>Vehicles.JobDriver_PaintVehicle</driverClass>
-		<reportString>Painting.</reportString>
+		<reportString>Painting vehicle.</reportString>
 		<casualInterruptible>true</casualInterruptible>
 	</JobDef>
 	
 	<JobDef>
 		<defName>UpgradeVehicle</defName>
 		<driverClass>Vehicles.JobDriver_WorkOnUpgrade</driverClass>
-		<reportString>Working on vehicles.</reportString>
+		<reportString>Working on vehicle.</reportString>
 		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
 	</JobDef>
 	
 	<JobDef>
 		<defName>RefuelVehicle</defName>
 		<driverClass>Vehicles.JobDriver_RefuelVehicle</driverClass>
-		<reportString>Refueling ship</reportString>
+		<reportString>Refueling vehicle</reportString>
 		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
 		<casualInterruptible>false</casualInterruptible>
 	</JobDef>
@@ -82,7 +89,7 @@
 	<JobDef>
 		<defName>RefuelVehicleAtomic</defName>
 		<driverClass>Vehicles.JobDriver_RefuelVehicleAtomic</driverClass>
-		<reportString>Refueling ship</reportString>
+		<reportString>Refueling vehicle</reportString>
 		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
 		<casualInterruptible>false</casualInterruptible>
 	</JobDef>
@@ -90,7 +97,7 @@
 	<JobDef>
 		<defName>FollowVehicle</defName>
 		<driverClass>Vehicles.JobDriver_FollowVehicle</driverClass>
-		<reportString>Following.</reportString>
+		<reportString>Following vehicle.</reportString>
 		<casualInterruptible>false</casualInterruptible>
 	</JobDef>
 	

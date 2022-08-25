@@ -14,11 +14,18 @@ namespace Vehicles
 {
 	public class CompFueledTravel : VehicleAIComp, IRefundable
 	{
-		private const float EfficiencyTickMultiplier = 1f / GenDate.TicksPerDay;
-		private const float CellOffsetIntVec3ToVector3 = 0.5f;
-		private const float TicksToCharge = 120;
+		public const float FuelPerLeak = 1;
+		public const float TicksPerLeakCheck = 60;
+		public const float MaxTicksPerLeak = 400;
+
+		public const float EfficiencyTickMultiplier = 1f / GenDate.TicksPerDay;
+		public const float CellOffsetIntVec3ToVector3 = 0.5f;
+		public const float TicksToCharge = 120;
 
 		private static MethodInfo powerNetMethod;
+
+		[Unsaved]
+		private bool leaking;
 
 		private float fuel;
 		private bool terminateMotes = false;
@@ -45,6 +52,7 @@ namespace Vehicles
 		public VehiclePawn Vehicle => parent as VehiclePawn;
 		public FuelConsumptionCondition FuelCondition => Props.fuelConsumptionCondition;
 		public Gizmo FuelCountGizmo => new Gizmo_RefuelableFuelTravel { refuelable = this };
+		public List<VehicleComponent> FuelComponents { get; private set; }
 
 		public IEnumerable<(ThingDef thingDef, float count)> Refunds
 		{
@@ -172,7 +180,7 @@ namespace Vehicles
 			if (fuel <= 0f)
 			{
 				fuel = 0f;
-				parent.BroadcastCompSignal("RanOutOfFuel");
+				parent.BroadcastCompSignal(CompSignals.RanOutOfFuel);
 			}
 		}
 
@@ -186,7 +194,7 @@ namespace Vehicles
 			if (fuel <= 0f)
 			{
 				fuel = 0f;
-				parent.BroadcastCompSignal("RanOutOfFuel");
+				parent.BroadcastCompSignal(CompSignals.RanOutOfFuel);
 			}
 		}
 
@@ -320,15 +328,49 @@ namespace Vehicles
 					Vehicle.drafter.Drafted = false;
 				}
 			}
-			else if (Props.electricPowered && !Charging)
+			else if (Props.electricPowered)
 			{
-				ConsumeFuel(Mathf.Min(Props.dischargeRate * EfficiencyTickMultiplier, Fuel));
+				if (!Charging)
+				{
+					ConsumeFuel(Mathf.Min(Props.dischargeRate * EfficiencyTickMultiplier, Fuel));
+				}
+				else if(Find.TickManager.TicksGame % TicksToCharge == 0)
+				{
+					PowerNetMethod.Invoke(connectedPower.PowerNet, new object[] { -Props.chargeRate });
+					Refuel(Props.chargeRate);
+				}
 			}
 
-			if (Props.electricPowered && Charging && Find.TickManager.TicksGame % TicksToCharge == 0)
+			if (Props.leakDef != null && fuel > 0 && Find.TickManager.TicksGame % TicksPerLeakCheck == 0)
 			{
-				PowerNetMethod.Invoke(connectedPower.PowerNet, new object[] { -Props.chargeRate });
-				Refuel(Props.chargeRate);
+				leaking = false;
+				foreach (VehicleComponent component in FuelComponents)
+				{
+					float efficiency = component.Efficiency;
+					if (efficiency < 0.9f)
+					{
+						leaking = true;
+					}
+				}
+			}
+			if (leaking)
+			{
+				foreach (VehicleComponent component in FuelComponents)
+				{
+					float efficiency = component.Efficiency;
+					int ticksPerLeak = Mathf.CeilToInt(Mathf.Pow(efficiency, 2) / 1000 + 20);
+					if (Find.TickManager.TicksGame % ticksPerLeak == 0)
+					{
+						float fuelLeaking = (1 - efficiency) * FuelPerLeak;
+						ConsumeFuel(fuelLeaking);
+						if (Vehicle.Spawned)
+						{
+							IntVec2 offset = component.props.hitbox.cells.RandomElement();
+							IntVec3 leakCell = new IntVec3(Vehicle.Position.x + offset.x, 0, Vehicle.Position.z + offset.z);
+							FilthMaker.TryMakeFilth(leakCell, Vehicle.Map, Props.leakDef);
+						}
+					}
+				}
 			}
 		}
 
@@ -437,6 +479,7 @@ namespace Vehicles
 			{
 				TryConnectPower();
 			}
+			FuelComponents = Vehicle.statHandler.components.Where(component => component.props.HasReactor<Reactor_FuelLeak>()).ToList();
 		}
 
 		public override void PostExposeData()

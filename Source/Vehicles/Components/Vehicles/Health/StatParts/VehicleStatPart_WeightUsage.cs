@@ -3,22 +3,31 @@ using System.Collections.Generic;
 using System.Linq;
 using Verse;
 using RimWorld;
-
+using SmashTools;
 namespace Vehicles
 {
 	public class VehicleStatPart_WeightUsage : VehicleStatPart
 	{
-		public SimpleCurve overweightSpeedCurve;
+		public SimpleCurve usageCurve;
+		public OperationType operation = OperationType.Addition;
 
 		public override float TransformValue(VehiclePawn vehicle, float value)
 		{
 			float capacity = vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
-			float usage = 0;
-			if (capacity > 0)
+			float modifier = 0;
+			if (usageCurve != null)
 			{
-				usage = MassUtility.InventoryMass(vehicle) / capacity;
+				if (capacity > 0)
+				{
+					modifier = MassUtility.InventoryMass(vehicle) / capacity;
+				}
+				modifier = usageCurve.Evaluate(modifier);
 			}
-			return value * overweightSpeedCurve.Evaluate(usage);
+			else
+			{
+				modifier = MassUtility.InventoryMass(vehicle);
+			}
+			return operation.Apply(value, modifier);
 		}
 
 		public override string ExplanationPart(VehiclePawn vehicle)

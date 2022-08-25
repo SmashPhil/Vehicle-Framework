@@ -14,7 +14,7 @@ namespace Vehicles
 			{
 				if (((Pawn)jobEndable.GetActor().jobs.curJob.GetTarget(index).Thing as VehiclePawn).vPather.MovingNow)
 				{
-					return JobCondition.InterruptOptional;
+					return JobCondition.InterruptForced;
 				}
 				return JobCondition.Ongoing;
 			});

@@ -30,7 +30,6 @@
 		<vehicleType>Land</vehicleType>
 		
 		<statBases>
-			<Mass>60000</Mass>
 			<ArmorRating_Blunt>1.0</ArmorRating_Blunt>
 			<ArmorRating_Sharp>1.0</ArmorRating_Sharp>
 			<MarketValue>75000</MarketValue>
@@ -38,12 +37,18 @@
 		</statBases>
 		
 		<vehicleStats>
+			<Mass>60000</Mass>
 			<MoveSpeed>3.25</MoveSpeed>
 			<CargoCapacity>100</CargoCapacity>
 			<RepairRate>2.5</RepairRate>
 		</vehicleStats>
 		
 		<properties>
+			<vehicleJobLimitations>
+				<li>(PaintVehicle, 3)</li>
+				<li>(RepairVehicle, 3)</li>
+			</vehicleJobLimitations>
+			
 			<customBiomeCosts>
 				<li>
 					<key>TropicalRainforest</key>
@@ -175,11 +180,15 @@
 				<armor>0.25</armor>
 				<efficiencyWeight>10</efficiencyWeight>
 				
-				<explosionProperties>
-					<chance>0.25</chance>
-					<radius>3</radius>
-					<damageDef>Bomb</damageDef>
-				</explosionProperties>
+				<reactors>
+					<li Class = "Vehicles.Reactor_Explosive">
+						<indicator>VF_Explosive</indicator>
+						<chance>0.25</chance>
+						<radius>3</radius>
+						<damageDef>Bomb</damageDef>
+					</li>
+					<li Class = "Vehicles.Reactor_FuelLeak"/>
+				</reactors>
 				
 				<hitbox>
 					<cells>

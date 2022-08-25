@@ -59,7 +59,20 @@
 		<workType>Construction</workType>
 		<verb>repairing</verb>
 		<gerund>repairing</gerund>
-		<priorityInType>90</priorityInType>
+		<priorityInType>80</priorityInType>
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+	</WorkGiverDef>
+	
+	<WorkGiverDef>
+		<defName>DisassembleVehicle</defName>
+		<label>Disassemble Vehicle</label>
+		<giverClass>Vehicles.WorkGiver_DisassembleVehicle</giverClass>
+		<workType>Construction</workType>
+		<verb>disassembling</verb>
+		<gerund>disassembling</gerund>
+		<priorityInType>80</priorityInType>
 		<requiredCapacities>
 			<li>Manipulation</li>
 		</requiredCapacities>

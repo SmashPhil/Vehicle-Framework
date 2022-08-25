@@ -140,11 +140,17 @@
 				<health>100</health>
 				<armor>.1</armor>
 				<efficiencyWeight>10</efficiencyWeight>
-				<explosionProperties>
-					<chance>0.25</chance>
-					<radius>3</radius>
-					<damageDef>Bomb</damageDef>
-				</explosionProperties>
+				
+				<reactors>
+					<li Class = "Vehicles.Reactor_Explosive">
+						<indicator>VF_Explosive</indicator>
+						<chance>0.25</chance>
+						<radius>3</radius>
+						<damageDef>Bomb</damageDef>
+					</li>
+					<li Class = "Vehicles.Reactor_FuelLeak"/>
+				</reactors>
+				
 				<hitbox>
 					<cells>
 						<li>(0, 2)</li>

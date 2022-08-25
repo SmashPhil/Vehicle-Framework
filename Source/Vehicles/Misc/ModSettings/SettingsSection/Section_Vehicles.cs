@@ -149,8 +149,8 @@ namespace Vehicles
 							});
 						}
 					}
-					drawStatusMessage = $"Creating RotationHandle. Pattern={VehicleMod.selectedPatterns.Count}";
 
+					drawStatusMessage = $"Creating RotationHandle. Pattern={VehicleMod.selectedPatterns.Count}";
 					if (VehicleMod.selectedDef.graphicData.drawRotated && VehicleMod.selectedDef.graphicData.Graphic is Graphic_Vehicle graphicVehicle)
 					{
 						Rect rotateVehicleRect = new Rect(iconRect.x + iconRect.width, iconRect.y + SmallIconSize, SmallIconSize, SmallIconSize);

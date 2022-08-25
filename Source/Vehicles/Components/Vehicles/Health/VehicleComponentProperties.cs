@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Verse;
 using SmashTools;
 
@@ -15,7 +16,6 @@ namespace Vehicles
 
 		public int health;
 		public float armor;
-		public ExplosionProperties explosionProperties;
 		public int efficiencyWeight = 1;
 
 		public ComponentHitbox hitbox = new ComponentHitbox();
@@ -23,32 +23,31 @@ namespace Vehicles
 
 		public SimpleCurve efficiency;
 
+		public List<Reactor> reactors;
+
+		public virtual T GetReactor<T>() where T : Reactor
+		{
+			return reactors?.FirstOrDefault(reactor => reactor is T) as T;
+		}
+
+		public virtual bool HasReactor<T>() where T : Reactor
+		{
+			return reactors?.FirstOrDefault(reactor => reactor is T) != null;
+		}
+
 		public virtual void ResolveReferences(VehicleDef def)
 		{
-			if (efficiency is null)
+			efficiency ??= new SimpleCurve()
 			{
-				efficiency = new SimpleCurve()
-				{
-					new CurvePoint(0, 0),
-					new CurvePoint(0.25f, 0f),
-					new CurvePoint(0.4f, 0.4f),
-					new CurvePoint(0.7f, 0.7f),
-					new CurvePoint(0.85f, 1),
-					new CurvePoint(1, 1)
-				};
-			}
-			if (categories is null)
-			{
-				categories = new List<VehicleStatDef>();
-			}
-			if (compClass is null)
-			{
-				compClass = typeof(VehicleComponent);
-			}
-			if (!explosionProperties.Empty)
-			{
-				explosionProperties.Def = DefDatabase<DamageDef>.GetNamed(explosionProperties.damageDef);
-			}
+				new CurvePoint(0, 0),
+				new CurvePoint(0.25f, 0f),
+				new CurvePoint(0.4f, 0.4f),
+				new CurvePoint(0.7f, 0.7f),
+				new CurvePoint(0.85f, 1),
+				new CurvePoint(1, 1)
+			};
+			categories ??= new List<VehicleStatDef>();
+			compClass ??= typeof(VehicleComponent);
 			hitbox.Initialize(def);
 		}
 
@@ -74,17 +73,6 @@ namespace Vehicles
 			{
 				yield return $"{key}: <field>efficiencyWeight</field> cannot = 0. If average weight = 0, resulting damage will be NaN, causing an instant-kill on the vehicle.";
 			}
-		}
-
-		public struct ExplosionProperties
-		{
-			public float chance;
-			public int radius;
-			public string damageDef;
-
-			public DamageDef Def { get; set; }
-
-			public bool Empty => string.IsNullOrEmpty(damageDef);
 		}
 	}
 }

@@ -361,11 +361,22 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Achievements\VehicleBuilderTracker.cs" />
+    <Compile Include="AI\JobDrivers\JobDriver_DisassembleVehicle.cs" />
+    <Compile Include="AI\WorkGiver\VehicleWorkGiver.cs" />
+    <Compile Include="Components\Vehicles\Health\Reactors\IndicatorDef.cs" />
+    <Compile Include="Components\Vehicles\Health\Reactors\Reactor.cs" />
+    <Compile Include="Components\Vehicles\Health\Reactors\Reactor_FuelLeak.cs" />
+    <Compile Include="Components\Vehicles\Health\Reactors\Reactor_Explosive.cs" />
+    <Compile Include="Components\Vehicles\Health\VehicleStatDrawEntry.cs" />
+    <Compile Include="Comps\CompSignals.cs" />
+    <Compile Include="CustomFeatures\SharedJobs\SharedJob.cs" />
+    <Compile Include="AI\JobDrivers\VehicleJobDriver.cs" />
+    <Compile Include="AI\WorkGiver\WorkGiver_DisassembleVehicle.cs" />
     <Compile Include="Components\Vehicles\VehicleSustainers.cs" />
     <Compile Include="Misc\Attributes\ActionOnSettingsInputAttribute.cs" />
     <Compile Include="Misc\DefOf\HediffDefOf_Vehicles.cs" />
+    <Compile Include="Misc\DefOf\VehicleStatCategoryDefOf.cs" />
     <Compile Include="Utility\DesignatorCache.cs" />
-    <Compile Include="AI\Designators\Designator_DisassembleVehicle.cs" />
     <Compile Include="AI\Incidents\IncidentWorker_ShuttleDowned.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_FollowVehicle.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_PaintVehicle.cs" />
@@ -802,6 +813,7 @@
     <Compile Include="World\WorldObjectComps\AirDefense.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="AI\Designators\" />
     <Folder Include="Comps\Fishing\" />
     <Folder Include="CustomFeatures\AerialLaunch\Skyfaller\Bombs\" />
   </ItemGroup>

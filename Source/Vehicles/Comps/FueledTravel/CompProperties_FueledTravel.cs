@@ -9,6 +9,7 @@ namespace Vehicles
 	public class CompProperties_FueledTravel : VehicleCompProperties
 	{
 		public ThingDef fuelType;
+		public ThingDef leakDef;
 
 		public bool electricPowered;
 

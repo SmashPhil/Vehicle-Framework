@@ -47,13 +47,15 @@ namespace Vehicles
 		
 		public VehicleDrawProperties drawProperties;
 
+		//Event : SoundDef
 		public Dictionary<VehicleEventDef, SoundDef> soundOneShotsOnEvent = new Dictionary<VehicleEventDef, SoundDef>();
-		//<Start Sustainer, Stop Sustainer>
+		//<Start Event, Stop Event> : SoundDef
 		public Dictionary<Pair<VehicleEventDef, VehicleEventDef>, SoundDef> soundSustainersOnEvent = new Dictionary<Pair<VehicleEventDef, VehicleEventDef>, SoundDef>();
 
 		public List<Type> designatorTypes = new List<Type>();
 
 		public string draftLabel = "[MISSING]";
+
 		/// <summary>
 		/// Auto-generated <c>PawnKindDef</c> that has been assigned for this VehicleDef.
 		/// </summary>

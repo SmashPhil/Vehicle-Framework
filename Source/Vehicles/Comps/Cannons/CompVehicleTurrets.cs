@@ -254,15 +254,15 @@ namespace Vehicles
 
 		private void ResolveTurretQueue()
 		{
-			for (int i = 0; i < turretQueue.Count; i++)
+			for (int i = turretQueue.Count - 1; i >= 0; i--)
 			{
 				TurretData turretData = turretQueue[i];
-				if (!turretData.turret.cannonTarget.IsValid || (turretData.turret.shellCount <= 0 && !DebugSettings.godMode))
+				if (!turretData.turret.cannonTarget.IsValid || turretData.turret.shellCount <= 0)
 				{
 					DequeueTurret(turretData);
 					continue;
 				}
-				if (turretData.turret.TurretDisabled || turretData.turret.OnCooldown || !turretData.turret.IsManned)
+				if (turretData.turret.TurretRestricted || turretData.turret.OnCooldown || (!turretData.turret.IsManned && !DebugSettings.godMode))
 				{
 					turretData.turret.SetTarget(LocalTargetInfo.Invalid);
 					DequeueTurret(turretData);
