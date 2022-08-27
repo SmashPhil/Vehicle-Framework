@@ -61,7 +61,7 @@
 		<label>Repair Rate</label>
 		<description>The amount of health that is repaired per second.</description>
 		<category>VehicleBasics</category>
-		<defaultBaseValue>3</defaultBaseValue>
+		<defaultBaseValue>1</defaultBaseValue>
 		<minValue>0</minValue>
 		
 		<toStringStyle>FloatTwo</toStringStyle>

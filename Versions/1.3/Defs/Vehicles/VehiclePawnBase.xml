@@ -28,13 +28,6 @@
 			<MeatAmount>0</MeatAmount> 
 		</statBases>
 		
-		<vehicleStats>
-			<Mass>100</Mass>
-			<MoveSpeed>3.75</MoveSpeed>
-			<CargoCapacity>200</CargoCapacity>
-			<RepairRate>1.5</RepairRate>
-		</vehicleStats>
-		
 		<soundOneShotsOnEvent>
 			<li>
 				<key>DraftOn</key>

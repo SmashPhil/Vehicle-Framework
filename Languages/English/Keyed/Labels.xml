@@ -31,7 +31,7 @@ Drafted vehicles can be moved, but restrict the unloading of pawns.
 	<ColorPickerHex>Hex</ColorPickerHex>
 	
 	<!-- Stats -->
-	<VF_StatsReport_Weight>Weight: {0}</VF_StatsReport_Weight>
+	<VF_StatsReport_CargoWeight>Cargo: {0}</VF_StatsReport_CargoWeight>
 	
 	<!-- Designators -->
 	

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using UnityEngine;
 using Verse;
 using SmashTools;
@@ -12,6 +13,7 @@ namespace Vehicles
 		public VehicleStatDef statDef;
 
 		protected Dictionary<VehicleDef, float> baseValues;
+		protected List<VehicleStatPart> statParts;
 
 		public VehicleStatWorker()
 		{
@@ -44,6 +46,7 @@ namespace Vehicles
 				if (statModifier.statDef == statDef)
 				{
 					value = statModifier.value; //TODO - Retrieve modified value from ModSettings, use statModifier value as fallback
+					statParts = statModifier.parts;
 					break;
 				}
 			}
@@ -80,6 +83,13 @@ namespace Vehicles
 			if (!statDef.parts.NullOrEmpty())
 			{
 				foreach (VehicleStatPart statPart in statDef.parts)
+				{
+					value = statPart.TransformValue(vehicle, value);
+				}
+			}
+			if (!statParts.NullOrEmpty())
+			{
+				foreach (VehicleStatPart statPart in statParts)
 				{
 					value = statPart.TransformValue(vehicle, value);
 				}
@@ -191,9 +201,21 @@ namespace Vehicles
 			StringBuilder stringBuilder = new StringBuilder();
 			if (statDef.parts != null)
 			{
-				for (int i = 0; i < statDef.parts.Count; i++)
+				foreach (VehicleStatPart statPart in statDef.parts)
 				{
-					string text = statDef.parts[i].ExplanationPart(vehicle);
+					string text = statPart.ExplanationPart(vehicle);
+					if (!text.NullOrEmpty())
+					{
+						stringBuilder.AppendLine(text);
+					}
+				}
+			}
+			if (vehicle.VehicleDef.vehicleStats?.FirstOrDefault(statModifier => statModifier.statDef == statDef) is VehicleStatModifier statModifier && !statModifier.parts.NullOrEmpty())
+			{
+				//TODO - Add disclaimer this is vehicle specific
+				foreach (VehicleStatPart statPart in statModifier.parts)
+				{
+					string text = statPart.ExplanationPart(vehicle);
 					if (!text.NullOrEmpty())
 					{
 						stringBuilder.AppendLine(text);

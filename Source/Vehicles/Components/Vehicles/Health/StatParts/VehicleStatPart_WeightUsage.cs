@@ -44,7 +44,7 @@ namespace Vehicles
 			{
 				weightUsage = string.Format(formatString, MassUtility.InventoryMass(vehicle), capacity);
 			}
-			return "VF_StatsReport_Weight".Translate(weightUsage);
+			return "VF_StatsReport_CargoWeight".Translate(weightUsage);
 		}
 	}
 }
