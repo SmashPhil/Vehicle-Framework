@@ -4,19 +4,21 @@ using System.Linq;
 using Verse;
 using RimWorld;
 using SmashTools;
+
 namespace Vehicles
 {
 	public class VehicleStatPart_WeightUsage : VehicleStatPart
 	{
 		public SimpleCurve usageCurve;
 		public OperationType operation = OperationType.Addition;
+		public string formatString;
 
 		public override float TransformValue(VehiclePawn vehicle, float value)
 		{
-			float capacity = vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
 			float modifier = 0;
 			if (usageCurve != null)
 			{
+				float capacity = vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
 				if (capacity > 0)
 				{
 					modifier = MassUtility.InventoryMass(vehicle) / capacity;
@@ -32,7 +34,17 @@ namespace Vehicles
 
 		public override string ExplanationPart(VehiclePawn vehicle)
 		{
-			return "StatsReport_BaseValue".Translate();
+			float capacity = vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
+			string weightUsage;
+			if (formatString.NullOrEmpty())
+			{
+				weightUsage = string.Format(statDef.formatString, MassUtility.InventoryMass(vehicle), capacity);
+			}
+			else
+			{
+				weightUsage = string.Format(formatString, MassUtility.InventoryMass(vehicle), capacity);
+			}
+			return "VF_StatsReport_Weight".Translate(weightUsage);
 		}
 	}
 }

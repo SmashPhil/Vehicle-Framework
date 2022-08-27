@@ -132,14 +132,9 @@ namespace Vehicles
 			return string.Empty;
 		}
 
-		public virtual string StatBuilderExplanation(VehiclePawn vehicle)
-		{
-			return statDef.description;
-		}
-
 		public virtual string GetStatDrawEntryLabel(VehicleStatDef stat, float value, ToStringNumberSense numberSense, bool finalized = true)
 		{
-			return stat.ValueToString(value, numberSense, finalized);
+			return stat.ValueToString(value, finalized, numberSense);
 		}
 
 		public string GetExplanationFull(VehiclePawn vehicle, ToStringNumberSense numberSense, float value)
@@ -162,7 +157,7 @@ namespace Vehicles
 			float baseValueFor = GetBaseValue(vehicle);
 			if (baseValueFor != 0f || statDef.showZeroBaseValue)
 			{
-				stringBuilder.AppendLine($"{"StatsReport_BaseValue".Translate()}: {statDef.ValueToString(baseValueFor, numberSense)}");
+				stringBuilder.AppendLine($"{"StatsReport_BaseValue".Translate()}: {statDef.ValueToString(baseValueFor, numberSense: numberSense)}");
 			}
 			if (vehicle.Stuff != null)
 			{
@@ -212,7 +207,7 @@ namespace Vehicles
 				if (!Mathf.Approximately(value, num))
 				{
 					string valueString = ValueToString(value, false, ToStringNumberSense.Absolute);
-					string valueStringFormatted = statDef.ValueToString(num, numberSense, true);
+					string valueStringFormatted = statDef.ValueToString(num, true, numberSense);
 					stringBuilder.AppendLine($"{"StatsReport_PostProcessed".Translate()}: {valueString} => {valueStringFormatted}");
 				}
 			}
@@ -229,7 +224,7 @@ namespace Vehicles
 			//{
 			//	stringBuilder.AppendLine("StatsReport_ScenarioFactor".Translate() + ": " + statFactor.ToStringPercent());
 			//}
-			stringBuilder.Append($"{"StatsReport_FinalValue".Translate()}:  {statDef.ValueToString(finalValue, statDef.toStringNumberSense)}");
+			stringBuilder.Append($"{"StatsReport_FinalValue".Translate()}:  {statDef.ValueToString(finalValue, numberSense: statDef.toStringNumberSense)}");
 			return stringBuilder.ToString();
 		}
 

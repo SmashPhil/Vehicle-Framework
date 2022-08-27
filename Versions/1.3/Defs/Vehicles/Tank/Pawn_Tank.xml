@@ -32,12 +32,12 @@
 		<statBases>
 			<ArmorRating_Blunt>1.0</ArmorRating_Blunt>
 			<ArmorRating_Sharp>1.0</ArmorRating_Sharp>
-			<MarketValue>75000</MarketValue>
 			<Flammability>0</Flammability>
 		</statBases>
 		
 		<vehicleStats>
 			<Mass>60000</Mass>
+			<MarketValue>75000</MarketValue>
 			<MoveSpeed>3.25</MoveSpeed>
 			<CargoCapacity>100</CargoCapacity>
 			<RepairRate>2.5</RepairRate>
@@ -53,7 +53,6 @@
 				<li>
 					<key>TropicalRainforest</key>
 					<value>-1</value>
-					<!-- <value>2</value> -->
 				</li>
 				<li>
 					<key>TropicalSwamp</key>

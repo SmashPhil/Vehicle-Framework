@@ -30,9 +30,10 @@ Drafted vehicles can be moved, but restrict the unloading of pawns.
 	<ColorThree>ColorThree</ColorThree>
 	<ColorPickerHex>Hex</ColorPickerHex>
 	
+	<!-- Stats -->
+	<VF_StatsReport_Weight>Weight: {0}</VF_StatsReport_Weight>
+	
 	<!-- Designators -->
-	<VF_DesignatorDisassemble>Disassemble</VF_DesignatorDisassemble>
-	<VF_DesignatorDisassembleDesc>Disassemble vehicle into parts.</VF_DesignatorDisassembleDesc>
 	
 	<!-- Tooltips -->
 	<VF_RenameVehicleTooltip>Assign or clear name.</VF_RenameVehicleTooltip>

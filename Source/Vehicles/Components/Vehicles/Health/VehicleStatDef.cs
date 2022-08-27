@@ -26,7 +26,6 @@ namespace Vehicles
 		public List<string> showIfModsLoaded;
 		public List<VehicleType> showOnVehicleTypes;
 
-		[MustTranslate]
 		public string formatString;
 		public ToStringStyle toStringStyle = ToStringStyle.Integer;
 		public ToStringNumberSense toStringNumberSense = ToStringNumberSense.Absolute;
@@ -83,7 +82,7 @@ namespace Vehicles
 			modSettingsInfo.maxValue = maxValue;
 		}
 
-		public string ValueToString(float val, ToStringNumberSense numberSense = ToStringNumberSense.Absolute, bool finalized = true)
+		public string ValueToString(float val, bool finalized = true, ToStringNumberSense numberSense = ToStringNumberSense.Absolute)
 		{
 			return Worker.ValueToString(val, finalized, numberSense);
 		}

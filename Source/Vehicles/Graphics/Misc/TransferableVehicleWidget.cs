@@ -600,22 +600,30 @@ namespace Vehicles
 			{
 				return 0f;
 			}
-			float num = thing.GetStatValue(StatDefOf.Mass, true);
+			float mass;
+			if (thing is VehiclePawn vehicle)
+			{
+				mass = vehicle.GetVehicleStatValue(VehicleStatDefOf.Mass);
+			}
+			else
+			{
+				mass = thing.GetStatValue(StatDefOf.Mass, true);
+			}
 			if (thing is Pawn pawn)
 			{
 				if (InventoryCalculatorsUtility.ShouldIgnoreInventoryOf(pawn, ignorePawnInventoryMass))
 				{
-					num -= MassUtility.InventoryMass(pawn);
+					mass -= MassUtility.InventoryMass(pawn);
 				}
 			}
 			else if (ignoreSpawnedCorpseGearAndInventoryMass)
 			{
 				if (thing is Corpse corpse && corpse.Spawned)
 				{
-					num -= MassUtility.GearAndInventoryMass(corpse.InnerPawn);
+					mass -= MassUtility.GearAndInventoryMass(corpse.InnerPawn);
 				}
 			}
-			return num;
+			return mass;
 		}
 
 		private struct Section

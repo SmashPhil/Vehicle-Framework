@@ -10,16 +10,17 @@ namespace Vehicles
 			DefOfHelper.EnsureInitializedInCtor(typeof(VehicleStatDefOf));
 		}
 
+		//General
 		public static VehicleStatDef MoveSpeed;
-
+		public static VehicleStatDef Mass;
+		public static VehicleStatDef CargoCapacity;
+		public static VehicleStatDef RepairRate;
 		public static VehicleStatDef BodyIntegrity;
 
-		public static VehicleStatDef CargoCapacity;
+		//Combat
 
-		public static VehicleStatDef RepairRate;
-
+		//Aerial
 		public static VehicleStatDef FlightSpeed;
-
 		public static VehicleStatDef FlightControl;
 	}
 }

@@ -13,6 +13,11 @@ namespace Vehicles
 {
 	public static class Ext_Vehicles
 	{
+		public static float GetVehicleStatValue(this VehiclePawn vehicle, VehicleStatDef statDef)
+		{
+			return statDef.Worker.GetValue(vehicle);
+		}
+
 		public static void RegenerateEvents(this VehiclePawn vehicle)
 		{
 			vehicle.EventRegistry?.Clear();

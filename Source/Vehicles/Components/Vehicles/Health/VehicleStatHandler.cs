@@ -52,6 +52,7 @@ namespace Vehicles
 		{
 			if (!comp.props.categories.NullOrEmpty())
 			{
+				statComponents.Clear();
 				foreach (VehicleStatDef category in comp.props.categories)
 				{
 					if (statComponents.TryGetValue(category, out var list))
@@ -60,7 +61,7 @@ namespace Vehicles
 					}
 					else
 					{
-						statComponents.Add(category, new List<VehicleComponent>() { comp });
+						statComponents[category] = new List<VehicleComponent>() { comp };
 					}
 				}
 			}

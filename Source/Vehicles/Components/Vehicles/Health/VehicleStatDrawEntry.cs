@@ -33,7 +33,6 @@ namespace Vehicles
 			this.value = value;
 			valueString = null;
 			displayOrderWithinCategory = stat.displayPriorityInCategory;
-			numberSense = ToStringNumberSense.Undefined;
 		}
 
 		public VehicleStatDrawEntry(StatCategoryDef category, string label, string valueString, string reportText, int displayPriorityWithinCategory, string overrideReportTitle = null, IEnumerable<Dialog_InfoCard.Hyperlink> hyperlinks = null, bool forceUnfinalizedMode = false)
@@ -59,7 +58,6 @@ namespace Vehicles
 			value = 0f;
 			valueString = "-";
 			displayOrderWithinCategory = stat.displayPriorityInCategory;
-			numberSense = ToStringNumberSense.Undefined;
 		}
 
 		public bool ShouldDisplay => stat == null || !Mathf.Approximately(value, stat.hideAtValue);

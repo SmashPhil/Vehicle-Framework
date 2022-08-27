@@ -123,7 +123,6 @@ namespace Vehicles
 
 		public static void RegisterDisplayStats()
 		{
-			//VehicleInfoCard.RegisterStatDef(StatDefOf.MarketValue);
 			VehicleInfoCard.RegisterStatDef(StatDefOf.Flammability);
 
 			//VehicleInfoCard.RegisterStatDef(StatDefOf.RestRateMultiplier);
