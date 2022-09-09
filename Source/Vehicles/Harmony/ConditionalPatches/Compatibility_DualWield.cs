@@ -5,14 +5,16 @@ using SmashTools;
 
 namespace Vehicles
 {
-	internal class CompatibilityPatch_DualWield : IConditionalPatch
+	internal class Compatibility_DualWield : IConditionalPatch
 	{
 		public void PatchAll(ModMetaData mod, Harmony harmony)
 		{
 			harmony.Patch(original: AccessTools.Method(typeof(Pawn_RotationTracker), "UpdateRotation"), prefix: null, postfix: null, transpiler: null,
-				finalizer: new HarmonyMethod(typeof(CompatibilityPatch_DualWield),
+				finalizer: new HarmonyMethod(typeof(Compatibility_DualWield),
 				nameof(NoRotationCallForVehicles)));
 		}
+
+		public static bool Active { get; set; }
 
 		public string PackageId => ConditionalPatchApplier.DualWield;
 

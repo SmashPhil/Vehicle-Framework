@@ -360,7 +360,7 @@ namespace Vehicles
 					}
 					bool validated = validator is null || validator(vehicle);
 					string tooltip = tooltipGetter != null ? tooltipGetter(validated) : string.Empty;
-					if (listingStandard.ListItemSelectable(vehicle.defName, Color.yellow, selectedDef == vehicle, validated, tooltip))
+					if (listingStandard.ListItemSelectable(vehicle.LabelCap, Color.yellow, selectedDef == vehicle, validated, tooltip))
 					{
 						if (selectedDef == vehicle)
 						{

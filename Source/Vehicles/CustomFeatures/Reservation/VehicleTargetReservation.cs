@@ -45,10 +45,12 @@ namespace Vehicles
 
 		public override void ReleaseAllReservations()
 		{
-			foreach (Pawn p in claimants.Keys)
+			var pawns = claimants.Keys.ToList();
+			for (int i = pawns.Count - 1; i >= 0; i--)
 			{
-				p.jobs.EndCurrentJob(JobCondition.InterruptForced);
-				p.ClearMind();
+				Pawn pawn = pawns[i];
+				pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
+				pawn.ClearMind();
 			}
 		}
 

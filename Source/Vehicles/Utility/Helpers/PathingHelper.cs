@@ -223,6 +223,19 @@ namespace Vehicles
 			}
 		}
 
+		public static void RecalculateAllPerceivedPathCosts(Map map)
+		{
+			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+			foreach (IntVec3 cell in map.AllCells)
+			{
+				TerrainDef terrainDef = map.terrainGrid.TerrainAt(cell);
+				foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+				{
+					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
+				}
+			}
+		}
+
 		/// <summary>
 		/// Recalculate perceived path cost for all vehicles at <paramref name="cell"/>
 		/// </summary>
@@ -232,10 +245,10 @@ namespace Vehicles
 		public static void RecalculatePerceivedPathCostAt(IntVec3 cell, Map map)
 		{
 			TerrainDef terrainDef = map.terrainGrid.TerrainAt(cell);
-			if (terrainDef != null && terrainEffecters.TryGetValue(terrainDef, out List<VehicleDef> vehicleDefs))
+			if (terrainDef != null)
 			{
 				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-				foreach (VehicleDef vehicleDef in vehicleDefs)
+				foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
 				{
 					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
 				}

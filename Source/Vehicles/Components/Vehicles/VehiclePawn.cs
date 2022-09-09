@@ -740,7 +740,7 @@ namespace Vehicles
 						yield return unloadAction;
 					}
 				}
-				if (SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.fishing), VehicleDef.properties.fishing) && FishingCompatibility.fishingActivated)
+				if (SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.fishing), VehicleDef.properties.fishing) && Compatibility_VEFishing.Active)
 				{
 					Command_Toggle fishing = new Command_Toggle
 					{

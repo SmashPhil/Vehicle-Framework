@@ -47,6 +47,8 @@ namespace Vehicles
 		
 		public VehicleDrawProperties drawProperties;
 
+		public BezierCurve testCurve;
+
 		//Event : SoundDef
 		public Dictionary<VehicleEventDef, SoundDef> soundOneShotsOnEvent = new Dictionary<VehicleEventDef, SoundDef>();
 		//<Start Event, Stop Event> : SoundDef
@@ -55,6 +57,7 @@ namespace Vehicles
 		public List<Type> designatorTypes = new List<Type>();
 
 		public string draftLabel = "[MISSING]";
+		public SoundDef soundBuilt;
 
 		/// <summary>
 		/// Auto-generated <c>PawnKindDef</c> that has been assigned for this VehicleDef.

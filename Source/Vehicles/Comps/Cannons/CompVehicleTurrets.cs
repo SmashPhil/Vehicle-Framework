@@ -170,22 +170,18 @@ namespace Vehicles
 						{
 							turretCommand = new Command_CooldownAction()
 							{
-								turrets = new List<VehicleTurret>() { turret },
+								turret = turret,
 								defaultLabel = !string.IsNullOrEmpty(turret.gizmoLabel) ? turret.gizmoLabel : $"{turret.turretDef.LabelCap} {turretNumber}",
 								icon = turret.GizmoIcon,
 								iconDrawScale = turret.turretDef.gizmoIconScale
 							};
-							turretCommand.PostVariablesInit();
+							turretCommand.canReload = turrets.All(t => t.turretDef.ammunition != null);
 							turretNumber++;
 							newCommand = true;
 							if (!string.IsNullOrEmpty(turret.turretDef.gizmoDescription))
 							{
 								turretCommand.defaultDesc = turret.turretDef.gizmoDescription;
 							}
-						}
-						else
-						{
-							turretCommand.turrets.Add(turret);
 						}
 						
 						foreach (VehicleHandler relatedHandler in Vehicle.GetAllHandlersMatch(HandlingTypeFlags.Cannon, turret.key))

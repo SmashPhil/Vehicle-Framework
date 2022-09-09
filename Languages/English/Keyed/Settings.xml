@@ -76,7 +76,7 @@ Determines whether Vehicles should use values from the mod settings or Defs</VF_
 	<VF_VehicleStats>Stats</VF_VehicleStats>
 	
 	<!-- Upgrade Menu Settings -->
-	<VF_Upgrades>Upgrades</VF_Upgrades>
+	<VF_Upgrades>Upgrades (Disabled)</VF_Upgrades>
 	<VF_DrawUpgradeInformationScreen>Draw Upgrade Menu Info Screen</VF_DrawUpgradeInformationScreen>
 	<VF_DrawUpgradeInformationScreenTooltip>Draw additional menu on the upgrade menu to display ship stats and ship icon.</VF_DrawUpgradeInformationScreenTooltip>
 	<VF_OverrideDrawColor>Override Draw Color</VF_OverrideDrawColor>

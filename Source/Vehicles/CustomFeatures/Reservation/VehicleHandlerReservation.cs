@@ -81,16 +81,16 @@ namespace Vehicles
 		public override void VerifyAndValidateClaimants()
 		{
 			List<Pawn> actors = new List<Pawn>(claimants.Keys);
-			foreach(Pawn actor in actors)
+			foreach (Pawn actor in actors)
 			{
 				Job matchedJob = actor.CurJob;
-				if(matchedJob?.def.defName != jobDef)
+				if (matchedJob?.def.defName != jobDef)
 				{
 					matchedJob = actor.jobs.jobQueue?.FirstOrDefault(j => j.job.def.defName == jobDef)?.job;
 				}
-				if(!actor.Spawned || actor.InMentalState || actor.Downed || actor.Dead || matchedJob?.def.defName != jobDef || matchedJob?.targetA != targetA || vehicle.vPather.Moving)
+				if (!actor.Spawned || actor.InMentalState || actor.Downed || actor.Dead || matchedJob?.def.defName != jobDef || matchedJob?.targetA != targetA || vehicle.vPather.Moving)
 				{
-					if(--handlerClaimants[claimants[actor]] <= 0)
+					if (--handlerClaimants[claimants[actor]] <= 0)
 					{
 						handlerClaimants.Remove(claimants[actor]);
 					}

@@ -171,7 +171,7 @@ namespace Vehicles
 
 				listingStandard.NewColumn();
 				string fishingHeader = "VF_Fishing".Translate();
-				if (!FishingCompatibility.fishingActivated)
+				if (!Compatibility_VEFishing.Active)
 				{
 					GUIUtility.DisableGUI();
 					fishingHeader = "VF_FishingInactive".Translate();
@@ -196,7 +196,6 @@ namespace Vehicles
 				listingStandard.CheckboxLabeled("VF_DeployOnLanding".Translate(), ref deployOnLanding, "VF_DeployOnLandingTooltip".Translate());
 				if (deployOnLanding)
 				{
-					//REDO - ADD TOOLTIP TRANSLATION
 					listingStandard.Gap(16);
 					listingStandard.SliderLabeled("VF_DelayOnLanding".Translate(), "VF_DelayOnLandingTooltip".Translate(), $" {"VF_DelaySeconds".Translate()}", ref delayDeployOnLanding, 0, 5, 1, 1);
 				}

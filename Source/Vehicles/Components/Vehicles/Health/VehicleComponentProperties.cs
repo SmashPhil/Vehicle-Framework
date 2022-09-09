@@ -24,6 +24,7 @@ namespace Vehicles
 		public SimpleCurve efficiency;
 
 		public List<Reactor> reactors;
+		public List<string> tags;
 
 		public virtual T GetReactor<T>() where T : Reactor
 		{

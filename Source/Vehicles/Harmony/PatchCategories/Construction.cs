@@ -278,7 +278,7 @@ namespace Vehicles
 						{
 							if (VehicleMod.settings.main.showDisabledVehicles)
 							{
-								designator.Disable("VehicleGizmoDisabledTooltip".Translate());
+								designator.Disable("VF_GizmoDisabledTooltip".Translate());
 							}
 							else
 							{

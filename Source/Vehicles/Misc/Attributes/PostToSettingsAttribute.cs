@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Verse;
 using SmashTools;
@@ -44,6 +45,16 @@ namespace Vehicles
 		/// </summary>
 		public bool ParentHolder { get; set; }
 
+		public string ResolvedLabel()
+		{
+			return Translate ? Label.Translate().ToString() : Label;
+		}
+
+		public string ResolvedTooltip()
+		{
+			return Translate ? Tooltip.Translate().ToString() : Tooltip;
+		}
+
 		/// <summary>
 		/// Draws UI element for lister in ModSettings
 		/// </summary>
@@ -52,12 +63,41 @@ namespace Vehicles
 		/// <param name="field"></param>
 		public void DrawLister(Listing_Settings lister, VehicleDef vehicleDef, FieldInfo field)
 		{
-			string label = Translate ? Label.Translate().ToString() : Label;
-			string tooltip = Translate ? Tooltip.Translate().ToString() : Tooltip;
+			string label = ResolvedLabel();
+			string tooltip = ResolvedTooltip();
 			string disabledTooltip = string.Empty;
+
+			bool dependenciesFulfilled = true;
+			if (field.TryGetAttribute(out DisableSettingConditionalAttribute disableSetting))
+			{
+				if (!disableSetting.MayRequire.NullOrEmpty())
+				{
+					dependenciesFulfilled = ModsConfig.IsActive(disableSetting.MayRequire);
+					disabledTooltip = "VF_DisabledSingleModDependencyTooltip".Translate(disableSetting.MayRequire);
+				}
+				else if (!disableSetting.MayRequireAny.NullOrEmpty())
+				{
+					dependenciesFulfilled = disableSetting.MayRequireAny.Any(packageId => ModsConfig.IsActive(packageId));
+					disabledTooltip = "VF_DisabledSingleModDependencyTooltip".Translate(Environment.NewLine + string.Join(Environment.NewLine, disableSetting.MayRequireAny));
+				}
+				else if (!disableSetting.MayRequireAll.NullOrEmpty())
+				{
+					dependenciesFulfilled = disableSetting.MayRequireAll.All(packageId => ModsConfig.IsActive(packageId));
+					disabledTooltip = "VF_DisabledMultipleModsDependencyTooltip".Translate(Environment.NewLine + string.Join(Environment.NewLine, disableSetting.MayRequireAll));
+				}
+				else if (disableSetting.FieldDisabled(vehicleDef, out string fieldDisabledTooltip))
+				{
+					disabledTooltip = "VF_SaveableFieldDisabledConditionTooltip".Translate(fieldDisabledTooltip);
+				}
+				else if (disableSetting.PropertyDisabled(vehicleDef, out string propertyDisabledTooltip))
+				{
+					disabledTooltip = "VF_SaveableFieldDisabledConditionTooltip".Translate(propertyDisabledTooltip);
+				}
+			}
+
 			if (VehicleType != VehicleType.Universal && VehicleType != vehicleDef.vehicleType)
 			{
-				disabledTooltip = "VehicleSaveableFieldDisabledTooltip".Translate();
+				disabledTooltip = "VF_SaveableFieldDisabledTooltip".Translate();
 			}
 			bool locked = false;
 			if (ParsingHelper.lockedFields.TryGetValue(vehicleDef.defName, out HashSet<FieldInfo> lockedFields))
@@ -65,12 +105,12 @@ namespace Vehicles
 				if (lockedFields.Contains(field))
 				{
 					locked = true;
-					disabledTooltip = "VehicleSaveableFieldLockedTooltip".Translate();
+					disabledTooltip = "VF_SaveableFieldLockedTooltip".Translate();
 				}
 			}
 			if (field.HasAttribute<DisableSettingAttribute>())
 			{
-				disabledTooltip = "VehicleDebugDisabledTooltip".Translate();
+				disabledTooltip = "VF_DebugDisabledTooltip".Translate();
 			}
 			if (field.FieldType.GetInterface(nameof(ICustomSettingsDrawer)) is ICustomSettingsDrawer settingsDrawer)
 			{

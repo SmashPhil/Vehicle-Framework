@@ -162,8 +162,6 @@ namespace Vehicles
 			ResetCannonAngle();
 		}
 
-		public bool AmmoWindowOpened { get; set; }
-
 		public bool GizmoHighlighted { get; set; }
 
 		public bool TargetLocked { get; private set; }
@@ -1223,7 +1221,7 @@ namespace Vehicles
 						Log.Error("No saved or specified shell upon reload");
 						return;
 					}
-					int countToRefill = turretDef.magazineCapacity - shellCount; //storedAmmo.stackCount >= turretDef.magazineCapacity - shellCount ?  : storedAmmo.stackCount;
+					int countToRefill = turretDef.magazineCapacity - shellCount;
 					int countToTake = Mathf.CeilToInt(countToRefill * (float)turretDef.ammoCountPerCharge);
 					if (countToTake > storedAmmo.stackCount)
 					{
@@ -1278,7 +1276,7 @@ namespace Vehicles
 			if (loadedAmmo != null && shellCount > 0)
 			{
 				Thing thing = ThingMaker.MakeThing(loadedAmmo);
-				thing.stackCount = shellCount;
+				thing.stackCount = shellCount * turretDef.ammoCountPerCharge;
 				vehicle.inventory.innerContainer.TryAdd(thing);
 				loadedAmmo = null;
 				shellCount = 0;

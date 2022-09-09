@@ -12,10 +12,11 @@ namespace Vehicles
 	public class VehicleProperties
 	{
 		[PostToSettings(Label = "VehicleVisibilityWorldMap", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
-		[SliderValues(MinValue = 0, MaxValue = 1, MinValueDisplay = "Invisible", MaxValueDisplay = "FullyVisible", RoundDecimalPlaces = 1)]
+		[SliderValues(MinValue = 0, MaxValue = 3, RoundDecimalPlaces = 1)]
 		public float visibility = 2.5f;
 
 		[PostToSettings(Label = "VehicleFishingEnabled", Translate = true, UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Sea)]
+		[DisableSettingConditional(MayRequireAny = new string[] { ConditionalPatchApplier.VE_Fishing })]
 		public bool fishing = false;
 		public float wakeMultiplier = 1.6f;
 		public float wakeSpeed = 1.6f;

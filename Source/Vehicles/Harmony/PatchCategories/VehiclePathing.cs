@@ -27,28 +27,31 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), nameof(Pawn_PathFollower.StartPath)),
 				prefix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(StartVehiclePath)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathFinder), nameof(PathFinder.FindPath), new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode), typeof(PathFinderCostTuning) }),
-				transpiler: new HarmonyMethod(typeof(VehiclePathing),
-				nameof(PathAroundVehicles)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Reachability), nameof(Reachability.CanReach), new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(PathEndMode), typeof(TraverseParms) }),
-				prefix: new HarmonyMethod(typeof(VehiclePathing),
-				nameof(CanReachVehiclePosition)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenGrid), nameof(GenGrid.Impassable)),
-				postfix: new HarmonyMethod(typeof(VehiclePathing),
-				nameof(ImpassableThroughVehicle)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.Walkable)),
-				postfix: new HarmonyMethod(typeof(VehiclePathing),
-				nameof(WalkableThroughVehicle)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.WalkableFast), new Type[] { typeof(IntVec3) }),
-				postfix: new HarmonyMethod(typeof(VehiclePathing),
-				nameof(WalkableFastThroughVehicleIntVec3)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.WalkableFast), new Type[] { typeof(int), typeof(int) }),
-				postfix: new HarmonyMethod(typeof(VehiclePathing),
-				nameof(WalkableFastThroughVehicleInt2)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.WalkableFast), new Type[] { typeof(int) }),
-				postfix: new HarmonyMethod(typeof(VehiclePathing),
-				nameof(WalkableFastThroughVehicleInt)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathFinder), nameof(PathFinder.FindPath), new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode), typeof(PathFinderCostTuning) }),
+			//	transpiler: new HarmonyMethod(typeof(VehiclePathing),
+			//	nameof(PathAroundVehicles)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Reachability), nameof(Reachability.CanReach), new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(PathEndMode), typeof(TraverseParms) }),
+			//	prefix: new HarmonyMethod(typeof(VehiclePathing),
+			//	nameof(CanReachVehiclePosition)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenGrid), nameof(GenGrid.Impassable)),
+			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
+			//	nameof(ImpassableThroughVehicle)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.Walkable)),
+			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
+			//	nameof(WalkableThroughVehicle)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.WalkableFast), new Type[] { typeof(IntVec3) }),
+			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
+			//	nameof(WalkableFastThroughVehicleIntVec3)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.WalkableFast), new Type[] { typeof(int), typeof(int) }),
+			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
+			//	nameof(WalkableFastThroughVehicleInt2)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.WalkableFast), new Type[] { typeof(int) }),
+			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
+			//	nameof(WalkableFastThroughVehicleInt)));
 
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pathing), nameof(Pathing.RecalculateAllPerceivedPathCosts)),
+				postfix: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(RecalculateAllPerceivedPathCostForVehicle)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pathing), nameof(Pathing.RecalculatePerceivedPathCostAt)),
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(RecalculatePerceivedPathCostForVehicle)));
@@ -330,6 +333,11 @@ namespace Vehicles
 			}
 		}
 
+		public static void RecalculateAllPerceivedPathCostForVehicle(PathingContext ___normal)
+		{
+			PathingHelper.RecalculateAllPerceivedPathCosts(___normal.map);
+		}
+
 		public static void RecalculatePerceivedPathCostForVehicle(IntVec3 c, PathingContext ___normal)
 		{
 			PathingHelper.RecalculatePerceivedPathCostAt(c, ___normal.map);
@@ -365,35 +373,6 @@ namespace Vehicles
 			{
 				VehicleRegionListersUpdater.DeregisterInRegions(thing, map, vehicleDef);
 			}
-		}
-
-		[DebugAction(category = VehicleHarmony.VehiclesLabel, name = "Draw Regions", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.PlayingOnMap)]
-		private static void DebugDrawRegions()
-		{
-			List<DebugMenuOption> listCheckbox = new List<DebugMenuOption>();
-			listCheckbox.Add(new DebugMenuOption("Clear", DebugMenuOptionMode.Action, delegate ()
-			{
-				DebugHelper.drawRegionsFor = null;
-				DebugHelper.debugRegionType = DebugRegionType.None;
-			}));
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs.OrderBy(d => d.defName))
-			{
-				listCheckbox.Add(new DebugMenuOption(vehicleDef.defName, DebugMenuOptionMode.Action, delegate ()
-				{
-					List<DebugMenuOption> listCheckbox2 = new List<DebugMenuOption>();
-
-					foreach (string name in Enum.GetNames(typeof(DebugRegionType)))
-					{
-						listCheckbox2.Add(new DebugMenuOption(name, DebugMenuOptionMode.Action, delegate ()
-						{
-							DebugHelper.drawRegionsFor = vehicleDef;
-							DebugHelper.debugRegionType = (DebugRegionType)Enum.Parse(typeof(DebugRegionType), name);
-						}));
-					}
-					Find.WindowStack.Add(new Dialog_DebugOptionListLister(listCheckbox2));
-				}));
-			}
-			Find.WindowStack.Add(new Dialog_DebugOptionListLister(listCheckbox));
 		}
 	}
 }

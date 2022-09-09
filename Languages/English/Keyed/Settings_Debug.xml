@@ -6,8 +6,10 @@
 	<VF_DevMode_Logging>Logging</VF_DevMode_Logging>
 	<VF_DevMode_Troubleshooting>Troubleshooting</VF_DevMode_Troubleshooting>
 	<VF_DevMode_Drawers>Visual Help</VF_DevMode_Drawers>
+	<VF_DevMode_Pathing>Pathing</VF_DevMode_Pathing>
 	<VF_DevMode_ShowRecentNews>Show Most Recent News</VF_DevMode_ShowRecentNews>
 	<VF_DevMode_OpenQuickTestSettings>Quick Test Menu</VF_DevMode_OpenQuickTestSettings>
+	<VF_DevMode_GraphDrawer>Line Graph</VF_DevMode_GraphDrawer>
 	
 	<!-- Reset Popup Labels -->
 	<VF_DevMode_ResetAll>Reset All Settings</VF_DevMode_ResetAll>
@@ -21,8 +23,6 @@
 	<VF_DevMode_DebugLoggingTooltip>Enable message logging to output specific values and pieces of information useful for debugging Vehicles. Use only if you're making a Vehicle add-on.</VF_DevMode_DebugLoggingTooltip>
 	<VF_DevMode_DebugPathCostRecalculationLogging>Debug PathCost Recalculation Logging</VF_DevMode_DebugPathCostRecalculationLogging>
 	<VF_DevMode_DebugPathCostRecalculationLoggingTooltip>Log summary of path cost change for all vehicles affected by region dirtying.</VF_DevMode_DebugPathCostRecalculationLoggingTooltip>
-	<VF_DevMode_DebugWriteVehiclePathingCosts>Draw Vehicle PathCosts</VF_DevMode_DebugWriteVehiclePathingCosts>
-	<VF_DevMode_DebugWriteVehiclePathingCostsTooltip>Draw path costs calculated from pathfinder on the map, highlighting every cell searched as well as the accumulated path cost.</VF_DevMode_DebugWriteVehiclePathingCostsTooltip>
 	
 	<!-- Bypass Mechanics -->
 	<VF_DevMode_DebugDraftAnyVehicle>Draft Any Vehicle</VF_DevMode_DebugDraftAnyVehicle>
@@ -39,4 +39,10 @@
 	<VF_DevMode_DebugDrawVehicleTracksTooltip>Draw cells occupied by vehicle's "VehicleTracks" which mark what cells will end up being damaged per move action.</VF_DevMode_DebugDrawVehicleTracksTooltip>
 	<VF_DevMode_DebugDrawBumpers>Draw Vehicle Bumpers</VF_DevMode_DebugDrawBumpers>
 	<VF_DevMode_DebugDrawBumpersTooltip>Draw cells immediately in front of vehicle that will indicate when the vehicle "bumps" into something and halts pathing.</VF_DevMode_DebugDrawBumpersTooltip>
+	
+	<!-- Pathing -->
+	<VF_DevMode_DebugDrawVehiclePathingCosts>Draw Path Costs</VF_DevMode_DebugDrawVehiclePathingCosts>
+	<VF_DevMode_DebugDrawVehiclePathingCostsTooltip>Draw costs per cell calculated from pathfinder on the map, highlighting every cell searched as well as the accumulated path cost.</VF_DevMode_DebugDrawVehiclePathingCostsTooltip>
+	<VF_DevMode_DebugDrawVehiclePathGridCellCosts>Draw Cell Costs</VF_DevMode_DebugDrawVehiclePathGridCellCosts>
+	<VF_DevMode_DebugDrawVehiclePathGridCellCostsTooltip>Draw costs per cell for the currently highlighted region. Only shows final cost of individual cells, taking terrain and things into account.</VF_DevMode_DebugDrawVehiclePathGridCellCostsTooltip>
 </LanguageData>

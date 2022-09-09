@@ -117,7 +117,7 @@ namespace Vehicles
 				bool mouseOver = Mouse.IsOver(rect);
 				if (disabled)
 				{
-					UIElements.DoTooltipRegion(rect, disabledTooltip);
+					TooltipHandler.TipRegion(rect, disabledTooltip);
 				}
 				else if (!tooltip.NullOrEmpty())
 				{
@@ -125,7 +125,7 @@ namespace Vehicles
 					{
 						Widgets.DrawHighlight(rect);
 					}
-					UIElements.DoTooltipRegion(rect, tooltip);
+					TooltipHandler.TipRegion(rect, tooltip);
 				}
 				if (!disabled && mouseOver)
 				{
@@ -181,16 +181,17 @@ namespace Vehicles
 				bool disabled = !disabledTooltip.NullOrEmpty();
 				Rect rect = GetSplitRect(24);
 				float centerY = rect.y + (rect.height - Text.LineHeight) / 2;
-				float length = rect.width * 0.45f;
-				Rect rectLeft = new Rect(rect.x, centerY, length, rect.height);
-				Rect rectRight = new Rect(rect.x + (rect.width - length), centerY, length, Text.LineHeight);
+				float leftLength = rect.width * 0.75f;
+				float rightLength = rect.width * 0.25f;
+				Rect rectLeft = new Rect(rect.x, centerY, leftLength, rect.height);
+				Rect rectRight = new Rect(rect.x + rect.width - rightLength, centerY, rightLength, Text.LineHeight);
 
 				Color color = GUI.color;
 				bool mouseOver = Mouse.IsOver(rect);
 				if (disabled)
 				{
 					GUIUtility.DisableGUI();
-					UIElements.DoTooltipRegion(rect, disabledTooltip);
+					TooltipHandler.TipRegion(rect, disabledTooltip);
 				}
 				else if (!tooltip.NullOrEmpty())
 				{
@@ -198,7 +199,7 @@ namespace Vehicles
 					{
 						Widgets.DrawHighlight(rect);
 					}
-					UIElements.DoTooltipRegion(rect, tooltip);
+					TooltipHandler.TipRegion(rect, tooltip);
 				}
 				if (!disabled && mouseOver)
 				{
@@ -255,15 +256,16 @@ namespace Vehicles
 				bool disabled = !disabledTooltip.NullOrEmpty();
 				Rect rect = GetSplitRect(24);
 				float centerY = rect.y + (rect.height - Text.LineHeight) / 2;
-				float length = rect.width * 0.45f;
-				Rect rectLeft = new Rect(rect.x, centerY, length, rect.height);
-				Rect rectRight = new Rect(rect.x + (rect.width - length), centerY, length, Text.LineHeight);
+				float leftLength = rect.width * 0.75f;
+				float rightLength = rect.width * 0.25f;
+				Rect rectLeft = new Rect(rect.x, centerY, leftLength, rect.height);
+				Rect rectRight = new Rect(rect.x + rect.width - rightLength, centerY, rightLength, Text.LineHeight);
 
 				bool mouseOver = Mouse.IsOver(rect);
 				if (disabled)
 				{
 					GUIUtility.DisableGUI();
-					UIElements.DoTooltipRegion(rect, disabledTooltip);
+					TooltipHandler.TipRegion(rect, disabledTooltip);
 				}
 				else if (!tooltip.NullOrEmpty())
 				{
@@ -271,7 +273,7 @@ namespace Vehicles
 					{
 						Widgets.DrawHighlight(rect);
 					}
-					UIElements.DoTooltipRegion(rect, tooltip);
+					TooltipHandler.TipRegion(rect, tooltip);
 				}
 				if (!disabled && mouseOver)
 				{
@@ -327,6 +329,7 @@ namespace Vehicles
 				float value = Convert.ToSingle(GetSettingsValue(def, field));
 				bool disabled = !disabledTooltip.NullOrEmpty();
 				Rect rect = GetSplitRect(24f);
+				Rect fullRect = rect;
 				rect.y += rect.height / 2;
 				string format = $"{Math.Round(value * 100, decimalPlaces)}" + endSymbol;
 				
@@ -341,19 +344,19 @@ namespace Vehicles
 						}
 					}
 				}
-				bool mouseOver = Mouse.IsOver(rect);
+				bool mouseOver = Mouse.IsOver(fullRect);
 				if (disabled)
 				{
 					GUIUtility.DisableGUI();
-					UIElements.DoTooltipRegion(rect, disabledTooltip);
+					TooltipHandler.TipRegion(fullRect, disabledTooltip);
 				}
 				else if (!tooltip.NullOrEmpty())
 				{
 					if (mouseOver)
 					{
-						Widgets.DrawHighlight(rect);
+						Widgets.DrawHighlight(fullRect);
 					}
-					UIElements.DoTooltipRegion(rect, tooltip, true);
+					TooltipHandler.TipRegion(fullRect, tooltip);
 				}
 				if (!disabled && mouseOver)
 				{
@@ -410,6 +413,7 @@ namespace Vehicles
 				float value = Convert.ToSingle(GetSettingsValue(def, field));
 				bool disabled = !disabledTooltip.NullOrEmpty();
 				Rect rect = GetSplitRect(24f);
+				Rect fullRect = rect;
 				rect.y += rect.height / 2;
 				string format = $"{Math.Round(value, decimalPlaces)}" + endSymbol;
 				if (!endValueDisplay.NullOrEmpty())
@@ -423,19 +427,19 @@ namespace Vehicles
 						}
 					}
 				}
-				bool mouseOver = Mouse.IsOver(rect);
+				bool mouseOver = Mouse.IsOver(fullRect);
 				if (disabled)
 				{
 					GUIUtility.DisableGUI();
-					UIElements.DoTooltipRegion(rect, disabledTooltip);
+					TooltipHandler.TipRegion(fullRect, disabledTooltip);
 				}
 				else if (!tooltip.NullOrEmpty())
 				{
 					if (mouseOver)
 					{
-						Widgets.DrawHighlight(rect);
+						Widgets.DrawHighlight(fullRect);
 					}
-					UIElements.DoTooltipRegion(rect, tooltip, true);
+					TooltipHandler.TipRegion(fullRect, tooltip);
 				}
 				if (!disabled && mouseOver)
 				{
@@ -497,6 +501,7 @@ namespace Vehicles
 				int value = Convert.ToInt32(GetSettingsValue(def, field));
 				bool disabled = !disabledTooltip.NullOrEmpty();
 				Rect rect = GetSplitRect(24f);
+				Rect fullRect = rect;
 				rect.y += rect.height / 2;
 				string format = string.Format("{0}" + endSymbol, value);
 				if (!maxValueDisplay.NullOrEmpty())
@@ -521,19 +526,19 @@ namespace Vehicles
 						}
 					}
 				}
-				bool mouseOver = Mouse.IsOver(rect);
+				bool mouseOver = Mouse.IsOver(fullRect);
 				if (disabled)
 				{
 					GUIUtility.DisableGUI();
-					UIElements.DoTooltipRegion(rect, disabledTooltip);
+					TooltipHandler.TipRegion(fullRect, disabledTooltip);
 				}
 				else if (!tooltip.NullOrEmpty())
 				{
 					if (mouseOver)
 					{
-						Widgets.DrawHighlight(rect);
+						Widgets.DrawHighlight(fullRect);
 					}
-					UIElements.DoTooltipRegion(rect, tooltip, true);
+					TooltipHandler.TipRegion(fullRect, tooltip);
 				}
 				if (!disabled && mouseOver)
 				{
@@ -593,6 +598,7 @@ namespace Vehicles
 				int min = enumValues[0];
 				int max = enumValues.Last();
 				Rect rect = GetSplitRect(24f);
+				Rect fullRect = rect;
 				rect.y += rect.height / 2;
 				string format = Enum.GetName(enumType, value);
 				if (translate)
@@ -600,19 +606,19 @@ namespace Vehicles
 					format = format.Translate();
 				}
 				Color color = GUI.color;
-				bool mouseOver = Mouse.IsOver(rect);
+				bool mouseOver = Mouse.IsOver(fullRect);
 				if (disabled)
 				{
 					GUIUtility.DisableGUI();
-					UIElements.DoTooltipRegion(rect, disabledTooltip);
+					TooltipHandler.TipRegion(fullRect, disabledTooltip);
 				}
 				else if (!tooltip.NullOrEmpty())
 				{
 					if (mouseOver)
 					{
-						Widgets.DrawHighlight(rect);
+						Widgets.DrawHighlight(fullRect);
 					}
-					UIElements.DoTooltipRegion(rect, tooltip, true);
+					TooltipHandler.TipRegion(fullRect, tooltip);
 				}
 				if (!disabled && mouseOver)
 				{

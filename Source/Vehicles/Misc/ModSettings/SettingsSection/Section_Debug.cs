@@ -16,7 +16,6 @@ namespace Vehicles
 		public const int ButtonRows = 3;
 
 		public bool debugDraftAnyShip;
-
 		public bool debugSpawnVehicleBuildingGodMode;
 
 		public bool debugDrawCannonGrid;
@@ -27,6 +26,7 @@ namespace Vehicles
 
 		public bool debugLogging;
 		public bool debugPathCostChanges;
+
 		public bool debugDrawVehiclePathCosts;
 
 		public override void ResetSettings()
@@ -39,11 +39,12 @@ namespace Vehicles
 			debugDrawNodeGrid = false;
 			debugDrawHitbox = false;
 			debugDrawVehicleTracks = false;
-			debugDrawVehiclePathCosts = false;
 			debugDrawBumpers = false;
 
 			debugLogging = false;
 			debugPathCostChanges = false;
+
+			debugDrawVehiclePathCosts = false;
 		}
 
 		public override void ExposeData()
@@ -72,22 +73,26 @@ namespace Vehicles
 			listingStandard.ColumnWidth = devModeRect.width / 2;
 			listingStandard.Begin(devModeRect);
 			{
-				listingStandard.Header("VF_DevMode_Logging".Translate(), ListingExtension.BannerColor, GameFont.Medium, TextAnchor.MiddleCenter);
+				listingStandard.Header("VF_DevMode_Logging".Translate(), ListingExtension.BannerColor, anchor: TextAnchor.MiddleCenter);
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugLogging".Translate(), ref debugLogging, "VF_DevMode_DebugLoggingTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugPathCostRecalculationLogging".Translate(), ref debugPathCostChanges, "VF_DevMode_DebugPathCostRecalculationLoggingTooltip".Translate());
-				listingStandard.CheckboxLabeled("VF_DevMode_DebugWriteVehiclePathingCosts".Translate(), ref debugDrawVehiclePathCosts, "VF_DevMode_DebugWriteVehiclePathingCostsTooltip".Translate());
 
-				listingStandard.Header("VF_DevMode_Troubleshooting".Translate(), ListingExtension.BannerColor, GameFont.Medium, TextAnchor.MiddleCenter);
+				listingStandard.Header("VF_DevMode_Troubleshooting".Translate(), ListingExtension.BannerColor, anchor: TextAnchor.MiddleCenter);
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugDraftAnyVehicle".Translate(), ref debugDraftAnyShip, "VF_DevMode_DebugDraftAnyVehicleTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugSpawnVehiclesGodMode".Translate(), ref debugSpawnVehicleBuildingGodMode, "VF_DevMode_DebugSpawnVehiclesGodModeTooltip".Translate());
 
-				listingStandard.Header("VF_DevMode_Drawers".Translate(), ListingExtension.BannerColor, GameFont.Medium, TextAnchor.MiddleCenter);
+				listingStandard.Header("VF_DevMode_Drawers".Translate(), ListingExtension.BannerColor, anchor: TextAnchor.MiddleCenter);
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawUpgradeNodeGrid".Translate(), ref debugDrawNodeGrid, "VF_DevMode_DebugDrawUpgradeNodeGridTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawHitbox".Translate(), ref debugDrawHitbox, "VF_DevMode_DebugDrawHitboxTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawVehicleTracks".Translate(), ref debugDrawVehicleTracks, "VF_DevMode_DebugDrawVehicleTracksTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawBumpers".Translate(), ref debugDrawBumpers, "VF_DevMode_DebugDrawBumpersTooltip".Translate());
 
-				//listingStandard.GapLine(16);
+				listingStandard.Header("VF_DevMode_Pathing".Translate(), ListingExtension.BannerColor, anchor: TextAnchor.MiddleCenter);
+				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawVehiclePathingCosts".Translate(), ref debugDrawVehiclePathCosts, "VF_DevMode_DebugDrawVehiclePathingCostsTooltip".Translate());
+				if (listingStandard.ButtonText("VF_DevMode_DebugDrawVehiclePathGridCellCosts".Translate(), "VF_DevMode_DebugDrawVehiclePathGridCellCostsTooltip".Translate()))
+				{
+
+				}
 			}
 			listingStandard.End();
 
@@ -106,11 +111,17 @@ namespace Vehicles
 				{
 					Find.WindowStack.Add(new Dialog_UnitTesting());
 				}
+				if (listingStandard.ButtonText("VF_DevMode_GraphDrawer".Translate()))
+				{
+					//REDO
+					VehicleDef tank = DefDatabase<VehicleDef>.GetNamed("Tank");
+					//Find.WindowStack.Add(tank.testCurve.Graph());
+				}
 			}
 			listingStandard.End();
 		}
 
-		internal void ShowAllUpdates()
+		public void ShowAllUpdates()
 		{
 			string versionChecking = "Null";
 			VehicleHarmony.updates.Clear();
@@ -140,6 +151,34 @@ namespace Vehicles
 			{
 				Log.Error($"{VehicleHarmony.LogLabel} Unable to show update for {versionChecking} Exception = {ex.Message}");
 			}
+		}
+
+		public static void DebugDrawRegions()
+		{
+			List<DebugMenuOption> listCheckbox = new List<DebugMenuOption>();
+			listCheckbox.Add(new DebugMenuOption("Clear", DebugMenuOptionMode.Action, delegate ()
+			{
+				DebugHelper.drawRegionsFor = null;
+				DebugHelper.debugRegionType = DebugRegionType.None;
+			}));
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs.OrderBy(d => d.defName))
+			{
+				listCheckbox.Add(new DebugMenuOption(vehicleDef.defName, DebugMenuOptionMode.Action, delegate ()
+				{
+					List<DebugMenuOption> listCheckbox2 = new List<DebugMenuOption>();
+
+					foreach (string name in Enum.GetNames(typeof(DebugRegionType)))
+					{
+						listCheckbox2.Add(new DebugMenuOption(name, DebugMenuOptionMode.Action, delegate ()
+						{
+							DebugHelper.drawRegionsFor = vehicleDef;
+							DebugHelper.debugRegionType = (DebugRegionType)Enum.Parse(typeof(DebugRegionType), name);
+						}));
+					}
+					Find.WindowStack.Add(new Dialog_DebugOptionListLister(listCheckbox2));
+				}));
+			}
+			Find.WindowStack.Add(new Dialog_DebugOptionListLister(listCheckbox));
 		}
 	}
 }

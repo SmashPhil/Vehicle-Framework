@@ -26,10 +26,13 @@
 	<VehicleCanCaravanTooltip>Vehicle is able to be taken on caravans.</VehicleCanCaravanTooltip>
 	
 	<!-- Disabled Tooltip -->
-	<VehicleSaveableFieldDisabledTooltip>This feature is disabled for this Vehicle Type.</VehicleSaveableFieldDisabledTooltip>
-	<VehicleSaveableFieldLockedTooltip>This setting is locked for this Vehicle.</VehicleSaveableFieldLockedTooltip>
-	<VehicleDebugDisabledTooltip>This feature is disabled for all Vehicles at this time.</VehicleDebugDisabledTooltip>
-	<VehicleGizmoDisabledTooltip>This vehicle is disabled in the mod settings.</VehicleGizmoDisabledTooltip>
+	<VF_SaveableFieldDisabledConditionTooltip>Disabled. {0}</VF_SaveableFieldDisabledConditionTooltip>
+	<VF_DisabledSingleModDependencyTooltip>Disabled. Compatible mod not in active mod list: {0}</VF_DisabledSingleModDependencyTooltip>
+	<VF_DisabledMultipleModsDependencyTooltip>Disabled. Compatible mods not in active mod list: {0}</VF_DisabledMultipleModsDependencyTooltip>
+	<VF_SaveableFieldDisabledTooltip>Disabled for this Vehicle Type.</VF_SaveableFieldDisabledTooltip>
+	<VF_SaveableFieldLockedTooltip>Setting is locked for this Vehicle.</VF_SaveableFieldLockedTooltip>
+	<VF_DebugDisabledTooltip>Disabled for all Vehicles at this time.</VF_DebugDisabledTooltip>
+	<VF_GizmoDisabledTooltip>Disabled in the mod settings.</VF_GizmoDisabledTooltip>
 	
 	<!-- (Properties) -->
 	<VehicleProperties>Properties</VehicleProperties>
@@ -48,13 +51,16 @@
 	<VehicleFuelCapacity>Fuel Capacity</VehicleFuelCapacity>
 	<VehicleFuelConsumptionRateWorldMultiplier>World Multiplier</VehicleFuelConsumptionRateWorldMultiplier>
 	
-	<VehicleFuelConsumptionWorld>Fuel Consumption Multiplier (World)</VehicleFuelConsumptionWorld>
+	<VehicleFuelConsumptionWorld>Fuel Consumption %</VehicleFuelConsumptionWorld>
+	<VehicleFuelConsumptionWorldTooltip>Fule consumption multiplier on the world map.</VehicleFuelConsumptionWorldTooltip>
 	<VehicleLaunchFixedMaxDistance>Fixed Max Distance</VehicleLaunchFixedMaxDistance>
 	<VehicleLaunchFixedMaxDistanceDisabled>None</VehicleLaunchFixedMaxDistanceDisabled>
 	<VehicleReconDistance>Recon Distance</VehicleReconDistance>
 	<VehicleReconDistanceTooltip>Distance in tiles the shuttle will be able to perform recon of a site or settlement.</VehicleReconDistanceTooltip>
 	<VehicleControlInFlight>Control in Flight</VehicleControlInFlight>
 	<VehicleControlInFlightTooltip>Control the aerial vehicle while it is in flight. Allows for changing of flight paths midflight, choosing your landing after loading a map, and strafing maps that have not yet been loaded.</VehicleControlInFlightTooltip>
+	<VehicleSpaceFlight>Space Faring</VehicleSpaceFlight>
+	<VehicleSpaceFlightTooltip>Vehicle is capable of launching to and taking off from space objects.</VehicleSpaceFlightTooltip>
 	
 	<VehicleRateOfClimb>Rate of Climb</VehicleRateOfClimb>
 	<VehicleRateOfClimbTooltip>Amount the vehicle ascends per tick.</VehicleRateOfClimbTooltip>
