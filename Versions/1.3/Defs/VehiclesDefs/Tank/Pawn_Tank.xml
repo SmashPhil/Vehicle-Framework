@@ -18,7 +18,7 @@
 		
 		<combatPower>200</combatPower>
 		<fillPercent>1</fillPercent>
-		<!--
+		
 		<testCurve>
 			<coordinates>
 				<li>
@@ -28,7 +28,7 @@
 				</li>
 			</coordinates>
 		</testCurve>
-		-->
+		
 		<nameable>true</nameable>
 		<buildDef>Tank_Blueprint</buildDef>
 		

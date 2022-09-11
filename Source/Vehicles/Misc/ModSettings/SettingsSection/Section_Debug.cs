@@ -115,7 +115,7 @@ namespace Vehicles
 				{
 					//REDO
 					VehicleDef tank = DefDatabase<VehicleDef>.GetNamed("Tank");
-					//Find.WindowStack.Add(tank.testCurve.Graph());
+					tank.testCurve.Graph();
 				}
 			}
 			listingStandard.End();

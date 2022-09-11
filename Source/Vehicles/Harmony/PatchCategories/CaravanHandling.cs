@@ -67,6 +67,12 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Property(typeof(Caravan), nameof(Caravan.PawnsListForReading)).GetGetMethod(),
 				postfix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(InternalPawnsIncludedInList)));
+			VehicleHarmony.Patch(original: AccessTools.Property(typeof(Caravan), nameof(Caravan.TicksPerMove)).GetGetMethod(),
+				prefix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(VehicleCaravanTicksPerMove)));
+			VehicleHarmony.Patch(original: AccessTools.Property(typeof(Caravan), nameof(Caravan.TicksPerMoveExplanation)).GetGetMethod(),
+				prefix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(VehicleCaravanTicksPerMoveExplanation)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.ContainsPawn)), prefix: null,
 				postfix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(ContainsPawnInVehicle)));
@@ -616,6 +622,28 @@ namespace Vehicles
 				return allPawns;
 			}
 			return __result;
+		}
+
+		public static bool VehicleCaravanTicksPerMove(ref int __result, Caravan __instance)
+		{
+			if (__instance is VehicleCaravan vehicleCaravan)
+			{
+				__result = CaravanHelper.GetTicksPerMove(vehicleCaravan);
+				return false;
+			}
+			return true;
+		}
+
+		public static bool VehicleCaravanTicksPerMoveExplanation(ref string __result, Caravan __instance)
+		{
+			if (__instance is VehicleCaravan vehicleCaravan)
+			{
+				StringBuilder stringBuilder = new StringBuilder();
+				CaravanHelper.GetTicksPerMove(vehicleCaravan, stringBuilder);
+				__result = stringBuilder.ToString();
+				return false;
+			}
+			return true;
 		}
 
 		//REDO - Need better transpiler to retrieve all map pawns
