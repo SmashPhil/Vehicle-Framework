@@ -5,6 +5,7 @@ using UnityEngine;
 using Verse;
 using RimWorld;
 using SmashTools;
+using SmashTools.Debugging;
 using UpdateLogTool;
 
 namespace Vehicles
@@ -89,9 +90,9 @@ namespace Vehicles
 
 				listingStandard.Header("VF_DevMode_Pathing".Translate(), ListingExtension.BannerColor, anchor: TextAnchor.MiddleCenter);
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawVehiclePathingCosts".Translate(), ref debugDrawVehiclePathCosts, "VF_DevMode_DebugDrawVehiclePathingCostsTooltip".Translate());
-				if (listingStandard.ButtonText("VF_DevMode_DebugDrawVehiclePathGridCellCosts".Translate(), "VF_DevMode_DebugDrawVehiclePathGridCellCostsTooltip".Translate()))
+				if (listingStandard.ButtonText("VF_DevMode_DebugPathfinderDebugging".Translate(), "VF_DevMode_DebugPathfinderDebuggingTooltip".Translate()))
 				{
-
+					RegionDebugMenu();
 				}
 			}
 			listingStandard.End();
@@ -109,16 +110,44 @@ namespace Vehicles
 				}
 				if (listingStandard.ButtonText("VF_DevMode_OpenQuickTestSettings".Translate()))
 				{
-					Find.WindowStack.Add(new Dialog_UnitTesting());
+					UnitTesting.OpenMenu();
 				}
-				if (listingStandard.ButtonText("VF_DevMode_GraphDrawer".Translate()))
+				if (listingStandard.ButtonText("VF_DevMode_GraphEditor".Translate()))
 				{
-					//REDO
-					VehicleDef tank = DefDatabase<VehicleDef>.GetNamed("Tank");
-					tank.testCurve.Graph();
+					Find.WindowStack.Add(new Dialog_GraphEditor());
 				}
 			}
 			listingStandard.End();
+		}
+
+		public void RegionDebugMenu()
+		{
+			List<Toggle> vehicleDefToggles = new List<Toggle>();
+			vehicleDefToggles.Add(new Toggle("None", () => DebugHelper.drawRegionsFor == null || DebugHelper.debugRegionType == DebugRegionType.None, delegate (bool value)
+			{
+				if (value)
+				{
+					DebugHelper.drawRegionsFor = null;
+					DebugHelper.debugRegionType = DebugRegionType.None;
+				}
+			}));
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs.OrderBy(d => d.defName))
+			{
+				vehicleDefToggles.Add(new Toggle(vehicleDef.defName, () => DebugHelper.drawRegionsFor == vehicleDef, (value) => { }, onToggle: delegate (bool value)
+				{
+					if (value)
+					{
+						List<Toggle> debugOptionToggles = DebugHelper.RegionToggles(vehicleDef).ToList();
+						Find.WindowStack.Add(new Dialog_ToggleMenu("VF_DevMode_DebugPathfinderDebugging".Translate(), debugOptionToggles));
+					}
+					else
+					{
+						DebugHelper.drawRegionsFor = null;
+						DebugHelper.debugRegionType = DebugRegionType.None;
+					}
+				}));
+			}
+			Find.WindowStack.Add(new Dialog_RadioButtonMenu("VF_DevMode_DebugPathfinderDebugging".Translate(), vehicleDefToggles));
 		}
 
 		public void ShowAllUpdates()

@@ -7,6 +7,7 @@ using Verse;
 using Verse.Sound;
 using RimWorld;
 using HarmonyLib;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -232,7 +233,7 @@ namespace Vehicles
 
 			scrollPositioner.ClearInterestRects();
 
-			GUIUtility.PushGUIState();
+			GUIState.Push();
 
 			Text.Font = GameFont.Small;
 			Rect viewRect = new Rect(0f, 0f, outRect.width - 16f, listHeight);
@@ -320,7 +321,7 @@ namespace Vehicles
 				Widgets.EndScrollView();
 			}
 
-			GUIUtility.Close();
+			GUIState.Pop();
 		}
 
 		private enum InfoCardTab : byte

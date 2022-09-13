@@ -47,8 +47,6 @@ namespace Vehicles
 		
 		public VehicleDrawProperties drawProperties;
 
-		public BezierCurve testCurve;
-
 		//Event : SoundDef
 		public Dictionary<VehicleEventDef, SoundDef> soundOneShotsOnEvent = new Dictionary<VehicleEventDef, SoundDef>();
 		//<Start Event, Stop Event> : SoundDef

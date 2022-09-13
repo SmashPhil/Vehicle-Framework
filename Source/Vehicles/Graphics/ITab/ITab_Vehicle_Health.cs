@@ -55,7 +55,7 @@ namespace Vehicles
 
 		protected override void FillTab()
 		{
-			GUIUtility.PushGUIState();
+			GUIState.Push();
 			
 			try
 			{
@@ -71,12 +71,12 @@ namespace Vehicles
 				infoPanelRect.yMin += 11f; //Extra space for tab, excluded from componentPanelRect for top options
 
 				VehicleHealthTabHelper.DrawHealthInfo(infoPanelRect, vehicle: Vehicle);
-				GUIUtility.ResetGUIState();
+				GUIState.Reset();
 				VehicleHealthTabHelper.DrawComponentsInfo(componentPanelRect, vehicle: Vehicle, componentViewHeight: componentListHeight);
 			}
 			finally
 			{
-				GUIUtility.Close();
+				GUIState.Pop();
 			}
 		}
 

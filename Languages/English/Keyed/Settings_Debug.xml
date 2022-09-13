@@ -9,7 +9,7 @@
 	<VF_DevMode_Pathing>Pathing</VF_DevMode_Pathing>
 	<VF_DevMode_ShowRecentNews>Show Most Recent News</VF_DevMode_ShowRecentNews>
 	<VF_DevMode_OpenQuickTestSettings>Quick Test Menu</VF_DevMode_OpenQuickTestSettings>
-	<VF_DevMode_GraphDrawer>Line Graph</VF_DevMode_GraphDrawer>
+	<VF_DevMode_GraphEditor>Graph Editor</VF_DevMode_GraphEditor>
 	
 	<!-- Reset Popup Labels -->
 	<VF_DevMode_ResetAll>Reset All Settings</VF_DevMode_ResetAll>
@@ -41,6 +41,8 @@
 	<VF_DevMode_DebugDrawBumpersTooltip>Draw cells immediately in front of vehicle that will indicate when the vehicle "bumps" into something and halts pathing.</VF_DevMode_DebugDrawBumpersTooltip>
 	
 	<!-- Pathing -->
+	<VF_DevMode_DebugPathfinderDebugging>PathFinder Debugging</VF_DevMode_DebugPathfinderDebugging>
+	<VF_DevMode_DebugPathfinderDebuggingTooltip>Open menu for debugging various outputs of pathfinding (both cell based and region based)</VF_DevMode_DebugPathfinderDebuggingTooltip>
 	<VF_DevMode_DebugDrawVehiclePathingCosts>Draw Path Costs</VF_DevMode_DebugDrawVehiclePathingCosts>
 	<VF_DevMode_DebugDrawVehiclePathingCostsTooltip>Draw costs per cell calculated from pathfinder on the map, highlighting every cell searched as well as the accumulated path cost.</VF_DevMode_DebugDrawVehiclePathingCostsTooltip>
 	<VF_DevMode_DebugDrawVehiclePathGridCellCosts>Draw Cell Costs</VF_DevMode_DebugDrawVehiclePathGridCellCosts>

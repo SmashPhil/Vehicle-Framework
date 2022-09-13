@@ -1,4 +1,4 @@
-﻿Shader "Custom/ShaderRGB"
+﻿Shader "VehicleFramework/ShaderRGB"
 {
 	Properties
 	{
@@ -13,9 +13,8 @@
 		Tags 
 		{ 
 			"IgnoreProjector" = "true" 
-			"Queue" = "Transparent-100" 
+			"Queue" = "Transparent" 
 			"RenderType" = "Transparent"
-			"PreviewType" = "Plane"
 		}
 		ZWrite Off
 		Pass
@@ -77,5 +76,5 @@
 			ENDCG
 		}
 	}
-	Fallback "Custom/CutoutComplex"
+	Fallback Off
 }

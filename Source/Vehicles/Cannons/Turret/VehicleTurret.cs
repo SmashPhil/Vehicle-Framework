@@ -293,9 +293,9 @@ namespace Vehicles
 			{
 				if (reloadTicks <= 0)
 				{
-					return 0.5f;
+					return 1;
 				}
-				return Mathf.PingPong(reloadTicks, 25) / 100;
+				return Mathf.PingPong(reloadTicks, 25) / 50f + 0.25f; //ping pong between 0.25 and 0.75 alpha
 			}
 		}
 
@@ -519,6 +519,11 @@ namespace Vehicles
 				restrictions = (TurretRestrictions)Activator.CreateInstance(reference.turretDef.restrictionType);
 				restrictions.Init(vehicle, this);
 			}
+		}
+
+		public bool GroupsWith(VehicleTurret turret)
+		{
+			return !groupKey.NullOrEmpty() && !turret.groupKey.NullOrEmpty() && groupKey == turret.groupKey;
 		}
 
 		public Vector3 TurretDrawLocFor(Rot8 rot)
@@ -1222,13 +1227,12 @@ namespace Vehicles
 						return;
 					}
 					int countToRefill = turretDef.magazineCapacity - shellCount;
-					int countToTake = Mathf.CeilToInt(countToRefill * (float)turretDef.ammoCountPerCharge);
+					int countToTake = Mathf.FloorToInt(countToRefill / (float)turretDef.ammoCountPerCharge);
 					if (countToTake > storedAmmo.stackCount)
 					{
 						countToTake = storedAmmo.stackCount;
-						countToRefill = Mathf.CeilToInt(countToTake / (float)turretDef.ammoCountPerCharge);
+						countToRefill = Mathf.FloorToInt(countToTake * (float)turretDef.ammoCountPerCharge);
 					}
-					Debug.Message($"StackCount: {storedAmmo.stackCount} Taking: {countToTake}");
 					vehicle.inventory.innerContainer.Take(storedAmmo, countToTake);
 					int additionalCount = 0;
 					int additionalCountToTake = 0;
@@ -1239,7 +1243,7 @@ namespace Vehicles
 							if (t.def == storedAmmo.def)
 							{
 								additionalCount = t.stackCount >= turretDef.magazineCapacity - (shellCount + countToRefill) ? turretDef.magazineCapacity - (shellCount + countToRefill) : t.stackCount;
-								additionalCountToTake = Mathf.CeilToInt(additionalCount / (float)turretDef.ammoCountPerCharge);
+								additionalCountToTake = Mathf.FloorToInt(additionalCount / (float)turretDef.ammoCountPerCharge);
 								vehicle.inventory.innerContainer.Take(t, additionalCountToTake);
 								if (additionalCount + countToRefill >= turretDef.magazineCapacity) break;
 							}    
@@ -1276,7 +1280,7 @@ namespace Vehicles
 			if (loadedAmmo != null && shellCount > 0)
 			{
 				Thing thing = ThingMaker.MakeThing(loadedAmmo);
-				thing.stackCount = shellCount * turretDef.ammoCountPerCharge;
+				thing.stackCount = shellCount / turretDef.ammoCountPerCharge;
 				vehicle.inventory.innerContainer.TryAdd(thing);
 				loadedAmmo = null;
 				shellCount = 0;

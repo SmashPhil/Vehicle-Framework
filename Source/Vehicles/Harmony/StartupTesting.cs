@@ -17,7 +17,7 @@ namespace Vehicles
 		/// <summary>
 		/// Load up game, get first settlement, find available vehicle, initiate strafing run
 		/// </summary>
-		[UnitTest(Category = "Vehicles", Name = "Strafe Run")]
+		[UnitTest(Category = "Vehicle Framework", Name = "Strafe Run")]
 		private static void UnitTestStrafing()
 		{
 			Map sourceMap = null;
@@ -48,7 +48,7 @@ namespace Vehicles
 		/// <summary>
 		/// Load up game, find available vehicle with upgrade tree, focus camera on vehicle
 		/// </summary>
-		[UnitTest(Category = "Vehicles", Name = "Upgrade Tree")]
+		[UnitTest(Category = "Vehicle Framework", Name = "Upgrade Tree")]
 		private static void UnitTestUpgradeMenu()
 		{
 			Map map = Find.CurrentMap ?? Find.Maps.FirstOrDefault();
@@ -62,7 +62,7 @@ namespace Vehicles
 			Find.Selector.Select(vehicle);
 		}
 
-		[UnitTest(Category = "Vehicles", Name = "Color Dialog", GameState = GameState.Playing)]
+		[UnitTest(Category = "Vehicle Framework", Name = "Color Dialog", GameState = GameState.Playing)]
 		private static void UnitTestColorDialog()
 		{
 			Map map = Find.CurrentMap ?? Find.Maps.FirstOrDefault();
@@ -79,7 +79,7 @@ namespace Vehicles
 		/// <summary>
 		/// Load up game, open update menu for all previous versions
 		/// </summary>
-		[UnitTest(Category = "Vehicles", Name = "Previous Versions Menu", GameState = GameState.OnStartup)]
+		[UnitTest(Category = "Vehicle Framework", Name = "Previous Versions Menu", GameState = GameState.OnStartup)]
 		private static void UnitTestShowUpdates()
 		{
 			VehicleMod.settings.debug.ShowAllUpdates();
@@ -88,7 +88,7 @@ namespace Vehicles
 		/// <summary>
 		/// Load up game, open Mod Settings
 		/// </summary>
-		[UnitTest(Category = "Vehicles", Name = "Mod Settings", GameState = GameState.OnStartup)]
+		[UnitTest(Category = "Vehicle Framework", Name = "Mod Settings", GameState = GameState.OnStartup)]
 		private static void UnitTestModSettings()
 		{
 			Dialog_ModSettings settings = new Dialog_ModSettings();
@@ -99,7 +99,7 @@ namespace Vehicles
 		/// <summary>
 		/// Load up game, open route planner
 		/// </summary>
-		[UnitTest(Category = "Vehicles", Name = "World Route Planner", GameState = GameState.Playing)]
+		[UnitTest(Category = "Vehicle Framework", Name = "World Route Planner", GameState = GameState.Playing)]
 		private static void UnitTestRoutePlanner()
 		{
 			Prefs.DevMode = true;
@@ -107,24 +107,15 @@ namespace Vehicles
 			VehicleRoutePlanner.Instance.Start();
 		}
 
-		[UnitTest(Category = "Vehicles", Name = "Regions", GameState = GameState.Playing)]
+		[UnitTest(Category = "Vehicle Framework", Name = "Regions", GameState = GameState.Playing)]
 		private static void UnitTestRegionsOn()
 		{
 			Prefs.DevMode = true;
 			CameraJumper.TryHideWorld();
-			List<DebugMenuOption> listCheckbox = new List<DebugMenuOption>();
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs.OrderBy(d => d.defName))
-			{
-				listCheckbox.Add(new DebugMenuOption(vehicleDef.defName, DebugMenuOptionMode.Action, delegate ()
-				{
-					DebugHelper.drawRegionsFor = vehicleDef;
-					DebugHelper.debugRegionType = DebugRegionType.Regions;
-				}));
-			}
-			Find.WindowStack.Add(new Dialog_DebugOptionListLister(listCheckbox));
+			VehicleMod.settings.debug.RegionDebugMenu();
 		}
 
-		[UnitTest(Category = "Vehicles", Name = "Vehicle Area Manager", GameState = GameState.Playing)]
+		[UnitTest(Category = "Vehicle Framework", Name = "Vehicle Area Manager", GameState = GameState.Playing)]
 		private static void UnitTestVehicleAreaManager()
 		{
 			Prefs.DevMode = true;

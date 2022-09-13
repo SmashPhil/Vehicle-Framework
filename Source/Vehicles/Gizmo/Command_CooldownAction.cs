@@ -18,7 +18,7 @@ namespace Vehicles
 
 		public VehicleTurret turret;
 
-		protected Color alphaColorTicked = new Color(GUI.color.r * 0.5f, GUI.color.g * 0.5f, GUI.color.b * 0.5f, 0.5f);
+		protected Color alphaColorTicked = new Color(255, 255, 255, 0.5f);
 
 		public bool canReload;
 
@@ -47,7 +47,7 @@ namespace Vehicles
 
 		public override bool GroupsWith(Gizmo other)
 		{
-			return other is Command_CooldownAction command_CooldownAction && command_CooldownAction.turret.groupKey == turret.groupKey;
+			return other is Command_CooldownAction command_CooldownAction && command_CooldownAction.turret.GroupsWith(turret);
 		}
 
 		public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth, GizmoRenderParms parms)

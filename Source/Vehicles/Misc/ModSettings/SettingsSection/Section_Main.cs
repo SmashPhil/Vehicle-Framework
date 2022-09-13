@@ -127,7 +127,7 @@ namespace Vehicles
 
 		public override void DrawSection(Rect rect)
 		{
-			GUIUtility.PushGUIState();
+			GUIState.Push();
 			{
 				listingStandard = new Listing_Standard();
 
@@ -173,7 +173,7 @@ namespace Vehicles
 				string fishingHeader = "VF_Fishing".Translate();
 				if (!Compatibility_VEFishing.Active)
 				{
-					GUIUtility.DisableGUI();
+					GUIState.Disable();
 					fishingHeader = "VF_FishingInactive".Translate();
 				}
 
@@ -187,7 +187,7 @@ namespace Vehicles
 				listingStandard.CheckboxLabeled("VF_FishingPersists".Translate(), ref fishingPersists, "VF_FishingPersistsTooltip".Translate());
 				listingStandard.Gap(4);
 
-				GUIUtility.EnableGUI();
+				GUIState.Enable();
 
 				listingStandard.Header("VF_AerialVehicles".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 				listingStandard.Gap(4);
@@ -202,17 +202,17 @@ namespace Vehicles
 				listingStandard.CheckboxLabeled("VF_DynamicDrawing".Translate(), ref dynamicWorldDrawing, "VF_DynamicDrawingTooltip".Translate());
 				listingStandard.Gap(8);
 
-				GUIUtility.DisableGUI();
+				GUIState.Disable();
 
 				listingStandard.Header("VF_Upgrades".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 				listingStandard.CheckboxLabeled("VF_DrawUpgradeInformationScreen".Translate(), ref drawUpgradeInformationScreen, "VF_DrawUpgradeInformationScreenTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_OverrideDrawColor".Translate(), ref overrideDrawColors, "VF_OverrideDrawColorTooltip".Translate());
 
-				GUIUtility.EnableGUI();
+				GUIState.Enable();
 
 				listingStandard.End();
 			}
-			GUIUtility.Close();
+			GUIState.Pop();
 		}
 	}
 }

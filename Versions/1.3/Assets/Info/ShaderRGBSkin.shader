@@ -1,4 +1,4 @@
-﻿Shader "Custom/ShaderRGBSkin"
+﻿Shader "VehicleFramework/ShaderRGBSkin"
 {
     Properties
 	{
@@ -18,7 +18,6 @@
 			"IgnoreProjector" = "true" 
 			"Queue" = "Transparent-100" 
 			"RenderType" = "Transparent"
-			"PreviewType" = "Plane"
 		}
 		ZWrite Off
 		Pass
@@ -29,17 +28,20 @@
 			#pragma fragment frag
 			#include "UnityCG.cginc"
 
-			struct appdata {
+			struct appdata 
+			{
 				float4 vertex : POSITION;
 				float2 uv : TEXCOORD0;
 			};
 
-			struct v2f {
+			struct v2f 
+			{
 				float2 uv : TEXCOORD0;
 				float4 vertex : SV_POSITION;
 			};
 
-			v2f vert(appdata v) {
+			v2f vert(appdata v) 
+			{
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
 				o.uv = v.uv;
@@ -63,7 +65,8 @@
 
 			float4 finalColor;
 
-			fixed4 frag(v2f i) : SV_Target {
+			fixed4 frag(v2f i) : SV_Target 
+			{
 				_MainTexColor = tex2D(_MainTex, i.uv);
 				_MaskTexColor = tex2D(_MaskTex, i.uv);
 				finalColor = _MainTexColor;
@@ -84,5 +87,5 @@
 			ENDCG
 		}
 	}
-	Fallback "Custom/ShaderRGB"
+	Fallback "VehicleFramework/ShaderRGB"
 }

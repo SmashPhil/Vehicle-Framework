@@ -207,7 +207,7 @@ namespace Vehicles
 					debugRegion.DebugDraw();
 				}
 			}
-			IntVec3 intVec = Verse.UI.MouseCell();
+			IntVec3 intVec = UI.MouseCell();
 			if (intVec.InBounds(map))
 			{
 				VehicleRegion regionAt_NoRebuild_InvalidAllowed = GetRegionAt_NoRebuild_InvalidAllowed(intVec);
@@ -223,7 +223,7 @@ namespace Vehicles
 		/// </summary>
 		public void DebugOnGUI(DebugRegionType debugRegionType)
 		{
-			IntVec3 intVec = Verse.UI.MouseCell();
+			IntVec3 intVec = UI.MouseCell();
 			if (intVec.InBounds(map))
 			{
 				VehicleRegion regionAt_NoRebuild_InvalidAllowed = GetRegionAt_NoRebuild_InvalidAllowed(intVec);

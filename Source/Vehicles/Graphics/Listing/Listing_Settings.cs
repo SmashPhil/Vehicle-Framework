@@ -32,13 +32,13 @@ namespace Vehicles
 		public override void Begin(Rect rect)
 		{
 			base.Begin(rect);
-			GUIUtility.PushGUIState();
+			GUIState.Push();
 		}
 
 		public override void End()
 		{
 			base.End();
-			GUIUtility.Close();
+			GUIState.Pop();
 		}
 
 		public object GetSettingsValue(VehicleDef def, SaveableField field)
@@ -166,8 +166,8 @@ namespace Vehicles
 			}
 			finally
 			{
-				GUIUtility.ResetGUIState();
-				GUIUtility.EnableGUI();
+				GUIState.Reset();
+				GUIState.Enable();
 			}
 		}
 
@@ -190,7 +190,7 @@ namespace Vehicles
 				bool mouseOver = Mouse.IsOver(rect);
 				if (disabled)
 				{
-					GUIUtility.DisableGUI();
+					GUIState.Disable();
 					TooltipHandler.TipRegion(rect, disabledTooltip);
 				}
 				else if (!tooltip.NullOrEmpty())
@@ -241,8 +241,8 @@ namespace Vehicles
 			}
 			finally
 			{
-				GUIUtility.ResetGUIState();
-				GUIUtility.EnableGUI();
+				GUIState.Reset();
+				GUIState.Enable();
 			}
 		}
 
@@ -264,7 +264,7 @@ namespace Vehicles
 				bool mouseOver = Mouse.IsOver(rect);
 				if (disabled)
 				{
-					GUIUtility.DisableGUI();
+					GUIState.Disable();
 					TooltipHandler.TipRegion(rect, disabledTooltip);
 				}
 				else if (!tooltip.NullOrEmpty())
@@ -315,8 +315,8 @@ namespace Vehicles
 			}
 			finally
 			{
-				GUIUtility.ResetGUIState();
-				GUIUtility.EnableGUI();
+				GUIState.Reset();
+				GUIState.Enable();
 			}
 		}
 
@@ -347,7 +347,7 @@ namespace Vehicles
 				bool mouseOver = Mouse.IsOver(fullRect);
 				if (disabled)
 				{
-					GUIUtility.DisableGUI();
+					GUIState.Disable();
 					TooltipHandler.TipRegion(fullRect, disabledTooltip);
 				}
 				else if (!tooltip.NullOrEmpty())
@@ -399,8 +399,8 @@ namespace Vehicles
 			}
 			finally
 			{
-				GUIUtility.ResetGUIState();
-				GUIUtility.EnableGUI();
+				GUIState.Reset();
+				GUIState.Enable();
 			}
 		}
 
@@ -430,7 +430,7 @@ namespace Vehicles
 				bool mouseOver = Mouse.IsOver(fullRect);
 				if (disabled)
 				{
-					GUIUtility.DisableGUI();
+					GUIState.Disable();
 					TooltipHandler.TipRegion(fullRect, disabledTooltip);
 				}
 				else if (!tooltip.NullOrEmpty())
@@ -487,8 +487,8 @@ namespace Vehicles
 			}
 			finally
 			{
-				GUIUtility.ResetGUIState();
-				GUIUtility.EnableGUI();
+				GUIState.Reset();
+				GUIState.Enable();
 			}
 		}
 
@@ -529,7 +529,7 @@ namespace Vehicles
 				bool mouseOver = Mouse.IsOver(fullRect);
 				if (disabled)
 				{
-					GUIUtility.DisableGUI();
+					GUIState.Disable();
 					TooltipHandler.TipRegion(fullRect, disabledTooltip);
 				}
 				else if (!tooltip.NullOrEmpty())
@@ -581,8 +581,8 @@ namespace Vehicles
 			}
 			finally
 			{
-				GUIUtility.ResetGUIState();
-				GUIUtility.EnableGUI();
+				GUIState.Reset();
+				GUIState.Enable();
 			}
 		}
 
@@ -609,7 +609,7 @@ namespace Vehicles
 				bool mouseOver = Mouse.IsOver(fullRect);
 				if (disabled)
 				{
-					GUIUtility.DisableGUI();
+					GUIState.Disable();
 					TooltipHandler.TipRegion(fullRect, disabledTooltip);
 				}
 				else if (!tooltip.NullOrEmpty())
@@ -656,8 +656,8 @@ namespace Vehicles
 			}
 			finally
 			{
-				GUIUtility.ResetGUIState();
-				GUIUtility.EnableGUI();
+				GUIState.Reset();
+				GUIState.Enable();
 			}
 		}
 	}

@@ -28,6 +28,58 @@ namespace Vehicles
 			}
 		}
 
+		public static IEnumerable<Toggle> RegionToggles(VehicleDef vehicleDef)
+		{
+			yield return new Toggle(DebugRegionType.Regions.ToString(), () => drawRegionsFor == vehicleDef && debugRegionType.HasFlag(DebugRegionType.Regions), delegate (bool value)
+			{
+				drawRegionsFor = vehicleDef;
+				if (value)
+				{
+					debugRegionType |= DebugRegionType.Regions;
+				}
+				else
+				{
+					debugRegionType &= ~DebugRegionType.Regions;
+				}
+			});
+			yield return new Toggle(DebugRegionType.Links.ToString(), () => drawRegionsFor == vehicleDef && debugRegionType.HasFlag(DebugRegionType.Links), delegate (bool value)
+			{
+				drawRegionsFor = vehicleDef;
+				if (value)
+				{
+					debugRegionType |= DebugRegionType.Links;
+				}
+				else
+				{
+					debugRegionType &= ~DebugRegionType.Links;
+				}
+			});
+			yield return new Toggle(DebugRegionType.Things.ToString(), () => drawRegionsFor == vehicleDef && debugRegionType.HasFlag(DebugRegionType.Things), delegate (bool value)
+			{
+				drawRegionsFor = vehicleDef;
+				if (value)
+				{
+					debugRegionType |= DebugRegionType.Things;
+				}
+				else
+				{
+					debugRegionType &= ~DebugRegionType.Things;
+				}
+			});
+			yield return new Toggle(DebugRegionType.PathCosts.ToString(), () => drawRegionsFor == vehicleDef && debugRegionType.HasFlag(DebugRegionType.PathCosts), delegate (bool value)
+			{
+				drawRegionsFor = vehicleDef;
+				if (value)
+				{
+					debugRegionType |= DebugRegionType.PathCosts;
+				}
+				else
+				{
+					debugRegionType &= ~DebugRegionType.PathCosts;
+				}
+			});
+		}
+
 		/// <summary>
 		/// Draw water regions to show if they are valid and initialized
 		/// </summary>

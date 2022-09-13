@@ -80,8 +80,9 @@
       <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\NVorbis.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SmashTools">
-      <HintPath>..\..\..\..\..\..\..\..\SmashTools\SmashTools.dll</HintPath>
+    <Reference Include="SmashTools, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Versions\1.3\Assemblies\SmashTools.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Private>False</Private>
@@ -650,7 +651,6 @@
     <Compile Include="Graphics\VehicleGhostUtility.cs" />
     <Compile Include="Utility\Extensions\Ext_Caravan.cs" />
     <Compile Include="Utility\Extensions\Ext_Toils.cs" />
-    <Compile Include="Utility\Extensions\GUIUtility.cs" />
     <Compile Include="Utility\Extensions\Ext_Settings.cs" />
     <Compile Include="Utility\Extensions\Ext_Vehicles.cs" />
     <Compile Include="Utility\Helpers\AchievementsHelper.cs" />

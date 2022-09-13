@@ -40,7 +40,7 @@ namespace Vehicles
 		{
 			float damage = dinfo.Amount;
 			ReduceDamageFromArmor(ref damage, dinfo.ArmorPenetrationInt, out bool penetrated);
-			if (damage <= 0 || !penetrated)
+			if (cell.IsValid && (damage <= 0 || !penetrated))
 			{
 				vehicle.Drawer.Notify_DamageDeflected(cell);
 			}

@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vehicles", "Vehicles.csproj", "{357562A0-ED54-4AE8-AA13-5FC3AC4C5B8E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmashTools", "..\..\..\..\..\..\..\..\SmashTools\SmashTools\SmashTools\SmashTools.csproj", "{B6B2FD58-D7EC-482A-927D-EBB012A468A8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Beta|Any CPU = Beta|Any CPU
@@ -18,6 +20,12 @@ Global
 		{357562A0-ED54-4AE8-AA13-5FC3AC4C5B8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{357562A0-ED54-4AE8-AA13-5FC3AC4C5B8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{357562A0-ED54-4AE8-AA13-5FC3AC4C5B8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6B2FD58-D7EC-482A-927D-EBB012A468A8}.Beta|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6B2FD58-D7EC-482A-927D-EBB012A468A8}.Beta|Any CPU.Build.0 = Debug|Any CPU
+		{B6B2FD58-D7EC-482A-927D-EBB012A468A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6B2FD58-D7EC-482A-927D-EBB012A468A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6B2FD58-D7EC-482A-927D-EBB012A468A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6B2FD58-D7EC-482A-927D-EBB012A468A8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

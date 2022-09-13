@@ -449,7 +449,7 @@ namespace Vehicles
 			{
 				color = Color.green;
 			}
-			if ((debugRegionType & DebugRegionType.Regions) == DebugRegionType.Regions)
+			if (debugRegionType.HasFlag(DebugRegionType.Regions))
 			{
 				GenDraw.DrawFieldEdges(Cells.ToList(), color);
 				foreach (VehicleRegion region in Neighbors)
@@ -457,7 +457,7 @@ namespace Vehicles
 					GenDraw.DrawFieldEdges(region.Cells.ToList(), Color.grey);
 				}
 			}
-			if ((debugRegionType & DebugRegionType.Links) == DebugRegionType.Links)
+			if (debugRegionType.HasFlag(DebugRegionType.Links))
 			{
 				foreach (VehicleRegionLink regionLink in links)
 				{
@@ -469,6 +469,13 @@ namespace Vehicles
 							CellRenderer.RenderCell(c, DebugSolidColorMats.MaterialOf(Color.magenta));
 						}
 					}
+				}
+			}
+			if (debugRegionType.HasFlag(DebugRegionType.Things))
+			{
+				foreach (Thing thing in listerThings.AllThings)
+				{
+					CellRenderer.RenderSpot(thing.TrueCenter(), (thing.thingIDNumber % 256) / 256f, 0.15f);
 				}
 			}
 		}

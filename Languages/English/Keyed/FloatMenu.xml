@@ -13,4 +13,5 @@
 	
 	<VehicleStrafeRun>Strafe Run</VehicleStrafeRun>
 	<AerialReconSite>Recon</AerialReconSite>
+	<VF_VehicleTurrets_NoAmmoToReload>No usable ammo.</VF_VehicleTurrets_NoAmmoToReload>
 </LanguageData>

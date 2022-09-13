@@ -81,7 +81,7 @@ namespace Vehicles
 		/// </remarks>
 		public override void MapComponentUpdate()
 		{
-			if (VehicleRegionGrid.vehicleRegionGridIndexChecking >= VehicleHarmony.AllMoveableVehicleDefsCount)
+			if (VehicleRegionGrid.vehicleRegionGridIndexChecking <= VehicleHarmony.AllMoveableVehicleDefsCount)
 			{
 				VehicleDef vehicleDef = VehicleHarmony.AllMoveableVehicleDefs[VehicleRegionGrid.vehicleRegionGridIndexChecking];
 				VehiclePathData vehiclePathData = this[vehicleDef];
