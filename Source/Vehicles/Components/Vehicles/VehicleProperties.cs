@@ -38,7 +38,6 @@ namespace Vehicles
 
 		//---------------   Pathing   ---------------
 		public bool defaultTerrainImpassable = false;
-		public int pathTurnCost = 10;
 
 		/// <summary>
 		/// Do not use snow costs to try and set impassable terrain based on snow depth. It is not designed for that, and if it was it would lag

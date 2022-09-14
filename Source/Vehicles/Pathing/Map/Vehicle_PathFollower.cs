@@ -295,7 +295,7 @@ namespace Vehicles
 			}
 		}
 
-		public void Notify_Teleported_Int()
+		public void Notify_Teleported()
 		{
 			StopDead();
 			ResetToCurrentPosition();

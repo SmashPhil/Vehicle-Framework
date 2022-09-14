@@ -98,22 +98,6 @@ namespace Vehicles
 			}
 		}
 
-		public void ExposeData()
-		{
-			Scribe_Values.Look(ref moving, "moving", true, false);
-			Scribe_Values.Look(ref paused, "paused", false, false);
-			Scribe_Values.Look(ref nextTile, "nextTile", 0, false);
-			Scribe_Values.Look(ref previousTileForDrawingIfInDoubt, "previousTileForDrawingIfInDoubt", 0, false);
-			Scribe_Values.Look(ref nextTileCostLeft, "nextTileCostLeft", 0f, false);
-			Scribe_Values.Look(ref nextTileCostTotal, "nextTileCostTotal", 0f, false);
-			Scribe_Values.Look(ref destTile, "destTile", 0, false);
-			Scribe_Deep.Look(ref arrivalAction, "arrivalAction", Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.PostLoadInit && Current.ProgramState != ProgramState.Entry && moving && !StartPath(destTile, arrivalAction, true, false))
-			{
-				StopDead();
-			}
-		}
-
 		public bool StartPath(int destTile, CaravanArrivalAction arrivalAction, bool repathImmediately = false, bool resetPauseStatus = true)
 		{
 			caravan.autoJoinable = false;
@@ -222,27 +206,14 @@ namespace Vehicles
 
 		private bool TryRecoverFromUnwalkablePosition()
 		{
-			if (GenWorldClosest.TryFindClosestTile(caravan.Tile, (int t) => IsPassable(t) && WorldVehicleReachability.Instance.CanReach(caravan, t), out int num, 2147483647, true))
+			if (GenWorldClosest.TryFindClosestTile(caravan.Tile, (int t) => IsPassable(t) && WorldVehicleReachability.Instance.CanReach(caravan, t), out int tile, 2147483647, true))
 			{
-				Log.Warning(string.Concat(new object[]
-				{
-					caravan,
-					" on unwalkable tile ",
-					caravan.Tile,
-					". Teleporting to ",
-					num
-				}));
-				caravan.Tile = num;
+				Log.Warning($"{caravan} on impassable tile: {caravan.Tile}. Teleporting to {tile}");
+				caravan.Tile = tile;
 				caravan.Notify_VehicleTeleported();
 				return true;
 			}
-			Log.Error(string.Concat(new object[]
-			{
-				caravan,
-				" on unwalkable tile ",
-				caravan.Tile,
-				". Could not find walkable position nearby. Removed."
-			}));
+			Log.Error($"{caravan} on impassable tile: {caravan.Tile}. Could not find moveable position nearby. Destroying caravan.");
 			caravan.Destroy();
 			return false;
 		}
@@ -313,13 +284,7 @@ namespace Vehicles
 			previousTileForDrawingIfInDoubt = -1;
 			if (!IsPassable(nextTile))
 			{
-				Log.Error(string.Concat(new object[]
-				{
-					caravan,
-					" entering ",
-					nextTile,
-					" which is unwalkable."
-				}));
+				Log.Error($"{caravan} entering {nextTile} which is impassable");
 			}
 			int num = CostToMove(caravan.Tile, nextTile);
 			nextTileCostTotal = num;
@@ -351,7 +316,7 @@ namespace Vehicles
 			StringBuilder stringBuilder = (explanation != null) ? new StringBuilder() : null;
 			float num = float.MaxValue;
 
-			foreach(VehicleDef vehicle in caravan.UniqueVehicleDefsInCaravan().ToList())
+			foreach (VehicleDef vehicle in caravan.UniqueVehicleDefsInCaravan().ToList())
 			{
 				float numTmp = WorldVehiclePathGrid.CalculatedMovementDifficultyAt(end, vehicle, ticksAbs, stringBuilder);
 				if(numTmp < num)
@@ -379,16 +344,7 @@ namespace Vehicles
 				explanation.Append("FinalCaravanMovementSpeed".Translate() + ":");
 				int num3 = Mathf.CeilToInt(num2 / 1f);
 				explanation.AppendLine();
-				explanation.Append(string.Concat(new string[]
-				{
-					"  ",
-					(60000f / caravanTicksPerMove).ToString("0.#"),
-					" / ",
-					(num * roadMovementDifficultyMultiplier).ToString("0.#"),
-					" = ",
-					(60000f / num3).ToString("0.#"),
-					" "
-				}) + "TilesPerDay".Translate());
+				explanation.Append($"  {60000f / caravanTicksPerMove:0.#} / {num * roadMovementDifficultyMultiplier:0.#} = {60000f / num3:0.#} {"TilesPerDay".Translate()}");
 			}
 			return num2;
 		}
@@ -521,17 +477,31 @@ namespace Vehicles
 			{
 				return true;
 			}
-			int num = 0;
-			while (num < MaxCheckAheadNodes && num < curPath.NodesLeftCount)
+			for (int i = 0; i < MaxCheckAheadNodes && i < curPath.NodesLeftCount; i++)
 			{
-				int tileID = curPath.Peek(num);
+				int tileID = curPath.Peek(i);
 				if (!IsPassable(tileID))
 				{
 					return true;
 				}
-				num++;
 			}
 			return false;
+		}
+
+		public void ExposeData()
+		{
+			Scribe_Values.Look(ref moving, "moving", true, false);
+			Scribe_Values.Look(ref paused, "paused", false, false);
+			Scribe_Values.Look(ref nextTile, "nextTile", 0, false);
+			Scribe_Values.Look(ref previousTileForDrawingIfInDoubt, "previousTileForDrawingIfInDoubt", 0, false);
+			Scribe_Values.Look(ref nextTileCostLeft, "nextTileCostLeft", 0f, false);
+			Scribe_Values.Look(ref nextTileCostTotal, "nextTileCostTotal", 0f, false);
+			Scribe_Values.Look(ref destTile, "destTile", 0, false);
+			Scribe_Deep.Look(ref arrivalAction, "arrivalAction", Array.Empty<object>());
+			if (Scribe.mode == LoadSaveMode.PostLoadInit && Current.ProgramState != ProgramState.Entry && moving && !StartPath(destTile, arrivalAction, true, false))
+			{
+				StopDead();
+			}
 		}
 	}
 }

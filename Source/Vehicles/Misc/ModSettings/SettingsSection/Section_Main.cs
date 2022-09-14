@@ -18,6 +18,7 @@ namespace Vehicles
 		public bool modifiableSettings = true;
 		public bool useCustomShaders = true;
 		public bool fullVehiclePathing = true;
+		public bool smoothVehiclePaths = true;
 		public bool multiplePawnsPerJob = true;
 		public bool showDisabledVehicles = false;
 
@@ -60,6 +61,7 @@ namespace Vehicles
 			modifiableSettings = true;
 			useCustomShaders = true;
 			fullVehiclePathing = true;
+			smoothVehiclePaths = true;
 			multiplePawnsPerJob = true;
 			showDisabledVehicles = false;
 
@@ -99,6 +101,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref modifiableSettings, nameof(modifiableSettings), defaultValue: true);
 			Scribe_Values.Look(ref useCustomShaders, nameof(useCustomShaders), defaultValue: true);
 			Scribe_Values.Look(ref fullVehiclePathing, nameof(fullVehiclePathing), defaultValue: true);
+			Scribe_Values.Look(ref smoothVehiclePaths, nameof(smoothVehiclePaths), defaultValue: true);
 			Scribe_Values.Look(ref multiplePawnsPerJob, nameof(multiplePawnsPerJob), defaultValue: true);
 			Scribe_Values.Look(ref showDisabledVehicles, nameof(showDisabledVehicles), defaultValue: false);
 
@@ -147,6 +150,7 @@ namespace Vehicles
 				listingStandard.CheckboxLabeled("VF_ModifiableSettings".Translate(), ref modifiableSettings, "VF_ModifiableSettingsTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_CustomShaders".Translate(), ref useCustomShaders, "VF_CustomShadersTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_FullVehiclePathing".Translate(), ref fullVehiclePathing, "VF_FullVehiclePathingTooltip".Translate());
+				listingStandard.CheckboxLabeled("VF_SmoothVehiclePathing".Translate(), ref smoothVehiclePaths, "VF_SmoothVehiclePathingTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_MultiplePawnsPerJob".Translate(), ref multiplePawnsPerJob, "VF_MultiplePawnsPerJobTooltip".Translate());
 				bool checkBefore = showDisabledVehicles;
 				listingStandard.CheckboxLabeled("VF_ShowDisabledVehicles".Translate(), ref showDisabledVehicles, "VF_ShowDisabledVehiclesTooltip".Translate());

@@ -23,6 +23,7 @@ namespace Vehicles
 		public const int DefaultMoveTicksCardinal = 13;
 		public const int DefaultMoveTicksDiagonal = 18;
 		private const int SearchLimit = 160000;
+		private const int TurnCostTicks = 2;
 
 		internal Dictionary<IntVec3, int> postCalculatedCells = new Dictionary<IntVec3, int>();
 		internal Dictionary<IntVec3, int> postCalculatedTurns = new Dictionary<IntVec3, int>();
@@ -49,24 +50,26 @@ namespace Vehicles
 		/// <summary>
 		/// 8 directional x,y adjacent offsets
 		/// </summary>
-		private static readonly int[] Directions = new int[]
+		private static readonly int[] directions = new int[]
 		{
-			0,
-			1,
-			0,
-			-1,
-			1,
-			1,
-			-1,
-			-1,
-			-1,
-			0,
-			1,
-			0,
-			-1,
-			1,
-			1,
-			-1
+			//x coord
+			0, //North
+			1, //East
+			0, //South
+			-1, //West
+			1, //NorthEast
+			1, //SouthEast
+			-1, //SouthWest
+			-1, //NorthWest
+			//y coord
+			-1, //North
+			0, //East
+			1, //South
+			0, //West
+			-1, //NorthEast
+			1, //SouthEast
+			1, //SouthWest
+			-1 //NorthWest
 		};
 
 		private static readonly SimpleCurve NonRegionBasedHeuristicStrength_DistanceCurve = new SimpleCurve
@@ -265,8 +268,8 @@ namespace Vehicles
 
 					for(int i = 0; i < 8; i++)
 					{
-						uint cellX = (uint)(x2 + Directions[i]);   //x
-						uint cellY = (uint)(z2 + Directions[i + 8]); //y
+						uint cellX = (uint)(x2 + directions[i]);
+						uint cellY = (uint)(z2 + directions[i + 8]);
 
 						if (cellX < ((ulong)mapSizeX) && cellY < (ulong)(mapSizeZ))
 						{
@@ -279,7 +282,6 @@ namespace Vehicles
 							{
 								goto EndPathing;
 							}
-							Rot8 newDirection = Rot8.DirectionFromCells(prevCell, cellToCheck);
 							if (calcGrid[cellIndex].status != statusClosedValue || weightedHeuristics)
 							{
 								int initialCost = 0;
@@ -388,10 +390,10 @@ namespace Vehicles
 										}
 									}
 									int tickCost = ((i <= 3) ? ticksCardinal : ticksDiagonal) + initialCost;
-									if (newDirection != costNode.direction)
+									Rot8 pathDir = Rot8.DirectionFromCells(prevCell, cellToCheck);
+									if (VehicleMod.settings.main.smoothVehiclePaths && pathDir != costNode.direction)
 									{
-										int rotWeight = costNode.direction.Difference(newDirection);
-										int turnCost = vehicle.VehicleDef.properties.pathTurnCost * rotWeight;
+										int turnCost = costNode.direction.Difference(pathDir) * TurnCostTicks;
 										tickCost += turnCost;
 										if (postCalculatedTurns.ContainsKey(cellToCheck))
 										{
@@ -433,8 +435,7 @@ namespace Vehicles
 									{
 										tickCost += Cost_PawnCollision;
 									}
-									Building building2 = edificeGrid[cellIndex];
-									if (building2 != null)
+									if (edificeGrid[cellIndex] is Building building2)
 									{
 										//REDO - Building Costs Here
 									}
@@ -496,7 +497,7 @@ namespace Vehicles
 										{
 											closedValueCost = ticksCardinal;
 										}
-										if(calcGrid[cellIndex].knownCost <= calculatedCost + closedValueCost)
+										if (calcGrid[cellIndex].knownCost <= calculatedCost + closedValueCost)
 										{
 											goto EndPathing;
 										}

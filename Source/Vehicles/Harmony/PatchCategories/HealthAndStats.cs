@@ -50,17 +50,16 @@ namespace Vehicles
 		{
 			if (__instance is VehiclePawn vehicle)
 			{
-				float num = vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed) / 60;
-				float num2 = 1 / num;
+				float speed = 1 / (vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed) / 60);
 				if (vehicle.Spawned && !vehicle.Map.roofGrid.Roofed(vehicle.Position))
 				{
-					num2 /= vehicle.Map.weatherManager.CurMoveSpeedMultiplier;
+					speed /= vehicle.Map.weatherManager.CurMoveSpeedMultiplier;
 				}
 				if (diagonal)
 				{
-					num2 *= Mathf.Sqrt(2);
+					speed *= 1.41421f; //sqrt(2)
 				}
-				__result = Mathf.RoundToInt(num2).Clamp(1, 450);
+				__result = Mathf.RoundToInt(speed).Clamp(1, 450);
 				return false;
 			}
 			return true;
