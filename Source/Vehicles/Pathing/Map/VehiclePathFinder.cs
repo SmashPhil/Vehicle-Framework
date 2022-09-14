@@ -390,18 +390,21 @@ namespace Vehicles
 										}
 									}
 									int tickCost = ((i <= 3) ? ticksCardinal : ticksDiagonal) + initialCost;
-									Rot8 pathDir = Rot8.DirectionFromCells(prevCell, cellToCheck);
-									if (VehicleMod.settings.main.smoothVehiclePaths && pathDir != costNode.direction)
+									if (VehicleMod.settings.main.smoothVehiclePaths)
 									{
-										int turnCost = costNode.direction.Difference(pathDir) * TurnCostTicks;
-										tickCost += turnCost;
-										if (postCalculatedTurns.ContainsKey(cellToCheck))
+										Rot8 pathDir = Rot8.DirectionFromCells(prevCell, cellToCheck);
+										if (pathDir != costNode.direction)
 										{
-											postCalculatedTurns[cellToCheck] = turnCost;
-										}
-										else
-										{
-											postCalculatedTurns.Add(cellToCheck, turnCost);
+											int turnCost = costNode.direction.Difference(pathDir) * TurnCostTicks;
+											tickCost += turnCost;
+											if (postCalculatedTurns.ContainsKey(cellToCheck))
+											{
+												postCalculatedTurns[cellToCheck] = turnCost;
+											}
+											else
+											{
+												postCalculatedTurns.Add(cellToCheck, turnCost);
+											}
 										}
 									}
 									if (vehicle.VehicleDef.properties.customTerrainCosts?.NotNullAndAny() ?? false)

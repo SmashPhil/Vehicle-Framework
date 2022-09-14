@@ -19,9 +19,6 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan_PathFollower), "StartPath"),
 				prefix: new HarmonyMethod(typeof(WorldPathing),
 				nameof(StartVehicleCaravanPath)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(TilesPerDayCalculator), nameof(TilesPerDayCalculator.ApproxTilesPerDay), new Type[] { typeof(Caravan), typeof(StringBuilder) }),
-				prefix: new HarmonyMethod(typeof(WorldPathing),
-				nameof(ApproxTilesForShips)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldRoutePlanner), nameof(WorldRoutePlanner.WorldRoutePlannerUpdate)),
 				prefix: new HarmonyMethod(typeof(WorldPathing),
 				nameof(VehicleRoutePlannerUpdateHook)));
@@ -69,18 +66,11 @@ namespace Vehicles
 		/// <param name="resetPauseStatus"></param>
 		public static bool StartVehicleCaravanPath(int destTile, CaravanArrivalAction arrivalAction, Caravan ___caravan, bool repathImmediately = false, bool resetPauseStatus = true)
 		{
-			if(___caravan is VehicleCaravan vehicleCaravan)
+			if (___caravan is VehicleCaravan vehicleCaravan)
 			{
 				vehicleCaravan.vPather.StartPath(destTile, arrivalAction, repathImmediately, resetPauseStatus);
 				return false;
 			}
-			return true;
-		}
-
-		//REDO
-		public static bool ApproxTilesForShips(Caravan caravan, StringBuilder explanation = null)
-		{
-			//Continue here
 			return true;
 		}
 

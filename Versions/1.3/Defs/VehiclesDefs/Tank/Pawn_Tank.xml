@@ -38,7 +38,7 @@
 		<vehicleStats>
 			<Mass>60000</Mass>
 			<MarketValue>75000</MarketValue>
-			<MoveSpeed>3.25</MoveSpeed>
+			<MoveSpeed>3.5</MoveSpeed>
 			<CargoCapacity>100</CargoCapacity>
 			<RepairRate>2.5</RepairRate>
 		</vehicleStats>
@@ -48,6 +48,8 @@
 				<li>(PaintVehicle, 3)</li>
 				<li>(RepairVehicle, 3)</li>
 			</vehicleJobLimitations>
+			
+			<worldSpeedMultiplier>5</worldSpeedMultiplier>
 			
 			<customBiomeCosts>
 				<li>

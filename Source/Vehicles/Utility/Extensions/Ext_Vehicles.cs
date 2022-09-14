@@ -185,6 +185,15 @@ namespace Vehicles
 		}
 
 		/// <summary>
+		/// Get all unique Vehicles in <paramref name="vehicles"/>
+		/// </summary>
+		/// <param name="vehicles"></param>
+		public static List<VehicleDef> UniqueVehicleDefsInList(this IEnumerable<Pawn> pawns)
+		{
+			return pawns.Where(pawn => pawn is VehiclePawn).Select(pawn => (pawn as VehiclePawn).VehicleDef).Distinct().ToList();
+		}
+
+		/// <summary>
 		/// Check if <paramref name="thing"/> is a boat
 		/// </summary>
 		/// <param name="thing"></param>

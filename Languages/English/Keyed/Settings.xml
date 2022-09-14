@@ -27,6 +27,8 @@ Determines whether Vehicles should use values from the mod settings or Defs</VF_
 	<VF_FullVehiclePathingTooltip>Use the entire hitbox of the vehicle to determine pathing constraints (prevents Vehicles from going through smaller passages than hitbox size).</VF_FullVehiclePathingTooltip>
 	<VF_SmoothVehiclePathing>Smooth Vehicle Paths</VF_SmoothVehiclePathing>
 	<VF_SmoothVehiclePathingTooltip>Vehicle pathing will have an additional "turn" cost, preventing unnecessary zig zag patterns from shortest path.</VF_SmoothVehiclePathingTooltip>
+	<VF_RoadBiomeCostPathing>Flat Cost On Roads</VF_RoadBiomeCostPathing>
+	<VF_RoadBiomeCostPathingTooltip>Vehicles pathing on roads on the world map are not affected by biome path costs.</VF_RoadBiomeCostPathingTooltip>
 	<VF_MultiplePawnsPerJob>Multi-Pawn Jobs</VF_MultiplePawnsPerJob>
 	<VF_MultiplePawnsPerJobTooltip>Allows vehicle related jobs to allow more than 1 pawn to reserve and work on it. Max allowed pawns determined by modders.</VF_MultiplePawnsPerJobTooltip>
 	<VF_ShowDisabledVehicles>Show Disabled Vehicles</VF_ShowDisabledVehicles>
@@ -46,7 +48,7 @@ Determines whether Vehicles should use values from the mod settings or Defs</VF_
 	<!-- Land Vehicles (none right now)-->
 	
 	<!-- Sea Vehicles -->
-	<VF_SeaVehicles>Sea</VF_SeaVehicles>
+	<VF_SeaVehicles>Boats</VF_SeaVehicles>
 	<VF_PassiveWaterWaves>Passive Water Waves</VF_PassiveWaterWaves>
 	<VF_PassiveWaterWavesTooltip>Generate passive waves for each boat. Purely cosmetic.</VF_PassiveWaterWavesTooltip>
 	<VF_Fishing>Fishing</VF_Fishing>

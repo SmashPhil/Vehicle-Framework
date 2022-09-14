@@ -29,8 +29,6 @@ namespace Vehicles
 
 		public override Vector3 DrawPos => vTweener.TweenedPos;
 
-		public new virtual int TicksPerMove => CaravanHelper.GetTicksPerMove(this);
-
 		public VehiclePawn LeadVehicle
 		{
 			get

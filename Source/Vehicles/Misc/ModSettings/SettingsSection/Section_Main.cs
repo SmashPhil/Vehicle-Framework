@@ -19,6 +19,7 @@ namespace Vehicles
 		public bool useCustomShaders = true;
 		public bool fullVehiclePathing = true;
 		public bool smoothVehiclePaths = true;
+		public bool vehiclePathingRoadNoCost = true;
 		public bool multiplePawnsPerJob = true;
 		public bool showDisabledVehicles = false;
 
@@ -62,6 +63,7 @@ namespace Vehicles
 			useCustomShaders = true;
 			fullVehiclePathing = true;
 			smoothVehiclePaths = true;
+			vehiclePathingRoadNoCost = true;
 			multiplePawnsPerJob = true;
 			showDisabledVehicles = false;
 
@@ -102,6 +104,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref useCustomShaders, nameof(useCustomShaders), defaultValue: true);
 			Scribe_Values.Look(ref fullVehiclePathing, nameof(fullVehiclePathing), defaultValue: true);
 			Scribe_Values.Look(ref smoothVehiclePaths, nameof(smoothVehiclePaths), defaultValue: true);
+			Scribe_Values.Look(ref vehiclePathingRoadNoCost, nameof(vehiclePathingRoadNoCost), defaultValue: true);
 			Scribe_Values.Look(ref multiplePawnsPerJob, nameof(multiplePawnsPerJob), defaultValue: true);
 			Scribe_Values.Look(ref showDisabledVehicles, nameof(showDisabledVehicles), defaultValue: false);
 
@@ -151,6 +154,9 @@ namespace Vehicles
 				listingStandard.CheckboxLabeled("VF_CustomShaders".Translate(), ref useCustomShaders, "VF_CustomShadersTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_FullVehiclePathing".Translate(), ref fullVehiclePathing, "VF_FullVehiclePathingTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_SmoothVehiclePathing".Translate(), ref smoothVehiclePaths, "VF_SmoothVehiclePathingTooltip".Translate());
+				GUIState.Disable();
+				listingStandard.CheckboxLabeled("VF_RoadBiomeCostPathing".Translate(), ref vehiclePathingRoadNoCost, "VF_RoadBiomeCostPathingTooltip".Translate());
+				GUIState.Enable();
 				listingStandard.CheckboxLabeled("VF_MultiplePawnsPerJob".Translate(), ref multiplePawnsPerJob, "VF_MultiplePawnsPerJobTooltip".Translate());
 				bool checkBefore = showDisabledVehicles;
 				listingStandard.CheckboxLabeled("VF_ShowDisabledVehicles".Translate(), ref showDisabledVehicles, "VF_ShowDisabledVehiclesTooltip".Translate());
@@ -160,15 +166,6 @@ namespace Vehicles
 				{
 					DefDatabase<DesignationCategoryDef>.AllDefs.ForEach(desCat => GizmoHelper.DesignatorsChanged(desCat));
 				}
-
-				listingStandard.Header("VF_VehicleDamageMultipliers".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-				listingStandard.Gap(4);
-				listingStandard.SliderLabeled("VF_MeleeDamageMultiplier".Translate(), string.Empty, "%", ref meleeDamageMultiplier, 0, 2, multiplier: 100);
-				listingStandard.SliderLabeled("VF_RangedDamageMultiplier".Translate(), string.Empty, "%", ref rangedDamageMultiplier, 0, 2, multiplier: 100);
-				listingStandard.SliderLabeled("VF_ExplosiveDamageMultiplier".Translate(), string.Empty, "%", ref explosiveDamageMultiplier, 0, 2, multiplier: 100);
-
-				listingStandard.Header("VF_VehicleTurrets".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-				listingStandard.CheckboxLabeled("VF_TurretOverheatMechanics".Translate(), ref overheatMechanics, "VF_TurretOverheatMechanicsTooltip".Translate());
 
 				listingStandard.Header("VF_SeaVehicles".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 				listingStandard.CheckboxLabeled("VF_PassiveWaterWaves".Translate(), ref passiveWaterWaves, "VF_PassiveWaterWavesTooltip".Translate());
@@ -213,6 +210,16 @@ namespace Vehicles
 				listingStandard.CheckboxLabeled("VF_OverrideDrawColor".Translate(), ref overrideDrawColors, "VF_OverrideDrawColorTooltip".Translate());
 
 				GUIState.Enable();
+
+				listingStandard.NewColumn();
+				listingStandard.Header("VF_VehicleDamageMultipliers".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
+				listingStandard.Gap(4);
+				listingStandard.SliderLabeled("VF_MeleeDamageMultiplier".Translate(), string.Empty, "%", ref meleeDamageMultiplier, 0, 2, multiplier: 100);
+				listingStandard.SliderLabeled("VF_RangedDamageMultiplier".Translate(), string.Empty, "%", ref rangedDamageMultiplier, 0, 2, multiplier: 100);
+				listingStandard.SliderLabeled("VF_ExplosiveDamageMultiplier".Translate(), string.Empty, "%", ref explosiveDamageMultiplier, 0, 2, multiplier: 100);
+
+				listingStandard.Header("VF_VehicleTurrets".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
+				listingStandard.CheckboxLabeled("VF_TurretOverheatMechanics".Translate(), ref overheatMechanics, "VF_TurretOverheatMechanicsTooltip".Translate());
 
 				listingStandard.End();
 			}

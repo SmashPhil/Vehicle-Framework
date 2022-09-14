@@ -293,30 +293,25 @@ namespace Vehicles
 
 		private int CostToMove(int start, int end)
 		{
-			return CostToMove(caravan, start, end, null);
+			return CostToMove(caravan, start, end);
 		}
 
 		public static int CostToMove(VehicleCaravan caravan, int start, int end, int? ticksAbs = null)
 		{
-			return CostToMove(caravan, start, end, ticksAbs, null, null);
+			return CostToMove(caravan.UniqueVehicleDefsInCaravan().ToList(), caravan.TicksPerMove, start, end, ticksAbs);
 		}
 
-		public static int CostToMove(VehicleCaravan caravan, int start, int end, int? ticksAbs = null, StringBuilder explanation = null, string caravanTicksPerMoveExplanation = null)
+		public static int CostToMove(List<VehicleDef> vehicleDefs, int ticksPerMove, int start, int end, int? ticksAbs = null, StringBuilder explanation = null, string caravanTicksPerMoveExplanation = null)
 		{
-			int caravanTicksPerMove = caravan.TicksPerMove;
 			if (start == end)
 			{
 				return 0;
 			}
-			if (explanation != null)
-			{
-				explanation.Append(caravanTicksPerMoveExplanation);
-				explanation.AppendLine();
-			}
+			explanation?.AppendLine(caravanTicksPerMoveExplanation);
 			StringBuilder stringBuilder = (explanation != null) ? new StringBuilder() : null;
 			float num = float.MaxValue;
 
-			foreach (VehicleDef vehicle in caravan.UniqueVehicleDefsInCaravan().ToList())
+			foreach (VehicleDef vehicle in vehicleDefs)
 			{
 				float numTmp = WorldVehiclePathGrid.CalculatedMovementDifficultyAt(end, vehicle, ticksAbs, stringBuilder);
 				if(numTmp < num)
@@ -325,26 +320,22 @@ namespace Vehicles
 				}
 			}
 			
-			float roadMovementDifficultyMultiplier = GetRoadMovementDifficultyMultiplier(caravan, start, end, stringBuilder);
+			float roadMovementDifficultyMultiplier = GetRoadMovementDifficultyMultiplier(vehicleDefs, start, end, stringBuilder);
 			if (explanation != null)
 			{
 				explanation.AppendLine();
-				explanation.Append("TileMovementDifficulty".Translate() + ":");
-				explanation.AppendLine();
-				explanation.Append(stringBuilder.ToString().Indented("  "));
-				explanation.AppendLine();
-				explanation.Append("  = " + (num * roadMovementDifficultyMultiplier).ToString("0.#"));
+				explanation.AppendLine("TileMovementDifficulty".Translate() + ":");
+				explanation.AppendLine(stringBuilder.ToString().Indented("  "));
+				explanation.AppendLine("  = " + (num * roadMovementDifficultyMultiplier).ToString("0.#"));
 			}
-			int num2 = (int)(caravanTicksPerMove * num * roadMovementDifficultyMultiplier);
+			int num2 = (int)(ticksPerMove * num * roadMovementDifficultyMultiplier);
 			num2 = Mathf.Clamp(num2, 1, MaxMoveTicks);
 			if (explanation != null)
 			{
 				explanation.AppendLine();
-				explanation.AppendLine();
-				explanation.Append("FinalCaravanMovementSpeed".Translate() + ":");
+				explanation.AppendLine("FinalCaravanMovementSpeed".Translate() + ":");
 				int num3 = Mathf.CeilToInt(num2 / 1f);
-				explanation.AppendLine();
-				explanation.Append($"  {60000f / caravanTicksPerMove:0.#} / {num * roadMovementDifficultyMultiplier:0.#} = {60000f / num3:0.#} {"TilesPerDay".Translate()}");
+				explanation.Append($"  {60000f / ticksPerMove:0.#} / {num * roadMovementDifficultyMultiplier:0.#} = {60000f / num3:0.#} {"TilesPerDay".Translate()}");
 			}
 			return num2;
 		}
@@ -370,27 +361,35 @@ namespace Vehicles
 			{
 				if (roads[i].neighbor == toTile)
 				{
-					float movementCostMultiplier = roads[i].road.movementCostMultiplier;
-					foreach (VehicleDef vehicleDef in vehicleDefs)
-					{
-						//Take slowest multiplier (caravan is limited by slowest vehicle)
-						if (vehicleDef.properties.customRoadCosts.TryGetValue(roads[i].road, out float value) && value > movementCostMultiplier)
-						{
-							movementCostMultiplier = value;
-						}
-					}
+					float roadMultiplier = GetRoadMovementDifficultyMultiplier(vehicleDefs, roads[i].road);
+					
 					if (explanation != null)
 					{
 						if (explanation.Length > 0)
 						{
 							explanation.AppendLine();
 						}
-						explanation.Append(roads[i].road.LabelCap + ": " + movementCostMultiplier.ToStringPercent());
+						explanation.Append($"{roads[i].road.LabelCap}: {roadMultiplier.ToStringPercent()}");
 					}
-					return movementCostMultiplier;
+					return roadMultiplier;
 				}
 			}
 			return 1f;
+		}
+
+		public static float GetRoadMovementDifficultyMultiplier(List<VehicleDef> vehicleDefs, RoadDef roadDef)
+		{
+			float roadMultiplier = roadDef.movementCostMultiplier;
+			bool customRoadCosts = false;
+			foreach (VehicleDef vehicleDef in vehicleDefs)
+			{
+				if (vehicleDef.properties.customRoadCosts.TryGetValue(roadDef, out float movementCostMultiplier) && (!customRoadCosts || movementCostMultiplier < roadMultiplier))
+				{
+					customRoadCosts = true;
+					roadMultiplier = movementCostMultiplier;
+				}
+			}
+			return roadMultiplier;
 		}
 
 		public static bool IsValidFinalPushDestination(int tile)

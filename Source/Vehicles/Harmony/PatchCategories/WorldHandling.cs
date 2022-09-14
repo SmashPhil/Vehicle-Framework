@@ -20,12 +20,6 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldPawns), nameof(WorldPawns.RemoveAndDiscardPawnViaGC)),
 				prefix: new HarmonyMethod(typeof(WorldHandling),
 				nameof(DoNotRemoveVehicleObjects)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldDynamicDrawManager), name: nameof(WorldDynamicDrawManager.DrawDynamicWorldObjects)),
-			//	transpiler: new HarmonyMethod(typeof(WorldHandling),
-			//	nameof(DrawDynamicAerialVehiclesTranspiler)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(ExpandableWorldObjectsUtility), name: nameof(ExpandableWorldObjectsUtility.ExpandableWorldObjectsOnGUI)),
-			//	transpiler: new HarmonyMethod(typeof(WorldHandling),
-			//	nameof(ExpandableIconDetourAerialVehicleTranspiler)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldObjectsHolder), "AddToCache"),
 				postfix: new HarmonyMethod(typeof(WorldHandling),
 				nameof(AddVehicleObjectToCache)));
@@ -126,44 +120,6 @@ namespace Vehicles
 				}
 			}
 			return true;
-		}
-
-		/// <summary>
-		/// Draw AerialVehicle textures dynamically to mimic both the AerialVehicle texture and its rotation
-		/// </summary>
-		/// <param name="instructions"></param>
-		/// <param name="ilg"></param>
-		public static IEnumerable<CodeInstruction> DrawDynamicAerialVehiclesTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
-		{
-			List<CodeInstruction> instructionList = instructions.ToList();
-
-			for (int i = 0; i < instructionList.Count; i++)
-			{
-				CodeInstruction instruction = instructionList[i];
-
-				if (instruction.Calls(AccessTools.Property(typeof(ExpandableWorldObjectsUtility), nameof(ExpandableWorldObjectsUtility.TransitionPct)).GetGetMethod()))
-				{
-					Label label = ilg.DefineLabel();
-					Label brlabel = ilg.DefineLabel();
-
-					yield return new CodeInstruction(opcode: OpCodes.Ldloc_1);
-					yield return new CodeInstruction(opcode: OpCodes.Call, AccessTools.Method(typeof(RenderHelper), nameof(RenderHelper.RenderDynamicWorldObjects)));
-					yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
-
-					yield return new CodeInstruction(opcode: OpCodes.Leave, brlabel);
-
-					for (int j = i; j < instructionList.Count; j++)
-					{
-						if (instructionList[j].opcode == OpCodes.Ldloca_S)
-						{
-							instructionList[j].labels.Add(brlabel);
-							break;
-						}
-					}
-					instruction.labels.Add(label);
-				}
-				yield return instruction;
-			}
 		}
 
 		/// <summary>

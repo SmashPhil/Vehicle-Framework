@@ -44,7 +44,7 @@
 	<VF_DevMode_DebugPathfinderDebugging>PathFinder Debugging</VF_DevMode_DebugPathfinderDebugging>
 	<VF_DevMode_DebugPathfinderDebuggingTooltip>Open menu for debugging various outputs of pathfinding (both cell based and region based)</VF_DevMode_DebugPathfinderDebuggingTooltip>
 	<VF_DevMode_DebugDrawVehiclePathingCosts>Draw Path Costs</VF_DevMode_DebugDrawVehiclePathingCosts>
-	<VF_DevMode_DebugDrawVehiclePathingCostsTooltip>Draw costs per cell calculated from pathfinder on the map, highlighting every cell searched as well as the accumulated path cost.</VF_DevMode_DebugDrawVehiclePathingCostsTooltip>
+	<VF_DevMode_DebugDrawVehiclePathingCostsTooltip>Draw costs per cell/tile calculated from pathfinder. Shows accumulated path cost.</VF_DevMode_DebugDrawVehiclePathingCostsTooltip>
 	<VF_DevMode_DebugDrawVehiclePathGridCellCosts>Draw Cell Costs</VF_DevMode_DebugDrawVehiclePathGridCellCosts>
 	<VF_DevMode_DebugDrawVehiclePathGridCellCostsTooltip>Draw costs per cell for the currently highlighted region. Only shows final cost of individual cells, taking terrain and things into account.</VF_DevMode_DebugDrawVehiclePathGridCellCostsTooltip>
 </LanguageData>

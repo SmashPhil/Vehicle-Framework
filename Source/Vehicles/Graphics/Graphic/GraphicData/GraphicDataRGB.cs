@@ -84,7 +84,7 @@ namespace Vehicles
 			}
 			if (!VehicleMod.settings.main.useCustomShaders)
 			{
-				shaderTypeDef = shaderTypeDef.Shader.SupportsMaskTex() ? ShaderTypeDefOf.CutoutComplex : ShaderTypeDefOf.Cutout;
+				shaderTypeDef = shaderTypeDef.Shader.SupportsRGBMaskTex() ? ShaderTypeDefOf.CutoutComplex : ShaderTypeDefOf.Cutout;
 			}
 			Shader shader = shaderTypeDef.Shader;
 			cachedRGBGraphic = GraphicDatabaseRGB.Get(graphicClass, texPath, shader, drawSize, color, colorTwo, colorThree, tiles, displacement.x, displacement.y, this, shaderParameters);

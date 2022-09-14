@@ -17,40 +17,6 @@ namespace Vehicles
 	public static class CaravanHelper
 	{
 		public static Dictionary<Pawn, (VehiclePawn vehicle, VehicleHandler handler)> assignedSeats = new Dictionary<Pawn, (VehiclePawn vehicle, VehicleHandler handler)>();
-		private static List<Pawn> outerPawns = new List<Pawn>();
-		private static List<int> moveSpeedTicks = new List<int>();
-
-		public static int GetTicksPerMove(VehicleCaravan caravan, StringBuilder stringBuilder = null)
-		{
-			return GetTicksPerMove(caravan.PawnsListForReading, stringBuilder);
-		}
-
-		public static int GetTicksPerMove(IEnumerable<Pawn> pawns, StringBuilder stringBuilder = null)
-		{
-			moveSpeedTicks.Clear();
-			outerPawns.Clear();
-			foreach (Pawn pawn in pawns)
-			{
-				if (pawn is VehiclePawn vehicle)
-				{
-					float moveSpeed = vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed) * vehicle.VehicleDef.properties.worldSpeedMultiplier;
-					float tickSpeed = 1 / (moveSpeed / 60) * CaravanTicksPerMoveUtility.CellToTilesConversionRatio;
-					int ticksPerTile = Mathf.Max(Mathf.RoundToInt(tickSpeed), 1);
-					moveSpeedTicks.Add(ticksPerTile);
-				}
-				else if (!pawn.IsInVehicle())
-				{
-					outerPawns.Add(pawn);
-				}
-			}
-			int pawnTickAverage = int.MaxValue;
-			if (!outerPawns.NullOrEmpty())
-			{
-				pawnTickAverage = CaravanTicksPerMoveUtility.GetTicksPerMove(outerPawns, 0, 100, stringBuilder);
-			}
-			int minTicks = Mathf.Min(Mathf.RoundToInt((float)moveSpeedTicks.Average()), pawnTickAverage);
-			return minTicks;
-		}
 
 		/// <summary>
 		/// Remove all pawns from <see cref="assignedSeats"/> for this vehicle

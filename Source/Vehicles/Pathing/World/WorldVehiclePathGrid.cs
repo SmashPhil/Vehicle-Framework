@@ -188,7 +188,7 @@ namespace Vehicles
 			{
 				defaultBiomeCost = Mathf.Min(defaultBiomeCost, vehicleDef.properties.customBiomeCosts[BiomeDefOf.Ocean]);
 			}
-			
+			//float roadMultiplier = VehicleCaravan_PathFollower.GetRoadMovementDifficultyMultiplier(vehicleDefs, tile, neighbor, null)
 			float biomeCost = vehicleDef.properties.customBiomeCosts.TryGetValue(worldTile.biome, defaultBiomeCost);
 			float hillinessCost = vehicleDef.properties.customHillinessCosts.TryGetValue(worldTile.hilliness, HillinessMovementDifficultyOffset(worldTile.hilliness));
 			if (ImpassableCost(biomeCost) || ImpassableCost(hillinessCost))
@@ -199,19 +199,13 @@ namespace Vehicles
 				}
 				return ImpassableMovementDifficulty;
 			}
-
-			float totalBiomeCost = biomeCost;
-			if (vehicleDef.properties.worldSpeedMultiplier != 0)
-			{
-				totalBiomeCost /= vehicleDef.properties.worldSpeedMultiplier;
-			}
 			
 			if (explanation != null)
 			{
 				explanation.Append(worldTile.biome.LabelCap + ": " + biomeCost.ToStringWithSign("0.#"));
 			}
 			
-			float totalCost = totalBiomeCost + hillinessCost;
+			float totalCost = biomeCost + hillinessCost;
 			if (explanation != null && hillinessCost != 0f)
 			{
 				explanation.AppendLine();

@@ -73,6 +73,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Property(typeof(Caravan), nameof(Caravan.TicksPerMoveExplanation)).GetGetMethod(),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(VehicleCaravanTicksPerMoveExplanation)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(TilesPerDayCalculator), nameof(TilesPerDayCalculator.ApproxTilesPerDay), new Type[] { typeof(Caravan), typeof(StringBuilder) }),
+				prefix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(ApproxTilesForVehicles)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.ContainsPawn)), prefix: null,
 				postfix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(ContainsPawnInVehicle)));
@@ -628,7 +631,7 @@ namespace Vehicles
 		{
 			if (__instance is VehicleCaravan vehicleCaravan)
 			{
-				__result = CaravanHelper.GetTicksPerMove(vehicleCaravan);
+				__result = VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(vehicleCaravan);
 				return false;
 			}
 			return true;
@@ -639,8 +642,18 @@ namespace Vehicles
 			if (__instance is VehicleCaravan vehicleCaravan)
 			{
 				StringBuilder stringBuilder = new StringBuilder();
-				CaravanHelper.GetTicksPerMove(vehicleCaravan, stringBuilder);
+				VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(vehicleCaravan, stringBuilder);
 				__result = stringBuilder.ToString();
+				return false;
+			}
+			return true;
+		}
+
+		public static bool ApproxTilesForVehicles(Caravan caravan, ref float __result, StringBuilder explanation = null)
+		{
+			if (caravan is VehicleCaravan vehicleCaravan)
+			{
+				__result = VehicleCaravanTicksPerMoveUtility.ApproxTilesPerDay(vehicleCaravan, explanation);
 				return false;
 			}
 			return true;

@@ -157,8 +157,6 @@ namespace Vehicles
 			ResolveCannonGraphics(vehicle);
 
 			rTracker = new Turret_RecoilTracker(this);
-			restrictedTheta = (int)Math.Abs(angleRestricted.x - (angleRestricted.y + 360)).ClampAngle();
-
 			ResetCannonAngle();
 		}
 
@@ -511,6 +509,8 @@ namespace Vehicles
 			uiRenderProperties = new VehicleTurretRender(reference.uiRenderProperties);
 			aimPieOffset = reference.aimPieOffset;
 			angleRestricted = reference.angleRestricted;
+			restrictedTheta = (int)Mathf.Abs(angleRestricted.x - (angleRestricted.y + 360)).ClampAngle();
+
 			defaultAngleRotated = reference.defaultAngleRotated;
 
 			drawLayer = reference.drawLayer;
@@ -990,8 +990,7 @@ namespace Vehicles
 			{
 				if (angleRestricted != Vector2.zero)
 				{
-					var drawLinesTask = new Task(() => { RenderHelper.DrawAngleLines(TurretLocation, angleRestricted, MinRange, MaxRange, restrictedTheta, attachedTo?.TurretRotation ?? vehicle.FullRotation.AsAngle); });
-					drawLinesTask.RunSynchronously();
+					RenderHelper.DrawAngleLines(TurretLocation, angleRestricted, MinRange, MaxRange, restrictedTheta, attachedTo?.TurretRotation ?? vehicle.FullRotation.AsAngle);
 				}
 				else if (turretDef.turretType == TurretType.Static)
 				{

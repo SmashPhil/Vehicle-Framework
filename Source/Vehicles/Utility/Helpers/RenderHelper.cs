@@ -540,6 +540,7 @@ namespace Vehicles
 
 			Vector3 lastPointMin = minTargetPos1;
 			Vector3 lastPointMax = maxTargetPos1;
+			
 			for (int angle = 0; angle < theta + 1; angle++)
 			{
 				Vector3 targetPointMax = cannonPos.PointFromAngle(maxRange, angleStart + angle + additionalAngle);

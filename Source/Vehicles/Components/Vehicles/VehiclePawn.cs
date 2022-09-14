@@ -1376,7 +1376,7 @@ namespace Vehicles
 				}
 				rect.x -= rect.width;
 			}
-			if (VehicleGraphic.Shader.SupportsRGBMaskTex())
+			if (VehicleMod.settings.main.useCustomShaders && VehicleGraphic.Shader.SupportsRGBMaskTex())
 			{
 				usedWidth += rect.width;
 				TooltipHandler.TipRegionByKey(rect, "VF_RecolorTooltip");

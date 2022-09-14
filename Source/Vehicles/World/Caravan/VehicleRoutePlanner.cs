@@ -65,7 +65,7 @@ namespace Vehicles
 			get
 			{
 				VehicleCaravanTicksPerMoveUtility.VehicleInfo? caravanInfo = CaravanInfo;
-				if (caravanInfo != null && caravanInfo.Value.vehicles.NotNullAndAny())
+				if (caravanInfo != null && caravanInfo.Value.pawns.NotNullAndAny(pawn => pawn is VehiclePawn))
 				{
 					return VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(caravanInfo.Value, null);
 				}
@@ -121,7 +121,7 @@ namespace Vehicles
 			caravanInfoFromFormCaravanDialog = new VehicleCaravanTicksPerMoveUtility.VehicleInfo(formCaravanDialog);
 			formCaravanDialog.choosingRoute = true;
 			Find.WindowStack.TryRemove(formCaravanDialog, true);
-			vehicleDefs = caravanInfoFromFormCaravanDialog.Value.vehicles.UniqueVehicleDefsInList();
+			vehicleDefs = caravanInfoFromFormCaravanDialog.Value.pawns.UniqueVehicleDefsInList();
 			InitiateRoutePlanner();
 			TryAddWaypoint(formCaravanDialog.CurrentTile, true);
 			cantRemoveFirstWaypoint = true;
@@ -470,7 +470,7 @@ namespace Vehicles
 			for (int i = 1; i < waypoints.Count; i++)
 			{
 				List<string> explanations = new List<string>();
-				paths.Add(WorldVehiclePathfinder.Instance.FindPath(waypoints[i - 1].Tile, waypoints[i].Tile, vehicleDefs, null, explanations));
+				paths.Add(WorldVehiclePathfinder.Instance.FindPath(waypoints[i - 1].Tile, waypoints[i].Tile, vehicleDefs));
 				if (VehicleMod.settings.debug.debugLogging)
 				{
 					Log.Message($"------ RoutePlanner ------");

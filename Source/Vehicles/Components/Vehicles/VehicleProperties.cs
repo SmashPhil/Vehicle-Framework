@@ -64,7 +64,7 @@ namespace Vehicles
 		public float winterPathCostMultiplier = 2.5f;
 		[PostToSettings(Label = "VehicleWorldSpeedMultiplier", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(MinValue = 0, MaxValue = 10, RoundDecimalPlaces = 1)]
-		public float worldSpeedMultiplier = 1;
+		public float worldSpeedMultiplier = 4;
 
 		public List<FactionDef> restrictToFactions;
 
