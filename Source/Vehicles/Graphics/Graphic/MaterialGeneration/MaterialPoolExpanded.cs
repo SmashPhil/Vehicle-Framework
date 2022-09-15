@@ -88,6 +88,20 @@ namespace Vehicles
 				Log.Warning("Matfrom with null shader.");
 				return BaseContent.BadMat;
 			}
+			if (req.maskTex != null && req.shader.SupportsMaskTex())
+			{
+				//divert to vanilla
+				return MaterialPool.MatFrom(new MaterialRequest()
+				{
+					mainTex = req.mainTex,
+					shader = req.shader,
+					color = req.color,
+					colorTwo = req.colorTwo,
+					maskTex = req.maskTex,
+					shaderParameters = req.shaderParameters,
+					renderQueue = req.renderQueue,
+				});
+			}
 			if (req.maskTex != null && !req.shader.SupportsRGBMaskTex())
 			{
 				Log.Error($"MaterialRequest has maskTex but shader does not support it. req={req}");

@@ -37,13 +37,16 @@
 	<!-- (Properties) -->
 	<VehicleProperties>Properties</VehicleProperties>
 	<VehicleVisibilityWorldMap>Visibility</VehicleVisibilityWorldMap>
+	<VehicleVisibilityWorldMapTooltip>Visibility on the world map when traveling in a caravan.</VehicleVisibilityWorldMapTooltip>
 	<VehicleManhunterTargeted>Manhunter Targets Vehicle</VehicleManhunterTargeted>
 	
 	<VehicleJobLimitations>Vehicle Jobs</VehicleJobLimitations>
 	<VehicleMaxWorkers>Max Workers</VehicleMaxWorkers>
 	
-	<VehicleWinterCostMultiplier>Winter PathCost Multiplier</VehicleWinterCostMultiplier>
+	<VehicleWinterSpeedMultiplier>Winter Speed Multiplier</VehicleWinterSpeedMultiplier>
+	<VehicleWinterSpeedMultiplierTooltip>Additional cost for traveling during winter.</VehicleWinterSpeedMultiplierTooltip>
 	<VehicleWorldSpeedMultiplier>World Speed Multiplier</VehicleWorldSpeedMultiplier>
+	<VehicleWorldSpeedMultiplierTooltip>Multiplier to MoveSpeed when on the world map in a caravan.</VehicleWorldSpeedMultiplierTooltip>
 	
 	<VehicleDischargePerTick>Discharge Rate</VehicleDischargePerTick>
 	<VehicleTicksPerCharge>Charge Rate</VehicleTicksPerCharge>
@@ -70,7 +73,7 @@
 	<VehicleMaxFallRateTooltip>Max amount this vehicle will descend when shot down or out of fuel.</VehicleMaxFallRateTooltip>
 	
 	<VehicleFishingEnabled>Can Fish</VehicleFishingEnabled>
-	<VehicleFishingEnabledTooltip>Enables fishing for this Boat</VehicleFishingEnabledTooltip>
+	<VehicleFishingEnabledTooltip>Enables fishing when stationary over water.</VehicleFishingEnabledTooltip>
 	<ManhunterTargetsVehicle>Manhunter Targets</ManhunterTargetsVehicle>
 	<ManhunterTargetsVehicleTooltip>Manhunter animals will target this vehicle.</ManhunterTargetsVehicleTooltip>
 	

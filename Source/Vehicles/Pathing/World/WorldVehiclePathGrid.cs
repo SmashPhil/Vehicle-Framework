@@ -242,24 +242,23 @@ namespace Vehicles
 				ticksAbs = new int?(GenTicks.TicksAbs);
 			}
 			Vector2 vector = Find.WorldGrid.LongLatOf(tile);
-			SeasonUtility.GetSeason(GenDate.YearPercent(ticksAbs.Value, vector.x), vector.y, out float num, out float num2, out float num3, out float num4, out float num5, out float num6);
-			float num7 = num4 + num6;
-			num7 *= Mathf.InverseLerp(MaxTempForWinterOffset, 0f, GenTemperature.GetTemperatureFromSeasonAtTile(ticksAbs.Value, tile));
-			if (num7 > 0.01f)
+			SeasonUtility.GetSeason(GenDate.YearPercent(ticksAbs.Value, vector.x), vector.y, out _, out _, out _, out float winter, out _, out float permaWinter);
+			float totalWinter = winter + permaWinter;
+			totalWinter *= Mathf.InverseLerp(MaxTempForWinterOffset, 0f, GenTemperature.GetTemperatureFromSeasonAtTile(ticksAbs.Value, tile));
+			if (totalWinter > 0.01f)
 			{
-				float num8 = WinterMovementDifficultyOffset * num7;
-				float finalCost = num8 * vehicleDef.properties.winterPathCostMultiplier;
+				float finalCost = totalWinter * vehicleDef.properties.winterSpeedMultiplier;
 				if (explanation != null)
 				{
 					explanation.AppendLine();
 					explanation.Append("Winter".Translate());
-					if (num7 < 0.999f)
+					if (totalWinter < 0.999f)
 					{
-						explanation.Append($" ({num7.ToStringPercent("F0")})");
+						explanation.Append($" ({totalWinter.ToStringPercent("F0")})");
 					}
-					if (vehicleDef.properties.winterPathCostMultiplier != 1)
+					if (vehicleDef.properties.winterSpeedMultiplier != 1)
 					{
-						explanation.Append($" (Offset: {vehicleDef.properties.winterPathCostMultiplier})");
+						explanation.Append($" (Offset: {vehicleDef.properties.winterSpeedMultiplier})");
 					}
 					explanation.Append(": ");
 					explanation.Append(finalCost.ToStringWithSign("0.#"));

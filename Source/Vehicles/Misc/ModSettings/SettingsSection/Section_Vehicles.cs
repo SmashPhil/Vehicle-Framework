@@ -133,7 +133,7 @@ namespace Vehicles
 					iconRect.y += 35;
 
 					drawStatusMessage = $"Creating Paintbrush. Pattern={VehicleMod.selectedPatterns.Count}";
-					if (VehicleMod.selectedPatterns.Count > 1 && VehicleMod.selectedDef.graphicData.shaderType.Shader.SupportsRGBMaskTex())
+					if (VehicleMod.selectedPatterns.Count > 1 && VehicleMod.settings.main.useCustomShaders && VehicleMod.selectedDef.graphicData.shaderType.Shader.SupportsRGBMaskTex())
 					{
 						Rect paintBrushRect = new Rect(iconRect.x + iconRect.width, iconRect.y, SmallIconSize, SmallIconSize);
 						Widgets.DrawHighlightIfMouseover(paintBrushRect);
@@ -177,7 +177,7 @@ namespace Vehicles
 					drawStatusMessage = RenderHelper.DrawVehicleDef(vehicleTexRect, VehicleMod.selectedDef, null, patternData, directionFacing.TryGetValue(VehicleMod.selectedDef, currentVehicleFacing));
 					if (!drawStatusMessage.NullOrEmpty())
 					{
-						throw new Exception();
+						throw new Exception(drawStatusMessage);
 					}
 					Widgets.EndGroup();
 

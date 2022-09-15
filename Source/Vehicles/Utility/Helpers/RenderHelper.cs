@@ -234,10 +234,10 @@ namespace Vehicles
 			
 			Texture2D mainTex = vehicle.VehicleGraphic.TexAt(rotDrawn);
 			Material mat = vehicle.VehicleGraphic.MatAt(rotDrawn, pattern, vehicle);
-			if (vehicle.VehicleGraphic.Shader.SupportsRGBMaskTex())
+			if (vehicle.VehicleGraphic.Shader.SupportsRGBMaskTex() || vehicle.VehicleGraphic.Shader.SupportsMaskTex())
 			{
 				mat = new Material(vehicle.VehicleGraphic.MatAt(rotDrawn, vehicle));
-				if (vehicle.VehicleGraphic.Shader.SupportsRGBMaskTex() && manualColorOne != null || manualColorTwo != null || manualColorThree != null)
+				if (manualColorOne != null || manualColorTwo != null || manualColorThree != null)
 				{
 					MaterialRequestRGB matReq = new MaterialRequestRGB()
 					{
@@ -309,7 +309,7 @@ namespace Vehicles
 				Vector2 displacement = patternData?.displacement ?? vehicleDef.graphicData.displacement;
 
 				Texture2D mainTex = VehicleTex.VehicleTexture(vehicleDef, rotDrawn, out float angle);
-				if (material is null && pattern != null && graphic.Shader.SupportsRGBMaskTex())
+				if (material is null && pattern != null && (graphic.Shader.SupportsRGBMaskTex() || graphic.Shader.SupportsMaskTex()))
 				{
 					drawStep = $"Regenerating material for pattern={pattern.defName}";
 
@@ -448,7 +448,7 @@ namespace Vehicles
 					adjustedRect.height = rectSize.x;
 				}
 				Material cannonMat = turret.CannonGraphic.Shader.SupportsRGBMaskTex() ? new Material(turret.CannonGraphic.MatAt(patternData.patternDef)) : null;
-				if (turret.CannonGraphic.Shader.SupportsRGBMaskTex() && patternData != VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData))
+				if ((turret.CannonGraphic.Shader.SupportsRGBMaskTex() || turret.CannonGraphic.Shader.SupportsMaskTex()) && patternData != VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData))
 				{
 					MaterialRequestRGB matReq = new MaterialRequestRGB()
 					{

@@ -11,11 +11,11 @@ namespace Vehicles
 	[HeaderTitle(Label = "VehicleProperties", Translate = true)]
 	public class VehicleProperties
 	{
-		[PostToSettings(Label = "VehicleVisibilityWorldMap", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
+		[PostToSettings(Label = "VehicleVisibilityWorldMap", Tooltip = "VehicleVisibilityWorldMapTooltip", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(MinValue = 0, MaxValue = 3, RoundDecimalPlaces = 1)]
 		public float visibility = 2.5f;
 
-		[PostToSettings(Label = "VehicleFishingEnabled", Translate = true, UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Sea)]
+		[PostToSettings(Label = "VehicleFishingEnabled", Tooltip = "VehicleFishingEnabledTooltip", Translate = true, UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Sea)]
 		[DisableSettingConditional(MayRequireAny = new string[] { ConditionalPatchApplier.VE_Fishing })]
 		public bool fishing = false;
 		public float wakeMultiplier = 1.6f;
@@ -59,10 +59,10 @@ namespace Vehicles
 		public Dictionary<RoadDef, float> customRoadCosts = new Dictionary<RoadDef, float>();
 		//-------------------------------------------
 
-		[PostToSettings(Label = "VehicleWinterCostMultiplier", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
+		[PostToSettings(Label = "VehicleWinterSpeedMultiplier", Tooltip = "VehicleWinterSpeedMultiplierTooltip",Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(MinValue = 0, MaxValue = 10, RoundDecimalPlaces = 1)]
-		public float winterPathCostMultiplier = 2.5f;
-		[PostToSettings(Label = "VehicleWorldSpeedMultiplier", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
+		public float winterSpeedMultiplier = 2.5f;
+		[PostToSettings(Label = "VehicleWorldSpeedMultiplier", Tooltip = "VehicleWorldSpeedMultiplierTooltip", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(MinValue = 0, MaxValue = 10, RoundDecimalPlaces = 1)]
 		public float worldSpeedMultiplier = 4;
 

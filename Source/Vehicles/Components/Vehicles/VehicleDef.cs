@@ -19,6 +19,7 @@ namespace Vehicles
 		[PostToSettings(Label = "VehicleNameable", Translate = true, Tooltip = "VehicleNameableTooltip", UISettingsType = UISettingsType.Checkbox)]
 		public bool nameable = false;
 
+		[DisableSetting]
 		[PostToSettings(Label = "VehicleCombatPower", Translate = true, Tooltip = "VehicleCombatPowerTooltip", UISettingsType = UISettingsType.FloatBox)]
 		[NumericBoxValues(MinValue = 0, MaxValue = float.MaxValue)]
 		public float combatPower = 0;
@@ -54,6 +55,7 @@ namespace Vehicles
 
 		public List<Type> designatorTypes = new List<Type>();
 
+		[NoTranslate] //Should be translated in xml and parsed in appropriately
 		public string draftLabel = "[MISSING]";
 		public SoundDef soundBuilt;
 
@@ -65,8 +67,11 @@ namespace Vehicles
 
 		public List<VehicleComponentProperties> components;
 
+		[Unsaved]
 		private readonly SelfOrderingList<CompProperties> cachedComps = new SelfOrderingList<CompProperties>();
+		[Unsaved]
 		private Texture2D resolvedLoadCargoTexture;
+		[Unsaved]
 		private Texture2D resolvedCancelCargoTexture;
 
 		/// <summary>

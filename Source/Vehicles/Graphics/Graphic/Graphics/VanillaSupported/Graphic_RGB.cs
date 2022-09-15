@@ -146,7 +146,8 @@ namespace Vehicles
 		{
 			var tmpMaskArray = new Texture2D[MatCount];
 			var patternPointers = new int[MatCount] { 0, 1, 2, 3, 4, 5, 6, 7 };
-			if (req.shader.SupportsRGBMaskTex())
+
+			if (req.shader.SupportsRGBMaskTex() || req.shader.SupportsMaskTex())
 			{
 				tmpMaskArray[0] = ContentFinder<Texture2D>.Get(req.path + "_north" + MaskSuffix, false);
 				tmpMaskArray[0] ??= ContentFinder<Texture2D>.Get(req.path + Graphic_Single.MaskSuffix, false); // _m for single texture to remain consistent with vanilla
@@ -157,7 +158,6 @@ namespace Vehicles
 				tmpMaskArray[5] = ContentFinder<Texture2D>.Get(req.path + "_southEast" + MaskSuffix, false);
 				tmpMaskArray[6] = ContentFinder<Texture2D>.Get(req.path + "_southWest" + MaskSuffix, false);
 				tmpMaskArray[7] = ContentFinder<Texture2D>.Get(req.path + "_northWest" + MaskSuffix, false);
-
 				if (tmpMaskArray[0] is null)
 				{
 					if (tmpMaskArray[2] != null)
