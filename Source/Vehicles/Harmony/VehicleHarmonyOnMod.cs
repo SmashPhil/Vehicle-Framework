@@ -124,6 +124,10 @@ namespace Vehicles
 						DefGenerator.AddImpliedDef(skyfallerCrashing);
 					}
 				}
+				if (ThingDefGenerator_Buildables.GenerateImpliedBuildDef(vehicleDef, out VehicleBuildDef buildDef))
+				{
+					DefGenerator.AddImpliedDef(buildDef);
+				}
 			}
 		}
 

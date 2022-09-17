@@ -87,7 +87,6 @@
 		<shotSound>Shot_Minigun</shotSound>
 		<projectile>Bullet_HeavyMachineGun</projectile>
 		<genericAmmo>true</genericAmmo>
-		<ammoCountPerCharge>2</ammoCountPerCharge>
 		
 		<projectileOffset>1</projectileOffset>
 		<hitFlags>All</hitFlags>

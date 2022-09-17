@@ -1226,11 +1226,20 @@ namespace Vehicles
 						return;
 					}
 					int countToRefill = turretDef.magazineCapacity - shellCount;
-					int countToTake = Mathf.FloorToInt(countToRefill / (float)turretDef.ammoCountPerCharge);
+					int countToTake = Mathf.FloorToInt(turretDef.chargePerAmmoCount * countToRefill);
+					if (countToTake == 0)
+					{
+						Log.Error($"CountToTake = 0, if you don't want to charge ammo then don't set it up for ammo.");
+						return;
+					}
 					if (countToTake > storedAmmo.stackCount)
 					{
 						countToTake = storedAmmo.stackCount;
-						countToRefill = Mathf.FloorToInt(countToTake * (float)turretDef.ammoCountPerCharge);
+						countToRefill = Mathf.FloorToInt(countToTake / (float)turretDef.chargePerAmmoCount);
+					}
+					if (countToRefill == 0 || countToTake == 0)
+					{
+						return;
 					}
 					vehicle.inventory.innerContainer.Take(storedAmmo, countToTake);
 					int additionalCount = 0;
@@ -1242,7 +1251,7 @@ namespace Vehicles
 							if (t.def == storedAmmo.def)
 							{
 								additionalCount = t.stackCount >= turretDef.magazineCapacity - (shellCount + countToRefill) ? turretDef.magazineCapacity - (shellCount + countToRefill) : t.stackCount;
-								additionalCountToTake = Mathf.FloorToInt(additionalCount / (float)turretDef.ammoCountPerCharge);
+								additionalCountToTake = Mathf.FloorToInt(turretDef.chargePerAmmoCount * additionalCount);
 								vehicle.inventory.innerContainer.Take(t, additionalCountToTake);
 								if (additionalCount + countToRefill >= turretDef.magazineCapacity) break;
 							}    
@@ -1259,7 +1268,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Unable to reload Cannon: {uniqueID} on Pawn: {vehicle.LabelShort}. Exception: {ex.Message}");
+				Log.Error($"Unable to reload Cannon: {uniqueID} on Pawn: {vehicle.LabelShort}. Exception: {ex}");
 				return;
 			}
 		}
@@ -1279,7 +1288,7 @@ namespace Vehicles
 			if (loadedAmmo != null && shellCount > 0)
 			{
 				Thing thing = ThingMaker.MakeThing(loadedAmmo);
-				thing.stackCount = shellCount / turretDef.ammoCountPerCharge;
+				thing.stackCount = shellCount * turretDef.chargePerAmmoCount;
 				vehicle.inventory.innerContainer.TryAdd(thing);
 				loadedAmmo = null;
 				shellCount = 0;

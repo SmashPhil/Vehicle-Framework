@@ -18,6 +18,7 @@ namespace Vehicles
 		private Vector2 thoughtScrollPosition;
 		private float scrollViewHeight;
 
+		private VehicleHandler editingPawnOverlayRenderer;
 		private Pawn specificNeedsTabForPawn;
 		private Pawn draggedPawn;
 		private VehicleHandler transferToHandler;
@@ -64,121 +65,127 @@ namespace Vehicles
 				return Vehicle.handlers;
 			}
 		}
-
+		
 		protected override void FillTab()
 		{
-			EnsureSpecificNeedsTabForPawnValid();
+			GUIState.Push();
 
+			EnsureSpecificNeedsTabForPawnValid();
+			
 			Text.Font = GameFont.Small;
+
 			Rect rect = new Rect(0f, 0f, size.x, size.y).ContractedBy(10f);
 			Rect viewRect = new Rect(0f, 0f, rect.width - 16f, scrollViewHeight);
 
 			Widgets.BeginScrollView(rect, ref scrollPosition, viewRect, true);
-			float num = 0f;
-			bool flag = false;
+			{
+				float num = 0f;
+				bool flag = false;
 
-			//if (slotsAvailable && Mouse.IsOver(roleRect) && draggedPawn != null)
-			//{
-			//	if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
-			//	{
-			//		if (!handler.role.handlingTypes.NullOrEmpty() && !draggedPawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) || draggedPawn.Downed || draggedPawn.Dead)
-			//		{
-			//			if (handler.role.handlingTypes.NotNullAndAny(h => h == HandlingTypeFlags.Movement))
-			//			{
-			//				Messages.Message("IncapableStatusForRole".Translate(draggedPawn.LabelShortCap), MessageTypeDefOf.RejectInput);
-			//			}
-			//			else
-			//			{
-			//				Messages.Message("IncapableStatusForRole".Translate(draggedPawn.LabelShortCap), MessageTypeDefOf.CautionInput);
-			//				assignedSeats.Add(draggedPawn, (Vehicle, handler));
-			//			}
-			//		}
-			//		else
-			//		{
-			//			assignedSeats.Add(draggedPawn, (Vehicle, handler));
-			//		}
-			//	}
-			//}
-			bool overHandler = false;
-			for (int i = 0; i < Handlers.Count; i++)
-			{
-				VehicleHandler handler = Handlers[i];
-				List<Pawn> pawns = handler.handlers.InnerListForReading;
-				Rect handlerRect = new Rect(0, num, viewRect.width, 25f + (PawnRowHeight * pawns.Count));
-				if (draggedPawn != null && Mouse.IsOver(handlerRect))
+				bool overHandler = false;
+				for (int i = 0; i < Handlers.Count; i++)
 				{
-					transferToHandler = handler;
-					overHandler = true;
-					Widgets.DrawHighlight(handlerRect);
-				}
-				Widgets.ListSeparator(ref num, viewRect.width, handler.role.label);
-				foreach (Pawn pawn in pawns)
-				{
-					if (DoRow(num, viewRect, rect, pawn, ref specificNeedsTabForPawn, draggedPawn == null))
+					VehicleHandler handler = Handlers[i];
+					List<Pawn> pawns = handler.handlers.InnerListForReading;
+					Rect handlerRect = new Rect(0, num, viewRect.width - 48, 25f + (PawnRowHeight * pawns.Count));
+					if (draggedPawn != null && Mouse.IsOver(handlerRect))
 					{
-						hoveringOverPawn = pawn;
+						transferToHandler = handler;
+						overHandler = true;
+						Widgets.DrawHighlight(handlerRect);
 					}
-					num += PawnRowHeight;
+					Rect editPawnOverlayRect = new Rect(viewRect.width - 15, num + 3, 15, 15);
+					Widgets.ListSeparator(ref num, viewRect.width, handler.role.label);
+					if (handler.role.pawnRenderer != null && Prefs.DevMode)
+					{
+						TooltipHandler.TipRegionByKey(editPawnOverlayRect, "VF_EditPawnOverlayRendererTooltip");
+						Color baseColor = (editingPawnOverlayRenderer != handler) ? Color.white : Color.green;
+						Color mouseoverColor = (editingPawnOverlayRenderer != handler) ? GenUI.MouseoverColor : new Color(0f, 0.5f, 0f);
+						if (false && Widgets.ButtonImage(editPawnOverlayRect, VehicleTex.Settings, baseColor, mouseoverColor)) //TEMP DISABLED UNTIL UI FIXED
+						{
+							if (editingPawnOverlayRenderer == null || editingPawnOverlayRenderer != handler)
+							{
+								SoundDefOf.TabOpen.PlayOneShotOnCamera(null);
+								editingPawnOverlayRenderer = handler;
+							}
+							else
+							{
+								SoundDefOf.TabClose.PlayOneShotOnCamera(null);
+								editingPawnOverlayRenderer = null;
+							}
+						}
+						GUIState.Reset();
+					}
+					foreach (Pawn pawn in pawns)
+					{
+						if (DoRow(num, viewRect, rect, pawn, ref specificNeedsTabForPawn, draggedPawn == null))
+						{
+							hoveringOverPawn = pawn;
+						}
+						num += PawnRowHeight;
+					}
 				}
-			}
 
-			if (!overHandler)
-			{
-				transferToHandler = null;
-			}
+				if (!overHandler)
+				{
+					transferToHandler = null;
+				}
 
-			if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
-			{
-				if (draggedPawn != null && transferToHandler != null)
+				if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
 				{
-					if (!transferToHandler.AreSlotsAvailable)
+					if (draggedPawn != null && transferToHandler != null)
 					{
-						if (hoveringOverPawn != null && draggedPawn.ParentHolder is VehicleHandler curHandler && transferToHandler.CanOperateRole(draggedPawn) && curHandler.CanOperateRole(hoveringOverPawn))
+						if (!transferToHandler.AreSlotsAvailable)
 						{
-							Vehicle.EventRegistry[VehicleEventDefOf.PawnChangedSeats].ExecuteEvents();
-							curHandler.handlers.Swap(transferToHandler.handlers, draggedPawn, hoveringOverPawn);
+							if (hoveringOverPawn != null && draggedPawn.ParentHolder is VehicleHandler curHandler && curHandler != transferToHandler && transferToHandler.CanOperateRole(draggedPawn) && curHandler.CanOperateRole(hoveringOverPawn))
+							{
+								Vehicle.EventRegistry[VehicleEventDefOf.PawnChangedSeats].ExecuteEvents();
+								curHandler.handlers.Swap(transferToHandler.handlers, draggedPawn, hoveringOverPawn);
+							}
+							else
+							{
+								Messages.Message(TranslatorFormattedStringExtensions.Translate("Vehicles_HandlerNotEnoughRoom", transferToHandler.role.label, draggedPawn), MessageTypeDefOf.RejectInput);
+							}
 						}
-						else
+						else if (draggedPawn.ParentHolder is VehicleHandler curHandler && curHandler != transferToHandler)
 						{
-							Messages.Message(TranslatorFormattedStringExtensions.Translate("Vehicles_HandlerNotEnoughRoom", transferToHandler.role.label, draggedPawn), MessageTypeDefOf.RejectInput);
+							if (transferToHandler.handlers.TryAddOrTransfer(draggedPawn, false))
+							{
+								Vehicle.EventRegistry[VehicleEventDefOf.PawnChangedSeats].ExecuteEvents();
+							}
+							else
+							{
+								Messages.Message($"Unable to add {draggedPawn} to {transferToHandler.role.label}.", MessageTypeDefOf.RejectInput);
+							}
 						}
 					}
-					else
+					draggedPawn = null;
+				}
+
+				foreach (Pawn pawn in Passengers)
+				{
+					if (!pawn.IsColonist)
 					{
-						if (transferToHandler.handlers.TryAddOrTransfer(draggedPawn, false))
+						if (!flag)
 						{
-							Vehicle.EventRegistry[VehicleEventDefOf.PawnChangedSeats].ExecuteEvents();
+							Widgets.ListSeparator(ref num, viewRect.width, "CaravanPrisonersAndAnimals".Translate());
+							flag = true;
 						}
-						else
+						if (DoRow(num, viewRect, rect, pawn, ref specificNeedsTabForPawn, true))
 						{
-							Messages.Message($"Unable to add {draggedPawn} to {transferToHandler.role.label}.", MessageTypeDefOf.RejectInput);
+							hoveringOverPawn = pawn;
 						}
+						num += PawnRowHeight;
 					}
 				}
-				draggedPawn = null;
-			}
-			
-			foreach (Pawn pawn in Passengers)
-			{
-				if (!pawn.IsColonist)
+				if (Event.current.type is EventType.Layout)
 				{
-					if (!flag)
-					{
-						Widgets.ListSeparator(ref num, viewRect.width, "CaravanPrisonersAndAnimals".Translate());
-						flag = true;
-					}
-					if (DoRow(num, viewRect, rect, pawn, ref specificNeedsTabForPawn, true))
-					{
-						hoveringOverPawn = pawn;
-					}
-					num += PawnRowHeight;
+					scrollViewHeight = num + 30f;
 				}
-			}
-			if (Event.current.type is EventType.Layout)
-			{
-				scrollViewHeight = num + 30f;
 			}
 			Widgets.EndScrollView();
+
+			GUIState.Pop();
 		}
 
 		private bool DoRow(float curY, Rect viewRect, Rect scrollOutRect, Pawn pawn, ref Pawn specificNeedsTabForPawn, bool highlight)
@@ -195,24 +202,26 @@ namespace Vehicles
 			Rect rect = new Rect(0f, nonRefY, viewRect.width, PawnRowHeight);
 
 			Widgets.BeginGroup(rect);
-			Rect rect2 = rect.AtZero();
-			bool mouseOver = Mouse.IsOver(rect2);
+
+			Rect fullRect = rect.AtZero();
+			Rect rowRect = new Rect(0, 0, fullRect.width - 48, PawnRowHeight);
+			bool mouseOver = Mouse.IsOver(rowRect);
 			if (draggedPawn == null && mouseOver && Event.current.type == EventType.MouseDown && Event.current.button == 0)
 			{
 				draggedPawn = pawn;
 				Event.current.Use();
 				SoundDefOf.Click.PlayOneShotOnCamera(null);
 			}
-			Widgets.InfoCardButton(rect2.width - 24f, (rect.height - 24f) / 2f, pawn);
-			rect2.width -= 24f;
+			Widgets.InfoCardButton(fullRect.width - 24f, (rect.height - 24f) / 2f, pawn);
+			fullRect.width -= 24f;
 			if (!pawn.Dead)
 			{
-				OpenSpecificTabButton(rect2, pawn, ref specificNeedsTabForPawn);
-				rect2.width -= 24f;
+				OpenSpecificTabButton(fullRect, pawn, ref specificNeedsTabForPawn);
+				fullRect.width -= 24f;
 			}
 			if (highlight)
 			{
-				Widgets.DrawHighlightIfMouseover(rect2);
+				Widgets.DrawHighlightIfMouseover(fullRect);
 			}
 			Rect rect3 = new Rect(4f, (rect.height - 27f) / 2f, 27f, 27f);
 			Widgets.ThingIcon(rect3, pawn, 1f);
@@ -246,23 +255,25 @@ namespace Vehicles
 				xMax = rect4.xMax;
 			}
 			
-			if(pawn.Downed)
+			if (pawn.Downed)
 			{
 				GUI.color = new Color(1f, 0f, 0f, 0.5f);
 				Widgets.DrawLineHorizontal(0f, rect.height / 2f, rect.width);
 				GUI.color = Color.white;
 			}
+
 			Widgets.EndGroup();
 			return mouseOver && !isDraggingPawn;
 		}
 
 		private static void OpenSpecificTabButton(Rect rowRect, Pawn p, ref Pawn specificTabForPawn)
 		{
+			GUIState.Push();
 			Color baseColor = (p != specificTabForPawn) ? Color.white : Color.green;
 			Color mouseoverColor = (p != specificTabForPawn) ? GenUI.MouseoverColor : new Color(0f, 0.5f, 0f);
 			Rect rect = new Rect(rowRect.width - 24f, (rowRect.height - 24f) / 2f, 24f, 24f);
 			
-			if(Widgets.ButtonImage(rect, CaravanThingsTabUtility.SpecificTabButtonTex, baseColor, mouseoverColor))
+			if (Widgets.ButtonImage(rect, CaravanThingsTabUtility.SpecificTabButtonTex, baseColor, mouseoverColor))
 			{
 				if(p == specificTabForPawn)
 				{
@@ -276,7 +287,7 @@ namespace Vehicles
 				}
 			}
 			TooltipHandler.TipRegion(rect, "OpenSpecificTabButtonTip".Translate());
-			GUI.color = Color.white;
+			GUIState.Pop();
 		}
 
 		protected override void UpdateSize()
@@ -324,25 +335,42 @@ namespace Vehicles
 		{
 			EnsureSpecificNeedsTabForPawnValid();
 			base.ExtraOnGUI();
-			Pawn localSpecificNeedsTabForPawn = specificNeedsTabForPawn;
-			if (localSpecificNeedsTabForPawn != null)
+			if (specificNeedsTabForPawn != null)
 			{
 				Rect tabRect = TabRect;
 				float specificNeedsTabWidth = SpecificNeedsTabWidth;
 				Rect rect = new Rect(tabRect.xMax - 1f, tabRect.yMin, specificNeedsTabWidth, tabRect.height);
 				Find.WindowStack.ImmediateWindow(1439870015, rect, WindowLayer.GameUI, delegate
 				{
-					if (localSpecificNeedsTabForPawn.DestroyedOrNull())
+					if (specificNeedsTabForPawn.DestroyedOrNull())
 					{
 						return;
 					}
-					NeedsCardUtility.DoNeedsMoodAndThoughts(rect.AtZero(), localSpecificNeedsTabForPawn, ref thoughtScrollPosition);
+					NeedsCardUtility.DoNeedsMoodAndThoughts(rect.AtZero(), specificNeedsTabForPawn, ref thoughtScrollPosition);
 					if (Widgets.CloseButtonFor(rect.AtZero()))
 					{
 						specificNeedsTabForPawn = null;
 						SoundDefOf.TabClose.PlayOneShotOnCamera(null);
 					}
 				}, true, false, 1f);
+			}
+			else if (editingPawnOverlayRenderer != null)
+			{
+				Rect pawnOverlayRect = new Rect(size.x + 1, TabRect.yMin, 600, size.y);
+				Find.WindowStack.ImmediateWindow(editingPawnOverlayRenderer.role.GetHashCode() ^ Vehicle.GetHashCode(), pawnOverlayRect, WindowLayer.GameUI, delegate ()
+				{
+					if (editingPawnOverlayRenderer is null || editingPawnOverlayRenderer.vehicle.DestroyedOrNull())
+					{
+						return;
+					}
+					Rect rendererRect = new Rect(0, 0, pawnOverlayRect.width, pawnOverlayRect.height).ContractedBy(5);
+					editingPawnOverlayRenderer.role.pawnRenderer.RenderEditor(rendererRect);
+					if (Widgets.CloseButtonFor(rendererRect))
+					{
+						editingPawnOverlayRenderer = null;
+						SoundDefOf.TabClose.PlayOneShotOnCamera(null);
+					}
+				});
 			}
 		}
 
@@ -351,11 +379,16 @@ namespace Vehicles
 			base.Notify_ClearingAllMapsMemory();
 			specificNeedsTabForPawn = null;
 		}
+
 		private void EnsureSpecificNeedsTabForPawnValid()
 		{
-			if(!(specificNeedsTabForPawn is null) && (specificNeedsTabForPawn.Destroyed || !AllAboard.Contains(specificNeedsTabForPawn)))
+			if (specificNeedsTabForPawn != null && (specificNeedsTabForPawn.Destroyed || !AllAboard.Contains(specificNeedsTabForPawn)))
 			{
 				specificNeedsTabForPawn = null;
+			}
+			if (editingPawnOverlayRenderer != null && (specificNeedsTabForPawn != null || editingPawnOverlayRenderer.handlers.Count == 0))
+			{
+				editingPawnOverlayRenderer = null;
 			}
 		}
 	}

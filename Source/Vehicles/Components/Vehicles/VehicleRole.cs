@@ -8,7 +8,7 @@ namespace Vehicles
 	{
 		public string key;
 		public string label = "Missing Label";
-		public List<HandlingTypeFlags> handlingTypes;
+		public List<HandlingTypeFlags> handlingTypes = new List<HandlingTypeFlags>();
 		public int slots;
 		public int slotsToOperate;
 		public List<string> turretIds;

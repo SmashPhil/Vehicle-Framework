@@ -95,6 +95,8 @@ namespace Vehicles
 
 		public static readonly Texture2D ResetAll = ContentFinder<Texture2D>.Get("UI/Settings/ResetAll");
 
+		public static readonly Texture2D Settings = ContentFinder<Texture2D>.Get("UI/Settings/Settings");
+
 		public static readonly Texture2D ExportSettings = ContentFinder<Texture2D>.Get("UI/Settings/ExportSettings");
 
 		public static readonly Texture2D TradeCommandTex = ContentFinder<Texture2D>.Get("UI/Commands/Trade");

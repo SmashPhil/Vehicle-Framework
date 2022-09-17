@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using Verse;
 using RimWorld;
@@ -11,6 +12,7 @@ namespace Vehicles
 	{
 		public ThingOwner<Pawn> handlers;
 
+		private string roleKey;
 		public VehicleRole role;
 
 		private List<Pawn> tempSavedPawns = new List<Pawn>();
@@ -42,6 +44,7 @@ namespace Vehicles
 			uniqueID = VehicleIdManager.Instance.GetNextHandlerId();
 			this.vehicle = vehicle;
 			role = new VehicleRole(newRole);
+			roleKey = role.key;
 			if (handlers is null)
 			{
 				handlers = new ThingOwner<Pawn>(this, false, LookMode.Reference);
@@ -122,7 +125,7 @@ namespace Vehicles
 
 		public bool Equals(VehicleHandler obj2)
 		{
-			return obj2?.role.key == role.key;
+			return obj2?.roleKey == roleKey;
 		}
 
 		public override string ToString()
@@ -152,9 +155,11 @@ namespace Vehicles
 
 		public void ExposeData()
 		{
-			Scribe_Values.Look(ref uniqueID, "uniqueID", -1);
-			Scribe_References.Look(ref vehicle, "vehicle", true);
-			Scribe_Deep.Look(ref role, "role");
+			Scribe_Values.Look(ref uniqueID, nameof(uniqueID), -1);
+			Scribe_References.Look(ref vehicle, nameof(vehicle), true);
+			
+			Scribe_Values.Look(ref roleKey, nameof(role), forceSave: true);
+			//Scribe_Deep.Look(ref role, "role");
 
 			if (Scribe.mode == LoadSaveMode.Saving)
 			{
@@ -164,12 +169,19 @@ namespace Vehicles
 				handlers.RemoveAll(x => x.Destroyed);
 			}
 
-			Scribe_Collections.Look(ref tempSavedPawns, "tempSavedPawns", LookMode.Reference);
-			Scribe_Deep.Look(ref handlers, "handlers", new object[]
+			Scribe_Collections.Look(ref tempSavedPawns, nameof(tempSavedPawns), LookMode.Reference);
+			Scribe_Deep.Look(ref handlers, nameof(handlers), new object[]
 			{
 				this
 			});
-
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				role = vehicle.VehicleDef.properties.roles.FirstOrDefault(role => role.key == roleKey);
+				if (role is null)
+				{
+					Log.Error($"Could not load VehicleRole from {roleKey}. Was role removed or name changed?");
+				}
+			}
 			if (Scribe.mode == LoadSaveMode.PostLoadInit || Scribe.mode == LoadSaveMode.Saving)
 			{
 				for (int j = 0; j < tempSavedPawns.Count; j++)

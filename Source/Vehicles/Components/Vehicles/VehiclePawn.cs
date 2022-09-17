@@ -150,7 +150,7 @@ namespace Vehicles
 		{
 			get
 			{
-				if (!VehicleDef.properties.diagonalRotation)
+				if (!VehicleMod.settings.main.allowDiagonalRendering || !VehicleDef.properties.diagonalRotation)
 				{
 					return 0f;
 				}
@@ -308,10 +308,12 @@ namespace Vehicles
 			get
 			{
 				int pawnCount = 0;
-				foreach (VehicleRole r in VehicleDef.properties.roles)
+				foreach (VehicleRole role in VehicleDef.properties.roles)
 				{
-					if (r.handlingTypes.NotNullAndAny(h => h == HandlingTypeFlags.Movement))
-						pawnCount += r.slotsToOperate;
+					if (role.handlingTypes.NotNullAndAny(h => h == HandlingTypeFlags.Movement))
+					{
+						pawnCount += role.slotsToOperate;
+					}
 				}
 				return pawnCount;
 			}
@@ -322,7 +324,7 @@ namespace Vehicles
 			get
 			{
 				int pawnsMounted = 0;
-				foreach(VehicleHandler handler in handlers.Where(h => h.role.handlingTypes.Contains(HandlingTypeFlags.Movement)))
+				foreach (VehicleHandler handler in handlers.Where(handler => !handler.role.handlingTypes.NullOrEmpty() && handler.role.handlingTypes.Contains(HandlingTypeFlags.Movement)))
 				{
 					pawnsMounted += handler.handlers.Count;
 				}

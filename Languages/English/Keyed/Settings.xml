@@ -17,12 +17,15 @@
 	
 	<!-- General Settings -->
 	<VF_SettingsGeneral>General</VF_SettingsGeneral>
+	<VF_WillRequireRestart>This action requires a restart to take effect.</VF_WillRequireRestart>
 	<VF_ModifiableSettings>Modifiable Settings</VF_ModifiableSettings>
 	<VF_ModifiableSettingsTooltip>Toggle Modifiable Settings. Restarting with this disabled will bypass generation of modifiable settings.
 	
 Determines whether Vehicles should use values from the mod settings or Defs</VF_ModifiableSettingsTooltip>
 	<VF_CustomShaders>Use RGB Shaders</VF_CustomShaders>
 	<VF_CustomShadersTooltip>Enable use of custom shaders provided by the framework.</VF_CustomShadersTooltip>
+	<VF_DiagonalVehicleRendering>Allow Diagonal Rendering</VF_DiagonalVehicleRendering>
+	<VF_DiagonalVehicleRenderingTooltip>Vehicles that support diagonal rendering will do so when set to diagonal rotations (NorthEast, SouthEast, SouthWest, NorthWest)</VF_DiagonalVehicleRenderingTooltip>
 	<VF_FullVehiclePathing>Full Vehicle Pathing</VF_FullVehiclePathing>
 	<VF_FullVehiclePathingTooltip>Use the entire hitbox of the vehicle to determine pathing constraints (prevents Vehicles from going through smaller passages than hitbox size).</VF_FullVehiclePathingTooltip>
 	<VF_SmoothVehiclePathing>Smooth Vehicle Paths</VF_SmoothVehiclePathing>

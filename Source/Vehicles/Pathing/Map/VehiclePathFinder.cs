@@ -23,7 +23,7 @@ namespace Vehicles
 		public const int DefaultMoveTicksCardinal = 13;
 		public const int DefaultMoveTicksDiagonal = 18;
 		private const int SearchLimit = 160000;
-		private const int TurnCostTicks = 2;
+		private const int TurnCostTicks = 1;
 
 		internal Dictionary<IntVec3, int> postCalculatedCells = new Dictionary<IntVec3, int>();
 		internal Dictionary<IntVec3, int> postCalculatedTurns = new Dictionary<IntVec3, int>();

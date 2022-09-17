@@ -30,7 +30,7 @@ namespace Vehicles
 			{
 				foreach (VehicleTurret turret in turrets)
 				{
-					yield return (turret.loadedAmmo, turret.shellCount / (float)turret.turretDef.ammoCountPerCharge);
+					yield return (turret.loadedAmmo, turret.shellCount * turret.turretDef.chargePerAmmoCount);
 				}
 			}
 		}

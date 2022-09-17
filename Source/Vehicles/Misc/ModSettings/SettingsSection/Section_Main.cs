@@ -17,6 +17,7 @@ namespace Vehicles
 		/* General */
 		public bool modifiableSettings = true;
 		public bool useCustomShaders = true;
+		public bool allowDiagonalRendering = true;
 		public bool fullVehiclePathing = true;
 		public bool smoothVehiclePaths = true;
 		public bool vehiclePathingRoadNoCost = true;
@@ -61,8 +62,11 @@ namespace Vehicles
 			/* General */
 			modifiableSettings = true;
 			useCustomShaders = true;
+
+			allowDiagonalRendering = true;
 			fullVehiclePathing = true;
 			smoothVehiclePaths = true;
+
 			vehiclePathingRoadNoCost = true;
 			multiplePawnsPerJob = true;
 			showDisabledVehicles = false;
@@ -102,8 +106,11 @@ namespace Vehicles
 
 			Scribe_Values.Look(ref modifiableSettings, nameof(modifiableSettings), defaultValue: true);
 			Scribe_Values.Look(ref useCustomShaders, nameof(useCustomShaders), defaultValue: true);
+
+			Scribe_Values.Look(ref allowDiagonalRendering, nameof(allowDiagonalRendering), defaultValue: true);
 			Scribe_Values.Look(ref fullVehiclePathing, nameof(fullVehiclePathing), defaultValue: true);
 			Scribe_Values.Look(ref smoothVehiclePaths, nameof(smoothVehiclePaths), defaultValue: true);
+
 			Scribe_Values.Look(ref vehiclePathingRoadNoCost, nameof(vehiclePathingRoadNoCost), defaultValue: true);
 			Scribe_Values.Look(ref multiplePawnsPerJob, nameof(multiplePawnsPerJob), defaultValue: true);
 			Scribe_Values.Look(ref showDisabledVehicles, nameof(showDisabledVehicles), defaultValue: false);
@@ -150,8 +157,13 @@ namespace Vehicles
 
 				listingStandard.Header("VF_SettingsGeneral".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 				listingStandard.Gap(4);
-				listingStandard.CheckboxLabeled("VF_ModifiableSettings".Translate(), ref modifiableSettings, "VF_ModifiableSettingsTooltip".Translate());
+				listingStandard.CheckboxLabeledWithMessage("VF_ModifiableSettings".Translate(), delegate (bool value)
+				{
+					return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput);
+				}, ref modifiableSettings, "VF_ModifiableSettingsTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_CustomShaders".Translate(), ref useCustomShaders, "VF_CustomShadersTooltip".Translate());
+
+				listingStandard.CheckboxLabeled("VF_DiagonalVehicleRendering".Translate(), ref allowDiagonalRendering, "VF_DiagonalVehicleRenderingTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_FullVehiclePathing".Translate(), ref fullVehiclePathing, "VF_FullVehiclePathingTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_SmoothVehiclePathing".Translate(), ref smoothVehiclePaths, "VF_SmoothVehiclePathingTooltip".Translate());
 				GUIState.Disable();

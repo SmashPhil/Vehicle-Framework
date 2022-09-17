@@ -43,6 +43,7 @@ Drafted vehicles can be moved, but restrict the unloading of pawns.
 	<VF_StartFishing>Fish</VF_StartFishing>
 	<VF_StartFishingDesc>Gather fish. Depth of water affects fishing chances.</VF_StartFishingDesc>
 	<VF_ExplosiveComponent>Explosive</VF_ExplosiveComponent>
+	<VF_EditPawnOverlayRendererTooltip>Edit Pawn Overlay</VF_EditPawnOverlayRendererTooltip>
 	
 	<!-- Turret Restrictions -->
 	<VF_VehicleRestriction_Stationary>Cannot fire while moving.</VF_VehicleRestriction_Stationary>

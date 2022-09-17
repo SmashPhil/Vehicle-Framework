@@ -10,7 +10,9 @@ namespace Vehicles
 {
 	public class PawnOverlayRenderer
 	{
-		private const float LayersTotalAllowed = 5;
+		private const float LayersTotalAllowed = 10;
+
+		private static Listing_SplitColumns listing = new Listing_SplitColumns();
 
 		public Rot4 north = Rot8.North;
 		public Rot4 east = Rot8.East;
@@ -21,7 +23,7 @@ namespace Vehicles
 		public Rot4 southWest = Rot4.South;
 		public Rot4 northWest = Rot4.North;
 
-		public int layer = 0;
+		public int layer = 1;
 		public int? layerNorth;
 		public int? layerEast;
 		public int? layerSouth;
@@ -72,13 +74,13 @@ namespace Vehicles
 			return rot.AsInt switch
 			{
 				0 => angleNorth ?? angleSouth + 180 ?? angle,
-				1 => angleEast ?? -angleWest ?? (angle + 45 * rot.AsIntClockwise),
-				2 => angleSouth ?? -angleNorth ?? (angle + 45 * rot.AsIntClockwise),
-				3 => angleWest ?? -angleEast ?? (angle + 45 * rot.AsIntClockwise),
-				4 => angleNorthEast ?? -angleNorthWest ?? (angle + 45 * rot.AsIntClockwise),
-				5 => angleSouthEast ?? -angleSouthWest ?? (angle + 45 * rot.AsIntClockwise),
-				6 => angleSouthWest ?? -angleSouthEast ?? (angle + 45 * rot.AsIntClockwise),
-				7 => angleNorthWest ?? -angleNorthEast ?? (angle + 45 * rot.AsIntClockwise),
+				1 => angleEast ?? -angleWest ?? angle,
+				2 => angleSouth ?? -angleNorth ?? angle,
+				3 => angleWest ?? -angleEast ?? angle,
+				4 => angleNorthEast ?? -angleNorthWest ?? angle + 45,
+				5 => angleSouthEast ?? -angleSouthWest ?? angle - 45,
+				6 => angleSouthWest ?? -angleSouthEast ?? angle + 45,
+				7 => angleNorthWest ?? -angleNorthEast ?? angle - 45,
 				_ => throw new NotImplementedException(),
 			};
 		}
@@ -91,10 +93,10 @@ namespace Vehicles
 				1 => (layerEast ?? layerWest ?? layer) / LayersTotalAllowed,
 				2 => (layerSouth ?? layerNorth ?? layer) / LayersTotalAllowed,
 				3 => (layerWest ?? layerEast ?? layer) / LayersTotalAllowed,
-				4 => (layerNorthEast ?? layerNorthWest ?? layer) / LayersTotalAllowed,
-				5 => (layerSouthEast ?? layerSouthWest ?? layer) / LayersTotalAllowed,
-				6 => (layerSouthWest ?? layerSouthEast ?? layer) / LayersTotalAllowed,
-				7 => (layerNorthWest ?? layerNorthEast ?? layer) / LayersTotalAllowed,
+				4 => (layerNorthEast ?? layerNorthWest ?? layerNorth ?? layer) / LayersTotalAllowed,
+				5 => (layerSouthEast ?? layerSouthWest ?? layerSouth ?? layer) / LayersTotalAllowed,
+				6 => (layerSouthWest ?? layerSouthEast ?? layerSouth ?? layer) / LayersTotalAllowed,
+				7 => (layerNorthWest ?? layerNorthEast ?? layerNorth ?? layer) / LayersTotalAllowed,
 				_ => throw new NotImplementedException(),
 			};
 		}
@@ -107,14 +109,72 @@ namespace Vehicles
 				1 => drawOffsetEast ?? drawOffsetWest?.MirrorHorizontal() ?? drawOffset.RotatedBy(rot.AsAngle),
 				2 => drawOffsetSouth ?? drawOffsetNorth?.MirrorVertical() ?? drawOffset.RotatedBy(rot.AsAngle),
 				3 => drawOffsetWest ?? drawOffsetEast?.MirrorHorizontal() ?? drawOffset.RotatedBy(rot.AsAngle),
-				4 => drawOffsetNorthEast ?? drawOffsetNorthWest?.MirrorHorizontal() ?? drawOffset.RotatedBy(rot.AsAngle),
-				5 => drawOffsetSouthEast ?? drawOffsetSouthWest?.MirrorHorizontal() ?? drawOffset.RotatedBy(rot.AsAngle),
-				6 => drawOffsetSouthWest ?? drawOffsetSouthEast?.MirrorHorizontal() ?? drawOffset.RotatedBy(rot.AsAngle),
-				7 => drawOffsetNorthWest ?? drawOffsetNorthEast?.MirrorHorizontal() ?? drawOffset.RotatedBy(rot.AsAngle),
+				4 => drawOffsetNorthEast ?? drawOffsetNorthWest?.MirrorHorizontal() ?? drawOffsetNorth?.RotatedBy(45) ?? drawOffset.RotatedBy(rot.AsAngle),
+				5 => drawOffsetSouthEast ?? drawOffsetSouthWest?.MirrorHorizontal() ?? drawOffsetSouth?.RotatedBy(-45) ?? drawOffset.RotatedBy(rot.AsAngle),
+				6 => drawOffsetSouthWest ?? drawOffsetSouthEast?.MirrorHorizontal() ?? drawOffsetSouth?.RotatedBy(45) ?? drawOffset.RotatedBy(rot.AsAngle),
+				7 => drawOffsetNorthWest ?? drawOffsetNorthEast?.MirrorHorizontal() ?? drawOffsetNorth?.RotatedBy(-45) ?? drawOffset.RotatedBy(rot.AsAngle),
 				_ => throw new NotImplementedException(),
 			};
 			offset.y = LayerFor(rot);
 			return offset;
+		}
+
+		public void RenderEditor(Rect rect)
+		{
+			listing.Begin(rect, 2);
+
+			//Rotations
+
+			//Layers
+			if (layerNorth != null)
+			{
+				int value = layerNorth.Value;
+				listing.SliderLabeled("Layer North", ref value, string.Empty, string.Empty, string.Empty, -5, 5);
+				layerNorth = value;
+			}
+			if (layerEast != null)
+			{
+				int value = layerEast.Value;
+				listing.SliderLabeled("Layer East", ref value, string.Empty, string.Empty, string.Empty, -5, 5);
+				layerEast = value;
+			}
+			if (layerSouth != null)
+			{
+				int value = layerSouth.Value;
+				listing.SliderLabeled("Layer South", ref value, string.Empty, string.Empty, string.Empty, -5, 5);
+				layerSouth = value;
+			}
+			if (layerWest != null)
+			{
+				int value = layerWest.Value;
+				listing.SliderLabeled("Layer West", ref value, string.Empty, string.Empty, string.Empty, -5, 5);
+				layerWest = value;
+			}
+			listing.NextRow();
+			//Offsets
+			if (drawOffsetNorth != null)
+			{
+				drawOffsetNorth = listing.Vector3Box("Offset North", drawOffsetNorth.Value, string.Empty);
+				listing.NextRow();
+			}
+			if (drawOffsetEast != null)
+			{
+				drawOffsetEast = listing.Vector3Box("Offset East", drawOffsetEast.Value, string.Empty);
+				listing.NextRow();
+			}
+			if (drawOffsetSouth != null)
+			{
+				drawOffsetSouth = listing.Vector3Box("Offset South", drawOffsetSouth.Value, string.Empty);
+				listing.NextRow();
+			}
+			if (drawOffsetWest != null)
+			{
+				drawOffsetWest = listing.Vector3Box("Offset West", drawOffsetWest.Value, string.Empty);
+				listing.NextRow();
+			}
+			//Angles
+
+			listing.End();
 		}
 	}
 }
