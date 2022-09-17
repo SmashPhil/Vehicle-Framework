@@ -920,11 +920,11 @@ namespace Vehicles
 			}
 			if (statHandler.NeedsRepairs)
 			{
-				yield return new FloatMenuOption("VF_RepairVehicle".Translate(LabelShort), delegate ()
-				{
-					Job job = new Job(JobDefOf_Vehicles.RepairVehicle, this);
-					selPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
-				});
+				//yield return new FloatMenuOption("VF_RepairVehicle".Translate(LabelShort), delegate ()
+				//{
+				//	Job job = new Job(JobDefOf_Vehicles.RepairVehicle, this);
+				//	selPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+				//});
 			}
 			if (patternToPaint != null)
 			{

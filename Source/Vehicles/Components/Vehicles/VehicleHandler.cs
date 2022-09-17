@@ -90,7 +90,7 @@ namespace Vehicles
 				int operationalCount = 0;
 				foreach (Pawn pawn in handlers)
 				{
-					if (!CanOperateRole(pawn))
+					if (CanOperateRole(pawn))
 					{
 						operationalCount++;
 					}
