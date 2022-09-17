@@ -26,6 +26,9 @@ namespace Vehicles
 		
 		public static VehicleEventDef PawnEntered;
 		public static VehicleEventDef PawnExited;
+
 		public static VehicleEventDef PawnChangedSeats;
+		public static VehicleEventDef PawnCapacitiesDirty;
+		public static VehicleEventDef PawnKilled;
 	}
 }

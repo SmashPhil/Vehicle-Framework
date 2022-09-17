@@ -159,7 +159,7 @@ namespace Vehicles
 			{
 				command.Disable("Vehicles_CannotMove".Translate(Vehicle.LabelShort));
 			}
-			if (!VehicleMod.settings.debug.debugDraftAnyShip && !Vehicle.PawnCountToOperateFullfilled)
+			if (!VehicleMod.settings.debug.debugDraftAnyVehicle && !Vehicle.CanMoveWithOperators)
 			{
 				command.Disable("Vehicles_NotEnoughToOperate".Translate());
 			}
@@ -172,7 +172,7 @@ namespace Vehicles
 
 		public override string CompInspectStringExtra()
 		{
-			if (Vehicle.PawnCountToOperateFullfilled && AnyLeftToLoad)
+			if (Vehicle.CanMoveWithOperators && AnyLeftToLoad)
 			{
 				return "NotReadyForLaunch".Translate() + ": " + "TransportPodInGroupHasSomethingLeftToLoad".Translate().CapitalizeFirst() + ".";
 			}

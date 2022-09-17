@@ -650,6 +650,7 @@
     <Compile Include="Graphics\Textures\TexData.cs" />
     <Compile Include="Graphics\VehicleGhostUtility.cs" />
     <Compile Include="Utility\Extensions\Ext_Caravan.cs" />
+    <Compile Include="Utility\Extensions\Ext_ThingOwner.cs" />
     <Compile Include="Utility\Extensions\Ext_Toils.cs" />
     <Compile Include="Utility\Extensions\Ext_Settings.cs" />
     <Compile Include="Utility\Extensions\Ext_Vehicles.cs" />
@@ -761,7 +762,6 @@
     <Compile Include="Harmony\VehicleHarmony.cs" />
     <Compile Include="CustomFeatures\Upgrades\UpgradeNode.cs" />
     <Compile Include="Misc\CellFinderExtended.cs" />
-    <Compile Include="Misc\DefOf\DesignationCategoryDefOf_Vehicles.cs" />
     <Compile Include="Graphics\Graphic\MaterialGeneration\MaterialPresets.cs" />
     <Compile Include="Misc\DefOf\RiverDefOf.cs" />
     <Compile Include="Misc\DefOf\SoundDefOf_Vehicles.cs" />

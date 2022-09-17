@@ -40,7 +40,7 @@ namespace Vehicles
 			{
 				if (value && !__instance.Drafted)
 				{
-					if (!VehicleMod.settings.debug.debugDraftAnyShip && (vehicle.CompFueledTravel?.EmptyTank ?? false))
+					if (!VehicleMod.settings.debug.debugDraftAnyVehicle && (vehicle.CompFueledTravel?.EmptyTank ?? false))
 					{
 						Messages.Message("Vehicles_OutOfFuel".Translate(), MessageTypeDefOf.RejectInput);
 						return false;

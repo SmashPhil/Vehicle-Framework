@@ -52,4 +52,12 @@
 	<Vehicles.VehicleEventDef>
 		<defName>PawnChangedSeats</defName>
 	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>PawnCapacitiesDirty</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>PawnKilled</defName>
+	</Vehicles.VehicleEventDef>
 </Defs>

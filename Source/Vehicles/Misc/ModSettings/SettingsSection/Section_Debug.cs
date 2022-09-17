@@ -16,7 +16,7 @@ namespace Vehicles
 		public const float VerticalGap = 2f;
 		public const int ButtonRows = 3;
 
-		public bool debugDraftAnyShip;
+		public bool debugDraftAnyVehicle;
 		public bool debugSpawnVehicleBuildingGodMode;
 
 		public bool debugDrawCannonGrid;
@@ -33,7 +33,7 @@ namespace Vehicles
 		public override void ResetSettings()
 		{
 			base.ResetSettings();
-			debugDraftAnyShip = false;
+			debugDraftAnyVehicle = false;
 			debugSpawnVehicleBuildingGodMode = false;
 
 			debugDrawCannonGrid = false;
@@ -50,18 +50,18 @@ namespace Vehicles
 
 		public override void ExposeData()
 		{
-			Scribe_Values.Look(ref debugDraftAnyShip, "debugDraftAnyShip");
-			Scribe_Values.Look(ref debugSpawnVehicleBuildingGodMode, "debugSpawnVehicleBuildingGodMode");
+			Scribe_Values.Look(ref debugDraftAnyVehicle, nameof(debugDraftAnyVehicle));
+			Scribe_Values.Look(ref debugSpawnVehicleBuildingGodMode, nameof(debugSpawnVehicleBuildingGodMode));
 
-			Scribe_Values.Look(ref debugDrawCannonGrid, "debugDrawCannonGrid");
-			Scribe_Values.Look(ref debugDrawNodeGrid, "debugDrawNodeGrid");
-			Scribe_Values.Look(ref debugDrawHitbox, "debugDrawHitbox");
-			Scribe_Values.Look(ref debugDrawVehicleTracks, "debugDrawVehicleTracks");
-			Scribe_Values.Look(ref debugDrawBumpers, "debugDrawBumpers");
+			Scribe_Values.Look(ref debugDrawCannonGrid, nameof(debugDrawCannonGrid));
+			Scribe_Values.Look(ref debugDrawNodeGrid, nameof(debugDrawNodeGrid));
+			Scribe_Values.Look(ref debugDrawHitbox, nameof(debugDrawHitbox));
+			Scribe_Values.Look(ref debugDrawVehicleTracks, nameof(debugDrawVehicleTracks));
+			Scribe_Values.Look(ref debugDrawBumpers, nameof(debugDrawBumpers));
 
-			Scribe_Values.Look(ref debugLogging, "debugLogging");
-			Scribe_Values.Look(ref debugPathCostChanges, "debugPathCostChanges");
-			Scribe_Values.Look(ref debugDrawVehiclePathCosts, "debugDrawVehiclePathCosts");
+			Scribe_Values.Look(ref debugLogging, nameof(debugLogging));
+			Scribe_Values.Look(ref debugPathCostChanges, nameof(debugPathCostChanges));
+			Scribe_Values.Look(ref debugDrawVehiclePathCosts, nameof(debugDrawVehiclePathCosts));
 		}
 
 		public override void DrawSection(Rect rect)
@@ -79,7 +79,7 @@ namespace Vehicles
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugPathCostRecalculationLogging".Translate(), ref debugPathCostChanges, "VF_DevMode_DebugPathCostRecalculationLoggingTooltip".Translate());
 
 				listingStandard.Header("VF_DevMode_Troubleshooting".Translate(), ListingExtension.BannerColor, anchor: TextAnchor.MiddleCenter);
-				listingStandard.CheckboxLabeled("VF_DevMode_DebugDraftAnyVehicle".Translate(), ref debugDraftAnyShip, "VF_DevMode_DebugDraftAnyVehicleTooltip".Translate());
+				listingStandard.CheckboxLabeled("VF_DevMode_DebugDraftAnyVehicle".Translate(), ref debugDraftAnyVehicle, "VF_DevMode_DebugDraftAnyVehicleTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugSpawnVehiclesGodMode".Translate(), ref debugSpawnVehicleBuildingGodMode, "VF_DevMode_DebugSpawnVehiclesGodModeTooltip".Translate());
 
 				listingStandard.Header("VF_DevMode_Drawers".Translate(), ListingExtension.BannerColor, anchor: TextAnchor.MiddleCenter);

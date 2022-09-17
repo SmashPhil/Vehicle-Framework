@@ -323,7 +323,7 @@ namespace Vehicles
 						DrawMotes();
 					}
 				}
-				if (EmptyTank && !VehicleMod.settings.debug.debugDraftAnyShip)
+				if (EmptyTank && !VehicleMod.settings.debug.debugDraftAnyVehicle)
 				{
 					Vehicle.drafter.Drafted = false;
 				}

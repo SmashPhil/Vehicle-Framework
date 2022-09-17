@@ -75,8 +75,7 @@ namespace Vehicles
 
 		public VehiclePermissions MovementPermissions => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), nameof(VehicleDef.vehicleMovementPermissions), VehicleDef.vehicleMovementPermissions);
 		public bool CanMove => GetStatValue(VehicleStatDefOf.MoveSpeed) > 0.1f && MovementPermissions > VehiclePermissions.NotAllowed && movementStatus == VehicleMovementStatus.Online;
-		public bool CanMoveFinal => CanMove && (PawnCountToOperateFullfilled || VehicleMod.settings.debug.debugDraftAnyShip);
-		public bool PawnCountToOperateFullfilled => PawnCountToOperateLeft <= 0;
+		public bool CanMoveFinal => CanMove && (CanMoveWithOperators || VehicleMod.settings.debug.debugDraftAnyVehicle);
 
 		public VehicleDef VehicleDef => def as VehicleDef;
 
@@ -324,11 +323,29 @@ namespace Vehicles
 			get
 			{
 				int pawnsMounted = 0;
-				foreach (VehicleHandler handler in handlers.Where(handler => !handler.role.handlingTypes.NullOrEmpty() && handler.role.handlingTypes.Contains(HandlingTypeFlags.Movement)))
+				foreach (VehicleHandler handler in handlers)
 				{
-					pawnsMounted += handler.handlers.Count;
+					if (!handler.role.handlingTypes.NullOrEmpty() && handler.role.handlingTypes.Contains(HandlingTypeFlags.Movement))
+					{
+						pawnsMounted += handler.handlers.Count;
+					}
 				}
 				return PawnCountToOperate - pawnsMounted;
+			}
+		}
+
+		public bool CanMoveWithOperators
+		{
+			get
+			{
+				foreach (VehicleHandler handler in handlers)
+				{
+					if (!handler.role.handlingTypes.NullOrEmpty() && handler.role.handlingTypes.Contains(HandlingTypeFlags.Movement) && !handler.RoleFulfilled)
+					{
+						return false;
+					}
+				}
+				return true;
 			}
 		}
 
@@ -2061,6 +2078,7 @@ namespace Vehicles
 			if (signal == CompSignals.RanOutOfFuel)
 			{
 				vPather.StopDead();
+				drafter.Drafted = false;
 			}
 		}
 

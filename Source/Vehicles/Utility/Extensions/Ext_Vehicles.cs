@@ -33,6 +33,9 @@ namespace Vehicles
 				vehicle.AddEvent(VehicleEventDefOf.Immobilized, vehicle.vPather.RecalculatePermissions);
 				vehicle.AddEvent(VehicleEventDefOf.PawnExited, vehicle.vPather.RecalculatePermissions);
 				vehicle.AddEvent(VehicleEventDefOf.PawnChangedSeats, vehicle.vPather.RecalculatePermissions);
+				vehicle.AddEvent(VehicleEventDefOf.PawnKilled, vehicle.vPather.RecalculatePermissions);
+				vehicle.AddEvent(VehicleEventDefOf.PawnCapacitiesDirty, vehicle.vPather.RecalculatePermissions);
+
 				//One Shots
 				if (!vehicle.VehicleDef.soundOneShotsOnEvent.NullOrEmpty())
 				{

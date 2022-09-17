@@ -49,6 +49,9 @@ namespace Vehicles
 				transpiler: new HarmonyMethod(typeof(Extra),
 				nameof(VehicleAreaRowTranspiler)));
 
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnCapacitiesHandler), nameof(PawnCapacitiesHandler.Notify_CapacityLevelsDirty)),
+				prefix: new HarmonyMethod(typeof(Extra),
+				nameof(RecheckVehicleHandlerCapacities)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn), nameof(Pawn.Kill)),
                 prefix: new HarmonyMethod(typeof(Extra), 
 				nameof(MoveOnDeath)));
@@ -218,12 +221,20 @@ namespace Vehicles
 			}
 		}
 
+		public static void RecheckVehicleHandlerCapacities(Pawn ___pawn)
+		{
+			if (___pawn.GetVehicle() is VehiclePawn vehicle)
+			{
+				vehicle.EventRegistry[VehicleEventDefOf.PawnCapacitiesDirty].ExecuteEvents();
+			}
+		}
+
 		public static void MoveOnDeath(Pawn __instance)
         {
             if (__instance.IsInVehicle())
             {
                 VehiclePawn vehicle = __instance.GetVehicle();
-				vehicle.EventRegistry[VehicleEventDefOf.PawnChangedSeats].ExecuteEvents();
+				vehicle.EventRegistry[VehicleEventDefOf.PawnKilled].ExecuteEvents();
                 vehicle.inventory.innerContainer.TryAddOrTransfer(__instance);
 				Find.WorldPawns.RemovePawn(__instance);
             }

@@ -78,7 +78,26 @@ namespace Vehicles
 
 		public bool RequiredForMovement => role.handlingTypes.NotNullAndAny(h => h.HasFlag(HandlingTypeFlags.Movement));
 
-		public bool RoleFulfilled => role != null && handlers.Count >= role.slotsToOperate;
+		public bool RoleFulfilled
+		{
+			get
+			{
+				bool minRequirement = role != null && handlers.Count >= role.slotsToOperate;
+				if (!minRequirement)
+				{
+					return false;
+				}
+				int operationalCount = 0;
+				foreach (Pawn pawn in handlers)
+				{
+					if (!CanOperateRole(pawn))
+					{
+						operationalCount++;
+					}
+				}
+				return operationalCount >= role.slotsToOperate;
+			}
+		}
 
 		public bool AreSlotsAvailable
 		{
