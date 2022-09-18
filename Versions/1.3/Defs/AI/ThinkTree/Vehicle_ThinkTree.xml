@@ -47,7 +47,7 @@
 				</li>
 				
 				<!-- Idle Ship -->
-				<li Class= "JobGiver_IdleError"/>
+				<li Class= "Vehicles.JobGiver_AwaitOrders"/>
 			</subNodes>
 		</thinkRoot>
 	</ThinkTreeDef>

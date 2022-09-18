@@ -79,8 +79,8 @@ namespace Vehicles
 
 		public override void ExposeData()
 		{
-			Scribe_NestedCollections.Look(ref fieldSettings, "fieldSettings", LookMode.Value, LookMode.Deep, LookMode.Undefined);
-			Scribe_Collections.Look(ref defaultGraphics, "defaultGraphics", LookMode.Value, LookMode.Deep);
+			Scribe_NestedCollections.Look(ref fieldSettings, nameof(fieldSettings), LookMode.Value, LookMode.Deep, LookMode.Undefined);
+			Scribe_Collections.Look(ref defaultGraphics, nameof(defaultGraphics), LookMode.Value, LookMode.Deep);
 		}
 
 		public override void DrawSection(Rect rect)
