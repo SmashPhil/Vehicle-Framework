@@ -40,7 +40,11 @@ namespace Vehicles
 
 		public override bool CanReserve(Pawn pawn, LocalTargetInfo target)
 		{
-			return !claimants.ContainsKey(pawn) && !claimants.ContainsValue(target);
+			if (claimants.ContainsKey(pawn))
+			{
+				return claimants[pawn] == target;
+			}
+			return !claimants.ContainsValue(target);
 		}
 
 		public override void ReleaseAllReservations()

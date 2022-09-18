@@ -27,7 +27,7 @@ namespace Vehicles
 				VehicleReservationManager reservationManager = pawn.Map.GetCachedMapComponent<VehicleReservationManager>();
 				if (reservationManager.CanReserve(vehicle, pawn, JobDef))
 				{
-					IntVec3 jobCell = vehicle.SurroundingCells.RandomOrDefault(cell => reservationManager.CanReserve<LocalTargetInfo, VehicleTargetReservation>(vehicle, pawn, cell));
+					IntVec3 jobCell = vehicle.SurroundingCells.RandomOrFallback(cell => reservationManager.CanReserve<LocalTargetInfo, VehicleTargetReservation>(vehicle, pawn, cell), IntVec3.Invalid);
 					if (jobCell.IsValid)
 					{
 						return JobMaker.MakeJob(JobDef, vehicle, jobCell);

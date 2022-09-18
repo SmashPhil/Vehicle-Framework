@@ -16,16 +16,6 @@ namespace Vehicles
 
 		protected abstract JobDef JobDef { get; }
 
-		public override void Notify_Starting()
-		{
-			base.Notify_Starting();
-			if (!JobCell.IsValid)
-			{
-				VehicleReservationManager reservationManager = pawn.Map.GetCachedMapComponent<VehicleReservationManager>();
-				job.targetB = Vehicle.SurroundingCells.RandomOrDefault(cell => reservationManager.CanReserve<LocalTargetInfo, VehicleTargetReservation>(Vehicle, pawn, cell));
-			}
-		}
-
 		public override bool TryMakePreToilReservations(bool errorOnFailed)
 		{
 			if (!JobCell.IsValid)
