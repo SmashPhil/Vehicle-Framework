@@ -215,6 +215,8 @@ namespace Vehicles
 		/// <returns></returns>
 		public IEnumerable<VehicleStatDef> StatCategoryDefs()
 		{
+			yield return VehicleStatDefOf.BodyIntegrity;
+
 			foreach (VehicleStatModifier statModifier in vehicleStats)
 			{
 				if (statModifier.statDef == VehicleStatDefOf.MoveSpeed && vehicleMovementPermissions == VehiclePermissions.NotAllowed)

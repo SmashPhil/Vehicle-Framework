@@ -818,23 +818,42 @@ namespace Vehicles
 			{
 				yield return new Command_Action
 				{
-					defaultLabel = "Destroy Random Component",
+					defaultLabel = "Destroy Component",
 					action = delegate ()
 					{
-						VehicleComponent component = statHandler.components.Where(component => !component.props.categories.Contains(VehicleStatDefOf.BodyIntegrity)).RandomOrDefault();
-						component ??= statHandler.components.RandomElement();
-						component.TakeDamage(this, new DamageInfo(DamageDefOf.Bite, float.MaxValue), Position);
-						Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleTookDamage(this);
+						var options = new List<FloatMenuOption>();
+						foreach (VehicleComponent component in statHandler.components)
+						{
+							options.Add(new FloatMenuOption(component.props.label, delegate ()
+							{
+								component.TakeDamage(this, new DamageInfo(DamageDefOf.Bite, float.MaxValue), Position);
+								Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleTookDamage(this);
+							}));
+						}
+						if (!options.NullOrEmpty())
+						{
+							Find.WindowStack.Add(new FloatMenu(options));
+						}
 					}
 				};
 				yield return new Command_Action
 				{
-					defaultLabel = "Damage Random Component",
+					defaultLabel = "Damage Component",
 					action = delegate ()
 					{
-						VehicleComponent component = statHandler.components.RandomElement();
-						component.TakeDamage(this, new DamageInfo(DamageDefOf.Bite, component.health * 0.5f), Position);
-						Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleTookDamage(this);
+						var options = new List<FloatMenuOption>();
+						foreach (VehicleComponent component in statHandler.components)
+						{
+							options.Add(new FloatMenuOption(component.props.label, delegate ()
+							{
+								component.TakeDamage(this, new DamageInfo(DamageDefOf.Bite, component.health * Rand.Range(0.1f, 1)), Position);
+								Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleTookDamage(this);
+							}));
+						}
+						if (!options.NullOrEmpty())
+						{
+							Find.WindowStack.Add(new FloatMenu(options));
+						}
 					}
 				};
 				yield return new Command_Action

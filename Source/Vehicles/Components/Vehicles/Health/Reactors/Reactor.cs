@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Verse;
 
 namespace Vehicles
 {
@@ -11,7 +12,7 @@ namespace Vehicles
 		public IndicatorDef indicator;
 		public Color highlightColor = new Color(1, 0.5f, 0);
 
-		public abstract void Hit(VehiclePawn vehicle, VehicleComponent component, float damage, bool penetrated);
+		public abstract void Hit(VehiclePawn vehicle, VehicleComponent component, ref DamageInfo dinfo, bool penetrated);
 
 		public virtual void Repaired(VehiclePawn vehicle, VehicleComponent component, float amount)
 		{

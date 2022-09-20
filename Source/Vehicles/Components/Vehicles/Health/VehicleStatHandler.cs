@@ -40,7 +40,7 @@ namespace Vehicles
 			components.Clear();
 			foreach (VehicleComponentProperties props in vehicle.VehicleDef.components)
 			{
-				VehicleComponent component = (VehicleComponent)Activator.CreateInstance(props.compClass);
+				VehicleComponent component = (VehicleComponent)Activator.CreateInstance(props.compClass, vehicle);
 				components.Add(component);
 				component.Initialize(props);
 				component.PostCreate();
@@ -73,6 +73,10 @@ namespace Vehicles
 		{
 			if (statComponents.TryGetValue(statDef, out var categories))
 			{
+				if (categories.FirstOrDefault(component => component.props.priorityStatEfficiency) is VehicleComponent component)
+				{
+					return component.Efficiency;
+				}
 				return statDef.operationType switch
 				{
 					EfficiencyOperationType.None => 1,
@@ -241,6 +245,7 @@ namespace Vehicles
 				report?.AppendLine($"Final Damage = {damage}. Exiting.");
 				return;
 			}
+			dinfo.SetAmount(damage);
 			vehicle.EventRegistry[VehicleEventDefOf.DamageTaken].ExecuteEvents();
 			if (explosive)
 			{
@@ -248,12 +253,11 @@ namespace Vehicles
 				Rot4 direction = DirectionFromAngle(dinfo.Angle);
 				for (int i = 0; i < Mathf.Max(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z); i++)
 				{
-					float lastDamage = 0;
 					IntVec2 cellOffset = cell;
 					for (int e = 0, seq = 0; e < 1 + i * 2; seq += e % 2 == 0 ? 1 : 0, e++)
 					{
 						int seqAlt = e % 2 == 0 ? seq : -seq;
-						float stepDamage = damage / (1 + i * 2);
+						float stepDamage = dinfo.Amount / (1 + i * 2);
 						if (direction.IsHorizontal)
 						{
 							cellOffset.z = seqAlt;
@@ -277,10 +281,9 @@ namespace Vehicles
 						}
 						dinfo.SetAmount(stepDamage);
 						DamageRoles(dinfo, cellOffset);
-						lastDamage = component.TakeDamage(vehicle, dinfo, new IntVec3(vehicle.Position.x + hitCell.x, 0, vehicle.Position.z + hitCell.z));
+						component.TakeDamage(vehicle, ref dinfo, new IntVec3(vehicle.Position.x + hitCell.x, 0, vehicle.Position.z + hitCell.z));
 					}
-					damage = lastDamage;
-					if (damage > 0 && direction.IsValid)
+					if (dinfo.Amount > 0 && direction.IsValid)
 					{
 						switch (direction.AsInt)
 						{
@@ -313,7 +316,7 @@ namespace Vehicles
 					VehicleComponent component = componentLocations.TryGetValue(cell, componentLocations[IntVec2.Zero]).Where(c => c.HealthPercent > 0).RandomElementWithFallback();
 					if (component is null)
 					{
-						if (damage > 0 && direction.IsValid)
+						if (dinfo.Amount > 0 && direction.IsValid)
 						{
 							switch (direction.AsInt)
 							{
@@ -341,12 +344,11 @@ namespace Vehicles
 					{
 						debugCellHighlight.Add(new Pair<IntVec2, int>(new IntVec2(cell.x, cell.z), TicksHighlighted));
 					}
-					dinfo.SetAmount(damage);
-					report?.AppendLine($"Applying Damage = {damage} to {component.props.key}");
+					report?.AppendLine($"Applying Damage = {dinfo.Amount} to {component.props.key}");
 					DamageRoles(dinfo, cell);
-					damage = component.TakeDamage(vehicle, dinfo, new IntVec3(vehicle.Position.x + hitCell.x, 0, vehicle.Position.z + hitCell.z));
-					report?.AppendLine($"Recycled Damage = {damage}");
-					if (damage > 0 && direction.IsValid)
+					component.TakeDamage(vehicle, ref dinfo, new IntVec3(vehicle.Position.x + hitCell.x, 0, vehicle.Position.z + hitCell.z));
+					report?.AppendLine($"Fallthrough Damage = {dinfo.Amount}");
+					if (dinfo.Amount > 0 && direction.IsValid)
 					{
 						switch (direction.AsInt)
 						{
@@ -483,7 +485,7 @@ namespace Vehicles
 		public void ExposeData()
 		{
 			Scribe_References.Look(ref vehicle, nameof(vehicle), true);
-			Scribe_Collections.Look(ref components, nameof(components), LookMode.Deep);
+			Scribe_Collections.Look(ref components, nameof(components), LookMode.Deep, vehicle);
 			
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{

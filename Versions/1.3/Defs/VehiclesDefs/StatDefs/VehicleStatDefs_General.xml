@@ -41,7 +41,7 @@
 	<Vehicles.VehicleStatDef>
 		<defName>CargoCapacity</defName>
 		<label>Cargo</label>
-		<description>The amount of stuff this vehicle can carry as cargo. This is the same amount that is available for caravans.</description>
+		<description>The amount of weight this vehicle can carry as cargo. This is the same amount that is available for caravans.</description>
 		<category>VehicleBasics</category>
 		<defaultBaseValue>100</defaultBaseValue>
 		<minValue>0</minValue>
@@ -121,13 +121,17 @@
 	<Vehicles.VehicleStatDef>
 		<defName>BodyIntegrity</defName>
 		<label>Body Integrity</label>
+		<description>The average of all vehicle parts' health. If the integrity of the vehicle reaches 0, it will disintegrate into a fraction of its build cost.</description>
+		<workerClass>Vehicles.VehicleStatWorker_BodyIntegrity</workerClass>
 		<category>VehicleBasics</category>
 		<defaultBaseValue>1</defaultBaseValue>
 		<minValue>0</minValue>
 		<maxValue>1</maxValue>
 		
+		<showIfUndefined>true</showIfUndefined>
+		<neverDisabled>true</neverDisabled>
+		
 		<toStringStyle>PercentZero</toStringStyle>
-		<formatString>{0}%</formatString>
 		<operationType>Average</operationType>
 		<alwaysHide>true</alwaysHide>
 	</Vehicles.VehicleStatDef>

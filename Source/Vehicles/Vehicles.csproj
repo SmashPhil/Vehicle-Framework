@@ -368,6 +368,7 @@
     <Compile Include="Components\Vehicles\Health\Reactors\Reactor.cs" />
     <Compile Include="Components\Vehicles\Health\Reactors\Reactor_FuelLeak.cs" />
     <Compile Include="Components\Vehicles\Health\Reactors\Reactor_Explosive.cs" />
+    <Compile Include="Components\Vehicles\Health\StatWorkers\VehicleStatWorker_BodyIntegrity.cs" />
     <Compile Include="Components\Vehicles\Health\VehicleStatDrawEntry.cs" />
     <Compile Include="Comps\CompSignals.cs" />
     <Compile Include="CustomFeatures\SharedJobs\SharedJob.cs" />

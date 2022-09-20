@@ -7,17 +7,17 @@ namespace Vehicles
 	public class VehicleRole : IExposable
 	{
 		public string key;
-		public string label = "Missing Label";
+		public string label = "[MissingLabel]";
 		public List<HandlingTypeFlags> handlingTypes = new List<HandlingTypeFlags>();
 		public int slots;
 		public int slotsToOperate;
+		public bool exposed = false;
 		public List<string> turretIds;
 		public ComponentHitbox hitbox = new ComponentHitbox();
 		public PawnOverlayRenderer pawnRenderer;
 
 		public VehicleRole()
 		{
-
 		}
 
 		public VehicleRole(VehicleHandler group)
@@ -64,12 +64,13 @@ namespace Vehicles
 
 		public void ExposeData()
 		{
-			Scribe_Values.Look(ref key, "key");
-			Scribe_Values.Look(ref label, "label", "");
-			Scribe_Collections.Look(ref handlingTypes, "handlingTypes");
-			Scribe_Values.Look(ref slots, "slots", 1);
-			Scribe_Values.Look(ref slotsToOperate, "slotsToOperate", 1);
-			Scribe_Collections.Look(ref turretIds, "turretIds");
+			Scribe_Values.Look(ref key, nameof(key), forceSave: true);
+			Scribe_Values.Look(ref label, nameof(label), string.Empty);
+			Scribe_Collections.Look(ref handlingTypes, nameof(handlingTypes));
+			Scribe_Values.Look(ref slots, nameof(slots), 1);
+			Scribe_Values.Look(ref slotsToOperate, nameof(slotsToOperate), 1);
+			Scribe_Values.Look(ref exposed, nameof(exposed), false);
+			Scribe_Collections.Look(ref turretIds, nameof(turretIds));
 		}
 	}
 }

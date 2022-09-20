@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using UnityEngine;
+using RimWorld;
 using Verse;
 using SmashTools;
 
@@ -7,6 +8,7 @@ namespace Vehicles
 {
 	public class VehicleComponent : IExposable
 	{
+		public VehiclePawn vehicle;
 		public static Gradient gradient;
 
 		public VehicleComponentProperties props;
@@ -15,15 +17,14 @@ namespace Vehicles
 		public IndicatorDef indicator;
 		public Color highlightColor = Color.white;
 
-		public VehicleComponent()
+		public VehicleComponent(VehiclePawn vehicle)
 		{
+			this.vehicle = vehicle;
 		}
 
 		public float HealthPercent => Ext_Math.RoundTo(health / props.health, 0.01f);
 
 		public float Efficiency => props.efficiency.Evaluate(HealthPercent); //Allow evaluating beyond 100% via stat parts
-
-		public float ArmorRating => Ext_Math.RoundTo(props.armor, 0.1f);
 
 		public Color EfficiencyColor => gradient.Evaluate(Efficiency);
 
@@ -36,11 +37,15 @@ namespace Vehicles
 			}
 		}
 
-		public virtual float TakeDamage(VehiclePawn vehicle, DamageInfo dinfo, IntVec3 cell)
+		public void TakeDamage(VehiclePawn vehicle, DamageInfo dinfo, IntVec3 cell)
 		{
-			float damage = dinfo.Amount;
-			ReduceDamageFromArmor(ref damage, dinfo.ArmorPenetrationInt, out bool penetrated);
-			if (cell.IsValid && (damage <= 0 || !penetrated))
+			TakeDamage(vehicle, ref dinfo, cell);
+		}
+
+		public virtual void TakeDamage(VehiclePawn vehicle, ref DamageInfo dinfo, IntVec3 cell)
+		{
+			ReduceDamageFromArmor(ref dinfo, out bool penetrated);
+			if (cell.IsValid && (dinfo.Amount <= 0 || !penetrated))
 			{
 				vehicle.Drawer.Notify_DamageDeflected(cell);
 			}
@@ -48,21 +53,20 @@ namespace Vehicles
 			{
 				foreach (Reactor reactor in props.reactors)
 				{
-					reactor.Hit(vehicle, this, damage, penetrated);
+					reactor.Hit(vehicle, this, ref dinfo, penetrated);
 				}
 			}
-			health -= damage;
+			health -= dinfo.Amount;
 			float remainingDamage = -health;
 			health = health.Clamp(0, props.health);
-			if (!penetrated)
+			if (!penetrated || health > (props.health / 2f))
 			{
-				return 0;
+				dinfo.SetAmount(0);
 			}
-			if (remainingDamage > 0 && remainingDamage >= damage / 2)
+			else if (remainingDamage > 0 && remainingDamage >= dinfo.Amount / 2)
 			{
-				return remainingDamage;
+				dinfo.SetAmount(remainingDamage);
 			}
-			return health > (props.health / 2) ? 0 : damage / 2;
 		}
 
 		public virtual void HealComponent(float amount)
@@ -74,28 +78,58 @@ namespace Vehicles
 			}
 		}
 
-		public virtual void ReduceDamageFromArmor(ref float damage, float armorPenetration, out bool penetrate)
+		public virtual void ReduceDamageFromArmor(ref DamageInfo dinfo, out bool penetrated)
 		{
-			float armorRating = props.armor - armorPenetration; 
-			penetrate = props.hitbox.fallthrough;
-			if (damage < (armorRating / 2))
+			penetrated = false;
+			if (dinfo.Def.armorCategory == null)
 			{
-				damage = 0;
-				penetrate = false;
+				return;
+			}
+			StatDef damageType = dinfo.Def.armorCategory.armorRatingStat;
+			float armorRating = ArmorRating(damageType);
+			float armorDiff = armorRating - dinfo.ArmorPenetrationInt;
+			penetrated = props.hitbox.fallthrough;
+			float chance = Rand.Value;
+			if (chance < (armorDiff / 2))
+			{
+				dinfo.SetAmount(0);
+				penetrated = false;
 			}
 			else
 			{
-				if (damage < armorRating)
+				if (chance < armorDiff)
 				{
-					damage = Mathf.Lerp(damage / 2, damage, armorPenetration / props.armor);
-					penetrate = false;
+					float damage = GenMath.RoundRandom(dinfo.Amount / 2);
+					dinfo.SetAmount(damage);
+					penetrated = false;
+					if (dinfo.Def.armorCategory == DamageArmorCategoryDefOf.Sharp)
+					{
+						dinfo.Def = DamageDefOf.Blunt;
+					}
 				}
 			}
-			if (damage < 1)
+			Debug.Message($"Damaging: {props.label}\nArmor: {armorRating}\nPenetration: {dinfo.ArmorPenetrationInt}\nDamage: {dinfo.Amount}\nFallthrough: {penetrated}");
+		}
+
+		public float ArmorRating(StatDef statDef)
+		{
+			if (statDef is null)
 			{
-				damage = 0;
+				float rating = 0;
+				int count = 0;
+				foreach (StatDef armorRatingDef in DefDatabase<DamageArmorCategoryDef>.AllDefs.Select(armorCategory => armorCategory.armorRatingStat))
+				{
+					if (armorRatingDef != null)
+					{
+						StatModifier sumArmorModifier = props.armor?.FirstOrDefault(rating => rating.stat == armorRatingDef);
+						rating += sumArmorModifier?.value ?? vehicle.GetStatValue(armorRatingDef);
+						count++;
+					}
+				}
+				return rating / count;
 			}
-			Debug.Message($"Damaging: {props.label}\nArmor: {props.armor}\nPenetration: {armorPenetration}\nDamage: {damage}\nFallthrough: {penetrate}");
+			StatModifier armorModifier = props.armor?.FirstOrDefault(rating => rating.stat == statDef);
+			return armorModifier?.value ?? vehicle.GetStatValue(statDef);
 		}
 
 		public virtual void PostCreate()
@@ -123,7 +157,16 @@ namespace Vehicles
 
 		public virtual void ExposeData()
 		{
-			Scribe_Values.Look(ref health, "health");
+			Scribe_Values.Look(ref health, nameof(health));
+			Scribe_References.Look(ref vehicle, nameof(vehicle));
+		}
+
+		///Yes I'm aware this is very similar to BodyPartDepth, creating this for clarity that this is an entirely different set of mechanics for similar purpose
+		public enum VehiclePartDepth
+		{ 
+			Undefined,
+			External,
+			Internal
 		}
 	}
 }

@@ -17,6 +17,7 @@ namespace Vehicles
 		public const int ButtonRows = 3;
 
 		public bool debugDraftAnyVehicle;
+		public bool debugShootAnyTurret;
 		public bool debugSpawnVehicleBuildingGodMode;
 
 		public bool debugDrawCannonGrid;
@@ -34,6 +35,7 @@ namespace Vehicles
 		{
 			base.ResetSettings();
 			debugDraftAnyVehicle = false;
+			debugShootAnyTurret = false;
 			debugSpawnVehicleBuildingGodMode = false;
 
 			debugDrawCannonGrid = false;
@@ -51,6 +53,7 @@ namespace Vehicles
 		public override void ExposeData()
 		{
 			Scribe_Values.Look(ref debugDraftAnyVehicle, nameof(debugDraftAnyVehicle));
+			Scribe_Values.Look(ref debugShootAnyTurret, nameof(debugShootAnyTurret));
 			Scribe_Values.Look(ref debugSpawnVehicleBuildingGodMode, nameof(debugSpawnVehicleBuildingGodMode));
 
 			Scribe_Values.Look(ref debugDrawCannonGrid, nameof(debugDrawCannonGrid));
@@ -80,6 +83,7 @@ namespace Vehicles
 
 				listingStandard.Header("VF_DevMode_Troubleshooting".Translate(), ListingExtension.BannerColor, anchor: TextAnchor.MiddleCenter);
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugDraftAnyVehicle".Translate(), ref debugDraftAnyVehicle, "VF_DevMode_DebugDraftAnyVehicleTooltip".Translate());
+				listingStandard.CheckboxLabeled("VF_DevMode_DebugShootAnyTurret".Translate(), ref debugShootAnyTurret, "VF_DevMode_DebugShootAnyTurretTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugSpawnVehiclesGodMode".Translate(), ref debugSpawnVehicleBuildingGodMode, "VF_DevMode_DebugSpawnVehiclesGodModeTooltip".Translate());
 
 				listingStandard.Header("VF_DevMode_Drawers".Translate(), ListingExtension.BannerColor, anchor: TextAnchor.MiddleCenter);

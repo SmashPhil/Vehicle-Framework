@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <!--Can utilize Version.txt file placed in mod's root directory-->
+  <currentVersion>1.3.8295</currentVersion>
+  <!--Startup,GameInit,LoadedGame,NewGame-->
+  <updateOn>Startup</updateOn>
+  <!--Full description shown in update page-->
+  <description>[title]Recent News[/title][font]Small[/font]
+The mod is officially released for testing. Visit the discord server for more information.
+[title]Bug Fixes[/title][font]Small[/font]
+- Fixed issue with DynamicDrawnWorldObjects on the world map where the mod setting wasn't properly applied
+
+- Fixed bug where air defenses were still drawing their perimeter radius despite being disabled.
+
+- Fixed compatibility issue with XmlExtensions, which would cause a fatal error and CTD.
+
+- Fixed bug where changing a vehicle's movement permissions would not update cached moveable defs, requiring a restart.
+
+- Fixed bug where vehicle's info card would throw exception upon closing.
+
+- Fixed CTD compatibility issue with XmlExtensions and Hugslib.
+
+- Fixed bug where CutoutComplex and Cutout would not properly apply vanilla mask with vehicles.
+
+- Fixed bug where damaging a vehicle would trigger the DraftOn/DraftOff events.
+
+- Fixed bug where pawn would go to (0, 0) on the map while repairing vehicle.
+
+- Fixed bug where pawn would go to (0, 0) when given a prioritized vehicle job.
+
+- Fixed bug where vehicle pathgrid would not update when some Things were destroyed.
+
+- Fixed bug where vehicle turrets would take too much ammo or not refund enough ammo when configured w/ chargePerAmmoCount.
+
+- Fixed bug where vehicle pathing costs were not properly calculated, resulting in zig zags when pathing behind the vehicle.
+
+- Fixed bug where vehicle caravans would calculate incorrect movement ticks.
+
+- Fixed duplicate float menu option bug for repair / paint.
+[title]Additional Changes[/title][font]Small[/font]
+- Modified chance of instant death when boat sinks over deep water
+
+- Added Drowning hediff that applies to pawns in sinking ship (proportional to manipulation / movement capacities average)
+
+- Added pawn rendering + icon for disembarking individual pawns from a vehicle
+
+- Added VehicleTurret restriction mechanics, allowing for turret to be enabled or disabled only if certain conditions are met (eg. must be stationary to aim + shoot)
+
+- Added Reactor mechanics to VehicleComponents.  Reactors are event based mechanics that will trigger certain mechanics when a vehicle component takes damage. (eg. explode, leak fuel, etc.)
+
+- Gizmos for unloading pawns inside the vehicle now render the pawn instead of a generic icon
+
+- Painting a vehicle now requires a pawn to perform the paint job on the vehicle, rather than being instantaneous
+
+- Vehicles can be given a deconstruct designator, breaking the vehicle apart into a fraction of its cost.
+
+- Added basic information to vehicle info card
+
+- Reworked job limitations to apply to prioritized jobs rather than just workgivers.
+
+- Added vehicle stat parts that can be applied to specific vehicle defs and not just entire vehicle stat defs.
+
+- Adjusted ModSettings UI for better float and integer box inputs.
+[title]Final Notes[/title][font]Small[/font]
+Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
+</description>
+  <!--Static parameterless method to execute when update log is executed-->
+  <actionOnUpdate></actionOnUpdate>
+  <!--Show update log on next startup.-->
+  <update>false</update>
+  <!--Testing mode prevents the update from saving over the UpdateLog file-->
+  <testing>false</testing>
+  <!--Icon bar shown to the right of the mod's name-->
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon</icon>
+      <url>steam://url/CommunityFilePage/2356577528</url>
+    </li>
+  </rightIconBar>
+  <!--Icon bar shown to the left of the mod's name-->
+  <leftIconBar>
+    <li>
+      <name>Patreon</name>
+      <icon>patreonIcon</icon>
+      <url>https://www.patreon.com/smashphil</url>
+    </li>
+    <li>
+      <name>Cursed Crew</name>
+      <icon>cursedCrewIcon</icon>
+      <url>https://discord.gg/NNe2VxAU7Z</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>

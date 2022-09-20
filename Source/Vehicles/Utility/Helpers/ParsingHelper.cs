@@ -94,7 +94,7 @@ namespace Vehicles
 			{
 				setDefaultValues.Add(defName, new Dictionary<string, string>());
 			}
-			setDefaultValues[defName].Add(node.Name, value);
+			setDefaultValues[defName][node.Name] = value;
 		}
 
 		private static void CheckDisabledSettings(XmlNode node, string value, FieldInfo field)

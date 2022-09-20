@@ -182,7 +182,7 @@ namespace Vehicles
 
 		public bool NoGraphic => turretDef.graphicData is null;
 
-		public bool CanAutoTarget => autoTargeting || DebugSettings.godMode;
+		public bool CanAutoTarget => autoTargeting || VehicleMod.settings.debug.debugShootAnyTurret;
 
 		public int MaxTicks => Mathf.CeilToInt(turretDef.reloadTimer * 60f);
 
@@ -194,7 +194,7 @@ namespace Vehicles
 
 		public List<VehicleHandler> RelatedHandlers => vehicle.handlers.FindAll(h => !h.role.turretIds.NullOrEmpty() && h.role.turretIds.Contains(key));
 
-		public bool IsManned => (RelatedHandlers?.All(handler => handler.RoleFulfilled) ?? true) || DebugSettings.godMode;
+		public bool IsManned => (RelatedHandlers?.All(handler => handler.RoleFulfilled) ?? true) || VehicleMod.settings.debug.debugShootAnyTurret;
 
 		public bool HasAmmo => turretDef.ammunition is null || shellCount > 0;
 

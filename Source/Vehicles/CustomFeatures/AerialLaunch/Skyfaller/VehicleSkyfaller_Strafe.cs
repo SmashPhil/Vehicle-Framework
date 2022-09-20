@@ -50,7 +50,7 @@ namespace Vehicles
 				{
 					CompVehicleTurrets.TurretData turretData = turrets[i];
 					VehicleTurret turret = turretData.turret;
-					if (!turret.HasAmmo && !DebugSettings.godMode)
+					if (!turret.HasAmmo && !VehicleMod.settings.debug.debugShootAnyTurret)
 					{
 						turrets.Remove(turretData);
 						shotsFired = turrets.NullOrEmpty();

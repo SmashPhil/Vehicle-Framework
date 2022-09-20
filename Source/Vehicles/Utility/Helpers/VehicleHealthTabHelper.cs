@@ -136,7 +136,7 @@ namespace Vehicles
 				{
 					Rect compRect = new Rect(rect.x, curY, rect.width - 16, ComponentRowHeight);
 					float usedHeight = DrawCompRow(compRect, component, labelWidth, columnWidth, alternatingRow);
-					TooltipHandler.TipRegion(compRect, "VehicleComponentClickMoreInfo".Translate());
+					//TooltipHandler.TipRegion(compRect, "VehicleComponentClickMoreInfo".Translate());
 					Rect highlightingRect = new Rect(compRect)
 					{
 						height = usedHeight
@@ -199,7 +199,7 @@ namespace Vehicles
 			labelRect.x += columnWidth;
 			Widgets.Label(labelRect, component.Efficiency.ToStringPercent().Colorize(component.ComponentEfficiencyColor()));
 			labelRect.x += columnWidth;
-			Widgets.Label(labelRect, component.ArmorRating.ToStringPercent());
+			Widgets.Label(labelRect, component.ArmorRating(null).ToStringPercent());
 			labelRect.x += columnWidth;
 
 			Rect iconRect = new Rect(labelRect.x, labelRect.y, ComponentIndicatorIconSize, ComponentIndicatorIconSize);

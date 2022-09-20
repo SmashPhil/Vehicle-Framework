@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
+using RimWorld;
 using SmashTools;
 
 namespace Vehicles
@@ -15,12 +16,13 @@ namespace Vehicles
 		public Type compClass;
 
 		public int health;
-		public float armor;
+		public VehicleComponent.VehiclePartDepth depth = VehicleComponent.VehiclePartDepth.External; //currently unused
 		public int efficiencyWeight = 1;
+		public List<StatModifier> armor;
+		public bool priorityStatEfficiency = false;
 
 		public ComponentHitbox hitbox = new ComponentHitbox();
 		public List<VehicleStatDef> categories;
-
 		public SimpleCurve efficiency;
 
 		public List<Reactor> reactors;

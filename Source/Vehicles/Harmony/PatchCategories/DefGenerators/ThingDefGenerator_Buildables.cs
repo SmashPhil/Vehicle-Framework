@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
+using RimWorld;
+using UnityEngine;
 
 namespace Vehicles
 {
@@ -23,12 +25,12 @@ namespace Vehicles
 					selectable = vehicleDef.selectable,
 					altitudeLayer = vehicleDef.altitudeLayer,
 					terrainAffordanceNeeded = vehicleDef.terrainAffordanceNeeded,
-					constructEffect = vehicleDef.constructEffect,
+					constructEffect = vehicleDef.constructEffect ?? EffecterDefOf.ConstructMetal,
 					leaveResourcesWhenKilled = vehicleDef.leaveResourcesWhenKilled,
 					passability = vehicleDef.passability,
 					fillPercent = vehicleDef.fillPercent,
 					neverMultiSelect = true,
-					designationCategory = vehicleDef.designationCategory,
+					designationCategory = vehicleDef.designationCategory ?? DesignationCategoryDefOf.Structure,
 					clearBuildingArea = true,
 					category = ThingCategory.Building,
 					blockWind = vehicleDef.blockWind,
@@ -46,7 +48,8 @@ namespace Vehicles
 					graphicData = new GraphicData()
 				};
 				impliedBuildDef.graphicData.CopyFrom(vehicleDef.graphicData);
-				impliedBuildDef.graphicData.graphicClass = vehicleDef.graphicData.drawRotated ? typeof(Graphic_Single) : typeof(Graphic_Multi);
+				Type graphicClass = vehicleDef.graphicData.drawRotated ? typeof(Graphic_Multi) : typeof(Graphic_Single);
+				impliedBuildDef.graphicData.graphicClass = graphicClass;
 				return true;
 			}
 			return false;

@@ -166,20 +166,18 @@ namespace Vehicles
 		
 		private void TryDrawMassInfo(ref float curY, float width)
 		{
-			if (SelPawnForCargo.beached)
-				return;
 			Rect rect = new Rect(0f, curY, width, StandardLineHeight);
 			float cannonsNum = 0f;
-			if(SelPawnForCargo.TryGetComp<CompVehicleTurrets>() != null)
+			if (SelPawnForCargo.TryGetComp<CompVehicleTurrets>() != null)
 			{
 				foreach (VehicleTurret turret in SelPawnForCargo.CompVehicleTurrets.turrets)
 				{
 					cannonsNum += turret.loadedAmmo is null ? 0f : turret.loadedAmmo.BaseMass * turret.shellCount;
 				}
 			}
-			float num = MassUtility.GearAndInventoryMass(SelPawnForCargo) + cannonsNum;
-			float num2 = MassUtility.Capacity(SelPawnForCargo, null);
-			Widgets.Label(rect, "MassCarried".Translate(num.ToString("0.##"), num2.ToString("0.##")));
+			float mass = MassUtility.GearAndInventoryMass(SelPawnForCargo) + cannonsNum;
+			float capacity = MassUtility.Capacity(SelPawnForCargo, null);
+			Widgets.Label(rect, "MassCarried".Translate(mass.ToString("0.##"), capacity.ToString("0.##")));
 			curY += StandardLineHeight;
 		}
 

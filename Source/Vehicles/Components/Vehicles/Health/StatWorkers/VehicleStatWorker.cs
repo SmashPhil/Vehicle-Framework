@@ -33,7 +33,7 @@ namespace Vehicles
 			return value.Clamp(statDef.minValue, statDef.maxValue);
 		}
 
-		public float StatEfficiency(VehiclePawn vehicle)
+		public virtual float StatEfficiency(VehiclePawn vehicle)
 		{
 			return vehicle.statHandler.StatEfficiency(statDef);
 		}
@@ -139,7 +139,7 @@ namespace Vehicles
 
 		public virtual string TipSignal(VehiclePawn vehicle)
 		{
-			return string.Empty;
+			return statDef.description;
 		}
 
 		public virtual string GetStatDrawEntryLabel(VehicleStatDef stat, float value, ToStringNumberSense numberSense, bool finalized = true)
