@@ -11,6 +11,8 @@
 - Fixed bug where AssignDefaults xml attribute would attempt to add a duplicate custom cost.
 
 - Fixed damage / deflection / penetration calculation which is supposed to immitate vanilla RNG damage mechanics.
+
+- Fixed bug where damaging components through dev mode would not notify vehicle of damage, resulting in no deconstruction or undrafting.
 [title]Additional Changes[/title][font]Small[/font]
 - Removed "Click for More Info tooltip on vehicle components health menu until further notice.  I need to actually add an additional window for more details.
 

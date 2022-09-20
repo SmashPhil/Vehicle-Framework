@@ -27,7 +27,7 @@ namespace Vehicles
 			{
 				throw new InvalidOperationException($"Total health of VehicleDef {vehicle.VehicleDef} is less than or equal to 0.");
 			}
-			value = current / total;
+			value = (current / total).RoundTo(0.001f);
 			return base.TransformValue(vehicle, value);
 		}
 	}

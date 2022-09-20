@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Verse;
 using RimWorld;
+using UnityEngine;
 
 namespace Vehicles
 {
@@ -39,13 +40,20 @@ namespace Vehicles
 
 		public void Notify_VehicleTookDamage(VehiclePawn vehicle)
 		{
-			if (vehicle.statHandler.NeedsRepairs)
+			if (vehicle.statHandler.NeedsRepairs && !Mathf.Approximately(vehicle.GetStatValue(VehicleStatDefOf.BodyIntegrity), 0))
 			{
 				if (vehiclesToRepair.TryGetValue(vehicle.Faction, out var vehicles))
 				{
-					vehicles.Add(vehicle);
+					if (vehicle.Spawned)
+					{
+						vehicles.Add(vehicle);
+					}
+					else 
+					{
+						vehicles.Remove(vehicle);
+					}
 				}
-				else
+				else if (vehicle.Spawned)
 				{
 					vehiclesToRepair.Add(vehicle.Faction, new HashSet<VehiclePawn>() { vehicle });
 				}

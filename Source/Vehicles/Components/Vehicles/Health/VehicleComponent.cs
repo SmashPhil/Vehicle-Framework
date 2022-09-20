@@ -59,6 +59,20 @@ namespace Vehicles
 			health -= dinfo.Amount;
 			float remainingDamage = -health;
 			health = health.Clamp(0, props.health);
+
+			if (dinfo.Amount > 0)
+			{
+				vehicle.EventRegistry[VehicleEventDefOf.DamageTaken].ExecuteEvents();
+				if (vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed) <= 0.1f)
+				{
+					vehicle.drafter.Drafted = false;
+				}
+				if (vehicle.Spawned && Mathf.Approximately(vehicle.GetStatValue(VehicleStatDefOf.BodyIntegrity), 0))
+				{
+					vehicle.Kill(dinfo);
+				}
+			}
+
 			if (!penetrated || health > (props.health / 2f))
 			{
 				dinfo.SetAmount(0);

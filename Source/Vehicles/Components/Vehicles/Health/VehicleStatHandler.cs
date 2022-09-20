@@ -191,16 +191,11 @@ namespace Vehicles
 			}
 
 			Debug.Message(report.ToStringSafe());
-
-			if (vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed) <= 0.1f)
-			{
-				vehicle.drafter.Drafted = false;
-			}
-
-			if (vehicle.Spawned && (vehicle.GetStatValue(VehicleStatDefOf.BodyIntegrity) <= 0 || components.All(c => c.health <= 0)))
-			{
-				vehicle.Kill(dinfo);
-			}
+			
+			//if (vehicle.Spawned && Mathf.Approximately(vehicle.GetStatValue(VehicleStatDefOf.BodyIntegrity), 0))
+			//{
+			//	vehicle.Kill(dinfo);
+			//}
 		}
 
 		private void ApplyDamageToComponent(DamageInfo dinfo, IntVec2 hitCell, bool explosive = false, StringBuilder report = null)
@@ -211,7 +206,7 @@ namespace Vehicles
 			report?.AppendLine("-- DAMAGE REPORT --");
 			report?.AppendLine($"Base Damage: {damage}");
 			report?.AppendLine($"HitCell: {hitCell}");
-
+			
 			if (dinfo.Weapon?.GetModExtension<VehicleDamageMultiplierDefModExtension>() is VehicleDamageMultiplierDefModExtension weaponMultiplier)
 			{
 				damage *= weaponMultiplier.multiplier;
@@ -246,7 +241,6 @@ namespace Vehicles
 				return;
 			}
 			dinfo.SetAmount(damage);
-			vehicle.EventRegistry[VehicleEventDefOf.DamageTaken].ExecuteEvents();
 			if (explosive)
 			{
 				IntVec2 cell = new IntVec2(hitCell.x, hitCell.z);
@@ -256,6 +250,10 @@ namespace Vehicles
 					IntVec2 cellOffset = cell;
 					for (int e = 0, seq = 0; e < 1 + i * 2; seq += e % 2 == 0 ? 1 : 0, e++)
 					{
+						if (!vehicle.Spawned)
+						{
+							return;
+						}
 						int seqAlt = e % 2 == 0 ? seq : -seq;
 						float stepDamage = dinfo.Amount / (1 + i * 2);
 						if (direction.IsHorizontal)
@@ -313,6 +311,10 @@ namespace Vehicles
 				Rot4 direction = DirectionFromAngle(dinfo.Angle);
 				for (int i = 0; i < Mathf.Max(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z); i++)
 				{
+					if (!vehicle.Spawned)
+					{
+						return;
+					}
 					VehicleComponent component = componentLocations.TryGetValue(cell, componentLocations[IntVec2.Zero]).Where(c => c.HealthPercent > 0).RandomElementWithFallback();
 					if (component is null)
 					{
@@ -372,7 +374,6 @@ namespace Vehicles
 					}
 				}
 			}
-			vehicle.Map?.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleTookDamage(vehicle);
 		}
 
 		private void DamageRoles(DamageInfo dinfo, IntVec2 cell)

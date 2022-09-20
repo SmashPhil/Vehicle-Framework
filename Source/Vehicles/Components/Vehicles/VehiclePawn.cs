@@ -827,7 +827,6 @@ namespace Vehicles
 							options.Add(new FloatMenuOption(component.props.label, delegate ()
 							{
 								component.TakeDamage(this, new DamageInfo(DamageDefOf.Bite, float.MaxValue), Position);
-								Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleTookDamage(this);
 							}));
 						}
 						if (!options.NullOrEmpty())
@@ -847,7 +846,6 @@ namespace Vehicles
 							options.Add(new FloatMenuOption(component.props.label, delegate ()
 							{
 								component.TakeDamage(this, new DamageInfo(DamageDefOf.Bite, component.health * Rand.Range(0.1f, 1)), Position);
-								Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleTookDamage(this);
 							}));
 						}
 						if (!options.NullOrEmpty())
@@ -1045,7 +1043,7 @@ namespace Vehicles
 			Map mapHeld = MapHeld;
 			bool spawned = Spawned;
 			bool worldPawn = this.IsWorldPawn();
-			Caravan caravan = this.GetCaravan();
+			VehicleCaravan caravan = this.GetCaravan() as VehicleCaravan;
 			ThingDef vehicleDef = VehicleDef.buildDef;
 
 			if (Current.ProgramState == ProgramState.Playing)
@@ -2062,6 +2060,20 @@ namespace Vehicles
 			base.Destroy(mode);
 		}
 
+		public virtual void Notify_TookDamage()
+		{
+			Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleTookDamage(this);
+		}
+
+		protected override void ReceiveCompSignal(string signal)
+		{
+			if (signal == CompSignals.RanOutOfFuel)
+			{
+				vPather.StopDead();
+				drafter.Drafted = false;
+			}
+		}
+
 		public override void Tick()
 		{
 			BaseTickOptimized();
@@ -2089,15 +2101,6 @@ namespace Vehicles
 				{
 					comp.CompTick();
 				}
-			}
-		}
-
-		protected override void ReceiveCompSignal(string signal)
-		{
-			if (signal == CompSignals.RanOutOfFuel)
-			{
-				vPather.StopDead();
-				drafter.Drafted = false;
 			}
 		}
 

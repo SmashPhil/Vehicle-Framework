@@ -71,6 +71,9 @@ namespace Vehicles
 		{
 			switch (mode)
 			{
+				case DestroyMode.KillFinalize:
+					vehicle.RefundMaterials(map, mode, multiplier: 0.25f);
+					break;
 				case DestroyMode.Deconstruct:
 					vehicle.RefundMaterials(map, mode, multiplier: vehicle.VehicleDef.resourcesFractionWhenDeconstructed);
 					break;
