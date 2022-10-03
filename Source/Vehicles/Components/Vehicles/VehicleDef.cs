@@ -74,6 +74,8 @@ namespace Vehicles
 		[Unsaved]
 		private Texture2D resolvedCancelCargoTexture;
 
+		public VehicleFleshTypeDef BodyType => kindDef.RaceProps.FleshType as VehicleFleshTypeDef;
+
 		/// <summary>
 		/// Icon used for LoadCargo gizmo
 		/// </summary>

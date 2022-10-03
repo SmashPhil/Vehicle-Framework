@@ -370,6 +370,12 @@
     <Compile Include="Components\Vehicles\Health\Reactors\Reactor_Explosive.cs" />
     <Compile Include="Components\Vehicles\Health\StatWorkers\VehicleStatWorker_BodyIntegrity.cs" />
     <Compile Include="Components\Vehicles\Health\VehicleStatDrawEntry.cs" />
+    <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Handlers.cs" />
+    <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Caravan.cs" />
+    <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_AI.cs" />
+    <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Tickers.cs" />
+    <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Health.cs" />
+    <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Rendering.cs" />
     <Compile Include="Comps\CompSignals.cs" />
     <Compile Include="CustomFeatures\SharedJobs\SharedJob.cs" />
     <Compile Include="AI\JobDrivers\VehicleJobDriver.cs" />
@@ -666,6 +672,7 @@
     <Compile Include="Utility\Helpers\SelectionHelper.cs" />
     <Compile Include="Utility\Helpers\GizmoHelper.cs" />
     <Compile Include="Utility\Helpers\MultithreadHelper.cs" />
+    <Compile Include="Utility\Helpers\SoundHelper.cs" />
     <Compile Include="Utility\Helpers\VehicleHealthTabHelper.cs" />
     <Compile Include="Utility\Helpers\XmlHelper.cs" />
     <Compile Include="Utility\Helpers\SkyfallerHelper.cs" />
@@ -688,7 +695,7 @@
     <Compile Include="World\Caravan\VehicleCaravan.cs" />
     <Compile Include="Components\Vehicles\VehicleHandler.cs" />
     <Compile Include="Pathing\Map\VehiclePathFinder.cs" />
-    <Compile Include="Components\Vehicles\VehiclePawn.cs" />
+    <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn.cs" />
     <Compile Include="Components\Rendering\VehicleRenderer.cs" />
     <Compile Include="Components\Vehicles\VehicleRole.cs" />
     <Compile Include="World\Caravan\VehicleCaravanTicksPerMoveUtility.cs" />

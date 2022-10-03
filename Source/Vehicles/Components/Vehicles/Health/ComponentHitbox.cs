@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Verse;
 using UnityEngine;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -21,6 +22,15 @@ namespace Vehicles
 		public bool Contains(IntVec2 cell) => Hitbox?.Contains(cell) ?? false;
 
 		public bool Contains(IntVec3 cell) => Hitbox?.Contains(new IntVec2(cell.x, cell.z)) ?? false;
+
+		public IntVec2 NearestTo(IntVec2 cell)
+		{
+			if (Hitbox.Count == 1)
+			{
+				return Hitbox[0];
+			}
+			return Hitbox.MinBy(hb => (hb - cell).Magnitude);
+		}
 
 		public void Initialize(VehicleDef def)
 		{

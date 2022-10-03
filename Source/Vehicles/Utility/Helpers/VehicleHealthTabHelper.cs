@@ -197,7 +197,8 @@ namespace Vehicles
 			Text.Anchor = TextAnchor.MiddleCenter;
 			Widgets.Label(labelRect, component.HealthPercent.ToStringPercent().Colorize(component.ComponentEfficiencyColor()));
 			labelRect.x += columnWidth;
-			Widgets.Label(labelRect, component.Efficiency.ToStringPercent().Colorize(component.ComponentEfficiencyColor()));
+			string efficiencyEntry = component.props.categories.NullOrEmpty() ? "-" : component.Efficiency.ToStringPercent().Colorize(component.ComponentEfficiencyColor());
+			Widgets.Label(labelRect, efficiencyEntry);
 			labelRect.x += columnWidth;
 			Widgets.Label(labelRect, component.ArmorRating(null).ToStringPercent());
 			labelRect.x += columnWidth;

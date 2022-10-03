@@ -62,7 +62,7 @@ namespace Vehicles
 				List<VehiclePawn> vehicles = ((LordJob_FormAndSendVehicles)lord.LordJob).vehicles;
 				foreach (VehiclePawn vehicle in vehicles)
 				{
-					downedPawns.RemoveAll(pawn => vehicle.HasPawn(pawn));
+					downedPawns.RemoveAll(pawn => vehicle.AllPawnsAboard.Contains(pawn));
 				}
 				CheckMemo(downedPawns);
 			}

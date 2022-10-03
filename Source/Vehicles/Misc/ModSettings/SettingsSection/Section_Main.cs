@@ -232,7 +232,7 @@ namespace Vehicles
 
 				listingStandard.Header("VF_VehicleTurrets".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 				listingStandard.CheckboxLabeled("VF_TurretOverheatMechanics".Translate(), ref overheatMechanics, "VF_TurretOverheatMechanicsTooltip".Translate());
-
+				listingStandard.Gap(4);
 				listingStandard.End();
 			}
 			GUIState.Pop();

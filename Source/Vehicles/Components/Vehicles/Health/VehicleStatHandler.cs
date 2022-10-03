@@ -13,6 +13,11 @@ namespace Vehicles
 	{
 		private const int TicksHighlighted = 100;
 
+		private const float ChanceDirectHit = 1.25f;
+		private const float ChanceFallthroughHit = 1;
+		private const float ChanceMinorDeflectHit = 0.75f;
+		private const float ChanceMajorDeflectHit = 0.75f;
+
 		private VehiclePawn vehicle;
 		public List<VehicleComponent> components = new List<VehicleComponent>();
 		private readonly Dictionary<IntVec2, List<VehicleComponent>> componentLocations = new Dictionary<IntVec2, List<VehicleComponent>>();
@@ -119,14 +124,28 @@ namespace Vehicles
 			}
 		}
 
-		public void RegisterImpacter(Thing launcher, IntVec3 cell)
+		/// <summary>
+		/// Registers instigator to specific cell so that damage can be applied to the vehicle components belonging to that area of the hitbox.
+		/// </summary>
+		/// <remarks>The instigator is immediately deregistered upon dealing damage to make way for multiple damage instances from the same instigator (won't conflict with synchronous operations)</remarks>
+		/// <param name="thing"></param>
+		/// <param name="cell"></param>
+		public void RegisterImpacter(Thing thing, IntVec3 cell)
 		{
 			CellRect occupiedRect = vehicle.OccupiedRect();
 			if (!occupiedRect.Contains(cell))
 			{
 				cell = occupiedRect.MinBy(c => Ext_Map.Distance(c, cell));
 			}
-			impacter[launcher] = cell;
+			impacter[thing] = cell;
+		}
+
+		public void DeregisterImpacter(Thing thing)
+		{
+			if (thing != null)
+			{
+				impacter.Remove(thing);
+			}
 		}
 
 		private IntVec2 AdjustFromVehiclePosition(IntVec2 cell)
@@ -162,9 +181,9 @@ namespace Vehicles
 			return hitCell;
 		}
 
-		public void TakeDamage(DamageInfo dinfo, bool explosive = false)
+		public void TakeDamage(DamageInfo dinfo)
 		{
-			if (!impacter.TryGetValue(dinfo.Instigator, out IntVec3 cell))
+			if (dinfo.Instigator is null || !impacter.TryGetValue(dinfo.Instigator, out IntVec3 cell))
 			{
 				if (dinfo.Instigator != null)
 				{
@@ -176,29 +195,19 @@ namespace Vehicles
 				}
 			}
 			IntVec2 hitCell = AdjustFromVehiclePosition(cell.ToIntVec2);
-			TakeDamage(dinfo, hitCell, explosive);
+			TakeDamage(dinfo, hitCell);
 		}
 
-		public void TakeDamage(DamageInfo dinfo, IntVec2 hitCell, bool explosive = false)
+		public void TakeDamage(DamageInfo dinfo, IntVec2 hitCell)
 		{
 			StringBuilder report = VehicleMod.settings.debug.debugLogging ? new StringBuilder() : null;
 
-			ApplyDamageToComponent(dinfo, hitCell, explosive, report);
-
-			if (dinfo.Instigator != null)
-			{
-				impacter.Remove(dinfo.Instigator);
-			}
-
+			ApplyDamageToComponent(dinfo, hitCell, report);
+			DeregisterImpacter(dinfo.Instigator);
 			Debug.Message(report.ToStringSafe());
-			
-			//if (vehicle.Spawned && Mathf.Approximately(vehicle.GetStatValue(VehicleStatDefOf.BodyIntegrity), 0))
-			//{
-			//	vehicle.Kill(dinfo);
-			//}
 		}
 
-		private void ApplyDamageToComponent(DamageInfo dinfo, IntVec2 hitCell, bool explosive = false, StringBuilder report = null)
+		private void ApplyDamageToComponent(DamageInfo dinfo, IntVec2 hitCell, StringBuilder report = null)
 		{
 			DamageDef defApplied = dinfo.Def;
 			float damage = dinfo.Amount;
@@ -241,151 +250,137 @@ namespace Vehicles
 				return;
 			}
 			dinfo.SetAmount(damage);
-			if (explosive)
+			Rot4 direction = DirectionFromAngle(dinfo.Angle);
+			VehicleComponent.VehiclePartDepth hitDepth = VehicleComponent.VehiclePartDepth.External;
+			for (int i = 0; i < Mathf.Max(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z); i++)
 			{
-				IntVec2 cell = new IntVec2(hitCell.x, hitCell.z);
-				Rot4 direction = DirectionFromAngle(dinfo.Angle);
-				for (int i = 0; i < Mathf.Max(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z); i++)
+				if (!vehicle.Spawned || dinfo.Amount <= 0)
 				{
-					IntVec2 cellOffset = cell;
-					for (int e = 0, seq = 0; e < 1 + i * 2; seq += e % 2 == 0 ? 1 : 0, e++)
+					return;
+				}
+				VehicleComponent component = null;
+				report?.AppendLine($"Damaging = {hitCell}");
+				if (componentLocations.TryGetValue(hitCell, out List<VehicleComponent> components))
+				{
+					report?.AppendLine($"components=({string.Join(",", components.Select(c => c.props.label))})");
+					report?.AppendLine($"hitDepth = {hitDepth}");
+					//If no components at hit cell, fallthrough to internal
+					if (!components.Where(comp => comp.props.depth == hitDepth && comp.HealthPercent > 0).TryRandomElement(out component))
 					{
-						if (!vehicle.Spawned)
+						report?.AppendLine($"No components found. Hitting internal parts.");
+						hitDepth = VehicleComponent.VehiclePartDepth.Internal;
+						//If depth = internal then pick random internal component even if it does not have a hitbox
+						component = this.components.Where(comp => comp.props.depth == hitDepth && comp.HealthPercent > 0).RandomElementWithFallback();
+						//If no internal components, pick random component w/ health
+						component ??= this.components.Where(comp => comp.HealthPercent > 0).RandomElementWithFallback();
+						if (component is null)
 						{
 							return;
 						}
-						int seqAlt = e % 2 == 0 ? seq : -seq;
-						float stepDamage = dinfo.Amount / (1 + i * 2);
-						if (direction.IsHorizontal)
-						{
-							cellOffset.z = seqAlt;
-						}
-						else
-						{
-							cellOffset.x = seqAlt;
-						}
-						VehicleComponent component = componentLocations.TryGetValue(cellOffset, componentLocations[new IntVec2(0, 0)]).Where(c => c.HealthPercent > 0).RandomElementWithFallback();
-						if (component is null)
-						{
-							continue;
-						}
-						if (!cell.IsValid)
-						{
-							break;
-						}
-						if (VehicleMod.settings.debug.debugDrawHitbox)
-						{
-							debugCellHighlight.Add(new Pair<IntVec2, int>(new IntVec2(cellOffset.x, cellOffset.z), TicksHighlighted));
-						}
-						dinfo.SetAmount(stepDamage);
-						DamageRoles(dinfo, cellOffset);
-						component.TakeDamage(vehicle, ref dinfo, new IntVec3(vehicle.Position.x + hitCell.x, 0, vehicle.Position.z + hitCell.z));
-					}
-					if (dinfo.Amount > 0 && direction.IsValid)
-					{
-						switch (direction.AsInt)
-						{
-							case 0:
-								cell.z += 1;
-								break;
-							case 1:
-								cell.x += 1;
-								break;
-							case 2:
-								cell.z -= 1;
-								break;
-							case 3:
-								cell.x -= 1;
-								break;
-						}
 					}
 					else
 					{
-						break;
+						report?.AppendLine($"Found {component} at {hitCell}");
 					}
 				}
-			}
-			else
-			{
-				IntVec2 cell = hitCell;
-				Rot4 direction = DirectionFromAngle(dinfo.Angle);
-				for (int i = 0; i < Mathf.Max(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z); i++)
+				else
 				{
-					if (!vehicle.Spawned)
+					report?.AppendLine($"No components found. Hitting internal parts.");
+					hitDepth = VehicleComponent.VehiclePartDepth.Internal;
+					//If depth = internal then pick random internal component even if it does not have a hitbox
+					component = this.components.Where(comp => comp.props.depth == hitDepth && comp.HealthPercent > 0).RandomElementWithFallback();
+					//If no internal components, pick random component w/ health
+					component ??= this.components.Where(comp => comp.HealthPercent > 0).RandomElementWithFallback();
+					if (component is null)
 					{
 						return;
 					}
-					VehicleComponent component = componentLocations.TryGetValue(cell, componentLocations[IntVec2.Zero]).Where(c => c.HealthPercent > 0).RandomElementWithFallback();
-					if (component is null)
-					{
-						if (dinfo.Amount > 0 && direction.IsValid)
-						{
-							switch (direction.AsInt)
-							{
-								case 0:
-									cell.z += 1;
-									break;
-								case 1:
-									cell.x += 1;
-									break;
-								case 2:
-									cell.z -= 1;
-									break;
-								case 3:
-									cell.x -= 1;
-									break;
-							}
-						}
-						continue;
-					}
-					if (!cell.IsValid)
-					{
-						break;
-					}
-					if (VehicleMod.settings.debug.debugDrawHitbox)
-					{
-						debugCellHighlight.Add(new Pair<IntVec2, int>(new IntVec2(cell.x, cell.z), TicksHighlighted));
-					}
-					report?.AppendLine($"Applying Damage = {dinfo.Amount} to {component.props.key}");
-					DamageRoles(dinfo, cell);
-					component.TakeDamage(vehicle, ref dinfo, new IntVec3(vehicle.Position.x + hitCell.x, 0, vehicle.Position.z + hitCell.z));
-					report?.AppendLine($"Fallthrough Damage = {dinfo.Amount}");
-					if (dinfo.Amount > 0 && direction.IsValid)
-					{
-						switch (direction.AsInt)
-						{
-							case 0:
-								cell.z += 1;
-								break;
-							case 1:
-								cell.x += 1;
-								break;
-							case 2:
-								cell.z -= 1;
-								break;
-							case 3:
-								cell.x -= 1;
-								break;
-						}
-					}
-					else
-					{
-						break;
-					}
 				}
+				if (!hitCell.IsValid)
+				{
+					break;
+				}
+				if (VehicleMod.settings.debug.debugDrawHitbox)
+				{
+					debugCellHighlight.Add(new Pair<IntVec2, int>(hitCell, TicksHighlighted));
+				}
+				report?.AppendLine($"Damaging {hitCell}");
+				if (hitDepth == VehicleComponent.VehiclePartDepth.Internal && HitPawn(dinfo, hitCell, direction, out Pawn hitPawn))
+				{
+					report?.AppendLine($"Hit {hitPawn} for {dinfo.Amount}. Impact site = {hitCell}");
+					return;
+				}
+				report?.AppendLine($"Applying Damage = {dinfo.Amount} to {component.props.key} at {hitCell}");
+				VehicleComponent.Penetration result = component.TakeDamage(vehicle, ref dinfo);
+				//Effecters and sounds only for first hit
+				if (i == 0)
+				{
+					IntVec3 impactCell = new IntVec3(vehicle.Position.x + hitCell.x, 0, vehicle.Position.z + hitCell.z);
+					vehicle.Notify_DamageImpact(new VehicleComponent.DamageResult()
+					{
+						penetration = result,
+						damageInfo = dinfo,
+						cell = hitCell
+					});
+				}
+				report?.AppendLine($"Fallthrough Damage = {dinfo.Amount}");
 			}
 		}
 
-		private void DamageRoles(DamageInfo dinfo, IntVec2 cell)
+		private bool HitPawn(DamageInfo dinfo, IntVec2 cell, Rot4 dir, out Pawn hitPawn, StringBuilder report = null)
 		{
-			var effectedHandlers = vehicle.handlers.Where(h => h.role.hitbox.Contains(cell)).ToList();
-			foreach (VehicleHandler handler in effectedHandlers)
+			VehicleHandler handler;
+			float multiplier = 1;
+			hitPawn = null;
+			if (TrySelectHandler(cell, out handler))
 			{
-				foreach (Pawn pawn in handler.handlers.InnerListForReading)
+				multiplier = ChanceDirectHit;
+			}
+			else if (dir.IsValid)
+			{
+				//Check immediately behind
+				if (TrySelectHandler(cell.Shifted(dir, 1), out handler))
 				{
-					pawn.TakeDamage(dinfo);
+					multiplier = ChanceFallthroughHit;
+				}
+				else
+				{
+					//Directly left
+					if (TrySelectHandler(cell.Shifted(dir, 0, -1), out handler))
+					{
+						multiplier = ChanceMajorDeflectHit;
+					}
+					//Directly right
+					else if (TrySelectHandler(cell.Shifted(dir, 0, 1), out handler))
+					{
+						multiplier = ChanceMajorDeflectHit;
+					}
+					//Behind and left
+					else if (TrySelectHandler(cell.Shifted(dir, 1, -1), out handler))
+					{
+						multiplier = ChanceMinorDeflectHit;
+					}
+					//Behind and right
+					else if (TrySelectHandler(cell.Shifted(dir, 1, 1), out handler))
+					{
+						multiplier = ChanceMinorDeflectHit;
+					}
 				}
 			}
+			if (handler != null && handler.handlers.Count > 0 && Rand.Chance(handler.role.chanceToHit * multiplier))
+			{
+				hitPawn = handler.handlers.InnerListForReading.RandomElement();
+				report?.AppendLine($"Hitting {handler} with chance {handler.role.chanceToHit * multiplier}");
+				hitPawn.TakeDamage(dinfo);
+				return true;
+			}
+			return false;
+		}
+
+		private bool TrySelectHandler(IntVec2 cell, out VehicleHandler handler)
+		{
+			handler = vehicle.handlers.FirstOrDefault(handler => handler.role.hitbox != null && handler.role.hitbox.Contains(cell) && handler.handlers.Count > 0);
+			return handler != null;
 		}
 
 		private Rot4 DirectionFromAngle(float angle)

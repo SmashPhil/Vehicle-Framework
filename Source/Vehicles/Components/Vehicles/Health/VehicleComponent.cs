@@ -37,29 +37,24 @@ namespace Vehicles
 			}
 		}
 
-		public void TakeDamage(VehiclePawn vehicle, DamageInfo dinfo, IntVec3 cell)
+		public void TakeDamage(VehiclePawn vehicle, DamageInfo dinfo)
 		{
-			TakeDamage(vehicle, ref dinfo, cell);
+			TakeDamage(vehicle, ref dinfo);
 		}
 
-		public virtual void TakeDamage(VehiclePawn vehicle, ref DamageInfo dinfo, IntVec3 cell)
+		public virtual Penetration TakeDamage(VehiclePawn vehicle, ref DamageInfo dinfo)
 		{
-			ReduceDamageFromArmor(ref dinfo, out bool penetrated);
-			if (cell.IsValid && (dinfo.Amount <= 0 || !penetrated))
-			{
-				vehicle.Drawer.Notify_DamageDeflected(cell);
-			}
+			ReduceDamageFromArmor(ref dinfo, out Penetration result);
 			if (!props.reactors.NullOrEmpty())
 			{
 				foreach (Reactor reactor in props.reactors)
 				{
-					reactor.Hit(vehicle, this, ref dinfo, penetrated);
+					reactor.Hit(vehicle, this, ref dinfo, result);
 				}
 			}
 			health -= dinfo.Amount;
-			float remainingDamage = -health;
+			float remainingDamage = Mathf.Clamp(-health, 0, float.MaxValue);
 			health = health.Clamp(0, props.health);
-
 			if (dinfo.Amount > 0)
 			{
 				vehicle.EventRegistry[VehicleEventDefOf.DamageTaken].ExecuteEvents();
@@ -73,14 +68,17 @@ namespace Vehicles
 				}
 			}
 
-			if (!penetrated || health > (props.health / 2f))
+			if (result > Penetration.Penetrated || health > (props.health / 2f))
 			{
+				//Don't fallthrough until part is below 50% health or damage has penetrated
 				dinfo.SetAmount(0);
 			}
-			else if (remainingDamage > 0 && remainingDamage >= dinfo.Amount / 2)
+			else if (result == Penetration.Penetrated || (remainingDamage > 0 && remainingDamage >= dinfo.Amount / 2))
 			{
+				//If penetrated or remaining damage is above half original damage amount
 				dinfo.SetAmount(remainingDamage);
 			}
+			return result;
 		}
 
 		public virtual void HealComponent(float amount)
@@ -92,9 +90,9 @@ namespace Vehicles
 			}
 		}
 
-		public virtual void ReduceDamageFromArmor(ref DamageInfo dinfo, out bool penetrated)
+		public virtual void ReduceDamageFromArmor(ref DamageInfo dinfo, out Penetration result)
 		{
-			penetrated = false;
+			result = Penetration.NonPenetrated;
 			if (dinfo.Def.armorCategory == null)
 			{
 				return;
@@ -102,12 +100,12 @@ namespace Vehicles
 			StatDef damageType = dinfo.Def.armorCategory.armorRatingStat;
 			float armorRating = ArmorRating(damageType);
 			float armorDiff = armorRating - dinfo.ArmorPenetrationInt;
-			penetrated = props.hitbox.fallthrough;
+			result = props.hitbox.fallthrough ? Penetration.Penetrated : Penetration.NonPenetrated;
 			float chance = Rand.Value;
 			if (chance < (armorDiff / 2))
 			{
 				dinfo.SetAmount(0);
-				penetrated = false;
+				result = Penetration.Deflected;
 			}
 			else
 			{
@@ -115,14 +113,13 @@ namespace Vehicles
 				{
 					float damage = GenMath.RoundRandom(dinfo.Amount / 2);
 					dinfo.SetAmount(damage);
-					penetrated = false;
+					result = Penetration.Diminished;
 					if (dinfo.Def.armorCategory == DamageArmorCategoryDefOf.Sharp)
 					{
 						dinfo.Def = DamageDefOf.Blunt;
 					}
 				}
 			}
-			Debug.Message($"Damaging: {props.label}\nArmor: {armorRating}\nPenetration: {dinfo.ArmorPenetrationInt}\nDamage: {dinfo.Amount}\nFallthrough: {penetrated}");
 		}
 
 		public float ArmorRating(StatDef statDef)
@@ -181,6 +178,22 @@ namespace Vehicles
 			Undefined,
 			External,
 			Internal
+		}
+
+		public enum Penetration
+		{
+			Penetrated,
+			NonPenetrated,
+			Diminished,
+			Deflected,
+		}
+
+		public struct DamageResult
+		{
+			public Penetration penetration;
+
+			public DamageInfo damageInfo;
+			public IntVec2 cell;
 		}
 	}
 }

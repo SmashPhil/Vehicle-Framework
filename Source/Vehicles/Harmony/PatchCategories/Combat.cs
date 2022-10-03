@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Linq;
 using UnityEngine;
 using HarmonyLib;
 using Verse;
 using RimWorld;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -28,6 +30,15 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Thing), nameof(Thing.Destroy)),
 				prefix: new HarmonyMethod(typeof(Combat),
 				nameof(ProjectileMapToWorld)));
+
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Explosion), "AffectCell"),
+				prefix: new HarmonyMethod(typeof(Combat),
+				nameof(AffectVehicleInCell)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(DamageWorker), "ExplosionDamageThing"),
+				postfix: new HarmonyMethod(typeof(Combat),
+				nameof(VehicleMultipleExplosionInstances)),
+				transpiler: new HarmonyMethod(typeof(Combat),
+				nameof(VehicleExplosionDamageTranspiler)));
 		}
 
 		public static void StartingTicksFromTurret(Projectile __instance, ref float __result, Vector3 ___origin, Vector3 ___destination)
@@ -144,6 +155,63 @@ namespace Vehicles
 			{
 				exitMap.LeaveMap();
 			}
+		}
+
+		public static bool AffectVehicleInCell(Explosion __instance, IntVec3 c)
+		{
+			if (__instance.Map.GetCachedMapComponent<VehiclePositionManager>().ClaimedBy(c) is VehiclePawn vehicle)
+			{
+				//If cell is not on edge of vehicle, block explosion
+				return vehicle.OccupiedRect().EdgeCells.Contains(c);
+			}
+			return true;
+		}
+
+		public static void VehicleMultipleExplosionInstances(Thing t, ref List<Thing> damagedThings, List<Thing> ignoredThings, IntVec3 cell)
+		{
+			if (t is VehiclePawn vehicle)
+			{
+				if (ignoredThings != null && ignoredThings.Contains(t))
+				{
+					return;
+				}
+				damagedThings.Remove(vehicle);
+			}
+		}
+
+		public static IEnumerable<CodeInstruction> VehicleExplosionDamageTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+		{
+			List<CodeInstruction> instructionList = instructions.ToList();
+			MethodInfo takeDamageMethod = AccessTools.Method(typeof(Thing), nameof(Thing.TakeDamage));
+			for (int i = 0; i < instructionList.Count; i++)
+			{
+				CodeInstruction instruction = instructionList[i];
+
+				if (instruction.Calls(takeDamageMethod))
+				{
+					//Clear stack for rerouted call
+					yield return new CodeInstruction(opcode: OpCodes.Pop); //ldarg.2 : thing
+					yield return new CodeInstruction(opcode: OpCodes.Pop); //ldloc.1 : dinfo
+
+					yield return new CodeInstruction(opcode: OpCodes.Ldloc_1); //dinfo
+					yield return new CodeInstruction(opcode: OpCodes.Ldarg_2); //thing
+					yield return new CodeInstruction(opcode: OpCodes.Ldarg_S, 5); //cell
+					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(Combat), nameof(Combat.TakeDamageReroute)));
+
+					instruction = instructionList[++i];
+				}
+
+				yield return instruction;
+			}
+		}
+
+		private static DamageWorker.DamageResult TakeDamageReroute(DamageInfo dinfo, Thing thing, IntVec3 cell)
+		{
+			if (thing is VehiclePawn vehicle && vehicle.TryTakeDamage(dinfo, cell, out var result))
+			{
+				return result;
+			}
+			return thing.TakeDamage(dinfo);
 		}
 	}
 }

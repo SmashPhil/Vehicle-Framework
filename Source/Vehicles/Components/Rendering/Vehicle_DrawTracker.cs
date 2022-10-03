@@ -65,14 +65,5 @@ namespace Vehicles
 		{
 			tweener.ResetTweenedPosToRoot();
 		}
-
-		public void Notify_DamageDeflected(IntVec3 cell)
-		{
-			if (vehicle.Destroyed)
-			{
-				return;
-			}
-			//EffecterDefOf.Deflect_Metal.Spawn().Trigger(vehicle, vehicle);
-		}
 	}
 }

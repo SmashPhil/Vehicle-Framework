@@ -10,7 +10,6 @@ namespace Vehicles
 	{
 		public float damage;
 		public float accuracy;
-		public bool explosive = true;
 		public AirDefenseProperties properties = new AirDefenseProperties();
 
 		public int ticksBetweenShots = 20;

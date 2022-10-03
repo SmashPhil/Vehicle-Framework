@@ -17,6 +17,10 @@
 - Removed "Click for More Info tooltip on vehicle components health menu until further notice.  I need to actually add an additional window for more details.
 
 - Removed generic armor value and implemented armor ratings on a per part basis.
+
+- Changed vehicle damage mechanics to instead only take directional damage to external armor.  After external armor has been penetrated at that cell, it will fall through and have a chance to hit any internal or undefined part of the vehicle.
+
+- Added effector and sound options to VehicleFleshTypeDef for all vehicles.  Defaults will be assigned for Wooden, Metal, and Spacer vehicle flesh types which are included in the framework but you're free to make your own.
 [title]Final Notes[/title][font]Small[/font]
 Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
 </description>

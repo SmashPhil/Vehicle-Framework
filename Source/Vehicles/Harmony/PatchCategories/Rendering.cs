@@ -168,7 +168,7 @@ namespace Vehicles
 					__result = vehicle.Position.ToVector3Shifted();
 					return false;
 				}
-				float num = vehicle.VehicleMovedPercent();
+				float num = vehicle.VehicleMovedPercent;
 				__result = vehicle.vPather.nextCell.ToVector3Shifted() * num + vehicle.Position.ToVector3Shifted() * (1f - num); //+ PawnCollisionOffset?
 				return false;
 			}

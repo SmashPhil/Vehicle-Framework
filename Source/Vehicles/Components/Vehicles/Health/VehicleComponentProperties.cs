@@ -16,7 +16,7 @@ namespace Vehicles
 		public Type compClass;
 
 		public int health;
-		public VehicleComponent.VehiclePartDepth depth = VehicleComponent.VehiclePartDepth.External; //currently unused
+		public VehicleComponent.VehiclePartDepth depth;
 		public int efficiencyWeight = 1;
 		public List<StatModifier> armor;
 		public bool priorityStatEfficiency = false;
@@ -70,7 +70,7 @@ namespace Vehicles
 			}
 			if (hitbox is null)
 			{
-				yield return $"{key}: <field>hitbox</field> must be specified.".ConvertRichText();
+				yield return $"{key}: <field>hitbox</field> must be specified even if it occupies no cells.".ConvertRichText();
 			}
 			if (efficiencyWeight == 0)
 			{

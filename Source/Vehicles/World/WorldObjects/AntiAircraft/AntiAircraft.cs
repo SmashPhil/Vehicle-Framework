@@ -104,7 +104,7 @@ namespace Vehicles
 			if (Rand.Chance(AADef.accuracy) && (target?.vehicle.CompVehicleLauncher.inFlight ?? false))
 			{
 				IntVec3 randomHit = target.vehicle.OccupiedRect().RandomCell;
-				target.TakeDamage(new DamageInfo(DamageDefOf.Bomb, AADef.damage), randomHit.ToIntVec2, AADef.explosive);
+				target.TakeDamage(new DamageInfo(DamageDefOf.Bomb, AADef.damage), randomHit.ToIntVec2);
 			}
 			base.Destroy();
 		}

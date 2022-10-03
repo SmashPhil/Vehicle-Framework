@@ -14,6 +14,7 @@ namespace Vehicles
 		public bool exposed = false;
 		public List<string> turretIds;
 		public ComponentHitbox hitbox = new ComponentHitbox();
+		public float chanceToHit = 0.3f;
 		public PawnOverlayRenderer pawnRenderer;
 
 		public VehicleRole()
