@@ -8,13 +8,17 @@ namespace Vehicles
 	{
 		public string key;
 		public string label = "[MissingLabel]";
+
+		//Operating
 		public List<HandlingTypeFlags> handlingTypes = new List<HandlingTypeFlags>();
 		public int slots;
 		public int slotsToOperate;
-		public bool exposed = false;
 		public List<string> turretIds;
+		//Damaging
 		public ComponentHitbox hitbox = new ComponentHitbox();
+		public bool exposed = false;
 		public float chanceToHit = 0.3f;
+		//Rendering
 		public PawnOverlayRenderer pawnRenderer;
 
 		public VehicleRole()

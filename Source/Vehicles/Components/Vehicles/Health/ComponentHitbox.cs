@@ -53,9 +53,13 @@ namespace Vehicles
 						cells.Add(new IntVec3(cell.x, 0, cell.z));
 					}
 				}
-				else
+				else if (side != VehicleComponentPosition.Empty)
 				{
 					cells = rect.GetEdgeCells(RotationFromSide(side)).ToList();
+				}
+				else
+				{
+					cells = new List<IntVec3>() { IntVec3.Zero }; //If no hitbox provided, default to root position. (Only matters in the case of non-hitbox external components)
 				}
 				List<IntVec2> intVec2s = new List<IntVec2>();
 				foreach (IntVec3 cell in cells)

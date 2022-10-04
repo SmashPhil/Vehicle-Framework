@@ -305,7 +305,7 @@ namespace Vehicles
 					debugCellHighlight.Add(new Pair<IntVec2, int>(hitCell, TicksHighlighted));
 				}
 				report?.AppendLine($"Damaging {hitCell}");
-				if (hitDepth == VehicleComponent.VehiclePartDepth.Internal && HitPawn(dinfo, hitCell, direction, out Pawn hitPawn))
+				if (HitPawn(dinfo, hitDepth, hitCell, direction, out Pawn hitPawn))
 				{
 					report?.AppendLine($"Hit {hitPawn} for {dinfo.Amount}. Impact site = {hitCell}");
 					return;
@@ -327,43 +327,51 @@ namespace Vehicles
 			}
 		}
 
-		private bool HitPawn(DamageInfo dinfo, IntVec2 cell, Rot4 dir, out Pawn hitPawn, StringBuilder report = null)
+		private bool HitPawn(DamageInfo dinfo, VehicleComponent.VehiclePartDepth hitDepth, IntVec2 cell, Rot4 dir, out Pawn hitPawn, StringBuilder report = null)
 		{
 			VehicleHandler handler;
 			float multiplier = 1;
 			hitPawn = null;
-			if (TrySelectHandler(cell, out handler))
+			if (hitDepth == VehicleComponent.VehiclePartDepth.External)
 			{
 				multiplier = ChanceDirectHit;
+				TrySelectHandler(cell, out handler, exposed: true);
 			}
-			else if (dir.IsValid)
+			else
 			{
-				//Check immediately behind
-				if (TrySelectHandler(cell.Shifted(dir, 1), out handler))
+				if (TrySelectHandler(cell, out handler))
 				{
-					multiplier = ChanceFallthroughHit;
+					multiplier = ChanceDirectHit;
 				}
-				else
+				else if (dir.IsValid)
 				{
-					//Directly left
-					if (TrySelectHandler(cell.Shifted(dir, 0, -1), out handler))
+					//Check immediately behind
+					if (TrySelectHandler(cell.Shifted(dir, 1), out handler))
 					{
-						multiplier = ChanceMajorDeflectHit;
+						multiplier = ChanceFallthroughHit;
 					}
-					//Directly right
-					else if (TrySelectHandler(cell.Shifted(dir, 0, 1), out handler))
+					else
 					{
-						multiplier = ChanceMajorDeflectHit;
-					}
-					//Behind and left
-					else if (TrySelectHandler(cell.Shifted(dir, 1, -1), out handler))
-					{
-						multiplier = ChanceMinorDeflectHit;
-					}
-					//Behind and right
-					else if (TrySelectHandler(cell.Shifted(dir, 1, 1), out handler))
-					{
-						multiplier = ChanceMinorDeflectHit;
+						//Directly left
+						if (TrySelectHandler(cell.Shifted(dir, 0, -1), out handler))
+						{
+							multiplier = ChanceMajorDeflectHit;
+						}
+						//Directly right
+						else if (TrySelectHandler(cell.Shifted(dir, 0, 1), out handler))
+						{
+							multiplier = ChanceMajorDeflectHit;
+						}
+						//Behind and left
+						else if (TrySelectHandler(cell.Shifted(dir, 1, -1), out handler))
+						{
+							multiplier = ChanceMinorDeflectHit;
+						}
+						//Behind and right
+						else if (TrySelectHandler(cell.Shifted(dir, 1, 1), out handler))
+						{
+							multiplier = ChanceMinorDeflectHit;
+						}
 					}
 				}
 			}
@@ -377,9 +385,9 @@ namespace Vehicles
 			return false;
 		}
 
-		private bool TrySelectHandler(IntVec2 cell, out VehicleHandler handler)
+		private bool TrySelectHandler(IntVec2 cell, out VehicleHandler handler, bool exposed = false)
 		{
-			handler = vehicle.handlers.FirstOrDefault(handler => handler.role.hitbox != null && handler.role.hitbox.Contains(cell) && handler.handlers.Count > 0);
+			handler = vehicle.handlers.FirstOrDefault(handler => handler.role.hitbox != null && handler.role.hitbox.Contains(cell) && handler.handlers.Count > 0 && handler.role.exposed == exposed);
 			return handler != null;
 		}
 
@@ -454,7 +462,7 @@ namespace Vehicles
 					}
 					hitboxCells.Add(new IntVec3(x, 0, z));
 				}
-				GenDraw.DrawFieldEdges(hitboxCells, component.highlightColor);
+				GenDraw.DrawFieldEdges(hitboxCells, component.highlightColor, AltitudeLayer.MetaOverlays.AltitudeFor());
 			}
 			
 			if (VehicleMod.settings.debug.debugDrawHitbox)

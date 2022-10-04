@@ -9,16 +9,16 @@ namespace Vehicles
 	{
 		private VehiclePawn vehicle;
 
-		public PawnTweener tweener;
+		public VehicleTweener tweener;
 		public VehicleRenderer renderer;
-		public PawnUIOverlay ui;
-		public PawnFootprintMaker footprintMaker;
+		public PawnUIOverlay ui; //reimplement for better control over vehicle overlays (names should show despite animal Prefs set to none, traders inside should transfer question mark, etc.)
+		public PawnFootprintMaker footprintMaker; //reimplement for vehicle specific "footprints"
 		public Vehicle_RecoilTracker rTracker;
 
 		public Vehicle_DrawTracker(VehiclePawn vehicle)
 		{
 			this.vehicle = vehicle;
-			tweener = new PawnTweener(vehicle);
+			tweener = new VehicleTweener(vehicle);
 			renderer = new VehicleRenderer(vehicle);
 			ui = new PawnUIOverlay(vehicle);
 			footprintMaker = new PawnFootprintMaker(vehicle);

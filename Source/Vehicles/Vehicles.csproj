@@ -364,6 +364,7 @@
     <Compile Include="Achievements\VehicleBuilderTracker.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_DisassembleVehicle.cs" />
     <Compile Include="AI\WorkGiver\VehicleWorkGiver.cs" />
+    <Compile Include="Components\Rendering\VehicleTweener.cs" />
     <Compile Include="Components\Vehicles\Health\Reactors\IndicatorDef.cs" />
     <Compile Include="Components\Vehicles\Health\Reactors\Reactor.cs" />
     <Compile Include="Components\Vehicles\Health\Reactors\Reactor_FuelLeak.cs" />
