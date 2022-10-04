@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
+using RimWorld;
+using UnityEngine;
 
 namespace Vehicles
 {
@@ -34,9 +36,33 @@ namespace Vehicles
 
 		public int ticksToSpawnMote;
 
+		public string fuelIconPath;
+
+		private Texture2D fuelIcon;
+
 		public CompProperties_FueledTravel()
 		{
 			compClass = typeof(CompFueledTravel);
+		}
+
+		public Texture2D FuelIcon
+		{
+			get
+			{
+				if (fuelIcon == null)
+				{
+					if (!fuelIconPath.NullOrEmpty())
+					{
+						fuelIcon = ContentFinder<Texture2D>.Get(fuelIconPath);
+					}
+					else
+					{
+						//implement ThingFilter using AnyAllowedDef -> CompProperties_Refuelable for example
+						fuelIcon = fuelType.uiIcon;
+					}
+				}
+				return fuelIcon;
+			}
 		}
 	}
 }

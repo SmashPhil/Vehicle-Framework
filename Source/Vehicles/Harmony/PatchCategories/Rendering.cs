@@ -15,6 +15,10 @@ namespace Vehicles
 {
 	internal class Rendering : IPatchCategory
 	{
+		private static readonly Material OutOfFuelMat = MaterialPool.MatFrom("UI/Overlays/OutOfFuel", ShaderDatabase.MetaOverlay);
+
+		private static MethodInfo RenderPulsingOverlay { get; set; } = AccessTools.Method(typeof(OverlayDrawer), "RenderPulsingOverlay", parameters: new Type[] { typeof(Thing), typeof(Material), typeof(int), typeof(bool) });
+
 		public void PatchMethods()
 		{
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_RotationTracker), nameof(Pawn_RotationTracker.UpdateRotation)),
@@ -29,9 +33,6 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnFootprintMaker), nameof(PawnFootprintMaker.FootprintMakerTick)),
 				prefix: new HarmonyMethod(typeof(Rendering),
 				nameof(BoatWakesTicker)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnTweener), "TweenedPosRoot"),
-				prefix: new HarmonyMethod(typeof(Rendering),
-				nameof(VehicleTweenedPosRoot)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GhostDrawer), nameof(GhostDrawer.DrawGhostThing)),
 				postfix: new HarmonyMethod(typeof(Rendering),
 				nameof(DrawGhostVehicle)));
@@ -45,13 +46,19 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Targeter), nameof(Targeter.TargeterUpdate)),
 				postfix: new HarmonyMethod(typeof(Rendering),
 				nameof(TargeterUpdate)));
+
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(OverlayDrawer), "RenderOutOfFuelOverlay"),
+				prefix: new HarmonyMethod(typeof(Rendering),
+				nameof(RenderVehicleOutOfFuelOverlay)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(OverlayDrawer), "RenderPulsingOverlay", parameters: new Type[] { typeof(Thing), typeof(Material), typeof(int), typeof(Mesh), typeof(bool) }),
+				transpiler: new HarmonyMethod(typeof(Rendering),
+				nameof(RenderOverlaysCenterVehicle)));
 		}
 
 		/// <summary>
 		/// Use own Vehicle rotation to disallow moving rotation for various tasks such as Drafted
 		/// </summary>
 		/// <param name="__instance"></param>
-		/// <returns></returns>
 		public static bool UpdateVehicleRotation(Pawn_RotationTracker __instance, Pawn ___pawn)
 		{
 			if (___pawn is VehiclePawn vehicle)
@@ -159,22 +166,6 @@ namespace Vehicles
 			return true;
 		}
 
-		public static bool VehicleTweenedPosRoot(Pawn ___pawn, ref Vector3 __result)
-		{
-			if (___pawn is VehiclePawn vehicle)
-			{
-				if (!vehicle.Spawned || vehicle.vPather == null)
-				{
-					__result = vehicle.Position.ToVector3Shifted();
-					return false;
-				}
-				float num = vehicle.VehicleMovedPercent;
-				__result = vehicle.vPather.nextCell.ToVector3Shifted() * num + vehicle.Position.ToVector3Shifted() * (1f - num); //+ PawnCollisionOffset?
-				return false;
-			}
-			return true;
-		}
-
 		public static void DrawGhostVehicle(IntVec3 center, Rot8 rot, ThingDef thingDef, Graphic baseGraphic, Color ghostCol, AltitudeLayer drawAltitude, Thing thing = null)
 		{
 			if (thingDef is VehicleBuildDef def)
@@ -192,6 +183,45 @@ namespace Vehicles
 					vehicleDef.DrawGhostTurretTextures(loc, rot, ghostCol);
 				}
 			}
+		}
+
+		public static bool RenderVehicleOutOfFuelOverlay(OverlayDrawer __instance, Thing t)
+		{
+			if (t is VehiclePawn vehicle)
+			{
+				Material material = MaterialPool.MatFrom(vehicle.CompFueledTravel?.Props.FuelIcon ?? ThingDefOf.Chemfuel.uiIcon, ShaderDatabase.MetaOverlay, Color.white);
+				RenderPulsingOverlay.Invoke(__instance, new object[] { t, material, 5, false });
+				RenderPulsingOverlay.Invoke(__instance, new object[] { t, OutOfFuelMat, 6, true });
+				return false;
+			}
+			return true;
+		}
+
+		public static IEnumerable<CodeInstruction> RenderOverlaysCenterVehicle(IEnumerable<CodeInstruction> instructions)
+		{
+			List<CodeInstruction> instructionList = instructions.ToList();
+			MethodInfo trueCenterMethod = AccessTools.Method(typeof(GenThing), nameof(GenThing.TrueCenter), parameters: new Type[] { typeof(IntVec3), typeof(Rot4), typeof(IntVec2), typeof(float) });
+			for (int i = 0; i < instructionList.Count; i++)
+			{
+				CodeInstruction instruction = instructionList[i];
+
+				if (instruction.opcode == OpCodes.Stloc_0 && instructionList[i - 1].Calls(trueCenterMethod))
+				{
+					yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
+					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(Rendering), nameof(Rendering.VehicleTrueCenterReroute)));
+				}
+
+				yield return instruction;
+			}
+		}
+
+		private static Vector3 VehicleTrueCenterReroute(Vector3 trueCenter, Thing thing)
+		{
+			if (thing is VehiclePawn vehicle)
+			{
+				return vehicle.OverlayCenter;
+			}
+			return trueCenter;
 		}
 
 		/* ---------------- Hooks onto Targeter calls ---------------- */

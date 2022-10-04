@@ -210,9 +210,16 @@ namespace Vehicles
 		public override void PostDraw()
 		{
 			base.PostDraw();
-			if(EmptyTank)
+			if (EmptyTank)
 			{
-				parent.Map.overlayDrawer.DrawOverlay(parent, OverlayTypes.OutOfFuel);
+				if (Props.electricPowered)
+				{
+					parent.Map.overlayDrawer.DrawOverlay(parent, OverlayTypes.NeedsPower);
+				}
+				else
+				{
+					parent.Map.overlayDrawer.DrawOverlay(parent, OverlayTypes.OutOfFuel);
+				}
 			}
 		}
 

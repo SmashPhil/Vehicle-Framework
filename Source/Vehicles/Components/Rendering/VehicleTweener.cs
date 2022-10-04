@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
+using RimWorld;
 using UnityEngine;
 
 namespace Vehicles
 {
 	/// <summary>
-	/// Tween vehicle while still maintaining TrueCenter pos rather than root position
+	/// Tween vehicle while still maintaining the non-pawn TrueCenter pos rather than offset position
 	/// </summary>
 	public class VehicleTweener
 	{
@@ -68,37 +69,37 @@ namespace Vehicles
 
 		private Vector3 TweenedPosRoot()
 		{
-			if (!vehicle.Spawned)
+			if (!vehicle.Spawned || vehicle.vPather == null)
 			{
-				return vehicle.Position.ToVector3Shifted();
+				return vehicle.TrueCenter;
 			}
 			float num = MovedPercent();
-			return vehicle.pather.nextCell.ToVector3Shifted() * num + vehicle.Position.ToVector3Shifted() * (1f - num);
+			return GenThing.TrueCenter(vehicle.vPather.nextCell, vehicle.Rotation, vehicle.VehicleDef.Size, vehicle.VehicleDef.Altitude) * num + vehicle.TrueCenter * (1f - num);
 		}
 
-		private float MovedPercent()
+		public float MovedPercent()
 		{
-			if (!vehicle.pather.Moving)
+			if (vehicle.vPather is null)
 			{
 				return 0f;
 			}
-			if (vehicle.stances.FullBodyBusy)
+			if (!vehicle.vPather.Moving)
 			{
 				return 0f;
 			}
-			if (vehicle.pather.BuildingBlockingNextPathCell() != null)
+			if (vehicle.vPather.BuildingBlockingNextPathCell() != null)
 			{
 				return 0f;
 			}
-			if (vehicle.pather.NextCellDoorToWaitForOrManuallyOpen() != null)
+			if (vehicle.vPather.NextCellDoorToWaitForOrManuallyOpen() != null)
 			{
 				return 0f;
 			}
-			if (vehicle.pather.WillCollideWithPawnOnNextPathCell())
+			if (vehicle.vPather.WillCollideWithPawnOnNextPathCell())
 			{
 				return 0f;
 			}
-			return 1f - vehicle.pather.nextCellCostLeft / vehicle.pather.nextCellCostTotal;
+			return 1f - vehicle.vPather.nextCellCostLeft / vehicle.vPather.nextCellCostTotal;
 		}
 	}
 }

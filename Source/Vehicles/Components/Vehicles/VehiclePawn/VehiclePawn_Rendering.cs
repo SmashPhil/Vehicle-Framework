@@ -173,31 +173,75 @@ namespace Vehicles
 			}
 		}
 
-		public float VehicleMovedPercent
+		public Vector3 OverlayCenter
 		{
 			get
 			{
-				if (vPather is null)
+				float movePercent = vDrawer.tweener.MovedPercent();
+				return GenThing.TrueCenter(Position, Rotation, VehicleDef.Size, VehicleDef.Altitude);
+			}
+		}
+
+		public Vector3 TrueCenter
+		{
+			get
+			{
+				Vector3 result = Position.ToVector3ShiftedWithAltitude(VehicleDef.Altitude);
+				IntVec2 size = VehicleDef.Size;
+				Rot8 rot = Rotation; //Switch to FullRotation when diagonal hitboxes are implemented
+				if (size.x != 1 || size.z != 1)
 				{
-					return 0f;
+					if (rot.IsHorizontal)
+					{
+						int x = size.x;
+						size.x = size.z;
+						size.z = x;
+					}
+					switch (rot.AsInt)
+					{
+						case 0:
+							if (size.x % 2 == 0)
+							{
+								result.x += 0.5f;
+							}
+							if (size.z % 2 == 0)
+							{
+								result.z += 0.5f;
+							}
+							break;
+						case 1:
+							if (size.x % 2 == 0)
+							{
+								result.x += 0.5f;
+							}
+							if (size.z % 2 == 0)
+							{
+								result.z -= 0.5f;
+							}
+							break;
+						case 2:
+							if (size.x % 2 == 0)
+							{
+								result.x -= 0.5f;
+							}
+							if (size.z % 2 == 0)
+							{
+								result.z -= 0.5f;
+							}
+							break;
+						case 3:
+							if (size.x % 2 == 0)
+							{
+								result.x -= 0.5f;
+							}
+							if (size.z % 2 == 0)
+							{
+								result.z += 0.5f;
+							}
+							break;
+					}
 				}
-				if (!vPather.Moving)
-				{
-					return 0f;
-				}
-				if (vPather.BuildingBlockingNextPathCell() != null)
-				{
-					return 0f;
-				}
-				if (vPather.NextCellDoorToWaitForOrManuallyOpen() != null)
-				{
-					return 0f;
-				}
-				if (vPather.WillCollideWithPawnOnNextPathCell())
-				{
-					return 0f;
-				}
-				return 1f - vPather.nextCellCostLeft / vPather.nextCellCostTotal;
+				return result;
 			}
 		}
 

@@ -94,7 +94,7 @@ namespace Vehicles
 		
 		public static void Patch(MethodBase original, HarmonyMethod prefix = null, HarmonyMethod postfix = null, HarmonyMethod transpiler = null, HarmonyMethod finalizer = null)
 		{
-			methodPatching = original.Name;
+			methodPatching = original?.Name ?? $"Null\", Previous = \"{methodPatching}";
 			Harmony.Patch(original, prefix, postfix, transpiler, finalizer);
 		}
 
