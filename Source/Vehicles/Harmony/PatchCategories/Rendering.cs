@@ -47,12 +47,12 @@ namespace Vehicles
 				postfix: new HarmonyMethod(typeof(Rendering),
 				nameof(TargeterUpdate)));
 
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(OverlayDrawer), "RenderOutOfFuelOverlay"),
-				prefix: new HarmonyMethod(typeof(Rendering),
-				nameof(RenderVehicleOutOfFuelOverlay)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(OverlayDrawer), "RenderPulsingOverlay", parameters: new Type[] { typeof(Thing), typeof(Material), typeof(int), typeof(Mesh), typeof(bool) }),
-				transpiler: new HarmonyMethod(typeof(Rendering),
-				nameof(RenderOverlaysCenterVehicle)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(OverlayDrawer), "RenderOutOfFuelOverlay"),
+			//	prefix: new HarmonyMethod(typeof(Rendering),
+			//	nameof(RenderVehicleOutOfFuelOverlay)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(OverlayDrawer), "RenderPulsingOverlay", parameters: new Type[] { typeof(Thing), typeof(Material), typeof(int), typeof(Mesh), typeof(bool) }),
+			//	transpiler: new HarmonyMethod(typeof(Rendering),
+			//	nameof(RenderOverlaysCenterVehicle)));
 		}
 
 		/// <summary>

@@ -71,10 +71,10 @@ namespace Vehicles
 		{
 			if (!vehicle.Spawned || vehicle.vPather == null)
 			{
-				return vehicle.TrueCenter;
+				return vehicle.Position.ToVector3Shifted();
 			}
 			float num = MovedPercent();
-			return GenThing.TrueCenter(vehicle.vPather.nextCell, vehicle.Rotation, vehicle.VehicleDef.Size, vehicle.VehicleDef.Altitude) * num + vehicle.TrueCenter * (1f - num);
+			return vehicle.vPather.nextCell.ToVector3Shifted() * num + vehicle.Position.ToVector3Shifted() * (1f - num);
 		}
 
 		public float MovedPercent()
