@@ -15,10 +15,6 @@ namespace Vehicles
 {
 	internal class Rendering : IPatchCategory
 	{
-		private static readonly Material OutOfFuelMat = MaterialPool.MatFrom("UI/Overlays/OutOfFuel", ShaderDatabase.MetaOverlay);
-
-		private static MethodInfo RenderPulsingOverlay { get; set; } = AccessTools.Method(typeof(OverlayDrawer), "RenderPulsingOverlay", parameters: new Type[] { typeof(Thing), typeof(Material), typeof(int), typeof(bool) });
-
 		public void PatchMethods()
 		{
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_RotationTracker), nameof(Pawn_RotationTracker.UpdateRotation)),
@@ -189,10 +185,10 @@ namespace Vehicles
 		{
 			if (t is VehiclePawn vehicle)
 			{
-				Material material = MaterialPool.MatFrom(vehicle.CompFueledTravel?.Props.FuelIcon ?? ThingDefOf.Chemfuel.uiIcon, ShaderDatabase.MetaOverlay, Color.white);
-				RenderPulsingOverlay.Invoke(__instance, new object[] { t, material, 5, false });
-				RenderPulsingOverlay.Invoke(__instance, new object[] { t, OutOfFuelMat, 6, true });
-				return false;
+				//Material material = MaterialPool.MatFrom(vehicle.CompFueledTravel?.Props.FuelIcon ?? ThingDefOf.Chemfuel.uiIcon, ShaderDatabase.MetaOverlay, Color.white);
+				//RenderPulsingOverlay.Invoke(__instance, new object[] { t, material, 5, false });
+				//RenderPulsingOverlay.Invoke(__instance, new object[] { t, OutOfFuelMat, 6, true });
+				//return false;
 			}
 			return true;
 		}

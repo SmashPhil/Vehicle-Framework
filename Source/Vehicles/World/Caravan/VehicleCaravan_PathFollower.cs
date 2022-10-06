@@ -351,7 +351,7 @@ namespace Vehicles
 			List<Tile.RoadLink> roads = Find.WorldGrid.tiles[fromTile].Roads;
 			if (roads == null)
 			{
-				return 1f;
+				return Mathf.Clamp(vehicleDefs.Max(vehicleDef => vehicleDef.properties.offRoadMultiplier), 0.1f, 100);
 			}
 			if (toTile == -1)
 			{

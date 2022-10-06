@@ -204,8 +204,8 @@ namespace Vehicles
 				Vehicle.DeSpawn(DestroyMode.Vanish);
 			}
 			Find.WorldPawns.PassToWorld(Vehicle);
-
 			CameraJumper.TryHideWorld();
+			Vehicle.EventRegistry[VehicleEventDefOf.AerialLaunch].ExecuteEvents();
 		}
 
 		public float FuelNeededToLaunchAtDist(Vector3 origin, int destination)

@@ -27,10 +27,15 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Projectile), "Impact"),
 				prefix: new HarmonyMethod(typeof(Combat),
 				nameof(RegisterImpactCell)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Projectile), "ImpactSomething"),
+				transpiler: new HarmonyMethod(typeof(Combat),
+				nameof(VehicleProjectileChanceToHit)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Thing), nameof(Thing.Destroy)),
 				prefix: new HarmonyMethod(typeof(Combat),
 				nameof(ProjectileMapToWorld)));
-
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Projectile), "CheckForFreeIntercept"),
+				transpiler: new HarmonyMethod(typeof(Combat),
+				nameof(VehicleProjectileInterceptor)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Explosion), "AffectCell"),
 				prefix: new HarmonyMethod(typeof(Combat),
 				nameof(AffectVehicleInCell)));
@@ -149,11 +154,53 @@ namespace Vehicles
 			}
 		}
 
+		public static IEnumerable<CodeInstruction> VehicleProjectileChanceToHit(IEnumerable<CodeInstruction> instructions)
+		{
+			List<CodeInstruction> instructionList = instructions.ToList();
+
+			for (int i = 0; i < instructionList.Count; i++)
+			{
+				CodeInstruction instruction = instructionList[i];
+
+				if (instruction.opcode == OpCodes.Stloc_S && instruction.operand is LocalBuilder localBuilder && localBuilder.LocalIndex == 8)
+				{
+					yield return instruction; //Stloc_S : 8
+					instruction = instructionList[++i];
+					yield return instruction; //Ldloc_S : 8
+					instruction = instructionList[++i];
+					yield return new CodeInstruction(opcode: OpCodes.Call, AccessTools.Method(typeof(Combat), nameof(VehiclePawnFillageInterceptReroute)));
+				}
+
+				yield return instruction;
+			}
+		}
+
 		public static void ProjectileMapToWorld(Thing __instance, DestroyMode mode = DestroyMode.Vanish)
 		{
 			if (__instance is Projectile projectile && projectile.GetComp<CompProjectileExitMap>() is CompProjectileExitMap exitMap)
 			{
 				exitMap.LeaveMap();
+			}
+		}
+
+		public static IEnumerable<CodeInstruction> VehicleProjectileInterceptor(IEnumerable<CodeInstruction> instructions)
+		{
+			List<CodeInstruction> instructionList = instructions.ToList();
+
+			for (int i = 0; i < instructionList.Count; i++)
+			{
+				CodeInstruction instruction = instructionList[i];
+
+				if (instruction.opcode == OpCodes.Stloc_S && instruction.operand is LocalBuilder localBuilder && localBuilder.LocalIndex == 7)
+				{
+					yield return instruction; //Stloc_S : 7
+					instruction = instructionList[++i];
+					yield return instruction; //Ldloc_S : 7
+					instruction = instructionList[++i];
+					yield return new CodeInstruction(opcode: OpCodes.Call, AccessTools.Method(typeof(Combat), nameof(VehiclePawnFillageInterceptReroute)));
+				}
+
+				yield return instruction;
 			}
 		}
 
@@ -212,6 +259,16 @@ namespace Vehicles
 				return result;
 			}
 			return thing.TakeDamage(dinfo);
+		}
+
+		private static Pawn VehiclePawnFillageInterceptReroute(Pawn pawn)
+		{
+			if (pawn is VehiclePawn)
+			{
+				//if pawn is vehicle, assign back to null to avoid "stance" based interception chance, and fall through to fillage.
+				return null;
+			}
+			return pawn;
 		}
 	}
 }

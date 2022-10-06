@@ -20,6 +20,7 @@ namespace Vehicles
 
 		public override void Arrived(int tile)
 		{
+			vehicle.EventRegistry[VehicleEventDefOf.AerialCrashLanding].ExecuteEvents();
 			VehicleSkyfaller_Crashing skyfaller = (VehicleSkyfaller_Crashing)ThingMaker.MakeThing(vehicle.CompVehicleLauncher.Props.skyfallerCrashing);
 			skyfaller.vehicle = vehicle;
 			skyfaller.rotCrashing = Rot4.East;

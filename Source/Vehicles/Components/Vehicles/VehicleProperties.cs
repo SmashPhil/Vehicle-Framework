@@ -53,6 +53,7 @@ namespace Vehicles
 		public Dictionary<ThingDef, int> customThingCosts;
 
 		public bool defaultBiomesImpassable = false;
+		public float offRoadMultiplier = 1;
 		public Dictionary<RiverDef, float> customRiverCosts = new Dictionary<RiverDef, float>();
 		public Dictionary<BiomeDef, float> customBiomeCosts = new Dictionary<BiomeDef, float>();
 		public Dictionary<Hilliness, float> customHillinessCosts = new Dictionary<Hilliness, float>();
@@ -64,7 +65,7 @@ namespace Vehicles
 		public float winterSpeedMultiplier = 2.5f;
 		[PostToSettings(Label = "VehicleWorldSpeedMultiplier", Tooltip = "VehicleWorldSpeedMultiplierTooltip", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(MinValue = 0, MaxValue = 10, RoundDecimalPlaces = 1)]
-		public float worldSpeedMultiplier = 4;
+		public float worldSpeedMultiplier = 2.5f;
 
 		public List<FactionDef> restrictToFactions;
 

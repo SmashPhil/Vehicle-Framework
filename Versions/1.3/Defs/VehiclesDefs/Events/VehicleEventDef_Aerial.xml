@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<Vehicles.VehicleEventDef>
+		<defName>AerialLaunch</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>AerialLanding</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>AerialCrashLanding</defName>
+	</Vehicles.VehicleEventDef>
+</Defs>

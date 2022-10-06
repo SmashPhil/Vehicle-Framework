@@ -30,5 +30,9 @@ namespace Vehicles
 		public static VehicleEventDef PawnChangedSeats;
 		public static VehicleEventDef PawnCapacitiesDirty;
 		public static VehicleEventDef PawnKilled;
+
+		public static VehicleEventDef AerialLaunch;
+		public static VehicleEventDef AerialLanding;
+		public static VehicleEventDef AerialCrashLanding;
 	}
 }
