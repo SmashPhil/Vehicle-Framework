@@ -792,7 +792,7 @@ namespace Vehicles
 					if (TargetLocked && ReadyToFire)
 					{
 						float facing = cannonTarget.Thing != null ? (cannonTarget.Thing.DrawPos - TurretLocation).AngleFlat() : (cannonTarget.Cell - TurretLocation.ToIntVec3()).AngleFlat;
-						GenDraw.DrawAimPieRaw(TurretLocation + new Vector3(aimPieOffset.x, 0.5f, aimPieOffset.y).RotatedBy(TurretRotation), facing, (int)(PrefireTickCount * 0.5f));
+						GenDraw.DrawAimPieRaw(TurretLocation + new Vector3(aimPieOffset.x, Altitudes.AltInc, aimPieOffset.y).RotatedBy(TurretRotation), facing, (int)(PrefireTickCount * 0.5f));
 						PrefireTickCount--;
 					}
 				}

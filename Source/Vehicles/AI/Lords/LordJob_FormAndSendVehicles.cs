@@ -315,7 +315,7 @@ namespace Vehicles
 			}
 			if (!caravanSent)
 			{
-				if (condition == PawnLostCondition.IncappedOrKilled && pawn.Downed)
+				if (condition == PawnLostCondition.Incapped && pawn.Downed)
 				{
 					downedPawns.Add(pawn);
 				}
@@ -332,7 +332,15 @@ namespace Vehicles
 		public override void LordJobTick()
 		{
 			base.LordJobTick();
-			for(int i = downedPawns.Count - 1; i >= 0; i--)
+			if (VehicleMod.settings.debug.debugDrawLordMeetingPoint && Find.TickManager.TicksGame % 10 == 0)
+			{
+				if (lord.CurLordToil is IDebugLordMeetingPoint debugLordMeetingPoint)
+				{
+					lord.Map.debugDrawer.FlashCell(debugLordMeetingPoint.MeetingPoint, colorPct: 0.95f, duration: 10);
+				}
+			}
+
+			for (int i = downedPawns.Count - 1; i >= 0; i--)
 			{
 				if (downedPawns[i].Destroyed)
 				{
@@ -369,13 +377,13 @@ namespace Vehicles
 
 			ResolveSeatingAssignments();
 
-			gatherAnimals = new LordToil_PrepareCaravan_GatherAnimals(meetingPoint);
+			gatherAnimals = new LordToil_PrepareCaravan_GatherAnimalsForVehicles(meetingPoint);
 			gatherAnimals_pause = new LordToil_PrepareCaravan_Pause();
 			gatherItems = new LordToil_PrepareCaravan_GatherCargo(meetingPoint);
 			gatherItems_pause = new LordToil_PrepareCaravan_Pause();
 			gatherSlaves = new LordToil_PrepareCaravan_GatherSlavesVehicle(meetingPoint);
 			gatherSlaves_pause = new LordToil_PrepareCaravan_Pause();
-			gatherDownedPawns = new LordToil_PrepareCaravan_GatherDownedPawnsVehicle(meetingPoint, exitPoint);
+			gatherDownedPawns = new LordToil_PrepareCaravan_GatherDownedPawnsVehicle(meetingPoint);
 			gatherDownedPawns_pause = new LordToil_PrepareCaravan_Pause();
 			tieAnimals = new LordToil_PrepareCaravan_TieAnimalsToVehicle(meetingPoint);
 			tieAnimals_pause = new LordToil_PrepareCaravan_Pause();
@@ -388,7 +396,7 @@ namespace Vehicles
 			//AddToStateGraph(stateGraph, TieAnimals, MemoTrigger.AnimalsTied, postActions: new TransitionAction[] { new TransitionAction_EndAllJobs() });
 			AddToStateGraph(stateGraph, GatherItems, MemoTrigger.ItemsGathered, postActions: new TransitionAction[] { new TransitionAction_EndAllJobs() });
 			AddToStateGraph(stateGraph, GatherDowned, MemoTrigger.DownedPawnsGathered);
-			AddToStateGraph(stateGraph, GatherSlaves, MemoTrigger.SlavesGathered);
+			//AddToStateGraph(stateGraph, GatherSlaves, MemoTrigger.SlavesGathered);
 			AddToStateGraph(stateGraph, Board, MemoTrigger.PawnsOnboard, preActions: new TransitionAction[] { new TransitionAction_EndAllJobs() }, postActions: new TransitionAction[] { new TransitionAction_EndAllJobs() });
 			AddToStateGraph(stateGraph, Leave);
 

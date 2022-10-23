@@ -8,7 +8,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class LordToil_PrepareCaravan_LeaveWithVehicles : LordToil
+	public class LordToil_PrepareCaravan_LeaveWithVehicles : LordToil, IDebugLordMeetingPoint
 	{
 		private IntVec3 exitSpot;
 
@@ -16,6 +16,8 @@ namespace Vehicles
 		{
 			this.exitSpot = exitSpot;
 		}
+
+		public IntVec3 MeetingPoint => exitSpot;
 
 		public override bool AllowSatisfyLongNeeds => false;
 

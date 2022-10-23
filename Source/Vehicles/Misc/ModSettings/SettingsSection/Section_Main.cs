@@ -144,7 +144,8 @@ namespace Vehicles
 			{
 				listingStandard = new Listing_Standard();
 
-				Rect mainSettings = new Rect(rect.x + 20f, rect.y + 40f, rect.width - 40f, rect.height);
+				//17 = Column Gap, x2 column gaps for 3 columns
+				Rect mainSettings = new Rect(rect.x + 20f, rect.y + 40f, rect.width - (17 * 2) - 40, rect.height);
 
 				listingStandard.ColumnWidth = mainSettings.width / 3;
 				listingStandard.Begin(mainSettings);

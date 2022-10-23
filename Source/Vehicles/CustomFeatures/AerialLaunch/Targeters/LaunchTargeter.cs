@@ -13,8 +13,7 @@ namespace Vehicles
 	public class LaunchTargeter : BaseVehicleWorldTargeter
 	{
 		private const float BaseFeedbackTexSize = 0.8f;
-		private int origin;
-
+		
 		private Func<GlobalTargetInfo, float, bool> action;
 		private Func<GlobalTargetInfo, List<FlightNode>, float, string> extraLabelGetter;
 
@@ -33,62 +32,62 @@ namespace Vehicles
 
 		public override bool IsTargeting => action != null;
 
-		public void BeginTargeting(VehiclePawn vehicle, Func<GlobalTargetInfo, float, bool> action, int origin, bool canTargetTiles, Texture2D mouseAttachment = null, bool closeWorldTabWhenFinished = false, Action onUpdate = null,
+		public static void BeginTargeting(VehiclePawn vehicle, Func<GlobalTargetInfo, float, bool> action, int origin, bool canTargetTiles, Texture2D mouseAttachment = null, bool closeWorldTabWhenFinished = false, Action onUpdate = null,
 			Func<GlobalTargetInfo, List<FlightNode>, float, string> extraLabelGetter = null)
 		{
-			this.vehicle = vehicle;
-			this.action = action;
-			originOnMap = WorldHelper.GetTilePos(origin);
-			this.canTargetTiles = canTargetTiles;
-			this.mouseAttachment = mouseAttachment;
-			this.closeWorldTabWhenFinished = closeWorldTabWhenFinished;
-			this.onUpdate = onUpdate;
-			this.extraLabelGetter = extraLabelGetter;
+			Instance.vehicle = vehicle;
+			Instance.action = action;
+			Instance.originOnMap = WorldHelper.GetTilePos(origin);
+			Instance.canTargetTiles = canTargetTiles;
+			Instance.mouseAttachment = mouseAttachment;
+			Instance.closeWorldTabWhenFinished = closeWorldTabWhenFinished;
+			Instance.onUpdate = onUpdate;
+			Instance.extraLabelGetter = extraLabelGetter;
 			FlightPath.Clear();
 			TotalDistance = 0;
 			TotalFuelCost = 0;
 		}
 
-		public void BeginTargeting(VehiclePawn vehicle, Func<GlobalTargetInfo, float, bool> action, AerialVehicleInFlight aerialVehicle, bool canTargetTiles, Texture2D mouseAttachment = null, bool closeWorldTabWhenFinished = false, Action onUpdate = null,
+		public static void BeginTargeting(VehiclePawn vehicle, Func<GlobalTargetInfo, float, bool> action, AerialVehicleInFlight aerialVehicle, bool canTargetTiles, Texture2D mouseAttachment = null, bool closeWorldTabWhenFinished = false, Action onUpdate = null,
 			Func<GlobalTargetInfo, List<FlightNode>, float, string> extraLabelGetter = null)
 		{
-			this.vehicle = vehicle;
-			this.action = action;
-			this.aerialVehicle = aerialVehicle;
-			this.canTargetTiles = canTargetTiles;
-			this.mouseAttachment = mouseAttachment;
-			this.closeWorldTabWhenFinished = closeWorldTabWhenFinished;
-			this.onUpdate = onUpdate;
-			this.extraLabelGetter = extraLabelGetter;
+			Instance.vehicle = vehicle;
+			Instance.action = action;
+			Instance.aerialVehicle = aerialVehicle;
+			Instance.canTargetTiles = canTargetTiles;
+			Instance.mouseAttachment = mouseAttachment;
+			Instance.closeWorldTabWhenFinished = closeWorldTabWhenFinished;
+			Instance.onUpdate = onUpdate;
+			Instance.extraLabelGetter = extraLabelGetter;
 			FlightPath.Clear();
 			TotalDistance = 0;
 			TotalFuelCost = 0;
 		}
 
-		public void ContinueTargeting(VehiclePawn vehicle, Func<GlobalTargetInfo, float, bool> action, int origin, bool canTargetTiles, Texture2D mouseAttachment = null, bool closeWorldTabWhenFinished = false, Action onUpdate = null,
+		public static void ContinueTargeting(VehiclePawn vehicle, Func<GlobalTargetInfo, float, bool> action, int origin, bool canTargetTiles, Texture2D mouseAttachment = null, bool closeWorldTabWhenFinished = false, Action onUpdate = null,
 			Func<GlobalTargetInfo, List<FlightNode>, float, string> extraLabelGetter = null)
 		{
-			this.vehicle = vehicle;
-			this.action = action;
-			originOnMap = WorldHelper.GetTilePos(origin);
-			this.canTargetTiles = canTargetTiles;
-			this.mouseAttachment = mouseAttachment;
-			this.closeWorldTabWhenFinished = closeWorldTabWhenFinished;
-			this.onUpdate = onUpdate;
-			this.extraLabelGetter = extraLabelGetter;
+			Instance.vehicle = vehicle;
+			Instance.action = action;
+			Instance.originOnMap = WorldHelper.GetTilePos(origin);
+			Instance.canTargetTiles = canTargetTiles;
+			Instance.mouseAttachment = mouseAttachment;
+			Instance.closeWorldTabWhenFinished = closeWorldTabWhenFinished;
+			Instance.onUpdate = onUpdate;
+			Instance.extraLabelGetter = extraLabelGetter;
 		}
 
 		public void ContinueTargeting(VehiclePawn vehicle, Func<GlobalTargetInfo, float, bool> action, AerialVehicleInFlight aerialVehicle, bool canTargetTiles, Texture2D mouseAttachment = null, bool closeWorldTabWhenFinished = false, Action onUpdate = null,
 			Func<GlobalTargetInfo, List<FlightNode>, float, string> extraLabelGetter = null)
 		{
-			this.vehicle = vehicle;
-			this.action = action;
-			this.aerialVehicle = aerialVehicle;
-			this.canTargetTiles = canTargetTiles;
-			this.mouseAttachment = mouseAttachment;
-			this.closeWorldTabWhenFinished = closeWorldTabWhenFinished;
-			this.onUpdate = onUpdate;
-			this.extraLabelGetter = extraLabelGetter;
+			Instance.vehicle = vehicle;
+			Instance.action = action;
+			Instance.aerialVehicle = aerialVehicle;
+			Instance.canTargetTiles = canTargetTiles;
+			Instance.mouseAttachment = mouseAttachment;
+			Instance.closeWorldTabWhenFinished = closeWorldTabWhenFinished;
+			Instance.onUpdate = onUpdate;
+			Instance.extraLabelGetter = extraLabelGetter;
 		}
 
 		public override void RegisterActionOnTile(int tile, AerialVehicleArrivalAction arrivalAction)
@@ -165,7 +164,7 @@ namespace Vehicles
 					Event.current.Use();
 				}
 			}
-			if (KeyBindingDefOf.Cancel.KeyDownEvent && IsTargeting)
+			if ((Event.current.type == EventType.MouseDown && Event.current.button == 1) || (KeyBindingDefOf.Cancel.KeyDownEvent && IsTargeting))
 			{
 				SoundDefOf.CancelMode.PlayOneShotOnCamera(null);
 				StopTargeting();
@@ -179,52 +178,58 @@ namespace Vehicles
 			{
 				if (!Mouse.IsInputBlockedNow)
 				{
-					GlobalTargetInfo mouseTarget = CurrentTargetUnderMouse();
-
-					Vector2 mousePosition = Event.current.mousePosition;
-					Texture2D image = mouseAttachment ?? TexCommand.Attack;
-					Rect position = new Rect(mousePosition.x + 8f, mousePosition.y + 8f, 32f, 32f);
-					GUI.DrawTexture(position, image);
-
-					CostAndDistanceCalculator(out float fuelOnPathCost, out float tileDistance);
-
-					Vector3 flightPathPos = originOnMap;
-					if (!FlightPath.NullOrEmpty())
+					GUIState.Push();
 					{
-						flightPathPos = WorldHelper.GetTilePos(FlightPath.LastOrDefault().tile);
-					}
-					float finalFuelCost = fuelOnPathCost;
-					float finalTileDistance = tileDistance;
-					if (mouseTarget.IsValid && WorldHelper.GetTilePos(mouseTarget.Tile) != flightPathPos)
-					{
-						finalFuelCost += vehicle.CompVehicleLauncher.FuelNeededToLaunchAtDist(flightPathPos, mouseTarget.Tile);
-						finalTileDistance += Ext_Math.SphericalDistance(flightPathPos, WorldHelper.GetTilePos(mouseTarget.Tile));
-					}
-					TotalFuelCost = (float)Math.Round(finalFuelCost, 0);
-					TotalDistance = finalTileDistance;
-					string fuelCostLabel = "VF_VehicleFuelCost".Translate(TotalFuelCost);
-					Vector2 textSize = Text.CalcSize(fuelCostLabel);
-					Rect labelPosition = new Rect(mousePosition.x, mousePosition.y + textSize.y + 20f, textSize.x, textSize.y);
-					float bgWidth = textSize.x * 1.2f;
-					var color = GUI.color;
+						GlobalTargetInfo mouseTarget = CurrentTargetUnderMouse();
 
-					if (extraLabelGetter != null)
-					{
-						string text = extraLabelGetter(mouseTarget, FlightPath, TotalFuelCost);
-						Vector2 labelGetterText = Text.CalcSize(text);
-						Rect rect = new Rect(position.xMax, position.y, 9999f, 100f);
-						Rect bgRect = new Rect(rect.x - labelGetterText.x * 0.1f, rect.y, labelGetterText.x * 1.2f, labelGetterText.y);
-						var textColor = GUI.color;
+						Vector2 mousePosition = Event.current.mousePosition;
+						Texture2D image = mouseAttachment ?? TexCommand.Attack;
+						Rect position = new Rect(mousePosition.x + 8f, mousePosition.y + 8f, 32f, 32f);
+						GUI.DrawTexture(position, image);
+
+						CostAndDistanceCalculator(out float fuelOnPathCost, out float sphericalDistance);
+
+						Vector3 flightPathOrigin = originOnMap;
+						if (!FlightPath.NullOrEmpty())
+						{
+							flightPathOrigin = WorldHelper.GetTilePos(FlightPath.LastOrDefault().tile);
+						}
+						float finalFuelCost = fuelOnPathCost;
+						float finalDistance = sphericalDistance;
+						if (mouseTarget.IsValid && FlightPath.Count < vehicle.CompVehicleLauncher.launchProtocol.MaxFlightNodes)
+						{
+							(fuelOnPathCost, sphericalDistance) = CostAndDistanceCalculator(flightPathOrigin, WorldHelper.GetTilePos(mouseTarget.Tile));
+							finalFuelCost += fuelOnPathCost;
+							finalDistance += sphericalDistance;
+						}
+
+						TotalFuelCost = Mathf.RoundToInt(finalFuelCost);
+						TotalDistance = finalDistance;
+						string fuelCostLabel = "VF_VehicleFuelCost".Translate(TotalFuelCost);
+						Vector2 textSize = Text.CalcSize(fuelCostLabel);
+						Rect labelPosition = new Rect(mousePosition.x, mousePosition.y + textSize.y + 20f, textSize.x, textSize.y);
+						float bgWidth = textSize.x * 1.2f;
+
+						if (extraLabelGetter != null)
+						{
+							string text = extraLabelGetter(mouseTarget, FlightPath, TotalFuelCost);
+							Vector2 labelGetterText = Text.CalcSize(text);
+							Rect rect = new Rect(position.xMax, position.y, 9999f, 100f);
+							Rect bgRect = new Rect(rect.x - labelGetterText.x * 0.1f, rect.y, labelGetterText.x * 1.2f, labelGetterText.y);
+
+							GUIState.Push();
+							{
+								GUI.color = Color.white;
+								GUI.DrawTexture(bgRect, TexUI.GrayTextBG);
+								GUI.Label(rect, text);
+							}
+							GUIState.Pop();
+						}
 						GUI.color = Color.white;
-						GUI.DrawTexture(bgRect, TexUI.GrayTextBG);
-						GUI.color = textColor;
-						GUI.Label(rect, text);
+						GUI.DrawTexture(new Rect(labelPosition.x - textSize.x * 0.1f, labelPosition.y, bgWidth, textSize.y), TexUI.GrayTextBG);
+						GUI.Label(labelPosition, fuelCostLabel);
 					}
-					GUI.color = Color.white;
-					GUI.DrawTexture(new Rect(labelPosition.x - textSize.x * 0.1f, labelPosition.y, bgWidth, textSize.y), TexUI.GrayTextBG);
-
-					GUI.Label(labelPosition, fuelCostLabel);
-					GUI.color = color;
+					GUIState.Pop();
 				}
 			}
 		}
@@ -242,74 +247,75 @@ namespace Vehicles
 
 		public override void TargeterUpdate()
 		{
-			if (IsTargeting)
+			DrawAirDefenseGrid();
+			if (aerialVehicle != null)
 			{
-				DrawAirDefenseGrid();
-				if (aerialVehicle != null)
+				originOnMap = aerialVehicle.DrawPos;
+			}
+			Vector3 pos = Vector3.zero;
+			GlobalTargetInfo arg = CurrentTargetUnderMouse();
+			if (arg.HasWorldObject)
+			{
+				pos = arg.WorldObject.DrawPos;
+			}
+			else if (arg.Tile >= 0)
+			{
+				pos = WorldHelper.GetTilePos(arg.Tile);
+			}
+			if (arg.IsValid && !Mouse.IsInputBlockedNow)
+			{
+				if (vehicle.CompVehicleLauncher.launchProtocol.GetFloatMenuOptionsAt(arg.Tile).NotNullAndAny())
 				{
-					originOnMap = aerialVehicle.DrawPos;
+					WorldRendererUtility.DrawQuadTangentialToPlanet(pos, BaseFeedbackTexSize * Find.WorldGrid.averageTileSize, 0.018f, WorldMaterials.CurTargetingMat);
 				}
-				Vector3 pos = Vector3.zero;
-				GlobalTargetInfo arg = CurrentTargetUnderMouse();
-				if (arg.HasWorldObject)
-				{
-					pos = arg.WorldObject.DrawPos;
-				}
-				else if (arg.Tile >= 0)
-				{
-					pos = WorldHelper.GetTilePos(arg.Tile);
-				}
-				if (arg.IsValid && !Mouse.IsInputBlockedNow)
-				{
-					if (vehicle.CompVehicleLauncher.launchProtocol.GetFloatMenuOptionsAt(arg.Tile).NotNullAndAny())
-					{
-						WorldRendererUtility.DrawQuadTangentialToPlanet(pos, BaseFeedbackTexSize * Find.WorldGrid.averageTileSize, 0.018f, WorldMaterials.CurTargetingMat);
-					}
-				}
+			}
 
-				Vector3 start = originOnMap;
-				var tiles = new List<int>(FlightPath.Select(n => n.tile));
-				Material lineMat = null;
-				switch (vehicle.CompVehicleLauncher.GetShuttleStatus(arg, start))
+			Vector3 start = originOnMap;
+			var tiles = new List<int>(FlightPath.Select(n => n.tile));
+			Material lineMat = null;
+			switch (vehicle.CompVehicleLauncher.GetShuttleStatus(arg, start))
+			{
+				case ShuttleLaunchStatus.Valid:
+					lineMat = TexData.WorldLineMatWhite;
+					break;
+				case ShuttleLaunchStatus.NoReturnTrip:
+					lineMat = TexData.WorldLineMatYellow;
+					break;
+				case ShuttleLaunchStatus.Invalid:
+					lineMat = TexData.WorldLineMatRed;
+					break;
+			}
+			for (int n = 0; n < FlightPath.Count; n++)
+			{
+				int curTile = tiles.PopAt(0);
+				Vector3 end = WorldHelper.GetTilePos(curTile);
+				DrawTravelPoint(start, end, lineMat);
+				start = end;
+			}
+			if (FlightPath.Count > 0)
+			{
+				string destLabel = "VF_DoubleClickShuttleTarget".Translate();
+				Vector2 labelGetterText = Text.CalcSize(destLabel);
+				Rect destPosition = new Rect(start.x, start.y, 32f, 32f);
+				Rect rect = new Rect(destPosition.xMax, destPosition.y, 9999f, 100f);
+				Rect bgRect = new Rect(rect.x - labelGetterText.x * 0.1f, rect.y, labelGetterText.x * 1.2f, labelGetterText.y);
+
+				GUIState.Push();
 				{
-					case ShuttleLaunchStatus.Valid:
-						lineMat = TexData.WorldLineMatWhite;
-						break;
-					case ShuttleLaunchStatus.NoReturnTrip:
-						lineMat = TexData.WorldLineMatYellow;
-						break;
-					case ShuttleLaunchStatus.Invalid:
-						lineMat = TexData.WorldLineMatRed;
-						break;
-				}
-				for (int n = 0; n < FlightPath.Count; n++)
-				{
-					int curTile = tiles.PopAt(0);
-					Vector3 end = WorldHelper.GetTilePos(curTile);
-					DrawTravelPoint(start, end, lineMat);
-					start = end;
-				}
-				if (FlightPath.Count > 0)
-				{
-					string destLabel = "VF_DoubleClickShuttleTarget".Translate();
-					Vector2 labelGetterText = Text.CalcSize(destLabel);
-					Rect destPosition = new Rect(start.x, start.y, 32f, 32f);
-					Rect rect = new Rect(destPosition.xMax, destPosition.y, 9999f, 100f);
-					Rect bgRect = new Rect(rect.x - labelGetterText.x * 0.1f, rect.y, labelGetterText.x * 1.2f, labelGetterText.y);
-					var textColor = GUI.color;
 					GUI.color = Color.white;
 					Graphics.DrawTexture(bgRect, TexUI.GrayTextBG);
-					GUI.color = textColor;
-					//GUI.Label(rect, destLabel);
-					WorldRendererUtility.DrawQuadTangentialToPlanet(start, BaseFeedbackTexSize * Find.WorldGrid.averageTileSize, 0.018f, WorldMaterials.CurTargetingMat);
 				}
-				if (FlightPath.Count < vehicle.CompVehicleLauncher.launchProtocol.MaxFlightNodes && arg.IsValid)
-				{
-					DrawTravelPoint(start, WorldHelper.GetTilePos(arg.Tile), lineMat);
-				}
+				GUIState.Pop();
 
-				onUpdate?.Invoke();
+				//GUI.Label(rect, destLabel);
+				WorldRendererUtility.DrawQuadTangentialToPlanet(start, BaseFeedbackTexSize * Find.WorldGrid.averageTileSize, 0.018f, WorldMaterials.CurTargetingMat);
 			}
+			if (FlightPath.Count < vehicle.CompVehicleLauncher.launchProtocol.MaxFlightNodes && arg.IsValid)
+			{
+				DrawTravelPoint(start, WorldHelper.GetTilePos(arg.Tile), lineMat);
+			}
+
+			onUpdate?.Invoke();
 		}
 
 		public bool IsTargetedNow(WorldObject worldObject, List<WorldObject> worldObjectsUnderMouse = null)
@@ -329,15 +335,28 @@ namespace Vehicles
 		{
 			fuelCost = 0;
 			distance = 0;
-			int source = origin;
+			Vector3 source = originOnMap;
 			foreach (FlightNode node in FlightPath)
 			{
 				int tile = node.tile;
-				float nodeDistance = WorldHelper.GetTileDistance(source, tile);
-				fuelCost += vehicle.CompVehicleLauncher.FuelNeededToLaunchAtDist(nodeDistance);
-				distance += nodeDistance;
-				source = tile;
+				Vector3 target = WorldHelper.GetTilePos(tile);
+				(float nextFuelCost, float nextDistance) = CostAndDistanceCalculator(source, target);
+
+				fuelCost += nextFuelCost;
+				distance += nextDistance;
+				source = target;
 			}
+		}
+
+		private (float fuelCost, float distance) CostAndDistanceCalculator(Vector3 from, Vector3 to)
+		{
+			if (from == to)
+			{
+				return (0, 0);
+			}
+			float distance = Ext_Math.SphericalDistance(from, to);
+			float fuelCost = vehicle.CompVehicleLauncher.FuelNeededToLaunchAtDist(distance);
+			return (fuelCost, distance);
 		}
 
 		public static void DrawTravelPoint(Vector3 start, Vector3 end, Material material = null)

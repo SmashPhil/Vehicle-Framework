@@ -19,13 +19,13 @@ namespace Vehicles
 
 		public float Recoil => curRecoil;
 
-		public void RecoilTick()
+		public void ProcessPostTickVisuals(int ticksPassed)
 		{
 			if (targetRecoil > 0f)
 			{
 				if (recoilingBack)
 				{
-					curRecoil += recoilStep;
+					curRecoil += recoilStep * ticksPassed;
 					if (curRecoil >= targetRecoil)
 					{
 						curRecoil = targetRecoil;
@@ -33,7 +33,7 @@ namespace Vehicles
 				}
 				else
 				{
-					curRecoil -= recoilStep * speedMultiplierPostRecoil;
+					curRecoil -= recoilStep * speedMultiplierPostRecoil * ticksPassed;
 					if (curRecoil <= 0)
 					{
 						ResetRecoilVars();

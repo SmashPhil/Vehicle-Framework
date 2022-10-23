@@ -272,9 +272,10 @@ namespace Vehicles
 				ResetCurrentTarget();
 				return;
 			}
-			if (def.building.turretBurstWarmupTime > 0f)
+			float randomInRange = this.def.building.turretBurstWarmupTime.RandomInRange;
+			if (randomInRange > 0f)
 			{
-				burstWarmupTicksLeft = def.building.turretBurstWarmupTime.SecondsToTicks();
+				burstWarmupTicksLeft = randomInRange.SecondsToTicks();
 				return;
 			}
 			if (canBeginBurstImmediately)

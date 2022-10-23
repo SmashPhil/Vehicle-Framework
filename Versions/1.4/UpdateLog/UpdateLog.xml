@@ -1,24 +1,28 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.3.8295</currentVersion>
+  <currentVersion>1.4.1051</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>[title]Recent News[/title][font]Small[/font]
-
+I've updated the framework to version 1.4! I'm happy to say it wasn't a massive undertaking and tons of things were broken. Here are all the bugfixes + changes from the first round of testing.
 [title]Bug Fixes[/title][font]Small[/font]
 - Fixed bug where AssignDefaults xml attribute would attempt to add a duplicate custom cost.
 
 - Fixed damage / deflection / penetration calculation which is supposed to immitate vanilla RNG damage mechanics.
 
 - Fixed bug where damaging components through dev mode would not notify vehicle of damage, resulting in no deconstruction or undrafting.
+
+- Fixed bug with material renderQueue, causing vehicles to render underneath shadows in all instances.
 [title]Additional Changes[/title][font]Small[/font]
 - Removed "Click for More Info tooltip on vehicle components health menu until further notice.  I need to actually add an additional window for more details.
 
 - Removed generic armor value and implemented armor ratings on a per part basis.
 
 - Changed vehicle damage mechanics to instead only take directional damage to external armor.  After external armor has been penetrated at that cell, it will fall through and have a chance to hit any internal or undefined part of the vehicle.
+
+- Changed explosion damage mechanics to now apply to every external cell it hits in the hitbox.  Internal parts (and occupants) will be damaged if the explosion penetrates external parts.
 
 - Added effector and sound options to VehicleFleshTypeDef for all vehicles.  Defaults will be assigned for Wooden, Metal, and Spacer vehicle flesh types which are included in the framework but you're free to make your own.
 [title]Final Notes[/title][font]Small[/font]
@@ -29,7 +33,7 @@ Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/is
   <!--Show update log on next startup.-->
   <update>false</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
-  <testing>true</testing>
+  <testing>false</testing>
   <!--Icon bar shown to the right of the mod's name-->
   <rightIconBar>
     <li>

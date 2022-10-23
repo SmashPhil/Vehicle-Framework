@@ -46,6 +46,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldTargeter), nameof(WorldTargeter.ProcessInputEvents)),
 				postfix: new HarmonyMethod(typeof(WorldHandling),
 				nameof(WorldTargeterProcessInputEvents)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldTargeter), nameof(WorldTargeter.StopTargeting)),
+				postfix: new HarmonyMethod(typeof(WorldHandling),
+				nameof(WorldTargeterStop)));
 		}
 
 		/// <summary>
@@ -210,6 +213,10 @@ namespace Vehicles
 			Targeters.ProcessWorldTargeterInputEvents();
 		}
 
+		public static void WorldTargeterStop()
+		{
+			Targeters.StopAllWorldTargeters();
+		}
 		/* --------------------------------------------------------- */
 	}
 }

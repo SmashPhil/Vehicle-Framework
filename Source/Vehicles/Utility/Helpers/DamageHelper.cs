@@ -50,10 +50,13 @@ namespace Vehicles
 			float chanceToStartFire = proj.def.projectile.explosionChanceToStartFire * 0.0f;
 			int postExplosionSpawnThingCount = proj.def.projectile.postExplosionSpawnThingCount;
 			ThingDef preExplosionSpawnThingDef = proj.def.projectile.preExplosionSpawnThingDef;
-			GenExplosion.DoExplosion(position, map2, explosionRadius, damageDef, launcher, damageAmount, armorPenetration, soundExplode,
-				equipmentDef, def, thing, postExplosionSpawnThingDef, postExplosionSpawnChance, postExplosionSpawnThingCount,
-				proj.def.projectile.applyDamageToExplosionCellsNeighbors, preExplosionSpawnThingDef, proj.def.projectile.preExplosionSpawnChance,
-				proj.def.projectile.preExplosionSpawnThingCount, chanceToStartFire, proj.def.projectile.explosionDamageFalloff);
+			GenExplosion.DoExplosion(position, map2, explosionRadius, damageDef, launcher, 
+				damAmount: damageAmount, armorPenetration: armorPenetration, explosionSound: soundExplode,
+				weapon: equipmentDef, projectile: def, intendedTarget: thing, 
+				postExplosionSpawnThingDef: postExplosionSpawnThingDef, postExplosionSpawnChance: postExplosionSpawnChance, postExplosionSpawnThingCount: postExplosionSpawnThingCount, 
+				applyDamageToExplosionCellsNeighbors: proj.def.projectile.applyDamageToExplosionCellsNeighbors,
+				preExplosionSpawnThingDef: preExplosionSpawnThingDef, preExplosionSpawnChance: proj.def.projectile.preExplosionSpawnChance, preExplosionSpawnThingCount: proj.def.projectile.preExplosionSpawnThingCount, 
+				chanceToStartFire: chanceToStartFire, damageFalloff: proj.def.projectile.explosionDamageFalloff);
 		}
 	}
 }

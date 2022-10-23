@@ -12,7 +12,7 @@ namespace Vehicles
 		public VehicleTweener tweener;
 		public VehicleRenderer renderer;
 		public PawnUIOverlay ui; //reimplement for better control over vehicle overlays (names should show despite animal Prefs set to none, traders inside should transfer question mark, etc.)
-		public PawnFootprintMaker footprintMaker; //reimplement for vehicle specific "footprints"
+		public VehicleTrackMaker trackMaker; //reimplement for vehicle specific "footprints"
 		public Vehicle_RecoilTracker rTracker;
 
 		public Vehicle_DrawTracker(VehiclePawn vehicle)
@@ -21,7 +21,7 @@ namespace Vehicles
 			tweener = new VehicleTweener(vehicle);
 			renderer = new VehicleRenderer(vehicle);
 			ui = new PawnUIOverlay(vehicle);
-			footprintMaker = new PawnFootprintMaker(vehicle);
+			trackMaker = new VehicleTrackMaker(vehicle);
 			rTracker = new Vehicle_RecoilTracker();
 		}
 
@@ -41,19 +41,15 @@ namespace Vehicles
 			}
 		}
 
-		public void VehicleDrawerTick()
+		public void ProcessPostTickVisuals(int ticksPassed)
 		{
 			if (!vehicle.Spawned)
 			{
 				return;
 			}
-			if (Current.ProgramState == ProgramState.Playing && !Find.CameraDriver.CurrentViewRect.ExpandedBy(3).Contains(vehicle.Position))
-			{
-				return;
-			}
-			footprintMaker.FootprintMakerTick();
-			renderer.RendererTick();
-			rTracker.RecoilTick();
+			renderer.ProcessPostTickVisuals(ticksPassed);
+			trackMaker.ProcessPostTickVisuals(ticksPassed);
+			rTracker.ProcessPostTickVisuals(ticksPassed);
 		}
 
 		public void DrawAt(Vector3 loc)

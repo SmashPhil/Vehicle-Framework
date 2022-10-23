@@ -52,13 +52,9 @@ namespace Vehicles
 			float num = maxTravelRadiusFromLocus + cannon.MaxRange;
 			float maxLocusDistSquared = num * num;
 			Func<IntVec3, bool> losValidator = null;
-			if ((flags & TargetScanFlags.LOSBlockableByGas) != TargetScanFlags.None)
+			if (flags.HasFlag(TargetScanFlags.LOSBlockableByGas))
 			{
-				losValidator = delegate(IntVec3 vec3)
-				{
-					Gas gas = vec3.GetGas(searcherPawn.Map);
-					return gas == null || !gas.def.gas.blockTurretTracking;
-				};
+				losValidator = (pos) => pos.AnyGas(searcherPawn.Map, GasType.BlindSmoke);
 			}
 			Predicate<IAttackTarget> innerValidator = delegate(IAttackTarget t)
 			{

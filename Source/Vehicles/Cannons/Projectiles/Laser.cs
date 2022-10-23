@@ -26,7 +26,7 @@ namespace Vehicles
 			}
 		}
 
-		protected override void Impact(Thing hitThing)
+		protected override void Impact(Thing hitThing, bool blockedByShield = false)
 		{
 			Map map = Map;
 			IntVec3 position = Position;

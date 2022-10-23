@@ -6,7 +6,7 @@ using Verse.AI.Group;
 
 namespace Vehicles
 {
-	public class LordToil_PrepareCaravan_BoardVehicles : LordToil
+	public class LordToil_PrepareCaravan_BoardVehicles : LordToil, IDebugLordMeetingPoint
 	{
 		private IntVec3 meetingPoint;
 
@@ -14,6 +14,8 @@ namespace Vehicles
 		{
 			this.meetingPoint = meetingPoint;
 		}
+
+		public IntVec3 MeetingPoint => meetingPoint;
 
 		public override float? CustomWakeThreshold
 		{
@@ -35,7 +37,7 @@ namespace Vehicles
 		{
 			foreach(Pawn p in lord.ownedPawns)
 			{
-				if(p is VehiclePawn)
+				if (p is VehiclePawn)
 				{
 					p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareVehicleCaravan_WaitVehicle);
 				}

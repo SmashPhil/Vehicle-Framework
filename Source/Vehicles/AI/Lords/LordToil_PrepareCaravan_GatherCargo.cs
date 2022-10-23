@@ -7,7 +7,7 @@ using Verse.AI.Group;
 
 namespace Vehicles
 {
-	public class LordToil_PrepareCaravan_GatherCargo : LordToil
+	public class LordToil_PrepareCaravan_GatherCargo : LordToil, IDebugLordMeetingPoint
 	{
 		private IntVec3 meetingPoint;
 
@@ -15,6 +15,8 @@ namespace Vehicles
 		{
 			this.meetingPoint = meetingPoint;
 		}
+
+		public IntVec3 MeetingPoint => meetingPoint;
 
 		public override float? CustomWakeThreshold
 		{

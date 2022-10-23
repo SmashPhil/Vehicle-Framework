@@ -2,14 +2,9 @@
 
 <Defs>
 	<ThinkTreeDef>
-		<defName>Vehicle</defName>
+		<defName>ThinkTree_Vehicle</defName>
 		<thinkRoot Class="ThinkNode_Priority">
 			<subNodes>
-				<!-- Downed -->
-				<li Class = "ThinkNode_Subtree">
-					<treeDef>Downed</treeDef>
-				</li>
-				
 				<!--Do a queued job -->
 				<li Class = "ThinkNode_QueuedJob"/>
 				

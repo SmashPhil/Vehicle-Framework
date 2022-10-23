@@ -20,7 +20,7 @@ namespace Vehicles
 	/// support versioning for AssetBundles, I can move to using that instead.
 	/// </remarks>
 	[LoadedEarly]
-	[IsMainThread]
+	[StaticConstructorOnStartup]
 	public static class AssetBundleDatabase
 	{
 		private const string VehicleAssetFolder = "Assets";
@@ -35,9 +35,10 @@ namespace Vehicles
 		/// <summary>
 		/// AssetBundle version loader
 		/// </summary>
-		private static readonly Dictionary<string, string> bundleBuildVersionManifest = new Dictionary<string, string>()
+		private static readonly Dictionary<string, string> bundleBuildVersions = new Dictionary<string, string>()
 		{
-			{"1.3", "2019.4.30f1"}
+			{"1.3", "2019.4.30f1"},
+			{"1.4", "2019.4.30f1"}
 		};
 
 		private static readonly Dictionary<string, UnityEngine.Object> assetLookup = new Dictionary<string, UnityEngine.Object>();
@@ -46,21 +47,27 @@ namespace Vehicles
 
 		public static readonly List<AssetBundle> vehicleAssets = new List<AssetBundle>();
 
-		public static readonly Shader CutoutComplexRGB;
-		public static readonly Shader CutoutComplexPattern;
-		public static readonly Shader CutoutComplexSkin;
+		public static Shader CutoutComplexRGB { get; private set; }
+		public static Shader CutoutComplexPattern { get; private set; }
+		public static Shader CutoutComplexSkin { get; private set; }
 
-		public static readonly Texture2D MouseHandOpen;
-		public static readonly Texture2D MouseHandClosed;
+		public static Texture2D MouseHandOpen { get; private set; }
+		public static Texture2D MouseHandClosed { get; private set; }
+
+		public static bool Loaded { get; private set; } = false;
 
 		static AssetBundleDatabase()
 		{
 			if (!UnityData.IsInMainThread)
 			{
-				SmashLog.Error($"Static Constructor was not called on main thread for type <type>AssetBundleDatabase</type> which has attribute <attribute>IsMainThread</attribute>. Use <attribute>StaticConstructorOnStartup</attribute instead.");
+				Log.Error("Attempting to load AssetBundles outside of MainThread.");
+				return;
 			}
-			string version = $"{VersionControl.CurrentMajor}.{VersionControl.CurrentMinor}";
-			if (bundleBuildVersionManifest.TryGetValue(version, out string currentVersion))
+			if (Loaded) //Don't load on StaticConstructorOnStartup (only for suppressing warning)
+			{
+				return;
+			}
+			if (bundleBuildVersions.TryGetValue(VersionControl.CurrentVersionStringWithoutBuild, out string currentVersion))
 			{
 				if (currentVersion != Application.unityVersion)
 				{
@@ -69,9 +76,9 @@ namespace Vehicles
 			}
 			else
 			{
-				SmashLog.Warning($"{VehicleHarmony.LogLabel} Unable to locate cached UnityVersion: {version}. This mod might not support this version.");
+				SmashLog.Warning($"{VehicleHarmony.LogLabel} Unable to locate cached Unity version {Application.unityVersion} for {VersionControl.CurrentVersionString}. This mod might not support this version.");
 			}
-			
+
 			List<string> loadFolders = FilePaths.ModFoldersForVersion(VehicleMod.settings.Mod.Content);
 			try
 			{
@@ -119,6 +126,8 @@ namespace Vehicles
 			CutoutComplexSkin = LoadAsset<Shader>(CutoutComplexSkinPath);
 			MouseHandOpen = LoadAsset<Texture2D>(MouseHandOpenPath);
 			MouseHandClosed = LoadAsset<Texture2D>(MouseHandClosedPath);
+
+			Loaded = true;
 		}
 
 		/// <summary>

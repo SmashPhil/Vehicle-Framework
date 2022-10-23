@@ -18,8 +18,8 @@ namespace Vehicles
 		[PostToSettings(Label = "VehicleFishingEnabled", Tooltip = "VehicleFishingEnabledTooltip", Translate = true, UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Sea)]
 		[DisableSettingConditional(MayRequireAny = new string[] { ConditionalPatchApplier.VE_Fishing })]
 		public bool fishing = false;
-		public float wakeMultiplier = 1.6f;
-		public float wakeSpeed = 1.6f;
+
+		public VehicleTrack track;
 
 		public List<VehicleJobLimitations> vehicleJobLimitations = new List<VehicleJobLimitations>();
 

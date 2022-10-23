@@ -610,7 +610,7 @@ namespace Vehicles
 					TaleRecorder.RecordTale(TaleDefOf.CaravanFormed, author);
 					return;
 				}
-				if (GenHostility.AnyHostileActiveThreatToPlayer_NewTemp(author.Map, false))
+				if (GenHostility.AnyHostileActiveThreatToPlayer(author.Map, false))
 				{
 					TaleRecorder.RecordTale(TaleDefOf.CaravanFled, author);
 				}

@@ -258,7 +258,7 @@ namespace Vehicles
 					displacement = req.displacement,
 					maskTex = tmpMaskArray[i],
 					patternTex = pattern[new Rot8(patternPointers[i])],
-					shaderParameters = req.shaderParameters
+					shaderParameters = req.shaderParameters,
 				};
 				mats[i] = MaterialPoolExpanded.MatFrom(req2);
 			}

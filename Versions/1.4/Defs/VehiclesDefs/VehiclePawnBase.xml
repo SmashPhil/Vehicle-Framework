@@ -19,7 +19,7 @@
 		
 		<statBases>
 			<PsychicSensitivity>0</PsychicSensitivity>
-			<ToxicSensitivity>0</ToxicSensitivity>
+			<ToxicResistance>1</ToxicResistance>
 			<Flammability>0</Flammability>
 			<ComfyTemperatureMin>-200</ComfyTemperatureMin>
 			<ComfyTemperatureMax>200</ComfyTemperatureMax>
@@ -82,7 +82,7 @@
 		<race>
 			<body>emptyBody</body>
 			<trainability>None</trainability>
-			<thinkTreeMain>Vehicle</thinkTreeMain>
+			<thinkTreeMain>ThinkTree_Vehicle</thinkTreeMain>
 			<intelligence>ToolUser</intelligence>
 			<fleshType>MetalVehicle</fleshType>
 			<needsRest>false</needsRest>

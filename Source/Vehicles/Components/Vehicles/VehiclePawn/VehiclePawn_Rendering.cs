@@ -40,7 +40,7 @@ namespace Vehicles
 
 		public bool Nameable => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), nameof(VehicleDef.nameable), VehicleDef.nameable);
 
-		public override Vector3 DrawPos => Drawer.DrawPos;
+		public override Vector3 DrawPos => vDrawer.DrawPos;
 
 		public float Angle
 		{
@@ -271,6 +271,18 @@ namespace Vehicles
 				}
 			});
 			drawVehicle.RunSynchronously();
+		}
+
+		public new void ProcessPostTickVisuals(int ticksPassed, CellRect viewRect)
+		{
+			if (!Suspended && Spawned)
+			{
+				if (Current.ProgramState != ProgramState.Playing || viewRect.Contains(base.Position))
+				{
+					vDrawer.ProcessPostTickVisuals(ticksPassed);
+				}
+				rotationTracker.ProcessPostTickVisuals(ticksPassed);
+			}
 		}
 
 		public void ResetRenderStatus()

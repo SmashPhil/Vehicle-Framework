@@ -131,8 +131,7 @@ namespace Vehicles
 			if (def.skyfaller.CausesExplosion)
 			{
 				GenExplosion.DoExplosion(Position, Map, def.skyfaller.explosionRadius, def.skyfaller.explosionDamage, null, 
-					GenMath.RoundRandom(def.skyfaller.explosionDamage.defaultDamage * def.skyfaller.explosionDamageFactor), 
-					-1f, null, null, null, null, null, 0f, 1, false, null, 0f, 1, 0f, false, null, (!def.skyfaller.damageSpawnedThings) ? vehicle.inventory.innerContainer.ToList() : null);
+					GenMath.RoundRandom(def.skyfaller.explosionDamage.defaultDamage * def.skyfaller.explosionDamageFactor), ignoredThings: (!def.skyfaller.damageSpawnedThings) ? vehicle.inventory.innerContainer.ToList() : null);
 			}
 			//this.SpawnThings();
 			CellRect cellRect = this.OccupiedRect();

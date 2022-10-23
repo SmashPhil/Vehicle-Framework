@@ -49,7 +49,7 @@ namespace Vehicles
 					nameof(DebugWorldObjects)));
 			}
 
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_RopeTracker), "BreakAllRopes"),
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(ThingWithComps), nameof(ThingWithComps.SpawnSetup)),
 			//	prefix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestPrefix)),
 			//	postfix: new HarmonyMethod(typeof(Debug),
@@ -63,11 +63,11 @@ namespace Vehicles
 		{
 			try
 			{
-				Log.Message($"DROP");
+				Log.Message($"Called");
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"[Test Test Prefix] Exception Thrown.\n{ex.Message}\n{ex.InnerException}\n{ex.StackTrace}");
+				Log.Error($"[Test Prefix] Exception Thrown.\n{ex.Message}\n{ex.InnerException}\n{ex.StackTrace}");
 			}
 		}
 
@@ -75,7 +75,7 @@ namespace Vehicles
 		{
             try
             {
-                //Log.Message($"END");
+                Log.Message($"Finished");
             }
             catch (Exception ex)
             {

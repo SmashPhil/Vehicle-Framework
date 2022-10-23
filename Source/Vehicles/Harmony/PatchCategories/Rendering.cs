@@ -26,9 +26,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(SelectionDrawer), "DrawSelectionBracketFor"),
 				prefix: new HarmonyMethod(typeof(Rendering),
 				nameof(DrawSelectionBracketsVehicles)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnFootprintMaker), nameof(PawnFootprintMaker.FootprintMakerTick)),
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn), nameof(Pawn.ProcessPostTickVisuals)),
 				prefix: new HarmonyMethod(typeof(Rendering),
-				nameof(BoatWakesTicker)));
+				nameof(ProcessVehiclePostTickVisuals)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GhostDrawer), nameof(GhostDrawer.DrawGhostThing)),
 				postfix: new HarmonyMethod(typeof(Rendering),
 				nameof(DrawGhostVehicle)));
@@ -42,6 +42,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Targeter), nameof(Targeter.TargeterUpdate)),
 				postfix: new HarmonyMethod(typeof(Rendering),
 				nameof(TargeterUpdate)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Targeter), nameof(Targeter.StopTargeting)),
+				postfix: new HarmonyMethod(typeof(Rendering),
+				nameof(TargeterStop)));
 
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(OverlayDrawer), "RenderOutOfFuelOverlay"),
 			//	prefix: new HarmonyMethod(typeof(Rendering),
@@ -133,29 +136,17 @@ namespace Vehicles
 			return true;
 		}
 
-		/// <summary>
-		/// Create custom water footprints, resembling a wake behind the boat
-		/// </summary>
-		/// <param name="___pawn"></param>
-		/// <param name="___lastFootprintPlacePos"></param>
-		/// <returns></returns>
-		public static bool BoatWakesTicker(Pawn ___pawn, ref Vector3 ___lastFootprintPlacePos)
+		public static bool ProcessVehiclePostTickVisuals(Pawn __instance, int ticksPassed, CellRect viewRect)
 		{
-			if (___pawn is VehiclePawn vehicle && vehicle.IsBoat())
+			if (__instance is VehiclePawn vehicle)
 			{
-				if ((vehicle.Drawer.DrawPos - ___lastFootprintPlacePos).MagnitudeHorizontalSquared() > 0.1)
+				if (!vehicle.Suspended && vehicle.Spawned)
 				{
-					Vector3 drawPos = vehicle.Drawer.DrawPos;
-					if (drawPos.ToIntVec3().InBounds(vehicle.Map) && !vehicle.beached)
+					if (Current.ProgramState != ProgramState.Playing || viewRect.Contains(vehicle.Position))
 					{
-						FleckMaker.WaterSplash(drawPos, vehicle.Map, 7 * vehicle.VehicleDef.properties.wakeMultiplier, vehicle.VehicleDef.properties.wakeSpeed);
-						___lastFootprintPlacePos = drawPos;
+						vehicle.Drawer.ProcessPostTickVisuals(ticksPassed);
 					}
-				}
-				else if (VehicleMod.settings.main.passiveWaterWaves && Find.TickManager.TicksGame % 360 == 0)
-				{
-					float offset = Mathf.PingPong(Find.TickManager.TicksGame / 10, vehicle.VehicleDef.graphicData.drawSize.y / 4);
-					FleckMaker.WaterSplash(vehicle.Drawer.DrawPos - new Vector3(0, 0, offset), vehicle.Map, vehicle.VehicleDef.properties.wakeMultiplier, vehicle.VehicleDef.properties.wakeSpeed);
+					vehicle.rotationTracker.ProcessPostTickVisuals(ticksPassed);
 				}
 				return false;
 			}
@@ -234,6 +225,11 @@ namespace Vehicles
 		public static void TargeterUpdate()
 		{
 			Targeters.UpdateTargeters();
+		}
+
+		public static void TargeterStop()
+		{
+			Targeters.StopAllTargeters();
 		}
 		/* ----------------------------------------------------------- */
 	}

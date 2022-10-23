@@ -216,26 +216,34 @@ namespace Vehicles
 			{
 				if (daysWorthOfFoodDirty)
 				{
+					List<Pawn> pawns = TransferableUtility.GetPawnsFromTransferables(transferables);
+					List<VehiclePawn> vehicles = pawns.Where(v => v is VehiclePawn).Cast<VehiclePawn>().ToList();
 					daysWorthOfFoodDirty = false;
-					float first;
-					float second;
-					if (destinationTile != -1)
+
+					if (!vehicles.NullOrEmpty())
 					{
-						List<Pawn> pawns = TransferableUtility.GetPawnsFromTransferables(transferables);
-						List<VehiclePawn> vehicles = pawns.Where(v => v is VehiclePawn).Cast<VehiclePawn>().ToList();
-						using (WorldPath worldPath = WorldVehiclePathfinder.Instance.FindPath(CurrentTile, destinationTile, vehicles))
+						float first;
+						float second;
+						if (destinationTile != -1)
 						{
-							int ticksPerMove = VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(new VehicleCaravanTicksPerMoveUtility.VehicleInfo(this), null);
-							first = DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(transferables, CurrentTile, IgnoreInventoryMode, Faction.OfPlayer, worldPath, 0f, ticksPerMove);
-							second = DaysUntilRotCalculator.ApproxDaysUntilRot(transferables, CurrentTile, IgnoreInventoryMode, worldPath, 0f, ticksPerMove);
+							using (WorldPath worldPath = WorldVehiclePathfinder.Instance.FindPath(CurrentTile, destinationTile, vehicles))
+							{
+								int ticksPerMove = VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(new VehicleCaravanTicksPerMoveUtility.VehicleInfo(this), null);
+								first = DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(transferables, CurrentTile, IgnoreInventoryMode, Faction.OfPlayer, worldPath, 0f, ticksPerMove);
+								second = DaysUntilRotCalculator.ApproxDaysUntilRot(transferables, CurrentTile, IgnoreInventoryMode, worldPath, 0f, ticksPerMove);
+							}
 						}
+						else
+						{
+							first = DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(transferables, CurrentTile, IgnoreInventoryMode, Faction.OfPlayer);
+							second = DaysUntilRotCalculator.ApproxDaysUntilRot(transferables, CurrentTile, IgnoreInventoryMode, null);
+						}
+						cachedDaysWorthOfFood = new Pair<float, float>(first, second);
 					}
 					else
 					{
-						first = DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(transferables, CurrentTile, IgnoreInventoryMode, Faction.OfPlayer);
-						second = DaysUntilRotCalculator.ApproxDaysUntilRot(transferables, CurrentTile, IgnoreInventoryMode, null);
+						cachedDaysWorthOfFood = new Pair<float, float>(0, 0);
 					}
-					cachedDaysWorthOfFood = new Pair<float, float>(first, second);
 				}
 				return cachedDaysWorthOfFood;
 			}
@@ -703,7 +711,7 @@ namespace Vehicles
 				Messages.Message("MessageMustChooseRouteFirst".Translate(), MessageTypeDefOf.RejectInput, false);
 				return false;
 			}
-			if(vehicles.Any(v => v.CountAssignedToVehicle() < v.PawnCountToOperate))
+			if (vehicles.Any(v => v.CountAssignedToVehicle() < v.PawnCountToOperate))
 			{
 				Messages.Message("MessageMustAssignEnoughToVehicle".Translate(), MessageTypeDefOf.RejectInput, false);
 				return false;
@@ -724,11 +732,11 @@ namespace Vehicles
 				Messages.Message("TooBigCaravanMassUsage".Translate(), MessageTypeDefOf.RejectInput, false);
 				return false;
 			}
-			if(!CaravanHelper.CanStartCaravan(pawns))
+			if (!CaravanHelper.CanStartCaravan(pawns))
 			{
 				return false;
 			}
-			Pawn pawn = pawns.Find((Pawn x) => x is VehiclePawn && pawns.NotNullAndAny(p => !(p is VehiclePawn) && !p.IsWorldPawn() && p.IsColonist && !p.CanReach(x, PathEndMode.Touch, Danger.Deadly, false)));
+			Pawn pawn = pawns.Find((Pawn pawn) => pawn is VehiclePawn vehicle && pawns.NotNullAndAny(p => !(p is VehiclePawn) && p.Spawned && p.IsColonist && !p.CanReach(vehicle, PathEndMode.Touch, Danger.Deadly)));
 			if (pawn != null)
 			{
 				Messages.Message("CaravanPawnIsUnreachable".Translate(pawn.LabelShort, pawn), pawn, MessageTypeDefOf.RejectInput, false);
@@ -744,10 +752,10 @@ namespace Vehicles
 					{
 						for (int j = 0; j < transferables[i].things.Count; j++)
 						{
-							Thing t = transferables[i].things[j];
-							if (!t.Spawned || pawns.NotNullAndAny((Pawn x) => x.IsColonist && x.CanReach(t, PathEndMode.Touch, Danger.Deadly, false)))
+							Thing thing = transferables[i].things[j];
+							if (!thing.Spawned || pawns.NotNullAndAny((Pawn pawn) => pawn.IsColonist && (pawn.CanReach(thing, PathEndMode.Touch, Danger.Deadly) || CanReachUnspawned(pawn, thing))))
 							{
-								num += t.stackCount;
+								num += thing.stackCount;
 								if (num >= countToTransfer)
 								{
 									break;
@@ -770,6 +778,24 @@ namespace Vehicles
 				}
 			}
 			return true;
+
+			bool CanReachUnspawned(Pawn pawn, Thing thing, PathEndMode peMode = PathEndMode.Touch, TraverseMode mode = TraverseMode.ByPawn, Danger maxDanger = Danger.Deadly)
+			{
+				VehiclePawn vehicle = pawn.GetVehicle();
+				if (vehicle is null)
+				{
+					return false;
+				}
+				return map.reachability.CanReach(vehicle.Position, thing.Position, peMode, new TraverseParms
+				{
+					maxDanger = maxDanger,
+					mode = mode,
+					canBashDoors = false,
+					canBashFences = false,
+					alwaysUseAvoidGrid = false,
+					fenceBlocked = false
+				});
+			}
 		}
 
 		private bool TryFindExitSpot(List<Pawn> pawns, bool reachableForEveryColonist, out IntVec3 spot)

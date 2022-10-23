@@ -30,7 +30,7 @@ namespace Vehicles
 				prefix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
 				nameof(ShaderFromAssetBundle)));
 			harmony.Patch(original: AccessTools.Method(typeof(DefGenerator), nameof(DefGenerator.GenerateImpliedDefs_PreResolve)),
-				postfix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
+				prefix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
 				nameof(ImpliedDefGeneratorVehicles)));
 			harmony.Patch(original: AccessTools.Method(typeof(GraphicData), "Init"),
 				prefix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),

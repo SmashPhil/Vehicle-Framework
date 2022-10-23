@@ -1,0 +1,6 @@
+- Rebuild entire solution
+- Verify Version.txt file is correct with AssemblyVersion
+- Update Manifest version
+- Verify UpdateLog version, testing and update flag, and text
+- Update via PublisherPlus (verify Ignore/ folders, source code, and git files are excluded)
+- Archive UpdateLog and clear it for next version

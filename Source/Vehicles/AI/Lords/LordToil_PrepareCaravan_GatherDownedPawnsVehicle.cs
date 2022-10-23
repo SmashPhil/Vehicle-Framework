@@ -7,17 +7,16 @@ using Verse.AI.Group;
 
 namespace Vehicles
 {
-	public class LordToil_PrepareCaravan_GatherDownedPawnsVehicle : LordToil
+	public class LordToil_PrepareCaravan_GatherDownedPawnsVehicle : LordToil, IDebugLordMeetingPoint
 	{
 		private IntVec3 meetingPoint;
 
-		private IntVec3 exitSpot;
-
-		public LordToil_PrepareCaravan_GatherDownedPawnsVehicle(IntVec3 meetingPoint, IntVec3 exitSpot)
+		public LordToil_PrepareCaravan_GatherDownedPawnsVehicle(IntVec3 meetingPoint)
 		{
 			this.meetingPoint = meetingPoint;
-			this.exitSpot = exitSpot;
 		}
+
+		public IntVec3 MeetingPoint => meetingPoint;
 
 		public override float? CustomWakeThreshold
 		{
@@ -41,11 +40,15 @@ namespace Vehicles
 			{
 				if (pawn.IsColonist)
 				{
-					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareVehicleCaravan_GatherDownedPawns, meetingPoint, exitSpot, -1f);
+					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareVehicleCaravan_GatherDownedPawns);
+				}
+				else if (pawn is VehiclePawn)
+				{
+					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareVehicleCaravan_WaitVehicle);
 				}
 				else
 				{
-					pawn.mindState.duty = new PawnDuty(DutyDefOf.PrepareCaravan_Wait, meetingPoint, -1f);
+					pawn.mindState.duty = new PawnDuty(DutyDefOf.PrepareCaravan_Wait, meetingPoint);
 				}
 			}
 		}

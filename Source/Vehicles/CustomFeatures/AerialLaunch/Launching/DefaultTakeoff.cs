@@ -190,7 +190,7 @@ namespace Vehicles
 					{
 						if (vehicle.Spawned)
 						{
-							LaunchTargeter.Instance.ContinueTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseWorldTarget), vehicle.Map.Tile, true, VehicleTex.TargeterMouseAttachment, true, null,
+							LaunchTargeter.ContinueTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseWorldTarget), vehicle.Map.Tile, true, VehicleTex.TargeterMouseAttachment, true, null,
 								(GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => TargetingLabelGetter(target, tile, path, fuelCost));
 						}
 						else
@@ -254,7 +254,7 @@ namespace Vehicles
 			CameraJumper.TryJump(CameraJumper.GetWorldTarget(vehicle));
 			Find.WorldSelector.ClearSelection();
 			int tile = vehicle.Map.Tile;
-			LaunchTargeter.Instance.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseWorldTarget), vehicle.Map.Tile, true, VehicleTex.TargeterMouseAttachment, true, null, 
+			LaunchTargeter.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseWorldTarget), vehicle.Map.Tile, true, VehicleTex.TargeterMouseAttachment, true, null, 
 				(GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => TargetingLabelGetter(target, tile, path, fuelCost));
 		}
 

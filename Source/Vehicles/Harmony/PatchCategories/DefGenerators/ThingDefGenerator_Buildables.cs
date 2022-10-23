@@ -14,6 +14,7 @@ namespace Vehicles
 			impliedBuildDef = null;
 			if (vehicleDef.buildDef is null)
 			{
+				Log.Warning($"Implied generation for vehicles is incomplete. Please define the VehicleBuildDef separately to avoid improper vehicle generation.");
 				impliedBuildDef = new VehicleBuildDef
 				{
 					defName = $"{vehicleDef.defName}_Blueprint",
@@ -45,11 +46,19 @@ namespace Vehicles
 					soundImpactDefault = vehicleDef.soundImpactDefault,
 					soundBuilt = vehicleDef.soundBuilt,
 
-					graphicData = new GraphicData()
+					graphicData = new GraphicData(),
+
+					building = vehicleDef.building ?? new BuildingProperties()
+					{
+						canPlaceOverImpassablePlant = false,
+						paintable = false
+					}
 				};
+				vehicleDef.designationCategory = null; //Purge designation category from non-buildable VehiclePawn
 				impliedBuildDef.graphicData.CopyFrom(vehicleDef.graphicData);
 				Type graphicClass = vehicleDef.graphicData.drawRotated ? typeof(Graphic_Multi) : typeof(Graphic_Single);
 				impliedBuildDef.graphicData.graphicClass = graphicClass;
+				vehicleDef.buildDef = impliedBuildDef;
 				return true;
 			}
 			return false;

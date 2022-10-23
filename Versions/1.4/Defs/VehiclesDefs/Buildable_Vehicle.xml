@@ -18,6 +18,11 @@
 		<rotatable>true</rotatable>
 		<blockWind>true</blockWind>
 		<useHitPoints>true</useHitPoints>
+		
+		<building>
+			<canPlaceOverImpassablePlant>false</canPlaceOverImpassablePlant>
+			<paintable>false</paintable>
+		</building>
 	</Vehicles.VehicleBuildDef>
 	
 	<!-- Vehicle base -->

@@ -119,6 +119,11 @@ namespace Vehicles
 		/// <param name="terminator"></param>
 		public WorldPath FindPath(int startTile, int destTile, List<VehicleDef> vehicleDefs, int ticksPerMove = VehicleCaravanTicksPerMoveUtility.DefaultTicksPerMove, Func<float, bool> terminator = null)
 		{
+			if (vehicleDefs.NullOrEmpty())
+			{
+				Log.Error($"Attempting to find path with no vehicles.");
+				return WorldPath.NotFound;
+			}
 			ClearTileCache();
 			try
 			{

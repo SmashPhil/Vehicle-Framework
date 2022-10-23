@@ -247,7 +247,6 @@ namespace Vehicles
 
 					instruction = instructionList[++i];
 				}
-
 				yield return instruction;
 			}
 		}

@@ -41,6 +41,8 @@
 	<VF_DevMode_DebugDrawVehicleTracksTooltip>Draw cells occupied by vehicle's "VehicleTracks" which mark what cells will end up being damaged per move action.</VF_DevMode_DebugDrawVehicleTracksTooltip>
 	<VF_DevMode_DebugDrawBumpers>Draw Vehicle Bumpers</VF_DevMode_DebugDrawBumpers>
 	<VF_DevMode_DebugDrawBumpersTooltip>Draw cells immediately in front of vehicle that will indicate when the vehicle "bumps" into something and halts pathing.</VF_DevMode_DebugDrawBumpersTooltip>
+	<VF_DevMode_DebugDrawLordMeetingPoint>Draw Lord Meeting Point</VF_DevMode_DebugDrawLordMeetingPoint>
+	<VF_DevMode_DebugDrawLordMeetingPointTooltip>Highlights the cell where the Form Vehicle Caravan meeting point has been set.</VF_DevMode_DebugDrawLordMeetingPointTooltip>
 	
 	<!-- Pathing -->
 	<VF_DevMode_DebugPathfinderDebugging>PathFinder Debugging</VF_DevMode_DebugPathfinderDebugging>

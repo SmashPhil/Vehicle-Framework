@@ -458,11 +458,11 @@ namespace Vehicles
 
 		private void TryEnterNextPathCell()
 		{
-			CompVehicleTracks vehicleTrack = vehicle.GetSortedComp<CompVehicleTracks>();
-			if (vehicleTrack != null)
-			{
-				vehicleTrack.TakeStep();
-			}
+			//CompVehicleDamager vehicleDamager = vehicle.GetSortedComp<CompVehicleDamager>();
+			//if (vehicleDamager != null)
+			//{
+			//	vehicleDamager.TakeStep();
+			//}
 
 			if (vehicle.IsBoat())
 			{

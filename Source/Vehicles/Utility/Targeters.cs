@@ -12,6 +12,9 @@ namespace Vehicles
 		private static readonly List<BaseTargeter> targeters = new List<BaseTargeter>();
 		private static readonly List<BaseWorldTargeter> worldTargeters = new List<BaseWorldTargeter>();
 
+		public static BaseTargeter CurrentTargeter { get; private set; }
+		public static BaseWorldTargeter CurrentWorldTargeter { get; private set; }
+
 		static Targeters()
 		{
 			foreach (Type type in typeof(BaseTargeter).InstantiableDescendantsAndSelf())
@@ -25,6 +28,36 @@ namespace Vehicles
 				BaseWorldTargeter targeter = (BaseWorldTargeter)Activator.CreateInstance(type, null);
 				worldTargeters.Add(targeter);
 				targeter.PostInit();
+			}
+		}
+
+		public static void StartTargeter(BaseTargeter baseTargeter)
+		{
+			throw new NotImplementedException();
+
+			//Stop existing targeter
+			//Assign to active targeter
+			//Update method hooks to update only active targeters
+		}
+
+		public static void StartWorldTargeter(BaseWorldTargeter baseTargeter)
+		{
+			throw new NotImplementedException();
+
+			//Stop existing targeter
+			//Assign to active targeter
+			//Update method hooks to update only active targeters
+		}
+
+		/* ------ Map Targeters ------ */
+		public static void StopAllTargeters()
+		{
+			foreach (BaseTargeter targeter in targeters)
+			{
+				if (targeter.IsTargeting)
+				{
+					targeter.StopTargeting();
+				}
 			}
 		}
 
@@ -57,6 +90,19 @@ namespace Vehicles
 				if (targeter.IsTargeting)
 				{
 					targeter.ProcessInputEvents();
+				}
+			}
+		}
+		/* --------------------------- */
+
+		/* ----- World Targeters ----- */
+		public static void StopAllWorldTargeters()
+		{
+			foreach (BaseWorldTargeter targeter in worldTargeters)
+			{
+				if (targeter.IsTargeting)
+				{
+					targeter.StopTargeting();
 				}
 			}
 		}
@@ -93,5 +139,6 @@ namespace Vehicles
 				}
 			}
 		}
+		/* --------------------------- */
 	}
 }

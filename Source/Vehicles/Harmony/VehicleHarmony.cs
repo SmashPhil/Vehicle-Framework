@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.IO;
+using UnityEngine;
 using HarmonyLib;
 using Verse;
 using RimWorld;
@@ -15,10 +16,12 @@ namespace Vehicles
 	[StaticConstructorOnStartup]
 	internal static class VehicleHarmony
 	{
+		private static readonly DateTime ProjectStartDate = new DateTime(2019, 12, 7);
+
 		public const string VehiclesUniqueId = "SmashPhil.VehicleFramework";
 		public const string VehiclesLabel = "Vehicle Framework";
 		internal const string LogLabel = "[VehicleFramework]";
-		
+
 		internal static ModMetaData VehicleMMD;
 		internal static ModContentPack VehicleMCP;
 
@@ -34,9 +37,9 @@ namespace Vehicles
 
 		internal static List<UpdateLog> updates = new List<UpdateLog>();
 
-		public static string CurrentVersion { get; private set; }
-
 		internal static Harmony Harmony { get; private set; } = new Harmony(VehiclesUniqueId);
+
+		internal static ModVersion Version { get; private set; }
 
 		internal static string VersionDir => Path.Combine(VehicleMMD.RootDir.FullName, "Version.txt");
 
@@ -52,11 +55,11 @@ namespace Vehicles
 			VehicleMCP = VehicleMod.settings.Mod.Content;
 			VehicleMMD = ModLister.GetActiveModWithIdentifier(VehiclesUniqueId);
 
-			Version version = Assembly.GetExecutingAssembly().GetName().Version;
-			CurrentVersion = $"{version.Major}.{version.Minor}.{version.Build}";
-			Log.Message($"{LogLabel} version {CurrentVersion}");
+			Version = ModVersion.VersionFromAssembly(Assembly.GetExecutingAssembly(), ProjectStartDate);
+			string readout = Prefs.DevMode ? Version.VersionStringWithRevision : Version.VersionString;
+			Log.Message($"<color=orange>{LogLabel}</color> version {readout}");
 
-			File.WriteAllText(VersionDir, CurrentVersion);
+			File.WriteAllText(VersionDir, Version.VersionString);
 
 			IEnumerable <Type> patchCategories = GenTypes.AllTypes.Where(t => t.GetInterfaces().Contains(typeof(IPatchCategory)));
 			foreach (Type patchCategory in patchCategories)
@@ -72,7 +75,7 @@ namespace Vehicles
 					throw ex;
 				}
 			}
-			SmashLog.Message($"{LogLabel} <success>{Harmony.GetPatchedMethods().Count()} patches successfully applied.</success>");
+			if (Prefs.DevMode) SmashLog.Message($"{LogLabel} <success>{Harmony.GetPatchedMethods().Count()} patches successfully applied.</success>");
 
 			Utilities.InvokeWithLogging(ResolveAllReferences);
 			Utilities.InvokeWithLogging(PostDefDatabaseCalls);

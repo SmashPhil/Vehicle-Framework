@@ -170,6 +170,76 @@ namespace Vehicles
 			ResetRenderStatus();
 		}
 
+		private void PawnSetup(Map map, bool respawningAfterLoad)
+		{
+			if (def == null || kindDef == null)
+			{
+				Log.Warning("Tried to spawn pawn without def " + this.ToStringSafe<Pawn>() + ".");
+				return;
+			}
+			if (Find.WorldPawns.Contains(this))
+			{
+				Find.WorldPawns.RemovePawn(this);
+			}
+			PawnComponentsUtility.AddComponentsForSpawn(this);
+			if (!PawnUtility.InValidState(this))
+			{
+				Log.Error($"Vehicle {this} spawned in invalid state. Destroying...");
+				try
+				{
+					DeSpawn(DestroyMode.Vanish);
+				}
+				catch (Exception ex)
+				{
+					Log.Error($"Tried to despawn {this} because of previous error but wasn't able to. Passing to world for discard. Exception=\"{ex}\"");
+				}
+				Find.WorldPawns.PassToWorld(this, PawnDiscardDecideMode.Discard);
+				return;
+			}
+			vDrawer.Notify_Spawned();
+			rotationTracker.Notify_Spawned();
+			if (!respawningAfterLoad)
+			{
+				vPather.ResetToCurrentPosition();
+			}
+			Map.mapPawns.RegisterPawn(this);
+			if (equipment != null)
+			{
+				equipment.Notify_PawnSpawned();
+			}
+			if (!respawningAfterLoad)
+			{
+				Find.GameEnder.CheckOrUpdateGameOver();
+				if (Faction == Faction.OfPlayer)
+				{
+					Find.StoryWatcher.statsRecord.UpdateGreatestPopulation();
+					Find.World.StoryState.RecordPopulationIncrease();
+				}
+			}
+			if (RaceProps.soundAmbience != null)
+			{
+				LongEventHandler.ExecuteWhenFinished(delegate
+				{
+					sustainerAmbient = RaceProps.soundAmbience.TrySpawnSustainer(SoundInfo.InMap(this, MaintenanceType.PerTick));
+				});
+			}
+		}
+
+		private void ComponentSetup(Map map, bool respawningAfterLoad)
+		{
+			if (AllComps != null)
+			{
+				for (int i = 0; i < AllComps.Count; i++)
+				{
+					AllComps[i].PostSpawnSetup(respawningAfterLoad);
+				}
+			}
+		}
+
+		private void EntitySetup(Map map, bool respawningAfterLoad)
+		{
+		}
+
 		public override void ExposeData()
 		{
 			base.ExposeData();

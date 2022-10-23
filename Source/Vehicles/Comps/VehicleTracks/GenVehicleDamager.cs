@@ -7,11 +7,11 @@ using RimWorld;
 
 namespace Vehicles
 {
-	public static class GenVehicleTracks
+	public static class GenVehicleDamager
 	{
 		private static readonly int PawnNotifyCellCount = GenRadial.NumCellsInRadius(4.5f);
 
-		public static void NotifyNearbyPawnsPathOfVehicleTrack(VehiclePawn vehicle)
+		public static void NotifyNearbyPawnsPathOfVehicleDamager(VehiclePawn vehicle)
 		{
 			Room room = RegionAndRoomQuery.GetRoom(vehicle, RegionType.Set_Passable);
 			for (int i = 0; i < PawnNotifyCellCount; i++)

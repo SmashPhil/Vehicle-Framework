@@ -9,11 +9,18 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class LordToil_PrepareCaravan_TieAnimalsToVehicle : LordToil
+	public class LordToil_PrepareCaravan_TieAnimalsToVehicle : LordToil, IDebugLordMeetingPoint
 	{
 		protected IntVec3 meetingPoint;
 
 		protected RotatingList<VehiclePawn> vehicles;
+
+		public LordToil_PrepareCaravan_TieAnimalsToVehicle(IntVec3 meetingPoint)
+		{
+			this.meetingPoint = meetingPoint;
+		}
+
+		public IntVec3 MeetingPoint => meetingPoint;
 
 		public VehiclePawn NextVehicle
 		{
@@ -25,11 +32,6 @@ namespace Vehicles
 				}
 				return vehicles.Next;
 			}
-		}
-
-		public LordToil_PrepareCaravan_TieAnimalsToVehicle(IntVec3 meetingPoint)
-		{
-			this.meetingPoint = meetingPoint;
 		}
 
 		public override void UpdateAllDuties()

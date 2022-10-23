@@ -23,9 +23,6 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_HealthTracker), "ShouldBeDowned"),
 				prefix: new HarmonyMethod(typeof(HealthAndStats),
 				nameof(VehicleShouldBeDowned)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnDownedWiggler), nameof(PawnDownedWiggler.WigglerTick)),
-				prefix: new HarmonyMethod(typeof(HealthAndStats),
-				nameof(VehicleShouldWiggle)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(HediffUtility), nameof(HediffUtility.CanHealNaturally)),
 				prefix: new HarmonyMethod(typeof(HealthAndStats),
 				nameof(VehiclesDontHeal)));
@@ -118,20 +115,6 @@ namespace Vehicles
 			if (___pawn != null && ___pawn is VehiclePawn)
 			{
 				__result = false;
-				return false;
-			}
-			return true;
-		}
-
-		/// <summary>
-		/// Only allow the Boat to wiggle if specified within the XML def
-		/// </summary>
-		/// <param name="___pawn"></param>
-		/// <returns></returns>
-		public static bool VehicleShouldWiggle(ref Pawn ___pawn)
-		{
-			if (___pawn != null && ___pawn is VehiclePawn vehicle)
-			{
 				return false;
 			}
 			return true;

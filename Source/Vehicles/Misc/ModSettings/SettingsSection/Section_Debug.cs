@@ -5,7 +5,6 @@ using UnityEngine;
 using Verse;
 using RimWorld;
 using SmashTools;
-using SmashTools.Debugging;
 using UpdateLogTool;
 
 namespace Vehicles
@@ -25,7 +24,7 @@ namespace Vehicles
 		public bool debugDrawHitbox;
 		public bool debugDrawVehicleTracks;
 		public bool debugDrawBumpers;
-
+		public bool debugDrawLordMeetingPoint;
 		public bool debugLogging;
 		public bool debugPathCostChanges;
 
@@ -43,6 +42,7 @@ namespace Vehicles
 			debugDrawHitbox = false;
 			debugDrawVehicleTracks = false;
 			debugDrawBumpers = false;
+			debugDrawLordMeetingPoint = false;
 
 			debugLogging = false;
 			debugPathCostChanges = false;
@@ -61,6 +61,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref debugDrawHitbox, nameof(debugDrawHitbox));
 			Scribe_Values.Look(ref debugDrawVehicleTracks, nameof(debugDrawVehicleTracks));
 			Scribe_Values.Look(ref debugDrawBumpers, nameof(debugDrawBumpers));
+			Scribe_Values.Look(ref debugDrawLordMeetingPoint, nameof(debugDrawLordMeetingPoint));
 
 			Scribe_Values.Look(ref debugLogging, nameof(debugLogging));
 			Scribe_Values.Look(ref debugPathCostChanges, nameof(debugPathCostChanges));
@@ -91,6 +92,9 @@ namespace Vehicles
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawHitbox".Translate(), ref debugDrawHitbox, "VF_DevMode_DebugDrawHitboxTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawVehicleTracks".Translate(), ref debugDrawVehicleTracks, "VF_DevMode_DebugDrawVehicleTracksTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawBumpers".Translate(), ref debugDrawBumpers, "VF_DevMode_DebugDrawBumpersTooltip".Translate());
+				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawLordMeetingPoint".Translate(), ref debugDrawLordMeetingPoint, "VF_DevMode_DebugDrawLordMeetingPointTooltip".Translate());
+
+				listingStandard.NewColumn();
 
 				listingStandard.Header("VF_DevMode_Pathing".Translate(), ListingExtension.BannerColor, anchor: TextAnchor.MiddleCenter);
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawVehiclePathingCosts".Translate(), ref debugDrawVehiclePathCosts, "VF_DevMode_DebugDrawVehiclePathingCostsTooltip".Translate());
@@ -169,7 +173,7 @@ namespace Vehicles
 				{
 					versionChecking = update.UpdateData.currentVersion;
 					string label = versionChecking;
-					if (versionChecking == VehicleHarmony.CurrentVersion)
+					if (versionChecking == VehicleHarmony.Version.VersionString)
 					{
 						label += " (Current)";
 					}

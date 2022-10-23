@@ -251,7 +251,7 @@ namespace Vehicles
 				{
 					SoundDefOf.Tick_Tiny.PlayOneShotOnCamera(null);
 					Find.DesignatorManager.Select(des);
-					des.SetStuffDefTemporary(stuff);
+					des.SetStuffDef(stuff);
 				};
 				command_Action.defaultLabel = "CommandBuildCopy".Translate();
 				command_Action.defaultDesc = "CommandBuildCopyDesc".Translate();
@@ -263,7 +263,7 @@ namespace Vehicles
 				command_Action.iconTexCoords = des.iconTexCoords;
 				command_Action.iconAngle = des.iconAngle;
 				command_Action.iconOffset = des.iconOffset;
-				command_Action.order = 10f;
+				command_Action.Order = 10f;
 				command_Action.buildDef = buildDef;
 				command_Action.SetColorOverride(des.IconDrawColor);
 				des.SetStuffDef(stuffDefRaw);

@@ -165,7 +165,7 @@ namespace Vehicles
 				}
 				if (highlightLabel)
 				{
-					QuickSearchWidget.DrawTextHighlight(rect, 4f);
+					Widgets.DrawTextHighlight(rect, 4f);
 				}
 				if (lowlightLabel)
 				{

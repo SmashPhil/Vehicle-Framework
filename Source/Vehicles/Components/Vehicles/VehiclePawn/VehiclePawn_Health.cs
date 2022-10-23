@@ -118,6 +118,7 @@ namespace Vehicles
 			{
 				vPather.StopDead();
 			}
+			SoundCleanup();
 		}
 
 		public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
@@ -165,7 +166,7 @@ namespace Vehicles
 
 			if (this.GetLord() != null)
 			{
-				this.GetLord().Notify_PawnLost(this, PawnLostCondition.IncappedOrKilled, dinfo);
+				this.GetLord().Notify_PawnLost(this, PawnLostCondition.Killed, dinfo);
 			}
 			if (spawned)
 			{

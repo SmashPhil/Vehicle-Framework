@@ -24,11 +24,17 @@ namespace Vehicles
 		protected List<Graphic> cachedLaunchGraphics;
 		protected List<Graphic> cachedLandingGraphics;
 
+		protected List<GraphicDataLayered> cachedLaunchGraphicDatas;
+		protected List<GraphicDataLayered> cachedLandingGraphicDatas;
+
+		/* -- Xml Input -- */
+
+		protected int maxFlightNodes = int.MaxValue;
+
 		public LaunchProtocolProperties landingProperties;
 		public LaunchProtocolProperties launchProperties;
 
-		protected List<GraphicDataLayered> cachedLaunchGraphicDatas;
-		protected List<GraphicDataLayered> cachedLandingGraphicDatas;
+		/* ---------------- */
 
 		/// <summary>
 		/// Include only for XML initialization
@@ -45,6 +51,9 @@ namespace Vehicles
 		public LaunchProtocol(LaunchProtocol reference, VehiclePawn vehicle)
 		{
 			this.vehicle = vehicle;
+
+			maxFlightNodes = reference.maxFlightNodes;
+
 			landingProperties = reference.landingProperties;
 			launchProperties = reference.launchProperties;
 		}
@@ -70,7 +79,7 @@ namespace Vehicles
 		/// <summary>
 		/// Maximum number of flight nodes able to be selected in LaunchTargeter
 		/// </summary>
-		public virtual int MaxFlightNodes => int.MaxValue;
+		public virtual int MaxFlightNodes => maxFlightNodes;
 
 		public virtual float TimeInAnimation
 		{
@@ -492,14 +501,15 @@ namespace Vehicles
 
 		public virtual void ExposeData()
 		{
-			Scribe_References.Look(ref vehicle, "vehicle", true);
-			Scribe_Values.Look(ref drawPos, "drawPos");
-			Scribe_Values.Look(ref ticksPassed, "ticksPassed");
+			Scribe_References.Look(ref vehicle, nameof(vehicle), true);
+			Scribe_Values.Look(ref drawPos, nameof(drawPos));
+			Scribe_Values.Look(ref ticksPassed, nameof(ticksPassed));
 
-			Scribe_Values.Look(ref landing, "landing");
+			Scribe_Values.Look(ref landing, nameof(landing));
+			Scribe_Values.Look(ref maxFlightNodes, nameof(maxFlightNodes), int.MaxValue);
 
-			Scribe_References.Look(ref currentMap, "currentMap");
-			Scribe_References.Look(ref targetMap, "targetMap");
+			Scribe_References.Look(ref currentMap, nameof(currentMap));
+			Scribe_References.Look(ref targetMap, nameof(targetMap));
 
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{

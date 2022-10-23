@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<KeyBindingDef>
+		<defName>QuickStartMenu</defName>
+		<label>Quick Start Menu</label>
+		<category>Development</category>
+		<defaultKeyCodeA>Keypad2</defaultKeyCodeA>
+	</KeyBindingDef>
+	
+	<KeyBindingDef>
+		<defName>RestartGame</defName>
+		<label>Quick Restart</label>
+		<category>Development</category>
+		<defaultKeyCodeA>Keypad1</defaultKeyCodeA>
+	</KeyBindingDef>
+</Defs>

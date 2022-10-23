@@ -12,12 +12,11 @@ namespace Vehicles
 	{
 		private float finalAngle;
 
-		public float rocketTiltRate;
-		public FloatRange thrusterSize;
-		public FloatRange? dustSize;
-		public int burnRadius;
-		public int maxFlightNodes = 1;
-
+		protected float rocketTiltRate;
+		protected FloatRange thrusterSize;
+		protected FloatRange? dustSize;
+		protected int burnRadius;
+		
 		public RocketTakeoff()
 		{
 		}
@@ -29,8 +28,6 @@ namespace Vehicles
 			dustSize = reference.dustSize;
 			burnRadius = reference.burnRadius;
 		}
-
-		public override int MaxFlightNodes => maxFlightNodes;
 
 		public override Command_Action LaunchCommand
 		{

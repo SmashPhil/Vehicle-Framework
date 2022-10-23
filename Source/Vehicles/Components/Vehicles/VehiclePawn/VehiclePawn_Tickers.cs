@@ -164,25 +164,23 @@ namespace Vehicles
 				{
 					stances.StanceTrackerTick();
 					verbTracker.VerbsTick();
-					natives.NativeVerbsTick();
+					//natives.NativeVerbsTick();
 					jobs.JobTrackerTick();
-					Drawer.VehicleDrawerTick();
-					rotationTracker.RotationTrackerTick();
-					interactions?.InteractionsTrackerTick();
+					//interactions?.InteractionsTrackerTick();
 				}
 				equipment?.EquipmentTrackerTick();
-				apparel?.ApparelTrackerTick();
+				//apparel?.ApparelTrackerTick();
 
-				caller?.CallTrackerTick();
-				skills?.SkillsTick();
-				abilities?.AbilitiesTick();
+				//caller?.CallTrackerTick();
+				//skills?.SkillsTick();
+				//abilities?.AbilitiesTick();
 				inventory?.InventoryTrackerTick();
 				drafter?.DraftControllerTick();
-				relations?.RelationsTrackerTick();
+				//relations?.RelationsTrackerTick();
 
 				if (ModsConfig.RoyaltyActive)
 				{
-					royalty?.RoyaltyTrackerTick();
+					//royalty?.RoyaltyTrackerTick();
 				}
 				ageTracker.AgeTick();
 				records.RecordsTick();

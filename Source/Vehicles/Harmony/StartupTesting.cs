@@ -91,7 +91,7 @@ namespace Vehicles
 		[UnitTest(Category = "Vehicle Framework", Name = "Mod Settings", GameState = GameState.OnStartup)]
 		private static void UnitTestModSettings()
 		{
-			Dialog_ModSettings settings = new Dialog_ModSettings();
+			Dialog_ModSettings settings = new Dialog_ModSettings(VehicleMod.mod);
 			Find.WindowStack.Add(settings);
 			AccessTools.Field(typeof(Dialog_ModSettings), "selMod").SetValue(settings, VehicleMod.mod);
 		}

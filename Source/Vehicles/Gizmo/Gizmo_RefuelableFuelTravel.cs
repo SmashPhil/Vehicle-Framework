@@ -18,7 +18,7 @@ namespace Vehicles
 
 		public Gizmo_RefuelableFuelTravel()
 		{
-			order = -100f;
+			Order = -100f;
 		}
 
 		public override float GetWidth(float maxWidth)
@@ -43,9 +43,9 @@ namespace Vehicles
 				/*if (this.refuelable.Props.targetFuelLevelConfigurable)
 				{
 					float num = this.refuelable.TargetFuelLevel / this.refuelable.FuelCapacity;
-					float num2 = rect3.x + num * rect3.width - (float)TargetLevelArrow.width * 0.5f / 2f;
-					float num3 = rect3.y - (float)TargetLevelArrow.height * 0.5f;
-					GUI.DrawTexture(new Rect(num2, num3, (float)TargetLevelArrow.width * 0.5f, (float)TargetLevelArrow.height * 0.5f), TargetLevelArrow);
+					float num2 = rect3.x + num * rect3.width - (float)TargetLevelArrow.width * ArrowScale / 2f;
+					float num3 = rect3.y - (float)TargetLevelArrow.height * ArrowScale;
+					GUI.DrawTexture(new Rect(num2, num3, (float)TargetLevelArrow.width * ArrowScale, (float)TargetLevelArrow.height * ArrowScale), TargetLevelArrow);
 				}*/
 				Text.Font = GameFont.Small;
 				Text.Anchor = TextAnchor.MiddleCenter;
