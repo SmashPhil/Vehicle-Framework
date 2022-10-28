@@ -5,7 +5,8 @@
 	<VF_MustSelectColorPalette>Must have a palette selected to save over.</VF_MustSelectColorPalette>
 
 	<!-- Game Mechanics -->
-
+	<VF_VehicleUnableToMove>{0_labelShort} is unable to move.</VF_VehicleUnableToMove>
+	
 	<!-- Misc. Info -->
 	
 	

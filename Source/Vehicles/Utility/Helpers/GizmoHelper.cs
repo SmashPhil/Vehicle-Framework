@@ -119,7 +119,8 @@ namespace Vehicles
 			}
 			if (!vehicle.CanMove)
 			{
-				draftCommand.Disable("IsIncapped".Translate(vehicle.LabelShort, vehicle));
+				draftCommand.Disable("VF_VehicleUnableToMove".Translate(vehicle));
+				drafter.Drafted = false;
 			}
 			if (!drafter.Drafted)
 			{

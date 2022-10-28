@@ -654,7 +654,7 @@ namespace Vehicles
 					{
 						return;
 					}
-					if (!cannonTarget.IsValid && CannonTargeter.Instance.Cannon != this && reloadTicks <= 0 && HasAmmo)
+					if (!cannonTarget.IsValid && TurretTargeter.Turret != this && reloadTicks <= 0 && HasAmmo)
 					{
 						LocalTargetInfo autoTarget = this.GetCannonTarget();
 						if (autoTarget.IsValid)
@@ -759,7 +759,7 @@ namespace Vehicles
 			}
 			if (TurretTargetValid)
 			{
-				if (IsTargetable && !CannonTargeter.TargetMeetsRequirements(this, cannonTarget))
+				if (IsTargetable && !TurretTargeter.TargetMeetsRequirements(this, cannonTarget))
 				{
 					SetTarget(LocalTargetInfo.Invalid);
 					TargetLocked = false;
@@ -986,7 +986,7 @@ namespace Vehicles
 
 		protected virtual void DrawTargeter()
 		{
-			if (GizmoHighlighted || CannonTargeter.Instance.Cannon == this)
+			if (GizmoHighlighted || TurretTargeter.Turret == this)
 			{
 				if (angleRestricted != Vector2.zero)
 				{
@@ -1397,7 +1397,7 @@ namespace Vehicles
 
 		protected void ValidateLockStatus()
 		{
-			if (!cannonTarget.IsValid && CannonTargeter.Instance.Cannon != this) 
+			if (!cannonTarget.IsValid && TurretTargeter.Turret != this) 
             {
 				float angleDifference = vehicle.Angle - parentAngleCached;
 				if (attachedTo is null)

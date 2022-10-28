@@ -15,6 +15,8 @@ namespace Vehicles
 {
 	internal class Jobs : IPatchCategory
 	{
+		private static bool startingErrorRecoverJob = false;
+
 		public void PatchMethods()
 		{
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(JobUtility), nameof(JobUtility.TryStartErrorRecoverJob)),
@@ -45,7 +47,7 @@ namespace Vehicles
 		/// <returns></returns>
 		public static bool VehicleErrorRecoverJob(Pawn pawn, string message, Exception exception = null, JobDriver concreteDriver = null)
 		{
-			if(pawn is VehiclePawn)
+			if (pawn is VehiclePawn)
 			{
 				if (pawn.jobs != null)
 				{
@@ -53,6 +55,12 @@ namespace Vehicles
 					{
 						pawn.jobs.EndCurrentJob(JobCondition.Errored, false);
 					}
+					if (startingErrorRecoverJob)
+					{
+						Log.Error($"An error occurred while starting an error recover job. We have to stop now to avoid infinite recursion. This means that the vehicle is now jobless which can cause further bugs. vehicle={pawn}");
+						return false;
+					}
+					startingErrorRecoverJob = true;
 					try
 					{
 						if (pawn.jobs.jobQueue.Count > 0)
@@ -63,11 +71,16 @@ namespace Vehicles
 						else
 						{
 							pawn.jobs.StartJob(new Job(JobDefOf_Vehicles.IdleVehicle, 150, false), JobCondition.None, null, false, true, null, null, false);
-						}  
+						}
+						startingErrorRecoverJob = false;
 					}
 					catch
 					{
-						Log.Error("An error occurred when trying to recover the job for ship " + pawn.def + ". Please contact Mod Author.");
+						Log.Error($"An error occurred when trying to recover the job for {pawn}. Unable to assign idle recovery job.");
+					}
+					finally
+					{
+						startingErrorRecoverJob = false;
 					}
 				}
 				return false;

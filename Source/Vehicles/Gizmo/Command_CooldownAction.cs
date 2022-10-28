@@ -8,25 +8,8 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class Command_CooldownAction : Command
+	public class Command_CooldownAction : Command_Turret
 	{
-		protected const float AmmoWindowOffset = 5f;
-
-		protected readonly Color DarkGrey = new Color(0.05f, 0.05f, 0.05f, 0.5f);
-
-		public TargetingParameters targetingParams;
-
-		public VehicleTurret turret;
-
-		protected Color alphaColorTicked = new Color(255, 255, 255, 0.5f);
-
-		public bool canReload;
-
-		public Command_CooldownAction()
-		{
-			
-		}
-
 		public override void ProcessInput(Event ev)
 		{
 			if (turret.reloadTicks <= 0)
@@ -38,16 +21,6 @@ namespace Vehicles
 				turret.PushTurretToQueue();
 				turret.ResetPrefireTimer();
 			}
-		}
-
-		public override float GetWidth(float maxWidth)
-		{
-			return turret.turretDef.cooldown != null ? 279 : 210f;
-		}
-
-		public override bool GroupsWith(Gizmo other)
-		{
-			return other is Command_CooldownAction command_CooldownAction && command_CooldownAction.turret.GroupsWith(turret);
 		}
 
 		public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth, GizmoRenderParms parms)

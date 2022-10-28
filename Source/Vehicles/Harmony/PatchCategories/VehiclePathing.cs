@@ -48,7 +48,9 @@ namespace Vehicles
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.WalkableFast), new Type[] { typeof(int) }),
 			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
 			//	nameof(WalkableFastThroughVehicleInt)));
-
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenAdj), nameof(GenAdj.OccupiedRect), parameters: new Type[] { typeof(Thing) }),
+				prefix: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(OccupiedRectEvenSizedVehicles)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pathing), nameof(Pathing.RecalculateAllPerceivedPathCosts)),
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(RecalculateAllPerceivedPathCostForVehicle)));
@@ -102,9 +104,8 @@ namespace Vehicles
 					$" GridCost={mapping[vehicle.VehicleDef].VehiclePathGrid.pathGrid[vehicle.Map.cellIndices.CellToIndex(clickCell)]} VanillaCost={vehicle.Map.terrainGrid.TerrainAt(clickCell).pathCost} VanillaCalcCost={vehicle.Map.pathing.Normal.pathGrid.CalculatedCostAt(clickCell, true, IntVec3.Invalid)}");
 				
 				int num = GenRadial.NumCellsInRadius(2.9f);
-				int i = 0;
 				IntVec3 curLoc;
-				while (i < num)
+				for (int i = 0; i < num; i++)
 				{
 					curLoc = GenRadial.RadialPattern[i] + clickCell;
 					if (GenGridVehicles.Standable(curLoc, vehicle, vehicle.Map))
@@ -154,10 +155,6 @@ namespace Vehicles
 							autoTakeablePriority = 10f
 						};
 						return false;
-					}
-					else
-					{
-						i++;
 					}
 				}
 				__result = null;
@@ -331,6 +328,19 @@ namespace Vehicles
 			{
 				__result = !PathingHelper.VehicleImpassableInCell(___map, ___map.cellIndices.IndexToCell(index));
 			}
+		}
+		
+		public static bool OccupiedRectEvenSizedVehicles(Thing t, ref CellRect __result)
+		{
+			if (t is VehiclePawn vehicle && vehicle.VehicleDef.Size.x % 2 == 0)
+			{
+				Rot4 rot = vehicle.Rotation;
+				if (rot == Rot4.West) rot = Rot4.East;
+				if (rot == Rot4.South) rot = Rot4.South;
+				__result = GenAdj.OccupiedRect(vehicle.Position, rot, vehicle.VehicleDef.Size);
+				return false;
+			}
+			return true;
 		}
 
 		public static void RecalculateAllPerceivedPathCostForVehicle(PathingContext ___normal)

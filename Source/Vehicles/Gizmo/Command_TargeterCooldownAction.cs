@@ -8,20 +8,16 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class Command_TargeterCooldownAction : Command_CooldownAction
+	public class Command_TargeterCooldownAction : Command_Turret
 	{
-		public Command_TargeterCooldownAction()
-		{
-
-		}
-
 		public override void ProcessInput(Event ev)
 		{
 			if (turret.reloadTicks <= 0)
 			{
 				base.ProcessInput(ev);
 				SoundDefOf.Tick_Tiny.PlayOneShotOnCamera(null);
-				CannonTargeter.Instance.BeginTargeting(targetingParams, delegate(LocalTargetInfo target)
+				turret.SetTarget(LocalTargetInfo.Invalid);
+				TurretTargeter.BeginTargeting(targetingParams, delegate(LocalTargetInfo target)
 				{
 					turret.SetTarget(target);
 					turret.ResetPrefireTimer();

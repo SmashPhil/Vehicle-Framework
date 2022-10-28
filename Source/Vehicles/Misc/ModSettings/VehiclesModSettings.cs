@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using HarmonyLib;
 using Verse;
+using RimWorld;
 using SmashTools;
 
 namespace Vehicles
@@ -34,6 +36,12 @@ namespace Vehicles
 			{
 				Log.Error($"Exception thrown while trying to load mod settings. Deleting the Vehicles config file might fix this.\nException={ex.Message}\nInnerException={ex.InnerException}");
 			}
+		}
+
+		public static void Open()
+		{
+			Dialog_ModSettings settings = new Dialog_ModSettings(VehicleMod.mod);
+			Find.WindowStack.Add(settings);
 		}
 	}
 }

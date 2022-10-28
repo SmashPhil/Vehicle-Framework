@@ -2,16 +2,23 @@
 
 <Defs>
 	<KeyBindingDef>
-		<defName>QuickStartMenu</defName>
+		<defName>VF_RestartGame</defName>
+		<label>Quick Restart</label>
+		<category>Development</category>
+		<defaultKeyCodeA>Keypad1</defaultKeyCodeA>
+	</KeyBindingDef>
+	
+	<KeyBindingDef>
+		<defName>VF_QuickStartMenu</defName>
 		<label>Quick Start Menu</label>
 		<category>Development</category>
 		<defaultKeyCodeA>Keypad2</defaultKeyCodeA>
 	</KeyBindingDef>
 	
 	<KeyBindingDef>
-		<defName>RestartGame</defName>
-		<label>Quick Restart</label>
+		<defName>VF_DebugSettings</defName>
+		<label>Debug Settings</label>
 		<category>Development</category>
-		<defaultKeyCodeA>Keypad1</defaultKeyCodeA>
+		<defaultKeyCodeA>Keypad3</defaultKeyCodeA>
 	</KeyBindingDef>
 </Defs>

@@ -93,7 +93,6 @@ namespace Vehicles
 		{
 			Dialog_ModSettings settings = new Dialog_ModSettings(VehicleMod.mod);
 			Find.WindowStack.Add(settings);
-			AccessTools.Field(typeof(Dialog_ModSettings), "selMod").SetValue(settings, VehicleMod.mod);
 		}
 
 		/// <summary>

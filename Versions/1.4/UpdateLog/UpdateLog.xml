@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.4.1051</currentVersion>
+  <currentVersion>1.4.1055</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>[title]Recent News[/title][font]Small[/font]
-I've updated the framework to version 1.4! I'm happy to say it wasn't a massive undertaking and tons of things were broken. Here are all the bugfixes + changes from the first round of testing.
+I've updated the framework to version 1.4! I'm happy to say it wasn't a massive undertaking and that tons of things weren't broken. Here are all the bugfixes + changes from the first round of testing.
 [title]Bug Fixes[/title][font]Small[/font]
 - Fixed bug where AssignDefaults xml attribute would attempt to add a duplicate custom cost.
 

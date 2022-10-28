@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Verse;
 using Verse.AI;
 using SmashTools;
@@ -99,21 +100,32 @@ namespace Vehicles
 			}
 		}
 
-		public bool CanReserve(VehiclePawn vehicle, Pawn pawn, JobDef jobDef)
+		public bool CanReserve(VehiclePawn vehicle, Pawn pawn, JobDef jobDef, StringBuilder stringBuilder = null)
 		{
+			stringBuilder?.AppendLine($"Starting Reservation check.");
 			if (reservations.TryGetValue(vehicle, out ReservationBase reservation))
 			{
+				stringBuilder?.AppendLine($"Reservation cached. Claimants = {vehicle.TotalAllowedFor(jobDef)}/{reservation.TotalClaimants}.");
 				return vehicle.TotalAllowedFor(jobDef) > reservation.TotalClaimants;
 			}
+			stringBuilder?.AppendLine($"Reservation not cached. Can automatically reserve");
 			return true;
 		}
 
-		public bool CanReserve<T1, T2>(VehiclePawn vehicle, Pawn pawn, T1 target) where T2 : Reservation<T1>
+		public bool CanReserve<T1, T2>(VehiclePawn vehicle, Pawn pawn, T1 target, StringBuilder stringBuilder = null) where T2 : Reservation<T1>
 		{
+			stringBuilder?.AppendLine($"Starting Reservation check.");
 			if (reservations.TryGetValue(vehicle, out ReservationBase reservation))
 			{
-				return reservation is T2 type && type.CanReserve(pawn, target);
+				if (!(reservation is T2 type))
+				{
+					stringBuilder?.AppendLine($"Reservation failed. Outer type does not match inner type. T1={typeof(T1)} T2={typeof(T2)}");
+					return false;
+				}
+				stringBuilder?.AppendLine($"Reservation cached. Type={typeof(T2)} CanReserve={type.CanReserve(pawn, target)}");
+				return type.CanReserve(pawn, target);
 			}
+			stringBuilder?.AppendLine($"Reservation not cached. Can automatically reserve");
 			return true;
 		}
 

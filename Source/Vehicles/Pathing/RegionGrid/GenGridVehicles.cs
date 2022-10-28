@@ -95,7 +95,7 @@ namespace Vehicles
 			List<Thing> list = map.thingGrid.ThingsListAt(cell);
 			foreach (Thing t in list)
 			{
-				if (vehicleDef.properties.customThingCosts.TryGetValue(t.def, out int value) && (value >= VehiclePathGrid.ImpassableCost || value < 0))
+				if (vehicleDef.properties.customThingCosts.TryGetValue(t.def, out int value) && value >= VehiclePathGrid.ImpassableCost)
 				{
 					return true;
 				}

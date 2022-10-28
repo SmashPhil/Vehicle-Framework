@@ -6,6 +6,7 @@ using System.IO;
 using UnityEngine;
 using HarmonyLib;
 using Verse;
+using Verse.AI;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
@@ -81,6 +82,8 @@ namespace Vehicles
 			Utilities.InvokeWithLogging(PostDefDatabaseCalls);
 			Utilities.InvokeWithLogging(RegisterDisplayStats);
 
+			Utilities.InvokeWithLogging(RegisterKeyBindingDefs);
+
 			//Will want to be added via xml
 			Utilities.InvokeWithLogging(FillVehicleLordJobTypes);
 
@@ -133,6 +136,13 @@ namespace Vehicles
 			//VehicleInfoCard.RegisterStatDef(StatDefOf.Insulation_Cold);
 			//VehicleInfoCard.RegisterStatDef(StatDefOf.Insulation_Heat);
 			//VehicleInfoCard.RegisterStatDef(StatDefOf.SellPriceFactor);
+		}
+
+		public static void RegisterKeyBindingDefs()
+		{
+			MainMenuKeyBindHandler.RegisterKeyBind(KeyBindingDefOf_Vehicles.VF_RestartGame, GenCommandLine.Restart);
+			MainMenuKeyBindHandler.RegisterKeyBind(KeyBindingDefOf_Vehicles.VF_QuickStartMenu, () => Find.WindowStack.Add(new QuickStartMenu()));
+			MainMenuKeyBindHandler.RegisterKeyBind(KeyBindingDefOf_Vehicles.VF_DebugSettings, VehiclesModSettings.Open);
 		}
 
 		public static void FillVehicleLordJobTypes()

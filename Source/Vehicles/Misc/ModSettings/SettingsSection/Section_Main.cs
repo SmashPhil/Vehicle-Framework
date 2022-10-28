@@ -10,6 +10,8 @@ namespace Vehicles
 {
 	public class Section_Main : SettingsSection
 	{
+		public const int MainSectionColumns = 3;
+
 		/* Map/World Generation */
 		public float beachMultiplier = 0f;
 		public int forceFactionCoastRadius = 1;
@@ -144,96 +146,99 @@ namespace Vehicles
 			{
 				listingStandard = new Listing_Standard();
 
-				//17 = Column Gap, x2 column gaps for 3 columns
-				Rect mainSettings = new Rect(rect.x + 20f, rect.y + 40f, rect.width - (17 * 2) - 40, rect.height);
+				Rect mainSettings = rect.ContractedBy(10);
+				float paddingTop = VehicleMod.ResetImageSize + 5;
+				mainSettings.y += paddingTop;
+				mainSettings.height -= paddingTop;
 
-				listingStandard.ColumnWidth = mainSettings.width / 3;
+				listingStandard.ColumnWidth = (mainSettings.width / MainSectionColumns) - 4 * MainSectionColumns;
 				listingStandard.Begin(mainSettings);
-
-				listingStandard.Header("VF_WorldMapGen".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-				listingStandard.Gap(4);
-				listingStandard.SliderLabeled("VF_BeachGenMultiplier".Translate(), "VF_BeachGenMultiplierTooltip".Translate(), "%", ref beachMultiplier, 0f, 2f, 100, 0);
-				listingStandard.SliderLabeled("VF_ForceSettlementCoast".Translate(), "VF_ForceSettlementCoastTooltip".Translate(), $" {"VF_WorldTiles".Translate()}", ref forceFactionCoastRadius, 0,
-					VehicleMod.MaxCoastalSettlementPush, 1, "VF_EverySettlementToCoast".Translate());
-
-				listingStandard.Header("VF_SettingsGeneral".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-				listingStandard.Gap(4);
-				listingStandard.CheckboxLabeledWithMessage("VF_ModifiableSettings".Translate(), delegate (bool value)
 				{
-					return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput);
-				}, ref modifiableSettings, "VF_ModifiableSettingsTooltip".Translate());
-				listingStandard.CheckboxLabeled("VF_CustomShaders".Translate(), ref useCustomShaders, "VF_CustomShadersTooltip".Translate());
+					listingStandard.Header("VF_WorldMapGen".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
+					listingStandard.Gap(4);
+					listingStandard.SliderLabeled("VF_BeachGenMultiplier".Translate(), "VF_BeachGenMultiplierTooltip".Translate(), "%", ref beachMultiplier, 0f, 2f, 100, 0);
+					listingStandard.SliderLabeled("VF_ForceSettlementCoast".Translate(), "VF_ForceSettlementCoastTooltip".Translate(), $" {"VF_WorldTiles".Translate()}", ref forceFactionCoastRadius, 0,
+						VehicleMod.MaxCoastalSettlementPush, 1, "VF_EverySettlementToCoast".Translate());
 
-				listingStandard.CheckboxLabeled("VF_DiagonalVehicleRendering".Translate(), ref allowDiagonalRendering, "VF_DiagonalVehicleRenderingTooltip".Translate());
-				listingStandard.CheckboxLabeled("VF_FullVehiclePathing".Translate(), ref fullVehiclePathing, "VF_FullVehiclePathingTooltip".Translate());
-				listingStandard.CheckboxLabeled("VF_SmoothVehiclePathing".Translate(), ref smoothVehiclePaths, "VF_SmoothVehiclePathingTooltip".Translate());
-				GUIState.Disable();
-				listingStandard.CheckboxLabeled("VF_RoadBiomeCostPathing".Translate(), ref vehiclePathingRoadNoCost, "VF_RoadBiomeCostPathingTooltip".Translate());
-				GUIState.Enable();
-				listingStandard.CheckboxLabeled("VF_MultiplePawnsPerJob".Translate(), ref multiplePawnsPerJob, "VF_MultiplePawnsPerJobTooltip".Translate());
-				bool checkBefore = showDisabledVehicles;
-				listingStandard.CheckboxLabeled("VF_ShowDisabledVehicles".Translate(), ref showDisabledVehicles, "VF_ShowDisabledVehiclesTooltip".Translate());
-				listingStandard.Gap(4);
+					listingStandard.Header("VF_SettingsGeneral".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
+					listingStandard.Gap(4);
+					listingStandard.CheckboxLabeledWithMessage("VF_ModifiableSettings".Translate(), delegate (bool value)
+					{
+						return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput);
+					}, ref modifiableSettings, "VF_ModifiableSettingsTooltip".Translate());
+					listingStandard.CheckboxLabeled("VF_CustomShaders".Translate(), ref useCustomShaders, "VF_CustomShadersTooltip".Translate());
 
-				if (checkBefore != showDisabledVehicles)
-				{
-					DefDatabase<DesignationCategoryDef>.AllDefs.ForEach(desCat => GizmoHelper.DesignatorsChanged(desCat));
-				}
-
-				listingStandard.Header("VF_SeaVehicles".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-				listingStandard.CheckboxLabeled("VF_PassiveWaterWaves".Translate(), ref passiveWaterWaves, "VF_PassiveWaterWavesTooltip".Translate());
-
-				listingStandard.NewColumn();
-				string fishingHeader = "VF_Fishing".Translate();
-				if (!Compatibility_VEFishing.Active)
-				{
+					listingStandard.CheckboxLabeled("VF_DiagonalVehicleRendering".Translate(), ref allowDiagonalRendering, "VF_DiagonalVehicleRenderingTooltip".Translate());
+					listingStandard.CheckboxLabeled("VF_FullVehiclePathing".Translate(), ref fullVehiclePathing, "VF_FullVehiclePathingTooltip".Translate());
+					listingStandard.CheckboxLabeled("VF_SmoothVehiclePathing".Translate(), ref smoothVehiclePaths, "VF_SmoothVehiclePathingTooltip".Translate());
 					GUIState.Disable();
-					fishingHeader = "VF_FishingInactive".Translate();
+					listingStandard.CheckboxLabeled("VF_RoadBiomeCostPathing".Translate(), ref vehiclePathingRoadNoCost, "VF_RoadBiomeCostPathingTooltip".Translate());
+					GUIState.Enable();
+					listingStandard.CheckboxLabeled("VF_MultiplePawnsPerJob".Translate(), ref multiplePawnsPerJob, "VF_MultiplePawnsPerJobTooltip".Translate());
+					bool checkBefore = showDisabledVehicles;
+					listingStandard.CheckboxLabeled("VF_ShowDisabledVehicles".Translate(), ref showDisabledVehicles, "VF_ShowDisabledVehiclesTooltip".Translate());
+					listingStandard.Gap(4);
+					
+					if (checkBefore != showDisabledVehicles)
+					{
+						DefDatabase<DesignationCategoryDef>.AllDefs.ForEach(desCat => GizmoHelper.DesignatorsChanged(desCat));
+					}
+
+					listingStandard.Header("VF_SeaVehicles".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
+					listingStandard.CheckboxLabeled("VF_PassiveWaterWaves".Translate(), ref passiveWaterWaves, "VF_PassiveWaterWavesTooltip".Translate());
+
+					listingStandard.NewColumn();
+					string fishingHeader = "VF_Fishing".Translate();
+					if (!Compatibility_VEFishing.Active)
+					{
+						GUIState.Disable();
+						fishingHeader = "VF_FishingInactive".Translate();
+					}
+
+					listingStandard.Header(fishingHeader, ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
+					listingStandard.Gap(4);
+					listingStandard.SliderLabeled("VF_FishingMultiplier".Translate(), "VF_FishingMultiplierTooltip".Translate(), "%", ref fishingMultiplier, 0.1f, 3, 100, 1);
+					listingStandard.IntegerBox("VF_FishingDelay".Translate(), "VF_FishingDelayTooltip".Translate(), ref fishingDelay, listingStandard.ColumnWidth * 0.5f, 0, 0);
+					listingStandard.Gap(8);
+					listingStandard.IntegerBox("VF_FishingSkill".Translate(), "VF_FishingSkillTooltip".Translate(), ref fishingSkillIncrease, listingStandard.ColumnWidth * 0.5f, 0, 0);
+					listingStandard.Gap(8);
+					listingStandard.CheckboxLabeled("VF_FishingPersists".Translate(), ref fishingPersists, "VF_FishingPersistsTooltip".Translate());
+					listingStandard.Gap(4);
+
+					GUIState.Enable();
+
+					listingStandard.Header("VF_AerialVehicles".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
+					listingStandard.Gap(4);
+					listingStandard.CheckboxLabeled("VF_RocketsBurnRadius".Translate(), ref burnRadiusOnRockets, "VF_RocketsBurnRadiusTooltip".Translate());
+					//listingStandard.CheckboxLabeled("VF_AirDefensesActive".Translate(), ref airDefenses, "VF_AirDefensesActiveTooltip".Translate());
+					listingStandard.CheckboxLabeled("VF_DeployOnLanding".Translate(), ref deployOnLanding, "VF_DeployOnLandingTooltip".Translate());
+					if (deployOnLanding)
+					{
+						listingStandard.Gap(16);
+						listingStandard.SliderLabeled("VF_DelayOnLanding".Translate(), "VF_DelayOnLandingTooltip".Translate(), $" {"VF_DelaySeconds".Translate()}", ref delayDeployOnLanding, 0, 5, 1, 1);
+					}
+					listingStandard.CheckboxLabeled("VF_DynamicDrawing".Translate(), ref dynamicWorldDrawing, "VF_DynamicDrawingTooltip".Translate());
+					listingStandard.Gap(8);
+
+					GUIState.Disable();
+
+					listingStandard.Header("VF_Upgrades".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
+					listingStandard.CheckboxLabeled("VF_DrawUpgradeInformationScreen".Translate(), ref drawUpgradeInformationScreen, "VF_DrawUpgradeInformationScreenTooltip".Translate());
+					listingStandard.CheckboxLabeled("VF_OverrideDrawColor".Translate(), ref overrideDrawColors, "VF_OverrideDrawColorTooltip".Translate());
+
+					GUIState.Enable();
+
+					listingStandard.NewColumn();
+					listingStandard.Header("VF_VehicleDamageMultipliers".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
+					listingStandard.Gap(4);
+					listingStandard.SliderLabeled("VF_MeleeDamageMultiplier".Translate(), string.Empty, "%", ref meleeDamageMultiplier, 0, 2, multiplier: 100);
+					listingStandard.SliderLabeled("VF_RangedDamageMultiplier".Translate(), string.Empty, "%", ref rangedDamageMultiplier, 0, 2, multiplier: 100);
+					listingStandard.SliderLabeled("VF_ExplosiveDamageMultiplier".Translate(), string.Empty, "%", ref explosiveDamageMultiplier, 0, 2, multiplier: 100);
+
+					listingStandard.Header("VF_VehicleTurrets".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
+					listingStandard.CheckboxLabeled("VF_TurretOverheatMechanics".Translate(), ref overheatMechanics, "VF_TurretOverheatMechanicsTooltip".Translate());
+					listingStandard.Gap(4);
 				}
-
-				listingStandard.Header(fishingHeader, ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-				listingStandard.Gap(4);
-				listingStandard.SliderLabeled("VF_FishingMultiplier".Translate(), "VF_FishingMultiplierTooltip".Translate(), "%", ref fishingMultiplier, 0.1f, 3, 100, 1);
-				listingStandard.IntegerBox("VF_FishingDelay".Translate(), "VF_FishingDelayTooltip".Translate(), ref fishingDelay, listingStandard.ColumnWidth * 0.5f, 0, 0);
-				listingStandard.Gap(8);
-				listingStandard.IntegerBox("VF_FishingSkill".Translate(), "VF_FishingSkillTooltip".Translate(), ref fishingSkillIncrease, listingStandard.ColumnWidth * 0.5f, 0, 0);
-				listingStandard.Gap(8);
-				listingStandard.CheckboxLabeled("VF_FishingPersists".Translate(), ref fishingPersists, "VF_FishingPersistsTooltip".Translate());
-				listingStandard.Gap(4);
-
-				GUIState.Enable();
-
-				listingStandard.Header("VF_AerialVehicles".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-				listingStandard.Gap(4);
-				listingStandard.CheckboxLabeled("VF_RocketsBurnRadius".Translate(), ref burnRadiusOnRockets, "VF_RocketsBurnRadiusTooltip".Translate());
-				//listingStandard.CheckboxLabeled("VF_AirDefensesActive".Translate(), ref airDefenses, "VF_AirDefensesActiveTooltip".Translate());
-				listingStandard.CheckboxLabeled("VF_DeployOnLanding".Translate(), ref deployOnLanding, "VF_DeployOnLandingTooltip".Translate());
-				if (deployOnLanding)
-				{
-					listingStandard.Gap(16);
-					listingStandard.SliderLabeled("VF_DelayOnLanding".Translate(), "VF_DelayOnLandingTooltip".Translate(), $" {"VF_DelaySeconds".Translate()}", ref delayDeployOnLanding, 0, 5, 1, 1);
-				}
-				listingStandard.CheckboxLabeled("VF_DynamicDrawing".Translate(), ref dynamicWorldDrawing, "VF_DynamicDrawingTooltip".Translate());
-				listingStandard.Gap(8);
-
-				GUIState.Disable();
-
-				listingStandard.Header("VF_Upgrades".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-				listingStandard.CheckboxLabeled("VF_DrawUpgradeInformationScreen".Translate(), ref drawUpgradeInformationScreen, "VF_DrawUpgradeInformationScreenTooltip".Translate());
-				listingStandard.CheckboxLabeled("VF_OverrideDrawColor".Translate(), ref overrideDrawColors, "VF_OverrideDrawColorTooltip".Translate());
-
-				GUIState.Enable();
-
-				listingStandard.NewColumn();
-				listingStandard.Header("VF_VehicleDamageMultipliers".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-				listingStandard.Gap(4);
-				listingStandard.SliderLabeled("VF_MeleeDamageMultiplier".Translate(), string.Empty, "%", ref meleeDamageMultiplier, 0, 2, multiplier: 100);
-				listingStandard.SliderLabeled("VF_RangedDamageMultiplier".Translate(), string.Empty, "%", ref rangedDamageMultiplier, 0, 2, multiplier: 100);
-				listingStandard.SliderLabeled("VF_ExplosiveDamageMultiplier".Translate(), string.Empty, "%", ref explosiveDamageMultiplier, 0, 2, multiplier: 100);
-
-				listingStandard.Header("VF_VehicleTurrets".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-				listingStandard.CheckboxLabeled("VF_TurretOverheatMechanics".Translate(), ref overheatMechanics, "VF_TurretOverheatMechanicsTooltip".Translate());
-				listingStandard.Gap(4);
 				listingStandard.End();
 			}
 			GUIState.Pop();

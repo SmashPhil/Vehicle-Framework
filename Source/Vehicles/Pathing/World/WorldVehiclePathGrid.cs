@@ -15,7 +15,6 @@ namespace Vehicles
 	public class WorldVehiclePathGrid : WorldComponent
 	{
 		public const float ImpassableMovementDifficulty = 1000f;
-		public const float WinterMovementDifficultyOffset = 2f;
 		public const float MaxTempForWinterOffset = 5f;
 
 		/// <summary>
@@ -47,7 +46,7 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="cost"></param>
 		/// <returns><paramref name="cost"/> is impassable</returns>
-		public static bool ImpassableCost(float cost) => cost >= ImpassableMovementDifficulty || cost < 0;
+		public static bool ImpassableCost(float cost) => cost >= ImpassableMovementDifficulty;
 
 		/// <summary>
 		/// Reset all cached pathGrids for VehicleDefs

@@ -413,10 +413,6 @@ namespace Vehicles
 										if (vehicle.VehicleDef.properties.customTerrainCosts.ContainsKey(currentTerrain))
 										{
 											int customCost = vehicle.VehicleDef.properties.customTerrainCosts[currentTerrain];
-											if (customCost < 0)
-											{
-												goto EndPathing;
-											}
 											tickCost += customCost;
 										}
 										else

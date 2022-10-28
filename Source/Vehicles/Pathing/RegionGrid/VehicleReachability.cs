@@ -24,6 +24,7 @@ namespace Vehicles
 		private uint reachedIndex = 1;
 
 		private VehicleReachabilityCache cache = new VehicleReachabilityCache();
+
 		private VehiclePathGrid pathGrid;
 		private VehicleRegionGrid regionGrid;
 
@@ -31,6 +32,11 @@ namespace Vehicles
 		{
 			this.map = map;
 			this.vehicleDef = vehicleDef;
+		}
+
+		public void FinalizeInit()
+		{
+			//TODO - cache pathGrid and regionGrid
 		}
 
 		/// <summary>
@@ -165,6 +171,14 @@ namespace Vehicles
 			{
 				return false;
 			}
+
+			pathGrid = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehiclePathGrid;
+			regionGrid = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid;
+
+			if (!pathGrid.WalkableFast(start))
+			{
+				return false;
+			}
 			bool freeTraversal = traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater && traverseParms.mode != TraverseMode.PassAllDestroyableThingsNotWater;
 			if ((peMode == PathEndMode.OnCell || peMode == PathEndMode.Touch || peMode == PathEndMode.ClosestTouch) && freeTraversal)
 			{
@@ -188,8 +202,6 @@ namespace Vehicles
 			bool result;
 			try
 			{
-				pathGrid = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehiclePathGrid;
-				regionGrid = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid;
 				reachedIndex += 1;
 				destRegions.Clear();
 				if (peMode == PathEndMode.OnCell)
@@ -376,44 +388,12 @@ namespace Vehicles
 		private bool CheckCellBasedReachability(IntVec3 start, LocalTargetInfo dest, PathEndMode peMode, TraverseParms traverseParms)
 		{
 			IntVec3 foundCell = IntVec3.Invalid;
-			VehicleRegion[] directionRegionGrid = regionGrid.DirectGrid;
-			VehiclePathGrid pathGrid = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehiclePathGrid;
-			CellIndices cellIndices = map.cellIndices;
-			map.floodFiller.FloodFill(start, delegate (IntVec3 c)
-			{
-				int num = cellIndices.CellToIndex(c);
-				if ((traverseParms.mode == TraverseMode.PassAllDestroyableThingsNotWater || traverseParms.mode == TraverseMode.NoPassClosedDoorsOrWater) &&
-				c.GetTerrain(map).IsWater)
-				{
-					return false;
-				}
-				if (traverseParms.mode == TraverseMode.PassAllDestroyableThings || traverseParms.mode == TraverseMode.PassAllDestroyableThingsNotWater)
-				{
-					if (!pathGrid.WalkableFast(num))
-					{
-						Building edifice = c.GetEdifice(map);
-						if (edifice is null || !VehiclePathFinder.IsDestroyable(edifice))
-						{
-							return false;
-						}
-					}
-				}
-				else if (traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater)
-				{
-					Log.ErrorOnce("Do not use this method for non-cell based modes!", 938476762);
-					if (!pathGrid.WalkableFast(num))
-					{
-						return false;
-					}
-				}
-				VehicleRegion region = directionRegionGrid[num];
-				return region is null || region.Allows(traverseParms, false);
-			}, delegate (IntVec3 c)
+			map.floodFiller.FloodFill(start, (IntVec3 cell) => PassCheck(cell, map, traverseParms), delegate (IntVec3 cell)
 			{
 				VehiclePawn vehicle = traverseParms.pawn as VehiclePawn;
-				if (VehicleReachabilityImmediate.CanReachImmediateVehicle(c, dest, map, vehicle.VehicleDef, peMode))
+				if (VehicleReachabilityImmediate.CanReachImmediateVehicle(cell, dest, map, vehicle.VehicleDef, peMode))
 				{
-					foundCell = c;
+					foundCell = cell;
 					return true;
 				}
 				return false;
@@ -445,6 +425,36 @@ namespace Vehicles
 				}
 			}
 			return false;
+		}
+
+		private bool PassCheck(IntVec3 cell, Map map, TraverseParms traverseParms)
+		{
+			int num = map.cellIndices.CellToIndex(cell);
+			if ((traverseParms.mode == TraverseMode.PassAllDestroyableThingsNotWater || traverseParms.mode == TraverseMode.NoPassClosedDoorsOrWater) && cell.GetTerrain(map).IsWater)
+			{
+				return false;
+			}
+			if (traverseParms.mode == TraverseMode.PassAllDestroyableThings || traverseParms.mode == TraverseMode.PassAllDestroyableThingsNotWater)
+			{
+				if (!pathGrid.WalkableFast(num))
+				{
+					Building edifice = cell.GetEdifice(map);
+					if (edifice is null || !VehiclePathFinder.IsDestroyable(edifice))
+					{
+						return false;
+					}
+				}
+			}
+			else if (traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater)
+			{
+				Log.ErrorOnce("Do not use this method for non-cell based modes!", 938476762);
+				if (!pathGrid.WalkableFast(num))
+				{
+					return false;
+				}
+			}
+			VehicleRegion region = regionGrid.DirectGrid[num];
+			return region is null || region.Allows(traverseParms, false);
 		}
 
 		/// <summary>

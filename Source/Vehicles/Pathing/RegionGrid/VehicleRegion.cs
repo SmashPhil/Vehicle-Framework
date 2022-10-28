@@ -336,13 +336,7 @@ namespace Vehicles
 			switch (traverseParms.mode)
 			{
 				case TraverseMode.ByPawn:
-					{
-						if (door is null)
-						{
-							return true;
-						}
-						return false; //Vehicles cannot path through doors for now
-					}
+					return door is null; //Vehicles cannot path through doors for now
 				case TraverseMode.PassDoors:
 					return true;
 				case TraverseMode.NoPassClosedDoorsOrWater:

@@ -20,16 +20,7 @@ namespace Vehicles
 		/// <summary>
 		/// Retrieve all <see cref="VehiclePathData"/> for this map
 		/// </summary>
-		public IEnumerable<VehiclePathData> AllPathData
-		{
-			get
-			{
-				foreach (VehiclePathData pathData in vehicleData.Values)
-				{
-					yield return pathData;
-				}
-			}
-		}
+		public IEnumerable<VehiclePathData> AllPathData => vehicleData.Values;
 
 		/// <summary>
 		/// Get <see cref="VehiclePathData"/> for <paramref name="vehicleDef"/>
@@ -90,6 +81,15 @@ namespace Vehicles
 			}
 		}
 
+		public override void FinalizeInit()
+		{
+			base.FinalizeInit();
+			foreach (VehiclePathData data in AllPathData)
+			{
+				data.FinalizeInit();
+			}
+		}
+
 		/// <summary>
 		/// Generate new <see cref="VehiclePathData"/> for <paramref name="vehicleDef"/>
 		/// </summary>
@@ -140,6 +140,11 @@ namespace Vehicles
 			public VehicleRegionAndRoomUpdater VehicleRegionAndRoomUpdater { get; set; }
 
 			public VehicleRegionDirtyer VehicleRegionDirtyer { get; set; }
+
+			public void FinalizeInit()
+			{
+				//TODO - cache map components in relevant classes for reachability / pathfinding
+			}
 		}
 	}
 }

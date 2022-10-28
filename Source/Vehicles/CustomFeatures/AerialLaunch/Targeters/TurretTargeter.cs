@@ -8,28 +8,28 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class CannonTargeter : BaseTargeter
+	public class TurretTargeter : BaseTargeter
 	{
 		private Action<LocalTargetInfo> action;
 		private TargetingParameters targetParams;
 		private Map map;
 
-		public static CannonTargeter Instance { get; private set; }
+		public static TurretTargeter Instance { get; private set; }
 
-		public VehicleTurret Cannon { get; private set; }
+		public static VehicleTurret Turret { get; private set; }
 
 		public override bool IsTargeting => action != null;
 
-		public void BeginTargeting(TargetingParameters targetParams, Action<LocalTargetInfo> action, VehicleTurret cannon, Action actionWhenFinished = null, Texture2D mouseAttachment = null)
+		public static void BeginTargeting(TargetingParameters targetParams, Action<LocalTargetInfo> action, VehicleTurret cannon, Action actionWhenFinished = null, Texture2D mouseAttachment = null)
 		{
-			this.action = action;
-			this.targetParams = targetParams;
-			vehicle = cannon.vehicle;
-			Cannon = cannon;
-			Cannon.SetTarget(LocalTargetInfo.Invalid);
-			this.actionWhenFinished = actionWhenFinished;
-			this.mouseAttachment = mouseAttachment;
-			map = cannon.vehicle.Map;
+			Instance.action = action;
+			Instance.targetParams = targetParams;
+			Instance.vehicle = cannon.vehicle;
+			Turret = cannon;
+			Turret.SetTarget(LocalTargetInfo.Invalid);
+			Instance.actionWhenFinished = actionWhenFinished;
+			Instance.mouseAttachment = mouseAttachment;
+			Instance.map = cannon.vehicle.Map;
 		}
 
 		public override void StopTargeting()
@@ -40,15 +40,15 @@ namespace Vehicles
 				actionWhenFinished = null;
 				action();
 			}
-			Cannon = null;
+			Turret = null;
 			action = null;
 		}
 
 		public void StopTargeting(bool canceled)
 		{
-			if (canceled && Cannon != null)
+			if (canceled && Turret != null)
 			{
-				Cannon.AlignToAngleRestricted(Cannon.TurretRotationUncorrected);
+				Turret.AlignToAngleRestricted(Turret.TurretRotationUncorrected);
 			}
 			StopTargeting();
 		}
@@ -64,7 +64,7 @@ namespace Vehicles
 					if(action != null)
 					{                      
 						LocalTargetInfo obj = CurrentTargetUnderMouse();
-						if(obj.Cell.InBounds(map) && TargetMeetsRequirements(Cannon, obj))
+						if(obj.Cell.InBounds(map) && TargetMeetsRequirements(Turret, obj))
 						{
 							action(obj);
 							SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
@@ -90,8 +90,8 @@ namespace Vehicles
 		{
 			if(action != null)
 			{
-				float distance = (Cannon.TurretLocation.ToIntVec3() - CurrentTargetUnderMouse().Cell).LengthHorizontal;
-				if (TargetMeetsRequirements(Cannon, CurrentTargetUnderMouse()))
+				float distance = (Turret.TurretLocation.ToIntVec3() - CurrentTargetUnderMouse().Cell).LengthHorizontal;
+				if (TargetMeetsRequirements(Turret, CurrentTargetUnderMouse()))
 				{
 					Texture2D icon = mouseAttachment ?? TexCommand.Attack;
 					GenUI.DrawMouseAttachment(icon);
@@ -103,14 +103,14 @@ namespace Vehicles
 		{
 			if(IsTargeting)
 			{
-				float distance = (Cannon.TurretLocation.ToIntVec3() - CurrentTargetUnderMouse().Cell).LengthHorizontal;
-				if (TargetMeetsRequirements(Cannon, CurrentTargetUnderMouse()))
+				float distance = (Turret.TurretLocation.ToIntVec3() - CurrentTargetUnderMouse().Cell).LengthHorizontal;
+				if (TargetMeetsRequirements(Turret, CurrentTargetUnderMouse()))
 				{
 					GenDraw.DrawTargetHighlight(CurrentTargetUnderMouse());
 
-					if (CurrentTargetUnderMouse() != Cannon.vehicle)
+					if (CurrentTargetUnderMouse() != Turret.vehicle)
 					{
-						Cannon.AlignToAngleRestricted((float)Cannon.TurretLocation.ToIntVec3().AngleToCell(CurrentTargetUnderMouse().Cell, map));
+						Turret.AlignToAngleRestricted((float)Turret.TurretLocation.ToIntVec3().AngleToCell(CurrentTargetUnderMouse().Cell, map));
 					}
 				}
 				//REDO Radius Circle

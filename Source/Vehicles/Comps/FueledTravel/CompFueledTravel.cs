@@ -230,7 +230,7 @@ namespace Vehicles
 				yield return gizmo;
 			}
 
-			if(Find.Selector.SingleSelectedThing == parent)
+			if (Find.Selector.SingleSelectedThing == parent)
 			{
 				yield return FuelCountGizmo;
 			}

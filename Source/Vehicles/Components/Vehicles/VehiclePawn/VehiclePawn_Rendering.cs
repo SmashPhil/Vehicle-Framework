@@ -551,6 +551,7 @@ namespace Vehicles
 							options.Add(new FloatMenuOption(component.props.label, delegate ()
 							{
 								component.TakeDamage(this, new DamageInfo(DamageDefOf.Bite, float.MaxValue));
+								Notify_TookDamage();
 							}));
 						}
 						if (!options.NullOrEmpty())
@@ -570,6 +571,7 @@ namespace Vehicles
 							options.Add(new FloatMenuOption(component.props.label, delegate ()
 							{
 								component.TakeDamage(this, new DamageInfo(DamageDefOf.Bite, component.health * Rand.Range(0.1f, 1)));
+								Notify_TookDamage();
 							}));
 						}
 						if (!options.NullOrEmpty())
@@ -617,6 +619,21 @@ namespace Vehicles
 						pawn?.Kill(null);
 					}
 				};
+				yield return new Command_Action()
+				{
+					defaultLabel = "Flash OccupiedRect",
+					action = delegate ()
+					{
+						CellRect occupiedRect = this.OccupiedRect();
+						foreach (IntVec3 intVec3 in occupiedRect)
+						{
+							if (intVec3.InBounds(Map))
+							{
+								Map.debugDrawer.FlashCell(intVec3, 0.95f, duration: 180);
+							}
+						}
+					}
+				};
 			}
 		}
 
@@ -658,22 +675,6 @@ namespace Vehicles
 						});
 					yield return opt;
 				}
-			}
-			if (statHandler.NeedsRepairs)
-			{
-				//yield return new FloatMenuOption("VF_RepairVehicle".Translate(LabelShort), delegate ()
-				//{
-				//	Job job = new Job(JobDefOf_Vehicles.RepairVehicle, this);
-				//	selPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
-				//});
-			}
-			if (patternToPaint != null)
-			{
-				yield return new FloatMenuOption("VF_PaintVehicle".Translate(LabelShort), delegate ()
-				{
-					Job job = new Job(JobDefOf_Vehicles.PaintVehicle, this);
-					selPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
-				});
 			}
 		}
 

@@ -37,7 +37,7 @@ namespace Vehicles
 		/// <param name="value"></param>
 		public static bool DraftedVehiclesCanMove(Pawn_DraftController __instance, bool value)
 		{
-			if(__instance.pawn is VehiclePawn vehicle)
+			if (__instance.pawn is VehiclePawn vehicle)
 			{
 				if (value && !__instance.Drafted)
 				{
@@ -62,6 +62,7 @@ namespace Vehicles
 				{
 					vehicle.vPather.PatherFailed();
 				}
+
 				if (!VehicleMod.settings.main.fishingPersists)
 				{
 					vehicle.currentlyFishing = false;

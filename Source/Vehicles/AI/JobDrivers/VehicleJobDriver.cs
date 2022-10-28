@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Verse;
 using Verse.AI;
 using RimWorld;
@@ -23,10 +24,6 @@ namespace Vehicles
 				return false;
 			}
 			VehicleReservationManager reservationManager = pawn.Map.GetCachedMapComponent<VehicleReservationManager>();
-			if (!reservationManager.CanReserve(Vehicle, pawn, JobDef))
-			{
-				return false;
-			}
 			return reservationManager.Reserve<LocalTargetInfo, VehicleTargetReservation>(Vehicle, pawn, job, JobCell);
 		}
 	}

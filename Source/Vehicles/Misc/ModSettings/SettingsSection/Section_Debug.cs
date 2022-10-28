@@ -14,6 +14,7 @@ namespace Vehicles
 		public const float ButtonHeight = 30f;
 		public const float VerticalGap = 2f;
 		public const int ButtonRows = 3;
+		public const int DebugSectionColumns = 2;
 
 		public bool debugDraftAnyVehicle;
 		public bool debugShootAnyTurret;
@@ -70,12 +71,12 @@ namespace Vehicles
 
 		public override void DrawSection(Rect rect)
 		{
-			Rect devModeRect = rect.ContractedBy(20);
+			Rect devModeRect = rect.ContractedBy(10);
 			float buttonRowHeight = (ButtonHeight * ButtonRows + VerticalGap * (ButtonRows - 1));
 			devModeRect.height = devModeRect.height - buttonRowHeight;
 			
 			listingStandard = new Listing_Standard();
-			listingStandard.ColumnWidth = devModeRect.width / 2;
+			listingStandard.ColumnWidth = (devModeRect.width / DebugSectionColumns) - 4 * DebugSectionColumns;
 			listingStandard.Begin(devModeRect);
 			{
 				listingStandard.Header("VF_DevMode_Logging".Translate(), ListingExtension.BannerColor, anchor: TextAnchor.MiddleCenter);

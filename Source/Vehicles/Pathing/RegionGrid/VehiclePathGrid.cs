@@ -196,7 +196,7 @@ namespace Vehicles
 				}
 				if (vehicleDef.properties.customThingCosts.TryGetValue(thing.def, out int thingPathCost))
 				{
-					if (thingPathCost < 0 || thingPathCost >= ImpassableCost)
+					if (thingPathCost >= ImpassableCost)
 					{
 						stringBuilder.AppendLine($"thingPathCost is impassable: {thingPathCost}");
 						return ImpassableCost;
@@ -229,11 +229,6 @@ namespace Vehicles
 			}
 			stringBuilder.AppendLine($"snowPathCost: {snowPathCost}");
 			pathCost += snowPathCost;
-			if (pathCost < 0)
-			{
-				stringBuilder.AppendLine($"pathCost < 0. Setting to {ImpassableCost}");
-				pathCost = ImpassableCost;
-			}
 			stringBuilder.AppendLine($"final cost: {pathCost}");
 			return pathCost;
 		}

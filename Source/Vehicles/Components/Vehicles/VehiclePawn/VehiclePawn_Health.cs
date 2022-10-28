@@ -79,7 +79,10 @@ namespace Vehicles
 
 		public virtual void Notify_TookDamage()
 		{
-			Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleTookDamage(this);
+			if (Spawned)
+			{
+				Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleTookDamage(this);
+			}
 		}
 
 		public bool TryTakeDamage(DamageInfo dinfo, IntVec3 position, out DamageWorker.DamageResult result)
