@@ -173,7 +173,7 @@ namespace Vehicles
 			}
 			this.peMode = peMode;
 			destination = dest;
-			if ((GenGridVehicles.Walkable(nextCell, vehicle.VehicleDef, vehicle.Map) || WillCollideWithPawnOnNextPathCell()) || nextCellCostLeft == nextCellCostTotal)
+			if (GenGridVehicles.Walkable(nextCell, vehicle.VehicleDef, vehicle.Map) || WillCollideWithPawnOnNextPathCell() || nextCellCostLeft == nextCellCostTotal)
 			{
 				ResetToCurrentPosition();
 			}

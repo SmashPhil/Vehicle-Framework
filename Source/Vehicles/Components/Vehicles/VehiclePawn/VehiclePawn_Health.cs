@@ -49,31 +49,18 @@ namespace Vehicles
 
 		public IEnumerable<IntVec3> InhabitedCells(int expandedBy = 0)
 		{
-			return InhabitedCellsProjected(Position, FullRotation, def.Size, expandedBy);
+			return InhabitedCellsProjected(Position, FullRotation, expandedBy);
 		}
 
-		public IEnumerable<IntVec3> InhabitedCellsProjected(IntVec3 projectedCell, Rot8 rot, IntVec2? size = null, int expandedBy = 0)
+		public IEnumerable<IntVec3> InhabitedCellsProjected(IntVec3 projectedCell, Rot8 rot, int expandedBy = 0)
 		{
-			size ??= def.Size;
-			int sizeX = size.Value.x;
-			int sizeZ = size.Value.z;
-			if (!rot.IsValid)
-			{
-				int largestSize = Mathf.Max(sizeX, sizeZ);
-				sizeX = largestSize;
-				sizeZ = largestSize;
-			}
-			else if (rot.IsHorizontal)
-			{
-				sizeX = size.Value.z;
-				sizeZ = size.Value.x;
-			}
-			return CellRect.CenteredOn(projectedCell, sizeX, sizeZ).ExpandedBy(expandedBy).Cells; //REDO FOR DIAGONALS
+			bool maxSizePossible = !rot.IsValid;
+			return this.VehicleRect(projectedCell, rot, maxSizePossible: maxSizePossible).ExpandedBy(expandedBy).Cells; //REDO FOR DIAGONALS
 		}
 
 		private void InitializeHitbox()
 		{
-			Hitbox = CellRect.CenteredOn(IntVec3.Zero, VehicleDef.Size.x, VehicleDef.Size.z);
+			Hitbox = this.VehicleRect(IntVec3.Zero, Rot4.North);
 			statHandler.InitializeHitboxCells();
 		}
 

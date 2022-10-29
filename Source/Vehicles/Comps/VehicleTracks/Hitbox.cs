@@ -5,7 +5,6 @@ using Verse;
 
 namespace Vehicles
 {
-	//TODO - Add custom damage for tracks
 	public struct Hitbox : IEnumerable<IntVec2>, IEnumerable
 	{
 		public VehicleComponentPosition side;
@@ -21,7 +20,7 @@ namespace Vehicles
 			}
 			else
 			{
-				CellRect rect = CellRect.CenteredOn(new IntVec3(0, 0, 0), def.Size.x, def.Size.z);
+				CellRect rect = def.VehicleRect(new IntVec3(0, 0, 0), Rot4.North);
 				List<IntVec3> cells;
 				if (side == VehicleComponentPosition.Body || side == VehicleComponentPosition.BodyNoOverlap)
 				{

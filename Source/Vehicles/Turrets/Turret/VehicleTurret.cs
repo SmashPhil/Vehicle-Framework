@@ -558,8 +558,7 @@ namespace Vehicles
 				locationRotation = TurretRotationFor(rot, attachedTo.currentRotation);
 			}
 			Vector2 turretLoc = RenderHelper.TurretDrawOffset(rot, uiRenderProperties, locationRotation, attachedTo);
-			Vector3 graphicOffset = CannonGraphic.DrawOffset(rot);
-			return new Vector3(pos.x + graphicOffset.x + turretLoc.x, pos.y + graphicOffset.y + drawLayer * Altitudes.AltInc, pos.z + graphicOffset.z + turretLoc.y);
+			return new Vector3(pos.x + turretLoc.x, pos.y + drawLayer * Altitudes.AltInc, pos.z + turretLoc.y);
 		}
 
 		public Vector3 DefaultOffsetLocFor(Rot8 rot)

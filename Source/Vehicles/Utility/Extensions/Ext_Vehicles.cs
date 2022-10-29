@@ -13,6 +13,30 @@ namespace Vehicles
 {
 	public static class Ext_Vehicles
 	{
+		public static CellRect VehicleRect(this VehiclePawn vehicle, bool maxSizePossible = false)
+		{
+			return vehicle.VehicleRect(vehicle.Position, vehicle.Rotation, maxSizePossible: maxSizePossible);
+		}
+
+		public static CellRect VehicleRect(this VehiclePawn vehicle, IntVec3 center, Rot4 rot, bool maxSizePossible = false)
+		{
+			return VehicleRect(vehicle.VehicleDef, center, rot, maxSizePossible: maxSizePossible);
+		}
+
+		public static CellRect VehicleRect(this VehicleDef vehicleDef, IntVec3 center, Rot4 rot, bool maxSizePossible = false)
+		{
+			if (rot == Rot4.West) rot = Rot4.East;
+			if (rot == Rot4.South) rot = Rot4.North;
+			IntVec2 size = vehicleDef.Size;
+			if (maxSizePossible)
+			{
+				int maxSize = Mathf.Max(size.x, size.z);
+				size.x = maxSize;
+				size.z = maxSize;
+			}
+			return GenAdj.OccupiedRect(center, rot, size);
+		}
+
 		public static float GetVehicleStatValue(this VehiclePawn vehicle, VehicleStatDef statDef)
 		{
 			return statDef.Worker.GetValue(vehicle);
@@ -320,11 +344,16 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="vehicle"></param>
 		/// <param name="dest"></param>
-		public static bool LocationRestrictedBySize(this VehiclePawn vehicle, IntVec3 dest)
+		public static bool LocationRestrictedBySize(this VehiclePawn vehicle, IntVec3 dest, Rot8 rot)
 		{
-			return CellRect.CenteredOn(dest, vehicle.def.Size.x, vehicle.def.Size.z).NotNullAndAny(c2 => !c2.InBounds(vehicle.Map) || GenGridVehicles.Impassable(c2, vehicle.Map, vehicle.VehicleDef) &&
-																								   CellRect.CenteredOn(dest, vehicle.def.Size.z, vehicle.def.Size.x).NotNullAndAny(c2 => !c2.InBounds(vehicle.Map) ||
-																								   GenGridVehicles.Impassable(c2, vehicle.Map, vehicle.VehicleDef)));
+			return vehicle.VehicleRect(dest, rot).NotNullAndAny(c2 => !c2.InBounds(vehicle.Map) || GenGridVehicles.Impassable(c2, vehicle.Map, vehicle.VehicleDef));
+		}
+
+		public static bool FitsOnCell(this VehiclePawn vehicle, IntVec3 cell)
+		{
+			bool verticalBlocked = vehicle.LocationRestrictedBySize(cell, Rot8.North);
+			bool horizontalBlocked = vehicle.LocationRestrictedBySize(cell, Rot8.East);
+			return !verticalBlocked || !horizontalBlocked;
 		}
 
 		/// <summary>
@@ -335,21 +364,8 @@ namespace Vehicles
 		public static bool CellRectStandable(this VehiclePawn vehicle, Map map, IntVec3? c = null, Rot4? rot = null)
 		{
 			IntVec3 loc = c ?? vehicle.Position;
-			IntVec2 dimensions = vehicle.VehicleDef.Size;
-			if (rot?.IsHorizontal ?? false)
-			{
-				int x = dimensions.x;
-				dimensions.x = dimensions.z;
-				dimensions.z = x;
-			}
-			foreach (IntVec3 cell in CellRect.CenteredOn(loc, dimensions.x, dimensions.z))
-			{
-				if (!GenGridVehicles.Standable(cell, vehicle, map))
-				{
-					return false;
-				}
-			}
-			return true;
+			Rot4 facing = rot ?? vehicle.Rotation;
+			return vehicle.VehicleDef.CellRectStandable(map, loc, facing);
 		}
 
 		/// <summary>
@@ -357,18 +373,11 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="pawn"></param>
 		/// <param name="c"></param>
-		public static bool CellRectStandable(this VehicleDef vehicleDef, Map map, IntVec3 cell, Rot4? rot = null)
+		public static bool CellRectStandable(this VehicleDef vehicleDef, Map map, IntVec3 position, Rot4 rot)
 		{
-			IntVec2 dimensions = vehicleDef.Size;
-			if (rot?.IsHorizontal ?? false)
+			foreach (IntVec3 cell in vehicleDef.VehicleRect(position, rot))
 			{
-				int x = dimensions.x;
-				dimensions.x = dimensions.z;
-				dimensions.z = x;
-			}
-			foreach (IntVec3 cell2 in CellRect.CenteredOn(cell, dimensions.x, dimensions.z))
-			{
-				if (!GenGridVehicles.Standable(cell2, vehicleDef, map))
+				if (!GenGridVehicles.Standable(cell, vehicleDef, map))
 				{
 					return false;
 				}

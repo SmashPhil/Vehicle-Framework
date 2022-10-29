@@ -15,8 +15,14 @@ namespace Vehicles
 {
 	internal class Rendering : IPatchCategory
 	{
+		public static MethodInfo TrueCenter_Thing { get; private set; }
+		public static MethodInfo TrueCenter_Baseline { get; private set; }
+
 		public void PatchMethods()
 		{
+			TrueCenter_Thing = AccessTools.Method(typeof(GenThing), nameof(GenThing.TrueCenter), parameters: new Type[] { typeof(Thing) });
+			TrueCenter_Baseline = AccessTools.Method(typeof(GenThing), nameof(GenThing.TrueCenter), parameters: new Type[] { typeof(IntVec3), typeof(Rot4), typeof(IntVec2), typeof(float) });
+
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_RotationTracker), nameof(Pawn_RotationTracker.UpdateRotation)),
 				prefix: new HarmonyMethod(typeof(Rendering),
 				nameof(UpdateVehicleRotation)));
@@ -32,7 +38,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GhostDrawer), nameof(GhostDrawer.DrawGhostThing)),
 				postfix: new HarmonyMethod(typeof(Rendering),
 				nameof(DrawGhostVehicle)));
-
+			VehicleHarmony.Patch(original: TrueCenter_Thing,
+				prefix: new HarmonyMethod(typeof(Rendering),
+				nameof(TrueCenterVehicle)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Targeter), nameof(Targeter.TargeterOnGUI)),
 				postfix: new HarmonyMethod(typeof(Rendering),
 				nameof(DrawTargeters)));
@@ -187,12 +195,11 @@ namespace Vehicles
 		public static IEnumerable<CodeInstruction> RenderOverlaysCenterVehicle(IEnumerable<CodeInstruction> instructions)
 		{
 			List<CodeInstruction> instructionList = instructions.ToList();
-			MethodInfo trueCenterMethod = AccessTools.Method(typeof(GenThing), nameof(GenThing.TrueCenter), parameters: new Type[] { typeof(IntVec3), typeof(Rot4), typeof(IntVec2), typeof(float) });
 			for (int i = 0; i < instructionList.Count; i++)
 			{
 				CodeInstruction instruction = instructionList[i];
 
-				if (instruction.opcode == OpCodes.Stloc_0 && instructionList[i - 1].Calls(trueCenterMethod))
+				if (instruction.opcode == OpCodes.Stloc_0 && instructionList[i - 1].Calls(TrueCenter_Baseline))
 				{
 					yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
 					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(Rendering), nameof(Rendering.VehicleTrueCenterReroute)));
@@ -202,13 +209,23 @@ namespace Vehicles
 			}
 		}
 
-		private static Vector3 VehicleTrueCenterReroute(Vector3 trueCenter, Thing thing)
+		public static Vector3 VehicleTrueCenterReroute(Vector3 trueCenter, Thing thing)
 		{
 			if (thing is VehiclePawn vehicle)
 			{
 				return vehicle.OverlayCenter;
 			}
 			return trueCenter;
+		}
+
+		public static bool TrueCenterVehicle(Thing t, ref Vector3 __result)
+		{
+			if (t is VehiclePawn vehicle)
+			{
+				__result = vehicle.TrueCenter();
+				return false;
+			}
+			return true;
 		}
 
 		/* ---------------- Hooks onto Targeter calls ---------------- */

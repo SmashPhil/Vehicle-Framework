@@ -40,7 +40,7 @@ namespace Vehicles
 			}
 			else
 			{
-				CellRect rect = CellRect.CenteredOn(new IntVec3(0, 0, 0), def.Size.x, def.Size.z);
+				CellRect rect = def.VehicleRect(new IntVec3(0, 0, 0), Rot4.North);
 				List<IntVec3> cells = new List<IntVec3>();
 				if (side == VehicleComponentPosition.Body)
 				{

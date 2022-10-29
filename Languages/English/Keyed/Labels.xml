@@ -11,6 +11,7 @@
 	<VF_PaintVehicle>Apply Paint</VF_PaintVehicle>
 	<VF_DisembarkAllPawns>Unload All Pawns</VF_DisembarkAllPawns>
 	<VF_DisembarkSinglePawn>Unload {0}</VF_DisembarkSinglePawn>
+	<VF_DisembarkNoExit>Unable to exit vehicle. No valid cells to exit onto.</VF_DisembarkNoExit>
 	<VF_DraftVehicleDesc>Draft Vehicle
 
 Drafted vehicles can be moved, but restrict the unloading of pawns.

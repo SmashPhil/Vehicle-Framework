@@ -131,7 +131,7 @@ namespace Vehicles
 		/// <param name="peMode"></param>
 		public (PawnPath path, bool found) FindVehiclePath(IntVec3 start, LocalTargetInfo dest, VehiclePawn vehicle, CancellationToken token, PathEndMode peMode = PathEndMode.OnCell)
 		{
-			if (vehicle.LocationRestrictedBySize(dest.Cell))
+			if (!vehicle.FitsOnCell(dest.Cell))
 			{
 				Messages.Message("VehicleCannotFit".Translate(), MessageTypeDefOf.RejectInput);
 				return (PawnPath.NotFound, false);
@@ -264,8 +264,7 @@ namespace Vehicles
 						goto Block_33;
 					}
 
-					List<IntVec3> fullRectCells = CellRect.CenteredOn(prevCell, vehicle.def.size.x, vehicle.def.size.z).Where(cl2 => cl2 != prevCell).ToList();
-
+					//List<IntVec3> fullRectCells = vehicle.VehicleRect(prevCell, Rot4.North).Where(cl2 => cl2 != prevCell).ToList();
 					for(int i = 0; i < 8; i++)
 					{
 						uint cellX = (uint)(x2 + directions[i]);
@@ -278,7 +277,8 @@ namespace Vehicles
 							int cellIndex = cellIndices.CellToIndex(cellIntX, cellIntY);
 							
 							IntVec3 cellToCheck = cellIndices.IndexToCell(cellIndex);
-							if (VehicleMod.settings.main.fullVehiclePathing && vehicle.LocationRestrictedBySize(cellToCheck))
+							Rot8 dirOfPath = Rot8.DirectionFromCells(prevCell, cellToCheck); //TODO - change to LocationRestricted for directional check
+							if (VehicleMod.settings.main.fullVehiclePathing && !vehicle.FitsOnCell(cellToCheck))
 							{
 								goto EndPathing;
 							}
@@ -293,7 +293,7 @@ namespace Vehicles
 										{
 											if (drawPaths)
 											{
-												DebugFlash(new IntVec3(cellIntX, 0, cellIntY), 0.22f, "walk");
+												DebugFlash(new IntVec3(cellIntX, 0, cellIntY), 0.22f, "impass");
 											}
 											goto EndPathing;
 										}
@@ -320,7 +320,7 @@ namespace Vehicles
 												{
 													if (drawPaths)
 													{
-														DebugFlash(new IntVec3(x2, 0, z2 - 1), 0.9f, "vehicles");
+														DebugFlash(new IntVec3(x2, 0, z2 - 1), 0.9f, "diag");
 													}
 													initialCost += 70;
 												}
@@ -328,7 +328,7 @@ namespace Vehicles
 												{
 													if (drawPaths)
 													{
-														DebugFlash(new IntVec3(x2 + 1, 0, z2), 0.9f, "vehicles");
+														DebugFlash(new IntVec3(x2 + 1, 0, z2), 0.9f, "diag");
 													}
 													initialCost += 70;
 												}
@@ -338,7 +338,7 @@ namespace Vehicles
 												{
 													if (drawPaths)
 													{
-														DebugFlash(new IntVec3(x2, 0, z2 + 1), 0.9f, "vehicles");
+														DebugFlash(new IntVec3(x2, 0, z2 + 1), 0.9f, "diag");
 													}
 													initialCost += 70;
 												}
@@ -346,7 +346,7 @@ namespace Vehicles
 												{
 													if (drawPaths)
 													{
-														DebugFlash(new IntVec3(x2 + 1, 0, z2), 0.9f, "vehicles");
+														DebugFlash(new IntVec3(x2 + 1, 0, z2), 0.9f, "diag");
 													}
 													initialCost += 70;
 												}
@@ -356,7 +356,7 @@ namespace Vehicles
 												{
 													if (drawPaths)
 													{
-														DebugFlash(new IntVec3(x2 + 1, 0, z2), 0.9f, "vehicles");
+														DebugFlash(new IntVec3(x2 + 1, 0, z2), 0.9f, "diag");
 													}
 													initialCost += 70;
 												}
@@ -364,7 +364,7 @@ namespace Vehicles
 												{
 													if (drawPaths)
 													{
-														DebugFlash(new IntVec3(x2 + 1, 0, z2), 0.9f, "vehicles");
+														DebugFlash(new IntVec3(x2 + 1, 0, z2), 0.9f, "diag");
 													}
 													initialCost += 70;
 												}
@@ -374,7 +374,7 @@ namespace Vehicles
 												{
 													if (drawPaths)
 													{
-														DebugFlash(new IntVec3(x2, 0, z2 - 1), 0.9f, "vehicles");
+														DebugFlash(new IntVec3(x2, 0, z2 - 1), 0.9f, "diag");
 													}
 													initialCost += 70;
 												}
@@ -382,7 +382,7 @@ namespace Vehicles
 												{
 													if (drawPaths)
 													{
-														DebugFlash(new IntVec3(x2 - 1, 0, z2), 0.9f, "vehicles");
+														DebugFlash(new IntVec3(x2 - 1, 0, z2), 0.9f, "diag");
 													}
 													initialCost += 70;
 												}
@@ -510,7 +510,7 @@ namespace Vehicles
 											calcGrid[cellIndex].heuristicCost = 0;
 										}
 									}
-									else if(status != statusClosedValue && status != statusOpenValue)
+									else if (status != statusClosedValue && status != statusOpenValue)
 									{
 										int dx = Math.Abs(cellIntX - x);
 										int dz = Math.Abs(cellIntY - z);

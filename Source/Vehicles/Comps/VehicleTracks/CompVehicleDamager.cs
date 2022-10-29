@@ -97,7 +97,6 @@ namespace Vehicles
 			{
 				opDirection = -1;
 			}
-
 			int x = Vehicle.Position.x;
 			int z = Vehicle.Position.z;
 
@@ -109,16 +108,7 @@ namespace Vehicles
 			{
 				z += Vehicle.def.Size.z * opDirection;
 			}
-
-			int sizeX = Vehicle.def.Size.x;
-			int sizeZ = Vehicle.def.Size.z;
-			if (Vehicle.Rotation.IsHorizontal)
-			{
-				int tmp = sizeX;
-				sizeX = sizeZ;
-				sizeZ = tmp;
-			}
-			return CellRect.CenteredOn(new IntVec3(x, 0, z), sizeX, sizeZ);
+			return Vehicle.VehicleRect(new IntVec3(x, 0, z), Vehicle.Rotation);
 		}
 	}
 }

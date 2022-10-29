@@ -423,10 +423,9 @@ namespace Vehicles
 				{
 					continue;
 				}
-				
 				Vector2 rectSize = turret.turretDef.ScaleDrawRatio(vehicleDef, rect.size);
 				turret.ResolveCannonGraphics(vehicleDef);
-				
+				if (vehicleDef.defName == "VVE_Highwayman") SmashLog.QuickMessage($"Rect: {rect.size} VehicleDrawSize: {vehicleDef.graphicData.drawSize} Turret: {turret.turretDef.graphicData.drawSize} Scalar: {vehicleDef.graphicData.drawSize / turret.turretDef.graphicData.drawSize} uiScale: {vehicleDef.uiIconScale} Scale: {rectSize}");
 				bool elongated = rot.IsHorizontal || rot.IsDiagonal;
 
 				Vector2 displayOffset = vehicleDef.drawProperties.DisplayOffsetForRot(rot);
@@ -438,8 +437,9 @@ namespace Vehicles
 					scaledHeight = rectSize.x;
 				}
 				Vector3 turretOffset = turret.TurretDrawLocUI(rot, Vector3.zero);
-				float offsetX = (rect.width - scaledWidth) / 2 + (displayOffset.x * rect.width) + turretOffset.x;
-				float offsetY = (rect.height - scaledHeight) / 2 + (displayOffset.y * rect.height) + turretOffset.z;
+				Vector2 turretOffsetScaled = new Vector2(turretOffset.x, turretOffset.z) * (rectSize / rect.size);
+				float offsetX = (rect.width - scaledWidth) / 2 + (displayOffset.x * rect.width) + turretOffsetScaled.x;
+				float offsetY = (rect.height - scaledHeight) / 2 + (displayOffset.y * rect.height) + turretOffsetScaled.y;
 
 				Rect adjustedRect = new Rect(rect.x + offsetX, rect.y + offsetY, rectSize.x, rectSize.y);
 				if (elongated)

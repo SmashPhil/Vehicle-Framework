@@ -139,7 +139,7 @@ namespace Vehicles
 				{
 					IntVec3 second = UI.MouseCell();
 					CellRect cellRect = CellRect.FromLimits(first, second).ClipInsideMap(Find.CurrentMap);
-					IntVec3 center = cellRect.CenterCell;
+					IntVec3 center = cellRect.ThingPositionFromRect();
 					foreach (IntVec3 cell in cellRect)
 					{
 						IntVec3 diff = cell - center;

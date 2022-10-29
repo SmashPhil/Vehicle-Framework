@@ -36,7 +36,6 @@ namespace Vehicles
 				nameof(AcceptsVehicleRefuelable)));
 		}
 
-		//REDO
 		/// <summary>
 		/// Intercept Error Recover handler of no job, and assign idling for vehicle
 		/// </summary>
@@ -44,11 +43,15 @@ namespace Vehicles
 		/// <param name="message"></param>
 		/// <param name="exception"></param>
 		/// <param name="concreteDriver"></param>
-		/// <returns></returns>
 		public static bool VehicleErrorRecoverJob(Pawn pawn, string message, Exception exception = null, JobDriver concreteDriver = null)
 		{
 			if (pawn is VehiclePawn)
 			{
+				if (exception != null)
+				{
+					message += $"\n{exception}";
+				}
+				Log.Error(message);
 				if (pawn.jobs != null)
 				{
 					if (pawn.jobs.curJob != null)

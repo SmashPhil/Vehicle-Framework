@@ -50,7 +50,7 @@ namespace Vehicles
 			//	nameof(WalkableFastThroughVehicleInt)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenAdj), nameof(GenAdj.OccupiedRect), parameters: new Type[] { typeof(Thing) }),
 				prefix: new HarmonyMethod(typeof(VehiclePathing),
-				nameof(OccupiedRectEvenSizedVehicles)));
+				nameof(OccupiedRectVehicles)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pathing), nameof(Pathing.RecalculateAllPerceivedPathCosts)),
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(RecalculateAllPerceivedPathCostForVehicle)));
@@ -87,7 +87,7 @@ namespace Vehicles
 				{
 					return false;
 				}
-				if (VehicleMod.settings.main.fullVehiclePathing && vehicle.LocationRestrictedBySize(clickCell))
+				if (VehicleMod.settings.main.fullVehiclePathing && !vehicle.FitsOnCell(clickCell))
 				{
 					Messages.Message("VehicleCannotFit".Translate(), MessageTypeDefOf.RejectInput);
 					return false;
@@ -330,14 +330,11 @@ namespace Vehicles
 			}
 		}
 		
-		public static bool OccupiedRectEvenSizedVehicles(Thing t, ref CellRect __result)
+		public static bool OccupiedRectVehicles(Thing t, ref CellRect __result)
 		{
-			if (t is VehiclePawn vehicle && vehicle.VehicleDef.Size.x % 2 == 0)
+			if (t is VehiclePawn vehicle)
 			{
-				Rot4 rot = vehicle.Rotation;
-				if (rot == Rot4.West) rot = Rot4.East;
-				if (rot == Rot4.South) rot = Rot4.South;
-				__result = GenAdj.OccupiedRect(vehicle.Position, rot, vehicle.VehicleDef.Size);
+				__result = vehicle.VehicleRect();
 				return false;
 			}
 			return true;

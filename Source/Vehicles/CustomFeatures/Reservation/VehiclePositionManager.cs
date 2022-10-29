@@ -22,15 +22,7 @@ namespace Vehicles
 
 		public void ClaimPosition(VehiclePawn vehicle)
 		{
-			int x = vehicle.def.Size.x;
-			int z = vehicle.def.Size.z;
-			if (vehicle.Rotation.IsHorizontal)
-			{
-				int tmp = x;
-				x = z;
-				z = tmp;
-			}
-			CellRect newRect = CellRect.CenteredOn(vehicle.Position, x, z);
+			CellRect newRect = vehicle.VehicleRect();
 			HashSet<IntVec3> hash = newRect.Cells.ToHashSet();
 			occupiedRect[vehicle] = hash;
 

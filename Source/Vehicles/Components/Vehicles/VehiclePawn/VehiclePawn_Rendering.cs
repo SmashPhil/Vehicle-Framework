@@ -182,67 +182,68 @@ namespace Vehicles
 			}
 		}
 
-		public Vector3 TrueCenter
+		public Vector3 TrueCenter() => TrueCenter(Position);
+
+		public Vector3 TrueCenter(IntVec3 cell)
 		{
-			get
+			Vector3 result = cell.ToVector3ShiftedWithAltitude(VehicleDef.Altitude);
+			IntVec2 size = VehicleDef.Size;
+			Rot8 rot = Rotation; //Switch to FullRotation when diagonal hitboxes are implemented
+			if (size.x != 1 || size.z != 1)
 			{
-				Vector3 result = Position.ToVector3ShiftedWithAltitude(VehicleDef.Altitude);
-				IntVec2 size = VehicleDef.Size;
-				Rot8 rot = Rotation; //Switch to FullRotation when diagonal hitboxes are implemented
-				if (size.x != 1 || size.z != 1)
+				if (rot.IsHorizontal)
 				{
-					if (rot.IsHorizontal)
-					{
-						int x = size.x;
-						size.x = size.z;
-						size.z = x;
-					}
-					switch (rot.AsInt)
-					{
-						case 0:
-							if (size.x % 2 == 0)
-							{
-								result.x += 0.5f;
-							}
-							if (size.z % 2 == 0)
-							{
-								result.z += 0.5f;
-							}
-							break;
-						case 1:
-							if (size.x % 2 == 0)
-							{
-								result.x += 0.5f;
-							}
-							if (size.z % 2 == 0)
-							{
-								result.z -= 0.5f;
-							}
-							break;
-						case 2:
-							if (size.x % 2 == 0)
-							{
-								result.x -= 0.5f;
-							}
-							if (size.z % 2 == 0)
-							{
-								result.z -= 0.5f;
-							}
-							break;
-						case 3:
-							if (size.x % 2 == 0)
-							{
-								result.x -= 0.5f;
-							}
-							if (size.z % 2 == 0)
-							{
-								result.z += 0.5f;
-							}
-							break;
-					}
+					int x = size.x;
+					size.x = size.z;
+					size.z = x;
 				}
-				return result;
+				switch (rot.AsInt)
+				{
+					case 0:
+					case 2:
+						if (size.x % 2 == 0)
+						{
+							result.x += 0.5f;
+						}
+						if (size.z % 2 == 0)
+						{
+							result.z += 0.5f;
+						}
+						break;
+					case 1:
+					case 3:
+						if (size.x % 2 == 0)
+						{
+							result.x += 0.5f;
+						}
+						if (size.z % 2 == 0)
+						{
+							result.z -= 0.5f;
+						}
+						break;
+					//case 2:
+					//	if (size.x % 2 == 0)
+					//	{
+					//		result.x += 0.5f;
+					//	}
+					//	if (size.z % 2 == 0)
+					//	{
+					//		result.z -= 0.5f;
+					//	}
+					//	break;
+					//case 3:
+					//	if (size.x % 2 == 0)
+					//	{
+					//		result.x -= 0.5f;
+					//	}
+					//	if (size.z % 2 == 0)
+					//	{
+					//		result.z += 0.5f;
+					//	}
+					//	break;
+				}
 			}
+			return result;
 		}
 
 		public override void DrawAt(Vector3 drawLoc, bool flip = false)
@@ -466,12 +467,15 @@ namespace Vehicles
 					hotKey = KeyBindingDefOf.Misc2
 				};
 				yield return unloadAll;
-
+				bool exitBlocked = !SurroundingCells.NotNullAndAny(cell => cell.Walkable(Map));
+				if (exitBlocked)
+				{
+					unloadAll.Disable("VF_DisembarkNoExit".Translate());
+				}
 				foreach (VehicleHandler handler in handlers)
 				{
 					for (int i = 0; i < handler.handlers.Count; i++)
 					{
-
 						Pawn currentPawn = handler.handlers.InnerListForReading[i];
 						Command_Action_PawnDrawer unloadAction = new Command_Action_PawnDrawer();
 						unloadAction.defaultLabel = "VF_DisembarkSinglePawn".Translate(currentPawn.LabelShort);
@@ -480,6 +484,10 @@ namespace Vehicles
 						{
 							DisembarkPawn(currentPawn);
 						};
+						if (exitBlocked)
+						{
+							unloadAction.Disable("VF_DisembarkNoExit".Translate());
+						}
 						yield return unloadAction;
 					}
 				}
@@ -621,15 +629,45 @@ namespace Vehicles
 				};
 				yield return new Command_Action()
 				{
+					defaultLabel = "Flash Position",
+					action = delegate ()
+					{
+						Map.debugDrawer.FlashCell(Position, 0.95f, duration: 60);
+					}
+				};
+				yield return new Command_Action()
+				{
 					defaultLabel = "Flash OccupiedRect",
 					action = delegate ()
 					{
-						CellRect occupiedRect = this.OccupiedRect();
-						foreach (IntVec3 intVec3 in occupiedRect)
+						if (vPather.Moving)
 						{
-							if (intVec3.InBounds(Map))
+							IntVec3 prevCell = Position;
+							Rot8 rot = FullRotation;
+							HashSet<IntVec3> cellsToHighlight = new HashSet<IntVec3>();
+							foreach (IntVec3 cell in vPather.curPath.NodesReversed)
 							{
-								Map.debugDrawer.FlashCell(intVec3, 0.95f, duration: 180);
+								if (prevCell != cell) rot = Rot8.DirectionFromCells(prevCell, cell);
+								if (!rot.IsValid) rot = Rot8.North;
+								foreach (IntVec3 occupiedCell in this.VehicleRect(cell, rot).Cells)
+								{
+									if (occupiedCell.InBounds(Map) && cellsToHighlight.Add(occupiedCell))
+									{
+										Map.debugDrawer.FlashCell(occupiedCell, 0.95f, duration: 180);
+									}
+								}
+								prevCell = cell;
+							}
+						}
+						else
+						{
+							CellRect occupiedRect = this.OccupiedRect();
+							foreach (IntVec3 cell in occupiedRect)
+							{
+								if (cell.InBounds(Map))
+								{
+									Map.debugDrawer.FlashCell(cell, 0.95f, duration: 180);
+								}
 							}
 						}
 					}
