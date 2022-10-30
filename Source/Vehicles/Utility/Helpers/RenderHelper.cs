@@ -423,30 +423,10 @@ namespace Vehicles
 				{
 					continue;
 				}
-				Vector2 rectSize = turret.turretDef.ScaleDrawRatio(vehicleDef, rect.size);
 				turret.ResolveCannonGraphics(vehicleDef);
-				if (vehicleDef.defName == "VVE_Highwayman") SmashLog.QuickMessage($"Rect: {rect.size} VehicleDrawSize: {vehicleDef.graphicData.drawSize} Turret: {turret.turretDef.graphicData.drawSize} Scalar: {vehicleDef.graphicData.drawSize / turret.turretDef.graphicData.drawSize} uiScale: {vehicleDef.uiIconScale} Scale: {rectSize}");
-				bool elongated = rot.IsHorizontal || rot.IsDiagonal;
-
-				Vector2 displayOffset = vehicleDef.drawProperties.DisplayOffsetForRot(rot);
-				float scaledWidth = rectSize.x;
-				float scaledHeight = rectSize.y;
-				if (elongated)
-				{
-					scaledWidth = rectSize.y;
-					scaledHeight = rectSize.x;
-				}
-				Vector3 turretOffset = turret.TurretDrawLocUI(rot, Vector3.zero);
-				Vector2 turretOffsetScaled = new Vector2(turretOffset.x, turretOffset.z) * (rectSize / rect.size);
-				float offsetX = (rect.width - scaledWidth) / 2 + (displayOffset.x * rect.width) + turretOffsetScaled.x;
-				float offsetY = (rect.height - scaledHeight) / 2 + (displayOffset.y * rect.height) + turretOffsetScaled.y;
-
-				Rect adjustedRect = new Rect(rect.x + offsetX, rect.y + offsetY, rectSize.x, rectSize.y);
-				if (elongated)
-				{
-					adjustedRect.width = rectSize.y;
-					adjustedRect.height = rectSize.x;
-				}
+				Vector2 rectSize = turret.turretDef.ScaleDrawRatio(vehicleDef, rect.size);
+				Vector2 adjustedPosition = rect.position + (rect.size - rectSize) / 2f;
+				Rect turretRect = new Rect(turret.ScaleUIRect(adjustedPosition, rectSize, rot), rectSize);
 				Material cannonMat = turret.CannonGraphic.Shader.SupportsRGBMaskTex() ? new Material(turret.CannonGraphic.MatAt(patternData.patternDef)) : null;
 				if ((turret.CannonGraphic.Shader.SupportsRGBMaskTex() || turret.CannonGraphic.Shader.SupportsMaskTex()) && patternData != VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData))
 				{
@@ -465,7 +445,7 @@ namespace Vehicles
 					};
 					cannonMat = MaterialPoolExpanded.MatFrom(matReq);
 				}
-				yield return new ValueTuple<Rect, Texture, Material, float, float>(adjustedRect, turret.CannonTexture, cannonMat, turret.CannonGraphicData.drawOffset.y, turret.defaultAngleRotated + rot.AsAngle);
+				yield return new ValueTuple<Rect, Texture, Material, float, float>(turretRect, turret.CannonTexture, cannonMat, turret.CannonGraphicData.drawOffset.y, turret.defaultAngleRotated + rot.AsAngle);
 			}
 		}
 

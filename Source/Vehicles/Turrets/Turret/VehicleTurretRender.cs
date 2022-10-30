@@ -116,7 +116,7 @@ namespace Vehicles
 
 		public struct RotationalOffset
 		{
-			private Vector2 offset;
+			private Vector2? offset;
 
 			public RotationalOffset(Vector2 offset)
 			{
@@ -126,9 +126,9 @@ namespace Vehicles
 
 			public Rot8 Rot { get; set; }
 
-			public Vector2 Offset => offset;
+			public Vector2 Offset => offset ?? Vector2.zero;
 
-			public bool IsValid => offset != Vector2.zero;
+			public bool IsValid => offset != null;
 
 			public static RotationalOffset Default => new RotationalOffset(Vector2.zero);
 
@@ -141,14 +141,14 @@ namespace Vehicles
 				}
 				return new RotationalOffset()
 				{
-					offset = offset.RotatedBy(angle),
+					offset = Offset.RotatedBy(angle),
 					Rot = angle < 0 ? Rot.Rotated(Mathf.Abs(angle), RotationDirection.Counterclockwise) : Rot.Rotated(angle, RotationDirection.Clockwise)
 				};
 			}
 
 			public RotationalOffset Flip(bool flipX, bool flipY)
 			{
-				Vector2 newOffset = offset;
+				Vector2 newOffset = Offset;
 				if (flipX)
 				{
 					newOffset.x *= -1;

@@ -550,15 +550,21 @@ namespace Vehicles
 			return new Vector3(pos.x + graphicOffset.x + turretLoc.x, pos.y + graphicOffset.y + drawLayer * Altitudes.AltInc, pos.z + graphicOffset.z + turretLoc.y);
 		}
 
-		public Vector3 TurretDrawLocUI(Rot8 rot, Vector3 pos)
+		public Vector2 ScaleUIRect(Vector2 position, Vector2 size, Rot8 rot)
 		{
 			float locationRotation = 0f;
 			if (attachedTo != null)
 			{
-				locationRotation = TurretRotationFor(rot, attachedTo.currentRotation);
+				//locationRotation = TurretRotationFor(rot, attachedTo.currentRotation);
 			}
-			Vector2 turretLoc = RenderHelper.TurretDrawOffset(rot, uiRenderProperties, locationRotation, attachedTo);
-			return new Vector3(pos.x + turretLoc.x, pos.y + drawLayer * Altitudes.AltInc, pos.z + turretLoc.y);
+			return rot.AsInt switch
+			{
+				0 => position + size * uiRenderProperties.north.Offset,
+				1 => position + size * uiRenderProperties.east.Offset,
+				2 => position + size * uiRenderProperties.south.Offset,
+				3 => position + size * uiRenderProperties.west.Offset,
+				_ => throw new NotImplementedException("Diagonal rotations"),
+			};
 		}
 
 		public Vector3 DefaultOffsetLocFor(Rot8 rot)
