@@ -18,26 +18,4 @@
 			</customBiomeCosts>
 		</properties>
 	</Vehicles.VehicleDef>
-	
-	<Vehicles.VehicleDef Name="BaseSeaVehicleUpgradeable" ParentName="BaseVehiclePawnUpgradeable" Abstract="True">
-		<inspectorTabs>
-			<li>Vehicles.UI.ITab_Vehicle_Upgrades</li>
-		</inspectorTabs>
-
-		<properties>
-			<defaultBiomesImpassable>true</defaultBiomesImpassable>
-			<defaultTerrainImpassable>true</defaultTerrainImpassable>
-			<customTerrainCosts AllowTerrainWithTag="Water" PathCost="1"/>
-			<customBiomeCosts>
-				<li>
-					<key>Ocean</key>
-					<value>1</value>
-				</li>
-				<li>
-					<key>Lake</key>
-					<value>1</value>
-				</li>
-			</customBiomeCosts>
-		</properties>
-	</Vehicles.VehicleDef>
 </Defs>

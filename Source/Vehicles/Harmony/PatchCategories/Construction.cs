@@ -55,7 +55,18 @@ namespace Vehicles
 				GenSpawn.Spawn(vehicle, __instance.Position, map, __instance.Rotation, WipeMode.FullRefund, false);
 				worker.records.Increment(RecordDefOf.ThingsConstructed);
 				
-				vehicle.Rename();
+				if (!DebugSettings.godMode) //quick spawning for development
+				{
+					vehicle.Rename();
+				}
+				else
+				{
+					foreach (VehicleComp vehicleComp in vehicle.AllComps.Where(comp => comp is VehicleComp))
+					{
+						vehicleComp.SpawnedInGodMode();
+					}
+				}
+
 				//Quality?
 				//Art?
 				//Tale RecordTale LongConstructionProject?
@@ -127,7 +138,19 @@ namespace Vehicles
 						def.soundBuilt.PlayOneShot(new TargetInfo(loc, map, false));
 					}
 					VehiclePawn vehicleSpawned = (VehiclePawn)GenSpawn.Spawn(vehiclePawn, loc, map, rot, WipeMode.FullRefund, false);
-					vehicleSpawned.Rename();
+
+					if (!DebugSettings.godMode) //quick spawning for development
+					{
+						vehicleSpawned.Rename();
+					}
+					else
+					{
+						foreach (VehicleComp vehicleComp in vehicleSpawned.AllComps.Where(comp => comp is VehicleComp))
+						{
+							vehicleComp.SpawnedInGodMode();
+						}
+					}
+					
 					__result = vehicleSpawned;
 					AchievementsHelper.TriggerVehicleConstructionEvent(vehicleSpawned);
 					return false;

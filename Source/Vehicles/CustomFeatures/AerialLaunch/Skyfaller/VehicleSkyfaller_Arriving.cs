@@ -5,7 +5,6 @@ using SmashTools;
 
 namespace Vehicles
 {
-	//REDO - CACHE LAUNCH PROTOCOL
 	public class VehicleSkyfaller_Arriving : VehicleSkyfaller
 	{
 		public const int NotificationSquishInterval = 50;
@@ -19,20 +18,18 @@ namespace Vehicles
 
 		public override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
-			skyfallerLoc = vehicle.CompVehicleLauncher.launchProtocol.AnimateLanding(drawLoc.y, flip);
-			vehicle.CompVehicleLauncher.launchProtocol.DrawAdditionalLandingTextures(drawLoc.y);
+			vehicle.CompVehicleLauncher.launchProtocol.Draw(drawLoc, 0);
 			DrawDropSpotShadow();
 		}
 
 		public override void Tick()
 		{
 			base.Tick();
-			if (vehicle.CompVehicleLauncher.launchProtocol.FinishedLanding(this))
+			if (vehicle.CompVehicleLauncher.launchProtocol.FinishedAnimation(this))
 			{
 				delayLandingTicks--;
 				if (delayLandingTicks <= 0 && Position.InBounds(Map))
 				{
-					Position = skyfallerLoc.ToIntVec3();
 					FinalizeLanding();
 				}
 			}
@@ -47,6 +44,7 @@ namespace Vehicles
 
 		protected virtual void FinalizeLanding()
 		{
+			vehicle.CompVehicleLauncher.launchProtocol.Release();
 			vehicle.CompVehicleLauncher.inFlight = false;
 			if (VehicleReservationManager.AnyVehicleInhabitingCells(vehicle.PawnOccupiedCells(Position, Rotation), Map))
 			{
@@ -68,8 +66,8 @@ namespace Vehicles
 			base.SpawnSetup(map, respawningAfterLoad);
 			if (!respawningAfterLoad)
 			{
-				vehicle.CompVehicleLauncher.launchProtocol.SetPositionArriving(new Vector3(DrawPos.x, DrawPos.y + 1, DrawPos.z), Rotation, map);
-				vehicle.CompVehicleLauncher.launchProtocol.OrderProtocol(true);
+				vehicle.CompVehicleLauncher.launchProtocol.Prepare(map, Position, Rotation);
+				vehicle.CompVehicleLauncher.launchProtocol.OrderProtocol(LaunchProtocol.LaunchType.Landing);
 				delayLandingTicks = vehicle.CompVehicleLauncher.launchProtocol.landingProperties?.delayByTicks ?? 0;
 			}
 		}

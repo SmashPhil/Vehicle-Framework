@@ -56,7 +56,6 @@ namespace Vehicles
 		protected override void FillTab()
 		{
 			GUIState.Push();
-			
 			try
 			{
 				if (Vehicle != inspectingVehicle)

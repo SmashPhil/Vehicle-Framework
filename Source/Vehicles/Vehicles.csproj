@@ -382,6 +382,9 @@
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Health.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Rendering.cs" />
     <Compile Include="Comps\CompSignals.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Launching\Misc\FleckData.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Launching\Properties\PropellerProtocolProperties.cs" />
+    <Compile Include="CustomFeatures\Misc\AnimationEditorTags.cs" />
     <Compile Include="CustomFeatures\SharedJobs\SharedJob.cs" />
     <Compile Include="AI\JobDrivers\VehicleJobDriver.cs" />
     <Compile Include="AI\WorkGiver\WorkGiver_DisassembleVehicle.cs" />
@@ -430,7 +433,7 @@
     <Compile Include="Components\Vehicles\VehicleFleshTypeDef.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_Trade.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\PropellerTakeoff.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Launching\VerticalProtocolProperties.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Launching\Properties\VerticalProtocolProperties.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_Strafe.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Targeters\AntiAirTargeter.cs" />
     <Compile Include="Turrets\Components\TurretCooldownProperties.cs" />
@@ -501,7 +504,7 @@
     <Compile Include="CustomFeatures\AerialLaunch\Launching\VTOLTakeoff.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\RocketTakeoff.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\DefaultTakeoff.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Launching\LaunchProtocolProperties.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Launching\Properties\LaunchProtocolProperties.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\Projectiles\ProjectileSkyfaller.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\SkyfallerMaker\ProjectileSkyfallerMaker.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\SkyfallerMaker\VehicleSkyfallerMaker.cs" />
@@ -610,7 +613,6 @@
     <Compile Include="Misc\Attributes\HeaderTitleAttribute.cs" />
     <Compile Include="Misc\Attributes\PostToSettingsAttribute.cs" />
     <Compile Include="Misc\Attributes\SliderValuesAttribute.cs" />
-    <Compile Include="Misc\DefOf\MoteDefOf.cs" />
     <Compile Include="Misc\DefOf\VehicleIncidentDefOf.cs" />
     <Compile Include="Misc\Enums\Vehicle\ShuttleLaunchStatus.cs" />
     <Compile Include="Misc\Enums\UI\UISettingsType.cs" />

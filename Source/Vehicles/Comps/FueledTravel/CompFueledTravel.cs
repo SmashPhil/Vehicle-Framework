@@ -317,6 +317,13 @@ namespace Vehicles
 				}, MenuOptionPriority.Default, null, null, 0f, null, null);
 		}
 
+		public override void SpawnedInGodMode()
+		{
+			base.SpawnedInGodMode();
+			fuel = FuelCapacity;
+			parent.BroadcastCompSignal("Refueled");
+		}
+
 		public override void CompTick()
 		{
 			base.CompTick();

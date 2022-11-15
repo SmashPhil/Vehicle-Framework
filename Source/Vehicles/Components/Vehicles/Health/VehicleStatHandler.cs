@@ -266,14 +266,14 @@ namespace Vehicles
 					report?.AppendLine($"components=({string.Join(",", components.Select(c => c.props.label))})");
 					report?.AppendLine($"hitDepth = {hitDepth}");
 					//If no components at hit cell, fallthrough to internal
-					if (!components.Where(comp => comp.props.depth == hitDepth && comp.HealthPercent > 0).TryRandomElement(out component))
+					if (!components.Where(comp => comp.props.depth == hitDepth && comp.HealthPercent > 0).TryRandomElementByWeight((component) => component.props.hitWeight, out component))
 					{
 						report?.AppendLine($"No components found. Hitting internal parts.");
 						hitDepth = VehicleComponent.VehiclePartDepth.Internal;
 						//If depth = internal then pick random internal component even if it does not have a hitbox
-						component = this.components.Where(comp => comp.props.depth == hitDepth && comp.HealthPercent > 0).RandomElementWithFallback();
+						component = this.components.Where(comp => comp.props.depth == hitDepth && comp.HealthPercent > 0).RandomElementByWeightWithFallback((component) => component.props.hitWeight);
 						//If no internal components, pick random component w/ health
-						component ??= this.components.Where(comp => comp.HealthPercent > 0).RandomElementWithFallback();
+						component ??= this.components.Where(comp => comp.HealthPercent > 0).RandomElementByWeightWithFallback((component) => component.props.hitWeight);
 						if (component is null)
 						{
 							return;
@@ -289,9 +289,9 @@ namespace Vehicles
 					report?.AppendLine($"No components found. Hitting internal parts.");
 					hitDepth = VehicleComponent.VehiclePartDepth.Internal;
 					//If depth = internal then pick random internal component even if it does not have a hitbox
-					component = this.components.Where(comp => comp.props.depth == hitDepth && comp.HealthPercent > 0).RandomElementWithFallback();
+					component = this.components.Where(comp => comp.props.depth == hitDepth && comp.HealthPercent > 0).RandomElementByWeightWithFallback((component) => component.props.hitWeight);
 					//If no internal components, pick random component w/ health
-					component ??= this.components.Where(comp => comp.HealthPercent > 0).RandomElementWithFallback();
+					component ??= this.components.Where(comp => comp.HealthPercent > 0).RandomElementByWeightWithFallback((component) => component.props.hitWeight);
 					if (component is null)
 					{
 						return;

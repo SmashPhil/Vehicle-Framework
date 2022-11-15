@@ -295,6 +295,25 @@ namespace Vehicles
 			}
 		}
 
+		public override void SpawnedInGodMode()
+		{
+			base.SpawnedInGodMode();
+			foreach (VehicleTurret turret in turrets)
+			{
+				if (turret.turretDef.ammunition is null)
+				{
+					turret.ReloadCannon(null);
+				}
+				else if (turret.turretDef.ammunition?.AllowedThingDefs.FirstOrDefault() is ThingDef thingDef)
+				{
+					Thing ammo = ThingMaker.MakeThing(thingDef);
+					ammo.stackCount = thingDef.stackLimit;
+					Vehicle.inventory.innerContainer.TryAddOrTransfer(ammo);
+					turret.ReloadCannon(thingDef);
+				}
+			}
+		}
+
 		public override void CompTick()
 		{
 			base.CompTick();

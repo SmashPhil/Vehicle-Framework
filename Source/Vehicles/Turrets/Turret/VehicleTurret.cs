@@ -396,7 +396,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return TurretDrawLocFor(vehicle.FullRotation);
+				return TurretDrawLocFor(vehicle.FullRotation, vehicle.DrawPos);
 			}
 		}
 
@@ -524,18 +524,6 @@ namespace Vehicles
 		public bool GroupsWith(VehicleTurret turret)
 		{
 			return !groupKey.NullOrEmpty() && !turret.groupKey.NullOrEmpty() && groupKey == turret.groupKey;
-		}
-
-		public Vector3 TurretDrawLocFor(Rot8 rot)
-		{
-			float locationRotation = 0f;
-			if (attachedTo != null)
-			{
-				locationRotation = TurretRotationFor(rot, attachedTo.currentRotation);
-			}
-			Vector2 turretLoc = RenderHelper.TurretDrawOffset(rot, renderProperties, locationRotation, attachedTo);
-			Vector3 graphicOffset = CannonGraphic.DrawOffset(rot);
-			return new Vector3(vehicle.DrawPos.x + graphicOffset.x + turretLoc.x, vehicle.DrawPos.y + graphicOffset.y + drawLayer * Altitudes.AltInc, vehicle.DrawPos.z + graphicOffset.z + turretLoc.y);
 		}
 
 		public Vector3 TurretDrawLocFor(Rot8 rot, Vector3 pos)

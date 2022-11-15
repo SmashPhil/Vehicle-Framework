@@ -34,7 +34,7 @@ namespace Vehicles
 			displacement = Vector2.zero;
 			maskTex = null;
 			patternTex = null;
-			renderQueue = 3170;
+			renderQueue = 0;
 			shaderParameters = null;
 		}
 
@@ -50,7 +50,7 @@ namespace Vehicles
 			tiles = 1;
 			displacement = Vector2.zero;
 			patternTex = null;
-			renderQueue = 3170;
+			renderQueue = 0;
 			shaderParameters = null;
 		}
 
@@ -66,7 +66,7 @@ namespace Vehicles
 			tiles = properties.tiles.TryGetValue("All", 1);
 			displacement = Vector2.zero;
 			patternTex = null;
-			renderQueue = 3170;
+			renderQueue = 0;
 			shaderParameters = null;
 		}
 

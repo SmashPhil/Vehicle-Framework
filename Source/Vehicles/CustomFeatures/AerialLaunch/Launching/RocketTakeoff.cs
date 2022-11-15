@@ -77,207 +77,157 @@ namespace Vehicles
 						rocketTiltRate *= -1f;
 						break;
 					default:
-						angle = 0f;
+						//angle = 0f;
 						break;
 				}
 			}
 			return base.ChoseWorldTarget(target, pos, validator, launchAction);
 		}
 
-		public override Vector3 AnimateLanding(float layer, bool flip)
-		{
-			Vector3 adjustedDrawPos = DrawPos;
-			if (landingProperties?.angleCurve != null)
-			{
-				angle = landingProperties.angleCurve.Evaluate(TimeInAnimation);
-			}
-			if (landingProperties?.rotationCurve != null)
-			{
-				rotation = landingProperties.rotationCurve.Evaluate(TimeInAnimation);
-			}
-			if (landingProperties?.xPositionCurve != null)
-			{
-				adjustedDrawPos.x += landingProperties.xPositionCurve.Evaluate(TimeInAnimation);
-			}
-			if (landingProperties?.zPositionCurve != null)
-			{
-				adjustedDrawPos.z += landingProperties.zPositionCurve.Evaluate(TimeInAnimation);
-			}
-			adjustedDrawPos.y = layer;
-			vehicle.DrawAt(adjustedDrawPos, rotation, flip);
-			return adjustedDrawPos;
-		}
+		//public override void DrawAdditionalLandingTextures(Vector3 drawPos)
+		//{
+		//	if (!LaunchGraphics.NullOrEmpty() /*&& DrawPos.z - drawPos.z > vehicle.VehicleDef.Size.z*/)
+		//	{
+		//		Rand.PushState();
+		//		for (int i = 0; i < LaunchGraphics.Count; i++)
+		//		{
+		//			Graphic graphic = LaunchGraphics[i];
+		//			if (graphic is Graphic_Animate animationGraphic)
+		//			{
+		//				//animationGraphic.DrawWorkerAnimated(drawPos, Rot4.North, ticksPassed, rotation, true);
+		//			}
+		//			else
+		//			{
+		//				//graphic.DrawWorker(drawPos, Rot4.North, null, null, rotation);
+		//			}
+		//		}
+		//		Rand.PopState();
+		//	}
+		//}
 
-		public override Vector3 AnimateTakeoff(float layer, bool flip)
-		{
-			Vector3 adjustedDrawPos = DrawPos;
-			if (launchProperties?.angleCurve != null)
-			{
-				angle = launchProperties.angleCurve.Evaluate(TimeInAnimation);
-			}
-			if (launchProperties?.rotationCurve != null)
-			{
-				rotation = launchProperties.rotationCurve.Evaluate(TimeInAnimation);
-			}
-			if (launchProperties?.xPositionCurve != null)
-			{
-				adjustedDrawPos.x += launchProperties.xPositionCurve.Evaluate(TimeInAnimation);
-			}
-			if (launchProperties?.zPositionCurve != null)
-			{
-				adjustedDrawPos.z += launchProperties.zPositionCurve.Evaluate(TimeInAnimation);
-			}
-			adjustedDrawPos.y = layer;
-			vehicle.DrawAt(adjustedDrawPos, rotation, flip);
-			return adjustedDrawPos;
-		}
-
-		public override void DrawAdditionalLandingTextures(float layer)
-		{
-			if (!LaunchGraphics.NullOrEmpty() && DrawPos.z - drawPos.z > vehicle.VehicleDef.Size.z)
-			{
-				Rand.PushState();
-				for (int i = 0; i < LaunchGraphics.Count; i++)
-				{
-					Graphic graphic = LaunchGraphics[i];
-					Vector3 texPosition = new Vector3(DrawPos.x, layer, DrawPos.z);
-					if (graphic is Graphic_Animate animationGraphic)
-					{
-						animationGraphic.DrawWorkerAnimated(texPosition, Rot4.North, ticksPassed, rotation, true);
-					}
-					else
-					{
-						graphic.DrawWorker(texPosition, Rot4.North, null, null, rotation);
-					}
-				}
-				Rand.PopState();
-			}
-		}
-
-		public override void DrawAdditionalLaunchTextures(float layer)
-		{
-			if (!LaunchGraphics.NullOrEmpty() && DrawPos.z - drawPos.z > vehicle.VehicleDef.Size.z)
-			{
-				Rand.PushState();
-				for (int i = 0; i < LaunchGraphics.Count; i++)
-				{
-					Graphic graphic = LaunchGraphics[i];
-					Vector3 texPosition = new Vector3(DrawPos.x, layer, DrawPos.z);
-					if (graphic is Graphic_Animate animationGraphic)
-					{
-						animationGraphic.DrawWorkerAnimated(texPosition, Rot4.North, ticksPassed, rotation, true);
-					}
-					else
-					{
-						graphic.DrawWorker(texPosition, Rot4.North, null, null, rotation);
-					}
-				}
-				Rand.PopState();
-			}
-		}
+		//public override void DrawAdditionalLaunchTextures(Vector3 drawPos)
+		//{
+		//	if (!LaunchGraphics.NullOrEmpty() /*&& DrawPos.z - drawPos.z > vehicle.VehicleDef.Size.z*/)
+		//	{
+		//		Rand.PushState();
+		//		for (int i = 0; i < LaunchGraphics.Count; i++)
+		//		{
+		//			Graphic graphic = LaunchGraphics[i];
+		//			if (graphic is Graphic_Animate animationGraphic)
+		//			{
+		//				//animationGraphic.DrawWorkerAnimated(drawPos, Rot4.North, ticksPassed, rotation, true);
+		//			}
+		//			else
+		//			{
+		//				//graphic.DrawWorker(drawPos, Rot4.North, null, null, rotation);
+		//			}
+		//		}
+		//		Rand.PopState();
+		//	}
+		//}
 
 		protected override void TickLanding()
 		{
 			base.TickLanding();
-			if (dustSize.HasValue)
-			{
-				Rand.PushState();
-				if (DrawPos.z - drawPos.z <= vehicle.VehicleDef.Size.z * 4 && DrawPos.z > drawPos.z)
-				{
-					float randX = drawPos.x + Rand.Range(-0.5f, 0.5f);
-					float zOffset = vehicle.VehicleDef.Size.z / 2;
-					ThrowRocketExhaustLong(new Vector3(randX, drawPos.y, drawPos.z - zOffset), targetMap, thrusterSize.RandomInRange);
-					float randSmokeX = drawPos.x + Rand.Range(-0.1f, 0.1f);
-					float smokeZOffset = vehicle.VehicleDef.Size.z / 1.5f;
-					ThrowRocketSmokeLong(new Vector3(randSmokeX, drawPos.y, drawPos.z - smokeZOffset), targetMap, dustSize.Value.RandomInRange);
-					if (ticksPassed % 50 == 0)
-					{
-						BurnCells(targetMap);
-					}
-				}
-				if (DrawPos.z - drawPos.z > vehicle.VehicleDef.Size.z * 3)
-				{
-					float randX = DrawPos.x + Rand.Range(-0.1f, 0.1f);
-					float zPos = DrawPos.z - vehicle.VehicleDef.Size.z / 2f;
-					Vector3 motePos = new Vector3(randX, DrawPos.y, zPos);
-					ThrowRocketExhaust(motePos, targetMap, 1, Rand.Range(175, 185), 35);
-				}
-				else if (DrawPos.z - drawPos.z > vehicle.VehicleDef.Size.z)
-				{
-					float randX = DrawPos.x + Rand.Range(-0.1f, 0.1f);
-					float zPos = DrawPos.z - vehicle.VehicleDef.Size.z / 2f;
-					Vector3 motePos = new Vector3(randX, DrawPos.y, zPos);
-					ThrowRocketExhaust(motePos, targetMap, 1, Rand.Range(175, 185), Mathf.Lerp(5, 35, (DrawPos.z - drawPos.z) / (vehicle.VehicleDef.Size.z * 3)));
-				}
-				Rand.PopState();
-			}
+			//if (dustSize.HasValue)
+			//{
+			//	Rand.PushState();
+			//	if (DrawPos.z - drawPos.z <= vehicle.VehicleDef.Size.z * 4 && DrawPos.z > drawPos.z)
+			//	{
+			//		float randX = drawPos.x + Rand.Range(-0.5f, 0.5f);
+			//		float zOffset = vehicle.VehicleDef.Size.z / 2;
+			//		ThrowRocketExhaustLong(new Vector3(randX, drawPos.y, drawPos.z - zOffset), targetMap, thrusterSize.RandomInRange);
+			//		float randSmokeX = drawPos.x + Rand.Range(-0.1f, 0.1f);
+			//		float smokeZOffset = vehicle.VehicleDef.Size.z / 1.5f;
+			//		ThrowRocketSmokeLong(new Vector3(randSmokeX, drawPos.y, drawPos.z - smokeZOffset), targetMap, dustSize.Value.RandomInRange);
+			//		if (ticksPassed % 50 == 0)
+			//		{
+			//			BurnCells(targetMap);
+			//		}
+			//	}
+			//	if (DrawPos.z - drawPos.z > vehicle.VehicleDef.Size.z * 3)
+			//	{
+			//		float randX = DrawPos.x + Rand.Range(-0.1f, 0.1f);
+			//		float zPos = DrawPos.z - vehicle.VehicleDef.Size.z / 2f;
+			//		Vector3 motePos = new Vector3(randX, DrawPos.y, zPos);
+			//		ThrowRocketExhaust(motePos, targetMap, 1, Rand.Range(175, 185), 35);
+			//	}
+			//	else if (DrawPos.z - drawPos.z > vehicle.VehicleDef.Size.z)
+			//	{
+			//		float randX = DrawPos.x + Rand.Range(-0.1f, 0.1f);
+			//		float zPos = DrawPos.z - vehicle.VehicleDef.Size.z / 2f;
+			//		Vector3 motePos = new Vector3(randX, DrawPos.y, zPos);
+			//		ThrowRocketExhaust(motePos, targetMap, 1, Rand.Range(175, 185), Mathf.Lerp(5, 35, (DrawPos.z - drawPos.z) / (vehicle.VehicleDef.Size.z * 3)));
+			//	}
+			//	Rand.PopState();
+			//}
 		}
 
 		protected override void TickTakeoff()
 		{
 			base.TickTakeoff();
-			if (dustSize.HasValue)
-			{ 
-				Rand.PushState();
-				if (DrawPos.z - drawPos.z <= vehicle.VehicleDef.Size.z)
-				{
-					float randX = drawPos.x + Rand.Range(-0.5f, 0.5f);
-					float zOffset = vehicle.VehicleDef.Size.z / 2;
-					ThrowRocketExhaustLong(new Vector3(randX, drawPos.y, drawPos.z - zOffset), currentMap, thrusterSize.RandomInRange);
-					float randSmokeX = drawPos.x + Rand.Range(-0.1f, 0.1f);
-					float smokeZOffset = vehicle.VehicleDef.Size.z / 1.5f;
-					ThrowRocketSmokeLong(new Vector3(randSmokeX, drawPos.y, drawPos.z - smokeZOffset), currentMap, dustSize.Value.RandomInRange);
-					if (ticksPassed % 50 == 0)
-					{
-						BurnCells(currentMap);
-					}
-				}
-				else
-				{
-					float randX = DrawPos.x + Rand.Range(-0.1f, 0.1f);
-					float zPos = DrawPos.z - vehicle.VehicleDef.Size.z / 2f;
-					Vector3 motePos = new Vector3(randX, DrawPos.y, zPos);
-					ThrowRocketExhaust(motePos, currentMap, 1, Rand.Range(0f, 360f), 0.12f);
-					//if (Math.Abs(angle) <= Math.Abs(finalAngle))
-					//{
-					//    angle += rocketTiltRate;
-					//    rotation += rocketTiltRate;
-					//}
-				}
-				Rand.PopState();
-			}
+			//if (dustSize.HasValue)
+			//{ 
+			//	Rand.PushState();
+			//	if (DrawPos.z - drawPos.z <= vehicle.VehicleDef.Size.z)
+			//	{
+			//		float randX = drawPos.x + Rand.Range(-0.5f, 0.5f);
+			//		float zOffset = vehicle.VehicleDef.Size.z / 2;
+			//		ThrowRocketExhaustLong(new Vector3(randX, drawPos.y, drawPos.z - zOffset), currentMap, thrusterSize.RandomInRange);
+			//		float randSmokeX = drawPos.x + Rand.Range(-0.1f, 0.1f);
+			//		float smokeZOffset = vehicle.VehicleDef.Size.z / 1.5f;
+			//		ThrowRocketSmokeLong(new Vector3(randSmokeX, drawPos.y, drawPos.z - smokeZOffset), currentMap, dustSize.Value.RandomInRange);
+			//		if (ticksPassed % 50 == 0)
+			//		{
+			//			BurnCells(currentMap);
+			//		}
+			//	}
+			//	else
+			//	{
+			//		float randX = DrawPos.x + Rand.Range(-0.1f, 0.1f);
+			//		float zPos = DrawPos.z - vehicle.VehicleDef.Size.z / 2f;
+			//		Vector3 motePos = new Vector3(randX, DrawPos.y, zPos);
+			//		ThrowRocketExhaust(motePos, currentMap, 1, Rand.Range(0f, 360f), 0.12f);
+			//		//if (Math.Abs(angle) <= Math.Abs(finalAngle))
+			//		//{
+			//		//    angle += rocketTiltRate;
+			//		//    rotation += rocketTiltRate;
+			//		//}
+			//	}
+			//	Rand.PopState();
+			//}
 		}
 
 		private void BurnCells(Map map)
 		{
-			if (burnRadius > 0 && VehicleMod.settings.main.burnRadiusOnRockets)
-			{
-				foreach (IntVec3 intVec in CellsToBurn(drawPos.ToIntVec3(), map, burnRadius, null, null))
-				{
-					Rand.PushState();
-					float fireSize = Rand.Range(0.65f, 0.95f);
-					if (map.terrainGrid.TerrainAt(intVec).Flammable())
-					{
-						FireUtility.TryStartFireIn(intVec, map, fireSize);
-					}
-					foreach (Thing thing in map.thingGrid.ThingsAt(intVec))
-					{
-						if (thing == vehicle)
-						{
-							continue;
-						}
-						if (thing.FlammableNow)
-						{
-							if (thing is Pawn pawn)
-							{
-								TakeFireDamage(pawn, fireSize);
-							}
-							FireUtility.TryStartFireIn(intVec, map, fireSize);
-						}
-					}
-					Rand.PopState();
-				}
-			}
+			//if (burnRadius > 0 && VehicleMod.settings.main.burnRadiusOnRockets)
+			//{
+			//	foreach (IntVec3 intVec in CellsToBurn(drawPos.ToIntVec3(), map, burnRadius, null, null))
+			//	{
+			//		Rand.PushState();
+			//		float fireSize = Rand.Range(0.65f, 0.95f);
+			//		if (map.terrainGrid.TerrainAt(intVec).Flammable())
+			//		{
+			//			FireUtility.TryStartFireIn(intVec, map, fireSize);
+			//		}
+			//		foreach (Thing thing in map.thingGrid.ThingsAt(intVec))
+			//		{
+			//			if (thing == vehicle)
+			//			{
+			//				continue;
+			//			}
+			//			if (thing.FlammableNow)
+			//			{
+			//				if (thing is Pawn pawn)
+			//				{
+			//					TakeFireDamage(pawn, fireSize);
+			//				}
+			//				FireUtility.TryStartFireIn(intVec, map, fireSize);
+			//			}
+			//		}
+			//		Rand.PopState();
+			//	}
+			//}
 		}
 
 		public static IEnumerable<IntVec3> CellsToBurn(IntVec3 center, Map map, float radius, IntVec3? needLOSToCell1 = null, IntVec3? needLOSToCell2 = null)
@@ -342,12 +292,12 @@ namespace Vehicles
 		public override void ResolveProperties(LaunchProtocol reference)
 		{
 			base.ResolveProperties(reference);
-			RocketTakeoff rocketTakeoff = reference as RocketTakeoff;
-			finalAngle = rocketTakeoff.finalAngle;
-			rocketTiltRate = rocketTakeoff.rocketTiltRate;
-			thrusterSize = rocketTakeoff.thrusterSize;
-			dustSize = rocketTakeoff.dustSize;
-			burnRadius = rocketTakeoff.burnRadius;
+			//RocketTakeoff rocketTakeoff = reference as RocketTakeoff;
+			//finalAngle = rocketTakeoff.finalAngle;
+			//rocketTiltRate = rocketTakeoff.rocketTiltRate;
+			//thrusterSize = rocketTakeoff.thrusterSize;
+			//dustSize = rocketTakeoff.dustSize;
+			//burnRadius = rocketTakeoff.burnRadius;
 		}
 	}
 }

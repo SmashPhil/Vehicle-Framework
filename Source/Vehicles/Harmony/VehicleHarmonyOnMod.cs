@@ -15,9 +15,6 @@ namespace Vehicles
 	{
 		static VehicleHarmonyOnMod()
 		{
-			ParsingHelper.RegisterParsers();
-			ParsingHelper.RegisterAttributes();
-
 			var harmony = new Harmony($"{VehicleHarmony.VehiclesUniqueId}_preload");
 
 			harmony.Patch(original: AccessTools.Property(type: typeof(RaceProperties), name: nameof(RaceProperties.IsFlesh)).GetGetMethod(),

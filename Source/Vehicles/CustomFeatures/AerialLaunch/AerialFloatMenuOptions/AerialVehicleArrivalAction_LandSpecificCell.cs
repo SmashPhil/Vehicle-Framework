@@ -14,11 +14,10 @@ namespace Vehicles
 		{
 		}
 
-		public AerialVehicleArrivalAction_LandSpecificCell(VehiclePawn vehicle, MapParent mapParent, int tile, LaunchProtocol launchProtocol, IntVec3 landingCell, Rot4 landingRot) : base(vehicle, mapParent, tile, launchProtocol)
+		public AerialVehicleArrivalAction_LandSpecificCell(VehiclePawn vehicle, MapParent mapParent, int tile, IntVec3 landingCell, Rot4 landingRot) : base(vehicle, mapParent, tile)
 		{
 			this.tile = tile;
 			this.mapParent = mapParent;
-			this.launchProtocol = launchProtocol;
 			this.landingCell = landingCell;
 			this.landingRot = landingRot;
 		}
@@ -32,7 +31,7 @@ namespace Vehicles
 		{
 			base.Arrived(tile);
 			VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)VehicleSkyfallerMaker.MakeSkyfaller(vehicle.CompVehicleLauncher.Props.skyfallerIncoming, vehicle);
-			Rot4 vehicleRotation = launchProtocol.landingProperties.forcedRotation ?? landingRot;
+			Rot4 vehicleRotation = vehicle.CompVehicleLauncher.launchProtocol.landingProperties.forcedRotation ?? landingRot;
 			GenSpawn.Spawn(skyfaller, landingCell, mapParent.Map, vehicleRotation);
 		}
 

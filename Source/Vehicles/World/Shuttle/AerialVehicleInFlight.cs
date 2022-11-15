@@ -513,7 +513,8 @@ namespace Vehicles
 		{
 			foreach (Graphic_Rotator rotator in rotatorGraphics)
 			{
-				vehicle.graphicOverlay.rotationRegistry[rotator.RegistryKey] += rotator.MaxRotationSpeed;
+				//hardcoded to 59° per tick to still allow room for eye to capture rotation
+				vehicle.graphicOverlay.rotationRegistry[rotator.RegistryKey] += PropellerTakeoff.MaxRotationStep;
 			}
 		}
 

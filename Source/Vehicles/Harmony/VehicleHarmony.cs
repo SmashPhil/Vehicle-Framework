@@ -58,7 +58,7 @@ namespace Vehicles
 
 			Version = ModVersion.VersionFromAssembly(Assembly.GetExecutingAssembly(), ProjectStartDate);
 			string readout = Prefs.DevMode ? Version.VersionStringWithRevision : Version.VersionString;
-			Log.Message($"<color=orange>{LogLabel}</color> version {readout}");
+			Log.Message($"{LogLabel} version {readout}");
 
 			File.WriteAllText(VersionDir, Version.VersionString);
 
@@ -76,7 +76,7 @@ namespace Vehicles
 					throw ex;
 				}
 			}
-			if (Prefs.DevMode) SmashLog.Message($"{LogLabel} <success>{Harmony.GetPatchedMethods().Count()} patches successfully applied.</success>");
+			if (Prefs.DevMode) SmashLog.Message($"<color=orange>{LogLabel}</color> <success>{Harmony.GetPatchedMethods().Count()} patches successfully applied.</success>");
 
 			Utilities.InvokeWithLogging(ResolveAllReferences);
 			Utilities.InvokeWithLogging(PostDefDatabaseCalls);
@@ -142,7 +142,7 @@ namespace Vehicles
 		{
 			MainMenuKeyBindHandler.RegisterKeyBind(KeyBindingDefOf_Vehicles.VF_RestartGame, GenCommandLine.Restart);
 			MainMenuKeyBindHandler.RegisterKeyBind(KeyBindingDefOf_Vehicles.VF_QuickStartMenu, () => Find.WindowStack.Add(new QuickStartMenu()));
-			MainMenuKeyBindHandler.RegisterKeyBind(KeyBindingDefOf_Vehicles.VF_DebugSettings, VehiclesModSettings.Open);
+			MainMenuKeyBindHandler.RegisterKeyBind(KeyBindingDefOf_Vehicles.VF_DebugSettings, () => VehiclesModSettings.OpenWithContext());
 		}
 
 		public static void FillVehicleLordJobTypes()

@@ -55,7 +55,7 @@ namespace Vehicles
 			CurrentSection = settings.main;
 		}
 
-		public static SettingsSection CurrentSection { get; private set; }
+		public static SettingsSection CurrentSection { get; internal set; }
 
 		public static bool ModifiableSettings => settings.main.modifiableSettings;
 		public static int CoastRadius => settings.main.forceFactionCoastRadius >= MaxCoastalSettlementPush ? 9999 : settings.main.forceFactionCoastRadius;

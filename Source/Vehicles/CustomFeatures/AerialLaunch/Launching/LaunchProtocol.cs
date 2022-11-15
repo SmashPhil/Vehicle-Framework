@@ -13,26 +13,33 @@ namespace Vehicles
 	public abstract class LaunchProtocol : IExposable
 	{
 		protected VehiclePawn vehicle;
-		
-		protected Vector3 drawPos;
+
+		protected bool drawOverlays = true;
+		protected bool drawMotes = true;
+
 		protected int ticksPassed;
-		protected bool landing;
+		protected float effectsToThrow;
+		protected LaunchType launchType;
 
-		protected Map currentMap;
-		protected Map targetMap;
+		private Map map;
+		protected IntVec3 position;
 
-		protected List<Graphic> cachedLaunchGraphics;
-		protected List<Graphic> cachedLandingGraphics;
+		protected List<Graphic>[] cachedOverlayGraphics;
+		protected List<GraphicDataLayered>[] cachedOverlayGraphicDatas;
 
-		protected List<GraphicDataLayered> cachedLaunchGraphicDatas;
-		protected List<GraphicDataLayered> cachedLandingGraphicDatas;
+		/// <summary>
+		/// True if animation at index has been triggered.
+		/// </summary>
+		protected bool[] animationStatuses;
 
 		/* -- Xml Input -- */
 
 		protected int maxFlightNodes = int.MaxValue;
 
-		public LaunchProtocolProperties landingProperties;
+		[GraphEditable(Category = AnimationEditorTags.Takeoff)]
 		public LaunchProtocolProperties launchProperties;
+		[GraphEditable(Category = AnimationEditorTags.Landing)]
+		public LaunchProtocolProperties landingProperties;
 
 		/* ---------------- */
 
@@ -58,12 +65,23 @@ namespace Vehicles
 			launchProperties = reference.launchProperties;
 		}
 
-		public int TicksPassed => ticksPassed;
+		public Vector3 DrawPos { get; protected set; }
+		public float Rotation { get; protected set; }
 
 		/// <summary>
-		/// Check if launch protocol is set for landing or takeoff
+		/// Launch gizmo for specific takeoff versions
 		/// </summary>
-		public bool IsLanding => landing;
+		public abstract Command_Action LaunchCommand { get; }
+
+		public int TicksPassed => ticksPassed;
+
+		protected Map Map => map ?? vehicle.Map;
+
+		protected virtual int TotalTicks_Takeoff => launchProperties.maxTicks;
+
+		protected virtual int TotalTicks_Landing => landingProperties.maxTicks;
+
+		public LaunchProtocolProperties CurAnimationProperties => launchType == LaunchType.Landing ? landingProperties : launchProperties;
 
 		/// <summary>
 		/// Message displayed to user when CanLaunchNow returns false
@@ -81,198 +99,115 @@ namespace Vehicles
 		/// </summary>
 		public virtual int MaxFlightNodes => maxFlightNodes;
 
-		public virtual float TimeInAnimation
+		public virtual float TimeInAnimation => (float)ticksPassed / CurAnimationProperties.maxTicks;
+
+		public virtual IEnumerable<AnimationDriver> Animations
 		{
 			get
 			{
-				if (landing)
-				{
-					return (float)ticksPassed / landingProperties.maxTicks;
-				}
-				else
-				{
-					return (float)ticksPassed / launchProperties.maxTicks;
-				}
+				yield return new AnimationDriver(AnimationEditorTags.Takeoff, AnimationEditorTick_Takeoff, Draw, TotalTicks_Takeoff, () => OrderProtocol(LaunchType.Takeoff));
+				yield return new AnimationDriver(AnimationEditorTags.Landing, AnimationEditorTick_Landing, Draw, TotalTicks_Landing, () => OrderProtocol(LaunchType.Landing));
 			}
 		}
-
-		public virtual Vector3 DrawPos
-		{
-			get
-			{
-				return drawPos;
-			}
-		}
-
-		public List<GraphicDataLayered> LaunchGraphicDatas
-		{
-			get
-			{
-				if (cachedLaunchGraphicDatas.NullOrEmpty() && !(launchProperties?.additionalLaunchTextures.NullOrEmpty() ?? true))
-				{
-					cachedLaunchGraphicDatas = new List<GraphicDataLayered>();
-					foreach (GraphicDataLayered graphicData in launchProperties.additionalLaunchTextures)
-					{
-						GraphicDataLayered graphicDataNew = new GraphicDataLayered();
-						cachedLaunchGraphicDatas.Add(graphicDataNew);
-						graphicDataNew.CopyFrom(graphicData);
-					}
-				}
-				return cachedLaunchGraphicDatas;
-			}
-		}
-
-		public List<GraphicDataLayered> LandingGraphicDatas
-		{
-			get
-			{
-				if (cachedLandingGraphicDatas.NullOrEmpty() && !(landingProperties?.additionalLandingTextures.NullOrEmpty() ?? true))
-				{
-					cachedLandingGraphicDatas = new List<GraphicDataLayered>();
-					foreach (GraphicDataLayered graphicData in landingProperties.additionalLandingTextures)
-					{
-						GraphicDataLayered graphicDataNew = new GraphicDataLayered();
-						cachedLandingGraphicDatas.Add(graphicDataNew);
-						graphicDataNew.CopyFrom(graphicData);
-					}
-				}
-				return cachedLandingGraphicDatas;
-			}
-		}
-
-		public List<Graphic> LaunchGraphics
-		{
-			get
-			{
-				if (cachedLaunchGraphics.NullOrEmpty() && !LaunchGraphicDatas.NullOrEmpty())
-				{
-					cachedLaunchGraphics = new List<Graphic>();
-					foreach (GraphicDataLayered graphicData in LaunchGraphicDatas)
-					{
-						cachedLaunchGraphics.Add(graphicData.Graphic);
-					}
-				}
-				return cachedLaunchGraphics;
-			}
-		}
-
-		public List<Graphic> LandingGraphics
-		{
-			get
-			{
-				if (cachedLandingGraphics.NullOrEmpty() && !LandingGraphicDatas.NullOrEmpty())
-				{
-					cachedLandingGraphics = new List<Graphic>();
-					foreach (GraphicDataLayered graphicData in LandingGraphicDatas)
-					{
-						cachedLandingGraphics.Add(graphicData.Graphic);
-					}
-				}
-				return cachedLandingGraphics;
-			}
-		}
-
-		/// <summary>
-		/// Speed of skyfaller upon launching
-		/// </summary>
-		protected virtual float CurrentSpeed
-		{
-			get
-			{
-				if (landing)
-				{
-					if (landingProperties?.speedCurve is null)
-					{
-						return landingProperties?.speed ?? 0.5f;
-					}
-					return landingProperties.speedCurve.Evaluate(ticksPassed) * landingProperties.speed;
-				}
-				if (launchProperties?.speedCurve is null)
-				{
-					return launchProperties?.speed ?? 0.5f;
-				}
-				return launchProperties.speedCurve.Evaluate(ticksPassed) * launchProperties.speed;
-			}
-		}
-
-		/// <summary>
-		/// Launch gizmo for specific takeoff versions
-		/// </summary>
-		public abstract Command_Action LaunchCommand { get; }
 
 		/// <summary>
 		/// Takeoff animation has finished
 		/// </summary>
 		/// <returns></returns>
-		public virtual bool FinishedTakeoff(VehicleSkyfaller skyfaller)
+		public virtual bool FinishedAnimation(VehicleSkyfaller skyfaller)
 		{
-			return ticksPassed >= launchProperties.maxTicks;
+			return ticksPassed >= CurAnimationProperties.maxTicks;
 		}
 
-		/// <summary>
-		/// Landing animation is finished
-		/// </summary>
-		/// <param name="map"></param>
-		/// <returns></returns>
-		public virtual bool FinishedLanding(VehicleSkyfaller skyfaller)
+		public (Vector3 drawPos, float rotation) Draw(Vector3 drawPos, float rotation)
 		{
-			return ticksPassed <= 0;
+			(Vector3 drawPos, float rotation) result = (drawPos, rotation);
+			switch (launchType)
+			{
+				case LaunchType.Landing:
+					result = AnimateLanding(drawPos, rotation);
+					break;
+				case LaunchType.Takeoff:
+					result = AnimateTakeoff(drawPos, rotation);
+					break;
+			}
+			result.drawPos.y = AltitudeLayer.Skyfaller.AltitudeFor();
+			vehicle.DrawAt(result.drawPos, result.rotation);
+			(DrawPos, Rotation) = result;
+			if (VehicleMod.settings.main.aerialVehicleEffects)
+			{
+				DrawOverlays(result.drawPos, result.rotation);
+			}
+
+			return result;
 		}
 
 		/// <summary>
 		/// Landing animation when vehicle is entering map through flight
 		/// </summary>
-		/// <param name="flip"></param>
-		/// <returns>Position rendered on the map</returns>
-		public abstract Vector3 AnimateLanding(float layer, bool flip);
+		/// <param name="drawPos"
+		/// <param name="rotation"></param>
+		protected virtual (Vector3 drawPos, float rotation) AnimateLanding(Vector3 drawPos, float rotation)
+		{
+			return (drawPos, rotation);
+		}
 
 		/// <summary>
 		/// Takeoff animation when vehicle is leaving map through flight
 		/// </summary>
-		/// <returns>Position rendered on the map</returns>
-		public abstract Vector3 AnimateTakeoff(float layer, bool flip);
+		/// <param name="drawPos"
+		/// <param name="rotation"></param>
+		protected virtual (Vector3 drawPos, float rotation) AnimateTakeoff(Vector3 drawPos, float rotation)
+		{
+			return (drawPos, rotation);
+		}
 
 		/// <summary>
-		/// Takeoff animation for additional textures specified in properties on launch
+		/// Tick method for <see cref="AnimationManager"/> with total ticks passed since start.
 		/// </summary>
-		public virtual void DrawAdditionalLaunchTextures(float layer)
+		/// <param name="ticksPassed"></param>
+		protected virtual int AnimationEditorTick_Landing(int ticksPassed)
 		{
-			if (!LaunchGraphics.NullOrEmpty())
+			this.ticksPassed = ticksPassed.Take(landingProperties.maxTicks, out int remaining);
+			TickMotes();
+			return remaining;
+		}
+
+		protected virtual int AnimationEditorTick_Takeoff(int ticksPassed)
+		{
+			this.ticksPassed = ticksPassed;
+			TickMotes();
+			return 0;
+		}
+
+		protected virtual void DrawOverlays(Vector3 drawPos, float rotation)
+		{
+			if (drawOverlays && !CurAnimationProperties.additionalTextures.NullOrEmpty())
 			{
-				for (int i = 0; i < LaunchGraphics.Count; i++)
+				for (int i = 0; i < CurAnimationProperties.additionalTextures.Count; i++)
 				{
-					Graphic graphic = LaunchGraphics[i];
-					Vector3 texPosition = new Vector3(DrawPos.x, layer, DrawPos.z);
-					if (graphic is Graphic_Animate animationGraphic)
+					GraphicDataLayered graphicData = CurAnimationProperties.additionalTextures[i];
+					if (graphicData.Graphic is Graphic_Animate animationGraphic)
 					{
-						animationGraphic.DrawWorkerAnimated(texPosition, Rot4.North, ticksPassed, 0f);
+						animationGraphic.DrawWorkerAnimated(drawPos, Rot4.North, ticksPassed, rotation);
 					}
 					else
 					{
-						graphic.DrawWorker(texPosition, Rot4.North, null, null, 0f);
+						graphicData.Graphic.DrawWorker(drawPos, Rot4.North, null, null, rotation);
 					}
 				}
 			}
 		}
 
-		/// <summary>
-		/// Takeoff animation for additional textures specified in properties on launch
-		/// </summary>
-		public virtual void DrawAdditionalLandingTextures(float layer)
+		protected virtual void TickMotes()
 		{
-			if (!LandingGraphics.NullOrEmpty())
+			if (!CurAnimationProperties.fleckData.NullOrEmpty())
 			{
-				for (int i = 0; i < LandingGraphics.Count; i++)
+				foreach (FleckData fleckData in CurAnimationProperties.fleckData)
 				{
-					Graphic graphic = LandingGraphics[i];
-					Vector3 texPosition = new Vector3(DrawPos.x, layer, DrawPos.z);
-					if (graphic is Graphic_Animate animationGraphic)
+					if (fleckData.runOutOfStep || (TimeInAnimation > 0 && TimeInAnimation < 1))
 					{
-						animationGraphic.DrawWorkerAnimated(texPosition, Rot4.North, ticksPassed, 0f);
-					}
-					else
-					{
-						graphic.DrawWorker(texPosition, Rot4.North, null, null, 0f);
+						effectsToThrow = TryThrowFleck(fleckData, TimeInAnimation, effectsToThrow);
 					}
 				}
 			}
@@ -284,13 +219,15 @@ namespace Vehicles
 		public void Tick()
 		{
 			vehicle.Tick();
-			if (IsLanding)
+
+			switch (launchType)
 			{
-				TickLanding();
-			}
-			else
-			{
-				TickTakeoff();
+				case LaunchType.Landing:
+					TickLanding();
+					break;
+				case LaunchType.Takeoff:
+					TickTakeoff();
+					break;
 			}
 		}
 
@@ -299,7 +236,13 @@ namespace Vehicles
 		/// </summary>
 		protected virtual void TickLanding()
 		{
-			ticksPassed--;
+			TickEvents();
+			if (VehicleMod.settings.main.aerialVehicleEffects)
+			{
+				TickMotes();
+			}
+
+			ticksPassed++;
 		}
 
 		/// <summary>
@@ -307,31 +250,64 @@ namespace Vehicles
 		/// </summary>
 		protected virtual void TickTakeoff()
 		{
+			TickEvents();
+			if (VehicleMod.settings.main.aerialVehicleEffects)
+			{
+				TickMotes();
+			}
+
 			ticksPassed++;
 		}
 
-		/// <summary>
-		/// Set starting Draw Position for leaving
-		/// </summary>
-		/// <param name="pos"></param>
-		public virtual void SetPositionLeaving(Vector3 pos, Rot4 rot, Map map)
+		protected virtual void TickEvents()
 		{
-			drawPos = pos;
-			vehicle.Rotation = rot;
-			currentMap = map;
+			if (!CurAnimationProperties.events.NullOrEmpty())
+			{
+				for (int i = 0; i < CurAnimationProperties.events.Count; i++)
+				{
+					SmashTools.AnimationEvent @event = CurAnimationProperties.events[i];
+					if (!animationStatuses[i] && @event.EventFrame(TimeInAnimation))
+					{
+						@event.method.InvokeUnsafe(null, this);
+					}
+				}
+			}
 		}
-		
+
+		/* ---------- Animation Events ---------- */
+
+		private static void SetMoteStatus(LaunchProtocol launchProtocol, bool active)
+		{
+			launchProtocol.drawOverlays = active;
+		}
+
+		private static void SetOverlayStatus(LaunchProtocol launchProtocol, bool active)
+		{
+			launchProtocol.drawOverlays = active;
+		}
+
+		/* ---------- Animation Events ---------- */
+
 		/// <summary>
-		/// Set starting Draw Position for arrival
+		/// Set map, root position of vehicle, and rotation to initiate
 		/// </summary>
 		/// <param name="pos"></param>
 		/// <param name="rot"></param>
 		/// <param name="map"></param>
-		public virtual void SetPositionArriving(Vector3 pos, Rot4 rot, Map map)
+		public virtual void Prepare(Map map, IntVec3 position, Rot4 rot)
 		{
-			drawPos = pos;
+			this.map = map;
+			this.position = position;
 			vehicle.Rotation = rot;
-			targetMap = map;
+		}
+
+		/// <summary>
+		/// Release map and root position to prevent repeated use in un-prepared protocols
+		/// </summary>
+		public virtual void Release()
+		{
+			map = null;
+			position = IntVec3.Invalid;
 		}
 
 		/// <summary>
@@ -348,26 +324,34 @@ namespace Vehicles
 		/// </summary>
 		protected virtual void PreAnimationSetup()
 		{
-			ticksPassed = landing ? landingProperties.maxTicks : 0;
+			ticksPassed = 0;
+			if (!CurAnimationProperties.events.NullOrEmpty())
+			{
+				animationStatuses = new bool[CurAnimationProperties.events.Count];
+
+				//Trigger events at t=0 before next draw frame
+				if (!CurAnimationProperties.events.NullOrEmpty())
+				{
+					for (int i = 0; i < CurAnimationProperties.events.Count; i++)
+					{
+						SmashTools.AnimationEvent @event = CurAnimationProperties.events[i];
+						if (!animationStatuses[i] && @event.EventFrame(TimeInAnimation))
+						{
+							@event.method.InvokeUnsafe(null, this);
+						}
+					}
+				}
+			}
 		}
 
 		/// <summary>
 		/// Set initial vars for landing / takeoff
 		/// </summary>
 		/// <param name="landing"></param>
-		public virtual void OrderProtocol(bool landing)
+		public virtual void OrderProtocol(LaunchType launchType)
 		{
-			this.landing = landing;
+			this.launchType = launchType;
 			PreAnimationSetup();
-		}
-
-		/// <summary>
-		/// Additional Drawer method for LandingTargeter
-		/// </summary>
-		/// <param name="cell"></param>
-		/// <param name="rot"></param>
-		public virtual void DrawLandingTarget(IntVec3 cell, Rot4 rot)
-		{
 		}
 
 		/// <summary>
@@ -437,8 +421,7 @@ namespace Vehicles
 		public virtual bool ChoseWorldTarget(GlobalTargetInfo target, Vector3 pos, Func<GlobalTargetInfo, Vector3, Action<int, AerialVehicleArrivalAction, bool>, bool> validator, 
 			Action<int, AerialVehicleArrivalAction, bool> launchAction)
 		{
-			currentMap = vehicle.Map;
-			targetMap = Find.WorldObjects.MapParentAt(target.Tile)?.Map;
+			map = vehicle.Map;
 			return validator(target, pos, launchAction);
 		}
 
@@ -465,9 +448,9 @@ namespace Vehicles
 						return false;
 					}
 					launchAction(target.Tile, null, false);
-					if (landingProperties.forcedRotation.HasValue && !landing)
+					if (CurAnimationProperties.forcedRotation.HasValue)
 					{
-						vehicle.Rotation = landingProperties.forcedRotation.Value;
+						vehicle.Rotation = CurAnimationProperties.forcedRotation.Value;
 					}
 					return true;
 				}
@@ -481,9 +464,9 @@ namespace Vehicles
 					if (!source.First().Disabled)
 					{
 						source.First().action();
-						if (landingProperties.forcedRotation.HasValue && !landing)
+						if (CurAnimationProperties.forcedRotation.HasValue)
 						{
-							vehicle.Rotation = landingProperties.forcedRotation.Value;
+							vehicle.Rotation = CurAnimationProperties.forcedRotation.Value;
 						}
 						return true;
 					}
@@ -497,26 +480,26 @@ namespace Vehicles
 		{
 			launchProperties = reference.launchProperties;
 			landingProperties = reference.landingProperties;
+
+			int launchTypeCount = Enum.GetNames(typeof(LaunchType)).Count();
+			cachedOverlayGraphicDatas = new List<GraphicDataLayered>[launchTypeCount];
+			cachedOverlayGraphics = new List<Graphic>[launchTypeCount];
 		}
 
 		public virtual void ExposeData()
 		{
 			Scribe_References.Look(ref vehicle, nameof(vehicle), true);
-			Scribe_Values.Look(ref drawPos, nameof(drawPos));
-			Scribe_Values.Look(ref ticksPassed, nameof(ticksPassed));
+			Scribe_Values.Look(ref ticksPassed, nameof(ticksPassed), 0);
+			Scribe_Values.Look(ref effectsToThrow, nameof(effectsToThrow), 0);
+			
+			Scribe_Values.Look(ref drawOverlays, nameof(drawOverlays), true);
+			Scribe_Values.Look(ref drawMotes, nameof(drawMotes), true);
 
-			Scribe_Values.Look(ref landing, nameof(landing));
+			Scribe_Values.Look(ref launchType, nameof(launchType));
 			Scribe_Values.Look(ref maxFlightNodes, nameof(maxFlightNodes), int.MaxValue);
 
-			Scribe_References.Look(ref currentMap, nameof(currentMap));
-			Scribe_References.Look(ref targetMap, nameof(targetMap));
-
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				LaunchProtocol defProtocol = vehicle.GetComp<CompVehicleLauncher>().Props.launchProtocol;
-				launchProperties = defProtocol.launchProperties;
-				landingProperties = defProtocol.landingProperties;
-			}
+			Scribe_Values.Look(ref position, nameof(position));
+			Scribe_References.Look(ref map, nameof(map));
 		}
 
 		public static bool CanLandInSpecificCell(MapParent mapParent)
@@ -525,93 +508,54 @@ namespace Vehicles
 				FloatMenuAcceptanceReport.WithFailMessage("MessageEnterCooldownBlocksEntering".Translate(mapParent.EnterCooldownTicksLeft().ToStringTicksToPeriod(true, false, true, true))));
 		}
 
-		public static void ThrowRocketExhaust(Vector3 vector, Map map, float size, float angle, float velocity)
+		protected virtual float TryThrowFleck(FleckData fleckData, float t, float count)
 		{
-			vector += size * new Vector3(Rand.Value - 0.5f, 0f, Rand.Value - 0.5f);
-			if (!vector.InBounds(map))
+			float frequency = fleckData.frequency.Evaluate(t);
+			count += frequency / 60;
+			int motesToThrow = Mathf.FloorToInt(count);
+			count -= motesToThrow;
+			for (int i = 0; i < motesToThrow; i++)
 			{
-				return;
+				float size = fleckData.size?.Evaluate(t) ?? 1;
+				float? airTime = fleckData.airTime?.Evaluate(t);
+				float? speed = fleckData.speed?.Evaluate(t);
+				float? rotationRate = fleckData.rotationRate?.Evaluate(t);
+				float? angle = fleckData.angle.RandomInRange;
+
+				Vector3 origin = fleckData.position == FleckData.PositionStart.Position ? position.ToVector3Shifted() : DrawPos;
+				if (angle.HasValue && fleckData.drawOffset != null)
+				{
+					origin = origin.PointFromAngle(fleckData.drawOffset.Evaluate(t), angle.Value);
+				}
+				origin += fleckData.originOffset;
+				origin.y = fleckData.def.altitudeLayer.AltitudeFor();
+				ThrowFleck(fleckData.def, origin, Map, size, airTime, angle, speed, rotationRate);
 			}
-			MoteThrown moteThrown = (MoteThrown)ThingMaker.MakeThing(MoteDefOf.Mote_RocketExhaust, null);
-			moteThrown.Scale = Rand.Range(4f, 6f) * size;
-			moteThrown.rotationRate = Rand.Range(-3f, 3f);
-			moteThrown.exactPosition = vector;
-			moteThrown.SetVelocity(angle, velocity);
-			GenSpawn.Spawn(moteThrown, vector.ToIntVec3(), map, WipeMode.Vanish);
+			return count;
 		}
 
-		public static void ThrowRocketExhaustLong(Vector3 vector, Map map, float size)
+		public static void ThrowFleck(FleckDef fleckDef, Vector3 loc, Map map, float size, float? airTime, float? angle, float? speed, float? rotationRate)
 		{
-			vector += size * new Vector3(Rand.Value - 0.5f, 0f, Rand.Value - 0.5f);
-			if (!vector.InBounds(map))
+			Rand.PushState();
+			try
 			{
-				return;
+				FleckCreationData fleckCreationData = FleckMaker.GetDataStatic(loc, map, fleckDef, size);
+				if (rotationRate.HasValue) fleckCreationData.rotationRate = rotationRate.Value * (Rand.Value < 0.5f ? 1 : -1);
+				if (speed.HasValue)  fleckCreationData.velocitySpeed = speed.Value;
+				if (angle.HasValue) fleckCreationData.velocityAngle = angle.Value;
+				if (airTime.HasValue)  fleckCreationData.airTimeLeft = airTime.Value;
+				map.flecks.CreateFleck(fleckCreationData);
 			}
-			MoteThrown moteThrown = (MoteThrown)ThingMaker.MakeThing(MoteDefOf.Mote_RocketExhaust_Long, null);
-			moteThrown.Scale = Rand.Range(4f, 6f) * size;
-			moteThrown.rotationRate = Rand.Range(-3f, 3f);
-			moteThrown.exactPosition = vector;
-			moteThrown.SetVelocity(Rand.Range(0f, 360f), 0.12f);
-			GenSpawn.Spawn(moteThrown, vector.ToIntVec3(), map, WipeMode.Vanish);
+			finally
+			{
+				Rand.PopState();
+			}
 		}
 
-		public static void ThrowRocketSmokeLong(Vector3 vector, Map map, float size)
+		public enum LaunchType : uint
 		{
-			vector += size * new Vector3(Rand.Value - 0.5f, 0f, Rand.Value - 0.5f);
-			if (!vector.InBounds(map))
-			{
-				return;
-			}
-			float angle = Rand.Range(0f, 360f);
-			MoteThrown moteThrown = (MoteThrown)ThingMaker.MakeThing(MoteDefOf.Mote_RocketSmoke_Long, null);
-			moteThrown.Scale = Rand.Range(4f, 6f) * size;
-			moteThrown.rotationRate = Rand.Range(-4f, 4f);
-			moteThrown.exactPosition = vector;
-			moteThrown.SetVelocity(angle, Rand.Range(5, 10));
-			GenSpawn.Spawn(moteThrown, vector.ToIntVec3(), map, WipeMode.Vanish);
-		}
-
-		public static void ThrowMoteLong(ThingDef mote, Vector3 vector, Map map, float size, float angle, float speed)
-		{
-			vector += size * new Vector3(Rand.Value - 0.5f, 0f, Rand.Value - 0.5f);
-			if (!vector.InBounds(map))
-			{
-				return;
-			}
-			MoteThrown moteThrown = (MoteThrown)ThingMaker.MakeThing(mote, null);
-			moteThrown.Scale = Rand.Range(4f, 6f) * size;
-			moteThrown.rotationRate = Rand.Range(-4f, 4f);
-			moteThrown.exactPosition = vector;
-			moteThrown.SetVelocity(angle, speed);
-			GenSpawn.Spawn(moteThrown, vector.ToIntVec3(), map, WipeMode.Vanish);
-		}
-
-		public class MoteInfo : IExposable
-		{
-			public ThingDef moteDef;
-			public FloatRange angle;
-			public FloatRange speed;
-			public FloatRange size;
-
-			public MoteInfo()
-			{
-			}
-
-			public MoteInfo(ThingDef moteDef, FloatRange angle, FloatRange speed, FloatRange size)
-			{
-				this.moteDef = moteDef ?? MoteDefOf.Mote_RocketSmoke_Long;
-				this.angle = angle;
-				this.speed = speed;
-				this.size = size;
-			}
-
-			public void ExposeData()
-			{
-				Scribe_Defs.Look(ref moteDef, "moteDef");
-				Scribe_Values.Look(ref angle, "angle");
-				Scribe_Values.Look(ref speed, "speed");
-				Scribe_Values.Look(ref size, "size");
-			}
+			Landing = 0,
+			Takeoff = 1
 		}
 	}
 }

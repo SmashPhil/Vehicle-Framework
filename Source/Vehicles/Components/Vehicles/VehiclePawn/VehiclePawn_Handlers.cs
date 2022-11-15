@@ -288,7 +288,7 @@ namespace Vehicles
 					}
 					if (pawnToBoard.Spawned)
 					{
-						pawnToBoard.DeSpawn(DestroyMode.Vanish);
+						pawnToBoard.DeSpawn(DestroyMode.WillReplace);
 					}
 					EventRegistry[VehicleEventDefOf.PawnEntered].ExecuteEvents();
 					if (bill.handler.handlers.TryAddOrTransfer(pawnToBoard, true))
@@ -303,7 +303,6 @@ namespace Vehicles
 							{
 								Map.GetCachedMapComponent<VehicleReservationManager>().ReleaseAllClaimedBy(pawnToBoard);
 							}
-							Find.WorldPawns.PassToWorld(pawnToBoard, PawnDiscardDecideMode.Decide);
 						}
 					}
 					else if (pawnToBoard.holdingOwner != null)

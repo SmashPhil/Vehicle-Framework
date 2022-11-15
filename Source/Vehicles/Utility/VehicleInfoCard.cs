@@ -234,93 +234,93 @@ namespace Vehicles
 			scrollPositioner.ClearInterestRects();
 
 			GUIState.Push();
-
-			Text.Font = GameFont.Small;
-			Rect viewRect = new Rect(0f, 0f, outRect.width - 16f, listHeight);
-			Widgets.BeginScrollView(outRect, ref scrollPosition, viewRect, true);
 			{
-				float num = 0f;
-				string categoryLabel = null;
-				mousedOverEntry = null;
-				foreach (VehicleStatDrawEntry drawEntry in cachedDrawEntries)
+				Text.Font = GameFont.Small;
+				Rect viewRect = new Rect(0f, 0f, outRect.width - 16f, listHeight);
+				Widgets.BeginScrollView(outRect, ref scrollPosition, viewRect, true);
 				{
-					if (drawEntry.category.LabelCap != categoryLabel)
+					float num = 0f;
+					string categoryLabel = null;
+					mousedOverEntry = null;
+					foreach (VehicleStatDrawEntry drawEntry in cachedDrawEntries)
 					{
-						Widgets.ListSeparator(ref num, viewRect.width, drawEntry.category.LabelCap);
-						categoryLabel = drawEntry.category.LabelCap;
-					}
-					bool highlightLabel = false;
-					bool lowlightLabel = false;
-					bool selected = selectedEntry == drawEntry;
-					bool matched = false;
+						if (drawEntry.category.LabelCap != categoryLabel)
+						{
+							Widgets.ListSeparator(ref num, viewRect.width, drawEntry.category.LabelCap);
+							categoryLabel = drawEntry.category.LabelCap;
+						}
+						bool highlightLabel = false;
+						bool lowlightLabel = false;
+						bool selected = selectedEntry == drawEntry;
+						bool matched = false;
 
-					GUI.color = Color.white;
-					if (quickSearchWidget.filter.Active)
-					{
-						if (Matching(drawEntry))
+						GUI.color = Color.white;
+						if (quickSearchWidget.filter.Active)
 						{
-							highlightLabel = true;
-							matched = true;
+							if (Matching(drawEntry))
+							{
+								highlightLabel = true;
+								matched = true;
+							}
+							else
+							{
+								lowlightLabel = true;
+							}
 						}
-						else
+						Rect drawRect = new Rect(8f, num, viewRect.width - 8f, 30f);
+						num += drawEntry.Draw(drawRect.x, drawRect.y, drawRect.width, selected, highlightLabel, lowlightLabel, delegate
 						{
-							lowlightLabel = true;
+							SelectEntry(drawEntry, true);
+						}, delegate
+						{
+							mousedOverEntry = drawEntry;
+						}, scrollPosition, outRect);
+						drawRect.yMax = num;
+						if (selected || matched)
+						{
+							scrollPositioner.RegisterInterestRect(drawRect);
 						}
 					}
-					Rect drawRect = new Rect(8f, num, viewRect.width - 8f, 30f);
-					num += drawEntry.Draw(drawRect.x, drawRect.y, drawRect.width, selected, highlightLabel, lowlightLabel, delegate
-					{
-						SelectEntry(drawEntry, true);
-					}, delegate
-					{
-						mousedOverEntry = drawEntry;
-					}, scrollPosition, outRect);
-					drawRect.yMax = num;
-					if (selected || matched)
-					{
-						scrollPositioner.RegisterInterestRect(drawRect);
-					}
-				}
-				listHeight = num + 100f;
-			}
-			Widgets.EndScrollView();
-
-			scrollPositioner.ScrollVertically(ref scrollPosition, outRect.size);
-			outRect = panelRect.ContractedBy(10f);
-			VehicleStatDrawEntry statDrawEntry = selectedEntry ?? mousedOverEntry ?? cachedDrawEntries.FirstOrDefault();
-			if (statDrawEntry != null)
-			{
-				Rect rect5 = new Rect(0f, 0f, outRect.width - 16f, rightPanelHeight);
-				string explanationText = statDrawEntry.GetExplanationText(vehicle);
-				float num2 = 0f;
-				Widgets.BeginScrollView(outRect, ref scrollPositionRightPanel, rect5, true);
-				{
-					Rect rect6 = rect5;
-					rect6.width -= 4f;
-					Widgets.Label(rect6, explanationText);
-					float num3 = Text.CalcHeight(explanationText, rect6.width) + 10f;
-					num2 += num3;
-					IEnumerable<Dialog_InfoCard.Hyperlink> hyperlinks = statDrawEntry.GetHyperlinks(vehicle);
-					if (hyperlinks != null)
-					{
-						Rect rect7 = new Rect(rect6.x, rect6.y + num3, rect6.width, rect6.height - num3);
-						Color color = GUI.color;
-						GUI.color = Widgets.NormalOptionColor;
-						foreach (Dialog_InfoCard.Hyperlink hyperlink in hyperlinks)
-						{
-							float num4 = Text.CalcHeight(hyperlink.Label, rect7.width);
-							Widgets.HyperlinkWithIcon(new Rect(rect7.x, rect7.y, rect7.width, num4), hyperlink, "ViewHyperlink".Translate(hyperlink.Label), 2f, 6f, null, false, null);
-							rect7.y += num4;
-							rect7.height -= num4;
-							num2 += num4;
-						}
-						GUI.color = color;
-					}
-					rightPanelHeight = num2;
+					listHeight = num + 100f;
 				}
 				Widgets.EndScrollView();
-			}
 
+				scrollPositioner.ScrollVertically(ref scrollPosition, outRect.size);
+				outRect = panelRect.ContractedBy(10f);
+				VehicleStatDrawEntry statDrawEntry = selectedEntry ?? mousedOverEntry ?? cachedDrawEntries.FirstOrDefault();
+				if (statDrawEntry != null)
+				{
+					Rect rect5 = new Rect(0f, 0f, outRect.width - 16f, rightPanelHeight);
+					string explanationText = statDrawEntry.GetExplanationText(vehicle);
+					float num2 = 0f;
+					Widgets.BeginScrollView(outRect, ref scrollPositionRightPanel, rect5, true);
+					{
+						Rect rect6 = rect5;
+						rect6.width -= 4f;
+						Widgets.Label(rect6, explanationText);
+						float num3 = Text.CalcHeight(explanationText, rect6.width) + 10f;
+						num2 += num3;
+						IEnumerable<Dialog_InfoCard.Hyperlink> hyperlinks = statDrawEntry.GetHyperlinks(vehicle);
+						if (hyperlinks != null)
+						{
+							Rect rect7 = new Rect(rect6.x, rect6.y + num3, rect6.width, rect6.height - num3);
+							Color color = GUI.color;
+							GUI.color = Widgets.NormalOptionColor;
+							foreach (Dialog_InfoCard.Hyperlink hyperlink in hyperlinks)
+							{
+								float num4 = Text.CalcHeight(hyperlink.Label, rect7.width);
+								Widgets.HyperlinkWithIcon(new Rect(rect7.x, rect7.y, rect7.width, num4), hyperlink, "ViewHyperlink".Translate(hyperlink.Label), 2f, 6f, null, false, null);
+								rect7.y += num4;
+								rect7.height -= num4;
+								num2 += num4;
+							}
+							GUI.color = color;
+						}
+						rightPanelHeight = num2;
+					}
+					Widgets.EndScrollView();
+				}
+			}
 			GUIState.Pop();
 		}
 

@@ -42,6 +42,10 @@ namespace Vehicles
 
 		public override Vector3 DrawPos => vDrawer.DrawPos;
 
+		public (Vector3 drawPos, float rotation) DrawData => (DrawPos, this.CalculateAngle(out _));
+
+		public ThingWithComps Thing => this;
+
 		public float Angle
 		{
 			get
@@ -182,11 +186,29 @@ namespace Vehicles
 			}
 		}
 
-		public Vector3 TrueCenter() => TrueCenter(Position);
-
-		public Vector3 TrueCenter(IntVec3 cell)
+		public IEnumerable<AnimationDriver> Animations
 		{
-			Vector3 result = cell.ToVector3ShiftedWithAltitude(VehicleDef.Altitude);
+			get
+			{
+				if (CompVehicleLauncher != null)
+				{
+					foreach (AnimationDriver animationDriver in compVehicleLauncher.Animations)
+					{
+						yield return animationDriver;
+					}
+				}
+			}
+		}
+
+		public Vector3 TrueCenter()
+		{
+			return TrueCenter(Position);
+		}
+
+		public Vector3 TrueCenter(IntVec3 cell, float? altitude = null)
+		{
+			float altitudeValue = altitude ?? VehicleDef.Altitude;
+			Vector3 result = cell.ToVector3ShiftedWithAltitude(altitudeValue);
 			IntVec2 size = VehicleDef.Size;
 			Rot8 rot = Rotation; //Switch to FullRotation when diagonal hitboxes are implemented
 			if (size.x != 1 || size.z != 1)
@@ -221,29 +243,22 @@ namespace Vehicles
 							result.z -= 0.5f;
 						}
 						break;
-					//case 2:
-					//	if (size.x % 2 == 0)
-					//	{
-					//		result.x += 0.5f;
-					//	}
-					//	if (size.z % 2 == 0)
-					//	{
-					//		result.z -= 0.5f;
-					//	}
-					//	break;
-					//case 3:
-					//	if (size.x % 2 == 0)
-					//	{
-					//		result.x -= 0.5f;
-					//	}
-					//	if (size.z % 2 == 0)
-					//	{
-					//		result.z += 0.5f;
-					//	}
-					//	break;
 				}
 			}
 			return result;
+		}
+
+		public override void Draw()
+		{
+			if (this.AnimationLocked()) return;
+
+			if (VehicleDef.drawerType == DrawerType.RealtimeOnly)
+			{
+				Vector3 drawPos = DrawPos;
+				float rotation = this.CalculateAngle(out _);
+				DrawAt(drawPos, rotation);
+			}
+			Comps_PostDraw();
 		}
 
 		public override void DrawAt(Vector3 drawLoc, bool flip = false)
@@ -260,12 +275,13 @@ namespace Vehicles
 			statHandler.DrawHitbox(HighlightedComponent);
 		}
 
-		public void DrawAt(Vector3 drawLoc, float angle, bool flip = false)
+		public virtual void DrawAt(Vector3 drawLoc, float rotation, bool flip = false)
 		{
-			bool northSouthRotation = VehicleGraphic.EastDiagonalRotated || VehicleGraphic.WestDiagonalRotated;
+			bool northSouthRotation = VehicleGraphic.EastDiagonalRotated && (FullRotation == Rot8.NorthEast || FullRotation == Rot8.SouthEast) ||
+				(VehicleGraphic.WestDiagonalRotated && (FullRotation == Rot8.NorthWest || FullRotation == Rot8.SouthWest));
 			var drawVehicle = new Task(delegate ()
 			{
-				Drawer.renderer.RenderPawnAt(drawLoc, angle, northSouthRotation);
+				Drawer.renderer.RenderPawnAt(drawLoc, rotation, northSouthRotation);
 				foreach (VehicleHandler handler in HandlersWithPawnRenderer)
 				{
 					handler.RenderPawns();
@@ -721,6 +737,10 @@ namespace Vehicles
 			Dialog_ColorPicker.OpenColorPicker(this, delegate (Color colorOne, Color colorTwo, Color colorThree, PatternDef patternDef, Vector2 displacement, float tiles)
 			{
 				patternToPaint = new PatternData(colorOne, colorTwo, colorThree, patternDef, displacement, tiles);
+				if (DebugSettings.godMode)
+				{
+					SetColor();
+				}
 			});
 		}
 
@@ -772,23 +792,54 @@ namespace Vehicles
 			if (Nameable)
 			{
 				usedWidth += rect.width;
-				TooltipHandler.TipRegionByKey(rect, "VF_RenameVehicleTooltip");
-				if (Widgets.ButtonImage(rect, VehicleTex.Rename))
 				{
-					Rename();
+					TooltipHandler.TipRegionByKey(rect, "VF_RenameVehicleTooltip");
+					if (Widgets.ButtonImage(rect, VehicleTex.Rename))
+					{
+						Rename();
+					}
 				}
 				rect.x -= rect.width;
 			}
 			if (VehicleMod.settings.main.useCustomShaders && VehicleGraphic.Shader.SupportsRGBMaskTex())
 			{
 				usedWidth += rect.width;
-				TooltipHandler.TipRegionByKey(rect, "VF_RecolorTooltip");
-				if (Widgets.ButtonImage(rect, VehicleTex.Recolor))
 				{
-					ChangeColor();
+					TooltipHandler.TipRegionByKey(rect, "VF_RecolorTooltip");
+					if (Widgets.ButtonImage(rect, VehicleTex.Recolor))
+					{
+						ChangeColor();
+					}
 				}
+				rect.x -= rect.width;
+			}
+			if (Prefs.DevMode)
+			{
+				usedWidth += rect.width;
+				{
+					if (Widgets.ButtonImage(rect, VehicleTex.Settings))
+					{
+						List<FloatMenuOption> options = new List<FloatMenuOption>();
+						if (CompVehicleLauncher != null)
+						{
+							options.Add(new FloatMenuOption("Open in animator", OpenInAnimator));
+						}
+						if (!options.NullOrEmpty())
+						{
+							Find.WindowStack.Add(new FloatMenu(options));
+						}
+					}
+				}
+				rect.x -= rect.width;
 			}
 			return usedWidth;
+		}
+
+		public void OpenInAnimator()
+		{
+			Dialog_GraphEditor dialog_GraphEditor = new Dialog_GraphEditor(this, false);
+			//dialog_GraphEditor.LogReport = VehicleMod.settings.debug.debugLogging;
+			Find.WindowStack.Add(dialog_GraphEditor);
 		}
 
 		public void MultiplePawnFloatMenuOptions(List<Pawn> pawns)

@@ -140,8 +140,8 @@ namespace Vehicles
 			base.SpawnSetup(map, respawningAfterLoad);
 			if (!respawningAfterLoad)
 			{
-				vehicle.CompVehicleLauncher.launchProtocol.SetPositionArriving(DrawPos, Rot8.North, Map);
-				vehicle.CompVehicleLauncher.launchProtocol.OrderProtocol(false);
+				vehicle.CompVehicleLauncher.launchProtocol.Prepare(Map, Position, Rot4.North);
+				vehicle.CompVehicleLauncher.launchProtocol.OrderProtocol(LaunchProtocol.LaunchType.Takeoff);
 				vehicle.CompVehicleLauncher.launchProtocol.SetTickCount(-def.skyfaller.ticksToImpactRange.max);
 			}
 		}

@@ -5,10 +5,10 @@ using Verse;
 using Verse.Sound;
 using RimWorld;
 using UnityEngine;
+using SmashTools;
 
 namespace Vehicles
 {
-	//REDO - CACHE LAUNCH PROTOCOL
 	[StaticConstructorOnStartup]
 	public abstract class VehicleSkyfaller : Thing, IActiveDropPod, IThingHolder
 	{
@@ -24,9 +24,9 @@ namespace Vehicles
 
 		protected ActiveDropPodInfo contents;
 
-		protected Vector3 skyfallerLoc = Vector3.zero;
+		public override Vector3 DrawPos => vehicle.TrueCenter(Position, base.DrawPos.y);
 
-		public override Vector3 DrawPos => skyfallerLoc == Vector3.zero ? base.DrawPos : skyfallerLoc;
+		public ThingWithComps Thing => vehicle;
 
 		private Material ShadowMaterial
 		{
@@ -83,6 +83,7 @@ namespace Vehicles
 			{
 				return;
 			}
+			//TODO - draw shadow at DrawPos but z-axis is left on ground and size decreases through curve
 			DrawDropSpotShadow(DrawPos, Rotation, shadowMaterial, def.skyfaller.shadowSize, vehicle.CompVehicleLauncher.launchProtocol.TicksPassed);
 		}
 
@@ -114,7 +115,6 @@ namespace Vehicles
 			
 			Scribe_Values.Look(ref angle, "angle", 0f, false);
 			Scribe_References.Look(ref vehicle, "vehicle", true);
-			Scribe_Values.Look(ref skyfallerLoc, "skyfallerLoc");
 		}
 	}
 }

@@ -9,6 +9,7 @@ using SmashTools.Xml;
 namespace Vehicles
 {
 	[LoadedEarly]
+	[StaticConstructorOnModInit]
 	public static class ParsingHelper
 	{
 		/// <summary>
@@ -23,6 +24,12 @@ namespace Vehicles
 		/// VehicleDef, (fieldName, defaultValue)
 		/// </summary>
 		public static readonly Dictionary<string, Dictionary<string, string>> setDefaultValues = new Dictionary<string, Dictionary<string, string>>();
+
+		static ParsingHelper()
+		{
+			RegisterParsers();
+			RegisterAttributes();
+		}
 
 		internal static void RegisterParsers()
 		{

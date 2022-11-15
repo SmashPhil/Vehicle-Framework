@@ -37,6 +37,13 @@ Determines whether Vehicles should use values from the mod settings or Defs</VF_
 	<VF_ShowDisabledVehicles>Show Disabled Vehicles</VF_ShowDisabledVehicles>
 	<VF_ShowDisabledVehiclesTooltip>Disabled vehicles from the mod settings will still be shown in the architect menu.</VF_ShowDisabledVehiclesTooltip>
 	
+	<!-- Performance -->
+	<VF_PerformanceSettings>Performance</VF_PerformanceSettings>
+	<VF_PassiveWaterWaves>Passive Water Waves</VF_PassiveWaterWaves>
+	<VF_PassiveWaterWavesTooltip>Generate passive waves when boat is idle.</VF_PassiveWaterWavesTooltip>
+	<VF_AerialVehicleEffects>Aerial Vehicle Effects</VF_AerialVehicleEffects>
+	<VF_AerialVehicleEffectsTooltip>When aerial vehicles takeoff and land, spawn flecks and render overlay textures.</VF_AerialVehicleEffectsTooltip>
+	
 	<!-- Multipliers -->
 	<VF_VehicleDamageMultipliers>Vehicle Damage</VF_VehicleDamageMultipliers>
 	<VF_MeleeDamageMultiplier>Melee Damage Multiplier</VF_MeleeDamageMultiplier>
@@ -52,8 +59,6 @@ Determines whether Vehicles should use values from the mod settings or Defs</VF_
 	
 	<!-- Sea Vehicles -->
 	<VF_SeaVehicles>Boats</VF_SeaVehicles>
-	<VF_PassiveWaterWaves>Passive Water Waves</VF_PassiveWaterWaves>
-	<VF_PassiveWaterWavesTooltip>Generate passive waves for each boat. Purely cosmetic.</VF_PassiveWaterWavesTooltip>
 	<VF_Fishing>Fishing</VF_Fishing>
 	<VF_FishingInactive>Fishing (Inactive)</VF_FishingInactive>
 	<VF_FishingMultiplier>Fishing Multiplier</VF_FishingMultiplier>

@@ -43,6 +43,8 @@
 	<VF_DevMode_DebugDrawBumpersTooltip>Draw cells immediately in front of vehicle that will indicate when the vehicle "bumps" into something and halts pathing.</VF_DevMode_DebugDrawBumpersTooltip>
 	<VF_DevMode_DebugDrawLordMeetingPoint>Draw Lord Meeting Point</VF_DevMode_DebugDrawLordMeetingPoint>
 	<VF_DevMode_DebugDrawLordMeetingPointTooltip>Highlights the cell where the Form Vehicle Caravan meeting point has been set.</VF_DevMode_DebugDrawLordMeetingPointTooltip>
+	<VF_DevMode_DebugCameraViewAnimator>Attach Camera in Animator</VF_DevMode_DebugCameraViewAnimator>
+	<VF_DevMode_DebugCameraViewAnimatorTooltip>Moves main camera to window view in graph editor when animation target is selected.</VF_DevMode_DebugCameraViewAnimatorTooltip>
 	
 	<!-- Pathing -->
 	<VF_DevMode_DebugPathfinderDebugging>PathFinder Debugging</VF_DevMode_DebugPathfinderDebugging>

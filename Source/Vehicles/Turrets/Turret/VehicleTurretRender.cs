@@ -68,12 +68,19 @@ namespace Vehicles
 				}
 				else
 				{
-					east = north.Rotate(270);
+					east = north.Rotate(90);
 				}
 			}
 			if (!west.IsValid)
 			{
-				west = east.Flip(true, false);
+				if (east.IsValid)
+				{
+					west = east.Flip(true, false);
+				}
+				else
+				{
+					west = north.Rotate(270);
+				}
 			}
 			if (!northEast.IsValid)
 			{
@@ -118,7 +125,7 @@ namespace Vehicles
 		{
 			private Vector2? offset;
 
-			public RotationalOffset(Vector2 offset)
+			public RotationalOffset(Vector2? offset)
 			{
 				this.offset = offset;
 				Rot = Rot8.Invalid;
@@ -130,7 +137,7 @@ namespace Vehicles
 
 			public bool IsValid => offset != null;
 
-			public static RotationalOffset Default => new RotationalOffset(Vector2.zero);
+			public static RotationalOffset Default => new RotationalOffset(null);
 
 			public RotationalOffset Rotate(float angle)
 			{

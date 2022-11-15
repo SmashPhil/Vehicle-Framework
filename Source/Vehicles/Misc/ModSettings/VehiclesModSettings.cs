@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using HarmonyLib;
 using Verse;
 using RimWorld;
+using RimWorld.Planet;
 using SmashTools;
 
 namespace Vehicles
@@ -42,6 +44,20 @@ namespace Vehicles
 		{
 			Dialog_ModSettings settings = new Dialog_ModSettings(VehicleMod.mod);
 			Find.WindowStack.Add(settings);
+		}
+
+		public static void OpenWithContext(SettingsSection section = null)
+		{
+			Open();
+			if (section != null)
+			{
+				VehicleMod.CurrentSection = section;
+			}
+			else if (!WorldRendererUtility.WorldRenderedNow && Find.CurrentMap != null && Find.Selector.SelectedObjects.FirstOrDefault() is VehiclePawn vehicle)
+			{
+				VehicleMod.CurrentSection = VehicleMod.settings.vehicles;
+				VehicleMod.selectedDef = vehicle.VehicleDef;
+			}
 		}
 	}
 }

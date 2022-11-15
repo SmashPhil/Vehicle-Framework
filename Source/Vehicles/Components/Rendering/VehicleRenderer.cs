@@ -11,9 +11,7 @@ namespace Vehicles
 	{
 		private const float SubInterval = 0.003787879f;
 		private const float YOffset_Body = 0.007575758f;
-		private const float YOffset_Wounds = 0.018939395f;
-		private const float YOffset_Shell = 0.022727273f;
-		private const float YOffset_Head = 0.026515152f;
+		private const float YOffset_Damage = 0.018939395f;
 
 		private readonly VehiclePawn vehicle;
 
@@ -98,25 +96,13 @@ namespace Vehicles
 			}
 
 			Vector3 drawLoc = rootLoc;
-			drawLoc.y += YOffset_Wounds;
+			drawLoc.y += YOffset_Damage;
 			//TODO - Render overlays for vehicle damage
 
-			Vector3 vector = rootLoc;
-			Vector3 a = rootLoc;
-			if (bodyFacing != Rot4.North)
-			{
-				a.y += YOffset_Head;
-				vector.y += YOffset_Shell;
-			}
-			else
-			{
-				a.y += YOffset_Shell;
-				vector.y += YOffset_Head;
-			}
 			//TODO - pack graphics?
 			if (!portraitDraw && vehicle.inventory != null && vehicle.inventory.innerContainer.Count > 0 && graphics.packGraphic != null)
 			{
-				Graphics.DrawMesh(mesh, vector, quaternion, graphics.packGraphic.MatAt(bodyFacing, null), 0);
+				Graphics.DrawMesh(mesh, drawLoc, quaternion, graphics.packGraphic.MatAt(bodyFacing, null), 0);
 			}
 			return loc;
 		}

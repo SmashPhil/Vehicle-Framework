@@ -75,8 +75,10 @@ Drafted vehicles can be moved, but restrict the unloading of pawns.
 	<RemoveName>Remove Name</RemoveName>
 	<VehicleTransportCountLabel>{0} Transport</VehicleTransportCountLabel>
 	<VehicleTransportsCountLabel>{0} Transports</VehicleTransportsCountLabel>
-	<Vehicles_CannotLaunchWhileMoving>Cannot launch while {0} is moving.</Vehicles_CannotLaunchWhileMoving>
-	<Vehicles_CannotMove>{0} cannot launch without being able to move.</Vehicles_CannotMove>
+	
+	<VF_NoFlightSpeed>Unable to launch with Flight Speed = 0</VF_NoFlightSpeed>
+	<VF_CannotLaunchWhileMoving>Cannot launch while {0} is moving.</VF_CannotLaunchWhileMoving>
+	<VF_CannotMove>{0} cannot launch without being able to move.</VF_CannotMove>
 	
 	<TabCargo>Cargo</TabCargo>
 	<TabPassengers>Pawns</TabPassengers>

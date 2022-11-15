@@ -29,18 +29,6 @@ namespace Vehicles
 			settings = SettingsPage.Vehicles;
 		}
 
-		public override void Begin(Rect rect)
-		{
-			base.Begin(rect);
-			GUIState.Push();
-		}
-
-		public override void End()
-		{
-			base.End();
-			GUIState.Pop();
-		}
-
 		public object GetSettingsValue(VehicleDef def, SaveableField field)
 		{
 			try

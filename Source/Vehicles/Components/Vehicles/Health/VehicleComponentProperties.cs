@@ -17,13 +17,14 @@ namespace Vehicles
 
 		public int health;
 		public VehicleComponent.VehiclePartDepth depth;
-		public int efficiencyWeight = 1;
+		public float efficiencyWeight = 1;
+		public float hitWeight = 1;
 		public List<StatModifier> armor;
 		public bool priorityStatEfficiency = false;
 
 		public ComponentHitbox hitbox = new ComponentHitbox();
 		public List<VehicleStatDef> categories;
-		public SimpleCurve efficiency;
+		public LinearCurve efficiency;
 
 		public List<Reactor> reactors;
 		public List<string> tags;
@@ -40,7 +41,7 @@ namespace Vehicles
 
 		public virtual void ResolveReferences(VehicleDef def)
 		{
-			efficiency ??= new SimpleCurve()
+			efficiency ??= new LinearCurve()
 			{
 				new CurvePoint(0, 0),
 				new CurvePoint(0.25f, 0f),

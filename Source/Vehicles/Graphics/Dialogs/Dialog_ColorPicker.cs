@@ -203,7 +203,7 @@ namespace Vehicles
 				GUI.color = UIElements.InactiveColor;
 			}
 			Rect sliderRect = new Rect(0f, inRect.height - ButtonHeight * 3, ButtonWidth * 3, ButtonHeight);
-			UIElements.SliderLabeled(sliderRect, "VehiclePatternZoom".Translate(), "VehiclePatternZoomTooltip".Translate(), string.Empty, ref additionalTiling, 0, 2);
+			UIElements.SliderLabeled(sliderRect, "VehiclePatternZoom".Translate(), "VehiclePatternZoomTooltip".Translate(), string.Empty, ref additionalTiling, 0.01f, 2);
 			Rect positionLeftBox = new Rect(sliderRect)
 			{
 				y = sliderRect.y + sliderRect.height,

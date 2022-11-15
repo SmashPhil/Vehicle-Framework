@@ -210,8 +210,8 @@ namespace Vehicles
 			base.SpawnSetup(map, respawningAfterLoad);
 			if (!respawningAfterLoad)
 			{
-				vehicle.CompVehicleLauncher.launchProtocol.SetPositionArriving(new Vector3(DrawPos.x, DrawPos.y + 1, DrawPos.z), Rotation, map);
-				vehicle.CompVehicleLauncher.launchProtocol.OrderProtocol(true);
+				vehicle.CompVehicleLauncher.launchProtocol.Prepare(map, Position, Rotation);
+				vehicle.CompVehicleLauncher.launchProtocol.OrderProtocol(LaunchProtocol.LaunchType.Landing);
 				delayLandingTicks = vehicle.CompVehicleLauncher.launchProtocol.landingProperties?.delayByTicks ?? 0;
 
 				ticksToImpact = def.skyfaller.ticksToImpactRange.RandomInRange;

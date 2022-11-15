@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Verse;
 using RimWorld;
@@ -10,22 +11,12 @@ namespace Vehicles
 {
 	public class DefaultTakeoff : LaunchProtocol
 	{
-		public SkyfallerMovementType movementType;
-		protected float angle;
-		protected float rotation;
-
-		protected List<MoteInfo> motes = new List<MoteInfo>();
-
 		public DefaultTakeoff()
 		{
 		}
 
 		public DefaultTakeoff(DefaultTakeoff reference, VehiclePawn vehicle) : base(reference, vehicle)
 		{
-			movementType = reference.movementType;
-			angle = reference.angle;
-			rotation = reference.rotation;
-			motes = reference.motes;
 		}
 
 		public override string FailLaunchMessage => "SkyfallerLaunchNotValid".Translate();
@@ -39,25 +30,6 @@ namespace Vehicles
 					return !vehicle.Position.Roofed(vehicle.Map);
 				}
 				return true;
-			}
-		}
-
-		public override Vector3 DrawPos
-		{
-			get
-			{
-				switch (movementType)
-				{
-					case SkyfallerMovementType.Accelerate:
-						return SkyfallerDrawPosUtility.DrawPos_Accelerate(drawPos, ticksPassed, angle, CurrentSpeed);
-					case SkyfallerMovementType.ConstantSpeed:
-						return SkyfallerDrawPosUtility.DrawPos_ConstantSpeed(drawPos, ticksPassed, angle, CurrentSpeed);
-					case SkyfallerMovementType.Decelerate:
-						return SkyfallerDrawPosUtility.DrawPos_Decelerate(drawPos, ticksPassed, angle, CurrentSpeed);
-					default:
-						Log.ErrorOnce("SkyfallerMovementType not handled: " + movementType, vehicle.thingIDNumber ^ 1948576711);
-						return SkyfallerDrawPosUtility.DrawPos_Accelerate(drawPos, ticksPassed, angle, CurrentSpeed);
-				}
 			}
 		}
 
@@ -85,52 +57,48 @@ namespace Vehicles
 			}
 		}
 
-		public override Vector3 AnimateLanding(float layer, bool flip)
+		protected override (Vector3 drawPos, float rotation) AnimateLanding(Vector3 drawPos, float rotation)
 		{
-			Vector3 adjustedDrawPos = DrawPos;
-			if (landingProperties?.angleCurve != null)
+			if (!landingProperties.rotationCurve.NullOrEmpty())
 			{
-				angle = landingProperties.angleCurve.Evaluate(TimeInAnimation);
+				rotation += landingProperties.rotationCurve.Evaluate(TimeInAnimation);
 			}
-			if (landingProperties?.rotationCurve != null)
+			if (!landingProperties.xPositionCurve.NullOrEmpty())
 			{
-				rotation = landingProperties.rotationCurve.Evaluate(TimeInAnimation);
+				drawPos.x += landingProperties.xPositionCurve.Evaluate(TimeInAnimation);
 			}
-			if (landingProperties?.xPositionCurve != null)
+			if (!landingProperties.zPositionCurve.NullOrEmpty())
 			{
-				adjustedDrawPos.x += landingProperties.xPositionCurve.Evaluate(TimeInAnimation);
+				drawPos.z += landingProperties.zPositionCurve.Evaluate(TimeInAnimation);
 			}
-			if (landingProperties?.zPositionCurve != null)
+			if (!landingProperties.offsetCurve.NullOrEmpty())
 			{
-				adjustedDrawPos.z += landingProperties.zPositionCurve.Evaluate(TimeInAnimation);
+				Vector2 offset = landingProperties.offsetCurve.EvaluateT(TimeInAnimation);
+				drawPos += new Vector3(offset.x, 0, offset.y);
 			}
-			adjustedDrawPos.y = layer;
-			vehicle.DrawAt(adjustedDrawPos, rotation, flip);
-			return adjustedDrawPos;
+			return base.AnimateLanding(drawPos, rotation);
 		}
 
-		public override Vector3 AnimateTakeoff(float layer, bool flip)
+		protected override (Vector3 drawPos, float rotation) AnimateTakeoff(Vector3 drawPos, float rotation)
 		{
-			Vector3 adjustedDrawPos = DrawPos;
-			if (launchProperties?.angleCurve != null)
+			if (!launchProperties.rotationCurve.NullOrEmpty())
 			{
-				angle = launchProperties.angleCurve.Evaluate(TimeInAnimation);
+				rotation += launchProperties.rotationCurve.Evaluate(TimeInAnimation);
 			}
-			if (launchProperties?.rotationCurve != null)
+			if (!launchProperties.xPositionCurve.NullOrEmpty())
 			{
-				rotation = launchProperties.rotationCurve.Evaluate(TimeInAnimation);
+				drawPos.x += launchProperties.xPositionCurve.Evaluate(TimeInAnimation);
 			}
-			if (launchProperties?.xPositionCurve != null)
+			if (!launchProperties.zPositionCurve.NullOrEmpty())
 			{
-				adjustedDrawPos.x += launchProperties.xPositionCurve.Evaluate(TimeInAnimation);
+				drawPos.z += launchProperties.zPositionCurve.Evaluate(TimeInAnimation);
 			}
-			if (launchProperties?.zPositionCurve != null)
+			if (!launchProperties.offsetCurve.NullOrEmpty())
 			{
-				adjustedDrawPos.z += launchProperties.zPositionCurve.Evaluate(TimeInAnimation);
+				Vector2 offset = launchProperties.offsetCurve.EvaluateT(TimeInAnimation);
+				drawPos += new Vector3(offset.x, 0, offset.y);
 			}
-			adjustedDrawPos.y = layer;
-			vehicle.DrawAt(adjustedDrawPos, rotation, flip);
-			return adjustedDrawPos;
+			return base.AnimateTakeoff(drawPos, rotation);
 		}
 
 		public override IEnumerable<FloatMenuOption> GetFloatMenuOptionsAt(int tile)
@@ -162,7 +130,7 @@ namespace Vehicles
 						{
 							if (vehicle.Spawned)
 							{
-								vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, this, target.Cell, rot));
+								vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, target.Cell, rot));
 							}
 							else
 							{
@@ -172,8 +140,8 @@ namespace Vehicles
 									Log.Error($"Attempted to launch into existing map where CurrentMap is null and no AerialVehicle with {vehicle.Label} exists.");
 									return;
 								}
-								aerial.arrivalAction = new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, this, target.Cell, rot);
-								aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, this, target.Cell, rot));
+								aerial.arrivalAction = new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, target.Cell, rot);
+								aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, target.Cell, rot));
 								vehicle.CompVehicleLauncher.inFlight = true;
 								CameraJumper.TryShowWorld();
 							}
@@ -256,16 +224,6 @@ namespace Vehicles
 			int tile = vehicle.Map.Tile;
 			LaunchTargeter.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseWorldTarget), vehicle.Map.Tile, true, VehicleTex.TargeterMouseAttachment, true, null, 
 				(GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => TargetingLabelGetter(target, tile, path, fuelCost));
-		}
-
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look(ref movementType, "movementType");
-			Scribe_Values.Look(ref angle, "angle");
-			Scribe_Values.Look(ref rotation, "rotation");
-
-			Scribe_Collections.Look(ref motes, "motes", LookMode.Deep);
 		}
 	}
 }

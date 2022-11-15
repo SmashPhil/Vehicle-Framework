@@ -71,12 +71,12 @@ namespace Vehicles
 			{
 				if (currentVersion != Application.unityVersion)
 				{
-					Log.Warning($"{VehicleHarmony.LogLabel} Unity Version {Application.unityVersion} does not match registered version for AssetBundles being loaded. Please report it on the workshop page so that I may update the UnityVersion supported for this AssetBundle.");
+					Log.Warning($"<color=orange>{VehicleHarmony.LogLabel}</color> Unity Version {Application.unityVersion} does not match registered version for AssetBundles being loaded. Please report it on the workshop page so that I may update the UnityVersion supported for this AssetBundle.");
 				}
 			}
 			else
 			{
-				SmashLog.Warning($"{VehicleHarmony.LogLabel} Unable to locate cached Unity version {Application.unityVersion} for {VersionControl.CurrentVersionString}. This mod might not support this version.");
+				SmashLog.Warning($"<color=orange>{VehicleHarmony.LogLabel}</color> Unable to locate cached Unity version {Application.unityVersion} for {VersionControl.CurrentVersionString}. This mod might not support this version.");
 			}
 
 			List<string> loadFolders = FilePaths.ModFoldersForVersion(VehicleMod.settings.Mod.Content);
@@ -116,7 +116,7 @@ namespace Vehicles
 				{
 					foreach (AssetBundle assetBundle in vehicleAssets)
 					{
-						SmashLog.Message($"{VehicleHarmony.LogLabel} Importing additional assets from {assetBundle.name}. UnityVersion={Application.unityVersion} Status: {AssetBundleLoadMessage(assetBundle)}");
+						SmashLog.Message($"<color=orange>{VehicleHarmony.LogLabel}</color> Importing additional assets from {assetBundle.name}. UnityVersion={Application.unityVersion} Status: {AssetBundleLoadMessage(assetBundle)}");
 					}
 				}
 			}

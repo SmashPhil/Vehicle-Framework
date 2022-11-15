@@ -12,17 +12,15 @@ namespace Vehicles
 	{
 		protected int tile;
 		protected MapParent mapParent;
-		protected LaunchProtocol launchProtocol;
 
 		public AerialVehicleArrivalAction_LandInMap()
 		{
 		}
 
-		public AerialVehicleArrivalAction_LandInMap(VehiclePawn vehicle, MapParent mapParent, int tile, LaunchProtocol launchProtocol) : base(vehicle)
+		public AerialVehicleArrivalAction_LandInMap(VehiclePawn vehicle, MapParent mapParent, int tile) : base(vehicle)
 		{
 			this.tile = tile;
 			this.mapParent = mapParent;
-			this.launchProtocol = launchProtocol;
 		}
 
 		public override bool DestroyOnArrival => true;
@@ -37,7 +35,6 @@ namespace Vehicles
 			base.ExposeData();
 			Scribe_Values.Look(ref tile, "tile");
 			Scribe_References.Look(ref mapParent, "mapParent");
-			Scribe_Deep.Look(ref launchProtocol, "launchProtocol");
 		}
 	}
 }

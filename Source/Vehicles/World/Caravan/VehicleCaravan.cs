@@ -12,8 +12,9 @@ namespace Vehicles
 	[StaticConstructorOnStartup]
 	public class VehicleCaravan : Caravan
 	{
-		private static MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock();
 		private static readonly Texture2D SplitCommand = ContentFinder<Texture2D>.Get("UI/Commands/SplitCaravan", true);
+
+		private static MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock();
 		private static Dictionary<ThingDef, Material> materials = new Dictionary<ThingDef, Material>();
 
 		public VehicleCaravan_PathFollower vPather;

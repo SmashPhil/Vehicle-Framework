@@ -114,10 +114,4 @@
 		
 		<drawGUIOverlay>true</drawGUIOverlay>
 	</Vehicles.VehicleDef>
-	
-	<Vehicles.VehicleDef Name="BaseVehiclePawnUpgradeable" ParentName="BaseVehiclePawn" Abstract="True">
-		<inspectorTabs>
-			<li>Vehicles.ITab_Vehicle_Upgrades</li>
-		</inspectorTabs>
-	</Vehicles.VehicleDef>
 </Defs>

@@ -46,8 +46,7 @@ namespace Vehicles
 				{
 					return false;
 				}
-				AerialVehicleArrivalAction_CrashSpecificCell arrivalAction = new AerialVehicleArrivalAction_CrashSpecificCell(aerialVehicle.vehicle, crashSite.Parent, crashSite.Tile,
-					aerialVehicle.vehicle.CompVehicleLauncher.launchProtocol, cell, Rot4.East);
+				AerialVehicleArrivalAction_CrashSpecificCell arrivalAction = new AerialVehicleArrivalAction_CrashSpecificCell(aerialVehicle.vehicle, crashSite.Parent, crashSite.Tile, cell, Rot4.East);
 				arrivalAction.Arrived(crashSite.Tile);
 				aerialVehicle.Destroy();
 				string settlementLabel = shotDownBy?.Label ?? string.Empty;

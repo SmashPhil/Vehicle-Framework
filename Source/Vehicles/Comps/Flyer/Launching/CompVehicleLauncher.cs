@@ -26,10 +26,11 @@ namespace Vehicles
 			new CurvePoint(1, 1)
 		};
 
+		[GraphEditable]
 		public LaunchProtocol launchProtocol;
 
 		public float fuelEfficiencyWorldModifier;
-		public float flySpeedModifier;
+		public float flightSpeedModifier;
 		public float rateOfClimbModifier;
 		public int maxAltitudeModifier;
 		public int landingAltitudeModifier;
@@ -38,12 +39,14 @@ namespace Vehicles
 
 		public bool inFlight = false;
 
+		public virtual bool AnyFlightControl { get; private set; }
+
 		public bool Roofed => Vehicle.Position.Roofed(Vehicle.Map);
 		public bool AnyLeftToLoad => Vehicle.cargoToLoad.NotNullAndAny();
 		public VehiclePawn Vehicle => parent as VehiclePawn;
 		public CompProperties_VehicleLauncher Props => props as CompProperties_VehicleLauncher;
 
-		public float FlySpeed => flySpeedModifier + Vehicle.GetStatValue(VehicleStatDefOf.FlightSpeed);
+		public float FlySpeed => flightSpeedModifier + Vehicle.GetStatValue(VehicleStatDefOf.FlightSpeed);
 		public float FuelConsumptionWorldMultiplier => fuelEfficiencyWorldModifier + SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.fuelConsumptionWorldMultiplier), Props.fuelConsumptionWorldMultiplier);
 		public int FixedMaxDistance => SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.fixedLaunchDistanceMax), Props.fixedLaunchDistanceMax);
 		public bool SpaceFlight => SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.spaceFlight), Props.spaceFlight);
@@ -55,7 +58,7 @@ namespace Vehicles
 
 		public virtual bool ControlledDescent => ClimbRateStat >= 0;
 
-		public virtual bool AnyFlightControl { get; private set; }
+		public override IEnumerable<AnimationDriver> Animations => launchProtocol.Animations;
 
 		public virtual float ClimbRateStat
 		{
@@ -145,7 +148,7 @@ namespace Vehicles
 			}
 			if (FlySpeed <= 0)
 			{
-				command.Disable("Vehicles_NoFlySpeed".Translate());
+				command.Disable("VF_NoFlightSpeed".Translate());
 			}
 			if (Roofed)
 			{
@@ -153,11 +156,11 @@ namespace Vehicles
 			}
 			if (Vehicle.vPather.Moving)
 			{
-				command.Disable("Vehicles_CannotLaunchWhileMoving".Translate(Vehicle.LabelShort));
+				command.Disable("VF_CannotLaunchWhileMoving".Translate(Vehicle.LabelShort));
 			}
 			if (SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(VehicleDef), "vehicleMovementPermissions", Vehicle.VehicleDef.vehicleMovementPermissions) > VehiclePermissions.NotAllowed && (!Vehicle.CanMoveFinal || Vehicle.Angle != 0))
 			{
-				command.Disable("Vehicles_CannotMove".Translate(Vehicle.LabelShort));
+				command.Disable("VF_CannotMove".Translate(Vehicle.LabelShort));
 			}
 			if (!VehicleMod.settings.debug.debugDraftAnyVehicle && !Vehicle.CanMoveWithOperators)
 			{
@@ -192,12 +195,13 @@ namespace Vehicles
 				flightPath.Add(new FlightNode(destinationTile, null));
 			}
 			Vehicle.CompVehicleLauncher.inFlight = true;
+			Vehicle.CompVehicleLauncher.launchProtocol.OrderProtocol(LaunchProtocol.LaunchType.Takeoff);
 			VehicleSkyfaller_Leaving vehicleLeaving = (VehicleSkyfaller_Leaving)VehicleSkyfallerMaker.MakeSkyfaller(Props.skyfallerLeaving, Vehicle);
 			vehicleLeaving.arrivalAction = arrivalAction;
 			vehicleLeaving.vehicle = Vehicle;
 			vehicleLeaving.flightPath = new List<FlightNode>(flightPath);
 			vehicleLeaving.orderRecon = recon;
-			GenSpawn.Spawn(vehicleLeaving, Vehicle.Position, Vehicle.Map, Vehicle.CompVehicleLauncher.launchProtocol.landingProperties.forcedRotation ?? Vehicle.Rotation, WipeMode.Vanish);
+			GenSpawn.Spawn(vehicleLeaving, Vehicle.Position, Vehicle.Map, Vehicle.CompVehicleLauncher.launchProtocol.CurAnimationProperties.forcedRotation ?? Vehicle.Rotation, WipeMode.Vanish);
 
 			if (Vehicle.Spawned)
 			{
@@ -255,15 +259,15 @@ namespace Vehicles
 		public override void PostExposeData()
 		{
 			base.PostExposeData();
-			Scribe_Deep.Look(ref launchProtocol, "launchProtocol");
-			Scribe_Values.Look(ref flySpeedModifier, "flySpeedModifier");
-			Scribe_Values.Look(ref fuelEfficiencyWorldModifier, "fuelEfficiencyWorldModifier");
-			Scribe_Values.Look(ref rateOfClimbModifier, "rateOfClimbModifier");
-			Scribe_Values.Look(ref maxAltitudeModifier, "maxAltitudeModifier");
-			Scribe_Values.Look(ref landingAltitudeModifier, "landingAltitudeModifier");
+			Scribe_Deep.Look(ref launchProtocol, nameof(launchProtocol));
+			Scribe_Values.Look(ref flightSpeedModifier, nameof(flightSpeedModifier));
+			Scribe_Values.Look(ref fuelEfficiencyWorldModifier, nameof(fuelEfficiencyWorldModifier));
+			Scribe_Values.Look(ref rateOfClimbModifier, nameof(rateOfClimbModifier));
+			Scribe_Values.Look(ref maxAltitudeModifier, nameof(maxAltitudeModifier));
+			Scribe_Values.Look(ref landingAltitudeModifier, nameof(landingAltitudeModifier));
 
-			Scribe_Values.Look(ref inFlight, "inFlight");
-			Scribe_Values.Look(ref timer, "timer");
+			Scribe_Values.Look(ref inFlight, nameof(inFlight));
+			Scribe_Values.Look(ref timer, nameof(timer));
 		}
 
 		public struct DeploymentTimer

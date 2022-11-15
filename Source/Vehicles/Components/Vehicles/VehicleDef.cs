@@ -211,6 +211,25 @@ namespace Vehicles
 			return new Vector2(width, height);
 		}
 
+		public Vector2 ScaleDrawRatio(GraphicData graphicData, Vector2 size)
+		{
+			Vector2 drawSize = graphicData.drawSize;
+			Vector2 scalar = drawSize / this.graphicData.drawSize;
+
+			float width = size.x * uiIconScale * scalar.x;
+			float height = size.y * uiIconScale * scalar.y;
+
+			if (width < height)
+			{
+				height = width * (drawSize.y / drawSize.x);
+			}
+			else
+			{
+				width = height * (drawSize.x / drawSize.y);
+			}
+			return new Vector2(width, height);
+		}
+
 		/// <summary>
 		/// Retrieve all <see cref="VehicleStatCategoryDef"/>'s for this VehicleDef
 		/// </summary>

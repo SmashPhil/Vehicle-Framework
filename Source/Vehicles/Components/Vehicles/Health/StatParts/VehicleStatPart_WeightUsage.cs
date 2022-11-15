@@ -9,7 +9,7 @@ namespace Vehicles
 {
 	public class VehicleStatPart_WeightUsage : VehicleStatPart
 	{
-		public SimpleCurve usageCurve;
+		public LinearCurve usageCurve;
 		public OperationType operation = OperationType.Addition;
 		public string formatString;
 

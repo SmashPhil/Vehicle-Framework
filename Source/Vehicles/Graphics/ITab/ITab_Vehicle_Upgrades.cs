@@ -377,8 +377,7 @@ namespace Vehicles
 						Widgets.BeginGroup(vehicleDisplayRect);
 
 						Rect displayRect = new Rect(0, 0, leftWindowWidth - 5, leftWindowWidth - 5);
-						RenderHelper.DrawVehicle(displayRect, Vehicle, 
-							Vehicle.Pattern, true, Vehicle.DrawColor, Vehicle.DrawColorTwo, Vehicle.DrawColorThree);
+						//RenderHelper.DrawVehicle(displayRect, Vehicle, Vehicle.Pattern, true, Vehicle.DrawColor, Vehicle.DrawColorTwo, Vehicle.DrawColorThree);
 
 						if (selectedNode != null)
 						{

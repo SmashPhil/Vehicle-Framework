@@ -33,8 +33,9 @@ namespace Vehicles
 		/* Turrets */
 		public bool overheatMechanics = true;
 
-		/* Boats */
+		/* Performance */
 		public bool passiveWaterWaves = true;
+		public bool aerialVehicleEffects = true;
 
 		/* Fishing */
 		public float fishingMultiplier = 1f;
@@ -82,6 +83,7 @@ namespace Vehicles
 
 			/* Boats */
 			passiveWaterWaves = true;
+			aerialVehicleEffects = true;
 
 			/* Fishing */
 			fishingMultiplier = 1f;
@@ -124,6 +126,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref overheatMechanics, nameof(overheatMechanics), defaultValue: true);
 
 			Scribe_Values.Look(ref passiveWaterWaves, nameof(passiveWaterWaves), defaultValue: true);
+			Scribe_Values.Look(ref aerialVehicleEffects, nameof(aerialVehicleEffects), defaultValue: aerialVehicleEffects);
 
 			Scribe_Values.Look(ref fishingMultiplier, nameof(fishingMultiplier), defaultValue: 1f);
 			Scribe_Values.Look(ref fishingDelay, nameof(fishingDelay), defaultValue: 10000);
@@ -184,8 +187,9 @@ namespace Vehicles
 						DefDatabase<DesignationCategoryDef>.AllDefs.ForEach(desCat => GizmoHelper.DesignatorsChanged(desCat));
 					}
 
-					listingStandard.Header("VF_SeaVehicles".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
+					listingStandard.Header("VF_PerformanceSettings".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 					listingStandard.CheckboxLabeled("VF_PassiveWaterWaves".Translate(), ref passiveWaterWaves, "VF_PassiveWaterWavesTooltip".Translate());
+					listingStandard.CheckboxLabeled("VF_AerialVehicleEffects".Translate(), ref aerialVehicleEffects, "VF_AerialVehicleEffectsTooltip".Translate());
 
 					listingStandard.NewColumn();
 					string fishingHeader = "VF_Fishing".Translate();

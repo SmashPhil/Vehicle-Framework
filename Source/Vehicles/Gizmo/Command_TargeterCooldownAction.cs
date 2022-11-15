@@ -116,14 +116,17 @@ namespace Vehicles
 				{
 					alphaColorTicked.a = turret.CannonIconAlphaTicked;
 					GUIState.Push();
-					GUI.color = alphaColorTicked;
-					GenUI.DrawTextureWithMaterial(ammoRect, turret.loadedAmmo.uiIcon, material);
-					GUI.color = defaultColor;
-					Rect ammoCountRect = new Rect(ammoRect);
-					string ammoCount = turret.vehicle.inventory.innerContainer.Where(td => td.def == turret.loadedAmmo).Select(t => t.stackCount).Sum().ToStringSafe();
-					ammoCountRect.y += ammoCountRect.height / 2;
-					ammoCountRect.x += ammoCountRect.width - Text.CalcSize(ammoCount).x;
-					Widgets.Label(ammoCountRect, ammoCount);
+					{
+						GUI.color = alphaColorTicked;
+						GenUI.DrawTextureWithMaterial(ammoRect, turret.loadedAmmo.uiIcon, material);
+						GUI.color = defaultColor;
+						Rect ammoCountRect = new Rect(ammoRect);
+						string ammoCount = turret.vehicle.inventory.innerContainer.Where(td => td.def == turret.loadedAmmo).Select(t => t.stackCount).Sum().ToStringSafe();
+						ammoCountRect.y += ammoCountRect.height / 2;
+						ammoCountRect.x += ammoCountRect.width - Text.CalcSize(ammoCount).x;
+						Widgets.Label(ammoCountRect, ammoCount);
+					}
+					GUIState.Pop();
 				}
 				else if (turret.turretDef.genericAmmo && turret.turretDef.ammunition.AllowedDefCount > 0)
 				{
@@ -185,15 +188,17 @@ namespace Vehicles
 				Widgets.FillableBar(reloadBar, (float)turret.shellCount / turret.turretDef.magazineCapacity, VehicleTex.FullBarTex, VehicleTex.EmptyBarTex, true);
 
 				GUIState.Push();
-				Text.Font = GameFont.Small;
-				Text.Anchor = TextAnchor.MiddleCenter;
-				string ammoCountLabel = string.Format("{0} / {1}", turret.shellCount.ToString("F0"), turret.turretDef.magazineCapacity.ToString("F0"));
-				if (turret.turretDef.magazineCapacity <= 0)
 				{
-					ammoCountLabel = "\u221E";
-					Text.Font = GameFont.Medium;
+					Text.Font = GameFont.Small;
+					Text.Anchor = TextAnchor.MiddleCenter;
+					string ammoCountLabel = string.Format("{0} / {1}", turret.shellCount.ToString("F0"), turret.turretDef.magazineCapacity.ToString("F0"));
+					if (turret.turretDef.magazineCapacity <= 0)
+					{
+						ammoCountLabel = "\u221E";
+						Text.Font = GameFont.Medium;
+					}
+					Widgets.Label(reloadBar, ammoCountLabel);
 				}
-				Widgets.Label(reloadBar, ammoCountLabel);
 				GUIState.Pop();
 
 				GUI.color = Color.white;

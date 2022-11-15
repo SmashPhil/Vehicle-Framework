@@ -8,7 +8,6 @@ using UnityEngine;
 
 namespace Vehicles
 {
-	//REDO - CACHE LAUNCH PROTOCOL
 	public class VehicleSkyfaller_Leaving : VehicleSkyfaller
 	{
 		public AerialVehicleArrivalAction arrivalAction;
@@ -23,8 +22,7 @@ namespace Vehicles
 
 		public override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
-			skyfallerLoc = vehicle.CompVehicleLauncher.launchProtocol.AnimateTakeoff(drawLoc.y, flip);
-			vehicle.CompVehicleLauncher.launchProtocol.DrawAdditionalLaunchTextures(drawLoc.y);
+			vehicle.CompVehicleLauncher.launchProtocol.Draw(drawLoc, 0);
 			DrawDropSpotShadow();
 		}
 
@@ -34,7 +32,7 @@ namespace Vehicles
 			if (delayLaunchingTicks <= 0)
 			{
 				base.Tick();
-				if (vehicle.CompVehicleLauncher.launchProtocol.FinishedTakeoff(this))
+				if (vehicle.CompVehicleLauncher.launchProtocol.FinishedAnimation(this))
 				{
 					LeaveMap();
 				}
@@ -43,6 +41,7 @@ namespace Vehicles
 
 		protected override void LeaveMap()
 		{
+			vehicle.CompVehicleLauncher.launchProtocol.Release();
 			if (!createWorldObject)
 			{
 				base.LeaveMap();
@@ -81,8 +80,8 @@ namespace Vehicles
 			base.SpawnSetup(map, respawningAfterLoad);
 			if (!respawningAfterLoad)
 			{
-				vehicle.CompVehicleLauncher.launchProtocol.SetPositionLeaving(new Vector3(DrawPos.x, DrawPos.y + 1, DrawPos.z), Rotation, map);
-				vehicle.CompVehicleLauncher.launchProtocol.OrderProtocol(false);
+				vehicle.CompVehicleLauncher.launchProtocol.Prepare(map, Position, Rotation);
+				vehicle.CompVehicleLauncher.launchProtocol.OrderProtocol(LaunchProtocol.LaunchType.Takeoff);
 				delayLaunchingTicks = vehicle.CompVehicleLauncher.launchProtocol.launchProperties.delayByTicks;
 			}
 		}

@@ -15,11 +15,10 @@
 	{
 		Tags 
 		{ 
-			"IgnoreProjector" = "true" 
-			"Queue" = "Transparent-100" 
+			"IgnoreProjector" = "true"
+			"Queue" = "Transparent-100"
 			"RenderType" = "Transparent"
 		}
-		ZWrite Off
 		Pass
 		{
 			Blend SrcAlpha OneMinusSrcAlpha
