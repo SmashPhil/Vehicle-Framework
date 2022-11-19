@@ -13,7 +13,7 @@ namespace Vehicles
 		public const int PingPongTickLength = 100;
 
 		private static float middleMouseDownTime;
-		private static float ticksOpen;
+		private static float framesOpen;
 
 		private LaunchProtocol launchProtocol;
 		private Action<LocalTargetInfo, Rot4> action;
@@ -21,6 +21,8 @@ namespace Vehicles
 		private LocalTargetInfo cachedTarget;
 		private Func<LocalTargetInfo, bool> targetValidator;
 		private bool allowRotating;
+
+		private static (IntVec3 startingCell, Rot4 rotation, bool result) restrictionCached;
 
 		public static LandingTargeter Instance { get; private set; }
 
@@ -33,6 +35,7 @@ namespace Vehicles
 			Current.Game.CurrentMap = map;
 			BeginTargeting(vehicle, launchProtocol, action, targetValidator, actionWhenFinished, mouseAttachment, allowRotating);
 			ForcedTargeting = forcedTargeting;
+			
 		}
 
 		public void BeginTargeting(VehiclePawn vehicle, LaunchProtocol launchProtocol, Action<LocalTargetInfo, Rot4> action, Func<LocalTargetInfo, bool> targetValidator = null, Action actionWhenFinished = null, Texture2D mouseAttachment = null, bool allowRotating = false, bool forcedTargeting = false)
@@ -44,8 +47,9 @@ namespace Vehicles
 			this.mouseAttachment = mouseAttachment;
 			this.targetValidator = targetValidator;
 			this.allowRotating = allowRotating;
-			landingRotation = launchProtocol.landingProperties?.forcedRotation ?? Rot4.North;
+			landingRotation = launchProtocol.LandingProperties?.forcedRotation ?? Rot4.North;
 			ForcedTargeting = forcedTargeting;
+			ResetRestrictionCache();
 		}
 
 		public override void StopTargeting()
@@ -57,16 +61,37 @@ namespace Vehicles
 			}
 			action = null;
 			targetValidator = null;
-			ticksOpen = 0;
+			framesOpen = 0;
 			ForcedTargeting = false;
 		}
 
-		public bool InvalidAtPos(LocalTargetInfo localTargetInfo)
+		private static void ResetRestrictionCache()
+		{
+			restrictionCached = (IntVec3.Invalid, Rot4.Invalid, true);
+		}
+
+		public bool InvalidAtPos(LocalTargetInfo localTargetInfo, bool drawRestriction = false)
 		{
 			IntVec3 cell = localTargetInfo.Cell;
 			Vector3 position = new Vector3(cell.x, AltitudeLayer.Building.AltitudeFor(), cell.z).ToIntVec3().ToVector3Shifted();
-			VehiclePawn vehicleAtPos = MapHelper.VehicleInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation);
-			return !localTargetInfo.IsValid || (vehicleAtPos != vehicle && MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation)) || (targetValidator != null && !targetValidator(localTargetInfo));
+			VehiclePawn vehicleAtPos = MapHelper.VehicleInPosition(vehicle, Current.Game.CurrentMap, cell, landingRotation);
+			bool invalidPosition = !localTargetInfo.IsValid || (vehicleAtPos != vehicle && MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation)) || (targetValidator != null && !targetValidator(localTargetInfo));
+			bool restricted = false;
+			vehicle.Rotation = landingRotation;
+			if (vehicle.CompVehicleLauncher.launchProtocol.LandingProperties?.restriction is LaunchRestriction launchRestriction)
+			{
+				if (restrictionCached.startingCell != cell || restrictionCached.rotation != landingRotation)
+				{
+					bool result = !launchRestriction.CanStartProtocol(vehicle, Current.Game.CurrentMap, cell, landingRotation);
+					restrictionCached = (cell, landingRotation, result);
+				}
+				if (drawRestriction)
+				{
+					launchRestriction.DrawRestrictionsTargeter(vehicle, Current.Game.CurrentMap, cell, landingRotation);
+				}
+				restricted = restrictionCached.result;
+			}
+			return invalidPosition || restricted;
 		}
 
 		public override void ProcessInputEvents()
@@ -113,13 +138,17 @@ namespace Vehicles
 
 		public override void TargeterUpdate()
 		{
-			ticksOpen++;
+			framesOpen++;
 			LocalTargetInfo localTargetInfo = CurrentTargetUnderMouse();
 			if (localTargetInfo.IsValid)
 			{
-				Color color = InvalidAtPos(localTargetInfo) ? Designator_Place.CannotPlaceColor : Designator_Place.CanPlaceColor;
-				color.a = (Mathf.PingPong(ticksOpen, PingPongTickLength / 1.5f) / PingPongTickLength) + 0.25f;
+				Color color = InvalidAtPos(localTargetInfo, true) ? Designator_Place.CannotPlaceColor : Designator_Place.CanPlaceColor;
+				color.a = (Mathf.PingPong(framesOpen, PingPongTickLength / 1.5f) / PingPongTickLength) + 0.25f;
 				GhostDrawer.DrawGhostThing(localTargetInfo.Cell, landingRotation, vehicle.VehicleDef.buildDef, vehicle.VehicleDef.buildDef.graphic, color, AltitudeLayer.Blueprint);
+			}
+			if (framesOpen % 60 == 0) //Reset every second
+			{
+				ResetRestrictionCache();
 			}
 		}
 

@@ -27,27 +27,6 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), nameof(Pawn_PathFollower.StartPath)),
 				prefix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(StartVehiclePath)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathFinder), nameof(PathFinder.FindPath), new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode), typeof(PathFinderCostTuning) }),
-			//	transpiler: new HarmonyMethod(typeof(VehiclePathing),
-			//	nameof(PathAroundVehicles)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Reachability), nameof(Reachability.CanReach), new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(PathEndMode), typeof(TraverseParms) }),
-			//	prefix: new HarmonyMethod(typeof(VehiclePathing),
-			//	nameof(CanReachVehiclePosition)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenGrid), nameof(GenGrid.Impassable)),
-			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
-			//	nameof(ImpassableThroughVehicle)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.Walkable)),
-			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
-			//	nameof(WalkableThroughVehicle)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.WalkableFast), new Type[] { typeof(IntVec3) }),
-			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
-			//	nameof(WalkableFastThroughVehicleIntVec3)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.WalkableFast), new Type[] { typeof(int), typeof(int) }),
-			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
-			//	nameof(WalkableFastThroughVehicleInt2)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.WalkableFast), new Type[] { typeof(int) }),
-			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
-			//	nameof(WalkableFastThroughVehicleInt)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenAdj), nameof(GenAdj.OccupiedRect), parameters: new Type[] { typeof(Thing) }),
 				prefix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(OccupiedRectVehicles)));

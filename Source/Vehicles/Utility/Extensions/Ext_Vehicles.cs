@@ -65,7 +65,13 @@ namespace Vehicles
 				{
 					foreach ((VehicleEventDef eventDef, SoundDef soundDef) in vehicle.VehicleDef.soundOneShotsOnEvent)
 					{
-						vehicle.AddEvent(eventDef, () => soundDef.PlayOneShot(vehicle));
+						vehicle.AddEvent(eventDef, delegate ()
+						{
+							if (vehicle.Spawned)
+							{
+								soundDef.PlayOneShot(vehicle);
+							}
+						});
 					}
 				}
 				//Sustainers
@@ -75,7 +81,10 @@ namespace Vehicles
 					{
 						vehicle.AddEvent(eventStartStop.First, delegate ()
 						{
-							vehicle.sustainers.Spawn(soundDef, MaintenanceType.PerTick);
+							if (vehicle.Spawned)
+							{
+								vehicle.sustainers.Spawn(soundDef, MaintenanceType.PerTick);
+							}
 						});
 						vehicle.AddEvent(eventStartStop.Second, delegate ()
 						{

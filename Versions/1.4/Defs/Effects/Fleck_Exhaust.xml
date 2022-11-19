@@ -23,7 +23,7 @@
 	</FleckDef>
 
 
-	<FleckDef ParentName="FleckBaseSmoke">
+	<FleckDef Name = "RocketExhaustBase" ParentName="FleckBaseSmoke">
 		<defName>RocketExhaust</defName>
 		
 		<graphicData>
@@ -35,5 +35,13 @@
 		<fadeInTime>0.1</fadeInTime>
 		<solidTime>0.25</solidTime>
 		<fadeOutTime>0.25</fadeOutTime>
+	</FleckDef>
+	
+	<FleckDef ParentName="RocketExhaustBase">
+		<defName>RocketExhaust_Short</defName>
+		
+		<fadeInTime>0.05</fadeInTime>
+		<solidTime>0.05</solidTime>
+		<fadeOutTime>0.05</fadeOutTime>
 	</FleckDef>
 </Defs>

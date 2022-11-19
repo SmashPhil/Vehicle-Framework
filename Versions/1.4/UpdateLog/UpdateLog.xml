@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.4.1074</currentVersion>
+  <currentVersion>1.4.1078</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
@@ -14,7 +14,11 @@ I've updated the framework to version 1.4! I'm happy to say it wasn't a massive 
 
 - Fixed bug where damaging components through dev mode would not notify vehicle of damage, resulting in no deconstruction or undrafting.
 
-- Fixed bug with material renderQueue, causing vehicles to render underneath shadows in all instances.
+- Fixed bug with material renderQueue, causing vehicles to render underneath shadows on all layers.
+
+- Fixed bug with shader depth buffer, causing vehicles to render underneath shadows and not offset altitude properly on all layers.
+
+- Fixed bug where crash landed aerial vehicles would not rotate selection brackets.
 [title]Additional Changes[/title][font]Small[/font]
 - Removed "Click for More Info tooltip on vehicle components health menu until further notice.  I need to actually add an additional window for more details.
 

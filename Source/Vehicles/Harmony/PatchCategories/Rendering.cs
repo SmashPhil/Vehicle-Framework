@@ -15,6 +15,18 @@ namespace Vehicles
 {
 	internal class Rendering : IPatchCategory
 	{
+		/// <summary>
+		/// Const values from <see cref="CellInspectorDrawer"/>
+		/// </summary>
+		public const float DistFromMouse = 26f;
+		public const float LabelColumnWidth = 130f;
+		public const float InfoColumnWidth = 170f;
+		public const float WindowPadding = 12f;
+		public const float ColumnPadding = 12f;
+		public const float LineHeight = 24f;
+		public const float ThingIconSize = 22f;
+		public const float WindowWidth = 336f;
+
 		public static MethodInfo TrueCenter_Thing { get; private set; }
 		public static MethodInfo TrueCenter_Baseline { get; private set; }
 
@@ -32,6 +44,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(SelectionDrawer), "DrawSelectionBracketFor"),
 				prefix: new HarmonyMethod(typeof(Rendering),
 				nameof(DrawSelectionBracketsVehicles)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CellInspectorDrawer), "DrawThingRow"),
+				prefix: new HarmonyMethod(typeof(Rendering),
+				nameof(CellInspectorDrawVehicle)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn), nameof(Pawn.ProcessPostTickVisuals)),
 				prefix: new HarmonyMethod(typeof(Rendering),
 				nameof(ProcessVehiclePostTickVisuals)));
@@ -41,6 +56,7 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: TrueCenter_Thing,
 				prefix: new HarmonyMethod(typeof(Rendering),
 				nameof(TrueCenterVehicle)));
+
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Targeter), nameof(Targeter.TargeterOnGUI)),
 				postfix: new HarmonyMethod(typeof(Rendering),
 				nameof(DrawTargeters)));
@@ -53,13 +69,6 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Targeter), nameof(Targeter.StopTargeting)),
 				postfix: new HarmonyMethod(typeof(Rendering),
 				nameof(TargeterStop)));
-
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(OverlayDrawer), "RenderOutOfFuelOverlay"),
-			//	prefix: new HarmonyMethod(typeof(Rendering),
-			//	nameof(RenderVehicleOutOfFuelOverlay)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(OverlayDrawer), "RenderPulsingOverlay", parameters: new Type[] { typeof(Thing), typeof(Material), typeof(int), typeof(Mesh), typeof(bool) }),
-			//	transpiler: new HarmonyMethod(typeof(Rendering),
-			//	nameof(RenderOverlaysCenterVehicle)));
 		}
 
 		/// <summary>
@@ -112,7 +121,7 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="obj"></param>
 		/// <returns></returns>
-		public static bool DrawSelectionBracketsVehicles(object obj)
+		public static bool DrawSelectionBracketsVehicles(object obj, Material overrideMat)
 		{
 			var vehicle = obj as VehiclePawn;
 			var building = obj as VehicleBuilding;
@@ -125,22 +134,48 @@ namespace Vehicles
 				Vector3[] brackets = new Vector3[4];
 				float angle = vehicle.Angle;
 
-				Vector3 newDrawPos = vehicle.DrawPosTransformed(vehicle.VehicleDef.drawProperties.selectionBracketsOffset, angle);
+				//Vector3 newDrawPos = vehicle.DrawPosTransformed(vehicle.VehicleDef.drawProperties.selectionBracketsOffset, angle);
 
-				FieldInfo info = AccessTools.Field(typeof(SelectionDrawer), "selectTimes");
-				object o = info.GetValue(null);
-				Ext_Pawn.CalculateSelectionBracketPositionsWorldForMultiCellPawns(brackets, vehicle, newDrawPos, vehicle.RotatedSize.ToVector2(), (Dictionary<object, float>)o, Vector2.one, angle, 1f);
+				Ext_Pawn.CalculateSelectionBracketPositionsWorldForMultiCellPawns(brackets, vehicle, vehicle.DrawPos, vehicle.RotatedSize.ToVector2(), SelectionDrawer.SelectTimes, Vector2.one, angle, 1f);
 				
 				int num = Mathf.CeilToInt(angle);
 				for (int i = 0; i < 4; i++)
 				{
 					Quaternion rotation = Quaternion.AngleAxis(num, Vector3.up);
-					Graphics.DrawMesh(MeshPool.plane10, brackets[i], rotation, MaterialPresets.SelectionBracketMat, 0);
+					Graphics.DrawMesh(MeshPool.plane10, brackets[i], rotation, overrideMat ?? MaterialPresets.SelectionBracketMat, 0);
 					num -= 90;
 				}
 				return false;
 			}
-			//Add for building too?
+			return true;
+		}
+
+		/// <summary>
+		/// Divert render call to instead render full vehicle in UI
+		/// </summary>
+		/// <param name="thing"></param>
+		public static bool CellInspectorDrawVehicle(Thing thing, ref int ___numLines)
+		{
+			if (thing is VehiclePawn vehicle)
+			{
+				float num = ___numLines * LineHeight;
+				List<object> selectedObjects = Find.Selector.SelectedObjects;
+				Rect rect = new Rect(LineHeight / 2, num + LineHeight / 2, WindowWidth - LineHeight, LineHeight);
+				if (selectedObjects.Contains(thing))
+				{
+					Widgets.DrawHighlight(rect);
+				}
+				else if (___numLines % 2 == 1)
+				{
+					Widgets.DrawLightHighlight(rect);
+				}
+				rect = new Rect(LineHeight, num + LineHeight / 2 + 1f, ThingIconSize, ThingIconSize);
+				RenderHelper.DrawVehicle(rect, vehicle);
+				rect = new Rect(58f, num + LineHeight / 2, 370f, LineHeight);
+				Widgets.Label(rect, thing.LabelMouseover);
+				___numLines++;
+				return false;
+			}
 			return true;
 		}
 

@@ -35,30 +35,6 @@ namespace Vehicles
 
 		public virtual float TimeInAnimationVTOL => (float)ticksPassedVertical / CurAnimationProperties_Vertical.maxTicksVertical;
 
-		public override Command_Action LaunchCommand
-		{
-			get
-			{
-				Command_Action skyfallerTakeoff = new Command_Action
-				{
-					defaultLabel = "CommandLaunchGroup".Translate(),
-					defaultDesc = "CommandLaunchGroupDesc".Translate(),
-					icon = VehicleTex.LaunchCommandTex,
-					alsoClickIfOtherInGroupClicked = false,
-					action = delegate ()
-					{
-						if (vehicle.CompVehicleLauncher.AnyLeftToLoad)
-						{
-							Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmSendNotCompletelyLoadedPods".Translate(vehicle.LabelCapNoCount), new Action(StartChoosingDestination), false, null));
-							return;
-						}
-						StartChoosingDestination();
-					}
-				};
-				return skyfallerTakeoff;
-			}
-		}
-
 		public override bool FinishedAnimation(VehicleSkyfaller skyfaller)
 		{
 			return ticksPassedVertical >= CurAnimationProperties_Vertical.maxTicksVertical && base.FinishedAnimation(skyfaller);

@@ -382,8 +382,12 @@
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Health.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Rendering.cs" />
     <Compile Include="Comps\CompSignals.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Launching\DirectionalTakeoff.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\Misc\FleckData.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Launching\Properties\DirectionalProtocolProperties.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\Properties\PropellerProtocolProperties.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Launching\Restrictions\LaunchRestriction_Runway.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Launching\Restrictions\LaunchRestriction.cs" />
     <Compile Include="CustomFeatures\Misc\AnimationEditorTags.cs" />
     <Compile Include="CustomFeatures\SharedJobs\SharedJob.cs" />
     <Compile Include="AI\JobDrivers\VehicleJobDriver.cs" />
@@ -573,7 +577,7 @@
     <Compile Include="Gizmo\AltitudeMeter.cs" />
     <Compile Include="Gizmo\Command_LoadToAerialTransport.cs" />
     <Compile Include="Gizmo\Landing\Command_HighlightRadius.cs" />
-    <Compile Include="Gizmo\Landing\Command_Highlight.cs" />
+    <Compile Include="Gizmo\Landing\Command_ActionHighlighter.cs" />
     <Compile Include="Gizmo\Landing\Zone_Runway.cs" />
     <Compile Include="Harmony\PatchCategories\Combat.cs" />
     <Compile Include="Harmony\PatchCategories\WorldObjects.cs" />

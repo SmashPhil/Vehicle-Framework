@@ -11,219 +11,152 @@ namespace Vehicles
 {
 	public class DefaultTakeoff : LaunchProtocol
 	{
+		/* -- Xml Input -- */
+
+		[GraphEditable(Category = AnimationEditorTags.Takeoff)]
+		public LaunchProtocolProperties launchProperties;
+		[GraphEditable(Category = AnimationEditorTags.Landing)]
+		public LaunchProtocolProperties landingProperties;
+
+		/* ---------------- */
+
 		public DefaultTakeoff()
 		{
 		}
 
 		public DefaultTakeoff(DefaultTakeoff reference, VehiclePawn vehicle) : base(reference, vehicle)
 		{
+			landingProperties = reference.landingProperties;
+			launchProperties = reference.launchProperties;
 		}
 
-		public override string FailLaunchMessage => "SkyfallerLaunchNotValid".Translate();
+		protected override int TotalTicks_Takeoff => launchProperties.maxTicks;
 
-		public override bool CanLaunchNow
+		protected override int TotalTicks_Landing => landingProperties.maxTicks;
+
+		public override LaunchProtocolProperties CurAnimationProperties => launchType == LaunchType.Landing ? landingProperties : launchProperties;
+
+		public override LaunchProtocolProperties LandingProperties => landingProperties;
+		public override LaunchProtocolProperties LaunchProperties => launchProperties;
+
+		public override bool FinishedAnimation(VehicleSkyfaller skyfaller)
 		{
-			get
-			{
-				if (vehicle.Map != null)
-				{
-					return !vehicle.Position.Roofed(vehicle.Map);
-				}
-				return true;
-			}
+			return ticksPassed >= CurAnimationProperties.maxTicks;
 		}
 
-		public override Command_Action LaunchCommand
+		/// <summary>
+		/// Tick method for <see cref="AnimationManager"/> with total ticks passed since start.
+		/// </summary>
+		/// <param name="ticksPassed"></param>
+		protected override int AnimationEditorTick_Landing(int ticksPassed)
 		{
-			get
-			{
-				Command_Action skyfallerTakeoff = new Command_Action
-				{
-					defaultLabel = "CommandLaunchGroup".Translate(),
-					defaultDesc = "CommandLaunchGroupDesc".Translate(),
-					icon = VehicleTex.LaunchCommandTex,
-					alsoClickIfOtherInGroupClicked = false,
-					action = delegate ()
-					{
-						if (vehicle.CompVehicleLauncher.AnyLeftToLoad)
-						{
-							Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmSendNotCompletelyLoadedPods".Translate(vehicle.LabelCapNoCount), new Action(StartChoosingDestination), false, null));
-							return;
-						}
-						StartChoosingDestination();
-					}
-				};
-				return skyfallerTakeoff;
-			}
+			this.ticksPassed = ticksPassed.Take(landingProperties.maxTicks, out int remaining);
+			TickMotes();
+			return remaining;
+		}
+
+		protected override int AnimationEditorTick_Takeoff(int ticksPassed)
+		{
+			this.ticksPassed = ticksPassed;
+			TickMotes();
+			return 0;
 		}
 
 		protected override (Vector3 drawPos, float rotation) AnimateLanding(Vector3 drawPos, float rotation)
 		{
-			if (!landingProperties.rotationCurve.NullOrEmpty())
+			if (!LandingProperties.rotationCurve.NullOrEmpty())
 			{
-				rotation += landingProperties.rotationCurve.Evaluate(TimeInAnimation);
+				//Flip rotation if either west or south
+				int sign = Ext_Math.Sign(LandingProperties.flipRotation != vehicle.Rotation);
+				rotation += LandingProperties.rotationCurve.Evaluate(TimeInAnimation) * sign;
 			}
-			if (!landingProperties.xPositionCurve.NullOrEmpty())
+			if (!LandingProperties.xPositionCurve.NullOrEmpty())
 			{
-				drawPos.x += landingProperties.xPositionCurve.Evaluate(TimeInAnimation);
+				//Flip rotation if either west or south
+				int sign = Ext_Math.Sign(LandingProperties.flipHorizontal != vehicle.Rotation);
+				drawPos.x += LandingProperties.xPositionCurve.Evaluate(TimeInAnimation) * sign;
 			}
-			if (!landingProperties.zPositionCurve.NullOrEmpty())
+			if (!LandingProperties.zPositionCurve.NullOrEmpty())
 			{
-				drawPos.z += landingProperties.zPositionCurve.Evaluate(TimeInAnimation);
+				//Flip rotation if either west or south
+				int sign = Ext_Math.Sign(LandingProperties.flipVertical != vehicle.Rotation);
+				drawPos.z += LandingProperties.zPositionCurve.Evaluate(TimeInAnimation) * sign;
 			}
-			if (!landingProperties.offsetCurve.NullOrEmpty())
+			if (!LandingProperties.offsetCurve.NullOrEmpty())
 			{
-				Vector2 offset = landingProperties.offsetCurve.EvaluateT(TimeInAnimation);
-				drawPos += new Vector3(offset.x, 0, offset.y);
+				Vector2 offset = LandingProperties.offsetCurve.EvaluateT(TimeInAnimation);
+				int signX = Ext_Math.Sign(LandingProperties.flipHorizontal != vehicle.Rotation);
+				int signZ = Ext_Math.Sign(LandingProperties.flipVertical != vehicle.Rotation);
+				drawPos += new Vector3(offset.x * signX, 0, offset.y * signZ);
 			}
 			return base.AnimateLanding(drawPos, rotation);
 		}
 
 		protected override (Vector3 drawPos, float rotation) AnimateTakeoff(Vector3 drawPos, float rotation)
 		{
-			if (!launchProperties.rotationCurve.NullOrEmpty())
+			if (!LaunchProperties.rotationCurve.NullOrEmpty())
 			{
-				rotation += launchProperties.rotationCurve.Evaluate(TimeInAnimation);
+				//Flip rotation if either west or south
+				int sign = Ext_Math.Sign(LaunchProperties.flipRotation != vehicle.Rotation);
+				rotation += LaunchProperties.rotationCurve.Evaluate(TimeInAnimation) * sign;
 			}
-			if (!launchProperties.xPositionCurve.NullOrEmpty())
+			if (!LaunchProperties.xPositionCurve.NullOrEmpty())
 			{
-				drawPos.x += launchProperties.xPositionCurve.Evaluate(TimeInAnimation);
+				//Flip rotation if either west or south
+				int sign = Ext_Math.Sign(LaunchProperties.flipHorizontal != vehicle.Rotation);
+				drawPos.x += LaunchProperties.xPositionCurve.Evaluate(TimeInAnimation) * sign;
 			}
-			if (!launchProperties.zPositionCurve.NullOrEmpty())
+			if (!LaunchProperties.zPositionCurve.NullOrEmpty())
 			{
-				drawPos.z += launchProperties.zPositionCurve.Evaluate(TimeInAnimation);
+				//Flip rotation if either west or south
+				int sign = Ext_Math.Sign(LaunchProperties.flipVertical != vehicle.Rotation);
+				drawPos.z += LaunchProperties.zPositionCurve.Evaluate(TimeInAnimation) * sign;
 			}
-			if (!launchProperties.offsetCurve.NullOrEmpty())
+			if (!LaunchProperties.offsetCurve.NullOrEmpty())
 			{
-				Vector2 offset = launchProperties.offsetCurve.EvaluateT(TimeInAnimation);
-				drawPos += new Vector3(offset.x, 0, offset.y);
+				Vector2 offset = LaunchProperties.offsetCurve.EvaluateT(TimeInAnimation);
+				int signX = Ext_Math.Sign(LaunchProperties.flipHorizontal != vehicle.Rotation);
+				int signZ = Ext_Math.Sign(LaunchProperties.flipVertical != vehicle.Rotation);
+				drawPos += new Vector3(offset.x * signX, 0, offset.y * signZ);
 			}
 			return base.AnimateTakeoff(drawPos, rotation);
 		}
 
-		public override IEnumerable<FloatMenuOption> GetFloatMenuOptionsAt(int tile)
+		protected override FloatMenuOption FloatMenuOption_LandInsideMap(MapParent mapParent, int tile)
 		{
-			if (AerialVehicleArrivalAction_FormVehicleCaravan.CanFormCaravanAt(vehicle, tile) && !Find.WorldObjects.AnySettlementBaseAt(tile) && !Find.WorldObjects.AnySiteAt(tile))
+			return new FloatMenuOption("LandInExistingMap".Translate(vehicle.Label), delegate ()
 			{
-				yield return new FloatMenuOption("FormCaravanHere".Translate(), delegate ()
+				Current.Game.CurrentMap = mapParent.Map;
+				CameraJumper.TryHideWorld();
+				LandingTargeter.Instance.BeginTargeting(vehicle, this, delegate (LocalTargetInfo target, Rot4 rot)
 				{
 					if (vehicle.Spawned)
 					{
-						vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_FormVehicleCaravan(vehicle));
+						vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, mapParent, tile, target.Cell, rot));
 					}
 					else
 					{
 						AerialVehicleInFlight aerial = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
-						aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_FormVehicleCaravan(vehicle));
-					}
-				}, MenuOptionPriority.Default, null, null, 0f, null, null);
-			}
-			else if (Find.WorldObjects.MapParentAt(tile) is MapParent parent)
-			{
-				if (CanLandInSpecificCell(parent))
-				{
-					yield return new FloatMenuOption("LandInExistingMap".Translate(vehicle.Label), delegate ()
-					{
-						Current.Game.CurrentMap = parent.Map;
-						CameraJumper.TryHideWorld();
-						LandingTargeter.Instance.BeginTargeting(vehicle, this, delegate (LocalTargetInfo target, Rot4 rot)
+						if (aerial is null)
 						{
-							if (vehicle.Spawned)
-							{
-								vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, target.Cell, rot));
-							}
-							else
-							{
-								AerialVehicleInFlight aerial = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
-								if (aerial is null)
-								{
-									Log.Error($"Attempted to launch into existing map where CurrentMap is null and no AerialVehicle with {vehicle.Label} exists.");
-									return;
-								}
-								aerial.arrivalAction = new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, target.Cell, rot);
-								aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, parent, tile, target.Cell, rot));
-								vehicle.CompVehicleLauncher.inFlight = true;
-								CameraJumper.TryShowWorld();
-							}
-						}, null, null, null, vehicle.VehicleDef.rotatable && landingProperties.forcedRotation is null);
-					}, MenuOptionPriority.Default, null, null, 0f, null, null);
-				}
-				if (vehicle.CompVehicleLauncher.ControlInFlight)
-				{
-					yield return MapHelper.ReconFloatMenuOption(vehicle, parent);
-				}
-				if (vehicle.CompVehicleLauncher.ControlInFlight && vehicle.CompVehicleTurrets != null) //REDO - strafe specific properties
-				{
-					yield return new FloatMenuOption("VehicleStrafeRun".Translate(), delegate ()
-					{
-						if (vehicle.Spawned)
-						{
-							LaunchTargeter.ContinueTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseWorldTarget), vehicle.Map.Tile, true, VehicleTex.TargeterMouseAttachment, true, null,
-								(GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => TargetingLabelGetter(target, tile, path, fuelCost));
+							Log.Error($"Attempted to launch into existing map where CurrentMap is null and no AerialVehicle with {vehicle.Label} exists.");
+							return;
 						}
-						else
-						{
-							AerialVehicleInFlight aerialVehicle = vehicle.GetAerialVehicle();
-							if (aerialVehicle is null)
-							{
-								Log.Error($"Unable to launch strafe run. AerialVehicle is null and {vehicle.LabelCap} is not spawned.");
-								return;
-							}
-							LaunchTargeter.Instance.ContinueTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(aerialVehicle.ChoseTargetOnMap), aerialVehicle, true, VehicleTex.TargeterMouseAttachment, false, null,
-								(GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, aerialVehicle.Tile, path, fuelCost));
-						}
+						aerial.arrivalAction = new AerialVehicleArrivalAction_LandSpecificCell(vehicle, mapParent, tile, target.Cell, rot);
+						aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, mapParent, tile, target.Cell, rot));
+						vehicle.CompVehicleLauncher.inFlight = true;
 						CameraJumper.TryShowWorld();
-						LaunchTargeter.Instance.RegisterActionOnTile(tile, new AerialVehicleArrivalAction_StrafeMap(vehicle, parent));
-					}, MenuOptionPriority.Default, null, null, 0f, null, null);
-				}
-			}
-			if (Find.WorldObjects.SettlementAt(tile) is Settlement settlement)
-			{
-				if (settlement.Faction.def.techLevel <= TechLevel.Industrial)
-				{
-					yield return new FloatMenuOption("LandVehicleHere".Translate(), delegate ()
-					{
-						if (vehicle.Spawned)
-						{
-							vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_FormVehicleCaravan(vehicle));
-						}
-						else
-						{
-							AerialVehicleInFlight aerial = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
-							aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_VisitSettlement(vehicle, settlement));
-						}
-					}, MenuOptionPriority.Default, null, null, 0f, null, null);
-				}
-
-                if (AerialVehicleArrivalAction_Trade.CanTradeWith(vehicle, settlement))
-                {
-                    yield return new FloatMenuOption("TradeWith".Translate(settlement.Label), delegate()
-                    {
-                        if (vehicle.Spawned)
-                        {
-                            vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_Trade(vehicle, settlement));
-                        }
-                        else
-                        {
-                            AerialVehicleInFlight aerial = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
-                            aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_Trade(vehicle, settlement));
-                        }
-                    });
-                }
-				foreach (FloatMenuOption option in AerialVehicleArrivalAction_AttackSettlement.GetFloatMenuOptions(vehicle, this, settlement))
-				{
-					yield return option;
-				}
-			}
+					}
+				}, null, null, null, vehicle.VehicleDef.rotatable && landingProperties.forcedRotation is null);
+			}, MenuOptionPriority.Default, null, null, 0f, null, null);
 		}
 
-		public override void StartChoosingDestination()
+		public override void ResolveProperties(LaunchProtocol reference)
 		{
-			CameraJumper.TryJump(CameraJumper.GetWorldTarget(vehicle));
-			Find.WorldSelector.ClearSelection();
-			int tile = vehicle.Map.Tile;
-			LaunchTargeter.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseWorldTarget), vehicle.Map.Tile, true, VehicleTex.TargeterMouseAttachment, true, null, 
-				(GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => TargetingLabelGetter(target, tile, path, fuelCost));
+			base.ResolveProperties(reference);
+			DefaultTakeoff defaultReference = reference as DefaultTakeoff;
+			launchProperties = defaultReference.launchProperties;
+			landingProperties = defaultReference.landingProperties;
 		}
 	}
 }

@@ -82,7 +82,7 @@ namespace Vehicles
 			{
 				vehicle.CompVehicleLauncher.launchProtocol.Prepare(map, Position, Rotation);
 				vehicle.CompVehicleLauncher.launchProtocol.OrderProtocol(LaunchProtocol.LaunchType.Takeoff);
-				delayLaunchingTicks = vehicle.CompVehicleLauncher.launchProtocol.launchProperties.delayByTicks;
+				delayLaunchingTicks = vehicle.CompVehicleLauncher.launchProtocol.CurAnimationProperties.delayByTicks;
 			}
 		}
 

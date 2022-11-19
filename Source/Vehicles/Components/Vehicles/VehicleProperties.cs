@@ -38,6 +38,7 @@ namespace Vehicles
 
 		//---------------   Pathing   ---------------
 		public bool defaultTerrainImpassable = false;
+		public bool defaultBiomesImpassable = false;
 
 		/// <summary>
 		/// Do not use snow costs to try and set impassable terrain based on snow depth. It is not designed for that, and if it was it would lag
@@ -52,7 +53,6 @@ namespace Vehicles
 		/// </summary>
 		public Dictionary<ThingDef, int> customThingCosts;
 
-		public bool defaultBiomesImpassable = false;
 		public float offRoadMultiplier = 1;
 		public Dictionary<RiverDef, float> customRiverCosts = new Dictionary<RiverDef, float>();
 		public Dictionary<BiomeDef, float> customBiomeCosts = new Dictionary<BiomeDef, float>();

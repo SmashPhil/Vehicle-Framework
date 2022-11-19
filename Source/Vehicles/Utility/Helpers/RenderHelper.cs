@@ -128,6 +128,11 @@ namespace Vehicles
 			}
 		}
 
+		public static string DrawVehicle(Rect rect, VehiclePawn vehicle, Rot8? rot = null)
+		{
+			return DrawVehicleDef(rect, vehicle.VehicleDef, patternData: vehicle.patternData, rot: rot);
+		}
+
 		/// <summary>
 		/// Draw <paramref name="vehicleDef"/>
 		/// </summary>

@@ -46,7 +46,7 @@ namespace Vehicles
 		public VehiclePawn Vehicle => parent as VehiclePawn;
 		public CompProperties_VehicleLauncher Props => props as CompProperties_VehicleLauncher;
 
-		public float FlySpeed => flightSpeedModifier + Vehicle.GetStatValue(VehicleStatDefOf.FlightSpeed);
+		public float FlightSpeed => flightSpeedModifier + Vehicle.GetStatValue(VehicleStatDefOf.FlightSpeed);
 		public float FuelConsumptionWorldMultiplier => fuelEfficiencyWorldModifier + SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.fuelConsumptionWorldMultiplier), Props.fuelConsumptionWorldMultiplier);
 		public int FixedMaxDistance => SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.fixedLaunchDistanceMax), Props.fixedLaunchDistanceMax);
 		public bool SpaceFlight => SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.spaceFlight), Props.spaceFlight);
@@ -64,7 +64,7 @@ namespace Vehicles
 		{
 			get
 			{
-				bool flight = launchProtocol.CanLaunchNow && FlySpeed > 0 && (!Vehicle.CompFueledTravel?.EmptyTank ?? true);
+				bool flight = launchProtocol.CanLaunchNow && FlightSpeed > 0 && (!Vehicle.CompFueledTravel?.EmptyTank ?? true);
 				if (!flight)
 				{
 					return ClimbRateCurve.Evaluate(0);
@@ -146,7 +146,7 @@ namespace Vehicles
 			{
 				command.Disable(launchProtocol.FailLaunchMessage);
 			}
-			if (FlySpeed <= 0)
+			if (FlightSpeed <= 0)
 			{
 				command.Disable("VF_NoFlightSpeed".Translate());
 			}
@@ -220,9 +220,9 @@ namespace Vehicles
 
 		public float FuelNeededToLaunchAtDist(float tileDistance)
 		{
-			float speedPctPerTick = (AerialVehicleInFlight.PctPerTick / tileDistance) * FlySpeed;
+			float speedPctPerTick = (AerialVehicleInFlight.PctPerTick / tileDistance) * FlightSpeed;
 			float amount = Vehicle.CompFueledTravel.ConsumptionRatePerTick * FuelConsumptionWorldMultiplier;
-			return amount * (1f / speedPctPerTick);
+			return amount / speedPctPerTick;
 		}
 
 		public virtual void InitializeLaunchProtocols(bool regenerateProtocols)

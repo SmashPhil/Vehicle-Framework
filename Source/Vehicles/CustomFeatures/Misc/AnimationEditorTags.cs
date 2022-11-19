@@ -10,5 +10,8 @@ namespace Vehicles
 	{
 		public const string Takeoff = "Takeoff";
 		public const string Landing = "Landing";
+
+		public const string Horizontal = "Horizontal";
+		public const string Vertical = "Vertical";
 	}
 }

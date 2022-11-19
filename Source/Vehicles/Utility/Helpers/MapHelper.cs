@@ -58,39 +58,6 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Recon option for vehicle targeting
-		/// </summary>
-		/// <param name="vehicle"></param>
-		/// <param name="parent"></param>
-		public static FloatMenuOption ReconFloatMenuOption(VehiclePawn vehicle, MapParent parent)
-		{
-			if (parent.EnterCooldownBlocksEntering())
-			{
-				return new FloatMenuOption($"{"AerialReconSite".Translate(parent.Label)} ({"EnterCooldownBlocksEntering".Translate()})", null);
-			}
-			return new FloatMenuOption("AerialReconSite".Translate(parent.Label), delegate ()
-			{
-				if (vehicle.Spawned)
-				{
-					vehicle.CompVehicleLauncher.TryLaunch(parent.Tile, null, true);
-				}
-				else
-				{
-					AerialVehicleInFlight aerial = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
-					if (aerial is null)
-					{
-						Log.Error($"Attempted to launch into existing map where CurrentMap is null and no AerialVehicle with {vehicle.Label} exists.");
-						return;
-					}
-					List<FlightNode> flightPath = new List<FlightNode>(LaunchTargeter.FlightPath);
-					aerial.OrderFlyToTiles(flightPath, aerial.DrawPos);
-					aerial.flightPath.ReconCircleAt(parent.Tile);
-					vehicle.CompVehicleLauncher.inFlight = true;
-				}
-			});
-		}
-
-		/// <summary>
 		/// Strafe option for combat aerial vehicles targeting open maps
 		/// </summary>
 		/// <param name="vehicle"></param>

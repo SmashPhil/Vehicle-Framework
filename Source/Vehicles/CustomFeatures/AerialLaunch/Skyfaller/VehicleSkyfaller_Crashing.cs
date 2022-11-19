@@ -212,7 +212,7 @@ namespace Vehicles
 			{
 				vehicle.CompVehicleLauncher.launchProtocol.Prepare(map, Position, Rotation);
 				vehicle.CompVehicleLauncher.launchProtocol.OrderProtocol(LaunchProtocol.LaunchType.Landing);
-				delayLandingTicks = vehicle.CompVehicleLauncher.launchProtocol.landingProperties?.delayByTicks ?? 0;
+				delayLandingTicks = vehicle.CompVehicleLauncher.launchProtocol.CurAnimationProperties.delayByTicks;
 
 				ticksToImpact = def.skyfaller.ticksToImpactRange.RandomInRange;
 				if (def.skyfaller.MakesShrapnel)

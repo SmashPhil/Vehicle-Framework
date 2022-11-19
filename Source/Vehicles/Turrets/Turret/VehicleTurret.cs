@@ -1345,9 +1345,9 @@ namespace Vehicles
 		/// <returns>true if cannonTarget set to target, false if target is still valid</returns>
 		public virtual bool SetTargetConditionalOnThing(LocalTargetInfo target, bool resetPrefireTimer = true)
 		{
-			if (cannonTarget.IsValid && HasAmmo && !OnCooldown && (cannonTarget.HasThing || FullAuto))
+			if (cannonTarget.IsValid && (cannonTarget.HasThing || FullAuto))
 			{
-				if(cannonTarget.Pawn != null)
+				if (cannonTarget.Pawn != null)
 				{
 					if ( (cannonTarget.Pawn.Dead && CachedPawnTargetStatus != PawnStatusOnTarget.Dead ) || (cannonTarget.Pawn.Downed && CachedPawnTargetStatus != PawnStatusOnTarget.Down) )
 					{
@@ -1355,13 +1355,10 @@ namespace Vehicles
 						return true;
 					}
 				}
-				else if(cannonTarget.Thing != null)
+				else if (cannonTarget.Thing != null && cannonTarget.Thing.HitPoints <= 0)
 				{
-					if (cannonTarget.Thing.HitPoints > 0)
-					{
-						SetTarget(target);
-						return true;
-					}
+					SetTarget(target);
+					return true;
 				}
 				return false;
 			}

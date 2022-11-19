@@ -11,7 +11,7 @@ namespace Vehicles
 	{
 		public override void VehicleArrived(VehiclePawn vehicle, LaunchProtocol launchProtocol, Map map)
 		{
-			Rot4 vehicleRotation = launchProtocol.landingProperties.forcedRotation ?? Rot4.Random;
+			Rot4 vehicleRotation = launchProtocol.LandingProperties?.forcedRotation ?? Rot4.Random;
 			IntVec2 vehicleSize = vehicle.VehicleDef.Size;
 			IntVec3 cell = CellFinderExtended.RandomEdgeCell(vehicleRotation.Opposite, map, delegate(IntVec3 cell)
 			{

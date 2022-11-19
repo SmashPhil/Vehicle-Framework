@@ -11,8 +11,6 @@ namespace Vehicles
 	/// </summary>
 	public class VehicleDrawProperties
 	{
-		public Vector2 selectionBracketsOffset = Vector2.zero;
-
 		public Rot8 displayRotation = Rot8.East;
 		//Same concept as display coord and size. Fit to settings window
 		public Vector2 displayOffset = Vector2.zero;

@@ -31,7 +31,7 @@ namespace Vehicles
 		{
 			base.Arrived(tile);
 			VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)VehicleSkyfallerMaker.MakeSkyfaller(vehicle.CompVehicleLauncher.Props.skyfallerIncoming, vehicle);
-			Rot4 vehicleRotation = vehicle.CompVehicleLauncher.launchProtocol.landingProperties.forcedRotation ?? landingRot;
+			Rot4 vehicleRotation = vehicle.CompVehicleLauncher.launchProtocol.LandingProperties?.forcedRotation ?? landingRot;
 			GenSpawn.Spawn(skyfaller, landingCell, mapParent.Map, vehicleRotation);
 		}
 

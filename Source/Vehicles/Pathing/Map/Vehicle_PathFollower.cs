@@ -201,6 +201,10 @@ namespace Vehicles
 
 		public void StopDead()
 		{
+			if (!vehicle.Spawned)
+			{
+				return;
+			}
 			if (curPath != null)
 			{
 				curPath.ReleaseToPool();

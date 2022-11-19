@@ -29,7 +29,7 @@ namespace Vehicles
 			burnRadius = reference.burnRadius;
 		}
 
-		public override Command_Action LaunchCommand
+		public override Command_ActionHighlighter LaunchCommand
 		{
 			get
 			{

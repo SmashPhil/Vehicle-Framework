@@ -13,8 +13,13 @@ namespace Vehicles
 		public int delayByTicks;
 		public Rot4? forcedRotation;
 
-		public List<GraphicDataLayered> additionalTextures;
+		public Rot4 flipHorizontal = Rot4.Invalid;
+		public Rot4 flipVertical = Rot4.Invalid;
+		public Rot4 flipRotation = Rot4.Invalid;
 
+		public LaunchRestriction restriction;
+
+		public List<GraphicDataLayered> additionalTextures;
 		public List<AnimationEvent> events;
 
 		[GraphEditable(FunctionOfT = true)]

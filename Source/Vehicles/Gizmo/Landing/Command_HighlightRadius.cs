@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Vehicles
 {
-	public class Command_HighlightRadius : Command_Action
+	public class Command_HighlightRadius : Command_ActionHighlighter
 	{
 		public int radius;
 		public bool needsLOS;

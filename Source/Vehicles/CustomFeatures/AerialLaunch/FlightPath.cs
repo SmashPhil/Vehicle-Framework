@@ -64,7 +64,7 @@ namespace Vehicles
 				{
 					Vector3 nextTile = Find.WorldGrid.GetTileCenter(Last.tile);
 					float distance = Ext_Math.SphericalDistance(start, nextTile);
-					float speedPctPerTick = (AerialVehicleInFlight.PctPerTick / distance) * aerialVehicle.vehicle.CompVehicleLauncher.FlySpeed;
+					float speedPctPerTick = (AerialVehicleInFlight.PctPerTick / distance) * aerialVehicle.vehicle.CompVehicleLauncher.FlightSpeed;
 					ticksLeft += Mathf.RoundToInt(transitionPctLeft / speedPctPerTick);
 				}
 				else
@@ -75,7 +75,7 @@ namespace Vehicles
 						float distance = Ext_Math.SphericalDistance(start, nextTile);
 						start = nextTile;
 
-						float speedPctPerTick = (AerialVehicleInFlight.PctPerTick / distance) * aerialVehicle.vehicle.CompVehicleLauncher.FlySpeed;
+						float speedPctPerTick = (AerialVehicleInFlight.PctPerTick / distance) * aerialVehicle.vehicle.CompVehicleLauncher.FlightSpeed;
 						ticksLeft += Mathf.RoundToInt(transitionPctLeft / speedPctPerTick);
 						transitionPctLeft = 1; //Only first node being traveled to has any progression
 					}

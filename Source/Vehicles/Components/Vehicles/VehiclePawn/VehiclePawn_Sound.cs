@@ -29,6 +29,10 @@ namespace Vehicles
 				sustainerAmbient.End();
 				sustainerAmbient = null;
 			}
+			if (sustainers != null)
+			{
+				sustainers.EndAll();
+			}
 		}
 	}
 }

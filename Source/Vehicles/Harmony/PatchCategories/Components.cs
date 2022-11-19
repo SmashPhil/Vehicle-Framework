@@ -56,7 +56,10 @@ namespace Vehicles
 						Messages.Message("Vehicles_NotEnoughToOperate".Translate(), MessageTypeDefOf.RejectInput);
 						return false;
 					}
-					vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(vehicle);
+					if (vehicle.Spawned)
+					{
+						vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(vehicle);
+					}
 				}
 				else if (!value && vehicle.vPather.curPath != null)
 				{

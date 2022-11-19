@@ -13,6 +13,7 @@ namespace Vehicles
 {
 	public class AerialVehicleInFlight : DynamicDrawnWorldObject
 	{
+		public const float ReconFlightSpeed = 5;
 		public const float ExpandingResize = 35f;
 		public const float TransitionTakeoff = 0.025f;
 		public const float PctPerTick = 0.001f;
@@ -287,7 +288,7 @@ namespace Vehicles
 							Settlement nearestSettlement = playerSettlements.MinBy(s => Ext_Math.SphericalDistance(s.DrawPos, DrawPos));
 							
 							LaunchProtocol launchProtocol = vehicle.CompVehicleLauncher.launchProtocol;
-							Rot4 vehicleRotation = launchProtocol.landingProperties.forcedRotation ?? Rot4.Random;
+							Rot4 vehicleRotation = launchProtocol.LandingProperties?.forcedRotation ?? Rot4.Random;
 							IntVec3 cell = CellFinderExtended.RandomCenterCell(nearestSettlement.Map, (IntVec3 cell) => !MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, cell, vehicleRotation));
 							VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
 							skyfaller.vehicle = vehicle;
@@ -355,7 +356,7 @@ namespace Vehicles
 		{
 			bool Validator(GlobalTargetInfo target, Vector3 pos, Action<int, AerialVehicleArrivalAction, bool> launchAction)
 			{
-				float maxGlideDistance = Mathf.Abs(Elevation / ElevationChange) * PctPerTick * vehicle.CompVehicleLauncher.FlySpeed.Clamp(0, 5);
+				float maxGlideDistance = Mathf.Abs(Elevation / ElevationChange) * PctPerTick * vehicle.CompVehicleLauncher.FlightSpeed.Clamp(0, 5);
 				float sphericalDistance = Ext_Math.SphericalDistance(pos, WorldHelper.GetTilePos(target.Tile));
 				if (!target.IsValid)
 				{
@@ -412,6 +413,11 @@ namespace Vehicles
 				MoveForward();
 				TickRotators();
 				SpendFuel();
+
+				if (vehicle.CompFueledTravel?.Fuel <= 0)
+				{
+					InitiateCrashEvent(null);
+				}
 				//ChangeElevation();
 			}
 			//if (Find.TickManager.TicksGame % TicksPerValidateFlightPath == 0)
@@ -551,7 +557,8 @@ namespace Vehicles
 		private void SetSpeed()
 		{
 			float tileDistance = Ext_Math.SphericalDistance(position, flightPath.First.center);
-			speedPctPerTick = (PctPerTick / tileDistance) * vehicle.CompVehicleLauncher.FlySpeed.Clamp(0, 99999);
+			float flightSpeed = recon ? ReconFlightSpeed : vehicle.CompVehicleLauncher.FlightSpeed;
+			speedPctPerTick = (PctPerTick / tileDistance) * flightSpeed.Clamp(0, 99999);
 		}
 
 		private void InitializeFacing()

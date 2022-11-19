@@ -25,6 +25,20 @@ namespace Vehicles
 			activeSustainers.Add(sustainer);
 		}
 
+		/// <summary>
+		/// End all active sustainers
+		/// </summary>
+		public void EndAll()
+		{
+			for (int i = activeSustainers.Count - 1; i >= 0; i--)
+			{
+				activeSustainers[i].End();
+			}
+		}
+
+		/// <summary>
+		/// End all active sustainers of <paramref name="soundDef"/> type
+		/// </summary>
 		public void EndAll(SoundDef soundDef)
 		{
 			List<Sustainer> sustainers = activeSustainers.Where(sustainers => sustainers.def == soundDef).ToList();
