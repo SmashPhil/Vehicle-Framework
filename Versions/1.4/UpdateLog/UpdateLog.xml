@@ -19,6 +19,42 @@ I've updated the framework to version 1.4! I'm happy to say it wasn't a massive 
 - Fixed bug with shader depth buffer, causing vehicles to render underneath shadows and not offset altitude properly on all layers.
 
 - Fixed bug where crash landed aerial vehicles would not rotate selection brackets.
+
+- Fixed bug so BodyIntegrity is based on the sum of hp% for all vehicle components.
+
+- Fixed Crash To Desktop bug during caravan formation while gathering animals.
+
+- Fixed infinite wandering bug while forming vehicle caravan with slaves / prisoners.
+
+- Fixed bug where vehicle caravan formation would assign improper duties while boarding.
+
+- Fixed bug where items would be unreachable for instant formation while all pawns are inside the vehicle.
+
+- Fixed aerial vehicle launch targeter not canceling when using Cancel keybind to exit the world map.
+
+- Fixed bug where aerial vehicle launch targeter would display inaccurate fuel costs for the first waypoint.
+
+- Fixed bug where vehicle turrets would queue a burst at the beginning of targeting, rather than after it finished warmup, allowing a turret to instant fire while paused.
+
+- Fixed incorrect cargo capacity stat in Cargo ITab
+
+- Fixed issue where pawns would be unable to exit when the vehicle becomes overencumbered, hiding the draft gizmo and therefor all disembark gizmos.
+
+- Fixed translation issue with vehicles using "walk" for any movement related commands.
+
+- Fixed issue where Mod Settings columns would clip on the right side of the window.
+
+- Fixed bug where clicking a turret while it was firing would throw an exception.
+
+- Fixed rendering issue where vehicle gizmos would incorrectly scale the turret offsets
+
+- Fixed rendering issue where east / west wouldn't mirror properly for turrets.
+
+- Fixed bug where colonist bar pawns would not be clickable / selectable when inside a vehicle.
+
+- Fixed bug where vehicle turrets would not maintain targeting while reloading on things with health &gt; 0.
+
+- Fixed (hover over) inspect window for vehicles.
 [title]Additional Changes[/title][font]Small[/font]
 - Removed "Click for More Info tooltip on vehicle components health menu until further notice.  I need to actually add an additional window for more details.
 
@@ -29,6 +65,12 @@ I've updated the framework to version 1.4! I'm happy to say it wasn't a massive 
 - Changed explosion damage mechanics to now apply to every external cell it hits in the hitbox.  Internal parts (and occupants) will be damaged if the explosion penetrates external parts.
 
 - Added effector and sound options to VehicleFleshTypeDef for all vehicles.  Defaults will be assigned for Wooden, Metal, and Spacer vehicle flesh types which are included in the framework but you're free to make your own.
+
+- Added health% setting the explosion occurs at for Reactor_Explosive.
+
+- Even-sized vehicles will now align properly with the CellRect they occupy, rather than being centered on their position.
+
+- Added animation editor and camera viewer.
 [title]Final Notes[/title][font]Small[/font]
 Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
 </description>
