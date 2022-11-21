@@ -54,7 +54,7 @@ namespace Vehicles
 			//Harmony.DEBUG = true;
 
 			VehicleMCP = VehicleMod.settings.Mod.Content;
-			VehicleMMD = ModLister.GetActiveModWithIdentifier(VehiclesUniqueId);
+			VehicleMMD = ModLister.GetActiveModWithIdentifier(VehiclesUniqueId, ignorePostfix: true);
 
 			Version = ModVersion.VersionFromAssembly(Assembly.GetExecutingAssembly(), ProjectStartDate);
 			string readout = Prefs.DevMode ? Version.VersionStringWithRevision : Version.VersionString;
