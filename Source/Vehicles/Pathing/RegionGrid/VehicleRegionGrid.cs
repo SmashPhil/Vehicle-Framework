@@ -14,7 +14,7 @@ namespace Vehicles
 		public static readonly HashSet<VehicleRegion> allRegionsYielded = new HashSet<VehicleRegion>();
 		public static int vehicleRegionGridIndexChecking = 0;
 
-		private readonly Map map;
+		private readonly VehicleMapping mapping;
 		private readonly VehicleDef vehicleDef;
 
 		private int curCleanIndex;
@@ -23,11 +23,11 @@ namespace Vehicles
 
 		public readonly List<VehicleRoom> allRooms = new List<VehicleRoom>();
 
-		public VehicleRegionGrid(Map map, VehicleDef vehicleDef)
+		public VehicleRegionGrid(VehicleMapping mapping, VehicleDef vehicleDef)
 		{
-			this.map = map;
+			this.mapping = mapping;
 			this.vehicleDef = vehicleDef;
-			regionGrid = new VehicleRegion[map.cellIndices.NumGridCells];
+			regionGrid = new VehicleRegion[mapping.map.cellIndices.NumGridCells];
 		}
 
 		/// <summary>
@@ -51,7 +51,7 @@ namespace Vehicles
 				allRegionsYielded.Clear();
 				try
 				{
-					int count = map.cellIndices.NumGridCells;
+					int count = mapping.map.cellIndices.NumGridCells;
 					for (int i = 0; i < count; i++)
 					{
 						if (regionGrid[i] != null && !allRegionsYielded.Contains(regionGrid[i]))
@@ -78,7 +78,7 @@ namespace Vehicles
 				allRegionsYielded.Clear();
 				try
 				{
-					int count = map.cellIndices.NumGridCells;
+					int count = mapping.map.cellIndices.NumGridCells;
 					for (int i = 0; i < count; i++)
 					{
 						if (regionGrid[i] != null && regionGrid[i].valid && !allRegionsYielded.Contains(regionGrid[i]))
@@ -102,17 +102,17 @@ namespace Vehicles
 		/// <param name="cell"></param>
 		public VehicleRegion GetValidRegionAt(IntVec3 cell)
 		{
-			if (!cell.InBounds(map))
+			if (!cell.InBounds(mapping.map))
 			{
 				Log.Error($"Tried to get valid vehicle region for {vehicleDef} out of bounds at {cell}");
 			}
-			if (!map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionAndRoomUpdater.Enabled && 
-				map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionAndRoomUpdater.AnythingToRebuild)
+			if (!mapping[vehicleDef].VehicleRegionAndRoomUpdater.Enabled &&
+				mapping[vehicleDef].VehicleRegionAndRoomUpdater.AnythingToRebuild)
 			{
 				Log.Warning($"Trying to get valid vehicle region for {vehicleDef} at {cell} but RegionAndRoomUpdater is disabled. The result may be incorrect.");
 			}
-			map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
-			VehicleRegion region = regionGrid[map.cellIndices.CellToIndex(cell)];
+			mapping[vehicleDef].VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
+			VehicleRegion region = regionGrid[mapping.map.cellIndices.CellToIndex(cell)];
 			
 			return (region != null && region.valid) ? region : null;
 		}
@@ -123,14 +123,14 @@ namespace Vehicles
 		/// <param name="c"></param>
 		public VehicleRegion GetValidRegionAt_NoRebuild(IntVec3 cell)
 		{
-			if (map is null)
+			if (mapping.map is null)
 			{
 				Log.Error($"Tried to get valid region with null map.");
 				return null;
 			}
-			if (map.info is null)
+			if (mapping.map.info is null)
 			{
-				Log.Error($"Tried to get map info with null info. Map = {map.uniqueID}");
+				Log.Error($"Tried to get map info with null info. Map = {mapping.map.uniqueID}");
 				return null;
 			}
 			if (regionGrid is null)
@@ -138,12 +138,12 @@ namespace Vehicles
 				Log.Error($"Tried to get valid region with null regionGrid. Have the vehicle regions been instantiated yet?");
 				return null;
 			}
-			if (!cell.InBounds(map))
+			if (!cell.InBounds(mapping.map))
 			{
 				Log.Error("Tried to get valid region out of bounds at " + cell);
 				return null;
 			}
-			VehicleRegion region = regionGrid[map.cellIndices.CellToIndex(cell)];
+			VehicleRegion region = regionGrid[mapping.map.cellIndices.CellToIndex(cell)];
 			return region != null && region.valid ? region : null;
 		}
 
@@ -153,7 +153,7 @@ namespace Vehicles
 		/// <param name="cell"></param>
 		public VehicleRegion GetRegionAt_NoRebuild_InvalidAllowed(IntVec3 cell)
 		{
-			return regionGrid[map.cellIndices.CellToIndex(cell)];
+			return regionGrid[mapping.map.cellIndices.CellToIndex(cell)];
 		}
 
 		/// <summary>
@@ -163,7 +163,7 @@ namespace Vehicles
 		/// <param name="reg"></param>
 		public void SetRegionAt(IntVec3 cell, VehicleRegion region)
 		{
-			regionGrid[map.cellIndices.CellToIndex(cell)] = region;
+			regionGrid[mapping.map.cellIndices.CellToIndex(cell)] = region;
 		}
 
 		/// <summary>
@@ -196,7 +196,7 @@ namespace Vehicles
 		/// </summary>
 		public void DebugDraw(DebugRegionType debugRegionType)
 		{
-			if (map != Find.CurrentMap)
+			if (mapping.map != Find.CurrentMap)
 			{
 				return;
 			}
@@ -208,7 +208,7 @@ namespace Vehicles
 				}
 			}
 			IntVec3 intVec = UI.MouseCell();
-			if (intVec.InBounds(map))
+			if (intVec.InBounds(mapping.map))
 			{
 				VehicleRegion regionAt_NoRebuild_InvalidAllowed = GetRegionAt_NoRebuild_InvalidAllowed(intVec);
 				if (regionAt_NoRebuild_InvalidAllowed != null)
@@ -224,7 +224,7 @@ namespace Vehicles
 		public void DebugOnGUI(DebugRegionType debugRegionType)
 		{
 			IntVec3 intVec = UI.MouseCell();
-			if (intVec.InBounds(map))
+			if (intVec.InBounds(mapping.map))
 			{
 				VehicleRegion regionAt_NoRebuild_InvalidAllowed = GetRegionAt_NoRebuild_InvalidAllowed(intVec);
 				if (regionAt_NoRebuild_InvalidAllowed != null)

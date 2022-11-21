@@ -71,6 +71,7 @@ namespace Vehicles
 
 		public VehicleTurretRender renderProperties = new VehicleTurretRender();
 		public VehicleTurretRender uiRenderProperties = new VehicleTurretRender();
+
 		public Vector2 aimPieOffset = Vector2.zero;
 		public Vector2 angleRestricted = Vector2.zero;
 		public float defaultAngleRotated = 0f;
@@ -538,13 +539,22 @@ namespace Vehicles
 			return new Vector3(pos.x + graphicOffset.x + turretLoc.x, pos.y + graphicOffset.y + drawLayer * Altitudes.AltInc, pos.z + graphicOffset.z + turretLoc.y);
 		}
 
-		public Vector2 ScaleUIRect(Vector2 position, Vector2 size, Rot8 rot)
+		public Vector2 ScaleUIRect(VehicleDef vehicleDef, Vector2 position, Vector2 size, Rot8 rot)
 		{
 			float locationRotation = 0f;
 			if (attachedTo != null)
 			{
 				//locationRotation = TurretRotationFor(rot, attachedTo.currentRotation);
 			}
+			//float scale = size.x / Mathf.Max(vehicleDef.Size.x, vehicleDef.Size.z);
+			//return rot.AsInt switch
+			//{
+			//	0 => position + scale * renderProperties.north.Offset,
+			//	1 => position + size * renderProperties.east.Offset,
+			//	2 => position + size * renderProperties.south.Offset,
+			//	3 => position + size * renderProperties.west.Offset,
+			//	_ => throw new NotImplementedException("Diagonal rotations"),
+			//};
 			return rot.AsInt switch
 			{
 				0 => position + size * uiRenderProperties.north.Offset,

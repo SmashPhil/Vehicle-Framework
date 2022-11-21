@@ -41,23 +41,23 @@ namespace Vehicles
 		public bool defaultBiomesImpassable = false;
 
 		/// <summary>
-		/// Do not use snow costs to try and set impassable terrain based on snow depth. It is not designed for that, and if it was it would lag
+		/// Additional tick cost for snow, clamped between 0 and 450 ticks.
 		/// </summary>
-		public Dictionary<SnowCategory, int> customSnowCosts;
+		public SimpleDictionary<SnowCategory, int> customSnowCategoryTicks;
 		/// <summary>
-		/// Set to -1 or >= to 10000 for impassable terrain
+		/// Set to 10000 for impassable terrain
 		/// </summary>
-		public Dictionary<TerrainDef, int> customTerrainCosts;
+		public SimpleDictionary<TerrainDef, int> customTerrainCosts;
 		/// <summary>
-		/// Set to -1 or >= to 10000 for impassable thing
+		/// Set to 10000 for impassable thing
 		/// </summary>
-		public Dictionary<ThingDef, int> customThingCosts;
+		public SimpleDictionary<ThingDef, int> customThingCosts;
 
 		public float offRoadMultiplier = 1;
-		public Dictionary<RiverDef, float> customRiverCosts = new Dictionary<RiverDef, float>();
-		public Dictionary<BiomeDef, float> customBiomeCosts = new Dictionary<BiomeDef, float>();
-		public Dictionary<Hilliness, float> customHillinessCosts = new Dictionary<Hilliness, float>();
-		public Dictionary<RoadDef, float> customRoadCosts = new Dictionary<RoadDef, float>();
+		public SimpleDictionary<RiverDef, float> customRiverCosts = new SimpleDictionary<RiverDef, float>();
+		public SimpleDictionary<BiomeDef, float> customBiomeCosts = new SimpleDictionary<BiomeDef, float>();
+		public SimpleDictionary<Hilliness, float> customHillinessCosts = new SimpleDictionary<Hilliness, float>();
+		public SimpleDictionary<RoadDef, float> customRoadCosts = new SimpleDictionary<RoadDef, float>();
 		//-------------------------------------------
 
 		[PostToSettings(Label = "VehicleWinterSpeedMultiplier", Tooltip = "VehicleWinterSpeedMultiplierTooltip",Translate = true, UISettingsType = UISettingsType.SliderFloat)]
@@ -81,12 +81,12 @@ namespace Vehicles
 		{
 			vehicleJobLimitations ??= new List<VehicleJobLimitations>();
 
-			customBiomeCosts ??= new Dictionary<BiomeDef, float>();
-			customHillinessCosts ??= new Dictionary<Hilliness, float>();
-			customRoadCosts ??= new Dictionary<RoadDef, float>();
-			customTerrainCosts ??= new Dictionary<TerrainDef, int>();
-			customThingCosts ??= new Dictionary<ThingDef, int>();
-			customSnowCosts ??= new Dictionary<SnowCategory, int>();
+			customBiomeCosts ??= new SimpleDictionary<BiomeDef, float>();
+			customHillinessCosts ??= new SimpleDictionary<Hilliness, float>();
+			customRoadCosts ??= new SimpleDictionary<RoadDef, float>();
+			customTerrainCosts ??= new SimpleDictionary<TerrainDef, int>();
+			customThingCosts ??= new SimpleDictionary<ThingDef, int>();
+			customSnowCategoryTicks ??= new SimpleDictionary<SnowCategory, int>();
 
 			roles.OrderBy(c => c.hitbox.side == VehicleComponentPosition.BodyNoOverlap).ForEach(c => c.hitbox.Initialize(vehicleDef));
 		}
@@ -95,7 +95,7 @@ namespace Vehicles
 		{
 			string defName = vehicleDef.defName;
 
-			XmlHelper.FillDefaults_Enum(defName, nameof(customSnowCosts), customSnowCosts);
+			XmlHelper.FillDefaults_Enum(defName, nameof(customSnowCategoryTicks), customSnowCategoryTicks);
 			XmlHelper.FillDefaults_Def(defName, nameof(customTerrainCosts), customTerrainCosts);
 			XmlHelper.FillDefaults_Def(defName, nameof(customThingCosts), customThingCosts);
 

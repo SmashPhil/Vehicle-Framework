@@ -15,8 +15,6 @@ namespace Vehicles
 		private string roleKey;
 		public VehicleRole role;
 
-		private List<Pawn> tempSavedPawns = new List<Pawn>();
-
 		public int uniqueID = -1;
 		public VehiclePawn vehicle;
 		
@@ -24,50 +22,20 @@ namespace Vehicles
 		{
 			if (handlers is null)
 			{
-				handlers = new ThingOwner<Pawn>(this, false, LookMode.Reference);
+				handlers = new ThingOwner<Pawn>(this, false, LookMode.Deep);
 			}
 		}
 
-		public VehicleHandler(VehiclePawn vehicle)
+		public VehicleHandler(VehiclePawn vehicle) : this()
 		{
 			uniqueID = VehicleIdManager.Instance.GetNextHandlerId();
 			this.vehicle = vehicle;
-			if (handlers is null)
-			{
-				handlers = new ThingOwner<Pawn>(this, false, LookMode.Reference);
-			}
 		}
 
-		public VehicleHandler(VehiclePawn vehicle, VehicleRole newRole)
+		public VehicleHandler(VehiclePawn vehicle, VehicleRole newRole) : this(vehicle)
 		{
-			List<Pawn> newHandlers = new List<Pawn>();
-			uniqueID = VehicleIdManager.Instance.GetNextHandlerId();
-			this.vehicle = vehicle;
 			role = new VehicleRole(newRole);
 			roleKey = role.key;
-			if (handlers is null)
-			{
-				handlers = new ThingOwner<Pawn>(this, false, LookMode.Reference);
-			}
-			if ((newHandlers?.Count ?? 0) > 0)
-			{
-				foreach (Pawn p in newHandlers)
-				{
-					if (p.Spawned) 
-					{ 
-						p.DeSpawn(); 
-					}
-					if (p.holdingOwner != null) 
-					{ 
-						p.holdingOwner = null; 
-					}
-					if (!p.IsWorldPawn()) 
-					{ 
-						Find.WorldPawns.PassToWorld(p, PawnDiscardDecideMode.Decide); 
-					}
-				}
-				handlers.TryAddRangeOrTransfer(newHandlers);
-			}
 		}
 
 		public IThingHolder ParentHolder => vehicle;
@@ -149,7 +117,7 @@ namespace Vehicles
 
 		public override string ToString()
 		{
-			return role.label;
+			return roleKey;
 		}
 
 		public override int GetHashCode()
@@ -176,38 +144,17 @@ namespace Vehicles
 		{
 			Scribe_Values.Look(ref uniqueID, nameof(uniqueID), -1);
 			Scribe_References.Look(ref vehicle, nameof(vehicle), true);
-			
 			Scribe_Values.Look(ref roleKey, nameof(role), forceSave: true);
-			//Scribe_Deep.Look(ref role, "role");
 
-			if (Scribe.mode == LoadSaveMode.Saving)
-			{
-				tempSavedPawns.Clear();
-				tempSavedPawns.AddRange(handlers.InnerListForReading);
-				handlers.RemoveAll(x => x is Pawn);
-				handlers.RemoveAll(x => x.Destroyed);
-			}
-
-			Scribe_Collections.Look(ref tempSavedPawns, nameof(tempSavedPawns), LookMode.Reference);
-			Scribe_Deep.Look(ref handlers, nameof(handlers), new object[]
-			{
-				this
-			});
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			Scribe_Deep.Look(ref handlers, nameof(handlers), new object[] { this });
+			
+			if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
 			{
 				role = vehicle.VehicleDef.properties.roles.FirstOrDefault(role => role.key == roleKey);
 				if (role is null)
 				{
 					Log.Error($"Could not load VehicleRole from {roleKey}. Was role removed or name changed?");
 				}
-			}
-			if (Scribe.mode == LoadSaveMode.PostLoadInit || Scribe.mode == LoadSaveMode.Saving)
-			{
-				for (int j = 0; j < tempSavedPawns.Count; j++)
-				{
-					handlers.TryAdd(tempSavedPawns[j], true);
-				}
-				tempSavedPawns.Clear();
 			}
 		}
 	}

@@ -225,7 +225,8 @@ namespace Vehicles
 		{
 			if (___pawn.GetVehicle() is VehiclePawn vehicle)
 			{
-				vehicle.EventRegistry[VehicleEventDefOf.PawnCapacitiesDirty].ExecuteEvents();
+				//Null check for initial pawn capacities dirty caching when VehiclePawn has not yet called SpawnSetup
+				vehicle.EventRegistry?[VehicleEventDefOf.PawnCapacitiesDirty].ExecuteEvents();
 			}
 		}
 

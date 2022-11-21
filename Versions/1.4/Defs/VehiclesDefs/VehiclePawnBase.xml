@@ -46,24 +46,8 @@
 		</inspectorTabs>
 		
 		<properties>
-			<visibility>2.25</visibility>
 			<diagonalRotation>true</diagonalRotation>
 			<manhunterTargetsVehicle>false</manhunterTargetsVehicle>
-			
-			<vehicleJobLimitations>
-				<li>
-					<defName>UpgradeVehicle</defName>
-					<maxWorkers>3</maxWorkers>
-				</li>
-				<li>
-					<defName>RepairVehicle</defName>
-					<maxWorkers>2</maxWorkers>
-				</li>
-				<li>
-					<defName>LoadUpgradeMaterials</defName>
-					<maxWorkers>2</maxWorkers>
-				</li>
-			</vehicleJobLimitations>
 			
 			<healthLabel_Healthy>Operational</healthLabel_Healthy>
 			<healthLabel_Injured>Needs Repairs</healthLabel_Injured>
@@ -74,7 +58,7 @@
 			<customThingCosts>
 				<li>
 					<key>Column</key>
-					<value>-1</value>
+					<value>10000</value>
 				</li>
 			</customThingCosts>
 		</properties>

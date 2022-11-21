@@ -98,26 +98,17 @@ namespace Vehicles
 		{
 			VehiclePathData data = new VehiclePathData()
 			{
-				VehiclePathGrid = new VehiclePathGrid(map, vehicleDef),
-				VehiclePathFinder = new VehiclePathFinder(map, vehicleDef),
-				VehicleReachability = new VehicleReachability(map, vehicleDef),
-				VehicleRegionGrid = new VehicleRegionGrid(map, vehicleDef),
-				VehicleRegionMaker = new VehicleRegionMaker(map, vehicleDef),
-				VehicleRegionAndRoomUpdater = new VehicleRegionAndRoomUpdater(map, vehicleDef),
+				VehiclePathGrid = new VehiclePathGrid(this, vehicleDef),
+				VehiclePathFinder = new VehiclePathFinder(this, vehicleDef),
+				VehicleReachability = new VehicleReachability(this, vehicleDef),
+				VehicleRegionGrid = new VehicleRegionGrid(this, vehicleDef),
+				VehicleRegionMaker = new VehicleRegionMaker(this, vehicleDef),
+				VehicleRegionAndRoomUpdater = new VehicleRegionAndRoomUpdater(this, vehicleDef),
 				VehicleRegionLinkDatabase = new VehicleRegionLinkDatabase(),
-				VehicleRegionDirtyer = new VehicleRegionDirtyer(map, vehicleDef)
+				VehicleRegionDirtyer = new VehicleRegionDirtyer(this, vehicleDef)
 			};
 			vehicleData.Add(vehicleDef, data);
 			return data;
-		}
-
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			if (Scribe.mode == LoadSaveMode.LoadingVars)
-			{
-				//this.regionAndRoomUpdater.Enabled = false;
-			}
 		}
 
 		/// <summary>

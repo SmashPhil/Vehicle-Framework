@@ -139,9 +139,11 @@ namespace Vehicles
 					DebugHelper.debugRegionType = DebugRegionType.None;
 				}
 			}));
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs.OrderBy(d => d.defName))
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs.OrderBy(def => def.modContentPack.PackageId == VehicleHarmony.VehiclesUniqueId)
+																			 .ThenBy(def => def.modContentPack.Name)
+																			 .ThenBy(d => d.defName))
 			{
-				vehicleDefToggles.Add(new Toggle(vehicleDef.defName, () => DebugHelper.drawRegionsFor == vehicleDef, (value) => { }, onToggle: delegate (bool value)
+				vehicleDefToggles.Add(new Toggle(vehicleDef.defName, vehicleDef.modContentPack.Name, () => DebugHelper.drawRegionsFor == vehicleDef, (value) => { }, onToggle: delegate (bool value)
 				{
 					if (value)
 					{

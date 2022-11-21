@@ -700,7 +700,6 @@
     <Compile Include="Utility\Helpers\ParsingHelper.cs" />
     <Compile Include="CustomFeatures\Spawner\VehicleGenerationRequest.cs" />
     <Compile Include="CustomFeatures\Spawner\VehicleSpawner.cs" />
-    <Compile Include="World\Defs\IncidentCrashedSiteDef.cs" />
     <Compile Include="World\Mechanics\AirDefensePositionTracker.cs" />
     <Compile Include="World\Mechanics\SettlementVehicleUtility.cs" />
     <Compile Include="World\Mechanics\WorldComponentTemp.cs" />

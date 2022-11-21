@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Verse;
 using RimWorld;
 using RimWorld.Planet;
@@ -10,54 +11,58 @@ namespace Vehicles
 {
 	public class IncidentWorker_ShuttleDowned : IncidentWorker
 	{
-		public IncidentCrashedSiteDef CrashSiteDef => def as IncidentCrashedSiteDef;
+		public static void Execute(AerialVehicleInFlight aerialVehicle, string[] reasons, WorldObject culprit = null, IntVec3? cell = null)
+		{
+			(VehicleIncidentDefOf.ShuttleCrashed.Worker as IncidentWorker_ShuttleDowned).TryExecuteEvent(aerialVehicle, reasons, culprit: culprit, cell: cell);
+		}
 
-		public virtual bool TryExecuteEvent(AerialVehicleInFlight aerialVehicle, WorldObject shotDownBy, IntVec3? precalculatedCell = null)
+		protected virtual string GetLetterText(AerialVehicleInFlight aerialVehicle, string[] reasons, WorldObject culprit)
+		{
+			StringBuilder letterText = new StringBuilder();
+			if (culprit != null)
+			{
+				letterText.AppendLine("VF_IncidentCrashedSite_ShotDown".Translate(aerialVehicle, culprit));
+			}
+			else
+			{
+				letterText.AppendLine("VF_IncidentCrashedSite_Crashing".Translate(aerialVehicle));
+				if (!reasons.NullOrEmpty())
+				{
+					letterText.AppendLine("VF_IncidentReasonLister".Translate(string.Join(Environment.NewLine, reasons)));
+				}
+			}
+			return letterText.ToString();
+		}
+
+		protected virtual string GetLetterLabel(AerialVehicleInFlight aerialVehicle, WorldObject culprit)
+		{
+			return culprit is null ? "VF_IncidentCrashedSiteLabel_Crashing".Translate() : "VF_IncidentCrashedSiteLabel_ShotDown".Translate();
+		}
+
+		public virtual bool TryExecuteEvent(AerialVehicleInFlight aerialVehicle, string[] reasons, WorldObject culprit = null, IntVec3? cell = null)
 		{
 			try
 			{
-				Map crashSite;
-				int ticksTillArrival = -1;
-				if (Find.WorldObjects.MapParentAt(aerialVehicle.Tile) is MapParent mapParent)
-				{
-					crashSite = mapParent.Map;
-				}
-				else
-				{
-					int num = CaravanIncidentUtility.CalculateIncidentMapSize(aerialVehicle.vehicle.AllPawnsAboard, aerialVehicle.vehicle.AllPawnsAboard);
-					crashSite = GetOrGenerateMapUtility.GetOrGenerateMap(aerialVehicle.Tile, new IntVec3(num, 1, num), WorldObjectDefOfVehicles.CrashedShipSite);
-					if (shotDownBy is Settlement settlement)
-					{
-						ticksTillArrival = (crashSite.Parent as CrashSite).InitiateReinforcementsRequest(settlement);
-					}
-				}
-				bool validator(IntVec3 c)
-				{
-					bool flag = aerialVehicle.vehicle.PawnOccupiedCells(c, Rot4.East).All(c2 => c2.Standable(crashSite) && !c.Roofed(crashSite) && !c.Fogged(crashSite) && c.InBounds(crashSite));
-					return flag;
-				}
-				IntVec3 RandomCentercell()
-				{
-					RCellFinder.TryFindRandomCellNearTheCenterOfTheMapWith(validator, crashSite, out IntVec3 result);
-					return result;
-				}
-				IntVec3 cell = precalculatedCell ?? RandomCentercell();
-				if (cell == IntVec3.Invalid)
+				int ticksTillArrival = GenerateMapAndReinforcements(aerialVehicle, culprit, out Map crashSite);
+				IntVec3 crashingCell = cell ?? RandomCrashingCell(aerialVehicle, crashSite);
+				if (crashingCell == IntVec3.Invalid)
 				{
 					return false;
 				}
-				AerialVehicleArrivalAction_CrashSpecificCell arrivalAction = new AerialVehicleArrivalAction_CrashSpecificCell(aerialVehicle.vehicle, crashSite.Parent, crashSite.Tile, cell, Rot4.East);
+				AerialVehicleArrivalAction_CrashSpecificCell arrivalAction = new AerialVehicleArrivalAction_CrashSpecificCell(aerialVehicle.vehicle, crashSite.Parent, crashSite.Tile, crashingCell, Rot4.East);
 				arrivalAction.Arrived(crashSite.Tile);
 				aerialVehicle.Destroy();
-				string settlementLabel = shotDownBy?.Label ?? string.Empty;
+				string settlementLabel = culprit?.Label ?? string.Empty;
 				if (ticksTillArrival > 0)
 				{
 					string hoursTillArrival = Ext_Math.RoundTo(ticksTillArrival / 2500f, 1).ToString();
-					SendCrashSiteLetter(shotDownBy, crashSite.Parent, CrashSiteDef.letterLabel, CrashSiteDef.letterTexts[1], CrashSiteDef.letterDef, crashSite.Parent, new NamedArgument[] { aerialVehicle.Label, settlementLabel, hoursTillArrival});
+					SendCrashSiteLetter(culprit, crashSite.Parent, GetLetterLabel(aerialVehicle, culprit), GetLetterText(aerialVehicle, reasons, culprit), 
+						def.letterDef, crashSite.Parent, new NamedArgument[] { aerialVehicle.Label, settlementLabel, hoursTillArrival});
 				}
 				else
 				{
-					SendCrashSiteLetter(shotDownBy, crashSite.Parent, CrashSiteDef.letterLabel, CrashSiteDef.letterTexts[0], CrashSiteDef.letterDef, crashSite.Parent, new NamedArgument[] { aerialVehicle.Label, settlementLabel});
+					SendCrashSiteLetter(culprit, crashSite.Parent, GetLetterLabel(aerialVehicle, culprit), GetLetterText(aerialVehicle, reasons, culprit), 
+						def.letterDef, crashSite.Parent, new NamedArgument[] { aerialVehicle.Label, settlementLabel});
 				} 
 				return true;
 			}
@@ -66,6 +71,32 @@ namespace Vehicles
 				Log.Error($"Failed to execute incident {GetType()}. Exception=\"{ex.Message}\"");
 				return false;
 			}
+		}
+		
+		protected virtual IntVec3 RandomCrashingCell(AerialVehicleInFlight aerialVehicle, Map crashSite)
+		{
+			Predicate<IntVec3> validator = (IntVec3 c) => aerialVehicle.vehicle.PawnOccupiedCells(c, Rot4.East).All(c2 => c2.Standable(crashSite) && !c.Roofed(crashSite) && !c.Fogged(crashSite) && c.InBounds(crashSite));
+			RCellFinder.TryFindRandomCellNearTheCenterOfTheMapWith(validator, crashSite, out IntVec3 result);
+			return result;
+		}
+
+		protected virtual int GenerateMapAndReinforcements(AerialVehicleInFlight aerialVehicle, WorldObject culprit, out Map crashSite)
+		{
+			int ticksTillArrival = -1;
+			if (Find.WorldObjects.MapParentAt(aerialVehicle.Tile) is MapParent mapParent)
+			{
+				crashSite = mapParent.Map;
+			}
+			else
+			{
+				int num = CaravanIncidentUtility.CalculateIncidentMapSize(aerialVehicle.vehicle.AllPawnsAboard, aerialVehicle.vehicle.AllPawnsAboard);
+				crashSite = GetOrGenerateMapUtility.GetOrGenerateMap(aerialVehicle.Tile, new IntVec3(num, 1, num), WorldObjectDefOfVehicles.CrashedShipSite);
+				if (culprit is Settlement settlement)
+				{
+					ticksTillArrival = (crashSite.Parent as CrashSite).InitiateReinforcementsRequest(settlement);
+				}
+			}
+			return ticksTillArrival;
 		}
 
 		protected virtual void SendCrashSiteLetter(WorldObject shotDownBy, MapParent crashSite, TaggedString baseLetterLabel, TaggedString baseLetterText, LetterDef letterDef, LookTargets lookTargets, params NamedArgument[] textArgs)

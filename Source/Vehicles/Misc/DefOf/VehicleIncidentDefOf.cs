@@ -13,6 +13,6 @@ namespace Vehicles
 			DefOfHelper.EnsureInitializedInCtor(typeof(VehicleIncidentDefOf));
 		}
 
-		public static IncidentDef BlackHawkDown;
+		public static IncidentDef ShuttleCrashed;
 	}
 }

@@ -291,7 +291,8 @@ namespace Vehicles
 				turret.ResolveCannonGraphics(vehicleDef);
 				Vector2 rectSize = vehicleDef.ScaleDrawRatio(turret.turretDef.graphicData, rect.size);
 				Vector2 adjustedPosition = rect.position + (rect.size - rectSize) / 2f;
-				Rect turretRect = new Rect(turret.ScaleUIRect(adjustedPosition, rectSize, rot), rectSize);
+				Vector2 turretUIPos = turret.ScaleUIRect(vehicleDef, adjustedPosition, rectSize, rot);
+				Rect turretRect = new Rect(turretUIPos, rectSize);
 				Material cannonMat = turret.CannonGraphic.Shader.SupportsRGBMaskTex() ? new Material(turret.CannonGraphic.MatAt(patternData.patternDef)) : null;
 				if ((turret.CannonGraphic.Shader.SupportsRGBMaskTex() || turret.CannonGraphic.Shader.SupportsMaskTex()) && patternData != VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData))
 				{

@@ -10,7 +10,7 @@ namespace Vehicles
 	/// </summary>
 	public class VehicleRegionCostCalculatorWrapper
 	{
-		private readonly Map map;
+		private readonly VehicleMapping mapping;
 		private readonly VehicleDef vehicleDef;
 		private IntVec3 endCell;
 
@@ -29,11 +29,11 @@ namespace Vehicles
 		private int cachedSecondBestLinkCost;
 		private bool cachedRegionIsDestination;
 
-		public VehicleRegionCostCalculatorWrapper(Map map, VehicleDef vehicleDef)
+		public VehicleRegionCostCalculatorWrapper(VehicleMapping mapping, VehicleDef vehicleDef)
 		{
-			this.map = map;
+			this.mapping = mapping;
 			this.vehicleDef = vehicleDef;
-			vehicleRegionCostCalculator = new VehicleRegionCostCalculator(map, this.vehicleDef);
+			vehicleRegionCostCalculator = new VehicleRegionCostCalculator(mapping, this.vehicleDef);
 		}
 
 		/// <summary>
@@ -57,11 +57,11 @@ namespace Vehicles
 			cachedBestLinkCost = 0;
 			cachedSecondBestLinkCost = 0;
 			cachedRegionIsDestination = false;
-			regionGrid = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid.DirectGrid;
+			regionGrid = mapping[vehicleDef].VehicleRegionGrid.DirectGrid;
 			destRegions.Clear();
 			if (end.Width == 1 && end.Height == 1)
 			{
-				VehicleRegion region = VehicleGridsUtility.GetRegion(endCell, map, vehicleDef, RegionType.Set_Passable);
+				VehicleRegion region = VehicleGridsUtility.GetRegion(endCell, mapping.map, vehicleDef, RegionType.Set_Passable);
 				if (region != null)
 				{
 					destRegions.Add(region);
@@ -71,9 +71,9 @@ namespace Vehicles
 			{
 				foreach (IntVec3 intVec in end)
 				{
-					if (intVec.InBounds(map) && !disallowedCorners.Contains(map.cellIndices.CellToIndex(intVec)))
+					if (intVec.InBounds(mapping.map) && !disallowedCorners.Contains(mapping.map.cellIndices.CellToIndex(intVec)))
 					{
-						VehicleRegion region2 = VehicleGridsUtility.GetRegion(intVec, map, vehicleDef, RegionType.Set_Passable);
+						VehicleRegion region2 = VehicleGridsUtility.GetRegion(intVec, mapping.map, vehicleDef, RegionType.Set_Passable);
 						if (region2 != null)
 						{
 							if (region2.Allows(traverseParms, true))
@@ -98,7 +98,7 @@ namespace Vehicles
 		public int GetPathCostFromDestToRegion(int cellIndex)
 		{
 			VehicleRegion region = regionGrid[cellIndex];
-			IntVec3 cell = map.cellIndices.IndexToCell(cellIndex);
+			IntVec3 cell = mapping.map.cellIndices.IndexToCell(cellIndex);
 			if (region != cachedRegion)
 			{
 				cachedRegionIsDestination = destRegions.Contains(region);

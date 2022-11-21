@@ -13,7 +13,7 @@ namespace Vehicles
 	/// </summary>
 	public sealed class VehicleReachability
 	{
-		private readonly Map map;
+		private readonly VehicleMapping mapping;
 		private readonly VehicleDef vehicleDef;
 
 		private readonly Queue<VehicleRegion> openQueue = new Queue<VehicleRegion>();
@@ -28,15 +28,10 @@ namespace Vehicles
 		private VehiclePathGrid pathGrid;
 		private VehicleRegionGrid regionGrid;
 
-		public VehicleReachability(Map map, VehicleDef vehicleDef)
+		public VehicleReachability(VehicleMapping mapping, VehicleDef vehicleDef)
 		{
-			this.map = map;
+			this.mapping = mapping;
 			this.vehicleDef = vehicleDef;
-		}
-
-		public void FinalizeInit()
-		{
-			//TODO - cache pathGrid and regionGrid
 		}
 
 		/// <summary>
@@ -103,7 +98,7 @@ namespace Vehicles
 		/// <param name="maxDanger"></param>
 		public bool CanReachVehicleNonLocal(IntVec3 start, TargetInfo dest, PathEndMode peMode, TraverseMode traverseMode, Danger maxDanger)
 		{
-			return (dest.Map is null || dest.Map == map) && CanReachVehicle(start, (LocalTargetInfo)dest, peMode, traverseMode, maxDanger);
+			return (dest.Map is null || dest.Map == mapping.map) && CanReachVehicle(start, (LocalTargetInfo)dest, peMode, traverseMode, maxDanger);
 		}
 
 		/// <summary>
@@ -115,7 +110,7 @@ namespace Vehicles
 		/// <param name="traverseParms"></param>
 		public bool CanReachVehicleNonLocal(IntVec3 start, TargetInfo dest, PathEndMode peMode, TraverseParms traverseParms)
 		{
-			return (dest.Map is null || dest.Map == map) && CanReachVehicle(start, (LocalTargetInfo)dest, peMode, traverseParms);
+			return (dest.Map is null || dest.Map == mapping.map) && CanReachVehicle(start, (LocalTargetInfo)dest, peMode, traverseParms);
 		}
 
 		/// <summary>
@@ -153,9 +148,9 @@ namespace Vehicles
 				{
 					return false;
 				}
-				if (vehicle.Map != map)
+				if (vehicle.Map != mapping.map)
 				{
-					Log.Error($"Called CanReach with a vehicle not spawned on this map. This means that we can't check its reachability here. Vehicle's current map should have been used instead. vehicle={vehicle} vehicle.Map={vehicle.Map} map={map}");
+					Log.Error($"Called CanReach with a vehicle not spawned on this map. This means that we can't check its reachability here. Vehicle's current map should have been used instead. vehicle={vehicle} vehicle.Map={vehicle.Map} map={mapping.map}");
 					return false;
 				}
 			}
@@ -163,17 +158,17 @@ namespace Vehicles
 			{
 				return false;
 			}
-			if (dest.HasThing && dest.Thing.Map != map)
+			if (dest.HasThing && dest.Thing.Map != mapping.map)
 			{
 				return false;
 			}
-			if (!start.InBounds(map) || !dest.Cell.InBounds(map)) 
+			if (!start.InBounds(mapping.map) || !dest.Cell.InBounds(mapping.map)) 
 			{
 				return false;
 			}
 
-			pathGrid = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehiclePathGrid;
-			regionGrid = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid;
+			pathGrid = mapping[vehicleDef].VehiclePathGrid;
+			regionGrid = mapping[vehicleDef].VehicleRegionGrid;
 
 			if (!pathGrid.WalkableFast(start))
 			{
@@ -182,8 +177,8 @@ namespace Vehicles
 			bool freeTraversal = traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater && traverseParms.mode != TraverseMode.PassAllDestroyableThingsNotWater;
 			if ((peMode == PathEndMode.OnCell || peMode == PathEndMode.Touch || peMode == PathEndMode.ClosestTouch) && freeTraversal)
 			{
-				VehicleRoom room = VehicleRegionAndRoomQuery.RoomAtFast(start, map, vehicleDef, RegionType.Set_Passable);
-				if (room != null && room == VehicleRegionAndRoomQuery.RoomAtFast(dest.Cell, map, vehicleDef, RegionType.Set_Passable))
+				VehicleRoom room = VehicleRegionAndRoomQuery.RoomAtFast(start, mapping.map, vehicleDef, RegionType.Set_Passable);
+				if (room != null && room == VehicleRegionAndRoomQuery.RoomAtFast(dest.Cell, mapping.map, vehicleDef, RegionType.Set_Passable))
 				{
 					return true;
 				}
@@ -197,7 +192,7 @@ namespace Vehicles
 					return true;
 				}
 			}
-			dest = (LocalTargetInfo)GenPathVehicles.ResolvePathMode(vehicle.VehicleDef, vehicle.Map, dest.ToTargetInfo(map), ref peMode);
+			dest = (LocalTargetInfo)GenPathVehicles.ResolvePathMode(vehicle.VehicleDef, vehicle.Map, dest.ToTargetInfo(mapping.map), ref peMode);
 			CalculatingReachability = true;
 			bool result;
 			try
@@ -206,7 +201,7 @@ namespace Vehicles
 				destRegions.Clear();
 				if (peMode == PathEndMode.OnCell)
 				{
-					VehicleRegion region = VehicleGridsUtility.GetRegion(dest.Cell, map, vehicleDef, RegionType.Set_Passable);
+					VehicleRegion region = VehicleGridsUtility.GetRegion(dest.Cell, mapping.map, vehicleDef, RegionType.Set_Passable);
 					if(region != null && region.Allows(traverseParms, true))
 					{
 						destRegions.Add(region);
@@ -214,7 +209,7 @@ namespace Vehicles
 				}
 				else if (peMode == PathEndMode.Touch)
 				{
-					TouchPathEndModeUtilityVehicles.AddAllowedAdjacentRegions(dest, traverseParms, map, vehicleDef, destRegions);
+					TouchPathEndModeUtilityVehicles.AddAllowedAdjacentRegions(dest, traverseParms, mapping.map, vehicleDef, destRegions);
 				}
 				if (destRegions.Count == 0 && traverseParms.mode != TraverseMode.PassAllDestroyableThings && traverseParms.mode !=
 					TraverseMode.PassAllDestroyableThingsNotWater)
@@ -284,7 +279,7 @@ namespace Vehicles
 				for (int i = 0; i < 8; i++)
 				{
 					IntVec3 c = start + GenAdj.AdjacentCells[i];
-					if (c.InBounds(map))
+					if (c.InBounds(mapping.map))
 					{
 						if (pathGrid.WalkableFast(c))
 						{
@@ -388,10 +383,10 @@ namespace Vehicles
 		private bool CheckCellBasedReachability(IntVec3 start, LocalTargetInfo dest, PathEndMode peMode, TraverseParms traverseParms)
 		{
 			IntVec3 foundCell = IntVec3.Invalid;
-			map.floodFiller.FloodFill(start, (IntVec3 cell) => PassCheck(cell, map, traverseParms), delegate (IntVec3 cell)
+			mapping.map.floodFiller.FloodFill(start, (IntVec3 cell) => PassCheck(cell, mapping.map, traverseParms), delegate (IntVec3 cell)
 			{
 				VehiclePawn vehicle = traverseParms.pawn as VehiclePawn;
-				if (VehicleReachabilityImmediate.CanReachImmediateVehicle(cell, dest, map, vehicle.VehicleDef, peMode))
+				if (VehicleReachabilityImmediate.CanReachImmediateVehicle(cell, dest, mapping.map, vehicle.VehicleDef, peMode))
 				{
 					foundCell = cell;
 					return true;
@@ -468,12 +463,12 @@ namespace Vehicles
 				return CanReachVehicle(c, MapGenerator.PlayerStartSpot, PathEndMode.OnCell, TraverseParms.For(TraverseMode.PassDoors,
 					Danger.Deadly, false));
 			}
-			if (!GenGridVehicles.Walkable(c, vehicleDef, map))
+			if (!GenGridVehicles.Walkable(c, vehicleDef, mapping.map))
 			{
 				return false;
 			}
-			Faction faction = map.ParentFaction ?? Faction.OfPlayer;
-			List<Pawn> list = map.mapPawns.SpawnedPawnsInFaction(faction);
+			Faction faction = mapping.map.ParentFaction ?? Faction.OfPlayer;
+			List<Pawn> list = mapping.map.mapPawns.SpawnedPawnsInFaction(faction);
 			foreach (Pawn p in list)
 			{
 				if (p.CanReach(c, PathEndMode.OnCell, Danger.Deadly, false, false, TraverseMode.ByPawn))
@@ -484,7 +479,7 @@ namespace Vehicles
 			TraverseParms traverseParms = TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false);
 			if(faction == Faction.OfPlayer)
 			{
-				List<Building> allBuildingsColonist = map.listerBuildings.allBuildingsColonist;
+				List<Building> allBuildingsColonist = mapping.map.listerBuildings.allBuildingsColonist;
 				foreach (Building b in allBuildingsColonist)
 				{
 					if (CanReachVehicle(c, b, PathEndMode.Touch, traverseParms))
@@ -495,7 +490,7 @@ namespace Vehicles
 			}
 			else
 			{
-				List<Thing> list2 = map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial);
+				List<Thing> list2 = mapping.map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial);
 				foreach(Thing t in list2)
 				{
 					if(t.Faction == faction && CanReachVehicle(c, t, PathEndMode.Touch, traverseParms))
@@ -541,13 +536,13 @@ namespace Vehicles
 				{
 					return false;
 				}
-				if (vehicle.Map != map)
+				if (vehicle.Map != mapping.map)
 				{
-					Log.Error($"Called CanReachMapEdge with vehicle not spawned on this map. Pawn's current map should have been used instead of this one. vehicle={vehicle} vehicle.Map={vehicle.Map} map={map}");
+					Log.Error($"Called CanReachMapEdge with vehicle not spawned on this map. Pawn's current map should have been used instead of this one. vehicle={vehicle} vehicle.Map={vehicle.Map} map={mapping.map}");
 					return false;
 				}
 			}
-			VehicleRegion region = VehicleGridsUtility.GetRegion(cell, map, vehicleDef, RegionType.Set_Passable);
+			VehicleRegion region = VehicleGridsUtility.GetRegion(cell, mapping.map, vehicleDef, RegionType.Set_Passable);
 			if (region is null)
 			{
 				return false;
@@ -584,7 +579,7 @@ namespace Vehicles
 				{
 					return false;
 				}
-				if (traverseParms.pawn.Map != map)
+				if (traverseParms.pawn.Map != mapping.map)
 				{
 					Log.Error(string.Concat(new object[]
 					{
@@ -593,20 +588,20 @@ namespace Vehicles
 						" pawn.Map=",
 						traverseParms.pawn.Map,
 						" map=",
-						map
+						mapping.map
 					}));
 					return false;
 				}
 			}
-			if (!cell.InBounds(map))
+			if (!cell.InBounds(mapping.map))
 			{
 				return false;
 			}
-			if (!cell.Fogged(map))
+			if (!cell.Fogged(mapping.map))
 			{
 				return true;
 			}
-			VehicleRegion region = VehicleGridsUtility.GetRegion(cell, map, vehicleDef, RegionType.Set_Passable);
+			VehicleRegion region = VehicleGridsUtility.GetRegion(cell, mapping.map, vehicleDef, RegionType.Set_Passable);
 			if (region == null)
 			{
 				return false;
@@ -615,7 +610,7 @@ namespace Vehicles
 			bool foundReg = false;
 			bool regionProcessor(VehicleRegion r)
 			{
-				if (!r.AnyCell.Fogged(map))
+				if (!r.AnyCell.Fogged(mapping.map))
 				{
 					foundReg = true;
 					return true;

@@ -14,14 +14,14 @@ namespace Vehicles
 	{
 		public const int ImpassableCost = 10000;
 
-		private readonly Map map;
+		private readonly VehicleMapping mapping;
 		private readonly VehicleDef vehicleDef;
 		
 		public int[] pathGrid;
 
-		public VehiclePathGrid(Map map, VehicleDef vehicleDef)
+		public VehiclePathGrid(VehicleMapping mapping, VehicleDef vehicleDef)
 		{
-			this.map = map;
+			this.mapping = mapping;
 			this.vehicleDef = vehicleDef;
 			ResetPathGrid();
 		}
@@ -31,7 +31,7 @@ namespace Vehicles
 		/// </summary>
 		public void ResetPathGrid()
 		{
-			pathGrid = new int[map.cellIndices.NumGridCells];
+			pathGrid = new int[mapping.map.cellIndices.NumGridCells];
 		}
 
 		/// <summary>
@@ -40,7 +40,7 @@ namespace Vehicles
 		/// <param name="loc"></param>
 		public bool Walkable(IntVec3 loc)
 		{
-			return loc.InBounds(map) && WalkableFast(loc);
+			return loc.InBounds(mapping.map) && WalkableFast(loc);
 		}
 
 		/// <summary>
@@ -49,7 +49,7 @@ namespace Vehicles
 		/// <param name="loc"></param>
 		public bool WalkableFast(IntVec3 loc)
 		{
-			return WalkableFast(map.cellIndices.CellToIndex(loc));
+			return WalkableFast(mapping.map.cellIndices.CellToIndex(loc));
 		}
 
 		/// <summary>
@@ -59,7 +59,7 @@ namespace Vehicles
 		/// <param name="z"></param>
 		public bool WalkableFast(int x, int z)
 		{
-			return WalkableFast(map.cellIndices.CellToIndex(x, z));
+			return WalkableFast(mapping.map.cellIndices.CellToIndex(x, z));
 		}
 
 		/// <summary>
@@ -77,7 +77,7 @@ namespace Vehicles
 		/// <param name="loc"></param>
 		public int PerceivedPathCostAt(IntVec3 loc)
 		{
-			return pathGrid[map.cellIndices.CellToIndex(loc)];
+			return pathGrid[mapping.map.cellIndices.CellToIndex(loc)];
 		}
 
 		/// <summary>
@@ -108,7 +108,7 @@ namespace Vehicles
 		/// <param name="cell"></param>
 		public void RecalculatePerceivedPathCostAt(IntVec3 cell)
 		{
-			if (!cell.InBounds(map))
+			if (!cell.InBounds(mapping.map))
 			{
 				return;
 			}
@@ -118,7 +118,7 @@ namespace Vehicles
 			{
 				debugString = new StringBuilder();
 			}
-			pathGrid[map.cellIndices.CellToIndex(cell)] = CalculatedCostAt(cell, debugString);
+			pathGrid[mapping.map.cellIndices.CellToIndex(cell)] = CalculatedCostAt(cell, debugString);
 			debugString?.Append($"WalkableNew: {WalkableFast(cell)} WalkableOld: {walkable}");
 			bool walkabilityChanged = WalkableFast(cell) != walkable;
 			if (VehicleMod.settings.debug.debugPathCostChanges)
@@ -127,8 +127,8 @@ namespace Vehicles
 			}
 			if (walkabilityChanged)
 			{
-				map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleReachability.ClearCache();
-				map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionDirtyer.Notify_WalkabilityChanged(cell);
+				mapping[vehicleDef].VehicleReachability.ClearCache();
+				mapping[vehicleDef].VehicleRegionDirtyer.Notify_WalkabilityChanged(cell);
 			}
 		}
 
@@ -137,7 +137,7 @@ namespace Vehicles
 		/// </summary>
 		public void RecalculateAllPerceivedPathCosts()
 		{
-			foreach (IntVec3 cell in map.AllCells)
+			foreach (IntVec3 cell in mapping.map.AllCells)
 			{
 				RecalculatePerceivedPathCostAt(cell);
 			}
@@ -149,7 +149,7 @@ namespace Vehicles
 		/// <param name="cell"></param>
 		public int CalculatedCostAt(IntVec3 cell, StringBuilder stringBuilder = null)
 		{
-			return CalculatePathCostFor(vehicleDef, map, cell, stringBuilder);
+			return CalculatePathCostFor(vehicleDef, mapping.map, cell, stringBuilder);
 		}
 
 		/// <summary>
@@ -222,11 +222,14 @@ namespace Vehicles
 				}
 			}
 			pathCost += thingCost;
+
 			SnowCategory snowCategory = map.snowGrid.GetCategory(cell);
-			if (!vehicleDef.properties.customSnowCosts.TryGetValue(snowCategory, out int snowPathCost))
+			if (!vehicleDef.properties.customSnowCategoryTicks.TryGetValue(snowCategory, out int snowPathCost))
 			{
-				snowPathCost = SnowUtility.MovementTicksAddOn(snowCategory).Clamp(0, 450);
+				snowPathCost = SnowUtility.MovementTicksAddOn(snowCategory);
 			}
+			snowPathCost = snowPathCost.Clamp(0, 450);
+
 			stringBuilder.AppendLine($"snowPathCost: {snowPathCost}");
 			pathCost += snowPathCost;
 			stringBuilder.AppendLine($"final cost: {pathCost}");

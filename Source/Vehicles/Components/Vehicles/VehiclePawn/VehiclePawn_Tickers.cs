@@ -81,7 +81,10 @@ namespace Vehicles
 			if (signal == CompSignals.RanOutOfFuel)
 			{
 				vPather.StopDead();
-				drafter.Drafted = false;
+				if (Spawned)
+				{
+					drafter.Drafted = false;
+				}
 			}
 		}
 

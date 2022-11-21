@@ -4,7 +4,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class VehicleRole : IExposable
+	public class VehicleRole
 	{
 		public string key;
 		public string label = "[MissingLabel]";
@@ -66,16 +66,5 @@ namespace Vehicles
 		}
 
 		public bool RequiredForCaravan => slotsToOperate > 0 && handlingTypes.NotNullAndAny(h => h == HandlingTypeFlags.Movement);
-
-		public void ExposeData()
-		{
-			Scribe_Values.Look(ref key, nameof(key), forceSave: true);
-			Scribe_Values.Look(ref label, nameof(label), string.Empty);
-			Scribe_Collections.Look(ref handlingTypes, nameof(handlingTypes));
-			Scribe_Values.Look(ref slots, nameof(slots), 1);
-			Scribe_Values.Look(ref slotsToOperate, nameof(slotsToOperate), 1);
-			Scribe_Values.Look(ref exposed, nameof(exposed), false);
-			Scribe_Collections.Look(ref turretIds, nameof(turretIds));
-		}
 	}
 }

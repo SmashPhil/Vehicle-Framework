@@ -416,7 +416,7 @@ namespace Vehicles
 
 				if (vehicle.CompFueledTravel?.Fuel <= 0)
 				{
-					InitiateCrashEvent(null);
+					InitiateCrashEvent(null, "VF_IncidentCrashedSiteReason_OutOfFuel".Translate());
 				}
 				//ChangeElevation();
 			}
@@ -439,11 +439,11 @@ namespace Vehicles
 			elevation = elevation.Clamp(AltitudeMeter.MinimumAltitude, AltitudeMeter.MaximumAltitude);
 			if (!vehicle.CompVehicleLauncher.AnyFlightControl)
 			{
-				InitiateCrashEvent(null);
+				InitiateCrashEvent(null, "VF_IncidentCrashedSiteReason_FlightControl".Translate());
 			}
 			else if (elevation <= AltitudeMeter.MinimumAltitude && !vehicle.CompVehicleLauncher.ControlledDescent)
 			{
-				InitiateCrashEvent(null);
+				InitiateCrashEvent(null, "VF_IncidentCrashedSiteReason_FlightControl".Translate());
 			}
 		}
 
@@ -461,14 +461,14 @@ namespace Vehicles
 			vehicle.TakeDamage(damageInfo, cell);
 		}
 
-		public void InitiateCrashEvent(WorldObject worldObject)
+		public void InitiateCrashEvent(WorldObject culprit, params string[] reasons)
 		{
 			vehicle.CompVehicleLauncher.inFlight = false;
 			Tile = WorldHelper.GetNearestTile(DrawPos);
 			ResetPosition(WorldHelper.GetTilePos(Tile));
 			flightPath.ResetPath();
 			AirDefensePositionTracker.DeregisterAerialVehicle(this);
-			(VehicleIncidentDefOf.BlackHawkDown.Worker as IncidentWorker_ShuttleDowned).TryExecuteEvent(this, worldObject);
+			IncidentWorker_ShuttleDowned.Execute(this, reasons, culprit: culprit);
 		}
 
 		public virtual void MoveForward()

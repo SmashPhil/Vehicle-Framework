@@ -27,7 +27,8 @@ namespace Vehicles
 
 		internal Dictionary<IntVec3, int> postCalculatedCells = new Dictionary<IntVec3, int>();
 		internal Dictionary<IntVec3, int> postCalculatedTurns = new Dictionary<IntVec3, int>();
-		private Map map;
+
+		private VehicleMapping mapping;
 		private VehicleDef vehicleDef;
 		private FastPriorityQueue<CostNode> openList;
 		private VehiclePathFinderNodeFast[] calcGrid;
@@ -108,15 +109,15 @@ namespace Vehicles
 			}
 		};
 
-		public VehiclePathFinder(Map map, VehicleDef vehicleDef)
+		public VehiclePathFinder(VehicleMapping mapping, VehicleDef vehicleDef)
 		{
-			this.map = map;
+			this.mapping = mapping;
 			this.vehicleDef = vehicleDef;
-			mapSizeX = map.Size.x;
-			mapSizeZ = map.Size.z;
+			mapSizeX = mapping.map.Size.x;
+			mapSizeZ = mapping.map.Size.z;
 			calcGrid = new VehiclePathFinderNodeFast[mapSizeX * mapSizeZ];
 			openList = new FastPriorityQueue<CostNode>(new CostNodeComparer());
-			regionCostCalculator = new VehicleRegionCostCalculatorWrapper(map, vehicleDef);
+			regionCostCalculator = new VehicleRegionCostCalculatorWrapper(mapping, vehicleDef);
 			postCalculatedCells = new Dictionary<IntVec3, int>();
 			postCalculatedTurns = new Dictionary<IntVec3, int>();
 		}
@@ -154,7 +155,6 @@ namespace Vehicles
 
 			postCalculatedCells.Clear();
 			postCalculatedTurns.Clear();
-			VehicleMapping vehicleMapping = map.GetCachedMapComponent<VehicleMapping>();
 			if (DebugSettings.pathThroughWalls)
 			{
 				traverseParms.mode = TraverseMode.PassAllDestroyableThings;
@@ -164,9 +164,9 @@ namespace Vehicles
 			{
 				Log.Message($"Tried to FindVehiclePath for non-vehicle pawn {traverseParms.pawn}");
 			}
-			else if (vehicle.Map != map)
+			else if (vehicle.Map != mapping.map)
 			{
-				Log.Error($"Tried to FindVehiclePath for vehicle which is spawned in another map. Their map PathFinder should  have been used, not this one. vehicle={vehicle} vehicle's map={vehicle.Map} map={map}");
+				Log.Error($"Tried to FindVehiclePath for vehicle which is spawned in another map. Their map PathFinder should  have been used, not this one. vehicle={vehicle} vehicle's map={vehicle.Map} map={mapping.map}");
 				return (PawnPath.NotFound, false);
 			}
 			if(!start.IsValid)
@@ -188,16 +188,16 @@ namespace Vehicles
 			}
 			else
 			{
-				if (!vehicleMapping[vehicleDef].VehicleReachability.CanReachVehicle(start, dest, peMode, traverseParms))
+				if (!mapping[vehicleDef].VehicleReachability.CanReachVehicle(start, dest, peMode, traverseParms))
 				{
 					return (PawnPath.NotFound, false);
 				}
 			}
-			cellIndices = map.cellIndices;
+			cellIndices = mapping.map.cellIndices;
 
-			vehiclePathGrid = vehicleMapping[vehicleDef].VehiclePathGrid;
-			this.edificeGrid = map.edificeGrid.InnerArray;
-			blueprintGrid = map.blueprintGrid.InnerArray;
+			vehiclePathGrid = mapping[vehicleDef].VehiclePathGrid;
+			this.edificeGrid = mapping.map.edificeGrid.InnerArray;
+			blueprintGrid = mapping.map.blueprintGrid.InnerArray;
 			int x = dest.Cell.x;
 			int z = dest.Cell.z;
 			int startIndex = cellIndices.CellToIndex(start);
@@ -208,13 +208,13 @@ namespace Vehicles
 			CellRect cellRect = CalculateDestinationRect(dest, peMode);
 			bool singleRect = cellRect.Width == 1 && cellRect.Height == 1;
 			int[] vehicleArray = vehiclePathGrid.pathGrid;
-			TerrainDef[] topGrid = map.terrainGrid.topGrid;
-			EdificeGrid edificeGrid = map.edificeGrid;
+			TerrainDef[] topGrid = mapping.map.terrainGrid.topGrid;
+			EdificeGrid edificeGrid = mapping.map.edificeGrid;
 			int searchCount = 0;
 			int nodesOpened = 0;
 			bool collideWithVehicles = PawnUtility.ShouldCollideWithPawns(vehicle) && false; //REDO - permanent false until vehicle collision implemented
 			bool drawPaths = DebugViewSettings.drawPaths;
-			bool allowedRegionTraversal = !passAllDestroyableThings && VehicleGridsUtility.GetRegion(start, map, vehicleDef, RegionType.Set_Passable) != null && freeTraversal;
+			bool allowedRegionTraversal = !passAllDestroyableThings && VehicleGridsUtility.GetRegion(start, mapping.map, vehicleDef, RegionType.Set_Passable) != null && freeTraversal;
 			bool weightedHeuristics = false;
 			bool drafted = vehicle.Drafted;
 
@@ -285,7 +285,7 @@ namespace Vehicles
 							if (calcGrid[cellIndex].status != statusClosedValue || weightedHeuristics)
 							{
 								int initialCost = 0;
-								if (freeTraversal || !new IntVec3(cellIntX, 0 , cellIntY).GetTerrain(map).HasTag("Water"))
+								if (freeTraversal || !new IntVec3(cellIntX, 0 , cellIntY).GetTerrain(mapping.map).HasTag("Water"))
 								{
 									if (!vehicle.DrivableFast(cellIndex))
 									{
@@ -409,7 +409,7 @@ namespace Vehicles
 									}
 									if (vehicle.VehicleDef.properties.customTerrainCosts?.NotNullAndAny() ?? false)
 									{
-										TerrainDef currentTerrain = map.terrainGrid.TerrainAt(cellIndex);
+										TerrainDef currentTerrain = mapping.map.terrainGrid.TerrainAt(cellIndex);
 										if (vehicle.VehicleDef.properties.customTerrainCosts.ContainsKey(currentTerrain))
 										{
 											int customCost = vehicle.VehicleDef.properties.customTerrainCosts[currentTerrain];
@@ -717,7 +717,7 @@ namespace Vehicles
 		/// <param name="str"></param>
 		private void DebugFlash(IntVec3 c, float colorPct, string str)
 		{
-			DebugFlash(c, map, colorPct, str);
+			DebugFlash(c, mapping.map, colorPct, str);
 		}
 
 		/// <summary>
@@ -739,13 +739,13 @@ namespace Vehicles
 		/// <param name="usedRegionHeuristics"></param>
 		private PawnPath FinalizedPath(int finalIndex, bool usedRegionHeuristics)
 		{
-			PawnPath newPath = map.pawnPathPool.GetEmptyPawnPath();
+			PawnPath newPath = mapping.map.pawnPathPool.GetEmptyPawnPath();
 			int num = finalIndex;
 			for (;;)
 			{
 				VehiclePathFinderNodeFast shipPathFinderNodeFast = calcGrid[num];
 				int parentIndex = shipPathFinderNodeFast.parentIndex;
-				IntVec3 cell = map.cellIndices.IndexToCell(num);
+				IntVec3 cell = mapping.map.cellIndices.IndexToCell(num);
 				newPath.AddNode(cell);
 				if (num == parentIndex)
 				{
@@ -804,7 +804,7 @@ namespace Vehicles
 				{
 					int index = openList.Pop().index;
 					IntVec3 c = new IntVec3(index % mapSizeX, 0, index / mapSizeX);
-					map.debugDrawer.FlashCell(c, 0f, "open", 50);
+					mapping.map.debugDrawer.FlashCell(c, 0f, "open", 50);
 				}
 			}
 		}
@@ -820,7 +820,7 @@ namespace Vehicles
 			{
 				foreach (KeyValuePair<IntVec3, int> pathCells in postCalculatedCells)
 				{
-					map.debugDrawer.FlashCell(pathCells.Key, colorPct, pathCells.Value.ToString(), duration);
+					mapping.map.debugDrawer.FlashCell(pathCells.Key, colorPct, pathCells.Value.ToString(), duration);
 				}
 			}
 		}
@@ -868,19 +868,19 @@ namespace Vehicles
 				int maxZ = destinationRect.maxZ;
 				if (!IsCornerTouchAllowed(minX + 1, minZ + 1, minX + 1, minZ, minX, minZ + 1))
 				{
-					disallowedCornerIndices.Add(map.cellIndices.CellToIndex(minX, minZ));
+					disallowedCornerIndices.Add(mapping.map.cellIndices.CellToIndex(minX, minZ));
 				}
 				if (!IsCornerTouchAllowed(minX + 1, maxZ - 1, minX + 1, maxZ, minX, maxZ - 1))
 				{
-					disallowedCornerIndices.Add(map.cellIndices.CellToIndex(minX, maxZ));
+					disallowedCornerIndices.Add(mapping.map.cellIndices.CellToIndex(minX, maxZ));
 				}
 				if (!IsCornerTouchAllowed(maxX - 1, maxZ - 1, maxX - 1, maxZ, maxX, maxZ - 1))
 				{
-					disallowedCornerIndices.Add(map.cellIndices.CellToIndex(maxX, maxZ));
+					disallowedCornerIndices.Add(mapping.map.cellIndices.CellToIndex(maxX, maxZ));
 				}
 				if (!IsCornerTouchAllowed(maxX - 1, minZ + 1, maxX - 1, minZ, maxX, minZ + 1))
 				{
-					disallowedCornerIndices.Add(map.cellIndices.CellToIndex(maxX, minZ));
+					disallowedCornerIndices.Add(mapping.map.cellIndices.CellToIndex(maxX, minZ));
 				}
 			}
 		}

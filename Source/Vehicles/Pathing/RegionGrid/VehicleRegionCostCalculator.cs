@@ -19,7 +19,7 @@ namespace Vehicles
 		private static readonly List<int> tmpPathableNeighborIndices = new List<int>();
 		private static readonly Dictionary<int, float> tmpDistances = new Dictionary<int, float>();
 
-		private readonly Map map;
+		private readonly VehicleMapping mapping;
 		private readonly VehicleDef vehicleDef;
 
 		private VehicleRegion[] regionGrid;
@@ -43,9 +43,9 @@ namespace Vehicles
 
 		private readonly List<Pair<VehicleRegionLink, int>> preciseRegionLinkDistances = new List<Pair<VehicleRegionLink, int>>();
 
-		public VehicleRegionCostCalculator(Map map, VehicleDef vehicleDef)
+		public VehicleRegionCostCalculator(VehicleMapping mapping, VehicleDef vehicleDef)
 		{
-			this.map = map;
+			this.mapping = mapping;
 			this.vehicleDef = vehicleDef;
 			preciseRegionLinkDistancesDistanceGetter = new Func<int, int, float>(PreciseRegionLinkDistancesDistanceGetter);
 		}
@@ -62,7 +62,7 @@ namespace Vehicles
 		/// <param name="drafted"></param>
 		public void Init(CellRect destination, HashSet<VehicleRegion> destRegions, TraverseParms parms, int moveTicksCardinal, int moveTicksDiagonal, ByteGrid avoidGrid, bool drafted)
 		{
-			regionGrid = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid.DirectGrid;
+			regionGrid = mapping[vehicleDef].VehicleRegionGrid.DirectGrid;
 			traverseParms = parms;
 			destinationCell = destination.CenterCell;
 			this.moveTicksCardinal = moveTicksCardinal;
@@ -221,7 +221,7 @@ namespace Vehicles
 			{
 				return result;
 			}
-			CellIndices cellIndices = map.cellIndices;
+			CellIndices cellIndices = mapping.map.cellIndices;
 			Rand.PushState();
 			Rand.Seed = cellIndices.CellToIndex(region.extentsClose.CenterCell) * (region.links.Count + 1);
 			for(int i = 0; i < SampleCount; i++)
@@ -241,12 +241,12 @@ namespace Vehicles
 		/// <param name="index"></param>
 		private int GetCellCostFast(int index)
 		{
-			int num = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehiclePathGrid.pathGrid[index];
+			int num = mapping[vehicleDef].VehiclePathGrid.pathGrid[index];
 			if (avoidGrid != null)
 			{
 				num += avoidGrid[index] * 8;
 			}
-			num += drafted ? map.terrainGrid.topGrid[index].extraDraftedPerceivedPathCost : map.terrainGrid.topGrid[index].extraNonDraftedPerceivedPathCost;
+			num += drafted ? mapping.map.terrainGrid.topGrid[index].extraDraftedPerceivedPathCost : mapping.map.terrainGrid.topGrid[index].extraNonDraftedPerceivedPathCost;
 			return num;
 		}
 
@@ -374,15 +374,15 @@ namespace Vehicles
 			tmpCellIndices.Clear();
 			if(destination.Width == 1 && destination.Height == 1)
 			{
-				tmpCellIndices.Add(map.cellIndices.CellToIndex(destination.CenterCell));
+				tmpCellIndices.Add(mapping.map.cellIndices.CellToIndex(destination.CenterCell));
 			}
 			else
 			{
 				foreach (IntVec3 cell in destination)
 				{
-					if (cell.InBounds(map))
+					if (cell.InBounds(mapping.map))
 					{
-						tmpCellIndices.Add(map.cellIndices.CellToIndex(cell));
+						tmpCellIndices.Add(mapping.map.cellIndices.CellToIndex(cell));
 					}
 				}
 			}
@@ -391,7 +391,7 @@ namespace Vehicles
 			{
 				if (regionLink.GetOtherRegion(region).Allows(traverseParms, false))
 				{
-					if(!tmpDistances.TryGetValue(map.cellIndices.CellToIndex(linkTargetCells[regionLink]), out float num))
+					if(!tmpDistances.TryGetValue(mapping.map.cellIndices.CellToIndex(linkTargetCells[regionLink]), out float num))
 					{
 						Log.ErrorOnce("Dijkstra couldn't reach one of the cells even though they are in the same region. There is most likely something wrong with the " +
 							"neighbor nodes getter.", vehicleDef.GetHashCode() ^ "VehiclesDijkstraRegionLinkDistanceCalculator".GetHashCode());
@@ -431,7 +431,7 @@ namespace Vehicles
 		/// <param name="b"></param>
 		private bool AreCellsDiagonal(int a, int b)
 		{
-			int x = map.Size.x;
+			int x = mapping.map.Size.x;
 			return a % x != b % x && a / x != b / x;
 		}
 
@@ -442,12 +442,12 @@ namespace Vehicles
 		private List<int> PathableNeighborIndices(int index)
 		{
 			tmpPathableNeighborIndices.Clear();
-			VehiclePathGrid pathGrid = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehiclePathGrid;
-			int x = map.Size.x;
+			VehiclePathGrid pathGrid = mapping[vehicleDef].VehiclePathGrid;
+			int x = mapping.map.Size.x;
 			bool flag = index % x > 0;
 			bool flag2 = index % x < x - 1;
 			bool flag3 = index >= x;
-			bool flag4 = index / x < map.Size.z - 1;
+			bool flag4 = index / x < mapping.map.Size.z - 1;
 			if(flag3 && pathGrid.WalkableFast(index - x))
 			{
 				tmpPathableNeighborIndices.Add(index - x);
@@ -464,9 +464,9 @@ namespace Vehicles
 			{
 				tmpPathableNeighborIndices.Add(index + x);
 			}
-			bool flag5 = !flag || VehiclePathFinder.BlocksDiagonalMovement(map, vehicleDef, index - 1);
-			bool flag6 = !flag2 || VehiclePathFinder.BlocksDiagonalMovement(map, vehicleDef, index + 1);
-			if(flag3 && !VehiclePathFinder.BlocksDiagonalMovement(map, vehicleDef, index - x))
+			bool flag5 = !flag || VehiclePathFinder.BlocksDiagonalMovement(mapping.map, vehicleDef, index - 1);
+			bool flag6 = !flag2 || VehiclePathFinder.BlocksDiagonalMovement(mapping.map, vehicleDef, index + 1);
+			if(flag3 && !VehiclePathFinder.BlocksDiagonalMovement(mapping.map, vehicleDef, index - x))
 			{
 				if(!flag6 && pathGrid.WalkableFast(index - x + 1))
 				{
@@ -477,7 +477,7 @@ namespace Vehicles
 					tmpPathableNeighborIndices.Add(index - x - 1);
 				}
 			}
-			if(flag4 && !VehiclePathFinder.BlocksDiagonalMovement(map, vehicleDef, index + x))
+			if(flag4 && !VehiclePathFinder.BlocksDiagonalMovement(mapping.map, vehicleDef, index + x))
 			{
 				if(!flag6 && pathGrid.WalkableFast(index + x + 1))
 				{

@@ -15,7 +15,7 @@ namespace Vehicles
 	public class CompFueledTravel : VehicleAIComp, IRefundable
 	{
 		public const float FuelPerLeak = 1;
-		public const float TicksPerLeakCheck = 60;
+		public const float TicksPerLeakCheck = 120;
 		public const float MaxTicksPerLeak = 400;
 
 		public const float EfficiencyTickMultiplier = 1f / GenDate.TicksPerDay;
@@ -355,6 +355,7 @@ namespace Vehicles
 				}
 			}
 
+			//Validate leak every so often
 			if (Props.leakDef != null && fuel > 0 && Find.TickManager.TicksGame % TicksPerLeakCheck == 0)
 			{
 				leaking = false;
@@ -367,6 +368,7 @@ namespace Vehicles
 					}
 				}
 			}
+			//If leaking, then loop through and spawn filth
 			if (leaking)
 			{
 				foreach (VehicleComponent component in FuelComponents)
