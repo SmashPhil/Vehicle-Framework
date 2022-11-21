@@ -77,7 +77,7 @@ Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/is
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>
   <!--Show update log on next startup.-->
-  <update>false</update>
+  <update>true</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
   <testing>false</testing>
   <!--Icon bar shown to the right of the mod's name-->
