@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <!--Can utilize Version.txt file placed in mod's root directory-->
+  <currentVersion>1.4.1079</currentVersion>
+  <!--Startup,GameInit,LoadedGame,NewGame-->
+  <updateOn>Startup</updateOn>
+  <!--Full description shown in update page-->
+  <description>[title]Recent News[/title][font]Small[/font]
+I've updated the framework to version 1.4! I'm happy to say it wasn't a massive undertaking and that tons of things weren't broken. Here are all the bugfixes + changes from the first round of testing.
+[title]Bug Fixes[/title][font]Small[/font]
+- Fixed bug where AssignDefaults xml attribute would attempt to add a duplicate custom cost.
+
+- Fixed damage / deflection / penetration calculation which is supposed to immitate vanilla RNG damage mechanics.
+
+- Fixed bug where damaging components through dev mode would not notify vehicle of damage, resulting in no deconstruction or undrafting.
+
+- Fixed bug with material renderQueue, causing vehicles to render underneath shadows on all layers.
+
+- Fixed bug with shader depth buffer, causing vehicles to render underneath shadows and not offset altitude properly on all layers.
+
+- Fixed bug where crash landed aerial vehicles would not rotate selection brackets.
+
+- Fixed bug so BodyIntegrity is based on the sum of hp% for all vehicle components.
+
+- Fixed Crash To Desktop bug during caravan formation while gathering animals.
+
+- Fixed infinite wandering bug while forming vehicle caravan with slaves / prisoners.
+
+- Fixed bug where vehicle caravan formation would assign improper duties while boarding.
+
+- Fixed bug where items would be unreachable for instant formation while all pawns are inside the vehicle.
+
+- Fixed aerial vehicle launch targeter not canceling when using Cancel keybind to exit the world map.
+
+- Fixed bug where aerial vehicle launch targeter would display inaccurate fuel costs for the first waypoint.
+
+- Fixed bug where vehicle turrets would queue a burst at the beginning of targeting, rather than after it finished warmup, allowing a turret to instant fire while paused.
+
+- Fixed incorrect cargo capacity stat in Cargo ITab
+
+- Fixed issue where pawns would be unable to exit when the vehicle becomes overencumbered, hiding the draft gizmo and therefor all disembark gizmos.
+
+- Fixed translation issue with vehicles using "walk" for any movement related commands.
+
+- Fixed issue where Mod Settings columns would clip on the right side of the window.
+
+- Fixed bug where clicking a turret while it was firing would throw an exception.
+
+- Fixed rendering issue where vehicle gizmos would incorrectly scale the turret offsets
+
+- Fixed rendering issue where east / west wouldn't mirror properly for turrets.
+
+- Fixed bug where colonist bar pawns would not be clickable / selectable when inside a vehicle.
+
+- Fixed bug where vehicle turrets would not maintain targeting while reloading on things with health &gt; 0.
+
+- Fixed (hover over) inspect window for vehicles.
+[title]Additional Changes[/title][font]Small[/font]
+- Removed "Click for More Info tooltip on vehicle components health menu until further notice.  I need to actually add an additional window for more details.
+
+- Removed generic armor value and implemented armor ratings on a per part basis.
+
+- Changed vehicle damage mechanics to instead only take directional damage to external armor.  After external armor has been penetrated at that cell, it will fall through and have a chance to hit any internal or undefined part of the vehicle.
+
+- Changed explosion damage mechanics to now apply to every external cell it hits in the hitbox.  Internal parts (and occupants) will be damaged if the explosion penetrates external parts.
+
+- Added effector and sound options to VehicleFleshTypeDef for all vehicles.  Defaults will be assigned for Wooden, Metal, and Spacer vehicle flesh types which are included in the framework but you're free to make your own.
+
+- Added health% setting the explosion occurs at for Reactor_Explosive.
+
+- Even-sized vehicles will now align properly with the CellRect they occupy, rather than being centered on their position.
+
+- Added animation editor and camera viewer.
+[title]Final Notes[/title][font]Small[/font]
+Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
+</description>
+  <!--Static parameterless method to execute when update log is executed-->
+  <actionOnUpdate></actionOnUpdate>
+  <!--Show update log on next startup.-->
+  <update>false</update>
+  <!--Testing mode prevents the update from saving over the UpdateLog file-->
+  <testing>false</testing>
+  <!--Icon bar shown to the right of the mod's name-->
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon</icon>
+      <url>steam://url/CommunityFilePage/2356577528</url>
+    </li>
+  </rightIconBar>
+  <!--Icon bar shown to the left of the mod's name-->
+  <leftIconBar>
+    <li>
+      <name>Patreon</name>
+      <icon>patreonIcon</icon>
+      <url>https://www.patreon.com/smashphil</url>
+    </li>
+    <li>
+      <name>Cursed Crew</name>
+      <icon>cursedCrewIcon</icon>
+      <url>https://discord.gg/NNe2VxAU7Z</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>
