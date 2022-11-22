@@ -177,8 +177,7 @@ namespace Vehicles
 			{
 				ResetToCurrentPosition();
 			}
-			PawnDestinationReservationManager.PawnDestinationReservation pawnDestinationReservation = vehicle.Map.pawnDestinationReservationManager.
-				MostRecentReservationFor(vehicle);
+			PawnDestinationReservationManager.PawnDestinationReservation pawnDestinationReservation = vehicle.Map.pawnDestinationReservationManager.MostRecentReservationFor(vehicle);
 			if (!(pawnDestinationReservation is null) && ((Destination.HasThing && pawnDestinationReservation.target != Destination.Cell)
 				|| (pawnDestinationReservation.job != vehicle.CurJob && pawnDestinationReservation.target != Destination.Cell)))
 			{
@@ -207,17 +206,17 @@ namespace Vehicles
 			}
 			if (curPath != null)
 			{
+				vehicle.EventRegistry[VehicleEventDefOf.MoveStop].ExecuteEvents();
 				curPath.ReleaseToPool();
 			}
 			curPath = null;
 			moving = false;
 			nextCell = vehicle.Position;
-			vehicle.EventRegistry[VehicleEventDefOf.MoveStop].ExecuteEvents();
 		}
 
 		public void PatherTick()
 		{
-			if (!vehicle.Drafted || !vehicle.CanMoveFinal)
+			if ((!vehicle.Drafted || !vehicle.CanMoveFinal) && curPath != null)
 			{
 				PatherFailed();
 				return;

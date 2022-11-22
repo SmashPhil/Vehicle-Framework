@@ -8,15 +8,7 @@ namespace Vehicles
 {
 	public class JobDriver_IdleVehicle : JobDriver
 	{
-		private VehiclePawn Vehicle
-		{
-			get
-			{
-				Thing thing = job.GetTarget(TargetIndex.A).Thing;
-				if (thing is null) return null;
-				return thing as VehiclePawn;
-			}
-		}
+		protected VehiclePawn Vehicle => TargetA.Thing as VehiclePawn;
 
 		public override bool TryMakePreToilReservations(bool errorOnFailed)
 		{
@@ -25,9 +17,9 @@ namespace Vehicles
 
 		protected override IEnumerable<Toil> MakeNewToils()
 		{
-			Toil wait = new Toil
+			yield return new Toil()
 			{
-				initAction = delegate ()
+				initAction = delegate()
 				{
 					Map.pawnDestinationReservationManager.Reserve(Vehicle, job, Vehicle.Position);
 					Vehicle.vPather.StopDead();
@@ -108,7 +100,6 @@ namespace Vehicles
 				},
 				defaultCompleteMode = ToilCompleteMode.Never
 			};
-			yield return wait;
 		}
 	}
 }

@@ -73,7 +73,7 @@ namespace Vehicles
 						}
 						else
 						{
-							pawn.jobs.StartJob(new Job(JobDefOf_Vehicles.IdleVehicle, 150, false), JobCondition.None, null, false, true, null, null, false);
+							pawn.jobs.StartJob(new Job(JobDefOf_Vehicles.IdleVehicle, -1), JobCondition.Incompletable);
 						}
 						startingErrorRecoverJob = false;
 					}
