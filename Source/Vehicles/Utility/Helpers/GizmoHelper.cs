@@ -103,15 +103,22 @@ namespace Vehicles
 				isActive = () => drafter.Drafted,
 				toggleAction = delegate ()
 				{
-					drafter.Drafted = !drafter.Drafted;
-					PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Drafting, KnowledgeAmount.SpecificInteraction);
-					if (drafter.Drafted)
+					if (drafter.Drafted && vehicle.vPather.Moving)
 					{
-						LessonAutoActivator.TeachOpportunity(ConceptDefOf.QueueOrders, OpportunityType.GoodToKnow);
+						vehicle.vPather.PatherFailed();
+					}
+					else
+					{
+						drafter.Drafted = !drafter.Drafted;
+						PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Drafting, KnowledgeAmount.SpecificInteraction);
+						if (drafter.Drafted)
+						{
+							LessonAutoActivator.TeachOpportunity(ConceptDefOf.QueueOrders, OpportunityType.GoodToKnow);
+						}
 					}
 				},
 				defaultDesc = "VF_DraftVehicleDesc".Translate(),
-				icon = VehicleTex.DraftVehicle
+				icon = (drafter.Drafted && vehicle.vPather.Moving) ? VehicleTex.HaltVehicle : VehicleTex.DraftVehicle
 			};
 			if (!drafter.Drafted)
 			{

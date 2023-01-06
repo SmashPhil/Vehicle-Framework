@@ -314,11 +314,22 @@ namespace Vehicles
 			}
 		}
 
-		public static void AllowDeconstructVehicle(Thing t, ref AcceptanceReport __result)
+		public static void AllowDeconstructVehicle(Designator_Deconstruct __instance, Thing t, ref AcceptanceReport __result)
 		{
 			if (t is VehiclePawn vehicle && vehicle.DeconstructibleBy(Faction.OfPlayer))
 			{
-				__result = true;
+				if (__instance.Map.designationManager.DesignationOn(t, DesignationDefOf.Deconstruct) != null)
+				{
+					__result = false;
+				}
+				else if (__instance.Map.designationManager.DesignationOn(t, DesignationDefOf.Uninstall) != null)
+				{
+					__result = false;
+				}
+				else
+				{
+					__result = true;
+				}
 			}
 		}
 

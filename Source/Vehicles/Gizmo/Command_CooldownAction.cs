@@ -12,7 +12,7 @@ namespace Vehicles
 	{
 		public override void ProcessInput(Event ev)
 		{
-			if (turret.reloadTicks <= 0)
+			if (turret.ReloadTicks <= 0)
 			{
 				SoundDefOf.Tick_Tiny.PlayOneShotOnCamera(null);
 				base.ProcessInput(ev);
@@ -263,21 +263,18 @@ namespace Vehicles
 				TipSignal tip = Desc;
 				if (!disabledReason.NullOrEmpty())
 				{
-					string text = tip.text;
-					tip.text = string.Concat(new string[]
+					string tooltip = Desc;
+					if (!disabledReason.NullOrEmpty())
 					{
-						text,
-						"\n\n",
-						"DisabledCommand".Translate(),
-						": ",
-						disabledReason
-					});
+						tooltip = $"{Desc}\n\n{"DisabledCommand".Translate()}: {disabledReason}";
+					}
+					TooltipHandler.TipRegion(gizmoRect, tooltip);
 				}
 				TooltipHandler.TipRegion(gizmoRect, tip);
 			}
-			if (turret.reloadTicks > 0)
+			if (turret.ReloadTicks > 0)
 			{
-				float percent = turret.reloadTicks / (float)turret.MaxTicks;
+				float percent = turret.ReloadTicks / (float)turret.MaxTicks;
 				UIElements.VerticalFillableBar(gizmoRect, percent, UIData.FillableBarTexture, UIData.ClearBarTexture);
 			}
 			if (!HighlightTag.NullOrEmpty() && (Find.WindowStack.FloatMenu == null || !Find.WindowStack.FloatMenu.windowRect.Overlaps(gizmoRect)))

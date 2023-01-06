@@ -25,7 +25,7 @@ namespace Vehicles
 
 		public float Recoil => curRecoil;
 
-		public void RecoilTick()
+		public bool RecoilTick()
 		{
 			if (targetRecoil > 0f)
 			{
@@ -43,6 +43,7 @@ namespace Vehicles
 					if (curRecoil <= 0)
 					{
 						ResetRecoilVars();
+						return false;
 					}
 				}
 
@@ -50,7 +51,9 @@ namespace Vehicles
 				{
 					recoilingBack = false;
 				}
+				return true;
 			}
+			return false;
 		}
 
 		public void Notify_TurretRecoil(VehicleTurret turret, float angle)

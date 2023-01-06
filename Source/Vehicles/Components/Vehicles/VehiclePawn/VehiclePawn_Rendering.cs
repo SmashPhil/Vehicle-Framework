@@ -430,7 +430,7 @@ namespace Vehicles
 				Designator designator = DesignatorCache.Get(type);
 				if (designator != null)
 				{
-					yield return designator;
+					//yield return designator;
 				}
 			}
 

@@ -90,7 +90,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return Props.fuelCapacity + fuelCapacityOffset;
+				return SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_FueledTravel), nameof(CompProperties_FueledTravel.fuelCapacity), Props.fuelCapacity) + fuelCapacityOffset;
 			}
 			set
 			{
@@ -116,8 +116,8 @@ namespace Vehicles
 				return FuelCondition switch
 				{
 					FuelConsumptionCondition.Drafted => Vehicle.Drafted || caravanMoving,
-					FuelConsumptionCondition.Flying => false, //Add flying condition
-					FuelConsumptionCondition.FlyingOrDrafted => Vehicle.Drafted || caravanMoving,//Add flying as well
+					FuelConsumptionCondition.Flying => false,
+					FuelConsumptionCondition.FlyingOrDrafted => Vehicle.Drafted || caravanMoving,
 					FuelConsumptionCondition.Moving => Vehicle.vPather.MovingNow || caravanMoving,
 					FuelConsumptionCondition.Always => true,
 					_ => throw new NotImplementedException("FuelCondition " + FuelCondition + " Not Yet Implemented"),

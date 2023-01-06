@@ -56,13 +56,13 @@ namespace Vehicles
 
 		public override void Upgrade()
 		{
-			vehicle.CompVehicleTurrets.AddCannons(turretsUnlocked.Keys.ToList());
+			vehicle.CompVehicleTurrets.AddTurrets(turretsUnlocked.Keys.ToList());
 			vehicle.AddHandlers(turretsUnlocked.Values.ToList());
 		}
 
 		public override void Refund()
 		{
-			vehicle.CompVehicleTurrets.RemoveCannons(turretsUnlocked.Keys.ToList());
+			vehicle.CompVehicleTurrets.RemoveTurrets(turretsUnlocked.Keys.ToList());
 			vehicle.RemoveHandlers(turretsUnlocked.Values.ToList());
 		}
 

@@ -23,13 +23,13 @@ namespace Vehicles
 		/* --- Saveables --- */
 		protected bool autoTargetingActive;
 
-		public int reloadTicks;
-		public int burstTicks;
-		public string groupKey;
+		private int reloadTicks;
+		private int burstTicks;
 
 		public int uniqueID = -1;
 		public string parentKey;
 		public string key;
+		public string groupKey;
 
 		public VehicleTurretDef turretDef;
 
@@ -199,9 +199,11 @@ namespace Vehicles
 
 		public bool HasAmmo => turretDef.ammunition is null || shellCount > 0;
 
-		public bool ReadyToFire => groupKey.NullOrEmpty() ? (burstTicks <= 0 && reloadTicks <= 0 && !TurretDisabled) : GroupTurrets.Any(t => t.burstTicks <= 0 && t.reloadTicks <= 0 && !t.TurretDisabled);
+		public bool ReadyToFire => groupKey.NullOrEmpty() ? (burstTicks <= 0 && ReloadTicks <= 0 && !TurretDisabled) : GroupTurrets.Any(t => t.burstTicks <= 0 && t.ReloadTicks <= 0 && !t.TurretDisabled);
 
 		public bool FullAuto => CurrentFireMode.ticksBetweenBursts == CurrentFireMode.ticksBetweenShots;
+
+		public int ReloadTicks => reloadTicks;
 
 		public Texture2D FireIcon
 		{
@@ -290,11 +292,11 @@ namespace Vehicles
 		{
 			get
 			{
-				if (reloadTicks <= 0)
+				if (ReloadTicks <= 0)
 				{
 					return 1;
 				}
-				return Mathf.PingPong(reloadTicks, 25) / 50f + 0.25f; //ping pong between 0.25 and 0.75 alpha
+				return Mathf.PingPong(ReloadTicks, 25) / 50f + 0.25f; //ping pong between 0.25 and 0.75 alpha
 			}
 		}
 
@@ -480,7 +482,13 @@ namespace Vehicles
 				{
 					return;
 				}
+
 				autoTargetingActive = value;
+
+				if (autoTargetingActive)
+				{
+					StartTicking();
+				}
 			}
 		}
 
@@ -594,12 +602,13 @@ namespace Vehicles
 
 		public virtual bool ActivateTimer(bool ignoreTimer = false)
 		{
-			if (reloadTicks > 0 && !ignoreTimer)
+			if (ReloadTicks > 0 && !ignoreTimer)
 			{
 				return false;
 			}
 			reloadTicks = MaxTicks;
 			TargetLocked = false;
+			StartTicking();
 			return true;
 		}
 
@@ -608,7 +617,37 @@ namespace Vehicles
 			burstTicks = CurrentFireMode.ticksBetweenBursts;
 		}
 
-		public virtual void Tick()
+		public void StartTicking()
+		{
+			vehicle.CompVehicleTurrets.QueueTicker(this);
+		}
+
+		/// <summary>
+		/// Should only be called in the event that this turret needs to stop ticking unconditionally, otherwise let <see cref="CompVehicleTurrets"/> dequeue
+		/// when it's determined this turret no longer requires ticking.
+		/// </summary>
+		public void StopTicking()
+		{
+			vehicle.CompVehicleTurrets.DequeueTicker(this);
+		}
+
+		public virtual bool Tick()
+		{
+			bool cooldownTicked = TurretCooldownTick();
+			bool autoTicked = TurretAutoTick();
+			bool rotationTicked = TurretRotationTick();
+			bool targeterTicked = TurretTargeterTick();
+			bool recoilTicked = false;
+			if (Recoils)
+			{
+				recoilTicked = rTracker.RecoilTick();
+			}
+			Log.Message("Ticking");
+			//Keep ticking until no longer needed
+			return cooldownTicked || autoTicked || rotationTicked || targeterTicked || recoilTicked;
+		}
+
+		protected virtual bool TurretCooldownTick()
 		{
 			if (turretDef.cooldown != null)
 			{
@@ -626,6 +665,7 @@ namespace Vehicles
 				{
 					currentHeatRate = 0;
 					triggeredCooldown = false;
+					return false;
 				}
 
 				if (ticksSinceLastShot >= TicksTillBeginCooldown)
@@ -637,27 +677,36 @@ namespace Vehicles
 					}
 					currentHeatRate -= dissipationRate;
 				}
+				return true;
 			}
-			TurretAutoTick();
-			TurretRotationTick();
-			TurretTargeterTick();
-			if (Recoils)
+			else if (vehicle.Spawned && !queuedToFire)
 			{
-				rTracker.RecoilTick();
+				if (ReloadTicks > 0 && !OnCooldown)
+				{
+					reloadTicks--;
+					return true;
+				}
+				if (burstTicks > 0)
+				{
+					burstTicks--;
+					return true;
+				}
 			}
+			return false;
 		}
 
-		protected virtual void TurretAutoTick()
+		protected virtual bool TurretAutoTick()
 		{
-			if (vehicle.Spawned && !queuedToFire)
+			//Todo - only tick if active threats on the map
+			if (vehicle.Spawned && !queuedToFire && AutoTarget)
 			{
-				if (AutoTarget && Find.TickManager.TicksGame % AutoTargetInterval == 0)
+				if (Find.TickManager.TicksGame % AutoTargetInterval == 0)
 				{
 					if (TurretDisabled)
 					{
-						return;
+						return false;
 					}
-					if (!cannonTarget.IsValid && TurretTargeter.Turret != this && reloadTicks <= 0 && HasAmmo)
+					if (!cannonTarget.IsValid && TurretTargeter.Turret != this && ReloadTicks <= 0 && HasAmmo)
 					{
 						LocalTargetInfo autoTarget = this.GetCannonTarget();
 						if (autoTarget.IsValid)
@@ -667,86 +716,75 @@ namespace Vehicles
 						}
 					}
 				}
-				if (reloadTicks > 0 && !OnCooldown)
-				{
-					reloadTicks--;
-				}
-				if (burstTicks > 0)
-				{
-					burstTicks--;
-				}
+				return true;
 			}
+			return false;
 		}
 
-		protected virtual void TurretRotationTick()
+		protected virtual bool TurretRotationTick()
 		{
 			if (currentRotation != rotationTargeted)
 			{
 				//REDO - SET TO CHECK CANNON HANDLERS COMPONENT HEALTH
-				if (true)
+				float relativeCurrentRotation = currentRotation + 90;
+				float relativeTargetedRotation = rotationTargeted + 90;
+				if (relativeCurrentRotation < 0)
 				{
-					float relativeCurrentRotation = currentRotation + 90;
-					float relativeTargetedRotation = rotationTargeted + 90;
-					if (relativeCurrentRotation < 0)
-					{
-						relativeCurrentRotation += 360;
-					}
-					else if (relativeCurrentRotation > 360)
-					{
-						relativeCurrentRotation -= 360;
-					}
-					if (relativeTargetedRotation < 0)
-					{
-						relativeTargetedRotation += 360;
-					}
-					else if (relativeTargetedRotation > 360)
-					{
-						relativeTargetedRotation -= 360;
-					}
-					if (Math.Abs(relativeCurrentRotation - relativeTargetedRotation) < turretDef.rotationSpeed)
-					{
-						currentRotation = rotationTargeted;
-					}
-					else
-					{
-						int rotationDir;
-						if (relativeCurrentRotation < relativeTargetedRotation)
-						{
-							if (Math.Abs(relativeCurrentRotation - relativeTargetedRotation) < 180)
-							{
-								rotationDir = 1;
-							}
-							else
-							{
-								rotationDir = -1;
-							}
-						}
-						else
-						{
-							if (Math.Abs(relativeCurrentRotation - relativeTargetedRotation) < 180)
-							{
-								rotationDir = -1;
-							}
-							else
-							{
-								rotationDir = 1;
-							}
-						}
-						currentRotation += turretDef.rotationSpeed * rotationDir;
-						foreach (VehicleTurret cannon in childCannons)
-						{
-							cannon.currentRotation += turretDef.rotationSpeed * rotationDir;
-						}
-					}
+					relativeCurrentRotation += 360;
+				}
+				else if (relativeCurrentRotation > 360)
+				{
+					relativeCurrentRotation -= 360;
+				}
+				if (relativeTargetedRotation < 0)
+				{
+					relativeTargetedRotation += 360;
+				}
+				else if (relativeTargetedRotation > 360)
+				{
+					relativeTargetedRotation -= 360;
+				}
+				if (Math.Abs(relativeCurrentRotation - relativeTargetedRotation) < turretDef.rotationSpeed)
+				{
+					currentRotation = rotationTargeted;
 				}
 				else
 				{
-					rotationTargeted = currentRotation;
+					int rotationDir;
+					if (relativeCurrentRotation < relativeTargetedRotation)
+					{
+						if (Math.Abs(relativeCurrentRotation - relativeTargetedRotation) < 180)
+						{
+							rotationDir = 1;
+						}
+						else
+						{
+							rotationDir = -1;
+						}
+					}
+					else
+					{
+						if (Math.Abs(relativeCurrentRotation - relativeTargetedRotation) < 180)
+						{
+							rotationDir = -1;
+						}
+						else
+						{
+							rotationDir = 1;
+						}
+					}
+					currentRotation += turretDef.rotationSpeed * rotationDir;
+					foreach (VehicleTurret cannon in childCannons)
+					{
+						cannon.currentRotation += turretDef.rotationSpeed * rotationDir;
+					}
 				}
+				return true;
 			}
+			return false;
 		}
 
-		protected virtual void TurretTargeterTick()
+		protected virtual bool TurretTargeterTick()
 		{
 			if (cannonTarget.IsValid)
 			{
@@ -758,6 +796,7 @@ namespace Vehicles
 				else if (!TurretTargetValid)
 				{
 					SetTarget(LocalTargetInfo.Invalid);
+					return TurretTargeter.Turret == this;
 				}
 			}
 			if (TurretTargetValid)
@@ -766,7 +805,7 @@ namespace Vehicles
 				{
 					SetTarget(LocalTargetInfo.Invalid);
 					TargetLocked = false;
-					return;
+					return TurretTargeter.Turret == this;
 				}
 				if (PrefireTickCount > 0)
 				{
@@ -811,10 +850,11 @@ namespace Vehicles
 					}
 				}
 			}
-			else if (IsTargetable)
+			else if (IsTargetable && SetTargetConditionalOnThing(LocalTargetInfo.Invalid))
 			{
-				SetTargetConditionalOnThing(LocalTargetInfo.Invalid);
+				return TurretTargeter.Turret == this;
 			}
+			return true;
 		}
 
 		public virtual CompVehicleTurrets.TurretData GenerateTurretData()
@@ -1345,6 +1385,11 @@ namespace Vehicles
 			else
 			{
 				CachedPawnTargetStatus = PawnStatusOnTarget.None;
+			}
+
+			if (cannonTarget.IsValid)
+			{
+				StartTicking();
 			}
 		}
 

@@ -20,16 +20,18 @@ namespace Vehicles
 
 		public override bool IsTargeting => action != null;
 
-		public static void BeginTargeting(TargetingParameters targetParams, Action<LocalTargetInfo> action, VehicleTurret cannon, Action actionWhenFinished = null, Texture2D mouseAttachment = null)
+		public static void BeginTargeting(TargetingParameters targetParams, Action<LocalTargetInfo> action, VehicleTurret turret, Action actionWhenFinished = null, Texture2D mouseAttachment = null)
 		{
 			Instance.action = action;
 			Instance.targetParams = targetParams;
-			Instance.vehicle = cannon.vehicle;
-			Turret = cannon;
+			Instance.vehicle = turret.vehicle;
+			Turret = turret;
 			Turret.SetTarget(LocalTargetInfo.Invalid);
 			Instance.actionWhenFinished = actionWhenFinished;
 			Instance.mouseAttachment = mouseAttachment;
-			Instance.map = cannon.vehicle.Map;
+			Instance.map = turret.vehicle.Map;
+
+			Turret.StartTicking();
 		}
 
 		public override void StopTargeting()

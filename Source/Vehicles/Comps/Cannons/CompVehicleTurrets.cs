@@ -16,6 +16,8 @@ namespace Vehicles
 
 		public List<VehicleTurret> turrets = new List<VehicleTurret>();
 
+		private List<VehicleTurret> tickers = new List<VehicleTurret>();
+
 		public CompProperties_VehicleTurrets Props => (CompProperties_VehicleTurrets)props;
 
 		public VehiclePawn Vehicle => parent as VehiclePawn;
@@ -48,7 +50,7 @@ namespace Vehicles
 			}
 		}
 
-		public void AddCannons(List<VehicleTurret> cannonList)
+		public void AddTurrets(List<VehicleTurret> cannonList)
 		{
 			if (cannonList.NullOrEmpty())
 			{
@@ -62,7 +64,7 @@ namespace Vehicles
 			}
 		}
 
-		public void RemoveCannons(List<VehicleTurret> cannonList)
+		public void RemoveTurrets(List<VehicleTurret> cannonList)
 		{
 			if (cannonList.NullOrEmpty())
 			{
@@ -236,6 +238,19 @@ namespace Vehicles
 			}
 		}
 
+		public void QueueTicker(VehicleTurret turret)
+		{
+			if (VehicleMod.settings.main.opportunisticTurretTicking && !tickers.Contains(turret))
+			{
+				tickers.Add(turret);
+			}
+		}
+
+		public void DequeueTicker(VehicleTurret turret)
+		{
+			tickers.Remove(turret);
+		}
+
 		public void QueueTurret(TurretData turretData)
 		{
 			turretData.turret.queuedToFire = true;
@@ -318,9 +333,25 @@ namespace Vehicles
 		{
 			base.CompTick();
 			ResolveTurretQueue();
-			foreach (VehicleTurret turret in turrets)
+
+			if (VehicleMod.settings.main.opportunisticTurretTicking)
 			{
-				turret.Tick();
+				//Only tick VehicleTurrets that actively request to be ticked
+				for (int i = tickers.Count - 1; i >= 0; i--)
+				{
+					VehicleTurret turret = tickers[i];
+					if (!turret.Tick())
+					{
+						tickers.RemoveAt(i);
+					}
+				}
+			}
+			else
+			{
+				foreach (VehicleTurret turret in turrets)
+				{
+					turret.Tick();
+				}
 			}
 		}
 
