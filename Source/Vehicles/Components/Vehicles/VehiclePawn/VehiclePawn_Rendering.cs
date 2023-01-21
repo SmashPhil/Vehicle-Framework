@@ -405,7 +405,7 @@ namespace Vehicles
 			base.DrawExtraSelectionOverlays();
 			if (vPather.curPath != null)
 			{
-				//vPather.curPath.DrawPath(this);
+				vPather.curPath.DrawPath(this);
 			}
 			RenderHelper.DrawLinesBetweenTargets(this, jobs.curJob, jobs.jobQueue);
 		}
