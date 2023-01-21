@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
 using Verse;
+using Verse.AI;
 using RimWorld;
 using UnityEngine;
 using SmashTools;
@@ -23,6 +24,18 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_HealthTracker), "ShouldBeDowned"),
 				prefix: new HarmonyMethod(typeof(HealthAndStats),
 				nameof(VehicleShouldBeDowned)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_HealthTracker), nameof(Pawn_HealthTracker.AddHediff), parameters: new Type[] { typeof(Hediff), typeof(BodyPartRecord), typeof(DamageInfo?), typeof(DamageWorker.DamageResult) }),
+				prefix: new HarmonyMethod(typeof(HealthAndStats),
+				nameof(VehiclesDontAddHediffs)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_HealthTracker), "MakeDowned"),
+				prefix: new HarmonyMethod(typeof(HealthAndStats),
+				nameof(VehiclesCantBeDowned)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MentalStateWorker), nameof(MentalStateWorker.StateCanOccur)),
+				prefix: new HarmonyMethod(typeof(HealthAndStats),
+				nameof(VehiclesCantEnterMentalState)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MentalBreakWorker), nameof(MentalBreakWorker.BreakCanOccur)),
+				prefix: new HarmonyMethod(typeof(HealthAndStats),
+				nameof(VehiclesCantEnterMentalBreak)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(HediffUtility), nameof(HediffUtility.CanHealNaturally)),
 				prefix: new HarmonyMethod(typeof(HealthAndStats),
 				nameof(VehiclesDontHeal)));
@@ -100,6 +113,44 @@ namespace Vehicles
 					__result = vehicle.VehicleDef.properties.healthLabel_Healthy;
 					return false;
 				}
+			}
+			return true;
+		}
+
+		public static bool VehiclesDontAddHediffs(Pawn ___pawn)
+		{
+			if (___pawn is VehiclePawn)
+			{
+				return false;
+			}
+			return true;
+		}
+
+		public static bool VehiclesCantBeDowned(Pawn ___pawn)
+		{
+			if (___pawn is VehiclePawn)
+			{
+				return false;
+			}
+			return true;
+		}
+
+		public static bool VehiclesCantEnterMentalState(Pawn pawn, ref bool __result)
+		{
+			if (pawn is VehiclePawn)
+			{
+				__result = false;
+				return false;
+			}
+			return true;
+		}
+
+		public static bool VehiclesCantEnterMentalBreak(Pawn pawn, ref bool __result)
+		{
+			if (pawn is VehiclePawn)
+			{
+				__result = false;
+				return false;
 			}
 			return true;
 		}
