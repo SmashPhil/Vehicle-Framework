@@ -46,8 +46,6 @@ namespace Vehicles
 
 		public static List<VehicleDef> AllMoveableVehicleDefs { get; internal set; }
 
-		public static int AllMoveableVehicleDefsCount { get; internal set; }
-
 		static VehicleHarmony()
 		{
 			//harmony.PatchAll(Assembly.GetExecutingAssembly());
@@ -158,7 +156,13 @@ namespace Vehicles
 		internal static void RecacheMoveableVehicleDefs()
 		{
 			AllMoveableVehicleDefs = DefDatabase<VehicleDef>.AllDefsListForReading.Where(vehicleDef => SettingsCache.TryGetValue(vehicleDef, typeof(VehicleDef), nameof(vehicleDef.vehicleMovementPermissions), vehicleDef.vehicleMovementPermissions) > VehiclePermissions.NotAllowed).ToList();
-			AllMoveableVehicleDefsCount = AllMoveableVehicleDefs.Count;
+			if (!Find.Maps.NullOrEmpty())
+			{
+				foreach (Map map in Find.Maps)
+				{
+					map.GetCachedMapComponent<VehicleMapping>().ConstructComponents();
+				}
+			}
 		}
 	}
 }

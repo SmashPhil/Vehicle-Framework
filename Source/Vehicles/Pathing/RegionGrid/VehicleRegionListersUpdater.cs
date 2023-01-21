@@ -24,10 +24,10 @@ namespace Vehicles
 				return;
 			}
 			GetTouchableRegions(thing, map, vehicleDef, tmpRegions, true);
-			for(int i = 0; i < tmpRegions.Count; i++)
+			for (int i = 0; i < tmpRegions.Count; i++)
 			{
 				ListerThings listerThings = tmpRegions[i].ListerThings;
-				if(listerThings.Contains(thing))
+				if (listerThings.Contains(thing))
 				{
 					listerThings.Remove(thing);
 				}
@@ -68,7 +68,7 @@ namespace Vehicles
 		{
 			List<Thing> thingList = cell.GetThingList(map);
 			int count = thingList.Count;
-			for(int i = 0; i < count; i++)
+			for (int i = 0; i < count; i++)
 			{
 				Thing thing = thingList[i];
 				if (processedThings is null || processedThings.Add(thing))
@@ -98,7 +98,8 @@ namespace Vehicles
 			{
 				if (intVec.InBounds(map))
 				{
-					VehicleRegion validRegionAt_NoRebuild = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid.GetValidRegionAt_NoRebuild(intVec);
+					VehicleMapping.VehiclePathData vehiclePathData = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef];
+					VehicleRegion validRegionAt_NoRebuild = vehiclePathData.VehicleRegionGrid.GetValidRegionAt_NoRebuild(intVec);
 					if (validRegionAt_NoRebuild != null && validRegionAt_NoRebuild.type.Passable() && !outRegions.Contains(validRegionAt_NoRebuild))
 					{
 						if (cellRect.Contains(intVec))

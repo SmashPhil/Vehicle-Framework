@@ -10,7 +10,7 @@ namespace Vehicles
 		private static readonly HashSet<Thing> tmpProcessedThings = new HashSet<Thing>();
 
 		private readonly VehicleMapping mapping;
-		private readonly VehicleDef vehicleDef;
+		private readonly VehicleDef createdFor;
 
 		private VehicleRegion newRegion;
 		private VehicleRegionGrid regionGrid;
@@ -28,10 +28,10 @@ namespace Vehicles
 			new HashSet<IntVec3>()
 		};
 
-		public VehicleRegionMaker(VehicleMapping mapping, VehicleDef vehicleDef)
+		public VehicleRegionMaker(VehicleMapping mapping, VehicleDef createdFor)
 		{
 			this.mapping = mapping;
-			this.vehicleDef = vehicleDef;
+			this.createdFor = createdFor;
 		}
 
 		public bool CreatingRegions { get; private set; }
@@ -42,7 +42,7 @@ namespace Vehicles
 		/// <param name="root"></param>
 		public VehicleRegion TryGenerateRegionFrom(IntVec3 root)
 		{
-			RegionType expectedRegionType = VehicleRegionTypeUtility.GetExpectedRegionType(root, mapping.map, vehicleDef);
+			RegionType expectedRegionType = VehicleRegionTypeUtility.GetExpectedRegionType(root, mapping.map, createdFor);
 			if (expectedRegionType == RegionType.None)
 			{
 				return null;
@@ -58,9 +58,9 @@ namespace Vehicles
 			try
 			{
 				lastRegionProcess = "Retrieving region grid";
-				regionGrid = mapping[vehicleDef].VehicleRegionGrid;
+				regionGrid = mapping[createdFor].VehicleRegionGrid;
 				lastRegionProcess = "Creating new unfilled region";
-				newRegion = VehicleRegion.MakeNewUnfilled(root, mapping.map, vehicleDef);
+				newRegion = VehicleRegion.MakeNewUnfilled(root, mapping.map, createdFor);
 				newRegion.type = expectedRegionType;
 				lastRegionProcess = "Flood filling all valid cells";
 				FloodFillAndAddCells(root);
@@ -119,7 +119,7 @@ namespace Vehicles
 			}
 			else
 			{
-				mapping.map.floodFiller.FloodFill(root, (IntVec3 x) => newRegion.extentsLimit.Contains(x) && VehicleRegionTypeUtility.GetExpectedRegionType(x, mapping.map, vehicleDef) == newRegion.type, 
+				mapping.map.floodFiller.FloodFill(root, (IntVec3 x) => newRegion.extentsLimit.Contains(x) && VehicleRegionTypeUtility.GetExpectedRegionType(x, mapping.map, createdFor) == newRegion.type,
 					delegate (IntVec3 x)
 					{
 						AddCell(x);
@@ -162,7 +162,7 @@ namespace Vehicles
 		/// </summary>
 		private void CreateLinks()
 		{
-			for(int i = 0; i <  linksProcessedAt.Length; i++)
+			for (int i = 0; i < linksProcessedAt.Length; i++)
 			{
 				linksProcessedAt[i].Clear();
 			}
@@ -200,7 +200,7 @@ namespace Vehicles
 				return;
 			}
 
-			RegionType expectedRegionType = VehicleRegionTypeUtility.GetExpectedRegionType(c2, mapping.map, vehicleDef);
+			RegionType expectedRegionType = VehicleRegionTypeUtility.GetExpectedRegionType(c2, mapping.map, createdFor);
 			if (expectedRegionType == RegionType.None || expectedRegionType == RegionType.Portal)
 			{
 				return;
@@ -212,11 +212,11 @@ namespace Vehicles
 			int num2 = 0;
 			hashSet.Add(cell);
 
-			for (;;)
+			for (; ; )
 			{
 				IntVec3 intVec = cell + rot.FacingCell * (num + 1);
 				if (!intVec.InBounds(mapping.map) || regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(intVec) != newRegion ||
-					VehicleRegionTypeUtility.GetExpectedRegionType(intVec + potentialOtherRegionDir.FacingCell, mapping.map, vehicleDef) != expectedRegionType)
+					VehicleRegionTypeUtility.GetExpectedRegionType(intVec + potentialOtherRegionDir.FacingCell, mapping.map, createdFor) != expectedRegionType)
 				{
 					break;
 				}
@@ -226,11 +226,11 @@ namespace Vehicles
 				}
 				num++;
 			}
-			for (;;)
+			for (; ; )
 			{
 				IntVec3 intVec2 = cell - rot.FacingCell * (num2 + 1);
 				if (!intVec2.InBounds(mapping.map) || regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(intVec2) != newRegion ||
-					VehicleRegionTypeUtility.GetExpectedRegionType(intVec2 + potentialOtherRegionDir.FacingCell, mapping.map, vehicleDef) != expectedRegionType)
+					VehicleRegionTypeUtility.GetExpectedRegionType(intVec2 + potentialOtherRegionDir.FacingCell, mapping.map, createdFor) != expectedRegionType)
 				{
 					break;
 				}
@@ -267,7 +267,7 @@ namespace Vehicles
 				root = cell - rot.FacingCell * num2;
 			}
 			EdgeSpan span = new EdgeSpan(root, dir, length);
-			VehicleRegionLink regionLink = mapping[vehicleDef].VehicleRegionLinkDatabase.LinkFrom(span);
+			VehicleRegionLink regionLink = mapping[createdFor].VehicleRegionLinkDatabase.LinkFrom(span);
 			regionLink.Register(newRegion);
 			newRegion.links.Add(regionLink);
 		}
@@ -298,7 +298,7 @@ namespace Vehicles
 				}
 				if (flag)
 				{
-					VehicleRegionListersUpdater.RegisterAllAt(intVec, mapping.map, vehicleDef, tmpProcessedThings);
+					VehicleRegionListersUpdater.RegisterAllAt(intVec, mapping.map, createdFor, tmpProcessedThings);
 				}
 			}
 			tmpProcessedThings.Clear();

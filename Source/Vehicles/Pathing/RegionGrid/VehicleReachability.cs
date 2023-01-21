@@ -14,7 +14,7 @@ namespace Vehicles
 	public sealed class VehicleReachability
 	{
 		private readonly VehicleMapping mapping;
-		private readonly VehicleDef vehicleDef;
+		private readonly VehicleDef createdFor;
 
 		private readonly Queue<VehicleRegion> openQueue = new Queue<VehicleRegion>();
 
@@ -28,10 +28,10 @@ namespace Vehicles
 		private VehiclePathGrid pathGrid;
 		private VehicleRegionGrid regionGrid;
 
-		public VehicleReachability(VehicleMapping mapping, VehicleDef vehicleDef)
+		public VehicleReachability(VehicleMapping mapping, VehicleDef createdFor)
 		{
 			this.mapping = mapping;
-			this.vehicleDef = vehicleDef;
+			this.createdFor = createdFor;
 		}
 
 		/// <summary>
@@ -44,9 +44,9 @@ namespace Vehicles
 		/// </summary>
 		public void ClearCache()
 		{
-			if (cache.Count > 0) 
-			{ 
-				cache.Clear(); 
+			if (cache.Count > 0)
+			{
+				cache.Clear();
 			}
 		}
 
@@ -162,13 +162,13 @@ namespace Vehicles
 			{
 				return false;
 			}
-			if (!start.InBounds(mapping.map) || !dest.Cell.InBounds(mapping.map)) 
+			if (!start.InBounds(mapping.map) || !dest.Cell.InBounds(mapping.map))
 			{
 				return false;
 			}
-
-			pathGrid = mapping[vehicleDef].VehiclePathGrid;
-			regionGrid = mapping[vehicleDef].VehicleRegionGrid;
+			//Pathgrid is strictly for impassable cost check, so this will still match for copies
+			pathGrid = mapping[createdFor].VehiclePathGrid;
+			regionGrid = mapping[createdFor].VehicleRegionGrid;
 
 			if (!pathGrid.WalkableFast(start))
 			{
@@ -177,12 +177,13 @@ namespace Vehicles
 			bool freeTraversal = traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater && traverseParms.mode != TraverseMode.PassAllDestroyableThingsNotWater;
 			if ((peMode == PathEndMode.OnCell || peMode == PathEndMode.Touch || peMode == PathEndMode.ClosestTouch) && freeTraversal)
 			{
-				VehicleRoom room = VehicleRegionAndRoomQuery.RoomAtFast(start, mapping.map, vehicleDef, RegionType.Set_Passable);
-				if (room != null && room == VehicleRegionAndRoomQuery.RoomAtFast(dest.Cell, mapping.map, vehicleDef, RegionType.Set_Passable))
+				VehicleRoom room = VehicleRegionAndRoomQuery.RoomAtFast(start, mapping.map, createdFor, RegionType.Set_Passable);
+				if (room != null && room == VehicleRegionAndRoomQuery.RoomAtFast(dest.Cell, mapping.map, createdFor, RegionType.Set_Passable))
 				{
 					return true;
 				}
 			}
+
 			if (traverseParms.mode == TraverseMode.PassAllDestroyableThings)
 			{
 				TraverseParms traverseParms2 = traverseParms;
@@ -192,7 +193,9 @@ namespace Vehicles
 					return true;
 				}
 			}
-			dest = (LocalTargetInfo)GenPathVehicles.ResolvePathMode(vehicle.VehicleDef, vehicle.Map, dest.ToTargetInfo(mapping.map), ref peMode);
+
+			//Try to use parms vehicle if possible for pathgrid check
+			dest = (LocalTargetInfo)GenPathVehicles.ResolvePathMode(vehicle?.VehicleDef ?? createdFor, mapping.map, dest.ToTargetInfo(mapping.map), ref peMode);
 			CalculatingReachability = true;
 			bool result;
 			try
@@ -201,15 +204,15 @@ namespace Vehicles
 				destRegions.Clear();
 				if (peMode == PathEndMode.OnCell)
 				{
-					VehicleRegion region = VehicleGridsUtility.GetRegion(dest.Cell, mapping.map, vehicleDef, RegionType.Set_Passable);
-					if(region != null && region.Allows(traverseParms, true))
+					VehicleRegion region = VehicleGridsUtility.GetRegion(dest.Cell, mapping.map, createdFor, RegionType.Set_Passable);
+					if (region != null && region.Allows(traverseParms, true))
 					{
 						destRegions.Add(region);
 					}
 				}
 				else if (peMode == PathEndMode.Touch)
 				{
-					TouchPathEndModeUtilityVehicles.AddAllowedAdjacentRegions(dest, traverseParms, mapping.map, vehicleDef, destRegions);
+					TouchPathEndModeUtilityVehicles.AddAllowedAdjacentRegions(dest, traverseParms, mapping.map, createdFor, destRegions);
 				}
 				if (destRegions.Count == 0 && traverseParms.mode != TraverseMode.PassAllDestroyableThings && traverseParms.mode !=
 					TraverseMode.PassAllDestroyableThingsNotWater)
@@ -240,7 +243,7 @@ namespace Vehicles
 								return false;
 							}
 						}
-						if (traverseParms.mode == TraverseMode.PassAllDestroyableThings || traverseParms.mode == TraverseMode.PassAllDestroyableThingsNotWater || 
+						if (traverseParms.mode == TraverseMode.PassAllDestroyableThings || traverseParms.mode == TraverseMode.PassAllDestroyableThingsNotWater ||
 							traverseParms.mode == TraverseMode.NoPassClosedDoorsOrWater)
 						{
 							bool flag = CheckCellBasedReachability(start, dest, peMode, traverseParms);
@@ -339,7 +342,7 @@ namespace Vehicles
 				VehicleRegion region = openQueue.Dequeue();
 				foreach (VehicleRegionLink regionLink in region.links)
 				{
-					for(int i = 0; i < 2; i++)
+					for (int i = 0; i < 2; i++)
 					{
 						VehicleRegion linkedRegion = regionLink.regions[i];
 						if (linkedRegion != null && linkedRegion.reachedIndex != reachedIndex && linkedRegion.type.Passable())
@@ -399,9 +402,9 @@ namespace Vehicles
 				if (CanUseCache(traverseParms.mode))
 				{
 					VehicleRegion validRegionAt = regionGrid.GetValidRegionAt(foundCell);
-					if( !(validRegionAt is null) )
+					if (!(validRegionAt is null))
 					{
-						foreach(VehicleRegion startRegion in startingRegions)
+						foreach (VehicleRegion startRegion in startingRegions)
 						{
 							cache.AddCachedResult(startRegion.Room, validRegionAt.Room, traverseParms, true);
 						}
@@ -411,9 +414,9 @@ namespace Vehicles
 			}
 			if (CanUseCache(traverseParms.mode))
 			{
-				foreach(VehicleRegion startRegion in startingRegions)
+				foreach (VehicleRegion startRegion in startingRegions)
 				{
-					foreach(VehicleRegion destRegion in destRegions)
+					foreach (VehicleRegion destRegion in destRegions)
 					{
 						cache.AddCachedResult(startRegion.Room, destRegion.Room, traverseParms, false);
 					}
@@ -455,15 +458,16 @@ namespace Vehicles
 		/// <summary>
 		/// Can reach colony at cell <paramref name="c"/>
 		/// </summary>
-		/// <param name="c"></param>
-		public bool CanReachBase(IntVec3 c)
+		/// <param name="cell"></param>
+		/// <param name="vehicleDef"></param>
+		public bool CanReachBase(IntVec3 cell, VehicleDef vehicleDef)
 		{
 			if (Current.ProgramState != ProgramState.Playing)
 			{
-				return CanReachVehicle(c, MapGenerator.PlayerStartSpot, PathEndMode.OnCell, TraverseParms.For(TraverseMode.PassDoors,
+				return CanReachVehicle(cell, MapGenerator.PlayerStartSpot, PathEndMode.OnCell, TraverseParms.For(TraverseMode.PassDoors,
 					Danger.Deadly, false));
 			}
-			if (!GenGridVehicles.Walkable(c, vehicleDef, mapping.map))
+			if (!GenGridVehicles.Walkable(cell, vehicleDef, mapping.map))
 			{
 				return false;
 			}
@@ -471,18 +475,18 @@ namespace Vehicles
 			List<Pawn> list = mapping.map.mapPawns.SpawnedPawnsInFaction(faction);
 			foreach (Pawn p in list)
 			{
-				if (p.CanReach(c, PathEndMode.OnCell, Danger.Deadly, false, false, TraverseMode.ByPawn))
+				if (p.CanReach(cell, PathEndMode.OnCell, Danger.Deadly, false, false, TraverseMode.ByPawn))
 				{
 					return true;
 				}
 			}
 			TraverseParms traverseParms = TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false);
-			if(faction == Faction.OfPlayer)
+			if (faction == Faction.OfPlayer)
 			{
 				List<Building> allBuildingsColonist = mapping.map.listerBuildings.allBuildingsColonist;
 				foreach (Building b in allBuildingsColonist)
 				{
-					if (CanReachVehicle(c, b, PathEndMode.Touch, traverseParms))
+					if (CanReachVehicle(cell, b, PathEndMode.Touch, traverseParms))
 					{
 						return true;
 					}
@@ -491,15 +495,15 @@ namespace Vehicles
 			else
 			{
 				List<Thing> list2 = mapping.map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial);
-				foreach(Thing t in list2)
+				foreach (Thing thing in list2)
 				{
-					if(t.Faction == faction && CanReachVehicle(c, t, PathEndMode.Touch, traverseParms))
+					if (thing.Faction == faction && CanReachVehicle(cell, thing, PathEndMode.Touch, traverseParms))
 					{
 						return true;
 					}
 				}
 			}
-			return CanReachBiggestMapEdgeRoom(c);
+			return CanReachBiggestMapEdgeRoom(cell);
 		}
 
 		/// <summary>
@@ -509,7 +513,7 @@ namespace Vehicles
 		public bool CanReachBiggestMapEdgeRoom(IntVec3 c)
 		{
 			VehicleRoom usableRoom = null;
-			foreach(VehicleRoom room in regionGrid.allRooms)
+			foreach (VehicleRoom room in regionGrid.allRooms)
 			{
 				if (room.TouchesMapEdge)
 				{
@@ -542,7 +546,7 @@ namespace Vehicles
 					return false;
 				}
 			}
-			VehicleRegion region = VehicleGridsUtility.GetRegion(cell, mapping.map, vehicleDef, RegionType.Set_Passable);
+			VehicleRegion region = VehicleGridsUtility.GetRegion(cell, mapping.map, createdFor, RegionType.Set_Passable);
 			if (region is null)
 			{
 				return false;
@@ -601,7 +605,7 @@ namespace Vehicles
 			{
 				return true;
 			}
-			VehicleRegion region = VehicleGridsUtility.GetRegion(cell, mapping.map, vehicleDef, RegionType.Set_Passable);
+			VehicleRegion region = VehicleGridsUtility.GetRegion(cell, mapping.map, createdFor, RegionType.Set_Passable);
 			if (region == null)
 			{
 				return false;
