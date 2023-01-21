@@ -10,16 +10,16 @@ namespace Vehicles
 	public class VehicleRegionDirtyer
 	{
 		private readonly VehicleMapping mapping;
-		private readonly VehicleDef vehicleDef;
+		private readonly VehicleDef createdFor;
 
 		private readonly HashSet<IntVec3> dirtyCells = new HashSet<IntVec3>();
 
 		private readonly List<VehicleRegion> regionsToDirty = new List<VehicleRegion>();
 
-		public VehicleRegionDirtyer(VehicleMapping mapping, VehicleDef vehicleDef)
+		public VehicleRegionDirtyer(VehicleMapping mapping, VehicleDef createdFor)
 		{
 			this.mapping = mapping;
-			this.vehicleDef = vehicleDef;
+			this.createdFor = createdFor;
 		}
 
 		/// <summary>
@@ -56,7 +56,7 @@ namespace Vehicles
 			{
 				dirtyCells.Add(cell);
 			}
-			foreach (VehicleRegion region in mapping[vehicleDef].VehicleRegionGrid.AllRegions_NoRebuild_InvalidAllowed)
+			foreach (VehicleRegion region in mapping[createdFor].VehicleRegionGrid.AllRegions_NoRebuild_InvalidAllowed)
 			{
 				SetRegionDirty(region, false);
 			}
@@ -74,7 +74,7 @@ namespace Vehicles
 				IntVec3 adjCell = cell + GenAdj.AdjacentCellsAndInside[i];
 				if (adjCell.InBounds(mapping.map))
 				{
-					VehicleRegion regionAt_NoRebuild_InvalidAllowed = mapping[vehicleDef].VehicleRegionGrid.GetRegionAt_NoRebuild_InvalidAllowed(adjCell);
+					VehicleRegion regionAt_NoRebuild_InvalidAllowed = mapping[createdFor].VehicleRegionGrid.GetRegionAt_NoRebuild_InvalidAllowed(adjCell);
 					if (regionAt_NoRebuild_InvalidAllowed != null && regionAt_NoRebuild_InvalidAllowed.valid)
 					{
 						regionsToDirty.Add(regionAt_NoRebuild_InvalidAllowed);
@@ -86,7 +86,7 @@ namespace Vehicles
 				SetRegionDirty(regionsToDirty[j], true);
 			}
 			regionsToDirty.Clear();
-			if (GenGridVehicles.Walkable(cell, vehicleDef, mapping.map))
+			if (GenGridVehicles.Walkable(cell, createdFor, mapping.map))
 			{
 				dirtyCells.Add(cell);
 			}
@@ -101,7 +101,7 @@ namespace Vehicles
 			regionsToDirty.Clear();
 			foreach (IntVec3 c in thing.OccupiedRect().ExpandedBy(1).ClipInsideMap(thing.Map))
 			{
-				VehicleRegion validRegionAt_NoRebuild = thing.Map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid.GetValidRegionAt_NoRebuild(c);
+				VehicleRegion validRegionAt_NoRebuild = mapping[createdFor].VehicleRegionGrid.GetValidRegionAt_NoRebuild(c);
 				if (validRegionAt_NoRebuild != null)
 				{
 					regionsToDirty.Add(validRegionAt_NoRebuild);
@@ -121,7 +121,7 @@ namespace Vehicles
 		public void Notify_ThingAffectingRegionsDespawned(Thing thing)
 		{
 			regionsToDirty.Clear();
-			VehicleRegion validRegionAt_NoRebuild = mapping[vehicleDef].VehicleRegionGrid.GetValidRegionAt_NoRebuild(thing.Position);
+			VehicleRegion validRegionAt_NoRebuild = mapping[createdFor].VehicleRegionGrid.GetValidRegionAt_NoRebuild(thing.Position);
 			if (validRegionAt_NoRebuild != null)
 			{
 				regionsToDirty.Add(validRegionAt_NoRebuild);
@@ -130,7 +130,7 @@ namespace Vehicles
 			{
 				if (c.InBounds(mapping.map))
 				{
-					VehicleRegion validRegionAt_NoRebuild2 = mapping[vehicleDef].VehicleRegionGrid.GetValidRegionAt_NoRebuild(c);
+					VehicleRegion validRegionAt_NoRebuild2 = mapping[createdFor].VehicleRegionGrid.GetValidRegionAt_NoRebuild(c);
 					if (validRegionAt_NoRebuild2 != null)
 					{
 						regionsToDirty.Add(validRegionAt_NoRebuild2);
@@ -173,7 +173,7 @@ namespace Vehicles
 			region.Room = null;
 			for (int i = 0; i < region.links.Count; i++)
 			{
-				region.links[i].Deregister(region, vehicleDef);
+				region.links[i].Deregister(region, createdFor);
 			}
 			region.links.Clear();
 			if (addCellsToDirtyCells)

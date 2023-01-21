@@ -15,7 +15,7 @@ namespace Vehicles
 		public static int vehicleRegionGridIndexChecking = 0;
 
 		private readonly VehicleMapping mapping;
-		private readonly VehicleDef vehicleDef;
+		private readonly VehicleDef createdFor;
 
 		private int curCleanIndex;
 
@@ -23,10 +23,10 @@ namespace Vehicles
 
 		public readonly List<VehicleRoom> allRooms = new List<VehicleRoom>();
 
-		public VehicleRegionGrid(VehicleMapping mapping, VehicleDef vehicleDef)
+		public VehicleRegionGrid(VehicleMapping mapping, VehicleDef createdFor)
 		{
 			this.mapping = mapping;
-			this.vehicleDef = vehicleDef;
+			this.createdFor = createdFor;
 			regionGrid = new VehicleRegion[mapping.map.cellIndices.NumGridCells];
 		}
 
@@ -104,16 +104,17 @@ namespace Vehicles
 		{
 			if (!cell.InBounds(mapping.map))
 			{
-				Log.Error($"Tried to get valid vehicle region for {vehicleDef} out of bounds at {cell}");
+				Log.Error($"Tried to get valid vehicle region for {createdFor} out of bounds at {cell}");
+				return null;
 			}
-			if (!mapping[vehicleDef].VehicleRegionAndRoomUpdater.Enabled &&
-				mapping[vehicleDef].VehicleRegionAndRoomUpdater.AnythingToRebuild)
+			if (!mapping[createdFor].VehicleRegionAndRoomUpdater.Enabled &&
+				mapping[createdFor].VehicleRegionAndRoomUpdater.AnythingToRebuild)
 			{
-				Log.Warning($"Trying to get valid vehicle region for {vehicleDef} at {cell} but RegionAndRoomUpdater is disabled. The result may be incorrect.");
+				Log.Warning($"Trying to get valid vehicle region for {createdFor} at {cell} but RegionAndRoomUpdater is disabled. The result may be incorrect.");
 			}
-			mapping[vehicleDef].VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
+			mapping[createdFor].VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
 			VehicleRegion region = regionGrid[mapping.map.cellIndices.CellToIndex(cell)];
-			
+
 			return (region != null && region.valid) ? region : null;
 		}
 
@@ -185,7 +186,7 @@ namespace Vehicles
 				curCleanIndex++;
 			}
 			vehicleRegionGridIndexChecking++;
-			if (vehicleRegionGridIndexChecking >= VehicleHarmony.AllMoveableVehicleDefsCount)
+			if (vehicleRegionGridIndexChecking >= mapping.TotalOwners)
 			{
 				vehicleRegionGridIndexChecking = 0;
 			}
