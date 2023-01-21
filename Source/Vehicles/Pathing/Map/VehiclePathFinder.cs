@@ -130,15 +130,15 @@ namespace Vehicles
 		/// <param name="vehicle"></param>
 		/// <param name="token"></param>
 		/// <param name="peMode"></param>
-		public (PawnPath path, bool found) FindVehiclePath(IntVec3 start, LocalTargetInfo dest, VehiclePawn vehicle, CancellationToken token, PathEndMode peMode = PathEndMode.OnCell)
+		public PawnPath FindVehiclePath(IntVec3 start, LocalTargetInfo dest, VehiclePawn vehicle, /*CancellationToken token,*/ PathEndMode peMode = PathEndMode.OnCell)
 		{
 			if (!vehicle.FitsOnCell(dest.Cell))
 			{
 				Messages.Message("VehicleCannotFit".Translate(), MessageTypeDefOf.RejectInput);
-				return (PawnPath.NotFound, false);
+				return PawnPath.NotFound;
 			}
 			Danger maxDanger = Danger.Deadly;
-			return FindVehiclePath(start, dest, TraverseParms.For(vehicle, maxDanger, TraverseMode.ByPawn, false), token, peMode);
+			return FindVehiclePath(start, dest, TraverseParms.For(vehicle, maxDanger, TraverseMode.ByPawn, false), peMode);
 		}
 
 		/// <summary>
@@ -149,10 +149,10 @@ namespace Vehicles
 		/// <param name="traverseParms"></param>
 		/// <param name="token"></param>
 		/// <param name="peMode"></param>
-		public (PawnPath path, bool found) FindVehiclePath(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms,  CancellationToken token, PathEndMode peMode = PathEndMode.OnCell)
+		public PawnPath FindVehiclePath(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms,  /*CancellationToken token,*/ PathEndMode peMode = PathEndMode.OnCell)
 		{
-			Debug.Message($"{VehicleHarmony.LogLabel} From={start} To={dest} MainPath for {traverseParms.pawn.LabelShort} - ThreadId: [{Thread.CurrentThread.ManagedThreadId}] TaskId: [{Task.CurrentId}]");
-
+			Debug.Message($"{VehicleHarmony.LogLabel} From={start} To={dest} MainPath for {traverseParms.pawn.LabelShort}");
+			
 			postCalculatedCells.Clear();
 			postCalculatedTurns.Clear();
 			if (DebugSettings.pathThroughWalls)
@@ -162,39 +162,40 @@ namespace Vehicles
 			VehiclePawn vehicle = traverseParms.pawn as VehiclePawn;
 			if (vehicle is null)
 			{
-				Log.Message($"Tried to FindVehiclePath for non-vehicle pawn {traverseParms.pawn}");
+				Log.Error($"Tried to FindVehiclePath for non-vehicle pawn {traverseParms.pawn}");
+				return PawnPath.NotFound;
 			}
 			else if (vehicle.Map != mapping.map)
 			{
 				Log.Error($"Tried to FindVehiclePath for vehicle which is spawned in another map. Their map PathFinder should  have been used, not this one. vehicle={vehicle} vehicle's map={vehicle.Map} map={mapping.map}");
-				return (PawnPath.NotFound, false);
+				return PawnPath.NotFound;
 			}
 			if(!start.IsValid)
 			{
 				Log.Error($"Tried to FindVehiclePath with invalid start {start}. vehicle={vehicle}");
-				return (PawnPath.NotFound, false);
+				return PawnPath.NotFound;
 			}
 			if (!dest.IsValid)
 			{
 				Log.Error($"Tried to FindVehiclePath with invalid destination {dest}. vehicle={vehicle}");
-				return (PawnPath.NotFound, false);
+				return PawnPath.NotFound;
 			}
 			if (traverseParms.mode == TraverseMode.ByPawn)
 			{
 				if (!vehicle.CanReachVehicle(dest, peMode, Danger.Deadly, traverseParms.mode))
 				{
-					return (PawnPath.NotFound, false);
+					return PawnPath.NotFound;
 				}
 			}
 			else
 			{
 				if (!mapping[vehicleDef].VehicleReachability.CanReachVehicle(start, dest, peMode, traverseParms))
 				{
-					return (PawnPath.NotFound, false);
+					return PawnPath.NotFound;
 				}
 			}
 			cellIndices = mapping.map.cellIndices;
-
+			
 			vehiclePathGrid = mapping[vehicleDef].VehiclePathGrid;
 			this.edificeGrid = mapping.map.edificeGrid.InnerArray;
 			blueprintGrid = mapping.map.blueprintGrid.InnerArray;
@@ -217,20 +218,20 @@ namespace Vehicles
 			bool allowedRegionTraversal = !passAllDestroyableThings && VehicleGridsUtility.GetRegion(start, mapping.map, vehicleDef, RegionType.Set_Passable) != null && freeTraversal;
 			bool weightedHeuristics = false;
 			bool drafted = vehicle.Drafted;
-
+			
 			float heuristicStrength = DetermineHeuristicStrength(vehicle, start, dest);
 			int ticksCardinal = vehicle.TicksPerMoveCardinal;
 			int ticksDiagonal = vehicle.TicksPerMoveDiagonal;
-
+			
 			CalculateAndAddDisallowedCorners(traverseParms, peMode, cellRect);
 			InitStatusesAndPushStartNode(ref startIndex, start);
 			int iterations = 0;
 			for (;;)
 			{
-				if (token.IsCancellationRequested)
-				{
-					return (PawnPath.NotFound, false);
-				}
+				//if (token.IsCancellationRequested)
+				//{
+				//	return (PawnPath.NotFound, false);
+				//}
 
 				iterations++;
 				if (openList.Count <= 0)
@@ -444,9 +445,9 @@ namespace Vehicles
 										if(!list.NullOrEmpty())
 										{
 											int num18 = 0;
-											foreach(Blueprint bp in list)
+											foreach (Blueprint blueprint in list)
 											{
-												num18 = Mathf.Max(num18, GetBlueprintCost(bp, vehicle));
+												num18 = Mathf.Max(num18, GetBlueprintCost(blueprint, vehicle));
 											}
 											if(num18 == int.MaxValue)
 											{
@@ -551,16 +552,15 @@ namespace Vehicles
 			string curFaction = vehicle.Faction?.ToString() ?? "null";
 			Log.Warning($"Vehicle {vehicle} pathing from {start} to {dest} ran out of cells to process. Job={curJob} Faction={curFaction} iterations={iterations}");
 			DebugDrawRichData();
-			return (PawnPath.NotFound, false);
+			return PawnPath.NotFound;
 			Block_32:
-			PawnPath result = PawnPath.NotFound;
-			result = FinalizedPath(startIndex, weightedHeuristics);
+			PawnPath result = FinalizedPath(startIndex, weightedHeuristics);
 			DebugDrawPathCost();
-			return (result, true);
+			return result;
 			Block_33:
 			Log.Warning($"Vehicle {vehicle} pathing from {start} to {dest} hit search limit of {SearchLimit}.");
 			DebugDrawRichData();
-			return (PawnPath.NotFound, false);
+			return PawnPath.NotFound;
 		}
 
 		/// <summary>

@@ -487,7 +487,7 @@ namespace Vehicles
 					{
 						Vector2 vector = intVec.ToUIPosition();
 						Rect rect = new Rect(vector.x - 20f, vector.y - 20f, 40f, 40f);
-						if (new Rect(0f, 0f, Verse.UI.screenWidth, Verse.UI.screenHeight).Overlaps(rect))
+						if (new Rect(0f, 0f, UI.screenWidth, UI.screenHeight).Overlaps(rect))
 						{
 							Widgets.Label(rect, Map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehiclePathGrid.PerceivedPathCostAt(intVec).ToString());
 						}
