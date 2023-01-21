@@ -657,7 +657,7 @@ namespace Vehicles
 
 		private bool TrySetNewPath()
 		{
-			PawnPath pawnPath = GenerateNewPath(CancellationToken.None).Item1;
+			PawnPath pawnPath = GenerateNewPath();
 			if (pawnPath is null || !pawnPath.Found)
 			{
 				PatherFailed();
@@ -692,7 +692,7 @@ namespace Vehicles
 			return true;
 		}
 
-		[Obsolete]
+		[Obsolete("Use sycronous method instead", error: true)]
 		public PawnPath GenerateNewPathAsync()
 		{
 			var cts = new CancellationTokenSource();
@@ -700,10 +700,10 @@ namespace Vehicles
 			{
 				var tasks = new[]
 				{
-					Task<Tuple<PawnPath, bool>>.Factory.StartNew( () => GenerateNewPath(cts.Token), cts.Token)
+					Task<PawnPath>.Factory.StartNew( () => GenerateNewPath(/*cts.Token*/), cts.Token)
 				};
 				int taskIndex = Task.WaitAny(tasks, cts.Token);
-				if (tasks[taskIndex].Result?.Item1 != null && !tasks[taskIndex].Result.Item1.Found && !tasks[taskIndex].Result.Item2)
+				if (tasks[taskIndex].Result != null && !tasks[taskIndex].Result.Found)
 				{ 
 					try
 					{
@@ -718,7 +718,7 @@ namespace Vehicles
 						SmashLog.ErrorLabel(VehicleHarmony.LogLabel, $"Unable to cancel and dispose remaining tasks. \nException: {ex.Message} \nStack: {ex.StackTrace}");
 					}
 				}
-				return tasks[0].Result?.Item1;
+				return tasks[0].Result;
 			}
 			catch (AggregateException ex)
 			{
@@ -737,11 +737,11 @@ namespace Vehicles
 			}
 		}
 
-		internal Tuple<PawnPath, bool> GenerateNewPath(CancellationToken token)
+		internal PawnPath GenerateNewPath()
 		{
 			lastPathedTargetPosition = destination.Cell;
-			var pathResult = vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathFinder.FindVehiclePath(vehicle.Position, destination, vehicle, token, peMode);
-			return new Tuple<PawnPath, bool>(pathResult.path, pathResult.found);
+			PawnPath pawnPath = vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathFinder.FindVehiclePath(vehicle.Position, destination, vehicle, peMode);
+			return pawnPath;
 		}
 
 		private bool AtDestinationPosition()
