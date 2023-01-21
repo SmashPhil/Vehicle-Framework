@@ -139,9 +139,9 @@ namespace Vehicles
 					DebugHelper.debugRegionType = DebugRegionType.None;
 				}
 			}));
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs.OrderBy(def => def.modContentPack.PackageId == VehicleHarmony.VehiclesUniqueId)
-																			 .ThenBy(def => def.modContentPack.Name)
-																			 .ThenBy(d => d.defName))
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading.OrderBy(def => def.modContentPack.PackageId == VehicleHarmony.VehiclesUniqueId)
+																						   .ThenBy(def => def.modContentPack.Name)
+																						   .ThenBy(d => d.defName))
 			{
 				vehicleDefToggles.Add(new Toggle(vehicleDef.defName, vehicleDef.modContentPack.Name, () => DebugHelper.drawRegionsFor == vehicleDef, (value) => { }, onToggle: delegate (bool value)
 				{
@@ -200,7 +200,7 @@ namespace Vehicles
 				DebugHelper.drawRegionsFor = null;
 				DebugHelper.debugRegionType = DebugRegionType.None;
 			}));
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs.OrderBy(d => d.defName))
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading.OrderBy(d => d.defName))
 			{
 				listCheckbox.Add(new DebugMenuOption(vehicleDef.defName, DebugMenuOptionMode.Action, delegate ()
 				{

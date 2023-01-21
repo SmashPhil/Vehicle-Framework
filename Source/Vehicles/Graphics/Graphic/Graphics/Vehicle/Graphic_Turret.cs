@@ -40,7 +40,7 @@ namespace Vehicles
 			}
 			else
 			{
-				foreach (PatternDef pattern in DefDatabase<PatternDef>.AllDefs)
+				foreach (PatternDef pattern in DefDatabase<PatternDef>.AllDefsListForReading)
 				{
 					maskMatPatterns.Add(pattern, new Pair<string, Material[]>(req.path, GenerateMasks(req, pattern)));
 				}

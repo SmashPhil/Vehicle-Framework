@@ -89,7 +89,7 @@ namespace Vehicles
 			{
 				if (vehicleDefs.NullOrEmpty())
 				{
-					vehicleDefs = DefDatabase<VehicleDef>.AllDefs.OrderBy(d => d.modContentPack.PackageId.Contains(VehicleHarmony.VehiclesUniqueId)).ThenBy(d2 => d2.modContentPack.PackageId).ToList();
+					vehicleDefs = DefDatabase<VehicleDef>.AllDefsListForReading.OrderBy(d => d.modContentPack.PackageId.Contains(VehicleHarmony.VehiclesUniqueId)).ThenBy(d2 => d2.modContentPack.PackageId).ToList();
 				}
 				return vehicleDefs;
 			}
@@ -99,7 +99,7 @@ namespace Vehicles
 		{
 			selectedDef = vehicleDef;
 			ClearSelectedDefCache();
-			selectedPatterns = DefDatabase<PatternDef>.AllDefs.Where(d => d.ValidFor(selectedDef)).ToList();
+			selectedPatterns = DefDatabase<PatternDef>.AllDefsListForReading.Where(d => d.ValidFor(selectedDef)).ToList();
 			selectedDefUpgradeComp = vehicleDef.GetSortedCompProperties<CompProperties_UpgradeTree>();
 			CurrentSection.VehicleSelected();
 			RecalculateHeight(selectedDef);

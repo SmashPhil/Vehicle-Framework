@@ -128,7 +128,7 @@ namespace Vehicles
 			{
 				float rating = 0;
 				int count = 0;
-				foreach (StatDef armorRatingDef in DefDatabase<DamageArmorCategoryDef>.AllDefs.Select(armorCategory => armorCategory.armorRatingStat))
+				foreach (StatDef armorRatingDef in DefDatabase<DamageArmorCategoryDef>.AllDefsListForReading.Select(armorCategory => armorCategory.armorRatingStat))
 				{
 					if (armorRatingDef != null)
 					{

@@ -17,7 +17,7 @@ namespace Vehicles
 				List<bool> successfulGenerations = new List<bool>();
 
 				VehicleMod.PopulateCachedFields();
-				foreach (VehicleDef def in DefDatabase<VehicleDef>.AllDefs)
+				foreach (VehicleDef def in DefDatabase<VehicleDef>.AllDefsListForReading)
 				{
 					bool fields = PopulateSaveableFields(def);
 					bool upgrades = true;// PopulateSaveableUpgrades(def);

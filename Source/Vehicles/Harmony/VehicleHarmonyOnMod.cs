@@ -99,7 +99,7 @@ namespace Vehicles
 		/// </summary>
 		public static void ImpliedDefGeneratorVehicles()
 		{
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
 				if (PawnKindDefGenerator_Vehicles.GenerateImpliedPawnKindDef(vehicleDef, out PawnKindDef kindDef))
 				{

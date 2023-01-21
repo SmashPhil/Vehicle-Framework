@@ -73,7 +73,7 @@ namespace Vehicles
 			return; //air defenses disabled for now
 			if (obj is Settlement) //TODO - Add check for what settlements can implement air defenses
 			{
-				foreach (AntiAircraftDef antiAircraft in DefDatabase<AntiAircraftDef>.AllDefs)
+				foreach (AntiAircraftDef antiAircraft in DefDatabase<AntiAircraftDef>.AllDefsListForReading)
 				{
 					if (!AirDefensePositionTracker.airDefenseCache.ContainsKey(obj))
 					{

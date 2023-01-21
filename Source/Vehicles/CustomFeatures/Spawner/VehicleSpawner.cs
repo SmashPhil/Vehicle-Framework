@@ -147,7 +147,7 @@ namespace Vehicles
 
 		public static IEnumerable<PawnKindDef> GetAppropriateVehicles(Faction faction, float points, bool combatFocused)
 		{
-			List<PawnKindDef> vehicles = DefDatabase<PawnKindDef>.AllDefs.Where(p => p.race.thingClass.SameOrSubclass(typeof(VehiclePawn))).ToList();
+			List<PawnKindDef> vehicles = DefDatabase<PawnKindDef>.AllDefsListForReading.Where(p => p.race.thingClass.SameOrSubclass(typeof(VehiclePawn))).ToList();
 			foreach (PawnKindDef vehicleKind in vehicles)
 			{
 				bool restrictToFactions = (vehicleKind.race as VehicleDef).properties.restrictToFactions.NullOrEmpty() || (vehicleKind.race as VehicleDef).properties.restrictToFactions.Contains(faction.def);

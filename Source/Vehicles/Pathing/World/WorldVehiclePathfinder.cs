@@ -149,7 +149,7 @@ namespace Vehicles
 				List<int> tileIDToNeighbors_offsets = grid.tileIDToNeighbors_offsets;
 				List<int> tileIDToNeighbors_values = grid.tileIDToNeighbors_values;
 				Vector3 normalized = grid.GetTileCenter(destTile).normalized;
-				float bestRoadDiscount = DefDatabase<RoadDef>.AllDefs.Min(road => VehicleCaravan_PathFollower.GetRoadMovementDifficultyMultiplier(vehicleDefs, road));
+				float bestRoadDiscount = DefDatabase<RoadDef>.AllDefsListForReading.Min(road => VehicleCaravan_PathFollower.GetRoadMovementDifficultyMultiplier(vehicleDefs, road));
 				int tilesSearched = 0;
 				int heuristicStrength = CalculateHeuristicStrength(startTile, destTile);
 				statusOpenValue += 2;
@@ -355,9 +355,9 @@ namespace Vehicles
 
 			public void RegisterAllFeatureTypes()
 			{
-				biomeDefs.AddRange(DefDatabase<BiomeDef>.AllDefs);
-				roadDefs.AddRange(DefDatabase<RoadDef>.AllDefs);
-				riverDefs.AddRange(DefDatabase<RiverDef>.AllDefs);
+				biomeDefs.AddRange(DefDatabase<BiomeDef>.AllDefsListForReading);
+				roadDefs.AddRange(DefDatabase<RoadDef>.AllDefsListForReading);
+				riverDefs.AddRange(DefDatabase<RiverDef>.AllDefsListForReading);
 				hills.AddRange(Enum.GetValues(typeof(Hilliness)).Cast<Hilliness>());
 			}
 

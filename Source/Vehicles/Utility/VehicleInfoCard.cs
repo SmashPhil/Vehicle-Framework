@@ -149,7 +149,7 @@ namespace Vehicles
 		{
 			yield return DescriptionEntry(vehicle);
 
-			foreach (VehicleStatDef statDef in DefDatabase<VehicleStatDef>.AllDefs.Where(statDef => statDef.Worker.ShouldShowFor(vehicle)))
+			foreach (VehicleStatDef statDef in DefDatabase<VehicleStatDef>.AllDefsListForReading.Where(statDef => statDef.Worker.ShouldShowFor(vehicle)))
 			{
 				yield return new VehicleStatDrawEntry(statDef.category, statDef, vehicle.GetStatValue(statDef));
 			}

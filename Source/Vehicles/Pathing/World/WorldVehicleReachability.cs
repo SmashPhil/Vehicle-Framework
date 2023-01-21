@@ -46,7 +46,7 @@ namespace Vehicles
 		/// </summary>
 		private void InitReachabilityGrid()
 		{
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
 				reachabilityGrid.Add(vehicleDef, new int[Find.WorldGrid.TilesCount]);
 			}

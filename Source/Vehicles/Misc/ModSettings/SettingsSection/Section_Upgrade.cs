@@ -43,7 +43,7 @@ namespace Vehicles
 			upgradeSettings.Clear();
 			if (VehicleMod.ModifiableSettings)
 			{
-				foreach (VehicleDef def in DefDatabase<VehicleDef>.AllDefs)
+				foreach (VehicleDef def in DefDatabase<VehicleDef>.AllDefsListForReading)
 				{
 					SettingsCustomizableFields.PopulateSaveableUpgrades(def, true);
 				}

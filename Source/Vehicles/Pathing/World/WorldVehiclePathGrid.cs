@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 using RimWorld;
@@ -54,7 +55,7 @@ namespace Vehicles
 		public void ResetPathGrid()
 		{
 			movementDifficulty = new Dictionary<VehicleDef, float[]>();
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
 				movementDifficulty[vehicleDef] = new float[Find.WorldGrid.TilesCount];
 			}
@@ -138,10 +139,14 @@ namespace Vehicles
 		/// <summary>
 		/// Recalculate all path costs for all VehicleDefs
 		/// </summary>
-		public void RecalculateAllPerceivedPathCosts()
+		public async Task RecalculateAllPerceivedPathCosts()
 		{
-			RecalculateAllPerceivedPathCosts(null);
-			allPathCostsRecalculatedDayOfYear = DayOfYearAt0Long;
+			Task recalculationTask = new Task(delegate ()
+			{
+				RecalculateAllPerceivedPathCosts(null);
+				allPathCostsRecalculatedDayOfYear = DayOfYearAt0Long;
+			});
+			await recalculationTask;
 		}
 
 		/// <summary>
@@ -151,7 +156,7 @@ namespace Vehicles
 		public void RecalculateAllPerceivedPathCosts(int? ticksAbs)
 		{
 			allPathCostsRecalculatedDayOfYear = -1;
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
 				if (!movementDifficulty.ContainsKey(vehicleDef))
 				{

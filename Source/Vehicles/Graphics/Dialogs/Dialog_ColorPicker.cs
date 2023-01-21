@@ -122,7 +122,7 @@ namespace Vehicles
 			CurrentSelectedPalette = -1;
 
 			pageNumber = 1;
-			AvailablePatterns = DefDatabase<PatternDef>.AllDefs.Where(p => p.ValidFor(VehicleDef)).ToList();
+			AvailablePatterns = DefDatabase<PatternDef>.AllDefsListForReading.Where(p => p.ValidFor(VehicleDef)).ToList();
 			float ratio = (float)AvailablePatterns.Count / (GridDimensionColumns * GridDimensionRows);
 			Instance.pageCount = Mathf.CeilToInt(ratio);
 

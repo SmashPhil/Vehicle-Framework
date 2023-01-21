@@ -88,7 +88,7 @@ namespace Vehicles
 				VehiclePawn vehicle = (VehiclePawn)map.mapPawns.AllPawns.FirstOrDefault(p => p is VehiclePawn vehicle && vehicle.VehicleGraphic.Shader.SupportsRGBMaskTex());
 				if (vehicle is null)
 				{
-					var vehicleDefs = DefDatabase<VehicleDef>.AllDefs.Where(vehicleDef => vehicleDef.graphicData.shaderType is RGBShaderTypeDef).ToList();
+					var vehicleDefs = DefDatabase<VehicleDef>.AllDefsListForReading.Where(vehicleDef => vehicleDef.graphicData.shaderType is RGBShaderTypeDef).ToList();
 					if (vehicleDefs.NullOrEmpty())
 					{
 						SmashLog.Error($"Unable to execute unit test <method>{nameof(UnitTest_ColorDialog)}</method>. No vehicle defs to use as test case.");
@@ -166,7 +166,7 @@ namespace Vehicles
 
 			VehicleDef GetVehicleDefAnimator()
 			{
-				List<VehicleDef> vehicleDefs = DefDatabase<VehicleDef>.AllDefs.ToList();
+				List<VehicleDef> vehicleDefs = DefDatabase<VehicleDef>.AllDefsListForReading.ToList();
 				foreach (VehicleDef vehicleDef in vehicleDefs)
 				{
 					foreach (CompProperties compProperties in vehicleDef.comps)

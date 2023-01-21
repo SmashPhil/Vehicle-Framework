@@ -405,7 +405,7 @@ namespace Vehicles
 			base.DrawExtraSelectionOverlays();
 			if (vPather.curPath != null)
 			{
-				vPather.curPath.DrawPath(this);
+				//vPather.curPath.DrawPath(this);
 			}
 			RenderHelper.DrawLinesBetweenTargets(this, jobs.curJob, jobs.jobQueue);
 		}
@@ -620,7 +620,7 @@ namespace Vehicles
 					{
 						if (AllPawnsAboard.TryRandomElement(out Pawn result))
 						{
-							foreach (MentalStateDef mentalState in DefDatabase<MentalStateDef>.AllDefs)
+							foreach (MentalStateDef mentalState in DefDatabase<MentalStateDef>.AllDefsListForReading)
 							{
 								if (result.mindState.mentalStateHandler.TryStartMentalState(mentalState, "testing"))
 								{

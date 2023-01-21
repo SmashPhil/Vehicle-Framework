@@ -347,7 +347,7 @@ namespace Vehicles
 
 		public static void RegisterInVehicleRegions(Thing thing, Map map)
 		{
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
 				VehicleRegionListersUpdater.RegisterInRegions(thing, map, vehicleDef);
 			}
@@ -355,7 +355,7 @@ namespace Vehicles
 
 		public static void DeregisterInVehicleRegions(Thing thing, Map map)
 		{
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
 				VehicleRegionListersUpdater.DeregisterInRegions(thing, map, vehicleDef);
 			}

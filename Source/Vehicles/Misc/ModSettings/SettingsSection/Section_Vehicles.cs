@@ -62,7 +62,7 @@ namespace Vehicles
 			defaultGraphics.Clear();
 			if (VehicleMod.ModifiableSettings)
 			{
-				foreach (VehicleDef def in DefDatabase<VehicleDef>.AllDefs)
+				foreach (VehicleDef def in DefDatabase<VehicleDef>.AllDefsListForReading)
 				{
 					SettingsCustomizableFields.PopulateSaveableFields(def, true);
 				}

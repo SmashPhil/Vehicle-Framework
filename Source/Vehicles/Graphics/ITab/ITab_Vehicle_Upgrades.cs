@@ -494,7 +494,7 @@ namespace Vehicles
 		
 		private IEnumerable<StatUpgradeCategoryDef> ValidCategories()
 		{
-			foreach (StatUpgradeCategoryDef statUpgrade in DefDatabase<StatUpgradeCategoryDef>.AllDefs)
+			foreach (StatUpgradeCategoryDef statUpgrade in DefDatabase<StatUpgradeCategoryDef>.AllDefsListForReading)
 			{
 				if (statUpgrade.AppliesToVehicle(Vehicle.VehicleDef))
 				{

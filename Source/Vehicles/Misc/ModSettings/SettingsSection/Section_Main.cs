@@ -187,7 +187,7 @@ namespace Vehicles
 					
 					if (checkBefore != showDisabledVehicles)
 					{
-						DefDatabase<DesignationCategoryDef>.AllDefs.ForEach(desCat => GizmoHelper.DesignatorsChanged(desCat));
+						DefDatabase<DesignationCategoryDef>.AllDefsListForReading.ForEach(desCat => GizmoHelper.DesignatorsChanged(desCat));
 					}
 
 					listingStandard.Header("VF_PerformanceSettings".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);

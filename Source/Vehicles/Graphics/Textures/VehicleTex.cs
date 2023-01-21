@@ -144,7 +144,7 @@ namespace Vehicles
 		static VehicleTex()
 		{
 			StringBuilder tasks = new StringBuilder();
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
 				tasks.Clear();
 				tasks.AppendLine($"Generating TextureCache for {vehicleDef.defName}");

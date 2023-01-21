@@ -37,9 +37,11 @@ namespace Vehicles
 		public bool generateThingIcon = true;
 
 		//---------------   Pathing   ---------------
+
 		public bool defaultTerrainImpassable = false;
 		public bool defaultBiomesImpassable = false;
 
+		// Local Pathing
 		/// <summary>
 		/// Additional tick cost for snow, clamped between 0 and 450 ticks.
 		/// </summary>
@@ -53,11 +55,13 @@ namespace Vehicles
 		/// </summary>
 		public SimpleDictionary<ThingDef, int> customThingCosts;
 
+		// World Pathing
 		public float offRoadMultiplier = 1;
 		public SimpleDictionary<RiverDef, float> customRiverCosts = new SimpleDictionary<RiverDef, float>();
 		public SimpleDictionary<BiomeDef, float> customBiomeCosts = new SimpleDictionary<BiomeDef, float>();
 		public SimpleDictionary<Hilliness, float> customHillinessCosts = new SimpleDictionary<Hilliness, float>();
 		public SimpleDictionary<RoadDef, float> customRoadCosts = new SimpleDictionary<RoadDef, float>();
+
 		//-------------------------------------------
 
 		[PostToSettings(Label = "VehicleWinterSpeedMultiplier", Tooltip = "VehicleWinterSpeedMultiplierTooltip",Translate = true, UISettingsType = UISettingsType.SliderFloat)]

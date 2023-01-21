@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using HarmonyLib;
 using Verse;
@@ -150,6 +151,12 @@ namespace Vehicles
 				DebugTools.curTool = new DebugTool(label, action, first);
 			});
 			DebugTools.curTool = tool;
+		}
+
+		[DebugAction(VehicleHarmony.VehiclesLabel, "Regenerate WorldPathGrid", allowedGameStates = AllowedGameStates.Playing)]
+		public static void DebugRegenerateWorldPathGrid()
+		{
+			Task task = Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().RecalculateAllPerceivedPathCosts();
 		}
 	}
 }

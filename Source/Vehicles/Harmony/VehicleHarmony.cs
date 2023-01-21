@@ -121,7 +121,7 @@ namespace Vehicles
 			VehicleMod.settings.vehicles.PostDefDatabase();
 			VehicleMod.settings.upgrades.PostDefDatabase();
 			VehicleMod.settings.debug.PostDefDatabase();
-			foreach (VehicleDef def in DefDatabase<VehicleDef>.AllDefs)
+			foreach (VehicleDef def in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
 				def.PostDefDatabase();
 			}
@@ -157,7 +157,7 @@ namespace Vehicles
 
 		internal static void RecacheMoveableVehicleDefs()
 		{
-			AllMoveableVehicleDefs = DefDatabase<VehicleDef>.AllDefs.Where(vehicleDef => SettingsCache.TryGetValue(vehicleDef, typeof(VehicleDef), nameof(vehicleDef.vehicleMovementPermissions), vehicleDef.vehicleMovementPermissions) > VehiclePermissions.NotAllowed).ToList();
+			AllMoveableVehicleDefs = DefDatabase<VehicleDef>.AllDefsListForReading.Where(vehicleDef => SettingsCache.TryGetValue(vehicleDef, typeof(VehicleDef), nameof(vehicleDef.vehicleMovementPermissions), vehicleDef.vehicleMovementPermissions) > VehiclePermissions.NotAllowed).ToList();
 			AllMoveableVehicleDefsCount = AllMoveableVehicleDefs.Count;
 		}
 	}

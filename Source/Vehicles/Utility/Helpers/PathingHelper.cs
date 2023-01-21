@@ -36,18 +36,18 @@ namespace Vehicles
 		/// </summary>
 		public static void LoadTerrainDefaults()
 		{
-			foreach (TerrainDef terrainDef in DefDatabase<TerrainDef>.AllDefs)
+			foreach (TerrainDef terrainDef in DefDatabase<TerrainDef>.AllDefsListForReading)
 			{
 				if (terrainDef.tags.NotNullAndAny(tag => tag == AllowTerrainWithTag))
 				{
-					foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+					foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 					{
 						vehicleDef.properties.customTerrainCosts[terrainDef] = 1;
 					}
 				}
 				else if (terrainDef.tags.NotNullAndAny(tag => tag == DisallowTerrainWithTag))
 				{
-					foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+					foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 					{
 						vehicleDef.properties.customTerrainCosts[terrainDef] = VehiclePathGrid.ImpassableCost;
 					}
@@ -84,7 +84,7 @@ namespace Vehicles
 		/// </summary>
 		public static void LoadDefModExtensionCosts()
 		{
-			foreach (Def def in DefDatabase<Def>.AllDefs)
+			foreach (Def def in DefDatabase<Def>.AllDefsListForReading)
 			{
 				if (def is VehicleDef)
 				{
@@ -130,12 +130,12 @@ namespace Vehicles
 		/// </summary>
 		public static void CacheVehicleRegionEffecters()
 		{
-			foreach (ThingDef thingDef in DefDatabase<ThingDef>.AllDefs)
+			foreach (ThingDef thingDef in DefDatabase<ThingDef>.AllDefsListForReading)
 			{
 				RegisterRegionEffecter(thingDef);
 			}
 
-			foreach (TerrainDef terrainDef in DefDatabase<TerrainDef>.AllDefs)
+			foreach (TerrainDef terrainDef in DefDatabase<TerrainDef>.AllDefsListForReading)
 			{
 				RegisterTerrainEffecter(terrainDef);
 			}
@@ -148,7 +148,7 @@ namespace Vehicles
 		public static void RegisterRegionEffecter(ThingDef thingDef)
 		{
 			regionEffecters[thingDef] = new List<VehicleDef>();
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
 				if (vehicleDef.properties.customThingCosts.TryGetValue(thingDef, out int value))
 				{
@@ -171,7 +171,7 @@ namespace Vehicles
 		public static void RegisterTerrainEffecter(TerrainDef terrainDef)
 		{
 			terrainEffecters[terrainDef] = new List<VehicleDef>();
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
 				if (vehicleDef.properties.customTerrainCosts.TryGetValue(terrainDef, out int value))
 				{
@@ -229,7 +229,7 @@ namespace Vehicles
 			foreach (IntVec3 cell in map.AllCells)
 			{
 				TerrainDef terrainDef = map.terrainGrid.TerrainAt(cell);
-				foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+				foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 				{
 					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
 				}
@@ -248,7 +248,7 @@ namespace Vehicles
 			if (terrainDef != null)
 			{
 				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-				foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+				foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 				{
 					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
 				}
