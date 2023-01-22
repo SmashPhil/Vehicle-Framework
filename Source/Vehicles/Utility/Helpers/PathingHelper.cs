@@ -28,8 +28,12 @@ namespace Vehicles
 		/// Quick retrieval of region updating status
 		/// </summary>
 		/// <param name="map"></param>
-		/// <returns></returns>
 		public static bool RegionWorking(Map map) => (bool)AccessTools.Field(typeof(RegionAndRoomUpdater), "working").GetValue(map.regionAndRoomUpdater);
+
+		public static bool ShouldCreateRegions(VehicleDef vehicleDef)
+		{
+			return SettingsCache.TryGetValue(vehicleDef, typeof(VehicleDef), nameof(vehicleDef.vehicleMovementPermissions), vehicleDef.vehicleMovementPermissions) > VehiclePermissions.NotAllowed;
+		}
 
 		/// <summary>
 		/// Register any <seealso cref="TerrainDef"/>s with tags "PassableVehicles" or "ImpassableVehicles"
@@ -148,7 +152,7 @@ namespace Vehicles
 		public static void RegisterRegionEffecter(ThingDef thingDef)
 		{
 			regionEffecters[thingDef] = new List<VehicleDef>();
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
+			foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
 			{
 				if (vehicleDef.properties.customThingCosts.TryGetValue(thingDef, out int value))
 				{
@@ -229,7 +233,7 @@ namespace Vehicles
 			foreach (IntVec3 cell in map.AllCells)
 			{
 				TerrainDef terrainDef = map.terrainGrid.TerrainAt(cell);
-				foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
+				foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
 				{
 					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
 				}
@@ -248,7 +252,7 @@ namespace Vehicles
 			if (terrainDef != null)
 			{
 				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-				foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
+				foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
 				{
 					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
 				}

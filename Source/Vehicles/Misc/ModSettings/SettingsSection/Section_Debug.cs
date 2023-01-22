@@ -139,11 +139,11 @@ namespace Vehicles
 					DebugHelper.debugRegionType = DebugRegionType.None;
 				}
 			}));
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading.OrderBy(def => def.modContentPack.PackageId == VehicleHarmony.VehiclesUniqueId)
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading.OrderBy(def => def.modContentPack.ModMetaData.SamePackageId(VehicleHarmony.VehiclesUniqueId, ignorePostfix: true))
 																						   .ThenBy(def => def.modContentPack.Name)
 																						   .ThenBy(d => d.defName))
 			{
-				vehicleDefToggles.Add(new Toggle(vehicleDef.defName, vehicleDef.modContentPack.Name, () => DebugHelper.drawRegionsFor == vehicleDef, (value) => { }, onToggle: delegate (bool value)
+				Toggle toggle = new Toggle(vehicleDef.defName, vehicleDef.modContentPack.Name, () => DebugHelper.drawRegionsFor == vehicleDef, (value) => { }, onToggle: delegate (bool value)
 				{
 					if (value)
 					{
@@ -155,7 +155,9 @@ namespace Vehicles
 						DebugHelper.drawRegionsFor = null;
 						DebugHelper.debugRegionType = DebugRegionType.None;
 					}
-				}));
+				});
+				toggle.Disabled = !PathingHelper.ShouldCreateRegions(vehicleDef);
+				vehicleDefToggles.Add(toggle);
 			}
 			Find.WindowStack.Add(new Dialog_RadioButtonMenu("VF_DevMode_DebugPathfinderDebugging".Translate(), vehicleDefToggles));
 		}

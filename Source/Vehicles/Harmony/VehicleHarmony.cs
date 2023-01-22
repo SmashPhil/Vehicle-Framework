@@ -88,9 +88,8 @@ namespace Vehicles
 			Utilities.InvokeWithLogging(PathingHelper.LoadDefModExtensionCosts);
 			Utilities.InvokeWithLogging(PathingHelper.LoadTerrainTagCosts);
 			Utilities.InvokeWithLogging(PathingHelper.LoadTerrainDefaults);
-			Utilities.InvokeWithLogging(PathingHelper.CacheVehicleRegionEffecters);
-
 			Utilities.InvokeWithLogging(RecacheMoveableVehicleDefs);
+			Utilities.InvokeWithLogging(PathingHelper.CacheVehicleRegionEffecters);
 
 			Utilities.InvokeWithLogging(LoadedModManager.GetMod<VehicleMod>().InitializeTabs);
 			Utilities.InvokeWithLogging(VehicleMod.settings.Write);
@@ -155,7 +154,7 @@ namespace Vehicles
 
 		internal static void RecacheMoveableVehicleDefs()
 		{
-			AllMoveableVehicleDefs = DefDatabase<VehicleDef>.AllDefsListForReading.Where(vehicleDef => SettingsCache.TryGetValue(vehicleDef, typeof(VehicleDef), nameof(vehicleDef.vehicleMovementPermissions), vehicleDef.vehicleMovementPermissions) > VehiclePermissions.NotAllowed).ToList();
+			AllMoveableVehicleDefs = DefDatabase<VehicleDef>.AllDefsListForReading.Where(PathingHelper.ShouldCreateRegions).ToList();
 			if (!Find.Maps.NullOrEmpty())
 			{
 				foreach (Map map in Find.Maps)

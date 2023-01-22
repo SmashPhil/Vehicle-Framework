@@ -19,7 +19,7 @@ namespace Vehicles
 			ConstructComponents();
 		}
 
-		public int TotalOwners => pathDataOwners.Count;
+		public List<VehicleDef> Owners => pathDataOwners;
 
 		/// <summary>
 		/// Retrieve all <see cref="VehiclePathData"/> for this map

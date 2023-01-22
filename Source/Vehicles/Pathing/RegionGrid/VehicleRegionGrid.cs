@@ -186,7 +186,7 @@ namespace Vehicles
 				curCleanIndex++;
 			}
 			vehicleRegionGridIndexChecking++;
-			if (vehicleRegionGridIndexChecking >= mapping.TotalOwners)
+			if (vehicleRegionGridIndexChecking >= mapping.Owners.Count)
 			{
 				vehicleRegionGridIndexChecking = 0;
 			}
