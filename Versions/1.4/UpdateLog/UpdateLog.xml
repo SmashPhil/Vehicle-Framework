@@ -16,6 +16,8 @@ Fixed bug where forcing a hediff onto a vehicle would immediately destroy it.
 
 Fixed bug where aerial vehicles wouldn't use fuel under certain conditions.
 
+Fixed some grammar issues for jobs labels for pawns.
+
 [title]Performance Improvements[/title]
 Compressed region making for vehicles to reuse region grids for vehicles with similar configurations.
 

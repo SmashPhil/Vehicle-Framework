@@ -39,14 +39,14 @@
 	<JobDef>
 		<defName>CarryPawnToVehicle</defName>
 		<driverClass>Vehicles.JobDriver_CarryPawnToVehicle</driverClass>
-		<reportString>Loading downed pawns.</reportString>
+		<reportString>Carrying TargetA to TargetB.</reportString>
 		<casualInterruptible>false</casualInterruptible>
 	</JobDef>
 	
 	<JobDef>
 		<defName>CarryItemToVehicle</defName>
 		<driverClass>Vehicles.JobDriver_GiveToVehicle</driverClass>
-		<reportString>Loading item onto TargetA</reportString>
+		<reportString>Loading TargetA onto TargetB</reportString>
 		<casualInterruptible>false</casualInterruptible>
 	</JobDef>
 	
