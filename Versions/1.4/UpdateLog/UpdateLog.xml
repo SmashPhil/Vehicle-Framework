@@ -1,16 +1,34 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.4.1141</currentVersion>
+  <currentVersion>1.4.1142</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>[title]Recent News[/title][font]Small[/font]
 
 [title]Bug Fixes[/title][font]Small[/font]
+Fixed compatibility issue with Vanilla Expanded Psycasts.
+
+Fixed bug where forcing a vehicle into a mental state or mental break would bypass its previous preventative measures.
+
+Fixed bug where forcing a hediff onto a vehicle would immediately destroy it.
+
+Fixed bug where aerial vehicles wouldn't use fuel under certain conditions.
+
+[title]Performance Improvements[/title]
+Compressed region making for vehicles to reuse region grids for vehicles with similar configurations.
+
+Calculations for vehicles' world path grid are now thrown into a separate thread.  This will prevent the game from locking up once per in-game-day when it recalculates for seasonal costs.
+
+Vehicle turrets will now only tick on request, rather than every turret ticking continuously despite not being in use.
 
 [title]Additional Changes[/title][font]Small[/font]
+Changed FuelConsumptionCondition to operate on flags.  Defaults to consuming fuel when drafted or moving in a caravan.
 
+Added configuration button for target fuel level of vehicle.
+
+Added indicator to target fuel level of vehicle.
 [title]Final Notes[/title][font]Small[/font]
 Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
 </description>

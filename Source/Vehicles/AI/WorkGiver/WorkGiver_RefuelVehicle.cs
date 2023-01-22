@@ -51,8 +51,12 @@ namespace Vehicles
 
 		public static bool CanRefuel(Pawn pawn, VehiclePawn vehicle, bool forced = false)
 		{
-			var comp = vehicle.CompFueledTravel;
-			if (comp is null || comp.FullTank)
+			CompFueledTravel compFueler = vehicle.CompFueledTravel;
+			if (compFueler is null || compFueler.FullTank)
+			{
+				return false;
+			}
+			if (!forced && !compFueler.ShouldAutoRefuelNow)
 			{
 				return false;
 			}
@@ -64,9 +68,9 @@ namespace Vehicles
 			{
 				return false;
 			}
-			if (comp.ClosestFuelAvailable(pawn) is null)
+			if (compFueler.ClosestFuelAvailable(pawn) is null)
 			{
-				JobFailReason.Is("NoFuelToRefuel".Translate(comp.Props.fuelType), null);
+				JobFailReason.Is("NoFuelToRefuel".Translate(compFueler.Props.fuelType), null);
 				return false;
 			}
 			return true;

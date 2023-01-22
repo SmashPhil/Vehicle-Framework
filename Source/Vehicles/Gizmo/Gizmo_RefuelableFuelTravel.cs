@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RimWorld;
 using Verse;
 using UnityEngine;
+using SmashTools;
 
 namespace Vehicles
 {    
 	[StaticConstructorOnStartup]
 	public class Gizmo_RefuelableFuelTravel : Gizmo
 	{
-		private const float ArrowScale = 0.5f;
+		private const float ConfigureSize = 20;
+		private const float ArrowSize = 14;
 
-		public CompFueledTravel refuelable;
+		private readonly CompFueledTravel refuelable;
 
-		public Gizmo_RefuelableFuelTravel()
+		public Gizmo_RefuelableFuelTravel(CompFueledTravel refuelable)
 		{
+			this.refuelable = refuelable;
 			Order = -100f;
 		}
 
@@ -28,31 +29,59 @@ namespace Vehicles
 
 		public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth, GizmoRenderParms parms)
 		{
-			Rect overRect = new Rect(topLeft.x, topLeft.y, this.GetWidth(maxWidth), 75f);
+			Rect overRect = new Rect(topLeft.x, topLeft.y, GetWidth(maxWidth), 75f);
 			Find.WindowStack.ImmediateWindow(1523289473, overRect, WindowLayer.GameUI, delegate
 			{
-				Rect rect2;
-				Rect rect = rect2 = overRect.AtZero().ContractedBy(6f);
-				rect2.height = overRect.height / 2f;
-				Text.Font = GameFont.Tiny;
-				Widgets.Label(rect2, refuelable.Props.electricPowered ? "VehicleElectric".Translate() : refuelable.Props.fuelType.LabelCap);
-				Rect rect3 = rect;
-				rect3.yMin = overRect.height / 2f;
-				float fillPercent = refuelable.Fuel / refuelable.FuelCapacity;
-				Widgets.FillableBar(rect3, fillPercent, VehicleTex.FullBarTex, VehicleTex.EmptyBarTex, false);
-				/*if (this.refuelable.Props.targetFuelLevelConfigurable)
+				GUIState.Push();
 				{
-					float num = this.refuelable.TargetFuelLevel / this.refuelable.FuelCapacity;
-					float num2 = rect3.x + num * rect3.width - (float)TargetLevelArrow.width * ArrowScale / 2f;
-					float num3 = rect3.y - (float)TargetLevelArrow.height * ArrowScale;
-					GUI.DrawTexture(new Rect(num2, num3, (float)TargetLevelArrow.width * ArrowScale, (float)TargetLevelArrow.height * ArrowScale), TargetLevelArrow);
-				}*/
-				Text.Font = GameFont.Small;
-				Text.Anchor = TextAnchor.MiddleCenter;
-				Widgets.Label(rect3, refuelable.Fuel.ToString("F0") + " / " + refuelable.FuelCapacity.ToString("F0"));
-				Text.Anchor = 0;
+					Rect rect = overRect.AtZero().ContractedBy(6f);
+					Rect labelRect = new Rect(rect)
+					{
+						height = overRect.height / 2f
+					};
+
+					Text.Font = GameFont.Tiny;
+
+					Widgets.Label(labelRect, refuelable.Props.electricPowered ? "VehicleElectric".Translate() : refuelable.Props.fuelType.LabelCap);
+
+					Rect configureRect = new Rect(labelRect.xMax - ConfigureSize, labelRect.y, ConfigureSize, ConfigureSize);
+					if (Widgets.ButtonImage(configureRect, VehicleTex.Settings))
+					{
+						ShowConfigureWindow();
+					}
+					rect.yMin = overRect.height / 2f;
+
+					float fillPercent = refuelable.Fuel / refuelable.FuelCapacity;
+					Widgets.FillableBar(rect, fillPercent, VehicleTex.FullBarTex, VehicleTex.EmptyBarTex, false);
+
+					float num = refuelable.TargetFuelLevel / refuelable.FuelCapacity;
+					float num2 = rect.x + num * rect.width - ArrowSize / 2;
+					float num3 = rect.y - ArrowSize;
+					GUI.DrawTexture(new Rect(num2, num3, ArrowSize, ArrowSize), UIElements.TargetLevelArrow);
+
+					Text.Font = GameFont.Small;
+					Text.Anchor = TextAnchor.MiddleCenter;
+
+					Widgets.Label(rect, refuelable.Fuel.ToString("F0") + " / " + refuelable.FuelCapacity.ToString("F0"));
+				}
+				GUIState.Pop();
 			}, true, false, 1f);
 			return new GizmoResult(GizmoState.Clear);
+		}
+
+		private void ShowConfigureWindow()
+		{
+			int min = 0;
+			int max = Mathf.RoundToInt(refuelable.FuelCapacity);
+			int startingValue = Mathf.RoundToInt(refuelable.TargetFuelLevel);
+
+			Func<int, string> textGetter = (int x) => "SetTargetFuelLevel".Translate(x);
+
+			Dialog_Slider dialog_Slider = new Dialog_Slider(textGetter, min, max, delegate (int value)
+			{
+				refuelable.TargetFuelLevel = value;
+			}, startingValue);
+			Find.WindowStack.Add(dialog_Slider);
 		}
 	}
 }

@@ -1,11 +1,13 @@
-﻿namespace Vehicles
+﻿using System;
+
+namespace Vehicles
 {
-	public enum FuelConsumptionCondition 
+	[Flags]
+	public enum FuelConsumptionCondition
 	{
-		Moving, 
-		Drafted,
-		Flying,
-		FlyingOrDrafted,
-		Always 
+		Moving = 1 << 0, 
+		Drafted = 1 << 1,
+		Flying = 1 << 2,
+		Always = 1 << 3
 	};
 }

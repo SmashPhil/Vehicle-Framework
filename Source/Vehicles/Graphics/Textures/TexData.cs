@@ -31,7 +31,7 @@ namespace Vehicles
 		public static readonly Texture2D SearchLightTex = SolidColorMaterials.NewSolidColorTexture(new ColorInt(155, 30, 30, 40).ToColor);
 		public static readonly Texture2D FillableBarTexture = SolidColorMaterials.NewSolidColorTexture(0.5f, 0.5f, 0.5f, 0.5f);
 		public static readonly Texture2D ClearBarTexture = BaseContent.ClearTex;
-		
+
 		/// <summary>
 		/// World Materials with color
 		/// </summary>

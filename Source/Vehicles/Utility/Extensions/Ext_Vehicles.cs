@@ -280,6 +280,15 @@ namespace Vehicles
 		}
 
 		/// <summary>
+		/// Check if pawn is in VehicleCaravan
+		/// </summary>
+		/// <param name="pawn"></param>
+		public static bool InVehicleCaravan(this Pawn pawn)
+		{
+			return pawn.GetVehicleCaravan() != null;
+		}
+
+		/// <summary>
 		/// Get VehicleCaravan pawn is in
 		/// </summary>
 		/// <param name="pawn"></param>

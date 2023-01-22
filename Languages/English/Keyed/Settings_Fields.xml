@@ -48,22 +48,23 @@
 	<VehicleWorldSpeedMultiplier>World Speed Multiplier</VehicleWorldSpeedMultiplier>
 	<VehicleWorldSpeedMultiplierTooltip>Multiplier to MoveSpeed when on the world map in a caravan.</VehicleWorldSpeedMultiplierTooltip>
 	
-	<VehicleDischargePerTick>Discharge Rate</VehicleDischargePerTick>
-	<VehicleTicksPerCharge>Charge Rate</VehicleTicksPerCharge>
-	<VehicleFuelConsumptionRate>Fuel Consumption Rate</VehicleFuelConsumptionRate>
-	<VehicleFuelCapacity>Fuel Capacity</VehicleFuelCapacity>
-	<VehicleFuelConsumptionRateWorldMultiplier>World Multiplier</VehicleFuelConsumptionRateWorldMultiplier>
+	<VF_DischargePerTick>Discharge Rate</VF_DischargePerTick>
+	<VF_TicksPerCharge>Charge Rate</VF_TicksPerCharge>
+	<VF_FuelConsumptionRate>Fuel Consumption Rate</VF_FuelConsumptionRate>
+	<VF_FuelCapacity>Fuel Capacity</VF_FuelCapacity>
+	<VF_FuelConsumptionRateWorldMultiplier>World Multiplier</VF_FuelConsumptionRateWorldMultiplier>
+	<VF_VehicleAutoRefuelPercent>Auto Refuel %</VF_VehicleAutoRefuelPercent>
 	
-	<VehicleFuelConsumptionWorld>Fuel Consumption %</VehicleFuelConsumptionWorld>
-	<VehicleFuelConsumptionWorldTooltip>Fule consumption multiplier on the world map.</VehicleFuelConsumptionWorldTooltip>
-	<VehicleLaunchFixedMaxDistance>Fixed Max Distance</VehicleLaunchFixedMaxDistance>
-	<VehicleLaunchFixedMaxDistanceDisabled>None</VehicleLaunchFixedMaxDistanceDisabled>
+	<VF_FuelConsumptionWorld>Fuel Consumption %</VF_FuelConsumptionWorld>
+	<VF_FuelConsumptionWorldTooltip>Fule consumption multiplier on the world map.</VF_FuelConsumptionWorldTooltip>
+	<VF_LaunchFixedMaxDistance>Fixed Max Distance</VF_LaunchFixedMaxDistance>
+	<VF_LaunchFixedMaxDistanceDisabled>None</VF_LaunchFixedMaxDistanceDisabled>
 	<VehicleReconDistance>Recon Distance</VehicleReconDistance>
 	<VehicleReconDistanceTooltip>Distance in tiles the shuttle will be able to perform recon of a site or settlement.</VehicleReconDistanceTooltip>
-	<VehicleControlInFlight>Control in Flight</VehicleControlInFlight>
-	<VehicleControlInFlightTooltip>Control the aerial vehicle while it is in flight. Allows for changing of flight paths midflight, choosing your landing after loading a map, and strafing maps that have not yet been loaded.</VehicleControlInFlightTooltip>
-	<VehicleSpaceFlight>Space Faring</VehicleSpaceFlight>
-	<VehicleSpaceFlightTooltip>Vehicle is capable of launching to and taking off from space objects.</VehicleSpaceFlightTooltip>
+	<VF_ControlInFlight>Control in Flight</VF_ControlInFlight>
+	<VF_ControlInFlightTooltip>Control the aerial vehicle while it is in flight. Allows for changing of flight paths midflight, choosing your landing after loading a map, and strafing maps that have not yet been loaded.</VF_ControlInFlightTooltip>
+	<VF_SpaceFlight>Space Faring</VF_SpaceFlight>
+	<VF_SpaceFlightTooltip>Vehicle is capable of launching to and taking off from space objects.</VF_SpaceFlightTooltip>
 	
 	<VehicleRateOfClimb>Rate of Climb</VehicleRateOfClimb>
 	<VehicleRateOfClimbTooltip>Amount the vehicle ascends per tick.</VehicleRateOfClimbTooltip>

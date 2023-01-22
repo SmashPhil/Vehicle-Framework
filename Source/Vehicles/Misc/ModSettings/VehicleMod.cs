@@ -15,7 +15,7 @@ namespace Vehicles
 	public class VehicleMod : Mod
 	{
 		public const int MaxCoastalSettlementPush = 21;
-		public const float ResetImageSize = 25f;
+		public const float ResetImageSize = 22;
 
 		public static VehiclesModSettings settings;
 		public static VehicleMod mod;
@@ -258,10 +258,10 @@ namespace Vehicles
 				//floatMenu.onCloseCallback...
 				Find.WindowStack.Add(floatMenu);
 			}
-			if (Widgets.ButtonImage(CurrentSection.ButtonRect(settingsButton), VehicleTex.ExportSettings))
-			{
+			//if (Widgets.ButtonImage(CurrentSection.ButtonRect(settingsButton), VehicleTex.ExportSettings))
+			//{
 
-			}
+			//}
 		}
 
 		public override string SettingsCategory()

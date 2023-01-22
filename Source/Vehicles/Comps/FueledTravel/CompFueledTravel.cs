@@ -28,6 +28,8 @@ namespace Vehicles
 		private bool leaking;
 
 		private float fuel;
+		private float targetFuelLevel;
+
 		private bool terminateMotes = false;
 		private Vector3 motePosition;
 		private float offsetX;
@@ -46,13 +48,21 @@ namespace Vehicles
 		public float FuelPercent => Fuel / FuelCapacity;
 		public bool EmptyTank => Fuel <= 0f;
 		public bool FullTank => fuel == FuelCapacity;
-		public int FuelCountToFull => Mathf.CeilToInt(FuelCapacity - Fuel);
+		public int FuelCountToFull => Mathf.CeilToInt(TargetFuelLevel - Fuel);
 
 		private bool Charging => connectedPower != null && !FullTank && connectedPower.PowerNet.CurrentStoredEnergy() > Props.chargeRate;
 		public VehiclePawn Vehicle => parent as VehiclePawn;
 		public FuelConsumptionCondition FuelCondition => Props.fuelConsumptionCondition;
-		public Gizmo FuelCountGizmo => new Gizmo_RefuelableFuelTravel { refuelable = this };
+		public Gizmo FuelCountGizmo => new Gizmo_RefuelableFuelTravel(this);
 		public List<VehicleComponent> FuelComponents { get; private set; }
+
+		public virtual float TargetFuelLevel { get => targetFuelLevel; set => targetFuelLevel = value; }
+
+		public float FuelPercentOfTarget => fuel / TargetFuelLevel;
+
+		public bool ShouldAutoRefuelNow => FuelPercentOfTarget <= Props.autoRefuelPercent && !FullTank && TargetFuelLevel > 0f && !Vehicle.Drafted && ShouldAutoRefuelNowIgnoringFuelPct;
+
+		public bool ShouldAutoRefuelNowIgnoringFuelPct => !Vehicle.IsBurning() && parent.Map.designationManager.DesignationOn(Vehicle, DesignationDefOf_Vehicles.DisassembleVehicle) == null;
 
 		public IEnumerable<(ThingDef thingDef, float count)> Refunds
 		{
@@ -111,17 +121,27 @@ namespace Vehicles
 		{
 			get
 			{
-				bool caravanMoving = Vehicle.IsWorldPawn() && Vehicle.GetVehicleCaravan() is VehicleCaravan caravan && caravan.vPather.MovingNow;
-
-				return FuelCondition switch
+				if (Vehicle.Spawned && FuelCondition.HasFlag(FuelConsumptionCondition.Drafted))
 				{
-					FuelConsumptionCondition.Drafted => Vehicle.Drafted || caravanMoving,
-					FuelConsumptionCondition.Flying => false,
-					FuelConsumptionCondition.FlyingOrDrafted => Vehicle.Drafted || caravanMoving,
-					FuelConsumptionCondition.Moving => Vehicle.vPather.MovingNow || caravanMoving,
-					FuelConsumptionCondition.Always => true,
-					_ => throw new NotImplementedException("FuelCondition " + FuelCondition + " Not Yet Implemented"),
-				};
+					return Vehicle.Drafted;
+				}
+				if (FuelCondition.HasFlag(FuelConsumptionCondition.Moving))
+				{
+					if (Vehicle.Spawned && Vehicle.vPather.MovingNow)
+					{
+						return true;
+					}
+					if (Vehicle.GetVehicleCaravan() is VehicleCaravan caravan && caravan.vPather.MovingNow)
+					{
+						return true;
+					}
+				}
+				if (FuelCondition.HasFlag(FuelConsumptionCondition.Always))
+				{
+					return true;
+				}
+				///Flying fuel consumption is handled in <see cref="AerialVehicleInFlight.SpendFuel"/>
+				return false;
 			}
 		}
 
@@ -195,15 +215,6 @@ namespace Vehicles
 			{
 				fuel = 0f;
 				parent.BroadcastCompSignal(CompSignals.RanOutOfFuel);
-			}
-		}
-
-		public override void Initialize(CompProperties props)
-		{
-			base.Initialize(props);
-			if(!(parent is Pawn))
-			{
-				Log.Error("ThingComp CompFueledTravel is ONLY meant for use with Pawns. - Smash Phil");
 			}
 		}
 
@@ -481,10 +492,10 @@ namespace Vehicles
 		public override void PostSpawnSetup(bool respawningAfterLoad)
 		{
 			base.PostSpawnSetup(respawningAfterLoad);
-			if(!respawningAfterLoad)
+			if (!respawningAfterLoad)
 			{
 				dischargeRate = ConsumptionRatePerTick * 0.1f;
-
+				targetFuelLevel = FuelCapacity;
 				if (Vehicle.Faction != Faction.OfPlayer)
 				{
 					RefuelHalfway();
@@ -503,18 +514,19 @@ namespace Vehicles
 			base.PostExposeData();
 
 			//Upgrades
-			Scribe_Values.Look(ref fuelConsumptionRateOffset, "fuelConsumptionRateOffset");
-			Scribe_Values.Look(ref fuelCapacityOffset, "fuelCapacityOffset");
+			Scribe_Values.Look(ref fuelConsumptionRateOffset, nameof(fuelConsumptionRateOffset));
+			Scribe_Values.Look(ref fuelCapacityOffset, nameof(fuelCapacityOffset));
 
 			//CurValues
-			Scribe_Values.Look(ref fuel, "fuel");
-			Scribe_Values.Look(ref dischargeRate, "dischargeRate");
+			Scribe_Values.Look(ref fuel, nameof(fuel));
+			Scribe_Values.Look(ref targetFuelLevel, nameof(targetFuelLevel), defaultValue: FuelCapacity);
+			Scribe_Values.Look(ref dischargeRate, nameof(dischargeRate));
 
 			if (Scribe.mode == LoadSaveMode.Saving)
 			{
 				postLoadReconnect = Charging;
 			}
-			Scribe_Values.Look(ref postLoadReconnect, "postLoadReconnect", false, true);
+			Scribe_Values.Look(ref postLoadReconnect, nameof(postLoadReconnect), defaultValue: false);
 		}
 	}
 }

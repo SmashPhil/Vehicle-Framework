@@ -9,6 +9,7 @@ using Verse.AI;
 
 namespace Vehicles
 {
+	[Obsolete("Needs more looking into.  Only added for potential use since it's also implemented for vanilla, despite never being used by the devs", error: true)]
 	public class JobDriver_RefuelVehicleAtomic : JobDriver
 	{
 		private const int RefuelingDuration = 240;

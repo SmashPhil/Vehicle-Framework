@@ -7,7 +7,7 @@ namespace Vehicles
 	[HeaderTitle(Label = "VehicleLauncherProperties", Translate = true)]
 	public class CompProperties_VehicleLauncher : VehicleCompProperties
 	{
-		[PostToSettings(Label = "VehicleFuelConsumptionWorld", Translate = true, Tooltip = "VehicleFuelEfficiencyWorldTooltip", UISettingsType = UISettingsType.FloatBox, VehicleType = VehicleType.Air)]
+		[PostToSettings(Label = "VF_FuelConsumptionWorld", Translate = true, Tooltip = "VF_FuelConsumptionWorldTooltip", UISettingsType = UISettingsType.FloatBox, VehicleType = VehicleType.Air)]
 		[NumericBoxValues(MinValue = 0)]
 		public float fuelConsumptionWorldMultiplier = 10;
 
@@ -32,14 +32,14 @@ namespace Vehicles
 		[DisableSettingConditional(MemberType = typeof(CompProperties_VehicleLauncher), Field = nameof(controlInFlight), DisableIfEqualTo = false)]
 		public int reconDistance = 1;
 
-		[PostToSettings(Label = "VehicleLaunchFixedMaxDistance", Translate = true, Tooltip = "VehicleLaunchFixedMaxDistanceTooltip", UISettingsType = UISettingsType.SliderInt, VehicleType = VehicleType.Air)]
-		[SliderValues(MinValue = 0, MaxValue = 100, MinValueDisplay = "VehicleLaunchFixedMaxDistanceDisabled")]
+		[PostToSettings(Label = "VF_LaunchFixedMaxDistance", Translate = true, Tooltip = "VehicleLaunchFixedMaxDistanceTooltip", UISettingsType = UISettingsType.SliderInt, VehicleType = VehicleType.Air)]
+		[SliderValues(MinValue = 0, MaxValue = 100, MinValueDisplay = "VF_LaunchFixedMaxDistanceDisabled")]
 		public int fixedLaunchDistanceMax = 0;
 
-		[PostToSettings(Label = "VehicleControlInFlight", Translate = true, Tooltip = "VehicleControlInFlightTooltip", UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Air)]
+		[PostToSettings(Label = "VF_ControlInFlight", Translate = true, Tooltip = "VF_ControlInFlightTooltip", UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Air)]
 		public bool controlInFlight = true;
 
-		[PostToSettings(Label = "VehicleSpaceFlight", Translate = true, Tooltip = "VehicleSpaceFlightTooltip", UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Air)]
+		[PostToSettings(Label = "VF_SpaceFlight", Translate = true, Tooltip = "VF_SpaceFlightTooltip", UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Air)]
 		[DisableSettingConditional(MayRequireAny = new string[] { ConditionalPatchApplier.SOS2, ConditionalPatchApplier.RimNauts })]
 		public bool spaceFlight = false;
 

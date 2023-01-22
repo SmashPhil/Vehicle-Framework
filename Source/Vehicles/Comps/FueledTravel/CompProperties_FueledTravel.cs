@@ -15,20 +15,27 @@ namespace Vehicles
 
 		public bool electricPowered;
 
-		[PostToSettings(Label = "VehicleDischargePerTick", Translate = true, UISettingsType = UISettingsType.FloatBox)]
+		//[PostToSettings(Label = "VF_DischargePerTick", Translate = true, UISettingsType = UISettingsType.FloatBox)]
 		public float dischargeRate = 2;
-		[PostToSettings(Label = "VehicleTicksPerCharge", Translate = true, UISettingsType = UISettingsType.FloatBox)]
+		//[PostToSettings(Label = "VF_TicksPerCharge", Translate = true, UISettingsType = UISettingsType.FloatBox)]
 		public float chargeRate;
 
-		[PostToSettings(Label = "VehicleFuelConsumptionRate", Translate = true, UISettingsType = UISettingsType.FloatBox)]
+		[PostToSettings(Label = "VF_FuelConsumptionRate", Translate = true, UISettingsType = UISettingsType.FloatBox)]
 		public float fuelConsumptionRate;
 		[PostToSettings(Label = "VF_VehicleFuelCapacity", Translate = true, UISettingsType = UISettingsType.IntegerBox)]
 		public int fuelCapacity;
-		[PostToSettings(Label = "VehicleFuelConsumptionRateWorldMultiplier", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
+		[PostToSettings(Label = "VF_VehicleRefuelWhileDrafted", Translate = true, UISettingsType = UISettingsType.Checkbox)]
+		public bool refuelWhileDrafted = false;
+
+		[PostToSettings(Label = "VF_FuelConsumptionRateWorldMultiplier", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(Increment = 0.1f, MinValue = 0, MaxValue = 2)]
 		public float fuelConsumptionWorldMultiplier = 1;
 
-		public FuelConsumptionCondition fuelConsumptionCondition;
+		[PostToSettings(Label = "VF_VehicleAutoRefuelPercent", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
+		[SliderValues(Increment = 0.1f, MinValue = 0, MaxValue = 1)]
+		public float autoRefuelPercent = 0.3f;
+		
+		public FuelConsumptionCondition fuelConsumptionCondition = FuelConsumptionCondition.Drafted | FuelConsumptionCondition.Moving | FuelConsumptionCondition.Flying;
 
 		public List<OffsetMote> motesGenerated;
 

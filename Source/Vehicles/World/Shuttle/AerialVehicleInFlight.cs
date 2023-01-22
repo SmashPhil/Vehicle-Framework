@@ -449,7 +449,7 @@ namespace Vehicles
 
 		public virtual void SpendFuel()
 		{
-			if (vehicle.CompFueledTravel != null)
+			if (vehicle.CompFueledTravel != null && vehicle.CompFueledTravel.FuelCondition.HasFlag(FuelConsumptionCondition.Flying))
 			{
 				float amount = vehicle.CompFueledTravel.ConsumptionRatePerTick * vehicle.CompVehicleLauncher.FuelConsumptionWorldMultiplier;
 				vehicle.CompFueledTravel.ConsumeFuel(amount);
