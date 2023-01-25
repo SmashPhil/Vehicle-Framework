@@ -263,15 +263,11 @@ namespace Vehicles
 
 		public override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
-			var drawVehicle = new Task(delegate ()
+			Drawer.DrawAt(drawLoc);
+			foreach (VehicleHandler handler in HandlersWithPawnRenderer)
 			{
-				Drawer.DrawAt(drawLoc);
-				foreach (VehicleHandler handler in HandlersWithPawnRenderer)
-				{
-					handler.RenderPawns();
-				}
-			});
-			drawVehicle.RunSynchronously();
+				handler.RenderPawns();
+			}
 			statHandler.DrawHitbox(HighlightedComponent);
 		}
 
@@ -279,15 +275,11 @@ namespace Vehicles
 		{
 			bool northSouthRotation = VehicleGraphic.EastDiagonalRotated && (FullRotation == Rot8.NorthEast || FullRotation == Rot8.SouthEast) ||
 				(VehicleGraphic.WestDiagonalRotated && (FullRotation == Rot8.NorthWest || FullRotation == Rot8.SouthWest));
-			var drawVehicle = new Task(delegate ()
+			Drawer.renderer.RenderPawnAt(drawLoc, rotation, northSouthRotation);
+			foreach (VehicleHandler handler in HandlersWithPawnRenderer)
 			{
-				Drawer.renderer.RenderPawnAt(drawLoc, rotation, northSouthRotation);
-				foreach (VehicleHandler handler in HandlersWithPawnRenderer)
-				{
-					handler.RenderPawns();
-				}
-			});
-			drawVehicle.RunSynchronously();
+				handler.RenderPawns();
+			}
 		}
 
 		public new void ProcessPostTickVisuals(int ticksPassed, CellRect viewRect)

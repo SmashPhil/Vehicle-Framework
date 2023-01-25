@@ -642,7 +642,6 @@ namespace Vehicles
 			{
 				recoilTicked = rTracker.RecoilTick();
 			}
-			Log.Message("Ticking");
 			//Keep ticking until no longer needed
 			return cooldownTicked || autoTicked || rotationTicked || targeterTicked || recoilTicked;
 		}

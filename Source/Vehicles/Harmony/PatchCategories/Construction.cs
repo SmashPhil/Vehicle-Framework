@@ -189,7 +189,7 @@ namespace Vehicles
 			{
 				try
 				{
-					var positionManager = map.GetCachedMapComponent<VehiclePositionManager>();
+					VehiclePositionManager positionManager = map.GetCachedMapComponent<VehiclePositionManager>();
 					if (positionManager.PositionClaimed(loc))
 					{
 						VehiclePawn inPlaceVehicle = positionManager.ClaimedBy(loc);
@@ -217,7 +217,7 @@ namespace Vehicles
 			{
 				try
 				{
-					var positionManager = map.GetCachedMapComponent<VehiclePositionManager>();
+					VehiclePositionManager positionManager = map.GetCachedMapComponent<VehiclePositionManager>();
 					if (positionManager.PositionClaimed(loc))
 					{
 						VehiclePawn inPlaceVehicle = positionManager.ClaimedBy(loc);

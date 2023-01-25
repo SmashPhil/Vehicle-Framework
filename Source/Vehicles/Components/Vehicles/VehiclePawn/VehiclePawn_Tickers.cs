@@ -145,12 +145,9 @@ namespace Vehicles
 
 		protected virtual void TickAllComps()
 		{
-			if (!compTickers.NullOrEmpty())
+			foreach (ThingComp comp in compTickers)
 			{
-				foreach (ThingComp comp in compTickers)
-				{
-					comp.CompTick();
-				}
+				comp.CompTick();
 			}
 		}
 

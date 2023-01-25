@@ -383,9 +383,9 @@ namespace Vehicles
 			}
 			if (vPather.Moving)
 			{
-				float num6 = CaravanArrivalTimeEstimator.EstimatedTicksToArrive(this, true) / 60000f;
+				float estimatedDaysToArrive = CaravanArrivalTimeEstimator.EstimatedTicksToArrive(this, true) / 60000f;
 				stringBuilder.AppendLine();
-				stringBuilder.Append("CaravanEstimatedTimeToDestination".Translate(num6.ToString("0.#")));
+				stringBuilder.Append("CaravanEstimatedTimeToDestination".Translate(estimatedDaysToArrive.ToString("0.#")));
 			}
 			if (AllOwnersDowned)
 			{

@@ -25,12 +25,12 @@ namespace Vehicles
 		public override void MapComponentTick()
 		{
 			base.MapComponentTick();
-			if(Find.TickManager.TicksGame % WindDirectionChangeTimer == 0)
+			if (Find.TickManager.TicksGame % WindDirectionChangeTimer == 0)
 			{
 				newWindDirectionAngle = Rand.Range(-30f, 30f);
 			}
 
-			if(windDirectionByAngle != newWindDirectionAngle)
+			if (windDirectionByAngle != newWindDirectionAngle)
 			{
 				if(windDirectionByAngle > newWindDirectionAngle)
 				{

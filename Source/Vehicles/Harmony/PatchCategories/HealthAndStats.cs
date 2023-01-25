@@ -48,6 +48,10 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(StatWorker), nameof(StatWorker.IsDisabledFor)),
 				prefix: new HarmonyMethod(typeof(HealthAndStats),
 				nameof(StatDisabledForVehicle)));
+
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(SchoolUtility), nameof(SchoolUtility.CanTeachNow)),
+				prefix: new HarmonyMethod(typeof(HealthAndStats),
+				nameof(CantTeachVehicles)));
 		}
 
 		/// <summary>
@@ -220,6 +224,16 @@ namespace Vehicles
 		public static bool StatDisabledForVehicle(Thing thing, ref bool __result)
 		{
 			if (thing is VehiclePawn)
+			{
+				__result = false;
+				return false;
+			}
+			return true;
+		}
+
+		public static bool CantTeachVehicles(Pawn teacher, ref bool __result)
+		{
+			if (teacher is VehiclePawn)
 			{
 				__result = false;
 				return false;

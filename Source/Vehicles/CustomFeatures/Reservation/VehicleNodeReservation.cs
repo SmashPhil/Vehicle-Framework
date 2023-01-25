@@ -99,7 +99,7 @@ namespace Vehicles
 			foreach(Pawn actor in claims)
 			{
 				//Fail if job def changes, vehicle target changes, thingDef is no longer available, or vehicle gets drafted
-				if(actor.CurJob.def.defName != jobDef || actor.Drafted || vehicle.Drafted)
+				if (actor.CurJob.def != jobDef || actor.Drafted || vehicle.Drafted)
 				{
 					claimants.Remove(actor);
 				}

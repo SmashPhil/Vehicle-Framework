@@ -43,23 +43,29 @@ namespace Vehicles
 		/// <param name="__instance"></param>
 		public static void NoAttackSettlementWhenDocked(Caravan caravan, ref IEnumerable<Gizmo> __result, Settlement __instance)
 		{
-			if (caravan.HasBoat() && !caravan.pather.Moving)
+			if (caravan is VehicleCaravan vehicleCaravan && vehicleCaravan.HasBoat() && !vehicleCaravan.vPather.Moving)
 			{
 				List<Gizmo> gizmos = __result.ToList();
 				if (caravan.PawnsListForReading.NotNullAndAny(p => !p.IsBoat()))
 				{
 					int index = gizmos.FindIndex(x => (x as Command_Action).icon == Settlement.AttackCommand);
 					if (index >= 0 && index < gizmos.Count)
+					{
 						gizmos[index].Disable("CommandAttackDockDisable".Translate(__instance.LabelShort));
+					}
 				}
 				else
 				{
 					int index2 = gizmos.FindIndex(x => (x as Command_Action).icon == ContentFinder<Texture2D>.Get("UI/Commands/Trade", false));
 					if (index2 >= 0 && index2 < gizmos.Count)
+					{
 						gizmos[index2].Disable("CommandTradeDockDisable".Translate(__instance.LabelShort));
+					}
 					int index3 = gizmos.FindIndex(x => (x as Command_Action).icon == ContentFinder<Texture2D>.Get("UI/Commands/OfferGifts", false));
 					if (index3 >= 0 && index3 < gizmos.Count)
+					{
 						gizmos[index3].Disable("CommandTradeDockDisable".Translate(__instance.LabelShort));
+					}
 				}
 				__result = gizmos;
 			}

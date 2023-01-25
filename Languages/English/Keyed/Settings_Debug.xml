@@ -47,8 +47,10 @@
 	<VF_DevMode_DebugCameraViewAnimatorTooltip>Moves main camera to window view in graph editor when animation target is selected.</VF_DevMode_DebugCameraViewAnimatorTooltip>
 	
 	<!-- Pathing -->
-	<VF_DevMode_DebugPathfinderDebugging>PathFinder Debugging</VF_DevMode_DebugPathfinderDebugging>
+	<VF_DevMode_DebugPathfinderDebugging>Local Pathing</VF_DevMode_DebugPathfinderDebugging>
 	<VF_DevMode_DebugPathfinderDebuggingTooltip>Open menu for debugging various outputs of pathfinding (both cell based and region based)</VF_DevMode_DebugPathfinderDebuggingTooltip>
+	<VF_DevMode_DebugWorldPathfinderDebugging>World Pathing</VF_DevMode_DebugWorldPathfinderDebugging>
+	<VF_DevMode_DebugWorldPathfinderDebuggingTooltip>Open menu for debugging WorldPathGrid for any VehicleDef.</VF_DevMode_DebugWorldPathfinderDebuggingTooltip>
 	<VF_DevMode_DebugDrawVehiclePathingCosts>Draw Path Costs</VF_DevMode_DebugDrawVehiclePathingCosts>
 	<VF_DevMode_DebugDrawVehiclePathingCostsTooltip>Draw costs per cell/tile calculated from pathfinder. Shows accumulated path cost.</VF_DevMode_DebugDrawVehiclePathingCostsTooltip>
 	<VF_DevMode_DebugDrawVehiclePathGridCellCosts>Draw Cell Costs</VF_DevMode_DebugDrawVehiclePathGridCellCosts>

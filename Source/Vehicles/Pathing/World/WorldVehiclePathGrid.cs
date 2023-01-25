@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
@@ -71,6 +72,18 @@ namespace Vehicles
 			{
 				RecalculateAllPerceivedPathCosts();
 			}
+			if (DebugHelper.World.VehicleDef != null && Find.WorldSelector.selectedTile >= 0 && Find.TickManager.TicksGame % 10 == 0)
+			{
+				int tile = Find.WorldSelector.selectedTile;
+				List<int> neighbors = new List<int>();
+				Find.WorldGrid.GetTileNeighbors(tile, neighbors);
+
+				Find.World.debugDrawer.FlashTile(tile, text: movementDifficulty[DebugHelper.World.VehicleDef][tile].ToString(), duration: 10);
+				foreach (int neighborTile in neighbors)
+				{
+					Find.World.debugDrawer.FlashTile(neighborTile, text: movementDifficulty[DebugHelper.World.VehicleDef][neighborTile].ToString(), duration: 10);
+				}
+			}
 		}
 
 		/// <summary>
@@ -139,14 +152,13 @@ namespace Vehicles
 		/// <summary>
 		/// Recalculate all path costs for all VehicleDefs
 		/// </summary>
-		public async Task RecalculateAllPerceivedPathCosts()
+		public void RecalculateAllPerceivedPathCosts()
 		{
-			Task recalculationTask = new Task(delegate ()
+			MultithreadHelper.RunAsync(delegate ()
 			{
 				RecalculateAllPerceivedPathCosts(null);
 				allPathCostsRecalculatedDayOfYear = DayOfYearAt0Long;
 			});
-			await recalculationTask;
 		}
 
 		/// <summary>

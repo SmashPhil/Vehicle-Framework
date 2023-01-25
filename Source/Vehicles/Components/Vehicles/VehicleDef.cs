@@ -38,7 +38,7 @@ namespace Vehicles
 		public VehicleType vehicleType = VehicleType.Land;
 
 		[PostToSettings(Label = "VehicleNavigationType", Translate = true, UISettingsType = UISettingsType.SliderEnum)]
-		public NavigationCategory defaultNavigation = NavigationCategory.Opportunistic;
+		public NavigationCategory navigationCategory = NavigationCategory.Opportunistic;
 
 		public VehicleBuildDef buildDef;
 		public new GraphicDataRGB graphicData;

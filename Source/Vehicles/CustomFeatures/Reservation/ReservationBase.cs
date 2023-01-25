@@ -7,9 +7,7 @@ namespace Vehicles
 	public abstract class ReservationBase : IExposable
 	{
 		protected VehiclePawn vehicle;
-
-		protected string jobDef;
-
+		protected JobDef jobDef;
 		protected LocalTargetInfo targetA;
 
 		protected int maxClaimants;
@@ -23,7 +21,7 @@ namespace Vehicles
 		public ReservationBase(VehiclePawn vehicle, Job job, int maxClaimants)
 		{
 			this.vehicle = vehicle;
-			jobDef = job.def.defName;
+			jobDef = job.def;
 			targetA = job.targetA;
 			this.maxClaimants = maxClaimants;
 			uniqueId = VehicleIdManager.Instance.GetNextReservationId();
@@ -32,6 +30,12 @@ namespace Vehicles
 		public abstract bool RemoveNow { get; }
 
 		public abstract int TotalClaimants { get; }
+
+		public JobDef JobDef => jobDef;
+
+		public VehiclePawn Vehicle => vehicle;
+
+		public LocalTargetInfo TargetA => targetA;
 
 		public abstract void ReleaseReservationBy(Pawn pawn);
 
@@ -46,10 +50,10 @@ namespace Vehicles
 
 		public virtual void ExposeData()
 		{
-			Scribe_References.Look(ref vehicle, "vehicle", true);
-			Scribe_TargetInfo.Look(ref targetA, "targetA");
-			Scribe_Values.Look(ref jobDef, "jobDef");
-			Scribe_Values.Look(ref maxClaimants, "maxClaimants");
+			Scribe_References.Look(ref vehicle, nameof(vehicle), true);
+			Scribe_TargetInfo.Look(ref targetA, nameof(targetA));
+			Scribe_Defs.Look(ref jobDef, nameof(jobDef));
+			Scribe_Values.Look(ref maxClaimants, nameof(maxClaimants));
 		}
 
 		//public string GetUniqueLoadID()

@@ -52,7 +52,7 @@ namespace Vehicles
 
 		public override void ExposeData()
 		{
-			Scribe_NestedCollections.Look(ref upgradeSettings, "upgradeSettings", LookMode.Value, LookMode.Deep, LookMode.Undefined, true);
+			Scribe_NestedCollections.Look(ref upgradeSettings, "upgradeSettings", LookMode.Value, LookMode.Deep, LookMode.Undefined);
 		}
 
 		public override void DrawSection(Rect rect)

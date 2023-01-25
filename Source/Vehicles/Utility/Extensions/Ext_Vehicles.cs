@@ -320,8 +320,19 @@ namespace Vehicles
 		/// <param name="tile"></param>
 		public static bool CoastalTravel(this VehicleDef vehicleDef, int tile)
 		{
-			return vehicleDef.properties.customBiomeCosts.ContainsKey(BiomeDefOf.Ocean) && vehicleDef.properties.customBiomeCosts[BiomeDefOf.Ocean] <= WorldVehiclePathGrid.ImpassableMovementDifficulty &&
-				Find.World.CoastDirectionAt(tile).IsValid;
+			if (vehicleDef.properties.customBiomeCosts.TryGetValue(BiomeDefOf.Ocean, out float pathCost) && pathCost < WorldVehiclePathGrid.ImpassableMovementDifficulty)
+			{
+				WorldGrid worldGrid = Find.WorldGrid;
+				List<int> neighbors = new List<int>();
+				worldGrid.GetTileNeighbors(tile, neighbors);
+
+				foreach (int neighborTile in neighbors)
+				{
+					if (worldGrid[neighborTile].biome == BiomeDefOf.Ocean) return true;
+				}
+			}
+			return false;
+				
 		}
 
 		/// <see cref="DrivableFast(VehiclePawn, IntVec3)"/>

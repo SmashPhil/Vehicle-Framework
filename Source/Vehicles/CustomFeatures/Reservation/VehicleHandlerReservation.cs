@@ -34,19 +34,19 @@ namespace Vehicles
 
 		public override bool AddClaimant(Pawn pawn, VehicleHandler target)
 		{
-			if(claimants.ContainsKey(pawn))
+			if (claimants.ContainsKey(pawn))
 			{
 				Log.Error($"Attempting to reserve Vehicle with {pawn.LabelShort}. Handler {target} is already reserved.");
 				return false;
 			}
-			claimants.Add(pawn, target);
-			if(handlerClaimants.ContainsKey(target))
+			claimants[pawn] = target;
+			if (handlerClaimants.ContainsKey(target))
 			{
 				handlerClaimants[target]++;
 			}
 			else
 			{
-				handlerClaimants.Add(target, 1);
+				handlerClaimants[target] = 1;
 			}
 			return true;
 		}
@@ -83,12 +83,12 @@ namespace Vehicles
 			List<Pawn> actors = new List<Pawn>(claimants.Keys);
 			foreach (Pawn actor in actors)
 			{
-				Job matchedJob = actor.CurJob;
-				if (matchedJob?.def.defName != jobDef)
+				Job matchedJob = null;
+				if (actor.CurJob?.def != jobDef)
 				{
-					matchedJob = actor.jobs.jobQueue?.FirstOrDefault(j => j.job.def.defName == jobDef)?.job;
+					matchedJob = actor.jobs.jobQueue?.FirstOrDefault(j => j.job.def == jobDef)?.job;
 				}
-				if (!actor.Spawned || actor.InMentalState || actor.Downed || actor.Dead || matchedJob?.def.defName != jobDef || matchedJob?.targetA != targetA || vehicle.vPather.Moving)
+				if (!actor.Spawned || actor.InMentalState || actor.Downed || actor.Dead || matchedJob?.def != jobDef || matchedJob?.targetA != targetA || vehicle.vPather.Moving)
 				{
 					if (--handlerClaimants[claimants[actor]] <= 0)
 					{

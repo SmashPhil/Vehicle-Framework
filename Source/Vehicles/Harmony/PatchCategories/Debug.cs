@@ -153,10 +153,10 @@ namespace Vehicles
 			DebugTools.curTool = tool;
 		}
 
-		[DebugAction(VehicleHarmony.VehiclesLabel, "Regenerate WorldPathGrid", allowedGameStates = AllowedGameStates.Playing)]
+		[DebugAction(VehicleHarmony.VehiclesLabel, "Regenerate WorldPathGrid", allowedGameStates = AllowedGameStates.WorldRenderedNow)]
 		public static void DebugRegenerateWorldPathGrid()
 		{
-			Task task = Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().RecalculateAllPerceivedPathCosts();
+			Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().RecalculateAllPerceivedPathCosts();
 		}
 	}
 }

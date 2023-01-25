@@ -89,7 +89,7 @@ namespace Vehicles
 				bills = new List<Bill_BoardVehicle>();
 			}
 
-			navigationCategory = VehicleDef.defaultNavigation;
+			//navigationCategory = VehicleDef.defaultNavigation;
 
 			if (VehicleDef.properties.roles != null && VehicleDef.properties.roles.Count > 0)
 			{
@@ -184,7 +184,7 @@ namespace Vehicles
 			Scribe_Deep.Look(ref patternToPaint, nameof(patternToPaint));
 
 			Scribe_Values.Look(ref movementStatus, nameof(movementStatus), VehicleMovementStatus.Online);
-			Scribe_Values.Look(ref navigationCategory, nameof(navigationCategory), NavigationCategory.Opportunistic);
+			//Scribe_Values.Look(ref navigationCategory, nameof(navigationCategory), NavigationCategory.Opportunistic);
 			Scribe_Values.Look(ref currentlyFishing, nameof(currentlyFishing), false);
 			Scribe_Values.Look(ref showAllItemsOnMap, nameof(showAllItemsOnMap));
 

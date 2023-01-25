@@ -668,9 +668,9 @@ namespace Vehicles
 			VehicleCaravan caravan = CaravanHelper.ExitMapAndCreateVehicleCaravan(pawnsFromTransferables, Faction.OfPlayer, CurrentTile, CurrentTile, destinationTile, false);
 			map.Parent.CheckRemoveMapNow();
 			TaggedString taggedString = "MessageReformedCaravan".Translate();
-			if (caravan.pather.Moving && caravan.pather.ArrivalAction != null)
+			if (caravan.vPather.Moving && caravan.vPather.ArrivalAction != null)
 			{
-				taggedString += " " + "MessageFormedCaravan_Orders".Translate() + ": " + caravan.pather.ArrivalAction.Label + ".";
+				taggedString += " " + "MessageFormedCaravan_Orders".Translate() + ": " + caravan.vPather.ArrivalAction.Label + ".";
 			}
 			Messages.Message(taggedString, caravan, MessageTypeDefOf.TaskCompletion, false);
 			return true;

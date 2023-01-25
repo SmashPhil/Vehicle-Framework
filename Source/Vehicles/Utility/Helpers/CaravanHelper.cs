@@ -134,11 +134,11 @@ namespace Vehicles
 		/// <param name="dock"></param>
 		public static void ToggleDocking(Caravan caravan, bool dock = false)
 		{
-			if (caravan.HasBoat())
+			if (caravan.HasBoat() && caravan is VehicleCaravan vehicleCaravan)
 			{
 				if (!dock)
 				{
-					BoardAllCaravanPawns(caravan);
+					BoardAllCaravanPawns(vehicleCaravan);
 				}
 				else
 				{
@@ -152,7 +152,7 @@ namespace Vehicles
 		/// Spawn DockedBoat object to store boats on World map
 		/// </summary>
 		/// <param name="caravan"></param>
-		public static void SpawnDockedBoatObject(Caravan caravan)
+		public static void SpawnDockedBoatObject(VehicleCaravan caravan)
 		{
 			if (!caravan.HasBoat())
 			{
@@ -166,13 +166,13 @@ namespace Vehicles
 		/// Directly board all pawns in caravan into Boats in caravan
 		/// </summary>
 		/// <param name="caravan"></param>
-		public static void BoardAllCaravanPawns(Caravan caravan)
+		public static void BoardAllCaravanPawns(VehicleCaravan caravan)
 		{
 			if (!AbleToEmbark(caravan))
 			{
-				if (caravan.pather.Moving)
+				if (caravan.vPather.Moving)
 				{
-					caravan.pather.StopDead();
+					caravan.vPather.StopDead();
 				}
 				Messages.Message("CantMoveDocked".Translate(), MessageTypeDefOf.RejectInput, false);
 				return;

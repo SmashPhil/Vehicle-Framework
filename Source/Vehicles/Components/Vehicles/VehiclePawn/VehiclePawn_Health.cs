@@ -23,7 +23,7 @@ namespace Vehicles
 		public VehicleStatHandler statHandler;
 
 		public VehicleMovementStatus movementStatus = VehicleMovementStatus.Online;
-		public NavigationCategory navigationCategory = NavigationCategory.Opportunistic;
+		//public NavigationCategory navigationCategory = NavigationCategory.Opportunistic;
 
 		internal VehicleComponent HighlightedComponent { get; set; }
 

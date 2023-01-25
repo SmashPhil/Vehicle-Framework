@@ -402,6 +402,7 @@
     <Compile Include="Misc\DefOf\HediffDefOf_Vehicles.cs" />
     <Compile Include="Misc\DefOf\KeyBindingDefOf_Vehicles.cs" />
     <Compile Include="Misc\DefOf\VehicleStatCategoryDefOf.cs" />
+    <Compile Include="Misc\Enums\UI\WorldPathingDebugType.cs" />
     <Compile Include="Misc\Interfaces\IDebugLordMeetingPoint.cs" />
     <Compile Include="Utility\DesignatorCache.cs" />
     <Compile Include="AI\Incidents\IncidentWorker_ShuttleDowned.cs" />
@@ -686,6 +687,7 @@
     <Compile Include="Utility\Helpers\GizmoHelper.cs" />
     <Compile Include="Utility\Helpers\MultithreadHelper.cs" />
     <Compile Include="Utility\Helpers\SoundHelper.cs" />
+    <Compile Include="Utility\Helpers\VehicleCaravanPathingHelper.cs" />
     <Compile Include="Utility\Helpers\VehicleHealthTabHelper.cs" />
     <Compile Include="Utility\Helpers\XmlHelper.cs" />
     <Compile Include="Utility\Helpers\SkyfallerHelper.cs" />

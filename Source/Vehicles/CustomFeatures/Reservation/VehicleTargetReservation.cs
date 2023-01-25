@@ -72,7 +72,7 @@ namespace Vehicles
 			foreach (Pawn actor in actors)
 			{
 				//Fail if job def changes, vehicle target changes, targetInfo is no longer valid, or vehicle gets drafted
-				if (actor == null || !actor.Spawned || actor.Dead || actor.CurJob.def.defName != jobDef || actor.CurJob.targetA != targetA || !claimants[actor].IsValid || actor.Drafted || vehicle.Drafted)
+				if (actor == null || !actor.Spawned || actor.Dead || actor.CurJob.def != jobDef || actor.CurJob.targetA != targetA || !claimants[actor].IsValid || actor.Drafted || vehicle.Drafted)
 				{
 					claimants.Remove(actor);
 				}

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Verse;
 using Verse.AI;
-using RimWorld;
+using SmashTools;
 
 namespace Vehicles
 {
-	public class VehiclePositionManager : MapComponent
+	public class VehiclePositionManager : DetachedMapComponent
 	{
 		private readonly Dictionary<VehiclePawn, HashSet<IntVec3>> occupiedRect = new Dictionary<VehiclePawn, HashSet<IntVec3>>();
 

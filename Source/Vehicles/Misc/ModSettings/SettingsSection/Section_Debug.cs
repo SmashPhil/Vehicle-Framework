@@ -102,6 +102,10 @@ namespace Vehicles
 				{
 					RegionDebugMenu();
 				}
+				if (listingStandard.ButtonText("VF_DevMode_DebugWorldPathfinderDebugging".Translate(), "VF_DevMode_DebugWorldPathfinderDebuggingTooltip".Translate()))
+				{
+					WorldPathingDebugMenu();
+				}
 			}
 			listingStandard.End();
 
@@ -131,32 +135,66 @@ namespace Vehicles
 		public void RegionDebugMenu()
 		{
 			List<Toggle> vehicleDefToggles = new List<Toggle>();
-			vehicleDefToggles.Add(new Toggle("None", () => DebugHelper.drawRegionsFor == null || DebugHelper.debugRegionType == DebugRegionType.None, delegate (bool value)
+			vehicleDefToggles.Add(new Toggle("None", () => DebugHelper.Local.VehicleDef == null || DebugHelper.Local.DebugType == DebugRegionType.None, delegate (bool value)
 			{
 				if (value)
 				{
-					DebugHelper.drawRegionsFor = null;
-					DebugHelper.debugRegionType = DebugRegionType.None;
+					DebugHelper.Local.VehicleDef = null;
+					DebugHelper.Local.DebugType = DebugRegionType.None;
 				}
 			}));
 			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading.OrderBy(def => def.modContentPack.ModMetaData.SamePackageId(VehicleHarmony.VehiclesUniqueId, ignorePostfix: true))
 																						   .ThenBy(def => def.modContentPack.Name)
 																						   .ThenBy(d => d.defName))
 			{
-				Toggle toggle = new Toggle(vehicleDef.defName, vehicleDef.modContentPack.Name, () => DebugHelper.drawRegionsFor == vehicleDef, (value) => { }, onToggle: delegate (bool value)
+				Toggle toggle = new Toggle(vehicleDef.defName, vehicleDef.modContentPack.Name, () => DebugHelper.Local.VehicleDef == vehicleDef, (value) => { }, onToggle: delegate (bool value)
 				{
 					if (value)
 					{
-						List<Toggle> debugOptionToggles = DebugHelper.RegionToggles(vehicleDef).ToList();
+						List<Toggle> debugOptionToggles = DebugHelper.DebugToggles(vehicleDef, DebugHelper.Local).ToList();
 						Find.WindowStack.Add(new Dialog_ToggleMenu("VF_DevMode_DebugPathfinderDebugging".Translate(), debugOptionToggles));
 					}
 					else
 					{
-						DebugHelper.drawRegionsFor = null;
-						DebugHelper.debugRegionType = DebugRegionType.None;
+						DebugHelper.Local.VehicleDef = null;
+						DebugHelper.Local.DebugType = DebugRegionType.None;
 					}
 				});
 				toggle.Disabled = !PathingHelper.ShouldCreateRegions(vehicleDef);
+				vehicleDefToggles.Add(toggle);
+			}
+			Find.WindowStack.Add(new Dialog_RadioButtonMenu("VF_DevMode_DebugPathfinderDebugging".Translate(), vehicleDefToggles));
+		}
+
+		public void WorldPathingDebugMenu()
+		{
+			List<Toggle> vehicleDefToggles = new List<Toggle>();
+			vehicleDefToggles.Add(new Toggle("None", () => DebugHelper.World.VehicleDef == null || DebugHelper.World.DebugType == WorldPathingDebugType.None, delegate (bool value)
+			{
+				if (value)
+				{
+					DebugHelper.World.VehicleDef = null;
+					DebugHelper.World.DebugType = WorldPathingDebugType.None;
+				}
+			}));
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading.OrderBy(def => def.modContentPack.ModMetaData.SamePackageId(VehicleHarmony.VehiclesUniqueId, ignorePostfix: true))
+																						   .ThenBy(def => def.modContentPack.Name)
+																						   .ThenBy(d => d.defName))
+			{
+				Toggle toggle = new Toggle(vehicleDef.defName, vehicleDef.modContentPack.Name, () => DebugHelper.World.VehicleDef == vehicleDef, (value) => { }, onToggle: delegate (bool value)
+				{
+					if (value)
+					{
+						List<Toggle> debugOptionToggles = DebugHelper.DebugToggles(vehicleDef, DebugHelper.World).ToList();
+						Find.WindowStack.Add(new Dialog_RadioButtonMenu("VF_DevMode_DebugWorldPathfinderDebugging".Translate(), debugOptionToggles));
+					}
+					else
+					{
+						DebugHelper.World.VehicleDef = null;
+						DebugHelper.World.DebugType = WorldPathingDebugType.None;
+					}
+				});
+				toggle.Disabled = !PathingHelper.ShouldCreateRegions(vehicleDef) || !vehicleDef.canCaravan;
 				vehicleDefToggles.Add(toggle);
 			}
 			Find.WindowStack.Add(new Dialog_RadioButtonMenu("VF_DevMode_DebugPathfinderDebugging".Translate(), vehicleDefToggles));
@@ -192,34 +230,6 @@ namespace Vehicles
 			{
 				Log.Error($"{VehicleHarmony.LogLabel} Unable to show update for {versionChecking} Exception = {ex.Message}");
 			}
-		}
-
-		public static void DebugDrawRegions()
-		{
-			List<DebugMenuOption> listCheckbox = new List<DebugMenuOption>();
-			listCheckbox.Add(new DebugMenuOption("Clear", DebugMenuOptionMode.Action, delegate ()
-			{
-				DebugHelper.drawRegionsFor = null;
-				DebugHelper.debugRegionType = DebugRegionType.None;
-			}));
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading.OrderBy(d => d.defName))
-			{
-				listCheckbox.Add(new DebugMenuOption(vehicleDef.defName, DebugMenuOptionMode.Action, delegate ()
-				{
-					List<DebugMenuOption> listCheckbox2 = new List<DebugMenuOption>();
-
-					foreach (string name in Enum.GetNames(typeof(DebugRegionType)))
-					{
-						listCheckbox2.Add(new DebugMenuOption(name, DebugMenuOptionMode.Action, delegate ()
-						{
-							DebugHelper.drawRegionsFor = vehicleDef;
-							DebugHelper.debugRegionType = (DebugRegionType)Enum.Parse(typeof(DebugRegionType), name);
-						}));
-					}
-					Find.WindowStack.Add(new Dialog_DebugOptionListLister(listCheckbox2));
-				}));
-			}
-			Find.WindowStack.Add(new Dialog_DebugOptionListLister(listCheckbox));
 		}
 	}
 }

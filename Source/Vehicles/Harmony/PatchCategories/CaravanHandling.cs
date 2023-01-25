@@ -160,12 +160,12 @@ namespace Vehicles
 						return;
 					}
 					AccessTools.Method(typeof(Dialog_FormCaravan), "AddItemsFromTransferablesToRandomInventories").Invoke(__instance, new object[] { correctedPawns });
-					Caravan caravan = CaravanExitMapUtility.ExitMapAndCreateCaravan(correctedPawns, Faction.OfPlayer, __instance.CurrentTile, __instance.CurrentTile, ___destinationTile, false);
+					VehicleCaravan caravan = CaravanHelper.ExitMapAndCreateVehicleCaravan(correctedPawns, Faction.OfPlayer, __instance.CurrentTile, __instance.CurrentTile, ___destinationTile, false);
 					___map.Parent.CheckRemoveMapNow();
 					TaggedString taggedString = "MessageReformedCaravan".Translate();
-					if (caravan.pather.Moving && caravan.pather.ArrivalAction != null)
+					if (caravan.vPather.Moving && caravan.vPather.ArrivalAction != null)
 					{
-						taggedString += " " + "MessageFormedCaravan_Orders".Translate() + ": " + caravan.pather.ArrivalAction.Label + ".";
+						taggedString += " " + "MessageFormedCaravan_Orders".Translate() + ": " + caravan.vPather.ArrivalAction.Label + ".";
 					}
 					Messages.Message(taggedString, caravan, MessageTypeDefOf.TaskCompletion, false);
 
@@ -593,14 +593,9 @@ namespace Vehicles
 
 		public static bool NoRestForVehicles(Caravan __instance, ref bool __result)
 		{
-			if (__instance.HasVehicle() && !__instance.PawnsListForReading.NotNullAndAny(x => !(x is VehiclePawn)))
+			if (__instance is VehicleCaravan caravan && !caravan.PawnsListForReading.NotNullAndAny(x => !(x is VehiclePawn)))
 			{
-				__result = false;
-				if(__instance.PawnsListForReading.NotNullAndAny(x => x is VehiclePawn vehicle && (vehicle.navigationCategory == NavigationCategory.Manual || vehicle.navigationCategory == NavigationCategory.Opportunistic)))
-				{
-					__result = __instance.Spawned && (!__instance.pather.Moving || __instance.pather.nextTile != __instance.pather.Destination || !Caravan_PathFollower.IsValidFinalPushDestination(__instance.pather.Destination) ||
-						Mathf.CeilToInt(__instance.pather.nextTileCostLeft / 1f) > 10000) && CaravanNightRestUtility.RestingNowAt(__instance.Tile);
-				}
+				__result = VehicleCaravanPathingHelper.ShouldRestAt(caravan, caravan.Tile);
 				return false;
 			}
 			return true;
@@ -608,7 +603,7 @@ namespace Vehicles
 
 		public static List<Pawn> InternalPawnsIncludedInList(List<Pawn> __result, Caravan __instance)
 		{
-			if (__instance is VehicleCaravan vehicleCaravan)
+			if (__instance is VehicleCaravan)
 			{
 				List<Pawn> allPawns = new List<Pawn>();
 				foreach (Pawn pawn in __result)
