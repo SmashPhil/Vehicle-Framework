@@ -23,7 +23,7 @@ namespace Vehicles
 			layer = graphicData.layer;
 		}
 
-		public virtual void PreInit()
+		public virtual void Init()
 		{
 			OriginalDrawOffset ??= drawOffset;
 			drawOffset = OriginalDrawOffset.Value;

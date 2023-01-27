@@ -5,18 +5,16 @@ using SmashTools;
 
 namespace Vehicles
 {
-	internal class Compatibility_DualWield : IConditionalPatch
+	internal class Compatibility_DualWield : ConditionalVehiclePatch
 	{
-		public void PatchAll(ModMetaData mod, Harmony harmony)
+		public override void PatchAll(ModMetaData mod, Harmony harmony)
 		{
 			harmony.Patch(original: AccessTools.Method(typeof(Pawn_RotationTracker), "UpdateRotation"), prefix: null, postfix: null, transpiler: null,
 				finalizer: new HarmonyMethod(typeof(Compatibility_DualWield),
 				nameof(NoRotationCallForVehicles)));
 		}
 
-		public static bool Active { get; set; }
-
-		public string PackageId => ConditionalPatchApplier.DualWield;
+		public override string PackageId => CompatibilityPackageIds.DualWield;
 
 		/// <summary>
 		/// Suppress DualWield errors for vehicles. Should not be applied regardless, disabling the vehicle

@@ -40,7 +40,7 @@ namespace Vehicles
 		public bool controlInFlight = true;
 
 		[PostToSettings(Label = "VF_SpaceFlight", Translate = true, Tooltip = "VF_SpaceFlightTooltip", UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Air)]
-		[DisableSettingConditional(MayRequireAny = new string[] { ConditionalPatchApplier.SOS2, ConditionalPatchApplier.RimNauts })]
+		[DisableSettingConditional(MayRequireAny = new string[] { CompatibilityPackageIds.SOS2, CompatibilityPackageIds.RimNauts })]
 		public bool spaceFlight = false;
 
 		public bool faceDirectionOfTravel = true;

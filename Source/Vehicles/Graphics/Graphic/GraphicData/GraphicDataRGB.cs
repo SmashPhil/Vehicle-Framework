@@ -67,8 +67,9 @@ namespace Vehicles
 			}
 		}
 
-		public virtual void Init()
+		public override void Init()
 		{
+			base.Init();
 			if (graphicClass is null)
 			{
 				cachedRGBGraphic = null;
@@ -88,7 +89,7 @@ namespace Vehicles
 			}
 			Shader shader = shaderTypeDef.Shader;
 			cachedRGBGraphic = GraphicDatabaseRGB.Get(graphicClass, texPath, shader, drawSize, color, colorTwo, colorThree, tiles, displacement.x, displacement.y, this, shaderParameters);
-			AccessTools.Field(typeof(GraphicData), "cachedGraphic").SetValue(this, cachedRGBGraphic);
+			//AccessTools.Field(typeof(GraphicData), "cachedGraphic").SetValue(this, cachedRGBGraphic);
 		}
 
 		public override string ToString()

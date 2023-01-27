@@ -16,7 +16,7 @@ namespace Vehicles
 		public float visibility = 2.5f;
 
 		[PostToSettings(Label = "VehicleFishingEnabled", Tooltip = "VehicleFishingEnabledTooltip", Translate = true, UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Sea)]
-		[DisableSettingConditional(MayRequireAny = new string[] { ConditionalPatchApplier.VE_Fishing })]
+		[DisableSettingConditional(MayRequireAny = new string[] { CompatibilityPackageIds.VE_Fishing })]
 		public bool fishing = false;
 
 		public VehicleTrack track;

@@ -5,14 +5,12 @@ using SmashTools;
 
 namespace Vehicles
 {
-	internal class Compatibility_SOS2 : IConditionalPatch
+	internal class Compatibility_SOS2 : ConditionalVehiclePatch
 	{
-		public void PatchAll(ModMetaData mod, Harmony harmony)
+		public override void PatchAll(ModMetaData mod, Harmony harmony)
 		{
 		}
 
-		public static bool Active { get; set; }
-
-		public string PackageId => ConditionalPatchApplier.SOS2;
+		public override string PackageId => CompatibilityPackageIds.SOS2;
 	}
 }

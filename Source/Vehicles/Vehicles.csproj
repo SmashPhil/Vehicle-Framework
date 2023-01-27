@@ -394,8 +394,10 @@
     <Compile Include="AI\WorkGiver\WorkGiver_DisassembleVehicle.cs" />
     <Compile Include="Components\Vehicles\VehicleSustainers.cs" />
     <Compile Include="Gizmo\Command_Turret.cs" />
+    <Compile Include="Gizmo\Gizmo_VehicleCaravanInfo.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_VEFishing.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_SOS2.cs" />
+    <Compile Include="Harmony\ConditionalPatches\ConditionalVehiclePatch.cs" />
     <Compile Include="Harmony\PatchCategories\DefGenerators\ThingDefGenerator_Buildables.cs" />
     <Compile Include="Misc\Attributes\ActionOnSettingsInputAttribute.cs" />
     <Compile Include="Misc\Attributes\DisableSettingConditionalAttribute.cs" />
@@ -777,7 +779,7 @@
     <Compile Include="Comps\VehicleTracks\CompVehicleDamager.cs" />
     <Compile Include="Gizmo\Gizmo_RefuelableFuelTravel.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_DualWield.cs" />
-    <Compile Include="Harmony\ConditionalPatches\ConditionalPatchApplier.cs" />
+    <Compile Include="Harmony\ConditionalPatches\CompatibilityPackageIDs.cs" />
     <Compile Include="Harmony\ConditionalPatches\FishingCompatibility.cs" />
     <Compile Include="Harmony\VehicleHarmonyOnMod.cs" />
     <Compile Include="Harmony\VehicleHarmony.cs" />

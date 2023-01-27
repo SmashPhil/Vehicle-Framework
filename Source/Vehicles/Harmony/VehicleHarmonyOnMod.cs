@@ -30,8 +30,8 @@ namespace Vehicles
 				prefix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
 				nameof(ImpliedDefGeneratorVehicles)));
 			harmony.Patch(original: AccessTools.Method(typeof(GraphicData), "Init"),
-				prefix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
-				nameof(GraphicPreInit)));
+				postfix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
+				nameof(GraphicInit)));
 			/* Debugging Only */
 			//harmony.Patch(original: AccessTools.Method(typeof(DirectXmlToObject), "GetFieldInfoForType"),
 			//	prefix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
@@ -132,18 +132,12 @@ namespace Vehicles
 		/// Redirect Init calls from GraphicData to GraphicDataRGB
 		/// </summary>
 		/// <param name="__instance"></param>
-		public static bool GraphicPreInit(GraphicData __instance)
+		public static void GraphicInit(GraphicData __instance)
 		{
 			if (__instance is GraphicDataLayered graphicDataLayered)
 			{
-				graphicDataLayered.PreInit();
+				graphicDataLayered.Init();
 			}
-			if (__instance is GraphicDataRGB graphicDataRGB)
-			{
-				graphicDataRGB.Init();
-				return false;
-			}
-			return true;
 		}
 	}
 }

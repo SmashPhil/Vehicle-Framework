@@ -5,14 +5,12 @@ using SmashTools;
 
 namespace Vehicles
 {
-	internal class Compatibility_VEFishing : IConditionalPatch
+	internal class Compatibility_VEFishing : ConditionalVehiclePatch
 	{
-		public void PatchAll(ModMetaData mod, Harmony harmony)
+		public override void PatchAll(ModMetaData mod, Harmony harmony)
 		{
 		}
 
-		public static bool Active { get; set; }
-
-		public string PackageId => ConditionalPatchApplier.VE_Fishing;
+		public override string PackageId => CompatibilityPackageIds.VE_Fishing;
 	}
 }

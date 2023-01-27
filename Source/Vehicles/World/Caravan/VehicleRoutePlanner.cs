@@ -237,7 +237,7 @@ namespace Vehicles
 
 		private void DoRouteDetailsBox()
 		{
-			Rect rect = new Rect((Verse.UI.screenWidth - BottomWindowSize.x) / 2f, Verse.UI.screenHeight - BottomWindowSize.y - BottomWindowBotMargin, BottomWindowSize.x, BottomWindowSize.y);
+			Rect rect = new Rect((UI.screenWidth - BottomWindowSize.x) / 2f, UI.screenHeight - BottomWindowSize.y - BottomWindowBotMargin, BottomWindowSize.x, BottomWindowSize.y);
 			if (Current.ProgramState == ProgramState.Entry)
 			{
 				rect.y -= BottomWindowEntryExtraBotMargin;
@@ -339,36 +339,37 @@ namespace Vehicles
 
 		private string GetTileTip(int tile, int pathIndex)
 		{
-			int num = paths[pathIndex].NodesReversed.IndexOf(tile);
-			int num2;
-			if (num > 0)
+			int tileIndex = paths[pathIndex].NodesReversed.IndexOf(tile);
+			int tileStep;
+			if (tileIndex > 0)
 			{
-				num2 = paths[pathIndex].NodesReversed[num - 1];
+				tileStep = paths[pathIndex].NodesReversed[tileIndex - 1];
 			}
 			else if (pathIndex < paths.Count - 1 && paths[pathIndex + 1].NodesReversed.Count >= 2)
 			{
-				num2 = paths[pathIndex + 1].NodesReversed[paths[pathIndex + 1].NodesReversed.Count - 2];
+				tileStep = paths[pathIndex + 1].NodesReversed[paths[pathIndex + 1].NodesReversed.Count - 2];
 			}
 			else
 			{
-				num2 = -1;
+				tileStep = -1;
 			}
-			int num3 = cachedTicksToWaypoint[pathIndex] + CaravanArrivalTimeEstimator.EstimatedTicksToArrive(paths[pathIndex].FirstNode, tile, paths[pathIndex], 0f, CaravanTicksPerMove, GenTicks.TicksAbs + cachedTicksToWaypoint[pathIndex]);
-			int num4 = GenTicks.TicksAbs + num3;
+			int estimatedTicks = VehicleCaravanPathingHelper.EstimatedTicksToArrive(vehicleDefs, paths[pathIndex].FirstNode, tile, paths[pathIndex], 0f, CaravanTicksPerMove, GenTicks.TicksAbs + cachedTicksToWaypoint[pathIndex]);
+			int totalTicks = cachedTicksToWaypoint[pathIndex] + estimatedTicks;
+			int ticksAbs = GenTicks.TicksAbs + totalTicks;
 			StringBuilder stringBuilder = new StringBuilder();
-			if (num3 != 0)
+			if (totalTicks != 0)
 			{
-				stringBuilder.AppendLine("EstimatedTimeToTile".Translate(num3.ToStringTicksToDays("0.##")));
+				stringBuilder.AppendLine("EstimatedTimeToTile".Translate(totalTicks.ToStringTicksToDays("0.##")));
 			}
 			stringBuilder.AppendLine("ForagedFoodAmount".Translate() + ": " + Find.WorldGrid[tile].biome.forageability.ToStringPercent());
-			stringBuilder.Append(VirtualPlantsUtility.GetVirtualPlantsStatusExplanationAt(tile, num4));
-			if (num2 != -1)
+			stringBuilder.Append(VirtualPlantsUtility.GetVirtualPlantsStatusExplanationAt(tile, ticksAbs));
+			if (tileStep != -1)
 			{
 				stringBuilder.AppendLine();
 				stringBuilder.AppendLine();
 				StringBuilder stringBuilder2 = new StringBuilder();
-				float num5 = WorldPathGrid.CalculatedMovementDifficultyAt(num2, false, new int?(num4), stringBuilder2);
-				float roadMovementDifficultyMultiplier = Find.WorldGrid.GetRoadMovementDifficultyMultiplier(tile, num2, stringBuilder2);
+				float num5 = WorldPathGrid.CalculatedMovementDifficultyAt(tileStep, false, new int?(ticksAbs), stringBuilder2);
+				float roadMovementDifficultyMultiplier = Find.WorldGrid.GetRoadMovementDifficultyMultiplier(tile, tileStep, stringBuilder2);
 				stringBuilder.Append("TileMovementDifficulty".Translate() + ":\n" + stringBuilder2.ToString().Indented("  "));
 				stringBuilder.AppendLine();
 				stringBuilder.Append("  = ");
@@ -489,7 +490,7 @@ namespace Vehicles
 				}
 				else
 				{
-					num += CaravanArrivalTimeEstimator.EstimatedTicksToArrive(waypoints[j - 1].Tile, waypoints[j].Tile, paths[j - 1], 0f, caravanTicksPerMove, GenTicks.TicksAbs + num);
+					num += VehicleCaravanPathingHelper.EstimatedTicksToArrive(vehicleDefs, waypoints[j - 1].Tile, waypoints[j].Tile, paths[j - 1], 0f, caravanTicksPerMove, GenTicks.TicksAbs + num);
 					cachedTicksToWaypoint.Add(num);
 				}
 			}

@@ -120,7 +120,7 @@ namespace Vehicles
 		{
 			if (req.shader.SupportsRGBMaskTex())
 			{
-				SmashLog.Error($"<type>Graphic_RGB</type> called <method>Init</method> with regular GraphicRequest. This will result in incorrectly colored RGB masks as <property>ColorThree</property> cannot be properly initialized.");
+				//SmashLog.Error($"<type>Graphic_RGB</type> called <method>Init</method> with regular GraphicRequest. This will result in incorrectly colored RGB masks as <property>ColorThree</property> cannot be properly initialized.");
 			}
 			Init(new GraphicRequestRGB(req), false);
 		}

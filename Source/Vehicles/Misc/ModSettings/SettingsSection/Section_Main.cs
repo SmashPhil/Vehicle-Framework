@@ -197,7 +197,7 @@ namespace Vehicles
 
 					listingStandard.NewColumn();
 					string fishingHeader = "VF_Fishing".Translate();
-					if (!Compatibility_VEFishing.Active)
+					if (!FishingCompatibility.Active)
 					{
 						GUIState.Disable();
 						fishingHeader = "VF_FishingInactive".Translate();

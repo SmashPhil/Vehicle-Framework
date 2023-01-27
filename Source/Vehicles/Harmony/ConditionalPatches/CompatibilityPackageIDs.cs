@@ -7,8 +7,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	[StaticConstructorOnStartup]
-	public static class ConditionalPatchApplier
+	public static class CompatibilityPackageIds
 	{
 		public const string CombatExtended = "CETeam.CombatExtended";
 		
@@ -17,12 +16,5 @@ namespace Vehicles
 
 		public const string VE_Fishing = "VanillaExpanded.VCEF";
 		public const string DualWield = "Roolo.DualWield";
-
-		static ConditionalPatchApplier()
-		{
-			var harmony = new Harmony("conditional_patches.rimworld.smashphil");
-			
-			ConditionalPatches.PatchAllActiveMods(harmony, VehicleHarmony.VehiclesUniqueId);
-		}
 	}
 }

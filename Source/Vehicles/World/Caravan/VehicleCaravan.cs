@@ -383,7 +383,7 @@ namespace Vehicles
 			}
 			if (vPather.Moving)
 			{
-				float estimatedDaysToArrive = CaravanArrivalTimeEstimator.EstimatedTicksToArrive(this, true) / 60000f;
+				float estimatedDaysToArrive = VehicleCaravanPathingHelper.EstimatedTicksToArrive(this, true) / 60000f;
 				stringBuilder.AppendLine();
 				stringBuilder.Append("CaravanEstimatedTimeToDestination".Translate(estimatedDaysToArrive.ToString("0.#")));
 			}
