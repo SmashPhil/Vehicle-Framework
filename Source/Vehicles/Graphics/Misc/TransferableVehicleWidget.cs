@@ -603,7 +603,7 @@ namespace Vehicles
 			float mass;
 			if (thing is VehiclePawn vehicle)
 			{
-				mass = vehicle.GetVehicleStatValue(VehicleStatDefOf.Mass);
+				mass = vehicle.GetStatValue(VehicleStatDefOf.Mass);
 			}
 			else
 			{

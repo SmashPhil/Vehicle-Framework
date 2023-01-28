@@ -1283,7 +1283,8 @@ namespace Vehicles
 					{
 						return;
 					}
-					vehicle.inventory.innerContainer.Take(storedAmmo, countToTake);
+					//vehicle.inventory.innerContainer.Take(storedAmmo, countToTake);
+					vehicle.TakeFromInventory(storedAmmo, countToTake);
 					int additionalCount = 0;
 					int additionalCountToTake = 0;
 					if (countToRefill + shellCount < turretDef.magazineCapacity)
@@ -1294,7 +1295,8 @@ namespace Vehicles
 							{
 								additionalCount = t.stackCount >= turretDef.magazineCapacity - (shellCount + countToRefill) ? turretDef.magazineCapacity - (shellCount + countToRefill) : t.stackCount;
 								additionalCountToTake = Mathf.FloorToInt(turretDef.chargePerAmmoCount * additionalCount);
-								vehicle.inventory.innerContainer.Take(t, additionalCountToTake);
+								//vehicle.inventory.innerContainer.Take(t, additionalCountToTake);
+								vehicle.TakeFromInventory(t, additionalCountToTake);
 								if (additionalCount + countToRefill >= turretDef.magazineCapacity) break;
 							}    
 						}
@@ -1331,7 +1333,8 @@ namespace Vehicles
 			{
 				Thing thing = ThingMaker.MakeThing(loadedAmmo);
 				thing.stackCount = shellCount * turretDef.chargePerAmmoCount;
-				vehicle.inventory.innerContainer.TryAdd(thing);
+				//vehicle.inventory.innerContainer.TryAdd(thing);
+				vehicle.AddOrTransfer(thing);
 				loadedAmmo = null;
 				shellCount = 0;
 				ActivateTimer(true);

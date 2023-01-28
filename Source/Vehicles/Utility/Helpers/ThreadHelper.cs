@@ -10,43 +10,8 @@ using UnityEngine;
 
 namespace Vehicles
 {
-	public static class MultithreadHelper
+	public static class ThreadHelper
 	{
-		public static async void RunAsync(Action action, bool reportFailure = true)
-		{
-			try
-			{
-				await Task.Run(action);
-			}
-			catch (Exception ex)
-			{
-				if (reportFailure)
-				{
-					string error = $"AsyncTask {action.Method.Name} threw exception while running. Exception = {ex}\n{StackTraceUtility.ExtractStringFromException(ex)}";
-					Log.Error(error);
-				}
-			}
-		}
-
-		public static Task<(bool result, string reason)> CreateTask(Action action, CancellationToken? cancellationToken = null)
-		{
-			CancellationToken token = cancellationToken ?? CancellationToken.None;
-			Task<(bool result, string reason)> recalculationTask = new Task<(bool result, string reason)>(delegate ()
-			{
-				try
-				{
-					action();
-				}
-				catch (Exception ex)
-				{
-					string reason = $"AsyncTask {action.Method.Name} threw exception while running. Exception = {ex}\n{StackTraceUtility.ExtractStringFromException(ex)}";
-					return (false, reason);
-				}
-				return (true, string.Empty);
-			}, token);
-			return recalculationTask;
-		}
-
 		/// <summary>
 		/// <paramref name="cell"/> is impassable for <paramref name="vehicle"/>
 		/// </summary>

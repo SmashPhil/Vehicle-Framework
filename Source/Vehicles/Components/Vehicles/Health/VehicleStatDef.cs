@@ -6,7 +6,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class VehicleStatDef : Def
+	public class VehicleStatDef : Def, IDefIndex<VehicleStatDef>
 	{
 		public float defaultBaseValue;
 		public float minValue = float.MinValue;
@@ -43,6 +43,8 @@ namespace Vehicles
 		private VehicleStatWorker statWorker;
 		[Unsaved]
 		private ToStringStyle? toStringStyleUnfinalized;
+
+		public int DefIndex { get; set; }
 
 		public VehicleStatWorker Worker
 		{

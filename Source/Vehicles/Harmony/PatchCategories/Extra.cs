@@ -236,7 +236,7 @@ namespace Vehicles
             {
                 VehiclePawn vehicle = __instance.GetVehicle();
 				vehicle.EventRegistry[VehicleEventDefOf.PawnKilled].ExecuteEvents();
-                vehicle.inventory.innerContainer.TryAddOrTransfer(__instance);
+                vehicle.AddOrTransfer(__instance);
 				if (Find.World.worldPawns.Contains(__instance))
 				{
 					Find.WorldPawns.RemovePawn(__instance);

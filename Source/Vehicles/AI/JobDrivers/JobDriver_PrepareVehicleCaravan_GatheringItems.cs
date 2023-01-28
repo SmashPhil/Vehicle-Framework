@@ -171,8 +171,9 @@ namespace Vehicles
 					Pawn_CarryTracker carryTracker = pawn.carryTracker;
 					Thing carriedThing = carryTracker.CarriedThing;
 					Transferable.AdjustTo(Mathf.Max(Transferable.CountToTransfer - carriedThing.stackCount, 0));
-					carryTracker.innerContainer.TryTransferToContainer(carriedThing, Carrier.inventory.innerContainer,
-						carriedThing.stackCount, true);
+					Carrier.AddOrTransfer(carriedThing, carriedThing.stackCount, pawn);
+					//carryTracker.innerContainer.TryTransferToContainer(carriedThing, Carrier.inventory.innerContainer,
+						//carriedThing.stackCount, true);
 				}
 			};
 		}

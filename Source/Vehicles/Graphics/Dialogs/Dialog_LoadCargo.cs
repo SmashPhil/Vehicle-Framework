@@ -144,7 +144,7 @@ namespace Vehicles
 						{
 							transferred = delegate(Thing thing, IThingHolder originalHolder)
 							{
-								vehicle.inventory.innerContainer.TryAdd(thing, true);
+								vehicle.AddOrTransfer(thing);
 							};
 						}
 						TransferableUtility.Transfer(things, countToTransfer, transferred);

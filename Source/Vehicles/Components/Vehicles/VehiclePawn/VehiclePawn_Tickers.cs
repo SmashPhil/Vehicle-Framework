@@ -28,6 +28,8 @@ namespace Vehicles
 		private SelfOrderingList<ThingComp> cachedComps = new SelfOrderingList<ThingComp>();
 		private List<ThingComp> compTickers = new List<ThingComp>();
 
+		public override bool Suspended => false; //Vehicles are not suspendable
+
 		public CompVehicleTurrets CompVehicleTurrets
 		{
 			get
@@ -151,6 +153,12 @@ namespace Vehicles
 			}
 		}
 
+		public override void TickRare()
+		{
+			base.TickRare();
+			statHandler.MarkAllDirty();
+		}
+
 		protected virtual void BaseTickOptimized()
 		{
 			if (Find.TickManager.TicksGame % 250 == 0)
@@ -162,14 +170,10 @@ namespace Vehicles
 			{
 				if (Spawned)
 				{
-					stances.StanceTrackerTick();
-					verbTracker.VerbsTick();
-					//natives.NativeVerbsTick();
+					//stances.StanceTrackerTick(); //TODO - Add as tick requester for stunning
 					jobs.JobTrackerTick();
-					//interactions?.InteractionsTrackerTick();
 				}
-				equipment?.EquipmentTrackerTick();
-				//apparel?.ApparelTrackerTick();
+				//equipment?.EquipmentTrackerTick();
 
 				//caller?.CallTrackerTick();
 				//skills?.SkillsTick();

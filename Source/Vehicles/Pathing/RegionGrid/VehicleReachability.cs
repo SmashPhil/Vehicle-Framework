@@ -39,6 +39,31 @@ namespace Vehicles
 		/// </summary>
 		private bool CalculatingReachability { get; set; }
 
+		public VehiclePathGrid PathGrid
+		{
+			get
+			{
+				if (pathGrid is null)
+				{
+					//Pathgrid is strictly for impassable cost check, so this will still match for copies
+					pathGrid = mapping[createdFor].VehiclePathGrid;
+				}
+				return pathGrid;
+			}
+		}
+
+		public VehicleRegionGrid RegionGrid
+		{
+			get
+			{
+				if (regionGrid is null)
+				{
+					regionGrid = mapping[createdFor].VehicleRegionGrid;
+				}
+				return regionGrid;
+			}
+		}
+
 		/// <summary>
 		/// Clear reachability cache
 		/// </summary>
@@ -136,41 +161,12 @@ namespace Vehicles
 		/// <returns>start can reach destination target</returns>
 		public bool CanReachVehicle(IntVec3 start, LocalTargetInfo dest, PathEndMode peMode, TraverseParms traverseParms)
 		{
-			if (CalculatingReachability)
-			{
-				Log.ErrorOnce("Called CanReachVehicle() while working. This should never happen. Suppressing further errors.", "CanReachVehicleWorkingError".GetHashCode());
-				return false;
-			}
-			VehiclePawn vehicle = traverseParms.pawn as VehiclePawn;
-			if (vehicle != null)
-			{
-				if (!vehicle.Spawned)
-				{
-					return false;
-				}
-				if (vehicle.Map != mapping.map)
-				{
-					Log.Error($"Called CanReach with a vehicle not spawned on this map. This means that we can't check its reachability here. Vehicle's current map should have been used instead. vehicle={vehicle} vehicle.Map={vehicle.Map} map={mapping.map}");
-					return false;
-				}
-			}
-			if (!dest.IsValid)
+			if (!ValidateCanStart(start, dest, traverseParms, out VehicleDef vehicleDef))
 			{
 				return false;
 			}
-			if (dest.HasThing && dest.Thing.Map != mapping.map)
-			{
-				return false;
-			}
-			if (!start.InBounds(mapping.map) || !dest.Cell.InBounds(mapping.map))
-			{
-				return false;
-			}
-			//Pathgrid is strictly for impassable cost check, so this will still match for copies
-			pathGrid = mapping[createdFor].VehiclePathGrid;
-			regionGrid = mapping[createdFor].VehicleRegionGrid;
 
-			if (!pathGrid.WalkableFast(start))
+			if (!PathGrid.WalkableFast(start))
 			{
 				return false;
 			}
@@ -195,7 +191,7 @@ namespace Vehicles
 			}
 
 			//Try to use parms vehicle if possible for pathgrid check
-			dest = (LocalTargetInfo)GenPathVehicles.ResolvePathMode(vehicle?.VehicleDef ?? createdFor, mapping.map, dest.ToTargetInfo(mapping.map), ref peMode);
+			dest = (LocalTargetInfo)GenPathVehicles.ResolvePathMode(vehicleDef, mapping.map, dest.ToTargetInfo(mapping.map), ref peMode);
 			CalculatingReachability = true;
 			bool result;
 			try
@@ -271,9 +267,9 @@ namespace Vehicles
 		private void DetermineStartRegions(IntVec3 start)
 		{
 			startingRegions.Clear();
-			if (pathGrid.WalkableFast(start))
+			if (PathGrid.WalkableFast(start))
 			{
-				VehicleRegion validRegionAt = regionGrid.GetValidRegionAt(start);
+				VehicleRegion validRegionAt = RegionGrid.GetValidRegionAt(start);
 				QueueNewOpenRegion(validRegionAt);
 				startingRegions.Add(validRegionAt);
 			}
@@ -284,9 +280,9 @@ namespace Vehicles
 					IntVec3 c = start + GenAdj.AdjacentCells[i];
 					if (c.InBounds(mapping.map))
 					{
-						if (pathGrid.WalkableFast(c))
+						if (PathGrid.WalkableFast(c))
 						{
-							VehicleRegion validRegionAt = regionGrid.GetValidRegionAt(c);
+							VehicleRegion validRegionAt = RegionGrid.GetValidRegionAt(c);
 							if (validRegionAt != null && validRegionAt.reachedIndex != reachedIndex)
 							{
 								QueueNewOpenRegion(validRegionAt);
@@ -373,6 +369,99 @@ namespace Vehicles
 			return false;
 		}
 
+		public Queue<VehicleRegion> FindChunks(IntVec3 start, LocalTargetInfo dest, PathEndMode peMode, TraverseParms traverseParms)
+		{
+			if (!ValidateCanStart(start, dest, traverseParms, out VehicleDef vehicleDef))
+			{
+				return null;
+			}
+
+			openQueue.Clear();
+			destRegions.Clear();
+			
+			DetermineStartRegions(start);
+			
+			if (peMode == PathEndMode.OnCell)
+			{
+				VehicleRegion region = VehicleGridsUtility.GetRegion(dest.Cell, mapping.map, createdFor, RegionType.Set_Passable);
+				if (region != null && region.Allows(traverseParms, true))
+				{
+					destRegions.Add(region);
+				}
+			}
+			while (openQueue.Count > 0)
+			{
+				VehicleRegion region = openQueue.Dequeue();
+				foreach (VehicleRegionLink regionLink in region.links)
+				{
+					for (int i = 0; i < 2; i++)
+					{
+						VehicleRegion linkedRegion = regionLink.regions[i];
+						if (linkedRegion != null && linkedRegion.reachedIndex != reachedIndex && linkedRegion.type.Passable())
+						{
+							if (linkedRegion.Allows(traverseParms, false))
+							{
+								if (destRegions.Contains(linkedRegion))
+								{
+									foreach (VehicleRegion startRegion in startingRegions)
+									{
+										cache.AddCachedResult(startRegion.Room, linkedRegion.Room, traverseParms, true);
+									}
+									return null; //TODO
+								}
+								QueueNewOpenRegion(linkedRegion);
+							}
+						}
+					}
+				}
+			}
+			foreach (VehicleRegion startRegion in startingRegions)
+			{
+				foreach (VehicleRegion destRegion in destRegions)
+				{
+					cache.AddCachedResult(startRegion.Room, destRegion.Room, traverseParms, false);
+				}
+			}
+			return null;
+		}
+
+		private bool ValidateCanStart(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, out VehicleDef forVehicleDef)
+		{
+			if (CalculatingReachability)
+			{
+				Log.ErrorOnce("Called CanReachVehicle() while working. This should never happen. Suppressing further errors.", "CanReachVehicleWorkingError".GetHashCode());
+				forVehicleDef = null;
+				return false;
+			}
+			VehiclePawn vehicle = traverseParms.pawn as VehiclePawn;
+			forVehicleDef = vehicle?.VehicleDef ?? createdFor;
+			if (vehicle != null)
+			{
+				if (!vehicle.Spawned)
+				{
+					return false;
+				}
+				if (vehicle.Map != mapping.map)
+				{
+					Log.Error($"Called CanReach with a vehicle not spawned on this map. This means that we can't check its reachability here. Vehicle's current map should have been used instead. vehicle={vehicle} vehicle.Map={vehicle.Map} map={mapping.map}");
+					return false;
+				}
+			}
+			if (!dest.IsValid)
+			{
+				return false;
+			}
+			if (dest.HasThing && dest.Thing.Map != mapping.map)
+			{
+				return false;
+			}
+			if (!start.InBounds(mapping.map) || !dest.Cell.InBounds(mapping.map))
+			{
+				return false;
+			}
+			return true;
+		}
+
 		/// <summary>
 		/// Determine reachability by cell traversal
 		/// </summary>
@@ -401,7 +490,7 @@ namespace Vehicles
 			{
 				if (CanUseCache(traverseParms.mode))
 				{
-					VehicleRegion validRegionAt = regionGrid.GetValidRegionAt(foundCell);
+					VehicleRegion validRegionAt = RegionGrid.GetValidRegionAt(foundCell);
 					if (!(validRegionAt is null))
 					{
 						foreach (VehicleRegion startRegion in startingRegions)
@@ -434,7 +523,7 @@ namespace Vehicles
 			}
 			if (traverseParms.mode == TraverseMode.PassAllDestroyableThings || traverseParms.mode == TraverseMode.PassAllDestroyableThingsNotWater)
 			{
-				if (!pathGrid.WalkableFast(num))
+				if (!PathGrid.WalkableFast(num))
 				{
 					Building edifice = cell.GetEdifice(map);
 					if (edifice is null || !VehiclePathFinder.IsDestroyable(edifice))
@@ -446,12 +535,12 @@ namespace Vehicles
 			else if (traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater)
 			{
 				Log.ErrorOnce("Do not use this method for non-cell based modes!", 938476762);
-				if (!pathGrid.WalkableFast(num))
+				if (!PathGrid.WalkableFast(num))
 				{
 					return false;
 				}
 			}
-			VehicleRegion region = regionGrid.DirectGrid[num];
+			VehicleRegion region = RegionGrid.DirectGrid[num];
 			return region is null || region.Allows(traverseParms, false);
 		}
 
@@ -513,7 +602,7 @@ namespace Vehicles
 		public bool CanReachBiggestMapEdgeRoom(IntVec3 c)
 		{
 			VehicleRoom usableRoom = null;
-			foreach (VehicleRoom room in regionGrid.allRooms)
+			foreach (VehicleRoom room in RegionGrid.allRooms)
 			{
 				if (room.TouchesMapEdge)
 				{

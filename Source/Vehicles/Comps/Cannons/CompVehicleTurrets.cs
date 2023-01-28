@@ -154,7 +154,8 @@ namespace Vehicles
 									{
 										Thing ammo = ThingMaker.MakeThing(thingDef);
 										ammo.stackCount = thingDef.stackLimit;
-										Vehicle.inventory.innerContainer.TryAddOrTransfer(ammo);
+										//Vehicle.inventory.innerContainer.TryAddOrTransfer(ammo);
+										Vehicle.AddOrTransfer(ammo);
 										turret.ReloadCannon(thingDef);
 									}
 								}
@@ -226,7 +227,7 @@ namespace Vehicles
 										{
 											Thing ammo = ThingMaker.MakeThing(thingDef);
 											ammo.stackCount = thingDef.stackLimit;
-											Vehicle.inventory.innerContainer.TryAddOrTransfer(ammo);
+											Vehicle.AddOrTransfer(ammo);
 											turret.ReloadCannon(thingDef);
 										}
 									}
@@ -323,7 +324,8 @@ namespace Vehicles
 				{
 					Thing ammo = ThingMaker.MakeThing(thingDef);
 					ammo.stackCount = thingDef.stackLimit;
-					Vehicle.inventory.innerContainer.TryAddOrTransfer(ammo);
+					//Vehicle.inventory.innerContainer.TryAddOrTransfer(ammo);
+					Vehicle.AddOrTransfer(ammo);
 					turret.ReloadCannon(thingDef);
 				}
 			}

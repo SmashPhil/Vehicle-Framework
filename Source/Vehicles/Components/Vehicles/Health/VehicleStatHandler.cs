@@ -18,18 +18,26 @@ namespace Vehicles
 		private const float ChanceMinorDeflectHit = 0.75f;
 		private const float ChanceMajorDeflectHit = 0.75f;
 
-		private VehiclePawn vehicle;
-		public List<VehicleComponent> components = new List<VehicleComponent>();
-		private readonly Dictionary<IntVec2, List<VehicleComponent>> componentLocations = new Dictionary<IntVec2, List<VehicleComponent>>();
-		public readonly Dictionary<VehicleStatDef, List<VehicleComponent>> statComponents = new Dictionary<VehicleStatDef, List<VehicleComponent>>();
-
+		//Debugging only
 		private readonly List<Pair<IntVec2, int>> debugCellHighlight = new List<Pair<IntVec2, int>>();
 
-		public Dictionary<Thing, IntVec3> impacter = new Dictionary<Thing, IntVec3>();
+		//Caching lookup
+		private readonly Dictionary<IntVec2, List<VehicleComponent>> componentLocations = new Dictionary<IntVec2, List<VehicleComponent>>();
+		private readonly Dictionary<VehicleStatDef, List<VehicleComponent>> statComponents = new Dictionary<VehicleStatDef, List<VehicleComponent>>();
 
+		//Caching values
+		private readonly StatCache statCache;
+
+		//Registry
+		private readonly Dictionary<Thing, IntVec3> impacter = new Dictionary<Thing, IntVec3>();
+		public List<VehicleComponent> components = new List<VehicleComponent>();
+
+		private VehiclePawn vehicle;
+		
 		public VehicleStatHandler(VehiclePawn vehicle)
 		{
 			this.vehicle = vehicle;
+			statCache = new StatCache(vehicle);
 			components = new List<VehicleComponent>();
 			statComponents = new Dictionary<VehicleStatDef, List<VehicleComponent>>();
 			debugCellHighlight = new List<Pair<IntVec2, int>>();
@@ -51,6 +59,21 @@ namespace Vehicles
 				component.PostCreate();
 				RecacheStatCategories(component);
 			}
+		}
+
+		public float GetStatValue(VehicleStatDef statDef)
+		{
+			return statCache[statDef];
+		}
+
+		public void MarkStatDirty(VehicleStatDef statDef)
+		{
+			statCache.MarkDirty(statDef);
+		}
+
+		public void MarkAllDirty()
+		{
+			statCache.Reset();
 		}
 
 		private void RecacheStatCategories(VehicleComponent comp)

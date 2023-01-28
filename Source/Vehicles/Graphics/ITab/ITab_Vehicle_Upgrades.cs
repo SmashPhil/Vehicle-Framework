@@ -303,7 +303,6 @@ namespace Vehicles
 				};
 				Find.WindowStack.ImmediateWindow(selectedNode.node.nodeID ^ selectedNode.node.GetHashCode(), detailRect, WindowLayer.SubSuper, delegate()
 				{
-					Log.Message("Drawing");
 					if (selectedNode != null)
 					{
 						UpgradeNode detailNode = selectedNode.node;

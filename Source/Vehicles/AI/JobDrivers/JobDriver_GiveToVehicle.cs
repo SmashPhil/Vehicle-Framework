@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 using Verse;
 using Verse.AI;
@@ -11,6 +12,8 @@ namespace Vehicles
 {
 	public class JobDriver_GiveToVehicle : JobDriver
 	{
+		private static FieldInfo countToTransferFieldInfo = AccessTools.Field(typeof(TransferableOneWay), "countToTransfer");
+
 		public virtual Thing Item
 		{
 			get
@@ -72,19 +75,19 @@ namespace Vehicles
 			{
 				initAction = delegate ()
 				{
-					if(Item is null)
+					if (Item is null)
 					{
 						pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true);
 					}
 					else
 					{
-						pawn.carryTracker.innerContainer.TryTransferToContainer(Item, Vehicle.inventory.innerContainer, Item.stackCount, true);
+						Vehicle.AddOrTransfer(Item, Item.stackCount, pawn);
 						TransferableOneWay transferable = Vehicle.cargoToLoad.FirstOrDefault(t => t.AnyThing is {def: var def} && def == Item.def);
                         if (transferable is null)
                         {
 							pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true);
                         }
-						AccessTools.Field(typeof(TransferableOneWay), "countToTransfer").SetValue(transferable, transferable.CountToTransfer - job.count);
+						countToTransferFieldInfo.SetValue(transferable, transferable.CountToTransfer - job.count);
 					}
 				}
 			};

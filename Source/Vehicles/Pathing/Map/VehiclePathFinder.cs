@@ -130,7 +130,7 @@ namespace Vehicles
 		/// <param name="vehicle"></param>
 		/// <param name="token"></param>
 		/// <param name="peMode"></param>
-		public PawnPath FindVehiclePath(IntVec3 start, LocalTargetInfo dest, VehiclePawn vehicle, /*CancellationToken token,*/ PathEndMode peMode = PathEndMode.OnCell)
+		public PawnPath FindVehiclePath(IntVec3 start, LocalTargetInfo dest, VehiclePawn vehicle, CancellationToken token, PathEndMode peMode = PathEndMode.OnCell)
 		{
 			if (!vehicle.FitsOnCell(dest.Cell))
 			{
@@ -138,7 +138,7 @@ namespace Vehicles
 				return PawnPath.NotFound;
 			}
 			Danger maxDanger = Danger.Deadly;
-			return FindVehiclePath(start, dest, TraverseParms.For(vehicle, maxDanger, TraverseMode.ByPawn, false), peMode);
+			return FindVehiclePath(start, dest, TraverseParms.For(vehicle, maxDanger, TraverseMode.ByPawn, false), token, peMode);
 		}
 
 		/// <summary>
@@ -149,7 +149,7 @@ namespace Vehicles
 		/// <param name="traverseParms"></param>
 		/// <param name="token"></param>
 		/// <param name="peMode"></param>
-		public PawnPath FindVehiclePath(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms,  /*CancellationToken token,*/ PathEndMode peMode = PathEndMode.OnCell)
+		public PawnPath FindVehiclePath(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, CancellationToken token, PathEndMode peMode = PathEndMode.OnCell)
 		{
 			Debug.Message($"{VehicleHarmony.LogLabel} From={start} To={dest} MainPath for {traverseParms.pawn.LabelShort}");
 			
@@ -187,12 +187,9 @@ namespace Vehicles
 					return PawnPath.NotFound;
 				}
 			}
-			else
+			else if (!mapping[vehicleDef].VehicleReachability.CanReachVehicle(start, dest, peMode, traverseParms))
 			{
-				if (!mapping[vehicleDef].VehicleReachability.CanReachVehicle(start, dest, peMode, traverseParms))
-				{
-					return PawnPath.NotFound;
-				}
+				return PawnPath.NotFound;
 			}
 			cellIndices = mapping.map.cellIndices;
 			
@@ -228,10 +225,10 @@ namespace Vehicles
 			int iterations = 0;
 			for (;;)
 			{
-				//if (token.IsCancellationRequested)
-				//{
-				//	return (PawnPath.NotFound, false);
-				//}
+				if (token.IsCancellationRequested)
+				{
+					return PawnPath.NotFound;
+				}
 
 				iterations++;
 				if (openList.Count <= 0)
@@ -266,7 +263,7 @@ namespace Vehicles
 					}
 
 					//List<IntVec3> fullRectCells = vehicle.VehicleRect(prevCell, Rot4.North).Where(cl2 => cl2 != prevCell).ToList();
-					for(int i = 0; i < 8; i++)
+					for (int i = 0; i < 8; i++)
 					{
 						uint cellX = (uint)(x2 + directions[i]);
 						uint cellY = (uint)(z2 + directions[i + 8]);
@@ -278,10 +275,10 @@ namespace Vehicles
 							int cellIndex = cellIndices.CellToIndex(cellIntX, cellIntY);
 							
 							IntVec3 cellToCheck = cellIndices.IndexToCell(cellIndex);
-							Rot8 dirOfPath = Rot8.DirectionFromCells(prevCell, cellToCheck); //TODO - change to LocationRestricted for directional check
-							if (VehicleMod.settings.main.fullVehiclePathing && !vehicle.FitsOnCell(cellToCheck))
+							Rot8 dirOfPath = Rot8.DirectionFromCells(prevCell, cellToCheck);
+							if (VehicleMod.settings.main.fullVehiclePathing && vehicle.LocationRestrictedBySize(cellToCheck, dirOfPath))
 							{
-								goto EndPathing;
+								continue;
 							}
 							if (calcGrid[cellIndex].status != statusClosedValue || weightedHeuristics)
 							{
@@ -296,18 +293,18 @@ namespace Vehicles
 											{
 												DebugFlash(new IntVec3(cellIntX, 0, cellIntY), 0.22f, "impass");
 											}
-											goto EndPathing;
+											continue;
 										}
 
 										initialCost += 70;
 										Building building = edificeGrid[cellIndex];
 										if (building is null)
 										{
-											goto EndPathing;
+											continue;
 										}
 										if (!IsDestroyable(building))
 										{
-											goto EndPathing;
+											continue;
 										}
 										initialCost += (int)(building.HitPoints * 0.2f);
 									}
@@ -431,7 +428,7 @@ namespace Vehicles
 										tickCost += (byteGrid[cellIndex] * 8);
 									}
 									//REDO - collisions?
-									if (collideWithVehicles && MultithreadHelper.AnyVehicleBlockingPathAt(new IntVec3(cellIntX, 0, cellIntY), vehicle, false, false, true) != null)
+									if (collideWithVehicles && ThreadHelper.AnyVehicleBlockingPathAt(new IntVec3(cellIntX, 0, cellIntY), vehicle, false, false, true) != null)
 									{
 										tickCost += Cost_PawnCollision;
 									}
@@ -449,9 +446,9 @@ namespace Vehicles
 											{
 												num18 = Mathf.Max(num18, GetBlueprintCost(blueprint, vehicle));
 											}
-											if(num18 == int.MaxValue)
+											if (num18 == int.MaxValue)
 											{
-												goto EndPathing;
+												continue;
 											}
 											tickCost += num18;
 										}
@@ -499,7 +496,7 @@ namespace Vehicles
 										}
 										if (calcGrid[cellIndex].knownCost <= calculatedCost + closedValueCost)
 										{
-											goto EndPathing;
+											continue;
 										}
 									}
 									if (weightedHeuristics)
@@ -534,7 +531,6 @@ namespace Vehicles
 								}
 							}
 						}
-						EndPathing:;
 					}
 					searchCount++;
 					calcGrid[startIndex].status = statusClosedValue;

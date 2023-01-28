@@ -43,8 +43,8 @@ namespace Vehicles
 
 		public float GetStatValue(VehicleStatDef statDef)
 		{
-			//Needs caching in VehicleStatHandler
-			return statDef.Worker.GetValue(this);
+			//Cached in VehicleStatHandler, can fetch fresh calculation from VehicleStatDef.Worker if necessary, or mark statDef dirty in cache before retrieving
+			return statHandler.GetStatValue(statDef);
 		}
 
 		public IEnumerable<IntVec3> InhabitedCells(int expandedBy = 0)
@@ -101,7 +101,9 @@ namespace Vehicles
 		public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
 		{
 			Map.GetCachedMapComponent<VehiclePositionManager>().ReleaseClaimed(this);
+			Map.GetCachedMapComponent<VehicleRegionUpdateCatalog>().Notify_VehicleDespawned(this);
 			Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(this);
+			Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleDespawned(this);
 			EventRegistry[VehicleEventDefOf.Despawned].ExecuteEvents();
 			base.DeSpawn(mode);
 			if (vPather != null)
@@ -113,12 +115,6 @@ namespace Vehicles
 
 		public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
 		{
-			if (Spawned)
-			{
-				Map.GetCachedMapComponent<VehiclePositionManager>().ReleaseClaimed(this);
-				Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(this);
-				Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleDespawned(this);
-			}
 			DisembarkAll();
 			sustainers.Cleanup();
 			EventRegistry[VehicleEventDefOf.Destroyed].ExecuteEvents();

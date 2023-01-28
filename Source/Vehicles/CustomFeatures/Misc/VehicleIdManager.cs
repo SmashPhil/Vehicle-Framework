@@ -11,15 +11,10 @@ namespace Vehicles
 	public class VehicleIdManager : GameComponent
 	{
 		private int nextUpgradeId;
-
 		private int nextCannonId;
-
 		private int nextVehicleHandlerId;
-
 		private int nextReservationId;
-
 		private int nextRequestCollectionId;
-
 		private int nextAirDefenseId;
 
 		public VehicleIdManager(Game game)

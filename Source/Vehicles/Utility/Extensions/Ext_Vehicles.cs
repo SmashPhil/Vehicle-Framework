@@ -27,7 +27,7 @@ namespace Vehicles
 		{
 			if (rot == Rot4.West) rot = Rot4.East;
 			if (rot == Rot4.South) rot = Rot4.North;
-			IntVec2 size = vehicleDef.Size;
+			IntVec2 size = vehicleDef.size;
 			if (maxSizePossible)
 			{
 				int maxSize = Mathf.Max(size.x, size.z);
@@ -37,9 +37,74 @@ namespace Vehicles
 			return GenAdj.OccupiedRect(center, rot, size);
 		}
 
-		public static float GetVehicleStatValue(this VehiclePawn vehicle, VehicleStatDef statDef)
+		[DebugAction(VehicleHarmony.VehiclesLabel, "Test Vehicle Rect", allowedGameStates = AllowedGameStates.PlayingOnMap)]
+		private static void TestMethod()
 		{
-			return statDef.Worker.GetValue(vehicle);
+			VehiclePawn firstVehicle = Find.CurrentMap.mapPawns.AllPawnsSpawned.FirstOrDefault(pawn => pawn is VehiclePawn) as VehiclePawn;
+			var cells = FullVehicleRectAllDirections(firstVehicle.VehicleDef, firstVehicle.Position);
+			Log.Message($"COUNT: {cells.Count()}");
+			foreach (IntVec3 cell in cells)
+			{
+				firstVehicle.Map.debugDrawer.FlashCell(cell, 0.75f, duration: 180);
+			}
+		}
+
+		//TODO - Doesn't work for even sizes. Should instead calculate only North and East (north calculate full OccupiedRect, east only calculate past the inner square)
+		public static IEnumerable<IntVec3> FullVehicleRectAllDirections(this VehicleDef vehicleDef, IntVec3 center)
+		{
+			//If size is square, rotation doesn't matter
+			IntVec2 size = vehicleDef.size;
+			if (size.x == size.z)
+			{
+				foreach (IntVec3 cell in GenAdj.OccupiedRect(center, Rot4.North, size))
+				{
+					yield return cell;
+				}
+				yield break;
+			}
+			GenAdj.AdjustForRotation(ref center, ref size, Rot4.North);
+
+			int minSize = Mathf.Min(size.x, size.z);
+			int maxSize = Mathf.Max(size.x, size.z);
+
+			//Fetch inner square
+			foreach (IntVec3 cell in GenAdj.OccupiedRect(center, Rot4.North, new IntVec2(minSize, minSize)))
+			{
+				yield return cell;
+			}
+
+			int cutoutSize = Mathf.CeilToInt((maxSize - minSize) / 2f);
+			int distanceToEdge = Mathf.FloorToInt((maxSize - minSize) / 2f);
+			IntVec2 subSize = new IntVec2(minSize, cutoutSize);
+			int startingDist = distanceToEdge + cutoutSize;
+
+			//North
+			IntVec3 subCenter = center + new IntVec3(0, 0, startingDist);
+			foreach (IntVec3 cell in GenAdj.OccupiedRect(subCenter, Rot4.North, subSize))
+			{
+				yield return cell;
+			}
+
+			//East
+			subCenter = center + new IntVec3(startingDist, 0, 0);
+			foreach (IntVec3 cell in GenAdj.OccupiedRect(subCenter, Rot4.East, subSize))
+			{
+				yield return cell;
+			}
+
+			//South
+			subCenter = center + new IntVec3(0, 0, -startingDist);
+			foreach (IntVec3 cell in GenAdj.OccupiedRect(subCenter, Rot4.South, subSize))
+			{
+				yield return cell;
+			}
+
+			//West
+			subCenter = center + new IntVec3(-startingDist, 0, 0);
+			foreach (IntVec3 cell in GenAdj.OccupiedRect(subCenter, Rot4.West, subSize))
+			{
+				yield return cell;
+			}
 		}
 
 		public static void RegenerateEvents(this VehiclePawn vehicle)
@@ -53,12 +118,26 @@ namespace Vehicles
 			if (vehicle.EventRegistry.NullOrEmpty())
 			{
 				vehicle.FillEvents_Def();
-				vehicle.AddEvent(VehicleEventDefOf.DraftOff, vehicle.vPather.RecalculatePermissions);
-				vehicle.AddEvent(VehicleEventDefOf.Immobilized, vehicle.vPather.RecalculatePermissions);
+
+				//Pather
 				vehicle.AddEvent(VehicleEventDefOf.PawnExited, vehicle.vPather.RecalculatePermissions);
 				vehicle.AddEvent(VehicleEventDefOf.PawnChangedSeats, vehicle.vPather.RecalculatePermissions);
 				vehicle.AddEvent(VehicleEventDefOf.PawnKilled, vehicle.vPather.RecalculatePermissions);
 				vehicle.AddEvent(VehicleEventDefOf.PawnCapacitiesDirty, vehicle.vPather.RecalculatePermissions);
+				vehicle.AddEvent(VehicleEventDefOf.DraftOff, vehicle.vPather.RecalculatePermissions);
+				vehicle.AddEvent(VehicleEventDefOf.DamageTaken, vehicle.vPather.RecalculatePermissions);
+				vehicle.AddEvent(VehicleEventDefOf.Repaired, vehicle.vPather.RecalculatePermissions);
+
+				if (!vehicle.VehicleDef.statEvents.NullOrEmpty())
+				{
+					foreach (StatCache.EventLister eventLister in vehicle.VehicleDef.statEvents)
+					{
+						foreach (VehicleEventDef eventDef in eventLister.eventDefs)
+						{
+							vehicle.AddEvent(eventDef, () => vehicle.statHandler.MarkStatDirty(eventLister.statDef));
+						}
+					}
+				}
 
 				//One Shots
 				if (!vehicle.VehicleDef.soundOneShotsOnEvent.NullOrEmpty())
@@ -146,7 +225,7 @@ namespace Vehicles
 				{
 					int count = thingDefCountClass.thingDef.slagDef.smeltProducts.First((ThingDefCountClass pro) => pro.thingDef == ThingDefOf.Steel).count;
 					int proportionalCount = refundCount / count;
-					proportionalCount = Mathf.Min(proportionalCount, vehicle.def.Size.Area / 2);
+					proportionalCount = Mathf.Min(proportionalCount, vehicle.def.size.Area / 2);
 					for (int n = 0; n < proportionalCount; n++)
 					{
 						thingOwner.TryAdd(ThingMaker.MakeThing(thingDefCountClass.thingDef.slagDef, null), true);
@@ -375,11 +454,19 @@ namespace Vehicles
 		/// <param name="dest"></param>
 		public static bool LocationRestrictedBySize(this VehiclePawn vehicle, IntVec3 dest, Rot8 rot)
 		{
-			return vehicle.VehicleRect(dest, rot).NotNullAndAny(c2 => !c2.InBounds(vehicle.Map) || GenGridVehicles.Impassable(c2, vehicle.Map, vehicle.VehicleDef));
+			foreach (IntVec3 cell in vehicle.VehicleRect(dest, rot))
+			{
+				if (!cell.Walkable(vehicle.VehicleDef, vehicle.Map))
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 
 		public static bool FitsOnCell(this VehiclePawn vehicle, IntVec3 cell)
 		{
+			IntVec2 size = vehicle.VehicleDef.size;
 			bool verticalBlocked = vehicle.LocationRestrictedBySize(cell, Rot8.North);
 			bool horizontalBlocked = vehicle.LocationRestrictedBySize(cell, Rot8.East);
 			return !verticalBlocked || !horizontalBlocked;
@@ -422,7 +509,7 @@ namespace Vehicles
 		/// <param name="dir"></param>
 		public static bool WidthStandable(this VehicleDef vehicleDef, Map map, IntVec3 cell)
 		{
-			CellRect cellRect = CellRect.CenteredOn(cell, vehicleDef.Size.x / 2);
+			CellRect cellRect = CellRect.CenteredOn(cell, vehicleDef.size.x / 2);
 			foreach (IntVec3 cellCheck in cellRect)
 			{
 				if (!cellCheck.InBounds(map) || GenGridVehicles.Impassable(cellCheck, map, vehicleDef))

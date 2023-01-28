@@ -18,27 +18,15 @@
 		<defName>MoveStop</defName>
 	</Vehicles.VehicleEventDef>
 	
-	<!-- Health -->
+	<!-- Inventory -->
+	
 	<Vehicles.VehicleEventDef>
-		<defName>DamageTaken</defName>
+		<defName>CargoAdded</defName>
 	</Vehicles.VehicleEventDef>
 	
 	<Vehicles.VehicleEventDef>
-		<defName>Immobilized</defName>
+		<defName>CargoRemoved</defName>
 	</Vehicles.VehicleEventDef>
-	
-	<Vehicles.VehicleEventDef>
-		<defName>Spawned</defName>
-	</Vehicles.VehicleEventDef>
-	
-	<Vehicles.VehicleEventDef>
-		<defName>Despawned</defName>
-	</Vehicles.VehicleEventDef>
-	
-	<Vehicles.VehicleEventDef>
-		<defName>Destroyed</defName>
-	</Vehicles.VehicleEventDef>
-	
 	
 	<!-- Pawns -->
 	<Vehicles.VehicleEventDef>

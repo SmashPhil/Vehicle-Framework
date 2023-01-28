@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Linq;
 using Verse;
 using UnityEngine;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -10,16 +12,18 @@ namespace Vehicles
 	/// </summary>
 	public sealed class VehicleMapping : MapComponent
 	{
-		private readonly Dictionary<VehicleDef, VehiclePathData> vehicleData = new Dictionary<VehicleDef, VehiclePathData>();
-		private readonly List<VehicleDef> pathDataOwners = new List<VehicleDef>();
+		private VehiclePathData[] vehicleData;
+		private int[] piggyToOwner;
+		private List<VehicleDef> owners = new List<VehicleDef>();
+
+		private int buildingFor = -1;
 
 		public VehicleMapping(Map map) : base(map)
 		{
-			vehicleData ??= new Dictionary<VehicleDef, VehiclePathData>();
 			ConstructComponents();
 		}
 
-		public List<VehicleDef> Owners => pathDataOwners;
+		public List<VehicleDef> Owners => owners;
 
 		/// <summary>
 		/// Retrieve all <see cref="VehiclePathData"/> for this map
@@ -28,9 +32,9 @@ namespace Vehicles
 		{
 			get
 			{
-				foreach (VehicleDef pathDataOwner in pathDataOwners)
+				foreach (VehicleDef pathDataOwner in owners)
 				{
-					yield return vehicleData[pathDataOwner];
+					yield return vehicleData[pathDataOwner.DefIndex];
 				}
 			}
 		}
@@ -43,14 +47,21 @@ namespace Vehicles
 		{
 			get
 			{
-				if (vehicleData.TryGetValue(vehicleDef, out VehiclePathData pathData))
+#if DEBUG
+				if (buildingFor == vehicleDef.DefIndex)
 				{
-					return pathData;
+					Log.Error($"Trying to pull VehiclePathData by indexing when it's currently in the middle of generation. Recursion is not supported here!");
+					return VehiclePathData.Invalid;
 				}
-				Log.Error($"Unable to retrieve path data on {map} for {vehicleDef.defName}. Was this VehicleDef created postload? Self-correcting...");
-				Log.Error($"StackTrace: {StackTraceUtility.ExtractStackTrace()}");
-				GeneratePathData(vehicleDef);
-				return vehicleData[vehicleDef];
+#endif
+				VehiclePathData pathData = vehicleData[vehicleDef.DefIndex];
+				if (!pathData.IsValid)
+				{
+					Log.Error($"Unable to retrieve path data on {map} for {vehicleDef.defName}. Was this VehicleDef created postload? Self-correcting...");
+					Log.Error($"StackTrace: {StackTraceUtility.ExtractStackTrace()}");
+					return GeneratePathData(vehicleDef);
+				}
+				return pathData;
 			}
 		}
 
@@ -59,11 +70,16 @@ namespace Vehicles
 		/// </summary>
 		public void RebuildVehiclePathData()
 		{
-			foreach (VehiclePathData data in vehicleData.Values)
+			for (int i = 0; i < vehicleData.Length; i++)
 			{
-				data.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
-				data.VehicleRegionAndRoomUpdater.Enabled = true;
-				data.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
+				VehiclePathData data = vehicleData[i];
+				//Needs to check validity, non-pathing vehicles are still indexed since sequential vehicles will have higher index numbers
+				if (data.IsValid)
+				{
+					data.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
+					data.VehicleRegionAndRoomUpdater.Enabled = true;
+					data.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
+				}
 			}
 		}
 
@@ -72,8 +88,9 @@ namespace Vehicles
 		/// </summary>
 		public void ConstructComponents()
 		{
-			vehicleData.Clear();
-			pathDataOwners.Clear();
+			int size = DefDatabase<VehicleDef>.DefCount;
+			vehicleData = new VehiclePathData[size];
+			piggyToOwner = new int[size].Populate(-1);
 			foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
 			{
 				GeneratePathData(vehicleDef);
@@ -88,9 +105,9 @@ namespace Vehicles
 		/// </remarks>
 		public override void MapComponentUpdate()
 		{
-			if (pathDataOwners.Count > 0 && VehicleRegionGrid.vehicleRegionGridIndexChecking <= pathDataOwners.Count)
+			if (piggyToOwner.Length > 0 && VehicleRegionGrid.vehicleRegionGridIndexChecking <= owners.Count)
 			{
-				VehicleDef vehicleDef = pathDataOwners[VehicleRegionGrid.vehicleRegionGridIndexChecking];
+				VehicleDef vehicleDef = owners[VehicleRegionGrid.vehicleRegionGridIndexChecking];
 				VehiclePathData vehiclePathData = this[vehicleDef];
 				vehiclePathData.VehicleRegionGrid.UpdateClean();
 				vehiclePathData.VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
@@ -101,26 +118,49 @@ namespace Vehicles
 		/// Generate new <see cref="VehiclePathData"/> for <paramref name="vehicleDef"/>
 		/// </summary>
 		/// <param name="vehicleDef"></param>
-		private void GeneratePathData(VehicleDef vehicleDef, bool compress = true)
+		private VehiclePathData GeneratePathData(VehicleDef vehicleDef, bool compress = true)
 		{
 			VehiclePathData vehiclePathData = new VehiclePathData(vehicleDef);
 
-			vehiclePathData.VehiclePathGrid = new VehiclePathGrid(this, vehicleDef);
-			vehiclePathData.VehiclePathFinder = new VehiclePathFinder(this, vehicleDef);
-
-			VehiclePathData matchingReachability = vehicleData.Values.FirstOrDefault(otherPathData => vehiclePathData.MatchesReachability(otherPathData));
-			if (compress && matchingReachability.IsValid)
+			buildingFor = vehicleDef.DefIndex;
 			{
-				//Piggy back off vehicles with similar width + impassability
-				vehiclePathData.ReachabilityData = matchingReachability.ReachabilityData;
-			}
-			else
-			{
-				vehiclePathData.ReachabilityData = new VehicleReachabilitySettings(this, vehicleDef);
-				pathDataOwners.Add(vehicleDef);
-			}
+				vehiclePathData.VehiclePathGrid = new VehiclePathGrid(this, vehicleDef);
+				vehiclePathData.VehiclePathFinder = new VehiclePathFinder(this, vehicleDef);
 
-			vehicleData[vehicleDef] = vehiclePathData;
+				if (TryGetOwner(vehiclePathData, out int ownerId) && compress)
+				{
+					//Piggy back off vehicles with similar width + impassability
+					vehiclePathData.ReachabilityData = vehicleData[ownerId].ReachabilityData;
+				}
+				else
+				{
+					vehiclePathData.ReachabilityData = new VehicleReachabilitySettings(this, vehicleDef);
+					AddOwner(vehicleDef);
+				}
+				vehicleData[vehicleDef.DefIndex] = vehiclePathData;
+			}
+			buildingFor = -1;
+			return vehiclePathData;
+		}
+
+		private void AddOwner(VehicleDef vehicleDef)
+		{
+			piggyToOwner[vehicleDef.DefIndex] = vehicleDef.DefIndex;
+			owners.Add(vehicleDef);
+		}
+
+		private bool TryGetOwner(VehiclePathData vehiclePathData, out int ownerId)
+		{
+			foreach (VehicleDef checkingOwner in owners)
+			{
+				ownerId = checkingOwner.DefIndex;
+				if (vehiclePathData.MatchesReachability(vehicleData[ownerId]))
+				{
+					return true;
+				}
+			}
+			ownerId = -1;
+			return false;
 		}
 
 		/// <summary>
@@ -149,6 +189,8 @@ namespace Vehicles
 				ReachabilityData = null;
 			}
 
+			public static VehiclePathData Invalid => new VehiclePathData();
+
 			public bool IsValid => vehicleDef != null;
 
 			public VehicleDef Owner => vehicleDef;
@@ -173,6 +215,10 @@ namespace Vehicles
 
 			public bool MatchesReachability(VehiclePathData other)
 			{
+				if (!other.IsValid)
+				{
+					return false;
+				}
 				return border == other.border && defaultTerrainImpassable == other.defaultTerrainImpassable &&
 					impassableThingDefs.SetEquals(other.impassableThingDefs) && impassableTerrain.SetEquals(other.impassableTerrain);
 			}

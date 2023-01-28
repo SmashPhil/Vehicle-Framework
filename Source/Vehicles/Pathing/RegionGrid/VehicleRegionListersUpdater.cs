@@ -88,27 +88,22 @@ namespace Vehicles
 		public static void GetTouchableRegions(Thing thing, Map map, VehicleDef vehicleDef, List<VehicleRegion> outRegions, bool allowAdjacenttEvenIfCantTouch = false)
 		{
 			outRegions.Clear();
-			CellRect cellRect = thing.OccupiedRect();
-			CellRect cellRect2 = cellRect;
-			if (CanRegisterInAdjacentRegions(thing))
-			{
-				cellRect2 = cellRect2.ExpandedBy(1);
-			}
-			foreach (IntVec3 intVec in cellRect2)
+			CellRect cellRect = thing.OccupiedRect().ExpandedBy(1);
+			foreach (IntVec3 intVec in cellRect)
 			{
 				if (intVec.InBounds(map))
 				{
 					VehicleMapping.VehiclePathData vehiclePathData = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef];
-					VehicleRegion validRegionAt_NoRebuild = vehiclePathData.VehicleRegionGrid.GetValidRegionAt_NoRebuild(intVec);
-					if (validRegionAt_NoRebuild != null && validRegionAt_NoRebuild.type.Passable() && !outRegions.Contains(validRegionAt_NoRebuild))
+					VehicleRegion region = vehiclePathData.VehicleRegionGrid.GetValidRegionAt_NoRebuild(intVec);
+					if (region != null && region.type.Passable() && !outRegions.Contains(region))
 					{
 						if (cellRect.Contains(intVec))
 						{
-							outRegions.Add(validRegionAt_NoRebuild);
+							outRegions.Add(region);
 						}
 						else if (allowAdjacenttEvenIfCantTouch || VehicleReachabilityImmediate.CanReachImmediateVehicle(intVec, thing, map, vehicleDef, PathEndMode.Touch))
 						{
-							outRegions.Add(validRegionAt_NoRebuild);
+							outRegions.Add(region);
 						}
 					}
 				}

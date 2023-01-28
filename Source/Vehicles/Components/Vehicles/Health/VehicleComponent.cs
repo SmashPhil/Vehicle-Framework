@@ -88,6 +88,7 @@ namespace Vehicles
 			{
 				health = props.health;
 			}
+			vehicle.EventRegistry[VehicleEventDefOf.Repaired].ExecuteEvents();
 		}
 
 		public virtual void ReduceDamageFromArmor(ref DamageInfo dinfo, out Penetration result)
