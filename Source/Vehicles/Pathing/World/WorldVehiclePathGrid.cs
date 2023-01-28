@@ -43,6 +43,8 @@ namespace Vehicles
 		/// </summary>
 		private static int DayOfYearAt0Long => GenDate.DayOfYear(GenTicks.TicksAbs, 0f);
 
+		private static bool Recalculating { get; set; }
+
 		/// <summary>
 		/// <paramref name="cost"/> is &gt; <see cref="ImpassableMovementDifficulty"/> or &lt; 0
 		/// </summary>
@@ -68,7 +70,7 @@ namespace Vehicles
 		public override void WorldComponentTick()
 		{
 			base.WorldComponentTick();
-			if (allPathCostsRecalculatedDayOfYear != DayOfYearAt0Long)
+			if (!Recalculating && allPathCostsRecalculatedDayOfYear != DayOfYearAt0Long)
 			{
 				RecalculateAllPerceivedPathCosts();
 			}
@@ -154,11 +156,13 @@ namespace Vehicles
 		/// </summary>
 		public void RecalculateAllPerceivedPathCosts()
 		{
-			TaskManager.RunAsync(delegate ()
-			{
-				RecalculateAllPerceivedPathCosts(null);
-				allPathCostsRecalculatedDayOfYear = DayOfYearAt0Long;
-			});
+			Log.Message($"Async Recalculation");
+			TaskManager.RunAsync(RecalculateAllPerceivedPathCosts_Async);
+		}
+
+		private void RecalculateAllPerceivedPathCosts_Async()
+		{
+			RecalculateAllPerceivedPathCosts(null);
 		}
 
 		/// <summary>
@@ -167,18 +171,22 @@ namespace Vehicles
 		/// <param name="ticksAbs"></param>
 		public void RecalculateAllPerceivedPathCosts(int? ticksAbs)
 		{
-			allPathCostsRecalculatedDayOfYear = -1;
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
+			Recalculating = true;
 			{
-				if (!movementDifficulty.ContainsKey(vehicleDef))
+				foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 				{
-					movementDifficulty[vehicleDef] = new float[Find.WorldGrid.TilesCount];
+					if (!movementDifficulty.ContainsKey(vehicleDef))
+					{
+						movementDifficulty[vehicleDef] = new float[Find.WorldGrid.TilesCount];
+					}
+					for (int i = 0; i < Find.WorldGrid.TilesCount; i++)
+					{
+						RecalculatePerceivedMovementDifficultyAt(i, vehicleDef, ticksAbs);
+					}
 				}
-				for (int i = 0; i < Find.WorldGrid.TilesCount; i++)
-				{
-					RecalculatePerceivedMovementDifficultyAt(i, vehicleDef, ticksAbs);
-				}
+				allPathCostsRecalculatedDayOfYear = DayOfYearAt0Long;
 			}
+			Recalculating = false;
 		}
 
 		/// <summary>
