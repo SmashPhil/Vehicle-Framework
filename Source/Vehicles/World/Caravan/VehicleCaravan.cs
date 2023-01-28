@@ -147,14 +147,15 @@ namespace Vehicles
 		{
 			if (Find.WorldSelector.SingleSelectedObject == this)
 			{
-				yield return new Gizmo_CaravanInfo(this);
+				yield return new Gizmo_VehicleCaravanInfo(this);
 			}
-			foreach (Gizmo gizmo in base.GetGizmos().Where(g => g is Command_Action && (g as Command_Action).defaultLabel != "Dev: Mental break" 
-				&& (g as Command_Action).defaultLabel != "Dev: Make random pawn hungry" && (g as Command_Action).defaultLabel != "Dev: Kill random pawn" 
-				&& (g as Command_Action).defaultLabel != "Dev: Harm random pawn" && (g as Command_Action).defaultLabel != "Dev: Down random pawn"
-				&& (g as Command_Action).defaultLabel != "Dev: Plague on random pawn" && (g as Command_Action).defaultLabel != "Dev: Teleport to destination"))
+			foreach (Gizmo gizmo in base.GetGizmos())
 			{
-				yield return gizmo;
+				//Only pull non-devmode gizmos
+				if (!DebugSettings.ShowDevGizmos || !(gizmo is Command command) || command.icon)
+				{
+					yield return gizmo;
+				}
 			}
 
 			if (IsPlayerControlled)

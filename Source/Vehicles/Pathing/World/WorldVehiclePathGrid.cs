@@ -172,7 +172,7 @@ namespace Vehicles
 			{
 				if (!movementDifficulty.ContainsKey(vehicleDef))
 				{
-					movementDifficulty.Add(vehicleDef, new float[Find.WorldGrid.TilesCount]);
+					movementDifficulty[vehicleDef] = new float[Find.WorldGrid.TilesCount];
 				}
 				for (int i = 0; i < Find.WorldGrid.TilesCount; i++)
 				{

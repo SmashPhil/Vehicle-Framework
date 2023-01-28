@@ -27,6 +27,26 @@
 			<MeatAmount>0</MeatAmount> 
 		</statBases>
 		
+		<statEvents>
+			<li>
+				<statDef>MoveSpeed</statDef>
+				
+				<eventDefs>
+					<li>DamageTaken</li>
+					<li>Repaired</li>
+					<li>Spawned</li>
+				</eventDefs>
+			</li>
+			<li>
+				<statDef>Mass</statDef>
+				
+				<eventDefs>
+					<li>CargoAdded</li>
+					<li>CargoRemoved</li>
+				</eventDefs>
+			</li>
+		</statEvents>
+		
 		<soundOneShotsOnEvent>
 			<li>
 				<key>DraftOn</key>

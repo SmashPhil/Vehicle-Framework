@@ -94,7 +94,7 @@ namespace Vehicles
 							if(countByFishingSkill <= 0) countByFishingSkill = 1;
 							Thing fish = ThingMaker.MakeThing(fishStats.Key);
 							fish.stackCount = countByFishingSkill;
-							Vehicle.inventory.innerContainer.TryAdd(fish, countByFishingSkill, true);
+							Vehicle.AddOrTransfer(fish, countByFishingSkill);
 						}
 					}
 				},

@@ -143,6 +143,12 @@ namespace Vehicles
 			}
 		}
 
+		public override void TickLong()
+		{
+			base.TickLong();
+			statHandler.MarkAllDirty();
+		}
+
 		protected virtual void TickAllComps()
 		{
 			foreach (ThingComp comp in compTickers)
@@ -162,14 +168,10 @@ namespace Vehicles
 			{
 				if (Spawned)
 				{
-					stances.StanceTrackerTick();
-					verbTracker.VerbsTick();
-					//natives.NativeVerbsTick();
+					//stances.StanceTrackerTick(); //TODO - Add as tick requester for stunning
 					jobs.JobTrackerTick();
-					//interactions?.InteractionsTrackerTick();
 				}
-				equipment?.EquipmentTrackerTick();
-				//apparel?.ApparelTrackerTick();
+				//equipment?.EquipmentTrackerTick();
 
 				//caller?.CallTrackerTick();
 				//skills?.SkillsTick();

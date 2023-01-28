@@ -11,7 +11,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class VehicleDef : ThingDef
+	public class VehicleDef : ThingDef, IDefIndex<VehicleDef>
 	{
 		[PostToSettings]
 		public VehicleEnabledFor enabled = VehicleEnabledFor.Everyone;
@@ -48,6 +48,8 @@ namespace Vehicles
 		
 		public VehicleDrawProperties drawProperties;
 
+		public List<StatCache.EventLister> statEvents;
+
 		//Event : SoundDef
 		public Dictionary<VehicleEventDef, SoundDef> soundOneShotsOnEvent = new Dictionary<VehicleEventDef, SoundDef>();
 		//<Start Event, Stop Event> : SoundDef
@@ -73,6 +75,8 @@ namespace Vehicles
 		private Texture2D resolvedLoadCargoTexture;
 		[Unsaved]
 		private Texture2D resolvedCancelCargoTexture;
+
+		public int DefIndex { get; set; }
 
 		public VehicleFleshTypeDef BodyType => kindDef.RaceProps.FleshType as VehicleFleshTypeDef;
 

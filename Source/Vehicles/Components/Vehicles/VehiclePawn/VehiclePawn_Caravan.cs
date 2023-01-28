@@ -32,6 +32,24 @@ namespace Vehicles
 			}
 		}
 
+		public void AddOrTransfer(Thing thing, int count, Pawn holder = null)
+		{
+			if (holder != null)
+			{
+				holder.carryTracker.innerContainer.TryTransferToContainer(thing, inventory.innerContainer, count, true);
+			}
+			else
+			{
+				inventory.innerContainer.TryAdd(Thing, count);
+			}
+			EventRegistry[VehicleEventDefOf.CargoAdded].ExecuteEvents();
+		}
+
+		public void TakeFromInventory()
+		{
+			EventRegistry[VehicleEventDefOf.CargoRemoved].ExecuteEvents();
+		}
+
 		protected IntVec3 CalculateOffset(Rot8 rot)
 		{
 			int offset = VehicleDef.Size.z; //Not reduced by half to avoid overlaps with vehicle tracks

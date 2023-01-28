@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<!-- Health -->
+	<Vehicles.VehicleEventDef>
+		<defName>DamageTaken</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>Repaired</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<!-- State -->
+	<Vehicles.VehicleEventDef>
+		<defName>Spawned</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>Despawned</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>Destroyed</defName>
+	</Vehicles.VehicleEventDef>
+</Defs>

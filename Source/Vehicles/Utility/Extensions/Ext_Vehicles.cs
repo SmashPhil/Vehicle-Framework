@@ -37,11 +37,6 @@ namespace Vehicles
 			return GenAdj.OccupiedRect(center, rot, size);
 		}
 
-		public static float GetVehicleStatValue(this VehiclePawn vehicle, VehicleStatDef statDef)
-		{
-			return statDef.Worker.GetValue(vehicle);
-		}
-
 		public static void RegenerateEvents(this VehiclePawn vehicle)
 		{
 			vehicle.EventRegistry?.Clear();
@@ -53,12 +48,26 @@ namespace Vehicles
 			if (vehicle.EventRegistry.NullOrEmpty())
 			{
 				vehicle.FillEvents_Def();
-				vehicle.AddEvent(VehicleEventDefOf.DraftOff, vehicle.vPather.RecalculatePermissions);
-				vehicle.AddEvent(VehicleEventDefOf.Immobilized, vehicle.vPather.RecalculatePermissions);
+
+				//Pather
 				vehicle.AddEvent(VehicleEventDefOf.PawnExited, vehicle.vPather.RecalculatePermissions);
 				vehicle.AddEvent(VehicleEventDefOf.PawnChangedSeats, vehicle.vPather.RecalculatePermissions);
 				vehicle.AddEvent(VehicleEventDefOf.PawnKilled, vehicle.vPather.RecalculatePermissions);
 				vehicle.AddEvent(VehicleEventDefOf.PawnCapacitiesDirty, vehicle.vPather.RecalculatePermissions);
+				vehicle.AddEvent(VehicleEventDefOf.DraftOff, vehicle.vPather.RecalculatePermissions);
+				vehicle.AddEvent(VehicleEventDefOf.DamageTaken, vehicle.vPather.RecalculatePermissions);
+				vehicle.AddEvent(VehicleEventDefOf.Repaired, vehicle.vPather.RecalculatePermissions);
+
+				if (!vehicle.VehicleDef.statEvents.NullOrEmpty())
+				{
+					foreach (StatCache.EventLister eventLister in vehicle.VehicleDef.statEvents)
+					{
+						foreach (VehicleEventDef eventDef in eventLister.eventDefs)
+						{
+							vehicle.AddEvent(eventDef, () => vehicle.statHandler.MarkStatDirty(eventLister.statDef));
+						}
+					}
+				}
 
 				//One Shots
 				if (!vehicle.VehicleDef.soundOneShotsOnEvent.NullOrEmpty())
