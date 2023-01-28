@@ -154,7 +154,7 @@ namespace Vehicles
 		/// </summary>
 		public void RecalculateAllPerceivedPathCosts()
 		{
-			MultithreadHelper.RunAsync(delegate ()
+			TaskManager.RunAsync(delegate ()
 			{
 				RecalculateAllPerceivedPathCosts(null);
 				allPathCostsRecalculatedDayOfYear = DayOfYearAt0Long;

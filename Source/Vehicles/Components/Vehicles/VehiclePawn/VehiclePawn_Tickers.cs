@@ -28,6 +28,8 @@ namespace Vehicles
 		private SelfOrderingList<ThingComp> cachedComps = new SelfOrderingList<ThingComp>();
 		private List<ThingComp> compTickers = new List<ThingComp>();
 
+		public override bool Suspended => false; //Vehicles are not suspendable
+
 		public CompVehicleTurrets CompVehicleTurrets
 		{
 			get
@@ -143,18 +145,18 @@ namespace Vehicles
 			}
 		}
 
-		public override void TickLong()
-		{
-			base.TickLong();
-			statHandler.MarkAllDirty();
-		}
-
 		protected virtual void TickAllComps()
 		{
 			foreach (ThingComp comp in compTickers)
 			{
 				comp.CompTick();
 			}
+		}
+
+		public override void TickRare()
+		{
+			base.TickRare();
+			statHandler.MarkAllDirty();
 		}
 
 		protected virtual void BaseTickOptimized()

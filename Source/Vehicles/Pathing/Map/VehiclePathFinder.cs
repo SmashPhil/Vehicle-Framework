@@ -431,7 +431,7 @@ namespace Vehicles
 										tickCost += (byteGrid[cellIndex] * 8);
 									}
 									//REDO - collisions?
-									if (collideWithVehicles && MultithreadHelper.AnyVehicleBlockingPathAt(new IntVec3(cellIntX, 0, cellIntY), vehicle, false, false, true) != null)
+									if (collideWithVehicles && ThreadHelper.AnyVehicleBlockingPathAt(new IntVec3(cellIntX, 0, cellIntY), vehicle, false, false, true) != null)
 									{
 										tickCost += Cost_PawnCollision;
 									}

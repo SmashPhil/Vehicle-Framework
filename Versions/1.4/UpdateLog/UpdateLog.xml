@@ -26,6 +26,11 @@ Calculations for vehicles' world path grid are now thrown into a separate thread
 
 Vehicle turrets will now only tick on request, rather than every turret ticking continuously despite not being in use.
 
+Improved startup time substantially.  This is especially apparent for large mod lists where it was taking upwards of 30s to load, now down to ~4-5s.
+
+Vehicle stats are now cached and calculated only when needed.  Event driven recaching will also allow unused stats to remain uncalculated until fetched. (Schrödinger's stat)
+
+Removed unnecessary tickers from VehiclePawn.
 [title]Additional Changes[/title][font]Small[/font]
 Changed FuelConsumptionCondition to operate on flags.  Defaults to consuming fuel when drafted or moving in a caravan.
 

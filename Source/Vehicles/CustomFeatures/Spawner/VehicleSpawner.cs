@@ -209,7 +209,8 @@ namespace Vehicles
 							float reloadsAvailable = (float)(startingWeight * Math.Pow(Math.E, -cannon.turretDef.magazineCapacity / exponentialDecay) + minReloads);
 							Thing ammo = ThingMaker.MakeThing(ammoType);
 							ammo.stackCount = Mathf.RoundToInt(cannon.turretDef.magazineCapacity * reloadsAvailable);
-							vehicle.inventory.innerContainer.TryAdd(ammo, true);
+							//vehicle.inventory.innerContainer.TryAdd(ammo, true);
+							vehicle.AddOrTransfer(ammo);
 						}
 						cannon.AutoReloadCannon();
 					}

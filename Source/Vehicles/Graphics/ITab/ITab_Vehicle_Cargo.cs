@@ -31,9 +31,9 @@ namespace Vehicles
 			labelKey = "TabCargo";
 		}
 
-		public override bool IsVisible => !SelPawnForCargo.beached;
+		public override bool IsVisible => !Vehicle.beached;
 
-		private VehiclePawn SelPawnForCargo
+		private VehiclePawn Vehicle
 		{
 			get
 			{
@@ -64,18 +64,18 @@ namespace Vehicles
 			{
 				Widgets.ListSeparator(ref num, viewRect.width, "Cargo".Translate());
 				workingInvList.Clear();
-				workingInvList.AddRange(SelPawnForCargo.inventory.innerContainer);
+				workingInvList.AddRange(Vehicle.inventory.innerContainer);
 				foreach(Thing t in workingInvList)
 				{
 					DrawThingRow(ref num, viewRect.width, t, null, true);
 				}
 				workingInvList.Clear();
 			}
-			if(IsVisible && !SelPawnForCargo.cargoToLoad.NullOrEmpty())
+			if(IsVisible && !Vehicle.cargoToLoad.NullOrEmpty())
 			{
-				foreach (TransferableOneWay transferable in SelPawnForCargo.cargoToLoad)
+				foreach (TransferableOneWay transferable in Vehicle.cargoToLoad)
 				{
-					if (transferable.AnyThing != null && transferable.CountToTransfer > 0 && !SelPawnForCargo.inventory.innerContainer.Contains(transferable.AnyThing))
+					if (transferable.AnyThing != null && transferable.CountToTransfer > 0 && !Vehicle.inventory.innerContainer.Contains(transferable.AnyThing))
 					{
 						DrawThingRow(ref num, viewRect.width, transferable.AnyThing, transferable.CountToTransfer, false, true);
 					}
@@ -104,7 +104,7 @@ namespace Vehicles
 			Widgets.InfoCardButton(rect.width - 24f, y, thing);
 			rect.width -= 24f;
 
-			if(inventory && SelPawnForCargo.Spawned)
+			if(inventory && Vehicle.Spawned)
 			{
 				Rect rectDrop = new Rect(rect.width - 24f, y, 24f, 24f);
 				TooltipHandler.TipRegion(rectDrop, "DropThing".Translate());
@@ -168,22 +168,25 @@ namespace Vehicles
 		{
 			Rect rect = new Rect(0f, curY, width, StandardLineHeight);
 			float cannonsNum = 0f;
-			if (SelPawnForCargo.TryGetComp<CompVehicleTurrets>() != null)
+			if (Vehicle.TryGetComp<CompVehicleTurrets>() != null)
 			{
-				foreach (VehicleTurret turret in SelPawnForCargo.CompVehicleTurrets.turrets)
+				foreach (VehicleTurret turret in Vehicle.CompVehicleTurrets.turrets)
 				{
 					cannonsNum += turret.loadedAmmo is null ? 0f : turret.loadedAmmo.BaseMass * turret.shellCount;
 				}
 			}
-			float mass = MassUtility.GearAndInventoryMass(SelPawnForCargo) + cannonsNum;
-			float capacity = MassUtility.Capacity(SelPawnForCargo, null);
+			float mass = MassUtility.GearAndInventoryMass(Vehicle) + cannonsNum;
+			float capacity = MassUtility.Capacity(Vehicle, null);
 			Widgets.Label(rect, "MassCarried".Translate(mass.ToString("0.##"), capacity.ToString("0.##")));
 			curY += StandardLineHeight;
 		}
 
-		private void InterfaceDrop(Thing t)
+		private void InterfaceDrop(Thing thing)
 		{
-			SelPawnForCargo.inventory.innerContainer.TryDrop(t, SelPawnForCargo.Position, SelPawnForCargo.Map, ThingPlaceMode.Near, out Thing thing, null, null);
+			if (Vehicle.inventory.innerContainer.TryDrop(thing, Vehicle.Position, Vehicle.Map, ThingPlaceMode.Near, out Thing _))
+			{
+				Vehicle.EventRegistry[VehicleEventDefOf.CargoRemoved].ExecuteEvents();
+			}
 		}
 	}
 }

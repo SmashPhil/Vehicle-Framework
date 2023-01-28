@@ -53,7 +53,6 @@ namespace Vehicles
 		{
 			cachedValues[statDef.DefIndex] = statDef.Worker.GetValue(vehicle);
 			dirty[statDef.DefIndex] = false;
-			Log.Message($"RECACHING: {statDef}");
 		}
 
 		public class EventLister

@@ -95,7 +95,6 @@ namespace Vehicles
 			if (!respawningAfterLoad)
 			{
 				ticksToImpact = Mathf.CeilToInt(ProjectileTicksToImpact);
-				Log.Message($"INIT: {ProjectileTicksToImpact}");
 			}
 		}
 	}

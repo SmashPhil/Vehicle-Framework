@@ -689,7 +689,7 @@
     <Compile Include="Utility\Helpers\RenderHelper.cs" />
     <Compile Include="Utility\Helpers\SelectionHelper.cs" />
     <Compile Include="Utility\Helpers\GizmoHelper.cs" />
-    <Compile Include="Utility\Helpers\MultithreadHelper.cs" />
+    <Compile Include="Utility\Helpers\ThreadHelper.cs" />
     <Compile Include="Utility\Helpers\SoundHelper.cs" />
     <Compile Include="Utility\Helpers\VehicleCaravanPathingHelper.cs" />
     <Compile Include="Utility\Helpers\VehicleHealthTabHelper.cs" />
