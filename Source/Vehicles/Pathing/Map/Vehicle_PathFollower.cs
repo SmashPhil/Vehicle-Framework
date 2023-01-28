@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using RimWorld;
 using Verse;
@@ -14,19 +15,12 @@ namespace Vehicles
 	public class Vehicle_PathFollower : IExposable
 	{
 		private const int MaxMoveTicks = 450;
-
 		private const int MaxCheckAheadNodes = 20;
-
 		private const float SnowReductionFromWalking = 0.001f;
-
 		private const int ClamorCellsInterval = 12;
-
 		private const int MinCostWalk = 50;
-
 		private const int MinCostAmble = 60;
-
 		private const int CheckForMovingCollidingPawnsIfCloserToTargetThanX = 30;
-
 		private const int AttackBlockingHostilePawnAfterTicks = 180;
 
 		protected VehiclePawn vehicle;
@@ -67,29 +61,13 @@ namespace Vehicles
 			bumperCells = new List<IntVec3>();
 		}
 
-		public LocalTargetInfo Destination
-		{
-			get
-			{
-				return destination;
-			}
-		}
+		public bool Recalculating { get; private set; }
 
-		public bool Moving
-		{
-			get
-			{
-				return moving;
-			}
-		}
+		public LocalTargetInfo Destination => destination;
 
-		public bool MovingNow
-		{
-			get
-			{
-				return Moving && !WillCollideWithPawnOnNextPathCell();
-			}
-		}
+		public bool Moving => moving;
+
+		public bool MovingNow => Moving && !WillCollideWithPawnOnNextPathCell();
 
 		public IntVec3 LastPassableCellInPath
 		{
@@ -290,6 +268,7 @@ namespace Vehicles
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void TryResumePathingAfterLoading()
 		{
 			if (moving)
@@ -339,16 +318,19 @@ namespace Vehicles
 			return null;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool WillCollideWithPawnOnNextPathCell()
 		{
 			return WillCollideWithPawnAt(nextCell);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private bool IsNextCellWalkable()
 		{
 			return vehicle.Drivable(nextCell) && !WillCollideWithPawnAt(nextCell);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private bool WillCollideWithPawnAt(IntVec3 c)
 		{
 			return PawnUtility.ShouldCollideWithPawns(vehicle) && PawnUtility.AnyPawnBlockingPathAt(c, vehicle, false, false, false);
@@ -364,6 +346,7 @@ namespace Vehicles
 			return null;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void PatherDraw()
 		{
 			if (DebugViewSettings.drawPaths && curPath != null && Find.Selector.IsSelected(vehicle))
@@ -372,6 +355,7 @@ namespace Vehicles
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool MovedRecently(int ticks)
 		{
 			return Find.TickManager.TicksGame - lastMovedTick <= ticks;
@@ -645,19 +629,15 @@ namespace Vehicles
 			return Mathf.Max(num, 1);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private float CostToPayThisTick()
 		{
-			float num = 1f;
-			if (num < nextCellCostTotal / MaxMoveTicks)
-			{
-				num = nextCellCostTotal / MaxMoveTicks;
-			}
-			return num;
+			return Mathf.Max(1, nextCellCostTotal / MaxMoveTicks);
 		}
 
 		private bool TrySetNewPath()
 		{
-			PawnPath pawnPath = GenerateNewPath();
+			PawnPath pawnPath = GenerateNewPath_Concurrent();
 			if (pawnPath is null || !pawnPath.Found)
 			{
 				PatherFailed();
@@ -670,37 +650,58 @@ namespace Vehicles
 			}
 			curPath = pawnPath;
 			int num = 0;
-			while (num < MaxCheckAheadNodes && num < curPath.NodesLeftCount)
-			{
-				IntVec3 c = curPath.Peek(num);
+			//while (num < MaxCheckAheadNodes && num < curPath.NodesLeftCount)
+			//{
+			//	IntVec3 c = curPath.Peek(num);
 
-				if (vehicle.beached) break;
-				if (PawnUtility.ShouldCollideWithPawns(vehicle) && PawnUtility.AnyPawnBlockingPathAt(c, vehicle, false, false, false))
-				{
-					foundPathWhichCollidesWithPawns = Find.TickManager.TicksGame;
-				}
-				if (PawnUtility.KnownDangerAt(c, vehicle.Map, vehicle))
-				{
-					foundPathWithDanger = Find.TickManager.TicksGame;
-				}
-				if (foundPathWhichCollidesWithPawns == Find.TickManager.TicksGame && foundPathWithDanger == Find.TickManager.TicksGame)
-				{
-					break;
-				}
-				num++;
-			}
+			//	if (vehicle.beached) break;
+			//	if (PawnUtility.ShouldCollideWithPawns(vehicle) && PawnUtility.AnyPawnBlockingPathAt(c, vehicle, false, false, false))
+			//	{
+			//		//TODO - use with runover mechanics
+			//		foundPathWhichCollidesWithPawns = Find.TickManager.TicksGame;
+			//	}
+			//	if (PawnUtility.KnownDangerAt(c, vehicle.Map, vehicle))
+			//	{
+			//		//TODO - use with AI
+			//		foundPathWithDanger = Find.TickManager.TicksGame;
+			//	}
+			//	if (foundPathWhichCollidesWithPawns == Find.TickManager.TicksGame && foundPathWithDanger == Find.TickManager.TicksGame)
+			//	{
+			//		break;
+			//	}
+			//	num++;
+			//}
 			return true;
 		}
 
-		[Obsolete("Use sycronous method instead", error: true)]
-		public PawnPath GenerateNewPathAsync()
+		private bool TrySetNewPath_Async()
 		{
-			var cts = new CancellationTokenSource();
+			if (Recalculating) return false;
+
+			Recalculating = true;
+			{
+
+			}
+			Recalculating = false;
+
+			return true;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public PawnPath GenerateNewPath_Concurrent()
+		{
+			return GenerateNewPath(CancellationToken.None);
+		}
+
+		[Obsolete("Use concurrent pathfinding.  Current async method is not suitable for non-concurrent pathfinding", error: true)]
+		public async Task<PawnPath> GenerateNewPath_Async()
+		{
+			CancellationTokenSource cts = new CancellationTokenSource();
 			try
 			{
 				var tasks = new[]
 				{
-					Task<PawnPath>.Factory.StartNew( () => GenerateNewPath(/*cts.Token*/), cts.Token)
+					Task<PawnPath>.Factory.StartNew( () => GenerateNewPath(cts.Token), cts.Token)
 				};
 				int taskIndex = Task.WaitAny(tasks, cts.Token);
 				if (tasks[taskIndex].Result != null && !tasks[taskIndex].Result.Found)
@@ -737,13 +738,14 @@ namespace Vehicles
 			}
 		}
 
-		internal PawnPath GenerateNewPath()
+		private PawnPath GenerateNewPath(CancellationToken token)
 		{
 			lastPathedTargetPosition = destination.Cell;
-			PawnPath pawnPath = vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathFinder.FindVehiclePath(vehicle.Position, destination, vehicle, peMode);
+			PawnPath pawnPath = vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathFinder.FindVehiclePath(vehicle.Position, destination, vehicle, token, peMode: peMode);
 			return pawnPath;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private bool AtDestinationPosition()
 		{
 			return VehicleReachabilityImmediate.CanReachImmediateVehicle(vehicle, destination, peMode);
@@ -820,17 +822,19 @@ namespace Vehicles
 			return false;
 		}
 
-
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private bool BestPathHadPawnsInTheWayRecently()
 		{
 			return foundPathWhichCollidesWithPawns + 240 > Find.TickManager.TicksGame;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private bool BestPathHadDangerRecently()
 		{
 			return foundPathWithDanger + 240 > Find.TickManager.TicksGame;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private bool FailedToFindCloseUnoccupiedCellRecently()
 		{
 			return failedToFindCloseUnoccupiedCellTicks + 100 > Find.TickManager.TicksGame;

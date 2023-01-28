@@ -156,7 +156,6 @@ namespace Vehicles
 		/// </summary>
 		public void RecalculateAllPerceivedPathCosts()
 		{
-			Log.Message($"Async Recalculation");
 			TaskManager.RunAsync(RecalculateAllPerceivedPathCosts_Async);
 		}
 
