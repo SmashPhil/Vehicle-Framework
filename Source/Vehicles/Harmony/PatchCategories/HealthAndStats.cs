@@ -71,7 +71,7 @@ namespace Vehicles
 				}
 				if (diagonal)
 				{
-					speed *= 1.41421f; //sqrt(2)
+					speed *= Ext_Math.Sqrt2;
 				}
 				__result = Mathf.RoundToInt(speed).Clamp(1, 450);
 				return false;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -54,6 +55,8 @@ namespace Vehicles
 		private int foundPathWithDanger = -999999;
 
 		private int failedToFindCloseUnoccupiedCellTicks = -999999;
+
+		private CancellationTokenSource cts = new CancellationTokenSource();
 
 		public Vehicle_PathFollower(VehiclePawn vehicle)
 		{
@@ -510,7 +513,7 @@ namespace Vehicles
 				{
 					vehicle.Map.snowGrid.AddDepth(vehicle.Position, -SnowReductionFromWalking); //REDO
 				}
-				if (NeedNewPath() && !TrySetNewPath())
+				if (NeedNewPath() && (!TrySetNewPath_Threaded() || curPath == null))
 				{
 					return;
 				}
@@ -674,17 +677,15 @@ namespace Vehicles
 			return true;
 		}
 
-		private bool TrySetNewPath_Async()
+		private bool TrySetNewPath_Threaded()
 		{
-			if (Recalculating) return false;
-
-			Recalculating = true;
+			if (!Recalculating)
 			{
-
+				Recalculating = true;
+				TrySetNewPath_Async();
 			}
-			Recalculating = false;
 
-			return true;
+			return Recalculating;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -693,33 +694,41 @@ namespace Vehicles
 			return GenerateNewPath(CancellationToken.None);
 		}
 
-		[Obsolete("Use concurrent pathfinding.  Current async method is not suitable for non-concurrent pathfinding", error: true)]
+		public async void TrySetNewPath_Async()
+		{
+			PawnPath pawnPath = await GenerateNewPath_Async();
+			curPath = pawnPath;
+			Recalculating = false;
+		}
+
 		public async Task<PawnPath> GenerateNewPath_Async()
 		{
-			CancellationTokenSource cts = new CancellationTokenSource();
+			if (cts != null)
+			{
+				cts.Cancel(); //Time out any existing requests
+				cts.Dispose();
+			}
 			try
 			{
-				var tasks = new[]
+				cts = new CancellationTokenSource();
+				PawnPath pawnPath = await TaskManager.RunAsync(GenerateNewPath, cts.Token);
+
+				try
 				{
-					Task<PawnPath>.Factory.StartNew( () => GenerateNewPath(cts.Token), cts.Token)
-				};
-				int taskIndex = Task.WaitAny(tasks, cts.Token);
-				if (tasks[taskIndex].Result != null && !tasks[taskIndex].Result.Found)
-				{ 
-					try
-					{
-						cts.Cancel();
-						cts.Dispose();
-						Debug.Message($"Ending and disposing remaining tasks...");
-						return PawnPath.NotFound;
-					
-					}
-					catch (Exception ex)
-					{
-						SmashLog.ErrorLabel(VehicleHarmony.LogLabel, $"Unable to cancel and dispose remaining tasks. \nException: {ex.Message} \nStack: {ex.StackTrace}");
-					}
+					cts.Cancel();
+					cts.Dispose();
 				}
-				return tasks[0].Result;
+				catch (Exception ex)
+				{
+					SmashLog.ErrorLabel(VehicleHarmony.LogLabel, $"Unable to cancel and dispose remaining tasks. \nException: {ex.Message} \nStack: {ex.StackTrace}");
+				}
+
+				if (pawnPath == null || !pawnPath.Found)
+				{ 
+					Debug.Message($"PawnPath not found. Ending and disposing remaining tasks...");
+					pawnPath = PawnPath.NotFound;
+				}
+				return pawnPath;
 			}
 			catch (AggregateException ex)
 			{
@@ -734,8 +743,12 @@ namespace Vehicles
 				}
 				cts.Cancel();
 				cts.Dispose();
-				return PawnPath.NotFound;
 			}
+			finally
+			{
+				cts = null;
+			}
+			return PawnPath.NotFound;
 		}
 
 		private PawnPath GenerateNewPath(CancellationToken token)
@@ -838,6 +851,48 @@ namespace Vehicles
 		private bool FailedToFindCloseUnoccupiedCellRecently()
 		{
 			return failedToFindCloseUnoccupiedCellTicks + 100 > Find.TickManager.TicksGame;
+		}
+
+		[DebugAction(VehicleHarmony.VehiclesLabel, "Test Pathfinder", allowedGameStates = AllowedGameStates.IsCurrentlyOnMap)]
+		private static void TestPathfinder()
+		{
+			List<DebugMenuOption> options = new List<DebugMenuOption>();
+			foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
+			{
+				options.Add(new DebugMenuOption(vehicleDef.defName, DebugMenuOptionMode.Action, delegate()
+				{
+					CoroutineManager.QueueInvoke(() => PathfinderRoutine(vehicleDef));
+				}));
+			}
+			Find.WindowStack.Add(new Dialog_DebugOptionListLister(options));
+		}
+		
+		private static IEnumerator PathfinderRoutine(VehicleDef vehicleDef)
+		{
+			IntVec3 start = IntVec3.Invalid;
+			IntVec3 dest = IntVec3.Invalid;
+
+			DebugTools.curTool = new DebugTool("Select Start", delegate ()
+			{
+				start = UI.MouseCell();
+				if (start.IsValid)
+				{
+					DebugTools.curTool = new DebugTool("Select Destination", () => dest = UI.MouseCell(), onGUIAction: delegate ()
+					{
+						Find.CurrentMap.debugDrawer.FlashCell(start, colorPct: 0.5f, duration: 5);
+						GenDraw.DrawLineBetween(start.ToVector3ShiftedWithAltitude(AltitudeLayer.Skyfaller), UI.MouseMapPosition(), SimpleColor.Green);
+					});
+				}
+			});
+
+			while (!start.IsValid && !dest.IsValid)
+			{
+				SmashLog.QuickMessage($"PathFinding: {start} to {dest}");
+				yield return null;
+			}
+
+
+			DebugTools.curTool = null;
 		}
 	}
 }

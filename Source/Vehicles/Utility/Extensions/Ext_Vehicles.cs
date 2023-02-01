@@ -509,7 +509,7 @@ namespace Vehicles
 		/// <param name="dir"></param>
 		public static bool WidthStandable(this VehicleDef vehicleDef, Map map, IntVec3 cell)
 		{
-			CellRect cellRect = CellRect.CenteredOn(cell, vehicleDef.size.x / 2);
+			CellRect cellRect = CellRect.CenteredOn(cell, Mathf.Min(vehicleDef.size.x, vehicleDef.size.z) / 2);
 			foreach (IntVec3 cellCheck in cellRect)
 			{
 				if (!cellCheck.InBounds(map) || GenGridVehicles.Impassable(cellCheck, map, vehicleDef))

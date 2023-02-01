@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
+using UnityEngine;
 using SmashTools;
 
 namespace Vehicles
@@ -12,6 +13,8 @@ namespace Vehicles
 	public class VehicleRegionCostCalculator
 	{
 		private const int SampleCount = 11;
+		private static readonly int DefaultTicksPerMoveCardinal = Mathf.RoundToInt(60 / 4.5f);
+		private static readonly int DefaultTicksPerMoveDiagonal = Mathf.RoundToInt(DefaultTicksPerMoveCardinal * Ext_Math.Sqrt2);
 
 		private static int[] pathCostSamples = new int[SampleCount];
 
@@ -144,7 +147,7 @@ namespace Vehicles
 						{
 							num2 = VehiclePathFinder.GetBuildingCost(otherRegion.door, traverseParms, traverseParms.pawn);
 							if (num2 == int.MaxValue) continue;
-							num2 += OctileDistance(1, 0);
+							num2 += OctileDistance(1, 0, moveTicksCardinal, moveTicksDiagonal);
 						}
 						int minPathCost = RegionMedianPathCost(otherRegion);
 						foreach(VehicleRegionLink regionLink in otherRegion.links)
@@ -263,7 +266,7 @@ namespace Vehicles
 			IntVec3 intVec = a2 - b2;
 			int num = Math.Abs(intVec.x);
 			int num2 = Math.Abs(intVec.z);
-			return OctileDistance(num, num2) + (minPathCost * Math.Max(num, num2)) + (minPathCost * Math.Min(num, num2));
+			return OctileDistance(num, num2, moveTicksCardinal, moveTicksDiagonal) + (minPathCost * Math.Max(num, num2)) + (minPathCost * Math.Min(num, num2));
 		}
 
 		/// <summary>
@@ -278,7 +281,7 @@ namespace Vehicles
 			IntVec3 intVec = cell - linkTargetCell;
 			int num = Math.Abs(intVec.x);
 			int num2 = Math.Abs(intVec.z);
-			return OctileDistance(num, num2) + (minPathCost * Math.Max(num, num2)) + (minPathCost * Math.Min(num, num2));
+			return OctileDistance(num, num2, moveTicksCardinal, moveTicksDiagonal) + (minPathCost * Math.Max(num, num2)) + (minPathCost * Math.Min(num, num2));
 		}
 
 		/// <summary>
@@ -303,9 +306,9 @@ namespace Vehicles
 		/// Center of region link <paramref name="link"/>
 		/// </summary>
 		/// <param name="link"></param>
-		private static IntVec3 RegionLinkCenter(VehicleRegionLink link)
+		public static IntVec3 RegionLinkCenter(VehicleRegionLink link)
 		{
-			return new IntVec3(SpanCenterX(link.span), 0, SpanCenterZ(link.span));
+			return new IntVec3(SpanCenterX(link.Span), 0, SpanCenterZ(link.Span));
 		}
 
 		/// <summary>
@@ -316,7 +319,7 @@ namespace Vehicles
 		private int MinimumRegionLinkDistance(IntVec3 cell, VehicleRegionLink link)
 		{
 			IntVec3 intVec = cell - LinkClosestCell(cell, link);
-			return OctileDistance(Math.Abs(intVec.x), Math.Abs(intVec.z));
+			return OctileDistance(Math.Abs(intVec.x), Math.Abs(intVec.z), moveTicksCardinal, moveTicksDiagonal);
 		}
 
 		/// <summary>
@@ -324,8 +327,16 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="dx"></param>
 		/// <param name="dz"></param>
-		private int OctileDistance(int dx, int dz)
+		internal static int OctileDistance(int dx, int dz, int moveTicksCardinal = -1, int moveTicksDiagonal = -1)
 		{
+			if (moveTicksCardinal < 0)
+			{
+				moveTicksCardinal = DefaultTicksPerMoveCardinal;
+			}
+			if (moveTicksDiagonal < 0)
+			{
+				moveTicksDiagonal = DefaultTicksPerMoveDiagonal;
+			}
 			return GenMath.OctileDistance(dx, dz, moveTicksCardinal, moveTicksDiagonal);
 		}
 
@@ -334,7 +345,7 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="cell"></param>
 		/// <param name="link"></param>
-		private IntVec3 GetLinkTargetCell(IntVec3 cell, VehicleRegionLink link)
+		private static IntVec3 GetLinkTargetCell(IntVec3 cell, VehicleRegionLink link)
 		{
 			return LinkClosestCell(cell, link);
 		}
@@ -346,7 +357,7 @@ namespace Vehicles
 		/// <param name="link"></param>
 		private static IntVec3 LinkClosestCell(IntVec3 cell, VehicleRegionLink link)
 		{
-			EdgeSpan span = link.span;
+			EdgeSpan span = link.Span;
 			int num = 0;
 			int num2 = 0;
 			if (span.dir == SpanDirection.North)

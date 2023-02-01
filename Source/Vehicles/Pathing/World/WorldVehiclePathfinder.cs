@@ -216,9 +216,17 @@ namespace Vehicles
 											calcGrid[neighbor].knownCost = totalPathCost;
 											calcGrid[neighbor].status = statusOpenValue;
 											calcGrid[neighbor].costNodeCost = costNodeCost;
-											if (VehicleMod.settings.debug.debugDrawVehiclePathCosts)
+											if (DebugHelper.World.VehicleDef != null)
 											{
-												Find.World.debugDrawer.FlashTile(neighbor, text: $"t:{ticksPerMove} h:{calcGrid[neighbor].heuristicCost}");
+												if (DebugHelper.World.DebugType == WorldPathingDebugType.PathCosts)
+												{
+													Find.World.debugDrawer.FlashTile(neighbor, colorPct: calcGrid[neighbor].knownCost / 150f,
+														text: $"t:{ticksPerMove} h:{calcGrid[neighbor].heuristicCost}");
+												}
+												else if (DebugHelper.World.DebugType == WorldPathingDebugType.Reachability)
+												{
+													Find.World.debugDrawer.FlashTile(neighbor, colorPct: 0.55f);
+												}
 											}
 											openList.Push(new CostNode(neighbor, costNodeCost));
 										}

@@ -408,6 +408,7 @@
     <Compile Include="Misc\Enums\UI\WorldPathingDebugType.cs" />
     <Compile Include="Misc\Interfaces\IDebugLordMeetingPoint.cs" />
     <Compile Include="Pathing\Map\VehicleRegionUpdateCatalog.cs" />
+    <Compile Include="Pathing\RegionGrid\ChunkList.cs" />
     <Compile Include="Utility\DesignatorCache.cs" />
     <Compile Include="AI\Incidents\IncidentWorker_ShuttleDowned.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_FollowVehicle.cs" />

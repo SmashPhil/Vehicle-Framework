@@ -845,7 +845,7 @@
             
         </member>
         <member name="F:HarmonyLib.ExceptionBlockType.BeginExceptFilterBlock">
-            <summary>The beginning of an except filter block</summary>
+            <summary>The beginning of an except filter block (currently not supported to use in a patch)</summary>
             
         </member>
         <member name="F:HarmonyLib.ExceptionBlockType.BeginFaultBlock">
@@ -2661,6 +2661,18 @@
              <param name="name">The optional name</param>
             
         </member>
+        <member name="M:HarmonyLib.CodeMatch.#ctor(System.Linq.Expressions.Expression{System.Action},System.String)">
+             <summary>Creates a code match that calls a method</summary>
+             <param name="expression">The lambda expression using the method</param>
+             <param name="name">The optional name</param>
+            
+        </member>
+        <member name="M:HarmonyLib.CodeMatch.#ctor(System.Linq.Expressions.LambdaExpression,System.String)">
+             <summary>Creates a code match that calls a method</summary>
+             <param name="expression">The lambda expression using the method</param>
+             <param name="name">The optional name</param>
+            
+        </member>
         <member name="M:HarmonyLib.CodeMatch.#ctor(HarmonyLib.CodeInstruction,System.String)">
              <summary>Creates a code match</summary>
              <param name="instruction">The CodeInstruction</param>
@@ -3217,6 +3229,13 @@
              <returns>True if the instruction loads the constant</returns>
             
         </member>
+        <member name="M:HarmonyLib.CodeInstructionExtensions.LoadsConstant(HarmonyLib.CodeInstruction,System.String)">
+             <summary>Tests if the code instruction loads a string constant</summary>
+             <param name="code">The <see cref="T:HarmonyLib.CodeInstruction"/></param>
+             <param name="str">The string</param>
+             <returns>True if the instruction loads the constant</returns>
+            
+        </member>
         <member name="M:HarmonyLib.CodeInstructionExtensions.LoadsField(HarmonyLib.CodeInstruction,System.Reflection.FieldInfo,System.Boolean)">
              <summary>Tests if the code instruction loads a field</summary>
              <param name="code">The <see cref="T:HarmonyLib.CodeInstruction"/></param>
@@ -3346,7 +3365,11 @@
              <summary>A file log for debugging</summary>
             
         </member>
-        <member name="F:HarmonyLib.FileLog.logPath">
+        <member name="P:HarmonyLib.FileLog.LogWriter">
+             <summary>Set this to make Harmony write its log content to this stream</summary>
+            
+        </member>
+        <member name="P:HarmonyLib.FileLog.LogPath">
              <summary>Full pathname of the log file, defaults to a file called <c>harmony.log.txt</c> on your Desktop</summary>
             
         </member>

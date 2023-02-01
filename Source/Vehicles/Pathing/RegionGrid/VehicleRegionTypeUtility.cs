@@ -15,25 +15,29 @@ namespace Vehicles
 		/// <param name="cell"></param>
 		/// <param name="map"></param>
 		/// <param name="vehicleDef"></param>
-		public static RegionType GetExpectedRegionType(this IntVec3 cell, Map map, VehicleDef vehicleDef)
+		public static RegionType GetExpectedRegionType(this IntVec3 cell, VehicleMapping mapping, VehicleDef vehicleDef)
 		{
-			if (!cell.InBounds(map))
+			if (!cell.InBounds(mapping.map))
 			{
 				return RegionType.None;
 			}
-			if (cell.GetDoor(map) != null)
+			if (cell.GetDoor(mapping.map) != null)
 			{
 				return RegionType.Portal;
 			}
-			if (cell.GetFence(map) != null)
+			if (cell.GetFence(mapping.map) != null)
 			{
-				return RegionType.Fence;
+				return RegionType.None; //Switch control back over to player for pathing over fences
 			}
-			if (GenGridVehicles.Walkable(cell, vehicleDef, map) && vehicleDef.WidthStandable(map, cell))
+			if (!vehicleDef.WidthStandable(mapping.map, cell))
+			{
+				return RegionType.None;
+			}
+			if (mapping[vehicleDef].VehiclePathGrid.WalkableFast(cell))
 			{
 				return RegionType.Normal;
 			}
-			List<Thing> thingList = cell.GetThingList(map);
+			List<Thing> thingList = cell.GetThingList(mapping.map);
 			for (int i = 0; i < thingList.Count; i++)
 			{
 				if (thingList[i].def.Fillage == FillCategory.Full)

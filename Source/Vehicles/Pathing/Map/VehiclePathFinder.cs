@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -151,7 +152,7 @@ namespace Vehicles
 		/// <param name="peMode"></param>
 		public PawnPath FindVehiclePath(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, CancellationToken token, PathEndMode peMode = PathEndMode.OnCell)
 		{
-			Debug.Message($"{VehicleHarmony.LogLabel} From={start} To={dest} MainPath for {traverseParms.pawn.LabelShort}");
+			Debug.Message($"{VehicleHarmony.LogLabel} From={start} To={dest} MainPath for {traverseParms.pawn.LabelShort} ThreadId: {Thread.CurrentThread.ManagedThreadId}");
 			
 			postCalculatedCells.Clear();
 			postCalculatedTurns.Clear();
@@ -170,7 +171,7 @@ namespace Vehicles
 				Log.Error($"Tried to FindVehiclePath for vehicle which is spawned in another map. Their map PathFinder should  have been used, not this one. vehicle={vehicle} vehicle's map={vehicle.Map} map={mapping.map}");
 				return PawnPath.NotFound;
 			}
-			if(!start.IsValid)
+			if (!start.IsValid)
 			{
 				Log.Error($"Tried to FindVehiclePath with invalid start {start}. vehicle={vehicle}");
 				return PawnPath.NotFound;
@@ -180,15 +181,10 @@ namespace Vehicles
 				Log.Error($"Tried to FindVehiclePath with invalid destination {dest}. vehicle={vehicle}");
 				return PawnPath.NotFound;
 			}
-			if (traverseParms.mode == TraverseMode.ByPawn)
+			//Will almost always be ByPawn
+			if (traverseParms.mode == TraverseMode.ByPawn && !vehicle.CanReachVehicle(dest, peMode, Danger.Deadly, traverseParms.mode))
 			{
-				if (!vehicle.CanReachVehicle(dest, peMode, Danger.Deadly, traverseParms.mode))
-				{
-					return PawnPath.NotFound;
-				}
-			}
-			else if (!mapping[vehicleDef].VehicleReachability.CanReachVehicle(start, dest, peMode, traverseParms))
-			{
+				Log.Error($"Trying to path to region not reachable, this should be blocked by reachability checks.");
 				return PawnPath.NotFound;
 			}
 			cellIndices = mapping.map.cellIndices;
@@ -211,7 +207,7 @@ namespace Vehicles
 			int searchCount = 0;
 			int nodesOpened = 0;
 			bool collideWithVehicles = PawnUtility.ShouldCollideWithPawns(vehicle) && false; //REDO - permanent false until vehicle collision implemented
-			bool drawPaths = DebugViewSettings.drawPaths;
+			bool drawPaths = VehicleMod.settings.debug.debugDrawPathfinderSearch;
 			bool allowedRegionTraversal = !passAllDestroyableThings && VehicleGridsUtility.GetRegion(start, mapping.map, vehicleDef, RegionType.Set_Passable) != null && freeTraversal;
 			bool weightedHeuristics = false;
 			bool drafted = vehicle.Drafted;
@@ -219,7 +215,22 @@ namespace Vehicles
 			float heuristicStrength = DetermineHeuristicStrength(vehicle, start, dest);
 			int ticksCardinal = vehicle.TicksPerMoveCardinal;
 			int ticksDiagonal = vehicle.TicksPerMoveDiagonal;
-			
+
+			ChunkList chunks = null;
+			if (VehicleMod.settings.debug.hierarchalPathfinding)
+			{
+				try
+				{
+					chunks = mapping[vehicleDef].VehicleReachability.FindChunks(start, dest, PathEndMode.OnCell, traverseParms, debugDrawSearch: drawPaths);
+				}
+				catch (Exception ex)
+				{
+					Log.Error($"Exception thrown while attempting to fetch chunks for HPA* search. Exception = {ex}");
+					return PawnPath.NotFound;
+				}
+			}
+			bool useHPA = VehicleMod.settings.debug.hierarchalPathfinding && chunks != null && !chunks.NullOrEmpty();
+
 			CalculateAndAddDisallowedCorners(traverseParms, peMode, cellRect);
 			InitStatusesAndPushStartNode(ref startIndex, start);
 			int iterations = 0;
@@ -227,6 +238,7 @@ namespace Vehicles
 			{
 				if (token.IsCancellationRequested)
 				{
+					Debug.Message($"Path request cancelled. Exiting...");
 					return PawnPath.NotFound;
 				}
 
@@ -275,8 +287,16 @@ namespace Vehicles
 							int cellIndex = cellIndices.CellToIndex(cellIntX, cellIntY);
 							
 							IntVec3 cellToCheck = cellIndices.IndexToCell(cellIndex);
-							Rot8 dirOfPath = Rot8.DirectionFromCells(prevCell, cellToCheck);
-							if (VehicleMod.settings.main.fullVehiclePathing && vehicle.LocationRestrictedBySize(cellToCheck, dirOfPath))
+
+							if (useHPA)
+							{
+								if (!chunks.Cells.Contains(cellToCheck))
+								{
+									continue;
+								}
+							}
+
+							if (VehicleMod.settings.main.fullVehiclePathing && !vehicle.FitsOnCell(cellToCheck)) //TODO - only check width
 							{
 								continue;
 							}
@@ -725,7 +745,13 @@ namespace Vehicles
 		/// <param name="str"></param>
 		private static void DebugFlash(IntVec3 c, Map map, float colorPct, string str)
 		{
-			map.debugDrawer.FlashCell(c, colorPct, str, 50);
+#if DEBUG
+			if (VehicleMod.settings.debug.debugDrawPathfinderSearch)
+			{
+				Thread.Sleep(2);
+			}
+#endif
+			map.debugDrawer.FlashCell(c, colorPct, str, 180);
 		}
 
 		/// <summary>
