@@ -22,7 +22,7 @@ namespace Vehicles
 			{
 				regionLink = new VehicleRegionLink()
 				{
-					span = span
+					Span = span
 				};
 				links.Add(key, regionLink);
 			}

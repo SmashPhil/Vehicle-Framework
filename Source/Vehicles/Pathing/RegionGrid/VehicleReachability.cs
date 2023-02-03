@@ -1,10 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Reflection;
 using System.Linq;
 using Verse;
 using Verse.AI;
 using RimWorld;
 using RimWorld.Planet;
+using UnityEngine;
 using SmashTools;
+using SmashTools.Pathfinding;
+using HarmonyLib;
 
 namespace Vehicles
 {
@@ -17,6 +25,7 @@ namespace Vehicles
 		private readonly VehicleDef createdFor;
 
 		private readonly Queue<VehicleRegion> openQueue = new Queue<VehicleRegion>();
+		private readonly AStar chunkSearch;
 
 		private readonly List<VehicleRegion> startingRegions = new List<VehicleRegion>();
 		private readonly List<VehicleRegion> destRegions = new List<VehicleRegion>();
@@ -32,6 +41,7 @@ namespace Vehicles
 		{
 			this.mapping = mapping;
 			this.createdFor = createdFor;
+			chunkSearch = new AStar(this, mapping, createdFor);
 		}
 
 		/// <summary>
@@ -107,6 +117,22 @@ namespace Vehicles
 			if (region.reachedIndex == reachedIndex)
 			{
 				Log.ErrorOnce($"VehicleRegion is already reached; you can't open it. VehicleRegion={region}", region.GetHashCode());
+				return;
+			}
+			openQueue.Enqueue(region);
+			region.reachedIndex = reachedIndex; //Ensures region links don't back traverse to regions already visited
+		}
+
+		private void QueueChunk(VehicleRegion region)
+		{
+			if (region is null)
+			{
+				Log.ErrorOnce($"[{VehicleHarmony.LogLabel}] Tried to queue null region.", "NullVehicleRegion".GetHashCode());
+				return;
+			}
+			if (region.reachedIndex == reachedIndex)
+			{
+				Log.ErrorOnce($"[{VehicleHarmony.LogLabel}] VehicleRegion has already been reached, attempting to retrace which may result in infinite loops. VehicleRegion={region}", region.GetHashCode());
 				return;
 			}
 			openQueue.Enqueue(region);
@@ -369,60 +395,66 @@ namespace Vehicles
 			return false;
 		}
 
-		public Queue<VehicleRegion> FindChunks(IntVec3 start, LocalTargetInfo dest, PathEndMode peMode, TraverseParms traverseParms)
+		public ChunkSet FindChunks(IntVec3 start, LocalTargetInfo dest, PathEndMode peMode, TraverseParms traverseParms, bool debugDrawSearch = false, float secondsBetweenDrawing = 0)
 		{
-			if (!ValidateCanStart(start, dest, traverseParms, out VehicleDef vehicleDef))
+			if (ValidateCanStart(start, dest, traverseParms, out VehicleDef _))
 			{
-				return null;
-			}
+				openQueue.Clear();
+				reachedIndex++;
 
-			openQueue.Clear();
-			destRegions.Clear();
-			
-			DetermineStartRegions(start);
-			
-			if (peMode == PathEndMode.OnCell)
+				return chunkSearch.Run(start, dest, traverseParms, debugDrawSearch: debugDrawSearch, secondsBetweenDrawing: secondsBetweenDrawing);
+			}
+			Log.Message($"Can't validate for chunk search");
+			return null;
+		}
+
+		private static void MarkRegionForDrawing(VehicleRegion region, Map map, bool drawRegions = true, bool drawLinks = true)
+		{
+			if (drawRegions)
 			{
-				VehicleRegion region = VehicleGridsUtility.GetRegion(dest.Cell, mapping.map, createdFor, RegionType.Set_Passable);
-				if (region != null && region.Allows(traverseParms, true))
+				foreach (IntVec3 cell in region.Cells)
 				{
-					destRegions.Add(region);
+					map.DrawCell_ThreadSafe(cell, colorPct: 0.65f);
 				}
 			}
-			while (openQueue.Count > 0)
+
+			if (drawLinks)
 			{
-				VehicleRegion region = openQueue.Dequeue();
-				foreach (VehicleRegionLink regionLink in region.links)
+				for (int i = 0; i < region.links.Count; i++)
 				{
-					for (int i = 0; i < 2; i++)
+					VehicleRegionLink regionLink = region.links[i];
+					foreach (VehicleRegionLink toRegionLink in region.links)
 					{
-						VehicleRegion linkedRegion = regionLink.regions[i];
-						if (linkedRegion != null && linkedRegion.reachedIndex != reachedIndex && linkedRegion.type.Passable())
-						{
-							if (linkedRegion.Allows(traverseParms, false))
-							{
-								if (destRegions.Contains(linkedRegion))
-								{
-									foreach (VehicleRegion startRegion in startingRegions)
-									{
-										cache.AddCachedResult(startRegion.Room, linkedRegion.Room, traverseParms, true);
-									}
-									return null; //TODO
-								}
-								QueueNewOpenRegion(linkedRegion);
-							}
-						}
+						if (regionLink == toRegionLink) continue;
+						float weight = region.WeightBetween(regionLink, toRegionLink).cost;
+						regionLink.DrawWeight(map, toRegionLink, weight);
 					}
 				}
 			}
-			foreach (VehicleRegion startRegion in startingRegions)
+		}
+
+		private static void MarkLinksForDrawing(VehicleRegion region, Map map, VehicleRegionLink from, VehicleRegionLink to)
+		{
+			float weight = region.WeightBetween(from, to).cost;
+			from.DrawWeight(map, to, weight);
+		}
+
+		private static void MarkConnectedLinksForDrawing(Map map, VehicleRegionLink regionLink)
+		{
+			foreach (VehicleRegionLink drawingRegionLink in regionLink.RegionB.links)
 			{
-				foreach (VehicleRegion destRegion in destRegions)
-				{
-					cache.AddCachedResult(startRegion.Room, destRegion.Room, traverseParms, false);
-				}
+				if (drawingRegionLink.RegionA != regionLink.RegionB && drawingRegionLink.RegionB != regionLink.RegionB) continue;
+				
+				float weight = regionLink.RegionB.WeightBetween(regionLink, drawingRegionLink).cost;
+				regionLink.DrawWeight(map, drawingRegionLink, weight);
 			}
-			return null;
+			foreach (VehicleRegionLink drawingRegionLink in regionLink.RegionA.links)
+			{
+				if (drawingRegionLink.RegionA != regionLink.RegionA && drawingRegionLink.RegionB != regionLink.RegionA) continue;
+
+				float weight = regionLink.RegionA.WeightBetween(regionLink, drawingRegionLink).cost;
+				regionLink.DrawWeight(map, drawingRegionLink, weight);
+			}
 		}
 
 		private bool ValidateCanStart(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, out VehicleDef forVehicleDef)
@@ -439,6 +471,7 @@ namespace Vehicles
 			{
 				if (!vehicle.Spawned)
 				{
+					Log.Error($"Attempting reachability check for unspawned vehicle {vehicle}.");
 					return false;
 				}
 				if (vehicle.Map != mapping.map)
@@ -449,14 +482,17 @@ namespace Vehicles
 			}
 			if (!dest.IsValid)
 			{
+				Debug.Warning($"Destination Invalid.");
 				return false;
 			}
 			if (dest.HasThing && dest.Thing.Map != mapping.map)
 			{
+				Log.Error($"Called CanReach for regions of a different map than destination.  Destination={dest} Map={mapping.map} Destination.Map={dest.Thing.Map}");
 				return false;
 			}
 			if (!start.InBounds(mapping.map) || !dest.Cell.InBounds(mapping.map))
 			{
+				Debug.Warning($"Start or Destination out of bounds for reachability check.");
 				return false;
 			}
 			return true;
@@ -721,6 +757,300 @@ namespace Vehicles
 		private bool CanUseCache(TraverseMode mode)
 		{
 			return mode != TraverseMode.PassAllDestroyableThingsNotWater && mode != TraverseMode.NoPassClosedDoorsOrWater;
+		}
+
+		/// <summary>
+		/// Not using generic pathfinding classes because traversal starts / ends from regions but traverses links with weights
+		/// </summary>
+		/// <returns>ChunkSet containing regions in order towards destination</returns>
+		private class AStar
+		{
+			private const int Status_Invalid = -1;
+			private const int Status_Open = 0;
+			private const int Status_Closed = 1;
+			private const int Status_Starter = 2;
+
+			private readonly PriorityQueue<Node, int> openQueue = new PriorityQueue<Node, int>();
+			private readonly Dictionary<IntVec3, Node> nodes = new Dictionary<IntVec3, Node>();
+
+			private readonly VehicleReachability vehicleReachability;
+			private readonly VehicleMapping mapping;
+			private readonly VehicleDef vehicleDef;
+
+			public AStar(VehicleReachability vehicleReachability, VehicleMapping mapping, VehicleDef vehicleDef)
+			{
+				this.vehicleReachability = vehicleReachability;
+				this.mapping = mapping;
+				this.vehicleDef = vehicleDef;
+			}
+
+			public bool LogRetraceAttempts { get; set; } = true;
+
+			public Map Map => mapping.map;
+
+			public ChunkSet Run(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, bool debugDrawSearch = false, float secondsBetweenDrawing = 0)
+			{
+				if (!InitRegions(start, dest, traverseParms, out VehicleRegion startingRegion, out VehicleRegion destinationRegion))
+				{
+					return null;
+				}
+				
+				if (debugDrawSearch)
+				{
+					CoroutineManager.QueueOrInvoke(() => MarkRegionForDrawing(startingRegion, Map), secondsBetweenDrawing);
+				}
+
+				VehicleRegionLink closestLinkHeuristically = null;
+				VehicleRegionLink closest2ndLinkHeuristically = null;
+				float firstClosest = float.MaxValue;
+				float secondClosest = float.MaxValue;
+				foreach (VehicleRegionLink startingLink in startingRegion.links)
+				{
+					float heuristic = VehicleRegion.EuclideanDistance(dest.Cell, startingLink);
+					if (heuristic < firstClosest)
+					{
+						firstClosest = heuristic;
+						secondClosest = firstClosest;
+						closestLinkHeuristically = startingLink;
+						closest2ndLinkHeuristically = closestLinkHeuristically;
+					}
+				}
+
+				//Start from link with smallest heuristic
+				VehicleRegion otherClosestHeuristic = closestLinkHeuristically.GetOtherRegion(startingRegion);
+				Node startingNodeHeuristic = CreateNode(dest.Cell, null, closestLinkHeuristically, startingRegion, otherClosestHeuristic, 0); //Null previous, shouldn't backtrack past starting nodes
+				startingNodeHeuristic.status = Status_Starter;
+				nodes[closestLinkHeuristically.anchor] = startingNodeHeuristic;
+				openQueue.Enqueue(startingNodeHeuristic, startingNodeHeuristic.cost + startingNodeHeuristic.heuristicCost);
+
+				//Queue 2nd closest link with slightly higher cost for sweeping 2 directions at start
+				if (closest2ndLinkHeuristically != null)
+				{
+					otherClosestHeuristic = closest2ndLinkHeuristically.GetOtherRegion(startingRegion);
+					Node startingNode2Heuristic = CreateNode(dest.Cell, null, closest2ndLinkHeuristically, startingRegion, otherClosestHeuristic, 1); //Null previous, shouldn't backtrack past starting nodes
+					startingNode2Heuristic.status = Status_Starter;
+					nodes[closest2ndLinkHeuristically.anchor] = startingNode2Heuristic;
+					openQueue.Enqueue(startingNode2Heuristic, startingNode2Heuristic.cost + startingNode2Heuristic.heuristicCost);
+				}
+
+				try
+				{
+					while (openQueue.Count > 0)
+					{
+						if (!openQueue.TryDequeue(out Node current, out int priority))
+						{
+							Log.Error($"Failed to dequeue node. Count={openQueue.Count}");
+							goto PathNotFound;
+						}
+						if (!current.IsOpen && current.status != Status_Starter)
+						{
+							Log.Error($"Attempting to open node which isn't open and isn't starting node. Node={current}");
+							continue;
+						}
+
+						//Sweep in all directions to neighboring links
+						foreach (VehicleRegionLink neighbor in Neighbors(current))
+						{
+							Node node = GetNode(dest.Cell, current, neighbor);
+							if (!node.Passable || !node.Allows(traverseParms))
+							{
+								node.status = Status_Invalid;
+							}
+
+							if (node.IsOpen)
+							{
+								//Cache node in back-traversal dict
+								nodes[neighbor.anchor] = node;
+								node.previous = current;
+
+								NodeRegions(current, neighbor, out VehicleRegion inFacingRegion, out VehicleRegion otherRegion);
+
+								//Check if destination reached
+								if (otherRegion == destinationRegion)
+								{
+									if (debugDrawSearch) CoroutineManager.QueueOrInvoke(() => MarkLinksForDrawing(inFacingRegion, Map, current.regionLink, neighbor), secondsBetweenDrawing);
+									return SolvePath(startingRegion, destinationRegion, current);
+								}
+								//Queue for traversal of neighbors
+								openQueue.Enqueue(node, node.cost + node.heuristicCost);
+
+								if (debugDrawSearch)
+								{
+									CoroutineManager.QueueOrInvoke(() => MarkLinksForDrawing(inFacingRegion, Map, current.regionLink, neighbor), secondsBetweenDrawing);
+								}
+							}
+						}
+						current.status = Status_Closed;
+					}
+					PathNotFound:;
+					Log.Error($"Unable to find path from {startingRegion} to {destinationRegion}.");
+					return null;
+				}
+				finally
+				{
+					CleanUp();
+				}
+			}
+
+			private Node GetNode(IntVec3 dest, Node current, VehicleRegionLink neighbor)
+			{
+				if (nodes.TryGetValue(neighbor.anchor, out Node node))
+				{
+					return node;
+				}
+
+				NodeRegions(current, neighbor, out VehicleRegion inFacingRegion, out VehicleRegion otherRegion);
+
+				int cost = inFacingRegion.WeightBetween(current.regionLink, neighbor).cost;
+				return CreateNode(dest, current, neighbor, inFacingRegion, otherRegion, cost);
+			}
+
+			private Node CreateNode(IntVec3 dest, Node current, VehicleRegionLink regionLink, VehicleRegion regionA, VehicleRegion regionB, int cost)
+			{
+				Node node = new Node(regionLink, regionA, regionB);
+				node.cost = cost;
+				node.heuristicCost = VehicleRegion.EuclideanDistance(dest, regionLink);
+				return node;
+			}
+
+			private IEnumerable<VehicleRegionLink> Neighbors(Node node)
+			{
+				foreach (VehicleRegionLink regionLink in node.regionA.links)
+				{
+					if (regionLink != node.regionLink && (!nodes.TryGetValue(regionLink.anchor, out Node neighborNode) || neighborNode.IsOpen))
+					{
+						yield return regionLink;
+					}
+				}
+				foreach (VehicleRegionLink regionLink in node.regionB.links)
+				{
+					if (regionLink != node.regionLink && (!nodes.TryGetValue(regionLink.anchor, out Node neighborNode) || neighborNode.IsOpen))
+					{
+						yield return regionLink;
+					}
+				}
+			}
+
+			private bool InitRegions(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, out VehicleRegion startingRegion, out VehicleRegion destinationRegion)
+			{
+				startingRegion = vehicleReachability.RegionGrid.GetValidRegionAt(start);
+				destinationRegion = null;
+				if (startingRegion == null)
+				{
+					Log.Error($"Unable to fetch valid starting region at {start}.");
+					return false;
+				}
+				destinationRegion = VehicleGridsUtility.GetRegion(dest.Cell, mapping.map, vehicleReachability.createdFor, RegionType.Set_Passable);
+				if (startingRegion == null || !destinationRegion.Allows(traverseParms, true))
+				{
+					Log.Error($"Unable to fetch valid starting region that allows traverseParms={traverseParms} at {start}.");
+					return false;
+				}
+				if (startingRegion == destinationRegion)
+				{
+					return false; //no need for HPA* in same region
+				}
+				return true;
+			}
+
+			private void NodeRegions(Node current, VehicleRegionLink neighbor, out VehicleRegion inFacingRegion, out VehicleRegion otherRegion)
+			{
+				inFacingRegion = current.regionLink.GetInFacingRegion(neighbor);
+				otherRegion = neighbor.GetOtherRegion(inFacingRegion);
+			}
+
+			private ChunkSet SolvePath(VehicleRegion start, VehicleRegion destination, Node finalNode)
+			{
+				HashSet<VehicleRegion> result = new HashSet<VehicleRegion>();
+				
+				//Pre-add destination region and in-facing region from starting node, start at link
+				Node node = finalNode;
+				result.Add(destination);
+				result.Add(node.regionB);
+				//result.AddRange(destination.Neighbors);
+
+				//Limit to total nodes traversed to avoid infinite loop
+				for (int i = 0; i < nodes.Count; i++)
+				{
+					node = node.previous;
+
+					//Will add duplicates but gets filtered out when building cells in ChunkList
+					result.Add(node.regionA);
+					result.Add(node.regionB);
+
+					//Ensure node doesn't reach incorrect destination with no backtrack available
+					if (node == null || node == node.previous)
+					{
+						SmashLog.Error($"Unable to find hierarchal path from {start} to {destination}.  Couldn't backtrack {node} to starting node.");
+						return null;
+					}
+
+					//RegionA (in-facing) may be the starting region is chunk traverses backwards from closest link heuristically
+					if (node.regionA == start || node.regionB == start)
+					{
+						//result.Add(start);
+						//result.Reverse(); //No need for reversal
+
+						foreach (VehicleRegion region in result)
+						{
+							MarkRegionForDrawing(region, Map, drawLinks: false);
+						}
+						return new ChunkSet(result);
+					}
+				}
+				SmashLog.Error($"Ran out of nodes to backtrace for solution.");
+				return null;
+			}
+
+			private void CleanUp()
+			{
+				openQueue.Clear();
+				nodes.Clear();
+			}
+
+			private class Node
+			{
+				public VehicleRegionLink regionLink;
+				public Node previous;
+
+				public VehicleRegion regionA; //in-facing region
+				public VehicleRegion regionB; //out-facing region
+
+				public int cost;
+				public int heuristicCost;
+				public int status;
+
+				//Initializes as newly opened node
+				public Node(VehicleRegionLink regionLink, VehicleRegion regionA, VehicleRegion regionB)
+				{
+					this.regionLink = regionLink;
+
+					this.regionA = regionA;
+					this.regionB = regionB;
+
+					cost = 0;
+					heuristicCost = 0;
+					status = Status_Open;
+				}
+
+				public IntVec3 Pos => regionLink.anchor;
+
+				public bool IsOpen => status == Status_Open;
+
+				public bool Passable => regionA != null && regionA.type.Passable() && regionB != null && regionB.type.Passable();
+
+				public bool Allows(TraverseParms traverseParms) => regionA.Allows(traverseParms, false) && regionB.Allows(traverseParms, false);
+
+				public override string ToString()
+				{
+					return Pos.ToString();
+				}
+
+				public override int GetHashCode()
+				{
+					return Pos.GetHashCode();
+				}
+			}
 		}
 	}
 }

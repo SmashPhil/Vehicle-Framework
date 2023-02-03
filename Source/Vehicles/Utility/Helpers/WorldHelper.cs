@@ -192,75 +192,47 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Change <paramref name="tileID"/> if tile is within CoastRadius of a coast <see cref="VehiclesModSettings"/>
+		/// Change <paramref name="tile"/> if tile is within CoastRadius of a coast <see cref="VehiclesModSettings"/>
 		/// </summary>
-		/// <param name="tileID"></param>
+		/// <param name="tile"></param>
 		/// <param name="faction"></param>
-		/// <returns>new tileID if a nearby coast is found or <paramref name="tileID"/> if not found</returns>
-		public static int PushSettlementToCoast(int tileID, Faction faction)
+		/// <returns>new tileID if a nearby coast is found or <paramref name="tile"/> if not found</returns>
+		public static int PushSettlementToCoast(int tile, Faction faction)
 		{
 			if (VehicleMod.CoastRadius <= 0)
 			{
-				return tileID;
+				return tile;
+			}
+
+			if (Find.World.CoastDirectionAt(tile).IsValid)
+			{
+				if (Find.WorldGrid[tile].biome.canBuildBase && !(faction is null))
+				{
+					VehicleHarmony.tiles.Add(new Pair<int, int>(tile, 0));
+				}
+				return tile;
 			}
 
 			List<int> neighbors = new List<int>();
-			Stack<int> stack = new Stack<int>();
-			stack.Push(tileID);
-			Stack<int> stackFull = stack;
-			List<int> newTilesSearch = new List<int>();
-			HashSet<int> allSearchedTiles = new HashSet<int>() { tileID };
-			int searchTile;
-			int searchedRadius = 0;
-
-			if (Find.World.CoastDirectionAt(tileID).IsValid)
+			return Ext_World.BFS(tile, neighbors, VehicleMod.CoastRadius, result: delegate (int currentTile, int currentRadius)
 			{
-				if (Find.WorldGrid[tileID].biome.canBuildBase && !(faction is null))
+				if (Find.World.CoastDirectionAt(currentTile).IsValid)
 				{
-					VehicleHarmony.tiles.Add(new Pair<int, int>(tileID, 0));
-				}
-				return tileID;
-			}
-
-			while (searchedRadius < VehicleMod.CoastRadius)
-			{
-				for (int j = 0; j < stackFull.Count; j++)
-				{
-					searchTile = stack.Pop();
-					Find.WorldGrid.GetTileNeighbors(searchTile, neighbors);
-					int count = neighbors.Count;
-					for (int i = 0; i < count; i++)
+					if (Find.WorldGrid[currentTile].biome.canBuildBase && Find.WorldGrid[currentTile].biome.implemented && Find.WorldGrid[currentTile].hilliness != Hilliness.Impassable)
 					{
-						if (allSearchedTiles.NotNullAndAny(x => x == neighbors[i]))
+						if (VehicleHarmony.debug && !(faction is null))
 						{
-							continue;
+							DebugHelper.DebugDrawSettlement(tile, currentTile);
 						}
-						newTilesSearch.Add(neighbors[i]);
-						allSearchedTiles.Add(neighbors[i]);
-						if (Find.World.CoastDirectionAt(neighbors[i]).IsValid)
+						if (faction != null)
 						{
-							if (Find.WorldGrid[neighbors[i]].biome.canBuildBase && Find.WorldGrid[neighbors[i]].biome.implemented && Find.WorldGrid[neighbors[i]].hilliness != Hilliness.Impassable)
-							{
-								if (VehicleHarmony.debug && !(faction is null))
-								{
-									DebugHelper.DebugDrawSettlement(tileID, neighbors[i]);
-								}
-								if (faction != null)
-								{
-									VehicleHarmony.tiles.Add(new Pair<int, int>(neighbors[i], searchedRadius));
-								}
-								return neighbors[i];
-							}
+							VehicleHarmony.tiles.Add(new Pair<int, int>(currentTile, currentRadius));
 						}
+						return true;
 					}
 				}
-				stack.Clear();
-				stack = new Stack<int>(newTilesSearch);
-				stackFull = stack;
-				newTilesSearch.Clear();
-				searchedRadius++;
-			}
-			return tileID;
+				return false;
+			});
 		}
 
 		/// <summary>

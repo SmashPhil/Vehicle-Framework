@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using RimWorld;
@@ -29,7 +30,9 @@ namespace Vehicles
 		private VehicleRoom room;
 		public Building_Door door;
 
-		public readonly List<VehicleRegionLink> links = new List<VehicleRegionLink>();
+		public List<VehicleRegionLink> links = new List<VehicleRegionLink>();
+		public Dictionary<int, Weight> weights = new Dictionary<int, Weight>();
+
 		private readonly List<KeyValuePair<Pawn, Danger>> cachedDangers = new List<KeyValuePair<Pawn, Danger>>();
 
 		public uint[] closedIndex = new uint[VehicleRegionTraverser.NumWorkers];
@@ -119,7 +122,6 @@ namespace Vehicles
 						}
 					}
 				}
-				yield break;
 			}
 		}
 
@@ -277,6 +279,65 @@ namespace Vehicles
 			}
 		}
 
+		public void AddLink(VehicleRegionLink regionLink)
+		{
+			links.Add(regionLink);
+		}
+
+		public bool RemoveLink(VehicleRegionLink regionLink)
+		{
+			if (links.Remove(regionLink))
+			{
+				RecalculateWeights();
+				return true;
+			}
+			return false;
+		}
+
+		public Weight WeightBetween(VehicleRegionLink linkA, VehicleRegionLink linkB)
+		{
+			int hash = HashBetween(linkA, linkB);
+			if (weights.TryGetValue(hash, out Weight weight))
+			{
+				return weight;
+			}
+			Log.Error($"Unable to pull weight between {linkA.anchor} and {linkB.anchor}");
+			return new Weight(linkA, linkB, 999);
+		}
+
+		public void RecalculateWeights()
+		{
+			weights = new Dictionary<int, Weight>();
+			for (int i = 0; i < links.Count; i++)
+			{
+				VehicleRegionLink regionLink = links[i];
+				foreach (VehicleRegionLink connectingToLink in links)
+				{
+					if (regionLink == connectingToLink) continue; //Skip matching link
+					
+					int weight = EuclideanDistance(regionLink.anchor, connectingToLink);
+					weights[HashBetween(regionLink,  connectingToLink)] = new Weight(regionLink, connectingToLink, weight);
+				}
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int HashBetween(VehicleRegionLink linkA, VehicleRegionLink linkB)
+		{
+			return linkA.anchor.GetHashCode() + linkB.anchor.GetHashCode();
+		}
+
+		/// <summary>
+		/// Doesn't take movement ticks into account
+		/// </summary>
+		/// <param name="cell"></param>
+		/// <param name="link"></param>
+		public static int EuclideanDistance(IntVec3 cell, VehicleRegionLink link)
+		{
+			IntVec3 diff = cell - link.anchor;
+			return Mathf.RoundToInt(Mathf.Sqrt(Mathf.Pow(diff.x, 2) + Mathf.Pow(diff.z, 2)));
+		}
+
 		/// <summary>
 		/// Create new region for <paramref name="vehicleDef"/>
 		/// </summary>
@@ -383,13 +444,9 @@ namespace Vehicles
 		/// </summary>
 		public void DecrementMapIndex()
 		{
-			if(mapIndex <= 0)
+			if (mapIndex <= 0)
 			{
-				Log.Warning(string.Concat(new object[]
-				{
-					"Tried to decrement map index for water region ",
-					id, ", but mapIndex=", mapIndex
-				}));
+				Log.Warning($"Tried to decrement map index for vehicle region {id} but mapIndex={mapIndex}");
 				return;
 			}
 			mapIndex = (sbyte)(mapIndex - 1);
@@ -458,9 +515,49 @@ namespace Vehicles
 					//Flash every other second
 					if (Mathf.RoundToInt(Time.realtimeSinceStartup * 2f) % 2 == 1)
 					{
-						foreach (IntVec3 c in regionLink.span.Cells)
+						foreach (IntVec3 c in regionLink.Span.Cells)
 						{
 							CellRenderer.RenderCell(c, DebugSolidColorMats.MaterialOf(Color.magenta));
+						}
+					}
+				}
+			}
+			if (debugRegionType.HasFlag(DebugRegionType.Weights))
+			{
+				Log.Clear();
+				for (int i = 0; i < links.Count; i++)
+				{
+					VehicleRegionLink regionLink = links[i];
+					foreach (VehicleRegionLink toRegionLink in links)
+					{
+						if (regionLink == toRegionLink) continue;
+						
+						float weight = weights[HashBetween(regionLink, toRegionLink)].cost;
+						Vector3 from = regionLink.anchor.ToVector3();
+						from.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
+						Vector3 to = toRegionLink.anchor.ToVector3();
+						to.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
+						GenDraw.DrawLineBetween(from, to, VehicleRegionLink.WeightColor(weight));
+					}
+				}
+
+				foreach (VehicleRegion region in Neighbors)
+				{
+					for (int i = 0; i < region.links.Count; i++)
+					{
+						VehicleRegionLink regionLink = region.links[i];
+						
+						foreach (VehicleRegionLink toRegionLink in region.links)
+						{
+							if (regionLink == toRegionLink) continue;
+							if (regionLink.RegionA != this && regionLink.RegionB != this) continue;
+
+							float weight = region.weights[HashBetween(regionLink, toRegionLink)].cost;
+							Vector3 from = regionLink.anchor.ToVector3();
+							from.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
+							Vector3 to = toRegionLink.anchor.ToVector3();
+							to.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
+							GenDraw.DrawLineBetween(from, to, VehicleRegionLink.WeightColor(weight));
 						}
 					}
 				}
@@ -519,6 +616,22 @@ namespace Vehicles
 		public override bool Equals(object obj)
 		{
 			return obj is VehicleRegion region && region.id == id;
+		}
+
+		public struct Weight
+		{
+			public VehicleRegionLink linkA;
+			public VehicleRegionLink linkB;
+			public int cost;
+
+			public bool IsValid => linkA != null && linkB != null;
+
+			public Weight(VehicleRegionLink linkA, VehicleRegionLink linkB, int cost)
+			{
+				this.linkA = linkA;
+				this.linkB = linkB;
+				this.cost = cost;
+			}
 		}
 	}
 }

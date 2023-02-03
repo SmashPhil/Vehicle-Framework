@@ -74,16 +74,34 @@ namespace Vehicles
 			{
 				RecalculateAllPerceivedPathCosts();
 			}
-			if (DebugHelper.World.VehicleDef != null && Find.WorldSelector.selectedTile >= 0 && Find.TickManager.TicksGame % 10 == 0)
+			if (DebugHelper.World.VehicleDef != null && Find.WorldSelector.selectedTile >= 0 && Find.TickManager.TicksGame % 30 == 0) //Twice per second at 60fps
 			{
-				int tile = Find.WorldSelector.selectedTile;
-				List<int> neighbors = new List<int>();
-				Find.WorldGrid.GetTileNeighbors(tile, neighbors);
-
-				Find.World.debugDrawer.FlashTile(tile, text: movementDifficulty[DebugHelper.World.VehicleDef][tile].ToString(), duration: 10);
-				foreach (int neighborTile in neighbors)
+				if (DebugHelper.World.DebugType == WorldPathingDebugType.PathCosts)
 				{
-					Find.World.debugDrawer.FlashTile(neighborTile, text: movementDifficulty[DebugHelper.World.VehicleDef][neighborTile].ToString(), duration: 10);
+					int tile = Find.WorldSelector.selectedTile;
+					List<int> neighbors = new List<int>();
+					Find.WorldGrid.GetTileNeighbors(tile, neighbors);
+
+					float cost = movementDifficulty[DebugHelper.World.VehicleDef][tile];
+					Find.World.debugDrawer.FlashTile(tile, colorPct: cost * 10 / ImpassableMovementDifficulty, text: cost.ToString(), duration: 15);
+					foreach (int neighborTile in neighbors)
+					{
+						Find.World.debugDrawer.FlashTile(neighborTile, text: movementDifficulty[DebugHelper.World.VehicleDef][neighborTile].ToString(), duration: 30);
+					}
+				}
+				else if (DebugHelper.World.DebugType == WorldPathingDebugType.Reachability)
+				{
+					int tile = Find.WorldSelector.selectedTile;
+					List<int> neighbors = new List<int>();
+					Ext_World.BFS(tile, neighbors, radius: 10);
+
+					Find.World.debugDrawer.FlashTile(tile, colorPct: 0.8f, duration: 30);
+					foreach (int neighbor in neighbors)
+					{
+						bool canReach = Find.World.GetCachedWorldComponent<WorldVehicleReachability>().CanReach(vehicleDef: DebugHelper.World.VehicleDef, tile, neighbor);
+						float colorPct = canReach ? 0.55f : 0f;
+						Find.World.debugDrawer.FlashTile(neighbor, colorPct: colorPct, duration: 30);
+					}
 				}
 			}
 		}

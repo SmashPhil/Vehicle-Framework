@@ -176,15 +176,12 @@ namespace Vehicles
 				region.links[i].Deregister(region, createdFor);
 			}
 			region.links.Clear();
+			region.weights.Clear();
 			if (addCellsToDirtyCells)
 			{
 				foreach (IntVec3 intVec in region.Cells)
 				{
 					dirtyCells.Add(intVec);
-					if (DebugViewSettings.drawRegionDirties)
-					{
-						mapping.map.debugDrawer.FlashCell(intVec, 0f, null, 50);
-					}
 				}
 			}
 		}
