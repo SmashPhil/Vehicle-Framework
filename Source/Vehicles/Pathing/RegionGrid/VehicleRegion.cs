@@ -301,8 +301,8 @@ namespace Vehicles
 			{
 				return weight;
 			}
-			Log.Error($"Unable to pull weight between {linkA} and {linkB}");
-			return new Weight(linkA, linkB, 1);
+			Log.Error($"Unable to pull weight between {linkA.anchor} and {linkB.anchor}");
+			return new Weight(linkA, linkB, 999);
 		}
 
 		public void RecalculateWeights()
@@ -315,7 +315,7 @@ namespace Vehicles
 				{
 					if (regionLink == connectingToLink) continue; //Skip matching link
 					
-					int weight = RegionLinkDistance(regionLink.anchor, connectingToLink, 1);
+					int weight = EuclideanDistance(regionLink.anchor, connectingToLink);
 					weights[HashBetween(regionLink,  connectingToLink)] = new Weight(regionLink, connectingToLink, weight);
 				}
 			}
@@ -324,14 +324,18 @@ namespace Vehicles
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int HashBetween(VehicleRegionLink linkA, VehicleRegionLink linkB)
 		{
-			return linkA.GetHashCode() ^ linkB.GetHashCode();
+			return linkA.anchor.GetHashCode() + linkB.anchor.GetHashCode();
 		}
 
-		public int RegionLinkDistance(IntVec3 cell, VehicleRegionLink link, int minPathCost)
+		/// <summary>
+		/// Doesn't take movement ticks into account
+		/// </summary>
+		/// <param name="cell"></param>
+		/// <param name="link"></param>
+		public static int EuclideanDistance(IntVec3 cell, VehicleRegionLink link)
 		{
 			IntVec3 diff = cell - link.anchor;
-			(int x, int z) abs = (Math.Abs(diff.x), Math.Abs(diff.z));
-			return VehicleRegionCostCalculator.OctileDistance(abs.x, abs.z) + (minPathCost * Math.Max(abs.x, abs.z)) + (minPathCost * Math.Min(abs.x, abs.z));
+			return Mathf.RoundToInt(Mathf.Sqrt(Mathf.Pow(diff.x, 2) + Mathf.Pow(diff.z, 2)));
 		}
 
 		/// <summary>
@@ -440,13 +444,9 @@ namespace Vehicles
 		/// </summary>
 		public void DecrementMapIndex()
 		{
-			if(mapIndex <= 0)
+			if (mapIndex <= 0)
 			{
-				Log.Warning(string.Concat(new object[]
-				{
-					"Tried to decrement map index for water region ",
-					id, ", but mapIndex=", mapIndex
-				}));
+				Log.Warning($"Tried to decrement map index for vehicle region {id} but mapIndex={mapIndex}");
 				return;
 			}
 			mapIndex = (sbyte)(mapIndex - 1);
@@ -524,6 +524,7 @@ namespace Vehicles
 			}
 			if (debugRegionType.HasFlag(DebugRegionType.Weights))
 			{
+				Log.Clear();
 				for (int i = 0; i < links.Count; i++)
 				{
 					VehicleRegionLink regionLink = links[i];
@@ -532,7 +533,32 @@ namespace Vehicles
 						if (regionLink == toRegionLink) continue;
 						
 						float weight = weights[HashBetween(regionLink, toRegionLink)].cost;
-						regionLink.DrawWeight(toRegionLink, weight);
+						Vector3 from = regionLink.anchor.ToVector3();
+						from.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
+						Vector3 to = toRegionLink.anchor.ToVector3();
+						to.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
+						GenDraw.DrawLineBetween(from, to, VehicleRegionLink.WeightColor(weight));
+					}
+				}
+
+				foreach (VehicleRegion region in Neighbors)
+				{
+					for (int i = 0; i < region.links.Count; i++)
+					{
+						VehicleRegionLink regionLink = region.links[i];
+						
+						foreach (VehicleRegionLink toRegionLink in region.links)
+						{
+							if (regionLink == toRegionLink) continue;
+							if (regionLink.RegionA != this && regionLink.RegionB != this) continue;
+
+							float weight = region.weights[HashBetween(regionLink, toRegionLink)].cost;
+							Vector3 from = regionLink.anchor.ToVector3();
+							from.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
+							Vector3 to = toRegionLink.anchor.ToVector3();
+							to.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
+							GenDraw.DrawLineBetween(from, to, VehicleRegionLink.WeightColor(weight));
+						}
 					}
 				}
 			}

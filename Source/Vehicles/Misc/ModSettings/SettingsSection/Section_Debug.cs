@@ -75,6 +75,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref debugDrawVehiclePathCosts, nameof(debugDrawVehiclePathCosts));
 			Scribe_Values.Look(ref debugDrawPathfinderSearch, nameof(debugDrawPathfinderSearch));
 			Scribe_Values.Look(ref hierarchalPathfinding, nameof(hierarchalPathfinding), defaultValue: true);
+			//hierarchalPathfinding = false; //temporarily hardcoded to false to avoid use of HPA* while unfinished
 		}
 
 		public override void DrawSection(Rect rect)
@@ -108,6 +109,7 @@ namespace Vehicles
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawVehiclePathingCosts".Translate(), ref debugDrawVehiclePathCosts, "VF_DevMode_DebugDrawVehiclePathingCostsTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawPathfinderSearch".Translate(), ref debugDrawPathfinderSearch, "VF_DevMode_DebugDrawPathfinderSearchTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugHierarchalPathfinding".Translate(), ref hierarchalPathfinding, "VF_DevMode_DebugHierarchalPathfindingTooltip".Translate());
+				
 				if (listingStandard.ButtonText("VF_DevMode_DebugPathfinderDebugging".Translate(), "VF_DevMode_DebugPathfinderDebuggingTooltip".Translate()))
 				{
 					RegionDebugMenu();

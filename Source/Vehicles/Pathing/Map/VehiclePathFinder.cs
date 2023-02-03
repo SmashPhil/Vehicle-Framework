@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,6 +26,7 @@ namespace Vehicles
 		public const int DefaultMoveTicksDiagonal = 18;
 		private const int SearchLimit = 160000;
 		private const int TurnCostTicks = 1;
+		private const float SecondsBetweenDraws = 0;
 
 		internal Dictionary<IntVec3, int> postCalculatedCells = new Dictionary<IntVec3, int>();
 		internal Dictionary<IntVec3, int> postCalculatedTurns = new Dictionary<IntVec3, int>();
@@ -216,12 +218,12 @@ namespace Vehicles
 			int ticksCardinal = vehicle.TicksPerMoveCardinal;
 			int ticksDiagonal = vehicle.TicksPerMoveDiagonal;
 
-			ChunkList chunks = null;
+			ChunkSet chunks = null;
 			if (VehicleMod.settings.debug.hierarchalPathfinding)
 			{
 				try
 				{
-					chunks = mapping[vehicleDef].VehicleReachability.FindChunks(start, dest, PathEndMode.OnCell, traverseParms, debugDrawSearch: drawPaths);
+					chunks = mapping[vehicleDef].VehicleReachability.FindChunks(start, dest, PathEndMode.OnCell, traverseParms, debugDrawSearch: drawPaths, SecondsBetweenDraws);
 				}
 				catch (Exception ex)
 				{
@@ -234,7 +236,7 @@ namespace Vehicles
 			CalculateAndAddDisallowedCorners(traverseParms, peMode, cellRect);
 			InitStatusesAndPushStartNode(ref startIndex, start);
 			int iterations = 0;
-			for (;;)
+			while (true)
 			{
 				if (token.IsCancellationRequested)
 				{
@@ -726,32 +728,26 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Flash <paramref name="str"/> for debugging
+		/// Flash <paramref name="label"/> for debugging
 		/// </summary>
-		/// <param name="c"></param>
+		/// <param name="cell"></param>
 		/// <param name="colorPct"></param>
-		/// <param name="str"></param>
-		private void DebugFlash(IntVec3 c, float colorPct, string str)
+		/// <param name="label"></param>
+		private void DebugFlash(IntVec3 cell, float colorPct, string label)
 		{
-			DebugFlash(c, mapping.map, colorPct, str);
+			DebugFlash(cell, mapping.map, colorPct, label);
 		}
 
 		/// <summary>
 		/// Flash <paramref name="str"/> on <paramref name="map"/> for debugging
 		/// </summary>
-		/// <param name="c"></param>
+		/// <param name="cell"></param>
 		/// <param name="map"></param>
 		/// <param name="colorPct"></param>
-		/// <param name="str"></param>
-		private static void DebugFlash(IntVec3 c, Map map, float colorPct, string str)
+		/// <param name="label"></param>
+		private static void DebugFlash(IntVec3 cell, Map map, float colorPct, string label, int duration = 50)
 		{
-#if DEBUG
-			if (VehicleMod.settings.debug.debugDrawPathfinderSearch)
-			{
-				Thread.Sleep(2);
-			}
-#endif
-			map.debugDrawer.FlashCell(c, colorPct, str, 180);
+			CoroutineManager.QueueOrInvoke(() => map.DrawCell_ThreadSafe(cell, colorPct, label, duration), SecondsBetweenDraws);
 		}
 
 		/// <summary>
@@ -825,8 +821,8 @@ namespace Vehicles
 				while (openList.Count > 0)
 				{
 					int index = openList.Pop().index;
-					IntVec3 c = new IntVec3(index % mapSizeX, 0, index / mapSizeX);
-					mapping.map.debugDrawer.FlashCell(c, 0f, "open", 50);
+					IntVec3 cell = new IntVec3(index % mapSizeX, 0, index / mapSizeX);
+					DebugFlash(cell, 0, "open");
 				}
 			}
 		}
@@ -840,9 +836,9 @@ namespace Vehicles
 		{
 			if (VehicleMod.settings.debug.debugDrawVehiclePathCosts)
 			{
-				foreach (KeyValuePair<IntVec3, int> pathCells in postCalculatedCells)
+				foreach ((IntVec3 cell, int cost) in postCalculatedCells)
 				{
-					mapping.map.debugDrawer.FlashCell(pathCells.Key, colorPct, pathCells.Value.ToString(), duration);
+					DebugFlash(cell, mapping.map, colorPct, cost.ToString(), duration: duration);
 				}
 			}
 		}

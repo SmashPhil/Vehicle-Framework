@@ -12,20 +12,20 @@ namespace Vehicles
 	/// </summary>
 	public class VehicleRegionLink
 	{
-		private const float WeightColorCeiling = 400;
+		private const float WeightColorCeiling = 30;
 
 		public VehicleRegion[] regions = new VehicleRegion[2];
 
 		private EdgeSpan span;
 
 		public IntVec3 anchor;
-		//public IntVec3[] anchors = new IntVec3[3];
 
 		private static readonly LinearPool<SimpleColor> colorWeights = new LinearPool<SimpleColor>
 		{
 			range = new FloatRange(0, WeightColorCeiling),
 			items = new List<SimpleColor>()
 			{
+				SimpleColor.White,
 				SimpleColor.Green,
 				SimpleColor.Yellow,
 				SimpleColor.Orange,
@@ -124,18 +124,22 @@ namespace Vehicles
 
 		public void ResetAnchors()
 		{
-			//anchors[0] = Span.root;
 			anchor = VehicleRegionCostCalculator.RegionLinkCenter(this);
-			//anchors[2] = CellInSpan(Span, Span.length - 1);
 		}
 
-		public void DrawWeight(VehicleRegionLink regionLink, float weight)
+		/// <summary>
+		/// Draws <paramref name="weight"/> on map from this link to <paramref name="regionLink"/>
+		/// </summary>
+		/// <param name="map"></param>
+		/// <param name="regionLink"></param>
+		/// <param name="weight"></param>
+		public void DrawWeight(Map map, VehicleRegionLink regionLink, float weight, int duration = 50)
 		{
 			Vector3 from = anchor.ToVector3();
 			from.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
 			Vector3 to = regionLink.anchor.ToVector3();
 			to.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
-			GenDraw.DrawLineBetween(from, to, WeightColor(weight));
+			map.DrawLine_ThreadSafe(from, to, color: WeightColor(weight), duration: duration);
 		}
 
 		private static IntVec3 CellInSpan(EdgeSpan span, int length)

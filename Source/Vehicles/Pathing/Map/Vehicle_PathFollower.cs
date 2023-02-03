@@ -56,7 +56,7 @@ namespace Vehicles
 
 		private int failedToFindCloseUnoccupiedCellTicks = -999999;
 
-		private CancellationTokenSource cts = new CancellationTokenSource();
+		private List<CancellationTokenSource> tokenSources = new List<CancellationTokenSource>();
 
 		public Vehicle_PathFollower(VehiclePawn vehicle)
 		{
@@ -513,7 +513,7 @@ namespace Vehicles
 				{
 					vehicle.Map.snowGrid.AddDepth(vehicle.Position, -SnowReductionFromWalking); //REDO
 				}
-				if (NeedNewPath() && (!TrySetNewPath_Threaded() || curPath == null))
+				if (NeedNewPath() && (!TrySetNewPath() || curPath == null))
 				{
 					return;
 				}
@@ -703,25 +703,18 @@ namespace Vehicles
 
 		public async Task<PawnPath> GenerateNewPath_Async()
 		{
-			if (cts != null)
+			if (!tokenSources.NullOrEmpty())
 			{
-				cts.Cancel(); //Time out any existing requests
-				cts.Dispose();
+				foreach (CancellationTokenSource activeTokenSources in tokenSources)
+				{
+					activeTokenSources.Cancel();
+				}
 			}
+			CancellationTokenSource tokenSource = new CancellationTokenSource();
+			tokenSources.Add(tokenSource);
 			try
 			{
-				cts = new CancellationTokenSource();
-				PawnPath pawnPath = await TaskManager.RunAsync(GenerateNewPath, cts.Token);
-
-				try
-				{
-					cts.Cancel();
-					cts.Dispose();
-				}
-				catch (Exception ex)
-				{
-					SmashLog.ErrorLabel(VehicleHarmony.LogLabel, $"Unable to cancel and dispose remaining tasks. \nException: {ex.Message} \nStack: {ex.StackTrace}");
-				}
+				PawnPath pawnPath = await TaskManager.RunAsync(GenerateNewPath, tokenSource.Token);
 
 				if (pawnPath == null || !pawnPath.Found)
 				{ 
@@ -741,12 +734,12 @@ namespace Vehicles
 					Log.Error($"InnerException {exIndex}: {innerEx.Message} \nStackTrace: {innerEx.StackTrace} \nSource: {innerEx.Source}");
 					exIndex++;
 				}
-				cts.Cancel();
-				cts.Dispose();
 			}
 			finally
 			{
-				cts = null;
+				tokenSource.Dispose();
+				tokenSources.Remove(tokenSource);
+				tokenSource = null;
 			}
 			return PawnPath.NotFound;
 		}
