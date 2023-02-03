@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -22,7 +23,7 @@ namespace Vehicles
 		/// <summary>
 		/// Store entire pathGrid for each <see cref="VehicleDef"/>
 		/// </summary>
-		public Dictionary<VehicleDef, float[]> movementDifficulty;
+		public ConcurrentDictionary<VehicleDef, float[]> movementDifficulty;
 
 		private int allPathCostsRecalculatedDayOfYear = -1;
 
@@ -57,7 +58,7 @@ namespace Vehicles
 		/// </summary>
 		public void ResetPathGrid()
 		{
-			movementDifficulty = new Dictionary<VehicleDef, float[]>();
+			movementDifficulty = new ConcurrentDictionary<VehicleDef, float[]>();
 			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
 				movementDifficulty[vehicleDef] = new float[Find.WorldGrid.TilesCount];
