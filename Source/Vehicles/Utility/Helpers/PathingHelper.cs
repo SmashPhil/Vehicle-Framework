@@ -204,27 +204,14 @@ namespace Vehicles
 			if (regionEffecters.TryGetValue(thing.def, out List<VehicleDef> vehicleDefs))
 			{
 				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-				//bool shouldTryAsync = !vehicleDefs.NullOrEmpty() && Current.ProgramState != ProgramState.MapInitializing;
 				//There's no magic number for when it will run faster asynchronously, but low count updates have minimal impact
 				if (!vehicleDefs.NullOrEmpty() && vehicleDefs.Count > 2 && mapping.ThreadAvailable)
 				{
-					mapping.dedicatedThread.Queue(new AsyncAction(Recalculate, () => map != null && map.Index > -1));
+					mapping.dedicatedThread.Queue(new AsyncAction(() => ThingInRegionSpawned(thing, mapping, vehicleDefs), () => map != null && map.Index > -1));
 				}
 				else
 				{
-					Recalculate();
-				}
-
-				void Recalculate()
-				{
-					foreach (VehicleDef vehicleDef in vehicleDefs)
-					{
-						if (mapping.IsOwner(vehicleDef))
-						{
-							mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsSpawned(thing);
-							mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderThing(thing);
-						}
-					}
+					ThingInRegionSpawned(thing, mapping, vehicleDefs);
 				}
 			}
 		}
@@ -239,13 +226,44 @@ namespace Vehicles
 			if (regionEffecters.TryGetValue(thing.def, out List<VehicleDef> vehicleDefs))
 			{
 				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-				foreach (VehicleDef vehicleDef in vehicleDefs)
+				//There's no magic number for when it will run faster asynchronously, but low count updates have minimal impact
+				if (!vehicleDefs.NullOrEmpty() && vehicleDefs.Count > 2 && mapping.ThreadAvailable)
 				{
-					if (mapping.IsOwner(vehicleDef))
-					{
-						mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsDespawned(thing);
-						mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderThing(thing);
-					}
+					mapping.dedicatedThread.Queue(new AsyncAction(() => ThingInRegionDespawned(thing, mapping, vehicleDefs), () => map != null && map.Index > -1));
+				}
+				else
+				{
+					ThingInRegionDespawned(thing, mapping, vehicleDefs);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Thread safe event for triggering dirtyer events
+		/// </summary>
+		/// <param name="thing"></param>
+		/// <param name="mapping"></param>
+		/// <param name="vehicleDefs"></param>
+		private static void ThingInRegionSpawned(Thing thing, VehicleMapping mapping, List<VehicleDef> vehicleDefs)
+		{
+			foreach (VehicleDef vehicleDef in vehicleDefs)
+			{
+				if (mapping.IsOwner(vehicleDef))
+				{
+					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsSpawned(thing);
+					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderThing(thing);
+				}
+			}
+		}
+
+		private static void ThingInRegionDespawned(Thing thing, VehicleMapping mapping, List<VehicleDef> vehicleDefs)
+		{
+			foreach (VehicleDef vehicleDef in vehicleDefs)
+			{
+				if (mapping.IsOwner(vehicleDef))
+				{
+					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsDespawned(thing);
+					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderThing(thing);
 				}
 			}
 		}

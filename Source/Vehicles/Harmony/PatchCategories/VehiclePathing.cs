@@ -8,6 +8,7 @@ using Verse.AI;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using SmashTools.Performance;
 
 namespace Vehicles
 {
@@ -347,17 +348,43 @@ namespace Vehicles
 
 		public static void RegisterInVehicleRegions(Thing thing, Map map)
 		{
-			foreach (VehicleDef vehicleDef in map.GetCachedMapComponent<VehicleMapping>().Owners)
+			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+			if (mapping.Owners.Count > 2)
 			{
-				VehicleRegionListersUpdater.RegisterInRegions(thing, map, vehicleDef);
+				mapping.dedicatedThread.Queue(new AsyncAction(() => RegisterInRegions(thing, mapping), () => map != null && map.Index > -1));
+			}
+			else
+			{
+				RegisterInRegions(thing, mapping);
 			}
 		}
 
 		public static void DeregisterInVehicleRegions(Thing thing, Map map)
 		{
-			foreach (VehicleDef vehicleDef in map.GetCachedMapComponent<VehicleMapping>().Owners)
+			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+			if (mapping.Owners.Count > 2)
 			{
-				VehicleRegionListersUpdater.DeregisterInRegions(thing, map, vehicleDef);
+				mapping.dedicatedThread.Queue(new AsyncAction(() => DeregisterInRegions(thing, mapping), () => map != null && map.Index > -1));
+			}
+			else
+			{
+				DeregisterInRegions(thing, mapping);
+			}
+		}
+
+		private static void RegisterInRegions(Thing thing, VehicleMapping mapping)
+		{
+			foreach (VehicleDef vehicleDef in mapping.Owners)
+			{
+				VehicleRegionListersUpdater.RegisterInRegions(thing, mapping.map, vehicleDef);
+			}
+		}
+
+		private static void DeregisterInRegions(Thing thing, VehicleMapping mapping)
+		{
+			foreach (VehicleDef vehicleDef in mapping.Owners)
+			{
+				VehicleRegionListersUpdater.DeregisterInRegions(thing, mapping.map, vehicleDef);
 			}
 		}
 	}
