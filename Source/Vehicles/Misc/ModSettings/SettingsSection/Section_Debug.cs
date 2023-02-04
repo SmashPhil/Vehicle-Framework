@@ -34,6 +34,8 @@ namespace Vehicles
 		public bool debugDrawPathfinderSearch;
 		public bool hierarchalPathfinding = true;
 
+		public bool useAsync = true;
+
 		public override void ResetSettings()
 		{
 			base.ResetSettings();
@@ -109,6 +111,8 @@ namespace Vehicles
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawVehiclePathingCosts".Translate(), ref debugDrawVehiclePathCosts, "VF_DevMode_DebugDrawVehiclePathingCostsTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawPathfinderSearch".Translate(), ref debugDrawPathfinderSearch, "VF_DevMode_DebugDrawPathfinderSearchTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugHierarchalPathfinding".Translate(), ref hierarchalPathfinding, "VF_DevMode_DebugHierarchalPathfindingTooltip".Translate());
+
+				listingStandard.CheckboxLabeled("Use Async", ref useAsync);
 
 				if (listingStandard.ButtonText("VF_DevMode_DebugPathfinderDebugging".Translate(), "VF_DevMode_DebugPathfinderDebuggingTooltip".Translate()))
 				{

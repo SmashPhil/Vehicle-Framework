@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
+using System.Threading;
 using HarmonyLib;
 using Verse;
 using Verse.AI;
@@ -347,7 +348,7 @@ namespace Vehicles
 		public static void RegisterInVehicleRegions(Thing thing, Map map)
 		{
 			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-			if (mapping.Owners.Count > 2)
+			if (mapping.Owners.Count > 2 && VehicleMod.settings.debug.useAsync)
 			{
 				mapping.dedicatedThread.Queue(new AsyncAction(() => RegisterInRegions(thing, mapping), () => map != null && map.Index > -1));
 			}
@@ -360,7 +361,7 @@ namespace Vehicles
 		public static void DeregisterInVehicleRegions(Thing thing, Map map)
 		{
 			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-			if (mapping.Owners.Count > 2)
+			if (mapping.Owners.Count > 2 && VehicleMod.settings.debug.useAsync)
 			{
 				mapping.dedicatedThread.Queue(new AsyncAction(() => DeregisterInRegions(thing, mapping), () => map != null && map.Index > -1));
 			}
@@ -372,17 +373,24 @@ namespace Vehicles
 
 		private static void RegisterInRegions(Thing thing, VehicleMapping mapping)
 		{
+			Log.Message("Running");
+			ProfilerWatch.Start("RegisterInRegions");
+			ProfilerWatch.Start("RegisterInRegions_Loop");
 			foreach (VehicleDef vehicleDef in mapping.Owners)
 			{
-				VehicleRegionListersUpdater.RegisterInRegions(thing, mapping.map, vehicleDef);
+				VehicleRegionListersUpdater.RegisterInRegions(thing, mapping, vehicleDef);
+				ProfilerWatch.Post("RegisterInRegions_Loop");
 			}
+			ProfilerWatch.Post("RegisterInRegions");
+			ProfilerWatch.End("RegisterInRegions_Loop");
+			ProfilerWatch.End("RegisterInRegions");
 		}
 
 		private static void DeregisterInRegions(Thing thing, VehicleMapping mapping)
 		{
 			foreach (VehicleDef vehicleDef in mapping.Owners)
 			{
-				VehicleRegionListersUpdater.DeregisterInRegions(thing, mapping.map, vehicleDef);
+				VehicleRegionListersUpdater.DeregisterInRegions(thing, mapping, vehicleDef);
 			}
 		}
 	}

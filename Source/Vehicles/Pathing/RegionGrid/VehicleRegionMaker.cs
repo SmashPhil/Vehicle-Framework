@@ -310,7 +310,7 @@ namespace Vehicles
 				}
 				if (flag)
 				{
-					VehicleRegionListersUpdater.RegisterAllAt(intVec, mapping.map, createdFor, tmpProcessedThings);
+					VehicleRegionListersUpdater.RegisterAllAt(intVec, mapping, createdFor, tmpProcessedThings);
 				}
 			}
 			tmpProcessedThings.Clear();
