@@ -4,6 +4,7 @@ using System.Linq;
 using Verse;
 using UnityEngine;
 using SmashTools;
+using SmashTools.Performance;
 
 namespace Vehicles
 {
@@ -18,12 +19,24 @@ namespace Vehicles
 
 		private int buildingFor = -1;
 
+		public readonly DedicatedThread dedicatedThread;
+
 		public VehicleMapping(Map map) : base(map)
 		{
 			ConstructComponents();
+			dedicatedThread = ThreadManager.CreateNew();
 		}
 
+		/// <summary>
+		/// VehicleDefs which have created and 'own' a set of regions
+		/// </summary>
 		public List<VehicleDef> Owners => owners;
+
+		/// <summary>
+		/// Check to make sure dedicated thread is instantiated and running.
+		/// </summary>
+		/// <remarks>Verify this is true before queueing up a method, otherwise you may just be sending it to the void where it will never be executed ever.</remarks>
+		public bool ThreadAvailable => dedicatedThread != null && dedicatedThread.thread.IsAlive;
 
 		/// <summary>
 		/// Retrieve all <see cref="VehiclePathData"/> for this map
@@ -66,6 +79,15 @@ namespace Vehicles
 		}
 
 		/// <summary>
+		/// Check if <paramref name="vehicleDef"/> is an owner of a region set
+		/// </summary>
+		/// <param name="vehicleDef"></param>
+		public bool IsOwner(VehicleDef vehicleDef)
+		{
+			return piggyToOwner[vehicleDef.DefIndex] == vehicleDef.DefIndex;
+		}
+
+		/// <summary>
 		/// Finalize initialization for map component
 		/// </summary>
 		public void RebuildVehiclePathData()
@@ -97,6 +119,11 @@ namespace Vehicles
 			}
 		}
 
+		public override void MapRemoved()
+		{
+			dedicatedThread.Release();
+		}
+
 		/// <summary>
 		/// Update vehicle regions sequentially
 		/// </summary>
@@ -105,7 +132,7 @@ namespace Vehicles
 		/// </remarks>
 		public override void MapComponentUpdate()
 		{
-			if (piggyToOwner.Length > 0 && VehicleRegionGrid.vehicleRegionGridIndexChecking <= owners.Count)
+			if (owners.Count > 0 && VehicleRegionGrid.vehicleRegionGridIndexChecking < owners.Count)
 			{
 				VehicleDef vehicleDef = owners[VehicleRegionGrid.vehicleRegionGridIndexChecking];
 				VehiclePathData vehiclePathData = this[vehicleDef];
@@ -130,6 +157,7 @@ namespace Vehicles
 				if (TryGetOwner(vehiclePathData, out int ownerId) && compress)
 				{
 					//Piggy back off vehicles with similar width + impassability
+					piggyToOwner[vehicleDef.DefIndex] = ownerId;
 					vehiclePathData.ReachabilityData = vehicleData[ownerId].ReachabilityData;
 				}
 				else

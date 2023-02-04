@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using System.Linq;
 using HarmonyLib;
 using Verse;
@@ -8,6 +10,7 @@ using Verse.AI.Group;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using SmashTools.Performance;
 
 namespace Vehicles
 {
@@ -201,10 +204,27 @@ namespace Vehicles
 			if (regionEffecters.TryGetValue(thing.def, out List<VehicleDef> vehicleDefs))
 			{
 				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-				foreach (VehicleDef vehicleDef in vehicleDefs)
+				//bool shouldTryAsync = !vehicleDefs.NullOrEmpty() && Current.ProgramState != ProgramState.MapInitializing;
+				//There's no magic number for when it will run faster asynchronously, but low count updates have minimal impact
+				if (!vehicleDefs.NullOrEmpty() && vehicleDefs.Count > 2 && mapping.ThreadAvailable)
 				{
-					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsSpawned(thing);
-					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderThing(thing);
+					mapping.dedicatedThread.Queue(new AsyncAction(Recalculate, () => map != null && map.Index > -1));
+				}
+				else
+				{
+					Recalculate();
+				}
+
+				void Recalculate()
+				{
+					foreach (VehicleDef vehicleDef in vehicleDefs)
+					{
+						if (mapping.IsOwner(vehicleDef))
+						{
+							mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsSpawned(thing);
+							mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderThing(thing);
+						}
+					}
 				}
 			}
 		}
@@ -221,8 +241,11 @@ namespace Vehicles
 				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
 				foreach (VehicleDef vehicleDef in vehicleDefs)
 				{
-					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsDespawned(thing);
-					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderThing(thing);
+					if (mapping.IsOwner(vehicleDef))
+					{
+						mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsDespawned(thing);
+						mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderThing(thing);
+					}
 				}
 			}
 		}

@@ -296,7 +296,7 @@ namespace Vehicles
 				{
 					if (AccessTools.Field(typeof(Designator_Build), "entDef").GetValue(buildDesignator) is VehicleBuildDef buildDef && buildDef.thingToSpawn is VehicleDef vehicleDef)
 					{
-						VehicleEnabledFor enabled = vehicleDef.TryGetValue(typeof(VehicleDef), nameof(VehicleDef.enabled), vehicleDef.enabled);
+						VehicleEnabledFor enabled = SettingsCache.TryGetValue(vehicleDef, typeof(VehicleDef), nameof(VehicleDef.enabled), vehicleDef.enabled);
 						if (enabled == VehicleEnabledFor.None || enabled == VehicleEnabledFor.Raiders)
 						{
 							if (VehicleMod.settings.main.showDisabledVehicles)

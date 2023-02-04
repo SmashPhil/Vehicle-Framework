@@ -23,7 +23,7 @@ namespace Vehicles
 			return field;
 		}
 
-		public static bool TryGetValue<T>(this VehicleDef def, FieldInfo field, out T value)
+		public static bool TryGetValue<T>(VehicleDef def, FieldInfo field, out T value)
 		{
 			value = default;
 			if (VehicleMod.settings.vehicles.fieldSettings.TryGetValue(def.defName, out var dict))
@@ -40,7 +40,7 @@ namespace Vehicles
 			return false;
 		}
 
-		public static T TryGetValue<T>(this VehicleDef def, Type containingType, string fieldName, T fallback = default)
+		public static T TryGetValue<T>(VehicleDef def, Type containingType, string fieldName, T fallback = default)
 		{
 			FieldInfo fieldInfo = GetCachedField(containingType, fieldName);
 			if (fieldInfo is null)
@@ -55,7 +55,7 @@ namespace Vehicles
 			Type objType = null;
 			try
 			{
-				if (def.TryGetValue(fieldInfo, out object value))
+				if (TryGetValue(def, fieldInfo, out object value))
 				{
 					objType = value.GetType();
 					if (objType != typeof(T))

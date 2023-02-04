@@ -79,7 +79,7 @@ namespace Vehicles
 			float cost = tileCache[tileFeatureLookup.IndexFor(tile)];
 			if (cost <= 0)
 			{
-				cost = vehicleDefs.NullOrEmpty() ? -1 : vehicleDefs.Max(vehicleDef => WorldVehiclePathGrid.Instance.movementDifficulty[vehicleDef][tile]);
+				cost = vehicleDefs.NullOrEmpty() ? -1 : vehicleDefs.Max(vehicleDef => WorldVehiclePathGrid.Instance.movementDifficulty[vehicleDef.DefIndex][tile]);
 				tileCache[tileFeatureLookup.IndexFor(tile)] = cost;
 			}
 			return cost;

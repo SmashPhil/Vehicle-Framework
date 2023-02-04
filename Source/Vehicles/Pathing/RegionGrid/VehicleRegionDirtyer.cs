@@ -99,9 +99,9 @@ namespace Vehicles
 		public void Notify_ThingAffectingRegionsSpawned(Thing thing)
 		{
 			regionsToDirty.Clear();
-			foreach (IntVec3 c in thing.OccupiedRect().ExpandedBy(1).ClipInsideMap(thing.Map))
+			foreach (IntVec3 cell in thing.OccupiedRect().ExpandedBy(1).ClipInsideMap(thing.Map))
 			{
-				VehicleRegion validRegionAt_NoRebuild = mapping[createdFor].VehicleRegionGrid.GetValidRegionAt_NoRebuild(c);
+				VehicleRegion validRegionAt_NoRebuild = mapping[createdFor].VehicleRegionGrid.GetValidRegionAt_NoRebuild(cell);
 				if (validRegionAt_NoRebuild != null)
 				{
 					regionsToDirty.Add(validRegionAt_NoRebuild);

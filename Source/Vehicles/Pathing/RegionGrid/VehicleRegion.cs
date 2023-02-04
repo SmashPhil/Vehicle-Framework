@@ -524,7 +524,6 @@ namespace Vehicles
 			}
 			if (debugRegionType.HasFlag(DebugRegionType.Weights))
 			{
-				Log.Clear();
 				for (int i = 0; i < links.Count; i++)
 				{
 					VehicleRegionLink regionLink = links[i];

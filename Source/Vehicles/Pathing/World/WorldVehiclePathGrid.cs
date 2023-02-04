@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -23,13 +23,15 @@ namespace Vehicles
 		/// <summary>
 		/// Store entire pathGrid for each <see cref="VehicleDef"/>
 		/// </summary>
-		public ConcurrentDictionary<VehicleDef, float[]> movementDifficulty;
+		public PathGrid[] movementDifficulty;
+		private readonly List<VehicleDef> owners = new List<VehicleDef>();
 
 		private int allPathCostsRecalculatedDayOfYear = -1;
 
 		public WorldVehiclePathGrid(World world) : base(world)
 		{
 			this.world = world;
+			movementDifficulty = new PathGrid[DefDatabase<VehicleDef>.DefCount];
 			ResetPathGrid();
 			Instance = this;
 		}
@@ -39,12 +41,12 @@ namespace Vehicles
 		/// </summary>
 		public static WorldVehiclePathGrid Instance { get; private set; }
 
+		private static bool Recalculating { get; set; }
+
 		/// <summary>
 		/// Day of year at 0 longitude for recalculating pathGrids
 		/// </summary>
 		private static int DayOfYearAt0Long => GenDate.DayOfYear(GenTicks.TicksAbs, 0f);
-
-		private static bool Recalculating { get; set; }
 
 		/// <summary>
 		/// <paramref name="cost"/> is &gt; <see cref="ImpassableMovementDifficulty"/> or &lt; 0
@@ -56,13 +58,94 @@ namespace Vehicles
 		/// <summary>
 		/// Reset all cached pathGrids for VehicleDefs
 		/// </summary>
-		public void ResetPathGrid()
+		public void Request_ResetPathGrid()
 		{
-			movementDifficulty = new ConcurrentDictionary<VehicleDef, float[]>();
+			if (Recalculating)
+			{
+				CoroutineManager.StartCoroutine(ResetWhenAvailable);
+			}
+			else
+			{
+				ResetPathGrid();
+			}
+		}
+
+		private IEnumerator ResetWhenAvailable()
+		{
+			while (Recalculating) yield return null; //Delay until recalculation is finished
+			ResetPathGrid();
+		}
+
+		private void ResetPathGrid()
+		{
 			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
-				movementDifficulty[vehicleDef] = new float[Find.WorldGrid.TilesCount];
+				//Skip vehicles that can't caravan, they'll either be exclusively AerialVehicles or never on the world map
+				if (vehicleDef.canCaravan)
+				{
+					bool owner = true;
+					foreach (VehicleDef ownerDef in owners)
+					{
+						if (MatchesReachability(vehicleDef, ownerDef))
+						{
+							owner = false;
+							movementDifficulty[vehicleDef.DefIndex] = movementDifficulty[ownerDef.DefIndex]; //Piggy back off same configuration of already registered vehicle
+							break;
+						}
+					}
+					if (owner)
+					{
+						owners.Add(vehicleDef);
+						movementDifficulty[vehicleDef.DefIndex] = new PathGrid(vehicleDef, Find.WorldGrid.TilesCount); //Register as owner with new path grid
+					}
+				}
 			}
+		}
+
+		private bool MatchesReachability(VehicleDef vehicleDef, VehicleDef otherVehicleDef)
+		{
+			if (vehicleDef.properties.defaultBiomesImpassable != otherVehicleDef.properties.defaultBiomesImpassable)
+			{
+				return false;
+			}
+
+			//Biome costs
+			foreach ((BiomeDef biomeDef, float cost) in vehicleDef.properties.customBiomeCosts)
+			{
+				if (!otherVehicleDef.properties.customBiomeCosts.TryGetValue(biomeDef, out float matchingCost) || matchingCost != cost)
+				{
+					return false;
+				}
+			}
+
+			//Road costs
+			foreach ((RoadDef roadDef, float cost) in vehicleDef.properties.customRoadCosts)
+			{
+				if (!otherVehicleDef.properties.customRoadCosts.TryGetValue(roadDef, out float matchingCost) || matchingCost != cost)
+				{
+					return false;
+				}
+			}
+
+			//River costs
+			foreach ((RiverDef riverDef, float cost) in vehicleDef.properties.customRiverCosts)
+			{
+				if (!otherVehicleDef.properties.customRiverCosts.TryGetValue(riverDef, out float matchingCost) || matchingCost != cost)
+				{
+					return false;
+				}
+			}
+
+			//Hilliness costs
+			foreach ((Hilliness hilliness, float cost) in vehicleDef.properties.customHillinessCosts)
+			{
+				if (!otherVehicleDef.properties.customHillinessCosts.TryGetValue(hilliness, out float matchingCost) || matchingCost != cost)
+				{
+					return false;
+				}
+			}
+
+			return true;
 		}
 
 		/// <summary>
@@ -83,11 +166,11 @@ namespace Vehicles
 					List<int> neighbors = new List<int>();
 					Find.WorldGrid.GetTileNeighbors(tile, neighbors);
 
-					float cost = movementDifficulty[DebugHelper.World.VehicleDef][tile];
+					float cost = movementDifficulty[DebugHelper.World.VehicleDef.DefIndex][tile];
 					Find.World.debugDrawer.FlashTile(tile, colorPct: cost * 10 / ImpassableMovementDifficulty, text: cost.ToString(), duration: 15);
 					foreach (int neighborTile in neighbors)
 					{
-						Find.World.debugDrawer.FlashTile(neighborTile, text: movementDifficulty[DebugHelper.World.VehicleDef][neighborTile].ToString(), duration: 30);
+						Find.World.debugDrawer.FlashTile(neighborTile, text: movementDifficulty[DebugHelper.World.VehicleDef.DefIndex][neighborTile].ToString(), duration: 30);
 					}
 				}
 				else if (DebugHelper.World.DebugType == WorldPathingDebugType.Reachability)
@@ -127,7 +210,7 @@ namespace Vehicles
 		/// <param name="vehicleDef"></param>
 		public bool Passable(int tile, VehicleDef vehicleDef)
 		{
-			return Find.WorldGrid.InBounds(tile) && movementDifficulty[vehicleDef][tile] < ImpassableMovementDifficulty;
+			return Find.WorldGrid.InBounds(tile) && movementDifficulty[vehicleDef.DefIndex][tile] < ImpassableMovementDifficulty;
 		}
 
 		/// <summary>
@@ -137,7 +220,7 @@ namespace Vehicles
 		/// <param name="vehicleDef"></param>
 		public bool PassableFast(int tile, VehicleDef vehicleDef)
 		{
-			return movementDifficulty[vehicleDef][tile] < ImpassableMovementDifficulty;
+			return movementDifficulty[vehicleDef.DefIndex][tile] < ImpassableMovementDifficulty;
 		}
 
 		/// <summary>
@@ -147,7 +230,7 @@ namespace Vehicles
 		/// <param name="vehicleDef"></param>
 		public float PerceivedMovementDifficultyAt(int tile, VehicleDef vehicleDef)
 		{
-			return movementDifficulty[vehicleDef][tile];
+			return movementDifficulty[vehicleDef.DefIndex][tile];
 		}
 
 		/// <summary>
@@ -163,7 +246,7 @@ namespace Vehicles
 				return;
 			}
 			bool flag = PassableFast(tile, vehicleDef);
-			movementDifficulty[vehicleDef][tile] = CalculatedMovementDifficultyAt(tile, vehicleDef, ticksAbs, null);
+			movementDifficulty[vehicleDef.DefIndex][tile] = CalculatedMovementDifficultyAt(tile, vehicleDef, ticksAbs, null);
 			if (flag != PassableFast(tile, vehicleDef))
 			{
 				WorldVehicleReachability.Instance.ClearCache();
@@ -190,13 +273,10 @@ namespace Vehicles
 		public void RecalculateAllPerceivedPathCosts(int? ticksAbs)
 		{
 			Recalculating = true;
+			try
 			{
-				foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
+				foreach (VehicleDef vehicleDef in owners)
 				{
-					if (!movementDifficulty.ContainsKey(vehicleDef))
-					{
-						movementDifficulty[vehicleDef] = new float[Find.WorldGrid.TilesCount];
-					}
 					for (int i = 0; i < Find.WorldGrid.TilesCount; i++)
 					{
 						RecalculatePerceivedMovementDifficultyAt(i, vehicleDef, ticksAbs);
@@ -204,7 +284,10 @@ namespace Vehicles
 				}
 				allPathCostsRecalculatedDayOfYear = DayOfYearAt0Long;
 			}
-			Recalculating = false;
+			finally
+			{
+				Recalculating = false;
+			}
 		}
 
 		/// <summary>
@@ -325,6 +408,20 @@ namespace Vehicles
 				Hilliness.Impassable => ImpassableMovementDifficulty,
 				_ => 0f,
 			};
+		}
+
+		public class PathGrid
+		{
+			public readonly VehicleDef owner;
+			public readonly float[] costs;
+
+			public float this[int index] { get => costs[index]; set => costs[index] = value; }
+
+			public PathGrid(VehicleDef owner, int size)
+			{
+				this.owner = owner;
+				costs = new float[size];
+			}
 		}
 	}
 }
