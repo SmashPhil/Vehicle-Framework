@@ -17,7 +17,6 @@ namespace Vehicles
 {
 	public partial class VehiclePawn
 	{
-		public bool draftStatusChanged = false;
 		public bool beached = false;
 
 		public VehicleStatHandler statHandler;

@@ -141,8 +141,8 @@ namespace Vehicles
 
 		public override void SpawnSetup(Map map, bool respawningAfterLoad)
 		{
+			this.RegisterEvents(); //Must register before comps call SpawnSetup to allow comps to access Registry
 			base.SpawnSetup(map, respawningAfterLoad);
-			this.RegisterEvents();
 			EventRegistry[VehicleEventDefOf.Spawned].ExecuteEvents();
 			sharedJob ??= new SharedJob();
 			if (!respawningAfterLoad)
@@ -151,7 +151,7 @@ namespace Vehicles
 			}
 			if (Faction != Faction.OfPlayer)
 			{
-				drafter.Drafted = true;
+				ignition.Drafted = true;
 				CompVehicleTurrets turretComp = CompVehicleTurrets;
 				if (turretComp != null)
 				{
@@ -175,6 +175,7 @@ namespace Vehicles
 		{
 			base.ExposeData();
 			Scribe_Deep.Look(ref vPather, nameof(vPather), new object[] { this });
+			Scribe_Deep.Look(ref ignition, nameof(ignition), new object[] { this });
 			Scribe_Deep.Look(ref statHandler, nameof(statHandler), new object[] { this });
 			Scribe_Deep.Look(ref sharedJob, nameof(sharedJob));
 

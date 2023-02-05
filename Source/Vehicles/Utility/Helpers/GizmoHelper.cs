@@ -91,56 +91,6 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Draft gizmos for VehiclePawn
-		/// </summary>
-		/// <param name="drafter"></param>
-		public static IEnumerable<Gizmo> VehicleGizmos(this VehiclePawn vehicle)
-		{
-			Pawn_DraftController drafter = vehicle.drafter;
-			Command draftCommand = new Command_Toggle()
-			{
-				hotKey = KeyBindingDefOf.Command_ColonistDraft,
-				isActive = () => drafter.Drafted,
-				toggleAction = delegate ()
-				{
-					if (drafter.Drafted && vehicle.vPather.Moving)
-					{
-						vehicle.vPather.PatherFailed();
-					}
-					else
-					{
-						drafter.Drafted = !drafter.Drafted;
-						PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Drafting, KnowledgeAmount.SpecificInteraction);
-						if (drafter.Drafted)
-						{
-							LessonAutoActivator.TeachOpportunity(ConceptDefOf.QueueOrders, OpportunityType.GoodToKnow);
-						}
-					}
-				},
-				defaultDesc = "VF_DraftVehicleDesc".Translate(),
-				icon = (drafter.Drafted && vehicle.vPather.Moving) ? VehicleTex.HaltVehicle : VehicleTex.DraftVehicle
-			};
-			if (!drafter.Drafted)
-			{
-				draftCommand.defaultLabel = vehicle.VehicleDef.draftLabel;
-			}
-			if (!vehicle.CanMove)
-			{
-				draftCommand.Disable("VF_VehicleUnableToMove".Translate(vehicle));
-				drafter.Drafted = false;
-			}
-			if (!drafter.Drafted)
-			{
-				draftCommand.tutorTag = "Draft";
-			}
-			else
-			{
-				draftCommand.tutorTag = "Undraft";
-			}
-			yield return draftCommand;
-		}
-
-		/// <summary>
 		/// Resolve designators when changes have been made to <paramref name="designationCategoryDef"/>
 		/// </summary>
 		/// <param name="designationCategoryDef"></param>

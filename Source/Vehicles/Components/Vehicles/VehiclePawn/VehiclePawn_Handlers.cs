@@ -627,9 +627,8 @@ namespace Vehicles
 		{
 			if (pawn.IsHashIntervalTick(1250))
 			{
-				float num = vPather.MovingNow ? 4E-05f : 4E-3f; //Incorporate 'shifts'
-				if (num <= 0f)
-					return;
+				float num = vPather.Moving ? 4E-05f : 4E-3f; //Incorporate 'shifts'
+				if (num <= 0f) return;
 				num *= 1250f;
 				List<JoyKindDef> tmpJoyList = GetAvailableJoyKindsFor(pawn);
 				if (!tmpJoyList.TryRandomElementByWeight((JoyKindDef x) => 1f - Mathf.Clamp01(pawn.needs.joy.tolerances[x]), out JoyKindDef joyKind))

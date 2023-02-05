@@ -26,7 +26,7 @@ namespace Vehicles
 		private CompVehicleLauncher compVehicleLauncher;
 
 		private SelfOrderingList<ThingComp> cachedComps = new SelfOrderingList<ThingComp>();
-		private List<ThingComp> compTickers = new List<ThingComp>();
+		private HashSet<ThingComp> compTickers = new HashSet<ThingComp>();
 
 		public override bool Suspended => false; //Vehicles are not suspendable
 
@@ -78,18 +78,6 @@ namespace Vehicles
 			}
 		}
 
-		protected override void ReceiveCompSignal(string signal)
-		{
-			if (signal == CompSignals.RanOutOfFuel)
-			{
-				vPather.StopDead();
-				if (Spawned)
-				{
-					drafter.Drafted = false;
-				}
-			}
-		}
-
 		public void AddComp(ThingComp comp)
 		{
 			cachedComps.Add(comp);
@@ -115,13 +103,13 @@ namespace Vehicles
 
 		protected virtual void RecacheComponents()
 		{
-			cachedComps = new SelfOrderingList<ThingComp>(AllComps);
-			compTickers.Clear();
-			foreach (ThingComp comp in AllComps)
+			cachedComps = new SelfOrderingList<ThingComp>();
+			foreach (ThingComp thingComp in AllComps)
 			{
-				if (comp.GetType().GetMethod("CompTick").MethodImplemented())
+				cachedComps.Add(thingComp);
+				if (!(thingComp is VehicleComp vehicleComp) || !vehicleComp.TickByRequest)
 				{
-					compTickers.Add(comp);
+					compTickers.Add(thingComp); //Tick normally, if VehicleComp and not TickByRequest it cannot request to stop
 				}
 			}
 		}
@@ -130,19 +118,24 @@ namespace Vehicles
 		{
 			BaseTickOptimized();
 			TickAllComps();
-			if (Spawned)
-			{
-				vPather.PatherTick();
-				sustainers.Tick();
-			}
 			if (Faction != Faction.OfPlayer)
 			{
 				vehicleAI?.AITick();
 			}
-			if (this.IsHashIntervalTick(150) && AllPawnsAboard.Any())
+			if (this.IsHashIntervalTick(150) && AllPawnsAboard.Count > 0)
 			{
 				TrySatisfyPawnNeeds();
 			}
+		}
+
+		public bool RequestTickStart<T>(T comp) where T : ThingComp
+		{
+			return compTickers.Add(comp);
+		}
+
+		public bool RequestTickStop<T>(T comp) where T : ThingComp
+		{
+			return compTickers.Remove(comp);
 		}
 
 		protected virtual void TickAllComps()
@@ -165,13 +158,17 @@ namespace Vehicles
 			{
 				TickRare();
 			}
-			bool suspended = Suspended;
-			if (!suspended)
+			if (!Suspended)
 			{
 				if (Spawned)
 				{
+					vPather.PatherTick();
+					sustainers.Tick();
 					//stances.StanceTrackerTick(); //TODO - Add as tick requester for stunning
-					jobs.JobTrackerTick();
+					if (Drafted)
+					{
+						jobs.JobTrackerTick();
+					}
 				}
 				//equipment?.EquipmentTrackerTick();
 
@@ -179,7 +176,6 @@ namespace Vehicles
 				//skills?.SkillsTick();
 				//abilities?.AbilitiesTick();
 				inventory?.InventoryTrackerTick();
-				drafter?.DraftControllerTick();
 				//relations?.RelationsTrackerTick();
 
 				if (ModsConfig.RoyaltyActive)

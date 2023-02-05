@@ -844,7 +844,6 @@ namespace Vehicles
 						}
 						if (!current.IsOpen && current.status != Status_Starter)
 						{
-							Log.Error($"Attempting to open node which isn't open and isn't starting node. Node={current}");
 							continue;
 						}
 
@@ -883,8 +882,7 @@ namespace Vehicles
 						current.status = Status_Closed;
 					}
 					PathNotFound:;
-					Log.Error($"Unable to find path from {startingRegion} to {destinationRegion}.");
-					return null;
+					return null; //Fall back to cell-based pathing
 				}
 				finally
 				{
@@ -966,18 +964,11 @@ namespace Vehicles
 				//Pre-add destination region and in-facing region from starting node, start at link
 				Node node = finalNode;
 				result.Add(destination);
-				result.Add(node.regionB);
 				//result.AddRange(destination.Neighbors);
 
 				//Limit to total nodes traversed to avoid infinite loop
 				for (int i = 0; i < nodes.Count; i++)
 				{
-					node = node.previous;
-
-					//Will add duplicates but gets filtered out when building cells in ChunkList
-					result.Add(node.regionA);
-					result.Add(node.regionB);
-
 					//Ensure node doesn't reach incorrect destination with no backtrack available
 					if (node == null || node == node.previous)
 					{
@@ -985,18 +976,20 @@ namespace Vehicles
 						return null;
 					}
 
+					//Will add duplicates but gets filtered out when building cells in ChunkList
+					result.Add(node.regionA);
+					result.Add(node.regionB);
+
 					//RegionA (in-facing) may be the starting region is chunk traverses backwards from closest link heuristically
 					if (node.regionA == start || node.regionB == start)
 					{
 						//result.Add(start);
 						//result.Reverse(); //No need for reversal
 
-						foreach (VehicleRegion region in result)
-						{
-							MarkRegionForDrawing(region, Map, drawLinks: false);
-						}
 						return new ChunkSet(result);
 					}
+
+					node = node.previous;
 				}
 				SmashLog.Error($"Ran out of nodes to backtrace for solution.");
 				return null;

@@ -14,8 +14,8 @@ namespace Vehicles
 		}
 		
 		//Movement
-		public static VehicleEventDef DraftOn;
-		public static VehicleEventDef DraftOff;
+		public static VehicleEventDef IgnitionOn;
+		public static VehicleEventDef IgnitionOff;
 		public static VehicleEventDef MoveStart;
 		public static VehicleEventDef MoveStop;
 
@@ -29,6 +29,10 @@ namespace Vehicles
 		public static VehicleEventDef PawnChangedSeats;
 		public static VehicleEventDef PawnCapacitiesDirty;
 		public static VehicleEventDef PawnKilled;
+
+		//Comps
+		public static VehicleEventDef OutOfFuel;
+		public static VehicleEventDef Refueled;
 
 		//Stats
 		public static VehicleEventDef DamageTaken;

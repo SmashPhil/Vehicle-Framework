@@ -33,7 +33,7 @@ namespace Vehicles
 				IntVec3 loc = pawns[i].ClampToMap(spawnCellGetter(pawns[i]), map, 2);
 				Pawn pawn = (Pawn)GenSpawn.Spawn(pawns[i], loc, map, edge.Opposite, WipeMode.Vanish);
 				
-				if ((pawn.IsColonist && !pawn.InMentalState) || pawn is VehiclePawn)
+				if (pawn.IsColonist && !pawn.InMentalState)
 				{
 					pawn.drafter.Drafted = draftColonists;
 				}
@@ -41,6 +41,7 @@ namespace Vehicles
 				if (pawn is VehiclePawn vehicle)
 				{
 					vehicle.Angle = 0;
+					vehicle.ignition.Drafted = draftColonists;
 				}
 			}
 			caravan.RemoveAllPawns();

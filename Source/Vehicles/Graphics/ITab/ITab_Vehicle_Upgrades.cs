@@ -110,7 +110,7 @@ namespace Vehicles
 					SoundDefOf.ExecuteTrade.PlayOneShotOnCamera(Vehicle.Map);
 					SoundDefOf.Building_Complete.PlayOneShot(Vehicle);
 
-					Vehicle.drafter.Drafted = false;
+					Vehicle.ignition.Drafted = false;
 					if (DebugSettings.godMode)
 					{
 						Vehicle.CompUpgradeTree.FinishUnlock(selectedNode.node);

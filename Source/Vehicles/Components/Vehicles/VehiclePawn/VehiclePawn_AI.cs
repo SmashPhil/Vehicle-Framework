@@ -21,6 +21,7 @@ namespace Vehicles
 		public VehicleAI vehicleAI;
 		
 		public Vehicle_PathFollower vPather;
+		public Vehicle_IgnitionController ignition;
 
 		public SharedJob sharedJob;
 		public bool currentlyFishing = false;
@@ -87,6 +88,23 @@ namespace Vehicles
 				}
 				return false;
 			}
+		}
+
+		public virtual bool CanDraft()
+		{
+			foreach (ThingComp thingComp in AllComps)
+			{
+				if (thingComp is VehicleComp vehicleComp && !vehicleComp.CanStartEngine(out string failReason))
+				{
+					Messages.Message(failReason, MessageTypeDefOf.RejectInput);
+					return false;
+				}
+			}
+			if (!CanMoveFinal)
+			{
+				Messages.Message("Vehicles_NotEnoughToOperate".Translate(), MessageTypeDefOf.RejectInput);
+			}
+			return true;
 		}
 
 		//REDO

@@ -10,6 +10,7 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using SmashTools;
+using SmashTools.Performance;
 
 namespace Vehicles
 {
@@ -69,8 +70,6 @@ namespace Vehicles
 		public LocalTargetInfo Destination => destination;
 
 		public bool Moving => moving;
-
-		public bool MovingNow => Moving && !WillCollideWithPawnOnNextPathCell();
 
 		public IntVec3 LastPassableCellInPath
 		{
@@ -141,10 +140,12 @@ namespace Vehicles
 			//Add Building and Position Recoverable extras
 			if (!GenGridVehicles.Walkable(vehicle.Position, vehicle.VehicleDef, vehicle.Map))
 			{
+				PatherFailed();
 				return;
 			}
 			if (Moving && curPath != null && destination == dest && this.peMode == peMode)
 			{
+				PatherFailed();
 				return;
 			}
 			if (!vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehicleReachability.CanReachVehicle(vehicle.Position, dest, peMode, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false)))
@@ -154,7 +155,7 @@ namespace Vehicles
 			}
 			this.peMode = peMode;
 			destination = dest;
-			if (GenGridVehicles.Walkable(nextCell, vehicle.VehicleDef, vehicle.Map) || WillCollideWithPawnOnNextPathCell() || nextCellCostLeft == nextCellCostTotal)
+			if (NextCellDoorToWaitForOrManuallyOpen() != null || nextCellCostLeft == nextCellCostTotal)
 			{
 				ResetToCurrentPosition();
 			}
@@ -164,7 +165,7 @@ namespace Vehicles
 			{
 				vehicle.Map.pawnDestinationReservationManager.ObsoleteAllClaimedBy(vehicle);
 			}
-			if (VehicleReachabilityImmediate.CanReachImmediateVehicle(vehicle, dest, peMode))
+			if (AtDestinationPosition())
 			{
 				PatherArrived();
 				return;
@@ -175,7 +176,6 @@ namespace Vehicles
 			}
 			curPath = null;
 			moving = true;
-			vehicle.jobs.posture = PawnPosture.Standing;
 			vehicle.EventRegistry[VehicleEventDefOf.MoveStart].ExecuteEvents();
 		}
 
@@ -208,66 +208,37 @@ namespace Vehicles
 				GenDraw.DrawFieldEdges(bumperCells);
 			}
 
-			if (WillCollideWithPawnAt(vehicle.Position))
+			//if (WillCollideWithPawnAt(vehicle.Position))
+			//{
+			//	if (!FailedToFindCloseUnoccupiedCellRecently())
+			//	{
+			//		if (CellFinder.TryFindBestPawnStandCell(vehicle, out IntVec3 intVec, true) && intVec != vehicle.Position)
+			//		{
+			//			vehicle.Position = intVec;
+			//			ResetToCurrentPosition();
+
+			//			if (moving && TrySetNewPath())
+			//			{
+			//				TryEnterNextPathCell();
+			//				return;
+			//			}
+			//		}
+			//		else
+			//		{
+			//			failedToFindCloseUnoccupiedCellTicks = Find.TickManager.TicksGame;
+			//		}
+			//	}
+			//	return;
+			//}
+			lastMovedTick = Find.TickManager.TicksGame;
+			if (nextCellCostLeft > 0f)
 			{
-				if (!FailedToFindCloseUnoccupiedCellRecently())
-				{
-					if (CellFinder.TryFindBestPawnStandCell(vehicle, out IntVec3 intVec, true) && intVec != vehicle.Position)
-					{
-						vehicle.Position = intVec;
-						ResetToCurrentPosition();
-						
-						if (moving && TrySetNewPath())
-						{
-							TryEnterNextPathCell();
-							return;
-						}
-					}
-					else
-					{
-						failedToFindCloseUnoccupiedCellTicks = Find.TickManager.TicksGame;
-					}
-				}
+				nextCellCostLeft -= CostToPayThisTick();
 				return;
 			}
-			if (vehicle.stances.FullBodyBusy)
+			if (moving)
 			{
-				return;
-			}
-			if (moving && WillCollideWithPawnOnNextPathCell())
-			{
-				nextCellCostLeft = nextCellCostTotal;
-				if (((curPath != null && curPath.NodesLeftCount < CheckForMovingCollidingPawnsIfCloserToTargetThanX) || PawnUtility.AnyPawnBlockingPathAt(nextCell, vehicle, collideOnlyWithStandingPawns: true)) && !BestPathHadPawnsInTheWayRecently() && TrySetNewPath())
-				{
-					ResetToCurrentPosition();
-					TryEnterNextPathCell();
-				}
-				else if (Find.TickManager.TicksGame - lastMovedTick >= AttackBlockingHostilePawnAfterTicks)
-				{
-					Pawn pawn = PawnUtility.PawnBlockingPathAt(nextCell, vehicle, false, false, false);
-					if (pawn != null && vehicle.HostileTo(pawn) && vehicle.TryGetAttackVerb(pawn, false) != null)
-					{
-						Job job = JobMaker.MakeJob(JobDefOf.AttackMelee, pawn);
-						job.maxNumMeleeAttacks = 1;
-						job.expiryInterval = 300;
-						vehicle.jobs.StartJob(job, JobCondition.Incompletable, null, false, true, null, null, false, false);
-					}
-				}
-				return;
-			}
-			else
-			{
-				lastMovedTick = Find.TickManager.TicksGame;
-				if (nextCellCostLeft > 0f)
-				{
-					nextCellCostLeft -= CostToPayThisTick();
-					return;
-				}
-				if (moving)
-				{
-					TryEnterNextPathCell();
-				}
-				return;
+				TryEnterNextPathCell();
 			}
 		}
 
@@ -321,22 +292,17 @@ namespace Vehicles
 			return null;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool WillCollideWithPawnOnNextPathCell()
-		{
-			return WillCollideWithPawnAt(nextCell);
-		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private bool IsNextCellWalkable()
 		{
-			return vehicle.Drivable(nextCell) && !WillCollideWithPawnAt(nextCell);
+			return vehicle.Drivable(nextCell);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private bool WillCollideWithPawnAt(IntVec3 c)
+		private bool AtDestinationPosition()
 		{
-			return PawnUtility.ShouldCollideWithPawns(vehicle) && PawnUtility.AnyPawnBlockingPathAt(c, vehicle, false, false, false);
+			return VehicleReachabilityImmediate.CanReachImmediateVehicle(vehicle, destination, peMode);
 		}
 
 		public Building_Door NextCellDoorToWaitForOrManuallyOpen()
@@ -454,76 +420,47 @@ namespace Vehicles
 			//	vehicleDamager.TakeStep();
 			//}
 
-			if (vehicle.IsBoat())
+			Building building = BuildingBlockingNextPathCell();
+			if (building != null)
 			{
-				if (!vehicle.Drafted)
-				{
-					if (vehicle.CurJob is null)
-					{
-						JobUtility.TryStartErrorRecoverJob(vehicle, string.Empty);
-					}
-					StopDead();
-				}
-				//Temporarily remove beached flagging for user testing
-				if (vehicle.beached/* || !nextCell.GetTerrain(vehicle.Map).IsWater*/)
-				{
-					vehicle.BeachShip();
-					vehicle.Position = nextCell;
-					StopDead();
-					vehicle.jobs.curDriver.Notify_PatherFailed();
-				}
-
-				lastCell = vehicle.Position;
-				vehicle.Position = nextCell;
-				if (NeedNewPath() && !TrySetNewPath())
-				{
-					return;
-				}
-				if (VehicleReachabilityImmediate.CanReachImmediateVehicle(vehicle, destination, peMode))
-				{
-					PatherArrived();
-				}
-				else
-				{
-					SetupMoveIntoNextCell();
-				}
+				PatherFailed();
 				return;
 			}
-			else
+			lastCell = vehicle.Position;
+			vehicle.Position = nextCell;
+
+			if (vehicle.beached)
 			{
-				Building building = BuildingBlockingNextPathCell();
-				if (building != null)
-				{
-					PatherFailed();
-					return;
-				}
-				lastCell = vehicle.Position;
+				vehicle.BeachShip();
 				vehicle.Position = nextCell;
-				if (vehicle.RaceProps.Humanlike)
-				{
-					cellsUntilClamor--;
-					if (cellsUntilClamor <= 0)
-					{
-						GenClamor.DoClamor(vehicle, 7f, ClamorDefOf.Movement);
-						cellsUntilClamor = ClamorCellsInterval;
-					}
-				}
-				//no filth for now
-				if (vehicle.BodySize > 0.9f)
-				{
-					vehicle.Map.snowGrid.AddDepth(vehicle.Position, -SnowReductionFromWalking); //REDO
-				}
-				if (NeedNewPath() && (!TrySetNewPath() || curPath == null))
-				{
-					return;
-				}
-				if (AtDestinationPosition())
-				{
-					PatherArrived();
-					return;
-				}
-				SetupMoveIntoNextCell();
+				StopDead();
+				vehicle.jobs.curDriver.Notify_PatherFailed();
 			}
+
+			if (vehicle.RaceProps.Humanlike)
+			{
+				cellsUntilClamor--;
+				if (cellsUntilClamor <= 0)
+				{
+					GenClamor.DoClamor(vehicle, 7f, ClamorDefOf.Movement);
+					cellsUntilClamor = ClamorCellsInterval;
+				}
+			}
+			//no filth for now
+			if (vehicle.BodySize > 0.9f)
+			{
+				vehicle.Map.snowGrid.AddDepth(vehicle.Position, -SnowReductionFromWalking); //REDO
+			}
+			if (NeedNewPath() && (!TrySetNewPath() || curPath == null))
+			{
+				return;
+			}
+			if (AtDestinationPosition())
+			{
+				PatherArrived();
+				return;
+			}
+			SetupMoveIntoNextCell();
 			vehicle.Map.GetCachedMapComponent<VehiclePositionManager>().ClaimPosition(vehicle);
 		}
 
@@ -652,28 +589,6 @@ namespace Vehicles
 				curPath.ReleaseToPool();
 			}
 			curPath = pawnPath;
-			int num = 0;
-			//while (num < MaxCheckAheadNodes && num < curPath.NodesLeftCount)
-			//{
-			//	IntVec3 c = curPath.Peek(num);
-
-			//	if (vehicle.beached) break;
-			//	if (PawnUtility.ShouldCollideWithPawns(vehicle) && PawnUtility.AnyPawnBlockingPathAt(c, vehicle, false, false, false))
-			//	{
-			//		//TODO - use with runover mechanics
-			//		foundPathWhichCollidesWithPawns = Find.TickManager.TicksGame;
-			//	}
-			//	if (PawnUtility.KnownDangerAt(c, vehicle.Map, vehicle))
-			//	{
-			//		//TODO - use with AI
-			//		foundPathWithDanger = Find.TickManager.TicksGame;
-			//	}
-			//	if (foundPathWhichCollidesWithPawns == Find.TickManager.TicksGame && foundPathWithDanger == Find.TickManager.TicksGame)
-			//	{
-			//		break;
-			//	}
-			//	num++;
-			//}
 			return true;
 		}
 
@@ -681,10 +596,10 @@ namespace Vehicles
 		{
 			if (!Recalculating)
 			{
-				Recalculating = true;
-				TrySetNewPath_Async();
+				//Recalculating = true;
+				//TrySetNewPath_Async();
+				vehicle.Map.GetCachedMapComponent<VehicleMapping>().dedicatedThread.Queue(new AsyncAction(() => TrySetNewPath(), () => moving));
 			}
-
 			return Recalculating;
 		}
 
@@ -750,13 +665,7 @@ namespace Vehicles
 			PawnPath pawnPath = vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathFinder.FindVehiclePath(vehicle.Position, destination, vehicle, token, peMode: peMode);
 			return pawnPath;
 		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private bool AtDestinationPosition()
-		{
-			return VehicleReachabilityImmediate.CanReachImmediateVehicle(vehicle, destination, peMode);
-		}
-
+		
 		private bool NeedNewPath()
 		{
 			if (!destination.IsValid || curPath is null || !curPath.Found || curPath.NodesLeftCount == 0)

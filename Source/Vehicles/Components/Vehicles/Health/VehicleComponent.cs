@@ -60,7 +60,7 @@ namespace Vehicles
 				vehicle.EventRegistry[VehicleEventDefOf.DamageTaken].ExecuteEvents();
 				if (vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed) <= 0.1f)
 				{
-					vehicle.drafter.Drafted = false;
+					vehicle.ignition.Drafted = false;
 				}
 				if (vehicle.Spawned && Mathf.Approximately(vehicle.GetStatValue(VehicleStatDefOf.BodyIntegrity), 0))
 				{

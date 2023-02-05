@@ -27,6 +27,7 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MapPawns), nameof(MapPawns.FreeHumanlikesOfFaction)), prefix: null,
 				postfix: new HarmonyMethod(typeof(Extra),
 				nameof(FreeHumanlikesInVehicles)));
+
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Selector), "HandleMapClicks"),
 				prefix: new HarmonyMethod(typeof(Extra),
 				nameof(MultiSelectFloatMenu)));
@@ -36,9 +37,6 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Projectile_Explosive), "Impact"),
 				prefix: new HarmonyMethod(typeof(Extra),
 				nameof(ShellsImpactWater)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WindowStack), nameof(WindowStack.Notify_ClickedInsideWindow)),
-				prefix: new HarmonyMethod(typeof(Extra),
-				nameof(HandleSingleWindowDialogs)));
 			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(TickManager), nameof(TickManager.Paused)),
 				postfix: new HarmonyMethod(typeof(Extra),
 				nameof(PausedFromVehicles)));
@@ -58,9 +56,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnUtility), nameof(PawnUtility.ShouldSendNotificationAbout)),
                 postfix: new HarmonyMethod(typeof(Extra), 
 				nameof(SendNotificationsVehicle)));
-
 		}
 
+		// REDO
 		public static void FreeColonistsInVehiclesTransport(ref int __result, List<Pawn> ___pawnsSpawned)
 		{
 			List<VehiclePawn> vehicles = ___pawnsSpawned.Where(x => x is VehiclePawn vehicle && x.Faction == Faction.OfPlayer).Cast<VehiclePawn>().ToList();
@@ -71,13 +69,13 @@ namespace Vehicles
 					__result += vehicle.AllPawnsAboard.Count;
 			}
 		}
-
-		public static void FreeHumanlikesSpawnedInVehicles(Faction faction, ref List<Pawn> __result, MapPawns __instance)
+		// REDO
+		public static void FreeHumanlikesSpawnedInVehicles(Faction faction, List<Pawn> __result, MapPawns __instance)
 		{
 			List<Pawn> innerPawns = __instance.SpawnedPawnsInFaction(faction).Where(p => p is VehiclePawn).SelectMany(v => (v as VehiclePawn).AllPawnsAboard).ToList();
 			__result.AddRange(innerPawns);
 		}
-
+		// REDO
 		public static void FreeHumanlikesInVehicles(Faction faction, ref List<Pawn> __result, MapPawns __instance)
 		{
 			List<Pawn> innerPawns = __instance.AllPawns.Where(p => p.Faction == faction && p is VehiclePawn).SelectMany(v => (v as VehiclePawn).AllPawnsAboard).ToList();
@@ -86,7 +84,7 @@ namespace Vehicles
 
 		public static bool MultiSelectFloatMenu(List<object> ___selected)
 		{
-			if(Event.current.type == EventType.MouseDown)
+			if (Event.current.type == EventType.MouseDown)
 			{
 				if(Event.current.button == 1 && ___selected.Count > 0)
 				{
@@ -101,13 +99,12 @@ namespace Vehicles
 
 		public static void ManhunterDontAttackVehicles(Thing t, ref bool __result)
 		{
-			if(__result is true && t is VehiclePawn vehicle && !SettingsCache.TryGetValue(vehicle.VehicleDef, typeof(VehicleProperties), "manhunterTargetsVehicle", vehicle.VehicleDef.properties.manhunterTargetsVehicle))
+			if (__result is true && t is VehiclePawn vehicle && !SettingsCache.TryGetValue(vehicle.VehicleDef, typeof(VehicleProperties), "manhunterTargetsVehicle", vehicle.VehicleDef.properties.manhunterTargetsVehicle))
 			{
 				__result = false;
 			}
 		}
 
-		//REDO
 		/// <summary>
 		/// Shells impacting water now have reduced radius of effect and different sound
 		/// </summary>
@@ -123,20 +120,6 @@ namespace Vehicles
 				return false;
 			}
 			return true;
-		}
-
-		public static void HandleSingleWindowDialogs(Window window, WindowStack __instance)
-		{
-			if (Event.current.type == EventType.MouseDown)
-			{
-				if (window is null || (!window.GetType().IsAssignableFrom(typeof(SingleWindow)) && (__instance.GetWindowAt(Verse.UI.GUIToScreenPoint(Event.current.mousePosition)) != SingleWindow.CurrentlyOpenedWindow)))
-				{
-					if (SingleWindow.CurrentlyOpenedWindow != null && SingleWindow.CurrentlyOpenedWindow.closeOnAnyClickOutside)
-					{
-						Find.WindowStack.TryRemove(SingleWindow.CurrentlyOpenedWindow);
-					}
-				}
-			}
 		}
 
 		public static void PausedFromVehicles(ref bool __result)

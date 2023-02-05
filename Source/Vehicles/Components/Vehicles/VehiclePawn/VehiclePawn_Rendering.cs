@@ -411,7 +411,7 @@ namespace Vehicles
 		{
 			if (MovementPermissions > VehiclePermissions.NotAllowed)
 			{
-				foreach (Gizmo gizmo in this.VehicleGizmos())
+				foreach (Gizmo gizmo in ignition.GetGizmos())
 				{
 					yield return gizmo;
 				}
@@ -470,7 +470,7 @@ namespace Vehicles
 					action = delegate ()
 					{
 						DisembarkAll();
-						drafter.Drafted = false;
+						ignition.Drafted = false;
 					},
 					hotKey = KeyBindingDefOf.Misc2
 				};

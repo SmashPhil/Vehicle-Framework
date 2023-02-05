@@ -37,18 +37,6 @@ namespace Vehicles
 			return GenAdj.OccupiedRect(center, rot, size);
 		}
 
-		[DebugAction(VehicleHarmony.VehiclesLabel, "Test Vehicle Rect", allowedGameStates = AllowedGameStates.PlayingOnMap)]
-		private static void TestMethod()
-		{
-			VehiclePawn firstVehicle = Find.CurrentMap.mapPawns.AllPawnsSpawned.FirstOrDefault(pawn => pawn is VehiclePawn) as VehiclePawn;
-			var cells = FullVehicleRectAllDirections(firstVehicle.VehicleDef, firstVehicle.Position);
-			Log.Message($"COUNT: {cells.Count()}");
-			foreach (IntVec3 cell in cells)
-			{
-				firstVehicle.Map.debugDrawer.FlashCell(cell, 0.75f, duration: 180);
-			}
-		}
-
 		//TODO - Doesn't work for even sizes. Should instead calculate only North and East (north calculate full OccupiedRect, east only calculate past the inner square)
 		public static IEnumerable<IntVec3> FullVehicleRectAllDirections(this VehicleDef vehicleDef, IntVec3 center)
 		{
@@ -124,9 +112,17 @@ namespace Vehicles
 				vehicle.AddEvent(VehicleEventDefOf.PawnChangedSeats, vehicle.vPather.RecalculatePermissions);
 				vehicle.AddEvent(VehicleEventDefOf.PawnKilled, vehicle.vPather.RecalculatePermissions);
 				vehicle.AddEvent(VehicleEventDefOf.PawnCapacitiesDirty, vehicle.vPather.RecalculatePermissions);
-				vehicle.AddEvent(VehicleEventDefOf.DraftOff, vehicle.vPather.RecalculatePermissions);
+				vehicle.AddEvent(VehicleEventDefOf.IgnitionOff, vehicle.vPather.RecalculatePermissions);
 				vehicle.AddEvent(VehicleEventDefOf.DamageTaken, vehicle.vPather.RecalculatePermissions);
 				vehicle.AddEvent(VehicleEventDefOf.Repaired, vehicle.vPather.RecalculatePermissions);
+				vehicle.AddEvent(VehicleEventDefOf.OutOfFuel, delegate ()
+				{
+					if (vehicle.Spawned)
+					{
+						vehicle.vPather.StopDead();
+						vehicle.ignition.Drafted = false;
+					}
+				});
 
 				if (!vehicle.VehicleDef.statEvents.NullOrEmpty())
 				{

@@ -154,8 +154,6 @@ namespace Vehicles
 		/// <param name="peMode"></param>
 		public PawnPath FindVehiclePath(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, CancellationToken token, PathEndMode peMode = PathEndMode.OnCell)
 		{
-			Debug.Message($"{VehicleHarmony.LogLabel} From={start} To={dest} MainPath for {traverseParms.pawn.LabelShort} ThreadId: {Thread.CurrentThread.ManagedThreadId}");
-			
 			postCalculatedCells.Clear();
 			postCalculatedTurns.Clear();
 			if (DebugSettings.pathThroughWalls)

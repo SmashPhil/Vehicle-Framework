@@ -15,6 +15,7 @@ namespace Vehicles
 		private readonly HashSet<IntVec3> dirtyCells = new HashSet<IntVec3>();
 
 		private readonly List<VehicleRegion> regionsToDirty = new List<VehicleRegion>();
+		private readonly List<VehicleRegion> regionsToDirtyFromWalkability = new List<VehicleRegion>();
 
 		public VehicleRegionDirtyer(VehicleMapping mapping, VehicleDef createdFor)
 		{
@@ -65,10 +66,11 @@ namespace Vehicles
 		/// <summary>
 		/// Notify that the walkable status at <paramref name="cell"/> has changed
 		/// </summary>
+		/// <remarks>Uses different static list, may be called from other threads than DedicatedThread for regions</remarks>
 		/// <param name="cell"></param>
 		public void Notify_WalkabilityChanged(IntVec3 cell)
 		{
-			regionsToDirty.Clear();
+			regionsToDirtyFromWalkability.Clear();
 			for (int i = 0; i < 9; i++)
 			{
 				IntVec3 adjCell = cell + GenAdj.AdjacentCellsAndInside[i];
@@ -77,19 +79,19 @@ namespace Vehicles
 					VehicleRegion regionAt_NoRebuild_InvalidAllowed = mapping[createdFor].VehicleRegionGrid.GetRegionAt_NoRebuild_InvalidAllowed(adjCell);
 					if (regionAt_NoRebuild_InvalidAllowed != null && regionAt_NoRebuild_InvalidAllowed.valid)
 					{
-						regionsToDirty.Add(regionAt_NoRebuild_InvalidAllowed);
+						regionsToDirtyFromWalkability.Add(regionAt_NoRebuild_InvalidAllowed);
 					}
 				}
 			}
-			for (int j = 0; j < regionsToDirty.Count; j++)
+			for (int j = 0; j < regionsToDirtyFromWalkability.Count; j++)
 			{
-				SetRegionDirty(regionsToDirty[j], true);
+				SetRegionDirty(regionsToDirtyFromWalkability[j], true);
 			}
-			regionsToDirty.Clear();
 			if (GenGridVehicles.Walkable(cell, createdFor, mapping.map))
 			{
 				dirtyCells.Add(cell);
 			}
+			regionsToDirtyFromWalkability.Clear();
 		}
 
 		/// <summary>
@@ -99,7 +101,7 @@ namespace Vehicles
 		public void Notify_ThingAffectingRegionsSpawned(Thing thing)
 		{
 			regionsToDirty.Clear();
-			foreach (IntVec3 cell in thing.OccupiedRect().ExpandedBy(1).ClipInsideMap(thing.Map))
+			foreach (IntVec3 cell in thing.OccupiedRect().ExpandedBy(1).ClipInsideMap(mapping.map))
 			{
 				VehicleRegion validRegionAt_NoRebuild = mapping[createdFor].VehicleRegionGrid.GetValidRegionAt_NoRebuild(cell);
 				if (validRegionAt_NoRebuild != null)

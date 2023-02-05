@@ -10,9 +10,9 @@ namespace Vehicles
 	{
 		public void PatchMethods()
 		{
-			VehicleHarmony.Patch(original: AccessTools.Property(typeof(Pawn_DraftController), nameof(Pawn_DraftController.Drafted)).GetSetMethod(),
-				prefix: new HarmonyMethod(typeof(Components),
-				nameof(DraftedVehiclesCanMove)));
+			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(Pawn), nameof(Pawn.Drafted)),
+				postfix: new HarmonyMethod(typeof(Components),
+				nameof(VehicleIsDrafted)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(FloatMenuMakerMap), "CanTakeOrder"), prefix: null,
 				postfix: new HarmonyMethod(typeof(Components),
 				nameof(CanVehicleTakeOrder)));
@@ -31,59 +31,16 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Allow vehicles to be drafted under the right conditions
+		/// Divert draft status check to <see cref="Vehicle_IgnitionController"/>
 		/// </summary>
 		/// <param name="__instance"></param>
-		/// <param name="value"></param>
-		public static bool DraftedVehiclesCanMove(Pawn_DraftController __instance, bool value)
+		/// <param name="__result"></param>
+		public static void VehicleIsDrafted(Pawn __instance, ref bool __result)
 		{
-			if (__instance.pawn is VehiclePawn vehicle)
+			if (__instance is VehiclePawn vehicle)
 			{
-				if (value && !__instance.Drafted)
-				{
-					if (!VehicleMod.settings.debug.debugDraftAnyVehicle && (vehicle.CompFueledTravel?.EmptyTank ?? false))
-					{
-						Messages.Message("Vehicles_OutOfFuel".Translate(), MessageTypeDefOf.RejectInput);
-						return false;
-					}
-					if (vehicle.CompUpgradeTree?.CurrentlyUpgrading ?? false)
-					{
-						Messages.Message("Vehicles_UpgradeInProgress".Translate(), MessageTypeDefOf.RejectInput);
-						return false;
-					}
-					if (!vehicle.CanMoveFinal)
-					{
-						Messages.Message("Vehicles_NotEnoughToOperate".Translate(), MessageTypeDefOf.RejectInput);
-						return false;
-					}
-					if (vehicle.Spawned)
-					{
-						vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(vehicle);
-					}
-				}
-				else if (!value && vehicle.vPather.curPath != null)
-				{
-					vehicle.vPather.PatherFailed();
-				}
-
-				if (!VehicleMod.settings.main.fishingPersists)
-				{
-					vehicle.currentlyFishing = false;
-				}
-
-				if (__instance.Drafted != value)
-				{
-					if (value)
-					{
-						vehicle.EventRegistry[VehicleEventDefOf.DraftOn].ExecuteEvents();
-					}
-					else
-					{
-						vehicle.EventRegistry[VehicleEventDefOf.DraftOff].ExecuteEvents();
-					}
-				}
+				__result = vehicle.ignition.Drafted;
 			}
-			return true;
 		}
 
 		/// <summary>
@@ -93,7 +50,7 @@ namespace Vehicles
 		/// <param name="__result"></param>
 		public static void CanVehicleTakeOrder(Pawn pawn, ref bool __result)
 		{
-			if(__result is false)
+			if (__result is false)
 			{
 				__result = pawn is VehiclePawn;
 			}
@@ -143,12 +100,12 @@ namespace Vehicles
 		/// <param name="actAsIfSpawned"></param>
 		public static void AddAndRemoveVehicleComponents(Pawn pawn, bool actAsIfSpawned = false)
 		{
-			if (pawn is VehiclePawn vehicle && (vehicle.Spawned || actAsIfSpawned) && vehicle.drafter is null)
+			if (pawn is VehiclePawn vehicle && (vehicle.Spawned || actAsIfSpawned) && vehicle.ignition is null)
 			{
-				vehicle.drafter = new Pawn_DraftController(pawn);
-				vehicle.trader = new Pawn_TraderTracker(pawn);
-				vehicle.story = new Pawn_StoryTracker(pawn);
-				vehicle.playerSettings = new Pawn_PlayerSettings(pawn);
+				vehicle.ignition = new Vehicle_IgnitionController(vehicle);
+				vehicle.trader = new Pawn_TraderTracker(vehicle);
+				vehicle.story = new Pawn_StoryTracker(vehicle);
+				vehicle.playerSettings = new Pawn_PlayerSettings(vehicle);
 				vehicle.training = null;
 			}
 		}

@@ -95,10 +95,6 @@ namespace Vehicles
 			{
 				return 0f;
 			}
-			if (vehicle.vPather.WillCollideWithPawnOnNextPathCell())
-			{
-				return 0f;
-			}
 			return 1f - vehicle.vPather.nextCellCostLeft / vehicle.vPather.nextCellCostTotal;
 		}
 	}

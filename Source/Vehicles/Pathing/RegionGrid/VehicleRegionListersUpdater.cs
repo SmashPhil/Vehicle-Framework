@@ -116,7 +116,6 @@ namespace Vehicles
 		/// Tmp method in case vanilla ever modifies this behavior to be specific to ThingDefs
 		/// </summary>
 		/// <param name="thing"></param>
-		/// <returns></returns>
 		private static bool CanRegisterInAdjacentRegions(Thing thing)
 		{
 			return true;

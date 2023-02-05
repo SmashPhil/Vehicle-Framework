@@ -96,7 +96,6 @@ namespace Vehicles
 						}
 						if (!VehicleReachabilityUtility.CanReachVehicle(vehicle, curLoc, PathEndMode.OnCell, Danger.Deadly, TraverseMode.ByPawn))
 						{
-							Debug.Message($"Cant Reach {curLoc} with {vehicle.Label}");
 							__result = new FloatMenuOption("VehicleCannotMoveToCell".Translate(vehicle.LabelCap), null, MenuOptionPriority.Default, null, null, 0f, null, null);
 							return false;
 						}
@@ -106,7 +105,6 @@ namespace Vehicles
 							bool isOnEdge = CellRect.WholeMap(vehicle.Map).IsOnEdge(clickCell, 3);
 							bool exitCell = vehicle.Map.exitMapGrid.IsExitCell(clickCell);
 							bool vehicleCellsOverlapExit = vehicle.InhabitedCellsProjected(clickCell, Rot8.Invalid).NotNullAndAny(cell => pawn.Map.exitMapGrid.IsExitCell(cell));
-							Debug.Message($"Exit Map? CellOnEdge={isOnEdge} ExitCell={exitCell} VehicleCellsOverlap={vehicleCellsOverlapExit}");
 							if (exitCell || vehicleCellsOverlapExit)
 							{
 								job.exitMapOnArrival = true;

@@ -3,11 +3,11 @@
 <Defs>
 	<!-- Movement -->
 	<Vehicles.VehicleEventDef>
-		<defName>DraftOn</defName>
+		<defName>IgnitionOn</defName>
 	</Vehicles.VehicleEventDef>
 	
 	<Vehicles.VehicleEventDef>
-		<defName>DraftOff</defName>
+		<defName>IgnitionOff</defName>
 	</Vehicles.VehicleEventDef>
 	
 	<Vehicles.VehicleEventDef>

@@ -32,7 +32,7 @@ namespace Vehicles
 
 		public bool debugDrawVehiclePathCosts;
 		public bool debugDrawPathfinderSearch;
-		public bool hierarchalPathfinding = true;
+		public bool hierarchalPathfinding;
 
 		public override void ResetSettings()
 		{
@@ -53,7 +53,7 @@ namespace Vehicles
 
 			debugDrawVehiclePathCosts = false;
 			debugDrawPathfinderSearch = false;
-			hierarchalPathfinding = true;
+			hierarchalPathfinding = false;
 		}
 
 		public override void ExposeData()
@@ -74,8 +74,7 @@ namespace Vehicles
 
 			Scribe_Values.Look(ref debugDrawVehiclePathCosts, nameof(debugDrawVehiclePathCosts));
 			Scribe_Values.Look(ref debugDrawPathfinderSearch, nameof(debugDrawPathfinderSearch));
-			Scribe_Values.Look(ref hierarchalPathfinding, nameof(hierarchalPathfinding), defaultValue: true);
-			//hierarchalPathfinding = false; //temporarily hardcoded to false to avoid use of HPA* while unfinished
+			Scribe_Values.Look(ref hierarchalPathfinding, nameof(hierarchalPathfinding), defaultValue: false); //TODO - Change to true when fully implemented
 		}
 
 		public override void DrawSection(Rect rect)

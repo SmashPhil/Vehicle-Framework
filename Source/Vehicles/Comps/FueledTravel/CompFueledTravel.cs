@@ -12,7 +12,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class CompFueledTravel : VehicleAIComp, IRefundable
+	public class CompFueledTravel : VehicleComp, IRefundable
 	{
 		public const float FuelPerLeak = 1;
 		public const float TicksPerLeakCheck = 120;
@@ -42,33 +42,39 @@ namespace Vehicles
 		private float fuelConsumptionRateOffset;
 		private float fuelCapacityOffset;
 
-		public CompProperties_FueledTravel Props => (CompProperties_FueledTravel)props;
-		public float ConsumptionRatePerTick => FuelEfficiency * EfficiencyTickMultiplier;
+		public List<VehicleComponent> FuelComponents { get; private set; }
+
+		public CompProperties_FueledTravel Props => props as CompProperties_FueledTravel;
+		public Gizmo FuelCountGizmo => new Gizmo_RefuelableFuelTravel(this);
+
+		public override bool TickByRequest => true;
+
+		//Fuel Tank
 		public float Fuel => fuel;
 		public float FuelPercent => Fuel / FuelCapacity;
 		public bool EmptyTank => Fuel <= 0f;
 		public bool FullTank => fuel == FuelCapacity;
 		public int FuelCountToFull => Mathf.CeilToInt(TargetFuelLevel - Fuel);
-
-		private bool Charging => connectedPower != null && !FullTank && connectedPower.PowerNet.CurrentStoredEnergy() > Props.chargeRate;
-		public VehiclePawn Vehicle => parent as VehiclePawn;
-		public FuelConsumptionCondition FuelCondition => Props.fuelConsumptionCondition;
-		public Gizmo FuelCountGizmo => new Gizmo_RefuelableFuelTravel(this);
-		public List<VehicleComponent> FuelComponents { get; private set; }
-
-		public virtual float TargetFuelLevel { get => targetFuelLevel; set => targetFuelLevel = value; }
-
+		public float TargetFuelLevel { get => targetFuelLevel; set => targetFuelLevel = value; }
 		public float FuelPercentOfTarget => fuel / TargetFuelLevel;
 
+		//Fuel Consumption
+		public float ConsumptionRatePerTick => FuelEfficiency * EfficiencyTickMultiplier;
+		public FuelConsumptionCondition FuelCondition => Props.fuelConsumptionCondition;
 		public bool ShouldAutoRefuelNow => FuelPercentOfTarget <= Props.autoRefuelPercent && !FullTank && TargetFuelLevel > 0f && !Vehicle.Drafted && ShouldAutoRefuelNowIgnoringFuelPct;
-
 		public bool ShouldAutoRefuelNowIgnoringFuelPct => !Vehicle.IsBurning() && parent.Map.designationManager.DesignationOn(Vehicle, DesignationDefOf_Vehicles.DisassembleVehicle) == null;
+
+		//Electric
+		private bool Charging => connectedPower != null && !FullTank && connectedPower.PowerNet.CurrentStoredEnergy() > Props.chargeRate;
 
 		public IEnumerable<(ThingDef thingDef, float count)> Refunds
 		{
 			get
 			{
-				yield return (Props.fuelType, Fuel);
+				if (!Props.electricPowered)
+				{
+					yield return (Props.fuelType, Fuel);
+				}
 			}
 		}
 
@@ -88,7 +94,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return Props.fuelConsumptionRate + fuelConsumptionRateOffset;
+				return SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_FueledTravel), nameof(CompProperties_FueledTravel.fuelConsumptionRate), Props.fuelConsumptionRate) + fuelConsumptionRateOffset;
 			}
 			set
 			{
@@ -117,17 +123,20 @@ namespace Vehicles
 			}
 		}
 
-		public virtual bool SatisfiesFuelConsumptionConditional
+		///Flying fuel consumption is handled in <see cref="AerialVehicleInFlight.SpendFuel"/>
+		public bool ShouldConsumeNow => (!EmptyTank && Vehicle.Spawned) && ConsumeWhenDrafted || ConsumeWhenMoving || ConsumeAlways;
+
+		public bool ConsumeAlways => FuelCondition.HasFlag(FuelConsumptionCondition.Always);
+
+		public bool ConsumeWhenDrafted => Vehicle.Spawned && FuelCondition.HasFlag(FuelConsumptionCondition.Drafted) && Vehicle.Drafted;
+
+		public bool ConsumeWhenMoving
 		{
 			get
 			{
-				if (Vehicle.Spawned && FuelCondition.HasFlag(FuelConsumptionCondition.Drafted))
-				{
-					return Vehicle.Drafted;
-				}
 				if (FuelCondition.HasFlag(FuelConsumptionCondition.Moving))
 				{
-					if (Vehicle.Spawned && Vehicle.vPather.MovingNow)
+					if (Vehicle.Spawned && Vehicle.vPather.Moving)
 					{
 						return true;
 					}
@@ -136,11 +145,6 @@ namespace Vehicles
 						return true;
 					}
 				}
-				if (FuelCondition.HasFlag(FuelConsumptionCondition.Always))
-				{
-					return true;
-				}
-				///Flying fuel consumption is handled in <see cref="AerialVehicleInFlight.SpendFuel"/>
 				return false;
 			}
 		}
@@ -158,14 +162,14 @@ namespace Vehicles
 
 		public virtual void Refuel(List<Thing> fuelThings)
 		{
-			int num = FuelCountToFull;
-			while(num > 0 && fuelThings.Count > 0)
+			int countToFull = FuelCountToFull;
+			while (countToFull > 0 && fuelThings.Count > 0)
 			{
 				Thing thing = fuelThings.Pop();
-				int num2 = Mathf.Min(num, thing.stackCount);
-				Refuel(num2);
-				thing.SplitOff(num2).Destroy(DestroyMode.Vanish);
-				num -= num2;
+				int count = Mathf.Min(countToFull, thing.stackCount);
+				Refuel(count);
+				thing.SplitOff(count).Destroy(DestroyMode.Vanish);
+				countToFull -= count;
 			}
 		}
 
@@ -176,6 +180,7 @@ namespace Vehicles
 				return;
 			}
 			fuel += amount;
+			Vehicle.EventRegistry[VehicleEventDefOf.Refueled].ExecuteEvents();
 			if (fuel >= FuelCapacity)
 			{
 				fuel = FuelCapacity;
@@ -187,7 +192,7 @@ namespace Vehicles
 		/// </summary>
 		private void RefuelHalfway()
 		{
-			fuel = FuelCapacity / 2;
+			Refuel(FuelCapacity / 2f);
 		}
 
 		public virtual void ConsumeFuel(float amount)
@@ -200,7 +205,7 @@ namespace Vehicles
 			if (fuel <= 0f)
 			{
 				fuel = 0f;
-				parent.BroadcastCompSignal(CompSignals.RanOutOfFuel);
+				Vehicle.EventRegistry[VehicleEventDefOf.OutOfFuel].ExecuteEvents();
 			}
 		}
 
@@ -214,7 +219,7 @@ namespace Vehicles
 			if (fuel <= 0f)
 			{
 				fuel = 0f;
-				parent.BroadcastCompSignal(CompSignals.RanOutOfFuel);
+				Vehicle.EventRegistry[VehicleEventDefOf.OutOfFuel].ExecuteEvents();
 			}
 		}
 
@@ -284,8 +289,7 @@ namespace Vehicles
 					defaultLabel = "Debug: Set fuel to 0",
 					action = delegate ()
 					{
-						fuel = 0f;
-						parent.BroadcastCompSignal("Refueled");
+						ConsumeFuel(float.MaxValue);
 					}
 				};
 				yield return new Command_Action
@@ -293,8 +297,8 @@ namespace Vehicles
 					defaultLabel = "Debug: Set fuel to 0.1",
 					action = delegate ()
 					{
-						fuel = 0.1f;
-						parent.BroadcastCompSignal("Refueled");
+						fuel = 0f;
+						Refuel(0.1f);
 					}
 				};
 				yield return new Command_Action
@@ -302,8 +306,7 @@ namespace Vehicles
 					defaultLabel = "Debug: Set fuel to half",
 					action = delegate ()
 					{
-						fuel = FuelCapacity / 2;
-						parent.BroadcastCompSignal("Refueled");
+						RefuelHalfway();
 					}
 				};
 				yield return new Command_Action
@@ -311,8 +314,7 @@ namespace Vehicles
 					defaultLabel = "Debug: Set fuel to max",
 					action = delegate ()
 					{
-						fuel = FuelCapacity;
-						parent.BroadcastCompSignal("Refueled");
+						Refuel(FuelCapacity);
 					}
 				};
 			}
@@ -331,29 +333,37 @@ namespace Vehicles
 		public override void SpawnedInGodMode()
 		{
 			base.SpawnedInGodMode();
-			fuel = FuelCapacity;
-			parent.BroadcastCompSignal("Refueled");
+			Refuel(FuelCapacity);
+		}
+
+		private void RevalidateConsumptionStatus()
+		{
+			if (ShouldConsumeNow)
+			{
+				StartTicking();
+			}
+			else
+			{
+				StopTicking();
+			}
 		}
 
 		public override void CompTick()
 		{
-			base.CompTick();
-			if (SatisfiesFuelConsumptionConditional)
+			ConsumeFuel(ConsumptionRatePerTick);
+			if (!terminateMotes && !Props.motesGenerated.NullOrEmpty())
 			{
-				ConsumeFuel(ConsumptionRatePerTick);
-				if (!terminateMotes && !Props.motesGenerated.NullOrEmpty())
+				if (Find.TickManager.TicksGame % Props.ticksToSpawnMote == 0)
 				{
-					if (Find.TickManager.TicksGame % Props.ticksToSpawnMote == 0)
-					{
-						DrawMotes();
-					}
-				}
-				if (EmptyTank && !VehicleMod.settings.debug.debugDraftAnyVehicle)
-				{
-					Vehicle.drafter.Drafted = false;
+					DrawMotes();
 				}
 			}
-			else if (Props.electricPowered)
+			if (EmptyTank && !VehicleMod.settings.debug.debugDraftAnyVehicle)
+			{
+				Vehicle.ignition.Drafted = false;
+			}
+
+			if (Props.electricPowered)
 			{
 				if (!Charging)
 				{
@@ -366,19 +376,6 @@ namespace Vehicles
 				}
 			}
 
-			//Validate leak every so often
-			if (Props.leakDef != null && fuel > 0 && Find.TickManager.TicksGame % TicksPerLeakCheck == 0)
-			{
-				leaking = false;
-				foreach (VehicleComponent component in FuelComponents)
-				{
-					float efficiency = component.Efficiency;
-					if (efficiency < 0.9f)
-					{
-						leaking = true;
-					}
-				}
-			}
 			//If leaking, then loop through and spawn filth
 			if (leaking)
 			{
@@ -404,6 +401,7 @@ namespace Vehicles
 		public override void CompTickRare()
 		{
 			base.CompTickRare();
+			RevalidateConsumptionStatus(); //Intermittent checks to ensure no missed cases cause vehicle to drain
 			if (Vehicle.Spawned)
 			{
 				if (!FullTank)
@@ -413,6 +411,20 @@ namespace Vehicles
 				else
 				{
 					Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Vehicle, ReservationType.Refuel);
+				}
+			}
+
+			//Validate leak every so often
+			if (Props.leakDef != null && fuel > 0 && Find.TickManager.TicksGame % TicksPerLeakCheck == 0)
+			{
+				leaking = false;
+				foreach (VehicleComponent component in FuelComponents)
+				{
+					float efficiency = component.Efficiency;
+					if (efficiency < 0.9f)
+					{
+						leaking = true;
+					}
 				}
 			}
 
@@ -501,6 +513,17 @@ namespace Vehicles
 					RefuelHalfway();
 				}
 			}
+
+			RevalidateConsumptionStatus();
+
+			Vehicle.AddEvent(VehicleEventDefOf.MoveStart, RevalidateConsumptionStatus);
+			Vehicle.AddEvent(VehicleEventDefOf.MoveStop, RevalidateConsumptionStatus);
+			Vehicle.AddEvent(VehicleEventDefOf.OutOfFuel, RevalidateConsumptionStatus);
+			Vehicle.AddEvent(VehicleEventDefOf.Refueled, RevalidateConsumptionStatus);
+			Vehicle.AddEvent(VehicleEventDefOf.IgnitionOn, RevalidateConsumptionStatus);
+			Vehicle.AddEvent(VehicleEventDefOf.IgnitionOff, RevalidateConsumptionStatus);
+			Vehicle.AddEvent(VehicleEventDefOf.DamageTaken, RevalidateConsumptionStatus);
+			Vehicle.AddEvent(VehicleEventDefOf.Repaired, RevalidateConsumptionStatus);
 
 			if (postLoadReconnect)
 			{

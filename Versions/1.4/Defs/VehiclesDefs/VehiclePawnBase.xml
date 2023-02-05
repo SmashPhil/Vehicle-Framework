@@ -66,11 +66,11 @@
 		
 		<soundOneShotsOnEvent>
 			<li>
-				<key>DraftOn</key>
+				<key>IgnitionOn</key>
 				<value>DraftOn</value>
 			</li>
 			<li>
-				<key>DraftOff</key>
+				<key>IgnitionOff</key>
 				<value>DraftOff</value>
 			</li>
 		</soundOneShotsOnEvent>

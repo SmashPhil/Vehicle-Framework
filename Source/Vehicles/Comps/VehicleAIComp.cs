@@ -20,7 +20,6 @@ namespace Vehicles
 
 		public virtual void AIAutoCheck()
 		{
-
 		}
 	}
 }

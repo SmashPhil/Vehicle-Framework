@@ -364,6 +364,7 @@
     <Compile Include="AI\JobDrivers\JobDriver_DisassembleVehicle.cs" />
     <Compile Include="AI\Lords\LordToil_PrepareCaravan_GatherAnimalsForVehicles.cs" />
     <Compile Include="AI\WorkGiver\VehicleWorkGiver.cs" />
+    <Compile Include="BackCompatibility\BackCompatibilityConverter_Universal.cs" />
     <Compile Include="Components\Rendering\Tracks\VehicleTrack_Wake.cs" />
     <Compile Include="Components\Rendering\Tracks\VehicleTrack.cs" />
     <Compile Include="Components\Rendering\VehicleTrackMaker.cs" />
@@ -375,6 +376,7 @@
     <Compile Include="Components\Vehicles\Health\StatCache.cs" />
     <Compile Include="Components\Vehicles\Health\StatWorkers\VehicleStatWorker_BodyIntegrity.cs" />
     <Compile Include="Components\Vehicles\Health\VehicleStatDrawEntry.cs" />
+    <Compile Include="Components\Vehicles\Misc\Vehicle_IgnitionController.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Handlers.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Caravan.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_AI.cs" />
@@ -382,7 +384,6 @@
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Tickers.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Health.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Rendering.cs" />
-    <Compile Include="Comps\CompSignals.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\DirectionalTakeoff.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\Misc\FleckData.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\Properties\DirectionalProtocolProperties.cs" />
