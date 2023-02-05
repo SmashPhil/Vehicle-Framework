@@ -350,7 +350,7 @@ namespace Vehicles
 		public static void RegisterInVehicleRegions(Thing thing, Map map)
 		{
 			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-			if (mapping.ThreadAvailable && VehicleMod.settings.debug.useAsync)
+			if (mapping.ThreadAvailable)
 			{
 				mapping.dedicatedThread.Queue(new AsyncAction(() => RegisterInRegions(thing, mapping), () => map != null && map.Index > -1));
 			}
@@ -363,7 +363,7 @@ namespace Vehicles
 		public static void DeregisterInVehicleRegions(Thing thing, Map map)
 		{
 			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-			if (mapping.ThreadAvailable && VehicleMod.settings.debug.useAsync)
+			if (mapping.ThreadAvailable)
 			{
 				mapping.dedicatedThread.Queue(new AsyncAction(() => DeregisterInRegions(thing, mapping), () => map != null && map.Index > -1));
 			}
