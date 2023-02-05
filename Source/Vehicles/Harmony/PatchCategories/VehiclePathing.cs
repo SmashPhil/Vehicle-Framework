@@ -331,7 +331,8 @@ namespace Vehicles
 
 		public static void Notify_ThingAffectingVehicleRegionsSpawned(Thing b)
 		{
-			if (b.Spawned) //For some reason other mods love to patch the SpawnSetup method and despawn the object. Extra check is necessary
+			//For some reason other mods love to patch the SpawnSetup method and despawn the object immediately. Extra check is necessary
+			if (b.Spawned)
 			{
 				PathingHelper.ThingAffectingRegionsSpawned(b, b.Map);
 			}
@@ -339,16 +340,17 @@ namespace Vehicles
 
 		public static void Notify_ThingAffectingVehicleRegionsDespawned(Thing b)
 		{
-			if (b.Spawned) //For some reason other mods love to patch the SpawnSetup method and despawn the object. Extra check is necessary
+			//For some reason other mods love to patch the SpawnSetup method and despawn the object immediately. Extra check is necessary
+			if (b.Spawned)
 			{
 				PathingHelper.ThingAffectingRegionsDeSpawned(b, b.Map);
 			}
 		}
-
+		
 		public static void RegisterInVehicleRegions(Thing thing, Map map)
 		{
 			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-			if (mapping.Owners.Count > 2 && VehicleMod.settings.debug.useAsync)
+			if (mapping.ThreadAvailable && VehicleMod.settings.debug.useAsync)
 			{
 				mapping.dedicatedThread.Queue(new AsyncAction(() => RegisterInRegions(thing, mapping), () => map != null && map.Index > -1));
 			}
@@ -357,11 +359,11 @@ namespace Vehicles
 				RegisterInRegions(thing, mapping);
 			}
 		}
-
+		
 		public static void DeregisterInVehicleRegions(Thing thing, Map map)
 		{
 			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-			if (mapping.Owners.Count > 2 && VehicleMod.settings.debug.useAsync)
+			if (mapping.ThreadAvailable && VehicleMod.settings.debug.useAsync)
 			{
 				mapping.dedicatedThread.Queue(new AsyncAction(() => DeregisterInRegions(thing, mapping), () => map != null && map.Index > -1));
 			}
@@ -373,17 +375,10 @@ namespace Vehicles
 
 		private static void RegisterInRegions(Thing thing, VehicleMapping mapping)
 		{
-			Log.Message("Running");
-			ProfilerWatch.Start("RegisterInRegions");
-			ProfilerWatch.Start("RegisterInRegions_Loop");
 			foreach (VehicleDef vehicleDef in mapping.Owners)
 			{
 				VehicleRegionListersUpdater.RegisterInRegions(thing, mapping, vehicleDef);
-				ProfilerWatch.Post("RegisterInRegions_Loop");
 			}
-			ProfilerWatch.Post("RegisterInRegions");
-			ProfilerWatch.End("RegisterInRegions_Loop");
-			ProfilerWatch.End("RegisterInRegions");
 		}
 
 		private static void DeregisterInRegions(Thing thing, VehicleMapping mapping)

@@ -34,7 +34,7 @@ namespace Vehicles
 		public bool debugDrawPathfinderSearch;
 		public bool hierarchalPathfinding = true;
 
-		public bool useAsync = true;
+		public bool useAsync = false;
 
 		public override void ResetSettings()
 		{

@@ -11,6 +11,9 @@ namespace Vehicles
 	/// </summary>
 	public static class VehicleRegionListersUpdater
 	{
+		//Can use static list for registering since it will only ever be used from DedicatedThread for regions
+		private static List<VehicleRegion> tmpRegions = new List<VehicleRegion>();
+
 		/// <summary>
 		/// Deregister <paramref name="thing"/> from nearby region
 		/// </summary>
@@ -22,7 +25,6 @@ namespace Vehicles
 			{
 				return;
 			}
-			List<VehicleRegion> tmpRegions = new List<VehicleRegion>();
 			GetTouchableRegions(thing, mapping, vehicleDef, tmpRegions, true);
 			for (int i = 0; i < tmpRegions.Count; i++)
 			{
@@ -32,6 +34,7 @@ namespace Vehicles
 					listerThings.Remove(thing);
 				}
 			}
+			tmpRegions.Clear();
 		}
 
 		/// <summary>
@@ -45,7 +48,6 @@ namespace Vehicles
 			{
 				return;
 			}
-			List<VehicleRegion> tmpRegions = new List<VehicleRegion>();
 			GetTouchableRegions(thing, mapping, vehicleDef, tmpRegions, false);
 			for (int i = 0; i < tmpRegions.Count; i++)
 			{
