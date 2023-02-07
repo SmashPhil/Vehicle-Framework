@@ -44,10 +44,14 @@ namespace Vehicles
 		{
 			this.FailOnDestroyedOrNull(TargetIndex.A);
 			this.FailOnDestroyedOrNull(TargetIndex.B);
+			this.FailOn(delegate ()
+			{
+				return !Map.GetCachedMapComponent<VehicleReservationManager>().VehicleListed(Vehicle, ReservationType.LoadVehicle);
+			});
 			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch);
 			yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false);
 			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).FailOnDespawnedNullOrForbidden(TargetIndex.B);
-			yield return GiveAsMuchToShipAsPossible();
+			yield return GiveAsMuchToVehicleAsPossible();
 		}
 
 		protected virtual Toil FindNearestVehicle()
@@ -63,19 +67,19 @@ namespace Vehicles
 					}
 					else
 					{
-						this.job.SetTarget(TargetIndex.B, pawn);
+						job.SetTarget(TargetIndex.B, pawn);
 					}
 				}
 			};
 		}
 
-		protected virtual Toil GiveAsMuchToShipAsPossible()
+		protected virtual Toil GiveAsMuchToVehicleAsPossible()
 		{
 			return new Toil
 			{
 				initAction = delegate ()
 				{
-					if (Item is null)
+					if (Item is null || Vehicle.cargoToLoad.NullOrEmpty())
 					{
 						pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true);
 					}
@@ -87,7 +91,10 @@ namespace Vehicles
                         {
 							pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true);
                         }
-						countToTransferFieldInfo.SetValue(transferable, transferable.CountToTransfer - job.count);
+						else
+						{
+							countToTransferFieldInfo.SetValue(transferable, transferable.CountToTransfer - job.count);
+						}
 					}
 				}
 			};

@@ -217,35 +217,44 @@ namespace Vehicles
 			}
 		}
 
-		public IEnumerable<VehiclePawn> VehicleListers(string req)
+		public bool VehicleListed(VehiclePawn vehicle, string request)
 		{
-			return vehicleListers.Where(v => v.Value.requests.Contains(req)).Select(v => v.Key);
+			if (vehicleListers.TryGetValue(vehicle, out VehicleRequestCollection collection))
+			{
+				return collection.requests.Contains(request);
+			}
+			return false;
 		}
 
-		public bool RegisterLister(VehiclePawn vehicle, string req)
+		public IEnumerable<VehiclePawn> VehicleListers(string request)
 		{
-			if (vehicleListers.TryGetValue(vehicle, out var request))
+			return vehicleListers.Where(v => v.Value.requests.Contains(request)).Select(v => v.Key);
+		}
+
+		public bool RegisterLister(VehiclePawn vehicle, string request)
+		{
+			if (vehicleListers.TryGetValue(vehicle, out VehicleRequestCollection collection))
 			{
-				if (!request.requests.NotNullAndAny())
+				if (!collection.requests.NotNullAndAny())
 				{
-					vehicleListers[vehicle] = new VehicleRequestCollection(req);
+					vehicleListers[vehicle] = new VehicleRequestCollection(request);
 					return true;
 				}
-				return request.requests.Add(req);
+				return collection.requests.Add(request);
 			}
-			vehicleListers.Add(vehicle, new VehicleRequestCollection(req));
+			vehicleListers.Add(vehicle, new VehicleRequestCollection(request));
 			return true;
 		}
 
-		public bool RemoveLister(VehiclePawn vehicle, string req)
+		public bool RemoveLister(VehiclePawn vehicle, string request)
 		{
-			if (vehicleListers.TryGetValue(vehicle, out var requests))  
+			if (vehicleListers.TryGetValue(vehicle, out VehicleRequestCollection collection))  
 			{
-				if(requests.requests.EnumerableNullOrEmpty())
+				if (collection.requests.EnumerableNullOrEmpty())
 				{
 					return vehicleListers.Remove(vehicle);
 				}
-				return requests.requests.Remove(req);
+				return collection.requests.Remove(request);
 			}
 			return false;
 		}

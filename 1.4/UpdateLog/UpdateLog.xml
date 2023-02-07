@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.4.1157</currentVersion>
+  <currentVersion>1.4.1158</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
@@ -25,6 +25,10 @@ Fixed bug where pawns weren't ticking inside the vehicle that was spawned on a m
 Fixed bug where using StackLimit mods would cause adding ammo to vehicle turrets via devmode to add hundreds or thousands at a time, overencumbering the vehicle.
 
 Fixed bug where creating a vehicle turret that did not require ammo to reload was impossible.
+
+Fixed bug where vehicle reservations and requesters wouldn't properly clear when vehicle is despawned.
+
+
 [title]Performance Improvements[/title]
 Compressed region making for vehicles to reuse region grids for vehicles with similar configurations.
 
