@@ -18,15 +18,12 @@ namespace Vehicles
 
 		public void PatchMethods()
 		{
-			VehicleHarmony.Patch(original: AccessTools.Property(typeof(MapPawns), nameof(MapPawns.FreeColonistsSpawnedOrInPlayerEjectablePodsCount)).GetGetMethod(), prefix: null,
-				postfix: new HarmonyMethod(typeof(Extra),
-				nameof(FreeColonistsInVehiclesTransport)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MapPawns), nameof(MapPawns.FreeHumanlikesSpawnedOfFaction)), prefix: null,
-				postfix: new HarmonyMethod(typeof(Extra),
-				nameof(FreeHumanlikesSpawnedInVehicles)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MapPawns), nameof(MapPawns.FreeHumanlikesOfFaction)), prefix: null,
-				postfix: new HarmonyMethod(typeof(Extra),
-				nameof(FreeHumanlikesInVehicles)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MapPawns), "PlayerEjectablePodHolder"),
+				prefix: new HarmonyMethod(typeof(Extra),
+				nameof(PlayerEjectableVehicles)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn), nameof(Pawn.GetChildHolders)),
+				prefix: new HarmonyMethod(typeof(Extra),
+				nameof(GetVehicleHandlerIThingHolders)));
 
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Selector), "HandleMapClicks"),
 				prefix: new HarmonyMethod(typeof(Extra),
@@ -58,28 +55,22 @@ namespace Vehicles
 				nameof(SendNotificationsVehicle)));
 		}
 
-		// REDO
-		public static void FreeColonistsInVehiclesTransport(ref int __result, List<Pawn> ___pawnsSpawned)
+		public static bool PlayerEjectableVehicles(Thing thing, ref IThingHolder __result)
 		{
-			List<VehiclePawn> vehicles = ___pawnsSpawned.Where(x => x is VehiclePawn vehicle && x.Faction == Faction.OfPlayer).Cast<VehiclePawn>().ToList();
-			
-			foreach(VehiclePawn vehicle in vehicles)
+			if (thing is VehiclePawn vehicle)
 			{
-				if(vehicle.AllPawnsAboard.NotNullAndAny(x => !x.Dead))
-					__result += vehicle.AllPawnsAboard.Count;
+				__result = vehicle;
+				return false;
 			}
+			return true;
 		}
-		// REDO
-		public static void FreeHumanlikesSpawnedInVehicles(Faction faction, List<Pawn> __result, MapPawns __instance)
+
+		public static void GetVehicleHandlerIThingHolders(Pawn __instance, List<IThingHolder> outChildren)
 		{
-			List<Pawn> innerPawns = __instance.SpawnedPawnsInFaction(faction).Where(p => p is VehiclePawn).SelectMany(v => (v as VehiclePawn).AllPawnsAboard).ToList();
-			__result.AddRange(innerPawns);
-		}
-		// REDO
-		public static void FreeHumanlikesInVehicles(Faction faction, ref List<Pawn> __result, MapPawns __instance)
-		{
-			List<Pawn> innerPawns = __instance.AllPawns.Where(p => p.Faction == faction && p is VehiclePawn).SelectMany(v => (v as VehiclePawn).AllPawnsAboard).ToList();
-			__result.AddRange(innerPawns);
+			if (__instance is VehiclePawn vehicle && !vehicle.handlers.NullOrEmpty())
+			{
+				outChildren.AddRange(vehicle.handlers);
+			}
 		}
 
 		public static bool MultiSelectFloatMenu(List<object> ___selected)

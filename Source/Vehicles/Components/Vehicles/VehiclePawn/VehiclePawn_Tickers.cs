@@ -26,7 +26,7 @@ namespace Vehicles
 		private CompVehicleLauncher compVehicleLauncher;
 
 		private SelfOrderingList<ThingComp> cachedComps = new SelfOrderingList<ThingComp>();
-		private HashSet<ThingComp> compTickers = new HashSet<ThingComp>();
+		private List<ThingComp> compTickers = new List<ThingComp>();
 
 		public override bool Suspended => false; //Vehicles are not suspendable
 
@@ -36,7 +36,7 @@ namespace Vehicles
 			{
 				if (compVehicleTurrets is null)
 				{
-					compVehicleTurrets = GetSortedComp<CompVehicleTurrets>();
+					compVehicleTurrets = GetCachedComp<CompVehicleTurrets>();
 				}
 				return compVehicleTurrets;
 			}
@@ -48,7 +48,7 @@ namespace Vehicles
 			{
 				if (compFuel is null)
 				{
-					compFuel = GetSortedComp<CompFueledTravel>();
+					compFuel = GetCachedComp<CompFueledTravel>();
 				}
 				return compFuel;
 			}
@@ -60,7 +60,7 @@ namespace Vehicles
 			{
 				if (compUpgradeTree is null)
 				{
-					compUpgradeTree = GetSortedComp<CompUpgradeTree>();
+					compUpgradeTree = GetCachedComp<CompUpgradeTree>();
 				}
 				return compUpgradeTree;
 			}
@@ -72,7 +72,7 @@ namespace Vehicles
 			{
 				if (compVehicleLauncher is null)
 				{
-					compVehicleLauncher = GetSortedComp<CompVehicleLauncher>();
+					compVehicleLauncher = GetCachedComp<CompVehicleLauncher>();
 				}
 				return compVehicleLauncher;
 			}
@@ -88,7 +88,7 @@ namespace Vehicles
 			cachedComps.Remove(comp);
 		}
 
-		public T GetSortedComp<T>() where T : ThingComp
+		public T GetCachedComp<T>() where T : ThingComp
 		{
 			for (int i = 0; i < cachedComps.Count; i++)
 			{
@@ -122,6 +122,8 @@ namespace Vehicles
 			{
 				vehicleAI?.AITick();
 			}
+
+			TickHandlers();
 			if (this.IsHashIntervalTick(150) && AllPawnsAboard.Count > 0)
 			{
 				TrySatisfyPawnNeeds();
@@ -130,19 +132,28 @@ namespace Vehicles
 
 		public bool RequestTickStart<T>(T comp) where T : ThingComp
 		{
-			return compTickers.Add(comp);
+			if (!compTickers.Contains(comp))
+			{
+				compTickers.Add(comp);
+				return true;
+			}
+			return false;
 		}
 
 		public bool RequestTickStop<T>(T comp) where T : ThingComp
 		{
+			if (!VehicleMod.settings.main.opportunisticTicking)
+			{
+				return false; //If opportunistic ticking is off, disallow removal from ticker list. VehicleComp should then always tick
+			}
 			return compTickers.Remove(comp);
 		}
 
 		protected virtual void TickAllComps()
 		{
-			foreach (ThingComp comp in compTickers)
+			for (int i = compTickers.Count - 1; i >= 0; i--)
 			{
-				comp.CompTick();
+				compTickers[i].CompTick(); //Must run back to front in case CompTick methods trigger their own removal
 			}
 		}
 
@@ -160,10 +171,10 @@ namespace Vehicles
 			}
 			if (!Suspended)
 			{
+				sustainers.Tick();
 				if (Spawned)
 				{
 					vPather.PatherTick();
-					sustainers.Tick();
 					//stances.StanceTrackerTick(); //TODO - Add as tick requester for stunning
 					if (Drafted)
 					{

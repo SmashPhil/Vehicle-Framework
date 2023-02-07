@@ -20,15 +20,21 @@ namespace Vehicles
 	/// </summary>
 	public partial class VehiclePawn
 	{
-		protected Sustainer sustainerAmbient;
+		public ISustainerTarget SustainerTarget { get; private set; }
+
+		public void SetSustainerTarget(ISustainerTarget sustainerTarget)
+		{
+			SustainerTarget = sustainerTarget;
+		}
+
+		public void ReleaseSustainerTarget()
+		{
+			sustainers.EndAll();
+			SustainerTarget = null;
+		}
 
 		public virtual void SoundCleanup()
 		{
-			if (sustainerAmbient != null)
-			{
-				sustainerAmbient.End();
-				sustainerAmbient = null;
-			}
 			if (sustainers != null)
 			{
 				sustainers.EndAll();

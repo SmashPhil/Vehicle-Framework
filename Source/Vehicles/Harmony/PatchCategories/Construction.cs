@@ -299,7 +299,7 @@ namespace Vehicles
 						VehicleEnabledFor enabled = SettingsCache.TryGetValue(vehicleDef, typeof(VehicleDef), nameof(VehicleDef.enabled), vehicleDef.enabled);
 						if (enabled == VehicleEnabledFor.None || enabled == VehicleEnabledFor.Raiders)
 						{
-							if (VehicleMod.settings.main.showDisabledVehicles)
+							if (!VehicleMod.settings.main.hideDisabledVehicles)
 							{
 								designator.Disable("VF_GizmoDisabledTooltip".Translate());
 							}

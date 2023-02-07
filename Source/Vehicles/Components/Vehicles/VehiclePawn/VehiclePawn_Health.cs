@@ -101,7 +101,9 @@ namespace Vehicles
 		{
 			Map.GetCachedMapComponent<VehiclePositionManager>().ReleaseClaimed(this);
 			Map.GetCachedMapComponent<VehicleRegionUpdateCatalog>().Notify_VehicleDespawned(this);
-			Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(this);
+			VehicleReservationManager reservationManager = Map.GetCachedMapComponent<VehicleReservationManager>();
+			reservationManager.ClearReservedFor(this);
+			reservationManager.RemoveAllListerFor(this);
 			Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleDespawned(this);
 			EventRegistry[VehicleEventDefOf.Despawned].ExecuteEvents();
 			base.DeSpawn(mode);
@@ -292,7 +294,7 @@ namespace Vehicles
 				{
 					num2 = VehicleDef.buildDef.shakeAmountPerAreaCurve?.Evaluate(VehicleDef.buildDef.Size.Area) ?? 0;
 				}
-				CompLifespan compLifespan = GetSortedComp<CompLifespan>();
+				CompLifespan compLifespan = GetCachedComp<CompLifespan>();
 				if (compLifespan == null || compLifespan.age < compLifespan.Props.lifespanTicks)
 				{
 					Find.CameraDriver.shaker.DoShake(num2);

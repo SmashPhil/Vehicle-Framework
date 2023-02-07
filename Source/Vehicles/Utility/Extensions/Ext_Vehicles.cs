@@ -107,14 +107,16 @@ namespace Vehicles
 			{
 				vehicle.FillEvents_Def();
 
-				//Pather
-				vehicle.AddEvent(VehicleEventDefOf.PawnExited, vehicle.vPather.RecalculatePermissions);
-				vehicle.AddEvent(VehicleEventDefOf.PawnChangedSeats, vehicle.vPather.RecalculatePermissions);
-				vehicle.AddEvent(VehicleEventDefOf.PawnKilled, vehicle.vPather.RecalculatePermissions);
+				vehicle.AddEvent(VehicleEventDefOf.CargoAdded, vehicle.statHandler.MarkAllDirty);
+				vehicle.AddEvent(VehicleEventDefOf.CargoRemoved, vehicle.statHandler.MarkAllDirty);
+				vehicle.AddEvent(VehicleEventDefOf.PawnEntered, vehicle.RecachePawnCount);
+				vehicle.AddEvent(VehicleEventDefOf.PawnExited, vehicle.vPather.RecalculatePermissions, vehicle.RecachePawnCount);
+				vehicle.AddEvent(VehicleEventDefOf.PawnChangedSeats, vehicle.vPather.RecalculatePermissions, vehicle.RecachePawnCount);
+				vehicle.AddEvent(VehicleEventDefOf.PawnKilled, vehicle.vPather.RecalculatePermissions, vehicle.RecachePawnCount);
 				vehicle.AddEvent(VehicleEventDefOf.PawnCapacitiesDirty, vehicle.vPather.RecalculatePermissions);
 				vehicle.AddEvent(VehicleEventDefOf.IgnitionOff, vehicle.vPather.RecalculatePermissions);
-				vehicle.AddEvent(VehicleEventDefOf.DamageTaken, vehicle.vPather.RecalculatePermissions);
-				vehicle.AddEvent(VehicleEventDefOf.Repaired, vehicle.vPather.RecalculatePermissions);
+				vehicle.AddEvent(VehicleEventDefOf.DamageTaken, vehicle.vPather.RecalculatePermissions, vehicle.statHandler.MarkAllDirty);
+				vehicle.AddEvent(VehicleEventDefOf.Repaired, vehicle.vPather.RecalculatePermissions, vehicle.statHandler.MarkAllDirty);
 				vehicle.AddEvent(VehicleEventDefOf.OutOfFuel, delegate ()
 				{
 					if (vehicle.Spawned)
@@ -149,6 +151,7 @@ namespace Vehicles
 						});
 					}
 				}
+
 				//Sustainers
 				if (!vehicle.VehicleDef.soundSustainersOnEvent.NullOrEmpty())
 				{
@@ -158,7 +161,11 @@ namespace Vehicles
 						{
 							if (vehicle.Spawned)
 							{
-								vehicle.sustainers.Spawn(soundDef, MaintenanceType.PerTick);
+								vehicle.sustainers.Spawn(vehicle, soundDef);
+							}
+							else if (vehicle.SustainerTarget is ISustainerTarget sustainerTarget)
+							{
+								vehicle.sustainers.Spawn(sustainerTarget, soundDef);
 							}
 						});
 						vehicle.AddEvent(eventStartStop.Second, delegate ()

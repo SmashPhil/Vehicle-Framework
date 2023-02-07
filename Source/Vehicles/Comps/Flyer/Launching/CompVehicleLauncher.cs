@@ -43,7 +43,7 @@ namespace Vehicles
 
 		public bool Roofed => Vehicle.Position.Roofed(Vehicle.Map);
 		public bool AnyLeftToLoad => Vehicle.cargoToLoad.NotNullAndAny();
-		public VehiclePawn Vehicle => parent as VehiclePawn;
+
 		public CompProperties_VehicleLauncher Props => props as CompProperties_VehicleLauncher;
 
 		public float FlightSpeed => flightSpeedModifier + Vehicle.GetStatValue(VehicleStatDefOf.FlightSpeed);
@@ -57,6 +57,8 @@ namespace Vehicles
 		public int ReconDistance => SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleLauncher), nameof(Props.reconDistance), Props.reconDistance);
 
 		public virtual bool ControlledDescent => ClimbRateStat >= 0;
+
+		public override bool TickByRequest => true;
 
 		public override IEnumerable<AnimationDriver> Animations => launchProtocol.Animations;
 
@@ -107,6 +109,7 @@ namespace Vehicles
 		public void SetTimedDeployment()
 		{
 			timer.Reset();
+			StartTicking();
 		}
 
 		public ShuttleLaunchStatus GetShuttleStatus(GlobalTargetInfo mouseTarget, Vector3 origin)
@@ -241,8 +244,11 @@ namespace Vehicles
 
 		public override void CompTick()
 		{
-			base.CompTick();
 			timer.Tick(Vehicle);
+			if (timer.Expired)
+			{
+				StopTicking();
+			}
 		}
 
 		public override void PostSpawnSetup(bool respawningAfterLoad)
@@ -283,12 +289,19 @@ namespace Vehicles
 
 			public static DeploymentTimer Default => new DeploymentTimer(0, false);
 
+			public bool Expired => !enabled || ticksLeft <= 0;
+
 			public void Reset()
 			{
 				ticksLeft = Mathf.RoundToInt(VehicleMod.settings.main.delayDeployOnLanding * 60);
 				enabled = true;
 			}
 
+			/// <summary>
+			/// Tick DeploymentTimer for delayed disembarkation 
+			/// </summary>
+			/// <param name="vehicle"></param>
+			/// <returns></returns>
 			public void Tick(VehiclePawn vehicle)
 			{
 				ticksLeft--;

@@ -46,8 +46,12 @@ namespace Vehicles
 		protected int ticksSinceLastShot;
 		public bool queuedToFire = false;
 
-		protected float currentRotation = 0f;
+		[Unsaved]
+		protected float currentRotation = 0f; //Rotation taking Vehicle rotation and angle into account
+		[Unsaved]
 		protected float rotationTargeted = 0f;
+
+		protected float rotation = 0; //True rotation of turret separate from Vehicle rotation and angle for saving
 
 		protected Rot4 parentRotCached = default;
 		protected float parentAngleCached = 0f;
@@ -68,6 +72,24 @@ namespace Vehicles
 		public List<VehicleTurret> groupTurrets;
 		[Unsaved]
 		public TurretRestrictions restrictions;
+
+		//Cache all root draw pos on spawn
+		[Unsaved]
+		private Vector3 rootDrawPos_North;
+		[Unsaved]
+		private Vector3 rootDrawPos_East;
+		[Unsaved]
+		private Vector3 rootDrawPos_South;
+		[Unsaved]
+		private Vector3 rootDrawPos_West;
+		[Unsaved]
+		private Vector3 rootDrawPos_NorthEast;
+		[Unsaved]
+		private Vector3 rootDrawPos_SouthEast;
+		[Unsaved]
+		private Vector3 rootDrawPos_SouthWest;
+		[Unsaved]
+		private Vector3 rootDrawPos_NorthWest;
 
 		public VehicleTurretRender renderProperties = new VehicleTurretRender();
 		public VehicleTurretRender uiRenderProperties = new VehicleTurretRender();
@@ -399,7 +421,27 @@ namespace Vehicles
 		{
 			get
 			{
-				return TurretDrawLocFor(vehicle.FullRotation, vehicle.DrawPos);
+				return vehicle.FullRotation.AsInt switch
+				{
+					//North
+					0 => vehicle.DrawPos + rootDrawPos_North,
+					//East
+					1 => vehicle.DrawPos + rootDrawPos_East,
+					//South
+					2 => vehicle.DrawPos + rootDrawPos_South,
+					//West
+					3 => vehicle.DrawPos + rootDrawPos_West,
+					//NorthEast
+					4 => vehicle.DrawPos + rootDrawPos_NorthEast,
+					//SouthEast
+					5 => vehicle.DrawPos + rootDrawPos_SouthEast,
+					//SouthWest
+					6 => vehicle.DrawPos + rootDrawPos_SouthWest,
+					//NorthWest
+					7 => vehicle.DrawPos + rootDrawPos_NorthWest,
+					//Should not reach here
+					_ => throw new NotImplementedException("Invalid Rot8")
+				};
 			}
 		}
 
@@ -528,6 +570,20 @@ namespace Vehicles
 				restrictions = (TurretRestrictions)Activator.CreateInstance(reference.turretDef.restrictionType);
 				restrictions.Init(vehicle, this);
 			}
+
+			LongEventHandler.ExecuteWhenFinished(RecacheRootDrawPos);
+		}
+
+		public void RecacheRootDrawPos()
+		{
+			rootDrawPos_North = TurretDrawLocFor(Rot8.North, Vector3.zero);
+			rootDrawPos_East = TurretDrawLocFor(Rot8.East, Vector3.zero);
+			rootDrawPos_South = TurretDrawLocFor(Rot8.South, Vector3.zero);
+			rootDrawPos_West = TurretDrawLocFor(Rot8.West, Vector3.zero);
+			rootDrawPos_NorthEast = TurretDrawLocFor(Rot8.NorthEast, Vector3.zero);
+			rootDrawPos_SouthEast = TurretDrawLocFor(Rot8.SouthEast, Vector3.zero);
+			rootDrawPos_SouthWest = TurretDrawLocFor(Rot8.SouthWest, Vector3.zero);
+			rootDrawPos_NorthWest = TurretDrawLocFor(Rot8.NorthWest, Vector3.zero);
 		}
 
 		public bool GroupsWith(VehicleTurret turret)
@@ -1513,7 +1569,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref burstTicks, nameof(burstTicks));
 			Scribe_Values.Look(ref groupKey, nameof(groupKey));
 
-			Scribe_Values.Look(ref uniqueID, nameof(uniqueID), -1);
+			Scribe_Values.Look(ref uniqueID, nameof(uniqueID), defaultValue: -1);
 			Scribe_Values.Look(ref parentKey, nameof(parentKey));
 			Scribe_Values.Look(ref key, nameof(key));
 
@@ -1529,16 +1585,24 @@ namespace Vehicles
 			Scribe_Values.Look(ref triggeredCooldown, nameof(triggeredCooldown));
 			Scribe_Values.Look(ref ticksSinceLastShot, nameof(ticksSinceLastShot));
 
-			Scribe_Values.Look(ref currentRotation, nameof(currentRotation), defaultAngleRotated - 90);
-			Scribe_Values.Look(ref rotationTargeted, nameof(rotationTargeted), defaultAngleRotated - 90);
-			Scribe_Values.Look(ref restrictedTheta, nameof(restrictedTheta), (int)Mathf.Abs(angleRestricted.x - (angleRestricted.y + 360)).ClampAngle());
+			Scribe_Values.Look(ref rotation, nameof(rotation), defaultValue: defaultAngleRotated);
+			Scribe_Values.Look(ref restrictedTheta, nameof(restrictedTheta), defaultValue: (int)Mathf.Abs(angleRestricted.x - (angleRestricted.y + 360)).ClampAngle());
 
 			Scribe_Defs.Look(ref loadedAmmo, nameof(loadedAmmo));
 			Scribe_Defs.Look(ref savedAmmoType, nameof(savedAmmoType));
 			Scribe_Values.Look(ref shellCount, nameof(shellCount));
 			Scribe_Values.Look(ref gizmoLabel, nameof(gizmoLabel));
 
-			Scribe_TargetInfo.Look(ref cannonTarget, nameof(cannonTarget), LocalTargetInfo.Invalid);
+			Scribe_TargetInfo.Look(ref cannonTarget, nameof(cannonTarget), defaultValue: LocalTargetInfo.Invalid);
+
+			if (Scribe.mode == LoadSaveMode.LoadingVars)
+			{
+				TurretRotation = Mathf.Abs(rotation - 270); //convert from traditional to relative, vehicle rotation will be taken into account during lock validation
+				if (cannonTarget.IsValid)
+				{
+					AlignToTargetRestricted(); //reassigns rotationTargeted for turrets currently turning
+				}
+			}
 		}
 	}
 }

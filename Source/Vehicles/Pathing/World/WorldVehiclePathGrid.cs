@@ -80,24 +80,20 @@ namespace Vehicles
 		{
 			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
-				//Skip vehicles that can't caravan, they'll either be exclusively AerialVehicles or never on the world map
-				if (vehicleDef.canCaravan)
+				bool owner = true;
+				foreach (VehicleDef ownerDef in owners)
 				{
-					bool owner = true;
-					foreach (VehicleDef ownerDef in owners)
+					if (MatchesReachability(vehicleDef, ownerDef))
 					{
-						if (MatchesReachability(vehicleDef, ownerDef))
-						{
-							owner = false;
-							movementDifficulty[vehicleDef.DefIndex] = movementDifficulty[ownerDef.DefIndex]; //Piggy back off same configuration of already registered vehicle
-							break;
-						}
+						owner = false;
+						movementDifficulty[vehicleDef.DefIndex] = movementDifficulty[ownerDef.DefIndex]; //Piggy back off same configuration of already registered vehicle
+						break;
 					}
-					if (owner)
-					{
-						owners.Add(vehicleDef);
-						movementDifficulty[vehicleDef.DefIndex] = new PathGrid(vehicleDef, Find.WorldGrid.TilesCount); //Register as owner with new path grid
-					}
+				}
+				if (owner)
+				{
+					owners.Add(vehicleDef);
+					movementDifficulty[vehicleDef.DefIndex] = new PathGrid(vehicleDef, Find.WorldGrid.TilesCount); //Register as owner with new path grid
 				}
 			}
 		}

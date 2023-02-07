@@ -12,9 +12,6 @@ namespace Vehicles
 		private static readonly List<BaseTargeter> targeters = new List<BaseTargeter>();
 		private static readonly List<BaseWorldTargeter> worldTargeters = new List<BaseWorldTargeter>();
 
-		private static readonly List<BaseTargeter> activeTargeters = new List<BaseTargeter>();
-		private static readonly List<BaseWorldTargeter> activeWorldTargeters = new List<BaseWorldTargeter>();
-
 		public static BaseTargeter CurrentTargeter { get; private set; }
 		public static BaseWorldTargeter CurrentWorldTargeter { get; private set; }
 
@@ -32,16 +29,6 @@ namespace Vehicles
 				worldTargeters.Add(targeter);
 				targeter.PostInit();
 			}
-		}
-
-		public static void StartTargeter(BaseTargeter baseTargeter)
-		{
-			activeTargeters.Add(baseTargeter);
-		}
-
-		public static void StartWorldTargeter(BaseWorldTargeter baseTargeter)
-		{
-			activeWorldTargeters.Add(baseTargeter);
 		}
 
 		/* ------ Map Targeters ------ */

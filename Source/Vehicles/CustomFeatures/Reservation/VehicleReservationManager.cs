@@ -195,17 +195,10 @@ namespace Vehicles
 		{
 			base.FinalizeInit();
 
-			VerifyCollection(ref reservations);
-			VerifyCollection(ref vehicleListers);
 			VerifyCollection(ref vehiclesReserving_tmp);
 			VerifyCollection(ref vehicleReservations_tmp);
 			VerifyCollection(ref vehicleListerPawns_tmp);
 			VerifyCollection(ref vehicleListerRequests_tmp);
-
-			if (vehicleListers.Keys.Any(l => l is null))
-			{
-				vehicleListers.RemoveAll(v => v.Key is null || v.Value.requests is null);
-			}
 		}
 
 		private static void VerifyCollection<T>(ref List<T> list)
@@ -220,21 +213,6 @@ namespace Vehicles
 				if (item is null)
 				{
 					list.Remove(item);
-				}
-			}
-		}
-
-		private static void VerifyCollection<T>(ref Dictionary<VehiclePawn, T> dict)
-		{
-			if (dict is null)
-			{
-				dict = new Dictionary<VehiclePawn, T>();
-			}
-			foreach(var item in dict.ToArray())
-			{
-				if (item.Key is null || item.Value is null)
-				{
-					dict.Remove(item.Key);
 				}
 			}
 		}
@@ -272,6 +250,11 @@ namespace Vehicles
 			return false;
 		}
 
+		public bool RemoveAllListerFor(VehiclePawn vehicle)
+		{
+			return vehicleListers.Remove(vehicle);
+		}
+
 		public static VehiclePawn VehicleInhabitingCells(IEnumerable<IntVec3> cells, Map map)
 		{
 			foreach (VehiclePawn vehicle in map.mapPawns.AllPawnsSpawned.Where(p => p is VehiclePawn))
@@ -287,12 +270,6 @@ namespace Vehicles
 		public static bool AnyVehicleInhabitingCells(IEnumerable<IntVec3> cells, Map map)
 		{
 			return VehicleInhabitingCells(cells, map) != null;
-		}
-
-		internal void ClearAllListers()
-		{
-			reservations.Clear();
-			vehicleListers.Clear();
 		}
 
 		public override void ExposeData()

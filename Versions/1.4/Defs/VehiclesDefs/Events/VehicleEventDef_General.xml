@@ -11,6 +11,10 @@
 	</Vehicles.VehicleEventDef>
 	
 	<Vehicles.VehicleEventDef>
+		<defName>Braking</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
 		<defName>MoveStart</defName>
 	</Vehicles.VehicleEventDef>
 	

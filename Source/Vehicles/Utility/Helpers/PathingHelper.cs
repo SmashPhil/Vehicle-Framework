@@ -155,7 +155,7 @@ namespace Vehicles
 		public static void RegisterRegionEffecter(ThingDef thingDef)
 		{
 			regionEffecters[thingDef] = new List<VehicleDef>();
-			foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
 				if (vehicleDef.properties.customThingCosts.TryGetValue(thingDef, out int value))
 				{
@@ -272,7 +272,7 @@ namespace Vehicles
 			foreach (IntVec3 cell in map.AllCells)
 			{
 				TerrainDef terrainDef = map.terrainGrid.TerrainAt(cell);
-				foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
+				foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 				{
 					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
 				}
@@ -291,7 +291,7 @@ namespace Vehicles
 			if (terrainDef != null)
 			{
 				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-				foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
+				foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 				{
 					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
 				}

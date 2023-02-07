@@ -10,7 +10,7 @@ using SmashTools;
 namespace Vehicles
 {
 	[StaticConstructorOnStartup]
-	public abstract class VehicleSkyfaller : Thing, IActiveDropPod, IThingHolder
+	public abstract class VehicleSkyfaller : Thing, IActiveDropPod, IThingHolder, ISustainerTarget
 	{
 		protected static MaterialPropertyBlock shadowPropertyBlock = new MaterialPropertyBlock();
 
@@ -27,6 +27,10 @@ namespace Vehicles
 		public override Vector3 DrawPos => vehicle.TrueCenter(Position, base.DrawPos.y);
 
 		public ThingWithComps Thing => vehicle;
+
+		public TargetInfo Target => this;
+
+		public MaintenanceType MaintenanceType => MaintenanceType.PerTick;
 
 		private Material ShadowMaterial
 		{
@@ -58,7 +62,11 @@ namespace Vehicles
 
 		public void GetChildHolders(List<IThingHolder> outChildren)
 		{
-			outChildren = vehicle.AllPawnsAboard.Cast<IThingHolder>().ToList();
+			if (outChildren == null)
+			{
+				return;
+			}
+			outChildren.AddRange(vehicle.handlers);
 		}
 
 		public ThingOwner GetDirectlyHeldThings()
@@ -69,10 +77,12 @@ namespace Vehicles
 		public override void Tick()
 		{
 			vehicle.CompVehicleLauncher.launchProtocol.Tick();
+			vehicle.Tick();
 		}
 
 		protected virtual void LeaveMap()
 		{
+			vehicle.ReleaseSustainerTarget();
 			Destroy();
 		}
 
@@ -107,6 +117,12 @@ namespace Vehicles
 			Matrix4x4 matrix = default;
 			matrix.SetTRS(pos, rot.AsQuat, s);
 			Graphics.DrawMesh(MeshPool.plane10Back, matrix, material, 0, null, 0, shadowPropertyBlock);
+		}
+
+		public override void SpawnSetup(Map map, bool respawningAfterLoad)
+		{
+			base.SpawnSetup(map, respawningAfterLoad);
+			vehicle.SetSustainerTarget(this);
 		}
 
 		public override void ExposeData()

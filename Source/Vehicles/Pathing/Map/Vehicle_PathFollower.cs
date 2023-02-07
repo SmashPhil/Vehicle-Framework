@@ -16,14 +16,13 @@ namespace Vehicles
 {
 	public class Vehicle_PathFollower : IExposable
 	{
-		private const int MaxMoveTicks = 450;
-		private const int MaxCheckAheadNodes = 20;
-		private const float SnowReductionFromWalking = 0.001f;
-		private const int ClamorCellsInterval = 12;
-		private const int MinCostWalk = 50;
-		private const int MinCostAmble = 60;
-		private const int CheckForMovingCollidingPawnsIfCloserToTargetThanX = 30;
-		private const int AttackBlockingHostilePawnAfterTicks = 180;
+		public const int MaxMoveTicks = 450;
+		public const int MaxCheckAheadNodes = 20;
+		public const float SnowReductionFromWalking = 0.001f;
+		public const int ClamorCellsInterval = 12;
+		public const int MinCostWalk = 50;
+		public const int MinCostAmble = 60;
+		public const int CheckForMovingCollidingPawnsIfCloserToTargetThanX = 30;
 
 		protected VehiclePawn vehicle;
 
@@ -58,6 +57,8 @@ namespace Vehicles
 		private int failedToFindCloseUnoccupiedCellTicks = -999999;
 
 		private List<CancellationTokenSource> tokenSources = new List<CancellationTokenSource>();
+
+		private object patherLock = new object();
 
 		public Vehicle_PathFollower(VehiclePawn vehicle)
 		{
@@ -378,7 +379,7 @@ namespace Vehicles
 			return flag;
 		}
 
-		internal void PatherArrived()
+		private void PatherArrived()
 		{
 			StopDead();
 			if (vehicle.jobs.curJob != null)
@@ -387,10 +388,16 @@ namespace Vehicles
 			}
 		}
 
-		internal void PatherFailed()
+		public void PatherFailed()
 		{
 			StopDead();
 			vehicle.jobs?.curDriver?.Notify_PatherFailed();
+		}
+
+		public void EngageBrakes()
+		{
+			vehicle.EventRegistry[VehicleEventDefOf.Braking].ExecuteEvents();
+			PatherFailed();
 		}
 
 		private void SetBumperCells()
@@ -491,7 +498,7 @@ namespace Vehicles
 					" which is unwalkable."
 				}));
 			}
-			int num = CostToMoveIntoCell(vehicle, nextCell);
+			int num = CostToMoveIntoCell(vehicle, vehicle.Position, nextCell);
 			nextCellCostTotal = num;
 			nextCellCostLeft = num;
 			Building_Door building_Door = vehicle.Map.thingGrid.ThingAt<Building_Door>(nextCell);
@@ -508,65 +515,65 @@ namespace Vehicles
 			}
 		}
 
-		public static int CostToMoveIntoCell(VehiclePawn vehicle, IntVec3 c)
+		public static int MoveTicksAt(VehiclePawn vehicle, IntVec3 from, IntVec3 to)
 		{
-			int num;
-			if (c.x == vehicle.Position.x || c.z == vehicle.Position.z)
+			int tickCost;
+			if (to.x == from.x || to.z == from.z)
 			{
-				num = vehicle.TicksPerMoveCardinal;
+				tickCost = vehicle.TicksPerMoveCardinal;
 			}
 			else
 			{
-				num = vehicle.TicksPerMoveDiagonal;
+				tickCost = vehicle.TicksPerMoveDiagonal;
 			}
-			num += vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathGrid.CalculatedCostAt(c);
-			Building edifice = c.GetEdifice(vehicle.Map);
-			if (edifice != null)
+			return tickCost;
+		}
+
+		private static void LocomotionTicks(VehiclePawn vehicle, IntVec3 from, IntVec3 to, ref int tickCost)
+		{
+			Pawn locomotionUrgencySameAs = vehicle.jobs.curDriver.locomotionUrgencySameAs;
+			if (locomotionUrgencySameAs is VehiclePawn locomotionVehicle && locomotionUrgencySameAs != vehicle && locomotionUrgencySameAs.Spawned)
 			{
-				num += edifice.PathWalkCostFor(vehicle);
+				int tickCostOtherVehicle = CostToMoveIntoCell(locomotionVehicle, from, to);
+				tickCost = Mathf.Max(tickCost, tickCostOtherVehicle); //Slow down to match other vehicle's speed
 			}
-			if (num > MaxMoveTicks)
+			else
 			{
-				num = MaxMoveTicks;
+				switch (vehicle.jobs.curJob.locomotionUrgency)
+				{
+					case LocomotionUrgency.Amble:
+						tickCost *= 3;
+						if (tickCost < MinCostAmble)
+						{
+							tickCost = MinCostAmble;
+						}
+						break;
+					case LocomotionUrgency.Walk:
+						tickCost *= 2;
+						if (tickCost < MinCostWalk)
+						{
+							tickCost = MinCostWalk;
+						}
+						break;
+					case LocomotionUrgency.Jog:
+						break;
+					case LocomotionUrgency.Sprint:
+						tickCost = Mathf.RoundToInt(tickCost * 0.75f);
+						break;
+				}
 			}
+		}
+
+		public static int CostToMoveIntoCell(VehiclePawn vehicle, IntVec3 from, IntVec3 to)
+		{
+			int tickCost = MoveTicksAt(vehicle, from, to);
+			tickCost += vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathGrid.CalculatedCostAt(to);
+			tickCost = Mathf.Min(tickCost, MaxMoveTicks);
 			if (vehicle.CurJob != null)
 			{
-				Pawn locomotionUrgencySameAs = vehicle.jobs.curDriver.locomotionUrgencySameAs;
-				if (locomotionUrgencySameAs is VehiclePawn locomotionVehicle && locomotionUrgencySameAs != vehicle && locomotionUrgencySameAs.Spawned)
-				{
-					int num2 = CostToMoveIntoCell(locomotionVehicle, c);
-					if (num < num2)
-					{
-						num = num2;
-					}
-				}
-				else
-				{
-					switch (vehicle.jobs.curJob.locomotionUrgency)
-					{
-						case LocomotionUrgency.Amble:
-							num *= 3;
-							if (num < MinCostAmble)
-							{
-								num = MinCostAmble;
-							}
-							break;
-						case LocomotionUrgency.Walk:
-							num *= 2;
-							if (num < MinCostWalk)
-							{
-								num = MinCostWalk;
-							}
-							break;
-						case LocomotionUrgency.Jog:
-							break;
-						case LocomotionUrgency.Sprint:
-							num = Mathf.RoundToInt(num * 0.75f);
-							break;
-					}
-				}
+				LocomotionTicks(vehicle, from, to, ref tickCost);
 			}
-			return Mathf.Max(num, 1);
+			return Mathf.Max(tickCost, 1);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -715,7 +722,7 @@ namespace Vehicles
 					return true;
 				}
 			}
-			bool flag = curPath.NodesLeftCount < CheckForMovingCollidingPawnsIfCloserToTargetThanX;
+			bool flag = curPath.NodesLeftCount < CheckForMovingCollidingPawnsIfCloserToTargetThanX; //check for collisions (TODO)
 			IntVec3 other = IntVec3.Invalid;
 			IntVec3 intVec = IntVec3.Invalid;
 			int num3 = 0;

@@ -33,11 +33,6 @@ namespace Vehicles
 			}
 		}
 
-		public void MarkForRecache(VehicleStatDef statDef)
-		{
-			throw new NotImplementedException();
-		}
-
 		public Pawn FindPawnWithBestStat(StatDef stat, Predicate<Pawn> pawnValidator = null)
 		{
 			Pawn pawn = null;
@@ -125,6 +120,7 @@ namespace Vehicles
 		{
 			RegenerateUnsavedComponents();
 			RecacheComponents();
+			RecachePawnCount();
 			foreach (VehicleComp comp in AllComps.Where(t => t is VehicleComp))
 			{
 				comp.PostLoad();
@@ -143,7 +139,14 @@ namespace Vehicles
 		{
 			this.RegisterEvents(); //Must register before comps call SpawnSetup to allow comps to access Registry
 			base.SpawnSetup(map, respawningAfterLoad);
+
+			ReleaseSustainerTarget(); //Ensure SustainerTarget and sustainer manager is given a clean slate to work with
 			EventRegistry[VehicleEventDefOf.Spawned].ExecuteEvents();
+			if (Drafted)
+			{
+				EventRegistry[VehicleEventDefOf.IgnitionOn].ExecuteEvents(); //Retrigger draft event if spawned with draft status = on (important for sustainers, tick requests, etc.)
+			}
+
 			sharedJob ??= new SharedJob();
 			if (!respawningAfterLoad)
 			{

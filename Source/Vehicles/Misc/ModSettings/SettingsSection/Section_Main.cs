@@ -22,9 +22,9 @@ namespace Vehicles
 		public bool allowDiagonalRendering = true;
 		public bool fullVehiclePathing = true;
 		public bool smoothVehiclePaths = true;
-		public bool vehiclePathingRoadNoCost = true;
+		public bool vehiclePathingBiomesCostOnRoads = true;
 		public bool multiplePawnsPerJob = true;
-		public bool showDisabledVehicles = false;
+		public bool hideDisabledVehicles = true;
 
 		public float meleeDamageMultiplier = 1;
 		public float rangedDamageMultiplier = 1;
@@ -36,7 +36,7 @@ namespace Vehicles
 		/* Performance */
 		public bool passiveWaterWaves = true;
 		public bool aerialVehicleEffects = true;
-		public bool opportunisticTurretTicking = true;
+		public bool opportunisticTicking = true;
 
 		/* Fishing */
 		public float fishingMultiplier = 1f;
@@ -71,9 +71,9 @@ namespace Vehicles
 			fullVehiclePathing = true;
 			smoothVehiclePaths = true;
 
-			vehiclePathingRoadNoCost = true;
+			vehiclePathingBiomesCostOnRoads = true;
 			multiplePawnsPerJob = true;
-			showDisabledVehicles = false;
+			hideDisabledVehicles = true;
 
 			meleeDamageMultiplier = 1;
 			rangedDamageMultiplier = 1;
@@ -85,7 +85,7 @@ namespace Vehicles
 			/* Performance */
 			passiveWaterWaves = true;
 			aerialVehicleEffects = true;
-			opportunisticTurretTicking = true;
+			opportunisticTicking = true;
 
 			/* Fishing */
 			fishingMultiplier = 1f;
@@ -117,9 +117,9 @@ namespace Vehicles
 			Scribe_Values.Look(ref fullVehiclePathing, nameof(fullVehiclePathing), defaultValue: true);
 			Scribe_Values.Look(ref smoothVehiclePaths, nameof(smoothVehiclePaths), defaultValue: true);
 
-			Scribe_Values.Look(ref vehiclePathingRoadNoCost, nameof(vehiclePathingRoadNoCost), defaultValue: true);
+			Scribe_Values.Look(ref vehiclePathingBiomesCostOnRoads, nameof(vehiclePathingBiomesCostOnRoads), defaultValue: true);
 			Scribe_Values.Look(ref multiplePawnsPerJob, nameof(multiplePawnsPerJob), defaultValue: true);
-			Scribe_Values.Look(ref showDisabledVehicles, nameof(showDisabledVehicles), defaultValue: false);
+			Scribe_Values.Look(ref hideDisabledVehicles, nameof(hideDisabledVehicles), defaultValue: true);
 
 			Scribe_Values.Look(ref meleeDamageMultiplier, nameof(meleeDamageMultiplier), defaultValue: 1);
 			Scribe_Values.Look(ref rangedDamageMultiplier, nameof(rangedDamageMultiplier), defaultValue: 1);
@@ -129,7 +129,7 @@ namespace Vehicles
 
 			Scribe_Values.Look(ref passiveWaterWaves, nameof(passiveWaterWaves), defaultValue: true);
 			Scribe_Values.Look(ref aerialVehicleEffects, nameof(aerialVehicleEffects), defaultValue: aerialVehicleEffects);
-			Scribe_Values.Look(ref opportunisticTurretTicking, nameof(opportunisticTurretTicking), defaultValue: true);
+			Scribe_Values.Look(ref opportunisticTicking, nameof(opportunisticTicking), defaultValue: true);
 
 			Scribe_Values.Look(ref fishingMultiplier, nameof(fishingMultiplier), defaultValue: 1f);
 			Scribe_Values.Look(ref fishingDelay, nameof(fishingDelay), defaultValue: 10000);
@@ -178,14 +178,14 @@ namespace Vehicles
 					listingStandard.CheckboxLabeled("VF_FullVehiclePathing".Translate(), ref fullVehiclePathing, "VF_FullVehiclePathingTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_SmoothVehiclePathing".Translate(), ref smoothVehiclePaths, "VF_SmoothVehiclePathingTooltip".Translate());
 					GUIState.Disable();
-					listingStandard.CheckboxLabeled("VF_RoadBiomeCostPathing".Translate(), ref vehiclePathingRoadNoCost, "VF_RoadBiomeCostPathingTooltip".Translate());
+					listingStandard.CheckboxLabeled("VF_RoadBiomeCostPathing".Translate(), ref vehiclePathingBiomesCostOnRoads, "VF_RoadBiomeCostPathingTooltip".Translate());
 					GUIState.Enable();
 					listingStandard.CheckboxLabeled("VF_MultiplePawnsPerJob".Translate(), ref multiplePawnsPerJob, "VF_MultiplePawnsPerJobTooltip".Translate());
-					bool checkBefore = showDisabledVehicles;
-					listingStandard.CheckboxLabeled("VF_ShowDisabledVehicles".Translate(), ref showDisabledVehicles, "VF_ShowDisabledVehiclesTooltip".Translate());
+					bool checkBefore = hideDisabledVehicles;
+					listingStandard.CheckboxLabeled("VF_HideDisabledVehicles".Translate(), ref hideDisabledVehicles, "VF_HideDisabledVehiclesTooltip".Translate());
 					listingStandard.Gap(4);
 					
-					if (checkBefore != showDisabledVehicles)
+					if (checkBefore != hideDisabledVehicles)
 					{
 						DefDatabase<DesignationCategoryDef>.AllDefsListForReading.ForEach(desCat => GizmoHelper.DesignatorsChanged(desCat));
 					}
@@ -193,7 +193,7 @@ namespace Vehicles
 					listingStandard.Header("VF_PerformanceSettings".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 					listingStandard.CheckboxLabeled("VF_PassiveWaterWaves".Translate(), ref passiveWaterWaves, "VF_PassiveWaterWavesTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_AerialVehicleEffects".Translate(), ref aerialVehicleEffects, "VF_AerialVehicleEffectsTooltip".Translate());
-					listingStandard.CheckboxLabeled("VF_TurretOpportunisticTicking".Translate(), ref opportunisticTurretTicking, "VF_TurretOpportunisticTicking".Translate());
+					listingStandard.CheckboxLabeled("VF_OpportunisticTicking".Translate(), ref opportunisticTicking, "VF_OpportunisticTickingTooltip".Translate());
 
 					listingStandard.NewColumn();
 					string fishingHeader = "VF_Fishing".Translate();

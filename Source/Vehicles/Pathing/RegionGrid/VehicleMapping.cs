@@ -113,7 +113,7 @@ namespace Vehicles
 			int size = DefDatabase<VehicleDef>.DefCount;
 			vehicleData = new VehiclePathData[size];
 			piggyToOwner = new int[size].Populate(-1);
-			foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading) //Even shuttles need path data for landing
 			{
 				GeneratePathData(vehicleDef);
 			}

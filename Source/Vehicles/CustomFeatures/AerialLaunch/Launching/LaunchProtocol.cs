@@ -145,7 +145,7 @@ namespace Vehicles
 		/// <summary>
 		/// Restrictions placed on launching only. Landing restrictions are validated through the <see cref="LandingTargeter"/>
 		/// </summary>
-		public virtual bool LaunchRestricted => vehicle.Spawned && LaunchProperties.restriction != null && !LaunchProperties.restriction.CanStartProtocol(vehicle, vehicle.Map, vehicle.Position, vehicle.Rotation);
+		public virtual bool LaunchRestricted => vehicle.Spawned && vehicle.ignition.Drafted && LaunchProperties.restriction != null && !LaunchProperties.restriction.CanStartProtocol(vehicle, vehicle.Map, vehicle.Position, vehicle.Rotation);
 
 		public virtual bool LandingRestricted(Map map, IntVec3 position, Rot4 rotation) => false;
 

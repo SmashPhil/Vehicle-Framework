@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.4.1155</currentVersion>
+  <currentVersion>1.4.1157</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
@@ -19,18 +19,32 @@ Fixed bug where aerial vehicles wouldn't use fuel under certain conditions.
 Fixed some grammar issues for jobs labels for pawns.
 
 Fixed bug where vehicles would attempt to pull dropdown for school mechanics.
+
+Fixed bug where pawns weren't ticking inside the vehicle that was spawned on a map, causing them to enter a suspended state.
+
+Fixed bug where using StackLimit mods would cause adding ammo to vehicle turrets via devmode to add hundreds or thousands at a time, overencumbering the vehicle.
+
+Fixed bug where creating a vehicle turret that did not require ammo to reload was impossible.
 [title]Performance Improvements[/title]
 Compressed region making for vehicles to reuse region grids for vehicles with similar configurations.
 
 Calculations for vehicles' world path grid are now thrown into a separate thread.  This will prevent the game from locking up once per in-game-day when it recalculates for seasonal costs.
 
-Vehicle turrets will now only tick on request, rather than every turret ticking continuously despite not being in use.
+Vehicle comps will now only tick on request, rather than every comp ticking continuously despite not being in use.
 
-Improved startup time substantially.  This is especially apparent for large mod lists where it was taking upwards of 30s to load, now down to ~4-5s.
+Improved startup time substantially.  This is especially apparent for large mod lists, startup time should be relatively consistent now regardless of mod list size
 
 Vehicle stats are now cached and calculated only when needed.  Event driven recaching will also allow unused stats to remain uncalculated until fetched. (Schrödinger's stat)
 
 Removed unnecessary tickers from VehiclePawn.
+
+Regions are now managed, dirtyed, and updated on the dedicated map thread for vehicles
+
+HPA* implementation for faster cross-map pathfinding
+
+Pathfinding is now performed on the dedicated map thread for vehicles.
+
+Fixed some old patches for detecting pawns inside vehicles for events such as Game Ender and alerts.
 [title]Additional Changes[/title][font]Small[/font]
 Changed FuelConsumptionCondition to operate on flags.  Defaults to consuming fuel when drafted or moving in a caravan.
 

@@ -120,9 +120,9 @@ namespace Vehicles
 			}
 			if (genericAmmo)
 			{
-				if (ammunition is null || projectile is null)
+				if (projectile is null)
 				{
-					yield return "Generic ammo must include a default projectile and populate <field>ammunition</field> with the <type>ThingDef</type> that will reload the cannon".ConvertRichText();
+					yield return "Generic ammo must include a default projectile so the turret knows what to shoot.".ConvertRichText();
 				}
 				if (ammunition != null && ammunition.AllowedDefCount != 1)
 				{

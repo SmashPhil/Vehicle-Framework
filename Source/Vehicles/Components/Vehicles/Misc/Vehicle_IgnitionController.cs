@@ -82,7 +82,7 @@ namespace Vehicles
 
 				if (value)
 				{
-					CompCanBeDormant compCanBeDormant = vehicle.GetSortedComp<CompCanBeDormant>();
+					CompCanBeDormant compCanBeDormant = vehicle.GetCachedComp<CompCanBeDormant>();
 					if (compCanBeDormant != null)
 					{
 						compCanBeDormant.WakeUp();
@@ -110,7 +110,7 @@ namespace Vehicles
 				{
 					if (Drafted && vehicle.vPather.Moving)
 					{
-						vehicle.vPather.PatherFailed();
+						vehicle.vPather.EngageBrakes();
 					}
 					else
 					{

@@ -105,6 +105,11 @@ namespace Vehicles
 			}
 		}
 
+		public void Tick()
+		{
+			handlers.ThingOwnerTick();
+		}
+
 		public override bool Equals(object obj)
 		{
 			return obj is VehicleHandler handler && Equals(handler);

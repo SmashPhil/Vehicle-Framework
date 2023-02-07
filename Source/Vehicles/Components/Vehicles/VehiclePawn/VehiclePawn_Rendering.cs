@@ -395,7 +395,7 @@ namespace Vehicles
 		public override void DrawExtraSelectionOverlays()
 		{
 			base.DrawExtraSelectionOverlays();
-			if (vPather.curPath != null)
+			if (vPather.curPath != null && vPather.curPath.NodesLeftCount > 0)
 			{
 				vPather.curPath.DrawPath(this);
 			}

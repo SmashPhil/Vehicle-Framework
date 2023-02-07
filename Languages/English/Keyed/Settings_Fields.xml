@@ -34,6 +34,10 @@
 	<VF_DebugDisabledTooltip>Disabled for all Vehicles at this time.</VF_DebugDisabledTooltip>
 	<VF_GizmoDisabledTooltip>Disabled in the mod settings.</VF_GizmoDisabledTooltip>
 	
+	<!-- Performance -->
+	<VF_OpportunisticTicking>Opportunistic Ticking</VF_OpportunisticTicking>
+	<VF_OpportunisticTickingTooltip>Vehicle components only tick when necessary, reducing impact on performance when idle.</VF_OpportunisticTickingTooltip>
+	
 	<!-- (Properties) -->
 	<VehicleProperties>Properties</VehicleProperties>
 	<VehicleVisibilityWorldMap>Visibility</VehicleVisibilityWorldMap>

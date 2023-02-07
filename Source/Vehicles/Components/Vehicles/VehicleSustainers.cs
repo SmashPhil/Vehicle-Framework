@@ -18,9 +18,16 @@ namespace Vehicles
 			activeSustainers = new List<Sustainer>();
 		}
 
-		public void Spawn(SoundDef soundDef, MaintenanceType maintenanceType)
+		public void Spawn(ISustainerTarget sustainerTarget, SoundDef soundDef)
 		{
-			SoundInfo soundInfo = SoundInfo.InMap(vehicle, maintenanceType);
+			SoundInfo soundInfo = SoundInfo.InMap(sustainerTarget.Target, sustainerTarget.MaintenanceType);
+			Sustainer sustainer = soundDef.TrySpawnSustainer(soundInfo);
+			activeSustainers.Add(sustainer);
+		}
+
+		public void Spawn(VehiclePawn vehicle, SoundDef soundDef)
+		{
+			SoundInfo soundInfo = SoundInfo.InMap(vehicle, MaintenanceType.PerTick);
 			Sustainer sustainer = soundDef.TrySpawnSustainer(soundInfo);
 			activeSustainers.Add(sustainer);
 		}

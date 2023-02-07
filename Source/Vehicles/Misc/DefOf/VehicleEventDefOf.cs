@@ -16,6 +16,7 @@ namespace Vehicles
 		//Movement
 		public static VehicleEventDef IgnitionOn;
 		public static VehicleEventDef IgnitionOff;
+		public static VehicleEventDef Braking;
 		public static VehicleEventDef MoveStart;
 		public static VehicleEventDef MoveStop;
 

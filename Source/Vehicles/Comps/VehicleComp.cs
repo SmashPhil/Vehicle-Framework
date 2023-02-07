@@ -35,7 +35,7 @@ namespace Vehicles
 			return true;
 		}
 
-		public void StartTicking()
+		public virtual void StartTicking()
 		{
 			if (TickByRequest)
 			{
@@ -43,7 +43,7 @@ namespace Vehicles
 			}
 		}
 
-		public void StopTicking()
+		public virtual void StopTicking()
 		{
 			if (TickByRequest)
 			{

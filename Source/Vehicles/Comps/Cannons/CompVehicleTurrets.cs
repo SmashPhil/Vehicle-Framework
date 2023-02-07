@@ -20,8 +20,6 @@ namespace Vehicles
 
 		public CompProperties_VehicleTurrets Props => (CompProperties_VehicleTurrets)props;
 
-		public VehiclePawn Vehicle => parent as VehiclePawn;
-
 		public bool WeaponStatusOnline => !Vehicle.Downed && !Vehicle.Dead; //REDO - Add vehicle component health as check
 
 		public float MinRange => turrets.Max(x => x.turretDef.minRange);
@@ -42,7 +40,7 @@ namespace Vehicles
 			get
 			{
 				IEnumerable<VehicleTurret> cannonRange = turrets.Where(x => x.turretDef.maxRange <= GenRadial.MaxRadialPatternRadius);
-				if(!cannonRange.NotNullAndAny())
+				if (!cannonRange.NotNullAndAny())
 				{
 					return (float)Math.Floor(GenRadial.MaxRadialPatternRadius);
 				}
@@ -88,7 +86,10 @@ namespace Vehicles
 
 		public override void PostDraw()
 		{
-			turrets.ForEach(c => c.Draw());
+			for (int i = 0; i < turrets.Count; i++)
+			{
+				turrets[i].Draw();
+			}
 		}
 
 		public override IEnumerable<Gizmo> CompGetGizmosExtra()
@@ -146,18 +147,7 @@ namespace Vehicles
 								defaultLabel = $"Full Refill: {turret.gizmoLabel}",
 								action = delegate()
 								{
-									if (turret.turretDef.ammunition is null)
-									{
-										turret.ReloadCannon(null);
-									}
-									else if (turret.turretDef.ammunition.AllowedThingDefs.FirstOrDefault() is ThingDef thingDef)
-									{
-										Thing ammo = ThingMaker.MakeThing(thingDef);
-										ammo.stackCount = thingDef.stackLimit;
-										//Vehicle.inventory.innerContainer.TryAddOrTransfer(ammo);
-										Vehicle.AddOrTransfer(ammo);
-										turret.ReloadCannon(thingDef);
-									}
+									DevModeReloadTurret(turret);
 								}
 							};
 						}
@@ -241,15 +231,20 @@ namespace Vehicles
 
 		public void QueueTicker(VehicleTurret turret)
 		{
-			if (VehicleMod.settings.main.opportunisticTurretTicking && !tickers.Contains(turret))
+			if (!tickers.Contains(turret))
 			{
 				tickers.Add(turret);
+				StartTicking();
 			}
 		}
 
 		public void DequeueTicker(VehicleTurret turret)
 		{
 			tickers.Remove(turret);
+			if (tickers.Count == 0)
+			{
+				StopTicking();
+			}
 		}
 
 		public void QueueTurret(TurretData turretData)
@@ -316,18 +311,33 @@ namespace Vehicles
 			base.SpawnedInGodMode();
 			foreach (VehicleTurret turret in turrets)
 			{
-				if (turret.turretDef.ammunition is null)
-				{
-					turret.ReloadCannon(null);
-				}
-				else if (turret.turretDef.ammunition?.AllowedThingDefs.FirstOrDefault() is ThingDef thingDef)
-				{
-					Thing ammo = ThingMaker.MakeThing(thingDef);
-					ammo.stackCount = thingDef.stackLimit;
-					//Vehicle.inventory.innerContainer.TryAddOrTransfer(ammo);
-					Vehicle.AddOrTransfer(ammo);
-					turret.ReloadCannon(thingDef);
-				}
+				DevModeReloadTurret(turret);
+			}
+		}
+
+		private void DevModeReloadTurret(VehicleTurret turret)
+		{
+			if (turret.turretDef.ammunition is null)
+			{
+				turret.ReloadCannon(null);
+			}
+			else if (turret.turretDef.ammunition.AllowedThingDefs.FirstOrDefault() is ThingDef thingDef)
+			{
+				Thing ammo = ThingMaker.MakeThing(thingDef);
+
+				//Limit to vehicle's cargo capacity to avoid stack limit mods from adding hundreds or thousands at a time
+				float capacity = Vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
+				float massLeft = capacity - MassUtility.InventoryMass(Vehicle);
+				float thingMass = thingDef.GetStatValueAbstract(StatDefOf.Mass);
+				int countTillOverEncumbered = Mathf.CeilToInt(massLeft / thingMass);
+				ammo.stackCount = Mathf.Min(thingDef.stackLimit, countTillOverEncumbered);
+
+				Vehicle.AddOrTransfer(ammo);
+				turret.ReloadCannon(thingDef);
+			}
+			else
+			{
+				Log.Error($"Unable to reload {turret} through DevMode, no AllowedThingDefs in ammunition list.");
 			}
 		}
 
@@ -336,23 +346,13 @@ namespace Vehicles
 			base.CompTick();
 			ResolveTurretQueue();
 
-			if (VehicleMod.settings.main.opportunisticTurretTicking)
+			//Only tick VehicleTurrets that actively request to be ticked
+			for (int i = tickers.Count - 1; i >= 0; i--)
 			{
-				//Only tick VehicleTurrets that actively request to be ticked
-				for (int i = tickers.Count - 1; i >= 0; i--)
+				VehicleTurret turret = tickers[i];
+				if (!turret.Tick())
 				{
-					VehicleTurret turret = tickers[i];
-					if (!turret.Tick())
-					{
-						tickers.RemoveAt(i);
-					}
-				}
-			}
-			else
-			{
-				foreach (VehicleTurret turret in turrets)
-				{
-					turret.Tick();
+					DequeueTicker(turret);
 				}
 			}
 		}

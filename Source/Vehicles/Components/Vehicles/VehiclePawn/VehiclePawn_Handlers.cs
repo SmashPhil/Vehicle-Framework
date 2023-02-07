@@ -21,6 +21,8 @@ namespace Vehicles
 		public List<Bill_BoardVehicle> bills = new List<Bill_BoardVehicle>();
 		public List<VehicleHandler> handlers = new List<VehicleHandler>();
 
+		public int PawnCount { get; private set; } //no need to save, can just recache PostLoad
+
 		public bool MovementHandlerAvailable
 		{
 			get
@@ -98,7 +100,6 @@ namespace Vehicles
 						}
 					}
 				}
-
 				return pawnsOnShip;
 			}
 		}
@@ -198,6 +199,11 @@ namespace Vehicles
 				}
 				return x;
 			}
+		}
+
+		public void RecachePawnCount()
+		{
+			PawnCount = AllPawnsAboard.Count;
 		}
 
 		public void AddHandlers(List<VehicleHandler> handlerList)
@@ -397,20 +403,36 @@ namespace Vehicles
 			}
 		}
 
-		private void TrySatisfyPawnNeeds()
+		private void TickHandlers()
 		{
-			if (Spawned || this.IsCaravanMember())
+			if (PawnCount > 0)
 			{
-				foreach (Pawn p in AllPawnsAboard)
+				//TODO - Implement VehicleHandlers as tick requesters
+				foreach (VehicleHandler handler in handlers)
 				{
-					TrySatisfyPawnNeeds(p);
+					handler.Tick();
 				}
 			}
 		}
 
-		private void TrySatisfyPawnNeeds(Pawn pawn)
+		private void TrySatisfyPawnNeeds()
+		{
+			if ((Spawned || this.IsCaravanMember()) && PawnCount > 0)
+			{
+				foreach (VehicleHandler handler in handlers)
+				{
+					foreach (VehiclePawn pawn in handler.handlers)
+					{
+						TrySatisfyPawnNeeds(handler, pawn);
+					}
+				}
+			}
+		}
+
+		private void TrySatisfyPawnNeeds(VehicleHandler handler, Pawn pawn)
 		{
 			if (pawn.Dead) return;
+
 			List<Need> allNeeds = pawn.needs.AllNeeds;
 			int tile = this.IsCaravanMember() ? this.GetCaravan().Tile : Map.Tile;
 
@@ -427,25 +449,31 @@ namespace Vehicles
 				else if (need is Need_Food)
 				{
 					if (!CaravanNightRestUtility.RestingNowAt(tile))
+					{
 						TrySatisfyFood(pawn, need as Need_Food);
+					}
 				}
 				else if (need is Need_Chemical)
 				{
 					if (!CaravanNightRestUtility.RestingNowAt(tile))
+					{
 						TrySatisfyChemicalNeed(pawn, need as Need_Chemical);
+					}
 				}
 				else if (need is Need_Joy)
 				{
 					if (!CaravanNightRestUtility.RestingNowAt(tile))
+					{
 						TrySatisfyJoyNeed(pawn, need as Need_Joy);
+					}
 				}
 				else if (need is Need_Comfort)
 				{
 					need.CurLevel = 0.5f;
 				}
-				else if (need is Need_Outdoors)
+				else if (need is Need_Outdoors needOutdoors)
 				{
-					need.CurLevel = 0.25f;
+					//need.CurLevel = 0.25f;
 				}
 			}
 		}
