@@ -28,7 +28,7 @@ Fixed bug where creating a vehicle turret that did not require ammo to reload wa
 
 Fixed bug where vehicle reservations and requesters wouldn't properly clear when vehicle is despawned.
 
-
+Fixed bug where canceling loading while pawns are actively hauling still attempts to load the items anyway.
 [title]Performance Improvements[/title]
 Compressed region making for vehicles to reuse region grids for vehicles with similar configurations.
 
