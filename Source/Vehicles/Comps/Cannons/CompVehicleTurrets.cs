@@ -251,12 +251,14 @@ namespace Vehicles
 		{
 			turretData.turret.queuedToFire = true;
 			turretQueue.Add(turretData);
+			turretData.turret.EventRegistry[VehicleTurretEventDefOf.Queued].ExecuteEvents();
 		}
 
 		public void DequeueTurret(TurretData turretData)
 		{
 			turretData.turret.queuedToFire = false;
 			turretQueue.RemoveAll(td => td.turret == turretData.turret);
+			turretData.turret.EventRegistry[VehicleTurretEventDefOf.Dequeued].ExecuteEvents();
 		}
 
 		private void ResolveTurretQueue()
@@ -416,6 +418,11 @@ namespace Vehicles
 			turretQueue ??= new List<TurretData>();
 			ResolveChildTurrets();
 			InitTurrets();
+
+			foreach (VehicleTurret turret in turrets)
+			{
+				turret.FillEvents_Def();
+			}
 		}
 
 		public void ResolveChildTurrets()
@@ -438,6 +445,11 @@ namespace Vehicles
 				VehicleTurret matchingTurret = turrets.FirstOrDefault(turret => turret.key == turretProps.key);
 				matchingTurret.Init(turretProps);
 			}
+		}
+
+		public override void PostSpawnSetup(bool respawningAfterLoad)
+		{
+			base.PostSpawnSetup(respawningAfterLoad);
 		}
 
 		public override void PostExposeData()

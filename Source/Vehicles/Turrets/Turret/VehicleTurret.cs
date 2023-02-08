@@ -10,7 +10,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class VehicleTurret : IExposable, ILoadReferenceable
+	public class VehicleTurret : IExposable, ILoadReferenceable, IEventManager<VehicleTurretEventDef>
 	{
 		public const int AutoTargetInterval = 50;
 		public const int TicksPerOverheatingFrame = 15;
@@ -226,6 +226,8 @@ namespace Vehicles
 		public bool FullAuto => CurrentFireMode.ticksBetweenBursts == CurrentFireMode.ticksBetweenShots;
 
 		public int ReloadTicks => reloadTicks;
+
+		public Dictionary<VehicleTurretEventDef, EventTrigger> EventRegistry { get; set; }
 
 		public Texture2D FireIcon
 		{
@@ -715,6 +717,7 @@ namespace Vehicles
 				{
 					triggeredCooldown = true;
 					currentHeatRate = MaxHeatCapacity;
+					EventRegistry[VehicleTurretEventDefOf.Cooldown].ExecuteEvents();
 				}
 				else if (currentHeatRate <= 0)
 				{
@@ -1004,6 +1007,7 @@ namespace Vehicles
 				turretDef.shotSound?.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map));
 				vehicle.vDrawer.rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
 				rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
+				EventRegistry[VehicleTurretEventDefOf.ShotFired].ExecuteEvents();
 				PostTurretFire();
 				InitTurretMotes(launchCell);
 			}
@@ -1360,6 +1364,7 @@ namespace Vehicles
 					
 					loadedAmmo = storedAmmo.def;
 					shellCount = countToRefill + additionalCount;
+					EventRegistry[VehicleTurretEventDefOf.Reload].ExecuteEvents();
 					if (turretDef.reloadSound != null)
 					{
 						turretDef.reloadSound.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map, false));
@@ -1496,6 +1501,7 @@ namespace Vehicles
 		public virtual void ResetPrefireTimer()
 		{
 			PrefireTickCount = WarmupTicks;
+			EventRegistry[VehicleTurretEventDefOf.Warmup].ExecuteEvents();
 		}
 
 		protected void ValidateLockStatus()

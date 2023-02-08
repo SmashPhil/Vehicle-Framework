@@ -567,8 +567,8 @@ namespace Vehicles
 		public static int CostToMoveIntoCell(VehiclePawn vehicle, IntVec3 from, IntVec3 to)
 		{
 			int tickCost = MoveTicksAt(vehicle, from, to);
-			tickCost += vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathGrid.CalculatedCostAt(to);
-			tickCost = Mathf.Min(tickCost, MaxMoveTicks);
+			tickCost += vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathGrid.PerceivedPathCostAt(to);
+			tickCost = Mathf.Min(tickCost, MaxMoveTicks); //At minimum should take ~7.5 seconds per cell, any slower vehicle should be disabled
 			if (vehicle.CurJob != null)
 			{
 				LocomotionTicks(vehicle, from, to, ref tickCost);
