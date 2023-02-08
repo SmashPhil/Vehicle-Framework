@@ -21,13 +21,19 @@ namespace Vehicles
 		public List<Bill_BoardVehicle> bills = new List<Bill_BoardVehicle>();
 		public List<VehicleHandler> handlers = new List<VehicleHandler>();
 
-		public int PawnCount { get; private set; } //no need to save, can just recache PostLoad
+		/* ----- Caches for VehicleHandlers ----- */
+
+		public List<VehicleHandler> OccupiedHandlers { get; private set; } = new List<VehicleHandler>();
+
+		public List<Pawn> AllPawnsAboard { get; private set; } = new List<Pawn>();
+
+		/* -------------------------------------- */
 
 		public bool MovementHandlerAvailable
 		{
 			get
 			{
-				foreach (VehicleHandler handler in this.handlers)
+				foreach (VehicleHandler handler in handlers)
 				{
 					if (handler.role.handlingTypes.NotNullAndAny(h => h == HandlingTypeFlags.Movement) && handler.handlers.Count < handler.role.slotsToOperate)
 					{
@@ -82,25 +88,6 @@ namespace Vehicles
 					}
 				}
 				return true;
-			}
-		}
-
-		public List<Pawn> AllPawnsAboard
-		{
-			get
-			{
-				List<Pawn> pawnsOnShip = new List<Pawn>();
-				if (handlers != null && handlers.Count > 0)
-				{
-					foreach (VehicleHandler handler in handlers)
-					{
-						if (handler.handlers != null && handler.handlers.Count > 0)
-						{
-							pawnsOnShip.AddRange(handler.handlers);
-						}
-					}
-				}
-				return pawnsOnShip;
 			}
 		}
 
@@ -203,7 +190,19 @@ namespace Vehicles
 
 		public void RecachePawnCount()
 		{
-			PawnCount = AllPawnsAboard.Count;
+			OccupiedHandlers.Clear();
+			AllPawnsAboard.Clear();
+			foreach (VehicleHandler handler in handlers)
+			{
+				if (handler.handlers.Any)
+				{
+					OccupiedHandlers.Add(handler);
+					foreach (Pawn pawn in handler.handlers)
+					{
+						AllPawnsAboard.Add(pawn);
+					}
+				}
+			}
 		}
 
 		public void AddHandlers(List<VehicleHandler> handlerList)
@@ -296,7 +295,6 @@ namespace Vehicles
 					{
 						pawnToBoard.DeSpawn(DestroyMode.WillReplace);
 					}
-					EventRegistry[VehicleEventDefOf.PawnEntered].ExecuteEvents();
 					if (bill.handler.handlers.TryAddOrTransfer(pawnToBoard, true))
 					{
 						if (pawnToBoard != null)
@@ -316,6 +314,7 @@ namespace Vehicles
 						pawnToBoard.holdingOwner.TryTransferToContainer(pawnToBoard, bill.handler.handlers);
 					}
 					bills.Remove(bill);
+					EventRegistry[VehicleEventDefOf.PawnEntered].ExecuteEvents();
 				}
 			}
 		}
@@ -359,7 +358,6 @@ namespace Vehicles
 				{
 					loc = newLoc;
 				}
-				EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
 				GenSpawn.Spawn(pawn, loc, MapHeld);
 				if (!GenGrid.Standable(loc, Map))
 				{
@@ -375,6 +373,7 @@ namespace Vehicles
 				}
 			}
 			RemovePawn(pawn);
+			EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
 			if (!AllPawnsAboard.NotNullAndAny() && outOfFoodNotified)
 			{
 				outOfFoodNotified = false;
@@ -405,24 +404,24 @@ namespace Vehicles
 
 		private void TickHandlers()
 		{
-			if (PawnCount > 0)
+			//Only need to tick VehicleHandlers with pawns inside them
+			for (int i = 0; i < OccupiedHandlers.Count; i++)
 			{
-				//TODO - Implement VehicleHandlers as tick requesters
-				foreach (VehicleHandler handler in handlers)
-				{
-					handler.Tick();
-				}
+				OccupiedHandlers[i].Tick();
 			}
 		}
 
 		private void TrySatisfyPawnNeeds()
 		{
-			if ((Spawned || this.IsCaravanMember()) && PawnCount > 0)
+			if ((Spawned || this.IsCaravanMember()) && AllPawnsAboard.Count > 0)
 			{
-				foreach (VehicleHandler handler in handlers)
+				//Not utilizing AllPawnsAboard since VehicleHandler is needed for checks further down the call stack
+				for (int i = 0; i < OccupiedHandlers.Count; i++)
 				{
-					foreach (VehiclePawn pawn in handler.handlers)
+					VehicleHandler handler = OccupiedHandlers[i];
+					for (int h = 0; h < handler.handlers.Count; h++)
 					{
+						Pawn pawn = handler.handlers[h];
 						TrySatisfyPawnNeeds(handler, pawn);
 					}
 				}
@@ -432,62 +431,66 @@ namespace Vehicles
 		private void TrySatisfyPawnNeeds(VehicleHandler handler, Pawn pawn)
 		{
 			if (pawn.Dead) return;
-
+			Log.Message($"Satisfying: {pawn}");
 			List<Need> allNeeds = pawn.needs.AllNeeds;
 			int tile = this.IsCaravanMember() ? this.GetCaravan().Tile : Map.Tile;
 
 			for (int i = 0; i < allNeeds.Count; i++)
 			{
 				Need need = allNeeds[i];
-				if (need is Need_Rest)
+				switch (need)
 				{
-					if (CaravanNightRestUtility.RestingNowAt(tile) || GetHandlersMatch(pawn).role.handlingTypes.NullOrEmpty())
-					{
-						TrySatisfyRest(pawn, need as Need_Rest);
-					}
-				}
-				else if (need is Need_Food)
-				{
-					if (!CaravanNightRestUtility.RestingNowAt(tile))
-					{
-						TrySatisfyFood(pawn, need as Need_Food);
-					}
-				}
-				else if (need is Need_Chemical)
-				{
-					if (!CaravanNightRestUtility.RestingNowAt(tile))
-					{
-						TrySatisfyChemicalNeed(pawn, need as Need_Chemical);
-					}
-				}
-				else if (need is Need_Joy)
-				{
-					if (!CaravanNightRestUtility.RestingNowAt(tile))
-					{
-						TrySatisfyJoyNeed(pawn, need as Need_Joy);
-					}
-				}
-				else if (need is Need_Comfort)
-				{
-					need.CurLevel = 0.5f;
-				}
-				else if (need is Need_Outdoors needOutdoors)
-				{
-					//need.CurLevel = 0.25f;
+					case Need_Rest _:
+						if (CaravanNightRestUtility.RestingNowAt(tile))
+						{
+							TrySatisfyRest(handler, pawn, need as Need_Rest);
+						}
+						break;
+					case Need_Food _:
+						if (!CaravanNightRestUtility.RestingNowAt(tile))
+						{
+							TrySatisfyFood(handler, pawn, need as Need_Food);
+						}
+						break;
+					case Need_Chemical _:
+						if (!CaravanNightRestUtility.RestingNowAt(tile))
+						{
+							TrySatisfyChemicalNeed(handler, pawn, need as Need_Chemical);
+						}
+						break;
+					case Need_Joy _:
+						if (!CaravanNightRestUtility.RestingNowAt(tile))
+						{
+							TrySatisfyJoyNeed(handler, pawn, need as Need_Joy);
+						}
+						break;
+					case Need_Comfort _:
+						need.CurLevel = 0.5f; //TODO - add comfort factor for roles
+						break;
+					case Need_Outdoors _:
+						if (handler.role.exposed)
+						{
+							need.NeedInterval();
+						}
+						break;
 				}
 			}
 		}
 
-		private void TrySatisfyRest(Pawn pawn, Need_Rest rest)
+		private void TrySatisfyRest(VehicleHandler handler, Pawn pawn, Need_Rest rest)
 		{
-			Building_Bed bed = (Building_Bed)inventory.innerContainer.InnerListForReading.Find(x => x is Building_Bed); // Reserve?
-			float restValue = bed is null ? 0.75f : bed.GetStatValue(StatDefOf.BedRestEffectiveness, true);
-			restValue *= pawn.GetStatValue(StatDefOf.RestRateMultiplier, true);
-			if (restValue > 0)
-				rest.CurLevel += 0.0057142857f * restValue;
+			bool cantRestWhileMoving = handler.RequiredForMovement && VehicleDef.navigationCategory <= NavigationCategory.Opportunistic;
+			
+			//Handler not required for movement OR Not Moving (Local) OR Not Moving (World)
+			if (!cantRestWhileMoving || (Spawned && !vPather.Moving) || (this.GetVehicleCaravan() is VehicleCaravan vehicleCaravan && !vehicleCaravan.vPather.Moving))
+			{
+				float restValue = StatDefOf.BedRestEffectiveness.valueIfMissing; //TODO - add rest modifier for vehicles
+				Log.Message($"Resting: {restValue} Resting={rest.Resting}");
+				rest.TickResting(restValue);
+			}
 		}
 
-		private void TrySatisfyFood(Pawn pawn, Need_Food food)
+		private void TrySatisfyFood(VehicleHandler handler, Pawn pawn, Need_Food food)
 		{
 			if (food.CurCategory < HungerCategory.Hungry)
 				return;
@@ -556,7 +559,7 @@ namespace Vehicles
 			return false;
 		}
 
-		private void TrySatisfyChemicalNeed(Pawn pawn, Need_Chemical chemical)
+		private void TrySatisfyChemicalNeed(VehicleHandler handler, Pawn pawn, Need_Chemical chemical)
 		{
 			if (chemical.CurCategory >= DrugDesireCategory.Satisfied)
 			{
@@ -582,6 +585,7 @@ namespace Vehicles
 				owner.inventory.innerContainer.Remove(drug);
 			}
 		}
+
 		public bool TryGetDrugToSatisfyNeed(Pawn forPawn, Need_Chemical chemical, out Thing drug, out Pawn owner)
 		{
 			Hediff_Addiction addictionHediff = chemical.AddictionHediff;
@@ -651,7 +655,7 @@ namespace Vehicles
 				FoodPreferability.DesperateOnlyForHumanlikes);
 		}
 
-		private void TrySatisfyJoyNeed(Pawn pawn, Need_Joy joy)
+		private void TrySatisfyJoyNeed(VehicleHandler handler, Pawn pawn, Need_Joy joy)
 		{
 			if (pawn.IsHashIntervalTick(1250))
 			{

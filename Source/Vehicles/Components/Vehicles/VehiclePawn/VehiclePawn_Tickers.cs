@@ -124,7 +124,7 @@ namespace Vehicles
 			}
 
 			TickHandlers();
-			if (this.IsHashIntervalTick(150) && AllPawnsAboard.Count > 0)
+			if (AllPawnsAboard.Count > 0)
 			{
 				TrySatisfyPawnNeeds();
 			}

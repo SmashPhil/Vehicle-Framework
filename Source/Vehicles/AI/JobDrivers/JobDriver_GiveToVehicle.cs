@@ -86,7 +86,7 @@ namespace Vehicles
 					else
 					{
 						Vehicle.AddOrTransfer(Item, Item.stackCount, pawn);
-						TransferableOneWay transferable = Vehicle.cargoToLoad.FirstOrDefault(t => t.AnyThing is {def: var def} && def == Item.def);
+						TransferableOneWay transferable = Vehicle.cargoToLoad.FirstOrDefault(t => t.AnyThing is {def: ThingDef def} && def == Item.def);
                         if (transferable is null)
                         {
 							pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true);
