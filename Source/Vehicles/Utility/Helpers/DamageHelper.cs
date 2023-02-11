@@ -40,8 +40,7 @@ namespace Vehicles
 			int damageAmount = proj.DamageAmount;
 			float armorPenetration = proj.ArmorPenetration;
 			SoundDef soundExplode;
-			soundExplode = SoundDefOf_Vehicles.Explode_BombWater; //Changed for current issues
-			SoundStarter.PlayOneShot(soundExplode, new TargetInfo(proj.Position, map, false));
+			soundExplode = SoundDefOf_Vehicles.Explode_BombWater;
 			ThingDef equipmentDef = null;
 			ThingDef def = proj.def;
 			Thing thing = null;

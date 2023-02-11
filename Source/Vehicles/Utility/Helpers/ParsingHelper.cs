@@ -183,7 +183,7 @@ namespace Vehicles
 				terrainDict = new Dictionary<string, int>();
 				PathingHelper.allTerrainCostsByTag[defName] = terrainDict;
 			}
-			terrainDict[value] = -1;
+			terrainDict[value] = VehiclePathGrid.ImpassableCost;
 		}
 
 		private static void MarkAsOverride(XmlNode node, string value, FieldInfo field)

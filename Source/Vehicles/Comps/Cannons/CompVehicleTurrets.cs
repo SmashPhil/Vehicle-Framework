@@ -429,11 +429,27 @@ namespace Vehicles
 		{
 			foreach (VehicleTurret turret in turrets)
 			{
-				turret.childCannons = new List<VehicleTurret>();
-				foreach (VehicleTurret cannon2 in turrets.Where(c => c.parentKey == turret.key))
+				ResolveChildTurrets(turret);
+			}
+		}
+
+		public void ResolveChildTurrets(VehicleTurret turret)
+		{
+			turret.childTurrets = new List<VehicleTurret>();
+			if (!string.IsNullOrEmpty(turret.parentKey))
+			{
+				foreach (VehicleTurret parentTurret in turrets.Where(c => c.key == turret.parentKey))
 				{
-					cannon2.attachedTo = turret;
-					turret.childCannons.Add(cannon2);
+					turret.attachedTo = parentTurret;
+					if (parentTurret.attachedTo == turret || turret == parentTurret)
+					{
+						Log.Error($"Recursive turret attachments detected, this is not allowed. Disconnecting turret from parent.");
+						turret.attachedTo = null;
+					}
+					else
+					{
+						parentTurret.childTurrets.Add(turret);
+					}
 				}
 			}
 		}

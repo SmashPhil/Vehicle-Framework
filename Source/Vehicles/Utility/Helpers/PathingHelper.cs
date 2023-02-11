@@ -182,7 +182,7 @@ namespace Vehicles
 			{
 				if (vehicleDef.properties.customTerrainCosts.TryGetValue(terrainDef, out int value))
 				{
-					if (value < 0 || value >= VehiclePathGrid.ImpassableCost)
+					if (value >= VehiclePathGrid.ImpassableCost)
 					{
 						terrainEffecters[terrainDef].Add(vehicleDef);
 					}
@@ -412,22 +412,22 @@ namespace Vehicles
 					vehicle.carryTracker.innerContainer.Clear();
 				}
 			}
-			bool flag = !vehicle.IsCaravanMember() && !vehicle.teleporting && !PawnUtility.IsTravelingInTransportPodWorldObject(vehicle) && (!vehicle.IsPrisoner || vehicle.ParentHolder == null || vehicle.ParentHolder is CompShuttle || (vehicle.guest != null && vehicle.guest.Released));
+			bool free = !vehicle.IsCaravanMember() && !vehicle.teleporting && !PawnUtility.IsTravelingInTransportPodWorldObject(vehicle) && (!vehicle.IsPrisoner || vehicle.ParentHolder == null || vehicle.ParentHolder is CompShuttle || (vehicle.guest != null && vehicle.guest.Released));
 
 			if (vehicle.Faction != null)
 			{
-				vehicle.Faction.Notify_MemberExitedMap(vehicle, flag);
+				vehicle.Faction.Notify_MemberExitedMap(vehicle, free);
 			}
 			if (vehicle.Faction == Faction.OfPlayer && vehicle.IsSlave && vehicle.SlaveFaction != null && vehicle.SlaveFaction != Faction.OfPlayer && vehicle.guest.Released)
 			{
-				vehicle.SlaveFaction.Notify_MemberExitedMap(vehicle, flag);
+				vehicle.SlaveFaction.Notify_MemberExitedMap(vehicle, free);
 			}
 			if (vehicle.Spawned)
 			{
 				vehicle.DeSpawn(DestroyMode.Vanish);
 			}
 			vehicle.inventory.UnloadEverything = false;
-			if (flag)
+			if (free)
 			{
 				vehicle.vPather.StopDead();
 				vehicle.jobs.StopAll(false, true);

@@ -32,7 +32,6 @@ namespace Vehicles
 
 		public bool debugDrawVehiclePathCosts;
 		public bool debugDrawPathfinderSearch;
-		public bool hierarchalPathfinding;
 
 		public override void ResetSettings()
 		{
@@ -53,7 +52,6 @@ namespace Vehicles
 
 			debugDrawVehiclePathCosts = false;
 			debugDrawPathfinderSearch = false;
-			hierarchalPathfinding = false;
 		}
 
 		public override void ExposeData()
@@ -74,7 +72,6 @@ namespace Vehicles
 
 			Scribe_Values.Look(ref debugDrawVehiclePathCosts, nameof(debugDrawVehiclePathCosts));
 			Scribe_Values.Look(ref debugDrawPathfinderSearch, nameof(debugDrawPathfinderSearch));
-			Scribe_Values.Look(ref hierarchalPathfinding, nameof(hierarchalPathfinding), defaultValue: false); //TODO - Change to true when fully implemented
 		}
 
 		public override void DrawSection(Rect rect)
@@ -107,8 +104,7 @@ namespace Vehicles
 				listingStandard.Header("VF_DevMode_Pathing".Translate(), ListingExtension.BannerColor, anchor: TextAnchor.MiddleCenter);
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawVehiclePathingCosts".Translate(), ref debugDrawVehiclePathCosts, "VF_DevMode_DebugDrawVehiclePathingCostsTooltip".Translate());
 				listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawPathfinderSearch".Translate(), ref debugDrawPathfinderSearch, "VF_DevMode_DebugDrawPathfinderSearchTooltip".Translate());
-				listingStandard.CheckboxLabeled("VF_DevMode_DebugHierarchalPathfinding".Translate(), ref hierarchalPathfinding, "VF_DevMode_DebugHierarchalPathfindingTooltip".Translate());
-
+				
 				if (listingStandard.ButtonText("VF_DevMode_DebugPathfinderDebugging".Translate(), "VF_DevMode_DebugPathfinderDebuggingTooltip".Translate()))
 				{
 					RegionDebugMenu();

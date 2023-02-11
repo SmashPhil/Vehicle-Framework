@@ -20,8 +20,11 @@ namespace Vehicles
 		public bool modifiableSettings = true;
 		public bool useCustomShaders = true;
 		public bool allowDiagonalRendering = true;
+
 		public bool fullVehiclePathing = true;
 		public bool smoothVehiclePaths = true;
+		public bool hierarchalPathfinding = false;
+
 		public bool vehiclePathingBiomesCostOnRoads = true;
 		public bool multiplePawnsPerJob = true;
 		public bool hideDisabledVehicles = true;
@@ -70,6 +73,7 @@ namespace Vehicles
 			allowDiagonalRendering = true;
 			fullVehiclePathing = true;
 			smoothVehiclePaths = true;
+			hierarchalPathfinding = false;
 
 			vehiclePathingBiomesCostOnRoads = true;
 			multiplePawnsPerJob = true;
@@ -116,6 +120,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref allowDiagonalRendering, nameof(allowDiagonalRendering), defaultValue: true);
 			Scribe_Values.Look(ref fullVehiclePathing, nameof(fullVehiclePathing), defaultValue: true);
 			Scribe_Values.Look(ref smoothVehiclePaths, nameof(smoothVehiclePaths), defaultValue: true);
+			Scribe_Values.Look(ref hierarchalPathfinding, nameof(hierarchalPathfinding), defaultValue: false);
 
 			Scribe_Values.Look(ref vehiclePathingBiomesCostOnRoads, nameof(vehiclePathingBiomesCostOnRoads), defaultValue: true);
 			Scribe_Values.Look(ref multiplePawnsPerJob, nameof(multiplePawnsPerJob), defaultValue: true);
@@ -128,7 +133,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref overheatMechanics, nameof(overheatMechanics), defaultValue: true);
 
 			Scribe_Values.Look(ref passiveWaterWaves, nameof(passiveWaterWaves), defaultValue: true);
-			Scribe_Values.Look(ref aerialVehicleEffects, nameof(aerialVehicleEffects), defaultValue: aerialVehicleEffects);
+			Scribe_Values.Look(ref aerialVehicleEffects, nameof(aerialVehicleEffects), defaultValue: true);
 			Scribe_Values.Look(ref opportunisticTicking, nameof(opportunisticTicking), defaultValue: true);
 
 			Scribe_Values.Look(ref fishingMultiplier, nameof(fishingMultiplier), defaultValue: 1f);
@@ -177,6 +182,8 @@ namespace Vehicles
 					listingStandard.CheckboxLabeled("VF_DiagonalVehicleRendering".Translate(), ref allowDiagonalRendering, "VF_DiagonalVehicleRenderingTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_FullVehiclePathing".Translate(), ref fullVehiclePathing, "VF_FullVehiclePathingTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_SmoothVehiclePathing".Translate(), ref smoothVehiclePaths, "VF_SmoothVehiclePathingTooltip".Translate());
+					//listingStandard.CheckboxLabeled("VF_HierarchalPathfinding".Translate(), ref hierarchalPathfinding, "VF_HierarchalPathfindingTooltip".Translate());
+
 					GUIState.Disable();
 					listingStandard.CheckboxLabeled("VF_RoadBiomeCostPathing".Translate(), ref vehiclePathingBiomesCostOnRoads, "VF_RoadBiomeCostPathingTooltip".Translate());
 					GUIState.Enable();

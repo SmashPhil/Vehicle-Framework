@@ -121,7 +121,7 @@ namespace Vehicles
 				{
 					if (vehicle.Spawned)
 					{
-						vehicle.vPather.StopDead();
+						vehicle.vPather.PatherFailed();
 						vehicle.ignition.Drafted = false;
 					}
 				});
@@ -451,7 +451,7 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Determine if <paramref name="dest"/> is not large enough to fit <paramref name="vehicle"/>'s size
+		/// Determine if <paramref name="dest"/> is not large enough to fit <paramref name="vehicle"/>'s full hitbox
 		/// </summary>
 		/// <param name="vehicle"></param>
 		/// <param name="dest"></param>
@@ -467,12 +467,31 @@ namespace Vehicles
 			return false;
 		}
 
+		/// <summary>
+		/// Determines if vehicle is able to traverse this cell given its minimum bounds.
+		/// </summary>
+		/// <remarks>DOES take other vehicles into account</remarks>
+		/// <param name="vehicle"></param>
+		/// <param name="cell"></param>
+		public static bool DrivableRectOnCell(this VehiclePawn vehicle, IntVec3 cell)
+		{
+			int minSize = Mathf.Min(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z);
+			CellRect cellRect = CellRect.CenteredOn(cell, Mathf.FloorToInt(minSize / 2f));
+			return cellRect.Cells.All(cell => vehicle.DrivableFast(cell));
+		}
+
+		/// <summary>
+		/// Determines if vehicle fits on this cell with its minimum bounds
+		/// </summary>
+		/// <remarks>DOES NOT take other vehicles into account</remarks>
+		/// <param name="vehicle"></param>
+		/// <param name="cell"></param>
+		/// <returns></returns>
 		public static bool FitsOnCell(this VehiclePawn vehicle, IntVec3 cell)
 		{
-			IntVec2 size = vehicle.VehicleDef.size;
-			bool verticalBlocked = vehicle.LocationRestrictedBySize(cell, Rot8.North);
-			bool horizontalBlocked = vehicle.LocationRestrictedBySize(cell, Rot8.East);
-			return !verticalBlocked || !horizontalBlocked;
+			int minSize = Mathf.Min(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z);
+			CellRect cellRect = CellRect.CenteredOn(cell, Mathf.FloorToInt(minSize / 2f));
+			return cellRect.Cells.All(cell => cell.Walkable(vehicle.VehicleDef, vehicle.Map));
 		}
 
 		/// <summary>

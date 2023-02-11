@@ -17,12 +17,13 @@ namespace Vehicles
 	public class Vehicle_PathFollower : IExposable
 	{
 		public const int MaxMoveTicks = 450;
-		public const int MaxCheckAheadNodes = 20;
 		public const float SnowReductionFromWalking = 0.001f;
 		public const int ClamorCellsInterval = 12;
 		public const int MinCostWalk = 50;
 		public const int MinCostAmble = 60;
-		public const int CheckForMovingCollidingPawnsIfCloserToTargetThanX = 30;
+
+		public const int MaxCheckAheadNodes = 10;
+		public const int TicksWhileWaiting = 120;
 
 		protected VehiclePawn vehicle;
 
@@ -31,46 +32,49 @@ namespace Vehicles
 		private bool moving;
 
 		public IntVec3 nextCell;
-
 		private IntVec3 lastCell;
+		public IntVec3 lastPathedTargetPosition;
+		private LocalTargetInfo destination;
 
 		public float nextCellCostLeft;
-
 		public float nextCellCostTotal = 1f;
 
 		private int cellsUntilClamor;
 
 		private int lastMovedTick = -999999;
-
-		private LocalTargetInfo destination;
-
-		private PathEndMode peMode;
+		private int waitTicks = 0;
 
 		public PawnPath curPath;
+		private PawnPath pathToAssign; //Explicitly used for Thread Safety. DO NOT TOUCH
+		private PathEndMode peMode;
 
-		public IntVec3 lastPathedTargetPosition;
-
-		private int foundPathWhichCollidesWithPawns = -999999;
-
-		private int foundPathWithDanger = -999999;
-
-		private int failedToFindCloseUnoccupiedCellTicks = -999999;
-
+		[Obsolete]
 		private List<CancellationTokenSource> tokenSources = new List<CancellationTokenSource>();
 
-		private object patherLock = new object();
+		private object pathLock = new object();
 
 		public Vehicle_PathFollower(VehiclePawn vehicle)
 		{
 			this.vehicle = vehicle;
 			bumperCells = new List<IntVec3>();
+			CanEnterDoors = vehicle.VehicleDef.size == IntVec2.One;
+			LookAheadStartingIndex = Mathf.CeilToInt(vehicle.VehicleDef.Size.z / 2f); //10 cells away from vehicle's front;
+			LookAheadDistance = MaxCheckAheadNodes + LookAheadStartingIndex;
 		}
 
-		public bool Recalculating { get; private set; }
+		public bool CanEnterDoors { get; private set; }
+
+		public int LookAheadDistance { get; private set; }
+
+		public int LookAheadStartingIndex { get; private set; }
+
+		public bool CalculatingPath { get; private set; }
 
 		public LocalTargetInfo Destination => destination;
 
 		public bool Moving => moving;
+
+		public bool Waiting => waitTicks > 0;
 
 		public IntVec3 LastPassableCellInPath
 		{
@@ -139,7 +143,7 @@ namespace Vehicles
 				return;
 			}
 			//Add Building and Position Recoverable extras
-			if (!GenGridVehicles.Walkable(vehicle.Position, vehicle.VehicleDef, vehicle.Map))
+			if (!GenGridVehicles.Walkable(vehicle.Position, vehicle.VehicleDef, vehicle.Map) && !TryRecoverFromUnwalkablePosition(error: true))
 			{
 				PatherFailed();
 				return;
@@ -198,6 +202,18 @@ namespace Vehicles
 
 		public void PatherTick()
 		{
+			if (pathToAssign != null)
+			{
+				lock (pathLock)
+				{
+					curPath?.ReleaseToPool(); //Release previous PawnPath for reassignment
+					curPath = pathToAssign;
+					pathToAssign = null; //Dedicated thread will only ever assign a valid path or PawnPath.NotFound, never null. MainThread handles invalidation
+					CalculatingPath = false;
+				}
+			}
+			
+			//Fail path last minute if necessary
 			if ((!vehicle.Drafted || !vehicle.CanMoveFinal) && curPath != null)
 			{
 				PatherFailed();
@@ -208,35 +224,16 @@ namespace Vehicles
 			{
 				GenDraw.DrawFieldEdges(bumperCells);
 			}
-
-			//if (WillCollideWithPawnAt(vehicle.Position))
-			//{
-			//	if (!FailedToFindCloseUnoccupiedCellRecently())
-			//	{
-			//		if (CellFinder.TryFindBestPawnStandCell(vehicle, out IntVec3 intVec, true) && intVec != vehicle.Position)
-			//		{
-			//			vehicle.Position = intVec;
-			//			ResetToCurrentPosition();
-
-			//			if (moving && TrySetNewPath())
-			//			{
-			//				TryEnterNextPathCell();
-			//				return;
-			//			}
-			//		}
-			//		else
-			//		{
-			//			failedToFindCloseUnoccupiedCellTicks = Find.TickManager.TicksGame;
-			//		}
-			//	}
-			//	return;
-			//}
+			
+			//Transition between cells
 			lastMovedTick = Find.TickManager.TicksGame;
 			if (nextCellCostLeft > 0f)
 			{
 				nextCellCostLeft -= CostToPayThisTick();
 				return;
 			}
+			
+			//Attempt setup for next cell transition
 			if (moving)
 			{
 				TryEnterNextPathCell();
@@ -265,24 +262,6 @@ namespace Vehicles
 			nextCellCostTotal = 1f;
 		}
 
-		private bool PawnCanOccupy(IntVec3 c)
-		{
-			if (!vehicle.Drivable(c))
-			{
-				return false;
-			}
-			Building edifice = c.GetEdifice(vehicle.Map);
-			if (edifice != null)
-			{
-				Building_Door building_Door = edifice as Building_Door;
-				if (building_Door != null && !building_Door.PawnCanOpen(vehicle) && !building_Door.Open)
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-
 		public Building BuildingBlockingNextPathCell()
 		{
 			Building edifice = nextCell.GetEdifice(vehicle.Map);
@@ -291,13 +270,6 @@ namespace Vehicles
 				return edifice;
 			}
 			return null;
-		}
-
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private bool IsNextCellWalkable()
-		{
-			return vehicle.Drivable(nextCell);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -333,55 +305,39 @@ namespace Vehicles
 
 		public bool TryRecoverFromUnwalkablePosition(bool error = true)
 		{
-			bool flag = false;
-			int i = 0;
-			while (i < GenRadial.RadialPattern.Length)
+			bool recovered = false;
+			for (int i = 0; i < GenRadial.RadialPattern.Length; i++)
 			{
-				IntVec3 intVec = vehicle.Position + GenRadial.RadialPattern[i];
-				if (PawnCanOccupy(intVec))
+				IntVec3 nearestAvailableCell = vehicle.Position + GenRadial.RadialPattern[i];
+				if (!vehicle.Drivable(nearestAvailableCell))
 				{
-					if (intVec == vehicle.Position)
+					if (nearestAvailableCell == vehicle.Position)
 					{
 						return true;
 					}
 					if (error)
 					{
-						Log.Warning(string.Concat(new object[]
-						{
-							vehicle,
-							" on unwalkable cell ",
-							vehicle.Position,
-							". Teleporting to ",
-							intVec
-						}));
+						Log.Warning($"{vehicle} on impassable cell {vehicle.Position}. Teleporting to {nearestAvailableCell}");
 					}
-					vehicle.Position = intVec;
-					vehicle.Notify_Teleported(true, false);
-					flag = true;
+					vehicle.Position = nearestAvailableCell;
+					vehicle.Notify_Teleported();
+					recovered = true;
 					break;
 				}
-				else
-				{
-					i++;
-				}
 			}
-			if (!flag)
+			if (!recovered)
 			{
+				Log.Error($"{vehicle} on impassable cell {vehicle.Position}. Cound not find nearby position to teleport to. Ejecting all pawns and destroying.");
+				vehicle.DisembarkAll();
 				vehicle.Destroy(DestroyMode.Vanish);
-				Log.Error(string.Concat(new object[]
-				{
-					vehicle.ToStringSafe<Pawn>(),
-					" on unwalkable cell ",
-					vehicle.Position,
-					". Could not find walkable position nearby. Destroyed."
-				}));
 			}
-			return flag;
+			return recovered;
 		}
 
 		private void PatherArrived()
 		{
 			StopDead();
+			vehicle.Map.GetCachedMapComponent<VehiclePositionManager>().ClaimPosition(vehicle);
 			if (vehicle.jobs.curJob != null)
 			{
 				vehicle.jobs.curDriver.Notify_PatherArrived();
@@ -392,6 +348,7 @@ namespace Vehicles
 		{
 			StopDead();
 			vehicle.jobs?.curDriver?.Notify_PatherFailed();
+			CalculatingPath = false;
 		}
 
 		public void EngageBrakes()
@@ -427,12 +384,13 @@ namespace Vehicles
 			//	vehicleDamager.TakeStep();
 			//}
 
-			Building building = BuildingBlockingNextPathCell();
-			if (building != null)
+			if (waitTicks > 0)
 			{
-				PatherFailed();
+				Log.Message("Waiting");
+				waitTicks--;
 				return;
 			}
+			
 			lastCell = vehicle.Position;
 			vehicle.Position = nextCell;
 
@@ -440,28 +398,40 @@ namespace Vehicles
 			{
 				vehicle.BeachShip();
 				vehicle.Position = nextCell;
-				StopDead();
-				vehicle.jobs.curDriver.Notify_PatherFailed();
+				PatherFailed();
+				return;
 			}
 
-			if (vehicle.RaceProps.Humanlike)
-			{
-				cellsUntilClamor--;
-				if (cellsUntilClamor <= 0)
-				{
-					GenClamor.DoClamor(vehicle, 7f, ClamorDefOf.Movement);
-					cellsUntilClamor = ClamorCellsInterval;
-				}
-			}
 			//no filth for now
 			if (vehicle.BodySize > 0.9f)
 			{
-				vehicle.Map.snowGrid.AddDepth(vehicle.Position, -SnowReductionFromWalking); //REDO
+				vehicle.Map.snowGrid.AddDepth(vehicle.Position, -SnowReductionFromWalking); //TODO - add snow footprints / reduction
 			}
-			if (NeedNewPath() && (!TrySetNewPath() || curPath == null))
+
+			PathRequest pathRequest = NeedNewPath();
+			switch (pathRequest)
+			{
+				case PathRequest.None: //If no path request is made, continue with method
+					break;
+				case PathRequest.Fail: //Immediate cancellation of path, stop dead
+					PatherFailed();
+					return;
+				case PathRequest.Wait: //Wait until path is cleared, do not cancel path
+					waitTicks = TicksWhileWaiting;
+					return;
+				case PathRequest.NeedNew:
+					TrySetNewPath_Threaded();
+					break;
+				default:
+					throw new NotImplementedException("TryEnterNextPathCell.PathRequest");
+			}
+
+			//Wait for path to be calculated
+			if (curPath == null)
 			{
 				return;
 			}
+
 			if (AtDestinationPosition())
 			{
 				PatherArrived();
@@ -475,44 +445,32 @@ namespace Vehicles
 		{
 			if (curPath.NodesLeftCount <= 1)
 			{
-				Log.Error(string.Concat(new object[]
-				{
-					vehicle,
-					" at ",
-					vehicle.Position,
-					" ran out of path nodes while pathing to ",
-					destination,
-					"."
-				}));
+				Log.Error($"{vehicle} at {vehicle.Position} ran outo f path nodes while pathing to {destination}.");
 				PatherFailed();
 				return;
 			}
 			nextCell = curPath.ConsumeNextNode();
 			if (!vehicle.DrivableFast(nextCell))
 			{
-				Log.Error(string.Concat(new object[]
-				{
-					vehicle,
-					" entering ",
-					nextCell,
-					" which is unwalkable."
-				}));
+				Log.Error($"{vehicle} entering {nextCell} which is impassable.");
+				PatherFailed();
+				return;
 			}
 			int num = CostToMoveIntoCell(vehicle, vehicle.Position, nextCell);
 			nextCellCostTotal = num;
 			nextCellCostLeft = num;
-			Building_Door building_Door = vehicle.Map.thingGrid.ThingAt<Building_Door>(nextCell);
-			if (building_Door != null)
-			{
-				building_Door.Notify_PawnApproaching(vehicle, num);
-			}
-			SetBumperCells();
-			bool flag = bumperCells.Any(c => c.InBounds(vehicle.Map) && c.GetThingList(vehicle.Map).NotNullAndAny(t => t is VehiclePawn vehicle && vehicle != this.vehicle));
 
-			if (vehicle.InsideMap(nextCell, vehicle.Map) || flag)
+			if (CanEnterDoors)
 			{
-				PatherFailed();
+				//Necessary for 1x1 vehicles
+				Building_Door building_Door = vehicle.Map.thingGrid.ThingAt<Building_Door>(nextCell);
+				if (building_Door != null)
+				{
+					building_Door.Notify_PawnApproaching(vehicle, num);
+				}
 			}
+
+			SetBumperCells();
 		}
 
 		public static int MoveTicksAt(VehiclePawn vehicle, IntVec3 from, IntVec3 to)
@@ -599,15 +557,42 @@ namespace Vehicles
 			return true;
 		}
 
-		private bool TrySetNewPath_Threaded()
+		/// <summary>
+		/// Calculates and assigns new path to <see cref="pathToAssign"/> for reassignment from <see cref="PatherTick"/>. This ensures <see cref="curPath"/> is only ever written to from main thread.
+		/// </summary>
+		private void TrySetNewPath_Delayed()
 		{
-			if (!Recalculating)
+			PawnPath pawnPath = GenerateNewPath_Concurrent();
+			if (pawnPath is null || !pawnPath.Found)
 			{
-				//Recalculating = true;
-				//TrySetNewPath_Async();
-				vehicle.Map.GetCachedMapComponent<VehicleMapping>().dedicatedThread.Queue(new AsyncAction(() => TrySetNewPath(), () => moving));
+				PatherFailed();
+				Messages.Message("NoPathForVehicle".Translate(), MessageTypeDefOf.RejectInput, false);
+				return;
 			}
-			return Recalculating;
+			lock (pathLock)
+			{
+				if (pathToAssign != null)
+				{
+					pathToAssign.ReleaseToPool(); //PawnPath still needs to be released back to object pool
+				}
+				pathToAssign = pawnPath; //Should be null at this point in time however
+			}
+		}
+
+		private void TrySetNewPath_Threaded()
+		{
+			CalculatingPath = true;
+			vehicle.Map.GetCachedMapComponent<VehicleMapping>().dedicatedThread.Queue(new AsyncAction(TrySetNewPath_Delayed, validator: () => moving && CalculatingPath, exceptionHandler: delegate (Exception ex)
+			{
+				CalculatingPath = false;
+			}));
+		}
+
+		[Obsolete("Use TrySetNewPath_Threaded. Async Task-based pathfinding has more overhead than using the dedicated thread.", error: true)]
+		public async void TrySetNewPath_Async()
+		{
+			PawnPath pawnPath = await GenerateNewPath_Async();
+			curPath = pawnPath;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -616,14 +601,7 @@ namespace Vehicles
 			return GenerateNewPath(CancellationToken.None);
 		}
 
-		public async void TrySetNewPath_Async()
-		{
-			PawnPath pawnPath = await GenerateNewPath_Async();
-			curPath = pawnPath;
-			Recalculating = false;
-		}
-
-		public async Task<PawnPath> GenerateNewPath_Async()
+		private async Task<PawnPath> GenerateNewPath_Async()
 		{
 			if (!tokenSources.NullOrEmpty())
 			{
@@ -673,135 +651,100 @@ namespace Vehicles
 			return pawnPath;
 		}
 		
-		private bool NeedNewPath()
+		private PathRequest NeedNewPath()
 		{
+			if (CalculatingPath)
+			{
+				return PathRequest.None; //Delay till not calculating path
+			}
 			if (!destination.IsValid || curPath is null || !curPath.Found || curPath.NodesLeftCount == 0)
 			{
-				return true;
+				return PathRequest.NeedNew;
 			}
 			if (destination.HasThing && destination.Thing.Map != vehicle.Map)
 			{
-				return true;
+				return PathRequest.NeedNew;
 			}
-			if ((vehicle.Position.InHorDistOf(curPath.LastNode, 15f) || vehicle.Position.InHorDistOf(destination.Cell, 15f)) && 
-				!VehicleReachabilityImmediate.CanReachImmediateVehicle(curPath.LastNode, destination, vehicle.Map, vehicle.VehicleDef, peMode))
+			if (vehicle.Position.InHorDistOf(curPath.LastNode, 15f) || vehicle.Position.InHorDistOf(destination.Cell, 15f))
 			{
-				return true;
+				if (!VehicleReachabilityImmediate.CanReachImmediateVehicle(curPath.LastNode, destination, vehicle.Map, vehicle.VehicleDef, peMode))
+				{
+					return PathRequest.NeedNew;
+				}
 			}
 			if (curPath.UsedRegionHeuristics && curPath.NodesConsumedCount >= 75)
 			{
-				return true;
+				return PathRequest.NeedNew;
 			}
 			if (lastPathedTargetPosition != destination.Cell)
 			{
-				float num = (vehicle.Position - destination.Cell).LengthHorizontalSquared;
-				float num2;
-				if (num > 900f)
+				float length = (vehicle.Position - destination.Cell).LengthHorizontalSquared;
+				float minLengthForRecalc;
+				if (length > 900f)
 				{
-					num2 = 10f;
+					minLengthForRecalc = 10f;
 				}
-				else if (num > 289f)
+				else if (length > 289f)
 				{
-					num2 = 5f;
+					minLengthForRecalc = 5f;
 				}
-				else if (num > 100f)
+				else if (length > 100f)
 				{
-					num2 = 3f;
+					minLengthForRecalc = 3f;
 				}
-				else if (num > 49f)
+				else if (length > 49f)
 				{
-					num2 = 2f;
+					minLengthForRecalc = 2f;
 				}
 				else
 				{
-					num2 = 0.5f;
+					minLengthForRecalc = 0.5f;
 				}
 
-				if ((lastPathedTargetPosition - destination.Cell).LengthHorizontalSquared > (num2 * num2))
+				if ((lastPathedTargetPosition - destination.Cell).LengthHorizontalSquared > (minLengthForRecalc * minLengthForRecalc))
 				{
-					return true;
+					return PathRequest.NeedNew;
 				}
 			}
-			bool flag = curPath.NodesLeftCount < CheckForMovingCollidingPawnsIfCloserToTargetThanX; //check for collisions (TODO)
-			IntVec3 other = IntVec3.Invalid;
-			IntVec3 intVec = IntVec3.Invalid;
-			int num3 = 0;
-			while (num3 < MaxCheckAheadNodes && num3 < curPath.NodesLeftCount)
+
+			IntVec3 previous = IntVec3.Invalid;
+			IntVec3 next;
+			int nodesAhead = LookAheadStartingIndex;
+			while (nodesAhead < MaxCheckAheadNodes && nodesAhead < curPath.NodesLeftCount)
 			{
-				intVec = curPath.Peek(num3);
-				if (!GenGridVehicles.Walkable(intVec, vehicle.VehicleDef, vehicle.Map))
+				next = curPath.Peek(nodesAhead);
+				if (!GenGridVehicles.Walkable(next, vehicle.VehicleDef, vehicle.Map))
 				{
-					return true;
+					return PathRequest.NeedNew;
 				}
-				if (num3 != 0 && intVec.AdjacentToDiagonal(other) && (VehiclePathFinder.BlocksDiagonalMovement(vehicle, vehicle.Map.cellIndices.CellToIndex(intVec.x, other.z))
-					|| VehiclePathFinder.BlocksDiagonalMovement(vehicle, vehicle.Map.cellIndices.CellToIndex(other.x, intVec.z))))
+				//Should two vehicles be pathing into eachother directly, first to stop will be given a Wait request while the other will request a new path
+				if (ThreadHelper.AnyVehicleBlockingPathAt(next, vehicle) is VehiclePawn otherVehicle)
 				{
-					return true;
-				}
-				other = intVec;
-				num3++;
-			}
-			return false;
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private bool BestPathHadPawnsInTheWayRecently()
-		{
-			return foundPathWhichCollidesWithPawns + 240 > Find.TickManager.TicksGame;
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private bool BestPathHadDangerRecently()
-		{
-			return foundPathWithDanger + 240 > Find.TickManager.TicksGame;
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private bool FailedToFindCloseUnoccupiedCellRecently()
-		{
-			return failedToFindCloseUnoccupiedCellTicks + 100 > Find.TickManager.TicksGame;
-		}
-
-		[DebugAction(VehicleHarmony.VehiclesLabel, "Test Pathfinder", allowedGameStates = AllowedGameStates.IsCurrentlyOnMap)]
-		private static void TestPathfinder()
-		{
-			List<DebugMenuOption> options = new List<DebugMenuOption>();
-			foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
-			{
-				options.Add(new DebugMenuOption(vehicleDef.defName, DebugMenuOptionMode.Action, delegate()
-				{
-					CoroutineManager.QueueInvoke(() => PathfinderRoutine(vehicleDef));
-				}));
-			}
-			Find.WindowStack.Add(new Dialog_DebugOptionListLister(options));
-		}
-		
-		private static IEnumerator PathfinderRoutine(VehicleDef vehicleDef)
-		{
-			IntVec3 start = IntVec3.Invalid;
-			IntVec3 dest = IntVec3.Invalid;
-
-			DebugTools.curTool = new DebugTool("Select Start", delegate ()
-			{
-				start = UI.MouseCell();
-				if (start.IsValid)
-				{
-					DebugTools.curTool = new DebugTool("Select Destination", () => dest = UI.MouseCell(), onGUIAction: delegate ()
+					if (otherVehicle.vPather.Moving && !otherVehicle.vPather.Waiting)
 					{
-						Find.CurrentMap.debugDrawer.FlashCell(start, colorPct: 0.5f, duration: 5);
-						GenDraw.DrawLineBetween(start.ToVector3ShiftedWithAltitude(AltitudeLayer.Skyfaller), UI.MouseMapPosition(), SimpleColor.Green);
-					});
+						return PathRequest.Wait;
+					}
+					return PathRequest.NeedNew;
 				}
-			});
-
-			while (!start.IsValid && !dest.IsValid)
-			{
-				SmashLog.QuickMessage($"PathFinding: {start} to {dest}");
-				yield return null;
+				if (nodesAhead != 0 && next.AdjacentToDiagonal(previous))
+				{
+					if (VehiclePathFinder.BlocksDiagonalMovement(vehicle, vehicle.Map.cellIndices.CellToIndex(next.x, previous.z)) || VehiclePathFinder.BlocksDiagonalMovement(vehicle, vehicle.Map.cellIndices.CellToIndex(previous.x, next.z)))
+					{
+						return PathRequest.NeedNew;
+					}
+				}
+				previous = next;
+				nodesAhead++;
 			}
+			return PathRequest.None;
+		}
 
-
-			DebugTools.curTool = null;
+		public enum PathRequest
+		{
+			None,
+			Wait,
+			Fail,
+			NeedNew
 		}
 	}
 }

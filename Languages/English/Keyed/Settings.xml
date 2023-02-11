@@ -26,10 +26,14 @@ Determines whether Vehicles should use values from the mod settings or Defs</VF_
 	<VF_CustomShadersTooltip>Enable use of custom shaders provided by the framework.</VF_CustomShadersTooltip>
 	<VF_DiagonalVehicleRendering>Allow Diagonal Rendering</VF_DiagonalVehicleRendering>
 	<VF_DiagonalVehicleRenderingTooltip>Vehicles that support diagonal rendering will do so when set to diagonal rotations (NorthEast, SouthEast, SouthWest, NorthWest)</VF_DiagonalVehicleRenderingTooltip>
+	
 	<VF_FullVehiclePathing>Full Vehicle Pathing</VF_FullVehiclePathing>
-	<VF_FullVehiclePathingTooltip>Use the entire hitbox of the vehicle to determine pathing constraints (prevents Vehicles from going through smaller passages than hitbox size).</VF_FullVehiclePathingTooltip>
+	<VF_FullVehiclePathingTooltip>Use the entire hitbox of the vehicle when determining shortest path. Vehicle will still be constrained by its size.</VF_FullVehiclePathingTooltip>
 	<VF_SmoothVehiclePathing>Smooth Vehicle Paths</VF_SmoothVehiclePathing>
 	<VF_SmoothVehiclePathingTooltip>Vehicle pathing will have an additional "turn" cost, preventing unnecessary zig zag patterns from shortest path.</VF_SmoothVehiclePathingTooltip>
+	<VF_HierarchalPathfinding>Hierarchal Pathfinding (Experimental)</VF_HierarchalPathfinding>
+	<VF_HierarchalPathfindingTooltip>Use HPA* instead of A* for faster pathfinding. Sacrifices a small amount of pathfinding accuracy for substantially faster pathfinding across large distances.</VF_HierarchalPathfindingTooltip>
+	
 	<VF_RoadBiomeCostPathing>Biome Cost on Roads</VF_RoadBiomeCostPathing>
 	<VF_RoadBiomeCostPathingTooltip>Vehicle Caravans moving over roads on the world map are still affected by biome path costs.</VF_RoadBiomeCostPathingTooltip>
 	<VF_MultiplePawnsPerJob>Multi-Pawn Jobs</VF_MultiplePawnsPerJob>

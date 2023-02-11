@@ -190,11 +190,12 @@ namespace Vehicles
 			int thingCost = 0;
 			foreach (Thing thing in list)
 			{
-				if (thing is VehiclePawn)
+				int thingPathCost = 0;
+				if (thing is VehiclePawn vehicle)
 				{
 					continue;
 				}
-				if (vehicleDef.properties.customThingCosts.TryGetValue(thing.def, out int thingPathCost))
+				else if (vehicleDef.properties.customThingCosts.TryGetValue(thing.def, out thingPathCost))
 				{
 					if (thingPathCost >= ImpassableCost)
 					{

@@ -67,7 +67,7 @@ namespace Vehicles
 		[Unsaved]
 		public VehicleTurret attachedTo;
 		[Unsaved]
-		public List<VehicleTurret> childCannons = new List<VehicleTurret>();
+		public List<VehicleTurret> childTurrets = new List<VehicleTurret>();
 		[Unsaved]
 		public List<VehicleTurret> groupTurrets;
 		[Unsaved]
@@ -92,7 +92,6 @@ namespace Vehicles
 		private Vector3 rootDrawPos_NorthWest;
 
 		public VehicleTurretRender renderProperties = new VehicleTurretRender();
-		public VehicleTurretRender uiRenderProperties = new VehicleTurretRender();
 
 		public Vector2 aimPieOffset = Vector2.zero;
 		public Vector2 angleRestricted = Vector2.zero;
@@ -168,15 +167,7 @@ namespace Vehicles
 			currentFireIcon = OverheatIcons.FirstOrDefault();
 			ticksSinceLastShot = 0;
 
-			childCannons = new List<VehicleTurret>();
-			if (!string.IsNullOrEmpty(parentKey))
-			{
-				foreach (VehicleTurret cannon in vehicle.CompVehicleTurrets.turrets.Where(c => c.key == parentKey))
-				{
-					attachedTo = cannon;
-					cannon.childCannons.Add(this);
-				}
-			}
+			vehicle.CompVehicleTurrets.ResolveChildTurrets(this);
 			ResolveCannonGraphics(vehicle);
 
 			rTracker = new Turret_RecoilTracker(this);
@@ -423,6 +414,11 @@ namespace Vehicles
 		{
 			get
 			{
+				if (attachedTo != null)
+				{
+					//Don't use cached value if attached to parent turret (position may change with rotations)
+					return TurretDrawLocFor(vehicle.FullRotation, vehicle.DrawPos);
+				}
 				return vehicle.FullRotation.AsInt switch
 				{
 					//North
@@ -559,7 +555,6 @@ namespace Vehicles
 		public void Init(VehicleTurret reference)
 		{
 			renderProperties = new VehicleTurretRender(reference.renderProperties);
-			uiRenderProperties = new VehicleTurretRender(reference.uiRenderProperties);
 			aimPieOffset = reference.aimPieOffset;
 			angleRestricted = reference.angleRestricted;
 			restrictedTheta = (int)Mathf.Abs(angleRestricted.x - (angleRestricted.y + 360)).ClampAngle();
@@ -576,16 +571,19 @@ namespace Vehicles
 			LongEventHandler.ExecuteWhenFinished(RecacheRootDrawPos);
 		}
 
+		/// <summary>
+		/// Caches VehicleTurret draw location based on <see cref="renderProperties"/>, <see cref="attachedTo"/> draw loc is not cached, as rotating can alter the final draw location
+		/// </summary>
 		public void RecacheRootDrawPos()
 		{
-			rootDrawPos_North = TurretDrawLocFor(Rot8.North, Vector3.zero);
-			rootDrawPos_East = TurretDrawLocFor(Rot8.East, Vector3.zero);
-			rootDrawPos_South = TurretDrawLocFor(Rot8.South, Vector3.zero);
-			rootDrawPos_West = TurretDrawLocFor(Rot8.West, Vector3.zero);
-			rootDrawPos_NorthEast = TurretDrawLocFor(Rot8.NorthEast, Vector3.zero);
-			rootDrawPos_SouthEast = TurretDrawLocFor(Rot8.SouthEast, Vector3.zero);
-			rootDrawPos_SouthWest = TurretDrawLocFor(Rot8.SouthWest, Vector3.zero);
-			rootDrawPos_NorthWest = TurretDrawLocFor(Rot8.NorthWest, Vector3.zero);
+			rootDrawPos_North = TurretDrawLocFor(Rot8.North, Vector3.zero, fullLoc: false);
+			rootDrawPos_East = TurretDrawLocFor(Rot8.East, Vector3.zero, fullLoc: false);
+			rootDrawPos_South = TurretDrawLocFor(Rot8.South, Vector3.zero, fullLoc: false);
+			rootDrawPos_West = TurretDrawLocFor(Rot8.West, Vector3.zero, fullLoc: false);
+			rootDrawPos_NorthEast = TurretDrawLocFor(Rot8.NorthEast, Vector3.zero, fullLoc: false);
+			rootDrawPos_SouthEast = TurretDrawLocFor(Rot8.SouthEast, Vector3.zero, fullLoc: false);
+			rootDrawPos_SouthWest = TurretDrawLocFor(Rot8.SouthWest, Vector3.zero, fullLoc: false);
+			rootDrawPos_NorthWest = TurretDrawLocFor(Rot8.NorthWest, Vector3.zero, fullLoc: false);
 		}
 
 		public bool GroupsWith(VehicleTurret turret)
@@ -593,14 +591,14 @@ namespace Vehicles
 			return !groupKey.NullOrEmpty() && !turret.groupKey.NullOrEmpty() && groupKey == turret.groupKey;
 		}
 
-		public Vector3 TurretDrawLocFor(Rot8 rot, Vector3 pos)
+		public Vector3 TurretDrawLocFor(Rot8 rot, Vector3 pos, bool fullLoc = true)
 		{
 			float locationRotation = 0f;
-			if (attachedTo != null)
+			if (fullLoc && attachedTo != null)
 			{
 				locationRotation = TurretRotationFor(rot, attachedTo.currentRotation);
 			}
-			Vector2 turretLoc = RenderHelper.TurretDrawOffset(rot, renderProperties, locationRotation, attachedTo);
+			Vector2 turretLoc = VehicleGraphics.TurretDrawOffset(rot, renderProperties, locationRotation, fullLoc ? attachedTo : null);
 			Vector3 graphicOffset = CannonGraphic.DrawOffset(rot);
 			return new Vector3(pos.x + graphicOffset.x + turretLoc.x, pos.y + graphicOffset.y + drawLayer * Altitudes.AltInc, pos.z + graphicOffset.z + turretLoc.y);
 		}
@@ -612,23 +610,24 @@ namespace Vehicles
 			{
 				//locationRotation = TurretRotationFor(rot, attachedTo.currentRotation);
 			}
-			//float scale = size.x / Mathf.Max(vehicleDef.Size.x, vehicleDef.Size.z);
-			//return rot.AsInt switch
-			//{
-			//	0 => position + scale * renderProperties.north.Offset,
-			//	1 => position + size * renderProperties.east.Offset,
-			//	2 => position + size * renderProperties.south.Offset,
-			//	3 => position + size * renderProperties.west.Offset,
-			//	_ => throw new NotImplementedException("Diagonal rotations"),
-			//};
-			return rot.AsInt switch
+			// Size / V_max = scalar
+			float scalar = size.x / Mathf.Max(vehicleDef.graphicData.drawSize.x, vehicleDef.graphicData.drawSize.y);
+			Vector2 offset = rot.AsInt switch
 			{
-				0 => position + size * uiRenderProperties.north.Offset,
-				1 => position + size * uiRenderProperties.east.Offset,
-				2 => position + size * uiRenderProperties.south.Offset,
-				3 => position + size * uiRenderProperties.west.Offset,
+				//North
+				0 => renderProperties.north.Offset,
+				//East
+				1 => renderProperties.east.Offset,
+				//South
+				2 => renderProperties.south.Offset,
+				//West
+				3 => renderProperties.west.Offset,
+				//Diagonals not handled
 				_ => throw new NotImplementedException("Diagonal rotations"),
 			};
+			Vector3 graphicOffset = CannonGraphic.DrawOffset(rot);
+			//Invert y axis for UI which is top to bottom, as opposed to in-game which is bottom to top
+			return position + (scalar * new Vector2(graphicOffset.x, graphicOffset.z)) + (scalar * new Vector2(offset.x, -offset.y));
 		}
 
 		public Vector3 DefaultOffsetLocFor(Rot8 rot)
@@ -638,7 +637,7 @@ namespace Vehicles
 			{
 				locationRotation = TurretRotationFor(rot, attachedTo.defaultAngleRotated - 90);
 			}
-			Vector2 turretLoc = RenderHelper.TurretDrawOffset(rot, renderProperties, locationRotation, attachedTo);
+			Vector2 turretLoc = VehicleGraphics.TurretDrawOffset(rot, renderProperties, locationRotation, attachedTo);
 			return new Vector3(turretLoc.x, drawLayer * Altitudes.AltInc, turretLoc.y);
 		}
 
@@ -832,9 +831,9 @@ namespace Vehicles
 						}
 					}
 					currentRotation += turretDef.rotationSpeed * rotationDir;
-					foreach (VehicleTurret cannon in childCannons)
+					foreach (VehicleTurret turret in childTurrets)
 					{
-						cannon.currentRotation += turretDef.rotationSpeed * rotationDir;
+						turret.currentRotation += turretDef.rotationSpeed * rotationDir;
 					}
 				}
 				return true;
@@ -1081,7 +1080,7 @@ namespace Vehicles
 		{
 			if (!NoGraphic)
 			{
-				RenderHelper.DrawTurret(this, Rot8.North);
+				VehicleGraphics.DrawTurret(this, Rot8.North);
 				DrawTargeter();
 			}
 		}
@@ -1092,7 +1091,7 @@ namespace Vehicles
 			{
 				if (angleRestricted != Vector2.zero)
 				{
-					RenderHelper.DrawAngleLines(TurretLocation, angleRestricted, MinRange, MaxRange, restrictedTheta, attachedTo?.TurretRotation ?? vehicle.FullRotation.AsAngle);
+					VehicleGraphics.DrawAngleLines(TurretLocation, angleRestricted, MinRange, MaxRange, restrictedTheta, attachedTo?.TurretRotation ?? vehicle.FullRotation.AsAngle);
 				}
 				else if (turretDef.turretType == TurretType.Static)
 				{

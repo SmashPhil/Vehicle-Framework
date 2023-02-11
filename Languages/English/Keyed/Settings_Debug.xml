@@ -55,8 +55,6 @@
 	<VF_DevMode_DebugDrawVehiclePathingCostsTooltip>Draw costs per cell/tile calculated from pathfinder. Shows accumulated path cost.</VF_DevMode_DebugDrawVehiclePathingCostsTooltip>
 	<VF_DevMode_DebugDrawPathfinderSearch>Draw Pathfinder Search</VF_DevMode_DebugDrawPathfinderSearch>
 	<VF_DevMode_DebugDrawPathfinderSearchTooltip>Draws Pathfinder search as it opens and closes nodes searching for a path.  Will also show chunk search if Hierarchal Pathfinding is enabled. Pathfinder is intentionally slowed down in order to clearly show the process, as the async search is too fast in most cases to view.</VF_DevMode_DebugDrawPathfinderSearchTooltip>
-	<VF_DevMode_DebugHierarchalPathfinding>Hierarchal Pathfinding (Experimental)</VF_DevMode_DebugHierarchalPathfinding>
-	<VF_DevMode_DebugHierarchalPathfindingTooltip>Use HPA* instead of A* for faster pathfinding. Sacrifices a small amount of pathfinding accuracy for substantially faster pathfinding across large distances.</VF_DevMode_DebugHierarchalPathfindingTooltip>
 	<VF_DevMode_DebugDrawVehiclePathGridCellCosts>Draw Cell Costs</VF_DevMode_DebugDrawVehiclePathGridCellCosts>
 	<VF_DevMode_DebugDrawVehiclePathGridCellCostsTooltip>Draw costs per cell for the currently highlighted region. Only shows final cost of individual cells, taking terrain and things into account.</VF_DevMode_DebugDrawVehiclePathGridCellCostsTooltip>
 </LanguageData>

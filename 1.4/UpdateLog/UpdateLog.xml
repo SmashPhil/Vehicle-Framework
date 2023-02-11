@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.4.1158</currentVersion>
+  <currentVersion>1.4.1162</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
@@ -29,6 +29,8 @@ Fixed bug where creating a vehicle turret that did not require ammo to reload wa
 Fixed bug where vehicle reservations and requesters wouldn't properly clear when vehicle is despawned.
 
 Fixed bug where canceling loading while pawns are actively hauling still attempts to load the items anyway.
+
+Fixed bug where default terrain would not be marked impassable but still invalid for pathfinding, resulting in floodfill searches due to reachability checks not working.
 [title]Performance Improvements[/title]
 Compressed region making for vehicles to reuse region grids for vehicles with similar configurations.
 

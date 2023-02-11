@@ -468,7 +468,7 @@ namespace Vehicles
 				{
 					try
 					{
-						Pair<float, float> moteOffset = RenderHelper.VehicleDrawOffset(Vehicle.FullRotation, offset.xOffset, offset.zOffset);
+						Pair<float, float> moteOffset = VehicleGraphics.VehicleDrawOffset(Vehicle.FullRotation, offset.xOffset, offset.zOffset);
 						offsetX = moteOffset.First;
 						offsetZ = moteOffset.Second;
 

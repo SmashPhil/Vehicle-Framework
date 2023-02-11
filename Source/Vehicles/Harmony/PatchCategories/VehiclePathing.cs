@@ -8,6 +8,7 @@ using Verse;
 using Verse.AI;
 using RimWorld;
 using RimWorld.Planet;
+using UnityEngine;
 using SmashTools;
 using SmashTools.Performance;
 
@@ -68,12 +69,7 @@ namespace Vehicles
 				{
 					return false;
 				}
-				if (VehicleMod.settings.main.fullVehiclePathing && !vehicle.FitsOnCell(clickCell))
-				{
-					Messages.Message("VehicleCannotFit".Translate(), MessageTypeDefOf.RejectInput);
-					return false;
-				}
-
+				
 				if (vehicle.CompFueledTravel != null && vehicle.CompFueledTravel.EmptyTank)
 				{
 					Messages.Message("VehicleOutOfFuel".Translate(), MessageTypeDefOf.RejectInput);
@@ -87,7 +83,8 @@ namespace Vehicles
 				for (int i = 0; i < num; i++)
 				{
 					curLoc = GenRadial.RadialPattern[i] + clickCell;
-					if (GenGridVehicles.Standable(curLoc, vehicle, vehicle.Map))
+					
+					if (GenGridVehicles.Standable(curLoc, vehicle, vehicle.Map) && (!VehicleMod.settings.main.fullVehiclePathing || vehicle.DrivableRectOnCell(curLoc)))
 					{
 						if (curLoc == vehicle.Position || vehicle.beached)
 						{
@@ -99,6 +96,7 @@ namespace Vehicles
 							__result = new FloatMenuOption("VehicleCannotMoveToCell".Translate(vehicle.LabelCap), null, MenuOptionPriority.Default, null, null, 0f, null, null);
 							return false;
 						}
+						
 						__result = new FloatMenuOption("GoHere".Translate(), delegate ()
 						{
 							Job job = new Job(JobDefOf.Goto, curLoc);

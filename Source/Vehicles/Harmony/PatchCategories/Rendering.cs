@@ -170,7 +170,7 @@ namespace Vehicles
 					Widgets.DrawLightHighlight(rect);
 				}
 				rect = new Rect(LineHeight, num + LineHeight / 2 + 1f, ThingIconSize, ThingIconSize);
-				RenderHelper.DrawVehicle(rect, vehicle);
+				VehicleGraphics.DrawVehicle(rect, vehicle);
 				rect = new Rect(58f, num + LineHeight / 2, 370f, LineHeight);
 				Widgets.Label(rect, thing.LabelMouseover);
 				___numLines++;

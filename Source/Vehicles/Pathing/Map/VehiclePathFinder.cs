@@ -20,13 +20,15 @@ namespace Vehicles
 	public class VehiclePathFinder
 	{
 		public const int Cost_OutsideAllowedArea = 600;
-		private const int Cost_PawnCollision = 200;
+		private const int Cost_VehicleCollision = 1000;
 		private const int NodesToOpenBeforeRegionBasedPathing = 100000;
 		public const int DefaultMoveTicksCardinal = 13;
 		public const int DefaultMoveTicksDiagonal = 18;
 		private const int SearchLimit = 160000;
-		private const int TurnCostTicks = 1;
+		private const int TurnCostTicks = 2;
 		private const float SecondsBetweenDraws = 0;
+
+		public const float RootPosWeight = 0.75f;
 
 		internal Dictionary<IntVec3, int> postCalculatedCells = new Dictionary<IntVec3, int>();
 		internal Dictionary<IntVec3, int> postCalculatedTurns = new Dictionary<IntVec3, int>();
@@ -206,7 +208,6 @@ namespace Vehicles
 			EdificeGrid edificeGrid = mapping.map.edificeGrid;
 			int searchCount = 0;
 			int nodesOpened = 0;
-			bool collideWithVehicles = PawnUtility.ShouldCollideWithPawns(vehicle) && false; //REDO - permanent false until vehicle collision implemented
 			bool drawPaths = VehicleMod.settings.debug.debugDrawPathfinderSearch;
 			bool allowedRegionTraversal = !passAllDestroyableThings && VehicleGridsUtility.GetRegion(start, mapping.map, vehicleDef, RegionType.Set_Passable) != null && freeTraversal;
 			bool weightedHeuristics = false;
@@ -216,8 +217,10 @@ namespace Vehicles
 			int ticksCardinal = vehicle.TicksPerMoveCardinal;
 			int ticksDiagonal = vehicle.TicksPerMoveDiagonal;
 
+			int minSize = VehicleMod.settings.main.fullVehiclePathing ? Mathf.Min(vehicleDef.Size.x, vehicleDef.Size.z) : 1;
+
 			ChunkSet chunks = null;
-			if (VehicleMod.settings.debug.hierarchalPathfinding)
+			if (VehicleMod.settings.main.hierarchalPathfinding)
 			{
 				try
 				{
@@ -229,7 +232,7 @@ namespace Vehicles
 					return PawnPath.NotFound;
 				}
 			}
-			bool useHPA = VehicleMod.settings.debug.hierarchalPathfinding && chunks != null && !chunks.NullOrEmpty();
+			bool useHPA = VehicleMod.settings.main.hierarchalPathfinding && chunks != null && !chunks.NullOrEmpty();
 
 			CalculateAndAddDisallowedCorners(traverseParms, peMode, cellRect);
 			InitStatusesAndPushStartNode(ref startIndex, start);
@@ -245,7 +248,7 @@ namespace Vehicles
 				iterations++;
 				if (openList.Count <= 0)
 				{
-					break;
+					break; //Exit loop, ran out of Nodes to process
 				}
 				CostNode costNode = openList.Pop();
 				startIndex = costNode.index;
@@ -262,25 +265,24 @@ namespace Vehicles
 					{
 						if (startIndex == destIndex)
 						{
-							goto Block_32;
+							goto PathFound;
 						}
 					}
 					else if (cellRect.Contains(prevCell) && !disallowedCornerIndices.Contains(startIndex))
 					{
-						goto Block_32;
+						goto PathFound;
 					}
 					if (searchCount > SearchLimit)
 					{
-						goto Block_33;
+						goto HitSearchLimit;
 					}
 
-					//List<IntVec3> fullRectCells = vehicle.VehicleRect(prevCell, Rot4.North).Where(cl2 => cl2 != prevCell).ToList();
 					for (int i = 0; i < 8; i++)
 					{
 						uint cellX = (uint)(x2 + directions[i]);
 						uint cellY = (uint)(z2 + directions[i + 8]);
 
-						if (cellX < ((ulong)mapSizeX) && cellY < (ulong)(mapSizeZ))
+						if (cellX < (ulong)mapSizeX && cellY < (ulong)mapSizeZ)
 						{
 							int cellIntX = (int)cellX;
 							int cellIntY = (int)cellY;
@@ -292,265 +294,160 @@ namespace Vehicles
 							{
 								if (!chunks.Cells.Contains(cellToCheck))
 								{
-									continue;
+									goto NeighborSearchEnd; //Node not included in hierarchal path, ignore
 								}
 							}
 
-							if (VehicleMod.settings.main.fullVehiclePathing && !vehicle.FitsOnCell(cellToCheck)) //TODO - only check width
-							{
-								continue;
-							}
 							if (calcGrid[cellIndex].status != statusClosedValue || weightedHeuristics)
 							{
 								int initialCost = 0;
-								if (freeTraversal || !new IntVec3(cellIntX, 0 , cellIntY).GetTerrain(mapping.map).HasTag("Water"))
+								if (!vehicle.DrivableFast(cellIndex))
 								{
-									if (!vehicle.DrivableFast(cellIndex))
+									if (!passAllDestroyableThings)
 									{
-										if (!passAllDestroyableThings)
+										if (drawPaths)
 										{
-											if (drawPaths)
-											{
-												DebugFlash(new IntVec3(cellIntX, 0, cellIntY), 0.22f, "impass");
-											}
-											continue;
+											DebugFlash(new IntVec3(cellIntX, 0, cellIntY), 0.22f, "impass");
 										}
-
-										initialCost += 70;
-										Building building = edificeGrid[cellIndex];
-										if (building is null)
-										{
-											continue;
-										}
-										if (!IsDestroyable(building))
-										{
-											continue;
-										}
-										initialCost += (int)(building.HitPoints * 0.2f);
+										goto NeighborSearchEnd;
 									}
 
-									if (i > 3)
+									initialCost += 70;
+									Building building = edificeGrid[cellIndex];
+									if (building is null)
 									{
-										switch(i)
-										{
-											case 4:
-												if (BlocksDiagonalMovement(vehicle, startIndex - mapSizeX))
-												{
-													if (drawPaths)
-													{
-														DebugFlash(new IntVec3(x2, 0, z2 - 1), 0.9f, "diag");
-													}
-													initialCost += 70;
-												}
-												if (BlocksDiagonalMovement(vehicle, startIndex + 1))
-												{
-													if (drawPaths)
-													{
-														DebugFlash(new IntVec3(x2 + 1, 0, z2), 0.9f, "diag");
-													}
-													initialCost += 70;
-												}
-												break;
-											case 5:
-												if (BlocksDiagonalMovement(vehicle, startIndex + mapSizeX))
-												{
-													if (drawPaths)
-													{
-														DebugFlash(new IntVec3(x2, 0, z2 + 1), 0.9f, "diag");
-													}
-													initialCost += 70;
-												}
-												if (BlocksDiagonalMovement(vehicle, startIndex + 1))
-												{
-													if (drawPaths)
-													{
-														DebugFlash(new IntVec3(x2 + 1, 0, z2), 0.9f, "diag");
-													}
-													initialCost += 70;
-												}
-												break;
-											case 6:
-												if (BlocksDiagonalMovement(vehicle, startIndex + mapSizeX))
-												{
-													if (drawPaths)
-													{
-														DebugFlash(new IntVec3(x2 + 1, 0, z2), 0.9f, "diag");
-													}
-													initialCost += 70;
-												}
-												if (BlocksDiagonalMovement(vehicle, startIndex - 1))
-												{
-													if (drawPaths)
-													{
-														DebugFlash(new IntVec3(x2 + 1, 0, z2), 0.9f, "diag");
-													}
-													initialCost += 70;
-												}
-												break;
-											case 7:
-												if (BlocksDiagonalMovement(vehicle, startIndex - mapSizeX))
-												{
-													if (drawPaths)
-													{
-														DebugFlash(new IntVec3(x2, 0, z2 - 1), 0.9f, "diag");
-													}
-													initialCost += 70;
-												}
-												if (BlocksDiagonalMovement(vehicle, startIndex - 1))
-												{
-													if (drawPaths)
-													{
-														DebugFlash(new IntVec3(x2 - 1, 0, z2), 0.9f, "diag");
-													}
-													initialCost += 70;
-												}
-												break;
-										}
+										goto NeighborSearchEnd;
 									}
-									int tickCost = ((i <= 3) ? ticksCardinal : ticksDiagonal) + initialCost;
-									if (VehicleMod.settings.main.smoothVehiclePaths)
+									if (!IsDestroyable(building))
 									{
-										Rot8 pathDir = Rot8.DirectionFromCells(prevCell, cellToCheck);
-										if (pathDir != costNode.direction)
-										{
-											int turnCost = costNode.direction.Difference(pathDir) * TurnCostTicks;
-											tickCost += turnCost;
-											if (postCalculatedTurns.ContainsKey(cellToCheck))
-											{
-												postCalculatedTurns[cellToCheck] = turnCost;
-											}
-											else
-											{
-												postCalculatedTurns.Add(cellToCheck, turnCost);
-											}
-										}
+										goto NeighborSearchEnd;
 									}
-									if (vehicle.VehicleDef.properties.customTerrainCosts?.NotNullAndAny() ?? false)
+									initialCost += (int)(building.HitPoints * 0.2f);
+								}
+
+								int tickCost = ((i <= 3) ? ticksCardinal : ticksDiagonal) + initialCost;
+								if (VehicleMod.settings.main.smoothVehiclePaths)
+								{
+									Rot8 pathDir = Rot8.DirectionFromCells(prevCell, cellToCheck);
+									if (pathDir != costNode.direction)
 									{
-										TerrainDef currentTerrain = mapping.map.terrainGrid.TerrainAt(cellIndex);
-										if (vehicle.VehicleDef.properties.customTerrainCosts.ContainsKey(currentTerrain))
+										int turnCost = costNode.direction.Difference(pathDir) * TurnCostTicks;
+										tickCost += turnCost;
+										if (postCalculatedTurns.ContainsKey(cellToCheck))
 										{
-											int customCost = vehicle.VehicleDef.properties.customTerrainCosts[currentTerrain];
-											tickCost += customCost;
+											postCalculatedTurns[cellToCheck] = turnCost;
 										}
 										else
 										{
-											tickCost += vehicleArray[cellIndex];
+											postCalculatedTurns.Add(cellToCheck, turnCost);
 										}
 									}
-									else
-									{
-										tickCost += vehicleArray[cellIndex];
-									}
-									tickCost += drafted ? topGrid[cellIndex].extraDraftedPerceivedPathCost : topGrid[cellIndex].extraNonDraftedPerceivedPathCost;
-									if (byteGrid != null)
-									{
-										tickCost += (byteGrid[cellIndex] * 8);
-									}
-									//REDO - collisions?
-									if (collideWithVehicles && ThreadHelper.AnyVehicleBlockingPathAt(new IntVec3(cellIntX, 0, cellIntY), vehicle, false, false, true) != null)
-									{
-										tickCost += Cost_PawnCollision;
-									}
-									if (edificeGrid[cellIndex] is Building building2)
-									{
-										//REDO - Building Costs Here
-									}
-									if (blueprintGrid[cellIndex] != null)
-									{
-										List<Blueprint> list = new List<Blueprint>(blueprintGrid[cellIndex]);
-										if(!list.NullOrEmpty())
-										{
-											int num18 = 0;
-											foreach (Blueprint blueprint in list)
-											{
-												num18 = Mathf.Max(num18, GetBlueprintCost(blueprint, vehicle));
-											}
-											if (num18 == int.MaxValue)
-											{
-												continue;
-											}
-											tickCost += num18;
-										}
-									}
-									
-									int calculatedCost = tickCost + calcGrid[startIndex].knownCost;
-									ushort status = calcGrid[cellIndex].status;
-
-									//if(pawn.Props.useFullHitboxPathing)
-									//{
-									//    foreach(IntVec3 fullRect in fullRectCells)
-									//    {
-									//        if(fullRect != cellToCheck)
-									//        {
-									//            num19 += calcGrid[cellIndices.CellToIndex(fullRect)].knownCost;
-									//            Log.Message($"Cell: {fullRect} Cost: {num19}");
-									//            if(postCalculatedCells.ContainsKey(fullRect))
-									//            {
-									//                postCalculatedCells[fullRect] = num19;
-									//            }
-									//            else
-									//            {
-									//                postCalculatedCells.Add(fullRect, num19);
-									//            }
-									//        }
-									//    }
-									//}
-
-									//Only generate path costs for linear non-reverse pathing check
-									if (postCalculatedCells.ContainsKey(cellToCheck))
-									{
-										postCalculatedCells[cellToCheck] = calculatedCost;
-									}
-									else
-									{
-										postCalculatedCells.Add(cellToCheck, calculatedCost);
-									}
-
-									if (status == statusClosedValue || status == statusOpenValue)
-									{
-										int closedValueCost = 0;
-										if (status == statusClosedValue)
-										{
-											closedValueCost = ticksCardinal;
-										}
-										if (calcGrid[cellIndex].knownCost <= calculatedCost + closedValueCost)
-										{
-											continue;
-										}
-									}
-									if (weightedHeuristics)
-									{
-										calcGrid[cellIndex].heuristicCost = Mathf.RoundToInt(regionCostCalculator.GetPathCostFromDestToRegion(cellIndex) * RegionHeuristicWeightByNodesOpened.Evaluate(nodesOpened));
-										if (calcGrid[cellIndex].heuristicCost < 0)
-										{
-											Log.ErrorOnce($"Heuristic cost overflow for vehicle {vehicle} pathing from {start} to {dest}.", vehicle.GetHashCode() ^ "FVPHeuristicCostOverflow".GetHashCode());
-											calcGrid[cellIndex].heuristicCost = 0;
-										}
-									}
-									else if (status != statusClosedValue && status != statusOpenValue)
-									{
-										int dx = Math.Abs(cellIntX - x);
-										int dz = Math.Abs(cellIntY - z);
-										int num21 = GenMath.OctileDistance(dx, dz, ticksCardinal, ticksDiagonal);
-										calcGrid[cellIndex].heuristicCost = Mathf.RoundToInt(num21 * heuristicStrength);
-									}
-									int costWithHeuristic = calculatedCost + calcGrid[cellIndex].heuristicCost;
-									if (costWithHeuristic < 0)
-									{
-										Log.ErrorOnce($"Node cost overflow for vehicle {vehicle} pathing from {start} to {dest}.", vehicle.GetHashCode() ^ "FVPNodeCostOverflow".GetHashCode());
-										costWithHeuristic = 0;
-									}
-									calcGrid[cellIndex].parentIndex = startIndex;
-									calcGrid[cellIndex].knownCost = calculatedCost;
-									calcGrid[cellIndex].status = statusOpenValue;
-									calcGrid[cellIndex].costNodeCost = costWithHeuristic;
-									nodesOpened++;
-									Rot8 rot = Rot8.DirectionFromCells(prevCell, cellToCheck);
-									openList.Push(new CostNode(cellIndex, costWithHeuristic, rot));
 								}
+								float totalAreaCost = 0;
+								float rootCost = 0;
+								CellRect cellToCheckRect = CellRect.CenteredOn(cellToCheck, Mathf.FloorToInt(minSize / 2f));
+								foreach (IntVec3 cellInRect in cellToCheckRect)
+								{
+									if (!vehicle.DrivableFast(cellInRect))
+									{
+										goto NeighborSearchEnd; //hitbox has invalid node, ignore in neighbor search
+									}
+									int cellToCheckIndex = cellIndices.CellToIndex(cellInRect);
+									if (cellInRect == cellToCheck)
+									{
+										rootCost = vehicleArray[cellToCheckIndex] * RootPosWeight;
+									}
+									else
+									{
+										totalAreaCost += vehicleArray[cellToCheckIndex] * (1 - RootPosWeight);
+									}
+								}
+								tickCost += Mathf.RoundToInt(totalAreaCost / (minSize * 2 - 1)); //minSize^2 - 1 to account for average of all cells except root
+								tickCost += Mathf.RoundToInt(rootCost);
+								tickCost += drafted ? topGrid[cellIndex].extraDraftedPerceivedPathCost : topGrid[cellIndex].extraNonDraftedPerceivedPathCost;
+								if (byteGrid != null)
+								{
+									tickCost += byteGrid[cellIndex] * 8;
+								}
+								if (ThreadHelper.AnyVehicleBlockingPathAt(cellToCheck, vehicle) != null)
+								{
+									tickCost += Cost_VehicleCollision;
+								}
+								if (blueprintGrid[cellIndex] != null)
+								{
+									List<Blueprint> list = new List<Blueprint>(blueprintGrid[cellIndex]);
+									if (!list.NullOrEmpty())
+									{
+										int num18 = 0;
+										foreach (Blueprint blueprint in list)
+										{
+											num18 = Mathf.Max(num18, GetBlueprintCost(blueprint, vehicle));
+										}
+										if (num18 == int.MaxValue)
+										{
+											goto NeighborSearchEnd;
+										}
+										tickCost += num18;
+									}
+								}
+
+								int calculatedCost = tickCost + calcGrid[startIndex].knownCost;
+								ushort status = calcGrid[cellIndex].status;
+
+								//Only generate path costs for linear non-reverse pathing check
+								if (postCalculatedCells.ContainsKey(cellToCheck))
+								{
+									postCalculatedCells[cellToCheck] = calculatedCost;
+								}
+								else
+								{
+									postCalculatedCells.Add(cellToCheck, calculatedCost);
+								}
+
+								if (status == statusClosedValue || status == statusOpenValue)
+								{
+									int closedValueCost = 0;
+									if (status == statusClosedValue)
+									{
+										closedValueCost = ticksCardinal;
+									}
+									if (calcGrid[cellIndex].knownCost <= calculatedCost + closedValueCost)
+									{
+										goto NeighborSearchEnd;
+									}
+								}
+								if (weightedHeuristics)
+								{
+									calcGrid[cellIndex].heuristicCost = Mathf.RoundToInt(regionCostCalculator.GetPathCostFromDestToRegion(cellIndex) * RegionHeuristicWeightByNodesOpened.Evaluate(nodesOpened));
+									if (calcGrid[cellIndex].heuristicCost < 0)
+									{
+										Log.ErrorOnce($"Heuristic cost overflow for vehicle {vehicle} pathing from {start} to {dest}.", vehicle.GetHashCode() ^ "FVPHeuristicCostOverflow".GetHashCode());
+										calcGrid[cellIndex].heuristicCost = 0;
+									}
+								}
+								else if (status != statusClosedValue && status != statusOpenValue)
+								{
+									int dx = Math.Abs(cellIntX - x);
+									int dz = Math.Abs(cellIntY - z);
+									int num21 = GenMath.OctileDistance(dx, dz, ticksCardinal, ticksDiagonal);
+									calcGrid[cellIndex].heuristicCost = Mathf.RoundToInt(num21 * heuristicStrength);
+								}
+								int costWithHeuristic = calculatedCost + calcGrid[cellIndex].heuristicCost;
+								if (costWithHeuristic < 0)
+								{
+									Log.ErrorOnce($"Node cost overflow for vehicle {vehicle} pathing from {start} to {dest}.", vehicle.GetHashCode() ^ "FVPNodeCostOverflow".GetHashCode());
+									costWithHeuristic = 0;
+								}
+								calcGrid[cellIndex].parentIndex = startIndex;
+								calcGrid[cellIndex].knownCost = calculatedCost;
+								calcGrid[cellIndex].status = statusOpenValue;
+								calcGrid[cellIndex].costNodeCost = costWithHeuristic;
+								nodesOpened++;
+								Rot8 rot = Rot8.DirectionFromCells(prevCell, cellToCheck);
+								openList.Push(new CostNode(cellIndex, costWithHeuristic, rot));
 							}
 						}
+						NeighborSearchEnd:;
 					}
 					searchCount++;
 					calcGrid[startIndex].status = statusClosedValue;
@@ -563,17 +460,18 @@ namespace Vehicles
 						searchCount = 0;
 					}
 				}
+				CurrentNodeEnd:;
 			}
 			string curJob = vehicle.CurJob?.ToString() ?? "null";
 			string curFaction = vehicle.Faction?.ToString() ?? "null";
 			Log.Warning($"Vehicle {vehicle} pathing from {start} to {dest} ran out of cells to process. Job={curJob} Faction={curFaction} iterations={iterations}");
 			DebugDrawRichData();
 			return PawnPath.NotFound;
-			Block_32:
+			PathFound:
 			PawnPath result = FinalizedPath(startIndex, weightedHeuristics);
 			DebugDrawPathCost();
 			return result;
-			Block_33:
+			HitSearchLimit:
 			Log.Warning($"Vehicle {vehicle} pathing from {start} to {dest} hit search limit of {SearchLimit}.");
 			DebugDrawRichData();
 			return PawnPath.NotFound;
@@ -745,7 +643,8 @@ namespace Vehicles
 		/// <param name="label"></param>
 		private static void DebugFlash(IntVec3 cell, Map map, float colorPct, string label, int duration = 50)
 		{
-			CoroutineManager.QueueOrInvoke(() => map.DrawCell_ThreadSafe(cell, colorPct, label, duration), SecondsBetweenDraws);
+			map.debugDrawer.FlashCell(cell, colorPct, text: label, duration: duration);
+			//CoroutineManager.QueueOrInvoke(() => map.DrawCell_ThreadSafe(cell, colorPct, label, duration), SecondsBetweenDraws);
 		}
 
 		/// <summary>

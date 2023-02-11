@@ -65,8 +65,9 @@ namespace Vehicles
 					vehicle.jobs.ClearQueuedJobs(true);
 					if (vehicle.jobs.curJob != null && vehicle.jobs.IsCurrentJobPlayerInterruptible())
 					{
-						vehicle.jobs.EndCurrentJob(JobCondition.InterruptForced, true, true);
+						vehicle.jobs.EndCurrentJob(JobCondition.InterruptForced);
 					}
+					vehicle.vPather.PatherFailed(); //Unecessary, but for exceptions thrown during pathfinding on dedicated thread it serves as a fail-safe
 				}
 				if (!VehicleMod.settings.main.fishingPersists)
 				{

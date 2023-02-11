@@ -229,7 +229,7 @@ namespace Vehicles
 			if (___entDef is VehicleBuildDef def)
 			{
 				float width = __instance.GetWidth(maxWidth);
-				__result = RenderHelper.GizmoOnGUIWithMaterial(__instance, new Rect(topLeft.x, topLeft.y, width, width), def);
+				__result = VehicleGUI.GizmoOnGUIWithMaterial(__instance, new Rect(topLeft.x, topLeft.y, width, width), def);
 				if (def.MadeFromStuff)
 				{
 					Designator_Dropdown.DrawExtraOptionsIcon(topLeft, __instance.GetWidth(maxWidth));

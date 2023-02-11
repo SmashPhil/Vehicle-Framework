@@ -7,12 +7,14 @@ using SmashTools;
 
 namespace Vehicles
 {
+	/// <summary>
+	/// Reservation manager for positions of vehicle, reserves entire hitbox of vehicle
+	/// </summary>
+	/// <remarks>Only ever read / written to from MainThread</remarks>
 	public class VehiclePositionManager : DetachedMapComponent
 	{
 		private readonly Dictionary<IntVec3, VehiclePawn> occupiedCells = new Dictionary<IntVec3, VehiclePawn>();
 		private readonly Dictionary<VehiclePawn, List<IntVec3>> occupiedRect = new Dictionary<VehiclePawn, List<IntVec3>>();
-
-		private object positionLock = new object();
 
 		public VehiclePositionManager(Map map) : base(map)
 		{
@@ -24,28 +26,25 @@ namespace Vehicles
 
 		public VehiclePawn ClaimedBy(IntVec3 cell) => occupiedCells.TryGetValue(cell, null);
 
-		//Dictionary may be accessed from pathfinder while claiming a position, lock to avoid read / write simultaneously executing
+		public List<IntVec3> ClaimedBy(VehiclePawn vehicle) => occupiedRect.TryGetValue(vehicle, null);
+
 		public void ClaimPosition(VehiclePawn vehicle)
 		{
-			lock (positionLock)
+			ReleaseClaimed(vehicle);
+			List<IntVec3> newClaim = vehicle.VehicleRect().ToList();
+			occupiedRect[vehicle] = newClaim;
+			foreach (IntVec3 cell in newClaim)
 			{
-				ReleaseClaimed(vehicle);
-				List<IntVec3> newClaim = vehicle.VehicleRect().ToList();
-				occupiedRect[vehicle] = newClaim;
-				foreach (IntVec3 cell in newClaim)
-				{
-					occupiedCells[cell] = vehicle;
-				}
+				occupiedCells[cell] = vehicle;
+			}
 
-				vehicle.RecalculateFollowerCell();
-				if (ClaimedBy(vehicle.FollowerCell) is VehiclePawn blockedVehicle)
-				{
-					blockedVehicle.RecalculateFollowerCell();
-				}
+			vehicle.RecalculateFollowerCell();
+			if (ClaimedBy(vehicle.FollowerCell) is VehiclePawn blockedVehicle)
+			{
+				blockedVehicle.RecalculateFollowerCell();
 			}
 		}
 
-		//Only called from MainThread methods, no need for lock
 		public bool ReleaseClaimed(VehiclePawn vehicle)
 		{
 			if (occupiedRect.TryGetValue(vehicle, out List<IntVec3> currentlyOccupied))

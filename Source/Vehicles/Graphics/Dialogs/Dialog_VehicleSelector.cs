@@ -52,9 +52,9 @@ namespace Vehicles
 			inRect.yMin += labelRect.height;
 			Widgets.DrawMenuSection(inRect);
 
-			Rect windowRect = new Rect(inRect);
-			windowRect.yMax = inRect.height - BottomButtonSize.y - ButtonPadding;
-			DrawVehicleSelect(inRect);
+			Rect windowRect = new Rect(inRect).ContractedBy(1);
+			windowRect.yMax = inRect.height - ButtonPadding - 5;
+			DrawVehicleSelect(windowRect);
 
 			Rect rectBottom = inRect.AtZero();
 			DoBottomButtons(rectBottom);
@@ -103,13 +103,7 @@ namespace Vehicles
 					float x = texProportions.x;
 					texProportions.x = texProportions.y;
 					texProportions.y = x;
-					Material mat = null;
-					if (vehicle.VehicleGraphic.Shader.SupportsRGBMaskTex())
-					{
-						mat = vehicle.VehicleGraphic.MatAt(Rot8.East, vehicle.Pattern);
-					}
-					RenderHelper.DrawVehicleFitted(iconRect, vehicle.VehicleDef, Rot4.East, mat);
-					//Widgets.DrawTextureFitted(iconRect, VehicleTex.VehicleTexture(vehicle.VehicleDef, Rot8.East), GenUI.IconDrawScale(vehicle.VehicleDef), texProportions, texCoords, 0, mat);
+					VehicleGUI.DrawVehicleDefOnGUI(iconRect, vehicle.VehicleDef);
 				}
 				else
 				{
@@ -158,13 +152,7 @@ namespace Vehicles
 					float x = texProportions.x;
 					texProportions.x = texProportions.y;
 					texProportions.y = x;
-					Material mat = null;
-					if (vehicleDef.graphic is Graphic_Vehicle graphicVehicle && graphicVehicle.Shader.SupportsRGBMaskTex())
-					{
-						mat = graphicVehicle.MatAt(Rot8.East, PatternDefOf.Default);
-					}
-					RenderHelper.DrawVehicleFitted(iconRect, vehicleDef, Rot4.East, mat);
-					//Widgets.DrawTextureFitted(iconRect, VehicleTex.VehicleTexture(vehicleDef, Rot8.East), vehicleDef.uiIconScale, texProportions, texCoords, 0, mat);
+					VehicleGUI.DrawVehicleDefOnGUI(iconRect, vehicleDef);
 				}
 				else
 				{

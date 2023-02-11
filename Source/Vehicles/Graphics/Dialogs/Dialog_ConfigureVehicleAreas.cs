@@ -130,14 +130,14 @@ namespace Vehicles
 					if (selectedVehicle != null)
 					{
 						cost = map.GetCachedMapComponent<VehicleAreaManager>().AdditionalTerrainCost(selectedVehicle, area);
-						RenderHelper.DrawVehicleDef(iconRect, selectedVehicle.VehicleDef, null, selectedVehicle.patternData);
+						VehicleGUI.DrawVehicleDefOnGUI(iconRect, selectedVehicle.VehicleDef, selectedVehicle.patternData);
 					}
 					break;
 				case VehicleConfigTab.VehicleDefs:
 					if (selectedVehicleDef != null)
 					{
 						cost = map.GetCachedMapComponent<VehicleAreaManager>().AdditionalTerrainCost(selectedVehicleDef, area);
-						RenderHelper.DrawVehicleDef(iconRect, selectedVehicleDef);
+						VehicleGUI.DrawVehicleDefOnGUI(iconRect, selectedVehicleDef);
 					}
 					break;
 			}

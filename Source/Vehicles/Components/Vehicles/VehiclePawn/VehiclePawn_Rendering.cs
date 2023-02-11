@@ -558,6 +558,18 @@ namespace Vehicles
 			{
 				yield return new Command_Action
 				{
+					defaultLabel = "Flash Reserved Position",
+					action = delegate ()
+					{
+						var cells = Map.GetCachedMapComponent<VehiclePositionManager>().ClaimedBy(this);
+						foreach (IntVec3 cell in cells)
+						{
+							Map.debugDrawer.FlashCell(cell, 0.5f);
+						}
+					}
+				};
+				yield return new Command_Action
+				{
 					defaultLabel = "Destroy Component",
 					action = delegate ()
 					{

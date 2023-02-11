@@ -90,6 +90,19 @@ namespace Vehicles
 			}
 		}
 
+		public new void Notify_Teleported(bool endCurrentJob = true, bool resetTweenedPos = true)
+		{
+			if (resetTweenedPos)
+			{
+				Drawer.tweener.ResetTweenedPosToRoot();
+			}
+			vPather.Notify_Teleported();
+			if (endCurrentJob && jobs != null && jobs.curJob != null)
+			{
+				jobs.EndCurrentJob(JobCondition.InterruptForced);
+			}
+		}
+
 		public virtual bool CanDraft()
 		{
 			foreach (ThingComp thingComp in AllComps)

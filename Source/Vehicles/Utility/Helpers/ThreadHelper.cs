@@ -7,6 +7,7 @@ using Verse;
 using Verse.AI;
 using RimWorld;
 using UnityEngine;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -54,48 +55,29 @@ namespace Vehicles
 		/// <remarks>Exceptions thrown during Task will be handled at the TaskFactory level</remarks>
 		/// <param name="c"></param>
 		/// <param name="vehicle"></param>
-		/// <param name="actAsIfHadCollideWithPawnsJob"></param>
-		/// <param name="collideOnlyWithStandingPawns"></param>
-		/// <param name="forPathFinder"></param>
-		public static Pawn AnyVehicleBlockingPathAt(IntVec3 cell, VehiclePawn vehicle, bool actAsIfHadCollideWithPawnsJob = false, bool collideOnlyWithStandingPawns = false, bool forPathFinder = false)
+		public static VehiclePawn AnyVehicleBlockingPathAt(IntVec3 cell, VehiclePawn vehicle)
 		{
-			List<Thing> thingList = new List<Thing>(cell.GetThingList(vehicle.Map)); //Create new list so ref type list is not overriden mid-task
+			List<Thing> thingList;
+			if (UnityData.IsInMainThread)
+			{
+				thingList = cell.GetThingList(vehicle.Map);
+			}
+			else
+			{
+				thingList  = new List<Thing>(cell.GetThingList(vehicle.Map)); //Create snapshot of current thing list to avoid race condition with read / write access
+			}
 			if (thingList.Count == 0)
 			{
 				return null;
 			}
-			bool flag = false;
-			if (actAsIfHadCollideWithPawnsJob)
-			{
-				flag = true;
-			}
-			else
-			{
-				Job curJob = vehicle.CurJob;
-				if (curJob != null && (curJob.collideWithPawns || curJob.def.collideWithPawns || vehicle.jobs.curDriver.collideWithPawns))
-				{
-					flag = true;
-				}
-				else if (vehicle.Drafted)
-				{
-					bool moving = vehicle.vPather.Moving;
-				}
-			}
+			float euclideanDistance = Ext_Map.Distance(vehicle.Position, cell);
 			for (int i = 0; i < thingList.Count; i++)
 			{
-				if (thingList[i] is Pawn pawn && pawn != vehicle && !pawn.Downed && (!collideOnlyWithStandingPawns || (!pawn.pather.MovingNow && (!pawn.pather.Moving || !pawn.pather.MovedRecently(60)))))
+				if (thingList[i] is VehiclePawn otherVehicle && otherVehicle != vehicle)
 				{
-					if (pawn.HostileTo(vehicle))
+					if (euclideanDistance < 20 || !otherVehicle.vPather.Moving)
 					{
-						return pawn;
-					}
-					if (flag && (forPathFinder || !vehicle.Drafted || !pawn.RaceProps.Animal))
-					{
-						Job curJob2 = pawn.CurJob;
-						if (curJob2 != null && (curJob2.collideWithPawns || curJob2.def.collideWithPawns || pawn.jobs.curDriver.collideWithPawns))
-						{
-							return pawn;
-						}
+						return otherVehicle;
 					}
 				}
 			}

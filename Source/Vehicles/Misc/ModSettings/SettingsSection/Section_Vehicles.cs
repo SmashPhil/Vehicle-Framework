@@ -174,7 +174,7 @@ namespace Vehicles
 					drawStatusMessage = $"Drawing VehicleTex in settings";
 					Widgets.BeginGroup(iconRect);
 					Rect vehicleTexRect = new Rect(Vector2.zero, iconRect.size);
-					drawStatusMessage = RenderHelper.DrawVehicleDef(vehicleTexRect, VehicleMod.selectedDef, null, patternData, directionFacing.TryGetValue(VehicleMod.selectedDef, currentVehicleFacing));
+					drawStatusMessage = VehicleGraphics.DrawVehicleDef(vehicleTexRect, VehicleMod.selectedDef, null, patternData, directionFacing.TryGetValue(VehicleMod.selectedDef, currentVehicleFacing));
 					if (!drawStatusMessage.NullOrEmpty())
 					{
 						throw new Exception(drawStatusMessage);

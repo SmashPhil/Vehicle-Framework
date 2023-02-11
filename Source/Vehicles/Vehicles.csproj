@@ -38,6 +38,7 @@
   <ItemGroup>
     <Reference Include="0Harmony, Version=2.2.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\Lib.Harmony.2.2.2\lib\net472\0Harmony.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="AchievementsExpanded, Version=1.4.8315.17730, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\AchievementsExpanded.1.4.82\lib\net472\AchievementsExpanded.dll</HintPath>
@@ -81,7 +82,7 @@
     </Reference>
     <Reference Include="SmashTools, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Versions\1.4\Assemblies\SmashTools.dll</HintPath>
+      <HintPath>..\..\1.4\Assemblies\SmashTools.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Private>False</Private>
@@ -475,7 +476,6 @@
     <Compile Include="Graphics\Graphic\Graphics\Animated\Graphic_Rotator.cs" />
     <Compile Include="Graphics\Graphic\Graphics\ExtraRotationRegistry.cs" />
     <Compile Include="Graphics\ITab\WITab_Vehicle_Health.cs" />
-    <Compile Include="Graphics\Textures\TextureCache.cs" />
     <Compile Include="Harmony\PatchCategories\PawnAI.cs" />
     <Compile Include="Harmony\PatchCategories\DefGenerators\ThingDefGenerator_Skyfallers.cs" />
     <Compile Include="Misc\DefModExtension\CETurretDataDefModExtension.cs" />
@@ -697,6 +697,8 @@
     <Compile Include="Utility\Helpers\ThreadHelper.cs" />
     <Compile Include="Utility\Helpers\SoundHelper.cs" />
     <Compile Include="Utility\Helpers\VehicleCaravanPathingHelper.cs" />
+    <Compile Include="Utility\Helpers\VehicleGraphics.cs" />
+    <Compile Include="Utility\Helpers\VehicleGUI.cs" />
     <Compile Include="Utility\Helpers\VehicleHealthTabHelper.cs" />
     <Compile Include="Utility\Helpers\XmlHelper.cs" />
     <Compile Include="Utility\Helpers\SkyfallerHelper.cs" />
