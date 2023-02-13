@@ -57,7 +57,6 @@ namespace Vehicles
 		{
 			if (__instance.TryGetComp<CompTurretProjectileProperties>() is CompTurretProjectileProperties comp)
 			{
-				Log.Message("OVERRIDING");
 				float num = (___origin - ___destination).magnitude / (comp.speed / 100);
 				if (num <= 0f)
 				{

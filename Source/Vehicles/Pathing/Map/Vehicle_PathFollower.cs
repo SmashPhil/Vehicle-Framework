@@ -58,8 +58,8 @@ namespace Vehicles
 			this.vehicle = vehicle;
 			bumperCells = new List<IntVec3>();
 			CanEnterDoors = vehicle.VehicleDef.size == IntVec2.One;
-			LookAheadStartingIndex = Mathf.CeilToInt(vehicle.VehicleDef.Size.z / 2f); //10 cells away from vehicle's front;
-			LookAheadDistance = MaxCheckAheadNodes + LookAheadStartingIndex;
+			LookAheadStartingIndex = Mathf.CeilToInt(vehicle.VehicleDef.Size.z / 2f); 
+			LookAheadDistance = MaxCheckAheadNodes + LookAheadStartingIndex; //10 cells away from vehicle's front;
 		}
 
 		public bool CanEnterDoors { get; private set; }
@@ -437,6 +437,7 @@ namespace Vehicles
 				PatherArrived();
 				return;
 			}
+			
 			SetupMoveIntoNextCell();
 			vehicle.Map.GetCachedMapComponent<VehiclePositionManager>().ClaimPosition(vehicle);
 		}
@@ -468,6 +469,13 @@ namespace Vehicles
 				{
 					building_Door.Notify_PawnApproaching(vehicle, num);
 				}
+			}
+
+			//Check ahead 5 nodes and stop prematurely if vehicle won't fit at final destination
+			if (curPath.NodesLeftCount < LookAheadDistance / 2 && vehicle.LocationRestrictedBySize(nextCell, vehicle.FullRotation))
+			{
+				PatherFailed();
+				return;
 			}
 
 			SetBumperCells();
