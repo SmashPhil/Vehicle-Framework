@@ -17,9 +17,45 @@ namespace Vehicles
 		public override void ResolveReferences(ThingDef parentDef)
 		{
 			base.ResolveReferences(parentDef);
-			if (turrets.NotNullAndAny())
+			ResolveChildTurrets();
+		}
+
+		private void ResolveChildTurrets()
+		{
+			if (!turrets.NullOrEmpty())
 			{
-				turrets.ForEach(c => c.turretDef.ammunition?.ResolveReferences());
+				foreach (VehicleTurret turret in turrets)
+				{
+					turret.ResetAngle();
+					ResolveChildTurrets(turret);
+					turret.turretDef.ammunition?.ResolveReferences();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Attach VehicleTurrets to parents.
+		/// </summary>
+		/// <remarks>Even though these VehicleTurret instances are for xml data only, the parent reference is necessary for UI rendering</remarks>
+		/// <param name="turret"></param>
+		private void ResolveChildTurrets(VehicleTurret turret)
+		{
+			turret.childTurrets = new List<VehicleTurret>();
+			if (!string.IsNullOrEmpty(turret.parentKey))
+			{
+				foreach (VehicleTurret parentTurret in turrets.Where(c => c.key == turret.parentKey))
+				{
+					turret.attachedTo = parentTurret;
+					if (parentTurret.attachedTo == turret || turret == parentTurret)
+					{
+						Log.Error($"Recursive turret attachments detected, this is not allowed. Disconnecting turret from parent.");
+						turret.attachedTo = null;
+					}
+					else
+					{
+						parentTurret.childTurrets.Add(turret);
+					}
+				}
 			}
 		}
 

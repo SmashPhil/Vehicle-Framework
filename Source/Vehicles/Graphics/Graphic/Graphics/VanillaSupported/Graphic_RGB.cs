@@ -30,7 +30,7 @@ namespace Vehicles
 
 		//folderName : <filePath, texture/mat array>
 		public Texture2D[] masks;
-		public Dictionary<PatternDef, Pair<string, Material[]>> maskMatPatterns = new Dictionary<PatternDef, Pair<string, Material[]>>();
+		public Dictionary<PatternDef, (string texPath, Material[] materials)> maskMatPatterns = new Dictionary<PatternDef, (string, Material[])>();
 
 		public override Material MatSingle => MatNorth;
 
@@ -130,7 +130,7 @@ namespace Vehicles
 			if (cacheResults is true)
 			{
 				masks = new Texture2D[MatCount];
-				maskMatPatterns = new Dictionary<PatternDef, Pair<string, Material[]>>();
+				maskMatPatterns = new Dictionary<PatternDef, (string, Material[])>();
 			}
 			data = req.graphicData;
 			path = req.path;

@@ -558,18 +558,6 @@ namespace Vehicles
 			{
 				yield return new Command_Action
 				{
-					defaultLabel = "Flash Reserved Position",
-					action = delegate ()
-					{
-						var cells = Map.GetCachedMapComponent<VehiclePositionManager>().ClaimedBy(this);
-						foreach (IntVec3 cell in cells)
-						{
-							Map.debugDrawer.FlashCell(cell, 0.5f);
-						}
-					}
-				};
-				yield return new Command_Action
-				{
 					defaultLabel = "Destroy Component",
 					action = delegate ()
 					{
@@ -617,6 +605,14 @@ namespace Vehicles
 						Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleRepaired(this);
 					}
 				};
+				yield return new Command_Action
+				{
+					defaultLabel = "Recache All Stats",
+					action = delegate ()
+					{
+						statHandler.MarkAllDirty();
+					}
+				};
 				yield return new Command_Action()
 				{
 					defaultLabel = "Give Random Pawn MentalState",
@@ -645,14 +641,6 @@ namespace Vehicles
 					{
 						Pawn pawn = AllPawnsAboard.RandomElementWithFallback(null);
 						pawn?.Kill(null);
-					}
-				};
-				yield return new Command_Action()
-				{
-					defaultLabel = "Flash Position",
-					action = delegate ()
-					{
-						Map.debugDrawer.FlashCell(Position, 0.95f, duration: 60);
 					}
 				};
 				yield return new Command_Action()

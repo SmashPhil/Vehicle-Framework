@@ -29,7 +29,7 @@ namespace Vehicles
 			if (cacheResults is true)
 			{
 				masks = new Texture2D[MatCount];
-				maskMatPatterns = new Dictionary<PatternDef, Pair<string, Material[]>>();
+				maskMatPatterns = new Dictionary<PatternDef, (string texPath, Material[] materials)>();
 			}
 			data = req.graphicData;
 			path = req.path;
@@ -120,7 +120,7 @@ namespace Vehicles
 					index -= (subGraphics.Length - 1);
 				}
 			}
-			return subGraphics[index].maskMatPatterns.TryGetValue(pattern, subGraphics[index].maskMatPatterns[PatternDefOf.Default]).Second[0];
+			return subGraphics[index].maskMatPatterns.TryGetValue(pattern, subGraphics[index].maskMatPatterns[PatternDefOf.Default]).materials[0];
 		}
 
 		public override Graphic GetColoredVersion(Shader newShader, Color newColor, Color newColorTwo)

@@ -190,10 +190,15 @@ namespace Vehicles
 			DrawColorPalette(paletteRect);
 
 			Rect displayRect = new Rect(0, paintRect.y + ((paintRect.height / 2) - ((paintRect.width - 15) / 2)), paintRect.width - 15, paintRect.width - 15);
-			VehicleGraphics.DrawVehicleDef(displayRect, VehicleDef, material: null, new PatternData(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, selectedPattern, 
+			Widgets.BeginGroup(displayRect);
+			{
+				Rect vehicleDefRect = displayRect.AtZero();
+				HandleDisplacementDrag(vehicleDefRect);
+				VehicleGraphics.DrawVehicleDef(vehicleDefRect, VehicleDef, material: null, new PatternData(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, selectedPattern,
 				new Vector2(displacementX, displacementY), additionalTiling), DisplayRotation);
-			Rect dragBoxRect = new Rect(0f, ButtonHeight * 1.5f, ButtonWidth * 3, inRect.height - ButtonHeight * 5);
-			HandleDisplacementDrag(dragBoxRect);
+			}
+			Widgets.EndGroup();
+			
 			var color = GUI.color;
 			if (!selectedPattern.properties.dynamicTiling)
 			{
@@ -268,18 +273,7 @@ namespace Vehicles
 			outRect = outRect.ContractedBy(10f);
 			float sqrGridSize = outRect.width / GridDimensionColumns;
 			float gridSize = sqrGridSize;
-			//float gridSizeY = sqrGridSize;
-
-			/* Scale down if dimensions are not equal */
-			Texture2D displayTex = VehicleGraphic.TexAt(Rot8.North);
-			if (displayTex.width < displayTex.height)
-			{
-				//gridSizeX *= (float)displayTex.width / displayTex.height;
-				//outRect.x += (sqrGridSize - gridSizeX) / 2;
-			}
-			/* -------------------------------------- */
-
-			float num = 0f;
+			
 			int startingIndex = (pageNumber - 1) * (GridDimensionColumns * GridDimensionRows);
 			int maxIndex = Ext_Numeric.Clamp(pageNumber * (GridDimensionColumns * GridDimensionRows), 0, AvailablePatterns.Count);
 			int iteration = 0;
@@ -289,17 +283,25 @@ namespace Vehicles
 			{
 				UIHelper.DrawPagination(paginationRect, ref pageNumber, pageCount);
 			}
+
+			float imageY = 0f;
 			for (int i = startingIndex; i < maxIndex; i++, iteration++)
 			{
 				PatternDef pattern = AvailablePatterns[i];
 				displayRect.x = outRect.x + (iteration % GridDimensionColumns) * sqrGridSize;
 				displayRect.y = outRect.y + (Mathf.FloorToInt(iteration / GridDimensionRows)) * gridSize;
 				PatternData patternData = new PatternData(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, pattern, new Vector2(displacementX, displacementY), additionalTiling);
-				VehicleGraphics.DrawVehicleDef(displayRect, VehicleDef, material: null, patternData, DisplayRotation);
+
+				Widgets.BeginGroup(displayRect);
+				{
+					VehicleGraphics.DrawVehicleDef(displayRect.AtZero(), VehicleDef, material: null, patternData, DisplayRotation);
+				}
+				Widgets.EndGroup();
+
 				Rect imageRect = new Rect(displayRect.x, displayRect.y, gridSize, gridSize);
 				if (iteration % GridDimensionColumns == 0)
 				{
-					num += imageRect.height;
+					imageY += imageRect.height;
 				}
 				TooltipHandler.TipRegion(imageRect, pattern.LabelCap);
 				if (Widgets.ButtonInvisible(imageRect))

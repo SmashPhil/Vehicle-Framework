@@ -14,7 +14,7 @@ namespace Vehicles
 			{
 				if (maskMatPatterns.TryGetValue(PatternDefOf.Default, out var maskMat))
 				{
-					return maskMat.Second?[0];
+					return maskMat.materials?[0];
 				}
 				return null;
 			}
@@ -26,7 +26,7 @@ namespace Vehicles
 			{
 				if (maskMatPatterns.TryGetValue(PatternDefOf.Default, out var maskMat))
 				{
-					return maskMat.Second?[1];
+					return maskMat.materials?[1];
 				}
 				return null;
 			}
@@ -38,7 +38,7 @@ namespace Vehicles
 			{
 				if (maskMatPatterns.TryGetValue(PatternDefOf.Default, out var maskMat))
 				{
-					return maskMat.Second?[2];
+					return maskMat.materials?[2];
 				}
 				return null;
 			}
@@ -50,7 +50,7 @@ namespace Vehicles
 			{
 				if (maskMatPatterns.TryGetValue(PatternDefOf.Default, out var maskMat))
 				{
-					return maskMat.Second?[3];
+					return maskMat.materials?[3];
 				}
 				return null;
 			}
@@ -81,13 +81,13 @@ namespace Vehicles
 			}
 			if (maskMatPatterns.TryGetValue(pattern, out var values))
 			{
-				return values.Second[rot.AsInt];
+				return values.materials[rot.AsInt];
 			}
 			Log.Error($"[{VehicleHarmony.LogLabel}] Key {pattern.defName} not found in {GetType()}.");
 			string folders = string.Empty;
-			foreach(var item in maskMatPatterns)
+			foreach ((PatternDef patternDef, (string texPath, Material[] materials)) in maskMatPatterns)
 			{
-				folders += $"Item: {item.Key} Destination: {item.Value.First}\n";
+				folders += $"Item: {patternDef} Destination: {texPath}\n";
 			}
 			Debug.Warning($"{VehicleHarmony.LogLabel} Additional Information:\nMatCount: {maskMatPatterns.Count}\n{folders}");
 			return BaseContent.BadMat;
@@ -101,7 +101,7 @@ namespace Vehicles
 			}
 			if (maskMatPatterns.TryGetValue(vehicle.Pattern, out var values))
 			{
-				return values.Second[vehicle.FullRotation.AsInt];
+				return values.materials[vehicle.FullRotation.AsInt];
 			}
 			else
 			{
@@ -109,9 +109,9 @@ namespace Vehicles
 				if(Prefs.DevMode)
 				{
 					string folders = string.Empty;
-					foreach(var item in maskMatPatterns)
+					foreach ((PatternDef patternDef, (string texPath, Material[] materials)) in maskMatPatterns)
 					{
-						folders += $"Item: {item.Key} Destination: {item.Value.First}\n";
+						folders += $"Item: {patternDef} Destination: {texPath}\n";
 					}
 					Log.Warning($"{VehicleHarmony.LogLabel} Additional Information:\n" +
 						$"MatCount: {maskMatPatterns.Count}\n" +
@@ -238,7 +238,7 @@ namespace Vehicles
 			
 			foreach (PatternDef pattern in DefDatabase<PatternDef>.AllDefsListForReading)
 			{
-				maskMatPatterns.Add(pattern, new Pair<string, Material[]>(req.path, GenerateMasks(req, pattern)));
+				maskMatPatterns.Add(pattern, (req.path, GenerateMasks(req, pattern)));
 			}
 		}
 

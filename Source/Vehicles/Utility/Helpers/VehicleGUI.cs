@@ -11,12 +11,17 @@ namespace Vehicles
 {
 	public static class VehicleGUI
 	{
-		public static string DrawVehicleDefOnGUI(Rect rect, VehicleDef vehicleDef, PatternData patternData = null, Rot8? rot = null)
+		public static void DrawVehicleDefOnGUI(Rect rect, VehicleDef vehicleDef, PatternData patternData = null, Rot8? rot = null)
 		{
 			string drawStep = string.Empty;
 			GUIState.Push();
 			try
 			{
+				/* ----- Reused in VehicleGraphics ----- */
+				if (rect.width != rect.height)
+				{
+					SmashLog.WarningOnce("Drawing VehicleDef with non-uniform rect. VehicleDefs are best drawn in square rects which will then be adjusted to fit.", nameof(DrawVehicleDefOnGUI).GetHashCode());
+				}
 				drawStep = "Setting rect and adjusted positioning.";
 				Vector2 rectSize = vehicleDef.ScaleDrawRatio(rect.size);
 				Rot8 rotDrawn = rot ?? vehicleDef.drawProperties.displayRotation;
@@ -51,6 +56,8 @@ namespace Vehicles
 				Vector2 displacement = patternData?.displacement ?? vehicleDef.graphicData.displacement;
 
 				Texture2D mainTex = VehicleTex.VehicleTexture(vehicleDef, rotDrawn, out float angle);
+				/* ------------------------------------- */
+
 				bool colorGUI = graphic.Shader.SupportsRGBMaskTex() || graphic.Shader.SupportsMaskTex();
 
 				if (colorGUI) GUI.color = color1;
@@ -59,11 +66,11 @@ namespace Vehicles
 				List<(Rect rect, Texture mainTex, Color color, float layer, float angle)> overlays = new List<(Rect, Texture, Color, float, float)>();
 				if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets props)
 				{
-					overlays.AddRange(RetrieveTurretSettingsGUIProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer),
+					overlays.AddRange(RetrieveAllTurretSettingsGUIProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer),
 						new PatternData(color1, color2, color3, pattern, displacement, tiling)));
 				}
 				drawStep = "Retrieving graphic overlays";
-				overlays.AddRange(RetrieveOverlaySettingsGUIProperties(rect, vehicleDef, rotDrawn));
+				overlays.AddRange(RetrieveAllOverlaySettingsGUIProperties(rect, vehicleDef, rotDrawn));
 
 				drawStep = "Rendering overlays with layer < 0";
 				//(Rect, Texture, Material, Layer, Angle)
@@ -81,17 +88,15 @@ namespace Vehicles
 				{
 					UIElements.DrawTextureWithMaterialOnGUI(overlay.rect, overlay.mainTex, null, overlay.angle);
 				}
-				return string.Empty;
 			}
 			catch (Exception ex)
 			{
-				SmashLog.Error($"Exception thrown while trying to draw <type>VehicleDef</type>=\"{vehicleDef?.defName ?? "Null"}\" Exception={ex.Message}");
+				SmashLog.Error($"Exception thrown while trying to draw <type>VehicleDef</type>=\"{vehicleDef?.defName ?? "Null"}\" during step {drawStep}.\nException={ex.Message}");
 			}
 			finally
 			{
 				GUIState.Pop();
 			}
-			return drawStep;
 		}
 
 		/// <summary>
@@ -100,21 +105,22 @@ namespace Vehicles
 		/// <param name="rect"></param>
 		/// <param name="vehicleDef"></param>
 		/// <param name="rot"></param>
-		public static IEnumerable<(Rect, Texture, Color, float, float)> RetrieveOverlaySettingsGUIProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, List<GraphicOverlay> graphicOverlays = null)
+		public static IEnumerable<(Rect rect, Texture mainTex, Color color, float layer, float angle)> RetrieveAllOverlaySettingsGUIProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, List<GraphicOverlay> graphicOverlays = null)
 		{
-			var overlays = graphicOverlays ?? vehicleDef.drawProperties.OverlayGraphics;
+			List<GraphicOverlay> overlays = graphicOverlays ?? vehicleDef.drawProperties.OverlayGraphics;
 			foreach (GraphicOverlay graphicOverlay in overlays)
 			{
-				Vector2 rectSize = vehicleDef.ScaleDrawRatio(graphicOverlay.graphic.data, rect.size);
-				Vector2 adjustedPosition = rect.position + (rect.size - rectSize) / 2f;
-				Vector3 offsets = graphicOverlay.graphic.DrawOffset(rot);
-				Vector2 finalPosition = new Vector2(offsets.x, offsets.z) + adjustedPosition;
-				Rect overlayRect = new Rect(finalPosition, rectSize);
-				Texture2D texture = ContentFinder<Texture2D>.Get(graphicOverlay.graphic.data.texPath);
-				bool canMask = graphicOverlay.graphic.Shader.SupportsMaskTex() || graphicOverlay.graphic.Shader.SupportsRGBMaskTex();
-				Color color = canMask ? graphicOverlay.graphic.data.color : Color.white;
-				yield return (overlayRect, texture, color, graphicOverlay.graphic.data.DrawOffsetFull(rot).y, graphicOverlay.rotation);
+				yield return RetrieveOverlaySettingsGUIProperties(rect, vehicleDef, rot, graphicOverlay);
 			}
+		}
+
+		public static (Rect rect, Texture mainTex, Color color, float layer, float angle) RetrieveOverlaySettingsGUIProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, GraphicOverlay graphicOverlay)
+		{
+			Rect overlayRect = VehicleGraphics.OverlayRect(rect, vehicleDef, graphicOverlay, rot);
+			Texture2D texture = ContentFinder<Texture2D>.Get(graphicOverlay.graphic.data.texPath);
+			bool canMask = graphicOverlay.graphic.Shader.SupportsMaskTex() || graphicOverlay.graphic.Shader.SupportsRGBMaskTex();
+			Color color = canMask ? graphicOverlay.graphic.data.color : Color.white;
+			return (overlayRect, texture, color, graphicOverlay.graphic.data.DrawOffsetFull(rot).y, graphicOverlay.rotation);
 		}
 
 		/// <summary>
@@ -125,23 +131,32 @@ namespace Vehicles
 		/// <param name="cannons"></param>
 		/// <param name="patternData"></param>
 		/// <param name="rot"></param>
-		public static IEnumerable<(Rect rect, Texture mainTex, Color color, float layer, float angle)> RetrieveTurretSettingsGUIProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, IEnumerable<VehicleTurret> turrets, PatternData patternData)
+		public static IEnumerable<(Rect rect, Texture mainTex, Color color, float layer, float angle)> RetrieveAllTurretSettingsGUIProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, IEnumerable<VehicleTurret> turrets, PatternData patternData)
 		{
 			foreach (VehicleTurret turret in turrets)
 			{
-				if (turret.NoGraphic)
+				if (!turret.NoGraphic)
 				{
-					continue;
+					yield return RetrieveTurretSettingsGUIProperties(rect, vehicleDef, turret, rot, patternData);
 				}
-				Rect turretRect = VehicleGraphics.TurretRect(rect, vehicleDef, turret, rot);
-				bool canMask = turret.CannonGraphic.Shader.SupportsMaskTex() || turret.CannonGraphic.Shader.SupportsRGBMaskTex();
-				Color color = canMask ? turret.turretDef.graphicData.color : Color.white;
-				if (turret.turretDef.matchParentColor)
-				{
-					color = patternData.color;
-				}
-				yield return (turretRect, turret.CannonTexture, color, turret.CannonGraphicData.drawOffset.y, turret.defaultAngleRotated + rot.AsAngle);
 			}
+		}
+
+		public static (Rect rect, Texture mainTex, Color color, float layer, float angle) RetrieveTurretSettingsGUIProperties(Rect rect, VehicleDef vehicleDef, VehicleTurret turret, Rot8 rot, PatternData patternData, float iconScale = 1)
+		{
+			if (turret.NoGraphic)
+			{
+				Log.Warning($"Attempting to fetch GUI properties for VehicleTurret with no graphic.");
+				return (Rect.zero, null, Color.white, -1, 0);
+			}
+			Rect turretRect = VehicleGraphics.TurretRect(rect, vehicleDef, turret, rot, iconScale: iconScale);
+			bool canMask = turret.CannonGraphic.Shader.SupportsMaskTex() || turret.CannonGraphic.Shader.SupportsRGBMaskTex();
+			Color color = canMask ? turret.turretDef.graphicData.color : Color.white;
+			if (canMask && turret.turretDef.matchParentColor)
+			{
+				color = patternData.color;
+			}
+			return (turretRect, turret.CannonTexture, color, turret.CannonGraphicData.drawOffset.y, turret.defaultAngleRotated + rot.AsAngle);
 		}
 
 		/// <summary>
@@ -169,7 +184,7 @@ namespace Vehicles
 			Material material = command.disabled ? TexUI.GrayscaleGUI : null;
 			GenUI.DrawTextureWithMaterial(rect, command.BGTexture, material);
 			Rect buttonRect = rect.ContractedBy(1);
-			GUI.BeginGroup(buttonRect);
+			Widgets.BeginGroup(buttonRect);
 			{
 				PatternData defaultPatternData = new PatternData(VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData));
 				if (command.disabled)
@@ -180,7 +195,7 @@ namespace Vehicles
 				}
 				DrawVehicleDefOnGUI(buttonRect.AtZero(), vehicleDef, defaultPatternData);
 			}
-			GUI.EndGroup();
+			Widgets.EndGroup();
 
 			bool flag2 = false;
 			KeyCode keyCode = (command.hotKey == null) ? KeyCode.None : command.hotKey.MainKey;

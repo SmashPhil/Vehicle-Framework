@@ -95,7 +95,7 @@ namespace Vehicles
 			}
 		}
 
-		private static void SelectVehicle(VehicleDef vehicleDef)
+		public static void SelectVehicle(VehicleDef vehicleDef)
 		{
 			selectedDef = vehicleDef;
 			ClearSelectedDefCache();

@@ -56,7 +56,7 @@ namespace Vehicles
 			else if (!WorldRendererUtility.WorldRenderedNow && Find.CurrentMap != null && Find.Selector.SelectedObjects.FirstOrDefault() is VehiclePawn vehicle)
 			{
 				VehicleMod.CurrentSection = VehicleMod.settings.vehicles;
-				VehicleMod.selectedDef = vehicle.VehicleDef;
+				VehicleMod.SelectVehicle(vehicle.VehicleDef);
 			}
 		}
 	}

@@ -69,27 +69,27 @@ namespace Vehicles
 		[Unsaved]
 		public List<VehicleTurret> childTurrets = new List<VehicleTurret>();
 		[Unsaved]
-		public List<VehicleTurret> groupTurrets;
+		protected List<VehicleTurret> groupTurrets;
 		[Unsaved]
 		public TurretRestrictions restrictions;
 
 		//Cache all root draw pos on spawn
 		[Unsaved]
-		private Vector3 rootDrawPos_North;
+		protected Vector3 rootDrawPos_North;
 		[Unsaved]
-		private Vector3 rootDrawPos_East;
+		protected Vector3 rootDrawPos_East;
 		[Unsaved]
-		private Vector3 rootDrawPos_South;
+		protected Vector3 rootDrawPos_South;
 		[Unsaved]
-		private Vector3 rootDrawPos_West;
+		protected Vector3 rootDrawPos_West;
 		[Unsaved]
-		private Vector3 rootDrawPos_NorthEast;
+		protected Vector3 rootDrawPos_NorthEast;
 		[Unsaved]
-		private Vector3 rootDrawPos_SouthEast;
+		protected Vector3 rootDrawPos_SouthEast;
 		[Unsaved]
-		private Vector3 rootDrawPos_SouthWest;
+		protected Vector3 rootDrawPos_SouthWest;
 		[Unsaved]
-		private Vector3 rootDrawPos_NorthWest;
+		protected Vector3 rootDrawPos_NorthWest;
 
 		public VehicleTurretRender renderProperties = new VehicleTurretRender();
 
@@ -156,22 +156,18 @@ namespace Vehicles
 			gizmoLabel = reference.gizmoLabel;
 
 			key = reference.key;
-			parentKey = reference.parentKey;
-			groupKey = reference.groupKey;
 
-			targetPersists = reference.targetPersists;
-			autoTargeting = reference.autoTargeting;
-			manualTargeting = reference.manualTargeting;
+			targetPersists = reference.turretDef.turretType == TurretType.Static ? false : reference.targetPersists;
+			autoTargeting = reference.turretDef.turretType == TurretType.Static ? false : reference.autoTargeting;
+			manualTargeting = reference.turretDef.turretType == TurretType.Static ? false : reference.manualTargeting;
 
 			currentFireMode = 0;
 			currentFireIcon = OverheatIcons.FirstOrDefault();
 			ticksSinceLastShot = 0;
 
-			vehicle.CompVehicleTurrets.ResolveChildTurrets(this);
 			ResolveCannonGraphics(vehicle);
 
 			rTracker = new Turret_RecoilTracker(this);
-			ResetCannonAngle();
 		}
 
 		public bool GizmoHighlighted { get; set; }
@@ -203,6 +199,8 @@ namespace Vehicles
 		public int WarmupTicks => Mathf.CeilToInt(turretDef.warmUpTimer * 60f);
 
 		public bool OnCooldown => triggeredCooldown;
+
+		public bool CanOverheat => VehicleMod.settings.main.overheatMechanics && turretDef.cooldown != null && turretDef.cooldown.heatPerShot > 0;
 
 		public bool Recoils => turretDef.recoil != null;
 
@@ -285,7 +283,7 @@ namespace Vehicles
 			{
 				if (FullAuto)
 				{
-					if (turretDef.cooldown is null)
+					if (!CanOverheat)
 					{
 						return CurrentFireMode.shotsPerBurst * 3;
 					}
@@ -407,6 +405,23 @@ namespace Vehicles
 					}
 				}
 				return gizmoIcon;
+			}
+		}
+
+		/// <summary>
+		/// Smaller actions inside VehicleTurret gizmo
+		/// </summary>
+		public virtual IEnumerable<SubGizmo> SubGizmos
+		{
+			get
+			{
+				yield return SubGizmo_RemoveAmmo(this);
+				yield return SubGizmo_ReloadFromInventory(this);
+				yield return SubGizmo_FireMode(this);
+				if (autoTargeting)
+				{
+					yield return SubGizmo_AutoTarget(this);
+				}
 			}
 		}
 
@@ -554,6 +569,9 @@ namespace Vehicles
 
 		public void Init(VehicleTurret reference)
 		{
+			groupKey = reference.groupKey;
+			parentKey = reference.parentKey;
+
 			renderProperties = new VehicleTurretRender(reference.renderProperties);
 			aimPieOffset = reference.aimPieOffset;
 			angleRestricted = reference.angleRestricted;
@@ -568,6 +586,7 @@ namespace Vehicles
 				restrictions.Init(vehicle, this);
 			}
 
+			ResetAngle();
 			LongEventHandler.ExecuteWhenFinished(RecacheRootDrawPos);
 		}
 
@@ -588,7 +607,7 @@ namespace Vehicles
 
 		public bool GroupsWith(VehicleTurret turret)
 		{
-			return !groupKey.NullOrEmpty() && !turret.groupKey.NullOrEmpty() && groupKey == turret.groupKey;
+			return !groupKey.NullOrEmpty() && groupKey == turret.groupKey;
 		}
 
 		public Vector3 TurretDrawLocFor(Rot8 rot, Vector3 pos, bool fullLoc = true)
@@ -596,22 +615,21 @@ namespace Vehicles
 			float locationRotation = 0f;
 			if (fullLoc && attachedTo != null)
 			{
-				locationRotation = TurretRotationFor(rot, attachedTo.currentRotation);
+				locationRotation = TurretRotationFor(rot, attachedTo.TurretRotationUncorrected);
 			}
 			Vector2 turretLoc = VehicleGraphics.TurretDrawOffset(rot, renderProperties, locationRotation, fullLoc ? attachedTo : null);
 			Vector3 graphicOffset = CannonGraphic.DrawOffset(rot);
 			return new Vector3(pos.x + graphicOffset.x + turretLoc.x, pos.y + graphicOffset.y + drawLayer * Altitudes.AltInc, pos.z + graphicOffset.z + turretLoc.y);
 		}
 
-		public Vector2 ScaleUIRect(VehicleDef vehicleDef, Vector2 position, Vector2 size, Rot8 rot)
+		public Rect ScaleUIRectRecursive(VehicleDef vehicleDef, Rect rect, Rot8 rot, float iconScale = 1)
 		{
-			float locationRotation = 0f;
-			if (attachedTo != null)
-			{
-				//locationRotation = TurretRotationFor(rot, attachedTo.currentRotation);
-			}
+			//Scale to VehicleDef drawSize
+			Vector2 size = vehicleDef.ScaleDrawRatio(turretDef.graphicData, rect.size, iconScale: iconScale);
+			//Adjust position from new rect size
+			Vector2 adjustedPosition = rect.position + (rect.size - size) / 2f;
 			// Size / V_max = scalar
-			float scalar = size.x / Mathf.Max(vehicleDef.graphicData.drawSize.x, vehicleDef.graphicData.drawSize.y);
+			float scalar = rect.size.x / Mathf.Max(vehicleDef.graphicData.drawSize.x, vehicleDef.graphicData.drawSize.y);
 			Vector2 offset = rot.AsInt switch
 			{
 				//North
@@ -625,20 +643,22 @@ namespace Vehicles
 				//Diagonals not handled
 				_ => throw new NotImplementedException("Diagonal rotations"),
 			};
-			Vector3 graphicOffset = CannonGraphic.DrawOffset(rot);
-			//Invert y axis for UI which is top to bottom, as opposed to in-game which is bottom to top
-			return position + (scalar * new Vector2(graphicOffset.x, graphicOffset.z)) + (scalar * new Vector2(offset.x, -offset.y));
-		}
 
-		public Vector3 DefaultOffsetLocFor(Rot8 rot)
-		{
-			float locationRotation = 0f;
+			Vector3 graphicOffset = turretDef.graphicData.DrawOffsetForRot(rot);
+			
+			Vector2 position = adjustedPosition + (scalar * new Vector2(graphicOffset.x, graphicOffset.z));
+			Vector2 offsetPosition = scalar * offset;
+			Vector2 parentPosition = Vector2.zero;
 			if (attachedTo != null)
 			{
-				locationRotation = TurretRotationFor(rot, attachedTo.defaultAngleRotated - 90);
+				parentPosition = attachedTo.ScaleUIRectRecursive(vehicleDef, rect, rot).position; //Recursively adjust from parent positions
+				float parentRotation = TurretRotationFor(rot, attachedTo.TurretRotationUncorrected) + rot.AsAngle;
+				offsetPosition = Ext_Math.RotatePointClockwise(offsetPosition, parentRotation); //Rotate around parent's position
 			}
-			Vector2 turretLoc = VehicleGraphics.TurretDrawOffset(rot, renderProperties, locationRotation, attachedTo);
-			return new Vector3(turretLoc.x, drawLayer * Altitudes.AltInc, turretLoc.y);
+			offsetPosition.y *= -1; //Invert y axis post-calculations, UI y-axis is top to bottom
+			offsetPosition += parentPosition;
+			position += offsetPosition;
+			return new Rect(position, size);
 		}
 
 		public static float TurretRotationFor(Rot8 rot, float currentRotation)
@@ -691,6 +711,7 @@ namespace Vehicles
 		public virtual bool Tick()
 		{
 			bool cooldownTicked = TurretCooldownTick();
+			bool reloadTicked = TurretReloadTick();
 			bool autoTicked = TurretAutoTick();
 			bool rotationTicked = TurretRotationTick();
 			bool targeterTicked = TurretTargeterTick();
@@ -700,12 +721,12 @@ namespace Vehicles
 				recoilTicked = rTracker.RecoilTick();
 			}
 			//Keep ticking until no longer needed
-			return cooldownTicked || autoTicked || rotationTicked || targeterTicked || recoilTicked;
+			return cooldownTicked || reloadTicked || autoTicked || rotationTicked || targeterTicked || recoilTicked;
 		}
 
 		protected virtual bool TurretCooldownTick()
 		{
-			if (turretDef.cooldown != null)
+			if (CanOverheat)
 			{
 				if (currentHeatRate > 0)
 				{
@@ -736,7 +757,12 @@ namespace Vehicles
 				}
 				return true;
 			}
-			else if (vehicle.Spawned && !queuedToFire)
+			return false;
+		}
+
+		protected virtual bool TurretReloadTick()
+		{
+			if (vehicle.Spawned && !queuedToFire)
 			{
 				if (ReloadTicks > 0 && !OnCooldown)
 				{
@@ -1019,7 +1045,7 @@ namespace Vehicles
 		public virtual void PostTurretFire()
 		{
 			ticksSinceLastShot = 0;
-			if (turretDef.cooldown != null)
+			if (CanOverheat)
 			{
 				currentHeatRate += turretDef.cooldown.heatPerShot;
 			}
@@ -1095,9 +1121,21 @@ namespace Vehicles
 				}
 				else if (turretDef.turretType == TurretType.Static)
 				{
-					Vector3 target = TurretLocation.PointFromAngle(MaxRange, TurretRotation);
-					float range = Vector3.Distance(TurretLocation, target);
-					GenDraw.DrawRadiusRing(target.ToIntVec3(), CurrentFireMode.spreadRadius * (range / turretDef.maxRange));
+					if (!groupKey.NullOrEmpty())
+					{
+						foreach (VehicleTurret turret in GroupTurrets)
+						{
+							Vector3 target = turret.TurretLocation.PointFromAngle(turret.MaxRange, turret.TurretRotation);
+							float range = Vector3.Distance(turret.TurretLocation, target);
+							GenDraw.DrawRadiusRing(target.ToIntVec3(), turret.CurrentFireMode.spreadRadius * (range / turret.turretDef.maxRange));
+						}
+					}
+					else
+					{
+						Vector3 target = TurretLocation.PointFromAngle(MaxRange, TurretRotation);
+						float range = Vector3.Distance(TurretLocation, target);
+						GenDraw.DrawRadiusRing(target.ToIntVec3(), CurrentFireMode.spreadRadius * (range / turretDef.maxRange));
+					}
 				}
 				else
 				{
@@ -1418,6 +1456,10 @@ namespace Vehicles
 				SoundDefOf.Click.PlayOneShotOnCamera(vehicle.Map);
 				AutoTarget = !AutoTarget;
 				SetTarget(LocalTargetInfo.Invalid);
+				if (AutoTarget)
+				{
+					StartTicking();
+				}
 			}
 			else
 			{
@@ -1483,7 +1525,7 @@ namespace Vehicles
 			return true;
 		}
 
-		public void ResetCannonAngle()
+		public void ResetAngle()
 		{
 			currentRotation = -defaultAngleRotated - 90;
 			if (currentRotation < 360)
@@ -1550,9 +1592,8 @@ namespace Vehicles
 			}
 			if (vehicleDef.GetCompProperties<CompProperties_VehicleTurrets>().turrets.Select(x => x.key).GroupBy(y => y).Where(y => y.Count() > 1).Select(z => z.Key).NotNullAndAny())
 			{
-				yield return $"Duplicate cannon key {key}";
+				yield return $"Duplicate turret key {key}";
 			}
-			//REDO - Add groupKeys for validation so vehicle turrets all match
 		}
 
 		public static string TurretEnableTypeDisableReason(TurretDisableType currentType)
@@ -1572,10 +1613,8 @@ namespace Vehicles
 
 			Scribe_Values.Look(ref reloadTicks, nameof(reloadTicks));
 			Scribe_Values.Look(ref burstTicks, nameof(burstTicks));
-			Scribe_Values.Look(ref groupKey, nameof(groupKey));
 
 			Scribe_Values.Look(ref uniqueID, nameof(uniqueID), defaultValue: -1);
-			Scribe_Values.Look(ref parentKey, nameof(parentKey));
 			Scribe_Values.Look(ref key, nameof(key));
 
 			Scribe_Defs.Look(ref turretDef, nameof(turretDef));
@@ -1608,6 +1647,158 @@ namespace Vehicles
 					AlignToTargetRestricted(); //reassigns rotationTargeted for turrets currently turning
 				}
 			}
+		}
+
+		public static SubGizmo SubGizmo_RemoveAmmo(VehicleTurret turret)
+		{
+			return new SubGizmo
+			{
+				drawGizmo = delegate (Rect rect)
+				{
+					//Widgets.DrawTextureFitted(rect, BGTex, 1);
+					if (turret.loadedAmmo != null)
+					{
+						GUIState.Push();
+						{
+							GUI.color = new Color(GUI.color.r, GUI.color.g, GUI.color.b, turret.CannonIconAlphaTicked); //Only modify alpha
+							Widgets.DrawTextureFitted(rect, turret.loadedAmmo.uiIcon, 1);
+							
+							GUIState.Reset();
+
+							Rect ammoCountRect = new Rect(rect);
+							string ammoCount = turret.vehicle.inventory.innerContainer.Where(td => td.def == turret.loadedAmmo).Select(t => t.stackCount).Sum().ToStringSafe();
+							ammoCountRect.y += ammoCountRect.height / 2;
+							ammoCountRect.x += ammoCountRect.width - Text.CalcSize(ammoCount).x;
+							Widgets.Label(ammoCountRect, ammoCount);
+						}
+						GUIState.Pop();
+					}
+					else if (turret.turretDef.genericAmmo && turret.turretDef.ammunition.AllowedDefCount > 0)
+					{
+						Widgets.DrawTextureFitted(rect, turret.turretDef.ammunition.AllowedThingDefs.FirstOrDefault().uiIcon, 1);
+						
+						Rect ammoCountRect = new Rect(rect);
+						string ammoCount = turret.vehicle.inventory.innerContainer.Where(td => td.def == turret.turretDef.ammunition.AllowedThingDefs.FirstOrDefault()).Select(t => t.stackCount).Sum().ToStringSafe();
+						ammoCountRect.y += ammoCountRect.height / 2;
+						ammoCountRect.x += ammoCountRect.width - Text.CalcSize(ammoCount).x;
+						Widgets.Label(ammoCountRect, ammoCount);
+					}
+				},
+				canClick = delegate ()
+				{
+					return turret.shellCount > 0;
+				},
+				onClick = delegate ()
+				{
+					turret.TryRemoveShell();
+					SoundDefOf.Artillery_ShellLoaded.PlayOneShot(new TargetInfo(turret.vehicle.Position, turret.vehicle.Map, false));
+				},
+				tooltip = turret.loadedAmmo?.LabelCap
+			};
+		}
+
+		public static SubGizmo SubGizmo_ReloadFromInventory(VehicleTurret turret)
+		{
+			return new SubGizmo
+			{
+				drawGizmo = delegate (Rect rect)
+				{
+					Widgets.DrawTextureFitted(rect, VehicleTex.ReloadIcon, 1);
+				},
+				canClick = delegate ()
+				{
+					return true;
+				},
+				onClick = delegate ()
+				{
+					if (turret.turretDef.genericAmmo)
+					{
+						if (!turret.vehicle.inventory.innerContainer.Contains(turret.turretDef.ammunition.AllowedThingDefs.FirstOrDefault()))
+						{
+							Messages.Message("NoAmmoAvailable".Translate(), MessageTypeDefOf.RejectInput);
+						}
+						else
+						{
+							turret.ReloadCannon(turret.turretDef.ammunition.AllowedThingDefs.FirstOrDefault());
+						}
+					}
+					else
+					{
+						List<FloatMenuOption> options = new List<FloatMenuOption>();
+						var ammoAvailable = turret.vehicle.inventory.innerContainer.Where(d => turret.ContainsAmmoDefOrShell(d.def)).Select(t => t.def).Distinct().ToList();
+						for (int i = ammoAvailable.Count - 1; i >= 0; i--)
+						{
+							ThingDef ammo = ammoAvailable[i];
+							options.Add(new FloatMenuOption(ammoAvailable[i].LabelCap, delegate ()
+							{
+								turret.ReloadCannon(ammo, true);
+							}));
+						}
+						if (options.NullOrEmpty())
+						{
+							FloatMenuOption noAmmoOption = new FloatMenuOption("VF_VehicleTurrets_NoAmmoToReload".Translate(), null);
+							noAmmoOption.Disabled = true;
+							options.Add(noAmmoOption);
+						}
+						Find.WindowStack.Add(new FloatMenu(options));
+					}
+				},
+				tooltip = "VehicleReloadVehicleTurret".Translate()
+			};
+		}
+
+		public static SubGizmo SubGizmo_FireMode(VehicleTurret turret)
+		{
+			return new SubGizmo
+			{
+				drawGizmo = delegate (Rect rect)
+				{
+					Widgets.DrawTextureFitted(rect, turret.CurrentFireMode.Icon, 1);
+				},
+				canClick = delegate ()
+				{
+					return turret.turretDef.fireModes.Count > 1;
+				},
+				onClick = delegate ()
+				{
+					turret.CycleFireMode();
+				},
+				tooltip = turret.CurrentFireMode.label
+			};
+		}
+
+		public static SubGizmo SubGizmo_AutoTarget(VehicleTurret turret)
+		{
+			return new SubGizmo
+			{
+				drawGizmo = delegate (Rect rect)
+				{
+					Widgets.DrawTextureFitted(rect, VehicleTex.AutoTargetIcon, 1);
+					Rect checkboxRect = new Rect(rect.x + rect.width / 2, rect.y + rect.height / 2, rect.width / 2, rect.height / 2);
+					GUI.DrawTexture(checkboxRect, turret.AutoTarget ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex);
+				},
+				canClick = delegate ()
+				{
+					return turret.CanAutoTarget;
+				},
+				onClick = delegate ()
+				{
+					turret.SwitchAutoTarget();
+				},
+				tooltip = "AutoTargeting".Translate(turret.AutoTarget.ToString())
+			};
+		}
+
+		public struct SubGizmo
+		{
+			public Action<Rect> drawGizmo;
+			public Func<bool> canClick;
+			public Action onClick;
+			public string tooltip;
+
+			public bool IsValid => onClick != null;
+
+			public static SubGizmo None { get; private set; } = new SubGizmo();
 		}
 	}
 }

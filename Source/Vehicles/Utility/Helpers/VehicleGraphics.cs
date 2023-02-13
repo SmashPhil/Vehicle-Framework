@@ -26,8 +26,8 @@ namespace Vehicles
 		/// <param name="rot"></param>
 		public static Vector3 DrawOffsetFull(this GraphicData graphicData, Rot8 rot)
 		{
-			Pair<float, float> offset = VehicleDrawOffset(rot, graphicData.drawOffset.x, graphicData.drawOffset.y);
-			return new Vector3(offset.First, graphicData.drawOffset.y, offset.Second);
+			Vector2 offset = VehicleDrawOffset(rot, graphicData.drawOffset.x, graphicData.drawOffset.y);
+			return new Vector3(offset.x, graphicData.drawOffset.y, offset.y);
 		}
 
 		/// <summary>
@@ -35,7 +35,7 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="rot"></param>
 		/// <param name="renderProps"></param>
-		/// <param name="turretRotation"></param>
+		/// <param name="extraRotation"></param>
 		/// <param name="attachedTo"></param>
 		public static Vector2 TurretDrawOffset(Rot8 rot, VehicleTurretRender renderProps, float extraRotation = 0, VehicleTurret attachedTo = null)
 		{
@@ -43,8 +43,8 @@ namespace Vehicles
 			if (attachedTo != null)
 			{
 				VehicleTurretRender.RotationalOffset parentOffset = attachedTo.renderProperties.OffsetFor(rot);
-				Pair<float, float> rootLoc = Ext_Math.RotatePointClockwise(turretOffset.Offset.x, turretOffset.Offset.y, extraRotation);
-				return new Vector2(rootLoc.First + parentOffset.Offset.x, rootLoc.Second + parentOffset.Offset.y);
+				Vector2 rootLoc = Ext_Math.RotatePointClockwise(turretOffset.Offset.x, turretOffset.Offset.y, extraRotation);
+				return new Vector2(rootLoc.x + parentOffset.Offset.x, rootLoc.y + parentOffset.Offset.y);
 			}
 			return turretOffset.Offset;
 		}
@@ -57,7 +57,7 @@ namespace Vehicles
 		/// <param name="offsetY"></param>
 		/// <param name="turretRotation"></param>
 		/// <param name="attachedTo"></param>
-		public static Pair<float, float> VehicleDrawOffset(Rot8 rot, float offsetX, float offsetY, float additionalRotation = 0)
+		public static Vector2 VehicleDrawOffset(Rot8 rot, float offsetX, float offsetY, float additionalRotation = 0)
 		{
 			return Ext_Math.RotatePointClockwise(offsetX, offsetY, rot.AsAngle + additionalRotation);
 		}
@@ -105,6 +105,10 @@ namespace Vehicles
 			string drawStep = string.Empty;
 			try
 			{
+				if (rect.width != rect.height)
+				{
+					SmashLog.WarningOnce("Drawing VehicleDef with non-uniform rect. VehicleDefs are best drawn in square rects which will then be adjusted to fit.", nameof(DrawVehicleDef).GetHashCode());
+				}
 				drawStep = "Setting rect and adjusted positioning.";
 				Vector2 rectSize = vehicleDef.ScaleDrawRatio(rect.size);
 				Rot8 rotDrawn = rot ?? vehicleDef.drawProperties.displayRotation;
@@ -139,6 +143,7 @@ namespace Vehicles
 				Vector2 displacement = patternData?.displacement ?? vehicleDef.graphicData.displacement;
 
 				Texture2D mainTex = VehicleTex.VehicleTexture(vehicleDef, rotDrawn, out float angle);
+
 				if (material is null && pattern != null && (graphic.Shader.SupportsRGBMaskTex() || graphic.Shader.SupportsMaskTex()))
 				{
 					drawStep = $"Regenerating material for pattern={pattern.defName}";
@@ -159,28 +164,28 @@ namespace Vehicles
 					material = MaterialPoolExpanded.MatFrom(matReq);
 				}
 				drawStep = "Attempting to retrieve turret overlays";
-				List<ValueTuple<Rect, Texture, Material, float, float>> overlays = new List<(Rect, Texture, Material, float, float)>();
+				List<(Rect rect, Texture mainTex, Material material, float layer, float angle)> overlays = new List<(Rect, Texture, Material, float, float)>();
 				if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets props)
 				{
-					overlays.AddRange(RetrieveTurretSettingsDrawProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer),
+					overlays.AddRange(RetrieveAllTurretSettingsGraphicsProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer),
 						new PatternData(color1, color2, color3, pattern, displacement, tiling)));
 				}
 				drawStep = "Retrieving graphic overlays";
-				//overlays.AddRange(RetrieveOverlaySettingsDrawProperties(rect, vehicleDef, rotDrawn));
+				overlays.AddRange(RetrieveAllOverlaySettingsGraphicsProperties(rect, vehicleDef, rotDrawn));
 
 				drawStep = "Rendering overlays with layer < 0";
-				foreach (var overlay in overlays.Where(o => o.Item4 < 0).OrderBy(o => o.Item4))
+				foreach (var overlay in overlays.Where(overlay => overlay.layer < 0).OrderBy(overlay => overlay.layer))
 				{
-					UIElements.DrawTextureWithMaterialOnGUI(overlay.Item1, overlay.Item2, overlay.Item3, overlay.Item5);
+					UIElements.DrawTextureWithMaterialOnGUI(overlay.rect, overlay.mainTex, overlay.material, overlay.angle);
 				}
 
 				drawStep = "Rendering main texture";
 				DrawVehicleFitted(adjustedRect, angle, mainTex, material);
 
 				drawStep = "Rendering overlays with layer >= 0";
-				foreach (var overlay in overlays.Where(o => o.Item4 >= 0).OrderBy(o => o.Item4))
+				foreach (var overlay in overlays.Where(overlay => overlay.layer >= 0).OrderBy(overlay => overlay.layer))
 				{
-					UIElements.DrawTextureWithMaterialOnGUI(overlay.Item1, overlay.Item2, overlay.Item3, overlay.Item5);
+					UIElements.DrawTextureWithMaterialOnGUI(overlay.rect, overlay.mainTex, overlay.material, overlay.angle);
 				}
 				return string.Empty;
 			}
@@ -191,6 +196,24 @@ namespace Vehicles
 			return drawStep;
 		}
 
+		public static IEnumerable<(Rect rect, Texture mainTex, Material material, float layer, float angle)> RetrieveAllOverlaySettingsGraphicsProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, List<GraphicOverlay> graphicOverlays = null)
+		{
+			List<GraphicOverlay> overlays = graphicOverlays ?? vehicleDef.drawProperties.OverlayGraphics;
+			foreach (GraphicOverlay graphicOverlay in overlays)
+			{
+				yield return RetrieveOverlaySettingsGraphicsProperties(rect, vehicleDef, rot, graphicOverlay);
+			}
+		}
+
+		public static (Rect rect, Texture mainTex, Material material, float layer, float angle) RetrieveOverlaySettingsGraphicsProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, GraphicOverlay graphicOverlay)
+		{
+			Rect overlayRect = OverlayRect(rect, vehicleDef, graphicOverlay, rot);
+			Texture2D texture = ContentFinder<Texture2D>.Get(graphicOverlay.graphic.data.texPath);
+			bool canMask = graphicOverlay.graphic.Shader.SupportsMaskTex() || graphicOverlay.graphic.Shader.SupportsRGBMaskTex();
+			Material material = canMask ? graphicOverlay.graphic.MatAt(rot) : null;
+			return (overlayRect, texture, material, graphicOverlay.graphic.data.DrawOffsetFull(rot).y, graphicOverlay.rotation);
+		}
+
 		/// <summary>
 		/// Retrieve <seealso cref="VehicleTurret"/> GUI data for rendering, adjusted by settings UI properties for <paramref name="vehicleDef"/>
 		/// </summary>
@@ -199,77 +222,78 @@ namespace Vehicles
 		/// <param name="cannons"></param>
 		/// <param name="patternData"></param>
 		/// <param name="rot"></param>
-		public static IEnumerable<(Rect, Texture, Material, float, float)> RetrieveTurretSettingsDrawProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, IEnumerable<VehicleTurret> turrets, PatternData patternData)
+		public static IEnumerable<(Rect rect, Texture mainTex, Material material, float layer, float angle)> RetrieveAllTurretSettingsGraphicsProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, IEnumerable<VehicleTurret> turrets, PatternData patternData)
 		{
 			foreach (VehicleTurret turret in turrets)
 			{
-				if (turret.NoGraphic)
+				if (!turret.NoGraphic)
 				{
-					continue;
+					yield return RetrieveTurretSettingsGraphicsProperties(rect, vehicleDef, rot, turret, patternData);
 				}
-				Rect turretRect = TurretRect(rect, vehicleDef, turret, rot);
-				Material cannonMat = turret.CannonGraphic.Shader.SupportsRGBMaskTex() ? new Material(turret.CannonGraphic.MatAt(patternData.patternDef)) : null;
-				if ((turret.CannonGraphic.Shader.SupportsRGBMaskTex() || turret.CannonGraphic.Shader.SupportsMaskTex()) && patternData != VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData))
-				{
-					MaterialRequestRGB matReq = new MaterialRequestRGB()
-					{
-						mainTex = turret.CannonTexture,
-						shader = patternData?.patternDef is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin.Shader : turret.CannonGraphic.Shader,
-						color = patternData.color,
-						colorTwo = patternData.colorTwo,
-						colorThree = patternData.colorThree,
-						tiles = patternData.tiles,
-						displacement = patternData.displacement,
-						properties = patternData.patternDef.properties,
-						maskTex = turret.CannonGraphic.masks[Rot8.North.AsInt],
-						patternTex = patternData.patternDef?[Rot8.North]
-					};
-					cannonMat = MaterialPoolExpanded.MatFrom(matReq);
-				}
-				yield return (turretRect, turret.CannonTexture, cannonMat, turret.CannonGraphicData.drawOffset.y, turret.defaultAngleRotated + rot.AsAngle);
 			}
+		}
+
+		public static (Rect rect, Texture mainTex, Material material, float layer, float angle) RetrieveTurretSettingsGraphicsProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, VehicleTurret turret, PatternData patternData)
+		{
+			Rect turretRect = TurretRect(rect, vehicleDef, turret, rot);
+			Material cannonMat = turret.CannonGraphic.Shader.SupportsRGBMaskTex() ? new Material(turret.CannonGraphic.MatAt(patternData.patternDef)) : null;
+			if ((turret.CannonGraphic.Shader.SupportsRGBMaskTex() || turret.CannonGraphic.Shader.SupportsMaskTex()) && patternData != VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData))
+			{
+				MaterialRequestRGB matReq = new MaterialRequestRGB()
+				{
+					mainTex = turret.CannonTexture,
+					shader = patternData?.patternDef is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin.Shader : turret.CannonGraphic.Shader,
+					color = patternData.color,
+					colorTwo = patternData.colorTwo,
+					colorThree = patternData.colorThree,
+					tiles = patternData.tiles,
+					displacement = patternData.displacement,
+					properties = patternData.patternDef.properties,
+					maskTex = turret.CannonGraphic.masks[Rot8.North.AsInt],
+					patternTex = patternData.patternDef?[Rot8.North]
+				};
+				cannonMat = MaterialPoolExpanded.MatFrom(matReq);
+			}
+			return (turretRect, turret.CannonTexture, cannonMat, turret.CannonGraphicData.drawOffset.y, turret.defaultAngleRotated + rot.AsAngle);
 		}
 
 		/// <summary>
 		/// Retrieves VehicleTurret Rect adjusted to <paramref name="rect"/> of where it's being rendered.
 		/// </summary>
-		/// <remarks>Scales up / down relative to drawSize of <paramref name="vehicleDef"/></remarks>
+		/// <remarks>Scales up / down relative to drawSize of <paramref name="vehicleDef"/>. Best used inside GUI Group</remarks>
 		/// <param name="rect"></param>
 		/// <param name="vehicleDef"></param>
 		/// <param name="turret"></param>
 		/// <param name="rot"></param>
-		internal static Rect TurretRect(Rect rect, VehicleDef vehicleDef, VehicleTurret turret, Rot8 rot)
+		internal static Rect TurretRect(Rect rect, VehicleDef vehicleDef, VehicleTurret turret, Rot8 rot, float iconScale = 1)
 		{
 			//Ensure CannonGraphics are up to date (only required upon changes to default pattern from mod settings)
 			turret.ResolveCannonGraphics(vehicleDef);
-			//Scale to VehicleDef drawSize
-			Vector2 rectSize = vehicleDef.ScaleDrawRatio(turret.turretDef.graphicData, rect.size);
-			//Adjust position from new rect size
-			Vector2 adjustedPosition = rect.position + (rect.size - rectSize) / 2f;
-			Vector2 turretUIPos = turret.ScaleUIRect(vehicleDef, adjustedPosition, rectSize, rot);
-			return new Rect(turretUIPos, rectSize);
+			return turret.ScaleUIRectRecursive(vehicleDef, rect, rot, iconScale: iconScale);
 		}
 
 		/// <summary>
-		/// Retrieve GUI data for rendering, adjusted by settings UI properties for <paramref name="vehicleDef"/>
+		/// Retrieve GraphicOverlay adjusted to <paramref name="rect"/> of where it's being rendered.
 		/// </summary>
+		/// <remarks>Best used inside GUI Group</remarks>
 		/// <param name="rect"></param>
 		/// <param name="vehicleDef"></param>
+		/// <param name="graphicOverlay"></param>
 		/// <param name="rot"></param>
-		public static IEnumerable<ValueTuple<Rect, Texture, Material, float, float>> RetrieveOverlaySettingsDrawProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, List<GraphicOverlay> graphicOverlays = null)
+		internal static Rect OverlayRect(Rect rect, VehicleDef vehicleDef, GraphicOverlay graphicOverlay, Rot8 rot)
 		{
-			var overlays = graphicOverlays ?? vehicleDef.drawProperties.OverlayGraphics;
-			foreach (GraphicOverlay graphicOverlay in overlays)
-			{
-				Vector2 rectSize = vehicleDef.ScaleDrawRatio(graphicOverlay.graphic.data, rect.size);
-				Vector2 adjustedPosition = rect.position + (rect.size - rectSize) / 2f;
-				Vector3 offsets = graphicOverlay.graphic.DrawOffset(rot);
-				Vector2 finalPosition = new Vector2(offsets.x, offsets.z) + adjustedPosition;
-				Rect overlayRect = new Rect(finalPosition, rectSize);
-				Texture2D texture = ContentFinder<Texture2D>.Get(graphicOverlay.graphic.data.texPath);
-				Material material = graphicOverlay.graphic.Shader.SupportsMaskTex() ? graphicOverlay.graphic.MatAt(rot) : null;
-				yield return new ValueTuple<Rect, Texture, Material, float, float>(overlayRect, texture, material, graphicOverlay.graphic.data.DrawOffsetFull(rot).y, graphicOverlay.rotation);
-			}
+			//Scale to VehicleDef drawSize
+			Vector2 size = vehicleDef.ScaleDrawRatio(graphicOverlay.graphic.data, rect.size);
+			//Adjust position from new rect size
+			Vector2 adjustedPosition = rect.position + (rect.size - size) / 2f;
+			// Size / V_max = scalar
+			float scalar = rect.size.x / Mathf.Max(vehicleDef.graphicData.drawSize.x, vehicleDef.graphicData.drawSize.y);
+			
+			Vector3 graphicOffset = graphicOverlay.graphic.data.DrawOffsetForRot(rot);
+
+			//Invert y axis post-calculations, UI y-axis is top to bottom
+			Vector2 position = adjustedPosition + (scalar * new Vector2(graphicOffset.x, -graphicOffset.z));
+			return new Rect(position, size);
 		}
 
 		public static void DrawVehicleFitted(Rect rect, VehicleDef vehicleDef, Rot4 rot, Material material)

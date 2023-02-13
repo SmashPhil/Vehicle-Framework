@@ -107,6 +107,7 @@ namespace Vehicles
 						{
 							Command_TargeterCooldownAction turretTargeterGizmo = new Command_TargeterCooldownAction
 							{
+								vehicle = Vehicle,
 								turret = turret,
 								defaultLabel = !string.IsNullOrEmpty(turret.gizmoLabel) ? turret.gizmoLabel : $"{turret.turretDef.LabelCap} {turretNumber}",
 								icon = turret.GizmoIcon,
@@ -163,6 +164,7 @@ namespace Vehicles
 						{
 							turretCommand = new Command_CooldownAction()
 							{
+								vehicle = Vehicle,
 								turret = turret,
 								defaultLabel = !string.IsNullOrEmpty(turret.gizmoLabel) ? turret.gizmoLabel : $"{turret.turretDef.LabelCap} {turretNumber}",
 								icon = turret.GizmoIcon,
@@ -266,45 +268,54 @@ namespace Vehicles
 			for (int i = turretQueue.Count - 1; i >= 0; i--)
 			{
 				TurretData turretData = turretQueue[i];
-				if (!turretData.turret.cannonTarget.IsValid || turretData.turret.shellCount <= 0)
+				try
 				{
-					DequeueTurret(turretData);
-					continue;
-				}
-				if (turretData.turret.TurretRestricted || turretData.turret.OnCooldown || (!turretData.turret.IsManned && !VehicleMod.settings.debug.debugShootAnyTurret))
-				{
-					turretData.turret.SetTarget(LocalTargetInfo.Invalid);
-					DequeueTurret(turretData);
-					continue;
-				}
-
-				turretQueue[i].turret.AlignToTargetRestricted();
-				if (turretQueue[i].ticksTillShot <= 0)
-				{
-					turretData.turret.FireTurret();
-					turretData.turret.CurrentTurretFiring++;
-					turretData.shots--;
-					turretData.ticksTillShot = turretData.turret.TicksPerShot;
-					if (turretData.turret.OnCooldown || turretData.shots == 0 || (turretData.turret.turretDef.ammunition != null && turretData.turret.shellCount <= 0))
+					if (!turretData.turret.cannonTarget.IsValid || turretData.turret.shellCount <= 0)
 					{
-						if (turretData.turret.targetPersists)
-						{
-							turretData.turret.SetTargetConditionalOnThing(LocalTargetInfo.Invalid);
-						}
-						else
-						{
-							turretData.turret.SetTarget(LocalTargetInfo.Invalid);
-						}
-						turretData.turret.ReloadCannon();
 						DequeueTurret(turretData);
 						continue;
 					}
+					if (turretData.turret.TurretRestricted || turretData.turret.OnCooldown || (!turretData.turret.IsManned && !VehicleMod.settings.debug.debugShootAnyTurret))
+					{
+						turretData.turret.SetTarget(LocalTargetInfo.Invalid);
+						DequeueTurret(turretData);
+						continue;
+					}
+
+					turretQueue[i].turret.AlignToTargetRestricted();
+					if (turretQueue[i].ticksTillShot <= 0)
+					{
+						turretData.turret.FireTurret();
+						turretData.turret.CurrentTurretFiring++;
+						turretData.shots--;
+						turretData.ticksTillShot = turretData.turret.TicksPerShot;
+						if (turretData.turret.OnCooldown || turretData.shots == 0 || (turretData.turret.turretDef.ammunition != null && turretData.turret.shellCount <= 0))
+						{
+							if (turretData.turret.targetPersists)
+							{
+								turretData.turret.SetTargetConditionalOnThing(LocalTargetInfo.Invalid);
+							}
+							else
+							{
+								turretData.turret.SetTarget(LocalTargetInfo.Invalid);
+							}
+							turretData.turret.ReloadCannon();
+							DequeueTurret(turretData);
+							continue;
+						}
+					}
+					else
+					{
+						turretData.ticksTillShot--;
+					}
+					turretQueue[i] = turretData;
 				}
-				else
+				catch (Exception ex)
 				{
-					turretData.ticksTillShot--;
+					turretData.turret.SetTarget(LocalTargetInfo.Invalid);
+					DequeueTurret(turretData);
+					Log.Error($"Exception thrown while shooting turret {turretData.turret}. Removing from queue to resolve issue temporarily.\nException={ex}");
 				}
-				turretQueue[i] = turretData;
 			}
 		}
 
@@ -386,7 +397,7 @@ namespace Vehicles
 		{
 			VehicleTurret newTurret = (VehicleTurret)Activator.CreateInstance(reference.GetType(), new object[] { vehicle, reference });
 			newTurret.SetTarget(LocalTargetInfo.Invalid);
-			newTurret.ResetCannonAngle();
+			newTurret.ResetAngle();
 			return newTurret;
 		}
 
@@ -416,13 +427,14 @@ namespace Vehicles
 		public void RevalidateTurrets()
 		{
 			turretQueue ??= new List<TurretData>();
-			ResolveChildTurrets();
-			InitTurrets();
 
 			foreach (VehicleTurret turret in turrets)
 			{
 				turret.FillEvents_Def();
 			}
+
+			ResolveChildTurrets();
+			InitTurrets();
 		}
 
 		public void ResolveChildTurrets()
@@ -456,10 +468,20 @@ namespace Vehicles
 
 		public void InitTurrets()
 		{
-			foreach (VehicleTurret turretProps in Props.turrets)
+			for (int i = turrets.Count - 1; i >= 0; i--)
 			{
-				VehicleTurret matchingTurret = turrets.FirstOrDefault(turret => turret.key == turretProps.key);
-				matchingTurret.Init(turretProps);
+				VehicleTurret turret = turrets[i];
+				if (Props.turrets.FirstOrDefault(turretProps => turretProps.key == turret.key) is VehicleTurret turretProps)
+				{
+					turret.Init(turretProps);
+					ResolveChildTurrets(turret);
+					QueueTicker(turret); //Queue all turrets initially, will be sorted out after 1st tick
+				}
+				else
+				{
+					Log.Error($"Unable to find matching turret from save file to CompProperties based on key {turret.key}. Was this changed or removed?");
+					turrets.Remove(turret); //Remove from turret list, invalid turret will throw exceptions
+				}
 			}
 		}
 

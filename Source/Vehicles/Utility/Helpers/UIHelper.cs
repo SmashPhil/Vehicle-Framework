@@ -238,10 +238,12 @@ namespace Vehicles
 			if (Widgets.ButtonImage(leftButtonRect, VehicleTex.LeftArrow))
 			{
 				pageNumber = (--pageNumber).Clamp(1, pageCount);
+				SoundDefOf.Click.PlayOneShotOnCamera();
 			}
 			if (Widgets.ButtonImage(rightButtonRect, VehicleTex.RightArrow))
 			{
 				pageNumber = (++pageNumber).Clamp(1, pageCount);
+				SoundDefOf.Click.PlayOneShotOnCamera();
 			}
 			float numbersLength = rect.width - rect.height * 2f;
 			int pageNumbersDisplayedTotal = Mathf.CeilToInt((numbersLength / 1.5f) / rect.height);
@@ -253,25 +255,27 @@ namespace Vehicles
 			Text.Anchor = TextAnchor.MiddleCenter;
 			float pageNumberingOrigin = rect.x + rect.height + numbersLength / 2;
 			Rect pageRect = new Rect(pageNumberingOrigin, rect.y, rect.height, rect.height);
-			Widgets.ButtonText(pageRect, pageNumber.ToString(), false);
+			Widgets.ButtonText(pageRect, pageNumber.ToString(), drawBackground: false, doMouseoverSound: false);
 
 			Text.Font = GameFont.Tiny;
 			int offsetRight = 1;
 			for (int pageLeftDisplayNum = pageNumber + 1; pageLeftDisplayNum <= (pageNumber + pageNumbersDisplayedHalf) && pageLeftDisplayNum <= pageCount; pageLeftDisplayNum++, offsetRight++)
 			{
 				pageRect.x = pageNumberingOrigin + (numbersLength / pageNumbersDisplayedTotal * offsetRight);
-				if (Widgets.ButtonText(pageRect, pageLeftDisplayNum.ToString(), false))
+				if (Widgets.ButtonText(pageRect, pageLeftDisplayNum.ToString(), drawBackground: false))
 				{
 					pageNumber = pageLeftDisplayNum;
+					SoundDefOf.Click.PlayOneShotOnCamera();
 				}
 			}
 			int offsetLeft = 1;
 			for (int pageRightDisplayNum = pageNumber - 1; pageRightDisplayNum >= (pageNumber - pageNumbersDisplayedHalf) && pageRightDisplayNum >= 1; pageRightDisplayNum--, offsetLeft++)
 			{
 				pageRect.x = pageNumberingOrigin - (numbersLength / pageNumbersDisplayedTotal * offsetLeft);
-				if (Widgets.ButtonText(pageRect, pageRightDisplayNum.ToString(), false))
+				if (Widgets.ButtonText(pageRect, pageRightDisplayNum.ToString(), drawBackground: false))
 				{
 					pageNumber = pageRightDisplayNum;
+					SoundDefOf.Click.PlayOneShotOnCamera();
 				}
 			}
 

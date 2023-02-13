@@ -24,9 +24,7 @@ namespace Vehicles
 		public float fuelConsumptionRate;
 		[PostToSettings(Label = "VF_VehicleFuelCapacity", Translate = true, UISettingsType = UISettingsType.IntegerBox)]
 		public int fuelCapacity;
-		[PostToSettings(Label = "VF_VehicleRefuelWhileDrafted", Translate = true, UISettingsType = UISettingsType.Checkbox)]
-		public bool refuelWhileDrafted = false;
-
+		
 		[PostToSettings(Label = "VF_FuelConsumptionRateWorldMultiplier", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(Increment = 0.1f, MinValue = 0, MaxValue = 2)]
 		public float fuelConsumptionWorldMultiplier = 1;

@@ -215,13 +215,13 @@ namespace Vehicles
 			return new Vector2(width, height);
 		}
 
-		public Vector2 ScaleDrawRatio(GraphicData graphicData, Vector2 size)
+		public Vector2 ScaleDrawRatio(GraphicData graphicData, Vector2 size, float iconScale = 1)
 		{
 			Vector2 drawSize = graphicData.drawSize;
 			Vector2 scalar = drawSize / this.graphicData.drawSize;
 
-			float width = size.x * uiIconScale * scalar.x;
-			float height = size.y * uiIconScale * scalar.y;
+			float width = size.x * uiIconScale * scalar.x * iconScale;
+			float height = size.y * uiIconScale * scalar.y * iconScale;
 
 			if (width < height)
 			{

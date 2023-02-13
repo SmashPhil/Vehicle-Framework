@@ -468,9 +468,9 @@ namespace Vehicles
 				{
 					try
 					{
-						Pair<float, float> moteOffset = VehicleGraphics.VehicleDrawOffset(Vehicle.FullRotation, offset.xOffset, offset.zOffset);
-						offsetX = moteOffset.First;
-						offsetZ = moteOffset.Second;
+						Vector2 moteOffset = VehicleGraphics.VehicleDrawOffset(Vehicle.FullRotation, offset.xOffset, offset.zOffset);
+						offsetX = moteOffset.x;
+						offsetZ = moteOffset.y;
 
 						motePosition = new Vector3(parent.Position.x + offsetX + CellOffsetIntVec3ToVector3, parent.Position.y, parent.Position.z + offsetZ + CellOffsetIntVec3ToVector3);
 					
