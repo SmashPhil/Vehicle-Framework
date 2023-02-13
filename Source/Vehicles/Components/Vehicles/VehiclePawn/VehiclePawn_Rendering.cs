@@ -848,7 +848,7 @@ namespace Vehicles
 						continue;
 					}
 					Job job = new Job(JobDefOf_Vehicles.Board, this);
-					VehicleHandler handler = p.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(h => h.AreSlotsAvailable && h.role.handlingTypes.NullOrEmpty());
+					VehicleHandler handler = p.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(handler => handler.AreSlotsAvailable && handler.role.handlingTypes == HandlingTypeFlags.None);
 					GiveLoadJob(p, handler);
 					reservationManager.Reserve<VehicleHandler, VehicleHandlerReservation>(this, p, job, handler);
 					p.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);

@@ -501,6 +501,18 @@ namespace Vehicles
 			} 
 		}
 
+		public override void EventRegistration()
+		{
+			Vehicle.AddEvent(VehicleEventDefOf.MoveStart, RevalidateConsumptionStatus);
+			Vehicle.AddEvent(VehicleEventDefOf.MoveStop, RevalidateConsumptionStatus);
+			Vehicle.AddEvent(VehicleEventDefOf.OutOfFuel, RevalidateConsumptionStatus);
+			Vehicle.AddEvent(VehicleEventDefOf.Refueled, RevalidateConsumptionStatus);
+			Vehicle.AddEvent(VehicleEventDefOf.IgnitionOn, RevalidateConsumptionStatus);
+			Vehicle.AddEvent(VehicleEventDefOf.IgnitionOff, RevalidateConsumptionStatus);
+			Vehicle.AddEvent(VehicleEventDefOf.DamageTaken, RevalidateConsumptionStatus);
+			Vehicle.AddEvent(VehicleEventDefOf.Repaired, RevalidateConsumptionStatus);
+		}
+
 		public override void PostSpawnSetup(bool respawningAfterLoad)
 		{
 			base.PostSpawnSetup(respawningAfterLoad);
@@ -515,15 +527,6 @@ namespace Vehicles
 			}
 
 			RevalidateConsumptionStatus();
-
-			Vehicle.AddEvent(VehicleEventDefOf.MoveStart, RevalidateConsumptionStatus);
-			Vehicle.AddEvent(VehicleEventDefOf.MoveStop, RevalidateConsumptionStatus);
-			Vehicle.AddEvent(VehicleEventDefOf.OutOfFuel, RevalidateConsumptionStatus);
-			Vehicle.AddEvent(VehicleEventDefOf.Refueled, RevalidateConsumptionStatus);
-			Vehicle.AddEvent(VehicleEventDefOf.IgnitionOn, RevalidateConsumptionStatus);
-			Vehicle.AddEvent(VehicleEventDefOf.IgnitionOff, RevalidateConsumptionStatus);
-			Vehicle.AddEvent(VehicleEventDefOf.DamageTaken, RevalidateConsumptionStatus);
-			Vehicle.AddEvent(VehicleEventDefOf.Repaired, RevalidateConsumptionStatus);
 
 			if (postLoadReconnect)
 			{

@@ -141,9 +141,8 @@ namespace Vehicles
 			}
 		}
 
-		public override void PostGenerationSetup()
+		public override void PostGeneration()
 		{
-			base.PostGenerationSetup();
 			InitializeUpgradeTree();
 		}
 

@@ -17,7 +17,7 @@ namespace Vehicles
 			if (pawn2 is null)
 				return null;
 			VehiclePawn vehicle = FindShipToDeposit(pawn, pawn2);
-			VehicleHandler handler = vehicle.handlers.Find(x => x.role.handlingTypes.NullOrEmpty());
+			VehicleHandler handler = vehicle.handlers.Find(x => x.role.handlingTypes == HandlingTypeFlags.None);
 			return new Job(JobDefOf.PrepareCaravan_GatherDownedPawns, pawn2)
 			{
 				count = 1
@@ -44,7 +44,7 @@ namespace Vehicles
 		private VehiclePawn FindShipToDeposit(Pawn pawn, Pawn downedPawn)
 		{
 			List<VehiclePawn> vehicles = pawn.GetLord().ownedPawns.Where(x => x is VehiclePawn).Cast<VehiclePawn>().ToList();
-			return vehicles.MaxBy(x => x.VehicleDef.properties.roles.Find(y => y.handlingTypes.NullOrEmpty()).slots);
+			return vehicles.MaxBy(x => x.VehicleDef.properties.roles.Find(y => y.handlingTypes == HandlingTypeFlags.None).slots);
 		}
 	}
 }

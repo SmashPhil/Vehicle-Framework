@@ -82,6 +82,7 @@ namespace Vehicles
 		public override void PostLoad()
 		{
 			turrets ??= new List<VehicleTurret>();
+			RecacheTurretPermissions();
 		}
 
 		public override void PostDraw()
@@ -123,7 +124,7 @@ namespace Vehicles
 								canTargetLocations = true
 							};
 							turretNumber++;
-							foreach (VehicleHandler relatedHandler in Vehicle.GetAllHandlersMatch(HandlingTypeFlags.Cannon, turret.key))
+							foreach (VehicleHandler relatedHandler in Vehicle.GetAllHandlersMatch(HandlingTypeFlags.Turret, turret.key))
 							{
 								if (relatedHandler.handlers.Count < relatedHandler.role.slotsToOperate && !VehicleMod.settings.debug.debugShootAnyTurret)
 								{
@@ -179,9 +180,9 @@ namespace Vehicles
 							}
 						}
 						
-						foreach (VehicleHandler relatedHandler in Vehicle.GetAllHandlersMatch(HandlingTypeFlags.Cannon, turret.key))
+						foreach (VehicleHandler relatedHandler in Vehicle.GetAllHandlersMatch(HandlingTypeFlags.Turret, turret.key))
 						{
-							if(relatedHandler.handlers.Count < relatedHandler.role.slotsToOperate && !VehicleMod.settings.debug.debugShootAnyTurret)
+							if (relatedHandler.handlers.Count < relatedHandler.role.slotsToOperate && !VehicleMod.settings.debug.debugShootAnyTurret)
 							{
 								turretCommand.Disable("NotEnoughCannonCrew".Translate(Vehicle.LabelShort, relatedHandler.role.label));
 								break;
@@ -386,11 +387,22 @@ namespace Vehicles
 			}
 		}
 
-		public override void PostGenerationSetup()
+		public override void PostGeneration()
 		{
-			base.PostGenerationSetup();
 			CreateTurretInstances();
-			RevalidateTurrets();
+		}
+
+		public override void EventRegistration()
+		{
+			Vehicle.AddEvent(VehicleEventDefOf.PawnEntered, RecacheTurretPermissions);
+			Vehicle.AddEvent(VehicleEventDefOf.PawnExited, RecacheTurretPermissions);
+			Vehicle.AddEvent(VehicleEventDefOf.PawnChangedSeats, RecacheTurretPermissions);
+			Vehicle.AddEvent(VehicleEventDefOf.PawnKilled, RecacheTurretPermissions);
+			Vehicle.AddEvent(VehicleEventDefOf.PawnCapacitiesDirty, RecacheTurretPermissions);
+			foreach (VehicleTurret turret in turrets)
+			{
+				turret.FillEvents_Def();
+			}
 		}
 
 		public static VehicleTurret CreateTurret(VehiclePawn vehicle, VehicleTurret reference)
@@ -427,12 +439,6 @@ namespace Vehicles
 		public void RevalidateTurrets()
 		{
 			turretQueue ??= new List<TurretData>();
-
-			foreach (VehicleTurret turret in turrets)
-			{
-				turret.FillEvents_Def();
-			}
-
 			ResolveChildTurrets();
 			InitTurrets();
 		}
@@ -485,9 +491,19 @@ namespace Vehicles
 			}
 		}
 
+		public void RecacheTurretPermissions()
+		{
+			foreach (VehicleTurret turret in turrets)
+			{
+				turret.RecacheMannedStatus();
+			}
+		}
+
 		public override void PostSpawnSetup(bool respawningAfterLoad)
 		{
 			base.PostSpawnSetup(respawningAfterLoad);
+			RevalidateTurrets();
+			RecacheTurretPermissions();
 		}
 
 		public override void PostExposeData()
@@ -495,10 +511,6 @@ namespace Vehicles
 			base.PostExposeData();
 			Scribe_Collections.Look(ref turrets, nameof(turrets), LookMode.Deep, ctorArgs: Vehicle);
 			Scribe_Collections.Look(ref turretQueue, nameof(turretQueue), LookMode.Reference);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				RevalidateTurrets();
-			}
 		}
 
 		public struct TurretData : IExposable

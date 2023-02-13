@@ -21,8 +21,16 @@ namespace Vehicles
 		{
 		}
 		
-		public virtual void PostGenerationSetup()
+		/// <summary>
+		/// Called when newly generated, unlike PostSpawnSetup called every time it is spawned in-map
+		/// </summary>
+		public virtual void PostGeneration()
 		{
+		}
+
+		public virtual void EventRegistration()
+		{
+
 		}
 
 		public virtual void SpawnedInGodMode()

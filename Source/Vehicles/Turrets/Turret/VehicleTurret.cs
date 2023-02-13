@@ -178,6 +178,8 @@ namespace Vehicles
 
 		public int CurrentTurretFiring { get; set; }
 
+		public bool IsManned { get; private set; }
+
 		public PawnStatusOnTarget CachedPawnTargetStatus { get; set; }
 
 		public bool IsTargetable => turretDef?.turretType == TurretType.Rotatable;
@@ -203,10 +205,6 @@ namespace Vehicles
 		public bool CanOverheat => VehicleMod.settings.main.overheatMechanics && turretDef.cooldown != null && turretDef.cooldown.heatPerShot > 0;
 
 		public bool Recoils => turretDef.recoil != null;
-
-		public List<VehicleHandler> RelatedHandlers => vehicle.handlers.FindAll(h => !h.role.turretIds.NullOrEmpty() && h.role.turretIds.Contains(key));
-
-		public bool IsManned => (RelatedHandlers?.All(handler => handler.RoleFulfilled) ?? true) || VehicleMod.settings.debug.debugShootAnyTurret;
 
 		public bool HasAmmo => turretDef.ammunition is null || shellCount > 0;
 
@@ -603,6 +601,23 @@ namespace Vehicles
 			rootDrawPos_SouthEast = TurretDrawLocFor(Rot8.SouthEast, Vector3.zero, fullLoc: false);
 			rootDrawPos_SouthWest = TurretDrawLocFor(Rot8.SouthWest, Vector3.zero, fullLoc: false);
 			rootDrawPos_NorthWest = TurretDrawLocFor(Rot8.NorthWest, Vector3.zero, fullLoc: false);
+		}
+
+		public void RecacheMannedStatus()
+		{
+			IsManned = true;
+			foreach (VehicleHandler handler in vehicle.handlers)
+			{
+				if (handler.role.handlingTypes.HasFlag(HandlingTypeFlags.Turret) && (handler.role.turretIds.Contains(key) || handler.role.turretIds.Contains(groupKey)))
+				{
+					if (!handler.RoleFulfilled)
+					{
+						IsManned = false;
+						break;
+					}
+				}
+			}
+			IsManned |= VehicleMod.settings.debug.debugShootAnyTurret; //Only if debug shoot any turret = true, set satisfied to true anyways.
 		}
 
 		public bool GroupsWith(VehicleTurret turret)

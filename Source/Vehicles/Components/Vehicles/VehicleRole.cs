@@ -10,7 +10,7 @@ namespace Vehicles
 		public string label = "[MissingLabel]";
 
 		//Operating
-		public List<HandlingTypeFlags> handlingTypes = new List<HandlingTypeFlags>();
+		public HandlingTypeFlags handlingTypes = HandlingTypeFlags.None;
 		public int slots;
 		public int slotsToOperate;
 		public List<string> turretIds;
@@ -25,24 +25,8 @@ namespace Vehicles
 		{
 		}
 
-		public VehicleRole(VehicleHandler group)
+		public VehicleRole(VehicleHandler group) : this(group.role)
 		{
-			if (string.IsNullOrEmpty(group.role.key))
-			{
-				Log.Error($"Missing Key on VehicleRole {group.role.label}");
-			}
-			key = group.role.key;
-			label = group.role.label;
-			handlingTypes = new List<HandlingTypeFlags>();
-			if (group.role.handlingTypes != null)
-			{
-				handlingTypes.AddRange(group.role.handlingTypes);
-			}
-			slots = group.role.slots;
-			slotsToOperate = group.role.slotsToOperate;
-			turretIds = new List<string>();
-			turretIds.AddRange(group.role.turretIds);
-			pawnRenderer = group.role.pawnRenderer;
 		}
 
 		public VehicleRole(VehicleRole reference)
@@ -53,18 +37,17 @@ namespace Vehicles
 			}
 			key = reference.key;
 			label = reference.label;
-			handlingTypes = new List<HandlingTypeFlags>();
-			if (reference.handlingTypes != null)
-			{
-				handlingTypes.AddRange(reference.handlingTypes);
-			}
+			handlingTypes = reference.handlingTypes;
 			slots = reference.slots;
 			slotsToOperate = reference.slotsToOperate;
-			turretIds = reference.turretIds;
+			if (!reference.turretIds.NullOrEmpty())
+			{
+				turretIds = new List<string>(reference.turretIds);
+			}
 			hitbox = reference.hitbox;
 			pawnRenderer = reference.pawnRenderer;
 		}
 
-		public bool RequiredForCaravan => slotsToOperate > 0 && handlingTypes.NotNullAndAny(h => h == HandlingTypeFlags.Movement);
+		public bool RequiredForCaravan => slotsToOperate > 0 && handlingTypes.HasFlag(HandlingTypeFlags.Movement);
 	}
 }

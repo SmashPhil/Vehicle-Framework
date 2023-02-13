@@ -4,8 +4,8 @@ namespace Vehicles
 	[Flags]
 	public enum HandlingTypeFlags 
 	{
-		Cannon = 1 << 0,
+		None = 0,
+		Movement = 1 << 0,
 		Turret = 1 << 1,
-		Movement = 1 << 2
 	}
 }

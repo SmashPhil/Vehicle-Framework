@@ -44,7 +44,7 @@ namespace Vehicles
 
 		public Rot4 PawnRotation => role.pawnRenderer?.RotFor(vehicle.FullRotation) ?? Rot4.South;
 
-		public bool RequiredForMovement => role.handlingTypes.NotNullAndAny(h => h.HasFlag(HandlingTypeFlags.Movement));
+		public bool RequiredForMovement => role.handlingTypes.HasFlag(HandlingTypeFlags.Movement);
 
 		public bool RoleFulfilled
 		{
@@ -82,7 +82,7 @@ namespace Vehicles
 
 		public bool CanOperateRole(Pawn pawn)
 		{
-			if (!role.handlingTypes.NullOrEmpty())
+			if (role.handlingTypes > HandlingTypeFlags.None)
 			{
 				bool manipulation = pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation);
 				bool downed = pawn.Downed;

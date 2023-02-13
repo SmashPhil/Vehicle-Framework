@@ -174,6 +174,11 @@ namespace Vehicles
 						});
 					}
 				}
+
+				foreach (VehicleComp comp in vehicle.AllComps.Where(comp => comp is VehicleComp))
+				{
+					comp.EventRegistration();
+				}
 			}
 		}
 

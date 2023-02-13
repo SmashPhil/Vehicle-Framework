@@ -91,7 +91,7 @@ namespace Vehicles
 				lastStep = "Component Post Generation Setup";
 				foreach (VehicleComp comp in result.AllComps.Where(c => c is VehicleComp))
 				{
-					comp.PostGenerationSetup();
+					comp.PostGeneration();
 				}
 
 				//REDO - Allow other modders to add setup for non clean-slate items
@@ -134,7 +134,7 @@ namespace Vehicles
 
 			if (autoFill)
 			{
-				foreach(VehicleHandler handler in vehicle.handlers.Where(h => h.role.handlingTypes.NotNullAndAny()))
+				foreach (VehicleHandler handler in vehicle.handlers.Where(h => h.role.handlingTypes > HandlingTypeFlags.None))
 				{
 					Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(PawnKindDefOf.Colonist, faction ));
 					pawn.SetFactionDirect(faction);
