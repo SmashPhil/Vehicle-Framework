@@ -46,10 +46,18 @@ namespace Vehicles
 				nameof(VehicleExplosionDamageTranspiler)));
 		}
 
+		/// <summary>
+		/// If projectile has <see cref="CompTurretProjectileProperties"/> override total ticks to impact for speed readjustment
+		/// </summary>
+		/// <param name="__instance"></param>
+		/// <param name="__result"></param>
+		/// <param name="___origin"></param>
+		/// <param name="___destination"></param>
 		public static void StartingTicksFromTurret(Projectile __instance, ref float __result, Vector3 ___origin, Vector3 ___destination)
 		{
-			if (__instance.AllComps.FirstOrDefault(c => c is CompTurretProjectileProperties) is CompTurretProjectileProperties comp)
+			if (__instance.TryGetComp<CompTurretProjectileProperties>() is CompTurretProjectileProperties comp)
 			{
+				Log.Message("OVERRIDING");
 				float num = (___origin - ___destination).magnitude / (comp.speed / 100);
 				if (num <= 0f)
 				{
@@ -59,17 +67,29 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// If projectile has <see cref="CompTurretProjectileProperties"/> override <see cref="ProjectileHitFlags"/>
+		/// </summary>
+		/// <param name="__instance"></param>
+		/// <param name="__result"></param>
 		public static void OverriddenHitFlags(Projectile __instance, ref ProjectileHitFlags __result)
 		{
-			if (__instance.AllComps.FirstOrDefault(c => c is CompTurretProjectileProperties) is CompTurretProjectileProperties comp && comp.hitflag.HasValue)
+			if (__instance.TryGetComp<CompTurretProjectileProperties>() is CompTurretProjectileProperties comp && comp.hitflag.HasValue)
 			{
 				__result = comp.hitflag.Value;
 			}
 		}
 
+		/// <summary>
+		/// Enforces behavior from <see cref="CompTurretProjectileProperties"/> where overridden hit flags should determine valid Things for interception
+		/// </summary>
+		/// <param name="thing"></param>
+		/// <param name="__instance"></param>
+		/// <param name="___launcher"></param>
+		/// <param name="__result"></param>
 		public static bool TurretHitFlags(Thing thing, Projectile __instance, Thing ___launcher, ref bool __result)
 		{
-			if (__instance.AllComps.FirstOrDefault(c => c is CompTurretProjectileProperties) is CompTurretProjectileProperties comp)
+			if (__instance.TryGetComp<CompTurretProjectileProperties>() is CompTurretProjectileProperties comp)
 			{
 				if (!thing.Spawned)
 				{

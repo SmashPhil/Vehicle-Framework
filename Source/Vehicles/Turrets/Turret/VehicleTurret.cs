@@ -993,17 +993,17 @@ namespace Vehicles
 				
 				if (LaunchProjectileCE is null)
 				{
-					Projectile projectile2 = (Projectile)GenSpawn.Spawn(projectile, vehicle.Position, vehicle.Map, WipeMode.Vanish);
+					Projectile projectileInstance = (Projectile)GenSpawn.Spawn(projectile, vehicle.Position, vehicle.Map, WipeMode.Vanish);
 					if (turretDef.projectileSpeed > 0)
 					{
-						projectile2.AllComps.Add(new CompTurretProjectileProperties(vehicle)
+						projectileInstance.TryAddComp(new CompTurretProjectileProperties(vehicle)
 						{
-							speed = turretDef.projectileSpeed > 0 ? turretDef.projectileSpeed : projectile2.def.projectile.speed,
+							speed = turretDef.projectileSpeed > 0 ? turretDef.projectileSpeed : projectileInstance.def.projectile.speed,
 							hitflag = turretDef.hitFlags,
 							hitflags = turretDef.attachProjectileFlag
 						});
 					}
-					projectile2.Launch(vehicle, launchCell, cell, cannonTarget, projectile2.HitFlags, false, vehicle);
+					projectileInstance.Launch(vehicle, launchCell, cell, cannonTarget, projectileInstance.HitFlags, false, vehicle);
 				}
 				else
 				{
