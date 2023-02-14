@@ -135,6 +135,7 @@ namespace Vehicles
 			{
 				return 1;
 			}
+
 			foreach (VehicleJobLimitations jobLimit in VehicleDef.properties.vehicleJobLimitations)
 			{
 				if (jobLimit.defName == jobDef.defName)

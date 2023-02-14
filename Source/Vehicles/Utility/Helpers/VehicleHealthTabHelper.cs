@@ -5,6 +5,7 @@ using UnityEngine;
 using Verse;
 using Verse.Sound;
 using RimWorld;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -21,11 +22,22 @@ namespace Vehicles
 		private static VehicleComponent selectedComponent;
 		private static VehicleComponent highlightedComponent;
 
+		private static readonly List<JobDef> jobLimitJobDefs = new List<JobDef>();
+
 		public static void InitHealthITab()
 		{
 			componentTabScrollPos = Vector2.zero;
 			selectedComponent = null;
 			highlightedComponent = null;
+
+			jobLimitJobDefs.Clear();
+			foreach (JobDef jobDef in DefDatabase<JobDef>.AllDefsListForReading)
+			{
+				if (jobDef.driverClass.IsSubclassOf(typeof(VehicleJobDriver)))
+				{
+					jobLimitJobDefs.Add(jobDef);
+				}
+			}
 		}
 
 		public static void DrawHealthInfo(Rect rect, VehiclePawn vehicle)
@@ -36,62 +48,92 @@ namespace Vehicles
 			{
 				onTab = ITab_Vehicle_Health.VehicleHealthTab.Overview;
 			}, onTab == ITab_Vehicle_Health.VehicleHealthTab.Overview));
-			list.Add(new TabRecord("VF_JobSettings".Translate(), delegate ()
-			{
-				onTab = ITab_Vehicle_Health.VehicleHealthTab.JobSettings;
-			}, onTab == ITab_Vehicle_Health.VehicleHealthTab.JobSettings));
+			//list.Add(new TabRecord("VF_JobSettings".Translate(), delegate ()
+			//{
+			//	onTab = ITab_Vehicle_Health.VehicleHealthTab.JobSettings;
+			//}, onTab == ITab_Vehicle_Health.VehicleHealthTab.JobSettings));
 			TabDrawer.DrawTabs(rect, list);
 
 			rect = rect.ContractedBy(9f);
 			Widgets.BeginGroup(rect);
 			{
-				Text.Font = GameFont.Medium;
-				GUI.color = Color.white;
-				Text.Anchor = TextAnchor.UpperCenter;
-
-				switch (onTab)
+				GUIState.Push();
 				{
-					case ITab_Vehicle_Health.VehicleHealthTab.Overview:
-						DrawVehicleInformation(rect, vehicle);
-						break;
-					case ITab_Vehicle_Health.VehicleHealthTab.JobSettings:
-						DrawJobSettings(rect, vehicle);
-						break;
+					Text.Font = GameFont.Small;
+					GUI.color = Color.white;
+					Text.Anchor = TextAnchor.UpperLeft;
+
+					switch (onTab)
+					{
+						case ITab_Vehicle_Health.VehicleHealthTab.Overview:
+							DrawVehicleInformation(rect, vehicle);
+							break;
+						case ITab_Vehicle_Health.VehicleHealthTab.JobSettings:
+							DrawJobSettings(rect, vehicle);
+							break;
+					}
 				}
+				GUIState.Pop();
 			}
 			Widgets.EndGroup();
 		}
 
 		public static void DrawJobSettings(Rect leftRect, VehiclePawn vehicle)
 		{
+			throw new NotImplementedException("Job Settings");
+			GUIState.Push();
+			{
+				float curY = 0;
+				Rect rect = new Rect(0f, curY, leftRect.width, 34f);
 
+				rect.SplitVertically(rect.width / 2, out Rect _, out Rect buttonRect);
+
+				if (Widgets.ButtonText(buttonRect, "ResetButton".Translate()))
+				{
+					//vehicle.jobLimitations.Clear();
+				}
+
+				foreach (JobDef jobDef in jobLimitJobDefs)
+				{
+					int maxWorkers = 1;
+					
+					curY += 34;
+				}
+			}
+			GUIState.Pop();
 		}
 
 		public static void DrawVehicleInformation(Rect leftRect, VehiclePawn vehicle)
 		{
-			float curY = 0;
-			Text.Font = GameFont.Tiny;
-			Text.Anchor = TextAnchor.UpperLeft;
-			GUI.color = new Color(0.9f, 0.9f, 0.9f);
-
-			Rect rect = new Rect(0f, curY, leftRect.width, 34f);
-
-			Widgets.Label(rect, vehicle.LabelCap);
-			if (Mouse.IsOver(rect))
+			GUIState.Push();
 			{
-				TooltipHandler.TipRegion(rect, () => vehicle.ageTracker.AgeTooltipString, "HealthTab".GetHashCode());
-				Widgets.DrawHighlight(rect);
-			}
-			GUI.color = Color.white;
-			curY += 34;
+				float curY = 0;
+				Rect rect = new Rect(0f, curY, leftRect.width, 34f);
 
-			Text.Font = GameFont.Small;
-			Rect statRect = new Rect(0, curY, leftRect.width, 34);
-			foreach (VehicleStatDef statDef in vehicle.VehicleDef.StatCategoryDefs().Distinct())
-			{
-				curY = statDef.Worker.DrawVehicleStat(statRect, curY, vehicle);
-				statRect.y = curY;
+				Text.Anchor = TextAnchor.UpperCenter;
+				Widgets.Label(rect, vehicle.LabelCap);
+				if (Mouse.IsOver(rect))
+				{
+					string dateReadout = $"{Find.ActiveLanguageWorker.OrdinalNumber(vehicle.ageTracker.BirthDayOfSeasonZeroBased + 1, Gender.None)} {vehicle.ageTracker.BirthQuadrum.Label()}, {vehicle.ageTracker.BirthYear}";
+					(GenTicks.TicksAbs - vehicle.ageTracker.BirthAbsTicks).TicksToPeriod(out int years, out int quadrums, out int days, out float hours);
+					string chronologicalReadout = "AgeChronological".Translate(years, quadrums, days);
+					
+					TooltipHandler.TipRegion(rect, () => $"{"VF_VehicleAgeReadout".Translate(dateReadout)}\n{chronologicalReadout}", "HealthTab".GetHashCode());
+					Widgets.DrawHighlight(rect);
+				}
+
+				GUIState.Reset();
+				
+				curY += 34;
+
+				Rect statRect = new Rect(0, curY, leftRect.width, 34);
+				foreach (VehicleStatDef statDef in vehicle.VehicleDef.StatCategoryDefs().Distinct())
+				{
+					curY = statDef.Worker.DrawVehicleStat(statRect, curY, vehicle);
+					statRect.y = curY;
+				}
 			}
+			GUIState.Pop();
 		}
 
 		/// <summary>

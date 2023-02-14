@@ -24,7 +24,6 @@ Drafted vehicles can be moved, but restrict the unloading of pawns.
 	<VF_ResetColorPalettesConfirmation>Are you sure you want to reset all saved palettes back to default settings? This action cannot be undone.</VF_ResetColorPalettesConfirmation>
 	<VF_RotateVehicleRendering>Rotate vehicle</VF_RotateVehicleRendering>
 	<VF_SaveColorPalette>Save Palette</VF_SaveColorPalette>
-	<VF_JobSettings>Job Settings</VF_JobSettings>
 	
 	<ColorOne>ColorOne</ColorOne>
 	<ColorTwo>ColorTwo</ColorTwo>

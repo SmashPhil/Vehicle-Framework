@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <LanguageData>
+	<VF_JobSettings>Job Settings</VF_JobSettings>
 	
+	<VF_VehicleAgeReadout>Produced: {0}</VF_VehicleAgeReadout>
 </LanguageData>

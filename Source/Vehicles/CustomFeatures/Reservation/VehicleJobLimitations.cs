@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using Verse;
 using SmashTools;
 
 namespace Vehicles
@@ -16,6 +17,8 @@ namespace Vehicles
 			this.defName = defName;
 			this.maxWorkers = maxWorkers;
 		}
+
+		public bool IsValid => !defName.NullOrEmpty();
 
 		public static VehicleJobLimitations Invalid => new VehicleJobLimitations(string.Empty, 0);
 
