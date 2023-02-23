@@ -64,7 +64,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return new Vector2(1024f, Verse.UI.screenHeight);
+				return new Vector2(1024f, UI.screenHeight);
 			}
 		}
 

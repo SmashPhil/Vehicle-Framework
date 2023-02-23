@@ -30,6 +30,8 @@ Drafted vehicles can be moved, but restrict the unloading of pawns.
 	<ColorThree>ColorThree</ColorThree>
 	<ColorPickerHex>Hex</ColorPickerHex>
 	
+	<VF_Caravan_Dismounted>Dismounted</VF_Caravan_Dismounted>
+	
 	<!-- Stats -->
 	<VF_StatsReport_CargoWeight>Cargo: {0}</VF_StatsReport_CargoWeight>
 	

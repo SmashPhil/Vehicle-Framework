@@ -412,6 +412,7 @@
     <Compile Include="Misc\Enums\UI\WorldPathingDebugType.cs" />
     <Compile Include="Misc\Interfaces\IDebugLordMeetingPoint.cs" />
     <Compile Include="Misc\Interfaces\ISustainerTarget.cs" />
+    <Compile Include="Misc\Interfaces\IVehicleWorldObject.cs" />
     <Compile Include="Pathing\Map\VehicleRegionUpdateCatalog.cs" />
     <Compile Include="Pathing\RegionGrid\ChunkSet.cs" />
     <Compile Include="Utility\DesignatorCache.cs" />
@@ -475,7 +476,7 @@
     <Compile Include="Graphics\Graphic\Graphics\Animated\Graphic_Propeller.cs" />
     <Compile Include="Graphics\Graphic\Graphics\Animated\Graphic_Rotator.cs" />
     <Compile Include="Graphics\Graphic\Graphics\ExtraRotationRegistry.cs" />
-    <Compile Include="Graphics\ITab\WITab_Vehicle_Health.cs" />
+    <Compile Include="Graphics\ITab\WITab_Vehicle_Manifest.cs" />
     <Compile Include="Harmony\PatchCategories\PawnAI.cs" />
     <Compile Include="Harmony\PatchCategories\DefGenerators\ThingDefGenerator_Skyfallers.cs" />
     <Compile Include="Misc\DefModExtension\CETurretDataDefModExtension.cs" />
@@ -686,6 +687,7 @@
     <Compile Include="Utility\Extensions\Ext_Vehicles.cs" />
     <Compile Include="Utility\Helpers\AchievementsHelper.cs" />
     <Compile Include="Utility\Helpers\CaravanHelper.cs" />
+    <Compile Include="Utility\Helpers\CaravanInfoHelper.cs" />
     <Compile Include="Utility\Helpers\DamageHelper.cs" />
     <Compile Include="Utility\Helpers\DebugHelper.cs" />
     <Compile Include="Utility\Helpers\HediffHelper.cs" />
@@ -699,7 +701,8 @@
     <Compile Include="Utility\Helpers\VehicleCaravanPathingHelper.cs" />
     <Compile Include="Utility\Helpers\VehicleGraphics.cs" />
     <Compile Include="Utility\Helpers\VehicleGUI.cs" />
-    <Compile Include="Utility\Helpers\VehicleHealthTabHelper.cs" />
+    <Compile Include="Utility\Helpers\VehicleTabHelper_Health.cs" />
+    <Compile Include="Utility\Helpers\VehicleTabHelper_Passenger.cs" />
     <Compile Include="Utility\Helpers\XmlHelper.cs" />
     <Compile Include="Utility\Helpers\SkyfallerHelper.cs" />
     <Compile Include="Utility\Helpers\TargetingHelper.cs" />

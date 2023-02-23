@@ -401,7 +401,9 @@ namespace Vehicles
 		public override void CompTickRare()
 		{
 			base.CompTickRare();
+			
 			RevalidateConsumptionStatus(); //Intermittent checks to ensure no missed cases cause vehicle to drain
+			
 			if (Vehicle.Spawned)
 			{
 				if (!FullTank)
@@ -415,7 +417,7 @@ namespace Vehicles
 			}
 
 			//Validate leak every so often
-			if (Props.leakDef != null && fuel > 0 && Find.TickManager.TicksGame % TicksPerLeakCheck == 0)
+			if (Props.leakDef != null && fuel > 0 && !FuelComponents.NullOrEmpty() && Find.TickManager.TicksGame % TicksPerLeakCheck == 0)
 			{
 				leaking = false;
 				foreach (VehicleComponent component in FuelComponents)
@@ -503,6 +505,8 @@ namespace Vehicles
 
 		public override void EventRegistration()
 		{
+			FuelComponents = Vehicle.statHandler.components.Where(component => component.props.HasReactor<Reactor_FuelLeak>()).ToList();
+
 			Vehicle.AddEvent(VehicleEventDefOf.MoveStart, RevalidateConsumptionStatus);
 			Vehicle.AddEvent(VehicleEventDefOf.MoveStop, RevalidateConsumptionStatus);
 			Vehicle.AddEvent(VehicleEventDefOf.OutOfFuel, RevalidateConsumptionStatus);
@@ -532,7 +536,6 @@ namespace Vehicles
 			{
 				TryConnectPower();
 			}
-			FuelComponents = Vehicle.statHandler.components.Where(component => component.props.HasReactor<Reactor_FuelLeak>()).ToList();
 		}
 
 		public override void PostExposeData()

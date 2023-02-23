@@ -335,7 +335,7 @@ namespace Vehicles
 			{
 				if (!pawn.IsWorldPawn())
 				{
-					Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.Decide);
+					Find.WorldPawns.PassToWorld(pawn);
 				}
 			}
 			if (map != null)
@@ -453,7 +453,7 @@ namespace Vehicles
 					caravan.AddPawn(pawn, addToWorldPawnsIfNotAlready);
 					if (addToWorldPawnsIfNotAlready && !pawn.IsWorldPawn())
 					{
-						Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.Decide);
+						Find.WorldPawns.PassToWorld(pawn);
 					}
 				}
 			}
@@ -490,7 +490,7 @@ namespace Vehicles
 				tmpCaravanPawns.Add(new ThingCount(pawn, pawn.stackCount));
 			}
 			num += CollectionsMassCalculator.MassUsage(tmpCaravanPawns, IgnorePawnsInventoryMode.IgnoreIfAssignedToUnload, false, false);
-			float num2 = CollectionsMassCalculator.Capacity(tmpCaravanPawns, null);
+			float num2 = CaravanInfoHelper.Capacity(tmpCaravanPawns, null);
 			tmpCaravanPawns.Clear();
 			return num2 - num;
 		}

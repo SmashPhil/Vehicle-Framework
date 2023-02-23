@@ -29,6 +29,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MassUtility), nameof(MassUtility.CanEverCarryAnything)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(CanCarryIfVehicle)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CollectionsMassCalculator), nameof(CollectionsMassCalculator.Capacity), parameters: new Type[] { typeof(List<ThingCount>), typeof(StringBuilder) }),
+				transpiler: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(PawnCapacityInVehicleTranspiler)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(ITab_Pawn_FormingCaravan), "FillTab"),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(FillTabVehicleCaravan)));
@@ -187,6 +190,14 @@ namespace Vehicles
 			if (p is VehiclePawn vehicle)
 			{
 				__result = vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
+				if (explanation != null)
+				{
+					if (explanation.Length > 0)
+					{
+						explanation.AppendLine();
+					}
+					explanation.Append($"  - {vehicle.LabelShortCap}: {__result.ToStringMassOffset()}");
+				}
 				return false;
 			}
 			return true;
@@ -201,12 +212,47 @@ namespace Vehicles
 		public static bool CanCarryIfVehicle(Pawn p, ref bool __result)
 		{
 			__result = false;
-			if(p is VehiclePawn)
+			if (p is VehiclePawn)
+			{
 				__result = true;
+			}
 			return !__result;
 		}
 
-		
+		public static IEnumerable<CodeInstruction> PawnCapacityInVehicleTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+		{
+			List<CodeInstruction> instructionList = instructions.ToList();
+			MethodInfo capacityMethod = AccessTools.Method(typeof(MassUtility), nameof(MassUtility.Capacity));
+			for (int i = 0; i < instructionList.Count; i++)
+			{
+				CodeInstruction instruction = instructionList[i];
+
+				if (instruction.Calls(capacityMethod))
+				{
+					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(CaravanHandling), nameof(PawnCapacityInVehicle)));
+					instruction = instructionList[++i]; //CALL : MassUtility.Capacity
+				}
+
+				yield return instruction;
+			}
+		}
+
+		private static float PawnCapacityInVehicle(Pawn pawn, StringBuilder explanation)
+		{
+			if (pawn.IsInVehicle() || CaravanHelper.assignedSeats.ContainsKey(pawn))
+			{
+				if (explanation != null)
+				{
+					if (explanation.Length > 0)
+					{
+						explanation.AppendLine();
+					}
+					explanation.Append($"  - {pawn.LabelCap}: +0 kg ({"VF_PawnInVehicleNoCapacity".Translate()})");
+				}
+				return 0; //pawns in vehicles or assigned to vehicle don't contribute to capacity
+			}
+			return MassUtility.Capacity(pawn, explanation);
+		}
 
 		public static bool FillTabVehicleCaravan(ITab_Pawn_FormingCaravan __instance, ref List<Thing> ___thingsToSelect, Vector2 ___size, 
 			ref float ___lastDrawnHeight, ref Vector2 ___scrollPosition, ref List<Thing> ___tmpSingleThing)

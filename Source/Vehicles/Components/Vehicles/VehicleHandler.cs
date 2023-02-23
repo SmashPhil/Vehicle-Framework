@@ -76,9 +76,33 @@ namespace Vehicles
 			}
 		}
 
-		public static bool operator ==(VehicleHandler obj1, VehicleHandler obj2) => obj1?.Equals(obj2) ?? (obj1 is null && obj2 is null);
+		public static bool operator ==(VehicleHandler lhs, VehicleHandler rhs)
+		{
+			if (lhs is null)
+			{
+				return rhs is null;
+			}
+			return lhs.Equals(rhs);
+		}
 
-		public static bool operator !=(VehicleHandler obj1, VehicleHandler obj2) => !(obj1 == obj2);
+		public static bool operator !=(VehicleHandler lhs, VehicleHandler rhs)
+		{
+			return !(lhs == rhs);
+		}
+
+		public static bool operator ==(VehicleHandler lhs, IThingHolder rhs)
+		{
+			if (!(rhs is VehicleHandler handler))
+			{
+				return false;
+			}
+			return lhs == handler;
+		}
+
+		public static bool operator !=(VehicleHandler lhs, IThingHolder rhs)
+		{
+			return !(lhs == rhs);
+		}
 
 		public bool CanOperateRole(Pawn pawn)
 		{

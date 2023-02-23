@@ -438,7 +438,6 @@ namespace Vehicles
 		private void TrySatisfyPawnNeeds(VehicleHandler handler, Pawn pawn)
 		{
 			if (pawn.Dead) return;
-			Log.Message($"Satisfying: {pawn}");
 			List<Need> allNeeds = pawn.needs.AllNeeds;
 			int tile = this.IsCaravanMember() ? this.GetCaravan().Tile : Map.Tile;
 
@@ -492,7 +491,6 @@ namespace Vehicles
 			if (!cantRestWhileMoving || (Spawned && !vPather.Moving) || (this.GetVehicleCaravan() is VehicleCaravan vehicleCaravan && !vehicleCaravan.vPather.Moving))
 			{
 				float restValue = StatDefOf.BedRestEffectiveness.valueIfMissing; //TODO - add rest modifier for vehicles
-				Log.Message($"Resting: {restValue} Resting={rest.Resting}");
 				rest.TickResting(restValue);
 			}
 		}

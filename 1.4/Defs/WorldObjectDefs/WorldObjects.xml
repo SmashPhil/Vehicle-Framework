@@ -21,6 +21,7 @@
 		<expandingIcon>true</expandingIcon>
 		<expandingIconTexture>UI/BoatObject</expandingIconTexture>
 		<expandingIconPriority>60</expandingIconPriority>
+		
 		<comps>
 			<li Class="WorldObjectCompProperties_Timeout" />
 		</comps>
@@ -44,7 +45,7 @@
 		</IncidentTargetTags>
 		
 		<inspectorTabs>
-			<li>WITab_Caravan_Health</li>
+			<li>Vehicles.WITab_Vehicle_Manifest</li>
 			<li>WITab_Caravan_Needs</li>
 			<li>WITab_Caravan_Gear</li>
 			<li>WITab_Caravan_Social</li>
@@ -70,11 +71,13 @@
 		<expandingIconPriority>100</expandingIconPriority>
 		<expandMore>true</expandMore>
 		<allowCaravanIncidentsWhichGenerateMap>true</allowCaravanIncidentsWhichGenerateMap>
+		
 		<IncidentTargetTags>
 			<li>Caravan</li>
 		</IncidentTargetTags>
+		
 		<inspectorTabs>
-			<li>Vehicles.WITab_Vehicle_Health</li>
+			<li>Vehicles.WITab_Vehicle_Manifest</li>
 		</inspectorTabs>
 	</WorldObjectDef>
 	
@@ -103,15 +106,18 @@
 		<expandingIconPriority>90</expandingIconPriority>
 		<expandMore>true</expandMore>
 		<drawSizeMultiplier>0.25</drawSizeMultiplier>
+		
 		<explosionGraphic>
 			<texPath>Projectiles/World/Flak/Explosion</texPath>
 			<graphicClass>Vehicles.Graphic_Animate</graphicClass>
 			<drawSize>(1,1)</drawSize>
 		</explosionGraphic>
+		
 		<framesForExplosion>6</framesForExplosion>
 		<damage>80</damage>
 		<accuracy>0.1</accuracy>
 		<ticksBetweenShots>180</ticksBetweenShots>
+		
 		<properties>
 			<distance>5</distance>
 			<arc>30</arc>

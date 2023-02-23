@@ -10,7 +10,7 @@ using SmashTools;
 namespace Vehicles
 {
 	[StaticConstructorOnStartup]
-	public class VehicleCaravan : Caravan
+	public class VehicleCaravan : Caravan, IVehicleWorldObject
 	{
 		private static readonly Texture2D SplitCommand = ContentFinder<Texture2D>.Get("UI/Commands/SplitCaravan", true);
 
@@ -29,6 +29,36 @@ namespace Vehicles
 		}
 
 		public override Vector3 DrawPos => vTweener.TweenedPos;
+
+		public bool CanDismount => true;
+
+		public IEnumerable<VehiclePawn> Vehicles
+		{
+			get
+			{
+				foreach (Pawn pawn in PawnsListForReading)
+				{
+					if (pawn is VehiclePawn vehicle)
+					{
+						yield return vehicle;
+					}
+				}
+			}
+		}
+
+		public IEnumerable<Pawn> DismountedPawns
+		{
+			get
+			{
+				foreach (Pawn pawn in PawnsListForReading)
+				{
+					if (!(pawn is VehiclePawn) && !pawn.IsInVehicle())
+					{
+						yield return pawn;
+					}
+				}
+			}
+		}
 
 		public VehiclePawn LeadVehicle
 		{
@@ -145,10 +175,6 @@ namespace Vehicles
 
 		public override IEnumerable<Gizmo> GetGizmos()
 		{
-			if (Find.WorldSelector.SingleSelectedObject == this)
-			{
-				yield return new Gizmo_VehicleCaravanInfo(this);
-			}
 			foreach (Gizmo gizmo in base.GetGizmos())
 			{
 				//Only pull non-devmode gizmos
@@ -457,6 +483,12 @@ namespace Vehicles
 		{
 			base.SpawnSetup();
 			vTweener.ResetTweenedPosToRoot();
+
+			//Necessary check for post load, otherwise registry will be null until spawned on map
+			foreach (VehiclePawn vehicle in Vehicles)
+			{
+				vehicle.RegisterEvents();
+			}
 		}
 
 		public override void Tick()

@@ -9,7 +9,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public static class VehicleHealthTabHelper
+	public static class VehicleTabHelper_Health
 	{
 		public const float ComponentRowHeight = 20f;
 		public const float ComponentIndicatorIconSize = 20f;
@@ -17,30 +17,64 @@ namespace Vehicles
 		private static readonly Color MouseOverColor = new Color(0.85f, 0.85f, 0.85f, 0.1f);
 		private static readonly Color AlternatingColor = new Color(0.75f, 0.75f, 0.75f, 0.1f);
 
+		private static float componentListHeight;
+		private static VehiclePawn inspectingVehicle;
+		private static Vector2 size;
+
 		private static ITab_Vehicle_Health.VehicleHealthTab onTab;
 		private static Vector2 componentTabScrollPos;
 		private static VehicleComponent selectedComponent;
-		private static VehicleComponent highlightedComponent;
 
 		private static readonly List<JobDef> jobLimitJobDefs = new List<JobDef>();
 
-		public static void InitHealthITab()
+		public static void Init()
 		{
 			componentTabScrollPos = Vector2.zero;
 			selectedComponent = null;
-			highlightedComponent = null;
+			//jobLimitJobDefs.Clear();
+			//foreach (JobDef jobDef in DefDatabase<JobDef>.AllDefsListForReading)
+			//{
+			//	if (jobDef.driverClass.IsSubclassOf(typeof(VehicleJobDriver)))
+			//	{
+			//		jobLimitJobDefs.Add(jobDef);
+			//	}
+			//}
+		}
 
-			jobLimitJobDefs.Clear();
-			foreach (JobDef jobDef in DefDatabase<JobDef>.AllDefsListForReading)
+		public static void Start(Vector2 size, VehiclePawn vehicle)
+		{
+			if (vehicle != inspectingVehicle)
 			{
-				if (jobDef.driverClass.IsSubclassOf(typeof(VehicleJobDriver)))
-				{
-					jobLimitJobDefs.Add(jobDef);
-				}
+				//Not captured by OnOpen when switching between vehicles with ITab already open
+				inspectingVehicle = vehicle;
+				VehicleTabHelper_Health.size = size;
+				RecacheComponentListHeight();
 			}
 		}
 
-		public static void DrawHealthInfo(Rect rect, VehiclePawn vehicle)
+		public static void End()
+		{
+		}
+
+		public static void DrawHealthPanel(VehiclePawn vehicle)
+		{
+			GUIState.Push();
+			{
+				Rect rect = new Rect(0, 20, size.x, size.y - 20);
+
+				Rect infoPanelRect = new Rect(rect.x, rect.y, ITab_Vehicle_Health.InfoPanelWidth, rect.height).Rounded();
+				Rect componentPanelRect = new Rect(infoPanelRect.xMax, rect.y, size.x - ITab_Vehicle_Health.InfoPanelWidth, rect.height);
+				
+				infoPanelRect.yMin += 11f; //Extra space for tab, excluded from componentPanelRect for top options
+
+				DrawHealthInfo(infoPanelRect, vehicle);
+				GUIState.Reset();
+				DrawComponentsInfo(componentPanelRect, vehicle);
+			}
+			GUIState.Pop();
+		}
+
+		private static void DrawHealthInfo(Rect rect, VehiclePawn vehicle)
 		{
 			Widgets.DrawMenuSection(rect);
 			List<TabRecord> list = new List<TabRecord>();
@@ -78,7 +112,7 @@ namespace Vehicles
 			Widgets.EndGroup();
 		}
 
-		public static void DrawJobSettings(Rect leftRect, VehiclePawn vehicle)
+		private static void DrawJobSettings(Rect leftRect, VehiclePawn vehicle)
 		{
 			throw new NotImplementedException("Job Settings");
 			GUIState.Push();
@@ -103,7 +137,7 @@ namespace Vehicles
 			GUIState.Pop();
 		}
 
-		public static void DrawVehicleInformation(Rect leftRect, VehiclePawn vehicle)
+		private static void DrawVehicleInformation(Rect leftRect, VehiclePawn vehicle)
 		{
 			GUIState.Push();
 			{
@@ -142,7 +176,7 @@ namespace Vehicles
 		/// <param name="rect"></param>
 		/// <param name="vehicle"></param>
 		/// <param name="componentViewHeight">Cached height of full component list, taking into account extra space of longer labels</param>
-		public static void DrawComponentsInfo(Rect rect, VehiclePawn vehicle, float componentViewHeight)
+		private static void DrawComponentsInfo(Rect rect, VehiclePawn vehicle)
 		{
 			Text.Font = GameFont.Small;
 			float textHeight = Text.CalcSize("VehicleComponentHealth".Translate()).y;
@@ -167,11 +201,10 @@ namespace Vehicles
 			rect.x += 2.5f;
 			rect.width -= 5;
 
-			Rect scrollView = new Rect(rect.x, rect.y + topLabelRect.height * 2, rect.width, componentViewHeight);
+			Rect scrollView = new Rect(rect.x, rect.y + topLabelRect.height * 2, rect.width, componentListHeight);
 			bool alternatingRow = false;
 			Widgets.BeginScrollView(rect, ref componentTabScrollPos, scrollView);
 			{
-				highlightedComponent = null;
 				float curY = scrollView.y;
 				bool highlighted = false;
 				foreach (VehicleComponent component in vehicle.statHandler.components)
@@ -185,7 +218,6 @@ namespace Vehicles
 					};
 					if (Mouse.IsOver(highlightingRect))
 					{
-						highlightedComponent = component;
 						Widgets.DrawBoxSolid(highlightingRect, MouseOverColor);
 						//For debug drawing of component hitbox
 						vehicle.HighlightedComponent = component;
@@ -249,6 +281,16 @@ namespace Vehicles
 			component.DrawIcon(iconRect);
 
 			return labelHeight;
+		}
+
+		private static void RecacheComponentListHeight(float lineHeight = ComponentRowHeight)
+		{
+			componentListHeight = 0;
+			foreach (VehicleComponent component in inspectingVehicle.statHandler.components)
+			{
+				float textHeight = Text.CalcHeight(component.props.label, size.x - ITab_Vehicle_Health.InfoPanelWidth);
+				componentListHeight += Mathf.Max(lineHeight, textHeight);
+			}
 		}
 
 		public static Color ComponentEfficiencyColor(this VehicleComponent component)

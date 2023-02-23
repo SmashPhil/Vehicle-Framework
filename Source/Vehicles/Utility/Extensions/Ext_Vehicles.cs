@@ -97,7 +97,6 @@ namespace Vehicles
 
 		public static void RegenerateEvents(this VehiclePawn vehicle)
 		{
-			vehicle.EventRegistry?.Clear();
 			vehicle.RegisterEvents();
 		}
 

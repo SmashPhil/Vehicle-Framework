@@ -56,7 +56,7 @@ namespace Vehicles
 
 			Version = ModVersion.VersionFromAssembly(Assembly.GetExecutingAssembly(), ProjectStartDate);
 			string readout = Prefs.DevMode ? Version.VersionStringWithRevision : Version.VersionString;
-			Log.Message($"{LogLabel} version {readout}");
+			Log.Message($"<color=orange>{LogLabel}</color> version {readout}");
 
 			File.WriteAllText(VersionDir, Version.VersionString);
 

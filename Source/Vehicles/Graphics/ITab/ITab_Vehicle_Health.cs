@@ -9,23 +9,20 @@ namespace Vehicles
 {
 	public class ITab_Vehicle_Health : ITab
 	{
-		private GameFont originalFont;
-		private TextAnchor originalAnchor;
-		private Color originalGUIColor;
+		public const float WindowWidth = 670;
+		public const float WindowHeight = 430;
 
-		private float componentListHeight;
+		public const float InfoPanelWidth = 250;
 
-		private static VehiclePawn inspectingVehicle;
+		public static readonly Vector2 panelSize = new Vector2(WindowWidth, WindowHeight);
 
 		public ITab_Vehicle_Health()
 		{
-			size = new Vector2(720, 430);
+			size = panelSize;
 			labelKey = "TabComponents";
 		}
 
 		public VehiclePawn Vehicle => SelPawn as VehiclePawn;
-
-		public (float left, float right) PanelWidths => (size.x * 0.375f, size.x * 0.625f);
 
 		/// <summary>
 		/// Recache height every time vehicle health tab is opened
@@ -33,8 +30,7 @@ namespace Vehicles
 		public override void OnOpen()
 		{
 			base.OnOpen();
-			VehicleHealthTabHelper.InitHealthITab();
-			RecacheComponentListHeight(PanelWidths.right);
+			VehicleTabHelper_Health.Init();
 		}
 
 		protected override void CloseTab()
@@ -43,40 +39,13 @@ namespace Vehicles
 			Vehicle.HighlightedComponent = null;
 		}
 
-		private void RecacheComponentListHeight(float width, float lineHeight = VehicleHealthTabHelper.ComponentRowHeight)
-		{
-			componentListHeight = 0;
-			foreach (VehicleComponent component in Vehicle.statHandler.components)
-			{
-				float textHeight = Text.CalcHeight(component.props.label, width);
-				componentListHeight += Mathf.Max(lineHeight, textHeight);
-			}
-		}
-
 		protected override void FillTab()
 		{
-			GUIState.Push();
-			try
+			VehicleTabHelper_Health.Start(panelSize, Vehicle);
 			{
-				if (Vehicle != inspectingVehicle)
-				{
-					//Not captured by OnOpen when switching between vehicles with ITab already open
-					inspectingVehicle = Vehicle;
-					RecacheComponentListHeight(PanelWidths.right);
-				}
-				Rect rect = new Rect(0, 20, size.x, size.y - 20);
-				Rect infoPanelRect = new Rect(rect.x, rect.y, PanelWidths.left, rect.height).Rounded();
-				Rect componentPanelRect = new Rect(infoPanelRect.xMax, rect.y, PanelWidths.right, rect.height);
-				infoPanelRect.yMin += 11f; //Extra space for tab, excluded from componentPanelRect for top options
-
-				VehicleHealthTabHelper.DrawHealthInfo(infoPanelRect, vehicle: Vehicle);
-				GUIState.Reset();
-				VehicleHealthTabHelper.DrawComponentsInfo(componentPanelRect, vehicle: Vehicle, componentViewHeight: componentListHeight);
+				VehicleTabHelper_Health.DrawHealthPanel(Vehicle);
 			}
-			finally
-			{
-				GUIState.Pop();
-			}
+			VehicleTabHelper_Health.End();
 		}
 
 		public enum VehicleHealthTab

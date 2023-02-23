@@ -433,7 +433,7 @@ namespace Vehicles
 				vehicle.jobs.StopAll(false, true);
 				vehicle.VerifyReservations();
 			}
-			Find.WorldPawns.PassToWorld(vehicle, PawnDiscardDecideMode.Decide);
+			Find.WorldPawns.PassToWorld(vehicle);
 			QuestUtility.SendQuestTargetSignals(vehicle.questTags, "LeftMap", vehicle.Named("SUBJECT"));
 			Find.FactionManager.Notify_PawnLeftMap(vehicle);
 			Find.IdeoManager.Notify_PawnLeftMap(vehicle);

@@ -11,7 +11,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class AerialVehicleInFlight : DynamicDrawnWorldObject
+	public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObject
 	{
 		public const float ReconFlightSpeed = 5;
 		public const float ExpandingResize = 35f;
@@ -79,6 +79,26 @@ namespace Vehicles
 		protected virtual Rot8 FullRotation => Rot8.North;
 
 		protected virtual float RotatorSpeeds => 59;
+
+		public bool CanDismount => false;
+
+		//For WITab readouts related to vehicles
+		public IEnumerable<VehiclePawn> Vehicles
+		{
+			get
+			{
+				yield return vehicle;
+			}
+		}
+
+		//All pawns will be in the AerialVehicle
+		public IEnumerable<Pawn> DismountedPawns
+		{
+			get
+			{
+				yield break;
+			}
+		}
 
 		public virtual Material VehicleMat
 		{
@@ -646,6 +666,16 @@ namespace Vehicles
 			Scribe_Values.Look(ref recon, nameof(recon));
 			Scribe_Values.Look(ref directionFacing, nameof(directionFacing));
 			Scribe_Values.Look(ref position, nameof(position));
+		}
+
+		public void GetChildHolders(List<IThingHolder> outChildren)
+		{
+			outChildren.AddRange(vehicle.handlers);
+		}
+
+		public ThingOwner GetDirectlyHeldThings()
+		{
+			return vehicle.inventory.innerContainer;
 		}
 	}
 }
