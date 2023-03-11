@@ -120,7 +120,6 @@ namespace Vehicles
 		/// Draw diagonal and shifted brackets for Boats
 		/// </summary>
 		/// <param name="obj"></param>
-		/// <returns></returns>
 		public static bool DrawSelectionBracketsVehicles(object obj, Material overrideMat)
 		{
 			var vehicle = obj as VehiclePawn;
@@ -133,8 +132,6 @@ namespace Vehicles
 				}
 				Vector3[] brackets = new Vector3[4];
 				float angle = vehicle.Angle;
-
-				//Vector3 newDrawPos = vehicle.DrawPosTransformed(vehicle.VehicleDef.drawProperties.selectionBracketsOffset, angle);
 
 				Ext_Pawn.CalculateSelectionBracketPositionsWorldForMultiCellPawns(brackets, vehicle, vehicle.DrawPos, vehicle.RotatedSize.ToVector2(), SelectionDrawer.SelectTimes, Vector2.one, angle, 1f);
 				

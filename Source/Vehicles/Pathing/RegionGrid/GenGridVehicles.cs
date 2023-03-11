@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
@@ -90,21 +91,34 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="cell"></param>
 		/// <param name="map"></param>
-		public static bool Impassable(IntVec3 cell, Map map, VehicleDef vehicleDef)
+		public static bool Impassable(IntVec3 cell, Map map, VehicleDef vehicleDef, Predicate<Thing> extraValidator = null)
 		{
-			List<Thing> list = map.thingGrid.ThingsListAt(cell);
-			foreach (Thing t in list)
+			List<Thing> thingList = map.thingGrid.ThingsListAt(cell);
+			foreach (Thing thing in thingList)
 			{
-				if (vehicleDef.properties.customThingCosts.TryGetValue(t.def, out int value) && value >= VehiclePathGrid.ImpassableCost)
+				if (vehicleDef.properties.customThingCosts.TryGetValue(thing.def, out int value) && value >= VehiclePathGrid.ImpassableCost)
 				{
 					return true;
 				}
-				else if (t.def.passability is Traversability.Impassable)
+				else if (thing.ImpassableForVehicles())
+				{
+					return true;
+				}
+				else if (extraValidator != null && extraValidator(thing))
 				{
 					return true;
 				}
 			}
 			return false;
+		}
+
+		/// <summary>
+		/// Impassability check which also handles temporary or additional vehicle mechanics that ignore vanilla fields.
+		/// </summary>
+		/// <param name="thing"></param>
+		public static bool ImpassableForVehicles(this Thing thing)
+		{
+			return thing.def.passability == Traversability.Impassable || thing.def.IsFence;
 		}
 	}
 }

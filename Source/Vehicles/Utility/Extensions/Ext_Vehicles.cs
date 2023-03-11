@@ -381,6 +381,10 @@ namespace Vehicles
 		/// <returns><c>null</c> if pawn is not currently inside a VehicleCaravan</returns>
 		public static VehicleCaravan GetVehicleCaravan(this Pawn pawn)
 		{
+			if (pawn.ParentHolder is VehicleHandler handler)
+			{
+				return handler.vehicle.GetVehicleCaravan();
+			}
 			return pawn.ParentHolder as VehicleCaravan;
 		}
 
@@ -455,6 +459,20 @@ namespace Vehicles
 		}
 
 		/// <summary>
+		/// Shallow copy of <see cref="DrivableFast(VehiclePawn, IntVec3)"/> for thread safety. Conversions back and forth using <see cref="CellIndices"/> is not thread safe
+		/// </summary>
+		/// <param name="vehicle"></param>
+		/// <param name="index"></param>
+		/// <returns></returns>
+		//public static bool DrivableFast(this VehiclePawn vehicle, int index)
+		//{
+		//	VehiclePawn claimedBy = vehicle.Map.GetCachedMapComponent<VehiclePositionManager>().ClaimedBy(cell);
+		//	bool passable = (claimedBy is null || claimedBy == vehicle) &&
+		//		vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathGrid.WalkableFast(cell);
+		//	return passable;
+		//}
+
+		/// <summary>
 		/// Determine if <paramref name="dest"/> is not large enough to fit <paramref name="vehicle"/>'s full hitbox
 		/// </summary>
 		/// <param name="vehicle"></param>
@@ -481,7 +499,7 @@ namespace Vehicles
 		{
 			int minSize = Mathf.Min(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z);
 			CellRect cellRect = CellRect.CenteredOn(cell, Mathf.FloorToInt(minSize / 2f));
-			return cellRect.Cells.All(cell => vehicle.DrivableFast(cell));
+			return cellRect.Cells.All(cell => vehicle.Drivable(cell));
 		}
 
 		/// <summary>
@@ -533,11 +551,12 @@ namespace Vehicles
 		/// <param name="vehicleDef"></param>
 		/// <param name="cell"></param>
 		/// <param name="dir"></param>
-		public static bool WidthStandable(this VehicleDef vehicleDef, Map map, IntVec3 cell)
+		public static bool WidthStandable(this VehicleDef vehicleDef, Map map, IntVec3 cell, Predicate<Thing> extraValidator = null)
 		{
 			CellRect cellRect = CellRect.CenteredOn(cell, Mathf.Min(vehicleDef.size.x, vehicleDef.size.z) / 2);
 			foreach (IntVec3 cellCheck in cellRect)
 			{
+				//Todo - remove hardcoded fence check
 				if (!cellCheck.InBounds(map) || GenGridVehicles.Impassable(cellCheck, map, vehicleDef))
 				{
 					return false;

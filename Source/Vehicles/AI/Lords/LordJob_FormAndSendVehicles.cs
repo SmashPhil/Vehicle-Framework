@@ -20,7 +20,8 @@ namespace Vehicles
 		public List<Pawn> prisoners = new List<Pawn>();
 		public List<VehiclePawn> vehicles = new List<VehiclePawn>();
 		public List<Pawn> pawns = new List<Pawn>();
-		protected Dictionary<Pawn, (VehiclePawn vehicle, VehicleHandler handler)> vehicleAssigned = new Dictionary<Pawn, (VehiclePawn, VehicleHandler)>();
+		protected Dictionary<Pawn, AssignedSeat> vehicleAssigned = new Dictionary<Pawn, AssignedSeat>();
+
 		protected IntVec3 meetingPoint;
 		protected IntVec3 exitPoint;
 		protected int startingTile;
@@ -42,6 +43,9 @@ namespace Vehicles
 		protected LordToil leave_pause;
 		protected bool requireAllSeated;
 
+		private List<Pawn> tmpPawnAssignments = new List<Pawn>();
+		private List<AssignedSeat> tmpVehicleHandlerAssignments = new List<AssignedSeat>();
+
 		public LordJob_FormAndSendVehicles()
 		{
 		}
@@ -59,7 +63,7 @@ namespace Vehicles
 			this.pawns = pawns;
 			this.prisoners = prisoners;
 			this.requireAllSeated = requireAllSeated;
-			vehicleAssigned = new Dictionary<Pawn, (VehiclePawn, VehicleHandler)>(CaravanHelper.assignedSeats);
+			vehicleAssigned = new Dictionary<Pawn, AssignedSeat>(CaravanHelper.assignedSeats);
 		}
 
 		public (LordToil source, LordToil pause) GatherAnimals => (gatherAnimals, gatherAnimals_pause);
@@ -449,16 +453,48 @@ namespace Vehicles
 
 		public override void ExposeData()
 		{
-			Scribe_Collections.Look(ref transferables, "transferables", LookMode.Deep);
-			Scribe_Collections.Look(ref downedPawns, "downedPawns", LookMode.Reference);
-			Scribe_Collections.Look(ref prisoners, "prisoners", LookMode.Reference);
-			Scribe_Collections.Look(ref vehicles, "vehicles", LookMode.Reference);
-			Scribe_Collections.Look(ref pawns, "pawns", LookMode.Reference);
-			Scribe_Values.Look(ref meetingPoint, "meetingPoint", default, false);
-			Scribe_Values.Look(ref exitPoint, "exitPoint", default, false);
-			Scribe_Values.Look(ref startingTile, "startingTile", 0, false);
-			Scribe_Values.Look(ref destinationTile, "destinationTile", 0, false);
-			Scribe_Collections.Look(ref vehicleAssigned, "vehicleAssigned", LookMode.Reference, LookMode.Reference);
+			Scribe_Collections.Look(ref transferables, nameof(transferables), LookMode.Deep);
+			Scribe_Collections.Look(ref downedPawns, nameof(downedPawns), LookMode.Reference);
+			Scribe_Collections.Look(ref prisoners, nameof(prisoners), LookMode.Reference);
+			Scribe_Collections.Look(ref vehicles, nameof(vehicles), LookMode.Reference);
+			Scribe_Collections.Look(ref pawns, nameof(pawns), LookMode.Reference);
+			Scribe_Values.Look(ref meetingPoint, nameof(meetingPoint));
+			Scribe_Values.Look(ref exitPoint, nameof(exitPoint));
+			Scribe_Values.Look(ref startingTile, nameof(startingTile));
+			Scribe_Values.Look(ref destinationTile, nameof(destinationTile));
+			Scribe_Collections.Look(ref vehicleAssigned, nameof(vehicleAssigned), LookMode.Reference, LookMode.Deep, ref tmpPawnAssignments, ref tmpVehicleHandlerAssignments);
+		}
+	}
+
+	public class AssignedSeat : IExposable
+	{
+		public VehiclePawn vehicle;
+		public VehicleHandler handler;
+
+		public AssignedSeat()
+		{
+		}
+
+		public AssignedSeat(VehiclePawn vehicle, VehicleHandler handler)
+		{
+			this.vehicle = vehicle;
+			this.handler = handler;
+		}
+
+		public static implicit operator ValueTuple<VehiclePawn, VehicleHandler>(AssignedSeat assignedSeat)
+		{
+			return (assignedSeat.vehicle, assignedSeat.handler);
+		}
+
+		public static implicit operator AssignedSeat(ValueTuple<VehiclePawn, VehicleHandler> tuple)
+		{
+			return new AssignedSeat(tuple.Item1, tuple.Item2);
+		}
+
+		public void ExposeData()
+		{
+			Scribe_References.Look(ref vehicle, nameof(vehicle));
+			Scribe_References.Look(ref handler, nameof(handler));
 		}
 	}
 }

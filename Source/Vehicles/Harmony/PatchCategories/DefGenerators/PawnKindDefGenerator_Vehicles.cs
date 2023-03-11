@@ -23,6 +23,9 @@ namespace Vehicles
 					lifeStages = new List<PawnKindLifeStage>()
 					{
 						new PawnKindLifeStage()
+						{
+							bodyGraphicData = vehicleDef.graphicData
+						}
 					}
 				};
 				vehicleDef.kindDef = kindDef;

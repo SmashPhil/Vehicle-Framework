@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Verse;
 using Verse.AI;
 using RimWorld;
@@ -19,6 +20,8 @@ namespace Vehicles
 
 		public abstract bool AddClaimant(Pawn pawn, T target);
 
-		public abstract bool CanReserve(Pawn pawn, T target);
+		public abstract bool CanReserve(Pawn pawn, T target, StringBuilder stringBuilder = null);
+
+		public abstract bool ReservedBy(Pawn pawn, T target);
 	}
 }

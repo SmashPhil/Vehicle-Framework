@@ -29,6 +29,10 @@ namespace Vehicles
 		{
 			get
 			{
+				if (!VehicleDef.graphicData.drawRotated)
+				{
+					return Rot8.North;
+				}
 				return new Rot8(Rotation, Angle);
 			}
 		}
@@ -169,7 +173,7 @@ namespace Vehicles
 			Drawer.Notify_Spawned();
 			InitializeHitbox();
 			Map.GetCachedMapComponent<VehiclePositionManager>().ClaimPosition(this);
-			Map.GetCachedMapComponent<VehicleRegionUpdateCatalog>().Notify_VehicleSpawned(this);
+			//Map.GetCachedMapComponent<VehicleRegionUpdateCatalog>().Notify_VehicleSpawned(this);
 			Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleSpawned(this);
 			ResetRenderStatus();
 		}

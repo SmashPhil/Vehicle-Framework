@@ -309,14 +309,14 @@ namespace Vehicles
 			}
 			explanation?.AppendLine(caravanTicksPerMoveExplanation);
 			StringBuilder stringBuilder = (explanation != null) ? new StringBuilder() : null;
-			float num = float.MaxValue;
+			float cost = float.MaxValue;
 
 			foreach (VehicleDef vehicle in vehicleDefs)
 			{
-				float numTmp = WorldVehiclePathGrid.CalculatedMovementDifficultyAt(end, vehicle, ticksAbs, stringBuilder);
-				if(numTmp < num)
+				float newCost = WorldVehiclePathGrid.CalculatedMovementDifficultyAt(end, vehicle, ticksAbs, stringBuilder);
+				if (newCost < cost)
 				{
-					num = numTmp;
+					cost = newCost;
 				}
 			}
 			
@@ -326,18 +326,18 @@ namespace Vehicles
 				explanation.AppendLine();
 				explanation.AppendLine("TileMovementDifficulty".Translate() + ":");
 				explanation.AppendLine(stringBuilder.ToString().Indented("  "));
-				explanation.AppendLine("  = " + (num * roadMovementDifficultyMultiplier).ToString("0.#"));
+				explanation.AppendLine($"  = {cost * roadMovementDifficultyMultiplier:0.#}");
 			}
-			int num2 = (int)(ticksPerMove * num * roadMovementDifficultyMultiplier);
-			num2 = Mathf.Clamp(num2, 1, MaxMoveTicks);
+			int finalCost = (int)(ticksPerMove * cost * roadMovementDifficultyMultiplier);
+			finalCost = Mathf.Clamp(finalCost, 1, MaxMoveTicks);
 			if (explanation != null)
 			{
 				explanation.AppendLine();
 				explanation.AppendLine("FinalCaravanMovementSpeed".Translate() + ":");
-				int num3 = Mathf.CeilToInt(num2 / 1f);
-				explanation.Append($"  {60000f / ticksPerMove:0.#} / {num * roadMovementDifficultyMultiplier:0.#} = {60000f / num3:0.#} {"TilesPerDay".Translate()}");
+				int num3 = Mathf.CeilToInt(finalCost / 1f);
+				explanation.Append($"  {GenDate.TicksPerDay / ticksPerMove:0.#} / {cost * roadMovementDifficultyMultiplier:0.#} = {GenDate.TicksPerDay / num3:0.#} {"TilesPerDay".Translate()}");
 			}
-			return num2;
+			return finalCost;
 		}
 
 		public static float GetRoadMovementDifficultyMultiplier(VehicleCaravan caravan, int fromTile, int toTile, StringBuilder explanation = null)

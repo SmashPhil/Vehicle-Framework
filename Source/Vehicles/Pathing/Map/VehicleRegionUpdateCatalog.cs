@@ -10,12 +10,12 @@ namespace Vehicles
 	/// <summary>
 	/// Tracks which region sets need to be updated
 	/// </summary>
-	public class VehicleRegionUpdateCatalog : DetachedMapComponent
+	public class VehicleRegionUpdateCatalog //: DetachedMapComponent
 	{
 		private int[] vehicleCounts;
 		private HashSet<VehicleDef> updateWanters = new HashSet<VehicleDef>();
 
-		public VehicleRegionUpdateCatalog(Map map) : base(map)
+		public VehicleRegionUpdateCatalog(Map map) //: base(map)
 		{
 			vehicleCounts = new int[DefDatabase<VehicleDef>.AllDefsListForReading.Count];
 		}

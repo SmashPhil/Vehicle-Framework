@@ -16,7 +16,7 @@ namespace Vehicles
 {
 	public static class CaravanHelper
 	{
-		public static Dictionary<Pawn, (VehiclePawn vehicle, VehicleHandler handler)> assignedSeats = new Dictionary<Pawn, (VehiclePawn vehicle, VehicleHandler handler)>();
+		public static Dictionary<Pawn, AssignedSeat> assignedSeats = new Dictionary<Pawn, AssignedSeat>();
 
 		/// <summary>
 		/// Remove all pawns from <see cref="assignedSeats"/> for this vehicle

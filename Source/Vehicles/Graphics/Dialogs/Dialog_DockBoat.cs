@@ -401,7 +401,7 @@ namespace Vehicles
 		{
 			DockedBoat dockedBoat = (DockedBoat)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.DockedBoat);
 			dockedBoat.Tile = caravan.Tile;
-			float randomInRange = Rand.Range(2f, 4f) + (50 * (1 - caravan.PawnsListForReading.Where(x => x.IsBoat()).Max(x => (x as VehiclePawn).VehicleDef.properties.visibility)));
+			float randomInRange = Rand.Range(2f, 4f) + (50 * (1 - caravan.PawnsListForReading.Where(x => x.IsBoat()).Max(x => (x as VehiclePawn).BodySize)));
 			dockedBoat.GetComponent<TimeoutComp>().StartTimeout(Mathf.CeilToInt(randomInRange * 60000));
 			List<Pawn> boats = caravan.PawnsListForReading.Where(p => p.IsBoat()).ToList();
 			List<Pawn> pawns = caravan.PawnsListForReading.Where(p => !p.IsBoat()).ToList();

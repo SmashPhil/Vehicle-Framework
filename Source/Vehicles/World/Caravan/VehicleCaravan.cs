@@ -87,6 +87,24 @@ namespace Vehicles
 			}
 		}
 
+		public new int TicksPerMove
+		{
+			get
+			{
+				return VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(this, null);
+			}
+		}
+
+		public new string TicksPerMoveExplanation
+		{
+			get
+			{
+				StringBuilder stringBuilder = new StringBuilder();
+				VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(this, stringBuilder);
+				return stringBuilder.ToString();
+			}
+		}
+
 		public override void Draw()
 		{
 			float averageTileSize = Find.WorldGrid.averageTileSize;

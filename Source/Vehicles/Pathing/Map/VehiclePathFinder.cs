@@ -281,15 +281,14 @@ namespace Vehicles
 					{
 						uint cellX = (uint)(x2 + directions[i]);
 						uint cellY = (uint)(z2 + directions[i + 8]);
-
-						if (cellX < (ulong)mapSizeX && cellY < (ulong)mapSizeZ)
+						
+						if (cellX < mapSizeX && cellY < mapSizeZ)
 						{
 							int cellIntX = (int)cellX;
 							int cellIntY = (int)cellY;
 							int cellIndex = cellIndices.CellToIndex(cellIntX, cellIntY);
 							
 							IntVec3 cellToCheck = cellIndices.IndexToCell(cellIndex);
-
 							if (useHPA)
 							{
 								if (!chunks.Cells.Contains(cellToCheck))
@@ -348,7 +347,7 @@ namespace Vehicles
 								CellRect cellToCheckRect = CellRect.CenteredOn(cellToCheck, Mathf.FloorToInt(minSize / 2f));
 								foreach (IntVec3 cellInRect in cellToCheckRect)
 								{
-									if (!vehicle.DrivableFast(cellInRect))
+									if (!vehicle.Drivable(cellInRect))
 									{
 										goto NeighborSearchEnd; //hitbox has invalid node, ignore in neighbor search
 									}

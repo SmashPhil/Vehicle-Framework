@@ -303,7 +303,7 @@ namespace Vehicles
 				explanation.AppendLine();
 			}
 
-			float defaultBiomeCost = vehicleDef.properties.defaultBiomesImpassable ? ImpassableMovementDifficulty : WorldPathGrid.CalculatedMovementDifficultyAt(tile, false, ticksAbs, explanation);
+			float defaultBiomeCost = vehicleDef.properties.defaultBiomesImpassable ? ImpassableMovementDifficulty : WorldPathGrid.CalculatedMovementDifficultyAt(tile, false, ticksAbs);
 
 			if (coastalTravel && vehicleDef.CoastalTravel(tile))
 			{

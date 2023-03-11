@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using Verse;
@@ -207,7 +208,7 @@ namespace Vehicles
 						thingCost = thingPathCost;
 					}
 				}
-				else if (thing.def.passability == Traversability.Impassable)
+				else if (thing.ImpassableForVehicles())
 				{
 					stringBuilder.AppendLine($"thingDef is impassable: {thingPathCost}");
 					return ImpassableCost;

@@ -36,7 +36,7 @@ namespace Vehicles
 				List<Thing> list = new List<Thing>(map.thingGrid.ThingsListAtFast(cell));
 				for (int i = 0; i < list.Count; i++)
 				{
-					if (list[i].def.passability == Traversability.Impassable)
+					if (list[i].ImpassableForVehicles())
 					{
 						return true;
 					}

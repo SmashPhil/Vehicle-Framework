@@ -146,7 +146,6 @@ namespace Vehicles
 		{
 			base.graphicData = graphicData;
 			base.PostLoad();
-			properties.PostVehicleDefLoad(this);
 		}
 
 		/// <summary>
@@ -154,6 +153,7 @@ namespace Vehicles
 		/// </summary>
 		public void PostDefDatabase()
 		{
+			properties.PostDefDatabase(this);
 			drawProperties.PostDefDatabase();
 			graphicData.pattern ??= PatternDefOf.Default;
 		}

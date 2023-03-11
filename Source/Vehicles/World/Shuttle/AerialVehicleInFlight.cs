@@ -420,9 +420,8 @@ namespace Vehicles
 		public void NewDestination(int destinationTile, AerialVehicleArrivalAction arrivalAction, bool recon = false)
 		{
 			vehicle.CompVehicleLauncher.inFlight = true;
-			this.arrivalAction = arrivalAction;
 			this.recon = recon;
-			OrderFlyToTiles(LaunchTargeter.FlightPath, DrawPos, arrivalAction);
+			OrderFlyToTiles(LaunchTargeter.FlightPath, DrawPos, arrivalAction: arrivalAction);
 		}
 
 		public override void Tick()
@@ -493,44 +492,55 @@ namespace Vehicles
 
 		public virtual void MoveForward()
 		{
-			transition += speedPctPerTick;
-			if (transition >= 1)
+			if (flightPath.Empty)
 			{
-				if (flightPath.Path.Count > 1)
+				Log.Error($"{this} in flight with empty FlightPath.  Grounding to current Tile.");
+				ResetPosition(Find.WorldGrid.GetTileCenter(Tile));
+				vehicle.CompVehicleLauncher.inFlight = false;
+				AirDefensePositionTracker.DeregisterAerialVehicle(this);
+			}
+			else
+			{
+				transition += speedPctPerTick;
+				if (transition >= 1)
 				{
-					Vector3 newPos = DrawPos;
-					int ticksLeft = Mathf.RoundToInt(1 / speedPctPerTick);
-					flightPath.NodeReached(ticksLeft > TicksTillLandingElevation && !recon);
-					if (Spawned)
+					if (flightPath.Path.Count > 1)
 					{
-						InitializeNextFlight(newPos);
-					}
-				}
-				else 
-				{
-					Messages.Message("VehicleAerialArrived".Translate(vehicle.LabelShort), MessageTypeDefOf.NeutralEvent);
-					Tile = flightPath.First.tile;
-					if (arrivalAction is AerialVehicleArrivalAction action)
-					{
-						action.Arrived(flightPath.First.tile);
-						if (action.DestroyOnArrival)
+						Vector3 newPos = DrawPos;
+						int ticksLeft = Mathf.RoundToInt(1 / speedPctPerTick);
+						flightPath.NodeReached(ticksLeft > TicksTillLandingElevation && !recon);
+						if (Spawned)
 						{
-							Destroy();
+							InitializeNextFlight(newPos);
 						}
 					}
-					vehicle.CompVehicleLauncher.inFlight = false;
-					AirDefensePositionTracker.DeregisterAerialVehicle(this);
+					else
+					{
+						Messages.Message("VehicleAerialArrived".Translate(vehicle.LabelShort), MessageTypeDefOf.NeutralEvent);
+						Tile = flightPath.First.tile;
+						ResetPosition(Find.WorldGrid.GetTileCenter(Tile));
+						if (arrivalAction is AerialVehicleArrivalAction action)
+						{
+							action.Arrived(flightPath.First.tile);
+							if (action.DestroyOnArrival)
+							{
+								Destroy();
+							}
+						}
+						vehicle.CompVehicleLauncher.inFlight = false;
+						AirDefensePositionTracker.DeregisterAerialVehicle(this);
 
-					//if (Elevation <= vehicle.CompVehicleLauncher.LandingAltitude)
-					//{
-						
-					//}
-					//else if (flightPath.Path.Count <= 1 && vehicle.CompVehicleLauncher.Props.circleToLand)
-					//{
-					//	Vector3 newPos = DrawPos;
-					//	SetCircle(flightPath.First.tile);
-					//	InitializeNextFlight(newPos);
-					//}
+						//if (Elevation <= vehicle.CompVehicleLauncher.LandingAltitude)
+						//{
+
+						//}
+						//else if (flightPath.Path.Count <= 1 && vehicle.CompVehicleLauncher.Props.circleToLand)
+						//{
+						//	Vector3 newPos = DrawPos;
+						//	SetCircle(flightPath.First.tile);
+						//	InitializeNextFlight(newPos);
+						//}
+					}
 				}
 			}
 		}
@@ -657,15 +667,22 @@ namespace Vehicles
 			Scribe_References.Look(ref vehicle, nameof(vehicle), true);
 
 			Scribe_Deep.Look(ref flightPath, nameof(flightPath), new object[] { this });
-
 			Scribe_Deep.Look(ref arrivalAction, nameof(arrivalAction));
-			Scribe_Values.Look(ref speedPctPerTick, nameof(speedPctPerTick));
-
 			Scribe_Values.Look(ref transition, nameof(transition));
+			Scribe_Values.Look(ref position, nameof(position));
+
 			//Scribe_Values.Look(ref elevation, "elevation");
 			Scribe_Values.Look(ref recon, nameof(recon));
-			Scribe_Values.Look(ref directionFacing, nameof(directionFacing));
-			Scribe_Values.Look(ref position, nameof(position));
+		}
+
+		public override void SpawnSetup()
+		{
+			base.SpawnSetup();
+			if (flightPath != null && !flightPath.Path.NullOrEmpty())
+			{
+				//Needs new list instance to avoid clearing before reset. This is only necessary for resetting with saved flight path due to flight being uninitialized from load.
+				OrderFlyToTiles(flightPath.Path.ToList(), DrawPos, arrivalAction: arrivalAction); 
+			}
 		}
 
 		public void GetChildHolders(List<IThingHolder> outChildren)

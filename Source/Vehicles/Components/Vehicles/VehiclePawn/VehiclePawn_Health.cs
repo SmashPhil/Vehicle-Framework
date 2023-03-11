@@ -100,7 +100,7 @@ namespace Vehicles
 		public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
 		{
 			Map.GetCachedMapComponent<VehiclePositionManager>().ReleaseClaimed(this);
-			Map.GetCachedMapComponent<VehicleRegionUpdateCatalog>().Notify_VehicleDespawned(this);
+			//Map.GetCachedMapComponent<VehicleRegionUpdateCatalog>().Notify_VehicleDespawned(this);
 			VehicleReservationManager reservationManager = Map.GetCachedMapComponent<VehicleReservationManager>();
 			reservationManager.ClearReservedFor(this);
 			reservationManager.RemoveAllListerFor(this);

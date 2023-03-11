@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Verse;
 using Verse.AI;
 using SmashTools;
@@ -34,9 +35,14 @@ namespace Vehicles
 			return true;
 		}
 
-		public override bool CanReserve(Pawn pawn, ThingDefCountClass target)
+		public override bool CanReserve(Pawn pawn, ThingDefCountClass target, StringBuilder stringBuilder = null)
 		{
 			return !claimants.ContainsKey(pawn) && claimants.Count < maxClaimants && vehicle.CompUpgradeTree.CurrentlyUpgrading && MaterialsLeft().NotNullAndAny();
+		}
+
+		public override bool ReservedBy(Pawn pawn, ThingDefCountClass target)
+		{
+			return claimants.TryGetValue(pawn, out ThingDefCountClass thingDefs) && thingDefs == target;
 		}
 
 		public List<ThingDefCountClass> MaterialsLeft()

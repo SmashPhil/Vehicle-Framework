@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Verse;
 using Verse.AI;
 
@@ -51,10 +52,28 @@ namespace Vehicles
 			return true;
 		}
 
-		public override bool CanReserve(Pawn pawn, VehicleHandler target)
+		public override bool CanReserve(Pawn pawn, VehicleHandler target, StringBuilder stringBuilder = null)
 		{
-			bool flag = (target.handlers.Count + (handlerClaimants.TryGetValue(target, out int claiming) ? claiming : 0)) < target.role.slots;
-			return (pawn is null || !claimants.ContainsKey(pawn)) && flag;
+			int reservations = handlerClaimants.TryGetValue(target, 0);
+			bool rolesAvailable = (target.handlers.Count + reservations) < target.role.slots;
+			if (!rolesAvailable)
+			{
+				stringBuilder?.AppendLine($"Roles not available.  Existing={target.handlers.Count} Claimants={string.Join(",", claimants.Where(kvp => kvp.Value == target).Select(kvp => kvp.Key))} Allowed: {target.role.slots}");
+				return false;
+			}
+			if (pawn is null)
+			{
+				stringBuilder?.AppendLine("Null Claimant");
+				return true;
+			}
+			bool newClaimant = !claimants.ContainsKey(pawn);
+			stringBuilder?.AppendLine($"{pawn} is new claimant? {newClaimant}");
+			return newClaimant;
+		}
+
+		public override bool ReservedBy(Pawn pawn, VehicleHandler target)
+		{
+			return claimants.TryGetValue(pawn, out VehicleHandler handler) && handler == target;
 		}
 
 		public override void ReleaseAllReservations()

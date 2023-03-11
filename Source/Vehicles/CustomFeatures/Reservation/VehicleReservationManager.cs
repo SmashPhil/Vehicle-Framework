@@ -135,19 +135,37 @@ namespace Vehicles
 
 		public bool CanReserve<T1, T2>(VehiclePawn vehicle, Pawn pawn, T1 target, StringBuilder stringBuilder = null) where T2 : Reservation<T1>
 		{
-			stringBuilder?.AppendLine($"Starting Reservation check.");
 			if (reservations.TryGetValue(vehicle, out VehicleReservationCollection vehicleReservations))
 			{
 				foreach (ReservationBase reservation in vehicleReservations.List)
 				{
 					if (reservation is T2 reversionSubType)
 					{
-						stringBuilder?.AppendLine($"Reservation cached. Type={typeof(T2)} CanReserve={reversionSubType.CanReserve(pawn, target)}");
-						return reversionSubType.CanReserve(pawn, target);
+						bool canReserve = reversionSubType.CanReserve(pawn, target, stringBuilder);
+						stringBuilder?.AppendLine($"Reservation cached. Type={typeof(T2)} Summary={stringBuilder}");
+						return canReserve;
 					}
 				}
 			}
 			stringBuilder?.AppendLine($"Reservation not cached. Can automatically reserve");
+			return true;
+		}
+
+		public bool ReservedBy<T1, T2>(VehiclePawn vehicle, Pawn pawn, T1 target, StringBuilder stringBuilder = null) where T2 : Reservation<T1>
+		{
+			if (reservations.TryGetValue(vehicle, out VehicleReservationCollection vehicleReservations))
+			{
+				foreach (ReservationBase reservation in vehicleReservations.List)
+				{
+					if (reservation is T2 reservationSubType)
+					{
+						bool reserved = reservationSubType.ReservedBy(pawn, target);
+						stringBuilder?.AppendLine($"Reserved={reserved}");
+						return reserved;
+					}
+				}
+			}
+			stringBuilder?.AppendLine($"Reservation not cached.");
 			return true;
 		}
 

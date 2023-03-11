@@ -30,7 +30,7 @@ namespace Vehicles
 		/// <summary>
 		/// True if animation at index has been triggered.
 		/// </summary>
-		protected bool[] animationStatuses;
+		protected List<bool> animationStatuses;
 
 		/* -- Xml Input -- */
 
@@ -362,7 +362,8 @@ namespace Vehicles
 			ticksPassed = 0;
 			if (!CurAnimationProperties.events.NullOrEmpty())
 			{
-				animationStatuses = new bool[CurAnimationProperties.events.Count];
+				animationStatuses = new List<bool>();
+				animationStatuses.Populate(false, CurAnimationProperties.events.Count);
 
 				//Trigger events at t=0 before next draw frame
 				if (!CurAnimationProperties.events.NullOrEmpty())
@@ -750,8 +751,10 @@ namespace Vehicles
 			Scribe_Values.Look(ref launchType, nameof(launchType));
 			Scribe_Values.Look(ref maxFlightNodes, nameof(maxFlightNodes), int.MaxValue);
 
-			Scribe_Values.Look(ref position, nameof(position));
 			Scribe_References.Look(ref map, nameof(map));
+			Scribe_Values.Look(ref position, nameof(position));
+
+			Scribe_Collections.Look(ref animationStatuses, nameof(animationStatuses), LookMode.Value);
 		}
 
 		public enum LaunchType : uint

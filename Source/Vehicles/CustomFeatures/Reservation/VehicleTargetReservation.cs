@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Verse;
 using RimWorld;
 using Verse.AI;
@@ -38,13 +39,18 @@ namespace Vehicles
 			return true;
 		}
 
-		public override bool CanReserve(Pawn pawn, LocalTargetInfo target)
+		public override bool CanReserve(Pawn pawn, LocalTargetInfo target, StringBuilder stringBuilder = null)
 		{
 			if (claimants.ContainsKey(pawn))
 			{
 				return claimants[pawn] == target;
 			}
 			return !claimants.ContainsValue(target);
+		}
+
+		public override bool ReservedBy(Pawn pawn, LocalTargetInfo target)
+		{
+			return claimants.TryGetValue(pawn, out LocalTargetInfo targetInfo) && targetInfo == target;
 		}
 
 		public override void ReleaseAllReservations()

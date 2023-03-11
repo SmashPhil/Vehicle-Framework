@@ -8,12 +8,8 @@
 				<!--Do a queued job -->
 				<li Class = "ThinkNode_QueuedJob"/>
 				
-				<!-- Lord Directives -->
-				<li Class = "ThinkNode_Subtree">
-					<treeDef>LordDuty</treeDef>
-				</li>
-				
 				<!-- Lord directives (high priority -->
+				<!--
 				<li Class="ThinkNode_JoinVoluntarilyJoinableLord">
 					<dutyHook>HighPriority</dutyHook>
 					<subNodes>
@@ -22,8 +18,10 @@
 						</li>
 					</subNodes>
 				</li>
+				-->
 				
 				<!-- Lord directives (medium priority) -->
+				<!--
 				<li Class="ThinkNode_JoinVoluntarilyJoinableLord">
 					<dutyHook>MediumPriority</dutyHook>
 					<subNodes>
@@ -32,6 +30,7 @@
 								</li>
 					</subNodes>
 				</li>
+				-->
 				
 				<!-- Go Idle -->
 				<li Class = "ThinkNode_Tagger">

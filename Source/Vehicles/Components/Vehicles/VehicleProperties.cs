@@ -11,10 +11,6 @@ namespace Vehicles
 	[HeaderTitle(Label = "VehicleProperties", Translate = true)]
 	public class VehicleProperties
 	{
-		[PostToSettings(Label = "VehicleVisibilityWorldMap", Tooltip = "VehicleVisibilityWorldMapTooltip", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
-		[SliderValues(MinValue = 0, MaxValue = 3, RoundDecimalPlaces = 1)]
-		public float visibility = 2.5f;
-
 		[PostToSettings(Label = "VehicleFishingEnabled", Tooltip = "VehicleFishingEnabledTooltip", Translate = true, UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Sea)]
 		[DisableSettingConditional(MayRequireAny = new string[] { CompatibilityPackageIds.VE_Fishing })]
 		public bool fishing = false;
@@ -91,11 +87,11 @@ namespace Vehicles
 			customTerrainCosts ??= new SimpleDictionary<TerrainDef, int>();
 			customThingCosts ??= new SimpleDictionary<ThingDef, int>();
 			customSnowCategoryTicks ??= new SimpleDictionary<SnowCategory, int>();
-
+			
 			roles.OrderBy(c => c.hitbox.side == VehicleComponentPosition.BodyNoOverlap).ForEach(c => c.hitbox.Initialize(vehicleDef));
 		}
 
-		public void PostVehicleDefLoad(VehicleDef vehicleDef)
+		public void PostDefDatabase(VehicleDef vehicleDef)
 		{
 			string defName = vehicleDef.defName;
 

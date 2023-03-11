@@ -205,14 +205,14 @@ namespace Vehicles
 			{
 				Map map = pawn.Map;
 				int directionTile = CaravanHelper.FindRandomStartingTileBasedOnExitDir(vehicle, map.Tile, exitDir);
-				VehicleCaravan vehicleCaravan2 = CaravanHelper.ExitMapAndCreateVehicleCaravan(Gen.YieldSingle(pawn), pawn.Faction, map.Tile, directionTile, -1);
-				vehicleCaravan2.autoJoinable = true;
+				VehicleCaravan newCaravan = CaravanHelper.ExitMapAndCreateVehicleCaravan(Gen.YieldSingle(pawn), pawn.Faction, map.Tile, directionTile, -1);
+				newCaravan.autoJoinable = true;
 
 				if (caravan != null)
 				{
-					caravan.pawns.TryTransferAllToContainer(vehicleCaravan2.pawns);
+					caravan.pawns.TryTransferAllToContainer(newCaravan.pawns);
 					caravan.Destroy();
-					vehicleCaravan2.Notify_Merged(new List<Caravan>() { caravan });
+					newCaravan.Notify_Merged(new List<Caravan>() { caravan });
 				}
 				bool animalWantsToJoin = false;
 				foreach (Pawn mapPawn in map.mapPawns.AllPawnsSpawned)

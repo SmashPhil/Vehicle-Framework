@@ -19,7 +19,7 @@
 	<CommandFormVehicleCaravanDesc>Form caravan with vehicles included.</CommandFormVehicleCaravanDesc>
 	<CommandReformVehicleCaravan>Reform Vehicle Caravan</CommandReformVehicleCaravan>
 	
-	<VF_DismountedPawns>Dismounted pawns. Slowing down to match speed: {0}</VF_DismountedPawns>
+	<VF_DismountedPawns>Dismounted Pawns</VF_DismountedPawns>
 	<VF_PawnInVehicleNoCapacity>Assigned to Vehicle</VF_PawnInVehicleNoCapacity>
 	
 	<VehicleRoutePlannerToggleVehicleDefs>VehicleDefs</VehicleRoutePlannerToggleVehicleDefs>

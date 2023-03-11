@@ -287,37 +287,28 @@ namespace Vehicles
 				Bill_BoardVehicle bill = bills.FirstOrDefault(x => x.pawnToBoard == pawnToBoard);
 				if (bill != null)
 				{
+					map ??= Map;
 					if (pawnToBoard.IsWorldPawn())
 					{
 						Log.Error("Tried boarding vehicle with world pawn. Use Notify_BoardedCaravan instead.");
 						return false;
 					}
-					if (!bill.handler.AreSlotsAvailable)
+					VehicleReservationManager reservationManager = map.GetCachedMapComponent<VehicleReservationManager>();
+					if (!reservationManager.ReservedBy<VehicleHandler, VehicleHandlerReservation>(this, pawnToBoard, bill.handler) && !bill.handler.AreSlotsAvailable)
 					{
+						bool canReserve = Map.GetCachedMapComponent<VehicleReservationManager>().CanReserve<VehicleHandler, VehicleHandlerReservation>(this, null, bill.handler);
 						return false; //If pawn attempts to board vehicle role which is already full, stop immediately
 					}
 					if (pawnToBoard.Spawned)
 					{
 						pawnToBoard.DeSpawn(DestroyMode.WillReplace);
 					}
-					if (bill.handler.handlers.TryAddOrTransfer(pawnToBoard, true))
+					if (!bill.handler.handlers.TryAddOrTransfer(pawnToBoard, canMergeWithExistingStacks: false) && pawnToBoard.holdingOwner != null)
 					{
-						if (pawnToBoard != null)
-						{
-							if (map != null)
-							{
-								map.GetCachedMapComponent<VehicleReservationManager>().ReleaseAllClaimedBy(pawnToBoard);
-							}
-							else
-							{
-								Map.GetCachedMapComponent<VehicleReservationManager>().ReleaseAllClaimedBy(pawnToBoard);
-							}
-						}
-					}
-					else if (pawnToBoard.holdingOwner != null)
-					{
+						//If can't add to handler and currently has other owner, transfer
 						pawnToBoard.holdingOwner.TryTransferToContainer(pawnToBoard, bill.handler.handlers);
 					}
+					reservationManager.ReleaseAllClaimedBy(pawnToBoard);
 					bills.Remove(bill);
 					EventRegistry[VehicleEventDefOf.PawnEntered].ExecuteEvents();
 					return true;
@@ -350,6 +341,10 @@ namespace Vehicles
 				VehicleHandler handler = handlers[i];
 				if (handler.handlers.Remove(pawn))
 				{
+					if (Spawned)
+					{
+						Map.GetCachedMapComponent<VehicleReservationManager>().ReleaseAllClaimedBy(pawn);
+					}
 					return;
 				}
 			}

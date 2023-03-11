@@ -27,6 +27,8 @@ namespace Vehicles
 
 		public FlightNode Last => nodes.LastOrDefault();
 
+		public bool Empty => nodes.NullOrEmpty();
+
 		public FlightNode this[int index] => nodes[index];
 
 		public bool Circling => circling;
@@ -88,6 +90,17 @@ namespace Vehicles
 		public void VerifyFlightPath()
 		{
 			First.RecalculateCenter();
+		}
+
+		public void RecacheCenters()
+		{
+			if (!nodes.NullOrEmpty())
+			{
+				for (int i = 0; i < nodes.Count; i++)
+				{
+					nodes[i].RecalculateCenter();
+				}
+			}
 		}
 
 		public void AddNode(int tile, AerialVehicleArrivalAction arrivalAction = null)
@@ -188,6 +201,7 @@ namespace Vehicles
 		public AerialVehicleArrivalAction arrivalAction;
 
 		public bool spaceObject;
+
 		public WorldObject WorldObject { get; private set; }
 
 		public FlightNode(int tile)
@@ -218,9 +232,9 @@ namespace Vehicles
 
 		public void ExposeData()
 		{
-			Scribe_Values.Look(ref tile, "tile");
-			Scribe_Deep.Look(ref arrivalAction, "arrivalAction");
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			Scribe_Values.Look(ref tile, nameof(tile));
+			Scribe_Deep.Look(ref arrivalAction, nameof(arrivalAction));
+			if (Scribe.mode == LoadSaveMode.LoadingVars)
 			{
 				WorldObject = WorldHelper.WorldObjectAt(tile);
 				center = WorldHelper.GetTilePos(tile, WorldObject, out spaceObject);

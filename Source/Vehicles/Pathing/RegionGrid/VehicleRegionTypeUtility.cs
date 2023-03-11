@@ -27,7 +27,7 @@ namespace Vehicles
 			}
 			if (cell.GetFence(mapping.map) != null)
 			{
-				return RegionType.None; //Switch control back over to player for pathing over fences
+				return RegionType.None; //TODO - Add settings available to player for configuring fence traversal
 			}
 			if (!vehicleDef.WidthStandable(mapping.map, cell))
 			{

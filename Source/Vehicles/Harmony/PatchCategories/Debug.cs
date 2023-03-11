@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Reflection.Emit;
 using UnityEngine;
 using HarmonyLib;
 using Verse;
@@ -50,12 +51,13 @@ namespace Vehicles
 					nameof(DebugWorldObjects)));
 			}
 
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(ThingWithComps), nameof(ThingWithComps.SpawnSetup)),
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanTendUtility), "FindPawnsNeedingTend"),
 			//	prefix: new HarmonyMethod(typeof(Debug),
-			//	nameof(TestPrefix)),
+			//	nameof(TestPrefix)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanTendUtility), "IsValidDoctorFor"),
 			//	postfix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestPostfix)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldGrid), nameof(WorldGrid.GetTileCenter)),
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(TargetHighlighter), "Highlight"),
 			//	finalizer: new HarmonyMethod(typeof(Debug),
 			//	nameof(ExceptionCatcher)));
 		}
@@ -64,7 +66,7 @@ namespace Vehicles
 		{
 			try
 			{
-				Log.Message($"Called");
+				Log.Message("Starting");
 			}
 			catch (Exception ex)
 			{
@@ -72,23 +74,24 @@ namespace Vehicles
 			}
 		}
 
-		public static void TestPostfix()
+		public static void TestPostfix(Pawn doctor, Pawn patient, Caravan caravan, ref bool __result)
 		{
-            try
-            {
-                Log.Message($"Finished");
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"[Test Postfix] Exception Thrown.\n{ex.Message}\n{ex.InnerException}\n{ex.StackTrace}");
-            }
+			try
+			{
+				//Log.Message($"Finished");
+				Log.Message($"Patient={patient} Checking={doctor} Result={__result}");
+			}
+			catch (Exception ex)
+			{
+				Log.Error($"[Test Postfix] Exception Thrown.\n{ex.Message}\n{ex.InnerException}\n{ex.StackTrace}");
+			}
 		}
 
-		public static Exception ExceptionCatcher(Exception __exception)
+		public static Exception ExceptionCatcher(GlobalTargetInfo target, bool arrow, bool colonistBar, bool circleOverlay, Exception __exception)
 		{
 			if (__exception != null)
 			{
-				SmashLog.Message($"Exception caught! <error>Ex={__exception.Message}</error>");
+				SmashLog.Message($"Exception caught! <error>Ex={__exception.Message}</error> Arrow={arrow} Bar={colonistBar} Overylay={circleOverlay} Target {target} is null = {(target.Thing as VehiclePawn)?.ageTracker is null}");
 			}
 			return __exception;
 		}

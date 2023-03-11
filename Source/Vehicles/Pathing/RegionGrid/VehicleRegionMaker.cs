@@ -219,7 +219,7 @@ namespace Vehicles
 
 			if (!expectedRegionType.IsOneCellRegion())
 			{
-				for (; spanRight <= VehicleRegion.GridSize; spanRight++)
+				for (spanRight = 0; spanRight <= VehicleRegion.GridSize; spanRight++)
 				{
 					IntVec3 sweepRight = cell + rotClockwise.FacingCell * (spanRight + 1);
 					if (InvalidForLinking(sweepRight, potentialOtherRegionDir, expectedRegionType))
@@ -231,7 +231,7 @@ namespace Vehicles
 						Log.Error("Attempting to process the same cell twice.");
 					}
 				}
-				for (; spanUp <= VehicleRegion.GridSize; spanUp++)
+				for (spanUp = 0; spanUp <= VehicleRegion.GridSize; spanUp++)
 				{
 					IntVec3 sweepUp = cell - rotClockwise.FacingCell * (spanUp + 1);
 					if (InvalidForLinking(sweepUp, potentialOtherRegionDir, expectedRegionType))

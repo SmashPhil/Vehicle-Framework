@@ -26,7 +26,7 @@ namespace Vehicles
 		private Dialog_FormVehicleCaravan currentFormCaravanDialog;
 
 		public List<VehicleDef> vehicleDefs = new List<VehicleDef>();
-		private VehicleCaravanTicksPerMoveUtility.VehicleInfo? caravanInfoFromFormCaravanDialog;
+		private VehicleCaravanTicksPerMoveUtility.VehicleCaravanInfo? caravanInfoFromFormCaravanDialog;
 		private List<WorldPath> paths = new List<WorldPath>();
 		private List<int> cachedTicksToWaypoint = new List<int>();
 		public List<RoutePlannerWaypoint> waypoints = new List<RoutePlannerWaypoint>();
@@ -64,7 +64,7 @@ namespace Vehicles
 		{
 			get
 			{
-				VehicleCaravanTicksPerMoveUtility.VehicleInfo? caravanInfo = CaravanInfo;
+				VehicleCaravanTicksPerMoveUtility.VehicleCaravanInfo? caravanInfo = CaravanInfo;
 				if (caravanInfo != null && caravanInfo.Value.pawns.NotNullAndAny(pawn => pawn is VehiclePawn))
 				{
 					return VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(caravanInfo.Value, null);
@@ -73,7 +73,7 @@ namespace Vehicles
 			}
 		}
 
-		private VehicleCaravanTicksPerMoveUtility.VehicleInfo? CaravanInfo
+		private VehicleCaravanTicksPerMoveUtility.VehicleCaravanInfo? CaravanInfo
 		{
 			get
 			{
@@ -84,7 +84,7 @@ namespace Vehicles
 				Caravan caravanAtTheFirstWaypoint = CaravanAtTheFirstWaypoint;
 				if (caravanAtTheFirstWaypoint != null)
 				{
-					return new VehicleCaravanTicksPerMoveUtility.VehicleInfo(caravanAtTheFirstWaypoint);
+					return new VehicleCaravanTicksPerMoveUtility.VehicleCaravanInfo(caravanAtTheFirstWaypoint);
 				}
 				return null;
 			}
@@ -118,7 +118,7 @@ namespace Vehicles
 				Stop();
 			}
 			currentFormCaravanDialog = formCaravanDialog;
-			caravanInfoFromFormCaravanDialog = new VehicleCaravanTicksPerMoveUtility.VehicleInfo(formCaravanDialog);
+			caravanInfoFromFormCaravanDialog = new VehicleCaravanTicksPerMoveUtility.VehicleCaravanInfo(formCaravanDialog);
 			formCaravanDialog.choosingRoute = true;
 			Find.WindowStack.TryRemove(formCaravanDialog, true);
 			vehicleDefs = caravanInfoFromFormCaravanDialog.Value.pawns.UniqueVehicleDefsInList();

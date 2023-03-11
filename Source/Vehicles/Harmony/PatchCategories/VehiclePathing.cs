@@ -102,7 +102,7 @@ namespace Vehicles
 							Job job = new Job(JobDefOf.Goto, curLoc);
 							bool isOnEdge = CellRect.WholeMap(vehicle.Map).IsOnEdge(clickCell, 3);
 							bool exitCell = vehicle.Map.exitMapGrid.IsExitCell(clickCell);
-							bool vehicleCellsOverlapExit = vehicle.InhabitedCellsProjected(clickCell, Rot8.Invalid).NotNullAndAny(cell => pawn.Map.exitMapGrid.IsExitCell(cell));
+							bool vehicleCellsOverlapExit = vehicle.InhabitedCellsProjected(clickCell, Rot8.Invalid).NotNullAndAny(cell => cell.InBounds(pawn.Map) && pawn.Map.exitMapGrid.IsExitCell(cell));
 							if (exitCell || vehicleCellsOverlapExit)
 							{
 								job.exitMapOnArrival = true;

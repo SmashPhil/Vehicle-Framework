@@ -123,6 +123,7 @@ namespace Vehicles
 		{
 			base.SpawnSetup(map, respawningAfterLoad);
 			vehicle.SetSustainerTarget(this);
+			vehicle.ResetRenderStatus(); //Reset required for recaching handler lists. Loading save file will not recache these since vehicle will be despawned initially
 		}
 
 		public override void ExposeData()
