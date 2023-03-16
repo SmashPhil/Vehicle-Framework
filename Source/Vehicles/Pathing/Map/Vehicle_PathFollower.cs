@@ -386,7 +386,6 @@ namespace Vehicles
 
 			if (waitTicks > 0)
 			{
-				Log.Message("Waiting");
 				waitTicks--;
 				return;
 			}

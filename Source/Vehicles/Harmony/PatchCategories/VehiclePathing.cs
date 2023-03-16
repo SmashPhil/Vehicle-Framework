@@ -83,13 +83,17 @@ namespace Vehicles
 				for (int i = 0; i < num; i++)
 				{
 					curLoc = GenRadial.RadialPattern[i] + clickCell;
-					
+
 					if (GenGridVehicles.Standable(curLoc, vehicle, vehicle.Map) && (!VehicleMod.settings.main.fullVehiclePathing || vehicle.DrivableRectOnCell(curLoc)))
 					{
 						if (curLoc == vehicle.Position || vehicle.beached)
 						{
 							__result = null;
 							return false;
+						}
+						if (!vehicle.CellRectStandable(vehicle.Map, curLoc, Rot4.East) || !vehicle.CellRectStandable(vehicle.Map, curLoc, Rot4.North))
+						{
+							continue;
 						}
 						if (!VehicleReachabilityUtility.CanReachVehicle(vehicle, curLoc, PathEndMode.OnCell, Danger.Deadly, TraverseMode.ByPawn))
 						{

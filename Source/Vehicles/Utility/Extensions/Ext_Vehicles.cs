@@ -459,20 +459,6 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Shallow copy of <see cref="DrivableFast(VehiclePawn, IntVec3)"/> for thread safety. Conversions back and forth using <see cref="CellIndices"/> is not thread safe
-		/// </summary>
-		/// <param name="vehicle"></param>
-		/// <param name="index"></param>
-		/// <returns></returns>
-		//public static bool DrivableFast(this VehiclePawn vehicle, int index)
-		//{
-		//	VehiclePawn claimedBy = vehicle.Map.GetCachedMapComponent<VehiclePositionManager>().ClaimedBy(cell);
-		//	bool passable = (claimedBy is null || claimedBy == vehicle) &&
-		//		vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathGrid.WalkableFast(cell);
-		//	return passable;
-		//}
-
-		/// <summary>
 		/// Determine if <paramref name="dest"/> is not large enough to fit <paramref name="vehicle"/>'s full hitbox
 		/// </summary>
 		/// <param name="vehicle"></param>
