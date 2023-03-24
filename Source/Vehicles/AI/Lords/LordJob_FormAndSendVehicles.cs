@@ -416,6 +416,12 @@ namespace Vehicles
 			return stateGraph;
 		}
 
+		public override void Cleanup()
+		{
+			base.Cleanup();
+			this.CleanupVehicleHandlers();
+		}
+
 		public void AddToStateGraph(StateGraph stateGraph, (LordToil source, LordToil pause) toil, string memo = null, TransitionAction[] preActions = null, TransitionAction[] postActions = null)
 		{
 			stateGraph.AddToil(toil.source);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using Verse.AI;
 using Verse.AI.Group;
 using Verse.Sound;
 using RimWorld;
@@ -13,6 +14,29 @@ namespace Vehicles
 {
 	public static class Ext_Vehicles
 	{
+		public static void CleanupVehicleHandlers(this LordJob lordJob)
+		{
+			foreach (Pawn pawn in lordJob.lord.ownedPawns)
+			{
+				if (pawn is VehiclePawn vehicle)
+				{
+					foreach (Pawn innerPawn in vehicle.AllPawnsAboard)
+					{
+						if (innerPawn.mindState != null)
+						{
+							innerPawn.mindState.duty = null;
+						}
+						lordJob.Map.attackTargetsCache.UpdateTarget(innerPawn);
+						if (lordJob.EndPawnJobOnCleanup(innerPawn) && innerPawn.Spawned && innerPawn.CurJob != null && 
+							(!lordJob.DontInterruptLayingPawnsOnCleanup || !RestUtility.IsLayingForJobCleanup(innerPawn)))
+						{
+							innerPawn.jobs.EndCurrentJob(JobCondition.InterruptForced, true, true);
+						}
+					}
+				}
+			}
+		}
+
 		public static CellRect VehicleRect(this VehiclePawn vehicle, bool maxSizePossible = false)
 		{
 			return vehicle.VehicleRect(vehicle.Position, vehicle.Rotation, maxSizePossible: maxSizePossible);
