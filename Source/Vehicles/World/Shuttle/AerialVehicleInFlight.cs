@@ -678,6 +678,13 @@ namespace Vehicles
 		public override void SpawnSetup()
 		{
 			base.SpawnSetup();
+
+			//Necessary check for post load, otherwise registry will be null until spawned on map
+			foreach (VehiclePawn vehicle in Vehicles)
+			{
+				vehicle.RegisterEvents();
+			}
+
 			if (flightPath != null && !flightPath.Path.NullOrEmpty())
 			{
 				//Needs new list instance to avoid clearing before reset. This is only necessary for resetting with saved flight path due to flight being uninitialized from load.
