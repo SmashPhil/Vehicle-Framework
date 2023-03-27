@@ -780,7 +780,7 @@ namespace Vehicles
 		{
 			if (candidates.HasVehicle())
 			{
-				if (candidates.Where(pawn => pawn is VehiclePawn && (ignoreCandidates == null || !ignoreCandidates.Contains(pawn)) 
+				if (candidates.Where(pawn => pawn is VehiclePawn && (ignoreCandidates == null || !ignoreCandidates.Contains(pawn))
 					&& currentItemOwner != pawn && !MassUtility.IsOverEncumbered(pawn)).TryRandomElement(out __result))
 				{
 					return false;

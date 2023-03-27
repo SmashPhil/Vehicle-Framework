@@ -330,8 +330,7 @@ namespace Vehicles
 			{
 				pawn.ExitMap(false, exitDir);
 			}
-			List<Pawn> pawnsListForReading = caravan.PawnsListForReading;
-			foreach (Pawn pawn in caravan.pawns)
+			foreach (Pawn pawn in caravan.PawnsListForReading)
 			{
 				if (!pawn.IsWorldPawn())
 				{
