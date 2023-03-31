@@ -167,11 +167,35 @@ namespace Vehicles
 		public static Pawn FindBestNegotiator(VehiclePawn vehicle, Faction faction = null, TraderKindDef trader = null)
 		{
 			Predicate<Pawn> pawnValidator = null;
-			if (faction != null)    
+			if (faction != null)
 			{
-				pawnValidator = ((Pawn p) => p.CanTradeWith(faction, trader));
+				pawnValidator = delegate (Pawn p)
+				{
+					AcceptanceReport report = p.CanTradeWith(faction, trader);
+					return report.Accepted;
+				};
 			}
 			return vehicle.FindPawnWithBestStat(StatDefOf.TradePriceImprovement, pawnValidator);
+		}
+
+		/// <summary>
+		/// Find best negotiator in Vehicle for trading on the World Map
+		/// </summary>
+		/// <param name="vehicle"></param>
+		/// <param name="faction"></param>
+		/// <param name="trader"></param>
+		public static Pawn FindBestNegotiator(VehicleCaravan caravan, Faction faction = null, TraderKindDef trader = null)
+		{
+			Predicate<Pawn> pawnValidator = null;
+			if (faction != null)    
+			{
+				pawnValidator = delegate (Pawn p)
+				{
+					AcceptanceReport report = p.CanTradeWith(faction, trader);
+					return report.Accepted;
+				};
+			}
+			return BestCaravanPawnUtility.FindPawnWithBestStat(caravan, StatDefOf.TradePriceImprovement, pawnValidator: pawnValidator);
 		}
 
 		/// <summary>

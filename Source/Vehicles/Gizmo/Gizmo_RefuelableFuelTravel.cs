@@ -15,10 +15,12 @@ namespace Vehicles
 		private const float ArrowSize = 14;
 
 		private readonly CompFueledTravel refuelable;
+		private readonly bool showLabel;
 
-		public Gizmo_RefuelableFuelTravel(CompFueledTravel refuelable)
+		public Gizmo_RefuelableFuelTravel(CompFueledTravel refuelable, bool showLabel)
 		{
 			this.refuelable = refuelable;
+			this.showLabel = showLabel;
 			Order = -100f;
 		}
 
@@ -37,12 +39,19 @@ namespace Vehicles
 					Rect rect = overRect.AtZero().ContractedBy(6f);
 					Rect labelRect = new Rect(rect)
 					{
-						height = overRect.height / 2f
+						height = overRect.height / 2
 					};
 
 					Text.Font = GameFont.Tiny;
 
-					Widgets.Label(labelRect, refuelable.Props.electricPowered ? "VehicleElectric".Translate() : refuelable.Props.fuelType.LabelCap);
+					if (showLabel)
+					{
+						Widgets.Label(labelRect, refuelable.Vehicle.LabelCap);
+					}
+					else
+					{
+						Widgets.Label(labelRect, refuelable.Props.electricPowered ? "VehicleElectric".Translate() : refuelable.Props.fuelType.LabelCap);
+					}
 
 					Rect configureRect = new Rect(labelRect.xMax - ConfigureSize, labelRect.y, ConfigureSize, ConfigureSize);
 					if (Widgets.ButtonImage(configureRect, VehicleTex.Settings))

@@ -9,6 +9,7 @@ using Verse.AI;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using System.Text;
 
 namespace Vehicles
 {
@@ -45,7 +46,6 @@ namespace Vehicles
 		public List<VehicleComponent> FuelComponents { get; private set; }
 
 		public CompProperties_FueledTravel Props => props as CompProperties_FueledTravel;
-		public Gizmo FuelCountGizmo => new Gizmo_RefuelableFuelTravel(this);
 
 		public override bool TickByRequest => true;
 
@@ -248,7 +248,7 @@ namespace Vehicles
 
 			if (Find.Selector.SingleSelectedThing == parent)
 			{
-				yield return FuelCountGizmo;
+				yield return new Gizmo_RefuelableFuelTravel(this, false);
 			}
 
 			if (Props.electricPowered)
@@ -277,6 +277,31 @@ namespace Vehicles
 			foreach (Gizmo gizmo in DevModeGizmos())
 			{
 				yield return gizmo;
+			}
+		}
+
+		public override IEnumerable<Gizmo> CompCaravanGizmos()
+		{
+			yield return new Gizmo_RefuelableFuelTravel(this, true);
+
+			if (Prefs.DevMode)
+			{
+				yield return new Command_Action
+				{
+					defaultLabel = $"Vehicle Dev: [{Vehicle.Label}] Set fuel to 0.",
+					action = delegate ()
+					{
+						ConsumeFuel(float.MaxValue);
+					}
+				};
+				yield return new Command_Action
+				{
+					defaultLabel = $"Vehicle Dev: [{Vehicle.Label}] Set fuel to max.",
+					action = delegate ()
+					{
+						Refuel(FuelCapacity);
+					}
+				};
 			}
 		}
 
@@ -328,6 +353,14 @@ namespace Vehicles
 					Job job = new Job(JobDefOf_Vehicles.RefuelVehicle, parent, ClosestFuelAvailable(selPawn));
 					selPawn.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
 				}, MenuOptionPriority.Default, null, null, 0f, null, null);
+		}
+
+		public override void CompCaravanInspectString(StringBuilder stringBuilder)
+		{
+			if (EmptyTank)
+			{
+				stringBuilder.AppendLine("VF_OutOfFuel".Translate());
+			}
 		}
 
 		public override void SpawnedInGodMode()

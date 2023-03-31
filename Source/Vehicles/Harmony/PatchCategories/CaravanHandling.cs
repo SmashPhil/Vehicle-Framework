@@ -82,13 +82,13 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(TilesPerDayCalculator), nameof(TilesPerDayCalculator.ApproxTilesPerDay), new Type[] { typeof(Caravan), typeof(StringBuilder) }),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(ApproxTilesForVehicles)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.ContainsPawn)), prefix: null,
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.ContainsPawn)),
 				postfix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(ContainsPawnInVehicle)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.IsOwner)), prefix: null,
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.IsOwner)),
 				postfix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(IsOwnerOfVehicle)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(SettlementDefeatUtility), nameof(SettlementDefeatUtility.CheckDefeated)), prefix: null, postfix: null,
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(SettlementDefeatUtility), nameof(SettlementDefeatUtility.CheckDefeated)),
 				transpiler: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(CheckDefeatedWithVehiclesTranspiler)));
 
@@ -113,9 +113,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanNeedsTabUtility), nameof(CaravanNeedsTabUtility.GetSize)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(NoVehiclesNeedNeeds)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(BestCaravanPawnUtility), nameof(BestCaravanPawnUtility.FindPawnWithBestStat)),
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(BestCaravanPawnUtility), nameof(BestCaravanPawnUtility.FindBestNegotiator)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
-				nameof(FindPawnInVehicleWithBestStat)));
+				nameof(FindBestNegotiatorInVehicle)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_OfferGifts), nameof(CaravanArrivalAction_OfferGifts.Arrived)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(UnloadVehicleOfferGifts)));
@@ -139,7 +139,8 @@ namespace Vehicles
 				nameof(RandomVehicleOwner)));
 
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_Trade), nameof(CaravanArrivalAction_Trade.CanTradeWith)),
-                postfix: new HarmonyMethod(typeof(CaravanHandling), nameof(NoTradingUndocked)));
+                postfix: new HarmonyMethod(typeof(CaravanHandling), 
+				nameof(NoTradingUndocked)));
 		}
 
 		/// <summary>
@@ -830,36 +831,11 @@ namespace Vehicles
 			pawns.RemoveAll(pawn => pawn is VehiclePawn);
 		}
 
-		public static bool FindPawnInVehicleWithBestStat(Caravan caravan, StatDef stat, ref Pawn __result)
+		public static bool FindBestNegotiatorInVehicle(Caravan caravan, ref Pawn __result, Faction negotiatingWith = null, TraderKindDef trader = null)
 		{
-			if (caravan.HasVehicle())
+			if (caravan is VehicleCaravan vehicleCaravan)
 			{
-				float num = -1f;
-				foreach (Pawn pawn in caravan.PawnsListForReading)
-				{
-					if (pawn is VehiclePawn vehicle)
-					{
-						foreach (Pawn innerPawn in vehicle.AllPawnsAboard.Where(p => !p.Dead && !p.Downed && !p.InMentalState && !stat.Worker.IsDisabledFor(p)))
-						{
-							float statValue = innerPawn.GetStatValue(stat, true);
-							if (__result is null || statValue > num)
-							{
-								__result = innerPawn;
-								num = statValue;
-							}
-						}
-					}
-					else if (!stat.Worker.IsDisabledFor(pawn))
-					{
-						float statValue = pawn.GetStatValue(stat, true);
-						if (__result is null || statValue > num)
-						{
-							__result = pawn;
-							num = statValue;
-						}
-					}
-					
-				}
+				__result = WorldHelper.FindBestNegotiator(vehicleCaravan, faction: negotiatingWith, trader: trader);
 				return false;
 			}
 			return true;
@@ -877,7 +853,7 @@ namespace Vehicles
 		{
 			if (!__result)
 			{
-				__result = p.GetVehicleCaravan() == __instance;//&& __instance.PawnsListForReading.Any(v => v is VehiclePawn vehicle && vehicle.AllPawnsAboard.Contains(p) && CaravanUtility.IsOwner(p, __instance.Faction));
+				__result = p.GetVehicle() is VehiclePawn vehicle && __instance.pawns.Contains(vehicle) && CaravanUtility.IsOwner(p, __instance.Faction);
 			}
 		}
 
@@ -936,7 +912,7 @@ namespace Vehicles
 
 		public static bool GetParentCaravan(Pawn pawn, ref Caravan __result)
 		{
-			if (pawn.ParentHolder is VehicleHandler {vehicle:{ParentHolder:Caravan caravan}})
+			if (pawn.ParentHolder is VehicleHandler handler && handler.vehicle.GetCaravan() is VehicleCaravan caravan)
 			{
 				__result = caravan;
                 return false;
@@ -946,7 +922,7 @@ namespace Vehicles
 
 		public static bool RandomVehicleOwner(Caravan caravan, ref Pawn __result)
 		{
-			if(caravan.HasVehicle())
+			if (caravan.HasVehicle())
 			{
 				__result = caravan.GrabPawnsFromVehicleCaravanSilentFail().Where(p => caravan.IsOwner(p)).RandomElement();
 				return false;
@@ -986,7 +962,6 @@ namespace Vehicles
 			return doctor.RaceProps.Humanlike && caravan.IsOwner(doctor) && (doctor != patient || (doctor.IsColonist && doctor.playerSettings.selfTend)) && 
 				!doctor.Downed && !doctor.InMentalState && (doctor.story == null || !doctor.WorkTypeIsDisabled(WorkTypeDefOf.Doctor));
 		}
-
 
 		public static void NoTradingUndocked(Caravan caravan, Settlement settlement, ref FloatMenuAcceptanceReport __result)
         {

@@ -58,7 +58,7 @@ Drafted vehicles can be moved, but restrict the unloading of pawns.
 	<VehicleElectric>Electric</VehicleElectric>
 	<VehicleElectricFlick>Charge Battery</VehicleElectricFlick>
 	<VehicleElectricFlickDesc>Connect to PowerNet below vehicle.</VehicleElectricFlickDesc>
-	<VehicleOutOfFuel>Cannot Move. Out of Fuel.</VehicleOutOfFuel>
+	<VF_OutOfFuel>Cannot Move. Out of Fuel.</VF_OutOfFuel>
 	<CommandGlideLand>Glide</CommandGlideLand>
 	
 	<AssignSeats>Assign Seats</AssignSeats>

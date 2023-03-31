@@ -218,7 +218,7 @@ namespace Vehicles
 			{
 				if (vehicle.CompFueledTravel != null)
 				{
-					yield return vehicle.CompFueledTravel.FuelCountGizmo;
+					yield return new Gizmo_RefuelableFuelTravel(vehicle.CompFueledTravel, false);
 					foreach (Gizmo fuelGizmo in vehicle.CompFueledTravel.DevModeGizmos())
 					{
 						yield return fuelGizmo;

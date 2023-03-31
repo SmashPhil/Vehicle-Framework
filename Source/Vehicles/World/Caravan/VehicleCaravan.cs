@@ -87,6 +87,21 @@ namespace Vehicles
 			}
 		}
 
+		public bool OutOfFuel
+		{
+			get
+			{
+				foreach (VehiclePawn vehicle in Vehicles)
+				{
+					if (vehicle.CompFueledTravel != null && vehicle.CompFueledTravel.Fuel <= 0)
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+		}
+
 		public new int TicksPerMove
 		{
 			get
@@ -199,6 +214,17 @@ namespace Vehicles
 				if (!DebugSettings.ShowDevGizmos || !(gizmo is Command command) || command.icon)
 				{
 					yield return gizmo;
+				}
+			}
+
+			foreach (VehiclePawn vehicle in Vehicles)
+			{
+				foreach (VehicleComp vehicleComp in vehicle.AllComps.Where(comp => comp is VehicleComp))
+				{
+					foreach (Gizmo gizmo in vehicleComp.CompCaravanGizmos())
+					{
+						yield return gizmo;
+					}
 				}
 			}
 
@@ -347,7 +373,7 @@ namespace Vehicles
 			if (vehicles >= 1)
 			{
 				Dictionary<VehicleDef, int> vehicleCounts = new Dictionary<VehicleDef, int>();
-				foreach (VehiclePawn vehicle in PawnsListForReading.Where(x => x is VehiclePawn))
+				foreach (VehiclePawn vehicle in Vehicles)
 				{
 					if (vehicleCounts.ContainsKey(vehicle.VehicleDef))
 					{
@@ -393,6 +419,13 @@ namespace Vehicles
 					stringBuilder.Append(", ");
 				}
 				stringBuilder.Append("CaravanPawnsDowned".Translate(downed));
+			}
+			foreach (VehiclePawn vehicle in Vehicles)
+			{
+				foreach (VehicleComp vehicleComp in vehicle.AllComps.Where(comp => comp is VehicleComp))
+				{
+					vehicleComp.CompCaravanInspectString(stringBuilder);
+				}
 			}
 			if (mentalState > 0 || downed > 0)
 			{

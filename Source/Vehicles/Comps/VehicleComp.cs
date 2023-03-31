@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Verse;
 using SmashTools;
 
@@ -16,6 +17,15 @@ namespace Vehicles
 		public virtual bool TickByRequest => false;
 
 		public virtual IEnumerable<AnimationDriver> Animations { get; }
+
+		public virtual IEnumerable<Gizmo> CompCaravanGizmos()
+		{
+			yield break;
+		}
+
+		public virtual void CompCaravanInspectString(StringBuilder stringBuilder)
+		{
+		}
 
 		public virtual void PostLoad()
 		{

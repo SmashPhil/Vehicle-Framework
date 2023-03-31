@@ -54,7 +54,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return Moving && !Paused && !caravan.CantMove;
+				return Moving && !Paused && !caravan.CantMove && !caravan.OutOfFuel;
 			}
 		}
 
@@ -174,7 +174,7 @@ namespace Vehicles
 				Messages.Message("MessageCaravanArrivalActionNoLongerValid".Translate(caravan.Name).CapitalizeFirst() + ((failMessage != null) ? (" " + failMessage) : ""), caravan, MessageTypeDefOf.NegativeEvent, true);
 				StopDead();
 			}
-			if (caravan.CantMove || paused)
+			if (caravan.CantMove || caravan.OutOfFuel || paused)
 			{
 				return;
 			}
