@@ -152,7 +152,7 @@ Please report any issues you find &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/lin
   <!--Show update log on next startup.-->
   <update>false</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
-  <testing>true</testing>
+  <testing>false</testing>
   <!--Icon bar shown to the right of the mod's name-->
   <rightIconBar>
     <li>
