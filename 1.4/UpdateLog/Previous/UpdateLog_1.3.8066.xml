@@ -5,7 +5,7 @@
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
-  <description>[title]Recent News[/title][font]Small[/font]
+  <description>&lt;title&gt;Recent News&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 Hey everyone! It's been awhile. Apart from working on my own game with Oskar and Roel, there hasn't been a whole lot going on.  I took a "short" 2 month break due to burn out and then caught Covid over Christmas break. Woo hoo :) 
 
 I've been back working on the mod now since the beginning of January and am making some great progress on getting it relatively functional. Once vehicle caravans work again I'll make it public on the steam workshop and start releasing the rest of the content in chunks. 
@@ -15,7 +15,7 @@ I would rather have a functional mod with the basic mechanics than a huge ass mo
 So, with that being said.. please do report bugs you encounter so that I may fix them.  Testing is extremely time consuming so even finding just 1 or 2 bugs I did not know about helps out a lot.
 
 There are a few people who have been testing the mod even with my extended absense and have helped nail a few bugs I'd been trying to replicate.. you know who you are! Thank you.  Stay tuned for the next update where caravans will be functional again.
-[font]Tiny[/font][title]Bug Fixes[/title]
+&lt;font&gt;Tiny&lt;/font&gt;&lt;title&gt;Bug Fixes&lt;/title&gt;
 Fixed bug where pawns previously assigned seats in dialog for a specific vehicle would also be able to be reassigned for the same caravan in another vehicle.
 
 Fixed bug where vehicle turrets could auto target without turret roles satisfied or turret disabled entirely.
@@ -49,11 +49,11 @@ Fixed bug where Dialog_AssignSeats would not update transferable count even afte
 Fixed bug where VehicleCaravan pather would not deep save, resetting pathing on load.
 
 Fixed all save load issues with vehicles.
-[title]New Additions[/title]
+&lt;title&gt;New Additions&lt;/title&gt;
 VehicleDefs can now accept a display rotation in the drawProperties to specify which rotation of the vehicle to show when rendering for certain icons like the build gizmo or in the upgrade tree. The ColorPicker and ModSettings will also now allow you to rotate the vehicle to see how each rotation looks.
 
 Added quick ColorPicker menu for Areas to allow you to change the color. This sorta has nothing to do with vehicles yet but it will in the future. If any other mods add a color picker for this, I'll make sure to disable my patch in place of theirs.
-[title]Additional Changes[/title]
+&lt;title&gt;Additional Changes&lt;/title&gt;
 Rearranged Dialog_AssignSeats for better user interaction between dragging and dropping seat assigning.
 
 Moved the rename and recolor buttons to the inspect pane of the vehicle (the little window in the bottom left that pops up when you select something). This will make it much easier to find and navigate to without it being hidden behind some ITab.
@@ -61,8 +61,8 @@ Moved the rename and recolor buttons to the inspect pane of the vehicle (the lit
 Refactored Settings draw properties to work as a generic "display" setting for the size and offset of the vehicle. Thus, these 2 fields will apply to anywhere the vehicle is displayed in UI.
 
 I have disabled upgrade and air defense mechanics for the time being. The plan is to work on them at a later time when I have the time to properly and fully implement them.
-[title]Final Notes[/title][font]Tiny[/font]
-Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+Please report any issues you find &lt;link&gt;https://github.com/SmashPhil/Vehicles/issues&lt;/link&gt;(here.) or on the discord server.
   </description>
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>

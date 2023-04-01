@@ -5,44 +5,44 @@
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
-  <description>[title]Recent News[/title][font]Small[/font]
+  <description>&lt;title&gt;Recent News&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 Hey everyone, another weekly update with tons of changes.  The current pace I've been working at is a huge time commitment, so let's keep it going while there are bugs to report!
 
-[b]This update I am very confident that Vehicle Caravans are in working condition[/b].  So PLEASE test very thoroughly.
+&lt;b&gt;This update I am very confident that Vehicle Caravans are in working condition&lt;/b&gt;.  So PLEASE test very thoroughly.
 I'm adding balance changes each update so it's a bit more convenient to use in actual games.
 
 Again, I don't care how minor the bug or feedback is, everything helps. Thanks again!
-[title]Balance Changes[/title][font]Small[/font]
-[b]Rowboat (Buildable)[/b]
+&lt;title&gt;Balance Changes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+&lt;b&gt;Rowboat (Buildable)&lt;/b&gt;
 - Reduced MaxHitPoints from 10000 to 50
 - Increased WorkToBuild from 30 to 200
 - Changed costList from 1 ComponentIndustrial to 35 WoodLog
 - Increased Flammability from 0.05 to 0.65
-[b]Rowboat (Vehicle)[/b]
+&lt;b&gt;Rowboat (Vehicle)&lt;/b&gt;
 - Decreased CargoCapacity from 300 to 75
 - Decreased MarketValue from 250000 to 85
 - Increased Flammability from 0 to 0.65
 - Decreased Mass from 10000 to 35
 
-[b]Fishing Boat (Buildable)[/b]
+&lt;b&gt;Fishing Boat (Buildable)&lt;/b&gt;
 - Reduced MaxHitPoints from 10000 to 250
 - Increased WorkToBuild from 30 to 1500
 - Changed costList from 35 ComponentIndustrial and 3000 Steel to 140 WoodLog
 - Increased Flammability from 0.05 to 0.65
-[b]Fishing Boat (Vehicle)[/b]
+&lt;b&gt;Fishing Boat (Vehicle)&lt;/b&gt;
 - Decreased MarketValue from 250000 to 250
 - Increased Flammability from 0 to 0.65
 - Decreased Mass from 10000 to 200
 
-[b]Sparrow (Buildable)[/b]
+&lt;b&gt;Sparrow (Buildable)&lt;/b&gt;
 - Reduced MaxHitPoints from 5000 to 750
 - Increased WorkToBuild from 30 to 85000
 - Changed costList from 35 ComponentIndustrial and 3000 Steel to 12 ComponentSpacer, 500 Steel, and 250 Plasteel
-[b]Sparrow (Vehicle)[/b]
+&lt;b&gt;Sparrow (Vehicle)&lt;/b&gt;
 - Decreased MarketValue from 250000 to 175000
 - Decreased Mass from 25000 to 6200
 - Removed VehicleTurrets, they were for testing only and the main focus for now will just be normal flying (not strafing or bombing runs)
-[title]Bug Fixes[/title][font]Small[/font]
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 - Fixed bug where GenSteps would attempt to recalculate vehicle path cost when regions had not been built yet. (Fixes compatibility with Biomes Core mods)
 
 - Fixed bug where arriving skyfallers would attempt to notify VehicleTracks comp a tick after its removal.
@@ -62,7 +62,7 @@ Again, I don't care how minor the bug or feedback is, everything helps. Thanks a
 - Fixed bug where selecting multiple pawns (with at least one of them actively reserving a vehicle) and then right clicking it would throw a reservation exception.
 
 - Fixed bug where VehicleRequestCollection wasn't saving
-[title]Additional Changes[/title][font]Small[/font]
+&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 - Removed irrelevant ResearchProjectDefs
 
 - Performance improvements to VehicleTurrets.
@@ -76,8 +76,8 @@ Again, I don't care how minor the bug or feedback is, everything helps. Thanks a
 - Improved VTOL animation of Sparrow
 
 - Changed vertical ticks to instead be a property of individual launch or land properties, allowing you to designate different tick counts for landing and launching vertical animations.
-[title]Final Notes[/title][font]Small[/font]
-Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+Please report any issues you find &lt;link&gt;https://github.com/SmashPhil/Vehicles/issues&lt;/link&gt;(here.) or on the discord server.
 </description>
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>

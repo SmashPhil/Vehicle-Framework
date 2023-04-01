@@ -5,9 +5,9 @@
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
-  <description>[title]Recent News[/title][font]Small[/font]
+  <description>&lt;title&gt;Recent News&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 The mod is officially released for testing. Visit the discord server for more information.
-[title]Bug Fixes[/title][font]Small[/font]
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 - Fixed issue with DynamicDrawnWorldObjects on the world map where the mod setting wasn't properly applied
 
 - Fixed bug where air defenses were still drawing their perimeter radius despite being disabled.
@@ -37,7 +37,7 @@ The mod is officially released for testing. Visit the discord server for more in
 - Fixed bug where vehicle caravans would calculate incorrect movement ticks.
 
 - Fixed duplicate float menu option bug for repair / paint.
-[title]Additional Changes[/title][font]Small[/font]
+&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 - Modified chance of instant death when boat sinks over deep water
 
 - Added Drowning hediff that applies to pawns in sinking ship (proportional to manipulation / movement capacities average)
@@ -61,8 +61,8 @@ The mod is officially released for testing. Visit the discord server for more in
 - Added vehicle stat parts that can be applied to specific vehicle defs and not just entire vehicle stat defs.
 
 - Adjusted ModSettings UI for better float and integer box inputs.
-[title]Final Notes[/title][font]Small[/font]
-Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+Please report any issues you find &lt;link&gt;https://github.com/SmashPhil/Vehicles/issues&lt;/link&gt;(here.) or on the discord server.
 </description>
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>

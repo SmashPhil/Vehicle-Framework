@@ -5,7 +5,7 @@
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
-  <description>[title]Recent News[/title][font]Small[/font]
+  <description>&lt;title&gt;Recent News&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 Hey everyone, it's time for some major testing. With caravans and their formations working, we are now in the testing phase.
 
 If you aren't already, please join the discord! If you're in the VE testing server, that works too. Once the remaining bugs are stomped out, I'll be prepping it for a steam release.
@@ -13,7 +13,7 @@ If you aren't already, please join the discord! If you're in the VE testing serv
 It's very important that all major bugs are found, because once the mod releases, I'm going to have to deal with not breaking save games in subsequent updates.
 
 Thanks again for sticking around for over 2 years of development!
-[title]Bug Fixes[/title][font]Tiny[/font]
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Fixed bug where vehicle caravans did not properly display the vehicles in it.
 
 Fixed bug where VehicleTurret would rotate 90 degrees upon loading a game.
@@ -51,15 +51,15 @@ Fixed bug where removing vehicle from caravan dialog would not update assigned s
 Fixed bug where you could remove pawns from caravan dialog but leave them assigned to vehicles.  Pawns will now be readonly if assigned to a vehicle in caravan formation dialog. Removing the vehicle from the caravan dialog will remove all assigned pawns as well.
 
 Fixed bug where removing and readding a vehicle that was recently given changed seating would revert to old seating assignments.
-[title]New Additions[/title][font]Small[/font]
+&lt;title&gt;New Additions&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 Float menu option added for shuttles and trading with friendly settlements.
 
 Vehicles can now exit event maps if there is an exit border.
 
-[title]Additional Changes[/title][font]Small[/font]
+&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 -
-[title]Final Notes[/title][font]Small[/font]
-Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+Please report any issues you find &lt;link&gt;https://github.com/SmashPhil/Vehicles/issues&lt;/link&gt;(here.) or on the discord server.
 </description>
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>

@@ -5,18 +5,18 @@
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
-  <description>[title]Recent News[/title][font]Small[/font]
+  <description>&lt;title&gt;Recent News&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 Hey everyone! Another short and sweet update with tons of bugfixes.  
 
 Your help with play testing the mod has been monumental in keeping development time shorter. So thanks!
 
 This update is the first of many that will be bringing along balance changes, so be sure to check them out. This will be done a little bit at a time so don't sweat it if I haven't gotten to your favorite vehicle yet.
-[title]Balance Changes[/title][font]Small[/font]
-[b]Tank (Buildable)[/b]
+&lt;title&gt;Balance Changes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+&lt;b&gt;Tank (Buildable)&lt;/b&gt;
 - Reduced MaxHitPoints from 20000 to 5000
 - Increased WorkToBuild from 30 to 125000
 - Decreased Steel cost from 3000 to 1500
-[b]Tank (Vehicle)[/b]
+&lt;b&gt;Tank (Vehicle)&lt;/b&gt;
 - Decreased CargoCapacity from 300 to 200
 - Increased MovementSpeed from 2.25 to 3.75
 - Decreased MarketValue from 250000 to 75000
@@ -29,7 +29,7 @@ Changed movement speed and passability of the following biomes
 - TemperateForest from 4 to game default
 
 Added heavy machine gun attached to MainTurret. (please test it so I can adjust the balance or fix bugs associated with it)
-[title]Bug Fixes[/title][font]Small[/font]
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 - Fixed bug where VehicleTurret restrictedAngle lines would not update with vehicle's rotation if not assigned to a parent turret.
 
 - Fixed bug where default graphics in mod settings would not reset with vehicle
@@ -49,7 +49,7 @@ Added heavy machine gun attached to MainTurret. (please test it so I can adjust 
 - Fixed bug where caravan formation when canceled mid way through would cause colonists to freeze while attempting to unload the vehicle.
 
 - Fixed bug where VehiclePawn would attempt to resume its path too early after loading a save file.
-[title]Additional Changes[/title][font]Small[/font]
+&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 - Adjusted various default setting values
 
 - Gathered animals will now be tied down at the beginning, only to be released from the ropes and follow a random vehicle.
@@ -59,8 +59,8 @@ Added heavy machine gun attached to MainTurret. (please test it so I can adjust 
 - Added "Cancel Caravan Formation" button to vehicles in the vehicle caravan.
 
 - Changed VehicleMapping region builder to execute at an earlier time. This should help alleviate issues with some maps not generating due to vehicle regions being disabled at the time of GenSteps.
-[title]Final Notes[/title][font]Small[/font]
-Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+Please report any issues you find &lt;link&gt;https://github.com/SmashPhil/Vehicles/issues&lt;/link&gt;(here.) or on the discord server.
 </description>
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>

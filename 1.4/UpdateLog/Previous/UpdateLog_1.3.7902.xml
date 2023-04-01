@@ -5,9 +5,9 @@
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
-  <description>[title]Recent News[/title][font]Small[/font]
-I've started a [link]https://www.patreon.com/smashphil[/link](Patreon) for Vehicles development if you're interested in supporting further development of the mod.
-[font]Tiny[/font][title]Bug Fixes[/title]
+  <description>&lt;title&gt;Recent News&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+I've started a &lt;link&gt;https://www.patreon.com/smashphil&lt;/link&gt;(Patreon) for Vehicles development if you're interested in supporting further development of the mod.
+&lt;font&gt;Tiny&lt;/font&gt;&lt;title&gt;Bug Fixes&lt;/title&gt;
 Fixed compatibility issue with Nature's Pretty Sweet, despawning objects immediately after spawning on lava while still triggering VehicleRegions to generate.
 
 Fixed bug where AerialVehicles on the world map would still render with lighting when zoomed out.
@@ -27,7 +27,7 @@ Fixed bug where forced takeoff rotation wouldn't execute for specific cell arriv
 Fixed bug where Smashtools settings for unit testing would save specific to the mod it was included in. This was caused by the behavior of vanilla mod settings and should be fine now in regards to this tool being used in other mods.
 
 Fixed bug where main turret would not load proper graphic data under specific circumstances.
-[title]New Additions[/title]
+&lt;title&gt;New Additions&lt;/title&gt;
 Added ExtraRotationRegistry class which handles extra rotation for overlays.
 
 Added Graphic_Rotator class to register extra rotation key in the ExtraRotationRegistry for any graphic class inheriting Graphic_Rotator.
@@ -39,7 +39,7 @@ Reimplemented GraphicDataLayered to work as an easy to implement data class to c
 Default pattern of vehicle is now split up into default GraphicDataRGB, meaning you can change the default pattern, color, colorTwo, colorThree, displacement, and tiles.  These default settings will apply ingame like the default pattern did.
 
 Added 2 more variations of the main turret for the Tank. I had the extra textures due to the previous way the turret was animated so I figured I'd put them to use :) if it feels out of place let me know.
-[title]Additional Changes[/title]
+&lt;title&gt;Additional Changes&lt;/title&gt;
 Changed the UpdateLog to now allow multiple mods to throw update notifications, allowing the user to page through all updates. I'll release this modder tool at a later time for other modders.
 
 Added rotation SimpleCurves for VTOLTakeoff to handle rotation of the vehicle while it is being vertically lifted before switching to using the launch or landing rotation simple curve.
@@ -51,8 +51,8 @@ Added fallbacks to the custom pattern shaders so that if the shaders fail, the g
 Removed "reversed" field in launch protocol launching and landing properties.
 
 Removed BETA dialog and top icon.
-[title]Final Notes[/title][font]Tiny[/font]
-Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+Please report any issues you find &lt;link&gt;https://github.com/SmashPhil/Vehicles/issues&lt;/link&gt;(here.) or on the discord server.
   </description>
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>

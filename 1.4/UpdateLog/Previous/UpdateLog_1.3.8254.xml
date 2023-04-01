@@ -5,14 +5,14 @@
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
-  <description>[title]Recent News[/title][font]Small[/font]
+  <description>&lt;title&gt;Recent News&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 I changed the PackageId of the framework to better match the name of the mod, so for anyone who has made a Vehicle add-on and specified a dependency in the About.xml or Manifest.xml files, you'll want to update it.
-[title]Bug Fixes &amp; Additional Changes[/title][font]Small[/font]
+&lt;title&gt;Bug Fixes &amp; Additional Changes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 This was a very big update with tons of changes. For a full list of all bugfixes, please visit the discord server #announcements channel.
 
 A small heads up, I've applied a hard reset of all VehicleFramework mod configs to ensure you pick up future changes after the bugfix where all fields were saving despite them not being modified.
-[title]Final Notes[/title][font]Small[/font]
-Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+Please report any issues you find &lt;link&gt;https://github.com/SmashPhil/Vehicles/issues&lt;/link&gt;(here.) or on the discord server.
 </description>
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate>Vehicles.VehicleHarmony.ClearModConfig</actionOnUpdate>

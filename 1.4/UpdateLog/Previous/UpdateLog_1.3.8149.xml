@@ -5,14 +5,14 @@
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
-  <description>[title]Recent News[/title][font]Small[/font]
-Okay, so I think I finally fixed the [b]second[/b] Crash To Desktop bug. It was a bit of a pain in the ass but it's okay cause I finally found it.
+  <description>&lt;title&gt;Recent News&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+Okay, so I think I finally fixed the &lt;b&gt;second&lt;/b&gt; Crash To Desktop bug. It was a bit of a pain in the ass but it's okay cause I finally found it.
 
 Thanks to everyone that has been testing the mod for me, your bug reports are invaluable to me! They really help find all those edge cases, and boy have there been a few.
 
 Thankfully they're all pretty mild so apart from another map generation edge case exception, the rest don't affect gameplay in a huge way.
 
-[title]Bug Fixes[/title][font]Small[/font]
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 - Fixed bug where game crashes when updating Duty to path to the cell currently occupied.
 
 - Fixed bug where an empty sequence would be used when pulling a tile path cost on the world map
@@ -22,8 +22,8 @@ Thankfully they're all pretty mild so apart from another map generation edge cas
 - Fixed bug where vehicles would render with North texture in SouthEast and SouthWest rotations for vehicles without diagonal textures.
 
 - Fix to translation in mod settings when resetting all settings.
-[title]Final Notes[/title][font]Small[/font]
-Please report any issues you find [link]https://github.com/SmashPhil/Vehicles/issues[/link](here.) or on the discord server.
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+Please report any issues you find &lt;link&gt;https://github.com/SmashPhil/Vehicles/issues&lt;/link&gt;(here.) or on the discord server.
 </description>
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>
