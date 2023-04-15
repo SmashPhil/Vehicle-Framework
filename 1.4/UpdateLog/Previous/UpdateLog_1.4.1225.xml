@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <!--Can utilize Version.txt file placed in mod's root directory-->
+  <currentVersion>1.4.1225</currentVersion>
+  <!--Startup,GameInit,LoadedGame,NewGame-->
+  <updateOn>Startup</updateOn>
+  <!--Full description shown in update page-->
+  <description>&lt;title&gt;Recent News&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+Tons of bugfixes! If you are currently in the middle of a game, make sure you revert back to 1.4.1079 as this version will require a new game.
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed compatibility issue with Vanilla Expanded Psycasts.
+
+- Fixed bug where forcing a vehicle into a mental state or mental break would bypass its previous preventative measures.
+
+- Fixed bug where forcing a hediff onto a vehicle would immediately destroy it.
+
+- Fixed bug where aerial vehicles wouldn't use fuel under certain conditions.
+
+- Fixed some grammar issues for jobs labels for pawns.
+
+- Fixed bug where vehicles would attempt to pull dropdown for school mechanics.
+
+- Fixed bug where pawns weren't ticking inside the vehicle that was spawned on a map, causing them to enter a suspended state.
+
+- Fixed bug where using StackLimit mods would cause adding ammo to vehicle turrets via devmode to add hundreds or thousands at a time, overencumbering the vehicle.
+
+- Fixed bug where creating a vehicle turret that did not require ammo to reload was impossible.
+
+- Fixed bug where vehicle reservations and requesters wouldn't properly clear when vehicle is despawned.
+
+- Fixed bug where canceling loading while pawns are actively hauling still attempts to load the items anyway.
+
+- Fixed bug where default terrain would not be marked impassable but still invalid for pathfinding, resulting in floodfill searches due to reachability checks not working.
+
+- Fixed compatibility issue with Vanilla Psycasts Expanded.
+
+- Fixed bug where vehicles would tick comps on world map.
+
+- Fixed bug where jobs would display duplicate float menu for repairing and painting.
+
+- Fixed visual issues where caravan speed, food left, and mass usage were not accurate to the vehicles in the caravan.
+
+- Fixed bug where vehicle turret rotation would reset upon loading a save.
+
+- Fixed PawnPathPool memory leak when queueing multiple paths for a vehicle.
+
+- Fixed visual bug with vehicle icons not masking inside scroll rects.
+
+- Fixed bug with RoutePlanner selections rendering off screen.
+
+- Fixed bug where resetting a vehicle in the ModSettings wouldn't reset the pattern data.
+
+- Fixed bug where vehicle turrets not using a mask would render transparent in gizmos.
+
+- Fixed bug where gizmos would size incorrectly according to enabled features.
+
+- Fixed issue where vehicle turret would persist in the turret queue if an exception was thrown, rendering the turret unusable.
+
+- Fixed bug where attached turrets would adjust incorrectly to the parent.
+
+- Fixed graphic overlay offsets not adjusting correctly for icons.
+
+- Fixed issue where projectile flags would override the def.
+
+- Fixed bug where vehicle would still attempt to path into impassable cells.
+
+- Fixed bug where vehicles spawning would not execute the Spawn event on loaded games.
+
+- Fixed bug where CompFueledTravel was unable to tick on the world map.
+
+- Fixed bug with AerialVehicles not loading correctly from a save file while in flight, causing them to be unusable unless landed through devmode.
+
+- Fixed visual issues with caravan gizmo for dismounted pawns, foraging of dismounted pawns, and visibility.
+
+- Fixed bug where AssignDefaults xml attribute would execute prematurely, incorrectly loading xml data.
+
+- Fixed bug with extended pathfinding while validating the min hitbox rect, causing CTD.
+
+- Fixed bug where a vehicle pathing near the edge of a map could clip off map, causing it to be destroyed.
+
+- Fixed bug where pawns would not be able to board the vehicle due to an improper last minute validation check of the handler.
+
+- Fixed bug where pawns were not able to be tended to while inside the vehicle.
+
+- Fixed bug where FormCaravan lord job of vehicles did not save correctly.
+
+- Fixed bug where vehicles would exit map prematurely next to edge of map due to increased distance check.
+
+- Fixed bug where canceling a caravan with pawns already boarded would not clear the duties of the pawns onboard.
+
+- Fixed issue with multi vehicle caravans not being able to properly path to the exit point.
+
+- Fixed bug where trading with an animal in the caravan would throw an exception.
+
+- Fixed bug where traders would not pick up player inventory when caravan was sent instantly through devmode.
+
+- Fixed bug where vehicles that ran out of fuel on the world map would still be able to function.
+
+- Fixed compatibility issue with Roads of the Rim.
+
+- Fixed visual bug with wound overlays rendering over vehicles despite the vehicle being over the building / pawn.
+&lt;title&gt;Performance Improvements&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Compressed region making for vehicles to reuse region grids for vehicles with similar configurations.
+
+- Calculations for vehicles' world path grid are now thrown into a separate thread.  This will prevent the game from locking up once per in-game-day when it recalculates for seasonal costs.
+
+- Vehicle comps will now only tick on request, rather than every comp ticking continuously despite not being in use.
+
+- Improved startup time substantially.  This is especially apparent for large mod lists, startup time should be relatively consistent now regardless of mod list size.
+
+- Vehicle stats are now cached and calculated only when needed.  Event driven recaching will also allow unused stats to remain uncalculated until fetched. (Schrödinger's stat)
+
+- Removed unnecessary tickers from VehiclePawn.
+
+- Regions are now managed, dirtyed, and updated on the dedicated map thread for vehicles.
+
+- HPA* implementation for faster cross-map pathfinding.
+
+- Pathfinding is now performed on the dedicated map thread for vehicles.
+
+- Fixed some old patches for detecting pawns inside vehicles for events such as Game Ender and alerts.
+
+- DefDatabase changes for better memory allocation.
+
+- VehicleTurret role caching for better validation when firing.
+&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Changed FuelConsumptionCondition to operate on flags.  Defaults to consuming fuel when drafted or moving in a caravan.
+
+- Added configuration button for target fuel level of vehicle.
+
+- Added indicator to target fuel level of vehicle.
+
+- Added gizmo of Fuel Count for vehicles on world map.
+
+- Vehicles are no longer able to be refueled while drafted.
+
+- Vehicles stop dead when clicking 'undraft' gizmo while moving, rather than undrafting immediately.
+
+- Added vehicle turret events.
+
+- Added high path costs for vehicles, giving high avoidal to paths found with vehicles in the search radius.
+
+- Vehicles stop dead before overlapping other vehicle while pathing. 2 Vehicles pathing into each other will trigger a 'stop and wait' or search for a new path.
+
+- Added WITabs for vehicle caravans that display all pawns (including vehicles) in the caravan.
+
+- Added seat swapping for caravans, allowing pawns to be moved around or even disembarked from a vehicle.
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+Please report any issues you find &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
+  <!--Static parameterless method to execute when update log is executed-->
+  <actionOnUpdate></actionOnUpdate>
+  <!--Show update log on next startup.-->
+  <update>true</update>
+  <!--Testing mode prevents the update from saving over the UpdateLog file-->
+  <testing>false</testing>
+  <!--Icon bar shown to the right of the mod's name-->
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon</icon>
+      <url>steam://url/CommunityFilePage/2356577528</url>
+    </li>
+  </rightIconBar>
+  <!--Icon bar shown to the left of the mod's name-->
+  <leftIconBar>
+    <li>
+      <name>Patreon</name>
+      <icon>patreonIcon</icon>
+      <url>https://www.patreon.com/smashphil</url>
+    </li>
+    <li>
+      <name>Cursed Crew</name>
+      <icon>cursedCrewIcon</icon>
+      <url>https://discord.gg/NNe2VxAU7Z</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>
