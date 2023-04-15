@@ -83,7 +83,7 @@ namespace Vehicles
 				bool owner = true;
 				foreach (VehicleDef ownerDef in owners)
 				{
-					if (MatchesReachability(vehicleDef, ownerDef))
+					if (MatchingPathCosts(vehicleDef, ownerDef))
 					{
 						owner = false;
 						movementDifficulty[vehicleDef.DefIndex] = movementDifficulty[ownerDef.DefIndex]; //Piggy back off same configuration of already registered vehicle
@@ -92,41 +92,24 @@ namespace Vehicles
 				}
 				if (owner)
 				{
+					Log.Message($"Owner: {vehicleDef}");
 					owners.Add(vehicleDef);
 					movementDifficulty[vehicleDef.DefIndex] = new PathGrid(vehicleDef, Find.WorldGrid.TilesCount); //Register as owner with new path grid
 				}
 			}
 		}
 
-		private bool MatchesReachability(VehicleDef vehicleDef, VehicleDef otherVehicleDef)
+		public bool MatchingPathCosts(VehicleDef vehicleDef, VehicleDef otherVehicleDef)
 		{
 			if (vehicleDef.properties.defaultBiomesImpassable != otherVehicleDef.properties.defaultBiomesImpassable)
 			{
-				return false;
+				return false; //Quick filter to avoid comparing all defs when it is most likely not going to match costs due to default impassable costs
 			}
 
 			//Biome costs
 			foreach ((BiomeDef biomeDef, float cost) in vehicleDef.properties.customBiomeCosts)
 			{
 				if (!otherVehicleDef.properties.customBiomeCosts.TryGetValue(biomeDef, out float matchingCost) || matchingCost != cost)
-				{
-					return false;
-				}
-			}
-
-			//Road costs
-			foreach ((RoadDef roadDef, float cost) in vehicleDef.properties.customRoadCosts)
-			{
-				if (!otherVehicleDef.properties.customRoadCosts.TryGetValue(roadDef, out float matchingCost) || matchingCost != cost)
-				{
-					return false;
-				}
-			}
-
-			//River costs
-			foreach ((RiverDef riverDef, float cost) in vehicleDef.properties.customRiverCosts)
-			{
-				if (!otherVehicleDef.properties.customRiverCosts.TryGetValue(riverDef, out float matchingCost) || matchingCost != cost)
 				{
 					return false;
 				}
@@ -141,6 +124,32 @@ namespace Vehicles
 				}
 			}
 
+			return true;
+		}
+
+		public bool MatchesReachability(VehicleDef vehicleDef, VehicleDef otherVehicleDef)
+		{
+			//Biomes
+			foreach (BiomeDef biomeDef in DefDatabase<BiomeDef>.AllDefsListForReading)
+			{
+				float pathCost = vehicleDef.properties.customBiomeCosts.TryGetValue(biomeDef, biomeDef.movementDifficulty);
+				float otherCost = otherVehicleDef.properties.customBiomeCosts.TryGetValue(biomeDef, biomeDef.movementDifficulty);
+				if ((pathCost == ImpassableMovementDifficulty || otherCost == ImpassableMovementDifficulty) && pathCost != otherCost)
+				{
+					return false;
+				}
+			}
+
+			//Hills
+			foreach (Hilliness hilliness in Enum.GetValues(typeof(Hilliness)))
+			{
+				float pathCost = vehicleDef.properties.customHillinessCosts.TryGetValue(hilliness, HillinessMovementDifficultyOffset(hilliness));
+				float otherCost = otherVehicleDef.properties.customHillinessCosts.TryGetValue(hilliness, HillinessMovementDifficultyOffset(hilliness));
+				if ((pathCost == ImpassableMovementDifficulty || otherCost == ImpassableMovementDifficulty) && pathCost != otherCost)
+				{
+					return false;
+				}
+			}
 			return true;
 		}
 

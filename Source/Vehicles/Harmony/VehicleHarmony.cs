@@ -60,6 +60,8 @@ namespace Vehicles
 
 			File.WriteAllText(VersionDir, Version.VersionString);
 
+			Harmony.PatchAll();
+
 			IEnumerable <Type> patchCategories = GenTypes.AllTypes.Where(t => t.GetInterfaces().Contains(typeof(IPatchCategory)));
 			foreach (Type patchCategory in patchCategories)
 			{

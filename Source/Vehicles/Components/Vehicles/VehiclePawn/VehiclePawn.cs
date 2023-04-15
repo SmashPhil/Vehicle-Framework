@@ -169,6 +169,17 @@ namespace Vehicles
 					}
 				}
 			}
+
+			RecachePawnCount();
+
+			foreach (Pawn pawn in AllPawnsAboard)
+			{
+				if (pawn.IsWorldPawn())
+				{
+					Find.WorldPawns.RemovePawn(pawn); //Remove internal pawns from WorldPawns
+				}
+			}
+
 			ResetGraphicCache();
 			Drawer.Notify_Spawned();
 			InitializeHitbox();

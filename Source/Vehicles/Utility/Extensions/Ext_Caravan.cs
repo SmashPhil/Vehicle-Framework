@@ -54,6 +54,24 @@ namespace Vehicles
 		}
 
 		/// <summary>
+		/// Validate if <paramref name="vehicle"/> is able to join <paramref name="vehicleCaravan"/> without causing caravan to not be able to path on world map with current path settings
+		/// </summary>
+		/// <param name="vehicleCaravan"></param>
+		/// <param name="vehicle"></param>
+		public static bool ViableForCaravan(this VehicleCaravan vehicleCaravan, VehiclePawn vehicle)
+		{
+			WorldVehiclePathGrid worldPathGrid = WorldVehiclePathGrid.Instance;
+			foreach (VehiclePawn caravanVehicle in vehicleCaravan.Vehicles)
+			{
+				if (!worldPathGrid.MatchesReachability(caravanVehicle.VehicleDef, vehicle.VehicleDef))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		/// <summary>
 		/// Get all pawns from Caravan inside vehicles
 		/// </summary>
 		/// <param name="caravan"></param>

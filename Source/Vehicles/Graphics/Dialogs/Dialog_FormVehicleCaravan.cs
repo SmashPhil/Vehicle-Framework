@@ -388,16 +388,16 @@ namespace Vehicles
 
 			tabsList.Add(new TabRecord("VF_Vehicles".Translate(), delegate ()
 			{
-				this.tab = Tab.Vehicles;
-			}, this.tab == Tab.Vehicles));
+				tab = Tab.Vehicles;
+			}, tab == Tab.Vehicles));
 			tabsList.Add(new TabRecord("PawnsTab".Translate(), delegate()
 			{
-				this.tab = Tab.Pawns;
-			}, this.tab == Tab.Pawns));
+				tab = Tab.Pawns;
+			}, tab == Tab.Pawns));
 			tabsList.Add(new TabRecord("ItemsTab".Translate(), delegate()
 			{
-				this.tab = Tab.Items;
-			}, this.tab == Tab.Items));
+				tab = Tab.Items;
+			}, tab == Tab.Items));
 			
 			inRect.yMin += 119f;
 			Widgets.DrawMenuSection(inRect);
@@ -406,26 +406,28 @@ namespace Vehicles
 			inRect = inRect.ContractedBy(17f);
 			inRect.height += 17f;
 			Widgets.BeginGroup(inRect);
-			Rect rect2 = inRect.AtZero();
-			DoBottomButtons(rect2);
-			Rect inRect2 = rect2;
-			inRect2.yMax -= 76f;
-			Tab tab = this.tab;
-			if (tab == Tab.Items)
 			{
-				itemsTransfer.OnGUI(inRect2, out cacheDirty);
-			}
-			else if (tab == Tab.Vehicles)
-			{
-				vehiclesTransfer.OnGUI(inRect2);
-			}
-			else
-			{
-				pawnsTransfer.OnGUI(inRect2, out cacheDirty);
-			}
-			if (cacheDirty)
-			{
-				CountToTransferChanged();
+				Rect rect2 = inRect.AtZero();
+				DoBottomButtons(rect2);
+				Rect inRect2 = rect2;
+				inRect2.yMax -= 76f;
+				Tab tab = this.tab;
+				if (tab == Tab.Items)
+				{
+					itemsTransfer.OnGUI(inRect2, out cacheDirty);
+				}
+				else if (tab == Tab.Vehicles)
+				{
+					vehiclesTransfer.OnGUI(inRect2);
+				}
+				else
+				{
+					pawnsTransfer.OnGUI(inRect2, out cacheDirty);
+				}
+				if (cacheDirty)
+				{
+					CountToTransferChanged();
+				}
 			}
 			Widgets.EndGroup();
 		}

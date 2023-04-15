@@ -626,14 +626,21 @@ namespace Vehicles
 			{
 				return null;
 			}
-			if (pawn is VehiclePawn vehicle && !vehicle.CanReachVehicleMapEdge())
+			if (pawn is VehiclePawn vehicle)
 			{
-				return null;
+				if (!vehicle.CanReachVehicleMapEdge())
+				{
+					return null;
+				}
 			}
-			if (!(pawn is VehiclePawn) && !pawn.CanReachMapEdge())
+			else
 			{
-				return null;
+				if (!pawn.CanReachMapEdge())
+				{
+					return null;
+				}
 			}
+			
 			List<int> neighbors = new List<int>();
 			int tile = pawn.Map.Tile;
 			Find.WorldGrid.GetTileNeighbors(tile, neighbors);
@@ -644,6 +651,13 @@ namespace Vehicles
 				Caravan caravan = caravans[i];
 				if (neighbors.Contains(caravan.Tile) && caravan.autoJoinable)
 				{
+					if (pawn is VehiclePawn vehicle2 && caravan is VehicleCaravan vehicleCaravan)
+					{
+						if (!vehicleCaravan.ViableForCaravan(vehicle2))
+						{
+							return null;
+						}
+					}
 					if (pawn.HostFaction == null)
 					{
 						if (caravan.Faction == pawn.Faction)

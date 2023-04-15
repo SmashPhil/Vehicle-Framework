@@ -347,7 +347,7 @@ namespace Vehicles
 				RemovePawn(member);
 			}
 		}
-
+		
 		public override string GetInspectString()
 		{
 			StringBuilder stringBuilder = new StringBuilder();
