@@ -702,6 +702,40 @@ namespace Vehicles
 					}
 				}
 			}
+
+			for (int i = 0; i < transferables.Count; i++)
+			{
+				if (!(transferables[i].AnyThing is Corpse))
+				{
+					//Transfer to vehicle or pawn
+					TransferableUtility.Transfer(transferables[i].things, transferables[i].CountToTransfer, delegate (Thing splitPiece, IThingHolder originalHolder)
+					{
+						Thing item2 = splitPiece.TryMakeMinified();
+						CaravanInventoryUtility.FindPawnToMoveInventoryTo(item2, pawns, null).inventory.TryAddAndUnforbid(item2);
+					});
+				}
+			}
+
+			for (int i = 0; i < transferables.Count; i++)
+			{
+				if (transferables[i].AnyThing is Corpse)
+				{
+					//Transfer to vehicle
+					TransferableUtility.TransferNoSplit(transferables[i].things, transferables[i].CountToTransfer, delegate (Thing originalThing, int numToTake)
+					{
+						if (AutoStripSpawnedCorpses)
+						{
+							Corpse corpse = originalThing as Corpse;
+							if (corpse != null && corpse.Spawned)
+							{
+								corpse.Strip();
+							}
+						}
+						Thing item = originalThing.SplitOff(numToTake);
+						CaravanInventoryUtility.FindPawnToMoveInventoryTo(item, pawns, null).inventory.TryAddAndUnforbid(item);
+					});
+				}
+			}
 		}
 
 		private bool CheckForErrors(List<Pawn> pawns)

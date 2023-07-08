@@ -18,8 +18,12 @@ namespace Vehicles
 {
 	internal class CaravanHandling : IPatchCategory
 	{
+		private static MethodInfo addAllTradeablesMethod;
+
 		public void PatchMethods()
 		{
+			addAllTradeablesMethod = AccessTools.Method(typeof(TradeDeal), "AddToTradeables");
+
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Dialog_FormCaravan), "TryReformCaravan"),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(ConfirmLeaveVehiclesOnReform)));
@@ -124,6 +128,9 @@ namespace Vehicles
 				nameof(GiveSoldThingToAerialVehicle)),
 				transpiler: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(GiveSoldThingToVehicleTranspiler)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(TradeDeal), "AddAllTradeables"),
+				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(AddAllTradeablesFromAerialVehicle)));
 
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan_NeedsTracker), "TrySatisfyPawnNeeds"),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
@@ -751,22 +758,22 @@ namespace Vehicles
 
 		public static bool AerialVehicleInventoryItems(Pawn playerNegotiator, ref IEnumerable<Thing> __result)
 		{
-			AerialVehicleInFlight aerial = playerNegotiator.GetAerialVehicle();
-			if (aerial != null)
+			AerialVehicleInFlight aerialVehicle = playerNegotiator.GetAerialVehicle();
+			if (aerialVehicle != null)
 			{
 				List<Thing> inventoryThings = new List<Thing>();
 				if (!__result.EnumerableNullOrEmpty())
 				{
 					inventoryThings.AddRange(__result);
 				}
-				foreach (Thing thing in aerial.vehicle.inventory.innerContainer)
+				foreach (Thing thing in aerialVehicle.vehicle.inventory.innerContainer)
 				{
 					inventoryThings.Add(thing);
 				}
-				List<Pawn> pawns = aerial.vehicle.AllPawnsAboard;
+				List<Pawn> pawns = aerialVehicle.vehicle.AllPawnsAboard;
 				for (int i = 0; i < pawns.Count; i++)
 				{
-					if (!CaravanUtility.IsOwner(pawns[i], aerial.Faction))
+					if (!CaravanUtility.IsOwner(pawns[i], aerialVehicle.Faction))
 					{
 						inventoryThings.Add(pawns[i]);
 					}
@@ -907,6 +914,20 @@ namespace Vehicles
 				}
 
 				yield return instruction;
+			}
+		}
+
+		public static void AddAllTradeablesFromAerialVehicle(TradeDeal __instance)
+		{
+			if (TradeSession.playerNegotiator.GetAerialVehicle() is AerialVehicleInFlight)
+			{
+				foreach (Thing thing in TradeSession.trader.ColonyThingsWillingToBuy(TradeSession.playerNegotiator))
+				{
+					if (TradeUtility.PlayerSellableNow(thing, TradeSession.trader))
+					{
+						addAllTradeablesMethod.Invoke(__instance, new object[] { thing, Transactor.Colony });
+					}
+				}
 			}
 		}
 

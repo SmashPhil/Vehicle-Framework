@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.IO;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using HarmonyLib;
 using Verse;
@@ -61,6 +62,15 @@ namespace Vehicles
 			File.WriteAllText(VersionDir, Version.VersionString);
 
 			Harmony.PatchAll();
+
+			bool linux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+			bool osx = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+			if (linux || osx)
+			{
+				string platform = linux ? "Linux" : "OSX";
+				Log.Warning($"{LogLabel} {platform} is not currently supported for RGB Shaders. Patterns and skins for vehicles as well as the color picker dialog will be disabled by default.");
+				VehicleMod.settings.main.useCustomShaders = false;
+			}
 
 			IEnumerable <Type> patchCategories = GenTypes.AllTypes.Where(t => t.GetInterfaces().Contains(typeof(IPatchCategory)));
 			foreach (Type patchCategory in patchCategories)
