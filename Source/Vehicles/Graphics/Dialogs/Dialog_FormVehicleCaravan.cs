@@ -815,7 +815,7 @@ namespace Vehicles
 			}
 			return true;
 
-			bool CanReachUnspawned(Pawn pawn, Thing thing, PathEndMode peMode = PathEndMode.Touch, TraverseMode mode = TraverseMode.ByPawn, Danger maxDanger = Danger.Deadly)
+			bool CanReachUnspawned(Pawn pawn, Thing thing, PathEndMode peMode = PathEndMode.Touch, TraverseMode mode = TraverseMode.PassDoors, Danger maxDanger = Danger.Deadly)
 			{
 				VehiclePawn vehicle = pawn.GetVehicle();
 				if (vehicle is null)
