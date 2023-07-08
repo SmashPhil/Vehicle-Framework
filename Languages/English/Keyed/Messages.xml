@@ -46,7 +46,8 @@
 	<LeaveVehicleBehindCaravan>Are you sure you want to leave Vehicles behind? Vehicles left behind: {0}</LeaveVehicleBehindCaravan>
 	<MessageMustAssignEnoughToVehicle>Must assign enough colonists to man vehicle.</MessageMustAssignEnoughToVehicle>
 	
-	<VehicleAerialArrived>{0} has arrived at their destination.</VehicleAerialArrived>
+	<VF_AerialVehicleArrived>{0} has arrived at their destination.</VF_AerialVehicleArrived>
+	<VF_AerialVehicleLeft>{0} has left the map.</VF_AerialVehicleLeft>
 	<VehicleLaunchOutOfFuel>Cannot launch. Out of Fuel.</VehicleLaunchOutOfFuel>
 	<VehicleRunwayCannotLand>Cannot land here.</VehicleRunwayCannotLand>
 	<VehicleRunwayCannotLandEnemy>Cannot land at enemy settlement.</VehicleRunwayCannotLandEnemy>

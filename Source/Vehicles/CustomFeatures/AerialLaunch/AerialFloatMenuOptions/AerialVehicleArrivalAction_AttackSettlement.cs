@@ -35,7 +35,7 @@ namespace Vehicles
 			return CanAttack(vehicle, settlement);
 		}
 
-		public override void Arrived(int tile)
+		public override bool Arrived(int tile)
 		{
 			LongEventHandler.QueueLongEvent(delegate ()
 			{
@@ -51,6 +51,7 @@ namespace Vehicles
 				Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.NeutralEvent, vehicle, settlement.Faction, null, null, null);
 				arrivalModeDef.Worker.VehicleArrived(vehicle, launchProtocol, settlement.Map);
 			}, "GeneratingMap", false, null, true);
+			return true;
 		}
 
 		public override void ExposeData()

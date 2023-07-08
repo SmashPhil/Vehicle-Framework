@@ -516,13 +516,15 @@ namespace Vehicles
 					}
 					else
 					{
-						Messages.Message("VehicleAerialArrived".Translate(vehicle.LabelShort), MessageTypeDefOf.NeutralEvent);
+						if (vehicle.Faction.IsPlayer)
+						{
+							Messages.Message("VF_AerialVehicleArrived".Translate(vehicle.LabelShort), MessageTypeDefOf.NeutralEvent);
+						}
 						Tile = flightPath.First.tile;
 						ResetPosition(Find.WorldGrid.GetTileCenter(Tile));
 						if (arrivalAction is AerialVehicleArrivalAction action)
 						{
-							action.Arrived(flightPath.First.tile);
-							if (action.DestroyOnArrival)
+							if (action.Arrived(flightPath.First.tile) && action.DestroyOnArrival)
 							{
 								Destroy();
 							}

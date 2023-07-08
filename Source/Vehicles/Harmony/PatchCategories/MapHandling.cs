@@ -112,9 +112,9 @@ namespace Vehicles
 					__result = true;
 					return;
 				}
-				foreach(Pawn pawn in __instance.AllPawnsSpawned)
+				foreach (Pawn pawn in __instance.AllPawnsSpawned)
 				{
-					if(pawn is VehiclePawn vehicle && vehicle.AllPawnsAboard.NotNullAndAny())
+					if (pawn is VehiclePawn vehicle && vehicle.AllPawnsAboard.NotNullAndAny())
 					{
 						foreach (Pawn sailor in vehicle.AllPawnsAboard)
 						{

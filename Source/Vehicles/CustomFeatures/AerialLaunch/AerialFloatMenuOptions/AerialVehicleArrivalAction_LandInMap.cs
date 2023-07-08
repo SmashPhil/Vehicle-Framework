@@ -25,9 +25,10 @@ namespace Vehicles
 
 		public override bool DestroyOnArrival => true;
 
-		public override void Arrived(int tile)
+		public override bool Arrived(int tile)
 		{
 			vehicle.EventRegistry[VehicleEventDefOf.AerialLanding].ExecuteEvents();
+			return true;
 		}
 
 		public override void ExposeData()

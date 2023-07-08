@@ -29,7 +29,7 @@ namespace Vehicles
 			return CanAttack(vehicle, parent);
 		}
 
-		public override void Arrived(int tile)
+		public override bool Arrived(int tile)
 		{
 			LongEventHandler.QueueLongEvent(delegate ()
 			{
@@ -55,6 +55,7 @@ namespace Vehicles
 				}, null, null, null, true);
 				aerialVehicle.Destroy();
 			}, "GeneratingMap", false, null, true);
+			return true;
 		}
 
 		public override void ExposeData()

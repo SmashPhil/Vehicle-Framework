@@ -57,7 +57,10 @@ namespace Vehicles
 					return;
 				}
 			}
-			Messages.Message($"{vehicle.LabelShort} LEFT", MessageTypeDefOf.PositiveEvent);
+			if (vehicle.Faction.IsPlayer)
+			{
+				Messages.Message("VF_AerialVehicleLeft".Translate(vehicle.LabelShort), MessageTypeDefOf.PositiveEvent);
+			}
 			if (createWorldObject)
 			{
 				AerialVehicleInFlight flyingVehicle = (AerialVehicleInFlight)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.AerialVehicle);

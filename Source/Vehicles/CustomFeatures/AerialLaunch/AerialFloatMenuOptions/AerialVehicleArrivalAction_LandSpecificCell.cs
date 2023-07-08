@@ -22,17 +22,27 @@ namespace Vehicles
 			this.landingRot = landingRot;
 		}
 
+		public virtual bool CanArriveInMap => mapParent?.Map != null;
+
 		public override FloatMenuAcceptanceReport StillValid(int destinationTile)
 		{
 			return WorldVehiclePathGrid.Instance.Passable(tile, vehicle.VehicleDef);
 		}
 
-		public override void Arrived(int tile)
+		public override bool Arrived(int tile)
 		{
-			base.Arrived(tile);
+			if (!base.Arrived(tile))
+			{
+				return false;
+			}
+			if (!CanArriveInMap)
+			{
+				return false;
+			}
 			VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)VehicleSkyfallerMaker.MakeSkyfaller(vehicle.CompVehicleLauncher.Props.skyfallerIncoming, vehicle);
 			Rot4 vehicleRotation = vehicle.CompVehicleLauncher.launchProtocol.LandingProperties?.forcedRotation ?? landingRot;
 			GenSpawn.Spawn(skyfaller, landingCell, mapParent.Map, vehicleRotation);
+			return true;
 		}
 
 		public override void ExposeData()
