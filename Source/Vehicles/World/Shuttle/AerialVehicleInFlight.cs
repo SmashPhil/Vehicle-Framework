@@ -228,7 +228,6 @@ namespace Vehicles
 				{
 					yield return this.AerialVehicleTradeCommand(settlement2.Faction, settlement2.TraderKind);
 				}
-				Log.Message($"InFlight: {vehicle.CompVehicleLauncher.inFlight} Control? {vehicle.CompVehicleLauncher.ControlInFlight}");
 				if (vehicle.CompVehicleLauncher.ControlInFlight || !vehicle.CompVehicleLauncher.inFlight)
 				{
 					Command_Action launchCommand = new Command_Action()

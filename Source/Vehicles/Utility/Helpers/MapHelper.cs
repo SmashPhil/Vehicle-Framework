@@ -32,7 +32,7 @@ namespace Vehicles
 				}
 				if (aerialVehicle.arrivalAction != null && aerialVehicle.flightPath.Last.tile == map.Tile)
 				{
-					//return true; //Keep open if aerial vehicle has active arrival action on tile
+					return true; //Keep open if aerial vehicle has active arrival action on tile
 				}
 			}
 			return false;
