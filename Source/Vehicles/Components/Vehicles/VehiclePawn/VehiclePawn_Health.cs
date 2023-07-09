@@ -116,9 +116,10 @@ namespace Vehicles
 
 		public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
 		{
+			Log.Message($"Destroying {this} sustainers={sustainers is null} EventRegistry={EventRegistry is null}");
 			DisembarkAll();
 			sustainers.Cleanup();
-			EventRegistry[VehicleEventDefOf.Destroyed].ExecuteEvents();
+			EventRegistry?[VehicleEventDefOf.Destroyed].ExecuteEvents(); //Null check in the event that this vehicle is a world pawn but not in any AerialVehicleInFlight, VehicleCaravan, or spawned on map
 			base.Destroy(mode);
 		}
 

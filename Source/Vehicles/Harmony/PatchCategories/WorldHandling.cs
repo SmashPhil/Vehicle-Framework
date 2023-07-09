@@ -94,10 +94,6 @@ namespace Vehicles
 		/// <param name="p"></param>
 		public static bool DoNotRemoveVehicleObjects(Pawn p)
 		{
-			if (p is VehiclePawn vehicleInFlight && (vehicleInFlight.CompVehicleLauncher?.inFlight ?? false))
-			{
-				return false;
-			}
 			foreach (DockedBoat obj in Find.WorldObjects.AllWorldObjects.Where(x => x is DockedBoat))
 			{
 				if (obj.dockedBoats.Contains(p))
@@ -105,11 +101,11 @@ namespace Vehicles
 					return false;
 				}
 			}
-			foreach (Caravan caravan in Find.WorldObjects.AllWorldObjects.Where(x => x is Caravan))
+			foreach (VehicleCaravan vehicleCaravan in Find.WorldObjects.AllWorldObjects.Where(x => x is VehicleCaravan))
 			{
-				foreach (Pawn innerPawn in caravan.PawnsListForReading)
+				foreach (Pawn innerPawn in vehicleCaravan.PawnsListForReading)
 				{
-					if (innerPawn is VehiclePawn vehicle && (vehicle == p || vehicle.AllPawnsAboard.Contains(p)))
+					if (innerPawn is VehiclePawn innerVehicle && (innerVehicle == p || innerVehicle.AllPawnsAboard.Contains(p)))
 					{
 						return false;
 					}
