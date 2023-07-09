@@ -99,6 +99,10 @@ namespace Vehicles
 
 		public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
 		{
+			if (vPather != null)
+			{
+				vPather.StopDead();
+			}
 			Map.GetCachedMapComponent<VehiclePositionManager>().ReleaseClaimed(this);
 			//Map.GetCachedMapComponent<VehicleRegionUpdateCatalog>().Notify_VehicleDespawned(this);
 			VehicleReservationManager reservationManager = Map.GetCachedMapComponent<VehicleReservationManager>();
@@ -107,10 +111,6 @@ namespace Vehicles
 			Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleDespawned(this);
 			EventRegistry[VehicleEventDefOf.Despawned].ExecuteEvents();
 			base.DeSpawn(mode);
-			if (vPather != null)
-			{
-				vPather.StopDead();
-			}
 			SoundCleanup();
 		}
 

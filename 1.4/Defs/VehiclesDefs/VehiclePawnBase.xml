@@ -103,7 +103,8 @@
 		<race>
 			<body>emptyBody</body>
 			<trainability>None</trainability>
-			<thinkTreeMain>ThinkTree_Vehicle</thinkTreeMain>
+			<thinkTreeMain>Vehicle</thinkTreeMain>
+			<thinkTreeConstant>Vehicle_Constant</thinkTreeConstant>
 			<intelligence>ToolUser</intelligence>
 			<fleshType>MetalVehicle</fleshType>
 			<needsRest>false</needsRest>

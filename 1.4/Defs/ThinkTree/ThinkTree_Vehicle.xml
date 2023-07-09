@@ -2,7 +2,7 @@
 
 <Defs>
 	<ThinkTreeDef>
-		<defName>ThinkTree_Vehicle</defName>
+		<defName>Vehicle</defName>
 		<thinkRoot Class="ThinkNode_Priority">
 			<subNodes>
 				<!--Do a queued job -->
@@ -38,6 +38,43 @@
 				
 				<!-- Idle Ship -->
 				<li Class= "Vehicles.JobGiver_AwaitOrders"/>
+			</subNodes>
+		</thinkRoot>
+	</ThinkTreeDef>
+	
+	<ThinkTreeDef>
+		<defName>Vehicle_Constant</defName>
+		<thinkRoot Class="ThinkNode_Priority">
+			<subNodes>
+				<!-- Despawned -->
+				<li Class="ThinkNode_Subtree">
+					<treeDef>Despawned</treeDef>
+				</li>
+
+				<li Class="ThinkNode_ConditionalCanDoConstantThinkTreeJobNow">
+					<subNodes>
+						<!-- Flee explosion -->
+						<li Class="JobGiver_FleePotentialExplosion" />
+
+						<!-- Join auto joinable caravan -->
+						<li Class="ThinkNode_Subtree">
+							<treeDef>JoinAutoJoinableCaravan</treeDef>
+						</li>
+
+						<!-- Hostility response -->
+						<li Class="JobGiver_ConfigurableHostilityResponse" />
+						
+					</subNodes>
+				</li>
+
+				<li Class="ThinkNode_ConditionalCanDoLordJobNow">
+					<subNodes>
+						<!-- Lord directives -->
+						<li Class="ThinkNode_Subtree">
+							<treeDef>LordDutyConstant</treeDef>
+						</li>
+					</subNodes>
+				</li>
 			</subNodes>
 		</thinkRoot>
 	</ThinkTreeDef>

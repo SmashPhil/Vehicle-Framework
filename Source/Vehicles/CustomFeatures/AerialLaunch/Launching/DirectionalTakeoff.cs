@@ -111,5 +111,13 @@ namespace Vehicles
 			}
 			return base.AnimateTakeoff(drawPos, rotation);
 		}
+
+		public override void ResolveProperties(LaunchProtocol reference)
+		{
+			base.ResolveProperties(reference);
+			DirectionalTakeoff directionalReference = reference as DirectionalTakeoff;
+			launchProperties = directionalReference.launchProperties;
+			landingProperties = directionalReference.landingProperties;
+		}
 	}
 }

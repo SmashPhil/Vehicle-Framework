@@ -51,7 +51,7 @@ namespace Vehicles
 					nameof(DebugWorldObjects)));
 			}
 
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanTendUtility), "FindPawnsNeedingTend"),
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(ThinkNode_JoinVoluntarilyJoinableLord), "JoinVoluntarilyJoinableLord"),
 			//	prefix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestPrefix)));
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanTendUtility), "IsValidDoctorFor"),
@@ -62,11 +62,14 @@ namespace Vehicles
 			//	nameof(ExceptionCatcher)));
 		}
 
-		public static void TestPrefix()
+		public static void TestPrefix(Pawn pawn)
 		{
 			try
 			{
-				Log.Message("Starting");
+				if (pawn.Faction?.IsPlayer ?? false)
+				{
+					Log.Message($"Pawn: {pawn} Map: {pawn.Map} Tick: {Find.TickManager.TicksGame}");
+				}
 			}
 			catch (Exception ex)
 			{
@@ -160,6 +163,30 @@ namespace Vehicles
 		public static void DebugRegenerateWorldPathGrid()
 		{
 			Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().RecalculateAllPerceivedPathCosts();
+		}
+
+		[DebugAction(VehicleHarmony.VehiclesLabel, "Ground All Aerial Vehicles", allowedGameStates = AllowedGameStates.Playing)]
+		public static void DebugGroundAllAerialVehicles()
+		{
+			foreach (AerialVehicleInFlight aerialVehicle in VehicleWorldObjectsHolder.Instance.AerialVehicles)
+			{
+				DebugLandAerialVehicle(aerialVehicle);
+			}
+		}
+
+		public static void DebugLandAerialVehicle(AerialVehicleInFlight aerialVehicleInFlight)
+		{
+			List<Settlement> playerSettlements = Find.WorldObjects.Settlements.Where(s => s.Faction == Faction.OfPlayer).ToList();
+			Settlement nearestSettlement = playerSettlements.MinBy(s => Ext_Math.SphericalDistance(s.DrawPos, aerialVehicleInFlight.DrawPos));
+
+			LaunchProtocol launchProtocol = aerialVehicleInFlight.vehicle.CompVehicleLauncher.launchProtocol;
+			Rot4 vehicleRotation = launchProtocol.LandingProperties?.forcedRotation ?? Rot4.Random;
+			IntVec3 cell = CellFinderExtended.RandomCenterCell(nearestSettlement.Map, (IntVec3 cell) => !MapHelper.VehicleBlockedInPosition(aerialVehicleInFlight.vehicle, Current.Game.CurrentMap, cell, vehicleRotation));
+			VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(aerialVehicleInFlight.vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
+			skyfaller.vehicle = aerialVehicleInFlight.vehicle;
+
+			GenSpawn.Spawn(skyfaller, cell, nearestSettlement.Map, vehicleRotation);
+			aerialVehicleInFlight.Destroy();
 		}
 	}
 }

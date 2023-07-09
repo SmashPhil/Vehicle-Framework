@@ -17,6 +17,8 @@ namespace Vehicles
 
 		protected override IEnumerable<Toil> MakeNewToils()
 		{
+			this.FailOnDestroyedOrNull(TargetIndex.A);
+			this.FailOn(() => !Vehicle.Spawned);
 			yield return new Toil()
 			{
 				initAction = delegate()

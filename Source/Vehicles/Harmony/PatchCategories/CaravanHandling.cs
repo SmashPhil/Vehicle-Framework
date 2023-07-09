@@ -160,7 +160,7 @@ namespace Vehicles
 		/// <param name="__result"></param>
 		public static bool ConfirmLeaveVehiclesOnReform(Dialog_FormCaravan __instance, ref List<TransferableOneWay> ___transferables, Map ___map, int ___destinationTile, ref bool __result)
 		{
-			if(___map.mapPawns.SpawnedPawnsInFaction(Faction.OfPlayer).HasVehicle())
+			if (___map.mapPawns.SpawnedPawnsInFaction(Faction.OfPlayer).HasVehicle())
 			{
 				List<Pawn> pawns = TransferableUtility.GetPawnsFromTransferables(___transferables);
 				List<Pawn> correctedPawns = pawns.Where(p => !(p is VehiclePawn)).ToList();

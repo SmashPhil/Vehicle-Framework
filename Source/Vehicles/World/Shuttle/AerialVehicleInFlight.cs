@@ -228,6 +228,7 @@ namespace Vehicles
 				{
 					yield return this.AerialVehicleTradeCommand(settlement2.Faction, settlement2.TraderKind);
 				}
+				Log.Message($"InFlight: {vehicle.CompVehicleLauncher.inFlight} Control? {vehicle.CompVehicleLauncher.ControlInFlight}");
 				if (vehicle.CompVehicleLauncher.ControlInFlight || !vehicle.CompVehicleLauncher.inFlight)
 				{
 					Command_Action launchCommand = new Command_Action()
@@ -304,17 +305,7 @@ namespace Vehicles
 						defaultLabel = "Debug: Land at Nearest Player Settlement",
 						action = delegate ()
 						{
-							List<Settlement> playerSettlements = Find.WorldObjects.Settlements.Where(s => s.Faction == Faction.OfPlayer).ToList();
-							Settlement nearestSettlement = playerSettlements.MinBy(s => Ext_Math.SphericalDistance(s.DrawPos, DrawPos));
-							
-							LaunchProtocol launchProtocol = vehicle.CompVehicleLauncher.launchProtocol;
-							Rot4 vehicleRotation = launchProtocol.LandingProperties?.forcedRotation ?? Rot4.Random;
-							IntVec3 cell = CellFinderExtended.RandomCenterCell(nearestSettlement.Map, (IntVec3 cell) => !MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, cell, vehicleRotation));
-							VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
-							skyfaller.vehicle = vehicle;
-
-							GenSpawn.Spawn(skyfaller, cell, nearestSettlement.Map, vehicleRotation);
-							Destroy();
+							Debug.DebugLandAerialVehicle(this);
 						}
 					};
 					yield return new Command_Action
@@ -702,6 +693,17 @@ namespace Vehicles
 		public ThingOwner GetDirectlyHeldThings()
 		{
 			return vehicle.inventory.innerContainer;
+		}
+
+		public static AerialVehicleInFlight Create(VehiclePawn vehicle, int tile)
+		{
+			AerialVehicleInFlight aerialVehicle = (AerialVehicleInFlight)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.AerialVehicle);
+			aerialVehicle.vehicle = vehicle;
+			aerialVehicle.Tile = tile;
+			aerialVehicle.SetFaction(vehicle.Faction);
+			aerialVehicle.Initialize();
+			Find.WorldObjects.Add(aerialVehicle);
+			return aerialVehicle;
 		}
 	}
 }

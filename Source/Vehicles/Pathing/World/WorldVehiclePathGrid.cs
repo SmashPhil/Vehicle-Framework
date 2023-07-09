@@ -85,6 +85,7 @@ namespace Vehicles
 				{
 					if (MatchingPathCosts(vehicleDef, ownerDef))
 					{
+						if (vehicleDef.defName == "VVE_Smuggler") Log.Message($"Owner: {ownerDef}");
 						owner = false;
 						movementDifficulty[vehicleDef.DefIndex] = movementDifficulty[ownerDef.DefIndex]; //Piggy back off same configuration of already registered vehicle
 						break;
@@ -92,7 +93,6 @@ namespace Vehicles
 				}
 				if (owner)
 				{
-					Log.Message($"Owner: {vehicleDef}");
 					owners.Add(vehicleDef);
 					movementDifficulty[vehicleDef.DefIndex] = new PathGrid(vehicleDef, Find.WorldGrid.TilesCount); //Register as owner with new path grid
 				}
@@ -106,6 +106,8 @@ namespace Vehicles
 				return false; //Quick filter to avoid comparing all defs when it is most likely not going to match costs due to default impassable costs
 			}
 
+			/* -- Must check both vehicles' configurations to avoid missed cases resulting in malformed pathing due to unequal ownership -- */
+
 			//Biome costs
 			foreach ((BiomeDef biomeDef, float cost) in vehicleDef.properties.customBiomeCosts)
 			{
@@ -115,10 +117,28 @@ namespace Vehicles
 				}
 			}
 
+			//Biome costs
+			foreach ((BiomeDef biomeDef, float cost) in otherVehicleDef.properties.customBiomeCosts)
+			{
+				if (!vehicleDef.properties.customBiomeCosts.TryGetValue(biomeDef, out float matchingCost) || matchingCost != cost)
+				{
+					return false;
+				}
+			}
+
 			//Hilliness costs
 			foreach ((Hilliness hilliness, float cost) in vehicleDef.properties.customHillinessCosts)
 			{
 				if (!otherVehicleDef.properties.customHillinessCosts.TryGetValue(hilliness, out float matchingCost) || matchingCost != cost)
+				{
+					return false;
+				}
+			}
+
+			//Hilliness costs
+			foreach ((Hilliness hilliness, float cost) in otherVehicleDef.properties.customHillinessCosts)
+			{
+				if (!vehicleDef.properties.customHillinessCosts.TryGetValue(hilliness, out float matchingCost) || matchingCost != cost)
 				{
 					return false;
 				}

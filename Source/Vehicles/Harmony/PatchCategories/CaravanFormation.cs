@@ -193,7 +193,21 @@ namespace Vehicles
 		public static bool ExitMapAndJoinOrCreateVehicleCaravan(Pawn pawn, Rot4 exitDir)
 		{
 			VehiclePawn vehicle = pawn as VehiclePawn;
+			if (vehicle != null && CaravanHelper.OpportunistcallyCreatedAerialVehicle(vehicle, pawn.Map.Tile))
+			{
+				return false;
+			}
 			Caravan caravan = CaravanHelper.FindCaravanToJoinForAllowingVehicles(pawn);
+			if (caravan == null && CaravanHelper.FindAerialVehicleToJoinForAllowingVehicles(pawn) is AerialVehicleInFlight aerialVehicle)
+			{
+				VehicleHandler handler = aerialVehicle.vehicle.handlers.FirstOrDefault(handler => handler.AreSlotsAvailable);
+				if (handler != null)
+				{
+					aerialVehicle.vehicle.GiveLoadJob(pawn, handler);
+					aerialVehicle.vehicle.Notify_Boarded(pawn);
+					return false;
+				}
+			}
 			if (caravan is VehicleCaravan vehicleCaravan && (vehicle is null || vehicle.IsBoat() == vehicleCaravan.LeadVehicle.IsBoat()))
 			{
 				CaravanHelper.AddVehicleCaravanExitTaleIfShould(pawn);

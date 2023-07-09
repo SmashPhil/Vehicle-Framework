@@ -222,7 +222,7 @@ namespace Vehicles
 						DebugHelper.World.DebugType = WorldPathingDebugType.None;
 					}
 				});
-				toggle.Disabled = !PathingHelper.ShouldCreateRegions(vehicleDef) || !vehicleDef.canCaravan;
+				toggle.Disabled = !PathingHelper.ShouldCreateRegions(vehicleDef);// || !vehicleDef.canCaravan;
 				vehicleDefToggles.Add(toggle);
 			}
 			Find.WindowStack.Add(new Dialog_RadioButtonMenu("VF_DevMode_DebugPathfinderDebugging".Translate(), vehicleDefToggles));

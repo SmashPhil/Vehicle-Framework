@@ -372,6 +372,22 @@ namespace Vehicles
 			return caravan;
 		}
 
+		public static bool OpportunistcallyCreatedAerialVehicle(VehiclePawn vehicle, int tile)
+		{
+			bool canExit = Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().Passable(tile, vehicle.VehicleDef);
+			if (!canExit && vehicle.GetCachedComp<CompVehicleLauncher>() is CompVehicleLauncher)
+			{
+				AerialVehicleInFlight.Create(vehicle, tile);
+				if (vehicle.Spawned)
+				{
+					vehicle.jobs.StopAll();
+					vehicle.DeSpawn(DestroyMode.Vanish);
+				}
+				return true;
+			}
+			return false;
+		}
+
 		/// <summary>
 		/// Find random starting tile for VehicleCaravan
 		/// </summary>
@@ -669,6 +685,43 @@ namespace Vehicles
 					{
 						return caravan;
 					}
+				}
+			}
+			return null;
+		}
+
+		public static AerialVehicleInFlight FindAerialVehicleToJoinForAllowingVehicles(Pawn pawn)
+		{
+			if (pawn.Faction != Faction.OfPlayer && pawn.HostFaction != Faction.OfPlayer)
+			{
+				return null;
+			}
+			if (!pawn.Spawned)
+			{
+				return null;
+			}
+			if (pawn is VehiclePawn)
+			{
+				return null; //Aerial vehicles can't fly together
+			}
+			else if (!pawn.CanReachMapEdge())
+			{
+				return null;
+			}
+			List<AerialVehicleInFlight> aerialVehicles = VehicleWorldObjectsHolder.Instance.AerialVehicles.Where(aerialVehicle => aerialVehicle.Tile == pawn.Map.Tile).ToList();
+			
+			foreach (AerialVehicleInFlight aerialVehicle in aerialVehicles)
+			{
+				if (pawn.HostFaction == null)
+				{
+					if (aerialVehicle.Faction == pawn.Faction)
+					{
+						return aerialVehicle;
+					}
+				}
+				if (aerialVehicle.Faction == pawn.HostFaction)
+				{
+					return aerialVehicle;
 				}
 			}
 			return null;

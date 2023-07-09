@@ -63,17 +63,12 @@ namespace Vehicles
 			}
 			if (createWorldObject)
 			{
-				AerialVehicleInFlight flyingVehicle = (AerialVehicleInFlight)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.AerialVehicle);
-				flyingVehicle.vehicle = vehicle;
-				flyingVehicle.Tile = Map.Tile;
-				flyingVehicle.SetFaction(vehicle.Faction);
-				flyingVehicle.OrderFlyToTiles(new List<FlightNode>(flightPath), WorldHelper.GetTilePos(Map.Tile), arrivalAction);
+				AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(vehicle, Map.Tile);
+				aerialVehicle.OrderFlyToTiles(new List<FlightNode>(flightPath), WorldHelper.GetTilePos(Map.Tile), arrivalAction);
 				if (orderRecon)
 				{
-					flyingVehicle.flightPath.ReconCircleAt(flightPath.LastOrDefault().tile);
+					aerialVehicle.flightPath.ReconCircleAt(flightPath.LastOrDefault().tile);
 				}
-				flyingVehicle.Initialize();
-				Find.WorldObjects.Add(flyingVehicle);
 			}
 			Destroy(DestroyMode.Vanish);
 		}
