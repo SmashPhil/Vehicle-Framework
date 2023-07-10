@@ -242,6 +242,11 @@ namespace Vehicles
 								(GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, Tile, path, fuelCost));
 						}
 					};
+					if (!VehicleMod.settings.debug.debugDraftAnyVehicle && !vehicle.CanMoveWithOperators)
+					{
+						launchCommand.disabled = true;
+						launchCommand.disabledReason = "Vehicles_NotEnoughToOperate".Translate();
+					}
 					yield return launchCommand;
 				}
 				if (!vehicle.CompVehicleLauncher.inFlight)

@@ -29,6 +29,13 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldObjectsHolder), "Recache"),
 				prefix: new HarmonyMethod(typeof(WorldHandling),
 				nameof(RecacheVehicleObjectCache)));
+			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(PawnsFinder), nameof(PawnsFinder.AllCaravansAndTravelingTransportPods_AliveOrDead)),
+				postfix: new HarmonyMethod(typeof(WorldHandling),
+				nameof(AllAerialVehicles_AliveOrDead)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnBanishUtility), nameof(PawnBanishUtility.Banish)),
+				prefix: new HarmonyMethod(typeof(WorldHandling),
+				nameof(BanishPawnFromAerialVehicle)));
+
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CameraJumper), nameof(CameraJumper.TryShowWorld)),
 				prefix: new HarmonyMethod(typeof(WorldHandling),
 				nameof(ForcedTargetingDontShowWorld)));
@@ -170,6 +177,65 @@ namespace Vehicles
 		public static void RecacheVehicleObjectCache()
 		{
 			VehicleWorldObjectsHolder.Instance.Recache();
+		}
+
+		public static void AllAerialVehicles_AliveOrDead(ref List<Pawn> __result)
+		{
+			foreach (AerialVehicleInFlight aerialVehicle in VehicleWorldObjectsHolder.Instance.AerialVehicles)
+			{
+				__result.AddRange(aerialVehicle.vehicle.AllPawnsAboard);
+			}
+		}
+
+		public static void BanishPawnFromAerialVehicle(Pawn pawn, ref int tile)
+		{
+			if (pawn.GetAerialVehicle() is AerialVehicleInFlight aerialVehicle)
+			{
+				if (tile == -1)
+				{
+					tile = pawn.Tile;
+				}
+				bool leftToDie = PawnBanishUtility.WouldBeLeftToDie(pawn, tile);
+				//if (!pawn.IsQuestLodger())
+				//{
+				//	PawnDiedOrDownedThoughtsUtility.TryGiveThoughts(pawn, null, leftToDie ? PawnDiedOrDownedThoughtsKind.BanishedToDie : PawnDiedOrDownedThoughtsKind.Banished);
+				//}
+
+				CaravanInventoryUtility.MoveAllInventoryToSomeoneElse(pawn, aerialVehicle.vehicle.AllPawnsAboard.Append(aerialVehicle.vehicle).ToList(), null);
+				aerialVehicle.vehicle.RemovePawn(pawn);
+				if (leftToDie)
+				{
+					if (Rand.Value < 0.8f)
+					{
+						pawn.Kill(null);
+					}
+					else
+					{
+						HealIfPossible(pawn);
+					}
+				}
+			}
+		}
+
+		private static void HealIfPossible(Pawn p)
+		{
+			List<Hediff> hediffs = new List<Hediff>(p.health.hediffSet.hediffs);
+			for (int i = 0; i < hediffs.Count; i++)
+			{
+				Hediff_Injury hediff_Injury = hediffs[i] as Hediff_Injury;
+				if (hediff_Injury != null && !hediff_Injury.IsPermanent())
+				{
+					p.health.RemoveHediff(hediff_Injury);
+				}
+				else
+				{
+					ImmunityRecord immunityRecord = p.health.immunity.GetImmunityRecord(hediffs[i].def);
+					if (immunityRecord != null)
+					{
+						immunityRecord.immunity = 1f;
+					}
+				}
+			}
 		}
 
 		public static bool ForcedTargetingDontShowWorld(ref bool __result)

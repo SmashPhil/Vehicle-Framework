@@ -52,4 +52,8 @@
 	<Vehicles.VehicleEventDef>
 		<defName>PawnKilled</defName>
 	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>PawnRemoved</defName>
+	</Vehicles.VehicleEventDef>
 </Defs>

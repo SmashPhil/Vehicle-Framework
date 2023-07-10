@@ -27,8 +27,6 @@ namespace Vehicles
 
 		public VerticalProtocolProperties CurAnimationProperties_Vertical => CurAnimationProperties as VerticalProtocolProperties;
 
-		public override string FailLaunchMessage => "SkyfallerLaunchNotValid".Translate();
-
 		protected override int TotalTicks_Landing => base.TotalTicks_Landing + LandingProperties_VTOL.maxTicksVertical;
 
 		protected override int TotalTicks_Takeoff => base.TotalTicks_Takeoff + LaunchProperties_VTOL.maxTicksVertical;

@@ -12,7 +12,22 @@ namespace Vehicles
 	//REDO - Rivers
 	public static class WorldHelper
 	{
+		private static readonly List<Thing> inventoryItems = new List<Thing>();
+
 		public static bool RiverIsValid(int tile, List<Pawn> vehicles) => true;
+
+		public static List<Thing> AllInventoryItems(AerialVehicleInFlight aerialVehicle)
+		{
+			inventoryItems.Clear();
+			List<Pawn> pawnsListForReading = aerialVehicle.vehicle.AllPawnsAboard;
+			for (int i = 0; i < pawnsListForReading.Count; i++)
+			{
+				Pawn pawn = pawnsListForReading[i];
+				inventoryItems.AddRange(pawn.inventory.innerContainer);
+			}
+			inventoryItems.AddRange(aerialVehicle.vehicle.inventory.innerContainer);
+			return inventoryItems;
+		}
 
 		public static float RiverCostAt(int tile, VehiclePawn vehicle)
 		{

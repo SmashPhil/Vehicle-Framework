@@ -48,6 +48,7 @@
 	
 	<VF_AerialVehicleArrived>{0} has arrived at their destination.</VF_AerialVehicleArrived>
 	<VF_AerialVehicleLeft>{0} has left the map.</VF_AerialVehicleLeft>
+	<VF_AerialVehicleLaunchNotValid>Unable to launch, conditions are not suitable.</VF_AerialVehicleLaunchNotValid>
 	<VehicleLaunchOutOfFuel>Cannot launch. Out of Fuel.</VehicleLaunchOutOfFuel>
 	<VehicleRunwayCannotLand>Cannot land here.</VehicleRunwayCannotLand>
 	<VehicleRunwayCannotLandEnemy>Cannot land at enemy settlement.</VehicleRunwayCannotLandEnemy>

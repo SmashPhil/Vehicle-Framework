@@ -45,8 +45,8 @@
 		</IncidentTargetTags>
 		
 		<inspectorTabs>
-			<li>Vehicles.WITab_Vehicle_Manifest</li>
-			<li>WITab_Caravan_Needs</li>
+			<li>Vehicles.WITab_Vehicle_Manifest</li> <!-- Similar to WITab_Caravan_Needs but contains drag & drop and entries of vehicle roles -->
+			<li>WITab_Caravan_Health</li>
 			<li>WITab_Caravan_Gear</li>
 			<li>WITab_Caravan_Social</li>
 			<li>WITab_Caravan_Items</li>
@@ -78,6 +78,9 @@
 		
 		<inspectorTabs>
 			<li>Vehicles.WITab_Vehicle_Manifest</li>
+			<li>Vehicles.WITab_AerialVehicle_Health</li>
+			<!-- <li>WITab_Caravan_Social</li> -->
+			<li>Vehicles.WITab_AerialVehicle_Items</li>
 		</inspectorTabs>
 	</WorldObjectDef>
 	

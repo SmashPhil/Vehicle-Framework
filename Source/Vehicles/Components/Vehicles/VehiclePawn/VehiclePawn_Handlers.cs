@@ -341,6 +341,7 @@ namespace Vehicles
 				VehicleHandler handler = handlers[i];
 				if (handler.handlers.Remove(pawn))
 				{
+					EventRegistry[VehicleEventDefOf.PawnRemoved].ExecuteEvents();
 					if (Spawned)
 					{
 						Map.GetCachedMapComponent<VehicleReservationManager>().ReleaseAllClaimedBy(pawn);

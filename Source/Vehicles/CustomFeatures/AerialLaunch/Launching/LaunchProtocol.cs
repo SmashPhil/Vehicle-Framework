@@ -94,7 +94,7 @@ namespace Vehicles
 		/// <summary>
 		/// Message displayed to user when CanLaunchNow returns false
 		/// </summary>
-		public virtual string FailLaunchMessage => "SkyfallerLaunchNotValid".Translate();
+		public virtual string FailLaunchMessage => "VF_AerialVehicleLaunchNotValid".Translate();
 
 		/// <summary>
 		/// Conditions in which shuttle can initiate takeoff

@@ -27,6 +27,9 @@ namespace Vehicles
 		public const float ThingIconSize = 22f;
 		public const float WindowWidth = 336f;
 
+		private static readonly List<AerialVehicleInFlight> tmpAerialVehicles = new List<AerialVehicleInFlight>();
+		private static readonly List<Pawn> tmpPawns = new List<Pawn>();
+
 		public static MethodInfo TrueCenter_Thing { get; private set; }
 		public static MethodInfo TrueCenter_Baseline { get; private set; }
 
@@ -41,6 +44,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(ColonistBarColonistDrawer), "DrawIcons"), prefix: null,
 				postfix: new HarmonyMethod(typeof(Rendering),
 				nameof(DrawIconsVehicles)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(ColonistBar), "CheckRecacheEntries"),
+				transpiler: new HarmonyMethod(typeof(Rendering),
+				nameof(CheckRecacheAerialVehicleEntriesTranspiler)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(SelectionDrawer), "DrawSelectionBracketFor"),
 				prefix: new HarmonyMethod(typeof(Rendering),
 				nameof(DrawSelectionBracketsVehicles)));
@@ -116,13 +122,61 @@ namespace Vehicles
 			vector.x += num;
 		}
 
+		public static IEnumerable<CodeInstruction> CheckRecacheAerialVehicleEntriesTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+		{
+			List<CodeInstruction> instructionList = instructions.ToList();
+
+			MethodInfo clearCachedEntriesMethod = AccessTools.Method(typeof(List<int>), nameof(List<int>.Clear));
+			for (int i = 0; i < instructionList.Count; i++)
+			{
+				CodeInstruction instruction = instructionList[i];
+
+				if (instruction.Calls(clearCachedEntriesMethod))
+				{
+					yield return instruction; //CALLVIRT : List<int32>.Clear
+					instruction = instructionList[++i];
+
+					yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+					yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: AccessTools.Field(typeof(ColonistBar), "cachedEntries"));
+					yield return new CodeInstruction(opcode: OpCodes.Ldloca, operand: 0);
+					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(Rendering), nameof(RecacheAerialVehicleEntries)));
+				}
+
+				yield return instruction;
+			}
+		}
+
+		private static void RecacheAerialVehicleEntries(List<ColonistBar.Entry> cachedEntries, ref int group)
+		{
+			tmpAerialVehicles.Clear();
+			tmpAerialVehicles.AddRange(VehicleWorldObjectsHolder.Instance.AerialVehicles);
+			tmpAerialVehicles.SortBy(aerialVehicle => aerialVehicle.ID);
+			foreach (AerialVehicleInFlight aerialVehicle in tmpAerialVehicles)
+			{
+				if (aerialVehicle.IsPlayerControlled)
+				{
+					tmpPawns.Clear();
+					tmpPawns.AddRange(aerialVehicle.vehicle.AllPawnsAboard);
+					PlayerPawnsDisplayOrderUtility.Sort(tmpPawns);
+					foreach (Pawn pawn in tmpPawns)
+					{
+						if (pawn.IsColonist)
+						{
+							cachedEntries.Add(new ColonistBar.Entry(pawn, null, group));
+						}
+					}
+					group++;
+				}
+			}
+		}
+
 		/// <summary>
 		/// Draw diagonal and shifted brackets for Boats
 		/// </summary>
 		/// <param name="obj"></param>
 		public static bool DrawSelectionBracketsVehicles(object obj, Material overrideMat)
 		{
-			var vehicle = obj as VehiclePawn;
+			var vehicle = obj as VehiclePawn; 
 			var building = obj as VehicleBuilding;
 			if (vehicle != null || building?.vehicle != null)
 			{
