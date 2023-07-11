@@ -315,12 +315,8 @@ namespace Vehicles
 		/// <returns><c>null</c> if not currently inside an AerialVehicle</returns>
 		public static AerialVehicleInFlight GetAerialVehicle(this Pawn pawn)
 		{
-			Log.Message($"Instance: {VehicleWorldObjectsHolder.Instance is null}");
-			Log.Message($"Instance: {VehicleWorldObjectsHolder.Instance.AerialVehicles is null}");
 			foreach (AerialVehicleInFlight aerialVehicle in VehicleWorldObjectsHolder.Instance.AerialVehicles)
 			{
-				Log.Message($"aerial: {aerialVehicle is null}");
-				Log.Message($"vehicle: {aerialVehicle.vehicle is null} pawns: {aerialVehicle.vehicle?.AllPawnsAboard}");
 				if (aerialVehicle.vehicle == pawn || aerialVehicle.vehicle.AllPawnsAboard.Contains(pawn))
 				{
 					return aerialVehicle;

@@ -201,6 +201,8 @@ namespace Vehicles
 			vehicle.CompVehicleLauncher.inFlight = false;
 			GenSpawn.Spawn(vehicle, Position, Map, Rotation);
 			vehicle.Angle = angle + Rotation.AsAngle;
+			vehicle.DisembarkAll();
+			vehicle.ignition.Drafted = false;
 			Destroy();
 		}
 

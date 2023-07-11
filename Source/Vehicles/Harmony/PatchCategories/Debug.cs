@@ -51,7 +51,7 @@ namespace Vehicles
 					nameof(DebugWorldObjects)));
 			}
 
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(ThinkNode_JoinVoluntarilyJoinableLord), "JoinVoluntarilyJoinableLord"),
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(CameraJumper), "TryJump", parameters: new Type[] { typeof(GlobalTargetInfo), typeof(CameraJumper.MovementMode) }),
 			//	prefix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestPrefix)));
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanTendUtility), "IsValidDoctorFor"),
@@ -62,14 +62,12 @@ namespace Vehicles
 			//	nameof(ExceptionCatcher)));
 		}
 
-		public static void TestPrefix(Pawn pawn)
+		public static void TestPrefix(GlobalTargetInfo target)
 		{
 			try
 			{
-				if (pawn.Faction?.IsPlayer ?? false)
-				{
-					Log.Message($"Pawn: {pawn} Map: {pawn.Map} Tick: {Find.TickManager.TicksGame}");
-				}
+				var adjusted = CameraJumper.GetAdjustedTarget(target);
+				Log.Message($"Jumping to {adjusted} HasThing={adjusted.HasThing} HasWorldObject={adjusted.HasWorldObject} CellValid={adjusted.Cell.IsValid}");
 			}
 			catch (Exception ex)
 			{

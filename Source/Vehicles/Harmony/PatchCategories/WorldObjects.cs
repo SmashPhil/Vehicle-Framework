@@ -15,6 +15,9 @@ namespace Vehicles
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(InspectPaneFiller), nameof(InspectPaneFiller.DoPaneContentsFor)),
 			//	postfix: new HarmonyMethod(typeof(WorldObjects),
 			//	nameof(AerialVehicleInFlightAltimeter)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CameraJumper), nameof(CameraJumper.GetAdjustedTarget)),
+				postfix: new HarmonyMethod(typeof(WorldObjects),
+				nameof(GetAdjustedTargetForAerialVehicle)));
 		}
 
 		public static void AerialVehicleInFlightAltimeter(ISelectable sel, Rect rect)
@@ -22,6 +25,14 @@ namespace Vehicles
 			if (sel is AerialVehicleInFlight aerialVehicle)
 			{
 				AltitudeMeter.DrawAltitudeMeter(aerialVehicle);
+			}
+		}
+
+		public static void GetAdjustedTargetForAerialVehicle(GlobalTargetInfo target, ref GlobalTargetInfo __result)
+		{
+			if (target.HasThing && target.Thing.ParentHolder is VehicleHandler handler && handler.vehicle.GetAerialVehicle() is AerialVehicleInFlight aerialVehicle)
+			{
+				__result = aerialVehicle;
 			}
 		}
 	}
