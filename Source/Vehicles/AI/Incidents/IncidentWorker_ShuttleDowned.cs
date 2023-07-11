@@ -83,7 +83,7 @@ namespace Vehicles
 		protected virtual int GenerateMapAndReinforcements(AerialVehicleInFlight aerialVehicle, WorldObject culprit, out Map crashSite)
 		{
 			int ticksTillArrival = -1;
-			if (Find.WorldObjects.MapParentAt(aerialVehicle.Tile) is MapParent mapParent)
+			if (Find.WorldObjects.MapParentAt(aerialVehicle.Tile) is MapParent mapParent && mapParent.Map != null)
 			{
 				crashSite = mapParent.Map;
 			}
