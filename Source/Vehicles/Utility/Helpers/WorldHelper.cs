@@ -146,17 +146,6 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// AerialVehicle <paramref name="vehicle"/> can offer gifts to <paramref name="settlement"/>
-		/// </summary>
-		/// <param name="vehicle"></param>
-		/// <param name="settlement"></param>
-		public static FloatMenuAcceptanceReport CanOfferGiftsTo(AerialVehicleInFlight vehicle, Settlement settlement)
-		{
-			return settlement != null && settlement.Spawned && !settlement.HasMap && settlement.Faction != null && settlement.Faction != Faction.OfPlayer
-				&& !settlement.Faction.def.permanentEnemy && settlement.Faction.HostileTo(Faction.OfPlayer) && settlement.CanTradeNow && vehicle.vehicle.HasNegotiator;
-		}
-
-		/// <summary>
 		/// Find best tile to snap to when ordering a caravan
 		/// </summary>
 		/// <param name="caravan"></param>

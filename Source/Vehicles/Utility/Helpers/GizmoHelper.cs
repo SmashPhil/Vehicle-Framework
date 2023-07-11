@@ -51,46 +51,6 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Trade dialog for AerialVehicle located on a Settlement
-		/// </summary>
-		/// <param name="vehicle"></param>
-		/// <param name="settlement"></param>
-		public static Command ShuttleTradeCommand(AerialVehicleInFlight vehicle, Settlement settlement)
-		{
-			Pawn bestNegotiator = WorldHelper.FindBestNegotiator(vehicle.vehicle, settlement.Faction, settlement.TraderKind);
-			Command_Action command_Action = new Command_Action
-			{
-				defaultLabel = "CommandTrade".Translate(),
-				defaultDesc = "CommandTradeDesc".Translate(),
-				icon = VehicleTex.TradeCommandTex,
-				action = delegate ()
-				{
-					if (settlement != null && settlement.CanTradeNow)
-					{
-						Find.WindowStack.Add(new Dialog_Trade(bestNegotiator, settlement, false));
-						PawnRelationUtility.Notify_PawnsSeenByPlayer_Letter_Send(settlement.Goods.OfType<Pawn>(), "LetterRelatedPawnsTradingWithSettlement".Translate(Faction.OfPlayer.def.pawnsPlural), LetterDefOf.NeutralEvent, false, true);
-					}
-				}
-			};
-			if (bestNegotiator is null)
-			{
-				if (settlement.TraderKind != null && settlement.TraderKind.permitRequiredForTrading != null && !vehicle.vehicle.AllPawnsAboard.Any((Pawn p) => p.royalty != null && p.royalty.HasPermit(settlement.TraderKind.permitRequiredForTrading, settlement.Faction)))
-				{
-					command_Action.Disable("CommandTradeFailNeedPermit".Translate(settlement.TraderKind.permitRequiredForTrading.LabelCap));
-				}
-				else
-				{
-					command_Action.Disable("CommandTradeFailNoNegotiator".Translate());
-				}
-			}
-			if (bestNegotiator != null && bestNegotiator.skills.GetSkill(SkillDefOf.Social).TotallyDisabled)
-			{
-				command_Action.Disable("CommandTradeFailSocialDisabled".Translate());
-			}
-			return command_Action;
-		}
-
-		/// <summary>
 		/// Resolve designators when changes have been made to <paramref name="designationCategoryDef"/>
 		/// </summary>
 		/// <param name="designationCategoryDef"></param>

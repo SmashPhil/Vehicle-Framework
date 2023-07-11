@@ -36,12 +36,25 @@ namespace Vehicles
 
         public override FloatMenuAcceptanceReport StillValid(int destinationTile) => base.StillValid(destinationTile) && CanTradeWith(vehicle, settlement);
 
-        public static bool CanTradeWith(VehiclePawn vehicle, Settlement settlement)
-		{
-            bool faction = settlement.Faction != null && settlement.Faction != Faction.OfPlayer;
-            bool canTrade = vehicle.AllPawnsAboard.Any(pawn => pawn.CanTradeWith(settlement.Faction, settlement.TraderKind));
-            bool hasNonHostileMap = !settlement.HasMap && !settlement.Faction.def.permanentEnemy && !settlement.Faction.HostileTo(Faction.OfPlayer) && settlement.CanTradeNow;
-            return faction && canTrade && hasNonHostileMap;
+        private static bool ValidGiftOrTradePartner(Settlement settlement)
+        {
+            return settlement != null && settlement.Spawned && !settlement.HasMap && settlement.Faction != null && settlement.Faction != Faction.OfPlayer
+                && !settlement.Faction.def.permanentEnemy && settlement.CanTradeNow;
+        }
+
+        /// <summary>
+        /// AerialVehicle <paramref name="vehicle"/> can offer gifts to <paramref name="settlement"/>
+        /// </summary>
+        /// <param name="vehicle"></param>
+        /// <param name="settlement"></param>
+        public static FloatMenuAcceptanceReport CanOfferGiftsTo(VehiclePawn vehicle, Settlement settlement)
+        {
+            return ValidGiftOrTradePartner(settlement) && settlement.Faction.HostileTo(Faction.OfPlayer) && vehicle.HasNegotiator;
+        }
+
+        public static FloatMenuAcceptanceReport CanTradeWith(VehiclePawn vehicle, Settlement settlement)
+        {
+            return ValidGiftOrTradePartner(settlement) && !settlement.Faction.HostileTo(Faction.OfPlayer) && vehicle.HasNegotiator;
         }
     }
 }

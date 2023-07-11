@@ -461,7 +461,15 @@ namespace Vehicles
 			}
 			if (Find.WorldObjects.SettlementAt(tile) is Settlement settlement)
 			{
-				foreach (FloatMenuOption option in FloatMenuOption_LandAtSettlement(settlement, tile))
+				if (settlement.Visitable)
+				{
+					foreach (FloatMenuOption option in FloatMenuOption_LandAtSettlement(settlement, tile))
+					{
+						yield return option;
+					}
+				}
+
+				foreach (FloatMenuOption option in AerialVehicleArrivalAction_AttackSettlement.GetFloatMenuOptions(vehicle, this, settlement))
 				{
 					yield return option;
 				}
@@ -598,10 +606,6 @@ namespace Vehicles
 						aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_Trade(vehicle, settlement));
 					}
 				});
-			}
-			foreach (FloatMenuOption option in AerialVehicleArrivalAction_AttackSettlement.GetFloatMenuOptions(vehicle, this, settlement))
-			{
-				yield return option;
 			}
 		}
 

@@ -224,9 +224,26 @@ namespace Vehicles
 						yield return fuelGizmo;
 					}
 				}
-				if (!vehicle.CompVehicleLauncher.inFlight && Find.WorldObjects.SettlementAt(Tile) is Settlement settlement2)
+				if (!vehicle.CompVehicleLauncher.inFlight && Find.WorldObjects.SettlementAt(Tile) is Settlement settlement)
 				{
-					yield return this.AerialVehicleTradeCommand(settlement2.Faction, settlement2.TraderKind);
+					if (AerialVehicleArrivalAction_Trade.CanTradeWith(vehicle, settlement))
+					{
+						yield return this.AerialVehicleTradeCommand(settlement.Faction, settlement.TraderKind);
+					}
+					if (AerialVehicleArrivalAction_Trade.CanOfferGiftsTo(vehicle, settlement))
+					{
+						yield return new Command_Action
+						{
+							defaultLabel = "CommandOfferGifts".Translate(),
+							defaultDesc = "CommandOfferGiftsDesc".Translate(),
+							icon = VehicleTex.OfferGiftsCommandTex,
+							action = delegate ()
+							{
+								Pawn playerNegotiator = WorldHelper.FindBestNegotiator(vehicle, null, null);
+								Find.WindowStack.Add(new Dialog_Trade(playerNegotiator, settlement, true));
+							}
+						};
+					}
 				}
 				if (vehicle.CompVehicleLauncher.ControlInFlight || !vehicle.CompVehicleLauncher.inFlight)
 				{
@@ -251,24 +268,6 @@ namespace Vehicles
 				}
 				if (!vehicle.CompVehicleLauncher.inFlight)
 				{
-					foreach (Settlement settlement in Find.WorldObjects.ObjectsAt(flightPath.First.tile).Where(o => o is Settlement).Cast<Settlement>())
-					{
-						yield return GizmoHelper.ShuttleTradeCommand(this, settlement);
-						if (WorldHelper.CanOfferGiftsTo(this, settlement))
-						{
-							yield return new Command_Action
-							{
-								defaultLabel = "CommandOfferGifts".Translate(),
-								defaultDesc = "CommandOfferGiftsDesc".Translate(),
-								icon = VehicleTex.OfferGiftsCommandTex,
-								action = delegate()
-								{
-									Pawn playerNegotiator = WorldHelper.FindBestNegotiator(vehicle, null, null);
-									Find.WindowStack.Add(new Dialog_Trade(playerNegotiator, settlement, true));
-								}
-							};
-						}
-					}
 					Command_Settle commandSettle = new Command_Settle
 					{
 						defaultLabel = "CommandSettle".Translate(),
