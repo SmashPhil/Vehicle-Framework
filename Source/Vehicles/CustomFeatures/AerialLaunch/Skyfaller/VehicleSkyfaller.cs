@@ -15,6 +15,7 @@ namespace Vehicles
 		protected static MaterialPropertyBlock shadowPropertyBlock = new MaterialPropertyBlock();
 
 		public float angle;
+		protected Vector3 launchProtocolDrawPos;
 
 		protected Material cachedShadowMaterial;
 
@@ -24,7 +25,9 @@ namespace Vehicles
 
 		protected ActiveDropPodInfo contents;
 
-		public override Vector3 DrawPos => vehicle.TrueCenter(Position, base.DrawPos.y);
+		public override Vector3 DrawPos => launchProtocolDrawPos;
+
+		protected Vector3 RootPos => vehicle.TrueCenter(Position, base.DrawPos.y);
 
 		public ThingWithComps Thing => vehicle;
 
@@ -122,6 +125,7 @@ namespace Vehicles
 		public override void SpawnSetup(Map map, bool respawningAfterLoad)
 		{
 			base.SpawnSetup(map, respawningAfterLoad);
+			launchProtocolDrawPos = RootPos;
 			vehicle.SetSustainerTarget(this);
 			vehicle.ResetRenderStatus(); //Reset required for recaching handler lists. Loading save file will not recache these since vehicle will be despawned initially
 		}

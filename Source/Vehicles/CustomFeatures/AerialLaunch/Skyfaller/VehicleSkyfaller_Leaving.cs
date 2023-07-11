@@ -22,7 +22,7 @@ namespace Vehicles
 
 		public override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
-			vehicle.CompVehicleLauncher.launchProtocol.Draw(drawLoc, 0);
+			(launchProtocolDrawPos, _) = vehicle.CompVehicleLauncher.launchProtocol.Draw(RootPos, 0);
 			DrawDropSpotShadow();
 		}
 
@@ -70,6 +70,7 @@ namespace Vehicles
 					aerialVehicle.flightPath.ReconCircleAt(flightPath.LastOrDefault().tile);
 				}
 			}
+			vehicle.EventRegistry[VehicleEventDefOf.AerialVehicleLeftMap].ExecuteEvents();
 			Destroy(DestroyMode.Vanish);
 		}
 

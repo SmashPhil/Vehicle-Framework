@@ -2,14 +2,18 @@
 
 <Defs>
 	<Vehicles.VehicleEventDef>
-		<defName>AerialLaunch</defName>
+		<defName>AerialVehicleLaunch</defName>
 	</Vehicles.VehicleEventDef>
 	
 	<Vehicles.VehicleEventDef>
-		<defName>AerialLanding</defName>
+		<defName>AerialVehicleLanding</defName>
 	</Vehicles.VehicleEventDef>
 	
 	<Vehicles.VehicleEventDef>
-		<defName>AerialCrashLanding</defName>
+		<defName>AerialVehicleCrashLanding</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>AerialVehicleLeftMap</defName>
 	</Vehicles.VehicleEventDef>
 </Defs>

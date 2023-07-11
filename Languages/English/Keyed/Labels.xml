@@ -12,10 +12,13 @@
 	<VF_DisembarkAllPawns>Unload All Pawns</VF_DisembarkAllPawns>
 	<VF_DisembarkSinglePawn>Unload {0}</VF_DisembarkSinglePawn>
 	<VF_DisembarkNoExit>Unable to exit vehicle. No valid cells to exit onto.</VF_DisembarkNoExit>
-	<VF_DraftVehicleDesc>Draft Vehicle
-
-Drafted vehicles can be moved, but restrict the unloading of pawns.
-</VF_DraftVehicleDesc>
+	
+	<VF_StopVehicle>Stop</VF_StopVehicle>
+	<VF_UndraftVehicle>Turn Off</VF_UndraftVehicle>
+	
+	<VF_DraftVehicleDesc>Drafts vehicle allowing it to move. This will consume fuel if applicable even if the vehicle is idle.</VF_DraftVehicleDesc>
+	<VF_StopVehicleDesc>Stop the vehicle immediately.</VF_StopVehicleDesc>
+	<VF_UndraftVehicleDesc>Undrafts vehicle, disabling the consumption of fuel and disallowing movement.</VF_UndraftVehicleDesc>
 	
 	<!-- UI / Buttons -->
 	<RefundButton>Uninstall</RefundButton>

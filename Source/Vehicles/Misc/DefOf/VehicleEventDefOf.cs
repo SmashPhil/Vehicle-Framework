@@ -46,8 +46,9 @@ namespace Vehicles
 		public static VehicleEventDef Destroyed;
 
 		//Aerial
-		public static VehicleEventDef AerialLaunch;
-		public static VehicleEventDef AerialLanding;
-		public static VehicleEventDef AerialCrashLanding;
+		public static VehicleEventDef AerialVehicleLaunch;
+		public static VehicleEventDef AerialVehicleLanding;
+		public static VehicleEventDef AerialVehicleCrashLanding;
+		public static VehicleEventDef AerialVehicleLeftMap;
 	}
 }

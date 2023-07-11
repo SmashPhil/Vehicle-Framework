@@ -7,15 +7,18 @@
 		<selectable>true</selectable>
 		<tickerType>Normal</tickerType>
 		<altitudeLayer>Pawn</altitudeLayer>
-		<useHitPoints>false</useHitPoints>
 		<hasTooltip>true</hasTooltip>
-		<repairEffect>Repair</repairEffect>
+		
 		<passability>Standable</passability>
 		<pathCost>250</pathCost>
 		
+		<useHitPoints>false</useHitPoints>
+		<repairEffect>Repair</repairEffect>
+		
+		<draftLabel>Start Engine</draftLabel>
+		
 		<!-- Temporary until icons are fixed and vehicle prices are balanced -->
 		<tradeability>None</tradeability>
-		<draftLabel>Start Engine</draftLabel>
 		
 		<statBases>
 			<PsychicSensitivity>0</PsychicSensitivity>

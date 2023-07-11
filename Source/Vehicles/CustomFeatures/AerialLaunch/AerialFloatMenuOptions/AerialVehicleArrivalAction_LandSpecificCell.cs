@@ -39,10 +39,15 @@ namespace Vehicles
 			{
 				return false;
 			}
+			SpawnSkyfaller();
+			return true;
+		}
+
+		protected virtual void SpawnSkyfaller()
+		{
 			VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)VehicleSkyfallerMaker.MakeSkyfaller(vehicle.CompVehicleLauncher.Props.skyfallerIncoming, vehicle);
 			Rot4 vehicleRotation = vehicle.CompVehicleLauncher.launchProtocol.LandingProperties?.forcedRotation ?? landingRot;
 			GenSpawn.Spawn(skyfaller, landingCell, mapParent.Map, vehicleRotation);
-			return true;
 		}
 
 		public override void ExposeData()

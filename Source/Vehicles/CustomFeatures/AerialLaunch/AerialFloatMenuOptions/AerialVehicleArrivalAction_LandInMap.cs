@@ -27,8 +27,13 @@ namespace Vehicles
 
 		public override bool Arrived(int tile)
 		{
-			vehicle.EventRegistry[VehicleEventDefOf.AerialLanding].ExecuteEvents();
+			ExecuteEvents();
 			return true;
+		}
+
+		protected virtual void ExecuteEvents()
+		{
+			vehicle.EventRegistry[VehicleEventDefOf.AerialVehicleLanding].ExecuteEvents();
 		}
 
 		public override void ExposeData()

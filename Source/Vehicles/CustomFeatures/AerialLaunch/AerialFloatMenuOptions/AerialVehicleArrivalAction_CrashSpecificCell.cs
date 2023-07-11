@@ -18,18 +18,17 @@ namespace Vehicles
 		{
 		}
 
-		public override bool Arrived(int tile)
+		protected override void SpawnSkyfaller()
 		{
-			if (!base.Arrived(tile))
-			{
-				return false;
-			}
-			vehicle.EventRegistry[VehicleEventDefOf.AerialCrashLanding].ExecuteEvents();
 			VehicleSkyfaller_Crashing skyfaller = (VehicleSkyfaller_Crashing)ThingMaker.MakeThing(vehicle.CompVehicleLauncher.Props.skyfallerCrashing);
 			skyfaller.vehicle = vehicle;
 			skyfaller.rotCrashing = Rot4.East;
 			GenSpawn.Spawn(skyfaller, landingCell, mapParent.Map, landingRot);
-			return true;
+		}
+
+		protected override void ExecuteEvents()
+		{
+			vehicle.EventRegistry[VehicleEventDefOf.AerialVehicleCrashLanding].ExecuteEvents();
 		}
 	}
 }

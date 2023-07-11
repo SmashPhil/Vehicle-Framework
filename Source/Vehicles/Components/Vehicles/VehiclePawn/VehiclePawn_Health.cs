@@ -120,7 +120,7 @@ namespace Vehicles
 			{
 				DisembarkAll();
 			}
-			sustainers.Cleanup();
+			sustainers.EndAll();
 			//Null check in the event that this vehicle is a world pawn but not in any AerialVehicleInFlight, VehicleCaravan, or spawned on map
 			EventRegistry?[VehicleEventDefOf.Destroyed].ExecuteEvents();
 			base.Destroy(mode);

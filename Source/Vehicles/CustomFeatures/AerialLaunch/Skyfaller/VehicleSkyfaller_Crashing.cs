@@ -9,7 +9,6 @@ using UnityEngine;
 
 namespace Vehicles
 {
-	//REDO - CACHE LAUNCH PROTOCOL
 	public class VehicleSkyfaller_Crashing : VehicleSkyfaller_Arriving
 	{
 		public const float DefaultAngle = -65;

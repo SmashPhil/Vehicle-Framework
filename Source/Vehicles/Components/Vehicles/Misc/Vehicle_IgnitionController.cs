@@ -98,6 +98,38 @@ namespace Vehicles
 			}
 		}
 
+		private string DraftGizmoLabel
+		{
+			get
+			{
+				if (Drafted)
+				{
+					if (vehicle.vPather.Moving)
+					{
+						return "VF_StopVehicle".Translate();
+					}
+					return "VF_UndraftVehicle".Translate();
+				}
+				return vehicle.VehicleDef.draftLabel;
+			}
+		}
+
+		private string DraftGizmoDescription
+		{
+			get
+			{
+				if (Drafted)
+				{
+					if (vehicle.vPather.Moving)
+					{
+						return "VF_StopVehicleDesc".Translate();
+					}
+					return "VF_UndraftVehicleDesc".Translate();
+				}
+				return "VF_DraftVehicleDesc".Translate();
+			}
+		}
+
 		/// <summary>
 		/// Draft gizmos for VehiclePawn
 		/// </summary>
@@ -118,7 +150,8 @@ namespace Vehicles
 						Drafted = !Drafted;
 					}
 				},
-				defaultDesc = "VF_DraftVehicleDesc".Translate(),
+				defaultLabel = DraftGizmoLabel,
+				defaultDesc = DraftGizmoDescription,
 				icon = (Drafted && vehicle.vPather.Moving) ? VehicleTex.HaltVehicle : VehicleTex.DraftVehicle
 			};
 			if (!Drafted)
