@@ -63,15 +63,6 @@ namespace Vehicles
 
 			Harmony.PatchAll();
 
-			bool linux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
-			bool osx = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
-			if (linux || osx)
-			{
-				string platform = linux ? "Linux" : "OSX";
-				Log.Warning($"{LogLabel} {platform} is not currently supported for RGB Shaders. Patterns and skins for vehicles as well as the color picker dialog will be disabled by default.");
-				VehicleMod.settings.main.useCustomShaders = false;
-			}
-
 			IEnumerable <Type> patchCategories = GenTypes.AllTypes.Where(t => t.GetInterfaces().Contains(typeof(IPatchCategory)));
 			foreach (Type patchCategory in patchCategories)
 			{

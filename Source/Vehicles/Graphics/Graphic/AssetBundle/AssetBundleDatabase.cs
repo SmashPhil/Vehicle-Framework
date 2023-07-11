@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using Verse;
 using RimWorld;
@@ -86,7 +87,7 @@ namespace Vehicles
 				foreach (string folder in loadFolders)
 				{
 					loadFoldersChecked.Add(folder);
-					string assetDirectory = Path.Combine(VehicleMod.settings.Mod.Content.RootDir, folder, VehicleAssetFolder);
+					string assetDirectory = Path.Combine(VehicleMod.settings.Mod.Content.RootDir, folder, VehicleAssetFolder, PlatformFolder);
 					DirectoryInfo directoryInfo = new DirectoryInfo(assetDirectory);
 					if (directoryInfo.Exists)
 					{
@@ -128,6 +129,29 @@ namespace Vehicles
 			MouseHandClosed = LoadAsset<Texture2D>(MouseHandClosedPath);
 
 			Loaded = true;
+		}
+
+		private static string PlatformFolder
+		{
+			get
+			{
+				if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+				{
+					return "StandaloneWindows64";
+				}
+				else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+				{
+					return "StandaloneLinux64";
+				}
+				else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+				{
+					return "StandaloneOSX";
+				}
+
+				Log.Warning($"{RuntimeInformation.OSDescription} is not currently supported for RGBShaders. Disabling custom shaders.");
+				VehicleMod.settings.main.useCustomShaders = false;
+				return null;
+			}
 		}
 
 		/// <summary>

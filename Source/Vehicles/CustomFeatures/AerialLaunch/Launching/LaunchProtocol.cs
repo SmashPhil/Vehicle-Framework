@@ -452,7 +452,7 @@ namespace Vehicles
 				}
 				if (vehicle.CompVehicleLauncher.ControlInFlight)
 				{
-					yield return FloatMenuOption_ReconMap(parent, tile);
+					//yield return FloatMenuOption_ReconMap(parent, tile);
 				}
 				if (vehicle.CompVehicleLauncher.ControlInFlight && vehicle.CompVehicleTurrets != null) //REDO - strafe specific properties
 				{
