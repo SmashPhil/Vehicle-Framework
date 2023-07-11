@@ -79,13 +79,14 @@ namespace Vehicles
 			{
 				initAction = delegate ()
 				{
-					if (Item is null || Vehicle.cargoToLoad.NullOrEmpty())
+					if (Item is null || Item.stackCount == 0 || Vehicle.cargoToLoad.NullOrEmpty())
 					{
 						pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true);
 					}
 					else
 					{
-						Vehicle.AddOrTransfer(Item, Item.stackCount, pawn);
+						int stackCount = Item.stackCount; //store before transfer for transferable recache
+						Vehicle.AddOrTransfer(Item, stackCount, pawn);
 						TransferableOneWay transferable = Vehicle.cargoToLoad.FirstOrDefault(t => t.AnyThing is {def: ThingDef def} && def == Item.def);
                         if (transferable is null)
                         {
@@ -93,7 +94,7 @@ namespace Vehicles
                         }
 						else
 						{
-							countToTransferFieldInfo.SetValue(transferable, transferable.CountToTransfer - job.count);
+							countToTransferFieldInfo.SetValue(transferable, transferable.CountToTransfer - stackCount);
 						}
 					}
 				}

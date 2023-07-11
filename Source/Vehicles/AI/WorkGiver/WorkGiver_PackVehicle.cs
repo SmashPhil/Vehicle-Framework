@@ -21,7 +21,7 @@ namespace Vehicles
 
 		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
 		{
-			if(t is VehiclePawn vehicle && vehicle.cargoToLoad.NotNullAndAny() && pawn.CanReach(new LocalTargetInfo(t.Position), PathEndMode.Touch, Danger.Deadly))
+			if (t is VehiclePawn vehicle && vehicle.cargoToLoad.NotNullAndAny() && pawn.CanReach(new LocalTargetInfo(t.Position), PathEndMode.Touch, Danger.Deadly))
 			{
 				Thing thing = FindThingToPack(vehicle, pawn);
 				if (thing != null)
