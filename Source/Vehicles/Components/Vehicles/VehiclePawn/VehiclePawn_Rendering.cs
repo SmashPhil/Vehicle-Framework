@@ -286,7 +286,7 @@ namespace Vehicles
 		{
 			if (!Suspended && Spawned)
 			{
-				if (Current.ProgramState != ProgramState.Playing || viewRect.Contains(base.Position))
+				if (Current.ProgramState != ProgramState.Playing || viewRect.Contains(Position))
 				{
 					vDrawer.ProcessPostTickVisuals(ticksPassed);
 				}

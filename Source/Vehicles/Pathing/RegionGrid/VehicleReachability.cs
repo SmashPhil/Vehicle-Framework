@@ -194,6 +194,7 @@ namespace Vehicles
 
 			if (!PathGrid.WalkableFast(start))
 			{
+				Debug.Message($"Unable to start pathing from {start} to {dest}. Not walkable at {start}");
 				return false;
 			}
 			bool freeTraversal = traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater && traverseParms.mode != TraverseMode.PassAllDestroyableThingsNotWater;
@@ -262,19 +263,19 @@ namespace Vehicles
 							}
 							if (cachedResult == BoolUnknown.False)
 							{
+								Debug.Message($"Unable to start pathing from {start} to {dest}. CachedResult = false");
 								return false;
 							}
 						}
 						if (traverseParms.mode == TraverseMode.PassAllDestroyableThings || traverseParms.mode == TraverseMode.PassAllDestroyableThingsNotWater ||
 							traverseParms.mode == TraverseMode.NoPassClosedDoorsOrWater)
 						{
-							bool flag = CheckCellBasedReachability(start, dest, peMode, traverseParms);
-							result = flag;
+							result = CheckCellBasedReachability(start, dest, peMode, traverseParms);
 						}
 						else
 						{
-							bool flag2 = CheckRegionBasedReachability(traverseParms);
-							result = flag2;
+							result = CheckRegionBasedReachability(traverseParms);
+							Debug.Message($"Recalculating region based reachability to {dest} from {start}. Result={result}");
 						}
 					}
 				}

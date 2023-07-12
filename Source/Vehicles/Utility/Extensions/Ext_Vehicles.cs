@@ -501,6 +501,29 @@ namespace Vehicles
 		}
 
 		/// <summary>
+		/// NxN rect of smallest dimension of vehicle
+		/// </summary>
+		/// <remarks>3x5 vehicle returns 3x3 rect, 2x4 returns 2x2, etc.</remarks>
+		/// <param name="vehicle"></param>
+		/// <param name="cell"></param>
+
+		public static CellRect MinRect(this VehiclePawn vehicle, IntVec3 cell)
+		{
+			int minSize = Mathf.Min(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z);
+			return CellRect.CenteredOn(cell, Mathf.FloorToInt(minSize / 2f));
+		}
+
+		public static IEnumerable<IntVec3> DiagonalRect(this VehiclePawn vehicle, IntVec3 cell, Rot8 rot)
+		{
+			if (!rot.IsDiagonal)
+			{
+				//return vehicle.OccupiedRect();
+			}
+
+			yield break;
+		}
+
+		/// <summary>
 		/// Determines if vehicle is able to traverse this cell given its minimum bounds.
 		/// </summary>
 		/// <remarks>DOES take other vehicles into account</remarks>
@@ -508,9 +531,7 @@ namespace Vehicles
 		/// <param name="cell"></param>
 		public static bool DrivableRectOnCell(this VehiclePawn vehicle, IntVec3 cell)
 		{
-			int minSize = Mathf.Min(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z);
-			CellRect cellRect = CellRect.CenteredOn(cell, Mathf.FloorToInt(minSize / 2f));
-			return cellRect.Cells.All(cell => vehicle.Drivable(cell));
+			return MinRect(vehicle, cell).Cells.All(cell => vehicle.Drivable(cell));
 		}
 
 		/// <summary>

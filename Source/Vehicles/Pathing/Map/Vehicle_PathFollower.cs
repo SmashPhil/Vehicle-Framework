@@ -22,7 +22,7 @@ namespace Vehicles
 		public const int MinCostWalk = 50;
 		public const int MinCostAmble = 60;
 
-		public const int MaxCheckAheadNodes = 10;
+		public const int MaxCheckAheadNodes = 1;
 		public const int TicksWhileWaiting = 120;
 
 		protected VehiclePawn vehicle;
@@ -359,21 +359,21 @@ namespace Vehicles
 
 		private void SetBumperCells()
 		{
-			int dir = Ext_Map.DirectionToCell(vehicle.Position, nextCell);
-			if (dir == -1)
+			Rot8 direction = Ext_Map.DirectionToCell(vehicle.Position, nextCell);
+			if (!direction.IsValid)
 			{
-				dir = vehicle.Rotation.AsInt;
+				direction = vehicle.FullRotation;
 			}
-			//TEMP
-			if (dir == 4 || dir == 5)
+			CellRect bumperRect;
+			if (direction.IsDiagonal)
 			{
-				dir = 1;
+				bumperRect = vehicle.MinRectShifted(new IntVec2(0, 2), direction);
 			}
-			else if (dir == 6 || dir == 7)
+			else
 			{
-				dir = 3;
+				bumperRect = vehicle.OccupiedRectShifted(new IntVec2(0, 2), direction);
 			}
-			bumperCells = vehicle.OccupiedRectShifted(new IntVec2(0, 2), new Rot4(dir)).GetEdgeCells(new Rot4(dir)).ToList();
+			bumperCells = bumperRect.ToList();//.GetEdgeCells(direction).ToList();
 		}
 
 		private void TryEnterNextPathCell()
@@ -413,6 +413,7 @@ namespace Vehicles
 				case PathRequest.None: //If no path request is made, continue with method
 					break;
 				case PathRequest.Fail: //Immediate cancellation of path, stop dead
+					Log.Message("Failed");
 					PatherFailed();
 					return;
 				case PathRequest.Wait: //Wait until path is cleared, do not cancel path
@@ -470,8 +471,8 @@ namespace Vehicles
 				}
 			}
 
-			//Check ahead 5 nodes and stop prematurely if vehicle won't fit at final destination
-			if (curPath.NodesLeftCount < LookAheadDistance / 2 && vehicle.LocationRestrictedBySize(nextCell, vehicle.FullRotation))
+			//Check ahead and stop prematurely if vehicle won't fit at final destination
+			if (curPath.NodesLeftCount < LookAheadDistance && vehicle.LocationRestrictedBySize(nextCell, vehicle.FullRotation))
 			{
 				PatherFailed();
 				return;
@@ -710,6 +711,7 @@ namespace Vehicles
 
 				if ((lastPathedTargetPosition - destination.Cell).LengthHorizontalSquared > (minLengthForRecalc * minLengthForRecalc))
 				{
+					Log.Message("Recalc");
 					return PathRequest.NeedNew;
 				}
 			}
@@ -722,6 +724,7 @@ namespace Vehicles
 				next = curPath.Peek(nodesAhead);
 				if (!GenGridVehicles.Walkable(next, vehicle.VehicleDef, vehicle.Map))
 				{
+					Log.Message("Unwalkable");
 					return PathRequest.NeedNew;
 				}
 				//Should two vehicles be pathing into eachother directly, first to stop will be given a Wait request while the other will request a new path
@@ -731,12 +734,14 @@ namespace Vehicles
 					{
 						return PathRequest.Wait;
 					}
+					Log.Message("Vehicle Blocked");
 					return PathRequest.NeedNew;
 				}
 				if (nodesAhead != 0 && next.AdjacentToDiagonal(previous))
 				{
 					if (VehiclePathFinder.BlocksDiagonalMovement(vehicle, vehicle.Map.cellIndices.CellToIndex(next.x, previous.z)) || VehiclePathFinder.BlocksDiagonalMovement(vehicle, vehicle.Map.cellIndices.CellToIndex(previous.x, next.z)))
 					{
+						Log.Message("Blocked");
 						return PathRequest.NeedNew;
 					}
 				}

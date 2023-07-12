@@ -250,6 +250,7 @@ namespace Vehicles
 				{
 					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsSpawned(thing);
 					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderThing(thing);
+					mapping[vehicleDef].VehicleReachability.ClearCache();
 				}
 			}
 		}
@@ -262,6 +263,34 @@ namespace Vehicles
 				{
 					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsDespawned(thing);
 					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderThing(thing);
+					mapping[vehicleDef].VehicleReachability.ClearCache();
+				}
+			}
+		}
+
+		public static void ThingAffectingRegionsOrientationChanged(Thing thing, Map map)
+		{
+			if (regionEffecters.TryGetValue(thing.def, out List<VehicleDef> vehicleDefs))
+			{
+				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+				if (!vehicleDefs.NullOrEmpty() && mapping.ThreadAvailable)
+				{
+					mapping.dedicatedThread.Queue(new AsyncAction(() => ThingInRegionOrientationChanged(mapping, vehicleDefs), () => map != null && map.Index > -1));
+				}
+				else
+				{
+					ThingInRegionOrientationChanged(mapping, vehicleDefs);
+				}
+			}
+		}
+
+		private static void ThingInRegionOrientationChanged(VehicleMapping mapping, List<VehicleDef> vehicleDefs)
+		{
+			foreach (VehicleDef vehicleDef in vehicleDefs)
+			{
+				if (mapping.IsOwner(vehicleDef))
+				{
+					mapping[vehicleDef].VehicleReachability.ClearCache();
 				}
 			}
 		}

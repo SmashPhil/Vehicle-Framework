@@ -44,7 +44,7 @@ namespace Vehicles
 		/// <param name="cell"></param>
 		public static bool VehicleBlockedInPosition(VehiclePawn vehicle, Map map, IntVec3 cell, Rot4 rot)
 		{
-			IEnumerable<IntVec3> cells = vehicle.PawnOccupiedCells(cell, rot);
+			IEnumerable<IntVec3> cells = vehicle.PawnOccupiedCells(cell, rot);	
 			return VehicleReservationManager.AnyVehicleInhabitingCells(cells, map) || !vehicle.CellRectStandable(map, cell, rot);
 		}
 

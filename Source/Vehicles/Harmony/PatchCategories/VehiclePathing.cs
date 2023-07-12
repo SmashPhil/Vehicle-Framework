@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
 using HarmonyLib;
@@ -40,18 +41,32 @@ namespace Vehicles
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(RecalculatePerceivedPathCostForVehicle)));
 
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(RegionDirtyer), "Notify_ThingAffectingRegionsSpawned"),
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Thing), nameof(Thing.DeSpawn)),
+				transpiler: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(DeSpawnAndUpdateVehicleRegionsTranspiler)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Thing), nameof(Thing.SpawnSetup)),
+				transpiler: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(SpawnAndUpdateVehicleRegionsTranspiler)));
+			VehicleHarmony.Patch(original: AccessTools.PropertySetter(typeof(Thing), nameof(Thing.Position)),
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
-				nameof(Notify_ThingAffectingVehicleRegionsSpawned)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(RegionDirtyer), "Notify_ThingAffectingRegionsDespawned"),
+				nameof(SetPositionAndUpdateVehicleRegions)));
+			VehicleHarmony.Patch(original: AccessTools.PropertySetter(typeof(Thing), nameof(Thing.Rotation)),
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
-				nameof(Notify_ThingAffectingVehicleRegionsDespawned)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(RegionListersUpdater), nameof(RegionListersUpdater.RegisterInRegions)),
-				postfix: new HarmonyMethod(typeof(VehiclePathing),
-				nameof(RegisterInVehicleRegions)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(RegionListersUpdater), nameof(RegionListersUpdater.DeregisterInRegions)),
-				postfix: new HarmonyMethod(typeof(VehiclePathing),
-				nameof(DeregisterInVehicleRegions)));
+				nameof(SetRotationAndUpdateVehicleRegions)));
+			
+
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(RegionDirtyer), "Notify_ThingAffectingRegionsSpawned"),
+			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
+			//	nameof(Notify_ThingAffectingVehicleRegionsSpawned)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(RegionDirtyer), "Notify_ThingAffectingRegionsDespawned"),
+			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
+			//	nameof(Notify_ThingAffectingVehicleRegionsDespawned)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(RegionListersUpdater), nameof(RegionListersUpdater.RegisterInRegions)),
+			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
+			//	nameof(RegisterInVehicleRegions)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(RegionListersUpdater), nameof(RegionListersUpdater.DeregisterInRegions)),
+			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
+			//	nameof(DeregisterInVehicleRegions)));
 		}
 
 		/// <summary>
@@ -91,10 +106,10 @@ namespace Vehicles
 							__result = null;
 							return false;
 						}
-						if (!vehicle.CellRectStandable(vehicle.Map, curLoc, Rot4.East) || !vehicle.CellRectStandable(vehicle.Map, curLoc, Rot4.North))
-						{
-							continue;
-						}
+						//if (!vehicle.CellRectStandable(vehicle.Map, curLoc, Rot4.East) || !vehicle.CellRectStandable(vehicle.Map, curLoc, Rot4.North))
+						//{
+						//	continue;
+						//}
 						if (!VehicleReachabilityUtility.CanReachVehicle(vehicle, curLoc, PathEndMode.OnCell, Danger.Deadly, TraverseMode.ByPawn))
 						{
 							__result = new FloatMenuOption("VehicleCannotMoveToCell".Translate(vehicle.LabelCap), null, MenuOptionPriority.Default, null, null, 0f, null, null);
@@ -329,6 +344,68 @@ namespace Vehicles
 			PathingHelper.RecalculatePerceivedPathCostAt(c, ___normal.map);
 		}
 
+		public static IEnumerable<CodeInstruction> DeSpawnAndUpdateVehicleRegionsTranspiler(IEnumerable<CodeInstruction> instructions)
+		{
+			List<CodeInstruction> instructionList = instructions.ToList();
+
+			MethodInfo coverGridDeregisterMethod = AccessTools.Method(typeof(CoverGrid), nameof(CoverGrid.DeRegister));
+			for (int i = 0; i < instructionList.Count; i++)
+			{
+				CodeInstruction instruction = instructionList[i];
+
+				if (instruction.Calls(coverGridDeregisterMethod))
+				{
+					yield return instruction;
+					instruction = instructionList[++i];
+
+					yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+					yield return new CodeInstruction(opcode: OpCodes.Ldloc_0);
+					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(VehiclePathing), nameof(VehiclePathing.DeSpawnAndNotifyVehicleRegions)));
+				}
+
+				yield return instruction;
+			}
+		}
+
+		public static IEnumerable<CodeInstruction> SpawnAndUpdateVehicleRegionsTranspiler(IEnumerable<CodeInstruction> instructions)
+		{
+			List<CodeInstruction> instructionList = instructions.ToList();
+
+			MethodInfo coverGridDeregisterMethod = AccessTools.Method(typeof(CoverGrid), nameof(CoverGrid.Register));
+			for (int i = 0; i < instructionList.Count; i++)
+			{
+				CodeInstruction instruction = instructionList[i];
+
+				if (instruction.Calls(coverGridDeregisterMethod))
+				{
+					yield return instruction;
+					instruction = instructionList[++i];
+
+					yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+					yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
+					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(VehiclePathing), nameof(VehiclePathing.SpawnAndNotifyVehicleRegions)));
+				}
+
+				yield return instruction;
+			}
+		}
+
+		public static void SetPositionAndUpdateVehicleRegions(Thing __instance)
+		{
+			if (__instance.Spawned)
+			{
+				PathingHelper.ThingAffectingRegionsOrientationChanged(__instance, __instance.Map);
+			}
+		}
+
+		public static void SetRotationAndUpdateVehicleRegions(Thing __instance)
+		{
+			if (__instance.Spawned && (__instance.def.size.x != 1 || __instance.def.size.z != 1))
+			{
+				PathingHelper.ThingAffectingRegionsOrientationChanged(__instance, __instance.Map);
+			}
+		}
+
 		public static void Notify_ThingAffectingVehicleRegionsSpawned(Thing b)
 		{
 			//For some reason other mods love to patch the SpawnSetup method and despawn the object immediately. Extra check is necessary
@@ -346,8 +423,23 @@ namespace Vehicles
 				PathingHelper.ThingAffectingRegionsDeSpawned(b, b.Map);
 			}
 		}
-		
-		public static void RegisterInVehicleRegions(Thing thing, Map map)
+
+
+		/* ---- Helper Methods related to patches ---- */
+
+		private static void SpawnAndNotifyVehicleRegions(Thing thing, Map map)
+		{
+			RegisterInVehicleRegions(thing, map);
+			PathingHelper.ThingAffectingRegionsSpawned(thing, map);
+		}
+
+		private static void DeSpawnAndNotifyVehicleRegions(Thing thing, Map map)
+		{
+			DeregisterInVehicleRegions(thing, map);
+			PathingHelper.ThingAffectingRegionsDeSpawned(thing, map);
+		}
+
+		private static void RegisterInVehicleRegions(Thing thing, Map map)
 		{
 			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
 			if (mapping.ThreadAvailable)
@@ -359,8 +451,8 @@ namespace Vehicles
 				RegisterInRegions(thing, mapping);
 			}
 		}
-		
-		public static void DeregisterInVehicleRegions(Thing thing, Map map)
+
+		private static void DeregisterInVehicleRegions(Thing thing, Map map)
 		{
 			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
 			if (mapping.ThreadAvailable)
