@@ -78,6 +78,8 @@ namespace Vehicles
 
 		public int DefIndex { get; set; }
 
+		public int SizePadding => Mathf.Min(size.x, size.z) / 2;
+
 		public VehicleFleshTypeDef BodyType => kindDef.RaceProps.FleshType as VehicleFleshTypeDef;
 
 		/// <summary>

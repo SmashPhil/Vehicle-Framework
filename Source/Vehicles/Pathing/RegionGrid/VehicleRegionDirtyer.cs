@@ -128,7 +128,8 @@ namespace Vehicles
 			{
 				regionsToDirty.Add(validRegionAt_NoRebuild);
 			}
-			foreach (IntVec3 c in GenAdj.CellsAdjacent8Way(thing))
+			IntVec2 sizeWithPadding = thing.def.size + new IntVec2(createdFor.SizePadding, createdFor.SizePadding);
+			foreach (IntVec3 c in GenAdj.CellsAdjacent8Way(thing.Position, thing.Rotation, sizeWithPadding))
 			{
 				if (c.InBounds(mapping.map))
 				{

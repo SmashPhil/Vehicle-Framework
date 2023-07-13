@@ -585,7 +585,7 @@ namespace Vehicles
 		/// <param name="dir"></param>
 		public static bool WidthStandable(this VehicleDef vehicleDef, Map map, IntVec3 cell, Predicate<Thing> extraValidator = null)
 		{
-			CellRect cellRect = CellRect.CenteredOn(cell, Mathf.Min(vehicleDef.size.x, vehicleDef.size.z) / 2);
+			CellRect cellRect = CellRect.CenteredOn(cell, vehicleDef.SizePadding);
 			foreach (IntVec3 cellCheck in cellRect)
 			{
 				//Todo - remove hardcoded fence check

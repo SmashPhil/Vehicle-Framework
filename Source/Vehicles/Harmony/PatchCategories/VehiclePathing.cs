@@ -348,7 +348,7 @@ namespace Vehicles
 		{
 			List<CodeInstruction> instructionList = instructions.ToList();
 
-			MethodInfo coverGridDeregisterMethod = AccessTools.Method(typeof(CoverGrid), nameof(CoverGrid.DeRegister));
+			MethodInfo coverGridDeregisterMethod = AccessTools.Method(typeof(TickManager), nameof(TickManager.DeRegisterAllTickabilityFor));
 			for (int i = 0; i < instructionList.Count; i++)
 			{
 				CodeInstruction instruction = instructionList[i];
