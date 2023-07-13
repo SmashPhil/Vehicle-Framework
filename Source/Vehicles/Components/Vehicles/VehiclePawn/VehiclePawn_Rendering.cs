@@ -33,7 +33,10 @@ namespace Vehicles
 		private Graphic_Vehicle graphicInt;
 		public PatternData patternToPaint;
 
+		private bool crashLanded;
+
 		public float CachedAngle { get; set; }
+
 		private List<VehicleHandler> HandlersWithPawnRenderer { get; set; }
 
 		public bool CanPaintNow => patternToPaint != null;
@@ -45,6 +48,30 @@ namespace Vehicles
 		public (Vector3 drawPos, float rotation) DrawData => (DrawPos, this.CalculateAngle(out _));
 
 		public ThingWithComps Thing => this;
+
+		public bool CrashLanded
+		{
+			get
+			{
+				return crashLanded;
+			}
+			set
+			{
+				if (crashLanded == value)
+				{
+					return;
+				}
+				crashLanded = value;
+				if (!crashLanded)
+				{
+					if (!VehicleDef.graphicData.drawRotated)
+					{
+						Rotation = VehicleDef.defaultPlacingRot;
+					}
+					Angle = 0;
+				}
+			}
+		}
 
 		public float Angle
 		{

@@ -198,6 +198,7 @@ namespace Vehicles
 
 		protected override void FinalizeLanding()
 		{
+			vehicle.CrashLanded = true;
 			vehicle.CompVehicleLauncher.inFlight = false;
 			GenSpawn.Spawn(vehicle, Position, Map, Rotation);
 			vehicle.Angle = angle + Rotation.AsAngle;

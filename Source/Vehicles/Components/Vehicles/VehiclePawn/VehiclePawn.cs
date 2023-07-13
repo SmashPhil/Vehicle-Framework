@@ -198,6 +198,7 @@ namespace Vehicles
 			Scribe_Deep.Look(ref sharedJob, nameof(sharedJob));
 
 			Scribe_Values.Look(ref angle, nameof(angle));
+			Scribe_Values.Look(ref crashLanded, nameof(crashLanded));
 
 			Scribe_Deep.Look(ref patternData, nameof(patternData));
 			Scribe_Defs.Look(ref retexture, nameof(retexture));

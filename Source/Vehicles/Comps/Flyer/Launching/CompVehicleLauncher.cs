@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 
@@ -161,9 +162,20 @@ namespace Vehicles
 			{
 				command.Disable("VF_CannotLaunchWhileMoving".Translate(Vehicle.LabelShort));
 			}
-			if (SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(VehicleDef), "vehicleMovementPermissions", Vehicle.VehicleDef.vehicleMovementPermissions) > VehiclePermissions.NotAllowed && (!Vehicle.CanMoveFinal || Vehicle.Angle != 0))
+			if (SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(VehicleDef), "vehicleMovementPermissions", Vehicle.VehicleDef.vehicleMovementPermissions) > VehiclePermissions.NotAllowed)
 			{
-				command.Disable("VF_CannotMove".Translate(Vehicle.LabelShort));
+				if (!Vehicle.CanMoveFinal || Vehicle.Angle != 0)
+				{
+					command.Disable("VF_CannotLaunchImmobile".Translate(Vehicle.LabelShort));
+				}
+			}
+			else
+			{
+				float capacity = Vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
+				if (MassUtility.InventoryMass(Vehicle) > capacity)
+				{
+					command.Disable("VF_CannotLaunchOverEncumbered".Translate(Vehicle.LabelShort));
+				}
 			}
 			if (!VehicleMod.settings.debug.debugDraftAnyVehicle && !Vehicle.CanMoveWithOperators)
 			{

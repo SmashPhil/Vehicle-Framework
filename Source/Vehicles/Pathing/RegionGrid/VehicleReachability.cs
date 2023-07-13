@@ -184,7 +184,6 @@ namespace Vehicles
 		/// <param name="dest"></param>
 		/// <param name="peMode"></param>
 		/// <param name="traverseParms"></param>
-		/// <returns>start can reach destination target</returns>
 		public bool CanReachVehicle(IntVec3 start, LocalTargetInfo dest, PathEndMode peMode, TraverseParms traverseParms)
 		{
 			if (!ValidateCanStart(start, dest, traverseParms, out VehicleDef vehicleDef))

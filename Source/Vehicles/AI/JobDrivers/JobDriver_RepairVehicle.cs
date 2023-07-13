@@ -47,6 +47,7 @@ namespace Vehicles
 					ticksToNextRepair = TicksForRepair;
 					var component = Vehicle.statHandler.ComponentsPrioritized.FirstOrDefault(c => c.HealthPercent < 1);
 					component.HealComponent(Vehicle.GetStatValue(VehicleStatDefOf.RepairRate));
+					Vehicle.CrashLanded = false;
 				}
 			};
 			repair.FailOnMoving(TargetIndex.A);
