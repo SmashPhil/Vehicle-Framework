@@ -36,6 +36,7 @@ namespace Vehicles
 					if (rot == Rot8.NorthEast && vehicle.VehicleGraphic.EastDiagonalRotated)
 					{
 						graphicRot = Rot8.North;
+						angle *= -1; //Flip angle for clockwise rotation facing north
 					}
 					else if (rot == Rot8.SouthEast && vehicle.VehicleGraphic.EastDiagonalRotated)
 					{
@@ -48,6 +49,7 @@ namespace Vehicles
 					else if (rot == Rot8.NorthWest && vehicle.VehicleGraphic.WestDiagonalRotated)
 					{
 						graphicRot = Rot8.North;
+						angle *= -1; //Flip angle for clockwise rotation facing north
 					}
 
 					Vector3 drawOffset = graphicOverlay.graphic.DrawOffset(rot);

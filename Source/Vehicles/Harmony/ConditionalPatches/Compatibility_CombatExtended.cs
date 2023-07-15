@@ -20,9 +20,6 @@ namespace Vehicles
 		/// <summary>
 		/// Suppress DualWield errors for vehicles. Should not be applied regardless, disabling the vehicle
 		/// </summary>
-		/// <param name="__instance"></param>
-		/// <param name="___pawn"></param>
-		/// <param name="exception"></param>
 		private static bool DontOverrideVehicleCapacity(Pawn p)
 		{
 			if (p is VehiclePawn)
