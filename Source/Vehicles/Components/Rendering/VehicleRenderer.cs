@@ -69,11 +69,12 @@ namespace Vehicles
 		private void RenderPawnInternal(Vector3 rootLoc, float angle, bool northSouthRotation, PawnRenderFlags flags)
 		{
 			vehicle.UpdateRotationAndAngle();
-			Vector3 aboveBodyLoc = RenderPawnInternal(rootLoc, angle, vehicle.Rotation, northSouthRotation, flags);
-			vehicle.graphicOverlay.RenderGraphicOverlays(aboveBodyLoc, vehicle.Rotation);
+			(Vector3 aboveBodyPos, Rot8 rot) = RenderPawnInternal(rootLoc, angle, vehicle.Rotation, northSouthRotation, flags);
+			//Log.Message($"Rendering {vehicle} at {rootLoc} angle={angle}");
+			vehicle.graphicOverlay.RenderGraphicOverlays(aboveBodyPos, angle, rot);
 		}
 
-		private Vector3 RenderPawnInternal(Vector3 rootLoc, float angle, Rot4 bodyFacing, bool northSouthRotation, PawnRenderFlags flags)
+		private (Vector3 aboveBodyPos, Rot8 rot) RenderPawnInternal(Vector3 rootLoc, float angle, Rot4 bodyFacing, bool northSouthRotation, PawnRenderFlags flags)
 		{
 			if (!graphics.AllResolved)
 			{
@@ -83,16 +84,16 @@ namespace Vehicles
 
 			Quaternion quaternion = Quaternion.AngleAxis(angle * (northSouthRotation ? -1 : 1), Vector3.up);
 
-			Vector3 loc = rootLoc + vehicle.VehicleGraphic.DrawOffset(bodyFacing);
-			loc.y += YOffset_Body;
+			Vector3 aboveBodyPos = rootLoc + vehicle.VehicleGraphic.DrawOffset(bodyFacing);
+			aboveBodyPos.y += YOffset_Body;
 			Rot8 vehicleRot = new Rot8(bodyFacing, angle);
 			Mesh mesh = graphics.vehicle.VehicleGraphic.MeshAtFull(vehicleRot);
 			List<Material> list = graphics.MatsBodyBaseAt(bodyFacing, RotDrawMode.Fresh);
 
 			for (int i = 0; i < list.Count; i++)
 			{
-				GenDraw.DrawMeshNowOrLater(mesh, loc, quaternion, list[i], flags.FlagSet(PawnRenderFlags.DrawNow));
-				loc.y += SubInterval;
+				GenDraw.DrawMeshNowOrLater(mesh, aboveBodyPos, quaternion, list[i], flags.FlagSet(PawnRenderFlags.DrawNow));
+				aboveBodyPos.y += SubInterval;
 			}
 
 			Vector3 drawLoc = rootLoc;
@@ -104,7 +105,7 @@ namespace Vehicles
 			{
 				Graphics.DrawMesh(mesh, drawLoc, quaternion, graphics.packGraphic.MatAt(bodyFacing, null), 0);
 			}
-			return loc;
+			return (aboveBodyPos, vehicleRot);
 		}
 
 		public void ProcessPostTickVisuals(int ticksPassed)

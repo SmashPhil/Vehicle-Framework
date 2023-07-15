@@ -23,6 +23,7 @@ namespace Vehicles
 		public const int MinCostAmble = 60;
 
 		public const int MaxCheckAheadNodes = 1;
+		public const int MaxCheckAheadNodesWaiting = 5;
 		public const int TicksWhileWaiting = 120;
 
 		protected VehiclePawn vehicle;
@@ -59,7 +60,7 @@ namespace Vehicles
 			bumperCells = new List<IntVec3>();
 			CanEnterDoors = vehicle.VehicleDef.size == IntVec2.One;
 			LookAheadStartingIndex = Mathf.CeilToInt(vehicle.VehicleDef.Size.z / 2f); 
-			LookAheadDistance = MaxCheckAheadNodes + LookAheadStartingIndex; //10 cells away from vehicle's front;
+			LookAheadDistance = MaxCheckAheadNodes + LookAheadStartingIndex; //N cells away from vehicle's front;
 		}
 
 		public bool CanEnterDoors { get; private set; }
@@ -725,7 +726,7 @@ namespace Vehicles
 			IntVec3 previous = IntVec3.Invalid;
 			IntVec3 next;
 			int nodesAhead = LookAheadStartingIndex;
-			while (nodesAhead < MaxCheckAheadNodes && nodesAhead < curPath.NodesLeftCount)
+			while (nodesAhead < MaxCheckAheadNodesWaiting && nodesAhead < curPath.NodesLeftCount)
 			{
 				next = curPath.Peek(nodesAhead);
 				if (!GenGridVehicles.Walkable(next, vehicle.VehicleDef, vehicle.Map))
