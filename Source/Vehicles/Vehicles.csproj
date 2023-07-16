@@ -488,7 +488,6 @@
     <Compile Include="Misc\DefModExtension\ProjectilePropertiesDefModExtension.cs" />
     <Compile Include="Turrets\Projectiles\Laser.cs" />
     <Compile Include="Turrets\Turret\VehicleTurretAlternating.cs" />
-    <Compile Include="Turrets\Turret\VehicleTurretRecoiled.cs" />
     <Compile Include="Components\Construction\ListerVehiclesRepairable.cs" />
     <Compile Include="Components\Vehicles\Health\ComponentHitbox.cs" />
     <Compile Include="Components\Vehicles\Health\VehicleComponent.cs" />

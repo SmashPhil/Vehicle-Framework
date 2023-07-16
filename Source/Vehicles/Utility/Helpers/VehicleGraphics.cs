@@ -88,6 +88,28 @@ namespace Vehicles
 			}
 		}
 
+		public static void DrawTurret(VehicleTurret turret, Vector3 drawPos, Rot8 rot)
+		{
+			try
+			{
+				Vector3 topVectorLocation = turret.TurretDrawLocFor(rot, drawPos);
+				if (turret.rTracker.Recoil > 0f)
+				{
+					topVectorLocation = Ext_Math.PointFromAngle(topVectorLocation, turret.rTracker.Recoil, turret.rTracker.Angle);
+				}
+				if (turret.attachedTo != null && turret.attachedTo.rTracker.Recoil > 0f)
+				{
+					topVectorLocation = Ext_Math.PointFromAngle(topVectorLocation, turret.attachedTo.rTracker.Recoil, turret.attachedTo.rTracker.Angle);
+				}
+				Mesh cannonMesh = turret.CannonGraphic.MeshAt(rot);
+				Graphics.DrawMesh(cannonMesh, topVectorLocation, turret.TurretRotation.ToQuat(), turret.CannonMaterial, 0);
+			}
+			catch (Exception ex)
+			{
+				Log.Error(string.Format("Error occurred during rendering of attached thing on {0}. Exception: {1}", turret.vehicle.Label, ex.Message));
+			}
+		}
+
 		public static string DrawVehicle(Rect rect, VehiclePawn vehicle, Rot8? rot = null)
 		{
 			return DrawVehicleDef(rect, vehicle.VehicleDef, patternData: vehicle.patternData, rot: rot);

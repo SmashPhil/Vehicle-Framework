@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Verse;
 using SmashTools;
+using UnityEngine;
 
 namespace Vehicles
 {
@@ -30,7 +31,11 @@ namespace Vehicles
 		public virtual void PostLoad()
 		{
 		}
-		
+
+		public virtual void PostDrawUnspawned(Vector3 drawLoc, float rotation)
+		{
+		}
+
 		/// <summary>
 		/// Called when newly generated, unlike PostSpawnSetup called every time it is spawned in-map
 		/// </summary>

@@ -85,7 +85,6 @@ namespace Vehicles
 				{
 					if (MatchingPathCosts(vehicleDef, ownerDef))
 					{
-						if (vehicleDef.defName == "VVE_Smuggler") Log.Message($"Owner: {ownerDef}");
 						owner = false;
 						movementDifficulty[vehicleDef.DefIndex] = movementDifficulty[ownerDef.DefIndex]; //Piggy back off same configuration of already registered vehicle
 						break;

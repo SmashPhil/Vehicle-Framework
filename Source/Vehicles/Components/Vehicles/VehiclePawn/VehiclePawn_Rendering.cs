@@ -298,6 +298,12 @@ namespace Vehicles
 			statHandler.DrawHitbox(HighlightedComponent);
 		}
 
+		/// <summary>
+		/// Called from skyfaller and launch protocol classes when vehicle is unspawned
+		/// </summary>
+		/// <param name="drawLoc"></param>
+		/// <param name="rotation"></param>
+		/// <param name="flip"></param>
 		public virtual void DrawAt(Vector3 drawLoc, float rotation, bool flip = false)
 		{
 			bool northSouthRotation = VehicleGraphic.EastDiagonalRotated && (FullRotation == Rot8.NorthEast || FullRotation == Rot8.SouthEast) ||
@@ -306,6 +312,21 @@ namespace Vehicles
 			foreach (VehicleHandler handler in HandlersWithPawnRenderer)
 			{
 				handler.RenderPawns();
+			}
+			Comps_PostDrawUnspawned(drawLoc, rotation);
+		}
+
+		public virtual void Comps_PostDrawUnspawned(Vector3 drawLoc, float rotation)
+		{
+			if (AllComps != null)
+			{
+				foreach (ThingComp thingComp in AllComps)
+				{
+					if (thingComp is VehicleComp vehicleComp)
+					{
+						vehicleComp.PostDrawUnspawned(drawLoc, rotation);
+					}
+				}
 			}
 		}
 

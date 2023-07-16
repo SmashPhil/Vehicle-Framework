@@ -54,7 +54,7 @@ namespace Vehicles
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(CameraJumper), "TryJump", parameters: new Type[] { typeof(GlobalTargetInfo), typeof(CameraJumper.MovementMode) }),
 			//	prefix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestPrefix)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanTendUtility), "IsValidDoctorFor"),
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), "AtDestinationPosition"),
 			//	postfix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestPostfix)));
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(TargetHighlighter), "Highlight"),
@@ -75,12 +75,16 @@ namespace Vehicles
 			}
 		}
 
-		public static void TestPostfix(Pawn doctor, Pawn patient, Caravan caravan, ref bool __result)
+		public static void TestPostfix(Pawn ___pawn, LocalTargetInfo ___destination, PathEndMode ___peMode, ref bool __result)
 		{
 			try
 			{
 				//Log.Message($"Finished");
-				Log.Message($"Patient={patient} Checking={doctor} Result={__result}");
+				if (!___pawn.NonHumanlikeOrWildMan())
+				{
+					bool result = ___pawn.CanReachImmediate(___destination, ___peMode);
+					Log.Message($"Result={result} for {___destination} with {___peMode}");
+				}
 			}
 			catch (Exception ex)
 			{

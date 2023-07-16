@@ -24,9 +24,6 @@ namespace Vehicles
 		{
 			var pawns = lord.ownedPawns.Where(p => !(p is VehiclePawn));
 			var vehicles = lord.ownedPawns.Where(p => p is VehiclePawn);
-			Log.Message("VEHICLE LORD");
-			Log.Message($"Vehicles: {vehicles.Count()}");
-			Log.Message($"Pawns: {pawns.Count()}");
 			foreach (VehiclePawn vehicle in vehicles)
 			{
 				vehicle.mindState.duty = new PawnDuty(DutyDefOf.AssaultColony); //CHANGE

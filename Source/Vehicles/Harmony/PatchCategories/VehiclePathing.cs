@@ -31,6 +31,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), nameof(Pawn_PathFollower.StartPath)),
 				prefix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(StartVehiclePath)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenAdj), nameof(GenAdj.AdjacentTo8WayOrInside), parameters: new Type[] { typeof(IntVec3), typeof(Thing) }),
+				prefix: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(AdjacentTo8WayOrInsideVehicle)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenAdj), nameof(GenAdj.OccupiedRect), parameters: new Type[] { typeof(Thing) }),
 				prefix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(OccupiedRectVehicles)));
@@ -212,6 +215,19 @@ namespace Vehicles
 			if (___pawn is VehiclePawn vehicle)
 			{
 				vehicle.vPather.StartPath(dest, peMode);
+				return false;
+			}
+			return true;
+		}
+
+		public static bool AdjacentTo8WayOrInsideVehicle(IntVec3 root, Thing t, ref bool __result)
+		{
+			if (t is VehiclePawn vehicle)
+			{
+				IntVec2 size = vehicle.def.size;
+				Rot4 rot = vehicle.Rotation;
+				Ext_Vehicles.AdjustForVehicleOccupiedRect(ref size, ref rot);
+				__result = root.AdjacentTo8WayOrInside(vehicle.Position, rot, size);
 				return false;
 			}
 			return true;

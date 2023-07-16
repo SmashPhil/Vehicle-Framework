@@ -93,6 +93,14 @@ namespace Vehicles
 			}
 		}
 
+		public override void PostDrawUnspawned(Vector3 drawPos, float rotation)
+		{
+			for (int i = 0; i < turrets.Count; i++)
+			{
+				turrets[i].DrawAt(drawPos);
+			}
+		}
+
 		public override IEnumerable<Gizmo> CompGetGizmosExtra()
 		{
 			if (turrets.Count > 0)

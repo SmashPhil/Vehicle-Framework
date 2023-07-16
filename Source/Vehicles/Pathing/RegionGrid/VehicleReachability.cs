@@ -404,7 +404,7 @@ namespace Vehicles
 
 				return chunkSearch.Run(start, dest, traverseParms, debugDrawSearch: debugDrawSearch, secondsBetweenDrawing: secondsBetweenDrawing);
 			}
-			Log.Message($"Can't validate for chunk search");
+			Log.Error($"Can't validate for chunk search");
 			return null;
 		}
 

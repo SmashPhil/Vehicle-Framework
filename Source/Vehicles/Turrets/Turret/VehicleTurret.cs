@@ -1117,6 +1117,15 @@ namespace Vehicles
 			}
 		}
 
+		public virtual void DrawAt(Vector3 drawPos)
+		{
+			if (!NoGraphic)
+			{
+				VehicleGraphics.DrawTurret(this, drawPos, Rot8.North);
+				DrawTargeter();
+			}
+		}
+
 		public virtual void Draw()
 		{
 			if (!NoGraphic)

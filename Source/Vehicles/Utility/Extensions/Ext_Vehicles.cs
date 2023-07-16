@@ -49,16 +49,21 @@ namespace Vehicles
 
 		public static CellRect VehicleRect(this VehicleDef vehicleDef, IntVec3 center, Rot4 rot, bool maxSizePossible = false)
 		{
+			IntVec2 size = vehicleDef.size;
+			AdjustForVehicleOccupiedRect(ref size, ref rot, maxSizePossible: maxSizePossible);
+			return GenAdj.OccupiedRect(center, rot, size);
+		}
+
+		public static void AdjustForVehicleOccupiedRect(ref IntVec2 size, ref Rot4 rot, bool maxSizePossible = false)
+		{
 			if (rot == Rot4.West) rot = Rot4.East;
 			if (rot == Rot4.South) rot = Rot4.North;
-			IntVec2 size = vehicleDef.size;
 			if (maxSizePossible)
 			{
 				int maxSize = Mathf.Max(size.x, size.z);
 				size.x = maxSize;
 				size.z = maxSize;
 			}
-			return GenAdj.OccupiedRect(center, rot, size);
 		}
 
 		//TODO - Doesn't work for even sizes. Should instead calculate only North and East (north calculate full OccupiedRect, east only calculate past the inner square)

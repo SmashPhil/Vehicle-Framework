@@ -70,7 +70,6 @@ namespace Vehicles
 		{
 			vehicle.UpdateRotationAndAngle();
 			(Vector3 aboveBodyPos, Rot8 rot) = RenderPawnInternal(rootLoc, angle, vehicle.Rotation, northSouthRotation, flags);
-			//Log.Message($"Rendering {vehicle} at {rootLoc} angle={angle}");
 			vehicle.graphicOverlay.RenderGraphicOverlays(aboveBodyPos, angle, rot);
 		}
 

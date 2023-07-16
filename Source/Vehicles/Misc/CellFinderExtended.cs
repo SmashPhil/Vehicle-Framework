@@ -38,9 +38,7 @@ namespace Vehicles
 			}
 			else
 			{
-				thingsOnMap.AddRange(from x in map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial)
-					where x.Faction == hostFaction
-					select x);
+				thingsOnMap.AddRange(map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial).Where(thing => thing.Faction == hostFaction));
 			}
 			float num2 = 65f;
 			for (int i = 0; i < 300; i++)
