@@ -30,6 +30,10 @@ namespace Vehicles
 			float value = GetBaseValue(vehicle.VehicleDef);
 			value = TransformValue(vehicle, value);
 			value *= StatEfficiency(vehicle);
+			if (statDef == VehicleStatDefOf.MoveSpeed)
+			{
+				Log.Message($"MoveSpeed: {value} StatEfficiency: {vehicle.statHandler.StatEfficiency(statDef)}");
+			}
 			return value.Clamp(statDef.minValue, statDef.maxValue);
 		}
 

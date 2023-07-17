@@ -617,7 +617,7 @@ namespace Vehicles
 						{
 							options.Add(new FloatMenuOption(component.props.label, delegate ()
 							{
-								component.TakeDamage(this, new DamageInfo(DamageDefOf.Bite, float.MaxValue));
+								component.TakeDamage(this, new DamageInfo(DamageDefOf.Vaporize, float.MaxValue));
 								Notify_TookDamage();
 							}));
 						}
@@ -637,7 +637,7 @@ namespace Vehicles
 						{
 							options.Add(new FloatMenuOption(component.props.label, delegate ()
 							{
-								component.TakeDamage(this, new DamageInfo(DamageDefOf.Bite, component.health * Rand.Range(0.1f, 1)));
+								component.TakeDamage(this, new DamageInfo(DamageDefOf.Vaporize, component.health * Rand.Range(0.1f, 1)));
 								Notify_TookDamage();
 							}));
 						}
