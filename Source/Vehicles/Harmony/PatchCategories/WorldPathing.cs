@@ -77,17 +77,17 @@ namespace Vehicles
 		/* --------------- VehicleRoutePlanner Hook --------------- */
 		public static void VehicleRoutePlannerUpdateHook()
 		{
-			VehicleRoutePlanner.Instance.WorldRoutePlannerUpdate();
+			VehicleRoutePlanner.Instance?.WorldRoutePlannerUpdate();
 		}
 
 		public static void VehicleRoutePlannerOnGUIHook()
 		{
-			VehicleRoutePlanner.Instance.WorldRoutePlannerOnGUI();
+			VehicleRoutePlanner.Instance?.WorldRoutePlannerOnGUI();
 		}
 
 		public static void VehicleRoutePlannerButton(ref float curBaseY)
 		{
-			VehicleRoutePlanner.Instance.DoRoutePlannerButton(ref curBaseY);
+			VehicleRoutePlanner.Instance?.DoRoutePlannerButton(ref curBaseY);
 		}
 		/* ------------------------------------------------------- */
 	}

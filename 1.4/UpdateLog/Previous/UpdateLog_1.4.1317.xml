@@ -1,17 +1,41 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.4.1318</currentVersion>
+  <currentVersion>1.4.1317</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Recent News&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
-
+This is the release candidate so if you encounter bugs please please please report them to me asap.  Thanks!
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+
+- AerialVehicle that left the map at the edge in an event map would immediately teleport to their previous position upon arriving back at colony.
+
+- AerialVehicle exiting map at edge border would create a vehicle caravan instead of an aerial vehicle object, causing vehicles not capable of caravaning to despawn immediately along with all pawns.
+
+- AerialVehicles could launch on the world map without any pawns or pawns in non-flight roles.
+
+- Pawns inside AerialVehicles don't show up in the colonist bar.
+
+- Pawns in AerialVehicles aren't registered as 'alive' colonists for the game over condition.
+
+- FloatMenuOptions and Gizmos for AerialVehicles showing incorrectly or not showing at all for certain colonies.
+
+- Being able to trade with any settlement with an AerialVehicle.
+
+- Graphic Overlays not rotating with the vehicle angle.
+
+- Pawns being unable to reach vehicles at certain angles due to it using vanilla hitboxes for even-width vehicles for specific jobs.
+
+- Compatibility issue with Combat Extended where cargo capacity of vehicles would be overwritten to 0.
 
 &lt;title&gt;Performance Improvements&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 
+None for now.  The mod runs quite smoothly but if anyone discovers any bottlenecks let me know and I'll fix them.
+
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+
+- Added various ITabs to AerialVehicle on the world map.
 
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
