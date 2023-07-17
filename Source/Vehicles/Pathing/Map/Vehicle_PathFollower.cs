@@ -53,11 +53,13 @@ namespace Vehicles
 		private List<CancellationTokenSource> tokenSources = new List<CancellationTokenSource>();
 
 		private object pathLock = new object();
+		private bool shouldStopClipping;
 
 		public Vehicle_PathFollower(VehiclePawn vehicle)
 		{
 			this.vehicle = vehicle;
 			bumperCells = new List<IntVec3>();
+			shouldStopClipping = vehicle.VehicleDef.size.x != vehicle.VehicleDef.size.z; //If vehicle is not NxN, it may clip buildings at destination.
 			CanEnterDoors = vehicle.VehicleDef.size == IntVec2.One;
 			LookAheadStartingIndex = Mathf.CeilToInt(vehicle.VehicleDef.Size.z / 2f); 
 			LookAheadDistance = MaxCheckAheadNodes + LookAheadStartingIndex; //N cells away from vehicle's front;
@@ -154,7 +156,7 @@ namespace Vehicles
 				PatherFailed();
 				return;
 			}
-			if (!vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehicleReachability.CanReachVehicle(vehicle.Position, dest, peMode, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false)))
+			if (!vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehicleReachability.CanReachVehicle(vehicle.Position, dest, peMode, TraverseParms.For(TraverseMode.ByPawn, Danger.Deadly, false)))
 			{
 				PatherFailed();
 				return;
@@ -446,7 +448,7 @@ namespace Vehicles
 		{
 			if (curPath.NodesLeftCount <= 1)
 			{
-				Log.Error($"{vehicle} at {vehicle.Position} ran outo f path nodes while pathing to {destination}.");
+				Log.Error($"{vehicle} at {vehicle.Position} ran out of path nodes while pathing to {destination}.");
 				PatherFailed();
 				return;
 			}
@@ -466,7 +468,7 @@ namespace Vehicles
 			}
 
 			//Check ahead and stop prematurely if vehicle won't fit at final destination
-			if (curPath.NodesLeftCount < LookAheadDistance && vehicle.LocationRestrictedBySize(nextCell, vehicle.FullRotation))
+			if (shouldStopClipping && curPath.NodesLeftCount < LookAheadDistance && vehicle.LocationRestrictedBySize(nextCell, vehicle.FullRotation))
 			{
 				PatherFailed();
 				return;

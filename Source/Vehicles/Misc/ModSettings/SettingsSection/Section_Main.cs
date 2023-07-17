@@ -51,7 +51,7 @@ namespace Vehicles
 		public bool burnRadiusOnRockets = true;
 		public bool deployOnLanding = true;
 		public bool airDefenses = true;
-		public bool dynamicWorldDrawing = true;
+		public bool dynamicWorldDrawing = false;
 		public float delayDeployOnLanding = 0;
 
 		/* Upgrades */
@@ -101,7 +101,7 @@ namespace Vehicles
 			burnRadiusOnRockets = true;
 			deployOnLanding = true;
 			airDefenses = true;
-			dynamicWorldDrawing = true;
+			dynamicWorldDrawing = false;
 			delayDeployOnLanding = 0;
 
 			/* Upgrades */
@@ -144,7 +144,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref burnRadiusOnRockets, nameof(burnRadiusOnRockets), defaultValue: true);
 			Scribe_Values.Look(ref deployOnLanding, nameof(deployOnLanding), defaultValue: true);
 			Scribe_Values.Look(ref airDefenses, nameof(airDefenses), defaultValue: true);
-			Scribe_Values.Look(ref dynamicWorldDrawing, nameof(dynamicWorldDrawing), defaultValue: true);
+			Scribe_Values.Look(ref dynamicWorldDrawing, nameof(dynamicWorldDrawing), defaultValue: false);
 			Scribe_Values.Look(ref delayDeployOnLanding, nameof(delayDeployOnLanding), defaultValue: 0);
 
 			Scribe_Values.Look(ref drawUpgradeInformationScreen, nameof(drawUpgradeInformationScreen), defaultValue: true);

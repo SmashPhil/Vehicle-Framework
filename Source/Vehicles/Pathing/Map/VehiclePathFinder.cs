@@ -325,7 +325,7 @@ namespace Vehicles
 								}
 
 								int tickCost = ((i <= 3) ? ticksCardinal : ticksDiagonal) + initialCost;
-								if (VehicleMod.settings.main.smoothVehiclePaths)
+								if (VehicleMod.settings.main.smoothVehiclePaths && (vehicle.VehicleDef.size.x != 1 || vehicle.VehicleDef.size.z != 1)) //Don't add turn cost for 1x1 vehicles
 								{
 									Rot8 pathDir = Rot8.DirectionFromCells(prevCell, cellToCheck);
 									if (pathDir != costNode.direction)

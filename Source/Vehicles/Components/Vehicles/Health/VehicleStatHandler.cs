@@ -81,10 +81,8 @@ namespace Vehicles
 		{
 			if (!comp.props.categories.NullOrEmpty())
 			{
-				Log.Message($"RECACHING");
 				foreach (VehicleStatDef category in comp.props.categories)
 				{
-					if (category == VehicleStatDefOf.MoveSpeed) Log.Message("Move speed cached");
 					if (statComponents.TryGetValue(category, out var list))
 					{
 						list.Add(comp);
@@ -94,7 +92,6 @@ namespace Vehicles
 						statComponents[category] = new List<VehicleComponent>() { comp };
 					}
 				}
-				Log.Message($"MoveSpeed categories: {statComponents.TryGetValue(VehicleStatDefOf.MoveSpeed, new List<VehicleComponent>()).Count}");
 			}
 		}
 
