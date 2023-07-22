@@ -77,16 +77,25 @@ namespace Vehicles
 				foreach (var overlay in overlays.Where(overlay => overlay.layer < 0).OrderBy(overlay => overlay.layer))
 				{
 					GUI.color = overlay.color;
-					UIElements.DrawTextureWithMaterialOnGUI(overlay.rect, overlay.mainTex, null, overlay.angle);
+					{
+						UIElements.DrawTextureWithMaterialOnGUI(overlay.rect, overlay.mainTex, null, overlay.angle);
+					}
+					GUIState.Reset();
 				}
 
 				drawStep = "Rendering main texture";
 				VehicleGraphics.DrawVehicleFitted(adjustedRect, angle, mainTex, material: null); //Null material will reroute to GUI methods
 
+				GUIState.Reset();
+
 				drawStep = "Rendering overlays with layer >= 0";
 				foreach (var overlay in overlays.Where(overlay => overlay.layer >= 0).OrderBy(overlay => overlay.layer))
 				{
-					UIElements.DrawTextureWithMaterialOnGUI(overlay.rect, overlay.mainTex, null, overlay.angle);
+					GUI.color = overlay.color;
+					{
+						UIElements.DrawTextureWithMaterialOnGUI(overlay.rect, overlay.mainTex, null, overlay.angle);
+					}
+					GUIState.Reset();
 				}
 			}
 			catch (Exception ex)
@@ -184,18 +193,14 @@ namespace Vehicles
 			Material material = command.disabled ? TexUI.GrayscaleGUI : null;
 			GenUI.DrawTextureWithMaterial(rect, command.BGTexture, material);
 			Rect buttonRect = rect.ContractedBy(1);
-			Widgets.BeginGroup(buttonRect);
+			PatternData defaultPatternData = new PatternData(VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData));
+			if (command.disabled)
 			{
-				PatternData defaultPatternData = new PatternData(VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData));
-				if (command.disabled)
-				{
-					defaultPatternData.color = vehicleDef.graphicData.color.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
-					defaultPatternData.colorTwo = vehicleDef.graphicData.colorTwo.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
-					defaultPatternData.colorThree = vehicleDef.graphicData.colorThree.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
-				}
-				DrawVehicleDefOnGUI(buttonRect.AtZero(), vehicleDef, defaultPatternData);
+				defaultPatternData.color = vehicleDef.graphicData.color.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
+				defaultPatternData.colorTwo = vehicleDef.graphicData.colorTwo.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
+				defaultPatternData.colorThree = vehicleDef.graphicData.colorThree.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
 			}
-			Widgets.EndGroup();
+			DrawVehicleDefOnGUI(buttonRect, vehicleDef, defaultPatternData);
 
 			bool flag2 = false;
 			KeyCode keyCode = (command.hotKey == null) ? KeyCode.None : command.hotKey.MainKey;

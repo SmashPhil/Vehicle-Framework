@@ -122,7 +122,7 @@ namespace Vehicles
 		/// <param name="rect"></param>
 		/// <param name="vehicleDef"></param>
 		/// <param name="material"></param>
-		public static string DrawVehicleDef(Rect rect, VehicleDef vehicleDef, Material material = null, PatternData patternData = null, Rot8? rot = null)
+		public static string DrawVehicleDef(Rect rect, VehicleDef vehicleDef, Material material = null, PatternData patternData = null, Rot8? rot = null, bool withoutTurrets = false)
 		{
 			string drawStep = string.Empty;
 			try
@@ -189,8 +189,11 @@ namespace Vehicles
 				List<(Rect rect, Texture mainTex, Material material, float layer, float angle)> overlays = new List<(Rect, Texture, Material, float, float)>();
 				if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets props)
 				{
-					overlays.AddRange(RetrieveAllTurretSettingsGraphicsProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer),
+					if (!withoutTurrets || Prefs.UIScale == 1) //NOTE: Temporary fix until Ludeon fixes vanilla bug with matrix rotations inside GUI groups
+					{
+						overlays.AddRange(RetrieveAllTurretSettingsGraphicsProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer),
 						new PatternData(color1, color2, color3, pattern, displacement, tiling)));
+					}
 				}
 				drawStep = "Retrieving graphic overlays";
 				overlays.AddRange(RetrieveAllOverlaySettingsGraphicsProperties(rect, vehicleDef, rotDrawn));
