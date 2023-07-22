@@ -45,7 +45,6 @@ namespace Vehicles
 
 		public virtual void EventRegistration()
 		{
-
 		}
 
 		public virtual void SpawnedInGodMode()

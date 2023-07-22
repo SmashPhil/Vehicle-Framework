@@ -209,13 +209,13 @@ namespace Vehicles
             if (__instance.IsInVehicle())
             {
                 VehiclePawn vehicle = __instance.GetVehicle();
-				vehicle.EventRegistry[VehicleEventDefOf.PawnKilled].ExecuteEvents();
                 vehicle.AddOrTransfer(__instance);
 				if (Find.World.worldPawns.Contains(__instance))
 				{
 					Find.WorldPawns.RemovePawn(__instance);
 				}
-            }
+				vehicle.EventRegistry[VehicleEventDefOf.PawnKilled].ExecuteEvents();
+			}
         }
 
         public static void SendNotificationsVehicle(Pawn p, ref bool __result)

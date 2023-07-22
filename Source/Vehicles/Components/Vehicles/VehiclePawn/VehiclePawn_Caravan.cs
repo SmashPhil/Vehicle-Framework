@@ -42,11 +42,11 @@ namespace Vehicles
 			bool result;
 			if (holder != null)
 			{
-				result = holder.carryTracker.innerContainer.TryTransferToContainer(thing, inventory.innerContainer, count, true) > 0;
+				result = holder.carryTracker.innerContainer.TryAddOrTransfer(thing, count, true) > 0;
 			}
 			else
 			{
-				result = inventory.innerContainer.TryAdd(thing, count) > 0;
+				result = inventory.innerContainer.TryAddOrTransfer(thing, count) > 0;
 			}
 			EventRegistry[VehicleEventDefOf.CargoAdded].ExecuteEvents();
 			return result;
