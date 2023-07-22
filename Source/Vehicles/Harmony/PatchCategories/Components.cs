@@ -90,6 +90,7 @@ namespace Vehicles
 				vehicle.graphicOverlay = new VehicleGraphicOverlay(vehicle);
 				PatternData defaultPatternData = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicle.VehicleDef.defName, vehicle.VehicleDef.graphicData);
 				vehicle.patternData = new PatternData(defaultPatternData);
+				vehicle.trader = null;
 			}
 		}
 
@@ -103,7 +104,7 @@ namespace Vehicles
 			if (pawn is VehiclePawn vehicle && (vehicle.Spawned || actAsIfSpawned) && vehicle.ignition is null)
 			{
 				vehicle.ignition = new Vehicle_IgnitionController(vehicle);
-				vehicle.trader = new Pawn_TraderTracker(vehicle);
+				vehicle.trader = null;// new Pawn_TraderTracker(vehicle);
 				vehicle.story = new Pawn_StoryTracker(vehicle);
 				vehicle.playerSettings = new Pawn_PlayerSettings(vehicle);
 				vehicle.training = null;

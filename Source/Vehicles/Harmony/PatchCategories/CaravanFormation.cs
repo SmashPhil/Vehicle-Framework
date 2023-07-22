@@ -120,7 +120,7 @@ namespace Vehicles
 			for (int i = 0; i < instructionList.Count; i++)
 			{
 				CodeInstruction instruction = instructionList[i];
-				if(instruction.LoadsField(AccessTools.Field(typeof(JobDefOf), nameof(JobDefOf.GiveToPackAnimal))))
+				if (instruction.LoadsField(AccessTools.Field(typeof(JobDefOf), nameof(JobDefOf.GiveToPackAnimal))))
 				{
 					yield return instruction; //Ldsfld : JobDefOf::GiveToPackAnimal
 					instruction = instructionList[++i];
