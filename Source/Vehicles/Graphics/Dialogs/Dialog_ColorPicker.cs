@@ -15,6 +15,7 @@ namespace Vehicles
 	{
 		private const float ButtonWidth = 90f;
 		private const float ButtonHeight = 30f;
+		private const float IconButtonSize = 48;
 
 		private const float SwitchSize = 60f;
 
@@ -46,19 +47,16 @@ namespace Vehicles
 		public static float initialDragDifferenceX = 0;
 		public static float initialDragDifferenceY = 0;
 
+		private static bool showPatterns = true;
 		private static bool mouseOver = false;
 
 		private Dialog_ColorPicker() 
 		{
 		}
 
-		public static Dialog_ColorPicker Instance { get; private set; }
-
 		private static VehicleDef VehicleDef { get; set; }
 
 		private static Rot8? DisplayRotation { get; set; }
-
-		private static Graphic_Vehicle VehicleGraphic { get; set; }
 
 		private static PatternData PatternData { get; set; }
 
@@ -84,16 +82,10 @@ namespace Vehicles
 		/// <param name="onSave"></param>
 		public static void OpenColorPicker(VehiclePawn vehicle, Action<Color, Color, Color, PatternDef, Vector2, float> onSave)
 		{
-			Instance = new Dialog_ColorPicker();
 			VehicleDef = vehicle.VehicleDef;
-			VehicleGraphic = vehicle.VehicleGraphic;
 			OnSave = onSave;
 			PatternData = new PatternData(vehicle);
-			Instance.SetColors(vehicle.DrawColor, vehicle.DrawColorTwo, vehicle.DrawColorThree);
-			additionalTiling = PatternData.tiles;
-			displacementX = PatternData.displacement.x;
-			displacementY = PatternData.displacement.y;
-			Instance.Init();
+			Open();
 		}
 
 		/// <summary>
@@ -103,32 +95,55 @@ namespace Vehicles
 		/// <param name="onSave"></param>
 		public static void OpenColorPicker(VehicleDef vehicleDef, Action<Color, Color, Color, PatternDef, Vector2, float> onSave)
 		{
-			Instance = new Dialog_ColorPicker();
 			VehicleDef = vehicleDef;
-			VehicleGraphic = vehicleDef.graphicData.Graphic as Graphic_Vehicle;
 			OnSave = onSave;
 			PatternData = new PatternData(VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData));
-			Instance.SetColors(PatternData.color, PatternData.colorTwo, PatternData.colorThree);
-			additionalTiling = PatternData.tiles;
-			displacementX = PatternData.displacement.x;
-			displacementY = PatternData.displacement.y;
-			Instance.Init();	
+			Open();
+		}
+
+		private static void Open()
+		{
+			Dialog_ColorPicker colorPicker = new Dialog_ColorPicker();
+			colorPicker.Init();
+			Find.WindowStack.Add(colorPicker);
 		}
 
 		private void Init()
 		{
-			CurrentSelectedPalette = -1;
+			additionalTiling = PatternData.tiles;
+			displacementX = PatternData.displacement.x;
+			displacementY = PatternData.displacement.y;
+			SetColors(PatternData.color, PatternData.colorTwo, PatternData.colorThree);
 
-			pageNumber = 1;
-			AvailablePatterns = DefDatabase<PatternDef>.AllDefsListForReading.Where(p => p.ValidFor(VehicleDef)).ToList();
-			float ratio = (float)AvailablePatterns.Count / (GridDimensionColumns * GridDimensionRows);
-			Instance.pageCount = Mathf.CeilToInt(ratio);
+			CurrentSelectedPalette = -1;
 
 			doCloseX = true;
 			forcePause = true;
 			absorbInputAroundWindow = true;
-			selectedPattern = AvailablePatterns.Contains(PatternData.patternDef) ? PatternData.patternDef ?? PatternDefOf.Default : PatternDefOf.Default;
-			Find.WindowStack.Add(Instance);
+
+			RecacheAvailablePatterns();
+		}
+
+		private void RecacheAvailablePatterns()
+		{
+			if (showPatterns)
+			{
+				AvailablePatterns = DefDatabase<PatternDef>.AllDefsListForReading.Where(patternDef => !(patternDef is SkinDef) && patternDef.ValidFor(VehicleDef)).ToList();
+			}
+			else
+			{
+				AvailablePatterns = DefDatabase<SkinDef>.AllDefsListForReading.Where(patternDef => patternDef.ValidFor(VehicleDef)).Cast<PatternDef>().ToList();
+			}
+			
+			float ratio = (float)AvailablePatterns.Count / (GridDimensionColumns * GridDimensionRows);
+			pageCount = Mathf.CeilToInt(ratio);
+			pageNumber = 1;
+
+			selectedPattern = AvailablePatterns.Contains(PatternData.patternDef) ? PatternData.patternDef : AvailablePatterns.FirstOrDefault();
+			if (selectedPattern == null)
+			{
+				selectedPattern = PatternDefOf.Default;
+			}
 		}
 
 		public override void PostClose()
@@ -269,6 +284,31 @@ namespace Vehicles
 		{
 			Widgets.DrawBoxSolid(paintRect, RenderHelper.Greyist);
 
+			string patternsLabel = "VF_Patterns".Translate();
+			string skinsLabel = "VF_Skins".Translate();
+			float labelHeight = Text.CalcSize(patternsLabel).y;
+			Rect switchRect = new Rect(paintRect.x, paintRect.y, paintRect.width / 2 - IconButtonSize / 2, labelHeight);
+
+			Color patternLabelColor = showPatterns ? Color.white : Color.gray;
+			Color skinLabelColor = !showPatterns ? Color.white : Color.gray;
+
+			UIElements.DrawLabel(switchRect, patternsLabel, Color.clear, patternLabelColor, GameFont.Small, TextAnchor.MiddleRight);
+			//Widgets.DrawBox(switchRect);
+			
+			Rect toggleRect = new Rect(switchRect.xMax, switchRect.y - IconButtonSize / 4 - 3, IconButtonSize, IconButtonSize);
+			bool mouseOverToggle = Mouse.IsOver(toggleRect);
+			//Widgets.DrawBox(toggleRect);
+			if (Widgets.ButtonImage(toggleRect, showPatterns ? VehicleTex.SwitchLeft : VehicleTex.SwitchRight))
+			{
+				showPatterns = !showPatterns;
+				RecacheAvailablePatterns();
+				SoundDefOf.Click.PlayOneShotOnCamera();
+			}
+
+			switchRect.x = toggleRect.xMax;
+			//Widgets.DrawBox(switchRect);
+			UIElements.DrawLabel(switchRect, skinsLabel, Color.clear, skinLabelColor, GameFont.Small, TextAnchor.MiddleLeft);
+
 			Rect outRect = paintRect;
 			outRect = outRect.ContractedBy(10f);
 			float sqrGridSize = outRect.width / GridDimensionColumns;
@@ -303,10 +343,14 @@ namespace Vehicles
 				{
 					imageY += imageRect.height;
 				}
-				TooltipHandler.TipRegion(imageRect, pattern.LabelCap);
-				if (Widgets.ButtonInvisible(imageRect))
+				if (!mouseOverToggle)
 				{
-					selectedPattern = pattern;
+					TooltipHandler.TipRegion(imageRect, pattern.LabelCap);
+					if (Widgets.ButtonInvisible(imageRect))
+					{
+						selectedPattern = pattern;
+						SoundDefOf.Click.PlayOneShotOnCamera();
+					}
 				}
 			}
 		}
@@ -350,6 +394,7 @@ namespace Vehicles
 			if (Widgets.ButtonImage(reverseRect, VehicleTex.ReverseIcon))
 			{
 				SetColors(CurrentColorTwo.ToColor, CurrentColorThree.ToColor, CurrentColorOne.ToColor);
+				SoundDefOf.Click.PlayOneShotOnCamera();
 			}
 			TooltipHandler.TipRegion(reverseRect, "VF_SwapColors".Translate());
 
@@ -377,16 +422,19 @@ namespace Vehicles
 			{
 				colorSelected = 1;
 				SetColor(CurrentColorOne.ToColor);
+				SoundDefOf.Click.PlayOneShotOnCamera();
 			}
 			if (colorSelected != 2 && Widgets.ButtonInvisible(c2Rect))
 			{
 				colorSelected = 2;
 				SetColor(CurrentColorTwo.ToColor);
+				SoundDefOf.Click.PlayOneShotOnCamera();
 			}
 			if (colorSelected != 3 && Widgets.ButtonInvisible(c3Rect))
 			{
 				colorSelected = 3;
 				SetColor(CurrentColorThree.ToColor);
+				SoundDefOf.Click.PlayOneShotOnCamera();
 			}
 
 			Rect inputRect = new Rect(colorRect.x, colorRect.y + colorRect.height + 5f, colorRect.width / 2, 20f);
@@ -407,6 +455,7 @@ namespace Vehicles
 				if (CurrentSelectedPalette >= 0 && CurrentSelectedPalette < ColorStorage.PaletteCount)
 				{
 					VehicleMod.settings.colorStorage.AddPalette(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, CurrentSelectedPalette);
+					SoundDefOf.Click.PlayOneShotOnCamera();
 				}
 				else
 				{

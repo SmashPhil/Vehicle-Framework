@@ -29,29 +29,29 @@ namespace Vehicles
 		{
 			colorPalette = new List<Tuple<Color, Color, Color>>()
 			{
-				new Tuple<Color, Color, Color>(new Color32(25, 25, 25, 255), new Color32(210, 210, 210, 255), new Color32(160, 160, 160, 255)),
-				new Tuple<Color, Color, Color>(new Color32(150, 10, 0, 255), new Color32(30, 50, 80, 255), new Color32(200, 200, 200, 255)),
-				new Tuple<Color, Color, Color>(new Color32(200, 140, 85, 255), new Color32(130, 85, 45, 255), new Color32(80, 50, 10, 255)),
-				new Tuple<Color, Color, Color>(new Color32(170, 120, 0, 255), new Color32(35, 25, 20, 255), new Color32(135, 135, 135, 255)),
-				new Tuple<Color, Color, Color>(new Color32(5, 40, 10, 255), new Color32(0, 70, 5, 255), new Color32(6, 30, 15, 255)),
+				new Tuple<Color, Color, Color>(new Color(0.306f, 0.329f, 0.306f), new Color(0.255f, 0.263f, 0.239f), new Color(0.388f, 0.271f, 0.231f)),
+				new Tuple<Color, Color, Color>(new Color(0.569f, 0.318f, 0.259f), new Color(0.557f, 0.282f, 0.263f), new Color(0.333f, 0.200f, 0.157f)),
+				new Tuple<Color, Color, Color>(new Color(0.565f, 0.545f, 0.533f), new Color(0.388f, 0.365f, 0.353f), new Color(0.278f, 0.259f, 0.251f)),
+				new Tuple<Color, Color, Color>(new Color(0.533f, 0.576f, 0.753f), new Color(0.396f, 0.451f, 0.569f), new Color(0.380f, 0.380f, 0.424f)),
+				new Tuple<Color, Color, Color>(new Color(0.580f, 0.580f, 0.580f), new Color(0.392f, 0.392f, 0.392f), new Color(0.196f, 0.196f, 0.196f)),
 
-				new Tuple<Color, Color, Color>(new Color32(0, 50, 100, 255), new Color32(30, 20, 60, 255), new Color32(70, 95, 160, 255)),
-				new Tuple<Color, Color, Color>(new Color32(0, 70, 35, 255), new Color32(20, 85, 65, 255), new Color32(10, 30, 20, 255)),
-				new Tuple<Color, Color, Color>(new Color32(175, 170, 40, 255), new Color32(85, 80, 0, 255), new Color32(30, 25, 20, 255)),
-				new Tuple<Color, Color, Color>(new Color32(55, 35, 60, 255), new Color32(35, 20, 45, 255), new Color32(45, 40, 70, 255)),
-				new Tuple<Color, Color, Color>(new Color32(78, 78, 78, 255), new Color32(60, 70, 75, 255), new Color32(55, 65, 60, 255)),
+				new Tuple<Color, Color, Color>(new Color(0.478f, 0.725f, 0.498f), new Color(0.322f, 0.490f, 0.337f), new Color(0.235f, 0.361f, 0.255f)),
+				new Tuple<Color, Color, Color>(new Color(0.886f, 0.843f, 0.647f), new Color(0.561f, 0.478f, 0.353f), new Color(0.463f, 0.380f, 0.271f)),
+				new Tuple<Color, Color, Color>(new Color(0.412f, 0.643f, 0.565f), new Color(0.345f, 0.490f, 0.467f), new Color(0.337f, 0.353f, 0.376f)),
+				new Tuple<Color, Color, Color>(new Color(0.788f, 0.804f, 0.753f), new Color(0.686f, 0.698f, 0.631f), new Color(0.490f, 0.518f, 0.427f)),
+				new Tuple<Color, Color, Color>(new Color(0.361f, 0.275f, 0.118f), new Color(0.290f, 0.204f, 0.063f), new Color(0.667f, 0.553f, 0.388f)),
 
-				new Tuple<Color, Color, Color>(new Color32(5, 40, 70, 255), new Color32(0, 55, 75, 255), new Color32(65, 80, 100, 255)),
-				new Tuple<Color, Color, Color>(new Color32(85, 30, 0, 255), new Color32(110, 65, 0, 255), new Color32(35, 20, 10, 255)),
-				new Tuple<Color, Color, Color>(new Color32(60, 30, 30, 255), new Color32(56, 56, 56, 255), new Color32(65, 40, 40, 255)),
-				new Tuple<Color, Color, Color>(new Color32(80, 130, 0, 255), new Color32(42, 42, 42, 255), new Color32(145, 185, 110, 255)),
-				new Tuple<Color, Color, Color>(new Color32(25, 30, 60, 255), new Color32(56, 56, 56, 255), new Color32(30, 45, 60, 255)),
+				new Tuple<Color, Color, Color>(new Color(0.573f, 0.537f, 0.514f), new Color(0.329f, 0.294f, 0.267f), new Color(0.263f, 0.239f, 0.227f)),
+				new Tuple<Color, Color, Color>(new Color(0.451f, 0.573f, 0.580f), new Color(0.345f, 0.478f, 0.475f), new Color(0.227f, 0.290f, 0.278f)),
+				new Tuple<Color, Color, Color>(new Color(0.741f, 0.714f, 0.678f), new Color(0.792f, 0.769f, 0.733f), new Color(0.365f, 0.345f, 0.302f)),
+				new Tuple<Color, Color, Color>(new Color(0.549f, 0.667f, 0.482f), new Color(0.349f, 0.494f, 0.275f), new Color(0.200f, 0.353f, 0.125f)),
+				new Tuple<Color, Color, Color>(new Color(0.871f, 0.741f, 0.235f), new Color(0.969f, 0.843f, 0.420f), new Color(0.627f, 0.502f, 0.039f)),
 
-				new Tuple<Color, Color, Color>(new Color32(140, 120, 0, 255), new Color32(78, 78, 78, 255), new Color32(210, 210, 210, 255)),
-				new Tuple<Color, Color, Color>(new Color32(135, 135, 135, 255), new Color32(0, 75, 85, 255), new Color32(210, 210, 210, 255)),
-				new Tuple<Color, Color, Color>(new Color32(120, 135, 140, 255), new Color32(191, 191, 191, 255), new Color32(210, 210, 210, 255)),
-				new Tuple<Color, Color, Color>(new Color32(190, 110, 185, 255), new Color32(125, 80, 155, 255), new Color32(50, 35, 90, 255)),
-				new Tuple<Color, Color, Color>(new Color32(60, 115, 110, 255), new Color32(255, 190, 120, 255), new Color32(250, 110, 0, 255)),
+				new Tuple<Color, Color, Color>(new Color(0.208f, 0.192f, 0.188f), new Color(0.333f, 0.314f, 0.302f), new Color(0.141f, 0.141f, 0.141f)),
+				new Tuple<Color, Color, Color>(new Color(0.420f, 0.443f, 0.192f), new Color(0.310f, 0.341f, 0.149f), new Color(0.365f, 0.243f, 0.031f)),
+				new Tuple<Color, Color, Color>(new Color(0.937f, 0.937f, 0.937f), new Color(0.722f, 0.725f, 0.722f), new Color(0.776f, 0.847f, 0.902f)),
+				new Tuple<Color, Color, Color>(new Color(0.576f, 0.537f, 0.490f), new Color(0.369f, 0.302f, 0.243f), new Color(0.149f, 0.114f, 0.094f)),
+				new Tuple<Color, Color, Color>(new Color(0.580f, 0.592f, 0.459f), new Color(0.451f, 0.475f, 0.353f), new Color(0.839f, 0.859f, 0.259f)),
 			};
 		}
 

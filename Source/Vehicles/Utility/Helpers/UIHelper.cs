@@ -238,12 +238,12 @@ namespace Vehicles
 			if (Widgets.ButtonImage(leftButtonRect, VehicleTex.LeftArrow))
 			{
 				pageNumber = (--pageNumber).Clamp(1, pageCount);
-				SoundDefOf.Click.PlayOneShotOnCamera();
+				SoundDefOf.PageChange.PlayOneShotOnCamera();
 			}
 			if (Widgets.ButtonImage(rightButtonRect, VehicleTex.RightArrow))
 			{
 				pageNumber = (++pageNumber).Clamp(1, pageCount);
-				SoundDefOf.Click.PlayOneShotOnCamera();
+				SoundDefOf.PageChange.PlayOneShotOnCamera();
 			}
 			float numbersLength = rect.width - rect.height * 2f;
 			int pageNumbersDisplayedTotal = Mathf.CeilToInt((numbersLength / 1.5f) / rect.height);
@@ -265,7 +265,7 @@ namespace Vehicles
 				if (Widgets.ButtonText(pageRect, pageLeftDisplayNum.ToString(), drawBackground: false))
 				{
 					pageNumber = pageLeftDisplayNum;
-					SoundDefOf.Click.PlayOneShotOnCamera();
+					SoundDefOf.PageChange.PlayOneShotOnCamera();
 				}
 			}
 			int offsetLeft = 1;
@@ -275,7 +275,7 @@ namespace Vehicles
 				if (Widgets.ButtonText(pageRect, pageRightDisplayNum.ToString(), drawBackground: false))
 				{
 					pageNumber = pageRightDisplayNum;
-					SoundDefOf.Click.PlayOneShotOnCamera();
+					SoundDefOf.PageChange.PlayOneShotOnCamera();
 				}
 			}
 

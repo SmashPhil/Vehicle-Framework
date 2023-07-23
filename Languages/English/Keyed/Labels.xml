@@ -53,6 +53,9 @@
 	<!-- Turret Restrictions -->
 	<VF_VehicleRestriction_Stationary>Cannot fire while moving.</VF_VehicleRestriction_Stationary>
 	
+	<!-- Color Picker -->
+	<VF_Patterns>Patterns</VF_Patterns>
+	<VF_Skins>Skins</VF_Skins>
 	<VehiclePatternZoom>Zoom</VehiclePatternZoom>
 	<VehiclePatternZoomTooltip>Scale the pattern up or down.</VehiclePatternZoomTooltip>
 	<VehiclePatternDisplacementX>Displacement X</VehiclePatternDisplacementX>
