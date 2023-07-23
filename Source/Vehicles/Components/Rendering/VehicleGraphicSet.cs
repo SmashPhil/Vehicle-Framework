@@ -38,7 +38,7 @@ namespace Vehicles
 
 		public List<Material> MatsBodyBaseAt(Rot4 facing, RotDrawMode bodyCondition = RotDrawMode.Fresh)
 		{
-			if(facing.IsHorizontal && vehicle.Angle != vehicle.CachedAngle)
+			if (facing.IsHorizontal && vehicle.Angle != vehicle.CachedAngle)
 			{
 				cachedMatsBodyBase.Clear();
 				cachedMatsBodyBaseHash = -1;

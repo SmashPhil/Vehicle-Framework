@@ -113,9 +113,7 @@ namespace Vehicles
 					{
 						folders += $"Item: {patternDef} Destination: {texPath}\n";
 					}
-					Log.Warning($"{VehicleHarmony.LogLabel} Additional Information:\n" +
-						$"MatCount: {maskMatPatterns.Count}\n" +
-						$"{folders}");
+					Log.Warning($"{VehicleHarmony.LogLabel} Additional Information:\n MatCount: {maskMatPatterns.Count}\n {folders}");
 				}
 			}
 			return BaseContent.BadMat;

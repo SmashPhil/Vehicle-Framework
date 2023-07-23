@@ -230,7 +230,7 @@ namespace Vehicles
 					{
 						yield return this.AerialVehicleTradeCommand(settlement.Faction, settlement.TraderKind);
 					}
-					if (AerialVehicleArrivalAction_Trade.CanOfferGiftsTo(vehicle, settlement))
+					if (AerialVehicleArrivalAction_OfferGifts.CanOfferGiftsTo(vehicle, settlement))
 					{
 						yield return new Command_Action
 						{

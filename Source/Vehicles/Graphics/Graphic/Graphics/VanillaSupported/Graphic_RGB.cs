@@ -193,6 +193,7 @@ namespace Vehicles
 					{
 						tmpMaskArray[1] = tmpMaskArray[3];
 						patternPointers[1] = 3;
+						eastFlipped = DataAllowsFlip;
 					}
 					else
 					{
@@ -203,17 +204,9 @@ namespace Vehicles
 				}
 				if (tmpMaskArray[3] is null)
 				{
-					if (tmpMaskArray[1] != null)
-					{
-						tmpMaskArray[3] = tmpMaskArray[1];
-						patternPointers[3] = 0;
-						westFlipped = DataAllowsFlip;
-					}
-					else
-					{
-						tmpMaskArray[3] = tmpMaskArray[0];
-						patternPointers[3] = 0;
-					}
+					tmpMaskArray[3] = tmpMaskArray[1];
+					patternPointers[3] = 1;
+					westFlipped = DataAllowsFlip;
 				}
 
 				if (tmpMaskArray[4] is null)
@@ -225,13 +218,13 @@ namespace Vehicles
 				if (tmpMaskArray[5] is null)
 				{
 					tmpMaskArray[5] = tmpMaskArray[2];
-					patternPointers[5] = 0;
+					patternPointers[5] = 2;
 					eastDiagonalRotated = DataAllowsFlip;
 				}
 				if (tmpMaskArray[6] is null)
 				{
 					tmpMaskArray[6] = tmpMaskArray[2];
-					patternPointers[6] = 0;
+					patternPointers[6] = 2;
 					westDiagonalRotated = DataAllowsFlip;
 				}
 				if (tmpMaskArray[7] is null)

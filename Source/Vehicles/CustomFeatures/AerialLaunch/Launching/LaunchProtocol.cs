@@ -607,6 +607,22 @@ namespace Vehicles
 					}
 				});
 			}
+
+			if (AerialVehicleArrivalAction_OfferGifts.CanOfferGiftsTo(vehicle, settlement))
+			{
+				yield return new FloatMenuOption("OfferGifts".Translate(settlement.Label), delegate ()
+				{
+					if (vehicle.Spawned)
+					{
+						vehicle.CompVehicleLauncher.TryLaunch(tile, new AerialVehicleArrivalAction_OfferGifts(vehicle, settlement));
+					}
+					else
+					{
+						AerialVehicleInFlight aerial = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
+						aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_OfferGifts(vehicle, settlement));
+					}
+				});
+			}
 		}
 
 		/// <summary>
