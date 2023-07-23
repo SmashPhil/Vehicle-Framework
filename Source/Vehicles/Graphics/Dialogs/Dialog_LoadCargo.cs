@@ -101,8 +101,8 @@ namespace Vehicles
 			BottomButtons(bottomRect);
 			Rect inRect2 = bottomRect;
 			inRect2.yMax -= 76f;
-			itemsTransfer.OnGUI(inRect2, out bool flag);
-			if (flag)
+			itemsTransfer.OnGUI(inRect2, out bool anythingChanged);
+			if (anythingChanged)
 			{
 				CountToTransferChanged();
 			}
@@ -205,7 +205,8 @@ namespace Vehicles
 		{
 			transferables = new List<TransferableOneWay>();
 			AddItemsToTransferables();
-			itemsTransfer = new TransferableOneWayWidget(transferables, null, null, null, true, IgnorePawnsInventoryMode.IgnoreIfAssignedToUnloadOrPlayerPawn);
+			itemsTransfer = new TransferableOneWayWidget(transferables, null, null, null, true, ignorePawnInventoryMass: IgnorePawnsInventoryMode.IgnoreIfAssignedToUnload, 
+				includePawnsMassInMassUsage: false, availableMassGetter: () => MassCapacity - MassUsage);
 			CountToTransferChanged();
 		}
 

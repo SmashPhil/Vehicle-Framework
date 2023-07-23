@@ -90,7 +90,6 @@ namespace Vehicles
 				vehicle.graphicOverlay = new VehicleGraphicOverlay(vehicle);
 				PatternData defaultPatternData = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicle.VehicleDef.defName, vehicle.VehicleDef.graphicData);
 				vehicle.patternData = new PatternData(defaultPatternData);
-				vehicle.trader = null;
 			}
 		}
 
