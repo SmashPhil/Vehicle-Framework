@@ -149,6 +149,8 @@ namespace Vehicles
 
 		public virtual bool LandingRestricted(Map map, IntVec3 position, Rot4 rotation) => false;
 
+		public abstract LaunchProtocolProperties GetProperties(LaunchType launchType, Rot4 rot);
+
 		/// <summary>
 		/// Takeoff animation has finished
 		/// </summary>

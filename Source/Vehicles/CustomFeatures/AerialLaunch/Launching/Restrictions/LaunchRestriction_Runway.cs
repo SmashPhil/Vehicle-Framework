@@ -63,7 +63,6 @@ namespace Vehicles
 		public override void DrawRestrictionsTargeter(VehiclePawn vehicle, Map map, IntVec3 position, Rot4 rot)
 		{
 			CellRect cellRect = RunwayRect(position, rot);
-
 			//Must null check map for immediately spawned & selected vehicles
 			if (!categories.NullOrEmpty() && map != null)
 			{

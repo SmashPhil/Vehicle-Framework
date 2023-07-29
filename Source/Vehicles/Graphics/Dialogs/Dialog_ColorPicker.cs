@@ -293,11 +293,9 @@ namespace Vehicles
 			Color skinLabelColor = !showPatterns ? Color.white : Color.gray;
 
 			UIElements.DrawLabel(switchRect, patternsLabel, Color.clear, patternLabelColor, GameFont.Small, TextAnchor.MiddleRight);
-			//Widgets.DrawBox(switchRect);
 			
-			Rect toggleRect = new Rect(switchRect.xMax, switchRect.y - IconButtonSize / 4 - 3, IconButtonSize, IconButtonSize);
+			Rect toggleRect = new Rect(switchRect.xMax, switchRect.y - IconButtonSize / 4 - 2, IconButtonSize, IconButtonSize);
 			bool mouseOverToggle = Mouse.IsOver(toggleRect);
-			//Widgets.DrawBox(toggleRect);
 			if (Widgets.ButtonImage(toggleRect, showPatterns ? VehicleTex.SwitchLeft : VehicleTex.SwitchRight))
 			{
 				showPatterns = !showPatterns;
@@ -306,7 +304,6 @@ namespace Vehicles
 			}
 
 			switchRect.x = toggleRect.xMax;
-			//Widgets.DrawBox(switchRect);
 			UIElements.DrawLabel(switchRect, skinsLabel, Color.clear, skinLabelColor, GameFont.Small, TextAnchor.MiddleLeft);
 
 			Rect outRect = paintRect;

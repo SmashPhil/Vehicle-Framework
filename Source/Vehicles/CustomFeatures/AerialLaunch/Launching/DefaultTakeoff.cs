@@ -37,7 +37,18 @@ namespace Vehicles
 		public override LaunchProtocolProperties CurAnimationProperties => launchType == LaunchType.Landing ? landingProperties : launchProperties;
 
 		public override LaunchProtocolProperties LandingProperties => landingProperties;
+
 		public override LaunchProtocolProperties LaunchProperties => launchProperties;
+
+		public override LaunchProtocolProperties GetProperties(LaunchType launchType, Rot4 rot)
+		{
+			return launchType switch
+			{
+				LaunchType.Landing => LandingProperties,
+				LaunchType.Takeoff => LaunchProperties,
+				_ => throw new NotImplementedException(),
+			};
+		}
 
 		public override bool FinishedAnimation(VehicleSkyfaller skyfaller)
 		{

@@ -42,9 +42,20 @@ namespace Vehicles
 		}
 
 		public override LaunchProtocolProperties LandingProperties => vehicle.Rotation.IsHorizontal ? landingProperties.horizontal : landingProperties.vertical;
+		
 		public override LaunchProtocolProperties LaunchProperties => vehicle.Rotation.IsHorizontal ? launchProperties.horizontal : launchProperties.vertical;
 
 		public override bool LaunchRestricted => vehicle.Spawned && LaunchProperties.restriction != null && !LaunchProperties.restriction.CanStartProtocol(vehicle, vehicle.Map, vehicle.Position, vehicle.Rotation);
+
+		public override LaunchProtocolProperties GetProperties(LaunchType launchType, Rot4 rot)
+		{
+			return launchType switch
+			{
+				LaunchType.Landing => rot.IsHorizontal ? landingProperties.horizontal : landingProperties.vertical,
+				LaunchType.Takeoff => rot.IsHorizontal ? launchProperties.horizontal : launchProperties.vertical,
+				_ => throw new NotImplementedException(),
+			};
+		}
 
 		public override bool LandingRestricted(Map map, IntVec3 position, Rot4 rotation)
 		{

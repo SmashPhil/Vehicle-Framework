@@ -35,7 +35,7 @@ namespace Vehicles
 				new Tuple<Color, Color, Color>(new Color(0.533f, 0.576f, 0.753f), new Color(0.396f, 0.451f, 0.569f), new Color(0.380f, 0.380f, 0.424f)),
 				new Tuple<Color, Color, Color>(new Color(0.580f, 0.580f, 0.580f), new Color(0.392f, 0.392f, 0.392f), new Color(0.196f, 0.196f, 0.196f)),
 
-				new Tuple<Color, Color, Color>(new Color(0.478f, 0.725f, 0.498f), new Color(0.322f, 0.490f, 0.337f), new Color(0.235f, 0.361f, 0.255f)),
+				new Tuple<Color, Color, Color>(new Color(0.502f, 0.216f, 0.216f), new Color(0.263f, 0.349f, 0.699f), new Color(0.722f, 0.722f, 0.722f)),
 				new Tuple<Color, Color, Color>(new Color(0.886f, 0.843f, 0.647f), new Color(0.561f, 0.478f, 0.353f), new Color(0.463f, 0.380f, 0.271f)),
 				new Tuple<Color, Color, Color>(new Color(0.412f, 0.643f, 0.565f), new Color(0.345f, 0.490f, 0.467f), new Color(0.337f, 0.353f, 0.376f)),
 				new Tuple<Color, Color, Color>(new Color(0.788f, 0.804f, 0.753f), new Color(0.686f, 0.698f, 0.631f), new Color(0.490f, 0.518f, 0.427f)),

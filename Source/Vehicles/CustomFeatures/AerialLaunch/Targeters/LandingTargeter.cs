@@ -77,8 +77,7 @@ namespace Vehicles
 			VehiclePawn vehicleAtPos = MapHelper.VehicleInPosition(vehicle, Current.Game.CurrentMap, cell, landingRotation);
 			bool invalidPosition = !localTargetInfo.IsValid || (vehicleAtPos != vehicle && MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation)) || (targetValidator != null && !targetValidator(localTargetInfo));
 			bool restricted = false;
-			vehicle.Rotation = landingRotation;
-			if (vehicle.CompVehicleLauncher.launchProtocol.LandingProperties?.restriction is LaunchRestriction launchRestriction)
+			if (vehicle.CompVehicleLauncher.launchProtocol.GetProperties(LaunchProtocol.LaunchType.Landing, landingRotation)?.restriction is LaunchRestriction launchRestriction)
 			{
 				if (restrictionCached.startingCell != cell || restrictionCached.rotation != landingRotation)
 				{
