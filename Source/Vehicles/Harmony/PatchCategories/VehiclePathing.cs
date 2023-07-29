@@ -54,6 +54,8 @@ namespace Vehicles
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(SetPositionAndUpdateVehicleRegions)));
 			VehicleHarmony.Patch(original: AccessTools.PropertySetter(typeof(Thing), nameof(Thing.Rotation)),
+				prefix: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(SetRotationAndUpdateVehicleRegionsClipping)),
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(SetRotationAndUpdateVehicleRegions)));
 			
@@ -412,6 +414,18 @@ namespace Vehicles
 			{
 				PathingHelper.ThingAffectingRegionsOrientationChanged(__instance, __instance.Map);
 			}
+		}
+
+		public static bool SetRotationAndUpdateVehicleRegionsClipping(Thing __instance, Rot4 value)
+		{
+			if (__instance is VehiclePawn vehicle && vehicle.Spawned)
+			{
+				if (!vehicle.OccupiedRectShifted(IntVec2.Zero, value).InBounds(vehicle.Map))
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 
 		public static void SetRotationAndUpdateVehicleRegions(Thing __instance)

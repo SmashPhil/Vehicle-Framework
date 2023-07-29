@@ -20,8 +20,12 @@ namespace Vehicles
 		public IntVec2 width = IntVec2.Zero;
 		public IntVec2 height = IntVec2.Zero;
 
-		public SimpleDictionary<ThingCategory, float> categories;
-		
+		public SimpleDictionary<ThingCategory, float> thingCategories;
+		public SimpleDictionary<ThingCategoryDef, float> thingCategoryDefs;
+		public float fillPercent = 0.2f;
+
+		private bool ShouldCheckValidators => !thingCategories.NullOrEmpty() || !thingCategoryDefs.NullOrEmpty() || fillPercent > 0;
+
 		private CellRect RunwayRect(IntVec3 position, Rot4 rot)
 		{
 			IntVec2 adjWidth = width;
@@ -45,7 +49,11 @@ namespace Vehicles
 		public override bool CanStartProtocol(VehiclePawn vehicle, Map map, IntVec3 position, Rot4 rot)
 		{
 			//Must null check map for immediately spawned & selected vehicles
-			if (categories.NullOrEmpty() && map is null)
+			if (map == null)
+			{
+				return true;
+			}
+			if (!ShouldCheckValidators)
 			{
 				return true;
 			}
@@ -62,9 +70,13 @@ namespace Vehicles
 
 		public override void DrawRestrictionsTargeter(VehiclePawn vehicle, Map map, IntVec3 position, Rot4 rot)
 		{
+			if (map == null)
+			{
+				return;
+			}
 			CellRect cellRect = RunwayRect(position, rot);
 			//Must null check map for immediately spawned & selected vehicles
-			if (!categories.NullOrEmpty() && map != null)
+			if (ShouldCheckValidators)
 			{
 				invalidCells.Clear();
 				foreach (IntVec3 cell in cellRect)
@@ -85,7 +97,27 @@ namespace Vehicles
 
 		private bool InvalidFor(Thing thing)
 		{
-			return categories.ContainsKey(thing.def.category) && thing.def.fillPercent >= categories[thing.def.category];
+			bool invalid = false;
+
+			if (fillPercent >= 0)
+			{
+				invalid |= thing.def.fillPercent >= fillPercent;
+			}
+			if (!thingCategories.NullOrEmpty() && thingCategories.ContainsKey(thing.def.category))
+			{
+				invalid |= thing.def.fillPercent >= thingCategories[thing.def.category];
+			}
+			if (!thingCategoryDefs.NullOrEmpty() && !thing.def.thingCategories.NullOrEmpty())
+			{
+				foreach (ThingCategoryDef thingCategoryDef in thing.def.thingCategories)
+				{
+					if (thingCategoryDefs.ContainsKey(thingCategoryDef))
+					{
+						invalid |= thing.def.fillPercent >= thingCategoryDefs[thingCategoryDef];
+					}
+				}
+			}
+			return invalid;
 		}
 	}
 }
