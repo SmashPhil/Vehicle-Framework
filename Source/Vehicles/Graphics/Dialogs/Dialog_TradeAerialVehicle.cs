@@ -42,6 +42,7 @@ namespace Vehicles
 		private static readonly Texture2D GiftModeIcon = ContentFinder<Texture2D>.Get("UI/Buttons/GiftMode", true);
 		private static readonly Texture2D TradeModeIcon = ContentFinder<Texture2D>.Get("UI/Buttons/TradeMode", true);
 
+		[Obsolete("Use Dialog_Trade instead", error: true)]
 		public Dialog_TradeAerialVehicle(AerialVehicleInFlight aerialVehicle, Pawn playerNegotiator, ITrader trader, bool giftsOnly = false) : base(playerNegotiator, trader, giftsOnly)
 		{
 			this.aerialVehicle = aerialVehicle;

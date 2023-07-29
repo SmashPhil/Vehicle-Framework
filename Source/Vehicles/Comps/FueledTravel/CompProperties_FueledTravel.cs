@@ -31,7 +31,7 @@ namespace Vehicles
 
 		[PostToSettings(Label = "VF_VehicleAutoRefuelPercent", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(Increment = 0.1f, MinValue = 0, MaxValue = 1)]
-		public float autoRefuelPercent = 0.3f;
+		public float autoRefuelPercent = 1;
 		
 		public FuelConsumptionCondition fuelConsumptionCondition = FuelConsumptionCondition.Drafted | FuelConsumptionCondition.Moving | FuelConsumptionCondition.Flying;
 

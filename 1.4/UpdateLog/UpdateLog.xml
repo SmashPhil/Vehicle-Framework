@@ -22,11 +22,15 @@
 
 - Fixed bug with turret recaching status not triggering on pawn death.
 
-- Compatibility fix for TraderGen
+- Compatibility fix for TraderGen.
 
-- Fixed bug where turrets would rotate incorrectly in UI at UIScale > 1.
+- Compatibility fix for RimHUD.
+
+- Fixed bug where turrets would rotate incorrectly in UI at UIScale &gt; 1.
 
 - Fixed bug where reserving handlers would get cleared immediately, allowing multiple pawns to enter the same role beyond the limit.
+
+- Fixed bug where aerial vehicles would ignore situations that should prevent the vehicle from launching on the world map.
 &lt;title&gt;Performance Improvements&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
@@ -36,7 +40,11 @@
 
 - Added toggle for patterns and skins displayed.
 
-- Added >M options for loading cargo into vehicles.
+- Added &gt;M options for loading cargo into vehicles.
+
+- Default auto-refuel percentage changed from 30% to 100%, meaning all vehicles will request to be refueled to full capacity if they are currently undrafted.
+
+- Added extra info when trading with AerialVehicle at settlement.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
   <!--Static parameterless method to execute when update log is executed-->

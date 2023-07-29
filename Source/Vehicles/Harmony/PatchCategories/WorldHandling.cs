@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
+using UnityEngine;
 using HarmonyLib;
 using Verse;
 using Verse.Sound;
@@ -42,6 +44,12 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MainButtonWorker_ToggleWorld), nameof(MainButtonWorker_ToggleWorld.Activate)),
 				prefix: new HarmonyMethod(typeof(WorldHandling),
 				nameof(ForcedTargetingDontToggleWorld)));
+			VehicleHarmony.Patch(original: AccessTools.Constructor(typeof(Dialog_Trade), parameters: new Type[] { typeof(Pawn), typeof(ITrader), typeof(bool) }),
+				postfix: new HarmonyMethod(typeof(WorldHandling),
+				nameof(SetupPlayerAerialVehicleVariables)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Dialog_Trade), nameof(Dialog_Trade.DoWindowContents)),
+				prefix: new HarmonyMethod(typeof(WorldHandling),
+				nameof(DrawAerialVehicleInfo)));
 
 			/* World Targeter Event Handling */
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldTargeter), nameof(WorldTargeter.TargeterUpdate)),
@@ -257,6 +265,16 @@ namespace Vehicles
 				return false;
 			}
 			return true;
+		}
+
+		public static void SetupPlayerAerialVehicleVariables(ref List<Thing> ___playerCaravanAllPawnsAndItems)
+		{
+			AerialVehicleTraderHelper.SetupAerialVehicleTrade(ref ___playerCaravanAllPawnsAndItems);
+		}
+
+		public static void DrawAerialVehicleInfo(ref Rect inRect)
+		{
+			AerialVehicleTraderHelper.DrawAerialVehicleInfo(ref inRect);
 		}
 
 		/* -------------------- Launch Targeter -------------------- */

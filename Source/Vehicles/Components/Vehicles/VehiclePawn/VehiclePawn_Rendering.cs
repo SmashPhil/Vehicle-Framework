@@ -834,6 +834,7 @@ namespace Vehicles
 			float usedWidth = 0;
 			if (Nameable)
 			{
+				rect.x -= rect.width;
 				usedWidth += rect.width;
 				{
 					TooltipHandler.TipRegionByKey(rect, "VF_RenameVehicleTooltip");
@@ -842,10 +843,10 @@ namespace Vehicles
 						Rename();
 					}
 				}
-				rect.x -= rect.width;
 			}
 			if (VehicleMod.settings.main.useCustomShaders && VehicleGraphic.Shader.SupportsRGBMaskTex())
 			{
+				rect.x -= rect.width;
 				usedWidth += rect.width;
 				{
 					TooltipHandler.TipRegionByKey(rect, "VF_RecolorTooltip");
@@ -854,10 +855,10 @@ namespace Vehicles
 						ChangeColor();
 					}
 				}
-				rect.x -= rect.width;
 			}
 			if (Prefs.DevMode)
 			{
+				rect.x -= rect.width;
 				usedWidth += rect.width;
 				{
 					if (Widgets.ButtonImage(rect, VehicleTex.Settings))
@@ -871,9 +872,12 @@ namespace Vehicles
 						{
 							Find.WindowStack.Add(new FloatMenu(options));
 						}
+						else
+						{
+							Messages.Message($"{this} doesn't have any configuration options available.", MessageTypeDefOf.RejectInput, historical: false);
+						}
 					}
 				}
-				rect.x -= rect.width;
 			}
 			return usedWidth;
 		}

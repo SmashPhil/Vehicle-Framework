@@ -28,7 +28,7 @@ namespace Vehicles
 				Settlement settlement = Find.WorldObjects.SettlementAt(aerialVehicle.Tile);
 				if (settlement != null && settlement.CanTradeNow)
 				{
-					Find.WindowStack.Add(new Dialog_TradeAerialVehicle(aerialVehicle, bestNegotiator, settlement, false));
+					Find.WindowStack.Add(new Dialog_Trade(bestNegotiator, settlement, false));
 					PawnRelationUtility.Notify_PawnsSeenByPlayer_Letter_Send(settlement.Goods.OfType<Pawn>(), "LetterRelatedPawnsTradingWithSettlement".Translate(Faction.OfPlayer.def.pawnsPlural), LetterDefOf.NeutralEvent, false, true);
 				}
 			};

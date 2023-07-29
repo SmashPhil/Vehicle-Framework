@@ -146,27 +146,33 @@ namespace Vehicles
 				yield break;
 			}
 			var command = launchProtocol.LaunchCommand;
-			if (!launchProtocol.CanLaunchNow)
+			if (!CanLaunchWithCargoCapacity(out string disableReason))
 			{
-				command.Disable(launchProtocol.FailLaunchMessage);
+				command.Disable(disableReason);
 			}
-			if (FlightSpeed <= 0)
+			yield return command;
+		}
+
+		public bool CanLaunchWithCargoCapacity(out string disableReason)
+		{
+			disableReason = null;
+			if (Vehicle.Spawned)
 			{
-				command.Disable("VF_NoFlightSpeed".Translate());
+				if (Vehicle.vPather.Moving)
+				{
+					disableReason = "VF_CannotLaunchWhileMoving".Translate(Vehicle.LabelShort);
+				}
+				else if (Roofed)
+				{
+					disableReason = "CommandLaunchGroupFailUnderRoof".Translate();
+				}
 			}
-			if (Roofed)
-			{
-				command.Disable("CommandLaunchGroupFailUnderRoof".Translate());
-			}
-			if (Vehicle.vPather.Moving)
-			{
-				command.Disable("VF_CannotLaunchWhileMoving".Translate(Vehicle.LabelShort));
-			}
-			if (SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(VehicleDef), "vehicleMovementPermissions", Vehicle.VehicleDef.vehicleMovementPermissions) > VehiclePermissions.NotAllowed)
+
+			if (SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(VehicleDef), nameof(VehicleDef.vehicleMovementPermissions), Vehicle.VehicleDef.vehicleMovementPermissions) > VehiclePermissions.NotAllowed)
 			{
 				if (!Vehicle.CanMoveFinal || Vehicle.Angle != 0)
 				{
-					command.Disable("VF_CannotLaunchImmobile".Translate(Vehicle.LabelShort));
+					disableReason = "VF_CannotLaunchImmobile".Translate(Vehicle.LabelShort);
 				}
 			}
 			else
@@ -174,18 +180,29 @@ namespace Vehicles
 				float capacity = Vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
 				if (MassUtility.InventoryMass(Vehicle) > capacity)
 				{
-					command.Disable("VF_CannotLaunchOverEncumbered".Translate(Vehicle.LabelShort));
+					disableReason = "VF_CannotLaunchOverEncumbered".Translate(Vehicle.LabelShort);
 				}
 			}
+
 			if (!VehicleMod.settings.debug.debugDraftAnyVehicle && !Vehicle.CanMoveWithOperators)
 			{
-				command.Disable("Vehicles_NotEnoughToOperate".Translate());
+				disableReason = "Vehicles_NotEnoughToOperate".Translate();
 			}
-			if (Vehicle.CompFueledTravel != null && Vehicle.CompFueledTravel.EmptyTank)
+			else if (Vehicle.CompFueledTravel != null && Vehicle.CompFueledTravel.EmptyTank)
 			{
-				command.Disable("VehicleLaunchOutOfFuel".Translate());
+				disableReason = "VehicleLaunchOutOfFuel".Translate();
 			}
-			yield return command;
+			else if(FlightSpeed <= 0)
+			{
+				disableReason = "VF_NoFlightSpeed".Translate();
+			}
+
+			if (!launchProtocol.CanLaunchNow)
+			{
+				disableReason = launchProtocol.FailLaunchMessage;
+			}
+
+			return disableReason.NullOrEmpty();
 		}
 
 		public override string CompInspectStringExtra()

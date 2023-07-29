@@ -404,6 +404,7 @@
     <Compile Include="Graphics\ITab\WITab_AerialVehicle_Health.cs" />
     <Compile Include="Graphics\ITab\WITab_AerialVehicle_Items.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_CombatExtended.cs" />
+    <Compile Include="Harmony\ConditionalPatches\Compatibility_RimHUD.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_VEFishing.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_SOS2.cs" />
     <Compile Include="Harmony\ConditionalPatches\ConditionalVehiclePatch.cs" />
@@ -692,6 +693,7 @@
     <Compile Include="Utility\Helpers\AchievementsHelper.cs" />
     <Compile Include="Utility\Helpers\AerialVehicleAbandonOrBanishHelper.cs" />
     <Compile Include="Utility\Helpers\AerialVehicleTabHelper.cs" />
+    <Compile Include="Utility\Helpers\AerialVehicleTraderHelper.cs" />
     <Compile Include="Utility\Helpers\CaravanHelper.cs" />
     <Compile Include="Utility\Helpers\CaravanInfoHelper.cs" />
     <Compile Include="Utility\Helpers\DamageHelper.cs" />

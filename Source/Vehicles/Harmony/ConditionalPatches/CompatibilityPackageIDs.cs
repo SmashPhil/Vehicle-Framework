@@ -16,5 +16,7 @@ namespace Vehicles
 
 		public const string VE_Fishing = "VanillaExpanded.VCEF";
 		public const string DualWield = "Roolo.DualWield";
+
+		public const string RimHUD = "Jaxe.RimHUD";
 	}
 }

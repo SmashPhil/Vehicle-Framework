@@ -20,8 +20,6 @@ namespace Vehicles
         public override bool Arrived(int tile)
         {
             base.Arrived(tile);
-            AerialVehicleInFlight aerialVehicleInFlight = vehicle.GetAerialVehicle();
-
             if (AerialVehicleArrivalAction_Trade.GetValidNegotiator(vehicle, settlement) == null)
 			{
                 return false;
@@ -34,7 +32,7 @@ namespace Vehicles
                 return false;
 			}
 
-            Find.WindowStack.Add(new Dialog_TradeAerialVehicle(aerialVehicleInFlight, negotiator, settlement, giftsOnly: true));
+            Find.WindowStack.Add(new Dialog_Trade(negotiator, settlement, giftsOnly: true));
             PawnRelationUtility.Notify_PawnsSeenByPlayer_Letter_Send(settlement.Goods.OfType<Pawn>(),
                 "LetterRelatedPawnsTradingWithSettlement".Translate(Faction.OfPlayer.def.pawnsPlural), LetterDefOf.NeutralEvent, false, true);
 
