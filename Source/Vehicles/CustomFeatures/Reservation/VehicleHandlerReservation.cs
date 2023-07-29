@@ -102,12 +102,12 @@ namespace Vehicles
 			List<Pawn> actors = new List<Pawn>(claimants.Keys);
 			foreach (Pawn actor in actors)
 			{
-				Job matchedJob = null;
+				Job matchedJob = actor.CurJob;
 				if (actor.CurJob?.def != jobDef)
 				{
 					matchedJob = actor.jobs.jobQueue?.FirstOrDefault(j => j.job.def == jobDef)?.job;
 				}
-				if (!actor.Spawned || actor.InMentalState || actor.Downed || actor.Dead || matchedJob?.def != jobDef || matchedJob?.targetA != targetA || vehicle.vPather.Moving)
+				if (!actor.Spawned || actor.InMentalState || actor.Downed || actor.Dead || matchedJob?.def != jobDef || matchedJob?.targetA != targetA)
 				{
 					if (--handlerClaimants[claimants[actor]] <= 0)
 					{

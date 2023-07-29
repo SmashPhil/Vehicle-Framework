@@ -8,11 +8,35 @@
   <description>&lt;title&gt;Recent News&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed bug where vehicles at corner of maps can clip out of bounds and be deleted.
 
+- Fixed bug where rotating while targeting landing would change the rotation of the vehicle actively.
+
+- Fixed bug where vehicle would pull incorrect landing properties while targeting.
+
+- Fixed bug where patterns would copy from incorrect rotation for material generation.
+
+- Fixed bug where aerial vehicles were unable to offer gifts.
+
+- Fixed bug where pawns would not transfer to inventory upon death inside vehicles.
+
+- Fixed bug with turret recaching status not triggering on pawn death.
+
+- Compatibility fix for TraderGen
+
+- Fixed bug where turrets would rotate incorrectly in UI at UIScale > 1.
+
+- Fixed bug where reserving handlers would get cleared immediately, allowing multiple pawns to enter the same role beyond the limit.
 &lt;title&gt;Performance Improvements&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Added additional configuration options for runway restrictions.
 
+- Changed default color palettes.
+
+- Added toggle for patterns and skins displayed.
+
+- Added >M options for loading cargo into vehicles.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
   <!--Static parameterless method to execute when update log is executed-->

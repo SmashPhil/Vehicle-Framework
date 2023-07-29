@@ -58,20 +58,6 @@ namespace Vehicles
 				nameof(SetRotationAndUpdateVehicleRegionsClipping)),
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(SetRotationAndUpdateVehicleRegions)));
-			
-
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(RegionDirtyer), "Notify_ThingAffectingRegionsSpawned"),
-			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
-			//	nameof(Notify_ThingAffectingVehicleRegionsSpawned)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(RegionDirtyer), "Notify_ThingAffectingRegionsDespawned"),
-			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
-			//	nameof(Notify_ThingAffectingVehicleRegionsDespawned)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(RegionListersUpdater), nameof(RegionListersUpdater.RegisterInRegions)),
-			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
-			//	nameof(RegisterInVehicleRegions)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(RegionListersUpdater), nameof(RegionListersUpdater.DeregisterInRegions)),
-			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
-			//	nameof(DeregisterInVehicleRegions)));
 		}
 
 		/// <summary>
@@ -80,7 +66,6 @@ namespace Vehicles
 		/// <param name="clickCell"></param>
 		/// <param name="pawn"></param>
 		/// <param name="__result"></param>
-		/// <returns></returns>
 		public static bool GotoLocationVehicles(IntVec3 clickCell, Pawn pawn, ref FloatMenuOption __result)
 		{
 			if (pawn is VehiclePawn vehicle)
