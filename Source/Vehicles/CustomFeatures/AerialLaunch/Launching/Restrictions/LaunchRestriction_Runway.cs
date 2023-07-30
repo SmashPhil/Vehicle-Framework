@@ -60,7 +60,7 @@ namespace Vehicles
 			CellRect cellRect = RunwayRect(position, rot);
 			foreach (IntVec3 cell in cellRect)
 			{
-				if (!cell.InBounds(map) || map.thingGrid.ThingsListAtFast(cell).Any(thing => InvalidFor(thing)))
+				if (!cell.InBounds(map) || map.thingGrid.ThingsListAtFast(cell).Any(thing => thing != vehicle && InvalidFor(thing)))
 				{
 					return false;
 				}
@@ -81,7 +81,7 @@ namespace Vehicles
 				invalidCells.Clear();
 				foreach (IntVec3 cell in cellRect)
 				{
-					if (cell.InBounds(map) && map.thingGrid.ThingsListAtFast(cell).Any(thing => InvalidFor(thing)))
+					if (cell.InBounds(map) && map.thingGrid.ThingsListAtFast(cell).Any(thing => thing != vehicle && InvalidFor(thing)))
 					{
 						invalidCells.Add(cell);
 					}
