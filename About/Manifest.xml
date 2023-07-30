@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Manifest>
     <identifier>smashphil.vehicles.rimworld</identifier>
-    <version>1.4.1225</version>
+    <version>1.4.1331</version>
     <dependencies/>
     <loadAfter>
 		<li>brrainz.harmony</li>

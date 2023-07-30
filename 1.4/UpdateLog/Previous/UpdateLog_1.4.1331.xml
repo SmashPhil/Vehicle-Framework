@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <!--Can utilize Version.txt file placed in mod's root directory-->
+  <currentVersion>1.4.1331</currentVersion>
+  <!--Startup,GameInit,LoadedGame,NewGame-->
+  <updateOn>Startup</updateOn>
+  <!--Full description shown in update page-->
+  <description>&lt;title&gt;Recent News&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+I've created a community managed google spreadsheet for translations, so if you want to help fill out one of the languages please DM me on discord and I can add you. Feel free to join even if the language you know is already filled out, I may need to edit or add entries in the future.  Thanks! :)
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed bug where vehicles at corner of maps can clip out of bounds and be deleted.
+
+- Fixed bug where rotating while targeting landing would change the rotation of the vehicle actively.
+
+- Fixed bug where vehicle would pull incorrect landing properties while targeting.
+
+- Fixed bug where patterns would copy from incorrect rotation for material generation.
+
+- Fixed bug where aerial vehicles were unable to offer gifts.
+
+- Fixed bug where pawns would not transfer to inventory upon death inside vehicles.
+
+- Fixed bug with turret recaching status not triggering on pawn death.
+
+- Compatibility fix for TraderGen.
+
+- Compatibility fix for RimHUD.
+
+- Fixed bug where turrets would rotate incorrectly in UI at UIScale &gt; 1.
+
+- Fixed bug where reserving handlers would get cleared immediately, allowing multiple pawns to enter the same role beyond the limit.
+
+- Fixed bug where aerial vehicles would ignore situations that should prevent the vehicle from launching on the world map.
+
+- Fixed bug where loading save file that saved while turret was shooting throws an exception, causing the vehicle to not load in.
+
+- Fixed bug where vehicles could still be drafted with out of fuel.
+&lt;title&gt;Performance Improvements&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+
+&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Added additional configuration options for runway restrictions.
+
+- Changed default color palettes.
+
+- Added toggle for patterns and skins displayed.
+
+- Added &gt;M options for loading cargo into vehicles.
+
+- Default auto-refuel percentage changed from 30% to 100%, meaning all vehicles will request to be refueled to full capacity if they are currently undrafted.
+
+- Added extra info when trading with AerialVehicle at settlement.
+
+- Cleaned up all translation files and added spreadsheet for tracking all translations.
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+Please report any issues you find &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
+  <!--Static parameterless method to execute when update log is executed-->
+  <actionOnUpdate></actionOnUpdate>
+  <!--Show update log on next startup.-->
+  <update>false</update>
+  <!--Testing mode prevents the update from saving over the UpdateLog file-->
+  <testing>false</testing>
+  <!--Icon bar shown to the right of the mod's name-->
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon</icon>
+      <url>steam://url/CommunityFilePage/2356577528</url>
+    </li>
+  </rightIconBar>
+  <!--Icon bar shown to the left of the mod's name-->
+  <leftIconBar>
+    <li>
+      <name>Patreon</name>
+      <icon>patreonIcon</icon>
+      <url>https://www.patreon.com/smashphil</url>
+    </li>
+    <li>
+      <name>Cursed Crew</name>
+      <icon>cursedCrewIcon</icon>
+      <url>https://discord.gg/NNe2VxAU7Z</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>
