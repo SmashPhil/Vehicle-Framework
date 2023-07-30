@@ -51,7 +51,7 @@ namespace Vehicles
 		{
 		}
 
-		public virtual bool CanStartEngine(out string failReason)
+		public virtual bool CanDraft(out string failReason)
 		{
 			failReason = string.Empty;
 			return true;

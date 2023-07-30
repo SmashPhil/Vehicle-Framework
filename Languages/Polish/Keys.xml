@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData> 
+  <VehicleFramework>Vehicle Framework</VehicleFramework>
+  <VF_Vehicles>Vehicles</VF_Vehicles>
+  <VF_LoadCargo>Load Cargo</VF_LoadCargo>
+  <VF_DisembarkAllPawns>Unload All Pawns</VF_DisembarkAllPawns>
+  <VF_DisembarkSinglePawn>Unload {0}</VF_DisembarkSinglePawn>
+  <VF_DisembarkNoExit>Unable to exit vehicle. No valid cells to exit onto.</VF_DisembarkNoExit>
+  <VF_StopVehicle>Stop</VF_StopVehicle>
+  <VF_UndraftVehicle>Turn Off</VF_UndraftVehicle>
+  <VF_DraftVehicleDesc>Drafts vehicle allowing it to move. This will consume fuel if applicable even if the vehicle is idle.</VF_DraftVehicleDesc>
+  <VF_StopVehicleDesc>Stop the vehicle immediately.</VF_StopVehicleDesc>
+  <VF_UndraftVehicleDesc>Undrafts vehicle, disabling the consumption of fuel and disallowing movement.</VF_UndraftVehicleDesc>
+  <VF_ShowAllItemsOnMap>Show All Items On Map</VF_ShowAllItemsOnMap>
+  <VF_ResetColorPalettes>Reset All Palettes</VF_ResetColorPalettes>
+  <VF_ResetColorPalettesConfirmation>Are you sure you want to reset all saved palettes back to default settings? This action cannot be undone.</VF_ResetColorPalettesConfirmation>
+  <VF_RotateVehicleRendering>Rotate vehicle</VF_RotateVehicleRendering>
+  <VF_SaveColorPalette>Save Palette</VF_SaveColorPalette>
+  <VF_ColorOne>ColorOne</VF_ColorOne>
+  <VF_ColorTwo>ColorTwo</VF_ColorTwo>
+  <VF_ColorThree>ColorThree</VF_ColorThree>
+  <VF_ColorPickerHex>Hex</VF_ColorPickerHex>
+  <VF_JobSettings>Job Settings</VF_JobSettings>
+  <VF_VehicleAgeReadout>Produced: {0}</VF_VehicleAgeReadout>
+  <VF_StatsReport_CargoWeight>Cargo: {0}</VF_StatsReport_CargoWeight>
+  <VF_RenameVehicleTooltip>Assign or clear name.</VF_RenameVehicleTooltip>
+  <VF_RecolorTooltip>Change colors or pattern.</VF_RecolorTooltip>
+  <VF_DoubleClickShuttleTarget>Click to Confirm Destination</VF_DoubleClickShuttleTarget>
+  <VF_SwapColors>Cycle colors between each other.\nColorOne -&gt; ColorTwo -&gt; ColorThree</VF_SwapColors>
+  <VF_StartFishing>Fish</VF_StartFishing>
+  <VF_StartFishingDesc>Gather fish. Depth of water affects fishing chances.</VF_StartFishingDesc>
+  <VF_ExplosiveComponent>Explosive</VF_ExplosiveComponent>
+  <VF_EditPawnOverlayRendererTooltip>Edit Pawn Overlay</VF_EditPawnOverlayRendererTooltip>
+  <VF_VehicleRestriction_Stationary>Cannot fire while moving.</VF_VehicleRestriction_Stationary>
+  <VF_Patterns>Patterns</VF_Patterns>
+  <VF_Skins>Skins</VF_Skins>
+  <VF_PatternZoom>Zoom</VF_PatternZoom>
+  <VF_PatternZoomTooltip>Scale the pattern up or down.</VF_PatternZoomTooltip>
+  <VF_PatternDisplacementX>Displacement X</VF_PatternDisplacementX>
+  <VF_PatternDisplacementY>Displacement Y</VF_PatternDisplacementY>
+  <VF_Electric>Electric</VF_Electric>
+  <VF_ElectricFlick>Charge Battery</VF_ElectricFlick>
+  <VF_ElectricFlickDesc>Connect to PowerNet below vehicle.</VF_ElectricFlickDesc>
+  <VF_OutOfFuel>Cannot Move. Out of Fuel.</VF_OutOfFuel>
+  <VF_Assign>Assign</VF_Assign>
+  <VF_Assigned>Assigned</VF_Assigned>
+  <VF_Colonists>Colonists</VF_Colonists>
+  <VF_ClearSeats>Clear</VF_ClearSeats>
+  <VF_RemoveFromRole>Remove</VF_RemoveFromRole>
+  <VF_AddToRole>Add</VF_AddToRole>
+  <VF_RoutePlannerButtonTip>Click to enter the planning mode for Vehicles where you can select specific vehicles you own, and plan your journey. Pathing is adjusted based on the vehicles selected.</VF_RoutePlannerButtonTip>
+  <VF_SelectVehiclesForPlanner>Select Vehicles</VF_SelectVehiclesForPlanner>
+  <VF_StartVehicleRoutePlanner>Start Route</VF_StartVehicleRoutePlanner>
+  <VF_OkName>Confirm Name</VF_OkName>
+  <VF_RemoveName>Remove Name</VF_RemoveName>
+  <VF_NoFlightSpeed>Unable to launch with Flight Speed = 0</VF_NoFlightSpeed>
+  <VF_CannotLaunchWhileMoving>Cannot launch while {0} is moving.</VF_CannotLaunchWhileMoving>
+  <VF_CannotLaunchImmobile>{0} cannot launch without being able to move.</VF_CannotLaunchImmobile>
+  <VF_CannotLaunchOverEncumbered>{0} cannot launch while over-encumbered.</VF_CannotLaunchOverEncumbered>
+  <VF_TabCargo>Cargo</VF_TabCargo>
+  <VF_TabPassengers>Pawns</VF_TabPassengers>
+  <VF_TabComponents>Health</VF_TabComponents>
+  <VF_TabUpgrades>Customize</VF_TabUpgrades>
+  <VF_ComponentHealth>Health</VF_ComponentHealth>
+  <VF_ComponentEfficiency>Efficiency</VF_ComponentEfficiency>
+  <VF_ComponentArmor>Armor</VF_ComponentArmor>
+  <VF_NoFuelReturnTrip>No Return Trip</VF_NoFuelReturnTrip>
+  <VF_NotEnoughFuel>Out Of Range</VF_NotEnoughFuel>
+  <VF_Cargo>Cargo</VF_Cargo>
+  <VF_Properties>Properties</VF_Properties>
+  <VF_LauncherProperties>Launch Properties</VF_LauncherProperties>
+  <VF_FueledTravelPropertes>Fuel</VF_FueledTravelPropertes>
+  <VF_JobLimitations>Max Workers per Job</VF_JobLimitations>
+  <VF_MustSelectColorPalette>Must have a palette selected to save over.</VF_MustSelectColorPalette>
+  <VF_VehicleUnableToMove>{0_labelShort} is unable to move.</VF_VehicleUnableToMove>
+  <VF_HandlerNotEnoughRoom>Failed to add {0} to {1}. No more space available.</VF_HandlerNotEnoughRoom>
+  <VF_NotEnoughToOperate>Needs more crew in order to operate.</VF_NotEnoughToOperate>
+  <VF_OutOfFuel>Cannot draft. Vehicle needs more fuel.</VF_OutOfFuel>
+  <VF_UpgradeInProgress>Cannot draft while Vehicle is upgrading.</VF_UpgradeInProgress>
+  <VF_NotEnoughCrew>Not enough colonists in {0} to operate {1}.</VF_NotEnoughCrew>
+  <VF_CannotFit>Not enough space.</VF_CannotFit>
+  <VF_NoPathForVehicle>Cannot path here.</VF_NoPathForVehicle>
+  <VF_IncapableStatusForRole>{0} is incapable of fulfilling this role.</VF_IncapableStatusForRole>
+  <VF_InvalidName>Name invalid for Vehicle.</VF_InvalidName>
+  <VF_OutOfFood>No food in {0} with Pawns onboard.</VF_OutOfFood>
+  <VF_NoAmmoLoadedTurret>No ammo loaded.</VF_NoAmmoLoadedTurret>
+  <VF_NoAmmoAvailable>No ammo available in inventory.</VF_NoAmmoAvailable>
+  <VF_VehicleCaravanMentalBreakMovementRole>{0} is no longer able to operate their role for the vehicle caravan.</VF_VehicleCaravanMentalBreakMovementRole>
+  <VF_PawnBoardedFormingCaravan>{0} has boarded the {1} and is ready for departure.</VF_PawnBoardedFormingCaravan>
+  <VF_CantMoveDocked>Not enough pawns to set sail.</VF_CantMoveDocked>
+  <VF_CantAssignVehicle>Not enough pawns for {0}.</VF_CantAssignVehicle>
+  <VF_AssignFailure>Failed to assign seats. {0}</VF_AssignFailure>
+  <VF_PackingSpotNotFound>Packing Spot was not found for Vehicle caravan. It is recommended you place a Packing Spot from Misc.</VF_PackingSpotNotFound>
+  <VF_ForceLeaveCaravan>Force to Leave</VF_ForceLeaveCaravan>
+  <VF_ForceLeaveCaravanDesc>Force Vehicle Caravan to leave the map. Will skip loading whatever items are not currently onboard</VF_ForceLeaveCaravanDesc>
+  <VF_ForceLeaveConfirmation>Crew is preparing to leave.</VF_ForceLeaveConfirmation>
+  <VF_CaravanTerminatedNoVehicles>Caravan process has been terminated. No vehicles remain.</VF_CaravanTerminatedNoVehicles>
+  <VF_LandAndSeaRoutePlannerRestriction>Cannot plan route for both Sea and Land vehicles. Paths will not register.</VF_LandAndSeaRoutePlannerRestriction>
+  <VF_LeaveVehicleBehindCaravan>Are you sure you want to leave Vehicles behind? Vehicles left behind: {0}</VF_LeaveVehicleBehindCaravan>
+  <VF_MustAssignEnoughToVehicle>Must assign enough colonists to man vehicle.</VF_MustAssignEnoughToVehicle>
+  <VF_AerialVehicleArrived>{0} has arrived at their destination.</VF_AerialVehicleArrived>
+  <VF_AerialVehicleLeft>{0} has left the map.</VF_AerialVehicleLeft>
+  <VF_AerialVehicleLaunchNotValid>Unable to launch, conditions are not suitable.</VF_AerialVehicleLaunchNotValid>
+  <VF_LaunchOutOfFuel>Cannot launch. Out of Fuel.</VF_LaunchOutOfFuel>
+  <VF_FlightPathMaxNodes>Maximum nodes for {0}'s flight path has been reached.</VF_FlightPathMaxNodes>
+  <VF_MustTargetLanding>A landing destination must be chosen.</VF_MustTargetLanding>
+  <VF_IncidentCrashedSiteLabel_Crashing>{0} Crash Landed</VF_IncidentCrashedSiteLabel_Crashing>
+  <VF_IncidentCrashedSiteLabel_ShotDown>{1} Shot Down {0}</VF_IncidentCrashedSiteLabel_ShotDown>
+  <VF_IncidentReasonLister>\n\nReason:\n {0}</VF_IncidentReasonLister>
+  <VF_IncidentCrashedSite_Crashing>{0} has crashed.</VF_IncidentCrashedSite_Crashing>
+  <VF_IncidentCrashedSite_ShotDown>{0} has been shot down by {1}.</VF_IncidentCrashedSite_ShotDown>
+  <VF_IncidentCrashedSiteReason_OutOfFuel>Ran out of fuel</VF_IncidentCrashedSiteReason_OutOfFuel>
+  <VF_IncidentCrashedSiteReason_FlightControl>Lost all flight control</VF_IncidentCrashedSiteReason_FlightControl>
+  <VF_ReinforcementsArrivedLabel>Reinforcements</VF_ReinforcementsArrivedLabel>
+  <VF_ReinforcementsArrived>{0} has arrived with reinforcements to investigate the crash site.</VF_ReinforcementsArrived>
+  <VF_BoatSunk>Boat Sunk</VF_BoatSunk>
+  <VF_BoatSunkDesc>{0} has sunk to the depths of the ocean.</VF_BoatSunkDesc>
+  <VF_BoatSunkWithPawnsDesc>{0} has sunk to the depths of the ocean. &#xD;
+&#xD;
+It has taken the following pawns down with it:&#xD;
+{1}</VF_BoatSunkWithPawnsDesc>
+  <NotAllowed>Disabled</NotAllowed>
+  <DriverNeeded>Colonist Driven</DriverNeeded>
+  <NoDriverNeeded>AI Driven</NoDriverNeeded>
+  <Misc>Other</Misc>
+  <Transport>Transport</Transport>
+  <Trader>Trader</Trader>
+  <Combat>Combat</Combat>
+  <Hybrid>Hybrid</Hybrid>
+  <Manual>Manual</Manual>
+  <Opportunistic>Opportunistic</Opportunistic>
+  <Automatic>Automatic</Automatic>
+  <VF_Caravan_Dismounted>Dismounted</VF_Caravan_Dismounted>
+  <VF_Sailing>Sailing</VF_Sailing>
+  <VF_DockToCaravan>Items to Take</VF_DockToCaravan>
+  <VF_CommandDockShip>Dock</VF_CommandDockShip>
+  <VF_CommandDockShipDesc>Unload all passengers and enable trade with the Settlement of {0}.</VF_CommandDockShipDesc>
+  <VF_CommandDockShipDisembark>Dock and Disembark</VF_CommandDockShipDisembark>
+  <VF_CommandDockShipObjectDesc>Dock Boats and go on foot</VF_CommandDockShipObjectDesc>
+  <VF_CommandUndockShip>Board Vehicle</VF_CommandUndockShip>
+  <VF_CommandUndockShipDesc>Load all pawns and items into Boats</VF_CommandUndockShipDesc>
+  <VF_CommandAttackDockDisable>Cannot attack {0} while docked at their Settlement</VF_CommandAttackDockDisable>
+  <VF_CommandTradeDockDisable>Cannot trade with {0}. Must dock boat first</VF_CommandTradeDockDisable>
+  <VF_CaravanMustHaveEnoughSpaceOnShip>Not enough space on ships to house all pawns.</VF_CaravanMustHaveEnoughSpaceOnShip>
+  <VF_CaravanMustHaveEnoughPawnsToOperate>Not enough Pawns selected to set sail. Need {0}</VF_CaravanMustHaveEnoughPawnsToOperate>
+  <VF_CaravanMustHaveAtLeastOneVehicle>Must have at least 1 vehicle selected in order to choose a route.</VF_CaravanMustHaveAtLeastOneVehicle>
+  <VF_CommandFormVehicleCaravan>Form Vehicle Caravan</VF_CommandFormVehicleCaravan>
+  <VF_CommandFormVehicleCaravanDesc>Form caravan with vehicles included.</VF_CommandFormVehicleCaravanDesc>
+  <VF_CommandReformVehicleCaravan>Reform Vehicle Caravan</VF_CommandReformVehicleCaravan>
+  <VF_CommandReformVehicleCaravanDesc>Reform vehicle caravan with vehicles selected.</VF_CommandReformVehicleCaravanDesc>
+  <VF_RoutePlannerToggleVehicleDefs>VehicleDefs</VF_RoutePlannerToggleVehicleDefs>
+  <VF_RoutePlannerToggleVehicles>Vehicles</VF_RoutePlannerToggleVehicles>
+  <VF_ReloadVehicleTurret>Reload</VF_ReloadVehicleTurret>
+  <VF_AutoTargeting>AutoTarget: {0}</VF_AutoTargeting>
+  <VF_AutoTargetingDisabled>AutoTargeting is not allowed for this turret.</VF_AutoTargetingDisabled>
+  <VF_VehicleTurrets_NoAmmoToReload>No usable ammo.</VF_VehicleTurrets_NoAmmoToReload>
+  <VF_FormingCaravanStatus_RopingAnimals>Roping animals to vehicles.</VF_FormingCaravanStatus_RopingAnimals>
+  <VF_FormingCaravanStatus_RopingAnimals_Pause>Roping animals to vehicles. (waiting)</VF_FormingCaravanStatus_RopingAnimals_Pause>
+  <VF_FormingCaravanStatus_BoardVehicles>Boarding.</VF_FormingCaravanStatus_BoardVehicles>
+  <VF_FormingCaravanStatus_BoardVehicles_Pause>Boarding. (waiting)</VF_FormingCaravanStatus_BoardVehicles_Pause>
+  <VF_FormingCaravanStatus_Leaving_Vehicles>Leaving.</VF_FormingCaravanStatus_Leaving_Vehicles>
+  <VF_FormingCaravanStatus_Leaving_Vehicles_Pause>Leaving. (waiting)</VF_FormingCaravanStatus_Leaving_Vehicles_Pause>
+  <VF_MainSettings>Main</VF_MainSettings>
+  <VF_ListSearchText>Search...</VF_ListSearchText>
+  <VF_SettingsDisabledTooltip>Settings have been locked for this vehicle and cannot be modified.</VF_SettingsDisabledTooltip>
+  <VF_NonUpgradeableSettingsTooltip>This vehicle cannot be upgraded.</VF_NonUpgradeableSettingsTooltip>
+  <VF_RecolorDefaultMaskTooltip>Change default pattern</VF_RecolorDefaultMaskTooltip>
+  <VF_WorldMapGen>World/Map Generation</VF_WorldMapGen>
+  <VF_BeachGenMultiplier>Beach Size Multiplier</VF_BeachGenMultiplier>
+  <VF_BeachGenMultiplierTooltip>Increase the amount of water on the coastline.</VF_BeachGenMultiplierTooltip>
+  <VF_ForceSettlementCoast>Push Settlement to Coast</VF_ForceSettlementCoast>
+  <VF_ForceSettlementCoastTooltip>Push nearby faction settlements to the coast if within given radius</VF_ForceSettlementCoastTooltip>
+  <VF_EverySettlementToCoast>Every Settlement</VF_EverySettlementToCoast>
+  <VF_WorldTiles>tiles</VF_WorldTiles>
+  <VF_SettingsGeneral>General</VF_SettingsGeneral>
+  <VF_WillRequireRestart>This action requires a restart to take effect.</VF_WillRequireRestart>
+  <VF_ModifiableSettings>Modifiable Settings</VF_ModifiableSettings>
+  <VF_ModifiableSettingsTooltip>Toggle Modifiable Settings. Restarting with this disabled will bypass generation of modifiable settings.&#xD;
+	&#xD;
+Determines whether Vehicles should use values from the mod settings or Defs</VF_ModifiableSettingsTooltip>
+  <VF_CustomShaders>Use RGB Shaders</VF_CustomShaders>
+  <VF_CustomShadersTooltip>Enable use of custom shaders provided by the framework.</VF_CustomShadersTooltip>
+  <VF_DiagonalVehicleRendering>Allow Diagonal Rendering</VF_DiagonalVehicleRendering>
+  <VF_DiagonalVehicleRenderingTooltip>Vehicles that support diagonal rendering will do so when set to diagonal rotations (NorthEast, SouthEast, SouthWest, NorthWest)</VF_DiagonalVehicleRenderingTooltip>
+  <VF_FullVehiclePathing>Full Vehicle Pathing</VF_FullVehiclePathing>
+  <VF_FullVehiclePathingTooltip>Use the entire hitbox of the vehicle when determining shortest path. Vehicle will still be constrained by its size.</VF_FullVehiclePathingTooltip>
+  <VF_SmoothVehiclePathing>Smooth Vehicle Paths</VF_SmoothVehiclePathing>
+  <VF_SmoothVehiclePathingTooltip>Vehicle pathing will have an additional "turn" cost, preventing unnecessary zig zag patterns from shortest path.</VF_SmoothVehiclePathingTooltip>
+  <VF_HierarchalPathfinding>Hierarchal Pathfinding (Experimental)</VF_HierarchalPathfinding>
+  <VF_HierarchalPathfindingTooltip>Use HPA* instead of A* for faster pathfinding. Sacrifices a small amount of pathfinding accuracy for substantially faster pathfinding across large distances.</VF_HierarchalPathfindingTooltip>
+  <VF_RoadBiomeCostPathing>Biome Cost on Roads</VF_RoadBiomeCostPathing>
+  <VF_RoadBiomeCostPathingTooltip>Vehicle Caravans moving over roads on the world map are still affected by biome path costs.</VF_RoadBiomeCostPathingTooltip>
+  <VF_MultiplePawnsPerJob>Multi-Pawn Jobs</VF_MultiplePawnsPerJob>
+  <VF_MultiplePawnsPerJobTooltip>Allows vehicle related jobs to allow more than 1 pawn to reserve and work on it. Max allowed pawns determined by modders.</VF_MultiplePawnsPerJobTooltip>
+  <VF_HideDisabledVehicles>Hide Disabled Vehicles</VF_HideDisabledVehicles>
+  <VF_HideDisabledVehiclesTooltip>Disabled vehicles from the mod settings will be hidden in architect menu.</VF_HideDisabledVehiclesTooltip>
+  <VF_PerformanceSettings>Performance</VF_PerformanceSettings>
+  <VF_PassiveWaterWaves>Passive Water Waves</VF_PassiveWaterWaves>
+  <VF_PassiveWaterWavesTooltip>Generate passive waves when boat is idle.</VF_PassiveWaterWavesTooltip>
+  <VF_AerialVehicleEffects>Aerial Vehicle Effects</VF_AerialVehicleEffects>
+  <VF_AerialVehicleEffectsTooltip>When aerial vehicles takeoff and land, spawn flecks and render overlay textures.</VF_AerialVehicleEffectsTooltip>
+  <VF_VehicleDamageMultipliers>Vehicle Damage</VF_VehicleDamageMultipliers>
+  <VF_MeleeDamageMultiplier>Melee Damage Multiplier</VF_MeleeDamageMultiplier>
+  <VF_RangedDamageMultiplier>Ranged Damage Multiplier</VF_RangedDamageMultiplier>
+  <VF_ExplosiveDamageMultiplier>Explosive Damage Multiplier</VF_ExplosiveDamageMultiplier>
+  <VF_VehicleTurrets>Vehicle Turrets</VF_VehicleTurrets>
+  <VF_TurretOverheatMechanics>Turret Overheating</VF_TurretOverheatMechanics>
+  <VF_TurretOverheatMechanicsTooltip>Some turrets have overheat mechanics to prevent nonstop firing without consequences. Keep this enabled?</VF_TurretOverheatMechanicsTooltip>
+  <VF_Fishing>Fishing</VF_Fishing>
+  <VF_FishingInactive>Fishing (Inactive)</VF_FishingInactive>
+  <VF_FishingMultiplier>Fishing Multiplier</VF_FishingMultiplier>
+  <VF_FishingMultiplierTooltip>Adjust the amount of fish gathered from fishing boat.</VF_FishingMultiplierTooltip>
+  <VF_FishingDelay>Fishing Delay</VF_FishingDelay>
+  <VF_FishingDelayTooltip>Base amount of ticks it takes to gather fish on a fishing boat.</VF_FishingDelayTooltip>
+  <VF_FishingSkill>Fishing Skill</VF_FishingSkill>
+  <VF_FishingSkillTooltip>How much exp is given by fishing on a boat</VF_FishingSkillTooltip>
+  <VF_FishingPersists>Fishing Persists</VF_FishingPersists>
+  <VF_FishingPersistsTooltip>The Fishing Boat fishing selection will not reset upon drafting.</VF_FishingPersistsTooltip>
+  <VF_AerialVehicles>Air</VF_AerialVehicles>
+  <VF_RocketsBurnRadius>Rockets Burn</VF_RocketsBurnRadius>
+  <VF_RocketsBurnRadiusTooltip>Allow aerial vehicles which support this feature to burn all things within a small radius upon takeoff and landing.</VF_RocketsBurnRadiusTooltip>
+  <VF_DynamicDrawing>Dynamic Drawing</VF_DynamicDrawing>
+  <VF_DynamicDrawingTooltip>Render aerial vehicles on the world map when zoomed in.</VF_DynamicDrawingTooltip>
+  <VF_DeployOnLanding>Deploy on Landing</VF_DeployOnLanding>
+  <VF_DeployOnLandingTooltip>When an aerial vehicle lands all pawns onboard will be unloaded.</VF_DeployOnLandingTooltip>
+  <VF_DelayOnLanding>Delay on Landing</VF_DelayOnLanding>
+  <VF_DelayOnLandingTooltip>When an aerial vehicle lands the deployment of all pawns will be delayed.</VF_DelayOnLandingTooltip>
+  <VF_DelaySeconds>seconds</VF_DelaySeconds>
+  <VF_AirDefensesActive>Air Defenses</VF_AirDefensesActive>
+  <VF_AirDefensesActiveTooltip>Certain world objects are able to utilize air defenses to shoot down nearby aircraft.</VF_AirDefensesActiveTooltip>
+  <VF_VehicleStats>Stats</VF_VehicleStats>
+  <VF_Upgrades>Upgrades (Disabled)</VF_Upgrades>
+  <VF_DrawUpgradeInformationScreen>Draw Upgrade Menu Info Screen</VF_DrawUpgradeInformationScreen>
+  <VF_DrawUpgradeInformationScreenTooltip>Draw additional menu on the upgrade menu to display ship stats and ship icon.</VF_DrawUpgradeInformationScreenTooltip>
+  <VF_OverrideDrawColor>Override Draw Color</VF_OverrideDrawColor>
+  <VF_OverrideDrawColorTooltip>When any upgrade is applied that comes with a pattern or draw color, the previous paint job will be overridden.</VF_OverrideDrawColorTooltip>
+  <VF_VehicleEnabled>Enabled</VF_VehicleEnabled>
+  <VF_VehicleDisabled>Disabled</VF_VehicleDisabled>
+  <VF_VehiclePlayerOnly>Player Only</VF_VehiclePlayerOnly>
+  <VF_VehicleRaiderOnly>NPC Only</VF_VehicleRaiderOnly>
+  <VF_EnableButtonTooltip>If disabled this vehicle will not be available in-game. Applies to both the player and NPC factions.</VF_EnableButtonTooltip>
+  <VF_MovementPermissions>Control Type</VF_MovementPermissions>
+  <VF_NavigationType>Navigation</VF_NavigationType>
+  <VF_NavigationTypeTooltip>Navigation category for the World Map. Dictates when the Vehicle may move on the World Map.</VF_NavigationTypeTooltip>
+  <VF_Nameable>Can Assign Name</VF_Nameable>
+  <VF_NameableTooltip>Allow naming of this vehicle. Name will appear over the vehicle and will replace the displayed label.</VF_NameableTooltip>
+  <VF_CombatPower>Combat Power</VF_CombatPower>
+  <VF_CombatPowerTooltip>Combat points vehicle costs in order to generate in an event.</VF_CombatPowerTooltip>
+  <VF_CanCaravan>Caravan</VF_CanCaravan>
+  <VF_CanCaravanTooltip>Vehicle is able to be taken on caravans.</VF_CanCaravanTooltip>
+  <VF_SaveableFieldDisabledConditionTooltip>Disabled. {0}</VF_SaveableFieldDisabledConditionTooltip>
+  <VF_DisabledSingleModDependencyTooltip>Disabled. Compatible mod not in active mod list: {0}</VF_DisabledSingleModDependencyTooltip>
+  <VF_DisabledMultipleModsDependencyTooltip>Disabled. Compatible mods not in active mod list: {0}</VF_DisabledMultipleModsDependencyTooltip>
+  <VF_SaveableFieldDisabledTooltip>Disabled for this Vehicle Type.</VF_SaveableFieldDisabledTooltip>
+  <VF_SaveableFieldLockedTooltip>Setting is locked for this Vehicle.</VF_SaveableFieldLockedTooltip>
+  <VF_DebugDisabledTooltip>Disabled for all Vehicles at this time.</VF_DebugDisabledTooltip>
+  <VF_GizmoDisabledTooltip>Disabled in the mod settings.</VF_GizmoDisabledTooltip>
+  <VF_OpportunisticTicking>Opportunistic Ticking</VF_OpportunisticTicking>
+  <VF_OpportunisticTickingTooltip>Vehicle components only tick when necessary, reducing impact on performance when idle.</VF_OpportunisticTickingTooltip>
+  <VF_ManhunterTargetsVehicle>Manhunter Targets</VF_ManhunterTargetsVehicle>
+  <VF_ManhunterTargetsVehicleTooltip>Manhunter animals will target this vehicle.</VF_ManhunterTargetsVehicleTooltip>
+  <VF_FishingEnabled>Can Fish</VF_FishingEnabled>
+  <VF_FishingEnabledTooltip>Enables fishing when stationary over water.</VF_FishingEnabledTooltip>
+  <VF_JobLimitations>Vehicle Jobs</VF_JobLimitations>
+  <VF_MaxWorkers>Max Workers</VF_MaxWorkers>
+  <VF_WinterSpeedMultiplier>Winter Speed Multiplier</VF_WinterSpeedMultiplier>
+  <VF_WinterSpeedMultiplierTooltip>Additional cost for traveling during winter.</VF_WinterSpeedMultiplierTooltip>
+  <VF_WorldSpeedMultiplier>World Speed Multiplier</VF_WorldSpeedMultiplier>
+  <VF_WorldSpeedMultiplierTooltip>Multiplier to MoveSpeed when on the world map in a caravan.</VF_WorldSpeedMultiplierTooltip>
+  <VF_DischargePerTick>Discharge Rate</VF_DischargePerTick>
+  <VF_TicksPerCharge>Charge Rate</VF_TicksPerCharge>
+  <VF_FuelConsumptionRate>Fuel Consumption Rate</VF_FuelConsumptionRate>
+  <VF_FuelConsumptionRateWorldMultiplier>World Multiplier</VF_FuelConsumptionRateWorldMultiplier>
+  <VF_FuelCapacity>Fuel Capacity</VF_FuelCapacity>
+  <VF_AutoRefuelPercent>Auto Refuel %</VF_AutoRefuelPercent>
+  <VF_FuelConsumptionWorld>Fuel Consumption %</VF_FuelConsumptionWorld>
+  <VF_FuelConsumptionWorldTooltip>Fuel consumption multiplier on the world map.</VF_FuelConsumptionWorldTooltip>
+  <VF_LaunchFixedMaxDistance>Fixed Max Distance</VF_LaunchFixedMaxDistance>
+  <VF_LaunchFixedMaxDistanceTooltip>Set a fixed max distance this vehicle can fly regardless of fuel level.</VF_LaunchFixedMaxDistanceTooltip>
+  <VF_LaunchFixedMaxDistanceDisabled>None</VF_LaunchFixedMaxDistanceDisabled>
+  <VF_ReconDistance>Recon Distance</VF_ReconDistance>
+  <VF_ReconDistanceTooltip>Distance in tiles the shuttle will be able to perform recon of a site or settlement.</VF_ReconDistanceTooltip>
+  <VF_ControlInFlight>Control in Flight</VF_ControlInFlight>
+  <VF_ControlInFlightTooltip>Control the aerial vehicle while it is in flight. Allows for changing of flight paths midflight, choosing your landing after loading a map, and strafing maps that have not yet been loaded.</VF_ControlInFlightTooltip>
+  <VF_SpaceFlight>Space Faring</VF_SpaceFlight>
+  <VF_SpaceFlightTooltip>Vehicle is capable of launching to and taking off from space objects.</VF_SpaceFlightTooltip>
+  <VF_RateOfClimb>Rate of Climb</VF_RateOfClimb>
+  <VF_RateOfClimbTooltip>Amount the vehicle ascends per tick.</VF_RateOfClimbTooltip>
+  <VF_MaxAltitude>Max Altitude</VF_MaxAltitude>
+  <VF_MaxAltitudeTooltip>Maximum altitude this vehicle can achieve when in flight.</VF_MaxAltitudeTooltip>
+  <VF_MaxFallRate>Max Fall Rate</VF_MaxFallRate>
+  <VF_MaxFallRateTooltip>Max amount this vehicle will descend when shot down or out of fuel.</VF_MaxFallRateTooltip>
+  <VF_Instant>Instant</VF_Instant>
+  <VF_DevMode>DevMode</VF_DevMode>
+  <VF_DevMode_Logging>Logging</VF_DevMode_Logging>
+  <VF_DevMode_Troubleshooting>Troubleshooting</VF_DevMode_Troubleshooting>
+  <VF_DevMode_Drawers>Visual Help</VF_DevMode_Drawers>
+  <VF_DevMode_Pathing>Pathing</VF_DevMode_Pathing>
+  <VF_DevMode_ShowRecentNews>Show Most Recent News</VF_DevMode_ShowRecentNews>
+  <VF_DevMode_OpenQuickTestSettings>Quick Test Menu</VF_DevMode_OpenQuickTestSettings>
+  <VF_DevMode_GraphEditor>Graph Editor</VF_DevMode_GraphEditor>
+  <VF_DevMode_ResetAll>Reset All Settings</VF_DevMode_ResetAll>
+  <VF_DevMode_ResetVehicle>Reset {0}</VF_DevMode_ResetVehicle>
+  <VF_DevMode_ResetAllVehicles>Reset All Vehicles</VF_DevMode_ResetAllVehicles>
+  <VF_DevMode_ResetPage>Reset Page</VF_DevMode_ResetPage>
+  <VF_DevMode_ResetAllConfirmation>Are you sure you want to reset all settings to original values? If you were locked out of the Mod Settings from an exception, you will need to restart after the reset.</VF_DevMode_ResetAllConfirmation>
+  <VF_DevMode_DebugLogging>Log debug information.</VF_DevMode_DebugLogging>
+  <VF_DevMode_DebugLoggingTooltip>Enable message logging to output specific values and pieces of information useful for debugging Vehicles. Use only if you're making a Vehicle add-on.</VF_DevMode_DebugLoggingTooltip>
+  <VF_DevMode_DebugPathCostRecalculationLogging>Debug PathCost Recalculation Logging</VF_DevMode_DebugPathCostRecalculationLogging>
+  <VF_DevMode_DebugPathCostRecalculationLoggingTooltip>Log summary of path cost change for all vehicles affected by region dirtying.</VF_DevMode_DebugPathCostRecalculationLoggingTooltip>
+  <VF_DevMode_DebugDraftAnyVehicle>Draft Any Vehicle</VF_DevMode_DebugDraftAnyVehicle>
+  <VF_DevMode_DebugDraftAnyVehicleTooltip>Be able to draft and move any vehicle regardless of passengers. Useful for empty boats in deep water or if you want to expedite testing.</VF_DevMode_DebugDraftAnyVehicleTooltip>
+  <VF_DevMode_DebugShootAnyTurret>Shoot Any Turret</VF_DevMode_DebugShootAnyTurret>
+  <VF_DevMode_DebugShootAnyTurretTooltip>Be able to shoot any turret regardless if the turret is being operated.</VF_DevMode_DebugShootAnyTurretTooltip>
+  <VF_DevMode_DebugSpawnVehiclesGodMode>Spawn Vehicle Buildings (god mode)</VF_DevMode_DebugSpawnVehiclesGodMode>
+  <VF_DevMode_DebugSpawnVehiclesGodModeTooltip>Vehicle blueprints being placed in godmode will spawn the Building variant as opposed to generating a VehiclePawn for spawning.</VF_DevMode_DebugSpawnVehiclesGodModeTooltip>
+  <VF_DevMode_DebugDrawUpgradeNodeGrid>Draw UpgradeTree Grid</VF_DevMode_DebugDrawUpgradeNodeGrid>
+  <VF_DevMode_DebugDrawUpgradeNodeGridTooltip>Draw UpgradeTree grid for placement on (x,y) axis.</VF_DevMode_DebugDrawUpgradeNodeGridTooltip>
+  <VF_DevMode_DebugDrawHitbox>Draw Hitbox</VF_DevMode_DebugDrawHitbox>
+  <VF_DevMode_DebugDrawHitboxTooltip>Draw vehicle's hitbox by highlighting the map cells the vehicle occupies.</VF_DevMode_DebugDrawHitboxTooltip>
+  <VF_DevMode_DebugDrawVehicleTracks>Draw VehicleTracks</VF_DevMode_DebugDrawVehicleTracks>
+  <VF_DevMode_DebugDrawVehicleTracksTooltip>Draw cells occupied by vehicle's "VehicleTracks" which mark what cells will end up being damaged per move action.</VF_DevMode_DebugDrawVehicleTracksTooltip>
+  <VF_DevMode_DebugDrawBumpers>Draw Vehicle Bumpers</VF_DevMode_DebugDrawBumpers>
+  <VF_DevMode_DebugDrawBumpersTooltip>Draw cells immediately in front of vehicle that will indicate when the vehicle "bumps" into something and halts pathing.</VF_DevMode_DebugDrawBumpersTooltip>
+  <VF_DevMode_DebugDrawLordMeetingPoint>Draw Lord Meeting Point</VF_DevMode_DebugDrawLordMeetingPoint>
+  <VF_DevMode_DebugDrawLordMeetingPointTooltip>Highlights the cell where the Form Vehicle Caravan meeting point has been set.</VF_DevMode_DebugDrawLordMeetingPointTooltip>
+  <VF_DevMode_DebugPathfinderDebugging>Local Pathing</VF_DevMode_DebugPathfinderDebugging>
+  <VF_DevMode_DebugPathfinderDebuggingTooltip>Open menu for debugging various outputs of pathfinding (both cell based and region based)</VF_DevMode_DebugPathfinderDebuggingTooltip>
+  <VF_DevMode_DebugWorldPathfinderDebugging>World Pathing</VF_DevMode_DebugWorldPathfinderDebugging>
+  <VF_DevMode_DebugWorldPathfinderDebuggingTooltip>Open menu for debugging WorldPathGrid for any VehicleDef.</VF_DevMode_DebugWorldPathfinderDebuggingTooltip>
+  <VF_DevMode_DebugDrawVehiclePathingCosts>Draw Path Costs</VF_DevMode_DebugDrawVehiclePathingCosts>
+  <VF_DevMode_DebugDrawVehiclePathingCostsTooltip>Draw costs per cell/tile calculated from pathfinder. Shows accumulated path cost.</VF_DevMode_DebugDrawVehiclePathingCostsTooltip>
+  <VF_DevMode_DebugDrawPathfinderSearch>Draw Pathfinder Search</VF_DevMode_DebugDrawPathfinderSearch>
+  <VF_DevMode_DebugDrawPathfinderSearchTooltip>Draws Pathfinder search as it opens and closes nodes searching for a path.  Will also show chunk search if Hierarchal Pathfinding is enabled. Pathfinder is intentionally slowed down in order to clearly show the process, as the async search is too fast in most cases to view.</VF_DevMode_DebugDrawPathfinderSearchTooltip>
+</LanguageData>
+

@@ -442,7 +442,7 @@ namespace Vehicles
 		/// <param name="tile"></param>
 		public virtual IEnumerable<FloatMenuOption> GetFloatMenuOptionsAt(int tile)
 		{
-			if (AerialVehicleArrivalAction_FormVehicleCaravan.CanFormCaravanAt(vehicle, tile) && !Find.WorldObjects.AnySettlementBaseAt(tile) && !Find.WorldObjects.AnySiteAt(tile))
+			if (AerialVehicleArrivalAction_FormVehicleCaravan.CanFormCaravanAt(vehicle, tile) && !Find.WorldObjects.AnyMapParentAt(tile))
 			{
 				yield return FloatMenuOption_LandCaravanEmptyTile(tile);
 			}
@@ -472,6 +472,13 @@ namespace Vehicles
 				}
 
 				foreach (FloatMenuOption option in AerialVehicleArrivalAction_AttackSettlement.GetFloatMenuOptions(vehicle, this, settlement))
+				{
+					yield return option;
+				}
+			}
+			if (Find.WorldObjects.SiteAt(tile) is Site site && !site.HasMap)
+			{
+				foreach (FloatMenuOption option in AerialVehicleArrivalAction_LoadMap.GetFloatMenuOptions(vehicle, this, site))
 				{
 					yield return option;
 				}

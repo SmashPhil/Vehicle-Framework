@@ -160,6 +160,16 @@ namespace Vehicles
 				false), 9999f, validator, null, 0, -1, false, RegionType.Set_Passable, false);
 		}
 
+		public override bool CanDraft(out string failReason)
+		{
+			if (EmptyTank)
+			{
+				failReason = "VF_OutOfFuel".Translate();
+				return false;
+			}
+			return base.CanDraft(out failReason);
+		}
+
 		public virtual void Refuel(List<Thing> fuelThings)
 		{
 			int countToFull = FuelCountToFull;

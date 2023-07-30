@@ -103,22 +103,6 @@
 	</Vehicles.VehicleStatDef>
 	
 	<Vehicles.VehicleStatDef>
-		<defName>MarketValue</defName>
-		<label>Market Value</label>
-		<description>The market value of this vehicle.\n\nThe actual trade price will be adjusted by total health, materials used, and other contextual factors.</description>
-		<category>VehicleBasics</category>
-		<defaultBaseValue>1</defaultBaseValue>
-		<minValue>0</minValue>
-		
-		<toStringStyle>Money</toStringStyle>
-		<displayPriorityInCategory>40</displayPriorityInCategory>
-		
-		<modSettingsInfo>
-			<settingsType>IntegerBox</settingsType>
-		</modSettingsInfo>
-	</Vehicles.VehicleStatDef>
-	
-	<Vehicles.VehicleStatDef>
 		<defName>BodyIntegrity</defName>
 		<label>Body Integrity</label>
 		<description>The average of all vehicle parts' health. If the integrity of the vehicle reaches 0, it will disintegrate into a fraction of its build cost.</description>

@@ -1045,7 +1045,7 @@ namespace Vehicles
 					LaunchProjectileCE(projectile, new Vector2(launchCell.x, launchCell.z), cannonTarget, vehicle, ProjectileAngleCE(speed, distance, -0.5f, false, 1f), -TurretRotation, 1f, speed);
 				}
 				turretDef.shotSound?.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map));
-				vehicle.vDrawer.rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
+				vehicle.Drawer.rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
 				rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
 				EventRegistry[VehicleTurretEventDefOf.ShotFired].ExecuteEvents();
 				PostTurretFire();
@@ -1663,7 +1663,7 @@ namespace Vehicles
 
 			Scribe_TargetInfo.Look(ref cannonTarget, nameof(cannonTarget), defaultValue: LocalTargetInfo.Invalid);
 
-			if (Scribe.mode == LoadSaveMode.LoadingVars)
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
 				TurretRotation = Mathf.Abs(rotation - 270); //convert from traditional to relative, vehicle rotation will be taken into account during lock validation
 				if (cannonTarget.IsValid)

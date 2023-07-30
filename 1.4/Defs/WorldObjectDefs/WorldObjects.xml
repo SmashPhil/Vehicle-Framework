@@ -14,8 +14,8 @@
 	
 	<WorldObjectDef>
 		<defName>DockedBoat</defName>
-		<label>Boat</label>
-		<description>Boats</description>
+		<label>Docked Boat</label>
+		<description>Boats left behind in order to go on foot.</description>
 		<worldObjectClass>Vehicles.DockedBoat</worldObjectClass>
 		<texture>UI/Icons/WorldObject_Boat</texture>
 		<expandingIcon>true</expandingIcon>
@@ -30,7 +30,7 @@
 	<WorldObjectDef>
 		<defName>VehicleCaravan</defName>
 		<label>Vehicle Caravan</label>
-		<description>A group of traveling people.</description>
+		<description>A group of traveling people with vehicles.</description>
 		<worldObjectClass>Vehicles.VehicleCaravan</worldObjectClass>
 		<texture>UI/DefaultVehicleIcon</texture>
 		<useDynamicDrawer>true</useDynamicDrawer>
@@ -62,8 +62,8 @@
 	
 	<WorldObjectDef>
 		<defName>AerialVehicle</defName>
-		<label>Aereial Vehicle in flight</label>
-		<description>An aerial vehicle currently midflight.</description>
+		<label>Aereial Vehicle</label>
+		<description>An aerial vehicle capable of flight on the world map.</description>
 		<worldObjectClass>Vehicles.AerialVehicleInFlight</worldObjectClass>
 		<texture>UI/Icons/DefaultVehicleIcon</texture>
 		<useDynamicDrawer>true</useDynamicDrawer>
@@ -87,7 +87,7 @@
 	<WorldObjectDef>
 		<defName>CrashedShipSite</defName>
 		<label>Crash Site</label>
-		<description>A recently downed shuttle with possible survivors.</description>
+		<description>A recently downed aerial vehicle with possible survivors.</description>
 		<worldObjectClass>Vehicles.CrashSite</worldObjectClass>
 		<texture>World/WorldObjects/Ambush</texture>
 		<expandingIcon>true</expandingIcon>

@@ -18,8 +18,8 @@
 		<label>load materials</label>
 		<giverClass>Vehicles.WorkGiver_BringUpgradeMaterial</giverClass>
 		<workType>Hauling</workType>
-		<verb>haul</verb>
-		<gerund>hauling</gerund>
+		<verb>load</verb>
+		<gerund>loading</gerund>
 		<priorityInType>60</priorityInType>
 		<requiredCapacities>
 			<li>Manipulation</li>
@@ -28,7 +28,7 @@
 	
 	<WorkGiverDef>
 		<defName>WorkOnUpgrade</defName>
-		<label>Work on Upgrade</label>
+		<label>work on upgrade</label>
 		<giverClass>Vehicles.WorkGiver_WorkOnUpgrade</giverClass>
 		<workType>Construction</workType>
 		<verb>upgrade</verb>
@@ -41,7 +41,7 @@
 	
 	<WorkGiverDef>
 		<defName>RefuelVehicle</defName>
-		<label>Refuel Vehicle</label>
+		<label>refuel vehicle</label>
 		<giverClass>Vehicles.WorkGiver_RefuelVehicle</giverClass>
 		<workType>Hauling</workType>
 		<verb>refuel</verb>
@@ -54,7 +54,7 @@
 	
 	<WorkGiverDef>
 		<defName>RepairVehicle</defName>
-		<label>Repair Vehicle</label>
+		<label>repair vehicle</label>
 		<giverClass>Vehicles.WorkGiver_RepairVehicle</giverClass>
 		<workType>Construction</workType>
 		<verb>repair</verb>
@@ -67,7 +67,7 @@
 	
 	<WorkGiverDef>
 		<defName>DisassembleVehicle</defName>
-		<label>Disassemble Vehicle</label>
+		<label>disassemble vehicle</label>
 		<giverClass>Vehicles.WorkGiver_DisassembleVehicle</giverClass>
 		<workType>Construction</workType>
 		<verb>disassemble</verb>

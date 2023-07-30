@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.4.1330</currentVersion>
+  <currentVersion>1.4.1331</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
@@ -31,6 +31,10 @@
 - Fixed bug where reserving handlers would get cleared immediately, allowing multiple pawns to enter the same role beyond the limit.
 
 - Fixed bug where aerial vehicles would ignore situations that should prevent the vehicle from launching on the world map.
+
+- Fixed bug where loading save file that saved while turret was shooting throws an exception, causing the vehicle to not load in.
+
+- Fixed bug where vehicles could still be drafted with out of fuel.
 &lt;title&gt;Performance Improvements&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
@@ -45,6 +49,8 @@
 - Default auto-refuel percentage changed from 30% to 100%, meaning all vehicles will request to be refueled to full capacity if they are currently undrafted.
 
 - Added extra info when trading with AerialVehicle at settlement.
+
+- Cleaned up all translation files and added spreadsheet for tracking all translations.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
   <!--Static parameterless method to execute when update log is executed-->

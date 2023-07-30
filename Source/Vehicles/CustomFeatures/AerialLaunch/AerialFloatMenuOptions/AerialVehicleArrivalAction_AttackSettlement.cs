@@ -7,21 +7,17 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class AerialVehicleArrivalAction_AttackSettlement : AerialVehicleArrivalAction
+	public class AerialVehicleArrivalAction_AttackSettlement : AerialVehicleArrivalAction_LoadMap
 	{
-		public LaunchProtocol launchProtocol;
 		public Settlement settlement;
-		public AerialVehicleArrivalModeDef arrivalModeDef;
 
 		public AerialVehicleArrivalAction_AttackSettlement()
 		{
 		}
 
-		public AerialVehicleArrivalAction_AttackSettlement(VehiclePawn vehicle, LaunchProtocol launchProtocol, Settlement settlement, AerialVehicleArrivalModeDef arrivalModeDef) : base(vehicle)
+		public AerialVehicleArrivalAction_AttackSettlement(VehiclePawn vehicle, LaunchProtocol launchProtocol, int tile, AerialVehicleArrivalModeDef arrivalModeDef) : base(vehicle, launchProtocol, tile, arrivalModeDef)
 		{
-			this.launchProtocol = launchProtocol;
-			this.settlement = settlement;
-			this.arrivalModeDef = arrivalModeDef;
+			settlement = Find.World.worldObjects.SettlementAt(tile);
 		}
 
 		public override bool DestroyOnArrival => true;
@@ -35,23 +31,17 @@ namespace Vehicles
 			return CanAttack(vehicle, settlement);
 		}
 
-		public override bool Arrived(int tile)
+		protected override void MapLoaded(Map map)
 		{
-			LongEventHandler.QueueLongEvent(delegate ()
+			TaggedString letterLabel = "LetterLabelCaravanEnteredEnemyBase".Translate();
+			TaggedString letterText = "LetterTransportPodsLandedInEnemyBase".Translate(map.Parent.Label).CapitalizeFirst();
+			SettlementUtility.AffectRelationsOnAttacked(settlement, ref letterText);
+			if (!settlement.HasMap)
 			{
-				Map map = GetOrGenerateMapUtility.GetOrGenerateMap(tile, null);
-				TaggedString label = "LetterLabelCaravanEnteredEnemyBase".Translate();
-				TaggedString text = "LetterTransportPodsLandedInEnemyBase".Translate(settlement.Label).CapitalizeFirst();
-				SettlementUtility.AffectRelationsOnAttacked(settlement, ref text);
-				if (!settlement.HasMap)
-				{
-					Find.TickManager.Notify_GeneratedPotentiallyHostileMap();
-					PawnRelationUtility.Notify_PawnsSeenByPlayer_Letter(map.mapPawns.AllPawns, ref label, ref text, "LetterRelatedPawnsInMapWherePlayerLanded".Translate(Faction.OfPlayer.def.pawnsPlural), true, true);
-				}
-				Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.NeutralEvent, vehicle, settlement.Faction, null, null, null);
-				arrivalModeDef.Worker.VehicleArrived(vehicle, launchProtocol, settlement.Map);
-			}, "GeneratingMap", false, null, true);
-			return true;
+				Find.TickManager.Notify_GeneratedPotentiallyHostileMap();
+				PawnRelationUtility.Notify_PawnsSeenByPlayer_Letter(map.mapPawns.AllPawns, ref letterLabel, ref letterText, "LetterRelatedPawnsInMapWherePlayerLanded".Translate(Faction.OfPlayer.def.pawnsPlural), true, true);
+			}
+			Find.LetterStack.ReceiveLetter(letterLabel, letterText, LetterDefOf.NeutralEvent, vehicle, settlement.Faction, null, null, null);
 		}
 
 		public override void ExposeData()
@@ -83,18 +73,18 @@ namespace Vehicles
 		{
 			if (vehicle.CompVehicleLauncher.ControlInFlight)
 			{
-				foreach (FloatMenuOption floatMenuOption2 in VehicleArrivalActionUtility.GetFloatMenuOptions(() => CanAttack(vehicle, settlement), () => new AerialVehicleArrivalAction_AttackSettlement(vehicle, launchProtocol, settlement, AerialVehicleArrivalModeDefOf.TargetedLanding),
+				foreach (FloatMenuOption floatMenuOption2 in VehicleArrivalActionUtility.GetFloatMenuOptions(() => CanAttack(vehicle, settlement), () => new AerialVehicleArrivalAction_AttackSettlement(vehicle, launchProtocol, settlement.Tile, AerialVehicleArrivalModeDefOf.TargetedLanding),
 				"VF_AttackAndTargetLanding".Translate(settlement.Label), vehicle, settlement.Tile, null))
 				{
 					yield return floatMenuOption2;
 				}
 			}
-			foreach (FloatMenuOption floatMenuOption2 in VehicleArrivalActionUtility.GetFloatMenuOptions(() => CanAttack(vehicle, settlement), () => new AerialVehicleArrivalAction_AttackSettlement(vehicle, launchProtocol, settlement, AerialVehicleArrivalModeDefOf.EdgeDrop),
+			foreach (FloatMenuOption floatMenuOption2 in VehicleArrivalActionUtility.GetFloatMenuOptions(() => CanAttack(vehicle, settlement), () => new AerialVehicleArrivalAction_AttackSettlement(vehicle, launchProtocol, settlement.Tile, AerialVehicleArrivalModeDefOf.EdgeDrop),
 					"AttackAndDropAtEdge".Translate(settlement.Label), vehicle, settlement.Tile, null))
 			{
 				yield return floatMenuOption2;
 			}
-			foreach (FloatMenuOption floatMenuOption2 in VehicleArrivalActionUtility.GetFloatMenuOptions(() => CanAttack(vehicle, settlement), () => new AerialVehicleArrivalAction_AttackSettlement(vehicle, launchProtocol, settlement, AerialVehicleArrivalModeDefOf.CenterDrop),
+			foreach (FloatMenuOption floatMenuOption2 in VehicleArrivalActionUtility.GetFloatMenuOptions(() => CanAttack(vehicle, settlement), () => new AerialVehicleArrivalAction_AttackSettlement(vehicle, launchProtocol, settlement.Tile, AerialVehicleArrivalModeDefOf.CenterDrop),
 				"AttackAndDropInCenter".Translate(settlement.Label), vehicle, settlement.Tile, null))
 			{
 				yield return floatMenuOption2;

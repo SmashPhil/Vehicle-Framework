@@ -107,7 +107,7 @@ namespace Vehicles
 		{
 			foreach (ThingComp thingComp in AllComps)
 			{
-				if (thingComp is VehicleComp vehicleComp && !vehicleComp.CanStartEngine(out string failReason))
+				if (thingComp is VehicleComp vehicleComp && !vehicleComp.CanDraft(out string failReason))
 				{
 					Messages.Message(failReason, MessageTypeDefOf.RejectInput);
 					return false;

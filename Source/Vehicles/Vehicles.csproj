@@ -385,6 +385,7 @@
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Tickers.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Health.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Rendering.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_LoadMap.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_OfferGifts.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\DirectionalTakeoff.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\Misc\FleckData.cs" />
@@ -411,7 +412,6 @@
     <Compile Include="Harmony\PatchCategories\DefGenerators\ThingDefGenerator_Buildables.cs" />
     <Compile Include="Misc\Attributes\ActionOnSettingsInputAttribute.cs" />
     <Compile Include="Misc\Attributes\DisableSettingConditionalAttribute.cs" />
-    <Compile Include="Misc\DefOf\HediffDefOf_Vehicles.cs" />
     <Compile Include="Misc\DefOf\KeyBindingDefOf_Vehicles.cs" />
     <Compile Include="Misc\DefOf\VehicleStatCategoryDefOf.cs" />
     <Compile Include="Misc\DefOf\VehicleTurretEventDefOf.cs" />
@@ -603,7 +603,6 @@
     <Compile Include="Misc\DefOf\RGBShaderTypeDefOf.cs" />
     <Compile Include="Misc\DefOf\PatternDefOf.cs" />
     <Compile Include="Misc\DefOf\VehicleStatDefOf.cs" />
-    <Compile Include="Misc\DefOf\VehicleIncidentTargetTypeDefOf.cs" />
     <Compile Include="Misc\Enums\UI\EfficiencyOperationType.cs" />
     <Compile Include="Misc\Enums\Vehicle\VehicleComponentPosition.cs" />
     <Compile Include="Misc\ModSettings\SettingsCache.cs" />

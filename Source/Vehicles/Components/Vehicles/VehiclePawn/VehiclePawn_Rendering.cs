@@ -21,7 +21,7 @@ namespace Vehicles
 	public partial class VehiclePawn
 	{
 		[Unsaved]
-		public Vehicle_DrawTracker vDrawer;
+		private Vehicle_DrawTracker vDrawer;
 		[Unsaved]
 		public VehicleGraphicOverlay graphicOverlay;
 
@@ -43,7 +43,7 @@ namespace Vehicles
 
 		public bool Nameable => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), nameof(VehicleDef.nameable), VehicleDef.nameable);
 
-		public override Vector3 DrawPos => vDrawer.DrawPos;
+		public override Vector3 DrawPos => Drawer.DrawPos;
 
 		public (Vector3 drawPos, float rotation) DrawData => (DrawPos, this.CalculateAngle(out _));
 
@@ -208,7 +208,7 @@ namespace Vehicles
 		{
 			get
 			{
-				float movePercent = vDrawer.tweener.MovedPercent();
+				float movePercent = Drawer.tweener.MovedPercent();
 				return GenThing.TrueCenter(Position, Rotation, VehicleDef.Size, VehicleDef.Altitude);
 			}
 		}
@@ -339,7 +339,7 @@ namespace Vehicles
 			{
 				if (Current.ProgramState != ProgramState.Playing || viewRect.Contains(Position))
 				{
-					vDrawer.ProcessPostTickVisuals(ticksPassed);
+					Drawer.ProcessPostTickVisuals(ticksPassed);
 				}
 				rotationTracker.ProcessPostTickVisuals(ticksPassed);
 			}
@@ -893,7 +893,7 @@ namespace Vehicles
 		{
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
 			VehicleReservationManager reservationManager = Map.GetCachedMapComponent<VehicleReservationManager>();
-			FloatMenuOption opt1 = new FloatMenuOption("VF_BoardShipGroup".Translate(LabelShort), delegate ()
+			FloatMenuOption opt1 = new FloatMenuOption("VF_BoardVehicleGroup".Translate(LabelShort), delegate ()
 			{
 				List<IntVec3> cells = this.OccupiedRect().Cells.ToList();
 				foreach (Pawn p in pawns)
@@ -909,7 +909,7 @@ namespace Vehicles
 					p.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
 				}
 			}, MenuOptionPriority.Default, null, null, 0f, null, null);
-			FloatMenuOption opt2 = new FloatMenuOption("VF_BoardShipGroupFail".Translate(LabelShort), null, MenuOptionPriority.Default, null, null, 0f, null, null)
+			FloatMenuOption opt2 = new FloatMenuOption("VF_BoardVehicleGroupFail".Translate(LabelShort), null, MenuOptionPriority.Default, null, null, 0f, null, null)
 			{
 				Disabled = true
 			};

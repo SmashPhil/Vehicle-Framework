@@ -18,9 +18,9 @@ namespace Vehicles
 
 		public override void TryPlaceTrack(VehiclePawn vehicle, ref Vector3 lastTrackPlacePos)
 		{
-			if ((vehicle.vDrawer.DrawPos - lastTrackPlacePos).MagnitudeHorizontalSquared() > WakeDistanceInterval)
+			if ((vehicle.Drawer.DrawPos - lastTrackPlacePos).MagnitudeHorizontalSquared() > WakeDistanceInterval)
 			{
-				Vector3 drawPos = vehicle.vDrawer.DrawPos;
+				Vector3 drawPos = vehicle.Drawer.DrawPos;
 				if (drawPos.ToIntVec3().InBounds(vehicle.Map) && !vehicle.beached)
 				{
 					FleckMaker.WaterSplash(drawPos, vehicle.Map, DefaultSizeSplash * size, speed);
@@ -30,7 +30,7 @@ namespace Vehicles
 			else if (VehicleMod.settings.main.passiveWaterWaves && Find.TickManager.TicksGame % 360 == 0)
 			{
 				float offset = Mathf.PingPong(Find.TickManager.TicksGame / 10, vehicle.VehicleDef.graphicData.drawSize.y / 4);
-				FleckMaker.WaterSplash(vehicle.vDrawer.DrawPos - new Vector3(0, 0, offset), vehicle.Map, DefaultSizePassiveSplash * size, speed);
+				FleckMaker.WaterSplash(vehicle.Drawer.DrawPos - new Vector3(0, 0, offset), vehicle.Map, DefaultSizePassiveSplash * size, speed);
 			}
 		}
 	}

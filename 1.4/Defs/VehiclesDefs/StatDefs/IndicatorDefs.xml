@@ -3,7 +3,7 @@
 <Defs>
 	<Vehicles.IndicatorDef>
 		<defName>VF_Explosive</defName>
-		<label>Move Speed</label>
+		<label>Explosive</label>
 		<iconPath>UI/Icons/WarningIcon</iconPath>
 	</Vehicles.IndicatorDef>
 	
