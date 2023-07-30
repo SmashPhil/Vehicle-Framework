@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.IO;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using HarmonyLib;
@@ -18,7 +19,11 @@ namespace Vehicles
 	[StaticConstructorOnStartup]
 	internal static class VehicleHarmony
 	{
+		private const int BuildMajor = 1;
+		private const int BuildMinor = 4;
+
 		private static readonly DateTime ProjectStartDate = new DateTime(2019, 12, 7);
+		private static readonly DateTime ProjectBuildDate = new DateTime(2023, 7, 30);
 
 		public const string VehiclesUniqueId = "SmashPhil.VehicleFramework";
 		public const string VehiclesLabel = "Vehicle Framework";
@@ -43,7 +48,9 @@ namespace Vehicles
 
 		internal static ModVersion Version { get; private set; }
 
-		internal static string VersionDir => Path.Combine(VehicleMMD.RootDir.FullName, "Version.txt");
+		internal static string VersionPath => Path.Combine(VehicleMMD.RootDir.FullName, "Version.txt");
+
+		internal static string BuildDatePath => Path.Combine(VehicleMMD.RootDir.FullName, "BuildDate.txt");
 
 		public static List<VehicleDef> AllMoveableVehicleDefs { get; internal set; }
 
@@ -55,11 +62,15 @@ namespace Vehicles
 			VehicleMCP = VehicleMod.settings.Mod.Content;
 			VehicleMMD = ModLister.GetActiveModWithIdentifier(VehiclesUniqueId, ignorePostfix: true);
 
-			Version = ModVersion.VersionFromAssembly(Assembly.GetExecutingAssembly(), ProjectStartDate);
+			string dateText = File.ReadAllText(BuildDatePath);
+			DateTime buildDate = DateTime.ParseExact(dateText, "yyyy/MM/dd HH:mm:ss", CultureInfo.InvariantCulture);
+
+			Version = new ModVersion(BuildMajor, BuildMinor, buildDate, ProjectStartDate);
+
 			string readout = Prefs.DevMode ? Version.VersionStringWithRevision : Version.VersionString;
 			Log.Message($"<color=orange>{LogLabel}</color> version {readout}");
 
-			File.WriteAllText(VersionDir, Version.VersionString);
+			File.WriteAllText(VersionPath, Version.VersionString);
 
 			Harmony.PatchAll();
 

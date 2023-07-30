@@ -6,7 +6,7 @@
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Recent News&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
-
+I've created a community managed google spreadsheet for translations, so if you want to help fill out one of the languages please DM me on discord and I can add you. Feel free to join even if the language you know is already filled out, I may need to edit or add entries in the future.  Thanks! :)
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Fixed bug where vehicles at corner of maps can clip out of bounds and be deleted.
 
