@@ -54,8 +54,7 @@ namespace Vehicles
 					tmpInfo.Add(new TransferableUIUtility.ExtraInfo("Mass".Translate(), massUsageReadout, GetMassColor(massUsage, massCapacity, lerpMassColor: lerpMassColor), massTip));
 
 					//Flight Speed
-					float flightSpeed = aerialVehicle.vehicle.GetStatValue(VehicleStatDefOf.FlightSpeed);
-					//tmpInfo.Add(new TransferableUIUtility.ExtraInfo(""))
+					tmpInfo.Add(new TransferableUIUtility.ExtraInfo(VehicleStatDefOf.FlightSpeed.LabelCap, GetSpeedLabel(), Color.white, string.Empty));
 
 					TransferableUIUtility.DrawExtraInfo(tmpInfo, rect);
 				}
@@ -68,8 +67,13 @@ namespace Vehicles
 
 		private static string GetMassTip(float massUsage, float massCapacity)
 		{
-			TaggedString taggedString = "MassCarriedSimple".Translate() + ": " + massUsage.ToStringEnsureThreshold(massCapacity, 2) + " " + "kg".Translate() + "\n" + "MassCapacity".Translate() + ": " + massCapacity.ToString("F2") + " " + "kg".Translate();
+			TaggedString taggedString = $"{"MassCarriedSimple".Translate()}: {massUsage.ToStringEnsureThreshold(massCapacity, 2)} {"kg".Translate()} \n {"MassCapacity".Translate()}: {massCapacity.ToString("F2")} {"kg".Translate()}";
 			return taggedString;
+		}
+
+		private static string GetSpeedLabel()
+		{
+			return VehicleStatDefOf.FlightSpeed.Worker.StatValueFormatted(aerialVehicle.vehicle);
 		}
 
 		private static Color GetMassColor(float massUsage, float massCapacity, bool lerpMassColor)

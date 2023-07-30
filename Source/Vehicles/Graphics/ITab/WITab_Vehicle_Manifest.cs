@@ -21,7 +21,7 @@ namespace Vehicles
 		public WITab_Vehicle_Manifest()
 		{
 			size = new Vector2(ITab_Vehicle_Passengers.WindowWidth, ITab_Vehicle_Passengers.WindowHeight);
-			labelKey = "TabPassengers";
+			labelKey = "VF_TabPassengers";
 		}
 
 		public override bool IsVisible => true;
