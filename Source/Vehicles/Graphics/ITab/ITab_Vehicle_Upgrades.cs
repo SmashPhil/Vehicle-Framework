@@ -52,7 +52,7 @@ namespace Vehicles
 		public ITab_Vehicle_Upgrades()
 		{
 			size = new Vector2(screenWidth, screenHeight);
-			labelKey = "TabUpgrades";
+			labelKey = "VF_TabUpgrades";
 		}
 
 		private VehiclePawn Vehicle
@@ -103,7 +103,7 @@ namespace Vehicles
 			{
 				if (Vehicle.CompUpgradeTree.Disabled(selectedNode.node))
 				{
-					Messages.Message("DisabledFromOtherNode".Translate(), MessageTypeDefOf.RejectInput, false);
+					Messages.Message("VF_DisabledFromOtherNode".Translate(), MessageTypeDefOf.RejectInput, false);
 				}
 				else if (Vehicle.CompUpgradeTree.PrerequisitesMet(selectedNode.node))
 				{
@@ -124,7 +124,7 @@ namespace Vehicles
 				}
 				else
 				{
-					Messages.Message("MissingPrerequisiteUpgrade".Translate(), MessageTypeDefOf.RejectInput, false);
+					Messages.Message("VF_MissingPrerequisiteUpgrade".Translate(), MessageTypeDefOf.RejectInput, false);
 				}
 			}
 			GUI.enabled = true;

@@ -135,7 +135,7 @@ namespace Vehicles
 					}
 					else if (maxNodesHit)
 					{
-						Messages.Message("VehicleFlightPathMaxNodes".Translate(vehicle.LabelShortCap), MessageTypeDefOf.RejectInput);
+						Messages.Message("VF_FlightPathMaxNodes".Translate(vehicle.LabelShortCap), MessageTypeDefOf.RejectInput);
 					}
 					else if (sameTile)
 					{

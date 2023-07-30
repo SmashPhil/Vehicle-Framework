@@ -16,34 +16,34 @@ namespace Vehicles
 		[PostToSettings]
 		public VehicleEnabledFor enabled = VehicleEnabledFor.Everyone;
 
-		[PostToSettings(Label = "VehicleNameable", Translate = true, Tooltip = "VehicleNameableTooltip", UISettingsType = UISettingsType.Checkbox)]
+		[PostToSettings(Label = "VF_Nameable", Translate = true, Tooltip = "VF_NameableTooltip", UISettingsType = UISettingsType.Checkbox)]
 		public bool nameable = false;
 
 		[DisableSetting]
-		[PostToSettings(Label = "VehicleCombatPower", Translate = true, Tooltip = "VehicleCombatPowerTooltip", UISettingsType = UISettingsType.FloatBox)]
+		[PostToSettings(Label = "VF_CombatPower", Translate = true, Tooltip = "VF_CombatPowerTooltip", UISettingsType = UISettingsType.FloatBox)]
 		[NumericBoxValues(MinValue = 0, MaxValue = float.MaxValue)]
 		public float combatPower = 0;
 
 		//[PostToSettings(Label = "VF_VehicleStats", Translate = true, Tooltip = "VF_VehicleStatsTooltip")]
 		public List<VehicleStatModifier> vehicleStats;
 
-		[PostToSettings(Label = "VehicleMovementPermissions", Translate = true, UISettingsType = UISettingsType.SliderEnum)]
+		[PostToSettings(Label = "VF_MovementPermissions", Translate = true, UISettingsType = UISettingsType.SliderEnum)]
 		[ActionOnSettingsInput(typeof(VehicleHarmony), nameof(VehicleHarmony.RecacheMoveableVehicleDefs))]
 		public VehiclePermissions vehicleMovementPermissions = VehiclePermissions.DriverNeeded;
 
-		[PostToSettings(Label = "VehicleCanCaravan", Translate = true, Tooltip = "VehicleCanCaravanTooltip", UISettingsType = UISettingsType.Checkbox)]
+		[PostToSettings(Label = "VF_CanCaravan", Translate = true, Tooltip = "VF_CanCaravanTooltip", UISettingsType = UISettingsType.Checkbox)]
 		public bool canCaravan = true;
 
 		public VehicleCategory vehicleCategory = VehicleCategory.Misc;
 		public VehicleType vehicleType = VehicleType.Land;
 
-		[PostToSettings(Label = "VehicleNavigationType", Translate = true, UISettingsType = UISettingsType.SliderEnum)]
+		[PostToSettings(Label = "VF_NavigationType", Translate = true, Tooltip = "VF_NavigationTypeTooltip", UISettingsType = UISettingsType.SliderEnum)]
 		public NavigationCategory navigationCategory = NavigationCategory.Opportunistic;
 
 		public VehicleBuildDef buildDef;
 		public new GraphicDataRGB graphicData;
 
-		[PostToSettings(Label = "VehicleProperties", Translate = true, ParentHolder = true)]
+		[PostToSettings(Label = "VF_Properties", Translate = true, ParentHolder = true)]
 		public VehicleProperties properties;
 		
 		public VehicleDrawProperties drawProperties;

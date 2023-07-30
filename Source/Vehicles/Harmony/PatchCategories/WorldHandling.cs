@@ -272,9 +272,11 @@ namespace Vehicles
 			AerialVehicleTraderHelper.SetupAerialVehicleTrade(ref ___playerCaravanAllPawnsAndItems);
 		}
 
-		public static void DrawAerialVehicleInfo(ref Rect inRect)
+		public static void DrawAerialVehicleInfo(Dialog_Trade __instance, ref Rect inRect)
 		{
-			AerialVehicleTraderHelper.DrawAerialVehicleInfo(ref inRect);
+			Rect rect = new Rect(12f, 0f, inRect.width - 24f, 40f);
+			float yUsed = AerialVehicleTraderHelper.DrawAerialVehicleInfo(__instance, rect);
+			inRect.yMin += yUsed;
 		}
 
 		/* -------------------- Launch Targeter -------------------- */

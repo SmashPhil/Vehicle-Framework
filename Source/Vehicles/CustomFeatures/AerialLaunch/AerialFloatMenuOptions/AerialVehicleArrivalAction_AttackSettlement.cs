@@ -84,7 +84,7 @@ namespace Vehicles
 			if (vehicle.CompVehicleLauncher.ControlInFlight)
 			{
 				foreach (FloatMenuOption floatMenuOption2 in VehicleArrivalActionUtility.GetFloatMenuOptions(() => CanAttack(vehicle, settlement), () => new AerialVehicleArrivalAction_AttackSettlement(vehicle, launchProtocol, settlement, AerialVehicleArrivalModeDefOf.TargetedLanding),
-				"AttackAndTargetLanding".Translate(settlement.Label), vehicle, settlement.Tile, null))
+				"VF_AttackAndTargetLanding".Translate(settlement.Label), vehicle, settlement.Tile, null))
 				{
 					yield return floatMenuOption2;
 				}

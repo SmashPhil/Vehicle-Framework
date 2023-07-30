@@ -1487,7 +1487,7 @@ namespace Vehicles
 			}
 			else
 			{
-				Messages.Message("AutoTargetingDisabled".Translate(), MessageTypeDefOf.RejectInput);
+				Messages.Message("VF_AutoTargetingDisabled".Translate(), MessageTypeDefOf.RejectInput);
 			}
 		}
 
@@ -1739,7 +1739,7 @@ namespace Vehicles
 					{
 						if (!turret.vehicle.inventory.innerContainer.Contains(turret.turretDef.ammunition.AllowedThingDefs.FirstOrDefault()))
 						{
-							Messages.Message("NoAmmoAvailable".Translate(), MessageTypeDefOf.RejectInput);
+							Messages.Message("VF_NoAmmoAvailable".Translate(), MessageTypeDefOf.RejectInput);
 						}
 						else
 						{
@@ -1767,7 +1767,7 @@ namespace Vehicles
 						Find.WindowStack.Add(new FloatMenu(options));
 					}
 				},
-				tooltip = "VehicleReloadVehicleTurret".Translate()
+				tooltip = "VF_ReloadVehicleTurret".Translate()
 			};
 		}
 
@@ -1809,7 +1809,7 @@ namespace Vehicles
 				{
 					turret.SwitchAutoTarget();
 				},
-				tooltip = "AutoTargeting".Translate(turret.AutoTarget.ToString())
+				tooltip = "VF_AutoTargeting".Translate(turret.AutoTarget.ToString())
 			};
 		}
 

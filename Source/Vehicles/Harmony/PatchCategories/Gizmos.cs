@@ -51,7 +51,7 @@ namespace Vehicles
 					int index = gizmos.FindIndex(x => (x as Command_Action).icon == Settlement.AttackCommand);
 					if (index >= 0 && index < gizmos.Count)
 					{
-						gizmos[index].Disable("CommandAttackDockDisable".Translate(__instance.LabelShort));
+						gizmos[index].Disable("VF_CommandAttackDockDisable".Translate(__instance.LabelShort));
 					}
 				}
 				else
@@ -59,12 +59,12 @@ namespace Vehicles
 					int index2 = gizmos.FindIndex(x => (x as Command_Action).icon == ContentFinder<Texture2D>.Get("UI/Commands/Trade", false));
 					if (index2 >= 0 && index2 < gizmos.Count)
 					{
-						gizmos[index2].Disable("CommandTradeDockDisable".Translate(__instance.LabelShort));
+						gizmos[index2].Disable("VF_CommandTradeDockDisable".Translate(__instance.LabelShort));
 					}
 					int index3 = gizmos.FindIndex(x => (x as Command_Action).icon == ContentFinder<Texture2D>.Get("UI/Commands/OfferGifts", false));
 					if (index3 >= 0 && index3 < gizmos.Count)
 					{
-						gizmos[index3].Disable("CommandTradeDockDisable".Translate(__instance.LabelShort));
+						gizmos[index3].Disable("VF_CommandTradeDockDisable".Translate(__instance.LabelShort));
 					}
 				}
 				__result = gizmos;
@@ -116,8 +116,8 @@ namespace Vehicles
 				{
 					yield return new Command_Action()
 					{
-						defaultLabel = "CommandFormVehicleCaravan".Translate(),
-						defaultDesc = "CommandFormVehicleCaravanDesc".Translate(),
+						defaultLabel = "VF_CommandFormVehicleCaravan".Translate(),
+						defaultDesc = "VF_CommandFormVehicleCaravanDesc".Translate(),
 						icon = VehicleTex.FormCaravanVehicle,
 						action = delegate ()
 						{
@@ -130,8 +130,8 @@ namespace Vehicles
 				{
 					Command_Action command_Action = new Command_Action
 					{
-						defaultLabel = "CommandReformVehicleCaravan".Translate(),
-						defaultDesc = "CommandReformVehicleCaravanDesc".Translate(),
+						defaultLabel = "VF_CommandReformVehicleCaravan".Translate(),
+						defaultDesc = "VF_CommandReformVehicleCaravanDesc".Translate(),
 						icon = VehicleTex.FormCaravanVehicle,
 						hotKey = KeyBindingDefOf.Misc2,
 						action = delegate ()

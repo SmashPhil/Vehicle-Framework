@@ -537,7 +537,7 @@ namespace Vehicles
 					if (pawnsFromTransferables.NotNullAndAny(v => v is VehiclePawn vehicle && vehicle.VehicleDef.vehicleType == VehicleType.Sea) 
 						&& pawnsFromTransferables.NotNullAndAny(v => v is VehiclePawn vehicle && vehicle.VehicleDef.vehicleType == VehicleType.Land))
 					{
-						Messages.Message("LandAndSeaRoutePlannerRestriction".Translate(), MessageTypeDefOf.RejectInput);
+						Messages.Message("VF_LandAndSeaRoutePlannerRestriction".Translate(), MessageTypeDefOf.RejectInput);
 						return;
 					}
 
@@ -546,9 +546,9 @@ namespace Vehicles
 					{
 						Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, false);
 					}
-					else if (!pawnsFromTransferables.Where(p => p is VehiclePawn).Any())
+					else if (!pawnsFromTransferables.Any(pawn => pawn is VehiclePawn))
 					{
-						Messages.Message("CaravanMustHaveAtLeastOneVehicle".Translate(), MessageTypeDefOf.RejectInput, false);
+						Messages.Message("VF_CaravanMustHaveAtLeastOneVehicle".Translate(), MessageTypeDefOf.RejectInput, false);
 					}
 					else
 					{
@@ -749,7 +749,7 @@ namespace Vehicles
 			}
 			if (vehicles.Any(v => v.CountAssignedToVehicle() < v.PawnCountToOperate))
 			{
-				Messages.Message("MessageMustAssignEnoughToVehicle".Translate(), MessageTypeDefOf.RejectInput, false);
+				Messages.Message("VF_MustAssignEnoughToVehicle".Translate(), MessageTypeDefOf.RejectInput, false);
 				return false;
 			}
 			if (!reform && startingTile < 0)
@@ -1064,7 +1064,7 @@ namespace Vehicles
 
 				if(!flag)
 				{
-					Messages.Message("PackingSpotNotFoundBoats".Translate(), MessageTypeDefOf.CautionInput, false);
+					Messages.Message("VF_PackingSpotNotFound".Translate(), MessageTypeDefOf.CautionInput, false);
 					flag = RCellFinder.TryFindRandomSpotJustOutsideColony(ships.First().Position, map, out packingSpot);
 				}
 				return flag;

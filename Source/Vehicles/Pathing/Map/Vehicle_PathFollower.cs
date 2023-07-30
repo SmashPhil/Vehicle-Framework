@@ -564,7 +564,7 @@ namespace Vehicles
 			if (pawnPath is null || !pawnPath.Found)
 			{
 				PatherFailed();
-				Messages.Message("NoPathForVehicle".Translate(), MessageTypeDefOf.RejectInput, false);
+				Messages.Message("VF_NoPathForVehicle".Translate(), MessageTypeDefOf.RejectInput, false);
 				return false;
 			}
 			if (curPath != null)
@@ -584,7 +584,7 @@ namespace Vehicles
 			if (pawnPath is null || !pawnPath.Found)
 			{
 				PatherFailed();
-				Messages.Message("NoPathForVehicle".Translate(), MessageTypeDefOf.RejectInput, false);
+				Messages.Message("VF_NoPathForVehicle".Translate(), MessageTypeDefOf.RejectInput, false);
 				return;
 			}
 			lock (pathLock)

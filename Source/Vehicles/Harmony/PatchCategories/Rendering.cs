@@ -118,7 +118,7 @@ namespace Vehicles
 
 			Rect rect2 = new Rect(vector.x, vector.y, num, num);
 			GUI.DrawTexture(rect2, VehicleTex.CachedTextureIcons[handler.vehicle.VehicleDef]);
-			TooltipHandler.TipRegion(rect2, "ActivityIconOnBoardShip".Translate(handler.vehicle.Label)); 
+			TooltipHandler.TipRegion(rect2, "VF_ActivityIconOnBoardShip".Translate(handler.vehicle.Label)); 
 			vector.x += num;
 		}
 

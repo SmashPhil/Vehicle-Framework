@@ -257,8 +257,8 @@ namespace Vehicles
 				{
 					hotKey = KeyBindingDefOf.Command_TogglePower,
 					icon = VehicleTex.FlickerIcon,
-					defaultLabel = "VehicleElectricFlick".Translate(),
-					defaultDesc = "VehicleElectricFlickDesc".Translate(),
+					defaultLabel = "VF_ElectricFlick".Translate(),
+					defaultDesc = "VF_ElectricFlickDesc".Translate(),
 					isActive = (() => Charging),
 					toggleAction = delegate()
 					{

@@ -510,7 +510,7 @@ namespace Vehicles
 				}
 				if (!outOfFoodNotified && !TryGetBestFood(pawn, out _, out Pawn _))
 				{
-					Messages.Message("ShipOutOfFood".Translate(LabelShort), this, MessageTypeDefOf.NegativeEvent, false);
+					Messages.Message("VF_OutOfFood".Translate(LabelShort), this, MessageTypeDefOf.NegativeEvent, false);
 					outOfFoodNotified = true;
 				}
 			}

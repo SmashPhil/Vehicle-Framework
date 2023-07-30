@@ -527,9 +527,9 @@ namespace Vehicles
 		{
 			if (mapParent.EnterCooldownBlocksEntering())
 			{
-				return new FloatMenuOption($"{"AerialReconSite".Translate(mapParent.Label)} ({"EnterCooldownBlocksEntering".Translate()})", null);
+				return new FloatMenuOption($"{"VF_AerialReconSite".Translate(mapParent.Label)} ({"EnterCooldownBlocksEntering".Translate()})", null);
 			}
-			return new FloatMenuOption("AerialReconSite".Translate(mapParent.Label), delegate ()
+			return new FloatMenuOption("VF_AerialReconSite".Translate(mapParent.Label), delegate ()
 			{
 				if (vehicle.Spawned)
 				{
@@ -553,7 +553,7 @@ namespace Vehicles
 
 		protected virtual FloatMenuOption FloatMenuOption_StrafeMap(MapParent mapParent, int tile)
 		{
-			return new FloatMenuOption("VehicleStrafeRun".Translate(), delegate ()
+			return new FloatMenuOption("VF_StrafeRun".Translate(), delegate ()
 			{
 				if (vehicle.Spawned)
 				{
@@ -580,7 +580,7 @@ namespace Vehicles
 		{
 			if (settlement.Faction.def.techLevel <= TechLevel.Industrial)
 			{
-				yield return new FloatMenuOption("LandVehicleHere".Translate(), delegate ()
+				yield return new FloatMenuOption("VF_LandVehicleHere".Translate(), delegate ()
 				{
 					if (vehicle.Spawned)
 					{
@@ -655,12 +655,12 @@ namespace Vehicles
 			if (fuelCost > vehicle.CompFueledTravel.Fuel)
 			{
 				GUI.color = TexData.RedReadable;
-				return "VehicleNotEnoughFuel".Translate();
+				return "VF_NotEnoughFuel".Translate();
 			}
 			else if (target.IsValid && vehicle.CompVehicleLauncher.FuelNeededToLaunchAtDist(WorldHelper.GetTilePos(tile), target.Tile)  > (vehicle.CompFueledTravel.Fuel - fuelCost))
 			{
 				GUI.color = TexData.YellowReadable;
-				return "VehicleNoFuelReturnTrip".Translate();
+				return "VF_NoFuelReturnTrip".Translate();
 			}
 			IEnumerable<FloatMenuOption> source = GetFloatMenuOptionsAt(target.Tile);
 			if (!source.Any())

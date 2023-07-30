@@ -92,7 +92,7 @@ namespace Vehicles
 				LordMaker.MakeNewLord(parms.faction, lordJob, Map, enemies);
 			}
 
-			var letter = LetterMaker.MakeLetter("ReinforcementsArrivedLabel".Translate(), "ReinforcementsArrived".Translate(reinforcementsFrom.Label), LetterDefOf.ThreatBig, reinforcementsFrom.Faction);
+			var letter = LetterMaker.MakeLetter("VF_ReinforcementsArrivedLabel".Translate(), "VF_ReinforcementsArrived".Translate(reinforcementsFrom.Label), LetterDefOf.ThreatBig, reinforcementsFrom.Faction);
 			Find.LetterStack.ReceiveLetter(letter);
 			ticksTillReinforcements = Mathf.RoundToInt(pathToSite.TotalCost * scaleFactor.RandomInRange);
 		}

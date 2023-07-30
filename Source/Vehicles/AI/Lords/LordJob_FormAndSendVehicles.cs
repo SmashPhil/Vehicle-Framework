@@ -127,14 +127,6 @@ namespace Vehicles
 				{
 					return "FormingCaravanStatus_GatheringItems_Pause".Translate();
 				}
-				if (curLordToil == gatherSlaves)
-				{
-					return "FormingCaravanStatus_GatheringSlaves_Vehicles".Translate();
-				}
-				if (curLordToil == gatherSlaves_pause)
-				{
-					return "FormingCaravanStatus_GatheringSlaves_Vehicles_Pause".Translate();
-				}
 				if (curLordToil == gatherDownedPawns)
 				{
 					return "FormingCaravanStatus_GatheringDownedPawns".Translate();
@@ -145,27 +137,27 @@ namespace Vehicles
 				}
 				if (curLordToil == tieAnimals)
 				{
-					return "FormingCaravanStatus_RopingAnimals".Translate();
+					return "VF_FormingCaravanStatus_RopingAnimals".Translate();
 				}
 				if (curLordToil == tieAnimals_pause)
 				{
-					return "FormingCaravanStatus_RopingAnimals_Pause".Translate();
+					return "VF_FormingCaravanStatus_RopingAnimals_Pause".Translate();
 				}
 				if (curLordToil == boardVehicle)
 				{
-					return "FormingCaravanStatus_BoardVehicles".Translate();
+					return "VF_FormingCaravanStatus_BoardVehicles".Translate();
 				}
 				if (curLordToil == boardVehicle_pause)
 				{
-					return "FormingCaravanStatus_BoardVehicles_Pause".Translate();
+					return "VF_FormingCaravanStatus_BoardVehicles_Pause".Translate();
 				}
 				if (curLordToil == leave)
 				{
-					return "FormingCaravanStatus_Leaving".Translate();
+					return "VF_FormingCaravanStatus_Leaving_Vehicles".Translate();
 				}
 				if (curLordToil == leave_pause)
 				{
-					return "FormingCaravanStatus_Leaving_Pause".Translate();
+					return "VF_FormingCaravanStatus_Leaving_Vehicles_Pause".Translate();
 				}
 				return "FormingCaravanStatus_Waiting".Translate();
 			}
@@ -359,7 +351,7 @@ namespace Vehicles
 			if (!lord.ownedPawns.NotNullAndAny(x => x is VehiclePawn))
 			{
 				lord.lordManager.RemoveLord(lord);
-				Messages.Message("BoatCaravanTerminatedNoBoats".Translate(), MessageTypeDefOf.NegativeEvent);
+				Messages.Message("VF_CaravanTerminatedNoVehicles".Translate(), MessageTypeDefOf.NegativeEvent);
 			}
 		}
 

@@ -28,7 +28,7 @@ namespace Vehicles
 		public ITab_Vehicle_Cargo()
 		{
 			size = new Vector2(460f, 450f);
-			labelKey = "TabCargo";
+			labelKey = "VF_TabCargo";
 		}
 
 		public override bool IsVisible => !Vehicle.beached;
@@ -62,7 +62,7 @@ namespace Vehicles
 			
 			if(IsVisible)
 			{
-				Widgets.ListSeparator(ref num, viewRect.width, "Cargo".Translate());
+				Widgets.ListSeparator(ref num, viewRect.width, "VF_Cargo".Translate());
 				workingInvList.Clear();
 				workingInvList.AddRange(Vehicle.inventory.innerContainer);
 				foreach(Thing t in workingInvList)

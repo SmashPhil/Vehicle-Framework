@@ -27,7 +27,7 @@ namespace Vehicles
 			{
 				range = new FloatRange(-value, value);
 			}
-			lister.SliderLabeled(def, field, "VehicleMaxSpeed".Translate(), "VehicleMaxSpeedTooltip".Translate(), string.Empty, string.Empty, value + range.Value.min, value + range.Value.max, 1, -1, 0.1f);
+			lister.SliderLabeled(def, field, "VF_MaxSpeed".Translate(), "VF_MaxSpeedTooltip".Translate(), string.Empty, string.Empty, value + range.Value.min, value + range.Value.max, 1, -1, 0.1f);
 		}
 	}
 }

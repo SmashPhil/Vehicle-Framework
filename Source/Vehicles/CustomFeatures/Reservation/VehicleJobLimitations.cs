@@ -5,11 +5,11 @@ using SmashTools;
 
 namespace Vehicles
 {
-	[HeaderTitle(Label = "VehicleJobLimitations", Translate = true)]
+	[HeaderTitle(Label = "VF_JobLimitations", Translate = true)]
 	public struct VehicleJobLimitations
 	{
 		public string defName;
-		[PostToSettings(Label = "VehicleMaxWorkers", Translate = true)]
+		[PostToSettings(Label = "VF_MaxWorkers", Translate = true)]
 		public int maxWorkers;
 
 		public VehicleJobLimitations(string defName, int maxWorkers)

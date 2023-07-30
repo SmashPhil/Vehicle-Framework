@@ -284,8 +284,8 @@ namespace Vehicles
 				{
 					Command_Action dock = new Command_Action();
 					dock.icon = VehicleTex.Anchor;
-					dock.defaultLabel = Find.WorldObjects.AnySettlementBaseAt(Tile) ? "CommandDockShip".Translate() : "CommandDockShipDisembark".Translate();
-					dock.defaultDesc = Find.WorldObjects.AnySettlementBaseAt(Tile) ? "CommandDockShipDesc".Translate(Find.WorldObjects.SettlementBaseAt(Tile)) : "CommandDockShipObjectDesc".Translate();
+					dock.defaultLabel = Find.WorldObjects.AnySettlementBaseAt(Tile) ? "VF_CommandDockShip".Translate() : "VF_CommandDockShipDisembark".Translate();
+					dock.defaultDesc = Find.WorldObjects.AnySettlementBaseAt(Tile) ? "VF_CommandDockShipDesc".Translate(Find.WorldObjects.SettlementBaseAt(Tile)) : "VF_CommandDockShipObjectDesc".Translate();
 					dock.action = delegate ()
 					{
 						List<WorldObject> objects = Find.WorldObjects.ObjectsAt(Tile).ToList();
@@ -306,8 +306,8 @@ namespace Vehicles
 					Command_Action undock = new Command_Action
 					{
 						icon = VehicleTex.UnloadAll,
-						defaultLabel = "CommandUndockShip".Translate(),
-						defaultDesc = "CommandUndockShipDesc".Translate(Label),
+						defaultLabel = "VF_CommandUndockShip".Translate(),
+						defaultDesc = "VF_CommandUndockShipDesc".Translate(Label),
 						action = delegate ()
 						{
 							CaravanHelper.ToggleDocking(this, false);
@@ -440,7 +440,7 @@ namespace Vehicles
 				}
 				else if (this.HasBoat())
 				{
-					stringBuilder.Append("CaravanSailing".Translate());
+					stringBuilder.Append("VF_Sailing".Translate());
 				}
 				else
 				{

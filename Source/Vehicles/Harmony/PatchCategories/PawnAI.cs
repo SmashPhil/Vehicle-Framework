@@ -27,7 +27,7 @@ namespace Vehicles
 				{
 					if (handler.RequiredForMovement)
 					{
-						Messages.Message(TranslatorFormattedStringExtensions.Translate("Vehicles_VehicleCaravanMentalBreakMovementRole", ___pawn),MessageTypeDefOf.NegativeEvent);
+						Messages.Message(TranslatorFormattedStringExtensions.Translate("VF_VehicleCaravanMentalBreakMovementRole", ___pawn),MessageTypeDefOf.NegativeEvent);
 					}
 				}
 				else

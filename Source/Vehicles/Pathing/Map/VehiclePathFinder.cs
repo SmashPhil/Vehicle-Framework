@@ -139,7 +139,7 @@ namespace Vehicles
 		{
 			if (!vehicle.FitsOnCell(dest.Cell))
 			{
-				Messages.Message("VehicleCannotFit".Translate(), MessageTypeDefOf.RejectInput);
+				Messages.Message("VF_CannotFit".Translate(), MessageTypeDefOf.RejectInput);
 				return PawnPath.NotFound;
 			}
 			Danger maxDanger = Danger.Deadly;

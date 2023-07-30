@@ -170,7 +170,7 @@ namespace Vehicles
 					vehicles += pawn.LabelShort;
 				}
 				
-				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("LeaveVehicleBehindCaravan".Translate(vehicles), delegate ()
+				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("VF_LeaveVehicleBehindCaravan".Translate(vehicles), delegate ()
 				{
 					if (!(bool)AccessTools.Method(typeof(Dialog_FormCaravan), "CheckForErrors").Invoke(__instance, new object[] { correctedPawns }))
 					{
@@ -255,14 +255,6 @@ namespace Vehicles
 		{
 			if (pawn.IsInVehicle() || CaravanHelper.assignedSeats.ContainsKey(pawn))
 			{
-				if (explanation != null)
-				{
-					if (explanation.Length > 0)
-					{
-						//explanation.AppendLine();
-					}
-					//explanation.Append($"  - {pawn.LabelCap}: +0 kg ({"VF_PawnInVehicleNoCapacity".Translate()})");
-				}
 				return 0; //pawns in vehicles or assigned to vehicle don't contribute to capacity
 			}
 			return MassUtility.Capacity(pawn, explanation);
@@ -381,7 +373,7 @@ namespace Vehicles
 
 				float yShip = curY;
 				float numS;
-				object[] mSargs = new object[] { inRect, "CaravanShips".Translate().ToStringSafe(), pawnsCountLabelShip, curY, null };
+				object[] mSargs = new object[] { inRect, "VF_Vehicles".Translate().ToStringSafe(), pawnsCountLabelShip, curY, null };
 				doPeopleAndAnimalsEntry.Invoke(__instance, mSargs);
 				curY = (float)mSargs[3];
 				numS = (float)mSargs[4];

@@ -1,59 +1,49 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <LanguageData>
-	<!-- UI Responses -->
+	<!-- Color Picker -->
 	<VF_MustSelectColorPalette>Must have a palette selected to save over.</VF_MustSelectColorPalette>
 
-	<!-- Game Mechanics -->
+	<!-- Vehicles -->
 	<VF_VehicleUnableToMove>{0_labelShort} is unable to move.</VF_VehicleUnableToMove>
-	
-	<!-- Misc. Info -->
-	
-	<!-- Caravan -->
 	<VF_HandlerNotEnoughRoom>Failed to add {0} to {1}. No more space available.</VF_HandlerNotEnoughRoom>
 	
-	<Vehicles_NotEnoughToOperate>Needs more crew in order to operate.</Vehicles_NotEnoughToOperate>
-	<Vehicles_OutOfFuel>Cannot draft. Vehicle needs more fuel.</Vehicles_OutOfFuel>
-	<Vehicles_UpgradeInProgress>Cannot draft while Vehicle is upgrading.</Vehicles_UpgradeInProgress>
+	<VF_NotEnoughToOperate>Needs more crew in order to operate.</VF_NotEnoughToOperate>
+	<VF_OutOfFuel>Cannot draft. Vehicle needs more fuel.</VF_OutOfFuel>
+	<VF_UpgradeInProgress>Cannot draft while Vehicle is upgrading.</VF_UpgradeInProgress>
+	<VF_NotEnoughCrew>Not enough colonists in {0} to operate {1}.</VF_NotEnoughCrew>
 	
-	<Vehicles_VehicleCaravanMentalBreakMovementRole>{0} is no longer able to operate their role for the vehicle caravan.</Vehicles_VehicleCaravanMentalBreakMovementRole>
-	<RunwayNotValid>Runway not valid</RunwayNotValid>
-	<NotEnoughCannonCrew>Not enough colonists in {0} to operate {1}.</NotEnoughCannonCrew>
-	<NameIsInvalid>Name invalid for Vehicle.</NameIsInvalid>
-	<VehicleGainsName>{0} has been named {1}</VehicleGainsName>
-	<ShipOutOfFood>No food in {0} with Pawns onboard</ShipOutOfFood>
-	<MessagePawnBoardedFormingCaravan>{0} has boarded the {1} and is ready for departure.</MessagePawnBoardedFormingCaravan>
-	<MessageCantAddWaypointBecauseNoShip>Must have a boat in order to travel across {0}</MessageCantAddWaypointBecauseNoShip>
-	<MessageCantAddWaypointBecauseShip>Cannot travel on land with boats.</MessageCantAddWaypointBecauseShip>
-	<MessageCantAddWaypointBecauseRiverUnreachable>Boat is not able to travel on this river</MessageCantAddWaypointBecauseRiverUnreachable>
-	<TerrainReset>({0}) Water Regions have been reset.</TerrainReset>
-	<CantMoveDocked>Not enough pawns to set sail.</CantMoveDocked>
-	<RejectDisembarkInvalidTile>Unable to exit vehicle. No valid tiles to exit onto.</RejectDisembarkInvalidTile>
-	<CantAssignVehicle>Not enough pawns for {0}.</CantAssignVehicle>
-	<AssignFailure>Failed to assign seats. {0}</AssignFailure>
-	<PackingSpotNotFoundBoats>Packing Spot was not found for Vehicle caravan. It is recommended you place a Packing Spot from Misc.</PackingSpotNotFoundBoats>
-	<ForceLeaveCaravan>Force to Leave</ForceLeaveCaravan>
-	<ForceLeaveCaravanDesc>Force Vehicle Caravan to leave the map. Will skip loading whatever items are not currently onboard</ForceLeaveCaravanDesc>
-	<ForceLeaveConfirmation>Crew is preparing to leave.</ForceLeaveConfirmation>
-	<BoatCaravanTerminatedNoBoats>Caravan process has been terminated. No boats remain. </BoatCaravanTerminatedNoBoats>
-	<NoAmmoLoadedCannon>No ammo loaded.</NoAmmoLoadedCannon>
-	<NoAmmoAvailable>No ammo available in inventory.</NoAmmoAvailable>
-	<VehicleCannotFit>Not enough space.</VehicleCannotFit>
-	<NoPathForVehicle>Cannot path here.</NoPathForVehicle>
-	<IncapableStatusForRole>{0} is incapable of fulfilling this role.</IncapableStatusForRole>
-	<LandAndSeaRoutePlannerRestriction>Cannot plan route for both Sea and Land vehicles. Paths will not register. </LandAndSeaRoutePlannerRestriction>
-	<AutoTargetingDisabled>AutoTargeting is not allowed for this turret.</AutoTargetingDisabled>
-	<LeaveVehicleBehindCaravan>Are you sure you want to leave Vehicles behind? Vehicles left behind: {0}</LeaveVehicleBehindCaravan>
-	<MessageMustAssignEnoughToVehicle>Must assign enough colonists to man vehicle.</MessageMustAssignEnoughToVehicle>
+	<VF_CannotFit>Not enough space.</VF_CannotFit>
+	<VF_NoPathForVehicle>Cannot path here.</VF_NoPathForVehicle>
+	<VF_IncapableStatusForRole>{0} is incapable of fulfilling this role.</VF_IncapableStatusForRole>
 	
+	<VF_InvalidName>Name invalid for Vehicle.</VF_InvalidName>
+	<VF_OutOfFood>No food in {0} with Pawns onboard.</VF_OutOfFood>
+	
+	<!-- Turrets -->
+	<VF_NoAmmoLoadedTurret>No ammo loaded.</VF_NoAmmoLoadedTurret>
+	<VF_NoAmmoAvailable>No ammo available in inventory.</VF_NoAmmoAvailable>
+	
+	<!-- Caravan -->
+	<VF_VehicleCaravanMentalBreakMovementRole>{0} is no longer able to operate their role for the vehicle caravan.</VF_VehicleCaravanMentalBreakMovementRole>
+	<VF_PawnBoardedFormingCaravan>{0} has boarded the {1} and is ready for departure.</VF_PawnBoardedFormingCaravan>
+	<VF_CantMoveDocked>Not enough pawns to set sail.</VF_CantMoveDocked>
+	<VF_CantAssignVehicle>Not enough pawns for {0}.</VF_CantAssignVehicle>
+	<VF_AssignFailure>Failed to assign seats. {0}</VF_AssignFailure>
+	<VF_PackingSpotNotFound>Packing Spot was not found for Vehicle caravan. It is recommended you place a Packing Spot from Misc.</VF_PackingSpotNotFound>
+	<VF_ForceLeaveCaravan>Force to Leave</VF_ForceLeaveCaravan>
+	<VF_ForceLeaveCaravanDesc>Force Vehicle Caravan to leave the map. Will skip loading whatever items are not currently onboard.</VF_ForceLeaveCaravanDesc>
+	<VF_ForceLeaveConfirmation>Crew is preparing to leave.</VF_ForceLeaveConfirmation>
+	<VF_CaravanTerminatedNoVehicles>Caravan process has been terminated. No vehicles remain.</VF_CaravanTerminatedNoVehicles>
+	<VF_LandAndSeaRoutePlannerRestriction>Cannot plan route for both Sea and Land vehicles. Paths will not register.</VF_LandAndSeaRoutePlannerRestriction>
+	<VF_LeaveVehicleBehindCaravan>Are you sure you want to leave Vehicles behind? Vehicles left behind: {0}</VF_LeaveVehicleBehindCaravan>
+	<VF_MustAssignEnoughToVehicle>Must assign enough colonists to man vehicle.</VF_MustAssignEnoughToVehicle>
+	
+	<!-- Aerial Vehicles -->
 	<VF_AerialVehicleArrived>{0} has arrived at their destination.</VF_AerialVehicleArrived>
 	<VF_AerialVehicleLeft>{0} has left the map.</VF_AerialVehicleLeft>
 	<VF_AerialVehicleLaunchNotValid>Unable to launch, conditions are not suitable.</VF_AerialVehicleLaunchNotValid>
-	<VehicleLaunchOutOfFuel>Cannot launch. Out of Fuel.</VehicleLaunchOutOfFuel>
-	<VehicleRunwayCannotLand>Cannot land here.</VehicleRunwayCannotLand>
-	<VehicleRunwayCannotLandEnemy>Cannot land at enemy settlement.</VehicleRunwayCannotLandEnemy>
-	<VehicleRunwayCannotLandTechLevel>Cannot land at settlement. No runway available.</VehicleRunwayCannotLandTechLevel>
-	<VehicleFlightPathMaxNodes>Maximum nodes for {0}'s flight path has been reached.</VehicleFlightPathMaxNodes>
-	<AerialVehicleTargetedAA>{0} is under attack.</AerialVehicleTargetedAA>
+	<VF_LaunchOutOfFuel>Cannot launch. Out of Fuel.</VF_LaunchOutOfFuel>
+	<VF_FlightPathMaxNodes>Maximum nodes for {0}'s flight path has been reached.</VF_FlightPathMaxNodes>
 	<VF_MustTargetLanding>A landing destination must be chosen.</VF_MustTargetLanding>
 </LanguageData>

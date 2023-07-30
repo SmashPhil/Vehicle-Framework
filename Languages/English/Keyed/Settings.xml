@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <LanguageData>
-	<!-- Misc. ModSettings labels -->
-	<VehicleListSearchText>Search...</VehicleListSearchText>
 	<VF_MainSettings>Main</VF_MainSettings>
+	
+	<!-- Misc. -->
+	<VF_ListSearchText>Search...</VF_ListSearchText>
+	<VF_SettingsDisabledTooltip>Settings have been locked for this vehicle and cannot be modified.</VF_SettingsDisabledTooltip>
+	<VF_NonUpgradeableSettingsTooltip>This vehicle cannot be upgraded.</VF_NonUpgradeableSettingsTooltip>
+	<VF_RecolorDefaultMaskTooltip>Change default pattern</VF_RecolorDefaultMaskTooltip>
 	
 	<!-- World & Map Generation -->
 	<VF_WorldMapGen>World/Map Generation</VF_WorldMapGen>
 	<VF_BeachGenMultiplier>Beach Size Multiplier</VF_BeachGenMultiplier>
 	<VF_BeachGenMultiplierTooltip>Increase the amount of water on the coastline.</VF_BeachGenMultiplierTooltip>
-	<VF_BeachGenMultiplierLargeTooltip>Current number is larger than recommended. The ocean can and may take up to as large as 80% of the map.</VF_BeachGenMultiplierLargeTooltip>
 	<VF_ForceSettlementCoast>Push Settlement to Coast</VF_ForceSettlementCoast>
 	<VF_ForceSettlementCoastTooltip>Push nearby faction settlements to the coast if within given radius</VF_ForceSettlementCoastTooltip>
 	<VF_EverySettlementToCoast>Every Settlement</VF_EverySettlementToCoast>
@@ -62,7 +65,6 @@ Determines whether Vehicles should use values from the mod settings or Defs</VF_
 	<!-- Land Vehicles (none right now)-->
 	
 	<!-- Sea Vehicles -->
-	<VF_SeaVehicles>Boats</VF_SeaVehicles>
 	<VF_Fishing>Fishing</VF_Fishing>
 	<VF_FishingInactive>Fishing (Inactive)</VF_FishingInactive>
 	<VF_FishingMultiplier>Fishing Multiplier</VF_FishingMultiplier>

@@ -186,11 +186,11 @@ namespace Vehicles
 
 			if (!VehicleMod.settings.debug.debugDraftAnyVehicle && !Vehicle.CanMoveWithOperators)
 			{
-				disableReason = "Vehicles_NotEnoughToOperate".Translate();
+				disableReason = "VF_NotEnoughToOperate".Translate();
 			}
 			else if (Vehicle.CompFueledTravel != null && Vehicle.CompFueledTravel.EmptyTank)
 			{
-				disableReason = "VehicleLaunchOutOfFuel".Translate();
+				disableReason = "VF_LaunchOutOfFuel".Translate();
 			}
 			else if(FlightSpeed <= 0)
 			{

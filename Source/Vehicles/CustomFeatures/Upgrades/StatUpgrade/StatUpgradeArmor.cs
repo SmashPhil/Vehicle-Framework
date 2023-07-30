@@ -27,7 +27,7 @@ namespace Vehicles
 			{
 				range = new FloatRange(-value, value);
 			}
-			lister.SliderLabeled(def, field, "VehicleMaxArmor".Translate(), "VehicleMaxArmorTooltip".Translate(), string.Empty, string.Empty, value + range.Value.min, value + range.Value.max, 1);
+			lister.SliderLabeled(def, field, "VF_MaxArmor".Translate(), "VF_MaxArmorTooltip".Translate(), string.Empty, string.Empty, value + range.Value.min, value + range.Value.max, 1);
 		}
 	}
 }

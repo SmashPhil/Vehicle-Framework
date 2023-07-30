@@ -179,18 +179,18 @@ namespace Vehicles
 		private static void DrawComponentsInfo(Rect rect, VehiclePawn vehicle)
 		{
 			Text.Font = GameFont.Small;
-			float textHeight = Text.CalcSize("VehicleComponentHealth".Translate()).y;
+			float textHeight = Text.CalcSize("VF_ComponentHealth".Translate()).y;
 			float columnWidth = 75 - (ComponentIndicatorIconSize / 3f);
 			float labelWidth = rect.width - (columnWidth * 3) - ComponentIndicatorIconSize * 2;
 			//Skip header for component name column
 			Rect topLabelRect = new Rect(rect.x + labelWidth, rect.y, columnWidth, textHeight);
 
 			Text.Anchor = TextAnchor.MiddleCenter;
-			Widgets.Label(topLabelRect, "VehicleComponentHealth".Translate());
+			Widgets.Label(topLabelRect, "VF_ComponentHealth".Translate());
 			topLabelRect.x += topLabelRect.width;
-			Widgets.Label(topLabelRect, "VehicleComponentEfficiency".Translate());
+			Widgets.Label(topLabelRect, "VF_ComponentEfficiency".Translate());
 			topLabelRect.x += topLabelRect.width;
-			Widgets.Label(topLabelRect, "VehicleComponentArmor".Translate());
+			Widgets.Label(topLabelRect, "VF_ComponentArmor".Translate());
 			topLabelRect.x += topLabelRect.width;
 
 			GUI.color = TexData.MenuBGColor;
@@ -211,7 +211,7 @@ namespace Vehicles
 				{
 					Rect compRect = new Rect(rect.x, curY, rect.width - 16, ComponentRowHeight);
 					float usedHeight = DrawCompRow(compRect, component, labelWidth, columnWidth, alternatingRow);
-					//TooltipHandler.TipRegion(compRect, "VehicleComponentClickMoreInfo".Translate());
+					//TooltipHandler.TipRegion(compRect, "VF_ComponentClickMoreInfoTooltip".Translate());
 					Rect highlightingRect = new Rect(compRect)
 					{
 						height = usedHeight

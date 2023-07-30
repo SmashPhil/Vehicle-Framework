@@ -331,7 +331,7 @@ namespace Vehicles
 			Rect rect = new Rect(0f, 0f, inRect.width, TitleRectHeight);
 			Text.Font = GameFont.Medium;
 			Text.Anchor = TextAnchor.MiddleCenter;
-			Widgets.Label(rect, "DockCaravan".Translate());
+			Widgets.Label(rect, "VF_DockToCaravan".Translate());
 			Text.Font = GameFont.Small;
 			Text.Anchor = TextAnchor.UpperLeft;
 			CaravanUIUtility.DrawCaravanInfo(new CaravanUIUtility.CaravanInfo(SourceMassUsage, SourceMassCapacity, cachedSourceMassCapacityExplanation, SourceTilesPerDay, 

@@ -85,7 +85,7 @@ namespace Vehicles
 				{
 					if (vehicle.AllPawnsAboard.Contains(pawn))
 					{
-						textShip = "MessagePawnBoardedFormingCaravan".Translate(pawn, vehicle.LabelShort).CapitalizeFirst();
+						textShip = "VF_PawnBoardedFormingCaravan".Translate(pawn, vehicle.LabelShort).CapitalizeFirst();
 						forcedToJoinOtherLord = true;
 						break;
 					}

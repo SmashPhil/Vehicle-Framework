@@ -221,7 +221,7 @@ namespace Vehicles
 				GUI.color = UIElements.InactiveColor;
 			}
 			Rect sliderRect = new Rect(0f, inRect.height - ButtonHeight * 3, ButtonWidth * 3, ButtonHeight);
-			UIElements.SliderLabeled(sliderRect, "VehiclePatternZoom".Translate(), "VehiclePatternZoomTooltip".Translate(), string.Empty, ref additionalTiling, 0.01f, 2);
+			UIElements.SliderLabeled(sliderRect, "VF_PatternZoom".Translate(), "VF_PatternZoomTooltip".Translate(), string.Empty, ref additionalTiling, 0.01f, 2);
 			Rect positionLeftBox = new Rect(sliderRect)
 			{
 				y = sliderRect.y + sliderRect.height,
@@ -232,8 +232,8 @@ namespace Vehicles
 				x = positionLeftBox.x + (sliderRect.width / 2) * 1.05f
 			};
 			
-			UIElements.SliderLabeled(positionLeftBox, "VehiclePatternDisplacementX".Translate(), string.Empty, string.Empty, ref displacementX, -1.5f, 1.5f);
-			UIElements.SliderLabeled(positionRightBox, "VehiclePatternDisplacementY".Translate(), string.Empty, string.Empty, ref displacementY, -1.5f, 1.5f);
+			UIElements.SliderLabeled(positionLeftBox, "VF_PatternDisplacementX".Translate(), string.Empty, string.Empty, ref displacementX, -1.5f, 1.5f);
+			UIElements.SliderLabeled(positionRightBox, "VF_PatternDisplacementY".Translate(), string.Empty, string.Empty, ref displacementY, -1.5f, 1.5f);
 			GUI.enabled = true;
 			GUI.color = color;
 
@@ -361,9 +361,9 @@ namespace Vehicles
 			
 			Widgets.DrawBoxSolid(colorContainerRect, RenderHelper.Greyist);
 
-			string c1Text = "ColorOne".Translate().ToString();
-			string c2Text = "ColorTwo".Translate().ToString();
-			string c3Text = "ColorThree".Translate().ToString();
+			string c1Text = "VF_ColorOne".Translate().ToString();
+			string c2Text = "VF_ColorTwo".Translate().ToString();
+			string c3Text = "VF_ColorThree".Translate().ToString();
 			float cHeight = Text.CalcSize(c1Text).y;
 			float c1Width = Text.CalcSize(c1Text).x;
 			float c2Width = Text.CalcSize(c2Text).x;
@@ -437,7 +437,7 @@ namespace Vehicles
 			Rect inputRect = new Rect(colorRect.x, colorRect.y + colorRect.height + 5f, colorRect.width / 2, 20f);
 			ApplyActionSwitch(delegate (ref ColorInt c, ref string hex)
 			{
-				hex = UIElements.HexField("ColorPickerHex".Translate(), inputRect, hex);
+				hex = UIElements.HexField("VF_ColorPickerHex".Translate(), inputRect, hex);
 				if (HexToColor(hex, out Color color) && color.a == 1)
 				{
 					c = new ColorInt(color);
@@ -456,7 +456,7 @@ namespace Vehicles
 				}
 				else
 				{
-					Messages.Message("MustSelectPalette".Translate(), MessageTypeDefOf.RejectInput);
+					Messages.Message("VF_MustSelectColorPalette".Translate(), MessageTypeDefOf.RejectInput);
 				}
 			}
 		}
@@ -507,7 +507,7 @@ namespace Vehicles
 
 		private void DoBottomButtons(Rect buttonRect)
 		{
-			if (Widgets.ButtonText(buttonRect, "ApplyButton".Translate()))
+			if (Widgets.ButtonText(buttonRect, "VF_ApplyButton".Translate()))
 			{
 				OnSave(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, selectedPattern, new Vector2(displacementX, displacementY), additionalTiling);
 				Close(true);

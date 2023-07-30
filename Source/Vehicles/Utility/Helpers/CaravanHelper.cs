@@ -174,7 +174,7 @@ namespace Vehicles
 				{
 					caravan.vPather.StopDead();
 				}
-				Messages.Message("CantMoveDocked".Translate(), MessageTypeDefOf.RejectInput, false);
+				Messages.Message("VF_CantMoveDocked".Translate(), MessageTypeDefOf.RejectInput, false);
 				return;
 			}
 
@@ -252,7 +252,7 @@ namespace Vehicles
 			int seats = 0;
 			int pawnCount = 0;
 			int prereq = 0;
-			bool flag = pawns.NotNullAndAny(p => p.IsBoat()); //Ships or No Ships
+			bool hasBoats = pawns.NotNullAndAny(p => p.IsBoat()); //Ships or No Ships
 
 			foreach (Pawn p in pawns)
 			{
@@ -267,17 +267,17 @@ namespace Vehicles
 				}
 			}
 
-			bool flag2 = flag ? pawnCount > seats : false; //Not Enough Room, must board all pawns
-			bool flag3 = pawnCount < prereq;
-			if (flag2)
+			bool notEnoughSeats = hasBoats ? pawnCount > seats : false; //Not Enough Room, must board all pawns
+			bool prereqNotMet = pawnCount < prereq;
+			if (notEnoughSeats)
 			{
-				Messages.Message("CaravanMustHaveEnoughSpaceOnShip".Translate(), MessageTypeDefOf.RejectInput, false);
+				Messages.Message("VF_CaravanMustHaveEnoughSpaceOnShip".Translate(), MessageTypeDefOf.RejectInput, false);
 			}
-			if (flag3)
+			if (prereqNotMet)
 			{
-				Messages.Message("CaravanMustHaveEnoughPawnsToOperate".Translate(prereq), MessageTypeDefOf.RejectInput, false);
+				Messages.Message("VF_CaravanMustHaveEnoughPawnsToOperate".Translate(prereq), MessageTypeDefOf.RejectInput, false);
 			}
-			return !flag2 && !flag3;
+			return !notEnoughSeats && !prereqNotMet;
 		}
 		
 		/// <summary>

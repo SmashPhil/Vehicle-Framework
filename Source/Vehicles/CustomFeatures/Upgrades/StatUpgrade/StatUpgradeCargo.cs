@@ -27,7 +27,7 @@ namespace Vehicles
 			{
 				range = new FloatRange(-value, value);
 			}
-			lister.FloatBox(def, field, "VehicleCargoCapacity".Translate(), "VehicleCargoCapacityTooltip".Translate(), string.Empty, value + range.Value.min, value + range.Value.max);
+			lister.FloatBox(def, field, "VF_CargoCapacity".Translate(), "VF_CargoCapacityTooltip".Translate(), string.Empty, value + range.Value.min, value + range.Value.max);
 		}
 	}
 }

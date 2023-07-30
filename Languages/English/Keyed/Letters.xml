@@ -2,7 +2,7 @@
 
 <LanguageData>
 	<VF_IncidentCrashedSiteLabel_Crashing>{0} Crash Landed</VF_IncidentCrashedSiteLabel_Crashing>
-	<VF_IncidentCrashedSiteLabel_ShotDown>{1} Shot Down</VF_IncidentCrashedSiteLabel_ShotDown>
+	<VF_IncidentCrashedSiteLabel_ShotDown>{1} Shot Down {0}</VF_IncidentCrashedSiteLabel_ShotDown>
 	
 	<VF_IncidentReasonLister>\n\nReason:\n {0}</VF_IncidentReasonLister>
 	<VF_IncidentCrashedSite_Crashing>{0} has crashed.</VF_IncidentCrashedSite_Crashing>
@@ -10,8 +10,8 @@
 	<VF_IncidentCrashedSiteReason_OutOfFuel>Ran out of fuel</VF_IncidentCrashedSiteReason_OutOfFuel>
 	<VF_IncidentCrashedSiteReason_FlightControl>Lost all flight control</VF_IncidentCrashedSiteReason_FlightControl>
 	
-	<ReinforcementsArrivedLabel>Reinforcements</ReinforcementsArrivedLabel>
-	<ReinforcementsArrived>{0} has arrived with reinforcements to investigate the crash site.</ReinforcementsArrived>
+	<VF_ReinforcementsArrivedLabel>Reinforcements</VF_ReinforcementsArrivedLabel>
+	<VF_ReinforcementsArrived>{0} has arrived with reinforcements to investigate the crash site.</VF_ReinforcementsArrived>
 	
 	<VF_BoatSunk>Boat Sunk</VF_BoatSunk>
 	<VF_BoatSunkDesc>{0} has sunk to the depths of the ocean.</VF_BoatSunkDesc>

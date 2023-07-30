@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Vehicles
 {
-	[HeaderTitle(Label = "FueledTravelPropertes", Translate = true)]
+	[HeaderTitle(Label = "VF_FueledTravelPropertes", Translate = true)]
 	public class CompProperties_FueledTravel : VehicleCompProperties
 	{
 		public ThingDef fuelType;
@@ -22,14 +22,14 @@ namespace Vehicles
 
 		[PostToSettings(Label = "VF_FuelConsumptionRate", Translate = true, UISettingsType = UISettingsType.FloatBox)]
 		public float fuelConsumptionRate;
-		[PostToSettings(Label = "VF_VehicleFuelCapacity", Translate = true, UISettingsType = UISettingsType.IntegerBox)]
+		[PostToSettings(Label = "VF_FuelCapacity", Translate = true, UISettingsType = UISettingsType.IntegerBox)]
 		public int fuelCapacity;
 		
 		[PostToSettings(Label = "VF_FuelConsumptionRateWorldMultiplier", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(Increment = 0.1f, MinValue = 0, MaxValue = 2)]
 		public float fuelConsumptionWorldMultiplier = 1;
 
-		[PostToSettings(Label = "VF_VehicleAutoRefuelPercent", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
+		[PostToSettings(Label = "VF_AutoRefuelPercent", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(Increment = 0.1f, MinValue = 0, MaxValue = 1)]
 		public float autoRefuelPercent = 1;
 		

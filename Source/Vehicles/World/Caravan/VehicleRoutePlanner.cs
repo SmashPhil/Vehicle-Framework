@@ -394,7 +394,7 @@ namespace Vehicles
 					SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
 				}
 			}
-			TooltipHandler.TipRegion(rect, "VehicleRoutePlannerButtonTip".Translate());
+			TooltipHandler.TipRegion(rect, "VF_RoutePlannerButtonTip".Translate());
 			curBaseY -= RouteButtonDimension + 20f;
 		}
 

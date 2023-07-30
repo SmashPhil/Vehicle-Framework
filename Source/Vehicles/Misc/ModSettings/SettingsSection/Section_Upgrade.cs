@@ -58,7 +58,7 @@ namespace Vehicles
 		public override void DrawSection(Rect rect)
 		{
 			DrawVehicleUpgrades(rect);
-			VehicleMod.DrawVehicleList(rect, (bool valid) => valid ? string.Empty : "VehicleNonUpgradeableSettingsTooltip".Translate().ToString(),
+			VehicleMod.DrawVehicleList(rect, (bool valid) => valid ? string.Empty : "VF_NonUpgradeableSettingsTooltip".Translate().ToString(),
 						(VehicleDef def) => !VehicleMod.settingsDisabledFor.Contains(def.defName) && def.HasComp(typeof(CompUpgradeTree)));
 
 		}

@@ -115,7 +115,7 @@ namespace Vehicles
 			}
 			if (!CanMoveFinal)
 			{
-				Messages.Message("Vehicles_NotEnoughToOperate".Translate(), MessageTypeDefOf.RejectInput);
+				Messages.Message("VF_NotEnoughToOperate".Translate(), MessageTypeDefOf.RejectInput);
 			}
 			return true;
 		}

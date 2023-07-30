@@ -38,13 +38,13 @@ namespace Vehicles
 			Rect labelRect = new Rect(0f, 0f, inRect.width, 35f);
 			Text.Font = GameFont.Medium;
 			Text.Anchor = TextAnchor.MiddleCenter;
-			Widgets.Label(labelRect, "SelectVehiclesForPlanner".Translate());
+			Widgets.Label(labelRect, "VF_SelectVehiclesForPlanner".Translate());
 
 			Text.Font = GameFont.Small;
 			Text.Anchor = TextAnchor.UpperLeft;
 
 			Rect toggleRect = new Rect(labelRect);
-			if (UIElements.ClickableLabel(toggleRect, showVehicleDefs ? "VehicleRoutePlannerToggleVehicleDefs".Translate() : "VehicleRoutePlannerToggleVehicles".Translate(), Color.grey, Color.white))
+			if (UIElements.ClickableLabel(toggleRect, showVehicleDefs ? "VF_RoutePlannerToggleVehicleDefs".Translate() : "VF_RoutePlannerToggleVehicles".Translate(), Color.grey, Color.white))
 			{
 				showVehicleDefs = !showVehicleDefs;
 			}
@@ -182,11 +182,11 @@ namespace Vehicles
 		{
 			Rect rect2 = new Rect(rect.width - BottomButtonSize.x - ButtonPadding - 15f, rect.height - ButtonPadding, BottomButtonSize.x, BottomButtonSize.y);
 
-			if (Widgets.ButtonText(rect2, "StartVehicleRoutePlanner".Translate()))
+			if (Widgets.ButtonText(rect2, "VF_StartVehicleRoutePlanner".Translate()))
 			{
 				if (storedVehicleDefs.NotNullAndAny(v => v.vehicleType == VehicleType.Sea) && storedVehicleDefs.NotNullAndAny(v => v.vehicleType == VehicleType.Land))
 				{
-					Messages.Message("LandAndSeaRoutePlannerRestriction".Translate(), MessageTypeDefOf.RejectInput);
+					Messages.Message("VF_LandAndSeaRoutePlannerRestriction".Translate(), MessageTypeDefOf.RejectInput);
 					return;
 				}
 

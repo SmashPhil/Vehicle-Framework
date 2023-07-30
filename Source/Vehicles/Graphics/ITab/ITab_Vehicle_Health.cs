@@ -19,7 +19,7 @@ namespace Vehicles
 		public ITab_Vehicle_Health()
 		{
 			size = panelSize;
-			labelKey = "TabComponents";
+			labelKey = "VF_TabComponents";
 		}
 
 		public VehiclePawn Vehicle => SelPawn as VehiclePawn;

@@ -36,7 +36,7 @@ namespace Vehicles
 
 		protected virtual string GetLetterLabel(AerialVehicleInFlight aerialVehicle, WorldObject culprit)
 		{
-			return culprit is null ? "VF_IncidentCrashedSiteLabel_Crashing".Translate() : "VF_IncidentCrashedSiteLabel_ShotDown".Translate();
+			return culprit is null ? "VF_IncidentCrashedSiteLabel_Crashing".Translate(aerialVehicle.vehicle) : "VF_IncidentCrashedSiteLabel_ShotDown".Translate(aerialVehicle.vehicle, culprit);
 		}
 
 		public virtual bool TryExecuteEvent(AerialVehicleInFlight aerialVehicle, string[] reasons, WorldObject culprit = null, IntVec3? cell = null)

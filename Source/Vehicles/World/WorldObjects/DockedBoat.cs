@@ -51,7 +51,7 @@ namespace Vehicles
 		{
 			if(caravan.PawnsListForReading.Where(p => !p.IsBoat()).Count() > TotalAvailableSeats)
 			{
-				Messages.Message("CaravanMustHaveEnoughSpaceOnShip".Translate(), this, MessageTypeDefOf.RejectInput, false);
+				Messages.Message("VF_CaravanMustHaveEnoughSpaceOnShip".Translate(), this, MessageTypeDefOf.RejectInput, false);
 				return;
 			}
 			caravan.pawns.TryAddRangeOrTransfer(dockedBoats);

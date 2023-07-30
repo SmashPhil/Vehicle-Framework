@@ -7,33 +7,30 @@
 	
 	<!-- Gizmos / Float Menus -->
 	<VF_LoadCargo>Load Cargo</VF_LoadCargo>
-	<VF_RepairVehicle>Repair</VF_RepairVehicle>
-	<VF_PaintVehicle>Apply Paint</VF_PaintVehicle>
 	<VF_DisembarkAllPawns>Unload All Pawns</VF_DisembarkAllPawns>
 	<VF_DisembarkSinglePawn>Unload {0}</VF_DisembarkSinglePawn>
 	<VF_DisembarkNoExit>Unable to exit vehicle. No valid cells to exit onto.</VF_DisembarkNoExit>
 	
 	<VF_StopVehicle>Stop</VF_StopVehicle>
 	<VF_UndraftVehicle>Turn Off</VF_UndraftVehicle>
-	
 	<VF_DraftVehicleDesc>Drafts vehicle allowing it to move. This will consume fuel if applicable even if the vehicle is idle.</VF_DraftVehicleDesc>
 	<VF_StopVehicleDesc>Stop the vehicle immediately.</VF_StopVehicleDesc>
 	<VF_UndraftVehicleDesc>Undrafts vehicle, disabling the consumption of fuel and disallowing movement.</VF_UndraftVehicleDesc>
 	
 	<!-- UI / Buttons -->
-	<RefundButton>Uninstall</RefundButton>
 	<VF_ShowAllItemsOnMap>Show All Items On Map</VF_ShowAllItemsOnMap>
 	<VF_ResetColorPalettes>Reset All Palettes</VF_ResetColorPalettes>
 	<VF_ResetColorPalettesConfirmation>Are you sure you want to reset all saved palettes back to default settings? This action cannot be undone.</VF_ResetColorPalettesConfirmation>
 	<VF_RotateVehicleRendering>Rotate vehicle</VF_RotateVehicleRendering>
 	<VF_SaveColorPalette>Save Palette</VF_SaveColorPalette>
 	
-	<ColorOne>ColorOne</ColorOne>
-	<ColorTwo>ColorTwo</ColorTwo>
-	<ColorThree>ColorThree</ColorThree>
-	<ColorPickerHex>Hex</ColorPickerHex>
+	<VF_ColorOne>ColorOne</VF_ColorOne>
+	<VF_ColorTwo>ColorTwo</VF_ColorTwo>
+	<VF_ColorThree>ColorThree</VF_ColorThree>
+	<VF_ColorPickerHex>Hex</VF_ColorPickerHex>
 	
-	<VF_Caravan_Dismounted>Dismounted</VF_Caravan_Dismounted>
+	<VF_JobSettings>Job Settings</VF_JobSettings>
+	<VF_VehicleAgeReadout>Produced: {0}</VF_VehicleAgeReadout>
 	
 	<!-- Stats -->
 	<VF_StatsReport_CargoWeight>Cargo: {0}</VF_StatsReport_CargoWeight>
@@ -49,6 +46,7 @@
 	<VF_StartFishingDesc>Gather fish. Depth of water affects fishing chances.</VF_StartFishingDesc>
 	<VF_ExplosiveComponent>Explosive</VF_ExplosiveComponent>
 	<VF_EditPawnOverlayRendererTooltip>Edit Pawn Overlay</VF_EditPawnOverlayRendererTooltip>
+	<VF_ComponentClickMoreInfoTooltip>Click for detailed information.</VF_ComponentClickMoreInfoTooltip>
 	
 	<!-- Turret Restrictions -->
 	<VF_VehicleRestriction_Stationary>Cannot fire while moving.</VF_VehicleRestriction_Stationary>
@@ -56,67 +54,51 @@
 	<!-- Color Picker -->
 	<VF_Patterns>Patterns</VF_Patterns>
 	<VF_Skins>Skins</VF_Skins>
-	<VehiclePatternZoom>Zoom</VehiclePatternZoom>
-	<VehiclePatternZoomTooltip>Scale the pattern up or down.</VehiclePatternZoomTooltip>
-	<VehiclePatternDisplacementX>Displacement X</VehiclePatternDisplacementX>
-	<VehiclePatternDisplacementY>Displacement Y</VehiclePatternDisplacementY>
+	<VF_PatternZoom>Zoom</VF_PatternZoom>
+	<VF_PatternZoomTooltip>Scale the pattern up or down.</VF_PatternZoomTooltip>
+	<VF_PatternDisplacementX>Displacement X</VF_PatternDisplacementX>
+	<VF_PatternDisplacementY>Displacement Y</VF_PatternDisplacementY>
 	
-	<VehicleElectric>Electric</VehicleElectric>
-	<VehicleElectricFlick>Charge Battery</VehicleElectricFlick>
-	<VehicleElectricFlickDesc>Connect to PowerNet below vehicle.</VehicleElectricFlickDesc>
+	<VF_Electric>Electric</VF_Electric>
+	<VF_ElectricFlick>Charge Battery</VF_ElectricFlick>
+	<VF_ElectricFlickDesc>Connect to PowerNet below vehicle.</VF_ElectricFlickDesc>
 	<VF_OutOfFuel>Cannot Move. Out of Fuel.</VF_OutOfFuel>
-	<CommandGlideLand>Glide</CommandGlideLand>
 	
-	<AssignSeats>Assign Seats</AssignSeats>
-	<Assign>Assign</Assign>
-	<Assigned>Assigned</Assigned>
-	<ApplyButton>Apply</ApplyButton>
-	<Colonists>Colonists</Colonists>
-	<ClearSeats>Clear</ClearSeats>
-	<RemoveFromRole>Remove</RemoveFromRole>
-	<AddToRole>Add</AddToRole>
-	<VehicleRoutePlannerButtonTip>Click to enter the planning mode for Vehicles where you can select specific vehicles you own, and plan your journey. Pathing is adjusted based on the vehicles selected.</VehicleRoutePlannerButtonTip>
-	<SelectVehiclesForPlanner>Select Vehicles</SelectVehiclesForPlanner>
-	<StartVehicleRoutePlanner>Start Route</StartVehicleRoutePlanner>
-	<OkName>Confirm Name</OkName>
-	<RemoveName>Remove Name</RemoveName>
-	<VehicleTransportCountLabel>{0} Transport</VehicleTransportCountLabel>
-	<VehicleTransportsCountLabel>{0} Transports</VehicleTransportsCountLabel>
+	<VF_Assign>Assign</VF_Assign>
+	<VF_Assigned>Assigned</VF_Assigned>
+	<VF_ApplyButton>Apply</VF_ApplyButton>
+	<VF_Colonists>Colonists</VF_Colonists>
+	<VF_ClearSeats>Clear</VF_ClearSeats>
+	<VF_RemoveFromRole>Remove</VF_RemoveFromRole>
+	<VF_AddToRole>Add</VF_AddToRole>
+	<VF_RoutePlannerButtonTip>Click to enter the planning mode for Vehicles where you can select specific vehicles you own, and plan your journey. Pathing is adjusted based on the vehicles selected.</VF_RoutePlannerButtonTip>
+	<VF_SelectVehiclesForPlanner>Select Vehicles</VF_SelectVehiclesForPlanner>
+	<VF_StartVehicleRoutePlanner>Start Route</VF_StartVehicleRoutePlanner>
+	<VF_OkName>Confirm Name</VF_OkName>
+	<VF_RemoveName>Remove Name</VF_RemoveName>
 	
-	<VF_NoFlightSpeed>Unable to launch with Flight Speed = 0</VF_NoFlightSpeed>
+	<!-- Aerial Vehicles -->
+	<VF_NoFlightSpeed>Unable to launch with Flight Speed = 0.</VF_NoFlightSpeed>
 	<VF_CannotLaunchWhileMoving>Cannot launch while {0} is moving.</VF_CannotLaunchWhileMoving>
 	<VF_CannotLaunchImmobile>{0} cannot launch without being able to move.</VF_CannotLaunchImmobile>
 	<VF_CannotLaunchOverEncumbered>{0} cannot launch while over-encumbered.</VF_CannotLaunchOverEncumbered>
 	
-	<TabCargo>Cargo</TabCargo>
-	<TabPassengers>Pawns</TabPassengers>
-	<TabComponents>Health</TabComponents>
-	<TabUpgrades>Customize</TabUpgrades>
-	<Cargo>Cargo</Cargo>
+	<VF_TabCargo>Cargo</VF_TabCargo>
+	<VF_TabPassengers>Pawns</VF_TabPassengers>
+	<VF_TabComponents>Health</VF_TabComponents>
+	<VF_TabUpgrades>Customize</VF_TabUpgrades>
 	
-	<VehicleComponentHealth>Health</VehicleComponentHealth>
-	<VehicleComponentEfficiency>Efficiency</VehicleComponentEfficiency>
-	<VehicleComponentArmor>Armor</VehicleComponentArmor>
+	<VF_ComponentHealth>Health</VF_ComponentHealth>
+	<VF_ComponentEfficiency>Efficiency</VF_ComponentEfficiency>
+	<VF_ComponentArmor>Armor</VF_ComponentArmor>
 	
-	<VehicleNoFuelReturnTrip>No Return Trip</VehicleNoFuelReturnTrip>
-	<VehicleNotEnoughFuel>Out Of Range</VehicleNotEnoughFuel>
+	<VF_NoFuelReturnTrip>No Return Trip</VF_NoFuelReturnTrip>
+	<VF_NotEnoughFuel>Out Of Range</VF_NotEnoughFuel>
 	
 	<!-- HeaderTitles -->
-	<VehicleProperties>Properties</VehicleProperties>
-	<VehicleLauncherProperties>Launch Properties</VehicleLauncherProperties>
-	<FueledTravelPropertes>Fuel</FueledTravelPropertes>
-	<VehicleVehicleTracks>Tracks</VehicleVehicleTracks>
-	<VehicleDamageMultipliers>Damage Multipliers</VehicleDamageMultipliers>
-	<VehicleJobLimitations>Max Workers per Job</VehicleJobLimitations>
-
-	<!-- Upgrades -->
-	<VF_Upgrade>Upgrade</VF_Upgrade>
-	<DisabledFromOtherNode>Cannot upgrade. Node is now inaccessible from previous unlock.</DisabledFromOtherNode>
-	<MissingPrerequisiteUpgrade>Missing prerequisite node</MissingPrerequisiteUpgrade>
-	<VehicleMaxArmor>Armor</VehicleMaxArmor>
-	<VehicleMaxSpeed>Speed</VehicleMaxSpeed>
-	<VehicleCargoCapacity>Cargo Capacity</VehicleCargoCapacity>
-	<VF_VehicleFuelCost>Fuel Cost: {0}</VF_VehicleFuelCost>
-	<VF_VehicleFuelCapacity>Fuel Capacity</VF_VehicleFuelCapacity>
-	
+	<VF_Cargo>Cargo</VF_Cargo>
+	<VF_Properties>Properties</VF_Properties>
+	<VF_LauncherProperties>Launch Properties</VF_LauncherProperties>
+	<VF_FueledTravelPropertes>Fuel</VF_FueledTravelPropertes>
+	<VF_JobLimitations>Max Workers per Job</VF_JobLimitations>
 </LanguageData>

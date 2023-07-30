@@ -2,28 +2,25 @@
 
 <LanguageData>
 	<!-- (VehicleDef)-->
-	<VehicleEnabled>Enabled</VehicleEnabled>
-	<VehicleDisabled>Disabled</VehicleDisabled>
-	<VehiclePlayerOnly>Player Only</VehiclePlayerOnly>
-	<VehicleRaiderOnly>NPC Only</VehicleRaiderOnly>
+	<VF_VehicleEnabled>Enabled</VF_VehicleEnabled>
+	<VF_VehicleDisabled>Disabled</VF_VehicleDisabled>
+	<VF_VehiclePlayerOnly>Player Only</VF_VehiclePlayerOnly>
+	<VF_VehicleRaiderOnly>NPC Only</VF_VehicleRaiderOnly>
 	
-	<VehicleRaidsEnabled>Raids Can Use</VehicleRaidsEnabled>
-	<VehicleRaidsEnabledTooltip>Raids using Vehicles will be allowed to use this vehicle if points and tech level allow for it.</VehicleRaidsEnabledTooltip>
-	<VehicleMovementPermissions>Control Type</VehicleMovementPermissions>
-	<VehicleCategory>Category</VehicleCategory>
-	<VehicleNavigationType>Navigation</VehicleNavigationType>
-	<VehicleNavigationTypeTooltip>Navigation category for the World Map. Dictates when the Vehicle may move on the World Map.</VehicleNavigationTypeTooltip>
-	<VehicleTicksBetweenRepair>Repair Rate</VehicleTicksBetweenRepair>
-	<VehicleTicksBetweenRepairTooltip>Amount repaired every 100 ticks.</VehicleTicksBetweenRepairTooltip>
-	<VehicleNameable>Can Assign Name</VehicleNameable>
-	<VehicleNameableTooltip>Allow naming of this vehicle. Name will appear over the vehicle and will replace the displayed label.</VehicleNameableTooltip>
-	<BoatPowerType>Power Type</BoatPowerType>
+	<VF_EnableButtonTooltip>If disabled this vehicle will not be available in-game. Applies to both the player and NPC factions.</VF_EnableButtonTooltip>
 	
-	<VehicleCombatPower>Combat Power</VehicleCombatPower>
-	<VehicleCombatPowerTooltip>Combat points vehicle costs in order to generate in an event.</VehicleCombatPowerTooltip>
+	<VF_MovementPermissions>Control Type</VF_MovementPermissions>
+	<VF_NavigationType>Navigation</VF_NavigationType>
+	<VF_NavigationTypeTooltip>Navigation category for the World Map. Dictates when the Vehicle may move on the World Map.</VF_NavigationTypeTooltip>
 	
-	<VehicleCanCaravan>Caravan</VehicleCanCaravan>
-	<VehicleCanCaravanTooltip>Vehicle is able to be taken on caravans.</VehicleCanCaravanTooltip>
+	<VF_Nameable>Can Assign Name</VF_Nameable>
+	<VF_NameableTooltip>Allow naming of this vehicle. Name will appear over the vehicle and will replace the displayed label.</VF_NameableTooltip>
+	
+	<VF_CombatPower>Combat Power</VF_CombatPower>
+	<VF_CombatPowerTooltip>Combat points vehicle costs in order to generate in an event.</VF_CombatPowerTooltip>
+	
+	<VF_CanCaravan>Caravan</VF_CanCaravan>
+	<VF_CanCaravanTooltip>Vehicle is able to be taken on caravans.</VF_CanCaravanTooltip>
 	
 	<!-- Disabled Tooltip -->
 	<VF_SaveableFieldDisabledConditionTooltip>Disabled. {0}</VF_SaveableFieldDisabledConditionTooltip>
@@ -39,47 +36,44 @@
 	<VF_OpportunisticTickingTooltip>Vehicle components only tick when necessary, reducing impact on performance when idle.</VF_OpportunisticTickingTooltip>
 	
 	<!-- (Properties) -->
-	<VehicleProperties>Properties</VehicleProperties>
-	<VehicleManhunterTargeted>Manhunter Targets Vehicle</VehicleManhunterTargeted>
+	<VF_ManhunterTargetsVehicle>Manhunter Targets</VF_ManhunterTargetsVehicle>
+	<VF_ManhunterTargetsVehicleTooltip>Manhunter animals will target this vehicle.</VF_ManhunterTargetsVehicleTooltip>
+	<VF_FishingEnabled>Can Fish</VF_FishingEnabled>
+	<VF_FishingEnabledTooltip>Enables fishing when stationary over water.</VF_FishingEnabledTooltip>
 	
-	<VehicleJobLimitations>Vehicle Jobs</VehicleJobLimitations>
-	<VehicleMaxWorkers>Max Workers</VehicleMaxWorkers>
+	<VF_JobLimitations>Vehicle Jobs</VF_JobLimitations>
+	<VF_MaxWorkers>Max Workers</VF_MaxWorkers>
 	
-	<VehicleWinterSpeedMultiplier>Winter Speed Multiplier</VehicleWinterSpeedMultiplier>
-	<VehicleWinterSpeedMultiplierTooltip>Additional cost for traveling during winter.</VehicleWinterSpeedMultiplierTooltip>
-	<VehicleWorldSpeedMultiplier>World Speed Multiplier</VehicleWorldSpeedMultiplier>
-	<VehicleWorldSpeedMultiplierTooltip>Multiplier to MoveSpeed when on the world map in a caravan.</VehicleWorldSpeedMultiplierTooltip>
+	<VF_WinterSpeedMultiplier>Winter Speed Multiplier</VF_WinterSpeedMultiplier>
+	<VF_WinterSpeedMultiplierTooltip>Additional cost for traveling during winter.</VF_WinterSpeedMultiplierTooltip>
+	<VF_WorldSpeedMultiplier>World Speed Multiplier</VF_WorldSpeedMultiplier>
+	<VF_WorldSpeedMultiplierTooltip>Multiplier to MoveSpeed when on the world map in a caravan.</VF_WorldSpeedMultiplierTooltip>
 	
 	<VF_DischargePerTick>Discharge Rate</VF_DischargePerTick>
 	<VF_TicksPerCharge>Charge Rate</VF_TicksPerCharge>
 	<VF_FuelConsumptionRate>Fuel Consumption Rate</VF_FuelConsumptionRate>
-	<VF_FuelCapacity>Fuel Capacity</VF_FuelCapacity>
 	<VF_FuelConsumptionRateWorldMultiplier>World Multiplier</VF_FuelConsumptionRateWorldMultiplier>
-	<VF_VehicleAutoRefuelPercent>Auto Refuel %</VF_VehicleAutoRefuelPercent>
+	<VF_FuelCapacity>Fuel Capacity</VF_FuelCapacity>
+	<VF_AutoRefuelPercent>Auto Refuel %</VF_AutoRefuelPercent>
 	
 	<VF_FuelConsumptionWorld>Fuel Consumption %</VF_FuelConsumptionWorld>
-	<VF_FuelConsumptionWorldTooltip>Fule consumption multiplier on the world map.</VF_FuelConsumptionWorldTooltip>
+	<VF_FuelConsumptionWorldTooltip>Fuel consumption multiplier on the world map.</VF_FuelConsumptionWorldTooltip>
 	<VF_LaunchFixedMaxDistance>Fixed Max Distance</VF_LaunchFixedMaxDistance>
+	<VF_LaunchFixedMaxDistanceTooltip>Set a fixed max distance this vehicle can fly regardless of fuel level.</VF_LaunchFixedMaxDistanceTooltip>
 	<VF_LaunchFixedMaxDistanceDisabled>None</VF_LaunchFixedMaxDistanceDisabled>
-	<VehicleReconDistance>Recon Distance</VehicleReconDistance>
-	<VehicleReconDistanceTooltip>Distance in tiles the shuttle will be able to perform recon of a site or settlement.</VehicleReconDistanceTooltip>
+	<VF_ReconDistance>Recon Distance</VF_ReconDistance>
+	<VF_ReconDistanceTooltip>Distance in tiles the shuttle will be able to perform recon of a site or settlement.</VF_ReconDistanceTooltip>
 	<VF_ControlInFlight>Control in Flight</VF_ControlInFlight>
 	<VF_ControlInFlightTooltip>Control the aerial vehicle while it is in flight. Allows for changing of flight paths midflight, choosing your landing after loading a map, and strafing maps that have not yet been loaded.</VF_ControlInFlightTooltip>
 	<VF_SpaceFlight>Space Faring</VF_SpaceFlight>
 	<VF_SpaceFlightTooltip>Vehicle is capable of launching to and taking off from space objects.</VF_SpaceFlightTooltip>
 	
-	<VehicleRateOfClimb>Rate of Climb</VehicleRateOfClimb>
-	<VehicleRateOfClimbTooltip>Amount the vehicle ascends per tick.</VehicleRateOfClimbTooltip>
-	<VehicleMaxAltitude>Max Altitude</VehicleMaxAltitude>
-	<VehicleMaxAltitudeTooltip>Maximum altitude this vehicle can achieve when in flight.</VehicleMaxAltitudeTooltip>
-	<VehicleMaxFallRate>Max Fall Rate</VehicleMaxFallRate>
-	<VehicleMaxFallRateTooltip>Max amount this vehicle will descend when shot down or out of fuel.</VehicleMaxFallRateTooltip>
+	<VF_RateOfClimb>Rate of Climb</VF_RateOfClimb>
+	<VF_RateOfClimbTooltip>Amount the vehicle ascends per tick.</VF_RateOfClimbTooltip>
+	<VF_MaxAltitude>Max Altitude</VF_MaxAltitude>
+	<VF_MaxAltitudeTooltip>Maximum altitude this vehicle can achieve when in flight.</VF_MaxAltitudeTooltip>
+	<VF_MaxFallRate>Max Fall Rate</VF_MaxFallRate>
+	<VF_MaxFallRateTooltip>Max amount this vehicle will descend when shot down or out of fuel.</VF_MaxFallRateTooltip>
 	
-	<VehicleFishingEnabled>Can Fish</VehicleFishingEnabled>
-	<VehicleFishingEnabledTooltip>Enables fishing when stationary over water.</VehicleFishingEnabledTooltip>
-	<ManhunterTargetsVehicle>Manhunter Targets</ManhunterTargetsVehicle>
-	<ManhunterTargetsVehicleTooltip>Manhunter animals will target this vehicle.</ManhunterTargetsVehicleTooltip>
-	
-	<VehicleDamageInvulnerable>Invulnerable</VehicleDamageInvulnerable>
-	<VehicleInstant>Instant</VehicleInstant>
+	<VF_Instant>Instant</VF_Instant>
 </LanguageData>

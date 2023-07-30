@@ -117,7 +117,7 @@ namespace Vehicles
 
 		private void DrawPawns(Rect rect)
 		{
-			Widgets.Label(rect, "Colonists".Translate());
+			Widgets.Label(rect, "VF_Colonists".Translate());
 			Rect pawnRowRect = new Rect(rect.x, rect.y + RowHeight + 5, rect.width - 1, RowHeight);
 			Rect outRect = new Rect(pawnRowRect)
 			{
@@ -150,7 +150,7 @@ namespace Vehicles
 
 					if (draggedPawn != pawn)
 					{
-						DrawPawnRow(pawnRowRect, pawn, (ButtonHeight * 3, "AddToRole".Translate(), delegate()
+						DrawPawnRow(pawnRowRect, pawn, (ButtonHeight * 3, "VF_AddToRole".Translate(), delegate()
 						{
 							bool Validate(VehicleHandler handler) => assignedSeats.Where(seat => seat.Value.handler.role == handler.role).Select(p => p.Key).Count() < handler.role.slots;
 							VehicleHandler firstHandler = Vehicle.handlers.FirstOrDefault(handler => handler.CanOperateRole(pawn) && Validate(handler));
@@ -161,11 +161,11 @@ namespace Vehicles
 								{
 									if (firstHandler.role.handlingTypes.HasFlag(HandlingTypeFlags.Movement))
 									{
-										Messages.Message("IncapableStatusForRole".Translate(pawn.LabelShortCap), MessageTypeDefOf.RejectInput);
+										Messages.Message("VF_IncapableStatusForRole".Translate(pawn.LabelShortCap), MessageTypeDefOf.RejectInput);
 									}
 									else
 									{
-										Messages.Message("IncapableStatusForRole".Translate(pawn.LabelShortCap), MessageTypeDefOf.CautionInput);
+										Messages.Message("VF_IncapableStatusForRole".Translate(pawn.LabelShortCap), MessageTypeDefOf.CautionInput);
 										assignedSeats.Add(pawn, (Vehicle, firstHandler));
 									}
 								}
@@ -185,7 +185,7 @@ namespace Vehicles
 
 		private void DrawAssignees(Rect rect)
 		{
-			Widgets.Label(rect, "Assigned".Translate());
+			Widgets.Label(rect, "VF_Assigned".Translate());
 			Predicate<VehicleHandler> seatsAvailable = (handler) => assignedSeats.Where(seat => seat.Value.handler.role == handler.role).Select(p => p.Key).Count() < handler.role.slots;
 			Rect pawnRowRect = new Rect(rect.x, rect.y + RowHeight + 5, rect.width - 1, RowHeight);
 			Rect outRect = new Rect(pawnRowRect)
@@ -219,11 +219,11 @@ namespace Vehicles
 							{
 								if (handler.role.handlingTypes.HasFlag(HandlingTypeFlags.Movement))
 								{
-									Messages.Message("IncapableStatusForRole".Translate(draggedPawn.LabelShortCap), MessageTypeDefOf.RejectInput);
+									Messages.Message("VF_IncapableStatusForRole".Translate(draggedPawn.LabelShortCap), MessageTypeDefOf.RejectInput);
 								}
 								else
 								{
-									Messages.Message("IncapableStatusForRole".Translate(draggedPawn.LabelShortCap), MessageTypeDefOf.CautionInput);
+									Messages.Message("VF_IncapableStatusForRole".Translate(draggedPawn.LabelShortCap), MessageTypeDefOf.CautionInput);
 									assignedSeats.Add(draggedPawn, (Vehicle, handler));
 								}
 							}
@@ -241,7 +241,7 @@ namespace Vehicles
 						{
 							onClick = () => removalList.Add(pawn);
 						}
-						DrawPawnRow(pawnRowRect, pawn, (ButtonHeight * 3, "RemoveFromRole".Translate(), onClick));
+						DrawPawnRow(pawnRowRect, pawn, (ButtonHeight * 3, "VF_RemoveFromRole".Translate(), onClick));
 						pawnRowRect.y += RowHeight;
 					}
 					foreach (Pawn pawn in removalList)
@@ -264,11 +264,11 @@ namespace Vehicles
 		private void DoBottomButtons(Rect rect)
 		{
 			Rect buttonRect = new Rect(rect.width - ButtonWidth * 3, rect.height - ButtonHeight, ButtonWidth, ButtonHeight);
-			if (Widgets.ButtonText(buttonRect, "Assign".Translate()))
+			if (Widgets.ButtonText(buttonRect, "VF_Assign".Translate()))
 			{
 				if (!FinalizeSeats(out string failReason))
 				{
-					Messages.Message("AssignFailure".Translate(failReason), MessageTypeDefOf.RejectInput);
+					Messages.Message("VF_AssignFailure".Translate(failReason), MessageTypeDefOf.RejectInput);
 					return;
 				}
 				Close(true);
@@ -279,7 +279,7 @@ namespace Vehicles
 				Close(true);
 			}
 			buttonRect.x += ButtonWidth;
-			if (Widgets.ButtonText(buttonRect, "ClearSeats".Translate()))
+			if (Widgets.ButtonText(buttonRect, "VF_ClearSeats".Translate()))
 			{
 				SoundDefOf.Click.PlayOneShotOnCamera(null);
 				assignedSeats.RemoveAll(kvp => pawns.Contains(kvp.Key) && !Vehicle.AllPawnsAboard.Contains(kvp.Key));
@@ -293,7 +293,7 @@ namespace Vehicles
 			{
 				if (assignedSeats.Where(r => r.Value.handler.role == handler.role).Select(k => k.Key).Count() < handler.role.slotsToOperate)
 				{
-					failReason = "CantAssignVehicle".Translate(Vehicle.LabelCap);
+					failReason = "VF_CantAssignVehicle".Translate(Vehicle.LabelCap);
 					return false;
 				}
 			}

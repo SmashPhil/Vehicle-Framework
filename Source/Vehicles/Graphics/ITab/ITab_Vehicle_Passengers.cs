@@ -27,7 +27,7 @@ namespace Vehicles
 		public ITab_Vehicle_Passengers()
 		{
 			size = new Vector2(WindowWidth, WindowHeight);
-			labelKey = "TabPassengers";
+			labelKey = "VF_TabPassengers";
 		}
 
 		public VehiclePawn Vehicle => SelPawn as VehiclePawn;

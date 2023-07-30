@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <LanguageData>
-	<EnterVehicle>Board {0} as {1}  [{2}]</EnterVehicle>
-	<BoardShipGroup>Board {0}</BoardShipGroup>
-	<BoardShipGroupFail>Board {0} (Too many selected)</BoardShipGroupFail>
-	<ActivityIconOnBoardShip>Onboard {0}</ActivityIconOnBoardShip>
-	<IsIncapableOfRamming>Ram {0}</IsIncapableOfRamming>
-	<VehicleCannotMoveToCell>{0} cannot reach this area.</VehicleCannotMoveToCell>
-	<AutoTargeting>AutoTarget: {0}</AutoTargeting>
-	<LandVehicleHere>Land Vehicle Here</LandVehicleHere>
-	<AttackAndTargetLanding>Attack {0}: Choose Landing</AttackAndTargetLanding>
+	<VF_EnterVehicle>Board {0} as {1}  [{2}]</VF_EnterVehicle>
 	
-	<VehicleStrafeRun>Strafe Run</VehicleStrafeRun>
-	<AerialReconSite>Recon</AerialReconSite>
-	<VF_VehicleTurrets_NoAmmoToReload>No usable ammo.</VF_VehicleTurrets_NoAmmoToReload>
+	<VF_BoardShipGroup>Board {0}</VF_BoardShipGroup>
+	<VF_BoardShipGroupFail>Board {0} (Too many selected)</VF_BoardShipGroupFail>
+	
+	<VF_ActivityIconOnBoardShip>Onboard {0}</VF_ActivityIconOnBoardShip>
+	<VF_IsIncapableOfRamming>Ram {0}</VF_IsIncapableOfRamming>
+	<VF_CannotMoveToCell>{0} cannot reach this area.</VF_CannotMoveToCell>
+	
+	<!-- Aerial Vehicles -->
+	<VF_LandVehicleHere>Land Vehicle Here</VF_LandVehicleHere>
+	<VF_AttackAndTargetLanding>Attack {0}: Choose Landing</VF_AttackAndTargetLanding>
+	
+	<VF_StrafeRun>Strafe Run</VF_StrafeRun>
+	<VF_AerialReconSite>Recon</VF_AerialReconSite>
 </LanguageData>

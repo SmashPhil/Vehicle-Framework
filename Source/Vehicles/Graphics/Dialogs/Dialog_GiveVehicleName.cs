@@ -49,7 +49,7 @@ namespace Vehicles
 
 		protected virtual AcceptanceReport NameIsValid(string name)
 		{
-			if(name.Length == 0)
+			if (name.Length == 0)
 			{
 				return false;
 			}
@@ -77,14 +77,14 @@ namespace Vehicles
 				curName = text2;
 			}
 			Rect buttonRect = new Rect(MarginSize, inRect.height - 35f - MarginSize, (inRect.width / 2) - MarginSize, 35f);
-			if (Widgets.ButtonText(buttonRect, "OkName".Translate()) || flag)
+			if (Widgets.ButtonText(buttonRect, "VF_OkName".Translate()) || flag)
 			{
 				AcceptanceReport acceptanceReport = NameIsValid(curName);
 				if(!acceptanceReport.Accepted)
 				{
-					if(acceptanceReport.Reason.NullOrEmpty())
+					if (acceptanceReport.Reason.NullOrEmpty())
 					{
-						Messages.Message("NameIsInvalid".Translate(), MessageTypeDefOf.RejectInput, false);
+						Messages.Message("VF_InvalidName".Translate(), MessageTypeDefOf.RejectInput, false);
 					}
 					else
 					{
@@ -99,12 +99,10 @@ namespace Vehicles
 					}
 					vehicle.Name = CurVehicleName;
 					Find.WindowStack.TryRemove(this, true);
-					string msg = "VehicleGainsName".Translate(curName, vehicle.Named("Vehicle")).AdjustedFor(vehicle, "Vehicle");
-					Messages.Message(msg, vehicle, MessageTypeDefOf.PositiveEvent, false);
 				}
 			}
 			buttonRect.x += buttonRect.width;
-			if (Widgets.ButtonText(buttonRect, "RemoveName".Translate()) || flag)
+			if (Widgets.ButtonText(buttonRect, "VF_RemoveName".Translate()) || flag)
 			{
 				vehicle.Name = null;
 				Find.WindowStack.TryRemove(this, true);

@@ -310,7 +310,7 @@ namespace Vehicles
 				height = 22f
 			};
 			Text.Font = GameFont.Small;
-			Widgets.Label(searchBoxRect, "VehicleListSearchText".Translate());
+			Widgets.Label(searchBoxRect, "VF_ListSearchText".Translate());
 			searchBoxRect.y += searchBoxRect.height;
 			vehicleFilter.Text = Widgets.TextField(searchBoxRect, vehicleFilter.Text);
 			Text.Font = font;

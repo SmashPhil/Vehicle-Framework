@@ -50,7 +50,7 @@ namespace Vehicles
 					}
 					else
 					{
-						Widgets.Label(labelRect, refuelable.Props.electricPowered ? "VehicleElectric".Translate() : refuelable.Props.fuelType.LabelCap);
+						Widgets.Label(labelRect, refuelable.Props.electricPowered ? "VF_Electric".Translate() : refuelable.Props.fuelType.LabelCap);
 					}
 
 					Rect configureRect = new Rect(labelRect.xMax - ConfigureSize, labelRect.y, ConfigureSize, ConfigureSize);

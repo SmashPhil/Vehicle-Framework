@@ -87,7 +87,7 @@ namespace Vehicles
 		public override void DrawSection(Rect rect)
 		{
 			DrawVehicleOptions(rect);
-			VehicleMod.DrawVehicleList(rect, (bool valid) => valid ? string.Empty : "VehicleSettingsDisabledTooltip".Translate().ToString(), 
+			VehicleMod.DrawVehicleList(rect, (bool valid) => valid ? string.Empty : "VF_SettingsDisabledTooltip".Translate().ToString(), 
 				(VehicleDef def) => !VehicleMod.settingsDisabledFor.Contains(def.defName));
 		}
 
@@ -241,7 +241,7 @@ namespace Vehicles
 			drawStatusMessage = $"Creating Paintbrush. Pattern={VehicleMod.selectedPatterns.Count}";
 			if (VehicleMod.selectedPatterns.Count > 1 && VehicleMod.settings.main.useCustomShaders && VehicleMod.selectedDef.graphicData.shaderType.Shader.SupportsRGBMaskTex())
 			{
-				if (VehicleShowcaseButton(showcaseIconRect, VehicleTex.Recolor, "VehiclesRecolorDefaultMaskTooltip"))
+				if (VehicleShowcaseButton(showcaseIconRect, VehicleTex.Recolor, "VF_RecolorDefaultMaskTooltip"))
 				{
 					Dialog_ColorPicker.OpenColorPicker(VehicleMod.selectedDef,
 					delegate (Color colorOne, Color colorTwo, Color colorThree, PatternDef pattern, Vector2 displacement, float tiles)
@@ -288,7 +288,7 @@ namespace Vehicles
 			(string text, Color color) = EnabledStatus(enabledFor);
 			Vector2 size = Text.CalcSize(text);
 			Rect enabledButtonRect = new Rect(rect.x, rect.y, size.x, size.y);
-			TooltipHandler.TipRegion(enabledButtonRect, "VehicleEnableButtonTooltip".Translate());
+			TooltipHandler.TipRegion(enabledButtonRect, "VF_EnableButtonTooltip".Translate());
 
 			Color highlightedColor = new Color(color.r + 0.25f, color.g + 0.25f, color.b + 0.25f);
 			if (UIElements.ClickableLabel(enabledButtonRect, text, highlightedColor, color, GameFont.Medium, TextAnchor.MiddleLeft, new Color(color.r - 0.15f, color.g - 0.15f, color.b - 0.15f)))
@@ -309,10 +309,10 @@ namespace Vehicles
 		{
 			return status switch
 			{
-				VehicleEnabledFor.Everyone => ("VehicleEnabled".Translate(), Color.green),
-				VehicleEnabledFor.None => ("VehicleDisabled".Translate(), Color.red),
-				VehicleEnabledFor.Player => ("VehiclePlayerOnly".Translate(), new Color(0.1f, 0.85f, 0.85f)),
-				VehicleEnabledFor.Raiders => ("VehicleRaiderOnly".Translate(), new Color(0.9f, 0.53f, 0.1f)),
+				VehicleEnabledFor.Everyone => ("VF_VehicleEnabled".Translate(), Color.green),
+				VehicleEnabledFor.None => ("VF_VehicleDisabled".Translate(), Color.red),
+				VehicleEnabledFor.Player => ("VF_VehiclePlayerOnly".Translate(), new Color(0.1f, 0.85f, 0.85f)),
+				VehicleEnabledFor.Raiders => ("VF_VehicleRaiderOnly".Translate(), new Color(0.9f, 0.53f, 0.1f)),
 				_ => ("[Err] Uncaught Status", Color.red)
 			};
 		}

@@ -39,12 +39,12 @@ namespace Vehicles
 					{
 						if (!VehicleMod.settings.debug.debugDraftAnyVehicle && (vehicle.CompFueledTravel?.EmptyTank ?? false))
 						{
-							Messages.Message("Vehicles_OutOfFuel".Translate(), MessageTypeDefOf.RejectInput);
+							Messages.Message("VF_OutOfFuel".Translate(), MessageTypeDefOf.RejectInput);
 							return;
 						}
 						if (vehicle.CompUpgradeTree?.CurrentlyUpgrading ?? false)
 						{
-							Messages.Message("Vehicles_UpgradeInProgress".Translate(), MessageTypeDefOf.RejectInput);
+							Messages.Message("VF_UpgradeInProgress".Translate(), MessageTypeDefOf.RejectInput);
 							return;
 						}
 					}

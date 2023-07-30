@@ -43,8 +43,6 @@
 	<VF_DevMode_DebugDrawBumpersTooltip>Draw cells immediately in front of vehicle that will indicate when the vehicle "bumps" into something and halts pathing.</VF_DevMode_DebugDrawBumpersTooltip>
 	<VF_DevMode_DebugDrawLordMeetingPoint>Draw Lord Meeting Point</VF_DevMode_DebugDrawLordMeetingPoint>
 	<VF_DevMode_DebugDrawLordMeetingPointTooltip>Highlights the cell where the Form Vehicle Caravan meeting point has been set.</VF_DevMode_DebugDrawLordMeetingPointTooltip>
-	<VF_DevMode_DebugCameraViewAnimator>Attach Camera in Animator</VF_DevMode_DebugCameraViewAnimator>
-	<VF_DevMode_DebugCameraViewAnimatorTooltip>Moves main camera to window view in graph editor when animation target is selected.</VF_DevMode_DebugCameraViewAnimatorTooltip>
 	
 	<!-- Pathing -->
 	<VF_DevMode_DebugPathfinderDebugging>Local Pathing</VF_DevMode_DebugPathfinderDebugging>
@@ -55,6 +53,4 @@
 	<VF_DevMode_DebugDrawVehiclePathingCostsTooltip>Draw costs per cell/tile calculated from pathfinder. Shows accumulated path cost.</VF_DevMode_DebugDrawVehiclePathingCostsTooltip>
 	<VF_DevMode_DebugDrawPathfinderSearch>Draw Pathfinder Search</VF_DevMode_DebugDrawPathfinderSearch>
 	<VF_DevMode_DebugDrawPathfinderSearchTooltip>Draws Pathfinder search as it opens and closes nodes searching for a path.  Will also show chunk search if Hierarchal Pathfinding is enabled. Pathfinder is intentionally slowed down in order to clearly show the process, as the async search is too fast in most cases to view.</VF_DevMode_DebugDrawPathfinderSearchTooltip>
-	<VF_DevMode_DebugDrawVehiclePathGridCellCosts>Draw Cell Costs</VF_DevMode_DebugDrawVehiclePathGridCellCosts>
-	<VF_DevMode_DebugDrawVehiclePathGridCellCostsTooltip>Draw costs per cell for the currently highlighted region. Only shows final cost of individual cells, taking terrain and things into account.</VF_DevMode_DebugDrawVehiclePathGridCellCostsTooltip>
 </LanguageData>

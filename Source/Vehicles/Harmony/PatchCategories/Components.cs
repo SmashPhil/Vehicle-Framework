@@ -67,7 +67,7 @@ namespace Vehicles
 		{
 			if (pawn is VehiclePawn)
 			{
-				failStr = "IsIncapableOfRamming".Translate(target.Thing.LabelShort);
+				failStr = "VF_IsIncapableOfRamming".Translate(target.Thing.LabelShort);
 				//Add more to string or Action if ramming is implemented
 				return false;
 			}

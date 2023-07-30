@@ -570,14 +570,14 @@ namespace Vehicles
 			{
 				Command_Action forceCaravanLeave = new Command_Action
 				{
-					defaultLabel = "ForceLeaveCaravan".Translate(),
-					defaultDesc = "ForceLeaveCaravanDesc".Translate(),
+					defaultLabel = "VF_ForceLeaveCaravan".Translate(),
+					defaultDesc = "VF_ForceLeaveCaravanDesc".Translate(),
 					icon = VehicleTex.CaravanIcon,
 					activateSound = SoundDefOf.Tick_Low,
 					action = delegate ()
 					{
 						formCaravanLordJob.ForceCaravanLeave();
-						Messages.Message("ForceLeaveConfirmation".Translate(), MessageTypeDefOf.TaskCompletion);
+						Messages.Message("VF_ForceLeaveConfirmation".Translate(), MessageTypeDefOf.TaskCompletion);
 					}
 				};
 				yield return forceCaravanLeave;
@@ -758,7 +758,7 @@ namespace Vehicles
 				if (handler.AreSlotsAvailable)
 				{
 					VehicleReservationManager reservationManager = Map.GetCachedMapComponent<VehicleReservationManager>();
-					FloatMenuOption opt = new FloatMenuOption("EnterVehicle".Translate(LabelShort, handler.role.label, (handler.role.slots - (handler.handlers.Count +
+					FloatMenuOption opt = new FloatMenuOption("VF_EnterVehicle".Translate(LabelShort, handler.role.label, (handler.role.slots - (handler.handlers.Count +
 						reservationManager.GetReservation<VehicleHandlerReservation>(this)?.ClaimantsOnHandler(handler) ?? 0)).ToString()), delegate ()
 						{
 							Job job = new Job(JobDefOf_Vehicles.Board, this);
@@ -893,7 +893,7 @@ namespace Vehicles
 		{
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
 			VehicleReservationManager reservationManager = Map.GetCachedMapComponent<VehicleReservationManager>();
-			FloatMenuOption opt1 = new FloatMenuOption("BoardShipGroup".Translate(LabelShort), delegate ()
+			FloatMenuOption opt1 = new FloatMenuOption("VF_BoardShipGroup".Translate(LabelShort), delegate ()
 			{
 				List<IntVec3> cells = this.OccupiedRect().Cells.ToList();
 				foreach (Pawn p in pawns)
@@ -909,7 +909,7 @@ namespace Vehicles
 					p.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
 				}
 			}, MenuOptionPriority.Default, null, null, 0f, null, null);
-			FloatMenuOption opt2 = new FloatMenuOption("BoardShipGroupFail".Translate(LabelShort), null, MenuOptionPriority.Default, null, null, 0f, null, null)
+			FloatMenuOption opt2 = new FloatMenuOption("VF_BoardShipGroupFail".Translate(LabelShort), null, MenuOptionPriority.Default, null, null, 0f, null, null)
 			{
 				Disabled = true
 			};
