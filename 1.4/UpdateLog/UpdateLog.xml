@@ -10,6 +10,7 @@
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Fixed bug where propeller animation class would finish prematurely.
 
+- Fixed bug where PostToSettings fields with disable conditions would disable regardless if dependencies were active or not.
 &lt;title&gt;Performance Improvements&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;

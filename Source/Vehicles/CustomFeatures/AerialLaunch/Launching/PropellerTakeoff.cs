@@ -62,7 +62,6 @@ namespace Vehicles
 				TickMotes();
 			}
 			float rotationRate = RotationRate(TimeInAnimationPropeller);
-			Log.Message($"RotationRate: {rotationRate} t={TimeInAnimationPropeller} = {ticksPassedPropeller} / {CurAnimationProperties_Propeller.maxTicksPropeller}");
 			vehicle.graphicOverlay.rotationRegistry[Graphic_Propeller.Key] += rotationRate;
 		}
 
