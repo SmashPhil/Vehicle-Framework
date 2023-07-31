@@ -61,7 +61,9 @@ namespace Vehicles
 				ticksPassedPropeller++;
 				TickMotes();
 			}
-			vehicle.graphicOverlay.rotationRegistry[Graphic_Propeller.Key] += RotationRate(TimeInAnimationPropeller);
+			float rotationRate = RotationRate(TimeInAnimationPropeller);
+			Log.Message($"RotationRate: {rotationRate} t={TimeInAnimationPropeller} = {ticksPassedPropeller} / {CurAnimationProperties_Propeller.maxTicksPropeller}");
+			vehicle.graphicOverlay.rotationRegistry[Graphic_Propeller.Key] += rotationRate;
 		}
 
 		protected override void TickTakeoff()
@@ -95,7 +97,7 @@ namespace Vehicles
 
 		public override bool FinishedAnimation(VehicleSkyfaller skyfaller)
 		{
-			return ticksPassedPropeller >= CurAnimationProperties.maxTicks && base.FinishedAnimation(skyfaller);
+			return ticksPassedPropeller >= CurAnimationProperties_Propeller.maxTicksPropeller && base.FinishedAnimation(skyfaller);
 		}
 
 		protected override void PreAnimationSetup()
