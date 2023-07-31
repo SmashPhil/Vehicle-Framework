@@ -86,7 +86,7 @@ namespace Vehicles
 					else
 					{
 						int stackCount = Item.stackCount; //store before transfer for transferable recache
-						Vehicle.AddOrTransfer(Item, stackCount, pawn);
+						Vehicle.AddOrTransfer(Item, stackCount);
 						TransferableOneWay transferable = Vehicle.cargoToLoad.FirstOrDefault(t => t.AnyThing is {def: ThingDef def} && def == Item.def);
                         if (transferable is null)
                         {
