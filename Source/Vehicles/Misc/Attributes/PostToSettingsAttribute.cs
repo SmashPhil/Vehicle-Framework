@@ -67,22 +67,18 @@ namespace Vehicles
 			string tooltip = ResolvedTooltip();
 			string disabledTooltip = string.Empty;
 
-			bool dependenciesFulfilled = true;
 			if (field.TryGetAttribute(out DisableSettingConditionalAttribute disableSetting))
 			{
-				if (!disableSetting.MayRequire.NullOrEmpty())
+				if (!disableSetting.MayRequire.NullOrEmpty() && !ModsConfig.IsActive(disableSetting.MayRequire))
 				{
-					dependenciesFulfilled = ModsConfig.IsActive(disableSetting.MayRequire);
 					disabledTooltip = "VF_DisabledSingleModDependencyTooltip".Translate(disableSetting.MayRequire);
 				}
-				else if (!disableSetting.MayRequireAny.NullOrEmpty())
+				else if (!disableSetting.MayRequireAny.NullOrEmpty() && !disableSetting.MayRequireAny.Any(packageId => ModsConfig.IsActive(packageId)))
 				{
-					dependenciesFulfilled = disableSetting.MayRequireAny.Any(packageId => ModsConfig.IsActive(packageId));
 					disabledTooltip = "VF_DisabledSingleModDependencyTooltip".Translate(Environment.NewLine + string.Join(Environment.NewLine, disableSetting.MayRequireAny));
 				}
-				else if (!disableSetting.MayRequireAll.NullOrEmpty())
+				else if (!disableSetting.MayRequireAll.NullOrEmpty() && !disableSetting.MayRequireAll.All(packageId => ModsConfig.IsActive(packageId)))
 				{
-					dependenciesFulfilled = disableSetting.MayRequireAll.All(packageId => ModsConfig.IsActive(packageId));
 					disabledTooltip = "VF_DisabledMultipleModsDependencyTooltip".Translate(Environment.NewLine + string.Join(Environment.NewLine, disableSetting.MayRequireAll));
 				}
 				else if (disableSetting.FieldDisabled(vehicleDef, out string fieldDisabledTooltip))
