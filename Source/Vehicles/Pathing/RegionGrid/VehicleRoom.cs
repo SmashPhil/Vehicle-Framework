@@ -122,7 +122,7 @@ namespace Vehicles
 			}
 			if (Regions.Count == 0)
 			{
-				Map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid.allRooms.Remove(this);
+				Map?.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid.allRooms.Remove(this);
 			}
 		}
 

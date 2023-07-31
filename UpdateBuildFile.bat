@@ -1,2 +1,2 @@
 @echo off
-@echo %date% %time:~0,8%> "BuildDate.txt"
+@echo %date% %time:~0,8%> "..\..\BuildDate.txt"
