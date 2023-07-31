@@ -1,6 +1,7 @@
+- Run bat file
 - Rebuild entire solution
-- Verify Version.txt file is correct with AssemblyVersion
+- Reboot game to update Version.txt with current build date.
 - Update Manifest version
-- Verify UpdateLog version, testing and update flag, and text
-- Update via PublisherPlus (verify Ignore/ folders, source code, and git files are excluded)
+- Verify UpdateLog version, testing update flag, and text
+- Update via PublisherPlus (ensure Ignore/ folders, source code, bat file, and git files are excluded)
 - Archive UpdateLog and clear it for next version

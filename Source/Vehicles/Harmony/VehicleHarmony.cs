@@ -62,15 +62,22 @@ namespace Vehicles
 			VehicleMCP = VehicleMod.settings.Mod.Content;
 			VehicleMMD = ModLister.GetActiveModWithIdentifier(VehiclesUniqueId, ignorePostfix: true);
 
-			string dateText = File.ReadAllText(BuildDatePath);
-			DateTime buildDate = DateTime.ParseExact(dateText, "yyyy/MM/dd HH:mm:ss", CultureInfo.InvariantCulture);
+			string dateText = File.ReadAllText(BuildDatePath).Trim(Environment.NewLine.ToCharArray());
+			try
+			{
+				DateTime buildDate = DateTime.ParseExact(dateText, "ddd MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
 
-			Version = new ModVersion(BuildMajor, BuildMinor, buildDate, ProjectStartDate);
+				Version = new ModVersion(BuildMajor, BuildMinor, buildDate, ProjectStartDate);
 
-			string readout = Prefs.DevMode ? Version.VersionStringWithRevision : Version.VersionString;
-			Log.Message($"<color=orange>{LogLabel}</color> version {readout}");
+				string readout = Prefs.DevMode ? Version.VersionStringWithRevision : Version.VersionString;
+				Log.Message($"<color=orange>{LogLabel}</color> version {readout}");
 
-			File.WriteAllText(VersionPath, Version.VersionString);
+				File.WriteAllText(VersionPath, Version.VersionString);
+			}
+			catch(Exception ex)
+			{
+				Log.Error($"Exception thrown while attempting to parse VehicleFramework version number. BuildDate = {dateText}\nException: {ex}");
+			}
 
 			Harmony.PatchAll();
 
