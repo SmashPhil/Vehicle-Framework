@@ -54,6 +54,10 @@ namespace Vehicles
 		public bool dynamicWorldDrawing = false;
 		public float delayDeployOnLanding = 0;
 
+		/* Combat */
+		public bool runOverPawns = true;
+		public float chanceRunOverFriendly = 0.4f;
+
 		/* Upgrades */
 		public bool drawUpgradeInformationScreen = true;
 		public bool overrideDrawColors = true;
@@ -104,6 +108,10 @@ namespace Vehicles
 			dynamicWorldDrawing = false;
 			delayDeployOnLanding = 0;
 
+			/* Combat */
+			runOverPawns = true;
+			chanceRunOverFriendly = 0.4f;
+
 			/* Upgrades */
 			drawUpgradeInformationScreen = true;
 			overrideDrawColors = true;
@@ -146,6 +154,9 @@ namespace Vehicles
 			Scribe_Values.Look(ref airDefenses, nameof(airDefenses), defaultValue: true);
 			Scribe_Values.Look(ref dynamicWorldDrawing, nameof(dynamicWorldDrawing), defaultValue: false);
 			Scribe_Values.Look(ref delayDeployOnLanding, nameof(delayDeployOnLanding), defaultValue: 0);
+
+			Scribe_Values.Look(ref runOverPawns, nameof(runOverPawns), defaultValue: true);
+			Scribe_Values.Look(ref chanceRunOverFriendly, nameof(chanceRunOverFriendly), defaultValue: 0.4f);
 
 			Scribe_Values.Look(ref drawUpgradeInformationScreen, nameof(drawUpgradeInformationScreen), defaultValue: true);
 			Scribe_Values.Look(ref overrideDrawColors, nameof(overrideDrawColors), defaultValue: true);
@@ -235,6 +246,14 @@ namespace Vehicles
 					listingStandard.CheckboxLabeled("VF_DynamicDrawing".Translate(), ref dynamicWorldDrawing, "VF_DynamicDrawingTooltip".Translate());
 					listingStandard.Gap(8);
 
+					listingStandard.Header("VF_CombatSettings".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
+					listingStandard.Gap(4);
+					listingStandard.CheckboxLabeled("VF_RunOverPawns".Translate(), ref runOverPawns, "VF_RunOverPawnsTooltip".Translate());
+					if (runOverPawns)
+					{
+						listingStandard.SliderLabeled("VF_ChanceToRunOverFriendlies".Translate(), "VF_ChanceToRunOverFriendliesTooltip".Translate(), "%", ref chanceRunOverFriendly, 0, 1, multiplier: 100, decimalPlaces: 0);
+					}
+
 					GUIState.Disable();
 
 					listingStandard.Header("VF_Upgrades".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
@@ -246,9 +265,9 @@ namespace Vehicles
 					listingStandard.NewColumn();
 					listingStandard.Header("VF_VehicleDamageMultipliers".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 					listingStandard.Gap(4);
-					listingStandard.SliderLabeled("VF_MeleeDamageMultiplier".Translate(), string.Empty, "%", ref meleeDamageMultiplier, 0, 2, multiplier: 100);
-					listingStandard.SliderLabeled("VF_RangedDamageMultiplier".Translate(), string.Empty, "%", ref rangedDamageMultiplier, 0, 2, multiplier: 100);
-					listingStandard.SliderLabeled("VF_ExplosiveDamageMultiplier".Translate(), string.Empty, "%", ref explosiveDamageMultiplier, 0, 2, multiplier: 100);
+					listingStandard.SliderLabeled("VF_MeleeDamageMultiplier".Translate(), string.Empty, "%", ref meleeDamageMultiplier, 0, 2, multiplier: 100, decimalPlaces: 0);
+					listingStandard.SliderLabeled("VF_RangedDamageMultiplier".Translate(), string.Empty, "%", ref rangedDamageMultiplier, 0, 2, multiplier: 100, decimalPlaces: 0);
+					listingStandard.SliderLabeled("VF_ExplosiveDamageMultiplier".Translate(), string.Empty, "%", ref explosiveDamageMultiplier, 0, 2, multiplier: 100, decimalPlaces: 0);
 
 					listingStandard.Header("VF_VehicleTurrets".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 					listingStandard.CheckboxLabeled("VF_TurretOverheatMechanics".Translate(), ref overheatMechanics, "VF_TurretOverheatMechanicsTooltip".Translate());

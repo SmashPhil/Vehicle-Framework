@@ -90,6 +90,13 @@ Determines whether Vehicles should use values from the mod settings or Defs</VF_
 	<VF_AirDefensesActive>Air Defenses</VF_AirDefensesActive>
 	<VF_AirDefensesActiveTooltip>Certain world objects are able to utilize air defenses to shoot down nearby aircraft.</VF_AirDefensesActiveTooltip>
 	
+	<!-- Combat -->
+	<VF_CombatSettings>Combat</VF_CombatSettings>
+	<VF_RunOverPawns>Run Over Pawns</VF_RunOverPawns>
+	<VF_RunOverPawnsTooltip>Vehicles can run over pawns and apply blunt damage based on mass and speed.</VF_RunOverPawnsTooltip>
+	<VF_ChanceToRunOverFriendlies>Friendly Fire Chance</VF_ChanceToRunOverFriendlies>
+	<VF_ChanceToRunOverFriendliesTooltip>Chance to run over friendly pawns.</VF_ChanceToRunOverFriendliesTooltip>
+	
 	<!-- Vehicle Stats -->
 	<VF_VehicleStats>Stats</VF_VehicleStats>
 	

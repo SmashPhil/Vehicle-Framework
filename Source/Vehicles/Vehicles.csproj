@@ -380,6 +380,7 @@
     <Compile Include="Components\Vehicles\Health\StatWorkers\VehicleStatWorker_BodyIntegrity.cs" />
     <Compile Include="Components\Vehicles\Health\VehicleStatDrawEntry.cs" />
     <Compile Include="Components\Vehicles\Misc\Vehicle_IgnitionController.cs" />
+    <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Combat.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Handlers.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Caravan.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_AI.cs" />

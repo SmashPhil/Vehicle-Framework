@@ -32,7 +32,7 @@ namespace Vehicles
 			repair.tickAction = delegate ()
 			{
 				Pawn actor = repair.actor;
-				actor.skills.Learn(SkillDefOf.Construction, 0.08f, false);
+				actor.skills?.Learn(SkillDefOf.Construction, 0.08f, false);
 				float statValue = actor.GetStatValue(StatDefOf.ConstructionSpeed, true);
 				ticksToNextRepair -= statValue;
 				if (ticksToNextRepair <= 0f)

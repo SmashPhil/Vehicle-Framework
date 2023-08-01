@@ -6,5 +6,6 @@
     <exclude>1.4\Defs\Ignore</exclude>
     <exclude>Source</exclude>
     <exclude>Textures\Ignore</exclude>
+    <exclude>UpdateBuildFile.bat</exclude>
   </Excluded>
 </Configuration>

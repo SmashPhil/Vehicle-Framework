@@ -11,6 +11,10 @@
 - Fixed bug where PostToSettings fields with disable conditions would disable regardless if dependencies were active or not.
 
 - Fixed issue where pawns were unable to load cargo to vehicle.
+
+- Fixed compatibility issue with Biotech where mechanitors were unable to repair vehicles.
+
+- Fixed issue where VF mod version number would use player's local time instead of the project build date.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
   <!--Static parameterless method to execute when update log is executed-->

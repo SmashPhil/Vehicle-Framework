@@ -62,7 +62,7 @@
 	
 	<WorldObjectDef>
 		<defName>AerialVehicle</defName>
-		<label>Aereial Vehicle</label>
+		<label>Aerial Vehicle</label>
 		<description>An aerial vehicle capable of flight on the world map.</description>
 		<worldObjectClass>Vehicles.AerialVehicleInFlight</worldObjectClass>
 		<texture>UI/Icons/DefaultVehicleIcon</texture>

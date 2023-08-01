@@ -395,7 +395,7 @@ namespace Vehicles
 
 			lastCell = vehicle.Position;
 			vehicle.Position = nextCell;
-
+			vehicle.CheckForCollisions();
 			if (vehicle.beached)
 			{
 				vehicle.BeachShip();
