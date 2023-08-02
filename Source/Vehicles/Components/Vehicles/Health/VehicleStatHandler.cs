@@ -99,22 +99,33 @@ namespace Vehicles
 		/// <returns>% efficiency of <paramref name="statDef"/> given <see cref="VehicleComponent"/> calculation.</returns>
 		public float StatEfficiency(VehicleStatDef statDef)
 		{
-			if (statComponents.TryGetValue(statDef, out var categories))
+			if (statComponents.TryGetValue(statDef, out var components))
 			{
-				if (categories.FirstOrDefault(component => component.props.priorityStatEfficiency) is VehicleComponent component)
+				float efficiency = EfficiencyFor(statDef.operationType, components);
+				float priorityEfficiency = EfficiencyFor(statDef.operationType, components.Where(component => component.props.priorityStatEfficiency));
+				if (priorityEfficiency < efficiency)
 				{
-					return component.Efficiency;
+					return priorityEfficiency;
 				}
-				return statDef.operationType switch
-				{
-					EfficiencyOperationType.None => 1,
-					EfficiencyOperationType.MinValue => categories.Min(c => c.Efficiency),
-					EfficiencyOperationType.MaxValue => categories.Max(c => c.Efficiency),
-					EfficiencyOperationType.Sum => categories.Sum(c => c.Efficiency).Clamp(0, 1),
-					_ => categories.AverageWeighted(c => c.props.efficiencyWeight, c => c.Efficiency) //Everything else falls through to Average case
-				};
+				return efficiency;
 			}
 			return 1;
+		}
+
+		private float EfficiencyFor(EfficiencyOperationType operationType, IEnumerable<VehicleComponent> components)
+		{
+			if (components.EnumerableNullOrEmpty())
+			{
+				return 1;
+			}
+			return operationType switch
+			{
+				EfficiencyOperationType.None => 1,
+				EfficiencyOperationType.MinValue => components.Min(c => c.Efficiency),
+				EfficiencyOperationType.MaxValue => components.Max(c => c.Efficiency),
+				EfficiencyOperationType.Sum => components.Sum(c => c.Efficiency).Clamp(0, 1),
+				_ => components.AverageWeighted(c => c.props.efficiencyWeight, c => c.Efficiency) //Everything else falls through to Average case
+			};
 		}
 
 		public void InitializeHitboxCells()

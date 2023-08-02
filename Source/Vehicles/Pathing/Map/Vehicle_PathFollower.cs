@@ -60,7 +60,7 @@ namespace Vehicles
 			this.vehicle = vehicle;
 			bumperCells = new List<IntVec3>();
 			shouldStopClipping = vehicle.VehicleDef.size.x != vehicle.VehicleDef.size.z; //If vehicle is not NxN, it may clip buildings at destination.
-			CanEnterDoors = vehicle.VehicleDef.size == IntVec2.One;
+			CanEnterDoors = false;// vehicle.VehicleDef.size == IntVec2.One;
 			LookAheadStartingIndex = Mathf.CeilToInt(vehicle.VehicleDef.Size.z / 2f); 
 			LookAheadDistance = MaxCheckAheadNodes + LookAheadStartingIndex; //N cells away from vehicle's front;
 		}
@@ -232,7 +232,8 @@ namespace Vehicles
 			lastMovedTick = Find.TickManager.TicksGame;
 			if (nextCellCostLeft > 0f)
 			{
-				nextCellCostLeft -= CostToPayThisTick();
+				float costsToPayTick = CostToPayThisTick();
+				nextCellCostLeft -= costsToPayTick;
 				return;
 			}
 			
@@ -393,9 +394,19 @@ namespace Vehicles
 				return;
 			}
 
+			if (VehicleMod.settings.main.runOverPawns)
+			{
+				float costsToPayThisTick = CostToPayThisTick();
+				float moveSpeed = 1 / (nextCellCostTotal / 60 / costsToPayThisTick);
+				if (vehicle.FullRotation.IsDiagonal)
+				{
+					moveSpeed *= Ext_Math.Sqrt2;
+				}
+				vehicle.CheckForCollisions(moveSpeed);
+			}
+			
 			lastCell = vehicle.Position;
 			vehicle.Position = nextCell;
-			vehicle.CheckForCollisions();
 			if (vehicle.beached)
 			{
 				vehicle.BeachShip();

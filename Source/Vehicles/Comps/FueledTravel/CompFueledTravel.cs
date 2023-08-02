@@ -373,12 +373,6 @@ namespace Vehicles
 			}
 		}
 
-		public override void SpawnedInGodMode()
-		{
-			base.SpawnedInGodMode();
-			Refuel(FuelCapacity);
-		}
-
 		private void RevalidateConsumptionStatus()
 		{
 			if (ShouldConsumeNow)

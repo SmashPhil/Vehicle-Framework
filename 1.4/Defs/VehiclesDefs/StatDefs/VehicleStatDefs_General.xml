@@ -12,7 +12,7 @@
 		
 		<toStringStyle>FloatOne</toStringStyle>
 		<formatString>{0} c/s</formatString>
-		<operationType>MinValue</operationType>
+		<operationType>Average</operationType>
 		<displayPriorityInCategory>100</displayPriorityInCategory>
 		
 		<modSettingsInfo>

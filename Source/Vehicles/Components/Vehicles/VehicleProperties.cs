@@ -17,6 +17,13 @@ namespace Vehicles
 
 		public VehicleTrack track;
 
+		[PostToSettings(Label = "VF_CollisionMultiplier", Tooltip = "VF_CollisionMultiplierTooltip", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
+		[SliderValues(MinValue = 0, MaxValue = 2, Increment = 0.05f, RoundDecimalPlaces = 2)]
+		public float pawnCollisionMultiplier = 0.5f;
+		[PostToSettings(Label = "VF_CollisionVehicleMultiplier", Tooltip = "VF_CollisionVehicleMultiplierTooltip", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
+		[SliderValues(MinValue = 0, MaxValue = 2, Increment = 0.05f, RoundDecimalPlaces = 2)]
+		public float pawnCollisionRecoilMultiplier = 0.5f;
+
 		public List<VehicleJobLimitations> vehicleJobLimitations = new List<VehicleJobLimitations>();
 
 		public bool diagonalRotation = true;

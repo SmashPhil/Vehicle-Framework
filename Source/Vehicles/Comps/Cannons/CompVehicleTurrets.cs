@@ -328,15 +328,6 @@ namespace Vehicles
 			}
 		}
 
-		public override void SpawnedInGodMode()
-		{
-			base.SpawnedInGodMode();
-			foreach (VehicleTurret turret in turrets)
-			{
-				DevModeReloadTurret(turret);
-			}
-		}
-
 		private void DevModeReloadTurret(VehicleTurret turret)
 		{
 			if (turret.turretDef.ammunition is null)

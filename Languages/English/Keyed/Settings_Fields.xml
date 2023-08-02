@@ -36,6 +36,11 @@
 	<VF_OpportunisticTickingTooltip>Vehicle components only tick when necessary, reducing impact on performance when idle.</VF_OpportunisticTickingTooltip>
 	
 	<!-- (Properties) -->
+	<VF_CollisionMultiplier>Pawn Damage</VF_CollisionMultiplier>
+	<VF_CollisionMultiplierTooltip>Multiplier for damage applied to pawns being run over by vehicles.</VF_CollisionMultiplierTooltip>
+	<VF_CollisionVehicleMultiplier>Vehicle Damage</VF_CollisionVehicleMultiplier>
+	<VF_CollisionVehicleMultiplierTooltip>Multiplier for damage applied to the vehicle when running over a pawn.</VF_CollisionVehicleMultiplierTooltip>
+	
 	<VF_ManhunterTargetsVehicle>Manhunter Targets</VF_ManhunterTargetsVehicle>
 	<VF_ManhunterTargetsVehicleTooltip>Manhunter animals will target this vehicle.</VF_ManhunterTargetsVehicleTooltip>
 	<VF_FishingEnabled>Can Fish</VF_FishingEnabled>
