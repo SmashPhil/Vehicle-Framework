@@ -757,10 +757,11 @@ namespace Vehicles
 				}
 				if (nodesAhead != 0 && next.AdjacentToDiagonal(previous))
 				{
-					if (VehiclePathFinder.BlocksDiagonalMovement(vehicle, vehicle.Map.cellIndices.CellToIndex(next.x, previous.z)) || VehiclePathFinder.BlocksDiagonalMovement(vehicle, vehicle.Map.cellIndices.CellToIndex(previous.x, next.z)))
-					{
-						return PathRequest.NeedNew;
-					}
+					//if (VehiclePathFinder.BlocksDiagonalMovement(vehicle, vehicle.Map.cellIndices.CellToIndex(next.x, previous.z)) || VehiclePathFinder.BlocksDiagonalMovement(vehicle, vehicle.Map.cellIndices.CellToIndex(previous.x, next.z)))
+					//{
+					//	Log.Message($"Diagonal Blocked");
+					//	return PathRequest.NeedNew;
+					//}
 				}
 				previous = next;
 				nodesAhead++;

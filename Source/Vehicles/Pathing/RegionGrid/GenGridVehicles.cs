@@ -118,7 +118,7 @@ namespace Vehicles
 		/// <param name="thing"></param>
 		public static bool ImpassableForVehicles(this Thing thing)
 		{
-			return thing.def.passability == Traversability.Impassable || thing.def.IsFence;
+			return thing.def.passability == Traversability.Impassable || thing.def.IsFence || thing is Building_Door;
 		}
 	}
 }
