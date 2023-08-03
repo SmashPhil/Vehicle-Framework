@@ -396,7 +396,8 @@ namespace Vehicles
 			totalWinter *= Mathf.InverseLerp(MaxTempForWinterOffset, 0f, GenTemperature.GetTemperatureFromSeasonAtTile(ticksAbs.Value, tile));
 			if (totalWinter > 0.01f)
 			{
-				float finalCost = totalWinter * vehicleDef.properties.winterSpeedMultiplier;
+				float winterSpeedMultiplier = SettingsCache.TryGetValue(vehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.winterSpeedMultiplier), vehicleDef.properties.winterSpeedMultiplier);
+				float finalCost = totalWinter * winterSpeedMultiplier;
 				if (explanation != null)
 				{
 					explanation.AppendLine();
@@ -405,9 +406,9 @@ namespace Vehicles
 					{
 						explanation.Append($" ({totalWinter.ToStringPercent("F0")})");
 					}
-					if (vehicleDef.properties.winterSpeedMultiplier != 1)
+					if (winterSpeedMultiplier != 1)
 					{
-						explanation.Append($" (Offset: {vehicleDef.properties.winterSpeedMultiplier})");
+						explanation.Append($" (Offset: {winterSpeedMultiplier})");
 					}
 					explanation.Append(": ");
 					explanation.Append(finalCost.ToStringWithSign("0.#"));

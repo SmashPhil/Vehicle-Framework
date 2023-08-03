@@ -864,6 +864,10 @@ namespace Vehicles
 					if (Widgets.ButtonImage(rect, VehicleTex.Settings))
 					{
 						List<FloatMenuOption> options = new List<FloatMenuOption>();
+						options.Add(new FloatMenuOption("Tweak Values", delegate ()
+						{
+							Find.WindowStack.Add(new EditWindow_TweakFields(this));
+						}));
 						if (CompVehicleLauncher != null)
 						{
 							options.Add(new FloatMenuOption("Open in animator", OpenInAnimator));

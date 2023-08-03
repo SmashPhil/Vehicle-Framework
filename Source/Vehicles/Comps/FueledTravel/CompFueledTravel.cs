@@ -13,6 +13,7 @@ using System.Text;
 
 namespace Vehicles
 {
+	[HeaderTitle(Label = nameof(CompFueledTravel))]
 	public class CompFueledTravel : VehicleComp, IRefundable
 	{
 		public const float FuelPerLeak = 1;
@@ -25,7 +26,7 @@ namespace Vehicles
 
 		private static MethodInfo powerNetMethod;
 
-		[Unsaved]
+		[Unsaved]	
 		private bool leaking;
 
 		private float fuel;

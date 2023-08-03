@@ -16,7 +16,7 @@ namespace Vehicles
 			{
 				if (Map.thingGrid.ThingAt(cell, ThingCategory.Pawn) is Pawn pawn && !(pawn is VehiclePawn))
 				{
-					if (pawn.Faction.HostileTo(Faction) || Rand.Chance(VehicleMod.settings.main.chanceRunOverFriendly))
+					if (pawn.Faction.HostileTo(Faction) || Rand.Chance(Find.Storyteller.difficulty.friendlyFireChanceFactor))
 					{
 						(float pawnDamage, float vehicleDamage) = CalculateImpactDamage(pawn, this, moveSpeed);
 						Pawn culprit = GetPriorityHandlers(HandlingTypeFlags.Movement)?.FirstOrDefault(handler => handler.handlers.Any)?.handlers.InnerListForReading.FirstOrDefault();
@@ -33,9 +33,11 @@ namespace Vehicles
 			float mass = vehicle.GetStatValue(VehicleStatDefOf.Mass);
 			float bodySize = pawn.RaceProps.baseBodySize;
 			float ke = 0.5f * mass * (velocity * velocity); //   (1/2)mv^2
-			float pawnDamage = vehicle.VehicleDef.properties.pawnCollisionMultiplier * ke / 100 * bodySize; //   0.7k / 100b
+			float pawnCollisionMultiplier = SettingsCache.TryGetValue(vehicle.VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.pawnCollisionMultiplier), vehicle.VehicleDef.properties.pawnCollisionMultiplier);
+			float pawnDamage = pawnCollisionMultiplier * ke / 100 * bodySize; //   0.7k / 100b
 			float baseBluntArmor = vehicle.GetStatValue(StatDefOf.ArmorRating_Blunt);
-			float vehicleDamage = vehicle.VehicleDef.properties.pawnCollisionRecoilMultiplier * (2- baseBluntArmor) * ke * bodySize / 200; //   p(2-a)kb / 200
+			float pawnCollisionRecoilMultiplier = SettingsCache.TryGetValue(vehicle.VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.pawnCollisionRecoilMultiplier), vehicle.VehicleDef.properties.pawnCollisionRecoilMultiplier);
+			float vehicleDamage = pawnCollisionRecoilMultiplier * (2- baseBluntArmor) * ke * bodySize / 200; //   p(2-a)kb / 200
 			return (pawnDamage, vehicleDamage);
 		}
 	}

@@ -22,9 +22,9 @@ namespace Vehicles
 		public const int MinCostWalk = 50;
 		public const int MinCostAmble = 60;
 
-		public const int MaxCheckAheadNodes = 1;
-		public const int MaxCheckAheadNodesWaiting = 5;
-		public const int TicksWhileWaiting = 120;
+		public const int MinCheckAheadNodes = 1;
+		public const int MaxCheckAheadNodes = 5;
+		public const int TicksWhileWaiting = 10;
 
 		protected VehiclePawn vehicle;
 
@@ -62,7 +62,7 @@ namespace Vehicles
 			shouldStopClipping = vehicle.VehicleDef.size.x != vehicle.VehicleDef.size.z; //If vehicle is not NxN, it may clip buildings at destination.
 			CanEnterDoors = false;// vehicle.VehicleDef.size == IntVec2.One;
 			LookAheadStartingIndex = Mathf.CeilToInt(vehicle.VehicleDef.Size.z / 2f); 
-			LookAheadDistance = MaxCheckAheadNodes + LookAheadStartingIndex; //N cells away from vehicle's front;
+			LookAheadDistance = MinCheckAheadNodes + LookAheadStartingIndex; //N cells away from vehicle's front;
 		}
 
 		public bool CanEnterDoors { get; private set; }
@@ -479,7 +479,7 @@ namespace Vehicles
 			}
 
 			//Check ahead and stop prematurely if vehicle won't fit at final destination
-			if (shouldStopClipping && curPath.NodesLeftCount < LookAheadDistance && vehicle.LocationRestrictedBySize(nextCell, vehicle.FullRotation))
+			if (shouldStopClipping && curPath.NodesLeftCount < LookAheadStartingIndex && vehicle.LocationRestrictedBySize(nextCell, vehicle.FullRotation))
 			{
 				PatherFailed();
 				return;
@@ -694,6 +694,21 @@ namespace Vehicles
 			{
 				return PathRequest.NeedNew;
 			}
+			foreach (IntVec3 cell in vehicle.VehicleRect(destination.Cell, Rot4.North))
+			{
+				if (ThreadHelper.AnyVehicleBlockingPathAt(cell, vehicle) is VehiclePawn otherVehicle)
+				{
+					if (!otherVehicle.vPather.Moving && !otherVehicle.vPather.Waiting)
+					{
+						if (PathingHelper.TryFindNearestStandableCell(vehicle, destination.Cell, out IntVec3 result))
+						{
+							destination = result;
+							return PathRequest.NeedNew;
+						}
+						return PathRequest.None;
+					}
+				}
+			}
 			if (vehicle.Position.InHorDistOf(curPath.LastNode, 15f) || vehicle.Position.InHorDistOf(destination.Cell, 15f))
 			{
 				if (!VehicleReachabilityImmediate.CanReachImmediateVehicle(curPath.LastNode, destination, vehicle.Map, vehicle.VehicleDef, peMode))
@@ -738,24 +753,30 @@ namespace Vehicles
 
 			IntVec3 previous = IntVec3.Invalid;
 			IntVec3 next;
-			int nodesAhead = LookAheadStartingIndex;
-			while (nodesAhead < MaxCheckAheadNodesWaiting && nodesAhead < curPath.NodesLeftCount)
+			int nodeIndex = LookAheadStartingIndex;
+			while (nodeIndex < LookAheadStartingIndex + MaxCheckAheadNodes && nodeIndex < curPath.NodesLeftCount)
 			{
-				next = curPath.Peek(nodesAhead);
+				next = curPath.Peek(nodeIndex);
+				Rot8 rot = Ext_Map.DirectionToCell(previous, next);
+				vehicle.Map.debugDrawer.FlashCell(next);
 				if (!GenGridVehicles.Walkable(next, vehicle.VehicleDef, vehicle.Map))
 				{
 					return PathRequest.NeedNew;
 				}
 				//Should two vehicles be pathing into eachother directly, first to stop will be given a Wait request while the other will request a new path
-				if (ThreadHelper.AnyVehicleBlockingPathAt(next, vehicle) is VehiclePawn otherVehicle)
+				CellRect vehicleRect = vehicle.VehicleRect(next, rot);
+				foreach (IntVec3 cell in vehicleRect)
 				{
-					if (otherVehicle.vPather.Moving && !otherVehicle.vPather.Waiting)
-					{
-						return PathRequest.Wait;
+					if (ThreadHelper.AnyVehicleBlockingPathAt(cell, vehicle) is VehiclePawn otherVehicle)
+				{
+						if (otherVehicle.vPather.Moving && !otherVehicle.vPather.Waiting)
+						{
+							return PathRequest.Wait;
+						}
+						return PathRequest.NeedNew;
 					}
-					return PathRequest.NeedNew;
 				}
-				if (nodesAhead != 0 && next.AdjacentToDiagonal(previous))
+				if (nodeIndex != 0 && next.AdjacentToDiagonal(previous))
 				{
 					//if (VehiclePathFinder.BlocksDiagonalMovement(vehicle, vehicle.Map.cellIndices.CellToIndex(next.x, previous.z)) || VehiclePathFinder.BlocksDiagonalMovement(vehicle, vehicle.Map.cellIndices.CellToIndex(previous.x, next.z)))
 					//{
@@ -764,7 +785,7 @@ namespace Vehicles
 					//}
 				}
 				previous = next;
-				nodesAhead++;
+				nodeIndex++;
 			}
 			return PathRequest.None;
 		}

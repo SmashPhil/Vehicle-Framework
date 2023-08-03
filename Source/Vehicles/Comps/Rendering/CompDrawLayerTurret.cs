@@ -11,6 +11,7 @@ using SmashTools;
 
 namespace Vehicles
 {
+	[Obsolete]
 	public class CompDrawLayerTurret : ThingComp
 	{
 		private List<Graphic> graphicInt;

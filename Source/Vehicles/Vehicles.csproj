@@ -600,7 +600,6 @@
     <Compile Include="Gizmo\Landing\Zone_Runway.cs" />
     <Compile Include="Harmony\PatchCategories\Combat.cs" />
     <Compile Include="Harmony\PatchCategories\WorldObjects.cs" />
-    <Compile Include="Misc\Attributes\NumericBoxValuesAttribute.cs" />
     <Compile Include="Misc\DefOf\AerialVehicleArrivalModeDefOf.cs" />
     <Compile Include="Misc\DefOf\AntiAircraftDefOf.cs" />
     <Compile Include="Misc\DefOf\RGBShaderTypeDefOf.cs" />
@@ -632,12 +631,9 @@
     <Compile Include="Harmony\PatchCategories\HealthAndStats.cs" />
     <Compile Include="Harmony\PatchCategories\MapHandling.cs" />
     <Compile Include="Misc\Attributes\DisableSettingAttribute.cs" />
-    <Compile Include="Misc\Attributes\HeaderTitleAttribute.cs" />
     <Compile Include="Misc\Attributes\PostToSettingsAttribute.cs" />
-    <Compile Include="Misc\Attributes\SliderValuesAttribute.cs" />
     <Compile Include="Misc\DefOf\VehicleIncidentDefOf.cs" />
     <Compile Include="Misc\Enums\Vehicle\ShuttleLaunchStatus.cs" />
-    <Compile Include="Misc\Enums\UI\UISettingsType.cs" />
     <Compile Include="Misc\Interfaces\IPatchCategory.cs" />
     <Compile Include="Misc\Enums\Animation\AnimationWrapperType.cs" />
     <Compile Include="Misc\Enums\BiomeCategory.cs" />

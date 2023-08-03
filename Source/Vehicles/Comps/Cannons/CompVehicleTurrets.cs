@@ -9,11 +9,13 @@ using SmashTools;
 
 namespace Vehicles
 {
+	[HeaderTitle(Label = nameof(CompVehicleTurrets))]
 	public class CompVehicleTurrets : VehicleAIComp, IRefundable
 	{
 		/// PARAMS => (# Shots Fired, VehicleTurret, tickCount}
 		private List<TurretData> turretQueue = new List<TurretData>();
 
+		[TweakField]
 		public List<VehicleTurret> turrets = new List<VehicleTurret>();
 
 		private List<VehicleTurret> tickers = new List<VehicleTurret>();
@@ -358,7 +360,6 @@ namespace Vehicles
 		{
 			base.CompTick();
 			ResolveTurretQueue();
-
 			//Only tick VehicleTurrets that actively request to be ticked
 			for (int i = tickers.Count - 1; i >= 0; i--)
 			{

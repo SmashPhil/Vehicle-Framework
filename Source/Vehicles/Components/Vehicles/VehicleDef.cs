@@ -31,8 +31,8 @@ namespace Vehicles
 		[ActionOnSettingsInput(typeof(VehicleHarmony), nameof(VehicleHarmony.RecacheMoveableVehicleDefs))]
 		public VehiclePermissions vehicleMovementPermissions = VehiclePermissions.DriverNeeded;
 
-		[PostToSettings(Label = "VF_CanCaravan", Translate = true, Tooltip = "VF_CanCaravanTooltip", UISettingsType = UISettingsType.Checkbox)]
-		public bool canCaravan = true;
+		//[PostToSettings(Label = "VF_CanCaravan", Translate = true, Tooltip = "VF_CanCaravanTooltip", UISettingsType = UISettingsType.Checkbox)]
+		//public bool canCaravan = true;
 
 		public VehicleCategory vehicleCategory = VehicleCategory.Misc;
 		public VehicleType vehicleType = VehicleType.Land;

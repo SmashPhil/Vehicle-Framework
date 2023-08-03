@@ -56,7 +56,6 @@ namespace Vehicles
 
 		/* Combat */
 		public bool runOverPawns = true;
-		public float chanceRunOverFriendly = 0.4f;
 
 		/* Upgrades */
 		public bool drawUpgradeInformationScreen = true;
@@ -110,7 +109,6 @@ namespace Vehicles
 
 			/* Combat */
 			runOverPawns = true;
-			chanceRunOverFriendly = 0.4f;
 
 			/* Upgrades */
 			drawUpgradeInformationScreen = true;
@@ -156,7 +154,6 @@ namespace Vehicles
 			Scribe_Values.Look(ref delayDeployOnLanding, nameof(delayDeployOnLanding), defaultValue: 0);
 
 			Scribe_Values.Look(ref runOverPawns, nameof(runOverPawns), defaultValue: true);
-			Scribe_Values.Look(ref chanceRunOverFriendly, nameof(chanceRunOverFriendly), defaultValue: 0.4f);
 
 			Scribe_Values.Look(ref drawUpgradeInformationScreen, nameof(drawUpgradeInformationScreen), defaultValue: true);
 			Scribe_Values.Look(ref overrideDrawColors, nameof(overrideDrawColors), defaultValue: true);
@@ -249,10 +246,6 @@ namespace Vehicles
 					listingStandard.Header("VF_CombatSettings".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 					listingStandard.Gap(4);
 					listingStandard.CheckboxLabeled("VF_RunOverPawns".Translate(), ref runOverPawns, "VF_RunOverPawnsTooltip".Translate());
-					if (runOverPawns)
-					{
-						listingStandard.SliderLabeled("VF_ChanceToRunOverFriendlies".Translate(), "VF_ChanceToRunOverFriendliesTooltip".Translate(), "%", ref chanceRunOverFriendly, 0, 1, multiplier: 100, decimalPlaces: 0);
-					}
 
 					GUIState.Disable();
 

@@ -11,6 +11,7 @@ using SmashTools;
 namespace Vehicles
 {
 	[StaticConstructorOnStartup]
+	[HeaderTitle(Label = nameof(CompVehicleLauncher))]
 	public class CompVehicleLauncher : VehicleComp
 	{
 		public static SimpleCurve ClimbRateCurve = new SimpleCurve()

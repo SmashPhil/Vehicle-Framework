@@ -9,6 +9,7 @@ using Verse.AI;
 using Verse.AI.Group;
 using RimWorld;
 using RimWorld.Planet;
+using UnityEngine;
 using SmashTools;
 using SmashTools.Performance;
 
@@ -341,6 +342,34 @@ namespace Vehicles
 		public static bool VehicleImpassableInCell(Map map, int x, int z)
 		{
 			return VehicleImpassableInCell(map, new IntVec3(x, 0, z));
+		}
+
+		public static bool TryFindNearestStandableCell(VehiclePawn vehicle, IntVec3 cell, out IntVec3 result)
+		{
+			int num = GenRadial.NumCellsInRadius(Mathf.Min(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z) * 2);
+			result = IntVec3.Invalid;
+			IntVec3 curLoc;
+			for (int i = 0; i < num; i++)
+			{
+				curLoc = GenRadial.RadialPattern[i] + cell;
+				vehicle.Map.debugDrawer.FlashCell(curLoc, colorPct: 0.5f);
+				if (GenGridVehicles.Standable(curLoc, vehicle, vehicle.Map) && (!VehicleMod.settings.main.fullVehiclePathing || vehicle.DrivableRectOnCell(curLoc)))
+				{
+					if (curLoc == vehicle.Position || vehicle.beached)
+					{
+						result = curLoc;
+						return true;
+					}
+					if (!VehicleReachabilityUtility.CanReachVehicle(vehicle, curLoc, PathEndMode.OnCell, Danger.Deadly, TraverseMode.ByPawn))
+					{
+						continue;
+					}
+					vehicle.Map.debugDrawer.FlashCell(curLoc, colorPct: 1);
+					result = curLoc;
+					return true;
+				}
+			}
+			return false;
 		}
 
 		/// <summary>

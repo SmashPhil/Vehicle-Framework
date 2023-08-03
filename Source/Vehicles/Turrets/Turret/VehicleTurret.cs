@@ -10,6 +10,7 @@ using SmashTools;
 
 namespace Vehicles
 {
+	[HeaderTitle(Label = "Turret")]
 	public class VehicleTurret : IExposable, ILoadReferenceable, IEventManager<VehicleTurretEventDef>
 	{
 		public const int AutoTargetInterval = 50;
@@ -20,12 +21,8 @@ namespace Vehicles
 		//WIP - may be removed in the future
 		public static HashSet<Pair<string, TurretDisableType>> conditionalTurrets = new HashSet<Pair<string, TurretDisableType>>();
 
-		/* --- Saveables --- */
-		protected bool autoTargetingActive;
-
-		private int reloadTicks;
-		private int burstTicks;
-
+		/* --- Parsed --- */
+		
 		public int uniqueID = -1;
 		public string parentKey;
 		public string key;
@@ -33,12 +30,41 @@ namespace Vehicles
 
 		public VehicleTurretDef turretDef;
 
-		protected float restrictedTheta;
+		[TweakField(SettingsType = UISettingsType.Checkbox)]
 		public bool targetPersists = true;
+		[TweakField(SettingsType = UISettingsType.Checkbox)]
 		public bool autoTargeting = true;
+		[TweakField(SettingsType = UISettingsType.Checkbox)]
 		public bool manualTargeting = true;
 
+		[TweakField]
+		public VehicleTurretRender renderProperties = new VehicleTurretRender();
+
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
+		public Vector2 aimPieOffset = Vector2.zero;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
+		public Vector2 angleRestricted = Vector2.zero;
+		public int drawLayer = 1;
+
+		public float defaultAngleRotated = 0f;
+		public string gizmoLabel;
+
+		/* ----------------- */
+
 		public LocalTargetInfo cannonTarget;
+
+		protected float rotation = 0; //True rotation of turret separate from Vehicle rotation and angle for saving
+		protected float restrictedTheta;
+
+		public ThingDef loadedAmmo;
+		public ThingDef savedAmmoType;
+
+		public int shellCount;
+
+		protected bool autoTargetingActive;
+
+		private int reloadTicks;
+		private int burstTicks;
 
 		protected int currentFireMode;
 		public float currentHeatRate;
@@ -46,21 +72,13 @@ namespace Vehicles
 		protected int ticksSinceLastShot;
 		public bool queuedToFire = false;
 
+		protected Rot4 parentRotCached = default;
+		protected float parentAngleCached = 0f;
+
 		[Unsaved]
 		protected float currentRotation = 0f; //Rotation taking Vehicle rotation and angle into account
 		[Unsaved]
 		protected float rotationTargeted = 0f;
-
-		protected float rotation = 0; //True rotation of turret separate from Vehicle rotation and angle for saving
-
-		protected Rot4 parentRotCached = default;
-		protected float parentAngleCached = 0f;
-
-		public ThingDef loadedAmmo;
-		public ThingDef savedAmmoType;
-		public int shellCount;
-		public string gizmoLabel;
-		/* ----------------- */
 
 		[Unsaved]
 		public VehiclePawn vehicle;
@@ -90,13 +108,6 @@ namespace Vehicles
 		protected Vector3 rootDrawPos_SouthWest;
 		[Unsaved]
 		protected Vector3 rootDrawPos_NorthWest;
-
-		public VehicleTurretRender renderProperties = new VehicleTurretRender();
-
-		public Vector2 aimPieOffset = Vector2.zero;
-		public Vector2 angleRestricted = Vector2.zero;
-		public float defaultAngleRotated = 0f;
-		public int drawLayer = 1;
 
 		protected Texture2D cannonTex;
 		protected Material cannonMaterialCache;

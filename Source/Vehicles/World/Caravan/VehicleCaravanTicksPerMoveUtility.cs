@@ -51,7 +51,8 @@ namespace Vehicles
 				{
 					if (pawn is VehiclePawn vehicle)
 					{
-						float moveSpeed = vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed) * vehicle.VehicleDef.properties.worldSpeedMultiplier / 60;
+						float worldSpeedMultiplier = SettingsCache.TryGetValue(vehicle.VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.worldSpeedMultiplier), vehicle.VehicleDef.properties.worldSpeedMultiplier);
+						float moveSpeed = vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed) * worldSpeedMultiplier / 60;
 						int ticksPerTile = TicksFromMoveSpeed(moveSpeed);
 						moveSpeedTicks.Add(ticksPerTile);
 						ticksExplanation?.AppendLine($"  {vehicle.LabelCap}: {GenDate.TicksPerDay / ticksPerTile:0.#} {"TilesPerDay".Translate()}");

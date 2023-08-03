@@ -90,7 +90,7 @@ namespace Vehicles
 
 		public static void ManhunterDontAttackVehicles(Thing t, ref bool __result)
 		{
-			if (__result is true && t is VehiclePawn vehicle && !SettingsCache.TryGetValue(vehicle.VehicleDef, typeof(VehicleProperties), "manhunterTargetsVehicle", vehicle.VehicleDef.properties.manhunterTargetsVehicle))
+			if (__result is true && t is VehiclePawn vehicle && !SettingsCache.TryGetValue(vehicle.VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.manhunterTargetsVehicle), vehicle.VehicleDef.properties.manhunterTargetsVehicle))
 			{
 				__result = false;
 			}

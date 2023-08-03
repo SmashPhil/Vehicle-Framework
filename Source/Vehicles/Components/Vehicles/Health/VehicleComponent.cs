@@ -62,7 +62,7 @@ namespace Vehicles
 				{
 					vehicle.ignition.Drafted = false;
 				}
-				if (vehicle.Spawned && Mathf.Approximately(vehicle.GetStatValue(VehicleStatDefOf.BodyIntegrity), 0))
+				if (vehicle.Spawned && vehicle.GetStatValue(VehicleStatDefOf.BodyIntegrity) < 0.01f)
 				{
 					vehicle.Kill(dinfo);
 				}
