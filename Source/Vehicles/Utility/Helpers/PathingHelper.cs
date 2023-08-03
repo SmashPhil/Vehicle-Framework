@@ -360,9 +360,13 @@ namespace Vehicles
 						result = curLoc;
 						return true;
 					}
+					if (ThreadHelper.AnyVehicleBlockingPathAt(curLoc, vehicle) != null)
+					{
+						continue; //If another vehicle occupies the cell, skip
+					}
 					if (!VehicleReachabilityUtility.CanReachVehicle(vehicle, curLoc, PathEndMode.OnCell, Danger.Deadly, TraverseMode.ByPawn))
 					{
-						continue;
+						continue; //If unreachable (eg. wall), skip
 					}
 					vehicle.Map.debugDrawer.FlashCell(curLoc, colorPct: 1);
 					result = curLoc;

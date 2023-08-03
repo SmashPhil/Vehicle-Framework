@@ -10,7 +10,9 @@
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Fixed bug where priority efficiency would overwrite other parts entirely for vehicle part stat calculations.
 
--
+- Fixed issue where multiple settings for vehicles were not being used by vehicles post-change.
+
+- Improved look-ahead when attempting to avoid colliding with other vehicles while pathing.
 &lt;title&gt;Performance Improvements&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
