@@ -105,7 +105,7 @@ namespace Vehicles
 
 		public static readonly Texture2D OfferGiftsCommandTex = ContentFinder<Texture2D>.Get("UI/Commands/OfferGifts");
 
-		public static readonly Texture2D AltitudeMeter = ContentFinder<Texture2D>.Get("UI/Gizmos/AltitudeMeter");
+		public static readonly Texture2D AltitudeMeter = null;// ContentFinder<Texture2D>.Get("UI/Gizmos/AltitudeMeter");
 
 		public static readonly Texture2D TradeArrow = ContentFinder<Texture2D>.Get("UI/Widgets/TradeArrow");
 

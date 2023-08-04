@@ -18,14 +18,7 @@
 		</li>
 	</modDependencies>
 	<description><![CDATA[<b><color=orange>Vehicle Framework</color></b>
-Welcome to the official Closed Beta for my work in progress framework.
 
-I am using this steam upload to allow for quick and easy updates to a larger audience of testers.
-
-If you are not already part of the discord, please join us! It is much easier for me to communicate future plans, bugfixes, and changes to the framework as I make progress.
-
-This mod is explicitly for <b>testing only</b> so if you are attempting to use this in your own save file to play with, it's at your own risk. I frequently make game breaking updates due to new features and changes to existing core mechanics. You've been warned.
-
-If you have ideas, feedback, or a bug to report, please head on over to the discord server (link is provided in the steam workshop description) and make an appropriate ticket there.]]>
+Enables the creation of vehicles in RimWorld.]]>
 	</description>
 </ModMetaData>

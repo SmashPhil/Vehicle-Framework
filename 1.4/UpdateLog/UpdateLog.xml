@@ -1,19 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.4.1336</currentVersion>
+  <currentVersion>1.5.1336</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Recent News&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
-  
+This version marks the official release of Vehicle Framework. Woohoo! Thank you all again for sticking with me for this long journey, I'm looking forward to continuing work on this big project.
+
+For those of you that are new, please report bugs and feedback on my discord server.  Link is at the end of this post.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Fixed bug where priority efficiency would overwrite other parts entirely for vehicle part stat calculations.
 
 - Fixed issue where multiple settings for vehicles were not being used by vehicles post-change.
 
 - Improved look-ahead when attempting to avoid colliding with other vehicles while pathing.
-&lt;title&gt;Performance Improvements&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+
+- Fixed bug where info card wouldn't show VehicleDef related stats
 
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Added vehicle collisions with pawns
@@ -24,7 +27,7 @@ Please report any issues you find &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/lin
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>
   <!--Show update log on next startup.-->
-  <update>false</update>
+  <update>true</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
   <testing>false</testing>
   <!--Icon bar shown to the right of the mod's name-->

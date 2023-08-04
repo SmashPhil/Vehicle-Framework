@@ -20,7 +20,7 @@ namespace Vehicles
 	internal static class VehicleHarmony
 	{
 		private const int BuildMajor = 1;
-		private const int BuildMinor = 4;
+		private const int BuildMinor = 5;
 
 		private static readonly DateTime ProjectStartDate = new DateTime(2019, 12, 7);
 		private static readonly DateTime ProjectBuildDate = new DateTime(2023, 7, 30);

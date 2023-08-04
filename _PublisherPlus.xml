@@ -4,6 +4,7 @@
     <exclude>.git</exclude>
     <exclude>.vs</exclude>
     <exclude>1.4\Defs\Ignore</exclude>
+    <exclude>About\PreviewArt</exclude>
     <exclude>Source</exclude>
     <exclude>Textures\Ignore</exclude>
     <exclude>UpdateBuildFile.bat</exclude>
