@@ -105,7 +105,7 @@ namespace Vehicles
 			return null;
 		}
 
-		public string GetExplanationText(VehiclePawn vehicle)
+		public string GetExplanationText(VehicleDef vehicleDef, VehiclePawn forVehicle = null)
 		{
 			if (explanationText == null)
 			{
@@ -118,7 +118,7 @@ namespace Vehicles
 			}
 			else
 			{
-				result = $"{explanationText}{Environment.NewLine}{Environment.NewLine}{stat.Worker.GetExplanationFull(vehicle, numberSense, value)}";
+				result = $"{explanationText}{Environment.NewLine}{Environment.NewLine}{stat.Worker.GetExplanationFull(vehicleDef, numberSense, value, forVehicle)}";
 			}
 			return result;
 		}

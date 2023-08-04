@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -14,6 +15,7 @@ namespace Vehicles
 	public static class VehicleInfoCard
 	{
 		private static VehiclePawn vehicle;
+		private static VehicleDef vehicleDef;
 		private static InfoCardTab tab;
 
 		private static float listHeight;
@@ -28,7 +30,7 @@ namespace Vehicles
 		private static VehicleStatDrawEntry mousedOverEntry;
 		private static List<VehicleStatDrawEntry> cachedDrawEntries = new List<VehicleStatDrawEntry>();
 		internal static List<StatDef> displayedStatDefs = new List<StatDef>();
-		
+
 		public static void RegisterStatDef(StatDef statDef)
 		{
 			displayedStatDefs.Add(statDef);
@@ -37,15 +39,22 @@ namespace Vehicles
 		public static void Init(VehiclePawn vehicle)
 		{
 			VehicleInfoCard.vehicle = vehicle;
-			tab = InfoCardTab.Stats;
-			scrollPosition = Vector2.zero;
-			cachedDrawEntries.Clear();
-			PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.InfoCard, KnowledgeAmount.Total);
+			VehicleInfoCard.vehicleDef = vehicle.VehicleDef;
+			Reset();
+		}
+
+		public static void Init(VehicleDef vehicleDef)
+		{
+			VehicleInfoCard.vehicleDef = vehicleDef;
+			Reset();
 		}
 
 		public static void Reset()
 		{
+			tab = InfoCardTab.Stats;
+			scrollPosition = Vector2.zero;
 			cachedDrawEntries.Clear();
+			PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.InfoCard, KnowledgeAmount.Total);
 		}
 
 		private static bool Matching(VehicleStatDrawEntry drawEntry)
@@ -56,19 +65,41 @@ namespace Vehicles
 		public static void Clear()
 		{
 			vehicle = null;
+			vehicleDef = null;
 			mousedOverEntry = null;
 			selectedEntry = null;
 			quickSearchWidget.Reset();
 		}
 
+		//TEMP (Needs proper hook for info card patch in Gizmos.VehicleInfoCardOverride
+		public static void DrawFor(Rect rect, VehicleDef vehicleDef)
+		{
+			if (VehicleInfoCard.vehicleDef != vehicleDef)
+			{
+				Init(vehicleDef);
+			}
+			Draw(rect.ContractedBy(18));
+		}
+
+		//TEMP
+		public static void DrawFor(Rect rect, VehiclePawn vehicle)
+		{
+			if (VehicleInfoCard.vehicle != vehicle)
+			{
+				Init(vehicle);
+			}
+			Draw(rect.ContractedBy(18));
+		}
+
 		public static void Draw(Rect rect)
 		{
-			if (vehicle != null)
+			if (vehicle != null || vehicleDef != null)
 			{
 				Rect labelRect = new Rect(rect);
 				labelRect.height = 34f;
 				Text.Font = GameFont.Medium;
-				Widgets.Label(labelRect, vehicle.LabelCapNoCount);
+				string label = vehicle != null ? vehicle.LabelCapNoCount : vehicleDef.LabelCap.ToString();
+				Widgets.Label(labelRect, label);
 				Rect tabRect = new Rect(rect)
 				{
 					yMin = labelRect.yMax + 45,
@@ -108,7 +139,14 @@ namespace Vehicles
 			switch (tab)
 			{
 				case InfoCardTab.Stats:
-					DrawStatsReport(rect, vehicle);
+					if (vehicle != null)
+					{
+						DrawStatsReport(rect);
+					}
+					else
+					{
+						DrawStatsReport(rect);
+					}
 					break;
 				case InfoCardTab.Health:
 					DrawHealthScreen();
@@ -140,18 +178,28 @@ namespace Vehicles
 			return false;
 		}
 
-		public static VehicleStatDrawEntry DescriptionEntry(VehiclePawn vehicle)
+		private static VehicleStatDrawEntry DescriptionEntry()
 		{
-			return new VehicleStatDrawEntry(VehicleStatCategoryDefOf.VehicleBasicsImportant, "Description".Translate(), string.Empty, vehicle.DescriptionFlavor, 99999, hyperlinks: Dialog_InfoCard.DefsToHyperlinks(vehicle.def.descriptionHyperlinks));
+			string description = vehicle != null ? vehicle.DescriptionFlavor : vehicleDef.description;
+			return new VehicleStatDrawEntry(VehicleStatCategoryDefOf.VehicleBasicsImportant, "Description".Translate(), string.Empty, description, 99999, hyperlinks: Dialog_InfoCard.DefsToHyperlinks(vehicleDef.descriptionHyperlinks));
 		}
 
-		private static IEnumerable<VehicleStatDrawEntry> StatsToDraw(VehiclePawn vehicle)
+		private static IEnumerable<VehicleStatDrawEntry> StatsToDraw()
 		{
-			yield return DescriptionEntry(vehicle);
+			yield return DescriptionEntry();
 
-			foreach (VehicleStatDef statDef in DefDatabase<VehicleStatDef>.AllDefsListForReading.Where(statDef => statDef.Worker.ShouldShowFor(vehicle)))
+			foreach (VehicleStatDef statDef in DefDatabase<VehicleStatDef>.AllDefsListForReading.Where(statDef => statDef.Worker.ShouldShowFor(vehicleDef)))
 			{
-				yield return new VehicleStatDrawEntry(statDef.category, statDef, vehicle.GetStatValue(statDef));
+				float statValue;
+				if (vehicle != null)
+				{
+					statValue = vehicle.GetStatValue(statDef);
+				}
+				else
+				{
+					statValue = vehicleDef.GetStatValueAbstract(statDef);
+				}
+				yield return new VehicleStatDrawEntry(statDef.category, statDef, statValue);
 			}
 		}
 
@@ -179,15 +227,20 @@ namespace Vehicles
 			}
 		}
 
-		public static void DrawStatsReport(Rect rect, VehiclePawn vehicle)
+		private static void DrawStatsReport(Rect rect)
+		{
+			TryRecacheEntries();
+			DrawStatsWorker(rect);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private static void TryRecacheEntries()
 		{
 			if (cachedDrawEntries.NullOrEmpty())
 			{
-				//cachedDrawEntries.AddRange(vehicle.def.SpecialDisplayStats(StatRequest.For(vehicle)));
-				cachedDrawEntries.AddRange(StatsToDraw(vehicle).Where(statDrawEntry => statDrawEntry.ShouldDisplay));
+				cachedDrawEntries.AddRange(StatsToDraw().Where(statDrawEntry => statDrawEntry.ShouldDisplay));
 				FinalizeCachedDrawEntries(cachedDrawEntries);
 			}
-			DrawStatsWorker(rect, vehicle);
 		}
 
 		public static void SelectEntry(int index)
@@ -222,7 +275,7 @@ namespace Vehicles
 			}
 		}
 
-		private static void DrawStatsWorker(Rect rect, VehiclePawn vehicle)
+		private static void DrawStatsWorker(Rect rect)
 		{
 			Rect outRect = new Rect(rect);
 			outRect.width *= 0.5f;
@@ -239,14 +292,14 @@ namespace Vehicles
 				Rect viewRect = new Rect(0f, 0f, outRect.width - 16f, listHeight);
 				Widgets.BeginScrollView(outRect, ref scrollPosition, viewRect, true);
 				{
-					float num = 0f;
+					float curY = 0f;
 					string categoryLabel = null;
 					mousedOverEntry = null;
 					foreach (VehicleStatDrawEntry drawEntry in cachedDrawEntries)
 					{
 						if (drawEntry.category.LabelCap != categoryLabel)
 						{
-							Widgets.ListSeparator(ref num, viewRect.width, drawEntry.category.LabelCap);
+							Widgets.ListSeparator(ref curY, viewRect.width, drawEntry.category.LabelCap);
 							categoryLabel = drawEntry.category.LabelCap;
 						}
 						bool highlightLabel = false;
@@ -267,21 +320,21 @@ namespace Vehicles
 								lowlightLabel = true;
 							}
 						}
-						Rect drawRect = new Rect(8f, num, viewRect.width - 8f, 30f);
-						num += drawEntry.Draw(drawRect.x, drawRect.y, drawRect.width, selected, highlightLabel, lowlightLabel, delegate
+						Rect drawRect = new Rect(8f, curY, viewRect.width - 8f, 30f);
+						curY += drawEntry.Draw(drawRect.x, drawRect.y, drawRect.width, selected, highlightLabel, lowlightLabel, delegate
 						{
 							SelectEntry(drawEntry, true);
 						}, delegate
 						{
 							mousedOverEntry = drawEntry;
 						}, scrollPosition, outRect);
-						drawRect.yMax = num;
+						drawRect.yMax = curY;
 						if (selected || matched)
 						{
 							scrollPositioner.RegisterInterestRect(drawRect);
 						}
 					}
-					listHeight = num + 100f;
+					listHeight = curY + 100f;
 				}
 				Widgets.EndScrollView();
 
@@ -291,37 +344,47 @@ namespace Vehicles
 				if (statDrawEntry != null)
 				{
 					Rect rect5 = new Rect(0f, 0f, outRect.width - 16f, rightPanelHeight);
-					string explanationText = statDrawEntry.GetExplanationText(vehicle);
-					float num2 = 0f;
+					string explanationText = statDrawEntry.GetExplanationText(vehicleDef, vehicle);
+					float panelHeight = 0f;
 					Widgets.BeginScrollView(outRect, ref scrollPositionRightPanel, rect5, true);
 					{
 						Rect rect6 = rect5;
 						rect6.width -= 4f;
 						Widgets.Label(rect6, explanationText);
-						float num3 = Text.CalcHeight(explanationText, rect6.width) + 10f;
-						num2 += num3;
-						IEnumerable<Dialog_InfoCard.Hyperlink> hyperlinks = statDrawEntry.GetHyperlinks(vehicle);
-						if (hyperlinks != null)
-						{
-							Rect rect7 = new Rect(rect6.x, rect6.y + num3, rect6.width, rect6.height - num3);
-							Color color = GUI.color;
-							GUI.color = Widgets.NormalOptionColor;
-							foreach (Dialog_InfoCard.Hyperlink hyperlink in hyperlinks)
-							{
-								float num4 = Text.CalcHeight(hyperlink.Label, rect7.width);
-								Widgets.HyperlinkWithIcon(new Rect(rect7.x, rect7.y, rect7.width, num4), hyperlink, "ViewHyperlink".Translate(hyperlink.Label), 2f, 6f, null, false, null);
-								rect7.y += num4;
-								rect7.height -= num4;
-								num2 += num4;
-							}
-							GUI.color = color;
-						}
-						rightPanelHeight = num2;
+						float textHeight = Text.CalcHeight(explanationText, rect6.width) + 10f;
+						panelHeight += textHeight;
+						DrawHyperlinks(rect6, statDrawEntry, textHeight);
+
+						rightPanelHeight = panelHeight;
 					}
 					Widgets.EndScrollView();
 				}
 			}
 			GUIState.Pop();
+		}
+
+		private static void DrawHyperlinks(Rect rect, VehicleStatDrawEntry statDrawEntry, float textHeight)
+		{
+			if (vehicle == null)
+			{
+				return;
+			}
+			IEnumerable<Dialog_InfoCard.Hyperlink> hyperlinks = statDrawEntry.GetHyperlinks(vehicle);
+			if (hyperlinks != null)
+			{
+				Rect rect7 = new Rect(rect.x, rect.y + textHeight, rect.width, rect.height - textHeight);
+				Color color = GUI.color;
+				GUI.color = Widgets.NormalOptionColor;
+				foreach (Dialog_InfoCard.Hyperlink hyperlink in hyperlinks)
+				{
+					float num4 = Text.CalcHeight(hyperlink.Label, rect7.width);
+					Widgets.HyperlinkWithIcon(new Rect(rect7.x, rect7.y, rect7.width, num4), hyperlink, "ViewHyperlink".Translate(hyperlink.Label), 2f, 6f, null, false, null);
+					rect7.y += num4;
+					rect7.height -= num4;
+					textHeight += num4;
+				}
+				GUI.color = color;
+			}
 		}
 
 		private enum InfoCardTab : byte

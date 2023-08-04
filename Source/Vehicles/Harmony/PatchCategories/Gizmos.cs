@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using HarmonyLib;
@@ -33,6 +34,10 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(BuildCopyCommandUtility), nameof(BuildCopyCommandUtility.BuildCopyCommand)),
 				prefix: new HarmonyMethod(typeof(Gizmos),
 				nameof(VehicleMaterialOnCopyBuildGizmo)));
+
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Dialog_InfoCard), nameof(Dialog_InfoCard.DoWindowContents)),
+				prefix: new HarmonyMethod(typeof(Gizmos),
+				nameof(VehicleInfoCardOverride)));
 		}
 
 		/// <summary>
@@ -284,6 +289,26 @@ namespace Vehicles
 				command_Action.hotKey = KeyBindingDefOf.Misc11;
 
 				__result = command_Action;
+				return false;
+			}
+			return true;
+		}
+
+		public static bool VehicleInfoCardOverride(Rect inRect, Thing ___thing, ThingDef ___def)
+		{
+			if (___def is VehicleBuildDef buildDef)
+			{
+				VehicleInfoCard.DrawFor(inRect, buildDef.thingToSpawn);
+				return false;
+			}
+			else if (___thing is VehicleBuilding building)
+			{
+				VehicleInfoCard.DrawFor(inRect, building.VehicleDef);
+				return false;
+			}
+			else if (___thing is VehiclePawn vehicle)
+			{
+				VehicleInfoCard.DrawFor(inRect, vehicle);
 				return false;
 			}
 			return true;

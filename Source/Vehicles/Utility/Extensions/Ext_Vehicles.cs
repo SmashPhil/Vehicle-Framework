@@ -518,6 +518,12 @@ namespace Vehicles
 			return CellRect.CenteredOn(cell, Mathf.FloorToInt(minSize / 2f));
 		}
 
+		public static CellRect MaxRect(this VehiclePawn vehicle, IntVec3 cell)
+		{
+			int maxSize = Mathf.Max(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z);
+			return CellRect.CenteredOn(cell, Mathf.FloorToInt(maxSize / 2f));
+		}
+
 		public static IEnumerable<IntVec3> DiagonalRect(this VehiclePawn vehicle, IntVec3 cell, Rot8 rot)
 		{
 			if (!rot.IsDiagonal)
@@ -534,8 +540,12 @@ namespace Vehicles
 		/// <remarks>DOES take other vehicles into account</remarks>
 		/// <param name="vehicle"></param>
 		/// <param name="cell"></param>
-		public static bool DrivableRectOnCell(this VehiclePawn vehicle, IntVec3 cell)
+		public static bool DrivableRectOnCell(this VehiclePawn vehicle, IntVec3 cell, bool maxPossibleSize = false)
 		{
+			if (maxPossibleSize)
+			{
+				return MaxRect(vehicle, cell).Cells.All(cell => vehicle.Drivable(cell));
+			}
 			return MinRect(vehicle, cell).Cells.All(cell => vehicle.Drivable(cell));
 		}
 
@@ -630,5 +640,10 @@ namespace Vehicles
         {
             return pawn.ParentHolder is VehicleHandler;
         }
+
+		public static float GetStatValueAbstract(this VehicleDef vehicleDef, VehicleStatDef statDef)
+		{
+			return statDef.Worker.GetValueAbstract(vehicleDef);
+		}
 	}
 }

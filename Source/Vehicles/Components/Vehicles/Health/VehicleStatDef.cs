@@ -104,11 +104,11 @@ namespace Vehicles
 			return true;
 		}
 
-		public bool CanShowWithVehicle(VehiclePawn vehicle)
+		public bool CanShowWithVehicle(VehicleDef vehicleDef)
 		{
 			if (!showOnVehicleTypes.NullOrEmpty())
 			{
-				return showOnVehicleTypes.Contains(vehicle.VehicleDef.vehicleType);
+				return showOnVehicleTypes.Contains(vehicleDef.vehicleType);
 			}
 			return true;
 		}

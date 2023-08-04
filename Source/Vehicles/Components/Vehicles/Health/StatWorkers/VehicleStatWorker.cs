@@ -33,6 +33,12 @@ namespace Vehicles
 			return value.Clamp(statDef.minValue, statDef.maxValue);
 		}
 
+		public virtual float GetValueAbstract(VehicleDef vehicleDef)
+		{
+			float value = GetBaseValue(vehicleDef);
+			return value;
+		}
+
 		public virtual float StatEfficiency(VehiclePawn vehicle)
 		{
 			return vehicle.statHandler.StatEfficiency(statDef);
@@ -116,13 +122,13 @@ namespace Vehicles
 			return false;
 		}
 
-		public virtual bool ShouldShowFor(VehiclePawn vehicle)
+		public virtual bool ShouldShowFor(VehicleDef vehicleDef)
 		{
 			if (statDef.alwaysHide)
 			{
 				return false;
 			}
-			if (!statDef.showIfUndefined && !vehicle.VehicleDef.vehicleStats.StatListContains(statDef))
+			if (!statDef.showIfUndefined && !vehicleDef.vehicleStats.StatListContains(statDef))
 			{
 				return false;
 			}
@@ -130,7 +136,7 @@ namespace Vehicles
 			{
 				return false;
 			}
-			if (!statDef.CanShowWithVehicle(vehicle))
+			if (!statDef.CanShowWithVehicle(vehicleDef))
 			{
 				return false;
 			}
@@ -147,29 +153,29 @@ namespace Vehicles
 			return stat.ValueToString(value, finalized, numberSense);
 		}
 
-		public string GetExplanationFull(VehiclePawn vehicle, ToStringNumberSense numberSense, float value)
+		public string GetExplanationFull(VehicleDef vehicleDef, ToStringNumberSense numberSense, float value, VehiclePawn forVehicle = null)
 		{
-			if (IsDisabledFor(vehicle))
+			if (IsDisabledFor(forVehicle))
 			{
 				return "StatsReport_PermanentlyDisabled".Translate();
 			}
-			string text = statDef.Worker.GetExplanationUnfinalized(vehicle, numberSense).TrimEndNewlines();
+			string text = statDef.Worker.GetExplanationUnfinalized(vehicleDef, numberSense, forVehicle).TrimEndNewlines();
 			if (!text.NullOrEmpty())
 			{
 				text += Environment.NewLine + Environment.NewLine;
 			}
-			return text + statDef.Worker.GetExplanationFinalizePart(vehicle, numberSense, value);
+			return text + statDef.Worker.GetExplanationFinalizePart(forVehicle, numberSense, value);
 		}
 
-		public virtual string GetExplanationUnfinalized(VehiclePawn vehicle, ToStringNumberSense numberSense)
+		public virtual string GetExplanationUnfinalized(VehicleDef vehicleDef, ToStringNumberSense numberSense, VehiclePawn forVehicle = null)
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			float baseValueFor = GetBaseValue(vehicle);
+			float baseValueFor = GetBaseValue(vehicleDef);
 			if (baseValueFor != 0f || statDef.showZeroBaseValue)
 			{
 				stringBuilder.AppendLine($"{"StatsReport_BaseValue".Translate()}: {statDef.ValueToString(baseValueFor, numberSense: numberSense)}");
 			}
-			if (vehicle.Stuff != null)
+			if (forVehicle?.Stuff != null)
 			{
 				if (baseValueFor > 0f || statDef.applyFactorsIfNegative)
 				{
@@ -190,7 +196,8 @@ namespace Vehicles
 				stringBuilder.AppendLine("StatsReport_OtherStats".Translate());
 				foreach (VehicleStatDef statDef in statDef.statFactors)
 				{
-					stringBuilder.AppendLine($"    {statDef.LabelCap}: {statDef.Worker.GetValue(vehicle).ToStringPercent()}");
+					string value = forVehicle != null ? statDef.Worker.GetValue(forVehicle).ToStringPercent() : statDef.Worker.GetValueAbstract(vehicleDef).ToStringPercent();
+					stringBuilder.AppendLine($"    {statDef.LabelCap}: {value}");
 				}
 			}
 			return stringBuilder.ToString();

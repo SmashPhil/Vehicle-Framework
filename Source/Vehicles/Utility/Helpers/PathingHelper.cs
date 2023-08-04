@@ -352,8 +352,7 @@ namespace Vehicles
 			for (int i = 0; i < num; i++)
 			{
 				curLoc = GenRadial.RadialPattern[i] + cell;
-				vehicle.Map.debugDrawer.FlashCell(curLoc, colorPct: 0.5f);
-				if (GenGridVehicles.Standable(curLoc, vehicle, vehicle.Map) && (!VehicleMod.settings.main.fullVehiclePathing || vehicle.DrivableRectOnCell(curLoc)))
+				if (GenGridVehicles.Standable(curLoc, vehicle, vehicle.Map) && (!VehicleMod.settings.main.fullVehiclePathing || vehicle.DrivableRectOnCell(curLoc, maxPossibleSize: true)))
 				{
 					if (curLoc == vehicle.Position || vehicle.beached)
 					{
@@ -368,7 +367,6 @@ namespace Vehicles
 					{
 						continue; //If unreachable (eg. wall), skip
 					}
-					vehicle.Map.debugDrawer.FlashCell(curLoc, colorPct: 1);
 					result = curLoc;
 					return true;
 				}

@@ -694,7 +694,7 @@ namespace Vehicles
 			{
 				return PathRequest.NeedNew;
 			}
-			foreach (IntVec3 cell in vehicle.VehicleRect(destination.Cell, Rot4.North))
+			foreach (IntVec3 cell in vehicle.VehicleRect(destination.Cell, Rot4.North, maxSizePossible: true))
 			{
 				if (ThreadHelper.AnyVehicleBlockingPathAt(cell, vehicle) is VehiclePawn otherVehicle)
 				{
@@ -758,7 +758,6 @@ namespace Vehicles
 			{
 				next = curPath.Peek(nodeIndex);
 				Rot8 rot = Ext_Map.DirectionToCell(previous, next);
-				vehicle.Map.debugDrawer.FlashCell(next);
 				if (!GenGridVehicles.Walkable(next, vehicle.VehicleDef, vehicle.Map))
 				{
 					return PathRequest.NeedNew;
