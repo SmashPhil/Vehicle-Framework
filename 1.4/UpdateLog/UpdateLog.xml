@@ -13,8 +13,12 @@ I've fixed a few bugs that aren't super critical but may prove annoying.  As alw
 - Fixed compatibility issue with Prepare Carefully when spawning with vehicles in the presets.
 
 - Fixed bug where project build date wouldn't get parsed correctly for Mac and Linux users.
-&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 
+- Fixed bug where large numbers of vehicles would not properly scroll in the vehicle list of the mod settings.
+&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Moved compatibility over from RimNauts to RimNauts 2 (requested by RimNauts devs)
+
+- Added thread check for path follower
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
   <!--Static parameterless method to execute when update log is executed-->

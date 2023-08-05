@@ -247,6 +247,11 @@ namespace Vehicles
 			DamageDef defApplied = dinfo.Def;
 			float damage = dinfo.Amount;
 
+			if (defApplied.Worker is DamageWorker_Extinguish)
+			{
+				damage = 0; //Vanilla has extinguish set to 999,999 damage that only applies to fire.  Apply 0 damage to vehicles
+			}
+
 			report?.AppendLine("-- DAMAGE REPORT --");
 			report?.AppendLine($"Base Damage: {damage}");
 			report?.AppendLine($"HitCell: {hitCell}");
