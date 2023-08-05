@@ -1,0 +1,16 @@
+
+<Patch>
+	<Operation Class = "PatchOperationAddModExtension">
+		<xpath>Defs/WorldObjectDef[defName = "RimNauts2_ObjectHolder"]</xpath>
+		<value>
+			<li Class = "Vehicles.SpaceObjectDefModExtension">
+				<!-- Land to Space -->
+				<fixedPercentCostL2S>0.8</fixedPercentCostL2S>
+				<!-- Space to Land -->
+				<fixedPercentCostS2L>0.15</fixedPercentCostS2L>
+				<!-- Space to Space -->
+				<multiplierCostS2S>0.1</multiplierCostS2S>
+			</li>
+		</value>
+	</Operation>
+</Patch>

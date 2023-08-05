@@ -8,6 +8,6 @@
 		<li IfModActive = "Ludeon.RimWorld.Biotech">1.4/_Biotech</li>
 		
 		<li IfModActive = "kentington.saveourship2">1.4/_SaveOurShip2</li>
-		<li IfModActive = "RadZerp.neoRimNauts">1.4/_RimNauts</li>
+		<li IfModActive = "sindre0830.rimnauts2">1.4/_RimNauts2</li>
 	</v1.4>
 </loadFolders>
