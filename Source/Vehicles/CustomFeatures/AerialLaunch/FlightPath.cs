@@ -197,12 +197,14 @@ namespace Vehicles
 	public struct FlightNode : IExposable
 	{
 		public int tile;
-		public Vector3 center;
+		public Vector3 origin;
 		public AerialVehicleArrivalAction arrivalAction;
 
 		public bool spaceObject;
 
 		public WorldObject WorldObject { get; private set; }
+
+		public Vector3 Center => WorldObject != null ? WorldObject.DrawPos : origin;
 
 		public FlightNode(int tile)
 		{
@@ -210,7 +212,7 @@ namespace Vehicles
 			arrivalAction = null;
 
 			WorldObject = WorldHelper.WorldObjectAt(tile);
-			center = WorldHelper.GetTilePos(tile, WorldObject, out spaceObject);
+			origin = WorldHelper.GetTilePos(tile, WorldObject, out spaceObject);
 		}
 
 		public FlightNode(int tile, AerialVehicleArrivalAction arrivalAction)
@@ -219,14 +221,14 @@ namespace Vehicles
 			this.arrivalAction = arrivalAction;
 
 			WorldObject = WorldHelper.WorldObjectAt(tile);
-			center = WorldHelper.GetTilePos(tile, WorldObject, out spaceObject);
+			origin = WorldHelper.GetTilePos(tile, WorldObject, out spaceObject);
 		}
 
 		public void RecalculateCenter()
 		{
 			if (spaceObject)
 			{
-				center = WorldHelper.GetTilePos(tile, WorldObject, out _);
+				origin = WorldHelper.GetTilePos(tile, WorldObject, out _);
 			}
 		}
 
@@ -237,7 +239,7 @@ namespace Vehicles
 			if (Scribe.mode == LoadSaveMode.LoadingVars)
 			{
 				WorldObject = WorldHelper.WorldObjectAt(tile);
-				center = WorldHelper.GetTilePos(tile, WorldObject, out spaceObject);
+				origin = WorldHelper.GetTilePos(tile, WorldObject, out spaceObject);
 			}
 		}
 	}

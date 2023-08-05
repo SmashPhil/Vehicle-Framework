@@ -66,7 +66,7 @@ namespace Vehicles
 
 		public virtual bool IsPlayerControlled => vehicle.Faction == Faction.OfPlayer;
 
-		public override Vector3 DrawPos => Vector3.Slerp(position, flightPath.First.center, transition);
+		public override Vector3 DrawPos => Vector3.Slerp(position, flightPath.First.Center, transition);
 
 		public float Elevation => 0;// vehicle.CompVehicleLauncher.inFlight ? elevation : 0;
 
@@ -152,7 +152,7 @@ namespace Vehicles
 			rotatorGraphics = vehicle.graphicOverlay.graphics.Where(g => g.graphic is Graphic_Rotator).Select(g => g.graphic).Cast<Graphic_Rotator>().ToList();
 		}
 
-		public virtual Vector3 DrawPosAhead(int ticksAhead) => Vector3.Slerp(position, flightPath.First.center, transition + speedPctPerTick * ticksAhead);
+		public virtual Vector3 DrawPosAhead(int ticksAhead) => Vector3.Slerp(position, flightPath.First.Center, transition + speedPctPerTick * ticksAhead);
 
 		public override void Draw()
 		{
@@ -582,14 +582,14 @@ namespace Vehicles
 
 		private void SetSpeed()
 		{
-			float tileDistance = Ext_Math.SphericalDistance(position, flightPath.First.center);
+			float tileDistance = Ext_Math.SphericalDistance(position, flightPath.First.Center);
 			float flightSpeed = recon ? ReconFlightSpeed : vehicle.CompVehicleLauncher.FlightSpeed;
 			speedPctPerTick = (PctPerTick / tileDistance) * flightSpeed.Clamp(0, 99999);
 		}
 
 		private void InitializeFacing()
 		{
-			Vector3 tileLocation = flightPath.First.center.normalized;
+			Vector3 tileLocation = flightPath.First.Center.normalized;
 			directionFacing = (DrawPos - tileLocation).normalized;
 		}
 
@@ -608,15 +608,15 @@ namespace Vehicles
 					Vector3 nodePosition = DrawPos;
 					for (int i = 0; i < flightPath.Path.Count; i++)
 					{
-						Vector3 nextNodePosition = flightPath[i].center;
+						Vector3 nextNodePosition = flightPath[i].Center;
 						LaunchTargeter.DrawTravelPoint(nodePosition, nextNodePosition);
 						nodePosition = nextNodePosition;
 					}
-					LaunchTargeter.DrawTravelPoint(nodePosition, flightPath.Last.center);
+					LaunchTargeter.DrawTravelPoint(nodePosition, flightPath.Last.Center);
 				}
 				else if (flightPath.Path.Count == 1)
 				{
-					LaunchTargeter.DrawTravelPoint(DrawPos, flightPath.First.center);
+					LaunchTargeter.DrawTravelPoint(DrawPos, flightPath.First.Center);
 				}
 			}
 		}
