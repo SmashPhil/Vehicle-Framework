@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1336</currentVersion>
+  <currentVersion>1.5.1337</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
@@ -11,6 +11,8 @@ I've fixed a few bugs that aren't super critical but may prove annoying.  As alw
 - Fixed bug where vehicles could be drafted if fueled but unmanned, but were still unable to move.
 
 - Fixed compatibility issue with Prepare Carefully when spawning with vehicles in the presets.
+
+- Fixed bug where project build date wouldn't get parsed correctly for Mac and Linux users.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
