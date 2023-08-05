@@ -47,6 +47,8 @@ namespace Vehicles
 							Messages.Message("VF_UpgradeInProgress".Translate(), MessageTypeDefOf.RejectInput);
 							return;
 						}
+						Messages.Message("VF_NotEnoughToOperate".Translate(), MessageTypeDefOf.RejectInput);
+						return;
 					}
 					
 					if (vehicle.Spawned)

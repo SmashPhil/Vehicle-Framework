@@ -39,7 +39,7 @@ namespace Vehicles
 		{
 			if (__instance is VehiclePawn vehicle)
 			{
-				__result = vehicle.ignition.Drafted;
+				__result = vehicle.ignition?.Drafted ?? false; //May trigger prematurely from PrepareCarefully
 			}
 		}
 

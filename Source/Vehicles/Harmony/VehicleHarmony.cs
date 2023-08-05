@@ -23,7 +23,6 @@ namespace Vehicles
 		private const int BuildMinor = 5;
 
 		private static readonly DateTime ProjectStartDate = new DateTime(2019, 12, 7);
-		private static readonly DateTime ProjectBuildDate = new DateTime(2023, 7, 30);
 
 		public const string VehiclesUniqueId = "SmashPhil.VehicleFramework";
 		public const string VehiclesLabel = "Vehicle Framework";

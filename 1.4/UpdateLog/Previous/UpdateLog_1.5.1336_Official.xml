@@ -5,14 +5,23 @@
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
-  <description>&lt;title&gt;Hotfix&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
-I've fixed a few bugs that aren't super critical but may prove annoying.  As always, please report bugs on my discord server.  Big thank you to everyone who has been giving feedback!
+  <description>&lt;title&gt;Recent News&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+This version marks the official release of Vehicle Framework. Woohoo! Thank you all again for sticking with me for this long journey, I'm looking forward to continuing work on this big project.
+
+For those of you that are new, please report bugs and feedback on my discord server.  Link is at the end of this post.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Fixed bug where vehicles could be drafted if fueled but unmanned, but were still unable to move.
+- Fixed bug where priority efficiency would overwrite other parts entirely for vehicle part stat calculations.
 
-- Fixed compatibility issue with Prepare Carefully when spawning with vehicles in the presets.
+- Fixed issue where multiple settings for vehicles were not being used by vehicles post-change.
+
+- Improved look-ahead when attempting to avoid colliding with other vehicles while pathing.
+
+- Fixed bug where info card wouldn't show VehicleDef related stats
+
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Added vehicle collisions with pawns
 
+- Removed spawning with full fuel / turret ammo when in godmode.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
   <!--Static parameterless method to execute when update log is executed-->
