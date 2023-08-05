@@ -329,7 +329,6 @@ namespace Vehicles
 
 				GUIState.Reset();
 
-				
 				if (selectedDef != null)
 				{
 					if (KeyBindingDefOf.MapDolly_Up.KeyDownEvent)
@@ -359,50 +358,46 @@ namespace Vehicles
 				scrollList.height -= searchBoxRect.height * 2; //x2 for both label and input field
 				Rect scrollView = scrollList;
 				scrollView.width -= 16f;
-				scrollView.height = (headers + filteredVehicleDefs.Count) * VehicleEntryHeight;
-				
-				Widgets.BeginScrollView(scrollList, ref vehicleDefsScrollPosition, scrollView);
+				scrollView.height = (headers + filteredVehicleDefs.Count) * 20;
+
+				Listing_SplitColumns listingStandard = new Listing_SplitColumns();
+				listingStandard.BeginScrollView(scrollList, ref vehicleDefsScrollPosition, ref scrollView, 1);
+				string currentModTitle = string.Empty;
+				foreach (VehicleDef vehicle in filteredVehicleDefs)
 				{
-					Listing_Standard listingStandard = new Listing_Standard();
-					listingStandard.Begin(scrollList);
-					string currentModTitle = string.Empty;
-					foreach (VehicleDef vehicle in filteredVehicleDefs)
+					try
 					{
-						try
+						if (currentModTitle != vehicle.modContentPack.Name)
 						{
-							if (currentModTitle != vehicle.modContentPack.Name)
-							{
-								currentModTitle = vehicle.modContentPack.Name;
-								listingStandard.Header(currentModTitle, ListingExtension.BannerColor, GameFont.Medium, TextAnchor.MiddleCenter);
-							}
-							bool validated = validator is null || validator(vehicle);
-							string tooltip = tooltipGetter != null ? tooltipGetter(validated) : string.Empty;
-							if (listingStandard.ListItemSelectable(vehicle.LabelCap, Color.yellow, selectedDef == vehicle, validated, tooltip))
-							{
-								if (selectedDef == vehicle)
-								{
-									DeselectVehicle();
-								}
-								else
-								{
-									SelectVehicle(vehicle);
-								}
-							}
+							currentModTitle = vehicle.modContentPack.Name;
+							listingStandard.Header(currentModTitle, ListingExtension.BannerColor, GameFont.Medium, TextAnchor.MiddleCenter);
 						}
-						catch (Exception ex)
+						bool validated = validator is null || validator(vehicle);
+						string tooltip = tooltipGetter != null ? tooltipGetter(validated) : string.Empty;
+						if (listingStandard.ListItemSelectable(vehicle.LabelCap, Color.yellow, selectedDef == vehicle, validated, tooltip))
 						{
-							Log.Error($"Exception thrown while trying to select {vehicle.defName}. Disabling vehicle to preserve mod settings.\nException={ex.Message}");
-							selectedDef = null;
-							selectedPatterns.Clear();
-							selectedDefUpgradeComp = null;
-							selectedNode = null;
-							SetVehicleTex(null);
-							settingsDisabledFor.Add(vehicle.defName);
+							if (selectedDef == vehicle)
+							{
+								DeselectVehicle();
+							}
+							else
+							{
+								SelectVehicle(vehicle);
+							}
 						}
 					}
-					listingStandard.End();
+					catch (Exception ex)
+					{
+						Log.Error($"Exception thrown while trying to select {vehicle.defName}. Disabling vehicle to preserve mod settings.\nException={ex.Message}");
+						selectedDef = null;
+						selectedPatterns.Clear();
+						selectedDefUpgradeComp = null;
+						selectedNode = null;
+						SetVehicleTex(null);
+						settingsDisabledFor.Add(vehicle.defName);
+					}
 				}
-				Widgets.EndScrollView();
+				listingStandard.EndScrollView(ref scrollView);
 			}
 			finally
 			{

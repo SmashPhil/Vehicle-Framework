@@ -611,10 +611,20 @@ namespace Vehicles
 		private void TrySetNewPath_Threaded()
 		{
 			CalculatingPath = true;
-			vehicle.Map.GetCachedMapComponent<VehicleMapping>().dedicatedThread.Queue(new AsyncAction(TrySetNewPath_Delayed, validator: () => moving && CalculatingPath, exceptionHandler: delegate (Exception ex)
+			VehicleMapping vehicleMapping = vehicle.Map.GetCachedMapComponent<VehicleMapping>();
+			
+			if (vehicleMapping.ThreadAvailable)
 			{
-				CalculatingPath = false;
-			}));
+				vehicleMapping.dedicatedThread.Queue(new AsyncAction(TrySetNewPath_Delayed, validator: () => moving && CalculatingPath, exceptionHandler: delegate (Exception ex)
+				{
+					CalculatingPath = false;
+				}));
+			}
+			else
+			{
+				Log.Warning($"Finding path on main thread. DedicatedThread was not available.");
+				TrySetNewPath();
+			}
 		}
 
 		[Obsolete("Use TrySetNewPath_Threaded. Async Task-based pathfinding has more overhead than using the dedicated thread.", error: true)]
