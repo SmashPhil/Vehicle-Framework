@@ -64,8 +64,16 @@ namespace Vehicles
 			string dateText = File.ReadAllText(BuildDatePath).Trim(Environment.NewLine.ToCharArray());
 			try
 			{
-				DateTime buildDate = DateTime.ParseExact(dateText, "ddd MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+				//DateTime buildDate = DateTime.ParseExact(dateText, "ddd MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
 
+				///Manually parsed because Linux and Mac be weird even with invariant culture, and it's just easier to do it this way
+				string month = dateText.Substring(4, 2);
+				string day = dateText.Substring(7, 2);
+				string year = dateText.Substring(10, 4);
+				string hour = dateText.Substring(15, 2);
+				string minute = dateText.Substring(18, 2);
+				string second = dateText.Substring(21, 2);
+				DateTime buildDate = new DateTime(int.Parse(year), int.Parse(month), int.Parse(day), int.Parse(hour), int.Parse(minute), int.Parse(second));
 				Version = new ModVersion(BuildMajor, BuildMinor, buildDate, ProjectStartDate);
 
 				string readout = Prefs.DevMode ? Version.VersionStringWithRevision : Version.VersionString;
