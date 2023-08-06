@@ -879,7 +879,7 @@ namespace Vehicles
 					aerial.vehicle.Notify_Boarded(pawn);
 					return false;
 				}
-				if (!aerial.vehicle.AddOrTransfer(thing))
+				if (aerial.vehicle.AddOrTransfer(thing) <= 0)
 				{
 					Log.Error("Could not add sold thing to inventory.");
 					thing.Destroy(DestroyMode.Vanish);

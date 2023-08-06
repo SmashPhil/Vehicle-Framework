@@ -95,26 +95,26 @@ namespace Vehicles
 					{
 						if (pawn.IsBoat() && vehicle.beached)
 						{
-							__result = vehicle.VehicleDef.properties.healthLabel_Beached;
+							__result = "VF_healthLabel_Beached".Translate();
 						}
 						else
 						{
-							__result = vehicle.VehicleDef.properties.healthLabel_Immobile;
+							__result = "VF_healthLabel_Immobile".Translate();
 						}
 
 						return false;
 					}
 					if (pawn.Dead)
 					{
-						__result = vehicle.VehicleDef.properties.healthLabel_Dead;
+						__result = "VF_healthLabel_Dead".Translate();
 						return false;
 					}
-					if (pawn.health.summaryHealth.SummaryHealthPercent < 0.95)
+					if (vehicle.statHandler.HealthPercent < 0.95f)
 					{
-						__result = vehicle.VehicleDef.properties.healthLabel_Injured;
+						__result = "VF_healthLabel_Injured".Translate();
 						return false;
 					}
-					__result = vehicle.VehicleDef.properties.healthLabel_Healthy;
+					__result = "VF_healthLabel_Healthy".Translate();
 					return false;
 				}
 			}

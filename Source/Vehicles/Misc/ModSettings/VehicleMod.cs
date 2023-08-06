@@ -306,6 +306,12 @@ namespace Vehicles
 			Rect scrollContainer = rect.ContractedBy(10);
 			scrollContainer.width /= 4;
 
+			if (filteredVehicleDefs.Count == 0 && VehicleDefs.Count == 0)
+			{
+				// No need to render list if no vehicle mods active, and also calling get_VehicleDefs will trigger recache if mod settings page is opened directly to Vehicles tab
+				return scrollContainer; 
+			}
+
 			GUIState.Push();
 			try
 			{

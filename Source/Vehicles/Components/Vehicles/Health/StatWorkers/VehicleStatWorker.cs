@@ -164,7 +164,11 @@ namespace Vehicles
 			{
 				text += Environment.NewLine + Environment.NewLine;
 			}
-			return text + statDef.Worker.GetExplanationFinalizePart(forVehicle, numberSense, value);
+			if (forVehicle != null)
+			{
+				text += statDef.Worker.GetExplanationFinalizePart(forVehicle, numberSense, value);
+			}
+			return text;
 		}
 
 		public virtual string GetExplanationUnfinalized(VehicleDef vehicleDef, ToStringNumberSense numberSense, VehiclePawn forVehicle = null)
@@ -191,7 +195,7 @@ namespace Vehicles
 				//	stringBuilder.AppendLine("StatsReport_Material".Translate() + " (" + req.StuffDef.LabelCap + "): " + statOffsetFromList2.ToStringByStyle(this.stat.toStringStyle, ToStringNumberSense.Offset));
 				//}
 			}
-			if (!statDef.statFactors.NullOrEmpty())
+			if (forVehicle != null && !statDef.statFactors.NullOrEmpty())
 			{
 				stringBuilder.AppendLine("StatsReport_OtherStats".Translate());
 				foreach (VehicleStatDef statDef in statDef.statFactors)

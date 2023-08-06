@@ -266,7 +266,7 @@ namespace Vehicles
 					}
 				}
 			}
-			if (Prefs.DevMode)
+			if (Prefs.DevMode && DebugSettings.godMode)
 			{
 				yield return new Command_Action
 				{

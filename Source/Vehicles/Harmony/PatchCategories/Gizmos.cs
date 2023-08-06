@@ -126,7 +126,6 @@ namespace Vehicles
 						icon = VehicleTex.FormCaravanVehicle,
 						action = delegate ()
 						{
-							Find.Tutor.learningReadout.TryActivateConcept(ConceptDefOf.FormCaravan);
 							Find.WindowStack.Add(new Dialog_FormVehicleCaravan(mapParent.Map));
 						}
 					};

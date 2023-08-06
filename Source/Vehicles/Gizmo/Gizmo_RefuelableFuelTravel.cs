@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using Verse;
+using Verse.Sound;
 using UnityEngine;
 using SmashTools;
 
@@ -16,6 +17,8 @@ namespace Vehicles
 
 		private readonly CompFueledTravel refuelable;
 		private readonly bool showLabel;
+
+		public VehiclePawn Vehicle => refuelable.Vehicle;
 
 		public Gizmo_RefuelableFuelTravel(CompFueledTravel refuelable, bool showLabel)
 		{
@@ -46,7 +49,7 @@ namespace Vehicles
 
 					if (showLabel)
 					{
-						Widgets.Label(labelRect, refuelable.Vehicle.LabelCap);
+						Widgets.Label(labelRect, Vehicle.LabelCap);
 					}
 					else
 					{
@@ -57,6 +60,46 @@ namespace Vehicles
 					if (Widgets.ButtonImage(configureRect, VehicleTex.Settings))
 					{
 						ShowConfigureWindow();
+					}
+					configureRect.x -= ConfigureSize;
+					if (Widgets.ButtonImage(configureRect, VehicleTex.ReverseIcon))
+					{
+						if (Vehicle.AllPawnsAboard.Count > 0)
+						{
+							List<Thing> fuelables = new List<Thing>();
+
+							if (Vehicle.GetVehicleCaravan() is VehicleCaravan vehicleCaravan)
+							{
+								fuelables.AddRange(vehicleCaravan.AllThings.Where(thing => thing.def == refuelable.Props.fuelType));
+							}
+							else
+							{
+								if (Vehicle.Spawned)
+								{
+									fuelables.AddRange(Vehicle.inventory.innerContainer.Where(thing => thing.def == refuelable.Props.fuelType));
+								}
+								else if (Vehicle.GetAerialVehicle() is AerialVehicleInFlight aerialVehicle)
+								{
+									if (!Vehicle.CompVehicleLauncher.inFlight)
+									{
+										fuelables.AddRange(Vehicle.inventory.innerContainer.Where(thing => thing.def == refuelable.Props.fuelType));
+									}
+								}
+							}
+
+							if (fuelables.NullOrEmpty())
+							{
+								SoundDefOf.ClickReject.PlayOneShotOnCamera();
+							}
+							else
+							{
+								refuelable.Refuel(fuelables);
+							}
+						}
+						else
+						{
+							Messages.Message("VF_NotEnoughToOperate".Translate(), MessageTypeDefOf.RejectInput);
+						}
 					}
 					rect.yMin = overRect.height / 2f;
 

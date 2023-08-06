@@ -301,7 +301,7 @@ namespace Vehicles
 					}
 					yield return commandSettle;
 				}
-				if (Prefs.DevMode)
+				if (Prefs.DevMode && DebugSettings.godMode)
 				{
 					yield return new Command_Action
 					{

@@ -79,6 +79,8 @@ namespace Vehicles
 
 		public static readonly Texture2D TargetLevelArrow = ContentFinder<Texture2D>.Get("UI/Misc/BarInstantMarkerRotated");
 
+		public static readonly Texture2D ConfigureFuelGauge = ContentFinder<Texture2D>.Get("UI/Gizmos/SetRefuelLevel");
+
 		public static readonly Texture2D SwitchLeft = ContentFinder<Texture2D>.Get("UI/ColorTools/SwitchLeft");
 
 		public static readonly Texture2D SwitchRight = ContentFinder<Texture2D>.Get("UI/ColorTools/SwitchRight");

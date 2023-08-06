@@ -295,7 +295,7 @@ namespace Vehicles
 		{
 			yield return new Gizmo_RefuelableFuelTravel(this, true);
 
-			if (Prefs.DevMode)
+			if (Prefs.DevMode && DebugSettings.godMode)
 			{
 				yield return new Command_Action
 				{
@@ -318,7 +318,7 @@ namespace Vehicles
 
 		public virtual IEnumerable<Gizmo> DevModeGizmos()
 		{
-			if (Prefs.DevMode)
+			if (Prefs.DevMode && DebugSettings.godMode)
 			{
 				yield return new Command_Action
 				{

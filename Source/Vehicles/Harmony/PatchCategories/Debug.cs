@@ -57,7 +57,7 @@ namespace Vehicles
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), "AtDestinationPosition"),
 			//	postfix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestPostfix)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(TargetHighlighter), "Highlight"),
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Thing), "ExposeData"),
 			//	finalizer: new HarmonyMethod(typeof(Debug),
 			//	nameof(ExceptionCatcher)));
 		}
@@ -92,11 +92,11 @@ namespace Vehicles
 			}
 		}
 
-		public static Exception ExceptionCatcher(GlobalTargetInfo target, bool arrow, bool colonistBar, bool circleOverlay, Exception __exception)
+		public static Exception ExceptionCatcher(Thing __instance, Exception __exception)
 		{
 			if (__exception != null)
 			{
-				SmashLog.Message($"Exception caught! <error>Ex={__exception.Message}</error> Arrow={arrow} Bar={colonistBar} Overylay={circleOverlay} Target {target} is null = {(target.Thing as VehiclePawn)?.ageTracker is null}");
+				SmashLog.Message($"Exception caught! <error>Ex={__exception.Message}</error> Instance: {__instance}");
 			}
 			return __exception;
 		}

@@ -17,7 +17,7 @@ namespace Vehicles
 
 		public int uniqueID = -1;
 		public VehiclePawn vehicle;
-		
+
 		public VehicleHandler()
 		{
 			if (handlers is null)
@@ -175,6 +175,10 @@ namespace Vehicles
 			Scribe_References.Look(ref vehicle, nameof(vehicle), true);
 			Scribe_Values.Look(ref roleKey, nameof(role), forceSave: true);
 
+			if (Scribe.mode == LoadSaveMode.Saving)
+			{
+				handlers.contentsLookMode = vehicle.IsWorldPawn() ? LookMode.Reference : LookMode.Deep; //Reference save on world map since pawns will be deep saved in WorldPawns.pawnsAlive
+			}
 			Scribe_Deep.Look(ref handlers, nameof(handlers), new object[] { this });
 			
 			if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)

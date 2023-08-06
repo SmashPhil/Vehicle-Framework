@@ -7,4 +7,12 @@
 	<VF_FormingCaravanStatus_BoardVehicles_Pause>Boarding. (waiting)</VF_FormingCaravanStatus_BoardVehicles_Pause>
 	<VF_FormingCaravanStatus_Leaving_Vehicles>Leaving.</VF_FormingCaravanStatus_Leaving_Vehicles>
 	<VF_FormingCaravanStatus_Leaving_Vehicles_Pause>Leaving. (waiting)</VF_FormingCaravanStatus_Leaving_Vehicles_Pause>
+	
+	<!-- cannot be def injected because they are filled from Abstract def in VehiclePawnBase-->
+	<VF_draftLabel>Start Engine TEST</VF_draftLabel>
+	<VF_healthLabel_Healthy>Operational</VF_healthLabel_Healthy>
+	<VF_healthLabel_Injured>Needs Repairs</VF_healthLabel_Injured>
+	<VF_healthLabel_Immobile>Inoperable</VF_healthLabel_Immobile>
+	<VF_healthLabel_Dead>Ruined</VF_healthLabel_Dead>
+	<VF_healthLabel_Beached>Beached</VF_healthLabel_Beached>
 </LanguageData>

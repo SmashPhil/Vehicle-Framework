@@ -51,6 +51,7 @@ namespace Vehicles
 			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch);
 			yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false);
 			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).FailOnDespawnedNullOrForbidden(TargetIndex.B);
+			yield return Toils_General.Wait(25, TargetIndex.None).WithProgressBarToilDelay(TargetIndex.B);
 			yield return GiveAsMuchToVehicleAsPossible();
 		}
 
@@ -79,21 +80,18 @@ namespace Vehicles
 			{
 				initAction = delegate ()
 				{
-					if (Item is null || Item.stackCount == 0 || Vehicle.cargoToLoad.NullOrEmpty())
+					if (Item is null || Item.stackCount == 0)
 					{
 						pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true);
 					}
 					else
 					{
 						int stackCount = Item.stackCount; //store before transfer for transferable recache
-						Vehicle.AddOrTransfer(Item, stackCount);
+
+						int result = Vehicle.AddOrTransfer(Item, stackCount);
 						TransferableOneWay transferable = Vehicle.cargoToLoad.FirstOrDefault(t => t.AnyThing is {def: ThingDef def} && def == Item.def);
-                        if (transferable is null)
+                        if (transferable != null)
                         {
-							pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true);
-                        }
-						else
-						{
 							countToTransferFieldInfo.SetValue(transferable, transferable.CountToTransfer - stackCount);
 						}
 					}

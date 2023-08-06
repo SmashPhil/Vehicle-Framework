@@ -32,21 +32,21 @@ namespace Vehicles
 			}
 		}
 
-		public bool AddOrTransfer(Thing thing, Pawn holder = null)
+		public int AddOrTransfer(Thing thing, Pawn holder = null)
 		{
 			return AddOrTransfer(thing, thing.stackCount, holder: holder);
 		}
 
-		public bool AddOrTransfer(Thing thing, int count, Pawn holder = null)
+		public int AddOrTransfer(Thing thing, int count, Pawn holder = null)
 		{
-			bool result;
+			int result;
 			if (holder != null)
 			{
-				result = holder.carryTracker.innerContainer.TryAddOrTransfer(thing, count, true) > 0;
+				result = holder.carryTracker.innerContainer.TryAddOrTransfer(thing, count);
 			}
 			else
 			{
-				result = inventory.innerContainer.TryAddOrTransfer(thing, count) > 0;
+				result = inventory.innerContainer.TryAddOrTransfer(thing, count);
 			}
 			EventRegistry[VehicleEventDefOf.CargoAdded].ExecuteEvents();
 			return result;

@@ -30,12 +30,6 @@ namespace Vehicles
 		[PostToSettings(Label = "VF_ManhunterTargetsVehicle", Tooltip = "VF_ManhunterTargetsVehicleTooltip", Translate = true, UISettingsType = UISettingsType.Checkbox)]
 		public bool manhunterTargetsVehicle = false;
 
-		public string healthLabel_Healthy = "MissingHealthyLabel";
-		public string healthLabel_Injured = "MissingInjuredLabel";
-		public string healthLabel_Immobile = "MissingImmobileLabel";
-		public string healthLabel_Dead = "MissingDeadLabel";
-		public string healthLabel_Beached = "MissingBeachedLabel";
-
 		public string iconTexPath;
 		public bool generateThingIcon = true;
 

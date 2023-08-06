@@ -23,7 +23,7 @@ For those of you that are new, please report bugs and feedback on my discord ser
 
 - Removed spawning with full fuel / turret ammo when in godmode.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-Please report any issues you find &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
+Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>
   <!--Show update log on next startup.-->

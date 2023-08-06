@@ -48,6 +48,8 @@ namespace Vehicles
 
 		public bool NeedsRepairs => components.Any(c => c.HealthPercent < 1);
 
+		public float HealthPercent { get; private set; }
+
 		public void InitializeComponents()
 		{
 			components.Clear();
@@ -75,6 +77,7 @@ namespace Vehicles
 		public void MarkAllDirty()
 		{
 			statCache.Reset();
+			vehicle.statHandler.RecalculateHealthPercent();
 		}
 
 		private void RecacheStatCategories(VehicleComponent comp)
@@ -215,6 +218,11 @@ namespace Vehicles
 			return hitCell;
 		}
 
+		public void RecalculateHealthPercent()
+		{
+			HealthPercent = components.Average(component => component.HealthPercent);
+		}
+
 		public void TakeDamage(DamageInfo dinfo)
 		{
 			if (dinfo.Instigator is null || !impacter.TryGetValue(dinfo.Instigator, out IntVec3 cell))
@@ -251,61 +259,80 @@ namespace Vehicles
 			{
 				damage = 0; //Vanilla has extinguish set to 999,999 damage that only applies to fire.  Apply 0 damage to vehicles
 			}
+			try
+			{
+				report?.AppendLine("-- DAMAGE REPORT --");
+				report?.AppendLine($"Base Damage: {damage}");
+				report?.AppendLine($"HitCell: {hitCell}");
 
-			report?.AppendLine("-- DAMAGE REPORT --");
-			report?.AppendLine($"Base Damage: {damage}");
-			report?.AppendLine($"HitCell: {hitCell}");
-			
-			if (dinfo.Weapon?.GetModExtension<VehicleDamageMultiplierDefModExtension>() is VehicleDamageMultiplierDefModExtension weaponMultiplier)
-			{
-				damage *= weaponMultiplier.multiplier;
-				report?.AppendLine($"ModExtension Multiplier: {weaponMultiplier.multiplier} Result: {damage}");
-			}
-
-			if (dinfo.Instigator?.def.GetModExtension<VehicleDamageMultiplierDefModExtension>() is VehicleDamageMultiplierDefModExtension defMultiplier)
-			{
-				damage *= defMultiplier.multiplier;
-				report?.AppendLine($"ModExtension Multiplier: {defMultiplier.multiplier} Result: {damage}");
-			}
-
-			if (dinfo.Def.isRanged)
-			{
-				damage *= VehicleMod.settings.main.rangedDamageMultiplier;
-				report?.AppendLine($"Settings Multiplier: {VehicleMod.settings.main.rangedDamageMultiplier} Result: {damage}");
-			}
-			else if (dinfo.Def.isExplosive)
-			{
-				damage *= VehicleMod.settings.main.explosiveDamageMultiplier;
-				report?.AppendLine($"Settings Multiplier: {VehicleMod.settings.main.explosiveDamageMultiplier} Result: {damage}");
-			}
-			else
-			{
-				damage *= VehicleMod.settings.main.meleeDamageMultiplier;
-				report?.AppendLine($"Settings Multiplier: {VehicleMod.settings.main.meleeDamageMultiplier} Result: {damage}");
-			}
-
-			if (damage <= 0)
-			{
-				report?.AppendLine($"Final Damage = {damage}. Exiting.");
-				return;
-			}
-			dinfo.SetAmount(damage);
-			Rot4 direction = DirectionFromAngle(dinfo.Angle);
-			VehicleComponent.VehiclePartDepth hitDepth = VehicleComponent.VehiclePartDepth.External;
-			for (int i = 0; i < Mathf.Max(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z); i++)
-			{
-				if (!vehicle.Spawned || dinfo.Amount <= 0)
+				if (dinfo.Weapon?.GetModExtension<VehicleDamageMultiplierDefModExtension>() is VehicleDamageMultiplierDefModExtension weaponMultiplier)
 				{
+					damage *= weaponMultiplier.multiplier;
+					report?.AppendLine($"ModExtension Multiplier: {weaponMultiplier.multiplier} Result: {damage}");
+				}
+
+				if (dinfo.Instigator?.def.GetModExtension<VehicleDamageMultiplierDefModExtension>() is VehicleDamageMultiplierDefModExtension defMultiplier)
+				{
+					damage *= defMultiplier.multiplier;
+					report?.AppendLine($"ModExtension Multiplier: {defMultiplier.multiplier} Result: {damage}");
+				}
+
+				if (dinfo.Def.isRanged)
+				{
+					damage *= VehicleMod.settings.main.rangedDamageMultiplier;
+					report?.AppendLine($"Settings Multiplier: {VehicleMod.settings.main.rangedDamageMultiplier} Result: {damage}");
+				}
+				else if (dinfo.Def.isExplosive)
+				{
+					damage *= VehicleMod.settings.main.explosiveDamageMultiplier;
+					report?.AppendLine($"Settings Multiplier: {VehicleMod.settings.main.explosiveDamageMultiplier} Result: {damage}");
+				}
+				else
+				{
+					damage *= VehicleMod.settings.main.meleeDamageMultiplier;
+					report?.AppendLine($"Settings Multiplier: {VehicleMod.settings.main.meleeDamageMultiplier} Result: {damage}");
+				}
+
+				if (damage <= 0)
+				{
+					report?.AppendLine($"Final Damage = {damage}. Exiting.");
 					return;
 				}
-				VehicleComponent component = null;
-				report?.AppendLine($"Damaging = {hitCell}");
-				if (componentLocations.TryGetValue(hitCell, out List<VehicleComponent> components))
+				dinfo.SetAmount(damage);
+				Rot4 direction = DirectionFromAngle(dinfo.Angle);
+				VehicleComponent.VehiclePartDepth hitDepth = VehicleComponent.VehiclePartDepth.External;
+				for (int i = 0; i < Mathf.Max(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z); i++)
 				{
-					report?.AppendLine($"components=({string.Join(",", components.Select(c => c.props.label))})");
-					report?.AppendLine($"hitDepth = {hitDepth}");
-					//If no components at hit cell, fallthrough to internal
-					if (!components.Where(comp => comp.props.depth == hitDepth && comp.HealthPercent > 0).TryRandomElementByWeight((component) => component.props.hitWeight, out component))
+					if (!vehicle.Spawned || dinfo.Amount <= 0)
+					{
+						return;
+					}
+					VehicleComponent component = null;
+					report?.AppendLine($"Damaging = {hitCell}");
+					if (componentLocations.TryGetValue(hitCell, out List<VehicleComponent> components))
+					{
+						report?.AppendLine($"components=({string.Join(",", components.Select(c => c.props.label))})");
+						report?.AppendLine($"hitDepth = {hitDepth}");
+						//If no components at hit cell, fallthrough to internal
+						if (!components.Where(comp => comp.props.depth == hitDepth && comp.HealthPercent > 0).TryRandomElementByWeight((component) => component.props.hitWeight, out component))
+						{
+							report?.AppendLine($"No components found. Hitting internal parts.");
+							hitDepth = VehicleComponent.VehiclePartDepth.Internal;
+							//If depth = internal then pick random internal component even if it does not have a hitbox
+							component = this.components.Where(comp => comp.props.depth == hitDepth && comp.HealthPercent > 0).RandomElementByWeightWithFallback((component) => component.props.hitWeight);
+							//If no internal components, pick random component w/ health
+							component ??= this.components.Where(comp => comp.HealthPercent > 0).RandomElementByWeightWithFallback((component) => component.props.hitWeight);
+							if (component is null)
+							{
+								return;
+							}
+						}
+						else
+						{
+							report?.AppendLine($"Found {component} at {hitCell}");
+						}
+					}
+					else
 					{
 						report?.AppendLine($"No components found. Hitting internal parts.");
 						hitDepth = VehicleComponent.VehiclePartDepth.Internal;
@@ -318,52 +345,39 @@ namespace Vehicles
 							return;
 						}
 					}
-					else
+					if (!hitCell.IsValid)
 					{
-						report?.AppendLine($"Found {component} at {hitCell}");
+						break;
 					}
-				}
-				else
-				{
-					report?.AppendLine($"No components found. Hitting internal parts.");
-					hitDepth = VehicleComponent.VehiclePartDepth.Internal;
-					//If depth = internal then pick random internal component even if it does not have a hitbox
-					component = this.components.Where(comp => comp.props.depth == hitDepth && comp.HealthPercent > 0).RandomElementByWeightWithFallback((component) => component.props.hitWeight);
-					//If no internal components, pick random component w/ health
-					component ??= this.components.Where(comp => comp.HealthPercent > 0).RandomElementByWeightWithFallback((component) => component.props.hitWeight);
-					if (component is null)
+					if (VehicleMod.settings.debug.debugDrawHitbox)
 					{
+						debugCellHighlight.Add(new Pair<IntVec2, int>(hitCell, TicksHighlighted));
+					}
+					report?.AppendLine($"Damaging {hitCell}");
+					if (HitPawn(dinfo, hitDepth, hitCell, direction, out Pawn hitPawn))
+					{
+						report?.AppendLine($"Hit {hitPawn} for {dinfo.Amount}. Impact site = {hitCell}");
 						return;
 					}
-				}
-				if (!hitCell.IsValid)
-				{
-					break;
-				}
-				if (VehicleMod.settings.debug.debugDrawHitbox)
-				{
-					debugCellHighlight.Add(new Pair<IntVec2, int>(hitCell, TicksHighlighted));
-				}
-				report?.AppendLine($"Damaging {hitCell}");
-				if (HitPawn(dinfo, hitDepth, hitCell, direction, out Pawn hitPawn))
-				{
-					report?.AppendLine($"Hit {hitPawn} for {dinfo.Amount}. Impact site = {hitCell}");
-					return;
-				}
-				report?.AppendLine($"Applying Damage = {dinfo.Amount} to {component.props.key} at {hitCell}");
-				VehicleComponent.Penetration result = component.TakeDamage(vehicle, ref dinfo);
-				//Effecters and sounds only for first hit
-				if (i == 0)
-				{
-					IntVec3 impactCell = new IntVec3(vehicle.Position.x + hitCell.x, 0, vehicle.Position.z + hitCell.z);
-					vehicle.Notify_DamageImpact(new VehicleComponent.DamageResult()
+					report?.AppendLine($"Applying Damage = {dinfo.Amount} to {component.props.key} at {hitCell}");
+					VehicleComponent.Penetration result = component.TakeDamage(vehicle, ref dinfo);
+					//Effecters and sounds only for first hit
+					if (i == 0)
 					{
-						penetration = result,
-						damageInfo = dinfo,
-						cell = hitCell
-					});
+						IntVec3 impactCell = new IntVec3(vehicle.Position.x + hitCell.x, 0, vehicle.Position.z + hitCell.z);
+						vehicle.Notify_DamageImpact(new VehicleComponent.DamageResult()
+						{
+							penetration = result,
+							damageInfo = dinfo,
+							cell = hitCell
+						});
+					}
+					report?.AppendLine($"Fallthrough Damage = {dinfo.Amount}");
 				}
-				report?.AppendLine($"Fallthrough Damage = {dinfo.Amount}");
+			}
+			finally
+			{
+				RecalculateHealthPercent();
 			}
 		}
 

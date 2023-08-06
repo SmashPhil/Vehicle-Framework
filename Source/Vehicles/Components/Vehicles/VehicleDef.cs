@@ -58,7 +58,7 @@ namespace Vehicles
 		public List<Type> designatorTypes = new List<Type>();
 
 		[NoTranslate] //Should be translated in xml and parsed in appropriately
-		public string draftLabel = "[MISSING]";
+		public string draftLabel = null;
 		public SoundDef soundBuilt;
 
 		/// <summary>
@@ -135,6 +135,10 @@ namespace Vehicles
 				VehicleMod.settings.vehicles.defaultGraphics = new Dictionary<string, PatternData>();
 			}
 
+			if (draftLabel.NullOrEmpty())
+			{
+				draftLabel = "VF_draftLabel".Translate(); //Default translation for draft label
+			}
 			if (!comps.NullOrEmpty())
 			{
 				cachedComps.AddRange(comps);

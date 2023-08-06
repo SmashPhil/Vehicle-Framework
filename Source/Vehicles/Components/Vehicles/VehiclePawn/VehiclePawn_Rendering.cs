@@ -605,7 +605,7 @@ namespace Vehicles
 				}
 			}
 
-			if (Prefs.DevMode && Spawned)
+			if (Prefs.DevMode && DebugSettings.godMode && Spawned)
 			{
 				yield return new Command_Action
 				{
