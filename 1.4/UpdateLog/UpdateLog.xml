@@ -30,7 +30,7 @@ That's all I've got for now, I'll push another patch soon-ish once I've made som
 
 - Fixed bug where vehicle health labels weren't updating properly.
 
-- Fixed bug where VehicleCaravans would save duplicates of pawn entries in the vehicle and world pawns, causing loading issues.
+- Fixed bug where VehicleCaravans would save duplicate entries in vehicle and WorldPawns, causing issues on loading.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Moved compatibility over from RimNauts to RimNauts 2 (requested by RimNauts devs)
 
