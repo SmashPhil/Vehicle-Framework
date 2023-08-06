@@ -31,6 +31,8 @@ That's all I've got for now, I'll push another patch soon-ish once I've made som
 - Fixed bug where vehicle health labels weren't updating properly.
 
 - Fixed bug where VehicleCaravans would save duplicate entries in vehicle and WorldPawns, causing issues on loading.
+
+- Fixed bug where tutor system would trigger when forming vehicle caravan, causing the tutorial window to open permanently for some people until the game was reloaded.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Moved compatibility over from RimNauts to RimNauts 2 (requested by RimNauts devs)
 
