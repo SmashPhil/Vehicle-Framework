@@ -20,7 +20,7 @@ That's all I've got for now, I'll push another patch soon-ish once I've made som
 
 - Fixed bug where large numbers of vehicles would not properly scroll in the vehicle list of the mod settings.
 
-- Fixed bug where firefoam poppers and mortar shells would deal infinite damage to vehicles.
+- Fixed bug where firefoam poppers and mortar shells would deal 999,999 damage to vehicles.
 
 - Fixed compatibility issue with Carry Capacity Fixed.
 
@@ -33,6 +33,8 @@ That's all I've got for now, I'll push another patch soon-ish once I've made som
 - Fixed bug where VehicleCaravans would save duplicate entries in vehicle and WorldPawns, causing issues on loading.
 
 - Fixed bug where tutor system would trigger when forming vehicle caravan, causing the tutorial window to open permanently for some people until the game was reloaded.
+
+- Fixed bug where space-faring vehicles traveling to RimNauts locations would travel to the location from launch, rather than the updated DrawPos.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Moved compatibility over from RimNauts to RimNauts 2 (requested by RimNauts devs)
 
