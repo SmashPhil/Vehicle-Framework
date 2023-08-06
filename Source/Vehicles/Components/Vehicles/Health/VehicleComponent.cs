@@ -101,7 +101,9 @@ namespace Vehicles
 			StatDef damageType = dinfo.Def.armorCategory.armorRatingStat;
 			float armorRating = ArmorRating(damageType);
 			float armorDiff = armorRating - dinfo.ArmorPenetrationInt;
+
 			result = props.hitbox.fallthrough ? Penetration.Penetrated : Penetration.NonPenetrated;
+
 			float chance = Rand.Value;
 			if (chance < (armorDiff / 2))
 			{
