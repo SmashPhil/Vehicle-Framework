@@ -1,4 +1,5 @@
 - Rebuild entire solution
+- Remove .pdb files
 - Reboot game to update Version.txt with current build date.
 - Update Manifest version
 - Verify UpdateLog version, testing update flag, and text
