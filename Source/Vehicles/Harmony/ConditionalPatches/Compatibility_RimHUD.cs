@@ -26,7 +26,7 @@ namespace Vehicles
 
 		private static bool DontRenderRimHUDForVehicles_InspectPaneUtility(Rect inRect, IInspectPane pane, ref bool __result)
 		{
-			if (Find.Selector.SingleSelectedThing is VehiclePawn)
+			if (Find.UIRoot is UIRoot_Play play && play.mapUI?.selector?.SingleSelectedThing is VehiclePawn) //Null check on UIRoot since inspect pane can be called during starting map location before UIRoot_Play loads
 			{
 				__result = true;
 				return false;

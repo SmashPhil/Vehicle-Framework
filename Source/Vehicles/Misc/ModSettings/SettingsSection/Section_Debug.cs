@@ -34,7 +34,7 @@ namespace Vehicles
 		public bool debugDrawVehiclePathCosts;
 		public bool debugDrawPathfinderSearch;
 
-		public bool debugUseMultithreading;
+		public bool debugUseMultithreading = true;
 
 		public override void ResetSettings()
 		{
@@ -78,7 +78,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref debugDrawVehiclePathCosts, nameof(debugDrawVehiclePathCosts));
 			Scribe_Values.Look(ref debugDrawPathfinderSearch, nameof(debugDrawPathfinderSearch));
 
-			Scribe_Values.Look(ref debugUseMultithreading, nameof(debugUseMultithreading), defaultValue: debugUseMultithreading);
+			Scribe_Values.Look(ref debugUseMultithreading, nameof(debugUseMultithreading), defaultValue: true);
 		}
 
 		public override void DrawSection(Rect rect)
@@ -115,7 +115,22 @@ namespace Vehicles
 					}
 					else
 					{
-						listingStandard.CheckboxLabeled("[DevOnly] Use Multithreading", ref debugUseMultithreading);
+						bool checkOn = debugUseMultithreading;
+						listingStandard.CheckboxLabeled("[DevOnly] Use Multithreading", ref checkOn);
+						if (checkOn != debugUseMultithreading)
+						{
+							if (!checkOn)
+							{
+								Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("Are you sure you want to disable multi-threading? Performance will decrease significantly. This should only be done for debugging.", delegate ()
+									{
+										debugUseMultithreading = checkOn;
+									}));
+							}
+							else
+							{
+								debugUseMultithreading = checkOn;
+							}
+						}
 					}
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugSpawnVehiclesGodMode".Translate(), ref debugSpawnVehicleBuildingGodMode, "VF_DevMode_DebugSpawnVehiclesGodModeTooltip".Translate());
 

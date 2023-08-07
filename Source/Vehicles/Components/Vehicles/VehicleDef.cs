@@ -17,7 +17,7 @@ namespace Vehicles
 		public VehicleEnabledFor enabled = VehicleEnabledFor.Everyone;
 
 		[PostToSettings(Label = "VF_Nameable", Translate = true, Tooltip = "VF_NameableTooltip", UISettingsType = UISettingsType.Checkbox)]
-		public bool nameable = false;
+		public bool nameable = true;
 
 		[DisableSetting]
 		[PostToSettings(Label = "VF_CombatPower", Translate = true, Tooltip = "VF_CombatPowerTooltip", UISettingsType = UISettingsType.FloatBox)]

@@ -83,6 +83,10 @@ namespace Vehicles
 
 		private static DedicatedThread GetDedicatedThread(Map map)
 		{
+			if (!VehicleMod.settings.debug.debugUseMultithreading)
+			{
+				return null;
+			}
 			return ThreadManager.CreateNew();
 			//WIP
 			if (map.IsPlayerHome)
