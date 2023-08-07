@@ -13,6 +13,9 @@ namespace Vehicles
 	/// </summary>
 	public sealed class VehicleMapping : MapComponent
 	{
+		private const int EventMapId = 0;
+		private const int TempIncidentMapId = 1;
+
 		private VehiclePathData[] vehicleData;
 		private int[] piggyToOwner;
 		private List<VehicleDef> owners = new List<VehicleDef>();
@@ -24,7 +27,7 @@ namespace Vehicles
 		public VehicleMapping(Map map) : base(map)
 		{
 			ConstructComponents();
-			dedicatedThread = ThreadManager.CreateNew();
+			dedicatedThread = GetDedicatedThread(map);
 		}
 
 		/// <summary>
@@ -76,6 +79,21 @@ namespace Vehicles
 				}
 				return pathData;
 			}
+		}
+
+		private static DedicatedThread GetDedicatedThread(Map map)
+		{
+			return ThreadManager.CreateNew();
+			//WIP
+			if (map.IsPlayerHome)
+			{
+				return ThreadManager.CreateNew();
+			}
+			if (map.IsTempIncidentMap)
+			{
+				return ThreadManager.GetPooled(TempIncidentMapId);
+			}
+			return ThreadManager.GetPooled(EventMapId);
 		}
 
 		/// <summary>

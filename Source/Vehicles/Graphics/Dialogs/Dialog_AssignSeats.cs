@@ -38,21 +38,23 @@ namespace Vehicles
 			absorbInputAroundWindow = true;
 			closeOnCancel = true;
 
-			assignedSeats ??= new Dictionary<Pawn, (VehiclePawn, VehicleHandler)>();
 			dialogPawnsScrollPos = Vector2.zero;
 			dialogPawnsAssignedScrollPos = Vector2.zero;
+
 			foreach (VehicleHandler handler in Vehicle.handlers)
 			{
 				foreach (Pawn pawn in handler.handlers)
 				{
-					assignedSeats.Add(pawn, (Vehicle, handler));
+					//Log.Message($"Adding {pawn} to assigned seating");
+					assignedSeats[pawn] = (Vehicle, handler);
 				}
 			}
-			foreach (var preassignedSeat in CaravanHelper.assignedSeats)
+			foreach ((Pawn pawn, AssignedSeat seat) in CaravanHelper.assignedSeats)
 			{
-				if (!assignedSeats.ContainsKey(preassignedSeat.Key))
+				if (!assignedSeats.ContainsKey(pawn))
 				{
-					assignedSeats.Add(preassignedSeat.Key, preassignedSeat.Value);
+					//Log.Message($"Adding {pawn} to assigned seating from Caravanhelper");
+					assignedSeats[pawn] = seat;
 				}
 			}
 		}

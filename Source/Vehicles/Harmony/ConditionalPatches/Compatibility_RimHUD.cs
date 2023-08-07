@@ -3,6 +3,7 @@ using HarmonyLib;
 using Verse;
 using SmashTools;
 using UnityEngine;
+using RimWorld;
 
 namespace Vehicles
 {
@@ -12,16 +13,32 @@ namespace Vehicles
 
 		public override void PatchAll(ModMetaData mod, Harmony harmony)
 		{
-			Type classType = AccessTools.TypeByName("RimHUD.Interface.InspectPanePlus");
-			harmony.Patch(AccessTools.Method(classType, "DrawMedicalButton"),
+			Type inspectPaneUtilityType = AccessTools.TypeByName("RimHUD.Patch.RimWorld_InspectPaneUtility_InspectPaneOnGUI");
+			harmony.Patch(AccessTools.Method(inspectPaneUtilityType, "Prefix"),
 				prefix: new HarmonyMethod(typeof(Compatibility_RimHUD),
-				nameof(VehiclesDontDrawMedicalButton)));
+				nameof(DontRenderRimHUDForVehicles_InspectPaneUtility)));
+
+			Type inspectPaneFillerType = AccessTools.TypeByName("RimHUD.Patch.RimWorld_InspectPaneFiller_DoPaneContentsFor");
+			harmony.Patch(AccessTools.Method(inspectPaneFillerType, "Prefix"),
+				prefix: new HarmonyMethod(typeof(Compatibility_RimHUD),
+				nameof(DontRenderRimHUDForVehicles_InspectPaneFiller)));
 		}
 
-		private static bool VehiclesDontDrawMedicalButton(Pawn pawn, Rect rect)
+		private static bool DontRenderRimHUDForVehicles_InspectPaneUtility(Rect inRect, IInspectPane pane, ref bool __result)
 		{
-			if (pawn is VehiclePawn)
+			if (Find.Selector.SingleSelectedThing is VehiclePawn)
 			{
+				__result = true;
+				return false;
+			}
+			return true;
+		}
+
+		private static bool DontRenderRimHUDForVehicles_InspectPaneFiller(ISelectable sel, Rect rect, ref bool __result)
+		{
+			if (sel is VehiclePawn)
+			{
+				__result = true;
 				return false;
 			}
 			return true;

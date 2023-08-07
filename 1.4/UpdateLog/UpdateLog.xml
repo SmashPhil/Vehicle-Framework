@@ -8,7 +8,7 @@
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 Hey everyone! Hope you're enjoying the mod so far, I've gotten a lot of feedback which is great. Things aren't utterly breaking, even in bigger mod lists, so I'm confident with a bit more work I can get this running smoothly for the majority of mod packs.
 
-I am aware of an inconsistent bug where regions aren't recaching, causing vehicles to be unable to enter / exit some areas. I'm still trying to pinpoint what exactly causes it, as it's an edge case and very hard to reproduce for me.  In the mean time, reloading your game will resolve the issue.
+I am aware of an inconsistent bug where regions aren't recaching, causing vehicles to be unable to enter / exit some areas. I'm still trying to pinpoint what exactly causes it, as it's an edge case and very hard to reproduce for me for some reason.  In the mean time, reloading your game will resolve the issue.  Same goes for some maps not being able to form caravans for vehicles, I'm looking into it!
 
 That's all I've got for now, I'll push another patch soon-ish once I've made some more fixes.  Thanks again for all the support and feedback! You guys are awesome.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
@@ -36,6 +36,10 @@ That's all I've got for now, I'll push another patch soon-ish once I've made som
 
 - Fixed bug where space-faring vehicles traveling to RimNauts locations would travel to the location from launch, rather than the updated DrawPos.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Added Spanish translation
+
+- Added Portuguese (Brazilian) translation
+
 - Moved compatibility over from RimNauts to RimNauts 2 (requested by RimNauts devs)
 
 - Added thread check for path follower

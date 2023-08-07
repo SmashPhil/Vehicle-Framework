@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using Verse.Sound;
 using RimWorld;
 using SmashTools;
 using UpdateLogTool;
@@ -33,6 +34,8 @@ namespace Vehicles
 		public bool debugDrawVehiclePathCosts;
 		public bool debugDrawPathfinderSearch;
 
+		public bool debugUseMultithreading;
+
 		public override void ResetSettings()
 		{
 			base.ResetSettings();
@@ -52,6 +55,8 @@ namespace Vehicles
 
 			debugDrawVehiclePathCosts = false;
 			debugDrawPathfinderSearch = false;
+
+			debugUseMultithreading = true;
 		}
 
 		public override void ExposeData()
@@ -72,6 +77,8 @@ namespace Vehicles
 
 			Scribe_Values.Look(ref debugDrawVehiclePathCosts, nameof(debugDrawVehiclePathCosts));
 			Scribe_Values.Look(ref debugDrawPathfinderSearch, nameof(debugDrawPathfinderSearch));
+
+			Scribe_Values.Look(ref debugUseMultithreading, nameof(debugUseMultithreading), defaultValue: debugUseMultithreading);
 		}
 
 		public override void DrawSection(Rect rect)
@@ -105,6 +112,10 @@ namespace Vehicles
 								}
 							}
 						}
+					}
+					else
+					{
+						listingStandard.CheckboxLabeled("[DevOnly] Use Multithreading", ref debugUseMultithreading);
 					}
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugSpawnVehiclesGodMode".Translate(), ref debugSpawnVehicleBuildingGodMode, "VF_DevMode_DebugSpawnVehiclesGodModeTooltip".Translate());
 
@@ -146,16 +157,27 @@ namespace Vehicles
 			{
 				if (listingStandard.ButtonText("VF_DevMode_ShowRecentNews".Translate()))
 				{
+					SoundDefOf.Click.PlayOneShotOnCamera();
 					ShowAllUpdates();
 				}
 				if (listingStandard.ButtonText("VF_DevMode_OpenQuickTestSettings".Translate()))
 				{
+					SoundDefOf.Click.PlayOneShotOnCamera();
 					UnitTesting.OpenMenu();
 				}
 				if (listingStandard.ButtonText("VF_DevMode_GraphEditor".Translate()))
 				{
+					SoundDefOf.Click.PlayOneShotOnCamera();
 					Find.WindowStack.Add(new Dialog_GraphEditor());
 				}
+				//if (listingStandard.ButtonText("[DevOnly] Unload Unused Assets"))
+				//{
+				//	SoundDefOf.Click.PlayOneShotOnCamera();
+				//	SmashTools.Performance.ProfilerWatch.Start("UnloadingAssets");
+				//	Resources.UnloadUnusedAssets();
+				//	SmashTools.Performance.ProfilerWatch.Post("UnloadingAssets");
+				//	SmashTools.Performance.ProfilerWatch.End("UnloadingAssets");
+				//}
 			}
 			listingStandard.End();
 		}
