@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_FormingCaravanStatus_RopingAnimals>Przyciąganie zwierząt do pojazdu.</VF_FormingCaravanStatus_RopingAnimals>
+  <VF_FormingCaravanStatus_RopingAnimals_Pause>Przyciąganie zwierząt do pojazdu. (Czekanie)</VF_FormingCaravanStatus_RopingAnimals_Pause>
+  <VF_FormingCaravanStatus_BoardVehicles>Wchodzenie do pojazdu.</VF_FormingCaravanStatus_BoardVehicles>
+  <VF_FormingCaravanStatus_BoardVehicles_Pause>Wchodzenie do pojazdu. (Czekanie)</VF_FormingCaravanStatus_BoardVehicles_Pause>
+  <VF_FormingCaravanStatus_Leaving_Vehicles>Wychodzenie.</VF_FormingCaravanStatus_Leaving_Vehicles>
+  <VF_FormingCaravanStatus_Leaving_Vehicles_Pause>Wychodzenie. (Czekanie)</VF_FormingCaravanStatus_Leaving_Vehicles_Pause>
+</LanguageData>
+

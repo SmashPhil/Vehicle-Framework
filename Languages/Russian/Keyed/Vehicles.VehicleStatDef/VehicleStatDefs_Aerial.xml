@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <FlightSpeed.label>Скорость полета</FlightSpeed.label>
+  <FlightSpeed.description>Скорость полета по карте.</FlightSpeed.description>
+  <FlightControl.label>Управление полетом</FlightControl.label>
+  <FlightControl.description>Грузоподъемность техники для полета.  Если значение достигнет 0, воздушному средству придется совершить аварийную посадку.</FlightControl.description>
+</LanguageData>
+

@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<LanguageData>
+  <VF_MainSettings>Principal</VF_MainSettings>
+
+  <!-- Diversos -->
+  <VF_ListSearchText>Buscar...</VF_ListSearchText>
+  <VF_SettingsDisabledTooltip>As configurações foram bloqueadas para este veículo e não podem ser modificadas.</VF_SettingsDisabledTooltip>
+  <VF_NonUpgradeableSettingsTooltip>Este veículo não pode ser atualizado.</VF_NonUpgradeableSettingsTooltip>
+  <VF_RecolorDefaultMaskTooltip>Alterar padrão padrão</VF_RecolorDefaultMaskTooltip>
+
+  <!-- Geração de Mundo e Mapa -->
+  <VF_WorldMapGen>Geração de Mundo/Mapa</VF_WorldMapGen>
+  <VF_BeachGenMultiplier>Multiplicador de Tamanho da Praia</VF_BeachGenMultiplier>
+  <VF_BeachGenMultiplierTooltip>Aumentar a quantidade de água na costa.</VF_BeachGenMultiplierTooltip>
+  <VF_ForceSettlementCoast>Empurrar Assentamento para a Costa</VF_ForceSettlementCoast>
+  <VF_ForceSettlementCoastTooltip>Empurrar assentamentos de facções próximas para a costa se estiverem dentro do raio especificado.</VF_ForceSettlementCoastTooltip>
+  <VF_EverySettlementToCoast>Cada Assentamento</VF_EverySettlementToCoast>
+  <VF_WorldTiles>telhas</VF_WorldTiles>
+
+  <!-- Configurações Gerais -->
+  <VF_SettingsGeneral>Geral</VF_SettingsGeneral>
+  <VF_WillRequireRestart>Esta ação requer uma reinicialização para ter efeito.</VF_WillRequireRestart>
+  <VF_ModifiableSettings>Configurações Modificáveis</VF_ModifiableSettings>
+  <VF_ModifiableSettingsTooltip>Ativar/Desativar Configurações Modificáveis. Reiniciar com isso desativado irá ignorar a geração de configurações modificáveis.
+	
+Determina se os Veículos devem usar valores das configurações do mod ou Defs.</VF_ModifiableSettingsTooltip>
+  <VF_CustomShaders>Usar Shaders RGB</VF_CustomShaders>
+  <VF_CustomShadersTooltip>Habilitar o uso de shaders personalizados fornecidos pelo framework.</VF_CustomShadersTooltip>
+  <VF_DiagonalVehicleRendering>Permitir Renderização Diagonal</VF_DiagonalVehicleRendering>
+  <VF_DiagonalVehicleRenderingTooltip>Veículos que suportam renderização diagonal irão fazê-lo ao serem configurados para rotações diagonais (Nordeste, Sudeste, Sudoeste, Noroeste).</VF_DiagonalVehicleRenderingTooltip>
+
+  <VF_FullVehiclePathing>Caminho Completo do Veículo</VF_FullVehiclePathing>
+  <VF_FullVehiclePathingTooltip>Utiliza toda a caixa de colisão do veículo ao determinar o caminho mais curto. O veículo ainda será limitado pelo seu tamanho..</VF_FullVehiclePathingTooltip>
+  <VF_SmoothVehiclePathing>Caminhos Suaves do Veículo</VF_SmoothVehiclePathing>
+  <VF_SmoothVehiclePathingTooltip>O caminho do veículo terá um custo adicional de "curva", impedindo padrões desnecessários de zigue-zague no caminho mais curto.</VF_SmoothVehiclePathingTooltip>
+  <VF_HierarchalPathfinding>Hierarquia de Busca de Caminho (Experimental)</VF_HierarchalPathfinding>
+  <VF_HierarchalPathfindingTooltip>Utiliza HPA* em vez de A* para busca de caminho mais rápida. Sacrifica uma pequena quantidade de precisão na busca de caminho em troca de uma busca substancialmente mais rápida em distâncias grandes.</VF_HierarchalPathfindingTooltip>
+
+  <VF_RoadBiomeCostPathing>Custo de Bioma em Estradas</VF_RoadBiomeCostPathing>
+  <VF_RoadBiomeCostPathingTooltip>Caravanas de veículos que se movem pelas estradas no mapa mundial ainda são afetadas pelos custos de caminho do bioma.</VF_RoadBiomeCostPathingTooltip>
+  <VF_MultiplePawnsPerJob>Trabalhos Multi-Personagens</VF_MultiplePawnsPerJob>
+  <VF_MultiplePawnsPerJobTooltip>Permite que trabalhos relacionados a veículos sejam realizados por mais de 1 personagem. O número máximo de personagens permitido é determinado pelos criadores de mods.</VF_MultiplePawnsPerJobTooltip>
+  <VF_HideDisabledVehicles>Ocultar Veículos Desativados</VF_HideDisabledVehicles>
+  <VF_HideDisabledVehiclesTooltip>Veículos desativados nas configurações do mod serão ocultados no menu de arquiteto.</VF_HideDisabledVehiclesTooltip>
+
+  <!-- Desempenho -->
+  <VF_PerformanceSettings>Desempenho</VF_PerformanceSettings>
+  <VF_PassiveWaterWaves>Ondas Passivas de Água</VF_PassiveWaterWaves>
+  <VF_PassiveWaterWavesTooltip>Gerar ondas passivas quando o barco está parado.</VF_PassiveWaterWavesTooltip>
+  <VF_AerialVehicleEffects>Efeitos de Veículos Aéreos</VF_AerialVehicleEffects>
+  <VF_AerialVehicleEffectsTooltip>Quando veículos aéreos decolam e pousam, geram partículas e renderizam texturas sobrepostas.</VF_AerialVehicleEffectsTooltip>
+
+  <!-- Multiplicadores -->
+  <VF_VehicleDamageMultipliers>Dano a Veículos</VF_VehicleDamageMultipliers>
+  <VF_MeleeDamageMultiplier>Multiplicador de Dano Corpo a Corpo</VF_MeleeDamageMultiplier>
+  <VF_RangedDamageMultiplier>Multiplicador de Dano à Distância</VF_RangedDamageMultiplier>
+  <VF_ExplosiveDamageMultiplier>Multiplicador de Dano Explosivo</VF_ExplosiveDamageMultiplier>
+
+  <!-- Torretas de Veículos -->
+  <VF_VehicleTurrets>Torretas de Veículos</VF_VehicleTurrets>
+  <VF_TurretOverheatMechanics>Superaquecimento de Torretas</VF_TurretOverheatMechanics>
+  <VF_TurretOverheatMechanicsTooltip>Algumas torretas possuem mecânicas de superaquecimento para evitar disparos contínuos sem consequências. Manter isso habilitado?</VF_TurretOverheatMechanicsTooltip>
+
+  <!-- Veículos Terrestres (nenhum agora)-->
+
+  <!-- Veículos Marítimos -->
+  <VF_Fishing>Pesca</VF_Fishing>
+  <VF_FishingInactive>Pesca (Inativo)</VF_FishingInactive>
+  <VF_FishingMultiplier>Multiplicador de Pesca</VF_FishingMultiplier>
+  <VF_FishingMultiplierTooltip>Ajustar a quantidade de peixes coletados a partir de um barco de pesca.</VF_FishingMultiplierTooltip>
+  <VF_FishingDelay>Atraso na Pesca</VF_FishingDelay>
+  <VF_FishingDelayTooltip>Quantidade base de intervalos necessários para coletar peixes em um barco de pesca.</VF_FishingDelayTooltip>
+  <VF_FishingSkill>Habilidade de Pesca</VF_FishingSkill>
+  <VF_FishingSkillTooltip>Quanta experiência é concedida ao pescar em um barco.</VF_FishingSkillTooltip>
+  <VF_FishingPersists>Persistência na Pesca</VF_FishingPersists>
+  <VF_FishingPersistsTooltip>A seleção de pesca do barco não será reiniciada ao ser recrutado.</VF_FishingPersistsTooltip>
+
+  <!-- Veículos Aéreos -->
+  <VF_AerialVehicles>Ar</VF_AerialVehicles>
+  <VF_RocketsBurnRadius>Queima de Foguetes</VF_RocketsBurnRadius>
+  <VF_RocketsBurnRadiusTooltip>Permite que veículos aéreos que suportam esse recurso queimem tudo em um pequeno raio durante a decolagem e o pouso.</VF_RocketsBurnRadiusTooltip>
+  <VF_DynamicDrawing>Desenho Dinâmico</VF_DynamicDrawing>
+  <VF_DynamicDrawingTooltip>Renderiza veículos aéreos no mapa mundial quando ampliado.</VF_DynamicDrawingTooltip>
+  <VF_DeployOnLanding>Implantação no Pouso</VF_DeployOnLanding>
+  <VF_DeployOnLandingTooltip>Quando um veículo aéreo pousa, todos os ocupantes serão descarregados.</VF_DeployOnLandingTooltip>
+  <VF_DelayOnLanding>Atraso no Pouso</VF_DelayOnLanding>
+  <VF_DelayOnLandingTooltip>Quando um veículo aéreo pousa, a implantação de todos os ocupantes será atrasada.</VF_DelayOnLandingTooltip>
+  <VF_DelaySeconds>segundos</VF_DelaySeconds>
+  <VF_AirDefensesActive>Defesas Aéreas</VF_AirDefensesActive>
+  <VF_AirDefensesActiveTooltip>Certos objetos mundiais podem utilizar defesas aéreas para abater aeronaves próximas.</VF_AirDefensesActiveTooltip>
+
+  <!-- Combate -->
+  <VF_CombatSettings>Combate</VF_CombatSettings>
+  <VF_RunOverPawns>Atropelar Personagens</VF_RunOverPawns>
+  <VF_RunOverPawnsTooltip>Veículos podem atropelar personagens e causar dano contundente com base na massa e velocidade.</VF_RunOverPawnsTooltip>
+  <VF_ChanceToRunOverFriendlies>Chance de Fogo Amigo</VF_ChanceToRunOverFriendlies>
+  <VF_ChanceToRunOverFriendliesTooltip>Chance de atropelar personagens aliados.</VF_ChanceToRunOverFriendliesTooltip>
+
+  <!-- Estatísticas de Veículos -->
+  <VF_VehicleStats>Estatísticas</VF_VehicleStats>
+
+  <!-- Atualização das Configurações de Menu -->
+  <VF_Upgrades>Atualizações (Desativado)</VF_Upgrades>
+  <VF_DrawUpgradeInformationScreen>Mostrar Tela de Informações do Menu de Atualizações</VF_DrawUpgradeInformationScreen>
+  <VF_DrawUpgradeInformationScreenTooltip>Desenhar um menu adicional no menu de atualizações para exibir estatísticas da nave e ícone da nave.</VF_DrawUpgradeInformationScreenTooltip>
+  <VF_OverrideDrawColor>Sobrepor Cor de Desenho</VF_OverrideDrawColor>
+  <VF_OverrideDrawColorTooltip>Quando qualquer atualização é aplicada com um padrão ou cor de desenho, o trabalho de pintura anterior será substituído.</VF_OverrideDrawColorTooltip>
+
+</LanguageData>

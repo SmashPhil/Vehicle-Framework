@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <NotAllowed>Недоступен</NotAllowed>
+  <DriverNeeded>Управляемый колонистом</DriverNeeded>
+  <NoDriverNeeded>Управляемый ИИ</NoDriverNeeded>
+  <Misc>Другой</Misc>
+  <Transport>Транспортный</Transport>
+  <Trader>Торговый</Trader>
+  <Combat>Боевой</Combat>
+  <Hybrid>Гибридный</Hybrid>
+  <Manual>Ручной</Manual>
+  <Opportunistic>Оппортунистический (Ищущий возможности)</Opportunistic>
+  <Automatic>Автоматический</Automatic>
+</LanguageData>
+

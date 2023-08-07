@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_VehicleEnabled>Включено</VF_VehicleEnabled>
+  <VF_VehicleDisabled>Выключено</VF_VehicleDisabled>
+  <VF_VehiclePlayerOnly>Только Игрок</VF_VehiclePlayerOnly>
+  <VF_VehicleRaiderOnly>Только NPC</VF_VehicleRaiderOnly>
+  <VF_EnableButtonTooltip>Если выключить данную технику, то она не будет доступна в игре. Применяется и для игрока и для NPC фракций.</VF_EnableButtonTooltip>
+  <VF_MovementPermissions>Тип управления</VF_MovementPermissions>
+  <VF_NavigationType>Навигация</VF_NavigationType>
+  <VF_NavigationTypeTooltip>Категория навигации для карты мира. Определяет, когда техника может двигаться по карте мира.</VF_NavigationTypeTooltip>
+  <VF_Nameable>Можно установить Имя</VF_Nameable>
+  <VF_NameableTooltip>Допустить переименовывания данной техники. Название будет отображаться поверх и перезапишет отображаемую маркировку.</VF_NameableTooltip>
+  <VF_CombatPower>Сила в бою</VF_CombatPower>
+  <VF_CombatPowerTooltip>Боевые очки, которые стоит техника для появления ее в событии.</VF_CombatPowerTooltip>
+  <VF_CanCaravan>Караван</VF_CanCaravan>
+  <VF_CanCaravanTooltip>Техника может быть взята в караваны.</VF_CanCaravanTooltip>
+  <VF_SaveableFieldDisabledConditionTooltip>Отключен. {0}</VF_SaveableFieldDisabledConditionTooltip>
+  <VF_DisabledSingleModDependencyTooltip>Отключено. Совместимый мод отсутствует в списке активных модов: {0}</VF_DisabledSingleModDependencyTooltip>
+  <VF_DisabledMultipleModsDependencyTooltip>Отключено. Совместимые моды отсутствуют в списке активных модов: {0}</VF_DisabledMultipleModsDependencyTooltip>
+  <VF_SaveableFieldDisabledTooltip>Отключено для данного типа техники.</VF_SaveableFieldDisabledTooltip>
+  <VF_SaveableFieldLockedTooltip>Настройка заблокирована для этой техники.</VF_SaveableFieldLockedTooltip>
+  <VF_DebugDisabledTooltip>Отключено для всей техники в данный момент.</VF_DebugDisabledTooltip>
+  <VF_GizmoDisabledTooltip>Отключено в настройках мода.</VF_GizmoDisabledTooltip>
+  <VF_OpportunisticTicking>Оппортунистическое тиканье</VF_OpportunisticTicking>
+  <VF_OpportunisticTickingTooltip>Компоненты техники тикают только когда необходимы, снижается влияние на производительность во время ожидания.</VF_OpportunisticTickingTooltip>
+  <VF_CollisionMultiplier>Урон пешкам</VF_CollisionMultiplier>
+  <VF_CollisionMultiplierTooltip>Множитель урона наносимый пешкам, когда их переезжает техника.</VF_CollisionMultiplierTooltip>
+  <VF_CollisionVehicleMultiplier>Урон технике</VF_CollisionVehicleMultiplier>
+  <VF_CollisionVehicleMultiplierTooltip>Множитель урона наносимый технике, когда переезжает пешку.</VF_CollisionVehicleMultiplierTooltip>
+  <VF_ManhunterTargetsVehicle>Цели охотников за головами. (Manhunters)</VF_ManhunterTargetsVehicle>
+  <VF_ManhunterTargetsVehicleTooltip>Агрессивные животные будут нападать на эту технику.</VF_ManhunterTargetsVehicleTooltip>
+  <VF_FishingEnabled>Может рыбачить</VF_FishingEnabled>
+  <VF_FishingEnabledTooltip>Позволяет ловить рыбу, находясь над водой.</VF_FishingEnabledTooltip>
+  <VF_JobLimitations>Задачи по технике</VF_JobLimitations>
+  <VF_MaxWorkers>Максимальное количество рабочих</VF_MaxWorkers>
+  <VF_WinterSpeedMultiplier>Множитель скорости зимой</VF_WinterSpeedMultiplier>
+  <VF_WinterSpeedMultiplierTooltip>Дополнительная стоимость для путешествий во время зимы.</VF_WinterSpeedMultiplierTooltip>
+  <VF_WorldSpeedMultiplier>Множитель скорости движения по миру</VF_WorldSpeedMultiplier>
+  <VF_WorldSpeedMultiplierTooltip>Множитель к скорости движения по миру в караване.</VF_WorldSpeedMultiplierTooltip>
+  <VF_DischargePerTick>Скорость разряда</VF_DischargePerTick>
+  <VF_TicksPerCharge>Скорость зарядки</VF_TicksPerCharge>
+  <VF_FuelConsumptionRate>Потребление топлива</VF_FuelConsumptionRate>
+  <VF_FuelConsumptionRateWorldMultiplier>Множитель мира</VF_FuelConsumptionRateWorldMultiplier>
+  <VF_FuelCapacity>Вместимость топлива</VF_FuelCapacity>
+  <VF_AutoRefuelPercent>Автоматическа заправка %</VF_AutoRefuelPercent>
+  <VF_FuelConsumptionWorld>Потребление топлива %</VF_FuelConsumptionWorld>
+  <VF_FuelConsumptionWorldTooltip>Множитель потребления топлива на карте мира.</VF_FuelConsumptionWorldTooltip>
+  <VF_LaunchFixedMaxDistance>Фиксированное максимальное расстояние</VF_LaunchFixedMaxDistance>
+  <VF_LaunchFixedMaxDistanceTooltip>Установить фиксированное макс. расстояние, которое сможет пролететь данная техника независимо от уровня топлива.</VF_LaunchFixedMaxDistanceTooltip>
+  <VF_LaunchFixedMaxDistanceDisabled>Отсутствует</VF_LaunchFixedMaxDistanceDisabled>
+  <VF_ReconDistance>Расстояние разведки</VF_ReconDistance>
+  <VF_ReconDistanceTooltip>Расстояние в клетках, на котором шаттл сможет провести разведку участка или поселения.</VF_ReconDistanceTooltip>
+  <VF_ControlInFlight>Управление в полете</VF_ControlInFlight>
+  <VF_ControlInFlightTooltip>Управляйте летательным аппаратом во время полета. Позволяет изменять траектории полета во время полета, выбирать место посадки после загрузки карты и обстреливать еще не загруженные карты.</VF_ControlInFlightTooltip>
+  <VF_SpaceFlight>Космический полет</VF_SpaceFlight>
+  <VF_SpaceFlightTooltip>Аппарат способен осуществлять запуск и взлет с космических объектов.</VF_SpaceFlightTooltip>
+  <VF_RateOfClimb>Скорость набора выстоы</VF_RateOfClimb>
+  <VF_RateOfClimbTooltip>Величина подъема транспортного средства за тик.</VF_RateOfClimbTooltip>
+  <VF_MaxAltitude>Максимальная высота</VF_MaxAltitude>
+  <VF_MaxAltitudeTooltip>Максимальная высота, которую может достичь данная техника в полете.</VF_MaxAltitudeTooltip>
+  <VF_MaxFallRate>Максимальная скорость падения</VF_MaxFallRate>
+  <VF_MaxFallRateTooltip>Максимальное значение, на которое эта техника будет опускаться при сбитии или израсходовании топлива.</VF_MaxFallRateTooltip>
+  <VF_Instant>Мгновенный</VF_Instant>
+</LanguageData>
+

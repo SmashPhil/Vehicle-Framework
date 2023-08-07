@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<LanguageData>
+  <VF_FormingCaravanStatus_RopingAnimals>Amarrando animais a veículos.</VF_FormingCaravanStatus_RopingAnimals>
+  <VF_FormingCaravanStatus_RopingAnimals_Pause>Amarrando animais a veículos. (Aguardando)</VF_FormingCaravanStatus_RopingAnimals_Pause>
+  <VF_FormingCaravanStatus_BoardVehicles>Embarcando.</VF_FormingCaravanStatus_BoardVehicles>
+  <VF_FormingCaravanStatus_BoardVehicles_Pause>Embarcando. (Aguardando)</VF_FormingCaravanStatus_BoardVehicles_Pause>
+  <VF_FormingCaravanStatus_Leaving_Vehicles>Partindo.</VF_FormingCaravanStatus_Leaving_Vehicles>
+  <VF_FormingCaravanStatus_Leaving_Vehicles_Pause>Partindo. (Aguardando)</VF_FormingCaravanStatus_Leaving_Vehicles_Pause>
+
+</LanguageData>

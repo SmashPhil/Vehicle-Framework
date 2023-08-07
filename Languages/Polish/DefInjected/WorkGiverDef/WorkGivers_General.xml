@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <PackVehicle.label>pakuj pojazd</PackVehicle.label>
+  <PackVehicle.verb>pakuj</PackVehicle.verb>
+  <PackVehicle.gerund>pakowanie</PackVehicle.gerund>
+  <LoadUpgradeMaterials.label>ładuj materiały</LoadUpgradeMaterials.label>
+  <LoadUpgradeMaterials.verb>ładuj</LoadUpgradeMaterials.verb>
+  <LoadUpgradeMaterials.gerund>ładowanie</LoadUpgradeMaterials.gerund>
+  <WorkOnUpgrade.label>pracuj nad ulepszeniem</WorkOnUpgrade.label>
+  <WorkOnUpgrade.verb>ulepsz</WorkOnUpgrade.verb>
+  <WorkOnUpgrade.gerund>ulepszanie</WorkOnUpgrade.gerund>
+  <RefuelVehicle.label>zatankuj pojazd</RefuelVehicle.label>
+  <RefuelVehicle.verb>zatankuj</RefuelVehicle.verb>
+  <RefuelVehicle.gerund>tankowanie</RefuelVehicle.gerund>
+  <RepairVehicle.label>napraw pojazd</RepairVehicle.label>
+  <RepairVehicle.verb>napraw</RepairVehicle.verb>
+  <RepairVehicle.gerund>naprawianie</RepairVehicle.gerund>
+  <DisassembleVehicle.label>zdemontuj pojazd</DisassembleVehicle.label>
+  <DisassembleVehicle.verb>zdemontuj</DisassembleVehicle.verb>
+  <DisassembleVehicle.gerund>zdemontowanie</DisassembleVehicle.gerund>
+  <PaintVehicle.label>maluj pojazd</PaintVehicle.label>
+  <PaintVehicle.verb>maluj</PaintVehicle.verb>
+  <PaintVehicle.gerund>malowanie</PaintVehicle.gerund>
+</LanguageData>
+

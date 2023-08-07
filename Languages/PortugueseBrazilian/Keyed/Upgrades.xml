@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<LanguageData>
+  <!-- DO NOT TRANSLATE THIS FILE YET, THESE KEYS ARE UNUSED -->
+  <!-- Upgrades -->
+  <VF_Upgrade>Upgrade</VF_Upgrade>
+  <VF_DisabledFromOtherNode>Cannot upgrade. Node is now inaccessible from previous unlock.</VF_DisabledFromOtherNode>
+  <VF_MissingPrerequisiteUpgrade>Missing prerequisite node.</VF_MissingPrerequisiteUpgrade>
+  <VF_MaxArmor>Armor</VF_MaxArmor>
+  <VF_MaxArmorTooltip>TODO</VF_MaxArmorTooltip>
+  <VF_MaxSpeed>Speed</VF_MaxSpeed>
+  <VF_MaxSpeedTooltip>TODO</VF_MaxSpeedTooltip>
+  <VF_CargoCapacity>Cargo Capacity</VF_CargoCapacity>
+  <VF_CargoCapacityTooltip>TODO</VF_CargoCapacityTooltip>
+
+
+  <!-- aerial vehicle -->
+  <VF_VehicleFuelCost>Fuel Cost: {0}</VF_VehicleFuelCost>
+  <!-- comp properties -->
+  <VF_VehicleFuelCapacity>Fuel Capacity</VF_VehicleFuelCapacity>
+
+</LanguageData>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_MainSettings>Główne</VF_MainSettings>
+  <VF_ListSearchText>Szukaj...</VF_ListSearchText>
+  <VF_SettingsDisabledTooltip>Ustawienia dla tego pojazdu zostały zablokowane i nie można ich zmienić.</VF_SettingsDisabledTooltip>
+  <VF_NonUpgradeableSettingsTooltip>Tego pojazdu nie można ulepszyć.</VF_NonUpgradeableSettingsTooltip>
+  <VF_RecolorDefaultMaskTooltip>Zmień domyślny wzór</VF_RecolorDefaultMaskTooltip>
+  <VF_WorldMapGen>Generowanie świata/mapy</VF_WorldMapGen>
+  <VF_BeachGenMultiplier>Mnożnik rozmiaru plaży</VF_BeachGenMultiplier>
+  <VF_BeachGenMultiplierTooltip>Zwiększ ilość wody na linii brzegowej.</VF_BeachGenMultiplierTooltip>
+  <VF_ForceSettlementCoast>Przesuwaj bazy na wybrzeże</VF_ForceSettlementCoast>
+  <VF_ForceSettlementCoastTooltip>Przesuwaj bazy na wybrzeże jeśli w określonym promieniu.</VF_ForceSettlementCoastTooltip>
+  <VF_EverySettlementToCoast>Każda baza</VF_EverySettlementToCoast>
+  <VF_WorldTiles>kratki</VF_WorldTiles>
+  <VF_SettingsGeneral>Ogólne</VF_SettingsGeneral>
+  <VF_WillRequireRestart>Ta czynność wymaga ponownego uruchomienia, aby odniosła skutek.</VF_WillRequireRestart>
+  <VF_ModifiableSettings>Modyfikowalne ustawienia</VF_ModifiableSettings>
+  <VF_ModifiableSettingsTooltip>Włącz modyfikowalne ustawienia. Ponowne uruchomienie z wyłączoną opcją spowoduje pominięcie generowania modyfikowalnych ustawień.
+        
+Określa, czy pojazdy powinny używać wartości z ustawień modów, czy z Defs</VF_ModifiableSettingsTooltip>
+  <VF_CustomShaders>Użyj shaderów RGB</VF_CustomShaders>
+  <VF_CustomShadersTooltip>Włącz korzystanie z niestandardowych shaderów dostarczanych przez VF</VF_CustomShadersTooltip>
+  <VF_DiagonalVehicleRendering>Zezwól na renderowanie po przekątnej</VF_DiagonalVehicleRendering>
+  <VF_DiagonalVehicleRenderingTooltip>Pojazdy obsługujące renderowanie po przekątnej będą to robić kiedy ustawione do ukośnych obrotów (Północny Wschód, Południowy Wschód, Południowy Zachód, Północny Zachód)</VF_DiagonalVehicleRenderingTooltip>
+  <VF_FullVehiclePathing>Pełne Pathing Pojazdów</VF_FullVehiclePathing>
+  <VF_FullVehiclePathingTooltip>Wykorzystaj cały hitbox pojazdu podczas określania najkrótszej ścieżki. Pojazd nadal będzie ograniczony przez swój rozmiar.</VF_FullVehiclePathingTooltip>
+  <VF_SmoothVehiclePathing>Płynne Pathing Pojazdów</VF_SmoothVehiclePathing>
+  <VF_SmoothVehiclePathingTooltip>Pathing pojazdu będzie miała dodatkowy koszt „obrotu”, zapobiegając niepotrzebnym zygzakom na najkrótszej ścieżce.</VF_SmoothVehiclePathingTooltip>
+  <VF_HierarchalPathfinding>Hierarchiczne Pathfinding (Eksperymentalne)</VF_HierarchalPathfinding>
+  <VF_HierarchalPathfindingTooltip>Użyj HPA* zamiast A*, aby mieć szybszy Pathfinding. Poświęca niewielką dokładność odnajdywania ścieżki na rzecz znacznie szybszego odnajdywania ścieżki na dużych odległościach.</VF_HierarchalPathfindingTooltip>
+  <VF_RoadBiomeCostPathing>Koszt Biomu na Drogach</VF_RoadBiomeCostPathing>
+  <VF_RoadBiomeCostPathingTooltip>Karawany pojazdów poruszające się po drogach na mapie świata nadal podlegają kosztom ścieżek biomów.</VF_RoadBiomeCostPathingTooltip>
+  <VF_MultiplePawnsPerJob>Prace z Wieloma Kolonistami</VF_MultiplePawnsPerJob>
+  <VF_MultiplePawnsPerJobTooltip>Pozwala pracą związanych z pojazdami na pozwolenie użycia więcej jak jednego kolonisty do pracowania nad tą pracą. Maks kolonistów jest zdeterminowana przez modderów.</VF_MultiplePawnsPerJobTooltip>
+  <VF_HideDisabledVehicles>Ukryj Wyłączone Pojazdy</VF_HideDisabledVehicles>
+  <VF_HideDisabledVehiclesTooltip>Wyłączone pojazdy z ustawień modów zostaną ukryte w menu architekta.</VF_HideDisabledVehiclesTooltip>
+  <VF_PerformanceSettings>Wydajność</VF_PerformanceSettings>
+  <VF_PassiveWaterWaves>Pasywne Fale Wodne</VF_PassiveWaterWaves>
+  <VF_PassiveWaterWavesTooltip>Generuj pasywne fale, gdy łódź jest bezczynna.</VF_PassiveWaterWavesTooltip>
+  <VF_AerialVehicleEffects>Efekty Pojazdów Powietrznych</VF_AerialVehicleEffects>
+  <VF_AerialVehicleEffectsTooltip>Kiedy pojazdy powietrzne startują i lądują, twóż plamki i renderuj tekstury nasadkowe.</VF_AerialVehicleEffectsTooltip>
+  <VF_VehicleDamageMultipliers>Mnożnik Obrażeń Pojazdów</VF_VehicleDamageMultipliers>
+  <VF_MeleeDamageMultiplier>Mnożnik Obrażeń Melee</VF_MeleeDamageMultiplier>
+  <VF_RangedDamageMultiplier>Mnożnik Obrażeń Dystansowych</VF_RangedDamageMultiplier>
+  <VF_ExplosiveDamageMultiplier>Mnożnik Obrażeń Wybuchowych</VF_ExplosiveDamageMultiplier>
+  <VF_VehicleTurrets>Wieżyczki Pojazdu</VF_VehicleTurrets>
+  <VF_TurretOverheatMechanics>Przegrzanie Wieżyczki</VF_TurretOverheatMechanics>
+  <VF_TurretOverheatMechanicsTooltip>Niektóre wieżyczki mają mechanikę przegrzania, która zapobiega nieprzerwanemu strzelaniu bez konsekwencji. Pozostawić to włączone?</VF_TurretOverheatMechanicsTooltip>
+  <VF_Fishing>Wędkowanie</VF_Fishing>
+  <VF_FishingInactive>Wędkowanie (Nieaktywne)</VF_FishingInactive>
+  <VF_FishingMultiplier>Mnożnik Wędkowania</VF_FishingMultiplier>
+  <VF_FishingMultiplierTooltip>Dostosuj ilość ryb zebranych na łodzi rybackiej.</VF_FishingMultiplierTooltip>
+  <VF_FishingDelay>Opóźnienie Wędkowania</VF_FishingDelay>
+  <VF_FishingDelayTooltip>Podstawowa liczba ticków potrzebnych do zebrania ryb na łodzi rybackiej.</VF_FishingDelayTooltip>
+  <VF_FishingSkill>Umiejętności Wędkarskie</VF_FishingSkill>
+  <VF_FishingSkillTooltip>Jak dużo exp daje łowienie na łodzi</VF_FishingSkillTooltip>
+  <VF_FishingPersists>Wędkowanie Pozostaje</VF_FishingPersists>
+  <VF_FishingPersistsTooltip>Selekcja wędkarstwa nie zostanie zresetowana podczas włączenia.</VF_FishingPersistsTooltip>
+  <VF_AerialVehicles>Powietrze</VF_AerialVehicles>
+  <VF_RocketsBurnRadius>Rakiety Płoną</VF_RocketsBurnRadius>
+  <VF_RocketsBurnRadiusTooltip>Zezwalaj pojazdą powietrznym, które obsługują tę funkcję, na spalanie wszystkich rzeczy w małym promieniu podczas startu i lądowania.</VF_RocketsBurnRadiusTooltip>
+  <VF_DynamicDrawing>Dynamiczne Rysowanie</VF_DynamicDrawing>
+  <VF_DynamicDrawingTooltip>Renderuj pojazdy powietrzne na mapie świata po powiększeniu.</VF_DynamicDrawingTooltip>
+  <VF_DeployOnLanding>Rozmieść na Lądowaniu.</VF_DeployOnLanding>
+  <VF_DeployOnLandingTooltip>Kiedy pojazd powietrzny wyląduje, wszystkie koloniści na pokładzie zostaną rozładowane.</VF_DeployOnLandingTooltip>
+  <VF_DelayOnLanding>Opóźnienie po Lądowaniu</VF_DelayOnLanding>
+  <VF_DelayOnLandingTooltip>Gdy pojazd powietrzny wyląduje, rozstawienie wszystkich kolonistów zostanie opóźnione.</VF_DelayOnLandingTooltip>
+  <VF_DelaySeconds>sekundy</VF_DelaySeconds>
+  <VF_AirDefensesActive>Obrony Przeciwlotnicze</VF_AirDefensesActive>
+  <VF_AirDefensesActiveTooltip>Niektóre obiekty na świecie są w stanie wykorzystać obronę powietrzną do zestrzelenia pobliskich samolotów.</VF_AirDefensesActiveTooltip>
+  <VF_CombatSettings>Bojowe</VF_CombatSettings>
+  <VF_RunOverPawns>Przejechanie Żywych Stworzeń</VF_RunOverPawns>
+  <VF_RunOverPawnsTooltip>Pojazdy mogą przejechać przez żywe stworzenia i zadać obrażenia tępe na podstawie masy i prędkości.</VF_RunOverPawnsTooltip>
+  <VF_ChanceToRunOverFriendlies>Szansa na Obrażenia Sojusznicze</VF_ChanceToRunOverFriendlies>
+  <VF_ChanceToRunOverFriendliesTooltip>Szansa na przejechanie przyjazne żywe stworzenia.</VF_ChanceToRunOverFriendliesTooltip>
+  <VF_VehicleStats>Statystyki</VF_VehicleStats>
+  <VF_Upgrades>Ulepszenia (Wyłączone)</VF_Upgrades>
+  <VF_DrawUpgradeInformationScreen>Rysuj Menu Ulepszeń</VF_DrawUpgradeInformationScreen>
+  <VF_DrawUpgradeInformationScreenTooltip>Narysuj dodatkowe menu w menu ulepszeń, aby wyświetlić statystyki statku i ikonę statku.</VF_DrawUpgradeInformationScreenTooltip>
+  <VF_OverrideDrawColor>Zastąp Kolor Rysowania</VF_OverrideDrawColor>
+  <VF_OverrideDrawColorTooltip>Gdy zostanie zastosowane jakiekolwiek ulepszenie, które zawiera wzór lub kolor rysowania, poprzednie malowanie zostanie nadpisane.</VF_OverrideDrawColorTooltip>
+</LanguageData>
+

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_EnterVehicle>Погрузить {0} как {1}  [{2}]</VF_EnterVehicle>
+  <VF_BoardVehicleGroup>Погрузить {0}</VF_BoardVehicleGroup>
+  <VF_BoardVehicleGroupFail>Погрузить {0} (Слишком много выбрано)</VF_BoardVehicleGroupFail>
+  <VF_ActivityIconOnBoardShip>На борту {0}</VF_ActivityIconOnBoardShip>
+  <VF_IsIncapableOfRamming>Таранить {0}</VF_IsIncapableOfRamming>
+  <VF_CannotMoveToCell>{0} невозможно достигнуть эту зону.</VF_CannotMoveToCell>
+  <VF_LandVehicleHere>Посадить технику здесь.</VF_LandVehicleHere>
+  <VF_LandVehicleEdge>Посадить в {0} на краю карты.</VF_LandVehicleEdge>
+  <VF_LandVehicleCenter>Посадить в {0} в центре.</VF_LandVehicleCenter>
+  <VF_LandVehicleTargetedLanding>Посадить в {0} и выбрать точку посадки.</VF_LandVehicleTargetedLanding>
+  <VF_AttackAndTargetLanding>Провести Атаку {0}: Выбрать точку посадки</VF_AttackAndTargetLanding>
+  <VF_StrafeRun>Стрейф (Strafe)</VF_StrafeRun>
+  <VF_AerialReconSite>Разведка</VF_AerialReconSite>
+</LanguageData>
+

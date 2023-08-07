@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VehicleFramework>Vehicle Framework-Spolszczenie</VehicleFramework>
+  <VF_Vehicles>Pojazdy</VF_Vehicles>
+  <VF_LoadCargo>Załaduj Ładunek</VF_LoadCargo>
+  <VF_DisembarkAllPawns>Rozładuj Wszystkich Kolonistów</VF_DisembarkAllPawns>
+  <VF_DisembarkSinglePawn>Wypakuj {0}</VF_DisembarkSinglePawn>
+  <VF_DisembarkNoExit>Niemożliwe jest rozładowanie. Brak możliwych pól</VF_DisembarkNoExit>
+  <VF_StopVehicle>Stój</VF_StopVehicle>
+  <VF_UndraftVehicle>Wyłącz</VF_UndraftVehicle>
+  <VF_DraftVehicleDesc>Włącza pojazd, pozwalając mu się poruszać. Będzie to używać paliwo, jeśli możliwe, nawet jeśli pojazd jest nieruchomy.</VF_DraftVehicleDesc>
+  <VF_StopVehicleDesc>Natychmiast zatrzymuję pojazd.</VF_StopVehicleDesc>
+  <VF_UndraftVehicleDesc>Wyłącza pojazd, zatrzymując zużycie paliwa i możliwość poruszania się.</VF_UndraftVehicleDesc>
+  <VF_ShowAllItemsOnMap>Pokaż Wszystkie Przedmioty Na Mapie</VF_ShowAllItemsOnMap>
+  <VF_ResetColorPalettes>Reset Wszystkich Palet</VF_ResetColorPalettes>
+  <VF_ResetColorPalettesConfirmation>Jesteś pewien, że chcesz zresetować wszystkie zapisane palety do ustawień domyślnych? Ta akcja jest nieodwracalna.</VF_ResetColorPalettesConfirmation>
+  <VF_RotateVehicleRendering>Obróć Pojazd</VF_RotateVehicleRendering>
+  <VF_SaveColorPalette>Zapisz Paletę</VF_SaveColorPalette>
+  <VF_ColorOne>Kolor Pierwszy</VF_ColorOne>
+  <VF_ColorTwo>Kolor Drugi</VF_ColorTwo>
+  <VF_ColorThree>Kolor Trzeci</VF_ColorThree>
+  <VF_ColorPickerHex>Kolor Hex</VF_ColorPickerHex>
+  <VF_JobSettings>Ustawienia Prac</VF_JobSettings>
+  <VF_VehicleAgeReadout>Stworzone w: {0}</VF_VehicleAgeReadout>
+  <VF_StatsReport_CargoWeight>Masa: {0}</VF_StatsReport_CargoWeight>
+  <VF_RenameVehicleTooltip>Przypisz lub wyczyść nazwę.</VF_RenameVehicleTooltip>
+  <VF_RecolorTooltip>Zmień kolor lub wzór.</VF_RecolorTooltip>
+  <VF_DoubleClickShuttleTarget>Kliknij Tutaj by Potwierdzić Miejsce Docelowe</VF_DoubleClickShuttleTarget>
+  <VF_SwapColors>Cykluj kolory pomiędzy sobą.\nKolor Pierwszy -&gt; Kolor Drugi -&gt; Kolor Trzeci</VF_SwapColors>
+  <VF_StartFishing>Zacznij Łowić</VF_StartFishing>
+  <VF_StartFishingDesc>Łów ryby. Głębokość wody ma znaczenie na efektywności łowienia.</VF_StartFishingDesc>
+  <VF_ExplosiveComponent>Wybuchowe</VF_ExplosiveComponent>
+  <VF_EditPawnOverlayRendererTooltip>Edytuj Nakładkę Kolonistów</VF_EditPawnOverlayRendererTooltip>
+  <VF_VehicleRestriction_Stationary>Niemożliwość strzelania podczas ruchu</VF_VehicleRestriction_Stationary>
+  <VF_Patterns>Wzory</VF_Patterns>
+  <VF_Skins>Skórki</VF_Skins>
+  <VF_PatternZoom>Przybliżenie</VF_PatternZoom>
+  <VF_PatternZoomTooltip>Skaluj wzór w górę lub w dół</VF_PatternZoomTooltip>
+  <VF_PatternDisplacementX>Przesunięcie X</VF_PatternDisplacementX>
+  <VF_PatternDisplacementY>Przesunięcie Y</VF_PatternDisplacementY>
+  <VF_Electric>Elektryczne</VF_Electric>
+  <VF_ElectricFlick>Ładuj Baterie</VF_ElectricFlick>
+  <VF_ElectricFlickDesc>Podłącz do Przewodów pod Pojazdem</VF_ElectricFlickDesc>
+  <VF_OutOfFuel>Koniec Paliwa, Silnik Wyłączony</VF_OutOfFuel>
+  <VF_Assign>Przydziel</VF_Assign>
+  <VF_Assigned>Przydzielony/a</VF_Assigned>
+  <VF_Colonists>Koloniści</VF_Colonists>
+  <VF_ClearSeats>Wyczyść</VF_ClearSeats>
+  <VF_RemoveFromRole>Usuń</VF_RemoveFromRole>
+  <VF_AddToRole>Dodaj</VF_AddToRole>
+  <VF_RoutePlannerButtonTip>Kliknij by wejść do ekranu planowania dla pojazdów gdzie możesz wybrać specyficzne pojazdy, które posiadasz i zaplanować swoją drogę. Ścieżka jest dopasowana zależnie od wybranych pojazdów.</VF_RoutePlannerButtonTip>
+  <VF_SelectVehiclesForPlanner>Wybierz Pojazdy</VF_SelectVehiclesForPlanner>
+  <VF_StartVehicleRoutePlanner>Zacznij Ścieżkę</VF_StartVehicleRoutePlanner>
+  <VF_OkName>Potwierdź Nazwę</VF_OkName>
+  <VF_RemoveName>Usuń Nazwę</VF_RemoveName>
+  <VF_NoFlightSpeed>Odlot niemożliwy z Prędkością Lotu = 0</VF_NoFlightSpeed>
+  <VF_CannotLaunchWhileMoving>Odlot niemożliwy podczas kiedy {0} się porusza.</VF_CannotLaunchWhileMoving>
+  <VF_CannotLaunchImmobile>{0} nie może odlecieć kiedy nie może się poruszać</VF_CannotLaunchImmobile>
+  <VF_CannotLaunchOverEncumbered>{0} nie może odlecieć kiedy jest przeciążony.</VF_CannotLaunchOverEncumbered>
+  <VF_TabCargo>Ładunek</VF_TabCargo>
+  <VF_TabPassengers>Pasażerowie</VF_TabPassengers>
+  <VF_TabComponents>Zdrowie</VF_TabComponents>
+  <VF_TabUpgrades>Dostosuj</VF_TabUpgrades>
+  <VF_ComponentHealth>Zdrowie</VF_ComponentHealth>
+  <VF_ComponentEfficiency>Wydajność</VF_ComponentEfficiency>
+  <VF_ComponentArmor>Pancerz</VF_ComponentArmor>
+  <VF_NoFuelReturnTrip>Brak Możliwości Podróży Powrotnej</VF_NoFuelReturnTrip>
+  <VF_NotEnoughFuel>Poza Zasięgiem</VF_NotEnoughFuel>
+  <VF_Cargo>Ładunek</VF_Cargo>
+  <VF_Properties>Właściwości</VF_Properties>
+  <VF_LauncherProperties>Właściwości Odlotu</VF_LauncherProperties>
+  <VF_FueledTravelPropertes>Paliwo</VF_FueledTravelPropertes>
+  <VF_JobLimitations>Maks Pracowników na Prace</VF_JobLimitations>
+</LanguageData>
+

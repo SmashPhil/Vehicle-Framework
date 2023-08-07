@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <Board.reportString>Wchodzenie do TargetA.</Board.reportString>
+  <LoadUpgradeMaterials.reportString>Ładowanie materiałów ulepszeń do TargetB.</LoadUpgradeMaterials.reportString>
+  <IdleVehicle.reportString>Bezczynne.</IdleVehicle.reportString>
+  <PrepareCaravan_GatheringVehicle.reportString>Ładowanie ładunku do TargetB</PrepareCaravan_GatheringVehicle.reportString>
+  <RopeAnimalToVehicle.reportString>Przyciąganie {0} do TargetA.</RopeAnimalToVehicle.reportString>
+  <CarryPawnToVehicle.reportString>Noszenie TargetA do TargetB.</CarryPawnToVehicle.reportString>
+  <CarryItemToVehicle.reportString>Ładowanie TargetA do TargetB</CarryItemToVehicle.reportString>
+  <RepairVehicle.reportString>Naprawianie TargetA.</RepairVehicle.reportString>
+  <DisassembleVehicle.reportString>Rozmontowywanie TargetA.</DisassembleVehicle.reportString>
+  <PaintVehicle.reportString>Malowanie TargetA.</PaintVehicle.reportString>
+  <UpgradeVehicle>Pracowanie na TargetA.</UpgradeVehicle>
+  <RefuelVehicle.reportString>Tankowanie TargetA</RefuelVehicle.reportString>
+  <RefuelVehicleAtomic.reportString>Tankowanie TargetA</RefuelVehicleAtomic.reportString>
+  <FollowVehicle.reportString>Chodzenie zaTargetA.</FollowVehicle.reportString>
+  <EscortVehicle.reportString>Eskortowanie TargetA.</EscortVehicle.reportString>
+</LanguageData>
+

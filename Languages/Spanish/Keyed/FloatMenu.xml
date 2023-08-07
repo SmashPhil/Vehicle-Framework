@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_EnterVehicle>Se ha abordado {0} como {1}  [{2}]</VF_EnterVehicle>
+  <VF_BoardVehicleGroup>Ha abordado {0}</VF_BoardVehicleGroup>
+  <VF_BoardVehicleGroupFail>Ha abordado {0} (Se han elegido demasiados)</VF_BoardVehicleGroupFail>
+  <VF_ActivityIconOnBoardShip>Abordo de {0}</VF_ActivityIconOnBoardShip>
+  <VF_IsIncapableOfRamming>Ha embestido {0}</VF_IsIncapableOfRamming>
+  <VF_CannotMoveToCell>{0} no puede llegar aquí.</VF_CannotMoveToCell>
+  <VF_LandVehicleHere>Aterrizar aeronave aquí</VF_LandVehicleHere>
+  <VF_LandVehicleEdge>Aterrizar en {0} en los alrededores del mapa.</VF_LandVehicleEdge>
+  <VF_LandVehicleCenter>Aterrizar en {0} en el centro del mapa.</VF_LandVehicleCenter>
+  <VF_LandVehicleTargetedLanding>Aterrizar en {0} y elegir lugar de aterrizaje.</VF_LandVehicleTargetedLanding>
+  <VF_AttackAndTargetLanding>Atacar {0}: Elegir lugar de aterrizaje</VF_AttackAndTargetLanding>
+  <VF_StrafeRun>Bombardear</VF_StrafeRun>
+  <VF_AerialReconSite>Hacer reconocimiento</VF_AerialReconSite>
+</LanguageData>
+

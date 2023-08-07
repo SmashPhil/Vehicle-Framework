@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_VehicleEnabled>Activo</VF_VehicleEnabled>
+  <VF_VehicleDisabled>Inactivo</VF_VehicleDisabled>
+  <VF_VehiclePlayerOnly>Solo para el jugador</VF_VehiclePlayerOnly>
+  <VF_VehicleRaiderOnly>Solo para NPC</VF_VehicleRaiderOnly>
+  <VF_EnableButtonTooltip>Si esta inactivo este vehículo no estara disponible en el juego. Se aplica a jugadores y NPCs.</VF_EnableButtonTooltip>
+  <VF_MovementPermissions>Tipo de control</VF_MovementPermissions>
+  <VF_NavigationType>Navegación</VF_NavigationType>
+  <VF_NavigationTypeTooltip>Categoria de navegación en el mapa del mundo. Dicta cuando un vehículo se pueda desplazar por el mapa del mundo.</VF_NavigationTypeTooltip>
+  <VF_Nameable>Se puede asignar nombre</VF_Nameable>
+  <VF_NameableTooltip>Permitir nombrar el vehículo. El nombre aparecera sobre el vehículo y remplazara la etiqueta mostrada.</VF_NameableTooltip>
+  <VF_CombatPower>Poder de combate</VF_CombatPower>
+  <VF_CombatPowerTooltip>Los puntos de combate que cuesta el vehículo para generar un evento.</VF_CombatPowerTooltip>
+  <VF_CanCaravan>Caravana</VF_CanCaravan>
+  <VF_CanCaravanTooltip>El vehículo se puede unir a caravanas.</VF_CanCaravanTooltip>
+  <VF_SaveableFieldDisabledConditionTooltip>Inactivo. {0}</VF_SaveableFieldDisabledConditionTooltip>
+  <VF_DisabledSingleModDependencyTooltip>Inactivo. Mod compatible no esta en la lista de mods activos: {0}</VF_DisabledSingleModDependencyTooltip>
+  <VF_DisabledMultipleModsDependencyTooltip>Inactivo. Mods compatibles no estan en la lista de mods activos: {0}</VF_DisabledMultipleModsDependencyTooltip>
+  <VF_SaveableFieldDisabledTooltip>Inactivo para este tipo de vehículo.</VF_SaveableFieldDisabledTooltip>
+  <VF_SaveableFieldLockedTooltip>Este ajuste esta bloqueado para este tipo de vehículos.</VF_SaveableFieldLockedTooltip>
+  <VF_DebugDisabledTooltip>Inhabilitados para todos los vehículos.</VF_DebugDisabledTooltip>
+  <VF_GizmoDisabledTooltip>Inhabilitado en los ajustes del mod.</VF_GizmoDisabledTooltip>
+  <VF_OpportunisticTicking>Ticking oportunistico</VF_OpportunisticTicking>
+  <VF_OpportunisticTickingTooltip>Los componentes de los vehículos solo dan ticks cuando es necesario, reduciendo el impacto en el rendimiento del juego.</VF_OpportunisticTickingTooltip>
+  <VF_CollisionMultiplier>Daño a personajes</VF_CollisionMultiplier>
+  <VF_CollisionMultiplierTooltip>Multiplicador de daño a personajes atropellados.</VF_CollisionMultiplierTooltip>
+  <VF_CollisionVehicleMultiplier>Daño a vehículo</VF_CollisionVehicleMultiplier>
+  <VF_CollisionVehicleMultiplierTooltip>Multiplicador de daño al vehículo cuando atropella un personaje.</VF_CollisionVehicleMultiplierTooltip>
+  <VF_ManhunterTargetsVehicle>Cazahumanos atacan</VF_ManhunterTargetsVehicle>
+  <VF_ManhunterTargetsVehicleTooltip>Los animales cazahumanos atacaran este vehículo.</VF_ManhunterTargetsVehicleTooltip>
+  <VF_FishingEnabled>Puede pescar</VF_FishingEnabled>
+  <VF_FishingEnabledTooltip>Permite pescar mientras este quieto sobre el agua.</VF_FishingEnabledTooltip>
+  <VF_JobLimitations>Trabajos de vehiculos</VF_JobLimitations>
+  <VF_MaxWorkers>Maximo de trabajadores</VF_MaxWorkers>
+  <VF_WinterSpeedMultiplier>Multiplicador de velocidad en invierno</VF_WinterSpeedMultiplier>
+  <VF_WinterSpeedMultiplierTooltip>Coste adicional al viajar en invierno</VF_WinterSpeedMultiplierTooltip>
+  <VF_WorldSpeedMultiplier>Multiplicador de velocidad por el mundo</VF_WorldSpeedMultiplier>
+  <VF_WorldSpeedMultiplierTooltip>Multiplicador de velocidad a las caravanas en el mapa del mundo.</VF_WorldSpeedMultiplierTooltip>
+  <VF_DischargePerTick>Velocidad de descargar</VF_DischargePerTick>
+  <VF_TicksPerCharge>Velocidad de cargar</VF_TicksPerCharge>
+  <VF_FuelConsumptionRate>Velocidad de consumo de combustible</VF_FuelConsumptionRate>
+  <VF_FuelConsumptionRateWorldMultiplier>Multiplicador de mundo</VF_FuelConsumptionRateWorldMultiplier>
+  <VF_FuelCapacity>Capacidad de gasolina</VF_FuelCapacity>
+  <VF_AutoRefuelPercent>% de repostaje automatico</VF_AutoRefuelPercent>
+  <VF_FuelConsumptionWorld>% de consumo de gasolina</VF_FuelConsumptionWorld>
+  <VF_FuelConsumptionWorldTooltip>Multiplicador de consumo de gasolina en el mapa del mundo.</VF_FuelConsumptionWorldTooltip>
+  <VF_LaunchFixedMaxDistance>Distancia maxima fija</VF_LaunchFixedMaxDistance>
+  <VF_LaunchFixedMaxDistanceTooltip>Establece una distancia fija maxima a la que puede llegar este vehículo a pesar de su combustible.</VF_LaunchFixedMaxDistanceTooltip>
+  <VF_LaunchFixedMaxDistanceDisabled>Ninguna</VF_LaunchFixedMaxDistanceDisabled>
+  <VF_ReconDistance>Distancia de reconocimiento</VF_ReconDistance>
+  <VF_ReconDistanceTooltip>Distania en losas las cuales podran la lanzadera realizar reconocimiento de un lugar o asentamiento.</VF_ReconDistanceTooltip>
+  <VF_ControlInFlight>Control en vuelo</VF_ControlInFlight>
+  <VF_ControlInFlightTooltip>Control de la aeronave mientras esta en vuelo. Permite cambiar los caminos de vuelo a mitad de vuelo, eligiendo tu aterrizaje tras cargar el mapa.</VF_ControlInFlightTooltip>
+  <VF_SpaceFlight>Viaje espacial</VF_SpaceFlight>
+  <VF_SpaceFlightTooltip>El vehículo es capaz de lanzar o recoger objetos espaciales.</VF_SpaceFlightTooltip>
+  <VF_RateOfClimb>Velocidad de escalada</VF_RateOfClimb>
+  <VF_RateOfClimbTooltip>Cantidad que el vehiculo asciendo por tick.</VF_RateOfClimbTooltip>
+  <VF_MaxAltitude>Altitud maxima</VF_MaxAltitude>
+  <VF_MaxAltitudeTooltip>Altitud maxima que el vehiculo puede obtener mientras vuela</VF_MaxAltitudeTooltip>
+  <VF_MaxFallRate>Velocidad de caida maxima</VF_MaxFallRate>
+  <VF_MaxFallRateTooltip>Cantidad maxima que el vehículo descendera cuando sea derribado o se quede sin gasolina.</VF_MaxFallRateTooltip>
+  <VF_Instant>Instante</VF_Instant>
+</LanguageData>
+

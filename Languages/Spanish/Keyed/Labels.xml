@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VehicleFramework>Vehicle Framework</VehicleFramework>
+  <VF_Vehicles>Vehículos</VF_Vehicles>
+  <VF_LoadCargo>Cargar el cargamento</VF_LoadCargo>
+  <VF_DisembarkAllPawns>Bajar a todos los pasajeros</VF_DisembarkAllPawns>
+  <VF_DisembarkSinglePawn>Descargar {0}</VF_DisembarkSinglePawn>
+  <VF_DisembarkNoExit>Imposible salir del vehículo. No hay celdas válidas para salir.</VF_DisembarkNoExit>
+  <VF_StopVehicle>Detener</VF_StopVehicle>
+  <VF_UndraftVehicle>Apagar</VF_UndraftVehicle>
+  <VF_DraftVehicleDesc>Arrancar el vehiculo permite que se mueva. Esto consumirá gasolina si es posible, incluso si el vehículo esta inactivo.</VF_DraftVehicleDesc>
+  <VF_StopVehicleDesc>Detener el vehículo inmediatamente.</VF_StopVehicleDesc>
+  <VF_UndraftVehicleDesc>Apagar el vehículo, detiene el consumo de gasolina e impide que se desplaze.</VF_UndraftVehicleDesc>
+  <VF_ShowAllItemsOnMap>Mostrar todos los objetos en el mapa</VF_ShowAllItemsOnMap>
+  <VF_ResetColorPalettes>Reiniciar todas las paletas</VF_ResetColorPalettes>
+  <VF_ResetColorPalettesConfirmation>Seguro que quieres reiniciar todas las paletas guardadas a los ajustes predeterminados? Esta acción no puede ser revertida.</VF_ResetColorPalettesConfirmation>
+  <VF_RotateVehicleRendering>Rotar vehículo</VF_RotateVehicleRendering>
+  <VF_SaveColorPalette>Guardar paleta</VF_SaveColorPalette>
+  <VF_ColorOne>ColorUno</VF_ColorOne>
+  <VF_ColorTwo>ColorDos</VF_ColorTwo>
+  <VF_ColorThree>ColorTres</VF_ColorThree>
+  <VF_ColorPickerHex>Hex</VF_ColorPickerHex>
+  <VF_JobSettings>Ajustes de trabajo</VF_JobSettings>
+  <VF_VehicleAgeReadout>Producido: {0}</VF_VehicleAgeReadout>
+  <VF_StatsReport_CargoWeight>Cargamento: {0}</VF_StatsReport_CargoWeight>
+  <VF_RenameVehicleTooltip>Asignar o limpiar nombre.</VF_RenameVehicleTooltip>
+  <VF_RecolorTooltip>Cambiar colores o patrones.</VF_RecolorTooltip>
+  <VF_DoubleClickShuttleTarget>Haz click para confirmar el destino</VF_DoubleClickShuttleTarget>
+  <VF_SwapColors>Rota los colores entre ellos.\nColorUno -&gt; ColorDos -&gt; ColorTres</VF_SwapColors>
+  <VF_StartFishing>Pescar</VF_StartFishing>
+  <VF_StartFishingDesc>Recoge el pescado. La profundidad del agua afecta las posibilidades de pesca.</VF_StartFishingDesc>
+  <VF_ExplosiveComponent>Explosivo</VF_ExplosiveComponent>
+  <VF_EditPawnOverlayRendererTooltip>Editar la sobreposición del vehículo.</VF_EditPawnOverlayRendererTooltip>
+  <VF_VehicleRestriction_Stationary>Imposible disparar mientras se desplaza.</VF_VehicleRestriction_Stationary>
+  <VF_Patterns>Patrones</VF_Patterns>
+  <VF_Skins>Skins</VF_Skins>
+  <VF_PatternZoom>Zoom</VF_PatternZoom>
+  <VF_PatternZoomTooltip>Cambia el tamaño del patrón.</VF_PatternZoomTooltip>
+  <VF_PatternDisplacementX>Desplazamiento X</VF_PatternDisplacementX>
+  <VF_PatternDisplacementY>Desplazamiento Y</VF_PatternDisplacementY>
+  <VF_Electric>Electrico</VF_Electric>
+  <VF_ElectricFlick>Cargar bateria</VF_ElectricFlick>
+  <VF_ElectricFlickDesc>Conectar a la red electrica bajo el vehículo.</VF_ElectricFlickDesc>
+  <VF_OutOfFuel>No se puede desplazar. Sin combustible.</VF_OutOfFuel>
+  <VF_Assign>Asignar</VF_Assign>
+  <VF_Assigned>Asignado</VF_Assigned>
+  <VF_Colonists>Colonos</VF_Colonists>
+  <VF_ClearSeats>Limpiar</VF_ClearSeats>
+  <VF_RemoveFromRole>Quitar</VF_RemoveFromRole>
+  <VF_AddToRole>Añadir</VF_AddToRole>
+  <VF_RoutePlannerButtonTip>Entrar al modo de planificación de vehículos, donde puedes elegir tus vehiculos y organizar tu viaje. El desplazamiento es ajustado segun los vehículos elegidos.</VF_RoutePlannerButtonTip>
+  <VF_SelectVehiclesForPlanner>Elegir vehículos.</VF_SelectVehiclesForPlanner>
+  <VF_StartVehicleRoutePlanner>Iniciar ruta</VF_StartVehicleRoutePlanner>
+  <VF_OkName>Confirmar Nombre</VF_OkName>
+  <VF_RemoveName>Quitar Nombre</VF_RemoveName>
+  <VF_NoFlightSpeed>Imposible despegar con velocidad de vuelo = 0</VF_NoFlightSpeed>
+  <VF_CannotLaunchWhileMoving>No puede despegar mientras {0} se mueve.</VF_CannotLaunchWhileMoving>
+  <VF_CannotLaunchImmobile>{0} no puede despegar si es incapaz de desplazarse.</VF_CannotLaunchImmobile>
+  <VF_CannotLaunchOverEncumbered>{0} no puede despegar con sobrepeso.</VF_CannotLaunchOverEncumbered>
+  <VF_TabCargo>Cargamento</VF_TabCargo>
+  <VF_TabPassengers>Pasajeros</VF_TabPassengers>
+  <VF_TabComponents>Salud</VF_TabComponents>
+  <VF_TabUpgrades>Personalizar</VF_TabUpgrades>
+  <VF_ComponentHealth>Salud</VF_ComponentHealth>
+  <VF_ComponentEfficiency>Eficiencia</VF_ComponentEfficiency>
+  <VF_ComponentArmor>Armadura</VF_ComponentArmor>
+  <VF_NoFuelReturnTrip>Viaje de no retorno</VF_NoFuelReturnTrip>
+  <VF_NotEnoughFuel>Fuera de rango</VF_NotEnoughFuel>
+  <VF_Cargo>Cargamento</VF_Cargo>
+  <VF_Properties>Propiedades</VF_Properties>
+  <VF_LauncherProperties>Propiedades de despegue</VF_LauncherProperties>
+  <VF_FueledTravelPropertes>Combustible</VF_FueledTravelPropertes>
+  <VF_JobLimitations>Maximo de trabajadores por trabajo</VF_JobLimitations>
+</LanguageData>
+

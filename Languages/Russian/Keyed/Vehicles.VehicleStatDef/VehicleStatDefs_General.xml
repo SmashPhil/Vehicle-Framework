@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <MoveSpeed.label>Скорость движения</MoveSpeed.label>
+  <MoveSpeed.description>Скорость движения по клеткам в секунду.</MoveSpeed.description>
+  <CargoCapacity.label>Груз</CargoCapacity.label>
+  <CargoCapacity.description>Количество веса, которое это транспортное средство может перевозить в качестве груза. Это же количество веса доступно и для караванов.</CargoCapacity.description>
+  <RepairRate.label>Скорость ремонта</RepairRate.label>
+  <RepairRate.description>Количество очков здоровья, которые восстанавливаются за секунду.</RepairRate.description>
+  <Mass.label>Масса</Mass.label>
+  <Mass.description>Физическая масса техники.</Mass.description>
+  <BodyIntegrity.label>Целостность корпуса</BodyIntegrity.label>
+  <BodyIntegrity.description>Среднее количество очков здоровья всех частей техники. Если целостность техники достигнет 0, то она развалится на части относительно своей стоимости сборки.</BodyIntegrity.description>
+</LanguageData>
+

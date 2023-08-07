@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <Board.reportString>Входит TargetA.</Board.reportString>
+  <LoadUpgradeMaterials.reportString>Загружает материалы для модернизации в TargetB.</LoadUpgradeMaterials.reportString>
+  <IdleVehicle.reportString>Ожидает.</IdleVehicle.reportString>
+  <PrepareCaravan_GatheringVehicle.reportString>Загружает груз для TargetB.</PrepareCaravan_GatheringVehicle.reportString>
+  <RopeAnimalToVehicle.reportString>Привязывает {0} к TargetA.</RopeAnimalToVehicle.reportString>
+  <CarryPawnToVehicle.reportString>Тащит TargetA к TargetB.</CarryPawnToVehicle.reportString>
+  <CarryItemToVehicle.reportString>Погружает TargetA на TargetB</CarryItemToVehicle.reportString>
+  <RepairVehicle.reportString>Производит починку TargetA.</RepairVehicle.reportString>
+  <DisassembleVehicle.reportString>Производит разборку TargetA.</DisassembleVehicle.reportString>
+  <PaintVehicle.reportString>Разукрашивает TargetA.</PaintVehicle.reportString>
+  <UpgradeVehicle>Работает над TargetA.</UpgradeVehicle>
+  <RefuelVehicle.reportString>Заправляет TargetA</RefuelVehicle.reportString>
+  <RefuelVehicleAtomic.reportString>Заправляет TargetA</RefuelVehicleAtomic.reportString>
+  <FollowVehicle.reportString>Следует TargetA.</FollowVehicle.reportString>
+  <EscortVehicle.reportString>СопровождаетTargetA.</EscortVehicle.reportString>
+</LanguageData>
+

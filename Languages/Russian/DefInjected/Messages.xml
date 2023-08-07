@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_MustSelectColorPalette>Должна быть выбрана цветовая палитра для сохранения.</VF_MustSelectColorPalette>
+  <VF_VehicleUnableToMove>{0_labelShort} движение невозможно.</VF_VehicleUnableToMove>
+  <VF_HandlerNotEnoughRoom>Невозможно добавить {0} к {1}. Отсутствует свободное место.</VF_HandlerNotEnoughRoom>
+  <VF_NotEnoughToOperate>Требуется больше экипажа для управления.</VF_NotEnoughToOperate>
+  <VF_OutOfFuel>Невозможно призвать. Технике требуется больше топлива.</VF_OutOfFuel>
+  <VF_UpgradeInProgress>Невозможно призвать пока техника модернизируется.</VF_UpgradeInProgress>
+  <VF_NotEnoughCrew>Недостаточно экипажа в {0} для управления {1}.</VF_NotEnoughCrew>
+  <VF_CannotFit>Недостаточно свободного места.</VF_CannotFit>
+  <VF_NoPathForVehicle>Движение сюда невозможно.</VF_NoPathForVehicle>
+  <VF_IncapableStatusForRole>{0} не может выполнять эту роль.</VF_IncapableStatusForRole>
+  <VF_InvalidName>Некорректное имя для техники.</VF_InvalidName>
+  <VF_OutOfFood>Еда отсутствует в {0} с экипажем внутри.</VF_OutOfFood>
+  <VF_NoAmmoLoadedTurret>Боеприпасы не заряжены.</VF_NoAmmoLoadedTurret>
+  <VF_NoAmmoAvailable>Боеприпасы отсутствуют в инвентаре.</VF_NoAmmoAvailable>
+  <VF_VehicleCaravanMentalBreakMovementRole>{0} не может продолжить заниматься своей ролью в технике каравана.</VF_VehicleCaravanMentalBreakMovementRole>
+  <VF_PawnBoardedFormingCaravan>{0} загрузил {1} и готов к отправке.</VF_PawnBoardedFormingCaravan>
+  <VF_CantMoveDocked>Недостаточно экипажа чтобы поставить парус.</VF_CantMoveDocked>
+  <VF_CantAssignVehicle>Недостаточно экипажа для {0}.</VF_CantAssignVehicle>
+  <VF_AssignFailure>Невозможно назначить места (сиденья). {0}</VF_AssignFailure>
+  <VF_PackingSpotNotFound>Точка Погрузки не найдена для техники каравана. Рекомендуется установить точку погрузкки (Packing Spot) из раздела разное (Misc).</VF_PackingSpotNotFound>
+  <VF_ForceLeaveCaravan>Заставить уйти</VF_ForceLeaveCaravan>
+  <VF_ForceLeaveCaravanDesc>Заставить караван с техникой покинуть карту. Это заставит бросить предметы, которые не находятся на борту.</VF_ForceLeaveCaravanDesc>
+  <VF_ForceLeaveConfirmation>Экипаж подготавливается к уходу (эвакуации).</VF_ForceLeaveConfirmation>
+  <VF_CaravanTerminatedNoVehicles>Караванный процесс был остановлен. Техники не осталось.</VF_CaravanTerminatedNoVehicles>
+  <VF_LandAndSeaRoutePlannerRestriction>Невозможно спланировать маршрут для морской и наземной техники. Пути не будут учтены.</VF_LandAndSeaRoutePlannerRestriction>
+  <VF_LeaveVehicleBehindCaravan>Вы уверены, что хотите бросить технику? Брошенная техника: {0}</VF_LeaveVehicleBehindCaravan>
+  <VF_MustAssignEnoughToVehicle>Необходимо назначить достаточное количество экипажа для управления техникой.</VF_MustAssignEnoughToVehicle>
+  <VF_AerialVehicleArrived>{0} прибыл в пункт назначения.</VF_AerialVehicleArrived>
+  <VF_AerialVehicleLeft>{0} покинул карту.</VF_AerialVehicleLeft>
+  <VF_AerialVehicleLaunchNotValid>Невозможно запустить, неподходящие условия для этого.</VF_AerialVehicleLaunchNotValid>
+  <VF_LaunchOutOfFuel>Невозможно запустить. Отсутствует топливо.</VF_LaunchOutOfFuel>
+  <VF_FlightPathMaxNodes>Достигнуто максимальное количество узлов для траектории полета {0}.</VF_FlightPathMaxNodes>
+  <VF_MustTargetLanding>Посадочный пункт назначения должен быть выбран.</VF_MustTargetLanding>
+</LanguageData>
+

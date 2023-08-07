@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_Caravan_Dismounted>Zsiadły</VF_Caravan_Dismounted>
+  <VF_Sailing>Żegluje</VF_Sailing>
+  <VF_DockToCaravan>Przedmioty do Zabrania</VF_DockToCaravan>
+  <VF_CommandDockShip>Zadokuj</VF_CommandDockShip>
+  <VF_CommandDockShipDesc>Wyładuj wszystkich pasażerów i umożliwij handel z Bazą {0}.</VF_CommandDockShipDesc>
+  <VF_CommandDockShipDisembark>Zadokuj i Wysiądź</VF_CommandDockShipDisembark>
+  <VF_CommandDockShipObjectDesc>Zadokuj Łodzie i idź pieszo</VF_CommandDockShipObjectDesc>
+  <VF_CommandUndockShip>Wejdź na Pojazd</VF_CommandUndockShip>
+  <VF_CommandUndockShipDesc>Załaduj wszystkie przedmioty i wszystkich kolonistów do łodzi</VF_CommandUndockShipDesc>
+  <VF_CommandAttackDockDisable>Nie można zaatakować {0}, gdy jest się zadokowanym w ich Bazie.</VF_CommandAttackDockDisable>
+  <VF_CommandTradeDockDisable>Nie można handlować z {0}. Najpierw należy zadokować łódź</VF_CommandTradeDockDisable>
+  <VF_CaravanMustHaveEnoughSpaceOnShip>Za mało miejsca na statkach, aby pomieścić wszystkich kolonistów.</VF_CaravanMustHaveEnoughSpaceOnShip>
+  <VF_CaravanMustHaveEnoughPawnsToOperate>Wybrano za mało kolonistów, aby wypłynąć. Potrzebujesz {0}</VF_CaravanMustHaveEnoughPawnsToOperate>
+  <VF_CaravanMustHaveAtLeastOneVehicle>Aby wybrać trasę, należy wybrać co najmniej 1 pojazd.</VF_CaravanMustHaveAtLeastOneVehicle>
+  <VF_CommandFormVehicleCaravan>Stwórz karawanę z pojazdem.</VF_CommandFormVehicleCaravan>
+  <VF_CommandFormVehicleCaravanDesc>Stwórz karawanę z włączonymi pojazdami.</VF_CommandFormVehicleCaravanDesc>
+  <VF_CommandReformVehicleCaravan>Odtwórz karawanę z pojazdem.</VF_CommandReformVehicleCaravan>
+  <VF_CommandReformVehicleCaravanDesc>Odtwórz karawanę z włączonymi pojazdami.</VF_CommandReformVehicleCaravanDesc>
+  <VF_RoutePlannerToggleVehicleDefs>DefsPojazdu</VF_RoutePlannerToggleVehicleDefs>
+  <VF_RoutePlannerToggleVehicles>Pojazdy</VF_RoutePlannerToggleVehicles>
+</LanguageData>
+

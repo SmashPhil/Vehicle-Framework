@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_MainSettings>Основные</VF_MainSettings>
+  <VF_ListSearchText>Поиск...</VF_ListSearchText>
+  <VF_SettingsDisabledTooltip>Настройки были закрыты для этой техникии и не могубт быть изменены.</VF_SettingsDisabledTooltip>
+  <VF_NonUpgradeableSettingsTooltip>Данная техника не может быть улучшена.</VF_NonUpgradeableSettingsTooltip>
+  <VF_RecolorDefaultMaskTooltip>Изменить стандартный шаблон</VF_RecolorDefaultMaskTooltip>
+  <VF_WorldMapGen>Генерация мира/карты</VF_WorldMapGen>
+  <VF_BeachGenMultiplier>Множитель размера пляжа</VF_BeachGenMultiplier>
+  <VF_BeachGenMultiplierTooltip>Увеличить количество воды у побережья.</VF_BeachGenMultiplierTooltip>
+  <VF_ForceSettlementCoast>Сдвинуть поселение к берегу</VF_ForceSettlementCoast>
+  <VF_ForceSettlementCoastTooltip>Сдвинуть ближайшее поселение фракции к берегу по заданному радиусу</VF_ForceSettlementCoastTooltip>
+  <VF_EverySettlementToCoast>Каждое поселение</VF_EverySettlementToCoast>
+  <VF_WorldTiles>тайлы (tiles)</VF_WorldTiles>
+  <VF_SettingsGeneral>Общие</VF_SettingsGeneral>
+  <VF_WillRequireRestart>Данное действие требует перезагрузку.</VF_WillRequireRestart>
+  <VF_ModifiableSettings>Изменяемые настройки</VF_ModifiableSettings>
+  <VF_ModifiableSettingsTooltip>Переключение изменяемых настроек. Перезагрузка с выключенным параметром не позволяет создавать изменяемые настройки (?).
+        
+Определяет, должны ли транспортные средства использовать значения из настроек мода или Defs.</VF_ModifiableSettingsTooltip>
+  <VF_CustomShaders>Использовать RGB Shaders</VF_CustomShaders>
+  <VF_CustomShadersTooltip>Разрешить использование пользовательских шейдеров предоставляемых набором инструментов (framework).</VF_CustomShadersTooltip>
+  <VF_DiagonalVehicleRendering>Разрешить Diagonal Rendering</VF_DiagonalVehicleRendering>
+  <VF_DiagonalVehicleRenderingTooltip>Транспортные средства, поддерживающие диагональный рендеринг, будут делать это, если установлено диагональное вращение (северо-восток, юго-восток, юго-запад, северо-запад).</VF_DiagonalVehicleRenderingTooltip>
+  <VF_FullVehiclePathing>Полный путь техники</VF_FullVehiclePathing>
+  <VF_FullVehiclePathingTooltip>Использовать весь хитбокс техники при определении кратчайшего пути. техника по-прежнему будет ограничена своим размером.</VF_FullVehiclePathingTooltip>
+  <VF_SmoothVehiclePathing>Более гладкий путь техники</VF_SmoothVehiclePathing>
+  <VF_SmoothVehiclePathingTooltip>Путь транспортного средства будет иметь дополнительную стоимость «поворота», предотвращая ненужные зигзагообразные схемы от кратчайшего пути.</VF_SmoothVehiclePathingTooltip>
+  <VF_HierarchalPathfinding>Иерархический (Hierarchal ) поиск пути (экспериментальный)</VF_HierarchalPathfinding>
+  <VF_HierarchalPathfindingTooltip>Использовать HPA* вместо A* для более быстрого поиска пути. Приносит в жертву небольшую точность поиска пути для значительно более быстрого поиска пути на больших расстояниях.</VF_HierarchalPathfindingTooltip>
+  <VF_RoadBiomeCostPathing>Стоимость биома на дорогах</VF_RoadBiomeCostPathing>
+  <VF_RoadBiomeCostPathingTooltip>Караваны с техникой двигающиеся по дорогам мира все еще находятся под влиянием стоимости пути через биом.</VF_RoadBiomeCostPathingTooltip>
+  <VF_MultiplePawnsPerJob>Задачи для нескольких пешек.</VF_MultiplePawnsPerJob>
+  <VF_MultiplePawnsPerJobTooltip>Разрешает задачам по технике использовать больше чем 1 пешку для работы над ними. Максимальное количество пешек устанавливается моддерами.</VF_MultiplePawnsPerJobTooltip>
+  <VF_HideDisabledVehicles>Скрыть отключенную технику</VF_HideDisabledVehicles>
+  <VF_HideDisabledVehiclesTooltip>Отключенная техника из настроек мода будет скрывать в меню архитектуры.</VF_HideDisabledVehiclesTooltip>
+  <VF_PerformanceSettings>Производительность</VF_PerformanceSettings>
+  <VF_PassiveWaterWaves>Пассивные волны на воде</VF_PassiveWaterWaves>
+  <VF_PassiveWaterWavesTooltip>Создавать пассивные волны, когда судно простаивает.</VF_PassiveWaterWavesTooltip>
+  <VF_AerialVehicleEffects>Эффекты летательного аппарата</VF_AerialVehicleEffects>
+  <VF_AerialVehicleEffectsTooltip>Когда летательный аппарат отрывается от земли, спавнить (spawn) и отрисовывать текстуры оверлея.</VF_AerialVehicleEffectsTooltip>
+  <VF_VehicleDamageMultipliers>Урон технике</VF_VehicleDamageMultipliers>
+  <VF_MeleeDamageMultiplier>Множитель урона Ближнего Боя</VF_MeleeDamageMultiplier>
+  <VF_RangedDamageMultiplier>Множитель урона Дальнего Боя</VF_RangedDamageMultiplier>
+  <VF_ExplosiveDamageMultiplier>Множитель взрывного урона</VF_ExplosiveDamageMultiplier>
+  <VF_VehicleTurrets>Туррели техники</VF_VehicleTurrets>
+  <VF_TurretOverheatMechanics>Перегрев туррели</VF_TurretOverheatMechanics>
+  <VF_TurretOverheatMechanicsTooltip>Некоторые туррели имеют механику перегрева, для прерывания огня без остановок. Оставить включенным?</VF_TurretOverheatMechanicsTooltip>
+  <VF_Fishing>Рыбалка</VF_Fishing>
+  <VF_FishingInactive>Рыбалка (Неактивна)</VF_FishingInactive>
+  <VF_FishingMultiplier>Множитель рыбалки</VF_FishingMultiplier>
+  <VF_FishingMultiplierTooltip>Установить количество рыбы получаемой с рыбацкой лодки.</VF_FishingMultiplierTooltip>
+  <VF_FishingDelay>Задержка рыбалки</VF_FishingDelay>
+  <VF_FishingDelayTooltip>Базовое количество тиков (ticks) необходимое для получения рыбы на рыбацкой лодке.</VF_FishingDelayTooltip>
+  <VF_FishingSkill>Навык рыбалки</VF_FishingSkill>
+  <VF_FishingSkillTooltip>Сколько опыта дается при рыбалке с лодки.</VF_FishingSkillTooltip>
+  <VF_FishingPersists>Рыбалка продолжается</VF_FishingPersists>
+  <VF_FishingPersistsTooltip>Рыбалка не будет сброшена после призыва судна.</VF_FishingPersistsTooltip>
+  <VF_AerialVehicles>Воздушный транспорт</VF_AerialVehicles>
+  <VF_RocketsBurnRadius>Ракетный огонь</VF_RocketsBurnRadius>
+  <VF_RocketsBurnRadiusTooltip>Разрешить воздушному транспорту сжигать все предметы в небольшом радиусе во время взлета и посадки (Только тот транспорт которому доступна эта функция)</VF_RocketsBurnRadiusTooltip>
+  <VF_DynamicDrawing>Динамическая отрисовка</VF_DynamicDrawing>
+  <VF_DynamicDrawingTooltip>Рендерить воздушные транспорт на карте мира, когда происходит приближение на нее.</VF_DynamicDrawingTooltip>
+  <VF_DeployOnLanding>Провести развертку при посадке</VF_DeployOnLanding>
+  <VF_DeployOnLandingTooltip>Выгружать всех пассажирова из воздушного транспорта при приземлении.</VF_DeployOnLandingTooltip>
+  <VF_DelayOnLanding>Задержка при посадке</VF_DelayOnLanding>
+  <VF_DelayOnLandingTooltip>Когда воздушное аппарат приземлится, развертывание всех пассажиров будет задержано.</VF_DelayOnLandingTooltip>
+  <VF_DelaySeconds>секунды</VF_DelaySeconds>
+  <VF_AirDefensesActive>Противовоздушная оборона (ПВО)</VF_AirDefensesActive>
+  <VF_AirDefensesActiveTooltip>Некоторые мировые объекты могут использовать средства ПВО чтобы подбить ближайшую воздушную технику.</VF_AirDefensesActiveTooltip>
+  <VF_CombatSettings>Бой</VF_CombatSettings>
+  <VF_RunOverPawns>Переезжать пешек.</VF_RunOverPawns>
+  <VF_RunOverPawnsTooltip>Техника может переехать пешек и имеет возможность нанести тупой (blunt) урон в зависимости от веса и скорости.</VF_RunOverPawnsTooltip>
+  <VF_ChanceToRunOverFriendlies>Шанс попадения по своим.</VF_ChanceToRunOverFriendlies>
+  <VF_ChanceToRunOverFriendliesTooltip>Шанс проехать по дружественным пешкам.</VF_ChanceToRunOverFriendliesTooltip>
+  <VF_VehicleStats>Статистика</VF_VehicleStats>
+  <VF_Upgrades>Улучшения (Отключены)</VF_Upgrades>
+  <VF_DrawUpgradeInformationScreen>Рисовать информационный экран для меню улучшений.</VF_DrawUpgradeInformationScreen>
+  <VF_DrawUpgradeInformationScreenTooltip>Рисовать дополнительное меню в меню улучшений, чтобы отображать статистики и иконки судна.</VF_DrawUpgradeInformationScreenTooltip>
+  <VF_OverrideDrawColor>Переопределить цвет рисования</VF_OverrideDrawColor>
+  <VF_OverrideDrawColorTooltip>Применение улучшения с шаблоном или изменением цвета приведет к изменению предыдущей цветовой работы.</VF_OverrideDrawColorTooltip>
+</LanguageData>
+

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_MustSelectColorPalette>Trzeba mieć wybraną paletę by zapisać.</VF_MustSelectColorPalette>
+  <VF_VehicleUnableToMove>{0_labelShort} Nie może się poruszać.</VF_VehicleUnableToMove>
+  <VF_HandlerNotEnoughRoom>Nie udało się dodać {0} do {1}. Brak wolnych miejsc.</VF_HandlerNotEnoughRoom>
+  <VF_NotEnoughToOperate>Potrzebuje więcej załogi by działać.</VF_NotEnoughToOperate>
+  <VF_OutOfFuel>Nie można włączyć. Pojazd potrzebuje więcej paliwa.</VF_OutOfFuel>
+  <VF_UpgradeInProgress>Nie można włączyć kiedy Pojazd jest ulepszany.</VF_UpgradeInProgress>
+  <VF_NotEnoughCrew>Za mało pasażerów w {0} by operować {1}.</VF_NotEnoughCrew>
+  <VF_CannotFit>Niewystarczająco miejsca.</VF_CannotFit>
+  <VF_NoPathForVehicle>Nie można dotrzeć do tego obszaru.</VF_NoPathForVehicle>
+  <VF_IncapableStatusForRole>{0} jest niezdolny/a do wypełnienia tej roli.</VF_IncapableStatusForRole>
+  <VF_InvalidName>Niepoprawna nazwa dla Pojazdu.</VF_InvalidName>
+  <VF_OutOfFood>Brak jedzenia w {0} z Kolonistami wewnątrz.</VF_OutOfFood>
+  <VF_NoAmmoLoadedTurret>Brak załadowanej amunicji.</VF_NoAmmoLoadedTurret>
+  <VF_NoAmmoAvailable>Brak zmagazynowanej amunicji.</VF_NoAmmoAvailable>
+  <VF_VehicleCaravanMentalBreakMovementRole>{0} już nie potrafi wypełniać swojej roli w karawanie z pojazdem.</VF_VehicleCaravanMentalBreakMovementRole>
+  <VF_PawnBoardedFormingCaravan>{0} wszedł/a do {1} i pojazd jest gotowy do wyjazdu.</VF_PawnBoardedFormingCaravan>
+  <VF_CantMoveDocked>Brak wystarczającej ilości kolonistów by odpłynąć.</VF_CantMoveDocked>
+  <VF_CantAssignVehicle>Brak wystarczającej ilości kolonistów dla {0}</VF_CantAssignVehicle>
+  <VF_AssignFailure>Nie udało się przypisać miejsc. {0}</VF_AssignFailure>
+  <VF_PackingSpotNotFound>Brak Miejsca Pakowania dla karawany z pojazdem. Jest to zalecane by postawić to z Różnych.</VF_PackingSpotNotFound>
+  <VF_ForceLeaveCaravan>Wymuś Wyjazd.</VF_ForceLeaveCaravan>
+  <VF_ForceLeaveCaravanDesc>Wymuś karawanę z pojazdem to wyjścia z mapy. Pominie wszystkie przedmioty które nie są obecnie w pojeździe.</VF_ForceLeaveCaravanDesc>
+  <VF_ForceLeaveConfirmation>Załoga przygotowuje się do wyjścia.</VF_ForceLeaveConfirmation>
+  <VF_CaravanTerminatedNoVehicles>Proces karawany został odwołany. Nie pozostały żadne pojazdy</VF_CaravanTerminatedNoVehicles>
+  <VF_LandAndSeaRoutePlannerRestriction>Nie można zaplanować trasy zarówno dla pojazdów morskich, jak i lądowych. Ścieżki nie zostaną zarejestrowane.</VF_LandAndSeaRoutePlannerRestriction>
+  <VF_LeaveVehicleBehindCaravan>Czy na pewno chcesz opuścić pojazdy? Opuszczone pojazdy: {0}</VF_LeaveVehicleBehindCaravan>
+  <VF_MustAssignEnoughToVehicle>Musisz przydzielić wystarczającą ilość kolonistów by pojazd był operacyjny.</VF_MustAssignEnoughToVehicle>
+  <VF_AerialVehicleArrived>{0} dotarł do miejsca docelowego.</VF_AerialVehicleArrived>
+  <VF_AerialVehicleLeft>{0} opuścił mapę.</VF_AerialVehicleLeft>
+  <VF_AerialVehicleLaunchNotValid>Nie można odlecieć, warunki nie są odpowiednie.</VF_AerialVehicleLaunchNotValid>
+  <VF_LaunchOutOfFuel>Nie można odlecieć, Brak paliwa.</VF_LaunchOutOfFuel>
+  <VF_FlightPathMaxNodes>Osiągnięto maksymalną liczbę przystanków na trasie lotu {0}.</VF_FlightPathMaxNodes>
+  <VF_MustTargetLanding>Należy wybrać miejsce lądowania.</VF_MustTargetLanding>
+</LanguageData>
+

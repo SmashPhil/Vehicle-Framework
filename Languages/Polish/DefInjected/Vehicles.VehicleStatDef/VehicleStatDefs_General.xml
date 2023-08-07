@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <MoveSpeed.label>Prędkość Ruchu</MoveSpeed.label>
+  <MoveSpeed.description>Prędkość Ruchu w Kratkach na Sekundę.</MoveSpeed.description>
+  <CargoCapacity.label>Ładunek</CargoCapacity.label>
+  <CargoCapacity.description>Masa, jaką ten pojazd może przewozić jako ładunek. Jest to ta sama ilość, która jest dostępna dla karawan.</CargoCapacity.description>
+  <RepairRate.label>Szybkość Naprawy</RepairRate.label>
+  <RepairRate.description>Ilość Zdrowia Naprawianego na Sekundę.</RepairRate.description>
+  <Mass.label>Masa</Mass.label>
+  <Mass.description>Fizyczna masa tego pojazdu</Mass.description>
+  <BodyIntegrity.label>Integralność Pojazdu</BodyIntegrity.label>
+  <BodyIntegrity.description>Średnia wszystkich komponentów pojazdu. Jeśli integralność pojazdu osiągnie 0, rozpadnie się on na ułamek kosztu budowy.</BodyIntegrity.description>
+</LanguageData>
+

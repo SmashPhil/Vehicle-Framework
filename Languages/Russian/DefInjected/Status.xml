@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_FormingCaravanStatus_RopingAnimals>Привязать животных к технике.</VF_FormingCaravanStatus_RopingAnimals>
+  <VF_FormingCaravanStatus_RopingAnimals_Pause>Привязать животных к технике. (ожидание)</VF_FormingCaravanStatus_RopingAnimals_Pause>
+  <VF_FormingCaravanStatus_BoardVehicles>Погрузка.</VF_FormingCaravanStatus_BoardVehicles>
+  <VF_FormingCaravanStatus_BoardVehicles_Pause>Погрузка. (ожидание)</VF_FormingCaravanStatus_BoardVehicles_Pause>
+  <VF_FormingCaravanStatus_Leaving_Vehicles>Выгрузка.</VF_FormingCaravanStatus_Leaving_Vehicles>
+  <VF_FormingCaravanStatus_Leaving_Vehicles_Pause>Выгрузка. (ожидание)</VF_FormingCaravanStatus_Leaving_Vehicles_Pause>
+</LanguageData>
+

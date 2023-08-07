@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_IncidentCrashedSiteLabel_Crashing>{0} Совершил жесткую посадку</VF_IncidentCrashedSiteLabel_Crashing>
+  <VF_IncidentCrashedSiteLabel_ShotDown>{1} Подбил {0}</VF_IncidentCrashedSiteLabel_ShotDown>
+  <VF_IncidentReasonLister>\n\nПричина:\n {0}</VF_IncidentReasonLister>
+  <VF_IncidentCrashedSite_Crashing>{0} разбился.</VF_IncidentCrashedSite_Crashing>
+  <VF_IncidentCrashedSite_ShotDown>{0} был подбит {1}.</VF_IncidentCrashedSite_ShotDown>
+  <VF_IncidentCrashedSiteReason_OutOfFuel>Закончилось топливо</VF_IncidentCrashedSiteReason_OutOfFuel>
+  <VF_IncidentCrashedSiteReason_FlightControl>Потерял управление в воздухе</VF_IncidentCrashedSiteReason_FlightControl>
+  <VF_ReinforcementsArrivedLabel>Подкрепления</VF_ReinforcementsArrivedLabel>
+  <VF_ReinforcementsArrived>{0} прибыл с подкреплениями для исследования места крушения.</VF_ReinforcementsArrived>
+  <VF_BoatSunk>Судно затонуло</VF_BoatSunk>
+  <VF_BoatSunkDesc>{0} затонуло в глубины океана.</VF_BoatSunkDesc>
+  <VF_BoatSunkWithPawnsDesc>{0} затонуло в глубины океана. 
+
+следующие моряки утонули вместе с судном:
+{1}</VF_BoatSunkWithPawnsDesc>
+</LanguageData>
+

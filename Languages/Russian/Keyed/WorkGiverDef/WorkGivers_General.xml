@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <PackVehicle.label>снарядить технику</PackVehicle.label>
+  <PackVehicle.verb>снарядить</PackVehicle.verb>
+  <PackVehicle.gerund>снаряжение</PackVehicle.gerund>
+  <LoadUpgradeMaterials.label>погрузить материалы</LoadUpgradeMaterials.label>
+  <LoadUpgradeMaterials.verb>погрузить</LoadUpgradeMaterials.verb>
+  <LoadUpgradeMaterials.gerund>загрузка</LoadUpgradeMaterials.gerund>
+  <WorkOnUpgrade.label>работа над улучшением</WorkOnUpgrade.label>
+  <WorkOnUpgrade.verb>улучшение</WorkOnUpgrade.verb>
+  <WorkOnUpgrade.gerund>улучшение</WorkOnUpgrade.gerund>
+  <RefuelVehicle.label>заправить технику</RefuelVehicle.label>
+  <RefuelVehicle.verb>заправить</RefuelVehicle.verb>
+  <RefuelVehicle.gerund>заправка</RefuelVehicle.gerund>
+  <RepairVehicle.label>починить технику</RepairVehicle.label>
+  <RepairVehicle.verb>починить</RepairVehicle.verb>
+  <RepairVehicle.gerund>починка</RepairVehicle.gerund>
+  <DisassembleVehicle.label>разобрать технику</DisassembleVehicle.label>
+  <DisassembleVehicle.verb>разобрать</DisassembleVehicle.verb>
+  <DisassembleVehicle.gerund>разборка</DisassembleVehicle.gerund>
+  <PaintVehicle.label>покрасить технику</PaintVehicle.label>
+  <PaintVehicle.verb>покрасить</PaintVehicle.verb>
+  <PaintVehicle.gerund>покраска</PaintVehicle.gerund>
+</LanguageData>
+
