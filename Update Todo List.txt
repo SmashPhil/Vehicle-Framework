@@ -1,4 +1,3 @@
-- Run bat file
 - Rebuild entire solution
 - Reboot game to update Version.txt with current build date.
 - Update Manifest version

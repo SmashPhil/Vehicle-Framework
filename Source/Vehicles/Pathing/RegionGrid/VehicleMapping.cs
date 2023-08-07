@@ -139,7 +139,9 @@ namespace Vehicles
 
 		public override void MapRemoved()
 		{
-			dedicatedThread.Release();
+			int id = dedicatedThread.id;
+			bool result = dedicatedThread.Release();
+			Log.Message($"Disposing Thread {id} Result={result}");
 		}
 
 		/// <summary>
