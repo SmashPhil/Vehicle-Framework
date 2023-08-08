@@ -246,12 +246,12 @@ namespace Vehicles
 		{
 			if (selectedPattern.properties.dynamicTiling && Mouse.IsOver(rect))
 			{
-				if (!mouseOver)
+				if (!mouseOver && AssetBundleDatabase.MouseHandOpen)
 				{
 					mouseOver = true;
 					Cursor.SetCursor(AssetBundleDatabase.MouseHandOpen, new Vector2(3, 3), CursorMode.Auto);
 				}
-				if (Input.GetMouseButtonDown(0) && !RenderHelper.draggingDisplacement)
+				if (Input.GetMouseButtonDown(0) && !RenderHelper.draggingDisplacement && AssetBundleDatabase.MouseHandClosed)
 				{
 					RenderHelper.draggingDisplacement = true;
 					initialDragDifferenceX = Mathf.InverseLerp(0f, rect.width, Event.current.mousePosition.x - rect.x) * 2 - 1 - displacementX;
@@ -263,7 +263,7 @@ namespace Vehicles
 					displacementX = (Mathf.InverseLerp(0f, rect.width, Event.current.mousePosition.x - rect.x) * 2 - 1 - initialDragDifferenceX).Clamp(-1.5f, 1.5f);
 					displacementY = (Mathf.InverseLerp(rect.height, 0f, Event.current.mousePosition.y - rect.y) * 2 - 1 - initialDragDifferenceY).Clamp(-1.5f, 1.5f);
 				}
-				if (Input.GetMouseButtonUp(0))
+				if (Input.GetMouseButtonUp(0) && AssetBundleDatabase.MouseHandOpen)
 				{
 					RenderHelper.draggingDisplacement = false;
 					Cursor.SetCursor(AssetBundleDatabase.MouseHandOpen, new Vector2(3, 3), CursorMode.Auto);

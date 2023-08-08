@@ -262,7 +262,6 @@ namespace Vehicles
 							}
 							if (cachedResult == BoolUnknown.False)
 							{
-								Debug.Message($"Unable to start pathing from {start} to {dest}. CachedResult = false");
 								return false;
 							}
 						}

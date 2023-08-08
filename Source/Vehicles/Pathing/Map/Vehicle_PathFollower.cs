@@ -622,8 +622,12 @@ namespace Vehicles
 			}
 			else
 			{
-				Log.Warning($"Finding path on main thread. DedicatedThread was not available.");
+				if (!VehicleMod.settings.debug.debugUseMultithreading)
+				{
+					Log.WarningOnce($"Finding path on main thread. DedicatedThread was not available.", vehicle.Map.GetHashCode());
+				}
 				TrySetNewPath();
+				CalculatingPath = false;
 			}
 		}
 

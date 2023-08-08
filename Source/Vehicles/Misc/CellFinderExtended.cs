@@ -9,6 +9,9 @@ namespace Vehicles
 {
 	public static class CellFinderExtended
 	{
+		private static List<IntVec3> mapEdgeCells;
+		private static IntVec3 mapEdgeCellsSize;
+
 		public static IntVec3 RandomEdgeCell(Rot4 dir, Map map, Predicate<IntVec3> validator, int offset)
 		{
 			List<IntVec3> cellsToCheck = dir.IsValid ? CellRect.WholeMap(map).ContractedBy(offset).GetEdgeCells(dir).ToList() : CellRect.WholeMap(map).ContractedBy(offset).EdgeCells.ToList();
@@ -213,6 +216,61 @@ namespace Vehicles
 				return result;
 			}
 			return root;
+		}
+
+		public static bool TryFindRandomEdgeCellWith(Predicate<IntVec3> validator, Map map, Rot4 exitDir, VehiclePawn largestVehicle, float roadChance, out IntVec3 result)
+		{
+			result = IntVec3.Invalid;
+
+			if (Rand.Chance(roadChance))
+			{
+				foreach (IntVec3 cell in map.roadInfo.roadEdgeTiles)
+				{
+					IntVec3 paddedCell = cell.PadForHitbox(map, largestVehicle);
+					if (validator(paddedCell))
+					{
+						result = paddedCell;
+						return true;
+					}
+				}
+			}
+
+			//Try to find random edge cell quickly
+			for (int i = 0; i < 100; i++)
+			{
+				result = CellFinder.RandomEdgeCell(map).PadForHitbox(map, largestVehicle);
+				if (validator(result))
+				{
+					return true;
+				}
+			}
+			
+			if (mapEdgeCells.NullOrEmpty() || map.Size != mapEdgeCellsSize)
+			{
+				mapEdgeCellsSize = map.Size;
+				mapEdgeCells = CellRect.WholeMap(map).EdgeCells.ToList();
+			}
+
+			mapEdgeCells.Shuffle();
+
+			foreach (IntVec3 cell in mapEdgeCells)
+			{
+				try
+				{
+					if (validator(cell))
+					{
+						result = cell;
+						return true;
+					}
+				}
+				catch (Exception ex)
+				{
+					Log.Error($"CellFinderExtended.TryFindRandomEdgeCellWith threw exception while validating {cell}. Exception={ex}");
+				}
+			}
+
+			result = IntVec3.Invalid;
+			return false;
 		}
 	}
 }

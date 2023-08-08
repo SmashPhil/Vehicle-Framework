@@ -163,7 +163,7 @@ namespace Vehicles
 
 		public override bool CanDraft(out string failReason)
 		{
-			if (EmptyTank)
+			if (!VehicleMod.settings.debug.debugDraftAnyVehicle && EmptyTank)
 			{
 				failReason = "VF_OutOfFuel".Translate();
 				return false;

@@ -68,6 +68,11 @@ namespace Vehicles
 			{
 				return;
 			}
+			if (!VehicleMod.settings.debug.debugLoadAssetBundles)
+			{
+				Log.Warning($"[{VehicleHarmony.LogLabel}] Skipping asset bundle loading!");
+				return;
+			}
 			if (bundleBuildVersions.TryGetValue(VersionControl.CurrentVersionStringWithoutBuild, out string currentVersion))
 			{
 				if (currentVersion != Application.unityVersion)

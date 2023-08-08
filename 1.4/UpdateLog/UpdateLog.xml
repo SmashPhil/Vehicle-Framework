@@ -11,6 +11,8 @@
 - Fixed Russian translation folder not loading properly
 
 - Fixed bug with compatibility patch for RimHUD which would cause WorldInspectPane to throw exception.
+
+- Fixed bug where VehicleCaravans would find an invalid exit spot, causing the vehicle to freeze and not exit the map.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - 'nameable' setting for vehicles is now True by default, making all vehicles able to be renamed unless changed by the modder or disabled in the mod settings.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;

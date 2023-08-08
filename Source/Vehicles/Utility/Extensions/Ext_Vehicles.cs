@@ -124,6 +124,31 @@ namespace Vehicles
 			}
 		}
 
+		public static IntVec3 PadForHitbox(this IntVec3 cell, Map map, VehiclePawn vehicle)
+		{
+			int largestSize = Mathf.Max(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z);
+			int padding = Mathf.CeilToInt(largestSize / 2);
+
+			if (cell.x < padding)
+			{
+				cell.x = padding;
+			}
+			else if (cell.x + padding > map.Size.x)
+			{
+				cell.x = map.Size.x - padding;
+			}
+
+			if (cell.z < padding)
+			{
+				cell.z = padding;
+			}
+			else if (cell.z + padding > map.Size.z)
+			{
+				cell.z = map.Size.z - padding;
+			}
+			return cell;
+		}
+
 		public static void RegenerateEvents(this VehiclePawn vehicle)
 		{
 			vehicle.RegisterEvents();
