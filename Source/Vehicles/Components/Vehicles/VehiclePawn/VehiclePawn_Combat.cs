@@ -9,6 +9,16 @@ namespace Vehicles
 {
 	public partial class VehiclePawn
 	{
+		public virtual bool CanApplyStun(Thing instigator)
+		{
+			return false;
+		}
+
+		public virtual bool CanApplyStagger()
+		{
+			return false;
+		}
+
 		public void CheckForCollisions(float moveSpeed)
 		{
 			CellRect occupiedRect = this.OccupiedRect();

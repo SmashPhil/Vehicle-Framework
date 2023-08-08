@@ -175,7 +175,7 @@ namespace Vehicles
 				if (Spawned)
 				{
 					vPather.PatherTick();
-					//stances.StanceTrackerTick(); //TODO - Add as tick requester for stunning
+					stances.StanceTrackerTick();
 					if (Drafted)
 					{
 						jobs.JobTrackerTick();

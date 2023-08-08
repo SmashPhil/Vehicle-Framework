@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1339</currentVersion>
+  <currentVersion>1.5.1340</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
@@ -13,6 +13,10 @@
 - Fixed bug with compatibility patch for RimHUD which would cause WorldInspectPane to throw exception.
 
 - Fixed bug where VehicleCaravans would find an invalid exit spot, causing the vehicle to freeze and not exit the map.
+
+- Fixed compatibility issue with Geological Landforms where impassable tiles settled on by the player would not allow vehicles to exit / enter.
+
+- Fixed bug where vehicles could become stunned permanently.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - 'nameable' setting for vehicles is now True by default, making all vehicles able to be renamed unless changed by the modder or disabled in the mod settings.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;

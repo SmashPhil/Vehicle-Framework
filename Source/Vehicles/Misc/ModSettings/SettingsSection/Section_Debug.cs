@@ -20,7 +20,7 @@ namespace Vehicles
 
 		public bool debugDraftAnyVehicle;
 		public bool debugShootAnyTurret;
-		public bool debugSpawnVehicleBuildingGodMode;
+		
 
 		public bool debugDrawCannonGrid;
 		public bool debugDrawNodeGrid;
@@ -35,6 +35,7 @@ namespace Vehicles
 		public bool debugDrawVehiclePathCosts;
 		public bool debugDrawPathfinderSearch;
 
+		public bool debugSpawnVehicleBuildingGodMode = false;
 		public bool debugUseMultithreading = true;
 		public bool debugLoadAssetBundles = true;
 
@@ -43,7 +44,7 @@ namespace Vehicles
 			base.ResetSettings();
 			debugDraftAnyVehicle = false;
 			debugShootAnyTurret = false;
-			debugSpawnVehicleBuildingGodMode = false;
+			
 
 			debugDrawCannonGrid = false;
 			debugDrawNodeGrid = false;
@@ -58,6 +59,7 @@ namespace Vehicles
 			debugDrawVehiclePathCosts = false;
 			debugDrawPathfinderSearch = false;
 
+			debugSpawnVehicleBuildingGodMode = false;
 			debugUseMultithreading = true;
 			debugLoadAssetBundles = true;
 		}
@@ -66,7 +68,6 @@ namespace Vehicles
 		{
 			Scribe_Values.Look(ref debugDraftAnyVehicle, nameof(debugDraftAnyVehicle));
 			Scribe_Values.Look(ref debugShootAnyTurret, nameof(debugShootAnyTurret));
-			Scribe_Values.Look(ref debugSpawnVehicleBuildingGodMode, nameof(debugSpawnVehicleBuildingGodMode));
 
 			Scribe_Values.Look(ref debugDrawCannonGrid, nameof(debugDrawCannonGrid));
 			Scribe_Values.Look(ref debugDrawNodeGrid, nameof(debugDrawNodeGrid));
@@ -81,6 +82,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref debugDrawVehiclePathCosts, nameof(debugDrawVehiclePathCosts));
 			Scribe_Values.Look(ref debugDrawPathfinderSearch, nameof(debugDrawPathfinderSearch));
 
+			Scribe_Values.Look(ref debugSpawnVehicleBuildingGodMode, nameof(debugSpawnVehicleBuildingGodMode));
 			Scribe_Values.Look(ref debugUseMultithreading, nameof(debugUseMultithreading), defaultValue: true);
 			Scribe_Values.Look(ref debugLoadAssetBundles, nameof(debugLoadAssetBundles), defaultValue: true);
 		}
@@ -104,9 +106,9 @@ namespace Vehicles
 					listingStandard.Header("VF_DevMode_Troubleshooting".Translate(), ListingExtension.BannerColor, anchor: TextAnchor.MiddleCenter);
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDraftAnyVehicle".Translate(), ref debugDraftAnyVehicle, "VF_DevMode_DebugDraftAnyVehicleTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugShootAnyTurret".Translate(), ref debugShootAnyTurret, "VF_DevMode_DebugShootAnyTurretTooltip".Translate());
-					listingStandard.CheckboxLabeled("VF_DevMode_DebugSpawnVehiclesGodMode".Translate(), ref debugSpawnVehicleBuildingGodMode, "VF_DevMode_DebugSpawnVehiclesGodModeTooltip".Translate());
-
+					
 					listingStandard.Header("Debugging Only", ListingExtension.BannerColor, anchor: TextAnchor.MiddleCenter);
+					listingStandard.CheckboxLabeled("VF_DevMode_DebugSpawnVehiclesGodMode".Translate(), ref debugSpawnVehicleBuildingGodMode, "VF_DevMode_DebugSpawnVehiclesGodModeTooltip".Translate());
 					bool checkOn = debugUseMultithreading;
 					listingStandard.CheckboxLabeled("Use Multithreading", ref checkOn);
 					if (checkOn != debugUseMultithreading)
