@@ -394,12 +394,6 @@ namespace Vehicles
 
 		private void TryEnterNextPathCell()
 		{
-			//CompVehicleDamager vehicleDamager = vehicle.GetSortedComp<CompVehicleDamager>();
-			//if (vehicleDamager != null)
-			//{
-			//	vehicleDamager.TakeStep();
-			//}
-
 			if (waitTicks > 0)
 			{
 				waitTicks--;

@@ -394,23 +394,26 @@ namespace Vehicles
 		{
 			get
 			{
-				if (!string.IsNullOrEmpty(turretDef.gizmoIconTexPath) && gizmoIcon is null)
+				if (gizmoIcon is null)
 				{
-					gizmoIcon = ContentFinder<Texture2D>.Get(turretDef.gizmoIconTexPath);
-				}
-				else if (NoGraphic)
-				{
-					gizmoIcon = BaseContent.BadTex;
-				}
-				else if (gizmoIcon is null)
-				{
-					if(CannonTexture != null)
+					if (!string.IsNullOrEmpty(turretDef.gizmoIconTexPath))
 					{
-						gizmoIcon = CannonTexture;
+						gizmoIcon = ContentFinder<Texture2D>.Get(turretDef.gizmoIconTexPath);
+					}
+					else if (NoGraphic)
+					{
+						gizmoIcon = BaseContent.BadTex;
 					}
 					else
 					{
-						gizmoIcon = BaseContent.BadTex;
+						if (CannonTexture != null)
+						{
+							gizmoIcon = CannonTexture;
+						}
+						else
+						{
+							gizmoIcon = BaseContent.BadTex;
+						}
 					}
 				}
 				return gizmoIcon;
