@@ -647,7 +647,7 @@ namespace Vehicles
 				locationRotation = TurretRotationFor(rot, attachedTo.TurretRotationUncorrected);
 			}
 			Vector2 turretLoc = VehicleGraphics.TurretDrawOffset(rot, renderProperties, locationRotation, fullLoc ? attachedTo : null);
-			Vector3 graphicOffset = CannonGraphic.DrawOffset(rot);
+			Vector3 graphicOffset = CannonGraphic?.DrawOffset(rot) ?? Vector3.zero;
 			return new Vector3(pos.x + graphicOffset.x + turretLoc.x, pos.y + graphicOffset.y + drawLayer * Altitudes.AltInc, pos.z + graphicOffset.z + turretLoc.y);
 		}
 

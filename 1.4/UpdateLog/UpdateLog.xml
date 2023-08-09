@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1340</currentVersion>
+  <currentVersion>1.5.1341</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
@@ -29,6 +29,8 @@
 - Fixed Region link issue where vehicles would be unable to reach certain parts of the map under very specific conditions.
 
 - Removed pdb files from steam upload, significantly decreasing the size of the Mod.
+
+- Fixed bug where turn cost would use incorrect rotation, causing sharp drastic turns.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - 'nameable' setting for vehicles is now True by default, making all vehicles able to be renamed unless changed by the modder or disabled in the mod settings.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
