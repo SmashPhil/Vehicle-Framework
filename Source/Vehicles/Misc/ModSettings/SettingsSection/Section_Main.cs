@@ -185,12 +185,18 @@ namespace Vehicles
 					{
 						return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput);
 					}, ref modifiableSettings, "VF_ModifiableSettingsTooltip".Translate());
-					listingStandard.CheckboxLabeled("VF_CustomShaders".Translate(), ref useCustomShaders, "VF_CustomShadersTooltip".Translate());
+
+					listingStandard.CheckboxLabeledWithMessage("VF_CustomShaders".Translate(), delegate (bool value)
+					{
+						return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput);
+					}, ref useCustomShaders, "VF_CustomShadersTooltip".Translate());
 
 					listingStandard.CheckboxLabeled("VF_DiagonalVehicleRendering".Translate(), ref allowDiagonalRendering, "VF_DiagonalVehicleRenderingTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_FullVehiclePathing".Translate(), ref fullVehiclePathing, "VF_FullVehiclePathingTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_SmoothVehiclePathing".Translate(), ref smoothVehiclePaths, "VF_SmoothVehiclePathingTooltip".Translate());
-					//listingStandard.CheckboxLabeled("VF_HierarchalPathfinding".Translate(), ref hierarchalPathfinding, "VF_HierarchalPathfindingTooltip".Translate());
+					GUIState.Disable();
+					listingStandard.CheckboxLabeled("VF_HierarchalPathfinding".Translate(), ref hierarchalPathfinding, "VF_HierarchalPathfindingTooltip".Translate());
+					GUIState.Enable();
 
 					GUIState.Disable();
 					listingStandard.CheckboxLabeled("VF_RoadBiomeCostPathing".Translate(), ref vehiclePathingBiomesCostOnRoads, "VF_RoadBiomeCostPathingTooltip".Translate());

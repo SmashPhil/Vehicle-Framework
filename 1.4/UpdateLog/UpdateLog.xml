@@ -7,6 +7,10 @@
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 Another round of bugfixes.
+
+If you're having problems with memory usage, go into the mod settings and turn off 'Use RGB Shaders.'  I'm still in the process of fixing this, so it'll be in the next patch.
+
+I'm gonna focus on performance improvements this next patch, so if you have grievances with performance now is the time to let me know.  Thanks!
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Fixed bug with compatibility patch for RimHUD which would cause WorldInspectPane to throw exception in initial map selection.
 
