@@ -604,14 +604,17 @@ namespace Vehicles
 		/// </summary>
 		public void RecacheRootDrawPos()
 		{
-			rootDrawPos_North = TurretDrawLocFor(Rot8.North, Vector3.zero, fullLoc: false);
-			rootDrawPos_East = TurretDrawLocFor(Rot8.East, Vector3.zero, fullLoc: false);
-			rootDrawPos_South = TurretDrawLocFor(Rot8.South, Vector3.zero, fullLoc: false);
-			rootDrawPos_West = TurretDrawLocFor(Rot8.West, Vector3.zero, fullLoc: false);
-			rootDrawPos_NorthEast = TurretDrawLocFor(Rot8.NorthEast, Vector3.zero, fullLoc: false);
-			rootDrawPos_SouthEast = TurretDrawLocFor(Rot8.SouthEast, Vector3.zero, fullLoc: false);
-			rootDrawPos_SouthWest = TurretDrawLocFor(Rot8.SouthWest, Vector3.zero, fullLoc: false);
-			rootDrawPos_NorthWest = TurretDrawLocFor(Rot8.NorthWest, Vector3.zero, fullLoc: false);
+			if (CannonGraphicData != null)
+			{
+				rootDrawPos_North = TurretDrawLocFor(Rot8.North, Vector3.zero, fullLoc: false);
+				rootDrawPos_East = TurretDrawLocFor(Rot8.East, Vector3.zero, fullLoc: false);
+				rootDrawPos_South = TurretDrawLocFor(Rot8.South, Vector3.zero, fullLoc: false);
+				rootDrawPos_West = TurretDrawLocFor(Rot8.West, Vector3.zero, fullLoc: false);
+				rootDrawPos_NorthEast = TurretDrawLocFor(Rot8.NorthEast, Vector3.zero, fullLoc: false);
+				rootDrawPos_SouthEast = TurretDrawLocFor(Rot8.SouthEast, Vector3.zero, fullLoc: false);
+				rootDrawPos_SouthWest = TurretDrawLocFor(Rot8.SouthWest, Vector3.zero, fullLoc: false);
+				rootDrawPos_NorthWest = TurretDrawLocFor(Rot8.NorthWest, Vector3.zero, fullLoc: false);
+			}
 		}
 
 		public void RecacheMannedStatus()
@@ -1820,7 +1823,7 @@ namespace Vehicles
 				{
 					turret.SwitchAutoTarget();
 				},
-				tooltip = "VF_AutoTargeting".Translate(turret.AutoTarget.ToString())
+				tooltip = "VF_AutoTargeting".Translate(turret.AutoTarget.ToStringYesNo())
 			};
 		}
 

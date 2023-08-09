@@ -176,7 +176,7 @@ namespace Vehicles
 			}
 			var color = GUI.color;
 			GUI.color = textColor;
-			string massText = string.Format("Mass: {0}/{1}", MassUsage, MassCapacity);
+			string massText = $"{"Mass".Translate()}: {MassUsage}/{MassCapacity}";
 			Widgets.Label(rect, massText);
 			GUI.color = color;
 		}

@@ -92,8 +92,12 @@ namespace Vehicles
 			{
 				if (vehicleDefs.NullOrEmpty())
 				{
-					vehicleDefs = DefDatabase<VehicleDef>.AllDefsListForReading.OrderBy(d => d.modContentPack.PackageId.Contains(VehicleHarmony.VehiclesUniqueId)).ThenBy(d2 => d2.modContentPack.PackageId).ToList();
-					RecacheVehicleFilter();
+					var allDefs = DefDatabase<VehicleDef>.AllDefsListForReading;
+					if (!allDefs.NullOrEmpty())
+					{
+						vehicleDefs = allDefs.OrderBy(d => d.modContentPack.PackageId.Contains(VehicleHarmony.VehiclesUniqueId)).ThenBy(d2 => d2.modContentPack.PackageId).ToList();
+						RecacheVehicleFilter();
+					}
 				}
 				return vehicleDefs;
 			}
@@ -306,12 +310,6 @@ namespace Vehicles
 			Rect scrollContainer = rect.ContractedBy(10);
 			scrollContainer.width /= 4;
 
-			if (filteredVehicleDefs.Count == 0 && VehicleDefs.Count == 0)
-			{
-				// No need to render list if no vehicle mods active, and also calling get_VehicleDefs will trigger recache if mod settings page is opened directly to Vehicles tab
-				return scrollContainer; 
-			}
-
 			GUIState.Push();
 			try
 			{
@@ -331,6 +329,12 @@ namespace Vehicles
 				{
 					vehicleFilter.Text = searchText;
 					RecacheVehicleFilter();
+				}
+
+				if (filteredVehicleDefs.NullOrEmpty() && VehicleDefs.NullOrEmpty())
+				{
+					// No need to render list if no vehicle mods active, and also calling get_VehicleDefs will trigger recache if mod settings page is opened directly to Vehicles tab
+					return scrollContainer;
 				}
 
 				GUIState.Reset();
@@ -368,39 +372,41 @@ namespace Vehicles
 
 				Listing_SplitColumns listingStandard = new Listing_SplitColumns();
 				listingStandard.BeginScrollView(scrollList, ref vehicleDefsScrollPosition, ref scrollView, 1);
-				string currentModTitle = string.Empty;
-				foreach (VehicleDef vehicle in filteredVehicleDefs)
 				{
-					try
+					string currentModTitle = string.Empty;
+					foreach (VehicleDef vehicle in filteredVehicleDefs)
 					{
-						if (currentModTitle != vehicle.modContentPack.Name)
+						try
 						{
-							currentModTitle = vehicle.modContentPack.Name;
-							listingStandard.Header(currentModTitle, ListingExtension.BannerColor, GameFont.Medium, TextAnchor.MiddleCenter);
+							if (currentModTitle != vehicle.modContentPack.Name)
+							{
+								currentModTitle = vehicle.modContentPack.Name;
+								listingStandard.Header(currentModTitle, ListingExtension.BannerColor, GameFont.Medium, TextAnchor.MiddleCenter);
+							}
+							bool validated = validator is null || validator(vehicle);
+							string tooltip = tooltipGetter != null ? tooltipGetter(validated) : string.Empty;
+							if (listingStandard.ListItemSelectable(vehicle.LabelCap, Color.yellow, selectedDef == vehicle, validated, tooltip))
+							{
+								if (selectedDef == vehicle)
+								{
+									DeselectVehicle();
+								}
+								else
+								{
+									SelectVehicle(vehicle);
+								}
+							}
 						}
-						bool validated = validator is null || validator(vehicle);
-						string tooltip = tooltipGetter != null ? tooltipGetter(validated) : string.Empty;
-						if (listingStandard.ListItemSelectable(vehicle.LabelCap, Color.yellow, selectedDef == vehicle, validated, tooltip))
+						catch (Exception ex)
 						{
-							if (selectedDef == vehicle)
-							{
-								DeselectVehicle();
-							}
-							else
-							{
-								SelectVehicle(vehicle);
-							}
+							Log.Error($"Exception thrown while trying to select {vehicle.defName}. Disabling vehicle to preserve mod settings.\nException={ex.Message}");
+							selectedDef = null;
+							selectedPatterns.Clear();
+							selectedDefUpgradeComp = null;
+							selectedNode = null;
+							SetVehicleTex(null);
+							settingsDisabledFor.Add(vehicle.defName);
 						}
-					}
-					catch (Exception ex)
-					{
-						Log.Error($"Exception thrown while trying to select {vehicle.defName}. Disabling vehicle to preserve mod settings.\nException={ex.Message}");
-						selectedDef = null;
-						selectedPatterns.Clear();
-						selectedDefUpgradeComp = null;
-						selectedNode = null;
-						SetVehicleTex(null);
-						settingsDisabledFor.Add(vehicle.defName);
 					}
 				}
 				listingStandard.EndScrollView(ref scrollView);
@@ -416,12 +422,15 @@ namespace Vehicles
 		{
 			filteredVehicleDefs.Clear();
 			HashSet<string> uniqueHeaders = new HashSet<string>();
-			foreach (VehicleDef vehicleDef in VehicleDefs)
+			if (!VehicleDefs.NullOrEmpty())
 			{
-				if (vehicleFilter.Text.NullOrEmpty() || vehicleFilter.Matches(vehicleDef.defName) || vehicleFilter.Matches(vehicleDef.label) || vehicleFilter.Matches(vehicleDef.modContentPack.Name))
+				foreach (VehicleDef vehicleDef in VehicleDefs)
 				{
-					uniqueHeaders.Add(vehicleDef.modContentPack.Name);
-					filteredVehicleDefs.Add(vehicleDef);
+					if (vehicleFilter.Text.NullOrEmpty() || vehicleFilter.Matches(vehicleDef.defName) || vehicleFilter.Matches(vehicleDef.label) || vehicleFilter.Matches(vehicleDef.modContentPack.Name))
+					{
+						uniqueHeaders.Add(vehicleDef.modContentPack.Name);
+						filteredVehicleDefs.Add(vehicleDef);
+					}
 				}
 			}
 			headers = uniqueHeaders.Count;

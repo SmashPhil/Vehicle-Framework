@@ -121,7 +121,7 @@ namespace Vehicles
 			listingStandard.Begin(vehicleDetailsContainer.ContractedBy(1));
 			listingStandard.Header($"{VehicleMod.selectedDef?.LabelCap ?? string.Empty}", ListingExtension.BannerColor, GameFont.Medium, TextAnchor.MiddleCenter);
 			listingStandard.End();
-
+			
 			if (VehicleMod.selectedDef != null)
 			{
 				try

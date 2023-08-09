@@ -96,6 +96,10 @@ namespace Vehicles
 			{
 				yield return $"Invalid fields in <field>motes</field>. <field>moteDef</field> cannot be null and <field>animationType</field> cannot be \"Off\"".ConvertRichText();
 			}
+			if (graphicData == null && gizmoIconTexPath.NullOrEmpty())
+			{
+				yield return $"Null graphicData and no gizmoIconTexPath, this turret has no way to be rendered in gizmos.";
+			}
 			if (fireModes.NullOrEmpty() || fireModes.Any(f => !f.IsValid))
 			{
 				yield return $"Empty or Invalid FireMode in <field>fireModes</field> list. Must include at least 1 entry with non-negative numbers.".ConvertRichText();

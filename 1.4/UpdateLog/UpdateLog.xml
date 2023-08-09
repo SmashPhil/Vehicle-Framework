@@ -19,6 +19,8 @@
 - Fixed bug where vehicles could become stunned permanently.
 
 - Fixed RimNauts2 package id for spaceFlight field
+
+- Fixed missing translations for Mass in LoadCargo dialog, AutoTargeting toggle, and 
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - 'nameable' setting for vehicles is now True by default, making all vehicles able to be renamed unless changed by the modder or disabled in the mod settings.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
