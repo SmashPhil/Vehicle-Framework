@@ -182,7 +182,7 @@ namespace Vehicles
 				Rect subIconRect = new Rect(gizmoRect.xMax - SubIconSize, gizmoRect.y, SubIconSize, SubIconSize); //top right
 				if ((turret.loadedAmmo is null || turret.shellCount <= 0) && turret.turretDef.ammunition != null)
 				{
-					disabledReason += "NoAmmoLoadedCannon".Translate();
+					disabledReason += "VF_NoAmmoLoadedTurret".Translate();
 					ammoLoaded = false;
 				}
 				else if (!turret.OnCooldown && Mouse.IsOver(gizmoRect) && (!Mouse.IsOver(subIconRect) || !turret.cannonTarget.IsValid))

@@ -5,32 +5,34 @@
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
-  <description>&lt;title&gt;Hot Fix&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
-
+  <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+Another round of bugfixes.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Fixed Russian translation folder not loading properly
+- Fixed bug with compatibility patch for RimHUD which would cause WorldInspectPane to throw exception in initial map selection.
 
-- Fixed bug with compatibility patch for RimHUD which would cause WorldInspectPane to throw exception.
-
-- Fixed bug where VehicleCaravans would find an invalid exit spot, causing the vehicle to freeze and not exit the map.
-
-- Fixed compatibility issue with Geological Landforms where impassable tiles settled on by the player would not allow vehicles to exit / enter.
-
-- Fixed bug where vehicles could become stunned permanently.
+- Fixed compatibility issue with Geological Landforms where impassable tiles settled on by the player (cave maps) would not allow vehicles to exit / enter.
 
 - Fixed RimNauts2 package id for spaceFlight field
 
-- Fixed missing translations for Mass in LoadCargo dialog, AutoTargeting toggle, and tooltip for DevMode buttons in mod settings.
+- Fixed bug where VehicleCaravans would find an invalid exit spot, causing the vehicle to freeze and not exit the map.
+
+- Fixed Region link issue where vehicles would be unable to reach certain parts of the map under very specific conditions.
+
+- Fixed bug where turn cost would use incorrect rotation, causing sharp drastic turns.
+
+- Fixed bug where vehicles could become stunned permanently.
 
 - Fixed bug where gizmoIcon for VehicleTurrets wouldn't render.
 
 - Fixed issue where AutoRefuel% in the mod settings didn't display decimals.
 
-- Fixed Region link issue where vehicles would be unable to reach certain parts of the map under very specific conditions.
+- Fixed Russian translation folder not loading properly
+
+- Fixed translation issue when turrets are disabled for not having enough ammo.
+
+- Fixed missing translations for Mass in LoadCargo dialog, AutoTargeting toggle, and tooltip for DevMode buttons in mod settings.
 
 - Removed pdb files from steam upload, significantly decreasing the size of the Mod.
-
-- Fixed bug where turn cost would use incorrect rotation, causing sharp drastic turns.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - 'nameable' setting for vehicles is now True by default, making all vehicles able to be renamed unless changed by the modder or disabled in the mod settings.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
