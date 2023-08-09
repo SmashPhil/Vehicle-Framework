@@ -128,12 +128,12 @@ namespace Vehicles
 			{
 				regionsToDirty.Add(validRegionAt_NoRebuild);
 			}
-			IntVec2 sizeWithPadding = thing.def.size + new IntVec2(createdFor.SizePadding, createdFor.SizePadding);
-			foreach (IntVec3 c in GenAdj.CellsAdjacent8Way(thing.Position, thing.Rotation, sizeWithPadding))
+			IntVec2 sizeWithPadding = thing.def.size + new IntVec2(createdFor.SizePadding * 2, createdFor.SizePadding * 2); //Doubled to account for opposite directions (N to S, E to W)
+			foreach (IntVec3 cell in GenAdj.CellsAdjacent8Way(thing.Position, thing.Rotation, sizeWithPadding))
 			{
-				if (c.InBounds(mapping.map))
+				if (cell.InBounds(mapping.map))
 				{
-					VehicleRegion validRegionAt_NoRebuild2 = mapping[createdFor].VehicleRegionGrid.GetValidRegionAt_NoRebuild(c);
+					VehicleRegion validRegionAt_NoRebuild2 = mapping[createdFor].VehicleRegionGrid.GetValidRegionAt_NoRebuild(cell);
 					if (validRegionAt_NoRebuild2 != null)
 					{
 						regionsToDirty.Add(validRegionAt_NoRebuild2);

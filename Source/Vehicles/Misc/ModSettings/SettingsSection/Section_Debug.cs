@@ -159,14 +159,19 @@ namespace Vehicles
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawVehiclePathingCosts".Translate(), ref debugDrawVehiclePathCosts, "VF_DevMode_DebugDrawVehiclePathingCostsTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawPathfinderSearch".Translate(), ref debugDrawPathfinderSearch, "VF_DevMode_DebugDrawPathfinderSearchTooltip".Translate());
 
-					if (listingStandard.ButtonText("VF_DevMode_DebugPathfinderDebugging".Translate(), "VF_DevMode_DebugPathfinderDebuggingTooltip".Translate()))
+					Rect buttonRect = listingStandard.GetRect(30);
+					if (Widgets.ButtonText(buttonRect, "VF_DevMode_DebugPathfinderDebugging".Translate()))
 					{
 						RegionDebugMenu();
 					}
-					if (listingStandard.ButtonText("VF_DevMode_DebugWorldPathfinderDebugging".Translate(), "VF_DevMode_DebugWorldPathfinderDebuggingTooltip".Translate()))
+					TooltipHandler.TipRegionByKey(buttonRect, "VF_DevMode_DebugPathfinderDebuggingTooltip");
+
+					buttonRect = listingStandard.GetRect(30);
+					if (Widgets.ButtonText(buttonRect, "VF_DevMode_DebugWorldPathfinderDebugging".Translate()))
 					{
 						WorldPathingDebugMenu();
 					}
+					TooltipHandler.TipRegionByKey(buttonRect, "VF_DevMode_DebugWorldPathfinderDebuggingTooltip");
 				}
 				GUIState.Pop();
 			}

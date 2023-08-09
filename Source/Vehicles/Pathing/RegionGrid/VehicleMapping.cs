@@ -116,6 +116,12 @@ namespace Vehicles
 			return piggyToOwner[vehicleDef.DefIndex] == vehicleDef.DefIndex;
 		}
 
+		public VehicleDef GetOwner(VehicleDef vehicleDef)
+		{
+			int id = piggyToOwner[vehicleDef.DefIndex];
+			return VehicleHarmony.AllMoveableVehicleDefs.FirstOrDefault(vehicleDef => vehicleDef.DefIndex == id);
+		}
+
 		/// <summary>
 		/// Finalize initialization for map component
 		/// </summary>

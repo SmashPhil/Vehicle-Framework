@@ -20,7 +20,15 @@
 
 - Fixed RimNauts2 package id for spaceFlight field
 
-- Fixed missing translations for Mass in LoadCargo dialog, AutoTargeting toggle, and 
+- Fixed missing translations for Mass in LoadCargo dialog, AutoTargeting toggle, and tooltip for DevMode buttons in mod settings.
+
+- Fixed bug where gizmoIcon for VehicleTurrets wouldn't render.
+
+- Fixed issue where AutoRefuel% in the mod settings didn't display decimals.
+
+- Fixed Region link issue where vehicles would be unable to reach certain parts of the map under very specific conditions.
+
+- Removed pdb files from steam upload, significantly decreasing the size of the Mod.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - 'nameable' setting for vehicles is now True by default, making all vehicles able to be renamed unless changed by the modder or disabled in the mod settings.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;

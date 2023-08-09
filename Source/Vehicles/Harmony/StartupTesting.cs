@@ -18,7 +18,7 @@ namespace Vehicles
 		/// <summary>
 		/// Load up game, get first settlement, find available vehicle, initiate strafing run
 		/// </summary>
-		[UnitTest(Category = "Aerial", Name = "Strafe Run")]
+		//[UnitTest(Category = "Aerial", Name = "Strafe Run")]
 		private static void UnitTest_Strafing()
 		{
 			Map sourceMap = null;

@@ -1264,7 +1264,7 @@ namespace Vehicles
 			Items
 		}
 
-		[DebugAction(VehicleHarmony.VehiclesLabel, null, allowedGameStates = AllowedGameStates.PlayingOnMap, hideInSubMenu = true, displayPriority = 1000)]
+		[DebugAction(VehicleHarmony.VehiclesLabel, null, allowedGameStates = AllowedGameStates.PlayingOnMap, displayPriority = 1000)]
 		private static List<DebugActionNode> TryFindExit()
 		{
 			List<DebugActionNode> debugActions = new List<DebugActionNode>();

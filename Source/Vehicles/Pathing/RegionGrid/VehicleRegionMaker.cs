@@ -315,5 +315,35 @@ namespace Vehicles
 			}
 			tmpProcessedThings.Clear();
 		}
+
+		[DebugAction(VehicleHarmony.VehiclesLabel, null, allowedGameStates = AllowedGameStates.PlayingOnMap, hideInSubMenu = true)]
+		private static List<DebugActionNode> ForceRegenerateRegion()
+		{
+			List<DebugActionNode> debugActions = new List<DebugActionNode>();
+			if (!VehicleHarmony.AllMoveableVehicleDefs.NullOrEmpty())
+			{
+				foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
+				{
+					debugActions.Add(new DebugActionNode(vehicleDef.defName, DebugActionType.ToolMap)
+					{
+						action = delegate ()
+						{
+							Map map = Find.CurrentMap;
+							if (map == null)
+							{
+								Log.Error($"Attempting to use DebugRegionOptions with null map.");
+								return;
+							}
+							DebugHelper.Local.VehicleDef = vehicleDef;
+							DebugHelper.Local.DebugType = DebugRegionType.Regions | DebugRegionType.Links;
+
+							IntVec3 cell = UI.MouseCell();
+							map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionDirtyer.Notify_WalkabilityChanged(cell);
+						}
+					});
+				}
+			}
+			return debugActions;
+		}
 	}
 }
