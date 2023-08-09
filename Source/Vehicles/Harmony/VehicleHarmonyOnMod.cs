@@ -84,7 +84,7 @@ namespace Vehicles
 		/// <param name="___shaderInt"></param>
 		public static void ShaderFromAssetBundle(ShaderTypeDef __instance, ref Shader ___shaderInt)
 		{
-			if (__instance is RGBShaderTypeDef)
+			if (__instance is RGBShaderTypeDef && VehicleMod.settings.debug.debugLoadAssetBundles)
 			{
 				___shaderInt = AssetBundleDatabase.LoadAsset<Shader>(__instance.shaderPath);
 				if (___shaderInt is null)

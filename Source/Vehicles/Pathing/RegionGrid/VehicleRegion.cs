@@ -159,6 +159,7 @@ namespace Vehicles
 			set
 			{
 				if (value == room) return;
+
 				if (room != null)
 				{
 					room.RemoveRegion(this);

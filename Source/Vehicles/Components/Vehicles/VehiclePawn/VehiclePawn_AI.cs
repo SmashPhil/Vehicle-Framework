@@ -103,19 +103,21 @@ namespace Vehicles
 			}
 		}
 
-		public virtual bool CanDraft()
+		public virtual bool CanDraft(out string reason)
 		{
+			reason = "";
 			foreach (ThingComp thingComp in AllComps)
 			{
 				if (thingComp is VehicleComp vehicleComp && !vehicleComp.CanDraft(out string failReason))
 				{
-					Messages.Message(failReason, MessageTypeDefOf.RejectInput);
+					reason = failReason;
 					return false;
 				}
 			}
-			if (!CanMoveFinal)
+			if (!CanMoveWithOperators)
 			{
-				Messages.Message("VF_NotEnoughToOperate".Translate(), MessageTypeDefOf.RejectInput);
+				reason = "VF_NotEnoughToOperate".Translate();
+				return false;
 			}
 			return true;
 		}

@@ -2,8 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using HarmonyLib;
 using UnityEngine;
 using Verse;
 using RimWorld;
@@ -27,6 +28,8 @@ namespace Vehicles
 		private readonly List<VehicleDef> owners = new List<VehicleDef>();
 
 		private int allPathCostsRecalculatedDayOfYear = -1;
+
+		private static readonly MethodInfo HillinessMethod = AccessTools.Method(typeof(WorldPathGrid), "HillinessMovementDifficultyOffset");
 
 		public WorldVehiclePathGrid(World world) : base(world)
 		{
@@ -422,18 +425,19 @@ namespace Vehicles
 		/// Default hilliness path costs
 		/// </summary>
 		/// <param name="hilliness"></param>
-		public static float HillinessMovementDifficultyOffset(Hilliness hilliness)
-		{
-			return hilliness switch
-			{
-				Hilliness.Flat => 0f,
-				Hilliness.SmallHills => 0.5f,
-				Hilliness.LargeHills => 1.5f,
-				Hilliness.Mountainous => 3f,
-				Hilliness.Impassable => ImpassableMovementDifficulty,
-				_ => 0f,
-			};
-		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float HillinessMovementDifficultyOffset(Hilliness hilliness) => (float)HillinessMethod.Invoke(null, new object[] { hilliness });
+		//{
+		//	return hilliness switch
+		//	{
+		//		Hilliness.Flat => 0f,
+		//		Hilliness.SmallHills => 0.5f,
+		//		Hilliness.LargeHills => 1.5f,
+		//		Hilliness.Mountainous => 3f,
+		//		Hilliness.Impassable => ImpassableMovementDifficulty,
+		//		_ => 0f,
+		//	};
+		//}
 
 		public class PathGrid
 		{

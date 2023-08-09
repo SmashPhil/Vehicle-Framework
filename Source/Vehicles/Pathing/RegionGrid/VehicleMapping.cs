@@ -22,7 +22,7 @@ namespace Vehicles
 
 		private int buildingFor = -1;
 
-		public readonly DedicatedThread dedicatedThread;
+		internal DedicatedThread dedicatedThread;
 
 		public VehicleMapping(Map map) : base(map)
 		{
@@ -34,6 +34,8 @@ namespace Vehicles
 		/// VehicleDefs which have created and 'own' a set of regions
 		/// </summary>
 		public List<VehicleDef> Owners => owners;
+
+		public DedicatedThread Thread => dedicatedThread;
 
 		/// <summary>
 		/// Check to make sure dedicated thread is instantiated and running.
@@ -81,19 +83,28 @@ namespace Vehicles
 			}
 		}
 
-		private static DedicatedThread GetDedicatedThread(Map map)
+		internal static DedicatedThread GetDedicatedThread(Map map)
 		{
-			return ThreadManager.CreateNew();
-			//WIP
+			if (!VehicleMod.settings.debug.debugUseMultithreading || map?.info?.parent?.def == null) //Sometimes DevMode test map generates an empty map
+			{
+				return null;
+			}
+			DedicatedThread thread;
 			if (map.IsPlayerHome)
 			{
-				return ThreadManager.CreateNew();
+				thread = ThreadManager.CreateNew();
+				Debug.Message($"<color=orange>Creating thread (id={thread?.id})</color>");
+				return thread;
 			}
 			if (map.IsTempIncidentMap)
 			{
-				return ThreadManager.GetPooled(TempIncidentMapId);
+				thread = ThreadManager.GetPooled(TempIncidentMapId);
+				Debug.Message($"<color=orange>Fetching thread from pool (id={thread?.id})</color>");
+				return thread;
 			}
-			return ThreadManager.GetPooled(EventMapId);
+			thread = ThreadManager.GetPooled(EventMapId);
+			Debug.Message($"<color=orange>Fetching thread from pool (id={thread?.id})</color>");
+			return thread;
 		}
 
 		/// <summary>
@@ -103,6 +114,12 @@ namespace Vehicles
 		public bool IsOwner(VehicleDef vehicleDef)
 		{
 			return piggyToOwner[vehicleDef.DefIndex] == vehicleDef.DefIndex;
+		}
+
+		public VehicleDef GetOwner(VehicleDef vehicleDef)
+		{
+			int id = piggyToOwner[vehicleDef.DefIndex];
+			return VehicleHarmony.AllMoveableVehicleDefs.FirstOrDefault(vehicleDef => vehicleDef.DefIndex == id);
 		}
 
 		/// <summary>
@@ -139,9 +156,13 @@ namespace Vehicles
 
 		public override void MapRemoved()
 		{
-			int id = dedicatedThread.id;
-			bool result = dedicatedThread.Release();
-			Log.Message($"Disposing Thread {id} Result={result}");
+			bool result = ReleaseThread();
+		}
+
+		internal bool ReleaseThread()
+		{
+			Debug.Message($"<orange>Releasing thread {Thread.id}.</orange>");
+			return dedicatedThread.Release();
 		}
 
 		/// <summary>

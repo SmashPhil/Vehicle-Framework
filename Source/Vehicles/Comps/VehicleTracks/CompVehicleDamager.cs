@@ -11,8 +11,7 @@ namespace Vehicles
 	public class CompVehicleDamager : VehicleAIComp
 	{
 		public CompProperties_VehicleDamager Props => (CompProperties_VehicleDamager)props;
-		public VehiclePawn Vehicle => (VehiclePawn)parent;
-
+		
 		public void TakeStep()
 		{
 			throw new NotImplementedException();

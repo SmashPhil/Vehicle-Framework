@@ -9,7 +9,7 @@
 	<VF_FormingCaravanStatus_Leaving_Vehicles_Pause>Leaving. (waiting)</VF_FormingCaravanStatus_Leaving_Vehicles_Pause>
 	
 	<!-- cannot be def injected because they are filled from Abstract def in VehiclePawnBase-->
-	<VF_draftLabel>Start Engine TEST</VF_draftLabel>
+	<VF_draftLabel>Start Engine</VF_draftLabel>
 	<VF_healthLabel_Healthy>Operational</VF_healthLabel_Healthy>
 	<VF_healthLabel_Injured>Needs Repairs</VF_healthLabel_Injured>
 	<VF_healthLabel_Immobile>Inoperable</VF_healthLabel_Immobile>

@@ -841,7 +841,7 @@ namespace Vehicles
 			{
 				//Rot4 rotFromTo = Find.WorldGrid.GetRotFromTo(__instance.CurrentTile, ___startingTile); WHEN WORLD GRID IS ESTABLISHED
 				Rot4 rotFromTo;
-				if(Find.World.CoastDirectionAt(map.Tile).IsValid)
+				if (Find.World.CoastDirectionAt(map.Tile).IsValid)
 				{
 					rotFromTo = Find.World.CoastDirectionAt(map.Tile);
 				}
@@ -890,16 +890,16 @@ namespace Vehicles
 				return result;
 			}
 			CaravanExitMapUtility.GetExitMapEdges(Find.WorldGrid, CurrentTile, startingTile, out Rot4 rot, out Rot4 rot2);
-			result = (rot != Rot4.Invalid && TryFindExitSpotLand(pawns, reachableForEveryColonist, rot, out spot)) || (rot2 != Rot4.Invalid && 
-				TryFindExitSpotLand(pawns, reachableForEveryColonist, rot2, out spot)) || 
-				TryFindExitSpotLand(pawns, reachableForEveryColonist, rot.Rotated(RotationDirection.Clockwise), out spot) || 
-				TryFindExitSpotLand(pawns, reachableForEveryColonist, rot.Rotated(RotationDirection.Counterclockwise), out spot);
+			result = (rot != Rot4.Invalid && TryFindExitSpot(pawns, reachableForEveryColonist, rot, out spot)) || (rot2 != Rot4.Invalid &&
+				TryFindExitSpot(pawns, reachableForEveryColonist, rot2, out spot)) ||
+				TryFindExitSpot(pawns, reachableForEveryColonist, rot.Rotated(RotationDirection.Clockwise), out spot) ||
+				TryFindExitSpot(pawns, reachableForEveryColonist, rot.Rotated(RotationDirection.Counterclockwise), out spot);
 			Pawn largestPawn = pawns.FindAll(x => x is VehiclePawn).MaxBy(x => x.def.size.z);
 			largestPawn.ClampToMap(ref spot, map);
 			return result;
 		}
 
-		private bool TryFindExitSpotLand(List<Pawn> pawns, bool reachableForEveryColonist, Rot4 exitDirection, out IntVec3 spot)
+		private bool TryFindExitSpot(List<Pawn> pawns, bool reachableForEveryColonist, Rot4 exitDirection, out IntVec3 spot)
 		{
 			spot = IntVec3.Invalid;
 			if (startingTile < 0)
@@ -907,49 +907,63 @@ namespace Vehicles
 				Log.Error("Can't find exit spot because startingTile is not set.");
 				return spot.IsValid;
 			}
+			return TryFindExitSpot(map, pawns, reachableForEveryColonist, exitDirection, out spot);
+		}
+
+		private static bool TryFindExitSpot(Map map, List<Pawn> pawns, bool reachableForEveryColonist, Rot4 exitDirection, out IntVec3 spot)
+		{
 			List<VehiclePawn> vehicles = pawns.Where(p => p is VehiclePawn).Cast<VehiclePawn>().ToList();
-			bool landValidator(IntVec3 x) => !x.Fogged(map) && vehicles.All(v => VehicleReachabilityUtility.CanReachVehicle(v, x, PathEndMode.ClosestTouch, Danger.Deadly));
+			VehiclePawn largestVehicle = vehicles.MaxBy(vehicle => vehicle.VehicleDef.Size.z);
+			
 			if (reachableForEveryColonist)
 			{
-				return CellFinder.TryFindRandomEdgeCellWith(delegate(IntVec3 x)
+				return CellFinderExtended.TryFindRandomEdgeCellWith(delegate (IntVec3 cell)
 				{
-					if (!landValidator(x))
+					if (vehicles.Any(vehicle => !ValidVehicleExitSpot(cell, vehicle, map)))
 					{
 						return false;
 					}
 					for (int j = 0; j < pawns.Count; j++)
 					{
-						if (pawns[j].IsColonist && !pawns[j].Downed && !pawns[j].CanReach(x, PathEndMode.Touch, Danger.Deadly, false))
+						if (pawns[j].IsColonist && !pawns[j].Downed && !pawns[j].CanReach(cell, PathEndMode.Touch, Danger.Deadly, false))
 						{
 							return false;
 						}
 					}
 					return true;
-				}, map, exitDirection, CellFinder.EdgeRoadChance_Always, out spot);
+				}, map, exitDirection, largestVehicle, CellFinder.EdgeRoadChance_Always, out spot);
 			}
-			IntVec3 intVec = IntVec3.Invalid;
-			int num = -1;
-			foreach (IntVec3 intVec2 in CellRect.WholeMap(map).GetEdgeCells(exitDirection).InRandomOrder(null))
+			//Finding exit point that might not reachable for everyone
+			IntVec3 cell = IntVec3.Invalid;
+			int numberCanReach = -1;
+			foreach (IntVec3 edgeCell in CellRect.WholeMap(map).GetEdgeCells(exitDirection).InRandomOrder(null))
 			{
-				if (landValidator(intVec2))
+				IntVec3 paddedCell = edgeCell.PadForHitbox(map, largestVehicle);
+				if (vehicles.All(vehicle => ValidVehicleExitSpot(paddedCell, vehicle, map)))
 				{
-					int num2 = 0;
+					int currentCount = 0;
 					for (int i = 0; i < pawns.Count; i++)
 					{
-						if (pawns[i].IsColonist && !pawns[i].Downed && pawns[i].CanReach(intVec2, PathEndMode.Touch, Danger.Deadly, false))
+						Pawn pawn = pawns[i];
+						if (pawn.IsColonist && !pawn.Downed && pawn.CanReach(paddedCell, PathEndMode.Touch, Danger.Deadly, false))
 						{
-							num2++;
+							currentCount++;
 						}
 					}
-					if (num2 > num)
+					if (currentCount > numberCanReach)
 					{
-						num = num2;
-						intVec = intVec2;
+						numberCanReach = currentCount;
+						cell = paddedCell;
 					}
 				}
 			}
-			spot = intVec;
-			return intVec.IsValid;
+			spot = cell;
+			return cell.IsValid;
+		}
+
+		private static bool ValidVehicleExitSpot(IntVec3 cell, VehiclePawn vehicle, Map map)
+		{
+			return !cell.Fogged(map) && VehicleReachabilityUtility.CanReachVehicle(vehicle, cell, PathEndMode.OnCell, Danger.Deadly) && vehicle.DrivableRectOnCell(cell);
 		}
 
 		public bool TryFindExitSpotOnWater(List<Pawn> pawns, bool reachableForEveryColonist, Rot4 exitDirection, out IntVec3 spot)
@@ -1248,6 +1262,51 @@ namespace Vehicles
 			Vehicles,
 			Pawns,
 			Items
+		}
+
+		[DebugAction(VehicleHarmony.VehiclesLabel, null, allowedGameStates = AllowedGameStates.PlayingOnMap, displayPriority = 1000)]
+		private static List<DebugActionNode> TryFindExit()
+		{
+			List<DebugActionNode> debugActions = new List<DebugActionNode>();
+			for (int i = 0; i < 4; i++)
+			{
+				Rot4 rot = new Rot4(i);
+				debugActions.Add(new DebugActionNode(rot.ToStringWord(), DebugActionType.ToolMap)
+				{
+					action = delegate ()
+					{
+						Map map = Find.CurrentMap;
+						if (map == null)
+						{
+							Log.Error($"Null map while trying to find debug exit spot for vehicle caravans.");
+							return;
+						}
+						VehiclePawn vehicle = map.mapPawns.AllPawnsSpawned.FirstOrDefault(pawn => pawn is VehiclePawn) as VehiclePawn;
+						if (vehicle is null)
+						{
+							Log.Error($"Null vehicle while trying to find debug exit spot for vehicle caravans.");
+							return;
+						}
+						for (int i = 0; i < 100; i++)
+						{
+							if (TryFindExitSpot(map, new List<Pawn>() { vehicle }, true, rot, out IntVec3 cell))
+							{
+								float colorPct = 0.5f;
+								SimpleColor lineColor = SimpleColor.Green;
+								if (!vehicle.DrivableRectOnCell(cell))
+								{
+									colorPct = 0;
+									lineColor = SimpleColor.Red;
+								}
+								map.debugDrawer.FlashCell(cell, colorPct, duration: 360);
+								map.debugDrawer.FlashLine(cell, vehicle.Position, duration: 360, color: lineColor);
+							}
+						}
+					}
+				});
+			}
+
+			return debugActions;
 		}
 	}
 }

@@ -234,9 +234,16 @@ namespace Vehicles
 				westDiagonalRotated = DataAllowsFlip;
 			}
 			
-			foreach (PatternDef pattern in DefDatabase<PatternDef>.AllDefsListForReading)
+			if (VehicleMod.settings.main.useCustomShaders)
 			{
-				maskMatPatterns.Add(pattern, (req.path, GenerateMasks(req, pattern)));
+				foreach (PatternDef pattern in DefDatabase<PatternDef>.AllDefsListForReading)
+				{
+					maskMatPatterns.Add(pattern, (req.path, GenerateMasks(req, pattern)));
+				}
+			}
+			else
+			{
+				maskMatPatterns.Add(PatternDefOf.Default, (req.path, GenerateMasks(req, PatternDefOf.Default)));
 			}
 		}
 

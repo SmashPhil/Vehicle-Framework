@@ -1,40 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Verse;
 using Verse.AI;
 using RimWorld;
+using SmashTools;
 
 namespace Vehicles
 {
 	public static class GenVehicleDamager
 	{
 		private static readonly int PawnNotifyCellCount = GenRadial.NumCellsInRadius(4.5f);
-
-		public static void NotifyNearbyPawnsPathOfVehicleDamager(VehiclePawn vehicle)
-		{
-			Room room = RegionAndRoomQuery.GetRoom(vehicle, RegionType.Set_Passable);
-			for (int i = 0; i < PawnNotifyCellCount; i++)
-			{
-				IntVec3 c = vehicle.Position + GenRadial.RadialPattern[i];
-				if (c.InBounds(vehicle.Map))
-				{
-					List<Thing> thingList = c.GetThingList(vehicle.Map);
-					for (int j = 0; j < thingList.Count; j++)
-					{
-						Pawn pawn = thingList[j] as Pawn;
-						if (pawn != null && pawn.RaceProps.intelligence >= Intelligence.ToolUser)
-						{
-							Room room2 = RegionAndRoomQuery.GetRoom(pawn, RegionType.Set_Passable);
-							if (room2 == null || room2.CellCount == 1 || (room2 == room && GenSight.LineOfSight(vehicle.Position, pawn.Position, vehicle.Map, true, null, 0, 0)))
-							{
-								pawn.Notify_DangerousVehiclePath(vehicle);
-							}
-						}
-					}
-				}
-			}
-		}
 
 		public static void NotifyNearbyPawnsOfDangerousPosition(Map map, IntVec3 cell)
 		{
@@ -58,7 +35,7 @@ namespace Vehicles
 			}
 		}
 
-		private static void Notify_DangerousVehiclePath(this Pawn pawn, VehiclePawn vehicle)
+		public static void Notify_DangerousVehiclePath(this Pawn pawn, VehiclePawn vehicle)
 		{
 			if (pawn is VehiclePawn)
 			{
@@ -68,16 +45,14 @@ namespace Vehicles
 			{
 				return;
 			}
-			if (pawn.RaceProps.intelligence < Intelligence.ToolUser)
-			{
-				return;
-			}
 			if (PawnUtility.PlayerForcedJobNowOrSoon(pawn))
 			{
 				return;
 			}
-
-			if (!TryFindDirectFleeDestination(vehicle.Position, 9f, vehicle.Rotation, pawn, out IntVec3 cell))
+			Rot8 oppositeVehicle = vehicle.FullRotation.Opposite;
+			Rot8 oppositeCW = oppositeVehicle.Rotated(RotationDirection.Clockwise);
+			Rot8 oppositeCCW = oppositeVehicle.Rotated(RotationDirection.Counterclockwise);
+			if (!TryFindDirectFleeDestination(vehicle.Position, vehicle.VehicleDef.Size.x * 5, pawn, out IntVec3 cell, oppositeVehicle, oppositeCW, oppositeCCW))
 			{
 				return;
 			}
@@ -112,32 +87,106 @@ namespace Vehicles
 			pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
 		}
 
-		private static bool TryFindDirectFleeDestination(IntVec3 root, float dist, Rot4 dirExcluded, Pawn pawn, out IntVec3 result)
+		private static bool TryFindDirectFleeDestination(IntVec3 root, float dist, Pawn pawn, out IntVec3 result, params Rot8[] excludeDirections)
 		{
-			for (int i = 0; i < 30; i++)
+			float increment = 45f / 2; //45 degrees per Rot8 angle
+
+			bool[] allowedDirections = new bool[8];
+			allowedDirections.Populate(true);
+			if (!excludeDirections.NullOrEmpty())
 			{
-				result = root + IntVec3.FromVector3(Vector3Utility.HorizontalVectorFromAngle(Rand.Range(0, 360)) * dist);
-				if (result.Walkable(pawn.Map) && result.DistanceToSquared(pawn.Position) < result.DistanceToSquared(root) && GenSight.LineOfSight(root, result, pawn.Map, true, null, 0, 0))
+				for (int i = 0; i < excludeDirections.Length; i++)
+				{
+					Rot8 rot = excludeDirections[i];
+					allowedDirections[rot.AsInt] = false;
+				}
+			}
+			Log.Message($"Finding flee destination with excluded directions: {string.Join(",", excludeDirections.Select(rot => rot.ToString()))}");
+			for (int i = 0; i < 4 + (4 * excludeDirections.Length); i++) //8 tries x4 iterations for 32 attempts (accounts for excluded direction count to ensure same number of attempts
+			{
+				FloatRange angleNorth = new FloatRange(360 - increment, increment);
+				if (allowedDirections[Rot8.NorthInt] && ImmediatelyWalkable(root, angleNorth, dist, pawn, out result))
+				{
+					return true;
+				}
+				FloatRange angleNorthEast = new FloatRange(angleNorth.max, angleNorth.max + 45);
+				if (allowedDirections[Rot8.NorthEastInt] && ImmediatelyWalkable(root, angleNorthEast, dist, pawn, out result))
+				{
+					return true;
+				}
+
+				FloatRange angleEast = new FloatRange(angleNorthEast.max, angleNorthEast.max + 45);
+				if (allowedDirections[Rot8.EastInt] && ImmediatelyWalkable(root, angleEast, dist, pawn, out result))
+				{
+					return true;
+				}
+
+				FloatRange angleSouthEast = new FloatRange(angleEast.max, angleEast.max + 45);
+				if (allowedDirections[Rot8.SouthEastInt] && ImmediatelyWalkable(root, angleSouthEast, dist, pawn, out result))
+				{
+					return true;
+				}
+
+				FloatRange angleSouth = new FloatRange(angleSouthEast.max, angleSouthEast.max + 45);
+				if (allowedDirections[Rot8.SouthInt] && ImmediatelyWalkable(root, angleSouth, dist, pawn, out result))
+				{
+					return true;
+				}
+
+				FloatRange angleSouthWest = new FloatRange(angleSouth.max, angleSouth.max + 45);
+				if (allowedDirections[Rot8.SouthWestInt] && ImmediatelyWalkable(root, angleSouthWest, dist, pawn, out result))
+				{
+					return true;
+				}
+
+				FloatRange angleWest = new FloatRange(angleSouthWest.max, angleSouthWest.max + 45);
+				if (allowedDirections[Rot8.WestInt] && ImmediatelyWalkable(root, angleWest, dist, pawn, out result))
+				{
+					return true;
+				}
+
+				FloatRange angleNorthWest = new FloatRange(angleWest.max, angleWest.max + 45);
+				if (allowedDirections[Rot8.NorthWestInt] && ImmediatelyWalkable(root, angleNorthWest, dist, pawn, out result))
 				{
 					return true;
 				}
 			}
+			Log.Message("Failsafe check");
+			//Failsafe check
 			Region region = RegionAndRoomQuery.GetRegion(pawn, RegionType.Set_Passable);
 			for (int j = 0; j < 30; j++)
 			{
-				IntVec3 randomCell = CellFinder.RandomRegionNear(region, 15, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.ByPawn, false), null, null, RegionType.Set_Passable).RandomCell;
-				if (randomCell.Walkable(pawn.Map) && (float)(root - randomCell).LengthHorizontalSquared > dist * dist)
+				IntVec3 randomCell = CellFinder.RandomRegionNear(region, 15, TraverseParms.For(pawn)).RandomCell;
+				if (randomCell.Walkable(pawn.Map) && (root - randomCell).LengthHorizontalSquared > dist * dist)
 				{
-					using (PawnPath pawnPath = pawn.Map.pathFinder.FindPath(pawn.Position, randomCell, pawn, PathEndMode.OnCell))
+					using PawnPath pawnPath = pawn.Map.pathFinder.FindPath(pawn.Position, randomCell, pawn, PathEndMode.OnCell);
+					if (PawnPathUtility.TryFindCellAtIndex(pawnPath, (int)dist + 3, out result))
 					{
-						if (PawnPathUtility.TryFindCellAtIndex(pawnPath, (int)dist + 3, out result))
-						{
-							return true;
-						}
+						return true;
 					}
 				}
 			}
 			result = pawn.Position;
+			return false;
+		}
+
+		private static bool ImmediatelyWalkable(IntVec3 root, FloatRange angleRange, float dist, Pawn pawn, out IntVec3 result)
+		{
+			float radians = angleRange.RandomInRange * Mathf.Deg2Rad;
+			int x = Mathf.RoundToInt(dist * Mathf.Cos(radians));
+			int z = Mathf.RoundToInt(dist * Mathf.Sin(radians));
+			result = root + new IntVec3(x, 0, z);
+			if (result.Walkable(pawn.Map) && result.DistanceToSquared(pawn.Position) < result.DistanceToSquared(root) && GenSight.LineOfSight(root, result, pawn.Map, true))
+			{
+				pawn.Map.debugDrawer.FlashCell(result, 0.5f);
+				pawn.Map.debugDrawer.FlashLine(pawn.Position, result, color: SimpleColor.Green);
+				return true;
+			}
+			if (result.InBounds(pawn.Map))
+			{
+				pawn.Map.debugDrawer.FlashCell(result, 0);
+				pawn.Map.debugDrawer.FlashLine(pawn.Position, result, color: SimpleColor.Red);
+			}
 			return false;
 		}
 	}

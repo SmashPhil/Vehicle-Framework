@@ -16,6 +16,7 @@
 	<VF_DraftVehicleDesc>Drafts vehicle allowing it to move. This will consume fuel if applicable even if the vehicle is idle.</VF_DraftVehicleDesc>
 	<VF_StopVehicleDesc>Stop the vehicle immediately.</VF_StopVehicleDesc>
 	<VF_UndraftVehicleDesc>Undrafts vehicle, disabling the consumption of fuel and disallowing movement.</VF_UndraftVehicleDesc>
+	<VF_RefuelFromInventory>Refuel From Inventory</VF_RefuelFromInventory>
 	
 	<!-- UI / Buttons -->
 	<VF_ShowAllItemsOnMap>Show All Items On Map</VF_ShowAllItemsOnMap>

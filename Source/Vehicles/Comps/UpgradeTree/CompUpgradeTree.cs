@@ -141,6 +141,16 @@ namespace Vehicles
 			}
 		}
 
+		public override bool CanDraft(out string failReason)
+		{
+			if (CurrentlyUpgrading)
+			{
+				failReason = "VF_UpgradeInProgress".Translate();
+				return false;
+			}
+			return base.CanDraft(out failReason);
+		}
+
 		public override void PostGeneration()
 		{
 			InitializeUpgradeTree();

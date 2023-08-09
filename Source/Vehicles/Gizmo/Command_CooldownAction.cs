@@ -182,7 +182,7 @@ namespace Vehicles
 				Rect subIconRect = new Rect(gizmoRect.xMax - SubIconSize, gizmoRect.y, SubIconSize, SubIconSize); //top right
 				if ((turret.loadedAmmo is null || turret.shellCount <= 0) && turret.turretDef.ammunition != null)
 				{
-					disabledReason += "NoAmmoLoadedCannon".Translate();
+					disabledReason += "VF_NoAmmoLoadedTurret".Translate();
 					ammoLoaded = false;
 				}
 				else if (!turret.OnCooldown && Mouse.IsOver(gizmoRect) && (!Mouse.IsOver(subIconRect) || !turret.cannonTarget.IsValid))
@@ -206,7 +206,15 @@ namespace Vehicles
 				GUIState.Push();
 				{
 					Rect turretRect = gizmoRect.ContractedBy(2);
-					(Rect rect, Texture mainTex, Color color, float layer, float angle) turretProps = VehicleGUI.RetrieveTurretSettingsGUIProperties(turretRect, vehicle.VehicleDef, turret, Rot8.North, vehicle.patternData, iconScale: iconDrawScale);
+					(Rect rect, Texture mainTex, Color color, float layer, float angle) turretProps;
+					if (turret.turretDef.gizmoIconTexPath.NullOrEmpty())
+					{
+						turretProps = VehicleGUI.RetrieveTurretSettingsGUIProperties(turretRect, vehicle.VehicleDef, turret, Rot8.North, vehicle.patternData, iconScale: iconDrawScale);
+					}
+					else
+					{
+						turretProps = (new Rect(0, 0, turretRect.width, turretRect.height), turret.GizmoIcon, Color.white, 1, 0);
+					}
 					Widgets.BeginGroup(turretRect);
 					{
 						GUI.color = turretProps.color;

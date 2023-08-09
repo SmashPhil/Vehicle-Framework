@@ -28,7 +28,7 @@ namespace Vehicles
 						VehicleMod.settingsDisabledFor.Add(def.defName);
 					}
 				}
-				if (successfulGenerations.All(b => b == false))
+				if (!successfulGenerations.NullOrEmpty() && successfulGenerations.All(b => b == false))
 				{
 					Log.Error($"SaveableFields have failed for every VehicleDef. Consider turning off the ModifiableSettings option in the ModSettings to bypass customizable field generation. This will require a restart.");
 				}

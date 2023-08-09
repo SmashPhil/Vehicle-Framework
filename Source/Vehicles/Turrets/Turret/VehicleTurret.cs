@@ -394,23 +394,26 @@ namespace Vehicles
 		{
 			get
 			{
-				if (!string.IsNullOrEmpty(turretDef.gizmoIconTexPath) && gizmoIcon is null)
+				if (gizmoIcon is null)
 				{
-					gizmoIcon = ContentFinder<Texture2D>.Get(turretDef.gizmoIconTexPath);
-				}
-				else if (NoGraphic)
-				{
-					gizmoIcon = BaseContent.BadTex;
-				}
-				else if (gizmoIcon is null)
-				{
-					if(CannonTexture != null)
+					if (!string.IsNullOrEmpty(turretDef.gizmoIconTexPath))
 					{
-						gizmoIcon = CannonTexture;
+						gizmoIcon = ContentFinder<Texture2D>.Get(turretDef.gizmoIconTexPath);
+					}
+					else if (NoGraphic)
+					{
+						gizmoIcon = BaseContent.BadTex;
 					}
 					else
 					{
-						gizmoIcon = BaseContent.BadTex;
+						if (CannonTexture != null)
+						{
+							gizmoIcon = CannonTexture;
+						}
+						else
+						{
+							gizmoIcon = BaseContent.BadTex;
+						}
 					}
 				}
 				return gizmoIcon;
@@ -604,14 +607,17 @@ namespace Vehicles
 		/// </summary>
 		public void RecacheRootDrawPos()
 		{
-			rootDrawPos_North = TurretDrawLocFor(Rot8.North, Vector3.zero, fullLoc: false);
-			rootDrawPos_East = TurretDrawLocFor(Rot8.East, Vector3.zero, fullLoc: false);
-			rootDrawPos_South = TurretDrawLocFor(Rot8.South, Vector3.zero, fullLoc: false);
-			rootDrawPos_West = TurretDrawLocFor(Rot8.West, Vector3.zero, fullLoc: false);
-			rootDrawPos_NorthEast = TurretDrawLocFor(Rot8.NorthEast, Vector3.zero, fullLoc: false);
-			rootDrawPos_SouthEast = TurretDrawLocFor(Rot8.SouthEast, Vector3.zero, fullLoc: false);
-			rootDrawPos_SouthWest = TurretDrawLocFor(Rot8.SouthWest, Vector3.zero, fullLoc: false);
-			rootDrawPos_NorthWest = TurretDrawLocFor(Rot8.NorthWest, Vector3.zero, fullLoc: false);
+			if (CannonGraphicData != null)
+			{
+				rootDrawPos_North = TurretDrawLocFor(Rot8.North, Vector3.zero, fullLoc: false);
+				rootDrawPos_East = TurretDrawLocFor(Rot8.East, Vector3.zero, fullLoc: false);
+				rootDrawPos_South = TurretDrawLocFor(Rot8.South, Vector3.zero, fullLoc: false);
+				rootDrawPos_West = TurretDrawLocFor(Rot8.West, Vector3.zero, fullLoc: false);
+				rootDrawPos_NorthEast = TurretDrawLocFor(Rot8.NorthEast, Vector3.zero, fullLoc: false);
+				rootDrawPos_SouthEast = TurretDrawLocFor(Rot8.SouthEast, Vector3.zero, fullLoc: false);
+				rootDrawPos_SouthWest = TurretDrawLocFor(Rot8.SouthWest, Vector3.zero, fullLoc: false);
+				rootDrawPos_NorthWest = TurretDrawLocFor(Rot8.NorthWest, Vector3.zero, fullLoc: false);
+			}
 		}
 
 		public void RecacheMannedStatus()
@@ -644,7 +650,7 @@ namespace Vehicles
 				locationRotation = TurretRotationFor(rot, attachedTo.TurretRotationUncorrected);
 			}
 			Vector2 turretLoc = VehicleGraphics.TurretDrawOffset(rot, renderProperties, locationRotation, fullLoc ? attachedTo : null);
-			Vector3 graphicOffset = CannonGraphic.DrawOffset(rot);
+			Vector3 graphicOffset = CannonGraphic?.DrawOffset(rot) ?? Vector3.zero;
 			return new Vector3(pos.x + graphicOffset.x + turretLoc.x, pos.y + graphicOffset.y + drawLayer * Altitudes.AltInc, pos.z + graphicOffset.z + turretLoc.y);
 		}
 
@@ -1820,7 +1826,7 @@ namespace Vehicles
 				{
 					turret.SwitchAutoTarget();
 				},
-				tooltip = "VF_AutoTargeting".Translate(turret.AutoTarget.ToString())
+				tooltip = "VF_AutoTargeting".Translate(turret.AutoTarget.ToStringYesNo())
 			};
 		}
 

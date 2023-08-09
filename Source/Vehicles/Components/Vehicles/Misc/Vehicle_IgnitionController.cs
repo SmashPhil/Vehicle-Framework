@@ -35,19 +35,9 @@ namespace Vehicles
 
 				if (value)
 				{
-					if (!vehicle.CanDraft())
+					if (!VehicleMod.settings.debug.debugDraftAnyVehicle && !vehicle.CanDraft(out string reason))
 					{
-						if (!VehicleMod.settings.debug.debugDraftAnyVehicle && (vehicle.CompFueledTravel?.EmptyTank ?? false))
-						{
-							Messages.Message("VF_OutOfFuel".Translate(), MessageTypeDefOf.RejectInput);
-							return;
-						}
-						if (vehicle.CompUpgradeTree?.CurrentlyUpgrading ?? false)
-						{
-							Messages.Message("VF_UpgradeInProgress".Translate(), MessageTypeDefOf.RejectInput);
-							return;
-						}
-						Messages.Message("VF_NotEnoughToOperate".Translate(), MessageTypeDefOf.RejectInput);
+						Messages.Message(reason, MessageTypeDefOf.RejectInput);
 						return;
 					}
 					

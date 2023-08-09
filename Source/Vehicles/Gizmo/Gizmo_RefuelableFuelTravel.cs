@@ -57,11 +57,13 @@ namespace Vehicles
 					}
 
 					Rect configureRect = new Rect(labelRect.xMax - ConfigureSize, labelRect.y, ConfigureSize, ConfigureSize);
+					TooltipHandler.TipRegionByKey(configureRect, "CommandSetTargetFuelLevel");
 					if (Widgets.ButtonImage(configureRect, VehicleTex.Settings))
 					{
 						ShowConfigureWindow();
 					}
 					configureRect.x -= ConfigureSize;
+					TooltipHandler.TipRegionByKey(configureRect, "VF_RefuelFromInventory");
 					if (Widgets.ButtonImage(configureRect, VehicleTex.ReverseIcon))
 					{
 						if (Vehicle.AllPawnsAboard.Count > 0)

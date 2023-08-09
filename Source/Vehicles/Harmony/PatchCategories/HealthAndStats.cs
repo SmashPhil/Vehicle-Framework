@@ -52,6 +52,13 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(SchoolUtility), nameof(SchoolUtility.CanTeachNow)),
 				prefix: new HarmonyMethod(typeof(HealthAndStats),
 				nameof(CantTeachVehicles)));
+
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(StunHandler), nameof(StunHandler.StunFor)),
+				prefix: new HarmonyMethod(typeof(HealthAndStats),
+				nameof(StunVehicleConditionally)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(StaggerHandler), nameof(StaggerHandler.StaggerFor)),
+				prefix: new HarmonyMethod(typeof(HealthAndStats),
+				nameof(StaggerVehicleConditionally)));
 		}
 
 		/// <summary>
@@ -237,6 +244,25 @@ namespace Vehicles
 			{
 				__result = false;
 				return false;
+			}
+			return true;
+		}
+
+		public static bool StunVehicleConditionally(int ticks, Thing instigator, Thing ___parent)
+		{
+			if (___parent is VehiclePawn vehicle)
+			{
+				return vehicle.CanApplyStun(instigator);
+			}
+			return true;
+		}
+
+		public static bool StaggerVehicleConditionally(int ticks, Thing ___parent, ref bool __result)
+		{
+			if (___parent is VehiclePawn vehicle)
+			{
+				__result = false;
+				return vehicle.CanApplyStagger();
 			}
 			return true;
 		}

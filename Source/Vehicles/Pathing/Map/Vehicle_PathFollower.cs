@@ -26,6 +26,8 @@ namespace Vehicles
 		public const int MaxCheckAheadNodes = 5;
 		public const int TicksWhileWaiting = 10;
 
+		public const int CheckAheadNodesForCollisions = 3;
+		public const int MaxCheckAheadNodesForCollisions = 7;
 		protected VehiclePawn vehicle;
 
 		private List<IntVec3> bumperCells;
@@ -55,14 +57,20 @@ namespace Vehicles
 		private object pathLock = new object();
 		private bool shouldStopClipping;
 
+		private static readonly HashSet<IntVec3> collisionCells = new HashSet<IntVec3>();
+
 		public Vehicle_PathFollower(VehiclePawn vehicle)
 		{
 			this.vehicle = vehicle;
 			bumperCells = new List<IntVec3>();
 			shouldStopClipping = vehicle.VehicleDef.size.x != vehicle.VehicleDef.size.z; //If vehicle is not NxN, it may clip buildings at destination.
 			CanEnterDoors = false;// vehicle.VehicleDef.size == IntVec2.One;
+
 			LookAheadStartingIndex = Mathf.CeilToInt(vehicle.VehicleDef.Size.z / 2f); 
 			LookAheadDistance = MinCheckAheadNodes + LookAheadStartingIndex; //N cells away from vehicle's front;
+
+			CollisionsLookAheadStartingIndex = Mathf.CeilToInt(vehicle.VehicleDef.Size.z / 2f);
+			CollisionsLookAheadDistance = CheckAheadNodesForCollisions + CollisionsLookAheadStartingIndex; //N cells away from vehicle's front;
 		}
 
 		public bool CanEnterDoors { get; private set; }
@@ -70,6 +78,10 @@ namespace Vehicles
 		public int LookAheadDistance { get; private set; }
 
 		public int LookAheadStartingIndex { get; private set; }
+
+		public int CollisionsLookAheadDistance { get; private set; }
+
+		public int CollisionsLookAheadStartingIndex { get; private set; }
 
 		public bool CalculatingPath { get; private set; }
 
@@ -382,12 +394,6 @@ namespace Vehicles
 
 		private void TryEnterNextPathCell()
 		{
-			//CompVehicleDamager vehicleDamager = vehicle.GetSortedComp<CompVehicleDamager>();
-			//if (vehicleDamager != null)
-			//{
-			//	vehicleDamager.TakeStep();
-			//}
-
 			if (waitTicks > 0)
 			{
 				waitTicks--;
@@ -402,6 +408,7 @@ namespace Vehicles
 				{
 					moveSpeed *= Ext_Math.Sqrt2;
 				}
+				//WarnPawnsImpendingCollision();
 				vehicle.CheckForCollisions(moveSpeed);
 			}
 			
@@ -622,8 +629,12 @@ namespace Vehicles
 			}
 			else
 			{
-				Log.Warning($"Finding path on main thread. DedicatedThread was not available.");
+				if (!VehicleMod.settings.debug.debugUseMultithreading)
+				{
+					Log.WarningOnce($"Finding path on main thread. DedicatedThread was not available.", vehicle.Map.GetHashCode());
+				}
 				TrySetNewPath();
+				CalculatingPath = false;
 			}
 		}
 
@@ -797,6 +808,47 @@ namespace Vehicles
 				nodeIndex++;
 			}
 			return PathRequest.None;
+		}
+
+		private void WarnPawnsImpendingCollision()
+		{
+			if (curPath != null)
+			{
+				collisionCells.Clear();
+				IntVec3 previous = IntVec3.Invalid;
+				IntVec3 next;
+				int nodeIndex = CollisionsLookAheadStartingIndex;
+				while (nodeIndex < CollisionsLookAheadStartingIndex + MaxCheckAheadNodesForCollisions && nodeIndex < curPath.NodesLeftCount)
+				{
+					next = curPath.Peek(nodeIndex);
+					Rot8 rot = Ext_Map.DirectionToCell(previous, next);
+					
+					CellRect vehicleRect = vehicle.VehicleRect(next, rot);
+					foreach (IntVec3 cell in vehicleRect)
+					{
+						if (collisionCells.Add(cell))
+						{
+							vehicle.Map.debugDrawer.FlashCell(cell, 0.25f, duration: 60);
+							List<Thing> thingList = cell.GetThingList(vehicle.Map);
+							foreach (Thing thing in thingList)
+							{
+								if (thing is Pawn pawn)
+								{
+									Room room = RegionAndRoomQuery.RoomAt(cell, vehicle.Map, RegionType.Set_Passable);
+									Room pawnRoom = RegionAndRoomQuery.GetRoom(pawn, RegionType.Set_Passable);
+									if (pawnRoom == null || pawnRoom.CellCount == 1 || (room == pawnRoom && GenSight.LineOfSight(vehicle.Position, pawn.Position, vehicle.Map)))
+									{
+										pawn.Notify_DangerousVehiclePath(vehicle);
+									}
+								}
+							}
+						}
+					}
+					previous = next;
+					nodeIndex++;
+				}
+				collisionCells.Clear();
+			}
 		}
 
 		public enum PathRequest
