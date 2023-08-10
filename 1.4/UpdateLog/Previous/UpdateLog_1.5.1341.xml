@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <!--Can utilize Version.txt file placed in mod's root directory-->
+  <currentVersion>1.5.1341</currentVersion>
+  <!--Startup,GameInit,LoadedGame,NewGame-->
+  <updateOn>Startup</updateOn>
+  <!--Full description shown in update page-->
+  <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+Another round of bugfixes.
+
+If you're having problems with memory usage, go into the mod settings and turn off 'Use RGB Shaders.'  I'm still in the process of fixing this, so it'll be in the next patch.
+
+Just to reiterate: ALL bug reports for Vehicle Framework should be done in my discord server, it's a lot easier for me to track. Thanks!
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed bug with compatibility patch for RimHUD which would cause WorldInspectPane to throw exception in initial map selection.
+
+- Fixed compatibility issue with Geological Landforms where impassable tiles settled on by the player (cave maps) would not allow vehicles to exit / enter.
+
+- Fixed RimNauts2 package id for spaceFlight field
+
+- Fixed bug where VehicleCaravans would find an invalid exit spot, causing the vehicle to freeze and not exit the map.
+
+- Fixed issue where vehicles would be unable to reach certain areas due to an issue with region generation. This was especially problematic for garage doors from VVE.
+
+- Fixed bug where turn cost would use incorrect rotation, causing sharp drastic turns.
+
+- Fixed bug where vehicles could become stunned permanently.
+
+- Fixed bug where gizmoIcon for VehicleTurrets wouldn't render.
+
+- Fixed issue where AutoRefuel% in the mod settings didn't display decimals.
+
+- Fixed Russian translation folder not loading properly
+
+- Fixed translation issue when turrets are disabled for not having enough ammo.
+
+- Fixed missing translations for Mass in LoadCargo dialog, AutoTargeting toggle, and tooltip for DevMode buttons in mod settings.
+
+- Removed pdb files from steam upload, significantly decreasing the size of the Mod.
+&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- 'nameable' setting for vehicles is now True by default, making all vehicles able to be renamed unless changed by the modder or disabled in the mod settings.
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
+  <!--Static parameterless method to execute when update log is executed-->
+  <actionOnUpdate></actionOnUpdate>
+  <!--Show update log on next startup.-->
+  <update>false</update>
+  <!--Testing mode prevents the update from saving over the UpdateLog file-->
+  <testing>false</testing>
+  <!--Icon bar shown to the right of the mod's name-->
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon</icon>
+      <url>steam://url/CommunityFilePage/2356577528</url>
+    </li>
+  </rightIconBar>
+  <!--Icon bar shown to the left of the mod's name-->
+  <leftIconBar>
+    <li>
+      <name>Patreon</name>
+      <icon>patreonIcon</icon>
+      <url>https://www.patreon.com/smashphil</url>
+    </li>
+    <li>
+      <name>Cursed Crew</name>
+      <icon>cursedCrewIcon</icon>
+      <url>https://discord.gg/NNe2VxAU7Z</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>
