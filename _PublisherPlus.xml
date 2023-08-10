@@ -3,6 +3,9 @@
   <Excluded>
     <exclude>.git</exclude>
     <exclude>.vs</exclude>
+    <exclude>1.4\Assemblies\SmashTools.pdb</exclude>
+    <exclude>1.4\Assemblies\UpdateLogTool.pdb</exclude>
+    <exclude>1.4\Assemblies\Vehicles.pdb</exclude>
     <exclude>1.4\Defs\Ignore</exclude>
     <exclude>About\PreviewArt</exclude>
     <exclude>Source</exclude>

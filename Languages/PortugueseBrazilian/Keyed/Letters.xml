@@ -1,23 +1,19 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-
+<?xml version="1.0" encoding="UTF-8"?>
 <LanguageData>
-  <VF_IncidentCrashedSiteLabel_Crashing>{0} Aterrissou Forçadamente</VF_IncidentCrashedSiteLabel_Crashing>
-  <VF_IncidentCrashedSiteLabel_ShotDown>{1} Derrubou {0}</VF_IncidentCrashedSiteLabel_ShotDown>
-
+  <VF_IncidentCrashedSiteLabel_Crashing>{0} Fez Pouso Forçado</VF_IncidentCrashedSiteLabel_Crashing>
+  <VF_IncidentCrashedSiteLabel_ShotDown>{1} Abateu {0}</VF_IncidentCrashedSiteLabel_ShotDown>
   <VF_IncidentReasonLister>\n\nMotivo:\n {0}</VF_IncidentReasonLister>
-  <VF_IncidentCrashedSite_Crashing>{0} caiu.</VF_IncidentCrashedSite_Crashing>
+  <VF_IncidentCrashedSite_Crashing>{0} sofreu um acidente.</VF_IncidentCrashedSite_Crashing>
   <VF_IncidentCrashedSite_ShotDown>{0} foi abatido por {1}.</VF_IncidentCrashedSite_ShotDown>
-  <VF_IncidentCrashedSiteReason_OutOfFuel>Ficou sem combustível</VF_IncidentCrashedSiteReason_OutOfFuel>
-  <VF_IncidentCrashedSiteReason_FlightControl>Perdeu todo o controle de voo</VF_IncidentCrashedSiteReason_FlightControl>
-
+  <VF_IncidentCrashedSiteReason_OutOfFuel>Ficou sem combustível.</VF_IncidentCrashedSiteReason_OutOfFuel>
+  <VF_IncidentCrashedSiteReason_FlightControl>Perdeu todo o controle de voo.</VF_IncidentCrashedSiteReason_FlightControl>
   <VF_ReinforcementsArrivedLabel>Reforços</VF_ReinforcementsArrivedLabel>
-  <VF_ReinforcementsArrived>{0} chegou com reforços para investigar o local da queda.</VF_ReinforcementsArrived>
-
-  <VF_BoatSunk>Barco Afundou</VF_BoatSunk>
+  <VF_ReinforcementsArrived>{0} chegou com reforços para investigar o local do acidente.</VF_ReinforcementsArrived>
+  <VF_BoatSunk>Barco Afundado</VF_BoatSunk>
   <VF_BoatSunkDesc>{0} afundou nas profundezas do oceano.</VF_BoatSunkDesc>
-  <VF_BoatSunkWithPawnsDesc>{0} afundou nas profundezas do oceano. 
-
-Levou consigo os seguintes peões:
-{1}</VF_BoatSunkWithPawnsDesc>
-
+  <VF_BoatSunkWithPawnsDesc>"{0} afundou nas profundezas do oceano.&#xD;
+&#xD;
+Levou consigo os seguintes indivíduos:&#xD;
+{1}"</VF_BoatSunkWithPawnsDesc>
 </LanguageData>
+

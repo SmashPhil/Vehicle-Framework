@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LanguageData>
-  <Default.label>Стандартный</Default.label>
-  <Tiger.label>Тигровый</Tiger.label>
-  <TigerStripes.label>Тигровые полоски</TigerStripes.label>
-  <Woodland.label>Лесной</Woodland.label>
-  <Hearts.label>Сердца</Hearts.label>
-  <Panther.label>Пантера</Panther.label>
-  <Digital.label>Цифровой</Digital.label>
-  <Polygon.label>Треугольники</Polygon.label>
-  <Rusty.label>Ржавый</Rusty.label>
-  <Waves.label>Волный</Waves.label>
-  <ZigZag.label>Зиг Заг</ZigZag.label>
-  <Abstract_Medium.label>Средняя Абстрактность</Abstract_Medium.label>
-  <Abstract_Large.label>Сильная Абстрактность</Abstract_Large.label>
-  <Lizard.label>Ящерица</Lizard.label>
-  <Hexagon.label>Шестиугольник</Hexagon.label>
+  <Default.label>стандарт</Default.label>
+  <Tiger.label>тигр</Tiger.label>
+  <TigerStripes.label>тигриные полосы</TigerStripes.label>
+  <Woodland.label>камуфляж</Woodland.label>
+  <Hearts.label>сердца</Hearts.label>
+  <Panther.label>пантера</Panther.label>
+  <Digital.label>цифровой камуфляж</Digital.label>
+  <Polygon.label>многоугольники</Polygon.label>
+  <Rusty.label>ржавчина</Rusty.label>
+  <Waves.label>волны</Waves.label>
+  <ZigZag.label>зигзаг</ZigZag.label>
+  <Abstract_Medium.label>абстрактный средний</Abstract_Medium.label>
+  <Abstract_Large.label>абстрактный крупный</Abstract_Large.label>
+  <Lizard.label>рептилия</Lizard.label>
+  <Hexagon.label>шестиугольники</Hexagon.label>
 </LanguageData>
 

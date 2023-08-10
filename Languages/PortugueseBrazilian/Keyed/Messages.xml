@@ -1,50 +1,37 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-
+<?xml version="1.0" encoding="UTF-8"?>
 <LanguageData>
-  <!-- Seletor de Cores -->
-  <VF_MustSelectColorPalette>É necessário ter uma paleta selecionada para salvar por cima.</VF_MustSelectColorPalette>
-
-  <!-- Veículos -->
-  <VF_VehicleUnableToMove>{0_labelShort} não consegue se mover.</VF_VehicleUnableToMove>
+  <VF_MustSelectColorPalette>É necessário selecionar uma paleta para salvar por cima.</VF_MustSelectColorPalette>
+  <VF_VehicleUnableToMove>{0_labelShort} não pode se mover.</VF_VehicleUnableToMove>
   <VF_HandlerNotEnoughRoom>Falha ao adicionar {0} a {1}. Não há mais espaço disponível.</VF_HandlerNotEnoughRoom>
-
-  <VF_NotEnoughToOperate>Necessita de mais tripulantes para operar.</VF_NotEnoughToOperate>
-  <VF_OutOfFuel>Não é possível criar um esboço. O veículo precisa de mais combustível.</VF_OutOfFuel>
-  <VF_UpgradeInProgress>Não é possível criar um esboço enquanto o veículo está sendo atualizado.</VF_UpgradeInProgress>
+  <VF_NotEnoughToOperate>É necessário mais tripulação para operar.</VF_NotEnoughToOperate>
+  <VF_OutOfFuel>Não é possível avançar. O veículo precisa de mais combustível.</VF_OutOfFuel>
+  <VF_UpgradeInProgress>Não é possível avançar enquanto o veículo está sendo melhorado.</VF_UpgradeInProgress>
   <VF_NotEnoughCrew>Não há colonos suficientes em {0} para operar {1}.</VF_NotEnoughCrew>
-
-  <VF_CannotFit>Não há espaço suficiente.</VF_CannotFit>
-  <VF_NoPathForVehicle>Não é possível traçar um caminho aqui.</VF_NoPathForVehicle>
-  <VF_IncapableStatusForRole>{0} não é capaz de desempenhar este papel.</VF_IncapableStatusForRole>
-
-  <VF_InvalidName>Nome inválido para o veículo.</VF_InvalidName>
-  <VF_OutOfFood>Sem comida em {0} com Colonos a bordo.</VF_OutOfFood>
-
-  <!-- Torretas -->
-  <VF_NoAmmoLoadedTurret>Sem munição carregada.</VF_NoAmmoLoadedTurret>
-  <VF_NoAmmoAvailable>Sem munição disponível no inventário.</VF_NoAmmoAvailable>
-
-  <!-- Caravana -->
-  <VF_VehicleCaravanMentalBreakMovementRole>{0} não consegue mais desempenhar sua função no comboio do veículo.</VF_VehicleCaravanMentalBreakMovementRole>
+  <VF_CannotFit>Espaço insuficiente.</VF_CannotFit>
+  <VF_NoPathForVehicle>Não é possível traçar um caminho até aqui.</VF_NoPathForVehicle>
+  <VF_IncapableStatusForRole>{0} não é capaz de desempenhar esse papel.</VF_IncapableStatusForRole>
+  <VF_InvalidName>Nome inválido para o Veículo.</VF_InvalidName>
+  <VF_OutOfFood>Não há comida em {0} com Peões a bordo.</VF_OutOfFood>
+  <VF_NoAmmoLoadedTurret>Nenhuma munição carregada.</VF_NoAmmoLoadedTurret>
+  <VF_NoAmmoAvailable>Nenhuma munição disponível no inventário.</VF_NoAmmoAvailable>
+  <VF_VehicleCaravanMentalBreakMovementRole>{0} não pode mais desempenhar sua função no veículo da caravana.</VF_VehicleCaravanMentalBreakMovementRole>
   <VF_PawnBoardedFormingCaravan>{0} embarcou no {1} e está pronto para partir.</VF_PawnBoardedFormingCaravan>
-  <VF_CantMoveDocked>Não há colonos suficientes para partir.</VF_CantMoveDocked>
+  <VF_CantMoveDocked>Não há colonos suficientes para zarpar.</VF_CantMoveDocked>
   <VF_CantAssignVehicle>Não há colonos suficientes para {0}.</VF_CantAssignVehicle>
   <VF_AssignFailure>Falha ao atribuir assentos. {0}</VF_AssignFailure>
-  <VF_PackingSpotNotFound>Ponto de Empacotamento não foi encontrado para o comboio de veículos. É recomendado que você coloque um Ponto de Empacotamento do Misc.</VF_PackingSpotNotFound>
+  <VF_PackingSpotNotFound>Local de Empacotamento não foi encontrado para a caravana de veículos. É recomendado que você coloque um Local de Empacotamento do Misc.</VF_PackingSpotNotFound>
   <VF_ForceLeaveCaravan>Forçar a Partida</VF_ForceLeaveCaravan>
-  <VF_ForceLeaveCaravanDesc>Forçar o comboio de veículos a deixar o mapa. Irá pular o carregamento dos itens que não estão a bordo no momento.</VF_ForceLeaveCaravanDesc>
+  <VF_ForceLeaveCaravanDesc>Forçar a caravana de veículos a deixar o mapa. Irá pular o carregamento de quaisquer itens que não estejam a bordo no momento.</VF_ForceLeaveCaravanDesc>
   <VF_ForceLeaveConfirmation>A tripulação está se preparando para partir.</VF_ForceLeaveConfirmation>
-  <VF_CaravanTerminatedNoVehicles>O processo do comboio foi encerrado. Não há mais veículos restantes.</VF_CaravanTerminatedNoVehicles>
-  <VF_LandAndSeaRoutePlannerRestriction>Não é possível planejar rota para veículos Marítimos e Terrestres ao mesmo tempo. Os caminhos não serão registrados.</VF_LandAndSeaRoutePlannerRestriction>
-  <VF_LeaveVehicleBehindCaravan>Tem certeza de que deseja deixar veículos para trás? Veículos deixados para trás: {0}</VF_LeaveVehicleBehindCaravan>
-  <VF_MustAssignEnoughToVehicle>É necessário designar colonos suficientes para operar o veículo.</VF_MustAssignEnoughToVehicle>
-
-  <!-- Veículos Aéreos -->
+  <VF_CaravanTerminatedNoVehicles>O processo da caravana foi encerrado. Não há mais veículos.</VF_CaravanTerminatedNoVehicles>
+  <VF_LandAndSeaRoutePlannerRestriction>Não é possível planejar rota para veículos tanto no mar quanto em terra. Caminhos não serão registrados.</VF_LandAndSeaRoutePlannerRestriction>
+  <VF_LeaveVehicleBehindCaravan>Tem certeza de que deseja deixar os Veículos para trás? Veículos deixados para trás: {0}</VF_LeaveVehicleBehindCaravan>
+  <VF_MustAssignEnoughToVehicle>Deve designar colonos suficientes para operar o veículo.</VF_MustAssignEnoughToVehicle>
   <VF_AerialVehicleArrived>{0} chegou ao seu destino.</VF_AerialVehicleArrived>
-  <VF_AerialVehicleLeft>{0} deixou o mapa.</VF_AerialVehicleLeft>
+  <VF_AerialVehicleLeft>{0} saiu do mapa.</VF_AerialVehicleLeft>
   <VF_AerialVehicleLaunchNotValid>Não é possível lançar, as condições não são adequadas.</VF_AerialVehicleLaunchNotValid>
   <VF_LaunchOutOfFuel>Não é possível lançar. Sem combustível.</VF_LaunchOutOfFuel>
-  <VF_FlightPathMaxNodes>O número máximo de nós para o trajeto de voo de {0} foi atingido.</VF_FlightPathMaxNodes>
-  <VF_MustTargetLanding>É necessário escolher um destino de pouso.</VF_MustTargetLanding>
-
+  <VF_FlightPathMaxNodes>O número máximo de nós para a trajetória de voo de {0} foi atingido.</VF_FlightPathMaxNodes>
+  <VF_MustTargetLanding>Um destino de pouso deve ser escolhido.</VF_MustTargetLanding>
 </LanguageData>
+

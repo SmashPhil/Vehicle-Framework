@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LanguageData>
-  <VF_Caravan_Dismounted>Спешенный</VF_Caravan_Dismounted>
-  <VF_Sailing>Мореходство</VF_Sailing>
-  <VF_DockToCaravan>Предметы, которые нужно взять.</VF_DockToCaravan>
-  <VF_CommandDockShip>Пришвартовать</VF_CommandDockShip>
-  <VF_CommandDockShipDesc>Выгрузить всех пассажиров и начать торговлю с поселением {0}.</VF_CommandDockShipDesc>
-  <VF_CommandDockShipDisembark>Пришвартоваться и высадиться</VF_CommandDockShipDisembark>
-  <VF_CommandDockShipObjectDesc>Пришвартовать судна и отправиться пешком</VF_CommandDockShipObjectDesc>
-  <VF_CommandUndockShip>Погрузить технику</VF_CommandUndockShip>
-  <VF_CommandUndockShipDesc>Загрузить всех пешек и предметы в судна</VF_CommandUndockShipDesc>
-  <VF_CommandAttackDockDisable>Невозможно атаковать {0}, когда пришвартован к их поселению.</VF_CommandAttackDockDisable>
-  <VF_CommandTradeDockDisable>Невозможно торговать с {0}. Необходимо сначала пришвартоваться.</VF_CommandTradeDockDisable>
-  <VF_CaravanMustHaveEnoughSpaceOnShip>Недостаточно места на суднах чтобы разместить всех пешек.</VF_CaravanMustHaveEnoughSpaceOnShip>
-  <VF_CaravanMustHaveEnoughPawnsToOperate>Недостаточно пешек выбрано чтобы поставить парус. Необходимо {0}</VF_CaravanMustHaveEnoughPawnsToOperate>
-  <VF_CaravanMustHaveAtLeastOneVehicle>Следует выбрать как минимум 1 технику для выбра маршрута.</VF_CaravanMustHaveAtLeastOneVehicle>
-  <VF_CommandFormVehicleCaravan>Сформировать караван с техникой</VF_CommandFormVehicleCaravan>
-  <VF_CommandFormVehicleCaravanDesc>Сформировать караван включая технику.</VF_CommandFormVehicleCaravanDesc>
-  <VF_CommandReformVehicleCaravan>Переформировать караван с техникой.</VF_CommandReformVehicleCaravan>
-  <VF_CommandReformVehicleCaravanDesc>Переформировать караван с включенной техникой.</VF_CommandReformVehicleCaravanDesc>
-  <VF_RoutePlannerToggleVehicleDefs>Определение техники</VF_RoutePlannerToggleVehicleDefs>
-  <VF_RoutePlannerToggleVehicles>Техника</VF_RoutePlannerToggleVehicles>
+  <VF_Caravan_Dismounted>Пешком</VF_Caravan_Dismounted>
+  <VF_Sailing>В плавании</VF_Sailing>
+  <VF_DockToCaravan>Выбрать предметы для погрузки</VF_DockToCaravan>
+  <VF_CommandDockShip>Причалить</VF_CommandDockShip>
+  <VF_CommandDockShipDesc>Высадить всех пассажиров и начать торговлю с поселением {0}.</VF_CommandDockShipDesc>
+  <VF_CommandDockShipDisembark>Швартовка и высадка</VF_CommandDockShipDisembark>
+  <VF_CommandDockShipObjectDesc>Пришвартовать судно и отправиться дальше пешком.</VF_CommandDockShipObjectDesc>
+  <VF_CommandUndockShip>Погрузиться на борт</VF_CommandUndockShip>
+  <VF_CommandUndockShipDesc>Загрузить всех персонажей и предметы на судно.</VF_CommandUndockShipDesc>
+  <VF_CommandAttackDockDisable>Нельзя атаковать {0} во время стоянки в их поселении.</VF_CommandAttackDockDisable>
+  <VF_CommandTradeDockDisable>Нельзя торговать с {0}. Сначала необходимо пришвартовать судно.</VF_CommandTradeDockDisable>
+  <VF_CaravanMustHaveEnoughSpaceOnShip>Недостаточно места на судне, чтобы разместить всех персонажей.</VF_CaravanMustHaveEnoughSpaceOnShip>
+  <VF_CaravanMustHaveEnoughPawnsToOperate>Не хватает персонажей для отплытия. Необходимо {0}</VF_CaravanMustHaveEnoughPawnsToOperate>
+  <VF_CaravanMustHaveAtLeastOneVehicle>Для прокладывания маршрута необходимо выбрать как минимум одно ТС.</VF_CaravanMustHaveAtLeastOneVehicle>
+  <VF_CommandFormVehicleCaravan>Снарядить караван с транспортом</VF_CommandFormVehicleCaravan>
+  <VF_CommandFormVehicleCaravanDesc>Снарядить караван для путешествия с транспортными средствами.</VF_CommandFormVehicleCaravanDesc>
+  <VF_CommandReformVehicleCaravan>Продолжить путь</VF_CommandReformVehicleCaravan>
+  <VF_CommandReformVehicleCaravanDesc>Продолжить путь с выбранными транспортными средствами.</VF_CommandReformVehicleCaravanDesc>
+  <VF_RoutePlannerToggleVehicleDefs>VehicleDefs</VF_RoutePlannerToggleVehicleDefs>
+  <VF_RoutePlannerToggleVehicles>Транспортные средства</VF_RoutePlannerToggleVehicles>
 </LanguageData>
 

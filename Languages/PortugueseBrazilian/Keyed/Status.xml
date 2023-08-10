@@ -1,11 +1,16 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-
+<?xml version="1.0" encoding="UTF-8"?>
 <LanguageData>
   <VF_FormingCaravanStatus_RopingAnimals>Amarrando animais a veículos.</VF_FormingCaravanStatus_RopingAnimals>
-  <VF_FormingCaravanStatus_RopingAnimals_Pause>Amarrando animais a veículos. (Aguardando)</VF_FormingCaravanStatus_RopingAnimals_Pause>
-  <VF_FormingCaravanStatus_BoardVehicles>Embarcando.</VF_FormingCaravanStatus_BoardVehicles>
-  <VF_FormingCaravanStatus_BoardVehicles_Pause>Embarcando. (Aguardando)</VF_FormingCaravanStatus_BoardVehicles_Pause>
-  <VF_FormingCaravanStatus_Leaving_Vehicles>Partindo.</VF_FormingCaravanStatus_Leaving_Vehicles>
-  <VF_FormingCaravanStatus_Leaving_Vehicles_Pause>Partindo. (Aguardando)</VF_FormingCaravanStatus_Leaving_Vehicles_Pause>
-
+  <VF_FormingCaravanStatus_RopingAnimals_Pause>Amarrando animais a veículos. (aguardando)</VF_FormingCaravanStatus_RopingAnimals_Pause>
+  <VF_FormingCaravanStatus_BoardVehicles>Embarque.</VF_FormingCaravanStatus_BoardVehicles>
+  <VF_FormingCaravanStatus_BoardVehicles_Pause>Embarque. (aguardando)</VF_FormingCaravanStatus_BoardVehicles_Pause>
+  <VF_FormingCaravanStatus_Leaving_Vehicles>Desembarque.</VF_FormingCaravanStatus_Leaving_Vehicles>
+  <VF_FormingCaravanStatus_Leaving_Vehicles_Pause>Desembarque. (aguardando)</VF_FormingCaravanStatus_Leaving_Vehicles_Pause>
+  <VF_draftLabel>Ligar Motor</VF_draftLabel>
+  <VF_healthLabel_Healthy>Operacional</VF_healthLabel_Healthy>
+  <VF_healthLabel_Injured>Necessita de Reparos</VF_healthLabel_Injured>
+  <VF_healthLabel_Immobile>Inoperante</VF_healthLabel_Immobile>
+  <VF_healthLabel_Dead>Arruinado</VF_healthLabel_Dead>
+  <VF_healthLabel_Beached>Encalhado</VF_healthLabel_Beached>
 </LanguageData>
+

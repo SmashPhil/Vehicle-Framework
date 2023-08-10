@@ -10,7 +10,7 @@ Another round of bugfixes.
 
 If you're having problems with memory usage, go into the mod settings and turn off 'Use RGB Shaders.'  I'm still in the process of fixing this, so it'll be in the next patch.
 
-I'm gonna focus on performance improvements this next patch, so if you have grievances with performance now is the time to let me know.  Thanks!
+Just to reiterate: ALL bug reports for Vehicle Framework should be done in my discord server, it's a lot easier for me to track. Thanks!
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Fixed bug with compatibility patch for RimHUD which would cause WorldInspectPane to throw exception in initial map selection.
 
@@ -20,7 +20,7 @@ I'm gonna focus on performance improvements this next patch, so if you have grie
 
 - Fixed bug where VehicleCaravans would find an invalid exit spot, causing the vehicle to freeze and not exit the map.
 
-- Fixed Region link issue where vehicles would be unable to reach certain parts of the map under very specific conditions.
+- Fixed issue where vehicles would be unable to reach certain areas due to an issue with region generation. This was especially problematic for garage doors from VVE.
 
 - Fixed bug where turn cost would use incorrect rotation, causing sharp drastic turns.
 
@@ -44,7 +44,7 @@ Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>
   <!--Show update log on next startup.-->
-  <update>false</update>
+  <update>true</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
   <testing>false</testing>
   <!--Icon bar shown to the right of the mod's name-->

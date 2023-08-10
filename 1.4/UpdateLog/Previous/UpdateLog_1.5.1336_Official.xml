@@ -5,7 +5,7 @@
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
-  <description>&lt;title&gt;Recent News&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+  <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 This version marks the official release of Vehicle Framework. Woohoo! Thank you all again for sticking with me for this long journey, I'm looking forward to continuing work on this big project.
 
 For those of you that are new, please report bugs and feedback on my discord server.  Link is at the end of this post.
@@ -17,7 +17,6 @@ For those of you that are new, please report bugs and feedback on my discord ser
 - Improved look-ahead when attempting to avoid colliding with other vehicles while pathing.
 
 - Fixed bug where info card wouldn't show VehicleDef related stats
-
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Added vehicle collisions with pawns
 

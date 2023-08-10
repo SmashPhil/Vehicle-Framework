@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LanguageData>
-  <VF_Explosive.label>Взрыв</VF_Explosive.label>
-  <VF_Leaker.label>Утечка Топлива</VF_Leaker.label>
+  <VF_Explosive.label>Взрывоопасно</VF_Explosive.label>
+  <VF_Leaker.label>Утечка топлива</VF_Leaker.label>
 </LanguageData>
 

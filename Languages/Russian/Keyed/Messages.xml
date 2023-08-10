@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LanguageData>
-  <VF_MustSelectColorPalette>Должна быть выбрана цветовая палитра для сохранения.</VF_MustSelectColorPalette>
-  <VF_VehicleUnableToMove>{0_labelShort} движение невозможно.</VF_VehicleUnableToMove>
-  <VF_HandlerNotEnoughRoom>Невозможно добавить {0} к {1}. Отсутствует свободное место.</VF_HandlerNotEnoughRoom>
-  <VF_NotEnoughToOperate>Требуется больше экипажа для управления.</VF_NotEnoughToOperate>
-  <VF_OutOfFuel>Невозможно призвать. Технике требуется больше топлива.</VF_OutOfFuel>
-  <VF_UpgradeInProgress>Невозможно призвать пока техника модернизируется.</VF_UpgradeInProgress>
+  <VF_MustSelectColorPalette>Для сохранения необходимо выбрать перезаписываемую палитру.</VF_MustSelectColorPalette>
+  <VF_VehicleUnableToMove>{0_labelShort} не может двигаться.</VF_VehicleUnableToMove>
+  <VF_HandlerNotEnoughRoom>Не удалось добавить {0} в {1}. Нет свободного места.</VF_HandlerNotEnoughRoom>
+  <VF_NotEnoughToOperate>Не хватает экипажа для работы транспорта.</VF_NotEnoughToOperate>
+  <VF_OutOfFuel>Невозможно завести двигатель — необходимо больше топлива.</VF_OutOfFuel>
+  <VF_UpgradeInProgress>Невозможно запустить двигатель, пока производится улучшение транспорта.</VF_UpgradeInProgress>
   <VF_NotEnoughCrew>Недостаточно экипажа в {0} для управления {1}.</VF_NotEnoughCrew>
   <VF_CannotFit>Недостаточно свободного места.</VF_CannotFit>
-  <VF_NoPathForVehicle>Движение сюда невозможно.</VF_NoPathForVehicle>
+  <VF_NoPathForVehicle>Невозможно проехать сюда.</VF_NoPathForVehicle>
   <VF_IncapableStatusForRole>{0} не может выполнять эту роль.</VF_IncapableStatusForRole>
-  <VF_InvalidName>Некорректное имя для техники.</VF_InvalidName>
-  <VF_OutOfFood>Еда отсутствует в {0} с экипажем внутри.</VF_OutOfFood>
-  <VF_NoAmmoLoadedTurret>Боеприпасы не заряжены.</VF_NoAmmoLoadedTurret>
-  <VF_NoAmmoAvailable>Боеприпасы отсутствуют в инвентаре.</VF_NoAmmoAvailable>
-  <VF_VehicleCaravanMentalBreakMovementRole>{0} не может продолжить заниматься своей ролью в технике каравана.</VF_VehicleCaravanMentalBreakMovementRole>
-  <VF_PawnBoardedFormingCaravan>{0} загрузил {1} и готов к отправке.</VF_PawnBoardedFormingCaravan>
-  <VF_CantMoveDocked>Недостаточно экипажа чтобы поставить парус.</VF_CantMoveDocked>
-  <VF_CantAssignVehicle>Недостаточно экипажа для {0}.</VF_CantAssignVehicle>
-  <VF_AssignFailure>Невозможно назначить места (сиденья). {0}</VF_AssignFailure>
-  <VF_PackingSpotNotFound>Точка Погрузки не найдена для техники каравана. Рекомендуется установить точку погрузкки (Packing Spot) из раздела разное (Misc).</VF_PackingSpotNotFound>
-  <VF_ForceLeaveCaravan>Заставить уйти</VF_ForceLeaveCaravan>
-  <VF_ForceLeaveCaravanDesc>Заставить караван с техникой покинуть карту. Это заставит бросить предметы, которые не находятся на борту.</VF_ForceLeaveCaravanDesc>
-  <VF_ForceLeaveConfirmation>Экипаж подготавливается к уходу (эвакуации).</VF_ForceLeaveConfirmation>
-  <VF_CaravanTerminatedNoVehicles>Караванный процесс был остановлен. Техники не осталось.</VF_CaravanTerminatedNoVehicles>
-  <VF_LandAndSeaRoutePlannerRestriction>Невозможно спланировать маршрут для морской и наземной техники. Пути не будут учтены.</VF_LandAndSeaRoutePlannerRestriction>
-  <VF_LeaveVehicleBehindCaravan>Вы уверены, что хотите бросить технику? Брошенная техника: {0}</VF_LeaveVehicleBehindCaravan>
-  <VF_MustAssignEnoughToVehicle>Необходимо назначить достаточное количество экипажа для управления техникой.</VF_MustAssignEnoughToVehicle>
+  <VF_InvalidName>Недопустимые символы в имени транспорта.</VF_InvalidName>
+  <VF_OutOfFood>В {lookup: {0}; Case; 5} с персонажами на борту нет еды.</VF_OutOfFood>
+  <VF_NoAmmoLoadedTurret>Отсутствуют боеприпасы.</VF_NoAmmoLoadedTurret>
+  <VF_NoAmmoAvailable>Отсутствуют боеприпасы в инвентаре.</VF_NoAmmoAvailable>
+  <VF_VehicleCaravanMentalBreakMovementRole>{0} больше не может выполнять свою роль в караване с транспортом.</VF_VehicleCaravanMentalBreakMovementRole>
+  <VF_PawnBoardedFormingCaravan>{0} {0_gender ? сел : села} в {1} и {0_gender ? готов : готова} к отправлению.</VF_PawnBoardedFormingCaravan>
+  <VF_CantMoveDocked>Недостаточно экипажа для отплытия.</VF_CantMoveDocked>
+  <VF_CantAssignVehicle>Недостаточно экипажа для {lookup: {0}; Case; 1}.</VF_CantAssignVehicle>
+  <VF_AssignFailure>Не удалось назначить пассажирские места. {0}</VF_AssignFailure>
+  <VF_PackingSpotNotFound>Невозможно найти подходящее место для сбора каравана с транспортом. Рекомендуется построить место привязи каравана из раздела «Разное».</VF_PackingSpotNotFound>
+  <VF_ForceLeaveCaravan>Принудительная отправка</VF_ForceLeaveCaravan>
+  <VF_ForceLeaveCaravanDesc>Принудительно отправить караван в путь. При этом будет пропущена загрузка всех предметов, на данный момент не находящихся в инвентаре ТС.</VF_ForceLeaveCaravanDesc>
+  <VF_ForceLeaveConfirmation>Экипаж готовится к отправке.</VF_ForceLeaveConfirmation>
+  <VF_CaravanTerminatedNoVehicles>Снаряжение каравана было прервано — не осталось транспорта.</VF_CaravanTerminatedNoVehicles>
+  <VF_LandAndSeaRoutePlannerRestriction>Невозможно спланировать маршрут для морского и сухопутного транспорта. Маршрут не будет проложен.</VF_LandAndSeaRoutePlannerRestriction>
+  <VF_LeaveVehicleBehindCaravan>Вы уверены, что хотите бросить транспорт? Будут оставлены следующие ТС:\n {0}</VF_LeaveVehicleBehindCaravan>
+  <VF_MustAssignEnoughToVehicle>Необходимо назначить достаточное количество экипажа для управления транспортом.</VF_MustAssignEnoughToVehicle>
   <VF_AerialVehicleArrived>{0} прибыл в пункт назначения.</VF_AerialVehicleArrived>
   <VF_AerialVehicleLeft>{0} покинул карту.</VF_AerialVehicleLeft>
-  <VF_AerialVehicleLaunchNotValid>Невозможно запустить, неподходящие условия для этого.</VF_AerialVehicleLaunchNotValid>
-  <VF_LaunchOutOfFuel>Невозможно запустить. Отсутствует топливо.</VF_LaunchOutOfFuel>
-  <VF_FlightPathMaxNodes>Достигнуто максимальное количество узлов для траектории полета {0}.</VF_FlightPathMaxNodes>
-  <VF_MustTargetLanding>Посадочный пункт назначения должен быть выбран.</VF_MustTargetLanding>
+  <VF_AerialVehicleLaunchNotValid>Невозможно осуществить взлёт — препятствия на взлётно-посадочной полосе.</VF_AerialVehicleLaunchNotValid>
+  <VF_LaunchOutOfFuel>Взлёт невозможен — нет топлива.</VF_LaunchOutOfFuel>
+  <VF_FlightPathMaxNodes>Достигнуто максимальное количество точек маршрута для траектории полёта {0}.</VF_FlightPathMaxNodes>
+  <VF_MustTargetLanding>Необходимо выбрать место приземления.</VF_MustTargetLanding>
 </LanguageData>
 
