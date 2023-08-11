@@ -9,6 +9,7 @@ using SmashTools;
 
 namespace Vehicles
 {
+	[StaticConstructorOnStartup]
 	public static class VehicleTabHelper_Health
 	{
 		public const float LeftWindowWidth = 250;
@@ -27,19 +28,20 @@ namespace Vehicles
 		private static float componentListHeight;
 		private static VehiclePawn inspectingVehicle;
 		private static Vector2 size;
+		private static bool compressed;
 
 		private static ITab_Vehicle_Health.VehicleHealthTab onTab;
 		private static Vector2 componentTabScrollPos;
 		private static VehicleComponent selectedComponent;
 
-		private static List<DamageArmorCategoryDef> armorRatingDefs;
+		private static readonly List<DamageArmorCategoryDef> armorRatingDefs;
 
 		private static readonly List<JobDef> jobLimitJobDefs = new List<JobDef>();
 
-		public static void Init()
+		public static Vector2 Size => size;
+
+		static VehicleTabHelper_Health()
 		{
-			componentTabScrollPos = Vector2.zero;
-			selectedComponent = null;
 			armorRatingDefs = DefDatabase<DamageArmorCategoryDef>.AllDefsListForReading;
 
 			//jobLimitJobDefs.Clear();
@@ -52,14 +54,26 @@ namespace Vehicles
 			//}
 		}
 
-		public static Vector2 Start(VehiclePawn vehicle)
+		public static void Init()
+		{
+			componentTabScrollPos = Vector2.zero;
+			selectedComponent = null;
+		}
+
+		public static Vector2 Start(VehiclePawn vehicle, bool compressed = false)
 		{
 			if (vehicle != inspectingVehicle)
 			{
 				//Not captured by OnOpen when switching between vehicles with ITab already open
 				inspectingVehicle = vehicle;
+				VehicleTabHelper_Health.compressed = compressed;
 				//+ 2x ColumnWidth for Health and Efficiency columns
-				size = new Vector2(LeftWindowWidth + LabelColumnWidth + (ColumnCount * ColumnWidth) + ColumnWidth * armorRatingDefs.Count, WindowHeight);
+				size = new Vector2(LeftWindowWidth + LabelColumnWidth + (ColumnCount * ColumnWidth) + ComponentIndicatorIconSize + 20, WindowHeight);
+
+				if (!compressed)
+				{
+					size.x += ColumnWidth * armorRatingDefs.Count;
+				}
 				RecacheComponentListHeight();
 			}
 			return size;
@@ -202,11 +216,14 @@ namespace Vehicles
 			Widgets.Label(topLabelRect, "VF_ComponentEfficiency".Translate());
 			topLabelRect.x += topLabelRect.width;
 
-			for (int i = 0; i < armorRatingDefs.Count; i++)
+			if (!compressed)
 			{
-				DamageArmorCategoryDef armorCategoryDef = armorRatingDefs[i];
-				Widgets.Label(topLabelRect, armorCategoryDef.armorRatingStat.LabelCap);
-				topLabelRect.x += topLabelRect.width;
+				for (int i = 0; i < armorRatingDefs.Count; i++)
+				{
+					DamageArmorCategoryDef armorCategoryDef = armorRatingDefs[i];
+					Widgets.Label(topLabelRect, armorCategoryDef.armorRatingStat.LabelCap);
+					topLabelRect.x += topLabelRect.width;
+				}
 			}
 
 			GUI.color = TexData.MenuBGColor;
@@ -290,12 +307,14 @@ namespace Vehicles
 			string efficiencyEntry = component.props.categories.NullOrEmpty() ? "-" : component.Efficiency.ToStringPercent().Colorize(component.ComponentEfficiencyColor());
 			Widgets.Label(labelRect, efficiencyEntry);
 			
-
-			for (int i = 0; i < armorRatingDefs.Count; i++)
+			if (!compressed)
 			{
-				labelRect.x += columnWidth;
-				DamageArmorCategoryDef armorCategoryDef = armorRatingDefs[i];
-				Widgets.Label(labelRect, component.ArmorRating(armorCategoryDef).ToStringByStyle(armorCategoryDef.armorRatingStat.toStringStyle));
+				for (int i = 0; i < armorRatingDefs.Count; i++)
+				{
+					labelRect.x += columnWidth;
+					DamageArmorCategoryDef armorCategoryDef = armorRatingDefs[i];
+					Widgets.Label(labelRect, component.ArmorRating(armorCategoryDef).ToStringByStyle(armorCategoryDef.armorRatingStat.toStringStyle));
+				}
 			}
 
 			Rect iconRect = new Rect(labelRect.xMax, labelRect.y, ComponentIndicatorIconSize, ComponentIndicatorIconSize);
