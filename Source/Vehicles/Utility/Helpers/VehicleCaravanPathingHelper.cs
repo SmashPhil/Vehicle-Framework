@@ -31,12 +31,20 @@ namespace Vehicles
 			}
 			bool conditionalResting = !caravan.vPather.Moving || caravan.vPather.nextTile != caravan.vPather.Destination || !Caravan_PathFollower.IsValidFinalPushDestination(caravan.vPather.Destination) ||
 						Mathf.CeilToInt(caravan.vPather.nextTileCostLeft / 1f) > 10000;
-			 return conditionalResting && ShouldRestAt(caravan.AllVehicles(), tile);
+			 return conditionalResting && ShouldRestAt(caravan.Vehicles, tile);
 		}
 
-		public static bool ShouldRestAt(List<VehiclePawn> vehicles, int tile)
+		public static bool ShouldRestAt(IEnumerable<VehiclePawn> vehicles, int tile)
 		{
-			return ShouldRestAt(vehicles.Select(vehicle => vehicle.VehicleDef), tile);
+			foreach (VehiclePawn vehicle in vehicles)
+			{
+				NavigationCategory navigationCategory = SettingsCache.TryGetValue(vehicle.VehicleDef, typeof(VehicleDef), nameof(VehicleDef.navigationCategory), vehicle.VehicleDef.navigationCategory);
+				if (navigationCategory == NavigationCategory.Automatic)
+				{
+					return false;
+				}
+			}
+			return CaravanNightRestUtility.RestingNowAt(tile);
 		}
 
 		public static bool ShouldRestAt(IEnumerable<VehicleDef> vehicleDefs, int tile)
@@ -63,7 +71,7 @@ namespace Vehicles
 			if (caravan.Spawned && caravan.vPather.Moving && caravan.vPather.curPath != null)
 			{
 				to = caravan.vPather.Destination;
-				List<VehicleDef> vehicleDefs = caravan.AllVehicles().Cast<VehiclePawn>().Select(vehicle => vehicle.VehicleDef).ToList();
+				List<VehicleDef> vehicleDefs = caravan.Vehicles.Select(vehicle => vehicle.VehicleDef).ToList();
 				result = EstimatedTicksToArrive(vehicleDefs, caravan.Tile, to, caravan.vPather.curPath, caravan.vPather.nextTileCostLeft, caravan.TicksPerMove, Find.TickManager.TicksAbs);
 			}
 			if (allowCaching)
@@ -87,7 +95,7 @@ namespace Vehicles
 				}
 				else
 				{
-					List<VehicleDef> vehicleDefs = caravan.AllVehicles().Cast<VehiclePawn>().Select(vehicle => vehicle.VehicleDef).ToList();
+					List<VehicleDef> vehicleDefs = caravan.Vehicles.Select(vehicle => vehicle.VehicleDef).ToList();
 					result = EstimatedTicksToArrive(vehicleDefs, from, to, worldPath, 0f, (caravan != null) ? caravan.TicksPerMove : 3300, Find.TickManager.TicksAbs);
 				}
 			}

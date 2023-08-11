@@ -20,6 +20,8 @@ namespace Vehicles
 	{
 		private static MethodInfo addAllTradeablesMethod;
 
+		private static List<Pawn> tmpCaravanPawns = new List<Pawn>();
+
 		public void PatchMethods()
 		{
 			addAllTradeablesMethod = AccessTools.Method(typeof(TradeDeal), "AddToTradeables");
@@ -89,6 +91,12 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.ContainsPawn)),
 				postfix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(ContainsPawnInVehicle)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.AddPawn)),
+				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(AddPawnInVehicleCaravan)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.RemovePawn)),
+				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(RemovePawnInVehicleCaravan)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.IsOwner)),
 				postfix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(IsOwnerOfVehicle)));
@@ -655,23 +663,15 @@ namespace Vehicles
 
 		public static List<Pawn> InternalPawnsIncludedInList(List<Pawn> __result, Caravan __instance)
 		{
-			if (__instance is VehicleCaravan)
+			if (__instance is VehicleCaravan vehicleCaravan)
 			{
-				int currentSize = __result.Count;
-				List<Pawn> pawns = new List<Pawn>();
-				foreach (Pawn pawn in __result)// (int i = 0; i < currentSize; i++)
+				tmpCaravanPawns.Clear();
+				tmpCaravanPawns.AddRange(__result);
+				foreach (VehiclePawn vehicle in vehicleCaravan.Vehicles)
 				{
-					//Pawn pawn = __result[i];
-					if (pawn is VehiclePawn vehicle)
-					{
-						foreach (Pawn innerPawn in vehicle.AllPawnsAboard)
-						{
-							pawns.Add(innerPawn);
-						}
-					}
-					pawns.Add(pawn);
+					tmpCaravanPawns.AddRange(vehicle.AllPawnsAboard);
 				}
-				return pawns;
+				return tmpCaravanPawns;
 			}
 			return __result;
 		}
@@ -848,6 +848,22 @@ namespace Vehicles
 			}
 		}
 
+		public static void AddPawnInVehicleCaravan(Pawn p, Caravan __instance)
+		{
+			if (__instance is VehicleCaravan vehicleCaravan)
+			{
+				vehicleCaravan.RecacheVehicles();
+			}
+		}
+
+		public static void RemovePawnInVehicleCaravan(Pawn p, Caravan __instance)
+		{
+			if (__instance is VehicleCaravan vehicleCaravan)
+			{
+				vehicleCaravan.RecacheVehicles();
+			}
+		}
+
 		public static void IsOwnerOfVehicle(Pawn p, Caravan __instance, ref bool __result)
 		{
 			if (!__result)
@@ -958,8 +974,10 @@ namespace Vehicles
 		{
 			if (caravan is VehicleCaravan vehicleCaravan)
 			{
-				foreach (Pawn pawn in vehicleCaravan.PawnsListForReading)
+				var pawns = vehicleCaravan.PawnsListForReading;
+				for (int i = 0; i < pawns.Count; i++)
 				{
+					Pawn pawn = pawns[i];
 					if (IsValidDoctorFor(pawn, null, caravan) && pawn.IsHashIntervalTick(1250))
 					{
 						CaravanTendUtility.TryTendToAnyPawn(caravan);

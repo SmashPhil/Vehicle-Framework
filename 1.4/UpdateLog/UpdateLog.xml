@@ -17,7 +17,7 @@
 - Fixed bug where CustomCostDefModExtension wasn't properly applying.
 
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-
+- DedicatedThreads now pool for non-settlement maps
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;

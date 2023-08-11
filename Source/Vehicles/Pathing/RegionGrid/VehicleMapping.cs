@@ -98,11 +98,11 @@ namespace Vehicles
 			}
 			if (map.IsTempIncidentMap)
 			{
-				thread = ThreadManager.GetPooled(TempIncidentMapId);
+				thread = ThreadManager.GetShared(TempIncidentMapId);
 				Debug.Message($"<color=orange>Fetching thread from pool (id={thread?.id})</color>");
 				return thread;
 			}
-			thread = ThreadManager.GetPooled(EventMapId);
+			thread = ThreadManager.GetShared(EventMapId);
 			Debug.Message($"<color=orange>Fetching thread from pool (id={thread?.id})</color>");
 			return thread;
 		}
