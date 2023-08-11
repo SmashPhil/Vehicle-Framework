@@ -306,10 +306,27 @@ namespace Vehicles
 		public static void RecalculateAllPerceivedPathCosts(Map map)
 		{
 			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-			foreach (IntVec3 cell in map.AllCells)
+			if (!mapping.Owners.NullOrEmpty())
 			{
-				TerrainDef terrainDef = map.terrainGrid.TerrainAt(cell);
-				foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
+				if (mapping.ThreadAvailable)
+				{
+					mapping.dedicatedThread.Queue(new AsyncAction(() => RecalculateAllPerceivedPathCosts(mapping), () => map != null && map.Index > -1));
+				}
+				else
+				{
+					RecalculateAllPerceivedPathCosts(mapping);
+				}
+			}
+
+			
+		}
+
+		private static void RecalculateAllPerceivedPathCosts(VehicleMapping mapping)
+		{
+			foreach (IntVec3 cell in mapping.map.AllCells)
+			{
+				TerrainDef terrainDef = mapping.map.terrainGrid.TerrainAt(cell);
+				foreach (VehicleDef vehicleDef in mapping.Owners)
 				{
 					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
 				}
@@ -328,10 +345,25 @@ namespace Vehicles
 			if (terrainDef != null)
 			{
 				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-				foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
+				if (!mapping.Owners.NullOrEmpty())
 				{
-					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
+					if (mapping.ThreadAvailable)
+					{
+						mapping.dedicatedThread.Queue(new AsyncAction(() => RecalculatePerceivedPathCostAtFor(mapping, cell), () => map != null && map.Index > -1));
+					}
+					else
+					{
+						RecalculatePerceivedPathCostAtFor(mapping, cell);
+					}
 				}
+			}
+		}
+
+		private static void RecalculatePerceivedPathCostAtFor(VehicleMapping mapping, IntVec3 cell)
+		{
+			foreach (VehicleDef vehicleDef in mapping.Owners)
+			{
+				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
 			}
 		}
 

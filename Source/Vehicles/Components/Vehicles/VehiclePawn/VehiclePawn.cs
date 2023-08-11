@@ -204,6 +204,13 @@ namespace Vehicles
 			Scribe_Defs.Look(ref retexture, nameof(retexture));
 			Scribe_Deep.Look(ref patternToPaint, nameof(patternToPaint));
 
+			if (!VehicleMod.settings.main.useCustomShaders)
+			{
+				patternData = new PatternData(VehicleDef.graphicData.color, VehicleDef.graphicData.colorTwo, VehicleDef.graphicData.colorThree, PatternDefOf.Default, Vector2.zero, 0);
+				retexture = null;
+				patternToPaint = null;
+			}
+
 			Scribe_Values.Look(ref movementStatus, nameof(movementStatus), VehicleMovementStatus.Online);
 			//Scribe_Values.Look(ref navigationCategory, nameof(navigationCategory), NavigationCategory.Opportunistic);
 			Scribe_Values.Look(ref currentlyFishing, nameof(currentlyFishing), false);

@@ -67,7 +67,6 @@ namespace Vehicles
 		{
 			if (Spawned)
 			{
-				Log.Message($"TOOK DAMAGE");
 				Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleTookDamage(this);
 			}
 		}
