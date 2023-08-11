@@ -829,9 +829,10 @@ namespace Vehicles
 					{
 						if (collisionCells.Add(cell))
 						{
-							List<Thing> thingList = cell.GetThingList(vehicle.Map);
-							foreach (Thing thing in thingList)
+							var thingList = cell.GetThingList(vehicle.Map);
+							for (int i = thingList.Count - 1; i >= 0; i--) //Reverse iterate in case a thing or pawn is destroyed from being run over
 							{
+								Thing thing = thingList[i];
 								if (thing is Pawn pawn)
 								{
 									Room room = RegionAndRoomQuery.RoomAt(cell, vehicle.Map, RegionType.Set_Passable);

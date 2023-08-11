@@ -9,7 +9,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public static class GenVehicleDamager
+	public static class VehicleDamager
 	{
 		private const float FleeAngleIncrement = 45f / 2; //45 degrees per Rot8 angle
 
@@ -37,7 +37,7 @@ namespace Vehicles
 					List<Thing> thingList = c.GetThingList(map);
 					for (int j = 0; j < thingList.Count; j++)
 					{
-						if (thingList[j] is Pawn pawn && !(pawn is VehiclePawn) && pawn.RaceProps.intelligence >= Intelligence.ToolUser)
+						if (thingList[j] is Pawn pawn && !(pawn is VehiclePawn) && pawn.RaceProps.intelligence >= Intelligence.ToolUser && !pawn.Dead && !pawn.Downed)
 						{
 							if (GenSight.LineOfSight(cell, pawn.Position, map, true, null, 0, 0))
 							{
@@ -47,6 +47,28 @@ namespace Vehicles
 					}
 				}
 			}
+		}
+
+		private static void Notify_DangerousPosition(this Pawn pawn, IntVec3 cell)
+		{
+			if (!pawn.Spawned)
+			{
+				return;
+			}
+			if (pawn.RaceProps.intelligence < Intelligence.ToolUser)
+			{
+				return;
+			}
+			if (PawnUtility.PlayerForcedJobNowOrSoon(pawn))
+			{
+				return;
+			}
+
+			if (!RCellFinder.TryFindDirectFleeDestination(cell, 9f, pawn, out IntVec3 fleeCell))
+			{
+				return;
+			}
+			ForcePawnFlee(pawn, fleeCell);
 		}
 
 		public static void Notify_DangerousVehiclePath(this Pawn pawn, VehiclePawn vehicle)
@@ -70,35 +92,18 @@ namespace Vehicles
 			{
 				return;
 			}
+			ForcePawnFlee(pawn, cell);
+		}
+
+		private static void ForcePawnFlee(Pawn pawn, IntVec3 cell)
+		{
 			pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
 			Job job = JobMaker.MakeJob(JobDefOf.Goto, cell);
 			job.locomotionUrgency = LocomotionUrgency.Sprint;
-			pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
-		}
-
-		private static void Notify_DangerousPosition(this Pawn pawn, IntVec3 cell)
-		{
-			if (!pawn.Spawned)
+			if (pawn.jobs.TryTakeOrderedJob(job))
 			{
-				return;
+				MoteMaker.MakeColonistActionOverlay(pawn, ThingDefOf.Mote_ColonistFleeing);
 			}
-			if (pawn.RaceProps.intelligence < Intelligence.ToolUser)
-			{
-				return;
-			}
-			if (PawnUtility.PlayerForcedJobNowOrSoon(pawn))
-			{
-				return;
-			}
-
-			if (!RCellFinder.TryFindDirectFleeDestination(cell, 9f, pawn, out IntVec3 cell2))
-			{
-				return;
-			}
-			pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
-			Job job = JobMaker.MakeJob(JobDefOf.Goto, cell2);
-			job.locomotionUrgency = LocomotionUrgency.Sprint;
-			pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
 		}
 
 		private static bool TryFindDirectFleeDestination(IntVec3 root, float dist, Pawn pawn, out IntVec3 result, params Rot8[] excludeDirections)

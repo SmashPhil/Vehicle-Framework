@@ -33,11 +33,11 @@ namespace Vehicles
 					FinalizeLanding();
 				}
 			}
-			if (Find.TickManager.TicksGame % NotificationSquishInterval == 0 && Map != null && vehicle.VehicleDef.HasComp(typeof(CompProperties_VehicleDamager)))
+			if (Find.TickManager.TicksGame % NotificationSquishInterval == 0 && Map != null)
 			{
 				foreach (IntVec3 cell in vehicle.PawnOccupiedCells(Position, Rotation))
 				{
-					GenVehicleDamager.NotifyNearbyPawnsOfDangerousPosition(Map, cell);
+					VehicleDamager.NotifyNearbyPawnsOfDangerousPosition(Map, cell);
 				}
 			}
 		}
