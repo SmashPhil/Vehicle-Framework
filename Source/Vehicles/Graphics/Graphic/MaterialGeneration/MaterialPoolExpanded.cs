@@ -8,6 +8,7 @@ namespace Vehicles
 	public class MaterialPoolExpanded
 	{
 		private static readonly Dictionary<MaterialRequestRGB, Material> matDictionary = new Dictionary<MaterialRequestRGB, Material>();
+		internal static int count = 0;
 
 		public static Material MatFrom(string texPath, bool reportFailure)
 		{
@@ -178,6 +179,7 @@ namespace Vehicles
 						req.shaderParameters[i].Apply(material);
 					}
 				}
+				count++;
 				matDictionary.Add(req, material);
 			}
 			return material;

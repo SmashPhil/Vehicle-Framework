@@ -27,7 +27,7 @@ namespace Vehicles
 		public const int TicksWhileWaiting = 10;
 
 		public const int CheckAheadNodesForCollisions = 3;
-		public const int MaxCheckAheadNodesForCollisions = 7;
+		public const int MaxCheckAheadNodesForCollisions = 8;
 		protected VehiclePawn vehicle;
 
 		private List<IntVec3> bumperCells;
@@ -400,6 +400,9 @@ namespace Vehicles
 				return;
 			}
 
+			lastCell = vehicle.Position;
+			vehicle.Position = nextCell;
+
 			if (VehicleMod.settings.main.runOverPawns)
 			{
 				float costsToPayThisTick = CostToPayThisTick();
@@ -408,12 +411,10 @@ namespace Vehicles
 				{
 					moveSpeed *= Ext_Math.Sqrt2;
 				}
-				//WarnPawnsImpendingCollision();
+				WarnPawnsImpendingCollision();
 				vehicle.CheckForCollisions(moveSpeed);
 			}
-			
-			lastCell = vehicle.Position;
-			vehicle.Position = nextCell;
+
 			if (vehicle.beached)
 			{
 				vehicle.BeachShip();
@@ -823,12 +824,11 @@ namespace Vehicles
 					next = curPath.Peek(nodeIndex);
 					Rot8 rot = Ext_Map.DirectionToCell(previous, next);
 					
-					CellRect vehicleRect = vehicle.VehicleRect(next, rot);
+					CellRect vehicleRect = vehicle.VehicleRect(next, rot).ExpandedBy(1);
 					foreach (IntVec3 cell in vehicleRect)
 					{
 						if (collisionCells.Add(cell))
 						{
-							vehicle.Map.debugDrawer.FlashCell(cell, 0.25f, duration: 60);
 							List<Thing> thingList = cell.GetThingList(vehicle.Map);
 							foreach (Thing thing in thingList)
 							{

@@ -9,12 +9,7 @@ namespace Vehicles
 {
 	public class ITab_Vehicle_Health : ITab
 	{
-		public const float WindowWidth = 670;
-		public const float WindowHeight = 430;
-
-		public const float InfoPanelWidth = 250;
-
-		public static readonly Vector2 panelSize = new Vector2(WindowWidth, WindowHeight);
+		public static readonly Vector2 panelSize = new Vector2(100, 100);
 
 		public ITab_Vehicle_Health()
 		{
@@ -41,8 +36,13 @@ namespace Vehicles
 
 		protected override void FillTab()
 		{
-			VehicleTabHelper_Health.Start(panelSize, Vehicle);
+			Vector2 size = VehicleTabHelper_Health.Start(Vehicle);
 			{
+				if (this.size != size)
+				{
+					this.size = size;
+					UpdateSize();
+				}
 				VehicleTabHelper_Health.DrawHealthPanel(Vehicle);
 			}
 			VehicleTabHelper_Health.End();

@@ -113,7 +113,7 @@ namespace Vehicles
 			//Will want to be added via xml
 			Utilities.InvokeWithLogging(FillVehicleLordJobTypes);
 
-			Utilities.InvokeWithLogging(PathingHelper.LoadDefModExtensionCosts);
+			Utilities.InvokeWithLogging(ApplyAllDefModExtensions);
 			Utilities.InvokeWithLogging(PathingHelper.LoadTerrainTagCosts);
 			Utilities.InvokeWithLogging(PathingHelper.LoadTerrainDefaults);
 			Utilities.InvokeWithLogging(RecacheMoveableVehicleDefs);
@@ -121,6 +121,9 @@ namespace Vehicles
 
 			Utilities.InvokeWithLogging(LoadedModManager.GetMod<VehicleMod>().InitializeTabs);
 			Utilities.InvokeWithLogging(VehicleMod.settings.Write);
+
+			Log.Message($"Materials: {MaterialPoolExpanded.count}");
+			Log.Message($"Vanilla: {((Dictionary<Material, MaterialRequest>)AccessTools.Field(typeof(MaterialPool), "matDictionaryReverse").GetValue(null)).Count}");
 		}
 		
 		public static void Patch(MethodBase original, HarmonyMethod prefix = null, HarmonyMethod postfix = null, HarmonyMethod transpiler = null, HarmonyMethod finalizer = null)
@@ -190,6 +193,15 @@ namespace Vehicles
 					map.GetCachedMapComponent<VehicleMapping>().ConstructComponents();
 				}
 			}
+		}
+
+		private static void ApplyAllDefModExtensions()
+		{
+			PathingHelper.LoadDefModExtensionCosts(vehicleDef => vehicleDef.properties.customThingCosts);
+			PathingHelper.LoadDefModExtensionCosts(vehicleDef => vehicleDef.properties.customTerrainCosts);
+			PathingHelper.LoadDefModExtensionCosts(vehicleDef => vehicleDef.properties.customBiomeCosts);
+			PathingHelper.LoadDefModExtensionCosts(vehicleDef => vehicleDef.properties.customRoadCosts);
+			PathingHelper.LoadDefModExtensionCosts(vehicleDef => vehicleDef.properties.customRiverCosts);
 		}
 	}
 }

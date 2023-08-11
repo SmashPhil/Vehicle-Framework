@@ -343,6 +343,7 @@ namespace Vehicles
 			//float roadMultiplier = VehicleCaravan_PathFollower.GetRoadMovementDifficultyMultiplier(vehicleDefs, tile, neighbor, null)
 			float biomeCost = vehicleDef.properties.customBiomeCosts.TryGetValue(worldTile.biome, defaultBiomeCost);
 			float hillinessCost = vehicleDef.properties.customHillinessCosts.TryGetValue(worldTile.hilliness, HillinessMovementDifficultyOffset(worldTile.hilliness));
+
 			if (ImpassableCost(biomeCost) || ImpassableCost(hillinessCost))
 			{
 				if (explanation != null)

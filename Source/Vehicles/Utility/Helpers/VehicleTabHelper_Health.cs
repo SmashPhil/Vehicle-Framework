@@ -11,8 +11,15 @@ namespace Vehicles
 {
 	public static class VehicleTabHelper_Health
 	{
+		public const float LeftWindowWidth = 250;
+		public const float WindowHeight = 430;
+		public const float LabelColumnWidth = 200;
+		public const float ColumnWidth = 100;
+
 		public const float ComponentRowHeight = 20f;
 		public const float ComponentIndicatorIconSize = 20f;
+
+		private const int ColumnCount = 2;
 
 		private static readonly Color MouseOverColor = new Color(0.85f, 0.85f, 0.85f, 0.1f);
 		private static readonly Color AlternatingColor = new Color(0.75f, 0.75f, 0.75f, 0.1f);
@@ -25,12 +32,16 @@ namespace Vehicles
 		private static Vector2 componentTabScrollPos;
 		private static VehicleComponent selectedComponent;
 
+		private static List<DamageArmorCategoryDef> armorRatingDefs;
+
 		private static readonly List<JobDef> jobLimitJobDefs = new List<JobDef>();
 
 		public static void Init()
 		{
 			componentTabScrollPos = Vector2.zero;
 			selectedComponent = null;
+			armorRatingDefs = DefDatabase<DamageArmorCategoryDef>.AllDefsListForReading;
+
 			//jobLimitJobDefs.Clear();
 			//foreach (JobDef jobDef in DefDatabase<JobDef>.AllDefsListForReading)
 			//{
@@ -41,15 +52,17 @@ namespace Vehicles
 			//}
 		}
 
-		public static void Start(Vector2 size, VehiclePawn vehicle)
+		public static Vector2 Start(VehiclePawn vehicle)
 		{
 			if (vehicle != inspectingVehicle)
 			{
 				//Not captured by OnOpen when switching between vehicles with ITab already open
 				inspectingVehicle = vehicle;
-				VehicleTabHelper_Health.size = size;
+				//+ 2x ColumnWidth for Health and Efficiency columns
+				size = new Vector2(LeftWindowWidth + LabelColumnWidth + (ColumnCount * ColumnWidth) + ColumnWidth * armorRatingDefs.Count, WindowHeight);
 				RecacheComponentListHeight();
 			}
+			return size;
 		}
 
 		public static void End()
@@ -62,8 +75,8 @@ namespace Vehicles
 			{
 				Rect rect = new Rect(0, 20, size.x, size.y - 20);
 
-				Rect infoPanelRect = new Rect(rect.x, rect.y, ITab_Vehicle_Health.InfoPanelWidth, rect.height).Rounded();
-				Rect componentPanelRect = new Rect(infoPanelRect.xMax, rect.y, size.x - ITab_Vehicle_Health.InfoPanelWidth, rect.height);
+				Rect infoPanelRect = new Rect(rect.x, rect.y, LeftWindowWidth, rect.height).Rounded();
+				Rect componentPanelRect = new Rect(infoPanelRect.xMax, rect.y, size.x - LeftWindowWidth, rect.height);
 				
 				infoPanelRect.yMin += 11f; //Extra space for tab, excluded from componentPanelRect for top options
 
@@ -180,18 +193,21 @@ namespace Vehicles
 		{
 			Text.Font = GameFont.Small;
 			float textHeight = Text.CalcSize("VF_ComponentHealth".Translate()).y;
-			float columnWidth = 75 - (ComponentIndicatorIconSize / 3f);
-			float labelWidth = rect.width - (columnWidth * 3) - ComponentIndicatorIconSize * 2;
+			
 			//Skip header for component name column
-			Rect topLabelRect = new Rect(rect.x + labelWidth, rect.y, columnWidth, textHeight);
-
+			Rect topLabelRect = new Rect(rect.x + LabelColumnWidth, rect.y, ColumnWidth, textHeight);
 			Text.Anchor = TextAnchor.MiddleCenter;
 			Widgets.Label(topLabelRect, "VF_ComponentHealth".Translate());
 			topLabelRect.x += topLabelRect.width;
 			Widgets.Label(topLabelRect, "VF_ComponentEfficiency".Translate());
 			topLabelRect.x += topLabelRect.width;
-			Widgets.Label(topLabelRect, "VF_ComponentArmor".Translate());
-			topLabelRect.x += topLabelRect.width;
+
+			for (int i = 0; i < armorRatingDefs.Count; i++)
+			{
+				DamageArmorCategoryDef armorCategoryDef = armorRatingDefs[i];
+				Widgets.Label(topLabelRect, armorCategoryDef.armorRatingStat.LabelCap);
+				topLabelRect.x += topLabelRect.width;
+			}
 
 			GUI.color = TexData.MenuBGColor;
 			Widgets.DrawLineHorizontal(rect.x, topLabelRect.y + textHeight / 1.25f, rect.width);
@@ -210,7 +226,7 @@ namespace Vehicles
 				foreach (VehicleComponent component in vehicle.statHandler.components)
 				{
 					Rect compRect = new Rect(rect.x, curY, rect.width - 16, ComponentRowHeight);
-					float usedHeight = DrawCompRow(compRect, component, labelWidth, columnWidth, alternatingRow);
+					float usedHeight = DrawCompRow(compRect, component, LabelColumnWidth, ColumnWidth, alternatingRow);
 					//TooltipHandler.TipRegion(compRect, "VF_ComponentClickMoreInfoTooltip".Translate());
 					Rect highlightingRect = new Rect(compRect)
 					{
@@ -273,11 +289,16 @@ namespace Vehicles
 			labelRect.x += columnWidth;
 			string efficiencyEntry = component.props.categories.NullOrEmpty() ? "-" : component.Efficiency.ToStringPercent().Colorize(component.ComponentEfficiencyColor());
 			Widgets.Label(labelRect, efficiencyEntry);
-			labelRect.x += columnWidth;
-			Widgets.Label(labelRect, component.ArmorRating(null).ToStringPercent());
-			labelRect.x += columnWidth;
+			
 
-			Rect iconRect = new Rect(labelRect.x, labelRect.y, ComponentIndicatorIconSize, ComponentIndicatorIconSize);
+			for (int i = 0; i < armorRatingDefs.Count; i++)
+			{
+				labelRect.x += columnWidth;
+				DamageArmorCategoryDef armorCategoryDef = armorRatingDefs[i];
+				Widgets.Label(labelRect, component.ArmorRating(armorCategoryDef).ToStringByStyle(armorCategoryDef.armorRatingStat.toStringStyle));
+			}
+
+			Rect iconRect = new Rect(labelRect.xMax, labelRect.y, ComponentIndicatorIconSize, ComponentIndicatorIconSize);
 			component.DrawIcon(iconRect);
 
 			return labelHeight;
@@ -288,7 +309,7 @@ namespace Vehicles
 			componentListHeight = 0;
 			foreach (VehicleComponent component in inspectingVehicle.statHandler.components)
 			{
-				float textHeight = Text.CalcHeight(component.props.label, size.x - ITab_Vehicle_Health.InfoPanelWidth);
+				float textHeight = Text.CalcHeight(component.props.label, size.x - LeftWindowWidth);
 				componentListHeight += Mathf.Max(lineHeight, textHeight);
 			}
 		}

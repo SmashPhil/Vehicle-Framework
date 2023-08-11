@@ -28,6 +28,7 @@ namespace Vehicles
 		public bool debugDrawVehicleTracks;
 		public bool debugDrawBumpers;
 		public bool debugDrawLordMeetingPoint;
+		public bool debugDrawFleePoint;
 
 		public bool debugLogging;
 		public bool debugPathCostChanges;
@@ -52,6 +53,7 @@ namespace Vehicles
 			debugDrawVehicleTracks = false;
 			debugDrawBumpers = false;
 			debugDrawLordMeetingPoint = false;
+			debugDrawFleePoint = false;
 
 			debugLogging = false;
 			debugPathCostChanges = false;
@@ -75,6 +77,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref debugDrawVehicleTracks, nameof(debugDrawVehicleTracks));
 			Scribe_Values.Look(ref debugDrawBumpers, nameof(debugDrawBumpers));
 			Scribe_Values.Look(ref debugDrawLordMeetingPoint, nameof(debugDrawLordMeetingPoint));
+			Scribe_Values.Look(ref debugDrawFleePoint, nameof(debugDrawFleePoint));
 
 			Scribe_Values.Look(ref debugLogging, nameof(debugLogging));
 			Scribe_Values.Look(ref debugPathCostChanges, nameof(debugPathCostChanges));
@@ -153,6 +156,7 @@ namespace Vehicles
 
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawBumpers".Translate(), ref debugDrawBumpers, "VF_DevMode_DebugDrawBumpersTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawLordMeetingPoint".Translate(), ref debugDrawLordMeetingPoint, "VF_DevMode_DebugDrawLordMeetingPointTooltip".Translate());
+					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawFleePoints".Translate(), ref debugDrawFleePoint, "VF_DevMode_DebugDrawFleePointsTooltip".Translate());
 					listingStandard.NewColumn();
 
 					listingStandard.Header("VF_DevMode_Pathing".Translate(), ListingExtension.BannerColor, anchor: TextAnchor.MiddleCenter);

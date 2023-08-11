@@ -38,7 +38,7 @@ namespace Vehicles
 				}
 				if (moreDetailsForPawn is VehiclePawn)
 				{
-					return ITab_Vehicle_Health.WindowWidth;
+					return VehicleTabHelper_Health.LeftWindowWidth;
 				}
 				return NeedsCardUtility.GetSize(moreDetailsForPawn).x;
 			}
@@ -145,7 +145,7 @@ namespace Vehicles
 		{
 			if (moreDetailsForPawn is VehiclePawn vehicle)
 			{
-				VehicleTabHelper_Health.Start(rect.size, vehicle);
+				VehicleTabHelper_Health.Start(vehicle);
 				{
 					VehicleTabHelper_Health.DrawHealthPanel(vehicle);
 				}

@@ -645,7 +645,7 @@ namespace Vehicles
 
 		public static bool NoRestForVehicles(Caravan __instance, ref bool __result)
 		{
-			if (__instance is VehicleCaravan caravan && !caravan.PawnsListForReading.NotNullAndAny(x => !(x is VehiclePawn)))
+			if (__instance is VehicleCaravan caravan)
 			{
 				__result = VehicleCaravanPathingHelper.ShouldRestAt(caravan, caravan.Tile);
 				return false;

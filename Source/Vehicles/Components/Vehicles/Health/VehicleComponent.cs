@@ -98,8 +98,8 @@ namespace Vehicles
 			{
 				return;
 			}
-			StatDef damageType = dinfo.Def.armorCategory.armorRatingStat;
-			float armorRating = ArmorRating(damageType);
+			DamageArmorCategoryDef armorCategoryDef = dinfo.Def.armorCategory;
+			float armorRating = ArmorRating(armorCategoryDef);
 			float armorDiff = armorRating - dinfo.ArmorPenetrationInt;
 
 			result = props.hitbox.fallthrough ? Penetration.Penetrated : Penetration.NonPenetrated;
@@ -125,25 +125,15 @@ namespace Vehicles
 			}
 		}
 
-		public float ArmorRating(StatDef statDef)
+		/// <summary>
+		/// Pulls armor rating of component for <paramref name="armorCategoryDef"/>.  If armor rating is not specified, defaults to vehicles overall armor rating for that armor category.
+		/// </summary>
+		/// <param name="armorCategoryDef"></param>
+		/// <returns>armor rating %</returns>
+		public float ArmorRating(DamageArmorCategoryDef armorCategoryDef)
 		{
-			if (statDef is null)
-			{
-				float rating = 0;
-				int count = 0;
-				foreach (StatDef armorRatingDef in DefDatabase<DamageArmorCategoryDef>.AllDefsListForReading.Select(armorCategory => armorCategory.armorRatingStat))
-				{
-					if (armorRatingDef != null)
-					{
-						StatModifier sumArmorModifier = props.armor?.FirstOrDefault(rating => rating.stat == armorRatingDef);
-						rating += sumArmorModifier?.value ?? vehicle.GetStatValue(armorRatingDef);
-						count++;
-					}
-				}
-				return rating / count;
-			}
-			StatModifier armorModifier = props.armor?.FirstOrDefault(rating => rating.stat == statDef);
-			return armorModifier?.value ?? vehicle.GetStatValue(statDef);
+			StatModifier armorModifier = props.armor?.FirstOrDefault(rating => rating.stat == armorCategoryDef.armorRatingStat);
+			return armorModifier?.value ?? vehicle.GetStatValue(armorCategoryDef.armorRatingStat);
 		}
 
 		public virtual void PostCreate()

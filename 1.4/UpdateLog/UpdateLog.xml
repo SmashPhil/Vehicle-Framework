@@ -1,13 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1341</currentVersion>
+  <currentVersion>1.5.1342</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed thread safety bug when recalculating pathfinding costs.
+
+- Fixed config error issue with CustomCostDefModExtension
+
+- Fixed bug where damaging vehicle components directly wouldn't notify the vehicle needs repairs.  (This occured only with VVE and tires being damaged)
+
+- Fixed bug where CustomCostDefModExtension wasn't properly applying.
+
+&lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 

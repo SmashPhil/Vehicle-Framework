@@ -169,7 +169,7 @@ namespace Vehicles
 				vehicle.AddEvent(VehicleEventDefOf.PawnKilled, vehicle.vPather.RecalculatePermissions, vehicle.RecachePawnCount);
 				vehicle.AddEvent(VehicleEventDefOf.PawnCapacitiesDirty, vehicle.vPather.RecalculatePermissions);
 				vehicle.AddEvent(VehicleEventDefOf.IgnitionOff, vehicle.vPather.RecalculatePermissions);
-				vehicle.AddEvent(VehicleEventDefOf.DamageTaken, vehicle.vPather.RecalculatePermissions, vehicle.statHandler.MarkAllDirty);
+				vehicle.AddEvent(VehicleEventDefOf.DamageTaken, vehicle.vPather.RecalculatePermissions, vehicle.statHandler.MarkAllDirty, vehicle.Notify_TookDamage);
 				vehicle.AddEvent(VehicleEventDefOf.Repaired, vehicle.vPather.RecalculatePermissions, vehicle.statHandler.MarkAllDirty);
 				vehicle.AddEvent(VehicleEventDefOf.OutOfFuel, delegate ()
 				{

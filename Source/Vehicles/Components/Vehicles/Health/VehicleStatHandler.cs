@@ -245,7 +245,7 @@ namespace Vehicles
 			StringBuilder report = VehicleMod.settings.debug.debugLogging ? new StringBuilder() : null;
 
 			ApplyDamageToComponent(dinfo, hitCell, report);
-			vehicle.Notify_TookDamage();
+			
 			DeregisterImpacter(dinfo.Instigator);
 			Debug.Message(report.ToStringSafe());
 		}

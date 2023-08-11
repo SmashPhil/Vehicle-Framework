@@ -90,17 +90,17 @@ namespace Vehicles
 		/// <summary>
 		/// Load custom path costs from <see cref="CustomCostDefModExtension"/>
 		/// </summary>
-		public static void LoadDefModExtensionCosts()
+		public static void LoadDefModExtensionCosts<T>(Func<VehicleDef, Dictionary<T, int>> dictFromVehicle) where T : Def
 		{
-			foreach (Def def in DefDatabase<Def>.AllDefsListForReading)
+			foreach (T def in DefDatabase<T>.AllDefsListForReading)
 			{
-				if (def is VehicleDef)
-				{
-					Debug.Warning($"Attempting to set custom path cost for {def.defName} when vehicles should not be pathing over other vehicles to begin with. Please do not add this DefModExtension to VehicleDefs.");
-					continue;
-				}
 				if (def.GetModExtension<CustomCostDefModExtension>() is CustomCostDefModExtension customCost)
 				{
+					if (def is VehicleDef)
+					{
+						Debug.Warning($"Attempting to set custom path cost for {def.defName} when vehicles should not be pathing over other vehicles to begin with. Please do not add this DefModExtension to VehicleDefs.");
+						continue;
+					}
 					List<VehicleDef> vehicles = customCost.vehicles;
 					if (vehicles.NullOrEmpty()) //If no vehicles are specified, apply to all
 					{
@@ -108,26 +108,31 @@ namespace Vehicles
 					}
 					foreach (VehicleDef vehicleDef in vehicles)
 					{
-						if (def is TerrainDef terrainDef)
-						{
-							vehicleDef.properties.customTerrainCosts[terrainDef] = customCost.cost;
-						}
-						if (def is ThingDef thingDef)
-						{
-							vehicleDef.properties.customThingCosts[thingDef] = customCost.cost;
-						}
-						if (def is BiomeDef biomeDef)
-						{
-							vehicleDef.properties.customBiomeCosts[biomeDef] = customCost.cost;
-						}
-						if (def is RiverDef riverDef)
-						{
-							vehicleDef.properties.customRiverCosts[riverDef] = customCost.cost;
-						}
-						if (def is RoadDef roadDef)
-						{
-							vehicleDef.properties.customRoadCosts[roadDef] = customCost.cost;
-						}
+						dictFromVehicle(vehicleDef)[def] = Mathf.RoundToInt(customCost.cost);
+					}
+				}
+			}
+		}
+
+		public static void LoadDefModExtensionCosts<T>(Func<VehicleDef, Dictionary<T, float>> dictFromVehicle) where T : Def
+		{
+			foreach (T def in DefDatabase<T>.AllDefsListForReading)
+			{
+				if (def.GetModExtension<CustomCostDefModExtension>() is CustomCostDefModExtension customCost)
+				{
+					if (def is VehicleDef)
+					{
+						Debug.Warning($"Attempting to set custom path cost for {def.defName} when vehicles should not be pathing over other vehicles to begin with. Please do not add this DefModExtension to VehicleDefs.");
+						continue;
+					}
+					List<VehicleDef> vehicles = customCost.vehicles;
+					if (vehicles.NullOrEmpty()) //If no vehicles are specified, apply to all
+					{
+						vehicles = DefDatabase<VehicleDef>.AllDefsListForReading;
+					}
+					foreach (VehicleDef vehicleDef in vehicles)
+					{
+						dictFromVehicle(vehicleDef)[def] = customCost.cost;
 					}
 				}
 			}
@@ -156,10 +161,12 @@ namespace Vehicles
 		public static void RegisterRegionEffecter(ThingDef thingDef)
 		{
 			regionEffecters[thingDef] = new List<VehicleDef>();
+			if (thingDef.defName == "FT_TankTrap") Log.Message($"ThingDef: {thingDef}");
 			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
 				if (vehicleDef.properties.customThingCosts.TryGetValue(thingDef, out int value))
 				{
+					if (thingDef.defName == "FT_TankTrap") Log.Message($"Cost: {value}");
 					if (value < 0 || value >= VehiclePathGrid.ImpassableCost)
 					{
 						regionEffecters[thingDef].Add(vehicleDef);

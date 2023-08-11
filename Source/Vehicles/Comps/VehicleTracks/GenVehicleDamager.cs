@@ -11,7 +11,21 @@ namespace Vehicles
 {
 	public static class GenVehicleDamager
 	{
+		private const float FleeAngleIncrement = 45f / 2; //45 degrees per Rot8 angle
+
 		private static readonly int PawnNotifyCellCount = GenRadial.NumCellsInRadius(4.5f);
+
+		private static readonly FloatRange[] FleeAngleRanges = new FloatRange[]
+		{
+			new FloatRange(360 - FleeAngleIncrement, FleeAngleIncrement),
+			new FloatRange(Rot8.NorthEast.AsAngle - FleeAngleIncrement, Rot8.NorthEast.AsAngle + FleeAngleIncrement),
+			new FloatRange(Rot8.East.AsAngle - FleeAngleIncrement, Rot8.East.AsAngle + FleeAngleIncrement),
+			new FloatRange(Rot8.SouthEast.AsAngle - FleeAngleIncrement, Rot8.SouthEast.AsAngle + FleeAngleIncrement),
+			new FloatRange(Rot8.South.AsAngle - FleeAngleIncrement, Rot8.South.AsAngle + FleeAngleIncrement),
+			new FloatRange(Rot8.SouthWest.AsAngle - FleeAngleIncrement, Rot8.SouthWest.AsAngle + FleeAngleIncrement),
+			new FloatRange(Rot8.West.AsAngle - FleeAngleIncrement, Rot8.West.AsAngle + FleeAngleIncrement),
+			new FloatRange(Rot8.NorthWest.AsAngle - FleeAngleIncrement, Rot8.NorthWest.AsAngle + FleeAngleIncrement),
+		};
 
 		public static void NotifyNearbyPawnsOfDangerousPosition(Map map, IntVec3 cell)
 		{
@@ -89,69 +103,32 @@ namespace Vehicles
 
 		private static bool TryFindDirectFleeDestination(IntVec3 root, float dist, Pawn pawn, out IntVec3 result, params Rot8[] excludeDirections)
 		{
-			float increment = 45f / 2; //45 degrees per Rot8 angle
-
-			bool[] allowedDirections = new bool[8];
-			allowedDirections.Populate(true);
+			List<Rot8> directions = new List<Rot8>() { Rot8.North, Rot8.NorthEast, Rot8.East, Rot8.SouthEast, Rot8.South, Rot8.SouthWest, Rot8.West, Rot8.NorthWest };
 			if (!excludeDirections.NullOrEmpty())
 			{
 				for (int i = 0; i < excludeDirections.Length; i++)
 				{
 					Rot8 rot = excludeDirections[i];
-					allowedDirections[rot.AsInt] = false;
+					directions.Remove(rot);
 				}
 			}
-			Log.Message($"Finding flee destination with excluded directions: {string.Join(",", excludeDirections.Select(rot => rot.ToString()))}");
-			for (int i = 0; i < 4 + (4 * excludeDirections.Length); i++) //8 tries x4 iterations for 32 attempts (accounts for excluded direction count to ensure same number of attempts
+			Rand.PushState();
+			try
 			{
-				FloatRange angleNorth = new FloatRange(360 - increment, increment);
-				if (allowedDirections[Rot8.NorthInt] && ImmediatelyWalkable(root, angleNorth, dist, pawn, out result))
+				for (int i = 0; i < 30; i++)
 				{
-					return true;
-				}
-				FloatRange angleNorthEast = new FloatRange(angleNorth.max, angleNorth.max + 45);
-				if (allowedDirections[Rot8.NorthEastInt] && ImmediatelyWalkable(root, angleNorthEast, dist, pawn, out result))
-				{
-					return true;
-				}
-
-				FloatRange angleEast = new FloatRange(angleNorthEast.max, angleNorthEast.max + 45);
-				if (allowedDirections[Rot8.EastInt] && ImmediatelyWalkable(root, angleEast, dist, pawn, out result))
-				{
-					return true;
-				}
-
-				FloatRange angleSouthEast = new FloatRange(angleEast.max, angleEast.max + 45);
-				if (allowedDirections[Rot8.SouthEastInt] && ImmediatelyWalkable(root, angleSouthEast, dist, pawn, out result))
-				{
-					return true;
-				}
-
-				FloatRange angleSouth = new FloatRange(angleSouthEast.max, angleSouthEast.max + 45);
-				if (allowedDirections[Rot8.SouthInt] && ImmediatelyWalkable(root, angleSouth, dist, pawn, out result))
-				{
-					return true;
-				}
-
-				FloatRange angleSouthWest = new FloatRange(angleSouth.max, angleSouth.max + 45);
-				if (allowedDirections[Rot8.SouthWestInt] && ImmediatelyWalkable(root, angleSouthWest, dist, pawn, out result))
-				{
-					return true;
-				}
-
-				FloatRange angleWest = new FloatRange(angleSouthWest.max, angleSouthWest.max + 45);
-				if (allowedDirections[Rot8.WestInt] && ImmediatelyWalkable(root, angleWest, dist, pawn, out result))
-				{
-					return true;
-				}
-
-				FloatRange angleNorthWest = new FloatRange(angleWest.max, angleWest.max + 45);
-				if (allowedDirections[Rot8.NorthWestInt] && ImmediatelyWalkable(root, angleNorthWest, dist, pawn, out result))
-				{
-					return true;
+					Rot8 rot = directions.RandomElementWithFallback(fallback: pawn.Rotation.Opposite);
+					if (ImmediatelyWalkable(root, FleeAngleRanges[rot.AsIntClockwise], dist, pawn, out result))
+					{
+						return true;
+					}
 				}
 			}
-			Log.Message("Failsafe check");
+			finally
+			{
+				Rand.PopState();
+			}
+
 			//Failsafe check
 			Region region = RegionAndRoomQuery.GetRegion(pawn, RegionType.Set_Passable);
 			for (int j = 0; j < 30; j++)
@@ -170,19 +147,21 @@ namespace Vehicles
 			return false;
 		}
 
-		private static bool ImmediatelyWalkable(IntVec3 root, FloatRange angleRange, float dist, Pawn pawn, out IntVec3 result)
+		private static bool ImmediatelyWalkable(IntVec3 root, FloatRange angleRange, float distance, Pawn pawn, out IntVec3 result)
 		{
-			float radians = angleRange.RandomInRange * Mathf.Deg2Rad;
-			int x = Mathf.RoundToInt(dist * Mathf.Cos(radians));
-			int z = Mathf.RoundToInt(dist * Mathf.Sin(radians));
-			result = root + new IntVec3(x, 0, z);
+			float angle = angleRange.RandomInRange;
+			IntVec3 offset = IntVec3.FromVector3(Quaternion.AngleAxis(angle, Vector3.up) * Vector3.forward * distance);
+			result = root + offset;
 			if (result.Walkable(pawn.Map) && result.DistanceToSquared(pawn.Position) < result.DistanceToSquared(root) && GenSight.LineOfSight(root, result, pawn.Map, true))
 			{
-				pawn.Map.debugDrawer.FlashCell(result, 0.5f);
-				pawn.Map.debugDrawer.FlashLine(pawn.Position, result, color: SimpleColor.Green);
+				if (VehicleMod.settings.debug.debugDrawFleePoint)
+				{
+					pawn.Map.debugDrawer.FlashCell(result, 0.5f);
+					pawn.Map.debugDrawer.FlashLine(pawn.Position, result, color: SimpleColor.Green);
+				}
 				return true;
 			}
-			if (result.InBounds(pawn.Map))
+			if (VehicleMod.settings.debug.debugDrawFleePoint && result.InBounds(pawn.Map))
 			{
 				pawn.Map.debugDrawer.FlashCell(result, 0);
 				pawn.Map.debugDrawer.FlashLine(pawn.Position, result, color: SimpleColor.Red);
