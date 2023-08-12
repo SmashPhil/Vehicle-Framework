@@ -122,8 +122,7 @@ namespace Vehicles
 			Utilities.InvokeWithLogging(LoadedModManager.GetMod<VehicleMod>().InitializeTabs);
 			Utilities.InvokeWithLogging(VehicleMod.settings.Write);
 
-			Log.Message($"Materials: {MaterialPoolExpanded.count}");
-			Log.Message($"Vanilla: {((Dictionary<Material, MaterialRequest>)AccessTools.Field(typeof(MaterialPool), "matDictionaryReverse").GetValue(null)).Count}");
+			Log.Message($"VanillaFramework: {MaterialPoolExpanded.count} Vanilla: {((Dictionary<Material, MaterialRequest>)AccessTools.Field(typeof(MaterialPool), "matDictionaryReverse").GetValue(null)).Count}");
 		}
 		
 		public static void Patch(MethodBase original, HarmonyMethod prefix = null, HarmonyMethod postfix = null, HarmonyMethod transpiler = null, HarmonyMethod finalizer = null)

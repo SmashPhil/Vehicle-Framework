@@ -521,7 +521,6 @@ namespace Vehicles
 					action = delegate ()
 					{
 						DisembarkAll();
-						ignition.Drafted = false;
 					},
 					hotKey = KeyBindingDefOf.Misc2
 				};
