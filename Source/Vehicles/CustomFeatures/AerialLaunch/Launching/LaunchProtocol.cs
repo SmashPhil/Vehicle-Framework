@@ -24,7 +24,7 @@ namespace Vehicles
 		protected LaunchType launchType;
 
 		private Map map;
-		protected IntVec3 position;
+		protected IntVec3 position = IntVec3.Invalid;
 
 		protected List<Graphic>[] cachedOverlayGraphics;
 		protected List<GraphicDataLayered>[] cachedOverlayGraphicDatas;
@@ -186,14 +186,16 @@ namespace Vehicles
 
 		public (Vector3 drawPos, float rotation) Draw(Vector3 drawPos, float rotation)
 		{
+
 			(Vector3 drawPos, float rotation) result = (drawPos, rotation);
+			ShadowData shadowData = ShadowData.CreateFrom(vehicle);
 			switch (launchType)
 			{
 				case LaunchType.Landing:
-					result = AnimateLanding(drawPos, rotation);
+					(result.drawPos, result.rotation, shadowData) = AnimateLanding(result.drawPos, result.rotation, shadowData);
 					break;
 				case LaunchType.Takeoff:
-					result = AnimateTakeoff(drawPos, rotation);
+					(result.drawPos, result.rotation, shadowData) = AnimateTakeoff(result.drawPos, result.rotation, shadowData);
 					break;
 			}
 			result.drawPos.y = AltitudeLayer.Skyfaller.AltitudeFor();
@@ -203,29 +205,19 @@ namespace Vehicles
 			{
 				DrawOverlays(result.drawPos, result.rotation);
 			}
-			if (CurAnimationProperties.renderShadow)
+			if (!shadowData.Invalid)
 			{
-				Vector2 shadowSize = vehicle.VehicleGraphic.data.drawSize;
 				Color shadowColor = Color.white;
-				if (!CurAnimationProperties.shadowSizeXCurve.NullOrEmpty())
-				{
-					shadowSize.x = CurAnimationProperties.shadowSizeXCurve.Evaluate(TimeInAnimation);
-				}
-				if (!CurAnimationProperties.shadowSizeZCurve.NullOrEmpty())
-				{
-					shadowSize.y = CurAnimationProperties.shadowSizeZCurve.Evaluate(TimeInAnimation);
-				}
-				if (!CurAnimationProperties.shadowAlphaCurve.NullOrEmpty())
-				{
-					shadowColor.a = CurAnimationProperties.shadowAlphaCurve.Evaluate(TimeInAnimation);
-				}
-				DrawShadow(drawPos, shadowSize, shadowColor);
+				shadowColor.a = shadowData.alpha;
+				IntVec3 position = this.position.IsValid || !vehicle.Spawned ? this.position : vehicle.Position;
+				DrawShadow(position.ToVector3Shifted(), shadowData.width, shadowData.height, shadowColor);
 			}
 			return result;
 		}
 
-		private void DrawShadow(Vector3 drawPos, Vector2 size, Color color)
+		protected void DrawShadow(Vector3 drawPos, float width, float height, Color color)
 		{
+			Log.Message($"Drawing shadow at {drawPos} Position={position}:{position.IsValid} Vehicle={vehicle.Spawned} Position={vehicle.Position}");
 			Material shadowMaterial = ShadowMaterial;
 			if (shadowMaterial is null)
 			{
@@ -238,15 +230,15 @@ namespace Vehicles
 			}
 			if (!CurAnimationProperties.lockShadowZ)
 			{
-				shadowSpot.x = DrawPos.z;
+				shadowSpot.z = DrawPos.z;
 			}
-			DrawShadow(shadowSpot, CurAnimationProperties.forcedRotation ?? vehicle.Rotation, shadowMaterial, size, color);
+			DrawShadow(shadowSpot, CurAnimationProperties.forcedRotation ?? vehicle.Rotation, shadowMaterial, width, height, color);
 		}
 
-		private void DrawShadow(Vector3 pos, Rot4 rot, Material material, Vector2 shadowSize, Color color)
+		private void DrawShadow(Vector3 pos, Rot4 rot, Material material, float width, float height, Color color)
 		{
 			pos.y = AltitudeLayer.Shadows.AltitudeFor();
-			Vector3 s = new Vector3(shadowSize.x, 1f, shadowSize.y);
+			Vector3 s = new Vector3(width, 1f, height);
 			
 			shadowPropertyBlock.SetColor(ShaderPropertyIDs.Color, color);
 			Matrix4x4 matrix = default;
@@ -259,9 +251,9 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="drawPos"
 		/// <param name="rotation"></param>
-		protected virtual (Vector3 drawPos, float rotation) AnimateLanding(Vector3 drawPos, float rotation)
+		protected virtual (Vector3 drawPos, float rotation, ShadowData shadowData) AnimateLanding(Vector3 drawPos, float rotation, ShadowData shadowData)
 		{
-			return (drawPos, rotation);
+			return (drawPos, rotation, shadowData);
 		}
 
 		/// <summary>
@@ -269,9 +261,9 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="drawPos"
 		/// <param name="rotation"></param>
-		protected virtual (Vector3 drawPos, float rotation) AnimateTakeoff(Vector3 drawPos, float rotation)
+		protected virtual (Vector3 drawPos, float rotation, ShadowData shadowData) AnimateTakeoff(Vector3 drawPos, float rotation, ShadowData shadowData)
 		{
-			return (drawPos, rotation);
+			return (drawPos, rotation, shadowData);
 		}
 
 		/// <summary>
@@ -864,7 +856,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref maxFlightNodes, nameof(maxFlightNodes), int.MaxValue);
 
 			Scribe_References.Look(ref map, nameof(map));
-			Scribe_Values.Look(ref position, nameof(position));
+			Scribe_Values.Look(ref position, nameof(position), defaultValue: IntVec3.Invalid);
 
 			Scribe_Collections.Look(ref animationStatuses, nameof(animationStatuses), LookMode.Value);
 		}

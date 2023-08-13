@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Verse;
 using SmashTools;
+using UnityEngine;
 
 namespace Vehicles
 {
@@ -10,6 +11,16 @@ namespace Vehicles
 	{
 		public int maxTicksVertical;
 
+		/* ----- Shadows ----- */
+		[GraphEditable]
+		public LinearCurve shadowSizeXVerticalCurve;
+		[GraphEditable]
+		public LinearCurve shadowSizeZVerticalCurve;
+		[GraphEditable]
+		public LinearCurve shadowAlphaVerticalCurve;
+		/* --------------------*/
+
+		/* ----- Graphics ----- */
 		[GraphEditable(FunctionOfT = true)]
 		public LinearCurve offsetVerticalCurve;
 		[GraphEditable]
@@ -21,5 +32,6 @@ namespace Vehicles
 
 		[GraphEditable(Prefix = "FleckVTOL")]
 		public FleckData fleckDataVertical;
+		/* ---------------------*/
 	}
 }

@@ -263,6 +263,7 @@ namespace Vehicles
 			{
 				report?.AppendLine("-- DAMAGE REPORT --");
 				report?.AppendLine($"Base Damage: {damage}");
+				report?.AppendLine($"DamageDef: {dinfo.Def}");
 				report?.AppendLine($"HitCell: {hitCell}");
 
 				if (dinfo.Weapon?.GetModExtension<VehicleDamageMultiplierDefModExtension>() is VehicleDamageMultiplierDefModExtension weaponMultiplier)

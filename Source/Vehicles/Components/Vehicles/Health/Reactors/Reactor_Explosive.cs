@@ -8,7 +8,7 @@ namespace Vehicles
 	public class Reactor_Explosive : Reactor
 	{
 		public float chance = 1;
-		public float maxHealth = 0;
+		public float maxHealth = 1;
 		public int radius;
 		public DamageDef damageDef;
 

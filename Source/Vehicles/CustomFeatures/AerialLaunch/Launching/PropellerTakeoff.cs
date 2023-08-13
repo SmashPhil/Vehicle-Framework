@@ -106,7 +106,7 @@ namespace Vehicles
 			return base.AnimationEditorTick_Takeoff(remaining);
 		}
 
-		protected override (Vector3 drawPos, float rotation) AnimateLanding(Vector3 drawPos, float rotation)
+		protected override (Vector3 drawPos, float rotation, ShadowData shadowData) AnimateLanding(Vector3 drawPos, float rotation, ShadowData shadowData)
 		{
 			if (!LandingProperties_Propeller.rotationPropellerCurve.NullOrEmpty())
 			{
@@ -125,10 +125,27 @@ namespace Vehicles
 				Vector2 offset = LandingProperties_Propeller.offsetPropellerCurve.EvaluateT(TimeInAnimationPropeller);
 				drawPos += new Vector3(offset.x, 0, offset.y);
 			}
-			return base.AnimateLanding(drawPos, rotation);
+
+			if (LandingProperties_Propeller.renderShadow)
+			{
+				if (!LandingProperties_Propeller.shadowSizeXPropellerCurve.NullOrEmpty())
+				{
+					shadowData.width = LandingProperties_Propeller.shadowSizeXPropellerCurve.Evaluate(TimeInAnimation);
+				}
+				if (!LandingProperties_Propeller.shadowSizeZPropellerCurve.NullOrEmpty())
+				{
+					shadowData.height = LandingProperties_Propeller.shadowSizeZPropellerCurve.Evaluate(TimeInAnimation);
+				}
+				if (!LandingProperties_Propeller.shadowAlphaPropellerCurve.NullOrEmpty())
+				{
+					shadowData.alpha = LandingProperties_Propeller.shadowAlphaPropellerCurve.Evaluate(TimeInAnimation);
+				}
+			}
+
+			return base.AnimateLanding(drawPos, rotation, shadowData);
 		}
 
-		protected override (Vector3 drawPos, float rotation) AnimateTakeoff(Vector3 drawPos, float rotation)
+		protected override (Vector3 drawPos, float rotation, ShadowData shadowData) AnimateTakeoff(Vector3 drawPos, float rotation, ShadowData shadowData)
 		{
 			if (!LaunchProperties_Propeller.rotationPropellerCurve.NullOrEmpty())
 			{
@@ -147,7 +164,24 @@ namespace Vehicles
 				Vector2 offset = LaunchProperties_Propeller.offsetPropellerCurve.EvaluateT(TimeInAnimationPropeller);
 				drawPos += new Vector3(offset.x, 0, offset.y);
 			}
-			return base.AnimateTakeoff(drawPos, rotation);
+
+			if (LaunchProperties_Propeller.renderShadow)
+			{
+				if (!LaunchProperties_Propeller.shadowSizeXPropellerCurve.NullOrEmpty())
+				{
+					shadowData.width = LaunchProperties_Propeller.shadowSizeXPropellerCurve.Evaluate(TimeInAnimation);
+				}
+				if (!LaunchProperties_Propeller.shadowSizeZPropellerCurve.NullOrEmpty())
+				{
+					shadowData.height = LaunchProperties_Propeller.shadowSizeZPropellerCurve.Evaluate(TimeInAnimation);
+				}
+				if (!LaunchProperties_Propeller.shadowAlphaPropellerCurve.NullOrEmpty())
+				{
+					shadowData.alpha = LaunchProperties_Propeller.shadowAlphaPropellerCurve.Evaluate(TimeInAnimation);
+				}
+			}
+
+			return base.AnimateTakeoff(drawPos, rotation, shadowData);
 		}
 
 		public override bool FinishedAnimation(VehicleSkyfaller skyfaller)

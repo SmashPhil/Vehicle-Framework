@@ -392,6 +392,7 @@
     <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_OfferGifts.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\DirectionalTakeoff.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\Misc\FleckData.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Launching\Misc\ShadowData.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\Properties\DirectionalProtocolProperties.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\Properties\PropellerProtocolProperties.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\Restrictions\LaunchRestriction_Runway.cs" />

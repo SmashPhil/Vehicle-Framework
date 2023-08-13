@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
+using UnityEngine;
 using Verse;
 using SmashTools;
+using AnimationEvent = SmashTools.AnimationEvent;
 
 namespace Vehicles
 {
@@ -17,15 +19,26 @@ namespace Vehicles
 		public Rot4 flipVertical = Rot4.Invalid;
 		public Rot4 flipRotation = Rot4.Invalid;
 
+		public LaunchRestriction restriction;
+		public List<GraphicDataLayered> additionalTextures;
+		public List<AnimationEvent> events;
+
 		public bool renderShadow = true;
 		public bool lockShadowX = false;
 		public bool lockShadowZ = false;
 
-		public LaunchRestriction restriction;
+		/* ----- Shadows ----- */
+		public Vector2 shadowOffset = Vector2.zero;
 
-		public List<GraphicDataLayered> additionalTextures;
-		public List<AnimationEvent> events;
+		[GraphEditable]
+		public LinearCurve shadowSizeXCurve;
+		[GraphEditable]
+		public LinearCurve shadowSizeZCurve;
+		[GraphEditable]
+		public LinearCurve shadowAlphaCurve;
+		/* --------------------*/
 
+		/* ----- Graphics ----- */
 		[GraphEditable(FunctionOfT = true)]
 		public LinearCurve offsetCurve;
 		[GraphEditable]
@@ -35,14 +48,8 @@ namespace Vehicles
 		[GraphEditable]
 		public LinearCurve rotationCurve;
 
-		[GraphEditable]
-		public LinearCurve shadowSizeXCurve;
-		[GraphEditable]
-		public LinearCurve shadowSizeZCurve;
-		[GraphEditable]
-		public LinearCurve shadowAlphaCurve;
-
 		[GraphEditable(Prefix = "Fleck")]
 		public List<FleckData> fleckData;
+		/* ---------------------*/
 	}
 }

@@ -61,7 +61,7 @@ namespace Vehicles
 			return remaining;
 		}
 
-		protected override (Vector3 drawPos, float rotation) AnimateLanding(Vector3 drawPos, float rotation)
+		protected override (Vector3 drawPos, float rotation, ShadowData shadowData) AnimateLanding(Vector3 drawPos, float rotation, ShadowData shadowData)
 		{
 			if (!LandingProperties_VTOL.rotationVerticalCurve.NullOrEmpty())
 			{
@@ -80,10 +80,27 @@ namespace Vehicles
 				Vector2 offset = LandingProperties_VTOL.offsetVerticalCurve.EvaluateT(TimeInAnimationVTOL);
 				drawPos += new Vector3(offset.x, 0, offset.y);
 			}
-			return base.AnimateLanding(drawPos, rotation);
+
+			if (LandingProperties_VTOL.renderShadow)
+			{
+				if (!LandingProperties_VTOL.shadowSizeXVerticalCurve.NullOrEmpty())
+				{
+					shadowData.width = LandingProperties_VTOL.shadowSizeXVerticalCurve.Evaluate(TimeInAnimation);
+				}
+				if (!LandingProperties_VTOL.shadowSizeZVerticalCurve.NullOrEmpty())
+				{
+					shadowData.height = LandingProperties_VTOL.shadowSizeZVerticalCurve.Evaluate(TimeInAnimation);
+				}
+				if (!LandingProperties_VTOL.shadowAlphaVerticalCurve.NullOrEmpty())
+				{
+					shadowData.alpha = LandingProperties_VTOL.shadowAlphaVerticalCurve.Evaluate(TimeInAnimation);
+				}
+			}
+
+			return base.AnimateLanding(drawPos, rotation, shadowData);
 		}
 
-		protected override (Vector3 drawPos, float rotation) AnimateTakeoff(Vector3 drawPos, float rotation)
+		protected override (Vector3 drawPos, float rotation, ShadowData shadowData) AnimateTakeoff(Vector3 drawPos, float rotation, ShadowData shadowData)
 		{
 			if (!LaunchProperties_VTOL.rotationVerticalCurve.NullOrEmpty())
 			{
@@ -102,7 +119,24 @@ namespace Vehicles
 				Vector2 offset = LaunchProperties_VTOL.offsetVerticalCurve.EvaluateT(TimeInAnimationVTOL);
 				drawPos += new Vector3(offset.x, 0, offset.y);
 			}
-			return base.AnimateTakeoff(drawPos, rotation);
+
+			if (LaunchProperties_VTOL.renderShadow)
+			{
+				if (!LaunchProperties_VTOL.shadowSizeXVerticalCurve.NullOrEmpty())
+				{
+					shadowData.width = LaunchProperties_VTOL.shadowSizeXVerticalCurve.Evaluate(TimeInAnimation);
+				}
+				if (!LaunchProperties_VTOL.shadowSizeZVerticalCurve.NullOrEmpty())
+				{
+					shadowData.height = LaunchProperties_VTOL.shadowSizeZVerticalCurve.Evaluate(TimeInAnimation);
+				}
+				if (!LaunchProperties_VTOL.shadowAlphaVerticalCurve.NullOrEmpty())
+				{
+					shadowData.alpha = LaunchProperties_VTOL.shadowAlphaVerticalCurve.Evaluate(TimeInAnimation);
+				}
+			}
+
+			return base.AnimateTakeoff(drawPos, rotation, shadowData);
 		}
 
 		protected override void TickMotes()

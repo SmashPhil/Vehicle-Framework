@@ -12,6 +12,7 @@ namespace Vehicles
 		{
 			get
 			{
+				//return materials[0];
 				if (maskMatPatterns.TryGetValue(PatternDefOf.Default, out var maskMat))
 				{
 					return maskMat.materials?[0];
@@ -24,6 +25,7 @@ namespace Vehicles
 		{
 			get
 			{
+				//return materials[1];
 				if (maskMatPatterns.TryGetValue(PatternDefOf.Default, out var maskMat))
 				{
 					return maskMat.materials?[1];
@@ -36,6 +38,7 @@ namespace Vehicles
 		{
 			get
 			{
+				//return materials[2];
 				if (maskMatPatterns.TryGetValue(PatternDefOf.Default, out var maskMat))
 				{
 					return maskMat.materials?[2];
@@ -48,6 +51,7 @@ namespace Vehicles
 		{
 			get
 			{
+				//return materials[3];
 				if (maskMatPatterns.TryGetValue(PatternDefOf.Default, out var maskMat))
 				{
 					return maskMat.materials?[3];
@@ -79,6 +83,7 @@ namespace Vehicles
 			{
 				return MatAt(rot, vehicle);
 			}
+			//return materials[rot.AsInt];
 			if (maskMatPatterns.TryGetValue(pattern, out var values))
 			{
 				return values.materials[rot.AsInt];
@@ -99,6 +104,7 @@ namespace Vehicles
 			{
 				return base.MatAt(rot, thing);
 			}
+			//return materials[rot.AsInt];
 			if (maskMatPatterns.TryGetValue(vehicle.Pattern, out var values))
 			{
 				return values.materials[vehicle.FullRotation.AsInt];
@@ -233,7 +239,9 @@ namespace Vehicles
 				}
 				westDiagonalRotated = DataAllowsFlip;
 			}
-			
+
+			//materials = GenerateMasks(req, PatternDefOf.Default);
+			//return;
 			if (VehicleMod.settings.main.useCustomShaders)
 			{
 				foreach (PatternDef pattern in DefDatabase<PatternDef>.AllDefsListForReading)
