@@ -85,8 +85,13 @@ namespace Vehicles
 
 		protected virtual void LeaveMap()
 		{
-			vehicle.ReleaseSustainerTarget();
 			Destroy();
+		}
+
+		public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
+		{
+			base.DeSpawn(mode);
+			vehicle.ReleaseSustainerTarget();
 		}
 
 		protected virtual void DrawDropSpotShadow()

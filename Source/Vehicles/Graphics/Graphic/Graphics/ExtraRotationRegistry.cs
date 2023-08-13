@@ -11,6 +11,12 @@ namespace Vehicles
 	public class ExtraRotationRegistry
 	{
 		private readonly Dictionary<string, float> innerLookup = new Dictionary<string, float>();
+		private readonly VehicleGraphicOverlay vehicleGraphicOverlay;
+
+		public ExtraRotationRegistry(VehicleGraphicOverlay vehicleGraphicOverlay)
+		{
+			this.vehicleGraphicOverlay = vehicleGraphicOverlay;
+		}
 
 		public float this[string key]
 		{
@@ -21,6 +27,31 @@ namespace Vehicles
 			set
 			{
 				innerLookup[key.ToUpperInvariant()] = value;
+			}
+		}
+
+		public void UpdateRegistry(float addRotation)
+		{
+			foreach (GraphicOverlay graphicOverlay in vehicleGraphicOverlay.Overlays)
+			{
+				if (graphicOverlay.data.graphicData.Graphic is Graphic_Rotator graphicRotator)
+				{
+					this[graphicRotator.RegistryKey] += graphicRotator.ModifyIncomingRotation(addRotation);
+				}
+			}
+		}
+
+		public void Reset()
+		{
+			if (!vehicleGraphicOverlay.Overlays.NullOrEmpty())
+			{
+				foreach (GraphicOverlay graphicOverlay in vehicleGraphicOverlay.Overlays)
+				{
+					if (graphicOverlay.data.graphicData.Graphic is Graphic_Rotator graphicRotator)
+					{
+						this[graphicRotator.RegistryKey] = graphicOverlay.data.rotation;
+					}
+				}
 			}
 		}
 	}

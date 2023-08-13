@@ -317,6 +317,7 @@ namespace Vehicles
 			{
 				Comps_PostDrawUnspawned(drawLoc, rotation);
 			}
+			statHandler.DrawHitbox(HighlightedComponent);
 		}
 
 		public virtual void Comps_PostDrawUnspawned(Vector3 drawLoc, float rotation)
@@ -616,7 +617,7 @@ namespace Vehicles
 						{
 							options.Add(new FloatMenuOption(component.props.label, delegate ()
 							{
-								component.TakeDamage(this, new DamageInfo(DamageDefOf.Vaporize, float.MaxValue));
+								component.TakeDamage(this, new DamageInfo(DamageDefOf.Vaporize, float.MaxValue), ignoreArmor: true);
 								Notify_TookDamage();
 							}));
 						}
@@ -636,7 +637,7 @@ namespace Vehicles
 						{
 							options.Add(new FloatMenuOption(component.props.label, delegate ()
 							{
-								component.TakeDamage(this, new DamageInfo(DamageDefOf.Vaporize, component.health * Rand.Range(0.1f, 1)));
+								component.TakeDamage(this, new DamageInfo(DamageDefOf.Vaporize, component.health * Rand.Range(0.1f, 1)), ignoreArmor: true);
 								Notify_TookDamage();
 							}));
 						}
@@ -751,6 +752,16 @@ namespace Vehicles
 			if (movementStatus is VehicleMovementStatus.Offline)
 			{
 				yield break;
+			}
+			foreach (ThingComp thingComp in AllComps)
+			{
+				if (thingComp is VehicleComp vehicleComp)
+				{
+					foreach (FloatMenuOption floatMenuOption in vehicleComp.CompFloatMenuOptions())
+					{
+						yield return floatMenuOption;
+					}
+				}
 			}
 			foreach (VehicleHandler handler in handlers)
 			{

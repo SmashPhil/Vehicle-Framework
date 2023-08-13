@@ -40,6 +40,7 @@ namespace Vehicles
 				return false;
 			}
 			SpawnSkyfaller();
+			ExecuteEvents();
 			return true;
 		}
 

@@ -223,20 +223,23 @@ namespace Vehicles
 
 		public static IEnumerable<(Rect rect, Texture mainTex, Material material, float layer, float angle)> RetrieveAllOverlaySettingsGraphicsProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, List<GraphicOverlay> graphicOverlays = null)
 		{
-			List<GraphicOverlay> overlays = graphicOverlays ?? vehicleDef.drawProperties.OverlayGraphics;
+			List<GraphicOverlay> overlays = graphicOverlays ?? vehicleDef.drawProperties.overlays;
 			foreach (GraphicOverlay graphicOverlay in overlays)
 			{
-				yield return RetrieveOverlaySettingsGraphicsProperties(rect, vehicleDef, rot, graphicOverlay);
+				if (graphicOverlay.data.renderUI)
+				{
+					yield return RetrieveOverlaySettingsGraphicsProperties(rect, vehicleDef, rot, graphicOverlay);
+				}
 			}
 		}
 
 		public static (Rect rect, Texture mainTex, Material material, float layer, float angle) RetrieveOverlaySettingsGraphicsProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, GraphicOverlay graphicOverlay)
 		{
 			Rect overlayRect = OverlayRect(rect, vehicleDef, graphicOverlay, rot);
-			Texture2D texture = ContentFinder<Texture2D>.Get(graphicOverlay.graphic.data.texPath);
-			bool canMask = graphicOverlay.graphic.Shader.SupportsMaskTex() || graphicOverlay.graphic.Shader.SupportsRGBMaskTex();
-			Material material = canMask ? graphicOverlay.graphic.MatAt(rot) : null;
-			return (overlayRect, texture, material, graphicOverlay.graphic.data.DrawOffsetFull(rot).y, graphicOverlay.rotation);
+			Texture2D texture = ContentFinder<Texture2D>.Get(graphicOverlay.data.graphicData.texPath);
+			bool canMask = graphicOverlay.data.graphicData.Graphic.Shader.SupportsMaskTex() || graphicOverlay.data.graphicData.Graphic.Shader.SupportsRGBMaskTex();
+			Material material = canMask ? graphicOverlay.data.graphicData.Graphic.MatAt(rot) : null;
+			return (overlayRect, texture, material, graphicOverlay.data.graphicData.DrawOffsetFull(rot).y, graphicOverlay.data.rotation);
 		}
 
 		/// <summary>
@@ -308,13 +311,13 @@ namespace Vehicles
 		internal static Rect OverlayRect(Rect rect, VehicleDef vehicleDef, GraphicOverlay graphicOverlay, Rot8 rot)
 		{
 			//Scale to VehicleDef drawSize
-			Vector2 size = vehicleDef.ScaleDrawRatio(graphicOverlay.graphic.data, rect.size);
+			Vector2 size = vehicleDef.ScaleDrawRatio(graphicOverlay.data.graphicData, rect.size);
 			//Adjust position from new rect size
 			Vector2 adjustedPosition = rect.position + (rect.size - size) / 2f;
 			// Size / V_max = scalar
 			float scalar = rect.size.x / Mathf.Max(vehicleDef.graphicData.drawSize.x, vehicleDef.graphicData.drawSize.y);
 			
-			Vector3 graphicOffset = graphicOverlay.graphic.data.DrawOffsetForRot(rot);
+			Vector3 graphicOffset = graphicOverlay.data.graphicData.DrawOffsetForRot(rot);
 
 			//Invert y axis post-calculations, UI y-axis is top to bottom
 			Vector2 position = adjustedPosition + (scalar * new Vector2(graphicOffset.x, -graphicOffset.z));

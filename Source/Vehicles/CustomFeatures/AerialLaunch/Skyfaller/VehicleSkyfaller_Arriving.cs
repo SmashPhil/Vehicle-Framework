@@ -19,7 +19,7 @@ namespace Vehicles
 		public override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
 			(launchProtocolDrawPos, _) = vehicle.CompVehicleLauncher.launchProtocol.Draw(RootPos, 0);
-			DrawDropSpotShadow();
+			//DrawDropSpotShadow();
 		}
 
 		public override void Tick()

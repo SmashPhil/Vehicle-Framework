@@ -122,6 +122,7 @@ namespace Vehicles
 			Utilities.InvokeWithLogging(LoadedModManager.GetMod<VehicleMod>().InitializeTabs);
 			Utilities.InvokeWithLogging(VehicleMod.settings.Write);
 
+			Utilities.InvokeWithLogging(RegisterTweakFieldsInEditor);
 			Log.Message($"VanillaFramework: {MaterialPoolExpanded.count} Vanilla: {((Dictionary<Material, MaterialRequest>)AccessTools.Field(typeof(MaterialPool), "matDictionaryReverse").GetValue(null)).Count}");
 		}
 		
@@ -201,6 +202,16 @@ namespace Vehicles
 			PathingHelper.LoadDefModExtensionCosts(vehicleDef => vehicleDef.properties.customBiomeCosts);
 			PathingHelper.LoadDefModExtensionCosts(vehicleDef => vehicleDef.properties.customRoadCosts);
 			PathingHelper.LoadDefModExtensionCosts(vehicleDef => vehicleDef.properties.customRiverCosts);
+		}
+		
+		private static void RegisterTweakFieldsInEditor()
+		{
+			//EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawSize)), string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffset)), string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffsetNorth)), string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffsetEast)), string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffsetSouth)), string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffsetWest)), string.Empty, UISettingsType.FloatBox);
 		}
 	}
 }

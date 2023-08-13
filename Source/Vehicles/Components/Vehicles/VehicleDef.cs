@@ -11,6 +11,7 @@ using SmashTools;
 
 namespace Vehicles
 {
+	[HeaderTitle(Label = nameof(VehicleDef))]
 	public class VehicleDef : ThingDef, IDefIndex<VehicleDef>
 	{
 		[PostToSettings]
@@ -41,11 +42,14 @@ namespace Vehicles
 		public NavigationCategory navigationCategory = NavigationCategory.Opportunistic;
 
 		public VehicleBuildDef buildDef;
+		[TweakField(Category = "VehicleDef")]
 		public new GraphicDataRGB graphicData;
 
+		[TweakField]
 		[PostToSettings(Label = "VF_Properties", Translate = true, ParentHolder = true)]
 		public VehicleProperties properties;
 		
+		[TweakField]
 		public VehicleDrawProperties drawProperties;
 
 		public List<StatCache.EventLister> statEvents;

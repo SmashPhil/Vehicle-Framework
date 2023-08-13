@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1343</currentVersion>
+  <currentVersion>1.5.1344</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
@@ -19,16 +19,40 @@ On top of this, I changed the way the pattern system caches materials so it shou
 - Fixed bug where CustomCostDefModExtension wasn't properly applying.
 
 - Fixed bug where vehicles with a pattern would then load in without a valid material when restarting the game with RGB Shaders disabled.
+
+- Fixed bug with Hitbox Rendering debug option, which didn't highlight components that were hovered over in the Health tab.
+
+- Fixed bug where layering for GraphicDataLayer wasn't applying for specific rotations.
+
+- Added temporary fix for overlays due to a vanilla bug where drawOffset would not copy over correctly for drawOffsetWest.
+
+- Fixed bug where overlays would only render 1 graphic for ghost graphic if they used the same texture.
+
+- Fixed bug where vehicles would be cleaned up by GC during takeoff animations.
+
+- Fixed bug where rotation registry for rotating overlays (eg. helicopter rotors) wouldn't reset upon entering the map.
+
+- Fixed bug where AerialVehicleLanding wouldn't properly set SustainerTarget for sustainer and one shot sounds from soundEvents.
+
+- Fixed bug where Explosive vehicle components marked as 'internal' weren't exploding when damaged.
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - DedicatedThreads now pool for non-settlement maps
 
 - Moved individual path cost recalculations for vehicles to the dedicated thread.
+
+- Decreased file sizes for all patterns included in the framework.
 
 - Optimized Caravan related patches
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Added 'Flee' directive when pawns are in the path of a vehicle.
 
 - Vehicle health tab now lists armor categories separately rather than averaged.
+
+- Generalized ExtraRotationRegistry for Graphic_Rotator graphics.
+
+- Added Graphic_ReversePropeller, allowing animations to support dual rotors rotating the opposite way.
+
+- Added animation curves for shadows and disconnected vanilla shadow rendering for vehicle skyfallers, giving modders full control over how shadows should render during takeoff and landing.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
   <!--Static parameterless method to execute when update log is executed-->

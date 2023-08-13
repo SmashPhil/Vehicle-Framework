@@ -7,9 +7,11 @@ using Verse;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using AnimationEvent = SmashTools.AnimationEvent;
 
 namespace Vehicles
 {
+	[StaticConstructorOnStartup]
 	public abstract class LaunchProtocol : IExposable
 	{
 		protected VehiclePawn vehicle;
@@ -26,6 +28,9 @@ namespace Vehicles
 
 		protected List<Graphic>[] cachedOverlayGraphics;
 		protected List<GraphicDataLayered>[] cachedOverlayGraphicDatas;
+
+		protected Material cachedShadowMaterial;
+		private static MaterialPropertyBlock shadowPropertyBlock = new MaterialPropertyBlock();
 
 		/// <summary>
 		/// True if animation at index has been triggered.
@@ -80,7 +85,18 @@ namespace Vehicles
 		/// </summary>
 		public virtual int MaxFlightNodes => maxFlightNodes;
 
-		public virtual float TimeInAnimation => (float)ticksPassed / CurAnimationProperties.maxTicks;
+		public virtual float TimeInAnimation
+		{
+			get
+			{
+				int ticks = CurAnimationProperties.maxTicks;
+				if (ticks <= 0)
+				{
+					return 0;
+				}
+				return (float)ticksPassed / ticks;
+			}
+		}
 
 		public virtual IEnumerable<AnimationDriver> Animations
 		{
@@ -88,6 +104,18 @@ namespace Vehicles
 			{
 				yield return new AnimationDriver(AnimationEditorTags.Takeoff, AnimationEditorTick_Takeoff, Draw, TotalTicks_Takeoff, () => OrderProtocol(LaunchType.Takeoff));
 				yield return new AnimationDriver(AnimationEditorTags.Landing, AnimationEditorTick_Landing, Draw, TotalTicks_Landing, () => OrderProtocol(LaunchType.Landing));
+			}
+		}
+
+		protected virtual Material ShadowMaterial
+		{
+			get
+			{
+				if (cachedShadowMaterial == null && !vehicle.CompVehicleLauncher.Props.shadow.NullOrEmpty())
+				{
+					cachedShadowMaterial = MaterialPool.MatFrom(vehicle.CompVehicleLauncher.Props.shadow, ShaderDatabase.Transparent);
+				}
+				return cachedShadowMaterial;
 			}
 		}
 
@@ -175,8 +203,55 @@ namespace Vehicles
 			{
 				DrawOverlays(result.drawPos, result.rotation);
 			}
-
+			if (CurAnimationProperties.renderShadow)
+			{
+				Vector2 shadowSize = vehicle.VehicleGraphic.data.drawSize;
+				Color shadowColor = Color.white;
+				if (!CurAnimationProperties.shadowSizeXCurve.NullOrEmpty())
+				{
+					shadowSize.x = CurAnimationProperties.shadowSizeXCurve.Evaluate(TimeInAnimation);
+				}
+				if (!CurAnimationProperties.shadowSizeZCurve.NullOrEmpty())
+				{
+					shadowSize.y = CurAnimationProperties.shadowSizeZCurve.Evaluate(TimeInAnimation);
+				}
+				if (!CurAnimationProperties.shadowAlphaCurve.NullOrEmpty())
+				{
+					shadowColor.a = CurAnimationProperties.shadowAlphaCurve.Evaluate(TimeInAnimation);
+				}
+				DrawShadow(drawPos, shadowSize, shadowColor);
+			}
 			return result;
+		}
+
+		private void DrawShadow(Vector3 drawPos, Vector2 size, Color color)
+		{
+			Material shadowMaterial = ShadowMaterial;
+			if (shadowMaterial is null)
+			{
+				return;
+			}
+			Vector3 shadowSpot = drawPos;
+			if (!CurAnimationProperties.lockShadowX)
+			{
+				shadowSpot.x = DrawPos.x;
+			}
+			if (!CurAnimationProperties.lockShadowZ)
+			{
+				shadowSpot.x = DrawPos.z;
+			}
+			DrawShadow(shadowSpot, CurAnimationProperties.forcedRotation ?? vehicle.Rotation, shadowMaterial, size, color);
+		}
+
+		private void DrawShadow(Vector3 pos, Rot4 rot, Material material, Vector2 shadowSize, Color color)
+		{
+			pos.y = AltitudeLayer.Shadows.AltitudeFor();
+			Vector3 s = new Vector3(shadowSize.x, 1f, shadowSize.y);
+			
+			shadowPropertyBlock.SetColor(ShaderPropertyIDs.Color, color);
+			Matrix4x4 matrix = default;
+			matrix.SetTRS(pos, rot.AsQuat, s);
+			Graphics.DrawMesh(MeshPool.plane10Back, matrix, material, 0, null, 0, shadowPropertyBlock);
 		}
 
 		/// <summary>
@@ -302,7 +377,7 @@ namespace Vehicles
 			{
 				for (int i = 0; i < CurAnimationProperties.events.Count; i++)
 				{
-					SmashTools.AnimationEvent @event = CurAnimationProperties.events[i];
+					AnimationEvent @event = CurAnimationProperties.events[i];
 					if (!animationStatuses[i] && @event.EventFrame(TimeInAnimation))
 					{
 						@event.method.InvokeUnsafe(null, this);
@@ -372,7 +447,7 @@ namespace Vehicles
 				{
 					for (int i = 0; i < CurAnimationProperties.events.Count; i++)
 					{
-						SmashTools.AnimationEvent @event = CurAnimationProperties.events[i];
+						AnimationEvent @event = CurAnimationProperties.events[i];
 						if (!animationStatuses[i] && @event.EventFrame(TimeInAnimation))
 						{
 							@event.method.InvokeUnsafe(null, this);
@@ -396,7 +471,15 @@ namespace Vehicles
 				float? rotationRate = fleckData.rotationRate?.Evaluate(t);
 				float? angle = fleckData.angle.RandomInRange;
 
-				Vector3 origin = fleckData.position == FleckData.PositionStart.Position ? position.ToVector3Shifted() : DrawPos;
+				Vector3 origin = position.ToVector3Shifted();
+				if (!fleckData.lockFleckX)
+				{
+					origin.x = DrawPos.x;
+				}
+				if (!fleckData.lockFleckZ)
+				{
+					origin.z = DrawPos.z;
+				}
 				if (angle.HasValue && fleckData.drawOffset != null)
 				{
 					origin = origin.PointFromAngle(fleckData.drawOffset.Evaluate(t), angle.Value);

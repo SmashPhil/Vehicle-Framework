@@ -150,7 +150,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref burnRadiusOnRockets, nameof(burnRadiusOnRockets), defaultValue: true);
 			Scribe_Values.Look(ref deployOnLanding, nameof(deployOnLanding), defaultValue: true);
 			Scribe_Values.Look(ref airDefenses, nameof(airDefenses), defaultValue: true);
-			Scribe_Values.Look(ref dynamicWorldDrawing, nameof(dynamicWorldDrawing), defaultValue: false);
+			//Scribe_Values.Look(ref dynamicWorldDrawing, nameof(dynamicWorldDrawing), defaultValue: false);
 			Scribe_Values.Look(ref delayDeployOnLanding, nameof(delayDeployOnLanding), defaultValue: 0);
 
 			Scribe_Values.Look(ref runOverPawns, nameof(runOverPawns), defaultValue: true);
@@ -246,7 +246,9 @@ namespace Vehicles
 						listingStandard.Gap(16);
 						listingStandard.SliderLabeled("VF_DelayOnLanding".Translate(), "VF_DelayOnLandingTooltip".Translate(), $" {"VF_DelaySeconds".Translate()}", ref delayDeployOnLanding, 0, 5, 1, 1);
 					}
+					GUIState.Disable();
 					listingStandard.CheckboxLabeled("VF_DynamicDrawing".Translate(), ref dynamicWorldDrawing, "VF_DynamicDrawingTooltip".Translate());
+					GUIState.Enable();
 					listingStandard.Gap(8);
 
 					listingStandard.Header("VF_CombatSettings".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);

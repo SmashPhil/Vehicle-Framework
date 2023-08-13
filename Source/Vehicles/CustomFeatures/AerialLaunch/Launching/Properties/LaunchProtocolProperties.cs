@@ -17,6 +17,10 @@ namespace Vehicles
 		public Rot4 flipVertical = Rot4.Invalid;
 		public Rot4 flipRotation = Rot4.Invalid;
 
+		public bool renderShadow = true;
+		public bool lockShadowX = false;
+		public bool lockShadowZ = false;
+
 		public LaunchRestriction restriction;
 
 		public List<GraphicDataLayered> additionalTextures;
@@ -30,6 +34,13 @@ namespace Vehicles
 		public LinearCurve zPositionCurve;
 		[GraphEditable]
 		public LinearCurve rotationCurve;
+
+		[GraphEditable]
+		public LinearCurve shadowSizeXCurve;
+		[GraphEditable]
+		public LinearCurve shadowSizeZCurve;
+		[GraphEditable]
+		public LinearCurve shadowAlphaCurve;
 
 		[GraphEditable(Prefix = "Fleck")]
 		public List<FleckData> fleckData;

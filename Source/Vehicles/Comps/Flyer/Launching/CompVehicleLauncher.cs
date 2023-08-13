@@ -240,7 +240,6 @@ namespace Vehicles
 			{
 				Vehicle.DeSpawn(DestroyMode.Vanish);
 			}
-			Find.WorldPawns.PassToWorld(Vehicle);
 			CameraJumper.TryHideWorld();
 			Vehicle.EventRegistry[VehicleEventDefOf.AerialVehicleLaunch].ExecuteEvents();
 		}

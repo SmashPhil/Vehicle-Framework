@@ -37,26 +37,33 @@ namespace Vehicles
 			}
 		}
 
-		public void TakeDamage(VehiclePawn vehicle, DamageInfo dinfo)
+		public void TakeDamage(VehiclePawn vehicle, DamageInfo dinfo, bool ignoreArmor = false)
 		{
-			TakeDamage(vehicle, ref dinfo);
+			TakeDamage(vehicle, ref dinfo, ignoreArmor: ignoreArmor);
 		}
 
-		public virtual Penetration TakeDamage(VehiclePawn vehicle, ref DamageInfo dinfo)
+		public virtual Penetration TakeDamage(VehiclePawn vehicle, ref DamageInfo dinfo, bool ignoreArmor = false)
 		{
-			ReduceDamageFromArmor(ref dinfo, out Penetration result);
-			if (!props.reactors.NullOrEmpty())
+			Penetration penetration = Penetration.NonPenetrated;
+			if (!ignoreArmor)
 			{
-				foreach (Reactor reactor in props.reactors)
-				{
-					reactor.Hit(vehicle, this, ref dinfo, result);
-				}
+				ReduceDamageFromArmor(ref dinfo, out penetration);
 			}
+			
 			health -= dinfo.Amount;
 			float remainingDamage = Mathf.Clamp(-health, 0, float.MaxValue);
 			health = health.Clamp(0, props.health);
+
 			if (dinfo.Amount > 0)
 			{
+				if (!props.reactors.NullOrEmpty())
+				{
+					foreach (Reactor reactor in props.reactors)
+					{
+						reactor.Hit(vehicle, this, ref dinfo, penetration);
+					}
+				}
+
 				vehicle.EventRegistry[VehicleEventDefOf.DamageTaken].ExecuteEvents();
 				if (vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed) <= 0.1f)
 				{
@@ -68,17 +75,17 @@ namespace Vehicles
 				}
 			}
 
-			if (result > Penetration.Penetrated || health > (props.health / 2f))
+			if (penetration > Penetration.Penetrated || health > (props.health / 2f))
 			{
 				//Don't fallthrough until part is below 50% health or damage has penetrated
 				dinfo.SetAmount(0);
 			}
-			else if (result == Penetration.Penetrated || (remainingDamage > 0 && remainingDamage >= dinfo.Amount / 2))
+			else if (penetration == Penetration.Penetrated || (remainingDamage > 0 && remainingDamage >= dinfo.Amount / 2))
 			{
 				//If penetrated or remaining damage is above half original damage amount
 				dinfo.SetAmount(remainingDamage);
 			}
-			return result;
+			return penetration;
 		}
 
 		public virtual void HealComponent(float amount)

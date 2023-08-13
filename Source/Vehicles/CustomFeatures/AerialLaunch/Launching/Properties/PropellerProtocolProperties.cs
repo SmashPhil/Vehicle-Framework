@@ -12,6 +12,14 @@ namespace Vehicles
 
 		[GraphEditable]
 		public LinearCurve angularVelocityPropeller;
+		[GraphEditable(FunctionOfT = true)]
+		public LinearCurve offsetPropellerCurve;
+		[GraphEditable]
+		public LinearCurve xPositionPropellerCurve;
+		[GraphEditable]
+		public LinearCurve zPositionPropellerCurve;
+		[GraphEditable]
+		public LinearCurve rotationPropellerCurve;
 
 		[GraphEditable(Prefix = "FleckPropeller")]
 		public FleckData fleckDataPropeller;

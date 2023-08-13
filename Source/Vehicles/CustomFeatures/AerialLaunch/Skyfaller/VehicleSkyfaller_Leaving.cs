@@ -23,7 +23,7 @@ namespace Vehicles
 		public override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
 			(launchProtocolDrawPos, _) = vehicle.CompVehicleLauncher.launchProtocol.Draw(RootPos, 0);
-			DrawDropSpotShadow();
+			//DrawDropSpotShadow();
 		}
 
 		public override void Tick()
@@ -63,6 +63,7 @@ namespace Vehicles
 			}
 			if (createWorldObject)
 			{
+				Find.WorldPawns.PassToWorld(vehicle);
 				AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(vehicle, Map.Tile);
 				aerialVehicle.OrderFlyToTiles(new List<FlightNode>(flightPath), WorldHelper.GetTilePos(Map.Tile), arrivalAction);
 				if (orderRecon)
@@ -71,7 +72,7 @@ namespace Vehicles
 				}
 			}
 			vehicle.EventRegistry[VehicleEventDefOf.AerialVehicleLeftMap].ExecuteEvents();
-			Destroy(DestroyMode.Vanish);
+			base.LeaveMap();
 		}
 
 		public override void SpawnSetup(Map map, bool respawningAfterLoad)

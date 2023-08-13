@@ -31,8 +31,18 @@ namespace Vehicles
 
 		protected override int TotalTicks_Takeoff => base.TotalTicks_Takeoff + LaunchProperties_VTOL.maxTicksVertical;
 
-		public virtual float TimeInAnimationVTOL => (float)ticksPassedVertical / CurAnimationProperties_Vertical.maxTicksVertical;
-
+		public virtual float TimeInAnimationVTOL
+		{
+			get
+			{
+				int ticks = CurAnimationProperties_Vertical.maxTicksVertical;
+				if (ticks <= 0)
+				{
+					return 0;
+				}
+				return (float)ticksPassedVertical / ticks;
+			}
+		}
 		public override bool FinishedAnimation(VehicleSkyfaller skyfaller)
 		{
 			return ticksPassedVertical >= CurAnimationProperties_Vertical.maxTicksVertical && base.FinishedAnimation(skyfaller);

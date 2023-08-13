@@ -514,7 +514,7 @@ namespace Vehicles
 							z += cell.x;
 							break;
 					}
-					hitboxCells.Add(new IntVec3(x, 0, z));
+					hitboxCells.Add(new IntVec3(vehicle.Position.x + x, 0, vehicle.Position.z + z));
 				}
 				GenDraw.DrawFieldEdges(hitboxCells, component.highlightColor, AltitudeLayer.MetaOverlays.AltitudeFor());
 			}
