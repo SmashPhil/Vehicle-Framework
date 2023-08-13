@@ -277,6 +277,12 @@ namespace Vehicles
 					report?.AppendLine($"ModExtension Multiplier: {defMultiplier.multiplier} Result: {damage}");
 				}
 
+				if (!vehicle.VehicleDef.properties.damageDefMultipliers.NullOrEmpty() && vehicle.VehicleDef.properties.damageDefMultipliers.TryGetValue(dinfo.Def, out float multiplier))
+				{
+					damage *= multiplier;
+					report?.AppendLine($"DamageDef Multiplier: {multiplier} Result: {damage}");
+				}
+
 				if (dinfo.Def.isRanged)
 				{
 					damage *= VehicleMod.settings.main.rangedDamageMultiplier;

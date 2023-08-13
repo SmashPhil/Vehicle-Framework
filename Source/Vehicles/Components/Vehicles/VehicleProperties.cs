@@ -33,6 +33,8 @@ namespace Vehicles
 		public string iconTexPath;
 		public bool generateThingIcon = true;
 
+		public SimpleDictionary<DamageDef, float> damageDefMultipliers;
+
 		//---------------   Pathing   ---------------
 
 		public bool defaultTerrainImpassable = false;
