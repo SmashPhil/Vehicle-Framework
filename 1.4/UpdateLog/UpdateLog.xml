@@ -6,17 +6,17 @@
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
-This update comes with some significant performance improvements.  Vehicle Framework was mostly optimized before release, however there were still a few areas that could be improved.
+This update comes with some significant performance improvements.  Vehicle Framework was mostly optimized before release, however there were still a few areas it could be improved.
 
 On top of this, I changed the way the pattern system caches materials so it should take up way less memory now.  Feel free to re-enable RGB Shaders if you were having memory issues before.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Fixed thread safety bug when recalculating pathfinding costs.
+- Fixed thread safety issue when recalculating pathfinding costs.
 
 - Fixed config error issue with CustomCostDefModExtension
 
-- Fixed bug where damaging vehicle components directly wouldn't notify the vehicle needs repairs.  (This occured only with VVE and tires being damaged)
-
 - Fixed bug where CustomCostDefModExtension wasn't properly applying.
+
+- Fixed bug where damaging vehicle components directly wouldn't notify the vehicle needs repairs.  (This occured only with VVE and tires being damaged)
 
 - Fixed bug where vehicles with a pattern would then load in without a valid material when restarting the game with RGB Shaders disabled.
 

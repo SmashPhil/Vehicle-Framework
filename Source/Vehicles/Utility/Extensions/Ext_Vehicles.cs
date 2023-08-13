@@ -213,7 +213,6 @@ namespace Vehicles
 					{
 						vehicle.AddEvent(eventStartStop.First, delegate ()
 						{
-							Log.Message($"Spawning sustainer: {soundDef} spawned={vehicle.Spawned} target={vehicle.SustainerTarget}");
 							if (vehicle.Spawned)
 							{
 								vehicle.sustainers.Spawn(vehicle, soundDef);

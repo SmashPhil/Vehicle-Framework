@@ -4,6 +4,7 @@ using System.Linq;
 using Verse;
 using Verse.Sound;
 using RimWorld;
+using RimWorld.Planet;
 using UnityEngine;
 using SmashTools;
 
@@ -131,6 +132,10 @@ namespace Vehicles
 		{
 			base.SpawnSetup(map, respawningAfterLoad);
 			launchProtocolDrawPos = RootPos;
+			if (vehicle.IsWorldPawn())
+			{
+				Find.WorldPawns.RemovePawn(vehicle);
+			}
 			vehicle.SetSustainerTarget(this);
 			vehicle.ResetRenderStatus(); //Reset required for recaching handler lists. Loading save file will not recache these since vehicle will be despawned initially
 		}
