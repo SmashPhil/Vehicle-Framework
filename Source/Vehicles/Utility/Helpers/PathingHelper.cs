@@ -161,12 +161,10 @@ namespace Vehicles
 		public static void RegisterRegionEffecter(ThingDef thingDef)
 		{
 			regionEffecters[thingDef] = new List<VehicleDef>();
-			if (thingDef.defName == "FT_TankTrap") Log.Message($"ThingDef: {thingDef}");
 			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
 				if (vehicleDef.properties.customThingCosts.TryGetValue(thingDef, out int value))
 				{
-					if (thingDef.defName == "FT_TankTrap") Log.Message($"Cost: {value}");
 					if (value < 0 || value >= VehiclePathGrid.ImpassableCost)
 					{
 						regionEffecters[thingDef].Add(vehicleDef);
