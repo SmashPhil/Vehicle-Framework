@@ -90,6 +90,10 @@ namespace Vehicles
 				vehicle.graphicOverlay = new VehicleGraphicOverlay(vehicle);
 				PatternData defaultPatternData = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicle.VehicleDef.defName, vehicle.VehicleDef.graphicData);
 				vehicle.patternData = new PatternData(defaultPatternData);
+				if (vehicle.Stuff != null)
+				{
+					vehicle.DrawColor = vehicle.VehicleDef.GetColorForStuff(vehicle.Stuff);
+				}
 			}
 		}
 

@@ -35,6 +35,8 @@ On top of this, I changed the way the pattern system caches materials so it shou
 - Fixed bug where AerialVehicleLanding wouldn't properly set SustainerTarget for sustainer and one shot sounds from soundEvents.
 
 - Fixed bug where Explosive vehicle components marked as 'internal' weren't exploding when damaged.
+
+- Fixed bug where quick search widget in Architect Menu didn't filter for vehicles or highlight them in the gizmo.
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - DedicatedThreads now pool for non-settlement maps
 
@@ -57,6 +59,8 @@ On top of this, I changed the way the pattern system caches materials so it shou
 - Added animation curves for shadows and disconnected vanilla shadow rendering for vehicle skyfallers, giving modders full control over how shadows should render during takeoff and landing.
 
 - Switched Reactor_Explosive maxHealth trigger to be based on % of health.  Values should now be between 0 and 1.
+
+- Vehicles that use 'stuffable' ingredients in the build recipe will assign the stuff color upon construction. (Stuffables do not affect stats, it is visual only and if the vehicle supports RGB shaders, it can be colored over)
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
   <!--Static parameterless method to execute when update log is executed-->

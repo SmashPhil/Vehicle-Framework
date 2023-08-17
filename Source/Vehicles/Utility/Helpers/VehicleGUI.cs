@@ -177,7 +177,7 @@ namespace Vehicles
 		/// <param name="command"></param>
 		/// <param name="rect"></param>
 		/// <param name="buildDef"></param>
-		public static GizmoResult GizmoOnGUIWithMaterial(Command command, Rect rect, VehicleBuildDef buildDef)
+		public static GizmoResult GizmoOnGUIWithMaterial(Command command, Rect rect, GizmoRenderParms parms, VehicleBuildDef buildDef)
 		{
 			bool mouseOver = false;
 			bool clicked = false;
@@ -194,13 +194,27 @@ namespace Vehicles
 						GUI.color = GenUI.MouseoverColor;
 					}
 				}
-				GUI.BeginGroup(rect.ContractedBy(1));
+
+				MouseoverSounds.DoRegion(rect, SoundDefOf.Mouseover_Command);
+				if (parms.highLight)
 				{
-					rect = rect.AtZero();
-					MouseoverSounds.DoRegion(rect, SoundDefOf.Mouseover_Command);
-					Material material = command.disabled ? TexUI.GrayscaleGUI : null;
-					GenUI.DrawTextureWithMaterial(rect, command.BGTexture, material);
-					Rect buttonRect = rect;
+					Widgets.DrawStrongHighlight(rect.ExpandedBy(12f), null);
+				}
+
+				if (parms.lowLight)
+				{
+					GUI.color = Command.LowLightBgColor;
+				}
+				Material material = command.disabled ? TexUI.GrayscaleGUI : null;
+				GenUI.DrawTextureWithMaterial(rect, command.BGTexture, material);
+				GUI.color = Color.white;
+
+				Rect iconRect = rect.ContractedBy(1);
+				GUI.BeginGroup(iconRect);
+				{
+					iconRect = iconRect.AtZero();
+					
+					Rect buttonRect = iconRect;
 					PatternData defaultPatternData = new PatternData(VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData));
 					if (command.disabled)
 					{
@@ -208,13 +222,33 @@ namespace Vehicles
 						defaultPatternData.colorTwo = vehicleDef.graphicData.colorTwo.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
 						defaultPatternData.colorThree = vehicleDef.graphicData.colorThree.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
 					}
+
+					if (!command.disabled || parms.lowLight)
+					{
+						GUI.color = command.IconDrawColor;
+					}
+					else
+					{
+						GUI.color = command.IconDrawColor.SaturationChanged(0f);
+						defaultPatternData.color = vehicleDef.graphicData.color.SaturationChanged(0);
+						defaultPatternData.colorTwo = vehicleDef.graphicData.colorTwo.SaturationChanged(0);
+						defaultPatternData.colorThree = vehicleDef.graphicData.colorThree.SaturationChanged(0);
+					}
+					if (parms.lowLight)
+					{
+						GUI.color = GUI.color.ToTransparent(0.6f);
+						defaultPatternData.color = defaultPatternData.color.ToTransparent(0.6f);
+						defaultPatternData.colorTwo = defaultPatternData.colorTwo.ToTransparent(0.6f);
+						defaultPatternData.colorThree = defaultPatternData.colorThree.ToTransparent(0.6f);
+					}
 					DrawVehicleDefOnGUI(buttonRect, vehicleDef, defaultPatternData);
+					GUI.color = Color.white;
 
 					KeyCode keyCode = (command.hotKey == null) ? KeyCode.None : command.hotKey.MainKey;
 					if (keyCode != KeyCode.None && !GizmoGridDrawer.drawnHotKeys.Contains(keyCode))
 					{
 						Vector2 vector = new Vector2(5f, 3f);
-						Widgets.Label(new Rect(rect.x + vector.x, rect.y + vector.y, rect.width - 10f, 18f), keyCode.ToStringReadable());
+						Widgets.Label(new Rect(iconRect.x + vector.x, iconRect.y + vector.y, iconRect.width - 10f, 18f), keyCode.ToStringReadable());
 						GizmoGridDrawer.drawnHotKeys.Add(keyCode);
 						if (command.hotKey.KeyDownEvent)
 						{
@@ -222,52 +256,54 @@ namespace Vehicles
 							Event.current.Use();
 						}
 					}
-					if (Widgets.ButtonInvisible(rect, true))
+					if (Widgets.ButtonInvisible(iconRect, true))
 					{
 						clicked = true;
 					}
-					string topRightLabel = command.TopRightLabel;
-					if (!topRightLabel.NullOrEmpty())
-					{
-						Vector2 vector2 = Text.CalcSize(topRightLabel);
-						Rect position;
-						Rect rectBase = position = new Rect(rect.xMax - vector2.x - 2f, rect.y + 3f, vector2.x, vector2.y);
-						position.x -= 2f;
-						position.width += 3f;
-						GUI.color = Color.white;
-						Text.Anchor = TextAnchor.UpperRight;
-						GUI.DrawTexture(position, TexUI.GrayTextBG);
-						Widgets.Label(rectBase, topRightLabel);
-						Text.Anchor = TextAnchor.UpperLeft;
-					}
-					string labelCap = command.LabelCap;
-					if (!labelCap.NullOrEmpty())
-					{
-						float num = Text.CalcHeight(labelCap, rect.width);
-						Rect rect2 = new Rect(rect.x, rect.yMax - num + 12f, rect.width, num);
-						GUI.DrawTexture(rect2, TexUI.GrayTextBG);
-						GUI.color = Color.white;
-						Text.Anchor = TextAnchor.UpperCenter;
-						Widgets.Label(rect2, labelCap);
-						Text.Anchor = TextAnchor.UpperLeft;
-						GUI.color = Color.white;
-					}
-					GUI.color = Color.white;
-					if (Mouse.IsOver(rect) /*&& command.DoTooltip*/)
-					{
-						TipSignal tip = command.Desc;
-						if (command.disabled && !command.disabledReason.NullOrEmpty())
-						{
-							tip.text += "\n\n" + "DisabledCommand".Translate() + ": " + command.disabledReason;
-						}
-						TooltipHandler.TipRegion(rect, tip);
-					}
-					if (!command.HighlightTag.NullOrEmpty() && (Find.WindowStack.FloatMenu == null || !Find.WindowStack.FloatMenu.windowRect.Overlaps(rect)))
-					{
-						UIHighlighter.HighlightOpportunity(rect, command.HighlightTag);
-					}
 				}
 				GUI.EndGroup();
+
+				string topRightLabel = command.TopRightLabel;
+				if (!topRightLabel.NullOrEmpty())
+				{
+					Vector2 vector2 = Text.CalcSize(topRightLabel);
+					Rect position = new Rect(rect.xMax - vector2.x - 2f, rect.y + 3f, vector2.x, vector2.y);
+					Rect rectBase = position;
+					position.x -= 2f;
+					position.width += 3f;
+
+					GUI.color = Color.white;
+					Text.Anchor = TextAnchor.UpperRight;
+					GUI.DrawTexture(position, TexUI.GrayTextBG);
+					Widgets.Label(rectBase, topRightLabel);
+					Text.Anchor = TextAnchor.UpperLeft;
+				}
+				string labelCap = buildDef.LabelCap;
+				if (!labelCap.NullOrEmpty())
+				{
+					float num = Text.CalcHeight(labelCap, rect.width);
+					Rect rect2 = new Rect(rect.x, rect.yMax - num + 12f, rect.width, num);
+					GUI.DrawTexture(rect2, TexUI.GrayTextBG);
+					GUI.color = Color.white;
+					Text.Anchor = TextAnchor.UpperCenter;
+					Widgets.Label(rect2, labelCap);
+					Text.Anchor = TextAnchor.UpperLeft;
+					GUI.color = Color.white;
+				}
+				GUI.color = Color.white;
+				if (Mouse.IsOver(rect))
+				{
+					TipSignal tip = command.Desc;
+					if (command.disabled && !command.disabledReason.NullOrEmpty())
+					{
+						tip.text += "\n\n" + "DisabledCommand".Translate() + ": " + command.disabledReason;
+					}
+					TooltipHandler.TipRegion(rect, tip);
+				}
+				if (!command.HighlightTag.NullOrEmpty() && (Find.WindowStack.FloatMenu == null || !Find.WindowStack.FloatMenu.windowRect.Overlaps(rect)))
+				{
+					UIHighlighter.HighlightOpportunity(rect, command.HighlightTag);
+				}
 			}
 			GUIState.Pop();
 
