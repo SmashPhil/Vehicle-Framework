@@ -56,12 +56,12 @@
 	
 	<VF_DischargePerTick>Discharge Rate</VF_DischargePerTick>
 	<VF_TicksPerCharge>Charge Rate</VF_TicksPerCharge>
-	<VF_FuelConsumptionRate>Fuel Consumption Rate</VF_FuelConsumptionRate>
+	<VF_FuelConsumptionRate>Fuel Rate</VF_FuelConsumptionRate>
 	<VF_FuelConsumptionRateWorldMultiplier>World Multiplier</VF_FuelConsumptionRateWorldMultiplier>
 	<VF_FuelCapacity>Fuel Capacity</VF_FuelCapacity>
 	<VF_AutoRefuelPercent>Auto Refuel %</VF_AutoRefuelPercent>
 	
-	<VF_FuelConsumptionWorld>Fuel Consumption %</VF_FuelConsumptionWorld>
+	<VF_FuelConsumptionWorld>Fuel Rate %</VF_FuelConsumptionWorld>
 	<VF_FuelConsumptionWorldTooltip>Fuel consumption multiplier on the world map.</VF_FuelConsumptionWorldTooltip>
 	<VF_LaunchFixedMaxDistance>Fixed Max Distance</VF_LaunchFixedMaxDistance>
 	<VF_LaunchFixedMaxDistanceTooltip>Set a fixed max distance this vehicle can fly regardless of fuel level.</VF_LaunchFixedMaxDistanceTooltip>

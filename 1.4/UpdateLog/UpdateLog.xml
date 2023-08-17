@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1348</currentVersion>
+  <currentVersion>1.5.1349</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
@@ -37,6 +37,10 @@ On top of this, I changed the way the pattern system caches materials so it shou
 - Fixed bug where Explosive vehicle components marked as 'internal' weren't exploding when damaged.
 
 - Fixed bug where quick search widget in Architect Menu didn't filter for vehicles or highlight them in the gizmo.
+
+- Fixed bug where aerial vehicles would sometimes get cleaned up by WorldPawnsGC, deleting the inventory.
+
+- Fixed bug where aerial vehicles were unable to buy / sell pawns on the world map.
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - DedicatedThreads now pool for non-settlement maps
 

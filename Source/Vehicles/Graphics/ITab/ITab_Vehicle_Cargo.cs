@@ -5,6 +5,7 @@ using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -47,58 +48,64 @@ namespace Vehicles
 
 		protected override void FillTab()
 		{
-			Text.Font = GameFont.Small;
-			Rect rect = new Rect(0f, TopPadding, size.x, size.y - TopPadding);
-			Rect rect2 = rect.ContractedBy(10f);
-			Rect position = new Rect(rect2.x, rect2.y, rect2.width, rect2.height);
-			Widgets.BeginGroup(position);
-			Text.Font = GameFont.Small;
-			GUI.color = Color.white;
-			Rect outRect = new Rect(0f, 0f, position.width, position.height);
-			Rect viewRect = new Rect(0f, 0f, position.width - 16f, scrollViewHeight);
-			Widgets.BeginScrollView(outRect, ref scrollPosition, viewRect, true);
-			float num = 0f;
-			TryDrawMassInfo(ref num, viewRect.width);
-			
-			if(IsVisible)
+			GUIState.Push();
 			{
-				Widgets.ListSeparator(ref num, viewRect.width, "VF_Cargo".Translate());
-				workingInvList.Clear();
-				workingInvList.AddRange(Vehicle.inventory.innerContainer);
-				foreach(Thing t in workingInvList)
+				Text.Font = GameFont.Small;
+				Rect rect = new Rect(0f, TopPadding, size.x, size.y - TopPadding);
+				Rect rect2 = rect.ContractedBy(10f);
+				Rect position = new Rect(rect2.x, rect2.y, rect2.width, rect2.height);
+
+				GUI.color = Color.white;
+				Rect outRect = new Rect(0f, 0f, position.width, position.height);
+				Rect viewRect = new Rect(0f, 0f, position.width - 16f, scrollViewHeight);
+
+				Widgets.BeginGroup(position);
+				Widgets.BeginScrollView(outRect, ref scrollPosition, viewRect, true);
 				{
-					DrawThingRow(ref num, viewRect.width, t, null, true);
-				}
-				workingInvList.Clear();
-			}
-			if(IsVisible && !Vehicle.cargoToLoad.NullOrEmpty())
-			{
-				foreach (TransferableOneWay transferable in Vehicle.cargoToLoad)
-				{
-					if (transferable.AnyThing != null && transferable.CountToTransfer > 0 && !Vehicle.inventory.innerContainer.Contains(transferable.AnyThing))
+					float num = 0f;
+					TryDrawMassInfo(ref num, viewRect.width);
+
+					if (IsVisible)
 					{
-						DrawThingRow(ref num, viewRect.width, transferable.AnyThing, transferable.CountToTransfer, false, true);
+						Widgets.ListSeparator(ref num, viewRect.width, "VF_Cargo".Translate());
+						workingInvList.Clear();
+						workingInvList.AddRange(Vehicle.inventory.innerContainer);
+						foreach (Thing t in workingInvList)
+						{
+							DrawThingRow(ref num, viewRect.width, t, null, true);
+						}
+						workingInvList.Clear();
+					}
+					if (IsVisible && !Vehicle.cargoToLoad.NullOrEmpty())
+					{
+						foreach (TransferableOneWay transferable in Vehicle.cargoToLoad)
+						{
+							if (transferable.AnyThing != null && transferable.CountToTransfer > 0 && !Vehicle.inventory.innerContainer.Contains(transferable.AnyThing))
+							{
+								DrawThingRow(ref num, viewRect.width, transferable.AnyThing, transferable.CountToTransfer, false, true);
+							}
+						}
+					}
+
+					if (Event.current.type is EventType.Layout)
+					{
+						scrollViewHeight = num + 30f;
 					}
 				}
+				Widgets.EndScrollView();
+				Widgets.EndGroup();
 			}
-
-			if(Event.current.type is EventType.Layout)
-			{
-				scrollViewHeight = num + 30f;
-			}
-			Widgets.EndScrollView();
-			Widgets.EndGroup();
-			GUI.color = Color.white;
-			Text.Anchor = TextAnchor.UpperLeft;
+			GUIState.Pop();
 		}
 
 		private void DrawThingRow(ref float y, float width, Thing thing, int? transferStackCount = null, bool inventory = false, bool missingFromInventory = false)
 		{
 			var color = GUI.color;
 
-
 			if (missingFromInventory)
+			{
 				GUI.color = MissingItemColor;
+			}
 
 			Rect rect = new Rect(0f, y, width, ThingIconSize);
 			Widgets.InfoCardButton(rect.width - 24f, y, thing);
@@ -121,12 +128,12 @@ namespace Vehicles
 			CaravanThingsTabUtility.DrawMass(thing, rect2);
 			rect.width -= 60f;
 			GUI.color = color;
-			if(Mouse.IsOver(rect))
+			if (Mouse.IsOver(rect))
 			{
 				GUI.color = HighlightColor;
 				GUI.DrawTexture(rect, TexUI.HighlightTex);
 			}
-			if(!(thing.def.DrawMatSingle is null) && !(thing.def.DrawMatSingle.mainTexture is null))
+			if (!(thing.def.DrawMatSingle is null) && !(thing.def.DrawMatSingle.mainTexture is null))
 			{
 				Widgets.ThingIcon(new Rect(4f, y, ThingIconSize, ThingRowHeight), thing, 1f);
 			}

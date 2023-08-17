@@ -111,12 +111,13 @@ namespace Vehicles
 			{
 				if (graphicInt is null)
 				{
-					if (Destroyed)
+					if (Destroyed && !RGBMaterialPool.GetAll(this).NullOrEmpty())
 					{
-						Log.Error($"Reinitializing RGB Materials but {this} has already been destroyed.  This may result in a memory leak.");
+						Log.Error($"Reinitializing RGB Materials but {this} has already been destroyed and the cache was not cleared for this entry. This may result in a memory leak.");
+						RGBMaterialPool.Release(this);
 					}
 
-					var graphicData = new GraphicDataRGB();
+					GraphicDataRGB graphicData = new GraphicDataRGB();
 					if (retexture != null)
 					{
 						graphicData.CopyFrom(retexture.graphicData);

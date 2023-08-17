@@ -18,6 +18,8 @@ namespace Vehicles
 	{
 		public static Dictionary<Pawn, AssignedSeat> assignedSeats = new Dictionary<Pawn, AssignedSeat>();
 
+		private static int pawnsBeingAdded = 0;
+
 		/// <summary>
 		/// Remove all pawns from <see cref="assignedSeats"/> for this vehicle
 		/// </summary>
@@ -529,12 +531,11 @@ namespace Vehicles
 		/// <param name="pawn"></param>
 		public static Pawn UsableVehicleWithTheMostFreeSpace(Pawn pawn)
 		{
-			
 			Pawn carrierPawn = null;
 			float num = 0f;
 			foreach(Pawn p in UsableCandidatesForCargo(pawn))
 			{
-				if(p is VehiclePawn && p != pawn && pawn.CanReach(p, PathEndMode.Touch, Danger.Deadly, false))
+				if (p is VehiclePawn && p != pawn && pawn.CanReach(p, PathEndMode.Touch, Danger.Deadly, false))
 				{
 					float num2 = MassUtility.FreeSpace(p);
 					if(carrierPawn is null || num2 > num)
@@ -545,6 +546,36 @@ namespace Vehicles
 				}
 			}
 			return carrierPawn;
+		}
+
+		public static void CountPawnsBeingTraded(List<Tradeable> ___cachedTradeables)
+		{
+			int count = 0;
+			foreach (Tradeable tradeable in ___cachedTradeables)
+			{
+				if (tradeable.AnyThing is Pawn pawn && pawn.RaceProps.Humanlike)
+				{
+					if (tradeable.ActionToDo == TradeAction.PlayerBuys)
+					{
+						count += tradeable.CountToTransfer;
+					}
+					else if (tradeable.ActionToDo == TradeAction.PlayerSells)
+					{
+						count -= tradeable.CountToTransfer;
+					}
+				}
+			}
+			pawnsBeingAdded = count;
+		}
+
+		public static bool CanFitInVehicle(AerialVehicleInFlight aerialVehicle)
+		{
+			if (!TradeSession.Active)
+			{
+				Log.Warning($"Improper use of CanFitInVehicle which should only operate during TradeSessions.");
+				return true;
+			}
+			return aerialVehicle.vehicle.SeatsAvailable - pawnsBeingAdded > 0;
 		}
 
 		/// <summary>

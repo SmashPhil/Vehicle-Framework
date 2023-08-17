@@ -110,6 +110,12 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Settlement_TraderTracker), nameof(Settlement_TraderTracker.ColonyThingsWillingToBuy)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(AerialVehicleInventoryItems)));
+			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(Tradeable), nameof(Tradeable.Interactive)),
+				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(AerialVehicleSlaveTradeRoomCheck)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Dialog_Trade), "CountToTransferChanged"),
+				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(AerialVehicleCountPawnsToTransfer)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanInventoryUtility), nameof(CaravanInventoryUtility.FindPawnToMoveInventoryTo)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(FindVehicleToMoveInventoryTo)));
@@ -776,6 +782,23 @@ namespace Vehicles
 			return true;
 		}
 
+		public static void AerialVehicleSlaveTradeRoomCheck(ref bool __result, Tradeable __instance)
+		{
+			if (__instance.AnyThing is Pawn pawn && pawn.RaceProps.Humanlike && __instance.CountToTransfer == 0)
+			{
+				Pawn negotiator = TradeSession.playerNegotiator;
+				if (negotiator.GetAerialVehicle() is AerialVehicleInFlight aerialVehicle)
+				{
+					__result &= CaravanHelper.CanFitInVehicle(aerialVehicle);
+				}
+			}
+		}
+
+		public static void AerialVehicleCountPawnsToTransfer(List<Tradeable> ___cachedTradeables)
+		{
+			CaravanHelper.CountPawnsBeingTraded(___cachedTradeables);
+		}
+
 		public static bool FindVehicleToMoveInventoryTo(ref Pawn __result, Thing item, List<Pawn> candidates, List<Pawn> ignoreCandidates, Pawn currentItemOwner = null)
 		{
 			if (candidates.HasVehicle())
@@ -890,9 +913,29 @@ namespace Vehicles
 				thing.PreTraded(TradeAction.PlayerBuys, playerNegotiator, ___settlement);
 				if (thing is Pawn pawn && pawn.RaceProps.Humanlike)
 				{
-					VehicleHandler handler = aerial.vehicle.GetAllHandlersMatch(null).FirstOrDefault();
-					aerial.vehicle.GiveLoadJob(pawn, handler);
-					aerial.vehicle.Notify_Boarded(pawn);
+					VehicleHandler handler = aerial.vehicle.NextAvailableHandler(HandlingTypeFlags.None);
+					if (handler == null)
+					{
+						Log.Error($"Unable to locate available handler for {toGive}. Squeezing into other role to avoid aborted trade.");
+						handler = aerial.vehicle.NextAvailableHandler();
+						handler ??= aerial.vehicle.handlers.RandomElementWithFallback(fallback: null);
+
+						if (handler == null)
+						{
+							Log.Error($"Unable to find other role to squeeze {pawn} into. Tossing into inventory.");
+							return true;
+						}
+					}
+
+					if (pawn.Spawned)
+					{
+						aerial.vehicle.GiveLoadJob(pawn, handler);
+						aerial.vehicle.Notify_Boarded(pawn);
+					}
+					else if (!pawn.IsInVehicle())
+					{
+						aerial.vehicle.Notify_BoardedCaravan(pawn, handler.handlers);
+					}
 					return false;
 				}
 				if (aerial.vehicle.AddOrTransfer(thing) <= 0)

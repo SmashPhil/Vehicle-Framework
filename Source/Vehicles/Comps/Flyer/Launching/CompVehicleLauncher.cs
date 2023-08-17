@@ -244,6 +244,12 @@ namespace Vehicles
 			Vehicle.EventRegistry[VehicleEventDefOf.AerialVehicleLaunch].ExecuteEvents();
 		}
 
+		[DebugAction(VehicleHarmony.VehiclesLabel)]
+		private static void DoGCPass()
+		{
+			HarmonyLib.AccessTools.Field(typeof(WorldPawnGC), "lastSuccessfulGCTick").SetValue(Find.WorldPawns.gc, -1);
+		}
+
 		public float FuelNeededToLaunchAtDist(Vector3 origin, int destination)
 		{
 			float tileDistance = Ext_Math.SphericalDistance(origin, WorldHelper.GetTilePos(destination));

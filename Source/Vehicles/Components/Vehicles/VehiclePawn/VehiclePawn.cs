@@ -180,6 +180,13 @@ namespace Vehicles
 					Find.WorldPawns.RemovePawn(pawn); //Remove internal pawns from WorldPawns
 				}
 			}
+			foreach (Thing thing in inventory.innerContainer)
+			{
+				if (thing is Pawn pawn)
+				{
+					Find.WorldPawns.RemovePawn(pawn); //Remove inventory pawns in case some were transfered here (like animals)
+				}
+			}
 
 			Drawer.Notify_Spawned();
 			InitializeHitbox();
