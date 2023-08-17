@@ -85,15 +85,15 @@ namespace Vehicles
 			{
 				if (!LandingProperties_VTOL.shadowSizeXVerticalCurve.NullOrEmpty())
 				{
-					shadowData.width = LandingProperties_VTOL.shadowSizeXVerticalCurve.Evaluate(TimeInAnimation);
+					shadowData.width = LandingProperties_VTOL.shadowSizeXVerticalCurve.Evaluate(TimeInAnimationVTOL);
 				}
 				if (!LandingProperties_VTOL.shadowSizeZVerticalCurve.NullOrEmpty())
 				{
-					shadowData.height = LandingProperties_VTOL.shadowSizeZVerticalCurve.Evaluate(TimeInAnimation);
+					shadowData.height = LandingProperties_VTOL.shadowSizeZVerticalCurve.Evaluate(TimeInAnimationVTOL);
 				}
 				if (!LandingProperties_VTOL.shadowAlphaVerticalCurve.NullOrEmpty())
 				{
-					shadowData.alpha = LandingProperties_VTOL.shadowAlphaVerticalCurve.Evaluate(TimeInAnimation);
+					shadowData.alpha = LandingProperties_VTOL.shadowAlphaVerticalCurve.Evaluate(TimeInAnimationVTOL);
 				}
 			}
 
@@ -124,15 +124,15 @@ namespace Vehicles
 			{
 				if (!LaunchProperties_VTOL.shadowSizeXVerticalCurve.NullOrEmpty())
 				{
-					shadowData.width = LaunchProperties_VTOL.shadowSizeXVerticalCurve.Evaluate(TimeInAnimation);
+					shadowData.width = LaunchProperties_VTOL.shadowSizeXVerticalCurve.Evaluate(TimeInAnimationVTOL);
 				}
 				if (!LaunchProperties_VTOL.shadowSizeZVerticalCurve.NullOrEmpty())
 				{
-					shadowData.height = LaunchProperties_VTOL.shadowSizeZVerticalCurve.Evaluate(TimeInAnimation);
+					shadowData.height = LaunchProperties_VTOL.shadowSizeZVerticalCurve.Evaluate(TimeInAnimationVTOL);
 				}
 				if (!LaunchProperties_VTOL.shadowAlphaVerticalCurve.NullOrEmpty())
 				{
-					shadowData.alpha = LaunchProperties_VTOL.shadowAlphaVerticalCurve.Evaluate(TimeInAnimation);
+					shadowData.alpha = LaunchProperties_VTOL.shadowAlphaVerticalCurve.Evaluate(TimeInAnimationVTOL);
 				}
 			}
 

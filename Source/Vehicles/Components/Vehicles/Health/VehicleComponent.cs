@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using UnityEngine;
 using RimWorld;
 using Verse;
@@ -35,6 +36,17 @@ namespace Vehicles
 				Widgets.DrawTextureFitted(rect, indicator.Icon, 1);
 				TooltipHandler.TipRegion(rect, indicator.label);
 			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="vehicle"></param>
+		/// <param name="dinfo"></param>
+		[Obsolete("Use TakeDamage method with optional parameter instead. This will be removed in the future.", error: true)]
+		public void TakeDamage(VehiclePawn vehicle, DamageInfo dinfo)
+		{
+			TakeDamage(vehicle, ref dinfo, ignoreArmor: false);
 		}
 
 		public void TakeDamage(VehiclePawn vehicle, DamageInfo dinfo, bool ignoreArmor = false)

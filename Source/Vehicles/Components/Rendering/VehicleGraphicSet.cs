@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Verse;
 using RimWorld;
 using UnityEngine;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -36,7 +37,7 @@ namespace Vehicles
 			}
 		}
 
-		public List<Material> MatsBodyBaseAt(Rot4 facing, RotDrawMode bodyCondition = RotDrawMode.Fresh)
+		public List<Material> MatsBodyBaseAt(Rot8 facing)
 		{
 			if (facing.IsHorizontal && vehicle.Angle != vehicle.CachedAngle)
 			{
@@ -44,12 +45,12 @@ namespace Vehicles
 				cachedMatsBodyBaseHash = -1;
 				vehicle.CachedAngle = vehicle.Angle;
 			}
-			int num = facing.AsInt + 1000 * (int)bodyCondition;
+			int num = facing.AsInt;
 			if (num != cachedMatsBodyBaseHash)
 			{
 				cachedMatsBodyBase.Clear();
 				cachedMatsBodyBaseHash = num;
-				cachedMatsBodyBase.Add(vehicle.VehicleGraphic.MatAt(facing, vehicle));
+				cachedMatsBodyBase.Add(vehicle.VehicleGraphic.MatAtFull(facing));
 			}
 			return cachedMatsBodyBase;
 		}

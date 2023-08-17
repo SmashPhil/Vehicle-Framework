@@ -122,7 +122,7 @@ namespace Vehicles
 		/// <param name="rect"></param>
 		/// <param name="vehicleDef"></param>
 		/// <param name="material"></param>
-		public static string DrawVehicleDef(Rect rect, VehicleDef vehicleDef, Material material = null, PatternData patternData = null, Rot8? rot = null, bool withoutTurrets = false)
+		public static string DrawVehicleDef(Rect rect, VehicleDef vehicleDef, PatternData patternData = null, Rot8? rot = null, bool withoutTurrets = false)
 		{
 			string drawStep = string.Empty;
 			try
@@ -166,24 +166,13 @@ namespace Vehicles
 
 				Texture2D mainTex = VehicleTex.VehicleTexture(vehicleDef, rotDrawn, out float angle);
 
-				if (material is null && pattern != null && (graphic.Shader.SupportsRGBMaskTex() || graphic.Shader.SupportsMaskTex()))
+				Material material = null;
+				if (pattern != null && graphic.Shader.SupportsRGBMaskTex())
 				{
-					drawStep = $"Regenerating material for pattern={pattern.defName}";
+					drawStep = $"Fetching material for {vehicleDef}";
 
-					MaterialRequestRGB matReq = new MaterialRequestRGB()
-					{
-						mainTex = mainTex,
-						shader = pattern is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin.Shader : vehicleDef.graphic.Shader,
-						color = color1,
-						colorTwo = color2,
-						colorThree = color3,
-						tiles = tiling,
-						displacement = displacement,
-						properties = pattern.properties,
-						maskTex = (vehicleDef.graphic as Graphic_Vehicle).masks[rotDrawn.AsInt],
-						patternTex = pattern?[rotDrawn]
-					};
-					material = MaterialPoolExpanded.MatFrom(matReq);
+					material = RGBMaterialPool.Get(vehicleDef, rotDrawn);
+					RGBMaterialPool.SetProperties(vehicleDef, patternData);
 				}
 				drawStep = "Attempting to retrieve turret overlays";
 				List<(Rect rect, Texture mainTex, Material material, float layer, float angle)> overlays = new List<(Rect, Texture, Material, float, float)>();
@@ -216,7 +205,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				SmashLog.Error($"Exception thrown while trying to draw <type>VehicleDef</type>=\"{vehicleDef?.defName ?? "Null"}\" Exception={ex.Message}");
+				SmashLog.Error($"Exception thrown while trying to draw Graphics <type>VehicleDef</type>=\"{vehicleDef?.defName ?? "Null"}\" Exception={ex.Message}");
 			}
 			return drawStep;
 		}
@@ -237,17 +226,16 @@ namespace Vehicles
 		{
 			Rect overlayRect = OverlayRect(rect, vehicleDef, graphicOverlay, rot);
 			Texture2D texture = ContentFinder<Texture2D>.Get(graphicOverlay.data.graphicData.texPath);
-			bool canMask = graphicOverlay.data.graphicData.Graphic.Shader.SupportsMaskTex() || graphicOverlay.data.graphicData.Graphic.Shader.SupportsRGBMaskTex();
-			Material material = canMask ? graphicOverlay.data.graphicData.Graphic.MatAt(rot) : null;
+			Material material = graphicOverlay.data.graphicData.Graphic.MatAt(rot);
 			return (overlayRect, texture, material, graphicOverlay.data.graphicData.DrawOffsetFull(rot).y, graphicOverlay.data.rotation);
 		}
 
 		/// <summary>
 		/// Retrieve <seealso cref="VehicleTurret"/> GUI data for rendering, adjusted by settings UI properties for <paramref name="vehicleDef"/>
 		/// </summary>
-		/// <param name="displayRect"></param>
+		/// <param name="rect"></param>
 		/// <param name="vehicleDef"></param>
-		/// <param name="cannons"></param>
+		/// <param name="turrets"></param>
 		/// <param name="patternData"></param>
 		/// <param name="rot"></param>
 		public static IEnumerable<(Rect rect, Texture mainTex, Material material, float layer, float angle)> RetrieveAllTurretSettingsGraphicsProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, IEnumerable<VehicleTurret> turrets, PatternData patternData)
@@ -264,25 +252,17 @@ namespace Vehicles
 		public static (Rect rect, Texture mainTex, Material material, float layer, float angle) RetrieveTurretSettingsGraphicsProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, VehicleTurret turret, PatternData patternData)
 		{
 			Rect turretRect = TurretRect(rect, vehicleDef, turret, rot);
-			Material cannonMat = turret.CannonGraphic.Shader.SupportsRGBMaskTex() ? new Material(turret.CannonGraphic.MatAt(patternData.patternDef)) : null;
-			if ((turret.CannonGraphic.Shader.SupportsRGBMaskTex() || turret.CannonGraphic.Shader.SupportsMaskTex()) && patternData != VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData))
+			Material material = null;
+			if (turret.CannonGraphic.Shader.SupportsMaskTex())
 			{
-				MaterialRequestRGB matReq = new MaterialRequestRGB()
-				{
-					mainTex = turret.CannonTexture,
-					shader = patternData?.patternDef is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin.Shader : turret.CannonGraphic.Shader,
-					color = patternData.color,
-					colorTwo = patternData.colorTwo,
-					colorThree = patternData.colorThree,
-					tiles = patternData.tiles,
-					displacement = patternData.displacement,
-					properties = patternData.patternDef.properties,
-					maskTex = turret.CannonGraphic.masks[Rot8.North.AsInt],
-					patternTex = patternData.patternDef?[Rot8.North]
-				};
-				cannonMat = MaterialPoolExpanded.MatFrom(matReq);
+				material = turret.CannonGraphic.MatAt(rot);
 			}
-			return (turretRect, turret.CannonTexture, cannonMat, turret.CannonGraphicData.drawOffset.y, turret.defaultAngleRotated + rot.AsAngle);
+			else if (patternData != null && turret.CannonGraphic.Shader.SupportsRGBMaskTex())
+			{
+				material = RGBMaterialPool.Get(vehicleDef, rot);
+				RGBMaterialPool.SetProperties(vehicleDef, patternData);
+			}
+			return (turretRect, turret.CannonTexture, material, turret.CannonGraphicData.drawOffset.y, turret.defaultAngleRotated + rot.AsAngle);
 		}
 
 		/// <summary>

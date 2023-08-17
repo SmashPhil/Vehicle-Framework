@@ -80,6 +80,10 @@ namespace Vehicles
 		{
 			get
 			{
+				if (MovementPermissions == VehiclePermissions.NoDriverNeeded)
+				{
+					return true;
+				}
 				foreach (VehicleHandler handler in handlers)
 				{
 					if (handler.role.handlingTypes.HasFlag(HandlingTypeFlags.Movement) && !handler.RoleFulfilled)

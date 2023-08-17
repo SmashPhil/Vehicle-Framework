@@ -123,7 +123,7 @@ namespace Vehicles
 			Utilities.InvokeWithLogging(VehicleMod.settings.Write);
 
 			Utilities.InvokeWithLogging(RegisterTweakFieldsInEditor);
-			Log.Message($"VanillaFramework: {MaterialPoolExpanded.count} Vanilla: {((Dictionary<Material, MaterialRequest>)AccessTools.Field(typeof(MaterialPool), "matDictionaryReverse").GetValue(null)).Count}");
+			Utilities.InvokeWithLogging(PatternDef.GenerateMaterials);
 		}
 		
 		public static void Patch(MethodBase original, HarmonyMethod prefix = null, HarmonyMethod postfix = null, HarmonyMethod transpiler = null, HarmonyMethod finalizer = null)

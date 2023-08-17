@@ -17,16 +17,17 @@ namespace Vehicles
 		public override void ResolveReferences(ThingDef parentDef)
 		{
 			base.ResolveReferences(parentDef);
-			ResolveChildTurrets();
+			ResolveChildTurrets(parentDef as VehicleDef);
 		}
 
-		private void ResolveChildTurrets()
+		private void ResolveChildTurrets(VehicleDef vehicleDef)
 		{
 			if (!turrets.NullOrEmpty())
 			{
 				foreach (VehicleTurret turret in turrets)
 				{
 					turret.ResetAngle();
+					turret.vehicleDef = vehicleDef;
 					ResolveChildTurrets(turret);
 					turret.turretDef.ammunition?.ResolveReferences();
 				}

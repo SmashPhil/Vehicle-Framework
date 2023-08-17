@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
@@ -6,6 +7,7 @@ using SmashTools;
 
 namespace Vehicles
 {
+	[Obsolete]
 	public class Graphic_TurretAnimate : Graphic_Turret
 	{
 		protected string[] graphicPaths;
@@ -24,13 +26,9 @@ namespace Vehicles
 			}
 		}
 
-		public override void Init(GraphicRequestRGB req, bool cacheResults = true)
+		public override void Init(GraphicRequestRGB req)
 		{
-			if (cacheResults is true)
-			{
-				masks = new Texture2D[MatCount];
-				maskMatPatterns = new Dictionary<PatternDef, (string texPath, Material[] materials)>();
-			}
+			throw new NotSupportedException($"Graphic_TurretAnimate is no longer supported.");
 			data = req.graphicData;
 			path = req.path;
 			color = req.color;
@@ -65,37 +63,37 @@ namespace Vehicles
 				};
 				return;
 			}
-			for (int i = 0; i < list.Count; i++)
-			{
-				string fullPath = string.Concat(req.path, '/', list[i].name);
-				graphicPaths[i] = fullPath;
-				subGraphics[i] = GraphicDatabaseRGB.Get<Graphic_Turret>(fullPath, req.shader, req.drawSize, req.color, req.colorTwo, req.colorThree, req.tiles, 
-					req.displacement.x, req.displacement.y, DataRGB, req.shaderParameters) as Graphic_Turret;
-			}
+			//for (int i = 0; i < list.Count; i++)
+			//{
+			//	string fullPath = string.Concat(req.path, '/', list[i].name);
+			//	graphicPaths[i] = fullPath;
+			//	subGraphics[i] = GraphicDatabaseRGB.Get<Graphic_Turret>(fullPath, req.shader, req.drawSize, req.color, req.colorTwo, req.colorThree, req.tiles, 
+			//		req.displacement.x, req.displacement.y, DataRGB, req.shaderParameters) as Graphic_Turret;
+			//}
 		}
 
-		protected override Material[] GenerateMasks(GraphicRequestRGB req, PatternDef pattern)
-		{
-			Texture2D mainTex = ContentFinder<Texture2D>.Get(req.path);
-			Texture2D maskTex = ContentFinder<Texture2D>.Get(req.path + MaskSuffix, false);
-			masks = Enumerable.Repeat(maskTex, MatCount).ToArray();
-			var mats = new Material[MatCount];
-			MaterialRequestRGB mReq = new MaterialRequestRGB()
-			{
-				mainTex = mainTex,
-				shader = pattern is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin.Shader : req.shader,
-				properties = pattern.properties,
-				color = pattern.properties.colorOne ?? req.color,
-				colorTwo = pattern.properties.colorTwo ?? req.colorTwo,
-				colorThree = pattern.properties.colorThree ?? req.colorThree,
-				tiles = req.tiles,
-				maskTex = maskTex,
-				patternTex = pattern?[Rot8.North],
-				shaderParameters = req.shaderParameters
-			};
-			mats[0] = MaterialPoolExpanded.MatFrom(mReq);
-			return mats;
-		}
+		//protected override Material[] GenerateMasks(GraphicRequestRGB req, PatternDef pattern)
+		//{
+		//	Texture2D mainTex = ContentFinder<Texture2D>.Get(req.path);
+		//	Texture2D maskTex = ContentFinder<Texture2D>.Get(req.path + MaskSuffix, false);
+		//	masks = Enumerable.Repeat(maskTex, MatCount).ToArray();
+		//	var mats = new Material[MatCount];
+		//	MaterialRequestRGB mReq = new MaterialRequestRGB()
+		//	{
+		//		mainTex = mainTex,
+		//		shader = pattern is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin.Shader : req.shader,
+		//		properties = pattern.properties,
+		//		color = pattern.properties.colorOne ?? req.color,
+		//		colorTwo = pattern.properties.colorTwo ?? req.colorTwo,
+		//		colorThree = pattern.properties.colorThree ?? req.colorThree,
+		//		tiles = req.tiles,
+		//		maskTex = maskTex,
+		//		patternTex = pattern?[Rot8.North],
+		//		shaderParameters = req.shaderParameters
+		//	};
+		//	mats[0] = RGBMaterialPool.MatFrom(mReq);
+		//	return mats;
+		//}
 
 		public Graphic SubGraphicCycle(int index, Shader newShader, Color colorOne, Color colorTwo, Color colorThree, float tiles = 1, float displacementX = 0, float displacementY = 0)
 		{
@@ -107,7 +105,8 @@ namespace Vehicles
 					index -= (graphicPaths.Length - 1);
 				}
 			}
-			return GraphicDatabaseRGB.Get<Graphic_Turret>(graphicPaths[index], newShader, drawSize, colorOne, colorTwo, colorThree, tiles, displacementX, displacementY, DataRGB);
+			return null;
+			//return GraphicDatabaseRGB.Get<Graphic_Turret>(graphicPaths[index], newShader, drawSize, colorOne, colorTwo, colorThree, tiles, displacementX, displacementY, DataRGB);
 		}
 
 		public Material SubMaterialCycle(PatternDef pattern, int index)
@@ -126,11 +125,6 @@ namespace Vehicles
 		public override Graphic GetColoredVersion(Shader newShader, Color newColor, Color newColorTwo)
 		{
 			return GraphicDatabase.Get<Graphic_TurretAnimate>(path, newShader, drawSize, newColor, newColorTwo, data);
-		}
-
-		public override Graphic_RGB GetColoredVersion(Shader shader, Color colorOne, Color colorTwo, Color colorThree, float tiles = 1, float displacementX = 0, float displacementY = 0)
-		{
-			return GraphicDatabaseRGB.Get<Graphic_TurretAnimate>(path, shader, drawSize, colorOne, colorTwo, colorThree, tiles, displacementX, displacementY, DataRGB);
 		}
 
 		public override string ToString()

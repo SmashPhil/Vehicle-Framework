@@ -44,10 +44,12 @@ namespace Vehicles
 					else if (rot == Rot8.SouthEast && vehicle.VehicleGraphic.EastDiagonalRotated)
 					{
 						graphicRot = Rot8.South;
+						overlayAngle *= -1; //Flip angle for clockwise rotation facing south
 					}
 					else if (rot == Rot8.SouthWest && vehicle.VehicleGraphic.WestDiagonalRotated)
 					{
 						graphicRot = Rot8.South;
+						overlayAngle *= -1; //Flip angle for clockwise rotation facing south
 					}
 					else if (rot == Rot8.NorthWest && vehicle.VehicleGraphic.WestDiagonalRotated)
 					{

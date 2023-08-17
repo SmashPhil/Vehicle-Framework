@@ -123,6 +123,21 @@ namespace Vehicles
 			sustainers.EndAll();
 			//Null check in the event that this vehicle is a world pawn but not in any AerialVehicleInFlight, VehicleCaravan, or spawned on map
 			EventRegistry?[VehicleEventDefOf.Destroyed].ExecuteEvents();
+
+			RGBMaterialPool.Release(this);
+
+			if (!cachedComps.NullOrEmpty())
+			{
+				for (int i = 0; i < cachedComps.Count; i++)
+				{
+					if (cachedComps[i] is VehicleComp vehicleComp)
+					{
+						vehicleComp.OnDestroy();
+					}
+				}
+			}
+
+			graphicInt = null;
 			base.Destroy(mode);
 		}
 

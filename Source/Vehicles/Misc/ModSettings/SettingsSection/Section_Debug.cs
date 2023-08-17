@@ -179,9 +179,9 @@ namespace Vehicles
 					TooltipHandler.TipRegionByKey(buttonRect, "VF_DevMode_DebugWorldPathfinderDebuggingTooltip");
 
 					buttonRect = listingStandard.GetRect(30);
-					if (Widgets.ButtonText(buttonRect, "Log Materials"))
+					if (Widgets.ButtonText(buttonRect, "Output Material Cache"))
 					{
-						Log.Message($"VanillaFramework: {MaterialPoolExpanded.count} Vanilla: {((Dictionary<Material, MaterialRequest>)AccessTools.Field(typeof(MaterialPool), "matDictionaryReverse").GetValue(null)).Count}");
+						RGBMaterialPool.LogAllMaterials();
 					}
 				}
 				GUIState.Pop();

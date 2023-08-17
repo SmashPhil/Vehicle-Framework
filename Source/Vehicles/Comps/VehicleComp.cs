@@ -37,6 +37,10 @@ namespace Vehicles
 		{
 		}
 
+		public virtual void OnDestroy()
+		{
+		}
+
 		public virtual void PostDrawUnspawned(Vector3 drawLoc, float rotation)
 		{
 		}

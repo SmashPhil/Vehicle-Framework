@@ -423,6 +423,7 @@
     <Compile Include="Misc\DefOf\VehicleTurretEventDefOf.cs" />
     <Compile Include="Misc\Enums\UI\WorldPathingDebugType.cs" />
     <Compile Include="Misc\Interfaces\IDebugLordMeetingPoint.cs" />
+    <Compile Include="Misc\Interfaces\IMaterialCacheTarget.cs" />
     <Compile Include="Misc\Interfaces\ISustainerTarget.cs" />
     <Compile Include="Misc\Interfaces\IVehicleWorldObject.cs" />
     <Compile Include="Pathing\Map\VehicleRegionUpdateCatalog.cs" />
@@ -674,7 +675,7 @@
     <Compile Include="Graphics\Graphic\Graphics\Animated\Graphic_Animate.cs" />
     <Compile Include="Graphics\Graphic\Graphics\VanillaSupported\Graphic_RGB.cs" />
     <Compile Include="Graphics\Graphic\MaterialGeneration\MaterialRGBRequest.cs" />
-    <Compile Include="Graphics\Graphic\MaterialGeneration\MaterialPoolExpanded.cs" />
+    <Compile Include="Graphics\Graphic\MaterialGeneration\RGBMaterialPool.cs" />
     <Compile Include="Graphics\Graphic\MaterialGeneration\AdditionalShaderPropertyIDs.cs" />
     <Compile Include="Graphics\Graphic\AssetBundle\AssetBundleDatabase.cs" />
     <Compile Include="Graphics\Graphic\Patterns\PatternProperties.cs" />

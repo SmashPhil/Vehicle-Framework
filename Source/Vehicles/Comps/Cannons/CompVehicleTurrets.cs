@@ -64,21 +64,33 @@ namespace Vehicles
 			}
 		}
 
-		public void RemoveTurrets(List<VehicleTurret> cannonList)
+		public void RemoveTurrets(List<VehicleTurret> turrets)
 		{
-			if (cannonList.NullOrEmpty())
+			if (turrets.NullOrEmpty())
 			{
 				return;
 			}
-			foreach(VehicleTurret cannon in cannonList)
+			for (int i = turrets.Count - 1; i >= 0; i--)
 			{
-				VehicleTurret resultingHandler = turrets.FirstOrDefault(c => c.key == cannon.key);
-				if(resultingHandler is null)
+				VehicleTurret turret = turrets[i];
+				VehicleTurret matchingTurret = turrets.FirstOrDefault(c => c.key == turret.key);
+				if (matchingTurret is null)
 				{
-					Log.Error($"Unable to locate {cannon.key} in cannonList for removal. Is Key missing on upgraded cannon?");
+					Log.Error($"Unable to locate {turret.key} in cannonList for removal. Is Key missing on upgraded cannon?");
 				}
-				turrets.Remove(resultingHandler);
+				matchingTurret.OnDestroy();
+				this.turrets.Remove(matchingTurret);
 			}
+		}
+
+		public bool RemoveTurret(VehicleTurret turret)
+		{
+			return turrets.Remove(turret);
+		}
+
+		public override void OnDestroy()
+		{
+			RemoveTurrets(turrets); //Trigger self removal of entire turret list for cleanup
 		}
 
 		public override void PostLoad()

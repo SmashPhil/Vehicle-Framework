@@ -27,9 +27,9 @@ namespace Vehicles
 		{
 			get
 			{
-				if (cachedRGBGraphic is null)
+				if (cachedRGBGraphic == null && !shaderType.Shader.SupportsRGBMaskTex())
 				{
-					Init();
+					cachedRGBGraphic = base.Graphic as Graphic_RGB; //Invoke vanilla Init method
 				}
 				return cachedRGBGraphic;
 			}
@@ -67,14 +67,15 @@ namespace Vehicles
 			}
 		}
 
-		public override void Init()
+		public override void Init(IMaterialCacheTarget target)
 		{
-			base.Init();
+			base.Init(target);
 			if (graphicClass is null)
 			{
 				cachedRGBGraphic = null;
 				return;
 			}
+			pattern ??= PatternDefOf.Default; //Ensure 1 last check that pattern isn't null
 			ShaderTypeDef shaderTypeDef = pattern is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin : shaderType;
 			if (shaderTypeDef == null)
 			{
@@ -88,8 +89,8 @@ namespace Vehicles
 				shaderTypeDef = shaderTypeDef.Shader.SupportsRGBMaskTex() ? ShaderTypeDefOf.CutoutComplex : ShaderTypeDefOf.Cutout;
 			}
 			Shader shader = shaderTypeDef.Shader;
-			cachedRGBGraphic = GraphicDatabaseRGB.Get(graphicClass, texPath, shader, drawSize, color, colorTwo, colorThree, tiles, displacement.x, displacement.y, this, shaderParameters);
-			//AccessTools.Field(typeof(GraphicData), "cachedGraphic").SetValue(this, cachedRGBGraphic);
+			cachedRGBGraphic = GraphicDatabaseRGB.Get(target, graphicClass, texPath, shader, drawSize, color, colorTwo, colorThree, tiles, displacement.x, displacement.y, this, shaderParameters);
+			AccessTools.Field(typeof(GraphicData), "cachedGraphic").SetValue(this, cachedRGBGraphic);
 		}
 
 		public override string ToString()

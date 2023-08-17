@@ -15,7 +15,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public partial class VehiclePawn : Pawn, IInspectable, IAnimationTarget, IEventManager<VehicleEventDef>
+	public partial class VehiclePawn : Pawn, IInspectable, IAnimationTarget, IEventManager<VehicleEventDef>, IMaterialCacheTarget
 	{
 		public Dictionary<VehicleEventDef, EventTrigger> EventRegistry { get; set; }
 
@@ -156,6 +156,7 @@ namespace Vehicles
 			{
 				vPather.ResetToCurrentPosition();
 			}
+
 			if (Faction != Faction.OfPlayer)
 			{
 				ignition.Drafted = true;
@@ -180,7 +181,6 @@ namespace Vehicles
 				}
 			}
 
-			ResetGraphicCache();
 			Drawer.Notify_Spawned();
 			InitializeHitbox();
 			Map.GetCachedMapComponent<VehiclePositionManager>().ClaimPosition(this);

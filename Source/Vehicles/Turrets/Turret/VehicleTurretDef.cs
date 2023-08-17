@@ -108,6 +108,17 @@ namespace Vehicles
 			{
 				yield return $"Must include either <field>ammunition</field> or a default <field>projectile</field>.".ConvertRichText();
 			}
+			if (ammunition is null)
+			{
+				if (genericAmmo)
+				{
+					yield return $"Turret has no <field>ammunition</field> field, but has been flagged as using <field>genericAmmo</field>. This makes no sense.";
+				}
+				if (chargePerAmmoCount != 1)
+				{
+					yield return $"Turret has no <field>ammunition</field> field, but has been assigned <field>chargePerAmmoCount</field>. This makes no sense.";
+				}
+			}
 			if (chargePerAmmoCount <= 0)
 			{
 				yield return $"<field>ammoCountPerCharge</field> must be greater than 1.".ConvertRichText();

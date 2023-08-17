@@ -108,7 +108,7 @@ namespace Vehicles
 				{
 					return Material;
 				}
-				vehicleMat ??= new Material(vehicle.VehicleGraphic.MatAt(FullRotation, vehicle.Pattern))
+				vehicleMat ??= new Material(vehicle.VehicleGraphic.MatAtFull(FullRotation))
 				{
 					shader = ShaderDatabase.WorldOverlayTransparentLit,
 					renderQueue = WorldMaterials.WorldObjectRenderQueue
@@ -125,7 +125,7 @@ namespace Vehicles
 				{
 					return Material;
 				}
-				vehicleMatNonLit ??= new Material(vehicle.VehicleGraphic.MatAt(FullRotation, vehicle.Pattern))
+				vehicleMatNonLit ??= new Material(vehicle.VehicleGraphic.MatAtFull(FullRotation))
 				{
 					shader = ShaderDatabase.WorldOverlayTransparent,
 					renderQueue = WorldMaterials.WorldObjectRenderQueue

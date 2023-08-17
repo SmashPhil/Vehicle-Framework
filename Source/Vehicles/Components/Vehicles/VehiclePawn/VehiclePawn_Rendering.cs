@@ -111,6 +111,11 @@ namespace Vehicles
 			{
 				if (graphicInt is null)
 				{
+					if (Destroyed)
+					{
+						Log.Error($"Reinitializing RGB Materials but {this} has already been destroyed.  This may result in a memory leak.");
+					}
+
 					var graphicData = new GraphicDataRGB();
 					if (retexture != null)
 					{
@@ -126,11 +131,28 @@ namespace Vehicles
 					graphicData.tiles = patternData.tiles;
 					graphicData.displacement = patternData.displacement;
 					graphicData.pattern = patternData.patternDef;
-					graphicInt = graphicData.Graphic as Graphic_Vehicle;
+
+					if (graphicData.shaderType.Shader.SupportsRGBMaskTex())
+					{
+						RGBMaterialPool.CacheMaterialsFor(this);
+						graphicData.Init(this);
+						graphicInt = graphicData.Graphic as Graphic_Vehicle;
+						RGBMaterialPool.SetProperties(this, patternData, graphicInt.TexAt, graphicInt.MaskAt);
+					}
+					else
+					{
+						graphicInt = ((GraphicData)graphicData).Graphic as Graphic_Vehicle; //Triggers vanilla Init call for normal material caching
+					}
 				}
 				return graphicInt;
 			}
 		}
+
+		public int MaterialCount => 8;
+
+		public PatternDef PatternDef => Pattern;
+
+		string IMaterialCacheTarget.Name => $"{VehicleDef}_{this}";
 
 		public override Color DrawColor
 		{
@@ -362,7 +384,7 @@ namespace Vehicles
 		{
 			if (UnityData.IsInMainThread)
 			{
-				ResetMaskCache();
+				RGBMaterialPool.SetProperties(this, patternData);
 				var cannonComp = CompVehicleTurrets;
 				if (cannonComp != null)
 				{
@@ -372,12 +394,6 @@ namespace Vehicles
 					}
 				}
 			}
-		}
-
-		private void ResetMaskCache()
-		{
-			graphicInt = null;
-			VehicleDef.graphicData.Init();
 		}
 
 		public void UpdateRotationAndAngle()

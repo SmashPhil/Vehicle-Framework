@@ -100,7 +100,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				SmashLog.Error($"Exception thrown while trying to draw <type>VehicleDef</type>=\"{vehicleDef?.defName ?? "Null"}\" during step {drawStep}.\nException={ex.Message}");
+				SmashLog.Error($"Exception thrown while trying to draw GUI <type>VehicleDef</type>=\"{vehicleDef?.defName ?? "Null"}\" during step {drawStep}.\nException={ex.Message}");
 			}
 			finally
 			{

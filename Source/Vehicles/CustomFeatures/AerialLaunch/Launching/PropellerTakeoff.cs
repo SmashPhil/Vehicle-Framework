@@ -130,15 +130,15 @@ namespace Vehicles
 			{
 				if (!LandingProperties_Propeller.shadowSizeXPropellerCurve.NullOrEmpty())
 				{
-					shadowData.width = LandingProperties_Propeller.shadowSizeXPropellerCurve.Evaluate(TimeInAnimation);
+					shadowData.width = LandingProperties_Propeller.shadowSizeXPropellerCurve.Evaluate(TimeInAnimationPropeller);
 				}
 				if (!LandingProperties_Propeller.shadowSizeZPropellerCurve.NullOrEmpty())
 				{
-					shadowData.height = LandingProperties_Propeller.shadowSizeZPropellerCurve.Evaluate(TimeInAnimation);
+					shadowData.height = LandingProperties_Propeller.shadowSizeZPropellerCurve.Evaluate(TimeInAnimationPropeller);
 				}
 				if (!LandingProperties_Propeller.shadowAlphaPropellerCurve.NullOrEmpty())
 				{
-					shadowData.alpha = LandingProperties_Propeller.shadowAlphaPropellerCurve.Evaluate(TimeInAnimation);
+					shadowData.alpha = LandingProperties_Propeller.shadowAlphaPropellerCurve.Evaluate(TimeInAnimationPropeller);
 				}
 			}
 
@@ -169,15 +169,15 @@ namespace Vehicles
 			{
 				if (!LaunchProperties_Propeller.shadowSizeXPropellerCurve.NullOrEmpty())
 				{
-					shadowData.width = LaunchProperties_Propeller.shadowSizeXPropellerCurve.Evaluate(TimeInAnimation);
+					shadowData.width = LaunchProperties_Propeller.shadowSizeXPropellerCurve.Evaluate(TimeInAnimationPropeller);
 				}
 				if (!LaunchProperties_Propeller.shadowSizeZPropellerCurve.NullOrEmpty())
 				{
-					shadowData.height = LaunchProperties_Propeller.shadowSizeZPropellerCurve.Evaluate(TimeInAnimation);
+					shadowData.height = LaunchProperties_Propeller.shadowSizeZPropellerCurve.Evaluate(TimeInAnimationPropeller);
 				}
 				if (!LaunchProperties_Propeller.shadowAlphaPropellerCurve.NullOrEmpty())
 				{
-					shadowData.alpha = LaunchProperties_Propeller.shadowAlphaPropellerCurve.Evaluate(TimeInAnimation);
+					shadowData.alpha = LaunchProperties_Propeller.shadowAlphaPropellerCurve.Evaluate(TimeInAnimationPropeller);
 				}
 			}
 

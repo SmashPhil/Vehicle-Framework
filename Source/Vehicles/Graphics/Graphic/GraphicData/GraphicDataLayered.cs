@@ -29,7 +29,7 @@ namespace Vehicles
 			layer = graphicData.layer;
 		}
 
-		public virtual void Init()
+		public virtual void Init(IMaterialCacheTarget target)
 		{
 			OriginalDrawOffset ??= drawOffset;
 			OriginalDrawOffsetNorth ??= drawOffsetNorth;

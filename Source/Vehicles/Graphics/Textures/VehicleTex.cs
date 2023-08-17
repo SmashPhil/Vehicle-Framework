@@ -172,8 +172,8 @@ namespace Vehicles
 					if (vehicleDef.graphicData is GraphicDataRGB graphicDataRGB)
 					{
 						Texture2D tex;
-						var graphicData = new GraphicDataRGB();
-						graphicData.CopyFrom(graphicDataRGB);
+						var graphicData = vehicleDef.graphicData;// new GraphicDataRGB();
+						//graphicData.CopyFrom(graphicDataRGB);
 						Graphic_Vehicle graphic = graphicData.Graphic as Graphic_Vehicle;
 						tasks.AppendLine("Setting TextureCache...");
 						SetTextureCache(vehicleDef, graphicData);

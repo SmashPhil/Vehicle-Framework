@@ -217,7 +217,6 @@ namespace Vehicles
 
 		protected void DrawShadow(Vector3 drawPos, float width, float height, Color color)
 		{
-			Log.Message($"Drawing shadow at {drawPos} Position={position}:{position.IsValid} Vehicle={vehicle.Spawned} Position={vehicle.Position}");
 			Material shadowMaterial = ShadowMaterial;
 			if (shadowMaterial is null)
 			{
