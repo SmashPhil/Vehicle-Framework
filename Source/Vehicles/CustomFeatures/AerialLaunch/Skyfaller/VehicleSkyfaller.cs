@@ -82,6 +82,7 @@ namespace Vehicles
 		{
 			vehicle.CompVehicleLauncher.launchProtocol.Tick();
 			vehicle.Tick();
+			vehicle.TickHandlers(); ///Manually tick handlers since vehicle is despawned but pawns aren't world pawns (so they aren't ticking from <see cref="WorldPawns"/>)
 		}
 
 		protected virtual void LeaveMap()
@@ -135,6 +136,13 @@ namespace Vehicles
 			if (vehicle.IsWorldPawn())
 			{
 				Find.WorldPawns.RemovePawn(vehicle);
+				foreach (Pawn pawn in vehicle.AllPawnsAboard)
+				{
+					if (pawn.IsWorldPawn())
+					{
+						Find.WorldPawns.RemovePawn(pawn);
+					}
+				}
 			}
 			vehicle.SetSustainerTarget(this);
 			vehicle.ResetRenderStatus(); //Reset required for recaching handler lists. Loading save file will not recache these since vehicle will be despawned initially

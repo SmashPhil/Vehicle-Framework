@@ -123,7 +123,6 @@ namespace Vehicles
 				vehicleAI?.AITick();
 			}
 
-			TickHandlers();
 			if (AllPawnsAboard.Count > 0)
 			{
 				TrySatisfyPawnNeeds();
@@ -180,6 +179,7 @@ namespace Vehicles
 					{
 						jobs.JobTrackerTick();
 					}
+					TickHandlers();
 				}
 				//equipment?.EquipmentTrackerTick();
 

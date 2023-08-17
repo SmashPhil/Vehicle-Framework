@@ -41,6 +41,8 @@ On top of this, I changed the way the pattern system caches materials so it shou
 - Fixed bug where aerial vehicles would sometimes get cleaned up by WorldPawnsGC, deleting the inventory.
 
 - Fixed bug where aerial vehicles were unable to buy / sell pawns on the world map.
+
+- Fixed bug where pawns in VehicleCaravans would double tick, causing needs to decrease rapidly.
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - DedicatedThreads now pool for non-settlement maps
 

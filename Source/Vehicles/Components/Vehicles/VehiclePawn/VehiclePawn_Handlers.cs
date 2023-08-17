@@ -409,7 +409,7 @@ namespace Vehicles
 			}
 		}
 
-		private void TickHandlers()
+		internal void TickHandlers()
 		{
 			//Only need to tick VehicleHandlers with pawns inside them
 			for (int i = 0; i < OccupiedHandlers.Count; i++)

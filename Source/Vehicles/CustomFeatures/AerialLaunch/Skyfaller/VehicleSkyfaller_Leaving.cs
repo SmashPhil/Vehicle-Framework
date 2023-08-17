@@ -64,6 +64,13 @@ namespace Vehicles
 			if (createWorldObject)
 			{
 				Find.WorldPawns.PassToWorld(vehicle);
+				foreach (Pawn pawn in vehicle.AllPawnsAboard)
+				{
+					if (!pawn.IsWorldPawn())
+					{
+						Find.WorldPawns.PassToWorld(pawn);
+					}
+				}
 				AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(vehicle, Map.Tile);
 				aerialVehicle.OrderFlyToTiles(new List<FlightNode>(flightPath), WorldHelper.GetTilePos(Map.Tile), arrivalAction);
 				if (orderRecon)
