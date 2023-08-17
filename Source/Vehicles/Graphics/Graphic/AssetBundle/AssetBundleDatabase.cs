@@ -17,10 +17,9 @@ namespace Vehicles
 	/// <remarks>
 	/// Q: Why don't you just use RimWorld's content loader to load the asset bundle? It's supported right? <br/>
 	/// A: Yes, but it does not support versioning.. meaning if a later version of Unity is used in a future update that requires a rebuild of all asset bundles,
-	/// I may not be able to support that previous version. AssetBundles on older versions of Unity might not load properly and vice verse. When Ludeon decides to
-	/// support versioning for AssetBundles, I can move to using that instead.
+	/// I may not be able to support that previous version. AssetBundles on older versions of Unity might not load properly and vice verse. Vanilla also doesn't support
+	/// AssetBundles loading on other platforms, which requires different builds.
 	/// </remarks>
-	[LoadedEarly]
 	[StaticConstructorOnStartup]
 	public static class AssetBundleDatabase
 	{
@@ -197,8 +196,12 @@ namespace Vehicles
 		/// <paramref name="shader"/> supports AssetBundle shaders implementing RGB or RGB Pattern masks
 		/// </summary>
 		/// <param name="shader"></param>
-		public static bool SupportsRGBMaskTex(this Shader shader)
+		public static bool SupportsRGBMaskTex(this Shader shader, bool ignoreSettings = false)
 		{
+			if (!VehicleMod.settings.main.useCustomShaders && !ignoreSettings)
+			{
+				return false;
+			}
 			return shader == CutoutComplexPattern || shader == CutoutComplexSkin || shader == CutoutComplexRGB;
 		}
 	}
