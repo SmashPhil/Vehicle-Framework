@@ -12,6 +12,7 @@ using Verse.Sound;
 using Verse.AI;
 using Verse.AI.Group;
 using SmashTools;
+using Mono.Security;
 
 namespace Vehicles
 {
@@ -770,7 +771,12 @@ namespace Vehicles
 			{
 				yield break;
 			}
-			foreach (ThingComp thingComp in AllComps)
+            if (!IdeoAllowsBoarding(selPawn))
+            {
+                yield return new FloatMenuOption("VF_CantEnterVehicle_IdeoligionForbids".Translate(), null);
+				yield break;
+            }
+            foreach (ThingComp thingComp in AllComps)
 			{
 				if (thingComp is VehicleComp vehicleComp)
 				{
@@ -801,6 +807,45 @@ namespace Vehicles
 				}
 			}
 		}
+
+		public bool IdeoAllowsBoarding(Pawn selPawn)
+		{
+			if (!ModsConfig.IdeologyActive)
+			{ 
+				return true; 
+			}
+
+            switch (this.VehicleDef.vehicleType)
+			{
+				case VehicleType.Air:
+					if(!IdeoUtility.DoerWillingToDo(HistoryEventDefOf_Vehicles.VF_BoardAirVehicle, selPawn))
+					{
+						return false;
+					}
+					break;
+                case VehicleType.Sea:
+                    if (!IdeoUtility.DoerWillingToDo(HistoryEventDefOf_Vehicles.VF_BoardSeaVehicle, selPawn))
+                    {
+                        return false;
+                    }
+                    break;
+                case VehicleType.Land:
+                    if (!IdeoUtility.DoerWillingToDo(HistoryEventDefOf_Vehicles.VF_BoardLandVehicle, selPawn))
+                    {
+                        return false;
+                    }
+                    break;
+                case VehicleType.Universal:
+                    if (!IdeoUtility.DoerWillingToDo(HistoryEventDefOf_Vehicles.VF_BoardUniversalVehicle, selPawn))
+                    {
+                        return false;
+                    }
+                    break;
+
+            }
+			return true;
+		}
+
 
 		public void ChangeColor()
 		{
