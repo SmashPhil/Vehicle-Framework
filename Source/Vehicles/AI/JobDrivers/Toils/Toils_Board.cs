@@ -52,22 +52,27 @@ namespace Vehicles
 
 		public static void ThrowAppropriateHistoryEvent(VehicleType type,Pawn pawn)
 		{
-            switch (type)
-            {
-                case VehicleType.Air:
-                    Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf_Vehicles.VF_BoardedAirVehicle,pawn.Named(HistoryEventArgsNames.Doer)));
-                    break;
-                case VehicleType.Sea:
-                    Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf_Vehicles.VF_BoardedSeaVehicle, pawn.Named(HistoryEventArgsNames.Doer)));
-                    break;
-                case VehicleType.Land:
-                    Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf_Vehicles.VF_BoardedLandVehicle, pawn.Named(HistoryEventArgsNames.Doer)));
-                    break;
-                case VehicleType.Universal:
-                    Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf_Vehicles.VF_BoardedUniversalVehicle, pawn.Named(HistoryEventArgsNames.Doer)));
-                    break;
 
+            if (ModsConfig.IdeologyActive)
+            {
+                switch (type)
+                {
+                    case VehicleType.Air:
+                        Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf_Vehicles.VF_BoardedAirVehicle, pawn.Named(HistoryEventArgsNames.Doer)));
+                        break;
+                    case VehicleType.Sea:
+                        Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf_Vehicles.VF_BoardedSeaVehicle, pawn.Named(HistoryEventArgsNames.Doer)));
+                        break;
+                    case VehicleType.Land:
+                        Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf_Vehicles.VF_BoardedLandVehicle, pawn.Named(HistoryEventArgsNames.Doer)));
+                        break;
+                    case VehicleType.Universal:
+                        Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf_Vehicles.VF_BoardedUniversalVehicle, pawn.Named(HistoryEventArgsNames.Doer)));
+                        break;
+
+                }
             }
+            
         }
 	}
 }
