@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using RimWorld;
 using UnityEngine;
@@ -13,6 +14,7 @@ namespace Vehicles
 		protected const float TurretGizmoPadding = 5;
 
 		protected const float GizmoHeight = 75;
+		protected const float ConfigureButtonSize = 20;
 		protected const float SubIconSize = GizmoHeight / 2.25f;
 
 		protected const float CooldownBarWidth = 32;
@@ -67,7 +69,7 @@ namespace Vehicles
 				Rect topBarRect = new Rect(cooldownRect.x + cooldownWidth, gizmoRect.y, barWidth, topIconSize);
 				VehicleTurret.SubGizmo subGizmo = DrawTopBar(topBarRect, ref mouseOver);
 				Rect bottomBarRect = new Rect(topBarRect.x, topBarRect.y + topIconSize, topBarRect.width, topIconSize);
-				DrawBottomBar(bottomBarRect);
+				DrawBottomBar(bottomBarRect, ref mouseOver);
 
 				GUIState.Reset();
 
@@ -328,7 +330,7 @@ namespace Vehicles
 			return clickedGizmo;
 		}
 
-		protected virtual void DrawBottomBar(Rect rect)
+		protected virtual void DrawBottomBar(Rect rect, ref bool mouseOver)
 		{
 			Widgets.FillableBar(rect, (float)turret.shellCount / turret.turretDef.magazineCapacity, VehicleTex.FullBarTex, VehicleTex.EmptyBarTex, true);
 
@@ -345,6 +347,29 @@ namespace Vehicles
 				Widgets.Label(rect, ammoCountLabel);
 			}
 			GUIState.Pop();
+
+			if (turret.turretDef.ammunition != null)
+			{
+				Rect configureRect = new Rect(rect.xMax - ConfigureButtonSize, rect.yMax - ConfigureButtonSize, ConfigureButtonSize, ConfigureButtonSize);
+				TooltipHandler.TipRegionByKey(configureRect, "VF_SetReloadLevelTooltip");
+				if (Mouse.IsOver(configureRect))
+				{
+					mouseOver = true;
+				}
+				if (Widgets.ButtonImageFitted(configureRect, VehicleTex.Settings))
+				{
+					string textGetter(int x) => "VF_SetReloadLevel".Translate(x);
+
+					int min = 0;
+					ThingDef ammoDef = turret.loadedAmmo ?? turret.turretDef.ammunition.AllowedThingDefs.FirstOrDefault();
+					int max = Mathf.RoundToInt(vehicle.VehicleDef.GetStatValueAbstract(VehicleStatDefOf.CargoCapacity) / ammoDef.GetStatValueAbstract(StatDefOf.Mass));
+					Dialog_Slider dialog_Slider = new Dialog_Slider(textGetter, min, max, delegate (int value)
+					{
+						vehicle.CompVehicleTurrets.SetQuotaLevel(turret, value);
+					}, vehicle.CompVehicleTurrets.GetQuotaLevel(turret), 5);
+					Find.WindowStack.Add(dialog_Slider);
+				}
+			}
 		}
 	}
 }

@@ -11,6 +11,7 @@ namespace Vehicles
 	public static class ReservationType
 	{
 		public const string LoadVehicle = "LoadVehicle";
+		public const string LoadTurret = "LoadVehicleForTurret";
 		public const string Refuel = "Refuel";
 		public const string Repair = "Repair";
 		public const string Upgrade = "Upgrade";

@@ -43,6 +43,8 @@ On top of this, I changed the way the pattern system caches materials so it shou
 - Fixed bug where aerial vehicles were unable to buy / sell pawns on the world map.
 
 - Fixed bug where pawns in VehicleCaravans would double tick, causing needs to decrease rapidly.
+
+- Fixed bug where DedicatedThread wouldn't be created in some cases when loading a save, leading to performance problems.
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - DedicatedThreads now pool for non-settlement maps
 
@@ -55,6 +57,8 @@ On top of this, I changed the way the pattern system caches materials so it shou
 - Reworked Material Generation for vehicles using the pattern system, significantly decreasing materials cached (and thus memory usage overall).
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Added 'Flee' directive when pawns are in the path of a vehicle.
+
+- Added auto-reloading configuration for vehicle turrets
 
 - Vehicle health tab now lists armor categories separately rather than averaged.
 

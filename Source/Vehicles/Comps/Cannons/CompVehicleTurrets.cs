@@ -15,10 +15,15 @@ namespace Vehicles
 		/// PARAMS => (# Shots Fired, VehicleTurret, tickCount}
 		private List<TurretData> turretQueue = new List<TurretData>();
 
+		private Dictionary<VehicleTurret, int> turretQuotas = new Dictionary<VehicleTurret, int>();
+
 		[TweakField]
 		public List<VehicleTurret> turrets = new List<VehicleTurret>();
 
 		private List<VehicleTurret> tickers = new List<VehicleTurret>();
+
+		private static List<VehicleTurret> tmpListTurrets = new List<VehicleTurret>();
+		private static List<int> tmpListTurretQuota = new List<int>();
 
 		public CompProperties_VehicleTurrets Props => (CompProperties_VehicleTurrets)props;
 
@@ -50,6 +55,57 @@ namespace Vehicles
 			}
 		}
 
+		public void SetQuotaLevel(VehicleTurret turret, int level)
+		{
+			turretQuotas[turret] = level;
+			if (turretQuotas[turret] <= 0)
+			{
+				Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Vehicle, ReservationType.LoadTurret);
+			}
+			else
+			{
+				Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RegisterLister(Vehicle, ReservationType.LoadTurret);
+			}
+		}
+
+		public int GetQuotaLevel(VehicleTurret turret)
+		{
+			if (!turretQuotas.TryGetValue(turret, out int count))
+			{
+				count = Mathf.CeilToInt(turret.turretDef.autoRefuelProportion * turret.turretDef.magazineCapacity * turret.turretDef.chargePerAmmoCount);
+			}
+			return count;
+		}
+
+		public bool GetTurretToFill(out VehicleTurret turretToFill, out int quota)
+		{
+			turretToFill = null;
+			quota = 0;
+			if (!turrets.NullOrEmpty())
+			{
+				int massAvailable = Mathf.RoundToInt(Vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity) - MassUtility.InventoryMass(Vehicle));
+				foreach (VehicleTurret turret in turrets)
+				{
+					ThingDef reloadDef = turret.loadedAmmo;
+					reloadDef ??= turret.turretDef.ammunition?.AllowedThingDefs.FirstOrDefault();
+					if (reloadDef != null)
+					{
+						int desiredCount = GetQuotaLevel(turret);
+						int maxCount = Mathf.RoundToInt(massAvailable / Mathf.Max(reloadDef.GetStatValueAbstract(StatDefOf.Mass), 0.1f));
+						int existingCount = Vehicle.inventory.Count(reloadDef);
+						int availableCount = desiredCount - existingCount;
+						if (availableCount > 0)
+						{
+							turretToFill = turret;
+							quota = Mathf.Min(maxCount, availableCount);
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
+
 		public void AddTurrets(List<VehicleTurret> cannonList)
 		{
 			if (cannonList.NullOrEmpty())
@@ -78,8 +134,7 @@ namespace Vehicles
 				{
 					Log.Error($"Unable to locate {turret.key} in cannonList for removal. Is Key missing on upgraded cannon?");
 				}
-				matchingTurret.OnDestroy();
-				this.turrets.Remove(matchingTurret);
+				RemoveTurret(matchingTurret);
 			}
 		}
 
@@ -90,7 +145,10 @@ namespace Vehicles
 
 		public override void OnDestroy()
 		{
-			RemoveTurrets(turrets); //Trigger self removal of entire turret list for cleanup
+			foreach (VehicleTurret turret in turrets) //Cleanup entire turret list
+			{
+				turret.OnDestroy();
+			}
 		}
 
 		public override void PostLoad()
@@ -516,6 +574,14 @@ namespace Vehicles
 			base.PostSpawnSetup(respawningAfterLoad);
 			RevalidateTurrets();
 			RecacheTurretPermissions();
+
+			if (!respawningAfterLoad)
+			{
+				foreach (VehicleTurret turret in turrets)
+				{
+					SetQuotaLevel(turret, GetQuotaLevel(turret)); //Stores default quota level
+				}
+			}
 		}
 
 		public override void PostExposeData()
@@ -523,6 +589,7 @@ namespace Vehicles
 			base.PostExposeData();
 			Scribe_Collections.Look(ref turrets, nameof(turrets), LookMode.Deep, ctorArgs: Vehicle);
 			Scribe_Collections.Look(ref turretQueue, nameof(turretQueue), LookMode.Reference);
+			Scribe_Collections.Look(ref turretQuotas, nameof(turretQuotas), LookMode.Reference, LookMode.Value, ref tmpListTurrets, ref tmpListTurretQuota);
 		}
 
 		public struct TurretData : IExposable
@@ -540,9 +607,9 @@ namespace Vehicles
 
 			public void ExposeData()
 			{
-				Scribe_Values.Look(ref shots, "shots");
-				Scribe_Values.Look(ref ticksTillShot, "ticksTillShot");
-				Scribe_References.Look(ref turret, "turret");
+				Scribe_Values.Look(ref shots, nameof(shots));
+				Scribe_Values.Look(ref ticksTillShot, nameof(ticksTillShot));
+				Scribe_References.Look(ref turret, nameof(turret));
 			}
 		}
 	}
