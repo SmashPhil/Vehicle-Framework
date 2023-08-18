@@ -1019,7 +1019,7 @@ namespace Vehicles
 			ThingDef projectile = turretDef.projectile;
 			if (turretDef.ammunition != null && !turretDef.genericAmmo)
 			{
-				projectile = loadedAmmo?.projectileWhenLoaded ?? loadedAmmo; //nc to loaded ammo for CE handling
+				projectile = loadedAmmo?.projectileWhenLoaded ?? projectile; //nc to loaded ammo for CE handling
 			}
 			try
 			{
