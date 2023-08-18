@@ -27,7 +27,11 @@ namespace Vehicles
 		internal VehicleComponent HighlightedComponent { get; set; }
 
 		public VehiclePermissions MovementPermissions => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), nameof(VehicleDef.vehicleMovementPermissions), VehicleDef.vehicleMovementPermissions);
+		
+		public float WorldSpeedMultiplier => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.worldSpeedMultiplier), VehicleDef.properties.worldSpeedMultiplier);
+		
 		public bool CanMove => GetStatValue(VehicleStatDefOf.MoveSpeed) > 0.1f && MovementPermissions > VehiclePermissions.NotAllowed && movementStatus == VehicleMovementStatus.Online;
+		
 		public bool CanMoveFinal => CanMove && (CanMoveWithOperators || VehicleMod.settings.debug.debugDraftAnyVehicle);
 
 		public CellRect Hitbox { get; private set; }
