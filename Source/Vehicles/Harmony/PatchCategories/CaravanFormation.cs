@@ -131,7 +131,7 @@ namespace Vehicles
 					yield return new CodeInstruction(opcode: OpCodes.Brfalse, jobLabel);
 
 					yield return new CodeInstruction(opcode: OpCodes.Pop);
-					yield return new CodeInstruction(opcode: OpCodes.Ldsfld, AccessTools.Field(typeof(JobDefOf_Vehicles), nameof(JobDefOf_Vehicles.CarryItemToVehicle)));
+					yield return new CodeInstruction(opcode: OpCodes.Ldsfld, AccessTools.Field(typeof(JobDefOf_Vehicles), nameof(JobDefOf_Vehicles.LoadVehicle)));
 					int j = i;
 					while(j < instructionList.Count)
 					{

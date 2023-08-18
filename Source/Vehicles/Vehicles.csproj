@@ -365,8 +365,10 @@
   <ItemGroup>
     <Compile Include="Achievements\VehicleBuilderTracker.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_DisassembleVehicle.cs" />
+    <Compile Include="AI\JobDrivers\JobDriver_GiveItemToVehicle.cs" />
     <Compile Include="AI\Lords\LordToil_PrepareCaravan_GatherAnimalsForVehicles.cs" />
     <Compile Include="AI\WorkGiver\VehicleWorkGiver.cs" />
+    <Compile Include="AI\WorkGiver\WorkGiver_RefuelVehicleTurret.cs" />
     <Compile Include="BackCompatibility\BackCompatibilityConverter_Universal.cs" />
     <Compile Include="Components\Rendering\Tracks\VehicleTrack_Wake.cs" />
     <Compile Include="Components\Rendering\Tracks\VehicleTrack.cs" />
@@ -761,7 +763,7 @@
     <Compile Include="Misc\DefOf\JobDefOf_Vehicles.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_Board.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_CarryPawnToVehicle.cs" />
-    <Compile Include="AI\JobDrivers\JobDriver_GiveToVehicle.cs" />
+    <Compile Include="AI\JobDrivers\JobDriver_LoadVehicle.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_GiveToUpgradeContainer.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_IdleVehicle.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_PrepareVehicleCaravan_GatheringItems.cs" />

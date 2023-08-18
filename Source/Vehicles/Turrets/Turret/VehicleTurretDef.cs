@@ -60,6 +60,8 @@ namespace Vehicles
 		public float reloadTimer = 5;
 		public float warmUpTimer = 3;
 
+		public float autoRefuelProportion = 2;
+
 		/// <summary>
 		/// Sounds
 		/// </summary>

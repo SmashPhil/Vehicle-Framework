@@ -9,6 +9,10 @@ namespace Vehicles
 {
 	public partial class VehiclePawn
 	{
+		public float PawnCollisionMultiplier => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.pawnCollisionMultiplier), VehicleDef.properties.pawnCollisionMultiplier);
+		
+		public float PawnCollisionRecoilMultiplier => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.pawnCollisionRecoilMultiplier), VehicleDef.properties.pawnCollisionRecoilMultiplier);
+		
 		public virtual bool CanApplyStun(Thing instigator)
 		{
 			return false;
@@ -43,11 +47,9 @@ namespace Vehicles
 			float mass = vehicle.GetStatValue(VehicleStatDefOf.Mass);
 			float bodySize = pawn.RaceProps.baseBodySize;
 			float ke = 0.5f * mass * (velocity * velocity); //   (1/2)mv^2
-			float pawnCollisionMultiplier = SettingsCache.TryGetValue(vehicle.VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.pawnCollisionMultiplier), vehicle.VehicleDef.properties.pawnCollisionMultiplier);
-			float pawnDamage = pawnCollisionMultiplier * ke / 100 * bodySize; //   0.7k / 100b
+			float pawnDamage = vehicle.PawnCollisionMultiplier * ke / 100 * bodySize; //   0.7k / 100b
 			float baseBluntArmor = vehicle.GetStatValue(StatDefOf.ArmorRating_Blunt);
-			float pawnCollisionRecoilMultiplier = SettingsCache.TryGetValue(vehicle.VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.pawnCollisionRecoilMultiplier), vehicle.VehicleDef.properties.pawnCollisionRecoilMultiplier);
-			float vehicleDamage = pawnCollisionRecoilMultiplier * (2- baseBluntArmor) * ke * bodySize / 200; //   p(2-a)kb / 200
+			float vehicleDamage = vehicle.PawnCollisionRecoilMultiplier * (2- baseBluntArmor) * ke * bodySize / 200; //   p(2-a)kb / 200
 			return (pawnDamage, vehicleDamage);
 		}
 	}

@@ -85,14 +85,14 @@ namespace Vehicles
 
 		internal static DedicatedThread GetDedicatedThread(Map map)
 		{
-			if (!VehicleMod.settings.debug.debugUseMultithreading) //Sometimes DevMode test map generates an empty map
+			if (!VehicleMod.settings.debug.debugUseMultithreading)
 			{
 				Log.Warning($"Loading map without DedicatedThread. This will cause performance issues. Map={map}.");
 				return null;
 			}
 			if (map.info?.parent == null)
 			{
-				return null; //MapParent won't have referenced resolved when loading from save, GetDedicatedThread will be called a 2nd time in PostLoadInit
+				return null; //MapParent won't have reference resolved when loading from save, GetDedicatedThread will be called a 2nd time on PostLoadInit
 			}
 			DedicatedThread thread;
 			if (map.IsPlayerHome)

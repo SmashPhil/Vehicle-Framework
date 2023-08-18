@@ -27,6 +27,8 @@ namespace Vehicles
 
 		public static JobDef PaintVehicle;
 
+		public static JobDef LoadVehicle;
+
 		public static JobDef CarryItemToVehicle;
 
 		public static JobDef LoadUpgradeMaterials;
