@@ -46,7 +46,10 @@ namespace Vehicles
 
 				PatternDef pattern = patternData?.patternDef;
 				pattern ??= VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData)?.patternDef ?? PatternDefOf.Default;
-
+				if (!VehicleMod.settings.main.useCustomShaders)
+				{
+					pattern = PatternDefOf.Default;
+				}
 				drawStep = "Fetching PatternData";
 				Color color1 = patternData?.color ?? vehicleDef.graphicData.color;
 				Color color2 = patternData?.colorTwo ?? vehicleDef.graphicData.color;

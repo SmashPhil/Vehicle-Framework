@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using RimWorld;
 using SmashTools;
 using HarmonyLib;
 
@@ -84,6 +85,18 @@ namespace Vehicles
 			{
 				ammunition.ResolveReferences();
 			}
+		}
+
+		public override void PostLoad()
+		{
+			base.PostLoad();
+			LongEventHandler.ExecuteWhenFinished(delegate ()
+			{
+				if (!VehicleMod.settings.main.useCustomShaders && graphicData?.shaderType != null)
+				{
+					graphicData.shaderType = graphicData.shaderType.Shader.SupportsRGBMaskTex(ignoreSettings: true) ? ShaderTypeDefOf.CutoutComplex : graphicData.shaderType;
+				}
+			});
 		}
 
 		public override IEnumerable<string> ConfigErrors()

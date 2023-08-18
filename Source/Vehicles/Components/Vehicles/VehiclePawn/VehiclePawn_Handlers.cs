@@ -326,6 +326,7 @@ namespace Vehicles
 			if (!pawnToBoard.IsWorldPawn())
 			{
 				Log.Warning("Tried boarding Caravan with non-worldpawn");
+				return;
 			}
 
 			if (pawnToBoard.holdingOwner != null)
@@ -336,6 +337,7 @@ namespace Vehicles
 			{
 				handler.TryAdd(pawnToBoard);
 			}
+			EventRegistry[VehicleEventDefOf.PawnEntered].ExecuteEvents();
 		}
 
 		public void RemovePawn(Pawn pawn)

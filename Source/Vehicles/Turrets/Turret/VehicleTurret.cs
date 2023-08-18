@@ -164,6 +164,7 @@ namespace Vehicles
 		{
 			this.vehicle = vehicle;
 			vehicleDef = vehicle.VehicleDef;
+
 			uniqueID = Find.UniqueIDsManager.GetNextThingID();
 			turretDef = reference.turretDef;
 
@@ -1274,8 +1275,6 @@ namespace Vehicles
 				{
 					cannonGraphic = ((GraphicData)cachedGraphicData).Graphic as Graphic_Turret;
 				}
-				cachedGraphicData.Init(this);
-				RGBMaterialPool.SetProperties(this, patternData, cannonGraphic.TexAt, cannonGraphic.MaskAt);
 			}
 
 			if (cannonGraphic is null || forceRegen)

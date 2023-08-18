@@ -339,20 +339,16 @@ namespace Vehicles
 		/// <param name="map"></param>
 		public static void RecalculatePerceivedPathCostAt(IntVec3 cell, Map map)
 		{
-			TerrainDef terrainDef = map.terrainGrid.TerrainAt(cell);
-			if (terrainDef != null)
+			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+			if (!mapping.Owners.NullOrEmpty())
 			{
-				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-				if (!mapping.Owners.NullOrEmpty())
+				if (mapping.ThreadAvailable)
 				{
-					if (mapping.ThreadAvailable)
-					{
-						mapping.dedicatedThread.Queue(new AsyncAction(() => RecalculatePerceivedPathCostAtFor(mapping, cell), () => map != null && map.Index > -1));
-					}
-					else
-					{
-						RecalculatePerceivedPathCostAtFor(mapping, cell);
-					}
+					mapping.dedicatedThread.Queue(new AsyncAction(() => RecalculatePerceivedPathCostAtFor(mapping, cell), () => map != null && map.Index > -1));
+				}
+				else
+				{
+					RecalculatePerceivedPathCostAtFor(mapping, cell);
 				}
 			}
 		}

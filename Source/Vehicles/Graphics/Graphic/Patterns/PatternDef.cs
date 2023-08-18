@@ -173,10 +173,17 @@ namespace Vehicles
 
 		internal static void GenerateMaterials()
 		{
-			foreach (PatternDef patternDef in DefDatabase<PatternDef>.AllDefsListForReading)
+			if (VehicleMod.settings.main.useCustomShaders)
 			{
-				patternDef.RecacheTextures();
-				RGBMaterialPool.CacheMaterialsFor(patternDef);
+				foreach (PatternDef patternDef in DefDatabase<PatternDef>.AllDefsListForReading)
+				{
+					patternDef.RecacheTextures();
+					RGBMaterialPool.CacheMaterialsFor(patternDef);
+				}
+			}
+			else
+			{
+				PatternDefOf.Default.RecacheTextures();
 			}
 		}
 	}

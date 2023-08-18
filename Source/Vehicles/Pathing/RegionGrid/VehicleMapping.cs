@@ -85,25 +85,30 @@ namespace Vehicles
 
 		internal static DedicatedThread GetDedicatedThread(Map map)
 		{
-			if (!VehicleMod.settings.debug.debugUseMultithreading || map?.info?.parent?.def == null) //Sometimes DevMode test map generates an empty map
+			if (!VehicleMod.settings.debug.debugUseMultithreading) //Sometimes DevMode test map generates an empty map
 			{
+				Log.Warning($"Loading map without DedicatedThread. This will cause performance issues. Map={map}.");
 				return null;
+			}
+			if (map.info?.parent == null)
+			{
+				return null; //MapParent won't have referenced resolved when loading from save, GetDedicatedThread will be called a 2nd time in PostLoadInit
 			}
 			DedicatedThread thread;
 			if (map.IsPlayerHome)
 			{
 				thread = ThreadManager.CreateNew();
-				Debug.Message($"<color=orange>Creating thread (id={thread?.id})</color>");
+				Debug.Message($"<color=orange>{VehicleHarmony.LogLabel} Creating thread (id={thread?.id})</color>");
 				return thread;
 			}
 			if (map.IsTempIncidentMap)
 			{
 				thread = ThreadManager.GetShared(TempIncidentMapId);
-				Debug.Message($"<color=orange>Fetching thread from pool (id={thread?.id})</color>");
+				Debug.Message($"<color=orange>{VehicleHarmony.LogLabel} Fetching thread from pool (id={thread?.id})</color>");
 				return thread;
 			}
 			thread = ThreadManager.GetShared(EventMapId);
-			Debug.Message($"<color=orange>Fetching thread from pool (id={thread?.id})</color>");
+			Debug.Message($"<color=orange>{VehicleHarmony.LogLabel} Fetching thread from pool (id={thread?.id})</color>");
 			return thread;
 		}
 
@@ -151,6 +156,18 @@ namespace Vehicles
 			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading) //Even shuttles need path data for landing
 			{
 				GeneratePathData(vehicleDef);
+			}
+		}
+
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				if (dedicatedThread == null)
+				{
+					dedicatedThread = GetDedicatedThread(map);
+				}
 			}
 		}
 
