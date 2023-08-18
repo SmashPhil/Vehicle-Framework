@@ -126,14 +126,19 @@ namespace Vehicles
 
 		/* --------- CE hooks for compatibility --------- */
 		/// <summary>
-		/// (projectileDef, origin, intendedTarget, launcher, shotAngle, shotRotation, shotHeight, shotSpeed, CE projectile)
+		/// (projectileDef, ammoDef, AmmoSetDef, origin, intendedTarget, launcher, shotAngle, shotRotation, shotHeight, shotSpeed, ret CE projectile)
 		/// </summary>
-		public static Func<ThingDef, Vector2, LocalTargetInfo, VehiclePawn, float, float, float, float, object> LaunchProjectileCE = null;
+		public static Func<ThingDef, ThingDef, Def, Vector2, LocalTargetInfo, VehiclePawn, float, float, float, float, object> LaunchProjectileCE = null;
 
 		/// <summary>
-		/// (velocity, range, heightDiff, flyOverhead, gravityModifier, angle
+		/// (velocity, range, shooter, target, origin, flyOverhead, gravityModifier, sway, spread, recoil, ret 2-angles)
 		/// </summary>
-		public static Func<float, float, float, bool, float, float> ProjectileAngleCE = null;
+		public static Func<float, float, Thing, LocalTargetInfo, Vector3, bool, float, float, float, float, Vector2> ProjectileAngleCE = null;
+
+		/// <summary>
+		/// (ammoset name, ret ammoset def)
+		/// </summary>
+		public static Func<string, Def> LookupAmmosetCE = null;
 		/* ---------------------------------------------- */
 
 		/// <summary>
