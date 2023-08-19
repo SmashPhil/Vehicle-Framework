@@ -11,7 +11,7 @@ namespace Vehicles
 {
 	public static class VehicleGUI
 	{
-		public static void DrawVehicleDefOnGUI(Rect rect, VehicleDef vehicleDef, PatternData patternData = null, Rot8? rot = null)
+		public static void DrawVehicleDefOnGUI(Rect rect, VehicleDef vehicleDef, PatternData patternData = null, Rot8? rot = null, bool withoutTurrets = true)
 		{
 			string drawStep = string.Empty;
 			GUIState.Push();
@@ -44,33 +44,28 @@ namespace Vehicles
 				drawStep = "Retrieving cached graphic and pattern";
 				Graphic_Vehicle graphic = vehicleDef.graphicData.Graphic as Graphic_Vehicle;// VehicleTex.CachedGraphics[vehicleDef];
 
-				PatternDef pattern = patternData?.patternDef;
-				pattern ??= VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData)?.patternDef ?? PatternDefOf.Default;
+				drawStep = "Fetching PatternData";
+				PatternData pattern = patternData ?? VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData);
 				if (!VehicleMod.settings.main.useCustomShaders)
 				{
-					pattern = PatternDefOf.Default;
+					pattern.patternDef = PatternDefOf.Default;
 				}
-				drawStep = "Fetching PatternData";
-				Color color1 = patternData?.color ?? vehicleDef.graphicData.color;
-				Color color2 = patternData?.colorTwo ?? vehicleDef.graphicData.color;
-				Color color3 = patternData?.colorThree ?? vehicleDef.graphicData.color;
-
-				float tiling = patternData?.tiles ?? vehicleDef.graphicData.tiles;
-				Vector2 displacement = patternData?.displacement ?? vehicleDef.graphicData.displacement;
-
+				
 				Texture2D mainTex = VehicleTex.VehicleTexture(vehicleDef, rotDrawn, out float angle);
 				/* ------------------------------------- */
 
 				bool colorGUI = graphic.Shader.SupportsRGBMaskTex() || graphic.Shader.SupportsMaskTex();
 
-				if (colorGUI) GUI.color = color1;
+				if (colorGUI) GUI.color = pattern?.color ?? Color.white;
 
 				drawStep = "Attempting to retrieve turret overlays";
 				List<(Rect rect, Texture mainTex, Color color, float layer, float angle)> overlays = new List<(Rect, Texture, Color, float, float)>();
 				if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets props)
 				{
-					overlays.AddRange(RetrieveAllTurretSettingsGUIProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer),
-						new PatternData(color1, color2, color3, pattern, displacement, tiling)));
+					if (!withoutTurrets || Prefs.UIScale == 1)
+					{
+						overlays.AddRange(RetrieveAllTurretSettingsGUIProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer), pattern));
+					}
 				}
 				drawStep = "Retrieving graphic overlays";
 				overlays.AddRange(RetrieveAllOverlaySettingsGUIProperties(rect, vehicleDef, rotDrawn));
