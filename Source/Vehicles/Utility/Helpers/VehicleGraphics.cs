@@ -154,19 +154,10 @@ namespace Vehicles
 				Graphic_Vehicle graphic = vehicleDef.graphicData.Graphic as Graphic_Vehicle;// VehicleTex.CachedGraphics[vehicleDef];
 
 				PatternData pattern = patternData;
-				if (patternData is null)
+				if (pattern is null)
 				{
-					PatternDef patternDef = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData)?.patternDef ?? PatternDefOf.Default;
-
 					drawStep = "Setting default color";
-					Color color1 = patternData?.color ?? vehicleDef.graphicData.color;
-					Color color2 = patternData?.colorTwo ?? vehicleDef.graphicData.color;
-					Color color3 = patternData?.colorThree ?? vehicleDef.graphicData.color;
-
-					float tiling = patternData?.tiles ?? vehicleDef.graphicData.tiles;
-					Vector2 displacement = patternData?.displacement ?? vehicleDef.graphicData.displacement;
-
-					pattern = new PatternData(color1, color2, color3, patternDef, displacement, tiling);
+					pattern = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData);
 				}
 
 				Texture2D mainTex = VehicleTex.VehicleTexture(vehicleDef, rotDrawn, out float angle);
@@ -177,11 +168,11 @@ namespace Vehicles
 					drawStep = $"Fetching material for {vehicleDef}";
 
 					material = RGBMaterialPool.Get(vehicleDef, rotDrawn);
-					RGBMaterialPool.SetProperties(vehicleDef, pattern);
+					RGBMaterialPool.SetProperties(vehicleDef, pattern, graphic.TexAt, graphic.MaskAt);
 				}
 				else
 				{
-					material = vehicleDef.graphicData.Graphic.MatAt(rotDrawn);
+					//material = vehicleDef.graphicData.Graphic.MatAt(rotDrawn);
 				}
 				
 				drawStep = "Attempting to retrieve turret overlays";
@@ -270,12 +261,12 @@ namespace Vehicles
 			Material material = null;
 			if (turret.CannonGraphic.Shader.SupportsMaskTex())
 			{
-				material = turret.CannonGraphic.MatAt(rot);
+				//material = turret.CannonGraphic.MatAt(Rot8.North);
 			}
 			else if (patternData != null && turret.CannonGraphic.Shader.SupportsRGBMaskTex())
 			{
-				material = RGBMaterialPool.Get(vehicleDef, rot);
-				RGBMaterialPool.SetProperties(vehicleDef, patternData);
+				material = RGBMaterialPool.Get(turret, Rot8.North);
+				RGBMaterialPool.SetProperties(turret, patternData, turret.CannonGraphic.TexAt, turret.CannonGraphic.MaskAt);
 			}
 			return (turretRect, turret.CannonTexture, material, turret.CannonGraphicData.drawOffset.y, turret.defaultAngleRotated + rot.AsAngle);
 		}

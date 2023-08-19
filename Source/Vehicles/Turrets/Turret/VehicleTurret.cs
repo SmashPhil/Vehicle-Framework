@@ -1253,28 +1253,7 @@ namespace Vehicles
 			}
 			if (cachedGraphicData is null || forceRegen)
 			{
-				cachedGraphicData = new GraphicDataRGB();
-				cachedGraphicData.CopyFrom(turretDef.graphicData);
-				if (turretDef.matchParentColor)
-				{
-					cachedGraphicData.color = patternData.color;
-					cachedGraphicData.colorTwo = patternData.colorTwo;
-					cachedGraphicData.colorThree = patternData.colorThree;
-					cachedGraphicData.tiles = patternData.tiles;
-					cachedGraphicData.displacement = patternData.displacement;
-				}
-
-				if (cachedGraphicData.shaderType.Shader.SupportsRGBMaskTex())
-				{
-					RGBMaterialPool.CacheMaterialsFor(this);
-					cachedGraphicData.Init(this);
-					cannonGraphic = CannonGraphicData.Graphic as Graphic_Turret;
-					RGBMaterialPool.SetProperties(this, patternData, cannonGraphic.TexAt, cannonGraphic.MaskAt);
-				}
-				else
-				{
-					cannonGraphic = ((GraphicData)cachedGraphicData).Graphic as Graphic_Turret;
-				}
+				CacheGraphicData(patternData);
 			}
 
 			if (cannonGraphic is null || forceRegen)
@@ -1296,27 +1275,32 @@ namespace Vehicles
 			if (cachedGraphicData is null || forceRegen)
 			{
 				PatternData patternData = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData);
-				cachedGraphicData = new GraphicDataRGB();
-				cachedGraphicData.CopyFrom(turretDef.graphicData);
-				if (turretDef.matchParentColor)
-				{
-					cachedGraphicData.CopyDrawData(patternData);
-				}
-				if (cachedGraphicData.shaderType != null && cachedGraphicData.shaderType.Shader.SupportsRGBMaskTex())
-				{
-					RGBMaterialPool.CacheMaterialsFor(this);
-					cachedGraphicData.Init(this);
-					cannonGraphic = CannonGraphicData.Graphic as Graphic_Turret;
-					RGBMaterialPool.SetProperties(this, patternData, cannonGraphic.TexAt, cannonGraphic.MaskAt);
-				}
-				else
-				{
-					cannonGraphic = ((GraphicData)cachedGraphicData).Graphic as Graphic_Turret;
-				}
+				CacheGraphicData(patternData);
 			}
 			if (cannonMaterialCache is null || forceRegen)
 			{
 				cannonMaterialCache = CannonGraphic.MatAtFull(Rot8.North);
+			}
+		}
+
+		private void CacheGraphicData(PatternData patternData)
+		{
+			cachedGraphicData = new GraphicDataRGB();
+			cachedGraphicData.CopyFrom(turretDef.graphicData);
+			if (turretDef.matchParentColor)
+			{
+				cachedGraphicData.CopyDrawData(patternData);
+			}
+			if (cachedGraphicData.shaderType != null && cachedGraphicData.shaderType.Shader.SupportsRGBMaskTex())
+			{
+				RGBMaterialPool.CacheMaterialsFor(this);
+				cachedGraphicData.Init(this);
+				cannonGraphic = CannonGraphicData.Graphic as Graphic_Turret;
+				RGBMaterialPool.SetProperties(this, patternData, cannonGraphic.TexAt, cannonGraphic.MaskAt);
+			}
+			else
+			{
+				cannonGraphic = ((GraphicData)cachedGraphicData).Graphic as Graphic_Turret;
 			}
 		}
 
