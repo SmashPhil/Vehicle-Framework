@@ -46,6 +46,7 @@ On top of this, I changed the way the pattern system caches materials so it shou
 
 - Fixed bug where CustomCostDefModExtension wasn't properly applying.
 
+- Fixed compatibility issue with Bulk Carrier
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Reworked Material Generation for vehicles using the pattern system, significantly decreasing materials cached (and thus memory usage overall).
 

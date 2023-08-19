@@ -183,7 +183,7 @@ namespace Vehicles
 				}
 			}
 			float mass = MassUtility.GearAndInventoryMass(Vehicle) + cannonsNum;
-			float capacity = MassUtility.Capacity(Vehicle, null);
+			float capacity = Vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
 			Widgets.Label(rect, "MassCarried".Translate(mass.ToString("0.##"), capacity.ToString("0.##")));
 			curY += StandardLineHeight;
 		}
