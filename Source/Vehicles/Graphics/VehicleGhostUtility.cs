@@ -12,21 +12,23 @@ namespace Vehicles
 	{
 		public static Dictionary<int, Graphic> cachedGhostGraphics = new Dictionary<int, Graphic>();
 
-		public static Graphic_Turret GhostGraphicFor(this VehicleDef vehicleDef, VehicleTurret cannon, Color ghostColor)
+		public static Graphic_Turret GhostGraphicFor(this VehicleDef vehicleDef, VehicleTurret turret, Color ghostColor)
 		{
 			int num = 0;
 			num = Gen.HashCombine(num, vehicleDef);
-			num = Gen.HashCombine(num, cannon);
+			num = Gen.HashCombine(num, turret);
 			num = Gen.HashCombineStruct(num, ghostColor);
 			if (!cachedGhostGraphics.TryGetValue(num, out Graphic graphic))
 			{
-				cannon.ResolveCannonGraphics(vehicleDef, true);
-				graphic = cannon.CannonGraphic;
+				turret.ResolveCannonGraphics(vehicleDef, true);
+				graphic = turret.CannonGraphic;
 
 				GraphicData graphicData = new GraphicData();
-				AccessTools.Method(typeof(GraphicData), "Init").Invoke(graphicData, new object[] { });
 				graphicData.CopyFrom(graphic.data);
+				graphicData.drawOffsetWest = graphic.data.drawOffsetWest; //TEMPORARY - Bug in vanilla copies South over to West
 				graphicData.shadowData = null;
+				graphicData.shaderType = ShaderTypeDefOf.EdgeDetect;
+				_ = graphicData.Graphic;
 
 				graphic = (Graphic_Turret)GraphicDatabase.Get(graphic.GetType(), graphic.path, ShaderTypeDefOf.EdgeDetect.Shader, graphic.drawSize, ghostColor, Color.white, graphicData, null);
 				
@@ -35,27 +37,28 @@ namespace Vehicles
 			return (Graphic_Turret)graphic;
 		}
 
-		public static IEnumerable<GraphicOverlay> GhostGraphicOverlaysFor(this VehicleDef vehicleDef, Color ghostColor)
+		public static IEnumerable<(Graphic graphic, float rotation)> GhostGraphicOverlaysFor(this VehicleDef vehicleDef, Color ghostColor)
 		{
 			int num = 0;
 			num = Gen.HashCombine(num, vehicleDef);
 			num = Gen.HashCombineStruct(num, ghostColor);
-			foreach (GraphicOverlay graphicOverlay in vehicleDef.drawProperties.OverlayGraphics)
+			foreach (GraphicOverlay graphicOverlay in vehicleDef.drawProperties.overlays)
 			{
-				int hash = Gen.HashCombine(num, graphicOverlay.graphic.data.texPath);
+				int hash = Gen.HashCombine(num, graphicOverlay.data.graphicData);
 				if (!cachedGhostGraphics.TryGetValue(hash, out Graphic graphic))
 				{
-					graphic = graphicOverlay.graphic;
+					graphic = graphicOverlay.data.graphicData.Graphic;
 					GraphicData graphicData = new GraphicData();
-					AccessTools.Method(typeof(GraphicData), "Init").Invoke(graphicData, new object[] { });
 					graphicData.CopyFrom(graphic.data);
+					graphicData.drawOffsetWest = graphic.data.drawOffsetWest; //TEMPORARY - Bug in vanilla copies South over to West
 					graphicData.shadowData = null;
+					_ = graphicData.Graphic;
 
 					graphic = GraphicDatabase.Get(graphic.GetType(), graphic.path, ShaderTypeDefOf.EdgeDetect.Shader, graphic.drawSize, ghostColor, Color.white, graphicData, null);
 
 					cachedGhostGraphics.Add(hash, graphic);
 				}
-				yield return new GraphicOverlay(graphic, graphicOverlay.rotation);
+				yield return (graphic, graphicOverlay.data.rotation);
 			}
 		}
 

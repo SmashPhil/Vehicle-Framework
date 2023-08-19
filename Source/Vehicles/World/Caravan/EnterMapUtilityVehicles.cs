@@ -119,7 +119,7 @@ namespace Vehicles
 
 		private static IntVec3 FindNearEdgeCell(Map map, VehicleCaravan caravan, Predicate<IntVec3> extraCellValidator)
 		{
-			bool baseValidator(IntVec3 x) => caravan.AllVehicles().TrueForAll(v => GenGridVehicles.Standable(x, v, map)) && !x.Fogged(map);
+			bool baseValidator(IntVec3 x) => caravan.Vehicles.Any(v => GenGridVehicles.Standable(x, v, map)) && !x.Fogged(map);
 			Faction hostFaction = map.ParentFaction;
 			IntVec3 root;
 			if (caravan.HasBoat())

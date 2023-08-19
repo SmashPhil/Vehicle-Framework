@@ -10,9 +10,11 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class JobDriver_GiveToVehicle : JobDriver
+	public class JobDriver_LoadVehicle : JobDriver
 	{
 		private static FieldInfo countToTransferFieldInfo = AccessTools.Field(typeof(TransferableOneWay), "countToTransfer");
+
+		public virtual string ListerTag => ReservationType.LoadVehicle;
 
 		public virtual Thing Item
 		{
@@ -32,7 +34,7 @@ namespace Vehicles
 
 		public override bool TryMakePreToilReservations(bool errorOnFailed)
 		{
-			if (!pawn.Reserve(Item, job, 1, -1, null, errorOnFailed))
+			if (!pawn.Reserve(Item, job))
 			{
 				return false;
 			}
@@ -46,10 +48,10 @@ namespace Vehicles
 			this.FailOnDestroyedOrNull(TargetIndex.B);
 			this.FailOn(delegate ()
 			{
-				return !Map.GetCachedMapComponent<VehicleReservationManager>().VehicleListed(Vehicle, ReservationType.LoadVehicle);
+				return !Map.GetCachedMapComponent<VehicleReservationManager>().VehicleListed(Vehicle, ListerTag);
 			});
 			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch);
-			yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false);
+			yield return Toils_Haul.StartCarryThing(TargetIndex.A);
 			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).FailOnDespawnedNullOrForbidden(TargetIndex.B);
 			yield return Toils_General.Wait(25, TargetIndex.None).WithProgressBarToilDelay(TargetIndex.B);
 			yield return GiveAsMuchToVehicleAsPossible();

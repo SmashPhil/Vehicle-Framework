@@ -14,6 +14,19 @@
 	</WorkGiverDef>
 	
 	<WorkGiverDef>
+		<defName>PackVehicleTurret</defName>
+		<label>pack vehicle</label>
+		<giverClass>Vehicles.WorkGiver_RefuelVehicleTurret</giverClass>
+		<workType>Hauling</workType>
+		<verb>pack</verb>
+		<gerund>packing</gerund>
+		<priorityInType>80</priorityInType>
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+	</WorkGiverDef>
+	
+	<WorkGiverDef>
 		<defName>LoadUpgradeMaterials</defName>
 		<label>load materials</label>
 		<giverClass>Vehicles.WorkGiver_BringUpgradeMaterial</giverClass>

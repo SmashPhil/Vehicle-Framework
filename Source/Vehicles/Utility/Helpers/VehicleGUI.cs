@@ -11,7 +11,7 @@ namespace Vehicles
 {
 	public static class VehicleGUI
 	{
-		public static void DrawVehicleDefOnGUI(Rect rect, VehicleDef vehicleDef, PatternData patternData = null, Rot8? rot = null)
+		public static void DrawVehicleDefOnGUI(Rect rect, VehicleDef vehicleDef, PatternData patternData = null, Rot8? rot = null, bool withoutTurrets = true)
 		{
 			string drawStep = string.Empty;
 			GUIState.Push();
@@ -42,32 +42,30 @@ namespace Vehicles
 				Rect adjustedRect = new Rect(rect.x + offsetX, rect.y + offsetY, scaledWidth, scaledHeight);
 
 				drawStep = "Retrieving cached graphic and pattern";
-				Graphic_Vehicle graphic = VehicleTex.CachedGraphics[vehicleDef];
-
-				PatternDef pattern = patternData?.patternDef;
-				pattern ??= VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData)?.patternDef ?? PatternDefOf.Default;
+				Graphic_Vehicle graphic = vehicleDef.graphicData.Graphic as Graphic_Vehicle;// VehicleTex.CachedGraphics[vehicleDef];
 
 				drawStep = "Fetching PatternData";
-				Color color1 = patternData?.color ?? vehicleDef.graphicData.color;
-				Color color2 = patternData?.colorTwo ?? vehicleDef.graphicData.color;
-				Color color3 = patternData?.colorThree ?? vehicleDef.graphicData.color;
-
-				float tiling = patternData?.tiles ?? vehicleDef.graphicData.tiles;
-				Vector2 displacement = patternData?.displacement ?? vehicleDef.graphicData.displacement;
-
+				PatternData pattern = patternData ?? VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData);
+				if (!VehicleMod.settings.main.useCustomShaders)
+				{
+					pattern.patternDef = PatternDefOf.Default;
+				}
+				
 				Texture2D mainTex = VehicleTex.VehicleTexture(vehicleDef, rotDrawn, out float angle);
 				/* ------------------------------------- */
 
 				bool colorGUI = graphic.Shader.SupportsRGBMaskTex() || graphic.Shader.SupportsMaskTex();
 
-				if (colorGUI) GUI.color = color1;
+				if (colorGUI) GUI.color = pattern?.color ?? Color.white;
 
 				drawStep = "Attempting to retrieve turret overlays";
 				List<(Rect rect, Texture mainTex, Color color, float layer, float angle)> overlays = new List<(Rect, Texture, Color, float, float)>();
 				if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets props)
 				{
-					overlays.AddRange(RetrieveAllTurretSettingsGUIProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer),
-						new PatternData(color1, color2, color3, pattern, displacement, tiling)));
+					if (!withoutTurrets || Prefs.UIScale == 1)
+					{
+						overlays.AddRange(RetrieveAllTurretSettingsGUIProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer), pattern));
+					}
 				}
 				drawStep = "Retrieving graphic overlays";
 				overlays.AddRange(RetrieveAllOverlaySettingsGUIProperties(rect, vehicleDef, rotDrawn));
@@ -100,7 +98,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				SmashLog.Error($"Exception thrown while trying to draw <type>VehicleDef</type>=\"{vehicleDef?.defName ?? "Null"}\" during step {drawStep}.\nException={ex.Message}");
+				SmashLog.Error($"Exception thrown while trying to draw GUI <type>VehicleDef</type>=\"{vehicleDef?.defName ?? "Null"}\" during step {drawStep}.\nException={ex.Message}");
 			}
 			finally
 			{
@@ -116,20 +114,23 @@ namespace Vehicles
 		/// <param name="rot"></param>
 		public static IEnumerable<(Rect rect, Texture mainTex, Color color, float layer, float angle)> RetrieveAllOverlaySettingsGUIProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, List<GraphicOverlay> graphicOverlays = null)
 		{
-			List<GraphicOverlay> overlays = graphicOverlays ?? vehicleDef.drawProperties.OverlayGraphics;
+			List<GraphicOverlay> overlays = graphicOverlays ?? vehicleDef.drawProperties.overlays;
 			foreach (GraphicOverlay graphicOverlay in overlays)
 			{
-				yield return RetrieveOverlaySettingsGUIProperties(rect, vehicleDef, rot, graphicOverlay);
+				if (graphicOverlay.data.renderUI)
+				{
+					yield return RetrieveOverlaySettingsGUIProperties(rect, vehicleDef, rot, graphicOverlay);
+				}
 			}
 		}
 
 		public static (Rect rect, Texture mainTex, Color color, float layer, float angle) RetrieveOverlaySettingsGUIProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, GraphicOverlay graphicOverlay)
 		{
 			Rect overlayRect = VehicleGraphics.OverlayRect(rect, vehicleDef, graphicOverlay, rot);
-			Texture2D texture = ContentFinder<Texture2D>.Get(graphicOverlay.graphic.data.texPath);
-			bool canMask = graphicOverlay.graphic.Shader.SupportsMaskTex() || graphicOverlay.graphic.Shader.SupportsRGBMaskTex();
-			Color color = canMask ? graphicOverlay.graphic.data.color : Color.white;
-			return (overlayRect, texture, color, graphicOverlay.graphic.data.DrawOffsetFull(rot).y, graphicOverlay.rotation);
+			Texture2D texture = ContentFinder<Texture2D>.Get(graphicOverlay.data.graphicData.texPath);
+			bool canMask = graphicOverlay.data.graphicData.Graphic.Shader.SupportsMaskTex() || graphicOverlay.data.graphicData.Graphic.Shader.SupportsRGBMaskTex();
+			Color color = canMask ? graphicOverlay.data.graphicData.color : Color.white;
+			return (overlayRect, texture, color, graphicOverlay.data.graphicData.DrawOffsetFull(rot).y, graphicOverlay.data.rotation);
 		}
 
 		/// <summary>
@@ -174,95 +175,141 @@ namespace Vehicles
 		/// <param name="command"></param>
 		/// <param name="rect"></param>
 		/// <param name="buildDef"></param>
-		public static GizmoResult GizmoOnGUIWithMaterial(Command command, Rect rect, VehicleBuildDef buildDef)
+		public static GizmoResult GizmoOnGUIWithMaterial(Command command, Rect rect, GizmoRenderParms parms, VehicleBuildDef buildDef)
 		{
-			VehicleDef vehicleDef = buildDef.thingToSpawn;
-			var font = Text.Font;
-			Text.Font = GameFont.Tiny;
-			bool flag = false;
-			if (Mouse.IsOver(rect))
-			{
-				flag = true;
-				if (!command.disabled)
-				{
-					GUI.color = GenUI.MouseoverColor;
-				}
-			}
+			bool mouseOver = false;
+			bool clicked = false;
 
-			MouseoverSounds.DoRegion(rect, SoundDefOf.Mouseover_Command);
-			Material material = command.disabled ? TexUI.GrayscaleGUI : null;
-			GenUI.DrawTextureWithMaterial(rect, command.BGTexture, material);
-			Rect buttonRect = rect.ContractedBy(1);
-			PatternData defaultPatternData = new PatternData(VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData));
-			if (command.disabled)
+			GUIState.Push();
 			{
-				defaultPatternData.color = vehicleDef.graphicData.color.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
-				defaultPatternData.colorTwo = vehicleDef.graphicData.colorTwo.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
-				defaultPatternData.colorThree = vehicleDef.graphicData.colorThree.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
-			}
-			DrawVehicleDefOnGUI(buttonRect, vehicleDef, defaultPatternData);
+				VehicleDef vehicleDef = buildDef.thingToSpawn;
+				Text.Font = GameFont.Tiny;
+				if (Mouse.IsOver(rect))
+				{
+					mouseOver = true;
+					if (!command.disabled)
+					{
+						GUI.color = GenUI.MouseoverColor;
+					}
+				}
 
-			bool flag2 = false;
-			KeyCode keyCode = (command.hotKey == null) ? KeyCode.None : command.hotKey.MainKey;
-			if (keyCode != KeyCode.None && !GizmoGridDrawer.drawnHotKeys.Contains(keyCode))
-			{
-				Vector2 vector = new Vector2(5f, 3f);
-				Widgets.Label(new Rect(rect.x + vector.x, rect.y + vector.y, rect.width - 10f, 18f), keyCode.ToStringReadable());
-				GizmoGridDrawer.drawnHotKeys.Add(keyCode);
-				if (command.hotKey.KeyDownEvent)
+				MouseoverSounds.DoRegion(rect, SoundDefOf.Mouseover_Command);
+				if (parms.highLight)
 				{
-					flag2 = true;
-					Event.current.Use();
+					Widgets.DrawStrongHighlight(rect.ExpandedBy(12f), null);
+				}
+
+				if (parms.lowLight)
+				{
+					GUI.color = Command.LowLightBgColor;
+				}
+				Material material = command.disabled ? TexUI.GrayscaleGUI : null;
+				GenUI.DrawTextureWithMaterial(rect, command.BGTexture, material);
+				GUI.color = Color.white;
+
+				Rect iconRect = rect.ContractedBy(1);
+				GUI.BeginGroup(iconRect);
+				{
+					iconRect = iconRect.AtZero();
+					
+					Rect buttonRect = iconRect;
+					PatternData defaultPatternData = new PatternData(VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData));
+					if (command.disabled)
+					{
+						defaultPatternData.color = vehicleDef.graphicData.color.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
+						defaultPatternData.colorTwo = vehicleDef.graphicData.colorTwo.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
+						defaultPatternData.colorThree = vehicleDef.graphicData.colorThree.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
+					}
+
+					if (!command.disabled || parms.lowLight)
+					{
+						GUI.color = command.IconDrawColor;
+					}
+					else
+					{
+						GUI.color = command.IconDrawColor.SaturationChanged(0f);
+						defaultPatternData.color = vehicleDef.graphicData.color.SaturationChanged(0);
+						defaultPatternData.colorTwo = vehicleDef.graphicData.colorTwo.SaturationChanged(0);
+						defaultPatternData.colorThree = vehicleDef.graphicData.colorThree.SaturationChanged(0);
+					}
+					if (parms.lowLight)
+					{
+						GUI.color = GUI.color.ToTransparent(0.6f);
+						defaultPatternData.color = defaultPatternData.color.ToTransparent(0.6f);
+						defaultPatternData.colorTwo = defaultPatternData.colorTwo.ToTransparent(0.6f);
+						defaultPatternData.colorThree = defaultPatternData.colorThree.ToTransparent(0.6f);
+					}
+					DrawVehicleDefOnGUI(buttonRect, vehicleDef, defaultPatternData);
+					GUI.color = Color.white;
+
+					KeyCode keyCode = (command.hotKey == null) ? KeyCode.None : command.hotKey.MainKey;
+					if (keyCode != KeyCode.None && !GizmoGridDrawer.drawnHotKeys.Contains(keyCode))
+					{
+						Vector2 vector = new Vector2(5f, 3f);
+						Widgets.Label(new Rect(iconRect.x + vector.x, iconRect.y + vector.y, iconRect.width - 10f, 18f), keyCode.ToStringReadable());
+						GizmoGridDrawer.drawnHotKeys.Add(keyCode);
+						if (command.hotKey.KeyDownEvent)
+						{
+							clicked = true;
+							Event.current.Use();
+						}
+					}
+					if (Widgets.ButtonInvisible(iconRect, true))
+					{
+						clicked = true;
+					}
+				}
+				GUI.EndGroup();
+
+				string topRightLabel = command.TopRightLabel;
+				if (!topRightLabel.NullOrEmpty())
+				{
+					Vector2 vector2 = Text.CalcSize(topRightLabel);
+					Rect position = new Rect(rect.xMax - vector2.x - 2f, rect.y + 3f, vector2.x, vector2.y);
+					Rect rectBase = position;
+					position.x -= 2f;
+					position.width += 3f;
+
+					GUI.color = Color.white;
+					Text.Anchor = TextAnchor.UpperRight;
+					GUI.DrawTexture(position, TexUI.GrayTextBG);
+					Widgets.Label(rectBase, topRightLabel);
+					Text.Anchor = TextAnchor.UpperLeft;
+				}
+				string labelCap = buildDef.LabelCap;
+				if (!labelCap.NullOrEmpty())
+				{
+					float num = Text.CalcHeight(labelCap, rect.width);
+					Rect rect2 = new Rect(rect.x, rect.yMax - num + 12f, rect.width, num);
+					GUI.DrawTexture(rect2, TexUI.GrayTextBG);
+					GUI.color = Color.white;
+					Text.Anchor = TextAnchor.UpperCenter;
+					Widgets.Label(rect2, labelCap);
+					Text.Anchor = TextAnchor.UpperLeft;
+					GUI.color = Color.white;
+				}
+				GUI.color = Color.white;
+				if (Mouse.IsOver(rect))
+				{
+					TipSignal tip = command.Desc;
+					if (command.disabled && !command.disabledReason.NullOrEmpty())
+					{
+						tip.text += "\n\n" + "DisabledCommand".Translate() + ": " + command.disabledReason;
+					}
+					TooltipHandler.TipRegion(rect, tip);
+				}
+				if (!command.HighlightTag.NullOrEmpty() && (Find.WindowStack.FloatMenu == null || !Find.WindowStack.FloatMenu.windowRect.Overlaps(rect)))
+				{
+					UIHighlighter.HighlightOpportunity(rect, command.HighlightTag);
 				}
 			}
-			if (Widgets.ButtonInvisible(rect, true))
-			{
-				flag2 = true;
-			}
-			string topRightLabel = command.TopRightLabel;
-			if (!topRightLabel.NullOrEmpty())
-			{
-				Vector2 vector2 = Text.CalcSize(topRightLabel);
-				Rect position;
-				Rect rectBase = position = new Rect(rect.xMax - vector2.x - 2f, rect.y + 3f, vector2.x, vector2.y);
-				position.x -= 2f;
-				position.width += 3f;
-				GUI.color = Color.white;
-				Text.Anchor = TextAnchor.UpperRight;
-				GUI.DrawTexture(position, TexUI.GrayTextBG);
-				Widgets.Label(rectBase, topRightLabel);
-				Text.Anchor = TextAnchor.UpperLeft;
-			}
-			string labelCap = command.LabelCap;
-			if (!labelCap.NullOrEmpty())
-			{
-				float num = Text.CalcHeight(labelCap, rect.width);
-				Rect rect2 = new Rect(rect.x, rect.yMax - num + 12f, rect.width, num);
-				GUI.DrawTexture(rect2, TexUI.GrayTextBG);
-				GUI.color = Color.white;
-				Text.Anchor = TextAnchor.UpperCenter;
-				Widgets.Label(rect2, labelCap);
-				Text.Anchor = TextAnchor.UpperLeft;
-				GUI.color = Color.white;
-			}
-			GUI.color = Color.white;
-			if (Mouse.IsOver(rect) /*&& command.DoTooltip*/)
-			{
-				TipSignal tip = command.Desc;
-				if (command.disabled && !command.disabledReason.NullOrEmpty())
-				{
-					tip.text += "\n\n" + "DisabledCommand".Translate() + ": " + command.disabledReason;
-				}
-				TooltipHandler.TipRegion(rect, tip);
-			}
-			if (!command.HighlightTag.NullOrEmpty() && (Find.WindowStack.FloatMenu == null || !Find.WindowStack.FloatMenu.windowRect.Overlaps(rect)))
-			{
-				UIHighlighter.HighlightOpportunity(rect, command.HighlightTag);
-			}
-			Text.Font = GameFont.Small;
+			GUIState.Pop();
+
 			try
 			{
-				if (flag2)
+				GUIState.Push();
+				Text.Font = GameFont.Small;
+				if (clicked)
 				{
 					if (command.disabled)
 					{
@@ -290,7 +337,7 @@ namespace Vehicles
 				}
 				else
 				{
-					if (flag)
+					if (mouseOver)
 					{
 						return new GizmoResult(GizmoState.Mouseover, null);
 					}
@@ -299,7 +346,7 @@ namespace Vehicles
 			}
 			finally
 			{
-				Text.Font = font;
+				GUIState.Pop();
 			}
 		}
 	}

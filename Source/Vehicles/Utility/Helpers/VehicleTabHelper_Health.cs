@@ -5,14 +5,24 @@ using UnityEngine;
 using Verse;
 using Verse.Sound;
 using RimWorld;
+using RimWorld.Planet;
 using SmashTools;
 
 namespace Vehicles
 {
+	[StaticConstructorOnStartup]
 	public static class VehicleTabHelper_Health
 	{
+		public const float LeftWindowWidth = 250;
+		public const float WindowHeight = 430;
+		public const float LabelColumnWidth = 200;
+		public const float ColumnWidth = 100;
+
 		public const float ComponentRowHeight = 20f;
 		public const float ComponentIndicatorIconSize = 20f;
+		public const float MoreInfoIconSize = 24;
+
+		private const int ColumnCount = 2;
 
 		private static readonly Color MouseOverColor = new Color(0.85f, 0.85f, 0.85f, 0.1f);
 		private static readonly Color AlternatingColor = new Color(0.75f, 0.75f, 0.75f, 0.1f);
@@ -20,17 +30,23 @@ namespace Vehicles
 		private static float componentListHeight;
 		private static VehiclePawn inspectingVehicle;
 		private static Vector2 size;
+		private static bool compressed;
+		private static bool moreInfo;
 
 		private static ITab_Vehicle_Health.VehicleHealthTab onTab;
 		private static Vector2 componentTabScrollPos;
 		private static VehicleComponent selectedComponent;
 
+		private static readonly List<DamageArmorCategoryDef> armorRatingDefs;
+
 		private static readonly List<JobDef> jobLimitJobDefs = new List<JobDef>();
 
-		public static void Init()
+		public static Vector2 Size => size;
+
+		static VehicleTabHelper_Health()
 		{
-			componentTabScrollPos = Vector2.zero;
-			selectedComponent = null;
+			armorRatingDefs = DefDatabase<DamageArmorCategoryDef>.AllDefsListForReading;
+
 			//jobLimitJobDefs.Clear();
 			//foreach (JobDef jobDef in DefDatabase<JobDef>.AllDefsListForReading)
 			//{
@@ -41,15 +57,25 @@ namespace Vehicles
 			//}
 		}
 
-		public static void Start(Vector2 size, VehiclePawn vehicle)
+		public static void Init()
+		{
+			componentTabScrollPos = Vector2.zero;
+			selectedComponent = null;
+			moreInfo = false;
+		}
+
+		public static Vector2 Start(VehiclePawn vehicle, bool compressed = false)
 		{
 			if (vehicle != inspectingVehicle)
 			{
 				//Not captured by OnOpen when switching between vehicles with ITab already open
 				inspectingVehicle = vehicle;
-				VehicleTabHelper_Health.size = size;
+				VehicleTabHelper_Health.compressed = compressed;
+				//+ 2x ColumnWidth for Health and Efficiency columns
+				RecacheWindowWidth();
 				RecacheComponentListHeight();
 			}
+			return size;
 		}
 
 		public static void End()
@@ -62,8 +88,8 @@ namespace Vehicles
 			{
 				Rect rect = new Rect(0, 20, size.x, size.y - 20);
 
-				Rect infoPanelRect = new Rect(rect.x, rect.y, ITab_Vehicle_Health.InfoPanelWidth, rect.height).Rounded();
-				Rect componentPanelRect = new Rect(infoPanelRect.xMax, rect.y, size.x - ITab_Vehicle_Health.InfoPanelWidth, rect.height);
+				Rect infoPanelRect = new Rect(rect.x, rect.y, LeftWindowWidth, rect.height).Rounded();
+				Rect componentPanelRect = new Rect(infoPanelRect.xMax, rect.y, size.x - LeftWindowWidth, rect.height);
 				
 				infoPanelRect.yMin += 11f; //Extra space for tab, excluded from componentPanelRect for top options
 
@@ -178,77 +204,113 @@ namespace Vehicles
 		/// <param name="componentViewHeight">Cached height of full component list, taking into account extra space of longer labels</param>
 		private static void DrawComponentsInfo(Rect rect, VehiclePawn vehicle)
 		{
-			Text.Font = GameFont.Small;
-			float textHeight = Text.CalcSize("VF_ComponentHealth".Translate()).y;
-			float columnWidth = 75 - (ComponentIndicatorIconSize / 3f);
-			float labelWidth = rect.width - (columnWidth * 3) - ComponentIndicatorIconSize * 2;
-			//Skip header for component name column
-			Rect topLabelRect = new Rect(rect.x + labelWidth, rect.y, columnWidth, textHeight);
-
-			Text.Anchor = TextAnchor.MiddleCenter;
-			Widgets.Label(topLabelRect, "VF_ComponentHealth".Translate());
-			topLabelRect.x += topLabelRect.width;
-			Widgets.Label(topLabelRect, "VF_ComponentEfficiency".Translate());
-			topLabelRect.x += topLabelRect.width;
-			Widgets.Label(topLabelRect, "VF_ComponentArmor".Translate());
-			topLabelRect.x += topLabelRect.width;
-
-			GUI.color = TexData.MenuBGColor;
-			Widgets.DrawLineHorizontal(rect.x, topLabelRect.y + textHeight / 1.25f, rect.width);
-			GUI.color = Color.white;
-
-			rect.y += textHeight / 1.25f + 1; //+1 for H. line
-			rect.x += 2.5f;
-			rect.width -= 5;
-
-			Rect scrollView = new Rect(rect.x, rect.y + topLabelRect.height * 2, rect.width, componentListHeight);
-			bool alternatingRow = false;
-			Widgets.BeginScrollView(rect, ref componentTabScrollPos, scrollView);
+			GUIState.Push();
 			{
-				float curY = scrollView.y;
-				bool highlighted = false;
-				foreach (VehicleComponent component in vehicle.statHandler.components)
+				Text.Font = GameFont.Small;
+				float textHeight = Text.CalcSize("VF_ComponentHealth".Translate()).y;
+
+				//Skip header for component name column
+				Rect topLabelRect = new Rect(rect.x + LabelColumnWidth, rect.y, ColumnWidth, textHeight);
+				Text.Anchor = TextAnchor.MiddleCenter;
+				Widgets.Label(topLabelRect, "VF_ComponentHealth".Translate());
+				topLabelRect.x += topLabelRect.width;
+
+				Rect moreInfoButtonRect = new Rect(topLabelRect.x + topLabelRect.width / 2f, 0, MoreInfoIconSize, MoreInfoIconSize);
+
+				Widgets.Label(topLabelRect, "VF_ComponentEfficiency".Translate());
+				topLabelRect.x += topLabelRect.width;
+
+				if (!compressed)
 				{
-					Rect compRect = new Rect(rect.x, curY, rect.width - 16, ComponentRowHeight);
-					float usedHeight = DrawCompRow(compRect, component, labelWidth, columnWidth, alternatingRow);
-					//TooltipHandler.TipRegion(compRect, "VF_ComponentClickMoreInfoTooltip".Translate());
-					Rect highlightingRect = new Rect(compRect)
+
+					Color baseColor = !moreInfo ? Color.white : Color.green;
+					Color mouseoverColor = !moreInfo ? GenUI.MouseoverColor : new Color(0f, 0.5f, 0f);
+					if (Widgets.ButtonImageFitted(moreInfoButtonRect, CaravanThingsTabUtility.SpecificTabButtonTex, baseColor, mouseoverColor))
 					{
-						height = usedHeight
-					};
-					if (Mouse.IsOver(highlightingRect))
-					{
-						Widgets.DrawBoxSolid(highlightingRect, MouseOverColor);
-						//For debug drawing of component hitbox
-						vehicle.HighlightedComponent = component;
-						highlighted = true;
-					}
-					else if (selectedComponent == component)
-					{
-						Widgets.DrawBoxSolid(highlightingRect, MouseOverColor);
-						highlighted = true;
-					}
-					if (Widgets.ButtonInvisible(compRect))
-					{
-						SoundDefOf.Click.PlayOneShotOnCamera(null);
-						if (selectedComponent != component)
+						moreInfo = !moreInfo;
+						RecacheWindowWidth();
+
+						if (moreInfo)
 						{
-							selectedComponent = component;
+							SoundDefOf.TabOpen.PlayOneShotOnCamera(null);
 						}
 						else
 						{
-							selectedComponent = null;
+							SoundDefOf.TabClose.PlayOneShotOnCamera(null);
 						}
 					}
-					curY += usedHeight;
-					alternatingRow = !alternatingRow;
+
+					GUIState.Reset();
+
+					if (moreInfo)
+					{
+						for (int i = 0; i < armorRatingDefs.Count; i++)
+						{
+							DamageArmorCategoryDef armorCategoryDef = armorRatingDefs[i];
+							Widgets.Label(topLabelRect, armorCategoryDef.armorRatingStat.LabelCap);
+							topLabelRect.x += topLabelRect.width;
+						}
+					}
 				}
-				if (!highlighted)
+
+				GUI.color = TexData.MenuBGColor;
+				Widgets.DrawLineHorizontal(rect.x, topLabelRect.y + textHeight / 1.25f, rect.width);
+				GUI.color = Color.white;
+
+				rect.y += textHeight / 1.25f + 1; //+1 for H. line
+				rect.x += 2.5f;
+				rect.width -= 5;
+
+				Rect scrollView = new Rect(rect.x, rect.y + topLabelRect.height * 2, rect.width, componentListHeight);
+				bool alternatingRow = false;
+				Widgets.BeginScrollView(rect, ref componentTabScrollPos, scrollView);
 				{
-					vehicle.HighlightedComponent = null;
+					float curY = scrollView.y;
+					bool highlighted = false;
+					foreach (VehicleComponent component in vehicle.statHandler.components)
+					{
+						Rect compRect = new Rect(rect.x, curY, rect.width - 16, ComponentRowHeight);
+						float usedHeight = DrawCompRow(compRect, component, LabelColumnWidth, ColumnWidth, alternatingRow);
+						//TooltipHandler.TipRegion(compRect, "VF_ComponentClickMoreInfoTooltip".Translate());
+						Rect highlightingRect = new Rect(compRect)
+						{
+							height = usedHeight
+						};
+						if (Mouse.IsOver(highlightingRect))
+						{
+							Widgets.DrawBoxSolid(highlightingRect, MouseOverColor);
+							//For debug drawing of component hitbox
+							vehicle.HighlightedComponent = component;
+							highlighted = true;
+						}
+						else if (selectedComponent == component)
+						{
+							Widgets.DrawBoxSolid(highlightingRect, MouseOverColor);
+							highlighted = true;
+						}
+						if (Widgets.ButtonInvisible(compRect))
+						{
+							SoundDefOf.Click.PlayOneShotOnCamera(null);
+							if (selectedComponent != component)
+							{
+								selectedComponent = component;
+							}
+							else
+							{
+								selectedComponent = null;
+							}
+						}
+						curY += usedHeight;
+						alternatingRow = !alternatingRow;
+					}
+					if (!highlighted)
+					{
+						vehicle.HighlightedComponent = null;
+					}
 				}
+				Widgets.EndScrollView();
 			}
-			Widgets.EndScrollView();
+			GUIState.Pop();
 		}
 
 		private static float DrawCompRow(Rect rect, VehicleComponent component, float labelWidth, float columnWidth, bool highlighted)
@@ -273,14 +335,31 @@ namespace Vehicles
 			labelRect.x += columnWidth;
 			string efficiencyEntry = component.props.categories.NullOrEmpty() ? "-" : component.Efficiency.ToStringPercent().Colorize(component.ComponentEfficiencyColor());
 			Widgets.Label(labelRect, efficiencyEntry);
-			labelRect.x += columnWidth;
-			Widgets.Label(labelRect, component.ArmorRating(null).ToStringPercent());
-			labelRect.x += columnWidth;
+			
+			if (!compressed && moreInfo)
+			{
+				for (int i = 0; i < armorRatingDefs.Count; i++)
+				{
+					labelRect.x += columnWidth;
+					DamageArmorCategoryDef armorCategoryDef = armorRatingDefs[i];
+					Widgets.Label(labelRect, component.ArmorRating(armorCategoryDef).ToStringByStyle(armorCategoryDef.armorRatingStat.toStringStyle));
+				}
+			}
 
-			Rect iconRect = new Rect(labelRect.x, labelRect.y, ComponentIndicatorIconSize, ComponentIndicatorIconSize);
+			Rect iconRect = new Rect(labelRect.xMax, labelRect.y, ComponentIndicatorIconSize, ComponentIndicatorIconSize);
 			component.DrawIcon(iconRect);
 
 			return labelHeight;
+		}
+
+		private static void RecacheWindowWidth()
+		{
+			size = new Vector2(LeftWindowWidth + LabelColumnWidth + (ColumnCount * ColumnWidth) + ComponentIndicatorIconSize + 20, WindowHeight);
+
+			if (!compressed && moreInfo)
+			{
+				size.x += ColumnWidth * armorRatingDefs.Count;
+			}
 		}
 
 		private static void RecacheComponentListHeight(float lineHeight = ComponentRowHeight)
@@ -288,7 +367,7 @@ namespace Vehicles
 			componentListHeight = 0;
 			foreach (VehicleComponent component in inspectingVehicle.statHandler.components)
 			{
-				float textHeight = Text.CalcHeight(component.props.label, size.x - ITab_Vehicle_Health.InfoPanelWidth);
+				float textHeight = Text.CalcHeight(component.props.label, size.x - LeftWindowWidth);
 				componentListHeight += Mathf.Max(lineHeight, textHeight);
 			}
 		}

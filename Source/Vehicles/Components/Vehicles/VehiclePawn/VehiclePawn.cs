@@ -15,7 +15,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public partial class VehiclePawn : Pawn, IInspectable, IAnimationTarget, IEventManager<VehicleEventDef>
+	public partial class VehiclePawn : Pawn, IInspectable, IAnimationTarget, IEventManager<VehicleEventDef>, IMaterialCacheTarget
 	{
 		public Dictionary<VehicleEventDef, EventTrigger> EventRegistry { get; set; }
 
@@ -156,6 +156,7 @@ namespace Vehicles
 			{
 				vPather.ResetToCurrentPosition();
 			}
+
 			if (Faction != Faction.OfPlayer)
 			{
 				ignition.Drafted = true;
@@ -179,8 +180,14 @@ namespace Vehicles
 					Find.WorldPawns.RemovePawn(pawn); //Remove internal pawns from WorldPawns
 				}
 			}
+			foreach (Thing thing in inventory.innerContainer)
+			{
+				if (thing is Pawn pawn)
+				{
+					Find.WorldPawns.RemovePawn(pawn); //Remove inventory pawns in case some were transfered here (like animals)
+				}
+			}
 
-			ResetGraphicCache();
 			Drawer.Notify_Spawned();
 			InitializeHitbox();
 			Map.GetCachedMapComponent<VehiclePositionManager>().ClaimPosition(this);
@@ -203,6 +210,13 @@ namespace Vehicles
 			Scribe_Deep.Look(ref patternData, nameof(patternData));
 			Scribe_Defs.Look(ref retexture, nameof(retexture));
 			Scribe_Deep.Look(ref patternToPaint, nameof(patternToPaint));
+
+			if (!VehicleMod.settings.main.useCustomShaders)
+			{
+				patternData = new PatternData(VehicleDef.graphicData.color, VehicleDef.graphicData.colorTwo, VehicleDef.graphicData.colorThree, PatternDefOf.Default, Vector2.zero, 0);
+				retexture = null;
+				patternToPaint = null;
+			}
 
 			Scribe_Values.Look(ref movementStatus, nameof(movementStatus), VehicleMovementStatus.Online);
 			//Scribe_Values.Look(ref navigationCategory, nameof(navigationCategory), NavigationCategory.Opportunistic);

@@ -129,14 +129,15 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Redirect Init calls from GraphicData to GraphicDataRGB
+		/// Check to make sure GraphicData.Init calls are not being triggered for RGBShader-supporting graphics
 		/// </summary>
 		/// <param name="__instance"></param>
 		public static void GraphicInit(GraphicData __instance)
 		{
-			if (__instance is GraphicDataLayered graphicDataLayered)
+			if (__instance is GraphicDataLayered graphicDataLayered && graphicDataLayered.shaderType.Shader.SupportsRGBMaskTex())
 			{
-				graphicDataLayered.Init();
+				graphicDataLayered.Init(null);
+				Log.Error($"Calling Init for {__instance.GetType()} with path: {__instance.texPath} from GraphicData which means it's being cached in vanilla when it should be using RGBMaterialPool.");
 			}
 		}
 	}

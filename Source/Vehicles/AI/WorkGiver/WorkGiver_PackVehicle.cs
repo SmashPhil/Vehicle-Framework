@@ -26,7 +26,7 @@ namespace Vehicles
 				Thing thing = FindThingToPack(vehicle, pawn);
 				if (thing != null)
 				{
-					Job job = JobMaker.MakeJob(JobDefOf_Vehicles.CarryItemToVehicle, thing, t);
+					Job job = JobMaker.MakeJob(JobDefOf_Vehicles.LoadVehicle, thing, t);
 					job.count = Mathf.Min(thing.stackCount, CountLeftToTransferItem(vehicle, pawn, thing));
 					return job;
 				}
@@ -80,9 +80,9 @@ namespace Vehicles
 			for (int i = 0; i < allPawnsSpawned.Count; i++)
 			{
 				Pawn pawn2 = allPawnsSpawned[i];
-				if (pawn2 != pawn && pawn2.CurJob != null && pawn2.CurJob.def == JobDefOf_Vehicles.CarryItemToVehicle)
+				if (pawn2 != pawn && pawn2.CurJob != null && (pawn2.CurJob.def == JobDefOf_Vehicles.LoadVehicle || pawn2.CurJob.def == JobDefOf_Vehicles.CarryItemToVehicle))
 				{
-					if (pawn2.jobs.curDriver is JobDriver_GiveToVehicle driver)
+					if (pawn2.jobs.curDriver is JobDriver_LoadVehicle driver)
 					{
 						Thing toHaul = driver.Item;
 						if (toHaul != null && transferable.things.Contains(toHaul) || TransferableUtility.TransferAsOne(transferable.AnyThing, toHaul, TransferAsOneMode.PodsOrCaravanPacking))

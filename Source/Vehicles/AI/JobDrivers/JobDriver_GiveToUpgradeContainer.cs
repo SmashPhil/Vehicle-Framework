@@ -7,7 +7,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class JobDriver_GiveToUpgradeContainer : JobDriver_GiveToVehicle
+	public class JobDriver_GiveToUpgradeContainer : JobDriver_LoadVehicle
 	{
 		public ThingDefCountClass ThingDef => new ThingDefCountClass(Item.def, Item.stackCount);
 

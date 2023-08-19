@@ -44,8 +44,15 @@
 	</JobDef>
 	
 	<JobDef>
+		<defName>LoadVehicle</defName>
+		<driverClass>Vehicles.JobDriver_LoadVehicle</driverClass>
+		<reportString>Loading TargetA onto TargetB</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+	
+	<JobDef>
 		<defName>CarryItemToVehicle</defName>
-		<driverClass>Vehicles.JobDriver_GiveToVehicle</driverClass>
+		<driverClass>Vehicles.JobDriver_GiveItemToVehicle</driverClass>
 		<reportString>Loading TargetA onto TargetB</reportString>
 		<casualInterruptible>false</casualInterruptible>
 	</JobDef>

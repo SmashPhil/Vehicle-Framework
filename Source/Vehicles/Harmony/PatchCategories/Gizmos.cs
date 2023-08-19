@@ -228,12 +228,12 @@ namespace Vehicles
 			}
 		}
 
-		public static bool VehicleMaterialOnBuildGizmo(Vector2 topLeft, float maxWidth, BuildableDef ___entDef, ref GizmoResult __result, Designator_Build __instance)
+		public static bool VehicleMaterialOnBuildGizmo(Vector2 topLeft, float maxWidth, BuildableDef ___entDef, ref GizmoResult __result, Designator_Build __instance, GizmoRenderParms parms)
 		{
 			if (___entDef is VehicleBuildDef def)
 			{
 				float width = __instance.GetWidth(maxWidth);
-				__result = VehicleGUI.GizmoOnGUIWithMaterial(__instance, new Rect(topLeft.x, topLeft.y, width, width), def);
+				__result = VehicleGUI.GizmoOnGUIWithMaterial(__instance, new Rect(topLeft.x, topLeft.y, width, width), parms, def);
 				if (def.MadeFromStuff)
 				{
 					Designator_Dropdown.DrawExtraOptionsIcon(topLeft, __instance.GetWidth(maxWidth));

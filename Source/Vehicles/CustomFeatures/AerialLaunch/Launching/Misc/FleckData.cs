@@ -12,11 +12,15 @@ namespace Vehicles
 	{
 		public FleckDef def;
 		public FloatRange angle = new FloatRange(0, 360);
+		[Obsolete]
 		public PositionStart position = PositionStart.Position;
 
 		public Vector3 originOffset = Vector3.zero;
 
 		public bool runOutOfStep = true;
+
+		public bool lockFleckX = true;
+		public bool lockFleckZ = true;
 
 		[GraphEditable]
 		public LinearCurve drawOffset;

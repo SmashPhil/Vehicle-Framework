@@ -27,7 +27,6 @@ namespace Vehicles
 
 		public override bool Arrived(int tile)
 		{
-			ExecuteEvents();
 			return true;
 		}
 

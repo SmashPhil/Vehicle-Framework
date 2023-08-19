@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using RimWorld;
 using SmashTools;
 using HarmonyLib;
 
@@ -59,6 +60,8 @@ namespace Vehicles
 		public float reloadTimer = 5;
 		public float warmUpTimer = 3;
 
+		public float autoRefuelProportion = 2;
+
 		/// <summary>
 		/// Sounds
 		/// </summary>
@@ -86,6 +89,22 @@ namespace Vehicles
 			}
 		}
 
+		public override void PostLoad()
+		{
+			base.PostLoad();
+			LongEventHandler.ExecuteWhenFinished(delegate ()
+			{
+				if (graphicData.shaderType == null)
+				{
+					graphicData.shaderType = ShaderTypeDefOf.Cutout;
+				}
+				if (!VehicleMod.settings.main.useCustomShaders)
+				{
+					graphicData.shaderType = graphicData.shaderType.Shader.SupportsRGBMaskTex(ignoreSettings: true) ? ShaderTypeDefOf.CutoutComplex : graphicData.shaderType;
+				}
+			});
+		}
+
 		public override IEnumerable<string> ConfigErrors()
 		{
 			foreach (string error in base.ConfigErrors())
@@ -107,6 +126,17 @@ namespace Vehicles
 			if (ammunition is null && projectile is null)
 			{
 				yield return $"Must include either <field>ammunition</field> or a default <field>projectile</field>.".ConvertRichText();
+			}
+			if (ammunition is null)
+			{
+				if (genericAmmo)
+				{
+					yield return $"Turret has no <field>ammunition</field> field, but has been flagged as using <field>genericAmmo</field>. This makes no sense.";
+				}
+				if (chargePerAmmoCount != 1)
+				{
+					yield return $"Turret has no <field>ammunition</field> field, but has been assigned <field>chargePerAmmoCount</field>. This makes no sense.";
+				}
 			}
 			if (chargePerAmmoCount <= 0)
 			{

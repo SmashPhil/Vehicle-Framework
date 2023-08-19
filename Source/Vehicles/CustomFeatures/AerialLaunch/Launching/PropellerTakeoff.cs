@@ -31,9 +31,18 @@ namespace Vehicles
 		protected override int TotalTicks_Landing => base.TotalTicks_Landing + LandingProperties_Propeller.maxTicksPropeller;
 		protected override int TotalTicks_Takeoff => base.TotalTicks_Takeoff + LaunchProperties_Propeller.maxTicksPropeller;
 
-		public virtual float TicksVertical => ticksPassedVertical;
-
-		public virtual float TimeInAnimationPropeller => (float)ticksPassedPropeller / CurAnimationProperties_Propeller.maxTicksPropeller;
+		public virtual float TimeInAnimationPropeller
+		{
+			get
+			{
+				int ticks = CurAnimationProperties_Propeller.maxTicksPropeller;
+				if (ticks <= 0)
+				{
+					return 0;
+				}
+				return (float)ticksPassedPropeller / ticks;
+			}
+		}
 
 		protected virtual float RotationRate(float t)
 		{
@@ -62,7 +71,7 @@ namespace Vehicles
 				TickMotes();
 			}
 			float rotationRate = RotationRate(TimeInAnimationPropeller);
-			vehicle.graphicOverlay.rotationRegistry[Graphic_Propeller.Key] += rotationRate;
+			vehicle.graphicOverlay.rotationRegistry.UpdateRegistry(rotationRate);
 		}
 
 		protected override void TickTakeoff()
@@ -76,22 +85,103 @@ namespace Vehicles
 				ticksPassedPropeller++;
 				TickMotes();
 			}
-			vehicle.graphicOverlay.rotationRegistry[Graphic_Propeller.Key] += RotationRate(TimeInAnimationPropeller);
+			float rotationRate = RotationRate(TimeInAnimationPropeller);
+			vehicle.graphicOverlay.rotationRegistry.UpdateRegistry(rotationRate);
 		}
 
 		protected override int AnimationEditorTick_Landing(int ticksPassed)
 		{
 			ticksPassed = base.AnimationEditorTick_Landing(ticksPassed);
 			ticksPassedPropeller = ticksPassed.Take(LandingProperties_Propeller.maxTicksPropeller, out int remaining);
-			vehicle.graphicOverlay.rotationRegistry[Graphic_Propeller.Key] += RotationRate(TimeInAnimationPropeller);
+			float rotationRate = RotationRate(TimeInAnimationPropeller);
+			vehicle.graphicOverlay.rotationRegistry.UpdateRegistry(rotationRate);
 			return remaining;
 		}
 
 		protected override int AnimationEditorTick_Takeoff(int ticksPassed)
 		{
 			ticksPassedPropeller = ticksPassed.Take(LaunchProperties_Propeller.maxTicksPropeller, out int remaining);
-			vehicle.graphicOverlay.rotationRegistry[Graphic_Propeller.Key] += RotationRate(TimeInAnimationPropeller);
+			float rotationRate = RotationRate(TimeInAnimationPropeller);
+			vehicle.graphicOverlay.rotationRegistry.UpdateRegistry(rotationRate);
 			return base.AnimationEditorTick_Takeoff(remaining);
+		}
+
+		protected override (Vector3 drawPos, float rotation, ShadowData shadowData) AnimateLanding(Vector3 drawPos, float rotation, ShadowData shadowData)
+		{
+			if (!LandingProperties_Propeller.rotationPropellerCurve.NullOrEmpty())
+			{
+				rotation += LandingProperties_Propeller.rotationPropellerCurve.Evaluate(TimeInAnimationPropeller);
+			}
+			if (!LandingProperties_Propeller.zPositionPropellerCurve.NullOrEmpty())
+			{
+				drawPos.z += LandingProperties_Propeller.zPositionPropellerCurve.Evaluate(TimeInAnimationPropeller);
+			}
+			if (!LandingProperties_Propeller.xPositionPropellerCurve.NullOrEmpty())
+			{
+				drawPos.x += LandingProperties_Propeller.xPositionPropellerCurve.Evaluate(TimeInAnimationPropeller);
+			}
+			if (!LandingProperties_Propeller.offsetPropellerCurve.NullOrEmpty())
+			{
+				Vector2 offset = LandingProperties_Propeller.offsetPropellerCurve.EvaluateT(TimeInAnimationPropeller);
+				drawPos += new Vector3(offset.x, 0, offset.y);
+			}
+
+			if (LandingProperties_Propeller.renderShadow)
+			{
+				if (!LandingProperties_Propeller.shadowSizeXPropellerCurve.NullOrEmpty())
+				{
+					shadowData.width = LandingProperties_Propeller.shadowSizeXPropellerCurve.Evaluate(TimeInAnimationPropeller);
+				}
+				if (!LandingProperties_Propeller.shadowSizeZPropellerCurve.NullOrEmpty())
+				{
+					shadowData.height = LandingProperties_Propeller.shadowSizeZPropellerCurve.Evaluate(TimeInAnimationPropeller);
+				}
+				if (!LandingProperties_Propeller.shadowAlphaPropellerCurve.NullOrEmpty())
+				{
+					shadowData.alpha = LandingProperties_Propeller.shadowAlphaPropellerCurve.Evaluate(TimeInAnimationPropeller);
+				}
+			}
+
+			return base.AnimateLanding(drawPos, rotation, shadowData);
+		}
+
+		protected override (Vector3 drawPos, float rotation, ShadowData shadowData) AnimateTakeoff(Vector3 drawPos, float rotation, ShadowData shadowData)
+		{
+			if (!LaunchProperties_Propeller.rotationPropellerCurve.NullOrEmpty())
+			{
+				rotation += LaunchProperties_Propeller.rotationPropellerCurve.Evaluate(TimeInAnimationPropeller);
+			}
+			if (!LaunchProperties_Propeller.zPositionPropellerCurve.NullOrEmpty())
+			{
+				drawPos.z += LaunchProperties_Propeller.zPositionPropellerCurve.Evaluate(TimeInAnimationPropeller);
+			}
+			if (!LaunchProperties_Propeller.xPositionPropellerCurve.NullOrEmpty())
+			{
+				drawPos.x += LaunchProperties_Propeller.xPositionPropellerCurve.Evaluate(TimeInAnimationPropeller);
+			}
+			if (!LaunchProperties_Propeller.offsetPropellerCurve.NullOrEmpty())
+			{
+				Vector2 offset = LaunchProperties_Propeller.offsetPropellerCurve.EvaluateT(TimeInAnimationPropeller);
+				drawPos += new Vector3(offset.x, 0, offset.y);
+			}
+
+			if (LaunchProperties_Propeller.renderShadow)
+			{
+				if (!LaunchProperties_Propeller.shadowSizeXPropellerCurve.NullOrEmpty())
+				{
+					shadowData.width = LaunchProperties_Propeller.shadowSizeXPropellerCurve.Evaluate(TimeInAnimationPropeller);
+				}
+				if (!LaunchProperties_Propeller.shadowSizeZPropellerCurve.NullOrEmpty())
+				{
+					shadowData.height = LaunchProperties_Propeller.shadowSizeZPropellerCurve.Evaluate(TimeInAnimationPropeller);
+				}
+				if (!LaunchProperties_Propeller.shadowAlphaPropellerCurve.NullOrEmpty())
+				{
+					shadowData.alpha = LaunchProperties_Propeller.shadowAlphaPropellerCurve.Evaluate(TimeInAnimationPropeller);
+				}
+			}
+
+			return base.AnimateTakeoff(drawPos, rotation, shadowData);
 		}
 
 		public override bool FinishedAnimation(VehicleSkyfaller skyfaller)
@@ -104,6 +194,10 @@ namespace Vehicles
 			base.PreAnimationSetup();
 			ticksPassedPropeller = 0;
 			effectsToThrowPropeller = 0;
+			if (launchType == LaunchType.Landing)
+			{
+				vehicle.graphicOverlay.rotationRegistry.Reset();
+			}
 		}
 
 		public override void ExposeData()

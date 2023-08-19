@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Linq;
+using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 using SmashTools;
@@ -8,8 +11,9 @@ namespace Vehicles
 	public abstract class Graphic_RGB : Graphic
 	{
 		public const string MaskSuffix = "m";
-		public const int MatCount = 8;
 
+		private static readonly string[] pathExtensions = new string[8] {"_north", "_east", "_south", "_west",
+																	     "_northEast","_southEast","_southWest","_northWest" };
 		protected bool westFlipped;
 		protected bool eastFlipped;
 		protected bool eastRotated;
@@ -26,14 +30,16 @@ namespace Vehicles
 		/// <summary>
 		/// Needs to be initialized and filled in <see cref="Init(GraphicRequestRGB, bool)"/> before mask data is generated
 		/// </summary>
-		protected Texture2D[] textureArray;
+		protected Texture2D[] textures;
+		protected Texture2D[] masks;
 
 		//folderName : <filePath, texture/mat array>
-		public Texture2D[] masks;
-		public Dictionary<PatternDef, (string texPath, Material[] materials)> maskMatPatterns = new Dictionary<PatternDef, (string, Material[])>();
+		public Material[] materials;
+		public int[] patternPointers;
 
 		public override Material MatSingle => MatNorth;
 
+		public virtual int MatCount => 4;
 		public override bool WestFlipped => westFlipped;
 		public override bool EastFlipped => eastFlipped;
 		public virtual bool EastRotated => eastRotated;
@@ -60,7 +66,12 @@ namespace Vehicles
 
 		public virtual Texture2D TexAt(Rot8 rot)
 		{
-			return textureArray[rot.AsInt];
+			return textures[rot.AsInt];
+		}
+
+		public virtual Texture2D MaskAt(Rot8 rot)
+		{
+			return masks[rot.AsInt];
 		}
 
 		public override Mesh MeshAt(Rot4 rot)
@@ -118,147 +129,284 @@ namespace Vehicles
 
 		public override void Init(GraphicRequest req)
 		{
+			masks = new Texture2D[MatCount];
+			materials = new Material[MatCount];
+
 			if (req.shader.SupportsRGBMaskTex())
 			{
-				//SmashLog.Error($"<type>Graphic_RGB</type> called <method>Init</method> with regular GraphicRequest. This will result in incorrectly colored RGB masks as <property>ColorThree</property> cannot be properly initialized.");
+				Log.Warning($"Calling Non-RGB Init with shader type that supports RGB Shaders. Req={req.path} ShaderType={req.graphicData.shaderType}");
 			}
-			Init(new GraphicRequestRGB(req), false);
+			CopyData(req);
+			GetTextures(req.path);
+			if (req.shader.SupportsMaskTex() || req.shader.SupportsRGBMaskTex())
+			{
+				GetMasks(req.path, req.shader);
+			}
+			for (int i = 0; i < masks.Length; i++)
+			{
+				MaterialRequest matReq2 = new MaterialRequest()
+				{
+					mainTex = textures[i],
+					maskTex = masks[i],
+					shader = req.shader,
+					color = req.color,
+					colorTwo = req.colorTwo,
+					renderQueue = req.renderQueue,
+					shaderParameters = req.shaderParameters
+				};
+				materials[i] = MaterialPool.MatFrom(matReq2);
+			}
 		}
 
-		public virtual void Init(GraphicRequestRGB req, bool cacheResults = true)
+		public virtual void Init(GraphicRequestRGB req)
 		{
-			if (cacheResults is true)
+			if (!req.shader.SupportsRGBMaskTex())
 			{
-				masks = new Texture2D[MatCount];
-				maskMatPatterns = new Dictionary<PatternDef, (string, Material[])>();
+				Log.Warning($"Calling RGB Init with unsupported shader type. Req={req}");
 			}
-			data = req.graphicData;
-			path = req.path;
-			color = req.color;
-			colorTwo = req.colorTwo;
+
+			masks = new Texture2D[MatCount];
+			materials = new Material[MatCount];
+			
+			CopyData(req);
 			colorThree = req.colorThree;
 			tiles = req.tiles;
 			displacement = req.displacement;
+
+			GetTextures(req.path);
+
+			if (req.shader.SupportsMaskTex() || req.shader.SupportsRGBMaskTex())
+			{
+				GetMasks(req.path, req.shader);
+			}
+		}
+
+		private void CopyData(GraphicRequest req)
+		{
+			data = req.graphicData;
+			path = req.path;
+			maskPath = req.maskPath;
+			color = req.color;
+			colorTwo = req.colorTwo;
 			drawSize = req.drawSize;
 		}
 
-		protected virtual Material[] GenerateMasks(GraphicRequestRGB req, PatternDef pattern)
+		protected virtual void GetTextures(string path)
 		{
-			var tmpMaskArray = new Texture2D[MatCount];
-			var patternPointers = new int[MatCount] { 0, 1, 2, 3, 4, 5, 6, 7 };
+			textures = new Texture2D[MatCount];
 
-			if (req.shader.SupportsRGBMaskTex() || req.shader.SupportsMaskTex())
+			for (int i = 0; i < MatCount; i++)
 			{
-				tmpMaskArray[0] = ContentFinder<Texture2D>.Get(req.path + "_north" + MaskSuffix, false);
-				tmpMaskArray[0] ??= ContentFinder<Texture2D>.Get(req.path + Graphic_Single.MaskSuffix, false); // _m for single texture to remain consistent with vanilla
-				tmpMaskArray[1] = ContentFinder<Texture2D>.Get(req.path + "_east" + MaskSuffix, false);
-				tmpMaskArray[2] = ContentFinder<Texture2D>.Get(req.path + "_south" + MaskSuffix, false);
-				tmpMaskArray[3] = ContentFinder<Texture2D>.Get(req.path + "_west" + MaskSuffix, false);
-				tmpMaskArray[4] = ContentFinder<Texture2D>.Get(req.path + "_northEast" + MaskSuffix, false);
-				tmpMaskArray[5] = ContentFinder<Texture2D>.Get(req.path + "_southEast" + MaskSuffix, false);
-				tmpMaskArray[6] = ContentFinder<Texture2D>.Get(req.path + "_southWest" + MaskSuffix, false);
-				tmpMaskArray[7] = ContentFinder<Texture2D>.Get(req.path + "_northWest" + MaskSuffix, false);
-				if (tmpMaskArray[0] is null)
+				textures[i] = ContentFinder<Texture2D>.Get(path + pathExtensions[i], false); //Autosizes depending on the MatCount
+			}
+
+			if (!textures[0])
+			{
+				textures[0] = ContentFinder<Texture2D>.Get(path, true);
+			}
+
+			if (MatCount >= 4)
+			{
+				if (textures[0] is null)
 				{
-					if (tmpMaskArray[2] != null)
+					if (textures[2] != null)
 					{
-						tmpMaskArray[0] = tmpMaskArray[2];
-						patternPointers[0] = 2;
+						textures[0] = textures[2];
+						drawRotatedExtraAngleOffset = 180f;
 					}
-					else if (tmpMaskArray[1] != null)
+					else if (textures[1] != null)
 					{
-						tmpMaskArray[0] = tmpMaskArray[1];
-						patternPointers[0] = 1;
+						textures[0] = textures[1];
+						drawRotatedExtraAngleOffset = -90f;
 					}
-					else if (tmpMaskArray[3] != null)
+					else if (textures[3] != null)
 					{
-						tmpMaskArray[0] = tmpMaskArray[3];
-						patternPointers[0] = 3;
+						textures[0] = textures[3];
+						drawRotatedExtraAngleOffset = 90f;
 					}
 				}
-				if (tmpMaskArray[0] is null)
+				if (textures[0] is null)
 				{
-					Log.Error("Failed to find any mask textures at " + req.path + " while constructing " + this.ToStringSafe());
-					return null;
+					Log.Error("Failed to find any textures at " + path + " while constructing " + this.ToStringSafe());
+					return;
 				}
-				if (tmpMaskArray[2] is null)
+				if (textures[2] is null)
 				{
-					tmpMaskArray[2] = tmpMaskArray[0];
-					patternPointers[2] = 0;
-					southRotated = DataAllowsFlip;
+					textures[2] = textures[0];
 				}
-				if (tmpMaskArray[1] is null)
+				if (textures[1] is null)
 				{
-					if (tmpMaskArray[3] != null)
+					if (textures[3] != null)
 					{
-						tmpMaskArray[1] = tmpMaskArray[3];
-						patternPointers[1] = 3;
+						textures[1] = textures[3];
 						eastFlipped = DataAllowsFlip;
 					}
 					else
 					{
-						tmpMaskArray[1] = tmpMaskArray[0];
-						patternPointers[1] = 0;
-						eastRotated = DataAllowsFlip;
+						textures[1] = textures[0];
 					}
 				}
-				if (tmpMaskArray[3] is null)
+				if (textures[3] is null)
 				{
-					tmpMaskArray[3] = tmpMaskArray[1];
-					patternPointers[3] = 1;
-					westFlipped = DataAllowsFlip;
+					if (textures[1] != null)
+					{
+						textures[3] = textures[1];
+						westFlipped = DataAllowsFlip;
+					}
+					else
+					{
+						textures[3] = textures[0];
+					}
 				}
-
-				if (tmpMaskArray[4] is null)
-				{
-					tmpMaskArray[4] = tmpMaskArray[0];
-					patternPointers[4] = 0;
-					eastDiagonalRotated = DataAllowsFlip;
-				}
-				if (tmpMaskArray[5] is null)
-				{
-					tmpMaskArray[5] = tmpMaskArray[2];
-					patternPointers[5] = 2;
-					eastDiagonalRotated = DataAllowsFlip;
-				}
-				if (tmpMaskArray[6] is null)
-				{
-					tmpMaskArray[6] = tmpMaskArray[2];
-					patternPointers[6] = 2;
-					westDiagonalRotated = DataAllowsFlip;
-				}
-				if (tmpMaskArray[7] is null)
-				{
-					tmpMaskArray[7] = tmpMaskArray[0];
-					patternPointers[7] = 0;
-					westDiagonalRotated = DataAllowsFlip;
-				}
-				masks = tmpMaskArray;
 			}
 			
-			var mats = new Material[MatCount];
-			for (int i = 0; i < MatCount; i++)
+			if (MatCount == 8)
 			{
-				MaterialRequestRGB req2 = new MaterialRequestRGB()
+				if (textures[4] is null)
 				{
-					mainTex = textureArray[i],
-					shader = pattern is SkinDef ? RGBShaderTypeDefOf.CutoutComplexSkin.Shader : req.shader,
-					properties = pattern.properties,
-					color = pattern.properties.colorOne ?? req.color,
-					colorTwo = pattern.properties.colorTwo ?? req.colorTwo,
-					colorThree = pattern.properties.colorThree ?? req.colorThree,
-					tiles = req.tiles,
-					displacement = req.displacement,
-					maskTex = tmpMaskArray[i],
-					patternTex = pattern[new Rot8(patternPointers[i])],
-					shaderParameters = req.shaderParameters,
-				};
-				mats[i] = MaterialPoolExpanded.MatFrom(req2);
+					if (textures[7] != null)
+					{
+						textures[4] = textures[7];
+					}
+					else
+					{
+						textures[4] = textures[0];
+					}
+					eastDiagonalRotated = DataAllowsFlip;
+				}
+				if (textures[5] is null)
+				{
+					if (textures[6] != null)
+					{
+						textures[5] = textures[6];
+					}
+					else
+					{
+						textures[5] = textures[2];
+					}
+					eastDiagonalRotated = DataAllowsFlip;
+				}
+				if (textures[6] is null)
+				{
+					if (textures[5] != null)
+					{
+						textures[6] = textures[5];
+					}
+					else
+					{
+						textures[6] = textures[2];
+					}
+					westDiagonalRotated = DataAllowsFlip;
+				}
+				if (textures[7] is null)
+				{
+					if (textures[4] != null)
+					{
+						textures[7] = textures[4];
+					}
+					else
+					{
+						textures[7] = textures[0];
+					}
+					westDiagonalRotated = DataAllowsFlip;
+				}
 			}
-			return mats;
 		}
 
-		public abstract Graphic_RGB GetColoredVersion(Shader shader, Color colorOne, Color colorTwo, Color colorThree, float tiles = 1, float displacementX = 0, float displacementY = 0);
+		protected virtual void GetMasks(string path, Shader shader)
+		{
+			patternPointers = new int[] { 0, 1, 2, 3, 4, 5, 6, 7 };
+			if (shader.SupportsRGBMaskTex() || shader.SupportsMaskTex())
+			{
+				masks[0] = ContentFinder<Texture2D>.Get(path + Graphic_Single.MaskSuffix, false); // _m for single texture to remain consistent with vanilla
+				for (int i = 0; i < MatCount; i++)
+				{
+					masks[i] ??= ContentFinder<Texture2D>.Get(path + pathExtensions[i] + MaskSuffix, false); //Autosizes depending on the MatCount
+				}
+
+				if (MatCount >= 4)
+				{
+					if (masks[0] is null)
+					{
+						if (masks[2] != null)
+						{
+							masks[0] = masks[2];
+							patternPointers[0] = 2;
+						}
+						else if (masks[1] != null)
+						{
+							masks[0] = masks[1];
+							patternPointers[0] = 1;
+						}
+						else if (masks[3] != null)
+						{
+							masks[0] = masks[3];
+							patternPointers[0] = 3;
+						}
+					}
+					if (masks[0] is null)
+					{
+						Log.Error("Failed to find any mask textures at " + path + " while constructing " + this.ToStringSafe());
+						return;
+					}
+					if (masks[2] is null)
+					{
+						masks[2] = masks[0];
+						patternPointers[2] = 0;
+						southRotated = DataAllowsFlip;
+					}
+					if (masks[1] is null)
+					{
+						if (masks[3] != null)
+						{
+							masks[1] = masks[3];
+							patternPointers[1] = 3;
+							eastFlipped = DataAllowsFlip;
+						}
+						else
+						{
+							masks[1] = masks[0];
+							patternPointers[1] = 0;
+							eastRotated = DataAllowsFlip;
+						}
+					}
+					if (masks[3] is null)
+					{
+						masks[3] = masks[1];
+						patternPointers[3] = 1;
+						westFlipped = DataAllowsFlip;
+					}
+				}
+				
+				if (MatCount == 8)
+				{
+					if (masks[4] is null)
+					{
+						masks[4] = masks[0];
+						patternPointers[4] = 0;
+						eastDiagonalRotated = DataAllowsFlip;
+					}
+					if (masks[5] is null)
+					{
+						masks[5] = masks[2];
+						patternPointers[5] = 2;
+						eastDiagonalRotated = DataAllowsFlip;
+					}
+					if (masks[6] is null)
+					{
+						masks[6] = masks[2];
+						patternPointers[6] = 2;
+						westDiagonalRotated = DataAllowsFlip;
+					}
+					if (masks[7] is null)
+					{
+						masks[7] = masks[0];
+						patternPointers[7] = 0;
+						westDiagonalRotated = DataAllowsFlip;
+					}
+				}
+			}
+		}
 
 		public override string ToString()
 		{

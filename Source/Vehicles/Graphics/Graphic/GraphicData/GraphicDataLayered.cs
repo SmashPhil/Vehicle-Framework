@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using Verse;
 using RimWorld;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -12,6 +13,11 @@ namespace Vehicles
 		protected int layer = 0;
 
 		public Vector3? OriginalDrawOffset { get; private set; }
+
+		public Vector3? OriginalDrawOffsetNorth { get; private set; }
+		public Vector3? OriginalDrawOffsetEast { get; private set; }
+		public Vector3? OriginalDrawOffsetSouth { get; private set; }
+		public Vector3? OriginalDrawOffsetWest { get; private set; }
 
 		public GraphicDataLayered() : base()
 		{
@@ -23,12 +29,42 @@ namespace Vehicles
 			layer = graphicData.layer;
 		}
 
-		public virtual void Init()
+		public virtual void Init(IMaterialCacheTarget target)
 		{
 			OriginalDrawOffset ??= drawOffset;
-			drawOffset = OriginalDrawOffset.Value;
+			OriginalDrawOffsetNorth ??= drawOffsetNorth;
+			OriginalDrawOffsetEast ??= drawOffsetEast;
+			OriginalDrawOffsetSouth ??= drawOffsetSouth;
+			OriginalDrawOffsetWest ??= drawOffsetWest;
+
 			float layerOffset = layer * (Altitudes.AltInc / Enum.GetNames(typeof(AltitudeLayer)).EnumerableCount());
+
+			drawOffset = OriginalDrawOffset.Value;
 			drawOffset.y += layerOffset;
+
+			if (drawOffsetNorth != null)
+			{
+				drawOffsetNorth = OriginalDrawOffsetNorth.Value;
+				drawOffsetNorth = new Vector3(drawOffsetNorth.Value.x, drawOffsetNorth.Value.y + layerOffset, drawOffsetNorth.Value.z);
+			}
+
+			if (drawOffsetEast != null)
+			{
+				drawOffsetEast = OriginalDrawOffsetEast.Value;
+				drawOffsetEast = new Vector3(drawOffsetEast.Value.x, drawOffsetEast.Value.y + layerOffset, drawOffsetEast.Value.z);
+			}
+
+			if (drawOffsetSouth != null)
+			{
+				drawOffsetSouth = OriginalDrawOffsetSouth.Value;
+				drawOffsetSouth = new Vector3(drawOffsetSouth.Value.x, drawOffsetSouth.Value.y + layerOffset, drawOffsetSouth.Value.z);
+			}
+
+			if (drawOffsetWest != null)
+			{
+				drawOffsetWest = OriginalDrawOffsetWest.Value;
+				drawOffsetWest = new Vector3(drawOffsetWest.Value.x, drawOffsetWest.Value.y + layerOffset, drawOffsetWest.Value.z);
+			}
 		}
 	}
 }

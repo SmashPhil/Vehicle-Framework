@@ -12,6 +12,7 @@ using Verse.Sound;
 using Verse.AI;
 using Verse.AI.Group;
 using SmashTools;
+using Mono.Security;
 
 namespace Vehicles
 {
@@ -111,7 +112,13 @@ namespace Vehicles
 			{
 				if (graphicInt is null)
 				{
-					var graphicData = new GraphicDataRGB();
+					if (Destroyed && !RGBMaterialPool.GetAll(this).NullOrEmpty())
+					{
+						Log.Error($"Reinitializing RGB Materials but {this} has already been destroyed and the cache was not cleared for this entry. This may result in a memory leak.");
+						RGBMaterialPool.Release(this);
+					}
+
+					GraphicDataRGB graphicData = new GraphicDataRGB();
 					if (retexture != null)
 					{
 						graphicData.CopyFrom(retexture.graphicData);
@@ -126,11 +133,28 @@ namespace Vehicles
 					graphicData.tiles = patternData.tiles;
 					graphicData.displacement = patternData.displacement;
 					graphicData.pattern = patternData.patternDef;
-					graphicInt = graphicData.Graphic as Graphic_Vehicle;
+
+					if (graphicData.shaderType.Shader.SupportsRGBMaskTex())
+					{
+						RGBMaterialPool.CacheMaterialsFor(this);
+						graphicData.Init(this);
+						graphicInt = graphicData.Graphic as Graphic_Vehicle;
+						RGBMaterialPool.SetProperties(this, patternData, graphicInt.TexAt, graphicInt.MaskAt);
+					}
+					else
+					{
+						graphicInt = ((GraphicData)graphicData).Graphic as Graphic_Vehicle; //Triggers vanilla Init call for normal material caching
+					}
 				}
 				return graphicInt;
 			}
 		}
+
+		public int MaterialCount => 8;
+
+		public PatternDef PatternDef => Pattern;
+
+		string IMaterialCacheTarget.Name => $"{VehicleDef}_{this}";
 
 		public override Color DrawColor
 		{
@@ -317,6 +341,7 @@ namespace Vehicles
 			{
 				Comps_PostDrawUnspawned(drawLoc, rotation);
 			}
+			statHandler.DrawHitbox(HighlightedComponent);
 		}
 
 		public virtual void Comps_PostDrawUnspawned(Vector3 drawLoc, float rotation)
@@ -361,7 +386,7 @@ namespace Vehicles
 		{
 			if (UnityData.IsInMainThread)
 			{
-				ResetMaskCache();
+				RGBMaterialPool.SetProperties(this, patternData);
 				var cannonComp = CompVehicleTurrets;
 				if (cannonComp != null)
 				{
@@ -371,12 +396,6 @@ namespace Vehicles
 					}
 				}
 			}
-		}
-
-		private void ResetMaskCache()
-		{
-			graphicInt = null;
-			VehicleDef.graphicData.Init();
 		}
 
 		public void UpdateRotationAndAngle()
@@ -521,7 +540,6 @@ namespace Vehicles
 					action = delegate ()
 					{
 						DisembarkAll();
-						ignition.Drafted = false;
 					},
 					hotKey = KeyBindingDefOf.Misc2
 				};
@@ -617,7 +635,7 @@ namespace Vehicles
 						{
 							options.Add(new FloatMenuOption(component.props.label, delegate ()
 							{
-								component.TakeDamage(this, new DamageInfo(DamageDefOf.Vaporize, float.MaxValue));
+								component.TakeDamage(this, new DamageInfo(DamageDefOf.Vaporize, float.MaxValue), ignoreArmor: true);
 								Notify_TookDamage();
 							}));
 						}
@@ -637,7 +655,7 @@ namespace Vehicles
 						{
 							options.Add(new FloatMenuOption(component.props.label, delegate ()
 							{
-								component.TakeDamage(this, new DamageInfo(DamageDefOf.Vaporize, component.health * Rand.Range(0.1f, 1)));
+								component.TakeDamage(this, new DamageInfo(DamageDefOf.Vaporize, component.health * Rand.Range(0.1f, 1)), ignoreArmor: true);
 								Notify_TookDamage();
 							}));
 						}
@@ -753,6 +771,21 @@ namespace Vehicles
 			{
 				yield break;
 			}
+            if (!IdeoAllowsBoarding(selPawn))
+            {
+                yield return new FloatMenuOption("VF_CantEnterVehicle_IdeoligionForbids".Translate(), null);
+				yield break;
+            }
+            foreach (ThingComp thingComp in AllComps)
+			{
+				if (thingComp is VehicleComp vehicleComp)
+				{
+					foreach (FloatMenuOption floatMenuOption in vehicleComp.CompFloatMenuOptions())
+					{
+						yield return floatMenuOption;
+					}
+				}
+			}
 			foreach (VehicleHandler handler in handlers)
 			{
 				if (handler.AreSlotsAvailable)
@@ -774,6 +807,45 @@ namespace Vehicles
 				}
 			}
 		}
+
+		public bool IdeoAllowsBoarding(Pawn selPawn)
+		{
+			if (!ModsConfig.IdeologyActive)
+			{ 
+				return true; 
+			}
+
+            switch (this.VehicleDef.vehicleType)
+			{
+				case VehicleType.Air:
+					if(!IdeoUtility.DoerWillingToDo(HistoryEventDefOf_Vehicles.VF_BoardAirVehicle, selPawn))
+					{
+						return false;
+					}
+					break;
+                case VehicleType.Sea:
+                    if (!IdeoUtility.DoerWillingToDo(HistoryEventDefOf_Vehicles.VF_BoardSeaVehicle, selPawn))
+                    {
+                        return false;
+                    }
+                    break;
+                case VehicleType.Land:
+                    if (!IdeoUtility.DoerWillingToDo(HistoryEventDefOf_Vehicles.VF_BoardLandVehicle, selPawn))
+                    {
+                        return false;
+                    }
+                    break;
+                case VehicleType.Universal:
+                    if (!IdeoUtility.DoerWillingToDo(HistoryEventDefOf_Vehicles.VF_BoardUniversalVehicle, selPawn))
+                    {
+                        return false;
+                    }
+                    break;
+
+            }
+			return true;
+		}
+
 
 		public void ChangeColor()
 		{
@@ -896,33 +968,42 @@ namespace Vehicles
 		public void MultiplePawnFloatMenuOptions(List<Pawn> pawns)
 		{
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
-			VehicleReservationManager reservationManager = Map.GetCachedMapComponent<VehicleReservationManager>();
-			FloatMenuOption opt1 = new FloatMenuOption("VF_BoardVehicleGroup".Translate(LabelShort), delegate ()
+
+			if (pawns.Any(pawn => !IdeoAllowsBoarding(pawn)))
 			{
-				List<IntVec3> cells = this.OccupiedRect().Cells.ToList();
-				foreach (Pawn p in pawns)
-				{
-					if (cells.Contains(p.Position))
-					{
-						continue;
-					}
-					Job job = new Job(JobDefOf_Vehicles.Board, this);
-					VehicleHandler handler = p.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(handler => handler.AreSlotsAvailable && handler.role.handlingTypes == HandlingTypeFlags.None);
-					GiveLoadJob(p, handler);
-					reservationManager.Reserve<VehicleHandler, VehicleHandlerReservation>(this, p, job, handler);
-					p.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
-				}
-			}, MenuOptionPriority.Default, null, null, 0f, null, null);
-			FloatMenuOption opt2 = new FloatMenuOption("VF_BoardVehicleGroupFail".Translate(LabelShort), null, MenuOptionPriority.Default, null, null, 0f, null, null)
-			{
-				Disabled = true
-			};
-			int r = 0;
-			foreach (VehicleHandler h in handlers)
-			{
-				r += reservationManager.GetReservation<VehicleHandlerReservation>(this)?.ClaimantsOnHandler(h) ?? 0;
+				options.Add(new FloatMenuOption("VF_CantEnterVehicle_IdeoligionForbids".Translate(), null));
+
 			}
-			options.Add(pawns.Count + r > SeatsAvailable ? opt2 : opt1);
+			else
+			{
+				VehicleReservationManager reservationManager = Map.GetCachedMapComponent<VehicleReservationManager>();
+				FloatMenuOption opt1 = new FloatMenuOption("VF_BoardVehicleGroup".Translate(LabelShort), delegate ()
+				{
+					List<IntVec3> cells = this.OccupiedRect().Cells.ToList();
+					foreach (Pawn p in pawns)
+					{
+						if (cells.Contains(p.Position))
+						{
+							continue;
+						}
+						Job job = new Job(JobDefOf_Vehicles.Board, this);
+						VehicleHandler handler = p.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(handler => handler.AreSlotsAvailable && handler.role.handlingTypes == HandlingTypeFlags.None);
+						GiveLoadJob(p, handler);
+						reservationManager.Reserve<VehicleHandler, VehicleHandlerReservation>(this, p, job, handler);
+						p.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
+					}
+				}, MenuOptionPriority.Default, null, null, 0f, null, null);
+				FloatMenuOption opt2 = new FloatMenuOption("VF_BoardVehicleGroupFail".Translate(LabelShort), null, MenuOptionPriority.Default, null, null, 0f, null, null)
+				{
+					Disabled = true
+				};
+				int r = 0;
+				foreach (VehicleHandler h in handlers)
+				{
+					r += reservationManager.GetReservation<VehicleHandlerReservation>(this)?.ClaimantsOnHandler(h) ?? 0;
+				}
+				options.Add(pawns.Count + r > SeatsAvailable ? opt2 : opt1);
+			}
 			FloatMenuMulti floatMenuMap = new FloatMenuMulti(options, pawns, this, pawns[0].LabelCap, Verse.UI.MouseMapPosition())
 			{
 				givesColonistOrders = true

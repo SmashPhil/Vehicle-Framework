@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using UnityEngine;
 using Verse;
 using RimWorld;
@@ -187,7 +188,15 @@ namespace Vehicles
 				stringBuilder.AppendLine($"defaultTerrain is impassable and no custom pathCost was found.");
 				return ImpassableCost;
 			}
-			List<Thing> list = map.thingGrid.ThingsListAt(cell);
+			List<Thing> list;
+			if (!UnityData.IsInMainThread)
+			{
+				list = new List<Thing>(map.thingGrid.ThingsListAt(cell));
+			}
+			else
+			{
+				list = map.thingGrid.ThingsListAt(cell);
+			}
 			int thingCost = 0;
 			foreach (Thing thing in list)
 			{
@@ -202,10 +211,6 @@ namespace Vehicles
 					{
 						stringBuilder.AppendLine($"thingPathCost is impassable: {thingPathCost}");
 						return ImpassableCost;
-					}
-					if (thingPathCost > thingCost)
-					{
-						thingCost = thingPathCost;
 					}
 				}
 				else if (thing.ImpassableForVehicles())

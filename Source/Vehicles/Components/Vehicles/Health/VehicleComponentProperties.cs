@@ -36,7 +36,7 @@ namespace Vehicles
 
 		public virtual bool HasReactor<T>() where T : Reactor
 		{
-			return reactors?.FirstOrDefault(reactor => reactor is T) != null;
+			return GetReactor<T>() != null;
 		}
 
 		public virtual void ResolveReferences(VehicleDef def)

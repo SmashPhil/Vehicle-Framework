@@ -8,5 +8,10 @@ namespace Vehicles
 	public abstract class Graphic_Rotator : Graphic_Single
 	{
 		public abstract string RegistryKey { get; }
+
+		public virtual float ModifyIncomingRotation(float rotation)
+		{
+			return rotation;
+		}
 	}
 }

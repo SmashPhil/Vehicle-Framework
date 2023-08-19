@@ -4,6 +4,7 @@ using System.Linq;
 using Verse;
 using Verse.Sound;
 using RimWorld;
+using RimWorld.Planet;
 using UnityEngine;
 using SmashTools;
 
@@ -81,12 +82,18 @@ namespace Vehicles
 		{
 			vehicle.CompVehicleLauncher.launchProtocol.Tick();
 			vehicle.Tick();
+			vehicle.TickHandlers(); ///Manually tick handlers since vehicle is despawned but pawns aren't world pawns (so they aren't ticking from <see cref="WorldPawns"/>)
 		}
 
 		protected virtual void LeaveMap()
 		{
-			vehicle.ReleaseSustainerTarget();
 			Destroy();
+		}
+
+		public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
+		{
+			base.DeSpawn(mode);
+			vehicle.ReleaseSustainerTarget();
 		}
 
 		protected virtual void DrawDropSpotShadow()
@@ -126,6 +133,17 @@ namespace Vehicles
 		{
 			base.SpawnSetup(map, respawningAfterLoad);
 			launchProtocolDrawPos = RootPos;
+			if (vehicle.IsWorldPawn())
+			{
+				Find.WorldPawns.RemovePawn(vehicle);
+				foreach (Pawn pawn in vehicle.AllPawnsAboard)
+				{
+					if (pawn.IsWorldPawn())
+					{
+						Find.WorldPawns.RemovePawn(pawn);
+					}
+				}
+			}
 			vehicle.SetSustainerTarget(this);
 			vehicle.ResetRenderStatus(); //Reset required for recaching handler lists. Loading save file will not recache these since vehicle will be despawned initially
 		}

@@ -87,7 +87,7 @@ namespace Vehicles
 			aboveBodyPos.y += YOffset_Body;
 			Rot8 vehicleRot = new Rot8(bodyFacing, angle);
 			Mesh mesh = graphics.vehicle.VehicleGraphic.MeshAtFull(vehicleRot);
-			List<Material> list = graphics.MatsBodyBaseAt(bodyFacing, RotDrawMode.Fresh);
+			List<Material> list = graphics.MatsBodyBaseAt(vehicleRot);
 
 			for (int i = 0; i < list.Count; i++)
 			{

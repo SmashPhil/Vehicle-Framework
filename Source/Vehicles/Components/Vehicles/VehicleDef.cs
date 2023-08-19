@@ -11,7 +11,8 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class VehicleDef : ThingDef, IDefIndex<VehicleDef>
+	[HeaderTitle(Label = nameof(VehicleDef))]
+	public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget
 	{
 		[PostToSettings]
 		public VehicleEnabledFor enabled = VehicleEnabledFor.Everyone;
@@ -41,11 +42,14 @@ namespace Vehicles
 		public NavigationCategory navigationCategory = NavigationCategory.Opportunistic;
 
 		public VehicleBuildDef buildDef;
+		[TweakField(Category = "VehicleDef")]
 		public new GraphicDataRGB graphicData;
 
+		[TweakField]
 		[PostToSettings(Label = "VF_Properties", Translate = true, ParentHolder = true)]
 		public VehicleProperties properties;
 		
+		[TweakField]
 		public VehicleDrawProperties drawProperties;
 
 		public List<StatCache.EventLister> statEvents;
@@ -112,6 +116,12 @@ namespace Vehicles
 			}
 		}
 
+		public int MaterialCount => 4;
+
+		public PatternDef PatternDef => PatternDefOf.Default;
+
+		public string Name => $"{modContentPack.Name}_{defName}";
+
 		/// <summary>
 		/// Resolve all references related to this VehicleDef
 		/// </summary>
@@ -151,6 +161,26 @@ namespace Vehicles
 		public override void PostLoad()
 		{
 			base.graphicData = graphicData;
+			LongEventHandler.ExecuteWhenFinished(delegate ()
+			{
+				if (!VehicleMod.settings.main.useCustomShaders)
+				{
+					graphicData.shaderType = graphicData.shaderType.Shader.SupportsRGBMaskTex(ignoreSettings: true) ? ShaderTypeDefOf.CutoutComplex : graphicData.shaderType;
+				}
+				if (graphicData.shaderType.Shader.SupportsRGBMaskTex())
+				{
+					RGBMaterialPool.CacheMaterialsFor(this);
+					graphicData.Init(this);
+					PatternData patternData = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(defName, new PatternData(graphicData));
+					patternData.ExposeDataPostDefDatabase();
+					RGBMaterialPool.SetProperties(this, patternData, graphicData.Graphic.TexAt, graphicData.Graphic.MaskAt);
+				}
+				else
+				{
+					_ = graphicData.Graphic;
+				}
+			});
+			
 			base.PostLoad();
 		}
 
@@ -162,6 +192,30 @@ namespace Vehicles
 			properties.PostDefDatabase(this);
 			drawProperties.PostDefDatabase();
 			graphicData.pattern ??= PatternDefOf.Default;
+		}
+
+		/// <summary>
+		/// Resolve icon for VehicleDef
+		/// </summary>
+		/// <remarks>
+		/// Removed icon based on lifeStages, vehicles don't have lifeStages
+		/// </remarks>
+		protected override void ResolveIcon()
+		{
+			if (graphic != null && graphic != BaseContent.BadGraphic)
+			{
+				Material material;
+				if (graphicData.Graphic.Shader.SupportsRGBMaskTex())
+				{
+					material = RGBMaterialPool.Get(this, defaultPlacingRot);
+				}
+				else
+				{
+					material = graphic.MatAt(defaultPlacingRot);
+				}
+				uiIcon = (Texture2D)material.mainTexture;
+				uiIconColor = material.color;
+			}
 		}
 
 		/// <summary>
@@ -263,22 +317,6 @@ namespace Vehicles
 				{
 					yield return statCategoryDef;
 				}
-			}
-		}
-
-		/// <summary>
-		/// Resolve icon for VehicleDef
-		/// </summary>
-		/// <remarks>
-		/// Removed icon based on lifeStages, vehicles don't have lifeStages
-		/// </remarks>
-		protected override void ResolveIcon()
-		{
-			if (graphic != null && graphic != BaseContent.BadGraphic)
-			{
-				Material material = graphic.ExtractInnerGraphicFor(null).MatAt(defaultPlacingRot, null);
-				uiIcon = (Texture2D)material.mainTexture;
-				uiIconColor = material.color;
 			}
 		}
 

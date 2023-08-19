@@ -20,6 +20,9 @@ namespace Vehicles
 	{
 		private static MethodInfo addAllTradeablesMethod;
 
+		private static readonly List<Pawn> tmpCaravanPawns = new List<Pawn>();
+		private static readonly List<Thing> tmpAerialVehicleThingsWillToBuy = new List<Thing>();
+
 		public void PatchMethods()
 		{
 			addAllTradeablesMethod = AccessTools.Method(typeof(TradeDeal), "AddToTradeables");
@@ -89,6 +92,12 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.ContainsPawn)),
 				postfix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(ContainsPawnInVehicle)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.AddPawn)),
+				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(AddPawnInVehicleCaravan)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.RemovePawn)),
+				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(RemovePawnInVehicleCaravan)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.IsOwner)),
 				postfix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(IsOwnerOfVehicle)));
@@ -102,6 +111,12 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Settlement_TraderTracker), nameof(Settlement_TraderTracker.ColonyThingsWillingToBuy)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(AerialVehicleInventoryItems)));
+			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(Tradeable), nameof(Tradeable.Interactive)),
+				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(AerialVehicleSlaveTradeRoomCheck)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Dialog_Trade), "CountToTransferChanged"),
+				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(AerialVehicleCountPawnsToTransfer)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanInventoryUtility), nameof(CaravanInventoryUtility.FindPawnToMoveInventoryTo)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(FindVehicleToMoveInventoryTo)));
@@ -128,9 +143,9 @@ namespace Vehicles
 				nameof(GiveSoldThingToAerialVehicle)),
 				transpiler: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(GiveSoldThingToVehicleTranspiler)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(TradeDeal), "AddAllTradeables"),
-				postfix: new HarmonyMethod(typeof(CaravanHandling),
-				nameof(AddAllTradeablesFromAerialVehicle)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(TradeDeal), "AddAllTradeables"),
+			//	postfix: new HarmonyMethod(typeof(CaravanHandling),
+			//	nameof(AddAllTradeablesFromAerialVehicle)));
 
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan_NeedsTracker), "TrySatisfyPawnNeeds"),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
@@ -645,7 +660,7 @@ namespace Vehicles
 
 		public static bool NoRestForVehicles(Caravan __instance, ref bool __result)
 		{
-			if (__instance is VehicleCaravan caravan && !caravan.PawnsListForReading.NotNullAndAny(x => !(x is VehiclePawn)))
+			if (__instance is VehicleCaravan caravan)
 			{
 				__result = VehicleCaravanPathingHelper.ShouldRestAt(caravan, caravan.Tile);
 				return false;
@@ -655,23 +670,15 @@ namespace Vehicles
 
 		public static List<Pawn> InternalPawnsIncludedInList(List<Pawn> __result, Caravan __instance)
 		{
-			if (__instance is VehicleCaravan)
+			if (__instance is VehicleCaravan vehicleCaravan)
 			{
-				int currentSize = __result.Count;
-				List<Pawn> pawns = new List<Pawn>();
-				foreach (Pawn pawn in __result)// (int i = 0; i < currentSize; i++)
+				tmpCaravanPawns.Clear();
+				tmpCaravanPawns.AddRange(__result);
+				foreach (VehiclePawn vehicle in vehicleCaravan.Vehicles)
 				{
-					//Pawn pawn = __result[i];
-					if (pawn is VehiclePawn vehicle)
-					{
-						foreach (Pawn innerPawn in vehicle.AllPawnsAboard)
-						{
-							pawns.Add(innerPawn);
-						}
-					}
-					pawns.Add(pawn);
+					tmpCaravanPawns.AddRange(vehicle.AllPawnsAboard);
 				}
-				return pawns;
+				return tmpCaravanPawns;
 			}
 			return __result;
 		}
@@ -753,27 +760,40 @@ namespace Vehicles
 			AerialVehicleInFlight aerialVehicle = playerNegotiator.GetAerialVehicle();
 			if (aerialVehicle != null)
 			{
-				List<Thing> inventoryThings = new List<Thing>();
-				if (!__result.EnumerableNullOrEmpty())
-				{
-					inventoryThings.AddRange(__result);
-				}
+				tmpAerialVehicleThingsWillToBuy.Clear();
 				foreach (Thing thing in aerialVehicle.vehicle.inventory.innerContainer)
 				{
-					inventoryThings.Add(thing);
+					tmpAerialVehicleThingsWillToBuy.Add(thing);
 				}
 				List<Pawn> pawns = aerialVehicle.vehicle.AllPawnsAboard;
 				for (int i = 0; i < pawns.Count; i++)
 				{
 					if (!CaravanUtility.IsOwner(pawns[i], aerialVehicle.Faction))
 					{
-						inventoryThings.Add(pawns[i]);
+						tmpAerialVehicleThingsWillToBuy.Add(pawns[i]);
 					}
 				}
-				__result = inventoryThings;
+				__result = tmpAerialVehicleThingsWillToBuy;
 				return false;
 			}
 			return true;
+		}
+
+		public static void AerialVehicleSlaveTradeRoomCheck(ref bool __result, Tradeable __instance)
+		{
+			if (__instance.AnyThing is Pawn pawn && pawn.RaceProps.Humanlike && __instance.CountToTransfer == 0)
+			{
+				Pawn negotiator = TradeSession.playerNegotiator;
+				if (negotiator.GetAerialVehicle() is AerialVehicleInFlight aerialVehicle)
+				{
+					__result &= CaravanHelper.CanFitInVehicle(aerialVehicle);
+				}
+			}
+		}
+
+		public static void AerialVehicleCountPawnsToTransfer(List<Tradeable> ___cachedTradeables)
+		{
+			CaravanHelper.CountPawnsBeingTraded(___cachedTradeables);
 		}
 
 		public static bool FindVehicleToMoveInventoryTo(ref Pawn __result, Thing item, List<Pawn> candidates, List<Pawn> ignoreCandidates, Pawn currentItemOwner = null)
@@ -848,6 +868,22 @@ namespace Vehicles
 			}
 		}
 
+		public static void AddPawnInVehicleCaravan(Pawn p, Caravan __instance)
+		{
+			if (__instance is VehicleCaravan vehicleCaravan)
+			{
+				vehicleCaravan.RecacheVehicles();
+			}
+		}
+
+		public static void RemovePawnInVehicleCaravan(Pawn p, Caravan __instance)
+		{
+			if (__instance is VehicleCaravan vehicleCaravan)
+			{
+				vehicleCaravan.RecacheVehicles();
+			}
+		}
+
 		public static void IsOwnerOfVehicle(Pawn p, Caravan __instance, ref bool __result)
 		{
 			if (!__result)
@@ -874,9 +910,29 @@ namespace Vehicles
 				thing.PreTraded(TradeAction.PlayerBuys, playerNegotiator, ___settlement);
 				if (thing is Pawn pawn && pawn.RaceProps.Humanlike)
 				{
-					VehicleHandler handler = aerial.vehicle.GetAllHandlersMatch(null).FirstOrDefault();
-					aerial.vehicle.GiveLoadJob(pawn, handler);
-					aerial.vehicle.Notify_Boarded(pawn);
+					VehicleHandler handler = aerial.vehicle.NextAvailableHandler(HandlingTypeFlags.None);
+					if (handler == null)
+					{
+						Log.Error($"Unable to locate available handler for {toGive}. Squeezing into other role to avoid aborted trade.");
+						handler = aerial.vehicle.NextAvailableHandler();
+						handler ??= aerial.vehicle.handlers.RandomElementWithFallback(fallback: null);
+
+						if (handler == null)
+						{
+							Log.Error($"Unable to find other role to squeeze {pawn} into. Tossing into inventory.");
+							return true;
+						}
+					}
+
+					if (pawn.Spawned)
+					{
+						aerial.vehicle.GiveLoadJob(pawn, handler);
+						aerial.vehicle.Notify_Boarded(pawn);
+					}
+					else if (!pawn.IsInVehicle())
+					{
+						aerial.vehicle.Notify_BoardedCaravan(pawn, handler.handlers);
+					}
 					return false;
 				}
 				if (aerial.vehicle.AddOrTransfer(thing) <= 0)
@@ -958,8 +1014,10 @@ namespace Vehicles
 		{
 			if (caravan is VehicleCaravan vehicleCaravan)
 			{
-				foreach (Pawn pawn in vehicleCaravan.PawnsListForReading)
+				var pawns = vehicleCaravan.PawnsListForReading;
+				for (int i = 0; i < pawns.Count; i++)
 				{
+					Pawn pawn = pawns[i];
 					if (IsValidDoctorFor(pawn, null, caravan) && pawn.IsHashIntervalTick(1250))
 					{
 						CaravanTendUtility.TryTendToAnyPawn(caravan);

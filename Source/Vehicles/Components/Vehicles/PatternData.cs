@@ -79,7 +79,7 @@ namespace Vehicles
 
 		public virtual void ExposeDataPostDefDatabase()
 		{
-			if (!patternId.NullOrEmpty())
+			if (!patternId.NullOrEmpty() && patternDef is null)
 			{
 				patternDef = DefDatabase<PatternDef>.GetNamed(patternId);
 				patternDef ??= PatternDefOf.Default;

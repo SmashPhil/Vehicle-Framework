@@ -333,6 +333,7 @@ namespace Vehicles
 				if (lord.CurLordToil is IDebugLordMeetingPoint debugLordMeetingPoint)
 				{
 					lord.Map.debugDrawer.FlashCell(debugLordMeetingPoint.MeetingPoint, colorPct: 0.95f, duration: 10);
+					lord.Map.debugDrawer.FlashLine(debugLordMeetingPoint.MeetingPoint, LeadVehicle.Position, duration: 10, color: SimpleColor.Magenta);
 				}
 			}
 

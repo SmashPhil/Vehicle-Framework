@@ -22,6 +22,8 @@ namespace Vehicles
 
 		private VehiclePawn leadVehicle;
 
+		private List<VehiclePawn> vehicles = new List<VehiclePawn>();
+
 		public VehicleCaravan() : base()
 		{
 			vPather = new VehicleCaravan_PathFollower(this);
@@ -32,19 +34,7 @@ namespace Vehicles
 
 		public bool CanDismount => true;
 
-		public IEnumerable<VehiclePawn> Vehicles
-		{
-			get
-			{
-				foreach (Pawn pawn in PawnsListForReading)
-				{
-					if (pawn is VehiclePawn vehicle)
-					{
-						yield return vehicle;
-					}
-				}
-			}
-		}
+		public IEnumerable<VehiclePawn> Vehicles => vehicles;
 
 		public IEnumerable<Pawn> DismountedPawns
 		{
@@ -339,13 +329,18 @@ namespace Vehicles
 					Find.LetterStack.ReceiveLetter("LetterLabelAllCaravanColonistsDied".Translate(), "LetterAllCaravanColonistsDied".Translate(Name).CapitalizeFirst(), LetterDefOf.NegativeEvent, new GlobalTargetInfo(Tile), null, null);
 				}
 				pawns.Clear();
-				Find.WorldObjects.Remove(this);
+				Destroy();
 			}
 			else
 			{
 				member.Strip();
 				RemovePawn(member);
 			}
+		}
+
+		public void RecacheVehicles()
+		{
+			vehicles = pawns.InnerListForReading.Where(pawn => pawn is VehiclePawn).Cast<VehiclePawn>().ToList();
 		}
 		
 		public override string GetInspectString()
@@ -549,12 +544,9 @@ namespace Vehicles
 			vTweener.TweenerTick();
 			if (vPather.MovingNow)
 			{
-				foreach (Pawn pawn in pawns)
+				foreach (VehiclePawn vehicle in vehicles)
 				{
-					if (pawn is VehiclePawn vehicle)
-					{
-						vehicle.CompFueledTravel?.ConsumeFuelWorld();
-					}
+					vehicle.CompFueledTravel?.ConsumeFuelWorld();
 				}
 			}
 		}
@@ -563,6 +555,11 @@ namespace Vehicles
 		{
 			base.ExposeData();
 			Scribe_Deep.Look(ref vPather, "vehiclePather", new object[] { this });
+
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				vehicles = pawns.InnerListForReading.Where(pawn => pawn is VehiclePawn).Cast<VehiclePawn>().ToList();
+			}
 		}
 	}
 }

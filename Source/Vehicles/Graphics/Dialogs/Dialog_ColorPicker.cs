@@ -209,7 +209,7 @@ namespace Vehicles
 			{
 				Rect vehicleDefRect = displayRect.AtZero();
 				HandleDisplacementDrag(vehicleDefRect);
-				VehicleGraphics.DrawVehicleDef(vehicleDefRect, VehicleDef, material: null, new PatternData(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, selectedPattern,
+				VehicleGraphics.DrawVehicleDef(vehicleDefRect, VehicleDef, new PatternData(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, selectedPattern,
 				new Vector2(displacementX, displacementY), additionalTiling), DisplayRotation, withoutTurrets: true);
 			}
 			Widgets.EndGroup();
@@ -331,7 +331,7 @@ namespace Vehicles
 
 				Widgets.BeginGroup(displayRect);
 				{
-					VehicleGraphics.DrawVehicleDef(displayRect.AtZero(), VehicleDef, material: null, patternData, DisplayRotation, withoutTurrets: true);
+					VehicleGraphics.DrawVehicleDef(displayRect.AtZero(), VehicleDef, patternData, DisplayRotation, withoutTurrets: true);
 				}
 				Widgets.EndGroup();
 

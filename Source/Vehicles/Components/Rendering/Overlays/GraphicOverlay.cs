@@ -1,17 +1,17 @@
 ﻿using UnityEngine;
 using Verse;
+using SmashTools;
 
 namespace Vehicles
 {
 	public class GraphicOverlay
 	{
-		public Graphic graphic;
-		public float rotation = 0;
+		[TweakField]
+		public GraphicDataOverlay data;
 
-		public GraphicOverlay(Graphic graphic, float rotation)
+		public GraphicOverlay(GraphicDataOverlay graphicDataOverlay)
 		{
-			this.graphic = graphic;
-			this.rotation = rotation;
+			data = graphicDataOverlay;
 		}
 	}
 }

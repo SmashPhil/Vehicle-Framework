@@ -245,7 +245,7 @@ namespace Vehicles
 			StringBuilder report = VehicleMod.settings.debug.debugLogging ? new StringBuilder() : null;
 
 			ApplyDamageToComponent(dinfo, hitCell, report);
-			vehicle.Notify_TookDamage();
+			
 			DeregisterImpacter(dinfo.Instigator);
 			Debug.Message(report.ToStringSafe());
 		}
@@ -263,6 +263,7 @@ namespace Vehicles
 			{
 				report?.AppendLine("-- DAMAGE REPORT --");
 				report?.AppendLine($"Base Damage: {damage}");
+				report?.AppendLine($"DamageDef: {dinfo.Def}");
 				report?.AppendLine($"HitCell: {hitCell}");
 
 				if (dinfo.Weapon?.GetModExtension<VehicleDamageMultiplierDefModExtension>() is VehicleDamageMultiplierDefModExtension weaponMultiplier)
@@ -275,6 +276,12 @@ namespace Vehicles
 				{
 					damage *= defMultiplier.multiplier;
 					report?.AppendLine($"ModExtension Multiplier: {defMultiplier.multiplier} Result: {damage}");
+				}
+
+				if (!vehicle.VehicleDef.properties.damageDefMultipliers.NullOrEmpty() && vehicle.VehicleDef.properties.damageDefMultipliers.TryGetValue(dinfo.Def, out float multiplier))
+				{
+					damage *= multiplier;
+					report?.AppendLine($"DamageDef Multiplier: {multiplier} Result: {damage}");
 				}
 
 				if (dinfo.Def.isRanged)
@@ -514,7 +521,7 @@ namespace Vehicles
 							z += cell.x;
 							break;
 					}
-					hitboxCells.Add(new IntVec3(x, 0, z));
+					hitboxCells.Add(new IntVec3(vehicle.Position.x + x, 0, vehicle.Position.z + z));
 				}
 				GenDraw.DrawFieldEdges(hitboxCells, component.highlightColor, AltitudeLayer.MetaOverlays.AltitudeFor());
 			}

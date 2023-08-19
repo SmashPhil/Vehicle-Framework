@@ -24,11 +24,20 @@ namespace Vehicles
 			yield break;
 		}
 
+		public virtual IEnumerable<FloatMenuOption> CompFloatMenuOptions()
+		{
+			yield break;
+		}
+
 		public virtual void CompCaravanInspectString(StringBuilder stringBuilder)
 		{
 		}
 
 		public virtual void PostLoad()
+		{
+		}
+
+		public virtual void OnDestroy()
 		{
 		}
 

@@ -240,9 +240,14 @@ namespace Vehicles
 			{
 				Vehicle.DeSpawn(DestroyMode.Vanish);
 			}
-			Find.WorldPawns.PassToWorld(Vehicle);
 			CameraJumper.TryHideWorld();
 			Vehicle.EventRegistry[VehicleEventDefOf.AerialVehicleLaunch].ExecuteEvents();
+		}
+
+		[DebugAction(VehicleHarmony.VehiclesLabel)]
+		private static void DoGCPass()
+		{
+			HarmonyLib.AccessTools.Field(typeof(WorldPawnGC), "lastSuccessfulGCTick").SetValue(Find.WorldPawns.gc, -1);
 		}
 
 		public float FuelNeededToLaunchAtDist(Vector3 origin, int destination)

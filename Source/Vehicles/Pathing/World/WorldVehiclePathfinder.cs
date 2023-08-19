@@ -94,7 +94,7 @@ namespace Vehicles
 		/// <param name="terminator"></param>
 		public WorldPath FindPath(int startTile, int destTile, VehicleCaravan caravan, Func<float, bool> terminator = null)
 		{
-			return FindPath(startTile, destTile, caravan.AllVehicles(), caravan.TicksPerMove, terminator);
+			return FindPath(startTile, destTile, caravan.Vehicles.ToList(), caravan.TicksPerMove, terminator);
 		}
 
 		/// <summary>

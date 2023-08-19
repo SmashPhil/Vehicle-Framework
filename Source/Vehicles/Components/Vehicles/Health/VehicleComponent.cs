@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using UnityEngine;
 using RimWorld;
 using Verse;
@@ -37,26 +38,44 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="vehicle"></param>
+		/// <param name="dinfo"></param>
+		[Obsolete("Use TakeDamage method with optional parameter instead. This will be removed in the future.", error: true)]
 		public void TakeDamage(VehiclePawn vehicle, DamageInfo dinfo)
 		{
-			TakeDamage(vehicle, ref dinfo);
+			TakeDamage(vehicle, ref dinfo, ignoreArmor: false);
 		}
 
-		public virtual Penetration TakeDamage(VehiclePawn vehicle, ref DamageInfo dinfo)
+		public void TakeDamage(VehiclePawn vehicle, DamageInfo dinfo, bool ignoreArmor = false)
 		{
-			ReduceDamageFromArmor(ref dinfo, out Penetration result);
-			if (!props.reactors.NullOrEmpty())
+			TakeDamage(vehicle, ref dinfo, ignoreArmor: ignoreArmor);
+		}
+
+		public virtual Penetration TakeDamage(VehiclePawn vehicle, ref DamageInfo dinfo, bool ignoreArmor = false)
+		{
+			Penetration penetration = Penetration.NonPenetrated;
+			if (!ignoreArmor)
 			{
-				foreach (Reactor reactor in props.reactors)
-				{
-					reactor.Hit(vehicle, this, ref dinfo, result);
-				}
+				ReduceDamageFromArmor(ref dinfo, out penetration);
 			}
+			
 			health -= dinfo.Amount;
 			float remainingDamage = Mathf.Clamp(-health, 0, float.MaxValue);
 			health = health.Clamp(0, props.health);
+
 			if (dinfo.Amount > 0)
 			{
+				if (!props.reactors.NullOrEmpty())
+				{
+					foreach (Reactor reactor in props.reactors)
+					{
+						reactor.Hit(vehicle, this, ref dinfo, penetration);
+					}
+				}
+
 				vehicle.EventRegistry[VehicleEventDefOf.DamageTaken].ExecuteEvents();
 				if (vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed) <= 0.1f)
 				{
@@ -68,17 +87,17 @@ namespace Vehicles
 				}
 			}
 
-			if (result > Penetration.Penetrated || health > (props.health / 2f))
+			if (penetration > Penetration.Penetrated || health > (props.health / 2f))
 			{
 				//Don't fallthrough until part is below 50% health or damage has penetrated
 				dinfo.SetAmount(0);
 			}
-			else if (result == Penetration.Penetrated || (remainingDamage > 0 && remainingDamage >= dinfo.Amount / 2))
+			else if (penetration == Penetration.Penetrated || (remainingDamage > 0 && remainingDamage >= dinfo.Amount / 2))
 			{
 				//If penetrated or remaining damage is above half original damage amount
 				dinfo.SetAmount(remainingDamage);
 			}
-			return result;
+			return penetration;
 		}
 
 		public virtual void HealComponent(float amount)
@@ -98,8 +117,8 @@ namespace Vehicles
 			{
 				return;
 			}
-			StatDef damageType = dinfo.Def.armorCategory.armorRatingStat;
-			float armorRating = ArmorRating(damageType);
+			DamageArmorCategoryDef armorCategoryDef = dinfo.Def.armorCategory;
+			float armorRating = ArmorRating(armorCategoryDef);
 			float armorDiff = armorRating - dinfo.ArmorPenetrationInt;
 
 			result = props.hitbox.fallthrough ? Penetration.Penetrated : Penetration.NonPenetrated;
@@ -125,25 +144,15 @@ namespace Vehicles
 			}
 		}
 
-		public float ArmorRating(StatDef statDef)
+		/// <summary>
+		/// Pulls armor rating of component for <paramref name="armorCategoryDef"/>.  If armor rating is not specified, defaults to vehicles overall armor rating for that armor category.
+		/// </summary>
+		/// <param name="armorCategoryDef"></param>
+		/// <returns>armor rating %</returns>
+		public float ArmorRating(DamageArmorCategoryDef armorCategoryDef)
 		{
-			if (statDef is null)
-			{
-				float rating = 0;
-				int count = 0;
-				foreach (StatDef armorRatingDef in DefDatabase<DamageArmorCategoryDef>.AllDefsListForReading.Select(armorCategory => armorCategory.armorRatingStat))
-				{
-					if (armorRatingDef != null)
-					{
-						StatModifier sumArmorModifier = props.armor?.FirstOrDefault(rating => rating.stat == armorRatingDef);
-						rating += sumArmorModifier?.value ?? vehicle.GetStatValue(armorRatingDef);
-						count++;
-					}
-				}
-				return rating / count;
-			}
-			StatModifier armorModifier = props.armor?.FirstOrDefault(rating => rating.stat == statDef);
-			return armorModifier?.value ?? vehicle.GetStatValue(statDef);
+			StatModifier armorModifier = props.armor?.FirstOrDefault(rating => rating.stat == armorCategoryDef.armorRatingStat);
+			return armorModifier?.value ?? vehicle.GetStatValue(armorCategoryDef.armorRatingStat);
 		}
 
 		public virtual void PostCreate()

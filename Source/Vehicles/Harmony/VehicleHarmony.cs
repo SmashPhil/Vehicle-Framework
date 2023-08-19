@@ -113,7 +113,7 @@ namespace Vehicles
 			//Will want to be added via xml
 			Utilities.InvokeWithLogging(FillVehicleLordJobTypes);
 
-			Utilities.InvokeWithLogging(PathingHelper.LoadDefModExtensionCosts);
+			Utilities.InvokeWithLogging(ApplyAllDefModExtensions);
 			Utilities.InvokeWithLogging(PathingHelper.LoadTerrainTagCosts);
 			Utilities.InvokeWithLogging(PathingHelper.LoadTerrainDefaults);
 			Utilities.InvokeWithLogging(RecacheMoveableVehicleDefs);
@@ -121,6 +121,9 @@ namespace Vehicles
 
 			Utilities.InvokeWithLogging(LoadedModManager.GetMod<VehicleMod>().InitializeTabs);
 			Utilities.InvokeWithLogging(VehicleMod.settings.Write);
+
+			Utilities.InvokeWithLogging(RegisterTweakFieldsInEditor);
+			Utilities.InvokeWithLogging(PatternDef.GenerateMaterials);
 		}
 		
 		public static void Patch(MethodBase original, HarmonyMethod prefix = null, HarmonyMethod postfix = null, HarmonyMethod transpiler = null, HarmonyMethod finalizer = null)
@@ -190,6 +193,25 @@ namespace Vehicles
 					map.GetCachedMapComponent<VehicleMapping>().ConstructComponents();
 				}
 			}
+		}
+
+		private static void ApplyAllDefModExtensions()
+		{
+			PathingHelper.LoadDefModExtensionCosts(vehicleDef => vehicleDef.properties.customThingCosts);
+			PathingHelper.LoadDefModExtensionCosts(vehicleDef => vehicleDef.properties.customTerrainCosts);
+			PathingHelper.LoadDefModExtensionCosts(vehicleDef => vehicleDef.properties.customBiomeCosts);
+			PathingHelper.LoadDefModExtensionCosts(vehicleDef => vehicleDef.properties.customRoadCosts);
+			PathingHelper.LoadDefModExtensionCosts(vehicleDef => vehicleDef.properties.customRiverCosts);
+		}
+		
+		private static void RegisterTweakFieldsInEditor()
+		{
+			//EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawSize)), string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffset)), string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffsetNorth)), string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffsetEast)), string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffsetSouth)), string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffsetWest)), string.Empty, UISettingsType.FloatBox);
 		}
 	}
 }

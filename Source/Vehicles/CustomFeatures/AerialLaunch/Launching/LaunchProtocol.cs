@@ -7,9 +7,11 @@ using Verse;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using AnimationEvent = SmashTools.AnimationEvent;
 
 namespace Vehicles
 {
+	[StaticConstructorOnStartup]
 	public abstract class LaunchProtocol : IExposable
 	{
 		protected VehiclePawn vehicle;
@@ -22,10 +24,13 @@ namespace Vehicles
 		protected LaunchType launchType;
 
 		private Map map;
-		protected IntVec3 position;
+		protected IntVec3 position = IntVec3.Invalid;
 
 		protected List<Graphic>[] cachedOverlayGraphics;
 		protected List<GraphicDataLayered>[] cachedOverlayGraphicDatas;
+
+		protected Material cachedShadowMaterial;
+		private static MaterialPropertyBlock shadowPropertyBlock = new MaterialPropertyBlock();
 
 		/// <summary>
 		/// True if animation at index has been triggered.
@@ -80,7 +85,18 @@ namespace Vehicles
 		/// </summary>
 		public virtual int MaxFlightNodes => maxFlightNodes;
 
-		public virtual float TimeInAnimation => (float)ticksPassed / CurAnimationProperties.maxTicks;
+		public virtual float TimeInAnimation
+		{
+			get
+			{
+				int ticks = CurAnimationProperties.maxTicks;
+				if (ticks <= 0)
+				{
+					return 0;
+				}
+				return (float)ticksPassed / ticks;
+			}
+		}
 
 		public virtual IEnumerable<AnimationDriver> Animations
 		{
@@ -88,6 +104,18 @@ namespace Vehicles
 			{
 				yield return new AnimationDriver(AnimationEditorTags.Takeoff, AnimationEditorTick_Takeoff, Draw, TotalTicks_Takeoff, () => OrderProtocol(LaunchType.Takeoff));
 				yield return new AnimationDriver(AnimationEditorTags.Landing, AnimationEditorTick_Landing, Draw, TotalTicks_Landing, () => OrderProtocol(LaunchType.Landing));
+			}
+		}
+
+		protected virtual Material ShadowMaterial
+		{
+			get
+			{
+				if (cachedShadowMaterial == null && !vehicle.CompVehicleLauncher.Props.shadow.NullOrEmpty())
+				{
+					cachedShadowMaterial = MaterialPool.MatFrom(vehicle.CompVehicleLauncher.Props.shadow, ShaderDatabase.Transparent);
+				}
+				return cachedShadowMaterial;
 			}
 		}
 
@@ -158,14 +186,16 @@ namespace Vehicles
 
 		public (Vector3 drawPos, float rotation) Draw(Vector3 drawPos, float rotation)
 		{
+
 			(Vector3 drawPos, float rotation) result = (drawPos, rotation);
+			ShadowData shadowData = ShadowData.CreateFrom(vehicle);
 			switch (launchType)
 			{
 				case LaunchType.Landing:
-					result = AnimateLanding(drawPos, rotation);
+					(result.drawPos, result.rotation, shadowData) = AnimateLanding(result.drawPos, result.rotation, shadowData);
 					break;
 				case LaunchType.Takeoff:
-					result = AnimateTakeoff(drawPos, rotation);
+					(result.drawPos, result.rotation, shadowData) = AnimateTakeoff(result.drawPos, result.rotation, shadowData);
 					break;
 			}
 			result.drawPos.y = AltitudeLayer.Skyfaller.AltitudeFor();
@@ -175,8 +205,44 @@ namespace Vehicles
 			{
 				DrawOverlays(result.drawPos, result.rotation);
 			}
-
+			if (!shadowData.Invalid)
+			{
+				Color shadowColor = Color.white;
+				shadowColor.a = shadowData.alpha;
+				IntVec3 position = this.position.IsValid || !vehicle.Spawned ? this.position : vehicle.Position;
+				DrawShadow(position.ToVector3Shifted(), shadowData.width, shadowData.height, shadowColor);
+			}
 			return result;
+		}
+
+		protected void DrawShadow(Vector3 drawPos, float width, float height, Color color)
+		{
+			Material shadowMaterial = ShadowMaterial;
+			if (shadowMaterial is null)
+			{
+				return;
+			}
+			Vector3 shadowSpot = drawPos;
+			if (!CurAnimationProperties.lockShadowX)
+			{
+				shadowSpot.x = DrawPos.x;
+			}
+			if (!CurAnimationProperties.lockShadowZ)
+			{
+				shadowSpot.z = DrawPos.z;
+			}
+			DrawShadow(shadowSpot, CurAnimationProperties.forcedRotation ?? vehicle.Rotation, shadowMaterial, width, height, color);
+		}
+
+		private void DrawShadow(Vector3 pos, Rot4 rot, Material material, float width, float height, Color color)
+		{
+			pos.y = AltitudeLayer.Shadows.AltitudeFor();
+			Vector3 s = new Vector3(width, 1f, height);
+			
+			shadowPropertyBlock.SetColor(ShaderPropertyIDs.Color, color);
+			Matrix4x4 matrix = default;
+			matrix.SetTRS(pos, rot.AsQuat, s);
+			Graphics.DrawMesh(MeshPool.plane10Back, matrix, material, 0, null, 0, shadowPropertyBlock);
 		}
 
 		/// <summary>
@@ -184,9 +250,9 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="drawPos"
 		/// <param name="rotation"></param>
-		protected virtual (Vector3 drawPos, float rotation) AnimateLanding(Vector3 drawPos, float rotation)
+		protected virtual (Vector3 drawPos, float rotation, ShadowData shadowData) AnimateLanding(Vector3 drawPos, float rotation, ShadowData shadowData)
 		{
-			return (drawPos, rotation);
+			return (drawPos, rotation, shadowData);
 		}
 
 		/// <summary>
@@ -194,9 +260,9 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="drawPos"
 		/// <param name="rotation"></param>
-		protected virtual (Vector3 drawPos, float rotation) AnimateTakeoff(Vector3 drawPos, float rotation)
+		protected virtual (Vector3 drawPos, float rotation, ShadowData shadowData) AnimateTakeoff(Vector3 drawPos, float rotation, ShadowData shadowData)
 		{
-			return (drawPos, rotation);
+			return (drawPos, rotation, shadowData);
 		}
 
 		/// <summary>
@@ -302,7 +368,7 @@ namespace Vehicles
 			{
 				for (int i = 0; i < CurAnimationProperties.events.Count; i++)
 				{
-					SmashTools.AnimationEvent @event = CurAnimationProperties.events[i];
+					AnimationEvent @event = CurAnimationProperties.events[i];
 					if (!animationStatuses[i] && @event.EventFrame(TimeInAnimation))
 					{
 						@event.method.InvokeUnsafe(null, this);
@@ -372,7 +438,7 @@ namespace Vehicles
 				{
 					for (int i = 0; i < CurAnimationProperties.events.Count; i++)
 					{
-						SmashTools.AnimationEvent @event = CurAnimationProperties.events[i];
+						AnimationEvent @event = CurAnimationProperties.events[i];
 						if (!animationStatuses[i] && @event.EventFrame(TimeInAnimation))
 						{
 							@event.method.InvokeUnsafe(null, this);
@@ -396,7 +462,15 @@ namespace Vehicles
 				float? rotationRate = fleckData.rotationRate?.Evaluate(t);
 				float? angle = fleckData.angle.RandomInRange;
 
-				Vector3 origin = fleckData.position == FleckData.PositionStart.Position ? position.ToVector3Shifted() : DrawPos;
+				Vector3 origin = position.ToVector3Shifted();
+				if (!fleckData.lockFleckX)
+				{
+					origin.x = DrawPos.x;
+				}
+				if (!fleckData.lockFleckZ)
+				{
+					origin.z = DrawPos.z;
+				}
 				if (angle.HasValue && fleckData.drawOffset != null)
 				{
 					origin = origin.PointFromAngle(fleckData.drawOffset.Evaluate(t), angle.Value);
@@ -781,7 +855,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref maxFlightNodes, nameof(maxFlightNodes), int.MaxValue);
 
 			Scribe_References.Look(ref map, nameof(map));
-			Scribe_Values.Look(ref position, nameof(position));
+			Scribe_Values.Look(ref position, nameof(position), defaultValue: IntVec3.Invalid);
 
 			Scribe_Collections.Look(ref animationStatuses, nameof(animationStatuses), LookMode.Value);
 		}

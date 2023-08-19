@@ -19,7 +19,7 @@ namespace Vehicles
 		public override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
 			(launchProtocolDrawPos, _) = vehicle.CompVehicleLauncher.launchProtocol.Draw(RootPos, 0);
-			DrawDropSpotShadow();
+			//DrawDropSpotShadow();
 		}
 
 		public override void Tick()
@@ -33,11 +33,11 @@ namespace Vehicles
 					FinalizeLanding();
 				}
 			}
-			if (Find.TickManager.TicksGame % NotificationSquishInterval == 0 && Map != null && vehicle.VehicleDef.HasComp(typeof(CompProperties_VehicleDamager)))
+			if (Find.TickManager.TicksGame % NotificationSquishInterval == 0 && Map != null)
 			{
 				foreach (IntVec3 cell in vehicle.PawnOccupiedCells(Position, Rotation))
 				{
-					GenVehicleDamager.NotifyNearbyPawnsOfDangerousPosition(Map, cell);
+					VehicleDamager.NotifyNearbyPawnsOfDangerousPosition(Map, cell);
 				}
 			}
 		}

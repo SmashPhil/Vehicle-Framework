@@ -178,7 +178,7 @@ namespace Vehicles
 					texProportions.x = texProportions.y;
 					texProportions.y = x;
 					Widgets.DrawTextureFitted(rect, vehicleIcon, GenUI.IconDrawScale(vehicle.VehicleDef), texProportions, 
-						texCoords, angle, vehicle.VehicleGraphic.MatAt(Rot8.East, vehicle.Pattern));
+						texCoords, angle, vehicle.VehicleGraphic.MatAtFull(Rot8.East));
 					if (vehicle.CompVehicleTurrets is CompVehicleTurrets comp)
 					{
 						//REDO

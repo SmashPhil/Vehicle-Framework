@@ -80,6 +80,10 @@ namespace Vehicles
 		{
 			get
 			{
+				if (MovementPermissions == VehiclePermissions.NoDriverNeeded)
+				{
+					return true;
+				}
 				foreach (VehicleHandler handler in handlers)
 				{
 					if (handler.role.handlingTypes.HasFlag(HandlingTypeFlags.Movement) && !handler.RoleFulfilled)
@@ -322,6 +326,7 @@ namespace Vehicles
 			if (!pawnToBoard.IsWorldPawn())
 			{
 				Log.Warning("Tried boarding Caravan with non-worldpawn");
+				return;
 			}
 
 			if (pawnToBoard.holdingOwner != null)
@@ -332,6 +337,7 @@ namespace Vehicles
 			{
 				handler.TryAdd(pawnToBoard);
 			}
+			EventRegistry[VehicleEventDefOf.PawnEntered].ExecuteEvents();
 		}
 
 		public void RemovePawn(Pawn pawn)
@@ -405,7 +411,7 @@ namespace Vehicles
 			}
 		}
 
-		private void TickHandlers()
+		internal void TickHandlers()
 		{
 			//Only need to tick VehicleHandlers with pawns inside them
 			for (int i = 0; i < OccupiedHandlers.Count; i++)

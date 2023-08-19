@@ -54,7 +54,7 @@ namespace Vehicles
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(CameraJumper), "TryJump", parameters: new Type[] { typeof(GlobalTargetInfo), typeof(CameraJumper.MovementMode) }),
 			//	prefix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestPrefix)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), "AtDestinationPosition"),
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn), "Tick"),
 			//	postfix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestPostfix)));
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Thing), "ExposeData"),
@@ -75,16 +75,11 @@ namespace Vehicles
 			}
 		}
 
-		public static void TestPostfix(Pawn ___pawn, LocalTargetInfo ___destination, PathEndMode ___peMode, ref bool __result)
+		public static void TestPostfix(Pawn __instance)
 		{
 			try
 			{
-				//Log.Message($"Finished");
-				if (!___pawn.NonHumanlikeOrWildMan())
-				{
-					bool result = ___pawn.CanReachImmediate(___destination, ___peMode);
-					Log.Message($"Result={result} for {___destination} with {___peMode}");
-				}
+				if (__instance.Faction == Faction.OfPlayer && !__instance.Spawned) Log.Message($"Ticking: {__instance} GameTicks: {Find.TickManager.TicksGame}");
 			}
 			catch (Exception ex)
 			{

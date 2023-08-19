@@ -9,6 +9,7 @@ namespace Vehicles
 {
 	public struct GraphicRequestRGB : IEquatable<GraphicRequestRGB>
 	{
+		public IMaterialCacheTarget target;
 		public Type graphicClass;
 		public string path;
 		public Shader shader;
@@ -22,8 +23,9 @@ namespace Vehicles
 		public int renderQueue;
 		public List<ShaderParameter> shaderParameters;
 
-		public GraphicRequestRGB(Type graphicClass, string path, Shader shader, Vector2 drawSize, Color color, Color colorTwo, Color colorThree, float tiles, Vector2 displacement, GraphicDataRGB graphicData, int renderQueue, List<ShaderParameter> shaderParameters)
+		public GraphicRequestRGB(IMaterialCacheTarget target, Type graphicClass, string path, Shader shader, Vector2 drawSize, Color color, Color colorTwo, Color colorThree, float tiles, Vector2 displacement, GraphicDataRGB graphicData, int renderQueue, List<ShaderParameter> shaderParameters)
 		{
+			this.target = target;
 			this.graphicClass = graphicClass;
 			this.path = path;
 			this.shader = shader;
@@ -38,23 +40,7 @@ namespace Vehicles
 			this.shaderParameters = (shaderParameters.NullOrEmpty() ? null : shaderParameters);
 		}
 
-		public GraphicRequestRGB(GraphicRequest req)
-		{
-			graphicClass = req.graphicClass;
-			path = req.path;
-			shader = req.shader;
-			drawSize = req.drawSize;
-			color = req.color;
-			colorTwo = req.colorTwo;
-			colorThree = Color.blue;
-			tiles = 1;
-			displacement = Vector2.zero;
-			graphicData = req.graphicData as GraphicDataRGB;
-			renderQueue = req.renderQueue;
-			shaderParameters = req.shaderParameters;
-		}
-
-		public string Summary => $"Type: {graphicClass}\nPath: {path}\nShader: {shader}\nDrawSize: {drawSize}\nColors: {color}|{colorTwo}|{colorThree}\nGraphicData: {graphicData}\nRenderQueue: {renderQueue}\nParams Count: {shaderParameters?.Count.ToString() ?? "Null"}";
+		public string Summary => $"Target: {target}\nType: {graphicClass}\nPath: {path}\nShader: {shader}\nDrawSize: {drawSize}\nColors: {color}|{colorTwo}|{colorThree}\nGraphicData: {graphicData}\nRenderQueue: {renderQueue}\nParams Count: {shaderParameters?.Count.ToString() ?? "Null"}";
 
 		public override int GetHashCode()
 		{
@@ -62,9 +48,7 @@ namespace Vehicles
 			{
 				path = BaseContent.BadTexPath;
 			}
-			return Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombineStruct(
-				Gen.HashCombineStruct(Gen.HashCombineStruct(Gen.HashCombineStruct(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(Gen.HashCombine(
-					Gen.HashCombine(0, displacement), tiles), graphicClass), path), shader), drawSize), color), colorTwo), colorThree), graphicData), renderQueue), shaderParameters);
+			return target.GetHashCode();
 		}
 
 		public override bool Equals(object obj)
@@ -74,9 +58,7 @@ namespace Vehicles
 
 		public bool Equals(GraphicRequestRGB other)
 		{
-			return graphicClass == other.graphicClass && path == other.path && shader == other.shader && drawSize == other.drawSize && 
-				color == other.color && colorTwo == other.colorTwo && colorThree == other.colorThree && tiles == other.tiles && displacement == other.displacement &&
-				graphicData == other.graphicData && renderQueue == other.renderQueue && shaderParameters == other.shaderParameters;
+			return other.target == target;
 		}
 
 		public static bool operator ==(GraphicRequestRGB lhs, GraphicRequestRGB rhs)
@@ -87,6 +69,11 @@ namespace Vehicles
 		public static bool operator !=(GraphicRequestRGB lhs, GraphicRequestRGB rhs)
 		{
 			return !(lhs == rhs);
+		}
+
+		public static implicit operator GraphicRequest(GraphicRequestRGB req)
+		{
+			return new GraphicRequest(req.graphicClass, req.path, req.shader, req.drawSize, req.color, req.colorTwo, req.graphicData, req.renderQueue, req.shaderParameters, null);
 		}
 	}
 }

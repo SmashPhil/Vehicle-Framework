@@ -67,7 +67,7 @@ namespace Vehicles
 			return TicksPassed >= CurAnimationProperties.maxTicks;
 		}
 
-		protected override (Vector3 drawPos, float rotation) AnimateLanding(Vector3 drawPos, float rotation)
+		protected override (Vector3 drawPos, float rotation, ShadowData shadowData) AnimateLanding(Vector3 drawPos, float rotation, ShadowData shadowData)
 		{
 			if (!LandingProperties.rotationCurve.NullOrEmpty())
 			{
@@ -92,10 +92,27 @@ namespace Vehicles
 				int signZ = Ext_Math.Sign(LandingProperties.flipVertical != vehicle.Rotation);
 				drawPos += new Vector3(offset.x * signX, 0, offset.y * signZ);
 			}
-			return base.AnimateLanding(drawPos, rotation);
+
+			if (LandingProperties.renderShadow)
+			{
+				if (!LandingProperties.shadowSizeXCurve.NullOrEmpty())
+				{
+					shadowData.width = LandingProperties.shadowSizeXCurve.Evaluate(TimeInAnimation);
+				}
+				if (!LandingProperties.shadowSizeZCurve.NullOrEmpty())
+				{
+					shadowData.height = LandingProperties.shadowSizeZCurve.Evaluate(TimeInAnimation);
+				}
+				if (!LandingProperties.shadowAlphaCurve.NullOrEmpty())
+				{
+					shadowData.alpha = LandingProperties.shadowAlphaCurve.Evaluate(TimeInAnimation);
+				}
+			}
+
+			return base.AnimateLanding(drawPos, rotation, shadowData);
 		}
 
-		protected override (Vector3 drawPos, float rotation) AnimateTakeoff(Vector3 drawPos, float rotation)
+		protected override (Vector3 drawPos, float rotation, ShadowData shadowData) AnimateTakeoff(Vector3 drawPos, float rotation, ShadowData shadowData)
 		{
 			if (!LaunchProperties.rotationCurve.NullOrEmpty())
 			{
@@ -120,7 +137,24 @@ namespace Vehicles
 				Vector2 offset = LaunchProperties.offsetCurve.EvaluateT(TimeInAnimation);
 				drawPos += new Vector3(offset.x * signX, 0, offset.y * signZ);
 			}
-			return base.AnimateTakeoff(drawPos, rotation);
+
+			if (LaunchProperties.renderShadow)
+			{
+				if (!LaunchProperties.shadowSizeXCurve.NullOrEmpty())
+				{
+					shadowData.width = LaunchProperties.shadowSizeXCurve.Evaluate(TimeInAnimation);
+				}
+				if (!LaunchProperties.shadowSizeZCurve.NullOrEmpty())
+				{
+					shadowData.height = LaunchProperties.shadowSizeZCurve.Evaluate(TimeInAnimation);
+				}
+				if (!LaunchProperties.shadowAlphaCurve.NullOrEmpty())
+				{
+					shadowData.alpha = LaunchProperties.shadowAlphaCurve.Evaluate(TimeInAnimation);
+				}
+			}
+
+			return base.AnimateTakeoff(drawPos, rotation, shadowData);
 		}
 
 		public override void ResolveProperties(LaunchProtocol reference)

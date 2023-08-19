@@ -253,29 +253,15 @@ namespace Vehicles
 			{
 				VehicleDef vehicleDef = def.thingToSpawn;
 				Vector3 loc = GenThing.TrueCenter(center, rot, def.Size, drawAltitude.AltitudeFor());
-				float extraAngle;
-				foreach (GraphicOverlay graphicOverlay in vehicleDef.GhostGraphicOverlaysFor(ghostCol))
+				foreach ((Graphic graphic, float rotation) in vehicleDef.GhostGraphicOverlaysFor(ghostCol))
 				{
-					extraAngle = graphicOverlay.rotation;
-					graphicOverlay.graphic.DrawWorker(loc + baseGraphic.DrawOffsetFull(rot), rot, def, thing, rot.AsAngle + extraAngle);
+					graphic.DrawWorker(loc + baseGraphic.DrawOffsetFull(rot), rot, def, thing, /*rot.AsAngle +*/ rotation);
 				}
 				if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets)
 				{
 					vehicleDef.DrawGhostTurretTextures(loc, rot, ghostCol);
 				}
 			}
-		}
-
-		public static bool RenderVehicleOutOfFuelOverlay(OverlayDrawer __instance, Thing t)
-		{
-			if (t is VehiclePawn vehicle)
-			{
-				//Material material = MaterialPool.MatFrom(vehicle.CompFueledTravel?.Props.FuelIcon ?? ThingDefOf.Chemfuel.uiIcon, ShaderDatabase.MetaOverlay, Color.white);
-				//RenderPulsingOverlay.Invoke(__instance, new object[] { t, material, 5, false });
-				//RenderPulsingOverlay.Invoke(__instance, new object[] { t, OutOfFuelMat, 6, true });
-				//return false;
-			}
-			return true;
 		}
 
 		public static IEnumerable<CodeInstruction> RenderOverlaysCenterVehicle(IEnumerable<CodeInstruction> instructions)

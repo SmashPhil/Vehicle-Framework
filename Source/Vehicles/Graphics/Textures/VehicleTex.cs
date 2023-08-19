@@ -115,8 +115,6 @@ namespace Vehicles
 
 		public static readonly Texture2D ColorHue = ContentFinder<Texture2D>.Get("UI/ColorTools/ColorHue");
 
-		public static readonly Texture2D BlankPattern = ContentFinder<Texture2D>.Get("Graphics/Patterns/Default/Blank");
-
 		public static readonly Texture2D LeftArrow = ContentFinder<Texture2D>.Get("UI/Icons/ArrowLeft");
 
 		public static readonly Texture2D RightArrow = ContentFinder<Texture2D>.Get("UI/Icons/ArrowRight");
@@ -174,8 +172,8 @@ namespace Vehicles
 					if (vehicleDef.graphicData is GraphicDataRGB graphicDataRGB)
 					{
 						Texture2D tex;
-						var graphicData = new GraphicDataRGB();
-						graphicData.CopyFrom(graphicDataRGB);
+						var graphicData = vehicleDef.graphicData;// new GraphicDataRGB();
+						//graphicData.CopyFrom(graphicDataRGB);
 						Graphic_Vehicle graphic = graphicData.Graphic as Graphic_Vehicle;
 						tasks.AppendLine("Setting TextureCache...");
 						SetTextureCache(vehicleDef, graphicData);

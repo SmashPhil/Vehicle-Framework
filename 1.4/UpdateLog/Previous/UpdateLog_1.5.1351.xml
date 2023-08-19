@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <!--Can utilize Version.txt file placed in mod's root directory-->
+  <currentVersion>1.5.1351</currentVersion>
+  <!--Startup,GameInit,LoadedGame,NewGame-->
+  <updateOn>Startup</updateOn>
+  <!--Full description shown in update page-->
+  <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+This update comes with some significant performance improvements.  Vehicle Framework was mostly optimized before release, however there were still a few areas that could be improved.
+
+On top of this, I changed the way the pattern system caches materials so it should take up way less memory now.  Feel free to re-enable RGB Shaders if you were having memory issues before.
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed bug where aerial vehicles would sometimes get cleaned up by WorldPawnsGC, deleting the inventory.
+
+- Fixed bug where pawns in VehicleCaravans would double tick, causing needs to decrease rapidly.
+
+- Fixed bug where DedicatedThread wouldn't be created in some cases when loading a save, leading to performance problems.
+
+- Fixed thread safety issue when recalculating pathfinding costs.
+
+- Fixed bug where Explosive vehicle components marked as 'internal' weren't exploding when damaged.
+
+- Fixed bug where AerialVehicleLanding wouldn't properly set SustainerTarget for sustainer and one shot sounds from soundEvents.
+ 
+- Fixed bug where quick search widget in Architect Menu didn't filter for vehicles or highlight them in the gizmo.
+
+- Fixed bug where vehicles with a pattern would then load in without a valid material when restarting the game with RGB Shaders disabled.
+
+- Fixed bug with Hitbox Rendering debug option, which didn't highlight components that were hovered over in the Health tab.
+
+- Fixed bug where layering for GraphicDataLayer wasn't applying for specific rotations.
+
+- Added temporary fix for overlays due to a vanilla bug where drawOffset would copy over incorrectly for drawOffsetWest.
+
+- Fixed bug where overlays would only render 1 graphic for ghost graphic if they used the same texture.
+
+- Fixed bug where turrets would still render at UI Scales &gt; 1 in UI windows.
+
+- Fixed bug where rotation registry for rotating overlays (eg. helicopter rotors) wouldn't reset upon entering the map.
+
+- Fixed bug where damaging vehicle components directly wouldn't notify the vehicle needs repairs.  (This occured only with VVE and tires being damaged)
+
+- Fixed bug where aerial vehicles were unable to buy / sell pawns on the world map.
+
+- Fixed config error issue with CustomCostDefModExtension.
+
+- Fixed bug where CustomCostDefModExtension wasn't properly applying.
+
+- Fixed compatibility issue with Bulk Carrier.
+&lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Reworked Material Generation for vehicles using the pattern system, significantly decreasing materials cached (and thus memory usage overall).
+
+- DedicatedThreads now pool for non-settlement maps.
+
+- Moved individual path cost recalculations for vehicles to the dedicated thread.
+
+- Downscaled all pattern textures included in the framework.
+
+- Optimized Caravan related patches.
+
+&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Added 'Flee' directive when pawns are in the path of a vehicle.
+
+- Added auto-reloading configuration for vehicle turrets, just for you Sam.
+
+- Vehicle health tab now lists armor categories separately rather than averaged.
+
+- Generalized ExtraRotationRegistry for Graphic_Rotator graphics.
+
+- Added Graphic_ReversePropeller, allowing animations to support dual rotors rotating the opposite way.
+
+- Added animation curves for shadows and disconnected vanilla shadow rendering for vehicle skyfallers, giving modders full control over how shadows should render during takeoff and landing.
+
+- Switched Reactor_Explosive maxHealth trigger to be based on % of health.  Values should now be between 0 and 1.
+
+- Vehicles that use 'stuffable' ingredients in the build recipe will assign the stuff color upon construction. (Stuffables do not affect stats, it is visual only and if the vehicle supports RGB shaders, it can be colored over)
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
+  <!--Static parameterless method to execute when update log is executed-->
+  <actionOnUpdate></actionOnUpdate>
+  <!--Show update log on next startup.-->
+  <update>false</update>
+  <!--Testing mode prevents the update from saving over the UpdateLog file-->
+  <testing>false</testing>
+  <!--Icon bar shown to the right of the mod's name-->
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon</icon>
+      <url>steam://url/CommunityFilePage/2356577528</url>
+    </li>
+  </rightIconBar>
+  <!--Icon bar shown to the left of the mod's name-->
+  <leftIconBar>
+    <li>
+      <name>Patreon</name>
+      <icon>patreonIcon</icon>
+      <url>https://www.patreon.com/smashphil</url>
+    </li>
+    <li>
+      <name>Cursed Crew</name>
+      <icon>cursedCrewIcon</icon>
+      <url>https://discord.gg/NNe2VxAU7Z</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>
