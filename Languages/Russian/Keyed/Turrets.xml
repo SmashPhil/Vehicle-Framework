@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LanguageData>
   <VF_ReloadVehicleTurret>Перезарядить</VF_ReloadVehicleTurret>
-  <VF_AutoTargeting>Автоматическое обнаружение: {0}</VF_AutoTargeting>
-  <VF_AutoTargetingDisabled>Автоматическое обнаружение недоступно для этой туррели.</VF_AutoTargetingDisabled>
-  <VF_VehicleTurrets_NoAmmoToReload>Отсутствуют подходящие боеприпасы.</VF_VehicleTurrets_NoAmmoToReload>
+  <VF_AutoTargeting>Автоогонь: {0}</VF_AutoTargeting>
+  <VF_AutoTargetingDisabled>Для этой турели недоступен автоогонь.</VF_AutoTargetingDisabled>
+  <VF_VehicleTurrets_NoAmmoToReload>Нет подходящего боеприпаса.</VF_VehicleTurrets_NoAmmoToReload>
+  <VF_SetReloadLevel>Установить уровень автоперезарядки на {0}</VF_SetReloadLevel>
+  <VF_SetReloadLevelTooltip>Настроить количество боеприпасов, по достижении которого будет произведена перезарядка.</VF_SetReloadLevelTooltip>
 </LanguageData>
 

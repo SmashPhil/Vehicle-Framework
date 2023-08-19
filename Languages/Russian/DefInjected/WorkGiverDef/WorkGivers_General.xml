@@ -1,25 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LanguageData>
-  <PackVehicle.label>снарядить технику</PackVehicle.label>
-  <PackVehicle.verb>снарядить</PackVehicle.verb>
-  <PackVehicle.gerund>снаряжение</PackVehicle.gerund>
-  <LoadUpgradeMaterials.label>погрузить материалы</LoadUpgradeMaterials.label>
-  <LoadUpgradeMaterials.verb>погрузить</LoadUpgradeMaterials.verb>
-  <LoadUpgradeMaterials.gerund>загрузка</LoadUpgradeMaterials.gerund>
-  <WorkOnUpgrade.label>работа над улучшением</WorkOnUpgrade.label>
-  <WorkOnUpgrade.verb>улучшение</WorkOnUpgrade.verb>
-  <WorkOnUpgrade.gerund>улучшение</WorkOnUpgrade.gerund>
-  <RefuelVehicle.label>заправить технику</RefuelVehicle.label>
-  <RefuelVehicle.verb>заправить</RefuelVehicle.verb>
-  <RefuelVehicle.gerund>заправка</RefuelVehicle.gerund>
-  <RepairVehicle.label>починить технику</RepairVehicle.label>
+  <PackVehicle.label>загружать ТС</PackVehicle.label>
+  <PackVehicle.verb>загружать</PackVehicle.verb>
+  <PackVehicle.gerund>загружать</PackVehicle.gerund>
+  <PackVehicleTurret.label>загружать ТС</PackVehicleTurret.label>
+  <PackVehicleTurret.verb>загружать</PackVehicleTurret.verb>
+  <PackVehicleTurret.gerund>загружать</PackVehicleTurret.gerund>
+  <LoadUpgradeMaterials.label>грузить материалы</LoadUpgradeMaterials.label>
+  <LoadUpgradeMaterials.verb>грузить</LoadUpgradeMaterials.verb>
+  <LoadUpgradeMaterials.gerund>грузить</LoadUpgradeMaterials.gerund>
+  <WorkOnUpgrade.label>улучшать транспорт</WorkOnUpgrade.label>
+  <WorkOnUpgrade.verb>улучшать</WorkOnUpgrade.verb>
+  <WorkOnUpgrade.gerund>улучшать</WorkOnUpgrade.gerund>
+  <RefuelVehicle.label>заправлять транспорт</RefuelVehicle.label>
+  <RefuelVehicle.verb>заправлять</RefuelVehicle.verb>
+  <RefuelVehicle.gerund>заправлять</RefuelVehicle.gerund>
+  <RepairVehicle.label>чинить транспорт</RepairVehicle.label>
   <RepairVehicle.verb>починить</RepairVehicle.verb>
-  <RepairVehicle.gerund>починка</RepairVehicle.gerund>
-  <DisassembleVehicle.label>разобрать технику</DisassembleVehicle.label>
+  <RepairVehicle.gerund>починить</RepairVehicle.gerund>
+  <DisassembleVehicle.label>разбирать транспорт</DisassembleVehicle.label>
   <DisassembleVehicle.verb>разобрать</DisassembleVehicle.verb>
-  <DisassembleVehicle.gerund>разборка</DisassembleVehicle.gerund>
-  <PaintVehicle.label>покрасить технику</PaintVehicle.label>
-  <PaintVehicle.verb>покрасить</PaintVehicle.verb>
-  <PaintVehicle.gerund>покраска</PaintVehicle.gerund>
+  <DisassembleVehicle.gerund>разобрать</DisassembleVehicle.gerund>
+  <PaintVehicle.label>красить транспорт</PaintVehicle.label>
+  <PaintVehicle.verb>красить</PaintVehicle.verb>
+  <PaintVehicle.gerund>красить</PaintVehicle.gerund>
 </LanguageData>
 

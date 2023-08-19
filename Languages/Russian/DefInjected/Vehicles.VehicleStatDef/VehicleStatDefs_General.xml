@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LanguageData>
-  <MoveSpeed.label>Скорость движения</MoveSpeed.label>
-  <MoveSpeed.description>Скорость движения по клеткам в секунду.</MoveSpeed.description>
-  <CargoCapacity.label>Груз</CargoCapacity.label>
-  <CargoCapacity.description>Количество веса, которое это транспортное средство может перевозить в качестве груза. Это же количество веса доступно и для караванов.</CargoCapacity.description>
-  <RepairRate.label>Скорость ремонта</RepairRate.label>
-  <RepairRate.description>Количество очков здоровья, которые восстанавливаются за секунду.</RepairRate.description>
-  <Mass.label>Масса</Mass.label>
-  <Mass.description>Физическая масса техники.</Mass.description>
-  <BodyIntegrity.label>Целостность корпуса</BodyIntegrity.label>
-  <BodyIntegrity.description>Среднее количество очков здоровья всех частей техники. Если целостность техники достигнет 0, то она развалится на части относительно своей стоимости сборки.</BodyIntegrity.description>
+  <MoveSpeed.label>скорость</MoveSpeed.label>
+  <MoveSpeed.description>Скорость передвижения в клетках в секунду.</MoveSpeed.description>
+  <MoveSpeed.formatString>{0} кл/с</MoveSpeed.formatString>
+  <CargoCapacity.label>груз</CargoCapacity.label>
+  <CargoCapacity.description>Количество груза, которое может перевозить данное транспортное средство. Соответствует количеству, доступному для обычных караванов.</CargoCapacity.description>
+  <CargoCapacity.formatString>{0} кг</CargoCapacity.formatString>
+  <RepairRate.label>скорость ремонта</RepairRate.label>
+  <RepairRate.description>Количество очков здоровья, восстанавливаемого в секунду.</RepairRate.description>
+  <RepairRate.formatString>{0} ОЗ/с</RepairRate.formatString>
+  <Mass.label>масса</Mass.label>
+  <Mass.description>Физическая масса транспортного средства.</Mass.description>
+  <Mass.formatString>{0} кг</Mass.formatString>
+  <BodyIntegrity.label>целостность корпуса</BodyIntegrity.label>
+  <BodyIntegrity.description>Среднее значение показателей «здоровья» всех частей транспортного средства. Если целостность транспортного средства достигнет 0, оно распадётся на части, вернув небольшое количество материалов, из которого было построено.</BodyIntegrity.description>
 </LanguageData>
 
