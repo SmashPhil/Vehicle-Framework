@@ -94,8 +94,12 @@ namespace Vehicles
 			base.PostLoad();
 			LongEventHandler.ExecuteWhenFinished(delegate ()
 			{
-				if (!VehicleMod.settings.main.useCustomShaders && graphicData?.shaderType != null)
+				if (!VehicleMod.settings.main.useCustomShaders)
 				{
+					if (graphicData.shaderType == null)
+					{
+						graphicData.shaderType = ShaderTypeDefOf.Cutout;
+					}
 					graphicData.shaderType = graphicData.shaderType.Shader.SupportsRGBMaskTex(ignoreSettings: true) ? ShaderTypeDefOf.CutoutComplex : graphicData.shaderType;
 				}
 			});

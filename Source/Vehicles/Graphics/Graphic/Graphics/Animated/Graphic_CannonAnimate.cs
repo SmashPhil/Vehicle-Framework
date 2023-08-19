@@ -119,7 +119,7 @@ namespace Vehicles
 					index -= (subGraphics.Length - 1);
 				}
 			}
-			return subGraphics[index].maskMatPatterns.TryGetValue(pattern, subGraphics[index].maskMatPatterns[PatternDefOf.Default]).materials[0];
+			return subGraphics[index].materials[0];
 		}
 
 		public override Graphic GetColoredVersion(Shader newShader, Color newColor, Color newColorTwo)
@@ -134,7 +134,7 @@ namespace Vehicles
 				"AnimationCount(path=",
 				path,
 				", count=",
-				maskMatPatterns.Count,
+				materials.Length,
 				")"
 			});
 		}

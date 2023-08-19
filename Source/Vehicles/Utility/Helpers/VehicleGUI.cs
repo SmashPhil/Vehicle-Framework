@@ -42,7 +42,7 @@ namespace Vehicles
 				Rect adjustedRect = new Rect(rect.x + offsetX, rect.y + offsetY, scaledWidth, scaledHeight);
 
 				drawStep = "Retrieving cached graphic and pattern";
-				Graphic_Vehicle graphic = VehicleTex.CachedGraphics[vehicleDef];
+				Graphic_Vehicle graphic = vehicleDef.graphicData.Graphic as Graphic_Vehicle;// VehicleTex.CachedGraphics[vehicleDef];
 
 				PatternDef pattern = patternData?.patternDef;
 				pattern ??= VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData)?.patternDef ?? PatternDefOf.Default;

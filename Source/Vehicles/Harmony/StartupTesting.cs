@@ -57,7 +57,7 @@ namespace Vehicles
 		/// <summary>
 		/// Load up game, find available vehicle with upgrade tree, focus camera on vehicle
 		/// </summary>
-		[UnitTest(Category = "UI", Name = "Upgrade Menu")]
+		//[UnitTest(Category = "UI", Name = "Upgrade Menu")]
 		private static void UnitTest_UpgradeMenu()
 		{
 			LongEventHandler.ExecuteWhenFinished(delegate ()
@@ -106,7 +106,7 @@ namespace Vehicles
 		/// <summary>
 		/// Load up game, open update menu for all previous versions
 		/// </summary>
-		[UnitTest(Category = "UI", Name = "Previous Versions Menu", GameState = GameState.OnStartup)]
+		[UnitTest(Category = "UI", Name = "Previous Versions Menu", GameState = GameState.Playing)]
 		private static void UnitTest_ShowUpdates()
 		{
 			VehicleMod.settings.debug.ShowAllUpdates();

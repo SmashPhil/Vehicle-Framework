@@ -52,27 +52,6 @@ namespace Vehicles
 			return materials[rot.AsInt];
 		}
 
-		public virtual Material MatAt(PatternDef pattern, int index = 0)
-		{
-			if (pattern != null && maskMatPatterns.TryGetValue(pattern, out var values))
-			{
-				return values.materials[index];
-			}
-			else
-			{
-				Log.Error($"{VehicleHarmony.LogLabel} Key {pattern?.defName ?? "[Null]"} not found in {GetType()}.");
-				string folders = string.Empty;
-				foreach ((PatternDef patternDef, (string texPath, Material[] materials)) in maskMatPatterns)
-				{
-					folders += $"Item: {patternDef} Destination: {texPath}\n";
-				}
-				Debug.Message($"{VehicleHarmony.LogLabel} Additional Information:\n" +
-					$"MatCount: {maskMatPatterns.Count}\n" +
-					$"{folders}");
-			}
-			return BaseContent.BadMat;
-		}
-
 		public override Graphic GetColoredVersion(Shader newShader, Color newColor, Color newColorTwo)
 		{
 			return GraphicDatabase.Get<Graphic_Turret>(path, newShader, drawSize, newColor, newColorTwo, DataRGB);

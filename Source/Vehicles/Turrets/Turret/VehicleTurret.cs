@@ -1293,24 +1293,16 @@ namespace Vehicles
 			{
 				return;
 			}
-			GraphicDataRGB defaultDrawData = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData);
 			if (cachedGraphicData is null || forceRegen)
 			{
+				PatternData patternData = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData);
 				cachedGraphicData = new GraphicDataRGB();
 				cachedGraphicData.CopyFrom(turretDef.graphicData);
-				cachedGraphicData.CopyDrawData(defaultDrawData);
-				PatternData patternData = defaultDrawData;
 				if (turretDef.matchParentColor)
 				{
-					patternData = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData);
-					cachedGraphicData.color = patternData.color;
-					cachedGraphicData.colorTwo = patternData.colorTwo;
-					cachedGraphicData.colorThree = patternData.colorThree;
-					cachedGraphicData.tiles = patternData.tiles;
-					cachedGraphicData.displacement = patternData.displacement;
+					cachedGraphicData.CopyDrawData(patternData);
 				}
-
-				if (cachedGraphicData.shaderType.Shader.SupportsRGBMaskTex())
+				if (cachedGraphicData.shaderType != null && cachedGraphicData.shaderType.Shader.SupportsRGBMaskTex())
 				{
 					RGBMaterialPool.CacheMaterialsFor(this);
 					cachedGraphicData.Init(this);

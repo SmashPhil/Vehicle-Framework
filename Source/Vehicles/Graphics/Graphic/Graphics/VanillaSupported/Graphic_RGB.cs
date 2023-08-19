@@ -36,7 +36,6 @@ namespace Vehicles
 		//folderName : <filePath, texture/mat array>
 		public Material[] materials;
 		public int[] patternPointers;
-		public Dictionary<PatternDef, (string texPath, Material[] materials)> maskMatPatterns = new Dictionary<PatternDef, (string, Material[])>();
 
 		public override Material MatSingle => MatNorth;
 

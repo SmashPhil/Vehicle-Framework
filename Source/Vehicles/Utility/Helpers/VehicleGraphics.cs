@@ -151,37 +151,46 @@ namespace Vehicles
 				Rect adjustedRect = new Rect(rect.x + offsetX, rect.y + offsetY, scaledWidth, scaledHeight);
 
 				drawStep = "Retrieving cached graphic and pattern";
-				Graphic_Vehicle graphic = VehicleTex.CachedGraphics[vehicleDef];
+				Graphic_Vehicle graphic = vehicleDef.graphicData.Graphic as Graphic_Vehicle;// VehicleTex.CachedGraphics[vehicleDef];
 
-				PatternDef pattern = patternData?.patternDef;
-				pattern ??= VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData)?.patternDef ?? PatternDefOf.Default;
+				PatternData pattern = patternData;
+				if (patternData is null)
+				{
+					PatternDef patternDef = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData)?.patternDef ?? PatternDefOf.Default;
 
-				drawStep = "Setting default color";
-				Color color1 = patternData?.color ?? vehicleDef.graphicData.color;
-				Color color2 = patternData?.colorTwo ?? vehicleDef.graphicData.color;
-				Color color3 = patternData?.colorThree ?? vehicleDef.graphicData.color;
+					drawStep = "Setting default color";
+					Color color1 = patternData?.color ?? vehicleDef.graphicData.color;
+					Color color2 = patternData?.colorTwo ?? vehicleDef.graphicData.color;
+					Color color3 = patternData?.colorThree ?? vehicleDef.graphicData.color;
 
-				float tiling = patternData?.tiles ?? vehicleDef.graphicData.tiles;
-				Vector2 displacement = patternData?.displacement ?? vehicleDef.graphicData.displacement;
+					float tiling = patternData?.tiles ?? vehicleDef.graphicData.tiles;
+					Vector2 displacement = patternData?.displacement ?? vehicleDef.graphicData.displacement;
+
+					pattern = new PatternData(color1, color2, color3, patternDef, displacement, tiling);
+				}
 
 				Texture2D mainTex = VehicleTex.VehicleTexture(vehicleDef, rotDrawn, out float angle);
 
 				Material material = null;
-				if (pattern != null && graphic.Shader.SupportsRGBMaskTex())
+				if (graphic.Shader.SupportsRGBMaskTex())
 				{
 					drawStep = $"Fetching material for {vehicleDef}";
 
 					material = RGBMaterialPool.Get(vehicleDef, rotDrawn);
-					RGBMaterialPool.SetProperties(vehicleDef, patternData);
+					RGBMaterialPool.SetProperties(vehicleDef, pattern);
 				}
+				else
+				{
+					material = vehicleDef.graphicData.Graphic.MatAt(rotDrawn);
+				}
+				
 				drawStep = "Attempting to retrieve turret overlays";
 				List<(Rect rect, Texture mainTex, Material material, float layer, float angle)> overlays = new List<(Rect, Texture, Material, float, float)>();
 				if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets props)
 				{
 					if (!withoutTurrets || Prefs.UIScale == 1) //NOTE: Temporary fix until Ludeon fixes vanilla bug with matrix rotations inside GUI groups
 					{
-						overlays.AddRange(RetrieveAllTurretSettingsGraphicsProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer),
-						new PatternData(color1, color2, color3, pattern, displacement, tiling)));
+						overlays.AddRange(RetrieveAllTurretSettingsGraphicsProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer), pattern));
 					}
 				}
 				drawStep = "Retrieving graphic overlays";
@@ -225,8 +234,14 @@ namespace Vehicles
 		public static (Rect rect, Texture mainTex, Material material, float layer, float angle) RetrieveOverlaySettingsGraphicsProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, GraphicOverlay graphicOverlay)
 		{
 			Rect overlayRect = OverlayRect(rect, vehicleDef, graphicOverlay, rot);
-			Texture2D texture = ContentFinder<Texture2D>.Get(graphicOverlay.data.graphicData.texPath);
-			Material material = graphicOverlay.data.graphicData.Graphic.MatAt(rot);
+			GraphicData graphicData = graphicOverlay.data.graphicData;
+			Texture2D texture = ContentFinder<Texture2D>.Get(graphicData.texPath);
+			Material material = null;
+			Graphic graphic = graphicData.Graphic;
+			if (graphic.Shader.SupportsMaskTex() || graphic.Shader.SupportsRGBMaskTex())
+			{
+				material = graphic.MatAt(rot);
+			}
 			return (overlayRect, texture, material, graphicOverlay.data.graphicData.DrawOffsetFull(rot).y, graphicOverlay.data.rotation);
 		}
 

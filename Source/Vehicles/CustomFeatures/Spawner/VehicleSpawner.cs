@@ -77,7 +77,7 @@ namespace Vehicles
 				PatternDef pattern = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(result.VehicleDef.defName, result.VehicleDef.graphicData)?.patternDef ?? PatternDefOf.Default;
 
 				lastStep = "Randomized pattern check";
-				result.Pattern = request.RandomizeMask ? result.VehicleGraphic.maskMatPatterns.RandomElement().Key : pattern;
+				result.Pattern = request.RandomizeMask ? DefDatabase<PatternDef>.AllDefsListForReading.RandomElementWithFallback(fallback: PatternDefOf.Default) : pattern;
 
 				lastStep = "Initializing colors";
 				result.DrawColor = request.ColorOne;

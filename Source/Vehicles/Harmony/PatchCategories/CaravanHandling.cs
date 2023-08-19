@@ -20,7 +20,8 @@ namespace Vehicles
 	{
 		private static MethodInfo addAllTradeablesMethod;
 
-		private static List<Pawn> tmpCaravanPawns = new List<Pawn>();
+		private static readonly List<Pawn> tmpCaravanPawns = new List<Pawn>();
+		private static readonly List<Thing> tmpAerialVehicleThingsWillToBuy = new List<Thing>();
 
 		public void PatchMethods()
 		{
@@ -142,9 +143,9 @@ namespace Vehicles
 				nameof(GiveSoldThingToAerialVehicle)),
 				transpiler: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(GiveSoldThingToVehicleTranspiler)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(TradeDeal), "AddAllTradeables"),
-				postfix: new HarmonyMethod(typeof(CaravanHandling),
-				nameof(AddAllTradeablesFromAerialVehicle)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(TradeDeal), "AddAllTradeables"),
+			//	postfix: new HarmonyMethod(typeof(CaravanHandling),
+			//	nameof(AddAllTradeablesFromAerialVehicle)));
 
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan_NeedsTracker), "TrySatisfyPawnNeeds"),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
@@ -759,24 +760,20 @@ namespace Vehicles
 			AerialVehicleInFlight aerialVehicle = playerNegotiator.GetAerialVehicle();
 			if (aerialVehicle != null)
 			{
-				List<Thing> inventoryThings = new List<Thing>();
-				if (!__result.EnumerableNullOrEmpty())
-				{
-					inventoryThings.AddRange(__result);
-				}
+				tmpAerialVehicleThingsWillToBuy.Clear();
 				foreach (Thing thing in aerialVehicle.vehicle.inventory.innerContainer)
 				{
-					inventoryThings.Add(thing);
+					tmpAerialVehicleThingsWillToBuy.Add(thing);
 				}
 				List<Pawn> pawns = aerialVehicle.vehicle.AllPawnsAboard;
 				for (int i = 0; i < pawns.Count; i++)
 				{
 					if (!CaravanUtility.IsOwner(pawns[i], aerialVehicle.Faction))
 					{
-						inventoryThings.Add(pawns[i]);
+						tmpAerialVehicleThingsWillToBuy.Add(pawns[i]);
 					}
 				}
-				__result = inventoryThings;
+				__result = tmpAerialVehicleThingsWillToBuy;
 				return false;
 			}
 			return true;
