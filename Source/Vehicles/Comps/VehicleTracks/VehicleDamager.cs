@@ -81,6 +81,10 @@ namespace Vehicles
 			{
 				return;
 			}
+			if (pawn.Downed || pawn.Dead || pawn.InMentalState)
+			{
+				return;
+			}
 			if (PawnUtility.PlayerForcedJobNowOrSoon(pawn))
 			{
 				return;

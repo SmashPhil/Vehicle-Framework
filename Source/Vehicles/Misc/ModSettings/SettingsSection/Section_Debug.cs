@@ -167,6 +167,7 @@ namespace Vehicles
 					Rect buttonRect = listingStandard.GetRect(30);
 					if (Widgets.ButtonText(buttonRect, "VF_DevMode_DebugPathfinderDebugging".Translate()))
 					{
+						SoundDefOf.Click.PlayOneShotOnCamera();
 						RegionDebugMenu();
 					}
 					TooltipHandler.TipRegionByKey(buttonRect, "VF_DevMode_DebugPathfinderDebuggingTooltip");
@@ -174,6 +175,7 @@ namespace Vehicles
 					buttonRect = listingStandard.GetRect(30);
 					if (Widgets.ButtonText(buttonRect, "VF_DevMode_DebugWorldPathfinderDebugging".Translate()))
 					{
+						SoundDefOf.Click.PlayOneShotOnCamera();
 						WorldPathingDebugMenu();
 					}
 					TooltipHandler.TipRegionByKey(buttonRect, "VF_DevMode_DebugWorldPathfinderDebuggingTooltip");
@@ -181,7 +183,23 @@ namespace Vehicles
 					buttonRect = listingStandard.GetRect(30);
 					if (Widgets.ButtonText(buttonRect, "Output Material Cache"))
 					{
+						SoundDefOf.Click.PlayOneShotOnCamera();
 						RGBMaterialPool.LogAllMaterials();
+					}
+
+					buttonRect = listingStandard.GetRect(30);
+					if (Widgets.ButtonText(buttonRect, "Regenerate All Regions"))
+					{
+						SoundDefOf.Click.PlayOneShotOnCamera();
+						foreach (Map map in Find.Maps)
+						{
+							VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+							foreach (VehicleDef vehicleDef in mapping.Owners)
+							{
+								mapping[vehicleDef].VehicleRegionDirtyer.SetAllDirty();
+								mapping[vehicleDef].VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
+							}
+						}
 					}
 				}
 				GUIState.Pop();

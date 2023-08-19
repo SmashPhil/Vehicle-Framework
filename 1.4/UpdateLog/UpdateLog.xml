@@ -34,7 +34,7 @@ On top of this, I changed the way the pattern system caches materials so it shou
 
 - Fixed bug where overlays would only render 1 graphic for ghost graphic if they used the same texture.
 
-- Fixed bug where turrets would still render at UI Scales > 1 in UI windows.
+- Fixed bug where turrets would still render at UI Scales &gt; 1 in UI windows.
 
 - Fixed bug where rotation registry for rotating overlays (eg. helicopter rotors) wouldn't reset upon entering the map.
 
