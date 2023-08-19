@@ -14,6 +14,8 @@ namespace Vehicles
 	{
 		private static FieldInfo countToTransferFieldInfo = AccessTools.Field(typeof(TransferableOneWay), "countToTransfer");
 
+		public virtual string ListerTag => ReservationType.LoadVehicle;
+
 		public virtual Thing Item
 		{
 			get
@@ -46,7 +48,7 @@ namespace Vehicles
 			this.FailOnDestroyedOrNull(TargetIndex.B);
 			this.FailOn(delegate ()
 			{
-				return !Map.GetCachedMapComponent<VehicleReservationManager>().VehicleListed(Vehicle, ReservationType.LoadTurret);
+				return !Map.GetCachedMapComponent<VehicleReservationManager>().VehicleListed(Vehicle, ReservationType.LoadVehicle);
 			});
 			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch);
 			yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false);
