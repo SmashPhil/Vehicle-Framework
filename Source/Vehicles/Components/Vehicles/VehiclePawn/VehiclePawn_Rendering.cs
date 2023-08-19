@@ -968,33 +968,42 @@ namespace Vehicles
 		public void MultiplePawnFloatMenuOptions(List<Pawn> pawns)
 		{
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
-			VehicleReservationManager reservationManager = Map.GetCachedMapComponent<VehicleReservationManager>();
-			FloatMenuOption opt1 = new FloatMenuOption("VF_BoardVehicleGroup".Translate(LabelShort), delegate ()
+
+			if (pawns.Any(pawn => !IdeoAllowsBoarding(pawn)))
 			{
-				List<IntVec3> cells = this.OccupiedRect().Cells.ToList();
-				foreach (Pawn p in pawns)
-				{
-					if (cells.Contains(p.Position))
-					{
-						continue;
-					}
-					Job job = new Job(JobDefOf_Vehicles.Board, this);
-					VehicleHandler handler = p.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(handler => handler.AreSlotsAvailable && handler.role.handlingTypes == HandlingTypeFlags.None);
-					GiveLoadJob(p, handler);
-					reservationManager.Reserve<VehicleHandler, VehicleHandlerReservation>(this, p, job, handler);
-					p.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
-				}
-			}, MenuOptionPriority.Default, null, null, 0f, null, null);
-			FloatMenuOption opt2 = new FloatMenuOption("VF_BoardVehicleGroupFail".Translate(LabelShort), null, MenuOptionPriority.Default, null, null, 0f, null, null)
-			{
-				Disabled = true
-			};
-			int r = 0;
-			foreach (VehicleHandler h in handlers)
-			{
-				r += reservationManager.GetReservation<VehicleHandlerReservation>(this)?.ClaimantsOnHandler(h) ?? 0;
+				options.Add(new FloatMenuOption("VF_CantEnterVehicle_IdeoligionForbids".Translate(), null));
+
 			}
-			options.Add(pawns.Count + r > SeatsAvailable ? opt2 : opt1);
+			else
+			{
+				VehicleReservationManager reservationManager = Map.GetCachedMapComponent<VehicleReservationManager>();
+				FloatMenuOption opt1 = new FloatMenuOption("VF_BoardVehicleGroup".Translate(LabelShort), delegate ()
+				{
+					List<IntVec3> cells = this.OccupiedRect().Cells.ToList();
+					foreach (Pawn p in pawns)
+					{
+						if (cells.Contains(p.Position))
+						{
+							continue;
+						}
+						Job job = new Job(JobDefOf_Vehicles.Board, this);
+						VehicleHandler handler = p.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(handler => handler.AreSlotsAvailable && handler.role.handlingTypes == HandlingTypeFlags.None);
+						GiveLoadJob(p, handler);
+						reservationManager.Reserve<VehicleHandler, VehicleHandlerReservation>(this, p, job, handler);
+						p.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
+					}
+				}, MenuOptionPriority.Default, null, null, 0f, null, null);
+				FloatMenuOption opt2 = new FloatMenuOption("VF_BoardVehicleGroupFail".Translate(LabelShort), null, MenuOptionPriority.Default, null, null, 0f, null, null)
+				{
+					Disabled = true
+				};
+				int r = 0;
+				foreach (VehicleHandler h in handlers)
+				{
+					r += reservationManager.GetReservation<VehicleHandlerReservation>(this)?.ClaimantsOnHandler(h) ?? 0;
+				}
+				options.Add(pawns.Count + r > SeatsAvailable ? opt2 : opt1);
+			}
 			FloatMenuMulti floatMenuMap = new FloatMenuMulti(options, pawns, this, pawns[0].LabelCap, Verse.UI.MouseMapPosition())
 			{
 				givesColonistOrders = true
