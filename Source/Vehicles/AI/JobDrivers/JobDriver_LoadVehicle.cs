@@ -48,10 +48,10 @@ namespace Vehicles
 			this.FailOnDestroyedOrNull(TargetIndex.B);
 			this.FailOn(delegate ()
 			{
-				return !Map.GetCachedMapComponent<VehicleReservationManager>().VehicleListed(Vehicle, ReservationType.LoadVehicle);
+				return !Map.GetCachedMapComponent<VehicleReservationManager>().VehicleListed(Vehicle, ListerTag);
 			});
 			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch);
-			yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false);
+			yield return Toils_Haul.StartCarryThing(TargetIndex.A);
 			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).FailOnDespawnedNullOrForbidden(TargetIndex.B);
 			yield return Toils_General.Wait(25, TargetIndex.None).WithProgressBarToilDelay(TargetIndex.B);
 			yield return GiveAsMuchToVehicleAsPossible();
