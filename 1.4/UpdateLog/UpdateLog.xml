@@ -8,7 +8,9 @@
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Fixed bug where vehicles weren't triggering path recalc when moving
+- Fixed bug where vehicles weren't triggering path recalculation when moving
+
+- Fixed bug where loading an older save with a vehicle on the world map (with turrets) would throw an exception upon returning.
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;

@@ -106,7 +106,7 @@ namespace Vehicles
 		private void RegenerateNewVehicleRegions()
 		{
 			newRegions.Clear();
-			HashSet<IntVec3> cells = mapping[createdFor].VehicleRegionDirtyer.DirtyCells;
+			List<IntVec3> cells = mapping[createdFor].VehicleRegionDirtyer.DirtyCells.ToList();
 			foreach (IntVec3 cell in cells)
 			{
 				if (VehicleGridsUtility.GetRegion(cell, mapping.map, createdFor, RegionType.Set_All) is null)

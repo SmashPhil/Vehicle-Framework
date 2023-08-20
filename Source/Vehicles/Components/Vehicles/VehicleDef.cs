@@ -163,6 +163,7 @@ namespace Vehicles
 			base.graphicData = graphicData;
 			LongEventHandler.ExecuteWhenFinished(delegate ()
 			{
+				graphicData.shaderType ??= ShaderTypeDefOf.Cutout;
 				if (!VehicleMod.settings.main.useCustomShaders)
 				{
 					graphicData.shaderType = graphicData.shaderType.Shader.SupportsRGBMaskTex(ignoreSettings: true) ? ShaderTypeDefOf.CutoutComplex : graphicData.shaderType;

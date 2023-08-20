@@ -31,7 +31,6 @@ namespace Vehicles
 		public const float RootPosWeight = 0.75f;
 
 		internal Dictionary<IntVec3, int> postCalculatedCells = new Dictionary<IntVec3, int>();
-		internal Dictionary<IntVec3, int> postCalculatedTurns = new Dictionary<IntVec3, int>();
 
 		private VehicleMapping mapping;
 		private VehicleDef vehicleDef;
@@ -124,7 +123,6 @@ namespace Vehicles
 			openList = new FastPriorityQueue<CostNode>(new CostNodeComparer());
 			regionCostCalculator = new VehicleRegionCostCalculatorWrapper(mapping, vehicleDef);
 			postCalculatedCells = new Dictionary<IntVec3, int>();
-			postCalculatedTurns = new Dictionary<IntVec3, int>();
 		}
 
 		/// <summary>
@@ -157,7 +155,6 @@ namespace Vehicles
 		public PawnPath FindVehiclePath(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, CancellationToken token, PathEndMode peMode = PathEndMode.OnCell)
 		{
 			postCalculatedCells.Clear();
-			postCalculatedTurns.Clear();
 			if (DebugSettings.pathThroughWalls)
 			{
 				traverseParms.mode = TraverseMode.PassAllDestroyableThings;
@@ -332,14 +329,6 @@ namespace Vehicles
 									{
 										int turnCost = costNode.direction.Difference(pathDir) * TurnCostTicks;
 										tickCost += turnCost;
-										if (postCalculatedTurns.ContainsKey(cellToCheck))
-										{
-											postCalculatedTurns[cellToCheck] = turnCost;
-										}
-										else
-										{
-											postCalculatedTurns.Add(cellToCheck, turnCost);
-										}
 									}
 								}
 								float totalAreaCost = 0;
@@ -393,15 +382,8 @@ namespace Vehicles
 								int calculatedCost = tickCost + calcGrid[startIndex].knownCost;
 								ushort status = calcGrid[cellIndex].status;
 
-								//Only generate path costs for linear non-reverse pathing check
-								if (postCalculatedCells.ContainsKey(cellToCheck))
-								{
-									postCalculatedCells[cellToCheck] = calculatedCost;
-								}
-								else
-								{
-									postCalculatedCells.Add(cellToCheck, calculatedCost);
-								}
+								//For debug path drawing
+								postCalculatedCells[cellToCheck] = calculatedCost;
 
 								if (status == statusClosedValue || status == statusOpenValue)
 								{

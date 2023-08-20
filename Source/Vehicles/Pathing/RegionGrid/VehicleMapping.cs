@@ -178,7 +178,7 @@ namespace Vehicles
 
 		internal bool ReleaseThread()
 		{
-			Debug.Message($"<orange>Releasing thread {Thread.id}.</orange>");
+			Debug.Message($"<color=orange>Releasing thread {Thread.id}.</color>");
 			return dedicatedThread.Release();
 		}
 

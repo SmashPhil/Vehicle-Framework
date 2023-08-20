@@ -205,15 +205,7 @@ namespace Vehicles
 					buttonRect = listingStandard.GetRect(30);
 					if (Widgets.ButtonText(buttonRect, "Flash Path Costs"))
 					{
-						SoundDefOf.Click.PlayOneShotOnCamera();
-						foreach (Map map in Find.Maps)
-						{
-							foreach (IntVec3 cell in map.AllCells)
-							{
-								int cost = map.pathing.Normal.pathGrid.PerceivedPathCostAt(cell);
-								map.debugDrawer.FlashCell(cell, cost / 500f, cost.ToString());
-							}
-						}
+						OpenFlashPathCostsMenu();
 					}
 				}
 				GUIState.Pop();
@@ -268,6 +260,55 @@ namespace Vehicles
 					else
 					{
 						mapComp.ReleaseThread();
+					}
+				}
+			}
+		}
+
+		public void OpenFlashPathCostsMenu()
+		{
+			List<Toggle> vehicleDefToggles = new List<Toggle>();
+			vehicleDefToggles.Add(new Toggle("Vanilla", () => false, delegate (bool value)
+			{
+				FlashPathCostsFor(null);
+				Find.WindowStack.WindowOfType<Dialog_RadioButtonMenu>()?.Close();
+			}));
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading.OrderBy(def => def.modContentPack.ModMetaData.SamePackageId(VehicleHarmony.VehiclesUniqueId, ignorePostfix: true))
+																						   .ThenBy(def => def.modContentPack.Name)
+																						   .ThenBy(d => d.defName))
+			{
+				Toggle toggle = new Toggle(vehicleDef.defName, vehicleDef.modContentPack.Name, () => DebugHelper.Local.VehicleDef == vehicleDef, (value) => { }, onToggle: delegate (bool value)
+				{
+					FlashPathCostsFor(vehicleDef);
+					Find.WindowStack.WindowOfType<Dialog_RadioButtonMenu>()?.Close();
+				});
+				toggle.Disabled = !PathingHelper.ShouldCreateRegions(vehicleDef);
+				vehicleDefToggles.Add(toggle);
+			}
+			Find.WindowStack.Add(new Dialog_RadioButtonMenu("VF_DevMode_DebugPathfinderDebugging".Translate(), vehicleDefToggles));
+		}
+
+		private void FlashPathCostsFor(VehicleDef vehicleDef)
+		{
+			SoundDefOf.Click.PlayOneShotOnCamera();
+			SoundDefOf.Click.PlayOneShotOnCamera();
+			if (Find.CurrentMap is Map map)
+			{
+				if (vehicleDef == null)
+				{
+					foreach (IntVec3 cell in map.AllCells)
+					{
+						int cost = map.pathing.Normal.pathGrid.PerceivedPathCostAt(cell);
+						map.debugDrawer.FlashCell(cell, cost / 500f, cost.ToString());
+					}
+				}
+				else
+				{
+					VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+					foreach (IntVec3 cell in map.AllCells)
+					{
+						int cost = mapping[vehicleDef].VehiclePathGrid.PerceivedPathCostAt(cell);
+						map.debugDrawer.FlashCell(cell, cost / 500f, cost.ToString());
 					}
 				}
 			}

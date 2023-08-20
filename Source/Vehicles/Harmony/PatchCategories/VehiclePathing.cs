@@ -398,6 +398,17 @@ namespace Vehicles
 			if (__instance.Spawned)
 			{
 				PathingHelper.ThingAffectingRegionsOrientationChanged(__instance, __instance.Map);
+				//if (__instance is VehiclePawn vehicle)
+				//{
+				//	foreach (IntVec3 cell in vehicle.OccupiedRect())
+				//	{
+				//		vehicle.Map.pathing.RecalculatePerceivedPathCostAt(cell);
+				//	}
+				//	foreach (IntVec3 cell in vehicle.OccupiedRect())
+				//	{
+				//		vehicle.Map.pathing.RecalculatePerceivedPathCostAt(cell);
+				//	}
+				//}
 			}
 		}
 
