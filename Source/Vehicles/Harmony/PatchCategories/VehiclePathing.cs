@@ -44,6 +44,9 @@ namespace Vehicles
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(RecalculatePerceivedPathCostForVehicle)));
 
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(TerrainGrid), nameof(TerrainGrid.SetTerrain)),
+				postfix: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(SetTerrainAndUpdateVehiclePathCosts)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Thing), nameof(Thing.DeSpawn)),
 				transpiler: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(DeSpawnAndUpdateVehicleRegionsTranspiler)));
@@ -347,6 +350,14 @@ namespace Vehicles
 			PathingHelper.RecalculatePerceivedPathCostAt(c, ___normal.map);
 		}
 
+		public static void SetTerrainAndUpdateVehiclePathCosts(IntVec3 c, Map ___map)
+		{
+			if (Current.ProgramState == ProgramState.Playing)
+			{
+				PathingHelper.RecalculatePerceivedPathCostAt(c, ___map);
+			}
+		}
+
 		public static IEnumerable<CodeInstruction> DeSpawnAndUpdateVehicleRegionsTranspiler(IEnumerable<CodeInstruction> instructions)
 		{
 			List<CodeInstruction> instructionList = instructions.ToList();
@@ -398,17 +409,6 @@ namespace Vehicles
 			if (__instance.Spawned)
 			{
 				PathingHelper.ThingAffectingRegionsOrientationChanged(__instance, __instance.Map);
-				//if (__instance is VehiclePawn vehicle)
-				//{
-				//	foreach (IntVec3 cell in vehicle.OccupiedRect())
-				//	{
-				//		vehicle.Map.pathing.RecalculatePerceivedPathCostAt(cell);
-				//	}
-				//	foreach (IntVec3 cell in vehicle.OccupiedRect())
-				//	{
-				//		vehicle.Map.pathing.RecalculatePerceivedPathCostAt(cell);
-				//	}
-				//}
 			}
 		}
 

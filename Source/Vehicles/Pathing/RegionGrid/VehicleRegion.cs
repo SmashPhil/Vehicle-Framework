@@ -312,8 +312,9 @@ namespace Vehicles
 			for (int i = 0; i < links.Count; i++)
 			{
 				VehicleRegionLink regionLink = links[i];
-				foreach (VehicleRegionLink connectingToLink in links)
+				for (int j = 0; j < links.Count; j++)
 				{
+					VehicleRegionLink connectingToLink = links[j];
 					if (regionLink == connectingToLink) continue; //Skip matching link
 					
 					int weight = EuclideanDistance(regionLink.anchor, connectingToLink);

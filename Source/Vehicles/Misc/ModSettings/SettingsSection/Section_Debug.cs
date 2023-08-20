@@ -190,16 +190,20 @@ namespace Vehicles
 					buttonRect = listingStandard.GetRect(30);
 					if (Widgets.ButtonText(buttonRect, "Regenerate All Regions"))
 					{
-						SoundDefOf.Click.PlayOneShotOnCamera();
-						foreach (Map map in Find.Maps)
+						LongEventHandler.QueueLongEvent(delegate ()
 						{
-							VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-							foreach (VehicleDef vehicleDef in mapping.Owners)
+							SoundDefOf.Click.PlayOneShotOnCamera();
+							foreach (Map map in Find.Maps)
 							{
-								mapping[vehicleDef].VehicleRegionDirtyer.SetAllDirty();
-								mapping[vehicleDef].VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
+								VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+								foreach (VehicleDef vehicleDef in mapping.Owners)
+								{
+									mapping[vehicleDef].VehicleRegionDirtyer.SetAllDirty();
+									mapping[vehicleDef].VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
+									mapping[vehicleDef].VehiclePathGrid.RecalculateAllPerceivedPathCosts();
+								}
 							}
-						}
+						}, "Regenerating Regions", false, null);
 					}
 
 					buttonRect = listingStandard.GetRect(30);
@@ -234,14 +238,6 @@ namespace Vehicles
 					SoundDefOf.Click.PlayOneShotOnCamera();
 					Find.WindowStack.Add(new Dialog_GraphEditor());
 				}
-				//if (listingStandard.ButtonText("[DevOnly] Unload Unused Assets"))
-				//{
-				//	SoundDefOf.Click.PlayOneShotOnCamera();
-				//	SmashTools.Performance.ProfilerWatch.Start("UnloadingAssets");
-				//	Resources.UnloadUnusedAssets();
-				//	SmashTools.Performance.ProfilerWatch.Post("UnloadingAssets");
-				//	SmashTools.Performance.ProfilerWatch.End("UnloadingAssets");
-				//}
 			}
 			listingStandard.End();
 		}
@@ -268,7 +264,7 @@ namespace Vehicles
 		public void OpenFlashPathCostsMenu()
 		{
 			List<Toggle> vehicleDefToggles = new List<Toggle>();
-			vehicleDefToggles.Add(new Toggle("Vanilla", () => false, delegate (bool value)
+			vehicleDefToggles.Add(new Toggle("Vanilla", () => false, (value) => { }, delegate (bool value)
 			{
 				FlashPathCostsFor(null);
 				Find.WindowStack.WindowOfType<Dialog_RadioButtonMenu>()?.Close();
@@ -277,7 +273,7 @@ namespace Vehicles
 																						   .ThenBy(def => def.modContentPack.Name)
 																						   .ThenBy(d => d.defName))
 			{
-				Toggle toggle = new Toggle(vehicleDef.defName, vehicleDef.modContentPack.Name, () => DebugHelper.Local.VehicleDef == vehicleDef, (value) => { }, onToggle: delegate (bool value)
+				Toggle toggle = new Toggle(vehicleDef.defName, vehicleDef.modContentPack.Name, () => false, (value) => { }, onToggle: delegate (bool value)
 				{
 					FlashPathCostsFor(vehicleDef);
 					Find.WindowStack.WindowOfType<Dialog_RadioButtonMenu>()?.Close();

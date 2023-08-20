@@ -161,7 +161,7 @@ namespace Vehicles
 		public static void RegisterRegionEffecter(ThingDef thingDef)
 		{
 			regionEffecters[thingDef] = new List<VehicleDef>();
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
+			foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
 			{
 				if (vehicleDef.properties.customThingCosts.TryGetValue(thingDef, out int value))
 				{
@@ -252,10 +252,10 @@ namespace Vehicles
 		{
 			foreach (VehicleDef vehicleDef in vehicleDefs)
 			{
+				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderThing(thing);
 				if (mapping.IsOwner(vehicleDef))
 				{
 					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsSpawned(thing);
-					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderThing(thing);
 					mapping[vehicleDef].VehicleReachability.ClearCache();
 				}
 			}
@@ -265,10 +265,10 @@ namespace Vehicles
 		{
 			foreach (VehicleDef vehicleDef in vehicleDefs)
 			{
+				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderThing(thing);
 				if (mapping.IsOwner(vehicleDef))
 				{
 					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsDespawned(thing);
-					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderThing(thing);
 					mapping[vehicleDef].VehicleReachability.ClearCache();
 				}
 			}
@@ -355,7 +355,7 @@ namespace Vehicles
 
 		private static void RecalculatePerceivedPathCostAtFor(VehicleMapping mapping, IntVec3 cell)
 		{
-			foreach (VehicleDef vehicleDef in mapping.Owners)
+			foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
 			{
 				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
 			}
