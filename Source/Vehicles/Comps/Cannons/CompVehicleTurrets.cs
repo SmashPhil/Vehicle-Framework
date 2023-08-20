@@ -572,15 +572,28 @@ namespace Vehicles
 		public override void PostSpawnSetup(bool respawningAfterLoad)
 		{
 			base.PostSpawnSetup(respawningAfterLoad);
-			RevalidateTurrets();
-			RecacheTurretPermissions();
 
-			if (!respawningAfterLoad)
+			string step = "";
+			try
 			{
-				foreach (VehicleTurret turret in turrets)
+				step = "Revalidating turrets";
+				RevalidateTurrets();
+				step = "Recaching turret permissions";
+				RecacheTurretPermissions();
+
+				if (!respawningAfterLoad)
 				{
-					SetQuotaLevel(turret, GetQuotaLevel(turret)); //Stores default quota level
+					step = "Setting quota levels";
+					foreach (VehicleTurret turret in turrets)
+					{
+						SetQuotaLevel(turret, GetQuotaLevel(turret)); //Stores default quota level
+					}
 				}
+				step = "Done";
+			}
+			catch (Exception ex)
+			{
+				Log.Error($"Exception caught while initializing turrets in PostSpawnSetup at step={step} Exception={ex}");
 			}
 		}
 
@@ -590,6 +603,8 @@ namespace Vehicles
 			Scribe_Collections.Look(ref turrets, nameof(turrets), LookMode.Deep, ctorArgs: Vehicle);
 			Scribe_Collections.Look(ref turretQueue, nameof(turretQueue), LookMode.Reference);
 			Scribe_Collections.Look(ref turretQuotas, nameof(turretQuotas), LookMode.Reference, LookMode.Value, ref tmpListTurrets, ref tmpListTurretQuota);
+
+			turretQuotas ??= new Dictionary<VehicleTurret, int>();
 		}
 
 		public struct TurretData : IExposable

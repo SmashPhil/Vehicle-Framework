@@ -58,7 +58,7 @@ namespace Vehicles
 		private bool shouldStopClipping;
 
 		private static readonly HashSet<IntVec3> collisionCells = new HashSet<IntVec3>();
-
+		private static readonly HashSet<IntVec3> hitboxUpdateCells = new HashSet<IntVec3>();
 		public Vehicle_PathFollower(VehiclePawn vehicle)
 		{
 			this.vehicle = vehicle;
@@ -400,8 +400,21 @@ namespace Vehicles
 				return;
 			}
 
+			CellRect hitboxBeforeMoving = vehicle.OccupiedRect();
+
 			lastCell = vehicle.Position;
 			vehicle.Position = nextCell;
+
+			hitboxUpdateCells.Clear();
+			hitboxUpdateCells.AddRange(hitboxBeforeMoving);
+			hitboxUpdateCells.AddRange(vehicle.OccupiedRect());
+
+			foreach (IntVec3 cell in hitboxUpdateCells)
+			{
+				vehicle.Map.pathing.RecalculatePerceivedPathCostAt(cell);
+			}
+
+			hitboxUpdateCells.Clear();
 
 			if (VehicleMod.settings.main.runOverPawns)
 			{

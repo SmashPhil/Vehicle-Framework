@@ -17,7 +17,7 @@ namespace Vehicles
 		protected const float ConfigureButtonSize = 20;
 		protected const float SubIconSize = GizmoHeight / 2.25f;
 
-		protected const float CooldownBarWidth = 32;
+		protected const float CooldownBarWidth = 18;
 		protected const float PaddingBetweenElements = 2;
 
 		protected override float RecalculateWidth()

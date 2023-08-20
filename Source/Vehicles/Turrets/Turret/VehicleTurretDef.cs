@@ -94,6 +94,10 @@ namespace Vehicles
 			base.PostLoad();
 			LongEventHandler.ExecuteWhenFinished(delegate ()
 			{
+				if (graphicData == null)
+				{
+					return;
+				}
 				if (graphicData.shaderType == null)
 				{
 					graphicData.shaderType = ShaderTypeDefOf.Cutout;

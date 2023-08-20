@@ -133,6 +133,7 @@ namespace Vehicles
 			{
 				if (cell.InBounds(mapping.map))
 				{
+					//mapping.map.debugDrawer.FlashCell(cell, 0);
 					VehicleRegion validRegionAt_NoRebuild2 = mapping[createdFor].VehicleRegionGrid.GetValidRegionAt_NoRebuild(cell);
 					if (validRegionAt_NoRebuild2 != null)
 					{

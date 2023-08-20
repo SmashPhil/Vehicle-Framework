@@ -201,6 +201,20 @@ namespace Vehicles
 							}
 						}
 					}
+
+					buttonRect = listingStandard.GetRect(30);
+					if (Widgets.ButtonText(buttonRect, "Flash Path Costs"))
+					{
+						SoundDefOf.Click.PlayOneShotOnCamera();
+						foreach (Map map in Find.Maps)
+						{
+							foreach (IntVec3 cell in map.AllCells)
+							{
+								int cost = map.pathing.Normal.pathGrid.PerceivedPathCostAt(cell);
+								map.debugDrawer.FlashCell(cell, cost / 500f, cost.ToString());
+							}
+						}
+					}
 				}
 				GUIState.Pop();
 			}
