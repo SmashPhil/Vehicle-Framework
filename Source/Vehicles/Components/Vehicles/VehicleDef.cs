@@ -82,7 +82,7 @@ namespace Vehicles
 
 		public int DefIndex { get; set; }
 
-		public int SizePadding => Mathf.Min(size.x, size.z) / 2;
+		public int SizePadding { get; private set; }
 
 		public VehicleFleshTypeDef BodyType => kindDef.RaceProps.FleshType as VehicleFleshTypeDef;
 
@@ -139,7 +139,11 @@ namespace Vehicles
 			drawProperties ??= new VehicleDrawProperties();
 			properties ??= new VehicleProperties();
 			properties.ResolveReferences(this);
-			
+
+			int padding = Mathf.CeilToInt(Mathf.Min(size.x, size.z) / 2f);
+			int result = Mathf.Clamp(padding - 1, 0, 100);
+			SizePadding = result;
+
 			if (VehicleMod.settings.vehicles.defaultGraphics.NullOrEmpty())
 			{
 				VehicleMod.settings.vehicles.defaultGraphics = new Dictionary<string, PatternData>();

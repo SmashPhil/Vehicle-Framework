@@ -259,13 +259,13 @@ namespace Vehicles
 
 			private readonly HashSet<ThingDef> impassableThingDefs;
 			private readonly HashSet<TerrainDef> impassableTerrain;
-			private readonly int border;
+			private readonly int size;
 			private readonly bool defaultTerrainImpassable;
 
 			public VehiclePathData(VehicleDef vehicleDef)
 			{
 				this.vehicleDef = vehicleDef;
-				border = Mathf.Min(vehicleDef.Size.x, vehicleDef.Size.z) / 2;
+				size = Mathf.Min(vehicleDef.Size.x, vehicleDef.Size.z);
 				defaultTerrainImpassable = vehicleDef.properties.defaultTerrainImpassable;
 				impassableThingDefs = vehicleDef.properties.customThingCosts.Where(kvp => kvp.Value >= VehiclePathGrid.ImpassableCost).Select(kvp => kvp.Key).ToHashSet();
 				impassableTerrain = vehicleDef.properties.customTerrainCosts.Where(kvp => kvp.Value >= VehiclePathGrid.ImpassableCost).Select(kvp => kvp.Key).ToHashSet();
@@ -305,7 +305,7 @@ namespace Vehicles
 				{
 					return false;
 				}
-				return border == other.border && defaultTerrainImpassable == other.defaultTerrainImpassable &&
+				return size == other.size && defaultTerrainImpassable == other.defaultTerrainImpassable &&
 					impassableThingDefs.SetEquals(other.impassableThingDefs) && impassableTerrain.SetEquals(other.impassableTerrain);
 			}
 		}

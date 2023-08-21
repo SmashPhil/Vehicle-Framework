@@ -33,6 +33,10 @@ namespace Vehicles
 			{
 				return RegionType.None;
 			}
+			if (!VerifyCardinalCellSpace(cell, mapping, vehicleDef))
+			{
+				return RegionType.None;
+			}
 			if (mapping[vehicleDef].VehiclePathGrid.WalkableFast(cell))
 			{
 				return RegionType.Normal;
@@ -46,6 +50,27 @@ namespace Vehicles
 				}
 			}
 			return RegionType.ImpassableFreeAirExchange;
+		}
+
+		private static bool VerifyCardinalCellSpace(IntVec3 cell, VehicleMapping mapping, VehicleDef vehicleDef)
+		{
+			if (vehicleDef.Size.x % 2 == 0 || vehicleDef.Size.z % 2 == 0)
+			{
+				int padding = vehicleDef.SizePadding + 1;
+				IntVec3 north = new IntVec3(cell.x, 0, cell.z + padding);
+				IntVec3 east = new IntVec3(cell.x + padding, 0, cell.z);
+				IntVec3 south = new IntVec3(cell.x, 0, cell.z - padding);
+				IntVec3 west = new IntVec3(cell.x - padding, 0, cell.z);
+				if (!vehicleDef.WidthStandable(mapping.map, north) && !vehicleDef.WidthStandable(mapping.map, south))
+				{
+					return false;
+				}
+				else if (!vehicleDef.WidthStandable(mapping.map, east) && !vehicleDef.WidthStandable(mapping.map, west))
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 	}
 }

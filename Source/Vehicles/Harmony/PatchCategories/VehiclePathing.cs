@@ -17,6 +17,8 @@ namespace Vehicles
 {
 	internal class VehiclePathing : IPatchCategory
 	{
+		private static readonly HashSet<IntVec3> hitboxUpdateCells = new HashSet<IntVec3>();
+
 		public void PatchMethods()
 		{
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(FloatMenuMakerMap), "GotoLocationOption"),
@@ -420,6 +422,16 @@ namespace Vehicles
 				{
 					return false;
 				}
+				hitboxUpdateCells.Clear();
+				hitboxUpdateCells.AddRange(vehicle.OccupiedRectShifted(IntVec2.Zero, Rot4.East));
+				hitboxUpdateCells.AddRange(vehicle.OccupiedRectShifted(IntVec2.Zero, Rot4.North));
+
+				foreach (IntVec3 cell in hitboxUpdateCells)
+				{
+					vehicle.Map.pathing.RecalculatePerceivedPathCostAt(cell);
+				}
+
+				hitboxUpdateCells.Clear();
 			}
 			return true;
 		}

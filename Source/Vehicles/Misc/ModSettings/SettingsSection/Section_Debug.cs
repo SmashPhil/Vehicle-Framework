@@ -196,11 +196,14 @@ namespace Vehicles
 							foreach (Map map in Find.Maps)
 							{
 								VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-								foreach (VehicleDef vehicleDef in mapping.Owners)
+								foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
 								{
-									mapping[vehicleDef].VehicleRegionDirtyer.SetAllDirty();
-									mapping[vehicleDef].VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
 									mapping[vehicleDef].VehiclePathGrid.RecalculateAllPerceivedPathCosts();
+									if (mapping.IsOwner(vehicleDef))
+									{
+										mapping[vehicleDef].VehicleRegionDirtyer.SetAllDirty();
+										mapping[vehicleDef].VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
+									}
 								}
 							}
 						}, "Regenerating Regions", false, null);

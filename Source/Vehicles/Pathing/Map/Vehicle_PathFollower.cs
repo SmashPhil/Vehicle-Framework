@@ -59,6 +59,7 @@ namespace Vehicles
 
 		private static readonly HashSet<IntVec3> collisionCells = new HashSet<IntVec3>();
 		private static readonly HashSet<IntVec3> hitboxUpdateCells = new HashSet<IntVec3>();
+
 		public Vehicle_PathFollower(VehiclePawn vehicle)
 		{
 			this.vehicle = vehicle;
