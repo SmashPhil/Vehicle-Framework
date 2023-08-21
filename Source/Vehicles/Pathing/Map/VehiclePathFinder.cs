@@ -333,7 +333,7 @@ namespace Vehicles
 								}
 								float totalAreaCost = 0;
 								float rootCost = 0;
-								CellRect cellToCheckRect = CellRect.CenteredOn(cellToCheck, Mathf.FloorToInt(minSize / 2f));
+								CellRect cellToCheckRect = vehicle.VehicleRect(cellToCheck, costNode.direction);// CellRect.CenteredOn(cellToCheck, Mathf.FloorToInt(minSize / 2f));
 								foreach (IntVec3 cellInRect in cellToCheckRect)
 								{
 									if (!vehicle.Drivable(cellInRect))

@@ -165,81 +165,90 @@ namespace Vehicles
 			stringBuilder ??= new StringBuilder();
 			stringBuilder.Clear();
 			stringBuilder.AppendLine($"Starting calculation for {vehicleDef} at {cell}.");
-			TerrainDef terrainDef = map.terrainGrid.TerrainAt(cell);
-			if (terrainDef is null)
+			int pathCost = 0;
+			try
 			{
-				stringBuilder.AppendLine($"Unable to retrieve terrain at {cell}.");
-				return ImpassableCost;
-			}
-			int pathCost = terrainDef.pathCost;
-			stringBuilder.AppendLine($"def pathCost = {pathCost}");
-			if (vehicleDef.properties.customTerrainCosts.TryGetValue(terrainDef, out int customPathCost))
-			{
-				stringBuilder.AppendLine($"custom turrain cost: {customPathCost}");
-				pathCost = customPathCost;
-			}
-			else if (terrainDef.passability == Traversability.Impassable)
-			{
-				stringBuilder.AppendLine($"terrainDef impassable: {ImpassableCost}");
-				return ImpassableCost;
-			}
-			else if (vehicleDef.properties.defaultTerrainImpassable)
-			{
-				stringBuilder.AppendLine($"defaultTerrain is impassable and no custom pathCost was found.");
-				return ImpassableCost;
-			}
-			List<Thing> list;
-			if (!UnityData.IsInMainThread)
-			{
-				list = new List<Thing>(map.thingGrid.ThingsListAt(cell));
-			}
-			else
-			{
-				list = map.thingGrid.ThingsListAt(cell);
-			}
-			int thingCost = 0;
-			foreach (Thing thing in list)
-			{
-				int thingPathCost = 0;
-				if (thing is VehiclePawn vehicle)
+				TerrainDef terrainDef = map.terrainGrid.TerrainAt(cell);
+				if (terrainDef is null)
 				{
-					continue;
-				}
-				else if (vehicleDef.properties.customThingCosts.TryGetValue(thing.def, out thingPathCost))
-				{
-					if (thingPathCost >= ImpassableCost)
-					{
-						stringBuilder.AppendLine($"thingPathCost is impassable: {thingPathCost}");
-						return ImpassableCost;
-					}
-				}
-				else if (thing.ImpassableForVehicles())
-				{
-					stringBuilder.AppendLine($"thingDef is impassable: {thingPathCost}");
+					stringBuilder.AppendLine($"Unable to retrieve terrain at {cell}.");
 					return ImpassableCost;
+				}
+				pathCost = terrainDef.pathCost;
+				stringBuilder.AppendLine($"def pathCost = {pathCost}");
+				if (vehicleDef.properties.customTerrainCosts.TryGetValue(terrainDef, out int customPathCost))
+				{
+					stringBuilder.AppendLine($"custom turrain cost: {customPathCost}");
+					pathCost = customPathCost;
+				}
+				else if (terrainDef.passability == Traversability.Impassable)
+				{
+					stringBuilder.AppendLine($"terrainDef impassable: {ImpassableCost}");
+					return ImpassableCost;
+				}
+				else if (vehicleDef.properties.defaultTerrainImpassable)
+				{
+					stringBuilder.AppendLine($"defaultTerrain is impassable and no custom pathCost was found.");
+					return ImpassableCost;
+				}
+				List<Thing> list;
+				if (!UnityData.IsInMainThread)
+				{
+					list = new List<Thing>(map.thingGrid.ThingsListAt(cell));
 				}
 				else
 				{
-					thingPathCost = thing.def.pathCost;
+					list = map.thingGrid.ThingsListAt(cell);
 				}
-				stringBuilder.AppendLine($"thingPathCost: {thingPathCost}");
-				if (thingPathCost > thingCost)
+				int thingCost = 0;
+				foreach (Thing thing in list)
 				{
-					thingCost = thingPathCost;
+					int thingPathCost = 0;
+					if (thing is VehiclePawn vehicle)
+					{
+						continue;
+					}
+					else if (vehicleDef.properties.customThingCosts.TryGetValue(thing.def, out thingPathCost))
+					{
+						if (thingPathCost >= ImpassableCost)
+						{
+							stringBuilder.AppendLine($"thingPathCost is impassable: {thingPathCost}");
+							return ImpassableCost;
+						}
+					}
+					else if (thing.ImpassableForVehicles())
+					{
+						stringBuilder.AppendLine($"thingDef is impassable: {thingPathCost}");
+						return ImpassableCost;
+					}
+					else
+					{
+						thingPathCost = thing.def.pathCost;
+					}
+					stringBuilder.AppendLine($"thingPathCost: {thingPathCost}");
+					if (thingPathCost > thingCost)
+					{
+						thingCost = thingPathCost;
+					}
 				}
-			}
-			pathCost += thingCost;
+				pathCost += thingCost;
 
-			SnowCategory snowCategory = map.snowGrid.GetCategory(cell);
-			if (!vehicleDef.properties.customSnowCategoryTicks.TryGetValue(snowCategory, out int snowPathCost))
+				SnowCategory snowCategory = map.snowGrid.GetCategory(cell);
+				if (!vehicleDef.properties.customSnowCategoryTicks.TryGetValue(snowCategory, out int snowPathCost))
+				{
+					snowPathCost = SnowUtility.MovementTicksAddOn(snowCategory);
+				}
+				snowPathCost = snowPathCost.Clamp(0, 450);
+
+				stringBuilder.AppendLine($"snowPathCost: {snowPathCost}");
+				pathCost += snowPathCost;
+				stringBuilder.AppendLine($"final cost: {pathCost}");
+			}
+			catch (Exception ex)
 			{
-				snowPathCost = SnowUtility.MovementTicksAddOn(snowCategory);
+				Log.Error($"Exception thrown while recalculating cost for {vehicleDef} at {cell}.\nException={ex}");
+				Log.Error($"Calculated Cost Report:\n{stringBuilder}");
 			}
-			snowPathCost = snowPathCost.Clamp(0, 450);
-
-			stringBuilder.AppendLine($"snowPathCost: {snowPathCost}");
-			pathCost += snowPathCost;
-			stringBuilder.AppendLine($"final cost: {pathCost}");
 			return pathCost;
 		}
 	}

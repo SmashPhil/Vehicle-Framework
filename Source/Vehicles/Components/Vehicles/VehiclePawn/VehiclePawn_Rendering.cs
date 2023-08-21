@@ -746,6 +746,14 @@ namespace Vehicles
 									Map.debugDrawer.FlashCell(cell, 0.95f, duration: 180);
 								}
 							}
+							CellRect vehicleRect = this.VehicleRect();
+							foreach (IntVec3 cell in vehicleRect)
+							{
+								if (cell.InBounds(Map))
+								{
+									Map.debugDrawer.FlashCell(cell, 0, duration: 180);
+								}
+							}
 						}
 					}
 				};
