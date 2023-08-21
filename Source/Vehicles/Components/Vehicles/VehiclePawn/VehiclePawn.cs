@@ -25,6 +25,18 @@ namespace Vehicles
 		{
 		}
 
+		public new IThingHolder ParentHolder
+		{
+			get
+			{
+				if (this.GetAerialVehicle() is AerialVehicleInFlight aerialVehicle)
+				{
+					return aerialVehicle;
+				}
+				return holdingOwner?.Owner;
+			}
+		}
+
 		public Rot8 FullRotation
 		{
 			get

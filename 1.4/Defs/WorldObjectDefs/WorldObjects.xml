@@ -50,11 +50,11 @@
 			<li>WITab_Caravan_Gear</li>
 			<li>WITab_Caravan_Social</li>
 			<li>WITab_Caravan_Items</li>
-			<li MayRequire = "Mlie.RoadsOfTheRim">RoadsOfTheRim.WITab_Caravan_Build</li>
+			<li MayRequireAnyOf = "Mlie.RoadsOfTheRim,Mlie.RoadsOfTheRim_steam">RoadsOfTheRim.WITab_Caravan_Build</li>
 		</inspectorTabs>
 		
 		<comps>
-			<li MayRequire = "Mlie.RoadsOfTheRim">
+			<li MayRequireAnyOf = "Mlie.RoadsOfTheRim,Mlie.RoadsOfTheRim_steam">
 				<compClass>RoadsOfTheRim.WorldObjectComp_Caravan</compClass>
 			</li>
 		</comps>

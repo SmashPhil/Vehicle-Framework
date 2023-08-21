@@ -14,6 +14,7 @@ namespace Vehicles
 		public const string SOS2 = "kentington.saveourship2";
 		public const string RimNauts = "sindre0830.rimnauts2";
 		public const string GeologicalLandforms = "m00nl1ght.GeologicalLandforms";
+		public const string RoadsOfTheRim = "Mlie.RoadsOfTheRim";
 
 		public const string VE_Fishing = "VanillaExpanded.VCEF";
 		public const string DualWield = "Roolo.DualWield";

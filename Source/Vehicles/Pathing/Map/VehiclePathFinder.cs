@@ -286,6 +286,7 @@ namespace Vehicles
 							int cellIndex = cellIndices.CellToIndex(cellIntX, cellIntY);
 							
 							IntVec3 cellToCheck = cellIndices.IndexToCell(cellIndex);
+							Rot8 pathDir = Rot8.DirectionFromCells(prevCell, cellToCheck);
 							if (useHPA)
 							{
 								if (!chunks.Cells.Contains(cellToCheck))
@@ -324,7 +325,6 @@ namespace Vehicles
 								int tickCost = ((i <= 3) ? ticksCardinal : ticksDiagonal) + initialCost;
 								if (VehicleMod.settings.main.smoothVehiclePaths && (vehicle.VehicleDef.size.x != 1 || vehicle.VehicleDef.size.z != 1)) //Don't add turn cost for 1x1 vehicles
 								{
-									Rot8 pathDir = Rot8.DirectionFromCells(prevCell, cellToCheck);
 									if (pathDir != costNode.direction)
 									{
 										int turnCost = costNode.direction.Difference(pathDir) * TurnCostTicks;
@@ -333,7 +333,7 @@ namespace Vehicles
 								}
 								float totalAreaCost = 0;
 								float rootCost = 0;
-								CellRect cellToCheckRect = vehicle.VehicleRect(cellToCheck, costNode.direction);// CellRect.CenteredOn(cellToCheck, Mathf.FloorToInt(minSize / 2f));
+								CellRect cellToCheckRect = vehicle.VehicleRect(cellToCheck, pathDir);// CellRect.CenteredOn(cellToCheck, Mathf.FloorToInt(minSize / 2f));
 								foreach (IntVec3 cellInRect in cellToCheckRect)
 								{
 									if (!vehicle.Drivable(cellInRect))
@@ -424,8 +424,7 @@ namespace Vehicles
 								calcGrid[cellIndex].status = statusOpenValue;
 								calcGrid[cellIndex].costNodeCost = costWithHeuristic;
 								nodesOpened++;
-								Rot8 rot = Rot8.DirectionFromCells(prevCell, cellToCheck);
-								openList.Push(new CostNode(cellIndex, costWithHeuristic, rot));
+								openList.Push(new CostNode(cellIndex, costWithHeuristic, pathDir));
 							}
 						}
 						NeighborSearchEnd:;

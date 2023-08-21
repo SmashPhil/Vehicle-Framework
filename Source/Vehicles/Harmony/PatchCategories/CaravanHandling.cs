@@ -65,6 +65,9 @@ namespace Vehicles
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(EnterMapVehiclesCatchAll2)));
 
+			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(Thing), nameof(Thing.ParentHolder)),
+				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(VehicleWorldObjectParentHolder)));
 			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(Caravan), nameof(Caravan.AllOwnersDowned)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(AllOwnersDownedVehicle)));
@@ -598,6 +601,14 @@ namespace Vehicles
 				return false;
 			}
 			return true;
+		}
+
+		public static void VehicleWorldObjectParentHolder(ref IThingHolder __result, Thing __instance)
+		{
+			if (__instance is VehiclePawn vehicle)
+			{
+				__result = vehicle.ParentHolder;
+			}
 		}
 
 		public static bool AllOwnersDownedVehicle(Caravan __instance, ref bool __result)

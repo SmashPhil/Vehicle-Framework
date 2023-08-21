@@ -10,14 +10,23 @@
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Fixed bug where vehicles weren't triggering path recalculation when moving
 
-- Fixed bug where path grids were only updating for vehicle region owners.
+- Fixed bug where path grids were only updating for vehicle region owners, allowing some vehicles to path over walls.
+
+- Fixed bug where even-width vehicles (eg. 2x4) would get stuck when stopped near a wall.
+
+- Fixed bug where defining a vehicle turret without a shaderType would throw an exception on startup.
+
+- Fixed bug where path grids wouldn't update when setting terrain via devmode.
 
 - Fixed bug where vehicle caravans wouldn't render fuel gizmos for multiple vehicles in a caravan.
 
 - Fixed bug where loading an older save with a vehicle on the world map (with turrets) would throw an exception upon returning.
-&lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+&lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Roads of the Rim
 
+- Dynamic Trade Interface
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Changed even-width vehicles from rounding up for region padding. 2xN vehicles can now fit through 2-cell gaps, rather than requiring 3.
 
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
