@@ -584,7 +584,7 @@
       <Version>2.2.2</Version>
     </PackageReference>
     <PackageReference Include="UpdateLog">
-      <Version>1.3.1000</Version>
+      <Version>1.4.1352</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
