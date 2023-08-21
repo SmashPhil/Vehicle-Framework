@@ -1,23 +1,17 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-
+<?xml version="1.0" encoding="UTF-8"?>
 <LanguageData>
-  <VF_EnterVehicle>Placa {0} como {1} [{2}]</VF_EnterVehicle>
-
-  <VF_BoardVehicleGroup>Placa {0}</VF_BoardVehicleGroup>
-  <VF_BoardVehicleGroupFail>Placa {0} (Muitas selecionadas)</VF_BoardVehicleGroupFail>
-
-  <VF_ActivityIconOnBoardShip>Integrado {0}</VF_ActivityIconOnBoardShip>
-  <VF_IsIncapableOfRamming>RAM {0}</VF_IsIncapableOfRamming>
+  <VF_EnterVehicle>Embarcar {0} como {1} [{2}]</VF_EnterVehicle>
+  <VF_BoardVehicleGroup>Embarcar {0}</VF_BoardVehicleGroup>
+  <VF_BoardVehicleGroupFail>Embarcar {0} (Muitos selecionados)</VF_BoardVehicleGroupFail>
+  <VF_ActivityIconOnBoardShip>A bordo de {0}</VF_ActivityIconOnBoardShip>
+  <VF_IsIncapableOfRamming>Colidir com {0}</VF_IsIncapableOfRamming>
   <VF_CannotMoveToCell>{0} não pode alcançar esta área.</VF_CannotMoveToCell>
-
-  <!-- Veículos Aéreos -->
-  <VF_LandVehicleHere>Veículo terrestre aqui</VF_LandVehicleHere>
+  <VF_LandVehicleHere>Veículo Terrestre Aqui</VF_LandVehicleHere>
   <VF_LandVehicleEdge>Pousar em {0} na borda do mapa.</VF_LandVehicleEdge>
   <VF_LandVehicleCenter>Pousar em {0} no centro.</VF_LandVehicleCenter>
-  <VF_LandVehicleTargetedLanding>Pousar em {0} e escolher local de pouso.</VF_LandVehicleTargetedLanding>
-  <VF_AttackAndTargetLanding>Ataque {0}: Escolher Pouso</VF_AttackAndTargetLanding>
-
-  <VF_StrafeRun>Ataque aéreo</VF_StrafeRun>
+  <VF_LandVehicleTargetedLanding>Pousar em {0} e escolher um local de pouso.</VF_LandVehicleTargetedLanding>
+  <VF_AttackAndTargetLanding>Atacar {0}: Escolher Pouso</VF_AttackAndTargetLanding>
+  <VF_StrafeRun>Navegar</VF_StrafeRun>
   <VF_AerialReconSite>Reconhecimento</VF_AerialReconSite>
-
 </LanguageData>
+

@@ -1,11 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-
+<?xml version="1.0" encoding="UTF-8"?>
 <LanguageData>
   <VF_ReloadVehicleTurret>Recarregar</VF_ReloadVehicleTurret>
-
-  <VF_AutoTargeting>AutoAlvo: {0}</VF_AutoTargeting>
-  <VF_AutoTargetingDisabled>O AutoAlvo não é permitido para esta torreta.</VF_AutoTargetingDisabled>
-
+  <VF_AutoTargeting>Alvo Automático: {0}</VF_AutoTargeting>
+  <VF_AutoTargetingDisabled>O direcionamento automático de alvo não é permitido para esta torre.</VF_AutoTargetingDisabled>
   <VF_VehicleTurrets_NoAmmoToReload>Sem munição utilizável.</VF_VehicleTurrets_NoAmmoToReload>
-
 </LanguageData>
+

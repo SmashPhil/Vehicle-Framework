@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <Default.label>Padrão</Default.label>
+  <Tiger.label>Tigre</Tiger.label>
+  <TigerStripes.label>Listras de Tigre</TigerStripes.label>
+  <Woodland.label>Floresta</Woodland.label>
+  <Hearts.label>Corações</Hearts.label>
+  <Panther.label>Pantera</Panther.label>
+  <Digital.label>Digital</Digital.label>
+  <Polygon.label>Polígono</Polygon.label>
+  <Rusty.label>Enferrujado</Rusty.label>
+  <Waves.label>Ondas</Waves.label>
+  <ZigZag.label>Zigue-zague</ZigZag.label>
+  <Abstract_Medium.label>Abstrato Médio</Abstract_Medium.label>
+  <Abstract_Large.label>Abstrato Grande</Abstract_Large.label>
+  <Lizard.label>Lagarto</Lizard.label>
+  <Hexagon.label>Hexágono</Hexagon.label>
+</LanguageData>
+

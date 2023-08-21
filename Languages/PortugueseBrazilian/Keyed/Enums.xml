@@ -1,18 +1,15 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-
+<?xml version="1.0" encoding="UTF-8"?>
 <LanguageData>
   <NotAllowed>Desativado</NotAllowed>
-  <DriverNeeded>Dirigido por Colonos</DriverNeeded>
-  <NoDriverNeeded>Dirigido por IA</NoDriverNeeded>
-
-  <Misc>Outro</Misc>
+  <DriverNeeded>Colonizado</DriverNeeded>
+  <NoDriverNeeded>Guiado por IA</NoDriverNeeded>
+  <Misc>Outros</Misc>
   <Transport>Transporte</Transport>
   <Trader>Comerciante</Trader>
   <Combat>Combate</Combat>
   <Hybrid>Híbrido</Hybrid>
-
   <Manual>Manual</Manual>
   <Opportunistic>Oportunista</Opportunistic>
   <Automatic>Automático</Automatic>
-
 </LanguageData>
+

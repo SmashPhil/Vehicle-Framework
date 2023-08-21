@@ -1,34 +1,24 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-
+<?xml version="1.0" encoding="UTF-8"?>
 <LanguageData>
   <VF_Caravan_Dismounted>Desembarcado</VF_Caravan_Dismounted>
-
   <VF_Sailing>Navegação</VF_Sailing>
-
-  <VF_DockToCaravan>Itens para Levar</VF_DockToCaravan>
-
-  <VF_CommandDockShip>Doca</VF_CommandDockShip>
-  <VF_CommandDockShipDesc>Desembarcar todos os passageiros e permitir o comércio com o Assentamento de {0}.</VF_CommandDockShipDesc>
-
+  <VF_DockToCaravan>Itens a Levar</VF_DockToCaravan>
+  <VF_CommandDockShip>Atracar</VF_CommandDockShip>
+  <VF_CommandDockShipDesc>Descarregar todos os passageiros e habilitar o comércio com o Assentamento de {0}.</VF_CommandDockShipDesc>
   <VF_CommandDockShipDisembark>Atracar e Desembarcar</VF_CommandDockShipDisembark>
   <VF_CommandDockShipObjectDesc>Atracar barcos e seguir a pé</VF_CommandDockShipObjectDesc>
-
   <VF_CommandUndockShip>Embarcar em Veículo</VF_CommandUndockShip>
-  <VF_CommandUndockShipDesc>Carregar todos os peões e itens nos Barcos</VF_CommandUndockShipDesc>
+  <VF_CommandUndockShipDesc>Carregar todos os peões e itens nos barcos</VF_CommandUndockShipDesc>
   <VF_CommandAttackDockDisable>Não é possível atacar {0} enquanto atracado em seu Assentamento</VF_CommandAttackDockDisable>
-  <VF_CommandTradeDockDisable>Não é possível negociar com {0}. Deve atracar o barco primeiro</VF_CommandTradeDockDisable>
-
-  <VF_CaravanMustHaveEnoughSpaceOnShip>Espaço insuficiente nos navios para abrigar todos os peões.</VF_CaravanMustHaveEnoughSpaceOnShip>
-  <VF_CaravanMustHaveEnoughPawnsToOperate>Peões insuficientes selecionados para zarpar. Necessita de {0}</VF_CaravanMustHaveEnoughPawnsToOperate>
-
-  <VF_CaravanMustHaveAtLeastOneVehicle>Deve ter pelo menos 1 veículo selecionado para escolher uma rota.</VF_CaravanMustHaveAtLeastOneVehicle>
+  <VF_CommandTradeDockDisable>Não é possível negociar com {0}. É necessário atracar o barco primeiro</VF_CommandTradeDockDisable>
+  <VF_CaravanMustHaveEnoughSpaceOnShip>Não há espaço suficiente nos navios para abrigar todos os peões.</VF_CaravanMustHaveEnoughSpaceOnShip>
+  <VF_CaravanMustHaveEnoughPawnsToOperate>Não foram selecionados peões suficientes para zarpar. São necessários {0}</VF_CaravanMustHaveEnoughPawnsToOperate>
+  <VF_CaravanMustHaveAtLeastOneVehicle>É necessário selecionar pelo menos 1 veículo para escolher uma rota.</VF_CaravanMustHaveAtLeastOneVehicle>
   <VF_CommandFormVehicleCaravan>Formar Caravana de Veículos</VF_CommandFormVehicleCaravan>
   <VF_CommandFormVehicleCaravanDesc>Formar caravana com veículos incluídos.</VF_CommandFormVehicleCaravanDesc>
-
   <VF_CommandReformVehicleCaravan>Reformar Caravana de Veículos</VF_CommandReformVehicleCaravan>
-  <VF_CommandReformVehicleCaravanDesc>Reformar caravana de veículos com veículos selecionados.</VF_CommandReformVehicleCaravanDesc>
-
+  <VF_CommandReformVehicleCaravanDesc>Reformar caravana de veículos selecionados.</VF_CommandReformVehicleCaravanDesc>
   <VF_RoutePlannerToggleVehicleDefs>Definições de Veículos</VF_RoutePlannerToggleVehicleDefs>
   <VF_RoutePlannerToggleVehicles>Veículos</VF_RoutePlannerToggleVehicles>
-
 </LanguageData>
+

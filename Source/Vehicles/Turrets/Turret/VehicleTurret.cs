@@ -128,14 +128,19 @@ namespace Vehicles
 
 		/* --------- CE hooks for compatibility --------- */
 		/// <summary>
-		/// (projectileDef, origin, intendedTarget, launcher, shotAngle, shotRotation, shotHeight, shotSpeed, CE projectile)
+		/// (projectileDef, ammoDef, AmmoSetDef, origin, intendedTarget, launcher, shotAngle, shotRotation, shotHeight, shotSpeed, ret CE projectile)
 		/// </summary>
-		public static Func<ThingDef, Vector2, LocalTargetInfo, VehiclePawn, float, float, float, float, object> LaunchProjectileCE = null;
+		public static Func<ThingDef, ThingDef, Def, Vector2, LocalTargetInfo, VehiclePawn, float, float, float, float, object> LaunchProjectileCE = null;
 
 		/// <summary>
-		/// (velocity, range, heightDiff, flyOverhead, gravityModifier, angle
+		/// (velocity, range, shooter, target, origin, flyOverhead, gravityModifier, sway, spread, recoil, ret 2-angles)
 		/// </summary>
-		public static Func<float, float, float, bool, float, float> ProjectileAngleCE = null;
+		public static Func<float, float, Thing, LocalTargetInfo, Vector3, bool, float, float, float, float, Vector2> ProjectileAngleCE = null;
+
+		/// <summary>
+		/// (ammoset name, ret ammoset def)
+		/// </summary>
+		public static Func<string, Def> LookupAmmosetCE = null;
 		/* ---------------------------------------------- */
 
 		/// <summary>
@@ -1038,7 +1043,7 @@ namespace Vehicles
 			ThingDef projectile = turretDef.projectile;
 			if (turretDef.ammunition != null && !turretDef.genericAmmo)
 			{
-				projectile = loadedAmmo?.projectileWhenLoaded ?? loadedAmmo; //nc to loaded ammo for CE handling
+				projectile = loadedAmmo?.projectileWhenLoaded ?? projectile; //nc to loaded ammo for CE handling
 			}
 			try
 			{
@@ -1067,7 +1072,10 @@ namespace Vehicles
 					float swayAndSpread = Mathf.Atan2(CurrentFireMode.spreadRadius, MaxRange) * Mathf.Rad2Deg;
 					float sway = swayAndSpread * 0.84f;
 					float spread = swayAndSpread * 0.16f;
-					if (turretDef.GetModExtension<CETurretDataDefModExtension>() is CETurretDataDefModExtension turretData)
+					float recoil = horizontalOffset / MaxRange;
+					float shotHeight = 1f;
+					CETurretDataDefModExtension turretData = turretDef.GetModExtension<CETurretDataDefModExtension>();
+					if (turretData != null)
 					{
 						if (turretData.speed > 0)
 						{
@@ -1081,9 +1089,19 @@ namespace Vehicles
 						{
 							spread = turretData.spread;
 						}
+						recoil = turretData.recoil;
+						shotHeight = turretData.shotHeight;
+						if (turretData._ammoSet == null && turretData.ammoSet != null) {
+						    turretData._ammoSet = LookupAmmosetCE(turretData.ammoSet);
+						}
 					}
 					float distance = (launchCell - cannonTarget.CenterVector3).magnitude;
-					LaunchProjectileCE(projectile, new Vector2(launchCell.x, launchCell.z), cannonTarget, vehicle, ProjectileAngleCE(speed, distance, -0.5f, false, 1f), -TurretRotation, 1f, speed);
+
+					Vector2 vce = ProjectileAngleCE(speed, distance, vehicle, cannonTarget, new Vector3(launchCell.x, shotHeight, launchCell.z), false, 1f, sway, spread, recoil * CurrentTurretFiring);
+					float sa = vce.y;
+					float tr = -TurretRotation + vce.x;
+
+					LaunchProjectileCE(projectile, loadedAmmo, turretData?._ammoSet, new Vector2(launchCell.x, launchCell.z), cannonTarget, vehicle, sa, tr, shotHeight, speed);
 				}
 				turretDef.shotSound?.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map));
 				vehicle.Drawer.rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
