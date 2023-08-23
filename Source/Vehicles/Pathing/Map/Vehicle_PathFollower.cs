@@ -841,7 +841,7 @@ namespace Vehicles
 					CellRect vehicleRect = vehicle.VehicleRect(next, rot).ExpandedBy(1);
 					foreach (IntVec3 cell in vehicleRect)
 					{
-						if (collisionCells.Add(cell))
+						if (cell.InBounds(vehicle.Map) && collisionCells.Add(cell))
 						{
 							var thingList = cell.GetThingList(vehicle.Map);
 							for (int i = thingList.Count - 1; i >= 0; i--) //Reverse iterate in case a thing or pawn is destroyed from being run over

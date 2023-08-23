@@ -255,9 +255,9 @@ namespace Vehicles
 			DamageDef defApplied = dinfo.Def;
 			float damage = dinfo.Amount;
 
-			if (defApplied.Worker is DamageWorker_Extinguish)
+			if (!defApplied.harmsHealth)
 			{
-				damage = 0; //Vanilla has extinguish set to 999,999 damage that only applies to fire.  Apply 0 damage to vehicles
+				damage = 0; //Don't apply damage to vehicles if the damage def isn't supposed to harm
 			}
 			try
 			{

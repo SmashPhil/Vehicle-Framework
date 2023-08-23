@@ -210,13 +210,31 @@ namespace Vehicles
 			if (regionEffecters.TryGetValue(thing.def, out List<VehicleDef> vehicleDefs))
 			{
 				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-				if (!vehicleDefs.NullOrEmpty() && mapping.ThreadAvailable)
+
+				if (thing.def.Size == IntVec2.One)
 				{
-					mapping.dedicatedThread.Queue(new AsyncAction(() => ThingInRegionSpawned(thing, mapping, vehicleDefs), () => map != null && map.Index > -1));
+					List<Thing> thingList = new List<Thing>(mapping.map.thingGrid.ThingsListAt(thing.Position));
+					if (!vehicleDefs.NullOrEmpty() && mapping.ThreadAvailable)
+					{
+						mapping.dedicatedThread.Queue(new AsyncAction(() => RecalculatePerceivedPathCostAtFor(mapping, thing.Position, new List<Thing>(thingList)), () => map != null && map.Index > -1));
+					}
+					else
+					{
+						RecalculatePerceivedPathCostAtFor(mapping, thing.Position, thingList);
+					}
 				}
 				else
 				{
-					ThingInRegionSpawned(thing, mapping, vehicleDefs);
+					CellRect occupiedRect = thing.OccupiedRect();
+					List<Thing>[] thingLists = occupiedRect.Select(cell => new List<Thing>(mapping.map.thingGrid.ThingsListAt(cell))).ToArray();
+					if (!vehicleDefs.NullOrEmpty() && mapping.ThreadAvailable)
+					{
+						mapping.dedicatedThread.Queue(new AsyncAction(() => ThingInRegionSpawned(occupiedRect, mapping, vehicleDefs, thingLists), () => map != null && map.Index > -1));
+					}
+					else
+					{
+						ThingInRegionSpawned(occupiedRect, mapping, vehicleDefs, thingLists);
+					}
 				}
 			}
 		}
@@ -231,13 +249,30 @@ namespace Vehicles
 			if (regionEffecters.TryGetValue(thing.def, out List<VehicleDef> vehicleDefs))
 			{
 				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-				if (!vehicleDefs.NullOrEmpty() && mapping.ThreadAvailable)
+				if (thing.def.Size == IntVec2.One)
 				{
-					mapping.dedicatedThread.Queue(new AsyncAction(() => ThingInRegionDespawned(thing, mapping, vehicleDefs), () => map != null && map.Index > -1));
+					List<Thing> thingList = new List<Thing>(mapping.map.thingGrid.ThingsListAt(thing.Position));
+					if (!vehicleDefs.NullOrEmpty() && mapping.ThreadAvailable)
+					{
+						mapping.dedicatedThread.Queue(new AsyncAction(() => RecalculatePerceivedPathCostAtFor(mapping, thing.Position, new List<Thing>(thingList)), () => map != null && map.Index > -1));
+					}
+					else
+					{
+						RecalculatePerceivedPathCostAtFor(mapping, thing.Position, thingList);
+					}
 				}
 				else
 				{
-					ThingInRegionDespawned(thing, mapping, vehicleDefs);
+					CellRect occupiedRect = thing.OccupiedRect();
+					List<Thing>[] thingLists = occupiedRect.Select(cell => new List<Thing>(mapping.map.thingGrid.ThingsListAt(cell))).ToArray();
+					if (!vehicleDefs.NullOrEmpty() && mapping.ThreadAvailable)
+					{
+						mapping.dedicatedThread.Queue(new AsyncAction(() => ThingInRegionDespawned(occupiedRect, mapping, vehicleDefs, thingLists), () => map != null && map.Index > -1));
+					}
+					else
+					{
+						ThingInRegionDespawned(occupiedRect, mapping, vehicleDefs, thingLists);
+					}
 				}
 			}
 		}
@@ -248,27 +283,27 @@ namespace Vehicles
 		/// <param name="thing"></param>
 		/// <param name="mapping"></param>
 		/// <param name="vehicleDefs"></param>
-		private static void ThingInRegionSpawned(Thing thing, VehicleMapping mapping, List<VehicleDef> vehicleDefs)
+		private static void ThingInRegionSpawned(CellRect occupiedRect, VehicleMapping mapping, List<VehicleDef> vehicleDefs, List<Thing>[] thingLists)
 		{
 			foreach (VehicleDef vehicleDef in vehicleDefs)
 			{
-				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderThing(thing);
+				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderRect(occupiedRect, thingLists);
 				if (mapping.IsOwner(vehicleDef))
 				{
-					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsSpawned(thing);
+					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsSpawned(occupiedRect);
 					mapping[vehicleDef].VehicleReachability.ClearCache();
 				}
 			}
 		}
 
-		private static void ThingInRegionDespawned(Thing thing, VehicleMapping mapping, List<VehicleDef> vehicleDefs)
+		private static void ThingInRegionDespawned(CellRect occupiedRect, VehicleMapping mapping, List<VehicleDef> vehicleDefs, List<Thing>[] thingLists)
 		{
 			foreach (VehicleDef vehicleDef in vehicleDefs)
 			{
-				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderThing(thing);
+				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderRect(occupiedRect, thingLists);
 				if (mapping.IsOwner(vehicleDef))
 				{
-					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsDespawned(thing);
+					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsDespawned(occupiedRect);
 					mapping[vehicleDef].VehicleReachability.ClearCache();
 				}
 			}
@@ -306,14 +341,15 @@ namespace Vehicles
 			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
 			if (!mapping.Owners.NullOrEmpty())
 			{
-				if (mapping.ThreadAvailable)
-				{
-					mapping.dedicatedThread.Queue(new AsyncAction(() => RecalculateAllPerceivedPathCosts(mapping), () => map != null && map.Index > -1));
-				}
-				else
-				{
-					RecalculateAllPerceivedPathCosts(mapping);
-				}
+				RecalculateAllPerceivedPathCosts(mapping);
+				//if (mapping.ThreadAvailable)
+				//{
+				//	mapping.dedicatedThread.Queue(new AsyncAction(() => RecalculateAllPerceivedPathCosts(mapping), () => map != null && map.Index > -1));
+				//}
+				//else
+				//{
+					
+				//}
 			}
 
 			
@@ -324,9 +360,10 @@ namespace Vehicles
 			foreach (IntVec3 cell in mapping.map.AllCells)
 			{
 				TerrainDef terrainDef = mapping.map.terrainGrid.TerrainAt(cell);
+				List<Thing> thingList = mapping.map.thingGrid.ThingsListAt(cell);
 				foreach (VehicleDef vehicleDef in mapping.Owners)
 				{
-					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
+					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell, thingList);
 				}
 			}
 		}
@@ -342,22 +379,23 @@ namespace Vehicles
 			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
 			if (!mapping.Owners.NullOrEmpty())
 			{
+				List<Thing> thingList = map.thingGrid.ThingsListAt(cell);
 				if (mapping.ThreadAvailable)
 				{
-					mapping.dedicatedThread.Queue(new AsyncAction(() => RecalculatePerceivedPathCostAtFor(mapping, cell), () => map != null && map.Index > -1));
+					mapping.dedicatedThread.Queue(new AsyncAction(() => RecalculatePerceivedPathCostAtFor(mapping, cell, new List<Thing>(thingList)), () => map != null && map.Index > -1));
 				}
 				else
 				{
-					RecalculatePerceivedPathCostAtFor(mapping, cell);
+					RecalculatePerceivedPathCostAtFor(mapping, cell, thingList);
 				}
 			}
 		}
 
-		private static void RecalculatePerceivedPathCostAtFor(VehicleMapping mapping, IntVec3 cell)
+		private static void RecalculatePerceivedPathCostAtFor(VehicleMapping mapping, IntVec3 cell, List<Thing> thingList)
 		{
 			foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
 			{
-				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
+				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell, thingList);
 			}
 		}
 
