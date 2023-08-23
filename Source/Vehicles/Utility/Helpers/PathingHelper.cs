@@ -213,23 +213,48 @@ namespace Vehicles
 
 				if (thing.def.Size == IntVec2.One)
 				{
-					List<Thing> thingList = new List<Thing>(mapping.map.thingGrid.ThingsListAt(thing.Position));
 					if (!vehicleDefs.NullOrEmpty() && mapping.ThreadAvailable)
 					{
-						mapping.dedicatedThread.Queue(new AsyncAction(() => RecalculatePerceivedPathCostAtFor(mapping, thing.Position, new List<Thing>(thingList)), () => map != null && map.Index > -1));
+						List<Thing> thingList = SimplePool<List<Thing>>.Get();
+						thingList.AddRange(mapping.map.thingGrid.ThingsListAt(thing.Position));
+
+						AsyncAction asyncAction = SimplePool<AsyncAction>.Get();
+						asyncAction.Set(delegate ()
+						{
+							RecalculatePerceivedPathCostAtFor(mapping, thing.Position, thingList);
+							thingList.Clear();
+							SimplePool<List<Thing>>.Return(thingList);
+						}, () => map != null && map.Index > -1);
+						mapping.dedicatedThread.Queue(asyncAction);
 					}
 					else
 					{
-						RecalculatePerceivedPathCostAtFor(mapping, thing.Position, thingList);
+						RecalculatePerceivedPathCostAtFor(mapping, thing.Position, mapping.map.thingGrid.ThingsListAt(thing.Position));
 					}
 				}
 				else
 				{
 					CellRect occupiedRect = thing.OccupiedRect();
-					List<Thing>[] thingLists = occupiedRect.Select(cell => new List<Thing>(mapping.map.thingGrid.ThingsListAt(cell))).ToArray();
+					List<Thing>[] thingLists = occupiedRect.Select(cell =>
+					{
+						List<Thing> thingList = SimplePool<List<Thing>>.Get();
+						thingList.AddRange(mapping.map.thingGrid.ThingsListAt(cell));
+						return thingList;
+					}).ToArray();
 					if (!vehicleDefs.NullOrEmpty() && mapping.ThreadAvailable)
 					{
-						mapping.dedicatedThread.Queue(new AsyncAction(() => ThingInRegionSpawned(occupiedRect, mapping, vehicleDefs, thingLists), () => map != null && map.Index > -1));
+						AsyncAction asyncAction = SimplePool<AsyncAction>.Get();
+						asyncAction.Set(delegate ()
+						{
+							ThingInRegionSpawned(occupiedRect, mapping, vehicleDefs, thingLists);
+							for (int i = thingLists.Length - 1; i >= 0; i--)
+							{
+								List<Thing> thingList = thingLists[i];
+								thingList.Clear();
+								SimplePool<List<Thing>>.Return(thingList);
+							}
+						}, () => map != null && map.Index > -1);
+						mapping.dedicatedThread.Queue(asyncAction);
 					}
 					else
 					{
@@ -254,7 +279,9 @@ namespace Vehicles
 					List<Thing> thingList = new List<Thing>(mapping.map.thingGrid.ThingsListAt(thing.Position));
 					if (!vehicleDefs.NullOrEmpty() && mapping.ThreadAvailable)
 					{
-						mapping.dedicatedThread.Queue(new AsyncAction(() => RecalculatePerceivedPathCostAtFor(mapping, thing.Position, new List<Thing>(thingList)), () => map != null && map.Index > -1));
+						AsyncAction asyncAction = SimplePool<AsyncAction>.Get();
+						asyncAction.Set(() => RecalculatePerceivedPathCostAtFor(mapping, thing.Position, new List<Thing>(thingList)), () => map != null && map.Index > -1);
+						mapping.dedicatedThread.Queue(asyncAction);
 					}
 					else
 					{
@@ -267,7 +294,9 @@ namespace Vehicles
 					List<Thing>[] thingLists = occupiedRect.Select(cell => new List<Thing>(mapping.map.thingGrid.ThingsListAt(cell))).ToArray();
 					if (!vehicleDefs.NullOrEmpty() && mapping.ThreadAvailable)
 					{
-						mapping.dedicatedThread.Queue(new AsyncAction(() => ThingInRegionDespawned(occupiedRect, mapping, vehicleDefs, thingLists), () => map != null && map.Index > -1));
+						AsyncAction asyncAction = SimplePool<AsyncAction>.Get();
+						asyncAction.Set(() => ThingInRegionDespawned(occupiedRect, mapping, vehicleDefs, thingLists), () => map != null && map.Index > -1);
+						mapping.dedicatedThread.Queue(asyncAction);
 					}
 					else
 					{
@@ -316,7 +345,9 @@ namespace Vehicles
 				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
 				if (!vehicleDefs.NullOrEmpty() && mapping.ThreadAvailable)
 				{
-					mapping.dedicatedThread.Queue(new AsyncAction(() => ThingInRegionOrientationChanged(mapping, vehicleDefs), () => map != null && map.Index > -1));
+					AsyncAction asyncAction = SimplePool<AsyncAction>.Get();
+					asyncAction.Set(() => ThingInRegionOrientationChanged(mapping, vehicleDefs), () => map != null && map.Index > -1);
+					mapping.dedicatedThread.Queue(asyncAction);
 				}
 				else
 				{
@@ -342,17 +373,7 @@ namespace Vehicles
 			if (!mapping.Owners.NullOrEmpty())
 			{
 				RecalculateAllPerceivedPathCosts(mapping);
-				//if (mapping.ThreadAvailable)
-				//{
-				//	mapping.dedicatedThread.Queue(new AsyncAction(() => RecalculateAllPerceivedPathCosts(mapping), () => map != null && map.Index > -1));
-				//}
-				//else
-				//{
-					
-				//}
 			}
-
-			
 		}
 
 		private static void RecalculateAllPerceivedPathCosts(VehicleMapping mapping)
@@ -382,7 +403,9 @@ namespace Vehicles
 				List<Thing> thingList = map.thingGrid.ThingsListAt(cell);
 				if (mapping.ThreadAvailable)
 				{
-					mapping.dedicatedThread.Queue(new AsyncAction(() => RecalculatePerceivedPathCostAtFor(mapping, cell, new List<Thing>(thingList)), () => map != null && map.Index > -1));
+					AsyncAction asyncAction = SimplePool<AsyncAction>.Get();
+					asyncAction.Set(() => RecalculatePerceivedPathCostAtFor(mapping, cell, new List<Thing>(thingList)), () => map != null && map.Index > -1);
+					mapping.dedicatedThread.Queue(asyncAction);
 				}
 				else
 				{

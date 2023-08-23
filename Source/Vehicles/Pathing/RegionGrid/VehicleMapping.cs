@@ -199,6 +199,20 @@ namespace Vehicles
 			}
 		}
 
+		public override void MapComponentTick()
+		{
+			base.MapComponentTick();
+			if (Find.TickManager.TicksGame % 150 == 0)
+			{
+				//Pass references back to SimplePool
+				foreach (AsyncAction asyncAction in dedicatedThread.actionsToReturn)
+				{
+					SimplePool<AsyncAction>.Return(asyncAction);
+				}
+				dedicatedThread.actionsToReturn.Clear();
+			}
+		}
+
 		/// <summary>
 		/// Generate new <see cref="VehiclePathData"/> for <paramref name="vehicleDef"/>
 		/// </summary>

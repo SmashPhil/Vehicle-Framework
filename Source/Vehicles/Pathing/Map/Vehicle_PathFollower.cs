@@ -637,10 +637,12 @@ namespace Vehicles
 			
 			if (vehicleMapping.ThreadAvailable)
 			{
-				vehicleMapping.dedicatedThread.Queue(new AsyncAction(TrySetNewPath_Delayed, validator: () => moving && CalculatingPath, exceptionHandler: delegate (Exception ex)
+				AsyncAction asyncAction = SimplePool<AsyncAction>.Get();
+				asyncAction.Set(TrySetNewPath_Delayed, validator: () => moving && CalculatingPath, exceptionHandler: delegate (Exception ex)
 				{
 					CalculatingPath = false;
-				}));
+				});
+				vehicleMapping.dedicatedThread.Queue(asyncAction);
 			}
 			else
 			{

@@ -14,6 +14,8 @@
 
 - Fixed bug where even-width vehicles (eg. 2x4) would get stuck when stopped near a wall.
 
+- Fixed thread safety issues related to pulling thing lists during region recaching and pathfinding.
+
 - Fixed bug where defining a vehicle turret without a shaderType would throw an exception on startup.
 
 - Fixed bug where path grids wouldn't update when setting terrain via devmode.
@@ -21,6 +23,10 @@
 - Fixed bug where vehicle caravans wouldn't render fuel gizmos for multiple vehicles in a caravan.
 
 - Fixed bug where loading an older save with a vehicle on the world map (with turrets) would throw an exception upon returning.
+&lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Async actions are now pooled
+
+- ThingList snapshots are now pooled
 &lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Roads of the Rim
 
