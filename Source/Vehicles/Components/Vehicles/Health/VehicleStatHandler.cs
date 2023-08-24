@@ -229,7 +229,7 @@ namespace Vehicles
 			{
 				if (dinfo.Instigator != null)
 				{
-					cell = vehicle.OccupiedRect().MinBy(cell => Ext_Map.Distance(dinfo.Instigator.Position, vehicle.Position));
+					cell = vehicle.OccupiedRect().MinBy(cell => Ext_Map.Distance(dinfo.Instigator.Position, cell));
 				}
 				else
 				{
