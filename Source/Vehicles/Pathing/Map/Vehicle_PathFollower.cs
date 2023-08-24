@@ -655,60 +655,10 @@ namespace Vehicles
 			}
 		}
 
-		[Obsolete("Use TrySetNewPath_Threaded. Async Task-based pathfinding has more overhead than using the dedicated thread.", error: true)]
-		public async void TrySetNewPath_Async()
-		{
-			PawnPath pawnPath = await GenerateNewPath_Async();
-			curPath = pawnPath;
-		}
-
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public PawnPath GenerateNewPath_Concurrent()
 		{
 			return GenerateNewPath(CancellationToken.None);
-		}
-
-		private async Task<PawnPath> GenerateNewPath_Async()
-		{
-			if (!tokenSources.NullOrEmpty())
-			{
-				foreach (CancellationTokenSource activeTokenSources in tokenSources)
-				{
-					activeTokenSources.Cancel();
-				}
-			}
-			CancellationTokenSource tokenSource = new CancellationTokenSource();
-			tokenSources.Add(tokenSource);
-			try
-			{
-				PawnPath pawnPath = await TaskManager.RunAsync(GenerateNewPath, tokenSource.Token);
-
-				if (pawnPath == null || !pawnPath.Found)
-				{ 
-					Debug.Message($"PawnPath not found. Ending and disposing remaining tasks...");
-					pawnPath = PawnPath.NotFound;
-				}
-				return pawnPath;
-			}
-			catch (AggregateException ex)
-			{
-				SmashLog.WarningLabel(VehicleHarmony.LogLabel, $"Pathfinding thread encountered an error due to unsafe thread activity. The resulting task and token have been cancelled and disposed." +
-					$"\nIf this occurrs often please report this behavior on the workshop page, it should be at worst an extreme edge case.");
-				SmashLog.ErrorLabel(VehicleHarmony.LogLabel, "Logging Errors for Multithreaded pathing:");
-				int exIndex = 1;
-				foreach (Exception innerEx in ex.InnerExceptions)
-				{
-					Log.Error($"InnerException {exIndex}: {innerEx.Message} \nStackTrace: {innerEx.StackTrace} \nSource: {innerEx.Source}");
-					exIndex++;
-				}
-			}
-			finally
-			{
-				tokenSource.Dispose();
-				tokenSources.Remove(tokenSource);
-				tokenSource = null;
-			}
-			return PawnPath.NotFound;
 		}
 
 		private PawnPath GenerateNewPath(CancellationToken token)

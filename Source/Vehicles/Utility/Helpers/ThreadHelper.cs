@@ -21,6 +21,7 @@ namespace Vehicles
 		/// <param name="c"></param>
 		/// <param name="map"></param>
 		/// <param name="vehicle"></param>
+		[Obsolete]
 		public static bool ImpassableReverseThreaded(IntVec3 cell, Map map, Pawn vehicle)
 		{
 			if (cell == vehicle.Position)
@@ -65,7 +66,8 @@ namespace Vehicles
 			}
 			else
 			{
-				thingList  = new List<Thing>(cell.GetThingList(vehicle.Map)); //Create snapshot of current thing list to avoid race condition with read / write access
+				//TODO - still not completely thread safe
+				thingList  = new List<Thing>(cell.GetThingList(vehicle.Map));
 			}
 			if (thingList.Count == 0)
 			{

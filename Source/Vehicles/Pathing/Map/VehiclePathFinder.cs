@@ -357,6 +357,7 @@ namespace Vehicles
 								{
 									tickCost += byteGrid[cellIndex] * 8;
 								}
+								//TODO - make thread safe for thing list retrieval
 								if (ThreadHelper.AnyVehicleBlockingPathAt(cellToCheck, vehicle) != null)
 								{
 									tickCost += Cost_VehicleCollision;
