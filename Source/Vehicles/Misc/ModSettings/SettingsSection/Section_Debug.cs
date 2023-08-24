@@ -22,7 +22,6 @@ namespace Vehicles
 		public bool debugDraftAnyVehicle;
 		public bool debugShootAnyTurret;
 		
-
 		public bool debugDrawCannonGrid;
 		public bool debugDrawNodeGrid;
 		public bool debugDrawHitbox;
@@ -185,6 +184,21 @@ namespace Vehicles
 					{
 						SoundDefOf.Click.PlayOneShotOnCamera();
 						RGBMaterialPool.LogAllMaterials();
+					}
+
+					buttonRect = listingStandard.GetRect(30);
+					if (Widgets.ButtonText(buttonRect, "Output Owners"))
+					{
+						Map map = Find.CurrentMap;
+						if (map != null)
+						{
+							VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+							foreach (VehicleDef vehicleDef in mapping.Owners)
+							{
+								List<VehicleDef> piggies = mapping.GetPiggies(vehicleDef);
+								Log.Message($"Owner: {vehicleDef} Piggies=({string.Join(",", piggies.Select(def => def.defName))})");
+							}
+						}
 					}
 
 					buttonRect = listingStandard.GetRect(30);

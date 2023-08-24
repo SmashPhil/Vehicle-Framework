@@ -12,7 +12,7 @@
 		<passability>Impassable</passability>
 		<fillPercent>1</fillPercent>
 		<neverMultiSelect>true</neverMultiSelect>
-		<designationCategory>Structure</designationCategory>
+		<designationCategory>VF_Vehicles</designationCategory>
 		<clearBuildingArea>true</clearBuildingArea>
 		<category>Building</category>
 		<rotatable>true</rotatable>

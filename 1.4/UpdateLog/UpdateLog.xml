@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1355</currentVersion>
+  <currentVersion>1.5.1356</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
@@ -32,6 +32,7 @@
 
 - Dynamic Trade interface
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Added default 'Vehicles' tab for modders.  Use this instead of creating a dozen different designation categories.
 - Changed even-width vehicles from rounding up for region padding. 2xN vehicles can now fit through 2-cell gaps, rather than requiring 3.
 
 - DamageDefs that aren't meant to harm health no longer damage vehicles (EMP, Smoke, Extinguish, etc.)

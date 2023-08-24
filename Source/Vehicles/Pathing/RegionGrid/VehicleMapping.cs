@@ -50,9 +50,9 @@ namespace Vehicles
 		{
 			get
 			{
-				foreach (VehicleDef pathDataOwner in owners)
+				foreach (VehiclePathData pathData in vehicleData)
 				{
-					yield return vehicleData[pathDataOwner.DefIndex];
+					yield return pathData;
 				}
 			}
 		}
@@ -127,22 +127,50 @@ namespace Vehicles
 			return VehicleHarmony.AllMoveableVehicleDefs.FirstOrDefault(vehicleDef => vehicleDef.DefIndex == id);
 		}
 
+		public List<VehicleDef> GetPiggies(VehicleDef ownerDef)
+		{
+			List<VehicleDef> owners = new List<VehicleDef>();
+			if (!IsOwner(ownerDef))
+			{
+				return owners;
+			}
+			foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
+			{
+				if (!IsOwner(vehicleDef))
+				{
+					VehicleDef matchingOwnerDef = GetOwner(vehicleDef);
+					if (matchingOwnerDef == ownerDef)
+					{
+						owners.Add(vehicleDef);
+					}
+				}
+			}
+			return owners;
+		}
+
 		/// <summary>
 		/// Finalize initialization for map component
 		/// </summary>
 		public void RebuildVehiclePathData()
 		{
-			for (int i = 0; i < vehicleData.Length; i++)
+			foreach (VehiclePathData vehiclePathData in AllPathData)
 			{
-				VehiclePathData data = vehicleData[i];
 				//Needs to check validity, non-pathing vehicles are still indexed since sequential vehicles will have higher index numbers
-				if (data.IsValid)
+				if (vehiclePathData.IsValid)
 				{
-					data.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
-					data.VehicleRegionAndRoomUpdater.Enabled = true;
-					data.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
+					//Debug.Message($"Rebuilding regions for {vehiclePathData.Owner}");
+					vehiclePathData.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
+					vehiclePathData.VehicleRegionAndRoomUpdater.Enabled = true;
+					vehiclePathData.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
 				}
 			}
+			//TODO 
+			//for (int i = 0; i < Owners.Count; i++)
+			//{
+			//	//VehiclePathData data = vehicleData[i];
+			//	//data.VehicleRegionAndRoomUpdater.Enabled = true;
+			//	//data.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
+			//}
 		}
 
 		/// <summary>

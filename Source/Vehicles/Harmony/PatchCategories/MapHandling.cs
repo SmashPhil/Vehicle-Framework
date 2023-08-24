@@ -150,8 +150,11 @@ namespace Vehicles
 			for (int i = mapIndex; i < maps.Count; i++)
 			{
 				Map searchMap = maps[i];
-				foreach (VehicleMapping.VehiclePathData pathData in searchMap.GetCachedMapComponent<VehicleMapping>().AllPathData)
+				VehicleMapping mapping = searchMap.GetCachedMapComponent<VehicleMapping>();
+				List<VehicleDef> owners = mapping.Owners;
+				for (int o = 0; o < owners.Count; o++)
 				{
+					VehicleMapping.VehiclePathData pathData = mapping[owners[o]];
 					foreach (VehicleRegion region in pathData.VehicleRegionGrid.AllRegions_NoRebuild_InvalidAllowed)
 					{
 						if (i == mapIndex)
