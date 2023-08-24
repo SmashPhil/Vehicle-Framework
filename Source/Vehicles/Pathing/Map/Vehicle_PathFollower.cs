@@ -637,7 +637,7 @@ namespace Vehicles
 			
 			if (vehicleMapping.ThreadAvailable)
 			{
-				AsyncAction asyncAction = SimplePool<AsyncAction>.Get();
+				AsyncAction asyncAction = AsyncPool<AsyncAction>.Get();
 				asyncAction.Set(TrySetNewPath_Delayed, validator: () => moving && CalculatingPath, exceptionHandler: delegate (Exception ex)
 				{
 					CalculatingPath = false;

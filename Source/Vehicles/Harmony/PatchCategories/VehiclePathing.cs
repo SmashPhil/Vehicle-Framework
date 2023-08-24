@@ -482,7 +482,7 @@ namespace Vehicles
 			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
 			if (mapping.ThreadAvailable)
 			{
-				AsyncAction asyncAction = SimplePool<AsyncAction>.Get();
+				AsyncAction asyncAction = AsyncPool<AsyncAction>.Get();
 				asyncAction.Set(() => RegisterInRegions(thing, mapping), () => map != null && map.Index > -1);
 				mapping.dedicatedThread.Queue(asyncAction);
 			}
@@ -497,7 +497,7 @@ namespace Vehicles
 			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
 			if (mapping.ThreadAvailable)
 			{
-				AsyncAction asyncAction = SimplePool<AsyncAction>.Get();
+				AsyncAction asyncAction = AsyncPool<AsyncAction>.Get();
 				asyncAction.Set(() => DeregisterInRegions(thing, mapping), () => map != null && map.Index > -1);
 				mapping.dedicatedThread.Queue(asyncAction);
 			}
