@@ -281,7 +281,7 @@ namespace Vehicles
 					}
 					health.deflectionEffecter = effecterDef.Spawn();
 				}
-				IntVec2 effectCell = damageResult.cell.RotatedBy(Rotation);
+				IntVec2 effectCell = damageResult.cell.RotatedBy(Rotation, VehicleDef.Size);
 				IntVec3 onMapCell = new IntVec3(Position.x + effectCell.x, 0, Position.z + effectCell.z);
 				health.deflectionEffecter?.Trigger(new TargetInfo(onMapCell, Map), damageResult.damageInfo.Instigator ?? new TargetInfo(onMapCell, Map));
 				this.PlayImpactSound(damageResult);

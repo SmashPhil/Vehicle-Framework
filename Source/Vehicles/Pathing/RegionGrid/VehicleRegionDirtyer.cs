@@ -21,6 +21,8 @@ namespace Vehicles
 		[ThreadStatic]
 		private static List<VehicleRegion> regionsToDirtyFromWalkability = new List<VehicleRegion>();
 
+		private object walkabilityLock = new object();
+
 		public static List<VehicleRegion> RegionsToDirty
 		{
 			get
@@ -98,24 +100,27 @@ namespace Vehicles
 		/// <param name="cell"></param>
 		public void Notify_WalkabilityChanged(IntVec3 cell)
 		{
-			RegionsToDirtyFromWalkability.Clear();
-			for (int i = 0; i < 9; i++)
+			//lock (walkabilityLock) //Can be called multiple times during map gen
 			{
-				IntVec3 adjCell = cell + GenAdj.AdjacentCellsAndInside[i];
-				if (adjCell.InBounds(mapping.map))
+				RegionsToDirtyFromWalkability.Clear();
+				for (int i = 0; i < 9; i++)
 				{
-					VehicleRegion regionAt_NoRebuild_InvalidAllowed = mapping[createdFor].VehicleRegionGrid.GetRegionAt_NoRebuild_InvalidAllowed(adjCell);
-					if (regionAt_NoRebuild_InvalidAllowed != null && regionAt_NoRebuild_InvalidAllowed.valid)
+					IntVec3 adjCell = cell + GenAdj.AdjacentCellsAndInside[i];
+					if (adjCell.InBounds(mapping.map))
 					{
-						SetRegionDirty(regionAt_NoRebuild_InvalidAllowed, true);
+						VehicleRegion regionAt_NoRebuild_InvalidAllowed = mapping[createdFor].VehicleRegionGrid.GetRegionAt_NoRebuild_InvalidAllowed(adjCell);
+						if (regionAt_NoRebuild_InvalidAllowed != null && regionAt_NoRebuild_InvalidAllowed.valid)
+						{
+							SetRegionDirty(regionAt_NoRebuild_InvalidAllowed, true);
+						}
 					}
 				}
+				if (GenGridVehicles.Walkable(cell, createdFor, mapping.map))
+				{
+					dirtyCells.Add(cell);
+				}
+				RegionsToDirtyFromWalkability.Clear();
 			}
-			if (GenGridVehicles.Walkable(cell, createdFor, mapping.map))
-			{
-				dirtyCells.Add(cell);
-			}
-			RegionsToDirtyFromWalkability.Clear();
 		}
 
 		public void Notify_ThingAffectingRegionsSpawned(CellRect occupiedRect)

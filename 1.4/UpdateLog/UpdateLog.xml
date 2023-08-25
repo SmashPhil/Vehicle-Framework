@@ -16,6 +16,7 @@
 - Map Preview
 
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Internal parts can now be given hitboxes.  They will be prioritized when taking penetrating damage at that cell, otherwise it will select a random internal part like before.
 
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>

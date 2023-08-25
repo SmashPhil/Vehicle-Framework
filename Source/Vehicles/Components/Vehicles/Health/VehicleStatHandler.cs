@@ -194,28 +194,7 @@ namespace Vehicles
 			int x = cell.x - vehicle.Position.x;
 			int z = cell.z - vehicle.Position.z;
 			IntVec2 hitCell = new IntVec2(x, z);
-			switch (vehicle.FullRotation.AsInt)
-			{
-				case 0: //North
-					break;
-				case 4: //NorthEast
-				case 5: //SouthEast
-				case 1: //East
-					hitCell.x = -z;
-					hitCell.z = x;
-					break;
-				case 2: //South
-					hitCell.x = -x;
-					hitCell.z = -z;
-					break;
-				case 6: //SouthWest
-				case 7: //NorthWest
-				case 3: //West
-					hitCell.x = z;
-					hitCell.z = -x;
-					break;
-			}
-			return hitCell;
+			return hitCell.RotatedBy(vehicle.Rotation, vehicle.VehicleDef.Size);
 		}
 
 		public void RecalculateHealthPercent()
@@ -368,7 +347,12 @@ namespace Vehicles
 					}
 					if (VehicleMod.settings.debug.debugDrawHitbox)
 					{
-						debugCellHighlight.Add(new Pair<IntVec2, int>(hitCell, TicksHighlighted));
+						IntVec2 renderCell = hitCell;
+						if (vehicle.Rotation != Rot4.North)
+						{
+							renderCell = renderCell.RotatedBy(vehicle.Rotation, vehicle.VehicleDef.Size);
+						}
+						debugCellHighlight.Add(new Pair<IntVec2, int>(renderCell, TicksHighlighted));
 					}
 					report?.AppendLine($"Damaging {hitCell}");
 					if (HitPawn(dinfo, hitDepth, hitCell, direction, out Pawn hitPawn))

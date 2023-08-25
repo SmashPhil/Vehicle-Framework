@@ -158,7 +158,6 @@ namespace Vehicles
 				//Needs to check validity, non-pathing vehicles are still indexed since sequential vehicles will have higher index numbers
 				if (vehiclePathData.IsValid)
 				{
-					//Debug.Message($"Rebuilding regions for {vehiclePathData.Owner}");
 					vehiclePathData.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
 					vehiclePathData.VehicleRegionAndRoomUpdater.Enabled = true;
 					vehiclePathData.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();

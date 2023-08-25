@@ -397,11 +397,14 @@ namespace Vehicles
 
 		public static void RecalculateAllPerceivedPathCosts(Map map)
 		{
-			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-			if (!mapping.Owners.NullOrEmpty())
+			LongEventHandler.ExecuteWhenFinished(delegate ()
 			{
-				RecalculateAllPerceivedPathCosts(mapping);
-			}
+				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+				if (!mapping.Owners.NullOrEmpty())
+				{
+					RecalculateAllPerceivedPathCosts(mapping);
+				}
+			});
 		}
 
 		private static void RecalculateAllPerceivedPathCosts(VehicleMapping mapping)
