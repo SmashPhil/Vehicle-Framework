@@ -153,7 +153,7 @@ namespace Vehicles
 			base.ExposeData();
 			
 			Scribe_Values.Look(ref angle, "angle", 0f, false);
-			Scribe_References.Look(ref vehicle, "vehicle", true);
+			Scribe_Deep.Look(ref vehicle, "vehicle");
 		}
 	}
 }

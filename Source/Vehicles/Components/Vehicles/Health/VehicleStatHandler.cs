@@ -194,7 +194,7 @@ namespace Vehicles
 			int x = cell.x - vehicle.Position.x;
 			int z = cell.z - vehicle.Position.z;
 			IntVec2 hitCell = new IntVec2(x, z);
-			return hitCell.RotatedBy(vehicle.Rotation, vehicle.VehicleDef.Size);
+			return hitCell;
 		}
 
 		public void RecalculateHealthPercent()
@@ -216,7 +216,8 @@ namespace Vehicles
 				}
 			}
 			IntVec2 hitCell = AdjustFromVehiclePosition(cell.ToIntVec2);
-			TakeDamage(dinfo, hitCell);
+			IntVec2 rotCell = hitCell.RotatedBy(vehicle.Rotation, vehicle.VehicleDef.Size);
+			TakeDamage(dinfo, rotCell);
 		}
 
 		public void TakeDamage(DamageInfo dinfo, IntVec2 hitCell)
@@ -350,7 +351,7 @@ namespace Vehicles
 						IntVec2 renderCell = hitCell;
 						if (vehicle.Rotation != Rot4.North)
 						{
-							renderCell = renderCell.RotatedBy(vehicle.Rotation, vehicle.VehicleDef.Size);
+							renderCell = renderCell.RotatedBy(vehicle.Rotation, vehicle.VehicleDef.Size, reverseRotate: true);
 						}
 						debugCellHighlight.Add(new Pair<IntVec2, int>(renderCell, TicksHighlighted));
 					}

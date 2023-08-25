@@ -179,6 +179,8 @@ namespace Vehicles
 			{
 				//Deep save if inner pawns are not world pawns, as they will not be saved in the WorldPawns list
 				handlers.contentsLookMode = (handlers.InnerListForReading.FirstOrDefault()?.IsWorldPawn() ?? false) ? LookMode.Reference : LookMode.Deep;
+
+				Log.Message($"saving with look mode: {handlers.contentsLookMode}. ParentHolder: {ParentHolder} Vehicle: {vehicle.ParentHolder}");
 			}
 			Scribe_Deep.Look(ref handlers, nameof(handlers), new object[] { this });
 			
