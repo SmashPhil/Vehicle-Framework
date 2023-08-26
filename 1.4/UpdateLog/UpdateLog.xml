@@ -10,6 +10,8 @@
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Fixed bug where biome costs would add additional costs for hills and winter costs from vanilla on top of adding vehicle related costs, essentially doubling the effect of hills and winter for vehicles.
 
+- Fixed bug where saving a vehicle while in the landing / takeoff animation would incorrectly serialize the vehicle + pawns, resulting in a save / load issue.
+
 - Fixed bug where hitboxes for even size vehicles wouldn't rotate properly, resulting in hits from very specific directions immediately damaging internal parts.
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 

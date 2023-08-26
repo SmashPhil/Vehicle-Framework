@@ -32,31 +32,47 @@ namespace Vehicles
 				case 0:
 					return cell;
 				case 1:
-					IntVec2 east = new IntVec2(-cell.z, -cell.x);
-					if (size.z % 2 == 0)
+					IntVec2 east = new IntVec2(-cell.z, cell.x);
+					if (reverseRotate)
 					{
-						cell.x--;
+						east.x *= -1;
+						east.z *= -1;
 					}
 					return east;
 				case 2:
 					IntVec2 south = new IntVec2(-cell.x, -cell.z);
-					if (size.x % 2 == 0)
+					if (size.x.IsEven())
 					{
 						south.x++;
 					}
-					if (size.z % 2 == 0)
+					if (size.z.IsEven())
 					{
 						south.z++;
 					}
 					return south;
 				case 3:
 					IntVec2 west = new IntVec2(cell.z, -cell.x);
-					if (size.z % 2 == 0)
+					if (size.x.IsEven())
 					{
-						west.x--;
+						west.x++;
+					}
+					if (size.z.IsEven())
+					{
+						west.z++;
 					}
 					if (reverseRotate)
 					{
+						if (size.x.IsEven())
+						{
+							west.z++;
+							west.x--;
+						}
+						if (size.z.IsEven())
+						{
+							west.z--;
+							west.x--;
+						}
+						west.x *= -1;
 						west.z *= -1;
 					}
 					return west;
