@@ -217,7 +217,6 @@ namespace Vehicles
 			}
 			IntVec2 hitCell = AdjustFromVehiclePosition(cell.ToIntVec2);
 			IntVec2 rotCell = hitCell.RotatedBy(vehicle.Rotation, vehicle.VehicleDef.Size);
-			Log.Message($"Impacting {hitCell} Rot={rotCell}");
 			TakeDamage(dinfo, rotCell);
 		}
 

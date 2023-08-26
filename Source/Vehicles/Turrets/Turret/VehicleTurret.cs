@@ -10,8 +10,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	[HeaderTitle(Label = "Turret")]
-	public class VehicleTurret : IExposable, ILoadReferenceable, IEventManager<VehicleTurretEventDef>, IMaterialCacheTarget
+	public class VehicleTurret : IExposable, ILoadReferenceable, IEventManager<VehicleTurretEventDef>, IMaterialCacheTarget, ITweakFieldLabel
 	{
 		public const int AutoTargetInterval = 50;
 		public const int TicksPerOverheatingFrame = 15;
@@ -95,20 +94,28 @@ namespace Vehicles
 
 		//Cache all root draw pos on spawn
 		[Unsaved]
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		protected Vector3 rootDrawPos_North;
 		[Unsaved]
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		protected Vector3 rootDrawPos_East;
 		[Unsaved]
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		protected Vector3 rootDrawPos_South;
 		[Unsaved]
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		protected Vector3 rootDrawPos_West;
 		[Unsaved]
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		protected Vector3 rootDrawPos_NorthEast;
 		[Unsaved]
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		protected Vector3 rootDrawPos_SouthEast;
 		[Unsaved]
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		protected Vector3 rootDrawPos_SouthWest;
 		[Unsaved]
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		protected Vector3 rootDrawPos_NorthWest;
 
 		protected Texture2D cannonTex;
@@ -189,6 +196,8 @@ namespace Vehicles
 
 			rTracker = new Turret_RecoilTracker(this);
 		}
+
+		public string TweakFieldLabel => turretDef.label;
 
 		public bool GizmoHighlighted { get; set; }
 
