@@ -131,16 +131,6 @@ namespace Vehicles
 			{
 				southWest = Rotate(south.Value, -45);
 			}
-
-			Log.Message($"--OFFSETS--");
-			Log.Message($"North: {North}");
-			Log.Message($"East: {East}");
-			Log.Message($"South: {South}");
-			Log.Message($"West: {West}");
-			Log.Message($"NorthEast: {NorthEast}");
-			Log.Message($"SouthEast: {SouthEast}");
-			Log.Message($"SouthWest: {SouthWest}");
-			Log.Message($"NorthWest: {NorthWest}");
 		}
 
 		public Vector2 Rotate(Vector2 offset, float angle)
