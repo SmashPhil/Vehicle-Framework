@@ -19,6 +19,9 @@ namespace Vehicles
 		public Dictionary<string, Dictionary<SaveableField, SavedField<object>>> fieldSettings = new Dictionary<string, Dictionary<SaveableField, SavedField<object>>>();
 		public Dictionary<string, Dictionary<SaveableField, object>> defaultValues = new Dictionary<string, Dictionary<SaveableField, object>>();
 
+		public Dictionary<string, Dictionary<string, float>> vanillaStats = new Dictionary<string, Dictionary<string, float>>();
+		public Dictionary<string, Dictionary<string, float>> vehicleStats = new Dictionary<string, Dictionary<string, float>>();
+
 		/// <summary>
 		/// <defName, maskName>
 		/// </summary>
@@ -36,6 +39,8 @@ namespace Vehicles
 					yield return new FloatMenuOption("VF_DevMode_ResetVehicle".Translate(VehicleMod.selectedDef.LabelCap), delegate ()
 					{
 						defaultGraphics.Remove(VehicleMod.selectedDef.defName);
+						vanillaStats.Remove(VehicleMod.selectedDef.defName);
+						vehicleStats.Remove(VehicleMod.selectedDef.defName);
 						SettingsCustomizableFields.PopulateSaveableFields(VehicleMod.selectedDef, true);
 					});
 				}
@@ -51,6 +56,8 @@ namespace Vehicles
 		public override void Initialize()
 		{
 			fieldSettings ??= new Dictionary<string, Dictionary<SaveableField, SavedField<object>>>();
+			vanillaStats ??= new Dictionary<string, Dictionary<string, float>>();
+			vehicleStats ??= new Dictionary<string, Dictionary<string, float>>();
 			defaultGraphics ??= new Dictionary<string, PatternData>();
 		}
 
@@ -60,6 +67,8 @@ namespace Vehicles
 			VehicleMod.cachedFields.Clear();
 			VehicleMod.PopulateCachedFields();
 			fieldSettings.Clear();
+			vanillaStats.Clear();
+			vehicleStats.Clear();
 			defaultGraphics.Clear();
 			if (VehicleMod.ModifiableSettings)
 			{
@@ -81,6 +90,8 @@ namespace Vehicles
 		public override void ExposeData()
 		{
 			Scribe_NestedCollections.Look(ref fieldSettings, nameof(fieldSettings), LookMode.Value, LookMode.Deep, LookMode.Undefined);
+			Scribe_NestedCollections.Look(ref vanillaStats, nameof(vanillaStats), LookMode.Value, LookMode.Value, LookMode.Value);
+			Scribe_NestedCollections.Look(ref vehicleStats, nameof(vehicleStats), LookMode.Value, LookMode.Value, LookMode.Value);
 			Scribe_Collections.Look(ref defaultGraphics, nameof(defaultGraphics), LookMode.Value, LookMode.Deep);
 		}
 
@@ -177,13 +188,9 @@ namespace Vehicles
 					if (Widgets.ButtonText(buttonRect, "VF_VehicleStats".Translate()))
 					{
 						SoundDefOf.Click.PlayOneShotOnCamera();
-						Find.WindowStack.ImmediateWindow("VF_VehicleStats".GetHashCode(), buttonRect, WindowLayer.Super, delegate ()
-						{
-
-						});
+						Find.WindowStack.Add(new Dialog_StatSettings(VehicleMod.selectedDef));
 					}
-					//TooltipHandler.TipRegionByKey(buttonRect, "VF_VehicleStatsTooltip"); //Key is currently not in translations, will add later
-
+					
 					listingSplit.End();
 
 					float scrollableFieldY = menuRect.height * 0.4f;
@@ -196,21 +203,6 @@ namespace Vehicles
 					drawStatusMessage = $"Drawing sub settings";
 					listingSplit.BeginScrollView(scrollableFieldsRect, ref VehicleMod.saveableFieldsScrollPosition, ref scrollableFieldsViewRect, 3);
 
-					if (!VehicleMod.selectedDef.statBases.NullOrEmpty())
-					{
-						foreach (StatModifier statModifier in VehicleMod.selectedDef.statBases)
-						{
-
-						}
-					}
-					if (!VehicleMod.selectedDef.vehicleStats.NullOrEmpty())
-					{
-						foreach (VehicleStatModifier statModifier in VehicleMod.selectedDef.vehicleStats)
-						{
-
-						}
-					}
-					
 					foreach ((Type type, List<FieldInfo> fields) in VehicleMod.VehicleCompFields)
 					{
 						if (fields.NullOrEmpty() || fields.All(f => f.TryGetAttribute<PostToSettingsAttribute>(out var settings) 

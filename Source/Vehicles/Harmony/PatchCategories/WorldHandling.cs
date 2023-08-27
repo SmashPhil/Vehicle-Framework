@@ -76,35 +76,20 @@ namespace Vehicles
 		{
 			if (__result == WorldPawnSituation.Free && p.Faction != null && p.Faction == Faction.OfPlayerSilentFail)
 			{
-				if (p is VehiclePawn aerialVehicle)
+				if (p is VehiclePawn)
 				{
-					__result = WorldPawnSituation.InTravelingTransportPod;
-					return;
+					//__result = WorldPawnSituation.InTravelingTransportPod;
+					//return;
 				}
 				if (p.GetAerialVehicle() != null)
 				{
 					__result = WorldPawnSituation.InTravelingTransportPod;
 					return;
 				}
-				//foreach (Map map in Find.Maps)
-				//{
-				//	foreach (VehiclePawn vehicle in map.mapPawns.AllPawnsSpawned.Where(v => v is VehiclePawn vehicle && vehicle.Faction == Faction.OfPlayer))
-				//	{
-				//		if (vehicle.AllPawnsAboard.Contains(p))
-				//		{
-				//			__result = WorldPawnSituation.InTravelingTransportPod;
-				//			return;
-				//		}
-				//	}
-				//}
-				//foreach (VehiclePawn vehicle in Find.WorldPawns.AllPawnsAlive.Where(v => v is VehiclePawn vehicle))
-				//{
-				//	if (vehicle.AllPawnsAboard.Contains(p))
-				//	{
-				//		__result = WorldPawnSituation.InTravelingTransportPod;
-				//		return;
-				//	}
-				//}
+				if (!p.Spawned)
+				{
+					Log.Message($"Pawn {p} Situation: {__result}");
+				}
 			}
 		}
 

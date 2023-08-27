@@ -91,6 +91,7 @@
     <Compile Include="Components\Vehicles\VehicleSustainers.cs" />
     <Compile Include="Gizmo\Command_Turret.cs" />
     <Compile Include="Gizmo\Gizmo_VehicleCaravanInfo.cs" />
+    <Compile Include="Graphics\Dialogs\Dialog_StatSettings.cs" />
     <Compile Include="Graphics\Graphic\Graphics\Animated\Graphic_ReversePropeller.cs" />
     <Compile Include="Graphics\ITab\WITab_AerialVehicle.cs" />
     <Compile Include="Graphics\ITab\WITab_AerialVehicle_Health.cs" />

@@ -79,9 +79,10 @@ namespace Vehicles
 		{
 			if (baseValues.TryGetValue(vehicleDef, out float value))
 			{
-				return value;
+				return SettingsCache.TryGetValue(vehicleDef, statDef, value);
 			}
-			return RecacheBaseValue(vehicleDef);
+			value = RecacheBaseValue(vehicleDef);
+			return SettingsCache.TryGetValue(vehicleDef, statDef, value);
 		}
 
 		public virtual float TransformValue(VehiclePawn vehicle, float value)
