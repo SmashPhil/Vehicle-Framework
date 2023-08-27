@@ -381,7 +381,7 @@ namespace Vehicles
 							if (currentModTitle != vehicle.modContentPack.Name)
 							{
 								currentModTitle = vehicle.modContentPack.Name;
-								listingStandard.Header(currentModTitle, ListingExtension.BannerColor, GameFont.Medium, TextAnchor.MiddleCenter);
+								listingStandard.Header(currentModTitle, ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 							}
 							bool validated = validator is null || validator(vehicle);
 							string tooltip = tooltipGetter != null ? tooltipGetter(validated) : string.Empty;

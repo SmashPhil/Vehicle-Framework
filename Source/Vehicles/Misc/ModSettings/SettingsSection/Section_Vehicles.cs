@@ -172,6 +172,18 @@ namespace Vehicles
 						}
 					}
 
+					listingSplit.Shift();
+					Rect buttonRect = listingSplit.GetSplitRect(24);
+					if (Widgets.ButtonText(buttonRect, "VF_VehicleStats".Translate()))
+					{
+						SoundDefOf.Click.PlayOneShotOnCamera();
+						Find.WindowStack.ImmediateWindow("VF_VehicleStats".GetHashCode(), buttonRect, WindowLayer.Super, delegate ()
+						{
+
+						});
+					}
+					//TooltipHandler.TipRegionByKey(buttonRect, "VF_VehicleStatsTooltip"); //Key is currently not in translations, will add later
+
 					listingSplit.End();
 
 					float scrollableFieldY = menuRect.height * 0.4f;
@@ -183,6 +195,22 @@ namespace Vehicles
 
 					drawStatusMessage = $"Drawing sub settings";
 					listingSplit.BeginScrollView(scrollableFieldsRect, ref VehicleMod.saveableFieldsScrollPosition, ref scrollableFieldsViewRect, 3);
+
+					if (!VehicleMod.selectedDef.statBases.NullOrEmpty())
+					{
+						foreach (StatModifier statModifier in VehicleMod.selectedDef.statBases)
+						{
+
+						}
+					}
+					if (!VehicleMod.selectedDef.vehicleStats.NullOrEmpty())
+					{
+						foreach (VehicleStatModifier statModifier in VehicleMod.selectedDef.vehicleStats)
+						{
+
+						}
+					}
+					
 					foreach ((Type type, List<FieldInfo> fields) in VehicleMod.VehicleCompFields)
 					{
 						if (fields.NullOrEmpty() || fields.All(f => f.TryGetAttribute<PostToSettingsAttribute>(out var settings) 
@@ -195,7 +223,7 @@ namespace Vehicles
 						{
 							header = title.Translate ? title.Label.Translate().ToString() : title.Label;
 						}
-						listingSplit.Header(header, ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter, 24);
+						listingSplit.Header(header, ListingExtension.BannerColor, fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter, rowGap: 24);
 						foreach (FieldInfo field in fields)
 						{
 							if (field.TryGetAttribute(out PostToSettingsAttribute post))

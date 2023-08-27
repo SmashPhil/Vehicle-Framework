@@ -27,6 +27,7 @@ namespace Vehicles
 		public string key;
 		public string groupKey;
 
+		[TweakField]
 		public VehicleTurretDef turretDef;
 
 		[TweakField(SettingsType = UISettingsType.Checkbox)]
@@ -197,7 +198,7 @@ namespace Vehicles
 			rTracker = new Turret_RecoilTracker(this);
 		}
 
-		public string TweakFieldLabel => turretDef.label;
+		public string TweakFieldLabel => turretDef.LabelCap;
 
 		public bool GizmoHighlighted { get; set; }
 

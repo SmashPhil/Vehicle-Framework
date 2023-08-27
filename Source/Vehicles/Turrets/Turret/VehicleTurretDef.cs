@@ -9,7 +9,7 @@ using HarmonyLib;
 
 namespace Vehicles
 {
-	public class VehicleTurretDef : Def
+	public class VehicleTurretDef : Def, ITweakFieldLabel
 	{
 		/// <summary>
 		/// Turret Type
@@ -26,7 +26,9 @@ namespace Vehicles
 		/// </summary>
 		public ThingFilter ammunition;
 
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
 		public int magazineCapacity = 1;
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
 		public int chargePerAmmoCount = 1;
 		public bool genericAmmo = false;
 		public TurretCooldownProperties cooldown;
@@ -41,6 +43,7 @@ namespace Vehicles
 		/// All fields related to gizmo or cannon related textures
 		/// baseCannonTexPath is for base plate only (static texture below cannon that represents the floor or attaching point of the cannon)
 		/// </summary>
+		[TweakField]
 		public GraphicDataRGB graphicData;
 
 		public string gizmoDescription;
@@ -54,12 +57,17 @@ namespace Vehicles
 		/// </summary>
 		public List<FireMode> fireModes = new List<FireMode>();
 		public bool autoSnapTargeting = false;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float rotationSpeed = 1;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float maxRange = -1;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float minRange = 0;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float reloadTimer = 5;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float warmUpTimer = 3;
-
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float autoRefuelProportion = 2;
 
 		/// <summary>
@@ -74,11 +82,15 @@ namespace Vehicles
 		public ThingDef projectile;
 		public CustomHitFlags attachProjectileFlag = null;
 		public ProjectileHitFlags? hitFlags;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float projectileOffset = 0f;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float projectileSpeed = -1;
 		public List<float> projectileShifting = new List<float>();
 
 		public Type restrictionType;
+
+		public string TweakFieldLabel => $"{defName} (Def)";
 
 		public override void ResolveReferences()
 		{

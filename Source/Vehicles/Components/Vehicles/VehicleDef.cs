@@ -11,8 +11,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	[HeaderTitle(Label = nameof(VehicleDef))]
-	public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget
+	public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget, ITweakFieldLabel
 	{
 		[PostToSettings]
 		public VehicleEnabledFor enabled = VehicleEnabledFor.Everyone;
@@ -25,7 +24,7 @@ namespace Vehicles
 		[NumericBoxValues(MinValue = 0, MaxValue = float.MaxValue)]
 		public float combatPower = 0;
 
-		//[PostToSettings(Label = "VF_VehicleStats", Translate = true, Tooltip = "VF_VehicleStatsTooltip")]
+		//Editing in ModSettings is handled manually as StatModifier list won't serialize well to the config file in the existing setup.
 		public List<VehicleStatModifier> vehicleStats;
 
 		[PostToSettings(Label = "VF_MovementPermissions", Translate = true, UISettingsType = UISettingsType.SliderEnum)]
@@ -121,6 +120,8 @@ namespace Vehicles
 		public PatternDef PatternDef => PatternDefOf.Default;
 
 		public string Name => $"{modContentPack.Name}_{defName}";
+
+		public string TweakFieldLabel => defName;
 
 		/// <summary>
 		/// Resolve all references related to this VehicleDef
