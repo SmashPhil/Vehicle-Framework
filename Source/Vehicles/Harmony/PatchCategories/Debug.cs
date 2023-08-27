@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Reflection.Emit;
+using System.Xml;
 using UnityEngine;
 using HarmonyLib;
 using Verse;
@@ -54,7 +55,7 @@ namespace Vehicles
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(CameraJumper), "TryJump", parameters: new Type[] { typeof(GlobalTargetInfo), typeof(CameraJumper.MovementMode) }),
 			//	prefix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestPrefix)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn), "Tick"),
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(XmlInheritance), nameof(XmlInheritance.TryRegister)),
 			//	postfix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestPostfix)));
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Thing), "ExposeData"),
@@ -75,11 +76,15 @@ namespace Vehicles
 			}
 		}
 
-		public static void TestPostfix(Pawn __instance)
+		public static void TestPostfix(XmlNode node, ModContentPack mod)
 		{
 			try
 			{
-				if (__instance.Faction == Faction.OfPlayer && !__instance.Spawned) Log.Message($"Ticking: {__instance} GameTicks: {Find.TickManager.TicksGame}");
+				XmlAttribute xmlAttribute = node.Attributes["Name"];
+				if (xmlAttribute != null && xmlAttribute.Value == "DrugBaseTest" && mod.PackageId == "SmashPhil.VehicleFramework")
+				{
+					Log.Message($"Registering {xmlAttribute.Name} = {xmlAttribute.Value}");
+				}
 			}
 			catch (Exception ex)
 			{

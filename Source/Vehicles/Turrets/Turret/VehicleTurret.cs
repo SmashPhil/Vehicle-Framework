@@ -10,7 +10,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class VehicleTurret : IExposable, ILoadReferenceable, IEventManager<VehicleTurretEventDef>, IMaterialCacheTarget, ITweakFieldLabel
+	public class VehicleTurret : IExposable, ILoadReferenceable, IEventManager<VehicleTurretEventDef>, IMaterialCacheTarget, ITweakFields
 	{
 		public const int AutoTargetInterval = 50;
 		public const int TicksPerOverheatingFrame = 15;
@@ -95,28 +95,20 @@ namespace Vehicles
 
 		//Cache all root draw pos on spawn
 		[Unsaved]
-		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		protected Vector3 rootDrawPos_North;
 		[Unsaved]
-		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		protected Vector3 rootDrawPos_East;
 		[Unsaved]
-		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		protected Vector3 rootDrawPos_South;
 		[Unsaved]
-		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		protected Vector3 rootDrawPos_West;
 		[Unsaved]
-		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		protected Vector3 rootDrawPos_NorthEast;
 		[Unsaved]
-		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		protected Vector3 rootDrawPos_SouthEast;
 		[Unsaved]
-		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		protected Vector3 rootDrawPos_SouthWest;
 		[Unsaved]
-		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		protected Vector3 rootDrawPos_NorthWest;
 
 		protected Texture2D cannonTex;
@@ -198,7 +190,9 @@ namespace Vehicles
 			rTracker = new Turret_RecoilTracker(this);
 		}
 
-		public string TweakFieldLabel => turretDef.LabelCap;
+		string ITweakFields.Label => turretDef.LabelCap;
+
+		string ITweakFields.Category => turretDef.LabelCap;
 
 		public bool GizmoHighlighted { get; set; }
 
@@ -641,6 +635,11 @@ namespace Vehicles
 			LongEventHandler.ExecuteWhenFinished(RecacheRootDrawPos);
 		}
 
+		public void OnFieldChanged()
+		{
+			RecacheRootDrawPos();
+		}
+
 		/// <summary>
 		/// Caches VehicleTurret draw location based on <see cref="renderProperties"/>, <see cref="attachedTo"/> draw loc is not cached, as rotating can alter the final draw location
 		/// </summary>
@@ -704,15 +703,15 @@ namespace Vehicles
 			Vector2 offset = rot.AsInt switch
 			{
 				//North
-				0 => renderProperties.north.Offset,
+				0 => renderProperties.North,
 				//East
-				1 => renderProperties.east.Offset,
+				1 => renderProperties.East,
 				//South
-				2 => renderProperties.south.Offset,
+				2 => renderProperties.South,
 				//West
-				3 => renderProperties.west.Offset,
+				3 => renderProperties.West,
 				//Diagonals not handled
-				_ => throw new NotImplementedException("Diagonal rotations"),
+				_ => throw new NotImplementedException("Diagonal rotations in UI"),
 			};
 
 			Vector3 graphicOffset = turretDef.graphicData.DrawOffsetForRot(rot);
@@ -1147,7 +1146,8 @@ namespace Vehicles
 						try
 						{
 							float altitudeLayer = Altitudes.AltitudeFor(moteProps.moteDef.altitudeLayer);
-							moteLoc += new Vector3(moteProps.offset.x, altitudeLayer + moteProps.offset.y, moteProps.offset.z);
+							Vector3 offset = moteProps.offset.RotatedBy(TurretRotation);
+							moteLoc += new Vector3(offset.x, altitudeLayer + offset.y, offset.z);
 							Mote mote = (Mote)ThingMaker.MakeThing(moteProps.moteDef);
 							mote.exactPosition = moteLoc;
 							mote.exactRotation = moteProps.exactRotation.RandomInRange;

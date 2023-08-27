@@ -11,7 +11,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget, ITweakFieldLabel
+	public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget, ITweakFields
 	{
 		[PostToSettings]
 		public VehicleEnabledFor enabled = VehicleEnabledFor.Everyone;
@@ -41,7 +41,7 @@ namespace Vehicles
 		public NavigationCategory navigationCategory = NavigationCategory.Opportunistic;
 
 		public VehicleBuildDef buildDef;
-		[TweakField(Category = "VehicleDef")]
+		[TweakField(SubCategory = "GraphicData")]
 		public new GraphicDataRGB graphicData;
 
 		[TweakField]
@@ -121,7 +121,13 @@ namespace Vehicles
 
 		public string Name => $"{modContentPack.Name}_{defName}";
 
-		public string TweakFieldLabel => defName;
+		string ITweakFields.Label => defName;
+
+		string ITweakFields.Category => defName;
+
+		public void OnFieldChanged()
+		{
+		}
 
 		/// <summary>
 		/// Resolve all references related to this VehicleDef

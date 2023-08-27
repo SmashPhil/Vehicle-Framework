@@ -9,7 +9,7 @@ using HarmonyLib;
 
 namespace Vehicles
 {
-	public class VehicleTurretDef : Def, ITweakFieldLabel
+	public class VehicleTurretDef : Def, ITweakFields
 	{
 		/// <summary>
 		/// Turret Type
@@ -36,7 +36,9 @@ namespace Vehicles
 		/// <summary>
 		/// Fields related to recoil
 		/// </summary>
+		[TweakField(SubCategory = "Turret Recoil")]
 		public RecoilProperties recoil;
+		[TweakField(SubCategory = "Vehicle Recoil")]
 		public RecoilProperties vehicleRecoil;
 
 		/// <summary>
@@ -90,7 +92,13 @@ namespace Vehicles
 
 		public Type restrictionType;
 
-		public string TweakFieldLabel => $"{defName} (Def)";
+		string ITweakFields.Label => nameof(VehicleTurretDef);
+
+		string ITweakFields.Category => string.Empty;//$"{defName} (Def)";
+
+		public void OnFieldChanged()
+		{
+		}
 
 		public override void ResolveReferences()
 		{

@@ -39,14 +39,14 @@ namespace Vehicles
 		/// <param name="attachedTo"></param>
 		public static Vector2 TurretDrawOffset(Rot8 rot, VehicleTurretRender renderProps, float extraRotation = 0, VehicleTurret attachedTo = null)
 		{
-			VehicleTurretRender.RotationalOffset turretOffset = renderProps.OffsetFor(rot);
+			Vector2 turretOffset = renderProps.OffsetFor(rot);
 			if (attachedTo != null)
 			{
-				VehicleTurretRender.RotationalOffset parentOffset = attachedTo.renderProperties.OffsetFor(rot);
-				Vector2 rootLoc = Ext_Math.RotatePointClockwise(turretOffset.Offset.x, turretOffset.Offset.y, extraRotation);
-				return new Vector2(rootLoc.x + parentOffset.Offset.x, rootLoc.y + parentOffset.Offset.y);
+				Vector2 parentOffset = attachedTo.renderProperties.OffsetFor(rot);
+				Vector2 rootLoc = Ext_Math.RotatePointClockwise(turretOffset.x, turretOffset.y, extraRotation);
+				return new Vector2(rootLoc.x + parentOffset.x, rootLoc.y + parentOffset.y);
 			}
-			return turretOffset.Offset;
+			return turretOffset;
 		}
 
 		/// <summary>
