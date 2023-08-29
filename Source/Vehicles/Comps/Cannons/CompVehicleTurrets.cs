@@ -370,7 +370,9 @@ namespace Vehicles
 						turretData.turret.CurrentTurretFiring++;
 						turretData.shots--;
 						turretData.ticksTillShot = turretData.turret.TicksPerShot;
-						if (turretData.turret.OnCooldown || turretData.shots == 0 || (turretData.turret.turretDef.ammunition != null && turretData.turret.shellCount <= 0))
+
+						bool outOfAmmo = turretData.turret.turretDef.ammunition != null && turretData.turret.shellCount <= 0;
+						if (turretData.turret.OnCooldown || turretData.shots == 0 || outOfAmmo)
 						{
 							if (turretData.turret.targetPersists)
 							{
@@ -380,7 +382,10 @@ namespace Vehicles
 							{
 								turretData.turret.SetTarget(LocalTargetInfo.Invalid);
 							}
-							turretData.turret.ReloadCannon();
+							if (outOfAmmo)
+							{
+								turretData.turret.ReloadCannon();
+							}
 							DequeueTurret(turretData);
 							continue;
 						}

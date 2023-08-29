@@ -5,6 +5,7 @@ using System.Linq;
 using Verse;
 using UnityEngine;
 using RimWorld;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -12,33 +13,29 @@ namespace Vehicles
 	/// FireMode selection option for VehicleTurret
 	/// </summary>
 	/// <remarks>XML Notation: (shotsPerBurst, ticksBetweenShots, ticksBetweenBursts, label, texPath)</remarks>
-	public struct FireMode : IEquatable<FireMode>
+	public class FireMode : IEquatable<FireMode>
 	{
-		public int shotsPerBurst;
-		public int ticksBetweenShots;
-		public int ticksBetweenBursts;
-		public float spreadRadius;
 		public string label;
 		public string texPath;
 
-		private Texture2D icon;
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
+		public int shotsPerBurst;
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
+		public int ticksBetweenShots;
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
+		public int ticksBetweenBursts;
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
+		public int burstsTillWarmup = 1;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
+		public float spreadRadius;
 
-		public FireMode(int shotsPerBurst, int ticksBetweenShots, int ticksBetweenBursts, float spreadRadius, string label, string texPath)
-		{
-			this.shotsPerBurst = shotsPerBurst;
-			this.ticksBetweenShots = ticksBetweenShots;
-			this.ticksBetweenBursts = ticksBetweenBursts;
-			this.spreadRadius = spreadRadius;
-			this.label = label;
-			this.texPath = texPath;
-			icon = null;
-		}
+		private Texture2D icon;
 
 		public Texture2D Icon
 		{
 			get
 			{
-				if(icon is null)
+				if (icon is null)
 				{
 					if (!string.IsNullOrEmpty(texPath))
 					{
@@ -50,14 +47,6 @@ namespace Vehicles
 					}
 				}
 				return icon;
-			}
-		}
-
-		public static FireMode Invalid
-		{
-			get
-			{
-				return new FireMode(-1, -1, -1, -1, "Invalid", string.Empty);
 			}
 		}
 
@@ -84,12 +73,12 @@ namespace Vehicles
 
 		public bool Equals(FireMode fireMode2)
 		{
-			return fireMode2.ticksBetweenBursts == ticksBetweenBursts && fireMode2.shotsPerBurst == shotsPerBurst && fireMode2.ticksBetweenShots == ticksBetweenShots;
+			return fireMode2.ticksBetweenBursts == ticksBetweenBursts && fireMode2.shotsPerBurst == shotsPerBurst && fireMode2.burstsTillWarmup == burstsTillWarmup && fireMode2.ticksBetweenShots == ticksBetweenShots;
 		}
 
 		public override int GetHashCode()
 		{
-			return Gen.HashCombineInt(Gen.HashCombineInt(Gen.HashCombineInt(0, ticksBetweenBursts), shotsPerBurst), ticksBetweenShots);
+			return Gen.HashCombineInt(Gen.HashCombineInt(Gen.HashCombineInt(Gen.HashCombineInt(0, ticksBetweenBursts), shotsPerBurst), burstsTillWarmup), ticksBetweenShots);
 		}
 	}
 }

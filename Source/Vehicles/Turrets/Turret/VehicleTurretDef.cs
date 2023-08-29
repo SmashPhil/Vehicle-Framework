@@ -57,7 +57,9 @@ namespace Vehicles
 		/// <summary>
 		/// Fields relating to targeting and reloading
 		/// </summary>
+		[TweakField(SubCategory = "Fire Modes")]
 		public List<FireMode> fireModes = new List<FireMode>();
+		[TweakField(SettingsType = UISettingsType.Checkbox)]
 		public bool autoSnapTargeting = false;
 		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float rotationSpeed = 1;
@@ -125,6 +127,11 @@ namespace Vehicles
 				else if (!VehicleMod.settings.main.useCustomShaders)
 				{
 					graphicData.shaderType = graphicData.shaderType.Shader.SupportsRGBMaskTex(ignoreSettings: true) ? ShaderTypeDefOf.CutoutComplex : graphicData.shaderType;
+				}
+
+				if (graphicData.shaderType == ShaderTypeDefOf.Cutout)
+				{
+					matchParentColor = false;
 				}
 			});
 		}

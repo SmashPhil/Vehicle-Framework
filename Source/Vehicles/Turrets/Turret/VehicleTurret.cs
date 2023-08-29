@@ -44,6 +44,7 @@ namespace Vehicles
 		public Vector2 aimPieOffset = Vector2.zero;
 		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public Vector2 angleRestricted = Vector2.zero;
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
 		public int drawLayer = 1;
 
 		public float defaultAngleRotated = 0f;
@@ -74,6 +75,8 @@ namespace Vehicles
 
 		protected Rot4 parentRotCached = default;
 		protected float parentAngleCached = 0f;
+
+		protected int burstsTillWarmup;
 
 		[Unsaved]
 		protected float currentRotation = 0f; //Rotation taking Vehicle rotation and angle into account
@@ -186,6 +189,7 @@ namespace Vehicles
 			currentFireMode = 0;
 			currentFireIcon = OverheatIcons.FirstOrDefault();
 			ticksSinceLastShot = 0;
+			burstsTillWarmup = 0;
 
 			ResolveCannonGraphics(vehicle);
 
@@ -549,6 +553,7 @@ namespace Vehicles
 			set
 			{
 				currentFireMode = turretDef.fireModes.IndexOf(value);
+				ResetPrefireTimer();
 			}
 		}
 
@@ -764,6 +769,12 @@ namespace Vehicles
 		public virtual void ActivateBurstTimer()
 		{
 			burstTicks = CurrentFireMode.ticksBetweenBursts;
+			burstsTillWarmup--;
+			Log.Message($"BurstsTillWarmup: {burstsTillWarmup}");
+			if (burstsTillWarmup <= 0)
+			{
+				ResetPrefireTimer();
+			}
 		}
 
 		public void StartTicking()
@@ -1417,11 +1428,6 @@ namespace Vehicles
 					ActivateTimer(ignoreTimer);
 				}
 			}
-			else if( (loadedAmmo != null || turretDef.genericAmmo ) && shellCount > 0)
-			{
-				ActivateBurstTimer();
-				return;
-			}
 		}
 
 		/// <summary>
@@ -1445,6 +1451,7 @@ namespace Vehicles
 			{
 				if (vehicle.inventory.innerContainer.Contains(savedAmmoType) || vehicle.inventory.innerContainer.Contains(ammo))
 				{
+					//Remembers previously stored ammo for auto-loading feature
 					Thing storedAmmo = null;
 					if (ammo != null)
 					{
@@ -1468,6 +1475,7 @@ namespace Vehicles
 
 					thingsToTakeReloading.Clear();
 					{
+						//Deterine which items (and how much) to take
 						foreach (Thing thing in vehicle.inventory.innerContainer)
 						{
 							if (thing.def == storedAmmo.def)
@@ -1479,10 +1487,12 @@ namespace Vehicles
 								if (countToTake <= 0) break;
 							}
 						}
+						//Quick check to make sure to not even bother removing items from inventory if there is not enough to reload 1 shot minimum
 						if (thingsToTakeReloading.Sum(pair => pair.Item2) < turretDef.chargePerAmmoCount)
 						{
 							return false;
 						}
+						//Take items from inventory without going over the amount required
 						for (int i = thingsToTakeReloading.Count - 1; i >= 0; i--)
 						{
 							if (thingsToTakeReloading.Sum(pair => pair.Item2) < turretDef.chargePerAmmoCount)
@@ -1648,6 +1658,9 @@ namespace Vehicles
 		{
 			PrefireTickCount = WarmupTicks;
 			EventRegistry[VehicleTurretEventDefOf.Warmup].ExecuteEvents();
+			burstsTillWarmup = CurrentFireMode.burstsTillWarmup;
+
+			Log.Message($"Pre Firing: {burstsTillWarmup}");
 		}
 
 		protected void ValidateLockStatus()
@@ -1738,6 +1751,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref currentHeatRate, nameof(currentHeatRate));
 			Scribe_Values.Look(ref triggeredCooldown, nameof(triggeredCooldown));
 			Scribe_Values.Look(ref ticksSinceLastShot, nameof(ticksSinceLastShot));
+			Scribe_Values.Look(ref burstsTillWarmup, nameof(burstsTillWarmup));
 
 			Scribe_Values.Look(ref rotation, nameof(rotation), defaultValue: defaultAngleRotated);
 			Scribe_Values.Look(ref restrictedTheta, nameof(restrictedTheta), defaultValue: (int)Mathf.Abs(angleRestricted.x - (angleRestricted.y + 360)).ClampAngle());
