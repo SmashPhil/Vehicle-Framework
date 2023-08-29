@@ -62,6 +62,7 @@ namespace Vehicles
 			componentTabScrollPos = Vector2.zero;
 			selectedComponent = null;
 			moreInfo = false;
+			RecacheWindowWidth();
 		}
 
 		public static Vector2 Start(VehiclePawn vehicle, bool compressed = false)
@@ -75,7 +76,7 @@ namespace Vehicles
 				RecacheWindowWidth();
 				RecacheComponentListHeight();
 			}
-			return size;
+			return Size;
 		}
 
 		public static void End()
@@ -86,10 +87,10 @@ namespace Vehicles
 		{
 			GUIState.Push();
 			{
-				Rect rect = new Rect(0, 20, size.x, size.y - 20);
+				Rect rect = new Rect(0, 20, Size.x, Size.y - 20);
 
 				Rect infoPanelRect = new Rect(rect.x, rect.y, LeftWindowWidth, rect.height).Rounded();
-				Rect componentPanelRect = new Rect(infoPanelRect.xMax, rect.y, size.x - LeftWindowWidth, rect.height);
+				Rect componentPanelRect = new Rect(infoPanelRect.xMax, rect.y, Size.x - LeftWindowWidth, rect.height);
 				
 				infoPanelRect.yMin += 11f; //Extra space for tab, excluded from componentPanelRect for top options
 
@@ -367,7 +368,7 @@ namespace Vehicles
 			componentListHeight = 0;
 			foreach (VehicleComponent component in inspectingVehicle.statHandler.components)
 			{
-				float textHeight = Text.CalcHeight(component.props.label, size.x - LeftWindowWidth);
+				float textHeight = Text.CalcHeight(component.props.label, Size.x - LeftWindowWidth);
 				componentListHeight += Mathf.Max(lineHeight, textHeight);
 			}
 		}

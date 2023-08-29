@@ -126,6 +126,8 @@ namespace Vehicles
 
 		public Turret_RecoilTracker rTracker;
 
+		private static readonly List<(Thing, int)> thingsToTakeReloading = new List<(Thing, int)>();
+
 		/* --------- CE hooks for compatibility --------- */
 		/// <summary>
 		/// (projectileDef, ammoDef, AmmoSetDef, origin, intendedTarget, launcher, shotAngle, shotRotation, shotHeight, shotSpeed, ret CE projectile)
@@ -1041,7 +1043,11 @@ namespace Vehicles
 			TryFindShootLineFromTo(TurretLocation.ToIntVec3(), cannonTarget, out ShootLine shootLine);
 			
 			float range = Vector3.Distance(TurretLocation, cannonTarget.CenterVector3);
-			IntVec3 cell = cannonTarget.Cell + GenRadial.RadialPattern[Rand.Range(0, GenRadial.NumCellsInRadius(CurrentFireMode.spreadRadius * (range / turretDef.maxRange)))];
+			IntVec3 cell = cannonTarget.Cell;//
+			if (CurrentFireMode.spreadRadius > 0)
+			{
+				cell += GenRadial.RadialPattern[Rand.Range(0, GenRadial.NumCellsInRadius(CurrentFireMode.spreadRadius * (range / turretDef.maxRange)))];
+			}
 			if (CurrentTurretFiring >= turretDef.projectileShifting.Count)
 			{
 				CurrentTurretFiring = 0;
@@ -1406,14 +1412,16 @@ namespace Vehicles
 			}
 			if (loadedAmmo is null || (ammo != null && shellCount < turretDef.magazineCapacity) || shellCount <= 0 || ammo != null)
 			{
-				ReloadInternal(ammo);
+				if (ReloadInternal(ammo))
+				{
+					ActivateTimer(ignoreTimer);
+				}
 			}
 			else if( (loadedAmmo != null || turretDef.genericAmmo ) && shellCount > 0)
 			{
 				ActivateBurstTimer();
 				return;
 			}
-			ActivateTimer(ignoreTimer);
 		}
 
 		/// <summary>
@@ -1425,14 +1433,13 @@ namespace Vehicles
 			ThingDef ammoType = vehicle.inventory.innerContainer.FirstOrDefault(t => turretDef.ammunition.Allows(t) || turretDef.ammunition.Allows(t.def.projectileWhenLoaded))?.def;
 			if (ammoType != null)
 			{
-				ReloadInternal(ammoType);
-				return true;
+				return ReloadInternal(ammoType);
 			}
 			Debug.Warning($"Failed to auto-reload {turretDef.label}");
 			return false;
 		}
 
-		protected void ReloadInternal(ThingDef ammo)
+		protected bool ReloadInternal(ThingDef ammo)
 		{
 			try
 			{
@@ -1452,45 +1459,52 @@ namespace Vehicles
 					else
 					{
 						Log.Error("No saved or specified shell upon reload");
-						return;
+						return false;
 					}
+
 					int countToRefill = turretDef.magazineCapacity - shellCount;
-					int countToTake = Mathf.FloorToInt(turretDef.chargePerAmmoCount * countToRefill);
-					if (countToTake == 0)
+					int countToTake = Mathf.FloorToInt(countToRefill * turretDef.chargePerAmmoCount);
+					int countRefilled = 0;
+
+					thingsToTakeReloading.Clear();
 					{
-						Log.Error($"CountToTake = 0, if you don't want to charge ammo then don't set it up for ammo.");
-						return;
-					}
-					if (countToTake > storedAmmo.stackCount)
-					{
-						countToTake = storedAmmo.stackCount;
-						countToRefill = Mathf.FloorToInt(countToTake / (float)turretDef.chargePerAmmoCount);
-					}
-					if (countToRefill == 0 || countToTake == 0)
-					{
-						return;
-					}
-					//vehicle.inventory.innerContainer.Take(storedAmmo, countToTake);
-					vehicle.TakeFromInventory(storedAmmo, countToTake);
-					int additionalCount = 0;
-					int additionalCountToTake = 0;
-					if (countToRefill + shellCount < turretDef.magazineCapacity)
-					{
-						foreach(Thing t in vehicle.inventory.innerContainer)
+						foreach (Thing thing in vehicle.inventory.innerContainer)
 						{
-							if (t.def == storedAmmo.def)
+							if (thing.def == storedAmmo.def)
 							{
-								additionalCount = t.stackCount >= turretDef.magazineCapacity - (shellCount + countToRefill) ? turretDef.magazineCapacity - (shellCount + countToRefill) : t.stackCount;
-								additionalCountToTake = Mathf.FloorToInt(turretDef.chargePerAmmoCount * additionalCount);
-								//vehicle.inventory.innerContainer.Take(t, additionalCountToTake);
-								vehicle.TakeFromInventory(t, additionalCountToTake);
-								if (additionalCount + countToRefill >= turretDef.magazineCapacity) break;
-							}    
+								int availableCount = thing.stackCount - thing.stackCount % turretDef.chargePerAmmoCount;
+								int takingFromThing = Mathf.Min(countToTake, availableCount);
+								thingsToTakeReloading.Add((thing, takingFromThing));
+								countToTake -= takingFromThing;
+								if (countToTake <= 0) break;
+							}
+						}
+						if (thingsToTakeReloading.Sum(pair => pair.Item2) < turretDef.chargePerAmmoCount)
+						{
+							return false;
+						}
+						for (int i = thingsToTakeReloading.Count - 1; i >= 0; i--)
+						{
+							if (thingsToTakeReloading.Sum(pair => pair.Item2) < turretDef.chargePerAmmoCount)
+							{
+								break;
+							}
+
+							(Thing thing, int count) = thingsToTakeReloading[i];
+							countRefilled += count;
+							vehicle.TakeFromInventory(thing, count);
+							thingsToTakeReloading.RemoveAt(i);
 						}
 					}
-					
+					thingsToTakeReloading.Clear();
+
+					if (countRefilled % turretDef.chargePerAmmoCount != 0)
+					{
+						Log.Warning($"Taking more than necessary to reload {this}. This is not supposed to occur. CountRefilled={countRefilled} CountNeeded={countToRefill * turretDef.chargePerAmmoCount}");
+					}
+
 					loadedAmmo = storedAmmo.def;
-					shellCount = countToRefill + additionalCount;
+					shellCount = countRefilled / turretDef.chargePerAmmoCount;
 					EventRegistry[VehicleTurretEventDefOf.Reload].ExecuteEvents();
 					if (turretDef.reloadSound != null)
 					{
@@ -1501,8 +1515,9 @@ namespace Vehicles
 			catch (Exception ex)
 			{
 				Log.Error($"Unable to reload Cannon: {uniqueID} on Pawn: {vehicle.LabelShort}. Exception: {ex}");
-				return;
+				return false;
 			}
+			return true;
 		}
 
 		public void ConsumeShellChambered()

@@ -4,12 +4,16 @@ using System.Linq;
 using UnityEngine;
 using SmashTools;
 using Verse;
+using AnimationEvent = SmashTools.AnimationEvent;
 
 namespace Vehicles
 {
 	public class PropellerProtocolProperties : VerticalProtocolProperties
 	{
 		public int maxTicksPropeller;
+
+		public List<GraphicDataLayered> additionalTexturesPropeller;
+		public List<AnimationEvent> eventsPropeller;
 
 		/* ----- Shadows ----- */
 		[GraphEditable]

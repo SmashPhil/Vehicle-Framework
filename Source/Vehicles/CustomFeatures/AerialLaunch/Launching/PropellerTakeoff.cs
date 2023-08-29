@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using Verse;
 using SmashTools;
+using AnimationEvent = SmashTools.AnimationEvent;
 
 namespace Vehicles
 {
@@ -87,6 +88,22 @@ namespace Vehicles
 			}
 			float rotationRate = RotationRate(TimeInAnimationPropeller);
 			vehicle.graphicOverlay.rotationRegistry.UpdateRegistry(rotationRate);
+		}
+
+		protected override void TickEvents()
+		{
+			base.TickEvents();
+			if (!CurAnimationProperties_Propeller.eventsPropeller.NullOrEmpty())
+			{
+				for (int i = 0; i < CurAnimationProperties_Propeller.eventsPropeller.Count; i++)
+				{
+					AnimationEvent @event = CurAnimationProperties_Propeller.eventsPropeller[i];
+					if (@event.EventFrame(TimeInAnimationPropeller))
+					{
+						@event.method.InvokeUnsafe(null, this);
+					}
+				}
+			}
 		}
 
 		protected override int AnimationEditorTick_Landing(int ticksPassed)
