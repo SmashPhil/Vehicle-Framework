@@ -99,6 +99,7 @@
     <Compile Include="Harmony\ConditionalPatches\Compatibility_CombatExtended.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_BulkCarrier.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_MapPreview.cs" />
+    <Compile Include="Harmony\ConditionalPatches\Compatibility_RailsOfTheRim.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_RoadsOfTheRim.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_GeologicalLandforms.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_RimHUD.cs" />

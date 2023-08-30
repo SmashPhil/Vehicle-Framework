@@ -16,6 +16,7 @@ namespace Vehicles
 		public const string GeologicalLandforms = "m00nl1ght.GeologicalLandforms";
 		public const string MapPreview = "m00nl1ght.MapPreview";
 		public const string RoadsOfTheRim = "Mlie.RoadsOfTheRim";
+		public const string RailsOfTheRim = "Vampiresbane.RailsAndRoadsOfTheRim";
 
 		public const string VE_Fishing = "VanillaExpanded.VCEF";
 		public const string DualWield = "Roolo.DualWield";
