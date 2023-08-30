@@ -470,6 +470,14 @@ namespace Vehicles
 				vPather.curPath.DrawPath(this);
 			}
 			RenderHelper.DrawLinesBetweenTargets(this, jobs.curJob, jobs.jobQueue);
+
+			if (!cargoToLoad.NullOrEmpty())
+			{
+				foreach (TransferableOneWay transferable in cargoToLoad)
+				{
+					GenDraw.DrawLineBetween(DrawPos, transferable.AnyThing.DrawPos);
+				}
+			}
 		}
 
 		public override TipSignal GetTooltip()
@@ -564,6 +572,12 @@ namespace Vehicles
 						}
 					}, delegate (LocalTargetInfo target)
 					{
+						if (target.Thing is Pawn pawn && pawn.IsColonistPlayerControlled)
+						{
+							VehicleHandler handler = pawn.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(handler => handler.AreSlotsAvailable && handler.role.handlingTypes == HandlingTypeFlags.None);
+							PromptToBoardVehicle(pawn, handler);
+							return;
+						}
 						TransferableOneWay transferable = new TransferableOneWay()
 						{
 							things = new List<Thing>() { target.Thing },
@@ -574,7 +588,7 @@ namespace Vehicles
 					}, this);
 				}
 			};
-			//yield return flagForLoading;
+			yield return flagForLoading;
 
 			if (!Drafted)
 			{
@@ -847,18 +861,28 @@ namespace Vehicles
 					FloatMenuOption opt = new FloatMenuOption("VF_EnterVehicle".Translate(LabelShort, handler.role.label, (handler.role.slots - (handler.handlers.Count +
 						reservationManager.GetReservation<VehicleHandlerReservation>(this)?.ClaimantsOnHandler(handler) ?? 0)).ToString()), delegate ()
 						{
-							Job job = new Job(JobDefOf_Vehicles.Board, this);
-							GiveLoadJob(selPawn, handler);
-							selPawn.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
-							if (!selPawn.Spawned)
-							{
-								return;
-							}
-							reservationManager.Reserve<VehicleHandler, VehicleHandlerReservation>(this, selPawn, selPawn.CurJob, handler);
+							PromptToBoardVehicle(selPawn, handler);
 						});
 					yield return opt;
 				}
 			}
+		}
+
+		public void PromptToBoardVehicle(Pawn pawn, VehicleHandler handler)
+		{
+			if (handler == null)
+			{
+				Messages.Message("VF_HandlerNotEnoughRoom".Translate(), MessageTypeDefOf.RejectInput, historical: false);
+				return;
+			}
+			Job job = new Job(JobDefOf_Vehicles.Board, this);
+			GiveLoadJob(pawn, handler);
+			pawn.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
+			if (!pawn.Spawned)
+			{
+				return;
+			}
+			Map.GetCachedMapComponent<VehicleReservationManager>().Reserve<VehicleHandler, VehicleHandlerReservation>(this, pawn, pawn.CurJob, handler);
 		}
 
 		public bool IdeoAllowsBoarding(Pawn selPawn)
@@ -1039,11 +1063,8 @@ namespace Vehicles
 						{
 							continue;
 						}
-						Job job = new Job(JobDefOf_Vehicles.Board, this);
 						VehicleHandler handler = p.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(handler => handler.AreSlotsAvailable && handler.role.handlingTypes == HandlingTypeFlags.None);
-						GiveLoadJob(p, handler);
-						reservationManager.Reserve<VehicleHandler, VehicleHandlerReservation>(this, p, job, handler);
-						p.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
+						PromptToBoardVehicle(p, handler);
 					}
 				}, MenuOptionPriority.Default, null, null, 0f, null, null);
 				FloatMenuOption opt2 = new FloatMenuOption("VF_BoardVehicleGroupFail".Translate(LabelShort), null, MenuOptionPriority.Default, null, null, 0f, null, null)

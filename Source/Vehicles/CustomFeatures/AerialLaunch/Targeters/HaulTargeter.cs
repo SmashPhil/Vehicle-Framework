@@ -92,7 +92,7 @@ namespace Vehicles
 				SimpleColor lineColor = SimpleColor.Red;
 				if (TargetMeetsRequirements(target))
 				{
-					lineColor = SimpleColor.Green;
+					lineColor = SimpleColor.White;
 				}
 				Vector3 linePos = UI.MouseMapPosition();
 				if (target.IsValid)
