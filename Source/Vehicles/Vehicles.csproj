@@ -52,6 +52,7 @@
     <Compile Include="AI\JobDrivers\JobDriver_GiveItemToVehicle.cs" />
     <Compile Include="AI\Lords\LordToil_PrepareCaravan_GatherAnimalsForVehicles.cs" />
     <Compile Include="AI\WorkGiver\VehicleWorkGiver.cs" />
+    <Compile Include="AI\WorkGiver\WorkGiver_CarryToVehicle.cs" />
     <Compile Include="AI\WorkGiver\WorkGiver_RefuelVehicleTurret.cs" />
     <Compile Include="BackCompatibility\BackCompatibilityConverter_Universal.cs" />
     <Compile Include="Components\Rendering\Tracks\VehicleTrack_Wake.cs" />
@@ -83,6 +84,7 @@
     <Compile Include="CustomFeatures\AerialLaunch\Launching\Properties\PropellerProtocolProperties.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\Restrictions\LaunchRestriction_Runway.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\Restrictions\LaunchRestriction.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Targeters\HaulTargeter.cs" />
     <Compile Include="CustomFeatures\EventDefs\VehicleTurretEventDef.cs" />
     <Compile Include="CustomFeatures\Misc\AnimationEditorTags.cs" />
     <Compile Include="CustomFeatures\SharedJobs\SharedJob.cs" />

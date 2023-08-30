@@ -46,6 +46,7 @@ namespace Vehicles
 		{
 			this.FailOnDestroyedOrNull(TargetIndex.A);
 			this.FailOnDestroyedOrNull(TargetIndex.B);
+			this.FailOnForbidden(TargetIndex.A);
 			this.FailOn(delegate ()
 			{
 				return !Map.GetCachedMapComponent<VehicleReservationManager>().VehicleListed(Vehicle, ListerTag);

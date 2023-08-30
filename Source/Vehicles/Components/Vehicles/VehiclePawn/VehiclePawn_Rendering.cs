@@ -519,7 +519,7 @@ namespace Vehicles
 			}
 			else
 			{
-				Command_Action loadShip = new Command_Action
+				Command_Action loadVehicle = new Command_Action
 				{
 					defaultLabel = "VF_LoadCargo".Translate(),
 					icon = VehicleDef.LoadCargoIcon,
@@ -528,8 +528,53 @@ namespace Vehicles
 						Find.WindowStack.Add(new Dialog_LoadCargo(this));
 					}
 				};
-				yield return loadShip;
+				yield return loadVehicle;
 			}
+
+			Command_Action flagForLoading = new Command_Action
+			{
+				defaultLabel = "HaulToVehicle".Translate(),
+				icon = VehicleTex.DismissTex,
+				action = delegate ()
+				{
+					SoundDefOf.Click.PlayOneShotOnCamera();
+					HaulTargeter.BeginTargeting(new TargetingParameters()
+					{
+						canTargetPawns = true,
+						canTargetBuildings = false,
+						neverTargetHostileFaction = true,
+						canTargetItems = true,
+						thingCategory = ThingCategory.Item,
+						validator = delegate (TargetInfo target)
+						{
+							if (!target.HasThing)
+							{
+								return false;
+							}
+							if (!(target.Thing is Pawn))
+							{
+								return target.Thing.def.EverHaulable;
+							}
+							Pawn pawn = target.Thing as Pawn;
+							if (pawn is VehiclePawn)
+							{
+								return false;
+							}
+							return pawn.Faction == Faction.OfPlayer || pawn.IsColonist || pawn.IsColonyMech || pawn.IsSlaveOfColony || pawn.IsPrisonerOfColony;
+						}
+					}, delegate (LocalTargetInfo target)
+					{
+						TransferableOneWay transferable = new TransferableOneWay()
+						{
+							things = new List<Thing>() { target.Thing },
+						};
+						transferable.AdjustTo(1);
+						cargoToLoad.Add(transferable);
+						Map.GetCachedMapComponent<VehicleReservationManager>().RegisterLister(this, ReservationType.LoadVehicle);
+					}, this);
+				}
+			};
+			//yield return flagForLoading;
 
 			if (!Drafted)
 			{

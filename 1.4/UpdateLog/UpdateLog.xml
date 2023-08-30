@@ -20,6 +20,7 @@
 &lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Map Preview
 
+- Rails of the Rim
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Added vehicle stats to mod settings in the vehicle section.  You can now modify vehicle stats (eg. Cargo Capacity, Move Speed, etc.) which is serialized to the config file, allowing you to rebalance vehicles across playthroughs.
 
@@ -35,7 +36,7 @@ Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&
   <!--Show update log on next startup.-->
   <update>false</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
-  <testing>false</testing>
+  <testing>true</testing>
   <!--Icon bar shown to the right of the mod's name-->
   <rightIconBar>
     <li>
