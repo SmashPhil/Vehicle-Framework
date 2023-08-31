@@ -17,7 +17,7 @@ namespace Vehicles
 		private readonly HashSet<IntVec3> dirtyCells = new HashSet<IntVec3>();
 
 		//Cant use ThreadStatic, thread is shared among maps and region sets
-		private readonly List<VehicleRegion> regionsToDirty;
+		private readonly List<VehicleRegion> regionsToDirty = new List<VehicleRegion>();
 		private readonly List<VehicleRegion> regionsToDirtyFromWalkability = new List<VehicleRegion>();
 		private object regionDirtyLock = new object();
 
