@@ -53,7 +53,7 @@ namespace Vehicles
 				{
 					return;
 				}
-				Rotation = FullRotation;
+				Rotation = value;
 				Angle = 0;
 				if (value == Rot8.NorthEast || value == Rot8.SouthWest)
 				{
