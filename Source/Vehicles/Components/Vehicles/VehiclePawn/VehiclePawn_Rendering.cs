@@ -541,8 +541,8 @@ namespace Vehicles
 
 			Command_Action flagForLoading = new Command_Action
 			{
-				defaultLabel = "HaulToVehicle".Translate(),
-				icon = VehicleTex.DismissTex,
+				defaultLabel = "VF_HaulPawnToVehicle".Translate(),
+				icon = VehicleTex.HaulPawnToVehicle,
 				action = delegate ()
 				{
 					SoundDefOf.Click.PlayOneShotOnCamera();
@@ -551,24 +551,23 @@ namespace Vehicles
 						canTargetPawns = true,
 						canTargetBuildings = false,
 						neverTargetHostileFaction = true,
-						canTargetItems = true,
-						thingCategory = ThingCategory.Item,
+						canTargetItems = false,
+						thingCategory = ThingCategory.Pawn,
 						validator = delegate (TargetInfo target)
 						{
 							if (!target.HasThing)
 							{
 								return false;
 							}
-							if (!(target.Thing is Pawn))
+							if (target.Thing is Pawn pawn)
 							{
-								return target.Thing.def.EverHaulable;
+								if (pawn is VehiclePawn)
+								{
+									return false;
+								}
+								return pawn.Faction == Faction.OfPlayer || pawn.IsColonist || pawn.IsColonyMech || pawn.IsSlaveOfColony || pawn.IsPrisonerOfColony;
 							}
-							Pawn pawn = target.Thing as Pawn;
-							if (pawn is VehiclePawn)
-							{
-								return false;
-							}
-							return pawn.Faction == Faction.OfPlayer || pawn.IsColonist || pawn.IsColonyMech || pawn.IsSlaveOfColony || pawn.IsPrisonerOfColony;
+							return false;
 						}
 					}, delegate (LocalTargetInfo target)
 					{
@@ -872,7 +871,7 @@ namespace Vehicles
 		{
 			if (handler == null)
 			{
-				Messages.Message("VF_HandlerNotEnoughRoom".Translate(), MessageTypeDefOf.RejectInput, historical: false);
+				Messages.Message("VF_HandlerNotEnoughRoom".Translate(pawn, this), MessageTypeDefOf.RejectInput, historical: false);
 				return;
 			}
 			Job job = new Job(JobDefOf_Vehicles.Board, this);

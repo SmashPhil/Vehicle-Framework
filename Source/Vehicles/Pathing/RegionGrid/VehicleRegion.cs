@@ -56,6 +56,8 @@ namespace Vehicles
 		private int debug_makeTick = -1000;
 		private int debug_lastTraverseTick = -1000;
 
+		private object roomLock = new object();
+
 		private VehicleRegion(VehicleDef vehicleDef) 
 		{
 			this.vehicleDef = vehicleDef;
@@ -154,20 +156,26 @@ namespace Vehicles
 		{
 			get
 			{
-				return room;
+				lock (roomLock)
+				{
+					return room;
+				}
 			}
 			set
 			{
 				if (value == room) return;
 
-				if (room != null)
+				lock (roomLock)
 				{
-					room.RemoveRegion(this);
-				}
-				room = value;
-				if (room != null)
-				{
-					room.AddRegion(this);
+					if (room != null)
+					{
+						room.RemoveRegion(this);
+					}
+					room = value;
+					if (room != null)
+					{
+						room.AddRegion(this);
+					}
 				}
 			}
 		}
