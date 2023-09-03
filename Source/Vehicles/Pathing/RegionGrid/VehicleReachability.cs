@@ -419,9 +419,8 @@ namespace Vehicles
 
 			if (drawLinks)
 			{
-				for (int i = 0; i < region.links.Count; i++)
+				foreach (VehicleRegionLink regionLink in region.links)
 				{
-					VehicleRegionLink regionLink = region.links[i];
 					foreach (VehicleRegionLink toRegionLink in region.links)
 					{
 						if (regionLink == toRegionLink) continue;

@@ -31,10 +31,10 @@ namespace Vehicles
 		private VehicleRoom room;
 		public Building_Door door;
 
-		public List<VehicleRegionLink> links = new List<VehicleRegionLink>();
+		public ConcurrentBag<VehicleRegionLink> links = new ConcurrentBag<VehicleRegionLink>();
 		public ConcurrentDictionary<int, Weight> weights = new ConcurrentDictionary<int, Weight>();
 
-		private readonly List<KeyValuePair<Pawn, Danger>> cachedDangers = new List<KeyValuePair<Pawn, Danger>>();
+		private readonly ConcurrentBag<(Pawn cachedFor, Danger danger)> cachedDangers = new ConcurrentBag<(Pawn, Danger)>();
 
 		public uint[] closedIndex = new uint[VehicleRegionTraverser.NumWorkers];
 
@@ -114,14 +114,13 @@ namespace Vehicles
 		{
 			get
 			{
-				for (int li = 0; li < links.Count; li++)
+				foreach (VehicleRegionLink link in links)
 				{
-					VehicleRegionLink link = links[li];
-					for (int ri = 0; ri < 2; ri++)
+					for (int i = 0; i < 2; i++)
 					{
-						if (link.regions[ri] != null && link.regions[ri] != this && link.regions[ri].valid)
+						if (link.regions[i] != null && link.regions[i] != this && link.regions[i].valid)
 						{
-							yield return link.regions[ri];
+							yield return link.regions[i];
 						}
 					}
 				}
@@ -135,14 +134,13 @@ namespace Vehicles
 		{
 			get
 			{
-				for (int li = 0; li < links.Count; li++)
+				foreach (VehicleRegionLink link in links)
 				{
-					VehicleRegionLink link = links[li];
-					for (int ri = 0; ri < 2; ri++)
+					for (int i = 0; i < 2; i++)
 					{
-						if (link.regions[ri] != null && link.regions[ri] != this && link.regions[ri].type == type && link.regions[ri].valid)
+						if (link.regions[i] != null && link.regions[i] != this && link.regions[i].type == type && link.regions[i].valid)
 						{
-							yield return link.regions[ri];
+							yield return link.regions[i];
 						}
 					}
 				}
@@ -286,16 +284,7 @@ namespace Vehicles
 		public void AddLink(VehicleRegionLink regionLink)
 		{
 			links.Add(regionLink);
-		}
-
-		public bool RemoveLink(VehicleRegionLink regionLink)
-		{
-			if (links.Remove(regionLink))
-			{
-				RecalculateWeights();
-				return true;
-			}
-			return false;
+			RecalculateWeights();
 		}
 
 		public Weight WeightBetween(VehicleRegionLink linkA, VehicleRegionLink linkB)
@@ -312,12 +301,10 @@ namespace Vehicles
 		public void RecalculateWeights()
 		{
 			weights = new ConcurrentDictionary<int, Weight>();
-			for (int i = 0; i < links.Count; i++)
+			foreach (VehicleRegionLink regionLink in links)
 			{
-				VehicleRegionLink regionLink = links[i];
-				for (int j = 0; j < links.Count; j++)
+				foreach (VehicleRegionLink connectingToLink in links)
 				{
-					VehicleRegionLink connectingToLink = links[j];
 					if (regionLink == connectingToLink) continue; //Skip matching link
 					
 					int weight = EuclideanDistance(regionLink.anchor, connectingToLink);
@@ -425,18 +412,18 @@ namespace Vehicles
 		{
 			if (Current.ProgramState == ProgramState.Playing)
 			{
-				if(cachedDangersForFrame != Time.frameCount)
+				if (cachedDangersForFrame != Time.frameCount)
 				{
 					cachedDangers.Clear();
 					cachedDangersForFrame = Time.frameCount;
 				}
 				else
 				{
-					for(int i = 0; i < cachedDangers.Count; i++)
+					foreach ((Pawn cachedFor, Danger danger) in cachedDangers)
 					{
-						if(cachedDangers[i].Key == pawn)
+						if (cachedFor == pawn)
 						{
-							return cachedDangers[i].Value;
+							return danger;
 						}
 					}
 				}
@@ -529,9 +516,8 @@ namespace Vehicles
 			}
 			if (debugRegionType.HasFlag(DebugRegionType.Weights))
 			{
-				for (int i = 0; i < links.Count; i++)
+				foreach (VehicleRegionLink regionLink in links)
 				{
-					VehicleRegionLink regionLink = links[i];
 					foreach (VehicleRegionLink toRegionLink in links)
 					{
 						if (regionLink == toRegionLink) continue;
@@ -547,10 +533,8 @@ namespace Vehicles
 
 				foreach (VehicleRegion region in Neighbors)
 				{
-					for (int i = 0; i < region.links.Count; i++)
+					foreach (VehicleRegionLink regionLink in links)
 					{
-						VehicleRegionLink regionLink = region.links[i];
-						
 						foreach (VehicleRegionLink toRegionLink in region.links)
 						{
 							if (regionLink == toRegionLink) continue;

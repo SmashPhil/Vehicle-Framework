@@ -16,12 +16,11 @@ namespace Vehicles
 		private readonly VehicleDef createdFor;
 
 		//.Net Framework doesn't have a ConcurrentHashSet type, so instead I use a concurrent dictionary with an unused value of low memory
-		private readonly ConcurrentDictionary<IntVec3, byte> dirtyCells = new ConcurrentDictionary<IntVec3, byte>();
+		private readonly ConcurrentSet<IntVec3> dirtyCells = new ConcurrentSet<IntVec3>();
 
 		//Cant use ThreadStatic, thread is shared among maps and region sets
-		private readonly List<VehicleRegion> regionsToDirty = new List<VehicleRegion>();
-		private readonly List<VehicleRegion> regionsToDirtyFromWalkability = new List<VehicleRegion>();
-		private object regionDirtyLock = new object();
+		private readonly ConcurrentBag<VehicleRegion> regionsToDirty = new ConcurrentBag<VehicleRegion>();
+		private readonly ConcurrentBag<VehicleRegion> regionsToDirtyFromWalkability = new ConcurrentBag<VehicleRegion>();
 
 		public VehicleRegionDirtyer(VehicleMapping mapping, VehicleDef createdFor)
 		{
@@ -67,7 +66,7 @@ namespace Vehicles
 			dirtyCells.Clear();
 			foreach (IntVec3 cell in mapping.map)
 			{
-				dirtyCells.TryAdd(cell, 0);
+				dirtyCells.Add(cell);
 			}
 			foreach (VehicleRegion region in mapping[createdFor].VehicleRegionGrid.AllRegions_NoRebuild_InvalidAllowed)
 			{
@@ -82,78 +81,69 @@ namespace Vehicles
 		/// <param name="cell"></param>
 		public void Notify_WalkabilityChanged(IntVec3 cell)
 		{
-			lock (regionsToDirtyFromWalkability)
+			regionsToDirtyFromWalkability.Clear();
+			for (int i = 0; i < 9; i++)
 			{
-				regionsToDirtyFromWalkability.Clear();
-				for (int i = 0; i < 9; i++)
+				IntVec3 adjCell = cell + GenAdj.AdjacentCellsAndInside[i];
+				if (adjCell.InBounds(mapping.map))
 				{
-					IntVec3 adjCell = cell + GenAdj.AdjacentCellsAndInside[i];
-					if (adjCell.InBounds(mapping.map))
+					VehicleRegion regionAt_NoRebuild_InvalidAllowed = mapping[createdFor].VehicleRegionGrid.GetRegionAt_NoRebuild_InvalidAllowed(adjCell);
+					if (regionAt_NoRebuild_InvalidAllowed != null && regionAt_NoRebuild_InvalidAllowed.valid)
 					{
-						VehicleRegion regionAt_NoRebuild_InvalidAllowed = mapping[createdFor].VehicleRegionGrid.GetRegionAt_NoRebuild_InvalidAllowed(adjCell);
-						if (regionAt_NoRebuild_InvalidAllowed != null && regionAt_NoRebuild_InvalidAllowed.valid)
-						{
-							SetRegionDirty(regionAt_NoRebuild_InvalidAllowed, true);
-						}
+						SetRegionDirty(regionAt_NoRebuild_InvalidAllowed, true);
 					}
 				}
-				if (GenGridVehicles.Walkable(cell, createdFor, mapping.map))
-				{
-					dirtyCells.TryAdd(cell, 0);
-				}
-				regionsToDirtyFromWalkability.Clear();
 			}
+			if (GenGridVehicles.Walkable(cell, createdFor, mapping.map))
+			{
+				dirtyCells.Add(cell);
+			}
+			regionsToDirtyFromWalkability.Clear();
 		}
 
 		public void Notify_ThingAffectingRegionsSpawned(CellRect occupiedRect)
 		{
-			lock (regionsToDirty)
+			regionsToDirty.Clear();
+			foreach (IntVec3 cell in occupiedRect.ExpandedBy(1).ClipInsideMap(mapping.map))
 			{
-				regionsToDirty.Clear();
-				foreach (IntVec3 cell in occupiedRect.ExpandedBy(1).ClipInsideMap(mapping.map))
+				VehicleRegion validRegionAt_NoRebuild = mapping[createdFor].VehicleRegionGrid.GetValidRegionAt_NoRebuild(cell);
+				if (validRegionAt_NoRebuild != null)
 				{
-					VehicleRegion validRegionAt_NoRebuild = mapping[createdFor].VehicleRegionGrid.GetValidRegionAt_NoRebuild(cell);
-					if (validRegionAt_NoRebuild != null)
-					{
-						regionsToDirty.Add(validRegionAt_NoRebuild);
-					}
+					regionsToDirty.Add(validRegionAt_NoRebuild);
 				}
-				for (int i = 0; i < regionsToDirty.Count; i++)
-				{
-					SetRegionDirty(regionsToDirty[i], true);
-				}
-				regionsToDirty.Clear();
 			}
+			foreach (VehicleRegion vehicleRegion in regionsToDirty)
+			{
+				SetRegionDirty(vehicleRegion, true);
+			}
+			regionsToDirty.Clear();
 		}
 
 		public void Notify_ThingAffectingRegionsDespawned(CellRect occupiedRect)
 		{
-			lock (regionsToDirty)
+			regionsToDirty.Clear();
+			//IntVec2 sizeWithPadding = thing.def.size + new IntVec2(createdFor.SizePadding * 2, createdFor.SizePadding * 2); //Doubled to account for opposite directions (N to S, E to W)
+			foreach (IntVec3 cell in occupiedRect.ExpandedBy(createdFor.SizePadding).ClipInsideMap(mapping.map))
 			{
-				regionsToDirty.Clear();
-				//IntVec2 sizeWithPadding = thing.def.size + new IntVec2(createdFor.SizePadding * 2, createdFor.SizePadding * 2); //Doubled to account for opposite directions (N to S, E to W)
-				foreach (IntVec3 cell in occupiedRect.ExpandedBy(createdFor.SizePadding).ClipInsideMap(mapping.map))
+				if (cell.InBounds(mapping.map))
 				{
-					if (cell.InBounds(mapping.map))
+					//mapping.map.debugDrawer.FlashCell(cell, 0);
+					VehicleRegion validRegionAt_NoRebuild2 = mapping[createdFor].VehicleRegionGrid.GetValidRegionAt_NoRebuild(cell);
+					if (validRegionAt_NoRebuild2 != null)
 					{
-						//mapping.map.debugDrawer.FlashCell(cell, 0);
-						VehicleRegion validRegionAt_NoRebuild2 = mapping[createdFor].VehicleRegionGrid.GetValidRegionAt_NoRebuild(cell);
-						if (validRegionAt_NoRebuild2 != null)
-						{
-							regionsToDirty.Add(validRegionAt_NoRebuild2);
-						}
+						regionsToDirty.Add(validRegionAt_NoRebuild2);
 					}
 				}
-				for (int i = 0; i < regionsToDirty.Count; i++)
-				{
-					SetRegionDirty(regionsToDirty[i], true);
-				}
-				regionsToDirty.Clear();
-				
-				foreach (IntVec3 cell in occupiedRect)
-				{
-					dirtyCells.TryAdd(cell, 0);
-				}
+			}
+			foreach (VehicleRegion vehicleRegion in regionsToDirty)
+			{
+				SetRegionDirty(vehicleRegion, true);
+			}
+			regionsToDirty.Clear();
+
+			foreach (IntVec3 cell in occupiedRect)
+			{
+				dirtyCells.Add(cell);
 			}
 		}
 
@@ -164,39 +154,36 @@ namespace Vehicles
 		/// <param name="addCellsToDirtyCells"></param>
 		private void SetRegionDirty(VehicleRegion region, bool addCellsToDirtyCells = true)
 		{
-			lock (regionDirtyLock) //Disallow reading / writing to links list from other region sets
+			string step = "";
+			try
 			{
-				string step = "";
-				try
+				if (!region.valid)
 				{
-					if (!region.valid)
+					return;
+				}
+				region.valid = false;
+				region.Room = null;
+				step = "Deregistering";
+				foreach (VehicleRegionLink regionLink in region.links)
+				{
+					regionLink.Deregister(region, createdFor);
+				}
+				step = "Clearing links and weights";
+				region.links.Clear();
+				region.weights.Clear();
+				if (addCellsToDirtyCells)
+				{
+					step = "Dirtying Cells";
+					foreach (IntVec3 intVec in region.Cells)
 					{
-						return;
-					}
-					region.valid = false;
-					region.Room = null;
-					step = "Deregistering";
-					for (int i = 0; i < region.links.Count; i++)
-					{
-						region.links[i].Deregister(region, createdFor);
-					}
-					step = "Clearing links and weights";
-					region.links.Clear();
-					region.weights.Clear();
-					if (addCellsToDirtyCells)
-					{
-						step = "Dirtying Cells";
-						foreach (IntVec3 intVec in region.Cells)
-						{
-							dirtyCells.TryAdd(intVec, 0);
-						}
+						dirtyCells.Add(intVec);
 					}
 				}
-				catch (Exception ex)
-				{
-					Log.Error($"Exception thrown in SetRegionDirty. Step = {step}\nNull: {region is null} Room: {region?.Room is null} links: {region?.links is null} weights: {region?.weights is null}");
-					throw ex;
-				}
+			}
+			catch (Exception ex)
+			{
+				Log.Error($"Exception thrown in SetRegionDirty. Step = {step}\nNull: {region is null} Room: {region?.Room is null} links: {region?.links is null} weights: {region?.weights is null}");
+				throw ex;
 			}
 		}
 	}
