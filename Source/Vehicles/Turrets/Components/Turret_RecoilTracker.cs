@@ -9,16 +9,17 @@ namespace Vehicles
 {
 	public class Turret_RecoilTracker
 	{
-		public float curRecoil;
-		protected float targetRecoil;
-		protected float recoilStep;
-		protected bool recoilingBack;
+		private float curRecoil;
 
-		protected VehicleTurret turret;
+		private float targetRecoil;
+		private float recoilStep;
+		private bool recoilingBack;
 
-		public Turret_RecoilTracker(VehicleTurret turret)
+		private readonly RecoilProperties recoilProperties;
+
+		public Turret_RecoilTracker(RecoilProperties recoilProperties)
 		{
-			this.turret = turret;
+			this.recoilProperties = recoilProperties;
 		}
 
 		public float Angle { get; private set; }
@@ -39,7 +40,7 @@ namespace Vehicles
 				}
 				else
 				{
-					curRecoil -= recoilStep * turret.turretDef.recoil.speedMultiplierPostRecoil;
+					curRecoil -= recoilStep * recoilProperties.speedMultiplierPostRecoil;
 					if (curRecoil <= 0)
 					{
 						ResetRecoilVars();
@@ -56,14 +57,10 @@ namespace Vehicles
 			return false;
 		}
 
-		public void Notify_TurretRecoil(VehicleTurret turret, float angle)
+		public void Notify_TurretRecoil(float angle)
 		{
-			if (!turret.Recoils)
-			{
-				return;
-			}
-			targetRecoil = turret.turretDef.recoil.distanceTotal;
-			recoilStep = turret.turretDef.recoil.distancePerTick;
+			targetRecoil = recoilProperties.distanceTotal;
+			recoilStep = recoilProperties.distancePerTick;
 			curRecoil = 0;
 			recoilingBack = true;
 			Angle = angle;

@@ -72,7 +72,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"[Test Prefix] Exception Thrown.\n{ex.Message}\n{ex.InnerException}\n{ex.StackTrace}");
+				Log.Error($"[Test Prefix] Exception Thrown.\nException={ex}\nInnerException={ex.InnerException}\n");
 			}
 		}
 
@@ -88,7 +88,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"[Test Postfix] Exception Thrown.\n{ex.Message}\n{ex.InnerException}\n{ex.StackTrace}");
+				Log.Error($"[Test Postfix] Exception Thrown.\nException={ex}\nInnerException={ex.InnerException}\n");
 			}
 		}
 
@@ -96,7 +96,7 @@ namespace Vehicles
 		{
 			if (__exception != null)
 			{
-				SmashLog.Message($"Exception caught! <error>Ex={__exception.Message}</error> Instance: {__instance}");
+				SmashLog.Message($"Exception caught! <error>Ex={__exception}</error> Instance: {__instance}");
 			}
 			return __exception;
 		}

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,7 +32,7 @@ namespace Vehicles
 		public Building_Door door;
 
 		public List<VehicleRegionLink> links = new List<VehicleRegionLink>();
-		public Dictionary<int, Weight> weights = new Dictionary<int, Weight>();
+		public ConcurrentDictionary<int, Weight> weights = new ConcurrentDictionary<int, Weight>();
 
 		private readonly List<KeyValuePair<Pawn, Danger>> cachedDangers = new List<KeyValuePair<Pawn, Danger>>();
 
@@ -156,26 +157,20 @@ namespace Vehicles
 		{
 			get
 			{
-				lock (roomLock)
-				{
-					return room;
-				}
+				return room;
 			}
 			set
 			{
 				if (value == room) return;
 
-				lock (roomLock)
+				if (room != null)
 				{
-					if (room != null)
-					{
-						room.RemoveRegion(this);
-					}
-					room = value;
-					if (room != null)
-					{
-						room.AddRegion(this);
-					}
+					room.RemoveRegion(this);
+				}
+				room = value;
+				if (room != null)
+				{
+					room.AddRegion(this);
 				}
 			}
 		}
@@ -316,7 +311,7 @@ namespace Vehicles
 
 		public void RecalculateWeights()
 		{
-			weights = new Dictionary<int, Weight>();
+			weights = new ConcurrentDictionary<int, Weight>();
 			for (int i = 0; i < links.Count; i++)
 			{
 				VehicleRegionLink regionLink = links[i];

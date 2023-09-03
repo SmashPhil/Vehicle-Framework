@@ -72,7 +72,7 @@ namespace Vehicles
 			}
 			catch (InvalidCastException ex)
 			{
-				Log.Error($"Cannot cast {fieldName} from {objType?.GetType().ToString() ?? "[Null]"} to {typeof(T)}.\nException=\"{ex.Message}\"");
+				Log.Error($"Cannot cast {fieldName} from {objType?.GetType().ToString() ?? "[Null]"} to {typeof(T)}.\nException=\"{ex}\"");
 			}
 			return fallback;
 		}

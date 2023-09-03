@@ -149,7 +149,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Unable to convert to bool. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex.Message}");
+				Log.Error($"Unable to convert to bool. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex}");
 				return;
 			}
 			finally
@@ -224,7 +224,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Unable to convert to integer. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex.Message}");
+				Log.Error($"Unable to convert to integer. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex}");
 				return;
 			}
 			finally
@@ -298,7 +298,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Unable to convert to float. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex.Message}");
+				Log.Error($"Unable to convert to float. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex}");
 				return;
 			}
 			finally
@@ -382,7 +382,7 @@ namespace Vehicles
 			}
 			catch(Exception ex)
 			{
-				Log.Error($"Unable to convert to float. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex.Message}");
+				Log.Error($"Unable to convert to float. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex}");
 				return;
 			}
 			finally
@@ -470,7 +470,7 @@ namespace Vehicles
 			}
 			catch(Exception ex)
 			{
-				Log.Error($"Unable to convert to float. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex.Message}");
+				Log.Error($"Unable to convert to float. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex}");
 				return;
 			}
 			finally
@@ -564,7 +564,7 @@ namespace Vehicles
 			}
 			catch(Exception ex)
 			{
-				Log.Error($"Unable to convert to int. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex.Message}");
+				Log.Error($"Unable to convert to int. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex}");
 				return;
 			}
 			finally
@@ -639,7 +639,7 @@ namespace Vehicles
 			}
 			catch(Exception ex)
 			{
-				Log.Error($"Unable to convert to int. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex.Message}");
+				Log.Error($"Unable to convert to int. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex}");
 				return;
 			}
 			finally

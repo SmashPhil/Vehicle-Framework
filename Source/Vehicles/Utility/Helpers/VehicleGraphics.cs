@@ -70,21 +70,25 @@ namespace Vehicles
 		{
 			try
 			{
-				Vector3 topVectorLocation = turret.TurretLocation;
-				if (turret.rTracker.Recoil > 0f)
+				Vector3 rootPos = turret.TurretLocation;
+				Vector3 recoilOffset = Vector3.zero;
+				Vector3 parentRecoilOffset = Vector3.zero;
+				if (turret.recoilTracker != null && turret.recoilTracker.Recoil > 0f)
 				{
-					topVectorLocation = Ext_Math.PointFromAngle(topVectorLocation, turret.rTracker.Recoil, turret.rTracker.Angle);
+					recoilOffset = Ext_Math.PointFromAngle(Vector3.zero, turret.recoilTracker.Recoil, turret.recoilTracker.Angle);
 				}
-				if (turret.attachedTo != null && turret.attachedTo.rTracker.Recoil > 0f)
+				if (turret.attachedTo?.recoilTracker != null && turret.attachedTo.recoilTracker.Recoil > 0f)
 				{
-					topVectorLocation = Ext_Math.PointFromAngle(topVectorLocation, turret.attachedTo.rTracker.Recoil, turret.attachedTo.rTracker.Angle);
+					parentRecoilOffset = Ext_Math.PointFromAngle(Vector3.zero, turret.attachedTo.recoilTracker.Recoil, turret.attachedTo.recoilTracker.Angle);
 				}
 				Mesh cannonMesh = turret.CannonGraphic.MeshAt(rot);
-				Graphics.DrawMesh(cannonMesh, topVectorLocation, turret.TurretRotation.ToQuat(), turret.CannonMaterial, 0);
+				Graphics.DrawMesh(cannonMesh, rootPos + recoilOffset + parentRecoilOffset, turret.TurretRotation.ToQuat(), turret.CannonMaterial, 0);
+
+				DrawTurretOverlays(turret, rootPos + parentRecoilOffset, rot);
 			}
 			catch (Exception ex)
 			{
-				Log.Error(string.Format("Error occurred during rendering of attached thing on {0}. Exception: {1}", turret.vehicle.Label, ex.Message));
+				Log.Error($"Error occurred during rendering of attached thing on {turret.vehicle.Label}. Exception: {ex}");
 			}
 		}
 
@@ -92,21 +96,58 @@ namespace Vehicles
 		{
 			try
 			{
-				Vector3 topVectorLocation = turret.TurretDrawLocFor(rot, drawPos);
-				if (turret.rTracker.Recoil > 0f)
+				Vector3 rootPos = drawPos + turret.TurretDrawLocFor(rot);
+				Vector3 recoilOffset = Vector3.zero;
+				Vector3 parentRecoilOffset = Vector3.zero;
+				if (turret.recoilTracker != null && turret.recoilTracker.Recoil > 0f)
 				{
-					topVectorLocation = Ext_Math.PointFromAngle(topVectorLocation, turret.rTracker.Recoil, turret.rTracker.Angle);
+					recoilOffset = Ext_Math.PointFromAngle(Vector3.zero, turret.recoilTracker.Recoil, turret.recoilTracker.Angle);
 				}
-				if (turret.attachedTo != null && turret.attachedTo.rTracker.Recoil > 0f)
+				if (turret.attachedTo?.recoilTracker != null && turret.attachedTo.recoilTracker.Recoil > 0f)
 				{
-					topVectorLocation = Ext_Math.PointFromAngle(topVectorLocation, turret.attachedTo.rTracker.Recoil, turret.attachedTo.rTracker.Angle);
+					parentRecoilOffset = Ext_Math.PointFromAngle(Vector3.zero, turret.attachedTo.recoilTracker.Recoil, turret.attachedTo.recoilTracker.Angle);
 				}
 				Mesh cannonMesh = turret.CannonGraphic.MeshAt(rot);
-				Graphics.DrawMesh(cannonMesh, topVectorLocation, turret.TurretRotation.ToQuat(), turret.CannonMaterial, 0);
+				Graphics.DrawMesh(cannonMesh, rootPos + recoilOffset + parentRecoilOffset, turret.TurretRotation.ToQuat(), turret.CannonMaterial, 0);
+
+				DrawTurretOverlays(turret, rootPos + parentRecoilOffset, rot);
 			}
 			catch (Exception ex)
 			{
-				Log.Error(string.Format("Error occurred during rendering of attached thing on {0}. Exception: {1}", turret.vehicle.Label, ex.Message));
+				Log.Error($"Error occurred during rendering of attached thing on {turret.vehicle.Label}. Exception: {ex}");
+			}
+		}
+
+		public static void DrawTurretOverlays(VehicleTurret turret, Vector3 drawPos, Rot8 rot)
+		{
+			try
+			{
+				if (!turret.TurretGraphics.NullOrEmpty())
+				{
+					for (int i = 0; i < turret.TurretGraphics.Count; i++)
+					{
+						VehicleTurret.TurretDrawData turretDrawData = turret.TurretGraphics[i];
+						Turret_RecoilTracker recoilTracker = turret.recoilTrackers[i];
+
+						Vector3 rootPos = turretDrawData.DrawOffset(drawPos, rot);
+						Vector3 recoilOffset = Vector3.zero;
+						Vector3 parentRecoilOffset = Vector3.zero;
+						if (recoilTracker != null && recoilTracker.Recoil > 0f)
+						{
+							recoilOffset = Ext_Math.PointFromAngle(Vector3.zero, recoilTracker.Recoil, recoilTracker.Angle);
+						}
+						if (turret.attachedTo != null && turret.attachedTo.recoilTracker != null && turret.attachedTo.recoilTracker.Recoil > 0f)
+						{
+							parentRecoilOffset = Ext_Math.PointFromAngle(Vector3.zero, turret.attachedTo.recoilTracker.Recoil, turret.attachedTo.recoilTracker.Angle);
+						}
+						Mesh cannonMesh = turretDrawData.graphic.MeshAt(rot);
+						Graphics.DrawMesh(cannonMesh, rootPos + recoilOffset + parentRecoilOffset, turret.TurretRotation.ToQuat(), turretDrawData.graphic.MatAt(Rot4.North), 0);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Log.Error($"Error occurred during rendering of layered turret graphics on {turret.vehicle.Label}. Exception: {ex}");
 			}
 		}
 
@@ -205,7 +246,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				SmashLog.Error($"Exception thrown while trying to draw Graphics <type>VehicleDef</type>=\"{vehicleDef?.defName ?? "Null"}\" Exception={ex.Message}");
+				SmashLog.Error($"Exception thrown while trying to draw Graphics <type>VehicleDef</type>=\"{vehicleDef?.defName ?? "Null"}\" Exception={ex}");
 			}
 			return drawStep;
 		}
@@ -251,6 +292,24 @@ namespace Vehicles
 				if (!turret.NoGraphic)
 				{
 					yield return RetrieveTurretSettingsGraphicsProperties(rect, vehicleDef, rot, turret, patternData);
+				}
+				if (!turret.TurretGraphics.NullOrEmpty())
+				{
+					foreach (VehicleTurret.TurretDrawData turretDrawData in turret.TurretGraphics)
+					{
+						Rect turretRect = TurretRect(rect, vehicleDef, turret, rot);
+						Material material = null;
+						if (turretDrawData.graphic.Shader.SupportsMaskTex())
+						{
+							//material = turretDrawData.graphic.MatAt(Rot8.North);
+						}
+						else if (patternData != null && turretDrawData.graphic.Shader.SupportsRGBMaskTex())
+						{
+							material = RGBMaterialPool.Get(turretDrawData, Rot8.North);
+							RGBMaterialPool.SetProperties(turretDrawData, patternData, turretDrawData.graphic.TexAt, turretDrawData.graphic.MaskAt);
+						}
+						yield return (turretRect, turretDrawData.graphic.TexAt(Rot8.North), material, turretDrawData.graphicDataRGB.drawOffset.y, turret.defaultAngleRotated + rot.AsAngle);
+					}
 				}
 			}
 		}

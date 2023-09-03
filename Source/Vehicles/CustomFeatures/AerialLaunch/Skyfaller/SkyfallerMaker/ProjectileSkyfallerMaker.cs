@@ -31,7 +31,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Unable to generate StrafeProjectile with projectile <type>{projectileDef.thingClass}</type>. Exception=\"{ex.Message}\"");
+				Log.Error($"Unable to generate StrafeProjectile with projectile <type>{projectileDef.thingClass}</type>. Exception=\"{ex}\"");
 			}
 			return null;
 		}

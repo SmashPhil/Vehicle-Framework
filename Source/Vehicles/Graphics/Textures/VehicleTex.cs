@@ -201,7 +201,7 @@ namespace Vehicles
 				}
 				catch (Exception ex)
 				{
-					Log.Error($"Exception thrown while trying to generate cached textures. Exception=\"{ex.Message}\"\n-----------------Tasks-----------------\n{tasks}");
+					Log.Error($"Exception thrown while trying to generate cached textures. Exception=\"{ex}\"\n-----------------Tasks-----------------\n{tasks}");
 				}
 			}
 		}

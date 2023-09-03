@@ -102,15 +102,15 @@ namespace Vehicles
 			{
 				GUIState.Push();
 				{
-					listingStandard.Header("VF_DevMode_Logging".Translate(), ListingExtension.BannerColor, anchor: TextAnchor.MiddleCenter);
+					listingStandard.Header("VF_DevMode_Logging".Translate(), ListingExtension.BannerColor, fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugLogging".Translate(), ref debugLogging, "VF_DevMode_DebugLoggingTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugPathCostRecalculationLogging".Translate(), ref debugPathCostChanges, "VF_DevMode_DebugPathCostRecalculationLoggingTooltip".Translate());
 
-					listingStandard.Header("VF_DevMode_Troubleshooting".Translate(), ListingExtension.BannerColor, anchor: TextAnchor.MiddleCenter);
+					listingStandard.Header("VF_DevMode_Troubleshooting".Translate(), ListingExtension.BannerColor, fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDraftAnyVehicle".Translate(), ref debugDraftAnyVehicle, "VF_DevMode_DebugDraftAnyVehicleTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugShootAnyTurret".Translate(), ref debugShootAnyTurret, "VF_DevMode_DebugShootAnyTurretTooltip".Translate());
 					
-					listingStandard.Header("Debugging Only", ListingExtension.BannerColor, anchor: TextAnchor.MiddleCenter);
+					listingStandard.Header("Debugging Only", ListingExtension.BannerColor, fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugSpawnVehiclesGodMode".Translate(), ref debugSpawnVehicleBuildingGodMode, "VF_DevMode_DebugSpawnVehiclesGodModeTooltip".Translate());
 					bool checkOn = debugUseMultithreading;
 					listingStandard.CheckboxLabeled("Use Multithreading", ref checkOn);
@@ -146,7 +146,7 @@ namespace Vehicles
 						}
 					}
 
-					listingStandard.Header("VF_DevMode_Drawers".Translate(), ListingExtension.BannerColor, anchor: TextAnchor.MiddleCenter);
+					listingStandard.Header("VF_DevMode_Drawers".Translate(), ListingExtension.BannerColor, fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawUpgradeNodeGrid".Translate(), ref debugDrawNodeGrid, "VF_DevMode_DebugDrawUpgradeNodeGridTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawHitbox".Translate(), ref debugDrawHitbox, "VF_DevMode_DebugDrawHitboxTooltip".Translate());
 
@@ -159,7 +159,7 @@ namespace Vehicles
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawFleePoints".Translate(), ref debugDrawFleePoint, "VF_DevMode_DebugDrawFleePointsTooltip".Translate());
 					listingStandard.NewColumn();
 
-					listingStandard.Header("VF_DevMode_Pathing".Translate(), ListingExtension.BannerColor, anchor: TextAnchor.MiddleCenter);
+					listingStandard.Header("VF_DevMode_Pathing".Translate(), ListingExtension.BannerColor, fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawVehiclePathingCosts".Translate(), ref debugDrawVehiclePathCosts, "VF_DevMode_DebugDrawVehiclePathingCostsTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawPathfinderSearch".Translate(), ref debugDrawPathfinderSearch, "VF_DevMode_DebugDrawPathfinderSearchTooltip".Translate());
 
@@ -423,7 +423,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"{VehicleHarmony.LogLabel} Unable to show update for {versionChecking} Exception = {ex.Message}");
+				Log.Error($"{VehicleHarmony.LogLabel} Unable to show update for {versionChecking} Exception = {ex}");
 			}
 		}
 	}

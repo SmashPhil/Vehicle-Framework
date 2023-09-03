@@ -113,7 +113,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				SmashLog.Error($"Unable to load AssetBundle.\nException = {ex.Message}\nFoldersSearched={loadFoldersChecked.ToCommaList()}");
+				SmashLog.Error($"Unable to load AssetBundle.\nException = {ex}\nFoldersSearched={loadFoldersChecked.ToCommaList()}");
 			}
 			finally
 			{

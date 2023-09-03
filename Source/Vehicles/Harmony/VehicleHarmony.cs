@@ -152,6 +152,17 @@ namespace Vehicles
 			foreach (VehicleDef def in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
 				def.PostDefDatabase();
+				foreach (CompProperties compProperties in def.comps)
+				{
+					if (compProperties is VehicleCompProperties vehicleCompProperties)
+					{
+						vehicleCompProperties.PostDefDatabase();
+					}
+				}
+			}
+			foreach (VehicleTurretDef turretDef in DefDatabase<VehicleTurretDef>.AllDefsListForReading)
+			{
+				turretDef.PostDefDatabase();
 			}
 		}
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Text;
 using Verse;
 
@@ -9,7 +10,7 @@ namespace Vehicles
 	/// </summary>
 	public class VehicleRegionLinkDatabase
 	{
-		private readonly Dictionary<ulong, VehicleRegionLink> links = new Dictionary<ulong, VehicleRegionLink>();
+		private readonly ConcurrentDictionary<ulong, VehicleRegionLink> links = new ConcurrentDictionary<ulong, VehicleRegionLink>();
 
 		/// <summary>
 		/// Region link between <paramref name="span"/>
@@ -24,7 +25,7 @@ namespace Vehicles
 				{
 					Span = span
 				};
-				links.Add(key, regionLink);
+				links[key] = regionLink;
 			}
 			return regionLink;
 		}
@@ -35,7 +36,7 @@ namespace Vehicles
 		/// <param name="link"></param>
 		public void Notify_LinkHasNoRegions(VehicleRegionLink link)
 		{
-			links.Remove(link.UniqueHashCode());
+			links.TryRemove(link.UniqueHashCode(), out _);
 		}
 	}
 }

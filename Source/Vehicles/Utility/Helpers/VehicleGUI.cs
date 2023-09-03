@@ -98,7 +98,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				SmashLog.Error($"Exception thrown while trying to draw GUI <type>VehicleDef</type>=\"{vehicleDef?.defName ?? "Null"}\" during step {drawStep}.\nException={ex.Message}");
+				SmashLog.Error($"Exception thrown while trying to draw GUI <type>VehicleDef</type>=\"{vehicleDef?.defName ?? "Null"}\" during step {drawStep}.\nException={ex}");
 			}
 			finally
 			{
@@ -148,6 +148,20 @@ namespace Vehicles
 				if (!turret.NoGraphic)
 				{
 					yield return RetrieveTurretSettingsGUIProperties(rect, vehicleDef, turret, rot, patternData);
+				}
+				if (!turret.TurretGraphics.NullOrEmpty())
+				{
+					foreach (VehicleTurret.TurretDrawData turretDrawData in turret.TurretGraphics)
+					{
+						Rect turretRect = VehicleGraphics.TurretRect(rect, vehicleDef, turret, rot);
+						bool canMask = turretDrawData.graphic.Shader.SupportsMaskTex() || turretDrawData.graphic.Shader.SupportsRGBMaskTex();
+						Color color = canMask ? turretDrawData.graphicDataRGB.color : Color.white;
+						if (canMask && turret.turretDef.matchParentColor)
+						{
+							color = patternData.color;
+						}
+						yield return (turretRect, turretDrawData.graphic.TexAt(Rot8.North), color, turretDrawData.graphicDataRGB.drawOffset.y, turret.defaultAngleRotated + rot.AsAngle);
+					}
 				}
 			}
 		}

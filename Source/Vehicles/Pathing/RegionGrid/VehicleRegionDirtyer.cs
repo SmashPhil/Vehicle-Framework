@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using Verse;
@@ -14,7 +15,8 @@ namespace Vehicles
 		private readonly VehicleMapping mapping;
 		private readonly VehicleDef createdFor;
 
-		private readonly HashSet<IntVec3> dirtyCells = new HashSet<IntVec3>();
+		//.Net Framework doesn't have a ConcurrentHashSet type, so instead I use a concurrent dictionary with an unused value of low memory
+		private readonly ConcurrentDictionary<IntVec3, byte> dirtyCells = new ConcurrentDictionary<IntVec3, byte>();
 
 		//Cant use ThreadStatic, thread is shared among maps and region sets
 		private readonly List<VehicleRegion> regionsToDirty = new List<VehicleRegion>();
@@ -30,7 +32,13 @@ namespace Vehicles
 		/// <summary>
 		/// <see cref="dirtyCells"/> getter
 		/// </summary>
-		public HashSet<IntVec3> DirtyCells => dirtyCells;
+		public IEnumerable<IntVec3> DirtyCells
+		{
+			get
+			{
+				return dirtyCells.Keys;
+			}
+		}
 
 		/// <summary>
 		/// Any dirty cells registered
@@ -59,7 +67,7 @@ namespace Vehicles
 			dirtyCells.Clear();
 			foreach (IntVec3 cell in mapping.map)
 			{
-				dirtyCells.Add(cell);
+				dirtyCells.TryAdd(cell, 0);
 			}
 			foreach (VehicleRegion region in mapping[createdFor].VehicleRegionGrid.AllRegions_NoRebuild_InvalidAllowed)
 			{
@@ -91,7 +99,7 @@ namespace Vehicles
 				}
 				if (GenGridVehicles.Walkable(cell, createdFor, mapping.map))
 				{
-					dirtyCells.Add(cell);
+					dirtyCells.TryAdd(cell, 0);
 				}
 				regionsToDirtyFromWalkability.Clear();
 			}
@@ -141,7 +149,11 @@ namespace Vehicles
 					SetRegionDirty(regionsToDirty[i], true);
 				}
 				regionsToDirty.Clear();
-				dirtyCells.AddRange(occupiedRect);
+				
+				foreach (IntVec3 cell in occupiedRect)
+				{
+					dirtyCells.TryAdd(cell, 0);
+				}
 			}
 		}
 
@@ -154,6 +166,7 @@ namespace Vehicles
 		{
 			lock (regionDirtyLock) //Disallow reading / writing to links list from other region sets
 			{
+				string step = "";
 				try
 				{
 					if (!region.valid)
@@ -162,23 +175,26 @@ namespace Vehicles
 					}
 					region.valid = false;
 					region.Room = null;
+					step = "Deregistering";
 					for (int i = 0; i < region.links.Count; i++)
 					{
 						region.links[i].Deregister(region, createdFor);
 					}
+					step = "Clearing links and weights";
 					region.links.Clear();
 					region.weights.Clear();
 					if (addCellsToDirtyCells)
 					{
+						step = "Dirtying Cells";
 						foreach (IntVec3 intVec in region.Cells)
 						{
-							dirtyCells.Add(intVec);
+							dirtyCells.TryAdd(intVec, 0);
 						}
 					}
 				}
 				catch (Exception ex)
 				{
-					Log.Error($"Exception thrown in SetRegionDirty. Null: {region is null} Room: {region?.Room is null} links: {region?.links is null} weights: {region?.weights is null}");
+					Log.Error($"Exception thrown in SetRegionDirty. Step = {step}\nNull: {region is null} Room: {region?.Room is null} links: {region?.links is null} weights: {region?.weights is null}");
 					throw ex;
 				}
 			}

@@ -323,7 +323,7 @@ namespace Vehicles
 			}
 			catch(Exception ex)
 			{
-				Log.Error($"Failed to finalize assigning vehicle seats. Message: {ex.Message} ST: {ex.StackTrace}");
+				Log.Error($"Failed to finalize assigning vehicle seats. Message: {ex}");
 				failReason = ex.Message;
 				return false;
 			}

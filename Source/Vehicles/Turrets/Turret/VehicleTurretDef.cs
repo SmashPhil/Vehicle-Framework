@@ -47,6 +47,9 @@ namespace Vehicles
 		/// </summary>
 		[TweakField]
 		public GraphicDataRGB graphicData;
+		//UPDATE - Merge to 1 list
+		[TweakField(SubCategory = "Layered Graphics")]
+		public List<VehicleTurretRenderData> graphics;
 
 		public string gizmoDescription;
 		public string gizmoIconTexPath;
@@ -64,8 +67,10 @@ namespace Vehicles
 		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float rotationSpeed = 1;
 		[TweakField(SettingsType = UISettingsType.FloatBox)]
+		[NumericBoxValues(MinValue = -1, MaxValue = 9999)]
 		public float maxRange = -1;
 		[TweakField(SettingsType = UISettingsType.FloatBox)]
+		[NumericBoxValues(MinValue = 0, MaxValue = 9999)]
 		public float minRange = 0;
 		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float reloadTimer = 5;
@@ -111,6 +116,10 @@ namespace Vehicles
 			}
 		}
 
+		public void PostDefDatabase()
+		{
+		}
+
 		public override void PostLoad()
 		{
 			base.PostLoad();
@@ -120,20 +129,31 @@ namespace Vehicles
 				{
 					return;
 				}
-				if (graphicData.shaderType == null)
+				FixInvalidGraphicDataFields(graphicData);
+				if (!graphics.NullOrEmpty())
 				{
-					graphicData.shaderType = ShaderTypeDefOf.Cutout;
-				}
-				else if (!VehicleMod.settings.main.useCustomShaders)
-				{
-					graphicData.shaderType = graphicData.shaderType.Shader.SupportsRGBMaskTex(ignoreSettings: true) ? ShaderTypeDefOf.CutoutComplex : graphicData.shaderType;
-				}
-
-				if (graphicData.shaderType == ShaderTypeDefOf.Cutout)
-				{
-					matchParentColor = false;
+					foreach (VehicleTurretRenderData renderData in graphics)
+					{
+						FixInvalidGraphicDataFields(renderData.graphicData);
+					}
 				}
 			});
+		}
+
+		private static void FixInvalidGraphicDataFields(GraphicDataRGB graphicData)
+		{
+			if (graphicData == null)
+			{
+				return;
+			}
+			if (graphicData.shaderType == null)
+			{
+				graphicData.shaderType = ShaderTypeDefOf.Cutout;
+			}
+			else if (!VehicleMod.settings.main.useCustomShaders)
+			{
+				graphicData.shaderType = graphicData.shaderType.Shader.SupportsRGBMaskTex(ignoreSettings: true) ? ShaderTypeDefOf.CutoutComplex : graphicData.shaderType;
+			}
 		}
 
 		public override IEnumerable<string> ConfigErrors()

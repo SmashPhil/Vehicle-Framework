@@ -42,7 +42,7 @@ namespace Vehicles
 			}
 			catch(Exception ex)
 			{
-				Log.Error($"{VehicleHarmony.LogLabel} Unable to add stat values to {vehicle.LabelShort}. Report on workshop page. \nException: {ex.Message} \nStackTrace: {ex.StackTrace}");
+				Log.Error($"{VehicleHarmony.LogLabel} Unable to add stat values to {vehicle.LabelShort}. Report on workshop page. \nException: {ex}");
 				return;
 			}
 

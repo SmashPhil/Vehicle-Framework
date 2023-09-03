@@ -523,17 +523,9 @@ namespace Vehicles
 						mote.SetVelocity(moteAngle, moteSpeed);
 						RenderHelper.ThrowMoteEnhanced(motePosition, parent.Map, mote);
 					}
-					catch(Exception ex)
+					catch (Exception ex)
 					{
-						Log.Error(string.Concat(new object[]
-						{
-							"Exception thrown while trying to display ",
-							Props.MoteDisplayed.defName,
-							" Terminating MoteDraw Method from ",
-							parent.LabelShort,
-							" Exception: ",
-							ex.Message
-						}));
+						Log.Error($"Exception thrown while trying to display {Props.MoteDisplayed.defName} Terminating MoteDraw Method from {parent.LabelShort} Exception={ex}");
 						terminateMotes = true;
 						return;
 					}

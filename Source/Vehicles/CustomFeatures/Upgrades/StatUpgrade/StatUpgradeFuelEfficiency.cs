@@ -23,7 +23,7 @@ namespace Vehicles
 			}
 			catch(Exception ex)
 			{
-				Log.Error($"Failed to apply StatUpgrade {defName} to {vehicle?.LabelShort ?? "[Null]"}. Exception={ex.Message}");
+				Log.Error($"Failed to apply StatUpgrade {defName} to {vehicle?.LabelShort ?? "[Null]"}. Exception={ex}");
 			}
 		}
 

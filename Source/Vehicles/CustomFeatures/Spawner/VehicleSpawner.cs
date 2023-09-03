@@ -116,7 +116,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				SmashLog.ErrorLabel(VehicleHarmony.LogLabel, $"Exception thrown while generating vehicle. Last Step: {lastStep}. Exception: {ex.Message}\nStackTrace: {ex.StackTrace}");
+				SmashLog.ErrorLabel(VehicleHarmony.LogLabel, $"Exception thrown while generating vehicle. Last Step: {lastStep}. Exception: {ex}");
 			}
 			return result;
 		}

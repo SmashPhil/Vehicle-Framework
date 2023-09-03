@@ -83,13 +83,13 @@ namespace Vehicles
 						{
 							locationRotation += turret.attachedTo.defaultAngleRotated + rot.AsAngle;
 						}
-						Vector3 turretLoc = turret.TurretDrawLocFor(rot, loc);
+						Vector3 turretLoc = loc + turret.TurretDrawLocFor(rot);
 						Mesh cannonMesh = graphic.MeshAt(rot);
 						Graphics.DrawMesh(cannonMesh, turretLoc, locationRotation.ToQuat(), graphic.MatAt(rot), 0);
 					}
 					catch(Exception ex)
 					{
-						Log.Error($"Failed to render Cannon=\"{turret.turretDef.defName}\" for VehicleDef=\"{vehicleDef.defName}\", Exception: {ex.Message}");
+						Log.Error($"Failed to render Cannon=\"{turret.turretDef.defName}\" for VehicleDef=\"{vehicleDef.defName}\", Exception: {ex}");
 					}
 				}
 			}

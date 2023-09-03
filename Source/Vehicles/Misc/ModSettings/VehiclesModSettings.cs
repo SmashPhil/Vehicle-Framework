@@ -36,7 +36,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Exception thrown while trying to load mod settings. Deleting the Vehicles config file might fix this.\nException={ex.Message}\nInnerException={ex.InnerException}");
+				Log.Error($"Exception thrown while trying to load mod settings. Deleting the Vehicles config file might fix this.\nException={ex}\nInnerException={ex.InnerException}");
 			}
 		}
 

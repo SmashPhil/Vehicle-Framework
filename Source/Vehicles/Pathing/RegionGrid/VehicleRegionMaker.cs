@@ -76,7 +76,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				SmashLog.ErrorLabel(VehicleHarmony.LogLabel, $"Exception thrown while generating region at {root}. Step={lastRegionProcess} Ex ={ex.Message}");
+				SmashLog.ErrorLabel(VehicleHarmony.LogLabel, $"Exception thrown while generating region at {root}. Step={lastRegionProcess} Exception={ex}");
 			}
 			finally
 			{

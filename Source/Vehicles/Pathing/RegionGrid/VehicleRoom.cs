@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
@@ -78,13 +79,7 @@ namespace Vehicles
 		{
 			if (Regions.Contains(region))
 			{
-				Log.Error(string.Concat(new object[]
-				{
-					"Tried to add the same region twice to Room. region=",
-					region,
-					", room=",
-					this
-				}));
+				Log.Error($"Tried to add the same region twice to Room. region={region} room={this}");
 				return;
 			}
 			Regions.Add(region);
@@ -102,21 +97,15 @@ namespace Vehicles
 		/// Remove region from room
 		/// </summary>
 		/// <param name="r"></param>
-		public void RemoveRegion(VehicleRegion r)
+		public void RemoveRegion(VehicleRegion region)
 		{
-			if (!Regions.Contains(r))
+			if (!Regions.Contains(region))
 			{
-				Log.Error(string.Concat(new object[]
-				{
-					"Tried to remove region from Room but this region is not here. region=",
-					r,
-					", room=",
-					this
-				}));
+				Log.Error($"Tried to remove region from Room but this region is not here. region={region} room={this}");
 				return;
 			}
-			Regions.Remove(r);
-			if (r.touchesMapEdge)
+			Regions.Remove(region);
+			if (region.touchesMapEdge)
 			{
 				numRegionsTouchingMapEdge--;
 			}

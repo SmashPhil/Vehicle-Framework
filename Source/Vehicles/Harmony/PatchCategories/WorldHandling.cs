@@ -78,17 +78,13 @@ namespace Vehicles
 			{
 				if (p is VehiclePawn)
 				{
-					//__result = WorldPawnSituation.InTravelingTransportPod;
-					//return;
+					__result = WorldPawnSituation.InTravelingTransportPod;
+					return;
 				}
 				if (p.GetAerialVehicle() != null)
 				{
 					__result = WorldPawnSituation.InTravelingTransportPod;
 					return;
-				}
-				if (!p.Spawned)
-				{
-					Log.Message($"Pawn {p} Situation: {__result}");
 				}
 			}
 		}
@@ -123,7 +119,6 @@ namespace Vehicles
 					return false;
 				}
 			}
-			Log.Message($"Removing {p} via GC");
 			return true;
 		}
 

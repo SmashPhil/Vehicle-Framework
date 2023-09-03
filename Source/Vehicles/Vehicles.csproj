@@ -122,6 +122,7 @@
     <Compile Include="Misc\Interfaces\IVehicleWorldObject.cs" />
     <Compile Include="Pathing\Map\VehicleRegionUpdateCatalog.cs" />
     <Compile Include="Pathing\RegionGrid\ChunkSet.cs" />
+    <Compile Include="Turrets\Turret\Rendering\VehicleTurretRenderData.cs" />
     <Compile Include="Utility\DesignatorCache.cs" />
     <Compile Include="AI\Incidents\IncidentWorker_ShuttleDowned.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_FollowVehicle.cs" />
