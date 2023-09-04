@@ -646,7 +646,7 @@ namespace Vehicles
 					}
 				}
 			}
-			return usableRoom != null && CanReachVehicle(c, usableRoom.Regions[0].AnyCell, PathEndMode.OnCell, TraverseParms.For(TraverseMode.PassDoors,
+			return usableRoom != null && CanReachVehicle(c, usableRoom.Regions.FirstOrDefault().Key.AnyCell, PathEndMode.OnCell, TraverseParms.For(TraverseMode.PassDoors,
 				Danger.Deadly, false));
 		}
 

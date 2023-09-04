@@ -13,6 +13,10 @@ Be mindful that this might not catch every single pathfinding bug out there, so 
 
 Thanks again to everyone that have been reporting bugs! And an even bigger thanks for those that have been helping me test.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed thread safety issue with 'district' chunks for vehicles.
+
+- Fixed thread safety issue with region links and weights.
+
 - Fixed bug where biome costs would add additional costs for hills and winter costs from vanilla on top of adding vehicle related costs, essentially doubling the effect of hills and winter for vehicles.
 
 - Fixed bug where saving a vehicle while in the landing / takeoff animation would incorrectly serialize the vehicle + pawns, resulting in a save / load issue.
@@ -20,9 +24,6 @@ Thanks again to everyone that have been reporting bugs! And an even bigger thank
 - Fixed bug where hitboxes for even size vehicles wouldn't rotate properly, resulting in hits from very specific directions immediately damaging internal parts.
 
 - Fixed bug where reloading with not enough ammo would still consume the ammo and reload to full.
-
-- Fixed thread safety issue with 'district' chunks for vehicles.
-
 &lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Map Preview
 

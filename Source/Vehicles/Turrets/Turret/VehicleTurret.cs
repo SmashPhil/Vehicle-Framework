@@ -168,7 +168,6 @@ namespace Vehicles
 		{
 			this.vehicle = vehicle;
 			vehicleDef = vehicle.VehicleDef;
-			InitRecoilTrackers();
 		}
 
 		/// <summary>
@@ -1861,6 +1860,7 @@ namespace Vehicles
 				{
 					AlignToTargetRestricted(); //reassigns rotationTargeted for turrets currently turning
 				}
+				InitRecoilTrackers();
 			}
 		}
 

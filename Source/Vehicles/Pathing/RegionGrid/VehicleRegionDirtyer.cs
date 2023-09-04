@@ -15,7 +15,6 @@ namespace Vehicles
 		private readonly VehicleMapping mapping;
 		private readonly VehicleDef createdFor;
 
-		//.Net Framework doesn't have a ConcurrentHashSet type, so instead I use a concurrent dictionary with an unused value of low memory
 		private readonly ConcurrentSet<IntVec3> dirtyCells = new ConcurrentSet<IntVec3>();
 
 		//Cant use ThreadStatic, thread is shared among maps and region sets
