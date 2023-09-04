@@ -4,5 +4,7 @@
   <VF_AutoTargeting>Automatyczne celowanie: {0}</VF_AutoTargeting>
   <VF_AutoTargetingDisabled>Automatyczne celowanie nie jest dozwolone dla tego pojazdu.</VF_AutoTargetingDisabled>
   <VF_VehicleTurrets_NoAmmoToReload>Brak używalnej amunicji.</VF_VehicleTurrets_NoAmmoToReload>
+  <VF_SetReloadLevel>Ustaw poziom automatycznego przeładowania na {0}</VF_SetReloadLevel>
+  <VF_SetReloadLevelTooltip>Skonfiguruj Ilość amunicji</VF_SetReloadLevelTooltip>
 </LanguageData>
 

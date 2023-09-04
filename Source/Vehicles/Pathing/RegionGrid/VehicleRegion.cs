@@ -38,7 +38,7 @@ namespace Vehicles
 
 		public uint[] closedIndex = new uint[VehicleRegionTraverser.NumWorkers];
 
-		private readonly ListerThings listerThings = new ListerThings(ListerThingsUse.Region);
+		private readonly ConcurrentListerThings listerThings = new ConcurrentListerThings(ListerThingsUse.Region);
 
 		public CellRect extentsClose;
 		public CellRect extentsLimit;
@@ -57,8 +57,6 @@ namespace Vehicles
 		private int debug_makeTick = -1000;
 		private int debug_lastTraverseTick = -1000;
 
-		private object roomLock = new object();
-
 		private VehicleRegion(VehicleDef vehicleDef) 
 		{
 			this.vehicleDef = vehicleDef;
@@ -68,6 +66,11 @@ namespace Vehicles
 		/// Map getter with fallback
 		/// </summary>
 		public Map Map => (mapIndex >= 0) ? Find.Maps[mapIndex] : null;
+
+		/// <summary>
+		/// Concurrent lister things for thread safe caching
+		/// </summary>
+		public ConcurrentListerThings ListerThings => listerThings;
 
 		/// <summary>
 		/// Yield all cells on the map
@@ -239,9 +242,9 @@ namespace Vehicles
 				stringBuilder.AppendLine("ListerThings:");
 				if (listerThings.AllThings != null)
 				{
-					for (int i = 0; i < listerThings.AllThings.Count; i++)
+					foreach (Thing thing in ListerThings.AllThings)
 					{
-						stringBuilder.AppendLine("  --" + listerThings.AllThings[i]);
+						stringBuilder.AppendLine($"  --{thing}");
 					}
 				}
 				return stringBuilder.ToString();
@@ -256,17 +259,6 @@ namespace Vehicles
 			get
 			{
 				return debug_makeTick > Find.TickManager.TicksGame - 60;
-			}
-		}
-
-		/// <summary>
-		/// Get lister things
-		/// </summary>
-		public ListerThings ListerThings
-		{
-			get
-			{
-				return listerThings;
 			}
 		}
 

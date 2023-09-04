@@ -8,21 +8,19 @@ using SmashTools;
 
 namespace Vehicles
 {
-	[Obsolete] //UNFINISHED AND NEEDS TESTING FOR USE
 	public sealed class ConcurrentListerThings
 	{
-		private ConcurrentDictionary<ThingDef, ConcurrentSet<Thing>> listsByDef = new ConcurrentDictionary<ThingDef, ConcurrentSet<Thing>>(ThingDefComparer.Instance);
-		private ConcurrentSet<Thing>[] listsByGroup;
-		private int[] stateHashByGroup;
 		public ListerThingsUse use;
 
-		private static readonly ConcurrentSet<Thing> EmptySet = new ConcurrentSet<Thing>();
+		private ConcurrentDictionary<ThingDef, ConcurrentSet<Thing>> listsByDef = new ConcurrentDictionary<ThingDef, ConcurrentSet<Thing>>(ThingDefComparer.Instance);
+		private ConcurrentSet<Thing>[] listsByGroup;
+		
+		private static readonly ConcurrentSet<Thing> emptySet = new ConcurrentSet<Thing>();
 
 		public ConcurrentListerThings(ListerThingsUse use)
 		{
 			this.use = use;
 			listsByGroup = new ConcurrentSet<Thing>[ThingListGroupHelper.AllGroups.Length];
-			stateHashByGroup = new int[ThingListGroupHelper.AllGroups.Length];
 			listsByGroup[2] = new ConcurrentSet<Thing>();
 		}
 
@@ -39,16 +37,6 @@ namespace Vehicles
 			return ThingsMatching(ThingRequest.ForGroup(group));
 		}
 
-		public int StateHashOfGroup(ThingRequestGroup group)
-		{
-			if (use == ListerThingsUse.Region && !group.StoreInRegion())
-			{
-				Log.ErrorOnce("Tried to get state hash of group " + group + " in a region, but this group is never stored in regions. Most likely a global query should have been used.", 1968738832);
-				return -1;
-			}
-			return Gen.HashCombineInt(85693994, stateHashByGroup[(int)group]);
-		}
-
 		public ConcurrentSet<Thing> ThingsOfDef(ThingDef def)
 		{
 			return ThingsMatching(ThingRequest.ForDef(def));
@@ -60,7 +48,7 @@ namespace Vehicles
 			{
 				if (!listsByDef.TryGetValue(req.singleDef, out ConcurrentSet<Thing> result))
 				{
-					return EmptySet;
+					return emptySet;
 				}
 				return result;
 			}
@@ -73,9 +61,9 @@ namespace Vehicles
 				if (use == ListerThingsUse.Region && !req.group.StoreInRegion())
 				{
 					Log.ErrorOnce("Tried to get things in group " + req.group + " in a region, but this group is never stored in regions. Most likely a global query should have been used.", 1968735132);
-					return EmptySet;
+					return emptySet;
 				}
-				return listsByGroup[(int)req.group] ?? EmptySet;
+				return listsByGroup[(int)req.group] ?? emptySet;
 			}
 		}
 
@@ -105,10 +93,8 @@ namespace Vehicles
 					{
 						groupList = new ConcurrentSet<Thing>();
 						listsByGroup[(int)thingRequestGroup] = groupList;
-						stateHashByGroup[(int)thingRequestGroup] = 0;
 					}
 					groupList.Add(t);
-					stateHashByGroup[(int)thingRequestGroup]++;
 				}
 			}
 		}
@@ -127,7 +113,6 @@ namespace Vehicles
 				if ((use != ListerThingsUse.Region || thingRequestGroup.StoreInRegion()) && thingRequestGroup.Includes(t.def))
 				{
 					listsByGroup[i].Remove(t);
-					stateHashByGroup[(int)thingRequestGroup]++;
 				}
 			}
 		}
@@ -146,7 +131,6 @@ namespace Vehicles
 				{
 					listsByGroup[i].Clear();
 				}
-				stateHashByGroup[i] = 0;
 			}
 		}
 	}

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Verse;
 using SmashTools;
 
@@ -11,18 +12,19 @@ namespace Vehicles
 	{
 		public const int CleanSquaresPerFrame = 16;
 
-		public static readonly HashSet<VehicleRegion> allRegionsYielded = new HashSet<VehicleRegion>();
-		public static int vehicleRegionGridIndexChecking = 0;
-
 		private readonly VehicleMapping mapping;
 		private readonly VehicleDef createdFor;
+		
+		//Only accessed from the same thread within the same method, so it is thread safe.
+		private readonly HashSet<VehicleRegion> allRegionsYielded = new HashSet<VehicleRegion>();
 
 		private int curCleanIndex;
+		private VehicleRegion[] regionGrid; //TODO - needs checking for thread safety
 
-		private VehicleRegion[] regionGrid;
+		public readonly ConcurrentSet<VehicleRoom> allRooms = new ConcurrentSet<VehicleRoom>();
 
-		public readonly List<VehicleRoom> allRooms = new List<VehicleRoom>();
-
+		public static int vehicleRegionGridIndexChecking = 0;
+		
 		public VehicleRegionGrid(VehicleMapping mapping, VehicleDef createdFor)
 		{
 			this.mapping = mapping;

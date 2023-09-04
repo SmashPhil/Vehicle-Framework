@@ -636,7 +636,8 @@ namespace Vehicles
 		public bool CanReachBiggestMapEdgeRoom(IntVec3 c)
 		{
 			VehicleRoom usableRoom = null;
-			foreach (VehicleRoom room in RegionGrid.allRooms)
+			//ConcurrentDictionary.Keys snapshots, but ConcurrentDictionary.GetEnumerator does not. Must utilize Key or Value collections for thread safe enumeration
+			foreach (VehicleRoom room in RegionGrid.allRooms.Keys)
 			{
 				if (room.TouchesMapEdge)
 				{

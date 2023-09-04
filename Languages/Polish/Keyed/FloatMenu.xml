@@ -13,5 +13,6 @@
   <VF_AttackAndTargetLanding>Atakuj {0}: i wybierz miejsce lądowania.</VF_AttackAndTargetLanding>
   <VF_StrafeRun>Ostrzelaj</VF_StrafeRun>
   <VF_AerialReconSite>Zwiady</VF_AerialReconSite>
+  <VF_CantEnterVehicle_IdeoligionForbids>Nie można wejść do pojazdu. Zakazane przez ideologię.</VF_CantEnterVehicle_IdeoligionForbids>
 </LanguageData>
 

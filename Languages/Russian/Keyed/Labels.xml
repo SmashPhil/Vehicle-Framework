@@ -3,6 +3,7 @@
   <VehicleFramework>Vehicle Framework</VehicleFramework>
   <VF_Vehicles>Транспорт</VF_Vehicles>
   <VF_LoadCargo>Погрузить груз</VF_LoadCargo>
+  <VF_HaulPawnToVehicle>Погрузить персонажа</VF_HaulPawnToVehicle>
   <VF_DisembarkAllPawns>Высадить всех персонажей</VF_DisembarkAllPawns>
   <VF_DisembarkSinglePawn>Высадить {0}</VF_DisembarkSinglePawn>
   <VF_DisembarkNoExit>Выход из транспортного средства невозможен. Нет подходящих клеток для высадки.</VF_DisembarkNoExit>

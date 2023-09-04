@@ -17,7 +17,6 @@ namespace Vehicles
 
 		private readonly ConcurrentSet<IntVec3> dirtyCells = new ConcurrentSet<IntVec3>();
 
-		//Cant use ThreadStatic, thread is shared among maps and region sets
 		private readonly ConcurrentBag<VehicleRegion> regionsToDirty = new ConcurrentBag<VehicleRegion>();
 		private readonly ConcurrentBag<VehicleRegion> regionsToDirtyFromWalkability = new ConcurrentBag<VehicleRegion>();
 
@@ -34,7 +33,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return dirtyCells.Keys;
+				return dirtyCells.Keys; //Snapshots inner list of keys
 			}
 		}
 
