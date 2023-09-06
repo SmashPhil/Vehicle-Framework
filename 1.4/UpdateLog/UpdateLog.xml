@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1366</currentVersion>
+  <currentVersion>1.5.1368</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
@@ -15,7 +15,7 @@ Thanks again to everyone that have been reporting bugs! And an even bigger thank
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Fixed thread safety issue with 'district' chunks for vehicles.
 
-- Fixed thread safety issue with region links and weights.
+- Fixed thread safety issue with region links, weights, and reachability cache.
 
 - Fixed bug where biome costs would add additional costs for hills and winter costs from vanilla on top of adding vehicle related costs, essentially doubling the effect of hills and winter for vehicles.
 
@@ -38,6 +38,8 @@ Thanks again to everyone that have been reporting bugs! And an even bigger thank
 - Added'Tweak Fields' editor window and a vast selection of fields for runtime editing for mod developers.
 
 - Added burstsTillWarmup field for FireModes, allowing turrets to shoot up to N bursts before requiring another warmup.
+
+- Added fields to Reactor_FuelLeak for modders to configure the rate of fuel leakage when taking damage to a component that is related to fuel (eg. Chemtank from VVE)
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
   <!--Static parameterless method to execute when update log is executed-->

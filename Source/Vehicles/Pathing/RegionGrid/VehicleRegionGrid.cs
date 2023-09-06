@@ -23,8 +23,6 @@ namespace Vehicles
 
 		public readonly ConcurrentSet<VehicleRoom> allRooms = new ConcurrentSet<VehicleRoom>();
 
-		public static int vehicleRegionGridIndexChecking = 0;
-		
 		public VehicleRegionGrid(VehicleMapping mapping, VehicleDef createdFor)
 		{
 			this.mapping = mapping;
@@ -186,11 +184,6 @@ namespace Vehicles
 					regionGrid[curCleanIndex] = null;
 				}
 				curCleanIndex++;
-			}
-			vehicleRegionGridIndexChecking++;
-			if (vehicleRegionGridIndexChecking >= mapping.Owners.Count)
-			{
-				vehicleRegionGridIndexChecking = 0;
 			}
 		}
 

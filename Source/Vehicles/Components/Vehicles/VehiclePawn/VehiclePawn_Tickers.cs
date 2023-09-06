@@ -154,6 +154,11 @@ namespace Vehicles
 			{
 				compTickers[i].CompTick(); //Must run back to front in case CompTick methods trigger their own removal
 			}
+
+			if (CompFueledTravel != null)
+			{
+				CompFueledTravel.LeakTick(); //Tick manually for leak checks that is separate from tick by request.
+			}
 		}
 
 		public override void TickRare()

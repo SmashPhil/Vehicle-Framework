@@ -453,6 +453,16 @@ namespace Vehicles
 				{
 					origin = origin.PointFromAngle(fleckData.drawOffset.Evaluate(t), angle.Value);
 				}
+
+				if (!fleckData.xFleckPositionCurve.NullOrEmpty())
+				{
+					origin.x += fleckData.xFleckPositionCurve.Evaluate(t);
+				}
+				if (!fleckData.zFleckPositionCurve.NullOrEmpty())
+				{
+					origin.z += fleckData.zFleckPositionCurve.Evaluate(t);
+				}
+
 				origin += fleckData.originOffset;
 				origin.y = fleckData.def.altitudeLayer.AltitudeFor();
 				ThrowFleck(fleckData.def, origin, Map, size, airTime, angle, speed, rotationRate);

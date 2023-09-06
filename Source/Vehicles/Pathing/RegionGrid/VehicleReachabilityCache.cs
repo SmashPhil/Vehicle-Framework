@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using RimWorld;
@@ -12,9 +13,22 @@ namespace Vehicles
 	/// </summary>
 	public class VehicleReachabilityCache
 	{
-		private Dictionary<CachedEntry, bool> cacheDict = new Dictionary<CachedEntry, bool>();
+		private ConcurrentDictionary<CachedEntry, bool> cacheDict = new ConcurrentDictionary<CachedEntry, bool>();
 
-		private static List<CachedEntry> tmpCachedEntries = new List<CachedEntry>();
+		[ThreadStatic]
+		private static ConcurrentBag<CachedEntry> tmpCachedEntries;
+
+		private static ConcurrentBag<CachedEntry> CachedEntries
+		{
+			get
+			{
+				if (tmpCachedEntries == null)
+				{
+					tmpCachedEntries = new ConcurrentBag<CachedEntry>();
+				}
+				return tmpCachedEntries;
+			}
+		}
 
 		/// <summary>
 		/// Cache count
@@ -60,8 +74,7 @@ namespace Vehicles
 		public void AddCachedResult(VehicleRoom A, VehicleRoom B, TraverseParms traverseParams, bool reachable)
 		{
 			CachedEntry key = new CachedEntry(A.ID, B.ID, traverseParams);
-			if (!cacheDict.ContainsKey(key))
-				cacheDict.Add(key, reachable);
+			cacheDict.TryAdd(key, reachable);
 		}
 
 		/// <summary>
@@ -70,19 +83,19 @@ namespace Vehicles
 		/// <param name="vehicle"></param>
 		public void ClearFor(VehiclePawn vehicle)
 		{
-			tmpCachedEntries.Clear();
+			CachedEntries.Clear();
 			foreach(KeyValuePair<CachedEntry, bool> keyValuePair in cacheDict)
 			{
 				if (keyValuePair.Key.TraverseParms.pawn == vehicle)
 				{
-					tmpCachedEntries.Add(keyValuePair.Key);
+					CachedEntries.Add(keyValuePair.Key);
 				}
 			}
-			foreach (CachedEntry cachedEntry in tmpCachedEntries)
+			foreach (CachedEntry cachedEntry in CachedEntries)
 			{
-				cacheDict.Remove(cachedEntry);
+				cacheDict.TryRemove(cachedEntry, out _);
 			}
-			tmpCachedEntries.Clear();
+			CachedEntries.Clear();
 		}
 
 		/// <summary>
@@ -91,19 +104,19 @@ namespace Vehicles
 		/// <param name="hostileTo"></param>
 		public void ClearForHostile(Thing hostileTo)
 		{
-			tmpCachedEntries.Clear();
+			CachedEntries.Clear();
 			foreach(KeyValuePair<CachedEntry, bool> keyValuePair in cacheDict)
 			{
 				if (keyValuePair.Key.TraverseParms.pawn is Pawn pawn && pawn.HostileTo(hostileTo))
 				{
-					tmpCachedEntries.Add(keyValuePair.Key);
+					CachedEntries.Add(keyValuePair.Key);
 				}
 			}
-			foreach (CachedEntry cachedEntry in tmpCachedEntries)
+			foreach (CachedEntry cachedEntry in CachedEntries)
 			{
-				cacheDict.Remove(cachedEntry);
+				cacheDict.TryRemove(cachedEntry, out _);
 			}
-			tmpCachedEntries.Clear();
+			CachedEntries.Clear();
 		}
 
 		/// <summary>

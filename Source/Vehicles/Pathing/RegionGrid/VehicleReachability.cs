@@ -32,7 +32,7 @@ namespace Vehicles
 
 		private uint reachedIndex = 1;
 
-		private VehicleReachabilityCache cache = new VehicleReachabilityCache();
+		private readonly VehicleReachabilityCache cache = new VehicleReachabilityCache();
 
 		private VehiclePathGrid pathGrid;
 		private VehicleRegionGrid regionGrid;
