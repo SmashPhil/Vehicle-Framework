@@ -39,6 +39,8 @@ namespace Vehicles
 
 		public static readonly Texture2D CaravanIcon = ContentFinder<Texture2D>.Get("UI/Commands/FormCaravan");
 
+		public static readonly Texture2D HaulPawnToVehicle = ContentFinder<Texture2D>.Get("UI/Gizmos/HaulPawnToVehicle");
+
 		public static readonly Texture2D[] PackCargoIcon = new Texture2D[] { ContentFinder<Texture2D>.Get("UI/Gizmos/StartLoadBoat"),
 																			 ContentFinder<Texture2D>.Get("UI/Gizmos/StartLoadAerial"),
 																			 ContentFinder<Texture2D>.Get("UI/Gizmos/StartLoadVehicle"),
@@ -199,7 +201,7 @@ namespace Vehicles
 				}
 				catch (Exception ex)
 				{
-					Log.Error($"Exception thrown while trying to generate cached textures. Exception=\"{ex.Message}\"\n-----------------Tasks-----------------\n{tasks}");
+					Log.Error($"Exception thrown while trying to generate cached textures. Exception=\"{ex}\"\n-----------------Tasks-----------------\n{tasks}");
 				}
 			}
 		}

@@ -381,7 +381,7 @@ namespace Vehicles
 							if (currentModTitle != vehicle.modContentPack.Name)
 							{
 								currentModTitle = vehicle.modContentPack.Name;
-								listingStandard.Header(currentModTitle, ListingExtension.BannerColor, GameFont.Medium, TextAnchor.MiddleCenter);
+								listingStandard.Header(currentModTitle, ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 							}
 							bool validated = validator is null || validator(vehicle);
 							string tooltip = tooltipGetter != null ? tooltipGetter(validated) : string.Empty;
@@ -399,7 +399,7 @@ namespace Vehicles
 						}
 						catch (Exception ex)
 						{
-							Log.Error($"Exception thrown while trying to select {vehicle.defName}. Disabling vehicle to preserve mod settings.\nException={ex.Message}");
+							Log.Error($"Exception thrown while trying to select {vehicle.defName}. Disabling vehicle to preserve mod settings.\nException={ex}");
 							selectedDef = null;
 							selectedPatterns.Clear();
 							selectedDefUpgradeComp = null;

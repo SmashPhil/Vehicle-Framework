@@ -79,7 +79,7 @@ namespace Vehicles
 				}
 				if (!field.HasAttribute<PostToSettingsAttribute>())
 				{
-					SmashLog.Error($"Cannont use <attribute>LockSetting</attribute> on <field>{field.Name}</field> since related field does not have PostToSettings attribute in <type>{field.DeclaringType}</type>");
+					SmashLog.Error($"Cannot use <attribute>LockSetting</attribute> on <field>{field.Name}</field> since related field does not have PostToSettings attribute in <type>{field.DeclaringType}</type>");
 				}
 				if (!lockedFields.ContainsKey(defName))
 				{

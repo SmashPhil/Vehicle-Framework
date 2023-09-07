@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Verse;
 using SmashTools;
@@ -8,7 +9,8 @@ namespace Vehicles
 {
 	public class VehicleRegionMaker
 	{
-		private static readonly HashSet<Thing> tmpProcessedThings = new HashSet<Thing>();
+		//Instance based, and VehicleRegionMaker exists 1 per owner per dedicated thread and only used for temporary caching within the same method, so this is thread safe.
+		private readonly HashSet<Thing> tmpProcessedThings = new HashSet<Thing>();
 
 		private readonly VehicleMapping mapping;
 		private readonly VehicleDef createdFor;
@@ -16,7 +18,7 @@ namespace Vehicles
 		private VehicleRegion newRegion;
 		private VehicleRegionGrid regionGrid;
 
-		private List<IntVec3> newRegCells = new List<IntVec3>();
+		private ConcurrentBag<IntVec3> newRegCells = new ConcurrentBag<IntVec3>();
 
 		/// <summary>
 		/// Contains hashset for 4 rotations
@@ -76,7 +78,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				SmashLog.ErrorLabel(VehicleHarmony.LogLabel, $"Exception thrown while generating region at {root}. Step={lastRegionProcess} Ex ={ex.Message}");
+				SmashLog.ErrorLabel(VehicleHarmony.LogLabel, $"Exception thrown while generating region at {root}. Step={lastRegionProcess} Exception={ex}");
 			}
 			finally
 			{
@@ -170,13 +172,12 @@ namespace Vehicles
 			{
 				linksProcessedAt[i].Clear();
 			}
-			for (int j = 0; j < newRegCells.Count; j++)
+			foreach (IntVec3 cell in newRegCells)
 			{
-				IntVec3 c = newRegCells[j];
-				SweepInTwoDirectionsAndTryToCreateLink(Rot4.North, c);
-				SweepInTwoDirectionsAndTryToCreateLink(Rot4.South, c);
-				SweepInTwoDirectionsAndTryToCreateLink(Rot4.East, c);
-				SweepInTwoDirectionsAndTryToCreateLink(Rot4.West, c);
+				SweepInTwoDirectionsAndTryToCreateLink(Rot4.North, cell);
+				SweepInTwoDirectionsAndTryToCreateLink(Rot4.South, cell);
+				SweepInTwoDirectionsAndTryToCreateLink(Rot4.East, cell);
+				SweepInTwoDirectionsAndTryToCreateLink(Rot4.West, cell);
 			}
 		}
 

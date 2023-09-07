@@ -59,7 +59,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Failed to populate field settings for <text>{def.defName}</text>.\nException=\"{ex.Message}\"\nInnerException=\"{ex.InnerException}\"");
+				Log.Error($"Failed to populate field settings for <text>{def.defName}</text>.\nException=\"{ex}\"\nInnerException=\"{ex.InnerException}\"");
 				return false;
 			}
 			return true;
@@ -90,7 +90,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Failed to populate upgrade settings for {def.defName}. Exception=\"{ex.Message}\"\nInnerException=\"{ex.InnerException}\"");
+				Log.Error($"Failed to populate upgrade settings for {def.defName}. Exception=\"{ex}\"\nInnerException=\"{ex.InnerException}\"");
 				return false;
 			}
 			return true;

@@ -32,7 +32,7 @@ namespace Vehicles
 
 		private uint reachedIndex = 1;
 
-		private VehicleReachabilityCache cache = new VehicleReachabilityCache();
+		private readonly VehicleReachabilityCache cache = new VehicleReachabilityCache();
 
 		private VehiclePathGrid pathGrid;
 		private VehicleRegionGrid regionGrid;
@@ -419,9 +419,8 @@ namespace Vehicles
 
 			if (drawLinks)
 			{
-				for (int i = 0; i < region.links.Count; i++)
+				foreach (VehicleRegionLink regionLink in region.links)
 				{
-					VehicleRegionLink regionLink = region.links[i];
 					foreach (VehicleRegionLink toRegionLink in region.links)
 					{
 						if (regionLink == toRegionLink) continue;
@@ -637,7 +636,8 @@ namespace Vehicles
 		public bool CanReachBiggestMapEdgeRoom(IntVec3 c)
 		{
 			VehicleRoom usableRoom = null;
-			foreach (VehicleRoom room in RegionGrid.allRooms)
+			//ConcurrentDictionary.Keys snapshots, but ConcurrentDictionary.GetEnumerator does not. Must utilize Key or Value collections for thread safe enumeration
+			foreach (VehicleRoom room in RegionGrid.allRooms.Keys)
 			{
 				if (room.TouchesMapEdge)
 				{
@@ -647,7 +647,7 @@ namespace Vehicles
 					}
 				}
 			}
-			return usableRoom != null && CanReachVehicle(c, usableRoom.Regions[0].AnyCell, PathEndMode.OnCell, TraverseParms.For(TraverseMode.PassDoors,
+			return usableRoom != null && CanReachVehicle(c, usableRoom.Regions.FirstOrDefault().Key.AnyCell, PathEndMode.OnCell, TraverseParms.For(TraverseMode.PassDoors,
 				Danger.Deadly, false));
 		}
 

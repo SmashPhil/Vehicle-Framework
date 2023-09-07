@@ -18,7 +18,7 @@ namespace Vehicles
 		/// <param name="mapping"></param>
 		public static void DeregisterInRegions(Thing thing, VehicleMapping mapping, VehicleDef vehicleDef)
 		{
-			if (!ListerThings.EverListable(thing.def, ListerThingsUse.Region))
+			if (!ConcurrentListerThings.EverListable(thing.def, ListerThingsUse.Region))
 			{
 				return;
 			}
@@ -26,7 +26,7 @@ namespace Vehicles
 			GetTouchableRegions(thing, mapping, vehicleDef, tmpRegions, true);
 			for (int i = 0; i < tmpRegions.Count; i++)
 			{
-				ListerThings listerThings = tmpRegions[i].ListerThings;
+				ConcurrentListerThings listerThings = tmpRegions[i].ListerThings;
 				if (listerThings.Contains(thing))
 				{
 					listerThings.Remove(thing);
@@ -41,7 +41,7 @@ namespace Vehicles
 		/// <param name="mapping"></param>
 		public static void RegisterInRegions(Thing thing, VehicleMapping mapping, VehicleDef vehicleDef)
 		{
-			if (!ListerThings.EverListable(thing.def, ListerThingsUse.Region))
+			if (!ConcurrentListerThings.EverListable(thing.def, ListerThingsUse.Region))
 			{
 				return;
 			}
@@ -49,7 +49,7 @@ namespace Vehicles
 			GetTouchableRegions(thing, mapping, vehicleDef, tmpRegions, false);
 			for (int i = 0; i < tmpRegions.Count; i++)
 			{
-				ListerThings listerThings = tmpRegions[i].ListerThings;
+				ConcurrentListerThings listerThings = tmpRegions[i].ListerThings;
 				if (!listerThings.Contains(thing))
 				{
 					listerThings.Add(thing);
@@ -107,15 +107,6 @@ namespace Vehicles
 					}
 				}
 			}
-		}
-
-		/// <summary>
-		/// Tmp method in case vanilla ever modifies this behavior to be specific to ThingDefs
-		/// </summary>
-		/// <param name="thing"></param>
-		private static bool CanRegisterInAdjacentRegions(Thing thing)
-		{
-			return true;
 		}
 	}
 }

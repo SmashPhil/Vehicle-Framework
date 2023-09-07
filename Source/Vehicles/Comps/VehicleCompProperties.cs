@@ -12,5 +12,9 @@ namespace Vehicles
 		{
 			yield break;
 		}
+
+		public virtual void PostDefDatabase()
+		{
+		}
 	}
 }

@@ -19,6 +19,9 @@ namespace Vehicles
 		public Dictionary<string, Dictionary<SaveableField, SavedField<object>>> fieldSettings = new Dictionary<string, Dictionary<SaveableField, SavedField<object>>>();
 		public Dictionary<string, Dictionary<SaveableField, object>> defaultValues = new Dictionary<string, Dictionary<SaveableField, object>>();
 
+		public Dictionary<string, Dictionary<string, float>> vanillaStats = new Dictionary<string, Dictionary<string, float>>();
+		public Dictionary<string, Dictionary<string, float>> vehicleStats = new Dictionary<string, Dictionary<string, float>>();
+
 		/// <summary>
 		/// <defName, maskName>
 		/// </summary>
@@ -36,6 +39,8 @@ namespace Vehicles
 					yield return new FloatMenuOption("VF_DevMode_ResetVehicle".Translate(VehicleMod.selectedDef.LabelCap), delegate ()
 					{
 						defaultGraphics.Remove(VehicleMod.selectedDef.defName);
+						vanillaStats.Remove(VehicleMod.selectedDef.defName);
+						vehicleStats.Remove(VehicleMod.selectedDef.defName);
 						SettingsCustomizableFields.PopulateSaveableFields(VehicleMod.selectedDef, true);
 					});
 				}
@@ -51,6 +56,8 @@ namespace Vehicles
 		public override void Initialize()
 		{
 			fieldSettings ??= new Dictionary<string, Dictionary<SaveableField, SavedField<object>>>();
+			vanillaStats ??= new Dictionary<string, Dictionary<string, float>>();
+			vehicleStats ??= new Dictionary<string, Dictionary<string, float>>();
 			defaultGraphics ??= new Dictionary<string, PatternData>();
 		}
 
@@ -60,6 +67,8 @@ namespace Vehicles
 			VehicleMod.cachedFields.Clear();
 			VehicleMod.PopulateCachedFields();
 			fieldSettings.Clear();
+			vanillaStats.Clear();
+			vehicleStats.Clear();
 			defaultGraphics.Clear();
 			if (VehicleMod.ModifiableSettings)
 			{
@@ -81,6 +90,8 @@ namespace Vehicles
 		public override void ExposeData()
 		{
 			Scribe_NestedCollections.Look(ref fieldSettings, nameof(fieldSettings), LookMode.Value, LookMode.Deep, LookMode.Undefined);
+			Scribe_NestedCollections.Look(ref vanillaStats, nameof(vanillaStats), LookMode.Value, LookMode.Value, LookMode.Value);
+			Scribe_NestedCollections.Look(ref vehicleStats, nameof(vehicleStats), LookMode.Value, LookMode.Value, LookMode.Value);
 			Scribe_Collections.Look(ref defaultGraphics, nameof(defaultGraphics), LookMode.Value, LookMode.Deep);
 		}
 
@@ -172,6 +183,14 @@ namespace Vehicles
 						}
 					}
 
+					listingSplit.Shift();
+					Rect buttonRect = listingSplit.GetSplitRect(24);
+					if (Widgets.ButtonText(buttonRect, "VF_VehicleStats".Translate()))
+					{
+						SoundDefOf.Click.PlayOneShotOnCamera();
+						Find.WindowStack.Add(new Dialog_StatSettings(VehicleMod.selectedDef));
+					}
+					
 					listingSplit.End();
 
 					float scrollableFieldY = menuRect.height * 0.4f;
@@ -183,6 +202,7 @@ namespace Vehicles
 
 					drawStatusMessage = $"Drawing sub settings";
 					listingSplit.BeginScrollView(scrollableFieldsRect, ref VehicleMod.saveableFieldsScrollPosition, ref scrollableFieldsViewRect, 3);
+
 					foreach ((Type type, List<FieldInfo> fields) in VehicleMod.VehicleCompFields)
 					{
 						if (fields.NullOrEmpty() || fields.All(f => f.TryGetAttribute<PostToSettingsAttribute>(out var settings) 
@@ -195,7 +215,7 @@ namespace Vehicles
 						{
 							header = title.Translate ? title.Label.Translate().ToString() : title.Label;
 						}
-						listingSplit.Header(header, ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter, 24);
+						listingSplit.Header(header, ListingExtension.BannerColor, fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter, rowGap: 24);
 						foreach (FieldInfo field in fields)
 						{
 							if (field.TryGetAttribute(out PostToSettingsAttribute post))
@@ -208,7 +228,7 @@ namespace Vehicles
 				}
 				catch (Exception ex)
 				{
-					Log.Error($"Exception thrown while trying to select {VehicleMod.selectedDef.defName}. LastTask={drawStatusMessage} Disabling vehicle to preserve mod settings.\nException={ex.Message}");
+					Log.Error($"Exception thrown while trying to select {VehicleMod.selectedDef.defName}. LastTask={drawStatusMessage} Disabling vehicle to preserve mod settings.\nException={ex}");
 					VehicleMod.settingsDisabledFor.Add(VehicleMod.selectedDef.defName);
 					VehicleMod.selectedDef = null;
 					VehicleMod.selectedPatterns.Clear();

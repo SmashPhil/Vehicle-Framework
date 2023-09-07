@@ -21,6 +21,7 @@ namespace Vehicles
 		private List<VehicleDef> owners = new List<VehicleDef>();
 
 		private int buildingFor = -1;
+		private int vehicleRegionGridIndexChecking = 0;
 
 		internal DedicatedThread dedicatedThread;
 
@@ -158,7 +159,6 @@ namespace Vehicles
 				//Needs to check validity, non-pathing vehicles are still indexed since sequential vehicles will have higher index numbers
 				if (vehiclePathData.IsValid)
 				{
-					//Debug.Message($"Rebuilding regions for {vehiclePathData.Owner}");
 					vehiclePathData.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
 					vehiclePathData.VehicleRegionAndRoomUpdater.Enabled = true;
 					vehiclePathData.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
@@ -218,9 +218,9 @@ namespace Vehicles
 		/// </remarks>
 		public override void MapComponentUpdate()
 		{
-			if (owners.Count > 0 && VehicleRegionGrid.vehicleRegionGridIndexChecking < owners.Count)
+			if (owners.Count > 0 && vehicleRegionGridIndexChecking < owners.Count)
 			{
-				VehicleDef vehicleDef = owners[VehicleRegionGrid.vehicleRegionGridIndexChecking];
+				VehicleDef vehicleDef = owners[vehicleRegionGridIndexChecking];
 				VehiclePathData vehiclePathData = this[vehicleDef];
 				vehiclePathData.VehicleRegionGrid.UpdateClean();
 				vehiclePathData.VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();

@@ -5,7 +5,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class CompProperties_VehicleTurrets : CompProperties
+	public class CompProperties_VehicleTurrets : VehicleCompProperties
 	{
 		public List<VehicleTurret> turrets = new List<VehicleTurret>();
 
@@ -17,10 +17,10 @@ namespace Vehicles
 		public override void ResolveReferences(ThingDef parentDef)
 		{
 			base.ResolveReferences(parentDef);
-			ResolveChildTurrets(parentDef as VehicleDef);
+			ResolveTurrets(parentDef as VehicleDef);
 		}
 
-		private void ResolveChildTurrets(VehicleDef vehicleDef)
+		private void ResolveTurrets(VehicleDef vehicleDef)
 		{
 			if (!turrets.NullOrEmpty())
 			{
@@ -31,6 +31,17 @@ namespace Vehicles
 					ResolveChildTurrets(turret);
 					turret.turretDef.ammunition?.ResolveReferences();
 				}
+			}
+		}
+
+		public override void PostDefDatabase()
+		{
+			base.PostDefDatabase();
+
+			//Cache turret graphics for UI
+			foreach (VehicleTurret turret in turrets)
+			{
+				turret.ResolveCannonGraphics(turret.vehicleDef, forceRegen: true);
 			}
 		}
 

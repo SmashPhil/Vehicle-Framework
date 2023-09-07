@@ -280,9 +280,8 @@ namespace Vehicles
 					{
 						return;
 					}
-					for (int i = 0; i < region.links.Count; i++)
+					foreach (VehicleRegionLink regionLink in region.links)
 					{
-						VehicleRegionLink regionLink = region.links[i];
 						for (int j = 0; j < 2; j++)
 						{
 							VehicleRegion region2 = regionLink.regions[j];

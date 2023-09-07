@@ -9,7 +9,7 @@ using HarmonyLib;
 
 namespace Vehicles
 {
-	public class VehicleTurretDef : Def
+	public class VehicleTurretDef : Def, ITweakFields
 	{
 		/// <summary>
 		/// Turret Type
@@ -26,7 +26,9 @@ namespace Vehicles
 		/// </summary>
 		public ThingFilter ammunition;
 
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
 		public int magazineCapacity = 1;
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
 		public int chargePerAmmoCount = 1;
 		public bool genericAmmo = false;
 		public TurretCooldownProperties cooldown;
@@ -34,14 +36,20 @@ namespace Vehicles
 		/// <summary>
 		/// Fields related to recoil
 		/// </summary>
+		[TweakField(SubCategory = "Turret Recoil")]
 		public RecoilProperties recoil;
+		[TweakField(SubCategory = "Vehicle Recoil")]
 		public RecoilProperties vehicleRecoil;
 
 		/// <summary>
 		/// All fields related to gizmo or cannon related textures
 		/// baseCannonTexPath is for base plate only (static texture below cannon that represents the floor or attaching point of the cannon)
 		/// </summary>
+		[TweakField]
 		public GraphicDataRGB graphicData;
+		//UPDATE - Merge to 1 list
+		[TweakField(SubCategory = "Layered Graphics")]
+		public List<VehicleTurretRenderData> graphics;
 
 		public string gizmoDescription;
 		public string gizmoIconTexPath;
@@ -52,14 +60,23 @@ namespace Vehicles
 		/// <summary>
 		/// Fields relating to targeting and reloading
 		/// </summary>
+		[TweakField(SubCategory = "Fire Modes")]
 		public List<FireMode> fireModes = new List<FireMode>();
+		[TweakField(SettingsType = UISettingsType.Checkbox)]
 		public bool autoSnapTargeting = false;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float rotationSpeed = 1;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
+		[NumericBoxValues(MinValue = -1, MaxValue = 9999)]
 		public float maxRange = -1;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
+		[NumericBoxValues(MinValue = 0, MaxValue = 9999)]
 		public float minRange = 0;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float reloadTimer = 5;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float warmUpTimer = 3;
-
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float autoRefuelProportion = 2;
 
 		/// <summary>
@@ -74,11 +91,21 @@ namespace Vehicles
 		public ThingDef projectile;
 		public CustomHitFlags attachProjectileFlag = null;
 		public ProjectileHitFlags? hitFlags;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float projectileOffset = 0f;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float projectileSpeed = -1;
 		public List<float> projectileShifting = new List<float>();
 
 		public Type restrictionType;
+
+		string ITweakFields.Label => nameof(VehicleTurretDef);
+
+		string ITweakFields.Category => string.Empty;//$"{defName} (Def)";
+
+		public void OnFieldChanged()
+		{
+		}
 
 		public override void ResolveReferences()
 		{
@@ -87,6 +114,10 @@ namespace Vehicles
 			{
 				ammunition.ResolveReferences();
 			}
+		}
+
+		public void PostDefDatabase()
+		{
 		}
 
 		public override void PostLoad()
@@ -98,15 +129,31 @@ namespace Vehicles
 				{
 					return;
 				}
-				if (graphicData.shaderType == null)
+				FixInvalidGraphicDataFields(graphicData);
+				if (!graphics.NullOrEmpty())
 				{
-					graphicData.shaderType = ShaderTypeDefOf.Cutout;
-				}
-				else if (!VehicleMod.settings.main.useCustomShaders)
-				{
-					graphicData.shaderType = graphicData.shaderType.Shader.SupportsRGBMaskTex(ignoreSettings: true) ? ShaderTypeDefOf.CutoutComplex : graphicData.shaderType;
+					foreach (VehicleTurretRenderData renderData in graphics)
+					{
+						FixInvalidGraphicDataFields(renderData.graphicData);
+					}
 				}
 			});
+		}
+
+		private static void FixInvalidGraphicDataFields(GraphicDataRGB graphicData)
+		{
+			if (graphicData == null)
+			{
+				return;
+			}
+			if (graphicData.shaderType == null)
+			{
+				graphicData.shaderType = ShaderTypeDefOf.Cutout;
+			}
+			else if (!VehicleMod.settings.main.useCustomShaders)
+			{
+				graphicData.shaderType = graphicData.shaderType.Shader.SupportsRGBMaskTex(ignoreSettings: true) ? ShaderTypeDefOf.CutoutComplex : graphicData.shaderType;
+			}
 		}
 
 		public override IEnumerable<string> ConfigErrors()

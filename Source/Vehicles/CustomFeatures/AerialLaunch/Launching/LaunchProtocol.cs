@@ -32,11 +32,6 @@ namespace Vehicles
 		protected Material cachedShadowMaterial;
 		private static MaterialPropertyBlock shadowPropertyBlock = new MaterialPropertyBlock();
 
-		/// <summary>
-		/// True if animation at index has been triggered.
-		/// </summary>
-		protected List<bool> animationStatuses;
-
 		/* -- Xml Input -- */
 
 		protected int maxFlightNodes = int.MaxValue;
@@ -369,7 +364,7 @@ namespace Vehicles
 				for (int i = 0; i < CurAnimationProperties.events.Count; i++)
 				{
 					AnimationEvent @event = CurAnimationProperties.events[i];
-					if (!animationStatuses[i] && @event.EventFrame(TimeInAnimation))
+					if (@event.EventFrame(TimeInAnimation))
 					{
 						@event.method.InvokeUnsafe(null, this);
 					}
@@ -428,24 +423,7 @@ namespace Vehicles
 		protected virtual void PreAnimationSetup()
 		{
 			ticksPassed = 0;
-			if (!CurAnimationProperties.events.NullOrEmpty())
-			{
-				animationStatuses = new List<bool>();
-				animationStatuses.Populate(false, CurAnimationProperties.events.Count);
-
-				//Trigger events at t=0 before next draw frame
-				if (!CurAnimationProperties.events.NullOrEmpty())
-				{
-					for (int i = 0; i < CurAnimationProperties.events.Count; i++)
-					{
-						AnimationEvent @event = CurAnimationProperties.events[i];
-						if (!animationStatuses[i] && @event.EventFrame(TimeInAnimation))
-						{
-							@event.method.InvokeUnsafe(null, this);
-						}
-					}
-				}
-			}
+			TickEvents(); //Trigger events at t=0 before next frame
 		}
 
 		protected virtual float TryThrowFleck(FleckData fleckData, float t, float count)
@@ -475,6 +453,16 @@ namespace Vehicles
 				{
 					origin = origin.PointFromAngle(fleckData.drawOffset.Evaluate(t), angle.Value);
 				}
+
+				if (!fleckData.xFleckPositionCurve.NullOrEmpty())
+				{
+					origin.x += fleckData.xFleckPositionCurve.Evaluate(t);
+				}
+				if (!fleckData.zFleckPositionCurve.NullOrEmpty())
+				{
+					origin.z += fleckData.zFleckPositionCurve.Evaluate(t);
+				}
+
 				origin += fleckData.originOffset;
 				origin.y = fleckData.def.altitudeLayer.AltitudeFor();
 				ThrowFleck(fleckData.def, origin, Map, size, airTime, angle, speed, rotationRate);
@@ -856,8 +844,6 @@ namespace Vehicles
 
 			Scribe_References.Look(ref map, nameof(map));
 			Scribe_Values.Look(ref position, nameof(position), defaultValue: IntVec3.Invalid);
-
-			Scribe_Collections.Look(ref animationStatuses, nameof(animationStatuses), LookMode.Value);
 		}
 
 		public enum LaunchType : uint

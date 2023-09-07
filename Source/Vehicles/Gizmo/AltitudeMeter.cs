@@ -89,7 +89,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				SmashLog.Error($"Exception thrown while trying to draw <type>AltitudeMeter</type> for {aerialVehicle?.Label ?? "NULL"}. Exception=\"{ex.Message}\"");
+				SmashLog.Error($"Exception thrown while trying to draw <type>AltitudeMeter</type> for {aerialVehicle?.Label ?? "NULL"}. Exception=\"{ex}\"");
 			}
 		}
 	}

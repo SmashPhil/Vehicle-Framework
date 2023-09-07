@@ -32,7 +32,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Exception getting {graphicClass} at {path}. Exception=\"{ex.Message}\"");
+				Log.Error($"Exception getting {graphicClass} at {path}. Exception=\"{ex}\"");
 			}
 			return null;
 		}

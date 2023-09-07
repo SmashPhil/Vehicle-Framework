@@ -68,7 +68,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Failed to execute incident {GetType()}. Exception=\"{ex.Message}\"");
+				Log.Error($"Failed to execute incident {GetType()}. Exception=\"{ex}\"");
 				return false;
 			}
 		}

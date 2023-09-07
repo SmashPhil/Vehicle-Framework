@@ -52,6 +52,7 @@
     <Compile Include="AI\JobDrivers\JobDriver_GiveItemToVehicle.cs" />
     <Compile Include="AI\Lords\LordToil_PrepareCaravan_GatherAnimalsForVehicles.cs" />
     <Compile Include="AI\WorkGiver\VehicleWorkGiver.cs" />
+    <Compile Include="AI\WorkGiver\WorkGiver_CarryToVehicle.cs" />
     <Compile Include="AI\WorkGiver\WorkGiver_RefuelVehicleTurret.cs" />
     <Compile Include="BackCompatibility\BackCompatibilityConverter_Universal.cs" />
     <Compile Include="Components\Rendering\Tracks\VehicleTrack_Wake.cs" />
@@ -83,6 +84,7 @@
     <Compile Include="CustomFeatures\AerialLaunch\Launching\Properties\PropellerProtocolProperties.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\Restrictions\LaunchRestriction_Runway.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\Restrictions\LaunchRestriction.cs" />
+    <Compile Include="CustomFeatures\AerialLaunch\Targeters\HaulTargeter.cs" />
     <Compile Include="CustomFeatures\EventDefs\VehicleTurretEventDef.cs" />
     <Compile Include="CustomFeatures\Misc\AnimationEditorTags.cs" />
     <Compile Include="CustomFeatures\SharedJobs\SharedJob.cs" />
@@ -91,12 +93,15 @@
     <Compile Include="Components\Vehicles\VehicleSustainers.cs" />
     <Compile Include="Gizmo\Command_Turret.cs" />
     <Compile Include="Gizmo\Gizmo_VehicleCaravanInfo.cs" />
+    <Compile Include="Graphics\Dialogs\Dialog_StatSettings.cs" />
     <Compile Include="Graphics\Graphic\Graphics\Animated\Graphic_ReversePropeller.cs" />
     <Compile Include="Graphics\ITab\WITab_AerialVehicle.cs" />
     <Compile Include="Graphics\ITab\WITab_AerialVehicle_Health.cs" />
     <Compile Include="Graphics\ITab\WITab_AerialVehicle_Items.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_CombatExtended.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_BulkCarrier.cs" />
+    <Compile Include="Harmony\ConditionalPatches\Compatibility_MapPreview.cs" />
+    <Compile Include="Harmony\ConditionalPatches\Compatibility_RailsOfTheRim.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_RoadsOfTheRim.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_GeologicalLandforms.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_RimHUD.cs" />
@@ -117,6 +122,8 @@
     <Compile Include="Misc\Interfaces\IVehicleWorldObject.cs" />
     <Compile Include="Pathing\Map\VehicleRegionUpdateCatalog.cs" />
     <Compile Include="Pathing\RegionGrid\ChunkSet.cs" />
+    <Compile Include="Pathing\RegionGrid\ConcurrentListerThings.cs" />
+    <Compile Include="Turrets\Turret\Rendering\VehicleTurretRenderData.cs" />
     <Compile Include="Utility\DesignatorCache.cs" />
     <Compile Include="AI\Incidents\IncidentWorker_ShuttleDowned.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_FollowVehicle.cs" />

@@ -14,6 +14,73 @@ namespace Vehicles
 {
 	public static class Ext_Vehicles
 	{
+		/// <summary>
+		/// Rotates <paramref name="cell"/> for vehicle rect. This means West rotation flips east.
+		/// </summary>
+		/// <param name="cell"></param>
+		/// <param name="rot"></param>
+		/// <param name="rectSize"></param>
+		/// <returns></returns>
+		public static IntVec2 RotatedBy(this IntVec2 cell, Rot4 rot, IntVec2 size, bool reverseRotate = false)
+		{
+			if (size.x == 1 && size.z == 1)
+			{
+				return cell;
+			}
+			switch (rot.AsInt)
+			{
+				case 0:
+					return cell;
+				case 1:
+					IntVec2 east = new IntVec2(-cell.z, cell.x);
+					if (reverseRotate)
+					{
+						east.x *= -1;
+						east.z *= -1;
+					}
+					return east;
+				case 2:
+					IntVec2 south = new IntVec2(-cell.x, -cell.z);
+					if (size.x.IsEven())
+					{
+						south.x++;
+					}
+					if (size.z.IsEven())
+					{
+						south.z++;
+					}
+					return south;
+				case 3:
+					IntVec2 west = new IntVec2(cell.z, -cell.x);
+					if (size.x.IsEven())
+					{
+						west.x++;
+					}
+					if (size.z.IsEven())
+					{
+						west.z++;
+					}
+					if (reverseRotate)
+					{
+						if (size.x.IsEven())
+						{
+							west.z++;
+							west.x--;
+						}
+						if (size.z.IsEven())
+						{
+							west.z--;
+							west.x--;
+						}
+						west.x *= -1;
+						west.z *= -1;
+					}
+					return west;
+				default:
+					return cell;
+			}
+		}
+
 		public static void CleanupVehicleHandlers(this LordJob lordJob)
 		{
 			foreach (Pawn pawn in lordJob.lord.ownedPawns)

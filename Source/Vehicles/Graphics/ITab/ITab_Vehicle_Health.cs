@@ -26,6 +26,7 @@ namespace Vehicles
 		{
 			base.OnOpen();
 			VehicleTabHelper_Health.Init();
+			UpdateSize();
 		}
 
 		protected override void CloseTab()

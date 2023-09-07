@@ -152,7 +152,7 @@ namespace Vehicles
 				}
 				catch (Exception ex)
 				{
-					Log.Error($"Exception thrown while trying to select {VehicleMod.selectedDef.defName}. Disabling vehicle to preserve mod settings.\nException={ex.Message}");
+					Log.Error($"Exception thrown while trying to select {VehicleMod.selectedDef.defName}. Disabling vehicle to preserve mod settings.\nException={ex}");
 					VehicleMod.settingsDisabledFor.Add(VehicleMod.selectedDef.defName);
 					VehicleMod.selectedDef = null;
 					VehicleMod.selectedPatterns.Clear();

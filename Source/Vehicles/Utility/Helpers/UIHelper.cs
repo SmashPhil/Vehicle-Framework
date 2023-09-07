@@ -196,7 +196,7 @@ namespace Vehicles
 				}
 				catch (Exception ex)
 				{
-					Log.ErrorOnce($"Unable to draw {vehicle.Label} for vehicle transferable item. Exception = \"{ex.Message}\"", vehicle.GetHashCode() ^ "TransferableIcon".GetHashCode());
+					Log.ErrorOnce($"Unable to draw {vehicle.Label} for vehicle transferable item. Exception = \"{ex}\"", vehicle.GetHashCode() ^ "TransferableIcon".GetHashCode());
 				}
 			}
 			

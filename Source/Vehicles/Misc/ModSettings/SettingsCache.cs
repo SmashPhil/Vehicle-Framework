@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
 using Verse;
+using RimWorld;
 using SmashTools;
 
 namespace Vehicles
@@ -71,7 +72,33 @@ namespace Vehicles
 			}
 			catch (InvalidCastException ex)
 			{
-				Log.Error($"Cannot cast {fieldName} from {objType?.GetType().ToString() ?? "[Null]"} to {typeof(T)}.\nException=\"{ex.Message}\"");
+				Log.Error($"Cannot cast {fieldName} from {objType?.GetType().ToString() ?? "[Null]"} to {typeof(T)}.\nException=\"{ex}\"");
+			}
+			return fallback;
+		}
+
+		public static float TryGetValue(VehicleDef def, StatDef statDef, float fallback)
+		{
+			throw new NotImplementedException("StatDef SettingsCache"); //This would have to be patched onto vanilla for the settings values to be retrieved.  This will need to be looked into later
+
+			if (VehicleMod.settings.vehicles.vanillaStats.TryGetValue(def.defName, out var dict))
+			{
+				if (dict.TryGetValue(statDef.defName, out float value))
+				{
+					return value;
+				}
+			}
+			return fallback;
+		}
+
+		public static float TryGetValue(VehicleDef def, VehicleStatDef statDef, float fallback)
+		{
+			if (VehicleMod.settings.vehicles.vehicleStats.TryGetValue(def.defName, out var dict))
+			{
+				if (dict.TryGetValue(statDef.defName, out float value))
+				{
+					return value;
+				}
 			}
 			return fallback;
 		}

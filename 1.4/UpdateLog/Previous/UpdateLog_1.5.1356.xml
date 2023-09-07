@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <!--Can utilize Version.txt file placed in mod's root directory-->
+  <currentVersion>1.5.1356</currentVersion>
+  <!--Startup,GameInit,LoadedGame,NewGame-->
+  <updateOn>Startup</updateOn>
+  <!--Full description shown in update page-->
+  <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+This update comes with some critical bugfixes to pathfinding and regions.  Your vehicles shouldn't have any problems going through garages, and they definitely won't be pathfinding over walls anymore.
+
+Next update will be focusing on everything related to Vehicle Caravans.  I understand they're not perfect right now, so next update should alleviate that.
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed bug where vehicles weren't triggering path recalculation when moving
+
+- Fixed bug where path grids were only updating for vehicle region owners, allowing some vehicles to path over walls.
+
+- Fixed bug where even-width vehicles (eg. 2x4) would get stuck when stopped near a wall.
+
+- Fixed thread safety issues related to pulling thing lists during region recaching and pathfinding.
+
+- Fixed bug where defining a vehicle turret without a shaderType would throw an exception on startup.
+
+- Fixed bug where path grids wouldn't update when setting terrain via devmode.
+
+- Fixed bug where vehicle caravans wouldn't render fuel gizmos for multiple vehicles in a caravan.
+
+- Fixed bug where loading an older save with a vehicle on the world map (with turrets) would throw an exception upon returning.
+&lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Async actions are now pooled
+
+- ThingList snapshots are now pooled
+&lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Roads of the Rim
+
+- Dynamic Trade interface
+&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Added default 'Vehicles' tab for modders.  Use this instead of creating a dozen different designation categories.
+
+- Changed even-width vehicles from rounding up for region padding. 2xN vehicles can now fit through 2-cell gaps, rather than requiring 3.
+
+- DamageDefs that aren't meant to harm health no longer damage vehicles (EMP, Smoke, Extinguish, etc.)
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
+  <!--Static parameterless method to execute when update log is executed-->
+  <actionOnUpdate></actionOnUpdate>
+  <!--Show update log on next startup.-->
+  <update>false</update>
+  <!--Testing mode prevents the update from saving over the UpdateLog file-->
+  <testing>false</testing>
+  <!--Icon bar shown to the right of the mod's name-->
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon</icon>
+      <url>steam://url/CommunityFilePage/2356577528</url>
+    </li>
+  </rightIconBar>
+  <!--Icon bar shown to the left of the mod's name-->
+  <leftIconBar>
+    <li>
+      <name>Patreon</name>
+      <icon>patreonIcon</icon>
+      <url>https://www.patreon.com/smashphil</url>
+    </li>
+    <li>
+      <name>Cursed Crew</name>
+      <icon>cursedCrewIcon</icon>
+      <url>https://discord.gg/NNe2VxAU7Z</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>

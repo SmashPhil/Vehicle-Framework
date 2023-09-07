@@ -46,8 +46,8 @@ namespace Vehicles
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(RecalculatePerceivedPathCostForVehicle)));
 
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(TerrainGrid), nameof(TerrainGrid.SetTerrain)),
-				postfix: new HarmonyMethod(typeof(VehiclePathing),
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(TerrainGrid), "DoTerrainChangedEffects"),
+				prefix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(SetTerrainAndUpdateVehiclePathCosts)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Thing), nameof(Thing.DeSpawn)),
 				transpiler: new HarmonyMethod(typeof(VehiclePathing),
@@ -352,7 +352,12 @@ namespace Vehicles
 			PathingHelper.RecalculatePerceivedPathCostAt(c, ___normal.map);
 		}
 
-		public static void SetTerrainAndUpdateVehiclePathCosts(IntVec3 c, Map ___map)
+		/// <summary>
+		/// Pass <paramref name="c"/> by reference to allow Harmony to skip prefix method when MapPreview skips it during preview generation
+		/// </summary>
+		/// <param name="c"></param>
+		/// <param name="___map"></param>
+		public static void SetTerrainAndUpdateVehiclePathCosts(ref IntVec3 c, Map ___map)
 		{
 			if (Current.ProgramState == ProgramState.Playing)
 			{

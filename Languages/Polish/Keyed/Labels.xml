@@ -3,6 +3,7 @@
   <VehicleFramework>Vehicle Framework-Spolszczenie</VehicleFramework>
   <VF_Vehicles>Pojazdy</VF_Vehicles>
   <VF_LoadCargo>Załaduj Ładunek</VF_LoadCargo>
+  <VF_HaulPawnToVehicle>Załaduj Pasażera</VF_HaulPawnToVehicle>
   <VF_DisembarkAllPawns>Rozładuj Wszystkich Kolonistów</VF_DisembarkAllPawns>
   <VF_DisembarkSinglePawn>Wypakuj {0}</VF_DisembarkSinglePawn>
   <VF_DisembarkNoExit>Niemożliwe jest rozładowanie. Brak możliwych pól</VF_DisembarkNoExit>
@@ -11,6 +12,7 @@
   <VF_DraftVehicleDesc>Włącza pojazd, pozwalając mu się poruszać. Będzie to używać paliwo, jeśli możliwe, nawet jeśli pojazd jest nieruchomy.</VF_DraftVehicleDesc>
   <VF_StopVehicleDesc>Natychmiast zatrzymuję pojazd.</VF_StopVehicleDesc>
   <VF_UndraftVehicleDesc>Wyłącza pojazd, zatrzymując zużycie paliwa i możliwość poruszania się.</VF_UndraftVehicleDesc>
+  <VF_RefuelFromInventory>Zatankuj z Plecaka</VF_RefuelFromInventory>
   <VF_ShowAllItemsOnMap>Pokaż Wszystkie Przedmioty Na Mapie</VF_ShowAllItemsOnMap>
   <VF_ResetColorPalettes>Reset Wszystkich Palet</VF_ResetColorPalettes>
   <VF_ResetColorPalettesConfirmation>Jesteś pewien, że chcesz zresetować wszystkie zapisane palety do ustawień domyślnych? Ta akcja jest nieodwracalna.</VF_ResetColorPalettesConfirmation>

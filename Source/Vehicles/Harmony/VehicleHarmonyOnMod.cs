@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 using UnityEngine;
 using HarmonyLib;
 using Verse;
@@ -33,17 +34,28 @@ namespace Vehicles
 				postfix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
 				nameof(GraphicInit)));
 			/* Debugging Only */
-			//harmony.Patch(original: AccessTools.Method(typeof(DirectXmlToObject), "GetFieldInfoForType"),
-			//	prefix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
+			//harmony.Patch(original: AccessTools.Method(typeof(XmlInheritance), nameof(XmlInheritance.TryRegister)),
+			//	postfix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
 			//	nameof(TestDebug)));
 		}
 
 		/// <summary>
 		/// Generic patch method for testing
 		/// </summary>
-		public static bool TestDebug()
+		public static void TestDebug(XmlNode node, ModContentPack mod)
 		{
-			return true;
+			try
+			{
+				XmlAttribute xmlAttribute = node.Attributes["Name"];
+				if (xmlAttribute != null)
+				{
+					Log.Message($"Registering {xmlAttribute.Name} = {xmlAttribute.Value}");
+				}
+			}
+			catch (Exception ex)
+			{
+				Log.Error($"[Test Postfix] Exception Thrown.\n{ex.Message}\n{ex.InnerException}\n{ex.StackTrace}");
+			}
 		}
 
 		/// <summary>

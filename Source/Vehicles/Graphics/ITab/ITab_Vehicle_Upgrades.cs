@@ -418,9 +418,9 @@ namespace Vehicles
 							GUI.color = color;
 						}
 					}
-					catch(Exception ex)
+					catch (Exception ex)
 					{
-						Log.ErrorOnce($"Unable to display {Vehicle.def.LabelCap} Texture on Upgrade Screen. Error: {ex.Message} \n StackTrace: {ex.StackTrace}", Vehicle.thingIDNumber);
+						Log.ErrorOnce($"Unable to display {Vehicle.def.LabelCap} Texture on Upgrade Screen. Exception: {ex}", Vehicle.thingIDNumber);
 					}
 				}
 			}

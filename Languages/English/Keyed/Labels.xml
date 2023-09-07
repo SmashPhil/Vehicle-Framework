@@ -7,6 +7,7 @@
 	
 	<!-- Gizmos / Float Menus -->
 	<VF_LoadCargo>Load Cargo</VF_LoadCargo>
+	<VF_HaulPawnToVehicle>Load Pawn</VF_HaulPawnToVehicle>
 	<VF_DisembarkAllPawns>Unload All Pawns</VF_DisembarkAllPawns>
 	<VF_DisembarkSinglePawn>Unload {0}</VF_DisembarkSinglePawn>
 	<VF_DisembarkNoExit>Unable to exit vehicle. No valid cells to exit onto.</VF_DisembarkNoExit>

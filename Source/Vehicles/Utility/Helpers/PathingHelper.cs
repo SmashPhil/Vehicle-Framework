@@ -217,7 +217,6 @@ namespace Vehicles
 					{
 						List<Thing> thingList = AsyncPool<List<Thing>>.Get();
 						thingList.AddRange(mapping.map.thingGrid.ThingsListAt(thing.Position));
-
 						AsyncAction asyncAction = AsyncPool<AsyncAction>.Get();
 						asyncAction.Set(delegate ()
 						{
@@ -280,7 +279,14 @@ namespace Vehicles
 					if (!vehicleDefs.NullOrEmpty() && mapping.ThreadAvailable)
 					{
 						AsyncAction asyncAction = AsyncPool<AsyncAction>.Get();
-						asyncAction.Set(() => RecalculatePerceivedPathCostAtFor(mapping, thing.Position, new List<Thing>(thingList)), () => map != null && map.Index > -1);
+						List<Thing> snapshotList = AsyncPool<List<Thing>>.Get();
+						snapshotList.AddRange(thingList);
+						asyncAction.Set(delegate ()
+						{
+							RecalculatePerceivedPathCostAtFor(mapping, thing.Position, snapshotList);
+							snapshotList.Clear();
+							AsyncPool<List<Thing>>.Return(snapshotList);
+						}, () => map != null && map.Index > -1);
 						mapping.dedicatedThread.Queue(asyncAction);
 					}
 					else
@@ -291,16 +297,38 @@ namespace Vehicles
 				else
 				{
 					CellRect occupiedRect = thing.OccupiedRect();
-					List<Thing>[] thingLists = occupiedRect.Select(cell => new List<Thing>(mapping.map.thingGrid.ThingsListAt(cell))).ToArray();
 					if (!vehicleDefs.NullOrEmpty() && mapping.ThreadAvailable)
 					{
+						//Select thing lists from AsyncPool
+						List<Thing>[] thingLists = occupiedRect.Select(cell =>
+						{
+							List<Thing> snapshotList = AsyncPool<List<Thing>>.Get();
+							snapshotList.AddRange(mapping.map.thingGrid.ThingsListAt(cell));
+							return snapshotList;
+						}).ToArray();
+
 						AsyncAction asyncAction = AsyncPool<AsyncAction>.Get();
-						asyncAction.Set(() => ThingInRegionDespawned(occupiedRect, mapping, vehicleDefs, thingLists), () => map != null && map.Index > -1);
+						asyncAction.Set(delegate ()
+						{
+							ThingInRegionDespawned(occupiedRect, mapping, vehicleDefs, thingLists);
+							for (int i = 0; i < thingLists.Length; i++)
+							{
+								thingLists[i].Clear();
+								AsyncPool<List<Thing>>.Return(thingLists[i]);
+							}
+						}, () => map != null && map.Index > -1);
 						mapping.dedicatedThread.Queue(asyncAction);
 					}
 					else
 					{
-						ThingInRegionDespawned(occupiedRect, mapping, vehicleDefs, thingLists);
+						//Use vanilla thingGrid lists
+						List<Thing>[] thingLists = occupiedRect.Select(cell =>
+						{
+							List<Thing> snapshotList = AsyncPool<List<Thing>>.Get();
+							snapshotList.AddRange(mapping.map.thingGrid.ThingsListAt(cell));
+							return snapshotList;
+						}).ToArray();
+						ThingInRegionDespawned(occupiedRect, mapping, vehicleDefs, occupiedRect.Select(cell => mapping.map.thingGrid.ThingsListAt(cell)).ToArray());
 					}
 				}
 			}
@@ -369,11 +397,14 @@ namespace Vehicles
 
 		public static void RecalculateAllPerceivedPathCosts(Map map)
 		{
-			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-			if (!mapping.Owners.NullOrEmpty())
+			LongEventHandler.ExecuteWhenFinished(delegate ()
 			{
-				RecalculateAllPerceivedPathCosts(mapping);
-			}
+				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+				if (!mapping.Owners.NullOrEmpty())
+				{
+					RecalculateAllPerceivedPathCosts(mapping);
+				}
+			});
 		}
 
 		private static void RecalculateAllPerceivedPathCosts(VehicleMapping mapping)
@@ -404,7 +435,14 @@ namespace Vehicles
 				if (mapping.ThreadAvailable)
 				{
 					AsyncAction asyncAction = AsyncPool<AsyncAction>.Get();
-					asyncAction.Set(() => RecalculatePerceivedPathCostAtFor(mapping, cell, new List<Thing>(thingList)), () => map != null && map.Index > -1);
+					List<Thing> snapshotList = AsyncPool<List<Thing>>.Get();
+					snapshotList.AddRange(thingList);
+					asyncAction.Set(delegate ()
+					{
+						RecalculatePerceivedPathCostAtFor(mapping, cell, snapshotList);
+						snapshotList.Clear();
+						AsyncPool<List<Thing>>.Return(snapshotList);
+					}, () => map != null && map.Index > -1);
 					mapping.dedicatedThread.Queue(asyncAction);
 				}
 				else

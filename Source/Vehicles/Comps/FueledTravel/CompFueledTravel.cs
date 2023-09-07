@@ -44,7 +44,7 @@ namespace Vehicles
 		private float fuelConsumptionRateOffset;
 		private float fuelCapacityOffset;
 
-		public List<VehicleComponent> FuelComponents { get; private set; }
+		public List<(VehicleComponent component, Reactor_FuelLeak fuelLeak)> FuelComponents { get; private set; }
 
 		public CompProperties_FueledTravel Props => props as CompProperties_FueledTravel;
 
@@ -413,21 +413,41 @@ namespace Vehicles
 					Refuel(Props.chargeRate);
 				}
 			}
+		}
+
+		public void LeakTick()
+		{
+			//Validate leak every so often
+			if (Props.leakDef != null && fuel > 0 && Find.TickManager.TicksGame % TicksPerLeakCheck == 0 && !FuelComponents.NullOrEmpty())
+			{
+				leaking = false;
+				foreach ((VehicleComponent component, Reactor_FuelLeak fuelLeak) in FuelComponents)
+				{
+					if (component.HealthPercent <= fuelLeak.maxHealth)
+					{
+						leaking = true;
+					}
+				}
+			}
 
 			//If leaking, then loop through and spawn filth
 			if (leaking)
 			{
-				foreach (VehicleComponent component in FuelComponents)
+				foreach ((VehicleComponent component, Reactor_FuelLeak fuelLeak) in FuelComponents)
 				{
-					float efficiency = component.Efficiency;
-					int ticksPerLeak = Mathf.CeilToInt(Mathf.Pow(efficiency, 2) / 1000 + 20);
+					float t = (fuelLeak.maxHealth - component.HealthPercent) * (1 / fuelLeak.maxHealth);
+					float rate = Mathf.Lerp(fuelLeak.rate.min, fuelLeak.rate.max, t);
+					if (rate == 0)
+					{
+						continue;
+					}
+					int ticksPerLeak = Mathf.CeilToInt(60 / rate);
 					if (Find.TickManager.TicksGame % ticksPerLeak == 0)
 					{
-						float fuelLeaking = (1 - efficiency) * FuelPerLeak;
-						ConsumeFuel(fuelLeaking);
+						ConsumeFuel(FuelPerLeak);
 						if (Vehicle.Spawned)
 						{
-							IntVec2 offset = component.props.hitbox.cells.RandomElement();
+							IntVec2 offset = component.props.hitbox.cells.RandomElementWithFallback(fallback: IntVec2.Zero);
 							IntVec3 leakCell = new IntVec3(Vehicle.Position.x + offset.x, 0, Vehicle.Position.z + offset.z);
 							FilthMaker.TryMakeFilth(leakCell, Vehicle.Map, Props.leakDef);
 						}
@@ -451,20 +471,6 @@ namespace Vehicles
 				else
 				{
 					Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Vehicle, ReservationType.Refuel);
-				}
-			}
-
-			//Validate leak every so often
-			if (Props.leakDef != null && fuel > 0 && !FuelComponents.NullOrEmpty() && Find.TickManager.TicksGame % TicksPerLeakCheck == 0)
-			{
-				leaking = false;
-				foreach (VehicleComponent component in FuelComponents)
-				{
-					float efficiency = component.Efficiency;
-					if (efficiency < 0.9f)
-					{
-						leaking = true;
-					}
 				}
 			}
 
@@ -523,17 +529,9 @@ namespace Vehicles
 						mote.SetVelocity(moteAngle, moteSpeed);
 						RenderHelper.ThrowMoteEnhanced(motePosition, parent.Map, mote);
 					}
-					catch(Exception ex)
+					catch (Exception ex)
 					{
-						Log.Error(string.Concat(new object[]
-						{
-							"Exception thrown while trying to display ",
-							Props.MoteDisplayed.defName,
-							" Terminating MoteDraw Method from ",
-							parent.LabelShort,
-							" Exception: ",
-							ex.Message
-						}));
+						Log.Error($"Exception thrown while trying to display {Props.MoteDisplayed.defName} Terminating MoteDraw Method from {parent.LabelShort} Exception={ex}");
 						terminateMotes = true;
 						return;
 					}
@@ -543,7 +541,14 @@ namespace Vehicles
 
 		public override void EventRegistration()
 		{
-			FuelComponents = Vehicle.statHandler.components.Where(component => component.props.HasReactor<Reactor_FuelLeak>()).ToList();
+			FuelComponents = new List<(VehicleComponent component, Reactor_FuelLeak fuelLeak)>();
+			foreach (VehicleComponent component in Vehicle.statHandler.components.Where(component => component.props.HasReactor<Reactor_FuelLeak>()))
+			{
+				if (component.props.HasReactor<Reactor_FuelLeak>())
+				{
+					FuelComponents.Add((component, component.props.GetReactor<Reactor_FuelLeak>()));
+				}
+			}
 
 			Vehicle.AddEvent(VehicleEventDefOf.MoveStart, RevalidateConsumptionStatus);
 			Vehicle.AddEvent(VehicleEventDefOf.MoveStop, RevalidateConsumptionStatus);

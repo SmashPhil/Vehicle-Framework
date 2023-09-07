@@ -6,6 +6,7 @@ using Verse;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using AnimationEvent = SmashTools.AnimationEvent;
 
 namespace Vehicles
 {
@@ -172,6 +173,22 @@ namespace Vehicles
 			{
 				ticksPassedVertical++;
 				TickMotes();
+			}
+		}
+
+		protected override void TickEvents()
+		{
+			base.TickEvents();
+			if (!CurAnimationProperties_Vertical.eventsVertical.NullOrEmpty())
+			{
+				for (int i = 0; i < CurAnimationProperties_Vertical.eventsVertical.Count; i++)
+				{
+					AnimationEvent @event = CurAnimationProperties_Vertical.eventsVertical[i];
+					if (@event.EventFrame(TimeInAnimationVTOL))
+					{
+						@event.method.InvokeUnsafe(null, this);
+					}
+				}
 			}
 		}
 

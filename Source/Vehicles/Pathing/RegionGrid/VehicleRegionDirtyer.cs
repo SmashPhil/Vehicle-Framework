@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using Verse;
@@ -14,36 +15,10 @@ namespace Vehicles
 		private readonly VehicleMapping mapping;
 		private readonly VehicleDef createdFor;
 
-		private readonly HashSet<IntVec3> dirtyCells = new HashSet<IntVec3>();
+		private readonly ConcurrentSet<IntVec3> dirtyCells = new ConcurrentSet<IntVec3>();
 
-		[ThreadStatic]
-		private static List<VehicleRegion> regionsToDirty;
-		[ThreadStatic]
-		private static List<VehicleRegion> regionsToDirtyFromWalkability = new List<VehicleRegion>();
-
-		public static List<VehicleRegion> RegionsToDirty
-		{
-			get
-			{
-				if (regionsToDirty == null)
-				{
-					regionsToDirty = new List<VehicleRegion>();
-				}
-				return regionsToDirty;
-			}
-		}
-
-		public static List<VehicleRegion> RegionsToDirtyFromWalkability
-		{
-			get
-			{
-				if (regionsToDirtyFromWalkability == null)
-				{
-					regionsToDirtyFromWalkability = new List<VehicleRegion>();
-				}
-				return regionsToDirtyFromWalkability;
-			}
-		}
+		private readonly ConcurrentBag<VehicleRegion> regionsToDirty = new ConcurrentBag<VehicleRegion>();
+		private readonly ConcurrentBag<VehicleRegion> regionsToDirtyFromWalkability = new ConcurrentBag<VehicleRegion>();
 
 		public VehicleRegionDirtyer(VehicleMapping mapping, VehicleDef createdFor)
 		{
@@ -54,7 +29,13 @@ namespace Vehicles
 		/// <summary>
 		/// <see cref="dirtyCells"/> getter
 		/// </summary>
-		public HashSet<IntVec3> DirtyCells => dirtyCells;
+		public IEnumerable<IntVec3> DirtyCells
+		{
+			get
+			{
+				return dirtyCells.Keys; //Snapshots inner list of keys
+			}
+		}
 
 		/// <summary>
 		/// Any dirty cells registered
@@ -98,7 +79,7 @@ namespace Vehicles
 		/// <param name="cell"></param>
 		public void Notify_WalkabilityChanged(IntVec3 cell)
 		{
-			RegionsToDirtyFromWalkability.Clear();
+			regionsToDirtyFromWalkability.Clear();
 			for (int i = 0; i < 9; i++)
 			{
 				IntVec3 adjCell = cell + GenAdj.AdjacentCellsAndInside[i];
@@ -115,30 +96,30 @@ namespace Vehicles
 			{
 				dirtyCells.Add(cell);
 			}
-			RegionsToDirtyFromWalkability.Clear();
+			regionsToDirtyFromWalkability.Clear();
 		}
 
 		public void Notify_ThingAffectingRegionsSpawned(CellRect occupiedRect)
 		{
-			RegionsToDirty.Clear();
+			regionsToDirty.Clear();
 			foreach (IntVec3 cell in occupiedRect.ExpandedBy(1).ClipInsideMap(mapping.map))
 			{
 				VehicleRegion validRegionAt_NoRebuild = mapping[createdFor].VehicleRegionGrid.GetValidRegionAt_NoRebuild(cell);
 				if (validRegionAt_NoRebuild != null)
 				{
-					RegionsToDirty.Add(validRegionAt_NoRebuild);
+					regionsToDirty.Add(validRegionAt_NoRebuild);
 				}
 			}
-			for (int i = 0; i < RegionsToDirty.Count; i++)
+			foreach (VehicleRegion vehicleRegion in regionsToDirty)
 			{
-				SetRegionDirty(RegionsToDirty[i], true);
+				SetRegionDirty(vehicleRegion, true);
 			}
-			RegionsToDirty.Clear();
+			regionsToDirty.Clear();
 		}
 
 		public void Notify_ThingAffectingRegionsDespawned(CellRect occupiedRect)
 		{
-			RegionsToDirty.Clear();
+			regionsToDirty.Clear();
 			//IntVec2 sizeWithPadding = thing.def.size + new IntVec2(createdFor.SizePadding * 2, createdFor.SizePadding * 2); //Doubled to account for opposite directions (N to S, E to W)
 			foreach (IntVec3 cell in occupiedRect.ExpandedBy(createdFor.SizePadding).ClipInsideMap(mapping.map))
 			{
@@ -148,16 +129,20 @@ namespace Vehicles
 					VehicleRegion validRegionAt_NoRebuild2 = mapping[createdFor].VehicleRegionGrid.GetValidRegionAt_NoRebuild(cell);
 					if (validRegionAt_NoRebuild2 != null)
 					{
-						RegionsToDirty.Add(validRegionAt_NoRebuild2);
+						regionsToDirty.Add(validRegionAt_NoRebuild2);
 					}
 				}
 			}
-			for (int i = 0; i < RegionsToDirty.Count; i++)
+			foreach (VehicleRegion vehicleRegion in regionsToDirty)
 			{
-				SetRegionDirty(RegionsToDirty[i], true);
+				SetRegionDirty(vehicleRegion, true);
 			}
-			RegionsToDirty.Clear();
-			dirtyCells.AddRange(occupiedRect);
+			regionsToDirty.Clear();
+
+			foreach (IntVec3 cell in occupiedRect)
+			{
+				dirtyCells.Add(cell);
+			}
 		}
 
 		/// <summary>
@@ -167,6 +152,7 @@ namespace Vehicles
 		/// <param name="addCellsToDirtyCells"></param>
 		private void SetRegionDirty(VehicleRegion region, bool addCellsToDirtyCells = true)
 		{
+			string step = "";
 			try
 			{
 				if (!region.valid)
@@ -175,14 +161,17 @@ namespace Vehicles
 				}
 				region.valid = false;
 				region.Room = null;
-				for (int i = 0; i < region.links.Count; i++)
+				step = "Deregistering";
+				foreach (VehicleRegionLink regionLink in region.links)
 				{
-					region.links[i].Deregister(region, createdFor);
+					regionLink.Deregister(region, createdFor);
 				}
+				step = "Clearing links and weights";
 				region.links.Clear();
 				region.weights.Clear();
 				if (addCellsToDirtyCells)
 				{
+					step = "Dirtying Cells";
 					foreach (IntVec3 intVec in region.Cells)
 					{
 						dirtyCells.Add(intVec);
@@ -191,7 +180,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Exception thrown in SetRegionDirty. Null: {region is null} Room: {region?.Room is null} links: {region?.links is null} weights: {region?.weights is null}");
+				Log.Error($"Exception thrown in SetRegionDirty. Step = {step}\nNull: {region is null} Room: {region?.Room is null} links: {region?.links is null} weights: {region?.weights is null}");
 				throw ex;
 			}
 		}

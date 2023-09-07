@@ -133,7 +133,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Exception when firing Cannon: {turret.turretDef.LabelCap} on Pawn: {vehicle.LabelCap}. Exception: {ex.Message}");
+				Log.Error($"Exception when firing Cannon: {turret.turretDef.LabelCap} on Pawn: {vehicle.LabelCap}. Exception: {ex}");
 			}
 		}
 

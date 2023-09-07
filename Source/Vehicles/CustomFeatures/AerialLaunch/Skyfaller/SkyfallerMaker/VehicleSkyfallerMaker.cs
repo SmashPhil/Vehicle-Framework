@@ -53,7 +53,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Unable to generate VehicleSkyfaller of type <type>{def.thingClass}</type>. Exception=\"{ex.Message}\"");
+				Log.Error($"Unable to generate VehicleSkyfaller of type <type>{def.thingClass}</type>. Exception=\"{ex}\"");
 			}
 			return null;
 		}

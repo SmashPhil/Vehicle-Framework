@@ -92,7 +92,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Exception while rebuilding vehicle regions for {createdFor}. Last step: {updateStep} Exception={ex.Message}");
+				Log.Error($"Exception while rebuilding vehicle regions for {createdFor}. Last step: {updateStep} Exception={ex}");
 			}
 			newRegions.Clear();
 			mapping[createdFor].VehicleRegionDirtyer.SetAllClean();
@@ -106,8 +106,7 @@ namespace Vehicles
 		private void RegenerateNewVehicleRegions()
 		{
 			newRegions.Clear();
-			List<IntVec3> cells = mapping[createdFor].VehicleRegionDirtyer.DirtyCells.ToList();
-			foreach (IntVec3 cell in cells)
+			foreach (IntVec3 cell in mapping[createdFor].VehicleRegionDirtyer.DirtyCells)
 			{
 				if (VehicleGridsUtility.GetRegion(cell, mapping.map, createdFor, RegionType.Set_All) is null)
 				{

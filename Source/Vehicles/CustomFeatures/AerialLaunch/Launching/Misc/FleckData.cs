@@ -25,6 +25,10 @@ namespace Vehicles
 		[GraphEditable]
 		public LinearCurve drawOffset;
 		[GraphEditable]
+		public LinearCurve xFleckPositionCurve;
+		[GraphEditable]
+		public LinearCurve zFleckPositionCurve;
+		[GraphEditable]
 		public LinearCurve airTime;
 		[GraphEditable]
 		public LinearCurve frequency;

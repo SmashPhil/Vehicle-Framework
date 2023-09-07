@@ -210,7 +210,7 @@ namespace Vehicles
 				}
 				catch (Exception ex)
 				{
-					Log.Error($"Pawn {newThing.Label} could not be readjusted for spawn location. Exception={ex.Message}");
+					Log.Error($"Pawn {newThing.Label} could not be readjusted for spawn location. Exception={ex}");
 				}
 			}
 			else
@@ -282,7 +282,7 @@ namespace Vehicles
 				}
 				catch (Exception ex)
 				{
-					Log.Error($"Thing {newThing.Label} could not be readjusted for spawn location. Exception={ex.Message}");
+					Log.Error($"Thing {newThing.Label} could not be readjusted for spawn location. Exception={ex}");
 				}
 			}
 			return true;

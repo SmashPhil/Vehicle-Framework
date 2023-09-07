@@ -47,6 +47,23 @@ namespace Vehicles
 				}
 				return new Rot8(Rotation, Angle);
 			}
+			set
+			{
+				if (value == FullRotation)
+				{
+					return;
+				}
+				Rotation = value;
+				Angle = 0;
+				if (value == Rot8.NorthEast || value == Rot8.SouthWest)
+				{
+					Angle = -45;
+				}
+				else if (value == Rot8.SouthEast || value == Rot8.NorthWest)
+				{
+					Angle = 45;
+				}
+			}
 		}
 
 		public Pawn FindPawnWithBestStat(StatDef stat, Predicate<Pawn> pawnValidator = null)

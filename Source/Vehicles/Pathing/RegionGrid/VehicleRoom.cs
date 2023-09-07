@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
@@ -21,9 +22,6 @@ namespace Vehicles
 		public int lastChangeTick = -1;
 		private int numRegionsTouchingMapEdge;
 
-		private readonly HashSet<VehicleRoom> uniqueNeighborsSet = new HashSet<VehicleRoom>();
-		private readonly List<VehicleRoom> uniqueNeighbors = new List<VehicleRoom>();
-
 		public VehicleRoom(VehicleDef vehicleDef)
 		{
 			this.vehicleDef = vehicleDef;
@@ -37,12 +35,12 @@ namespace Vehicles
 		/// <summary>
 		/// Region type with fallback
 		/// </summary>
-		public RegionType RegionType => Regions.NullOrEmpty() ? RegionType.None : Regions[0].type;
+		public RegionType RegionType => Regions.NullOrEmpty() ? RegionType.None : Regions.FirstOrDefault().Key.type;
 
 		/// <summary>
 		/// Region getter for regions contained within room
 		/// </summary>
-		public List<VehicleRegion> Regions { get; } = new List<VehicleRegion>();
+		public ConcurrentSet<VehicleRegion> Regions { get; } = new ConcurrentSet<VehicleRegion>();
 
 		/// <summary>
 		/// Region count
@@ -76,15 +74,9 @@ namespace Vehicles
 		/// <param name="region"></param>
 		public void AddRegion(VehicleRegion region)
 		{
-			if (Regions.Contains(region))
+			if (Regions.ContainsKey(region))
 			{
-				Log.Error(string.Concat(new object[]
-				{
-					"Tried to add the same region twice to Room. region=",
-					region,
-					", room=",
-					this
-				}));
+				Log.Error($"Tried to add the same region twice to Room. region={region} room={this}");
 				return;
 			}
 			Regions.Add(region);
@@ -102,21 +94,15 @@ namespace Vehicles
 		/// Remove region from room
 		/// </summary>
 		/// <param name="r"></param>
-		public void RemoveRegion(VehicleRegion r)
+		public void RemoveRegion(VehicleRegion region)
 		{
-			if (!Regions.Contains(r))
+			if (!Regions.ContainsKey(region))
 			{
-				Log.Error(string.Concat(new object[]
-				{
-					"Tried to remove region from Room but this region is not here. region=",
-					r,
-					", room=",
-					this
-				}));
+				Log.Error($"Tried to remove region from Room but this region is not here. region={region} room={this}");
 				return;
 			}
-			Regions.Remove(r);
-			if (r.touchesMapEdge)
+			Regions.Remove(region);
+			if (region.touchesMapEdge)
 			{
 				numRegionsTouchingMapEdge--;
 			}

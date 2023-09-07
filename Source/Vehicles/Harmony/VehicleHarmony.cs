@@ -152,6 +152,17 @@ namespace Vehicles
 			foreach (VehicleDef def in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
 				def.PostDefDatabase();
+				foreach (CompProperties compProperties in def.comps)
+				{
+					if (compProperties is VehicleCompProperties vehicleCompProperties)
+					{
+						vehicleCompProperties.PostDefDatabase();
+					}
+				}
+			}
+			foreach (VehicleTurretDef turretDef in DefDatabase<VehicleTurretDef>.AllDefsListForReading)
+			{
+				turretDef.PostDefDatabase();
 			}
 		}
 
@@ -206,12 +217,21 @@ namespace Vehicles
 		
 		private static void RegisterTweakFieldsInEditor()
 		{
-			//EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawSize)), string.Empty, UISettingsType.FloatBox);
-			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffset)), string.Empty, UISettingsType.FloatBox);
-			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffsetNorth)), string.Empty, UISettingsType.FloatBox);
-			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffsetEast)), string.Empty, UISettingsType.FloatBox);
-			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffsetSouth)), string.Empty, UISettingsType.FloatBox);
-			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffsetWest)), string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffset)), string.Empty, string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffsetNorth)), string.Empty, string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffsetEast)), string.Empty, string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffsetSouth)), string.Empty, string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffsetWest)), string.Empty, string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicDataLayered), nameof(GraphicData.drawOffset)), string.Empty, string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicDataLayered), nameof(GraphicData.drawOffsetNorth)), string.Empty, string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicDataLayered), nameof(GraphicData.drawOffsetEast)), string.Empty, string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicDataLayered), nameof(GraphicData.drawOffsetSouth)), string.Empty, string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicDataLayered), nameof(GraphicData.drawOffsetWest)), string.Empty, string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicDataRGB), nameof(GraphicData.drawOffset)), string.Empty, string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicDataRGB), nameof(GraphicData.drawOffsetNorth)), string.Empty, string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicDataRGB), nameof(GraphicData.drawOffsetEast)), string.Empty, string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicDataRGB), nameof(GraphicData.drawOffsetSouth)), string.Empty, string.Empty, UISettingsType.FloatBox);
+			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicDataRGB), nameof(GraphicData.drawOffsetWest)), string.Empty, string.Empty, UISettingsType.FloatBox);
 		}
 	}
 }
