@@ -1122,7 +1122,7 @@ namespace Vehicles
 							hitflags = turretDef.attachProjectileFlag
 						});
 					}
-					projectileInstance.Launch(vehicle, launchCell, cannonTarget, cannonTarget, projectileInstance.HitFlags, false, vehicle);
+					projectileInstance.Launch(vehicle, launchCell, cell, cannonTarget, projectileInstance.HitFlags, false, vehicle);
 				}
 				else
 				{

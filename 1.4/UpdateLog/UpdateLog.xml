@@ -24,6 +24,8 @@ Thanks again to everyone that have been reporting bugs! And an even bigger thank
 - Fixed bug where hitboxes for even size vehicles wouldn't rotate properly, resulting in hits from very specific directions immediately damaging internal parts.
 
 - Fixed bug where reloading with not enough ammo would still consume the ammo and reload to full.
+
+- Fixed bug with fuel leaks not operating when the vehicle is turned off.
 &lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Map Preview
 
@@ -39,13 +41,13 @@ Thanks again to everyone that have been reporting bugs! And an even bigger thank
 
 - Added burstsTillWarmup field for FireModes, allowing turrets to shoot up to N bursts before requiring another warmup.
 
-- Added fields to Reactor_FuelLeak for modders to configure the rate of fuel leakage when taking damage to a component that is related to fuel (eg. Chemtank from VVE)
+- Added fields to Reactor_FuelLeak for modders to configure the rate of fuel leakage when taking damage to a component that is related to fuel (eg. Chemtank from VVE).
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>
   <!--Show update log on next startup.-->
-  <update>false</update>
+  <update>true</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
   <testing>false</testing>
   <!--Icon bar shown to the right of the mod's name-->
