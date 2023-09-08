@@ -62,7 +62,7 @@ namespace Vehicles
 
 		public static List<Thing> FindThingsToPack(VehiclePawn vehicle, Pawn pawn, VehicleTurret turret, int count)
 		{
-			List<Thing> ammo = RefuelWorkGiverUtility.FindEnoughReservableThings(pawn, vehicle.Position, new IntRange(turret.turretDef.chargePerAmmoCount, count), delegate (Thing thing)
+			List<Thing> ammo = RefuelWorkGiverUtility.FindEnoughReservableThings(pawn, vehicle.Position, new IntRange(1, count), delegate (Thing thing)
 			{
 				if (turret.turretDef.ammunition is null)
 				{

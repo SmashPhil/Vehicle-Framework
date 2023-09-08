@@ -1555,7 +1555,7 @@ namespace Vehicles
 					}
 
 					int countToRefill = turretDef.magazineCapacity - shellCount;
-					int countToTake = Mathf.FloorToInt(countToRefill * turretDef.chargePerAmmoCount);
+					int countToTake = Mathf.CeilToInt(countToRefill * turretDef.chargePerAmmoCount);
 					int countRefilled = 0;
 
 					thingsToTakeReloading.Clear();
@@ -1565,7 +1565,7 @@ namespace Vehicles
 						{
 							if (thing.def == storedAmmo.def)
 							{
-								int availableCount = thing.stackCount - thing.stackCount % turretDef.chargePerAmmoCount;
+								int availableCount = thing.stackCount - thing.stackCount % Mathf.CeilToInt(turretDef.chargePerAmmoCount);
 								int takingFromThing = Mathf.Min(countToTake, availableCount);
 								thingsToTakeReloading.Add((thing, takingFromThing));
 								countToTake -= takingFromThing;
@@ -1599,7 +1599,7 @@ namespace Vehicles
 					}
 
 					loadedAmmo = storedAmmo.def;
-					shellCount = countRefilled / turretDef.chargePerAmmoCount;
+					shellCount = Mathf.CeilToInt(countRefilled / turretDef.chargePerAmmoCount).Clamp(0, turretDef.magazineCapacity);
 					EventRegistry[VehicleTurretEventDefOf.Reload].ExecuteEvents();
 					if (turretDef.reloadSound != null)
 					{
@@ -1630,7 +1630,7 @@ namespace Vehicles
 			if (loadedAmmo != null && shellCount > 0)
 			{
 				Thing thing = ThingMaker.MakeThing(loadedAmmo);
-				thing.stackCount = shellCount * turretDef.chargePerAmmoCount;
+				thing.stackCount = Mathf.CeilToInt(shellCount * turretDef.chargePerAmmoCount);
 				//vehicle.inventory.innerContainer.TryAdd(thing);
 				vehicle.AddOrTransfer(thing);
 				loadedAmmo = null;

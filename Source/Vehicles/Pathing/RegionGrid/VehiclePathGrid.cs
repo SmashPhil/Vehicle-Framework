@@ -158,39 +158,37 @@ namespace Vehicles
 		/// <param name="cell"></param>
 		public static int CalculatePathCostFor(VehicleDef vehicleDef, Map map, IntVec3 cell, List<Thing> thingList, StringBuilder stringBuilder = null)
 		{
-			stringBuilder ??= new StringBuilder();
-			stringBuilder.Clear();
-			stringBuilder.AppendLine($"Starting calculation for {vehicleDef} at {cell}.");
+			stringBuilder?.AppendLine($"Starting calculation for {vehicleDef} at {cell}.");
 			int pathCost = 0;
 			try
 			{
 				TerrainDef terrainDef = map.terrainGrid.TerrainAt(cell);
 				if (terrainDef is null)
 				{
-					stringBuilder.AppendLine($"Unable to retrieve terrain at {cell}.");
+					stringBuilder?.AppendLine($"Unable to retrieve terrain at {cell}.");
 					return ImpassableCost;
 				}
 				pathCost = terrainDef.pathCost;
-				stringBuilder.AppendLine($"def pathCost = {pathCost}");
+				stringBuilder?.AppendLine($"def pathCost = {pathCost}");
 
-				stringBuilder.AppendLine($"Starting Terrain check.");
+				stringBuilder?.AppendLine($"Starting Terrain check.");
 				if (vehicleDef.properties.customTerrainCosts.TryGetValue(terrainDef, out int customPathCost))
 				{
-					stringBuilder.AppendLine($"custom turrain cost: {customPathCost}");
+					stringBuilder?.AppendLine($"custom turrain cost: {customPathCost}");
 					pathCost = customPathCost;
 				}
 				else if (terrainDef.passability == Traversability.Impassable)
 				{
-					stringBuilder.AppendLine($"terrainDef impassable: {ImpassableCost}");
+					stringBuilder?.AppendLine($"terrainDef impassable: {ImpassableCost}");
 					return ImpassableCost;
 				}
 				else if (vehicleDef.properties.defaultTerrainImpassable)
 				{
-					stringBuilder.AppendLine($"defaultTerrain is impassable and no custom pathCost was found.");
+					stringBuilder?.AppendLine($"defaultTerrain is impassable and no custom pathCost was found.");
 					return ImpassableCost;
 				}
 
-				stringBuilder.AppendLine($"Starting ThingList check.");
+				stringBuilder?.AppendLine($"Starting ThingList check.");
 				if (!thingList.NullOrEmpty())
 				{
 					int thingCost = 0;
@@ -205,20 +203,20 @@ namespace Vehicles
 						{
 							if (thingPathCost >= ImpassableCost)
 							{
-								stringBuilder.AppendLine($"thingPathCost is impassable: {thingPathCost}");
+								stringBuilder?.AppendLine($"thingPathCost is impassable: {thingPathCost}");
 								return ImpassableCost;
 							}
 						}
 						else if (thing.ImpassableForVehicles())
 						{
-							stringBuilder.AppendLine($"thingDef is impassable: {thingPathCost}");
+							stringBuilder?.AppendLine($"thingDef is impassable: {thingPathCost}");
 							return ImpassableCost;
 						}
 						else
 						{
 							thingPathCost = thing.def.pathCost;
 						}
-						stringBuilder.AppendLine($"thingPathCost: {thingPathCost}");
+						stringBuilder?.AppendLine($"thingPathCost: {thingPathCost}");
 						if (thingPathCost > thingCost)
 						{
 							thingCost = thingPathCost;
@@ -234,9 +232,9 @@ namespace Vehicles
 				}
 				snowPathCost = snowPathCost.Clamp(0, 450);
 
-				stringBuilder.AppendLine($"snowPathCost: {snowPathCost}");
+				stringBuilder?.AppendLine($"snowPathCost: {snowPathCost}");
 				pathCost += snowPathCost;
-				stringBuilder.AppendLine($"final cost: {pathCost}");
+				stringBuilder?.AppendLine($"final cost: {pathCost}");
 			}
 			catch (Exception ex)
 			{

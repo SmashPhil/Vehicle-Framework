@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <!--Can utilize Version.txt file placed in mod's root directory-->
+  <currentVersion>1.5.1368</currentVersion>
+  <!--Startup,GameInit,LoadedGame,NewGame-->
+  <updateOn>Startup</updateOn>
+  <!--Full description shown in update page-->
+  <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+I'm pushing this patch early since a lot of people keep asking about Map Preview.  This patch includes a compatibility fix for it.
+
+I'm slowly working through pathfinding issues, multi-cell pathfinding (with multithreading) is difficult so it's going to be a slow grind for working out all the issues. This patch also incldues a couple pathfinding related fixes.  
+Be mindful that this might not catch every single pathfinding bug out there, so if you encounter one please report it to me.  In the mean time, you can always force regenerate regions from the VF Mod Settings under the DevMode tab.
+
+Thanks again to everyone that have been reporting bugs! And an even bigger thanks for those that have been helping me test.
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed thread safety issue with 'district' chunks for vehicles.
+
+- Fixed thread safety issue with region links, weights, and reachability cache.
+
+- Fixed bug where biome costs would add additional costs for hills and winter costs from vanilla on top of adding vehicle related costs, essentially doubling the effect of hills and winter for vehicles.
+
+- Fixed bug where saving a vehicle while in the landing / takeoff animation would incorrectly serialize the vehicle + pawns, resulting in a save / load issue.
+
+- Fixed bug where hitboxes for even size vehicles wouldn't rotate properly, resulting in hits from very specific directions immediately damaging internal parts.
+
+- Fixed bug where reloading with not enough ammo would still consume the ammo and reload to full.
+
+- Fixed bug with fuel leaks not operating when the vehicle is turned off.
+&lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Map Preview
+
+- Rails of the Rim
+&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Added Haul Pawn To Vehicle command, allowing any non-hostile pawn to be loaded into a vehicle if enough room is available. This applies to aerial vehicles and prisoners.
+
+- Added vehicle stats to mod settings in the vehicle section.  You can now modify vehicle stats (eg. Cargo Capacity, Move Speed, etc.) which is serialized to the config file, allowing you to rebalance vehicles across playthroughs.
+
+- Internal parts can now be given hitboxes.  They will be prioritized when taking penetrating damage at that cell, otherwise it will select a random internal part like before.
+
+- Added'Tweak Fields' editor window and a vast selection of fields for runtime editing for mod developers.
+
+- Added burstsTillWarmup field for FireModes, allowing turrets to shoot up to N bursts before requiring another warmup.
+
+- Added fields to Reactor_FuelLeak for modders to configure the rate of fuel leakage when taking damage to a component that is related to fuel (eg. Chemtank from VVE).
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
+  <!--Static parameterless method to execute when update log is executed-->
+  <actionOnUpdate></actionOnUpdate>
+  <!--Show update log on next startup.-->
+  <update>false</update>
+  <!--Testing mode prevents the update from saving over the UpdateLog file-->
+  <testing>false</testing>
+  <!--Icon bar shown to the right of the mod's name-->
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon</icon>
+      <url>steam://url/CommunityFilePage/2356577528</url>
+    </li>
+  </rightIconBar>
+  <!--Icon bar shown to the left of the mod's name-->
+  <leftIconBar>
+    <li>
+      <name>Patreon</name>
+      <icon>patreonIcon</icon>
+      <url>https://www.patreon.com/smashphil</url>
+    </li>
+    <li>
+      <name>Cursed Crew</name>
+      <icon>cursedCrewIcon</icon>
+      <url>https://discord.gg/NNe2VxAU7Z</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>

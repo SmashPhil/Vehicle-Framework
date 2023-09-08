@@ -28,8 +28,8 @@ namespace Vehicles
 
 		[TweakField(SettingsType = UISettingsType.IntegerBox)]
 		public int magazineCapacity = 1;
-		[TweakField(SettingsType = UISettingsType.IntegerBox)]
-		public int chargePerAmmoCount = 1;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
+		public float chargePerAmmoCount = 1;
 		public bool genericAmmo = false;
 		public TurretCooldownProperties cooldown;
 
