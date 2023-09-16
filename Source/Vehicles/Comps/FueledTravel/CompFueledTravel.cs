@@ -445,7 +445,7 @@ namespace Vehicles
 					if (Find.TickManager.TicksGame % ticksPerLeak == 0)
 					{
 						ConsumeFuel(FuelPerLeak);
-						if (Vehicle.Spawned)
+						if (Vehicle.Spawned && !EmptyTank)
 						{
 							IntVec2 offset = component.props.hitbox.cells.RandomElementWithFallback(fallback: IntVec2.Zero);
 							IntVec3 leakCell = new IntVec3(Vehicle.Position.x + offset.x, 0, Vehicle.Position.z + offset.z);

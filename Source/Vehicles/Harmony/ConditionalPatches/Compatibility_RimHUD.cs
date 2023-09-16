@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using HarmonyLib;
 using Verse;
 using SmashTools;
@@ -13,15 +14,15 @@ namespace Vehicles
 
 		public override void PatchAll(ModMetaData mod, Harmony harmony)
 		{
-			Type inspectPaneUtilityType = AccessTools.TypeByName("RimHUD.Patch.RimWorld_InspectPaneUtility_InspectPaneOnGUI");
+			Type inspectPaneUtilityType = AccessTools.TypeByName("RimHUD.Access.Patch.RimWorld_InspectPaneUtility_InspectPaneOnGUI");
 			harmony.Patch(AccessTools.Method(inspectPaneUtilityType, "Prefix"),
 				prefix: new HarmonyMethod(typeof(Compatibility_RimHUD),
 				nameof(DontRenderRimHUDForVehicles_InspectPaneUtility)));
 
-			Type inspectPaneFillerType = AccessTools.TypeByName("RimHUD.Patch.RimWorld_InspectPaneFiller_DoPaneContentsFor");
-			harmony.Patch(AccessTools.Method(inspectPaneFillerType, "Prefix"),
-				prefix: new HarmonyMethod(typeof(Compatibility_RimHUD),
-				nameof(DontRenderRimHUDForVehicles_InspectPaneFiller)));
+			//Type inspectPaneFillerType = AccessTools.TypeByName("RimHUD.Patch.RimWorld_InspectPaneFiller_DoPaneContentsFor");
+			//harmony.Patch(AccessTools.Method(inspectPaneFillerType, "Prefix"),
+			//	prefix: new HarmonyMethod(typeof(Compatibility_RimHUD),
+			//	nameof(DontRenderRimHUDForVehicles_InspectPaneFiller)));
 		}
 
 		private static bool DontRenderRimHUDForVehicles_InspectPaneUtility(Rect inRect, IInspectPane pane, ref bool __result)

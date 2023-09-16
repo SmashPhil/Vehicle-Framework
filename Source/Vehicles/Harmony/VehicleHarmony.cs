@@ -61,9 +61,9 @@ namespace Vehicles
 			VehicleMCP = VehicleMod.settings.Mod.Content;
 			VehicleMMD = ModLister.GetActiveModWithIdentifier(VehiclesUniqueId, ignorePostfix: true);
 
-			string dateText = File.ReadAllText(BuildDatePath).Trim(Environment.NewLine.ToCharArray());
 			try
 			{
+				string dateText = File.ReadAllText(BuildDatePath).Trim(Environment.NewLine.ToCharArray());
 				//DateTime buildDate = DateTime.ParseExact(dateText, "ddd MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
 
 				///Manually parsed because Linux and Mac be weird even with invariant culture, and it's just easier to do it this way
@@ -83,7 +83,7 @@ namespace Vehicles
 			}
 			catch(Exception ex)
 			{
-				Log.Error($"Exception thrown while attempting to parse VehicleFramework version number. BuildDate = {dateText}\nException: {ex}");
+				Log.Error($"Exception thrown while attempting to parse VehicleFramework version number. \nException={ex}");
 			}
 
 			Harmony.PatchAll();
