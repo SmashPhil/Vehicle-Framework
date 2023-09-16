@@ -152,6 +152,12 @@ namespace Vehicles
 		/// (ammoset name, ret ammoset def)
 		/// </summary>
 		public static Func<string, Def> LookupAmmosetCE = null;
+
+
+	        /// <summary>
+		/// (ammoDef, ammosetDef, spread, ret Tuple<projectileCount, spread>)
+		/// </summary>
+		public static Func<ThingDef, Def, float, Tuple<int, float>> LookupProjectileCountAndSpreadCE = null;
 		/* ---------------------------------------------- */
 
 		/// <summary>
@@ -1153,13 +1159,27 @@ namespace Vehicles
 						    turretData._ammoSet = LookupAmmosetCE(turretData.ammoSet);
 						}
 					}
+					int projectileCount = 1;
+					if (LookupProjectileCountAndSpreadCE != null)
+					{
+						var pcs = LookupProjectileCountAndSpreadCE(loadedAmmo, turretData?._ammoSet, spread);
+						projectileCount = pcs.Item1;
+						spread = pcs.Item2;
+					}
+
 					float distance = (launchCell - cannonTarget.CenterVector3).magnitude;
 
-					Vector2 vce = ProjectileAngleCE(speed, distance, vehicle, cannonTarget, new Vector3(launchCell.x, shotHeight, launchCell.z), false, 1f, sway, spread, recoil * CurrentTurretFiring);
+					Vector2 vce = ProjectileAngleCE(speed, distance, vehicle, cannonTarget, new Vector3(launchCell.x, shotHeight, launchCell.z), false, 1f, sway, 0, recoil * CurrentTurretFiring);
 					float sa = vce.y;
 					float tr = -TurretRotation + vce.x;
-
-					LaunchProjectileCE(projectile, loadedAmmo, turretData?._ammoSet, new Vector2(launchCell.x, launchCell.z), cannonTarget, vehicle, sa, tr, shotHeight, speed);
+					do {
+						double randomSpread = Rand.Value * spread;
+						double spreadDirection = Rand.Value * Math.PI * 2;
+						vce.y = (float)(randomSpread * Math.Sin(spreadDirection));
+						vce.x = (float)(randomSpread * Math.Cos(spreadDirection));
+						LaunchProjectileCE(projectile, loadedAmmo, turretData?._ammoSet, new Vector2(launchCell.x, launchCell.z), cannonTarget, vehicle, sa + vce.y, tr + vce.x, shotHeight, speed);
+					}
+					while (--projectileCount > 0);
 				}
 				turretDef.shotSound?.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map));
 				vehicle.Drawer.rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
