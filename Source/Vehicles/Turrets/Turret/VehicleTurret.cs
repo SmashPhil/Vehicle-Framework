@@ -236,7 +236,19 @@ namespace Vehicles
 
 		public bool CanAutoTarget => autoTargeting || VehicleMod.settings.debug.debugShootAnyTurret;
 
-		public int MaxTicks => Mathf.CeilToInt(turretDef.reloadTimer * 60f);
+		public int MaxTicks
+		{
+			get
+			{
+				float maxTicks = turretDef.reloadTimer * 60f;
+				if (turretDef.reloadTimerMultiplierPerCrewCount != null)
+                {
+                    var gunners = vehicle.AllCannonCrew; 
+                    maxTicks *= turretDef.reloadTimerMultiplierPerCrewCount.Evaluate(gunners.Count);
+                }
+                return Mathf.CeilToInt(maxTicks);
+            }
+		}
 
 		public int WarmupTicks => Mathf.CeilToInt(turretDef.warmUpTimer * 60f);
 
