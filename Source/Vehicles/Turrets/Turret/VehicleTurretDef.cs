@@ -74,7 +74,10 @@ namespace Vehicles
 		public float minRange = 0;
 		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float reloadTimer = 5;
-		[TweakField(SettingsType = UISettingsType.FloatBox)]
+        [GraphEditable]
+        public LinearCurve reloadTimerMultiplierPerCrewCount;
+
+        [TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float warmUpTimer = 3;
 		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float autoRefuelProportion = 2;
