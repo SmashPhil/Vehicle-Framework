@@ -14,6 +14,7 @@ namespace Vehicles
 		private const float ButtonWidth = 120f;
 		private const float ButtonHeight = 30f;
 		private const float RowHeight = 30f;
+		private const float RowPadding = 5f;
 
 		private Pawn draggedPawn;
 		private Vector2 draggedItemPosOffset;
@@ -126,7 +127,7 @@ namespace Vehicles
 			Rect viewRect = new Rect(outRect)
 			{
 				width = outRect.width - 17,
-				height = RowHeight * pawns.Count
+				height = (RowHeight + RowPadding) * pawns.Count
 			};
 			Widgets.BeginScrollView(outRect, ref dialogPawnsScrollPos, viewRect);
 			{
@@ -176,7 +177,7 @@ namespace Vehicles
 						}
 						));
 					}
-					pawnRowRect.y += RowHeight + 5;
+					pawnRowRect.y += RowHeight + RowPadding;
 				}
 			}
 			Widgets.EndScrollView();
