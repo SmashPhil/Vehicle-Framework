@@ -39,6 +39,15 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CollectionsMassCalculator), nameof(CollectionsMassCalculator.Capacity), parameters: new Type[] { typeof(List<ThingCount>), typeof(StringBuilder) }),
 				transpiler: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(PawnCapacityInVehicleTranspiler)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CollectionsMassCalculator), nameof(CollectionsMassCalculator.MassUsage), parameters: new Type[] { typeof(List<ThingCount>), typeof(IgnorePawnsInventoryMode), typeof(bool), typeof(bool) }),
+				transpiler: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(IgnorePawnGearAndInventoryMassTranspiler)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(InventoryCalculatorsUtility), nameof(InventoryCalculatorsUtility.ShouldIgnoreInventoryOf)),
+				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(ShouldIgnoreInventoryPawnInVehicle)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MassUtility), nameof(MassUtility.CanEverCarryAnything)),
+				prefix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(CanCarryIfVehicle)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(ITab_Pawn_FormingCaravan), "FillTab"),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(FillTabVehicleCaravan)));
@@ -266,6 +275,44 @@ namespace Vehicles
 				}
 
 				yield return instruction;
+			}
+		}
+
+		public static IEnumerable<CodeInstruction> IgnorePawnGearAndInventoryMassTranspiler(IEnumerable<CodeInstruction> instructions)
+		{
+			List<CodeInstruction> instructionList = instructions.ToList();
+			MethodInfo capacityMethod = AccessTools.Method(typeof(MassUtility), nameof(MassUtility.GearAndInventoryMass));
+
+			for (int i = 0; i < instructionList.Count; i++)
+			{
+				CodeInstruction instruction = instructionList[i];
+
+				if (instruction.Calls(capacityMethod))
+				{
+					yield return instruction; //CALL : MassUtility.GearAndInventoryMass
+					instruction = instructionList[++i];
+					yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 4);
+					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(CaravanHandling), nameof(PawnMassUsageInVehicle)));
+				}
+
+				yield return instruction;
+			}
+		}
+
+		private static float PawnMassUsageInVehicle(float massUsage, Pawn pawn)
+		{
+			if (pawn.IsInVehicle() || CaravanHelper.assignedSeats.ContainsKey(pawn))
+			{
+				return 0;
+			}
+			return massUsage;
+		}
+
+		public static void ShouldIgnoreInventoryPawnInVehicle(ref bool __result, Pawn pawn)
+		{
+			if (__result)
+			{
+				__result = !pawn.IsInVehicle() && !CaravanHelper.assignedSeats.ContainsKey(pawn); //Already ignored from gear and inventory calculation, shouldn't subtract again for negative mass usage.
 			}
 		}
 

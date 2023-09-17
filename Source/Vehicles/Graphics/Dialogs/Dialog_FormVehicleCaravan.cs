@@ -427,6 +427,7 @@ namespace Vehicles
 				if (cacheDirty)
 				{
 					CountToTransferChanged();
+					cacheDirty = false;
 				}
 			}
 			Widgets.EndGroup();
