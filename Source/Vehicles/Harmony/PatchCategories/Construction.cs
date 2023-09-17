@@ -159,9 +159,9 @@ namespace Vehicles
 			else if (newThing is VehiclePawn vehicle)
 			{
 				bool standable = true;
-				foreach (IntVec3 c in vehicle.PawnOccupiedCells(loc, rot))
+				foreach (IntVec3 cell in vehicle.PawnOccupiedCells(loc, rot))
 				{
-					if (!c.InBounds(map) || GenGridVehicles.Impassable(c, map, vehicle.VehicleDef))
+					if (!cell.InBounds(map) || !GenGridVehicles.Walkable(cell, vehicle.VehicleDef, map))
 					{
 						standable = false;
 						break;
@@ -170,9 +170,9 @@ namespace Vehicles
 				if (standable) return true;
 				if (!CellFinder.TryFindRandomCellNear(loc, map, 20, (IntVec3 cell) =>
 				{
-					foreach (IntVec3 c2 in vehicle.PawnOccupiedCells(cell, rot))
+					foreach (IntVec3 cell2 in vehicle.PawnOccupiedCells(cell, rot))
 					{
-						if (GenGridVehicles.Impassable(cell, map, vehicle.VehicleDef))
+						if (!GenGridVehicles.Walkable(cell2, vehicle.VehicleDef, map))
 						{
 							return false;
 						}

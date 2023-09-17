@@ -87,32 +87,6 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// <paramref name="cell"/> is impassable for <paramref name="vehicleDef"/>
-		/// </summary>
-		/// <param name="cell"></param>
-		/// <param name="map"></param>
-		public static bool Impassable(IntVec3 cell, Map map, VehicleDef vehicleDef, Predicate<Thing> extraValidator = null)
-		{
-			List<Thing> thingList = map.thingGrid.ThingsListAt(cell);
-			foreach (Thing thing in thingList)
-			{
-				if (vehicleDef.properties.customThingCosts.TryGetValue(thing.def, out int value) && value >= VehiclePathGrid.ImpassableCost)
-				{
-					return true;
-				}
-				else if (thing.ImpassableForVehicles())
-				{
-					return true;
-				}
-				else if (extraValidator != null && extraValidator(thing))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		/// <summary>
 		/// Impassability check which also handles temporary or additional vehicle mechanics that ignore vanilla fields.
 		/// </summary>
 		/// <param name="thing"></param>

@@ -695,8 +695,7 @@ namespace Vehicles
 			CellRect cellRect = CellRect.CenteredOn(cell, vehicleDef.SizePadding);
 			foreach (IntVec3 cellCheck in cellRect)
 			{
-				//Todo - remove hardcoded fence check
-				if (!cellCheck.InBounds(map) || GenGridVehicles.Impassable(cellCheck, map, vehicleDef))
+				if (!cellCheck.InBounds(map) || !GenGridVehicles.Walkable(cellCheck, vehicleDef, map))
 				{
 					return false;
 				}

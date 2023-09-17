@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1379</currentVersion>
+  <currentVersion>1.5.1380</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
@@ -16,10 +16,15 @@
 
 - Fixed bug where vehicle caravans were able to traverse impassable vanilla biomes like Oceans despite not being defined with custom biome costs.
 
+- Fixed bug where aerial vehicles with runway restrictions would still be able to takeoff over impassable terrain.
+
+- Removed vehicles from Spawn Pawn debug menu, as spawning them through that would result in partial generation, bugging out the vehicle completely.
+
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Optimized path cost recalculation, which should decrease the amount of time it takes to generate maps significantly.
 
 &lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- RimHUD after their most recent update.
 
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Changed chargePerAmmoCount to float type, allowing 1 ammo to refill multiple shots.

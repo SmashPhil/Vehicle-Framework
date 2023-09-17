@@ -66,7 +66,8 @@ namespace Vehicles
 		[PostToSettings(Label = "VF_WinterSpeedMultiplier", Tooltip = "VF_WinterSpeedMultiplierTooltip", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(MinValue = 0, MaxValue = 10, RoundDecimalPlaces = 1)]
 		//TODO - Needs to be renamed to winterCostMultiplier, higher number = slower speed!
-		public float winterSpeedMultiplier = 2.5f;
+		[LoadAlias("winterSpeedMultiplier")] //Changed in 1.5.1380
+		public float winterCostMultiplier = 2.5f;
 		[PostToSettings(Label = "VF_WorldSpeedMultiplier", Tooltip = "VF_WorldSpeedMultiplierTooltip", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(MinValue = 0, MaxValue = 10, RoundDecimalPlaces = 1)]
 		public float worldSpeedMultiplier = 2.5f;

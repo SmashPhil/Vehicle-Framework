@@ -60,7 +60,15 @@ namespace Vehicles
 			CellRect cellRect = RunwayRect(position, rot);
 			foreach (IntVec3 cell in cellRect)
 			{
-				if (!cell.InBounds(map) || map.thingGrid.ThingsListAtFast(cell).Any(thing => thing != vehicle && InvalidFor(thing)))
+				if (!cell.InBounds(map))
+				{
+					return false;
+				}
+				if (map.thingGrid.ThingsListAtFast(cell).Any(thing => thing != vehicle && InvalidFor(thing)))
+				{
+					return false;
+				}
+				if (!GenGridVehicles.Walkable(cell, vehicle.VehicleDef, map))
 				{
 					return false;
 				}
@@ -81,9 +89,16 @@ namespace Vehicles
 				invalidCells.Clear();
 				foreach (IntVec3 cell in cellRect)
 				{
-					if (cell.InBounds(map) && map.thingGrid.ThingsListAtFast(cell).Any(thing => thing != vehicle && InvalidFor(thing)))
+					if (cell.InBounds(map))
 					{
-						invalidCells.Add(cell);
+						if (map.thingGrid.ThingsListAtFast(cell).Any(thing => thing != vehicle && InvalidFor(thing)))
+						{
+							invalidCells.Add(cell);
+						}
+						else if (!GenGridVehicles.Walkable(cell, vehicle.VehicleDef, map))
+						{
+							invalidCells.Add(cell);
+						}
 					}
 				}
 			}

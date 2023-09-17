@@ -52,6 +52,9 @@ namespace Vehicles
 					nameof(DebugWorldObjects)));
 			}
 
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(DebugToolsSpawning), "SpawnPawn"),
+				postfix: new HarmonyMethod(typeof(Debug),
+				nameof(DebugHideVehiclesFromPawnSpawner)));
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(CameraJumper), "TryJump", parameters: new Type[] { typeof(GlobalTargetInfo), typeof(CameraJumper.MovementMode) }),
 			//	prefix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestPrefix)));
@@ -110,6 +113,23 @@ namespace Vehicles
 			if(o is Settlement)
 			{
 				VehicleHarmony.tiles.Add(new Pair<int, int>(o.Tile, 0));
+			}
+		}
+
+		/// <summary>
+		/// Removes Vehicle entries from Spawn Pawn menu, as that uses vanilla Pawn Generation whereas vehicles need special handling
+		/// </summary>
+		/// <param name="__result"></param>
+		public static void DebugHideVehiclesFromPawnSpawner(List<DebugActionNode> __result)
+		{
+			for (int i = __result.Count - 1; i >= 0; i--)
+			{
+				string defName = __result[i].label;
+				PawnKindDef pawnKindDef = DefDatabase<PawnKindDef>.GetNamed(defName);
+				if (pawnKindDef?.race is VehicleDef)
+				{
+					__result.RemoveAt(i);
+				}
 			}
 		}
 
