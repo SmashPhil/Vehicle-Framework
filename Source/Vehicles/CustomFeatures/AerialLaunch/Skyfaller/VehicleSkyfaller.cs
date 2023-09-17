@@ -32,9 +32,9 @@ namespace Vehicles
 
 		public ThingWithComps Thing => vehicle;
 
-		public TargetInfo Target => this;
+		TargetInfo ISustainerTarget.Target => this;
 
-		public MaintenanceType MaintenanceType => MaintenanceType.PerTick;
+		MaintenanceType ISustainerTarget.MaintenanceType => MaintenanceType.PerTick;
 
 		private Material ShadowMaterial
 		{

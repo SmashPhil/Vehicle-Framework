@@ -23,7 +23,7 @@ namespace Vehicles
 
 		private readonly Dictionary<Pawn, (VehiclePawn vehicle, VehicleHandler handler)> assignedSeats = new Dictionary<Pawn, (VehiclePawn, VehicleHandler)>();
 
-		private readonly List<TransferableOneWay> transferablePawns;
+		private readonly List<TransferableOneWay> transferablePawns = new List<TransferableOneWay>();
 		private readonly List<Pawn> pawns;
 
 		private readonly TransferableOneWay transferable;
@@ -31,8 +31,7 @@ namespace Vehicles
 		public Dialog_AssignSeats(List<TransferableOneWay> pawns, TransferableOneWay transferable)
 		{
 			this.transferable = transferable;
-			this.transferablePawns = pawns.Where(p => p.AnyThing is Pawn pawn && (Vehicle.handlers.NotNullAndAny(handler => handler.handlers.Contains(pawn)) ||
-				!CaravanHelper.assignedSeats.ContainsKey(pawn) || (CaravanHelper.assignedSeats.ContainsKey(pawn) && CaravanHelper.assignedSeats[pawn].vehicle == Vehicle))).ToList();
+			GetTransferablePawns(pawns, Vehicle, transferablePawns);
 			this.pawns = transferablePawns.Select(pawn => pawn.AnyThing as Pawn).ToList();
 
 			absorbInputAroundWindow = true;
@@ -45,15 +44,13 @@ namespace Vehicles
 			{
 				foreach (Pawn pawn in handler.handlers)
 				{
-					//Log.Message($"Adding {pawn} to assigned seating");
 					assignedSeats[pawn] = (Vehicle, handler);
 				}
 			}
 			foreach ((Pawn pawn, AssignedSeat seat) in CaravanHelper.assignedSeats)
 			{
-				if (!assignedSeats.ContainsKey(pawn))
+				if (assignedSeats.TryGetValue(pawn, out (VehiclePawn vehicle, VehicleHandler handler) assignedSeat) && assignedSeat.vehicle == Vehicle)
 				{
-					//Log.Message($"Adding {pawn} to assigned seating from Caravanhelper");
 					assignedSeats[pawn] = seat;
 				}
 			}
@@ -330,6 +327,30 @@ namespace Vehicles
 			return true;
 		}
 
-		
+		private static void GetTransferablePawns(List<TransferableOneWay> pawns, VehiclePawn vehicle, List<TransferableOneWay> outList)
+		{
+			outList.Clear();
+			foreach (TransferableOneWay transferable in pawns)
+			{
+				if (transferable.AnyThing is Pawn pawn)
+				{
+					if (!CaravanHelper.assignedSeats.ContainsKey(pawn) || CaravanHelper.assignedSeats[pawn].vehicle == vehicle)
+					{
+						outList.Add(transferable);
+					}
+					else
+					{
+						foreach (VehicleHandler handler in vehicle.handlers)
+						{
+							if (handler.handlers.Contains(pawn))
+							{
+								outList.Add(transferable);
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 }

@@ -141,7 +141,6 @@ namespace Vehicles
 
 		private static void DrawJobSettings(Rect leftRect, VehiclePawn vehicle)
 		{
-			throw new NotImplementedException("Job Settings");
 			GUIState.Push();
 			{
 				float curY = 0;
@@ -156,7 +155,7 @@ namespace Vehicles
 
 				foreach (JobDef jobDef in jobLimitJobDefs)
 				{
-					int maxWorkers = 1;
+					//int maxWorkers = 1;
 					
 					curY += 34;
 				}

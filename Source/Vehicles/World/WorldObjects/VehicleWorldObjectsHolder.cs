@@ -71,20 +71,20 @@ namespace Vehicles
 				dockedBoats.Add(dockedBoat);
 			}
 			return; //air defenses disabled for now
-			if (obj is Settlement) //TODO - Add check for what settlements can implement air defenses
-			{
-				foreach (AntiAircraftDef antiAircraft in DefDatabase<AntiAircraftDef>.AllDefsListForReading)
-				{
-					if (!AirDefensePositionTracker.airDefenseCache.ContainsKey(obj))
-					{
-						AirDefense airDefense = new AirDefense(obj)
-						{
-							defenseBuildings = antiAircraft.properties.buildings.RandomInRange
-						};
-						AirDefensePositionTracker.airDefenseCache.Add(obj, airDefense);
-					}
-				}
-			}
+			//if (obj is Settlement) //TODO - Add check for what settlements can implement air defenses
+			//{
+			//	foreach (AntiAircraftDef antiAircraft in DefDatabase<AntiAircraftDef>.AllDefsListForReading)
+			//	{
+			//		if (!AirDefensePositionTracker.airDefenseCache.ContainsKey(obj))
+			//		{
+			//			AirDefense airDefense = new AirDefense(obj)
+			//			{
+			//				defenseBuildings = antiAircraft.properties.buildings.RandomInRange
+			//			};
+			//			AirDefensePositionTracker.airDefenseCache.Add(obj, airDefense);
+			//		}
+			//	}
+			//}
 		}
 
 		public void RemoveFromCache(WorldObject obj)

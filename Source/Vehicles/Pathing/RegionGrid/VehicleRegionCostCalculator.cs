@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
-using UnityEngine;
 using SmashTools;
 
 namespace Vehicles

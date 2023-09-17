@@ -12,7 +12,7 @@ namespace Vehicles
 
 		public CompProperties_DrawLayer()
 		{
-			compClass = typeof(CompDrawLayer);
+			//compClass = typeof(CompDrawLayer);
 		}
 
 		public override IEnumerable<string> ConfigErrors(ThingDef parentDef)

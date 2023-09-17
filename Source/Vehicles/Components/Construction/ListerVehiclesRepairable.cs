@@ -11,9 +11,6 @@ namespace Vehicles
 	{
 		private Dictionary<Faction, VehicleRepairsCollection> vehiclesToRepair = new Dictionary<Faction, VehicleRepairsCollection>();
 
-		private List<Faction> factions_tmp;
-		private List<VehicleRepairsCollection> vehicleRepairs_tmp;
-
 		public ListerVehiclesRepairable(Map map) : base(map)
 		{
 		}

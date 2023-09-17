@@ -45,7 +45,6 @@ namespace Vehicles
 		private bool drawMarketValue;
 		private bool drawNutritionEatenPerDay;
 		private bool drawFishPerDay;
-		private bool playerPawnsReadOnly;
 		private bool transferablesCached;
 
 		private TransferableSorterDef sorter1;

@@ -5,7 +5,6 @@ using Verse;
 
 namespace Vehicles
 {
-	[Obsolete]
 	public class SpawnerPropertiesDefModExtension : DefModExtension
 	{
 		public float chanceToSpawnThing = 1;

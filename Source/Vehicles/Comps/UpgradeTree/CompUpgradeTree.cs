@@ -15,8 +15,6 @@ namespace Vehicles
 
 		public int WorkLeftUpgrading => CurrentlyUpgrading ? Mathf.CeilToInt(NodeUnlocking.WorkLeft) : 0;
 
-		public VehiclePawn Vehicle => parent as VehiclePawn;
-
 		public bool CurrentlyUpgrading => NodeUnlocking != null && NodeUnlocking.upgradePurchased && !NodeUnlocking.upgradeActive;
 
 		public UpgradeNode NodeUnlocking { get; set; }

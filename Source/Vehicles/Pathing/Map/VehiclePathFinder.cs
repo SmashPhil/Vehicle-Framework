@@ -441,7 +441,10 @@ namespace Vehicles
 						searchCount = 0;
 					}
 				}
+				//I need this jump label even if it isn't currently used, should I make further changes to the pathfinder.
+#pragma warning disable CS0164 // This label has not been referenced
 				CurrentNodeEnd:;
+#pragma warning restore CS0164 // This label has not been referenced
 			}
 			string curJob = vehicle.CurJob?.ToString() ?? "null";
 			string curFaction = vehicle.Faction?.ToString() ?? "null";

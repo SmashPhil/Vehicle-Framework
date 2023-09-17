@@ -7,7 +7,6 @@ using RimWorld.Planet;
 
 namespace Vehicles
 {
-	[Obsolete]
 	public abstract class WorldComponentTemp
 	{
 		public WorldComponentTemp(World world)

@@ -181,17 +181,6 @@ namespace Vehicles
 			}
 		}
 
-		/// <summary>
-		/// Load up game, open route planner
-		/// </summary>
-		[UnitTest(Category = "UI", Name = "World Route Planner", GameState = GameState.Playing)]
-		private static void UnitTest_RoutePlanner()
-		{
-			Prefs.DevMode = true;
-			CameraJumper.TryShowWorld();
-			VehicleRoutePlanner.Instance.Start();
-		}
-
 		[UnitTest(Category = "UI", Name = "Vehicle Area Manager", GameState = GameState.Playing)]
 		private static void UnitTest_VehicleAreaManager()
 		{
@@ -205,6 +194,34 @@ namespace Vehicles
 			{
 				SmashLog.Error($"Tried to unit test <type>{nameof(UnitTest_VehicleAreaManager)}</type> with null current map.");
 			}
+		}
+
+		[UnitTest(Category = "World", Name = "Caravan Formation", GameState = GameState.Playing)]
+		private static void UnitTest_CaravanFormation()
+		{
+			Prefs.DevMode = true;
+			LongEventHandler.ExecuteWhenFinished(delegate ()
+			{
+				CameraJumper.TryShowWorld();
+				Settlement settlement = Find.WorldObjects.Settlements.FirstOrDefault(settlement => settlement.Faction.IsPlayer);
+				if (settlement == null)
+				{
+					SmashLog.Error($"Unable to execute unit test {nameof(UnitTest_AnimationEditor)}. No map to form player caravan from.");
+					return;
+				}
+				Find.WindowStack.Add(new Dialog_FormVehicleCaravan(settlement.Map));
+			});
+		}
+
+		/// <summary>
+		/// Load up game, open route planner
+		/// </summary>
+		[UnitTest(Category = "World", Name = "World Route Planner", GameState = GameState.Playing)]
+		private static void UnitTest_RoutePlanner()
+		{
+			Prefs.DevMode = true;
+			CameraJumper.TryShowWorld();
+			VehicleRoutePlanner.Instance.Start();
 		}
 	}
 }

@@ -26,6 +26,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <NoWarn>CS0649</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -225,7 +226,6 @@
     <Compile Include="CustomFeatures\AerialLaunch\Landing\LandingArea.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Landing\LandingAreasHandler.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\VTOLTakeoff.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Launching\RocketTakeoff.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\DefaultTakeoff.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Launching\Properties\LaunchProtocolProperties.cs" />
     <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\Projectiles\ProjectileSkyfaller.cs" />
@@ -295,7 +295,6 @@
     <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgradeCategoryDef.cs" />
     <Compile Include="Gizmo\AltitudeMeter.cs" />
     <Compile Include="Gizmo\Command_LoadToAerialTransport.cs" />
-    <Compile Include="Gizmo\Landing\Command_HighlightRadius.cs" />
     <Compile Include="Gizmo\Landing\Command_ActionHighlighter.cs" />
     <Compile Include="Gizmo\Landing\Zone_Runway.cs" />
     <Compile Include="Harmony\PatchCategories\Combat.cs" />
@@ -541,7 +540,6 @@
     <Compile Include="Graphics\Dialogs\Dialog_LoadCargo.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_VehicleSelector.cs" />
     <Compile Include="Graphics\Misc\FloatMenuMulti.cs" />
-    <Compile Include="Graphics\Graphic\Graphics\Animated\Graphic_CannonAnimate.cs" />
     <Compile Include="Graphics\Graphic\Graphics\Vehicle\Graphic_Vehicle.cs" />
     <Compile Include="Graphics\ITab\ITab_Vehicle_Cargo.cs" />
     <Compile Include="Graphics\ITab\ITab_Vehicle_Health.cs" />

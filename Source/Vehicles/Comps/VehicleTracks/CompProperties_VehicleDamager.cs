@@ -9,7 +9,7 @@ namespace Vehicles
 
 		public CompProperties_VehicleDamager()
 		{
-			compClass = typeof(CompVehicleDamager);
+			//compClass = typeof(CompVehicleDamager);
 		}
 	}
 }
