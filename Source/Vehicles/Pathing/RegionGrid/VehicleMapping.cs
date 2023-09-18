@@ -160,8 +160,11 @@ namespace Vehicles
 				if (vehiclePathData.IsValid)
 				{
 					vehiclePathData.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
-					vehiclePathData.VehicleRegionAndRoomUpdater.Enabled = true;
-					vehiclePathData.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
+					if (IsOwner(vehiclePathData.Owner))
+					{
+						vehiclePathData.VehicleRegionAndRoomUpdater.Enabled = true;
+						vehiclePathData.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
+					}
 				}
 			}
 			//TODO 
