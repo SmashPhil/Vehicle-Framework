@@ -12,6 +12,8 @@
 
 - Fixed bug where Assign Seat pawn list would not scroll all the way to the bottom of the list.
 
+- Fixed edge case where regions would fail to update on edges for vehicles with padding (width > 2), resulting in areas that should be reachable still not registering as such.
+
 - Fixed bug where fuel leaks would continue to spawn filth even after the fuel tank is empty.
 
 - Fixed bug where pawn inventory would get counted for mass usage in vehicle caravans, despite them being inside a vehicle. Cargo Capacities do not include pawn mass, gear, and inventory. They should only count things inside the vehicle inventory.
@@ -23,7 +25,7 @@
 - Removed vehicles from Spawn Pawn debug menu, as spawning them through that would result in partial generation, bugging out the vehicle completely.
 
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Optimized path cost recalculation, which should decrease the amount of time it takes to generate maps significantly.
+- Optimized path cost recalculation, which should significantly decrease the amount of time it takes to generate maps.
 
 &lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - RimHUD after their most recent update.

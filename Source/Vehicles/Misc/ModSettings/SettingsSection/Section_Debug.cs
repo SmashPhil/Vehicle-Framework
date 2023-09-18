@@ -224,6 +224,23 @@ namespace Vehicles
 					}
 
 					buttonRect = listingStandard.GetRect(30);
+					if (Widgets.ButtonText(buttonRect, "Clear Region Cache"))
+					{
+						LongEventHandler.QueueLongEvent(delegate ()
+						{
+							SoundDefOf.Click.PlayOneShotOnCamera();
+							foreach (Map map in Find.Maps)
+							{
+								VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+								foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
+								{
+									mapping[vehicleDef].VehicleReachability.ClearCache();
+								}
+							}
+						}, "Clearing Region Cache", false, null);
+					}
+
+					buttonRect = listingStandard.GetRect(30);
 					if (Widgets.ButtonText(buttonRect, "Flash Path Costs"))
 					{
 						OpenFlashPathCostsMenu();

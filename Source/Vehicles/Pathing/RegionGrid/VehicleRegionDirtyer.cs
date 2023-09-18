@@ -102,8 +102,9 @@ namespace Vehicles
 		public void Notify_ThingAffectingRegionsSpawned(CellRect occupiedRect)
 		{
 			regionsToDirty.Clear();
-			foreach (IntVec3 cell in occupiedRect.ExpandedBy(1).ClipInsideMap(mapping.map))
+			foreach (IntVec3 cell in occupiedRect.ExpandedBy(createdFor.SizePadding + 1).ClipInsideMap(mapping.map))
 			{
+				mapping.map.DrawCell_ThreadSafe(cell, 0);
 				VehicleRegion validRegionAt_NoRebuild = mapping[createdFor].VehicleRegionGrid.GetValidRegionAt_NoRebuild(cell);
 				if (validRegionAt_NoRebuild != null)
 				{
@@ -120,12 +121,10 @@ namespace Vehicles
 		public void Notify_ThingAffectingRegionsDespawned(CellRect occupiedRect)
 		{
 			regionsToDirty.Clear();
-			//IntVec2 sizeWithPadding = thing.def.size + new IntVec2(createdFor.SizePadding * 2, createdFor.SizePadding * 2); //Doubled to account for opposite directions (N to S, E to W)
-			foreach (IntVec3 cell in occupiedRect.ExpandedBy(createdFor.SizePadding).ClipInsideMap(mapping.map))
+			foreach (IntVec3 cell in occupiedRect.ExpandedBy(createdFor.SizePadding + 1).ClipInsideMap(mapping.map))
 			{
 				if (cell.InBounds(mapping.map))
 				{
-					//mapping.map.debugDrawer.FlashCell(cell, 0);
 					VehicleRegion validRegionAt_NoRebuild2 = mapping[createdFor].VehicleRegionGrid.GetValidRegionAt_NoRebuild(cell);
 					if (validRegionAt_NoRebuild2 != null)
 					{
