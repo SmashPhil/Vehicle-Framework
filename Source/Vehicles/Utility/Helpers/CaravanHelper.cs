@@ -16,6 +16,8 @@ namespace Vehicles
 {
 	public static class CaravanHelper
 	{
+		private static List<int> availableExitTiles = new List<int>();
+		private static List<int> neighborTiles = new List<int>();
 		public static Dictionary<Pawn, AssignedSeat> assignedSeats = new Dictionary<Pawn, AssignedSeat>();
 
 		private static int pawnsBeingAdded = 0;
@@ -70,6 +72,98 @@ namespace Vehicles
 				pawns.Add(p);
 			}
 			return AbleToEmbark(pawns);
+		}
+
+		/// <summary>
+		/// <see cref="CaravanExitMapUtility.BestExitTileToGoTo(int, Map)"/> but implemented for vehicle pathfinding.
+		/// </summary>
+		/// <param name="destinationTile"></param>
+		/// <param name="from"></param>
+		/// <returns></returns>
+		public static int BestExitTileToGoTo(List<VehicleDef> vehicleDefs, int destinationTile, Map from)
+		{
+			int exitTile = -1;
+			using WorldPath worldPath = Find.World.GetCachedWorldComponent<WorldVehiclePathfinder>().FindPath(from.Tile, destinationTile, vehicleDefs);
+			if (worldPath.Found && worldPath.NodesLeftCount >= 2)
+			{
+				exitTile = worldPath.NodesReversed[worldPath.NodesReversed.Count - 2];
+			}
+			if (exitTile == -1)
+			{
+				return RandomBestExitTileFrom(vehicleDefs, from);
+			}
+			float shortestDistance = 0;
+			int nearestExitTile = -1;
+			List<int> validExitTiles = AvailableExitTilesAt(vehicleDefs, from);
+			for (int i = 0; i < validExitTiles.Count; i++)
+			{
+				if (validExitTiles[i] == exitTile)
+				{
+					return validExitTiles[i];
+				}
+				float distanceBetween = (Find.WorldGrid.GetTileCenter(validExitTiles[i]) - Find.WorldGrid.GetTileCenter(exitTile)).MagnitudeHorizontalSquared();
+				if (nearestExitTile == -1 || distanceBetween < shortestDistance)
+				{
+					nearestExitTile = validExitTiles[i];
+					shortestDistance = distanceBetween;
+				}
+			}
+			return nearestExitTile;
+		}
+
+		public static int RandomBestExitTileFrom(List<VehicleDef> vehicleDefs, Map map)
+		{
+			Tile tile = map.TileInfo;
+			List<int> options = AvailableExitTilesAt(vehicleDefs, map);
+			if (options.NullOrEmpty())
+			{
+				return -1;
+			}
+			List<Tile.RoadLink> roads = tile.Roads;
+			if (roads == null)
+			{
+				return options.RandomElement();
+			}
+			int bestRoadIndex = -1;
+			for (int i = 0; i < roads.Count; i++)
+			{
+				if (options.Contains(roads[i].neighbor) && (bestRoadIndex == -1 || roads[i].road.priority > roads[bestRoadIndex].road.priority))
+				{
+					bestRoadIndex = i;
+				}
+			}
+			if (bestRoadIndex == -1)
+			{
+				return options.RandomElement();
+			}
+			return roads.Where((Tile.RoadLink rl) => options.Contains(rl.neighbor) && rl.road == roads[bestRoadIndex].road).RandomElement().neighbor;
+		}
+
+		public static List<int> AvailableExitTilesAt(List<VehicleDef> vehicleDefs, Map map)
+		{
+			availableExitTiles.Clear();
+			{
+				int currentTileID = map.Tile;
+				World world = Find.World;
+				WorldGrid grid = world.grid;
+				grid.GetTileNeighbors(currentTileID, neighborTiles);
+				VehicleDef largestVehicle = vehicleDefs.MaxBy(vehicleDef => vehicleDef.Size.z);
+				for (int i = 0; i < neighborTiles.Count; i++)
+				{
+					int tile = neighborTiles[i];
+					if (vehicleDefs.All(vehicleDef => Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().Passable(tile, vehicleDef)))
+					{
+						CaravanExitMapUtility.GetExitMapEdges(grid, currentTileID, tile, out var primary, out var secondary);
+						if ((primary != Rot4.Invalid && CellFinderExtended.TryFindRandomEdgeCellWith((IntVec3 cell) => vehicleDefs.All(vehicleDef => GenGridVehicles.Walkable(cell, vehicleDef, map) && !cell.Fogged(map)), map, primary, largestVehicle, CellFinder.EdgeRoadChance_Ignore, out IntVec3 result) || 
+							(secondary != Rot4.Invalid && CellFinderExtended.TryFindRandomEdgeCellWith((IntVec3 cell) => vehicleDefs.All(vehicleDef => GenGridVehicles.Walkable(cell, vehicleDef, map) && !cell.Fogged(map)), map, secondary, largestVehicle, CellFinder.EdgeRoadChance_Ignore, out result))) && !availableExitTiles.Contains(tile))
+						{
+							availableExitTiles.Add(tile);
+						}
+					}
+				}
+				availableExitTiles.SortBy((int x) => grid.GetHeadingFromTo(currentTileID, x));
+			}
+			return availableExitTiles;
 		}
 
 		/// <summary>

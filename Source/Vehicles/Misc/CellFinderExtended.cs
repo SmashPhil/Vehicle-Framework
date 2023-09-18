@@ -218,7 +218,7 @@ namespace Vehicles
 			return root;
 		}
 
-		public static bool TryFindRandomEdgeCellWith(Predicate<IntVec3> validator, Map map, Rot4 exitDir, VehiclePawn largestVehicle, float roadChance, out IntVec3 result)
+		public static bool TryFindRandomEdgeCellWith(Predicate<IntVec3> validator, Map map, Rot4 exitDir, VehicleDef largestVehicleDef, float roadChance, out IntVec3 result)
 		{
 			result = IntVec3.Invalid;
 
@@ -226,7 +226,7 @@ namespace Vehicles
 			{
 				foreach (IntVec3 cell in map.roadInfo.roadEdgeTiles)
 				{
-					IntVec3 paddedCell = cell.PadForHitbox(map, largestVehicle);
+					IntVec3 paddedCell = cell.PadForHitbox(map, largestVehicleDef);
 					if (validator(paddedCell))
 					{
 						result = paddedCell;
@@ -238,7 +238,7 @@ namespace Vehicles
 			//Try to find random edge cell quickly
 			for (int i = 0; i < 100; i++)
 			{
-				result = CellFinder.RandomEdgeCell(map).PadForHitbox(map, largestVehicle);
+				result = CellFinder.RandomEdgeCell(map).PadForHitbox(map, largestVehicleDef);
 				if (validator(result))
 				{
 					return true;

@@ -193,7 +193,12 @@ namespace Vehicles
 
 		public static IntVec3 PadForHitbox(this IntVec3 cell, Map map, VehiclePawn vehicle)
 		{
-			int largestSize = Mathf.Max(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z);
+			return PadForHitbox(cell, map, vehicle.VehicleDef);
+		}
+
+		public static IntVec3 PadForHitbox(this IntVec3 cell, Map map, VehicleDef vehicleDef)
+		{
+			int largestSize = Mathf.Max(vehicleDef.Size.x, vehicleDef.Size.z);
 			int padding = Mathf.CeilToInt(largestSize / 2);
 
 			if (cell.x < padding)

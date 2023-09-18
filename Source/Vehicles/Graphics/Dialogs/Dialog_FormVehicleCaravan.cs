@@ -441,7 +441,9 @@ namespace Vehicles
 		public void Notify_ChoseRoute(int destinationTile)
 		{
 			this.destinationTile = destinationTile;
-			startingTile = CaravanExitMapUtility.BestExitTileToGoTo(destinationTile, map);
+
+			List<VehicleDef> vehicleDefs = TransferableUtility.GetPawnsFromTransferables(transferables).Where(pawn => pawn is VehiclePawn).Select(pawn => (pawn as VehiclePawn).VehicleDef).ToList();
+			startingTile = CaravanHelper.BestExitTileToGoTo(vehicleDefs, destinationTile, map);
 			ticksToArriveDirty = true;
 			daysWorthOfFoodDirty = true;
 			soundAppear.PlayOneShotOnCamera(null);
@@ -645,6 +647,7 @@ namespace Vehicles
 					return false;
 				}
 				Messages.Message("CaravanCouldNotFindReachableExitSpot".Translate(direction8WayFromTo.LabelShort()), new GlobalTargetInfo(intVec, map, false), MessageTypeDefOf.CautionInput, false);
+				return false;
 			}
 			if (!TryFindRandomPackingSpot(intVec, out IntVec3 meetingPoint))
 			{
@@ -838,7 +841,7 @@ namespace Vehicles
 		private bool TryFindExitSpot(List<Pawn> pawns, bool reachableForEveryColonist, out IntVec3 spot)
 		{
 			bool result;
-			if (pawns.HasBoat())
+			if (false && pawns.HasBoat())
 			{
 				//Rot4 rotFromTo = Find.WorldGrid.GetRotFromTo(__instance.CurrentTile, ___startingTile); WHEN WORLD GRID IS ESTABLISHED
 				Rot4 rotFromTo;
@@ -890,11 +893,12 @@ namespace Vehicles
 				pawn.ClampToMap(ref spot, map);
 				return result;
 			}
-			CaravanExitMapUtility.GetExitMapEdges(Find.WorldGrid, CurrentTile, startingTile, out Rot4 rot, out Rot4 rot2);
-			result = (rot != Rot4.Invalid && TryFindExitSpot(pawns, reachableForEveryColonist, rot, out spot)) || (rot2 != Rot4.Invalid &&
-				TryFindExitSpot(pawns, reachableForEveryColonist, rot2, out spot)) ||
-				TryFindExitSpot(pawns, reachableForEveryColonist, rot.Rotated(RotationDirection.Clockwise), out spot) ||
-				TryFindExitSpot(pawns, reachableForEveryColonist, rot.Rotated(RotationDirection.Counterclockwise), out spot);
+			CaravanExitMapUtility.GetExitMapEdges(Find.WorldGrid, CurrentTile, startingTile, out Rot4 primary, out Rot4 secondary);
+			Log.Message($"Exit: {primary} Secondary: {secondary}");
+			result = (primary != Rot4.Invalid && TryFindExitSpot(pawns, reachableForEveryColonist, primary, out spot)) || (secondary != Rot4.Invalid &&
+				TryFindExitSpot(pawns, reachableForEveryColonist, secondary, out spot)) ||
+				TryFindExitSpot(pawns, reachableForEveryColonist, primary.Rotated(RotationDirection.Clockwise), out spot) ||
+				TryFindExitSpot(pawns, reachableForEveryColonist, primary.Rotated(RotationDirection.Counterclockwise), out spot);
 			Pawn largestPawn = pawns.FindAll(x => x is VehiclePawn).MaxBy(x => x.def.size.z);
 			largestPawn.ClampToMap(ref spot, map);
 			return result;
@@ -932,7 +936,7 @@ namespace Vehicles
 						}
 					}
 					return true;
-				}, map, exitDirection, largestVehicle, CellFinder.EdgeRoadChance_Always, out spot);
+				}, map, exitDirection, largestVehicle.VehicleDef, CellFinder.EdgeRoadChance_Always, out spot);
 			}
 			//Finding exit point that might not reachable for everyone
 			IntVec3 cell = IntVec3.Invalid;
