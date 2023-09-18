@@ -167,13 +167,6 @@ namespace Vehicles
 					}
 				}
 			}
-			//TODO 
-			//for (int i = 0; i < Owners.Count; i++)
-			//{
-			//	//VehiclePathData data = vehicleData[i];
-			//	//data.VehicleRegionAndRoomUpdater.Enabled = true;
-			//	//data.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
-			//}
 		}
 
 		/// <summary>

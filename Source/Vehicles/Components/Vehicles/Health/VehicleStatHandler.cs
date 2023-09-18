@@ -217,10 +217,16 @@ namespace Vehicles
 			}
 			IntVec2 hitCell = AdjustFromVehiclePosition(cell.ToIntVec2);
 			IntVec2 rotCell = hitCell.RotatedBy(vehicle.Rotation, vehicle.VehicleDef.Size);
-			TakeDamage(dinfo, rotCell);
+			ApplyDamage(dinfo, rotCell);
 		}
 
-		public void TakeDamage(DamageInfo dinfo, IntVec2 hitCell)
+		public void TakeDamage(DamageInfo dinfo, IntVec2 hitCellPreRotate)
+		{
+			IntVec2 rotCell = hitCellPreRotate.RotatedBy(vehicle.Rotation, vehicle.VehicleDef.Size);
+			ApplyDamage(dinfo, rotCell);
+		}
+
+		private void ApplyDamage(DamageInfo dinfo, IntVec2 hitCell)
 		{
 			StringBuilder report = VehicleMod.settings.debug.debugLogging ? new StringBuilder() : null;
 

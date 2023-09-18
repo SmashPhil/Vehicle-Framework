@@ -894,7 +894,6 @@ namespace Vehicles
 				return result;
 			}
 			CaravanExitMapUtility.GetExitMapEdges(Find.WorldGrid, CurrentTile, startingTile, out Rot4 primary, out Rot4 secondary);
-			Log.Message($"Exit: {primary} Secondary: {secondary}");
 			result = (primary != Rot4.Invalid && TryFindExitSpot(pawns, reachableForEveryColonist, primary, out spot)) || (secondary != Rot4.Invalid &&
 				TryFindExitSpot(pawns, reachableForEveryColonist, secondary, out spot)) ||
 				TryFindExitSpot(pawns, reachableForEveryColonist, primary.Rotated(RotationDirection.Clockwise), out spot) ||

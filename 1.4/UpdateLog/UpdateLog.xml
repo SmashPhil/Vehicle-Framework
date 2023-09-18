@@ -12,18 +12,21 @@
 
 - Fixed bug where Assign Seat pawn list would not scroll all the way to the bottom of the list.
 
+- Fixed bug where pawn inventory would get counted for mass usage in vehicle caravans, despite them being inside a vehicle. Cargo Capacities do not include pawn mass, gear, and inventory. They should only count things inside the vehicle inventory.
+
+- Fixed bug where vehicle caravans would be unable to form on maps surrounded by vanilla-impassable biomes such as single tile islands, despite the vehicles being able to traverse those biomes.
+
+- Fixed bug where hitbox hits would over-rotate for non-instigator damage such as from explosions, resulting in mirrored damage.
+
 - Fixed edge case where regions would fail to update on edges for vehicles with padding (width &gt; 2), resulting in areas that should be reachable still not registering as such.
 
 - Fixed bug where fuel leaks would continue to spawn filth even after the fuel tank is empty.
-
-- Fixed bug where pawn inventory would get counted for mass usage in vehicle caravans, despite them being inside a vehicle. Cargo Capacities do not include pawn mass, gear, and inventory. They should only count things inside the vehicle inventory.
 
 - Fixed bug where vehicle caravans were able to traverse impassable vanilla biomes like Oceans despite not being defined with custom biome costs.
 
 - Fixed bug where aerial vehicles with runway restrictions would still be able to takeoff over impassable terrain.
 
 - Removed vehicles from Spawn Pawn debug menu, as spawning them through that would result in partial generation, bugging out the vehicle completely.
-
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Optimized path cost recalculation, which should significantly decrease the amount of time it takes to generate maps.
 
