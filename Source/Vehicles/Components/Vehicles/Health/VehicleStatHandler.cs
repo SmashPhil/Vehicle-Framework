@@ -226,7 +226,7 @@ namespace Vehicles
 			ApplyDamage(dinfo, rotCell);
 		}
 
-		private void ApplyDamage(DamageInfo dinfo, IntVec2 hitCell)
+		public void ApplyDamage(DamageInfo dinfo, IntVec2 hitCell)
 		{
 			StringBuilder report = VehicleMod.settings.debug.debugLogging ? new StringBuilder() : null;
 
