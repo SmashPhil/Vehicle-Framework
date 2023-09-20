@@ -845,12 +845,12 @@ namespace Vehicles
 			if (recoilTracker != null)
 			{
 				recoilTicked = recoilTracker.RecoilTick();
-				if (!recoilTrackers.NullOrEmpty())
+			}
+			if (!recoilTrackers.NullOrEmpty())
+			{
+				for (int i = 0; i < turretDef.graphics.Count; i++)
 				{
-					for (int i = 0; i < turretDef.graphics.Count; i++)
-					{
-						recoilTicked |= recoilTrackers[i]?.RecoilTick() ?? false;
-					}
+					recoilTicked |= recoilTrackers[i]?.RecoilTick() ?? false;
 				}
 			}
 			//Keep ticking until no longer needed
