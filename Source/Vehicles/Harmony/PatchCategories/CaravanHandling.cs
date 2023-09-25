@@ -159,9 +159,9 @@ namespace Vehicles
 			//	postfix: new HarmonyMethod(typeof(CaravanHandling),
 			//	nameof(AddAllTradeablesFromAerialVehicle)));
 
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan_NeedsTracker), "TrySatisfyPawnNeeds"),
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan_NeedsTracker), nameof(Caravan_NeedsTracker.TrySatisfyPawnsNeeds)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
-				nameof(TrySatisfyVehiclePawnsNeeds)));
+				nameof(TrySatisfyVehicleCaravanNeeds)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanTendUtility), nameof(CaravanTendUtility.CheckTend)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(CheckTendInVehicles)));
@@ -171,6 +171,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanUtility), nameof(CaravanUtility.RandomOwner)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(RandomVehicleOwner)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanMergeUtility), "MergeCaravans"),
+				transpiler: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(MergeWithVehicleCaravanTranspiler)));
 
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_Trade), nameof(CaravanArrivalAction_Trade.CanTradeWith)),
                 postfix: new HarmonyMethod(typeof(CaravanHandling), 
@@ -1057,13 +1060,39 @@ namespace Vehicles
 			return true;
 		}
 
-		//REDO?
-		public static bool TrySatisfyVehiclePawnsNeeds(Pawn pawn, Caravan_NeedsTracker __instance)
+		public static IEnumerable<CodeInstruction> MergeWithVehicleCaravanTranspiler(IEnumerable<CodeInstruction> instructions)
 		{
-			if(pawn is VehiclePawn)
+			List<CodeInstruction> instructionList = instructions.ToList();
+			for (int i = 0; i < instructionList.Count; i++)
 			{
-				if (pawn.needs?.AllNeeds.NullOrEmpty() ?? true)
-					return false;
+				CodeInstruction instruction = instructionList[i];
+
+				if (instruction.opcode == OpCodes.Stloc_0)
+				{
+					yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(CaravanHandling), nameof(CaravanForMerging)));
+				}
+
+				yield return instruction;
+			}
+		}
+
+		private static Caravan CaravanForMerging(Caravan caravan, List<Caravan> caravans)
+		{
+			if (caravans.NotNullAndAny(caravan => caravan is VehicleCaravan vehicleCaravan))
+			{
+				//Prioritize vehicle caravans for merging into
+				caravan = caravans.Where(caravan => caravan is VehicleCaravan vehicleCaravan).MaxBy(caravan => caravan.PawnsListForReading.Count);
+			}
+			return caravan;
+		}
+
+		public static bool TrySatisfyVehicleCaravanNeeds(Caravan_NeedsTracker __instance)
+		{
+			if (__instance.caravan is VehicleCaravan vehicleCaravan)
+			{
+				vehicleCaravan.TrySatisfyPawnsNeeds();
+				return false;
 			}
 			return true;
 		}

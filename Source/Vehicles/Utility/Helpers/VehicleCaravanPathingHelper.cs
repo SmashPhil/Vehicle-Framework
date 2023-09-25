@@ -29,7 +29,7 @@ namespace Vehicles
 			{
 				return false;
 			}
-			bool conditionalResting = !caravan.vPather.Moving || caravan.vPather.nextTile != caravan.vPather.Destination || !Caravan_PathFollower.IsValidFinalPushDestination(caravan.vPather.Destination) ||
+			bool conditionalResting = !caravan.vPather.Moving || !Caravan_PathFollower.IsValidFinalPushDestination(caravan.vPather.Destination) ||
 						Mathf.CeilToInt(caravan.vPather.nextTileCostLeft / 1f) > 10000;
 			 return conditionalResting && ShouldRestAt(caravan.Vehicles, tile);
 		}

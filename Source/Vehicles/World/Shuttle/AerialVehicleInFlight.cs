@@ -80,6 +80,8 @@ namespace Vehicles
 
 		protected virtual float RotatorSpeeds => 59;
 
+		public bool Flying => vehicle.CompVehicleLauncher.inFlight;
+
 		public bool CanDismount => false;
 
 		//For WITab readouts related to vehicles

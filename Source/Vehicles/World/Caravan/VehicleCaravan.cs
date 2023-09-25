@@ -270,7 +270,7 @@ namespace Vehicles
 			}
 			if (this.HasBoat() && (Find.World.CoastDirectionAt(Tile).IsValid || WorldHelper.RiverIsValid(Tile, PawnsListForReading.Where(p => p.IsBoat()).ToList())))
 			{
-				if(!vPather.Moving && !PawnsListForReading.NotNullAndAny(p => !p.IsBoat()))
+				if (!vPather.Moving && !PawnsListForReading.NotNullAndAny(p => !p.IsBoat()))
 				{
 					Command_Action dock = new Command_Action();
 					dock.icon = VehicleTex.Anchor;
@@ -313,6 +313,12 @@ namespace Vehicles
 		{
 			vTweener.ResetTweenedPosToRoot();
 			vPather.Notify_Teleported_Int();
+		}
+
+		public override void Notify_Merged(List<Caravan> group)
+		{
+			base.Notify_Merged(group);
+			RecacheVehicles();
 		}
 
 		public override void Notify_MemberDied(Pawn member)
@@ -519,6 +525,45 @@ namespace Vehicles
 			gotoMote.RenderMote();
 		}
 
+		public void TrySatisfyPawnsNeeds()
+		{
+			for (int i = pawns.Count - 1; i >= 0; i--)
+			{
+				Pawn pawn = pawns[i];
+				if (pawn is VehiclePawn vehicle)
+				{
+					vehicle.TrySatisfyPawnNeeds();
+				}
+				else
+				{
+
+				}
+			}
+		}
+
+		private void TrySatisfyPawnNeeds(Pawn pawn)
+		{
+			if (pawn.Dead)
+			{
+				return;
+			}
+			VehiclePawn.TrySatisfyPawnNeeds(pawn);
+		}
+
+		public override void Tick()
+		{
+			base.Tick();
+			vPather.PatherTick();
+			vTweener.TweenerTick();
+			if (vPather.MovingNow)
+			{
+				foreach (VehiclePawn vehicle in vehicles)
+				{
+					vehicle.CompFueledTravel?.ConsumeFuelWorld();
+				}
+			}
+		}
+
 		public override void PostRemove()
 		{
 			base.PostRemove();
@@ -534,20 +579,6 @@ namespace Vehicles
 			foreach (VehiclePawn vehicle in Vehicles)
 			{
 				vehicle.RegisterEvents();
-			}
-		}
-
-		public override void Tick()
-		{
-			base.Tick();
-			vPather.PatherTick();
-			vTweener.TweenerTick();
-			if (vPather.MovingNow)
-			{
-				foreach (VehiclePawn vehicle in vehicles)
-				{
-					vehicle.CompFueledTravel?.ConsumeFuelWorld();
-				}
 			}
 		}
 

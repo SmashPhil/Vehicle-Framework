@@ -1,13 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1383</currentVersion>
+  <currentVersion>1.5.1386</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed bug where merging any vehicle caravan would not recache the colonist bar.
+
+- Fixed bug where any caravan merging with vehicles would not guarantee that it spawns a vehicle caravan, missing out on the custom pathfinding among other mechanics.
+
+- Fixed bug where pawns in vehicle caravan would rest 24/7.
+
+- Fixed bug where pawns inside vehicles would not try to recover psyfocus and hemogen.
 
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 

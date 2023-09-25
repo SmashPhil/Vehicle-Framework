@@ -243,7 +243,7 @@ namespace Vehicles
 				float maxTicks = turretDef.reloadTimer * 60f;
 				if (turretDef.reloadTimerMultiplierPerCrewCount != null)
                 {
-                    var gunners = vehicle.AllCannonCrew; 
+                    List<Pawn> gunners = vehicle.AllCannonCrew; 
                     maxTicks *= turretDef.reloadTimerMultiplierPerCrewCount.Evaluate(gunners.Count);
                 }
                 return Mathf.CeilToInt(maxTicks);
