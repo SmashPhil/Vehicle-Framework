@@ -178,7 +178,7 @@ namespace Vehicles
 				sustainers.Tick();
 				if (Spawned)
 				{
-					vPather.PatherTick();
+					vehiclePather.PatherTick();
 					stances.StanceTrackerTick();
 					if (Drafted)
 					{

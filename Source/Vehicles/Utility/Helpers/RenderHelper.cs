@@ -52,9 +52,9 @@ namespace Vehicles
 		public static void DrawLinesBetweenTargets(VehiclePawn pawn, Job curJob, JobQueue jobQueue)
 		{
 			Vector3 a = pawn.Position.ToVector3Shifted();
-			if (pawn.vPather.curPath != null)
+			if (pawn.vehiclePather.curPath != null)
 			{
-				a = pawn.vPather.Destination.CenterVector3;
+				a = pawn.vehiclePather.Destination.CenterVector3;
 			}
 			else if (curJob != null && curJob.targetA.IsValid && (!curJob.targetA.HasThing || (curJob.targetA.Thing.Spawned && curJob.targetA.Thing.Map == pawn.Map)))
 			{

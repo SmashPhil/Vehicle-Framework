@@ -30,7 +30,7 @@ namespace Vehicles
 
 		public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
 		{
-			return t is VehiclePawn vehicle && vehicle.CompFueledTravel != null && CanRefuel(pawn, vehicle, forced) && !vehicle.vPather.Moving;
+			return t is VehiclePawn vehicle && vehicle.CompFueledTravel != null && CanRefuel(pawn, vehicle, forced) && !vehicle.vehiclePather.Moving;
 		}
 
 		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)

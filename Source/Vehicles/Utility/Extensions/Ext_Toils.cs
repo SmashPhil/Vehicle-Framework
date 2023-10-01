@@ -12,7 +12,7 @@ namespace Vehicles
 		{
 			jobEndable.AddEndCondition(delegate ()
 			{
-				if (((Pawn)jobEndable.GetActor().jobs.curJob.GetTarget(index).Thing as VehiclePawn).vPather.Moving)
+				if (((Pawn)jobEndable.GetActor().jobs.curJob.GetTarget(index).Thing as VehiclePawn).vehiclePather.Moving)
 				{
 					return JobCondition.InterruptForced;
 				}

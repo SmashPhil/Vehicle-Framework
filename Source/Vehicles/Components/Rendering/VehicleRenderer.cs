@@ -62,7 +62,7 @@ namespace Vehicles
 			if (vehicle.Spawned && !vehicle.Dead)
 			{
 				//vehicle.stances.StanceTrackerDraw();
-				vehicle.vPather.PatherDraw();
+				vehicle.vehiclePather.PatherDraw();
 			}
 		}
 

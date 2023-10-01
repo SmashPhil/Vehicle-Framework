@@ -29,8 +29,8 @@ namespace Vehicles
 			{
 				return false;
 			}
-			bool conditionalResting = !caravan.vPather.Moving || !Caravan_PathFollower.IsValidFinalPushDestination(caravan.vPather.Destination) ||
-						Mathf.CeilToInt(caravan.vPather.nextTileCostLeft / 1f) > 10000;
+			bool conditionalResting = !caravan.vehiclePather.Moving || !Caravan_PathFollower.IsValidFinalPushDestination(caravan.vehiclePather.Destination) ||
+						Mathf.CeilToInt(caravan.vehiclePather.nextTileCostLeft / 1f) > 10000;
 			 return conditionalResting && ShouldRestAt(caravan.Vehicles, tile);
 		}
 
@@ -62,17 +62,17 @@ namespace Vehicles
 
 		public static int EstimatedTicksToArrive(VehicleCaravan caravan, bool allowCaching)
 		{
-			if (allowCaching && caravan == cachedForCaravan && caravan.vPather.Destination == cachedForDest && Find.TickManager.TicksGame - cacheTicks < 100)
+			if (allowCaching && caravan == cachedForCaravan && caravan.vehiclePather.Destination == cachedForDest && Find.TickManager.TicksGame - cacheTicks < 100)
 			{
 				return cachedResult;
 			}
 			int to = -1;
 			int result = 0;
-			if (caravan.Spawned && caravan.vPather.Moving && caravan.vPather.curPath != null)
+			if (caravan.Spawned && caravan.vehiclePather.Moving && caravan.vehiclePather.curPath != null)
 			{
-				to = caravan.vPather.Destination;
+				to = caravan.vehiclePather.Destination;
 				List<VehicleDef> vehicleDefs = caravan.Vehicles.Select(vehicle => vehicle.VehicleDef).ToList();
-				result = EstimatedTicksToArrive(vehicleDefs, caravan.Tile, to, caravan.vPather.curPath, caravan.vPather.nextTileCostLeft, caravan.TicksPerMove, Find.TickManager.TicksAbs);
+				result = EstimatedTicksToArrive(vehicleDefs, caravan.Tile, to, caravan.vehiclePather.curPath, caravan.vehiclePather.nextTileCostLeft, caravan.TicksPerMove, Find.TickManager.TicksAbs);
 			}
 			if (allowCaching)
 			{

@@ -47,9 +47,9 @@ namespace Vehicles
 					}
 				}
 
-				if (!value && vehicle.vPather.curPath != null)
+				if (!value && vehicle.vehiclePather.curPath != null)
 				{
-					vehicle.vPather.PatherFailed();
+					vehicle.vehiclePather.PatherFailed();
 				}
 
 				if (!value)
@@ -59,7 +59,7 @@ namespace Vehicles
 					{
 						vehicle.jobs.EndCurrentJob(JobCondition.InterruptForced);
 					}
-					vehicle.vPather.PatherFailed(); //Unecessary, but for exceptions thrown during pathfinding on dedicated thread it serves as a fail-safe
+					vehicle.vehiclePather.PatherFailed(); //Unecessary, but for exceptions thrown during pathfinding on dedicated thread it serves as a fail-safe
 				}
 				if (!VehicleMod.settings.main.fishingPersists)
 				{
@@ -96,7 +96,7 @@ namespace Vehicles
 			{
 				if (Drafted)
 				{
-					if (vehicle.vPather.Moving)
+					if (vehicle.vehiclePather.Moving)
 					{
 						return "VF_StopVehicle".Translate();
 					}
@@ -112,7 +112,7 @@ namespace Vehicles
 			{
 				if (Drafted)
 				{
-					if (vehicle.vPather.Moving)
+					if (vehicle.vehiclePather.Moving)
 					{
 						return "VF_StopVehicleDesc".Translate();
 					}
@@ -133,9 +133,9 @@ namespace Vehicles
 				isActive = () => Drafted,
 				toggleAction = delegate ()
 				{
-					if (Drafted && vehicle.vPather.Moving)
+					if (Drafted && vehicle.vehiclePather.Moving)
 					{
-						vehicle.vPather.EngageBrakes();
+						vehicle.vehiclePather.EngageBrakes();
 					}
 					else
 					{
@@ -144,7 +144,7 @@ namespace Vehicles
 				},
 				defaultLabel = DraftGizmoLabel,
 				defaultDesc = DraftGizmoDescription,
-				icon = (Drafted && vehicle.vPather.Moving) ? VehicleTex.HaltVehicle : VehicleTex.DraftVehicle
+				icon = (Drafted && vehicle.vehiclePather.Moving) ? VehicleTex.HaltVehicle : VehicleTex.DraftVehicle
 			};
 			if (!Drafted)
 			{

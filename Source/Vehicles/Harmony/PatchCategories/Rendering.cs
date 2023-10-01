@@ -89,9 +89,9 @@ namespace Vehicles
 				{
 					return false;
 				}
-				if (vehicle.vPather.Moving)
+				if (vehicle.vehiclePather.Moving)
 				{
-					if (vehicle.vPather.curPath == null || vehicle.vPather.curPath.NodesLeftCount < 1)
+					if (vehicle.vehiclePather.curPath == null || vehicle.vehiclePather.curPath.NodesLeftCount < 1)
 					{
 						return false;
 					}

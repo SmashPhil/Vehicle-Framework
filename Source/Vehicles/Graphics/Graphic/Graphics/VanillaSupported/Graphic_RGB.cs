@@ -8,7 +8,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public abstract class Graphic_RGB : Graphic
+	public class Graphic_RGB : Graphic
 	{
 		public const string MaskSuffix = "m";
 

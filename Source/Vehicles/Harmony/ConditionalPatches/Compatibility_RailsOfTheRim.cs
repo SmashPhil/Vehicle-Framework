@@ -33,7 +33,7 @@ namespace Vehicles
 
 		private static void CaravanStateVehiclePather(WorldObjectComp __instance, ref object __result)
 		{
-			if (__instance.parent is VehicleCaravan vehicleCaravan && vehicleCaravan.vPather.MovingNow)
+			if (__instance.parent is VehicleCaravan vehicleCaravan && vehicleCaravan.vehiclePather.MovingNow)
 			{
 				__result = (byte)0; //CaravanState.Moving
 			}
@@ -63,7 +63,7 @@ namespace Vehicles
 		{
 			if (caravan is VehicleCaravan vehicleCaravan)
 			{
-				return vehicleCaravan.vPather.MovingNow;
+				return vehicleCaravan.vehiclePather.MovingNow;
 			}
 			return caravan.pather.MovingNow;
 		}

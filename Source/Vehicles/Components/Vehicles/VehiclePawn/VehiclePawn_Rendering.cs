@@ -406,11 +406,11 @@ namespace Vehicles
 
 		public void UpdateRotation()
 		{
-			if (vPather.nextCell == Position)
+			if (vehiclePather.nextCell == Position)
 			{
 				return;
 			}
-			IntVec3 intVec = vPather.nextCell - Position;
+			IntVec3 intVec = vehiclePather.nextCell - Position;
 			if (intVec.x > 0)
 			{
 				Rotation = Rot4.East;
@@ -431,9 +431,9 @@ namespace Vehicles
 
 		public void UpdateAngle()
 		{
-			if (vPather.Moving)
+			if (vehiclePather.Moving)
 			{
-				IntVec3 c = vPather.nextCell - Position;
+				IntVec3 c = vehiclePather.nextCell - Position;
 				if (c.x > 0 && c.z > 0)
 				{
 					angle = -45f;
@@ -465,9 +465,9 @@ namespace Vehicles
 		public override void DrawExtraSelectionOverlays()
 		{
 			base.DrawExtraSelectionOverlays();
-			if (vPather.curPath != null && vPather.curPath.NodesLeftCount > 0)
+			if (vehiclePather.curPath != null && vehiclePather.curPath.NodesLeftCount > 0)
 			{
-				vPather.curPath.DrawPath(this);
+				vehiclePather.curPath.DrawPath(this);
 			}
 			RenderHelper.DrawLinesBetweenTargets(this, jobs.curJob, jobs.jobQueue);
 
@@ -775,12 +775,12 @@ namespace Vehicles
 					defaultLabel = "Flash OccupiedRect",
 					action = delegate ()
 					{
-						if (vPather.Moving)
+						if (vehiclePather.Moving)
 						{
 							IntVec3 prevCell = Position;
 							Rot8 rot = FullRotation;
 							HashSet<IntVec3> cellsToHighlight = new HashSet<IntVec3>();
-							foreach (IntVec3 cell in vPather.curPath.NodesReversed)
+							foreach (IntVec3 cell in vehiclePather.curPath.NodesReversed)
 							{
 								if (prevCell != cell) rot = Rot8.DirectionFromCells(prevCell, cell);
 								if (!rot.IsValid) rot = Rot8.North;

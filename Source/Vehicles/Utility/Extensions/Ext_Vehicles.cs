@@ -235,19 +235,19 @@ namespace Vehicles
 				vehicle.AddEvent(VehicleEventDefOf.CargoAdded, vehicle.statHandler.MarkAllDirty);
 				vehicle.AddEvent(VehicleEventDefOf.CargoRemoved, vehicle.statHandler.MarkAllDirty);
 				vehicle.AddEvent(VehicleEventDefOf.PawnEntered, vehicle.RecachePawnCount);
-				vehicle.AddEvent(VehicleEventDefOf.PawnExited, vehicle.vPather.RecalculatePermissions, vehicle.RecachePawnCount);
-				vehicle.AddEvent(VehicleEventDefOf.PawnRemoved, vehicle.vPather.RecalculatePermissions, vehicle.RecachePawnCount);
-				vehicle.AddEvent(VehicleEventDefOf.PawnChangedSeats, vehicle.vPather.RecalculatePermissions, vehicle.RecachePawnCount);
-				vehicle.AddEvent(VehicleEventDefOf.PawnKilled, vehicle.vPather.RecalculatePermissions, vehicle.RecachePawnCount);
-				vehicle.AddEvent(VehicleEventDefOf.PawnCapacitiesDirty, vehicle.vPather.RecalculatePermissions);
-				vehicle.AddEvent(VehicleEventDefOf.IgnitionOff, vehicle.vPather.RecalculatePermissions);
-				vehicle.AddEvent(VehicleEventDefOf.DamageTaken, vehicle.vPather.RecalculatePermissions, vehicle.statHandler.MarkAllDirty, vehicle.Notify_TookDamage);
-				vehicle.AddEvent(VehicleEventDefOf.Repaired, vehicle.vPather.RecalculatePermissions, vehicle.statHandler.MarkAllDirty);
+				vehicle.AddEvent(VehicleEventDefOf.PawnExited, vehicle.vehiclePather.RecalculatePermissions, vehicle.RecachePawnCount);
+				vehicle.AddEvent(VehicleEventDefOf.PawnRemoved, vehicle.vehiclePather.RecalculatePermissions, vehicle.RecachePawnCount);
+				vehicle.AddEvent(VehicleEventDefOf.PawnChangedSeats, vehicle.vehiclePather.RecalculatePermissions, vehicle.RecachePawnCount);
+				vehicle.AddEvent(VehicleEventDefOf.PawnKilled, vehicle.vehiclePather.RecalculatePermissions, vehicle.RecachePawnCount);
+				vehicle.AddEvent(VehicleEventDefOf.PawnCapacitiesDirty, vehicle.vehiclePather.RecalculatePermissions);
+				vehicle.AddEvent(VehicleEventDefOf.IgnitionOff, vehicle.vehiclePather.RecalculatePermissions);
+				vehicle.AddEvent(VehicleEventDefOf.DamageTaken, vehicle.vehiclePather.RecalculatePermissions, vehicle.statHandler.MarkAllDirty, vehicle.Notify_TookDamage);
+				vehicle.AddEvent(VehicleEventDefOf.Repaired, vehicle.vehiclePather.RecalculatePermissions, vehicle.statHandler.MarkAllDirty);
 				vehicle.AddEvent(VehicleEventDefOf.OutOfFuel, delegate ()
 				{
 					if (vehicle.Spawned)
 					{
-						vehicle.vPather.PatherFailed();
+						vehicle.vehiclePather.PatherFailed();
 						vehicle.ignition.Drafted = false;
 					}
 				});

@@ -159,7 +159,7 @@ namespace Vehicles
 			disableReason = null;
 			if (Vehicle.Spawned)
 			{
-				if (Vehicle.vPather.Moving)
+				if (Vehicle.vehiclePather.Moving)
 				{
 					disableReason = "VF_CannotLaunchWhileMoving".Translate(Vehicle.LabelShort);
 				}

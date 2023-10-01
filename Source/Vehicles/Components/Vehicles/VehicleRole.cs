@@ -4,7 +4,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class VehicleRole
+	public class VehicleRole : ITweakFields
 	{
 		public string key;
 		public string label = "[MissingLabel]";
@@ -19,6 +19,7 @@ namespace Vehicles
 		public bool exposed = false;
 		public float chanceToHit = 0.3f;
 		//Rendering
+		[TweakField]
 		public PawnOverlayRenderer pawnRenderer;
 
 		public VehicleRole()
@@ -49,5 +50,18 @@ namespace Vehicles
 		}
 
 		public bool RequiredForCaravan => slotsToOperate > 0 && handlingTypes.HasFlag(HandlingTypeFlags.Movement);
+
+		string ITweakFields.Category => nameof(PawnOverlayRenderer);
+
+		string ITweakFields.Label => label;
+
+		public void ResolveReferences(VehicleDef vehicleDef)
+		{
+			hitbox.Initialize(vehicleDef);
+		}
+
+		void ITweakFields.OnFieldChanged()
+		{
+		}
 	}
 }

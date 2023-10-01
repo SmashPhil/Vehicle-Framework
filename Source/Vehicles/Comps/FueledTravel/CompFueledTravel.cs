@@ -137,11 +137,11 @@ namespace Vehicles
 			{
 				if (FuelCondition.HasFlag(FuelConsumptionCondition.Moving))
 				{
-					if (Vehicle.Spawned && Vehicle.vPather.Moving)
+					if (Vehicle.Spawned && Vehicle.vehiclePather.Moving)
 					{
 						return true;
 					}
-					if (Vehicle.GetVehicleCaravan() is VehicleCaravan caravan && caravan.vPather.MovingNow)
+					if (Vehicle.GetVehicleCaravan() is VehicleCaravan caravan && caravan.vehiclePather.MovingNow)
 					{
 						return true;
 					}
@@ -474,7 +474,7 @@ namespace Vehicles
 				}
 			}
 
-			if (Vehicle.vPather.Moving)
+			if (Vehicle.vehiclePather.Moving)
 			{
 				DisconnectPower();
 			}

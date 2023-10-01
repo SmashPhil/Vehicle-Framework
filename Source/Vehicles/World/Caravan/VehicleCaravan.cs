@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -17,8 +18,11 @@ namespace Vehicles
 		private static MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock();
 		private static Dictionary<ThingDef, Material> materials = new Dictionary<ThingDef, Material>();
 
+		[Obsolete("Renamed to vehiclePather, will be removed in 1.5")]
 		public VehicleCaravan_PathFollower vPather;
-		public VehicleCaravan_Tweener vTweener;
+
+		public VehicleCaravan_PathFollower vehiclePather;
+		public VehicleCaravan_Tweener vehicleTweener;
 
 		private VehiclePawn leadVehicle;
 
@@ -26,11 +30,15 @@ namespace Vehicles
 
 		public VehicleCaravan() : base()
 		{
-			vPather = new VehicleCaravan_PathFollower(this);
-			vTweener = new VehicleCaravan_Tweener(this);
+			vehiclePather = new VehicleCaravan_PathFollower(this);
+			vehicleTweener = new VehicleCaravan_Tweener(this);
+
+#pragma warning disable 0618
+			vPather = vehiclePather;
+#pragma warning restore 0618
 		}
 
-		public override Vector3 DrawPos => vTweener.TweenedPos;
+		public override Vector3 DrawPos => vehicleTweener.TweenedPos;
 
 		public bool CanDismount => true;
 
@@ -200,10 +208,11 @@ namespace Vehicles
 		{
 			foreach (Gizmo gizmo in base.GetGizmos())
 			{
+				yield return gizmo;
 				//Only pull non-devmode gizmos
 				if (!DebugSettings.ShowDevGizmos || !(gizmo is Command command) || command.icon)
 				{
-					yield return gizmo;
+					//yield return gizmo;
 				}
 			}
 
@@ -220,19 +229,19 @@ namespace Vehicles
 
 			if (IsPlayerControlled)
 			{
-				if (vPather.Moving)
+				if (vehiclePather.Moving)
 				{
 					yield return new Command_Toggle
 					{
 						hotKey = KeyBindingDefOf.Misc1,
-						isActive = (() => vPather.Paused),
+						isActive = (() => vehiclePather.Paused),
 						toggleAction = delegate()
 						{
-							if (!vPather.Moving)
+							if (!vehiclePather.Moving)
 							{
 								return;
 							}
-							vPather.Paused = !vPather.Paused;
+							vehiclePather.Paused = !vehiclePather.Paused;
 						},
 						defaultDesc = "CommandToggleCaravanPauseDesc".Translate(2f.ToString("0.#"), 0.3f.ToStringPercent()),
 						icon = TexCommand.PauseCaravan,
@@ -263,14 +272,14 @@ namespace Vehicles
 					defaultLabel = "Vehicle Dev: Teleport to destination",
 					action = delegate()
 					{
-						Tile = vPather.Destination;
-						vPather.StopDead();
+						Tile = vehiclePather.Destination;
+						vehiclePather.StopDead();
 					}
 				};
 			}
 			if (this.HasBoat() && (Find.World.CoastDirectionAt(Tile).IsValid || WorldHelper.RiverIsValid(Tile, PawnsListForReading.Where(p => p.IsBoat()).ToList())))
 			{
-				if (!vPather.Moving && !PawnsListForReading.NotNullAndAny(p => !p.IsBoat()))
+				if (!vehiclePather.Moving && !PawnsListForReading.NotNullAndAny(p => !p.IsBoat()))
 				{
 					Command_Action dock = new Command_Action();
 					dock.icon = VehicleTex.Anchor;
@@ -291,7 +300,7 @@ namespace Vehicles
 
 					yield return dock;
 				}
-				else if (!vPather.Moving && PawnsListForReading.NotNullAndAny(p => !p.IsBoat()))
+				else if (!vehiclePather.Moving && PawnsListForReading.NotNullAndAny(p => !p.IsBoat()))
 				{
 					Command_Action undock = new Command_Action
 					{
@@ -311,8 +320,8 @@ namespace Vehicles
 
 		public void Notify_VehicleTeleported()
 		{
-			vTweener.ResetTweenedPosToRoot();
-			vPather.Notify_Teleported_Int();
+			vehicleTweener.ResetTweenedPosToRoot();
+			vehiclePather.Notify_Teleported_Int();
 		}
 
 		public override void Notify_Merged(List<Caravan> group)
@@ -433,11 +442,11 @@ namespace Vehicles
 				stringBuilder.AppendLine();
 			}
 
-			if (vPather.Moving)
+			if (vehiclePather.Moving)
 			{
-				if (vPather.ArrivalAction != null)
+				if (vehiclePather.ArrivalAction != null)
 				{
-					stringBuilder.Append(vPather.ArrivalAction.ReportString);
+					stringBuilder.Append(vehiclePather.ArrivalAction.ReportString);
 				}
 				else if (this.HasBoat())
 				{
@@ -460,7 +469,7 @@ namespace Vehicles
 					stringBuilder.Append("CaravanWaiting".Translate());
 				}
 			}
-			if (vPather.Moving)
+			if (vehiclePather.Moving)
 			{
 				float estimatedDaysToArrive = VehicleCaravanPathingHelper.EstimatedTicksToArrive(this, true) / 60000f;
 				stringBuilder.AppendLine();
@@ -492,7 +501,7 @@ namespace Vehicles
 					stringBuilder.Append(".");
 				}
 			}
-			if (!vPather.MovingNow)
+			if (!vehiclePather.MovingNow)
 			{
 				int usedBedCount = beds.GetUsedBedCount();
 				stringBuilder.AppendLine();
@@ -518,9 +527,9 @@ namespace Vehicles
 
 		public override void DrawExtraSelectionOverlays()
 		{
-			if (IsPlayerControlled && vPather.curPath != null)
+			if (IsPlayerControlled && vehiclePather.curPath != null)
 			{
-				vPather.curPath.DrawPath(this);
+				vehiclePather.curPath.DrawPath(this);
 			}
 			gotoMote.RenderMote();
 		}
@@ -553,9 +562,9 @@ namespace Vehicles
 		public override void Tick()
 		{
 			base.Tick();
-			vPather.PatherTick();
-			vTweener.TweenerTick();
-			if (vPather.MovingNow)
+			vehiclePather.PatherTick();
+			vehicleTweener.TweenerTick();
+			if (vehiclePather.MovingNow)
 			{
 				foreach (VehiclePawn vehicle in vehicles)
 				{
@@ -567,14 +576,15 @@ namespace Vehicles
 		public override void PostRemove()
 		{
 			base.PostRemove();
-			vPather.StopDead();
+			vehiclePather.StopDead();
 		}
 
 		public override void SpawnSetup()
 		{
 			base.SpawnSetup();
-			vTweener.ResetTweenedPosToRoot();
-
+			RecacheVehicles();
+			vehicleTweener.ResetTweenedPosToRoot();
+			
 			//Necessary check for post load, otherwise registry will be null until spawned on map
 			foreach (VehiclePawn vehicle in Vehicles)
 			{
@@ -585,11 +595,13 @@ namespace Vehicles
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Deep.Look(ref vPather, "vehiclePather", new object[] { this });
+			Scribe_Deep.Look(ref vehiclePather, "vehiclePather", new object[] { this });
 
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
-				vehicles = pawns.InnerListForReading.Where(pawn => pawn is VehiclePawn).Cast<VehiclePawn>().ToList();
+#pragma warning disable 0618
+				vPather = vehiclePather; //Share reference until mods switch over to new name
+#pragma warning restore 0618
 			}
 		}
 	}

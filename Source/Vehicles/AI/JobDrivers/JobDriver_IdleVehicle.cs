@@ -24,7 +24,7 @@ namespace Vehicles
 				initAction = delegate()
 				{
 					Map.pawnDestinationReservationManager.Reserve(Vehicle, job, Vehicle.Position);
-					Vehicle.vPather.StopDead();
+					Vehicle.vehiclePather.StopDead();
 				},
 				tickAction = delegate()
 				{

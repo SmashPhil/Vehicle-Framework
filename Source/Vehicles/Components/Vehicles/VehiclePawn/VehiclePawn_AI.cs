@@ -20,11 +20,14 @@ namespace Vehicles
 		[Unsaved]
 		public VehicleAI vehicleAI;
 		
-		public Vehicle_PathFollower vPather;
+		public Vehicle_PathFollower vehiclePather;
 		public Vehicle_IgnitionController ignition;
 
 		public SharedJob sharedJob;
 		public bool currentlyFishing = false;
+
+		[Obsolete("Renamed to vehiclePather, will be removed in 1.5")]
+		public Vehicle_PathFollower vPather;
 
 		public virtual bool DeconstructibleBy(Faction faction)
 		{
@@ -96,7 +99,7 @@ namespace Vehicles
 			{
 				Drawer.tweener.ResetTweenedPosToRoot();
 			}
-			vPather.Notify_Teleported();
+			vehiclePather.Notify_Teleported();
 			if (endCurrentJob && jobs != null && jobs.curJob != null)
 			{
 				jobs.EndCurrentJob(JobCondition.InterruptForced);

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1386</currentVersion>
+  <currentVersion>1.5.1393</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
@@ -16,11 +16,13 @@
 
 - Fixed bug where pawns inside vehicles would not try to recover psyfocus and hemogen.
 
+- Fixed bug 
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 
 &lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Added pawn rendering to TweakField menu, allowing runtime editing of pawn rendering fields.
 
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>

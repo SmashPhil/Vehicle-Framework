@@ -266,9 +266,9 @@ namespace Vehicles
 		{
 			if (!AbleToEmbark(caravan))
 			{
-				if (caravan.vPather.Moving)
+				if (caravan.vehiclePather.Moving)
 				{
-					caravan.vPather.StopDead();
+					caravan.vehiclePather.StopDead();
 				}
 				Messages.Message("VF_CantMoveDocked".Translate(), MessageTypeDefOf.RejectInput, false);
 				return;
@@ -438,10 +438,10 @@ namespace Vehicles
 				map.Parent.Notify_CaravanFormed(caravan);
 				map.retainedCaravanData.Notify_CaravanFormed(caravan);
 			}
-			if (!caravan.vPather.Moving && caravan.Tile != directionTile)
+			if (!caravan.vehiclePather.Moving && caravan.Tile != directionTile)
 			{
-				caravan.vPather.StartPath(directionTile, null, true, true);
-				caravan.vPather.nextTileCostLeft /= 2f;
+				caravan.vehiclePather.StartPath(directionTile, null, true, true);
+				caravan.vehiclePather.nextTileCostLeft /= 2f;
 				caravan.tweener.ResetTweenedPosToRoot();
 			}
 			if (destinationTile != -1)
@@ -453,15 +453,15 @@ namespace Vehicles
 				}
 				else
 				{
-					caravan.vPather.StartPath(destinationTile, null, true, true);
+					caravan.vehiclePather.StartPath(destinationTile, null, true, true);
 				}
 			}
 			if (sendMessage)
 			{
 				TaggedString taggedString = "MessageFormedCaravan".Translate(caravan.Name).CapitalizeFirst();
-				if (caravan.vPather.Moving && caravan.vPather.ArrivalAction != null)
+				if (caravan.vehiclePather.Moving && caravan.vehiclePather.ArrivalAction != null)
 				{
-					taggedString += " " + "MessageFormedCaravan_Orders".Translate() + ": " + caravan.vPather.ArrivalAction.Label + ".";
+					taggedString += " " + "MessageFormedCaravan_Orders".Translate() + ": " + caravan.vehiclePather.ArrivalAction.Label + ".";
 				}
 				Messages.Message(taggedString, caravan, MessageTypeDefOf.TaskCompletion, true);
 			}

@@ -141,7 +141,7 @@ namespace Vehicles
 					sourceTilesPerDayDirty = false;
 					StringBuilder stringBuilder = new StringBuilder();
 					cachedSourceTilesPerDay = TilesPerDayCalculator.ApproxTilesPerDay(CaravanTicksPerMoveUtility.GetTicksPerMove(PawnsEmbarking.ToList(), SourceMassUsage, SourceMassCapacity, stringBuilder), caravan.Tile, -1, stringBuilder);
-					//this.cachedSourceTilesPerDay = TilesPerDayCalculator.ApproxTilesPerDay(this.transferables, this.SourceMassUsage, this.SourceMassCapacity, this.caravan.Tile, (!this.caravan.vPather.Moving) ? -1 : this.caravan.vPather.nextTile, stringBuilder);
+					//this.cachedSourceTilesPerDay = TilesPerDayCalculator.ApproxTilesPerDay(this.transferables, this.SourceMassUsage, this.SourceMassCapacity, this.caravan.Tile, (!this.caravan.vehiclePather.Moving) ? -1 : this.caravan.vehiclePather.nextTile, stringBuilder);
 					cachedSourceTilesPerDayExplanation = stringBuilder.ToString();
 				}
 				return cachedSourceTilesPerDay;
@@ -232,7 +232,7 @@ namespace Vehicles
 				{
 					destTilesPerDayDirty = false;
 					StringBuilder stringBuilder = new StringBuilder();
-					cachedDestTilesPerDay = TilesPerDayCalculator.ApproxTilesPerDay(transferables, DestMassUsage, DestMassCapacity, caravan.Tile, (!caravan.vPather.Moving) ? -1 : caravan.vPather.nextTile, stringBuilder);
+					cachedDestTilesPerDay = TilesPerDayCalculator.ApproxTilesPerDay(transferables, DestMassUsage, DestMassCapacity, caravan.Tile, (!caravan.vehiclePather.Moving) ? -1 : caravan.vehiclePather.nextTile, stringBuilder);
 					cachedDestTilesPerDayExplanation = stringBuilder.ToString();
 				}
 				return cachedDestTilesPerDay;
@@ -248,10 +248,10 @@ namespace Vehicles
 					destDaysWorthOfFoodDirty = false;
 					float first;
 					float second;
-					if (caravan.vPather.Moving)
+					if (caravan.vehiclePather.Moving)
 					{
-						first = DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(transferables, caravan.Tile, IgnorePawnsInventoryMode.Ignore, caravan.Faction, caravan.vPather.curPath, caravan.vPather.nextTileCostLeft, caravan.TicksPerMove);
-						second = DaysUntilRotCalculator.ApproxDaysUntilRot(transferables, caravan.Tile, IgnorePawnsInventoryMode.Ignore, caravan.vPather.curPath, caravan.vPather.nextTileCostLeft, caravan.TicksPerMove);
+						first = DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(transferables, caravan.Tile, IgnorePawnsInventoryMode.Ignore, caravan.Faction, caravan.vehiclePather.curPath, caravan.vehiclePather.nextTileCostLeft, caravan.TicksPerMove);
+						second = DaysUntilRotCalculator.ApproxDaysUntilRot(transferables, caravan.Tile, IgnorePawnsInventoryMode.Ignore, caravan.vehiclePather.curPath, caravan.vehiclePather.nextTileCostLeft, caravan.TicksPerMove);
 					}
 					else
 					{
@@ -298,7 +298,7 @@ namespace Vehicles
 		{
 			get
 			{
-				if (!caravan.vPather.Moving)
+				if (!caravan.vehiclePather.Moving)
 				{
 					return 0;
 				}
@@ -336,7 +336,7 @@ namespace Vehicles
 			Text.Anchor = TextAnchor.UpperLeft;
 			CaravanUIUtility.DrawCaravanInfo(new CaravanUIUtility.CaravanInfo(SourceMassUsage, SourceMassCapacity, cachedSourceMassCapacityExplanation, SourceTilesPerDay, 
 				cachedSourceTilesPerDayExplanation, SourceDaysWorthOfFood, SourceForagedFoodPerDay, cachedSourceForagedFoodPerDayExplanation, SourceVisibility, 
-				cachedSourceVisibilityExplanation, -1f, -1f, null), null, caravan.Tile, (!caravan.vPather.Moving) ? null : new int?(TicksToArrive), -9999f, 
+				cachedSourceVisibilityExplanation, -1f, -1f, null), null, caravan.Tile, (!caravan.vehiclePather.Moving) ? null : new int?(TicksToArrive), -9999f, 
 				new Rect(12f, TitleRectHeight, inRect.width - 24f, 40f), true, null, false);
 			inRect.yMin += 119f;
 			Widgets.DrawMenuSection(inRect);

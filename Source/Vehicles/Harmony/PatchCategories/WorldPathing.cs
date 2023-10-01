@@ -40,14 +40,14 @@ namespace Vehicles
 		{
 			if (c is VehicleCaravan vehicleCaravan)
 			{
-				if (tile < 0 || (tile == vehicleCaravan.Tile && !vehicleCaravan.vPather.Moving))
+				if (tile < 0 || (tile == vehicleCaravan.Tile && !vehicleCaravan.vehiclePather.Moving))
 				{
 					return false;
 				}
 				int num = WorldHelper.BestGotoDestForVehicle(vehicleCaravan, tile);
 				if (num >= 0)
 				{
-					vehicleCaravan.vPather.StartPath(num, null, true, true);
+					vehicleCaravan.vehiclePather.StartPath(num, null, true, true);
 					vehicleCaravan.gotoMote.OrderedToTile(num);
 					SoundDefOf.ColonistOrdered.PlayOneShotOnCamera(null);
 				}
@@ -68,7 +68,7 @@ namespace Vehicles
 		{
 			if (___caravan is VehicleCaravan vehicleCaravan)
 			{
-				vehicleCaravan.vPather.StartPath(destTile, arrivalAction, repathImmediately, resetPauseStatus);
+				vehicleCaravan.vehiclePather.StartPath(destTile, arrivalAction, repathImmediately, resetPauseStatus);
 				return false;
 			}
 			return true;

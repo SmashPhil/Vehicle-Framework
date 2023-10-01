@@ -464,7 +464,7 @@ namespace Vehicles
 				switch (need)
 				{
 					case Need_Rest _:
-						if (CaravanNightRestUtility.RestingNowAt(tile) || (vehicleCaravan != null && !vehicleCaravan.vPather.MovingNow))
+						if (CaravanNightRestUtility.RestingNowAt(tile) || (vehicleCaravan != null && !vehicleCaravan.vehiclePather.MovingNow))
 						{
 							TrySatisfyRest(handler, pawn, need as Need_Rest);
 						}
@@ -522,7 +522,7 @@ namespace Vehicles
 				cantRestWhileMoving = handler.RequiredForMovement && vehicle.VehicleDef.navigationCategory <= NavigationCategory.Opportunistic;
 			}
 			//Handler not required for movement OR Not Moving (Local) OR Not Moving (World)
-			if (!cantRestWhileMoving || (vehicle != null && vehicle.Spawned && !vehicle.vPather.Moving) || (pawn.GetVehicleCaravan() is VehicleCaravan vehicleCaravan && !vehicleCaravan.vPather.MovingNow))
+			if (!cantRestWhileMoving || (vehicle != null && vehicle.Spawned && !vehicle.vehiclePather.Moving) || (pawn.GetVehicleCaravan() is VehicleCaravan vehicleCaravan && !vehicleCaravan.vehiclePather.MovingNow))
 			{
 				float restValue = StatDefOf.BedRestEffectiveness.valueIfMissing; //TODO - add rest modifier for vehicles
 				rest.TickResting(restValue);
@@ -694,11 +694,11 @@ namespace Vehicles
 				bool moving = false;
 				if (pawn.GetVehicleCaravan() is VehicleCaravan vehicleCaravan)
 				{
-					moving = vehicleCaravan.vPather.Moving;
+					moving = vehicleCaravan.vehiclePather.Moving;
 				}
 				else if (handler != null)
 				{
-					moving = handler.vehicle.vPather.Moving;
+					moving = handler.vehicle.vehiclePather.Moving;
 				}
 				amount = moving ? 4E-05f : 4E-3f;
 				if (amount > 0f)
@@ -819,7 +819,7 @@ namespace Vehicles
 
 		private static void TryGainPsyfocus(VehicleHandler handler, Pawn pawn, Pawn_PsychicEntropyTracker tracker)
 		{
-			if (pawn.GetVehicleCaravan() is VehicleCaravan vehicleCaravan && !vehicleCaravan.vPather.MovingNow && !vehicleCaravan.NightResting)
+			if (pawn.GetVehicleCaravan() is VehicleCaravan vehicleCaravan && !vehicleCaravan.vehiclePather.MovingNow && !vehicleCaravan.NightResting)
 			{
 				tracker.GainPsyfocus(null);
 			}

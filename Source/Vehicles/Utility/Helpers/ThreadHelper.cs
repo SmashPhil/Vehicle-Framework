@@ -78,7 +78,7 @@ namespace Vehicles
 			{
 				if (thingList[i] is VehiclePawn otherVehicle && otherVehicle != vehicle)
 				{
-					if (euclideanDistance < 20 || !otherVehicle.vPather.Moving)
+					if (euclideanDistance < 20 || !otherVehicle.vehiclePather.Moving)
 					{
 						return otherVehicle;
 					}

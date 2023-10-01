@@ -113,6 +113,13 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.IsOwner)),
 				postfix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(IsOwnerOfVehicle)));
+			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(Caravan_PathFollower), nameof(Caravan_PathFollower.Moving)),
+				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(VehicleCaravanMoving)));
+			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(Caravan_PathFollower), nameof(Caravan_PathFollower.MovingNow)),
+				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(VehicleCaravanMovingNow)));
+
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(SettlementDefeatUtility), nameof(SettlementDefeatUtility.CheckDefeated)),
 				transpiler: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(CheckDefeatedWithVehiclesTranspiler)));
@@ -210,9 +217,9 @@ namespace Vehicles
 					VehicleCaravan caravan = CaravanHelper.ExitMapAndCreateVehicleCaravan(correctedPawns, Faction.OfPlayer, __instance.CurrentTile, __instance.CurrentTile, ___destinationTile, false);
 					___map.Parent.CheckRemoveMapNow();
 					TaggedString taggedString = "MessageReformedCaravan".Translate();
-					if (caravan.vPather.Moving && caravan.vPather.ArrivalAction != null)
+					if (caravan.vehiclePather.Moving && caravan.vehiclePather.ArrivalAction != null)
 					{
-						taggedString += " " + "MessageFormedCaravan_Orders".Translate() + ": " + caravan.vPather.ArrivalAction.Label + ".";
+						taggedString += " " + "MessageFormedCaravan_Orders".Translate() + ": " + caravan.vehiclePather.ArrivalAction.Label + ".";
 					}
 					Messages.Message(taggedString, caravan, MessageTypeDefOf.TaskCompletion, false);
 
@@ -535,7 +542,7 @@ namespace Vehicles
 		{
 			if (!__result.NullOrEmpty())
 			{
-				__result.RemoveAll(c => c is VehicleCaravan vehicleCaravan && vehicleCaravan.vPather.MovingNow);
+				__result.RemoveAll(c => c is VehicleCaravan vehicleCaravan && vehicleCaravan.vehiclePather.MovingNow);
 			}
 		}
 
@@ -950,6 +957,22 @@ namespace Vehicles
 			if (!__result)
 			{
 				__result = p.GetVehicle() is VehiclePawn vehicle && __instance.pawns.Contains(vehicle) && CaravanUtility.IsOwner(p, __instance.Faction);
+			}
+		}
+
+		public static void VehicleCaravanMoving(ref bool __result, Caravan ___caravan)
+		{
+			if (___caravan is VehicleCaravan vehicleCaravan)
+			{
+				__result = vehicleCaravan.vehiclePather.Moving;
+			}
+		}
+
+		public static void VehicleCaravanMovingNow(ref bool __result, Caravan ___caravan)
+		{
+			if (___caravan is VehicleCaravan vehicleCaravan)
+			{
+				__result = vehicleCaravan.vehiclePather.MovingNow;
 			}
 		}
 

@@ -48,7 +48,7 @@ namespace Vehicles
 		/// <param name="__instance"></param>
 		public static void NoAttackSettlementWhenDocked(Caravan caravan, ref IEnumerable<Gizmo> __result, Settlement __instance)
 		{
-			if (caravan is VehicleCaravan vehicleCaravan && vehicleCaravan.HasBoat() && !vehicleCaravan.vPather.Moving)
+			if (caravan is VehicleCaravan vehicleCaravan && vehicleCaravan.HasBoat() && !vehicleCaravan.vehiclePather.Moving)
 			{
 				List<Gizmo> gizmos = __result.ToList();
 				if (caravan.PawnsListForReading.NotNullAndAny(p => !p.IsBoat()))

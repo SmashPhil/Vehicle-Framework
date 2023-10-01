@@ -114,7 +114,7 @@ namespace Vehicles
 
 		public static float ApproxTilesPerDay(VehicleCaravan caravan, StringBuilder explanation = null)
 		{
-			return ApproxTilesPerDay(caravan.UniqueVehicleDefsInCaravan().ToList(), caravan.TicksPerMove, caravan.Tile, caravan.vPather.Moving ? caravan.vPather.nextTile : -1, explanation, explanation != null ? caravan.TicksPerMoveExplanation : null);
+			return ApproxTilesPerDay(caravan.UniqueVehicleDefsInCaravan().ToList(), caravan.TicksPerMove, caravan.Tile, caravan.vehiclePather.Moving ? caravan.vehiclePather.nextTile : -1, explanation, explanation != null ? caravan.TicksPerMoveExplanation : null);
 		}
 
 		public static float ApproxTilesPerDay(List<VehicleDef> vehicleDefs, int ticksPerMove, int tile, int nextTile, StringBuilder explanation = null, string caravanTicksPerMoveExplanation = null)

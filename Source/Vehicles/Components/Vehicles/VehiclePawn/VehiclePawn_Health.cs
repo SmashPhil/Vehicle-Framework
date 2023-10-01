@@ -103,9 +103,9 @@ namespace Vehicles
 
 		public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
 		{
-			if (vPather != null)
+			if (vehiclePather != null)
 			{
-				vPather.StopDead();
+				vehiclePather.StopDead();
 			}
 			Map.GetCachedMapComponent<VehiclePositionManager>().ReleaseClaimed(this);
 			//Map.GetCachedMapComponent<VehicleRegionUpdateCatalog>().Notify_VehicleDespawned(this);

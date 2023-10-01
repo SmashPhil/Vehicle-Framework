@@ -11,8 +11,11 @@ using SmashTools;
 
 namespace Vehicles
 {
+	[StaticConstructorOnStartup]
 	public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObject
 	{
+		private static readonly Texture2D ViewQuestCommandTex = ContentFinder<Texture2D>.Get("UI/Commands/ViewQuest", true);
+
 		public const float ReconFlightSpeed = 5;
 		public const float ExpandingResize = 35f;
 		public const float TransitionTakeoff = 0.025f;
@@ -214,6 +217,29 @@ namespace Vehicles
 			foreach (Gizmo gizmo in base.GetGizmos())
 			{
 				yield return gizmo;
+			}
+
+			if (ShowRelatedQuests)
+			{
+				List<Quest> quests = Find.QuestManager.QuestsListForReading;
+				foreach (Quest quest in quests)
+				{
+					if (!quest.hidden && !quest.Historical && !quest.dismissed && quest.QuestLookTargets.Contains(this))
+					{
+						yield return new Command_Action
+						{
+							defaultLabel = "CommandViewQuest".Translate(quest.name),
+							defaultDesc = "CommandViewQuestDesc".Translate(),
+							icon = ViewQuestCommandTex,
+							action = delegate ()
+							{
+								Find.MainTabsRoot.SetCurrentTab(MainButtonDefOf.Quests, true);
+								((MainTabWindow_Quests)MainButtonDefOf.Quests.TabWindow).Select(quest);
+							}
+						};
+					}
+				}
+				quests = null;
 			}
 
 			if (IsPlayerControlled)

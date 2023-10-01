@@ -22,7 +22,7 @@ namespace Vehicles
 			{
 				return null;
 			}
-			if (t is VehiclePawn vehicle && !vehicle.vPather.Moving && pawn.CanReach(new LocalTargetInfo(t.Position), PathEndMode.Touch, Danger.Deadly) && VehicleCondition(vehicle))
+			if (t is VehiclePawn vehicle && !vehicle.vehiclePather.Moving && pawn.CanReach(new LocalTargetInfo(t.Position), PathEndMode.Touch, Danger.Deadly) && VehicleCondition(vehicle))
 			{
 				VehicleReservationManager reservationManager = pawn.Map.GetCachedMapComponent<VehicleReservationManager>();
 				if (reservationManager.CanReserve(vehicle, pawn, JobDef))

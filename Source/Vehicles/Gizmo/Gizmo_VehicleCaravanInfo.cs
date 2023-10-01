@@ -33,7 +33,7 @@ namespace Vehicles
 			Widgets.DrawWindowBackground(rect);
 			Widgets.BeginGroup(rect);
 			{
-				int? ticksToArrive = caravan.vPather.Moving ? new int?(VehicleCaravanPathingHelper.EstimatedTicksToArrive(caravan, true)) : null;
+				int? ticksToArrive = caravan.vehiclePather.Moving ? new int?(VehicleCaravanPathingHelper.EstimatedTicksToArrive(caravan, true)) : null;
 				StringBuilder stringBuilder = new StringBuilder();
 				float tilesPerDay = VehicleCaravanTicksPerMoveUtility.ApproxTilesPerDay(caravan, stringBuilder);
 				DrawCaravanInfo(new CaravanUIUtility.CaravanInfo(caravan.MassUsage, caravan.MassCapacity, caravan.MassCapacityExplanation, tilesPerDay, 

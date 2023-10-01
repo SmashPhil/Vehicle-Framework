@@ -18,7 +18,7 @@ namespace Vehicles
 		{
 			if (pawn is VehiclePawn vehicle)
 			{
-				if (vehicle.vPather.Moving)
+				if (vehicle.vehiclePather.Moving)
 				{
 					return null;
 				}
