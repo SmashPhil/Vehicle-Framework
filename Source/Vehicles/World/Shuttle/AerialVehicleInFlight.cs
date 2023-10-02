@@ -105,6 +105,7 @@ namespace Vehicles
 			}
 		}
 
+		[Obsolete]
 		public virtual Material VehicleMat
 		{
 			get
@@ -122,6 +123,7 @@ namespace Vehicles
 			}
 		}
 
+		[Obsolete]
 		public virtual Material VehicleMatNonLit
 		{
 			get
@@ -185,12 +187,12 @@ namespace Vehicles
 
 					Matrix4x4 matrix = default;
 					matrix.SetTRS(DrawPos + normalized * TransitionTakeoff, quat, size);
-					Graphics.DrawMesh(MeshPool.plane10, matrix, VehicleMat, WorldCameraManager.WorldLayer);
-					RenderGraphicOverlays(normalized, direction, size);
+					//Graphics.DrawMesh(MeshPool.plane10, matrix, VehicleMat, WorldCameraManager.WorldLayer);
+					//RenderGraphicOverlays(normalized, direction, size);
 				}
 				else
 				{
-					WorldRendererUtility.DrawQuadTangentialToPlanet(DrawPos, 0.7f * averageTileSize, 0.015f, Material);
+					WorldHelper.DrawQuadTangentialToPlanet(DrawPos, 0.7f * averageTileSize, 0.015f, Material);
 				}
 			}
 		}
@@ -283,7 +285,7 @@ namespace Vehicles
 						alsoClickIfOtherInGroupClicked = false,
 						action = delegate ()
 						{
-							LaunchTargeter.BeginTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(ChoseTargetOnMap), this, true, VehicleTex.TargeterMouseAttachment, false, null,
+							LaunchTargeter.BeginTargeting(vehicle, ChoseTargetOnMap, this, true, VehicleTex.TargeterMouseAttachment, false, null,
 								(GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, Tile, path, fuelCost));
 						}
 					};
@@ -329,7 +331,7 @@ namespace Vehicles
 					}
 					yield return commandSettle;
 				}
-				if (Prefs.DevMode && DebugSettings.godMode)
+				if (DebugSettings.ShowDevGizmos)
 				{
 					yield return new Command_Action
 					{
@@ -550,6 +552,10 @@ namespace Vehicles
 							{
 								Destroy();
 							}
+							else
+							{
+								SwitchToCaravan();
+							}
 						}
 						vehicle.CompVehicleLauncher.inFlight = false;
 						AirDefensePositionTracker.DeregisterAerialVehicle(this);
@@ -598,6 +604,26 @@ namespace Vehicles
 		{
 			this.position = position;
 			transition = 0;
+		}
+
+		private void SwitchToCaravan()
+		{
+			bool autoSelect = false;
+			if (Find.WorldSelector.SelectedObjects.Contains(this))
+			{
+				autoSelect = true;
+			}
+
+			VehicleCaravan vehicleCaravan = CaravanHelper.MakeVehicleCaravan(Vehicles, vehicle.Faction, Tile, true);
+			if (!Destroyed)
+			{
+				Destroy();
+			}
+
+			if (autoSelect)
+			{
+				Find.WorldSelector.Select(vehicleCaravan, playSound: false);
+			}
 		}
 
 		private void InitializeNextFlight(Vector3 position)

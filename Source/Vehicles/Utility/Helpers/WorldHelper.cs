@@ -288,5 +288,46 @@ namespace Vehicles
 			matrix.SetTRS(pos + normalized * altOffset, q, s);
 			return matrix;
 		}
+
+		/// <summary>
+		/// Alternative to <see cref="WorldRendererUtility.DrawQuadTangentialToPlanet(Vector3, float, float, Material, bool, bool, MaterialPropertyBlock)"/> that rotates by -90 degrees for vehicle icons
+		/// </summary>
+		/// <param name="pos"></param>
+		/// <param name="size"></param>
+		/// <param name="altOffset"></param>
+		/// <param name="material"></param>
+		/// <param name="counterClockwise"></param>
+		/// <param name="useSkyboxLayer"></param>
+		/// <param name="propertyBlock"></param>
+		public static void DrawQuadTangentialToPlanet(Vector3 pos, float size, float altOffset, Material material, bool counterClockwise = false, bool useSkyboxLayer = false, MaterialPropertyBlock propertyBlock = null)
+		{
+			if (material == null)
+			{
+				Log.Warning("Tried to draw quad with null material.");
+				return;
+			}
+			Vector3 normalized = pos.normalized;
+			Vector3 vector;
+
+			if (counterClockwise)
+			{
+				vector = -normalized;
+			}
+			else
+			{
+				vector = normalized;
+			}
+			Quaternion q = Quaternion.LookRotation(Vector3.Cross(vector, Vector3.up), vector) * Quaternion.Euler(0, -90f, 0);
+			Vector3 s = new Vector3(size, 1f, size);
+			Matrix4x4 matrix = default;
+			matrix.SetTRS(pos + normalized * altOffset, q, s);
+			int layer = useSkyboxLayer ? WorldCameraManager.WorldSkyboxLayer : WorldCameraManager.WorldLayer;
+			if (propertyBlock != null)
+			{
+				Graphics.DrawMesh(MeshPool.plane10, matrix, material, layer, null, 0, propertyBlock);
+				return;
+			}
+			Graphics.DrawMesh(MeshPool.plane10, matrix, material, layer);
+		}
 	}
 }

@@ -222,7 +222,7 @@ namespace Vehicles
 							}
 							yield return turretTargeterGizmo;
 						}
-						if (Prefs.DevMode && DebugSettings.godMode)
+						if (DebugSettings.ShowDevGizmos)
 						{
 							yield return new Command_Action()
 							{
@@ -285,7 +285,7 @@ namespace Vehicles
 							{
 								gizmoGroups.Add(turret.groupKey, turretCommand);
 							}
-							if (Prefs.DevMode && DebugSettings.godMode)
+							if (DebugSettings.ShowDevGizmos)
 							{
 								yield return new Command_Action()
 								{

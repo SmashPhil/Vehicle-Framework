@@ -173,7 +173,7 @@ namespace Vehicles
 			{
 				Current.Game.CurrentMap = mapParent.Map;
 				CameraJumper.TryHideWorld();
-				LandingTargeter.Instance.BeginTargeting(vehicle, this, delegate (LocalTargetInfo target, Rot4 rot)
+				LandingTargeter.Instance.BeginTargeting(vehicle, delegate (LocalTargetInfo target, Rot4 rot)
 				{
 					if (vehicle.Spawned)
 					{
@@ -192,7 +192,7 @@ namespace Vehicles
 						vehicle.CompVehicleLauncher.inFlight = true;
 						CameraJumper.TryShowWorld();
 					}
-				}, null, null, null, vehicle.VehicleDef.rotatable && landingProperties.forcedRotation is null);
+				}, allowRotating: vehicle.VehicleDef.rotatable && landingProperties.forcedRotation is null);
 			}, MenuOptionPriority.Default, null, null, 0f, null, null);
 		}
 

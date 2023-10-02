@@ -194,6 +194,24 @@ namespace Vehicles
 			{
 				DebugLandAerialVehicle(aerialVehicle);
 			}
+			
+			foreach (Map map in Find.Maps)
+			{
+				foreach (Thing thing in map.spawnedThings.ToList())
+				{
+					if (thing is VehicleSkyfaller vehicleSkyfaller)
+					{
+						vehicleSkyfaller.vehicle.CompVehicleLauncher.launchProtocol.Release();
+						vehicleSkyfaller.vehicle.CompVehicleLauncher.inFlight = false;
+						GenSpawn.Spawn(vehicleSkyfaller.vehicle, vehicleSkyfaller.Position, vehicleSkyfaller.Map, vehicleSkyfaller.Rotation);
+						if (VehicleMod.settings.main.deployOnLanding)
+						{
+							vehicleSkyfaller.vehicle.CompVehicleLauncher.SetTimedDeployment();
+						}
+						vehicleSkyfaller.Destroy();
+					}
+				}
+			}
 		}
 
 		public static void DebugLandAerialVehicle(AerialVehicleInFlight aerialVehicleInFlight)

@@ -7,8 +7,13 @@ namespace Vehicles
 {
 	public class VehicleSkyfaller_Arriving : VehicleSkyfaller
 	{
-		public const int NotificationSquishInterval = 50;
+		public const int NotificationSquishInterval = 60;
 		public int delayLandingTicks;
+		
+		private static readonly Color GhostColor = new Color(1, 1, 1, 0.5f);
+		private static readonly Color GhostOccupiedColor = new Color(1, 0.5f, 0.2f, 0.5f);
+
+		public bool LandingSpotOccupied { get; private set; }
 
 		public override void ExposeData()
 		{
@@ -19,7 +24,7 @@ namespace Vehicles
 		public override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
 			(launchProtocolDrawPos, _) = vehicle.CompVehicleLauncher.launchProtocol.Draw(RootPos, 0);
-			//DrawDropSpotShadow();
+			DrawLandingGhost();
 		}
 
 		public override void Tick()
@@ -35,6 +40,11 @@ namespace Vehicles
 			}
 			if (Find.TickManager.TicksGame % NotificationSquishInterval == 0 && Map != null)
 			{
+				LandingSpotOccupied = false;
+				foreach (Thing thing in Map.thingGrid.ThingsAt(Position))
+				{
+					LandingSpotOccupied |= thing is VehiclePawn;
+				}
 				foreach (IntVec3 cell in vehicle.PawnOccupiedCells(Position, Rotation))
 				{
 					VehicleDamager.NotifyNearbyPawnsOfDangerousPosition(Map, cell);
@@ -59,6 +69,11 @@ namespace Vehicles
 				}
 			}
 			Destroy();
+		}
+
+		private void DrawLandingGhost()
+		{
+			GhostDrawer.DrawGhostThing(Position, Rotation, vehicle.VehicleDef, vehicle.VehicleGraphic, LandingSpotOccupied ? GhostOccupiedColor : GhostColor, AltitudeLayer.Blueprint, vehicle);
 		}
 
 		public override void SpawnSetup(Map map, bool respawningAfterLoad)

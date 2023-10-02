@@ -109,7 +109,7 @@ namespace Vehicles
 			{
 				return false;
 			}
-			if (!IsPassable(caravan.Tile)&& !TryRecoverFromUnwalkablePosition())
+			if (!IsPassable(caravan.Tile) && !TryRecoverFromUnwalkablePosition())
 			{
 				return false;
 			}
@@ -206,6 +206,10 @@ namespace Vehicles
 
 		private bool TryRecoverFromUnwalkablePosition()
 		{
+			if (caravan.Vehicles.All(vehicle => vehicle.VehicleDef.vehicleType == VehicleType.Air))
+			{
+				return false;
+			}
 			if (GenWorldClosest.TryFindClosestTile(caravan.Tile, (int t) => IsPassable(t) && WorldVehicleReachability.Instance.CanReach(caravan, t), out int tile, 2147483647, true))
 			{
 				Log.Warning($"{caravan} on impassable tile: {caravan.Tile}. Teleporting to {tile}");

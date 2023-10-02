@@ -37,6 +37,7 @@ namespace Vehicles
 		{
 			Instance.vehicle = vehicle;
 			Instance.action = action;
+			Instance.origin = origin;
 			Instance.originOnMap = WorldHelper.GetTilePos(origin);
 			Instance.canTargetTiles = canTargetTiles;
 			Instance.mouseAttachment = mouseAttachment;
@@ -69,6 +70,7 @@ namespace Vehicles
 		{
 			Instance.vehicle = vehicle;
 			Instance.action = action;
+			Instance.origin = origin;
 			Instance.originOnMap = WorldHelper.GetTilePos(origin);
 			Instance.canTargetTiles = canTargetTiles;
 			Instance.mouseAttachment = mouseAttachment;
@@ -119,7 +121,7 @@ namespace Vehicles
 				{
 					GlobalTargetInfo arg = CurrentTargetUnderMouse();
 					bool maxNodesHit = FlightPath.Count == vehicle.CompVehicleLauncher.launchProtocol.MaxFlightNodes;
-					int sourceTile = aerialVehicle?.Tile ?? vehicle.Map.Tile;
+					int sourceTile = aerialVehicle?.Tile ?? vehicle.Map?.Tile ?? origin;
 					bool sameTile = !vehicle.CompVehicleLauncher.inFlight && sourceTile == arg.Tile && FlightPath.NullOrEmpty();
 					if (WorldHelper.WorldObjectAt(arg.Tile) is WorldObject && vehicle.CompVehicleLauncher.SpaceFlight && !maxNodesHit && !sameTile)
 					{

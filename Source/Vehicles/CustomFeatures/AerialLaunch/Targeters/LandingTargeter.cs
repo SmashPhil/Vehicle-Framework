@@ -15,12 +15,13 @@ namespace Vehicles
 		private static float middleMouseDownTime;
 		private static float framesOpen;
 
-		private LaunchProtocol launchProtocol;
 		private Action<LocalTargetInfo, Rot4> action;
 		private Rot4 landingRotation;
 		private LocalTargetInfo cachedTarget;
 		private Func<LocalTargetInfo, bool> targetValidator;
 		private bool allowRotating;
+
+		private Queue<Action> targeterQueue = new Queue<Action>();
 
 		private static (IntVec3 startingCell, Rot4 rotation, bool result) restrictionCached;
 
@@ -30,26 +31,32 @@ namespace Vehicles
 
 		public override bool IsTargeting => action != null;
 
-		public void BeginTargeting(VehiclePawn vehicle, LaunchProtocol launchProtocol, Map map, Action<LocalTargetInfo, Rot4> action, Func<LocalTargetInfo, bool> targetValidator = null, Action actionWhenFinished = null, Texture2D mouseAttachment = null, bool allowRotating = false, bool forcedTargeting = false)
+		public void BeginTargeting(VehiclePawn vehicle, Map map, Action<LocalTargetInfo, Rot4> action, Func<LocalTargetInfo, bool> targetValidator = null, Action actionWhenFinished = null, Texture2D mouseAttachment = null, bool allowRotating = false, bool forcedTargeting = false)
 		{
 			Current.Game.CurrentMap = map;
-			BeginTargeting(vehicle, launchProtocol, action, targetValidator, actionWhenFinished, mouseAttachment, allowRotating);
-			ForcedTargeting = forcedTargeting;
-			
+			BeginTargeting(vehicle, action, targetValidator, delegate ()
+			{
+				Current.Game.CurrentMap = map;
+			}, actionWhenFinished, mouseAttachment, allowRotating, forcedTargeting: forcedTargeting);
 		}
 
-		public void BeginTargeting(VehiclePawn vehicle, LaunchProtocol launchProtocol, Action<LocalTargetInfo, Rot4> action, Func<LocalTargetInfo, bool> targetValidator = null, Action actionWhenFinished = null, Texture2D mouseAttachment = null, bool allowRotating = false, bool forcedTargeting = false)
+		public void BeginTargeting(VehiclePawn vehicle, Action<LocalTargetInfo, Rot4> action, Func<LocalTargetInfo, bool> targetValidator = null, Action actionOnStart = null, Action actionWhenFinished = null, Texture2D mouseAttachment = null, bool allowRotating = false, bool forcedTargeting = false)
 		{
-			this.vehicle = vehicle;
-			this.launchProtocol = launchProtocol;
-			this.action = action;
-			this.actionWhenFinished = actionWhenFinished;
-			this.mouseAttachment = mouseAttachment;
-			this.targetValidator = targetValidator;
-			this.allowRotating = allowRotating;
-			landingRotation = launchProtocol.LandingProperties?.forcedRotation ?? Rot4.North;
-			ForcedTargeting = forcedTargeting;
-			ResetRestrictionCache();
+			targeterQueue.Enqueue(delegate ()
+			{
+				actionOnStart?.Invoke();
+				this.vehicle = vehicle;
+				this.action = action;
+				this.actionWhenFinished = actionWhenFinished;
+				this.mouseAttachment = mouseAttachment;
+				this.targetValidator = targetValidator;
+				this.allowRotating = allowRotating;
+				landingRotation = vehicle.CompVehicleLauncher.launchProtocol.GetProperties(LaunchProtocol.LaunchType.Landing, landingRotation)?.forcedRotation ?? Rot4.North;
+				ForcedTargeting = forcedTargeting;
+				ResetRestrictionCache();
+			});
+
+			TryStartNextTargeter();
 		}
 
 		public override void StopTargeting()
@@ -63,6 +70,16 @@ namespace Vehicles
 			targetValidator = null;
 			framesOpen = 0;
 			ForcedTargeting = false;
+
+			TryStartNextTargeter();
+		}
+
+		private void TryStartNextTargeter()
+		{
+			if (!IsTargeting && targeterQueue.TryDequeue(out Action beginTargeting))
+			{
+				beginTargeting();
+			}
 		}
 
 		private static void ResetRestrictionCache()
@@ -75,7 +92,8 @@ namespace Vehicles
 			IntVec3 cell = localTargetInfo.Cell;
 			Vector3 position = new Vector3(cell.x, AltitudeLayer.Building.AltitudeFor(), cell.z).ToIntVec3().ToVector3Shifted();
 			VehiclePawn vehicleAtPos = MapHelper.VehicleInPosition(vehicle, Current.Game.CurrentMap, cell, landingRotation);
-			bool invalidPosition = !localTargetInfo.IsValid || (vehicleAtPos != vehicle && MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation)) || (targetValidator != null && !targetValidator(localTargetInfo));
+			bool invalidPosition = !localTargetInfo.IsValid || (targetValidator != null && !targetValidator(localTargetInfo));
+			invalidPosition |= (vehicleAtPos != vehicle && MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation));
 			bool restricted = false;
 			if (vehicle.CompVehicleLauncher.launchProtocol.GetProperties(LaunchProtocol.LaunchType.Landing, landingRotation)?.restriction is LaunchRestriction launchRestriction)
 			{

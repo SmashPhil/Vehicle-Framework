@@ -571,7 +571,7 @@ namespace Vehicles
 						}
 					}, delegate (LocalTargetInfo target)
 					{
-						if (target.Thing is Pawn pawn && pawn.IsColonistPlayerControlled)
+						if (target.Thing is Pawn pawn && pawn.IsColonistPlayerControlled && !pawn.Downed)
 						{
 							VehicleHandler handler = pawn.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(handler => handler.AreSlotsAvailable && handler.role.handlingTypes == HandlingTypeFlags.None);
 							PromptToBoardVehicle(pawn, handler);
@@ -681,7 +681,7 @@ namespace Vehicles
 				}
 			}
 
-			if (Prefs.DevMode && DebugSettings.godMode && Spawned)
+			if (DebugSettings.ShowDevGizmos && Spawned)
 			{
 				yield return new Command_Action
 				{

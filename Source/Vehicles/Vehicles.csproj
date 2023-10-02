@@ -388,9 +388,10 @@
     <Compile Include="Utility\Extensions\Ext_Settings.cs" />
     <Compile Include="Utility\Extensions\Ext_Vehicles.cs" />
     <Compile Include="Utility\Helpers\AchievementsHelper.cs" />
-    <Compile Include="Utility\Helpers\AerialVehicleAbandonOrBanishHelper.cs" />
-    <Compile Include="Utility\Helpers\AerialVehicleTabHelper.cs" />
-    <Compile Include="Utility\Helpers\AerialVehicleTraderHelper.cs" />
+    <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleAbandonOrBanishHelper.cs" />
+    <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleLaunchHelper.cs" />
+    <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleTabHelper.cs" />
+    <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleTraderHelper.cs" />
     <Compile Include="Utility\Helpers\CaravanHelper.cs" />
     <Compile Include="Utility\Helpers\CaravanInfoHelper.cs" />
     <Compile Include="Utility\Helpers\DamageHelper.cs" />

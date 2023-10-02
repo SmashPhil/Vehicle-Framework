@@ -1,13 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1393</currentVersion>
+  <currentVersion>1.5.1394</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed bug where launching 2 aerial vehicles to land in the same map at the same time would fail to start targeting for the 2nd aerial vehicle.
+
 - Fixed bug where merging any vehicle caravan would not recache the colonist bar.
 
 - Fixed bug where any caravan merging with vehicles would not guarantee that it spawns a vehicle caravan, missing out on the custom pathfinding among other mechanics.
@@ -16,7 +18,9 @@
 
 - Fixed bug where pawns inside vehicles would not try to recover psyfocus and hemogen.
 
-- Fixed bug 
+- Fixed bug where Load Pawn gizmo would not properly mark downed colonists for loading.
+
+- Fixed bug where AerialVehicle world map icon would rotate 90 degrees when zoomed in.
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 
 &lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;

@@ -43,7 +43,7 @@ namespace Vehicles
 		public override void ProcessInputEvents()
 		{
 			ConfirmStillValid();
-			if(IsTargeting)
+			if (IsTargeting)
 			{
 				if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
 				{

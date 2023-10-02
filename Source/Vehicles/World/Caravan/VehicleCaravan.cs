@@ -42,6 +42,8 @@ namespace Vehicles
 
 		public bool CanDismount => true;
 
+		public bool AerialVehicle => vehicles.Count == 1 && vehicles.FirstOrDefault().VehicleDef.vehicleType == VehicleType.Air;
+
 		public IEnumerable<VehiclePawn> Vehicles => vehicles;
 
 		public IEnumerable<Pawn> DismountedPawns
@@ -85,11 +87,26 @@ namespace Vehicles
 			}
 		}
 
+		public bool CanLaunch
+		{
+			get
+			{
+				foreach (VehiclePawn vehicle in vehicles)
+				{
+					if (vehicle.CompVehicleLauncher == null)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+
 		public bool OutOfFuel
 		{
 			get
 			{
-				foreach (VehiclePawn vehicle in Vehicles)
+				foreach (VehiclePawn vehicle in vehicles)
 				{
 					if (vehicle.CompFueledTravel != null && vehicle.CompFueledTravel.Fuel <= 0)
 					{
@@ -127,10 +144,10 @@ namespace Vehicles
 				Color color = Material.color;
 				float num = 1f - transitionPct;
 				propertyBlock.SetColor(ShaderPropertyIDs.Color, new Color(color.r, color.g, color.b, color.a * num));
-				DrawQuadTangentialToPlanet(DrawPos, 0.7f * averageTileSize, 0.015f, Material, false, false, propertyBlock);
+				WorldHelper.DrawQuadTangentialToPlanet(DrawPos, 0.7f * averageTileSize, 0.015f, Material, propertyBlock: propertyBlock);
 				return;
 			}
-			DrawQuadTangentialToPlanet(DrawPos, 0.7f * averageTileSize, 0.015f, Material, false, false, null);
+			WorldHelper.DrawQuadTangentialToPlanet(DrawPos, 0.7f * averageTileSize, 0.015f, Material);
 		}
 
 		public void DrawQuadTangentialToPlanet(Vector3 pos, float size, float altOffset, Material material, bool counterClockwise = false, bool useSkyboxLayer = false, MaterialPropertyBlock propertyBlock = null)
@@ -209,11 +226,6 @@ namespace Vehicles
 			foreach (Gizmo gizmo in base.GetGizmos())
 			{
 				yield return gizmo;
-				//Only pull non-devmode gizmos
-				if (!DebugSettings.ShowDevGizmos || !(gizmo is Command command) || command.icon)
-				{
-					//yield return gizmo;
-				}
 			}
 
 			foreach (VehiclePawn vehicle in Vehicles)
@@ -229,6 +241,29 @@ namespace Vehicles
 
 			if (IsPlayerControlled)
 			{
+				if (AerialVehicle)
+				{
+					VehiclePawn vehicle = vehicles.FirstOrDefault();
+					Command_Action launchCommand = new Command_Action()
+					{
+						defaultLabel = "CommandLaunchGroup".Translate(),
+						defaultDesc = "CommandLaunchGroupDesc".Translate(),
+						icon = VehicleTex.LaunchCommandTex,
+						alsoClickIfOtherInGroupClicked = false,
+						action = delegate ()
+						{
+							LaunchTargeter.BeginTargeting(vehicle, (GlobalTargetInfo target, float fuelCost) => AerialVehicleLaunchHelper.ChoseTargetOnMap(vehicle, Tile, target, fuelCost), Tile, 
+								true, VehicleTex.TargeterMouseAttachment, closeWorldTabWhenFinished: false, onUpdate: null,
+								extraLabelGetter: (GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, Tile, path, fuelCost));
+						}
+					};
+					if (!vehicle.CompVehicleLauncher.CanLaunchWithCargoCapacity(out string disableReason))
+					{
+						launchCommand.disabled = true;
+						launchCommand.disabledReason = disableReason;
+					}
+					yield return launchCommand;
+				}
 				if (vehiclePather.Moving)
 				{
 					yield return new Command_Toggle
@@ -248,7 +283,7 @@ namespace Vehicles
 						defaultLabel = "CommandPauseCaravan".Translate()
 					};
 				}
-				if (CaravanMergeUtility.ShouldShowMergeCommand)
+				if (!AerialVehicle && CaravanMergeUtility.ShouldShowMergeCommand)
 				{
 					yield return CaravanMergeUtility.MergeCommand(this);
 				}
@@ -256,26 +291,13 @@ namespace Vehicles
 				{
 					yield return gizmo2;
 				}
-
-				foreach (WorldObject worldObject in Find.WorldObjects.ObjectsAt(base.Tile))
+				foreach (WorldObject worldObject in Find.WorldObjects.ObjectsAt(Tile))
 				{
 					foreach (Gizmo gizmo3 in worldObject.GetCaravanGizmos(this))
 					{
 						yield return gizmo3;
 					}
 				}
-			}
-			if (Prefs.DevMode && DebugSettings.godMode)
-			{
-				yield return new Command_Action
-				{
-					defaultLabel = "Vehicle Dev: Teleport to destination",
-					action = delegate()
-					{
-						Tile = vehiclePather.Destination;
-						vehiclePather.StopDead();
-					}
-				};
 			}
 			if (this.HasBoat() && (Find.World.CoastDirectionAt(Tile).IsValid || WorldHelper.RiverIsValid(Tile, PawnsListForReading.Where(p => p.IsBoat()).ToList())))
 			{
@@ -315,6 +337,19 @@ namespace Vehicles
 
 					yield return undock;
 				}
+			}
+
+			if (DebugSettings.ShowDevGizmos)
+			{
+				yield return new Command_Action
+				{
+					defaultLabel = "Vehicle Dev: Teleport to destination",
+					action = delegate ()
+					{
+						Tile = vehiclePather.Destination;
+						vehiclePather.StopDead();
+					}
+				};
 			}
 		}
 

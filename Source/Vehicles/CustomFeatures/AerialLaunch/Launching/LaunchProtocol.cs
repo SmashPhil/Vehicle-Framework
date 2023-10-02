@@ -557,8 +557,8 @@ namespace Vehicles
 				}
 				else
 				{
-					AerialVehicleInFlight aerial = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
-					aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_FormVehicleCaravan(vehicle));
+					AerialVehicleInFlight aerialVehicle = AerialVehicleLaunchHelper.GetOrMakeAerialVehicle(vehicle);
+					aerialVehicle.OrderFlyToTiles(LaunchTargeter.FlightPath, aerialVehicle.DrawPos, new AerialVehicleArrivalAction_FormVehicleCaravan(vehicle));
 				}
 			}, MenuOptionPriority.Default, null, null, 0f, null, null);
 		}
@@ -569,7 +569,7 @@ namespace Vehicles
 			{
 				Current.Game.CurrentMap = mapParent.Map;
 				CameraJumper.TryHideWorld();
-				LandingTargeter.Instance.BeginTargeting(vehicle, this, delegate (LocalTargetInfo target, Rot4 rot)
+				LandingTargeter.Instance.BeginTargeting(vehicle, action: delegate (LocalTargetInfo target, Rot4 rot)
 				{
 					if (vehicle.Spawned)
 					{
@@ -577,18 +577,13 @@ namespace Vehicles
 					}
 					else
 					{
-						AerialVehicleInFlight aerial = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
-						if (aerial is null)
-						{
-							Log.Error($"Attempted to launch into existing map where CurrentMap is null and no AerialVehicle with {vehicle.Label} exists.");
-							return;
-						}
-						aerial.arrivalAction = new AerialVehicleArrivalAction_LandSpecificCell(vehicle, mapParent, tile, target.Cell, rot);
-						aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, mapParent, tile, target.Cell, rot));
+						AerialVehicleInFlight aerialVehicle = AerialVehicleLaunchHelper.GetOrMakeAerialVehicle(vehicle);
+						aerialVehicle.arrivalAction = new AerialVehicleArrivalAction_LandSpecificCell(vehicle, mapParent, tile, target.Cell, rot);
+						aerialVehicle.OrderFlyToTiles(LaunchTargeter.FlightPath, aerialVehicle.DrawPos, new AerialVehicleArrivalAction_LandSpecificCell(vehicle, mapParent, tile, target.Cell, rot));
 						vehicle.CompVehicleLauncher.inFlight = true;
 						CameraJumper.TryShowWorld();
 					}
-				}, null, null, null, vehicle.VehicleDef.rotatable);
+				}, allowRotating: vehicle.VehicleDef.rotatable);
 			}, MenuOptionPriority.Default, null, null, 0f, null, null);
 		}
 
@@ -606,15 +601,10 @@ namespace Vehicles
 				}
 				else
 				{
-					AerialVehicleInFlight aerial = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
-					if (aerial is null)
-					{
-						Log.Error($"Attempted to launch into existing map where CurrentMap is null and no AerialVehicle with {vehicle.Label} exists.");
-						return;
-					}
+					AerialVehicleInFlight aerialVehicle = AerialVehicleLaunchHelper.GetOrMakeAerialVehicle(vehicle);
 					List<FlightNode> flightPath = new List<FlightNode>(LaunchTargeter.FlightPath);
-					aerial.OrderFlyToTiles(flightPath, aerial.DrawPos);
-					aerial.flightPath.ReconCircleAt(mapParent.Tile);
+					aerialVehicle.OrderFlyToTiles(flightPath, aerialVehicle.DrawPos);
+					aerialVehicle.flightPath.ReconCircleAt(mapParent.Tile);
 					vehicle.CompVehicleLauncher.inFlight = true;
 				}
 			});
@@ -631,12 +621,7 @@ namespace Vehicles
 				}
 				else
 				{
-					AerialVehicleInFlight aerialVehicle = vehicle.GetAerialVehicle();
-					if (aerialVehicle is null)
-					{
-						Log.Error($"Unable to launch strafe run. AerialVehicle is null and {vehicle.LabelCap} is not spawned.");
-						return;
-					}
+					AerialVehicleInFlight aerialVehicle = AerialVehicleLaunchHelper.GetOrMakeAerialVehicle(vehicle);
 					LaunchTargeter.Instance.ContinueTargeting(vehicle, new Func<GlobalTargetInfo, float, bool>(aerialVehicle.ChoseTargetOnMap), aerialVehicle, true, VehicleTex.TargeterMouseAttachment, false, null,
 						(GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, aerialVehicle.Tile, path, fuelCost));
 				}
@@ -657,8 +642,8 @@ namespace Vehicles
 					}
 					else
 					{
-						AerialVehicleInFlight aerial = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
-						aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_VisitSettlement(vehicle, settlement));
+						AerialVehicleInFlight aerialVehicle = AerialVehicleLaunchHelper.GetOrMakeAerialVehicle(vehicle);
+						aerialVehicle.OrderFlyToTiles(LaunchTargeter.FlightPath, aerialVehicle.DrawPos, new AerialVehicleArrivalAction_VisitSettlement(vehicle, settlement));
 					}
 				}, MenuOptionPriority.Default, null, null, 0f, null, null);
 			}
@@ -673,8 +658,8 @@ namespace Vehicles
 					}
 					else
 					{
-						AerialVehicleInFlight aerial = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
-						aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_Trade(vehicle, settlement));
+						AerialVehicleInFlight aerialVehicle = AerialVehicleLaunchHelper.GetOrMakeAerialVehicle(vehicle);
+						aerialVehicle.OrderFlyToTiles(LaunchTargeter.FlightPath, aerialVehicle.DrawPos, new AerialVehicleArrivalAction_Trade(vehicle, settlement));
 					}
 				});
 			}
@@ -689,8 +674,8 @@ namespace Vehicles
 					}
 					else
 					{
-						AerialVehicleInFlight aerial = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
-						aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos, new AerialVehicleArrivalAction_OfferGifts(vehicle, settlement));
+						AerialVehicleInFlight aerialVehicle = AerialVehicleLaunchHelper.GetOrMakeAerialVehicle(vehicle);
+						aerialVehicle.OrderFlyToTiles(LaunchTargeter.FlightPath, aerialVehicle.DrawPos, new AerialVehicleArrivalAction_OfferGifts(vehicle, settlement));
 					}
 				});
 			}

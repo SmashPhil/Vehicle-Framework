@@ -15,7 +15,19 @@ namespace Vehicles
 		/// <param name="map"></param>
 		public static bool AnyVehicleSkyfallersBlockingMap(Map map)
 		{
-			return map?.listerThings?.ThingsInGroup(ThingRequestGroup.ThingHolder)?.Where(t => t is VehicleSkyfaller)?.Any() ?? false;
+			List<Thing> thingHolders = map?.listerThings?.ThingsInGroup(ThingRequestGroup.ThingHolder);
+			if (thingHolders.NullOrEmpty())
+			{
+				return false;
+			}
+			foreach (Thing thing in thingHolders)
+			{
+				if (thing is VehicleSkyfaller)
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 
 		/// <summary>
@@ -59,6 +71,20 @@ namespace Vehicles
 		{
 			IEnumerable<IntVec3> cells = vehicle.PawnOccupiedCells(cell, rot);
 			return VehicleReservationManager.VehicleInhabitingCells(cells, map);
+		}
+
+		public static VehicleSkyfaller VehicleSkyfallerInPosition(VehiclePawn vehicle, Map map, IntVec3 cell, Rot4 rot)
+		{
+			IEnumerable<IntVec3> cells = vehicle.PawnOccupiedCells(cell, rot);
+			foreach (IntVec3 hitboxCell in cells)
+			{
+				VehicleSkyfaller vehicleSkyfaller = map.thingGrid.ThingAt<VehicleSkyfaller>(hitboxCell);
+				if (vehicleSkyfaller != null)
+				{
+					return vehicleSkyfaller;
+				}
+			}
+			return null;
 		}
 
 		/// <summary>
