@@ -68,7 +68,7 @@ namespace Vehicles
 			}
 			foreach (VehicleRegion region in mapping[createdFor].VehicleRegionGrid.AllRegions_NoRebuild_InvalidAllowed)
 			{
-				SetRegionDirty(region, false);
+				SetRegionDirty(region, addCellsToDirtyCells: false);
 			}
 		}
 
@@ -88,7 +88,7 @@ namespace Vehicles
 					VehicleRegion regionAt_NoRebuild_InvalidAllowed = mapping[createdFor].VehicleRegionGrid.GetRegionAt_NoRebuild_InvalidAllowed(adjCell);
 					if (regionAt_NoRebuild_InvalidAllowed != null && regionAt_NoRebuild_InvalidAllowed.valid)
 					{
-						SetRegionDirty(regionAt_NoRebuild_InvalidAllowed, true);
+						SetRegionDirty(regionAt_NoRebuild_InvalidAllowed);
 					}
 				}
 			}
@@ -113,7 +113,7 @@ namespace Vehicles
 			}
 			foreach (VehicleRegion vehicleRegion in regionsToDirty)
 			{
-				SetRegionDirty(vehicleRegion, true);
+				SetRegionDirty(vehicleRegion);
 			}
 			regionsToDirty.Clear();
 		}
@@ -134,7 +134,7 @@ namespace Vehicles
 			}
 			foreach (VehicleRegion vehicleRegion in regionsToDirty)
 			{
-				SetRegionDirty(vehicleRegion, true);
+				SetRegionDirty(vehicleRegion);
 			}
 			regionsToDirty.Clear();
 
@@ -149,7 +149,7 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="region"></param>
 		/// <param name="addCellsToDirtyCells"></param>
-		private void SetRegionDirty(VehicleRegion region, bool addCellsToDirtyCells = true)
+		private void SetRegionDirty(VehicleRegion region, bool addCellsToDirtyCells = true, bool dirtyLinkedRegions = true)
 		{
 			string step = "";
 			try
@@ -163,7 +163,11 @@ namespace Vehicles
 				step = "Deregistering";
 				foreach (VehicleRegionLink regionLink in region.links)
 				{
-					regionLink.Deregister(region, createdFor);
+					VehicleRegion otherRegion = regionLink.Deregister(region, createdFor);
+					if (otherRegion != null && dirtyLinkedRegions)
+					{
+						SetRegionDirty(otherRegion, addCellsToDirtyCells: addCellsToDirtyCells, dirtyLinkedRegions: false);
+					}
 				}
 				step = "Clearing links and weights";
 				region.links.Clear();

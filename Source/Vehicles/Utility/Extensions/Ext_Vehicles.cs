@@ -199,7 +199,7 @@ namespace Vehicles
 		public static IntVec3 PadForHitbox(this IntVec3 cell, Map map, VehicleDef vehicleDef)
 		{
 			int largestSize = Mathf.Max(vehicleDef.Size.x, vehicleDef.Size.z);
-			int padding = Mathf.CeilToInt(largestSize / 2);
+			int padding = Mathf.CeilToInt(largestSize / 2f);
 
 			if (cell.x < padding)
 			{
@@ -419,7 +419,7 @@ namespace Vehicles
 		{
 			foreach (AerialVehicleInFlight aerialVehicle in VehicleWorldObjectsHolder.Instance.AerialVehicles)
 			{
-				if (aerialVehicle.vehicle == pawn || aerialVehicle.vehicle.AllPawnsAboard.Contains(pawn))
+				if (aerialVehicle?.vehicle == pawn || aerialVehicle.vehicle.AllPawnsAboard.Contains(pawn))
 				{
 					return aerialVehicle;
 				}
@@ -641,7 +641,11 @@ namespace Vehicles
 		{
 			if (maxPossibleSize)
 			{
-				return MaxRect(vehicle, cell).Cells.All(cell => vehicle.Drivable(cell));
+				if (!vehicle.VehicleRect(cell, Rot8.North).All(rectCell => vehicle.Drivable(rectCell)))
+				{
+					return false;
+				}
+				return vehicle.VehicleRect(cell, Rot8.East).All(rectCell => vehicle.Drivable(rectCell));
 			}
 			return MinRect(vehicle, cell).Cells.All(cell => vehicle.Drivable(cell));
 		}

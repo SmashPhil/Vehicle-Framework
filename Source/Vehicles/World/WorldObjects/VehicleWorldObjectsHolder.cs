@@ -111,6 +111,13 @@ namespace Vehicles
 			Scribe_Collections.Look(ref aerialVehicles, "aerialVehicles", LookMode.Reference);
 			Scribe_Collections.Look(ref vehicleCaravans, "vehicleCaravans", LookMode.Reference);
 			Scribe_Collections.Look(ref dockedBoats, "dockedBoats", LookMode.Reference);
+
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				aerialVehicles.RemoveAll(a => a is null);
+				vehicleCaravans.RemoveAll(c => c is null);
+				dockedBoats.RemoveAll(b => b is null);
+			}
 		}
 	}
 }

@@ -442,7 +442,7 @@ namespace Vehicles
 			{
 				caravan.vehiclePather.StartPath(directionTile, null, true, true);
 				caravan.vehiclePather.nextTileCostLeft /= 2f;
-				caravan.tweener.ResetTweenedPosToRoot();
+				caravan.vehicleTweener.ResetTweenedPosToRoot();
 			}
 			if (destinationTile != -1)
 			{

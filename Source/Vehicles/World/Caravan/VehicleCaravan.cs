@@ -598,7 +598,6 @@ namespace Vehicles
 		{
 			base.Tick();
 			vehiclePather.PatherTick();
-			vehicleTweener.TweenerTick();
 			if (vehiclePather.MovingNow)
 			{
 				foreach (VehiclePawn vehicle in vehicles)

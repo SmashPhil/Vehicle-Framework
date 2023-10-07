@@ -119,6 +119,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(Caravan_PathFollower), nameof(Caravan_PathFollower.MovingNow)),
 				postfix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(VehicleCaravanMovingNow)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan_Tweener), nameof(Caravan_Tweener.TweenerTick)),
+				prefix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(VehicleCaravanTweenerTick)));
 
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(SettlementDefeatUtility), nameof(SettlementDefeatUtility.CheckDefeated)),
 				transpiler: new HarmonyMethod(typeof(CaravanHandling),
@@ -975,6 +978,17 @@ namespace Vehicles
 				__result = vehicleCaravan.vehiclePather.MovingNow;
 			}
 		}
+
+		public static bool VehicleCaravanTweenerTick(Caravan ___caravan)
+		{
+			if (___caravan is VehicleCaravan vehicleCaravan)
+			{
+				vehicleCaravan.vehicleTweener.TweenerTick();
+				return false;
+			}
+			return true;
+		}
+
 
 		//REDO?
 		public static void UnloadVehicleOfferGifts(VehicleCaravan caravan)
