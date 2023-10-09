@@ -1,13 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1400</currentVersion>
+  <currentVersion>1.5.1401</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
-
+Hey everyone, 
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed bug where neighboring regions were not updated properly, causing areas to be unreachable.
+
+- Aerial Vehicles transition to caravans when landed, allowing sites / quests to be interacted with properly.
+
 - Fixed bug where launching 2 aerial vehicles to land in the same map at the same time would fail to start targeting for the 2nd aerial vehicle.
 
 - Fixed bug where merging any vehicle caravan would not recache the colonist bar.
@@ -16,18 +20,25 @@
 
 - Fixed bug where pawns in vehicle caravan would rest 24/7.
 
+- Fixed bug where loading cargo into a vehicle would sometimes issue too many jobs, or try to issue multiple jobs on the same item.
+
 - Fixed bug where pawns inside vehicles would not try to recover psyfocus and hemogen.
 
 - Fixed bug where Load Pawn gizmo would not properly mark downed colonists for loading.
 
+- Fixed bug where colonists would refuel vehicle while it's leaking, resulting in wasted fuel.
+
 - Fixed bug where AerialVehicle world map icon would rotate 90 degrees when zoomed in.
+
+- Fixed bug where the aim pie of vehicle turrets would flicker when rendering.
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 
 &lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-
+- Geological Landforms
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Added pawn rendering to TweakField menu, allowing runtime editing of pawn rendering fields.
 
+- Increased brightness of text in Cargo tab for items yet to be loaded.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
   <!--Static parameterless method to execute when update log is executed-->

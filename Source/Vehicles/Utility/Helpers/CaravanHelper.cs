@@ -533,7 +533,6 @@ namespace Vehicles
 		/// <param name="faction"></param>
 		/// <param name="startingTile"></param>
 		/// <param name="addToWorldPawnsIfNotAlready"></param>
-		/// <returns></returns>
 		public static VehicleCaravan MakeVehicleCaravan(IEnumerable<Pawn> pawns, Faction faction, int startingTile, bool addToWorldPawnsIfNotAlready)
 		{
 			if (startingTile < 0 && addToWorldPawnsIfNotAlready)
@@ -570,6 +569,8 @@ namespace Vehicles
 			}
 			caravan.Name = CaravanNameGenerator.GenerateCaravanName(caravan);
 			caravan.SetUniqueId(Find.UniqueIDsManager.GetNextCaravanID());
+
+			caravan.PostInit();
 			return caravan;
 		}
 

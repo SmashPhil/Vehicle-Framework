@@ -25,6 +25,7 @@ namespace Vehicles
 		public VehicleCaravan_Tweener vehicleTweener;
 
 		private VehiclePawn leadVehicle;
+		private bool initialized;
 
 		private List<VehiclePawn> vehicles = new List<VehiclePawn>();
 
@@ -66,7 +67,7 @@ namespace Vehicles
 			{
 				if (leadVehicle is null)
 				{
-					leadVehicle = PawnsListForReading.First(v => v is VehiclePawn) as VehiclePawn;
+					leadVehicle = PawnsListForReading.FirstOrDefault(v => v is VehiclePawn) as VehiclePawn;
 				}
 				return leadVehicle;
 			}
@@ -76,7 +77,11 @@ namespace Vehicles
 		{
 			get
 			{
-				VehicleDef leadVehicleDef = (PawnsListForReading.First(v => v is VehiclePawn) as VehiclePawn).VehicleDef;
+				VehicleDef leadVehicleDef = LeadVehicle?.VehicleDef;
+				if (leadVehicleDef is null)
+				{
+					return null;
+				}
 				if (!materials.ContainsKey(leadVehicleDef))
 				{
 					var texture = VehicleTex.CachedTextureIcons[leadVehicleDef];
@@ -391,6 +396,33 @@ namespace Vehicles
 		public void RecacheVehicles()
 		{
 			vehicles = pawns.InnerListForReading.Where(pawn => pawn is VehiclePawn).Cast<VehiclePawn>().ToList();
+			leadVehicle = null;
+			ValidateCaravanType();
+		}
+
+		public virtual void PostInit()
+		{
+			initialized = true;
+			RecacheVehicles();
+			ValidateCaravanType();
+		}
+
+		/// <summary>
+		/// Convert to vanilla caravan if no vehicles exist in VehicleCaravan
+		/// </summary>
+		private void ValidateCaravanType()
+		{
+			if (initialized && vehicles.NullOrEmpty())
+			{
+				Debug.Message($"VehicleCaravan {this} has no more vehicles. Converting to normal caravan. Pawns={string.Join($", ", pawns.InnerListForReading.Select(pawn => pawn.Label))}");
+				List<Pawn> pawnsToTransfer = pawns.InnerListForReading.ToList();
+				RemoveAllPawns();
+				Caravan caravan = CaravanMaker.MakeCaravan(pawnsToTransfer, Faction, Tile, true);
+				if (!Destroyed)
+				{
+					Destroy();
+				}
+			}
 		}
 		
 		public override string GetInspectString()
@@ -598,6 +630,7 @@ namespace Vehicles
 		{
 			base.Tick();
 			vehiclePather.PatherTick();
+
 			if (vehiclePather.MovingNow)
 			{
 				foreach (VehiclePawn vehicle in vehicles)
@@ -620,7 +653,7 @@ namespace Vehicles
 			vehicleTweener.ResetTweenedPosToRoot();
 			
 			//Necessary check for post load, otherwise registry will be null until spawned on map
-			foreach (VehiclePawn vehicle in Vehicles)
+			foreach (VehiclePawn vehicle in vehicles)
 			{
 				vehicle.RegisterEvents();
 			}
@@ -633,6 +666,7 @@ namespace Vehicles
 
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
+				initialized = true;
 #pragma warning disable 0618
 				vPather = vehiclePather; //Share reference until mods switch over to new name
 #pragma warning restore 0618

@@ -22,7 +22,7 @@ namespace Vehicles
 
 		public static readonly Color ThingLabelColor = new Color(0.9f, 0.9f, 0.9f, 1f);
 		public static readonly Color HighlightColor = new Color(0.5f, 0.5f, 0.5f, 1f);
-		public static readonly Color MissingItemColor = new Color(0.8f, 0, 0, 0.5f);
+		public static readonly Color MissingItemColor = new Color(1, 0, 0.1f, 0.75f);
 
 		private static List<Thing> workingInvList = new List<Thing>();
 

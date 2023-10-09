@@ -26,9 +26,13 @@ namespace Vehicles
 				Thing thing = FindThingToPack(vehicle, pawn);
 				if (thing != null)
 				{
-					Job job = JobMaker.MakeJob(JobDefOf_Vehicles.LoadVehicle, thing, t);
-					job.count = Mathf.Min(thing.stackCount, CountLeftToTransferItem(vehicle, pawn, thing));
-					return job;
+					int jobCount = Mathf.Min(thing.stackCount, CountLeftToTransferItem(vehicle, pawn, thing));
+					if (jobCount > 0)
+					{
+						Job job = JobMaker.MakeJob(JobDefOf_Vehicles.LoadVehicle, thing, t);
+						job.count = jobCount;
+						return job;
+					}
 				}
 			}
 			return null;
@@ -76,8 +80,15 @@ namespace Vehicles
 
 		private static int CountLeftToTransferItem(VehiclePawn vehicle, Pawn pawn, Thing thing)
 		{
-			var item = vehicle.cargoToLoad.FirstOrDefault(t => t.AnyThing.def == thing.def);
-			return Mathf.Max(Mathf.Min(thing.stackCount, item.CountToTransfer - TransferableCountHauledByOthersForPacking(vehicle, pawn, item)), 0);
+			TransferableOneWay cargo = vehicle.cargoToLoad.FirstOrDefault(t => t.AnyThing == thing);
+			if (cargo == null)
+			{
+				return 0;
+			}
+			int countToTransfer = cargo.CountToTransfer - TransferableCountHauledByOthersForPacking(vehicle, pawn, cargo);
+			int minCount = Mathf.Min(thing.stackCount, countToTransfer);
+			Log.Message($"{pawn} transfering {thing} Count={minCount}  ToTransfer={cargo.CountToTransfer} ByOthers: {TransferableCountHauledByOthersForPacking(vehicle, pawn, cargo)}");
+			return Mathf.Max(minCount, 0);
 		}
 
 		private static int TransferableCountHauledByOthersForPacking(VehiclePawn vehicle, Pawn pawn, TransferableOneWay transferable)

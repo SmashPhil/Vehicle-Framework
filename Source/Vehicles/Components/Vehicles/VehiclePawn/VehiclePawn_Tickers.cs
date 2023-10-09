@@ -185,6 +185,22 @@ namespace Vehicles
 						jobs.JobTrackerTick();
 					}
 					TickHandlers();
+
+					if (currentlyFishing)
+					{
+						if (Find.TickManager.TicksGame % 240 == 0)
+						{
+							if (AllPawnsAboard.Count == 0)
+							{
+								currentlyFishing = false;
+							}
+							else
+							{
+								IntVec3 cell = this.OccupiedRect().ExpandedBy(1).EdgeCells.RandomElement();
+								MoteMaker.MakeStaticMote(cell, Map, ThingDefOf_VehicleMotes.Mote_FishingNet);
+							}
+						}
+					}
 				}
 				//equipment?.EquipmentTrackerTick();
 

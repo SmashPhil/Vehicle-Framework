@@ -52,7 +52,7 @@ namespace Vehicles
 		public static bool CanRefuel(Pawn pawn, VehiclePawn vehicle, bool forced = false)
 		{
 			CompFueledTravel compFueler = vehicle.CompFueledTravel;
-			if (compFueler is null || compFueler.FullTank)
+			if (compFueler is null || compFueler.FullTank || compFueler.FuelLeaking)
 			{
 				return false;
 			}

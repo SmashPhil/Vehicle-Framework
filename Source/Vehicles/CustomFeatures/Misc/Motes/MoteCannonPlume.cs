@@ -3,7 +3,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class Mote_CannonPlume : Mote
+	public class MoteCannonPlume : Mote
 	{
 		protected int ticksActive = 0;
 		protected int frame = 0;

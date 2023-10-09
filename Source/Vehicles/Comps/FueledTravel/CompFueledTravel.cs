@@ -59,6 +59,8 @@ namespace Vehicles
 		public float TargetFuelLevel { get => targetFuelLevel; set => targetFuelLevel = value; }
 		public float FuelPercentOfTarget => fuel / TargetFuelLevel;
 
+		public bool FuelLeaking => leaking;
+
 		//Fuel Consumption
 		public float ConsumptionRatePerTick => FuelEfficiency * EfficiencyTickMultiplier;
 		public FuelConsumptionCondition FuelCondition => Props.fuelConsumptionCondition;

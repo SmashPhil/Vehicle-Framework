@@ -3,13 +3,15 @@
 <Defs>
 	<ThingDef ParentName="MoteBase">
 		<defName>Mote_CannonPlume</defName>
-		<thingClass>Vehicles.Mote_CannonPlume</thingClass>
+		<thingClass>Vehicles.MoteCannonPlume</thingClass>
+		<altitudeLayer>MoteOverhead</altitudeLayer>
+		
 		<graphicData>
 			<texPath>Animations/CannonPlume</texPath>
 			<graphicClass>Vehicles.Graphic_Animate</graphicClass>
 			<drawSize>(5,5)</drawSize>
 		</graphicData>
-		<altitudeLayer>MoteOverhead</altitudeLayer>
+		
 		<mote>
 			<fadeInTime>0</fadeInTime>
 			<solidTime>1</solidTime>

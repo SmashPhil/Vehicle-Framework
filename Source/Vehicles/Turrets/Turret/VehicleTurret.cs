@@ -1049,8 +1049,6 @@ namespace Vehicles
 
 					if (TargetLocked && ReadyToFire)
 					{
-						float facing = cannonTarget.Thing != null ? (cannonTarget.Thing.DrawPos - TurretLocation).AngleFlat() : (cannonTarget.Cell - TurretLocation.ToIntVec3()).AngleFlat;
-						GenDraw.DrawAimPieRaw(TurretLocation + new Vector3(aimPieOffset.x, Altitudes.AltInc, aimPieOffset.y).RotatedBy(TurretRotation), facing, (int)(PrefireTickCount * 0.5f));
 						PrefireTickCount--;
 					}
 				}
@@ -1263,7 +1261,7 @@ namespace Vehicles
 								}
 								thrownMote.SetVelocity(thrownAngle, moteProps.speedThrown.RandomInRange);
 							}
-							if (mote is Mote_CannonPlume cannonMote)
+							if (mote is MoteCannonPlume cannonMote)
 							{
 								cannonMote.cyclesLeft = moteProps.cycles;
 								cannonMote.animationType = moteProps.animationType;
@@ -1307,6 +1305,7 @@ namespace Vehicles
 			{
 				VehicleGraphics.DrawTurret(this, drawPos, Rot8.North);
 				DrawTargeter();
+				DrawAimPie();
 			}
 		}
 
@@ -1316,6 +1315,7 @@ namespace Vehicles
 			{
 				VehicleGraphics.DrawTurret(this, Rot8.North);
 				DrawTargeter();
+				DrawAimPie();
 			}
 		}
 
@@ -1380,6 +1380,15 @@ namespace Vehicles
 						}
 					}
 				}
+			}
+		}
+
+		protected virtual void DrawAimPie()
+		{
+			if (TargetLocked && ReadyToFire)
+			{
+				float facing = cannonTarget.Thing != null ? (cannonTarget.Thing.DrawPos - TurretLocation).AngleFlat() : (cannonTarget.Cell - TurretLocation.ToIntVec3()).AngleFlat;
+				GenDraw.DrawAimPieRaw(TurretLocation + new Vector3(aimPieOffset.x, Altitudes.AltInc, aimPieOffset.y).RotatedBy(TurretRotation), facing, (int)(PrefireTickCount * 0.5f));
 			}
 		}
 

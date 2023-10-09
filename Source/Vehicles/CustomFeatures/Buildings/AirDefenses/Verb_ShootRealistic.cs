@@ -230,7 +230,7 @@ namespace Vehicles
 									expandMote.growthRate = moteProps.growthRate.RandomInRange;
 								}
 							}
-							if (mote is Mote_CannonPlume cannonMote)
+							if (mote is MoteCannonPlume cannonMote)
 							{
 								cannonMote.cyclesLeft = moteProps.cycles;
 								cannonMote.animationType = moteProps.animationType;

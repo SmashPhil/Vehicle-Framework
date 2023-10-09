@@ -114,6 +114,7 @@
     <Compile Include="Misc\Attributes\DisableSettingConditionalAttribute.cs" />
     <Compile Include="Misc\DefOf\HistoryEventDefOf_Vehicles.cs" />
     <Compile Include="Misc\DefOf\KeyBindingDefOf_Vehicles.cs" />
+    <Compile Include="Misc\DefOf\ThingDefOf_VehicleMotes.cs" />
     <Compile Include="Misc\DefOf\VehicleStatCategoryDefOf.cs" />
     <Compile Include="Misc\DefOf\VehicleTurretEventDefOf.cs" />
     <Compile Include="Misc\Enums\UI\WorldPathingDebugType.cs" />
@@ -176,8 +177,8 @@
     <Compile Include="CustomFeatures\Buildings\AirDefenses\VerbProperties\VerbProperties_Animated.cs" />
     <Compile Include="CustomFeatures\Buildings\AirDefenses\Verb_ShootWorldRecoiled.cs" />
     <Compile Include="CustomFeatures\EventDefs\VehicleEventDef.cs" />
-    <Compile Include="CustomFeatures\Misc\MoteThrownSlowToSpeed.cs" />
-    <Compile Include="CustomFeatures\Misc\MoteThrownExpand.cs" />
+    <Compile Include="CustomFeatures\Misc\Motes\MoteThrownSlowToSpeed.cs" />
+    <Compile Include="CustomFeatures\Misc\Motes\MoteThrownExpand.cs" />
     <Compile Include="Components\Vehicles\VehicleAreaManager.cs" />
     <Compile Include="Gizmo\Command_ActionVehicleDrawn.cs" />
     <Compile Include="Gizmo\Command_Action_PawnDrawer.cs" />
@@ -253,7 +254,7 @@
     <Compile Include="CustomFeatures\Buildings\AirDefenses\VerbProperties\VerbProperties_Recoil.cs" />
     <Compile Include="CustomFeatures\Buildings\AirDefenses\Verb_ShootRealistic.cs" />
     <Compile Include="CustomFeatures\Buildings\AirDefenses\Verb_ShootRecoiled.cs" />
-    <Compile Include="CustomFeatures\Misc\Mote_CannonPlume.cs" />
+    <Compile Include="CustomFeatures\Misc\Motes\MoteCannonPlume.cs" />
     <Compile Include="Gizmo\Command_VerbWorldTarget.cs" />
     <Compile Include="Harmony\PatchCategories\DefGenerators\PawnKindDefGenerator_Vehicles.cs" />
     <Compile Include="Harmony\StartupTesting.cs" />

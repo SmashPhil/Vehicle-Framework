@@ -539,6 +539,22 @@ namespace Vehicles
 				yield return loadVehicle;
 			}
 
+			if (FishingCompatibility.Active && SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.fishing), VehicleDef.properties.fishing))
+			{
+				Command_Toggle fishing = new Command_Toggle
+				{
+					defaultLabel = "VF_StartFishing".Translate(),
+					defaultDesc = "VF_StartFishingDesc".Translate(),
+					icon = VehicleTex.FishingIcon,
+					isActive = () => currentlyFishing,
+					toggleAction = delegate ()
+					{
+						currentlyFishing = !currentlyFishing;
+					}
+				};
+				yield return fishing;
+			}
+
 			Command_Action flagForLoading = new Command_Action
 			{
 				defaultLabel = "VF_HaulPawnToVehicle".Translate(),
@@ -625,21 +641,6 @@ namespace Vehicles
 						}
 						yield return unloadAction;
 					}
-				}
-				if (SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.fishing), VehicleDef.properties.fishing) && FishingCompatibility.Active)
-				{
-					Command_Toggle fishing = new Command_Toggle
-					{
-						defaultLabel = "VF_StartFishing".Translate(),
-						defaultDesc = "VF_StartFishingDesc".Translate(),
-						icon = VehicleTex.FishingIcon,
-						isActive = (() => currentlyFishing),
-						toggleAction = delegate ()
-						{
-							currentlyFishing = !currentlyFishing;
-						}
-					};
-					yield return fishing;
 				}
 			}
 			if (this.GetLord()?.LordJob is LordJob_FormAndSendVehicles formCaravanLordJob)
