@@ -243,6 +243,7 @@ namespace Vehicles
 			return true;
 		}
 
+		//TODO - Bugfix related to Tier 3
 		public static bool VehicleMaterialOnCopyBuildGizmo(BuildableDef buildable, ThingDef stuff, ref Command __result)
 		{
 			if (buildable is VehicleBuildDef buildDef)
@@ -251,6 +252,7 @@ namespace Vehicles
 				if (des == null)
 				{
 					__result = null;
+					return false;
 				}
 				if (buildable.MadeFromStuff && stuff == null)
 				{

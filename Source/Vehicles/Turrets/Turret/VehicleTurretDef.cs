@@ -194,7 +194,7 @@ namespace Vehicles
 			}
 			if (chargePerAmmoCount <= 0)
 			{
-				yield return $"<field>ammoCountPerCharge</field> must be greater than 1.".ConvertRichText();
+				yield return $"<field>chargePerAmmoCount</field> must be greater than 1.".ConvertRichText();
 			}
 			if (ammunition != null)
 			{

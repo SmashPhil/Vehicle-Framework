@@ -133,64 +133,6 @@ namespace Vehicles
 			}
 		}
 
-		//TODO - Doesn't work for even sizes. Should instead calculate only North and East (north calculate full OccupiedRect, east only calculate past the inner square)
-		public static IEnumerable<IntVec3> FullVehicleRectAllDirections(this VehicleDef vehicleDef, IntVec3 center)
-		{
-			//If size is square, rotation doesn't matter
-			IntVec2 size = vehicleDef.size;
-			if (size.x == size.z)
-			{
-				foreach (IntVec3 cell in GenAdj.OccupiedRect(center, Rot4.North, size))
-				{
-					yield return cell;
-				}
-				yield break;
-			}
-			GenAdj.AdjustForRotation(ref center, ref size, Rot4.North);
-
-			int minSize = Mathf.Min(size.x, size.z);
-			int maxSize = Mathf.Max(size.x, size.z);
-
-			//Fetch inner square
-			foreach (IntVec3 cell in GenAdj.OccupiedRect(center, Rot4.North, new IntVec2(minSize, minSize)))
-			{
-				yield return cell;
-			}
-
-			int cutoutSize = Mathf.CeilToInt((maxSize - minSize) / 2f);
-			int distanceToEdge = Mathf.FloorToInt((maxSize - minSize) / 2f);
-			IntVec2 subSize = new IntVec2(minSize, cutoutSize);
-			int startingDist = distanceToEdge + cutoutSize;
-
-			//North
-			IntVec3 subCenter = center + new IntVec3(0, 0, startingDist);
-			foreach (IntVec3 cell in GenAdj.OccupiedRect(subCenter, Rot4.North, subSize))
-			{
-				yield return cell;
-			}
-
-			//East
-			subCenter = center + new IntVec3(startingDist, 0, 0);
-			foreach (IntVec3 cell in GenAdj.OccupiedRect(subCenter, Rot4.East, subSize))
-			{
-				yield return cell;
-			}
-
-			//South
-			subCenter = center + new IntVec3(0, 0, -startingDist);
-			foreach (IntVec3 cell in GenAdj.OccupiedRect(subCenter, Rot4.South, subSize))
-			{
-				yield return cell;
-			}
-
-			//West
-			subCenter = center + new IntVec3(-startingDist, 0, 0);
-			foreach (IntVec3 cell in GenAdj.OccupiedRect(subCenter, Rot4.West, subSize))
-			{
-				yield return cell;
-			}
-		}
-
 		public static IntVec3 PadForHitbox(this IntVec3 cell, Map map, VehiclePawn vehicle)
 		{
 			return PadForHitbox(cell, map, vehicle.VehicleDef);
