@@ -118,7 +118,7 @@ namespace Vehicles
 				{
 					speedTicksPerTile = turret.turretDef.projectileSpeed;
 				}
-				ProjectileSkyfaller projectile2 = ProjectileSkyfallerMaker.WrapProjectile(ProjectileSkyfallerDefOf.ProjectileSkyfaller, 
+				ProjectileSkyfaller projectile2 = ProjectileSkyfallerMaker.WrapProjectile(SkyfallerDefOf.ProjectileSkyfaller, 
 					projectile, this, launchPos, target.ToVector3Shifted(), speedTicksPerTile); //REDO - RANDOMIZE TARGETED CELLS
 				GenSpawn.Spawn(projectile2, target.ClampInsideMap(Map), Map);
 				if (turret.turretDef.ammunition != null)

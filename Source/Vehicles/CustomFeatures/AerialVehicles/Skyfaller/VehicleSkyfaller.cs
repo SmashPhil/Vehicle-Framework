@@ -11,7 +11,7 @@ using SmashTools;
 namespace Vehicles
 {
 	[StaticConstructorOnStartup]
-	public abstract class VehicleSkyfaller : Thing, IActiveDropPod, IThingHolder, ISustainerTarget
+	public abstract class VehicleSkyfaller : Thing, IActiveDropPod, ISustainerTarget
 	{
 		protected static MaterialPropertyBlock shadowPropertyBlock = new MaterialPropertyBlock();
 

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1401</currentVersion>
+  <currentVersion>1.5.1406</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
@@ -13,6 +13,8 @@ Hey everyone,
 - Aerial Vehicles transition to caravans when landed, allowing sites / quests to be interacted with properly.
 
 - Fixed bug where launching 2 aerial vehicles to land in the same map at the same time would fail to start targeting for the 2nd aerial vehicle.
+
+- Fixed bug where downed pawns were unable to be set for loading in any UI, including vanilla transport pods, caravans, and even reformation dialogs.
 
 - Fixed bug where merging any vehicle caravan would not recache the colonist bar.
 
@@ -28,6 +30,8 @@ Hey everyone,
 
 - Fixed bug where colonists would refuel vehicle while it's leaking, resulting in wasted fuel.
 
+- Fixed bug where targeting for launching aerial vehicles would throw an exception for any vehicles without a fuel component.
+
 - Fixed bug where AerialVehicle world map icon would rotate 90 degrees when zoomed in.
 
 - Fixed bug where the aim pie of vehicle turrets would flicker when rendering.
@@ -39,6 +43,8 @@ Hey everyone,
 - Added pawn rendering to TweakField menu, allowing runtime editing of pawn rendering fields.
 
 - Increased brightness of text in Cargo tab for items yet to be loaded.
+
+- Added damage field to explosive vehicle parts, allowing overriding of damage applied.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
   <!--Static parameterless method to execute when update log is executed-->

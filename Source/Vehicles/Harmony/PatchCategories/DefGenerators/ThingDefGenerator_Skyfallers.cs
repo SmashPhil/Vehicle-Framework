@@ -32,7 +32,7 @@ namespace Vehicles
 						skyfaller = new SkyfallerProperties()
 						{
 							shadow = "Things/Skyfaller/SkyfallerShadowDropPod",
-							shadowSize = vehicleDef.Size.ToVector2()
+							shadowSize = vehicleDef.Size.ToVector2(),
 						}
 					};
 					comp.skyfallerLeaving = skyfallerLeavingImpliedDef;

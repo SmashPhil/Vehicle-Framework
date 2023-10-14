@@ -120,7 +120,7 @@ namespace Vehicles
 			{
 				return ShuttleLaunchStatus.Invalid;
 			}
-			else
+			else if (Vehicle.CompFueledTravel != null)
 			{
 				if (!mouseTarget.IsValid || LaunchTargeter.TotalFuelCost > Vehicle.CompFueledTravel.Fuel)
 				{
@@ -130,8 +130,8 @@ namespace Vehicles
 				{
 					return ShuttleLaunchStatus.NoReturnTrip;
 				}
-				return ShuttleLaunchStatus.Valid;
 			}
+			return ShuttleLaunchStatus.Valid;
 		}
 
 		public override IEnumerable<Gizmo> CompGetGizmosExtra()
