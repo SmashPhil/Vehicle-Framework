@@ -17,9 +17,11 @@ namespace Vehicles
 			labelKey = "VF_TabCargo";
 		}
 
+		public override bool IsVisible => !Vehicle.beached;
+
 		protected override string InventoryLabelKey => "VF_Cargo";
 
-		public override bool IsVisible => !Vehicle.beached;
+		protected override bool AllowDropping => true;
 
 		private VehiclePawn Vehicle
 		{

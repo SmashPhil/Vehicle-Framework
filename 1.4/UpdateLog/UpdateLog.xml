@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1406</currentVersion>
+  <currentVersion>1.5.1407</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
@@ -19,6 +19,8 @@ Hey everyone,
 - Fixed bug where merging any vehicle caravan would not recache the colonist bar.
 
 - Fixed bug where any caravan merging with vehicles would not guarantee that it spawns a vehicle caravan, missing out on the custom pathfinding among other mechanics.
+
+- Fixed bug where entering a map with more than 1 vehicle caused vehicles to stack, making them hard to move (if not downright impossibly stuck).
 
 - Fixed bug where pawns in vehicle caravan would rest 24/7.
 

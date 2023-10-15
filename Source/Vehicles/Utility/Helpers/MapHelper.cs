@@ -56,8 +56,7 @@ namespace Vehicles
 		/// <param name="cell"></param>
 		public static bool VehicleBlockedInPosition(VehiclePawn vehicle, Map map, IntVec3 cell, Rot4 rot)
 		{
-			IEnumerable<IntVec3> cells = vehicle.PawnOccupiedCells(cell, rot);	
-			return VehicleReservationManager.AnyVehicleInhabitingCells(cells, map) || !vehicle.CellRectStandable(map, cell, rot);
+			return VehicleReservationManager.AnyVehicleInhabitingCells(vehicle.PawnOccupiedCells(cell, rot), map) || !vehicle.CellRectStandable(map, cell, rot);
 		}
 
 		/// <summary>
@@ -106,7 +105,7 @@ namespace Vehicles
 				}
 				else
 				{
-					AerialVehicleInFlight aerial = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
+					AerialVehicleInFlight aerial = AerialVehicleLaunchHelper.GetOrMakeAerialVehicle(vehicle);
 					if (aerial is null)
 					{
 						Log.Error($"Attempted to launch into existing map where CurrentMap is null and no AerialVehicle with {vehicle.Label} exists.");

@@ -13,9 +13,21 @@ namespace Vehicles
 	{
 		public static readonly Material RopeMat = MaterialPool.MatFrom(GenDraw.LineTexPath, ShaderDatabase.SolidColor, new Color(0.15f, 0.15f, 0.15f));
 
-		public bool shouldDraft;
+		private Material cachedShadowMaterial;
 
 		public AirdropDef AirdropDef => def as AirdropDef;
+
+		protected Material ShadowMaterial
+		{
+			get
+			{
+				if (cachedShadowMaterial == null && !def.skyfaller.shadow.NullOrEmpty())
+				{
+					cachedShadowMaterial = MaterialPool.MatFrom(def.skyfaller.shadow, ShaderDatabase.Transparent);
+				}
+				return cachedShadowMaterial;
+			}
+		}
 
 		public override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
@@ -54,7 +66,19 @@ namespace Vehicles
 				Graphic.Draw(drawLoc, flip ? thingForGraphic.Rotation.Opposite : thingForGraphic.Rotation, thingForGraphic, extraRotation);
 			}
 			DrawParachute(drawLoc, extraRotation);
-			DrawDropSpotShadow();
+			DrawDropSpotShadowTrailing(drawLoc);
+		}
+
+		protected virtual void DrawDropSpotShadowTrailing(Vector3 apparentLoc)
+		{
+			Material shadowMaterial = ShadowMaterial;
+			if (shadowMaterial == null)
+			{
+				return;
+			}
+			Vector3 drawLoc = this.TrueCenter();
+			drawLoc.x = apparentLoc.x;
+			DrawDropSpotShadow(drawLoc, Rotation, shadowMaterial, def.skyfaller.shadowSize, ticksToImpact);
 		}
 
 		public void DrawParachute(Vector3 drawLoc, float extraRotation)

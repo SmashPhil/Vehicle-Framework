@@ -14,26 +14,28 @@ namespace Vehicles
 	public class VehiclePositionManager : DetachedMapComponent
 	{
 		private readonly Dictionary<IntVec3, VehiclePawn> occupiedCells = new Dictionary<IntVec3, VehiclePawn>();
-		private readonly Dictionary<VehiclePawn, List<IntVec3>> occupiedRect = new Dictionary<VehiclePawn, List<IntVec3>>();
+		private readonly Dictionary<VehiclePawn, CellRect> occupiedRect = new Dictionary<VehiclePawn, CellRect>();
 
 		public VehiclePositionManager(Map map) : base(map)
 		{
 			occupiedCells = new Dictionary<IntVec3, VehiclePawn>();
-			occupiedRect = new Dictionary<VehiclePawn, List<IntVec3>>();
+			occupiedRect = new Dictionary<VehiclePawn, CellRect>();
 		}
+
+		public List<VehiclePawn> AllClaimants => occupiedRect.Keys.ToList();
 
 		public bool PositionClaimed(IntVec3 cell) => ClaimedBy(cell) != null;
 
 		public VehiclePawn ClaimedBy(IntVec3 cell) => occupiedCells.TryGetValue(cell, null);
 
-		public List<IntVec3> ClaimedBy(VehiclePawn vehicle) => occupiedRect.TryGetValue(vehicle, null);
+		public CellRect ClaimedBy(VehiclePawn vehicle) => occupiedRect.TryGetValue(vehicle, default);
 
 		public void ClaimPosition(VehiclePawn vehicle)
 		{
 			ReleaseClaimed(vehicle);
-			List<IntVec3> newClaim = vehicle.VehicleRect().ToList();
-			occupiedRect[vehicle] = newClaim;
-			foreach (IntVec3 cell in newClaim)
+			CellRect occupiedRect = vehicle.VehicleRect();
+			this.occupiedRect[vehicle] = occupiedRect;
+			foreach (IntVec3 cell in occupiedRect)
 			{
 				occupiedCells[cell] = vehicle;
 			}
@@ -47,9 +49,9 @@ namespace Vehicles
 
 		public bool ReleaseClaimed(VehiclePawn vehicle)
 		{
-			if (occupiedRect.TryGetValue(vehicle, out List<IntVec3> currentlyOccupied))
+			if (occupiedRect.TryGetValue(vehicle, out CellRect rect))
 			{
-				foreach (IntVec3 cell in currentlyOccupied)
+				foreach (IntVec3 cell in rect)
 				{
 					occupiedCells.Remove(cell);
 				}

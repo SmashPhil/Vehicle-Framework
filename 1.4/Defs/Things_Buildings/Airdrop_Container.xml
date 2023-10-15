@@ -26,9 +26,7 @@
 		<rotatable>false</rotatable>
 		<selectable>true</selectable>
 		
-		<building>
-			<alwaysDeconstructible>true</alwaysDeconstructible>
-		</building>
+		<building/>
 		
 		<statBases>
 			<MaxHitPoints>300</MaxHitPoints>

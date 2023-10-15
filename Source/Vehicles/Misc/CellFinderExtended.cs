@@ -84,9 +84,8 @@ namespace Vehicles
 			for (int j = 0; j < 10000; j++)
 			{
 				IntVec3 c = pawn.ClampToMap(CellFinder.RandomEdgeCell(dir, map), map, padding);
-				List<IntVec3> occupiedCells = pawn.PawnOccupiedCells(c, dir.Opposite);
 				
-				foreach (IntVec3 cAll in occupiedCells)
+				foreach (IntVec3 cAll in pawn.PawnOccupiedCells(c, dir.Opposite))
 				{
 					if (VehicleHarmony.debug && cAll != c)
 					{
@@ -112,8 +111,7 @@ namespace Vehicles
 				}
 				IntVec3 rCell = pawn.ClampToMap(cellsToCheck[startIndex + i], map, padding);
 				Debug.Message("Checking right: " + rCell + " | " + validator(rCell));
-				List<IntVec3> occupiedCellsRCell = pawn.PawnOccupiedCells(rCell, dir.Opposite);
-				foreach (IntVec3 c in occupiedCellsRCell)
+				foreach (IntVec3 c in pawn.PawnOccupiedCells(rCell, dir.Opposite))
 				{
 					if (!validator(c))
 						goto Block_0;
@@ -123,8 +121,7 @@ namespace Vehicles
 				Block_0:;
 				IntVec3 lCell = pawn.ClampToMap(cellsToCheck[startIndex - i], map, padding);
 				Debug.Message("Checking left: " + lCell + " | " + validator(lCell));
-				List<IntVec3> occupiedCellsLCell = pawn.PawnOccupiedCells(lCell, dir.Opposite);
-				foreach (IntVec3 c in occupiedCellsLCell)
+				foreach (IntVec3 c in pawn.PawnOccupiedCells(lCell, dir.Opposite))
 				{
 					if (!validator(c))
 						goto Block_1;
@@ -270,6 +267,22 @@ namespace Vehicles
 			}
 
 			result = IntVec3.Invalid;
+			return false;
+		}
+
+		public static bool TryRadialSearchForCell(IntVec3 cell, Map map, float radius, Predicate<IntVec3> validator, out IntVec3 result)
+		{
+			result = IntVec3.Invalid;
+			int num = GenRadial.NumCellsInRadius(radius);
+			for (int i = 0; i < num; i++)
+			{
+				IntVec3 radialCell = GenRadial.RadialPattern[i] + cell;
+				if (radialCell.InBounds(map) && validator(radialCell))
+				{
+					result = radialCell;
+					return true;
+				}
+			}
 			return false;
 		}
 	}
