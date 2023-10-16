@@ -243,42 +243,41 @@ namespace Vehicles
 			return true;
 		}
 
-		//TODO - Bugfix related to Tier 3
 		public static bool VehicleMaterialOnCopyBuildGizmo(BuildableDef buildable, ThingDef stuff, ref Command __result)
 		{
 			if (buildable is VehicleBuildDef buildDef)
 			{
-				Designator_Build des = BuildCopyCommandUtility.FindAllowedDesignator(buildable, true);
-				if (des == null)
+				Designator_Build designator = BuildCopyCommandUtility.FindAllowedDesignator(buildable, true);
+				if (designator == null)
 				{
 					__result = null;
 					return false;
 				}
 				if (buildable.MadeFromStuff && stuff == null)
 				{
-					__result = des;
+					__result = designator;
 				}
 				Command_ActionVehicleDrawn command_Action = new Command_ActionVehicleDrawn();
 				command_Action.action = delegate ()
 				{
 					SoundDefOf.Tick_Tiny.PlayOneShotOnCamera(null);
-					Find.DesignatorManager.Select(des);
-					des.SetStuffDef(stuff);
+					Find.DesignatorManager.Select(designator);
+					designator.SetStuffDef(stuff);
 				};
 				command_Action.defaultLabel = "CommandBuildCopy".Translate();
 				command_Action.defaultDesc = "CommandBuildCopyDesc".Translate();
-				ThingDef stuffDefRaw = des.StuffDefRaw;
-				des.SetStuffDef(stuff);
-				command_Action.icon = des.ResolvedIcon();
-				command_Action.iconProportions = des.iconProportions;
-				command_Action.iconDrawScale = des.iconDrawScale;
-				command_Action.iconTexCoords = des.iconTexCoords;
-				command_Action.iconAngle = des.iconAngle;
-				command_Action.iconOffset = des.iconOffset;
+				ThingDef stuffDefRaw = designator.StuffDefRaw;
+				designator.SetStuffDef(stuff);
+				command_Action.icon = designator.ResolvedIcon();
+				command_Action.iconProportions = designator.iconProportions;
+				command_Action.iconDrawScale = designator.iconDrawScale;
+				command_Action.iconTexCoords = designator.iconTexCoords;
+				command_Action.iconAngle = designator.iconAngle;
+				command_Action.iconOffset = designator.iconOffset;
 				command_Action.Order = 10f;
 				command_Action.buildDef = buildDef;
-				command_Action.SetColorOverride(des.IconDrawColor);
-				des.SetStuffDef(stuffDefRaw);
+				command_Action.SetColorOverride(designator.IconDrawColor);
+				designator.SetStuffDef(stuffDefRaw);
 				if (stuff != null)
 				{
 					command_Action.defaultIconColor = buildable.GetColorForStuff(stuff);

@@ -144,9 +144,9 @@ namespace Vehicles
 			return GenUI.TargetsAtMouse(targetParams).FirstOrFallback(LocalTargetInfo.Invalid);
 		}
 
-		public static bool TargetMeetsRequirements(VehicleTurret cannon, LocalTargetInfo obj)
+		public static bool TargetMeetsRequirements(VehicleTurret turret, LocalTargetInfo obj)
 		{
-			float distance = (cannon.TurretLocation.ToIntVec3() - obj.Cell).LengthHorizontal;
+			float distance = (turret.TurretLocation.ToIntVec3() - obj.Cell).LengthHorizontal;
 			bool los = false;
 			if (obj.HasThing)
 			{
@@ -154,15 +154,34 @@ namespace Vehicles
 				{
 					return false;
 				}
-				los = GenSight.LineOfSightToThing(cannon.TurretLocation.ToIntVec3(), obj.Thing, cannon.vehicle.Map);
+				los = GenSight.LineOfSightToThing(turret.TurretLocation.ToIntVec3(), obj.Thing, turret.vehicle.Map);
 			}
 			else
 			{
-				los = GenSight.LineOfSight(cannon.TurretLocation.ToIntVec3(), obj.Cell, cannon.vehicle.Map);
+				los = GenSight.LineOfSight(turret.TurretLocation.ToIntVec3(), obj.Cell, turret.vehicle.Map);
 			}
-			bool result = (distance >= cannon.MinRange && (distance < cannon.MaxRange || cannon.MaxRange <= -1))
-						&& cannon.AngleBetween(obj.CenterVector3) && ((cannon.loadedAmmo?.projectileWhenLoaded?.projectile?.flyOverhead ?? false) || los);
-			return result;
+			if (distance < turret.MinRange || (turret.MaxRange > 0 && distance >= turret.MaxRange))
+			{
+				return false;
+			}
+			if (!turret.AngleBetween(obj.CenterVector3))
+			{
+				return false;
+			}
+			ThingDef projectileDef;
+			if (turret.turretDef.genericAmmo)
+			{
+				projectileDef = turret.turretDef.projectile;
+			}
+			else
+			{
+				projectileDef = turret.loadedAmmo?.projectileWhenLoaded;
+			}
+			if (projectileDef != null && projectileDef.projectile.flyOverhead)
+			{
+				return true;
+			}
+			return los;
 		}
 
 		public override void PostInit()

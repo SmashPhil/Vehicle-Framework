@@ -662,7 +662,7 @@ namespace Vehicles
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Deep.Look(ref vehiclePather, "vehiclePather", new object[] { this });
+			Scribe_Deep.Look(ref vehiclePather, nameof(vehiclePather), new object[] { this });
 
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{

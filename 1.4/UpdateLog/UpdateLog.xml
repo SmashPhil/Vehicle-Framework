@@ -6,9 +6,15 @@
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
-Hey everyone, 
+Hey everyone, this update comes with a lot of fixes for caravans and aerial vehicles on the world map.  
+
+Please give the list of bugs a read, I know it's super long but previously unusable mechanics are now fixed and I'd hate for anyone to miss out. For example, pathfinding should now be fixed as well as janky caravan formations or entering maps stacked on top of each other.
+
+I'm slowly inching closer towards having Vehicle Framework free of critical bugs, which means I can start on raiders / traders soon (within the next few patches).  Yay!  If you guys have feedback or ideas you'd like to pitch for raiders / traders, lemme know.  I'll be designing the mechanics soon.
+
+Here's a sneak peek of something I'm working on: &lt;gif WIDTH=300 SIZE=(13,13) FPS=30 &gt;ParatrooperRaid&lt;/gif&gt;
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Fixed bug where neighboring regions were not updated properly, causing areas to be unreachable.
+- Fixed pathfinding bug where neighboring regions were not updated properly, causing areas to be unreachable.
 
 - Aerial Vehicles transition to caravans when landed, allowing sites / quests to be interacted with properly.
 
@@ -19,6 +25,8 @@ Hey everyone,
 - Fixed bug where merging any vehicle caravan would not recache the colonist bar.
 
 - Fixed bug where any caravan merging with vehicles would not guarantee that it spawns a vehicle caravan, missing out on the custom pathfinding among other mechanics.
+
+- Fixed bug where loading a save would cause vehicle caravans to not resume their saved path.
 
 - Fixed bug where entering a map with more than 1 vehicle caused vehicles to stack, making them hard to move (if not downright impossibly stuck).
 
@@ -37,6 +45,11 @@ Hey everyone,
 - Fixed bug where AerialVehicle world map icon would rotate 90 degrees when zoomed in.
 
 - Fixed bug where the aim pie of vehicle turrets would flicker when rendering.
+
+- Fixed bug where vehicle turrets with infinite range wouldn't be affected by spread radius.
+
+- Fixed bug where vehicle turrets with generic ammo wouldn't be able to ignore LOS for targeting with overhead projectiles.
+
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 
 &lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
@@ -52,9 +65,9 @@ Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>
   <!--Show update log on next startup.-->
-  <update>false</update>
+  <update>true</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
-  <testing>false</testing>
+  <testing>true</testing>
   <!--Icon bar shown to the right of the mod's name-->
   <rightIconBar>
     <li>
@@ -86,4 +99,14 @@ Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&
       <url>https://discord.gg/NNe2VxAU7Z</url>
     </li>
   </leftIconBar>
+  <images>
+	<li>
+		<name>ParatrooperSneakPeek</name>
+		<url>https://i.imgur.com/lZq25CV.png</url>
+	</li>
+	<li>
+		<name>ParatrooperRaid</name>
+		<url>https://i.imgur.com/AOSeSdX.jpg</url>
+	</li>
+  </images>
 </UpdateLog>

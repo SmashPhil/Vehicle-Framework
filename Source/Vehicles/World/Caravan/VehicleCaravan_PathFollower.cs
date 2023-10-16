@@ -493,17 +493,22 @@ namespace Vehicles
 
 		public void ExposeData()
 		{
-			Scribe_Values.Look(ref moving, "moving", true, false);
-			Scribe_Values.Look(ref paused, "paused", false, false);
-			Scribe_Values.Look(ref nextTile, "nextTile", 0, false);
-			Scribe_Values.Look(ref previousTileForDrawingIfInDoubt, "previousTileForDrawingIfInDoubt", 0, false);
-			Scribe_Values.Look(ref nextTileCostLeft, "nextTileCostLeft", 0f, false);
-			Scribe_Values.Look(ref nextTileCostTotal, "nextTileCostTotal", 0f, false);
-			Scribe_Values.Look(ref destTile, "destTile", 0, false);
-			Scribe_Deep.Look(ref arrivalAction, "arrivalAction", Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.PostLoadInit && Current.ProgramState != ProgramState.Entry && moving && !StartPath(destTile, arrivalAction, true, false))
+			Scribe_Values.Look(ref moving, nameof(moving), true);
+			Scribe_Values.Look(ref paused, nameof(paused));
+			Scribe_Values.Look(ref nextTile, nameof(nextTile));
+			Scribe_Values.Look(ref previousTileForDrawingIfInDoubt, nameof(previousTileForDrawingIfInDoubt));
+			Scribe_Values.Look(ref nextTileCostLeft, nameof(nextTileCostLeft));
+			Scribe_Values.Look(ref nextTileCostTotal, nameof(nextTileCostTotal));
+			Scribe_Values.Look(ref destTile, nameof(destTile));
+			Scribe_Deep.Look(ref arrivalAction, nameof(arrivalAction), Array.Empty<object>());
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
-				StopDead();
+				caravan.RecacheVehicles();
+				if (Current.ProgramState != ProgramState.Entry && moving && !StartPath(destTile, arrivalAction, true, false))
+				{
+					Log.Message("Stopping Dead");
+					StopDead();
+				}
 			}
 		}
 	}

@@ -1110,7 +1110,16 @@ namespace Vehicles
 			IntVec3 cell = cannonTarget.Cell;//
 			if (CurrentFireMode.spreadRadius > 0)
 			{
-				cell += GenRadial.RadialPattern[Rand.Range(0, GenRadial.NumCellsInRadius(CurrentFireMode.spreadRadius * (range / turretDef.maxRange)))];
+				int cellsInRadius;
+				if (turretDef.maxRange > 0)
+				{
+					cellsInRadius = GenRadial.NumCellsInRadius(CurrentFireMode.spreadRadius * (range / turretDef.maxRange));
+				}
+				else
+				{
+					cellsInRadius = GenRadial.NumCellsInRadius(CurrentFireMode.spreadRadius);
+				}
+				cell += GenRadial.RadialPattern[Rand.Range(0, cellsInRadius)];
 			}
 			if (CurrentTurretFiring >= turretDef.projectileShifting.Count)
 			{

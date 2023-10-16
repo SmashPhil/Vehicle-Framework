@@ -116,6 +116,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(Caravan_PathFollower), nameof(Caravan_PathFollower.Moving)),
 				postfix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(VehicleCaravanMoving)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanTweenerUtility), nameof(CaravanTweenerUtility.PatherTweenedPosRoot)),
+				prefix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(VehicleCaravanTweenedPosRoot)));
 			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(Caravan_PathFollower), nameof(Caravan_PathFollower.MovingNow)),
 				postfix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(VehicleCaravanMovingNow)));
@@ -969,6 +972,16 @@ namespace Vehicles
 			{
 				__result = vehicleCaravan.vehiclePather.Moving;
 			}
+		}
+
+		public static bool VehicleCaravanTweenedPosRoot(Caravan caravan, ref Vector3 __result)
+		{
+			if (caravan is VehicleCaravan)
+			{
+				__result = Find.WorldGrid.GetTileCenter(caravan.Tile);
+				return false;
+			}
+			return true;
 		}
 
 		public static void VehicleCaravanMovingNow(ref bool __result, Caravan ___caravan)
