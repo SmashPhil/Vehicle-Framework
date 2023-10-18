@@ -12,7 +12,7 @@ Please give the list of bugs a read, I know it's super long but previously unusa
 
 I'm slowly inching closer towards having Vehicle Framework free of critical bugs, which means I can start on raiders / traders soon (within the next few patches).  Yay!  If you guys have feedback or ideas you'd like to pitch for raiders / traders, lemme know.  I'll be designing the mechanics soon.
 
-Here's a sneak peek of something I'm working on: &lt;gif WIDTH=300 SIZE=(13,13) FPS=30 &gt;ParatrooperRaid&lt;/gif&gt;
+Here's a sneak peek of something I'm working on: &lt;gif WIDTH=300 SIZE=(13,13) FPS=30 &gt;ParatrooperRaid.gif&lt;/gif&gt;
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Fixed pathfinding bug where neighboring regions were not updated properly, causing areas to be unreachable.
 
@@ -68,7 +68,7 @@ Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&
   <update>true</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
   <testing>false</testing>
-  <!--Icon bar shown to the right of the mod's name-->
+  <!--Icon bar shown to the right of the mod's name.-->
   <rightIconBar>
     <li>
       <name>Github</name>
@@ -86,7 +86,7 @@ Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&
       <url>steam://url/CommunityFilePage/2356577528</url>
     </li>
   </rightIconBar>
-  <!--Icon bar shown to the left of the mod's name-->
+  <!--Icon bar shown to the left of the mod's name.-->
   <leftIconBar>
     <li>
       <name>Patreon</name>
@@ -99,261 +99,10 @@ Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&
       <url>https://discord.gg/NNe2VxAU7Z</url>
     </li>
   </leftIconBar>
+  <!--Images to download off the web to reference from the description.-->
   <images>
     <li>
-      <name>ParatrooperSneakPeek</name>
-      <urls />
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperSneakPeek</name>
-      <url>https://i.imgur.com/lZq25CV.png</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <urls />
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
-      <url>https://i.imgur.com/AOSeSdX.jpg</url>
-    </li>
-    <li>
-      <name>ParatrooperRaid</name>
+      <name>ParatrooperRaid.gif</name>
       <url>https://i.imgur.com/AOSeSdX.jpg</url>
     </li>
   </images>
