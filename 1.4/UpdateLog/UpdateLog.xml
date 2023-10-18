@@ -3,7 +3,7 @@
   <!--Can utilize Version.txt file placed in mod's root directory-->
   <currentVersion>1.5.1407</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
-  <updateOn>Startup</updateOn>
+  <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 Hey everyone, this update comes with a lot of fixes for caravans and aerial vehicles on the world map.  

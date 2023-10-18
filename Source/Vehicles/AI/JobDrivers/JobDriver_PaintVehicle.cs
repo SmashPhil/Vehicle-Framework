@@ -4,15 +4,17 @@ using System.Linq;
 using Verse;
 using Verse.AI;
 using RimWorld;
+using UnityEngine;
 using SmashTools;
 
 namespace Vehicles
 {
 	public class JobDriver_PaintVehicle : VehicleJobDriver
 	{
-		protected const float WorkPerCell = 200f;
+		protected const float WorkPerCell = 30;
+		protected const float MaxMultiplier = 20;
 
-		protected virtual float TotalWork => WorkPerCell * (Vehicle.VehicleDef.Size.x * Vehicle.VehicleDef.Size.z);
+		protected virtual float SizeMultiplier => Mathf.Min(Vehicle.VehicleDef.Size.x * Vehicle.VehicleDef.Size.z, MaxMultiplier);
 
 		protected override JobDef JobDef => JobDefOf_Vehicles.PaintVehicle;
 
@@ -30,9 +32,9 @@ namespace Vehicles
 			};
 			paintVehicle.tickAction = delegate ()
 			{
-				float statValue = paintVehicle.actor.GetStatValue(StatDefOf.GeneralLaborSpeed, true);
+				float statValue = paintVehicle.actor.GetStatValue(StatDefOf.WorkSpeedGlobal) / (WorkPerCell * SizeMultiplier);
 				Vehicle.sharedJob.workDone += statValue;
-				if (Vehicle.sharedJob.workDone >= TotalWork)
+				if (Vehicle.sharedJob.workDone >= 1)
 				{
 					Vehicle.SetColor();
 					paintVehicle.actor.jobs.EndCurrentJob(JobCondition.Succeeded);
@@ -41,7 +43,7 @@ namespace Vehicles
 			paintVehicle.FailOnMoving(TargetIndex.A);
 			paintVehicle.FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
 			paintVehicle.WithEffect(Vehicle.def.repairEffect, TargetIndex.A);
-			paintVehicle.WithProgressBar(TargetIndex.A, () => Vehicle.sharedJob.workDone / TotalWork);
+			paintVehicle.WithProgressBar(TargetIndex.A, () => Vehicle.sharedJob.workDone);
 			paintVehicle.defaultCompleteMode = ToilCompleteMode.Never;
 			paintVehicle.activeSkill = () => SkillDefOf.Construction;
 			paintVehicle.AddFinishAction(() => Vehicle.sharedJob.JobEnded(pawn));
