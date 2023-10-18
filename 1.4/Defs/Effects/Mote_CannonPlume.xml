@@ -3,7 +3,7 @@
 <Defs>
 	<ThingDef ParentName="MoteBase">
 		<defName>Mote_CannonPlume</defName>
-		<thingClass>Vehicles.MoteCannonPlume</thingClass>
+		<thingClass>Vehicles.Mote_CannonPlume</thingClass>
 		<altitudeLayer>MoteOverhead</altitudeLayer>
 		
 		<graphicData>

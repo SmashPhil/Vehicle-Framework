@@ -3,7 +3,8 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class MoteCannonPlume : Mote
+	//TODO - Rename to MoteCannonPlume in 1.5
+	public class Mote_CannonPlume : Mote
 	{
 		protected int ticksActive = 0;
 		protected int frame = 0;

@@ -265,7 +265,7 @@
     <Compile Include="CustomFeatures\Buildings\AirDefenses\VerbProperties\VerbProperties_Recoil.cs" />
     <Compile Include="CustomFeatures\Buildings\AirDefenses\Verb_ShootRealistic.cs" />
     <Compile Include="CustomFeatures\Buildings\AirDefenses\Verb_ShootRecoiled.cs" />
-    <Compile Include="CustomFeatures\Misc\Motes\MoteCannonPlume.cs" />
+    <Compile Include="CustomFeatures\Misc\Motes\Mote_CannonPlume.cs" />
     <Compile Include="Gizmo\Command_VerbWorldTarget.cs" />
     <Compile Include="Harmony\PatchCategories\DefGenerators\PawnKindDefGenerator_Vehicles.cs" />
     <Compile Include="Harmony\StartupTesting.cs" />

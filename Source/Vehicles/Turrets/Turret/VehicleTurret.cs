@@ -1280,7 +1280,7 @@ namespace Vehicles
 								}
 								thrownMote.SetVelocity(thrownAngle, moteProps.speedThrown.RandomInRange);
 							}
-							if (mote is MoteCannonPlume cannonMote)
+							if (mote is Mote_CannonPlume cannonMote)
 							{
 								cannonMote.cyclesLeft = moteProps.cycles;
 								cannonMote.animationType = moteProps.animationType;
