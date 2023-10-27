@@ -274,7 +274,20 @@ namespace Vehicles
 				stoppingPoints.Add(new TransferableCountToTransferStoppingPoint(threshold, "M<", ">M"));
 			}
 			VehiclePawn vehicle = trad.AnyThing as VehiclePawn;
-			UIHelper.DoCountAdjustInterface(rect2, trad, AvailablePawns, index, 0, maxCount, false, stoppingPoints, impassableOnTile.TryGetValue(vehicle, false));
+			string disableReason = null;
+			if (impassableOnTile.TryGetValue(vehicle, false))
+			{
+				disableReason = "VF_ImpassableBiome";
+			}
+			else if(!vehicle.VehicleDef.canCaravan)
+			{
+				disableReason = "VF_CaravanDisabled";
+			}
+			else if (!vehicle.CanMove)
+			{
+				disableReason = "VF_CaravanCantMove";
+			}
+			UIHelper.DoCountAdjustInterface(rect2, trad, AvailablePawns, index, 0, maxCount, false, stoppingPoints, disableReason: disableReason);
 			num -= 240f;
 			if (drawMarketValue)
 			{

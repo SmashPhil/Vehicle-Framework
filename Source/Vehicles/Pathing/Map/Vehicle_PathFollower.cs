@@ -401,6 +401,10 @@ namespace Vehicles
 				waitTicks--;
 				return;
 			}
+			if (CalculatingPath)
+			{
+				return;
+			}
 
 			CellRect hitboxBeforeMoving = vehicle.OccupiedRect();
 
@@ -448,6 +452,7 @@ namespace Vehicles
 			switch (pathRequest)
 			{
 				case PathRequest.None: //If no path request is made, continue with method
+					Log.Message("RECALCULATING");
 					break;
 				case PathRequest.Fail: //Immediate cancellation of path, stop dead
 					PatherFailed();

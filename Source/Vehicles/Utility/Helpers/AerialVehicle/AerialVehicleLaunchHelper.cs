@@ -11,7 +11,7 @@ namespace Vehicles
 {
 	public static class AerialVehicleLaunchHelper
 	{
-		public static AerialVehicleInFlight GetOrMakeAerialVehicle(VehiclePawn vehicle)
+		public static AerialVehicleInFlight GetOrMakeAerialVehicle(VehiclePawn vehicle, int fromTile = -1)
 		{
 			AerialVehicleInFlight aerialVehicle = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
 			if (aerialVehicle == null)
@@ -28,7 +28,11 @@ namespace Vehicles
 					autoSelect = true;
 				}
 
-				aerialVehicle = AerialVehicleInFlight.Create(vehicle, vehicleCaravan.Tile);
+				if (fromTile < 0)
+				{
+					fromTile = vehicleCaravan.Tile;
+				}
+				aerialVehicle = AerialVehicleInFlight.Create(vehicle, fromTile);
 				vehicleCaravan.RemoveAllPawns();
 				vehicleCaravan.Destroy();
 
@@ -50,7 +54,7 @@ namespace Vehicles
 		private static void NewDestination(VehiclePawn vehicle, int fromTile, int destinationTile, AerialVehicleArrivalAction arrivalAction, bool recon = false)
 		{
 			vehicle.CompVehicleLauncher.inFlight = true;
-			AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(vehicle, fromTile);
+			AerialVehicleInFlight aerialVehicle = GetOrMakeAerialVehicle(vehicle);
 			aerialVehicle.recon = recon;
 			aerialVehicle.OrderFlyToTiles(LaunchTargeter.FlightPath, Find.WorldGrid.GetTileCenter(fromTile), arrivalAction: arrivalAction);
 		}

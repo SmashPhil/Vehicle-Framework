@@ -69,8 +69,6 @@ namespace Vehicles
 
 		public virtual bool IsPlayerControlled => vehicle.Faction == Faction.OfPlayer;
 
-		public override Vector3 DrawPos => Vector3.Slerp(position, flightPath.First.Center, transition);
-
 		public float Elevation => 0;// vehicle.CompVehicleLauncher.inFlight ? elevation : 0;
 
 		public float ElevationChange { get; protected set; }
@@ -86,6 +84,19 @@ namespace Vehicles
 		public bool Flying => vehicle.CompVehicleLauncher.inFlight;
 
 		public bool CanDismount => false;
+
+		public override Vector3 DrawPos
+		{
+			get
+			{
+				Vector3 nodePos = flightPath.First.GetCenter(this);
+				if (position == nodePos)
+				{
+					return position;
+				}
+				return Vector3.Slerp(position, nodePos, transition);
+			}
+		}
 
 		//For WITab readouts related to vehicles
 		public IEnumerable<VehiclePawn> Vehicles
@@ -159,7 +170,7 @@ namespace Vehicles
 			rotatorGraphics = vehicle.graphicOverlay.Overlays.Where(g => g.data.graphicData.Graphic is Graphic_Rotator).Select(g => g.data.graphicData.Graphic).Cast<Graphic_Rotator>().ToList();
 		}
 
-		public virtual Vector3 DrawPosAhead(int ticksAhead) => Vector3.Slerp(position, flightPath.First.Center, transition + speedPctPerTick * ticksAhead);
+		public virtual Vector3 DrawPosAhead(int ticksAhead) => Vector3.Slerp(position, flightPath.First.GetCenter(this), transition + speedPctPerTick * ticksAhead);
 
 		public override void Draw()
 		{
@@ -544,21 +555,7 @@ namespace Vehicles
 						{
 							Messages.Message("VF_AerialVehicleArrived".Translate(vehicle.LabelShort), MessageTypeDefOf.NeutralEvent);
 						}
-						Tile = flightPath.First.tile;
-						ResetPosition(Find.WorldGrid.GetTileCenter(Tile));
-						if (arrivalAction is AerialVehicleArrivalAction action)
-						{
-							if (action.Arrived(flightPath.First.tile) && action.DestroyOnArrival)
-							{
-								Destroy();
-							}
-							else
-							{
-								SwitchToCaravan();
-							}
-						}
-						vehicle.CompVehicleLauncher.inFlight = false;
-						AirDefensePositionTracker.DeregisterAerialVehicle(this);
+						LandAtTile(flightPath.First.tile);
 
 						//if (Elevation <= vehicle.CompVehicleLauncher.LandingAltitude)
 						//{
@@ -575,6 +572,25 @@ namespace Vehicles
 			}
 		}
 
+		public void LandAtTile(int tile)
+		{
+			Tile = tile;
+			ResetPosition(Find.WorldGrid.GetTileCenter(Tile));
+			if (arrivalAction is AerialVehicleArrivalAction action)
+			{
+				if (action.Arrived(tile) && action.DestroyOnArrival)
+				{
+					Destroy();
+				}
+				else
+				{
+					SwitchToCaravan();
+				}
+			}
+			vehicle.CompVehicleLauncher.inFlight = false;
+			AirDefensePositionTracker.DeregisterAerialVehicle(this);
+		}
+
 		public virtual void TickRotators()
 		{
 			foreach (Graphic_Rotator rotator in rotatorGraphics)
@@ -589,6 +605,12 @@ namespace Vehicles
 			if (flightPath.NullOrEmpty() || flightPath.Any(node => node.tile < 0))
 			{
 				return;
+			}
+			FlightNode flightNode = flightPath.FirstOrDefault();
+			if (flightNode.tile == Tile)
+			{
+				//LandAtTile(Tile);
+				//return;
 			}
 			if (arrivalAction != null)
 			{
@@ -636,14 +658,20 @@ namespace Vehicles
 
 		private void SetSpeed()
 		{
-			float tileDistance = Ext_Math.SphericalDistance(position, flightPath.First.Center);
+			Vector3 center = flightPath.First.GetCenter(this);
+			if (position == center) //If position is still at origin, set speed to instantaneous
+			{
+				speedPctPerTick = 1;
+				return;
+			}
+			float tileDistance = Mathf.Clamp(Ext_Math.SphericalDistance(position, center), 0.00001f, float.MaxValue); //Clamp tile distance to PctPerTick
 			float flightSpeed = recon ? ReconFlightSpeed : vehicle.CompVehicleLauncher.FlightSpeed;
 			speedPctPerTick = (PctPerTick / tileDistance) * flightSpeed.Clamp(0, 99999);
 		}
 
 		private void InitializeFacing()
 		{
-			Vector3 tileLocation = flightPath.First.Center.normalized;
+			Vector3 tileLocation = flightPath.First.GetCenter(this).normalized;
 			directionFacing = (DrawPos - tileLocation).normalized;
 		}
 
@@ -662,15 +690,15 @@ namespace Vehicles
 					Vector3 nodePosition = DrawPos;
 					for (int i = 0; i < flightPath.Path.Count; i++)
 					{
-						Vector3 nextNodePosition = flightPath[i].Center;
+						Vector3 nextNodePosition = flightPath[i].GetCenter(this);
 						LaunchTargeter.DrawTravelPoint(nodePosition, nextNodePosition);
 						nodePosition = nextNodePosition;
 					}
-					LaunchTargeter.DrawTravelPoint(nodePosition, flightPath.Last.Center);
+					LaunchTargeter.DrawTravelPoint(nodePosition, flightPath.Last.GetCenter(this));
 				}
 				else if (flightPath.Path.Count == 1)
 				{
-					LaunchTargeter.DrawTravelPoint(DrawPos, flightPath.First.Center);
+					LaunchTargeter.DrawTravelPoint(DrawPos, flightPath.First.GetCenter(this));
 				}
 			}
 		}

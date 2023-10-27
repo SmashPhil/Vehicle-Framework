@@ -78,6 +78,13 @@ namespace Vehicles
 						Find.WorldPawns.PassToWorld(pawn);
 					}
 				}
+				foreach (Thing thing in vehicle.inventory.innerContainer)
+				{
+					if (thing is Pawn pawn && !pawn.IsWorldPawn())
+					{
+						Find.WorldPawns.PassToWorld(pawn);
+					}
+				}
 			}
 			vehicle.EventRegistry[VehicleEventDefOf.AerialVehicleLeftMap].ExecuteEvents();
 			base.LeaveMap();

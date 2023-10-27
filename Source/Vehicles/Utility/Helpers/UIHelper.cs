@@ -42,7 +42,7 @@ namespace Vehicles
 		public static void AddVehicleAndPawnSections(TransferableOneWayWidget pawnWidget, TransferableVehicleWidget vehicleWidget, List<TransferableOneWay> transferables)
 		{
 			IEnumerable<TransferableOneWay> source = transferables.Where(t => t.ThingDef.category == ThingCategory.Pawn);
-			vehicleWidget.AddSection("VF_Vehicles".Translate(), source.Where(t => t.AnyThing is VehiclePawn vehicle && vehicle.CanMove));
+			vehicleWidget.AddSection("VF_Vehicles".Translate(), source.Where(t => t.AnyThing is VehiclePawn vehicle));
 			pawnWidget.AddSection("ColonistsSection".Translate(), source.Where(t => t.AnyThing is Pawn pawn && pawn.IsFreeColonist));
 			pawnWidget.AddSection("PrisonersSection".Translate(), source.Where(t => t.AnyThing is Pawn pawn && pawn.IsPrisoner));
 			pawnWidget.AddSection("CaptureSection".Translate(), source.Where(t => t.AnyThing is Pawn pawn && pawn.Downed && CaravanUtility.ShouldAutoCapture(pawn, Faction.OfPlayer)));
@@ -51,8 +51,8 @@ namespace Vehicles
 				(pawn.IsColonistPlayerControlled || (pawn.IsColonist && pawn.MentalStateDef == null && (pawn.HostFaction == null || pawn.IsSlave) && pawn.IsInVehicle()))).ToList();
 		}
 
-		/// <seealso cref="DoCountAdjustInterfaceInternal(Rect, Transferable, List{TransferableOneWay}, List{TransferableCountToTransferStoppingPoint}, int, int, int, bool, bool)"/>
-		public static void DoCountAdjustInterface(Rect rect, Transferable trad, List<TransferableOneWay> pawns, int index, int min, int max, bool flash = false, List<TransferableCountToTransferStoppingPoint> extraStoppingPoints = null, bool readOnly = false)
+		/// <seealso cref="DoCountAdjustInterfaceInternal"/>
+		public static void DoCountAdjustInterface(Rect rect, Transferable trad, List<TransferableOneWay> pawns, int index, int min, int max, bool flash = false, List<TransferableCountToTransferStoppingPoint> extraStoppingPoints = null, string disableReason = null)
 		{
 			var stoppingPoints = new List<TransferableCountToTransferStoppingPoint>();
 			if (extraStoppingPoints != null)
@@ -79,7 +79,7 @@ namespace Vehicles
 			{
 				stoppingPoints.Add(new TransferableCountToTransferStoppingPoint(0, "0", "0"));
 			}
-			DoCountAdjustInterfaceInternal(rect, trad, pawns, stoppingPoints, index, min, max, flash, readOnly);
+			DoCountAdjustInterfaceInternal(rect, trad, pawns, stoppingPoints, index, min, max, flash, disableReason);
 		}
 
 		/// <summary>
@@ -93,8 +93,8 @@ namespace Vehicles
 		/// <param name="min"></param>
 		/// <param name="max"></param>
 		/// <param name="flash"></param>
-		/// <param name="readOnly"></param>
-		private static void DoCountAdjustInterfaceInternal(Rect rect, Transferable trad, List<TransferableOneWay> pawns, List<TransferableCountToTransferStoppingPoint> stoppingPoints, int index, int min, int max, bool flash, bool readOnly)
+		/// <param name="disableReason"></param>
+		private static void DoCountAdjustInterfaceInternal(Rect rect, Transferable trad, List<TransferableOneWay> pawns, List<TransferableCountToTransferStoppingPoint> stoppingPoints, int index, int min, int max, bool flash, string disableReason)
 		{
 			rect = rect.Rounded();
 			Rect rect2 = new Rect(rect.center.x - 45f, rect.center.y - 12.5f, 90f, 25f).Rounded();
@@ -109,8 +109,12 @@ namespace Vehicles
 			bool checkOn = setToTransfer;
 
 			Rect checkboxRect = new Rect(rect2.x + 125f, rect2.y, 24f, 24f);
-			Widgets.Checkbox(rect.x + 125, rect.y, ref checkOn, disabled: readOnly);
-			
+			bool disabled = !disableReason.NullOrEmpty();
+			Widgets.Checkbox(checkboxRect.x, checkboxRect.y, ref checkOn, size: checkboxRect.width, disabled: disabled);
+			if (disabled)
+			{
+				TooltipHandler.TipRegionByKey(checkboxRect, disableReason);
+			}
 			if (checkOn != setToTransfer)
 			{
 				if (setToTransfer)

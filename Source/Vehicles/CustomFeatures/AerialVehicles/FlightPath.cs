@@ -204,8 +204,6 @@ namespace Vehicles
 
 		public WorldObject WorldObject { get; private set; }
 
-		public Vector3 Center => WorldObject != null ? WorldObject.DrawPos : origin;
-
 		public FlightNode(int tile)
 		{
 			this.tile = tile;
@@ -222,6 +220,15 @@ namespace Vehicles
 
 			WorldObject = WorldHelper.WorldObjectAt(tile);
 			origin = WorldHelper.GetTilePos(tile, WorldObject, out spaceObject);
+		}
+
+		public Vector3 GetCenter(AerialVehicleInFlight aerialVehicle)
+		{
+			if (WorldObject != null && WorldObject != aerialVehicle)
+			{
+				return WorldObject.DrawPos;
+			}
+			return origin;
 		}
 
 		public void RecalculateCenter()

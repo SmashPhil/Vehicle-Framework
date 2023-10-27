@@ -626,6 +626,13 @@ namespace Vehicles
 				vehicle.VerifyReservations();
 			}
 			Find.WorldPawns.PassToWorld(vehicle);
+			foreach (Thing thing in vehicle.inventory.innerContainer)
+			{
+				if (thing is Pawn pawn && !pawn.IsWorldPawn())
+				{
+					Find.WorldPawns.PassToWorld(pawn);
+				}
+			}
 			QuestUtility.SendQuestTargetSignals(vehicle.questTags, "LeftMap", vehicle.Named("SUBJECT"));
 			Find.FactionManager.Notify_PawnLeftMap(vehicle);
 			Find.IdeoManager.Notify_PawnLeftMap(vehicle);

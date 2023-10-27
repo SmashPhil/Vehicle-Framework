@@ -31,8 +31,8 @@ namespace Vehicles
 		[ActionOnSettingsInput(typeof(VehicleHarmony), nameof(VehicleHarmony.RecacheMoveableVehicleDefs))]
 		public VehiclePermissions vehicleMovementPermissions = VehiclePermissions.DriverNeeded;
 
-		//[PostToSettings(Label = "VF_CanCaravan", Translate = true, Tooltip = "VF_CanCaravanTooltip", UISettingsType = UISettingsType.Checkbox)]
-		//public bool canCaravan = true;
+		[PostToSettings(Label = "VF_CanCaravan", Translate = true, Tooltip = "VF_CanCaravanTooltip", UISettingsType = UISettingsType.Checkbox)]
+		public bool canCaravan = true;
 
 		public VehicleCategory vehicleCategory = VehicleCategory.Misc;
 		public VehicleType vehicleType = VehicleType.Land;
@@ -140,7 +140,10 @@ namespace Vehicles
 			base.ResolveReferences();
 			if (!components.NullOrEmpty())
 			{
-				components.OrderBy(c => c.hitbox.side == VehicleComponentPosition.BodyNoOverlap).ForEach(c => c.ResolveReferences(this));
+				foreach (VehicleComponentProperties component in components)
+				{
+					component.ResolveReferences(this);
+				}
 			}
 			designatorTypes ??= new List<Type>();
 			drawProperties ??= new VehicleDrawProperties();

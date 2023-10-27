@@ -78,8 +78,12 @@ namespace Vehicles
 			{
 				if (p is VehiclePawn)
 				{
-					__result = WorldPawnSituation.InTravelingTransportPod;
+					__result = WorldPawnSituation.CaravanMember;
 					return;
+				}
+				if (p.ParentHolder?.ParentHolder is VehiclePawn)
+				{
+					__result = WorldPawnSituation.CaravanMember;
 				}
 				if (p.GetAerialVehicle() != null)
 				{
@@ -106,9 +110,19 @@ namespace Vehicles
 			{
 				foreach (Pawn innerPawn in vehicleCaravan.PawnsListForReading)
 				{
-					if (innerPawn is VehiclePawn innerVehicle && (innerVehicle == p || innerVehicle.AllPawnsAboard.Contains(p)))
+					if (innerPawn is VehiclePawn vehicle)
 					{
-						return false;
+						if (vehicle == p || vehicle.AllPawnsAboard.Contains(p))
+						{
+							return false;
+						}
+						foreach (Thing thing in vehicle.inventory.innerContainer)
+						{
+							if (thing == p)
+							{
+								return false;
+							}
+						}
 					}
 				}
 			}
@@ -117,6 +131,13 @@ namespace Vehicles
 				if (aerialVehicle.vehicle == p || aerialVehicle.vehicle.AllPawnsAboard.Contains(p))
 				{
 					return false;
+				}
+				foreach (Thing thing in aerialVehicle.vehicle.inventory.innerContainer)
+				{
+					if (thing == p)
+					{
+						return false;
+					}
 				}
 			}
 			return true;

@@ -46,13 +46,6 @@ namespace Vehicles
 				{
 					cells = rect.Cells.ToList();
 				}
-				else if (side == VehicleComponentPosition.BodyNoOverlap)
-				{
-					foreach (var cell in rect.Cells.Where(c => !def.components.Where(cp => noOverlapWith.Contains(cp.hitbox.side)).Any(cp => cp.hitbox.Contains(c))))
-					{
-						cells.Add(new IntVec3(cell.x, 0, cell.z));
-					}
-				}
 				else if (side != VehicleComponentPosition.Empty)
 				{
 					cells = rect.GetEdgeCells(RotationFromSide(side)).ToList();

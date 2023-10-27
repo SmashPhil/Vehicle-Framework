@@ -376,7 +376,7 @@ namespace Vehicles
 
 		private static void SetMoteStatus(LaunchProtocol launchProtocol, bool active)
 		{
-			launchProtocol.drawOverlays = active;
+			launchProtocol.drawMotes = active;
 		}
 
 		private static void SetOverlayStatus(LaunchProtocol launchProtocol, bool active)
@@ -453,7 +453,7 @@ namespace Vehicles
 				{
 					origin = origin.PointFromAngle(fleckData.drawOffset.Evaluate(t), angle.Value);
 				}
-
+				
 				if (!fleckData.xFleckPositionCurve.NullOrEmpty())
 				{
 					origin.x += fleckData.xFleckPositionCurve.Evaluate(t);
@@ -464,6 +464,30 @@ namespace Vehicles
 				}
 
 				origin += fleckData.originOffset;
+
+				if (fleckData.originOffsetRange != null)
+				{
+					Vector3 offsetFrom = fleckData.originOffsetRange.from;
+					Vector3 offsetTo = fleckData.originOffsetRange.to;
+					float offsetRangeX = offsetFrom.x;
+					if (offsetFrom.x != offsetTo.x)
+					{
+						offsetRangeX = Rand.Range(offsetFrom.x, offsetTo.x);
+					}
+					float offsetRangeY = offsetFrom.y;
+					if (offsetFrom.y != offsetTo.y)
+					{
+						offsetRangeY = Rand.Range(offsetFrom.y, offsetTo.y);
+					}
+					float offsetRangeZ = offsetFrom.z;
+					if (offsetFrom.z != offsetTo.z)
+					{
+						offsetRangeZ = Rand.Range(offsetFrom.z, offsetTo.z);
+					}
+
+					origin += new Vector3(offsetRangeX, offsetRangeY, offsetRangeZ);
+				}
+				
 				origin.y = fleckData.def.altitudeLayer.AltitudeFor();
 				ThrowFleck(fleckData.def, origin, Map, size, airTime, angle, speed, rotationRate);
 			}
@@ -508,11 +532,18 @@ namespace Vehicles
 			{
 				yield return FloatMenuOption_LandCaravanEmptyTile(tile);
 			}
-			else if (Find.WorldObjects.MapParentAt(tile) is MapParent parent)
+			else if (Find.WorldObjects.MapParentAt(tile) is MapParent mapParent)
 			{
-				if (CanLandInSpecificCell(parent))
+				if (CanLandInSpecificCell(mapParent))
 				{
-					yield return FloatMenuOption_LandInsideMap(parent, tile);
+					yield return FloatMenuOption_LandInsideMap(mapParent, tile);
+				}
+				else if (!mapParent.HasMap && AerialVehicleCompatibility.CanLandIn(mapParent))
+				{
+					foreach (FloatMenuOption option in AerialVehicleArrivalAction_LoadMap.GetFloatMenuOptions(vehicle, this, mapParent))
+					{
+						yield return option;
+					}
 				}
 				if (vehicle.CompVehicleLauncher.ControlInFlight)
 				{
@@ -829,6 +860,34 @@ namespace Vehicles
 
 			Scribe_References.Look(ref map, nameof(map));
 			Scribe_Values.Look(ref position, nameof(position), defaultValue: IntVec3.Invalid);
+		}
+
+		[DebugAction(category = VehicleHarmony.VehiclesLabel, name = "Lock Camera to Thing", actionType = DebugActionType.ToolMap, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+		private static void LockCameraToThing()
+		{
+			Map map = Find.CurrentMap;
+			if (map == null)
+			{
+				Log.Error($"Attempting to use LockCameraToThing with null map.");
+				return;
+			}
+			IntVec3 cell = UI.MouseCell();
+			if (cell.InBounds(map))
+			{
+				List<Thing> thingList = map.thingGrid.ThingsListAtFast(cell);
+				if (!thingList.NullOrEmpty())
+				{
+					List<FloatMenuOption> options = new List<FloatMenuOption>();
+					foreach (Thing thing in thingList)
+					{
+						options.Add(new FloatMenuOption(thing.Label, delegate ()
+						{
+							CameraAttacher.Create(thing);
+						}));
+					}
+					Find.WindowStack.Add(new FloatMenu(options));
+				}
+			}
 		}
 
 		public enum LaunchType : uint

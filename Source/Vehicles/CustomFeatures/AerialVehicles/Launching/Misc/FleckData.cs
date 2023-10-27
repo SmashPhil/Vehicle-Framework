@@ -16,6 +16,7 @@ namespace Vehicles
 		public PositionStart position = PositionStart.Position;
 
 		public Vector3 originOffset = Vector3.zero;
+		public Range<Vector3> originOffsetRange;
 
 		public bool runOutOfStep = true;
 
@@ -55,6 +56,12 @@ namespace Vehicles
 		{
 			DrawPos,
 			Position,
+		}
+
+		public class Range<T>
+		{
+			public T from;
+			public T to;
 		}
 	}
 }

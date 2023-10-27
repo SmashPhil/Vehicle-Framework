@@ -82,6 +82,7 @@
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Rendering.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalAction_LoadMap.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalAction_OfferGifts.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Events\AerialAnimationEvents.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\DirectionalTakeoff.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\FleckData.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\ShadowData.cs" />
@@ -108,10 +109,12 @@
     <Compile Include="Graphics\ITab\WITab_AerialVehicle.cs" />
     <Compile Include="Graphics\ITab\WITab_AerialVehicle_Health.cs" />
     <Compile Include="Graphics\ITab\WITab_AerialVehicle_Items.cs" />
+    <Compile Include="Harmony\ConditionalPatches\AerialVehicleCompatibility.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_CombatExtended.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_BulkCarrier.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_MapPreview.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_RailsOfTheRim.cs" />
+    <Compile Include="Harmony\ConditionalPatches\Compatibility_RealRuins.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_RoadsOfTheRim.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_GeologicalLandforms.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_RimHUD.cs" />
