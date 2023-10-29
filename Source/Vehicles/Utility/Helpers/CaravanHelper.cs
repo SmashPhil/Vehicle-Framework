@@ -228,6 +228,7 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="caravan"></param>
 		/// <param name="dock"></param>
+		[Obsolete("Do not use, very buggy", error: true)]
 		public static void ToggleDocking(Caravan caravan, bool dock = false)
 		{
 			if (caravan.HasBoat() && caravan is VehicleCaravan vehicleCaravan)
@@ -248,14 +249,23 @@ namespace Vehicles
 		/// Spawn DockedBoat object to store boats on World map
 		/// </summary>
 		/// <param name="caravan"></param>
-		public static void SpawnDockedBoatObject(VehicleCaravan caravan)
+		public static void StashVehicles(VehicleCaravan caravan)
 		{
 			if (!caravan.HasBoat())
 			{
 				Log.Error("Attempted to dock boats with no boats in caravan. This could have serious errors in the future. - Smash Phil");
 			}
-			ToggleDocking(caravan, true);
-			Find.WindowStack.Add(new Dialog_DockBoat(caravan));
+			Find.WindowStack.Add(new Dialog_StashVehicle(caravan));
+		}
+
+		public static Caravan CaravanForMerging(Caravan caravan, List<Caravan> caravans)
+		{
+			if (caravans.NotNullAndAny(caravan => caravan is VehicleCaravan vehicleCaravan))
+			{
+				//Prioritize vehicle caravans for merging into
+				caravan = caravans.Where(caravan => caravan is VehicleCaravan vehicleCaravan).MaxBy(caravan => caravan.PawnsListForReading.Count);
+			}
+			return caravan;
 		}
 
 		/// <summary>

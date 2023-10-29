@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1421</currentVersion>
+  <currentVersion>1.5.1422</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -57,6 +57,8 @@ Here's a sneak peek of something I'm working on: &lt;gif WIDTH=300 SIZE=(13,13) 
 
 - Real Ruins
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Removed "Dock Boat" option from vehicle caravans.  It was buggy and it has since been re-implemented as an all-purpose "stash vehicles" button to go on foot and leave vehicles behind for up to 20-30 days.  It will show when your caravan is stopped.
+
 - Added pawn rendering to TweakField menu, allowing runtime editing of pawn rendering fields.
 
 - Increased brightness of text in Cargo tab for items yet to be loaded.

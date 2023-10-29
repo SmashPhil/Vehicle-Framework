@@ -15,6 +15,11 @@
 	<VF_CommandDockShip>Dock</VF_CommandDockShip>
 	<VF_CommandDockShipDesc>Unload all passengers and enable trade with the Settlement of {0}.</VF_CommandDockShipDesc>
 	
+	<VF_CommandDisembark>Stash Vehicles</VF_CommandDisembark>
+	<VF_CommandDisembarkDesc>Leave all vehicles behind and go on foot.  Vehicles will remain on the world map for up to 20-30 days.</VF_CommandDisembarkDesc>
+	<VF_CommandDisembarkImpassableBiome>Cannot disembark, tile is impassable for colonists.</VF_CommandDisembarkImpassableBiome>
+	
+	<!-- Obsolete -->
 	<VF_CommandDockShipDisembark>Dock and Disembark</VF_CommandDockShipDisembark>
 	<VF_CommandDockShipObjectDesc>Dock Boats and go on foot</VF_CommandDockShipObjectDesc>
 	

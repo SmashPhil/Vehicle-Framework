@@ -548,7 +548,7 @@
     <Compile Include="Pathing\World\WorldVehiclePathGrid.cs" />
     <Compile Include="Pathing\World\WorldVehicleReachability.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_AssignSeats.cs" />
-    <Compile Include="Graphics\Dialogs\Dialog_DockBoat.cs" />
+    <Compile Include="Graphics\Dialogs\Dialog_StashVehicle.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_FormVehicleCaravan.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_GiveVehicleName.cs" />
     <Compile Include="Utility\VehicleInfoCard.cs" />
@@ -564,8 +564,8 @@
     <Compile Include="Graphics\Textures\VehicleTex.cs" />
     <Compile Include="Graphics\Misc\TransferableVehicleWidget.cs" />
     <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgrade.cs" />
-    <Compile Include="World\Caravan\CaravanArrivalAction_DockedBoats.cs" />
-    <Compile Include="World\WorldObjects\DockedBoat.cs" />
+    <Compile Include="World\Caravan\CaravanArrivalAction_StashedVehicle.cs" />
+    <Compile Include="World\WorldObjects\StashedVehicle.cs" />
     <Compile Include="World\Caravan\EnterMapUtilityVehicles.cs" />
     <Compile Include="Misc\DefOf\WorldObjectDefOfVehicles.cs" />
     <Compile Include="World\WorldObjectComps\AirDefense.cs" />

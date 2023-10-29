@@ -12,7 +12,7 @@ namespace Vehicles
 
 		public static WorldObjectDef DebugSettlement;
 
-		public static WorldObjectDef DockedBoat;
+		public static WorldObjectDef StashedVehicle;
 
 		public static WorldObjectDef VehicleCaravan;
 

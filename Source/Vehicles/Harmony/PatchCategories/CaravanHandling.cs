@@ -160,9 +160,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(BestCaravanPawnUtility), nameof(BestCaravanPawnUtility.FindBestNegotiator)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(FindBestNegotiatorInVehicle)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_OfferGifts), nameof(CaravanArrivalAction_OfferGifts.Arrived)),
-				prefix: new HarmonyMethod(typeof(CaravanHandling),
-				nameof(UnloadVehicleOfferGifts)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_OfferGifts), nameof(CaravanArrivalAction_OfferGifts.Arrived)),
+			//	prefix: new HarmonyMethod(typeof(CaravanHandling),
+			//	nameof(UnloadVehicleOfferGifts)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Settlement_TraderTracker), nameof(Settlement_TraderTracker.GiveSoldThingToPlayer)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(GiveSoldThingToAerialVehicle)),
@@ -1005,13 +1005,13 @@ namespace Vehicles
 			return true;
 		}
 
-
 		//REDO?
+		[Obsolete]
 		public static void UnloadVehicleOfferGifts(VehicleCaravan caravan)
 		{
 			if (caravan.HasVehicle())
 			{
-				CaravanHelper.ToggleDocking(caravan, true);
+				//CaravanHelper.ToggleDocking(caravan, true);
 			}
 		}
 
@@ -1123,7 +1123,7 @@ namespace Vehicles
 				if (instruction.opcode == OpCodes.Stloc_0)
 				{
 					yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(CaravanHandling), nameof(CaravanForMerging)));
+					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(CaravanHelper), nameof(CaravanHelper.CaravanForMerging)));
 				}
 
 				yield return instruction;
@@ -1146,16 +1146,6 @@ namespace Vehicles
 					}
 				}
 			}
-		}
-
-		private static Caravan CaravanForMerging(Caravan caravan, List<Caravan> caravans)
-		{
-			if (caravans.NotNullAndAny(caravan => caravan is VehicleCaravan vehicleCaravan))
-			{
-				//Prioritize vehicle caravans for merging into
-				caravan = caravans.Where(caravan => caravan is VehicleCaravan vehicleCaravan).MaxBy(caravan => caravan.PawnsListForReading.Count);
-			}
-			return caravan;
 		}
 
 		public static bool TrySatisfyVehicleCaravanNeeds(Caravan_NeedsTracker __instance)

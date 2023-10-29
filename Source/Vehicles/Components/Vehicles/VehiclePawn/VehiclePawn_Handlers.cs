@@ -340,6 +340,14 @@ namespace Vehicles
 			EventRegistry[VehicleEventDefOf.PawnEntered].ExecuteEvents();
 		}
 
+		public void RemoveAllPawns()
+		{
+			foreach (Pawn pawn in AllPawnsAboard.ToList())
+			{
+				RemovePawn(pawn);
+			}
+		}
+
 		public void RemovePawn(Pawn pawn)
 		{
 			for (int i = 0; i < handlers.Count; i++)
@@ -391,7 +399,7 @@ namespace Vehicles
 
 		public void DisembarkAll()
 		{
-			var pawnsToDisembark = new List<Pawn>(AllPawnsAboard);
+			List<Pawn> pawnsToDisembark = new List<Pawn>(AllPawnsAboard);
 			if (!(pawnsToDisembark is null) && pawnsToDisembark.Count > 0)
 			{
 				if (this.GetCaravan() != null && !Spawned)
@@ -404,9 +412,9 @@ namespace Vehicles
 					}
 					return;
 				}
-				foreach (Pawn p in pawnsToDisembark)
+				foreach (Pawn pawn in pawnsToDisembark)
 				{
-					DisembarkPawn(p);
+					DisembarkPawn(pawn);
 				}
 			}
 		}

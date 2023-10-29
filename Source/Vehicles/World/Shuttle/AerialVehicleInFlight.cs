@@ -17,7 +17,6 @@ namespace Vehicles
 		private static readonly Texture2D ViewQuestCommandTex = ContentFinder<Texture2D>.Get("UI/Commands/ViewQuest", true);
 
 		public const float ReconFlightSpeed = 5;
-		public const float ExpandingResize = 35f;
 		public const float TransitionTakeoff = 0.025f;
 		public const float PctPerTick = 0.001f;
 		public const int TicksPerValidateFlightPath = 60;

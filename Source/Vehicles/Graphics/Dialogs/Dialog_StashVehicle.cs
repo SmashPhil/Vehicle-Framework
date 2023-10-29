@@ -11,12 +11,12 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class Dialog_DockBoat : Window
+	public class Dialog_StashVehicle : Window
 	{
 		private const float TitleRectHeight = 35f;
 		private const float BottomAreaHeight = 55f;
 
-		private readonly Vector2 BottomButtonSize = new Vector2(160f, 60f);
+		private readonly Vector2 BottomButtonSize = new Vector2(160f, 40f);
 
 		private VehicleCaravan caravan;
 		private List<TransferableOneWay> transferables = new List<TransferableOneWay>();
@@ -57,14 +57,14 @@ namespace Vehicles
 		private bool ticksToArriveDirty = true;
 		private int cachedTicksToArrive;
 
-		public Dialog_DockBoat(VehicleCaravan caravan)
+		public Dialog_StashVehicle(VehicleCaravan caravan)
 		{
 			this.caravan = caravan;
 			forcePause = true;
 			absorbInputAroundWindow = true;
 		}
 
-		public override Vector2 InitialSize => new Vector2(1024f, Verse.UI.screenHeight);
+		public override Vector2 InitialSize => new Vector2(1024f, UI.screenHeight);
 
 		protected override float Margin => 0f;
 
@@ -74,25 +74,11 @@ namespace Vehicles
 		{
 			get
 			{
-				foreach (Pawn p in caravan.PawnsListForReading)
+				foreach (Pawn pawn in caravan.PawnsListForReading)
 				{
-					if (!p.IsBoat())
+					if (!pawn.IsBoat())
 					{
-						yield return p;
-					}
-				}
-			}
-		}
-
-		private IEnumerable<ThingCount> ItemsTaken
-		{
-			get
-			{
-				foreach(TransferableOneWay t in transferables)
-				{
-					if(t.HasAnyThing && t.CountToTransfer > 0)
-					{
-						yield return new ThingCount(t.things.First(), t.CountToTransfer);
+						yield return pawn;
 					}
 				}
 			}
@@ -119,16 +105,18 @@ namespace Vehicles
 				{
 					sourceMassCapacityDirty = false;
 					StringBuilder stringBuilder = new StringBuilder();
-					float num = 0;
-					foreach(Pawn p in PawnsEmbarking)
+					float capacity = 0;
+					foreach (Pawn pawn in PawnsEmbarking)
 					{
-						if(MassUtility.CanEverCarryAnything(p))
-							num += MassUtility.Capacity(p, stringBuilder);
+						if (MassUtility.CanEverCarryAnything(pawn))
+						{
+							capacity += MassUtility.Capacity(pawn, stringBuilder);
+						}
 					}
-					cachedSourceMassCapacity = num; //CollectionsMassCalculator.CapacityTransferables(this.transferables, stringBuilder);
+					cachedSourceMassCapacity = capacity; //CollectionsMassCalculator.CapacityTransferables(this.transferables, stringBuilder);
 					cachedSourceMassCapacityExplanation = stringBuilder.ToString();
 				}
-				return this.cachedSourceMassCapacity;
+				return cachedSourceMassCapacity;
 			}
 		}
 
@@ -157,7 +145,7 @@ namespace Vehicles
 					sourceDaysWorthOfFoodDirty = false;
 					float first;
 					float second;
-					first = DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(PawnsEmbarking.ToList(), ItemsTaken.ToList(), caravan.Tile, IgnorePawnsInventoryMode.Ignore, Faction.OfPlayer);
+					first = DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(transferables, caravan.Tile, IgnorePawnsInventoryMode.DontIgnore, caravan.Faction);
 					second = DaysUntilRotCalculator.ApproxDaysUntilRotLeftAfterTransfer(transferables, caravan.Tile, IgnorePawnsInventoryMode.Ignore, null, 0f, 3300);
 
 					cachedSourceDaysWorthOfFood = new Pair<float, float>(first, second);
@@ -317,42 +305,44 @@ namespace Vehicles
 			CalculateAndRecacheTransferables();
 		}
 
-		public override void PostClose()
-		{
-			base.PostClose();
-			if (caravan.PawnsListForReading.NotNullAndAny(p => p.IsBoat()))
-			{
-				CaravanHelper.ToggleDocking(caravan, false);
-			}
-		}
-
 		public override void DoWindowContents(Rect inRect)
 		{
-			Rect rect = new Rect(0f, 0f, inRect.width, TitleRectHeight);
-			Text.Font = GameFont.Medium;
-			Text.Anchor = TextAnchor.MiddleCenter;
-			Widgets.Label(rect, "VF_DockToCaravan".Translate());
-			Text.Font = GameFont.Small;
-			Text.Anchor = TextAnchor.UpperLeft;
-			CaravanUIUtility.DrawCaravanInfo(new CaravanUIUtility.CaravanInfo(SourceMassUsage, SourceMassCapacity, cachedSourceMassCapacityExplanation, SourceTilesPerDay, 
-				cachedSourceTilesPerDayExplanation, SourceDaysWorthOfFood, SourceForagedFoodPerDay, cachedSourceForagedFoodPerDayExplanation, SourceVisibility, 
-				cachedSourceVisibilityExplanation, -1f, -1f, null), null, caravan.Tile, (!caravan.vehiclePather.Moving) ? null : new int?(TicksToArrive), -9999f, 
-				new Rect(12f, TitleRectHeight, inRect.width - 24f, 40f), true, null, false);
-			inRect.yMin += 119f;
-			Widgets.DrawMenuSection(inRect);
-			TabDrawer.DrawTabs(inRect, new List<TabRecord>() { new TabRecord("ItemsTab".Translate(), null, true) }, 200f);
-			inRect = inRect.ContractedBy(17f);
-			Widgets.BeginGroup(inRect);
-			Rect rect2 = inRect.AtZero();
-			DoBottomButtons(rect2);
-			Rect inRect2 = rect2;
-			inRect2.yMax -= 59f;
-			itemsTransfer.OnGUI(inRect2, out bool flag);
-			if (flag)
+			GUIState.Push();
 			{
-				CountToTransferChanged();
+				Rect titleRect = new Rect(0f, 0f, inRect.width, TitleRectHeight);
+				Text.Font = GameFont.Medium;
+				Text.Anchor = TextAnchor.MiddleCenter;
+				Widgets.Label(titleRect, "VF_DockToCaravan".Translate());
+
+				Text.Font = GameFont.Small;
+				Text.Anchor = TextAnchor.UpperLeft;
+				CaravanUIUtility.DrawCaravanInfo(new CaravanUIUtility.CaravanInfo(SourceMassUsage, SourceMassCapacity, cachedSourceMassCapacityExplanation, SourceTilesPerDay,
+					cachedSourceTilesPerDayExplanation, SourceDaysWorthOfFood, SourceForagedFoodPerDay, cachedSourceForagedFoodPerDayExplanation, SourceVisibility,
+					cachedSourceVisibilityExplanation, -1f, -1f, null), null, caravan.Tile, (!caravan.vehiclePather.Moving) ? null : new int?(TicksToArrive), -9999f,
+					new Rect(12f, TitleRectHeight, inRect.width - 24f, 40f), true, null, false);
+
+				inRect.yMin += 119f;
+				Widgets.DrawMenuSection(inRect);
+				TabDrawer.DrawTabs(inRect, new List<TabRecord>() 
+				{ 
+					new TabRecord("ItemsTab".Translate(), null, true) 
+				}, 200f);
+				inRect = inRect.ContractedBy(17f);
+				Widgets.BeginGroup(inRect);
+				{
+					Rect groupRect = inRect.AtZero();
+					DoBottomButtons(groupRect);
+					Rect itemsRect = groupRect;
+					itemsRect.yMax -= 59f;
+					itemsTransfer.OnGUI(itemsRect, out bool anythingChange);
+					if (anythingChange)
+					{
+						CountToTransferChanged();
+					}
+				}
+				Widgets.EndGroup();
 			}
-			Widgets.EndGroup();
+			GUIState.Pop();
 		}
 
 		private void AddToTransferables(Thing t)
@@ -368,20 +358,20 @@ namespace Vehicles
 
 		private void DoBottomButtons(Rect rect)
 		{
-			Rect rect2 = new Rect(rect.width / 2f - BottomButtonSize.x / 2f, rect.height - BottomAreaHeight, BottomButtonSize.x, BottomButtonSize.y);
-			if(Widgets.ButtonText(rect2, "AcceptButton".Translate(), true, false, true) && DockBoatTransferPawns())
+			Rect acceptButtonRect = new Rect(rect.width / 2f - BottomButtonSize.x / 2f, rect.height - BottomAreaHeight, BottomButtonSize.x, BottomButtonSize.y);
+			if (Widgets.ButtonText(acceptButtonRect, "AcceptButton".Translate(), true, false, true) && TransferPawns())
 			{
 				SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
 				Close(false);
 			}
-			Rect rect3 = new Rect(rect2.x - 10f - BottomButtonSize.x, rect2.y, BottomButtonSize.x, BottomButtonSize.y);
-			if(Widgets.ButtonText(rect3, "ResetButton".Translate(), true, false, false))
+			Rect resetButtonRect = new Rect(acceptButtonRect.x - 10f - BottomButtonSize.x, acceptButtonRect.y, BottomButtonSize.x, BottomButtonSize.y);
+			if (Widgets.ButtonText(resetButtonRect, "ResetButton".Translate(), true, false, false))
 			{
 				SoundDefOf.Tick_Low.PlayOneShotOnCamera(null);
 				CalculateAndRecacheTransferables();
 			}
-			Rect rect4 = new Rect(rect2.xMax + 10f, rect2.y, BottomButtonSize.x, BottomButtonSize.y);
-			if(Widgets.ButtonText(rect4, "CancelButton".Translate(), true, false, true))
+			Rect cancelButtonRect = new Rect(acceptButtonRect.xMax + 10f, acceptButtonRect.y, BottomButtonSize.x, BottomButtonSize.y);
+			if (Widgets.ButtonText(cancelButtonRect, "CancelButton".Translate(), true, false, true))
 			{
 				Close(true);
 			}
@@ -397,35 +387,64 @@ namespace Vehicles
 			CountToTransferChanged();
 		}
 
-		private bool DockBoatTransferPawns()
+		private bool TransferPawns()
 		{
-			DockedBoat dockedBoat = (DockedBoat)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.DockedBoat);
-			dockedBoat.Tile = caravan.Tile;
-			float randomInRange = Rand.Range(2f, 4f) + (50 * (1 - caravan.PawnsListForReading.Where(x => x.IsBoat()).Max(x => (x as VehiclePawn).BodySize)));
-			dockedBoat.GetComponent<TimeoutComp>().StartTimeout(Mathf.CeilToInt(randomInRange * 60000));
-			List<Pawn> boats = caravan.PawnsListForReading.Where(p => p.IsBoat()).ToList();
-			List<Pawn> pawns = caravan.PawnsListForReading.Where(p => !p.IsBoat()).ToList();
-			if(caravan.PawnsListForReading.Where(p => !p.IsBoat()).Count() <= 0) return false;
+			StashedVehicle stashedVehicle = (StashedVehicle)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.StashedVehicle);
+			stashedVehicle.Tile = caravan.Tile;
+			
+			//Calculate days before removal from map
+			VehiclePawn largestVehicle = caravan.Vehicles.MaxBy(vehicle => vehicle.VehicleDef.Size.Magnitude);
+			float t = Ext_Math.ReverseInterpolate(largestVehicle.VehicleDef.Size.Magnitude, 1, 10);
+			float timeoutDays = 25 * Mathf.Lerp(1.2f, 0.8f, t); //20 to 30 days depending on size of vehicle
+			stashedVehicle.GetComponent<TimeoutComp>().StartTimeout(Mathf.CeilToInt(timeoutDays * 60000));
 
-			foreach(TransferableOneWay t in transferables)
+			List<Pawn> vehicles = new List<Pawn>();
+			List<Pawn> pawns = new List<Pawn>();
+			foreach (Pawn pawn in caravan.PawnsListForReading)
 			{
-				TransferableUtility.TransferNoSplit(t.things, t.CountToTransfer, delegate(Thing thing, int numToTake)
+				if (pawn is VehiclePawn vehicle)
+				{
+					vehicle.RemoveAllPawns();
+					vehicles.Add(vehicle);
+				}
+				else
+				{
+					pawns.Add(pawn);
+				}
+			}
+			if (vehicles.NullOrEmpty())
+			{
+				return false; //Should never reach this case but you never know.. sometimes weird hijinks occur and if the vehicle caravan didn't automatically downgrade to a normal caravan, it's possible
+			}
+
+			Caravan newCaravan = CaravanMaker.MakeCaravan(Enumerable.Empty<Pawn>(), caravan.Faction, caravan.Tile, true);
+			newCaravan.pawns.TryAddRangeOrTransfer(pawns, canMergeWithExistingStacks: false);
+
+			//Transfer all contents
+			foreach (TransferableOneWay transferable in transferables)
+			{
+				TransferableUtility.TransferNoSplit(transferable.things, transferable.CountToTransfer, delegate(Thing thing, int numToTake)
 				{
 					Pawn ownerOf = CaravanInventoryUtility.GetOwnerOf(caravan, thing);
-					if(ownerOf is null) return;
-					CaravanInventoryUtility.MoveInventoryToSomeoneElse(ownerOf, thing, pawns, boats, numToTake);
+					if (ownerOf is null)
+					{
+						Log.Error($"Error while stashing vehicle. {thing} has no owner.");
+					}
+					else
+					{
+						CaravanInventoryUtility.MoveInventoryToSomeoneElse(ownerOf, thing, pawns, vehicles, numToTake);
+					}
 				}, true, true);
 			}
 
-			for(int i = caravan.pawns.Count - 1; i >= 0; i--)
+			//Transfer vehicles to stashed vehicle object
+			for (int i = vehicles.Count - 1; i >= 0; i--)
 			{
-				Pawn p = caravan.PawnsListForReading[i];
-				if(p.IsBoat())
-				{
-					dockedBoat.dockedBoats.TryAddOrTransfer(p, false);
-				}
+				Pawn vehiclePawn = vehicles[i];
+				stashedVehicle.stash.TryAddOrTransfer(vehiclePawn, false);
 			}
-			Find.WorldObjects.Add(dockedBoat);
+			Find.WorldObjects.Add(stashedVehicle);
+			caravan.Destroy();
 			return true;
 		}
 
@@ -448,10 +467,12 @@ namespace Vehicles
 
 		private void AddItemsToTransferables()
 		{
-			List<Thing> list = CaravanInventoryUtility.AllInventoryItems(caravan);
-			foreach (Thing t in list)
+			foreach (VehiclePawn vehicle in caravan.Vehicles)
 			{
-				AddToTransferables(t);
+				foreach (Thing thing in vehicle.inventory.innerContainer)
+				{
+					AddToTransferables(thing);
+				}
 			}
 		}
 

@@ -94,49 +94,52 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Prevent RimWorld Garbage Collection from removing DockedBoats as well as pawns onboard DockedBoat WorldObjects
+		/// Prevent RimWorld Garbage Collection from removing pawns inside vehicles on the world map
 		/// </summary>
 		/// <param name="p"></param>
 		public static bool DoNotRemoveVehicleObjects(Pawn p)
 		{
-			foreach (DockedBoat obj in Find.WorldObjects.AllWorldObjects.Where(x => x is DockedBoat))
+			foreach (WorldObject worldObject in Find.WorldObjects.AllWorldObjects)
 			{
-				if (obj.dockedBoats.Contains(p))
+				if (worldObject is StashedVehicle stashedVehicle)
 				{
-					return false;
-				}
-			}
-			foreach (VehicleCaravan vehicleCaravan in Find.WorldObjects.AllWorldObjects.Where(x => x is VehicleCaravan))
-			{
-				foreach (Pawn innerPawn in vehicleCaravan.PawnsListForReading)
-				{
-					if (innerPawn is VehiclePawn vehicle)
+					if (stashedVehicle.Vehicles.Contains(p))
 					{
-						if (vehicle == p || vehicle.AllPawnsAboard.Contains(p))
+						return false;
+					}
+				}
+				else if (worldObject is VehicleCaravan vehicleCaravan)
+				{
+					foreach (Pawn innerPawn in vehicleCaravan.PawnsListForReading)
+					{
+						if (innerPawn is VehiclePawn vehicle)
 						{
-							return false;
-						}
-						foreach (Thing thing in vehicle.inventory.innerContainer)
-						{
-							if (thing == p)
+							if (vehicle == p || vehicle.AllPawnsAboard.Contains(p))
 							{
 								return false;
+							}
+							foreach (Thing thing in vehicle.inventory.innerContainer)
+							{
+								if (thing == p)
+								{
+									return false;
+								}
 							}
 						}
 					}
 				}
-			}
-			foreach (AerialVehicleInFlight aerialVehicle in Find.WorldObjects.AllWorldObjects.Where(x => x is AerialVehicleInFlight))
-			{
-				if (aerialVehicle.vehicle == p || aerialVehicle.vehicle.AllPawnsAboard.Contains(p))
+				else if (worldObject is AerialVehicleInFlight aerialVehicle)
 				{
-					return false;
-				}
-				foreach (Thing thing in aerialVehicle.vehicle.inventory.innerContainer)
-				{
-					if (thing == p)
+					if (aerialVehicle.vehicle == p || aerialVehicle.vehicle.AllPawnsAboard.Contains(p))
 					{
 						return false;
+					}
+					foreach (Thing thing in aerialVehicle.vehicle.inventory.innerContainer)
+					{
+						if (thing == p)
+						{
+							return false;
+						}
 					}
 				}
 			}

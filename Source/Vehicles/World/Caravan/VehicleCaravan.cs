@@ -14,6 +14,7 @@ namespace Vehicles
 	public class VehicleCaravan : Caravan, IVehicleWorldObject
 	{
 		private static readonly Texture2D SplitCommand = ContentFinder<Texture2D>.Get("UI/Commands/SplitCaravan", true);
+		private static readonly Dictionary<VehicleDef, int> vehicleCounts = new Dictionary<VehicleDef, int>();
 
 		private static MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock();
 		private static Dictionary<ThingDef, Material> materials = new Dictionary<ThingDef, Material>();
@@ -44,6 +45,8 @@ namespace Vehicles
 		public bool CanDismount => true;
 
 		public bool AerialVehicle => vehicles.Count == 1 && vehicles.FirstOrDefault().VehicleDef.vehicleType == VehicleType.Air;
+
+		public bool CanCaravan => vehicles.Count == 1 && !vehicles.FirstOrDefault().VehicleDef.canCaravan;
 
 		public IEnumerable<VehiclePawn> Vehicles => vehicles;
 
@@ -84,8 +87,8 @@ namespace Vehicles
 				}
 				if (!materials.ContainsKey(leadVehicleDef))
 				{
-					var texture = VehicleTex.CachedTextureIcons[leadVehicleDef];
-					var material = MaterialPool.MatFrom(texture, ShaderDatabase.WorldOverlayTransparentLit, Color.white, WorldMaterials.WorldObjectRenderQueue);
+					Texture2D texture = VehicleTex.CachedTextureIcons[leadVehicleDef];
+					Material material = MaterialPool.MatFrom(texture, ShaderDatabase.WorldOverlayTransparentLit, Color.white, WorldMaterials.WorldObjectRenderQueue);
 					materials.Add(leadVehicleDef, material);
 				}
 				return materials[leadVehicleDef];
@@ -230,18 +233,11 @@ namespace Vehicles
 		{
 			foreach (Gizmo gizmo in base.GetGizmos())
 			{
-				yield return gizmo;
-			}
-
-			foreach (VehiclePawn vehicle in Vehicles)
-			{
-				foreach (VehicleComp vehicleComp in vehicle.AllComps.Where(comp => comp is VehicleComp))
+				if (gizmo is Command command && command.icon == null)
 				{
-					foreach (Gizmo gizmo in vehicleComp.CompCaravanGizmos())
-					{
-						yield return gizmo;
-					}
+					continue; //skip all vanilla caravan devmode commands
 				}
+				yield return gizmo;
 			}
 
 			if (IsPlayerControlled)
@@ -288,6 +284,29 @@ namespace Vehicles
 						defaultLabel = "CommandPauseCaravan".Translate()
 					};
 				}
+				else
+				{
+					Command_Action disembark = new Command_Action();
+					disembark.icon = VehicleTex.Anchor;
+					disembark.defaultLabel = "VF_CommandDisembark".Translate(); //settlement != null ? "VF_CommandDockShip".Translate() : "VF_CommandDockShipDisembark".Translate();
+					disembark.defaultDesc = "VF_CommandDisembarkDesc".Translate(); //settlement != null ? "VF_CommandDockShipDesc".Translate(settlement) : "VF_CommandDockShipObjectDesc".Translate();
+					disembark.action = delegate ()
+					{
+						CaravanHelper.StashVehicles(this);
+					};
+					yield return disembark;
+
+					Settlement settlement = Find.WorldObjects.SettlementBaseAt(Tile);
+
+					if (Find.World.Impassable(Tile))
+					{
+						disembark.Disable("VF_CommandDisembarkImpassableBiome".Translate());
+					}
+					if (settlement != null)
+					{
+						disembark.Disable("CommandSettleFailAlreadyHaveBase".Translate());
+					}
+				}
 				foreach (Gizmo gizmo2 in forage.GetGizmos())
 				{
 					yield return gizmo2;
@@ -300,43 +319,15 @@ namespace Vehicles
 					}
 				}
 			}
-			if (this.HasBoat() && (Find.World.CoastDirectionAt(Tile).IsValid || WorldHelper.RiverIsValid(Tile, PawnsListForReading.Where(p => p.IsBoat()).ToList())))
+
+			foreach (VehiclePawn vehicle in Vehicles)
 			{
-				if (!vehiclePather.Moving && !PawnsListForReading.NotNullAndAny(p => !p.IsBoat()))
+				foreach (VehicleComp vehicleComp in vehicle.AllComps.Where(comp => comp is VehicleComp))
 				{
-					Command_Action dock = new Command_Action();
-					dock.icon = VehicleTex.Anchor;
-					dock.defaultLabel = Find.WorldObjects.AnySettlementBaseAt(Tile) ? "VF_CommandDockShip".Translate() : "VF_CommandDockShipDisembark".Translate();
-					dock.defaultDesc = Find.WorldObjects.AnySettlementBaseAt(Tile) ? "VF_CommandDockShipDesc".Translate(Find.WorldObjects.SettlementBaseAt(Tile)) : "VF_CommandDockShipObjectDesc".Translate();
-					dock.action = delegate ()
+					foreach (Gizmo gizmo in vehicleComp.CompCaravanGizmos())
 					{
-						List<WorldObject> objects = Find.WorldObjects.ObjectsAt(Tile).ToList();
-						if (!objects.All(x => x is Caravan))
-						{
-							CaravanHelper.ToggleDocking(this, true);
-						}
-						else
-						{
-							CaravanHelper.SpawnDockedBoatObject(this);
-						}
-					};
-
-					yield return dock;
-				}
-				else if (!vehiclePather.Moving && PawnsListForReading.NotNullAndAny(p => !p.IsBoat()))
-				{
-					Command_Action undock = new Command_Action
-					{
-						icon = VehicleTex.UnloadAll,
-						defaultLabel = "VF_CommandUndockShip".Translate(),
-						defaultDesc = "VF_CommandUndockShipDesc".Translate(Label),
-						action = delegate ()
-						{
-							CaravanHelper.ToggleDocking(this, false);
-						}
-					};
-
-					yield return undock;
+						yield return gizmo;
+					}
 				}
 			}
 
@@ -445,23 +436,26 @@ namespace Vehicles
 
 			if (vehicles >= 1)
 			{
-				Dictionary<VehicleDef, int> vehicleCounts = new Dictionary<VehicleDef, int>();
-				foreach (VehiclePawn vehicle in Vehicles)
+				vehicleCounts.Clear();
 				{
-					if (vehicleCounts.ContainsKey(vehicle.VehicleDef))
+					foreach (VehiclePawn vehicle in Vehicles)
 					{
-						vehicleCounts[vehicle.VehicleDef]++;
+						if (vehicleCounts.ContainsKey(vehicle.VehicleDef))
+						{
+							vehicleCounts[vehicle.VehicleDef]++;
+						}
+						else
+						{
+							vehicleCounts[vehicle.VehicleDef] = 1;
+						}
 					}
-					else
-					{
-						vehicleCounts[vehicle.VehicleDef] = 1;
-					}
-				}
 
-				foreach ((VehicleDef def, int count) in vehicleCounts)
-				{
-					stringBuilder.Append($"{count} {def.LabelCap}, ");
+					foreach ((VehicleDef def, int count) in vehicleCounts)
+					{
+						stringBuilder.Append($"{count} {def.LabelCap}, ");
+					}
 				}
+				vehicleCounts.Clear();
 			}
 			stringBuilder.Append("CaravanColonistsCount".Translate(colonists, (colonists != 1) ? Faction.OfPlayer.def.pawnsPlural : Faction.OfPlayer.def.pawnSingular));
 			if (animals == 1)
