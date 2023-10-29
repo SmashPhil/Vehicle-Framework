@@ -434,14 +434,17 @@ namespace Vehicles
 		public override void CompTick()
 		{
 			base.CompTick();
-			ResolveTurretQueue();
-			//Only tick VehicleTurrets that actively request to be ticked
-			for (int i = tickers.Count - 1; i >= 0; i--)
+			if (Vehicle.Spawned)
 			{
-				VehicleTurret turret = tickers[i];
-				if (!turret.Tick())
+				ResolveTurretQueue();
+				//Only tick VehicleTurrets that actively request to be ticked
+				for (int i = tickers.Count - 1; i >= 0; i--)
 				{
-					DequeueTicker(turret);
+					VehicleTurret turret = tickers[i];
+					if (!turret.Tick())
+					{
+						DequeueTicker(turret);
+					}
 				}
 			}
 		}
@@ -459,6 +462,16 @@ namespace Vehicles
 				{
 					cannon.AutoReloadCannon();
 				}
+			}
+		}
+
+		public override void PostDeSpawn(Map map)
+		{
+			base.PostDeSpawn(map);
+			for (int i = tickers.Count - 1; i >= 0; i--)
+			{
+				VehicleTurret turret = tickers[i];
+				DequeueTicker(turret); //Dequeue all turrets if vehicle despawns
 			}
 		}
 

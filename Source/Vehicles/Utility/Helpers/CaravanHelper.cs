@@ -251,10 +251,6 @@ namespace Vehicles
 		/// <param name="caravan"></param>
 		public static void StashVehicles(VehicleCaravan caravan)
 		{
-			if (!caravan.HasBoat())
-			{
-				Log.Error("Attempted to dock boats with no boats in caravan. This could have serious errors in the future. - Smash Phil");
-			}
 			Find.WindowStack.Add(new Dialog_StashVehicle(caravan));
 		}
 

@@ -167,6 +167,9 @@ namespace Vehicles
 							case VehicleType.Air:
 								iconFilePath = DefaultShuttleIconTexPath;
 								break;
+							default:
+								iconFilePath = DefaultVehicleIconTexPath;
+								break;
 						}
 					}
 					tasks.AppendLine("Icon created");

@@ -84,7 +84,6 @@ namespace Vehicles
 			}
 			
 			List<Pawn> pawns = caravan.pawns.InnerListForReading.ToList(); //Copy list separately
-			Log.Message($"Adding Pawns: {string.Join(", ", pawns.Select(pawn => pawn))}");
 			caravan.RemoveAllPawns();
 
 			List<Thing> stash = this.stash.InnerListForReading.ToList();
@@ -95,11 +94,6 @@ namespace Vehicles
 				{
 					stash.RemoveAt(i);
 					pawns.Add(pawn);
-					Log.Message($"Pawns in vehicle: {pawn}");
-					foreach (Pawn p2 in ((VehiclePawn)pawn).AllPawnsAboard)
-					{
-						Log.Message($"Pawn: {p2}");
-					}
 				}
 			}
 			VehicleCaravan mergedCaravan = CaravanHelper.MakeVehicleCaravan(pawns, caravan.Faction, caravan.Tile, true);
@@ -107,7 +101,6 @@ namespace Vehicles
 			for (int i = stash.Count - 1; i >= 0; i--)
 			{
 				mergedCaravan.AddPawnOrItem(stash[i], true);
-				Log.Message($"Adding: {stash[i]}");
 			}
 
 			Destroy();
