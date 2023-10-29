@@ -10,6 +10,7 @@
 	<VF_ImpassableBiome>Biome impassable for this vehicle.</VF_ImpassableBiome>
 	<VF_CaravanDisabled>Caravaning Disabled.</VF_CaravanDisabled>
 	<VF_CaravanCantMove>Unable to move.</VF_CaravanCantMove>
+	<VF_CantMergeAerialVehicle>Can't merge aerial vehicles.</VF_CantMergeAerialVehicle>
 	
 	<VF_CommandDockShip>Dock</VF_CommandDockShip>
 	<VF_CommandDockShipDesc>Unload all passengers and enable trade with the Settlement of {0}.</VF_CommandDockShipDesc>

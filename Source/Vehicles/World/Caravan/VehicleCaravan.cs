@@ -288,10 +288,6 @@ namespace Vehicles
 						defaultLabel = "CommandPauseCaravan".Translate()
 					};
 				}
-				if (!AerialVehicle && CaravanMergeUtility.ShouldShowMergeCommand)
-				{
-					yield return CaravanMergeUtility.MergeCommand(this);
-				}
 				foreach (Gizmo gizmo2 in forage.GetGizmos())
 				{
 					yield return gizmo2;

@@ -187,6 +187,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanMergeUtility), "MergeCaravans"),
 				transpiler: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(MergeWithVehicleCaravanTranspiler)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanMergeUtility), nameof(CaravanMergeUtility.MergeCommand)),
+				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(DisableMergeForAerialVehicles)));
 
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_Trade), nameof(CaravanArrivalAction_Trade.CanTradeWith)),
                 postfix: new HarmonyMethod(typeof(CaravanHandling), 
@@ -1124,6 +1127,24 @@ namespace Vehicles
 				}
 
 				yield return instruction;
+			}
+		}
+
+		public static void DisableMergeForAerialVehicles(ref Command __result, Caravan caravan)
+		{
+			if (__result != null && caravan is VehicleCaravan vehicleCaravan)
+			{
+				List<WorldObject> selectedObjects = Find.WorldSelector.SelectedObjects;
+				for (int i = 0; i < selectedObjects.Count; i++)
+				{
+					if (selectedObjects[i] is VehicleCaravan selectedCaravan)
+					{
+						if (selectedCaravan.AerialVehicle || vehicleCaravan.AerialVehicle)
+						{
+							__result.Disable("VF_CantMergeAerialVehicle".Translate());
+						}
+					}
+				}
 			}
 		}
 
