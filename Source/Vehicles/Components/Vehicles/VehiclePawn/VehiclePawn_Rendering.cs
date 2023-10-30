@@ -506,24 +506,17 @@ namespace Vehicles
 
 			if (!cargoToLoad.NullOrEmpty())
 			{
-				if (!cargoToLoad.NotNullAndAny(x => x.AnyThing != null && x.CountToTransfer > 0 && !inventory.innerContainer.Contains(x.AnyThing)))
+				Command_Action cancelLoad = new Command_Action
 				{
-					cargoToLoad.Clear();
-				}
-				else
-				{
-					Command_Action cancelLoad = new Command_Action
+					defaultLabel = "DesignatorCancel".Translate(),
+					icon = VehicleDef.CancelCargoIcon,
+					action = delegate ()
 					{
-						defaultLabel = "DesignatorCancel".Translate(),
-						icon = VehicleDef.CancelCargoIcon,
-						action = delegate ()
-						{
-							Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(this, ReservationType.LoadVehicle);
-							cargoToLoad.Clear();
-						}
-					};
-					yield return cancelLoad;
-				}
+						Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(this, ReservationType.LoadVehicle);
+						cargoToLoad.Clear();
+					}
+				};
+				yield return cancelLoad;
 			}
 			else
 			{

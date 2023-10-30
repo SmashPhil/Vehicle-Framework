@@ -506,7 +506,6 @@ namespace Vehicles
 				caravan.RecacheVehicles();
 				if (Current.ProgramState != ProgramState.Entry && moving && !StartPath(destTile, arrivalAction, true, false))
 				{
-					Log.Message("Stopping Dead");
 					StopDead();
 				}
 			}
