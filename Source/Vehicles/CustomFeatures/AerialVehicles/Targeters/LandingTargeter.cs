@@ -12,6 +12,8 @@ namespace Vehicles
 	{
 		public const int PingPongTickLength = 100;
 
+		public static readonly Color GhostOccupiedColor = new Color(1, 0.5f, 0.2f, 0.5f);
+
 		private static float middleMouseDownTime;
 		private static float framesOpen;
 
@@ -87,13 +89,15 @@ namespace Vehicles
 			restrictionCached = (IntVec3.Invalid, Rot4.Invalid, true);
 		}
 
-		public bool InvalidAtPos(LocalTargetInfo localTargetInfo, bool drawRestriction = false)
+		public PositionState GetPosState(LocalTargetInfo localTargetInfo, bool drawRestriction = false)
 		{
 			IntVec3 cell = localTargetInfo.Cell;
 			Vector3 position = new Vector3(cell.x, AltitudeLayer.Building.AltitudeFor(), cell.z).ToIntVec3().ToVector3Shifted();
-			VehiclePawn vehicleAtPos = MapHelper.VehicleInPosition(vehicle, Current.Game.CurrentMap, cell, landingRotation);
+			Map map = Current.Game.CurrentMap;
+			//VehiclePawn vehicleAtPos = MapHelper.VehicleInPosition(vehicle, Current.Game.CurrentMap, cell, landingRotation);
 			bool invalidPosition = !localTargetInfo.IsValid || (targetValidator != null && !targetValidator(localTargetInfo));
-			invalidPosition |= (vehicleAtPos != vehicle && MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, localTargetInfo.Cell, landingRotation));
+			invalidPosition |= MapHelper.ImpassableOrVehicleBlocked(vehicle, map, localTargetInfo.Cell, landingRotation);
+			bool obstructed = MapHelper.NonStandableOrVehicleBlocked(vehicle, map, localTargetInfo.Cell, landingRotation);
 			bool restricted = false;
 			if (vehicle.CompVehicleLauncher.launchProtocol.GetProperties(LaunchProtocol.LaunchType.Landing, landingRotation)?.restriction is LaunchRestriction launchRestriction)
 			{
@@ -108,7 +112,15 @@ namespace Vehicles
 				}
 				restricted = restrictionCached.result;
 			}
-			return invalidPosition || restricted;
+			if (invalidPosition || restricted)
+			{
+				return PositionState.Invalid;
+			}
+			else if (obstructed)
+			{
+				return PositionState.Obstructed;
+			}
+			return PositionState.Valid;
 		}
 
 		public override void ProcessInputEvents()
@@ -119,7 +131,7 @@ namespace Vehicles
 				LocalTargetInfo localTargetInfo = CurrentTargetUnderMouse();
 				if (action != null && localTargetInfo.Cell.InBounds(Current.Game.CurrentMap))
 				{
-					if (!InvalidAtPos(localTargetInfo))
+					if (GetPosState(localTargetInfo) != PositionState.Invalid)
 					{
 						SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
 						action(localTargetInfo, landingRotation);
@@ -159,7 +171,13 @@ namespace Vehicles
 			LocalTargetInfo localTargetInfo = CurrentTargetUnderMouse();
 			if (localTargetInfo.IsValid)
 			{
-				Color color = InvalidAtPos(localTargetInfo, true) ? Designator_Place.CannotPlaceColor : Designator_Place.CanPlaceColor;
+				Color color = GetPosState(localTargetInfo, true) switch
+				{
+					PositionState.Invalid => Designator_Place.CannotPlaceColor,
+					PositionState.Obstructed => GhostOccupiedColor,
+					PositionState.Valid => Designator_Place.CanPlaceColor,
+					_ => Designator_Place.CanPlaceColor,
+				};
 				color.a = (Mathf.PingPong(framesOpen, PingPongTickLength / 1.5f) / PingPongTickLength) + 0.25f;
 				GhostDrawer.DrawGhostThing(localTargetInfo.Cell, landingRotation, vehicle.VehicleDef.buildDef, vehicle.VehicleDef.buildDef.graphic, color, AltitudeLayer.Blueprint);
 			}
@@ -262,6 +280,13 @@ namespace Vehicles
 		public override void PostInit()
 		{
 			Instance = this;
+		}
+
+		public enum PositionState
+		{
+			Invalid,
+			Obstructed,
+			Valid
 		}
 	}
 }

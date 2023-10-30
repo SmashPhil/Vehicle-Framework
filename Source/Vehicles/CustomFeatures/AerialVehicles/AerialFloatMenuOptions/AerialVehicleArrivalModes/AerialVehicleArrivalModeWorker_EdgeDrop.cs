@@ -16,7 +16,7 @@ namespace Vehicles
 			IntVec3 cell = CellFinderExtended.RandomEdgeCell(vehicleRotation.Opposite, map, delegate(IntVec3 cell)
 			{
 				IntVec3 clampedCell = vehicle.ClampToMap(cell, map, 1);
-				return !MapHelper.VehicleBlockedInPosition(vehicle, Current.Game.CurrentMap, cell, vehicleRotation);
+				return !MapHelper.ImpassableOrVehicleBlocked(vehicle, Current.Game.CurrentMap, cell, vehicleRotation);
 			}, vehicleSize.x > vehicleSize.z ? vehicleSize.x : vehicleSize.z);
 			IntVec3 clampedCell = vehicle.ClampToMap(cell, map, 1);
 			VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(vehicle.CompVehicleLauncher.Props.skyfallerIncoming);

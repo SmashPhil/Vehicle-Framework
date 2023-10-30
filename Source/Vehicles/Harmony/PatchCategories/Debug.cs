@@ -221,7 +221,7 @@ namespace Vehicles
 
 			LaunchProtocol launchProtocol = aerialVehicleInFlight.vehicle.CompVehicleLauncher.launchProtocol;
 			Rot4 vehicleRotation = launchProtocol.LandingProperties?.forcedRotation ?? Rot4.Random;
-			IntVec3 cell = CellFinderExtended.RandomCenterCell(nearestSettlement.Map, (IntVec3 cell) => !MapHelper.VehicleBlockedInPosition(aerialVehicleInFlight.vehicle, Current.Game.CurrentMap, cell, vehicleRotation));
+			IntVec3 cell = CellFinderExtended.RandomCenterCell(nearestSettlement.Map, (IntVec3 cell) => !MapHelper.ImpassableOrVehicleBlocked(aerialVehicleInFlight.vehicle, Current.Game.CurrentMap, cell, vehicleRotation));
 			VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(aerialVehicleInFlight.vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
 			skyfaller.vehicle = aerialVehicleInFlight.vehicle;
 

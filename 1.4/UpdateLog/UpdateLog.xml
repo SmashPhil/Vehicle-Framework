@@ -6,12 +6,11 @@
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
-Hey everyone, I know it's been a long time since the last update.  I've been working hard on fixing major bugs for caravans and world map stuff, so this patch ended up being quite huge.
+Hey everyone, I know it's been a long time since the last update.  I've been working hard on fixing major bugs for caravans and world map stuff, so this patch ended up being quite large. x)
 
-Please give the list of bugs a read, I know it's super long but previously unusable mechanics are now fixed and I'd hate for anyone to miss out.
+If you don't want to go through the huge list, just know that I've fixed a LOT of caravan and world map bugs for vehicles, and I've also pushed a few fixes for pathfinding.  So if you still encounter pathing issues after this update please let me know asap.
 
-Pathfinding should also be fixed now, however if you still run into issues please let me know asap.  It's at the top of my priority list each patch so don't hesitate to 
-
+I'm sure you noticed I moved the patch notes to when you first load into game. Character Editor has a weird interaction with this tool at the main menu which was causing the game to freeze for some of you. I've already notified them so hopefully it'll get fixed soon.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Fixed pathfinding bug where neighboring regions were not updated properly, causing areas to be unreachable.
 
@@ -50,20 +49,21 @@ Pathfinding should also be fixed now, however if you still run into issues pleas
 - Fixed bug where vehicle turrets with infinite range wouldn't be affected by spread radius.
 
 - Fixed bug where vehicle turrets with generic ammo wouldn't be able to ignore LOS for targeting with overhead projectiles.
-
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Optimized WorldPawn GC pass for checking if a pawn is within a vehicle.
 
 - Optimized vehicle pathgrid updating for vehicle hitboxes
-
 &lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Geological Landforms
 
 - Real Ruins
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Removed "Dock Boat" option from vehicle caravans.  It was buggy and has since been re-implemented as an all-purpose "stash vehicles" button to go on foot and leave vehicles behind for up to 20-30 days.  It will show when your caravan is stopped.
+- Aerial vehicles can now land on trees and other structures that aren't completely impassable.  The vehicle will take slight damage for each object it lands on, however this means larger vehicles aren't blocked from landing like on maps with tons of trees.
+NOTE: Runway restrictions still apply, so planes will still require empty runways.
 
-- Increased brightness of text in Cargo tab for items yet to be loaded.
+- Removed "Dock Boat" option from vehicle caravans.  It was buggy and has since been re-implemented as an all-purpose "stash vehicles" button to go on foot and leave vehicles behind for up to 20-30 days.  It will show when your caravan is stopped and it works for all 3 vehicle types.
+
+- Increased brightness of red text in Cargo tab for items yet to be loaded.
 
 - Rebalanced painting vehicles to take less time and not scale as drastically with larger vehicles.
 
@@ -72,13 +72,12 @@ Pathfinding should also be fixed now, however if you still run into issues pleas
 - Added pawn rendering to TweakField menu, allowing runtime editing of pawn rendering fields.
 
 - Added damage field to explosive vehicle parts, allowing overriding of damage applied.
-
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>
   <!--Show update log on next startup.-->
-  <update>false</update>
+  <update>true</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
   <testing>false</testing>
   <!--Icon bar shown to the right of the mod's name.-->

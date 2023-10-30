@@ -54,9 +54,14 @@ namespace Vehicles
 		/// Vehicle is blocked at <paramref name="cell"/> and will not spawn correctly
 		/// </summary>
 		/// <param name="cell"></param>
-		public static bool VehicleBlockedInPosition(VehiclePawn vehicle, Map map, IntVec3 cell, Rot4 rot)
+		public static bool NonStandableOrVehicleBlocked(VehiclePawn vehicle, Map map, IntVec3 cell, Rot4 rot)
 		{
 			return VehicleReservationManager.AnyVehicleInhabitingCells(vehicle.PawnOccupiedCells(cell, rot), map) || !vehicle.CellRectStandable(map, cell, rot);
+		}
+
+		public static bool ImpassableOrVehicleBlocked(VehiclePawn vehicle, Map map, IntVec3 cell, Rot4 rot)
+		{
+			return VehicleReservationManager.AnyVehicleInhabitingCells(vehicle.PawnOccupiedCells(cell, rot), map) || vehicle.LocationRestrictedBySize(cell, rot, map);
 		}
 
 		/// <summary>

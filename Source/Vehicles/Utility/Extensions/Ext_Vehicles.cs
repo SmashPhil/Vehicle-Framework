@@ -535,11 +535,12 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="vehicle"></param>
 		/// <param name="dest"></param>
-		public static bool LocationRestrictedBySize(this VehiclePawn vehicle, IntVec3 dest, Rot8 rot)
+		public static bool LocationRestrictedBySize(this VehiclePawn vehicle, IntVec3 dest, Rot8 rot, Map map = null)
 		{
+			map ??= vehicle.Map;
 			foreach (IntVec3 cell in vehicle.VehicleRect(dest, rot))
 			{
-				if (!cell.Walkable(vehicle.VehicleDef, vehicle.Map))
+				if (!cell.Walkable(vehicle.VehicleDef, map))
 				{
 					return true;
 				}
@@ -601,7 +602,6 @@ namespace Vehicles
 		/// <remarks>DOES NOT take other vehicles into account</remarks>
 		/// <param name="vehicle"></param>
 		/// <param name="cell"></param>
-		/// <returns></returns>
 		public static bool FitsOnCell(this VehiclePawn vehicle, IntVec3 cell)
 		{
 			int minSize = Mathf.Min(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z);

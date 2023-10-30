@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using System.Collections.Generic;
+using UnityEngine;
 using Verse;
 using RimWorld;
 using SmashTools;
@@ -11,8 +13,7 @@ namespace Vehicles
 		public int delayLandingTicks;
 		
 		private static readonly Color GhostColor = new Color(1, 1, 1, 0.5f);
-		private static readonly Color GhostOccupiedColor = new Color(1, 0.5f, 0.2f, 0.5f);
-
+		
 		public bool LandingSpotOccupied { get; private set; }
 
 		public override void ExposeData()
@@ -63,6 +64,7 @@ namespace Vehicles
 			else
 			{
 				GenSpawn.Spawn(vehicle, Position, Map, Rotation);
+				vehicle.TryDamageObstructions();
 				if (VehicleMod.settings.main.deployOnLanding)
 				{
 					vehicle.CompVehicleLauncher.SetTimedDeployment();
@@ -73,7 +75,7 @@ namespace Vehicles
 
 		private void DrawLandingGhost()
 		{
-			GhostDrawer.DrawGhostThing(Position, Rotation, vehicle.VehicleDef, vehicle.VehicleGraphic, LandingSpotOccupied ? GhostOccupiedColor : GhostColor, AltitudeLayer.Blueprint, vehicle);
+			GhostDrawer.DrawGhostThing(Position, Rotation, vehicle.VehicleDef, vehicle.VehicleGraphic, LandingSpotOccupied ? LandingTargeter.GhostOccupiedColor : GhostColor, AltitudeLayer.Blueprint, vehicle);
 		}
 
 		public override void SpawnSetup(Map map, bool respawningAfterLoad)
