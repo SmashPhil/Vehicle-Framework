@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <!--Can utilize Version.txt file placed in mod's root directory-->
+  <currentVersion>1.5.1425</currentVersion>
+  <!--Startup,GameInit,LoadedGame,NewGame-->
+  <updateOn>GameInit</updateOn>
+  <!--Full description shown in update page-->
+  <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+Hey everyone, I know it's been a long time since the last update.  I've been working hard on fixing major bugs for caravans and world map stuff, so this patch ended up being quite large. x)
+
+If you don't want to go through the huge list, just know that I've fixed a LOT of caravan and world map bugs for vehicles, and I've also pushed a few fixes for pathfinding.  So if you still encounter pathing issues after this update please let me know asap.
+
+I'm sure you noticed I moved the patch notes to when you first load into game. Character Editor has a weird interaction with this tool at the main menu which was causing the game to freeze for some of you. I've already notified them so hopefully it'll get fixed soon.
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed pathfinding bug where neighboring regions were not updated properly, causing areas to be unreachable.
+
+- Aerial Vehicles transition to caravans when landed, allowing sites / quests to be interacted with properly.
+
+- Fixed bug where launching 2 aerial vehicles to land in the same map at the same time would fail to start targeting for the 2nd aerial vehicle.
+
+- Fixed bug where downed pawns were unable to be set for loading in any UI, including vanilla transport pods, caravans, and even reformation dialogs.
+
+- Fixed bug where merging any vehicle caravan would not recache the colonist bar.
+
+- Fixed bug where ordering aerial vehicle to fly to the same tile it launched from causes game to crash.
+
+- Fixed bug where any caravan merging with vehicles would not guarantee that it spawns a vehicle caravan, missing out on the custom pathfinding among other mechanics.
+
+- Fixed bug where loading a save would cause vehicle caravans to not resume their saved path.
+
+- Fixed bug where entering a map with more than 1 vehicle caused vehicles to stack, making them hard to move (if not downright impossibly stuck).
+
+- Fixed bug where pawns in vehicle caravan would rest 24/7.
+
+- Fixed bug where loading cargo into a vehicle would sometimes issue too many jobs, or try to issue multiple jobs on the same item.
+
+- Fixed bug where pawns inside vehicles would not try to recover psyfocus and hemogen.
+
+- Fixed bug where Load Pawn gizmo would not properly mark downed colonists for loading.
+
+- Fixed bug where colonists would refuel vehicle while it's leaking, resulting in wasted fuel.
+
+- Fixed bug where targeting for launching aerial vehicles would throw an exception for any vehicles without a fuel component.
+
+- Fixed bug where AerialVehicle world map icon would rotate 90 degrees when zoomed in.
+
+- Fixed bug where the aim pie of vehicle turrets would flicker when rendering.
+
+- Fixed bug where vehicle turrets with infinite range wouldn't be affected by spread radius.
+
+- Fixed bug where vehicle turrets with generic ammo wouldn't be able to ignore LOS for targeting with overhead projectiles.
+&lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Optimized WorldPawn GC pass for checking if a pawn is within a vehicle.
+
+- Optimized vehicle pathgrid updating for vehicle hitboxes
+&lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Geological Landforms
+
+- Real Ruins
+
+- Universum
+&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Aerial vehicles can now land on trees and other structures that aren't completely impassable.  The vehicle will take slight damage for each object it lands on, however this means larger vehicles aren't blocked from landing like on maps with tons of trees.
+NOTE: Runway restrictions still apply, so planes will still require empty runways.
+
+- Removed "Dock Boat" option from vehicle caravans.  It will be reimplemented for all vehicles in a future patch.
+
+- Increased brightness of red text in Cargo tab for items yet to be loaded.
+
+- Rebalanced painting vehicles to take less time and not scale as drastically with larger vehicles.
+
+- Moved icon for 'colonist inside vehicle' to the bottom right, which will allow for showing vanilla icons without overlap.
+
+- Added pawn rendering to TweakField menu, allowing runtime editing of pawn rendering fields.
+
+- Added damage field to explosive vehicle parts, allowing overriding of damage applied.
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
+  <!--Static parameterless method to execute when update log is executed-->
+  <actionOnUpdate></actionOnUpdate>
+  <!--Show update log on next startup.-->
+  <update>false</update>
+  <!--Testing mode prevents the update from saving over the UpdateLog file-->
+  <testing>false</testing>
+  <!--Icon bar shown to the right of the mod's name.-->
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon</icon>
+      <url>steam://url/CommunityFilePage/2356577528</url>
+    </li>
+  </rightIconBar>
+  <!--Icon bar shown to the left of the mod's name.-->
+  <leftIconBar>
+    <li>
+      <name>Patreon</name>
+      <icon>patreonIcon</icon>
+      <url>https://www.patreon.com/smashphil</url>
+    </li>
+    <li>
+      <name>Cursed Crew</name>
+      <icon>cursedCrewIcon</icon>
+      <url>https://discord.gg/NNe2VxAU7Z</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>
