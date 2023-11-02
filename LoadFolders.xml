@@ -9,6 +9,7 @@
 		
 		<li IfModActive = "kentington.saveourship2">1.4/_SaveOurShip2</li>
 		<li IfModActive = "sindre0830.rimnauts2">1.4/_RimNauts2</li>
+		<li IfModActive = "sindre0830.universum">1.4/_Universum</li>
 		
 		<li IfModActive = "monkey5206.carrycapacityfixed">1.4/_CarryCapacityFixed</li>
 	</v1.4>
