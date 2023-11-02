@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1422</currentVersion>
+  <currentVersion>1.5.1425</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -61,7 +61,7 @@ I'm sure you noticed I moved the patch notes to when you first load into game. C
 - Aerial vehicles can now land on trees and other structures that aren't completely impassable.  The vehicle will take slight damage for each object it lands on, however this means larger vehicles aren't blocked from landing like on maps with tons of trees.
 NOTE: Runway restrictions still apply, so planes will still require empty runways.
 
-- Removed "Dock Boat" option from vehicle caravans.  It was buggy and has since been re-implemented as an all-purpose "stash vehicles" button to go on foot and leave vehicles behind for up to 20-30 days.  It will show when your caravan is stopped and it works for all 3 vehicle types.
+- Removed "Dock Boat" option from vehicle caravans.  It will be reimplemented for all vehicles in a future patch.
 
 - Increased brightness of red text in Cargo tab for items yet to be loaded.
 
@@ -77,7 +77,7 @@ Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>
   <!--Show update log on next startup.-->
-  <update>true</update>
+  <update>false</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
   <testing>false</testing>
   <!--Icon bar shown to the right of the mod's name.-->

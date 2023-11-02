@@ -473,9 +473,13 @@ namespace Vehicles
 
 			if (!cargoToLoad.NullOrEmpty())
 			{
+				//TODO - can throw NRE
 				foreach (TransferableOneWay transferable in cargoToLoad)
 				{
-					GenDraw.DrawLineBetween(DrawPos, transferable.AnyThing.DrawPos);
+					if (transferable.HasAnyThing)
+					{
+						GenDraw.DrawLineBetween(DrawPos, transferable.AnyThing.DrawPos);
+					}
 				}
 			}
 		}

@@ -21,7 +21,7 @@ namespace Vehicles
 			this.stashedVehicle = stashedVehicle;
 		}
 
-		public override string Label => "CommandUndockShip".Translate(stashedVehicle.Label);
+		public override string Label => "VF_CommandUndockShip".Translate(stashedVehicle.Label);
 
 		public override string ReportString => "CaravanVisiting".Translate(stashedVehicle.Label);
 
@@ -32,7 +32,7 @@ namespace Vehicles
 			{
 				return floatMenuAcceptanceReport;
 			}
-			if(stashedVehicle != null && stashedVehicle.Tile != destinationTile)
+			if (stashedVehicle != null && stashedVehicle.Tile != destinationTile)
 			{
 				return false;
 			}
@@ -58,7 +58,7 @@ namespace Vehicles
 		public static IEnumerable<FloatMenuOption> GetFloatMenuOptions(Caravan caravan, StashedVehicle stashedVehicle)
 		{
 			return CaravanArrivalActionUtility.GetFloatMenuOptions(() => CanVisit(caravan, stashedVehicle), () => new CaravanArrivalAction_StashedVehicle(stashedVehicle),
-				"CommandUndockShip".Translate(stashedVehicle.Label), caravan, stashedVehicle.Tile, stashedVehicle);
+				"VF_CommandUndockShip".Translate(stashedVehicle.Label), caravan, stashedVehicle.Tile, stashedVehicle);
 		}
 	}
 }

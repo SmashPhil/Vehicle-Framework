@@ -23,8 +23,8 @@
 	<VF_CommandDockShipDisembark>Dock and Disembark</VF_CommandDockShipDisembark>
 	<VF_CommandDockShipObjectDesc>Dock Boats and go on foot</VF_CommandDockShipObjectDesc>
 	
-	<VF_CommandUndockShip>Board Vehicle</VF_CommandUndockShip>
-	<VF_CommandUndockShipDesc>Load all pawns and items into Boats</VF_CommandUndockShipDesc>
+	<VF_CommandUndockShip>Fetch vehicle.</VF_CommandUndockShip>
+	<VF_CommandUndockShipDesc>Load all pawns and items into vehicle.</VF_CommandUndockShipDesc>
 	<VF_CommandAttackDockDisable>Cannot attack {0} while docked at their Settlement</VF_CommandAttackDockDisable>
 	<VF_CommandTradeDockDisable>Cannot trade with {0}. Must dock boat first</VF_CommandTradeDockDisable>
 	
