@@ -9,6 +9,7 @@ namespace Vehicles
 	{
 		public override void PatchAll(ModMetaData mod, Harmony harmony)
 		{
+			//FishingCompatibility.EnableFishing();
 		}
 
 		public override string PackageId => CompatibilityPackageIds.VE_Fishing;

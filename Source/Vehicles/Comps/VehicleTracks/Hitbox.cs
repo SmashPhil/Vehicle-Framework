@@ -22,7 +22,7 @@ namespace Vehicles
 			{
 				CellRect rect = def.VehicleRect(new IntVec3(0, 0, 0), Rot4.North);
 				List<IntVec3> cells;
-				if (side == VehicleComponentPosition.Body || side == VehicleComponentPosition.BodyNoOverlap)
+				if (side == VehicleComponentPosition.Body)
 				{
 					cells = rect.Cells.ToList();
 				}

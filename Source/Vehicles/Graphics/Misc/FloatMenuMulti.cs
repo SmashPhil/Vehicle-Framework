@@ -44,7 +44,7 @@ namespace Vehicles
 
 		private static bool StillValid(FloatMenuOption opt, List<Pawn> pawns, Pawn ship)
 		{
-			if(!ship.Spawned || ship.Dead || ship.Downed || (ship as VehiclePawn).vPather.Moving)
+			if(!ship.Spawned || ship.Dead || ship.Downed || (ship as VehiclePawn).vehiclePather.Moving)
 			{
 				return false;
 			}

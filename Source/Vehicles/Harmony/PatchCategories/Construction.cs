@@ -158,27 +158,31 @@ namespace Vehicles
 			}
 			else if (newThing is VehiclePawn vehicle)
 			{
+				VehiclePositionManager positionManager = map.GetCachedMapComponent<VehiclePositionManager>();
 				bool standable = true;
 				foreach (IntVec3 cell in vehicle.PawnOccupiedCells(loc, rot))
 				{
-					if (!cell.InBounds(map) || !GenGridVehicles.Walkable(cell, vehicle.VehicleDef, map))
+					if (!cell.InBounds(map) || !GenGridVehicles.Walkable(cell, vehicle.VehicleDef, map) || positionManager.PositionClaimed(cell))
 					{
 						standable = false;
 						break;
 					}
 				}
-				if (standable) return true;
-				if (!CellFinder.TryFindRandomCellNear(loc, map, 20, (IntVec3 cell) =>
+				if (standable)
+				{
+					return true; //If location is still valid, skip to spawning
+				}
+				if (!CellFinderExtended.TryRadialSearchForCell(loc, map, 30, (IntVec3 cell) =>
 				{
 					foreach (IntVec3 cell2 in vehicle.PawnOccupiedCells(cell, rot))
 					{
-						if (!GenGridVehicles.Walkable(cell2, vehicle.VehicleDef, map))
+						if (!GenGridVehicles.Walkable(cell2, vehicle.VehicleDef, map) || positionManager.PositionClaimed(cell2))
 						{
 							return false;
 						}
 					}
 					return true;
-				}, out IntVec3 newLoc, 100))
+				}, out IntVec3 newLoc))
 				{
 					Log.Error($"Unable to find location to spawn {newThing.LabelShort} after 100 attempts. Aborting spawn.");
 					return false;
@@ -195,15 +199,17 @@ namespace Vehicles
 						VehiclePawn inPlaceVehicle = positionManager.ClaimedBy(loc);
 						CellRect occupiedRect = inPlaceVehicle.OccupiedRect().ExpandedBy(1);
 						Rand.PushState();
-						for (int i = 0; i < 3; i++)
 						{
-							IntVec3 newLoc = occupiedRect.EdgeCells.Where(c => GenGrid.InBounds(c, map) && GenGrid.Standable(c, map)).RandomElementWithFallback(inPlaceVehicle.Position);
-							if (occupiedRect.EdgeCells.Contains(newLoc))
+							for (int i = 0; i < 3; i++)
 							{
-								loc = newLoc;
-								break;
+								IntVec3 newLoc = occupiedRect.EdgeCells.Where(c => GenGrid.InBounds(c, map) && GenGrid.Standable(c, map)).RandomElementWithFallback(inPlaceVehicle.Position);
+								if (occupiedRect.EdgeCells.Contains(newLoc))
+								{
+									loc = newLoc;
+									break;
+								}
+								occupiedRect = occupiedRect.ExpandedBy(1);
 							}
-							occupiedRect = occupiedRect.ExpandedBy(1);
 						}
 						Rand.PopState();
 					}
@@ -211,78 +217,6 @@ namespace Vehicles
 				catch (Exception ex)
 				{
 					Log.Error($"Pawn {newThing.Label} could not be readjusted for spawn location. Exception={ex}");
-				}
-			}
-			else
-			{
-				try
-				{
-					VehiclePositionManager positionManager = map.GetCachedMapComponent<VehiclePositionManager>();
-					if (positionManager.PositionClaimed(loc))
-					{
-						VehiclePawn inPlaceVehicle = positionManager.ClaimedBy(loc);
-						CellRect occupiedRect = inPlaceVehicle.OccupiedRect().ExpandedBy(1);
-						for (int i = 0; i < 3; i++)
-						{
-							IntVec3 newLoc = IntVec3.Invalid;
-							//foreach (IntVec3 cell in occupiedRect.EdgeCells.Where(c => GenGrid.InBounds(c, map)))
-							//{
-							//	Thing thing2 = thing;
-							//	bool flag = false;
-							//	if (thing.stackCount > thing.def.stackLimit)
-							//	{
-							//		thing = thing.SplitOff(thing.def.stackLimit);
-							//		flag = true;
-							//	}
-							//	if (thing.def.stackLimit > 1)
-							//	{
-							//		List<Thing> thingList = loc.GetThingList(map);
-							//		int i = 0;
-							//		while (i < thingList.Count)
-							//		{
-							//			Thing thing3 = thingList[i];
-							//			if (thing3.CanStackWith(thing))
-							//			{
-							//				int stackCount = thing.stackCount;
-							//				if (thing3.TryAbsorbStack(thing, true))
-							//				{
-							//					resultingThing = thing3;
-							//					if (placedAction != null)
-							//					{
-							//						placedAction(thing3, stackCount);
-							//					}
-							//					return !flag;
-							//				}
-							//				resultingThing = null;
-							//				if (placedAction != null && stackCount != thing.stackCount)
-							//				{
-							//					placedAction(thing3, stackCount - thing.stackCount);
-							//				}
-							//				if (thing2 != thing)
-							//				{
-							//					thing2.TryAbsorbStack(thing, false);
-							//				}
-							//				return false;
-							//			}
-							//			else
-							//			{
-							//				i++;
-							//			}
-							//		}
-							//	}
-							//}
-							//if (newLoc.IsValid)
-							//{
-							//	loc = newLoc;
-							//	break;
-							//}
-							occupiedRect = occupiedRect.ExpandedBy(1);
-						}
-					}
-				}
-				catch (Exception ex)
-				{
-					Log.Error($"Thing {newThing.Label} could not be readjusted for spawn location. Exception={ex}");
 				}
 			}
 			return true;

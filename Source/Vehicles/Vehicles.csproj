@@ -46,6 +46,10 @@
     <Reference Include="System.Runtime.InteropServices.RuntimeInformation">
       <Private>False</Private>
     </Reference>
+    <Reference Include="UpdateLogTool, Version=1.3.8688.405, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\1.4\Assemblies\UpdateLogTool.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Achievements\VehicleBuilderTracker.cs" />
@@ -76,16 +80,21 @@
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Tickers.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Health.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Rendering.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_LoadMap.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_OfferGifts.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Launching\DirectionalTakeoff.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Launching\Misc\FleckData.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Launching\Misc\ShadowData.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Launching\Properties\DirectionalProtocolProperties.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Launching\Properties\PropellerProtocolProperties.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Launching\Restrictions\LaunchRestriction_Runway.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Launching\Restrictions\LaunchRestriction.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Targeters\HaulTargeter.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalAction_LoadMap.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalAction_OfferGifts.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Events\AerialAnimationEvents.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Launching\DirectionalTakeoff.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\FleckData.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\ShadowData.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Launching\Properties\DirectionalProtocolProperties.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Launching\Properties\PropellerProtocolProperties.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Launching\Restrictions\LaunchRestriction_Runway.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Launching\Restrictions\LaunchRestriction.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Skyfaller\Airdrop\Airdrop.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Skyfaller\Airdrop\AirdropDef.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Skyfaller\Airdrop\AirdropSkyfaller.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Skyfaller\SkyfallerMaker\AirdropSkyfallerMaker.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Targeters\HaulTargeter.cs" />
     <Compile Include="CustomFeatures\EventDefs\VehicleTurretEventDef.cs" />
     <Compile Include="CustomFeatures\Misc\AnimationEditorTags.cs" />
     <Compile Include="CustomFeatures\SharedJobs\SharedJob.cs" />
@@ -96,13 +105,16 @@
     <Compile Include="Gizmo\Gizmo_VehicleCaravanInfo.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_StatSettings.cs" />
     <Compile Include="Graphics\Graphic\Graphics\Animated\Graphic_ReversePropeller.cs" />
+    <Compile Include="Graphics\ITab\ITab_Airdrop_Container.cs" />
     <Compile Include="Graphics\ITab\WITab_AerialVehicle.cs" />
     <Compile Include="Graphics\ITab\WITab_AerialVehicle_Health.cs" />
     <Compile Include="Graphics\ITab\WITab_AerialVehicle_Items.cs" />
+    <Compile Include="Harmony\ConditionalPatches\AerialVehicleCompatibility.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_CombatExtended.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_BulkCarrier.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_MapPreview.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_RailsOfTheRim.cs" />
+    <Compile Include="Harmony\ConditionalPatches\Compatibility_RealRuins.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_RoadsOfTheRim.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_GeologicalLandforms.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_RimHUD.cs" />
@@ -114,6 +126,9 @@
     <Compile Include="Misc\Attributes\DisableSettingConditionalAttribute.cs" />
     <Compile Include="Misc\DefOf\HistoryEventDefOf_Vehicles.cs" />
     <Compile Include="Misc\DefOf\KeyBindingDefOf_Vehicles.cs" />
+    <Compile Include="Misc\DefOf\SkyfallerDefOf.cs" />
+    <Compile Include="Misc\DefOf\ThingDefOf_VehicleMotes.cs" />
+    <Compile Include="Misc\DefOf\ThingDefOf_Vehicles.cs" />
     <Compile Include="Misc\DefOf\VehicleStatCategoryDefOf.cs" />
     <Compile Include="Misc\DefOf\VehicleTurretEventDefOf.cs" />
     <Compile Include="Misc\Enums\UI\WorldPathingDebugType.cs" />
@@ -157,11 +172,11 @@
     <Compile Include="Components\Vehicles\Health\StatParts\VehicleStatPart.cs" />
     <Compile Include="Components\Vehicles\PatternData.cs" />
     <Compile Include="Components\Vehicles\VehicleFleshTypeDef.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_Trade.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Launching\PropellerTakeoff.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Launching\Properties\VerticalProtocolProperties.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_Strafe.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Targeters\AntiAirTargeter.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalAction_Trade.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Launching\PropellerTakeoff.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Launching\Properties\VerticalProtocolProperties.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Skyfaller\VehicleSkyfaller_Strafe.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Targeters\AntiAirTargeter.cs" />
     <Compile Include="Turrets\Components\TurretCooldownProperties.cs" />
     <Compile Include="Turrets\Components\Turret_RecoilTracker.cs" />
     <Compile Include="Turrets\Projectiles\CompTurretProjectileProperties.cs" />
@@ -169,15 +184,15 @@
     <Compile Include="Comps\Rendering\CompDrawLayer.cs" />
     <Compile Include="Comps\Rendering\CompProperties_DrawLayerTurret.cs" />
     <Compile Include="Comps\Rendering\CompProperties_DrawLayer.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Targeters\Base\BaseVehicleWorldTargeter.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Targeters\Base\BaseVehicleWorldTargeter.cs" />
     <Compile Include="CustomFeatures\Buildings\AirDefenses\Building_Artillery.cs" />
     <Compile Include="CustomFeatures\Buildings\AirDefenses\TurretTop_Artillery.cs" />
     <Compile Include="CustomFeatures\Buildings\AirDefenses\VerbProperties\RecoilProperties.cs" />
     <Compile Include="CustomFeatures\Buildings\AirDefenses\VerbProperties\VerbProperties_Animated.cs" />
     <Compile Include="CustomFeatures\Buildings\AirDefenses\Verb_ShootWorldRecoiled.cs" />
     <Compile Include="CustomFeatures\EventDefs\VehicleEventDef.cs" />
-    <Compile Include="CustomFeatures\Misc\MoteThrownSlowToSpeed.cs" />
-    <Compile Include="CustomFeatures\Misc\MoteThrownExpand.cs" />
+    <Compile Include="CustomFeatures\Misc\Motes\MoteThrownSlowToSpeed.cs" />
+    <Compile Include="CustomFeatures\Misc\Motes\MoteThrownExpand.cs" />
     <Compile Include="Components\Vehicles\VehicleAreaManager.cs" />
     <Compile Include="Gizmo\Command_ActionVehicleDrawn.cs" />
     <Compile Include="Gizmo\Command_Action_PawnDrawer.cs" />
@@ -207,53 +222,53 @@
     <Compile Include="Comps\VehicleComp.cs" />
     <Compile Include="Comps\VehicleCompProperties.cs" />
     <Compile Include="Comps\VehicleTracks\Hitbox.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_StrafeMap.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_CrashSpecificCell.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_LandInMap.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_LandSpecificCell.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_FormVehicleCaravan.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_AttackSettlement.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalAction_VisitSettlement.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeDef.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeWorker.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeWorker_TargetedDrop.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeWorker_EdgeDrop.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeWorker_CenterDrop.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\AerialFloatMenuOptions\VehicleArrivalActionUtility.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Bombing\StrafingProperties.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\FlightPath.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Landing\LandingArea.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Landing\LandingAreasHandler.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Launching\VTOLTakeoff.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Launching\DefaultTakeoff.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Launching\Properties\LaunchProtocolProperties.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\Projectiles\ProjectileSkyfaller.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\SkyfallerMaker\ProjectileSkyfallerMaker.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\SkyfallerMaker\VehicleSkyfallerMaker.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_Bomb.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_Bombing.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_FlyOver.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_Crashing.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Targeters\Base\BaseWorldTargeter.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Targeters\Base\BaseTargeter.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Targeters\StrafeTargeter.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Targeters\LandingTargeter.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalAction.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalAction_StrafeMap.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalAction_CrashSpecificCell.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalAction_LandInMap.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalAction_LandSpecificCell.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalAction_FormVehicleCaravan.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalAction_AttackSettlement.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalAction_VisitSettlement.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeDef.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeWorker.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeWorker_TargetedDrop.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeWorker_EdgeDrop.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalModes\AerialVehicleArrivalModeWorker_CenterDrop.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\VehicleArrivalActionUtility.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Bombing\StrafingProperties.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\FlightPath.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Landing\LandingArea.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Landing\LandingAreasHandler.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Launching\VTOLTakeoff.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Launching\DefaultTakeoff.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Launching\Properties\LaunchProtocolProperties.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Skyfaller\Projectiles\ProjectileSkyfaller.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Skyfaller\SkyfallerMaker\ProjectileSkyfallerMaker.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Skyfaller\SkyfallerMaker\VehicleSkyfallerMaker.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Skyfaller\VehicleSkyfaller_Bomb.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Skyfaller\VehicleSkyfaller_Bombing.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Skyfaller\VehicleSkyfaller_FlyOver.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Skyfaller\VehicleSkyfaller_Crashing.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Targeters\Base\BaseWorldTargeter.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Targeters\Base\BaseTargeter.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Targeters\StrafeTargeter.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Targeters\LandingTargeter.cs" />
     <Compile Include="Comps\Flyer\Launching\CompProperties_VehicleLauncher.cs" />
     <Compile Include="Comps\Flyer\Launching\CompVehicleLauncher.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Launching\LaunchProtocol.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Launching\LaunchProtocol.cs" />
     <Compile Include="Comps\VehicleTracks\VehicleDamager.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_Arriving.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Skyfaller\VehicleSkyfaller_Leaving.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Targeters\LaunchTargeter.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Bombing\BomberProperties.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Skyfaller\VehicleSkyfaller.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Skyfaller\VehicleSkyfaller_Arriving.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Skyfaller\VehicleSkyfaller_Leaving.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Targeters\LaunchTargeter.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Bombing\BomberProperties.cs" />
     <Compile Include="CustomFeatures\Buildings\AirDefenses\Building_RecoiledTurret.cs" />
     <Compile Include="CustomFeatures\Buildings\AirDefenses\TurretTop_Recoiled.cs" />
     <Compile Include="CustomFeatures\Buildings\AirDefenses\VerbProperties\VerbProperties_Recoil.cs" />
     <Compile Include="CustomFeatures\Buildings\AirDefenses\Verb_ShootRealistic.cs" />
     <Compile Include="CustomFeatures\Buildings\AirDefenses\Verb_ShootRecoiled.cs" />
-    <Compile Include="CustomFeatures\Misc\Mote_CannonPlume.cs" />
+    <Compile Include="CustomFeatures\Misc\Motes\Mote_CannonPlume.cs" />
     <Compile Include="Gizmo\Command_VerbWorldTarget.cs" />
     <Compile Include="Harmony\PatchCategories\DefGenerators\PawnKindDefGenerator_Vehicles.cs" />
     <Compile Include="Harmony\StartupTesting.cs" />
@@ -261,7 +276,6 @@
     <Compile Include="Misc\DefModExtension\SpawnerPropertiesDefModExtension.cs" />
     <Compile Include="Misc\DefModExtension\VehicleDamageMultiplierDefModExtension.cs" />
     <Compile Include="Misc\DefOf\DesignationDefOf_Vehicles.cs" />
-    <Compile Include="Misc\DefOf\ProjectileSkyfallerDefOf.cs" />
     <Compile Include="Misc\DefOf\VehicleClamorDefOf.cs" />
     <Compile Include="Misc\DefOf\VehicleEventDefOf.cs" />
     <Compile Include="Misc\Enums\Turret\TurretDisableType.cs" />
@@ -388,9 +402,10 @@
     <Compile Include="Utility\Extensions\Ext_Settings.cs" />
     <Compile Include="Utility\Extensions\Ext_Vehicles.cs" />
     <Compile Include="Utility\Helpers\AchievementsHelper.cs" />
-    <Compile Include="Utility\Helpers\AerialVehicleAbandonOrBanishHelper.cs" />
-    <Compile Include="Utility\Helpers\AerialVehicleTabHelper.cs" />
-    <Compile Include="Utility\Helpers\AerialVehicleTraderHelper.cs" />
+    <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleAbandonOrBanishHelper.cs" />
+    <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleLaunchHelper.cs" />
+    <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleTabHelper.cs" />
+    <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleTraderHelper.cs" />
     <Compile Include="Utility\Helpers\CaravanHelper.cs" />
     <Compile Include="Utility\Helpers\CaravanInfoHelper.cs" />
     <Compile Include="Utility\Helpers\DamageHelper.cs" />
@@ -477,7 +492,7 @@
     <Compile Include="AI\WorkGiver\WorkGiver_PackVehicle.cs" />
     <Compile Include="Turrets\Turret\VehicleTurretDef.cs" />
     <Compile Include="Turrets\Turret\VehicleTurret.cs" />
-    <Compile Include="CustomFeatures\AerialLaunch\Targeters\TurretTargeter.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Targeters\TurretTargeter.cs" />
     <Compile Include="Gizmo\Command_CooldownAction.cs" />
     <Compile Include="Gizmo\Command_TargeterCooldownAction.cs" />
     <Compile Include="Turrets\Components\FireMode.cs" />
@@ -533,7 +548,7 @@
     <Compile Include="Pathing\World\WorldVehiclePathGrid.cs" />
     <Compile Include="Pathing\World\WorldVehicleReachability.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_AssignSeats.cs" />
-    <Compile Include="Graphics\Dialogs\Dialog_DockBoat.cs" />
+    <Compile Include="Graphics\Dialogs\Dialog_StashVehicle.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_FormVehicleCaravan.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_GiveVehicleName.cs" />
     <Compile Include="Utility\VehicleInfoCard.cs" />
@@ -549,8 +564,8 @@
     <Compile Include="Graphics\Textures\VehicleTex.cs" />
     <Compile Include="Graphics\Misc\TransferableVehicleWidget.cs" />
     <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgrade.cs" />
-    <Compile Include="World\Caravan\CaravanArrivalAction_DockedBoats.cs" />
-    <Compile Include="World\WorldObjects\DockedBoat.cs" />
+    <Compile Include="World\Caravan\CaravanArrivalAction_StashedVehicle.cs" />
+    <Compile Include="World\WorldObjects\StashedVehicle.cs" />
     <Compile Include="World\Caravan\EnterMapUtilityVehicles.cs" />
     <Compile Include="Misc\DefOf\WorldObjectDefOfVehicles.cs" />
     <Compile Include="World\WorldObjectComps\AirDefense.cs" />
@@ -558,7 +573,7 @@
   <ItemGroup>
     <Folder Include="AI\Designators\" />
     <Folder Include="Comps\Fishing\" />
-    <Folder Include="CustomFeatures\AerialLaunch\Skyfaller\Bombs\" />
+    <Folder Include="CustomFeatures\AerialVehicles\Skyfaller\Bombs\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AchievementsExpanded">
@@ -569,9 +584,6 @@
     </PackageReference>
     <PackageReference Include="Lib.Harmony">
       <Version>2.2.2</Version>
-    </PackageReference>
-    <PackageReference Include="UpdateLog">
-      <Version>1.4.1352</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

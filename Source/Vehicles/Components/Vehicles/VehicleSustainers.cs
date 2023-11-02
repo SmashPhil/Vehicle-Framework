@@ -10,12 +10,11 @@ namespace Vehicles
 	public class VehicleSustainers
 	{
 		private VehiclePawn vehicle;
-		private List<Sustainer> activeSustainers;
+		private List<Sustainer> activeSustainers = new List<Sustainer>();
 
 		public VehicleSustainers(VehiclePawn vehicle)
 		{
 			this.vehicle = vehicle;
-			activeSustainers = new List<Sustainer>();
 		}
 
 		public void Spawn(ISustainerTarget sustainerTarget, SoundDef soundDef)

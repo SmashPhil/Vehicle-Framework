@@ -206,7 +206,7 @@ namespace Vehicles
 		{
 			if (___pawn is VehiclePawn vehicle)
 			{
-				vehicle.vPather.StartPath(dest, peMode);
+				vehicle.vehiclePather.StartPath(dest, peMode);
 				return false;
 			}
 			return true;

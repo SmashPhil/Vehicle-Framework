@@ -89,9 +89,9 @@ namespace Vehicles
 				{
 					return false;
 				}
-				if (vehicle.vPather.Moving)
+				if (vehicle.vehiclePather.Moving)
 				{
-					if (vehicle.vPather.curPath == null || vehicle.vPather.curPath.NodesLeftCount < 1)
+					if (vehicle.vehiclePather.curPath == null || vehicle.vehiclePather.curPath.NodesLeftCount < 1)
 					{
 						return false;
 					}
@@ -114,7 +114,7 @@ namespace Vehicles
 				return;
 			}
 			float num = 20f * Find.ColonistBar.Scale;
-			Vector2 vector = new Vector2(rect.x + 1f, rect.yMax - num - 1f);
+			Vector2 vector = new Vector2(rect.xMax - num - 1f, rect.yMax - num - 1f);
 
 			Rect rect2 = new Rect(vector.x, vector.y, num, num);
 			GUI.DrawTexture(rect2, VehicleTex.CachedTextureIcons[handler.vehicle.VehicleDef]);

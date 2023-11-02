@@ -9,19 +9,25 @@ using SmashTools;
 
 namespace Vehicles
 {
-	//[StaticConstructorOnStartup]
 	internal static class FishingCompatibility
 	{
-		public static Dictionary<ThingDef, int> fishDictionaryTemperateBiomeFreshWater = new Dictionary<ThingDef, int>();
-		public static Dictionary<ThingDef, int> fishDictionaryTropicalBiomeFreshWater = new Dictionary<ThingDef, int>();
-		public static Dictionary<ThingDef, int> fishDictionaryColdBiomeFreshWater = new Dictionary<ThingDef, int>();
-		public static Dictionary<ThingDef, int> fishDictionarySaltWater = new Dictionary<ThingDef, int>();
-		
+		private static List<ThingDef> tmpFishes = new List<ThingDef>();
+
 		public static bool Active { get; private set; }
 
-		static FishingCompatibility()
+		internal static void EnableFishing()
 		{
+			Active = true;
 
+			foreach (ThingDef thingDef in DefDatabase<ThingDef>.AllDefsListForReading.Where(thingDef => thingDef.ingestible != null))
+			{
+				tmpFishes.Add(thingDef);
+			}
+		}
+
+		internal static ThingDef FetchViableFish(BiomeDef biomeDef, TerrainDef terrainDef)
+		{
+			return tmpFishes.RandomElement();
 		}
 	}
 }

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<Vehicles.AirdropDef Name = "AerialVehicleAirdrop" ParentName = "SkyfallerBase" Abstract = "True">
+		<thingClass>Vehicles.AirdropSkyfaller</thingClass>
+		<seeThroughFog>true</seeThroughFog>
+		
+		<skyfaller>
+			<movementType>ConstantSpeed</movementType>
+			<shadow>Things/Skyfaller/SkyfallerShadowDropPod</shadow>
+			<shadowSize>(2, 2)</shadowSize>
+			<motesPerCell>1</motesPerCell>
+			<speed>0.1</speed>
+		</skyfaller>
+		
+		<parachuteGraphicData>
+			<texPath>Graphics/Parachute/Parachute</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+			<shaderType>Cutout</shaderType>
+			<color>(90, 110, 90)</color>
+			<drawSize>(5, 5)</drawSize>
+			<drawOffset>(0, 0, 5)</drawOffset>
+		</parachuteGraphicData>
+	</Vehicles.AirdropDef>
+	
+	<Vehicles.AirdropDef ParentName="AerialVehicleAirdrop">
+		<defName>AirdropPackage</defName>
+		<label>Airdrop</label>
+		
+		<skyfaller>
+			<ticksToImpactRange>1200~1400</ticksToImpactRange>
+			<impactSound>DropPod_Impact</impactSound>
+		</skyfaller>
+		
+		<ropes>
+			<!-- paracords --> 
+			<li>
+				<from>(-2.4, 5)</from>
+				<to>(0, 0.65)</to>
+				<layer>1</layer>
+			</li>
+			<li>
+				<from>(2.4, 5)</from>
+				<to>(0, 0.65)</to>
+				<layer>1</layer>
+			</li>
+			<li>
+				<from>(-1.64, 6)</from>
+				<to>(0, 0.65)</to>
+				<layer>1</layer>
+			</li>
+			<li>
+				<from>(1.64, 6)</from>
+				<to>(0, 0.65)</to>
+				<layer>1</layer>
+			</li>
+			<li>
+				<from>(-0.68, 6)</from>
+				<to>(0, 0.65)</to>
+				<layer>1</layer>
+			</li>
+			<li>
+				<from>(0.68, 6)</from>
+				<to>(0, 0.65)</to>
+				<layer>1</layer>
+			</li>
+			<!-- harness -->
+			<li>
+				<from>(0, 0.65)</from>
+				<to>(-0.4, 0)</to>
+				<layer>1</layer>
+			</li>
+			<li>
+				<from>(0, 0.65)</from>
+				<to>(0.4, 0)</to>
+				<layer>1</layer>
+			</li>
+			<li>
+				<from>(0, 0.65)</from>
+				<to>(-0.4, 0.35)</to>
+				<layer>1</layer>
+			</li>
+			<li>
+				<from>(0, 0.65)</from>
+				<to>(0.4, 0.35)</to>
+				<layer>1</layer>
+			</li>
+		</ropes>
+	</Vehicles.AirdropDef>
+	
+	<Vehicles.AirdropDef ParentName="AerialVehicleAirdrop">
+		<defName>AirdropParatrooper</defName>
+		<label>Paratrooper</label>
+		
+		<skyfaller>
+			<ticksToImpactRange>1200~1400</ticksToImpactRange>
+			<impactSound>Longjump_Land</impactSound>
+		</skyfaller>
+		
+		<ropes>
+			<!-- paracords --> 
+			<li>
+				<from>(-2.4, 5)</from>
+				<to>(0, 0)</to>
+				<layer>-1</layer>
+			</li>
+			<li>
+				<from>(2.4, 5)</from>
+				<to>(0, 0)</to>
+				<layer>-1</layer>
+			</li>
+			<li>
+				<from>(-1.64, 6)</from>
+				<to>(0, 0)</to>
+				<layer>-1</layer>
+			</li>
+			<li>
+				<from>(1.64, 6)</from>
+				<to>(0, 0)</to>
+				<layer>-1</layer>
+			</li>
+			<li>
+				<from>(-0.68, 6)</from>
+				<to>(0, 0)</to>
+				<layer>-1</layer>
+			</li>
+			<li>
+				<from>(0.68, 6)</from>
+				<to>(0, 0)</to>
+				<layer>-1</layer>
+			</li>
+		</ropes>
+	</Vehicles.AirdropDef>
+</Defs>

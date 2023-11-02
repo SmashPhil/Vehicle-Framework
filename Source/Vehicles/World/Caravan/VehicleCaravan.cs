@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -13,26 +14,39 @@ namespace Vehicles
 	public class VehicleCaravan : Caravan, IVehicleWorldObject
 	{
 		private static readonly Texture2D SplitCommand = ContentFinder<Texture2D>.Get("UI/Commands/SplitCaravan", true);
+		private static readonly Dictionary<VehicleDef, int> vehicleCounts = new Dictionary<VehicleDef, int>();
 
 		private static MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock();
 		private static Dictionary<ThingDef, Material> materials = new Dictionary<ThingDef, Material>();
 
+		[Obsolete("Renamed to vehiclePather, will be removed in 1.5")]
 		public VehicleCaravan_PathFollower vPather;
-		public VehicleCaravan_Tweener vTweener;
+
+		public VehicleCaravan_PathFollower vehiclePather;
+		public VehicleCaravan_Tweener vehicleTweener;
 
 		private VehiclePawn leadVehicle;
+		private bool initialized;
 
 		private List<VehiclePawn> vehicles = new List<VehiclePawn>();
 
 		public VehicleCaravan() : base()
 		{
-			vPather = new VehicleCaravan_PathFollower(this);
-			vTweener = new VehicleCaravan_Tweener(this);
+			vehiclePather = new VehicleCaravan_PathFollower(this);
+			vehicleTweener = new VehicleCaravan_Tweener(this);
+
+#pragma warning disable 0618
+			vPather = vehiclePather;
+#pragma warning restore 0618
 		}
 
-		public override Vector3 DrawPos => vTweener.TweenedPos;
+		public override Vector3 DrawPos => vehicleTweener.TweenedPos;
 
 		public bool CanDismount => true;
+
+		public bool AerialVehicle => vehicles.Count == 1 && vehicles.FirstOrDefault().VehicleDef.vehicleType == VehicleType.Air;
+
+		public bool CanCaravan => vehicles.Count == 1 && !vehicles.FirstOrDefault().VehicleDef.canCaravan;
 
 		public IEnumerable<VehiclePawn> Vehicles => vehicles;
 
@@ -56,7 +70,7 @@ namespace Vehicles
 			{
 				if (leadVehicle is null)
 				{
-					leadVehicle = PawnsListForReading.First(v => v is VehiclePawn) as VehiclePawn;
+					leadVehicle = PawnsListForReading.FirstOrDefault(v => v is VehiclePawn) as VehiclePawn;
 				}
 				return leadVehicle;
 			}
@@ -66,14 +80,33 @@ namespace Vehicles
 		{
 			get
 			{
-				VehicleDef leadVehicleDef = (PawnsListForReading.First(v => v is VehiclePawn) as VehiclePawn).VehicleDef;
+				VehicleDef leadVehicleDef = LeadVehicle?.VehicleDef;
+				if (leadVehicleDef is null)
+				{
+					return null;
+				}
 				if (!materials.ContainsKey(leadVehicleDef))
 				{
-					var texture = VehicleTex.CachedTextureIcons[leadVehicleDef];
-					var material = MaterialPool.MatFrom(texture, ShaderDatabase.WorldOverlayTransparentLit, Color.white, WorldMaterials.WorldObjectRenderQueue);
+					Texture2D texture = VehicleTex.CachedTextureIcons[leadVehicleDef];
+					Material material = MaterialPool.MatFrom(texture, ShaderDatabase.WorldOverlayTransparentLit, Color.white, WorldMaterials.WorldObjectRenderQueue);
 					materials.Add(leadVehicleDef, material);
 				}
 				return materials[leadVehicleDef];
+			}
+		}
+
+		public bool CanLaunch
+		{
+			get
+			{
+				foreach (VehiclePawn vehicle in vehicles)
+				{
+					if (vehicle.CompVehicleLauncher == null)
+					{
+						return false;
+					}
+				}
+				return true;
 			}
 		}
 
@@ -81,7 +114,7 @@ namespace Vehicles
 		{
 			get
 			{
-				foreach (VehiclePawn vehicle in Vehicles)
+				foreach (VehiclePawn vehicle in vehicles)
 				{
 					if (vehicle.CompFueledTravel != null && vehicle.CompFueledTravel.Fuel <= 0)
 					{
@@ -119,10 +152,10 @@ namespace Vehicles
 				Color color = Material.color;
 				float num = 1f - transitionPct;
 				propertyBlock.SetColor(ShaderPropertyIDs.Color, new Color(color.r, color.g, color.b, color.a * num));
-				DrawQuadTangentialToPlanet(DrawPos, 0.7f * averageTileSize, 0.015f, Material, false, false, propertyBlock);
+				WorldHelper.DrawQuadTangentialToPlanet(DrawPos, 0.7f * averageTileSize, 0.015f, Material, propertyBlock: propertyBlock);
 				return;
 			}
-			DrawQuadTangentialToPlanet(DrawPos, 0.7f * averageTileSize, 0.015f, Material, false, false, null);
+			WorldHelper.DrawQuadTangentialToPlanet(DrawPos, 0.7f * averageTileSize, 0.015f, Material);
 		}
 
 		public void DrawQuadTangentialToPlanet(Vector3 pos, float size, float altOffset, Material material, bool counterClockwise = false, bool useSkyboxLayer = false, MaterialPropertyBlock propertyBlock = null)
@@ -200,10 +233,91 @@ namespace Vehicles
 		{
 			foreach (Gizmo gizmo in base.GetGizmos())
 			{
-				//Only pull non-devmode gizmos
-				if (!DebugSettings.ShowDevGizmos || !(gizmo is Command command) || command.icon)
+				if (gizmo is Command command && command.icon == null)
 				{
-					yield return gizmo;
+					continue; //skip all vanilla caravan devmode commands
+				}
+				yield return gizmo;
+			}
+
+			if (IsPlayerControlled)
+			{
+				if (AerialVehicle)
+				{
+					VehiclePawn vehicle = vehicles.FirstOrDefault();
+					Command_Action launchCommand = new Command_Action()
+					{
+						defaultLabel = "CommandLaunchGroup".Translate(),
+						defaultDesc = "CommandLaunchGroupDesc".Translate(),
+						icon = VehicleTex.LaunchCommandTex,
+						alsoClickIfOtherInGroupClicked = false,
+						action = delegate ()
+						{
+							LaunchTargeter.BeginTargeting(vehicle, (GlobalTargetInfo target, float fuelCost) => AerialVehicleLaunchHelper.ChoseTargetOnMap(vehicle, Tile, target, fuelCost), Tile, 
+								true, VehicleTex.TargeterMouseAttachment, closeWorldTabWhenFinished: false, onUpdate: null,
+								extraLabelGetter: (GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, Tile, path, fuelCost));
+						}
+					};
+					if (!vehicle.CompVehicleLauncher.CanLaunchWithCargoCapacity(out string disableReason))
+					{
+						launchCommand.disabled = true;
+						launchCommand.disabledReason = disableReason;
+					}
+					yield return launchCommand;
+				}
+				if (vehiclePather.Moving)
+				{
+					yield return new Command_Toggle
+					{
+						hotKey = KeyBindingDefOf.Misc1,
+						isActive = (() => vehiclePather.Paused),
+						toggleAction = delegate()
+						{
+							if (!vehiclePather.Moving)
+							{
+								return;
+							}
+							vehiclePather.Paused = !vehiclePather.Paused;
+						},
+						defaultDesc = "CommandToggleCaravanPauseDesc".Translate(2f.ToString("0.#"), 0.3f.ToStringPercent()),
+						icon = TexCommand.PauseCaravan,
+						defaultLabel = "CommandPauseCaravan".Translate()
+					};
+				}
+				else
+				{
+					//TODO - Disabled as of 1.5.1425, needs bugfixing
+					//Command_Action disembark = new Command_Action();
+					//disembark.icon = VehicleTex.Anchor;
+					//disembark.defaultLabel = "VF_CommandDisembark".Translate(); //settlement != null ? "VF_CommandDockShip".Translate() : "VF_CommandDockShipDisembark".Translate();
+					//disembark.defaultDesc = "VF_CommandDisembarkDesc".Translate(); //settlement != null ? "VF_CommandDockShipDesc".Translate(settlement) : "VF_CommandDockShipObjectDesc".Translate();
+					//disembark.action = delegate ()
+					//{
+					//	CaravanHelper.StashVehicles(this);
+					//};
+					//yield return disembark;
+
+					//Settlement settlement = Find.WorldObjects.SettlementBaseAt(Tile);
+
+					//if (Find.World.Impassable(Tile))
+					//{
+					//	disembark.Disable("VF_CommandDisembarkImpassableBiome".Translate());
+					//}
+					//if (settlement != null)
+					//{
+					//	disembark.Disable("CommandSettleFailAlreadyHaveBase".Translate());
+					//}
+				}
+				foreach (Gizmo gizmo2 in forage.GetGizmos())
+				{
+					yield return gizmo2;
+				}
+				foreach (WorldObject worldObject in Find.WorldObjects.ObjectsAt(Tile))
+				{
+					foreach (Gizmo gizmo3 in worldObject.GetCaravanGizmos(this))
+					{
+						yield return gizmo3;
+					}
 				}
 			}
 
@@ -218,101 +332,30 @@ namespace Vehicles
 				}
 			}
 
-			if (IsPlayerControlled)
-			{
-				if (vPather.Moving)
-				{
-					yield return new Command_Toggle
-					{
-						hotKey = KeyBindingDefOf.Misc1,
-						isActive = (() => vPather.Paused),
-						toggleAction = delegate()
-						{
-							if (!vPather.Moving)
-							{
-								return;
-							}
-							vPather.Paused = !vPather.Paused;
-						},
-						defaultDesc = "CommandToggleCaravanPauseDesc".Translate(2f.ToString("0.#"), 0.3f.ToStringPercent()),
-						icon = TexCommand.PauseCaravan,
-						defaultLabel = "CommandPauseCaravan".Translate()
-					};
-				}
-				if (CaravanMergeUtility.ShouldShowMergeCommand)
-				{
-					yield return CaravanMergeUtility.MergeCommand(this);
-				}
-				foreach (Gizmo gizmo2 in forage.GetGizmos())
-				{
-					yield return gizmo2;
-				}
-
-				foreach (WorldObject worldObject in Find.WorldObjects.ObjectsAt(base.Tile))
-				{
-					foreach (Gizmo gizmo3 in worldObject.GetCaravanGizmos(this))
-					{
-						yield return gizmo3;
-					}
-				}
-			}
-			if (Prefs.DevMode && DebugSettings.godMode)
+			if (DebugSettings.ShowDevGizmos)
 			{
 				yield return new Command_Action
 				{
 					defaultLabel = "Vehicle Dev: Teleport to destination",
-					action = delegate()
+					action = delegate ()
 					{
-						Tile = vPather.Destination;
-						vPather.StopDead();
+						Tile = vehiclePather.Destination;
+						vehiclePather.StopDead();
 					}
 				};
-			}
-			if (this.HasBoat() && (Find.World.CoastDirectionAt(Tile).IsValid || WorldHelper.RiverIsValid(Tile, PawnsListForReading.Where(p => p.IsBoat()).ToList())))
-			{
-				if(!vPather.Moving && !PawnsListForReading.NotNullAndAny(p => !p.IsBoat()))
-				{
-					Command_Action dock = new Command_Action();
-					dock.icon = VehicleTex.Anchor;
-					dock.defaultLabel = Find.WorldObjects.AnySettlementBaseAt(Tile) ? "VF_CommandDockShip".Translate() : "VF_CommandDockShipDisembark".Translate();
-					dock.defaultDesc = Find.WorldObjects.AnySettlementBaseAt(Tile) ? "VF_CommandDockShipDesc".Translate(Find.WorldObjects.SettlementBaseAt(Tile)) : "VF_CommandDockShipObjectDesc".Translate();
-					dock.action = delegate ()
-					{
-						List<WorldObject> objects = Find.WorldObjects.ObjectsAt(Tile).ToList();
-						if (!objects.All(x => x is Caravan))
-						{
-							CaravanHelper.ToggleDocking(this, true);
-						}
-						else
-						{
-							CaravanHelper.SpawnDockedBoatObject(this);
-						}
-					};
-
-					yield return dock;
-				}
-				else if (!vPather.Moving && PawnsListForReading.NotNullAndAny(p => !p.IsBoat()))
-				{
-					Command_Action undock = new Command_Action
-					{
-						icon = VehicleTex.UnloadAll,
-						defaultLabel = "VF_CommandUndockShip".Translate(),
-						defaultDesc = "VF_CommandUndockShipDesc".Translate(Label),
-						action = delegate ()
-						{
-							CaravanHelper.ToggleDocking(this, false);
-						}
-					};
-
-					yield return undock;
-				}
 			}
 		}
 
 		public void Notify_VehicleTeleported()
 		{
-			vTweener.ResetTweenedPosToRoot();
-			vPather.Notify_Teleported_Int();
+			vehicleTweener.ResetTweenedPosToRoot();
+			vehiclePather.Notify_Teleported_Int();
+		}
+
+		public override void Notify_Merged(List<Caravan> group)
+		{
+			base.Notify_Merged(group);
+			RecacheVehicles();
 		}
 
 		public override void Notify_MemberDied(Pawn member)
@@ -341,6 +384,33 @@ namespace Vehicles
 		public void RecacheVehicles()
 		{
 			vehicles = pawns.InnerListForReading.Where(pawn => pawn is VehiclePawn).Cast<VehiclePawn>().ToList();
+			leadVehicle = null;
+			ValidateCaravanType();
+		}
+
+		public virtual void PostInit()
+		{
+			initialized = true;
+			RecacheVehicles();
+			ValidateCaravanType();
+		}
+
+		/// <summary>
+		/// Convert to vanilla caravan if no vehicles exist in VehicleCaravan
+		/// </summary>
+		private void ValidateCaravanType()
+		{
+			if (initialized && vehicles.NullOrEmpty())
+			{
+				Debug.Message($"VehicleCaravan {this} has no more vehicles. Converting to normal caravan. Pawns={string.Join($", ", pawns.InnerListForReading.Select(pawn => pawn.Label))}");
+				List<Pawn> pawnsToTransfer = pawns.InnerListForReading.ToList();
+				RemoveAllPawns();
+				Caravan caravan = CaravanMaker.MakeCaravan(pawnsToTransfer, Faction, Tile, true);
+				if (!Destroyed)
+				{
+					Destroy();
+				}
+			}
 		}
 		
 		public override string GetInspectString()
@@ -367,23 +437,26 @@ namespace Vehicles
 
 			if (vehicles >= 1)
 			{
-				Dictionary<VehicleDef, int> vehicleCounts = new Dictionary<VehicleDef, int>();
-				foreach (VehiclePawn vehicle in Vehicles)
+				vehicleCounts.Clear();
 				{
-					if (vehicleCounts.ContainsKey(vehicle.VehicleDef))
+					foreach (VehiclePawn vehicle in Vehicles)
 					{
-						vehicleCounts[vehicle.VehicleDef]++;
+						if (vehicleCounts.ContainsKey(vehicle.VehicleDef))
+						{
+							vehicleCounts[vehicle.VehicleDef]++;
+						}
+						else
+						{
+							vehicleCounts[vehicle.VehicleDef] = 1;
+						}
 					}
-					else
-					{
-						vehicleCounts[vehicle.VehicleDef] = 1;
-					}
-				}
 
-				foreach ((VehicleDef def, int count) in vehicleCounts)
-				{
-					stringBuilder.Append($"{count} {def.LabelCap}, ");
+					foreach ((VehicleDef def, int count) in vehicleCounts)
+					{
+						stringBuilder.Append($"{count} {def.LabelCap}, ");
+					}
 				}
+				vehicleCounts.Clear();
 			}
 			stringBuilder.Append("CaravanColonistsCount".Translate(colonists, (colonists != 1) ? Faction.OfPlayer.def.pawnsPlural : Faction.OfPlayer.def.pawnSingular));
 			if (animals == 1)
@@ -427,11 +500,11 @@ namespace Vehicles
 				stringBuilder.AppendLine();
 			}
 
-			if (vPather.Moving)
+			if (vehiclePather.Moving)
 			{
-				if (vPather.ArrivalAction != null)
+				if (vehiclePather.ArrivalAction != null)
 				{
-					stringBuilder.Append(vPather.ArrivalAction.ReportString);
+					stringBuilder.Append(vehiclePather.ArrivalAction.ReportString);
 				}
 				else if (this.HasBoat())
 				{
@@ -454,7 +527,7 @@ namespace Vehicles
 					stringBuilder.Append("CaravanWaiting".Translate());
 				}
 			}
-			if (vPather.Moving)
+			if (vehiclePather.Moving)
 			{
 				float estimatedDaysToArrive = VehicleCaravanPathingHelper.EstimatedTicksToArrive(this, true) / 60000f;
 				stringBuilder.AppendLine();
@@ -486,7 +559,7 @@ namespace Vehicles
 					stringBuilder.Append(".");
 				}
 			}
-			if (!vPather.MovingNow)
+			if (!vehiclePather.MovingNow)
 			{
 				int usedBedCount = beds.GetUsedBedCount();
 				stringBuilder.AppendLine();
@@ -512,37 +585,44 @@ namespace Vehicles
 
 		public override void DrawExtraSelectionOverlays()
 		{
-			if (IsPlayerControlled && vPather.curPath != null)
+			if (IsPlayerControlled && vehiclePather.curPath != null)
 			{
-				vPather.curPath.DrawPath(this);
+				vehiclePather.curPath.DrawPath(this);
 			}
 			gotoMote.RenderMote();
 		}
 
-		public override void PostRemove()
+		public void TrySatisfyPawnsNeeds()
 		{
-			base.PostRemove();
-			vPather.StopDead();
+			for (int i = pawns.Count - 1; i >= 0; i--)
+			{
+				Pawn pawn = pawns[i];
+				if (pawn is VehiclePawn vehicle)
+				{
+					vehicle.TrySatisfyPawnNeeds();
+				}
+				else
+				{
+
+				}
+			}
 		}
 
-		public override void SpawnSetup()
+		private void TrySatisfyPawnNeeds(Pawn pawn)
 		{
-			base.SpawnSetup();
-			vTweener.ResetTweenedPosToRoot();
-
-			//Necessary check for post load, otherwise registry will be null until spawned on map
-			foreach (VehiclePawn vehicle in Vehicles)
+			if (pawn.Dead)
 			{
-				vehicle.RegisterEvents();
+				return;
 			}
+			VehiclePawn.TrySatisfyPawnNeeds(pawn);
 		}
 
 		public override void Tick()
 		{
 			base.Tick();
-			vPather.PatherTick();
-			vTweener.TweenerTick();
-			if (vPather.MovingNow)
+			vehiclePather.PatherTick();
+
+			if (vehiclePather.MovingNow)
 			{
 				foreach (VehiclePawn vehicle in vehicles)
 				{
@@ -551,14 +631,36 @@ namespace Vehicles
 			}
 		}
 
+		public override void PostRemove()
+		{
+			base.PostRemove();
+			vehiclePather.StopDead();
+		}
+
+		public override void SpawnSetup()
+		{
+			base.SpawnSetup();
+			RecacheVehicles();
+			vehicleTweener.ResetTweenedPosToRoot();
+			
+			//Necessary check for post load, otherwise registry will be null until spawned on map
+			foreach (VehiclePawn vehicle in vehicles)
+			{
+				vehicle.RegisterEvents();
+			}
+		}
+
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Deep.Look(ref vPather, "vehiclePather", new object[] { this });
+			Scribe_Deep.Look(ref vehiclePather, nameof(vehiclePather), new object[] { this });
 
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
-				vehicles = pawns.InnerListForReading.Where(pawn => pawn is VehiclePawn).Cast<VehiclePawn>().ToList();
+				initialized = true;
+#pragma warning disable 0618
+				vPather = vehiclePather; //Share reference until mods switch over to new name
+#pragma warning restore 0618
 			}
 		}
 	}

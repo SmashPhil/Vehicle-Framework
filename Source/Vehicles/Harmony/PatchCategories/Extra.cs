@@ -225,11 +225,5 @@ namespace Vehicles
                 __result = true;
             }
         }
-
-		[DebugAction(VehicleHarmony.VehiclesLabel, "Kill Someone", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.PlayingOnMap)]
-        public static void KillPawn()
-        {
-			Find.CurrentMap.mapPawns.FreeColonists.RandomElement().Kill(null);
-        }
 	}
 }

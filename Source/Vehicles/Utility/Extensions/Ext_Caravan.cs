@@ -86,5 +86,29 @@ namespace Vehicles
 			}
 			return vehicles;
 		}
+
+		public static void TransferPawnOrItem(this Caravan caravan, ThingOwner owner, Thing thing)
+		{
+			if (thing is Pawn)
+			{
+				owner.TryTransferToContainer(thing, caravan.pawns, canMergeWithExistingStacks: false);
+			}
+			else
+			{
+				Pawn giveToPawn = CaravanInventoryUtility.FindPawnToMoveInventoryTo(thing, caravan.PawnsListForReading, null);
+				if (giveToPawn == null)
+				{
+					Log.Error($"Failed to give item {thing} to caravan {caravan}; item was lost.");
+					thing.Destroy(DestroyMode.Vanish);
+					return;
+				}
+				if (!giveToPawn.inventory.innerContainer.TryAddOrTransfer(thing))
+				{
+					Log.Error($"Failed to give item {thing} to caravan {caravan}; item was lost");
+					thing.Destroy(DestroyMode.Vanish);
+					return;
+				}
+			}
+		}
 	}
 }

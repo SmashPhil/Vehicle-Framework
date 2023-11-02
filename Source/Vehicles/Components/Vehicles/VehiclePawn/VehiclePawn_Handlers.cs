@@ -340,6 +340,14 @@ namespace Vehicles
 			EventRegistry[VehicleEventDefOf.PawnEntered].ExecuteEvents();
 		}
 
+		public void RemoveAllPawns()
+		{
+			foreach (Pawn pawn in AllPawnsAboard.ToList())
+			{
+				RemovePawn(pawn);
+			}
+		}
+
 		public void RemovePawn(Pawn pawn)
 		{
 			for (int i = 0; i < handlers.Count; i++)
@@ -391,7 +399,7 @@ namespace Vehicles
 
 		public void DisembarkAll()
 		{
-			var pawnsToDisembark = new List<Pawn>(AllPawnsAboard);
+			List<Pawn> pawnsToDisembark = new List<Pawn>(AllPawnsAboard);
 			if (!(pawnsToDisembark is null) && pawnsToDisembark.Count > 0)
 			{
 				if (this.GetCaravan() != null && !Spawned)
@@ -404,9 +412,9 @@ namespace Vehicles
 					}
 					return;
 				}
-				foreach (Pawn p in pawnsToDisembark)
+				foreach (Pawn pawn in pawnsToDisembark)
 				{
-					DisembarkPawn(p);
+					DisembarkPawn(pawn);
 				}
 			}
 		}
@@ -420,36 +428,51 @@ namespace Vehicles
 			}
 		}
 
-		private void TrySatisfyPawnNeeds()
+		public void TrySatisfyPawnNeeds()
 		{
 			if ((Spawned || this.IsCaravanMember()) && AllPawnsAboard.Count > 0)
 			{
 				//Not utilizing AllPawnsAboard since VehicleHandler is needed for checks further down the call stack
-				for (int i = 0; i < OccupiedHandlers.Count; i++)
+				for (int i = AllPawnsAboard.Count - 1; i >= 0; i--)
 				{
-					VehicleHandler handler = OccupiedHandlers[i];
-					for (int h = 0; h < handler.handlers.Count; h++)
-					{
-						Pawn pawn = handler.handlers[h];
-						TrySatisfyPawnNeeds(handler, pawn);
-					}
+					Pawn pawn = AllPawnsAboard[i];
+					TrySatisfyPawnNeeds(pawn);
 				}
 			}
 		}
 
-		private void TrySatisfyPawnNeeds(VehicleHandler handler, Pawn pawn)
+		public static void TrySatisfyPawnNeeds(Pawn pawn)
 		{
 			if (pawn.Dead) return;
-			List<Need> allNeeds = pawn.needs.AllNeeds;
-			int tile = this.IsCaravanMember() ? this.GetCaravan().Tile : Map.Tile;
 
+			List<Need> allNeeds = pawn.needs.AllNeeds;
+			VehicleHandler handler = pawn.ParentHolder as VehicleHandler;
+			int tile;
+			VehicleCaravan vehicleCaravan = pawn.GetVehicleCaravan();
+			if (vehicleCaravan != null)
+			{
+				tile = vehicleCaravan.Tile;
+			}
+			else if (handler != null)
+			{
+				tile = handler.vehicle.Map.Tile;
+			}
+			else if (pawn.Spawned)
+			{
+				tile = pawn.Map.Tile;
+			}
+			else
+			{
+				Log.Error($"Trying to satisfy pawn needs but pawn is not part of VehicleCaravan, vehicle crew, or spawned.");
+				return;
+			}
 			for (int i = 0; i < allNeeds.Count; i++)
 			{
 				Need need = allNeeds[i];
 				switch (need)
 				{
 					case Need_Rest _:
-						if (CaravanNightRestUtility.RestingNowAt(tile))
+						if (CaravanNightRestUtility.RestingNowAt(tile) || (vehicleCaravan != null && !vehicleCaravan.vehiclePather.MovingNow))
 						{
 							TrySatisfyRest(handler, pawn, need as Need_Rest);
 						}
@@ -483,24 +506,41 @@ namespace Vehicles
 						break;
 				}
 			}
+			if (ModsConfig.BiotechActive && pawn.genes != null)
+			{
+				Gene_Hemogen firstGeneOfType = pawn.genes.GetFirstGeneOfType<Gene_Hemogen>();
+				if (firstGeneOfType != null)
+				{
+					TrySatisfyHemogenNeed(handler, pawn, firstGeneOfType);
+				}
+			}
+			Pawn_PsychicEntropyTracker psychicEntropy = pawn.psychicEntropy;
+			if (psychicEntropy?.Psylink != null)
+			{
+				TryGainPsyfocus(handler, pawn, psychicEntropy);
+			}
 		}
 
-		private void TrySatisfyRest(VehicleHandler handler, Pawn pawn, Need_Rest rest)
+		private static void TrySatisfyRest(VehicleHandler handler, Pawn pawn, Need_Rest rest)
 		{
-			bool cantRestWhileMoving = handler.RequiredForMovement && VehicleDef.navigationCategory <= NavigationCategory.Opportunistic;
-			
+			bool cantRestWhileMoving = false;
+			VehiclePawn vehicle = handler?.vehicle;
+			if (handler != null)
+			{
+				cantRestWhileMoving = handler.RequiredForMovement && vehicle.VehicleDef.navigationCategory <= NavigationCategory.Opportunistic;
+			}
 			//Handler not required for movement OR Not Moving (Local) OR Not Moving (World)
-			if (!cantRestWhileMoving || (Spawned && !vPather.Moving) || (this.GetVehicleCaravan() is VehicleCaravan vehicleCaravan && !vehicleCaravan.vPather.Moving))
+			if (!cantRestWhileMoving || (vehicle != null && vehicle.Spawned && !vehicle.vehiclePather.Moving) || (pawn.GetVehicleCaravan() is VehicleCaravan vehicleCaravan && !vehicleCaravan.vehiclePather.MovingNow))
 			{
 				float restValue = StatDefOf.BedRestEffectiveness.valueIfMissing; //TODO - add rest modifier for vehicles
 				rest.TickResting(restValue);
 			}
 		}
 
-		private void TrySatisfyFood(VehicleHandler handler, Pawn pawn, Need_Food food)
+		//REDO - Incorporate ChildCare from Biotech (ie. like Caravan_NeedsTracker.TrySatisfyFoodNeed)
+		private static void TrySatisfyFood(VehicleHandler handler, Pawn pawn, Need_Food food)
 		{
-			if (food.CurCategory < HungerCategory.Hungry)
-				return;
+			if (food.CurCategory < HungerCategory.Hungry) return;
 
 			if (TryGetBestFood(pawn, out Thing thing, out Pawn owner))
 			{
@@ -508,78 +548,77 @@ namespace Vehicles
 				if (thing.Destroyed)
 				{
 					owner.inventory.innerContainer.Remove(thing);
-					if (this.IsCaravanMember())
+					if (pawn.GetVehicleCaravan() is VehicleCaravan vehicleCaravan)
 					{
-						this.GetCaravan().RecacheImmobilizedNow();
-						this.GetCaravan().RecacheDaysWorthOfFood();
+						vehicleCaravan.RecacheImmobilizedNow();
+						vehicleCaravan.RecacheDaysWorthOfFood();
 					}
 				}
-				if (!outOfFoodNotified && !TryGetBestFood(pawn, out _, out Pawn _))
+				if (handler != null && !handler.vehicle.outOfFoodNotified && !TryGetBestFood(pawn, out _, out Pawn _))
 				{
-					Messages.Message("VF_OutOfFood".Translate(LabelShort), this, MessageTypeDefOf.NegativeEvent, false);
-					outOfFoodNotified = true;
+					Messages.Message("VF_OutOfFood".Translate(handler.vehicle.LabelShort), handler.vehicle, MessageTypeDefOf.NegativeEvent, false);
+					handler.vehicle.outOfFoodNotified = true;
 				}
 			}
 		}
 
-		public bool TryGetBestFood(Pawn forPawn, out Thing food, out Pawn owner)
+		private static bool TryGetBestFood(Pawn forPawn, out Thing food, out Pawn owner)
 		{
-			List<Thing> list = inventory.innerContainer.InnerListForReading;
-			Thing thing = null;
 			float num = 0f;
-			foreach (Thing foodItem in list)
+			food = null;
+			owner = null;
+
+			if (forPawn.GetVehicleCaravan() is VehicleCaravan vehicleCaravan)
 			{
-				if (CanEatForNutrition(foodItem, forPawn))
+				CheckInventory(CaravanInventoryUtility.AllInventoryItems(vehicleCaravan), forPawn, ref food, ref num);
+				if (food != null)
 				{
-					float foodScore = CaravanPawnsNeedsUtility.GetFoodScore(foodItem, forPawn);
-					if (thing is null || foodScore > num)
-					{
-						thing = foodItem;
-						num = foodScore;
-					}
+					owner = CaravanInventoryUtility.GetOwnerOf(vehicleCaravan, food);
 				}
 			}
-			if (this.IsCaravanMember())
+			else if (forPawn.ParentHolder is VehicleHandler handler)
 			{
-				foreach (Thing foodItem2 in CaravanInventoryUtility.AllInventoryItems(this.GetCaravan()))
+				owner = forPawn;
+				CheckInventory(forPawn.inventory.innerContainer, forPawn, ref food, ref num);
+				if (food is null)
 				{
-					if (CanEatForNutrition(foodItem2, forPawn))
+					VehiclePawn vehicle = handler.vehicle;
+					owner = vehicle;
+					CheckInventory(vehicle.inventory.innerContainer, forPawn, ref food, ref num);
+				}
+			}
+			return food != null;
+
+			static void CheckInventory(IEnumerable<Thing> items, Pawn forPawn, ref Thing food, ref float score)
+			{
+				foreach (Thing potentialFood in items)
+				{
+					if (CanEatForNutrition(potentialFood, forPawn))
 					{
-						float foodScore = CaravanPawnsNeedsUtility.GetFoodScore(foodItem2, forPawn);
-						if (thing is null || foodScore > num)
+						float foodScore = CaravanPawnsNeedsUtility.GetFoodScore(potentialFood, forPawn);
+						if (food is null || foodScore > score)
 						{
-							thing = foodItem2;
-							num = foodScore;
+							food = potentialFood;
+							score = foodScore;
 						}
 					}
 				}
 			}
-
-			if (thing != null)
-			{
-				food = thing;
-				owner = this.IsCaravanMember() ? CaravanInventoryUtility.GetOwnerOf(this.GetCaravan(), thing) : this;
-				return true;
-			}
-			food = null;
-			owner = null;
-			return false;
 		}
 
-		private void TrySatisfyChemicalNeed(VehicleHandler handler, Pawn pawn, Need_Chemical chemical)
+		private static void TrySatisfyChemicalNeed(VehicleHandler handler, Pawn pawn, Need_Chemical chemical)
 		{
 			if (chemical.CurCategory >= DrugDesireCategory.Satisfied)
 			{
 				return;
 			}
-
-			if (TryGetDrugToSatisfyNeed(pawn, chemical, out Thing drug, out Pawn owner))
+			if (TryGetDrugToSatisfyNeed(handler, pawn, chemical, out Thing drug, out Pawn owner))
 			{
 				IngestDrug(pawn, drug, owner);
 			}
 		}
 
-		public void IngestDrug(Pawn pawn, Thing drug, Pawn owner)
+		private static void IngestDrug(Pawn pawn, Thing drug, Pawn owner)
 		{
 			float num = drug.Ingested(pawn, 0f);
 			Need_Food food = pawn.needs.food;
@@ -593,50 +632,52 @@ namespace Vehicles
 			}
 		}
 
-		public bool TryGetDrugToSatisfyNeed(Pawn forPawn, Need_Chemical chemical, out Thing drug, out Pawn owner)
+		private static bool TryGetDrugToSatisfyNeed(VehicleHandler handler, Pawn forPawn, Need_Chemical chemical, out Thing drug, out Pawn owner)
 		{
 			Hediff_Addiction addictionHediff = chemical.AddictionHediff;
+			drug = null;
+			owner = null;
+
 			if (addictionHediff is null)
 			{
-				drug = null;
-				owner = null;
 				return false;
 			}
-			List<Thing> list = inventory.innerContainer.InnerListForReading;
 
-			Thing thing = null;
-			foreach (Thing t in list)
+			if (forPawn.GetVehicleCaravan() is VehicleCaravan vehicleCaravan)
 			{
-				if (t.IngestibleNow && t.def.IsDrug)
+				CheckInventory(CaravanInventoryUtility.AllInventoryItems(vehicleCaravan), forPawn, addictionHediff, ref drug);
+				if (drug != null)
 				{
-					CompDrug compDrug = t.TryGetComp<CompDrug>();
-					if (compDrug != null && compDrug.Props.chemical != null)
-					{
-						if (compDrug.Props.chemical.addictionHediff == addictionHediff.def)
-						{
-							if (forPawn.drugs is null || forPawn.drugs.CurrentPolicy[t.def].allowedForAddiction || forPawn.story is null || forPawn.story.traits.DegreeOfTrait(TraitDefOf.DrugDesire) > 0)
-							{
-								thing = t;
-								break;
-							}
-						}
-					}
+					owner = CaravanInventoryUtility.GetOwnerOf(vehicleCaravan, drug);
 				}
 			}
-			if (this.IsCaravanMember())
+			else if (handler != null)
 			{
-				foreach (Thing t in CaravanInventoryUtility.AllInventoryItems(this.GetCaravan()))
+				owner = forPawn;
+				CheckInventory(forPawn.inventory.innerContainer, forPawn, addictionHediff, ref drug);
+				if (drug is null)
 				{
-					if (t.IngestibleNow && t.def.IsDrug)
+					VehiclePawn vehicle = handler.vehicle;
+					owner = vehicle;
+					CheckInventory(vehicle.inventory.innerContainer, forPawn, addictionHediff, ref drug);
+				}
+			}
+			return drug != null;
+
+			static void CheckInventory(IEnumerable<Thing> items, Pawn forPawn, Hediff_Addiction addictionHediff, ref Thing drug)
+			{
+				foreach (Thing thing in items)
+				{
+					if (thing.IngestibleNow && thing.def.IsDrug)
 					{
-						CompDrug compDrug = t.TryGetComp<CompDrug>();
+						CompDrug compDrug = thing.TryGetComp<CompDrug>();
 						if (compDrug != null && compDrug.Props.chemical != null)
 						{
 							if (compDrug.Props.chemical.addictionHediff == addictionHediff.def)
 							{
-								if (forPawn.drugs is null || forPawn.drugs.CurrentPolicy[t.def].allowedForAddiction || forPawn.story is null || forPawn.story.traits.DegreeOfTrait(TraitDefOf.DrugDesire) > 0)
+								if (forPawn.drugs is null || forPawn.drugs.CurrentPolicy[thing.def].allowedForAddiction || forPawn.story is null || forPawn.story.traits.DegreeOfTrait(TraitDefOf.DrugDesire) > 0)
 								{
-									thing = t;
+									drug = thing;
 									break;
 								}
 							}
@@ -644,58 +685,160 @@ namespace Vehicles
 					}
 				}
 			}
-			if (thing != null)
-			{
-				drug = thing;
-				owner = this.IsCaravanMember() ? CaravanInventoryUtility.GetOwnerOf(this.GetCaravan(), thing) : this;
-				return true;
-			}
-			drug = null;
-			owner = null;
-			return false;
 		}
 
-		public static bool CanEatForNutrition(Thing item, Pawn forPawn)
+		private static bool CanEatForNutrition(Thing item, Pawn forPawn)
 		{
 			return item.IngestibleNow && item.def.IsNutritionGivingIngestible && forPawn.WillEat_NewTemp(item, null) && item.def.ingestible.preferability > FoodPreferability.NeverForNutrition &&
 				(!item.def.IsDrug || !forPawn.IsTeetotaler()) && (!forPawn.RaceProps.Humanlike || forPawn.needs.food.CurCategory >= HungerCategory.Starving || item.def.ingestible.preferability >
 				FoodPreferability.DesperateOnlyForHumanlikes);
 		}
 
-		private void TrySatisfyJoyNeed(VehicleHandler handler, Pawn pawn, Need_Joy joy)
+		private static void TrySatisfyJoyNeed(VehicleHandler handler, Pawn pawn, Need_Joy joy)
 		{
 			if (pawn.IsHashIntervalTick(1250))
 			{
-				float num = vPather.Moving ? 4E-05f : 4E-3f; //Incorporate 'shifts'
-				if (num <= 0f) return;
-				num *= 1250f;
-				List<JoyKindDef> tmpJoyList = GetAvailableJoyKindsFor(pawn);
-				if (!tmpJoyList.TryRandomElementByWeight((JoyKindDef x) => 1f - Mathf.Clamp01(pawn.needs.joy.tolerances[x]), out JoyKindDef joyKind))
-					return;
-				joy.GainJoy(num, joyKind);
-				tmpJoyList.Clear();
+				float amount = 0; //Incorporate 'shifts'
+				bool moving = false;
+				if (pawn.GetVehicleCaravan() is VehicleCaravan vehicleCaravan)
+				{
+					moving = vehicleCaravan.vehiclePather.Moving;
+				}
+				else if (handler != null)
+				{
+					moving = handler.vehicle.vehiclePather.Moving;
+				}
+				amount = moving ? 4E-05f : 4E-3f;
+				if (amount > 0f)
+				{
+					amount *= 1250f;
+					List<JoyKindDef> availableJoyKinds = GetAvailableJoyKindsFor(handler, pawn);
+					if (!availableJoyKinds.TryRandomElementByWeight((JoyKindDef joyKindDef) => 1f - Mathf.Clamp01(pawn.needs.joy.tolerances[joyKindDef]), out JoyKindDef joyKind))
+					{
+						return;
+					}
+					joy.GainJoy(amount, joyKind);
+				}
 			}
 		}
 
-		public List<JoyKindDef> GetAvailableJoyKindsFor(Pawn p)
+		private static List<JoyKindDef> GetAvailableJoyKindsFor(VehicleHandler handler, Pawn forPawn)
 		{
 			List<JoyKindDef> outJoyKinds = new List<JoyKindDef>();
-			if (!p.needs.joy.tolerances.BoredOf(JoyKindDefOf.Meditative))
-				outJoyKinds.Add(JoyKindDefOf.Meditative);
-			if (!p.needs.joy.tolerances.BoredOf(JoyKindDefOf.Social))
+			if (!forPawn.needs.joy.tolerances.BoredOf(JoyKindDefOf.Meditative))
 			{
-				int num = 0;
-				foreach (Pawn targetpawn in AllPawnsAboard)
+				outJoyKinds.Add(JoyKindDefOf.Meditative);
+			}
+			if (!forPawn.needs.joy.tolerances.BoredOf(JoyKindDefOf.Social))
+			{
+				int pawnCount = 0;
+				if (forPawn.GetVehicleCaravan() is VehicleCaravan vehicleCaravan)
 				{
-					if (!targetpawn.Downed && targetpawn.RaceProps.Humanlike && !targetpawn.InMentalState)
+					foreach (Pawn otherPawn in vehicleCaravan.PawnsListForReading)
 					{
-						num++;
+						if (ValidSocialPawn(otherPawn))
+						{
+							pawnCount++;
+						}
 					}
 				}
-				if (num >= 2)
+				else if (handler != null)
+				{
+					foreach (Pawn otherPawn in handler.vehicle.AllPawnsAboard)
+					{
+						if (ValidSocialPawn(otherPawn))
+						{
+							pawnCount++;
+						}
+					}
+				}
+				if (pawnCount >= 2) //2+ since it includes pawn needing the socializing
+				{
 					outJoyKinds.Add(JoyKindDefOf.Social);
+				}
 			}
 			return outJoyKinds;
+
+			static bool ValidSocialPawn(Pawn targetPawn)
+			{
+				return !targetPawn.Downed && targetPawn.RaceProps.Humanlike && !targetPawn.InMentalState;
+			}
+		}
+
+		private static void TrySatisfyHemogenNeed(VehicleHandler handler, Pawn forPawn, Gene_Hemogen hemogenGene)
+		{
+			if (hemogenGene.ShouldConsumeHemogenNow())
+			{
+				Thing hemogenPack = null;
+				Pawn owner = null;
+				if (forPawn.GetVehicleCaravan() is VehicleCaravan vehicleCaravan)
+				{
+					CheckInventory(CaravanInventoryUtility.AllInventoryItems(vehicleCaravan), forPawn, ref hemogenPack);
+					if (hemogenPack != null)
+					{
+						owner = CaravanInventoryUtility.GetOwnerOf(vehicleCaravan, hemogenPack);
+					}
+				}
+				else if (handler != null)
+				{
+					owner = forPawn;
+					CheckInventory(forPawn.inventory.innerContainer, forPawn, ref hemogenPack);
+					if (hemogenPack is null)
+					{
+						VehiclePawn vehicle = handler.vehicle;
+						owner = vehicle;
+						CheckInventory(vehicle.inventory.innerContainer, forPawn, ref hemogenPack);
+					}
+				}
+
+				if (hemogenPack != null)
+				{
+					float amount = hemogenPack.Ingested(forPawn, hemogenPack.GetStatValue(StatDefOf.Nutrition));
+					Pawn_NeedsTracker needs = forPawn.needs;
+					if (needs?.food != null)
+					{
+						forPawn.needs.food.CurLevel += amount;
+					}
+					if (hemogenPack.Destroyed && owner != null)
+					{
+						owner.inventory.innerContainer.Remove(hemogenPack);
+
+						if (forPawn.GetVehicleCaravan() is Caravan caravan)
+						{
+							caravan.RecacheImmobilizedNow();
+							caravan.RecacheDaysWorthOfFood();
+						}
+					}
+				}
+
+				static void CheckInventory(IEnumerable<Thing> items, Pawn forPawn, ref Thing hemogenPack)
+				{
+					foreach (Thing thing in items)
+					{
+						if (thing.def == ThingDefOf.HemogenPack)
+						{
+							hemogenPack = thing;
+							return;
+						}
+					}
+				}
+			}
+		}
+
+		private static void TryGainPsyfocus(VehicleHandler handler, Pawn pawn, Pawn_PsychicEntropyTracker tracker)
+		{
+			if (pawn.GetVehicleCaravan() is VehicleCaravan vehicleCaravan && !vehicleCaravan.vehiclePather.MovingNow && !vehicleCaravan.NightResting)
+			{
+				tracker.GainPsyfocus(null);
+			}
+			else if (pawn.GetAerialVehicle() is AerialVehicleInFlight aerialVehicle && !aerialVehicle.Flying)
+			{
+				tracker.GainPsyfocus(null);
+			}
+			else if (handler != null && !handler.vehicle.Drafted)
+			{
+				tracker.GainPsyfocus(null);
+			}
 		}
 	}
 }

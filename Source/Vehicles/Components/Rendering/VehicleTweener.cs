@@ -69,33 +69,33 @@ namespace Vehicles
 
 		private Vector3 TweenedPosRoot()
 		{
-			if (!vehicle.Spawned || vehicle.vPather == null)
+			if (!vehicle.Spawned || vehicle.vehiclePather == null)
 			{
 				return vehicle.TrueCenter();
 			}
 			float num = MovedPercent();
-			return vehicle.TrueCenter(vehicle.vPather.nextCell) * num + vehicle.TrueCenter() * (1f - num);
+			return vehicle.TrueCenter(vehicle.vehiclePather.nextCell) * num + vehicle.TrueCenter() * (1f - num);
 		}
 
 		public float MovedPercent()
 		{
-			if (vehicle.vPather is null)
+			if (vehicle.vehiclePather is null)
 			{
 				return 0f;
 			}
-			if (!vehicle.vPather.Moving)
+			if (!vehicle.vehiclePather.Moving)
 			{
 				return 0f;
 			}
-			if (vehicle.vPather.BuildingBlockingNextPathCell() != null)
+			if (vehicle.vehiclePather.BuildingBlockingNextPathCell() != null)
 			{
 				return 0f;
 			}
-			if (vehicle.vPather.NextCellDoorToWaitForOrManuallyOpen() != null)
+			if (vehicle.vehiclePather.NextCellDoorToWaitForOrManuallyOpen() != null)
 			{
 				return 0f;
 			}
-			return 1f - vehicle.vPather.nextCellCostLeft / vehicle.vPather.nextCellCostTotal;
+			return 1f - vehicle.vehiclePather.nextCellCostLeft / vehicle.vehiclePather.nextCellCostTotal;
 		}
 	}
 }

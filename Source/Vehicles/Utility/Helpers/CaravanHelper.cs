@@ -228,6 +228,7 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="caravan"></param>
 		/// <param name="dock"></param>
+		[Obsolete("Do not use, very buggy", error: true)]
 		public static void ToggleDocking(Caravan caravan, bool dock = false)
 		{
 			if (caravan.HasBoat() && caravan is VehicleCaravan vehicleCaravan)
@@ -248,14 +249,19 @@ namespace Vehicles
 		/// Spawn DockedBoat object to store boats on World map
 		/// </summary>
 		/// <param name="caravan"></param>
-		public static void SpawnDockedBoatObject(VehicleCaravan caravan)
+		public static void StashVehicles(VehicleCaravan caravan)
 		{
-			if (!caravan.HasBoat())
+			Find.WindowStack.Add(new Dialog_StashVehicle(caravan));
+		}
+
+		public static Caravan CaravanForMerging(Caravan caravan, List<Caravan> caravans)
+		{
+			if (caravans.NotNullAndAny(caravan => caravan is VehicleCaravan vehicleCaravan))
 			{
-				Log.Error("Attempted to dock boats with no boats in caravan. This could have serious errors in the future. - Smash Phil");
+				//Prioritize vehicle caravans for merging into
+				caravan = caravans.Where(caravan => caravan is VehicleCaravan vehicleCaravan).MaxBy(caravan => caravan.PawnsListForReading.Count);
 			}
-			ToggleDocking(caravan, true);
-			Find.WindowStack.Add(new Dialog_DockBoat(caravan));
+			return caravan;
 		}
 
 		/// <summary>
@@ -266,9 +272,9 @@ namespace Vehicles
 		{
 			if (!AbleToEmbark(caravan))
 			{
-				if (caravan.vPather.Moving)
+				if (caravan.vehiclePather.Moving)
 				{
-					caravan.vPather.StopDead();
+					caravan.vehiclePather.StopDead();
 				}
 				Messages.Message("VF_CantMoveDocked".Translate(), MessageTypeDefOf.RejectInput, false);
 				return;
@@ -438,11 +444,11 @@ namespace Vehicles
 				map.Parent.Notify_CaravanFormed(caravan);
 				map.retainedCaravanData.Notify_CaravanFormed(caravan);
 			}
-			if (!caravan.vPather.Moving && caravan.Tile != directionTile)
+			if (!caravan.vehiclePather.Moving && caravan.Tile != directionTile)
 			{
-				caravan.vPather.StartPath(directionTile, null, true, true);
-				caravan.vPather.nextTileCostLeft /= 2f;
-				caravan.tweener.ResetTweenedPosToRoot();
+				caravan.vehiclePather.StartPath(directionTile, null, true, true);
+				caravan.vehiclePather.nextTileCostLeft /= 2f;
+				caravan.vehicleTweener.ResetTweenedPosToRoot();
 			}
 			if (destinationTile != -1)
 			{
@@ -453,15 +459,15 @@ namespace Vehicles
 				}
 				else
 				{
-					caravan.vPather.StartPath(destinationTile, null, true, true);
+					caravan.vehiclePather.StartPath(destinationTile, null, true, true);
 				}
 			}
 			if (sendMessage)
 			{
 				TaggedString taggedString = "MessageFormedCaravan".Translate(caravan.Name).CapitalizeFirst();
-				if (caravan.vPather.Moving && caravan.vPather.ArrivalAction != null)
+				if (caravan.vehiclePather.Moving && caravan.vehiclePather.ArrivalAction != null)
 				{
-					taggedString += " " + "MessageFormedCaravan_Orders".Translate() + ": " + caravan.vPather.ArrivalAction.Label + ".";
+					taggedString += " " + "MessageFormedCaravan_Orders".Translate() + ": " + caravan.vehiclePather.ArrivalAction.Label + ".";
 				}
 				Messages.Message(taggedString, caravan, MessageTypeDefOf.TaskCompletion, true);
 			}
@@ -533,7 +539,6 @@ namespace Vehicles
 		/// <param name="faction"></param>
 		/// <param name="startingTile"></param>
 		/// <param name="addToWorldPawnsIfNotAlready"></param>
-		/// <returns></returns>
 		public static VehicleCaravan MakeVehicleCaravan(IEnumerable<Pawn> pawns, Faction faction, int startingTile, bool addToWorldPawnsIfNotAlready)
 		{
 			if (startingTile < 0 && addToWorldPawnsIfNotAlready)
@@ -570,6 +575,8 @@ namespace Vehicles
 			}
 			caravan.Name = CaravanNameGenerator.GenerateCaravanName(caravan);
 			caravan.SetUniqueId(Find.UniqueIDsManager.GetNextCaravanID());
+
+			caravan.PostInit();
 			return caravan;
 		}
 

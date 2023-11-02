@@ -14,6 +14,8 @@ namespace Vehicles
 
 		public override PathEndMode PathEndMode => PathEndMode.Touch;
 
+		public override ThingRequest PotentialWorkThingRequest => ThingRequest.ForGroup(ThingRequestGroup.Pawn);
+
 		public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
 		{
 			return pawn.Map.GetCachedMapComponent<VehicleReservationManager>().VehicleListers(ReservationType.LoadVehicle);
@@ -21,14 +23,19 @@ namespace Vehicles
 
 		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
 		{
-			if (t is VehiclePawn vehicle && vehicle.cargoToLoad.NotNullAndAny() && pawn.CanReach(new LocalTargetInfo(t.Position), PathEndMode.Touch, Danger.Deadly))
+			if (t is VehiclePawn vehicle && !vehicle.cargoToLoad.NullOrEmpty() && pawn.CanReach(new LocalTargetInfo(t.Position), PathEndMode.Touch, Danger.Deadly))
 			{
 				Thing thing = FindThingToPack(vehicle, pawn);
 				if (thing != null)
 				{
-					Job job = JobMaker.MakeJob(JobDefOf_Vehicles.LoadVehicle, thing, t);
-					job.count = Mathf.Min(thing.stackCount, CountLeftToTransferItem(vehicle, pawn, thing));
-					return job;
+					int countLeft = CountLeftForItem(vehicle, pawn, thing);
+					int jobCount = Mathf.Min(thing.stackCount, countLeft);
+					if (jobCount > 0)
+					{
+						Job job = JobMaker.MakeJob(JobDefOf_Vehicles.LoadVehicle, thing, t);
+						job.count = jobCount;
+						return job;
+					}
 				}
 			}
 			return null;
@@ -40,7 +47,8 @@ namespace Vehicles
 			for (int i = 0; i < transferables.Count; i++)
 			{
 				TransferableOneWay transferableOneWay = transferables[i];
-				if (CountLeftToTransferPack(vehicle, pawn, transferableOneWay) > 0)
+				int countLeftToTransfer = CountLeftToPack(vehicle, pawn, transferableOneWay);
+				if (countLeftToTransfer > 0)
 				{
 					for (int j = 0; j < transferableOneWay.things.Count; j++)
 					{
@@ -52,20 +60,13 @@ namespace Vehicles
 			{
 				return null;
 			}
-			Thing result = ClosestThingFor(pawn, ThingRequestGroup.Pawn);
-			result ??= ClosestThingFor(pawn, ThingRequestGroup.HaulableEver);
+			Thing result = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForGroup(ThingRequestGroup.HaulableEver), PathEndMode.Touch, TraverseParms.For(pawn), 
+				validator: (Thing thing) => neededItems.Contains(thing) && pawn.CanReserve(thing));
 			neededItems.Clear();
 			return result;
 		}
 
-		private static Thing ClosestThingFor(Pawn pawn, ThingRequestGroup thingRequestGroup)
-		{
-			Thing thing = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForGroup(thingRequestGroup), PathEndMode.Touch, TraverseParms.For(pawn),
-				validator: (Thing thing) => neededItems.Contains(thing) && !thing.IsForbidden(pawn) && pawn.CanReserve(thing));
-			return thing;
-		}
-
-		public static int CountLeftToTransferPack(VehiclePawn vehicle, Pawn pawn, TransferableOneWay transferable)
+		public static int CountLeftToPack(VehiclePawn vehicle, Pawn pawn, TransferableOneWay transferable)
 		{
 			if (transferable.CountToTransfer <= 0 || !transferable.HasAnyThing)
 			{
@@ -74,10 +75,14 @@ namespace Vehicles
 			return Mathf.Max(transferable.CountToTransfer - TransferableCountHauledByOthersForPacking(vehicle, pawn, transferable), 0);
 		}
 
-		private static int CountLeftToTransferItem(VehiclePawn vehicle, Pawn pawn, Thing thing)
+		private static int CountLeftForItem(VehiclePawn vehicle, Pawn pawn, Thing thing)
 		{
-			var item = vehicle.cargoToLoad.FirstOrDefault(t => t.AnyThing.def == thing.def);
-			return Mathf.Max(Mathf.Min(thing.stackCount, item.CountToTransfer - TransferableCountHauledByOthersForPacking(vehicle, pawn, item)), 0);
+			TransferableOneWay transferable = JobDriver_LoadVehicle.GetTransferable(vehicle, thing);
+			if (transferable == null)
+			{
+				return 0;
+			}
+			return CountLeftToPack(vehicle, pawn, transferable);
 		}
 
 		private static int TransferableCountHauledByOthersForPacking(VehiclePawn vehicle, Pawn pawn, TransferableOneWay transferable)

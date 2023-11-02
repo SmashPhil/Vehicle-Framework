@@ -15,7 +15,19 @@ namespace Vehicles
 		/// <param name="map"></param>
 		public static bool AnyVehicleSkyfallersBlockingMap(Map map)
 		{
-			return map?.listerThings?.ThingsInGroup(ThingRequestGroup.ThingHolder)?.Where(t => t is VehicleSkyfaller)?.Any() ?? false;
+			List<Thing> thingHolders = map?.listerThings?.ThingsInGroup(ThingRequestGroup.ThingHolder);
+			if (thingHolders.NullOrEmpty())
+			{
+				return false;
+			}
+			foreach (Thing thing in thingHolders)
+			{
+				if (thing is VehicleSkyfaller)
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 
 		/// <summary>
@@ -42,10 +54,14 @@ namespace Vehicles
 		/// Vehicle is blocked at <paramref name="cell"/> and will not spawn correctly
 		/// </summary>
 		/// <param name="cell"></param>
-		public static bool VehicleBlockedInPosition(VehiclePawn vehicle, Map map, IntVec3 cell, Rot4 rot)
+		public static bool NonStandableOrVehicleBlocked(VehiclePawn vehicle, Map map, IntVec3 cell, Rot4 rot)
 		{
-			IEnumerable<IntVec3> cells = vehicle.PawnOccupiedCells(cell, rot);	
-			return VehicleReservationManager.AnyVehicleInhabitingCells(cells, map) || !vehicle.CellRectStandable(map, cell, rot);
+			return VehicleReservationManager.AnyVehicleInhabitingCells(vehicle.PawnOccupiedCells(cell, rot), map) || !vehicle.CellRectStandable(map, cell, rot);
+		}
+
+		public static bool ImpassableOrVehicleBlocked(VehiclePawn vehicle, Map map, IntVec3 cell, Rot4 rot)
+		{
+			return VehicleReservationManager.AnyVehicleInhabitingCells(vehicle.PawnOccupiedCells(cell, rot), map) || vehicle.LocationRestrictedBySize(cell, rot, map);
 		}
 
 		/// <summary>
@@ -59,6 +75,20 @@ namespace Vehicles
 		{
 			IEnumerable<IntVec3> cells = vehicle.PawnOccupiedCells(cell, rot);
 			return VehicleReservationManager.VehicleInhabitingCells(cells, map);
+		}
+
+		public static VehicleSkyfaller VehicleSkyfallerInPosition(VehiclePawn vehicle, Map map, IntVec3 cell, Rot4 rot)
+		{
+			IEnumerable<IntVec3> cells = vehicle.PawnOccupiedCells(cell, rot);
+			foreach (IntVec3 hitboxCell in cells)
+			{
+				VehicleSkyfaller vehicleSkyfaller = map.thingGrid.ThingAt<VehicleSkyfaller>(hitboxCell);
+				if (vehicleSkyfaller != null)
+				{
+					return vehicleSkyfaller;
+				}
+			}
+			return null;
 		}
 
 		/// <summary>
@@ -80,7 +110,7 @@ namespace Vehicles
 				}
 				else
 				{
-					AerialVehicleInFlight aerial = VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
+					AerialVehicleInFlight aerial = AerialVehicleLaunchHelper.GetOrMakeAerialVehicle(vehicle);
 					if (aerial is null)
 					{
 						Log.Error($"Attempted to launch into existing map where CurrentMap is null and no AerialVehicle with {vehicle.Label} exists.");

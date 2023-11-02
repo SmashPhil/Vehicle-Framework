@@ -19,7 +19,7 @@ namespace Vehicles
 
 		public override bool HasJobOnThing(Pawn pawn, Thing thing, bool forced = false)
 		{
-			return thing is VehiclePawn vehicle && vehicle.CompVehicleTurrets != null && !vehicle.vPather.Moving && CanTryRefill(pawn, vehicle, forced: forced) 
+			return thing is VehiclePawn vehicle && vehicle.CompVehicleTurrets != null && !vehicle.vehiclePather.Moving && CanTryRefill(pawn, vehicle, forced: forced) 
 				&& base.HasJobOnThing(pawn, thing, forced: forced);
 		}
 

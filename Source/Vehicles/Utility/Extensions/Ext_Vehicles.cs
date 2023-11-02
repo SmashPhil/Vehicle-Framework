@@ -133,64 +133,6 @@ namespace Vehicles
 			}
 		}
 
-		//TODO - Doesn't work for even sizes. Should instead calculate only North and East (north calculate full OccupiedRect, east only calculate past the inner square)
-		public static IEnumerable<IntVec3> FullVehicleRectAllDirections(this VehicleDef vehicleDef, IntVec3 center)
-		{
-			//If size is square, rotation doesn't matter
-			IntVec2 size = vehicleDef.size;
-			if (size.x == size.z)
-			{
-				foreach (IntVec3 cell in GenAdj.OccupiedRect(center, Rot4.North, size))
-				{
-					yield return cell;
-				}
-				yield break;
-			}
-			GenAdj.AdjustForRotation(ref center, ref size, Rot4.North);
-
-			int minSize = Mathf.Min(size.x, size.z);
-			int maxSize = Mathf.Max(size.x, size.z);
-
-			//Fetch inner square
-			foreach (IntVec3 cell in GenAdj.OccupiedRect(center, Rot4.North, new IntVec2(minSize, minSize)))
-			{
-				yield return cell;
-			}
-
-			int cutoutSize = Mathf.CeilToInt((maxSize - minSize) / 2f);
-			int distanceToEdge = Mathf.FloorToInt((maxSize - minSize) / 2f);
-			IntVec2 subSize = new IntVec2(minSize, cutoutSize);
-			int startingDist = distanceToEdge + cutoutSize;
-
-			//North
-			IntVec3 subCenter = center + new IntVec3(0, 0, startingDist);
-			foreach (IntVec3 cell in GenAdj.OccupiedRect(subCenter, Rot4.North, subSize))
-			{
-				yield return cell;
-			}
-
-			//East
-			subCenter = center + new IntVec3(startingDist, 0, 0);
-			foreach (IntVec3 cell in GenAdj.OccupiedRect(subCenter, Rot4.East, subSize))
-			{
-				yield return cell;
-			}
-
-			//South
-			subCenter = center + new IntVec3(0, 0, -startingDist);
-			foreach (IntVec3 cell in GenAdj.OccupiedRect(subCenter, Rot4.South, subSize))
-			{
-				yield return cell;
-			}
-
-			//West
-			subCenter = center + new IntVec3(-startingDist, 0, 0);
-			foreach (IntVec3 cell in GenAdj.OccupiedRect(subCenter, Rot4.West, subSize))
-			{
-				yield return cell;
-			}
-		}
-
 		public static IntVec3 PadForHitbox(this IntVec3 cell, Map map, VehiclePawn vehicle)
 		{
 			return PadForHitbox(cell, map, vehicle.VehicleDef);
@@ -199,7 +141,7 @@ namespace Vehicles
 		public static IntVec3 PadForHitbox(this IntVec3 cell, Map map, VehicleDef vehicleDef)
 		{
 			int largestSize = Mathf.Max(vehicleDef.Size.x, vehicleDef.Size.z);
-			int padding = Mathf.CeilToInt(largestSize / 2);
+			int padding = Mathf.CeilToInt(largestSize / 2f);
 
 			if (cell.x < padding)
 			{
@@ -235,19 +177,19 @@ namespace Vehicles
 				vehicle.AddEvent(VehicleEventDefOf.CargoAdded, vehicle.statHandler.MarkAllDirty);
 				vehicle.AddEvent(VehicleEventDefOf.CargoRemoved, vehicle.statHandler.MarkAllDirty);
 				vehicle.AddEvent(VehicleEventDefOf.PawnEntered, vehicle.RecachePawnCount);
-				vehicle.AddEvent(VehicleEventDefOf.PawnExited, vehicle.vPather.RecalculatePermissions, vehicle.RecachePawnCount);
-				vehicle.AddEvent(VehicleEventDefOf.PawnRemoved, vehicle.vPather.RecalculatePermissions, vehicle.RecachePawnCount);
-				vehicle.AddEvent(VehicleEventDefOf.PawnChangedSeats, vehicle.vPather.RecalculatePermissions, vehicle.RecachePawnCount);
-				vehicle.AddEvent(VehicleEventDefOf.PawnKilled, vehicle.vPather.RecalculatePermissions, vehicle.RecachePawnCount);
-				vehicle.AddEvent(VehicleEventDefOf.PawnCapacitiesDirty, vehicle.vPather.RecalculatePermissions);
-				vehicle.AddEvent(VehicleEventDefOf.IgnitionOff, vehicle.vPather.RecalculatePermissions);
-				vehicle.AddEvent(VehicleEventDefOf.DamageTaken, vehicle.vPather.RecalculatePermissions, vehicle.statHandler.MarkAllDirty, vehicle.Notify_TookDamage);
-				vehicle.AddEvent(VehicleEventDefOf.Repaired, vehicle.vPather.RecalculatePermissions, vehicle.statHandler.MarkAllDirty);
+				vehicle.AddEvent(VehicleEventDefOf.PawnExited, vehicle.vehiclePather.RecalculatePermissions, vehicle.RecachePawnCount);
+				vehicle.AddEvent(VehicleEventDefOf.PawnRemoved, vehicle.vehiclePather.RecalculatePermissions, vehicle.RecachePawnCount);
+				vehicle.AddEvent(VehicleEventDefOf.PawnChangedSeats, vehicle.vehiclePather.RecalculatePermissions, vehicle.RecachePawnCount);
+				vehicle.AddEvent(VehicleEventDefOf.PawnKilled, vehicle.vehiclePather.RecalculatePermissions, vehicle.RecachePawnCount);
+				vehicle.AddEvent(VehicleEventDefOf.PawnCapacitiesDirty, vehicle.vehiclePather.RecalculatePermissions);
+				vehicle.AddEvent(VehicleEventDefOf.IgnitionOff, vehicle.vehiclePather.RecalculatePermissions);
+				vehicle.AddEvent(VehicleEventDefOf.DamageTaken, vehicle.vehiclePather.RecalculatePermissions, vehicle.statHandler.MarkAllDirty, vehicle.Notify_TookDamage);
+				vehicle.AddEvent(VehicleEventDefOf.Repaired, vehicle.vehiclePather.RecalculatePermissions, vehicle.statHandler.MarkAllDirty);
 				vehicle.AddEvent(VehicleEventDefOf.OutOfFuel, delegate ()
 				{
 					if (vehicle.Spawned)
 					{
-						vehicle.vPather.PatherFailed();
+						vehicle.vehiclePather.PatherFailed();
 						vehicle.ignition.Drafted = false;
 					}
 				});
@@ -417,11 +359,14 @@ namespace Vehicles
 		/// <returns><c>null</c> if not currently inside an AerialVehicle</returns>
 		public static AerialVehicleInFlight GetAerialVehicle(this Pawn pawn)
 		{
-			foreach (AerialVehicleInFlight aerialVehicle in VehicleWorldObjectsHolder.Instance.AerialVehicles)
+			if (VehicleWorldObjectsHolder.Instance?.AerialVehicles != null) //may get triggered prematurely from loading save
 			{
-				if (aerialVehicle.vehicle == pawn || aerialVehicle.vehicle.AllPawnsAboard.Contains(pawn))
+				foreach (AerialVehicleInFlight aerialVehicle in VehicleWorldObjectsHolder.Instance.AerialVehicles)
 				{
-					return aerialVehicle;
+					if (aerialVehicle?.vehicle == pawn || aerialVehicle.vehicle.AllPawnsAboard.Contains(pawn))
+					{
+						return aerialVehicle;
+					}
 				}
 			}
 			return null;
@@ -590,11 +535,12 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="vehicle"></param>
 		/// <param name="dest"></param>
-		public static bool LocationRestrictedBySize(this VehiclePawn vehicle, IntVec3 dest, Rot8 rot)
+		public static bool LocationRestrictedBySize(this VehiclePawn vehicle, IntVec3 dest, Rot8 rot, Map map = null)
 		{
+			map ??= vehicle.Map;
 			foreach (IntVec3 cell in vehicle.VehicleRect(dest, rot))
 			{
-				if (!cell.Walkable(vehicle.VehicleDef, vehicle.Map))
+				if (!cell.Walkable(vehicle.VehicleDef, map))
 				{
 					return true;
 				}
@@ -641,7 +587,11 @@ namespace Vehicles
 		{
 			if (maxPossibleSize)
 			{
-				return MaxRect(vehicle, cell).Cells.All(cell => vehicle.Drivable(cell));
+				if (!vehicle.VehicleRect(cell, Rot8.North).All(rectCell => vehicle.Drivable(rectCell)))
+				{
+					return false;
+				}
+				return vehicle.VehicleRect(cell, Rot8.East).All(rectCell => vehicle.Drivable(rectCell));
 			}
 			return MinRect(vehicle, cell).Cells.All(cell => vehicle.Drivable(cell));
 		}
@@ -652,7 +602,6 @@ namespace Vehicles
 		/// <remarks>DOES NOT take other vehicles into account</remarks>
 		/// <param name="vehicle"></param>
 		/// <param name="cell"></param>
-		/// <returns></returns>
 		public static bool FitsOnCell(this VehiclePawn vehicle, IntVec3 cell)
 		{
 			int minSize = Mathf.Min(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z);

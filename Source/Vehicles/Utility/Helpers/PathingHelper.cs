@@ -514,9 +514,9 @@ namespace Vehicles
 		{
 			northSouthRotation = false;
 			if (vehicle is null) return 0f;
-			if (vehicle.vPather.Moving)
+			if (vehicle.vehiclePather.Moving)
 			{
-				IntVec3 c = vehicle.vPather.nextCell - vehicle.Position;
+				IntVec3 c = vehicle.vehiclePather.nextCell - vehicle.Position;
 				if (c.x > 0 && c.z > 0)
 				{
 					vehicle.Angle = -45f;
@@ -621,11 +621,18 @@ namespace Vehicles
 			vehicle.inventory.UnloadEverything = false;
 			if (free)
 			{
-				vehicle.vPather.StopDead();
+				vehicle.vehiclePather.StopDead();
 				vehicle.jobs.StopAll(false, true);
 				vehicle.VerifyReservations();
 			}
 			Find.WorldPawns.PassToWorld(vehicle);
+			foreach (Thing thing in vehicle.inventory.innerContainer)
+			{
+				if (thing is Pawn pawn && !pawn.IsWorldPawn())
+				{
+					Find.WorldPawns.PassToWorld(pawn);
+				}
+			}
 			QuestUtility.SendQuestTargetSignals(vehicle.questTags, "LeftMap", vehicle.Named("SUBJECT"));
 			Find.FactionManager.Notify_PawnLeftMap(vehicle);
 			Find.IdeoManager.Notify_PawnLeftMap(vehicle);

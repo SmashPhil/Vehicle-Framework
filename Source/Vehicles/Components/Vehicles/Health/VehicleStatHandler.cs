@@ -185,7 +185,7 @@ namespace Vehicles
 			}
 		}
 
-		private IntVec2 AdjustFromVehiclePosition(IntVec2 cell)
+		public static IntVec2 AdjustFromVehiclePosition(VehiclePawn vehicle, IntVec2 cell)
 		{
 			if (!vehicle.Spawned)
 			{
@@ -215,7 +215,7 @@ namespace Vehicles
 					cell = vehicle.OccupiedRect().RandomCell; //TODO - randomize based on coverage
 				}
 			}
-			IntVec2 hitCell = AdjustFromVehiclePosition(cell.ToIntVec2);
+			IntVec2 hitCell = AdjustFromVehiclePosition(vehicle, cell.ToIntVec2);
 			IntVec2 rotCell = hitCell.RotatedBy(vehicle.Rotation, vehicle.VehicleDef.Size);
 			ApplyDamage(dinfo, rotCell);
 		}

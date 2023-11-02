@@ -111,7 +111,7 @@ namespace Vehicles
 		{
 			if (region is null)
 			{
-				Log.ErrorOnce("Tried to queue null region (Vehicles).", "NullVehicleRegion".GetHashCode());
+				Log.Warning("Tried to queue null region (Vehicles).");
 				return;
 			}
 			if (region.reachedIndex == reachedIndex)

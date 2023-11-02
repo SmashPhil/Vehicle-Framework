@@ -102,7 +102,7 @@ namespace Vehicles
 		/// Deregister and recache region for region linking
 		/// </summary>
 		/// <param name="reg"></param>
-		public void Deregister(VehicleRegion region, VehicleDef vehicleDef)
+		public VehicleRegion Deregister(VehicleRegion region, VehicleDef vehicleDef)
 		{
 			if (RegionA == region)
 			{
@@ -110,6 +110,10 @@ namespace Vehicles
 				if (RegionB is null)
 				{
 					region.Map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionLinkDatabase.Notify_LinkHasNoRegions(this);
+				}
+				else
+				{
+					return RegionB;
 				}
 			}
 			else if (RegionB == region)
@@ -119,7 +123,12 @@ namespace Vehicles
 				{
 					region.Map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionLinkDatabase.Notify_LinkHasNoRegions(this);
 				}
+				else
+				{
+					return RegionA;
+				}
 			}
+			return null;
 		}
 
 		public void ResetAnchors()

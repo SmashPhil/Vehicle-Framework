@@ -101,11 +101,41 @@ namespace Vehicles
 			absorbed = true;
 		}
 
+		public bool TryDamageObstructions()
+		{
+			if (!this.CellRectStandable(Map, Position, Rotation))
+			{
+				List<Thing> things = SimplePool<List<Thing>>.Get();
+				{
+					foreach (IntVec3 cell in this.OccupiedRect())
+					{
+						things.AddRange(Map.thingGrid.ThingsListAt(cell));
+						foreach (Thing thing in things)
+						{
+							if (thing.def.useHitPoints && thing.def.fillPercent > 0.15f)
+							{
+								float damage = thing.HitPoints / 10f;
+								IntVec3 damageCell = Position - thing.Position;
+								TakeDamage(new DamageInfo(DamageDefOf.Blunt, damage), damageCell.ToIntVec2);
+								thing.Destroy(DestroyMode.KillFinalize);
+							}
+						}
+						things.Clear();
+					}
+				}
+				things.Clear();
+				SimplePool<List<Thing>>.Return(things);
+
+				return true;
+			}
+			return false;
+		}
+
 		public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
 		{
-			if (vPather != null)
+			if (vehiclePather != null)
 			{
-				vPather.StopDead();
+				vehiclePather.StopDead();
 			}
 			Map.GetCachedMapComponent<VehiclePositionManager>().ReleaseClaimed(this);
 			//Map.GetCachedMapComponent<VehicleRegionUpdateCatalog>().Notify_VehicleDespawned(this);

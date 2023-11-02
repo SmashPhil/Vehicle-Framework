@@ -22,27 +22,27 @@ namespace Vehicles
 			{
 				return worldGrid.GetTileCenter(caravan.Tile);
 			}
-			if (caravan.vPather.Moving)
+			if (caravan.vehiclePather.Moving)
 			{
 				float num;
-				if (!caravan.vPather.IsNextTilePassable())
+				if (!caravan.vehiclePather.IsNextTilePassable())
 				{
 					num = 0f;
 				}
 				else
 				{
-					num = 1f - caravan.vPather.nextTileCostLeft / caravan.vPather.nextTileCostTotal;
+					num = 1f - caravan.vehiclePather.nextTileCostLeft / caravan.vehiclePather.nextTileCostTotal;
 				}
 				int tileID;
-				if (caravan.vPather.nextTile == caravan.Tile && caravan.vPather.previousTileForDrawingIfInDoubt != -1)
+				if (caravan.vehiclePather.nextTile == caravan.Tile && caravan.vehiclePather.previousTileForDrawingIfInDoubt != -1)
 				{
-					tileID = caravan.vPather.previousTileForDrawingIfInDoubt;
+					tileID = caravan.vehiclePather.previousTileForDrawingIfInDoubt;
 				}
 				else
 				{
 					tileID = caravan.Tile;
 				}
-				return worldGrid.GetTileCenter(caravan.vPather.nextTile) * num + worldGrid.GetTileCenter(tileID) * (1f - num);
+				return worldGrid.GetTileCenter(caravan.vehiclePather.nextTile) * num + worldGrid.GetTileCenter(tileID) * (1f - num);
 			}
 			return worldGrid.GetTileCenter(caravan.Tile);
 		}
@@ -53,14 +53,14 @@ namespace Vehicles
 			{
 				return Vector3.zero;
 			}
-			bool flag = caravan.Spawned && caravan.vPather.Moving;
+			bool flag = caravan.Spawned && caravan.vehiclePather.Moving;
 			float d = BaseRadius * Find.WorldGrid.averageTileSize;
-			if (!flag || caravan.vPather.nextTile == caravan.vPather.Destination)
+			if (!flag || caravan.vehiclePather.nextTile == caravan.vehiclePather.Destination)
 			{
 				int num;
 				if (flag)
 				{
-					num = caravan.vPather.nextTile;
+					num = caravan.vehiclePather.nextTile;
 				}
 				else
 				{
@@ -99,15 +99,15 @@ namespace Vehicles
 				VehicleCaravan caravan = caravans[i];
 				if (caravan.Tile != tile)
 				{
-					if (caravan.vPather.Moving && caravan.vPather.nextTile == caravan.vPather.Destination)
+					if (caravan.vehiclePather.Moving && caravan.vehiclePather.nextTile == caravan.vehiclePather.Destination)
 					{
-						if (caravan.vPather.Destination == tile)
+						if (caravan.vehiclePather.Destination == tile)
 						{
 							goto IL_68;
 						}
 					}
 				}
-				else if (!caravan.vPather.Moving)
+				else if (!caravan.vehiclePather.Moving)
 				{
 					goto IL_68;
 				}

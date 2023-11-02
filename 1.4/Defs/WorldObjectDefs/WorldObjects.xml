@@ -13,14 +13,14 @@
 	</WorldObjectDef>
 	
 	<WorldObjectDef>
-		<defName>DockedBoat</defName>
-		<label>Docked Boat</label>
-		<description>Boats left behind in order to go on foot.</description>
-		<worldObjectClass>Vehicles.DockedBoat</worldObjectClass>
-		<texture>UI/Icons/WorldObject_Boat</texture>
+		<defName>StashedVehicle</defName>
+		<label>Stashed Vehicle</label>
+		<description>Stashed vehicles.</description>
+		<worldObjectClass>Vehicles.StashedVehicle</worldObjectClass>
 		<expandingIcon>true</expandingIcon>
-		<expandingIconTexture>UI/BoatObject</expandingIconTexture>
 		<expandingIconPriority>60</expandingIconPriority>
+		<expandMore>true</expandMore>
+		<useDynamicDrawer>true</useDynamicDrawer>
 		
 		<comps>
 			<li Class="WorldObjectCompProperties_Timeout" />

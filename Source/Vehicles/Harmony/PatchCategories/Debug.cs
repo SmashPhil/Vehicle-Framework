@@ -194,6 +194,24 @@ namespace Vehicles
 			{
 				DebugLandAerialVehicle(aerialVehicle);
 			}
+			
+			foreach (Map map in Find.Maps)
+			{
+				foreach (Thing thing in map.spawnedThings.ToList())
+				{
+					if (thing is VehicleSkyfaller vehicleSkyfaller)
+					{
+						vehicleSkyfaller.vehicle.CompVehicleLauncher.launchProtocol.Release();
+						vehicleSkyfaller.vehicle.CompVehicleLauncher.inFlight = false;
+						GenSpawn.Spawn(vehicleSkyfaller.vehicle, vehicleSkyfaller.Position, vehicleSkyfaller.Map, vehicleSkyfaller.Rotation);
+						if (VehicleMod.settings.main.deployOnLanding)
+						{
+							vehicleSkyfaller.vehicle.CompVehicleLauncher.SetTimedDeployment();
+						}
+						vehicleSkyfaller.Destroy();
+					}
+				}
+			}
 		}
 
 		public static void DebugLandAerialVehicle(AerialVehicleInFlight aerialVehicleInFlight)
@@ -203,7 +221,7 @@ namespace Vehicles
 
 			LaunchProtocol launchProtocol = aerialVehicleInFlight.vehicle.CompVehicleLauncher.launchProtocol;
 			Rot4 vehicleRotation = launchProtocol.LandingProperties?.forcedRotation ?? Rot4.Random;
-			IntVec3 cell = CellFinderExtended.RandomCenterCell(nearestSettlement.Map, (IntVec3 cell) => !MapHelper.VehicleBlockedInPosition(aerialVehicleInFlight.vehicle, Current.Game.CurrentMap, cell, vehicleRotation));
+			IntVec3 cell = CellFinderExtended.RandomCenterCell(nearestSettlement.Map, (IntVec3 cell) => !MapHelper.ImpassableOrVehicleBlocked(aerialVehicleInFlight.vehicle, Current.Game.CurrentMap, cell, vehicleRotation));
 			VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(aerialVehicleInFlight.vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
 			skyfaller.vehicle = aerialVehicleInFlight.vehicle;
 

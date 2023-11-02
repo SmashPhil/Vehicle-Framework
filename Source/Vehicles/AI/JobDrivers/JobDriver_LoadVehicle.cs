@@ -92,14 +92,34 @@ namespace Vehicles
 						int stackCount = Item.stackCount; //store before transfer for transferable recache
 
 						int result = Vehicle.AddOrTransfer(Item, stackCount);
-						TransferableOneWay transferable = Vehicle.cargoToLoad.FirstOrDefault(t => t.AnyThing is {def: ThingDef def} && def == Item.def);
+						TransferableOneWay transferable = GetTransferable(Vehicle, Item);
                         if (transferable != null)
                         {
-							countToTransferFieldInfo.SetValue(transferable, transferable.CountToTransfer - stackCount);
+							int count = transferable.CountToTransfer - stackCount;
+							countToTransferFieldInfo.SetValue(transferable, count);
+							if (transferable.CountToTransfer <= 0)
+							{
+								Vehicle.cargoToLoad.Remove(transferable);
+							}
 						}
 					}
 				}
 			};
+		}
+
+		public static TransferableOneWay GetTransferable(VehiclePawn vehicle, Thing thing)
+		{
+			foreach (TransferableOneWay transferable in vehicle.cargoToLoad)
+			{
+				foreach (Thing transferableThing in transferable.things)
+				{
+					if (transferableThing == thing)
+					{
+						return transferable;
+					}
+				}
+			}
+			return null;
 		}
 	}
 }

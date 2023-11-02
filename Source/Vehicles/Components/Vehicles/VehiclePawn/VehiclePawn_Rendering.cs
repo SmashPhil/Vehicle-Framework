@@ -406,11 +406,11 @@ namespace Vehicles
 
 		public void UpdateRotation()
 		{
-			if (vPather.nextCell == Position)
+			if (vehiclePather.nextCell == Position)
 			{
 				return;
 			}
-			IntVec3 intVec = vPather.nextCell - Position;
+			IntVec3 intVec = vehiclePather.nextCell - Position;
 			if (intVec.x > 0)
 			{
 				Rotation = Rot4.East;
@@ -431,9 +431,9 @@ namespace Vehicles
 
 		public void UpdateAngle()
 		{
-			if (vPather.Moving)
+			if (vehiclePather.Moving)
 			{
-				IntVec3 c = vPather.nextCell - Position;
+				IntVec3 c = vehiclePather.nextCell - Position;
 				if (c.x > 0 && c.z > 0)
 				{
 					angle = -45f;
@@ -465,17 +465,21 @@ namespace Vehicles
 		public override void DrawExtraSelectionOverlays()
 		{
 			base.DrawExtraSelectionOverlays();
-			if (vPather.curPath != null && vPather.curPath.NodesLeftCount > 0)
+			if (vehiclePather.curPath != null && vehiclePather.curPath.NodesLeftCount > 0)
 			{
-				vPather.curPath.DrawPath(this);
+				vehiclePather.curPath.DrawPath(this);
 			}
 			RenderHelper.DrawLinesBetweenTargets(this, jobs.curJob, jobs.jobQueue);
 
 			if (!cargoToLoad.NullOrEmpty())
 			{
+				//TODO - can throw NRE
 				foreach (TransferableOneWay transferable in cargoToLoad)
 				{
-					GenDraw.DrawLineBetween(DrawPos, transferable.AnyThing.DrawPos);
+					if (transferable.HasAnyThing)
+					{
+						GenDraw.DrawLineBetween(DrawPos, transferable.AnyThing.DrawPos);
+					}
 				}
 			}
 		}
@@ -506,24 +510,17 @@ namespace Vehicles
 
 			if (!cargoToLoad.NullOrEmpty())
 			{
-				if (!cargoToLoad.NotNullAndAny(x => x.AnyThing != null && x.CountToTransfer > 0 && !inventory.innerContainer.Contains(x.AnyThing)))
+				Command_Action cancelLoad = new Command_Action
 				{
-					cargoToLoad.Clear();
-				}
-				else
-				{
-					Command_Action cancelLoad = new Command_Action
+					defaultLabel = "DesignatorCancel".Translate(),
+					icon = VehicleDef.CancelCargoIcon,
+					action = delegate ()
 					{
-						defaultLabel = "DesignatorCancel".Translate(),
-						icon = VehicleDef.CancelCargoIcon,
-						action = delegate ()
-						{
-							Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(this, ReservationType.LoadVehicle);
-							cargoToLoad.Clear();
-						}
-					};
-					yield return cancelLoad;
-				}
+						Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(this, ReservationType.LoadVehicle);
+						cargoToLoad.Clear();
+					}
+				};
+				yield return cancelLoad;
 			}
 			else
 			{
@@ -537,6 +534,22 @@ namespace Vehicles
 					}
 				};
 				yield return loadVehicle;
+			}
+
+			if (FishingCompatibility.Active && SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.fishing), VehicleDef.properties.fishing))
+			{
+				Command_Toggle fishing = new Command_Toggle
+				{
+					defaultLabel = "VF_StartFishing".Translate(),
+					defaultDesc = "VF_StartFishingDesc".Translate(),
+					icon = VehicleTex.FishingIcon,
+					isActive = () => currentlyFishing,
+					toggleAction = delegate ()
+					{
+						currentlyFishing = !currentlyFishing;
+					}
+				};
+				yield return fishing;
 			}
 
 			Command_Action flagForLoading = new Command_Action
@@ -571,7 +584,7 @@ namespace Vehicles
 						}
 					}, delegate (LocalTargetInfo target)
 					{
-						if (target.Thing is Pawn pawn && pawn.IsColonistPlayerControlled)
+						if (target.Thing is Pawn pawn && pawn.IsColonistPlayerControlled && !pawn.Downed)
 						{
 							VehicleHandler handler = pawn.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(handler => handler.AreSlotsAvailable && handler.role.handlingTypes == HandlingTypeFlags.None);
 							PromptToBoardVehicle(pawn, handler);
@@ -626,21 +639,6 @@ namespace Vehicles
 						yield return unloadAction;
 					}
 				}
-				if (SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.fishing), VehicleDef.properties.fishing) && FishingCompatibility.Active)
-				{
-					Command_Toggle fishing = new Command_Toggle
-					{
-						defaultLabel = "VF_StartFishing".Translate(),
-						defaultDesc = "VF_StartFishingDesc".Translate(),
-						icon = VehicleTex.FishingIcon,
-						isActive = (() => currentlyFishing),
-						toggleAction = delegate ()
-						{
-							currentlyFishing = !currentlyFishing;
-						}
-					};
-					yield return fishing;
-				}
 			}
 			if (this.GetLord()?.LordJob is LordJob_FormAndSendVehicles formCaravanLordJob)
 			{
@@ -681,7 +679,7 @@ namespace Vehicles
 				}
 			}
 
-			if (Prefs.DevMode && DebugSettings.godMode && Spawned)
+			if (DebugSettings.ShowDevGizmos && Spawned)
 			{
 				yield return new Command_Action
 				{
@@ -775,12 +773,12 @@ namespace Vehicles
 					defaultLabel = "Flash OccupiedRect",
 					action = delegate ()
 					{
-						if (vPather.Moving)
+						if (vehiclePather.Moving)
 						{
 							IntVec3 prevCell = Position;
 							Rot8 rot = FullRotation;
 							HashSet<IntVec3> cellsToHighlight = new HashSet<IntVec3>();
-							foreach (IntVec3 cell in vPather.curPath.NodesReversed)
+							foreach (IntVec3 cell in vehiclePather.curPath.NodesReversed)
 							{
 								if (prevCell != cell) rot = Rot8.DirectionFromCells(prevCell, cell);
 								if (!rot.IsValid) rot = Rot8.North;

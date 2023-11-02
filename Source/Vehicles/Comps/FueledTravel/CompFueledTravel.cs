@@ -59,6 +59,8 @@ namespace Vehicles
 		public float TargetFuelLevel { get => targetFuelLevel; set => targetFuelLevel = value; }
 		public float FuelPercentOfTarget => fuel / TargetFuelLevel;
 
+		public bool FuelLeaking => leaking;
+
 		//Fuel Consumption
 		public float ConsumptionRatePerTick => FuelEfficiency * EfficiencyTickMultiplier;
 		public FuelConsumptionCondition FuelCondition => Props.fuelConsumptionCondition;
@@ -137,11 +139,11 @@ namespace Vehicles
 			{
 				if (FuelCondition.HasFlag(FuelConsumptionCondition.Moving))
 				{
-					if (Vehicle.Spawned && Vehicle.vPather.Moving)
+					if (Vehicle.Spawned && Vehicle.vehiclePather.Moving)
 					{
 						return true;
 					}
-					if (Vehicle.GetVehicleCaravan() is VehicleCaravan caravan && caravan.vPather.MovingNow)
+					if (Vehicle.GetVehicleCaravan() is VehicleCaravan caravan && caravan.vehiclePather.MovingNow)
 					{
 						return true;
 					}
@@ -295,7 +297,7 @@ namespace Vehicles
 		{
 			yield return new Gizmo_RefuelableFuelTravel(this, true);
 
-			if (Prefs.DevMode && DebugSettings.godMode)
+			if (DebugSettings.ShowDevGizmos)
 			{
 				yield return new Command_Action
 				{
@@ -318,7 +320,7 @@ namespace Vehicles
 
 		public virtual IEnumerable<Gizmo> DevModeGizmos()
 		{
-			if (Prefs.DevMode && DebugSettings.godMode)
+			if (DebugSettings.ShowDevGizmos)
 			{
 				yield return new Command_Action
 				{
@@ -474,7 +476,7 @@ namespace Vehicles
 				}
 			}
 
-			if (Vehicle.vPather.Moving)
+			if (Vehicle.vehiclePather.Moving)
 			{
 				DisconnectPower();
 			}

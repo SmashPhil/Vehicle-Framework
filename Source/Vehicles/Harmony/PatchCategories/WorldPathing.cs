@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Linq;
 using HarmonyLib;
 using Verse;
 using Verse.Sound;
@@ -40,15 +41,19 @@ namespace Vehicles
 		{
 			if (c is VehicleCaravan vehicleCaravan)
 			{
-				if (tile < 0 || (tile == vehicleCaravan.Tile && !vehicleCaravan.vPather.Moving))
+				if (tile < 0 || (tile == vehicleCaravan.Tile && !vehicleCaravan.vehiclePather.Moving))
 				{
 					return false;
 				}
-				int num = WorldHelper.BestGotoDestForVehicle(vehicleCaravan, tile);
-				if (num >= 0)
+				if (!vehicleCaravan.Vehicles.All(vehicle => WorldVehiclePathGrid.Instance.Passable(tile, vehicle.VehicleDef) && vehicle.VehicleDef.vehicleType != VehicleType.Air))
 				{
-					vehicleCaravan.vPather.StartPath(num, null, true, true);
-					vehicleCaravan.gotoMote.OrderedToTile(num);
+					return false;
+				}
+				int bestTile = WorldHelper.BestGotoDestForVehicle(vehicleCaravan, tile);
+				if (bestTile >= 0)
+				{
+					vehicleCaravan.vehiclePather.StartPath(bestTile, null, true, true);
+					vehicleCaravan.gotoMote.OrderedToTile(bestTile);
 					SoundDefOf.ColonistOrdered.PlayOneShotOnCamera(null);
 				}
 				return false;
@@ -68,7 +73,7 @@ namespace Vehicles
 		{
 			if (___caravan is VehicleCaravan vehicleCaravan)
 			{
-				vehicleCaravan.vPather.StartPath(destTile, arrivalAction, repathImmediately, resetPauseStatus);
+				vehicleCaravan.vehiclePather.StartPath(destTile, arrivalAction, repathImmediately, resetPauseStatus);
 				return false;
 			}
 			return true;

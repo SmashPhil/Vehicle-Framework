@@ -14,43 +14,87 @@ namespace Vehicles
 
 		private static Listing_SplitColumns listing = new Listing_SplitColumns();
 
+		[TweakField(SettingsType = UISettingsType.ToggleLabel)]
 		public Rot4 north = Rot8.North;
+		[TweakField(SettingsType = UISettingsType.ToggleLabel)]
 		public Rot4 east = Rot8.East;
+		[TweakField(SettingsType = UISettingsType.ToggleLabel)]
 		public Rot4 south = Rot8.South;
+		[TweakField(SettingsType = UISettingsType.ToggleLabel)]
 		public Rot4 west = Rot8.West;
+		[TweakField(SettingsType = UISettingsType.ToggleLabel)]
 		public Rot4 northEast = Rot4.North;
+		[TweakField(SettingsType = UISettingsType.ToggleLabel)]
 		public Rot4 southEast = Rot4.South;
+		[TweakField(SettingsType = UISettingsType.ToggleLabel)]
 		public Rot4 southWest = Rot4.South;
+		[TweakField(SettingsType = UISettingsType.ToggleLabel)]
 		public Rot4 northWest = Rot4.North;
 
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
 		public int layer = 1;
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
 		public int? layerNorth;
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
 		public int? layerEast;
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
 		public int? layerSouth;
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
 		public int? layerWest;
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
 		public int? layerNorthEast;
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
 		public int? layerSouthEast;
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
 		public int? layerSouthWest;
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
 		public int? layerNorthWest;
 
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public Vector3 drawOffset = Vector3.zero;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public Vector3? drawOffsetNorth;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public Vector3? drawOffsetEast;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public Vector3? drawOffsetSouth;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public Vector3? drawOffsetWest;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public Vector3? drawOffsetNorthEast;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public Vector3? drawOffsetSouthEast;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public Vector3? drawOffsetSouthWest;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public Vector3? drawOffsetNorthWest;
 
+		[TweakField(SettingsType = UISettingsType.SliderFloat)]
+		[SliderValues(MinValue = 0, MaxValue = 360, RoundDecimalPlaces = 0, Increment = 1)]
 		public float angle = 0;
+		[TweakField(SettingsType = UISettingsType.SliderFloat)]
+		[SliderValues(MinValue = 0, MaxValue = 360, RoundDecimalPlaces = 0, Increment = 1)]
 		public float? angleNorth;
+		[TweakField(SettingsType = UISettingsType.SliderFloat)]
+		[SliderValues(MinValue = 0, MaxValue = 360, RoundDecimalPlaces = 0, Increment = 1)]
 		public float? angleEast;
+		[TweakField(SettingsType = UISettingsType.SliderFloat)]
+		[SliderValues(MinValue = 0, MaxValue = 360, RoundDecimalPlaces = 0, Increment = 1)]
 		public float? angleSouth;
+		[TweakField(SettingsType = UISettingsType.SliderFloat)]
+		[SliderValues(MinValue = 0, MaxValue = 360, RoundDecimalPlaces = 0, Increment = 1)]
 		public float? angleWest;
+		[TweakField(SettingsType = UISettingsType.SliderFloat)]
+		[SliderValues(MinValue = 0, MaxValue = 360, RoundDecimalPlaces = 0, Increment = 1)]
 		public float? angleNorthEast;
+		[TweakField(SettingsType = UISettingsType.SliderFloat)]
+		[SliderValues(MinValue = 0, MaxValue = 360, RoundDecimalPlaces = 0, Increment = 1)]
 		public float? angleSouthEast;
+		[TweakField(SettingsType = UISettingsType.SliderFloat)]
+		[SliderValues(MinValue = 0, MaxValue = 360, RoundDecimalPlaces = 0, Increment = 1)]
 		public float? angleSouthWest;
+		[TweakField(SettingsType = UISettingsType.SliderFloat)]
+		[SliderValues(MinValue = 0, MaxValue = 360, RoundDecimalPlaces = 0, Increment = 1)]
 		public float? angleNorthWest;
 
 		public Rot4 RotFor(Rot8 rot)

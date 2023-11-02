@@ -132,7 +132,7 @@ namespace Vehicles
 
 		public override void PostMapInit()
 		{
-			vPather.TryResumePathingAfterLoading();
+			vehiclePather.TryResumePathingAfterLoading();
 		}
 
 		public virtual void PostGenerationSetup()
@@ -183,7 +183,7 @@ namespace Vehicles
 			sharedJob ??= new SharedJob();
 			if (!respawningAfterLoad)
 			{
-				vPather.ResetToCurrentPosition();
+				vehiclePather.ResetToCurrentPosition();
 			}
 
 			if (Faction != Faction.OfPlayer)
@@ -228,7 +228,7 @@ namespace Vehicles
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Deep.Look(ref vPather, nameof(vPather), new object[] { this });
+			Scribe_Deep.Look(ref vehiclePather, "vPather", new object[] { this }); //TODO - Rename to vehiclePather in 1.5
 			Scribe_Deep.Look(ref ignition, nameof(ignition), new object[] { this });
 			Scribe_Deep.Look(ref statHandler, nameof(statHandler), new object[] { this });
 			Scribe_Deep.Look(ref sharedJob, nameof(sharedJob));
@@ -260,6 +260,9 @@ namespace Vehicles
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
 				PostLoad();
+#pragma warning disable 0618
+				vPather = vehiclePather;
+#pragma warning restore 0618
 			}
 		}
 	}

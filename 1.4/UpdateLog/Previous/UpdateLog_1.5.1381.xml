@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <!--Can utilize Version.txt file placed in mod's root directory-->
+  <currentVersion>1.5.1381</currentVersion>
+  <!--Startup,GameInit,LoadedGame,NewGame-->
+  <updateOn>Startup</updateOn>
+  <!--Full description shown in update page-->
+  <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+The first of many updates where I will be reworking / improving vehicles on the world map.  If you have feedback for caravan / aerial vehicle UI, please let me know. Thanks!
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed bug where Assign Seat dialog would show colonists assigned to another vehicle.
+
+- Fixed bug where Assign Seat pawn list would not scroll all the way to the bottom of the list.
+
+- Fixed bug where pawn inventory would get counted for mass usage in vehicle caravans, despite them being inside a vehicle. Cargo Capacities do not include pawn mass, gear, and inventory. They should only count things inside the vehicle inventory.
+
+- Fixed bug where vehicle caravans would be unable to form on maps surrounded by vanilla-impassable biomes such as single tile islands, despite the vehicles being able to traverse those biomes.
+
+- Fixed bug where hitbox hits would over-rotate for non-instigator damage such as from explosions, resulting in mirrored damage.
+
+- Fixed edge case where regions would fail to update on edges for vehicles with padding (width &gt; 2), resulting in areas that should be reachable still not registering as such.
+
+- Fixed bug where fuel leaks would continue to spawn filth even after the fuel tank is empty.
+
+- Fixed bug where vehicle caravans were able to traverse impassable vanilla biomes like Oceans despite not being defined with custom biome costs.
+
+- Fixed bug where aerial vehicles with runway restrictions would still be able to takeoff over impassable terrain.
+
+- Removed vehicles from Spawn Pawn debug menu, as spawning them through that would result in partial generation, bugging out the vehicle completely.
+&lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Optimized path cost recalculation, which should significantly decrease the amount of time it takes to generate maps.
+
+- Various minor optimizations for region dirtying.
+&lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- RimHUD after their most recent update.
+
+&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Changed chargePerAmmoCount to float type, allowing 1 ammo to refill multiple shots.
+
+- Added curve for reload times of VehicleTurrets based on pawn counts inside the relevant vehicle roles.
+
+- Added additional support for CE shotgun mechanics.
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
+  <!--Static parameterless method to execute when update log is executed-->
+  <actionOnUpdate></actionOnUpdate>
+  <!--Show update log on next startup.-->
+  <update>false</update>
+  <!--Testing mode prevents the update from saving over the UpdateLog file-->
+  <testing>false</testing>
+  <!--Icon bar shown to the right of the mod's name-->
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon</icon>
+      <url>steam://url/CommunityFilePage/2356577528</url>
+    </li>
+  </rightIconBar>
+  <!--Icon bar shown to the left of the mod's name-->
+  <leftIconBar>
+    <li>
+      <name>Patreon</name>
+      <icon>patreonIcon</icon>
+      <url>https://www.patreon.com/smashphil</url>
+    </li>
+    <li>
+      <name>Cursed Crew</name>
+      <icon>cursedCrewIcon</icon>
+      <url>https://discord.gg/NNe2VxAU7Z</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>

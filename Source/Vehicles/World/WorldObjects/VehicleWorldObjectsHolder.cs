@@ -13,16 +13,16 @@ namespace Vehicles
 
 		private static List<VehicleCaravan> vehicleCaravans = new List<VehicleCaravan>();
 
-		private static List<DockedBoat> dockedBoats = new List<DockedBoat>();
+		private static List<StashedVehicle> stashedVehicles = new List<StashedVehicle>();
 
 		public VehicleWorldObjectsHolder(World world) : base(world)
 		{
 			aerialVehicles ??= new List<AerialVehicleInFlight>();
 			vehicleCaravans ??= new List<VehicleCaravan>();
-			dockedBoats ??= new List<DockedBoat>();
+			stashedVehicles ??= new List<StashedVehicle>();
 			aerialVehicles.RemoveAll(a => a is null);
 			vehicleCaravans.RemoveAll(c => c is null);
-			dockedBoats.RemoveAll(b => b is null);
+			stashedVehicles.RemoveAll(b => b is null);
 			Instance = this;
 		}
 
@@ -32,7 +32,7 @@ namespace Vehicles
 
 		public List<VehicleCaravan> VehicleCaravans => vehicleCaravans;
 
-		public List<DockedBoat> DockedBoats => dockedBoats;
+		public List<StashedVehicle> StashedVehicles => stashedVehicles;
 
 		public AerialVehicleInFlight AerialVehicleObject(VehiclePawn vehicle)
 		{
@@ -44,16 +44,16 @@ namespace Vehicles
 			return VehicleCaravans.FirstOrDefault(c => c.PawnsListForReading.Contains(vehicle));
 		}
 
-		public DockedBoat DockedBoatsObject(VehiclePawn vehicle)
+		public StashedVehicle StashedVehicleObject(VehiclePawn vehicle)
 		{
-			return DockedBoats.FirstOrDefault(d => d.dockedBoats.Contains(vehicle));
+			return StashedVehicles.FirstOrDefault(stash => stash.Vehicles.Contains(vehicle));
 		}
 
 		public void Recache()
 		{
 			aerialVehicles.Clear();
 			vehicleCaravans.Clear();
-			dockedBoats.Clear();
+			stashedVehicles.Clear();
 		}
 
 		public void AddToCache(WorldObject obj)
@@ -66,9 +66,9 @@ namespace Vehicles
 			{
 				vehicleCaravans.Add(caravan);
 			}
-			else if (obj is DockedBoat dockedBoat)
+			else if (obj is StashedVehicle dockedBoat)
 			{
-				dockedBoats.Add(dockedBoat);
+				stashedVehicles.Add(dockedBoat);
 			}
 			return; //air defenses disabled for now
 			//if (obj is Settlement) //TODO - Add check for what settlements can implement air defenses
@@ -97,9 +97,9 @@ namespace Vehicles
 			{
 				vehicleCaravans.Remove(caravan);
 			}
-			else if (obj is DockedBoat dockedBoat)
+			else if (obj is StashedVehicle dockedBoat)
 			{
-				dockedBoats.Remove(dockedBoat);
+				stashedVehicles.Remove(dockedBoat);
 			}
 
 			AirDefensePositionTracker.airDefenseCache.Remove(obj);
@@ -108,9 +108,16 @@ namespace Vehicles
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Collections.Look(ref aerialVehicles, "aerialVehicles", LookMode.Reference);
-			Scribe_Collections.Look(ref vehicleCaravans, "vehicleCaravans", LookMode.Reference);
-			Scribe_Collections.Look(ref dockedBoats, "dockedBoats", LookMode.Reference);
+			Scribe_Collections.Look(ref aerialVehicles, nameof(aerialVehicles), LookMode.Reference);
+			Scribe_Collections.Look(ref vehicleCaravans, nameof(vehicleCaravans), LookMode.Reference);
+			Scribe_Collections.Look(ref stashedVehicles, nameof(stashedVehicles), LookMode.Reference);
+
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				aerialVehicles.RemoveAll(a => a is null);
+				vehicleCaravans.RemoveAll(c => c is null);
+				stashedVehicles.RemoveAll(b => b is null);
+			}
 		}
 	}
 }

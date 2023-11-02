@@ -113,6 +113,19 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan), nameof(Caravan.IsOwner)),
 				postfix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(IsOwnerOfVehicle)));
+			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(Caravan_PathFollower), nameof(Caravan_PathFollower.Moving)),
+				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(VehicleCaravanMoving)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanTweenerUtility), nameof(CaravanTweenerUtility.PatherTweenedPosRoot)),
+				prefix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(VehicleCaravanTweenedPosRoot)));
+			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(Caravan_PathFollower), nameof(Caravan_PathFollower.MovingNow)),
+				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(VehicleCaravanMovingNow)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan_Tweener), nameof(Caravan_Tweener.TweenerTick)),
+				prefix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(VehicleCaravanTweenerTick)));
+
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(SettlementDefeatUtility), nameof(SettlementDefeatUtility.CheckDefeated)),
 				transpiler: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(CheckDefeatedWithVehiclesTranspiler)));
@@ -147,9 +160,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(BestCaravanPawnUtility), nameof(BestCaravanPawnUtility.FindBestNegotiator)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(FindBestNegotiatorInVehicle)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_OfferGifts), nameof(CaravanArrivalAction_OfferGifts.Arrived)),
-				prefix: new HarmonyMethod(typeof(CaravanHandling),
-				nameof(UnloadVehicleOfferGifts)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_OfferGifts), nameof(CaravanArrivalAction_OfferGifts.Arrived)),
+			//	prefix: new HarmonyMethod(typeof(CaravanHandling),
+			//	nameof(UnloadVehicleOfferGifts)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Settlement_TraderTracker), nameof(Settlement_TraderTracker.GiveSoldThingToPlayer)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(GiveSoldThingToAerialVehicle)),
@@ -159,9 +172,9 @@ namespace Vehicles
 			//	postfix: new HarmonyMethod(typeof(CaravanHandling),
 			//	nameof(AddAllTradeablesFromAerialVehicle)));
 
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan_NeedsTracker), "TrySatisfyPawnNeeds"),
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan_NeedsTracker), nameof(Caravan_NeedsTracker.TrySatisfyPawnsNeeds)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
-				nameof(TrySatisfyVehiclePawnsNeeds)));
+				nameof(TrySatisfyVehicleCaravanNeeds)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanTendUtility), nameof(CaravanTendUtility.CheckTend)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(CheckTendInVehicles)));
@@ -171,6 +184,12 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanUtility), nameof(CaravanUtility.RandomOwner)),
 				prefix: new HarmonyMethod(typeof(CaravanHandling),
 				nameof(RandomVehicleOwner)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanMergeUtility), "MergeCaravans"),
+				transpiler: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(MergeWithVehicleCaravanTranspiler)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanMergeUtility), nameof(CaravanMergeUtility.MergeCommand)),
+				postfix: new HarmonyMethod(typeof(CaravanHandling),
+				nameof(DisableMergeForAerialVehicles)));
 
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanArrivalAction_Trade), nameof(CaravanArrivalAction_Trade.CanTradeWith)),
                 postfix: new HarmonyMethod(typeof(CaravanHandling), 
@@ -207,9 +226,9 @@ namespace Vehicles
 					VehicleCaravan caravan = CaravanHelper.ExitMapAndCreateVehicleCaravan(correctedPawns, Faction.OfPlayer, __instance.CurrentTile, __instance.CurrentTile, ___destinationTile, false);
 					___map.Parent.CheckRemoveMapNow();
 					TaggedString taggedString = "MessageReformedCaravan".Translate();
-					if (caravan.vPather.Moving && caravan.vPather.ArrivalAction != null)
+					if (caravan.vehiclePather.Moving && caravan.vehiclePather.ArrivalAction != null)
 					{
-						taggedString += " " + "MessageFormedCaravan_Orders".Translate() + ": " + caravan.vPather.ArrivalAction.Label + ".";
+						taggedString += " " + "MessageFormedCaravan_Orders".Translate() + ": " + caravan.vehiclePather.ArrivalAction.Label + ".";
 					}
 					Messages.Message(taggedString, caravan, MessageTypeDefOf.TaskCompletion, false);
 
@@ -532,7 +551,7 @@ namespace Vehicles
 		{
 			if (!__result.NullOrEmpty())
 			{
-				__result.RemoveAll(c => c is VehicleCaravan vehicleCaravan && vehicleCaravan.vPather.MovingNow);
+				__result.RemoveAll(c => c is VehicleCaravan vehicleCaravan && vehicleCaravan.vehiclePather.MovingNow);
 			}
 		}
 
@@ -950,12 +969,49 @@ namespace Vehicles
 			}
 		}
 
+		public static void VehicleCaravanMoving(ref bool __result, Caravan ___caravan)
+		{
+			if (___caravan is VehicleCaravan vehicleCaravan)
+			{
+				__result = vehicleCaravan.vehiclePather.Moving;
+			}
+		}
+
+		public static bool VehicleCaravanTweenedPosRoot(Caravan caravan, ref Vector3 __result)
+		{
+			if (caravan is VehicleCaravan)
+			{
+				__result = Find.WorldGrid.GetTileCenter(caravan.Tile);
+				return false;
+			}
+			return true;
+		}
+
+		public static void VehicleCaravanMovingNow(ref bool __result, Caravan ___caravan)
+		{
+			if (___caravan is VehicleCaravan vehicleCaravan)
+			{
+				__result = vehicleCaravan.vehiclePather.MovingNow;
+			}
+		}
+
+		public static bool VehicleCaravanTweenerTick(Caravan ___caravan)
+		{
+			if (___caravan is VehicleCaravan vehicleCaravan)
+			{
+				vehicleCaravan.vehicleTweener.TweenerTick();
+				return false;
+			}
+			return true;
+		}
+
 		//REDO?
+		[Obsolete]
 		public static void UnloadVehicleOfferGifts(VehicleCaravan caravan)
 		{
 			if (caravan.HasVehicle())
 			{
-				CaravanHelper.ToggleDocking(caravan, true);
+				//CaravanHelper.ToggleDocking(caravan, true);
 			}
 		}
 
@@ -1057,13 +1113,47 @@ namespace Vehicles
 			return true;
 		}
 
-		//REDO?
-		public static bool TrySatisfyVehiclePawnsNeeds(Pawn pawn, Caravan_NeedsTracker __instance)
+		public static IEnumerable<CodeInstruction> MergeWithVehicleCaravanTranspiler(IEnumerable<CodeInstruction> instructions)
 		{
-			if(pawn is VehiclePawn)
+			List<CodeInstruction> instructionList = instructions.ToList();
+			for (int i = 0; i < instructionList.Count; i++)
 			{
-				if (pawn.needs?.AllNeeds.NullOrEmpty() ?? true)
-					return false;
+				CodeInstruction instruction = instructionList[i];
+
+				if (instruction.opcode == OpCodes.Stloc_0)
+				{
+					yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(CaravanHelper), nameof(CaravanHelper.CaravanForMerging)));
+				}
+
+				yield return instruction;
+			}
+		}
+
+		public static void DisableMergeForAerialVehicles(ref Command __result, Caravan caravan)
+		{
+			if (__result != null && caravan is VehicleCaravan vehicleCaravan)
+			{
+				List<WorldObject> selectedObjects = Find.WorldSelector.SelectedObjects;
+				for (int i = 0; i < selectedObjects.Count; i++)
+				{
+					if (selectedObjects[i] is VehicleCaravan selectedCaravan)
+					{
+						if (selectedCaravan.AerialVehicle || vehicleCaravan.AerialVehicle)
+						{
+							__result.Disable("VF_CantMergeAerialVehicle".Translate());
+						}
+					}
+				}
+			}
+		}
+
+		public static bool TrySatisfyVehicleCaravanNeeds(Caravan_NeedsTracker __instance)
+		{
+			if (__instance.caravan is VehicleCaravan vehicleCaravan)
+			{
+				vehicleCaravan.TrySatisfyPawnsNeeds();
+				return false;
 			}
 			return true;
 		}

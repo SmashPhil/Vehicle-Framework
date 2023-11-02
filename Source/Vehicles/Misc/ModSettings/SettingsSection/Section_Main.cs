@@ -43,7 +43,7 @@ namespace Vehicles
 
 		/* Fishing */
 		public float fishingMultiplier = 1f;
-		public int fishingDelay = 10000;
+		public int fishingDelay = 1000;
 		public int fishingSkillIncrease = 5;
 		public bool fishingPersists = true;
 
@@ -96,7 +96,7 @@ namespace Vehicles
 
 			/* Fishing */
 			fishingMultiplier = 1f;
-			fishingDelay = 10000;
+			fishingDelay = 1000;
 			fishingSkillIncrease = 5;
 			fishingPersists = true;
 
@@ -143,7 +143,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref opportunisticTicking, nameof(opportunisticTicking), defaultValue: true);
 
 			Scribe_Values.Look(ref fishingMultiplier, nameof(fishingMultiplier), defaultValue: 1f);
-			Scribe_Values.Look(ref fishingDelay, nameof(fishingDelay), defaultValue: 10000);
+			Scribe_Values.Look(ref fishingDelay, nameof(fishingDelay), defaultValue: 1000);
 			Scribe_Values.Look(ref fishingSkillIncrease, nameof(fishingSkillIncrease), defaultValue: 5);
 			Scribe_Values.Look(ref fishingPersists, nameof(fishingPersists), defaultValue: true);
 
@@ -227,7 +227,7 @@ namespace Vehicles
 					listingStandard.Header(fishingHeader, ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 					listingStandard.Gap(4);
 					listingStandard.SliderLabeled("VF_FishingMultiplier".Translate(), "VF_FishingMultiplierTooltip".Translate(), "%", ref fishingMultiplier, 0.1f, 3, 100, 1);
-					listingStandard.IntegerBox("VF_FishingDelay".Translate(), "VF_FishingDelayTooltip".Translate(), ref fishingDelay, listingStandard.ColumnWidth * 0.5f, 0, 0);
+					listingStandard.IntegerBox("VF_FishingDelay".Translate(), "VF_FishingDelayTooltip".Translate(), ref fishingDelay, listingStandard.ColumnWidth * 0.5f, 0, min: 120);
 					listingStandard.Gap(8);
 					listingStandard.IntegerBox("VF_FishingSkill".Translate(), "VF_FishingSkillTooltip".Translate(), ref fishingSkillIncrease, listingStandard.ColumnWidth * 0.5f, 0, 0);
 					listingStandard.Gap(8);

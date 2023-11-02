@@ -634,6 +634,13 @@ namespace Vehicles
 		private bool TryFormAndSendCaravan()
 		{
 			List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables);
+			foreach (Pawn pawn in pawnsFromTransferables)
+			{
+				if (pawn is VehiclePawn vehicle)
+				{
+					vehicle.DisembarkAll();
+				}
+			}
 			if (!CheckForErrors(pawnsFromTransferables))
 			{
 				return false;
@@ -674,9 +681,9 @@ namespace Vehicles
 			VehicleCaravan caravan = CaravanHelper.ExitMapAndCreateVehicleCaravan(pawnsFromTransferables, Faction.OfPlayer, CurrentTile, CurrentTile, destinationTile, false);
 			map.Parent.CheckRemoveMapNow();
 			TaggedString taggedString = "MessageReformedCaravan".Translate();
-			if (caravan.vPather.Moving && caravan.vPather.ArrivalAction != null)
+			if (caravan.vehiclePather.Moving && caravan.vehiclePather.ArrivalAction != null)
 			{
-				taggedString += " " + "MessageFormedCaravan_Orders".Translate() + ": " + caravan.vPather.ArrivalAction.Label + ".";
+				taggedString += " " + "MessageFormedCaravan_Orders".Translate() + ": " + caravan.vehiclePather.ArrivalAction.Label + ".";
 			}
 			Messages.Message(taggedString, caravan, MessageTypeDefOf.TaskCompletion, false);
 			return true;
@@ -776,11 +783,19 @@ namespace Vehicles
 			{
 				return false;
 			}
-			Pawn pawn = pawns.Find((Pawn pawn) => pawn is VehiclePawn vehicle && pawns.NotNullAndAny(p => !(p is VehiclePawn) && p.Spawned && p.IsColonist && !p.CanReach(vehicle, PathEndMode.Touch, Danger.Deadly)));
-			if (pawn != null)
+			if (!pawns.NullOrEmpty())
 			{
-				Messages.Message("CaravanPawnIsUnreachable".Translate(pawn.LabelShort, pawn), pawn, MessageTypeDefOf.RejectInput, false);
-				return false;
+				foreach (VehiclePawn vehicle in vehicles)
+				{
+					foreach (Pawn pawn in pawns)
+					{
+						if (pawn.Spawned && pawn.IsColonist && !pawn.CanReach(vehicle, PathEndMode.Touch, Danger.Deadly))
+						{
+							Messages.Message("CaravanPawnIsUnreachable".Translate(pawn.LabelShort, pawn), pawn, MessageTypeDefOf.RejectInput, historical: false);
+							return false;
+						}
+					}
+				}
 			}
 			for (int i = 0; i < transferables.Count; i++)
 			{
@@ -841,7 +856,8 @@ namespace Vehicles
 		private bool TryFindExitSpot(List<Pawn> pawns, bool reachableForEveryColonist, out IntVec3 spot)
 		{
 			bool result;
-			if (false && pawns.HasBoat())
+			/**
+			if (pawns.HasBoat())
 			{
 				//Rot4 rotFromTo = Find.WorldGrid.GetRotFromTo(__instance.CurrentTile, ___startingTile); WHEN WORLD GRID IS ESTABLISHED
 				Rot4 rotFromTo;
@@ -893,6 +909,7 @@ namespace Vehicles
 				pawn.ClampToMap(ref spot, map);
 				return result;
 			}
+			**/
 			CaravanExitMapUtility.GetExitMapEdges(Find.WorldGrid, CurrentTile, startingTile, out Rot4 primary, out Rot4 secondary);
 			result = (primary != Rot4.Invalid && TryFindExitSpot(pawns, reachableForEveryColonist, primary, out spot)) || (secondary != Rot4.Invalid &&
 				TryFindExitSpot(pawns, reachableForEveryColonist, secondary, out spot)) ||
@@ -914,25 +931,38 @@ namespace Vehicles
 			return TryFindExitSpot(map, pawns, reachableForEveryColonist, exitDirection, out spot);
 		}
 
-		private static bool TryFindExitSpot(Map map, List<Pawn> pawns, bool reachableForEveryColonist, Rot4 exitDirection, out IntVec3 spot)
+		private static bool TryFindExitSpot(Map map, List<Pawn> pawns, bool reachableForEveryColonist, Rot4 exitDirection, out IntVec3 spot, bool debug = false)
 		{
 			List<VehiclePawn> vehicles = pawns.Where(p => p is VehiclePawn).Cast<VehiclePawn>().ToList();
 			VehiclePawn largestVehicle = vehicles.MaxBy(vehicle => vehicle.VehicleDef.Size.z);
-			
+
+			IntVec3 root = largestVehicle.Position;
 			if (reachableForEveryColonist)
 			{
 				return CellFinderExtended.TryFindRandomEdgeCellWith(delegate (IntVec3 cell)
 				{
 					if (vehicles.Any(vehicle => !ValidVehicleExitSpot(cell, vehicle, map)))
 					{
+						if (debug)
+						{
+							DebugDrawCell(root, cell, false);
+						}
 						return false;
 					}
 					for (int j = 0; j < pawns.Count; j++)
 					{
 						if (pawns[j].IsColonist && !pawns[j].Downed && !pawns[j].CanReach(cell, PathEndMode.Touch, Danger.Deadly, false))
 						{
+							if (debug)
+							{
+								DebugDrawCell(root, cell, false);
+							}
 							return false;
 						}
+					}
+					if (debug)
+					{
+						DebugDrawCell(root, cell, true);
 					}
 					return true;
 				}, map, exitDirection, largestVehicle.VehicleDef, CellFinder.EdgeRoadChance_Always, out spot);
@@ -949,7 +979,7 @@ namespace Vehicles
 					for (int i = 0; i < pawns.Count; i++)
 					{
 						Pawn pawn = pawns[i];
-						if (pawn.IsColonist && !pawn.Downed && pawn.CanReach(paddedCell, PathEndMode.Touch, Danger.Deadly, false))
+						if (pawn.IsColonist && !pawn.Downed && pawn.CanReach(paddedCell, PathEndMode.Touch, Danger.Deadly))
 						{
 							currentCount++;
 						}
@@ -959,15 +989,39 @@ namespace Vehicles
 						numberCanReach = currentCount;
 						cell = paddedCell;
 					}
+					if (debug)
+					{
+						DebugDrawCell(root, paddedCell, true);
+					}
+				}
+				else
+				{
+					if (debug)
+					{
+						DebugDrawCell(root, paddedCell, false);
+					}
 				}
 			}
 			spot = cell;
 			return cell.IsValid;
+
+			void DebugDrawCell(IntVec3 root, IntVec3 cell, bool reachable)
+			{
+				float colorPct = 0.5f;
+				SimpleColor lineColor = SimpleColor.Green;
+				if (!reachable)
+				{
+					colorPct = 0;
+					lineColor = SimpleColor.Red;
+				}
+				map.debugDrawer.FlashCell(cell, colorPct, duration: 360);
+				map.debugDrawer.FlashLine(cell, root, duration: 360, color: lineColor);
+			}
 		}
 
 		private static bool ValidVehicleExitSpot(IntVec3 cell, VehiclePawn vehicle, Map map)
 		{
-			return !cell.Fogged(map) && VehicleReachabilityUtility.CanReachVehicle(vehicle, cell, PathEndMode.OnCell, Danger.Deadly) && vehicle.DrivableRectOnCell(cell);
+			return !cell.Fogged(map) && VehicleReachabilityUtility.CanReachVehicle(vehicle, cell, PathEndMode.OnCell, Danger.Deadly) && vehicle.DrivableRectOnCell(cell, maxPossibleSize: true);
 		}
 
 		public bool TryFindExitSpotOnWater(List<Pawn> pawns, bool reachableForEveryColonist, Rot4 exitDirection, out IntVec3 spot)
@@ -1293,17 +1347,9 @@ namespace Vehicles
 						}
 						for (int i = 0; i < 100; i++)
 						{
-							if (TryFindExitSpot(map, new List<Pawn>() { vehicle }, true, rot, out IntVec3 cell))
+							if (!TryFindExitSpot(map, new List<Pawn>() { vehicle }, true, rot, out IntVec3 cell, debug: true))
 							{
-								float colorPct = 0.5f;
-								SimpleColor lineColor = SimpleColor.Green;
-								if (!vehicle.DrivableRectOnCell(cell))
-								{
-									colorPct = 0;
-									lineColor = SimpleColor.Red;
-								}
-								map.debugDrawer.FlashCell(cell, colorPct, duration: 360);
-								map.debugDrawer.FlashLine(cell, vehicle.Position, duration: 360, color: lineColor);
+								TryFindExitSpot(map, new List<Pawn>() { vehicle }, false, rot, out cell, debug: true);
 							}
 						}
 					}

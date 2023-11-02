@@ -153,6 +153,11 @@ namespace Vehicles
 		/// </summary>
 		public static Func<string, Def> LookupAmmosetCE = null;
 
+		/// <summary>
+		/// (projectileDef, ammoDef, ammosetDef, turret, recoilAmount)
+		/// </summary>
+		public static Action<ThingDef, ThingDef, Def, VehicleTurret, float> NotifyShotFiredCE = null;
+
 
 	        /// <summary>
 		/// (ammoDef, ammosetDef, spread, ret Tuple<projectileCount, spread>)
@@ -243,7 +248,7 @@ namespace Vehicles
 				float maxTicks = turretDef.reloadTimer * 60f;
 				if (turretDef.reloadTimerMultiplierPerCrewCount != null)
                 {
-                    var gunners = vehicle.AllCannonCrew; 
+                    List<Pawn> gunners = vehicle.AllCannonCrew; 
                     maxTicks *= turretDef.reloadTimerMultiplierPerCrewCount.Evaluate(gunners.Count);
                 }
                 return Mathf.CeilToInt(maxTicks);
@@ -845,12 +850,12 @@ namespace Vehicles
 			if (recoilTracker != null)
 			{
 				recoilTicked = recoilTracker.RecoilTick();
-				if (!recoilTrackers.NullOrEmpty())
+			}
+			if (!recoilTrackers.NullOrEmpty())
+			{
+				for (int i = 0; i < turretDef.graphics.Count; i++)
 				{
-					for (int i = 0; i < turretDef.graphics.Count; i++)
-					{
-						recoilTicked |= recoilTrackers[i]?.RecoilTick() ?? false;
-					}
+					recoilTicked |= recoilTrackers[i]?.RecoilTick() ?? false;
 				}
 			}
 			//Keep ticking until no longer needed
@@ -1049,8 +1054,6 @@ namespace Vehicles
 
 					if (TargetLocked && ReadyToFire)
 					{
-						float facing = cannonTarget.Thing != null ? (cannonTarget.Thing.DrawPos - TurretLocation).AngleFlat() : (cannonTarget.Cell - TurretLocation.ToIntVec3()).AngleFlat;
-						GenDraw.DrawAimPieRaw(TurretLocation + new Vector3(aimPieOffset.x, Altitudes.AltInc, aimPieOffset.y).RotatedBy(TurretRotation), facing, (int)(PrefireTickCount * 0.5f));
 						PrefireTickCount--;
 					}
 				}
@@ -1107,7 +1110,16 @@ namespace Vehicles
 			IntVec3 cell = cannonTarget.Cell;//
 			if (CurrentFireMode.spreadRadius > 0)
 			{
-				cell += GenRadial.RadialPattern[Rand.Range(0, GenRadial.NumCellsInRadius(CurrentFireMode.spreadRadius * (range / turretDef.maxRange)))];
+				int cellsInRadius;
+				if (turretDef.maxRange > 0)
+				{
+					cellsInRadius = GenRadial.NumCellsInRadius(CurrentFireMode.spreadRadius * (range / turretDef.maxRange));
+				}
+				else
+				{
+					cellsInRadius = GenRadial.NumCellsInRadius(CurrentFireMode.spreadRadius);
+				}
+				cell += GenRadial.RadialPattern[Rand.Range(0, cellsInRadius)];
 			}
 			if (CurrentTurretFiring >= turretDef.projectileShifting.Count)
 			{
@@ -1192,6 +1204,11 @@ namespace Vehicles
 						LaunchProjectileCE(projectile, loadedAmmo, turretData?._ammoSet, new Vector2(launchCell.x, launchCell.z), cannonTarget, vehicle, sa + vce.y, tr + vce.x, shotHeight, speed);
 					}
 					while (--projectileCount > 0);
+
+					if (NotifyShotFiredCE != null)
+					{
+						NotifyShotFiredCE(projectile, loadedAmmo, turretData?._ammoSet, this, recoil);
+					}
 				}
 				turretDef.shotSound?.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map));
 				vehicle.Drawer.rTracker.Notify_TurretRecoil(this, Ext_Math.RotateAngle(TurretRotation, 180));
@@ -1307,6 +1324,7 @@ namespace Vehicles
 			{
 				VehicleGraphics.DrawTurret(this, drawPos, Rot8.North);
 				DrawTargeter();
+				DrawAimPie();
 			}
 		}
 
@@ -1316,6 +1334,7 @@ namespace Vehicles
 			{
 				VehicleGraphics.DrawTurret(this, Rot8.North);
 				DrawTargeter();
+				DrawAimPie();
 			}
 		}
 
@@ -1380,6 +1399,15 @@ namespace Vehicles
 						}
 					}
 				}
+			}
+		}
+
+		protected virtual void DrawAimPie()
+		{
+			if (TargetLocked && ReadyToFire)
+			{
+				float facing = cannonTarget.Thing != null ? (cannonTarget.Thing.DrawPos - TurretLocation).AngleFlat() : (cannonTarget.Cell - TurretLocation.ToIntVec3()).AngleFlat;
+				GenDraw.DrawAimPieRaw(TurretLocation + new Vector3(aimPieOffset.x, Altitudes.AltInc, aimPieOffset.y).RotatedBy(TurretRotation), facing, (int)(PrefireTickCount * 0.5f));
 			}
 		}
 

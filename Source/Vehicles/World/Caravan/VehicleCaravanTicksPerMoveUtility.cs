@@ -39,6 +39,7 @@ namespace Vehicles
 
 		public static int GetTicksPerMove(List<Pawn> pawns, float massUsage, float massCapacity, StringBuilder explanation = null)
 		{
+			bool immobile = false;
 			if (!pawns.NullOrEmpty())
 			{
 				moveSpeedTicks.Clear();
@@ -53,9 +54,17 @@ namespace Vehicles
 					{
 						float worldSpeedMultiplier = vehicle.WorldSpeedMultiplier;
 						float moveSpeed = vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed) * worldSpeedMultiplier / 60;
-						int ticksPerTile = TicksFromMoveSpeed(moveSpeed);
-						moveSpeedTicks.Add(ticksPerTile);
-						ticksExplanation?.AppendLine($"  {vehicle.LabelCap}: {GenDate.TicksPerDay / ticksPerTile:0.#} {"TilesPerDay".Translate()}");
+						if (moveSpeed > 0)
+						{
+							int ticksPerTile = TicksFromMoveSpeed(moveSpeed);
+							moveSpeedTicks.Add(ticksPerTile);
+							ticksExplanation?.AppendLine($"  {vehicle.LabelCap}: {GenDate.TicksPerDay / ticksPerTile:0.#} {"TilesPerDay".Translate()}");
+						}
+						else
+						{
+							immobile = true;
+							ticksExplanation?.AppendLine($"  {vehicle.LabelCap}: 0 {"TilesPerDay".Translate()}");
+						}
 					}
 					else if (!pawn.IsInVehicle())
 					{
@@ -65,7 +74,11 @@ namespace Vehicles
 						ticksExplanation?.AppendLine($"  {pawn.LabelCap}: {GenDate.TicksPerDay / ticksPerTile:0.#} {"TilesPerDay".Translate()}");
 					}
 				}
-				float averageVehicleSpeed = (float)moveSpeedTicks.Average();
+				float averageVehicleSpeed = float.MaxValue;
+				if (moveSpeedTicks.Count > 0 && !immobile)
+				{
+					averageVehicleSpeed = (float)moveSpeedTicks.Average();
+				}
 				int averageVehicleTicks = Mathf.RoundToInt(averageVehicleSpeed);
 				if (explanation != null)
 				{
@@ -76,7 +89,8 @@ namespace Vehicles
 						explanation.AppendLine($"  {"MultiplierForCarriedMass".Translate()}");
 					}
 					explanation.AppendLine();
-					explanation.AppendLine($"  {"Average".Translate()}: {GenDate.TicksPerDay / averageVehicleTicks:0.#} {"TilesPerDay".Translate()}");
+					float ticksPerDay = (float)GenDate.TicksPerDay / averageVehicleTicks;
+					explanation.AppendLine($"  {"Average".Translate()}: {ticksPerDay:0.#} {"TilesPerDay".Translate()}");
 				}
 				return averageVehicleTicks;
 			}
@@ -86,7 +100,7 @@ namespace Vehicles
 			}
 			return DefaultTicksPerMove;
 
-			int TicksFromMoveSpeed(float moveSpeed)
+			static int TicksFromMoveSpeed(float moveSpeed)
 			{
 				int moveSpeedRatio = Mathf.RoundToInt(1 / moveSpeed);
 				float tickSpeed = moveSpeedRatio * CellToTilesConversionRatio;
@@ -114,7 +128,11 @@ namespace Vehicles
 
 		public static float ApproxTilesPerDay(VehicleCaravan caravan, StringBuilder explanation = null)
 		{
-			return ApproxTilesPerDay(caravan.UniqueVehicleDefsInCaravan().ToList(), caravan.TicksPerMove, caravan.Tile, caravan.vPather.Moving ? caravan.vPather.nextTile : -1, explanation, explanation != null ? caravan.TicksPerMoveExplanation : null);
+			if (caravan.AerialVehicle)
+			{
+				return 0;
+			}
+			return ApproxTilesPerDay(caravan.UniqueVehicleDefsInCaravan().ToList(), caravan.TicksPerMove, caravan.Tile, caravan.vehiclePather.Moving ? caravan.vehiclePather.nextTile : -1, explanation, explanation != null ? caravan.TicksPerMoveExplanation : null);
 		}
 
 		public static float ApproxTilesPerDay(List<VehicleDef> vehicleDefs, int ticksPerMove, int tile, int nextTile, StringBuilder explanation = null, string caravanTicksPerMoveExplanation = null)

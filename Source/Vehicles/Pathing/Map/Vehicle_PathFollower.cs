@@ -401,6 +401,10 @@ namespace Vehicles
 				waitTicks--;
 				return;
 			}
+			if (CalculatingPath)
+			{
+				return;
+			}
 
 			CellRect hitboxBeforeMoving = vehicle.OccupiedRect();
 
@@ -687,7 +691,7 @@ namespace Vehicles
 			{
 				if (ThreadHelper.AnyVehicleBlockingPathAt(cell, vehicle) is VehiclePawn otherVehicle)
 				{
-					if (!otherVehicle.vPather.Moving && !otherVehicle.vPather.Waiting)
+					if (!otherVehicle.vehiclePather.Moving && !otherVehicle.vehiclePather.Waiting)
 					{
 						if (PathingHelper.TryFindNearestStandableCell(vehicle, destination.Cell, out IntVec3 result))
 						{
@@ -757,7 +761,7 @@ namespace Vehicles
 				{
 					if (ThreadHelper.AnyVehicleBlockingPathAt(cell, vehicle) is VehiclePawn otherVehicle)
 				{
-						if (otherVehicle.vPather.Moving && !otherVehicle.vPather.Waiting)
+						if (otherVehicle.vehiclePather.Moving && !otherVehicle.vehiclePather.Waiting)
 						{
 							return PathRequest.Wait;
 						}

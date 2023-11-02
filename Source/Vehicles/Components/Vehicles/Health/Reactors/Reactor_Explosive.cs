@@ -9,6 +9,8 @@ namespace Vehicles
 	{
 		public float chance = 1;
 		public float maxHealth = 1;
+		public int damage = -1;
+		public float armorPenetration = -1;
 		public int radius;
 		public DamageDef damageDef;
 
@@ -20,8 +22,12 @@ namespace Vehicles
 				{
 					offset = IntVec2.Zero;
 				}
-				IntVec3 loc = new IntVec3(vehicle.Position.x + offset.x, 0, vehicle.Position.z + offset.z);
-				GenExplosion.DoExplosion(loc, vehicle.Map, radius, damageDef, vehicle, damageDef.defaultDamage, damageDef.defaultArmorPenetration);
+				IntVec2 loc = new IntVec2(offset.x, offset.z);
+				IntVec2 adjustedLoc = loc.RotatedBy(vehicle.Rotation, vehicle.VehicleDef.Size);
+				IntVec3 explosionCell = new IntVec3(adjustedLoc.x + vehicle.Position.x, 0, adjustedLoc.z + vehicle.Position.z);
+				int damage = this.damage > 0 ? this.damage : damageDef.defaultDamage;
+				float armorPenetration = this.armorPenetration > 0 ? this.armorPenetration : damageDef.defaultArmorPenetration;
+				GenExplosion.DoExplosion(explosionCell, vehicle.Map, radius, damageDef, vehicle, damage, armorPenetration);
 			}
 		}
 	}

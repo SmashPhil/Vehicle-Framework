@@ -90,7 +90,7 @@ namespace Vehicles
 		{
 			if (trad.AnyThing is Pawn pawn)
 			{
-				readOnly = CaravanHelper.assignedSeats.ContainsKey(pawn) || pawn.Downed || pawn.IsInVehicle();
+				readOnly = CaravanHelper.assignedSeats.ContainsKey(pawn) || pawn.IsInVehicle();
 			}
 		}
 
