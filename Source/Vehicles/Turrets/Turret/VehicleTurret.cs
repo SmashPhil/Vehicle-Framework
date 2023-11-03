@@ -1201,7 +1201,7 @@ namespace Vehicles
 						double spreadDirection = Rand.Value * Math.PI * 2;
 						vce.y = (float)(randomSpread * Math.Sin(spreadDirection));
 						vce.x = (float)(randomSpread * Math.Cos(spreadDirection));
-						LaunchProjectileCE(projectile, loadedAmmo, turretData?._ammoSet, new Vector2(launchCell.x, launchCell.z), cannonTarget, vehicle, sa + vce.y, tr + vce.x, shotHeight, speed);
+						LaunchProjectileCE(projectile, loadedAmmo, turretData?._ammoSet, new Vector2(launchCell.x, launchCell.z), cannonTarget, vehicle, sa + vce.y * Mathf.Deg2Rad, tr + vce.x, shotHeight, speed);
 					}
 					while (--projectileCount > 0);
 
