@@ -141,8 +141,12 @@ namespace Vehicles
 		public static IntVec3 PadForHitbox(this IntVec3 cell, Map map, VehicleDef vehicleDef)
 		{
 			int largestSize = Mathf.Max(vehicleDef.Size.x, vehicleDef.Size.z);
+			bool even = largestSize % 2 == 0;
 			int padding = Mathf.CeilToInt(largestSize / 2f);
-
+			if (even)
+			{
+				padding += 1; // If size is even, add 1 to account for rotations with lower center point.  This will ensure all rotations are padded enough
+			}
 			if (cell.x < padding)
 			{
 				cell.x = padding;

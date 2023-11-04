@@ -30,12 +30,17 @@ namespace Vehicles
 				{
 					int countLeft = CountLeftForItem(vehicle, pawn, thing);
 					int jobCount = Mathf.Min(thing.stackCount, countLeft);
+					Log.Message($"Found: {thing} to pack. CountLeft={countLeft} JobCount={jobCount}");
 					if (jobCount > 0)
 					{
 						Job job = JobMaker.MakeJob(JobDefOf_Vehicles.LoadVehicle, thing, t);
 						job.count = jobCount;
 						return job;
 					}
+				}
+				else
+				{
+					Log.Message($"Nothing to pack");
 				}
 			}
 			return null;
@@ -60,10 +65,18 @@ namespace Vehicles
 			{
 				return null;
 			}
-			Thing result = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForGroup(ThingRequestGroup.HaulableEver), PathEndMode.Touch, TraverseParms.For(pawn), 
-				validator: (Thing thing) => neededItems.Contains(thing) && pawn.CanReserve(thing));
+
+			Thing result = ClosestHaulable(pawn, ThingRequestGroup.Pawn);
+			result ??= ClosestHaulable(pawn, ThingRequestGroup.HaulableEver);
+			Log.Message($"Result = {result}");
 			neededItems.Clear();
 			return result;
+		}
+
+		private static Thing ClosestHaulable(Pawn pawn, ThingRequestGroup thingRequestGroup)
+		{
+			return GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForGroup(thingRequestGroup), PathEndMode.Touch, TraverseParms.For(pawn),
+				validator: (Thing thing) => neededItems.Contains(thing) && pawn.CanReserve(thing));
 		}
 
 		public static int CountLeftToPack(VehiclePawn vehicle, Pawn pawn, TransferableOneWay transferable)

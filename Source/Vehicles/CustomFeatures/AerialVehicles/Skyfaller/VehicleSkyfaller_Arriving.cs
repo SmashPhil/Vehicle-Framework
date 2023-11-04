@@ -37,6 +37,7 @@ namespace Vehicles
 				if (delayLandingTicks <= 0 && Position.InBounds(Map))
 				{
 					FinalizeLanding();
+					return;
 				}
 			}
 			if (Find.TickManager.TicksGame % NotificationSquishInterval == 0 && Map != null)
