@@ -60,12 +60,33 @@ namespace Vehicles
 			float mass = MassUtility.GearAndInventoryMass(Vehicle) + cannonsNum;
 			float capacity = Vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
 			Widgets.Label(rect, "MassCarried".Translate(mass.ToString("0.##"), capacity.ToString("0.##")));
+
+			Rect rectDropAll = new Rect(rect.xMax - ThingDropButtonSize, curY, ThingDropButtonSize, ThingDropButtonSize);
+			if (AllowDropping && Inventory.Any)
+			{
+				TooltipHandler.TipRegion(rectDropAll, "EjectAll".Translate());
+				if (Widgets.ButtonImageFitted(rectDropAll, VehicleTex.Drop))
+				{
+					SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
+					InterfaceDropAll();
+				}
+			}
 			curY += StandardLineHeight;
 		}
 
 		protected override bool InterfaceDrop(Thing thing)
 		{
 			bool result = base.InterfaceDrop(thing);
+			if (result)
+			{
+				Vehicle.EventRegistry[VehicleEventDefOf.CargoRemoved].ExecuteEvents();
+			}
+			return result;
+		}
+
+		protected override bool InterfaceDropAll()
+		{
+			bool result = base.InterfaceDropAll();
 			if (result)
 			{
 				Vehicle.EventRegistry[VehicleEventDefOf.CargoRemoved].ExecuteEvents();

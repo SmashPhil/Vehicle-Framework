@@ -15,6 +15,7 @@ namespace Vehicles
 		protected const float TopPadding = 20f;
 		protected const float ThingIconSize = 28f;
 		protected const float ThingRowHeight = 28f;
+		protected const float ThingDropButtonSize = 24f;
 		protected const float ThingLeftX = 36f;
 		protected const float StandardLineHeight = 22f;
 
@@ -116,7 +117,7 @@ namespace Vehicles
 
 				if (inventory && AllowDropping && SelThing.Spawned)
 				{
-					Rect rectDrop = new Rect(rect.width - 24f, y, 24f, 24f);
+					Rect rectDrop = new Rect(rect.xMax - ThingDropButtonSize, y, ThingDropButtonSize, ThingDropButtonSize);
 					TooltipHandler.TipRegion(rectDrop, "DropThing".Translate());
 					if (Widgets.ButtonImage(rectDrop, VehicleTex.Drop))
 					{
@@ -191,6 +192,11 @@ namespace Vehicles
 		protected virtual bool InterfaceDrop(Thing thing)
 		{
 			return Inventory.TryDrop(thing, SelThing.Position, SelThing.Map, ThingPlaceMode.Near, out Thing _);
+		}
+
+		protected virtual bool InterfaceDropAll()
+		{
+			return Inventory.TryDropAll(SelThing.Position, SelThing.Map, ThingPlaceMode.Near);
 		}
 	}
 }

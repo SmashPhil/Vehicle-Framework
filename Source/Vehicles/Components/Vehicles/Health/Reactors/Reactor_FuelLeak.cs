@@ -18,6 +18,8 @@ namespace Vehicles
 		/// Rate of fuel leak at unit / second.
 		/// </summary>
 		/// <remarks><see cref="FloatRange.min"/> is the rate at <see cref="maxHealth"/> while <see cref="FloatRange.max"/> is the rate at 0% health.</remarks>
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
+		[NumericBoxValues(MinValue = 0)]
 		public FloatRange rate = new FloatRange(1, 10);
 
 		string ITweakFields.Category => string.Empty;

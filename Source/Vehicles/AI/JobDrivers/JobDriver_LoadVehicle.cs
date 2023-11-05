@@ -119,6 +119,17 @@ namespace Vehicles
 					}
 				}
 			}
+			//Unable to find thing instance, match on def
+			foreach (TransferableOneWay transferable in vehicle.cargoToLoad)
+			{
+				foreach (Thing transferableThing in transferable.things)
+				{
+					if (transferableThing.def == thing.def)
+					{
+						return transferable;
+					}
+				}
+			}
 			return null;
 		}
 	}

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1428</currentVersion>
+  <currentVersion>1.5.1429</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -9,6 +9,8 @@
 Hotfix for a few bugs that slipped through the cracks last patch.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Fixed bug where even-size vehicles wouldn't be able to find an exit for certain rotations of the map.
+
+- Fixed bug where loading cargo for a vehicle would load more than requested.
 
 - Fixed bug where downed pawns were unable to be loaded onto a vehicle.
 
@@ -19,6 +21,9 @@ Hotfix for a few bugs that slipped through the cracks last patch.
 - Fixed bug where Fire would render underneath turrets
 
 - Fixed bug where highlighting vehicle components in the health tab wouldn't highlight the hitbox on the vehicle.
+
+- Fixed bug where compatibility patch for Carry Capacity (Continued) would fail if no vehicle mods were alongside Vehicle Framework.
+
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 
 &lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
@@ -26,6 +31,7 @@ Hotfix for a few bugs that slipped through the cracks last patch.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Exploding vehicle parts will now let off a 'wick' for a certain amount of time, allowing nearby pawns to flee before it explodes.
 
+- Added 'Eject All' button to the Cargo tab
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
   <!--Static parameterless method to execute when update log is executed-->

@@ -78,7 +78,6 @@ namespace Vehicles
 		{
 			if (pawn is VehiclePawn vehicle)
 			{
-				Log.Message($"GOTO VEHICLE");
 				if (vehicle.Faction != Faction.OfPlayer || !vehicle.CanMoveFinal)
 				{
 					return false;
