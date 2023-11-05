@@ -27,6 +27,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(JobDriver_Goto), "MakeNewToils"),
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(GotoToilsPassthrough)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_JobTracker), nameof(Pawn_JobTracker.IsCurrentJobPlayerInterruptible)),
+				prefix: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(JobInterruptibleForVehicle)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), "NeedNewPath"),
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(IsVehicleInNextCell)));
@@ -75,6 +78,7 @@ namespace Vehicles
 		{
 			if (pawn is VehiclePawn vehicle)
 			{
+				Log.Message($"GOTO VEHICLE");
 				if (vehicle.Faction != Faction.OfPlayer || !vehicle.CanMoveFinal)
 				{
 					return false;
@@ -178,6 +182,30 @@ namespace Vehicles
 				}
 				yield return toil;
 			}
+		}
+
+		/// <summary>
+		/// Bypass vanilla check for now, since it forces on-fire pawns to not be able to interrupt jobs which obviously shouldn't apply to vehicles.
+		/// </summary>
+		public static bool JobInterruptibleForVehicle(Pawn_JobTracker __instance, Pawn ___pawn, ref bool __result)
+		{
+			if (___pawn is VehiclePawn)
+			{
+				__result = true;
+				if (__instance.curJob != null)
+				{
+					if (!__instance.curJob.def.playerInterruptible)
+					{
+						__result = false;
+					}
+					else if (__instance.curDriver != null && !__instance.curDriver.PlayerInterruptable)
+					{
+						__result = false;
+					}
+				}
+				return false;
+			}
+			return true;
 		}
 
 		/// <summary>

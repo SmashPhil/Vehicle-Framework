@@ -19,6 +19,7 @@ namespace Vehicles
 	{
 		public bool beached = false;
 
+		[TweakField]
 		public VehicleStatHandler statHandler;
 
 		public VehicleMovementStatus movementStatus = VehicleMovementStatus.Online;

@@ -358,6 +358,18 @@ namespace Vehicles
 			}
 		}
 
+		public virtual void DrawExplosiveWicks(Vector3 drawLoc, Rot8 rot)
+		{
+			for (int i = 0; i < explosives.Count; i++)
+			{
+				TimedExplosion timedExplosion = explosives[i];
+				if (timedExplosion.Active)
+				{
+					timedExplosion.DrawAt(drawLoc, rot);
+				}
+			}
+		}
+
 		public new void ProcessPostTickVisuals(int ticksPassed, CellRect viewRect)
 		{
 			if (!Suspended && Spawned)
@@ -714,6 +726,28 @@ namespace Vehicles
 								component.TakeDamage(this, new DamageInfo(DamageDefOf.Vaporize, component.health * Rand.Range(0.1f, 1)), ignoreArmor: true);
 								Notify_TookDamage();
 							}));
+						}
+						if (!options.NullOrEmpty())
+						{
+							Find.WindowStack.Add(new FloatMenu(options));
+						}
+					}
+				};
+				yield return new Command_Action
+				{
+					defaultLabel = "Explode Component",
+					action = delegate ()
+					{
+						var options = new List<FloatMenuOption>();
+						foreach (VehicleComponent component in statHandler.components)
+						{
+							if (component.props.GetReactor<Reactor_Explosive>() is Reactor_Explosive reactorExplosive)
+							{
+								options.Add(new FloatMenuOption(component.props.label, delegate ()
+								{
+									reactorExplosive.Explode(this, component, new DamageInfo(DamageDefOf.Bomb, component.health * 0.5f));
+								}));
+							}
 						}
 						if (!options.NullOrEmpty())
 						{

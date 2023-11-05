@@ -28,6 +28,8 @@ namespace Vehicles
 		private SelfOrderingList<ThingComp> cachedComps = new SelfOrderingList<ThingComp>();
 		private List<ThingComp> compTickers = new List<ThingComp>();
 
+		private List<TimedExplosion> explosives = new List<TimedExplosion>();
+
 		public override bool Suspended => false; //Vehicles are not suspendable
 
 		public CompVehicleTurrets CompVehicleTurrets
@@ -114,6 +116,22 @@ namespace Vehicles
 			}
 		}
 
+		public TimedExplosion AddTimedExplosion(IntVec2 cell, int ticks, int radius, DamageDef damageDef, int damageAmount = -1, float armorPenetration = -1, DrawOffsets drawOffsets = null)
+		{
+			if (damageAmount < 0)
+			{
+				damageAmount = damageDef.defaultDamage;
+			}
+			if (armorPenetration < 0)
+			{
+				armorPenetration = damageDef.defaultArmorPenetration;
+			}
+
+			TimedExplosion timedExplosion = new TimedExplosion(this, cell, ticks, radius, damageDef, damageAmount, armorPenetration: armorPenetration, drawOffsets: drawOffsets);
+			explosives.Add(timedExplosion);
+			return timedExplosion;
+		}
+
 		public override void Tick()
 		{
 			BaseTickOptimized();
@@ -146,6 +164,21 @@ namespace Vehicles
 				return false; //If opportunistic ticking is off, disallow removal from ticker list. VehicleComp should then always tick
 			}
 			return compTickers.Remove(comp);
+		}
+
+		private void TickExplosives()
+		{
+			if (explosives.Count > 0)
+			{
+				for (int i = explosives.Count - 1; i >= 0; i--)
+				{
+					TimedExplosion timedExplosion = explosives[i];
+					if (!timedExplosion.Tick())
+					{
+						explosives.Remove(timedExplosion);
+					}
+				}
+			}
 		}
 
 		protected virtual void TickAllComps()
@@ -185,7 +218,7 @@ namespace Vehicles
 						jobs.JobTrackerTick();
 					}
 					TickHandlers();
-
+					TickExplosives();
 					if (currentlyFishing)
 					{
 						if (Find.TickManager.TicksGame % 240 == 0)

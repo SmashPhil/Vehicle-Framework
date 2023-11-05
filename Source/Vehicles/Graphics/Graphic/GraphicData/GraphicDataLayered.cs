@@ -10,6 +10,8 @@ namespace Vehicles
 {
 	public class GraphicDataLayered : GraphicData
 	{
+		public const int SubLayerCount = 10;
+
 		protected int layer = 0;
 
 		public Vector3? OriginalDrawOffset { get; private set; }
@@ -37,7 +39,7 @@ namespace Vehicles
 			OriginalDrawOffsetSouth ??= drawOffsetSouth;
 			OriginalDrawOffsetWest ??= drawOffsetWest;
 
-			float layerOffset = layer * (Altitudes.AltInc / Enum.GetNames(typeof(AltitudeLayer)).EnumerableCount());
+			float layerOffset = layer * (Altitudes.AltInc / SubLayerCount);
 
 			drawOffset = OriginalDrawOffset.Value;
 			drawOffset.y += layerOffset;

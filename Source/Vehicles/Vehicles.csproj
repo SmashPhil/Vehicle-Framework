@@ -95,8 +95,10 @@
     <Compile Include="CustomFeatures\AerialVehicles\Skyfaller\Airdrop\AirdropSkyfaller.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Skyfaller\SkyfallerMaker\AirdropSkyfallerMaker.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Targeters\HaulTargeter.cs" />
+    <Compile Include="CustomFeatures\Damage\TimedExplosion.cs" />
     <Compile Include="CustomFeatures\EventDefs\VehicleTurretEventDef.cs" />
     <Compile Include="CustomFeatures\Misc\AnimationEditorTags.cs" />
+    <Compile Include="CustomFeatures\Misc\DrawOffsets.cs" />
     <Compile Include="CustomFeatures\SharedJobs\SharedJob.cs" />
     <Compile Include="AI\JobDrivers\VehicleJobDriver.cs" />
     <Compile Include="AI\WorkGiver\WorkGiver_DisassembleVehicle.cs" />

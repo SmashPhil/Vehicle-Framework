@@ -211,7 +211,7 @@ namespace Vehicles
 			InitRecoilTrackers();
 		}
 
-		string ITweakFields.Label => turretDef.LabelCap;
+		string ITweakFields.Label => nameof(VehicleTurret);////turretDef.LabelCap;
 
 		string ITweakFields.Category => turretDef.LabelCap;
 
@@ -744,7 +744,7 @@ namespace Vehicles
 			}
 			Vector2 turretLoc = VehicleGraphics.TurretDrawOffset(rot, renderProperties, locationRotation, fullLoc ? attachedTo : null);
 			Vector3 graphicOffset = CannonGraphic?.DrawOffset(rot) ?? Vector3.zero;
-			return new Vector3(graphicOffset.x + turretLoc.x, graphicOffset.y + drawLayer * Altitudes.AltInc, graphicOffset.z + turretLoc.y);
+			return new Vector3(graphicOffset.x + turretLoc.x, graphicOffset.y + drawLayer * (Altitudes.AltInc / GraphicDataLayered.SubLayerCount) + VehicleRenderer.YOffset_Body, graphicOffset.z + turretLoc.y);
 		}
 
 		public Rect ScaleUIRectRecursive(VehicleDef vehicleDef, Rect rect, Rot8 rot, float iconScale = 1)

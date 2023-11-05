@@ -7,11 +7,12 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class VehicleComponent : IExposable
+	public class VehicleComponent : IExposable, ITweakFields
 	{
 		public VehiclePawn vehicle;
 		public static Gradient gradient;
 
+		[TweakField]
 		public VehicleComponentProperties props;
 		public float health;
 
@@ -28,6 +29,10 @@ namespace Vehicles
 		public float Efficiency => props.efficiency.Evaluate(HealthPercent); //Allow evaluating beyond 100% via stat parts
 
 		public Color EfficiencyColor => gradient.Evaluate(Efficiency);
+
+		string ITweakFields.Category => props.key;
+
+		string ITweakFields.Label => props.key;
 
 		public virtual void DrawIcon(Rect rect)
 		{
@@ -184,7 +189,11 @@ namespace Vehicles
 			Scribe_References.Look(ref vehicle, nameof(vehicle));
 		}
 
-		///Yes I'm aware this is very similar to BodyPartDepth, creating this for clarity that this is an entirely different set of mechanics for similar purpose
+		void ITweakFields.OnFieldChanged()
+		{
+		}
+
+		//Yes I'm aware this is very similar to BodyPartDepth, creating this for clarity that this is an entirely different set of mechanics for similar purpose
 		public enum VehiclePartDepth
 		{ 
 			Undefined,

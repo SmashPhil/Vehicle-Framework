@@ -13,6 +13,7 @@ namespace Vehicles
 		Right,
 		Back,
 		Left,
-		Body
+		Body,
+		BodyNoOverlap
 	}
 }

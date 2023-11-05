@@ -26,6 +26,7 @@ namespace Vehicles
 		public List<VehicleStatDef> categories;
 		public LinearCurve efficiency;
 
+		[TweakField]
 		public List<Reactor> reactors;
 		public List<string> tags;
 

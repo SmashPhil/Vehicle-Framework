@@ -2,33 +2,57 @@
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
+using UnityEngine;
+using SmashTools;
 
 namespace Vehicles
 {
-	public class Reactor_Explosive : Reactor
+	public class Reactor_Explosive : Reactor, ITweakFields
 	{
+		[TweakField(SettingsType = UISettingsType.SliderFloat)]
+		[SliderValues(MinValue = 0, MaxValue = 1, Increment = 0.01f, RoundDecimalPlaces = 2)]
 		public float chance = 1;
+		[TweakField(SettingsType = UISettingsType.SliderFloat)]
+		[SliderValues(MinValue = 0, MaxValue = 1, Increment = 0.05f, RoundDecimalPlaces = 2)]
 		public float maxHealth = 1;
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
 		public int damage = -1;
+		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float armorPenetration = -1;
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
 		public int radius;
+
 		public DamageDef damageDef;
+
+		[TweakField(SettingsType = UISettingsType.IntegerBox)]
+		public int wickTicks = 180;
+
+		[TweakField]
+		public DrawOffsets drawOffsets;
+
+		string ITweakFields.Category => string.Empty;
+
+		string ITweakFields.Label => nameof(Reactor_Explosive);
 
 		public override void Hit(VehiclePawn vehicle, VehicleComponent component, ref DamageInfo dinfo, VehicleComponent.Penetration penetration)
 		{
 			if ((component.health / component.props.health) <= maxHealth && Rand.Chance(chance))
 			{
-				if (!component.props.hitbox.cells.TryRandomElement(out IntVec2 offset))
-				{
-					offset = IntVec2.Zero;
-				}
-				IntVec2 loc = new IntVec2(offset.x, offset.z);
-				IntVec2 adjustedLoc = loc.RotatedBy(vehicle.Rotation, vehicle.VehicleDef.Size);
-				IntVec3 explosionCell = new IntVec3(adjustedLoc.x + vehicle.Position.x, 0, adjustedLoc.z + vehicle.Position.z);
-				int damage = this.damage > 0 ? this.damage : damageDef.defaultDamage;
-				float armorPenetration = this.armorPenetration > 0 ? this.armorPenetration : damageDef.defaultArmorPenetration;
-				GenExplosion.DoExplosion(explosionCell, vehicle.Map, radius, damageDef, vehicle, damage, armorPenetration);
+				Explode(vehicle, component, dinfo);
 			}
+		}
+
+		internal void Explode(VehiclePawn vehicle, VehicleComponent component, DamageInfo dinfo)
+		{
+			if (!component.props.hitbox.cells.TryRandomElement(out IntVec2 offset))
+			{
+				offset = IntVec2.Zero;
+			}
+			vehicle.AddTimedExplosion(offset, wickTicks, radius, damageDef, damage, armorPenetration: armorPenetration, drawOffsets: drawOffsets);
+		}
+
+		void ITweakFields.OnFieldChanged()
+		{
 		}
 	}
 }

@@ -9,7 +9,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class VehicleStatHandler : IExposable
+	public class VehicleStatHandler : IExposable, ITweakFields
 	{
 		private const int TicksHighlighted = 100;
 
@@ -30,7 +30,10 @@ namespace Vehicles
 
 		//Registry
 		private readonly Dictionary<Thing, IntVec3> impacter = new Dictionary<Thing, IntVec3>();
+		[TweakField]
 		public List<VehicleComponent> components = new List<VehicleComponent>();
+
+		private static readonly List<IntVec3> hitboxHighlightCells = new List<IntVec3>();
 
 		private VehiclePawn vehicle;
 		
@@ -49,6 +52,10 @@ namespace Vehicles
 		public bool NeedsRepairs => components.Any(c => c.HealthPercent < 1);
 
 		public float HealthPercent { get; private set; }
+
+		string ITweakFields.Category => nameof(VehicleStatHandler);
+
+		string ITweakFields.Label => "Stat Handler";
 
 		public void InitializeComponents()
 		{
@@ -77,7 +84,7 @@ namespace Vehicles
 		public void MarkAllDirty()
 		{
 			statCache.Reset();
-			vehicle.statHandler.RecalculateHealthPercent();
+			RecalculateHealthPercent();
 		}
 
 		private void RecacheStatCategories(VehicleComponent comp)
@@ -241,6 +248,10 @@ namespace Vehicles
 			DamageDef defApplied = dinfo.Def;
 			float damage = dinfo.Amount;
 
+			if (defApplied.workerClass == typeof(DamageWorker_Extinguish))
+			{
+				TryExtinguishFire(dinfo, hitCell);
+			}
 			if (!defApplied.harmsHealth)
 			{
 				damage = 0; //Don't apply damage to vehicles if the damage def isn't supposed to harm
@@ -389,6 +400,22 @@ namespace Vehicles
 			}
 		}
 
+		private void TryExtinguishFire(DamageInfo damageInfo, IntVec2 hitCell)
+		{
+			if (damageInfo.Def.hediff == HediffDefOf.CoveredInFirefoam)
+			{
+				//TODO - Enable firefoam overlay
+			}
+			if (vehicle.GetAttachment(ThingDefOf.Fire) is Fire fire && !fire.Destroyed)
+			{
+				fire.fireSize -= damageInfo.Amount * 0.01f;
+				if (fire.fireSize < 0.1f)
+				{
+					fire.Destroy();
+				}
+			}
+		}
+
 		private bool HitPawn(DamageInfo dinfo, VehicleComponent.VehiclePartDepth hitDepth, IntVec2 cell, Rot4 dir, out Pawn hitPawn, StringBuilder report = null)
 		{
 			VehicleHandler handler;
@@ -482,49 +509,27 @@ namespace Vehicles
 		{
 			if (component != null)
 			{
-				List<IntVec3> hitboxCells = new List<IntVec3>();
-				foreach (var cell in component.props.hitbox.Hitbox)
+				hitboxHighlightCells.Clear();
 				{
-					int x = vehicle.Position.x;
-					int z = vehicle.Position.z;
-					switch (vehicle.FullRotation.AsInt)
+					if (!component.props.hitbox.Empty)
 					{
-						case 0:
-							x += cell.x;
-							z += cell.z;
-							break;
-						case 1:
-							x += cell.z;
-							z += -cell.x;
-							break;
-						case 2:
-							x += -cell.x;
-							z += -cell.z;
-							break;
-						case 3:
-							x += -cell.z;
-							z += cell.x;
-							break;
-						case 4:
-							x += cell.z;
-							z += -cell.x;
-							break;
-						case 5:
-							x += cell.z;
-							z += -cell.x;
-							break;
-						case 6:
-							x += -cell.z;
-							z += cell.x;
-							break;
-						case 7:
-							x += -cell.z;
-							z += cell.x;
-							break;
+						foreach (IntVec2 cell in component.props.hitbox.Hitbox)
+						{
+							IntVec2 rotatedCell = cell.RotatedBy(vehicle.Rotation, vehicle.VehicleDef.Size);
+							hitboxHighlightCells.Add(new IntVec3(vehicle.Position.x + rotatedCell.x, 0, vehicle.Position.z + rotatedCell.z));
+						}
 					}
-					hitboxCells.Add(new IntVec3(vehicle.Position.x + x, 0, vehicle.Position.z + z));
+					else if (component.props.depth == VehicleComponent.VehiclePartDepth.External) //Dont render Internal components without a hitbox
+					{
+						hitboxHighlightCells.AddRange(vehicle.OccupiedRect());
+					}
+					
+					if (hitboxHighlightCells.Count > 0)
+					{
+						GenDraw.DrawFieldEdges(hitboxHighlightCells, component.highlightColor);
+					}
 				}
-				GenDraw.DrawFieldEdges(hitboxCells, component.highlightColor, AltitudeLayer.MetaOverlays.AltitudeFor());
+				hitboxHighlightCells.Clear();
 			}
 			
 			if (VehicleMod.settings.debug.debugDrawHitbox)
@@ -566,6 +571,11 @@ namespace Vehicles
 					}
 				}
 			}
+		}
+
+		void ITweakFields.OnFieldChanged()
+		{
+			MarkAllDirty();
 		}
 	}
 }

@@ -30,7 +30,7 @@ namespace Vehicles
 				{
 					int countLeft = CountLeftForItem(vehicle, pawn, thing);
 					int jobCount = Mathf.Min(thing.stackCount, countLeft);
-					Log.Message($"Found: {thing} to pack. CountLeft={countLeft} JobCount={jobCount}");
+					Debug.Message($"Found: {thing} to pack. CountLeft={countLeft} JobCount={jobCount}");
 					if (jobCount > 0)
 					{
 						Job job = JobMaker.MakeJob(JobDefOf_Vehicles.LoadVehicle, thing, t);
@@ -40,7 +40,7 @@ namespace Vehicles
 				}
 				else
 				{
-					Log.Message($"Nothing to pack");
+					Debug.Message($"Nothing to pack");
 				}
 			}
 			return null;
@@ -68,7 +68,7 @@ namespace Vehicles
 
 			Thing result = ClosestHaulable(pawn, ThingRequestGroup.Pawn);
 			result ??= ClosestHaulable(pawn, ThingRequestGroup.HaulableEver);
-			Log.Message($"Result = {result}");
+			Debug.Message($"Result = {result}");
 			neededItems.Clear();
 			return result;
 		}

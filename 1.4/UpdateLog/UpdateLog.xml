@@ -6,14 +6,25 @@
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
-
+Hotfix for a few bugs that slipped through the cracks last patch.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed bug where even-size vehicles wouldn't be able to find an exit for certain rotations of the map.
 
+- Fixed bug where downed pawns were unable to be loaded onto a vehicle.
+
+- Fixed bug where vehicles would become soft locked when on fire, unable to path or take orders from the player.
+
+- Fixed bug where Extinguish damage (ie. foam poppers) did not extinguish vehicles on fire.
+
+- Fixed bug where Fire would render underneath turrets
+
+- Fixed bug where highlighting vehicle components in the health tab wouldn't highlight the hitbox on the vehicle.
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 
 &lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Exploding vehicle parts will now let off a 'wick' for a certain amount of time, allowing nearby pawns to flee before it explodes.
 
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>

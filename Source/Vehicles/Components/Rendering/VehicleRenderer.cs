@@ -9,9 +9,10 @@ namespace Vehicles
 {
 	public sealed class VehicleRenderer
 	{
-		private const float SubInterval = 0.003787879f;
-		private const float YOffset_Body = 0.007575758f;
-		private const float YOffset_Damage = 0.018939395f;
+		public const float SubInterval = 0.003787879f;
+		public const float YOffset_Body = 0.007575758f;
+		public const float YOffset_Damage = 0.018939395f;
+		public const float YOffset_CoveredInOverlay = 0.033301156f;
 
 		private readonly VehiclePawn vehicle;
 
@@ -19,11 +20,19 @@ namespace Vehicles
 
 		private Graphic_Shadow shadowGraphic;
 
+		//FOR TESTING ONLY
+		private PawnFirefoamDrawer firefoamOverlays;
+
 		public VehicleRenderer(VehiclePawn vehicle)
 		{
 			this.vehicle = vehicle;
 			graphics = new VehicleGraphicSet(vehicle);
+
+			//firefoamOverlays = new PawnFirefoamDrawer(vehicle);
 		}
+
+		[Obsolete("Not currently implemented, still WIP. Do not reference.", error: true)]
+		public PawnFirefoamDrawer FirefoamOverlays => firefoamOverlays;
 
 		private PawnRenderFlags DefaultRenderFlags
 		{
@@ -70,6 +79,7 @@ namespace Vehicles
 		{
 			vehicle.UpdateRotationAndAngle();
 			(Vector3 aboveBodyPos, Rot8 rot) = RenderPawnInternal(rootLoc, angle, vehicle.Rotation, northSouthRotation, flags);
+			vehicle.DrawExplosiveWicks(aboveBodyPos, rot);
 			vehicle.graphicOverlay.RenderGraphicOverlays(aboveBodyPos, angle, rot);
 		}
 
@@ -97,7 +107,13 @@ namespace Vehicles
 
 			Vector3 drawLoc = rootLoc;
 			drawLoc.y += YOffset_Damage;
-			//TODO - Render overlays for vehicle damage
+			//TODO - Render overlays for vehicle
+			//if (firefoamOverlays.IsCoveredInFoam)
+			//{
+			//	Vector3 overlayPos = rootLoc;
+			//	overlayPos.y += YOffset_CoveredInOverlay;
+			//	firefoamOverlays.RenderPawnOverlay(overlayPos, mesh, quaternion, flags.FlagSet(PawnRenderFlags.DrawNow), PawnOverlayDrawer.OverlayLayer.Body, bodyFacing);
+			//}
 
 			//TODO - pack graphics?
 			if (!portraitDraw && vehicle.inventory != null && vehicle.inventory.innerContainer.Count > 0 && graphics.packGraphic != null)

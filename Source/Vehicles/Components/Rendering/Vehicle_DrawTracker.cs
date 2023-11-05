@@ -15,6 +15,8 @@ namespace Vehicles
 		public VehicleTrackMaker trackMaker; //reimplement for vehicle specific "footprints"
 		public Vehicle_RecoilTracker rTracker;
 
+		
+
 		public Vehicle_DrawTracker(VehiclePawn vehicle)
 		{
 			this.vehicle = vehicle;
