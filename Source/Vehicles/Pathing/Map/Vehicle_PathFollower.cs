@@ -145,7 +145,6 @@ namespace Vehicles
 
 		public void StartPath(LocalTargetInfo dest, PathEndMode peMode)
 		{
-			Debug.Message($"Starting Path");
 			if (!vehicle.Drafted)
 			{
 				PatherFailed();

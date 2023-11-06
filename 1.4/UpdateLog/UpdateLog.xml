@@ -6,7 +6,7 @@
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
-Hotfix for a few bugs that slipped through the cracks last patch.
+Hotfix for bugs related to last patch and fire mechanics.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Fixed bug where even-size vehicles wouldn't be able to find an exit for certain rotations of the map.
 
@@ -22,12 +22,7 @@ Hotfix for a few bugs that slipped through the cracks last patch.
 
 - Fixed bug where highlighting vehicle components in the health tab wouldn't highlight the hitbox on the vehicle.
 
-- Fixed bug where compatibility patch for Carry Capacity (Continued) would fail if no vehicle mods were alongside Vehicle Framework.
-
-&lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-
-&lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-
+- Fixed bug where compatibility patch for Carry Capacity (Continued) would log an error if no vehicle mods were loaded alongside Vehicle Framework.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Exploding vehicle parts will now let off a 'wick' for a certain amount of time, allowing nearby pawns to flee before it explodes.
 

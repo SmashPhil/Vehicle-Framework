@@ -515,7 +515,7 @@ namespace Vehicles
 					{
 						foreach (IntVec2 cell in component.props.hitbox.Hitbox)
 						{
-							IntVec2 rotatedCell = cell.RotatedBy(vehicle.Rotation, vehicle.VehicleDef.Size);
+							IntVec2 rotatedCell = cell.RotatedBy(vehicle.Rotation, vehicle.VehicleDef.Size, reverseRotate: true);
 							hitboxHighlightCells.Add(new IntVec3(vehicle.Position.x + rotatedCell.x, 0, vehicle.Position.z + rotatedCell.z));
 						}
 					}

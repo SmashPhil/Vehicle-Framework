@@ -15,12 +15,13 @@ namespace Vehicles
 	public static class Ext_Vehicles
 	{
 		/// <summary>
-		/// Rotates <paramref name="cell"/> for vehicle rect. This means West rotation flips east.
+		/// Rotates <paramref name="cell"/> for vehicle rect.
 		/// </summary>
+		///<remarks>Rotation is opposite of <paramref name="rot"/> ie. rotating 'east' will return a cell as if the cell were rotated counter-clockwise (or rotating based on the vehicle facing east). 
+		///Set <paramref name="reverseRotate"/> to true if you want the cell to be rotated in the direction of <paramref name="rot"/></remarks>
 		/// <param name="cell"></param>
 		/// <param name="rot"></param>
-		/// <param name="rectSize"></param>
-		/// <returns></returns>
+		/// <param name="size"></param>
 		public static IntVec2 RotatedBy(this IntVec2 cell, Rot4 rot, IntVec2 size, bool reverseRotate = false)
 		{
 			if (size.x == 1 && size.z == 1)

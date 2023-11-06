@@ -53,7 +53,7 @@ namespace Vehicles
 		{
 			get
 			{
-				IntVec2 adjustedLoc = cell.RotatedBy(vehicle.Rotation, vehicle.VehicleDef.Size);
+				IntVec2 adjustedLoc = cell.RotatedBy(vehicle.Rotation, vehicle.VehicleDef.Size, reverseRotate: true);
 				IntVec3 adjustedCell = new IntVec3(adjustedLoc.x + vehicle.Position.x, 0, adjustedLoc.z + vehicle.Position.z);
 				return adjustedCell;
 			}
@@ -80,10 +80,10 @@ namespace Vehicles
 				}
 				else
 				{
-					IntVec2 rotatedHitCell = cell.RotatedBy(rot, vehicle.VehicleDef.Size);
-					IntVec3 mapCell = rotatedHitCell.ToIntVec3 + vehicle.Position;
-					Vector3 position = mapCell.ToVector3Shifted();
-					drawLoc = new Vector3(position.x, drawLoc.y, position.z);
+					IntVec2 rotatedHitCell = cell.RotatedBy(rot, vehicle.VehicleDef.Size, reverseRotate: true);
+					Vector3 position = rotatedHitCell.ToIntVec3.ToVector3();
+					Vector3 drawPos = vehicle.DrawPos;
+					drawLoc = new Vector3(drawPos.x + position.x, drawLoc.y, drawPos.z + position.z);
 				}
 				Matrix4x4 matrix = Matrix4x4.TRS(drawLoc, Quaternion.identity, Vector3.one);
 				Graphics.DrawMesh(MeshPool.plane20, matrix, material, 0);

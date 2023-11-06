@@ -36,7 +36,7 @@ namespace Vehicles
 
 		public override void Hit(VehiclePawn vehicle, VehicleComponent component, ref DamageInfo dinfo, VehicleComponent.Penetration penetration)
 		{
-			if ((component.health / component.props.health) <= maxHealth && Rand.Chance(chance))
+			if (component.health > 0 && (component.health / component.props.health) <= maxHealth && Rand.Chance(chance))
 			{
 				Explode(vehicle, component, dinfo);
 			}
