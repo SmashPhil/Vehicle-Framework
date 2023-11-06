@@ -30,17 +30,12 @@ namespace Vehicles
 				{
 					int countLeft = CountLeftForItem(vehicle, pawn, thing);
 					int jobCount = Mathf.Min(thing.stackCount, countLeft);
-					Debug.Message($"Found: {thing} to pack. CountLeft={countLeft} JobCount={jobCount}");
 					if (jobCount > 0)
 					{
 						Job job = JobMaker.MakeJob(JobDefOf_Vehicles.LoadVehicle, thing, t);
 						job.count = jobCount;
 						return job;
 					}
-				}
-				else
-				{
-					Debug.Message($"Nothing to pack");
 				}
 			}
 			return null;
@@ -68,7 +63,6 @@ namespace Vehicles
 
 			Thing result = ClosestHaulable(pawn, ThingRequestGroup.Pawn);
 			result ??= ClosestHaulable(pawn, ThingRequestGroup.HaulableEver);
-			Debug.Message($"Result = {result}");
 			neededItems.Clear();
 			return result;
 		}
@@ -100,24 +94,38 @@ namespace Vehicles
 
 		private static int TransferableCountHauledByOthersForPacking(VehiclePawn vehicle, Pawn pawn, TransferableOneWay transferable)
 		{
-			List<Pawn> allPawnsSpawned = vehicle.Map.mapPawns.FreeColonistsAndPrisonersSpawned;
-			int num = 0;
-			for (int i = 0; i < allPawnsSpawned.Count; i++)
+			int mechCount = 0;
+			if (ModsConfig.BiotechActive)
 			{
-				Pawn pawn2 = allPawnsSpawned[i];
-				if (pawn2 != pawn && pawn2.CurJob != null && (pawn2.CurJob.def == JobDefOf_Vehicles.LoadVehicle || pawn2.CurJob.def == JobDefOf_Vehicles.CarryItemToVehicle))
+				mechCount = HauledByOthers(pawn, transferable, vehicle.Map.mapPawns.SpawnedColonyMechs());
+			}
+			int slaveCount = 0;
+			if (ModsConfig.IdeologyActive)
+			{
+				slaveCount = HauledByOthers(pawn, transferable, vehicle.Map.mapPawns.SlavesOfColonySpawned);
+			}
+			return mechCount + slaveCount + HauledByOthers(pawn, transferable, vehicle.Map.mapPawns.FreeColonistsSpawned);
+		}
+
+		private static int HauledByOthers(Pawn pawn, TransferableOneWay transferable, List<Pawn> pawns)
+		{
+			int count = 0;
+			for (int i = 0; i < pawns.Count; i++)
+			{
+				Pawn spawnedPawn = pawns[i];
+				if (spawnedPawn != pawn && spawnedPawn.CurJob != null && (spawnedPawn.CurJob.def == JobDefOf_Vehicles.LoadVehicle || spawnedPawn.CurJob.def == JobDefOf_Vehicles.CarryItemToVehicle))
 				{
-					if (pawn2.jobs.curDriver is JobDriver_LoadVehicle driver)
+					if (spawnedPawn.jobs.curDriver is JobDriver_LoadVehicle driver)
 					{
 						Thing toHaul = driver.Item;
 						if (toHaul != null && transferable.things.Contains(toHaul) || TransferableUtility.TransferAsOne(transferable.AnyThing, toHaul, TransferAsOneMode.PodsOrCaravanPacking))
 						{
-							num += toHaul.stackCount;
+							count += toHaul.stackCount;
 						}
 					}
 				}
 			}
-			return num;
+			return count;
 		}
 	}
 }
