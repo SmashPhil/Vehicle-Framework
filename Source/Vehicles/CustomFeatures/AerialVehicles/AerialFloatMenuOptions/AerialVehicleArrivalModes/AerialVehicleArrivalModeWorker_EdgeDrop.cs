@@ -13,11 +13,29 @@ namespace Vehicles
 		{
 			Rot4 vehicleRotation = launchProtocol.LandingProperties?.forcedRotation ?? Rot4.Random;
 			IntVec2 vehicleSize = vehicle.VehicleDef.Size;
-			IntVec3 cell = CellFinderExtended.RandomEdgeCell(vehicleRotation.Opposite, map, delegate(IntVec3 cell)
+
+			//Try find a STANDABLE cell along the edge, won't take damage upon landing
+			bool found = CellFinderExtended.TryFindRandomEdgeCell(vehicleRotation.Opposite, map, delegate (IntVec3 cell)
 			{
 				IntVec3 clampedCell = vehicle.ClampToMap(cell, map, 1);
-				return !MapHelper.ImpassableOrVehicleBlocked(vehicle, Current.Game.CurrentMap, cell, vehicleRotation);
-			}, vehicleSize.x > vehicleSize.z ? vehicleSize.x : vehicleSize.z);
+				return !MapHelper.NonStandableOrVehicleBlocked(vehicle, Current.Game.CurrentMap, cell, vehicleRotation);
+			}, vehicleSize.x > vehicleSize.z ? vehicleSize.x : vehicleSize.z, out IntVec3 cell);
+			if (!found)
+			{
+				//Try finding any passable cell along the edge if one couldn't be found previously, might take damage upon landing
+				found = CellFinderExtended.TryFindRandomEdgeCell(vehicleRotation.Opposite, map, delegate (IntVec3 cell)
+				{
+					IntVec3 clampedCell = vehicle.ClampToMap(cell, map, 1);
+					return !MapHelper.ImpassableOrVehicleBlocked(vehicle, Current.Game.CurrentMap, cell, vehicleRotation);
+				}, vehicleSize.x > vehicleSize.z ? vehicleSize.x : vehicleSize.z, out cell);
+			}
+			if (!found)
+			{
+				//If no edge cell found, force targeting by the player
+				AerialVehicleArrivalModeDefOf.TargetedLanding.Worker.VehicleArrived(vehicle, launchProtocol, map);
+				return;
+			}
+
 			IntVec3 clampedCell = vehicle.ClampToMap(cell, map, 1);
 			VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
 			skyfaller.vehicle = vehicle;

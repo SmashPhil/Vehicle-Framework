@@ -48,6 +48,7 @@ namespace Vehicles
 		public bool fishingPersists = true;
 
 		/* Aerial */
+		public bool drawLandingGhost = false;
 		public bool burnRadiusOnRockets = true;
 		public bool deployOnLanding = true;
 		public bool airDefenses = true;
@@ -56,7 +57,8 @@ namespace Vehicles
 
 		/* Combat */
 		public bool runOverPawns = true;
-
+		public VehicleTracksFriendlyFire friendlyFire = VehicleTracksFriendlyFire.Vanilla;
+		
 		/* Upgrades */
 		public bool drawUpgradeInformationScreen = true;
 		public bool overrideDrawColors = true;
@@ -101,6 +103,7 @@ namespace Vehicles
 			fishingPersists = true;
 
 			/* Aerial */
+			drawLandingGhost = false;
 			burnRadiusOnRockets = true;
 			deployOnLanding = true;
 			airDefenses = true;
@@ -109,6 +112,7 @@ namespace Vehicles
 
 			/* Combat */
 			runOverPawns = true;
+			friendlyFire = VehicleTracksFriendlyFire.Vanilla;
 
 			/* Upgrades */
 			drawUpgradeInformationScreen = true;
@@ -147,6 +151,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref fishingSkillIncrease, nameof(fishingSkillIncrease), defaultValue: 5);
 			Scribe_Values.Look(ref fishingPersists, nameof(fishingPersists), defaultValue: true);
 
+			Scribe_Values.Look(ref drawLandingGhost, nameof(drawLandingGhost), defaultValue: false);
 			Scribe_Values.Look(ref burnRadiusOnRockets, nameof(burnRadiusOnRockets), defaultValue: true);
 			Scribe_Values.Look(ref deployOnLanding, nameof(deployOnLanding), defaultValue: true);
 			Scribe_Values.Look(ref airDefenses, nameof(airDefenses), defaultValue: true);
@@ -154,6 +159,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref delayDeployOnLanding, nameof(delayDeployOnLanding), defaultValue: 0);
 
 			Scribe_Values.Look(ref runOverPawns, nameof(runOverPawns), defaultValue: true);
+			Scribe_Values.Look(ref friendlyFire, nameof(friendlyFire), defaultValue: VehicleTracksFriendlyFire.Vanilla);
 
 			Scribe_Values.Look(ref drawUpgradeInformationScreen, nameof(drawUpgradeInformationScreen), defaultValue: true);
 			Scribe_Values.Look(ref overrideDrawColors, nameof(overrideDrawColors), defaultValue: true);
@@ -238,6 +244,7 @@ namespace Vehicles
 
 					listingStandard.Header("VF_AerialVehicles".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 					listingStandard.Gap(4);
+					listingStandard.CheckboxLabeled("VF_DrawLandingGhost".Translate(), ref drawLandingGhost, "VF_DrawLandingGhostTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_RocketsBurnRadius".Translate(), ref burnRadiusOnRockets, "VF_RocketsBurnRadiusTooltip".Translate());
 					//listingStandard.CheckboxLabeled("VF_AirDefensesActive".Translate(), ref airDefenses, "VF_AirDefensesActiveTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_DeployOnLanding".Translate(), ref deployOnLanding, "VF_DeployOnLandingTooltip".Translate());
@@ -254,6 +261,19 @@ namespace Vehicles
 					listingStandard.Header("VF_CombatSettings".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 					listingStandard.Gap(4);
 					listingStandard.CheckboxLabeled("VF_RunOverPawns".Translate(), ref runOverPawns, "VF_RunOverPawnsTooltip".Translate());
+					if (runOverPawns)
+					{
+						listingStandard.EnumSliderLabeled("VF_ChanceToRunOverFriendlies".Translate(), ref friendlyFire, "VF_ChanceToRunOverFriendliesTooltip".Translate(), string.Empty, delegate (VehicleTracksFriendlyFire friendlyFire)
+						{
+							return friendlyFire switch
+							{
+								VehicleTracksFriendlyFire.None => "VF_VehicleTracksNone".Translate(),
+								VehicleTracksFriendlyFire.Vanilla => "VF_VehicleTracksVanilla".Translate(),
+								VehicleTracksFriendlyFire.Full => "VF_VehicleTracksFull".Translate(),
+								_ => friendlyFire.ToString(),
+							};
+						});
+					}
 
 					GUIState.Disable();
 

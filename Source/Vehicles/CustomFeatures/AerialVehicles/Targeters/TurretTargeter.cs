@@ -51,6 +51,7 @@ namespace Vehicles
 			if (canceled && Turret != null)
 			{
 				Turret.AlignToAngleRestricted(Turret.TurretRotationUncorrected);
+				Turret.SetTarget(LocalTargetInfo.Invalid);
 			}
 			StopTargeting();
 		}
@@ -60,7 +61,7 @@ namespace Vehicles
 			ConfirmStillValid();
 			if(IsTargeting)
 			{
-				if(Event.current.type == EventType.MouseDown && Event.current.button == 0)
+				if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
 				{
 					Event.current.Use();
 					if(action != null)
@@ -103,18 +104,25 @@ namespace Vehicles
 
 		public override void TargeterUpdate()
 		{
-			if(IsTargeting)
+			if (IsTargeting)
 			{
-				float distance = (Turret.TurretLocation.ToIntVec3() - CurrentTargetUnderMouse().Cell).LengthHorizontal;
-				if (TargetMeetsRequirements(Turret, CurrentTargetUnderMouse()))
+				LocalTargetInfo mouseTarget = CurrentTargetUnderMouse();
+				float distance = (Turret.TurretLocation.ToIntVec3() - mouseTarget.Cell).LengthHorizontal;
+				if (TargetMeetsRequirements(Turret, mouseTarget))
 				{
-					GenDraw.DrawTargetHighlight(CurrentTargetUnderMouse());
+					GenDraw.DrawTargetHighlight(mouseTarget);
 
-					if (CurrentTargetUnderMouse() != Turret.vehicle)
+					if (mouseTarget != Turret.vehicle)
 					{
-						Turret.AlignToAngleRestricted((float)Turret.TurretLocation.ToIntVec3().AngleToCell(CurrentTargetUnderMouse().Cell, map));
+						Turret.AlignToAngleRestricted((float)Turret.TurretLocation.ToIntVec3().AngleToCell(mouseTarget.Cell, map));
 					}
 				}
+
+				if (Turret.CurrentFireMode.spreadRadius > 1)
+				{
+					GenDraw.DrawRadiusRing(mouseTarget.Cell, Turret.CurrentFireMode.spreadRadius);
+				}
+
 				//REDO Radius Circle
 				//if (Cannon.MinRange > 0)
 				//{

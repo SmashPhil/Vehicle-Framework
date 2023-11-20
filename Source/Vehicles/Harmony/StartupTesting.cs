@@ -157,7 +157,10 @@ namespace Vehicles
 						return;
 					}
 					vehicle = VehicleSpawner.GenerateVehicle(vehicleDef, Faction.OfPlayer);
-					IntVec3 cell = CellFinderExtended.RandomCenterCell(map, (IntVec3 cell) => !MapHelper.NonStandableOrVehicleBlocked(vehicle, Current.Game.CurrentMap, cell, Rot4.North));
+					if (!CellFinderExtended.TryFindRandomCenterCell(map, (IntVec3 cell) => !MapHelper.NonStandableOrVehicleBlocked(vehicle, Current.Game.CurrentMap, cell, Rot4.North), out IntVec3 cell))
+					{
+						cell = CellFinder.RandomCell(map);
+					}
 					GenSpawn.Spawn(vehicle, cell, map);
 				}
 				CameraJumper.TryJump(vehicle);

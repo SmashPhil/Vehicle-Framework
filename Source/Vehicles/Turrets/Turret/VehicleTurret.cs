@@ -37,6 +37,9 @@ namespace Vehicles
 		[TweakField(SettingsType = UISettingsType.Checkbox)]
 		public bool manualTargeting = true;
 
+		[TweakField(SettingsType = UISettingsType.SliderEnum)]
+		public DeploymentType deployment = DeploymentType.None;
+
 		[TweakField]
 		public VehicleTurretRender renderProperties = new VehicleTurretRender();
 
@@ -202,6 +205,8 @@ namespace Vehicles
 			autoTargeting = reference.turretDef.turretType == TurretType.Static ? false : reference.autoTargeting;
 			manualTargeting = reference.turretDef.turretType == TurretType.Static ? false : reference.manualTargeting;
 
+			deployment = reference.deployment;
+
 			currentFireMode = 0;
 			currentFireIcon = OverheatIcons.FirstOrDefault();
 			ticksSinceLastShot = 0;
@@ -229,31 +234,17 @@ namespace Vehicles
 
 		public bool IsTargetable => turretDef?.turretType == TurretType.Rotatable;
 
-		public bool RotationIsValid => currentRotation == rotationTargeted;
+		public bool RotationAligned => currentRotation == rotationTargeted;
 
 		public bool TurretRestricted => restrictions?.Disabled ?? false;
 
-		public virtual bool TurretDisabled => TurretRestricted || !IsManned;
+		public virtual bool TurretDisabled => TurretRestricted || !IsManned || !DeploymentSatisfied;
 
 		protected virtual bool TurretTargetValid => cannonTarget.Cell.IsValid && !TurretDisabled;
 
 		public bool NoGraphic => turretDef.graphicData is null;
 
 		public bool CanAutoTarget => autoTargeting || VehicleMod.settings.debug.debugShootAnyTurret;
-
-		public int MaxTicks
-		{
-			get
-			{
-				float maxTicks = turretDef.reloadTimer * 60f;
-				if (turretDef.reloadTimerMultiplierPerCrewCount != null)
-                {
-                    List<Pawn> gunners = vehicle.AllCannonCrew; 
-                    maxTicks *= turretDef.reloadTimerMultiplierPerCrewCount.Evaluate(gunners.Count);
-                }
-                return Mathf.CeilToInt(maxTicks);
-            }
-		}
 
 		public int WarmupTicks => Mathf.CeilToInt(turretDef.warmUpTimer * 60f);
 
@@ -270,6 +261,48 @@ namespace Vehicles
 		public int ReloadTicks => reloadTicks;
 
 		public Dictionary<VehicleTurretEventDef, EventTrigger> EventRegistry { get; set; }
+
+		public bool DeploymentSatisfied
+		{
+			get
+			{
+				return deployment switch
+				{
+					DeploymentType.None => true,
+					DeploymentType.Deployed => vehicle.CompVehicleTurrets.Deployed,
+					DeploymentType.Undeployed => !vehicle.CompVehicleTurrets.Deployed,
+					_ => throw new NotImplementedException(nameof(DeploymentType))
+				};
+			}
+		}
+
+		public string DeploymentDisabledReason
+		{
+			get
+			{
+				return deployment switch
+				{
+					DeploymentType.None => string.Empty,
+					DeploymentType.Deployed => "VF_MustBeDeployed".Translate(),
+					DeploymentType.Undeployed => "VF_MustBeUndeployed".Translate(),
+					_ => throw new NotImplementedException(nameof(DeploymentType))
+				};
+			}
+		}
+
+		public int MaxTicks
+		{
+			get
+			{
+				float maxTicks = turretDef.reloadTimer * 60f;
+				if (turretDef.reloadTimerMultiplierPerCrewCount != null)
+				{
+					List<Pawn> gunners = vehicle.AllCannonCrew;
+					maxTicks *= turretDef.reloadTimerMultiplierPerCrewCount.Evaluate(gunners.Count);
+				}
+				return Mathf.CeilToInt(maxTicks);
+			}
+		}
 
 		public Texture2D FireIcon
 		{
@@ -508,7 +541,7 @@ namespace Vehicles
 			}
 		}
 
-
+		//TODO - switch to normal angles for all cases in 1.5
 		public float TurretRotation
 		{
 			get
@@ -555,6 +588,26 @@ namespace Vehicles
 					return defaultAngleRotated -= 90 * (vehicle.Rotation.AsInt - parentRotCached.AsInt) + vehicle.Angle - parentAngleCached;
 				}
 				return currentRotation;
+			}
+		}
+
+		public float TurretRotationTargeted
+		{
+			get
+			{
+				return Mathf.Abs(rotationTargeted - 270);
+			}
+			set
+			{
+				rotationTargeted = TurretRotationFor(vehicle.FullRotation, value.ClampAndWrap(0, 360));
+			}
+		}
+
+		public float TurretRotationTargetedUncorrected
+		{
+			get
+			{
+				return rotationTargeted;
 			}
 		}
 
@@ -944,7 +997,8 @@ namespace Vehicles
 
 		protected virtual bool TurretRotationTick()
 		{
-			if (currentRotation != rotationTargeted)
+			Log.Message($"Current: {currentRotation} Targeted: {rotationTargeted}");
+			if (!RotationAligned)
 			{
 				//REDO - SET TO CHECK CANNON HANDLERS COMPONENT HEALTH
 				float relativeCurrentRotation = currentRotation + 90;
@@ -1059,7 +1113,7 @@ namespace Vehicles
 				}
 				else if (ReadyToFire)
 				{
-					if (IsTargetable && RotationIsValid && targetPersists && (cannonTarget.Pawn is null || !SetTargetConditionalOnThing(LocalTargetInfo.Invalid)))
+					if (IsTargetable && RotationAligned && (cannonTarget.Pawn is null || !CheckTargetInvalid()))
 					{
 						GroupTurrets.ForEach(t => t.PushTurretToQueue());
 					}
@@ -1069,7 +1123,7 @@ namespace Vehicles
 					}
 				}
 			}
-			else if (IsTargetable && SetTargetConditionalOnThing(LocalTargetInfo.Invalid))
+			else if (IsTargetable && CheckTargetInvalid())
 			{
 				return TurretTargeter.Turret == this;
 			}
@@ -1757,12 +1811,19 @@ namespace Vehicles
 			}
 		}
 
+		//TODO - remove in 1.5
+		[Obsolete("Use CheckTargetInvalid instead.", error: true)]
+		public virtual bool SetTargetConditionalOnThing(LocalTargetInfo target, bool resetPrefireTimer = true)
+		{
+			return CheckTargetInvalid(resetPrefireTimer);
+		}
+
 		/// <summary>
 		/// Set target only if cannonTarget is no longer valid or if target is cell based
 		/// </summary>
 		/// <param name="target"></param>
 		/// <returns>true if cannonTarget set to target, false if target is still valid</returns>
-		public virtual bool SetTargetConditionalOnThing(LocalTargetInfo target, bool resetPrefireTimer = true)
+		public virtual bool CheckTargetInvalid(bool resetPrefireTimer = true)
 		{
 			if (cannonTarget.IsValid && (cannonTarget.HasThing || FullAuto))
 			{
@@ -1770,19 +1831,18 @@ namespace Vehicles
 				{
 					if ( (cannonTarget.Pawn.Dead && CachedPawnTargetStatus != PawnStatusOnTarget.Dead ) || (cannonTarget.Pawn.Downed && CachedPawnTargetStatus != PawnStatusOnTarget.Down) )
 					{
-						SetTarget(target);
+						SetTarget(LocalTargetInfo.Invalid);
 						return true;
 					}
 				}
 				else if (cannonTarget.Thing != null && cannonTarget.Thing.HitPoints <= 0)
 				{
-					SetTarget(target);
+					SetTarget(LocalTargetInfo.Invalid);
 					return true;
 				}
 				return false;
 			}
-			SetTarget(target);
-			return true;
+			return false;
 		}
 
 		public void ResetAngle()
@@ -1808,8 +1868,8 @@ namespace Vehicles
 
 		protected void ValidateLockStatus()
 		{
-			if (!cannonTarget.IsValid && TurretTargeter.Turret != this) 
-            {
+			if (!cannonTarget.IsValid && TurretTargeter.Turret != this && !vehicle.Deploying)
+			{
 				float angleDifference = vehicle.Angle - parentAngleCached;
 				if (attachedTo is null)
 				{

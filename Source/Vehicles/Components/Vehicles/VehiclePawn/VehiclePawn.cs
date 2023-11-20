@@ -217,6 +217,8 @@ namespace Vehicles
 				}
 			}
 
+			UpdateRotationAndAngle();
+
 			Drawer.Notify_Spawned();
 			InitializeHitbox();
 			Map.GetCachedMapComponent<VehiclePositionManager>().ClaimPosition(this);

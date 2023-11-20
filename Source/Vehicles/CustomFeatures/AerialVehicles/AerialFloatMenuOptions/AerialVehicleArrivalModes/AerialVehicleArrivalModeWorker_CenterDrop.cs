@@ -11,7 +11,13 @@ namespace Vehicles
 		public override void VehicleArrived(VehiclePawn vehicle, LaunchProtocol launchProtocol, Map map)
 		{
 			Rot4 vehicleRotation = launchProtocol.LandingProperties?.forcedRotation ?? Rot4.Random;
-			IntVec3 cell = CellFinderExtended.RandomCenterCell(map, (IntVec3 cell) => !MapHelper.ImpassableOrVehicleBlocked(vehicle, Current.Game.CurrentMap, cell, vehicleRotation));
+			bool found = CellFinderExtended.TryFindRandomCenterCell(map, (IntVec3 cell) => !MapHelper.ImpassableOrVehicleBlocked(vehicle, Current.Game.CurrentMap, cell, vehicleRotation), out IntVec3 cell);
+			if (!found)
+			{
+				AerialVehicleArrivalModeDefOf.TargetedLanding.Worker.VehicleArrived(vehicle, launchProtocol, map);
+				return;
+			}
+
 			VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
 			skyfaller.vehicle = vehicle;
 			GenSpawn.Spawn(skyfaller, cell, map, vehicleRotation);

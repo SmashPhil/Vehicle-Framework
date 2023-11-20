@@ -4,6 +4,7 @@ using UnityEngine;
 using Verse;
 using Verse.Sound;
 using RimWorld;
+using RimWorld.Planet;
 using SmashTools;
 
 namespace Vehicles
@@ -148,9 +149,13 @@ namespace Vehicles
 			{
 				if (ForcedTargeting)
 				{
-					SoundDefOf.ClickReject.PlayOneShotOnCamera(null);
-					Messages.Message("VF_MustTargetLanding".Translate(), MessageTypeDefOf.RejectInput);
 					Event.current.Use();
+					Dialog_MessageBox messageBox = Dialog_MessageBox.CreateConfirmation("VF_ConfirmationCancelLanding".Translate(), delegate ()
+					{
+						AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(vehicle, Find.CurrentMap.Tile);
+						StopTargeting();
+					});
+					Find.WindowStack.Add(messageBox);
 					return;
 				}
 				SoundDefOf.CancelMode.PlayOneShotOnCamera(null);

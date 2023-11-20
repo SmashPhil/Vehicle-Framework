@@ -81,4 +81,5 @@
 	<VF_MaxFallRateTooltip>Max amount this vehicle will descend when shot down or out of fuel.</VF_MaxFallRateTooltip>
 	
 	<VF_Instant>Instant</VF_Instant>
+	<VF_DeployTime>Deploy Time</VF_DeployTime>
 </LanguageData>

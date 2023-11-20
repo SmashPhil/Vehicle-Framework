@@ -82,6 +82,11 @@ namespace Vehicles
 				{
 					return false;
 				}
+				if (vehicle.Deploying || (vehicle.CompVehicleTurrets != null && vehicle.CompVehicleTurrets.Deployed))
+				{
+					Messages.Message("VF_VehicleImmobileDeployed".Translate(vehicle), MessageTypeDefOf.RejectInput);
+					return false;
+				}
 				
 				if (vehicle.CompFueledTravel != null && vehicle.CompFueledTravel.EmptyTank)
 				{

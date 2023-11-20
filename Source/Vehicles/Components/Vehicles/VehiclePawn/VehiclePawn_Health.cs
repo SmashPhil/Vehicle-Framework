@@ -35,6 +35,8 @@ namespace Vehicles
 		
 		public bool CanMoveFinal => CanMove && (CanMoveWithOperators || VehicleMod.settings.debug.debugDraftAnyVehicle);
 
+		public bool Deploying => jobs.curJob?.def == JobDefOf_Vehicles.DeployVehicle;
+
 		public CellRect Hitbox { get; private set; }
 
 		public IEnumerable<IntVec3> SurroundingCells

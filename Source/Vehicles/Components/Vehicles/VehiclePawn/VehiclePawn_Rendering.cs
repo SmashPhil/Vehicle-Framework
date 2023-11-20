@@ -422,6 +422,11 @@ namespace Vehicles
 			{
 				return;
 			}
+			if (!VehicleDef.rotatable)
+			{
+				Rotation = VehicleDef.defaultPlacingRot;
+				return;
+			}
 			IntVec3 intVec = vehiclePather.nextCell - Position;
 			if (intVec.x > 0)
 			{
@@ -485,7 +490,6 @@ namespace Vehicles
 
 			if (!cargoToLoad.NullOrEmpty())
 			{
-				//TODO - can throw NRE
 				foreach (TransferableOneWay transferable in cargoToLoad)
 				{
 					if (transferable.HasAnyThing)

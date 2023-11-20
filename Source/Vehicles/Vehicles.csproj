@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Achievements\VehicleBuilderTracker.cs" />
+    <Compile Include="AI\JobDrivers\JobDriver_Deploy.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_DisassembleVehicle.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_GiveItemToVehicle.cs" />
     <Compile Include="AI\Lords\LordToil_PrepareCaravan_GatherAnimalsForVehicles.cs" />
@@ -69,10 +70,12 @@
     <Compile Include="Components\Vehicles\Health\Reactors\Reactor_FuelLeak.cs" />
     <Compile Include="Components\Vehicles\Health\Reactors\Reactor_Explosive.cs" />
     <Compile Include="Components\Vehicles\Health\StatCache.cs" />
+    <Compile Include="Components\Vehicles\Health\StatParts\VehicleStatPart_Deployed.cs" />
     <Compile Include="Components\Vehicles\Health\StatWorkers\VehicleStatWorker_BodyIntegrity.cs" />
     <Compile Include="Components\Vehicles\Health\VehicleStatDrawEntry.cs" />
     <Compile Include="Components\Vehicles\Misc\Vehicle_IgnitionController.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Combat.cs" />
+    <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Comps.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Handlers.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Caravan.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_AI.cs" />
@@ -133,7 +136,9 @@
     <Compile Include="Misc\DefOf\ThingDefOf_Vehicles.cs" />
     <Compile Include="Misc\DefOf\VehicleStatCategoryDefOf.cs" />
     <Compile Include="Misc\DefOf\VehicleTurretEventDefOf.cs" />
+    <Compile Include="Misc\Enums\Turret\DeploymentType.cs" />
     <Compile Include="Misc\Enums\UI\WorldPathingDebugType.cs" />
+    <Compile Include="Misc\Enums\Vehicle\VehicleTracksFriendlyFire.cs" />
     <Compile Include="Misc\Interfaces\IDebugLordMeetingPoint.cs" />
     <Compile Include="Misc\Interfaces\IMaterialCacheTarget.cs" />
     <Compile Include="Misc\Interfaces\ISustainerTarget.cs" />

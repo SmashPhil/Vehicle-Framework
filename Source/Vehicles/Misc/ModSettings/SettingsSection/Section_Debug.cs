@@ -192,7 +192,14 @@ namespace Vehicles
 						Map map = Find.CurrentMap;
 						if (map != null)
 						{
+							Log.Message($"Vehicles = {DefDatabase<VehicleDef>.AllDefsListForReading.Count}");
+							foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
+							{
+								Log.Message($"{vehicleDef} DefIndex = {vehicleDef.DefIndex}");
+							}
+							Log.Message("-------");
 							VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+							Log.Message($"Total Owners = {mapping.Owners.Count}");
 							foreach (VehicleDef vehicleDef in mapping.Owners)
 							{
 								List<VehicleDef> piggies = mapping.GetPiggies(vehicleDef);

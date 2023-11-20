@@ -218,10 +218,21 @@ namespace Vehicles
 		{
 			List<Settlement> playerSettlements = Find.WorldObjects.Settlements.Where(s => s.Faction == Faction.OfPlayer).ToList();
 			Settlement nearestSettlement = playerSettlements.MinBy(s => Ext_Math.SphericalDistance(s.DrawPos, aerialVehicleInFlight.DrawPos));
-
+			if (nearestSettlement == null)
+			{
+				Log.Error($"Attempting to force land aerial vehicle without a valid settlement.");
+				return;
+			}
 			LaunchProtocol launchProtocol = aerialVehicleInFlight.vehicle.CompVehicleLauncher.launchProtocol;
 			Rot4 vehicleRotation = launchProtocol.LandingProperties?.forcedRotation ?? Rot4.Random;
-			IntVec3 cell = CellFinderExtended.RandomCenterCell(nearestSettlement.Map, (IntVec3 cell) => !MapHelper.ImpassableOrVehicleBlocked(aerialVehicleInFlight.vehicle, Current.Game.CurrentMap, cell, vehicleRotation));
+			if (!CellFinderExtended.TryFindRandomCenterCell(nearestSettlement.Map, (IntVec3 cell) => !MapHelper.ImpassableOrVehicleBlocked(aerialVehicleInFlight.vehicle, nearestSettlement.Map, cell, vehicleRotation), out IntVec3 cell))
+			{
+				if (!CellFinderExtended.TryRadialSearchForCell(nearestSettlement.Map.Center, nearestSettlement.Map, 50, (IntVec3 cell) => !MapHelper.ImpassableOrVehicleBlocked(aerialVehicleInFlight.vehicle, nearestSettlement.Map, cell, vehicleRotation), out cell))
+				{
+					Log.Warning($"Could not find cell to spawn aerial vehicle.  Picking random cell.");
+					cell = CellFinder.RandomCell(nearestSettlement.Map);
+				}
+			}
 			VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(aerialVehicleInFlight.vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
 			skyfaller.vehicle = aerialVehicleInFlight.vehicle;
 

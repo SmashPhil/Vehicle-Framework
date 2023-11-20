@@ -12,7 +12,7 @@ namespace Vehicles
 		private static List<IntVec3> mapEdgeCells;
 		private static IntVec3 mapEdgeCellsSize;
 
-		public static IntVec3 RandomEdgeCell(Rot4 dir, Map map, Predicate<IntVec3> validator, int offset)
+		public static bool TryFindRandomEdgeCell(Rot4 dir, Map map, Predicate<IntVec3> validator, int offset, out IntVec3 result)
 		{
 			List<IntVec3> cellsToCheck = dir.IsValid ? CellRect.WholeMap(map).ContractedBy(offset).GetEdgeCells(dir).ToList() : CellRect.WholeMap(map).ContractedBy(offset).EdgeCells.ToList();
 			for (;;)
@@ -20,7 +20,8 @@ namespace Vehicles
 				IntVec3 rCell = cellsToCheck.PopRandom();
 				if (validator(rCell))
 				{
-					return rCell;
+					result = rCell;
+					return true;
 				}
 				if (cellsToCheck.Count <= 0)
 				{
@@ -28,10 +29,11 @@ namespace Vehicles
 					break;
 				}
 			}
-			return CellFinder.RandomEdgeCell(map);
+			result = CellFinder.RandomEdgeCell(map);
+			return false;
 		}
 
-		public static IntVec3 RandomCenterCell(Map map, Predicate<IntVec3> validator, bool allowRoofed = false)
+		public static bool  TryFindRandomCenterCell(Map map, Predicate<IntVec3> validator, out IntVec3 result, bool allowRoofed = false)
 		{
 			Faction hostFaction = map.ParentFaction ?? Faction.OfPlayer;
 			List<Thing> thingsOnMap = map.mapPawns.FreeHumanlikesSpawnedOfFaction(hostFaction).Cast<Thing>().ToList();
@@ -63,13 +65,14 @@ namespace Vehicles
 						}
 						if (!flag && map.reachability.CanReachFactionBase(intVec, hostFaction))
 						{
-							return intVec;
+							result = intVec;
+							return true;
 						}
 					}
 				}
 			}
-			Log.Warning("Unable to find cell to land in... fetching random cell.");
-			return CellFinder.RandomCell(map);
+			result = IntVec3.Invalid;
+			return false;
 		}
 
 		public static IntVec3 MiddleEdgeCell(Rot4 dir, Map map, Pawn pawn, Predicate<IntVec3> validator)
@@ -144,10 +147,8 @@ namespace Vehicles
 				result = IntVec3.Invalid;
 				return false;
 			}
-
 			Rot4 dir = Find.World.CoastDirectionAt(map.Tile).IsValid ? Find.World.CoastDirectionAt(map.Tile) : !Find.WorldGrid[map.Tile].Rivers.NullOrEmpty() ? Ext_Map.RiverDirection(map) : Rot4.Invalid;
-			result = RandomEdgeCell(dir, map, (IntVec3 c) => GenGridVehicles.Standable(c, vehicleDef, map) && !c.Fogged(map), 0);
-			return true;
+			return TryFindRandomEdgeCell(dir, map, (IntVec3 c) => GenGridVehicles.Standable(c, vehicleDef, map) && !c.Fogged(map), 0, out result);
 		}
 
 		public static IntVec3 RandomClosewalkCellNear(IntVec3 root, Map map, VehicleDef vehicleDef, int radius, Predicate<IntVec3> validator = null)

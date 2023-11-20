@@ -13,6 +13,8 @@ namespace Vehicles
 
 		public static JobDef IdleVehicle;
 
+		public static JobDef DeployVehicle;
+
 		public static JobDef Board;
 
 		public static JobDef PrepareCaravan_GatheringVehicle;

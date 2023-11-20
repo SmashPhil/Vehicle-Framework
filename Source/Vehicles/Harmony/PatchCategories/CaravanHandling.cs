@@ -669,6 +669,7 @@ namespace Vehicles
 			return true;
 		}
 
+		//TODO - needs cleanup
 		public static void VehicleWorldObjectParentHolder(ref IThingHolder __result, Thing __instance)
 		{
 			if (__instance is VehiclePawn vehicle)

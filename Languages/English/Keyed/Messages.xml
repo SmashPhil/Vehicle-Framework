@@ -6,6 +6,7 @@
 
 	<!-- Vehicles -->
 	<VF_VehicleUnableToMove>{0_labelShort} is unable to move.</VF_VehicleUnableToMove>
+	<VF_VehicleImmobileDeployed>{0_labelShort} is deployed and unable to move.</VF_VehicleImmobileDeployed>
 	<VF_HandlerNotEnoughRoom>Failed to add {0} to {1}. No more space available.</VF_HandlerNotEnoughRoom>
 	
 	<VF_NotEnoughToOperate>Needs more crew in order to operate.</VF_NotEnoughToOperate>

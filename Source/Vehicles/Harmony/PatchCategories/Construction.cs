@@ -125,7 +125,7 @@ namespace Vehicles
 		/// <param name="__result"></param>
 		/// <param name="wipeMode"></param>
 		/// <param name="respawningAfterLoad"></param>
-		public static bool RegisterThingSpawned(Thing newThing, ref IntVec3 loc, Map map, Rot4 rot, ref Thing __result, WipeMode wipeMode, bool respawningAfterLoad)
+		public static bool RegisterThingSpawned(Thing newThing, ref IntVec3 loc, Map map, ref Rot4 rot, ref Thing __result, WipeMode wipeMode, bool respawningAfterLoad)
 		{
 			if (newThing.def is VehicleBuildDef def)
 			{
@@ -158,6 +158,10 @@ namespace Vehicles
 			}
 			else if (newThing is VehiclePawn vehicle)
 			{
+				if (!vehicle.VehicleDef.rotatable)
+				{
+					rot = vehicle.VehicleDef.defaultPlacingRot;
+				}
 				VehiclePositionManager positionManager = map.GetCachedMapComponent<VehiclePositionManager>();
 				bool standable = true;
 				foreach (IntVec3 cell in vehicle.PawnOccupiedCells(loc, rot))
@@ -172,9 +176,10 @@ namespace Vehicles
 				{
 					return true; //If location is still valid, skip to spawning
 				}
+				Rot4 tmpRot = rot;
 				if (!CellFinderExtended.TryRadialSearchForCell(loc, map, 30, (IntVec3 cell) =>
 				{
-					foreach (IntVec3 cell2 in vehicle.PawnOccupiedCells(cell, rot))
+					foreach (IntVec3 cell2 in vehicle.PawnOccupiedCells(cell, tmpRot))
 					{
 						if (!GenGridVehicles.Walkable(cell2, vehicle.VehicleDef, map) || positionManager.PositionClaimed(cell2))
 						{

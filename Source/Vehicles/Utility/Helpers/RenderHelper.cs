@@ -49,14 +49,14 @@ namespace Vehicles
 			ColorChart.Apply(false);
 		}
 
-		public static void DrawLinesBetweenTargets(VehiclePawn pawn, Job curJob, JobQueue jobQueue)
+		public static void DrawLinesBetweenTargets(VehiclePawn vehicle, Job curJob, JobQueue jobQueue)
 		{
-			Vector3 a = pawn.Position.ToVector3Shifted();
-			if (pawn.vehiclePather.curPath != null)
+			Vector3 a = vehicle.Position.ToVector3Shifted();
+			if (vehicle.vehiclePather.curPath != null)
 			{
-				a = pawn.vehiclePather.Destination.CenterVector3;
+				a = vehicle.vehiclePather.Destination.CenterVector3;
 			}
-			else if (curJob != null && curJob.targetA.IsValid && (!curJob.targetA.HasThing || (curJob.targetA.Thing.Spawned && curJob.targetA.Thing.Map == pawn.Map)))
+			else if (curJob != null && curJob.targetA.IsValid && (!curJob.targetA.HasThing || (curJob.targetA.Thing.Spawned && curJob.targetA.Thing != vehicle && curJob.targetA.Thing.Map == vehicle.Map)))
 			{
 				GenDraw.DrawLineBetween(a, curJob.targetA.CenterVector3, AltitudeLayer.Item.AltitudeFor());
 				a = curJob.targetA.CenterVector3;
@@ -65,7 +65,7 @@ namespace Vehicles
 			{
 				if (jobQueue[i].job.targetA.IsValid)
 				{
-					if (!jobQueue[i].job.targetA.HasThing || (jobQueue[i].job.targetA.Thing.Spawned && jobQueue[i].job.targetA.Thing.Map == pawn.Map))
+					if (!jobQueue[i].job.targetA.HasThing || (jobQueue[i].job.targetA.Thing.Spawned && jobQueue[i].job.targetA.Thing.Map == vehicle.Map))
 					{
 						Vector3 centerVector = jobQueue[i].job.targetA.CenterVector3;
 						GenDraw.DrawLineBetween(a, centerVector, AltitudeLayer.Item.AltitudeFor());
@@ -79,7 +79,7 @@ namespace Vehicles
 					{
 						for (int j = 0; j < targetQueueA.Count; j++)
 						{
-							if (!targetQueueA[j].HasThing || (targetQueueA[j].Thing.Spawned && targetQueueA[j].Thing.Map == pawn.Map))
+							if (!targetQueueA[j].HasThing || (targetQueueA[j].Thing.Spawned && targetQueueA[j].Thing.Map == vehicle.Map))
 							{
 								Vector3 centerVector2 = targetQueueA[j].CenterVector3;
 								GenDraw.DrawLineBetween(a, centerVector2, AltitudeLayer.Item.AltitudeFor());

@@ -1,16 +1,28 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1429</currentVersion>
+  <currentVersion>1.5.1443</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed bug where immoveable vehicles would share regions with moveable ones, causing some vehicles to not update the regions / pathgrid throughout the game.
 
+- Fixed bug where modifying movement permissions wouldn't recache owners of regions.
+
+- Fixed bug where an idle vehicle would still render a tiny line to its current position.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- When landing at a map, if no edge or center cell is found, will default to forced targeting.
 
+- When landing and in 'forced targeting', right clicking (or your cancel keybind) will allow you to exit out to the world map should you be unable to land on the map.
+
+- Added toggle for rendering where aerial vehicles are landing
+
+- Added 'friendly fire' field in the mod settings for running over pawns.  This will allow you to keep the mechanic enabled without being forced to deal with accidentally running over friendlies.
+
+- Added ring radius when targeting with turrets that have spread.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
   <!--Static parameterless method to execute when update log is executed-->

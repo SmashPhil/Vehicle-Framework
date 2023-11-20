@@ -41,6 +41,10 @@ namespace Vehicles
 
 		public static readonly Texture2D HaulPawnToVehicle = ContentFinder<Texture2D>.Get("UI/Gizmos/HaulPawnToVehicle");
 
+		public static readonly Texture2D DeployVehicle = ContentFinder<Texture2D>.Get("UI/Gizmos/Gizmo_DeployVehicle");
+
+		public static readonly Texture2D UndeployVehicle = ContentFinder<Texture2D>.Get("UI/Gizmos/Gizmo_UndeployVehicle");
+
 		public static readonly Texture2D[] PackCargoIcon = new Texture2D[] { ContentFinder<Texture2D>.Get("UI/Gizmos/StartLoadBoat"),
 																			 ContentFinder<Texture2D>.Get("UI/Gizmos/StartLoadAerial"),
 																			 ContentFinder<Texture2D>.Get("UI/Gizmos/StartLoadVehicle"),

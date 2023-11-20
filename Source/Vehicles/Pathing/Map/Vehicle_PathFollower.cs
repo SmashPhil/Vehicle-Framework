@@ -32,7 +32,7 @@ namespace Vehicles
 
 		private List<IntVec3> bumperCells;
 
-		private bool moving;
+		private bool moving = false;
 
 		public IntVec3 nextCell;
 		private IntVec3 lastCell;
