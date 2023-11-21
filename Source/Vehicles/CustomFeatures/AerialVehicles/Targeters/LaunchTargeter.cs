@@ -227,9 +227,12 @@ namespace Vehicles
 							}
 							GUIState.Pop();
 						}
-						GUI.color = Color.white;
-						GUI.DrawTexture(new Rect(labelPosition.x - textSize.x * 0.1f, labelPosition.y, bgWidth, textSize.y), TexUI.GrayTextBG);
-						GUI.Label(labelPosition, fuelCostLabel);
+						if (TotalFuelCost > 0)
+						{
+							GUI.color = Color.white;
+							GUI.DrawTexture(new Rect(labelPosition.x - textSize.x * 0.1f, labelPosition.y, bgWidth, textSize.y), TexUI.GrayTextBG);
+							GUI.Label(labelPosition, fuelCostLabel);
+						}
 					}
 					GUIState.Pop();
 				}
@@ -357,7 +360,11 @@ namespace Vehicles
 				return (0, 0);
 			}
 			float distance = Ext_Math.SphericalDistance(from, to);
-			float fuelCost = vehicle.CompVehicleLauncher.FuelNeededToLaunchAtDist(distance);
+			float fuelCost = 0;
+			if (vehicle.CompFueledTravel != null)
+			{
+				fuelCost = vehicle.CompVehicleLauncher.FuelNeededToLaunchAtDist(distance);
+			}
 			return (fuelCost, distance);
 		}
 

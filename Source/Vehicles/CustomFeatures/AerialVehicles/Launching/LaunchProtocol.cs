@@ -614,7 +614,7 @@ namespace Vehicles
 						vehicle.CompVehicleLauncher.inFlight = true;
 						CameraJumper.TryShowWorld();
 					}
-				}, allowRotating: vehicle.VehicleDef.rotatable);
+				}, allowRotating: vehicle.VehicleDef.rotatable, targetValidator: (targetInfo) => !targetInfo.Cell.Roofed(mapParent.Map));
 			}, MenuOptionPriority.Default, null, null, 0f, null, null);
 		}
 

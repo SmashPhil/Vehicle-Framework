@@ -14,6 +14,8 @@
 
 - Fixed bug where an idle vehicle would still render a tiny line to its current position.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Added 'deploy' mechanic where vehicles will need to set up before being able to use its turrets.
+
 - When landing at a map, if no edge or center cell is found, will default to forced targeting.
 
 - When landing and in 'forced targeting', right clicking (or your cancel keybind) will allow you to exit out to the world map should you be unable to land on the map.

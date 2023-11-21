@@ -192,7 +192,7 @@ namespace Vehicles
 						vehicle.CompVehicleLauncher.inFlight = true;
 						CameraJumper.TryShowWorld();
 					}
-				}, allowRotating: vehicle.VehicleDef.rotatable && landingProperties.forcedRotation is null);
+				}, allowRotating: vehicle.VehicleDef.rotatable && landingProperties.forcedRotation is null, targetValidator: (targetInfo) => !targetInfo.Cell.Roofed(mapParent.Map));
 			}, MenuOptionPriority.Default, null, null, 0f, null, null);
 		}
 
