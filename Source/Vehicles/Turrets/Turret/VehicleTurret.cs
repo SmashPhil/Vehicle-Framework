@@ -997,7 +997,6 @@ namespace Vehicles
 
 		protected virtual bool TurretRotationTick()
 		{
-			Log.Message($"Current: {currentRotation} Targeted: {rotationTargeted}");
 			if (!RotationAligned)
 			{
 				//REDO - SET TO CHECK CANNON HANDLERS COMPONENT HEALTH

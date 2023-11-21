@@ -737,12 +737,12 @@ namespace Vehicles
 			{
 				return null;
 			}
-			if (fuelCost > vehicle.CompFueledTravel.Fuel)
+			if (vehicle.CompFueledTravel != null && fuelCost > vehicle.CompFueledTravel.Fuel)
 			{
 				GUI.color = TexData.RedReadable;
 				return "VF_NotEnoughFuel".Translate();
 			}
-			else if (target.IsValid && vehicle.CompVehicleLauncher.FuelNeededToLaunchAtDist(WorldHelper.GetTilePos(tile), target.Tile)  > (vehicle.CompFueledTravel.Fuel - fuelCost))
+			else if (vehicle.CompFueledTravel != null && target.IsValid && vehicle.CompVehicleLauncher.FuelNeededToLaunchAtDist(WorldHelper.GetTilePos(tile), target.Tile)  > (vehicle.CompFueledTravel.Fuel - fuelCost))
 			{
 				GUI.color = TexData.YellowReadable;
 				return "VF_NoFuelReturnTrip".Translate();
@@ -791,7 +791,7 @@ namespace Vehicles
 					Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(), MessageTypeDefOf.RejectInput, false);
 					return false;
 				}
-				else if (Ext_Math.SphericalDistance(pos, WorldHelper.GetTilePos(target.Tile)) > vehicle.CompVehicleLauncher.MaxLaunchDistance || fuelCost > vehicle.CompFueledTravel.Fuel)
+				else if (Ext_Math.SphericalDistance(pos, WorldHelper.GetTilePos(target.Tile)) > vehicle.CompVehicleLauncher.MaxLaunchDistance || (vehicle.CompFueledTravel != null && fuelCost > vehicle.CompFueledTravel.Fuel))
 				{
 					Messages.Message("TransportPodDestinationBeyondMaximumRange".Translate(), MessageTypeDefOf.RejectInput, false);
 					return false;
