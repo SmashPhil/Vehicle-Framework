@@ -309,6 +309,16 @@ namespace Vehicles
 					}
 				}
 			}
+			if (!CurAnimationProperties.fleckOneShots.NullOrEmpty())
+			{
+				foreach (FleckOneShot fleckOneShot in CurAnimationProperties.fleckOneShots)
+				{
+					if (fleckOneShot.emitAtTick == TicksPassed)
+					{
+						ThrowFleck(fleckOneShot);
+					}
+				}
+			}
 		}
 
 		/// <summary>
@@ -384,6 +394,11 @@ namespace Vehicles
 			launchProtocol.drawOverlays = active;
 		}
 
+		private static void SetComponentHealth(LaunchProtocol launchProtocol, string key, float health)
+		{
+			launchProtocol.vehicle.statHandler.SetComponentHealth(key, health);
+		}
+
 		/* ---------- Animation Events ---------- */
 
 		/// <summary>
@@ -434,64 +449,116 @@ namespace Vehicles
 			count -= motesToThrow;
 			for (int i = 0; i < motesToThrow; i++)
 			{
-				float size = fleckData.size?.Evaluate(t) ?? 1;
-				float? airTime = fleckData.airTime?.Evaluate(t);
-				float? speed = fleckData.speed?.Evaluate(t);
-				float? rotationRate = fleckData.rotationRate?.Evaluate(t);
-				float? angle = fleckData.angle.RandomInRange;
-
-				Vector3 origin = position.ToVector3Shifted();
-				if (!fleckData.lockFleckX)
-				{
-					origin.x = DrawPos.x;
-				}
-				if (!fleckData.lockFleckZ)
-				{
-					origin.z = DrawPos.z;
-				}
-				if (angle.HasValue && fleckData.drawOffset != null)
-				{
-					origin = origin.PointFromAngle(fleckData.drawOffset.Evaluate(t), angle.Value);
-				}
-				
-				if (!fleckData.xFleckPositionCurve.NullOrEmpty())
-				{
-					origin.x += fleckData.xFleckPositionCurve.Evaluate(t);
-				}
-				if (!fleckData.zFleckPositionCurve.NullOrEmpty())
-				{
-					origin.z += fleckData.zFleckPositionCurve.Evaluate(t);
-				}
-
-				origin += fleckData.originOffset;
-
-				if (fleckData.originOffsetRange != null)
-				{
-					Vector3 offsetFrom = fleckData.originOffsetRange.from;
-					Vector3 offsetTo = fleckData.originOffsetRange.to;
-					float offsetRangeX = offsetFrom.x;
-					if (offsetFrom.x != offsetTo.x)
-					{
-						offsetRangeX = Rand.Range(offsetFrom.x, offsetTo.x);
-					}
-					float offsetRangeY = offsetFrom.y;
-					if (offsetFrom.y != offsetTo.y)
-					{
-						offsetRangeY = Rand.Range(offsetFrom.y, offsetTo.y);
-					}
-					float offsetRangeZ = offsetFrom.z;
-					if (offsetFrom.z != offsetTo.z)
-					{
-						offsetRangeZ = Rand.Range(offsetFrom.z, offsetTo.z);
-					}
-
-					origin += new Vector3(offsetRangeX, offsetRangeY, offsetRangeZ);
-				}
-				
-				origin.y = fleckData.def.altitudeLayer.AltitudeFor();
-				ThrowFleck(fleckData.def, origin, Map, size, airTime, angle, speed, rotationRate);
+				ThrowFleck(fleckData, t);
 			}
 			return count;
+		}
+
+		public void ThrowFleck(FleckData fleckData, float t)
+		{
+			float size = fleckData.size?.Evaluate(t) ?? 1;
+			float? airTime = fleckData.airTime?.Evaluate(t);
+			float? speed = fleckData.speed?.Evaluate(t);
+			float? rotationRate = fleckData.rotationRate?.Evaluate(t);
+			float angle = fleckData.angle.RandomInRange;
+
+			Vector3 origin = position.ToVector3Shifted();
+			if (!fleckData.lockFleckX)
+			{
+				origin.x = DrawPos.x;
+			}
+			if (!fleckData.lockFleckZ)
+			{
+				origin.z = DrawPos.z;
+			}
+			if (fleckData.drawOffset != null)
+			{
+				origin = origin.PointFromAngle(fleckData.drawOffset.Evaluate(t), angle);
+			}
+
+			if (!fleckData.xFleckPositionCurve.NullOrEmpty())
+			{
+				origin.x += fleckData.xFleckPositionCurve.Evaluate(t);
+			}
+			if (!fleckData.zFleckPositionCurve.NullOrEmpty())
+			{
+				origin.z += fleckData.zFleckPositionCurve.Evaluate(t);
+			}
+
+			origin += fleckData.originOffset;
+
+			if (fleckData.originOffsetRange != null)
+			{
+				Vector3 offsetFrom = fleckData.originOffsetRange.from;
+				Vector3 offsetTo = fleckData.originOffsetRange.to;
+				float offsetRangeX = offsetFrom.x;
+				if (offsetFrom.x != offsetTo.x)
+				{
+					offsetRangeX = Rand.Range(offsetFrom.x, offsetTo.x);
+				}
+				float offsetRangeY = offsetFrom.y;
+				if (offsetFrom.y != offsetTo.y)
+				{
+					offsetRangeY = Rand.Range(offsetFrom.y, offsetTo.y);
+				}
+				float offsetRangeZ = offsetFrom.z;
+				if (offsetFrom.z != offsetTo.z)
+				{
+					offsetRangeZ = Rand.Range(offsetFrom.z, offsetTo.z);
+				}
+
+				origin += new Vector3(offsetRangeX, offsetRangeY, offsetRangeZ);
+			}
+
+			origin.y = fleckData.def.altitudeLayer.AltitudeFor();
+			ThrowFleck(fleckData.def, origin, Map, size, airTime, angle, speed, rotationRate);
+		}
+
+		public void ThrowFleck(FleckOneShot fleckOneShot)
+		{
+			float size = fleckOneShot.size?.RandomInRange ?? 1;
+			float? airTime = fleckOneShot.airTime?.RandomInRange;
+			float? speed = fleckOneShot.speed?.RandomInRange;
+			float? rotationRate = fleckOneShot.rotationRate?.RandomInRange;
+			float angle = fleckOneShot.angle.RandomInRange;
+
+			Vector3 origin = position.ToVector3Shifted();
+			if (!fleckOneShot.lockFleckX)
+			{
+				origin.x = DrawPos.x;
+			}
+			if (!fleckOneShot.lockFleckZ)
+			{
+				origin.z = DrawPos.z;
+			}
+			
+			origin += fleckOneShot.originOffset;
+
+			if (fleckOneShot.originOffsetRange != null)
+			{
+				Vector3 offsetFrom = fleckOneShot.originOffsetRange.from;
+				Vector3 offsetTo = fleckOneShot.originOffsetRange.to;
+				float offsetRangeX = offsetFrom.x;
+				if (offsetFrom.x != offsetTo.x)
+				{
+					offsetRangeX = Rand.Range(offsetFrom.x, offsetTo.x);
+				}
+				float offsetRangeY = offsetFrom.y;
+				if (offsetFrom.y != offsetTo.y)
+				{
+					offsetRangeY = Rand.Range(offsetFrom.y, offsetTo.y);
+				}
+				float offsetRangeZ = offsetFrom.z;
+				if (offsetFrom.z != offsetTo.z)
+				{
+					offsetRangeZ = Rand.Range(offsetFrom.z, offsetTo.z);
+				}
+
+				origin += new Vector3(offsetRangeX, offsetRangeY, offsetRangeZ);
+			}
+
+			origin.y = fleckOneShot.def.altitudeLayer.AltitudeFor();
+			ThrowFleck(fleckOneShot.def, origin, Map, size, airTime, angle, speed, rotationRate);
 		}
 
 		public static void ThrowFleck(FleckDef fleckDef, Vector3 loc, Map map, float size, float? airTime, float? angle, float? speed, float? rotationRate)

@@ -50,6 +50,8 @@ namespace Vehicles
 
 		[GraphEditable(Prefix = "Fleck")]
 		public List<FleckData> fleckData;
+
+		public List<FleckOneShot> fleckOneShots;
 		/* ---------------------*/
 	}
 }

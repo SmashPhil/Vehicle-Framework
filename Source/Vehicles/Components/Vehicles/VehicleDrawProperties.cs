@@ -36,11 +36,12 @@ namespace Vehicles
 		[TweakField]
 		public readonly List<GraphicOverlay> overlays = new List<GraphicOverlay>();
 
-		public void PostDefDatabase()
+		public void PostDefDatabase(VehicleDef vehicleDef)
 		{
 			foreach (GraphicDataOverlay graphicDataOverlay in graphicOverlays)
 			{
 				GraphicOverlay graphicOverlay = new GraphicOverlay(graphicDataOverlay);
+				graphicOverlay.data.graphicData.Init(vehicleDef);
 				overlays.Add(graphicOverlay);
 			}
 		}

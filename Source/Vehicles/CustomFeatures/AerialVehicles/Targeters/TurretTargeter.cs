@@ -91,9 +91,8 @@ namespace Vehicles
 
 		public override void TargeterOnGUI()
 		{
-			if(action != null)
+			if (action != null)
 			{
-				float distance = (Turret.TurretLocation.ToIntVec3() - CurrentTargetUnderMouse().Cell).LengthHorizontal;
 				if (TargetMeetsRequirements(Turret, CurrentTargetUnderMouse()))
 				{
 					Texture2D icon = mouseAttachment ?? TexCommand.Attack;
@@ -122,16 +121,6 @@ namespace Vehicles
 				{
 					GenDraw.DrawRadiusRing(mouseTarget.Cell, Turret.CurrentFireMode.spreadRadius);
 				}
-
-				//REDO Radius Circle
-				//if (Cannon.MinRange > 0)
-				//{
-				//	GenDraw.DrawRadiusRing(Cannon.TurretLocation.ToIntVec3(), Cannon.turretDef.minRange, Color.red);
-				//}
-				//if (Cannon.turretDef.maxRange <= GenRadial.MaxRadialPatternRadius)
-				//{
-				//	GenDraw.DrawRadiusRing(Cannon.TurretLocation.ToIntVec3(), Cannon.MaxRange, Color.white);
-				//}
 			}
 		}
 
@@ -154,21 +143,7 @@ namespace Vehicles
 
 		public static bool TargetMeetsRequirements(VehicleTurret turret, LocalTargetInfo obj)
 		{
-			float distance = (turret.TurretLocation.ToIntVec3() - obj.Cell).LengthHorizontal;
-			bool los = false;
-			if (obj.HasThing)
-			{
-				if (!obj.Thing.Spawned || obj.Thing.Destroyed)
-				{
-					return false;
-				}
-				los = GenSight.LineOfSightToThing(turret.TurretLocation.ToIntVec3(), obj.Thing, turret.vehicle.Map);
-			}
-			else
-			{
-				los = GenSight.LineOfSight(turret.TurretLocation.ToIntVec3(), obj.Cell, turret.vehicle.Map);
-			}
-			if (distance < turret.MinRange || (turret.MaxRange > 0 && distance >= turret.MaxRange))
+			if (!turret.InRange(obj))
 			{
 				return false;
 			}
@@ -185,9 +160,22 @@ namespace Vehicles
 			{
 				projectileDef = turret.loadedAmmo?.projectileWhenLoaded;
 			}
-			if (projectileDef != null && projectileDef.projectile.flyOverhead)
+			if (projectileDef == null && projectileDef.projectile.flyOverhead)
 			{
 				return true;
+			}
+			bool los = false;
+			if (obj.HasThing)
+			{
+				if (!obj.Thing.Spawned || obj.Thing.Destroyed)
+				{
+					return false;
+				}
+				los = GenSight.LineOfSightToThing(turret.TurretLocation.ToIntVec3(), obj.Thing, turret.vehicle.Map);
+			}
+			else
+			{
+				los = GenSight.LineOfSight(turret.TurretLocation.ToIntVec3(), obj.Cell, turret.vehicle.Map);
 			}
 			return los;
 		}

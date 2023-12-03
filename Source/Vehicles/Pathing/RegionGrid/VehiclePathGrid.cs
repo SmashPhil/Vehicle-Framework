@@ -86,7 +86,7 @@ namespace Vehicles
 		/// Recalculate path cost for tile <paramref name="vehicle"/> is registered on
 		/// </summary>
 		/// <param name="vehicle"></param>
-		public void RecalculatePerceivedPathCostUnderRect(CellRect cellRect, List<Thing>[] thingLists)
+		public void RecalculatePerceivedPathCostUnderRect(CellRect cellRect, List<List<Thing>> snapshotLists)
 		{
 			int index = 0;
 			for (int i = cellRect.minZ; i <= cellRect.maxZ; i++)
@@ -94,7 +94,7 @@ namespace Vehicles
 				for (int j = cellRect.minX; j <= cellRect.maxX; j++)
 				{
 					IntVec3 cell = new IntVec3(j, 0, i);
-					RecalculatePerceivedPathCostAt(cell, thingLists[index]);
+					RecalculatePerceivedPathCostAt(cell, snapshotLists[index]);
 					index++;
 				}
 			}

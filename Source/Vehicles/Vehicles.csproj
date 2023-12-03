@@ -88,6 +88,8 @@
     <Compile Include="CustomFeatures\AerialVehicles\Events\AerialAnimationEvents.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\DirectionalTakeoff.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\FleckData.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\FleckOneShot.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\Range.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\ShadowData.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Properties\DirectionalProtocolProperties.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Properties\PropellerProtocolProperties.cs" />
@@ -127,6 +129,8 @@
     <Compile Include="Harmony\ConditionalPatches\Compatibility_SOS2.cs" />
     <Compile Include="Harmony\ConditionalPatches\ConditionalVehiclePatch.cs" />
     <Compile Include="Harmony\PatchCategories\DefGenerators\ThingDefGenerator_Buildables.cs" />
+    <Compile Include="Harmony\UnitTesting\WorldTesting.cs" />
+    <Compile Include="Harmony\UnitTesting\UITesting.cs" />
     <Compile Include="Misc\Attributes\ActionOnSettingsInputAttribute.cs" />
     <Compile Include="Misc\Attributes\DisableSettingConditionalAttribute.cs" />
     <Compile Include="Misc\DefOf\HistoryEventDefOf_Vehicles.cs" />
@@ -278,7 +282,7 @@
     <Compile Include="CustomFeatures\Misc\Motes\Mote_CannonPlume.cs" />
     <Compile Include="Gizmo\Command_VerbWorldTarget.cs" />
     <Compile Include="Harmony\PatchCategories\DefGenerators\PawnKindDefGenerator_Vehicles.cs" />
-    <Compile Include="Harmony\StartupTesting.cs" />
+    <Compile Include="Harmony\UnitTesting\PerformanceTesting.cs" />
     <Compile Include="Misc\DefModExtension\SpaceObjectDefModExtension.cs" />
     <Compile Include="Misc\DefModExtension\SpawnerPropertiesDefModExtension.cs" />
     <Compile Include="Misc\DefModExtension\VehicleDamageMultiplierDefModExtension.cs" />
@@ -413,6 +417,11 @@
     <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleLaunchHelper.cs" />
     <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleTabHelper.cs" />
     <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleTraderHelper.cs" />
+    <Compile Include="Utility\Helpers\AsyncActions\AsyncPathFindAction.cs" />
+    <Compile Include="Utility\Helpers\AsyncActions\AsyncPathingAction.cs" />
+    <Compile Include="Utility\Helpers\AsyncActions\AsyncRegionAction.cs" />
+    <Compile Include="Utility\Helpers\AsyncActions\AsyncReachabilityCacheAction.cs" />
+    <Compile Include="Utility\Helpers\AsyncActions\AsyncRegionRegisterAction.cs" />
     <Compile Include="Utility\Helpers\CaravanHelper.cs" />
     <Compile Include="Utility\Helpers\CaravanInfoHelper.cs" />
     <Compile Include="Utility\Helpers\DamageHelper.cs" />

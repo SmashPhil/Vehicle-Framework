@@ -21,6 +21,8 @@ namespace Vehicles
 		public Vector3? OriginalDrawOffsetSouth { get; private set; }
 		public Vector3? OriginalDrawOffsetWest { get; private set; }
 
+		public bool AboveBody => layer >= 0;
+
 		public GraphicDataLayered() : base()
 		{
 		}

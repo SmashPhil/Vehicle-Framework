@@ -205,7 +205,7 @@ namespace Vehicles
 		public void PostDefDatabase()
 		{
 			properties.PostDefDatabase(this);
-			drawProperties.PostDefDatabase();
+			drawProperties.PostDefDatabase(this);
 			graphicData.pattern ??= PatternDefOf.Default;
 		}
 

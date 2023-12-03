@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
 using UnityEngine;
 using RimWorld;
 using Verse;
@@ -10,14 +11,21 @@ namespace Vehicles
 	public class VehicleComponent : IExposable, ITweakFields
 	{
 		public VehiclePawn vehicle;
-		public static Gradient gradient;
-
+		
 		[TweakField]
 		public VehicleComponentProperties props;
 		public float health;
 
+		public List<ComponentOverlay> overlayRendering;
+
+		[Unsaved]
+		[Obsolete]
+		public List<TurretHandling> turretHandling; //Not yet implemented
+
 		public IndicatorDef indicator;
 		public Color highlightColor = Color.white;
+
+		public static Gradient gradient;
 
 		public VehicleComponent(VehiclePawn vehicle)
 		{
@@ -215,6 +223,18 @@ namespace Vehicles
 
 			public DamageInfo damageInfo;
 			public IntVec2 cell;
+		}
+
+		public struct ComponentOverlay
+		{
+			public int index;
+			public float healthPercent;
+		}
+
+		public struct TurretHandling
+		{
+			public string key;
+			public float healthPercent;
 		}
 	}
 }

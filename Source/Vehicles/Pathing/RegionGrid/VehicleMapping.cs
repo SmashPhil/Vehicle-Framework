@@ -278,7 +278,6 @@ namespace Vehicles
 				ownerId = checkingOwner.DefIndex;
 				if (vehiclePathData.MatchesReachability(vehicleData[ownerId]))
 				{
-					Log.Message($"VehicleDef: {vehiclePathData.Owner} with id = {vehiclePathData.Owner.DefIndex} piggying off {checkingOwner} with ownerId = {ownerId}");
 					return true;
 				}
 			}

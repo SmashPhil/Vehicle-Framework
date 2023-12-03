@@ -29,6 +29,14 @@ namespace Vehicles
 				float overlayAngle = angle;
 				extraAngle = graphicOverlay.data.rotation;
 				Vector3 overlayDrawPos = drawPos;
+				if (graphicOverlay.data.component != null && vehicle.statHandler.GetComponentHealthPercent(graphicOverlay.data.component.key) <= graphicOverlay.data.component.healthPercent)
+				{
+					continue; //Skip rendering if health percent is below set amount for rendering
+				}
+				if (!graphicOverlay.data.graphicData.AboveBody)
+				{
+					overlayDrawPos -= new Vector3(0, VehicleRenderer.YOffset_Body + VehicleRenderer.SubInterval, 0);
+				}
 				if (graphicOverlay.data.graphicData.Graphic is Graphic_Rotator rotator)
 				{
 					extraAngle += rotationRegistry[rotator.RegistryKey].ClampAndWrap(0, 359);

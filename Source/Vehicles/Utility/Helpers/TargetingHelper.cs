@@ -14,42 +14,34 @@ namespace Vehicles
 		/// Find best attack target for VehicleTurret
 		/// </summary>
 		/// <seealso cref="BestAttackTarget(VehicleTurret, TargetScanFlags, Predicate{Thing}, float, float, IntVec3, float, bool, bool)"/>
-		/// <param name="cannon"></param>
-		/// <param name="restrictedAngle"></param>
-		/// <param name="param"></param>
-		public static LocalTargetInfo GetCannonTarget(this VehicleTurret cannon, float restrictedAngle = 0f, TargetingParameters param = null)
+		public static bool TryGetTarget(this VehicleTurret turret, out LocalTargetInfo targetInfo, TargetingParameters param = null)
 		{
-			if (cannon.vehicle.CompVehicleTurrets != null && cannon.vehicle.CompVehicleTurrets.WeaponStatusOnline && cannon.vehicle.Faction != null) //add fire at will option
+			targetInfo = LocalTargetInfo.Invalid;
+			if (turret.vehicle.CompVehicleTurrets.WeaponStatusOnline)
 			{
-				TargetScanFlags targetScanFlags = TargetScanFlags.NeedLOSToPawns | TargetScanFlags.NeedLOSToNonPawns | TargetScanFlags.NeedThreat | TargetScanFlags.NeedAutoTargetable;
-				Thing thing = (Thing)BestAttackTarget(cannon, targetScanFlags, null, 0f, 9999f, default(IntVec3), float.MaxValue, false, false);
+				TargetScanFlags targetScanFlags = turret.turretDef.targetScanFlags;// TargetScanFlags.NeedLOSToPawns | TargetScanFlags.NeedLOSToNonPawns | TargetScanFlags.NeedThreat | TargetScanFlags.NeedAutoTargetable;
+				Thing thing = (Thing)BestAttackTarget(turret, targetScanFlags, delegate (Thing thing)
+				{
+					return turret.AngleBetween(thing.DrawPos);
+				}, canTakeTargetsCloserThanEffectiveMinRange: false);
 				if (thing != null)
 				{
-					return new LocalTargetInfo(thing);
+					targetInfo = new LocalTargetInfo(thing);
+					return true;
 				}
 			}
-			return LocalTargetInfo.Invalid;
+			return false;
 		}
 
 		/// <summary>
 		/// Best attack target for VehicleTurret
 		/// </summary>
-		/// <param name="cannon"></param>
-		/// <param name="flags"></param>
-		/// <param name="validator"></param>
-		/// <param name="minDist"></param>
-		/// <param name="maxDist"></param>
-		/// <param name="locus"></param>
-		/// <param name="maxTravelRadiusFromLocus"></param>
-		/// <param name="canBash"></param>
-		/// <param name="canTakeTargetsCloserThanEffectiveMinRange"></param>
-		/// <returns></returns>
-		public static IAttackTarget BestAttackTarget(VehicleTurret cannon, TargetScanFlags flags, Predicate<Thing> validator = null, float minDist = 0f, float maxDist = 9999f, IntVec3 locus = default(IntVec3), float maxTravelRadiusFromLocus = 3.4028235E+38f, bool canBash = false, bool canTakeTargetsCloserThanEffectiveMinRange = true)
+		public static IAttackTarget BestAttackTarget(VehicleTurret turret, TargetScanFlags flags, Predicate<Thing> validator = null, float minDist = 0f, float maxDist = 9999f, IntVec3 locus = default(IntVec3), float maxTravelRadiusFromLocus = 3.4028235E+38f, bool canBash = false, bool canTakeTargetsCloserThanEffectiveMinRange = true)
 		{
-			VehiclePawn searcherPawn = cannon.vehicle;
+			VehiclePawn searcherPawn = turret.vehicle;
 
 			float minDistSquared = minDist * minDist;
-			float num = maxTravelRadiusFromLocus + cannon.MaxRange;
+			float num = maxTravelRadiusFromLocus + turret.MaxRange;
 			float maxLocusDistSquared = num * num;
 			Func<IntVec3, bool> losValidator = null;
 			if (flags.HasFlag(TargetScanFlags.LOSBlockableByGas))
@@ -63,14 +55,14 @@ namespace Vehicles
 				{
 					return false;
 				}
-				if (minDistSquared > 0f && (float)(searcherPawn.Position - thing.Position).LengthHorizontalSquared < minDistSquared)
+				if (minDistSquared > 0f && (searcherPawn.Position - thing.Position).LengthHorizontalSquared < minDistSquared)
 				{
 					return false;
 				}
 				if (!canTakeTargetsCloserThanEffectiveMinRange)
 				{
-					float num2 = cannon.MinRange;
-					if (num2 > 0f && (float)(cannon.vehicle.Position - thing.Position).LengthHorizontalSquared < num2 * num2)
+					float num2 = turret.MinRange;
+					if (num2 > 0f && (turret.vehicle.Position - thing.Position).LengthHorizontalSquared < num2 * num2)
 					{
 						return false;
 					}

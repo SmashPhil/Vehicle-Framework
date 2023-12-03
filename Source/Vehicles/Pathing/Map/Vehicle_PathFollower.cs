@@ -84,7 +84,7 @@ namespace Vehicles
 
 		public int CollisionsLookAheadStartingIndex { get; private set; }
 
-		public bool CalculatingPath { get; private set; }
+		public bool CalculatingPath { get; internal set; }
 
 		public LocalTargetInfo Destination => destination;
 
@@ -615,7 +615,7 @@ namespace Vehicles
 		/// <summary>
 		/// Calculates and assigns new path to <see cref="pathToAssign"/> for reassignment from <see cref="PatherTick"/>. This ensures <see cref="curPath"/> is only ever written to from main thread.
 		/// </summary>
-		private void TrySetNewPath_Delayed()
+		internal void TrySetNewPath_Delayed()
 		{
 			PawnPath pawnPath = GenerateNewPath_Concurrent();
 			if (pawnPath is null || !pawnPath.Found)
@@ -637,15 +637,11 @@ namespace Vehicles
 		private void TrySetNewPath_Threaded()
 		{
 			CalculatingPath = true;
-			VehicleMapping vehicleMapping = vehicle.Map.GetCachedMapComponent<VehicleMapping>();
-			
+			VehicleMapping vehicleMapping = MapComponentCache<VehicleMapping>.GetComponent(vehicle.Map);
 			if (vehicleMapping.ThreadAvailable)
 			{
-				AsyncAction asyncAction = AsyncPool<AsyncAction>.Get();
-				asyncAction.Set(TrySetNewPath_Delayed, validator: () => moving && CalculatingPath, exceptionHandler: delegate (Exception ex)
-				{
-					CalculatingPath = false;
-				});
+				AsyncPathFindAction asyncAction = AsyncPool<AsyncPathFindAction>.Get();
+				asyncAction.Set(vehicle);
 				vehicleMapping.dedicatedThread.Queue(asyncAction);
 			}
 			else

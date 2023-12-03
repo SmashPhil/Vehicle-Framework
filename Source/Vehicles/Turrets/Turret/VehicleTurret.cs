@@ -12,10 +12,11 @@ namespace Vehicles
 {
 	public class VehicleTurret : IExposable, ILoadReferenceable, IEventManager<VehicleTurretEventDef>, IMaterialCacheTarget, ITweakFields
 	{
-		public const int AutoTargetInterval = 50;
+		public const int AutoTargetInterval = 60;
 		public const int TicksPerOverheatingFrame = 15;
 		public const int TicksTillBeginCooldown = 60;
 		public const float MaxHeatCapacity = 100;
+		public const int DefaultMaxRange = 9999;
 
 		//WIP - may be removed in the future
 		public static HashSet<Pair<string, TurretDisableType>> conditionalTurrets = new HashSet<Pair<string, TurretDisableType>>();
@@ -657,7 +658,7 @@ namespace Vehicles
 			{
 				if (turretDef.maxRange < 0)
 				{
-					return 9999;
+					return DefaultMaxRange;
 				}
 				return turretDef.maxRange;
 			}
@@ -982,8 +983,7 @@ namespace Vehicles
 					}
 					if (!cannonTarget.IsValid && TurretTargeter.Turret != this && ReloadTicks <= 0 && HasAmmo)
 					{
-						LocalTargetInfo autoTarget = this.GetCannonTarget();
-						if (autoTarget.IsValid)
+						if (this.TryGetTarget(out LocalTargetInfo autoTarget))
 						{
 							AlignToAngleRestricted(TurretLocation.AngleToPointRelative(autoTarget.Thing.DrawPos));
 							SetTarget(autoTarget);
@@ -1254,7 +1254,7 @@ namespace Vehicles
 						double spreadDirection = Rand.Value * Math.PI * 2;
 						vce.y = (float)(randomSpread * Math.Sin(spreadDirection));
 						vce.x = (float)(randomSpread * Math.Cos(spreadDirection));
-						LaunchProjectileCE(projectile, loadedAmmo, turretData?._ammoSet, new Vector2(launchCell.x, launchCell.z), cannonTarget, vehicle, sa + vce.y, tr + vce.x, shotHeight, speed);
+						LaunchProjectileCE(projectile, loadedAmmo, turretData?._ammoSet, new Vector2(launchCell.x, launchCell.z), cannonTarget, vehicle, sa + vce.y * Mathf.Deg2Rad, tr + vce.x, shotHeight, speed);
 					}
 					while (--projectileCount > 0);
 
@@ -1568,6 +1568,20 @@ namespace Vehicles
 			end = (end - start) < 0f ? end - start + 360 : end - start;
 			mid = (mid - start) < 0f ? mid - start + 360 : mid - start;
 			return mid < end;
+		}
+
+		public bool InRange(LocalTargetInfo target)
+		{
+			if (MinRange == 0 && MaxRange == DefaultMaxRange)
+			{
+				return true;
+			}
+			IntVec3 cell = target.Cell;
+			Vector2 targetPos = new Vector2(cell.x, cell.z);
+			Vector3 targetLoc = TurretLocation;
+			float distance = Vector2.Distance(new Vector2(targetLoc.x, targetLoc.z), targetPos);
+
+			return distance >= MinRange && distance <= MaxRange;
 		}
 		
 		public void AlignToTargetRestricted()

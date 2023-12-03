@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1443</currentVersion>
+  <currentVersion>1.5.1457</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -9,10 +9,13 @@
 
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Fixed bug where immoveable vehicles would share regions with moveable ones, causing some vehicles to not update the regions / pathgrid throughout the game.
+NOTE: This primarily affected vehicles like the Wisent and Smuggler, so if you were having issues with those vehicles, this would be why.
 
 - Fixed bug where modifying movement permissions wouldn't recache owners of regions.
 
 - Fixed bug where an idle vehicle would still render a tiny line to its current position.
+
+- Fixed bug where overlays layered beneath the vehicle would still render on top of the vehicle in UI.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Added 'deploy' mechanic where vehicles will need to set up before being able to use its turrets.
 
@@ -25,6 +28,10 @@
 - Added 'friendly fire' field in the mod settings for running over pawns.  This will allow you to keep the mechanic enabled without being forced to deal with accidentally running over friendlies.
 
 - Added ring radius when targeting with turrets that have spread.
+
+- Added overlay rendering linked up to a component, allowing overlays to render based on the component's health.
+
+- Added one shot flecks to launch protocol animations, allowing for single-instance flecks being emitted at a specific frame in the animation.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
   <!--Static parameterless method to execute when update log is executed-->

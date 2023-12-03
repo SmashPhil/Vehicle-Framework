@@ -48,6 +48,11 @@ namespace Vehicles
 			Find.WindowStack.Add(settings);
 		}
 
+		public static void TryPromptPlayer(string labelKey, string descriptionKey, Action onConfirm, Action onDeny)
+		{
+			//Dialog_MessageBox.CreateConfirmation
+		}
+
 		public static void OpenWithContext(SettingsSection section = null)
 		{
 			Open();
