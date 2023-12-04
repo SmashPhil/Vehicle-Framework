@@ -57,6 +57,7 @@
 	<VF_MustBeDeployed>Must be deployed.</VF_MustBeDeployed>
 	<VF_MustBeUndeployed>Must be undeployed.</VF_MustBeUndeployed>
 	<VF_VehicleRestriction_Stationary>Cannot fire while moving.</VF_VehicleRestriction_Stationary>
+	<VF_TurretComponentDisabled>{0} needs repairs.</VF_TurretComponentDisabled>
 	
 	<!-- Color Picker -->
 	<VF_Patterns>Patterns</VF_Patterns>

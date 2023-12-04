@@ -17,18 +17,15 @@ namespace Vehicles
 		public static bool TryGetTarget(this VehicleTurret turret, out LocalTargetInfo targetInfo, TargetingParameters param = null)
 		{
 			targetInfo = LocalTargetInfo.Invalid;
-			if (turret.vehicle.CompVehicleTurrets.WeaponStatusOnline)
+			TargetScanFlags targetScanFlags = turret.turretDef.targetScanFlags;
+			Thing thing = (Thing)BestAttackTarget(turret, targetScanFlags, delegate (Thing thing)
 			{
-				TargetScanFlags targetScanFlags = turret.turretDef.targetScanFlags;// TargetScanFlags.NeedLOSToPawns | TargetScanFlags.NeedLOSToNonPawns | TargetScanFlags.NeedThreat | TargetScanFlags.NeedAutoTargetable;
-				Thing thing = (Thing)BestAttackTarget(turret, targetScanFlags, delegate (Thing thing)
-				{
-					return turret.AngleBetween(thing.DrawPos);
-				}, canTakeTargetsCloserThanEffectiveMinRange: false);
-				if (thing != null)
-				{
-					targetInfo = new LocalTargetInfo(thing);
-					return true;
-				}
+				return TurretTargeter.TargetMeetsRequirements(turret, thing);
+			}, canTakeTargetsCloserThanEffectiveMinRange: false);
+			if (thing != null)
+			{
+				targetInfo = new LocalTargetInfo(thing);
+				return true;
 			}
 			return false;
 		}

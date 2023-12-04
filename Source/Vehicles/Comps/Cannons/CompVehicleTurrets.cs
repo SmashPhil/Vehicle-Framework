@@ -38,8 +38,6 @@ namespace Vehicles
 
 		public CompProperties_VehicleTurrets Props => (CompProperties_VehicleTurrets)props;
 
-		public bool WeaponStatusOnline => !Vehicle.Downed && !Vehicle.Dead; //REDO - Add vehicle component health as check
-
 		public float MinRange => turrets.Max(x => x.turretDef.minRange);
 
 		public IEnumerable<(ThingDef thingDef, float count)> Refunds
@@ -214,6 +212,10 @@ namespace Vehicles
 
 		public override IEnumerable<Gizmo> CompGetGizmosExtra()
 		{
+			if (Vehicle.Faction != Faction.OfPlayer)
+			{
+				yield break; //Don't return any gizmos if belonging to another faction
+			}
 			if (CanDeploy)
 			{
 				Command_Toggle deployToggle = new Command_Toggle
@@ -276,10 +278,6 @@ namespace Vehicles
 									break;
 								}
 							}
-							if (Vehicle.Faction != Faction.OfPlayer)
-							{
-								turretTargeterGizmo.Disable("CannotOrderNonControlled".Translate());
-							}
 							if (turret.TurretRestricted)
 							{
 								turretTargeterGizmo.Disable(turret.restrictions.DisableReason);
@@ -287,6 +285,10 @@ namespace Vehicles
 							if (!turret.DeploymentSatisfied)
 							{
 								turretTargeterGizmo.Disable(turret.DeploymentDisabledReason);
+							}
+							if (turret.ComponentDisabled)
+							{
+								turretTargeterGizmo.Disable("VF_TurretComponentDisabled".Translate(turret.component.Label));
 							}
 							yield return turretTargeterGizmo;
 						}
@@ -336,20 +338,14 @@ namespace Vehicles
 								break;
 							}
 						}
-						if (Vehicle.Faction != Faction.OfPlayer)
-						{
-							turretCommand.Disable("CannotOrderNonControlled".Translate());
-						}
 						if (!turret.DeploymentSatisfied)
 						{
 							turretCommand.Disable(turret.DeploymentDisabledReason);
 						}
-						//(bool disabled, string reason) = turret.DisableGizmo;
-						//if (disabled)
-						//{
-						//	turretCommand.Disable(reason);
-						//}
-
+						if (turret.ComponentDisabled)
+						{
+							turretCommand.Disable("VF_TurretComponentDisabled".Translate(turret.component.Label));
+						}
 						if (newCommand)
 						{
 							yield return turretCommand;
@@ -595,6 +591,7 @@ namespace Vehicles
 			Vehicle.AddEvent(VehicleEventDefOf.PawnChangedSeats, RecacheTurretPermissions);
 			Vehicle.AddEvent(VehicleEventDefOf.PawnKilled, RecacheTurretPermissions);
 			Vehicle.AddEvent(VehicleEventDefOf.PawnCapacitiesDirty, RecacheTurretPermissions);
+			
 			foreach (VehicleTurret turret in turrets)
 			{
 				turret.FillEvents_Def();
@@ -701,6 +698,14 @@ namespace Vehicles
 			}
 		}
 
+		private void RecacheTurretComponents()
+		{
+			foreach (VehicleTurret turret in turrets)
+			{
+				turret.component?.RecacheComponent(Vehicle);
+			}
+		}
+
 		public override void PostSpawnSetup(bool respawningAfterLoad)
 		{
 			base.PostSpawnSetup(respawningAfterLoad);
@@ -712,6 +717,7 @@ namespace Vehicles
 				RevalidateTurrets();
 				step = "Recaching turret permissions";
 				RecacheTurretPermissions();
+				RecacheTurretComponents();
 
 				if (!respawningAfterLoad)
 				{

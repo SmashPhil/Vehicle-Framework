@@ -28,17 +28,21 @@
 
 - Optimized pawn overlay rendering in vehicles.  This should now be no more costly than vanilla pawn rendering.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Added 'deploy' mechanic where vehicles will need to set up before being able to use its turrets.
+&lt;b&gt;Players&lt;/b&gt;
+- Added toggle for rendering where aerial vehicles are landing
 
 - When landing at a map, if no edge or center cell is found it will now default to forced targeting.
 
 - When landing and in 'forced targeting', right clicking (or your cancel keybind) will allow you to exit out to the world map should you be unable to land on the map.
 
-- Added toggle for rendering where aerial vehicles are landing
-
 - Added 'friendly fire' field in the mod settings for running over pawns.  This will allow you to keep the mechanic enabled without being forced to deal with accidentally running over friendlies.
 
 - Added ring radius when targeting with turrets that have spread.
+
+&lt;b&gt;Modders&lt;/b&gt;
+- Added 'component' check for vehicle turrets, allowing turrets to be disabled by destroying or damaging a specific component of the vehicle.
+
+- Added 'deploy' mechanic where vehicles will need to set up before being able to use its turrets.
 
 - Added overlay rendering linked up to a component, allowing overlays to render based on the component's health.
 

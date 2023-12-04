@@ -253,9 +253,9 @@ namespace Vehicles
 						listingStandard.Gap(16);
 						listingStandard.SliderLabeled("VF_DelayOnLanding".Translate(), "VF_DelayOnLandingTooltip".Translate(), $" {"VF_DelaySeconds".Translate()}", ref delayDeployOnLanding, 0, 5, 1, 1);
 					}
-					GUIState.Disable();
-					listingStandard.CheckboxLabeled("VF_DynamicDrawing".Translate(), ref dynamicWorldDrawing, "VF_DynamicDrawingTooltip".Translate());
-					GUIState.Enable();
+					//GUIState.Disable();
+					//listingStandard.CheckboxLabeled("VF_DynamicDrawing".Translate(), ref dynamicWorldDrawing, "VF_DynamicDrawingTooltip".Translate());
+					//GUIState.Enable();
 					listingStandard.Gap(8);
 
 					listingStandard.Header("VF_CombatSettings".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);

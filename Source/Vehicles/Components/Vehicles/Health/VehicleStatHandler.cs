@@ -134,6 +134,11 @@ namespace Vehicles
 			MarkAllDirty();
 		}
 
+		public VehicleComponent GetComponent(string key)
+		{
+			return componentsByKeys.TryGetValue(key);
+		}
+
 		public float GetComponentHealthPercent(string key)
 		{
 			if (!componentsByKeys.TryGetValue(key, out VehicleComponent component))

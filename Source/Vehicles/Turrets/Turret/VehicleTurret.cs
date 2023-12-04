@@ -44,6 +44,8 @@ namespace Vehicles
 		[TweakField]
 		public VehicleTurretRender renderProperties = new VehicleTurretRender();
 
+		public TurretComponentRequirement component;
+
 		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public Vector2 aimPieOffset = Vector2.zero;
 		[TweakField(SettingsType = UISettingsType.FloatBox)]
@@ -99,7 +101,7 @@ namespace Vehicles
 		protected List<VehicleTurret> groupTurrets;
 		[Unsaved]
 		public TurretRestrictions restrictions;
-
+		
 		//UPDATE - merge recoil trackers
 		[Unsaved]
 		public Turret_RecoilTracker recoilTracker;
@@ -239,7 +241,9 @@ namespace Vehicles
 
 		public bool TurretRestricted => restrictions?.Disabled ?? false;
 
-		public virtual bool TurretDisabled => TurretRestricted || !IsManned || !DeploymentSatisfied;
+		public virtual bool TurretDisabled => TurretRestricted || !IsManned || !DeploymentSatisfied || ComponentDisabled;
+
+		public bool ComponentDisabled => component != null && !component.MeetsRequirements;
 
 		protected virtual bool TurretTargetValid => cannonTarget.Cell.IsValid && !TurretDisabled;
 
@@ -302,6 +306,18 @@ namespace Vehicles
 					maxTicks *= turretDef.reloadTimerMultiplierPerCrewCount.Evaluate(gunners.Count);
 				}
 				return Mathf.CeilToInt(maxTicks);
+			}
+		}
+
+		public ThingDef ProjectileDef
+		{
+			get
+			{
+				if (loadedAmmo != null && loadedAmmo.projectileWhenLoaded != null)
+				{
+					return loadedAmmo.projectileWhenLoaded;
+				}
+				return turretDef.projectile;
 			}
 		}
 
@@ -702,6 +718,11 @@ namespace Vehicles
 			parentKey = reference.parentKey;
 
 			renderProperties = new VehicleTurretRender(reference.renderProperties);
+			if (reference.component != null)
+			{
+				component = TurretComponentRequirement.CopyFrom(reference.component);
+			}
+
 			aimPieOffset = reference.aimPieOffset;
 			angleRestricted = reference.angleRestricted;
 			restrictedTheta = (int)Mathf.Abs(angleRestricted.x - (angleRestricted.y + 360)).ClampAngle();
@@ -998,7 +1019,7 @@ namespace Vehicles
 		{
 			if (!RotationAligned)
 			{
-				//REDO - SET TO CHECK CANNON HANDLERS COMPONENT HEALTH
+				//REDO - SET TO CHECK COMPONENT HEALTH
 				float relativeCurrentRotation = currentRotation + 90;
 				float relativeTargetedRotation = rotationTargeted + 90;
 				if (relativeCurrentRotation < 0)
@@ -1180,21 +1201,20 @@ namespace Vehicles
 			float horizontalOffset = turretDef.projectileShifting.NotNullAndAny() ? turretDef.projectileShifting[CurrentTurretFiring] : 0;
 			Vector3 launchCell = TurretLocation + new Vector3(horizontalOffset, 1f, turretDef.projectileOffset).RotatedBy(TurretRotation);
 
-			ThingDef projectile = turretDef.projectile;
-			if (turretDef.ammunition != null && !turretDef.genericAmmo)
-			{
-				projectile = loadedAmmo?.projectileWhenLoaded ?? projectile; //nc to loaded ammo for CE handling
-			}
+			ThingDef projectileDef = ProjectileDef;// turretDef.projectile;
+			//if (turretDef.ammunition != null && !turretDef.genericAmmo)
+			//{
+			//	projectile = loadedAmmo?.projectileWhenLoaded ?? projectile; //nc to loaded ammo for CE handling
+			//}
 			try
 			{
 				if (turretDef.ammunition != null)
 				{
 					ConsumeShellChambered();
 				}
-				
 				if (LaunchProjectileCE is null)
 				{
-					Projectile projectileInstance = (Projectile)GenSpawn.Spawn(projectile, vehicle.Position, vehicle.Map, WipeMode.Vanish);
+					Projectile projectileInstance = (Projectile)GenSpawn.Spawn(projectileDef, vehicle.Position, vehicle.Map, WipeMode.Vanish);
 					if (turretDef.projectileSpeed > 0)
 					{
 						projectileInstance.TryAddComp(new CompTurretProjectileProperties(vehicle)
@@ -1208,7 +1228,7 @@ namespace Vehicles
 				}
 				else
 				{
-					float speed = turretDef.projectileSpeed > 0 ? turretDef.projectileSpeed : projectile.projectile.speed;
+					float speed = turretDef.projectileSpeed > 0 ? turretDef.projectileSpeed : projectileDef.projectile.speed;
 					float swayAndSpread = Mathf.Atan2(CurrentFireMode.spreadRadius, MaxRange) * Mathf.Rad2Deg;
 					float sway = swayAndSpread * 0.84f;
 					float spread = swayAndSpread * 0.16f;
@@ -1253,13 +1273,13 @@ namespace Vehicles
 						double spreadDirection = Rand.Value * Math.PI * 2;
 						vce.y = (float)(randomSpread * Math.Sin(spreadDirection));
 						vce.x = (float)(randomSpread * Math.Cos(spreadDirection));
-						LaunchProjectileCE(projectile, loadedAmmo, turretData?._ammoSet, new Vector2(launchCell.x, launchCell.z), cannonTarget, vehicle, sa + vce.y * Mathf.Deg2Rad, tr + vce.x, shotHeight, speed);
+						LaunchProjectileCE(projectileDef, loadedAmmo, turretData?._ammoSet, new Vector2(launchCell.x, launchCell.z), cannonTarget, vehicle, sa + vce.y * Mathf.Deg2Rad, tr + vce.x, shotHeight, speed);
 					}
 					while (--projectileCount > 0);
 
 					if (NotifyShotFiredCE != null)
 					{
-						NotifyShotFiredCE(projectile, loadedAmmo, turretData?._ammoSet, this, recoil);
+						NotifyShotFiredCE(projectileDef, loadedAmmo, turretData?._ammoSet, this, recoil);
 					}
 				}
 				turretDef.shotSound?.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map));
@@ -1906,7 +1926,7 @@ namespace Vehicles
 		public bool ContainsAmmoDefOrShell(ThingDef def)
 		{
 			ThingDef projectile = null;
-			if(def.projectileWhenLoaded != null)
+			if (def.projectileWhenLoaded != null)
 			{
 				projectile = def.projectileWhenLoaded;
 			}
