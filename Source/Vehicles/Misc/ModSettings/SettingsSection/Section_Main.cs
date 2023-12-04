@@ -200,13 +200,13 @@ namespace Vehicles
 					listingStandard.CheckboxLabeled("VF_DiagonalVehicleRendering".Translate(), ref allowDiagonalRendering, "VF_DiagonalVehicleRenderingTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_FullVehiclePathing".Translate(), ref fullVehiclePathing, "VF_FullVehiclePathingTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_SmoothVehiclePathing".Translate(), ref smoothVehiclePaths, "VF_SmoothVehiclePathingTooltip".Translate());
-					GUIState.Disable();
-					listingStandard.CheckboxLabeled("VF_HierarchalPathfinding".Translate(), ref hierarchalPathfinding, "VF_HierarchalPathfindingTooltip".Translate());
-					GUIState.Enable();
+					//GUIState.Disable();
+					//listingStandard.CheckboxLabeled("VF_HierarchalPathfinding".Translate(), ref hierarchalPathfinding, "VF_HierarchalPathfindingTooltip".Translate());
+					//GUIState.Enable();
 
-					GUIState.Disable();
-					listingStandard.CheckboxLabeled("VF_RoadBiomeCostPathing".Translate(), ref vehiclePathingBiomesCostOnRoads, "VF_RoadBiomeCostPathingTooltip".Translate());
-					GUIState.Enable();
+					//GUIState.Disable();
+					//listingStandard.CheckboxLabeled("VF_RoadBiomeCostPathing".Translate(), ref vehiclePathingBiomesCostOnRoads, "VF_RoadBiomeCostPathingTooltip".Translate());
+					//GUIState.Enable();
 					listingStandard.CheckboxLabeled("VF_MultiplePawnsPerJob".Translate(), ref multiplePawnsPerJob, "VF_MultiplePawnsPerJobTooltip".Translate());
 					bool checkBefore = hideDisabledVehicles;
 					listingStandard.CheckboxLabeled("VF_HideDisabledVehicles".Translate(), ref hideDisabledVehicles, "VF_HideDisabledVehiclesTooltip".Translate());

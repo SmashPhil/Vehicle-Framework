@@ -83,6 +83,12 @@ namespace Vehicles
 				{
 					Log.Error($"Unable to retrieve path data on {map} for {vehicleDef.defName}. Was this VehicleDef created postload? Self-correcting...");
 					Log.Error($"StackTrace: {StackTraceUtility.ExtractStackTrace()}");
+					if (!UnityData.IsInMainThread)
+					{
+						Log.Error($"Unable to generate path data outside of the main thread. May encounter thread safety issues.");
+						return VehiclePathData.Invalid;
+						
+					}
 					return GeneratePathData(vehicleDef);
 				}
 				return pathData;

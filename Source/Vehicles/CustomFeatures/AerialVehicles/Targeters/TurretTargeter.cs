@@ -106,7 +106,6 @@ namespace Vehicles
 			if (IsTargeting)
 			{
 				LocalTargetInfo mouseTarget = CurrentTargetUnderMouse();
-				float distance = (Turret.TurretLocation.ToIntVec3() - mouseTarget.Cell).LengthHorizontal;
 				if (TargetMeetsRequirements(Turret, mouseTarget))
 				{
 					GenDraw.DrawTargetHighlight(mouseTarget);
@@ -160,7 +159,7 @@ namespace Vehicles
 			{
 				projectileDef = turret.loadedAmmo?.projectileWhenLoaded;
 			}
-			if (projectileDef == null && projectileDef.projectile.flyOverhead)
+			if (projectileDef == null || projectileDef.projectile.flyOverhead)
 			{
 				return true;
 			}

@@ -92,7 +92,7 @@ namespace Vehicles
 		/// <summary>
 		/// Fields relating to targeting
 		/// </summary>
-		public TargetScanFlags targetScanFlags;
+		public TargetScanFlags targetScanFlags = TargetScanFlags.None;
 
 		/// <summary>
 		/// Fields relating to the projectile

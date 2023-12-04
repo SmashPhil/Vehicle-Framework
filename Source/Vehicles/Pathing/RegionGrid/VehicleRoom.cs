@@ -108,7 +108,11 @@ namespace Vehicles
 			}
 			if (Regions.Count == 0)
 			{
-				Map?.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid.allRooms.Remove(this);
+				VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(Map);
+				if (mapping != null)
+				{
+					mapping[vehicleDef].VehicleRegionGrid?.allRooms.Remove(this);
+				}
 			}
 		}
 

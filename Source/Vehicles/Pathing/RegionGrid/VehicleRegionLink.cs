@@ -109,7 +109,8 @@ namespace Vehicles
 				RegionA = null;
 				if (RegionB is null)
 				{
-					region.Map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionLinkDatabase.Notify_LinkHasNoRegions(this);
+					VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(region.Map);
+					mapping?[vehicleDef].VehicleRegionLinkDatabase.Notify_LinkHasNoRegions(this);
 				}
 				else
 				{
@@ -121,7 +122,8 @@ namespace Vehicles
 				RegionB = null;
 				if (RegionA is null)
 				{
-					region.Map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionLinkDatabase.Notify_LinkHasNoRegions(this);
+					VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(region.Map);
+					mapping?[vehicleDef].VehicleRegionLinkDatabase.Notify_LinkHasNoRegions(this);
 				}
 				else
 				{

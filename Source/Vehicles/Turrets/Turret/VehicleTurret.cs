@@ -972,7 +972,6 @@ namespace Vehicles
 
 		protected virtual bool TurretAutoTick()
 		{
-			//Todo - only tick if active threats on the map
 			if (vehicle.Spawned && !queuedToFire && AutoTarget)
 			{
 				if (Find.TickManager.TicksGame % AutoTargetInterval == 0)

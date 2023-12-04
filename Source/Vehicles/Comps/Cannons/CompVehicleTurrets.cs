@@ -543,6 +543,21 @@ namespace Vehicles
 			}
 		}
 
+		public override bool IsThreat(IAttackTargetSearcher searcher)
+		{
+			if (!turrets.NullOrEmpty())
+			{
+				foreach (VehicleTurret turret in turrets)
+				{
+					if (turret.AutoTarget)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
 		public void ToggleDeployment()
 		{
 			deployed = !deployed;

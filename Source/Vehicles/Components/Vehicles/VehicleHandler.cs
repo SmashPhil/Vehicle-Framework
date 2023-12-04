@@ -40,9 +40,15 @@ namespace Vehicles
 
 		public IThingHolder ParentHolder => vehicle;
 
-		public float OverlayPawnBodyAngle => role.pawnRenderer.AngleFor(vehicle.FullRotation);
+		Rot4 IThingHolderPawnOverlayer.PawnRotation => role.pawnRenderer?.RotFor(vehicle.FullRotation) ?? Rot4.South;
 
-		public Rot4 PawnRotation => role.pawnRenderer?.RotFor(vehicle.FullRotation) ?? Rot4.South;
+		float IThingHolderWithDrawnPawn.HeldPawnDrawPos_Y => vehicle.DrawPos.y + role.pawnRenderer.LayerFor(vehicle.FullRotation);
+
+		float IThingHolderWithDrawnPawn.HeldPawnBodyAngle => role.pawnRenderer.AngleFor(vehicle.FullRotation);
+
+		PawnPosture IThingHolderWithDrawnPawn.HeldPawnPosture => PawnPosture.LayingInBedFaceUp;
+
+		bool IThingHolderPawnOverlayer.ShowBody => role.pawnRenderer.showBody;
 
 		public bool RequiredForMovement => role.handlingTypes.HasFlag(HandlingTypeFlags.Movement);
 

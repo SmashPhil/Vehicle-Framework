@@ -9,17 +9,28 @@
 
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Fixed bug where immoveable vehicles would share regions with moveable ones, causing some vehicles to not update the regions / pathgrid throughout the game.
-NOTE: This primarily affected vehicles like the Wisent and Smuggler, so if you were having issues with those vehicles, this would be why.
 
 - Fixed bug where modifying movement permissions wouldn't recache owners of regions.
 
 - Fixed bug where an idle vehicle would still render a tiny line to its current position.
 
+- Fixed bug where vehicle turrets capable of non-LOS aiming would still require LOS for auto-targeting.
+
+- Fixed bug where vehicle turrets would auto-target outside their limits of fire.
+
+- Fixed bug where vehicle turrets would auto-target outside their min / max range.
+
 - Fixed bug where overlays layered beneath the vehicle would still render on top of the vehicle in UI.
+&lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Optimized pathgrid updating when snowing
+
+- Optimized memory usage for dedicated thread requests
+
+- Optimized pawn overlay rendering in vehicles.  This should now be no more costly than vanilla pawn rendering.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Added 'deploy' mechanic where vehicles will need to set up before being able to use its turrets.
 
-- When landing at a map, if no edge or center cell is found, will default to forced targeting.
+- When landing at a map, if no edge or center cell is found it will now default to forced targeting.
 
 - When landing and in 'forced targeting', right clicking (or your cancel keybind) will allow you to exit out to the world map should you be unable to land on the map.
 

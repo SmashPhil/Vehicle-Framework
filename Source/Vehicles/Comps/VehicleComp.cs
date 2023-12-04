@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Verse;
+using Verse.AI;
 using SmashTools;
 using UnityEngine;
 
@@ -64,6 +65,11 @@ namespace Vehicles
 		{
 			failReason = string.Empty;
 			return true;
+		}
+
+		public virtual bool IsThreat(IAttackTargetSearcher searcher)
+		{
+			return false;
 		}
 
 		public virtual void StartTicking()
