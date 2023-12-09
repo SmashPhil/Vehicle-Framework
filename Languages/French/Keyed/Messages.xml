@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_MustSelectColorPalette>Vous devez sélectionner une palette de couleurs pour enregistrer.</VF_MustSelectColorPalette>
+  <VF_VehicleUnableToMove>{0_labelShort} ne peut pas bouger.</VF_VehicleUnableToMove>
+  <VF_HandlerNotEnoughRoom>Impossible d'ajouter {0} à {1}. Pas assez de place.</VF_HandlerNotEnoughRoom>
+  <VF_NotEnoughToOperate>Il faut plus de personnel pour faire fonctionner ce véhicule.</VF_NotEnoughToOperate>
+  <VF_OutOfFuel>Impossible d'allumer. Le véhicule a besoin de plus de carburant.</VF_OutOfFuel>
+  <VF_UpgradeInProgress>Impossible d'allumer pendant la mise à niveau du véhicule.</VF_UpgradeInProgress>
+  <VF_NotEnoughCrew>Pas assez de passagers dans {0} pour opérer {1}.</VF_NotEnoughCrew>
+  <VF_CannotFit>Pas assez de place.</VF_CannotFit>
+  <VF_NoPathForVehicle>Impossible d'atteindre cette zone.</VF_NoPathForVehicle>
+  <VF_IncapableStatusForRole>{0} est incapable de remplir ce rôle.</VF_IncapableStatusForRole>
+  <VF_InvalidName>Nom de véhicule invalide.</VF_InvalidName>
+  <VF_OutOfFood>Pas de nourriture dans {0} avec des colons à l'intérieur.</VF_OutOfFood>
+  <VF_NoAmmoLoadedTurret>Pas de munitions chargées.</VF_NoAmmoLoadedTurret>
+  <VF_NoAmmoAvailable>Pas de munitions stockées.</VF_NoAmmoAvailable>
+  <VF_VehicleCaravanMentalBreakMovementRole>{0} n'est plus capable de remplir son rôle dans la caravane avec véhicule.</VF_VehicleCaravanMentalBreakMovementRole>
+  <VF_PawnBoardedFormingCaravan>{0} est monté dans {1} et le véhicule est prêt à partir.</VF_PawnBoardedFormingCaravan>
+  <VF_CantMoveDocked>Pas assez de colons pour partir.</VF_CantMoveDocked>
+  <VF_CantAssignVehicle>Pas assez de colons pour {0}</VF_CantAssignVehicle>
+  <VF_AssignFailure>Impossible d'assigner des places. {0}</VF_AssignFailure>
+  <VF_PackingSpotNotFound>Pas de place de chargement pour la caravane avec véhicule. Il est recommandé de le placer à l'extérieur.</VF_PackingSpotNotFound>
+  <VF_ForceLeaveCaravan>Forcer le départ.</VF_ForceLeaveCaravan>
+  <VF_ForceLeaveCaravanDesc>Forcer la caravane avec véhicule à quitter la carte. Ignorera tous les objets qui ne sont pas actuellement dans le véhicule.</VF_ForceLeaveCaravanDesc>
+  <VF_ForceLeaveConfirmation>L'équipage se prépare à partir.</VF_ForceLeaveConfirmation>
+  <VF_CaravanTerminatedNoVehicles>Le processus de caravane a été annulé. Aucun véhicule restant</VF_CaravanTerminatedNoVehicles>
+  <VF_LandAndSeaRoutePlannerRestriction>Impossible de planifier un itinéraire pour les véhicules maritimes et terrestres. Les itinéraires ne seront pas enregistrés.</VF_LandAndSeaRoutePlannerRestriction>
+  <VF_LeaveVehicleBehindCaravan>Voulez-vous vraiment laisser les véhicules derrière? Véhicules laissés: {0}</VF_LeaveVehicleBehindCaravan>
+  <VF_MustAssignEnoughToVehicle>Vous devez affecter suffisamment de colons au véhicule pour qu'il soit opérationnel.</VF_MustAssignEnoughToVehicle>
+  <VF_AerialVehicleArrived>{0} est arrivé à destination.</VF_AerialVehicleArrived>
+  <VF_AerialVehicleLeft>{0} a quitté la carte.</VF_AerialVehicleLeft>
+  <VF_AerialVehicleLaunchNotValid>Impossible de décoller, les conditions ne sont pas réunies.</VF_AerialVehicleLaunchNotValid>
+  <VF_LaunchOutOfFuel>Impossible de décoller, plus de carburant.</VF_LaunchOutOfFuel>
+  <VF_FlightPathMaxNodes>Nombre maximum de nœuds de vol atteint {0}.</VF_FlightPathMaxNodes>
+  <VF_MustTargetLanding>Vous devez sélectionner un lieu d'atterrissage.</VF_MustTargetLanding>
+</LanguageData>

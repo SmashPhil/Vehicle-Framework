@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_EnterVehicle>Entrer dans {0} en tant que {1}  [{2}]</VF_EnterVehicle>
+  <VF_BoardVehicleGroup>Entrer dans {0}</VF_BoardVehicleGroup>
+  <VF_BoardVehicleGroupFail>Entrer dans {0} (Trop de véhicules sélectionnés)</VF_BoardVehicleGroupFail>
+  <VF_ActivityIconOnBoardShip>À bord {0}</VF_ActivityIconOnBoardShip>
+  <VF_IsIncapableOfRamming>Emboutir {0}</VF_IsIncapableOfRamming>
+  <VF_CannotMoveToCell>{0} ne peut pas atteindre cette zone.</VF_CannotMoveToCell>
+  <VF_LandVehicleHere>Atterrir ici</VF_LandVehicleHere>
+  <VF_LandVehicleEdge>Atterrir à {0} sur le bord de la carte.</VF_LandVehicleEdge>
+  <VF_LandVehicleCenter>Atterrir à {0} au centre de la carte.</VF_LandVehicleCenter>
+  <VF_LandVehicleTargetedLanding>Atterrir à {0} et choisir un lieu d’atterrissage.</VF_LandVehicleTargetedLanding>
+  <VF_AttackAndTargetLanding>Attaquer {0}: Choisir un lieu d’atterrissage</VF_AttackAndTargetLanding>
+  <VF_StrafeRun>Attaque aérienne</VF_StrafeRun>
+  <VF_AerialReconSite>Reconnaissance</VF_AerialReconSite>
+  <VF_CantEnterVehicle_IdeoligionForbids>Impossible d’entrer dans le véhicule. Interdit par l’idéologie.</VF_CantEnterVehicle_IdeoligionForbids>
+</LanguageData>

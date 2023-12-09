@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_ReloadVehicleTurret>Recharger</VF_ReloadVehicleTurret>
+  <VF_AutoTargeting>Visée automatique: {0}</VF_AutoTargeting>
+  <VF_AutoTargetingDisabled>La visée automatique n’est pas autorisée pour ce véhicule.</VF_AutoTargetingDisabled>
+  <VF_VehicleTurrets_NoAmmoToReload>Pas de munitions utilisables.</VF_VehicleTurrets_NoAmmoToReload>
+  <VF_SetReloadLevel>Réglez le niveau de rechargement automatique sur {0}</VF_SetReloadLevel>
+  <VF_SetReloadLevelTooltip>Configurer la quantité de munitions</VF_SetReloadLevelTooltip>
+</LanguageData>
+

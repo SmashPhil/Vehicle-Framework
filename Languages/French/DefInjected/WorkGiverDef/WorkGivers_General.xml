@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <PackVehicle.label>emballer le véhicule</PackVehicle.label>
+  <PackVehicle.verb>emballer</PackVehicle.verb>
+  <PackVehicle.gerund>emballage</PackVehicle.gerund>
+  <PackVehicleTurret.label>charger le véhicule</PackVehicleTurret.label>
+  <PackVehicleTurret.verb>charger</PackVehicleTurret.verb>
+  <PackVehicleTurret.gerund>chargement</PackVehicleTurret.gerund>
+  <LoadUpgradeMaterials.label>Charger les matériaux</LoadUpgradeMaterials.label>
+  <LoadUpgradeMaterials.verb>Charger</LoadUpgradeMaterials.verb>
+  <LoadUpgradeMaterials.gerund>Chargement</LoadUpgradeMaterials.gerund>
+  <WorkOnUpgrade.label>travailler à l’amélioration</WorkOnUpgrade.label>
+  <WorkOnUpgrade.verb>Mise à niveau</WorkOnUpgrade.verb>
+  <WorkOnUpgrade.gerund>Amélioration</WorkOnUpgrade.gerund>
+  <RefuelVehicle.label>ravitailler véhicule</RefuelVehicle.label>
+  <RefuelVehicle.verb>ravitailler</RefuelVehicle.verb>
+  <RefuelVehicle.gerund>ravitaillement</RefuelVehicle.gerund>
+  <RepairVehicle.label>véhicule de réparation</RepairVehicle.label>
+  <RepairVehicle.verb>réparer</RepairVehicle.verb>
+  <RepairVehicle.gerund>réparation</RepairVehicle.gerund>
+  <DisassembleVehicle.label>démonter le véhicule</DisassembleVehicle.label>
+  <DisassembleVehicle.verb>démonter</DisassembleVehicle.verb>
+  <DisassembleVehicle.gerund>Démantèlement</DisassembleVehicle.gerund>
+  <PaintVehicle.label>peindre le véhicule</PaintVehicle.label>
+  <PaintVehicle.verb>peindre</PaintVehicle.verb>
+  <PaintVehicle.gerund>peinture</PaintVehicle.gerund>
+</LanguageData>
+

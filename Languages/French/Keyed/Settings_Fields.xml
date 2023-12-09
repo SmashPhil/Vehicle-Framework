@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_VehicleEnabled>Activé</VF_VehicleEnabled>
+  <VF_VehicleDisabled>Désactivé</VF_VehicleDisabled>
+  <VF_VehiclePlayerOnly>Joueur uniquement</VF_VehiclePlayerOnly>
+  <VF_VehicleRaiderOnly>Ennemis uniquement</VF_VehicleRaiderOnly>
+  <VF_EnableButtonTooltip>Si désactivé, ce véhicule ne sera pas disponible dans le jeu. S'applique aux factions du joueur et aux factions ennemies.</VF_EnableButtonTooltip>
+  <VF_MovementPermissions>Type de contrôle</VF_MovementPermissions>
+  <VF_NavigationType>Type de navigation</VF_NavigationType>
+  <VF_NavigationTypeTooltip>Catégorie de navigation pour la carte du monde. Détermine quand le véhicule peut se déplacer sur la carte du monde.</VF_NavigationTypeTooltip>
+  <VF_Nameable>Peut être nommé</VF_Nameable>
+  <VF_NameableTooltip>Autorise l'attribution d'un nom à ce véhicule. Le nom apparaîtra au-dessus du véhicule et remplacera l'étiquette d'affichage.</VF_NameableTooltip>
+  <VF_CombatPower>Puissance de combat</VF_CombatPower>
+  <VF_CombatPowerTooltip>Coût du véhicule en points de combat pour la génération dans un événement.</VF_CombatPowerTooltip>
+  <VF_CanCaravan>Caravane</VF_CanCaravan>
+  <VF_CanCaravanTooltip>Le véhicule peut être emmené avec les caravanes.</VF_CanCaravanTooltip>
+  <VF_SaveableFieldDisabledConditionTooltip>Désactivé. {0}</VF_SaveableFieldDisabledConditionTooltip>
+  <VF_DisabledSingleModDependencyTooltip>Désactivé. Le mod compatible n'est pas dans la liste des mods actifs : {0}</VF_DisabledSingleModDependencyTooltip>
+  <VF_DisabledMultipleModsDependencyTooltip>Désactivé. Les mods compatibles ne sont pas dans la liste des mods actifs : {0}</VF_DisabledMultipleModsDependencyTooltip>
+  <VF_SaveableFieldDisabledTooltip>Désactivé pour ce type de véhicule.</VF_SaveableFieldDisabledTooltip>
+  <VF_SaveableFieldLockedTooltip>Le paramètre est verrouillé pour ce véhicule.</VF_SaveableFieldLockedTooltip>
+  <VF_DebugDisabledTooltip>Actuellement désactivé pour tous les véhicules.</VF_DebugDisabledTooltip>
+  <VF_GizmoDisabledTooltip>Désactivé dans les paramètres du mod.</VF_GizmoDisabledTooltip>
+  <VF_OpportunisticTicking>Ticking opportuniste</VF_OpportunisticTicking>
+  <VF_OpportunisticTickingTooltip>Le ticking des composants du véhicule ne fonctionne que lorsque cela est nécessaire, augmentant les performances.</VF_OpportunisticTickingTooltip>
+  <VF_CollisionMultiplier>Dégâts aux créatures vivantes</VF_CollisionMultiplier>
+  <VF_CollisionMultiplierTooltip>Multiplicateur de dégâts infligés aux créatures vivantes traversées par des véhicules.</VF_CollisionMultiplierTooltip>
+  <VF_CollisionVehicleMultiplier>Dégâts au véhicule</VF_CollisionVehicleMultiplier>
+  <VF_CollisionVehicleMultiplierTooltip>Multiplicateur de dégâts infligés au véhicule lorsqu'il traverse des créatures vivantes.</VF_CollisionVehicleMultiplierTooltip>
+  <VF_ManhunterTargetsVehicle>Cibles des chasseurs</VF_ManhunterTargetsVehicle>
+  <VF_ManhunterTargetsVehicleTooltip>Les animaux chasseurs attaqueront ce véhicule.</VF_ManhunterTargetsVehicleTooltip>
+  <VF_FishingEnabled>Pêche</VF_FishingEnabled>
+  <VF_FishingEnabledTooltip>Permet la pêche lorsqu'il est arrêté au-dessus de l'eau.</VF_FishingEnabledTooltip>
+  <VF_JobLimitations>Emplois dans le véhicule</VF_JobLimitations>
+  <VF_MaxWorkers>Max travailleurs</VF_MaxWorkers>
+  <VF_WinterSpeedMultiplier>Multiplicateur de vitesse en hiver</VF_WinterSpeedMultiplier>
+  <VF_WinterSpeedMultiplierTooltip>Cout de pathfinding supplémentaire lors des voyages en hiver.</VF_WinterSpeedMultiplierTooltip>
+  <VF_WorldSpeedMultiplier>Multiplicateur de vitesse sur la carte du monde</VF_WorldSpeedMultiplier>
+  <VF_WorldSpeedMultiplierTooltip>Multiplicateur de vitesse de déplacement sur la carte du monde en caravane.</VF_WorldSpeedMultiplierTooltip>
+  <VF_DischargePerTick>Vitesse de décharge</VF_DischargePerTick>
+  <VF_TicksPerCharge>Vitesse de charge</VF_TicksPerCharge>
+  <VF_FuelConsumptionRate>Vitesse de consommation de carburant</VF_FuelConsumptionRate>
+  <VF_FuelConsumptionRateWorldMultiplier>Multiplicateur sur la planète</VF_FuelConsumptionRateWorldMultiplier>
+  <VF_FuelCapacity>Capacité de carburant</VF_FuelCapacity>
+  <VF_AutoRefuelPercent>% de remplissage automatique</VF_AutoRefuelPercent>
+  <VF_FuelConsumptionWorld>% de consommation de carburant</VF_FuelConsumptionWorld>
+  <VF_FuelConsumptionWorldTooltip>Multiplicateur de consommation de carburant sur la carte du monde.</VF_FuelConsumptionWorldTooltip>
+  <VF_LaunchFixedMaxDistance>Distance maximale fixe</VF_LaunchFixedMaxDistance>
+  <VF_LaunchFixedMaxDistanceTooltip>Définissez une distance maximale fixe que ce véhicule peut parcourir indépendamment du niveau de carburant.</VF_LaunchFixedMaxDistanceTooltip>
+  <VF_LaunchFixedMaxDistanceDisabled>Désactivé</VF_LaunchFixedMaxDistanceDisabled>
+  <VF_ReconDistance>Distance de reconnaissance</VF_ReconDistance>
+  <VF_ReconDistanceTooltip>Distance en cases où le véhicule sera capable de faire une reconnaissance de la base.</VF_ReconDistanceTooltip>
+  <VF_ControlInFlight>Contrôle en vol</VF_ControlInFlight>
+  <VF_ControlInFlightTooltip>Contrôlez le véhicule aérien en vol. Permet de changer de chemin de vol en vol, de choisir votre atterrissage après le chargement de la carte et de tirer sur les cartes qui n'ont pas encore été chargées.</VF_ControlInFlightTooltip>
+  <VF_SpaceFlight>Voyage spatial</VF_SpaceFlight>
+  <VF_SpaceFlightTooltip>Le véhicule est capable de lancer ou de récupérer des objets spatiaux.</VF_SpaceFlightTooltip>
+  <VF_RateOfClimb>Vitesse de montée</VF_RateOfClimb>
+  <VF_RateOfClimbTooltip>Quantité que le véhicule monte par tick.</VF_RateOfClimbTooltip>
+  <VF_MaxAltitude>Altitude maximale</VF_MaxAltitude>
+  <VF_MaxAltitudeTooltip>Altitude maximale que le véhicule peut atteindre en vol.</VF_MaxAltitudeTooltip>
+  <VF_MaxFallRate>Vitesse de chute maximale</VF_MaxFallRate>
+  <VF_MaxFallRateTooltip>Valeur maximale de la chute du véhicule après avoir été abattu ou après avoir épuisé le carburant.</VF_MaxFallRateTooltip>
+  <VF_Instant>Instantané</VF_Instant>
+</LanguageData>

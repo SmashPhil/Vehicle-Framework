@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <Default.label>Faire défaut</Default.label>
+  <Tiger.label>Tigre</Tiger.label>
+  <TigerStripes.label>Tigre rayé</TigerStripes.label>
+  <Woodland.label>Forêt</Woodland.label>
+  <Hearts.label>Cœur</Hearts.label>
+  <Panther.label>Panthère</Panther.label>
+  <Digital.label>Numérique</Digital.label>
+  <Polygon.label>Polygone</Polygon.label>
+  <Rusty.label>Rouillé</Rusty.label>
+  <Waves.label>Vagues</Waves.label>
+  <ZigZag.label>Zigzag</ZigZag.label>
+  <Abstract_Medium.label>Médium Abstrait</Abstract_Medium.label>
+  <Abstract_Large.label>Très abstrait</Abstract_Large.label>
+  <Lizard.label>Lézard</Lizard.label>
+  <Hexagon.label>Hexagone</Hexagon.label>
+</LanguageData>
+

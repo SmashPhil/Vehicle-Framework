@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <NotAllowed>Non autorisé</NotAllowed>
+  <DriverNeeded>Operowane Przez Kolonistę</DriverNeeded>
+  <NoDriverNeeded>Propulsé par l’IA</NoDriverNeeded>
+  <Misc>Divers</Misc>
+  <Transport>Transport</Transport>
+  <Trader>Commerçant</Trader>
+  <Combat>Combat</Combat>
+  <Hybrid>Hybride</Hybrid>
+  <Manual>Manuelle</Manual>
+  <Opportunistic>Opportuniste</Opportunistic>
+  <Automatic>Automatique</Automatic>
+</LanguageData>
+

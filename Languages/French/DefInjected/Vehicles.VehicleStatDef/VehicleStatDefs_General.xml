@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <MoveSpeed.label>Vitesse de déplacement</MoveSpeed.label>
+  <MoveSpeed.description>Vitesse de déplacement en grilles par seconde.</MoveSpeed.description>
+  <MoveSpeed.formatString>{0} g/s</MoveSpeed.formatString>
+  <CargoCapacity.label>Capacité de chargement</CargoCapacity.label>
+  <CargoCapacity.description>Le poids que ce véhicule peut transporter en tant que cargaison. C’est le même montant qui est disponible pour les caravanes.</CargoCapacity.description>
+  <CargoCapacity.formatString>{0} kg</CargoCapacity.formatString>
+  <RepairRate.label>Rapidité de réparation</RepairRate.label>
+  <RepairRate.description>Quantité de points de vie réparés par seconde.</RepairRate.description>
+  <RepairRate.formatString>{0} pv/s</RepairRate.formatString>
+  <Mass.label>Masse</Mass.label>
+  <Mass.description>Le poids physique de ce véhicule</Mass.description>
+  <Mass.formatString>{0} kg</Mass.formatString>
+  <BodyIntegrity.label>Intégrité du véhicule</BodyIntegrity.label>
+  <BodyIntegrity.description>Moyenne de tous les composants du véhicule. Si l’intégrité du véhicule atteint 0, il se décomposera en une fraction du coût de construction.</BodyIntegrity.description>
+</LanguageData>
+

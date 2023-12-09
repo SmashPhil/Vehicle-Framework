@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_IncidentCrashedSiteLabel_Crashing>{0} Écrasé</VF_IncidentCrashedSiteLabel_Crashing>
+  <VF_IncidentCrashedSiteLabel_ShotDown>{1} Abattu {0}</VF_IncidentCrashedSiteLabel_ShotDown>
+  <VF_IncidentReasonLister>\n\nRaison:\n {0}</VF_IncidentReasonLister>
+  <VF_IncidentCrashedSite_Crashing>{0} Écrasé</VF_IncidentCrashedSite_Crashing>
+  <VF_IncidentCrashedSite_ShotDown>{0} a été abattu par {1}.</VF_IncidentCrashedSite_ShotDown>
+  <VF_IncidentCrashedSiteReason_OutOfFuel>Vous êtes tombé en panne d’essence</VF_IncidentCrashedSiteReason_OutOfFuel>
+  <VF_IncidentCrashedSiteReason_FlightControl>Perte de maîtrise de vol</VF_IncidentCrashedSiteReason_FlightControl>
+  <VF_ReinforcementsArrivedLabel>Renforts</VF_ReinforcementsArrivedLabel>
+  <VF_ReinforcementsArrived>{0} Arrivée avec des renforts pour enquêter sur le site de l’accident.</VF_ReinforcementsArrived>
+  <VF_BoatSunk>Le bateau a coulé</VF_BoatSunk>
+  <VF_BoatSunkDesc>{0} sombré dans les profondeurs de l’océan.</VF_BoatSunkDesc>
+  <VF_BoatSunkWithPawnsDesc>{0} s’enfonça dans les profondeurs de l’océan.
+
+Le bateau emmena avec lui les colons : {1}</VF_BoatSunkWithPawnsDesc>
+</LanguageData>
+

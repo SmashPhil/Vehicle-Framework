@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_MainSettings>Paramètres principaux</VF_MainSettings>
+  <VF_ListSearchText>Rechercher...</VF_ListSearchText>
+  <VF_SettingsDisabledTooltip>Les paramètres de ce véhicule sont verrouillés et ne peuvent pas être modifiés.</VF_SettingsDisabledTooltip>
+  <VF_NonUpgradeableSettingsTooltip>Ce véhicule ne peut pas être amélioré.</VF_NonUpgradeableSettingsTooltip>
+  <VF_RecolorDefaultMaskTooltip>Remplace le motif par défaut</VF_RecolorDefaultMaskTooltip>
+  <VF_WorldMapGen>Génération de la carte du monde</VF_WorldMapGen>
+  <VF_BeachGenMultiplier>Multiplicateur de taille de plage</VF_BeachGenMultiplier>
+  <VF_BeachGenMultiplierTooltip>Augmente la quantité d'eau sur la ligne de rivage.</VF_BeachGenMultiplierTooltip>
+  <VF_ForceSettlementCoast>Forcer les colonies sur la côte</VF_ForceSettlementCoast>
+  <VF_ForceSettlementCoastTooltip>Force les colonies à se déplacer sur la côte si elles sont dans un rayon spécifié.</VF_ForceSettlementCoastTooltip>
+  <VF_EverySettlementToCoast>Toutes les colonies</VF_EverySettlementToCoast>
+  <VF_WorldTiles>tuiles</VF_WorldTiles>
+  <VF_SettingsGeneral>Général</VF_SettingsGeneral>
+  <VF_WillRequireRestart>Cette action nécessite un redémarrage pour prendre effet.</VF_WillRequireRestart>
+  <VF_ModifiableSettings>Paramètres modifiables</VF_ModifiableSettings>
+  <VF_ModifiableSettingsTooltip>Active les paramètres modifiables. Redémarrer avec cette option désactivée ignorera la génération des paramètres modifiables.
+        
+Spécifie si les véhicules doivent utiliser les valeurs des paramètres de mod ou des defs</VF_ModifiableSettingsTooltip>
+  <VF_CustomShaders>Utiliser les shaders RVB</VF_CustomShaders>
+  <VF_CustomShadersTooltip>Active l'utilisation des shaders personnalisés fournis par VF</VF_CustomShadersTooltip>
+  <VF_DiagonalVehicleRendering>Autoriser le rendu en diagonale</VF_DiagonalVehicleRendering>
+  <VF_DiagonalVehicleRenderingTooltip>Les véhicules qui prennent en charge le rendu en diagonale le feront lorsqu'ils sont configurés pour des rotations en diagonale (Nord-Est, Sud-Est, Sud-Ouest, Nord-Ouest)</VF_DiagonalVehicleRenderingTooltip>
+  <VF_FullVehiclePathing>Pathing complet du véhicule</VF_FullVehiclePathing>
+  <VF_FullVehiclePathingTooltip>Utilisez la totalité de la hitbox du véhicule lors de la détermination du chemin le plus court. Le véhicule sera toujours limité par sa taille.</VF_FullVehiclePathingTooltip>
+  <VF_SmoothVehiclePathing>Pathing fluide du véhicule</VF_SmoothVehiclePathing>
+  <VF_SmoothVehiclePathingTooltip>Le pathing du véhicule aura un coût supplémentaire de «rotation», empêchant les zigzags inutiles sur le chemin le plus court.</VF_SmoothVehiclePathingTooltip>
+  <VF_HierarchalPathfinding>Pathfinding hiérarchique (expérimental)</VF_HierarchalPathfinding>
+  <VF_HierarchalPathfindingTooltip>Utilisez HPA* au lieu de A* pour avoir un pathfinding plus rapide. Sacrifie une petite précision de recherche de chemin pour un chemin beaucoup plus rapide sur de longues distances.</VF_HierarchalPathfindingTooltip>
+  <VF_RoadBiomeCostPathing>Coût du biome sur les routes</VF_RoadBiomeCostPathing>
+  <VF_RoadBiomeCostPathingTooltip>Les caravanes de véhicules qui se déplacent sur les routes de la carte du monde sont toujours soumises aux coûts de chemin des biomes.</VF_RoadBiomeCostPathingTooltip>
+  <VF_MultiplePawnsPerJob>Emplois avec plusieurs colons</VF_MultiplePawnsPerJob>
+  <VF_MultiplePawnsPerJobTooltip>Permet aux emplois liés aux véhicules d'autoriser plus d'un colon à travailler sur cet emploi. Le nombre maximum de colons est déterminé par les moddeurs.</VF_MultiplePawnsPerJobTooltip>
+  <VF_HideDisabledVehicles>Masquer les véhicules désactivés</VF_HideDisabledVehicles>
+  <VF_HideDisabledVehiclesTooltip>Les véhicules désactivés dans les paramètres du mod seront masqués dans le menu de l'architecte.</VF_HideDisabledVehiclesTooltip>
+  <VF_PerformanceSettings>Performances</VF_PerformanceSettings>
+  <VF_PassiveWaterWaves>Vagues d'eau passives</VF_PassiveWaterWaves>
+  <VF_PassiveWaterWavesTooltip>Génère des vagues passives lorsque le bateau est inactif.</VF_PassiveWaterWavesTooltip>
+  <VF_AerialVehicleEffects>Effets des véhicules aériens</VF_AerialVehicleEffects>
+  <VF_AerialVehicleEffectsTooltip>Lorsque les véhicules aériens décollent et atterrissent, ils créent des taches et rendent les textures floues.</VF_AerialVehicleEffectsTooltip>
+  <VF_VehicleDamageMultipliers>Multiplicateurs de dégâts des véhicules</VF_VehicleDamageMultipliers>
+  <VF_MeleeDamageMultiplier>Multiplicateur de dégâts de mêlée</VF_MeleeDamageMultiplier>
+  <VF_RangedDamageMultiplier>Multiplicateur de dégâts à distance</VF_RangedDamageMultiplier>
+  <VF_ExplosiveDamageMultiplier>Multiplicateur de dégâts explosifs</VF_ExplosiveDamageMultiplier>
+  <VF_VehicleTurrets>Tourelles de véhicules</VF_VehicleTurrets>
+  <VF_TurretOverheatMechanics>Mécanique de surchauffe de la tourelle</VF_TurretOverheatMechanics>
+  <VF_TurretOverheatMechanicsTooltip>Certaines tourelles ont une mécanique de surchauffe qui empêche de tirer en continu sans conséquences. Laisser activé ?</VF_TurretOverheatMechanicsTooltip>
+  <VF_Fishing>Pêche</VF_Fishing>
+  <VF_FishingInactive>Pêche (inactif)</VF_FishingInactive>
+  <VF_FishingMultiplier>Multiplicateur de pêche</VF_FishingMultiplier>
+  <VF_FishingMultiplierTooltip>Ajuste la quantité de poissons collectés sur un bateau de pêche.</VF_FishingMultiplierTooltip>
+  <VF_FishingDelay>Délai de pêche</VF_FishingDelay>
+  <VF_FishingDelayTooltip>Nombre de ticks de base nécessaires pour collecter du poisson sur un bateau de pêche.</VF_FishingDelayTooltip>
+  <VF_FishingSkill>Compétence de pêche</VF_FishingSkill>
+  <VF_FishingSkillTooltip>Combien d'expérience donne la pêche sur un bateau</VF_FishingSkillTooltip>
+  <VF_FishingPersists>La pêche persiste</VF_FishingPersists>
+  <VF_FishingPersistsTooltip>La sélection de pêche ne sera pas réinitialisée lorsqu'elle est activée.</VF_FishingPersistsTooltip>
+  <VF_AerialVehicles>Air</VF_AerialVehicles>
+  <VF_RocketsBurnRadius>Les roquettes brûlent</VF_RocketsBurnRadius>
+  <VF_RocketsBurnRadiusTooltip>Permet aux véhicules aériens qui prennent en charge cette fonctionnalité de brûler toutes les choses dans un petit rayon lors du décollage et de l'atterrissage.</VF_RocketsBurnRadiusTooltip>
+  <VF_DynamicDrawing>Dessin dynamique</VF_DynamicDrawing>
+  <VF_DynamicDrawingTooltip>Dessine les véhicules aériens sur la carte du monde lors du zoom.</VF_DynamicDrawingTooltip>
+  <VF_DeployOnLanding>Déployer à l'atterrissage</VF_DeployOnLanding>
+  <VF_DeployOnLandingTooltip>Lorsqu'un véhicule aérien atterrit, tous les colons à bord seront déchargés.</VF_DeployOnLandingTooltip>
+  <VF_DelayOnLanding>Délai d'atterrissage</VF_DelayOnLanding>
+  <VF_DelayOnLandingTooltip>Une fois que véhicule aérien aura atterri, le déploiement de tous les colons sera retardé.</VF_DelayOnLandingTooltip>
+  <VF_DelaySeconds>secondes</VF_DelaySeconds>
+  <VF_AirDefensesActive>Défenses aériennes</VF_AirDefensesActive>
+  <VF_AirDefensesActiveTooltip>Certains objets sur la carte du monde peuvent utiliser la défense aérienne pour abattre les avions à proximité.</VF_AirDefensesActiveTooltip>
+  <VF_CombatSettings>Combat</VF_CombatSettings>
+  <VF_RunOverPawns>Écraser les créatures vivantes</VF_RunOverPawns>
+  <VF_RunOverPawnsTooltip>Les véhicules peuvent écraser les créatures vivantes et infliger des dégâts contondants en fonction de la masse et de la vitesse.</VF_RunOverPawnsTooltip>
+  <VF_ChanceToRunOverFriendlies>Chance de dégâts amicaux</VF_ChanceToRunOverFriendlies>
+  <VF_ChanceToRunOverFriendliesTooltip>Chance d'écraser des créatures vivantes amicales.</VF_ChanceToRunOverFriendliesTooltip>
+  <VF_VehicleStats>Statistiques</VF_VehicleStats>
+  <VF_Upgrades>Améliorations (désactivées)</VF_Upgrades>
+  <VF_DrawUpgradeInformationScreen>Dessiner le menu des améliorations</VF_DrawUpgradeInformationScreen>
+  <VF_DrawUpgradeInformationScreenTooltip>Dessine un menu supplémentaire dans le menu des améliorations pour afficher les statistiques du véhicule et l'icône du véhicule.</VF_DrawUpgradeInformationScreenTooltip>
+  <VF_OverrideDrawColor>Remplacer la couleur de dessin</VF_OverrideDrawColor>
+  <VF_OverrideDrawColorTooltip>Lorsqu'une mise à niveau est appliquée qui contient un motif ou une couleur de dessin, le dessin précédent sera écrasé.</VF_OverrideDrawColorTooltip>
+</LanguageData>

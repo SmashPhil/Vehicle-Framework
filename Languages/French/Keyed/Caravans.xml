@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_Caravan_Dismounted>À pied</VF_Caravan_Dismounted>
+  <VF_Sailing>À la nage</VF_Sailing>
+  <VF_DockToCaravan>Objets à emporter</VF_DockToCaravan>
+  <VF_CommandDockShip>Amarrer</VF_CommandDockShip>
+  <VF_CommandDockShipDesc>Déchargez tous les passagers et activez le commerce avec la base {0}.</VF_CommandDockShipDesc>
+  <VF_CommandDockShipDisembark>Amarrer et descendre</VF_CommandDockShipDisembark>
+  <VF_CommandDockShipObjectDesc>Accostez les bateaux et partez à pied</VF_CommandDockShipObjectDesc>
+  <VF_CommandUndockShip>Montez dans le véhicule</VF_CommandUndockShip>
+  <VF_CommandUndockShipDesc>Chargez tous les objets et tous les colons dans le bateau</VF_CommandUndockShipDesc>
+  <VF_CommandAttackDockDisable>Il n’est pas possible d’attaquer {0} lorsqu’ils sont amarrés à leur base.</VF_CommandAttackDockDisable>
+  <VF_CommandTradeDockDisable>Il n’est pas possible de commercer avec {0}. Le bateau doit d’abord être amarré</VF_CommandTradeDockDisable>
+  <VF_CaravanMustHaveEnoughSpaceOnShip>Pas assez d’espace sur les navires pour accueillir tous les colons.</VF_CaravanMustHaveEnoughSpaceOnShip>
+  <VF_CaravanMustHaveEnoughPawnsToOperate>Il n’y a pas assez de colons choisis pour prendre la mer. Vous avez besoin {0}</VF_CaravanMustHaveEnoughPawnsToOperate>
+  <VF_CaravanMustHaveAtLeastOneVehicle>Pour sélectionner un itinéraire, vous devez sélectionner au moins 1 véhicule.</VF_CaravanMustHaveAtLeastOneVehicle>
+  <VF_CommandFormVehicleCaravan>Créez une caravane avec un véhicule.</VF_CommandFormVehicleCaravan>
+  <VF_CommandFormVehicleCaravanDesc>Créez une caravane avec les véhicules sélectionnées.</VF_CommandFormVehicleCaravanDesc>
+  <VF_CommandReformVehicleCaravan>Réorganiser les vehicules de la caravane</VF_CommandReformVehicleCaravan>
+  <VF_CommandReformVehicleCaravanDesc>Réorganisez la caravane de véhicules avec les véhicules sélectionnés.</VF_CommandReformVehicleCaravanDesc>
+  <VF_RoutePlannerToggleVehicleDefs>VéhiculesDefs</VF_RoutePlannerToggleVehicleDefs>
+  <VF_RoutePlannerToggleVehicles>Véhicule</VF_RoutePlannerToggleVehicles>
+</LanguageData>
+

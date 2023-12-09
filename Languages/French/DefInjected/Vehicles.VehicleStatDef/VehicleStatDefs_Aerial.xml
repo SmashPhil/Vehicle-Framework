@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <FlightSpeed.label>Vitesse de vol</FlightSpeed.label>
+  <FlightSpeed.description>La vitesse à laquelle vous vous déplacez sur la carte du monde en vol.</FlightSpeed.description>
+  <FlightSpeed.formatString>{0} g/s</FlightSpeed.formatString>
+  <FlightControl.label>Contrôle de vol</FlightControl.label>
+  <FlightControl.description>La capacité du véhicule à voler. Si la valeur atteint 0, le véhicule sera forcé d’effectuer un atterrissage d’urgence.</FlightControl.description>
+</LanguageData>
+

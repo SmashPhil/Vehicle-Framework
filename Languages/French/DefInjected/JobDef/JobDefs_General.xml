@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <Board.reportString>Saisie de la cibleA.</Board.reportString>
+  <LoadUpgradeMaterials.reportString>Chargement des matériaux d’amélioration sur la cibleB.</LoadUpgradeMaterials.reportString>
+  <IdleVehicle.reportString>Inactif.</IdleVehicle.reportString>
+  <PrepareCaravan_GatheringVehicle.reportString>Chargement de la cargaison vers la cibleB</PrepareCaravan_GatheringVehicle.reportString>
+  <RopeAnimalToVehicle.reportString>Attirer {0} vers cibleA.</RopeAnimalToVehicle.reportString>
+  <CarryPawnToVehicle.reportString>Porter cibleA à cibleB.</CarryPawnToVehicle.reportString>
+  <CarryItemToVehicle.reportString>Chargement de la cibleA vers la cibleB</CarryItemToVehicle.reportString>
+  <RepairVehicle.reportString>Réparation de la cible A.</RepairVehicle.reportString>
+  <DisassembleVehicle.reportString>Démantèlement de la cibleA.</DisassembleVehicle.reportString>
+  <PaintVehicle.reportString>Peinture de la cibleA.</PaintVehicle.reportString>
+  <UpgradeVehicle>Ameliorer la cibleA</UpgradeVehicle>
+  <RefuelVehicle.reportString>Ravitailler la cibleA</RefuelVehicle.reportString>
+  <RefuelVehicleAtomic.reportString>Ravitailler la cibleA</RefuelVehicleAtomic.reportString>
+  <FollowVehicle.reportString>Suivre la cibleA.</FollowVehicle.reportString>
+  <EscortVehicle.reportString>Escorter la cibleA.</EscortVehicle.reportString>
+</LanguageData>
+

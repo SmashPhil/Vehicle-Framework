@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_FormingCaravanStatus_RopingAnimals>Attirer les animaux vers le véhicule.</VF_FormingCaravanStatus_RopingAnimals>
+  <VF_FormingCaravanStatus_RopingAnimals_Pause>Attirer les animaux vers le véhicule. (En attente)</VF_FormingCaravanStatus_RopingAnimals_Pause>
+  <VF_FormingCaravanStatus_BoardVehicles>Monter dans le véhicule.</VF_FormingCaravanStatus_BoardVehicles>
+  <VF_FormingCaravanStatus_BoardVehicles_Pause>Monter dans le véhicule. (En attente)</VF_FormingCaravanStatus_BoardVehicles_Pause>
+  <VF_FormingCaravanStatus_Leaving_Vehicles>Sortie.</VF_FormingCaravanStatus_Leaving_Vehicles>
+  <VF_FormingCaravanStatus_Leaving_Vehicles_Pause>Sortie (En attente)</VF_FormingCaravanStatus_Leaving_Vehicles_Pause>
+  <VF_draftLabel>Allumez le moteur</VF_draftLabel>
+  <VF_healthLabel_Healthy>Opérationnel</VF_healthLabel_Healthy>
+  <VF_healthLabel_Injured>A besoin de réparations</VF_healthLabel_Injured>
+  <VF_healthLabel_Immobile>Non-Opérationnel</VF_healthLabel_Immobile>
+  <VF_healthLabel_Dead>Détruit</VF_healthLabel_Dead>
+  <VF_healthLabel_Beached>échoué sur le rivage</VF_healthLabel_Beached>
+</LanguageData>
+

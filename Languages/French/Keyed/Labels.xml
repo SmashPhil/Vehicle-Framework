@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VehicleFramework></VehicleFramework>
+  <VF_Vehicles>Véhicules</VF_Vehicles>
+  <VF_LoadCargo>Charger la cargaison</VF_LoadCargo>
+  <VF_HaulPawnToVehicle>Charger le passager</VF_HaulPawnToVehicle>
+  <VF_DisembarkAllPawns>Débarquer tous les colons</VF_DisembarkAllPawns>
+  <VF_DisembarkSinglePawn>Débarquer {0}</VF_DisembarkSinglePawn>
+  <VF_DisembarkNoExit>Impossible de débarquer. Aucune sortie possible</VF_DisembarkNoExit>
+  <VF_StopVehicle>Arrêter</VF_StopVehicle>
+  <VF_UndraftVehicle>Désactiver</VF_UndraftVehicle>
+  <VF_DraftVehicleDesc>Active le véhicule, lui permettant de se déplacer. Cela utilisera du carburant, si possible, même si le véhicule est immobile.</VF_DraftVehicleDesc>
+  <VF_StopVehicleDesc>Arrête immédiatement le véhicule.</VF_StopVehicleDesc>
+  <VF_UndraftVehicleDesc>Désactive le véhicule, arrêtant la consommation de carburant et la capacité de se déplacer.</VF_UndraftVehicleDesc>
+  <VF_RefuelFromInventory>Recharger depuis l'inventaire</VF_RefuelFromInventory>
+  <VF_ShowAllItemsOnMap>Afficher tous les objets sur la carte</VF_ShowAllItemsOnMap>
+  <VF_ResetColorPalettes>Réinitialiser toutes les palettes</VF_ResetColorPalettes>
+  <VF_ResetColorPalettesConfirmation>Êtes-vous sûr de vouloir réinitialiser toutes les palettes enregistrées aux paramètres par défaut ? Cette action est irréversible.</VF_ResetColorPalettesConfirmation>
+  <VF_RotateVehicleRendering>Faire pivoter le véhicule</VF_RotateVehicleRendering>
+  <VF_SaveColorPalette>Enregistrer la palette</VF_SaveColorPalette>
+  <VF_ColorOne>Couleur 1</VF_ColorOne>
+  <VF_ColorTwo>Couleur 2</VF_ColorTwo>
+  <VF_ColorThree>Couleur 3</VF_ColorThree>
+  <VF_ColorPickerHex>Couleur Hex</VF_ColorPickerHex>
+  <VF_JobSettings>Paramètres des tâches</VF_JobSettings>
+  <VF_VehicleAgeReadout>Créé en : {0}</VF_VehicleAgeReadout>
+  <VF_StatsReport_CargoWeight>Poids : {0}</VF_StatsReport_CargoWeight>
+  <VF_RenameVehicleTooltip>Attribuer ou effacer un nom.</VF_RenameVehicleTooltip>
+  <VF_RecolorTooltip>Changer la couleur ou le motif.</VF_RecolorTooltip>
+  <VF_DoubleClickShuttleTarget>Cliquez ici pour confirmer la cible</VF_DoubleClickShuttleTarget>
+  <VF_SwapColors>Alterner les couleurs.\nCouleur 1 -&gt; Couleur 2 -&gt; Couleur 3</VF_SwapColors>
+  <VF_StartFishing>Commencer à pêcher</VF_StartFishing>
+  <VF_StartFishingDesc>Pêcher du poisson. La profondeur de l'eau est importante pour l'efficacité de la pêche.</VF_StartFishingDesc>
+  <VF_ExplosiveComponent>Explosif</VF_ExplosiveComponent>
+  <VF_EditPawnOverlayRendererTooltip>Modifier la superposition des colons</VF_EditPawnOverlayRendererTooltip>
+  <VF_VehicleRestriction_Stationary>Impossible de tirer en mouvement</VF_VehicleRestriction_Stationary>
+  <VF_Patterns>Motifs</VF_Patterns>
+  <VF_Skins>Peaux</VF_Skins>
+  <VF_PatternZoom>Zoom</VF_PatternZoom>
+  <VF_PatternZoomTooltip>Échelle du motif vers le haut ou vers le bas</VF_PatternZoomTooltip>
+  <VF_PatternDisplacementX>Déplacement X</VF_PatternDisplacementX>
+  <VF_PatternDisplacementY>Déplacement Y</VF_PatternDisplacementY>
+  <VF_Electric>Électrique</VF_Electric>
+  <VF_ElectricFlick>Recharger les batteries</VF_ElectricFlick>
+  <VF_ElectricFlickDesc>Connectez-vous aux câbles sous le véhicule</VF_ElectricFlickDesc>
+  <VF_OutOfFuel>Plus de carburant, moteur éteint</VF_OutOfFuel>
+  <VF_Assign>Assigner</VF_Assign>
+  <VF_Assigned>Assigné</VF_Assigned>
+  <VF_Colonists>Colons</VF_Colonists>
+  <VF_ClearSeats>Effacer</VF_ClearSeats>
+  <VF_RemoveFromRole>Supprimer</VF_RemoveFromRole>
+  <VF_AddToRole>Ajouter</VF_AddToRole>
+  <VF_RoutePlannerButtonTip>Cliquez ici pour accéder à l'écran de planification des véhicules où vous pouvez sélectionner des véhicules spécifiques que vous possédez et planifier votre itinéraire. L'itinéraire est adapté en fonction des véhicules sélectionnés.</VF_RoutePlannerButtonTip>
+  <VF_SelectVehiclesForPlanner>Sélectionnez les véhicules</VF_SelectVehiclesForPlanner>
+  <VF_StartVehicleRoutePlanner>Démarrer l'itinéraire</VF_StartVehicleRoutePlanner>
+  <VF_OkName>Confirmer le nom</VF_OkName>
+  <VF_RemoveName>Supprimer le nom</VF_RemoveName>
+  <VF_NoFlightSpeed>Impossible de décoller avec une vitesse de vol = 0</VF_NoFlightSpeed>
+  <VF_CannotLaunchWhileMoving>Impossible de décoller pendant que {0} se déplace.</VF_CannotLaunchWhileMoving>
+  <VF_CannotLaunchImmobile>{0} ne peut pas décoller lorsqu'il est incapable de se déplacer</VF_CannotLaunchImmobile>
+  <VF_CannotLaunchOverEncumbered>{0} ne peut pas décoller lorsqu'il est surchargé.</VF_CannotLaunchOverEncumbered>
+  <VF_TabCargo>Cargaison</VF_TabCargo>
+  <VF_TabPassengers>Passagers</VF_TabPassengers>
+  <VF_TabComponents>Santé</VF_TabComponents>
+  <VF_TabUpgrades>Personnaliser</VF_TabUpgrades>
+  <VF_ComponentHealth>Santé</VF_ComponentHealth>
+  <VF_ComponentEfficiency>Efficacité</VF_ComponentEfficiency>
+  <VF_ComponentArmor>Armure</VF_ComponentArmor>
+  <VF_NoFuelReturnTrip>Pas de retour possible</VF_NoFuelReturnTrip>
+  <VF_NotEnoughFuel>Hors de portée</VF_NotEnoughFuel>
+  <VF_Cargo>Cargaison</VF_Cargo>
+  <VF_Properties>Propriétés</VF_Properties>
+  <VF_LauncherProperties>Propriétés de lancement</VF_LauncherProperties>
+  <VF_FueledTravelPropertes>Carburant</VF_FueledTravelPropertes>
+  <VF_JobLimitations>Limite de travailleurs par tâche</VF_JobLimitations>
+</LanguageData>
