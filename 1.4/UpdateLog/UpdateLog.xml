@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1457</currentVersion>
+  <currentVersion>1.5.1464</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -12,6 +12,16 @@
 
 - Fixed bug where modifying movement permissions wouldn't recache owners of regions.
 
+- Fixed bug where component cache wouldn't clear upon reloading the game.
+
+- Fixed bug where dedicated threads would not dispose when reloading the game.
+
+- Fixed bug where reloading a game with a vehicle caravan would recalculate an invalid path.
+
+- Fixed bug where arriving at a site in an Aerial vehicle would load a full sized map, rather than a small event map.
+
+- Fixed bug where dismounted pawns in a vehicle caravan would not satisfy needs. 
+
 - Fixed bug where an idle vehicle would still render a tiny line to its current position.
 
 - Fixed bug where vehicle turrets capable of non-LOS aiming would still require LOS for auto-targeting.
@@ -21,6 +31,14 @@
 - Fixed bug where vehicle turrets would auto-target outside their min / max range.
 
 - Fixed bug where overlays layered beneath the vehicle would still render on top of the vehicle in UI.
+
+- Fixed bug where pawns would unload the entire vehicle's cargo upon returning.
+
+- Fixed bug where pawn inventories would be reassigned upon reforming a caravan.
+
+- Fixed bug where loading cargo that is forbidden would fail to assign the job.
+
+- Fixed bug where vehicles spawning via scenarios (or using mods like Character Editor and Prepare Carefully) would only partially generate the vehicle, leaving it unusable.
 &lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Optimized pathgrid updating when snowing
 

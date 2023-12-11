@@ -507,20 +507,25 @@ namespace Vehicles
 
 		public override IEnumerable<Gizmo> GetGizmos()
 		{
-			if (MovementPermissions > VehiclePermissions.NotAllowed)
-			{
-				foreach (Gizmo gizmo in ignition.GetGizmos())
-				{
-					yield return gizmo;
-				}
-			}
-
 			foreach (Type type in VehicleDef.designatorTypes)
 			{
 				Designator designator = DesignatorCache.Get(type);
 				if (designator != null)
 				{
 					//yield return designator;
+				}
+			}
+
+			if (Faction != Faction.OfPlayer && !DebugSettings.ShowDevGizmos)
+			{
+				yield break;
+			}
+
+			if (MovementPermissions > VehiclePermissions.NotAllowed)
+			{
+				foreach (Gizmo gizmo in ignition.GetGizmos())
+				{
+					yield return gizmo;
 				}
 			}
 

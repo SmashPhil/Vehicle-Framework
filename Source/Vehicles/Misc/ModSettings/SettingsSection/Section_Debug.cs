@@ -216,7 +216,7 @@ namespace Vehicles
 							SoundDefOf.Click.PlayOneShotOnCamera();
 							foreach (Map map in Find.Maps)
 							{
-								VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+								VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
 								foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
 								{
 									mapping[vehicleDef].VehiclePathGrid.RecalculateAllPerceivedPathCosts();

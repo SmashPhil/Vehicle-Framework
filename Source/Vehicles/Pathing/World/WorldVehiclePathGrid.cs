@@ -29,7 +29,7 @@ namespace Vehicles
 
 		private int allPathCostsRecalculatedDayOfYear = -1;
 
-		private static readonly MethodInfo HillinessMethod = AccessTools.Method(typeof(WorldPathGrid), "HillinessMovementDifficultyOffset");
+		private static readonly MethodInfo hillinessMethod = AccessTools.Method(typeof(WorldPathGrid), "HillinessMovementDifficultyOffset");
 
 		public WorldVehiclePathGrid(World world) : base(world)
 		{
@@ -37,6 +37,7 @@ namespace Vehicles
 			movementDifficulty = new PathGrid[DefDatabase<VehicleDef>.DefCount];
 			ResetPathGrid();
 			Instance = this;
+			Initialized = false;
 		}
 
 		/// <summary>
@@ -44,7 +45,9 @@ namespace Vehicles
 		/// </summary>
 		public static WorldVehiclePathGrid Instance { get; private set; }
 
-		private static bool Recalculating { get; set; }
+		public static bool Recalculating { get; private set; }
+
+		public static bool Initialized { get; private set; }
 
 		/// <summary>
 		/// Day of year at 0 longitude for recalculating pathGrids
@@ -288,6 +291,14 @@ namespace Vehicles
 			TaskManager.RunAsync(RecalculateAllPerceivedPathCosts_Async);
 		}
 
+		/// <summary>
+		/// Only triggers on World.FinalizedInit since it is during a long event and PostLoad events will need this done synchronously
+		/// </summary>
+		internal void RecalculateAllPerceivedPathCostsSynchronous()
+		{
+			RecalculateAllPerceivedPathCosts(null);
+		}
+
 		private void RecalculateAllPerceivedPathCosts_Async()
 		{
 			RecalculateAllPerceivedPathCosts(null);
@@ -297,8 +308,9 @@ namespace Vehicles
 		/// Recalculate all path costs for all VehicleDefs
 		/// </summary>
 		/// <param name="ticksAbs"></param>
-		public void RecalculateAllPerceivedPathCosts(int? ticksAbs)
+		private void RecalculateAllPerceivedPathCosts(int? ticksAbs)
 		{
+			Initialized = false;
 			Recalculating = true;
 			try
 			{
@@ -314,7 +326,14 @@ namespace Vehicles
 			finally
 			{
 				Recalculating = false;
+				Initialized = true;
 			}
+		}
+
+		public override void FinalizeInit()
+		{
+			base.FinalizeInit();
+			RecalculateAllPerceivedPathCostsSynchronous();
 		}
 
 		/// <summary>
@@ -324,7 +343,6 @@ namespace Vehicles
 		/// <param name="vehicleDef"></param>
 		/// <param name="ticksAbs"></param>
 		/// <param name="explanation"></param>
-		/// <returns></returns>
 		public static float CalculatedMovementDifficultyAt(int tile, VehicleDef vehicleDef, int? ticksAbs = null, StringBuilder explanation = null, bool coastalTravel = true)
 		{
 			Tile worldTile = Find.WorldGrid[tile];
@@ -436,18 +454,8 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="hilliness"></param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float HillinessMovementDifficultyOffset(Hilliness hilliness) => (float)HillinessMethod.Invoke(null, new object[] { hilliness });
-		//{
-		//	return hilliness switch
-		//	{
-		//		Hilliness.Flat => 0f,
-		//		Hilliness.SmallHills => 0.5f,
-		//		Hilliness.LargeHills => 1.5f,
-		//		Hilliness.Mountainous => 3f,
-		//		Hilliness.Impassable => ImpassableMovementDifficulty,
-		//		_ => 0f,
-		//	};
-		//}
+		public static float HillinessMovementDifficultyOffset(Hilliness hilliness) => (float)hillinessMethod.Invoke(null, new object[] { hilliness });
+
 
 		public class PathGrid
 		{

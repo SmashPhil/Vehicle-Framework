@@ -63,7 +63,7 @@ namespace Vehicles
 
 		public void Notify_VehicleRepaired(VehiclePawn vehicle)
 		{
-			if (!vehicle.statHandler.NeedsRepairs)
+			if (!vehicle.statHandler.NeedsRepairs && vehicle.Faction != null)
 			{
 				if (vehiclesToRepair.TryGetValue(vehicle.Faction, out var vehicles))
 				{

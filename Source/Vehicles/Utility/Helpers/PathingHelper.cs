@@ -339,14 +339,26 @@ namespace Vehicles
 
 		private static void RecalculateAllPerceivedPathCosts(VehicleMapping mapping)
 		{
-			foreach (IntVec3 cell in mapping.map.AllCells)
+			string failedOn = "";
+			try
 			{
-				TerrainDef terrainDef = mapping.map.terrainGrid.TerrainAt(cell);
-				List<Thing> thingList = mapping.map.thingGrid.ThingsListAt(cell);
-				foreach (VehicleDef vehicleDef in mapping.Owners)
+				failedOn = $"Iterating: {mapping.map is null} Info = {mapping.map.info is null}";
+				foreach (IntVec3 cell in mapping.map.AllCells)
 				{
-					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell, thingList);
+					failedOn = $"Fetching thing list: {mapping.map is null} | {mapping.map?.thingGrid is null}";
+					List<Thing> thingList = mapping.map.thingGrid.ThingsListAt(cell);
+					failedOn = $"Updating with thinglist: {thingList is null}";
+					foreach (VehicleDef vehicleDef in mapping.Owners)
+					{
+						failedOn = $"Recalculating for {vehicleDef}";
+						mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell, thingList);
+					}
 				}
+			}
+			catch (Exception ex)
+			{
+				Log.Error($"Exception thrown while recalculating perceived path costs. FailedOn = {failedOn}");
+				throw ex;
 			}
 		}
 

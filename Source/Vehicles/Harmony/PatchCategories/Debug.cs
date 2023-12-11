@@ -55,7 +55,7 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(DebugToolsSpawning), "SpawnPawn"),
 				postfix: new HarmonyMethod(typeof(Debug),
 				nameof(DebugHideVehiclesFromPawnSpawner)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(CameraJumper), "TryJump", parameters: new Type[] { typeof(GlobalTargetInfo), typeof(CameraJumper.MovementMode) }),
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan_NeedsTracker), "TrySatisfyPawnNeeds", parameters: new Type[] { typeof(Pawn) }),
 			//	prefix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestPrefix)));
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(XmlInheritance), nameof(XmlInheritance.TryRegister)),
@@ -66,12 +66,11 @@ namespace Vehicles
 			//	nameof(ExceptionCatcher)));
 		}
 
-		public static void TestPrefix(GlobalTargetInfo target)
+		public static void TestPrefix(Pawn pawn)
 		{
 			try
 			{
-				var adjusted = CameraJumper.GetAdjustedTarget(target);
-				Log.Message($"Jumping to {adjusted} HasThing={adjusted.HasThing} HasWorldObject={adjusted.HasWorldObject} CellValid={adjusted.Cell.IsValid}");
+				Log.Message($"Satisfying: {pawn}");
 			}
 			catch (Exception ex)
 			{

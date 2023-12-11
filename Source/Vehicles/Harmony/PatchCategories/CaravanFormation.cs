@@ -37,6 +37,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanExitMapUtility), nameof(CaravanExitMapUtility.ExitMapAndJoinOrCreateCaravan)),
 				prefix: new HarmonyMethod(typeof(CaravanFormation),
 				nameof(ExitMapAndJoinOrCreateVehicleCaravan)));
+			VehicleHarmony.Patch(original: AccessTools.PropertySetter(typeof(Pawn_InventoryTracker), nameof(Pawn_InventoryTracker.UnloadEverything)),
+				prefix: new HarmonyMethod(typeof(CaravanFormation),
+				nameof(VehiclesShouldntUnloadEverything)));
 		}
 
 		/// <summary>
@@ -251,6 +254,14 @@ namespace Vehicles
 				return false;
 			}
 			return true;
+		}
+
+		public static void VehiclesShouldntUnloadEverything(ref bool value, Pawn ___pawn)
+		{
+			if (___pawn is VehiclePawn)
+			{
+				value = false;
+			}
 		}
 	}
 }

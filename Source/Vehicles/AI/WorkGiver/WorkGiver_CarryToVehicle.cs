@@ -70,7 +70,7 @@ namespace Vehicles
 		private static Thing ClosestHaulable(Pawn pawn, ThingRequestGroup thingRequestGroup)
 		{
 			return GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForGroup(thingRequestGroup), PathEndMode.Touch, TraverseParms.For(pawn),
-				validator: (Thing thing) => neededItems.Contains(thing) && pawn.CanReserve(thing));
+				validator: (Thing thing) => neededItems.Contains(thing) && pawn.CanReserve(thing) && !thing.IsForbidden(pawn.Faction));
 		}
 
 		public static int CountLeftToPack(VehiclePawn vehicle, Pawn pawn, TransferableOneWay transferable)

@@ -15,6 +15,9 @@ namespace Vehicles
 	{
 		public void PatchMethods()
 		{
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnGenerator), nameof(PawnGenerator.GeneratePawn), parameters: new Type[] { typeof(PawnGenerationRequest) }),
+				prefix: new HarmonyMethod(typeof(Construction),
+				nameof(GenerateVehiclePawn)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Frame), nameof(Frame.CompleteConstruction)),
 				prefix: new HarmonyMethod(typeof(Construction),
 				nameof(CompleteConstructionVehicle)));
@@ -36,6 +39,16 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn), nameof(Pawn.Destroy)),
 				transpiler: new HarmonyMethod(typeof(Construction),
 				nameof(ValidDestroyModeForVehicles)));
+		}
+
+		private static bool GenerateVehiclePawn(PawnGenerationRequest request, ref Pawn __result)
+		{
+			if (request.KindDef != null && request.KindDef.race is VehicleDef vehicleDef)
+			{
+				__result = VehicleSpawner.GenerateVehicle(vehicleDef, request.Faction);
+				return false;
+			}
+			return true;
 		}
 
 		public static bool CompleteConstructionVehicle(Pawn worker, Frame __instance)

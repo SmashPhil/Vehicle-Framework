@@ -603,18 +603,9 @@ namespace Vehicles
 				}
 				else
 				{
-
+					VehiclePawn.TrySatisfyPawnNeeds(pawn);
 				}
 			}
-		}
-
-		private void TrySatisfyPawnNeeds(Pawn pawn)
-		{
-			if (pawn.Dead)
-			{
-				return;
-			}
-			VehiclePawn.TrySatisfyPawnNeeds(pawn);
 		}
 
 		public override void Tick()
