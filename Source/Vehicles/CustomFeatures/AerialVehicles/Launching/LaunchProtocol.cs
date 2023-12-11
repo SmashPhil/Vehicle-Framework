@@ -7,7 +7,6 @@ using Verse;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
-using AnimationEvent = SmashTools.AnimationEvent;
 
 namespace Vehicles
 {
@@ -57,13 +56,17 @@ namespace Vehicles
 			maxFlightNodes = reference.maxFlightNodes;
 		}
 
+		public VehiclePawn Vehicle => vehicle;
+
 		public Vector3 DrawPos { get; protected set; }
+
+		public IntVec3 Position => position;
 
 		public float Angle { get; protected set; }
 
 		public int TicksPassed => ticksPassed;
 
-		protected Map Map => map ?? vehicle.Map;
+		public Map Map => map ?? vehicle.Map;
 
 		protected abstract int TotalTicks_Takeoff { get; }
 
@@ -128,7 +131,7 @@ namespace Vehicles
 			{
 				if (vehicle.Spawned)
 				{
-					return !LaunchRestricted && !vehicle.Position.Roofed(vehicle.Map);
+					return !LaunchRestricted && !Ext_Vehicles.IsRoofed(vehicle.Position, vehicle.Map);
 				}
 				return true;
 			}
@@ -168,7 +171,7 @@ namespace Vehicles
 		/// <summary>
 		/// Restrictions placed on launching only. Landing restrictions are validated through the <see cref="LandingTargeter"/>
 		/// </summary>
-		public virtual bool LaunchRestricted => vehicle.Spawned && vehicle.ignition.Drafted && LaunchProperties.restriction != null && !LaunchProperties.restriction.CanStartProtocol(vehicle, vehicle.Map, vehicle.Position, vehicle.Rotation);
+		public virtual bool LaunchRestricted => vehicle.Spawned && LaunchProperties.restriction != null && !LaunchProperties.restriction.CanStartProtocol(vehicle, vehicle.Map, vehicle.Position, vehicle.Rotation);
 
 		public virtual bool LandingRestricted(Map map, IntVec3 position, Rot4 rotation) => false;
 
@@ -344,13 +347,12 @@ namespace Vehicles
 		/// </summary>
 		protected virtual void TickLanding()
 		{
+			ticksPassed++;
 			TickEvents();
 			if (VehicleMod.settings.main.aerialVehicleEffects)
 			{
 				TickMotes();
 			}
-
-			ticksPassed++;
 		}
 
 		/// <summary>
@@ -358,13 +360,12 @@ namespace Vehicles
 		/// </summary>
 		protected virtual void TickTakeoff()
 		{
+			ticksPassed++;
 			TickEvents();
 			if (VehicleMod.settings.main.aerialVehicleEffects)
 			{
 				TickMotes();
 			}
-
-			ticksPassed++;
 		}
 
 		protected virtual void TickEvents()
@@ -373,10 +374,17 @@ namespace Vehicles
 			{
 				for (int i = 0; i < CurAnimationProperties.events.Count; i++)
 				{
-					AnimationEvent @event = CurAnimationProperties.events[i];
-					if (@event.EventFrame(TimeInAnimation))
+					AnimationEvent<LaunchProtocol> @event = CurAnimationProperties.events[i];
+					try
 					{
-						@event.method.InvokeUnsafe(null, this);
+						if (@event.EventFrame(TimeInAnimation))
+						{
+							@event.method.Invoke(null, this);
+						}
+					}
+					catch (Exception ex)
+					{
+						Log.Error($"Exception thrown ticking animation event {@event?.method} for {Vehicle}.\nException={ex}");
 					}
 				}
 			}
@@ -681,7 +689,7 @@ namespace Vehicles
 						vehicle.CompVehicleLauncher.inFlight = true;
 						CameraJumper.TryShowWorld();
 					}
-				}, allowRotating: vehicle.VehicleDef.rotatable, targetValidator: (targetInfo) => !targetInfo.Cell.Roofed(mapParent.Map));
+				}, allowRotating: vehicle.VehicleDef.rotatable, targetValidator: (targetInfo) => !Ext_Vehicles.IsRoofed(targetInfo.Cell, mapParent.Map));
 			}, MenuOptionPriority.Default, null, null, 0f, null, null);
 		}
 

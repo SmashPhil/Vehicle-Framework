@@ -5,9 +5,9 @@ using SmashTools;
 
 namespace Vehicles
 {
-	internal class Compatibility_SOS2 : ConditionalVehiclePatch
+	internal class Compatibility_RimNauts : ConditionalVehiclePatch
 	{
-		public override string PackageId => CompatibilityPackageIds.SOS2;
+		public override string PackageId => CompatibilityPackageIds.RimNauts;
 
 		public override void PatchAll(ModMetaData mod, Harmony harmony)
 		{

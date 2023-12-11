@@ -75,7 +75,7 @@ namespace Vehicles
 		
 		protected virtual IntVec3 RandomCrashingCell(AerialVehicleInFlight aerialVehicle, Map crashSite)
 		{
-			Predicate<IntVec3> validator = (IntVec3 c) => aerialVehicle.vehicle.PawnOccupiedCells(c, Rot4.East).All(c2 => c2.Standable(crashSite) && !c.Roofed(crashSite) && !c.Fogged(crashSite) && c.InBounds(crashSite));
+			Predicate<IntVec3> validator = (IntVec3 c) => aerialVehicle.vehicle.PawnOccupiedCells(c, Rot4.East).All(c2 => c2.Standable(crashSite) && !Ext_Vehicles.IsRoofed(c, crashSite) && !c.Fogged(crashSite) && c.InBounds(crashSite));
 			RCellFinder.TryFindRandomCellNearTheCenterOfTheMapWith(validator, crashSite, out IntVec3 result);
 			return result;
 		}

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
@@ -14,6 +15,9 @@ namespace Vehicles
 {
 	public static class Ext_Vehicles
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsRoofed(IntVec3 cell, Map map) => cell.Roofed(map);
+
 		/// <summary>
 		/// Rotates <paramref name="cell"/> for vehicle rect.
 		/// </summary>

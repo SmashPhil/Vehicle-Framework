@@ -93,6 +93,7 @@
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\ShadowData.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Properties\DirectionalProtocolProperties.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Properties\PropellerProtocolProperties.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Launching\Restrictions\LaunchRestriction_ComponentHealth.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Restrictions\LaunchRestriction_Runway.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Restrictions\LaunchRestriction.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Skyfaller\Airdrop\Airdrop.cs" />
@@ -125,6 +126,7 @@
     <Compile Include="Harmony\ConditionalPatches\Compatibility_RoadsOfTheRim.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_GeologicalLandforms.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_RimHUD.cs" />
+    <Compile Include="Harmony\ConditionalPatches\Compatibility_RimNauts.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_VEFishing.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_SOS2.cs" />
     <Compile Include="Harmony\ConditionalPatches\ConditionalVehiclePatch.cs" />

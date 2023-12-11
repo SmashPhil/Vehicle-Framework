@@ -4,7 +4,6 @@ using System.Linq;
 using UnityEngine;
 using Verse;
 using SmashTools;
-using AnimationEvent = SmashTools.AnimationEvent;
 
 namespace Vehicles
 {
@@ -97,10 +96,10 @@ namespace Vehicles
 			{
 				for (int i = 0; i < CurAnimationProperties_Propeller.eventsPropeller.Count; i++)
 				{
-					AnimationEvent @event = CurAnimationProperties_Propeller.eventsPropeller[i];
+					AnimationEvent<LaunchProtocol> @event = CurAnimationProperties_Propeller.eventsPropeller[i];
 					if (@event.EventFrame(TimeInAnimationPropeller))
 					{
-						@event.method.InvokeUnsafe(null, this);
+						@event.method.Invoke(null, this);
 					}
 				}
 			}

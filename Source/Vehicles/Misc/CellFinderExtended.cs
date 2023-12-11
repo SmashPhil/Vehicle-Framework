@@ -51,7 +51,7 @@ namespace Vehicles
 				CellFinder.TryFindRandomCellNear(map.Center, map, 30, validator, out IntVec3 intVec);
 				if (validator(intVec) && !intVec.Fogged(map))
 				{
-					if (allowRoofed || !intVec.Roofed(map))
+					if (allowRoofed || !Ext_Vehicles.IsRoofed(intVec, map))
 					{
 						num2 -= 0.2f;
 						bool flag = false;

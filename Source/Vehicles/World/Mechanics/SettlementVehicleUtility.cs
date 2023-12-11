@@ -39,7 +39,7 @@ namespace Vehicles
 		{
 			bool validator(IntVec3 c)
 			{
-				bool flag = aerialVehicle.vehicle.PawnOccupiedCells(c, Rot4.East).All(c2 => c2.Standable(map) && !c.Roofed(map) && !c.Fogged(map) && c.InBounds(map));
+				bool flag = aerialVehicle.vehicle.PawnOccupiedCells(c, Rot4.East).All(c2 => c2.Standable(map) && !Ext_Vehicles.IsRoofed(c, map) && !c.Fogged(map) && c.InBounds(map));
 				return flag;
 			}
 			IntVec3 RandomCentercell()
