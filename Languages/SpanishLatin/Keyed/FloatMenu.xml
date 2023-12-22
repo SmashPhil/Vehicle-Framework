@@ -13,5 +13,6 @@
   <VF_AttackAndTargetLanding>Atacar {0}: Elegir lugar de aterrizaje</VF_AttackAndTargetLanding>
   <VF_StrafeRun>Bombardear</VF_StrafeRun>
   <VF_AerialReconSite>Hacer reconocimiento</VF_AerialReconSite>
+  <VF_CantEnterVehicle_IdeoligionForbids>Can't enter vehicle. Forbidden by ideoligion.</VF_CantEnterVehicle_IdeoligionForbids>
 </LanguageData>
 

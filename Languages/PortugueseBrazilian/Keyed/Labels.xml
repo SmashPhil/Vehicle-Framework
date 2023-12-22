@@ -3,6 +3,7 @@
   <VehicleFramework>Vehicle Framework</VehicleFramework>
   <VF_Vehicles>Veículos</VF_Vehicles>
   <VF_LoadCargo>Carregar Carga</VF_LoadCargo>
+  <VF_HaulPawnToVehicle>Load Pawn</VF_HaulPawnToVehicle>
   <VF_DisembarkAllPawns>Descarregar Todos os Peões</VF_DisembarkAllPawns>
   <VF_DisembarkSinglePawn>Descarregar {0}</VF_DisembarkSinglePawn>
   <VF_DisembarkNoExit>Incapaz de sair do veículo. Sem células válidas para sair.</VF_DisembarkNoExit>
@@ -24,6 +25,7 @@
   <VF_JobSettings>Configurações de Trabalho</VF_JobSettings>
   <VF_VehicleAgeReadout>Produzido: {0}</VF_VehicleAgeReadout>
   <VF_StatsReport_CargoWeight>Carga: {0}</VF_StatsReport_CargoWeight>
+  <VF_StatsReport_Deployed>Deployed</VF_StatsReport_Deployed>
   <VF_RenameVehicleTooltip>Atribuir ou limpar nome.</VF_RenameVehicleTooltip>
   <VF_RecolorTooltip>Mudar cores ou padrão.</VF_RecolorTooltip>
   <VF_DoubleClickShuttleTarget>Clique para confirmar destino.</VF_DoubleClickShuttleTarget>
@@ -32,7 +34,13 @@
   <VF_StartFishingDesc>Pegar peixes. A profundidade da água afeta as chances de pesca.</VF_StartFishingDesc>
   <VF_ExplosiveComponent>Explosivo</VF_ExplosiveComponent>
   <VF_EditPawnOverlayRendererTooltip>Editar sobreposição de peças</VF_EditPawnOverlayRendererTooltip>
+  <VF_Deploy>Deploy</VF_Deploy>
+  <VF_Undeploy>Undeploy</VF_Undeploy>
+  <VF_DeployDescription>Deploy vehicle to enable use of turrets.</VF_DeployDescription>
+  <VF_MustBeDeployed>Must be deployed.</VF_MustBeDeployed>
+  <VF_MustBeUndeployed>Must be undeployed.</VF_MustBeUndeployed>
   <VF_VehicleRestriction_Stationary>Não pode disparar enquanto se move.</VF_VehicleRestriction_Stationary>
+  <VF_TurretComponentDisabled>{0} needs repairs.</VF_TurretComponentDisabled>
   <VF_Patterns>Padrões</VF_Patterns>
   <VF_Skins>Skins</VF_Skins>
   <VF_PatternZoom>Zoom</VF_PatternZoom>
@@ -67,6 +75,7 @@
   <VF_ComponentArmor>Armadura</VF_ComponentArmor>
   <VF_NoFuelReturnTrip>Sem Retorno</VF_NoFuelReturnTrip>
   <VF_NotEnoughFuel>Fora de Alcance</VF_NotEnoughFuel>
+  <VF_ConfirmationCancelLanding>Cancel landing in this map? Aerial vehicle will be kicked out to the world map.</VF_ConfirmationCancelLanding>
   <VF_Cargo>Carga</VF_Cargo>
   <VF_Properties>Propriedades</VF_Properties>
   <VF_LauncherProperties>Propriedades de Lançamento</VF_LauncherProperties>

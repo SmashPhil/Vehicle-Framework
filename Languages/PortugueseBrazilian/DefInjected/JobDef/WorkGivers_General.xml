@@ -3,6 +3,12 @@
   <PackVehicle.label>empacotar veículo</PackVehicle.label>
   <PackVehicle.verb>empacotar</PackVehicle.verb>
   <PackVehicle.gerund>empacotamento</PackVehicle.gerund>
+  <HelpPackVehicleCaravan.label>empacotar veículo</HelpPackVehicleCaravan.label>
+  <HelpPackVehicleCaravan.verb>empacotar</HelpPackVehicleCaravan.verb>
+  <HelpPackVehicleCaravan.gerund>empacotamento</HelpPackVehicleCaravan.gerund>
+  <PackVehicleTurret.label>empacotar veículo</PackVehicleTurret.label>
+  <PackVehicleTurret.verb>empacotar</PackVehicleTurret.verb>
+  <PackVehicleTurret.gerund>empacotamento</PackVehicleTurret.gerund>
   <LoadUpgradeMaterials.label>carregar materiais</LoadUpgradeMaterials.label>
   <LoadUpgradeMaterials.verb>carregar</LoadUpgradeMaterials.verb>
   <LoadUpgradeMaterials.gerund>carregamento</LoadUpgradeMaterials.gerund>

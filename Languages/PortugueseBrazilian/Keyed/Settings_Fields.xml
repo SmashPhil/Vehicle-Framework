@@ -40,9 +40,13 @@
   <VF_DischargePerTick>Taxa de Descarga</VF_DischargePerTick>
   <VF_TicksPerCharge>Taxa de Carga</VF_TicksPerCharge>
   <VF_FuelConsumptionRate>Taxa de Consumo de Combustível</VF_FuelConsumptionRate>
+  <VF_FuelConsumptionRateTooltip>Fuel consumed per day</VF_FuelConsumptionRateTooltip>
   <VF_FuelConsumptionRateWorldMultiplier>Multiplicador Mundial</VF_FuelConsumptionRateWorldMultiplier>
+  <VF_FuelConsumptionRateWorldMultiplierTooltip>Fuel consumption multiplier on the world map</VF_FuelConsumptionRateWorldMultiplierTooltip>
   <VF_FuelCapacity>Capacidade de Combustível</VF_FuelCapacity>
+  <VF_FuelCapacityTooltip>Amount of fuel that can be stored</VF_FuelCapacityTooltip>
   <VF_AutoRefuelPercent>Auto Reabastecer %</VF_AutoRefuelPercent>
+  <VF_AutoRefuelPercentTooltip>Colonists will attempt to refuel the vehicle when fuel gets below this percent.</VF_AutoRefuelPercentTooltip>
   <VF_FuelConsumptionWorld>Consumo de Combustível %</VF_FuelConsumptionWorld>
   <VF_FuelConsumptionWorldTooltip>Multiplicador de Consumo de Combustível no mapa mundial.</VF_FuelConsumptionWorldTooltip>
   <VF_LaunchFixedMaxDistance>Distância Máxima Fixa</VF_LaunchFixedMaxDistance>
@@ -61,5 +65,6 @@
   <VF_MaxFallRate>Taxa Máxima de Queda</VF_MaxFallRate>
   <VF_MaxFallRateTooltip>Máxima quantidade que o veículo vai descer quando abatido ou sem combustível.</VF_MaxFallRateTooltip>
   <VF_Instant>Instantâneo</VF_Instant>
+  <VF_DeployTime>Deploy Time</VF_DeployTime>
 </LanguageData>
 

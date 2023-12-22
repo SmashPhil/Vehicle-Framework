@@ -57,6 +57,8 @@ Determina se os Veículos devem usar valores das configurações de mod ou Defs<
   <VF_FishingPersists>Pesca Persistente</VF_FishingPersists>
   <VF_FishingPersistsTooltip>A seleção de pesca do Barco de Pesca não será reiniciada ao fazer uma seleção.</VF_FishingPersistsTooltip>
   <VF_AerialVehicles>Ar</VF_AerialVehicles>
+  <VF_DrawLandingGhost>Draw Landing Spot</VF_DrawLandingGhost>
+  <VF_DrawLandingGhostTooltip>Draws a transparent 'blueprint' where an aerial vehicle is landing.</VF_DrawLandingGhostTooltip>
   <VF_RocketsBurnRadius>Foguetes Combustíveis</VF_RocketsBurnRadius>
   <VF_RocketsBurnRadiusTooltip>Permite que veículos aéreos que suportem esse recurso queimem todas as coisas em um pequeno raio ao decolar e pousar.</VF_RocketsBurnRadiusTooltip>
   <VF_DynamicDrawing>Desenho Dinâmico</VF_DynamicDrawing>

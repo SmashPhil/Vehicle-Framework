@@ -57,6 +57,8 @@ Określa, czy pojazdy powinny używać wartości z ustawień modów, czy z Defs<
   <VF_FishingPersists>Wędkowanie Pozostaje</VF_FishingPersists>
   <VF_FishingPersistsTooltip>Selekcja wędkarstwa nie zostanie zresetowana podczas włączenia.</VF_FishingPersistsTooltip>
   <VF_AerialVehicles>Powietrze</VF_AerialVehicles>
+  <VF_DrawLandingGhost>Narysuj miejsce lądowania</VF_DrawLandingGhost>
+  <VF_DrawLandingGhostTooltip>Rysuje przezroczysty „plan” lądowania statku powietrznego.</VF_DrawLandingGhostTooltip>
   <VF_RocketsBurnRadius>Rakiety Płoną</VF_RocketsBurnRadius>
   <VF_RocketsBurnRadiusTooltip>Zezwalaj pojazdą powietrznym, które obsługują tę funkcję, na spalanie wszystkich rzeczy w małym promieniu podczas startu i lądowania.</VF_RocketsBurnRadiusTooltip>
   <VF_DynamicDrawing>Dynamiczne Rysowanie</VF_DynamicDrawing>

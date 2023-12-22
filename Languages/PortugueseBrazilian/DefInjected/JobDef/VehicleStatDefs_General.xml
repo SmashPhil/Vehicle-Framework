@@ -2,12 +2,16 @@
 <LanguageData>
   <MoveSpeed.label>Velocidade de Movimento</MoveSpeed.label>
   <MoveSpeed.description>Velocidade de movimento em células por segundo.</MoveSpeed.description>
+  <MoveSpeed.formatString>{0} c/s</MoveSpeed.formatString>
   <CargoCapacity.label>Carga</CargoCapacity.label>
   <CargoCapacity.description>A quantidade de peso que este veículo pode transportar como carga. É a mesma quantidade disponível para caravanas.</CargoCapacity.description>
+  <CargoCapacity.formatString>{0} kg</CargoCapacity.formatString>
   <RepairRate.label>Taxa de Reparo</RepairRate.label>
   <RepairRate.description>A quantidade de saúde que é reparada por segundo.</RepairRate.description>
+  <RepairRate.formatString>{0} hp/s</RepairRate.formatString>
   <Mass.label>Massa</Mass.label>
   <Mass.description>A massa física deste veículo.</Mass.description>
+  <Mass.formatString>{0} kg</Mass.formatString>
   <BodyIntegrity.label>Integridade do Corpo</BodyIntegrity.label>
   <BodyIntegrity.description>A média da saúde de todas as partes do veículo. Se a integridade do veículo chegar a 0, ele se desintegrará em uma fração de seu custo de construção.</BodyIntegrity.description>
 </LanguageData>

@@ -40,9 +40,13 @@
   <VF_DischargePerTick>Szybkość Rozładowania</VF_DischargePerTick>
   <VF_TicksPerCharge>Szybkość Ładowania</VF_TicksPerCharge>
   <VF_FuelConsumptionRate>Szybkość Użycia Paliwa</VF_FuelConsumptionRate>
+  <VF_FuelConsumptionRateTooltip>Fuel consumed per day</VF_FuelConsumptionRateTooltip>
   <VF_FuelConsumptionRateWorldMultiplier>Mnożnik na Planecie</VF_FuelConsumptionRateWorldMultiplier>
+  <VF_FuelConsumptionRateWorldMultiplierTooltip>Fuel consumption multiplier on the world map</VF_FuelConsumptionRateWorldMultiplierTooltip>
   <VF_FuelCapacity>Pojemność Paliwa</VF_FuelCapacity>
+  <VF_FuelCapacityTooltip>Amount of fuel that can be stored</VF_FuelCapacityTooltip>
   <VF_AutoRefuelPercent>% Automatycznego Uzupełniania Paliwa</VF_AutoRefuelPercent>
+  <VF_AutoRefuelPercentTooltip>Colonists will attempt to refuel the vehicle when fuel gets below this percent.</VF_AutoRefuelPercentTooltip>
   <VF_FuelConsumptionWorld>% Zużycia Paliwa</VF_FuelConsumptionWorld>
   <VF_FuelConsumptionWorldTooltip>Mnożnik zużycia paliwa na mapie świata.</VF_FuelConsumptionWorldTooltip>
   <VF_LaunchFixedMaxDistance>Stała Maksymalna Odległość</VF_LaunchFixedMaxDistance>
@@ -61,5 +65,6 @@
   <VF_MaxFallRate>Maksymalna Szybkość Spadania</VF_MaxFallRate>
   <VF_MaxFallRateTooltip>Maksymalna wartość, o jaką pojazd opadnie po zestrzeleniu lub po wyczerpaniu paliwa.</VF_MaxFallRateTooltip>
   <VF_Instant>Natychmiastowe</VF_Instant>
+  <VF_DeployTime>Czas rozmieszczenia</VF_DeployTime>
 </LanguageData>
 

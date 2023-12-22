@@ -11,5 +11,8 @@
   <Manual>Вручную</Manual>
   <Opportunistic>Адаптивная</Opportunistic>
   <Automatic>Авто</Automatic>
+  <VF_VehicleTracksNone>Никогда</VF_VehicleTracksNone>
+  <VF_VehicleTracksVanilla>Ванилла</VF_VehicleTracksVanilla>
+  <VF_VehicleTracksFull>Всегда</VF_VehicleTracksFull>
 </LanguageData>
 

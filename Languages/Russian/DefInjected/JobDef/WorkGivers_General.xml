@@ -3,6 +3,9 @@
   <PackVehicle.label>загружать ТС</PackVehicle.label>
   <PackVehicle.verb>загружать</PackVehicle.verb>
   <PackVehicle.gerund>загружать</PackVehicle.gerund>
+  <HelpPackVehicleCaravan.label>загружать ТС</HelpPackVehicleCaravan.label>
+  <HelpPackVehicleCaravan.verb>загружать</HelpPackVehicleCaravan.verb>
+  <HelpPackVehicleCaravan.gerund>загружать</HelpPackVehicleCaravan.gerund>
   <PackVehicleTurret.label>загружать ТС</PackVehicleTurret.label>
   <PackVehicleTurret.verb>загружать</PackVehicleTurret.verb>
   <PackVehicleTurret.gerund>загружать</PackVehicleTurret.gerund>

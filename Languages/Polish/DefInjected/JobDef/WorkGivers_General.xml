@@ -3,6 +3,9 @@
   <PackVehicle.label>pakuj pojazd</PackVehicle.label>
   <PackVehicle.verb>pakuj</PackVehicle.verb>
   <PackVehicle.gerund>pakowanie</PackVehicle.gerund>
+  <HelpPackVehicleCaravan.label>pakuj pojazd</HelpPackVehicleCaravan.label>
+  <HelpPackVehicleCaravan.verb>pakuj</HelpPackVehicleCaravan.verb>
+  <HelpPackVehicleCaravan.gerund>pakowanie</HelpPackVehicleCaravan.gerund>
   <PackVehicleTurret.label>pakuj pojazd</PackVehicleTurret.label>
   <PackVehicleTurret.verb>pakuj</PackVehicleTurret.verb>
   <PackVehicleTurret.gerund>pakowanie</PackVehicleTurret.gerund>

@@ -40,9 +40,13 @@
   <VF_DischargePerTick>Скорость разряда</VF_DischargePerTick>
   <VF_TicksPerCharge>Скорость зарядки</VF_TicksPerCharge>
   <VF_FuelConsumptionRate>Расход топлива</VF_FuelConsumptionRate>
+  <VF_FuelConsumptionRateTooltip>Расход топлива в день.</VF_FuelConsumptionRateTooltip>
   <VF_FuelConsumptionRateWorldMultiplier>Расход на карте мира</VF_FuelConsumptionRateWorldMultiplier>
+  <VF_FuelConsumptionRateWorldMultiplierTooltip>Множитель расхода топлива в на карте мира.</VF_FuelConsumptionRateWorldMultiplierTooltip>
   <VF_FuelCapacity>Объём бака</VF_FuelCapacity>
+  <VF_FuelCapacityTooltip>Количество топлива, которое помещается в топливном баке ТС.</VF_FuelCapacityTooltip>
   <VF_AutoRefuelPercent>Автозаправка %</VF_AutoRefuelPercent>
+  <VF_AutoRefuelPercentTooltip>Поселенцы будут заправлять это ТС, когда уровень топлива опустится ниже этого процента.</VF_AutoRefuelPercentTooltip>
   <VF_FuelConsumptionWorld>Расход топлива %</VF_FuelConsumptionWorld>
   <VF_FuelConsumptionWorldTooltip>Множитель потребления топлива на карте мира.</VF_FuelConsumptionWorldTooltip>
   <VF_LaunchFixedMaxDistance>Макс. дальность</VF_LaunchFixedMaxDistance>
@@ -61,5 +65,6 @@
   <VF_MaxFallRate>Макс. скорость падения</VF_MaxFallRate>
   <VF_MaxFallRateTooltip>Максимальная скорость, на которой будет падать это ТС, если его сбили или у него закончится топливо.</VF_MaxFallRateTooltip>
   <VF_Instant>Мгновенно</VF_Instant>
+  <VF_DeployTime>Скорость развёртывания</VF_DeployTime>
 </LanguageData>
 

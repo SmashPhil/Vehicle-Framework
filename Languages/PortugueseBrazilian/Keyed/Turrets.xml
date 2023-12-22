@@ -4,5 +4,7 @@
   <VF_AutoTargeting>Alvo Automático: {0}</VF_AutoTargeting>
   <VF_AutoTargetingDisabled>O direcionamento automático de alvo não é permitido para esta torre.</VF_AutoTargetingDisabled>
   <VF_VehicleTurrets_NoAmmoToReload>Sem munição utilizável.</VF_VehicleTurrets_NoAmmoToReload>
+  <VF_SetReloadLevel>Set auto-reloading level to {0}</VF_SetReloadLevel>
+  <VF_SetReloadLevelTooltip>Configure Ammo Level</VF_SetReloadLevelTooltip>
 </LanguageData>
 

@@ -40,9 +40,13 @@
   <VF_DischargePerTick>Velocidad de descargar</VF_DischargePerTick>
   <VF_TicksPerCharge>Velocidad de cargar</VF_TicksPerCharge>
   <VF_FuelConsumptionRate>Velocidad de consumo de combustible</VF_FuelConsumptionRate>
+  <VF_FuelConsumptionRateTooltip>Fuel consumed per day</VF_FuelConsumptionRateTooltip>
   <VF_FuelConsumptionRateWorldMultiplier>Multiplicador de mundo</VF_FuelConsumptionRateWorldMultiplier>
+  <VF_FuelConsumptionRateWorldMultiplierTooltip>Fuel consumption multiplier on the world map</VF_FuelConsumptionRateWorldMultiplierTooltip>
   <VF_FuelCapacity>Capacidad de gasolina</VF_FuelCapacity>
+  <VF_FuelCapacityTooltip>Amount of fuel that can be stored</VF_FuelCapacityTooltip>
   <VF_AutoRefuelPercent>% de repostaje automatico</VF_AutoRefuelPercent>
+  <VF_AutoRefuelPercentTooltip>Colonists will attempt to refuel the vehicle when fuel gets below this percent.</VF_AutoRefuelPercentTooltip>
   <VF_FuelConsumptionWorld>% de consumo de gasolina</VF_FuelConsumptionWorld>
   <VF_FuelConsumptionWorldTooltip>Multiplicador de consumo de gasolina en el mapa del mundo.</VF_FuelConsumptionWorldTooltip>
   <VF_LaunchFixedMaxDistance>Distancia maxima fija</VF_LaunchFixedMaxDistance>
@@ -61,5 +65,6 @@
   <VF_MaxFallRate>Velocidad de caida maxima</VF_MaxFallRate>
   <VF_MaxFallRateTooltip>Cantidad maxima que el vehículo descendera cuando sea derribado o se quede sin gasolina.</VF_MaxFallRateTooltip>
   <VF_Instant>Instante</VF_Instant>
+  <VF_DeployTime>Deploy Time</VF_DeployTime>
 </LanguageData>
 

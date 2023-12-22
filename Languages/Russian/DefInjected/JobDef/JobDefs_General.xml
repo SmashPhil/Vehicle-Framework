@@ -3,6 +3,7 @@
   <Board.reportString>садится в {lookup: {TargetA}; Case; 3}</Board.reportString>
   <LoadUpgradeMaterials.reportString>загружает материалы для улучшения в {lookup: {TargetA}; Case; 3}</LoadUpgradeMaterials.reportString>
   <IdleVehicle.reportString>простаивает</IdleVehicle.reportString>
+  <DeployVehicle.reportString>развёртывается</DeployVehicle.reportString>
   <PrepareCaravan_GatheringVehicle.reportString>несёт груз к {lookup: {TargetB}; Case; 2}</PrepareCaravan_GatheringVehicle.reportString>
   <RopeAnimalToVehicle.reportString>ведёт {lookup: {0}; Case; 1} к {lookup: {TargetB}; Case; 2}</RopeAnimalToVehicle.reportString>
   <CarryPawnToVehicle.reportString>несёт TargetA к {lookup: {TargetB}; Case; 2}</CarryPawnToVehicle.reportString>

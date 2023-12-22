@@ -3,9 +3,11 @@
   <Board.reportString>Entrando al TargetA.</Board.reportString>
   <LoadUpgradeMaterials.reportString>Cargando materiales de mejora a TargetB.</LoadUpgradeMaterials.reportString>
   <IdleVehicle.reportString>Inactivo.</IdleVehicle.reportString>
+  <DeployVehicle.reportString>Deploying.</DeployVehicle.reportString>
   <PrepareCaravan_GatheringVehicle.reportString>Cargando cargamento paraTargetB.</PrepareCaravan_GatheringVehicle.reportString>
   <RopeAnimalToVehicle.reportString>Amarrando {0} a TargetA.</RopeAnimalToVehicle.reportString>
   <CarryPawnToVehicle.reportString>Llevando TargetA a TargetB.</CarryPawnToVehicle.reportString>
+  <LoadVehicle.reportString>Cargando TargetA en TargetB</LoadVehicle.reportString>
   <CarryItemToVehicle.reportString>Cargando TargetA en TargetB</CarryItemToVehicle.reportString>
   <RepairVehicle.reportString>Reparando TargetA.</RepairVehicle.reportString>
   <DisassembleVehicle.reportString>Desarmando TargetA.</DisassembleVehicle.reportString>

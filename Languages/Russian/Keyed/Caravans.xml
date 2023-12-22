@@ -3,6 +3,15 @@
   <VF_Caravan_Dismounted>Пешком</VF_Caravan_Dismounted>
   <VF_Sailing>В плавании</VF_Sailing>
   <VF_DockToCaravan>Выбрать предметы для погрузки</VF_DockToCaravan>
+  <VF_ImpassableBiome>Этот биом непроходим для данного ТС.</VF_ImpassableBiome>
+  <VF_CaravanDisabled>Этот ТС не может быть использован для путешествий в составе каравана.</VF_CaravanDisabled>
+  <VF_CaravanCantMove>Не может двигаться.</VF_CaravanCantMove>
+  <VF_CantMergeAerialVehicle>Невозможно объединить воздушные ТС.</VF_CantMergeAerialVehicle>
+  <VF_CommandDisembark>Оставить ТС</VF_CommandDisembark>
+  <VF_CommandDisembarkDesc>Оставить весь транспорт и продолжить путешествие пешком. ТС будут оставаться на карте мира до 20-30 дней.</VF_CommandDisembarkDesc>
+  <VF_ToggleRepairVehicle>Ремонтировать ТС</VF_ToggleRepairVehicle>
+  <VF_ToggleRepairVehicleDesc>Приостановить движение каравана и отремонтировать транспорт.</VF_ToggleRepairVehicleDesc>
+  <VF_CommandDisembarkImpassableBiome>Невозможно высадиться: эта клетка непроходима.</VF_CommandDisembarkImpassableBiome>
   <VF_CommandDockShip>Причалить</VF_CommandDockShip>
   <VF_CommandDockShipDesc>Высадить всех пассажиров и начать торговлю с поселением {0}.</VF_CommandDockShipDesc>
   <VF_CommandDockShipDisembark>Швартовка и высадка</VF_CommandDockShipDisembark>

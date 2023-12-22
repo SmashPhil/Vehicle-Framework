@@ -9,7 +9,10 @@
   <Combat>Combate</Combat>
   <Hybrid>Hybrido</Hybrid>
   <Manual>Manual</Manual>
-  <Opportunistic>Opportunista</Opportunistic>
+  <Opportunistic>Oportunista</Opportunistic>
   <Automatic>Automatico</Automatic>
+  <VF_VehicleTracksNone>None</VF_VehicleTracksNone>
+  <VF_VehicleTracksVanilla>Vanilla</VF_VehicleTracksVanilla>
+  <VF_VehicleTracksFull>Full</VF_VehicleTracksFull>
 </LanguageData>
 

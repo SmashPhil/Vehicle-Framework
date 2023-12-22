@@ -25,6 +25,7 @@
   <VF_JobSettings>Ustawienia Prac</VF_JobSettings>
   <VF_VehicleAgeReadout>Stworzone w: {0}</VF_VehicleAgeReadout>
   <VF_StatsReport_CargoWeight>Masa: {0}</VF_StatsReport_CargoWeight>
+  <VF_StatsReport_Deployed>Zamontowany</VF_StatsReport_Deployed>
   <VF_RenameVehicleTooltip>Przypisz lub wyczyść nazwę.</VF_RenameVehicleTooltip>
   <VF_RecolorTooltip>Zmień kolor lub wzór.</VF_RecolorTooltip>
   <VF_DoubleClickShuttleTarget>Kliknij Tutaj by Potwierdzić Miejsce Docelowe</VF_DoubleClickShuttleTarget>
@@ -33,7 +34,13 @@
   <VF_StartFishingDesc>Łów ryby. Głębokość wody ma znaczenie na efektywności łowienia.</VF_StartFishingDesc>
   <VF_ExplosiveComponent>Wybuchowe</VF_ExplosiveComponent>
   <VF_EditPawnOverlayRendererTooltip>Edytuj Nakładkę Kolonistów</VF_EditPawnOverlayRendererTooltip>
+  <VF_Deploy>Rozmieść</VF_Deploy>
+  <VF_Undeploy>Złóż</VF_Undeploy>
+  <VF_DeployDescription>Rozmieść pojazd, aby umożliwić korzystanie z wieżyczek.</VF_DeployDescription>
+  <VF_MustBeDeployed>Musi być rozmieszczone.</VF_MustBeDeployed>
+  <VF_MustBeUndeployed>Musi być złożone.</VF_MustBeUndeployed>
   <VF_VehicleRestriction_Stationary>Niemożliwość strzelania podczas ruchu</VF_VehicleRestriction_Stationary>
+  <VF_TurretComponentDisabled>{0} potrzebuje napraw.</VF_TurretComponentDisabled>
   <VF_Patterns>Wzory</VF_Patterns>
   <VF_Skins>Skórki</VF_Skins>
   <VF_PatternZoom>Przybliżenie</VF_PatternZoom>
@@ -68,6 +75,7 @@
   <VF_ComponentArmor>Pancerz</VF_ComponentArmor>
   <VF_NoFuelReturnTrip>Brak Możliwości Podróży Powrotnej</VF_NoFuelReturnTrip>
   <VF_NotEnoughFuel>Poza Zasięgiem</VF_NotEnoughFuel>
+  <VF_ConfirmationCancelLanding>Anulować lądowanie na tej mapie? Pojazd powietrzny zostanie wyrzucony na mapę świata.</VF_ConfirmationCancelLanding>
   <VF_Cargo>Ładunek</VF_Cargo>
   <VF_Properties>Właściwości</VF_Properties>
   <VF_LauncherProperties>Właściwości Odlotu</VF_LauncherProperties>

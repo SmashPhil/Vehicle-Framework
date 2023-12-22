@@ -3,6 +3,7 @@
   <Board.reportString>Wchodzenie do TargetA.</Board.reportString>
   <LoadUpgradeMaterials.reportString>Ładowanie materiałów ulepszeń do TargetB.</LoadUpgradeMaterials.reportString>
   <IdleVehicle.reportString>Bezczynne.</IdleVehicle.reportString>
+  <DeployVehicle.reportString>Rozmieszczanie.</DeployVehicle.reportString>
   <PrepareCaravan_GatheringVehicle.reportString>Ładowanie ładunku do TargetB</PrepareCaravan_GatheringVehicle.reportString>
   <RopeAnimalToVehicle.reportString>Przyciąganie {0} do TargetA.</RopeAnimalToVehicle.reportString>
   <CarryPawnToVehicle.reportString>Noszenie TargetA do TargetB.</CarryPawnToVehicle.reportString>
