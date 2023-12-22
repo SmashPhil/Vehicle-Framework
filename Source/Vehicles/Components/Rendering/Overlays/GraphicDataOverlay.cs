@@ -18,6 +18,7 @@ namespace Vehicles
 		{
 			public string key;
 			public float healthPercent;
+			public ComparisonType comparison = ComparisonType.GreaterThan;
 		}
 	}
 }

@@ -33,9 +33,13 @@ namespace Vehicles
 					fromTile = vehicleCaravan.Tile;
 				}
 				aerialVehicle = AerialVehicleInFlight.Create(vehicle, fromTile);
-				vehicleCaravan.RemoveAllPawns();
-				vehicleCaravan.Destroy();
+				vehicleCaravan.RemovePawn(vehicle);
 
+				if (vehicleCaravan.PawnsListForReading.NullOrEmpty() && !vehicleCaravan.Destroyed)
+				{
+					vehicleCaravan.Destroy();
+				}
+				
 				if (autoSelect)
 				{
 					Find.WorldSelector.Select(aerialVehicle, playSound: false);

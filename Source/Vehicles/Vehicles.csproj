@@ -59,6 +59,7 @@
     <Compile Include="AI\Lords\LordToil_PrepareCaravan_GatherAnimalsForVehicles.cs" />
     <Compile Include="AI\WorkGiver\VehicleWorkGiver.cs" />
     <Compile Include="AI\WorkGiver\WorkGiver_CarryToVehicle.cs" />
+    <Compile Include="AI\WorkGiver\WorkGiver_HelpGatheringItemsForVehicleCaravan.cs" />
     <Compile Include="AI\WorkGiver\WorkGiver_RefuelVehicleTurret.cs" />
     <Compile Include="BackCompatibility\BackCompatibilityConverter_Universal.cs" />
     <Compile Include="Components\Rendering\Tracks\VehicleTrack_Wake.cs" />
@@ -131,6 +132,7 @@
     <Compile Include="Harmony\ConditionalPatches\Compatibility_SOS2.cs" />
     <Compile Include="Harmony\ConditionalPatches\ConditionalVehiclePatch.cs" />
     <Compile Include="Harmony\PatchCategories\DefGenerators\ThingDefGenerator_Buildables.cs" />
+    <Compile Include="Harmony\PatchCategories\NPCAI.cs" />
     <Compile Include="Harmony\UnitTesting\WorldTesting.cs" />
     <Compile Include="Harmony\UnitTesting\UITesting.cs" />
     <Compile Include="Misc\Attributes\ActionOnSettingsInputAttribute.cs" />
@@ -153,6 +155,7 @@
     <Compile Include="Pathing\RegionGrid\ChunkSet.cs" />
     <Compile Include="Pathing\RegionGrid\ConcurrentListerThings.cs" />
     <Compile Include="Turrets\Turret\Rendering\VehicleTurretRenderData.cs" />
+    <Compile Include="Turrets\Turret\TargetLock.cs" />
     <Compile Include="Turrets\Turret\TurretComponentRequirement.cs" />
     <Compile Include="Utility\DesignatorCache.cs" />
     <Compile Include="AI\Incidents\IncidentWorker_ShuttleDowned.cs" />
@@ -448,6 +451,7 @@
     <Compile Include="Utility\Helpers\UIHelper.cs" />
     <Compile Include="Utility\Helpers\WorldHelper.cs" />
     <Compile Include="Utility\Helpers\PathingHelper.cs" />
+    <Compile Include="Utility\VehicleEventMethods.cs" />
     <Compile Include="Utility\VehicleIncidentSwapper.cs" />
     <Compile Include="Utility\Targeters.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_ColorPicker.cs" />

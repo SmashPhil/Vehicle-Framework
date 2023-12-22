@@ -29,9 +29,13 @@ namespace Vehicles
 				float overlayAngle = angle;
 				extraAngle = graphicOverlay.data.rotation;
 				Vector3 overlayDrawPos = drawPos;
-				if (graphicOverlay.data.component != null && vehicle.statHandler.GetComponentHealthPercent(graphicOverlay.data.component.key) <= graphicOverlay.data.component.healthPercent)
+				if (graphicOverlay.data.component != null)
 				{
-					continue; //Skip rendering if health percent is below set amount for rendering
+					float healthPercent = vehicle.statHandler.GetComponentHealthPercent(graphicOverlay.data.component.key);
+					if (!graphicOverlay.data.component.comparison.Compare(healthPercent, graphicOverlay.data.component.healthPercent))
+					{
+						continue; //Skip rendering if health percent is below set amount for rendering
+					}
 				}
 				if (!graphicOverlay.data.graphicData.AboveBody)
 				{

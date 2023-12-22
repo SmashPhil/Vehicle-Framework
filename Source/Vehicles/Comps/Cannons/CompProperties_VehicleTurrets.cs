@@ -52,6 +52,7 @@ namespace Vehicles
 			foreach (VehicleTurret turret in turrets)
 			{
 				turret.ResolveCannonGraphics(turret.vehicleDef, forceRegen: true);
+				turret.renderProperties.PostLoad();
 			}
 		}
 
@@ -67,15 +68,18 @@ namespace Vehicles
 			{
 				foreach (VehicleTurret parentTurret in turrets.Where(c => c.key == turret.parentKey))
 				{
-					turret.attachedTo = parentTurret;
-					if (parentTurret.attachedTo == turret || turret == parentTurret)
+					if (turret.parentKey == parentTurret.key)
 					{
-						Log.Error($"Recursive turret attachments detected, this is not allowed. Disconnecting turret from parent.");
-						turret.attachedTo = null;
-					}
-					else
-					{
-						parentTurret.childTurrets.Add(turret);
+						turret.attachedTo = parentTurret;
+						if (parentTurret.attachedTo == turret || turret == parentTurret)
+						{
+							Log.Error($"Recursive turret attachments detected, this is not allowed. Disconnecting turret from parent.");
+							turret.attachedTo = null;
+						}
+						else
+						{
+							parentTurret.childTurrets.Add(turret);
+						}
 					}
 				}
 			}

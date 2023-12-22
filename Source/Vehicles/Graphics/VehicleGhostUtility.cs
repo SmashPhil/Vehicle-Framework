@@ -62,13 +62,13 @@ namespace Vehicles
 			}
 		}
 
-		public static void DrawGhostTurretTextures(this VehicleDef vehicleDef, Vector3 loc, Rot8 rot, Color ghostCol)
+		public static void DrawGhostTurretTextures(this VehicleDef vehicleDef, Vector3 loc, Rot8 rot, Color ghostColor)
 		{
 			if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets props)
 			{
 				foreach (VehicleTurret turret in props.turrets)
 				{
-					if (turret.NoGraphic)
+					if (!turret.parentKey.NullOrEmpty())
 					{
 						continue;
 					}
@@ -77,20 +77,41 @@ namespace Vehicles
 
 					try
 					{
-						Graphic graphic = vehicleDef.GhostGraphicFor(turret, ghostCol);
 						float locationRotation = turret.defaultAngleRotated + rot.AsAngle;
 						if (turret.attachedTo != null)
 						{
-							locationRotation += turret.attachedTo.defaultAngleRotated + rot.AsAngle;
+							locationRotation += turret.attachedTo.defaultAngleRotated;// + rot.AsAngle;
 						}
-						Vector3 turretLoc = loc + turret.TurretDrawLocFor(rot);
-						Mesh cannonMesh = graphic.MeshAt(rot);
-						Graphics.DrawMesh(cannonMesh, turretLoc, locationRotation.ToQuat(), graphic.MatAt(rot), 0);
+						Vector3 turretDrawLoc = turret.TurretDrawLocFor(rot);
+						Vector3 turretLoc = loc + turretDrawLoc;
+
+						if (!turret.NoGraphic)
+						{
+							Graphic graphic = vehicleDef.GhostGraphicFor(turret, ghostColor);
+							Mesh cannonMesh = graphic.MeshAt(rot);
+							Graphics.DrawMesh(cannonMesh, turretLoc, locationRotation.ToQuat(), graphic.MatAt(rot), 0);
+						}
+						//DrawTurretGhostOverlays(vehicleDef, turret, ghostColor, turretLoc, rot, locationRotation);
 					}
 					catch(Exception ex)
 					{
 						Log.Error($"Failed to render Cannon=\"{turret.turretDef.defName}\" for VehicleDef=\"{vehicleDef.defName}\", Exception: {ex}");
 					}
+				}
+			}
+		}
+
+		private static void DrawTurretGhostOverlays(VehicleDef vehicleDef, VehicleTurret turret, Color ghostColor, Vector3 drawPos, Rot8 rot, float extraRotation)
+		{
+			if (!turret.TurretGraphics.NullOrEmpty())
+			{
+				for (int i = 0; i < turret.TurretGraphics.Count; i++)
+				{
+					Graphic graphic = vehicleDef.GhostGraphicFor(turret, ghostColor);
+					VehicleTurret.TurretDrawData turretDrawData = turret.TurretGraphics[i];
+					Vector3 rootPos = turretDrawData.DrawOffset(drawPos, rot);
+					Mesh cannonMesh = graphic.MeshAt(rot);
+					Graphics.DrawMesh(cannonMesh, rootPos, extraRotation.ToQuat(), graphic.MatAt(rot), 0);
 				}
 			}
 		}

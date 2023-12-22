@@ -50,7 +50,7 @@ namespace Vehicles
 		{
 			if (canceled && Turret != null)
 			{
-				Turret.AlignToAngleRestricted(Turret.TurretRotationUncorrected);
+				Turret.AlignToAngleRestricted(Turret.TurretRotation);
 				Turret.SetTarget(LocalTargetInfo.Invalid);
 			}
 			StopTargeting();
@@ -59,15 +59,15 @@ namespace Vehicles
 		public override void ProcessInputEvents()
 		{
 			ConfirmStillValid();
-			if(IsTargeting)
+			if (IsTargeting)
 			{
 				if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
 				{
 					Event.current.Use();
-					if(action != null)
+					if (action != null)
 					{                      
 						LocalTargetInfo obj = CurrentTargetUnderMouse();
-						if(obj.Cell.InBounds(map) && TargetMeetsRequirements(Turret, obj))
+						if (obj.Cell.InBounds(map) && TargetMeetsRequirements(Turret, obj))
 						{
 							action(obj);
 							SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
@@ -146,6 +146,10 @@ namespace Vehicles
 				return false;
 			}
 			if (!turret.AngleBetween(target.CenterVector3))
+			{
+				return false;
+			}
+			if (target == turret.vehicle)
 			{
 				return false;
 			}

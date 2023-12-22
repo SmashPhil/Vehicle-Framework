@@ -131,9 +131,12 @@ namespace Vehicles
 			{
 				if (vehicle.Spawned)
 				{
-					return !LaunchRestricted && !Ext_Vehicles.IsRoofed(vehicle.Position, vehicle.Map);
+					if (Ext_Vehicles.IsRoofed(vehicle.Position, vehicle.Map))
+					{
+						return false;
+					}
 				}
-				return true;
+				return !LaunchRestricted;
 			}
 		}
 
@@ -171,7 +174,7 @@ namespace Vehicles
 		/// <summary>
 		/// Restrictions placed on launching only. Landing restrictions are validated through the <see cref="LandingTargeter"/>
 		/// </summary>
-		public virtual bool LaunchRestricted => vehicle.Spawned && LaunchProperties.restriction != null && !LaunchProperties.restriction.CanStartProtocol(vehicle, vehicle.Map, vehicle.Position, vehicle.Rotation);
+		public virtual bool LaunchRestricted => LaunchProperties.restriction != null && !LaunchProperties.restriction.CanStartProtocol(vehicle, vehicle.Map, vehicle.Position, vehicle.Rotation);
 
 		public virtual bool LandingRestricted(Map map, IntVec3 position, Rot4 rotation) => false;
 
@@ -197,7 +200,8 @@ namespace Vehicles
 					break;
 			}
 			result.drawPos.y = AltitudeLayer.Skyfaller.AltitudeFor();
-			vehicle.DrawAt(result.drawPos, result.rotation);
+			Rot8 rot = CurAnimationProperties.forcedRotation ?? vehicle.Rotation;
+			vehicle.DrawAt(result.drawPos, rot, result.rotation);
 			(DrawPos, Angle) = result;
 			if (VehicleMod.settings.main.aerialVehicleEffects)
 			{

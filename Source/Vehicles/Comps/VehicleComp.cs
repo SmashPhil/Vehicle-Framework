@@ -42,7 +42,7 @@ namespace Vehicles
 		{
 		}
 
-		public virtual void PostDrawUnspawned(Vector3 drawLoc, float rotation)
+		public virtual void PostDrawUnspawned(Vector3 drawLoc, Rot8 rot, float rotation)
 		{
 		}
 

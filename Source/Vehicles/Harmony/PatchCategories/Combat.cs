@@ -26,7 +26,7 @@ namespace Vehicles
 				nameof(TurretHitFlags)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Projectile), "Impact"),
 				prefix: new HarmonyMethod(typeof(Combat),
-				nameof(RegisterImpactCell)));
+				nameof(HandleImpactMechanics)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Projectile), "ImpactSomething"),
 				transpiler: new HarmonyMethod(typeof(Combat),
 				nameof(VehicleProjectileChanceToHit)));
@@ -165,7 +165,7 @@ namespace Vehicles
 			return true;
 		}
 
-		public static void RegisterImpactCell(Thing hitThing, Projectile __instance, Thing ___launcher)
+		public static void HandleImpactMechanics(Thing hitThing, Projectile __instance, Thing ___launcher)
 		{
 			if (hitThing is VehiclePawn vehicle)
 			{

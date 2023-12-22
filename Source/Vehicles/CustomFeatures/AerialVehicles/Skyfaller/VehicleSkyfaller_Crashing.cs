@@ -89,7 +89,7 @@ namespace Vehicles
 			{
 				drawLoc.z += def.skyfaller.zPositionCurve.Evaluate(vehicle.CompVehicleLauncher.launchProtocol.TimeInAnimation);
 			}
-			vehicle.DrawAt(drawLoc, num + Rotation.AsInt * 90, flip);
+			vehicle.DrawAt(drawLoc, Rotation, num + Rotation.AsInt * 90, flip);
 			DrawDropSpotShadow();
 		}
 

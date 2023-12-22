@@ -67,6 +67,8 @@ namespace Vehicles
 		/// </summary>
 		public static readonly Texture2D FormCaravanAerial = ContentFinder<Texture2D>.Get("UI/Gizmos/FormCaravanAerial");
 
+		public static readonly Texture2D RepairVehicles = ContentFinder<Texture2D>.Get("UI/Gizmos/Gizmo_RepairVehicles");
+
 		public static readonly Texture2D AmmoBG = ContentFinder<Texture2D>.Get("UI/Gizmos/AmmoBoxBG");
 
 		public static readonly Texture2D ReloadIcon = ContentFinder<Texture2D>.Get("UI/Gizmos/Reload");

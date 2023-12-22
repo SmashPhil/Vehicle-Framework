@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 
 namespace Vehicles
 {
-	public enum VehicleTracksFriendlyFire
+	[Flags]
+	public enum TargetLock : byte
 	{
-		None,
-		Vanilla,
-		Custom,
+		None = 1 << 0,
+		Cell = 1 << 1,
+		Thing = 1 << 2,
+		Pawn = 1 << 3,
 	}
 }

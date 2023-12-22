@@ -21,6 +21,12 @@ namespace Vehicles
 
 		public void PatchMethods()
 		{
+			//TODO - Implement in 1.5 with more testing and drag-to-rotate
+			//	   - Needs another patch on RCellFinder.BestOrderedGotoDestNear so it recomputes best position for vehicle
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(FloatMenuMakerMap), "CanTakeOrder"),
+			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
+			//	nameof(VehiclesCanTakeOrders)));
+
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(FloatMenuMakerMap), "GotoLocationOption"),
 				prefix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(GotoLocationVehicles)));
@@ -68,16 +74,29 @@ namespace Vehicles
 				nameof(SetRotationAndUpdateVehicleRegions)));
 		}
 
+		private static void VehiclesCanTakeOrders(Pawn pawn, ref bool __result)
+		{
+			if (!__result && pawn is VehiclePawn)
+			{
+				__result = true;
+			}
+		}
+
 		/// <summary>
 		/// Intercepts FloatMenuMakerMap call to restrict by size and call through to custom water based pathing requirements
 		/// </summary>
 		/// <param name="clickCell"></param>
 		/// <param name="pawn"></param>
 		/// <param name="__result"></param>
-		public static bool GotoLocationVehicles(IntVec3 clickCell, Pawn pawn, ref FloatMenuOption __result)
+		public static bool GotoLocationVehicles(IntVec3 clickCell, Pawn pawn, ref FloatMenuOption __result, bool suppressAutoTakeableGoto)
 		{
 			if (pawn is VehiclePawn vehicle)
 			{
+				if (suppressAutoTakeableGoto)
+				{
+					__result = null;
+					return false;
+				}
 				if (vehicle.Faction != Faction.OfPlayer || !vehicle.CanMoveFinal)
 				{
 					return false;

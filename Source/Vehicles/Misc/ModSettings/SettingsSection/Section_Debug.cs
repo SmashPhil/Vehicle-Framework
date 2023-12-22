@@ -40,6 +40,8 @@ namespace Vehicles
 		public bool debugUseMultithreading = true;
 		public bool debugLoadAssetBundles = true;
 
+		public bool debugAllowRaiders = false;
+
 		public override void ResetSettings()
 		{
 			base.ResetSettings();
@@ -64,6 +66,8 @@ namespace Vehicles
 			debugSpawnVehicleBuildingGodMode = false;
 			debugUseMultithreading = true;
 			debugLoadAssetBundles = true;
+
+			debugAllowRaiders = false;
 		}
 
 		public override void ExposeData()
@@ -88,6 +92,8 @@ namespace Vehicles
 			Scribe_Values.Look(ref debugSpawnVehicleBuildingGodMode, nameof(debugSpawnVehicleBuildingGodMode));
 			Scribe_Values.Look(ref debugUseMultithreading, nameof(debugUseMultithreading), defaultValue: true);
 			Scribe_Values.Look(ref debugLoadAssetBundles, nameof(debugLoadAssetBundles), defaultValue: true);
+
+			Scribe_Values.Look(ref debugAllowRaiders, nameof(debugAllowRaiders));
 		}
 
 		public override void DrawSection(Rect rect)
@@ -111,9 +117,14 @@ namespace Vehicles
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugShootAnyTurret".Translate(), ref debugShootAnyTurret, "VF_DevMode_DebugShootAnyTurretTooltip".Translate());
 					
 					listingStandard.Header("Debugging Only", ListingExtension.BannerColor, fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);
+					//listingStandard.CheckboxLabeledWithMessage("Raiders / Traders (Experimental)", delegate (bool value)
+					//{
+					//	return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput);
+					//}, ref debugAllowRaiders, "Enables vehicle generation for NPCs.\n NOTE: This is an experimental feature. Use at your own risk.");
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugSpawnVehiclesGodMode".Translate(), ref debugSpawnVehicleBuildingGodMode, "VF_DevMode_DebugSpawnVehiclesGodModeTooltip".Translate());
 					bool checkOn = debugUseMultithreading;
 					listingStandard.CheckboxLabeled("Use Multithreading", ref checkOn);
+
 					if (checkOn != debugUseMultithreading)
 					{
 						if (!checkOn)
@@ -163,95 +174,7 @@ namespace Vehicles
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawVehiclePathingCosts".Translate(), ref debugDrawVehiclePathCosts, "VF_DevMode_DebugDrawVehiclePathingCostsTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawPathfinderSearch".Translate(), ref debugDrawPathfinderSearch, "VF_DevMode_DebugDrawPathfinderSearchTooltip".Translate());
 
-					Rect buttonRect = listingStandard.GetRect(30);
-					if (Widgets.ButtonText(buttonRect, "VF_DevMode_DebugPathfinderDebugging".Translate()))
-					{
-						SoundDefOf.Click.PlayOneShotOnCamera();
-						RegionDebugMenu();
-					}
-					TooltipHandler.TipRegionByKey(buttonRect, "VF_DevMode_DebugPathfinderDebuggingTooltip");
-
-					buttonRect = listingStandard.GetRect(30);
-					if (Widgets.ButtonText(buttonRect, "VF_DevMode_DebugWorldPathfinderDebugging".Translate()))
-					{
-						SoundDefOf.Click.PlayOneShotOnCamera();
-						WorldPathingDebugMenu();
-					}
-					TooltipHandler.TipRegionByKey(buttonRect, "VF_DevMode_DebugWorldPathfinderDebuggingTooltip");
-
-					buttonRect = listingStandard.GetRect(30);
-					if (Widgets.ButtonText(buttonRect, "Output Material Cache"))
-					{
-						SoundDefOf.Click.PlayOneShotOnCamera();
-						RGBMaterialPool.LogAllMaterials();
-					}
-
-					buttonRect = listingStandard.GetRect(30);
-					if (Widgets.ButtonText(buttonRect, "Output Owners"))
-					{
-						Map map = Find.CurrentMap;
-						if (map != null)
-						{
-							Log.Message($"Vehicles = {DefDatabase<VehicleDef>.AllDefsListForReading.Count}");
-							foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
-							{
-								Log.Message($"{vehicleDef} DefIndex = {vehicleDef.DefIndex}");
-							}
-							Log.Message("-------");
-							VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-							Log.Message($"Total Owners = {mapping.Owners.Count}");
-							foreach (VehicleDef vehicleDef in mapping.Owners)
-							{
-								List<VehicleDef> piggies = mapping.GetPiggies(vehicleDef);
-								Log.Message($"Owner: {vehicleDef} Piggies=({string.Join(",", piggies.Select(def => def.defName))})");
-							}
-						}
-					}
-
-					buttonRect = listingStandard.GetRect(30);
-					if (Widgets.ButtonText(buttonRect, "Regenerate All Regions"))
-					{
-						LongEventHandler.QueueLongEvent(delegate ()
-						{
-							SoundDefOf.Click.PlayOneShotOnCamera();
-							foreach (Map map in Find.Maps)
-							{
-								VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
-								foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
-								{
-									mapping[vehicleDef].VehiclePathGrid.RecalculateAllPerceivedPathCosts();
-									if (mapping.IsOwner(vehicleDef))
-									{
-										mapping[vehicleDef].VehicleRegionDirtyer.SetAllDirty();
-										mapping[vehicleDef].VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
-									}
-								}
-							}
-						}, "Regenerating Regions", false, null);
-					}
-
-					buttonRect = listingStandard.GetRect(30);
-					if (Widgets.ButtonText(buttonRect, "Clear Region Cache"))
-					{
-						LongEventHandler.QueueLongEvent(delegate ()
-						{
-							SoundDefOf.Click.PlayOneShotOnCamera();
-							foreach (Map map in Find.Maps)
-							{
-								VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-								foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
-								{
-									mapping[vehicleDef].VehicleReachability.ClearCache();
-								}
-							}
-						}, "Clearing Region Cache", false, null);
-					}
-
-					buttonRect = listingStandard.GetRect(30);
-					if (Widgets.ButtonText(buttonRect, "Flash Path Costs"))
-					{
-						OpenFlashPathCostsMenu();
-					}
+					DoColumnButtons();
 				}
 				GUIState.Pop();
 			}
@@ -281,6 +204,105 @@ namespace Vehicles
 				}
 			}
 			listingStandard.End();
+		}
+
+		private void DoColumnButtons()
+		{
+			listingStandard.Gap(4);
+			Rect buttonRect = listingStandard.GetRect(30);
+			if (Widgets.ButtonText(buttonRect, "VF_DevMode_DebugPathfinderDebugging".Translate()))
+			{
+				SoundDefOf.Click.PlayOneShotOnCamera();
+				RegionDebugMenu();
+			}
+			TooltipHandler.TipRegionByKey(buttonRect, "VF_DevMode_DebugPathfinderDebuggingTooltip");
+
+			listingStandard.Gap(4);
+			buttonRect = listingStandard.GetRect(30);
+			if (Widgets.ButtonText(buttonRect, "VF_DevMode_DebugWorldPathfinderDebugging".Translate()))
+			{
+				SoundDefOf.Click.PlayOneShotOnCamera();
+				WorldPathingDebugMenu();
+			}
+			TooltipHandler.TipRegionByKey(buttonRect, "VF_DevMode_DebugWorldPathfinderDebuggingTooltip");
+
+			listingStandard.Gap(4);
+			buttonRect = listingStandard.GetRect(30);
+			if (Widgets.ButtonText(buttonRect, "Output Material Cache"))
+			{
+				SoundDefOf.Click.PlayOneShotOnCamera();
+				RGBMaterialPool.LogAllMaterials();
+			}
+
+			listingStandard.Gap(4);
+			buttonRect = listingStandard.GetRect(30);
+			if (Widgets.ButtonText(buttonRect, "Output Owners"))
+			{
+				Map map = Find.CurrentMap;
+				if (map != null)
+				{
+					Log.Message($"Vehicles = {DefDatabase<VehicleDef>.AllDefsListForReading.Count}");
+					foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
+					{
+						Log.Message($"{vehicleDef} DefIndex = {vehicleDef.DefIndex}");
+					}
+					Log.Message("-------");
+					VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+					Log.Message($"Total Owners = {mapping.Owners.Count}");
+					foreach (VehicleDef vehicleDef in mapping.Owners)
+					{
+						List<VehicleDef> piggies = mapping.GetPiggies(vehicleDef);
+						Log.Message($"Owner: {vehicleDef} Piggies=({string.Join(",", piggies.Select(def => def.defName))})");
+					}
+				}
+			}
+
+			listingStandard.Gap(4);
+			buttonRect = listingStandard.GetRect(30);
+			if (Widgets.ButtonText(buttonRect, "Regenerate All Regions"))
+			{
+				LongEventHandler.QueueLongEvent(delegate ()
+				{
+					SoundDefOf.Click.PlayOneShotOnCamera();
+					foreach (Map map in Find.Maps)
+					{
+						VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
+						foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
+						{
+							mapping[vehicleDef].VehiclePathGrid.RecalculateAllPerceivedPathCosts();
+							if (mapping.IsOwner(vehicleDef))
+							{
+								mapping[vehicleDef].VehicleRegionDirtyer.SetAllDirty();
+								mapping[vehicleDef].VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
+							}
+						}
+					}
+				}, "Regenerating Regions", false, null);
+			}
+
+			listingStandard.Gap(4);
+			buttonRect = listingStandard.GetRect(30);
+			if (Widgets.ButtonText(buttonRect, "Clear Region Cache"))
+			{
+				LongEventHandler.QueueLongEvent(delegate ()
+				{
+					SoundDefOf.Click.PlayOneShotOnCamera();
+					foreach (Map map in Find.Maps)
+					{
+						VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+						foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
+						{
+							mapping[vehicleDef].VehicleReachability.ClearCache();
+						}
+					}
+				}, "Clearing Region Cache", false, null);
+			}
+
+			buttonRect = listingStandard.GetRect(30);
+			if (Widgets.ButtonText(buttonRect, "Flash Path Costs"))
+			{
+				OpenFlashPathCostsMenu();
+			}
 		}
 
 		private void RevalidateAllMapThreads()

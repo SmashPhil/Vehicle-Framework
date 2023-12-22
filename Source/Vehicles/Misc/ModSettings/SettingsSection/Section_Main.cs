@@ -58,7 +58,8 @@ namespace Vehicles
 		/* Combat */
 		public bool runOverPawns = true;
 		public VehicleTracksFriendlyFire friendlyFire = VehicleTracksFriendlyFire.Vanilla;
-		
+		public float friendlyFireChance = 0.5f;
+
 		/* Upgrades */
 		public bool drawUpgradeInformationScreen = true;
 		public bool overrideDrawColors = true;
@@ -113,6 +114,7 @@ namespace Vehicles
 			/* Combat */
 			runOverPawns = true;
 			friendlyFire = VehicleTracksFriendlyFire.Vanilla;
+			friendlyFireChance = 0.5f;
 
 			/* Upgrades */
 			drawUpgradeInformationScreen = true;
@@ -160,7 +162,7 @@ namespace Vehicles
 
 			Scribe_Values.Look(ref runOverPawns, nameof(runOverPawns), defaultValue: true);
 			Scribe_Values.Look(ref friendlyFire, nameof(friendlyFire), defaultValue: VehicleTracksFriendlyFire.Vanilla);
-
+			Scribe_Values.Look(ref friendlyFireChance, nameof(friendlyFireChance), defaultValue: 0.5f);
 			Scribe_Values.Look(ref drawUpgradeInformationScreen, nameof(drawUpgradeInformationScreen), defaultValue: true);
 			Scribe_Values.Look(ref overrideDrawColors, nameof(overrideDrawColors), defaultValue: true);
 		}
@@ -184,6 +186,8 @@ namespace Vehicles
 					listingStandard.SliderLabeled("VF_BeachGenMultiplier".Translate(), "VF_BeachGenMultiplierTooltip".Translate(), "%", ref beachMultiplier, 0f, 2f, 100, 0);
 					listingStandard.SliderLabeled("VF_ForceSettlementCoast".Translate(), "VF_ForceSettlementCoastTooltip".Translate(), $" {"VF_WorldTiles".Translate()}", ref forceFactionCoastRadius, 0,
 						VehicleMod.MaxCoastalSettlementPush, 1, "VF_EverySettlementToCoast".Translate());
+
+					listingStandard.Gap(8);
 
 					listingStandard.Header("VF_SettingsGeneral".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 					listingStandard.Gap(4);
@@ -210,7 +214,8 @@ namespace Vehicles
 					listingStandard.CheckboxLabeled("VF_MultiplePawnsPerJob".Translate(), ref multiplePawnsPerJob, "VF_MultiplePawnsPerJobTooltip".Translate());
 					bool checkBefore = hideDisabledVehicles;
 					listingStandard.CheckboxLabeled("VF_HideDisabledVehicles".Translate(), ref hideDisabledVehicles, "VF_HideDisabledVehiclesTooltip".Translate());
-					listingStandard.Gap(4);
+					
+					listingStandard.Gap(8);
 					
 					if (checkBefore != hideDisabledVehicles)
 					{
@@ -231,19 +236,21 @@ namespace Vehicles
 					}
 
 					listingStandard.Header(fishingHeader, ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-					listingStandard.Gap(4);
+					//listingStandard.Gap(4);
 					listingStandard.SliderLabeled("VF_FishingMultiplier".Translate(), "VF_FishingMultiplierTooltip".Translate(), "%", ref fishingMultiplier, 0.1f, 3, 100, 1);
+					listingStandard.Gap(8);
 					listingStandard.IntegerBox("VF_FishingDelay".Translate(), "VF_FishingDelayTooltip".Translate(), ref fishingDelay, listingStandard.ColumnWidth * 0.5f, 0, min: 120);
 					listingStandard.Gap(8);
 					listingStandard.IntegerBox("VF_FishingSkill".Translate(), "VF_FishingSkillTooltip".Translate(), ref fishingSkillIncrease, listingStandard.ColumnWidth * 0.5f, 0, 0);
 					listingStandard.Gap(8);
 					listingStandard.CheckboxLabeled("VF_FishingPersists".Translate(), ref fishingPersists, "VF_FishingPersistsTooltip".Translate());
-					listingStandard.Gap(4);
+					
+					listingStandard.Gap(8);
 
 					GUIState.Enable();
 
 					listingStandard.Header("VF_AerialVehicles".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-					listingStandard.Gap(4);
+					//listingStandard.Gap(4);
 					listingStandard.CheckboxLabeled("VF_DrawLandingGhost".Translate(), ref drawLandingGhost, "VF_DrawLandingGhostTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_RocketsBurnRadius".Translate(), ref burnRadiusOnRockets, "VF_RocketsBurnRadiusTooltip".Translate());
 					//listingStandard.CheckboxLabeled("VF_AirDefensesActive".Translate(), ref airDefenses, "VF_AirDefensesActiveTooltip".Translate());
@@ -269,10 +276,15 @@ namespace Vehicles
 							{
 								VehicleTracksFriendlyFire.None => "VF_VehicleTracksNone".Translate(),
 								VehicleTracksFriendlyFire.Vanilla => "VF_VehicleTracksVanilla".Translate(),
-								VehicleTracksFriendlyFire.Full => "VF_VehicleTracksFull".Translate(),
+								VehicleTracksFriendlyFire.Custom => "ScenariosCustom".Translate(),
+								//VehicleTracksFriendlyFire.Full => "VF_VehicleTracksFull".Translate(),
 								_ => friendlyFire.ToString(),
 							};
 						});
+						if (friendlyFire == VehicleTracksFriendlyFire.Custom)
+						{
+							listingStandard.SliderLabeled("VF_ChanceToRunOverFriendlies".Translate(), "VF_ChanceToRunOverFriendliesTooltip".Translate(), "%", ref friendlyFireChance, 0, 1, multiplier: 100, decimalPlaces: 0);
+						}
 					}
 
 					GUIState.Disable();

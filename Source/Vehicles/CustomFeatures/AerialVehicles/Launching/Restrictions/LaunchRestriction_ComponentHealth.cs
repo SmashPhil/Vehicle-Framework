@@ -12,11 +12,6 @@ namespace Vehicles
 
 		public override bool CanStartProtocol(VehiclePawn vehicle, Map map, IntVec3 position, Rot4 rot)
 		{
-			//Must null check map for immediately spawned & selected vehicles
-			if (map == null)
-			{
-				return true;
-			}
 			if (!components.NullOrEmpty())
 			{
 				foreach ((string key, float percent) in components)

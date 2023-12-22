@@ -19,6 +19,9 @@
 	<VF_CommandDisembarkDesc>Leave all vehicles behind and go on foot.  Vehicles will remain on the world map for up to 20-30 days.</VF_CommandDisembarkDesc>
 	<VF_CommandDisembarkImpassableBiome>Cannot disembark, tile is impassable for colonists.</VF_CommandDisembarkImpassableBiome>
 	
+	<VF_ToggleRepairVehicle>Repair Vehicles</VF_ToggleRepairVehicle>
+	<VF_ToggleRepairVehicleDesc>Rest and perform repairs on vehicles inside the caravan</VF_ToggleRepairVehicleDesc>
+	
 	<!-- Obsolete -->
 	<VF_CommandDockShipDisembark>Dock and Disembark</VF_CommandDockShipDisembark>
 	<VF_CommandDockShipObjectDesc>Dock Boats and go on foot</VF_CommandDockShipObjectDesc>

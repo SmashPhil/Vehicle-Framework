@@ -17,6 +17,8 @@ namespace Vehicles
 {
 	public partial class VehiclePawn : Pawn, IInspectable, IAnimationTarget, IEventManager<VehicleEventDef>, IMaterialCacheTarget
 	{
+		public bool Initialized { get; private set; }
+
 		public Dictionary<VehicleEventDef, EventTrigger> EventRegistry { get; set; }
 
 		public VehicleDef VehicleDef => def as VehicleDef;
@@ -225,6 +227,8 @@ namespace Vehicles
 			//Map.GetCachedMapComponent<VehicleRegionUpdateCatalog>().Notify_VehicleSpawned(this);
 			Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleSpawned(this);
 			ResetRenderStatus();
+
+			Initialized = true;
 		}
 
 		public override void ExposeData()

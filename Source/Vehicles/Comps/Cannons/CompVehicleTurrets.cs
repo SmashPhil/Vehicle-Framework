@@ -86,7 +86,8 @@ namespace Vehicles
 			{
 				if (turret.TurretRotation != turret.defaultAngleRotated)
 				{
-					turret.TurretRotationTargeted = turret.defaultAngleRotated;
+					turret.SetTarget(LocalTargetInfo.Invalid);
+					turret.FlagForAlignment();
 					turret.StartTicking();
 				}
 			}
@@ -202,11 +203,11 @@ namespace Vehicles
 			}
 		}
 
-		public override void PostDrawUnspawned(Vector3 drawPos, float rotation)
+		public override void PostDrawUnspawned(Vector3 drawPos, Rot8 rot, float rotation)
 		{
 			for (int i = 0; i < turrets.Count; i++)
 			{
-				turrets[i].DrawAt(drawPos);
+				turrets[i].DrawAt(drawPos, rot);
 			}
 		}
 
@@ -230,7 +231,10 @@ namespace Vehicles
 					},
 					isActive = () => Deployed
 				};
-
+				if (!Vehicle.CanMoveFinal)
+				{
+					deployToggle.Disable();
+				}
 				if (Vehicle.Deploying)
 				{
 					deployToggle.Disable();
@@ -430,7 +434,6 @@ namespace Vehicles
 						DequeueTurret(turretData);
 						continue;
 					}
-
 					turretQueue[i].turret.AlignToTargetRestricted();
 					if (turretQueue[i].ticksTillShot <= 0)
 					{
@@ -449,7 +452,21 @@ namespace Vehicles
 							}
 							else
 							{
-								turretData.turret.SetTarget(LocalTargetInfo.Invalid);
+								if (turretData.turret.cannonTarget.Thing is Thing thing)
+								{
+									if (thing is Pawn pawn && !turretData.turret.targeting.HasFlag(TargetLock.Pawn))
+									{
+										turretData.turret.SetTarget(LocalTargetInfo.Invalid);
+									}
+									else if (!turretData.turret.targeting.HasFlag(TargetLock.Thing))
+									{
+										turretData.turret.SetTarget(LocalTargetInfo.Invalid);
+									}
+								}
+								else if (!turretData.turret.targeting.HasFlag(TargetLock.Cell))
+								{
+									turretData.turret.SetTarget(LocalTargetInfo.Invalid);
+								}
 							}
 							if (outOfAmmo)
 							{
@@ -649,17 +666,20 @@ namespace Vehicles
 			turret.childTurrets = new List<VehicleTurret>();
 			if (!string.IsNullOrEmpty(turret.parentKey))
 			{
-				foreach (VehicleTurret parentTurret in turrets.Where(c => c.key == turret.parentKey))
+				foreach (VehicleTurret parentTurret in turrets)
 				{
-					turret.attachedTo = parentTurret;
-					if (parentTurret.attachedTo == turret || turret == parentTurret)
+					if (parentTurret.key == turret.parentKey)
 					{
-						Log.Error($"Recursive turret attachments detected, this is not allowed. Disconnecting turret from parent.");
-						turret.attachedTo = null;
-					}
-					else
-					{
-						parentTurret.childTurrets.Add(turret);
+						turret.attachedTo = parentTurret;
+						if (parentTurret.attachedTo == turret || turret == parentTurret)
+						{
+							Log.Error($"Recursive turret attachments detected, this is not allowed. Disconnecting turret from parent.");
+							turret.attachedTo = null;
+						}
+						else
+						{
+							parentTurret.childTurrets.Add(turret);
+						}
 					}
 				}
 			}
@@ -713,8 +733,12 @@ namespace Vehicles
 			string step = "";
 			try
 			{
-				step = "Revalidating turrets";
-				RevalidateTurrets();
+				if (!Vehicle.Initialized)
+				{
+					step = "Revalidating turrets";
+					RevalidateTurrets();
+				}
+
 				step = "Recaching turret permissions";
 				RecacheTurretPermissions();
 				RecacheTurretComponents();

@@ -21,7 +21,7 @@ namespace Vehicles
 				{
 					VehicleTracksFriendlyFire.None => 0,
 					VehicleTracksFriendlyFire.Vanilla => Find.Storyteller.difficulty.friendlyFireChanceFactor,
-					VehicleTracksFriendlyFire.Full => 1,
+					VehicleTracksFriendlyFire.Custom => VehicleMod.settings.main.friendlyFireChance,
 					_ => throw new NotImplementedException(nameof(VehicleTracksFriendlyFire)),
 				};
 			}

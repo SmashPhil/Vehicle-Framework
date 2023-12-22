@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
@@ -26,7 +27,14 @@ namespace Vehicles
 			{
 				Map.pawnDestinationReservationManager.Reserve(Vehicle, job, Vehicle.Position);
 				Vehicle.vehiclePather.StopDead();
-				Vehicle.CompVehicleTurrets.FlagAllTurretsForAlignment();
+				if (Vehicle.CompVehicleTurrets.Deployed)
+				{
+					Vehicle.CompVehicleTurrets.FlagAllTurretsForAlignment(); //Vehicle is deployed, re-orient turret back to default position
+				}
+				if (Vehicle.CompVehicleTurrets.Props.deployingSustainer != null)
+				{
+					deployToil.PlaySustainerOrSound(Vehicle.CompVehicleTurrets.Props.deployingSustainer);
+				}
 			};
 			deployToil.tickAction = delegate ()
 			{
@@ -41,10 +49,6 @@ namespace Vehicles
 					ReadyForNextToil();
 				}
 			};
-			if (Vehicle.CompVehicleTurrets.Props.deployingSustainer != null)
-			{
-				deployToil.PlaySustainerOrSound(Vehicle.CompVehicleTurrets.Props.deployingSustainer);
-			}
 			deployToil.WithProgressBar(TargetIndex.A, () => 1 - Vehicle.CompVehicleTurrets.deployTicks / (float)Vehicle.CompVehicleTurrets.DeployTicks);
 			deployToil.defaultCompleteMode = ToilCompleteMode.Never;
 			yield return deployToil;

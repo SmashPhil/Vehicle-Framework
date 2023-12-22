@@ -192,7 +192,7 @@ namespace Vehicles
 			{
 				disableReason = "VF_LaunchOutOfFuel".Translate();
 			}
-			else if(FlightSpeed <= 0)
+			else if (FlightSpeed <= 0)
 			{
 				disableReason = "VF_NoFlightSpeed".Translate();
 			}

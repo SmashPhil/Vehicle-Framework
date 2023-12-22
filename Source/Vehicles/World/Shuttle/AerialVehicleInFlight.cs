@@ -619,6 +619,7 @@ namespace Vehicles
 			InitializeNextFlight(origin);
 			var flyoverDefenses = AirDefensePositionTracker.CheckNearbyObjects(this, speedPctPerTick)?.ToHashSet() ?? new HashSet<AirDefense>();
 			AirDefensePositionTracker.RegisterAerialVehicle(this, flyoverDefenses);
+			vehicle.EventRegistry[VehicleEventDefOf.AerialVehicleOrdered].ExecuteEvents();
 		}
 
 		private void ResetPosition(Vector3 position)
