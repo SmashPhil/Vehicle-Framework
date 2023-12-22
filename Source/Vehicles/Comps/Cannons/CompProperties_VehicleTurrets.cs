@@ -7,7 +7,17 @@ namespace Vehicles
 {
 	public class CompProperties_VehicleTurrets : VehicleCompProperties
 	{
+		//deploy time in seconds
+		[PostToSettings(Label = "VF_DeployTime", Translate = true, UISettingsType = UISettingsType.FloatBox)]
+		[NumericBoxValues(MinValue = 0)]
+		[ActionOnSettingsInput(typeof(CompProperties_VehicleTurrets), nameof(CompProperties_VehicleTurrets.RecacheAllTurrets))]
+		public float deployTime = 0;
+
 		public List<VehicleTurret> turrets = new List<VehicleTurret>();
+
+		public SoundDef deployingSustainer;
+		public SoundDef deploySound;
+		public SoundDef undeploySound;
 
 		public CompProperties_VehicleTurrets()
 		{
@@ -42,6 +52,7 @@ namespace Vehicles
 			foreach (VehicleTurret turret in turrets)
 			{
 				turret.ResolveCannonGraphics(turret.vehicleDef, forceRegen: true);
+				turret.renderProperties.PostLoad();
 			}
 		}
 
@@ -57,15 +68,18 @@ namespace Vehicles
 			{
 				foreach (VehicleTurret parentTurret in turrets.Where(c => c.key == turret.parentKey))
 				{
-					turret.attachedTo = parentTurret;
-					if (parentTurret.attachedTo == turret || turret == parentTurret)
+					if (turret.parentKey == parentTurret.key)
 					{
-						Log.Error($"Recursive turret attachments detected, this is not allowed. Disconnecting turret from parent.");
-						turret.attachedTo = null;
-					}
-					else
-					{
-						parentTurret.childTurrets.Add(turret);
+						turret.attachedTo = parentTurret;
+						if (parentTurret.attachedTo == turret || turret == parentTurret)
+						{
+							Log.Error($"Recursive turret attachments detected, this is not allowed. Disconnecting turret from parent.");
+							turret.attachedTo = null;
+						}
+						else
+						{
+							parentTurret.childTurrets.Add(turret);
+						}
 					}
 				}
 			}
@@ -90,6 +104,23 @@ namespace Vehicles
 			else
 			{
 				yield return "<field>parentDef</field> must be a <type>VehicleDef</type> in order to implement <type>CompCannons</type>.".ConvertRichText();
+			}
+		}
+
+		private static void RecacheAllTurrets()
+		{
+			if (!Find.Maps.NullOrEmpty())
+			{
+				foreach (Map map in Find.Maps)
+				{
+					foreach (Pawn pawn in map.mapPawns.AllPawnsSpawned)
+					{
+						if (pawn is VehiclePawn vehicle)
+						{
+							vehicle.CompVehicleTurrets?.RecacheDeployment();
+						}
+					}
+				}
 			}
 		}
 	}

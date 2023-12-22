@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <PackVehicle.label>empacar vehículo</PackVehicle.label>
+  <PackVehicle.verb>empacar</PackVehicle.verb>
+  <PackVehicle.gerund>empacando</PackVehicle.gerund>
+  <HelpPackVehicleCaravan.label>empacar vehículo</HelpPackVehicleCaravan.label>
+  <HelpPackVehicleCaravan.verb>empacar</HelpPackVehicleCaravan.verb>
+  <HelpPackVehicleCaravan.gerund>empacando</HelpPackVehicleCaravan.gerund>
+  <PackVehicleTurret.label>empacar vehículo</PackVehicleTurret.label>
+  <PackVehicleTurret.verb>empacar</PackVehicleTurret.verb>
+  <PackVehicleTurret.gerund>empacando</PackVehicleTurret.gerund>
+  <LoadUpgradeMaterials.label>cargar materiales</LoadUpgradeMaterials.label>
+  <LoadUpgradeMaterials.verb>cargar</LoadUpgradeMaterials.verb>
+  <LoadUpgradeMaterials.gerund>cargando</LoadUpgradeMaterials.gerund>
+  <WorkOnUpgrade.label>trabajar en mejora</WorkOnUpgrade.label>
+  <WorkOnUpgrade.verb>mejorar</WorkOnUpgrade.verb>
+  <WorkOnUpgrade.gerund>mejorando</WorkOnUpgrade.gerund>
+  <RefuelVehicle.label>rellenar combustible del vehículo</RefuelVehicle.label>
+  <RefuelVehicle.verb>rellenar combustible</RefuelVehicle.verb>
+  <RefuelVehicle.gerund>rellenando combustible</RefuelVehicle.gerund>
+  <RepairVehicle.label>reparar vehículo</RepairVehicle.label>
+  <RepairVehicle.verb>reparar</RepairVehicle.verb>
+  <RepairVehicle.gerund>reparando</RepairVehicle.gerund>
+  <DisassembleVehicle.label>desarmar vehículo</DisassembleVehicle.label>
+  <DisassembleVehicle.verb>desarmar</DisassembleVehicle.verb>
+  <DisassembleVehicle.gerund>desarmando</DisassembleVehicle.gerund>
+  <PaintVehicle.label>pintar vehículo</PaintVehicle.label>
+  <PaintVehicle.verb>pintar</PaintVehicle.verb>
+  <PaintVehicle.gerund>pintar vehículo</PaintVehicle.gerund>
+</LanguageData>
+

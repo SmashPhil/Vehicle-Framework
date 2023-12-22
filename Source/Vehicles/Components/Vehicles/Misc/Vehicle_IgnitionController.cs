@@ -155,6 +155,10 @@ namespace Vehicles
 				draftCommand.Disable("VF_VehicleUnableToMove".Translate(vehicle));
 				Drafted = false;
 			}
+			if (vehicle.Deploying)
+			{
+				draftCommand.Disable("VF_VehicleUnableToMove".Translate(vehicle));
+			}
 			if (!Drafted)
 			{
 				draftCommand.tutorTag = "Draft";

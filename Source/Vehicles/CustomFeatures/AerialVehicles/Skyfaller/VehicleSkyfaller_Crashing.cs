@@ -89,7 +89,7 @@ namespace Vehicles
 			{
 				drawLoc.z += def.skyfaller.zPositionCurve.Evaluate(vehicle.CompVehicleLauncher.launchProtocol.TimeInAnimation);
 			}
-			vehicle.DrawAt(drawLoc, num + Rotation.AsInt * 90, flip);
+			vehicle.DrawAt(drawLoc, Rotation, num + Rotation.AsInt * 90, flip);
 			DrawDropSpotShadow();
 		}
 
@@ -160,9 +160,9 @@ namespace Vehicles
 				return;
 			}
 			CellRect cr = this.OccupiedRect();
-			if (cr.Cells.Any((IntVec3 x) => x.Roofed(Map)))
+			if (cr.Cells.Any((IntVec3 x) => Ext_Vehicles.IsRoofed(x, Map)))
 			{
-				RoofDef roof = cr.Cells.First((IntVec3 x) => x.Roofed(Map)).GetRoof(Map);
+				RoofDef roof = cr.Cells.First((IntVec3 x) => Ext_Vehicles.IsRoofed(x, Map)).GetRoof(Map);
 				if (!roof.soundPunchThrough.NullOrUndefined())
 				{
 					roof.soundPunchThrough.PlayOneShot(new TargetInfo(Position, Map, false));

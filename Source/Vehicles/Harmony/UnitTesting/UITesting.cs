@@ -1,0 +1,172 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using HarmonyLib;
+using Verse;
+using Verse.Profile;
+using RimWorld;
+using RimWorld.Planet;
+using SmashTools;
+
+namespace Vehicles
+{
+	/// <summary>
+	/// Unit Testing
+	/// </summary>
+	public static class UITesting
+	{
+		[UnitTest(Category = "UI", Name = "Regions", GameState = GameState.Playing)]
+		private static void UnitTest_RegionsOn()
+		{
+			Prefs.DevMode = true;
+			CameraJumper.TryHideWorld();
+			VehicleMod.settings.debug.RegionDebugMenu();
+		}
+
+		/// <summary>
+		/// Load up game, find available vehicle with upgrade tree, focus camera on vehicle
+		/// </summary>
+		//[UnitTest(Category = "UI", Name = "Upgrade Menu")]
+		private static void UnitTest_UpgradeMenu()
+		{
+			LongEventHandler.ExecuteWhenFinished(delegate ()
+			{
+				Map map = Find.CurrentMap ?? Find.Maps.FirstOrDefault();
+				VehiclePawn vehicle = (VehiclePawn)map.mapPawns.AllPawns.FirstOrDefault(p => p is VehiclePawn vehicle && vehicle.CompUpgradeTree != null);
+				if (map is null || vehicle is null)
+				{
+					SmashLog.Error($"Unable to execute unit test <method>UnitTestUpgradeMenu</method> post load.");
+					return;
+				}
+				CameraJumper.TryJump(vehicle);
+				Find.Selector.Select(vehicle);
+			});
+		}
+
+		[UnitTest(Category = "UI", Name = "Color Dialog", GameState = GameState.Playing)]
+		private static void UnitTest_ColorDialog()
+		{
+			LongEventHandler.ExecuteWhenFinished(delegate ()
+			{
+				Map map = Find.CurrentMap ?? Find.Maps.FirstOrDefault();
+				if (map is null)
+				{
+					SmashLog.Error($"Unable to execute unit test <method>{nameof(UnitTest_ColorDialog )}</method> post load. No map.");
+					return;
+				}
+				VehiclePawn vehicle = (VehiclePawn)map.mapPawns.AllPawns.FirstOrDefault(p => p is VehiclePawn vehicle && vehicle.VehicleGraphic.Shader.SupportsRGBMaskTex());
+				if (vehicle is null)
+				{
+					var vehicleDefs = DefDatabase<VehicleDef>.AllDefsListForReading.Where(vehicleDef => vehicleDef.graphicData.shaderType is RGBShaderTypeDef).ToList();
+					if (vehicleDefs.NullOrEmpty())
+					{
+						SmashLog.Error($"Unable to execute unit test <method>{nameof(UnitTest_ColorDialog)}</method>. No vehicle defs to use as test case.");
+						return;
+					}
+					VehicleDef vehicleDef = vehicleDefs.FirstOrDefault();
+					vehicle = VehicleSpawner.GenerateVehicle(vehicleDef, Faction.OfPlayer);
+				}
+				CameraJumper.TryJump(vehicle);
+				Find.Selector.Select(vehicle);
+				vehicle.ChangeColor();
+			});
+		}
+
+		/// <summary>
+		/// Load up game, open update menu for all previous versions
+		/// </summary>
+		[UnitTest(Category = "UI", Name = "Previous Versions Menu", GameState = GameState.Playing)]
+		private static void UnitTest_ShowUpdates()
+		{
+			VehicleMod.settings.debug.ShowAllUpdates();
+		}
+
+		/// <summary>
+		/// Load up game, open Mod Settings
+		/// </summary>
+		[UnitTest(Category = "UI", Name = "Mod Settings", GameState = GameState.OnStartup)]
+		private static void UnitTest_ModSettings()
+		{
+			Dialog_ModSettings settings = new Dialog_ModSettings(VehicleMod.mod);
+			Find.WindowStack.Add(settings);
+		}
+
+		/// <summary>
+		/// Load up game, open blank Graph Editor
+		/// </summary>
+		[UnitTest(Category = "UI", Name = "Graph Editor", GameState = GameState.OnStartup)]
+		private static void UnitTest_GraphEditor()
+		{
+			Dialog_GraphEditor settings = new Dialog_GraphEditor();
+			Find.WindowStack.Add(settings);
+		}
+
+		/// <summary>
+		/// Load up game, spawn vehicle, open Graph Editor for vehicle
+		/// </summary>
+		[UnitTest(Category = "UI", Name = "Animation Editor", GameState = GameState.Playing)]
+		private static void UnitTest_AnimationEditor()
+		{
+			LongEventHandler.ExecuteWhenFinished(delegate ()
+			{
+				Map map = Find.CurrentMap ?? Find.Maps.FirstOrDefault();
+				if (map is null)
+				{
+					SmashLog.Error($"Unable to execute unit test {nameof(UnitTest_AnimationEditor)}. No map.");
+					return;
+				}
+				VehiclePawn vehicle = (VehiclePawn)map.mapPawns.AllPawns.FirstOrDefault(p => p is VehiclePawn vehicle);
+				if (vehicle is null)
+				{
+					VehicleDef vehicleDef = GetVehicleDefAnimator();
+					if (vehicleDef is null)
+					{
+						SmashLog.Error($"Unable to execute unit test {nameof(UnitTest_AnimationEditor)}. No vehicle defs to use as test case.");
+						return;
+					}
+					vehicle = VehicleSpawner.GenerateVehicle(vehicleDef, Faction.OfPlayer);
+					if (!CellFinderExtended.TryFindRandomCenterCell(map, (IntVec3 cell) => !MapHelper.NonStandableOrVehicleBlocked(vehicle, Current.Game.CurrentMap, cell, Rot4.North), out IntVec3 cell))
+					{
+						cell = CellFinder.RandomCell(map);
+					}
+					GenSpawn.Spawn(vehicle, cell, map);
+				}
+				CameraJumper.TryJump(vehicle);
+				Find.Selector.Select(vehicle);
+				vehicle.OpenInAnimator();
+			});
+
+			VehicleDef GetVehicleDefAnimator()
+			{
+				List<VehicleDef> vehicleDefs = DefDatabase<VehicleDef>.AllDefsListForReading.ToList();
+				foreach (VehicleDef vehicleDef in vehicleDefs)
+				{
+					foreach (CompProperties compProperties in vehicleDef.comps)
+					{
+						if (compProperties.compClass.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Any(fieldInfo => fieldInfo.HasAttribute<GraphEditableAttribute>()))
+						{
+							return vehicleDef;
+						}
+					}
+				}
+				return null;
+			}
+		}
+
+		[UnitTest(Category = "UI", Name = "Vehicle Area Manager", GameState = GameState.Playing)]
+		private static void UnitTest_VehicleAreaManager()
+		{
+			Prefs.DevMode = true;
+			CameraJumper.TryHideWorld();
+			if (Find.CurrentMap is Map map)
+			{
+				Find.WindowStack.Add(new Dialog_ManageAreas(map));
+			}
+			else
+			{
+				SmashLog.Error($"Tried to unit test <type>{nameof(UnitTest_VehicleAreaManager)}</type> with null current map.");
+			}
+		}
+	}
+}

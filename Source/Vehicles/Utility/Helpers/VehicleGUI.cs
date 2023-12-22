@@ -13,7 +13,7 @@ namespace Vehicles
 	{
 		public static void DrawVehicleDefOnGUI(Rect rect, VehicleDef vehicleDef, PatternData patternData = null, Rot8? rot = null, bool withoutTurrets = true)
 		{
-			string drawStep = string.Empty;
+			//string drawStep = string.Empty;
 			GUIState.Push();
 			try
 			{
@@ -22,7 +22,7 @@ namespace Vehicles
 				{
 					SmashLog.WarningOnce("Drawing VehicleDef with non-uniform rect. VehicleDefs are best drawn in square rects which will then be adjusted to fit.", nameof(DrawVehicleDefOnGUI).GetHashCode());
 				}
-				drawStep = "Setting rect and adjusted positioning.";
+				//drawStep = "Setting rect and adjusted positioning.";
 				Vector2 rectSize = vehicleDef.ScaleDrawRatio(rect.size);
 				Rot8 rotDrawn = rot ?? vehicleDef.drawProperties.displayRotation;
 
@@ -41,10 +41,10 @@ namespace Vehicles
 
 				Rect adjustedRect = new Rect(rect.x + offsetX, rect.y + offsetY, scaledWidth, scaledHeight);
 
-				drawStep = "Retrieving cached graphic and pattern";
+				//drawStep = "Retrieving cached graphic and pattern";
 				Graphic_Vehicle graphic = vehicleDef.graphicData.Graphic as Graphic_Vehicle;// VehicleTex.CachedGraphics[vehicleDef];
 
-				drawStep = "Fetching PatternData";
+				//drawStep = "Fetching PatternData";
 				PatternData pattern = patternData ?? VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData);
 				if (!VehicleMod.settings.main.useCustomShaders)
 				{
@@ -58,47 +58,51 @@ namespace Vehicles
 
 				if (colorGUI) GUI.color = pattern?.color ?? Color.white;
 
-				drawStep = "Attempting to retrieve turret overlays";
-				List<(Rect rect, Texture mainTex, Color color, float layer, float angle)> overlays = new List<(Rect, Texture, Color, float, float)>();
-				if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets props)
+				GUIState.Push();
 				{
-					if (!withoutTurrets || Prefs.UIScale == 1)
+					//drawStep = "Attempting to retrieve turret overlays";
+					List<(Rect rect, Texture mainTex, Color color, float layer, float angle)> overlays = new List<(Rect, Texture, Color, float, float)>();
+					if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets props)
 					{
-						overlays.AddRange(RetrieveAllTurretSettingsGUIProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer), pattern));
+						if (!withoutTurrets || Prefs.UIScale == 1)
+						{
+							overlays.AddRange(RetrieveAllTurretSettingsGUIProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer), pattern));
+						}
 					}
-				}
-				drawStep = "Retrieving graphic overlays";
-				overlays.AddRange(RetrieveAllOverlaySettingsGUIProperties(rect, vehicleDef, rotDrawn));
+					//drawStep = "Retrieving graphic overlays";
+					overlays.AddRange(RetrieveAllOverlaySettingsGUIProperties(rect, vehicleDef, rotDrawn));
 
-				drawStep = "Rendering overlays with layer < 0";
-				//(Rect, Texture, Material, Layer, Angle)
-				foreach (var overlay in overlays.Where(overlay => overlay.layer < 0).OrderBy(overlay => overlay.layer))
-				{
-					GUI.color = overlay.color;
+					//drawStep = "Rendering overlays with layer < 0";
+					//(Rect, Texture, Material, Layer, Angle)
+					foreach (var overlay in overlays.Where(overlay => overlay.layer < 0).OrderBy(overlay => overlay.layer))
 					{
-						UIElements.DrawTextureWithMaterialOnGUI(overlay.rect, overlay.mainTex, null, overlay.angle);
+						GUI.color = overlay.color;
+						{
+							UIElements.DrawTextureWithMaterialOnGUI(overlay.rect, overlay.mainTex, null, overlay.angle);
+						}
+						GUIState.Reset();
 					}
+
+					//drawStep = "Rendering main texture";
+					VehicleGraphics.DrawVehicleFitted(adjustedRect, angle, mainTex, material: null); //Null material will reroute to GUI methods
+
 					GUIState.Reset();
-				}
 
-				drawStep = "Rendering main texture";
-				VehicleGraphics.DrawVehicleFitted(adjustedRect, angle, mainTex, material: null); //Null material will reroute to GUI methods
-
-				GUIState.Reset();
-
-				drawStep = "Rendering overlays with layer >= 0";
-				foreach (var overlay in overlays.Where(overlay => overlay.layer >= 0).OrderBy(overlay => overlay.layer))
-				{
-					GUI.color = overlay.color;
+					//drawStep = "Rendering overlays with layer >= 0";
+					foreach (var overlay in overlays.Where(overlay => overlay.layer >= 0).OrderBy(overlay => overlay.layer))
 					{
-						UIElements.DrawTextureWithMaterialOnGUI(overlay.rect, overlay.mainTex, null, overlay.angle);
+						GUI.color = overlay.color;
+						{
+							UIElements.DrawTextureWithMaterialOnGUI(overlay.rect, overlay.mainTex, null, overlay.angle);
+						}
+						GUIState.Reset();
 					}
-					GUIState.Reset();
 				}
+				GUIState.Pop();
 			}
 			catch (Exception ex)
 			{
-				SmashLog.Error($"Exception thrown while trying to draw GUI <type>VehicleDef</type>=\"{vehicleDef?.defName ?? "Null"}\" during step {drawStep}.\nException={ex}");
+				SmashLog.Error($"Exception thrown while trying to draw GUI <type>VehicleDef</type>=\"{vehicleDef?.defName ?? "Null"}\".\nException={ex}");
 			}
 			finally
 			{
@@ -145,6 +149,10 @@ namespace Vehicles
 		{
 			foreach (VehicleTurret turret in turrets)
 			{
+				if (!turret.parentKey.NullOrEmpty())
+				{
+					continue; //Attached turrets temporarily disabled from rendering
+				}
 				if (!turret.NoGraphic)
 				{
 					yield return RetrieveTurretSettingsGUIProperties(rect, vehicleDef, turret, rot, patternData);

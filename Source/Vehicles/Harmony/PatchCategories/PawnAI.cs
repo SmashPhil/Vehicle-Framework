@@ -14,9 +14,20 @@ namespace Vehicles
 	{
 		public void PatchMethods()
 		{
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn), nameof(Pawn.ThreatDisabled)),
+				postfix: new HarmonyMethod(typeof(PawnAI),
+				nameof(VehicleThreatDisabled)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MentalStateHandler), nameof(MentalStateHandler.TryStartMentalState)),
 				prefix: new HarmonyMethod(typeof(PawnAI),
 				nameof(EjectPawnForMentalState)));
+		}
+
+		private static void VehicleThreatDisabled(Pawn __instance, IAttackTargetSearcher disabledFor, ref bool __result)
+		{
+			if (!__result && __instance is VehiclePawn vehicle)
+			{
+				__result = !vehicle.IsThreatToAttackTargetSearcher(disabledFor);
+			}
 		}
 
 		private static void EjectPawnForMentalState(MentalStateDef stateDef, Pawn ___pawn)
@@ -30,7 +41,7 @@ namespace Vehicles
 						Messages.Message(TranslatorFormattedStringExtensions.Translate("VF_VehicleCaravanMentalBreakMovementRole", ___pawn),MessageTypeDefOf.NegativeEvent);
 					}
 				}
-				else
+				else if (!handler.vehicle.vehiclePather.Moving)
 				{
 					handler.vehicle.DisembarkPawn(___pawn);
 				}

@@ -2,6 +2,7 @@
 <LanguageData>
   <VF_MustSelectColorPalette>Debe seleccionar una paleta para sobre guardar.</VF_MustSelectColorPalette>
   <VF_VehicleUnableToMove>{0_labelShort} no se puede mover.</VF_VehicleUnableToMove>
+  <VF_VehicleImmobileDeployed>{0_labelShort} is deployed and unable to move.</VF_VehicleImmobileDeployed>
   <VF_HandlerNotEnoughRoom>Imposible añadir {0} a {1}. No hay mas espacio disponible.</VF_HandlerNotEnoughRoom>
   <VF_NotEnoughToOperate>Requiere mas tripulación para funcionar.</VF_NotEnoughToOperate>
   <VF_OutOfFuel>Imposible arrancar. El vehículo necesita mas combustible.</VF_OutOfFuel>

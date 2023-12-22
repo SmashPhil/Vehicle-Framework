@@ -31,7 +31,16 @@ namespace Vehicles
 		{
 			LongEventHandler.QueueLongEvent(delegate ()
 			{
-				Map map = GetOrGenerateMapUtility.GetOrGenerateMap(tile, null);
+				Site site = Find.WorldObjects.WorldObjectAt<Site>(tile);
+				Map map;
+				if (site != null)
+				{
+					map = GetOrGenerateMapUtility.GetOrGenerateMap(tile, site.PreferredMapSize, null);
+				}
+				else
+				{
+					map = GetOrGenerateMapUtility.GetOrGenerateMap(tile, null);
+				}
 				string label = map.Parent.Label;
 				MapLoaded(map);
 				ExecuteEvents();

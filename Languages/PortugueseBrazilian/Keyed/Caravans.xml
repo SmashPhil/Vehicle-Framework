@@ -3,6 +3,15 @@
   <VF_Caravan_Dismounted>Desembarcado</VF_Caravan_Dismounted>
   <VF_Sailing>Navegação</VF_Sailing>
   <VF_DockToCaravan>Itens a Levar</VF_DockToCaravan>
+  <VF_ImpassableBiome>Biome impassable for this vehicle.</VF_ImpassableBiome>
+  <VF_CaravanDisabled>Caravaning disabled.</VF_CaravanDisabled>
+  <VF_CaravanCantMove>Unable to move.</VF_CaravanCantMove>
+  <VF_CantMergeAerialVehicle>Can't merge aerial vehicles.</VF_CantMergeAerialVehicle>
+  <VF_CommandDisembark>Stash Vehicles</VF_CommandDisembark>
+  <VF_CommandDisembarkDesc>Leave all vehicles behind and go on foot.  Vehicles will remain on the world map for up to 20-30 days.</VF_CommandDisembarkDesc>
+  <VF_ToggleRepairVehicle>Repair Vehicles</VF_ToggleRepairVehicle>
+  <VF_ToggleRepairVehicleDesc>Rest and perform repairs on vehicles inside the caravan</VF_ToggleRepairVehicleDesc>
+  <VF_CommandDisembarkImpassableBiome>Cannot disembark, tile is impassable for colonists.</VF_CommandDisembarkImpassableBiome>
   <VF_CommandDockShip>Atracar</VF_CommandDockShip>
   <VF_CommandDockShipDesc>Descarregar todos os passageiros e habilitar o comércio com o Assentamento de {0}.</VF_CommandDockShipDesc>
   <VF_CommandDockShipDisembark>Atracar e Desembarcar</VF_CommandDockShipDisembark>

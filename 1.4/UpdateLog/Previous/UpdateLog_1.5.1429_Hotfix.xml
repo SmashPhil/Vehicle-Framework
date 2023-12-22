@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <!--Can utilize Version.txt file placed in mod's root directory-->
+  <currentVersion>1.5.1429</currentVersion>
+  <!--Startup,GameInit,LoadedGame,NewGame-->
+  <updateOn>GameInit</updateOn>
+  <!--Full description shown in update page-->
+  <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+Hotfix for bugs related to last patch and fire mechanics.
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed bug where even-size vehicles wouldn't be able to find an exit for certain rotations of the map.
+
+- Fixed bug where loading cargo for a vehicle would load more than requested.
+
+- Fixed bug where downed pawns were unable to be loaded onto a vehicle.
+
+- Fixed bug where vehicles would become soft locked when on fire, unable to path or take orders from the player.
+
+- Fixed bug where Extinguish damage (ie. foam poppers) did not extinguish vehicles on fire.
+
+- Fixed bug where Fire would render underneath turrets
+
+- Fixed bug where highlighting vehicle components in the health tab wouldn't highlight the hitbox on the vehicle.
+
+- Fixed bug where compatibility patch for Carry Capacity (Continued) would log an error if no vehicle mods were loaded alongside Vehicle Framework.
+&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Exploding vehicle parts will now let off a 'wick' for a certain amount of time, allowing nearby pawns to flee before it explodes.
+
+- Added 'Eject All' button to the Cargo tab
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
+  <!--Static parameterless method to execute when update log is executed-->
+  <actionOnUpdate></actionOnUpdate>
+  <!--Show update log on next startup.-->
+  <update>false</update>
+  <!--Testing mode prevents the update from saving over the UpdateLog file-->
+  <testing>false</testing>
+  <!--Icon bar shown to the right of the mod's name.-->
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon</icon>
+      <url>steam://url/CommunityFilePage/2356577528</url>
+    </li>
+  </rightIconBar>
+  <!--Icon bar shown to the left of the mod's name.-->
+  <leftIconBar>
+    <li>
+      <name>Patreon</name>
+      <icon>patreonIcon</icon>
+      <url>https://www.patreon.com/smashphil</url>
+    </li>
+    <li>
+      <name>Cursed Crew</name>
+      <icon>cursedCrewIcon</icon>
+      <url>https://discord.gg/NNe2VxAU7Z</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>

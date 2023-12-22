@@ -22,6 +22,7 @@ namespace Vehicles
 		private readonly List<Pair<IntVec2, int>> debugCellHighlight = new List<Pair<IntVec2, int>>();
 
 		//Caching lookup
+		private readonly Dictionary<string, VehicleComponent> componentsByKeys = new Dictionary<string, VehicleComponent>();
 		private readonly Dictionary<IntVec2, List<VehicleComponent>> componentLocations = new Dictionary<IntVec2, List<VehicleComponent>>();
 		private readonly Dictionary<VehicleStatDef, List<VehicleComponent>> statComponents = new Dictionary<VehicleStatDef, List<VehicleComponent>>();
 
@@ -61,12 +62,14 @@ namespace Vehicles
 		{
 			components.Clear();
 			statComponents.Clear();
+			componentsByKeys.Clear();
 			foreach (VehicleComponentProperties props in vehicle.VehicleDef.components)
 			{
 				VehicleComponent component = (VehicleComponent)Activator.CreateInstance(props.compClass, vehicle);
 				components.Add(component);
 				component.Initialize(props);
 				component.PostCreate();
+				componentsByKeys[component.props.key] = component;
 				RecacheStatCategories(component);
 			}
 		}
@@ -87,22 +90,74 @@ namespace Vehicles
 			RecalculateHealthPercent();
 		}
 
-		private void RecacheStatCategories(VehicleComponent comp)
+		private void RecacheStatCategories(VehicleComponent component)
 		{
-			if (!comp.props.categories.NullOrEmpty())
+			if (!component.props.categories.NullOrEmpty())
 			{
-				foreach (VehicleStatDef category in comp.props.categories)
+				foreach (VehicleStatDef category in component.props.categories)
 				{
 					if (statComponents.TryGetValue(category, out var list))
 					{
-						list.Add(comp);
+						list.Add(component);
 					}
 					else
 					{
-						statComponents[category] = new List<VehicleComponent>() { comp };
+						statComponents[category] = new List<VehicleComponent>() { component };
 					}
 				}
 			}
+		}
+
+		public float GetComponentHealth(string key)
+		{
+			if (!componentsByKeys.TryGetValue(key, out VehicleComponent component))
+			{
+				Log.Error($"Unable to locate component {key} in stat handler.");
+				return 0;
+			}
+			return component.health;
+		}
+
+		/// <summary>
+		/// Set component health directly without triggering reactors
+		/// </summary>
+		/// <param name="key"></param>
+		/// <param name="value"></param>
+		public void SetComponentHealth(string key, float value)
+		{
+			if (!componentsByKeys.TryGetValue(key, out VehicleComponent component))
+			{
+				Log.Error($"Unable to locate component {key} in stat handler.");
+				return;
+			}
+			component.health = value;
+			MarkAllDirty();
+		}
+
+		public VehicleComponent GetComponent(string key)
+		{
+			return componentsByKeys.TryGetValue(key);
+		}
+
+		public float GetComponentHealthPercent(string key)
+		{
+			if (!componentsByKeys.TryGetValue(key, out VehicleComponent component))
+			{
+				Log.Error($"Unable to locate component {key} in stat handler.");
+				return 0;
+			}
+			return component.HealthPercent;
+		}
+
+		public void SetComponentHealthPercent(string key, float value)
+		{
+			if (!componentsByKeys.TryGetValue(key, out VehicleComponent component))
+			{
+				Log.Error($"Unable to locate component {key} in stat handler.");
+				return;
+			}
+			component.health = component.props.health * value;
+			MarkAllDirty();
 		}
 
 		/// <param name="statDef"></param>
@@ -564,9 +619,10 @@ namespace Vehicles
 				{
 					for (int i = 0; i < components.Count; i++)
 					{
-						var component = components[i];
-						var props = vehicle.VehicleDef.components[i];
+						VehicleComponent component = components[i];
+						VehicleComponentProperties props = vehicle.VehicleDef.components[i];
 						component.Initialize(props);
+						componentsByKeys[component.props.key] = component;
 						RecacheStatCategories(component);
 					}
 				}

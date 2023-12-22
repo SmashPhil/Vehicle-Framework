@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using Verse;
@@ -30,13 +31,16 @@ namespace Vehicles
 				nameof(UsableVehicleWithMostFreeSpace)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(FloatMenuMakerMap), "AddHumanlikeOrders"), prefix: null, postfix: null,
 				transpiler: new HarmonyMethod(typeof(CaravanFormation),
-				nameof(AddHumanLikeOrdersLoadVehiclesTranspiler)));
+				nameof(AddHumanlikeOrdersLoadVehiclesTranspiler)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanExitMapUtility), nameof(CaravanExitMapUtility.CanExitMapAndJoinOrCreateCaravanNow)),
 				postfix: new HarmonyMethod(typeof(CaravanFormation),
 				nameof(CanVehicleExitMapAndJoinOrCreateCaravanNow)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CaravanExitMapUtility), nameof(CaravanExitMapUtility.ExitMapAndJoinOrCreateCaravan)),
 				prefix: new HarmonyMethod(typeof(CaravanFormation),
 				nameof(ExitMapAndJoinOrCreateVehicleCaravan)));
+			VehicleHarmony.Patch(original: AccessTools.PropertySetter(typeof(Pawn_InventoryTracker), nameof(Pawn_InventoryTracker.UnloadEverything)),
+				prefix: new HarmonyMethod(typeof(CaravanFormation),
+				nameof(VehiclesShouldntUnloadEverything)));
 		}
 
 		/// <summary>
@@ -114,13 +118,15 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="instructions"></param>
 		/// <param name="ilg"></param>
-		public static IEnumerable<CodeInstruction> AddHumanLikeOrdersLoadVehiclesTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+		public static IEnumerable<CodeInstruction> AddHumanlikeOrdersLoadVehiclesTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
 		{
 			List<CodeInstruction> instructionList = instructions.ToList();
+			FieldInfo jobField = AccessTools.Field(typeof(JobDefOf), nameof(JobDefOf.GiveToPackAnimal));
+			MethodInfo lordJobProperty = AccessTools.PropertyGetter(typeof(Lord), nameof(Lord.LordJob));
 			for (int i = 0; i < instructionList.Count; i++)
 			{
 				CodeInstruction instruction = instructionList[i];
-				if (instruction.LoadsField(AccessTools.Field(typeof(JobDefOf), nameof(JobDefOf.GiveToPackAnimal))))
+				if (instruction.LoadsField(jobField))
 				{
 					yield return instruction; //Ldsfld : JobDefOf::GiveToPackAnimal
 					instruction = instructionList[++i];
@@ -143,7 +149,7 @@ namespace Vehicles
 						}
 					}
 				}
-				if(instruction.Calls(AccessTools.Property(typeof(Lord), nameof(Lord.LordJob)).GetGetMethod()))
+				if (instruction.Calls(lordJobProperty))
 				{
 					yield return instruction;
 					instruction = instructionList[++i];
@@ -170,7 +176,7 @@ namespace Vehicles
 					yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 49);
 					yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
 					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(LordUtility), "GetLord", new Type[] { typeof(Pawn) }));
-					yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.Property(typeof(Lord), nameof(Lord.LordJob)).GetGetMethod());
+					yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.PropertyGetter(typeof(Lord), nameof(Lord.LordJob)));
 					yield return new CodeInstruction(opcode: OpCodes.Castclass, operand: typeof(LordJob_FormAndSendVehicles));
 					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(CaravanHelper), nameof(CaravanHelper.CapacityLeft)));
 
@@ -251,6 +257,14 @@ namespace Vehicles
 				return false;
 			}
 			return true;
+		}
+
+		public static void VehiclesShouldntUnloadEverything(ref bool value, Pawn ___pawn)
+		{
+			if (___pawn is VehiclePawn)
+			{
+				value = false;
+			}
 		}
 	}
 }

@@ -159,7 +159,7 @@ namespace Vehicles
 					return;
 				}
 				region.valid = false;
-				region.Room = null;
+				region.Room = null; //ArgumentOutOfRange exception is thrown here in the setter
 				step = "Deregistering";
 				foreach (VehicleRegionLink regionLink in region.links)
 				{

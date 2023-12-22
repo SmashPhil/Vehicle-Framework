@@ -13,7 +13,7 @@ namespace Vehicles
 		public OperationType operation = OperationType.Addition;
 		public string formatString;
 
-		public override float TransformValue(VehiclePawn vehicle, float value)
+		protected float Modifier(VehiclePawn vehicle)
 		{
 			float modifier = 0;
 			if (usageCurve != null)
@@ -29,7 +29,12 @@ namespace Vehicles
 			{
 				modifier = MassUtility.InventoryMass(vehicle);
 			}
-			return operation.Apply(value, modifier);
+			return modifier;
+		}
+
+		public override float TransformValue(VehiclePawn vehicle, float value)
+		{
+			return operation.Apply(value, Modifier(vehicle));
 		}
 
 		public override string ExplanationPart(VehiclePawn vehicle)

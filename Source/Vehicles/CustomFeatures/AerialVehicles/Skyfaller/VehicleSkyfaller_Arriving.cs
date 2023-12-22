@@ -76,7 +76,10 @@ namespace Vehicles
 
 		private void DrawLandingGhost()
 		{
-			GhostDrawer.DrawGhostThing(Position, Rotation, vehicle.VehicleDef, vehicle.VehicleGraphic, LandingSpotOccupied ? LandingTargeter.GhostOccupiedColor : GhostColor, AltitudeLayer.Blueprint, vehicle);
+			if (VehicleMod.settings.main.drawLandingGhost)
+			{
+				GhostDrawer.DrawGhostThing(Position, Rotation, vehicle.VehicleDef, vehicle.VehicleGraphic, LandingSpotOccupied ? LandingTargeter.GhostOccupiedColor : GhostColor, AltitudeLayer.Blueprint, vehicle);
+			}
 		}
 
 		public override void SpawnSetup(Map map, bool respawningAfterLoad)

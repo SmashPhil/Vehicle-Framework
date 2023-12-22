@@ -271,8 +271,8 @@ namespace Vehicles
 						List<FloatMenuOption> options = new List<FloatMenuOption>();
 						options.Add(new FloatMenuOption("ResetButton".Translate(), delegate ()
 						{
-							ActionOnSettingsInputAttribute.InvokeIfApplicable(field.FieldInfo);
 							VehicleMod.settings.vehicles.fieldSettings[def.defName].Remove(field);
+							ActionOnSettingsInputAttribute.InvokeIfApplicable(field.FieldInfo);
 						}));
 						FloatMenu floatMenu = new FloatMenu(options)
 						{

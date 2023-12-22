@@ -13,5 +13,6 @@
   <VF_AttackAndTargetLanding>Atacar {0}: Escolher Pouso</VF_AttackAndTargetLanding>
   <VF_StrafeRun>Navegar</VF_StrafeRun>
   <VF_AerialReconSite>Reconhecimento</VF_AerialReconSite>
+  <VF_CantEnterVehicle_IdeoligionForbids>Can't enter vehicle. Forbidden by ideoligion.</VF_CantEnterVehicle_IdeoligionForbids>
 </LanguageData>
 

@@ -13,6 +13,7 @@ namespace Vehicles
 	{
 		// Not displayed in ModSettings
 		public bool showAllCargoItems;
+		public bool promptVehicleCollision;
 
 		public Section_Main main = new Section_Main();
 		public Section_Vehicles vehicles = new Section_Vehicles();
@@ -26,13 +27,14 @@ namespace Vehicles
 		{
 			try
 			{
-				Scribe_Deep.Look(ref main, "main");
-				Scribe_Deep.Look(ref vehicles, "vehicles");
+				Scribe_Deep.Look(ref main, nameof(main));
+				Scribe_Deep.Look(ref vehicles, nameof(vehicles));
 				//Scribe_Deep.Look(ref upgrades, "upgrades");
-				Scribe_Deep.Look(ref debug, "debug");
+				Scribe_Deep.Look(ref debug, nameof(debug));
 
-				Scribe_Values.Look(ref showAllCargoItems, "showAllCargoItems");
-				Scribe_Deep.Look(ref colorStorage, "colorStorage");
+				Scribe_Values.Look(ref showAllCargoItems, nameof(showAllCargoItems));
+				Scribe_Deep.Look(ref colorStorage, nameof(colorStorage));
+				Scribe_Values.Look(ref promptVehicleCollision, nameof(promptVehicleCollision), defaultValue: true);
 			}
 			catch (Exception ex)
 			{
@@ -44,6 +46,11 @@ namespace Vehicles
 		{
 			Dialog_ModSettings settings = new Dialog_ModSettings(VehicleMod.mod);
 			Find.WindowStack.Add(settings);
+		}
+
+		public static void TryPromptPlayer(string labelKey, string descriptionKey, Action onConfirm, Action onDeny)
+		{
+			//Dialog_MessageBox.CreateConfirmation
 		}
 
 		public static void OpenWithContext(SettingsSection section = null)

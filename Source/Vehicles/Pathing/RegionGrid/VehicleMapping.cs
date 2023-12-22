@@ -45,6 +45,11 @@ namespace Vehicles
 		public bool ThreadAvailable => dedicatedThread != null && dedicatedThread.thread.IsAlive;
 
 		/// <summary>
+		/// If dedicated thread is given long task, it should be marked as having a long operation so smaller tasks can avoid queueing up with a long wait time
+		/// </summary>
+		public bool ThreadBusy => !dedicatedThread.InLongOperation;
+
+		/// <summary>
 		/// Retrieve all <see cref="VehiclePathData"/> for this map
 		/// </summary>
 		public IEnumerable<VehiclePathData> AllPathData
@@ -78,6 +83,12 @@ namespace Vehicles
 				{
 					Log.Error($"Unable to retrieve path data on {map} for {vehicleDef.defName}. Was this VehicleDef created postload? Self-correcting...");
 					Log.Error($"StackTrace: {StackTraceUtility.ExtractStackTrace()}");
+					if (!UnityData.IsInMainThread)
+					{
+						Log.Error($"Unable to generate path data outside of the main thread. May encounter thread safety issues.");
+						return VehiclePathData.Invalid;
+						
+					}
 					return GeneratePathData(vehicleDef);
 				}
 				return pathData;
@@ -128,6 +139,11 @@ namespace Vehicles
 			return VehicleHarmony.AllMoveableVehicleDefs.FirstOrDefault(vehicleDef => vehicleDef.DefIndex == id);
 		}
 
+		public VehicleDef GetOwner(int ownerId)
+		{
+			return VehicleHarmony.AllMoveableVehicleDefs.FirstOrDefault(vehicleDef => vehicleDef.DefIndex == ownerId);
+		}
+
 		public List<VehicleDef> GetPiggies(VehicleDef ownerDef)
 		{
 			List<VehicleDef> owners = new List<VehicleDef>();
@@ -160,7 +176,7 @@ namespace Vehicles
 				if (vehiclePathData.IsValid)
 				{
 					vehiclePathData.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
-					if (IsOwner(vehiclePathData.Owner))
+					if (IsOwner(vehiclePathData.Owner) && vehiclePathData.UsesRegions)
 					{
 						vehiclePathData.VehicleRegionAndRoomUpdater.Enabled = true;
 						vehiclePathData.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
@@ -177,6 +193,8 @@ namespace Vehicles
 			int size = DefDatabase<VehicleDef>.DefCount;
 			vehicleData = new VehiclePathData[size];
 			piggyToOwner = new int[size].Populate(-1);
+
+			owners.Clear();
 			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading) //Even shuttles need path data for landing
 			{
 				GeneratePathData(vehicleDef);
@@ -303,6 +321,8 @@ namespace Vehicles
 
 			public bool IsValid => vehicleDef != null;
 
+			public bool UsesRegions => vehicleDef.vehicleMovementPermissions > VehiclePermissions.NotAllowed;
+
 			public VehicleDef Owner => vehicleDef;
 
 			internal VehicleReachabilitySettings ReachabilityData { get; set; }
@@ -329,7 +349,7 @@ namespace Vehicles
 				{
 					return false;
 				}
-				return size == other.size && defaultTerrainImpassable == other.defaultTerrainImpassable &&
+				return UsesRegions == other.UsesRegions && size == other.size && defaultTerrainImpassable == other.defaultTerrainImpassable &&
 					impassableThingDefs.SetEquals(other.impassableThingDefs) && impassableTerrain.SetEquals(other.impassableTerrain);
 			}
 		}

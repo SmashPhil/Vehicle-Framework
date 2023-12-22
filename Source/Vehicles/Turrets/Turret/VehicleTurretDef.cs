@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using Verse.AI;
 using RimWorld;
 using SmashTools;
 using HarmonyLib;
@@ -87,7 +88,12 @@ namespace Vehicles
 		/// </summary>
 		public SoundDef shotSound;
 		public SoundDef reloadSound;
-		
+
+		/// <summary>
+		/// Fields relating to targeting
+		/// </summary>
+		public TargetScanFlags targetScanFlags = TargetScanFlags.None;
+
 		/// <summary>
 		/// Fields relating to the projectile
 		/// </summary>
@@ -117,6 +123,7 @@ namespace Vehicles
 			{
 				ammunition.ResolveReferences();
 			}
+			ValidateTargetScanFlags();
 		}
 
 		public void PostDefDatabase()
@@ -141,6 +148,29 @@ namespace Vehicles
 					}
 				}
 			});
+		}
+
+		private void ValidateTargetScanFlags()
+		{
+			if (targetScanFlags == TargetScanFlags.None)
+			{
+				targetScanFlags = TargetScanFlags.NeedActiveThreat | TargetScanFlags.NeedAutoTargetable;
+				if (projectile?.projectile != null)
+				{
+					if (!projectile.projectile.flyOverhead)
+					{
+						targetScanFlags |= TargetScanFlags.NeedLOSToAll;
+					}
+					else
+					{
+						targetScanFlags |= TargetScanFlags.NeedNotUnderThickRoof;
+					}
+					if (projectile.projectile.ai_IsIncendiary)
+					{
+						targetScanFlags |= TargetScanFlags.NeedNonBurning;
+					}
+				}
+			}
 		}
 
 		private static void FixInvalidGraphicDataFields(GraphicDataRGB graphicData)

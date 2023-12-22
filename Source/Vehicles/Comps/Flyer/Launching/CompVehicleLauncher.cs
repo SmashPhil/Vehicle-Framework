@@ -43,7 +43,6 @@ namespace Vehicles
 
 		public virtual bool AnyFlightControl { get; private set; }
 
-		public bool Roofed => Vehicle.Position.Roofed(Vehicle.Map);
 		public bool AnyLeftToLoad => Vehicle.cargoToLoad.NotNullAndAny();
 
 		public CompProperties_VehicleLauncher Props => props as CompProperties_VehicleLauncher;
@@ -110,7 +109,7 @@ namespace Vehicles
 
 		public void SetTimedDeployment()
 		{
-			timer.Reset();
+			timer.Reset(Props.deployTicks);
 			StartTicking();
 		}
 
@@ -163,7 +162,7 @@ namespace Vehicles
 				{
 					disableReason = "VF_CannotLaunchWhileMoving".Translate(Vehicle.LabelShort);
 				}
-				else if (Roofed)
+				else if (Ext_Vehicles.IsRoofed(Vehicle.Position, Vehicle.Map))
 				{
 					disableReason = "CommandLaunchGroupFailUnderRoof".Translate();
 				}
@@ -193,7 +192,7 @@ namespace Vehicles
 			{
 				disableReason = "VF_LaunchOutOfFuel".Translate();
 			}
-			else if(FlightSpeed <= 0)
+			else if (FlightSpeed <= 0)
 			{
 				disableReason = "VF_NoFlightSpeed".Translate();
 			}
@@ -320,9 +319,9 @@ namespace Vehicles
 
 			public bool Expired => !enabled || ticksLeft <= 0;
 
-			public void Reset()
+			public void Reset(int delayDeploymentTicks)
 			{
-				ticksLeft = Mathf.RoundToInt(VehicleMod.settings.main.delayDeployOnLanding * 60);
+				ticksLeft = delayDeploymentTicks + Mathf.RoundToInt(VehicleMod.settings.main.delayDeployOnLanding * 60);
 				enabled = true;
 			}
 

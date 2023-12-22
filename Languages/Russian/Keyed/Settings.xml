@@ -57,6 +57,8 @@
   <VF_FishingPersists>Сохранять настройки рыбалки</VF_FishingPersists>
   <VF_FishingPersistsTooltip>Настройки рыбалки не сбрасываются при запуске двигателя (draft).</VF_FishingPersistsTooltip>
   <VF_AerialVehicles>Воздушные ТС</VF_AerialVehicles>
+  <VF_DrawLandingGhost>Отображать место приземления</VF_DrawLandingGhost>
+  <VF_DrawLandingGhostTooltip>Отображать полупрозрачный силуэт ТС на месте приземления.</VF_DrawLandingGhostTooltip>
   <VF_RocketsBurnRadius>Огонь от сопел</VF_RocketsBurnRadius>
   <VF_RocketsBurnRadiusTooltip>Разрешить летательным аппаратам, поддерживающим эту функцию, при взлёте и посадке поджигать все предметы в небольшом радиусе.</VF_RocketsBurnRadiusTooltip>
   <VF_DynamicDrawing>Динамическое отображение</VF_DynamicDrawing>

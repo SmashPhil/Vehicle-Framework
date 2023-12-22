@@ -16,4 +16,8 @@
 	<Vehicles.VehicleEventDef>
 		<defName>AerialVehicleLeftMap</defName>
 	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>AerialVehicleOrdered</defName>
+	</Vehicles.VehicleEventDef>
 </Defs>

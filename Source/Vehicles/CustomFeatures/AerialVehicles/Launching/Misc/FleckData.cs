@@ -57,11 +57,5 @@ namespace Vehicles
 			DrawPos,
 			Position,
 		}
-
-		public class Range<T>
-		{
-			public T from;
-			public T to;
-		}
 	}
 }

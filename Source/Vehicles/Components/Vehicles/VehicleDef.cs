@@ -58,6 +58,8 @@ namespace Vehicles
 		//<Start Event, Stop Event> : SoundDef
 		public Dictionary<Pair<VehicleEventDef, VehicleEventDef>, SoundDef> soundSustainersOnEvent = new Dictionary<Pair<VehicleEventDef, VehicleEventDef>, SoundDef>();
 
+		public Dictionary<VehicleEventDef, List<ResolvedMethod<VehiclePawn>>> events = new Dictionary<VehicleEventDef, List<ResolvedMethod<VehiclePawn>>>();
+
 		public List<Type> designatorTypes = new List<Type>();
 
 		[NoTranslate] //Should be translated in xml and parsed in appropriately
@@ -205,7 +207,7 @@ namespace Vehicles
 		public void PostDefDatabase()
 		{
 			properties.PostDefDatabase(this);
-			drawProperties.PostDefDatabase();
+			drawProperties.PostDefDatabase(this);
 			graphicData.pattern ??= PatternDefOf.Default;
 		}
 

@@ -7,7 +7,6 @@ using Verse;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
-using AnimationEvent = SmashTools.AnimationEvent;
 
 namespace Vehicles
 {
@@ -57,13 +56,17 @@ namespace Vehicles
 			maxFlightNodes = reference.maxFlightNodes;
 		}
 
+		public VehiclePawn Vehicle => vehicle;
+
 		public Vector3 DrawPos { get; protected set; }
+
+		public IntVec3 Position => position;
 
 		public float Angle { get; protected set; }
 
 		public int TicksPassed => ticksPassed;
 
-		protected Map Map => map ?? vehicle.Map;
+		public Map Map => map ?? vehicle.Map;
 
 		protected abstract int TotalTicks_Takeoff { get; }
 
@@ -128,9 +131,12 @@ namespace Vehicles
 			{
 				if (vehicle.Spawned)
 				{
-					return !LaunchRestricted && !vehicle.Position.Roofed(vehicle.Map);
+					if (Ext_Vehicles.IsRoofed(vehicle.Position, vehicle.Map))
+					{
+						return false;
+					}
 				}
-				return true;
+				return !LaunchRestricted;
 			}
 		}
 
@@ -168,7 +174,7 @@ namespace Vehicles
 		/// <summary>
 		/// Restrictions placed on launching only. Landing restrictions are validated through the <see cref="LandingTargeter"/>
 		/// </summary>
-		public virtual bool LaunchRestricted => vehicle.Spawned && vehicle.ignition.Drafted && LaunchProperties.restriction != null && !LaunchProperties.restriction.CanStartProtocol(vehicle, vehicle.Map, vehicle.Position, vehicle.Rotation);
+		public virtual bool LaunchRestricted => LaunchProperties.restriction != null && !LaunchProperties.restriction.CanStartProtocol(vehicle, vehicle.Map, vehicle.Position, vehicle.Rotation);
 
 		public virtual bool LandingRestricted(Map map, IntVec3 position, Rot4 rotation) => false;
 
@@ -194,7 +200,8 @@ namespace Vehicles
 					break;
 			}
 			result.drawPos.y = AltitudeLayer.Skyfaller.AltitudeFor();
-			vehicle.DrawAt(result.drawPos, result.rotation);
+			Rot8 rot = CurAnimationProperties.forcedRotation ?? vehicle.Rotation;
+			vehicle.DrawAt(result.drawPos, rot, result.rotation);
 			(DrawPos, Angle) = result;
 			if (VehicleMod.settings.main.aerialVehicleEffects)
 			{
@@ -309,6 +316,16 @@ namespace Vehicles
 					}
 				}
 			}
+			if (!CurAnimationProperties.fleckOneShots.NullOrEmpty())
+			{
+				foreach (FleckOneShot fleckOneShot in CurAnimationProperties.fleckOneShots)
+				{
+					if (fleckOneShot.emitAtTick == TicksPassed)
+					{
+						ThrowFleck(fleckOneShot);
+					}
+				}
+			}
 		}
 
 		/// <summary>
@@ -334,13 +351,12 @@ namespace Vehicles
 		/// </summary>
 		protected virtual void TickLanding()
 		{
+			ticksPassed++;
 			TickEvents();
 			if (VehicleMod.settings.main.aerialVehicleEffects)
 			{
 				TickMotes();
 			}
-
-			ticksPassed++;
 		}
 
 		/// <summary>
@@ -348,13 +364,12 @@ namespace Vehicles
 		/// </summary>
 		protected virtual void TickTakeoff()
 		{
+			ticksPassed++;
 			TickEvents();
 			if (VehicleMod.settings.main.aerialVehicleEffects)
 			{
 				TickMotes();
 			}
-
-			ticksPassed++;
 		}
 
 		protected virtual void TickEvents()
@@ -363,10 +378,17 @@ namespace Vehicles
 			{
 				for (int i = 0; i < CurAnimationProperties.events.Count; i++)
 				{
-					AnimationEvent @event = CurAnimationProperties.events[i];
-					if (@event.EventFrame(TimeInAnimation))
+					AnimationEvent<LaunchProtocol> @event = CurAnimationProperties.events[i];
+					try
 					{
-						@event.method.InvokeUnsafe(null, this);
+						if (@event.EventFrame(TimeInAnimation))
+						{
+							@event.method.Invoke(null, this);
+						}
+					}
+					catch (Exception ex)
+					{
+						Log.Error($"Exception thrown ticking animation event {@event?.method} for {Vehicle}.\nException={ex}");
 					}
 				}
 			}
@@ -382,6 +404,11 @@ namespace Vehicles
 		private static void SetOverlayStatus(LaunchProtocol launchProtocol, bool active)
 		{
 			launchProtocol.drawOverlays = active;
+		}
+
+		private static void SetComponentHealth(LaunchProtocol launchProtocol, string key, float health)
+		{
+			launchProtocol.vehicle.statHandler.SetComponentHealth(key, health);
 		}
 
 		/* ---------- Animation Events ---------- */
@@ -434,64 +461,116 @@ namespace Vehicles
 			count -= motesToThrow;
 			for (int i = 0; i < motesToThrow; i++)
 			{
-				float size = fleckData.size?.Evaluate(t) ?? 1;
-				float? airTime = fleckData.airTime?.Evaluate(t);
-				float? speed = fleckData.speed?.Evaluate(t);
-				float? rotationRate = fleckData.rotationRate?.Evaluate(t);
-				float? angle = fleckData.angle.RandomInRange;
-
-				Vector3 origin = position.ToVector3Shifted();
-				if (!fleckData.lockFleckX)
-				{
-					origin.x = DrawPos.x;
-				}
-				if (!fleckData.lockFleckZ)
-				{
-					origin.z = DrawPos.z;
-				}
-				if (angle.HasValue && fleckData.drawOffset != null)
-				{
-					origin = origin.PointFromAngle(fleckData.drawOffset.Evaluate(t), angle.Value);
-				}
-				
-				if (!fleckData.xFleckPositionCurve.NullOrEmpty())
-				{
-					origin.x += fleckData.xFleckPositionCurve.Evaluate(t);
-				}
-				if (!fleckData.zFleckPositionCurve.NullOrEmpty())
-				{
-					origin.z += fleckData.zFleckPositionCurve.Evaluate(t);
-				}
-
-				origin += fleckData.originOffset;
-
-				if (fleckData.originOffsetRange != null)
-				{
-					Vector3 offsetFrom = fleckData.originOffsetRange.from;
-					Vector3 offsetTo = fleckData.originOffsetRange.to;
-					float offsetRangeX = offsetFrom.x;
-					if (offsetFrom.x != offsetTo.x)
-					{
-						offsetRangeX = Rand.Range(offsetFrom.x, offsetTo.x);
-					}
-					float offsetRangeY = offsetFrom.y;
-					if (offsetFrom.y != offsetTo.y)
-					{
-						offsetRangeY = Rand.Range(offsetFrom.y, offsetTo.y);
-					}
-					float offsetRangeZ = offsetFrom.z;
-					if (offsetFrom.z != offsetTo.z)
-					{
-						offsetRangeZ = Rand.Range(offsetFrom.z, offsetTo.z);
-					}
-
-					origin += new Vector3(offsetRangeX, offsetRangeY, offsetRangeZ);
-				}
-				
-				origin.y = fleckData.def.altitudeLayer.AltitudeFor();
-				ThrowFleck(fleckData.def, origin, Map, size, airTime, angle, speed, rotationRate);
+				ThrowFleck(fleckData, t);
 			}
 			return count;
+		}
+
+		public void ThrowFleck(FleckData fleckData, float t)
+		{
+			float size = fleckData.size?.Evaluate(t) ?? 1;
+			float? airTime = fleckData.airTime?.Evaluate(t);
+			float? speed = fleckData.speed?.Evaluate(t);
+			float? rotationRate = fleckData.rotationRate?.Evaluate(t);
+			float angle = fleckData.angle.RandomInRange;
+
+			Vector3 origin = position.ToVector3Shifted();
+			if (!fleckData.lockFleckX)
+			{
+				origin.x = DrawPos.x;
+			}
+			if (!fleckData.lockFleckZ)
+			{
+				origin.z = DrawPos.z;
+			}
+			if (fleckData.drawOffset != null)
+			{
+				origin = origin.PointFromAngle(fleckData.drawOffset.Evaluate(t), angle);
+			}
+
+			if (!fleckData.xFleckPositionCurve.NullOrEmpty())
+			{
+				origin.x += fleckData.xFleckPositionCurve.Evaluate(t);
+			}
+			if (!fleckData.zFleckPositionCurve.NullOrEmpty())
+			{
+				origin.z += fleckData.zFleckPositionCurve.Evaluate(t);
+			}
+
+			origin += fleckData.originOffset;
+
+			if (fleckData.originOffsetRange != null)
+			{
+				Vector3 offsetFrom = fleckData.originOffsetRange.from;
+				Vector3 offsetTo = fleckData.originOffsetRange.to;
+				float offsetRangeX = offsetFrom.x;
+				if (offsetFrom.x != offsetTo.x)
+				{
+					offsetRangeX = Rand.Range(offsetFrom.x, offsetTo.x);
+				}
+				float offsetRangeY = offsetFrom.y;
+				if (offsetFrom.y != offsetTo.y)
+				{
+					offsetRangeY = Rand.Range(offsetFrom.y, offsetTo.y);
+				}
+				float offsetRangeZ = offsetFrom.z;
+				if (offsetFrom.z != offsetTo.z)
+				{
+					offsetRangeZ = Rand.Range(offsetFrom.z, offsetTo.z);
+				}
+
+				origin += new Vector3(offsetRangeX, offsetRangeY, offsetRangeZ);
+			}
+
+			origin.y = fleckData.def.altitudeLayer.AltitudeFor();
+			ThrowFleck(fleckData.def, origin, Map, size, airTime, angle, speed, rotationRate);
+		}
+
+		public void ThrowFleck(FleckOneShot fleckOneShot)
+		{
+			float size = fleckOneShot.size?.RandomInRange ?? 1;
+			float? airTime = fleckOneShot.airTime?.RandomInRange;
+			float? speed = fleckOneShot.speed?.RandomInRange;
+			float? rotationRate = fleckOneShot.rotationRate?.RandomInRange;
+			float angle = fleckOneShot.angle.RandomInRange;
+
+			Vector3 origin = position.ToVector3Shifted();
+			if (!fleckOneShot.lockFleckX)
+			{
+				origin.x = DrawPos.x;
+			}
+			if (!fleckOneShot.lockFleckZ)
+			{
+				origin.z = DrawPos.z;
+			}
+			
+			origin += fleckOneShot.originOffset;
+
+			if (fleckOneShot.originOffsetRange != null)
+			{
+				Vector3 offsetFrom = fleckOneShot.originOffsetRange.from;
+				Vector3 offsetTo = fleckOneShot.originOffsetRange.to;
+				float offsetRangeX = offsetFrom.x;
+				if (offsetFrom.x != offsetTo.x)
+				{
+					offsetRangeX = Rand.Range(offsetFrom.x, offsetTo.x);
+				}
+				float offsetRangeY = offsetFrom.y;
+				if (offsetFrom.y != offsetTo.y)
+				{
+					offsetRangeY = Rand.Range(offsetFrom.y, offsetTo.y);
+				}
+				float offsetRangeZ = offsetFrom.z;
+				if (offsetFrom.z != offsetTo.z)
+				{
+					offsetRangeZ = Rand.Range(offsetFrom.z, offsetTo.z);
+				}
+
+				origin += new Vector3(offsetRangeX, offsetRangeY, offsetRangeZ);
+			}
+
+			origin.y = fleckOneShot.def.altitudeLayer.AltitudeFor();
+			ThrowFleck(fleckOneShot.def, origin, Map, size, airTime, angle, speed, rotationRate);
 		}
 
 		public static void ThrowFleck(FleckDef fleckDef, Vector3 loc, Map map, float size, float? airTime, float? angle, float? speed, float? rotationRate)
@@ -614,7 +693,7 @@ namespace Vehicles
 						vehicle.CompVehicleLauncher.inFlight = true;
 						CameraJumper.TryShowWorld();
 					}
-				}, allowRotating: vehicle.VehicleDef.rotatable);
+				}, allowRotating: vehicle.VehicleDef.rotatable, targetValidator: (targetInfo) => !Ext_Vehicles.IsRoofed(targetInfo.Cell, mapParent.Map));
 			}, MenuOptionPriority.Default, null, null, 0f, null, null);
 		}
 
@@ -737,12 +816,12 @@ namespace Vehicles
 			{
 				return null;
 			}
-			if (fuelCost > vehicle.CompFueledTravel.Fuel)
+			if (vehicle.CompFueledTravel != null && fuelCost > vehicle.CompFueledTravel.Fuel)
 			{
 				GUI.color = TexData.RedReadable;
 				return "VF_NotEnoughFuel".Translate();
 			}
-			else if (target.IsValid && vehicle.CompVehicleLauncher.FuelNeededToLaunchAtDist(WorldHelper.GetTilePos(tile), target.Tile)  > (vehicle.CompFueledTravel.Fuel - fuelCost))
+			else if (vehicle.CompFueledTravel != null && target.IsValid && vehicle.CompVehicleLauncher.FuelNeededToLaunchAtDist(WorldHelper.GetTilePos(tile), target.Tile)  > (vehicle.CompFueledTravel.Fuel - fuelCost))
 			{
 				GUI.color = TexData.YellowReadable;
 				return "VF_NoFuelReturnTrip".Translate();
@@ -791,7 +870,7 @@ namespace Vehicles
 					Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(), MessageTypeDefOf.RejectInput, false);
 					return false;
 				}
-				else if (Ext_Math.SphericalDistance(pos, WorldHelper.GetTilePos(target.Tile)) > vehicle.CompVehicleLauncher.MaxLaunchDistance || fuelCost > vehicle.CompFueledTravel.Fuel)
+				else if (Ext_Math.SphericalDistance(pos, WorldHelper.GetTilePos(target.Tile)) > vehicle.CompVehicleLauncher.MaxLaunchDistance || (vehicle.CompFueledTravel != null && fuelCost > vehicle.CompFueledTravel.Fuel))
 				{
 					Messages.Message("TransportPodDestinationBeyondMaximumRange".Translate(), MessageTypeDefOf.RejectInput, false);
 					return false;

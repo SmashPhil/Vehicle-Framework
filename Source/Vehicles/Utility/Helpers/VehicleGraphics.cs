@@ -43,10 +43,27 @@ namespace Vehicles
 			if (attachedTo != null)
 			{
 				Vector2 parentOffset = attachedTo.renderProperties.OffsetFor(rot);
+				turretOffset = TEMP_ConvertRelativeOffset(rot, turretOffset);
 				Vector2 rootLoc = Ext_Math.RotatePointClockwise(turretOffset.x, turretOffset.y, extraRotation);
 				return new Vector2(rootLoc.x + parentOffset.x, rootLoc.y + parentOffset.y);
 			}
 			return turretOffset;
+		}
+
+		private static Vector2 TEMP_ConvertRelativeOffset(Rot8 rot, Vector2 offset)
+		{
+			return rot.AsInt switch
+			{
+				0 => offset,
+				1 => offset * new Vector2(-1, -1),
+				2 => offset,
+				3 => offset * new Vector2(-1, 1),
+				4 => new Vector2(-1 * offset.y, offset.x),
+				5 => new Vector2(offset.y, -1 * offset.x),
+				6 => new Vector2(-1 * offset.y, offset.x),
+				7 => new Vector2(offset.y, -1 * offset.x),
+				_ => offset,
+			};
 		}
 
 		/// <summary>
@@ -68,35 +85,15 @@ namespace Vehicles
 		/// <param name="turret"></param>
 		public static void DrawTurret(VehicleTurret turret, Rot8 rot)
 		{
-			try
-			{
-				Vector3 rootPos = turret.TurretLocation;
-				Vector3 recoilOffset = Vector3.zero;
-				Vector3 parentRecoilOffset = Vector3.zero;
-				if (turret.recoilTracker != null && turret.recoilTracker.Recoil > 0f)
-				{
-					recoilOffset = Ext_Math.PointFromAngle(Vector3.zero, turret.recoilTracker.Recoil, turret.recoilTracker.Angle);
-				}
-				if (turret.attachedTo?.recoilTracker != null && turret.attachedTo.recoilTracker.Recoil > 0f)
-				{
-					parentRecoilOffset = Ext_Math.PointFromAngle(Vector3.zero, turret.attachedTo.recoilTracker.Recoil, turret.attachedTo.recoilTracker.Angle);
-				}
-				Mesh cannonMesh = turret.CannonGraphic.MeshAt(rot);
-				Graphics.DrawMesh(cannonMesh, rootPos + recoilOffset + parentRecoilOffset, turret.TurretRotation.ToQuat(), turret.CannonMaterial, 0);
-
-				DrawTurretOverlays(turret, rootPos + parentRecoilOffset, rot);
-			}
-			catch (Exception ex)
-			{
-				Log.Error($"Error occurred during rendering of attached thing on {turret.vehicle.Label}. Exception: {ex}");
-			}
+			DrawTurret(turret, turret.vehicle.DrawPos, rot);
 		}
 
 		public static void DrawTurret(VehicleTurret turret, Vector3 drawPos, Rot8 rot)
 		{
 			try
 			{
-				Vector3 rootPos = drawPos + turret.TurretDrawLocFor(rot);
+				Vector3 turretDrawLoc = turret.TurretDrawLocFor(rot);
+				Vector3 rootPos = drawPos + turretDrawLoc;
 				Vector3 recoilOffset = Vector3.zero;
 				Vector3 parentRecoilOffset = Vector3.zero;
 				if (turret.recoilTracker != null && turret.recoilTracker.Recoil > 0f)

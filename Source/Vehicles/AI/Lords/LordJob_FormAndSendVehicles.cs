@@ -78,7 +78,7 @@ namespace Vehicles
 		{
 			get
 			{
-				return vehicles.First(x => x is VehiclePawn && x.RaceProps.baseBodySize == vehicles.Max(y => y.RaceProps.baseBodySize));
+				return vehicles.MaxBy(vehicle => vehicle.VehicleDef.Size.Magnitude);// First(x => x is VehiclePawn && x.RaceProps.baseBodySize == vehicles.Max(y => y.RaceProps.baseBodySize));
 			}
 		}
 

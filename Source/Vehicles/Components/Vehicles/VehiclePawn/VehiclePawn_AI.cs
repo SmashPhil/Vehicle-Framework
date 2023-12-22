@@ -93,6 +93,25 @@ namespace Vehicles
 			}
 		}
 
+		/// <summary>
+		/// Postfixed to <see cref="Pawn.ThreatDisabled(IAttackTargetSearcher)"/>, call that method instead. It will fall through to this one should it still evaluate to false
+		/// </summary>
+		internal bool IsThreatToAttackTargetSearcher(IAttackTargetSearcher attackTargetSearcher)
+		{
+			if (AllPawnsAboard.Count > 0)
+			{
+				return true;
+			}
+			foreach (ThingComp thingComp in AllComps)
+			{
+				if (thingComp is VehicleComp vehicleComp && vehicleComp.IsThreat(attackTargetSearcher))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 		public new void Notify_Teleported(bool endCurrentJob = true, bool resetTweenedPos = true)
 		{
 			if (resetTweenedPos)

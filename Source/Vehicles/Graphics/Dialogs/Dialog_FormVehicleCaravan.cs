@@ -718,12 +718,18 @@ namespace Vehicles
 			{
 				if (!(transferables[i].AnyThing is Corpse))
 				{
-					//Transfer to vehicle or pawn
-					TransferableUtility.Transfer(transferables[i].things, transferables[i].CountToTransfer, delegate (Thing splitPiece, IThingHolder originalHolder)
+					Pawn_InventoryTracker inventoryTracker = transferables[i].AnyThing?.ParentHolder as Pawn_InventoryTracker;
+					Pawn owner = inventoryTracker?.pawn;
+
+					bool vehicleInCaravan = owner?.GetVehicle() is VehiclePawn vehicle && pawns.Contains(vehicle);
+					if (owner == null || (!pawns.Contains(owner) && !vehicleInCaravan)) //Only transfer item that is in an inventory if that pawn is not part of the reformation
 					{
-						Thing item2 = splitPiece.TryMakeMinified();
-						CaravanInventoryUtility.FindPawnToMoveInventoryTo(item2, pawns, null).inventory.TryAddAndUnforbid(item2);
-					});
+						TransferableUtility.Transfer(transferables[i].things, transferables[i].CountToTransfer, delegate (Thing splitPiece, IThingHolder originalHolder)
+						{
+							Thing item2 = splitPiece.TryMakeMinified();
+							CaravanInventoryUtility.FindPawnToMoveInventoryTo(item2, pawns, null).inventory.TryAddAndUnforbid(item2);
+						});
+					}
 				}
 			}
 

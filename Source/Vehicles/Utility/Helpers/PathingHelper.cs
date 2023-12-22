@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using System.Runtime.CompilerServices;
 using System.Linq;
 using HarmonyLib;
 using Verse;
@@ -23,6 +24,8 @@ namespace Vehicles
 		private static readonly Dictionary<ThingDef, List<VehicleDef>> regionEffecters = new Dictionary<ThingDef, List<VehicleDef>>();
 		private static readonly Dictionary<TerrainDef, List<VehicleDef>> terrainEffecters = new Dictionary<TerrainDef, List<VehicleDef>>();
 
+		private static readonly List<List<Thing>> snapshotListsSynchronous = new List<List<Thing>>();
+
 		/// <summary>
 		/// VehicleDef , &lt;TerrainDef Tag,pathCost&gt;
 		/// </summary>
@@ -37,6 +40,14 @@ namespace Vehicles
 		public static bool ShouldCreateRegions(VehicleDef vehicleDef)
 		{
 			return SettingsCache.TryGetValue(vehicleDef, typeof(VehicleDef), nameof(vehicleDef.vehicleMovementPermissions), vehicleDef.vehicleMovementPermissions) > VehiclePermissions.NotAllowed;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static List<Thing> SnapshotThingGridAt(Map map, IntVec3 cell)
+		{
+			List<Thing> thingList = AsyncPool<List<Thing>>.Get();
+			thingList.AddRange(map.thingGrid.ThingsListAt(cell));
+			return thingList;
 		}
 
 		/// <summary>
@@ -201,135 +212,54 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Notify <paramref name="thing"/> has been spawned. Mark regions dirty if <paramref name="thing"/> affects passability
-		/// </summary>
-		/// <param name="thing"></param>
-		/// <param name="map"></param>
-		public static void ThingAffectingRegionsSpawned(Thing thing, Map map)
-		{
-			if (regionEffecters.TryGetValue(thing.def, out List<VehicleDef> vehicleDefs))
-			{
-				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-
-				if (thing.def.Size == IntVec2.One)
-				{
-					if (!vehicleDefs.NullOrEmpty() && mapping.ThreadAvailable)
-					{
-						List<Thing> thingList = AsyncPool<List<Thing>>.Get();
-						thingList.AddRange(mapping.map.thingGrid.ThingsListAt(thing.Position));
-						AsyncAction asyncAction = AsyncPool<AsyncAction>.Get();
-						asyncAction.Set(delegate ()
-						{
-							RecalculatePerceivedPathCostAtFor(mapping, thing.Position, thingList);
-							thingList.Clear();
-							AsyncPool<List<Thing>>.Return(thingList);
-						}, () => map != null && map.Index > -1);
-						mapping.dedicatedThread.Queue(asyncAction);
-					}
-					else
-					{
-						RecalculatePerceivedPathCostAtFor(mapping, thing.Position, mapping.map.thingGrid.ThingsListAt(thing.Position));
-					}
-				}
-				else
-				{
-					CellRect occupiedRect = thing.OccupiedRect();
-					List<Thing>[] thingLists = occupiedRect.Select(cell =>
-					{
-						List<Thing> thingList = AsyncPool<List<Thing>>.Get();
-						thingList.AddRange(mapping.map.thingGrid.ThingsListAt(cell));
-						return thingList;
-					}).ToArray();
-					if (!vehicleDefs.NullOrEmpty() && mapping.ThreadAvailable)
-					{
-						AsyncAction asyncAction = AsyncPool<AsyncAction>.Get();
-						asyncAction.Set(delegate ()
-						{
-							ThingInRegionSpawned(occupiedRect, mapping, vehicleDefs, thingLists);
-							for (int i = thingLists.Length - 1; i >= 0; i--)
-							{
-								List<Thing> thingList = thingLists[i];
-								thingList.Clear();
-								AsyncPool<List<Thing>>.Return(thingList);
-							}
-						}, () => map != null && map.Index > -1);
-						mapping.dedicatedThread.Queue(asyncAction);
-					}
-					else
-					{
-						ThingInRegionSpawned(occupiedRect, mapping, vehicleDefs, thingLists);
-					}
-				}
-			}
-		}
-
-		/// <summary>
 		/// Notify <paramref name="thing"/> has been despawned. Mark regions dirty if <paramref name="thing"/> affects passability
 		/// </summary>
 		/// <param name="thing"></param>
 		/// <param name="map"></param>
-		public static void ThingAffectingRegionsDeSpawned(Thing thing, Map map)
+		public static void ThingAffectingRegionsStateChange(Thing thing, Map map, bool spawned)
 		{
-			if (regionEffecters.TryGetValue(thing.def, out List<VehicleDef> vehicleDefs))
+			if (regionEffecters.TryGetValue(thing.def, out List<VehicleDef> vehicleDefs) && !vehicleDefs.NullOrEmpty())
 			{
-				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-				if (thing.def.Size == IntVec2.One)
+				VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
+				if (mapping.ThreadAvailable)
 				{
-					List<Thing> thingList = new List<Thing>(mapping.map.thingGrid.ThingsListAt(thing.Position));
-					if (!vehicleDefs.NullOrEmpty() && mapping.ThreadAvailable)
+					CellRect occupiedRect = thing.OccupiedRect();
+					List<List<Thing>> snapshotLists = AsyncPool<List<List<Thing>>>.Get();
+					for (int i = occupiedRect.minZ; i <= occupiedRect.maxZ; i++)
 					{
-						AsyncAction asyncAction = AsyncPool<AsyncAction>.Get();
-						List<Thing> snapshotList = AsyncPool<List<Thing>>.Get();
-						snapshotList.AddRange(thingList);
-						asyncAction.Set(delegate ()
+						for (int j = occupiedRect.minX; j <= occupiedRect.maxX; j++)
 						{
-							RecalculatePerceivedPathCostAtFor(mapping, thing.Position, snapshotList);
-							snapshotList.Clear();
-							AsyncPool<List<Thing>>.Return(snapshotList);
-						}, () => map != null && map.Index > -1);
-						mapping.dedicatedThread.Queue(asyncAction);
+							IntVec3 cell = new IntVec3(j, 0, i);
+							List<Thing> snapshotList = SnapshotThingGridAt(map, cell);
+							snapshotLists.Add(snapshotList);
+						}
 					}
-					else
-					{
-						RecalculatePerceivedPathCostAtFor(mapping, thing.Position, thingList);
-					}
+					AsyncRegionAction asyncAction = AsyncPool<AsyncRegionAction>.Get();
+					asyncAction.Set(mapping, vehicleDefs, snapshotLists, occupiedRect, spawned);
+					mapping.dedicatedThread.Queue(asyncAction);
 				}
 				else
 				{
 					CellRect occupiedRect = thing.OccupiedRect();
-					if (!vehicleDefs.NullOrEmpty() && mapping.ThreadAvailable)
+					snapshotListsSynchronous.Clear();
+					for (int i = occupiedRect.minZ; i <= occupiedRect.maxZ; i++)
 					{
-						//Select thing lists from AsyncPool
-						List<Thing>[] thingLists = occupiedRect.Select(cell =>
+						for (int j = occupiedRect.minX; j <= occupiedRect.maxX; j++)
 						{
-							List<Thing> snapshotList = AsyncPool<List<Thing>>.Get();
-							snapshotList.AddRange(mapping.map.thingGrid.ThingsListAt(cell));
-							return snapshotList;
-						}).ToArray();
-
-						AsyncAction asyncAction = AsyncPool<AsyncAction>.Get();
-						asyncAction.Set(delegate ()
-						{
-							ThingInRegionDespawned(occupiedRect, mapping, vehicleDefs, thingLists);
-							for (int i = 0; i < thingLists.Length; i++)
-							{
-								thingLists[i].Clear();
-								AsyncPool<List<Thing>>.Return(thingLists[i]);
-							}
-						}, () => map != null && map.Index > -1);
-						mapping.dedicatedThread.Queue(asyncAction);
+							IntVec3 cell = new IntVec3(j, 0, i);
+							List<Thing> snapshotList = map.thingGrid.ThingsListAt(cell);
+							snapshotListsSynchronous.Add(snapshotList);
+						}
+					}
+					if (spawned)
+					{
+						ThingInRegionSpawned(occupiedRect, mapping, vehicleDefs, snapshotListsSynchronous);
 					}
 					else
 					{
-						//Use vanilla thingGrid lists
-						List<Thing>[] thingLists = occupiedRect.Select(cell =>
-						{
-							List<Thing> snapshotList = AsyncPool<List<Thing>>.Get();
-							snapshotList.AddRange(mapping.map.thingGrid.ThingsListAt(cell));
-							return snapshotList;
-						}).ToArray();
-						ThingInRegionDespawned(occupiedRect, mapping, vehicleDefs, occupiedRect.Select(cell => mapping.map.thingGrid.ThingsListAt(cell)).ToArray());
+						ThingInRegionDespawned(occupiedRect, mapping, vehicleDefs, snapshotListsSynchronous);
 					}
+					snapshotListsSynchronous.Clear();
 				}
 			}
 		}
@@ -340,11 +270,11 @@ namespace Vehicles
 		/// <param name="thing"></param>
 		/// <param name="mapping"></param>
 		/// <param name="vehicleDefs"></param>
-		private static void ThingInRegionSpawned(CellRect occupiedRect, VehicleMapping mapping, List<VehicleDef> vehicleDefs, List<Thing>[] thingLists)
+		internal static void ThingInRegionSpawned(CellRect occupiedRect, VehicleMapping mapping, List<VehicleDef> vehicleDefs, List<List<Thing>> snapshotLists)
 		{
 			foreach (VehicleDef vehicleDef in vehicleDefs)
 			{
-				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderRect(occupiedRect, thingLists);
+				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderRect(occupiedRect, snapshotLists);
 				if (mapping.IsOwner(vehicleDef))
 				{
 					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsSpawned(occupiedRect);
@@ -353,11 +283,11 @@ namespace Vehicles
 			}
 		}
 
-		private static void ThingInRegionDespawned(CellRect occupiedRect, VehicleMapping mapping, List<VehicleDef> vehicleDefs, List<Thing>[] thingLists)
+		internal static void ThingInRegionDespawned(CellRect occupiedRect, VehicleMapping mapping, List<VehicleDef> vehicleDefs, List<List<Thing>> snapshotLists)
 		{
 			foreach (VehicleDef vehicleDef in vehicleDefs)
 			{
-				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderRect(occupiedRect, thingLists);
+				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderRect(occupiedRect, snapshotLists);
 				if (mapping.IsOwner(vehicleDef))
 				{
 					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsDespawned(occupiedRect);
@@ -368,13 +298,13 @@ namespace Vehicles
 
 		public static void ThingAffectingRegionsOrientationChanged(Thing thing, Map map)
 		{
-			if (regionEffecters.TryGetValue(thing.def, out List<VehicleDef> vehicleDefs))
+			if (regionEffecters.TryGetValue(thing.def, out List<VehicleDef> vehicleDefs) && !vehicleDefs.NullOrEmpty())
 			{
-				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-				if (!vehicleDefs.NullOrEmpty() && mapping.ThreadAvailable)
+				VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
+				if (mapping.ThreadAvailable)
 				{
-					AsyncAction asyncAction = AsyncPool<AsyncAction>.Get();
-					asyncAction.Set(() => ThingInRegionOrientationChanged(mapping, vehicleDefs), () => map != null && map.Index > -1);
+					AsyncReachabilityCacheAction asyncAction = AsyncPool<AsyncReachabilityCacheAction>.Get();
+					asyncAction.Set(mapping, vehicleDefs);
 					mapping.dedicatedThread.Queue(asyncAction);
 				}
 				else
@@ -399,7 +329,7 @@ namespace Vehicles
 		{
 			LongEventHandler.ExecuteWhenFinished(delegate ()
 			{
-				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+				VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
 				if (!mapping.Owners.NullOrEmpty())
 				{
 					RecalculateAllPerceivedPathCosts(mapping);
@@ -411,7 +341,6 @@ namespace Vehicles
 		{
 			foreach (IntVec3 cell in mapping.map.AllCells)
 			{
-				TerrainDef terrainDef = mapping.map.terrainGrid.TerrainAt(cell);
 				List<Thing> thingList = mapping.map.thingGrid.ThingsListAt(cell);
 				foreach (VehicleDef vehicleDef in mapping.Owners)
 				{
@@ -428,21 +357,15 @@ namespace Vehicles
 		/// <param name="map"></param>
 		public static void RecalculatePerceivedPathCostAt(IntVec3 cell, Map map)
 		{
-			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+			VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
 			if (!mapping.Owners.NullOrEmpty())
 			{
 				List<Thing> thingList = map.thingGrid.ThingsListAt(cell);
 				if (mapping.ThreadAvailable)
 				{
-					AsyncAction asyncAction = AsyncPool<AsyncAction>.Get();
-					List<Thing> snapshotList = AsyncPool<List<Thing>>.Get();
-					snapshotList.AddRange(thingList);
-					asyncAction.Set(delegate ()
-					{
-						RecalculatePerceivedPathCostAtFor(mapping, cell, snapshotList);
-						snapshotList.Clear();
-						AsyncPool<List<Thing>>.Return(snapshotList);
-					}, () => map != null && map.Index > -1);
+					List<Thing> snapshotList = SnapshotThingGridAt(map, cell);
+					AsyncPathingAction asyncAction = AsyncPool<AsyncPathingAction>.Get();
+					asyncAction.Set(mapping, snapshotList, cell);
 					mapping.dedicatedThread.Queue(asyncAction);
 				}
 				else
@@ -452,7 +375,7 @@ namespace Vehicles
 			}
 		}
 
-		private static void RecalculatePerceivedPathCostAtFor(VehicleMapping mapping, IntVec3 cell, List<Thing> thingList)
+		internal static void RecalculatePerceivedPathCostAtFor(VehicleMapping mapping, IntVec3 cell, List<Thing> thingList)
 		{
 			foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
 			{

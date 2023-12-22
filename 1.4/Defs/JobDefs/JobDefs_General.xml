@@ -24,6 +24,13 @@
 	</JobDef>
 	
 	<JobDef>
+		<defName>DeployVehicle</defName>
+		<driverClass>Vehicles.JobDriver_Deploy</driverClass>
+		<reportString>Deploying.</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+	
+	<JobDef>
 		<defName>PrepareCaravan_GatheringVehicle</defName>
 		<driverClass>Vehicles.JobDriver_PrepareVehicleCaravan_GatheringItems</driverClass>
 		<reportString>Loading cargo for TargetB.</reportString>

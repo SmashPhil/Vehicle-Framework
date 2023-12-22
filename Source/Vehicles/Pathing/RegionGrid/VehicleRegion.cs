@@ -73,7 +73,7 @@ namespace Vehicles
 		public ConcurrentListerThings ListerThings => listerThings;
 
 		/// <summary>
-		/// Yield all cells on the map
+		/// Yield all cells in the region
 		/// </summary>
 		public IEnumerable<IntVec3> Cells
 		{

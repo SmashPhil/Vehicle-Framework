@@ -5,7 +5,6 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 using SmashTools;
-using AnimationEvent = SmashTools.AnimationEvent;
 
 namespace Vehicles
 {
@@ -21,7 +20,7 @@ namespace Vehicles
 
 		public LaunchRestriction restriction;
 		public List<GraphicDataLayered> additionalTextures;
-		public List<AnimationEvent> events;
+		public List<AnimationEvent<LaunchProtocol>> events;
 
 		public bool renderShadow = true;
 		public bool lockShadowX = false;
@@ -50,6 +49,8 @@ namespace Vehicles
 
 		[GraphEditable(Prefix = "Fleck")]
 		public List<FleckData> fleckData;
+
+		public List<FleckOneShot> fleckOneShots;
 		/* ---------------------*/
 	}
 }

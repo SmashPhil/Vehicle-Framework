@@ -50,7 +50,8 @@ namespace Vehicles
 		{
 			if (canceled && Turret != null)
 			{
-				Turret.AlignToAngleRestricted(Turret.TurretRotationUncorrected);
+				Turret.AlignToAngleRestricted(Turret.TurretRotation);
+				Turret.SetTarget(LocalTargetInfo.Invalid);
 			}
 			StopTargeting();
 		}
@@ -58,15 +59,15 @@ namespace Vehicles
 		public override void ProcessInputEvents()
 		{
 			ConfirmStillValid();
-			if(IsTargeting)
+			if (IsTargeting)
 			{
-				if(Event.current.type == EventType.MouseDown && Event.current.button == 0)
+				if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
 				{
 					Event.current.Use();
-					if(action != null)
+					if (action != null)
 					{                      
 						LocalTargetInfo obj = CurrentTargetUnderMouse();
-						if(obj.Cell.InBounds(map) && TargetMeetsRequirements(Turret, obj))
+						if (obj.Cell.InBounds(map) && TargetMeetsRequirements(Turret, obj))
 						{
 							action(obj);
 							SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
@@ -90,9 +91,8 @@ namespace Vehicles
 
 		public override void TargeterOnGUI()
 		{
-			if(action != null)
+			if (action != null)
 			{
-				float distance = (Turret.TurretLocation.ToIntVec3() - CurrentTargetUnderMouse().Cell).LengthHorizontal;
 				if (TargetMeetsRequirements(Turret, CurrentTargetUnderMouse()))
 				{
 					Texture2D icon = mouseAttachment ?? TexCommand.Attack;
@@ -103,33 +103,28 @@ namespace Vehicles
 
 		public override void TargeterUpdate()
 		{
-			if(IsTargeting)
+			if (IsTargeting)
 			{
-				float distance = (Turret.TurretLocation.ToIntVec3() - CurrentTargetUnderMouse().Cell).LengthHorizontal;
-				if (TargetMeetsRequirements(Turret, CurrentTargetUnderMouse()))
+				LocalTargetInfo mouseTarget = CurrentTargetUnderMouse();
+				if (TargetMeetsRequirements(Turret, mouseTarget))
 				{
-					GenDraw.DrawTargetHighlight(CurrentTargetUnderMouse());
-
-					if (CurrentTargetUnderMouse() != Turret.vehicle)
+					GenDraw.DrawTargetHighlight(mouseTarget);
+					if (Turret.CurrentFireMode.spreadRadius > 1)
 					{
-						Turret.AlignToAngleRestricted((float)Turret.TurretLocation.ToIntVec3().AngleToCell(CurrentTargetUnderMouse().Cell, map));
+						GenDraw.DrawRadiusRing(mouseTarget.Cell, Turret.CurrentFireMode.spreadRadius);
+					}
+
+					if (mouseTarget != Turret.vehicle)
+					{
+						Turret.AlignToAngleRestricted((float)Turret.TurretLocation.ToIntVec3().AngleToCell(mouseTarget.Cell, map));
 					}
 				}
-				//REDO Radius Circle
-				//if (Cannon.MinRange > 0)
-				//{
-				//	GenDraw.DrawRadiusRing(Cannon.TurretLocation.ToIntVec3(), Cannon.turretDef.minRange, Color.red);
-				//}
-				//if (Cannon.turretDef.maxRange <= GenRadial.MaxRadialPatternRadius)
-				//{
-				//	GenDraw.DrawRadiusRing(Cannon.TurretLocation.ToIntVec3(), Cannon.MaxRange, Color.white);
-				//}
 			}
 		}
 
 		private void ConfirmStillValid()
 		{
-			if (vehicle is null || (vehicle.Map != Find.CurrentMap || vehicle.Destroyed || !Find.Selector.IsSelected(vehicle)))
+			if (vehicle is null || (vehicle.Map != Find.CurrentMap || vehicle.Destroyed || Turret.ComponentDisabled || !Find.Selector.IsSelected(vehicle)))
 			{
 				StopTargeting(true);
 			}
@@ -144,42 +139,37 @@ namespace Vehicles
 			return GenUI.TargetsAtMouse(targetParams).FirstOrFallback(LocalTargetInfo.Invalid);
 		}
 
-		public static bool TargetMeetsRequirements(VehicleTurret turret, LocalTargetInfo obj)
+		public static bool TargetMeetsRequirements(VehicleTurret turret, LocalTargetInfo target)
 		{
-			float distance = (turret.TurretLocation.ToIntVec3() - obj.Cell).LengthHorizontal;
-			bool los = false;
-			if (obj.HasThing)
+			if (!turret.InRange(target))
 			{
-				if (!obj.Thing.Spawned || obj.Thing.Destroyed)
+				return false;
+			}
+			if (!turret.AngleBetween(target.CenterVector3))
+			{
+				return false;
+			}
+			if (target == turret.vehicle)
+			{
+				return false;
+			}
+			ThingDef projectileDef = turret.ProjectileDef;
+			if (projectileDef.projectile.flyOverhead)
+			{
+				return true; //Skip LOS check
+			}
+			bool los = false;
+			if (target.HasThing)
+			{
+				if (!target.Thing.Spawned || target.Thing.Destroyed)
 				{
 					return false;
 				}
-				los = GenSight.LineOfSightToThing(turret.TurretLocation.ToIntVec3(), obj.Thing, turret.vehicle.Map);
+				los = GenSight.LineOfSightToThing(turret.TurretLocation.ToIntVec3(), target.Thing, turret.vehicle.Map);
 			}
 			else
 			{
-				los = GenSight.LineOfSight(turret.TurretLocation.ToIntVec3(), obj.Cell, turret.vehicle.Map);
-			}
-			if (distance < turret.MinRange || (turret.MaxRange > 0 && distance >= turret.MaxRange))
-			{
-				return false;
-			}
-			if (!turret.AngleBetween(obj.CenterVector3))
-			{
-				return false;
-			}
-			ThingDef projectileDef;
-			if (turret.turretDef.genericAmmo)
-			{
-				projectileDef = turret.turretDef.projectile;
-			}
-			else
-			{
-				projectileDef = turret.loadedAmmo?.projectileWhenLoaded;
-			}
-			if (projectileDef != null && projectileDef.projectile.flyOverhead)
-			{
-				return true;
+				los = GenSight.LineOfSight(turret.TurretLocation.ToIntVec3(), target.Cell, turret.vehicle.Map);
 			}
 			return los;
 		}

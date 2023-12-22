@@ -3,6 +3,15 @@
   <VF_Caravan_Dismounted>Zsiadły</VF_Caravan_Dismounted>
   <VF_Sailing>Żegluje</VF_Sailing>
   <VF_DockToCaravan>Przedmioty do Zabrania</VF_DockToCaravan>
+  <VF_ImpassableBiome>Biom jest nieprzejezdny dla tego pojazdu.</VF_ImpassableBiome>
+  <VF_CaravanDisabled>Karawaning wyłączony.</VF_CaravanDisabled>
+  <VF_CaravanCantMove>Niezdolny do ruchu.</VF_CaravanCantMove>
+  <VF_CantMergeAerialVehicle>Nie można łączyć pojazdów latających.</VF_CantMergeAerialVehicle>
+  <VF_CommandDisembark>Schowaj pojazdy.</VF_CommandDisembark>
+  <VF_CommandDisembarkDesc>Zostaw wszystkie pojazdy i idź pieszo. Pojazdy pozostaną na mapie świata przez maksymalnie 20-30 dni.</VF_CommandDisembarkDesc>
+  <VF_ToggleRepairVehicle>Repair Vehicles</VF_ToggleRepairVehicle>
+  <VF_ToggleRepairVehicleDesc>Rest and perform repairs on vehicles inside the caravan</VF_ToggleRepairVehicleDesc>
+  <VF_CommandDisembarkImpassableBiome>Nie można zejść na ląd, pole jest nieprzekraczalne dla kolonistów.</VF_CommandDisembarkImpassableBiome>
   <VF_CommandDockShip>Zadokuj</VF_CommandDockShip>
   <VF_CommandDockShipDesc>Wyładuj wszystkich pasażerów i umożliwij handel z Bazą {0}.</VF_CommandDockShipDesc>
   <VF_CommandDockShipDisembark>Zadokuj i Wysiądź</VF_CommandDockShipDisembark>

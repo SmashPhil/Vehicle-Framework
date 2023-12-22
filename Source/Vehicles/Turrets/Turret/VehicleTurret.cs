@@ -12,10 +12,11 @@ namespace Vehicles
 {
 	public class VehicleTurret : IExposable, ILoadReferenceable, IEventManager<VehicleTurretEventDef>, IMaterialCacheTarget, ITweakFields
 	{
-		public const int AutoTargetInterval = 50;
+		public const int AutoTargetInterval = 60;
 		public const int TicksPerOverheatingFrame = 15;
 		public const int TicksTillBeginCooldown = 60;
 		public const float MaxHeatCapacity = 100;
+		public const int DefaultMaxRange = 9999;
 
 		//WIP - may be removed in the future
 		public static HashSet<Pair<string, TurretDisableType>> conditionalTurrets = new HashSet<Pair<string, TurretDisableType>>();
@@ -30,15 +31,21 @@ namespace Vehicles
 		[TweakField]
 		public VehicleTurretDef turretDef;
 
+		public TargetLock targeting = TargetLock.Pawn | TargetLock.Thing;
 		[TweakField(SettingsType = UISettingsType.Checkbox)]
-		public bool targetPersists = true;
+		public bool targetPersists = false;
 		[TweakField(SettingsType = UISettingsType.Checkbox)]
 		public bool autoTargeting = true;
 		[TweakField(SettingsType = UISettingsType.Checkbox)]
 		public bool manualTargeting = true;
 
+		[TweakField(SettingsType = UISettingsType.SliderEnum)]
+		public DeploymentType deployment = DeploymentType.None;
+
 		[TweakField]
 		public VehicleTurretRender renderProperties = new VehicleTurretRender();
+
+		public TurretComponentRequirement component;
 
 		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public Vector2 aimPieOffset = Vector2.zero;
@@ -79,8 +86,6 @@ namespace Vehicles
 		protected int burstsTillWarmup;
 
 		[Unsaved]
-		protected float currentRotation = 0f; //Rotation taking Vehicle rotation and angle into account
-		[Unsaved]
 		protected float rotationTargeted = 0f;
 
 		[Unsaved]
@@ -95,7 +100,7 @@ namespace Vehicles
 		protected List<VehicleTurret> groupTurrets;
 		[Unsaved]
 		public TurretRestrictions restrictions;
-
+		
 		//UPDATE - merge recoil trackers
 		[Unsaved]
 		public Turret_RecoilTracker recoilTracker;
@@ -207,6 +212,8 @@ namespace Vehicles
 			ticksSinceLastShot = 0;
 			burstsTillWarmup = 0;
 
+			TurretRotation = reference.defaultAngleRotated;
+
 			ResolveCannonGraphics(vehicle);
 			InitRecoilTrackers();
 		}
@@ -229,31 +236,19 @@ namespace Vehicles
 
 		public bool IsTargetable => turretDef?.turretType == TurretType.Rotatable;
 
-		public bool RotationIsValid => currentRotation == rotationTargeted;
+		public bool RotationAligned => rotation == rotationTargeted;
 
 		public bool TurretRestricted => restrictions?.Disabled ?? false;
 
-		public virtual bool TurretDisabled => TurretRestricted || !IsManned;
+		public virtual bool TurretDisabled => TurretRestricted || !IsManned || !DeploymentSatisfied || ComponentDisabled;
+
+		public bool ComponentDisabled => component != null && !component.MeetsRequirements;
 
 		protected virtual bool TurretTargetValid => cannonTarget.Cell.IsValid && !TurretDisabled;
 
 		public bool NoGraphic => turretDef.graphicData is null;
 
 		public bool CanAutoTarget => autoTargeting || VehicleMod.settings.debug.debugShootAnyTurret;
-
-		public int MaxTicks
-		{
-			get
-			{
-				float maxTicks = turretDef.reloadTimer * 60f;
-				if (turretDef.reloadTimerMultiplierPerCrewCount != null)
-                {
-                    List<Pawn> gunners = vehicle.AllCannonCrew; 
-                    maxTicks *= turretDef.reloadTimerMultiplierPerCrewCount.Evaluate(gunners.Count);
-                }
-                return Mathf.CeilToInt(maxTicks);
-            }
-		}
 
 		public int WarmupTicks => Mathf.CeilToInt(turretDef.warmUpTimer * 60f);
 
@@ -270,6 +265,60 @@ namespace Vehicles
 		public int ReloadTicks => reloadTicks;
 
 		public Dictionary<VehicleTurretEventDef, EventTrigger> EventRegistry { get; set; }
+
+		public bool DeploymentSatisfied
+		{
+			get
+			{
+				return deployment switch
+				{
+					DeploymentType.None => true,
+					DeploymentType.Deployed => vehicle.CompVehicleTurrets.Deployed,
+					DeploymentType.Undeployed => !vehicle.CompVehicleTurrets.Deployed,
+					_ => throw new NotImplementedException(nameof(DeploymentType))
+				};
+			}
+		}
+
+		public string DeploymentDisabledReason
+		{
+			get
+			{
+				return deployment switch
+				{
+					DeploymentType.None => string.Empty,
+					DeploymentType.Deployed => "VF_MustBeDeployed".Translate(),
+					DeploymentType.Undeployed => "VF_MustBeUndeployed".Translate(),
+					_ => throw new NotImplementedException(nameof(DeploymentType))
+				};
+			}
+		}
+
+		public int MaxTicks
+		{
+			get
+			{
+				float maxTicks = turretDef.reloadTimer * 60f;
+				if (turretDef.reloadTimerMultiplierPerCrewCount != null)
+				{
+					List<Pawn> gunners = vehicle.AllCannonCrew;
+					maxTicks *= turretDef.reloadTimerMultiplierPerCrewCount.Evaluate(gunners.Count);
+				}
+				return Mathf.CeilToInt(maxTicks);
+			}
+		}
+
+		public ThingDef ProjectileDef
+		{
+			get
+			{
+				if (loadedAmmo != null && loadedAmmo.projectileWhenLoaded != null)
+				{
+					return loadedAmmo.projectileWhenLoaded;
+				}
+				return turretDef.projectile;
+			}
+		}
 
 		public Texture2D FireIcon
 		{
@@ -508,7 +557,6 @@ namespace Vehicles
 			}
 		}
 
-
 		public float TurretRotation
 		{
 			get
@@ -519,20 +567,7 @@ namespace Vehicles
 				}
 				ValidateLockStatus();
 
-				if (currentRotation > 360)
-				{
-					currentRotation -= 360;
-				}
-				else if (currentRotation < 0)
-				{
-					currentRotation += 360;
-				}
-
-				float rotation = 270 - currentRotation;
-				if (rotation < 0)
-				{
-					rotation += 360;
-				}
+				rotation = rotation.ClampAndWrap(0, 360);
 
 				if (attachedTo != null)
 				{
@@ -542,19 +577,23 @@ namespace Vehicles
 			}
 			set
 			{
-				currentRotation = value.ClampAndWrap(0, 360);
+				rotation = value.ClampAndWrap(0, 360);
 			}
 		}
 
-		public float TurretRotationUncorrected
+		public float TurretRotationTargeted
 		{
 			get
 			{
-				if (!IsTargetable && attachedTo is null)
+				return rotationTargeted;
+			}
+			set
+			{
+				if (vehicle == null)
 				{
-					return defaultAngleRotated -= 90 * (vehicle.Rotation.AsInt - parentRotCached.AsInt) + vehicle.Angle - parentAngleCached;
+					return;
 				}
-				return currentRotation;
+				rotationTargeted = value.ClampAndWrap(0, 360);
 			}
 		}
 
@@ -604,7 +643,7 @@ namespace Vehicles
 			{
 				if (turretDef.maxRange < 0)
 				{
-					return 9999;
+					return DefaultMaxRange;
 				}
 				return turretDef.maxRange;
 			}
@@ -648,11 +687,17 @@ namespace Vehicles
 			parentKey = reference.parentKey;
 
 			renderProperties = new VehicleTurretRender(reference.renderProperties);
+			if (reference.component != null)
+			{
+				component = TurretComponentRequirement.CopyFrom(reference.component);
+			}
+
 			aimPieOffset = reference.aimPieOffset;
 			angleRestricted = reference.angleRestricted;
 			restrictedTheta = (int)Mathf.Abs(angleRestricted.x - (angleRestricted.y + 360)).ClampAngle();
 
 			defaultAngleRotated = reference.defaultAngleRotated;
+			deployment = reference.deployment;
 
 			drawLayer = reference.drawLayer;
 			if (reference.turretDef.restrictionType != null)
@@ -740,7 +785,7 @@ namespace Vehicles
 			float locationRotation = 0f;
 			if (fullLoc && attachedTo != null)
 			{
-				locationRotation = TurretRotationFor(rot, attachedTo.TurretRotationUncorrected);
+				locationRotation = TurretRotationFor(rot, attachedTo.TurretRotation);
 			}
 			Vector2 turretLoc = VehicleGraphics.TurretDrawOffset(rot, renderProperties, locationRotation, fullLoc ? attachedTo : null);
 			Vector3 graphicOffset = CannonGraphic?.DrawOffset(rot) ?? Vector3.zero;
@@ -777,7 +822,7 @@ namespace Vehicles
 			if (attachedTo != null)
 			{
 				parentPosition = attachedTo.ScaleUIRectRecursive(vehicleDef, rect, rot).position; //Recursively adjust from parent positions
-				float parentRotation = TurretRotationFor(rot, attachedTo.TurretRotationUncorrected) + rot.AsAngle;
+				float parentRotation = TurretRotationFor(rot, attachedTo.TurretRotation);
 				offsetPosition = Ext_Math.RotatePointClockwise(offsetPosition, parentRotation); //Rotate around parent's position
 			}
 			offsetPosition.y *= -1; //Invert y axis post-calculations, UI y-axis is top to bottom
@@ -788,8 +833,7 @@ namespace Vehicles
 
 		public static float TurretRotationFor(Rot8 rot, float currentRotation)
 		{
-			float zeroAngle = 270 - currentRotation;
-			return zeroAngle - 45 * rot.AsIntClockwise;
+			return currentRotation + rot.AsAngle;
 		}
 
 		//REDO - disable type implementation
@@ -918,7 +962,6 @@ namespace Vehicles
 
 		protected virtual bool TurretAutoTick()
 		{
-			//Todo - only tick if active threats on the map
 			if (vehicle.Spawned && !queuedToFire && AutoTarget)
 			{
 				if (Find.TickManager.TicksGame % AutoTargetInterval == 0)
@@ -929,10 +972,9 @@ namespace Vehicles
 					}
 					if (!cannonTarget.IsValid && TurretTargeter.Turret != this && ReloadTicks <= 0 && HasAmmo)
 					{
-						LocalTargetInfo autoTarget = this.GetCannonTarget();
-						if (autoTarget.IsValid)
+						if (this.TryGetTarget(out LocalTargetInfo autoTarget))
 						{
-							AlignToAngleRestricted(TurretLocation.AngleToPointRelative(autoTarget.Thing.DrawPos));
+							AlignToAngleRestricted(TurretLocation.AngleToPoint(autoTarget.Thing.DrawPos));
 							SetTarget(autoTarget);
 						}
 					}
@@ -944,37 +986,29 @@ namespace Vehicles
 
 		protected virtual bool TurretRotationTick()
 		{
-			if (currentRotation != rotationTargeted)
+			bool tick = false;
+			if (TargetLocked)
 			{
-				//REDO - SET TO CHECK CANNON HANDLERS COMPONENT HEALTH
-				float relativeCurrentRotation = currentRotation + 90;
-				float relativeTargetedRotation = rotationTargeted + 90;
-				if (relativeCurrentRotation < 0)
+				AlignToTargetRestricted();
+				tick = true;
+			}
+			if (!RotationAligned)
+			{
+				if (ComponentDisabled)
 				{
-					relativeCurrentRotation += 360;
+					ResetAngle();
+					return false;
 				}
-				else if (relativeCurrentRotation > 360)
+				if (Math.Abs(rotation - TurretRotationTargeted) < turretDef.rotationSpeed + 0.1f)
 				{
-					relativeCurrentRotation -= 360;
-				}
-				if (relativeTargetedRotation < 0)
-				{
-					relativeTargetedRotation += 360;
-				}
-				else if (relativeTargetedRotation > 360)
-				{
-					relativeTargetedRotation -= 360;
-				}
-				if (Math.Abs(relativeCurrentRotation - relativeTargetedRotation) < turretDef.rotationSpeed)
-				{
-					currentRotation = rotationTargeted;
+					rotation = TurretRotationTargeted;
 				}
 				else
 				{
 					int rotationDir;
-					if (relativeCurrentRotation < relativeTargetedRotation)
+					if (rotation < TurretRotationTargeted)
 					{
-						if (Math.Abs(relativeCurrentRotation - relativeTargetedRotation) < 180)
+						if (Math.Abs(rotation - TurretRotationTargeted) < 180)
 						{
 							rotationDir = 1;
 						}
@@ -985,7 +1019,7 @@ namespace Vehicles
 					}
 					else
 					{
-						if (Math.Abs(relativeCurrentRotation - relativeTargetedRotation) < 180)
+						if (Math.Abs(rotation - TurretRotationTargeted) < 180)
 						{
 							rotationDir = -1;
 						}
@@ -994,22 +1028,23 @@ namespace Vehicles
 							rotationDir = 1;
 						}
 					}
-					currentRotation += turretDef.rotationSpeed * rotationDir;
+					
+					rotation += turretDef.rotationSpeed * rotationDir;
 					foreach (VehicleTurret turret in childTurrets)
 					{
-						turret.currentRotation += turretDef.rotationSpeed * rotationDir;
+						turret.rotation += turretDef.rotationSpeed * rotationDir;
 					}
 				}
 				return true;
 			}
-			return false;
+			return tick;
 		}
 
 		protected virtual bool TurretTargeterTick()
 		{
-			if (cannonTarget.IsValid)
+			if (TurretTargetValid)
 			{
-				if (currentRotation == rotationTargeted && !TargetLocked)
+				if (rotation == TurretRotationTargeted && !TargetLocked)
 				{
 					TargetLocked = true;
 					ResetPrefireTimer();
@@ -1019,9 +1054,7 @@ namespace Vehicles
 					SetTarget(LocalTargetInfo.Invalid);
 					return TurretTargeter.Turret == this;
 				}
-			}
-			if (TurretTargetValid)
-			{
+
 				if (IsTargetable && !TurretTargeter.TargetMeetsRequirements(this, cannonTarget))
 				{
 					SetTarget(LocalTargetInfo.Invalid);
@@ -1032,24 +1065,24 @@ namespace Vehicles
 				{
 					if (cannonTarget.HasThing)
 					{
-						rotationTargeted = TurretLocation.AngleToPointRelative(cannonTarget.Thing.DrawPos);
+						TurretRotationTargeted = TurretLocation.AngleToPoint(cannonTarget.Thing.DrawPos);
 						if (attachedTo != null)
 						{
-							rotationTargeted += attachedTo.TurretRotation;
+							TurretRotationTargeted -= attachedTo.TurretRotation;
 						}
 					}
 					else
 					{
-						rotationTargeted = TurretLocation.ToIntVec3().AngleToCell(cannonTarget.Cell, vehicle.Map);
+						TurretRotationTargeted = TurretLocation.ToIntVec3().AngleToCell(cannonTarget.Cell, vehicle.Map);
 						if (attachedTo != null)
 						{
-							rotationTargeted += attachedTo.TurretRotation;
+							TurretRotationTargeted -= attachedTo.TurretRotation;
 						}
 					}
 
 					if (turretDef.autoSnapTargeting)
 					{
-						currentRotation = rotationTargeted;
+						rotation = TurretRotationTargeted;
 					}
 
 					if (TargetLocked && ReadyToFire)
@@ -1059,7 +1092,7 @@ namespace Vehicles
 				}
 				else if (ReadyToFire)
 				{
-					if (IsTargetable && RotationIsValid && targetPersists && (cannonTarget.Pawn is null || !SetTargetConditionalOnThing(LocalTargetInfo.Invalid)))
+					if (IsTargetable && RotationAligned && (cannonTarget.Pawn is null || !CheckTargetInvalid()))
 					{
 						GroupTurrets.ForEach(t => t.PushTurretToQueue());
 					}
@@ -1068,12 +1101,13 @@ namespace Vehicles
 						GroupTurrets.ForEach(t => t.PushTurretToQueue());
 					}
 				}
+				return true;
 			}
-			else if (IsTargetable && SetTargetConditionalOnThing(LocalTargetInfo.Invalid))
+			else if (IsTargetable)
 			{
 				return TurretTargeter.Turret == this;
 			}
-			return true;
+			return false;
 		}
 
 		public virtual CompVehicleTurrets.TurretData GenerateTurretData()
@@ -1128,21 +1162,20 @@ namespace Vehicles
 			float horizontalOffset = turretDef.projectileShifting.NotNullAndAny() ? turretDef.projectileShifting[CurrentTurretFiring] : 0;
 			Vector3 launchCell = TurretLocation + new Vector3(horizontalOffset, 1f, turretDef.projectileOffset).RotatedBy(TurretRotation);
 
-			ThingDef projectile = turretDef.projectile;
-			if (turretDef.ammunition != null && !turretDef.genericAmmo)
-			{
-				projectile = loadedAmmo?.projectileWhenLoaded ?? projectile; //nc to loaded ammo for CE handling
-			}
+			ThingDef projectileDef = ProjectileDef;// turretDef.projectile;
+			//if (turretDef.ammunition != null && !turretDef.genericAmmo)
+			//{
+			//	projectile = loadedAmmo?.projectileWhenLoaded ?? projectile; //nc to loaded ammo for CE handling
+			//}
 			try
 			{
 				if (turretDef.ammunition != null)
 				{
 					ConsumeShellChambered();
 				}
-				
 				if (LaunchProjectileCE is null)
 				{
-					Projectile projectileInstance = (Projectile)GenSpawn.Spawn(projectile, vehicle.Position, vehicle.Map, WipeMode.Vanish);
+					Projectile projectileInstance = (Projectile)GenSpawn.Spawn(projectileDef, vehicle.Position, vehicle.Map, WipeMode.Vanish);
 					if (turretDef.projectileSpeed > 0)
 					{
 						projectileInstance.TryAddComp(new CompTurretProjectileProperties(vehicle)
@@ -1156,7 +1189,7 @@ namespace Vehicles
 				}
 				else
 				{
-					float speed = turretDef.projectileSpeed > 0 ? turretDef.projectileSpeed : projectile.projectile.speed;
+					float speed = turretDef.projectileSpeed > 0 ? turretDef.projectileSpeed : projectileDef.projectile.speed;
 					float swayAndSpread = Mathf.Atan2(CurrentFireMode.spreadRadius, MaxRange) * Mathf.Rad2Deg;
 					float sway = swayAndSpread * 0.84f;
 					float spread = swayAndSpread * 0.16f;
@@ -1201,13 +1234,13 @@ namespace Vehicles
 						double spreadDirection = Rand.Value * Math.PI * 2;
 						vce.y = (float)(randomSpread * Math.Sin(spreadDirection));
 						vce.x = (float)(randomSpread * Math.Cos(spreadDirection));
-						LaunchProjectileCE(projectile, loadedAmmo, turretData?._ammoSet, new Vector2(launchCell.x, launchCell.z), cannonTarget, vehicle, sa + vce.y, tr + vce.x, shotHeight, speed);
+						LaunchProjectileCE(projectileDef, loadedAmmo, turretData?._ammoSet, new Vector2(launchCell.x, launchCell.z), cannonTarget, vehicle, sa + vce.y * Mathf.Deg2Rad, tr + vce.x, shotHeight, speed);
 					}
 					while (--projectileCount > 0);
 
 					if (NotifyShotFiredCE != null)
 					{
-						NotifyShotFiredCE(projectile, loadedAmmo, turretData?._ammoSet, this, recoil);
+						NotifyShotFiredCE(projectileDef, loadedAmmo, turretData?._ammoSet, this, recoil);
 					}
 				}
 				turretDef.shotSound?.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map));
@@ -1318,7 +1351,7 @@ namespace Vehicles
 			}
 		}
 
-		public virtual void DrawAt(Vector3 drawPos)
+		public virtual void DrawAt(Vector3 drawPos, Rot8 rot)
 		{
 			if (!NoGraphic)
 			{
@@ -1332,7 +1365,7 @@ namespace Vehicles
 		{
 			if (!NoGraphic)
 			{
-				VehicleGraphics.DrawTurret(this, Rot8.North);
+				VehicleGraphics.DrawTurret(this, vehicle.FullRotation);
 				DrawTargeter();
 				DrawAimPie();
 			}
@@ -1497,7 +1530,7 @@ namespace Vehicles
 				return true;
 			}
 
-			float rotationOffset = attachedTo != null ? attachedTo.TurretRotation : vehicle.Rotation.AsInt * 90 + vehicle.Angle;
+			float rotationOffset = attachedTo != null ? attachedTo.TurretRotation : vehicle.Rotation.AsAngle + vehicle.Angle;
 
 			float start = angleRestricted.x + rotationOffset;
 			float end = angleRestricted.y + rotationOffset;
@@ -1516,23 +1549,37 @@ namespace Vehicles
 			mid = (mid - start) < 0f ? mid - start + 360 : mid - start;
 			return mid < end;
 		}
+
+		public bool InRange(LocalTargetInfo target)
+		{
+			if (MinRange == 0 && MaxRange == DefaultMaxRange)
+			{
+				return true;
+			}
+			IntVec3 cell = target.Cell;
+			Vector2 targetPos = new Vector2(cell.x, cell.z);
+			Vector3 targetLoc = TurretLocation;
+			float distance = Vector2.Distance(new Vector2(targetLoc.x, targetLoc.z), targetPos);
+
+			return distance >= MinRange && distance <= MaxRange;
+		}
 		
 		public void AlignToTargetRestricted()
 		{
 			if (cannonTarget.HasThing)
 			{
-				rotationTargeted = TurretLocation.AngleToPointRelative(cannonTarget.Thing.DrawPos);
+				TurretRotationTargeted = TurretLocation.AngleToPoint(cannonTarget.Thing.DrawPos);
 				if (attachedTo != null)
 				{
-					rotationTargeted += attachedTo.TurretRotation;
+					TurretRotationTargeted -= attachedTo.TurretRotation;
 				}
 			}
 			else
 			{
-				rotationTargeted = TurretLocation.ToIntVec3().AngleToCell(cannonTarget.Cell, vehicle.Map);
+				TurretRotationTargeted = TurretLocation.ToIntVec3().AngleToCell(cannonTarget.Cell, vehicle.Map);
 				if (attachedTo != null)
 				{
-					rotationTargeted += attachedTo.TurretRotation;
+					TurretRotationTargeted -= attachedTo.TurretRotation;
 				}
 			}
 		}
@@ -1542,12 +1589,12 @@ namespace Vehicles
 			float additionalAngle = attachedTo?.TurretRotation ?? 0;
 			if (turretDef.autoSnapTargeting)
 			{
-				TurretRotation = angle + additionalAngle;
-				rotationTargeted = currentRotation;
+				TurretRotation = angle - additionalAngle;
+				TurretRotationTargeted = rotation;
 			}
 			else
 			{
-				rotationTargeted = (angle + additionalAngle).ClampAndWrap(0, 360);
+				TurretRotationTargeted = (angle - additionalAngle).ClampAndWrap(0, 360);
 			}
 		}
 
@@ -1757,12 +1804,19 @@ namespace Vehicles
 			}
 		}
 
+		//TODO - remove in 1.5
+		[Obsolete("Use CheckTargetInvalid instead.", error: true)]
+		public virtual bool SetTargetConditionalOnThing(LocalTargetInfo target, bool resetPrefireTimer = true)
+		{
+			return CheckTargetInvalid(resetPrefireTimer);
+		}
+
 		/// <summary>
 		/// Set target only if cannonTarget is no longer valid or if target is cell based
 		/// </summary>
 		/// <param name="target"></param>
 		/// <returns>true if cannonTarget set to target, false if target is still valid</returns>
-		public virtual bool SetTargetConditionalOnThing(LocalTargetInfo target, bool resetPrefireTimer = true)
+		public virtual bool CheckTargetInvalid(bool resetPrefireTimer = true)
 		{
 			if (cannonTarget.IsValid && (cannonTarget.HasThing || FullAuto))
 			{
@@ -1770,33 +1824,29 @@ namespace Vehicles
 				{
 					if ( (cannonTarget.Pawn.Dead && CachedPawnTargetStatus != PawnStatusOnTarget.Dead ) || (cannonTarget.Pawn.Downed && CachedPawnTargetStatus != PawnStatusOnTarget.Down) )
 					{
-						SetTarget(target);
+						SetTarget(LocalTargetInfo.Invalid);
 						return true;
 					}
 				}
 				else if (cannonTarget.Thing != null && cannonTarget.Thing.HitPoints <= 0)
 				{
-					SetTarget(target);
+					SetTarget(LocalTargetInfo.Invalid);
 					return true;
 				}
 				return false;
 			}
-			SetTarget(target);
-			return true;
+			return false;
 		}
 
 		public void ResetAngle()
 		{
-			currentRotation = -defaultAngleRotated - 90;
-			if (currentRotation < 360)
-			{
-				currentRotation += 360;
-			}
-			else if (currentRotation > 360)
-			{
-				currentRotation -= 360;
-			}
-			rotationTargeted = currentRotation;
+			rotation = rotation.ClampAndWrap(0, 360);
+			TurretRotationTargeted = rotation;
+		}
+
+		public void FlagForAlignment()
+		{
+			TurretRotationTargeted = TurretRotationFor(vehicle.FullRotation, defaultAngleRotated.ClampAndWrap(0, 360));
 		}
 
 		public virtual void ResetPrefireTimer()
@@ -1808,17 +1858,20 @@ namespace Vehicles
 
 		protected void ValidateLockStatus()
 		{
-			if (!cannonTarget.IsValid && TurretTargeter.Turret != this) 
-            {
-				float angleDifference = vehicle.Angle - parentAngleCached;
-				if (attachedTo is null)
+			if (vehicle != null)
+			{
+				if (!cannonTarget.IsValid && TurretTargeter.Turret != this && !vehicle.Deploying)
 				{
-					currentRotation -= 90 * (vehicle.Rotation.AsInt - parentRotCached.AsInt) + angleDifference;
+					float angleDifference = vehicle.Angle - parentAngleCached;
+					if (attachedTo is null)
+					{
+						rotation += 90 * (vehicle.Rotation.AsInt - parentRotCached.AsInt) + angleDifference;
+					}
+					TurretRotationTargeted = rotation;
 				}
-				rotationTargeted = currentRotation;
+				parentRotCached = vehicle.Rotation;
+				parentAngleCached = vehicle.Angle;
 			}
-			parentRotCached = vehicle.Rotation;
-			parentAngleCached = vehicle.Angle;
 		}
 
 		public virtual string GetUniqueLoadID()
@@ -1834,7 +1887,7 @@ namespace Vehicles
 		public bool ContainsAmmoDefOrShell(ThingDef def)
 		{
 			ThingDef projectile = null;
-			if(def.projectileWhenLoaded != null)
+			if (def.projectileWhenLoaded != null)
 			{
 				projectile = def.projectileWhenLoaded;
 			}
@@ -1915,7 +1968,8 @@ namespace Vehicles
 
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
-				TurretRotation = Mathf.Abs(rotation - 270); //convert from traditional to relative, vehicle rotation will be taken into account during lock validation
+				parentRotCached = vehicle.Rotation;
+				parentAngleCached = vehicle.Angle;
 				if (cannonTarget.IsValid)
 				{
 					AlignToTargetRestricted(); //reassigns rotationTargeted for turrets currently turning
@@ -2111,7 +2165,7 @@ namespace Vehicles
 				float locationRotation = 0f;
 				if (turret.attachedTo != null)
 				{
-					locationRotation = TurretRotationFor(rot, turret.attachedTo.TurretRotationUncorrected);
+					locationRotation = TurretRotationFor(rot, turret.attachedTo.TurretRotation);
 				}
 				Vector3 graphicOffset = graphic.DrawOffset(rot);
 				Vector2 rotatedPoint = Ext_Math.RotatePointClockwise(graphicOffset.x, graphicOffset.z, locationRotation);

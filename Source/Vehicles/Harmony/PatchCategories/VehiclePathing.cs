@@ -21,6 +21,12 @@ namespace Vehicles
 
 		public void PatchMethods()
 		{
+			//TODO - Implement in 1.5 with more testing and drag-to-rotate
+			//	   - Needs another patch on RCellFinder.BestOrderedGotoDestNear so it recomputes best position for vehicle
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(FloatMenuMakerMap), "CanTakeOrder"),
+			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
+			//	nameof(VehiclesCanTakeOrders)));
+
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(FloatMenuMakerMap), "GotoLocationOption"),
 				prefix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(GotoLocationVehicles)));
@@ -68,18 +74,36 @@ namespace Vehicles
 				nameof(SetRotationAndUpdateVehicleRegions)));
 		}
 
+		private static void VehiclesCanTakeOrders(Pawn pawn, ref bool __result)
+		{
+			if (!__result && pawn is VehiclePawn)
+			{
+				__result = true;
+			}
+		}
+
 		/// <summary>
 		/// Intercepts FloatMenuMakerMap call to restrict by size and call through to custom water based pathing requirements
 		/// </summary>
 		/// <param name="clickCell"></param>
 		/// <param name="pawn"></param>
 		/// <param name="__result"></param>
-		public static bool GotoLocationVehicles(IntVec3 clickCell, Pawn pawn, ref FloatMenuOption __result)
+		public static bool GotoLocationVehicles(IntVec3 clickCell, Pawn pawn, ref FloatMenuOption __result, bool suppressAutoTakeableGoto)
 		{
 			if (pawn is VehiclePawn vehicle)
 			{
+				if (suppressAutoTakeableGoto)
+				{
+					__result = null;
+					return false;
+				}
 				if (vehicle.Faction != Faction.OfPlayer || !vehicle.CanMoveFinal)
 				{
+					return false;
+				}
+				if (vehicle.Deploying || (vehicle.CompVehicleTurrets != null && vehicle.CompVehicleTurrets.Deployed))
+				{
+					Messages.Message("VF_VehicleImmobileDeployed".Translate(vehicle), MessageTypeDefOf.RejectInput);
 					return false;
 				}
 				
@@ -89,7 +113,7 @@ namespace Vehicles
 					return false;
 				}
 
-				VehicleMapping mapping = vehicle.Map.GetCachedMapComponent<VehicleMapping>();
+				VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(vehicle.Map);
 				
 				int num = GenRadial.NumCellsInRadius(2.9f);
 				IntVec3 curLoc;
@@ -481,7 +505,7 @@ namespace Vehicles
 			//For some reason other mods love to patch the SpawnSetup method and despawn the object immediately. Extra check is necessary
 			if (b.Spawned)
 			{
-				PathingHelper.ThingAffectingRegionsSpawned(b, b.Map);
+				PathingHelper.ThingAffectingRegionsStateChange(b, b.Map, true);
 			}
 		}
 
@@ -490,7 +514,7 @@ namespace Vehicles
 			//For some reason other mods love to patch the SpawnSetup method and despawn the object immediately. Extra check is necessary
 			if (b.Spawned)
 			{
-				PathingHelper.ThingAffectingRegionsDeSpawned(b, b.Map);
+				PathingHelper.ThingAffectingRegionsStateChange(b, b.Map, false);
 			}
 		}
 
@@ -500,22 +524,22 @@ namespace Vehicles
 		private static void SpawnAndNotifyVehicleRegions(Thing thing, Map map)
 		{
 			RegisterInVehicleRegions(thing, map);
-			PathingHelper.ThingAffectingRegionsSpawned(thing, map);
+			PathingHelper.ThingAffectingRegionsStateChange(thing, map, true);
 		}
 
 		private static void DeSpawnAndNotifyVehicleRegions(Thing thing, Map map)
 		{
 			DeregisterInVehicleRegions(thing, map);
-			PathingHelper.ThingAffectingRegionsDeSpawned(thing, map);
+			PathingHelper.ThingAffectingRegionsStateChange(thing, map, false);
 		}
 
 		private static void RegisterInVehicleRegions(Thing thing, Map map)
 		{
-			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+			VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
 			if (mapping.ThreadAvailable)
 			{
-				AsyncAction asyncAction = AsyncPool<AsyncAction>.Get();
-				asyncAction.Set(() => RegisterInRegions(thing, mapping), () => map != null && map.Index > -1);
+				AsyncRegionRegisterAction asyncAction = AsyncPool<AsyncRegionRegisterAction>.Get();
+				asyncAction.Set(mapping, thing, true);
 				mapping.dedicatedThread.Queue(asyncAction);
 			}
 			else
@@ -526,11 +550,11 @@ namespace Vehicles
 
 		private static void DeregisterInVehicleRegions(Thing thing, Map map)
 		{
-			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+			VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
 			if (mapping.ThreadAvailable)
 			{
-				AsyncAction asyncAction = AsyncPool<AsyncAction>.Get();
-				asyncAction.Set(() => DeregisterInRegions(thing, mapping), () => map != null && map.Index > -1);
+				AsyncRegionRegisterAction asyncAction = AsyncPool<AsyncRegionRegisterAction>.Get();
+				asyncAction.Set(mapping, thing, false);
 				mapping.dedicatedThread.Queue(asyncAction);
 			}
 			else
@@ -539,7 +563,7 @@ namespace Vehicles
 			}
 		}
 
-		private static void RegisterInRegions(Thing thing, VehicleMapping mapping)
+		internal static void RegisterInRegions(Thing thing, VehicleMapping mapping)
 		{
 			foreach (VehicleDef vehicleDef in mapping.Owners)
 			{
@@ -547,7 +571,7 @@ namespace Vehicles
 			}
 		}
 
-		private static void DeregisterInRegions(Thing thing, VehicleMapping mapping)
+		internal static void DeregisterInRegions(Thing thing, VehicleMapping mapping)
 		{
 			foreach (VehicleDef vehicleDef in mapping.Owners)
 			{

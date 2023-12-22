@@ -78,6 +78,8 @@ Determines whether Vehicles should use values from the mod settings or Defs</VF_
 	
 	<!-- Aerial Vehicles -->
 	<VF_AerialVehicles>Air</VF_AerialVehicles>
+	<VF_DrawLandingGhost>Draw Landing Spot</VF_DrawLandingGhost>
+	<VF_DrawLandingGhostTooltip>Draws a transparent 'blueprint' where an aerial vehicle is landing.</VF_DrawLandingGhostTooltip>
 	<VF_RocketsBurnRadius>Rockets Burn</VF_RocketsBurnRadius>
 	<VF_RocketsBurnRadiusTooltip>Allow aerial vehicles which support this feature to burn all things within a small radius upon takeoff and landing.</VF_RocketsBurnRadiusTooltip>
 	<VF_DynamicDrawing>Dynamic Drawing</VF_DynamicDrawing>

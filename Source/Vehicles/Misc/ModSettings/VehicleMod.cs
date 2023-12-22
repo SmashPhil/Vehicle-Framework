@@ -36,7 +36,7 @@ namespace Vehicles
 		private static List<TabRecord> tabs = new List<TabRecord>();
 		private static List<VehicleDef> vehicleDefs;
 		private static List<VehicleDef> filteredVehicleDefs = new List<VehicleDef>();
-		private static int headers;
+		private static HashSet<string> headers = new HashSet<string>();
 
 		private static QuickSearchFilter vehicleFilter = new QuickSearchFilter();
 
@@ -368,7 +368,13 @@ namespace Vehicles
 				scrollList.height -= searchBoxRect.height * 2; //x2 for both label and input field
 				Rect scrollView = scrollList;
 				scrollView.width -= 16f;
-				scrollView.height = (headers + filteredVehicleDefs.Count) * 20;
+
+				float height = filteredVehicleDefs.Count * 20;
+				foreach (string header in headers)
+				{
+					height += Text.CalcHeight(header, scrollView.width);
+				}
+				scrollView.height = height;
 
 				Listing_SplitColumns listingStandard = new Listing_SplitColumns();
 				listingStandard.BeginScrollView(scrollList, ref vehicleDefsScrollPosition, ref scrollView, 1);
@@ -421,19 +427,18 @@ namespace Vehicles
 		private static void RecacheVehicleFilter()
 		{
 			filteredVehicleDefs.Clear();
-			HashSet<string> uniqueHeaders = new HashSet<string>();
+			headers.Clear();
 			if (!VehicleDefs.NullOrEmpty())
 			{
 				foreach (VehicleDef vehicleDef in VehicleDefs)
 				{
 					if (vehicleFilter.Text.NullOrEmpty() || vehicleFilter.Matches(vehicleDef.defName) || vehicleFilter.Matches(vehicleDef.label) || vehicleFilter.Matches(vehicleDef.modContentPack.Name))
 					{
-						uniqueHeaders.Add(vehicleDef.modContentPack.Name);
+						headers.Add(vehicleDef.modContentPack.Name);
 						filteredVehicleDefs.Add(vehicleDef);
 					}
 				}
 			}
-			headers = uniqueHeaders.Count;
 		}
 
 		public override void WriteSettings()

@@ -57,6 +57,8 @@ Determina si los vehículos deberian usar valores predeterminados del mod o defi
   <VF_FishingPersists>Mantener pesca</VF_FishingPersists>
   <VF_FishingPersistsTooltip>La seleccion de pesca del barco de pesca no se reiniciara al ser reclutado.</VF_FishingPersistsTooltip>
   <VF_AerialVehicles>Aeronaves</VF_AerialVehicles>
+  <VF_DrawLandingGhost>Draw Landing Spot</VF_DrawLandingGhost>
+  <VF_DrawLandingGhostTooltip>Draws a transparent 'blueprint' where an aerial vehicle is landing.</VF_DrawLandingGhostTooltip>
   <VF_RocketsBurnRadius>Coheteria</VF_RocketsBurnRadius>
   <VF_RocketsBurnRadiusTooltip>Permite a las aeronaves con esta funcion quemar un pequeño radio a su alrededor al despegar o aterrizar.</VF_RocketsBurnRadiusTooltip>
   <VF_DynamicDrawing>Dibujo dinamico</VF_DynamicDrawing>

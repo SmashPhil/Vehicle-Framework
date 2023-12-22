@@ -13,6 +13,8 @@ namespace Vehicles
 	[StaticConstructorOnStartup]
 	public class VehicleCaravan : Caravan, IVehicleWorldObject
 	{
+		private const int RepairMothballTicks = 300;
+
 		private static readonly Texture2D SplitCommand = ContentFinder<Texture2D>.Get("UI/Commands/SplitCaravan", true);
 		private static readonly Dictionary<VehicleDef, int> vehicleCounts = new Dictionary<VehicleDef, int>();
 
@@ -28,6 +30,8 @@ namespace Vehicles
 		private VehiclePawn leadVehicle;
 		private bool initialized;
 
+		private bool repairing;
+
 		private List<VehiclePawn> vehicles = new List<VehiclePawn>();
 
 		public VehicleCaravan() : base()
@@ -39,6 +43,10 @@ namespace Vehicles
 			vPather = vehiclePather;
 #pragma warning restore 0618
 		}
+
+		public float ConstructionAverage { get; private set; }
+
+		public bool VehiclesNeedRepairs { get; private set; }
 
 		public override Vector3 DrawPos => vehicleTweener.TweenedPos;
 
@@ -61,6 +69,22 @@ namespace Vehicles
 						yield return pawn;
 					}
 				}
+			}
+		}
+
+		public bool Repairing
+		{
+			get
+			{
+				if (vehiclePather.Moving)
+				{
+					return false;
+				}
+				return repairing;
+			}
+			set
+			{
+				repairing = value;
 			}
 		}
 
@@ -269,8 +293,11 @@ namespace Vehicles
 				{
 					yield return new Command_Toggle
 					{
+						defaultLabel = "CommandPauseCaravan".Translate(),
+						defaultDesc = "CommandToggleCaravanPauseDesc".Translate(2f.ToString("0.#"), 0.3f.ToStringPercent()),
+						icon = TexCommand.PauseCaravan,
 						hotKey = KeyBindingDefOf.Misc1,
-						isActive = (() => vehiclePather.Paused),
+						isActive = () => vehiclePather.Paused,
 						toggleAction = delegate()
 						{
 							if (!vehiclePather.Moving)
@@ -279,13 +306,26 @@ namespace Vehicles
 							}
 							vehiclePather.Paused = !vehiclePather.Paused;
 						},
-						defaultDesc = "CommandToggleCaravanPauseDesc".Translate(2f.ToString("0.#"), 0.3f.ToStringPercent()),
-						icon = TexCommand.PauseCaravan,
-						defaultLabel = "CommandPauseCaravan".Translate()
 					};
 				}
 				else
 				{
+					if (VehiclesNeedRepairs)
+					{
+						yield return new Command_Toggle
+						{
+							defaultLabel = "VF_ToggleRepairVehicle".Translate(),
+							defaultDesc = "VF_ToggleRepairVehicleDesc".Translate(),
+							icon = VehicleTex.RepairVehicles,
+							hotKey = KeyBindingDefOf.Misc2,
+							isActive = () => !vehiclePather.Moving && repairing && VehiclesNeedRepairs,
+							toggleAction = delegate ()
+							{
+								repairing = !repairing;
+							},
+						};
+					}
+
 					//TODO - Disabled as of 1.5.1425, needs bugfixing
 					//Command_Action disembark = new Command_Action();
 					//disembark.icon = VehicleTex.Anchor;
@@ -343,6 +383,17 @@ namespace Vehicles
 						vehiclePather.StopDead();
 					}
 				};
+				yield return new Command_Action
+				{
+					defaultLabel = "Repair all Vehicles",
+					action = delegate ()
+					{
+						foreach (VehiclePawn vehicle in Vehicles)
+						{
+							vehicle.statHandler.components.ForEach(c => c.HealComponent(float.MaxValue));
+						}
+					}
+				};
 			}
 		}
 
@@ -356,6 +407,7 @@ namespace Vehicles
 		{
 			base.Notify_Merged(group);
 			RecacheVehicles();
+			RecacheStatAverages();
 		}
 
 		public override void Notify_MemberDied(Pawn member)
@@ -379,6 +431,7 @@ namespace Vehicles
 				member.Strip();
 				RemovePawn(member);
 			}
+			RecacheStatAverages();
 		}
 
 		public void RecacheVehicles()
@@ -386,6 +439,29 @@ namespace Vehicles
 			vehicles = pawns.InnerListForReading.Where(pawn => pawn is VehiclePawn).Cast<VehiclePawn>().ToList();
 			leadVehicle = null;
 			ValidateCaravanType();
+			RecacheStatAverages();
+		}
+
+		public void RecacheStatAverages()
+		{
+			float total = 0;
+			int pawnCount = 0;
+			foreach (Pawn pawn in PawnsListForReading)
+			{
+				if (pawn.IsColonistPlayerControlled || pawn.IsColonyMechPlayerControlled)
+				{
+					total += pawn.GetStatValue(StatDefOf.ConstructionSpeed);
+					pawnCount++;
+				}
+			}
+			float average = 1;
+			if (pawnCount > 0)
+			{
+				average = total /pawnCount;
+			}
+			ConstructionAverage = average;
+
+			VehiclesNeedRepairs = vehicles.Any(vehicle => vehicle.statHandler.ComponentsPrioritized.Any(c => c.HealthPercent < 1));
 		}
 
 		public virtual void PostInit()
@@ -404,8 +480,11 @@ namespace Vehicles
 			{
 				Debug.Message($"VehicleCaravan {this} has no more vehicles. Converting to normal caravan. Pawns={string.Join($", ", pawns.InnerListForReading.Select(pawn => pawn.Label))}");
 				List<Pawn> pawnsToTransfer = pawns.InnerListForReading.ToList();
-				RemoveAllPawns();
-				Caravan caravan = CaravanMaker.MakeCaravan(pawnsToTransfer, Faction, Tile, true);
+				if (!pawnsToTransfer.NullOrEmpty())
+				{
+					RemoveAllPawns();
+					Caravan caravan = CaravanMaker.MakeCaravan(pawnsToTransfer, Faction, Tile, true);
+				}
 				if (!Destroyed)
 				{
 					Destroy();
@@ -603,18 +682,9 @@ namespace Vehicles
 				}
 				else
 				{
-
+					VehiclePawn.TrySatisfyPawnNeeds(pawn);
 				}
 			}
-		}
-
-		private void TrySatisfyPawnNeeds(Pawn pawn)
-		{
-			if (pawn.Dead)
-			{
-				return;
-			}
-			VehiclePawn.TrySatisfyPawnNeeds(pawn);
 		}
 
 		public override void Tick()
@@ -627,6 +697,45 @@ namespace Vehicles
 				foreach (VehiclePawn vehicle in vehicles)
 				{
 					vehicle.CompFueledTravel?.ConsumeFuelWorld();
+				}
+			}
+			else
+			{
+				int gameTicks = Find.TickManager.TicksGame;
+				if (gameTicks % RepairMothballTicks == 0)
+				{
+					RecacheStatAverages();
+				}
+				if (VehiclesNeedRepairs && Repairing && gameTicks % RepairMothballTicks == 0)
+				{
+					RepairAllVehicles();
+				}
+			}
+		}
+
+		public void RepairAllVehicles()
+		{
+			LearnSkill(SkillDefOf.Construction, RepairMothballTicks);
+			foreach (VehiclePawn vehicle in vehicles)
+			{
+				VehicleComponent component = vehicle.statHandler.ComponentsPrioritized.FirstOrDefault(c => c.HealthPercent < 1);
+				if (component != null)
+				{
+					component.HealComponent(vehicle.GetStatValue(VehicleStatDefOf.RepairRate) * RepairMothballTicks / JobDriver_RepairVehicle.TicksForRepair);
+					vehicle.CrashLanded = false;
+					return; //Only repair 1 vehicle at a time
+				}
+			}
+		}
+
+		public void LearnSkill(SkillDef skillDef, int mothballTicks)
+		{
+			foreach (Pawn pawn in PawnsListForReading)
+			{
+				if (pawn.IsColonistPlayerControlled || pawn.IsColonyMechPlayerControlled)
+				{
+					pawn.skills?.Learn(skillDef, 0.08f * mothballTicks, false);
+					pawn.records.Increment(RecordDefOf.ThingsRepaired);
 				}
 			}
 		}
@@ -654,6 +763,7 @@ namespace Vehicles
 		{
 			base.ExposeData();
 			Scribe_Deep.Look(ref vehiclePather, nameof(vehiclePather), new object[] { this });
+			Scribe_Values.Look(ref repairing, nameof(repairing));
 
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{

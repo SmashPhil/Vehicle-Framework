@@ -8,6 +8,21 @@
 		<verb>pack</verb>
 		<gerund>packing</gerund>
 		<priorityInType>80</priorityInType>
+		
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+	</WorkGiverDef>
+	
+	<WorkGiverDef>
+		<defName>HelpPackVehicleCaravan</defName>
+		<label>pack vehicle</label>
+		<giverClass>Vehicles.WorkGiver_HelpGatheringItemsForVehicleCaravan</giverClass>
+		<workType>Hauling</workType>
+		<verb>pack</verb>
+		<gerund>packing</gerund>
+		<priorityInType>80</priorityInType>
+		
 		<requiredCapacities>
 			<li>Manipulation</li>
 		</requiredCapacities>
@@ -21,6 +36,7 @@
 		<verb>pack</verb>
 		<gerund>packing</gerund>
 		<priorityInType>80</priorityInType>
+		
 		<requiredCapacities>
 			<li>Manipulation</li>
 		</requiredCapacities>
@@ -34,6 +50,7 @@
 		<verb>load</verb>
 		<gerund>loading</gerund>
 		<priorityInType>60</priorityInType>
+		
 		<requiredCapacities>
 			<li>Manipulation</li>
 		</requiredCapacities>
@@ -47,6 +64,7 @@
 		<verb>upgrade</verb>
 		<gerund>upgrading</gerund>
 		<priorityInType>70</priorityInType>
+		
 		<requiredCapacities>
 			<li>Manipulation</li>
 		</requiredCapacities>
@@ -60,6 +78,7 @@
 		<verb>refuel</verb>
 		<gerund>refueling</gerund>
 		<priorityInType>90</priorityInType>
+		
 		<requiredCapacities>
 			<li>Manipulation</li>
 		</requiredCapacities>
@@ -73,6 +92,7 @@
 		<verb>repair</verb>
 		<gerund>repairing</gerund>
 		<priorityInType>80</priorityInType>
+		
 		<requiredCapacities>
 			<li>Manipulation</li>
 		</requiredCapacities>
@@ -86,6 +106,7 @@
 		<verb>disassemble</verb>
 		<gerund>disassembling</gerund>
 		<priorityInType>80</priorityInType>
+		
 		<requiredCapacities>
 			<li>Manipulation</li>
 		</requiredCapacities>
@@ -99,6 +120,7 @@
 		<verb>paint</verb>
 		<gerund>painting</gerund>
 		<priorityInType>100</priorityInType>
+		
 		<requiredCapacities>
 			<li>Manipulation</li>
 		</requiredCapacities>

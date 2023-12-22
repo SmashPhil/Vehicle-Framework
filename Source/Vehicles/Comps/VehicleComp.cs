@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Verse;
+using Verse.AI;
 using SmashTools;
 using UnityEngine;
 
@@ -41,7 +42,7 @@ namespace Vehicles
 		{
 		}
 
-		public virtual void PostDrawUnspawned(Vector3 drawLoc, float rotation)
+		public virtual void PostDrawUnspawned(Vector3 drawLoc, Rot8 rot, float rotation)
 		{
 		}
 
@@ -64,6 +65,11 @@ namespace Vehicles
 		{
 			failReason = string.Empty;
 			return true;
+		}
+
+		public virtual bool IsThreat(IAttackTargetSearcher searcher)
+		{
+			return false;
 		}
 
 		public virtual void StartTicking()

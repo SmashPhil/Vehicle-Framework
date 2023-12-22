@@ -499,7 +499,7 @@ namespace Vehicles
 						need.CurLevel = 0.5f; //TODO - add comfort factor for roles
 						break;
 					case Need_Outdoors _:
-						if (handler.role.exposed)
+						if (handler == null || handler.role.exposed)
 						{
 							need.NeedInterval();
 						}

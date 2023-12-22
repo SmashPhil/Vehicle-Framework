@@ -14,6 +14,9 @@ namespace Vehicles
 
 		private static Listing_SplitColumns listing = new Listing_SplitColumns();
 
+		[TweakField(SettingsType = UISettingsType.Checkbox)]
+		public bool showBody = true;
+
 		[TweakField(SettingsType = UISettingsType.ToggleLabel)]
 		public Rot4 north = Rot8.North;
 		[TweakField(SettingsType = UISettingsType.ToggleLabel)]

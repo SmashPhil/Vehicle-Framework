@@ -20,13 +20,14 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan_PathFollower), "StartPath"),
 				prefix: new HarmonyMethod(typeof(WorldPathing),
 				nameof(StartVehicleCaravanPath)));
+
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldRoutePlanner), nameof(WorldRoutePlanner.WorldRoutePlannerUpdate)),
 				prefix: new HarmonyMethod(typeof(WorldPathing),
 				nameof(VehicleRoutePlannerUpdateHook)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldRoutePlanner), nameof(WorldRoutePlanner.WorldRoutePlannerOnGUI)),
 				prefix: new HarmonyMethod(typeof(WorldPathing),
 				nameof(VehicleRoutePlannerOnGUIHook)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldRoutePlanner), nameof(WorldRoutePlanner.DoRoutePlannerButton)), prefix: null,
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldRoutePlanner), nameof(WorldRoutePlanner.DoRoutePlannerButton)), 
 				postfix: new HarmonyMethod(typeof(WorldPathing),
 				nameof(VehicleRoutePlannerButton)));
 		}

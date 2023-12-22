@@ -3,6 +3,7 @@
   <Board.reportString>Entrando em AlvoA.</Board.reportString>
   <LoadUpgradeMaterials.reportString>Carregando materiais de atualização em AlvoB.</LoadUpgradeMaterials.reportString>
   <IdleVehicle.reportString>Inativo.</IdleVehicle.reportString>
+  <DeployVehicle.reportString>Deploying.</DeployVehicle.reportString>
   <PrepareCaravan_GatheringVehicle.reportString>Carregando carga para AlvoB.</PrepareCaravan_GatheringVehicle.reportString>
   <RopeAnimalToVehicle.reportString>Amarração de {0} a AlvoA.</RopeAnimalToVehicle.reportString>
   <CarryPawnToVehicle.reportString>Transportando AlvoA para AlvoB.</CarryPawnToVehicle.reportString>

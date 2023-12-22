@@ -20,101 +20,9 @@ namespace Vehicles
 		[Unsaved]
 		public VehicleSustainers sustainers;
 
-		private CompVehicleTurrets compVehicleTurrets;
-		private CompFueledTravel compFuel;
-		private CompUpgradeTree compUpgradeTree;
-		private CompVehicleLauncher compVehicleLauncher;
-
-		private SelfOrderingList<ThingComp> cachedComps = new SelfOrderingList<ThingComp>();
-		private List<ThingComp> compTickers = new List<ThingComp>();
-
 		private List<TimedExplosion> explosives = new List<TimedExplosion>();
 
 		public override bool Suspended => false; //Vehicles are not suspendable
-
-		public CompVehicleTurrets CompVehicleTurrets
-		{
-			get
-			{
-				if (compVehicleTurrets is null)
-				{
-					compVehicleTurrets = GetCachedComp<CompVehicleTurrets>();
-				}
-				return compVehicleTurrets;
-			}
-		}
-
-		public CompFueledTravel CompFueledTravel
-		{
-			get
-			{
-				if (compFuel is null)
-				{
-					compFuel = GetCachedComp<CompFueledTravel>();
-				}
-				return compFuel;
-			}
-		}
-
-		public CompUpgradeTree CompUpgradeTree
-		{
-			get
-			{
-				if (compUpgradeTree is null)
-				{
-					compUpgradeTree = GetCachedComp<CompUpgradeTree>();
-				}
-				return compUpgradeTree;
-			}
-		}
-
-		public CompVehicleLauncher CompVehicleLauncher
-		{
-			get
-			{
-				if (compVehicleLauncher is null)
-				{
-					compVehicleLauncher = GetCachedComp<CompVehicleLauncher>();
-				}
-				return compVehicleLauncher;
-			}
-		}
-
-		public void AddComp(ThingComp comp)
-		{
-			cachedComps.Add(comp);
-		}
-
-		public void RemoveComp(ThingComp comp)
-		{
-			cachedComps.Remove(comp);
-		}
-
-		public T GetCachedComp<T>() where T : ThingComp
-		{
-			for (int i = 0; i < cachedComps.Count; i++)
-			{
-				if (cachedComps[i] is T t)
-				{
-					cachedComps.CountIndex(i);
-					return t;
-				}
-			}
-			return default;
-		}
-
-		protected virtual void RecacheComponents()
-		{
-			cachedComps = new SelfOrderingList<ThingComp>();
-			foreach (ThingComp thingComp in AllComps)
-			{
-				cachedComps.Add(thingComp);
-				if (!(thingComp is VehicleComp vehicleComp) || !vehicleComp.TickByRequest)
-				{
-					compTickers.Add(thingComp); //Tick normally, if VehicleComp and not TickByRequest it cannot request to stop
-				}
-			}
-		}
 
 		public TimedExplosion AddTimedExplosion(IntVec2 cell, int ticks, int radius, DamageDef damageDef, int damageAmount = -1, float armorPenetration = -1, DrawOffsets drawOffsets = null)
 		{
@@ -213,7 +121,7 @@ namespace Vehicles
 				{
 					vehiclePather.PatherTick();
 					stances.StanceTrackerTick();
-					if (Drafted)
+					if (Drafted || Deploying)
 					{
 						jobs.JobTrackerTick();
 					}

@@ -11,5 +11,8 @@
   <Manual>Manual</Manual>
   <Opportunistic>Oportunista</Opportunistic>
   <Automatic>Automático</Automatic>
+  <VF_VehicleTracksNone>None</VF_VehicleTracksNone>
+  <VF_VehicleTracksVanilla>Vanilla</VF_VehicleTracksVanilla>
+  <VF_VehicleTracksFull>Full</VF_VehicleTracksFull>
 </LanguageData>
 

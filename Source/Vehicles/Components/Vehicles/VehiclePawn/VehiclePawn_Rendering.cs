@@ -307,7 +307,7 @@ namespace Vehicles
 			{
 				Vector3 drawPos = DrawPos;
 				float rotation = this.CalculateAngle(out _);
-				DrawAt(drawPos, rotation, compDraw: false);
+				DrawAt(drawPos, FullRotation, rotation, compDraw: false);
 			}
 			Comps_PostDraw();
 		}
@@ -328,23 +328,23 @@ namespace Vehicles
 		/// <param name="drawLoc"></param>
 		/// <param name="rotation"></param>
 		/// <param name="flip"></param>
-		public virtual void DrawAt(Vector3 drawLoc, float rotation, bool flip = false, bool compDraw = true)
+		public virtual void DrawAt(Vector3 drawLoc, Rot8 rot, float extraRotation, bool flip = false, bool compDraw = true)
 		{
 			bool northSouthRotation = VehicleGraphic.EastDiagonalRotated && (FullRotation == Rot8.NorthEast || FullRotation == Rot8.SouthEast) ||
 				(VehicleGraphic.WestDiagonalRotated && (FullRotation == Rot8.NorthWest || FullRotation == Rot8.SouthWest));
-			Drawer.renderer.RenderPawnAt(drawLoc, rotation, northSouthRotation);
+			Drawer.renderer.RenderPawnAt(drawLoc, extraRotation, northSouthRotation);
 			foreach (VehicleHandler handler in HandlersWithPawnRenderer)
 			{
 				handler.RenderPawns();
 			}
 			if (compDraw) //Temp fix till I get to cleaning up these 3 Draw methods
 			{
-				Comps_PostDrawUnspawned(drawLoc, rotation);
+				Comps_PostDrawUnspawned(drawLoc, rot, extraRotation);
 			}
 			statHandler.DrawHitbox(HighlightedComponent);
 		}
 
-		public virtual void Comps_PostDrawUnspawned(Vector3 drawLoc, float rotation)
+		public virtual void Comps_PostDrawUnspawned(Vector3 drawLoc, Rot8 rot, float rotation)
 		{
 			if (AllComps != null)
 			{
@@ -352,7 +352,7 @@ namespace Vehicles
 				{
 					if (thingComp is VehicleComp vehicleComp)
 					{
-						vehicleComp.PostDrawUnspawned(drawLoc, rotation);
+						vehicleComp.PostDrawUnspawned(drawLoc, rot, rotation);
 					}
 				}
 			}
@@ -422,6 +422,11 @@ namespace Vehicles
 			{
 				return;
 			}
+			if (!VehicleDef.rotatable)
+			{
+				Rotation = VehicleDef.defaultPlacingRot;
+				return;
+			}
 			IntVec3 intVec = vehiclePather.nextCell - Position;
 			if (intVec.x > 0)
 			{
@@ -485,7 +490,6 @@ namespace Vehicles
 
 			if (!cargoToLoad.NullOrEmpty())
 			{
-				//TODO - can throw NRE
 				foreach (TransferableOneWay transferable in cargoToLoad)
 				{
 					if (transferable.HasAnyThing)
@@ -503,20 +507,25 @@ namespace Vehicles
 
 		public override IEnumerable<Gizmo> GetGizmos()
 		{
-			if (MovementPermissions > VehiclePermissions.NotAllowed)
-			{
-				foreach (Gizmo gizmo in ignition.GetGizmos())
-				{
-					yield return gizmo;
-				}
-			}
-
 			foreach (Type type in VehicleDef.designatorTypes)
 			{
 				Designator designator = DesignatorCache.Get(type);
 				if (designator != null)
 				{
 					//yield return designator;
+				}
+			}
+
+			if (Faction != Faction.OfPlayer && !DebugSettings.ShowDevGizmos)
+			{
+				yield break;
+			}
+
+			if (MovementPermissions > VehiclePermissions.NotAllowed)
+			{
+				foreach (Gizmo gizmo in ignition.GetGizmos())
+				{
+					yield return gizmo;
 				}
 			}
 

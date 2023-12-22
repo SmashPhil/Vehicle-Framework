@@ -45,6 +45,7 @@ namespace Vehicles
 
 		public bool faceDirectionOfTravel = true;
 		public bool circleToLand = true;
+		public int deployTicks = 0;
 
 		public string shadow = "Things/Skyfaller/SkyfallerShadowCircle";
 

@@ -4,7 +4,6 @@ using System.Linq;
 using Verse;
 using SmashTools;
 using UnityEngine;
-using AnimationEvent = SmashTools.AnimationEvent;
 
 namespace Vehicles
 {
@@ -13,7 +12,7 @@ namespace Vehicles
 		public int maxTicksVertical;
 
 		public List<GraphicDataLayered> additionalTexturesVertical;
-		public List<AnimationEvent> eventsVertical;
+		public List<AnimationEvent<LaunchProtocol>> eventsVertical;
 
 		/* ----- Shadows ----- */
 		[GraphEditable]

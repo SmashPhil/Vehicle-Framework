@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
@@ -14,6 +15,9 @@ namespace Vehicles
 {
 	public static class Ext_Vehicles
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsRoofed(IntVec3 cell, Map map) => cell.Roofed(map);
+
 		/// <summary>
 		/// Rotates <paramref name="cell"/> for vehicle rect.
 		/// </summary>
@@ -199,6 +203,19 @@ namespace Vehicles
 					}
 				});
 
+				if (!vehicle.VehicleDef.events.NullOrEmpty())
+				{
+					foreach ((VehicleEventDef vehicleEventDef, List<ResolvedMethod<VehiclePawn>> methods) in vehicle.VehicleDef.events)
+					{
+						if (!methods.NullOrEmpty())
+						{
+							foreach (ResolvedMethod<VehiclePawn> method in methods)
+							{
+								vehicle.AddEvent(vehicleEventDef, () => method.Invoke(null, vehicle));
+							}
+						}
+					}
+				}
 				if (!vehicle.VehicleDef.statEvents.NullOrEmpty())
 				{
 					foreach (StatCache.EventLister eventLister in vehicle.VehicleDef.statEvents)
@@ -433,13 +450,18 @@ namespace Vehicles
 			return pawns?.NotNullAndAny(x => IsBoat(x)) ?? false;
 		}
 
+		public static bool IsFormingVehicleCaravan(this Pawn pawn)
+		{
+			return pawn.GetLord()?.LordJob is LordJob_FormAndSendVehicles;
+		}
+
 		/// <summary>
 		/// Caravan contains one or more Vehicles
 		/// </summary>
 		/// <param name="pawn"></param>
 		public static bool HasVehicleInCaravan(this Pawn pawn)
 		{
-			return pawn.IsFormingCaravan() && pawn.GetLord().LordJob is LordJob_FormAndSendVehicles && pawn.GetLord().ownedPawns.NotNullAndAny(p => p is VehiclePawn);
+			return pawn.IsFormingVehicleCaravan() && pawn.GetLord().ownedPawns.NotNullAndAny(p => p is VehiclePawn);
 		}
 
 		/// <summary>

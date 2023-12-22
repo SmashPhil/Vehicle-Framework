@@ -21,16 +21,16 @@ namespace Vehicles
 		//[PostToSettings(Label = "VF_TicksPerCharge", Translate = true, UISettingsType = UISettingsType.FloatBox)]
 		public float chargeRate;
 
-		[PostToSettings(Label = "VF_FuelConsumptionRate", Translate = true, UISettingsType = UISettingsType.FloatBox)]
+		[PostToSettings(Label = "VF_FuelConsumptionRate", Tooltip = "VF_FuelConsumptionRateTooltip", Translate = true, UISettingsType = UISettingsType.FloatBox)]
 		public float fuelConsumptionRate;
-		[PostToSettings(Label = "VF_FuelCapacity", Translate = true, UISettingsType = UISettingsType.IntegerBox)]
+		[PostToSettings(Label = "VF_FuelCapacity", Tooltip = "VF_FuelCapacityTooltip", Translate = true, UISettingsType = UISettingsType.IntegerBox)]
 		public int fuelCapacity;
 		
-		[PostToSettings(Label = "VF_FuelConsumptionRateWorldMultiplier", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
+		[PostToSettings(Label = "VF_FuelConsumptionRateWorldMultiplier", Tooltip = "VF_FuelConsumptionRateWorldMultiplierTooltip", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(Increment = 0.1f, MinValue = 0, MaxValue = 2)]
 		public float fuelConsumptionWorldMultiplier = 1;
 
-		[PostToSettings(Label = "VF_AutoRefuelPercent", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
+		[PostToSettings(Label = "VF_AutoRefuelPercent", Tooltip = "VF_AutoRefuelPercentTooltip", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(Increment = 0.05f, MinValue = 0, MaxValue = 1, RoundDecimalPlaces = 2)]
 		public float autoRefuelPercent = 1;
 		

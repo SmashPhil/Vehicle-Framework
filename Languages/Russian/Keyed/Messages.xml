@@ -2,6 +2,7 @@
 <LanguageData>
   <VF_MustSelectColorPalette>Для сохранения необходимо выбрать перезаписываемую палитру.</VF_MustSelectColorPalette>
   <VF_VehicleUnableToMove>{0_labelShort} не может двигаться.</VF_VehicleUnableToMove>
+  <VF_VehicleImmobileDeployed>{0_labelShort} развёрнут и не может двигаться.</VF_VehicleImmobileDeployed>
   <VF_HandlerNotEnoughRoom>Не удалось добавить {0} в {1}. Нет свободного места.</VF_HandlerNotEnoughRoom>
   <VF_NotEnoughToOperate>Не хватает экипажа для работы транспорта.</VF_NotEnoughToOperate>
   <VF_OutOfFuel>Невозможно завести двигатель — необходимо больше топлива.</VF_OutOfFuel>

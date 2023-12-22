@@ -50,5 +50,6 @@ namespace Vehicles
 		public static VehicleEventDef AerialVehicleLanding;
 		public static VehicleEventDef AerialVehicleCrashLanding;
 		public static VehicleEventDef AerialVehicleLeftMap;
+		public static VehicleEventDef AerialVehicleOrdered;
 	}
 }

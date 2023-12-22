@@ -136,7 +136,7 @@ namespace Vehicles
 						}
 						else
 						{
-							if(pawn is null)
+							if (pawn is null)
 							{
 								if (flag)
 								{
@@ -180,7 +180,7 @@ namespace Vehicles
 
 		public static bool IsUsableCarrier(VehiclePawn vehicle, Pawn forPawn)
 		{
-			return vehicle.IsFormingCaravan() && (!vehicle.DestroyedOrNull() && vehicle.Spawned) && vehicle.Faction == forPawn.Faction 
+			return vehicle.IsFormingVehicleCaravan() && (!vehicle.DestroyedOrNull() && vehicle.Spawned) && vehicle.Faction == forPawn.Faction 
 				&& !vehicle.IsBurning() && vehicle.movementStatus != VehicleMovementStatus.Offline
 				&& !MassUtility.IsOverEncumbered(vehicle);
 		}

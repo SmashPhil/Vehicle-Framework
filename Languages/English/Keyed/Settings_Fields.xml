@@ -57,9 +57,13 @@
 	<VF_DischargePerTick>Discharge Rate</VF_DischargePerTick>
 	<VF_TicksPerCharge>Charge Rate</VF_TicksPerCharge>
 	<VF_FuelConsumptionRate>Fuel Rate</VF_FuelConsumptionRate>
-	<VF_FuelConsumptionRateWorldMultiplier>World Multiplier</VF_FuelConsumptionRateWorldMultiplier>
+	<VF_FuelConsumptionRateTooltip>Fuel consumed per day</VF_FuelConsumptionRateTooltip>
+	<VF_FuelConsumptionRateWorldMultiplier>Fuel World %</VF_FuelConsumptionRateWorldMultiplier>
+	<VF_FuelConsumptionRateWorldMultiplierTooltip>Fuel consumption multiplier on the world map</VF_FuelConsumptionRateWorldMultiplierTooltip>
 	<VF_FuelCapacity>Fuel Capacity</VF_FuelCapacity>
+	<VF_FuelCapacityTooltip>Amount of fuel that can be stored</VF_FuelCapacityTooltip>
 	<VF_AutoRefuelPercent>Auto Refuel %</VF_AutoRefuelPercent>
+	<VF_AutoRefuelPercentTooltip>Colonists will attempt to refuel the vehicle when fuel gets below this percent.</VF_AutoRefuelPercentTooltip>
 	
 	<VF_FuelConsumptionWorld>Fuel Rate %</VF_FuelConsumptionWorld>
 	<VF_FuelConsumptionWorldTooltip>Fuel consumption multiplier on the world map.</VF_FuelConsumptionWorldTooltip>
@@ -81,4 +85,5 @@
 	<VF_MaxFallRateTooltip>Max amount this vehicle will descend when shot down or out of fuel.</VF_MaxFallRateTooltip>
 	
 	<VF_Instant>Instant</VF_Instant>
+	<VF_DeployTime>Deploy Time</VF_DeployTime>
 </LanguageData>

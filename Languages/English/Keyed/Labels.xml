@@ -50,8 +50,14 @@
 	<VF_EditPawnOverlayRendererTooltip>Edit Pawn Overlay</VF_EditPawnOverlayRendererTooltip>
 	<VF_ComponentClickMoreInfoTooltip>Click for detailed information.</VF_ComponentClickMoreInfoTooltip>
 	
-	<!-- Turret Restrictions -->
+	<!-- Turrets -->
+	<VF_Deploy>Deploy</VF_Deploy>
+	<VF_Undeploy>Undeploy</VF_Undeploy>
+	<VF_DeployDescription>Deploy vehicle to enable use of turrets.</VF_DeployDescription>
+	<VF_MustBeDeployed>Must be deployed.</VF_MustBeDeployed>
+	<VF_MustBeUndeployed>Must be undeployed.</VF_MustBeUndeployed>
 	<VF_VehicleRestriction_Stationary>Cannot fire while moving.</VF_VehicleRestriction_Stationary>
+	<VF_TurretComponentDisabled>{0} needs repairs.</VF_TurretComponentDisabled>
 	
 	<!-- Color Picker -->
 	<VF_Patterns>Patterns</VF_Patterns>
@@ -96,6 +102,7 @@
 	
 	<VF_NoFuelReturnTrip>No Return Trip</VF_NoFuelReturnTrip>
 	<VF_NotEnoughFuel>Out Of Range</VF_NotEnoughFuel>
+	<VF_ConfirmationCancelLanding>Cancel landing in this map? Aerial vehicle will be kicked out to the world map.</VF_ConfirmationCancelLanding>
 	
 	<!-- HeaderTitles -->
 	<VF_Cargo>Cargo</VF_Cargo>
