@@ -22,7 +22,7 @@ namespace Vehicles
 		[DisableSetting]
 		[PostToSettings(Label = "VF_CombatPower", Translate = true, Tooltip = "VF_CombatPowerTooltip", UISettingsType = UISettingsType.FloatBox)]
 		[NumericBoxValues(MinValue = 0, MaxValue = float.MaxValue)]
-		public float combatPower = 0;
+		public float combatPower = 100;
 
 		//Editing in ModSettings is handled manually as StatModifier list won't serialize well to the config file in the existing setup.
 		public List<VehicleStatModifier> vehicleStats;
@@ -47,7 +47,11 @@ namespace Vehicles
 		[TweakField]
 		[PostToSettings(Label = "VF_Properties", Translate = true, ParentHolder = true)]
 		public VehicleProperties properties;
-		
+
+		//[TweakField]
+		//[PostToSettings(Label = "VF_NPCProperties", Translate = true, ParentHolder = true)]
+		public VehicleNPCProperties npcProperties;
+
 		[TweakField]
 		public VehicleDrawProperties drawProperties;
 
@@ -244,7 +248,7 @@ namespace Vehicles
 			{
 				yield return error;
 			}
-			foreach (string error in properties.ConfigErrors())
+			foreach (string error in properties.ConfigErrors(this))
 			{
 				yield return error;
 			}

@@ -286,6 +286,10 @@ namespace Vehicles
 		{
 			foreach (VehicleTurret turret in turrets)
 			{
+				if (!turret.parentKey.NullOrEmpty())
+				{
+					continue; //Attached turrets temporarily disabled from rendering
+				}
 				if (!turret.NoGraphic)
 				{
 					yield return RetrieveTurretSettingsGraphicsProperties(rect, vehicleDef, rot, turret, patternData);

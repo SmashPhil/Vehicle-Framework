@@ -145,6 +145,7 @@ namespace Vehicles
 			VehicleReservationManager reservationManager = Map.GetCachedMapComponent<VehicleReservationManager>();
 			reservationManager.ClearReservedFor(this);
 			reservationManager.RemoveAllListerFor(this);
+			cargoToLoad.Clear(); //Clear cargo when leaving map, otherwise pawns may attempt to access those items from another map
 			Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleDespawned(this);
 			EventRegistry[VehicleEventDefOf.Despawned].ExecuteEvents();
 			base.DeSpawn(mode);

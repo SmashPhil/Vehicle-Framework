@@ -9,7 +9,7 @@ namespace Vehicles
 		Misc = 0,
 		Transport = 1, 
 		Trader = 2, 
-		Combat = 4, 
+		Combat = 4,
 		Hybrid = 6
 	}
 }

@@ -507,7 +507,7 @@ namespace Vehicles
 
 		private void DoBottomButtons(Rect buttonRect)
 		{
-			if (Widgets.ButtonText(buttonRect, "VF_ApplyButton".Translate()))
+			if (Widgets.ButtonText(buttonRect, "ApplyButton".Translate()))
 			{
 				OnSave(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, selectedPattern, new Vector2(displacementX, displacementY), additionalTiling);
 				Close(true);

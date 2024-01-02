@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <!--Can utilize Version.txt file placed in mod's root directory-->
+  <currentVersion>1.5.1475</currentVersion>
+  <!--Startup,GameInit,LoadedGame,NewGame-->
+  <updateOn>GameInit</updateOn>
+  <!--Full description shown in update page-->
+  <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+Hey everyone! It's been awhile since the last update. Aside from bugfixes I've implemented a few suggestions and QoL features, so thank you again to everyone for the feedback.
+
+Vehicle Framework has come a long way since the initial release, and I'm excited to see what it will look like next year. Luckily, I made it just in time for Christmas so I hope this is a sufficient gift :)
+
+Happy Holidays!
+
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed bug where immoveable vehicles would share regions with moveable ones, causing some vehicles to not update the regions / pathgrid throughout the game.
+
+- Fixed bug where modifying movement permissions wouldn't recache owners of regions.
+
+- Fixed bug where component cache wouldn't clear upon reloading the game.
+
+- Fixed bug where dedicated threads would not dispose when reloading the game.
+
+- Fixed bug where raiders would hard focus vehicles.
+
+- Fixed bug where reloading a game with a vehicle caravan would recalculate an invalid path.
+
+- Fixed bug where launching an aerial vehicle with dismounted pawns would delete them.
+
+- Fixed bug where aerial vehicles on the world map were not restricted from launching under any circumstance.
+
+- Fixed bug where arriving at a site in an Aerial vehicle would load a full sized map, rather than a small event map.
+
+- Fixed bug where dismounted pawns in a vehicle caravan would not satisfy needs. 
+
+- Fixed bug where an idle vehicle would still render a tiny line to its current position.
+
+- Fixed bug where vehicle turrets capable of non-LOS aiming would still require LOS for auto-targeting.
+
+- Fixed bug where vehicle turrets would auto-target outside their limits of fire.
+
+- Fixed bug where vehicle turrets would auto-target outside their min / max range.
+
+- Fixed bug where vehicle turrets would reset their angle upon entering a map.
+
+- Fixed bug where overlays layered beneath the vehicle would still render on top of the vehicle in UI.
+
+- Fixed bug where pawns would unload the entire vehicle's cargo upon returning.
+
+- Fixed bug where pawn inventories would be reassigned to a vehicle upon reforming a caravan.
+
+- Fixed bug where loading cargo that is forbidden would fail to assign the job.
+
+- Fixed bug where vehicles spawning via scenarios (or using mods like Character Editor and Prepare Carefully) would only partially generate the vehicle, leaving it unusable.
+
+- Fixed bug where the vehicle list in the mod settings wouldn't scroll all the way to the bottom if mods with long names were added.
+&lt;title&gt;Performance Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Optimized pathgrid updating when snowing
+
+- Optimized memory usage for dedicated thread requests
+
+- Optimized pawn overlay rendering in vehicles.  This should now be no more costly than vanilla pawn rendering.
+&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+&lt;b&gt;Players&lt;/b&gt;
+- Vehicles can be repaired in caravans
+
+- Vehicle Caravans now allow non-caravan pawns to assist with loading items.
+
+- Added toggle for rendering where aerial vehicles are landing
+
+- When landing at a map, if no edge or center cell is found it will now default to forced targeting.
+
+- When landing and in 'forced targeting', right clicking (or your cancel keybind) will allow you to exit out to the world map should you be unable to land on the map.
+
+- Added 'friendly fire' field in the mod settings for running over pawns.  This will allow you to keep the mechanic enabled without being forced to deal with accidentally running over friendlies.
+
+- Added ring radius when targeting with turrets that have spread.
+
+&lt;b&gt;Modders&lt;/b&gt;
+- Added specific target locking, allowing vehicles to enable target persistence explicitly for Cell, Pawn, or Thing. Before you could only enable target persistence for all or none.
+
+- Added 'component' check for vehicle turrets, allowing turrets to be disabled by destroying or damaging a specific component of the vehicle.
+
+- Added 'deploy' mechanic where vehicles will need to set up before being able to use certain turrets.
+
+- Added overlay rendering linked to a component, allowing the overlay to render only if the component's health is above or below a certain threshold.
+
+- Added one shot flecks to launch protocol animations, allowing for single-instance flecks being emitted at a specific frame in the animation.
+
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
+  <!--Static parameterless method to execute when update log is executed-->
+  <actionOnUpdate></actionOnUpdate>
+  <!--Show update log on next startup.-->
+  <update>false</update>
+  <!--Testing mode prevents the update from saving over the UpdateLog file-->
+  <testing>false</testing>
+  <!--Icon bar shown to the right of the mod's name.-->
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon</icon>
+      <url>steam://url/CommunityFilePage/2356577528</url>
+    </li>
+  </rightIconBar>
+  <!--Icon bar shown to the left of the mod's name.-->
+  <leftIconBar>
+    <li>
+      <name>Patreon</name>
+      <icon>patreonIcon</icon>
+      <url>https://www.patreon.com/smashphil</url>
+    </li>
+    <li>
+      <name>Cursed Crew</name>
+      <icon>cursedCrewIcon</icon>
+      <url>https://discord.gg/NNe2VxAU7Z</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>

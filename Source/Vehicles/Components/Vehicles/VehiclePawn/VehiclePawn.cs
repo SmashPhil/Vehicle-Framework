@@ -145,6 +145,25 @@ namespace Vehicles
 			ageTracker.BirthAbsTicks = 0;
 			health.Reset();
 			statHandler.InitializeComponents();
+
+			if (Faction != Faction.OfPlayer && VehicleDef.npcProperties != null)
+			{
+				GenerateInventory();
+			}
+		}
+
+		private void GenerateInventory()
+		{
+			if (!VehicleDef.npcProperties.inventory.NullOrEmpty())
+			{
+				foreach (PawnInventoryOption inventoryOption in VehicleDef.npcProperties.inventory)
+				{
+					foreach (Thing thing in inventoryOption.GenerateThings())
+					{
+						inventory.innerContainer.TryAdd(thing);
+					}
+				}
+			}
 		}
 
 		/// <summary>

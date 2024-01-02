@@ -193,7 +193,7 @@ namespace Vehicles
 				return;
 			}
 			fuel += amount;
-			Vehicle.EventRegistry[VehicleEventDefOf.Refueled].ExecuteEvents();
+			Vehicle.EventRegistry?[VehicleEventDefOf.Refueled].ExecuteEvents();
 			if (fuel >= FuelCapacity)
 			{
 				fuel = FuelCapacity;
@@ -562,6 +562,15 @@ namespace Vehicles
 			Vehicle.AddEvent(VehicleEventDefOf.Repaired, RevalidateConsumptionStatus);
 		}
 
+		public override void PostGeneration()
+		{
+			base.PostGeneration();
+			if (Vehicle.Faction != Faction.OfPlayer)
+			{
+				Refuel(FuelCapacity * Rand.Range(0.45f, 0.85f));
+			}
+		}
+
 		public override void PostSpawnSetup(bool respawningAfterLoad)
 		{
 			base.PostSpawnSetup(respawningAfterLoad);
@@ -569,10 +578,6 @@ namespace Vehicles
 			{
 				dischargeRate = ConsumptionRatePerTick * 0.1f;
 				targetFuelLevel = FuelCapacity;
-				if (Vehicle.Faction != Faction.OfPlayer)
-				{
-					RefuelHalfway();
-				}
 			}
 
 			RevalidateConsumptionStatus();

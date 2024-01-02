@@ -18,6 +18,31 @@ namespace Vehicles
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsRoofed(IntVec3 cell, Map map) => cell.Roofed(map);
 
+		public static bool IsRoofRestricted(VehicleDef vehicleDef, IntVec3 cell, Map map)
+		{
+			var compProperties = vehicleDef.GetCompProperties<CompProperties_VehicleLauncher>();
+			if (compProperties == null)
+			{
+				return true;
+			}
+			bool canRoofPunch = SettingsCache.TryGetValue(vehicleDef, typeof(CompProperties_VehicleLauncher), nameof(CompProperties_VehicleLauncher.canRoofPunch), compProperties.canRoofPunch);
+			return IsRoofRestricted(cell, map, canRoofPunch);
+		}
+
+		public static bool IsRoofRestricted(IntVec3 cell, Map map, bool canRoofPunch)
+		{
+			if (!canRoofPunch)
+			{
+				return IsRoofed(cell, map);
+			}
+			RoofDef roofDef = cell.GetRoof(map);
+			if (roofDef != null)
+			{
+				return roofDef.isThickRoof;
+			}
+			return false;
+		}
+
 		/// <summary>
 		/// Rotates <paramref name="cell"/> for vehicle rect.
 		/// </summary>
@@ -671,7 +696,7 @@ namespace Vehicles
 		/// <param name="vehicleDef"></param>
 		/// <param name="cell"></param>
 		/// <param name="dir"></param>
-		public static bool WidthStandable(this VehicleDef vehicleDef, Map map, IntVec3 cell, Predicate<Thing> extraValidator = null)
+		public static bool WidthStandable(this VehicleDef vehicleDef, Map map, IntVec3 cell)
 		{
 			CellRect cellRect = CellRect.CenteredOn(cell, vehicleDef.SizePadding);
 			foreach (IntVec3 cellCheck in cellRect)

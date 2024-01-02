@@ -1178,7 +1178,7 @@ namespace Vehicles
 					Projectile projectileInstance = (Projectile)GenSpawn.Spawn(projectileDef, vehicle.Position, vehicle.Map, WipeMode.Vanish);
 					if (turretDef.projectileSpeed > 0)
 					{
-						projectileInstance.TryAddComp(new CompTurretProjectileProperties(vehicle)
+						projectileInstance.TryAddComp(new CompTurretProjectileProperties(projectileInstance)
 						{
 							speed = turretDef.projectileSpeed > 0 ? turretDef.projectileSpeed : projectileInstance.def.projectile.speed,
 							hitflag = turretDef.hitFlags,
@@ -1635,6 +1635,11 @@ namespace Vehicles
 			}
 			Debug.Warning($"Failed to auto-reload {turretDef.label}");
 			return false;
+		}
+
+		public void SetMagazineCount(int count)
+		{
+			shellCount = Mathf.Clamp(count, 0, turretDef.magazineCapacity);
 		}
 
 		protected bool ReloadInternal(ThingDef ammo)

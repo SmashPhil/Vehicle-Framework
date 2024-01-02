@@ -213,7 +213,7 @@ namespace Vehicles
 
 		public override IEnumerable<Gizmo> CompGetGizmosExtra()
 		{
-			if (Vehicle.Faction != Faction.OfPlayer)
+			if (Vehicle.Faction != Faction.OfPlayer && !DebugSettings.ShowDevGizmos)
 			{
 				yield break; //Don't return any gizmos if belonging to another faction
 			}
@@ -547,7 +547,7 @@ namespace Vehicles
 
 		public override void AIAutoCheck()
 		{
-			foreach(VehicleTurret cannon in turrets)
+			foreach (VehicleTurret cannon in turrets)
 			{
 				if (cannon.shellCount < Mathf.CeilToInt(cannon.turretDef.magazineCapacity / 4f) && (!cannon.TargetLocked || cannon.shellCount <= 0))
 				{
@@ -599,6 +599,10 @@ namespace Vehicles
 		public override void PostGeneration()
 		{
 			CreateTurretInstances();
+			if (Vehicle.Faction != Faction.OfPlayer)
+			{
+				FillMagazineCapacity();
+			}
 		}
 
 		public override void EventRegistration()
@@ -702,6 +706,14 @@ namespace Vehicles
 					Log.Error($"Unable to find matching turret from save file to CompProperties based on key {turret.key}. Was this changed or removed?");
 					turrets.Remove(turret); //Remove from turret list, invalid turret will throw exceptions
 				}
+			}
+		}
+
+		public void FillMagazineCapacity()
+		{
+			foreach (VehicleTurret turret in turrets)
+			{
+				turret.SetMagazineCount(int.MaxValue);
 			}
 		}
 

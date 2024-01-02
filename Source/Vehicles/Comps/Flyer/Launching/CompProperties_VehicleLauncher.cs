@@ -38,6 +38,9 @@ namespace Vehicles
 
 		[PostToSettings(Label = "VF_ControlInFlight", Translate = true, Tooltip = "VF_ControlInFlightTooltip", UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Air)]
 		public bool controlInFlight = true;
+		[PostToSettings(Label = "VF_CanRoofPunch", Tooltip = "VF_CanRoofPunchTooltip", Translate = true, UISettingsType = UISettingsType.Checkbox)]
+		public bool canRoofPunch = false;
+		public float animationPunchAt = 0.95f;
 
 		[PostToSettings(Label = "VF_SpaceFlight", Translate = true, Tooltip = "VF_SpaceFlightTooltip", UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Air)]
 		[DisableSettingConditional(MayRequireAny = new string[] { CompatibilityPackageIds.SOS2, CompatibilityPackageIds.RimNauts, CompatibilityPackageIds.Universum })]

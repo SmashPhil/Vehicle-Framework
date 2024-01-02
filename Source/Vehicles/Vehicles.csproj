@@ -75,6 +75,7 @@
     <Compile Include="Components\Vehicles\Health\StatWorkers\VehicleStatWorker_BodyIntegrity.cs" />
     <Compile Include="Components\Vehicles\Health\VehicleStatDrawEntry.cs" />
     <Compile Include="Components\Vehicles\Misc\Vehicle_IgnitionController.cs" />
+    <Compile Include="Components\Vehicles\VehicleNPCProperties.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Combat.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Comps.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Handlers.cs" />
@@ -154,6 +155,7 @@
     <Compile Include="Pathing\Map\VehicleRegionUpdateCatalog.cs" />
     <Compile Include="Pathing\RegionGrid\ChunkSet.cs" />
     <Compile Include="Pathing\RegionGrid\ConcurrentListerThings.cs" />
+    <Compile Include="Turrets\Projectiles\Projectile_Deflected.cs" />
     <Compile Include="Turrets\Turret\Rendering\VehicleTurretRenderData.cs" />
     <Compile Include="Turrets\Turret\TargetLock.cs" />
     <Compile Include="Turrets\Turret\TurretComponentRequirement.cs" />
@@ -430,11 +432,13 @@
     <Compile Include="Utility\Helpers\AsyncActions\AsyncRegionRegisterAction.cs" />
     <Compile Include="Utility\Helpers\CaravanHelper.cs" />
     <Compile Include="Utility\Helpers\CaravanInfoHelper.cs" />
-    <Compile Include="Utility\Helpers\DamageHelper.cs" />
+    <Compile Include="Utility\Helpers\Combat\ProjectileHelper.cs" />
+    <Compile Include="Utility\Helpers\Combat\DamageHelper.cs" />
     <Compile Include="Utility\Helpers\DebugHelper.cs" />
     <Compile Include="Utility\Helpers\HediffHelper.cs" />
     <Compile Include="Utility\Helpers\MapHelper.cs" />
     <Compile Include="Utility\Helpers\ModSettingsHelper.cs" />
+    <Compile Include="Utility\Helpers\Combat\RaidInjectionHelper.cs" />
     <Compile Include="Utility\Helpers\RenderHelper.cs" />
     <Compile Include="Utility\Helpers\SelectionHelper.cs" />
     <Compile Include="Utility\Helpers\GizmoHelper.cs" />

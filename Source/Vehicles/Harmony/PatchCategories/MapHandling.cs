@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using HarmonyLib;
+using UnityEngine;
 using Verse;
 using Verse.AI;
 using RimWorld;
 using RimWorld.Planet;
-using OpCodes = System.Reflection.Emit.OpCodes;
 using SmashTools;
 
 namespace Vehicles
@@ -17,6 +20,14 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(BeachMaker), nameof(BeachMaker.Init)),
 				transpiler: new HarmonyMethod(typeof(MapHandling),
 				nameof(BeachMakerTranspiler)));
+			VehicleHarmony.Patch(original: AccessTools.Constructor(typeof(RiverMaker), parameters: new Type[] { typeof(Vector3), typeof(float), typeof(RiverDef) }),
+				transpiler: new HarmonyMethod(typeof(MapHandling),
+				nameof(RiverMakerTranspiler)));
+			//Compiler generated method from GenStep_Terrain.GenerateRiverLookupTexture
+			MethodInfo delegateInfo = typeof(GenStep_Terrain).GetNestedTypes(AccessTools.all).SelectMany(AccessTools.GetDeclaredMethods).First(methodInfo => methodInfo.ReturnType == typeof(float) && methodInfo.GetParameters()[0].ParameterType == typeof(RiverDef));
+			VehicleHarmony.Patch(original: delegateInfo,
+				transpiler: new HarmonyMethod(typeof(MapHandling),
+				nameof(RiverLookupTextureTranspiler)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(TileFinder), nameof(TileFinder.RandomSettlementTileFor)),
 				transpiler: new HarmonyMethod(typeof(MapHandling),
 				nameof(PushSettlementToCoastTranspiler)));
@@ -42,22 +53,61 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="instructions"></param>
 		/// <returns></returns>
-		public static IEnumerable<CodeInstruction> BeachMakerTranspiler(IEnumerable<CodeInstruction> instructions)
+		private static IEnumerable<CodeInstruction> BeachMakerTranspiler(IEnumerable<CodeInstruction> instructions)
 		{
 			List<CodeInstruction> instructionList = instructions.ToList();
 
-			for(int i = 0; i < instructionList.Count; i++)
+			MethodInfo propertyGetter = AccessTools.PropertyGetter(typeof(FloatRange), nameof(FloatRange.RandomInRange));
+			for (int i = 0; i < instructionList.Count; i++)
 			{
 				CodeInstruction instruction = instructionList[i];
 
-				if(instruction.Calls(AccessTools.Property(typeof(FloatRange), nameof(FloatRange.RandomInRange)).GetGetMethod()))
+				if (instruction.Calls(propertyGetter))
 				{
 					i++;
 					instruction = instructionList[i];
 					yield return new CodeInstruction(opcode: OpCodes.Pop);
 					yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(ModSettingsHelper), nameof(ModSettingsHelper.CustomFloatBeach)));
+					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(ModSettingsHelper), nameof(ModSettingsHelper.BeachMultiplier)));
 				}
+				yield return instruction;
+			}
+		}
+
+		private static IEnumerable<CodeInstruction> RiverMakerTranspiler(IEnumerable<CodeInstruction> instructions)
+		{
+			List<CodeInstruction> instructionList = instructions.ToList();
+
+			FieldInfo widthOnMapField = AccessTools.Field(typeof(RiverDef), nameof(RiverDef.widthOnMap));
+			for (int i = 0; i < instructionList.Count; i++)
+			{
+				CodeInstruction instruction = instructionList[i];
+				
+				if (instruction.LoadsField(widthOnMapField))
+				{
+					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(ModSettingsHelper), nameof(ModSettingsHelper.RiverMultiplier)));
+					instruction = instructionList[++i]; //Ldfld : RiverDef::widthOnMap
+				}
+
+				yield return instruction;
+			}
+		}
+
+		private static IEnumerable<CodeInstruction> RiverLookupTextureTranspiler(IEnumerable<CodeInstruction> instructions)
+		{
+			List<CodeInstruction> instructionList = instructions.ToList();
+
+			FieldInfo widthOnMapField = AccessTools.Field(typeof(RiverDef), nameof(RiverDef.widthOnMap));
+			for (int i = 0; i < instructionList.Count; i++)
+			{
+				CodeInstruction instruction = instructionList[i];
+
+				if (instruction.LoadsField(widthOnMapField))
+				{
+					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(ModSettingsHelper), nameof(ModSettingsHelper.RiverMultiplier)));
+					instruction = instructionList[++i]; //Ldfld : RiverDef::widthOnMap
+				}
+
 				yield return instruction;
 			}
 		}

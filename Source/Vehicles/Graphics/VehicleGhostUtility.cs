@@ -68,13 +68,17 @@ namespace Vehicles
 			{
 				foreach (VehicleTurret turret in props.turrets)
 				{
+					if (turret.NoGraphic)
+					{
+						continue;
+					}
 					if (!turret.parentKey.NullOrEmpty())
 					{
 						continue;
 					}
 
 					turret.ResolveCannonGraphics(vehicleDef);
-
+					
 					try
 					{
 						float locationRotation = turret.defaultAngleRotated + rot.AsAngle;

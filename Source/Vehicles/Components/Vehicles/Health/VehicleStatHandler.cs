@@ -229,7 +229,7 @@ namespace Vehicles
 		/// <remarks>The instigator is immediately deregistered upon dealing damage to make way for multiple damage instances from the same instigator (won't conflict with synchronous operations)</remarks>
 		/// <param name="thing"></param>
 		/// <param name="cell"></param>
-		public void RegisterImpacter(Thing thing, IntVec3 cell)
+		public IntVec3 RegisterImpacter(Thing thing, IntVec3 cell)
 		{
 			CellRect occupiedRect = vehicle.OccupiedRect();
 			if (!occupiedRect.Contains(cell))
@@ -237,6 +237,7 @@ namespace Vehicles
 				cell = occupiedRect.MinBy(c => Ext_Map.Distance(c, cell));
 			}
 			impacter[thing] = cell;
+			return cell;
 		}
 
 		public void DeregisterImpacter(Thing thing)
@@ -362,7 +363,7 @@ namespace Vehicles
 				VehicleComponent.VehiclePartDepth hitDepth = VehicleComponent.VehiclePartDepth.External;
 				for (int i = 0; i < Mathf.Max(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z); i++)
 				{
-					if (!vehicle.Spawned || dinfo.Amount <= 0)
+					if (vehicle.Destroyed || dinfo.Amount <= 0)
 					{
 						return;
 					}

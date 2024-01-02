@@ -108,7 +108,7 @@ namespace Vehicles
 			newRegions.Clear();
 			foreach (IntVec3 cell in mapping[createdFor].VehicleRegionDirtyer.DirtyCells)
 			{
-				if (VehicleGridsUtility.GetRegion(cell, mapping.map, createdFor, RegionType.Set_All) is null)
+				if (VehicleGridsUtility.GetRegion(cell, mapping.map, createdFor, RegionType.Set_All) == null)
 				{
 					VehicleRegion region = mapping[createdFor].VehicleRegionMaker.TryGenerateRegionFrom(cell);
 					if (region != null)

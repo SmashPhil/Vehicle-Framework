@@ -56,6 +56,7 @@ namespace Vehicles
 
 		// World Pathing
 		public float offRoadMultiplier = 1;
+		public float riverCost = -1;
 		public SimpleDictionary<RiverDef, float> customRiverCosts = new SimpleDictionary<RiverDef, float>();
 		public SimpleDictionary<BiomeDef, float> customBiomeCosts = new SimpleDictionary<BiomeDef, float>();
 		public SimpleDictionary<Hilliness, float> customHillinessCosts = new SimpleDictionary<Hilliness, float>();
@@ -73,11 +74,10 @@ namespace Vehicles
 
 		public List<FactionDef> restrictToFactions;
 
-		public RiverDef riverTraversability;
 		[TweakField]
 		public List<VehicleRole> roles  = new List<VehicleRole>();
 
-		public IEnumerable<string> ConfigErrors()
+		public IEnumerable<string> ConfigErrors(VehicleDef vehicleDef)
 		{
 			yield break;
 		}
@@ -86,6 +86,7 @@ namespace Vehicles
 		{
 			vehicleJobLimitations ??= new List<VehicleJobLimitations>();
 
+			customRiverCosts ??= new SimpleDictionary<RiverDef, float>();
 			customBiomeCosts ??= new SimpleDictionary<BiomeDef, float>();
 			customHillinessCosts ??= new SimpleDictionary<Hilliness, float>();
 			customRoadCosts ??= new SimpleDictionary<RoadDef, float>();
@@ -93,6 +94,18 @@ namespace Vehicles
 			customThingCosts ??= new SimpleDictionary<ThingDef, int>();
 			customSnowCategoryTicks ??= new SimpleDictionary<SnowCategory, int>();
 			
+			if (riverCost > 0)
+			{
+				float minWidth = vehicleDef.Size.x * Ext_Math.Sqrt2;
+				//Allow river travel on all larger rivers
+				foreach (RiverDef riverDef in DefDatabase<RiverDef>.AllDefsListForReading)
+				{
+					if (!customRiverCosts.ContainsKey(riverDef) && ModSettingsHelper.RiverMultiplier(riverDef) >= minWidth)
+					{
+						customRiverCosts[riverDef] = riverCost;
+					}
+				}
+			}
 			if (!roles.NullOrEmpty())
 			{
 				foreach (VehicleRole role in roles)

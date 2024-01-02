@@ -24,9 +24,12 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Projectile), "CanHit"),
 				prefix: new HarmonyMethod(typeof(Combat),
 				nameof(TurretHitFlags)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Projectile), "Impact"),
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Bullet), "Impact"),
 				prefix: new HarmonyMethod(typeof(Combat),
-				nameof(HandleImpactMechanics)));
+				nameof(BulletImpact)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Projectile_Explosive), "Impact"),
+				prefix: new HarmonyMethod(typeof(Combat),
+				nameof(ImpactExplosiveProjectiles)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Projectile), "ImpactSomething"),
 				transpiler: new HarmonyMethod(typeof(Combat),
 				nameof(VehicleProjectileChanceToHit)));
@@ -165,12 +168,34 @@ namespace Vehicles
 			return true;
 		}
 
-		public static void HandleImpactMechanics(Thing hitThing, Projectile __instance, Thing ___launcher)
+		public static bool BulletImpact(Thing hitThing, Projectile __instance, Thing ___launcher)
 		{
 			if (hitThing is VehiclePawn vehicle)
 			{
-				vehicle.statHandler.RegisterImpacter(___launcher, __instance.Position);
+				IntVec3 cell = vehicle.statHandler.RegisterImpacter(___launcher, __instance.Position);
+				//ProjectileHelper.DeflectProjectile(__instance, vehicle);
+				//return false;
 			}
+			return true;
+		}
+		
+		public static bool ImpactExplosiveProjectiles(Thing hitThing, Projectile __instance, Thing ___launcher)
+		{
+			Map map = __instance.Map;
+			TerrainDef terrainImpact = map.terrainGrid.TerrainAt(__instance.Position);
+			if (__instance.def.projectile.explosionDelay == 0 && terrainImpact.IsWater && !__instance.Position.GetThingList(__instance.Map).NotNullAndAny(x => x is VehiclePawn vehicle))
+			{
+				DamageHelper.Explode(__instance);
+				return false;
+			}
+
+			if (hitThing is VehiclePawn vehicle)
+			{
+				IntVec3 cell = vehicle.statHandler.RegisterImpacter(___launcher, __instance.Position);
+				//ProjectileHelper.DeflectProjectile(__instance, vehicle);
+				//return false;
+			}
+			return true;
 		}
 
 		public static IEnumerable<CodeInstruction> VehicleProjectileChanceToHit(IEnumerable<CodeInstruction> instructions)

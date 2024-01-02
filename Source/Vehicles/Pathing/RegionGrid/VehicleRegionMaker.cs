@@ -23,12 +23,12 @@ namespace Vehicles
 		/// <summary>
 		/// Contains hashset for 4 rotations
 		/// </summary>
-		private readonly HashSet<IntVec3>[] linksProcessedAt = new HashSet<IntVec3>[]
+		private readonly ConcurrentSet<IntVec3>[] linksProcessedAt = new ConcurrentSet<IntVec3>[]
 		{
-			new HashSet<IntVec3>(),
-			new HashSet<IntVec3>(),
-			new HashSet<IntVec3>(),
-			new HashSet<IntVec3>()
+			new ConcurrentSet<IntVec3>(),
+			new ConcurrentSet<IntVec3>(),
+			new ConcurrentSet<IntVec3>(),
+			new ConcurrentSet<IntVec3>()
 		};
 
 		public VehicleRegionMaker(VehicleMapping mapping, VehicleDef createdFor)
@@ -193,7 +193,7 @@ namespace Vehicles
 				return;
 			}
 
-			HashSet<IntVec3> hashSet = linksProcessedAt[potentialOtherRegionDir.AsInt];
+			ConcurrentSet<IntVec3> hashSet = linksProcessedAt[potentialOtherRegionDir.AsInt];
 			if (hashSet.Contains(cell))
 			{
 				return;

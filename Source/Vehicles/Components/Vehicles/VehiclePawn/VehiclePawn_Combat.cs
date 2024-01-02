@@ -12,21 +12,7 @@ namespace Vehicles
 		public float PawnCollisionMultiplier => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.pawnCollisionMultiplier), VehicleDef.properties.pawnCollisionMultiplier);
 		
 		public float PawnCollisionRecoilMultiplier => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.pawnCollisionRecoilMultiplier), VehicleDef.properties.pawnCollisionRecoilMultiplier);
-		
-		public float FriendlyFireChance
-		{
-			get
-			{
-				return VehicleMod.settings.main.friendlyFire switch
-				{
-					VehicleTracksFriendlyFire.None => 0,
-					VehicleTracksFriendlyFire.Vanilla => Find.Storyteller.difficulty.friendlyFireChanceFactor,
-					VehicleTracksFriendlyFire.Custom => VehicleMod.settings.main.friendlyFireChance,
-					_ => throw new NotImplementedException(nameof(VehicleTracksFriendlyFire)),
-				};
-			}
-		}
-					
+			
 		public virtual bool CanApplyStun(Thing instigator)
 		{
 			return false;
@@ -37,6 +23,22 @@ namespace Vehicles
 			return false;
 		}
 
+		public float FriendlyFireChance(Pawn pawn)
+		{
+			float multiplier = 1;
+			if (pawn.Faction == Faction)
+			{
+				multiplier = 0.5f;
+			}
+			return multiplier * VehicleMod.settings.main.friendlyFire switch
+			{
+				VehicleTracksFriendlyFire.None => 0,
+				VehicleTracksFriendlyFire.Vanilla => Find.Storyteller.difficulty.friendlyFireChanceFactor,
+				VehicleTracksFriendlyFire.Custom => VehicleMod.settings.main.friendlyFireChance,
+				_ => throw new NotImplementedException(nameof(VehicleTracksFriendlyFire)),
+			};
+		}
+
 		public void CheckForCollisions(float moveSpeed)
 		{
 			CellRect occupiedRect = this.OccupiedRect();
@@ -44,7 +46,7 @@ namespace Vehicles
 			{
 				if (Map.thingGrid.ThingAt(cell, ThingCategory.Pawn) is Pawn pawn && !(pawn is VehiclePawn))
 				{
-					if (pawn.Faction.HostileTo(Faction) || Rand.Chance(FriendlyFireChance))
+					if (pawn.Faction.HostileTo(Faction) || Rand.Chance(FriendlyFireChance(pawn)))
 					{
 						(float pawnDamage, float vehicleDamage) = CalculateImpactDamage(pawn, this, moveSpeed);
 						Pawn culprit = GetPriorityHandlers(HandlingTypeFlags.Movement)?.FirstOrDefault(handler => handler.handlers.Any)?.handlers.InnerListForReading.FirstOrDefault();

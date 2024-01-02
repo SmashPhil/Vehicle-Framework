@@ -29,22 +29,18 @@ namespace Vehicles
 			
 			if (randomizeColors)
 			{
-				float r1 = Rand.Range(0.25f, .75f);
-				float g1 = Rand.Range(0.25f, .75f);
-				float b1 = Rand.Range(0.25f, .75f);
-				ColorOne = new Color(r1, g1, b1, 1);
-				float r2 = Rand.Range(0.25f, .75f);
-				float g2 = Rand.Range(0.25f, .75f);
-				float b2 = Rand.Range(0.25f, .75f);
-				ColorTwo = new Color(r2, g2, b2, 1);
-				float r3 = Rand.Range(0.25f, .75f);
-				float g3 = Rand.Range(0.25f, .75f);
-				float b3 = Rand.Range(0.25f, .75f);
-				ColorThree = new Color(r3, g3, b3, 1);
-				Vector2 dv = new Vector2(Rand.Range(-1.5f, 1.5f), Rand.Range(-1.5f, 1.5f));
-				Displacement = dv;
-				float t = Rand.Range(0.01f, 2);
-				Tiling = t;
+				if (Rand.Chance(0.1f))
+				{
+					(ColorOne, ColorTwo, ColorThree) = GetCompletelyRandomColors();
+				}
+				else
+				{
+					(ColorOne, ColorTwo, ColorThree) = VehicleMod.settings.colorStorage.GetRandomPalette();
+				}
+				Vector2 displacement = new Vector2(Rand.Range(-1.5f, 1.5f), Rand.Range(-1.5f, 1.5f));
+				Displacement = displacement;
+				float tiling = Rand.Range(0.25f, 1.5f);
+				Tiling = tiling;
 			}
 			else
 			{
@@ -66,6 +62,24 @@ namespace Vehicles
 			RandomizeMask = randomizeMask;
 
 			Rand.PopState();
+		}
+
+		public static (Color colorOne, Color colorTwo, Color colorThree) GetCompletelyRandomColors()
+		{
+			float r1 = Rand.Range(0.25f, .75f);
+			float g1 = Rand.Range(0.25f, .75f);
+			float b1 = Rand.Range(0.25f, .75f);
+			Color colorOne = new Color(r1, g1, b1, 1);
+			float r2 = Rand.Range(0.25f, .75f);
+			float g2 = Rand.Range(0.25f, .75f);
+			float b2 = Rand.Range(0.25f, .75f);
+			Color colorTwo = new Color(r2, g2, b2, 1);
+			float r3 = Rand.Range(0.25f, .75f);
+			float g3 = Rand.Range(0.25f, .75f);
+			float b3 = Rand.Range(0.25f, .75f);
+			Color colorThree = new Color(r3, g3, b3, 1);
+
+			return (colorOne, colorTwo, colorThree);
 		}
 	}
 }

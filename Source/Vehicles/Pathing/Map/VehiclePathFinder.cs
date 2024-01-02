@@ -231,7 +231,7 @@ namespace Vehicles
 			}
 			bool useHPA = VehicleMod.settings.main.hierarchalPathfinding && chunks != null && !chunks.NullOrEmpty();
 
-			CalculateAndAddDisallowedCorners(traverseParms, peMode, cellRect);
+			//CalculateAndAddDisallowedCorners(traverseParms, peMode, cellRect);
 			InitStatusesAndPushStartNode(ref startIndex, start);
 			int iterations = 0;
 			while (true)
@@ -765,22 +765,22 @@ namespace Vehicles
 				int minZ = destinationRect.minZ;
 				int maxX = destinationRect.maxX;
 				int maxZ = destinationRect.maxZ;
-				if (!IsCornerTouchAllowed(minX + 1, minZ + 1, minX + 1, minZ, minX, minZ + 1))
-				{
-					disallowedCornerIndices.Add(mapping.map.cellIndices.CellToIndex(minX, minZ));
-				}
-				if (!IsCornerTouchAllowed(minX + 1, maxZ - 1, minX + 1, maxZ, minX, maxZ - 1))
-				{
-					disallowedCornerIndices.Add(mapping.map.cellIndices.CellToIndex(minX, maxZ));
-				}
-				if (!IsCornerTouchAllowed(maxX - 1, maxZ - 1, maxX - 1, maxZ, maxX, maxZ - 1))
-				{
-					disallowedCornerIndices.Add(mapping.map.cellIndices.CellToIndex(maxX, maxZ));
-				}
-				if (!IsCornerTouchAllowed(maxX - 1, minZ + 1, maxX - 1, minZ, maxX, minZ + 1))
-				{
-					disallowedCornerIndices.Add(mapping.map.cellIndices.CellToIndex(maxX, minZ));
-				}
+				//if (!IsCornerTouchAllowed(minX + 1, minZ + 1, minX + 1, minZ, minX, minZ + 1))
+				//{
+				//	disallowedCornerIndices.Add(mapping.map.cellIndices.CellToIndex(minX, minZ));
+				//}
+				//if (!IsCornerTouchAllowed(minX + 1, maxZ - 1, minX + 1, maxZ, minX, maxZ - 1))
+				//{
+				//	disallowedCornerIndices.Add(mapping.map.cellIndices.CellToIndex(minX, maxZ));
+				//}
+				//if (!IsCornerTouchAllowed(maxX - 1, maxZ - 1, maxX - 1, maxZ, maxX, maxZ - 1))
+				//{
+				//	disallowedCornerIndices.Add(mapping.map.cellIndices.CellToIndex(maxX, maxZ));
+				//}
+				//if (!IsCornerTouchAllowed(maxX - 1, minZ + 1, maxX - 1, minZ, maxX, minZ + 1))
+				//{
+				//	disallowedCornerIndices.Add(mapping.map.cellIndices.CellToIndex(maxX, minZ));
+				//}
 			}
 		}
 
@@ -793,9 +793,17 @@ namespace Vehicles
 		/// <param name="adjCardinal1Z"></param>
 		/// <param name="adjCardinal2X"></param>
 		/// <param name="adjCardinal2Z"></param>
-		private bool IsCornerTouchAllowed(int cornerX, int cornerZ, int adjCardinal1X, int adjCardinal1Z, int adjCardinal2X, int adjCardinal2Z)
+		private bool IsCornerTouchAllowed(VehiclePathGrid vehiclePathGrid, int cornerX, int cornerZ, int adjCardinal1X, int adjCardinal1Z, int adjCardinal2X, int adjCardinal2Z)
 		{
-			return TouchPathEndModeUtility.IsCornerTouchAllowed(cornerX, cornerZ, adjCardinal1X, adjCardinal1Z, adjCardinal2X, adjCardinal2Z, null); //REDO - PathingContext
+			//Building building = pc.map.edificeGrid[new IntVec3(cornerX, 0, cornerZ)];
+			//if (building != null && TouchPathEndModeUtility.MakesOccupiedCellsAlwaysReachableDiagonally(building.def))
+			//{
+			//	return true;
+			//}
+			//IntVec3 intVec = new IntVec3(adjCardinal1X, 0, adjCardinal1Z);
+			//IntVec3 intVec2 = new IntVec3(adjCardinal2X, 0, adjCardinal2Z);
+			//return (vehiclePathGrid.Walkable(intVec) && intVec.GetDoor(pc.map) == null) || (pc.pathGrid.Walkable(intVec2) && intVec2.GetDoor(pc.map) == null);
+			return false;
 		}
 
 		/// <summary>

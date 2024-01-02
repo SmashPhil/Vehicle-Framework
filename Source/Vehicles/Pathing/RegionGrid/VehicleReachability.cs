@@ -109,7 +109,7 @@ namespace Vehicles
 		/// <param name="region"></param>
 		private void QueueNewOpenRegion(VehicleRegion region)
 		{
-			if (region is null)
+			if (region == null)
 			{
 				Log.Warning("Tried to queue null region (Vehicles).");
 				return;

@@ -57,7 +57,7 @@ namespace Vehicles
 		{
 			if (vehicleDef.Size.x % 2 == 0 || vehicleDef.Size.z % 2 == 0)
 			{
-				int padding = vehicleDef.SizePadding + 1;
+				int padding = vehicleDef.SizePadding;
 				IntVec3 north = new IntVec3(cell.x, 0, cell.z + padding);
 				IntVec3 east = new IntVec3(cell.x + padding, 0, cell.z);
 				IntVec3 south = new IntVec3(cell.x, 0, cell.z - padding);

@@ -169,34 +169,13 @@ namespace Vehicles
 			{
 				Widgets.DrawHighlight(idRect);
 			}
-			Rect rect = new Rect(0f, 0f, 27f, 27f);
+			Rect iconRect = new Rect(0f, 0f, idRect.height, idRect.height);
 			//Draw Vehicle Icon
 			if (trad.AnyThing is VehiclePawn vehicle)
 			{
 				try
 				{
-					Texture2D vehicleIcon = VehicleTex.VehicleTexture(vehicle.VehicleDef, Rot8.East, out float angle);
-					Rect texCoords = new Rect(0, 0, 1, 1);
-					Vector2 texProportions = vehicle.VehicleDef.graphicData.drawSize;
-					float x = texProportions.x;
-					texProportions.x = texProportions.y;
-					texProportions.y = x;
-					Widgets.DrawTextureFitted(rect, vehicleIcon, GenUI.IconDrawScale(vehicle.VehicleDef), texProportions, 
-						texCoords, angle, vehicle.VehicleGraphic.MatAtFull(Rot8.East));
-					if (vehicle.CompVehicleTurrets is CompVehicleTurrets comp)
-					{
-						//REDO
-						//foreach (VehicleTurret turret in comp.Cannons)
-						//{
-						//	if (turret.NoGraphic)
-						//	{
-						//		continue;
-						//	}
-						//	Vector2 drawSize = turret.turretDef.graphicData.drawSize;
-						//	//Rect turretRect = new Rect(0, 0, rect.width / drawSize.x,);
-						//	Widgets.DrawTextureFitted(rect, turret.CannonTexture, 1, drawSize, texCoords, Rot8.East.AsAngle + turret.defaultAngleRotated, turret.CannonMaterial);
-						//}
-					}
+					VehicleGUI.DrawVehicleDefOnGUI(iconRect, vehicle.VehicleDef);
 				}
 				catch (Exception ex)
 				{
@@ -209,12 +188,13 @@ namespace Vehicles
 				//Widgets.InfoCardButton(40f, 0f, trad.AnyThing);
 			}
 			Text.Anchor = TextAnchor.MiddleLeft;
-			Rect rect2 = new Rect(40f, 0f, idRect.width - 80f, idRect.height);
+			Rect infoRect = new Rect(iconRect.height + 10, 0f, idRect.width - 80f, idRect.height);
 			Text.WordWrap = false;
 			GUI.color = labelColor;
-			Widgets.Label(rect2, trad.LabelCap);
+			Widgets.Label(infoRect, trad.LabelCap);
 			GUI.color = Color.white;
 			Text.WordWrap = true;
+
 			if (Mouse.IsOver(idRect))
 			{
 				Transferable localTrad = trad;
