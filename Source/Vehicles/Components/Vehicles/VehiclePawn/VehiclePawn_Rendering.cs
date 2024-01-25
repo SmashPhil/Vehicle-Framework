@@ -648,6 +648,7 @@ namespace Vehicles
 						Pawn currentPawn = handler.handlers.InnerListForReading[i];
 						Command_Action_PawnDrawer unloadAction = new Command_Action_PawnDrawer();
 						unloadAction.defaultLabel = "VF_DisembarkSinglePawn".Translate(currentPawn.LabelShort);
+						unloadAction.groupable = false;
 						unloadAction.pawn = currentPawn;
 						unloadAction.action = delegate ()
 						{

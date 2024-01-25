@@ -18,6 +18,7 @@
 
 - Fixed icon rendering for 'Form Vehicle Caravan' window.
 
+- Fixed bug where colonists with the same name would share the same "Unload _" gizmo generated for them.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 &lt;b&gt;Players&lt;/b&gt;
 - Enabled river travel

@@ -41,7 +41,7 @@ namespace Vehicles
 		{
 			for (int i = activeSustainers.Count - 1; i >= 0; i--)
 			{
-				activeSustainers[i].End();
+				activeSustainers[i]?.End();
 			}
 		}
 
@@ -50,7 +50,7 @@ namespace Vehicles
 		/// </summary>
 		public void EndAll(SoundDef soundDef)
 		{
-			List<Sustainer> sustainers = activeSustainers.Where(sustainers => sustainers.def == soundDef).ToList();
+			List<Sustainer> sustainers = activeSustainers.Where(sustainer => sustainer?.def == soundDef).ToList();
 			for (int i = sustainers.Count - 1; i >= 0; i--)
 			{
 				sustainers[i].End();

@@ -117,8 +117,7 @@ namespace Vehicles
 				{
 					DefGenerator.AddImpliedDef(kindDef);
 				}
-				if (vehicleDef.vehicleType == VehicleType.Air && 
-					ThingDefGenerator_Skyfallers.GenerateImpliedSkyfallerDef(vehicleDef, out ThingDef skyfallerLeaving, out ThingDef skyfallerIncoming, out ThingDef skyfallerCrashing))
+				if (ThingDefGenerator_Skyfallers.GenerateImpliedSkyfallerDef(vehicleDef, out ThingDef skyfallerLeaving, out ThingDef skyfallerIncoming, out ThingDef skyfallerCrashing))
 				{
 					if (skyfallerLeaving != null)
 					{
