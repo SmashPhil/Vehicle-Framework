@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<Vehicles.StatUpgradeArmor>
+		<defName>StatUpgradeArmor</defName>
+		<label>Armor</label>
+	</Vehicles.StatUpgradeArmor>
+	
+	<Vehicles.StatUpgradeSpeed>
+		<defName>StatUpgradeSpeed</defName>
+		<label>Speed</label>
+	</Vehicles.StatUpgradeSpeed>
+	
+	<Vehicles.StatUpgradeCargo>
+		<defName>StatUpgradeCargo</defName>
+		<label>Cargo</label>
+		<settingListerRange>-100000~100000</settingListerRange>
+	</Vehicles.StatUpgradeCargo>
+	
+	<Vehicles.StatUpgradeFuelCapacity>
+		<defName>StatUpgradeFuelCapacity</defName>
+		<label>Fuel Capacity</label>
+		<settingListerRange>-100000~100000</settingListerRange>
+	</Vehicles.StatUpgradeFuelCapacity>
+	
+	<Vehicles.StatUpgradeFuelEfficiency>
+		<defName>StatUpgradeFuelEfficiency</defName>
+		<label>Fuel Efficiency</label>
+		<settingListerRange>-100000~100000</settingListerRange>
+	</Vehicles.StatUpgradeFuelEfficiency>
+	
+	<Vehicles.StatUpgradeFlySpeed>
+		<defName>StatUpgradeFlySpeed</defName>
+		<label>Fly Speed</label>
+		<settingListerRange>-5~5</settingListerRange>
+	</Vehicles.StatUpgradeFlySpeed>
+</Defs>

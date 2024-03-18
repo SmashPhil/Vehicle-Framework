@@ -188,7 +188,7 @@ namespace Vehicles
 					}
 					else
 					{
-						if (CellFinder.TryFindRandomReachableCellNear(root, map, num, TraverseParms.For(TraverseMode.NoPassClosedDoors, Danger.Deadly, false),
+						if (CellFinder.TryFindRandomReachableNearbyCell(root, map, num, TraverseParms.For(TraverseMode.NoPassClosedDoors, Danger.Deadly, false),
 							(IntVec3 c) => validator(c) && vehicle.CellRectStandable(map, c) && (root.Fogged(map) || !c.Fogged(map)) && c.GetFirstPawn(map) is null, null, out result))
 						{
 							return result;

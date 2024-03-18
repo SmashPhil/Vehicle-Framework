@@ -1,10 +1,11 @@
 ﻿using Verse;
 using SmashTools;
+using UnityEngine;
 
 namespace Vehicles
 {
 	//TODO - Rename to MoteCannonPlume in 1.5
-	public class Mote_CannonPlume : Mote
+	public class MoteCannonPlume : Mote
 	{
 		protected int ticksActive = 0;
 		protected int frame = 0;
@@ -17,7 +18,7 @@ namespace Vehicles
 		public new Graphic_Animate Graphic => base.Graphic as Graphic_Animate;
 		public virtual bool AnimationFinished => frame < 0 || frame > Graphic.AnimationCount;
 
-		public override void Draw()
+		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
 			exactPosition.y = def.altitudeLayer.AltitudeFor();
 			Graphic.DrawWorkerAnimated(this, frame, angle.ClampAndWrap(0, 360));

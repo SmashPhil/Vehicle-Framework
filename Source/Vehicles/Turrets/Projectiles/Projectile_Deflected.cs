@@ -37,16 +37,15 @@ namespace Vehicles
 			}
 		}
 
-		public override void Draw()
+		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
 			float arc = DeflectedArcHeight * GenMath.InverseParabola(DistanceCoveredFraction);
-			Vector3 pos = DrawPos;
-			pos += Vector3.forward * arc;
+			drawLoc += Vector3.forward * arc;
 			if (projectile.def.projectile.shadowSize > 0)
 			{
-				DrawShadow(pos, arc);
+				DrawShadow(drawLoc, arc);
 			}
-			Graphics.DrawMesh(MeshPool.GridPlane(projectile.def.graphicData.drawSize), pos, ExactRotation, DrawMat, 0);
+			Graphics.DrawMesh(MeshPool.GridPlane(projectile.def.graphicData.drawSize), drawLoc, ExactRotation, DrawMat, 0);
 			Comps_PostDraw();
 		}
 

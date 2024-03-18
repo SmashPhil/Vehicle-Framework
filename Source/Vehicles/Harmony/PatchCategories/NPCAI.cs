@@ -32,17 +32,17 @@ namespace Vehicles
 			if (VehicleMod.settings.debug.debugAllowRaiders)
 			{
 				VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnGroupKindWorker_Normal), nameof(PawnGroupKindWorker_Normal.GeneratePawns), 
-					parameters: new Type[] { typeof(PawnGroupMakerParms), typeof(PawnGroupMaker), typeof(List<Pawn>), typeof(bool) }),
-				prefix: new HarmonyMethod(typeof(NPCAI),
-				nameof(InjectVehiclesIntoPawnKindGroupPrepare)),
-				postfix: new HarmonyMethod(typeof(NPCAI),
-				nameof(InjectVehiclesIntoPawnKindGroupPassthrough)));
+						parameters: new Type[] { typeof(PawnGroupMakerParms), typeof(PawnGroupMaker), typeof(List<Pawn>), typeof(bool) }),
+					prefix: new HarmonyMethod(typeof(NPCAI),
+					nameof(InjectVehiclesIntoPawnKindGroupPrepare)),
+					postfix: new HarmonyMethod(typeof(NPCAI),
+					nameof(InjectVehiclesIntoPawnKindGroupPassthrough)));
 
 				VehicleHarmony.Patch(original: AccessTools.Method(typeof(RaidStrategyWorker), nameof(RaidStrategyWorker.SpawnThreats)),
-				prefix: new HarmonyMethod(typeof(NPCAI),
-				nameof(InjectVehiclesIntoRaidPrepare)),
-				postfix: new HarmonyMethod(typeof(NPCAI),
-				nameof(InjectVehiclesIntoRaidPassthrough)));
+					prefix: new HarmonyMethod(typeof(NPCAI),
+					nameof(InjectVehiclesIntoRaidPrepare)),
+					postfix: new HarmonyMethod(typeof(NPCAI),
+					nameof(InjectVehiclesIntoRaidPassthrough)));
 			}
 		}
 

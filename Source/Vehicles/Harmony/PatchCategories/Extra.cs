@@ -122,7 +122,7 @@ namespace Vehicles
 					yield return instruction; //WidgetRow.Icon
 					i += 2; //Skip Pop
 					instruction = instructionList[i];
-					yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
+					yield return new CodeInstruction(opcode: OpCodes.Ldarg_2);
 					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(Extra), nameof(ChangeAreaColor)));
 				}
 				/*

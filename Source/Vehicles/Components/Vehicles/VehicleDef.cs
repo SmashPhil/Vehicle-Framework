@@ -34,7 +34,7 @@ namespace Vehicles
 		[PostToSettings(Label = "VF_CanCaravan", Translate = true, Tooltip = "VF_CanCaravanTooltip", UISettingsType = UISettingsType.Checkbox)]
 		public bool canCaravan = true;
 
-		public VehicleCategory vehicleCategory = VehicleCategory.Misc;
+		public VehicleCategory vehicleCategory;
 		public VehicleType vehicleType = VehicleType.Land;
 
 		[PostToSettings(Label = "VF_NavigationType", Translate = true, Tooltip = "VF_NavigationTypeTooltip", UISettingsType = UISettingsType.SliderEnum)]

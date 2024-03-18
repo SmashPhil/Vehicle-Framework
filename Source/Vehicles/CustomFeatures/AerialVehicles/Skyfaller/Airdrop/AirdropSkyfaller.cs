@@ -4,6 +4,7 @@ using System.Linq;
 using RimWorld;
 using Verse;
 using Verse.Sound;
+using LudeonTK;
 using UnityEngine;
 
 namespace Vehicles
@@ -29,7 +30,7 @@ namespace Vehicles
 			}
 		}
 
-		public override void DrawAt(Vector3 drawLoc, bool flip = false)
+		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
 			Thing thingForGraphic = GetThingForGraphic();
 			float extraRotation = 0f;
@@ -55,11 +56,11 @@ namespace Vehicles
 			}
 			if (thingForGraphic is VehiclePawn vehicle)
 			{
-				vehicle.DrawAt(drawLoc);
+				vehicle.DynamicDrawPhaseAt(DrawPhase.Draw, drawLoc, flip: flip);
 			}
 			if (thingForGraphic is Pawn pawn)
 			{
-				pawn.DrawAt(drawLoc, flip: flip);
+				pawn.DrawNowAt(drawLoc, flip: flip);
 			}
 			else
 			{

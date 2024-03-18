@@ -29,7 +29,7 @@ namespace Vehicles
 		{
 			if (t.Faction != pawn.Faction)
 				return null;
-			if(t is VehiclePawn availableBoat && t.TryGetComp<CompUpgradeTree>() != null && t.TryGetComp<CompUpgradeTree>().CurrentlyUpgrading && 
+			if (t is VehiclePawn availableBoat && t.TryGetComp<CompUpgradeTree>() != null && t.TryGetComp<CompUpgradeTree>().CurrentlyUpgrading && 
 				!t.TryGetComp<CompUpgradeTree>().NodeUnlocking.StoredCostSatisfied && pawn.CanReach(new LocalTargetInfo(t.Position), PathEndMode.Touch, Danger.Deadly))
 			{
 				return UpgradeNodeDeliverJob(pawn, availableBoat);
@@ -51,7 +51,7 @@ namespace Vehicles
 			{
 				ThingDefCountClass materialRequired = materials[i];
 
-				if (!pawn.Map.itemAvailability.ThingsAvailableAnywhere(materialRequired, pawn))
+				if (!pawn.Map.itemAvailability.ThingsAvailableAnywhere(materialRequired.thingDef, thingDefCountClass.count, pawn))
 				{
 					flag = true;
 					thingDefCountClass = materialRequired;

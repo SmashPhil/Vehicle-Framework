@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<Vehicles.VehicleTurretDef Name="VehicleTurretBase" Abstract="True">
+		<gizmoDescription>Select Target.\n\nFire for effect</gizmoDescription>
+	</Vehicles.VehicleTurretDef>
+</Defs>

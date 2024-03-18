@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<DesignationDef>
+		<defName>DisassembleVehicle</defName>
+		<label>Disassemble Vehicle</label>
+		<texturePath>Designations/Deconstruct</texturePath>
+		<targetType>Thing</targetType>
+	</DesignationDef>
+</Defs>

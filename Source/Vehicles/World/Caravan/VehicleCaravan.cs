@@ -284,7 +284,7 @@ namespace Vehicles
 					};
 					if (!vehicle.CompVehicleLauncher.CanLaunchWithCargoCapacity(out string disableReason))
 					{
-						launchCommand.disabled = true;
+						launchCommand.Disabled = true;
 						launchCommand.disabledReason = disableReason;
 					}
 					yield return launchCommand;

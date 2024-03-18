@@ -78,7 +78,7 @@ namespace Vehicles
 			}
 		}
 
-		public override void DrawAt(Vector3 drawLoc, bool flip = false)
+		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
 			float num = 0f;
 			if (def.skyfaller.rotateGraphicTowardsDirection)

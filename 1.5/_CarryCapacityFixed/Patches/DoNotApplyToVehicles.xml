@@ -1,0 +1,13 @@
+
+<Patch>
+	<!-- Apply to every single VehicleDef that has a defName -->
+	<Operation Class = "PatchOperationConditional">
+		<xpath>Defs/Vehicles.VehicleDef[defName]</xpath>
+		<match Class = "PatchOperationAddModExtension">
+			<xpath>Defs/Vehicles.VehicleDef[defName]</xpath>
+			<value>
+				<li Class = "CarryCapacityFixed.DoNotApply_ModExtension"/>
+			</value>
+		</match>
+	</Operation>
+</Patch>

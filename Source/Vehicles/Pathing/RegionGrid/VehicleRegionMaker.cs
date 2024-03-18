@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Verse;
+using LudeonTK;
 using SmashTools;
 
 namespace Vehicles
@@ -18,7 +19,7 @@ namespace Vehicles
 		private VehicleRegion newRegion;
 		private VehicleRegionGrid regionGrid;
 
-		private ConcurrentBag<IntVec3> newRegCells = new ConcurrentBag<IntVec3>();
+		private ConcurrentSet<IntVec3> newRegCells = new ConcurrentSet<IntVec3>();
 
 		/// <summary>
 		/// Contains hashset for 4 rotations
@@ -172,7 +173,7 @@ namespace Vehicles
 			{
 				linksProcessedAt[i].Clear();
 			}
-			foreach (IntVec3 cell in newRegCells)
+			foreach (IntVec3 cell in newRegCells.Keys)
 			{
 				SweepInTwoDirectionsAndTryToCreateLink(Rot4.North, cell);
 				SweepInTwoDirectionsAndTryToCreateLink(Rot4.South, cell);

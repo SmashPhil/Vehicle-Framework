@@ -30,7 +30,7 @@ namespace Vehicles
 
 		public const float RootPosWeight = 0.75f;
 
-		internal Dictionary<IntVec3, int> postCalculatedCells = new Dictionary<IntVec3, int>();
+		internal Dictionary<IntVec3, float> postCalculatedCells = new Dictionary<IntVec3, float>();
 
 		private VehicleMapping mapping;
 		private VehicleDef vehicleDef;
@@ -122,7 +122,7 @@ namespace Vehicles
 			calcGrid = new VehiclePathFinderNodeFast[mapSizeX * mapSizeZ];
 			openList = new FastPriorityQueue<CostNode>(new CostNodeComparer());
 			regionCostCalculator = new VehicleRegionCostCalculatorWrapper(mapping, vehicleDef);
-			postCalculatedCells = new Dictionary<IntVec3, int>();
+			postCalculatedCells = new Dictionary<IntVec3, float>();
 		}
 
 		/// <summary>
@@ -211,8 +211,8 @@ namespace Vehicles
 			bool drafted = vehicle.Drafted;
 			
 			float heuristicStrength = DetermineHeuristicStrength(vehicle, start, dest);
-			int ticksCardinal = vehicle.TicksPerMoveCardinal;
-			int ticksDiagonal = vehicle.TicksPerMoveDiagonal;
+			float ticksCardinal = vehicle.TicksPerMoveCardinal;
+			float ticksDiagonal = vehicle.TicksPerMoveDiagonal;
 
 			int minSize = VehicleMod.settings.main.fullVehiclePathing ? Mathf.Min(vehicleDef.Size.x, vehicleDef.Size.z) : 1;
 
@@ -322,7 +322,7 @@ namespace Vehicles
 									initialCost += (int)(building.HitPoints * 0.2f);
 								}
 
-								int tickCost = ((i <= 3) ? ticksCardinal : ticksDiagonal) + initialCost;
+								float tickCost = ((i <= 3) ? ticksCardinal : ticksDiagonal) + initialCost;
 								if (VehicleMod.settings.main.smoothVehiclePaths && (vehicle.VehicleDef.size.x != 1 || vehicle.VehicleDef.size.z != 1)) //Don't add turn cost for 1x1 vehicles
 								{
 									if (pathDir != costNode.direction)
@@ -380,7 +380,7 @@ namespace Vehicles
 									}
 								}
 
-								int calculatedCost = tickCost + calcGrid[startIndex].knownCost;
+								float calculatedCost = tickCost + calcGrid[startIndex].knownCost;
 								ushort status = calcGrid[cellIndex].status;
 
 								//For debug path drawing
@@ -388,7 +388,7 @@ namespace Vehicles
 
 								if (status == statusClosedValue || status == statusOpenValue)
 								{
-									int closedValueCost = 0;
+									float closedValueCost = 0;
 									if (status == statusClosedValue)
 									{
 										closedValueCost = ticksCardinal;
@@ -411,10 +411,10 @@ namespace Vehicles
 								{
 									int dx = Math.Abs(cellIntX - x);
 									int dz = Math.Abs(cellIntY - z);
-									int num21 = GenMath.OctileDistance(dx, dz, ticksCardinal, ticksDiagonal);
+									int num21 = GenMath.OctileDistance(dx, dz, Mathf.RoundToInt(ticksCardinal), Mathf.RoundToInt(ticksDiagonal));
 									calcGrid[cellIndex].heuristicCost = Mathf.RoundToInt(num21 * heuristicStrength);
 								}
-								int costWithHeuristic = calculatedCost + calcGrid[cellIndex].heuristicCost;
+								float costWithHeuristic = calculatedCost + calcGrid[cellIndex].heuristicCost;
 								if (costWithHeuristic < 0)
 								{
 									Log.ErrorOnce($"Node cost overflow for vehicle {vehicle} pathing from {start} to {dest}.", vehicle.GetHashCode() ^ "FVPNodeCostOverflow".GetHashCode());
@@ -717,7 +717,7 @@ namespace Vehicles
 		{
 			if (VehicleMod.settings.debug.debugDrawVehiclePathCosts)
 			{
-				foreach ((IntVec3 cell, int cost) in postCalculatedCells)
+				foreach ((IntVec3 cell, float cost) in postCalculatedCells)
 				{
 					DebugFlash(cell, mapping.map, colorPct, cost.ToString(), duration: duration);
 				}
@@ -811,15 +811,16 @@ namespace Vehicles
 		/// </summary>
 		internal struct CostNode
 		{
-			public CostNode(int index, int cost, Rot8 direction)
+			public int index;
+			public float cost;
+			public Rot8 direction;
+
+			public CostNode(int index, float cost, Rot8 direction)
 			{
 				this.index = index;
 				this.cost = cost;
 				this.direction = direction;
 			}
-			public int index;
-			public int cost;
-			public Rot8 direction;
 		}
 
 		/// <summary>
@@ -827,10 +828,10 @@ namespace Vehicles
 		/// </summary>
 		private struct VehiclePathFinderNodeFast
 		{
-			public int knownCost;
-			public int heuristicCost;
+			public float knownCost;
+			public float heuristicCost;
 			public int parentIndex;
-			public int costNodeCost;
+			public float costNodeCost;
 			public ushort status;
 		}
 

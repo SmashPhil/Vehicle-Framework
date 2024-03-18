@@ -209,7 +209,7 @@ namespace Vehicles
 				if (Mouse.IsOver(rect))
 				{
 					mouseOver = true;
-					if (!command.disabled)
+					if (!command.Disabled)
 					{
 						GUI.color = GenUI.MouseoverColor;
 					}
@@ -225,7 +225,7 @@ namespace Vehicles
 				{
 					GUI.color = Command.LowLightBgColor;
 				}
-				Material material = command.disabled ? TexUI.GrayscaleGUI : null;
+				Material material = command.Disabled ? TexUI.GrayscaleGUI : null;
 				GenUI.DrawTextureWithMaterial(rect, command.BGTexture, material);
 				GUI.color = Color.white;
 
@@ -236,14 +236,14 @@ namespace Vehicles
 					
 					Rect buttonRect = iconRect;
 					PatternData defaultPatternData = new PatternData(VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData));
-					if (command.disabled)
+					if (command.Disabled)
 					{
 						defaultPatternData.color = vehicleDef.graphicData.color.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
 						defaultPatternData.colorTwo = vehicleDef.graphicData.colorTwo.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
 						defaultPatternData.colorThree = vehicleDef.graphicData.colorThree.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
 					}
 
-					if (!command.disabled || parms.lowLight)
+					if (!command.Disabled || parms.lowLight)
 					{
 						GUI.color = command.IconDrawColor;
 					}
@@ -314,7 +314,7 @@ namespace Vehicles
 				if (Mouse.IsOver(rect))
 				{
 					TipSignal tip = command.Desc;
-					if (command.disabled && !command.disabledReason.NullOrEmpty())
+					if (command.Disabled && !command.disabledReason.NullOrEmpty())
 					{
 						tip.text += "\n\n" + "DisabledCommand".Translate() + ": " + command.disabledReason;
 					}
@@ -333,7 +333,7 @@ namespace Vehicles
 				Text.Font = GameFont.Small;
 				if (clicked)
 				{
-					if (command.disabled)
+					if (command.Disabled)
 					{
 						if (!command.disabledReason.NullOrEmpty())
 						{

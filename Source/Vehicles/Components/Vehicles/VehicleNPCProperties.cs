@@ -8,10 +8,6 @@ namespace Vehicles
 {
 	public class VehicleNPCProperties
 	{
-		public List<FactionDef> restrictedTo;
-
-		public List<PawnInventoryOption> inventory;
-
-		public List<PawnsArrivalModeDef> arrivalModes;
+		public VehicleRaidParamsDef raidParamsDef;
 	}
 }

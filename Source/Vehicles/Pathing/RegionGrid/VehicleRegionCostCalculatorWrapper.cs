@@ -14,8 +14,8 @@ namespace Vehicles
 		private readonly VehicleDef vehicleDef;
 		private IntVec3 endCell;
 
-		private int moveTicksCardinal;
-		private int moveTicksDiagonal;
+		private float moveTicksCardinal;
+		private float moveTicksDiagonal;
 
 		private VehicleRegionCostCalculator vehicleRegionCostCalculator;
 		private VehicleRegion cachedRegion;
@@ -46,7 +46,7 @@ namespace Vehicles
 		/// <param name="avoidGrid"></param>
 		/// <param name="drafted"></param>
 		/// <param name="disallowedCorners"></param>
-		public void Init(CellRect end, TraverseParms traverseParms, int moveTicksCardinal, int moveTicksDiagonal, ByteGrid avoidGrid, bool drafted, List<int> disallowedCorners)
+		public void Init(CellRect end, TraverseParms traverseParms, float moveTicksCardinal, float moveTicksDiagonal, ByteGrid avoidGrid, bool drafted, List<int> disallowedCorners)
 		{
 			this.moveTicksCardinal = moveTicksCardinal;
 			this.moveTicksDiagonal = moveTicksDiagonal;
@@ -135,7 +135,7 @@ namespace Vehicles
 		{
 			int dx = Mathf.Abs(cell.x - endCell.x);
 			int dz = Mathf.Abs(cell.z - endCell.z);
-			return GenMath.OctileDistance(dx, dz, moveTicksCardinal, moveTicksDiagonal);
+			return GenMath.OctileDistance(dx, dz, Mathf.RoundToInt(moveTicksCardinal), Mathf.RoundToInt(moveTicksDiagonal));
 		}
 
 		/// <summary>

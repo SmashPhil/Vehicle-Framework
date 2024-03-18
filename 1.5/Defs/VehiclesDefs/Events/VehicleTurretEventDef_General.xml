@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<Vehicles.VehicleTurretEventDef>
+		<defName>Queued</defName>
+	</Vehicles.VehicleTurretEventDef>
+	
+	<Vehicles.VehicleTurretEventDef>
+		<defName>Dequeued</defName>
+	</Vehicles.VehicleTurretEventDef>
+	
+	<Vehicles.VehicleTurretEventDef>
+		<defName>ShotFired</defName>
+	</Vehicles.VehicleTurretEventDef>
+	
+	<Vehicles.VehicleTurretEventDef>
+		<defName>Reload</defName>
+	</Vehicles.VehicleTurretEventDef>
+	
+	<Vehicles.VehicleTurretEventDef>
+		<defName>Warmup</defName>
+	</Vehicles.VehicleTurretEventDef>
+	
+	<Vehicles.VehicleTurretEventDef>
+		<defName>Cooldown</defName>
+	</Vehicles.VehicleTurretEventDef>
+</Defs>

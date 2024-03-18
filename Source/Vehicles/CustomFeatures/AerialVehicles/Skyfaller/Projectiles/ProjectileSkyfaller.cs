@@ -22,9 +22,9 @@ namespace Vehicles
 
 		public override Vector3 DrawPos => ExactPosition;
 
-		public override void Draw()
+		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
-			Graphics.DrawMesh(MeshPool.GridPlane(projectileDef.graphicData.drawSize), DrawPos, ExactRotation, projectileDef.DrawMatSingle, 0);
+			Graphics.DrawMesh(MeshPool.GridPlane(projectileDef.graphicData.drawSize), drawLoc, ExactRotation, projectileDef.DrawMatSingle, 0);
 		}
 
 		public virtual Vector3 ExactPosition

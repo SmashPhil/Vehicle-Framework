@@ -1,0 +1,128 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<WorkGiverDef>
+		<defName>PackVehicle</defName>
+		<label>pack vehicle</label>
+		<giverClass>Vehicles.WorkGiver_PackVehicle</giverClass>
+		<workType>Hauling</workType>
+		<verb>pack</verb>
+		<gerund>packing</gerund>
+		<priorityInType>80</priorityInType>
+		
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+	</WorkGiverDef>
+	
+	<WorkGiverDef>
+		<defName>HelpPackVehicleCaravan</defName>
+		<label>pack vehicle</label>
+		<giverClass>Vehicles.WorkGiver_HelpGatheringItemsForVehicleCaravan</giverClass>
+		<workType>Hauling</workType>
+		<verb>pack</verb>
+		<gerund>packing</gerund>
+		<priorityInType>80</priorityInType>
+		
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+	</WorkGiverDef>
+	
+	<WorkGiverDef>
+		<defName>PackVehicleTurret</defName>
+		<label>pack vehicle</label>
+		<giverClass>Vehicles.WorkGiver_RefuelVehicleTurret</giverClass>
+		<workType>Hauling</workType>
+		<verb>pack</verb>
+		<gerund>packing</gerund>
+		<priorityInType>80</priorityInType>
+		
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+	</WorkGiverDef>
+	
+	<WorkGiverDef>
+		<defName>LoadUpgradeMaterials</defName>
+		<label>load materials</label>
+		<giverClass>Vehicles.WorkGiver_BringUpgradeMaterial</giverClass>
+		<workType>Hauling</workType>
+		<verb>load</verb>
+		<gerund>loading</gerund>
+		<priorityInType>60</priorityInType>
+		
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+	</WorkGiverDef>
+	
+	<WorkGiverDef>
+		<defName>WorkOnUpgrade</defName>
+		<label>work on upgrade</label>
+		<giverClass>Vehicles.WorkGiver_WorkOnUpgrade</giverClass>
+		<workType>Construction</workType>
+		<verb>upgrade</verb>
+		<gerund>upgrading</gerund>
+		<priorityInType>70</priorityInType>
+		
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+	</WorkGiverDef>
+	
+	<WorkGiverDef>
+		<defName>RefuelVehicle</defName>
+		<label>refuel vehicle</label>
+		<giverClass>Vehicles.WorkGiver_RefuelVehicle</giverClass>
+		<workType>Hauling</workType>
+		<verb>refuel</verb>
+		<gerund>refueling</gerund>
+		<priorityInType>90</priorityInType>
+		
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+	</WorkGiverDef>
+	
+	<WorkGiverDef>
+		<defName>RepairVehicle</defName>
+		<label>repair vehicle</label>
+		<giverClass>Vehicles.WorkGiver_RepairVehicle</giverClass>
+		<workType>Construction</workType>
+		<verb>repair</verb>
+		<gerund>repairing</gerund>
+		<priorityInType>80</priorityInType>
+		
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+	</WorkGiverDef>
+	
+	<WorkGiverDef>
+		<defName>DisassembleVehicle</defName>
+		<label>disassemble vehicle</label>
+		<giverClass>Vehicles.WorkGiver_DisassembleVehicle</giverClass>
+		<workType>Construction</workType>
+		<verb>disassemble</verb>
+		<gerund>disassembling</gerund>
+		<priorityInType>80</priorityInType>
+		
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+	</WorkGiverDef>
+	
+	<WorkGiverDef>
+		<defName>PaintVehicle</defName>
+		<label>paint vehicle</label>
+		<giverClass>Vehicles.WorkGiver_PaintVehicle</giverClass>
+		<workType>Construction</workType>
+		<verb>paint</verb>
+		<gerund>painting</gerund>
+		<priorityInType>100</priorityInType>
+		
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+	</WorkGiverDef>
+</Defs>

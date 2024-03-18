@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<!-- Fuel -->
+	<Vehicles.VehicleEventDef>
+		<defName>OutOfFuel</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>Refueled</defName>
+	</Vehicles.VehicleEventDef>
+</Defs>

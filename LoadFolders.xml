@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <loadFolders>
+	<v1.5>
+		<li>/</li>
+		<li>1.5</li>
+		<li IfModActive = "Ludeon.RimWorld.Royalty">1.5/_Royalty</li>
+		<li IfModActive = "Ludeon.RimWorld.Ideology">1.5/_Ideology</li>
+		<li IfModActive = "Ludeon.RimWorld.Biotech">1.5/_Biotech</li>
+		
+		<li IfModActive = "kentington.saveourship2">1.5/_SaveOurShip2</li>
+		<li IfModActive = "sindre0830.rimnauts2">1.5/_RimNauts2</li>
+		<li IfModActive = "sindre0830.universum">1.5/_Universum</li>
+		
+		<li IfModActive = "monkey5206.carrycapacityfixed">1.5/_CarryCapacityFixed</li>
+	</v1.5>
 	<v1.4>
 		<li>/</li>
 		<li>1.4</li>

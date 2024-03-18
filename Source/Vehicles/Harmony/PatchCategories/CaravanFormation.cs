@@ -126,64 +126,64 @@ namespace Vehicles
 			for (int i = 0; i < instructionList.Count; i++)
 			{
 				CodeInstruction instruction = instructionList[i];
-				if (instruction.LoadsField(jobField))
-				{
-					yield return instruction; //Ldsfld : JobDefOf::GiveToPackAnimal
-					instruction = instructionList[++i];
-					Label jobLabel = ilg.DefineLabel();
+				//if (instruction.LoadsField(jobField))
+				//{
+				//	yield return instruction; //Ldsfld : JobDefOf::GiveToPackAnimal
+				//	instruction = instructionList[++i];
+				//	Label jobLabel = ilg.DefineLabel();
 
-					yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(typeof(FloatMenuMakerMap), nameof(FloatMenuMakerMap.makingFor)));
-					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(Ext_Vehicles), nameof(Ext_Vehicles.HasVehicleInCaravan)));
-					yield return new CodeInstruction(opcode: OpCodes.Brfalse, jobLabel);
+				//	yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: AccessTools.Field(typeof(FloatMenuMakerMap), nameof(FloatMenuMakerMap.makingFor)));
+				//	yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(Ext_Vehicles), nameof(Ext_Vehicles.HasVehicleInCaravan)));
+				//	yield return new CodeInstruction(opcode: OpCodes.Brfalse, jobLabel);
 
-					yield return new CodeInstruction(opcode: OpCodes.Pop);
-					yield return new CodeInstruction(opcode: OpCodes.Ldsfld, AccessTools.Field(typeof(JobDefOf_Vehicles), nameof(JobDefOf_Vehicles.LoadVehicle)));
-					int j = i;
-					while(j < instructionList.Count)
-					{
-						j++;
-						if(instructionList[j].opcode == OpCodes.Stfld)
-						{
-							instructionList[j].labels.Add(jobLabel);
-							break;
-						}
-					}
-				}
-				if (instruction.Calls(lordJobProperty))
-				{
-					yield return instruction;
-					instruction = instructionList[++i];
-					Label label = ilg.DefineLabel();
-					Label label2 = ilg.DefineLabel();
+				//	yield return new CodeInstruction(opcode: OpCodes.Pop);
+				//	yield return new CodeInstruction(opcode: OpCodes.Ldsfld, AccessTools.Field(typeof(JobDefOf_Vehicles), nameof(JobDefOf_Vehicles.LoadVehicle)));
+				//	int j = i;
+				//	while(j < instructionList.Count)
+				//	{
+				//		j++;
+				//		if(instructionList[j].opcode == OpCodes.Stfld)
+				//		{
+				//			instructionList[j].labels.Add(jobLabel);
+				//			break;
+				//		}
+				//	}
+				//}
+				//if (instruction.Calls(lordJobProperty))
+				//{
+				//	yield return instruction;
+				//	instruction = instructionList[++i];
+				//	Label label = ilg.DefineLabel();
+				//	Label label2 = ilg.DefineLabel();
 
-					yield return new CodeInstruction(opcode: OpCodes.Dup);
-					yield return new CodeInstruction(opcode: OpCodes.Isinst, operand: typeof(LordJob_FormAndSendVehicles));
-					yield return new CodeInstruction(opcode: OpCodes.Brtrue, label);
+				//	yield return new CodeInstruction(opcode: OpCodes.Dup);
+				//	yield return new CodeInstruction(opcode: OpCodes.Isinst, operand: typeof(LordJob_FormAndSendVehicles));
+				//	yield return new CodeInstruction(opcode: OpCodes.Brtrue, label);
 
-					yield return instruction; //CASTCLASS : LordJob_FormAndSendCaravan
-					instruction = instructionList[++i]; 
-					yield return instruction; //STLOC_S : 50
-					instruction = instructionList[++i];
-					yield return instruction; //LDLOC_S : 49
-					instruction = instructionList[++i];
-					yield return instruction; //LDLOC_S : 50
-					instruction = instructionList[++i];
-					yield return instruction; //CALL : CapacityLeft
-					instruction = instructionList[++i];
-					yield return new CodeInstruction(opcode: OpCodes.Br, label2);
+				//	yield return instruction; //CASTCLASS : LordJob_FormAndSendCaravan
+				//	instruction = instructionList[++i]; 
+				//	yield return instruction; //STLOC_S : 50
+				//	instruction = instructionList[++i];
+				//	yield return instruction; //LDLOC_S : 49
+				//	instruction = instructionList[++i];
+				//	yield return instruction; //LDLOC_S : 50
+				//	instruction = instructionList[++i];
+				//	yield return instruction; //CALL : CapacityLeft
+				//	instruction = instructionList[++i];
+				//	yield return new CodeInstruction(opcode: OpCodes.Br, label2);
 
-					yield return new CodeInstruction(opcode: OpCodes.Pop) { labels = new List<Label> { label } };
-					yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 49);
-					yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
-					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(LordUtility), "GetLord", new Type[] { typeof(Pawn) }));
-					yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.PropertyGetter(typeof(Lord), nameof(Lord.LordJob)));
-					yield return new CodeInstruction(opcode: OpCodes.Castclass, operand: typeof(LordJob_FormAndSendVehicles));
-					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(CaravanHelper), nameof(CaravanHelper.CapacityLeft)));
+				//	yield return new CodeInstruction(opcode: OpCodes.Pop) { labels = new List<Label> { label } };
+				//	yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 49);
+				//	yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
+				//	yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(LordUtility), "GetLord", new Type[] { typeof(Pawn) }));
+				//	yield return new CodeInstruction(opcode: OpCodes.Callvirt, operand: AccessTools.PropertyGetter(typeof(Lord), nameof(Lord.LordJob)));
+				//	yield return new CodeInstruction(opcode: OpCodes.Castclass, operand: typeof(LordJob_FormAndSendVehicles));
+				//	yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(CaravanHelper), nameof(CaravanHelper.CapacityLeft)));
 
-					instruction.labels.Add(label2);
-					yield return instruction; //STFLD : capacityLeft
-					instruction = instructionList[++i];
-				}
+				//	instruction.labels.Add(label2);
+				//	yield return instruction; //STFLD : capacityLeft
+				//	instruction = instructionList[++i];
+				//}
 				yield return instruction;
 			}
 		}

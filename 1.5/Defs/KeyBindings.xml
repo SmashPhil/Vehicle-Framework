@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<KeyBindingDef>
+		<defName>VF_RestartGame</defName>
+		<label>Quick Restart</label>
+		<category>Development</category>
+		<defaultKeyCodeA>Keypad1</defaultKeyCodeA>
+	</KeyBindingDef>
+	
+	<KeyBindingDef>
+		<defName>VF_QuickStartMenu</defName>
+		<label>Quick Start Menu</label>
+		<category>Development</category>
+		<defaultKeyCodeA>Keypad2</defaultKeyCodeA>
+	</KeyBindingDef>
+	
+	<KeyBindingDef>
+		<defName>VF_DebugSettings</defName>
+		<label>Debug Settings</label>
+		<category>Development</category>
+		<defaultKeyCodeA>Keypad3</defaultKeyCodeA>
+	</KeyBindingDef>
+</Defs>

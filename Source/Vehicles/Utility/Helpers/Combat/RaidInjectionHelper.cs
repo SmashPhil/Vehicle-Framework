@@ -10,14 +10,6 @@ namespace Vehicles
 	[StaticConstructorOnStartup]
 	public static class RaidInjectionHelper
 	{
-		private static readonly HashSet<PawnsArrivalModeDef> defaultArrivalModes = new HashSet<PawnsArrivalModeDef>();
-
-		static RaidInjectionHelper()
-		{
-			defaultArrivalModes.Add(PawnsArrivalModeDefOf.EdgeWalkIn);
-			defaultArrivalModes.Add(PawnsArrivalModeDefOf.EdgeWalkInGroups);
-		}
-
 		public static VehicleCategory GetResolvedCategory(PawnGroupMakerParms parms)
 		{
 			return VehicleCategory.Combat;
@@ -46,28 +38,18 @@ namespace Vehicles
 			{
 				return false;
 			}
-			if (vehicleDef.npcProperties != null)
+			if (!vehicleDef.enabled.HasFlag(VehicleEnabledFor.Raiders))
 			{
-				if (!vehicleDef.npcProperties.restrictedTo.NullOrEmpty() && !vehicleDef.npcProperties.restrictedTo.Contains(faction.def))
+				return false;
+			}
+			if (vehicleDef.npcProperties?.raidParamsDef != null)
+			{
+				if (!vehicleDef.npcProperties.raidParamsDef.Allows(faction, arrivalModeDef))
 				{
 					return false;
 				}
-				if (arrivalModeDef != null)
-				{
-					if (!vehicleDef.npcProperties.arrivalModes.NullOrEmpty())
-					{
-						if (!vehicleDef.npcProperties.arrivalModes.Contains(arrivalModeDef))
-						{
-							return false;
-						}
-					}
-					else if (!defaultArrivalModes.Contains(arrivalModeDef))
-					{
-						return false;
-					}
-				}
 			}
-			return vehicleDef.enabled.HasFlag(VehicleEnabledFor.Raiders);
+			return true;
 		}
 	}
 }

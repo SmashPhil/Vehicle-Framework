@@ -34,19 +34,6 @@ namespace Vehicles
 		[Obsolete("Not currently implemented, still WIP. Do not reference.", error: true)]
 		public PawnFirefoamDrawer FirefoamOverlays => firefoamOverlays;
 
-		private PawnRenderFlags DefaultRenderFlags
-		{
-			get
-			{
-				PawnRenderFlags pawnRenderFlags = PawnRenderFlags.None;
-				if (vehicle.IsInvisible())
-				{
-					pawnRenderFlags |= PawnRenderFlags.Invisible;
-				}
-				return pawnRenderFlags;
-			}
-		}
-
 		public void RenderPawnAt(Vector3 drawLoc, float angle, bool northSouthRotation)
 		{
 			if (!graphics.AllResolved)
@@ -54,7 +41,7 @@ namespace Vehicles
 				graphics.ResolveAllGraphics();
 			}
 
-			RenderPawnInternal(drawLoc, angle, northSouthRotation, DefaultRenderFlags);
+			RenderPawnInternal(drawLoc, angle, northSouthRotation);
 			
 			if (vehicle.def.race.specialShadowData != null)
 			{
@@ -75,22 +62,21 @@ namespace Vehicles
 			}
 		}
 
-		private void RenderPawnInternal(Vector3 rootLoc, float angle, bool northSouthRotation, PawnRenderFlags flags)
+		private void RenderPawnInternal(Vector3 rootLoc, float angle, bool northSouthRotation)
 		{
 			vehicle.UpdateRotationAndAngle();
-			(Vector3 aboveBodyPos, Rot8 rot) = RenderPawnInternal(rootLoc, angle, vehicle.Rotation, northSouthRotation, flags);
+			(Vector3 aboveBodyPos, Rot8 rot) = RenderPawnInternal(rootLoc, angle, vehicle.Rotation, northSouthRotation);
 			vehicle.DrawExplosiveWicks(aboveBodyPos, rot);
 			vehicle.graphicOverlay.RenderGraphicOverlays(aboveBodyPos, angle, rot);
 		}
 
-		private (Vector3 aboveBodyPos, Rot8 rot) RenderPawnInternal(Vector3 rootLoc, float angle, Rot4 bodyFacing, bool northSouthRotation, PawnRenderFlags flags)
+		private (Vector3 aboveBodyPos, Rot8 rot) RenderPawnInternal(Vector3 rootLoc, float angle, Rot4 bodyFacing, bool northSouthRotation)
 		{
 			if (!graphics.AllResolved)
 			{
 				graphics.ResolveAllGraphics();
 			}
-			bool portraitDraw = !flags.FlagSet(PawnRenderFlags.Portrait) && !flags.FlagSet(PawnRenderFlags.Cache);
-
+			
 			Quaternion quaternion = Quaternion.AngleAxis(angle * (northSouthRotation ? -1 : 1), Vector3.up);
 
 			Vector3 aboveBodyPos = rootLoc + vehicle.VehicleGraphic.DrawOffset(bodyFacing);
@@ -101,7 +87,7 @@ namespace Vehicles
 
 			for (int i = 0; i < list.Count; i++)
 			{
-				GenDraw.DrawMeshNowOrLater(mesh, aboveBodyPos, quaternion, list[i], flags.FlagSet(PawnRenderFlags.DrawNow));
+				GenDraw.DrawMeshNowOrLater(mesh, aboveBodyPos, quaternion, list[i], false);
 				aboveBodyPos.y += SubInterval;
 			}
 
@@ -116,7 +102,7 @@ namespace Vehicles
 			//}
 
 			//TODO - pack graphics?
-			if (!portraitDraw && vehicle.inventory != null && vehicle.inventory.innerContainer.Count > 0 && graphics.packGraphic != null)
+			if (vehicle.inventory != null && vehicle.inventory.innerContainer.Count > 0 && graphics.packGraphic != null)
 			{
 				Graphics.DrawMesh(mesh, drawLoc, quaternion, graphics.packGraphic.MatAt(bodyFacing, null), 0);
 			}

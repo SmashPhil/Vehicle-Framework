@@ -55,7 +55,7 @@ namespace Vehicles
 				Log.Warning("Can't determine transferable count hauled by others because transferable has 0 things.");
 				return 0;
 			}
-			List<Pawn> allPawnsSpawned = lord.Map.mapPawns.AllPawnsSpawned;
+			IReadOnlyList<Pawn> allPawnsSpawned = lord.Map.mapPawns.AllPawnsSpawned;
 			int num = 0;
 			for (int i = 0; i < allPawnsSpawned.Count; i++)
 			{

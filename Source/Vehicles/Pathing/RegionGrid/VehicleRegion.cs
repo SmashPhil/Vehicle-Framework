@@ -31,10 +31,10 @@ namespace Vehicles
 		private VehicleRoom room;
 		public Building_Door door;
 
-		public ConcurrentBag<VehicleRegionLink> links = new ConcurrentBag<VehicleRegionLink>();
+		public ConcurrentSet<VehicleRegionLink> links = new ConcurrentSet<VehicleRegionLink>();
 		public ConcurrentDictionary<int, Weight> weights = new ConcurrentDictionary<int, Weight>();
 
-		private readonly ConcurrentBag<(Pawn cachedFor, Danger danger)> cachedDangers = new ConcurrentBag<(Pawn, Danger)>();
+		private readonly ConcurrentDictionary<Pawn, Danger> cachedDangers = new ConcurrentDictionary<Pawn, Danger>();
 
 		public uint[] closedIndex = new uint[VehicleRegionTraverser.NumWorkers];
 
@@ -117,7 +117,7 @@ namespace Vehicles
 		{
 			get
 			{
-				foreach (VehicleRegionLink link in links)
+				foreach (VehicleRegionLink link in links.Keys)
 				{
 					for (int i = 0; i < 2; i++)
 					{
@@ -137,7 +137,7 @@ namespace Vehicles
 		{
 			get
 			{
-				foreach (VehicleRegionLink link in links)
+				foreach (VehicleRegionLink link in links.Keys)
 				{
 					for (int i = 0; i < 2; i++)
 					{
@@ -231,7 +231,7 @@ namespace Vehicles
 				stringBuilder.AppendLine("id: " + id);
 				stringBuilder.AppendLine("mapIndex: " + mapIndex);
 				stringBuilder.AppendLine("links count: " + links.Count);
-				foreach (VehicleRegionLink regionLink in links)
+				foreach (VehicleRegionLink regionLink in links.Keys)
 				{
 					stringBuilder.AppendLine("  --" + regionLink.ToString());
 				}
@@ -293,9 +293,9 @@ namespace Vehicles
 		public void RecalculateWeights()
 		{
 			weights = new ConcurrentDictionary<int, Weight>();
-			foreach (VehicleRegionLink regionLink in links)
+			foreach (VehicleRegionLink regionLink in links.Keys)
 			{
-				foreach (VehicleRegionLink connectingToLink in links)
+				foreach (VehicleRegionLink connectingToLink in links.Keys)
 				{
 					if (regionLink == connectingToLink) continue; //Skip matching link
 					
@@ -494,7 +494,7 @@ namespace Vehicles
 			}
 			if (debugRegionType.HasFlag(DebugRegionType.Links))
 			{
-				foreach (VehicleRegionLink regionLink in links)
+				foreach (VehicleRegionLink regionLink in links.Keys)
 				{
 					//Flash every other second
 					if (Mathf.RoundToInt(Time.realtimeSinceStartup * 2f) % 2 == 1)
@@ -508,9 +508,9 @@ namespace Vehicles
 			}
 			if (debugRegionType.HasFlag(DebugRegionType.Weights))
 			{
-				foreach (VehicleRegionLink regionLink in links)
+				foreach (VehicleRegionLink regionLink in links.Keys)
 				{
-					foreach (VehicleRegionLink toRegionLink in links)
+					foreach (VehicleRegionLink toRegionLink in links.Keys)
 					{
 						if (regionLink == toRegionLink) continue;
 						
@@ -525,9 +525,9 @@ namespace Vehicles
 
 				foreach (VehicleRegion region in Neighbors)
 				{
-					foreach (VehicleRegionLink regionLink in links)
+					foreach (VehicleRegionLink regionLink in links.Keys)
 					{
-						foreach (VehicleRegionLink toRegionLink in region.links)
+						foreach (VehicleRegionLink toRegionLink in region.links.Keys)
 						{
 							if (regionLink == toRegionLink) continue;
 							if (regionLink.RegionA != this && regionLink.RegionB != this) continue;

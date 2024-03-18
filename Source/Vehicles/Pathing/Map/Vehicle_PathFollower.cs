@@ -511,7 +511,7 @@ namespace Vehicles
 				return;
 			}
 
-			int num = CostToMoveIntoCell(vehicle, vehicle.Position, nextCell);
+			float num = CostToMoveIntoCell(vehicle, vehicle.Position, nextCell);
 			nextCellCostTotal = num;
 			nextCellCostLeft = num;
 
@@ -528,9 +528,9 @@ namespace Vehicles
 			SetBumperCells();
 		}
 
-		public static int MoveTicksAt(VehiclePawn vehicle, IntVec3 from, IntVec3 to)
+		public static float MoveTicksAt(VehiclePawn vehicle, IntVec3 from, IntVec3 to)
 		{
-			int tickCost;
+			float tickCost;
 			if (to.x == from.x || to.z == from.z)
 			{
 				tickCost = vehicle.TicksPerMoveCardinal;
@@ -542,12 +542,12 @@ namespace Vehicles
 			return tickCost;
 		}
 
-		private static void LocomotionTicks(VehiclePawn vehicle, IntVec3 from, IntVec3 to, ref int tickCost)
+		private static void LocomotionTicks(VehiclePawn vehicle, IntVec3 from, IntVec3 to, ref float tickCost)
 		{
 			Pawn locomotionUrgencySameAs = vehicle.jobs.curDriver.locomotionUrgencySameAs;
 			if (locomotionUrgencySameAs is VehiclePawn locomotionVehicle && locomotionUrgencySameAs != vehicle && locomotionUrgencySameAs.Spawned)
 			{
-				int tickCostOtherVehicle = CostToMoveIntoCell(locomotionVehicle, from, to);
+				float tickCostOtherVehicle = CostToMoveIntoCell(locomotionVehicle, from, to);
 				tickCost = Mathf.Max(tickCost, tickCostOtherVehicle); //Slow down to match other vehicle's speed
 			}
 			else
@@ -577,16 +577,16 @@ namespace Vehicles
 			}
 		}
 
-		public static int CostToMoveIntoCell(VehiclePawn vehicle, IntVec3 from, IntVec3 to)
+		public static float CostToMoveIntoCell(VehiclePawn vehicle, IntVec3 from, IntVec3 to)
 		{
-			int tickCost = MoveTicksAt(vehicle, from, to);
+			float tickCost = MoveTicksAt(vehicle, from, to);
 			tickCost += vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathGrid.PerceivedPathCostAt(to);
 			tickCost = Mathf.Min(tickCost, MaxMoveTicks); //At minimum should take ~7.5 seconds per cell, any slower vehicle should be disabled
 			if (vehicle.CurJob != null)
 			{
 				LocomotionTicks(vehicle, from, to, ref tickCost);
 			}
-			return Mathf.Max(tickCost, 1);
+			return Mathf.Max(tickCost, 1f);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

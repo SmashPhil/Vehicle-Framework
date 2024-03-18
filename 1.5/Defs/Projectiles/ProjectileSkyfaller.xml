@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<ThingDef>
+		<defName>ProjectileSkyfaller</defName>
+		<label>Projectile skyfaller</label>
+		<thingClass>Vehicles.ProjectileSkyfaller</thingClass>
+		<category>Projectile</category>
+		<useHitPoints>false</useHitPoints>
+		<drawOffscreen>true</drawOffscreen>
+		<tickerType>Normal</tickerType>
+		<altitudeLayer>Skyfaller</altitudeLayer>
+		<drawerType>RealtimeOnly</drawerType>
+		<neverMultiSelect>true</neverMultiSelect>
+	</ThingDef>
+</Defs>

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using RimWorld;
 using Verse;
-
+using SmashTools;
 
 namespace Vehicles
 {
@@ -16,15 +16,15 @@ namespace Vehicles
 		private ConcurrentDictionary<CachedEntry, bool> cacheDict = new ConcurrentDictionary<CachedEntry, bool>();
 
 		[ThreadStatic]
-		private static ConcurrentBag<CachedEntry> tmpCachedEntries;
+		private static ConcurrentSet<CachedEntry> tmpCachedEntries;
 
-		private static ConcurrentBag<CachedEntry> CachedEntries
+		private static ConcurrentSet<CachedEntry> CachedEntries
 		{
 			get
 			{
 				if (tmpCachedEntries == null)
 				{
-					tmpCachedEntries = new ConcurrentBag<CachedEntry>();
+					tmpCachedEntries = new ConcurrentSet<CachedEntry>();
 				}
 				return tmpCachedEntries;
 			}
@@ -91,7 +91,7 @@ namespace Vehicles
 					CachedEntries.Add(keyValuePair.Key);
 				}
 			}
-			foreach (CachedEntry cachedEntry in CachedEntries)
+			foreach (CachedEntry cachedEntry in CachedEntries.Keys)
 			{
 				cacheDict.TryRemove(cachedEntry, out _);
 			}
@@ -112,7 +112,7 @@ namespace Vehicles
 					CachedEntries.Add(keyValuePair.Key);
 				}
 			}
-			foreach (CachedEntry cachedEntry in CachedEntries)
+			foreach (CachedEntry cachedEntry in CachedEntries.Keys)
 			{
 				cacheDict.TryRemove(cachedEntry, out _);
 			}

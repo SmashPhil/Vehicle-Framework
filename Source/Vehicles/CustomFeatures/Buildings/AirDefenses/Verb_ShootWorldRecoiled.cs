@@ -12,6 +12,7 @@ using SmashTools;
 
 namespace Vehicles
 {
+	//TODO - needs fixing for CompReloadable
 	public class Verb_ShootWorldRecoiled : Verb_ShootRecoiled
 	{
 		protected GlobalTargetInfo target = GlobalTargetInfo.Invalid;
@@ -92,11 +93,11 @@ namespace Vehicles
 				{
 					comp.Notify_ProjectileLaunched();
 				}
-				CompReloadable comp2 = EquipmentSource.GetComp<CompReloadable>();
-				if (comp2 != null)
-				{
-					comp2.UsedOnce();
-				}
+				//CompReloadable comp2 = EquipmentSource.GetComp<CompReloadable>();
+				//if (comp2 != null)
+				//{
+				//	comp2.UsedOnce();
+				//}
 			}
 			Thing launcher = caster;
 			Thing equipment = EquipmentSource;

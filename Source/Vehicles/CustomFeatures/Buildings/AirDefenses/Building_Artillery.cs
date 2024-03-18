@@ -53,14 +53,6 @@ namespace Vehicles
 			}
 		}
 
-		public bool CanSetForcedTarget
-		{
-			get
-			{
-				return mannableComp != null && PlayerControlled;
-			}
-		}
-
 		public bool CanToggleHoldFire
 		{
 			get
@@ -152,12 +144,12 @@ namespace Vehicles
 			};
 		}
 
-		public override void Draw()
+		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
 			TopArtillery.DrawTurret();
 			if (def.drawerType == DrawerType.RealtimeOnly)
 			{
-				DrawAt(DrawPos, false);
+				DrawAt(drawLoc, false);
 				return;
 			}
 			Comps_PostDraw();
@@ -170,7 +162,7 @@ namespace Vehicles
 			{
 				topRecoiled.RecoilTick();
 			}
-			if (Active && (mannableComp is null || mannableComp.MannedNow) && !stunner.Stunned && Spawned && AttackVerb.state != VerbState.Bursting)
+			if (Active && (mannableComp is null || mannableComp.MannedNow) && !IsStunned && Spawned && AttackVerb.state != VerbState.Bursting)
 			{
 				TopArtillery.Tick();
 			}

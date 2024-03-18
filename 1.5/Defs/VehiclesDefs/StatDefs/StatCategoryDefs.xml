@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<StatCategoryDef>
+		<defName>VehicleBasics</defName>
+		<label>Basics</label>
+		<displayOrder>50</displayOrder>
+	</StatCategoryDef>
+	
+	<StatCategoryDef>
+		<defName>VehicleBasicsImportant</defName>
+		<label>Basics</label>
+		<displayOrder>10</displayOrder>
+	</StatCategoryDef>
+	
+	<StatCategoryDef>
+		<defName>VehicleCombat</defName>
+		<label>Combat</label>
+		<displayOrder>60</displayOrder>
+	</StatCategoryDef>
+	
+	<StatCategoryDef>
+		<defName>VehicleAerial</defName>
+		<label>Aerial</label>
+		<displayOrder>80</displayOrder>
+	</StatCategoryDef>
+</Defs>

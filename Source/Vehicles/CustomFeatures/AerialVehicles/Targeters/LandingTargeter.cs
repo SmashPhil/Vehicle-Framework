@@ -79,8 +79,9 @@ namespace Vehicles
 
 		private void TryStartNextTargeter()
 		{
-			if (!IsTargeting && targeterQueue.TryDequeue(out Action beginTargeting))
+			if (!IsTargeting && targeterQueue.Count > 0)
 			{
+				Action beginTargeting = targeterQueue.Dequeue();
 				beginTargeting();
 			}
 		}

@@ -239,8 +239,8 @@ namespace Vehicles
 				{
 					yield return instruction; //Stloc_S : 7
 					instruction = instructionList[++i];
-					yield return instruction; //Ldloc_S : 7
-					instruction = instructionList[++i];
+					//yield return instruction; //Ldloc_S : 7
+					//instruction = instructionList[++i];
 					yield return new CodeInstruction(opcode: OpCodes.Call, AccessTools.Method(typeof(Combat), nameof(VehiclePawnFillageInterceptReroute)));
 				}
 

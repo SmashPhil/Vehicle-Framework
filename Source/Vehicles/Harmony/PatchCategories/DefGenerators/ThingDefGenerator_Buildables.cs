@@ -9,6 +9,9 @@ namespace Vehicles
 {
 	public static class ThingDefGenerator_Buildables
 	{
+		//They removed the DefOf for this, and I can't be bothered to add it myself. Just doing a def lookup
+		private const string DefaultDesignationCategoryDefName = "Structure";
+
 		public static bool GenerateImpliedBuildDef(VehicleDef vehicleDef, out VehicleBuildDef impliedBuildDef)
 		{
 			impliedBuildDef = null;
@@ -31,7 +34,7 @@ namespace Vehicles
 					passability = vehicleDef.passability,
 					fillPercent = vehicleDef.fillPercent,
 					neverMultiSelect = true,
-					designationCategory = vehicleDef.designationCategory ?? DesignationCategoryDefOf.Structure,
+					designationCategory = vehicleDef.designationCategory ?? DefDatabase<DesignationCategoryDef>.GetNamed(DefaultDesignationCategoryDefName),
 					clearBuildingArea = true,
 					category = ThingCategory.Building,
 					blockWind = vehicleDef.blockWind,

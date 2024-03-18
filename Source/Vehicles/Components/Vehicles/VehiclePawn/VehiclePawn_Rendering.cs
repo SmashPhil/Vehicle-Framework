@@ -299,7 +299,12 @@ namespace Vehicles
 			return result;
 		}
 
-		public override void Draw()
+		public override void DynamicDrawPhaseAt(DrawPhase phase, Vector3 drawLoc, bool flip = false)
+		{
+			Draw();
+		}
+
+		public virtual void Draw()
 		{
 			if (this.AnimationLocked()) return;
 
@@ -312,7 +317,7 @@ namespace Vehicles
 			Comps_PostDraw();
 		}
 
-		public override void DrawAt(Vector3 drawLoc, bool flip = false)
+		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
 			Drawer.DrawAt(drawLoc);
 			foreach (VehicleHandler handler in HandlersWithPawnRenderer)

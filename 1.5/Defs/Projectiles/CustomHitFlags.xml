@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<Vehicles.CustomHitFlags>
+		<defName>Tank</defName>
+		<minFillPercent>0.8</minFillPercent>
+		<hitThroughPawns>true</hitThroughPawns>
+	</Vehicles.CustomHitFlags>
+</Defs>
