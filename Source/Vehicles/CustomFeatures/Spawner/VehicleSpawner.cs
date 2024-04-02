@@ -174,12 +174,11 @@ namespace Vehicles
 			if (vehicle.CompUpgradeTree != null)
 			{
 				Rand.PushState();
-				for(int i = 0; i < upgradeCount; i++)
+				for (int i = 0; i < upgradeCount; i++)
 				{
-					var potentialUpgrades = vehicle.CompUpgradeTree.upgradeList.Where(u => !u.upgradeActive && vehicle.CompUpgradeTree.PrerequisitesMet(u));
-					if (potentialUpgrades.NotNullAndAny())
+					IEnumerable<UpgradeNode> potentialUpgrades = vehicle.CompUpgradeTree.Props.def.nodes.Where(node => !vehicle.CompUpgradeTree.NodeUnlocked(node) && vehicle.CompUpgradeTree.PrerequisitesMet(node));
+					if (potentialUpgrades.TryRandomElement(out UpgradeNode node))
 					{
-						UpgradeNode node = potentialUpgrades.RandomElement();
 						vehicle.CompUpgradeTree.FinishUnlock(node);
 					}
 				}

@@ -143,6 +143,11 @@ namespace Vehicles
 		/// </remarks>
 		public override void ResolveReferences()
 		{
+			if (GetCompProperties<CompProperties_UpgradeTree>() != null)
+			{
+				inspectorTabs.Add(typeof(ITab_Vehicle_Upgrades));
+			}
+
 			base.ResolveReferences();
 			if (!components.NullOrEmpty())
 			{

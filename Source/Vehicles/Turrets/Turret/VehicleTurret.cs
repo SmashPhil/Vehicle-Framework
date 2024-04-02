@@ -1809,13 +1809,6 @@ namespace Vehicles
 			}
 		}
 
-		//TODO - remove in 1.5
-		[Obsolete("Use CheckTargetInvalid instead.", error: true)]
-		public virtual bool SetTargetConditionalOnThing(LocalTargetInfo target, bool resetPrefireTimer = true)
-		{
-			return CheckTargetInvalid(resetPrefireTimer);
-		}
-
 		/// <summary>
 		/// Set target only if cannonTarget is no longer valid or if target is cell based
 		/// </summary>

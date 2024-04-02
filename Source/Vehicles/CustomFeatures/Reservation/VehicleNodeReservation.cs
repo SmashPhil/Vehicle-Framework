@@ -47,7 +47,7 @@ namespace Vehicles
 
 		public List<ThingDefCountClass> MaterialsLeft()
 		{
-			var materials = vehicle.CompUpgradeTree.NodeUnlocking.MaterialsRequired();
+			var materials = vehicle.CompUpgradeTree.NodeUnlocking.MaterialsRequired(Vehicle);
 			Dictionary<ThingDef, int> cachedTd = new Dictionary<ThingDef, int>();
 			foreach(ThingDefCountClass td in materials)
 			{
@@ -100,7 +100,7 @@ namespace Vehicles
 
 		public override void VerifyAndValidateClaimants()
 		{
-			var mats = vehicle.CompUpgradeTree.NodeUnlocking.MaterialsRequired();
+			var mats = vehicle.CompUpgradeTree.NodeUnlocking.MaterialsRequired(Vehicle);
 			var claims = new List<Pawn>(claimants.Keys);
 			foreach(Pawn actor in claims)
 			{

@@ -342,7 +342,13 @@ namespace Vehicles
 				{
 					labelRect.x += columnWidth;
 					DamageArmorCategoryDef armorCategoryDef = armorRatingDefs[i];
-					Widgets.Label(labelRect, component.ArmorRating(armorCategoryDef).ToStringByStyle(armorCategoryDef.armorRatingStat.toStringStyle));
+					float armorRating = component.ArmorRating(armorCategoryDef, out bool upgraded);
+					string armorLabel = armorRating.ToStringByStyle(armorCategoryDef.armorRatingStat.toStringStyle);
+					if (upgraded)
+					{
+						armorLabel = armorLabel.Colorize(Color.cyan);
+					}
+					Widgets.Label(labelRect, armorLabel);
 				}
 			}
 

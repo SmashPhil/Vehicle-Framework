@@ -36,6 +36,10 @@ namespace Vehicles
 
 		public float Efficiency => props.efficiency.Evaluate(HealthPercent); //Allow evaluating beyond 100% via stat parts
 
+		public Dictionary<string, List<StatModifier>> SetArmorModifiers { get; private set; } = new Dictionary<string, List<StatModifier>>();
+
+		public Dictionary<string, List<StatModifier>> AddArmorModifiers { get; private set; } = new Dictionary<string, List<StatModifier>>();
+
 		public Color EfficiencyColor => gradient.Evaluate(Efficiency);
 
 		string ITweakFields.Category => props.key;
@@ -49,17 +53,6 @@ namespace Vehicles
 				Widgets.DrawTextureFitted(rect, indicator.Icon, 1);
 				TooltipHandler.TipRegion(rect, indicator.label);
 			}
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="vehicle"></param>
-		/// <param name="dinfo"></param>
-		[Obsolete("Use TakeDamage method with optional parameter instead. This will be removed in the future.", error: true)]
-		public void TakeDamage(VehiclePawn vehicle, DamageInfo dinfo)
-		{
-			TakeDamage(vehicle, ref dinfo, ignoreArmor: false);
 		}
 
 		public void TakeDamage(VehiclePawn vehicle, DamageInfo dinfo, bool ignoreArmor = false)
@@ -131,7 +124,7 @@ namespace Vehicles
 				return;
 			}
 			DamageArmorCategoryDef armorCategoryDef = dinfo.Def.armorCategory;
-			float armorRating = ArmorRating(armorCategoryDef);
+			float armorRating = ArmorRating(armorCategoryDef, out _);
 			float armorDiff = armorRating - dinfo.ArmorPenetrationInt;
 
 			result = props.hitbox.fallthrough ? Penetration.Penetrated : Penetration.NonPenetrated;
@@ -162,10 +155,56 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="armorCategoryDef"></param>
 		/// <returns>armor rating %</returns>
-		public float ArmorRating(DamageArmorCategoryDef armorCategoryDef)
+		public float ArmorRating(DamageArmorCategoryDef armorCategoryDef, out bool upgraded)
 		{
+			upgraded = false;
+			if (!SetArmorModifiers.NullOrEmpty())
+			{
+				foreach ((_, List<StatModifier> statModifiers) in SetArmorModifiers)
+				{
+					if (TryGetModifier(statModifiers, out float setValue))
+					{
+						upgraded = true;
+						return setValue;
+					}
+				}
+			}
+			float value = vehicle.GetStatValue(armorCategoryDef.armorRatingStat);
 			StatModifier armorModifier = props.armor?.FirstOrDefault(rating => rating.stat == armorCategoryDef.armorRatingStat);
-			return armorModifier?.value ?? vehicle.GetStatValue(armorCategoryDef.armorRatingStat);
+			if (armorModifier != null)
+			{
+				value = armorModifier.value;
+			}
+			if (!AddArmorModifiers.NullOrEmpty())
+			{
+				foreach ((_, List<StatModifier> statModifiers) in AddArmorModifiers)
+				{
+					if (TryGetModifier(statModifiers, out float addValue))
+					{
+						upgraded = true;
+						value += addValue;
+					}
+				}
+			}
+			return value;
+
+			bool TryGetModifier(List<StatModifier> statModifiers, out float value)
+			{
+				value = 0;
+				if (statModifiers.NullOrEmpty())
+				{
+					return false;
+				}
+				foreach (StatModifier statModifier in statModifiers)
+				{
+					if (statModifier.stat == armorCategoryDef.armorRatingStat)
+					{
+						value = statModifier.value;
+						return true;
+					}
+				}
+				return false;
+			}
 		}
 
 		public virtual void PostCreate()

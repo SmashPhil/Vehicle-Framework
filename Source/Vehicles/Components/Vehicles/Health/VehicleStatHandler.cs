@@ -34,6 +34,10 @@ namespace Vehicles
 		[TweakField]
 		public List<VehicleComponent> components = new List<VehicleComponent>();
 
+		private Dictionary<StatUpgradeCategoryDef, StatOffset> categoryOffsets = new Dictionary<StatUpgradeCategoryDef, StatOffset>();
+
+		private Dictionary<VehicleStatDef, StatOffset> statOffsets = new Dictionary<VehicleStatDef, StatOffset>();
+
 		private static readonly List<IntVec3> hitboxHighlightCells = new List<IntVec3>();
 
 		private VehiclePawn vehicle;
@@ -72,6 +76,55 @@ namespace Vehicles
 				componentsByKeys[component.props.key] = component;
 				RecacheStatCategories(component);
 			}
+			InitializeStatOffsets();
+		}
+
+		public void InitializeStatOffsets()
+		{
+			statOffsets.Clear();
+			categoryOffsets.Clear();
+
+			foreach (VehicleStatDef statDef in DefDatabase<VehicleStatDef>.AllDefsListForReading)
+			{
+				StatOffset statOffset = new StatOffset(vehicle, statDef);
+				statOffsets[statDef] = statOffset;
+			}
+
+			foreach (StatUpgradeCategoryDef upgradeCategoryDef in DefDatabase<StatUpgradeCategoryDef>.AllDefsListForReading)
+			{
+				StatOffset statOffset = new StatOffset(vehicle, upgradeCategoryDef);
+				categoryOffsets[upgradeCategoryDef] = statOffset;
+			}
+		}
+
+		public void AddStatOffset(VehicleStatDef statDef, float value)
+		{
+			statOffsets[statDef].Offset += value;
+		}
+
+		public void AddStatOffset(StatUpgradeCategoryDef upgradeCategoryDef, float value)
+		{
+			categoryOffsets[upgradeCategoryDef].Offset += value;
+		}
+
+		public void RemoveStatOffset(VehicleStatDef statDef, float value)
+		{
+			statOffsets[statDef].Offset -= value;
+		}
+
+		public void RemoveStatOffset(StatUpgradeCategoryDef upgradeCategoryDef, float value)
+		{
+			categoryOffsets[upgradeCategoryDef].Offset -= value;
+		}
+
+		public float GetStatOffset(VehicleStatDef statDef)
+		{
+			return statOffsets[statDef].Offset;
+		}
+
+		public float GetStatOffset(StatUpgradeCategoryDef upgradeCategoryDef)
+		{
+			return categoryOffsets[upgradeCategoryDef].Offset;
 		}
 
 		public float GetStatValue(VehicleStatDef statDef)
@@ -614,6 +667,10 @@ namespace Vehicles
 			Scribe_References.Look(ref vehicle, nameof(vehicle), true);
 			Scribe_Collections.Look(ref components, nameof(components), LookMode.Deep, vehicle);
 			
+			if (Scribe.mode == LoadSaveMode.LoadingVars)
+			{
+				InitializeStatOffsets();
+			}
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
 				if (!components.NullOrEmpty())

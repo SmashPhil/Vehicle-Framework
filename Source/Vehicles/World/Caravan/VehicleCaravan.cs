@@ -21,9 +21,6 @@ namespace Vehicles
 		private static MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock();
 		private static Dictionary<ThingDef, Material> materials = new Dictionary<ThingDef, Material>();
 
-		[Obsolete("Renamed to vehiclePather, will be removed in 1.5")]
-		public VehicleCaravan_PathFollower vPather;
-
 		public VehicleCaravan_PathFollower vehiclePather;
 		public VehicleCaravan_Tweener vehicleTweener;
 
@@ -38,10 +35,6 @@ namespace Vehicles
 		{
 			vehiclePather = new VehicleCaravan_PathFollower(this);
 			vehicleTweener = new VehicleCaravan_Tweener(this);
-
-#pragma warning disable 0618
-			vPather = vehiclePather;
-#pragma warning restore 0618
 		}
 
 		public float ConstructionAverage { get; private set; }
@@ -768,9 +761,6 @@ namespace Vehicles
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
 				initialized = true;
-#pragma warning disable 0618
-				vPather = vehiclePather; //Share reference until mods switch over to new name
-#pragma warning restore 0618
 			}
 		}
 	}

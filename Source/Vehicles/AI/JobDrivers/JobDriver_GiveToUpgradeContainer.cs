@@ -9,54 +9,42 @@ namespace Vehicles
 {
 	public class JobDriver_GiveToUpgradeContainer : JobDriver_LoadVehicle
 	{
-		public ThingDefCountClass ThingDef => new ThingDefCountClass(Item.def, Item.stackCount);
+		public override string ListerTag => ReservationType.LoadUpgradeMaterials;
 
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		public override bool FailJob()
 		{
-			return base.TryMakePreToilReservations(errorOnFailed) && pawn.Map.GetCachedMapComponent<VehicleReservationManager>().Reserve<ThingDefCountClass, VehicleNodeReservation>(Vehicle, pawn, job, ThingDef);
+			if (!Vehicle.CompUpgradeTree.CurrentlyUpgrading || !Vehicle.CompUpgradeTree.NodeUnlocking.AvailableSpace(Vehicle, Item))
+			{
+				Log.Message($"Failed Job");
+				return true;
+			}
+			return base.FailJob();
 		}
-
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			this.FailOnDestroyedOrNull(TargetIndex.A);
-			this.FailOnDestroyedOrNull(TargetIndex.B);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch).FailOn(() => !Vehicle.CompUpgradeTree.CurrentlyUpgrading 
-				|| !Vehicle.CompUpgradeTree.NodeUnlocking.AvailableSpace(Item));
-			yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false);
-			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).FailOnDespawnedNullOrForbidden(TargetIndex.B).FailOn(() => !Vehicle.CompUpgradeTree.CurrentlyUpgrading 
-				|| !Vehicle.CompUpgradeTree.NodeUnlocking.AvailableSpace(Item));
-			yield return GiveAsMuchToVehicleAsPossible();
-			yield return Toils_Jump.JumpIf(FindNearestVehicle(), () => pawn.carryTracker.CarriedThing != null);
-			yield break;
-		}
-
+		
 		protected override Toil GiveAsMuchToVehicleAsPossible()
 		{
 			return new Toil
 			{
 				initAction = delegate ()
 				{
-					if(Item is null)
+					if (Item is null || Item.stackCount <= 0)
 					{
+						Log.Message($"No item");
 						pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true);
 					}
 					else
 					{
-						ThingDefCountClass materialRequired = Vehicle.CompUpgradeTree.NodeUnlocking.MaterialsRequired().FirstOrDefault(x => x.thingDef == Item.def);
+						ThingDefCountClass materialRequired = Vehicle.CompUpgradeTree.NodeUnlocking.MaterialsRequired(Vehicle).FirstOrDefault(x => x.thingDef == Item.def);
 						
-						if(ThingDef is null || ThingDef.count <= 0)
+						if (materialRequired is null || materialRequired.count <= 0)
 						{
+							Log.Message($"No material");
 							pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true);
 						}
 						else
 						{
-							int count = Mathf.Min(ThingDef.count, Item.stackCount); //Check back here
-							pawn.carryTracker.innerContainer.TryTransferToContainer(Item, Vehicle.CompUpgradeTree.NodeUnlocking.itemContainer, count, true);
-							pawn.Map.GetCachedMapComponent<VehicleReservationManager>().ReleaseAllClaimedBy(pawn);
-							if(Vehicle.CompUpgradeTree.NodeUnlocking.StoredCostSatisfied)
-							{
-								pawn.Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(Vehicle);
-							}
+							int count = Mathf.Min(materialRequired.count, Item.stackCount); //Check back here
+							pawn.carryTracker.innerContainer.TryTransferToContainer(Item, Vehicle.CompUpgradeTree.upgradeContainer, count, true);
 						}
 					}
 				}

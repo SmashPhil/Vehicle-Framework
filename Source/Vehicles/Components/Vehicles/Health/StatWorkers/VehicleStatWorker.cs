@@ -51,7 +51,7 @@ namespace Vehicles
 			{
 				if (statModifier.statDef == statDef)
 				{
-					value = statModifier.value; //TODO - Retrieve modified value from ModSettings, use statModifier value as fallback
+					value = statModifier.value;
 					statParts = statModifier.parts;
 					break;
 				}
@@ -101,7 +101,8 @@ namespace Vehicles
 					value = statPart.TransformValue(vehicle, value);
 				}
 			}
-			return value;
+			float offset = vehicle.statHandler.GetStatOffset(statDef);
+			return value + offset;
 		}
 
 		public virtual bool IsDisabledFor(VehiclePawn vehicle)

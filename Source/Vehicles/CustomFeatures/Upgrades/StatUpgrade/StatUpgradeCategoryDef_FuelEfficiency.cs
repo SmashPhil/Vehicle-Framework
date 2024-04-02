@@ -7,17 +7,10 @@ using HarmonyLib;
 
 namespace Vehicles
 {
-	public class StatUpgradeCargo : StatUpgradeCategoryDef
+	public class StatUpgradeCategoryDef_FuelEfficiency : StatUpgradeCategoryDef
 	{
-		public StatUpgradeCargo()
+		public StatUpgradeCategoryDef_FuelEfficiency()
 		{
-		}
-
-		public override bool AppliesToVehicle(VehicleDef def) => true;
-
-		public override void ApplyStatUpgrade(VehiclePawn vehicle, float value)
-		{
-			//vehicle.CargoCapacity += value;
 		}
 
 		public override void DrawStatLister(VehicleDef def, Listing_Settings lister, SaveableField field, float value)

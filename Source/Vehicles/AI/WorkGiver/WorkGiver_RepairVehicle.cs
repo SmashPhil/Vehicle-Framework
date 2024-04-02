@@ -9,8 +9,11 @@ namespace Vehicles
 	{
 		public override JobDef JobDef => JobDefOf_Vehicles.RepairVehicle;
 
-		public override Predicate<VehiclePawn> VehicleCondition => (vehicle) => vehicle.statHandler.NeedsRepairs;
-
 		public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn) => pawn.Map.GetCachedMapComponent<ListerVehiclesRepairable>().RepairsForFaction(pawn.Faction);
+
+		public override bool CanBeWorkedOn(VehiclePawn vehicle)
+		{
+			return vehicle.statHandler.NeedsRepairs;
+		}
 	}
 }

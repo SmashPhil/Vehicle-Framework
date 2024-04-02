@@ -94,7 +94,7 @@
 	<VF_TabCargo>Cargo</VF_TabCargo>
 	<VF_TabPassengers>Pawns</VF_TabPassengers>
 	<VF_TabComponents>Health</VF_TabComponents>
-	<VF_TabUpgrades>Customize</VF_TabUpgrades>
+	<VF_TabUpgrades>Upgrade</VF_TabUpgrades>
 	
 	<VF_ComponentHealth>Health</VF_ComponentHealth>
 	<VF_ComponentEfficiency>Efficiency</VF_ComponentEfficiency>

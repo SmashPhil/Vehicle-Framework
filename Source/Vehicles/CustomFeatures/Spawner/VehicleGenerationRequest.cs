@@ -56,7 +56,7 @@ namespace Vehicles
 			CleanSlate = cleanSlate;
 			if (!CleanSlate && vehicleDef.GetSortedCompProperties<CompProperties_UpgradeTree>() is CompProperties_UpgradeTree compProperties_UpgradeTree)
 			{
-				Upgrades = Rand.Range(0, compProperties_UpgradeTree.upgrades.Count);
+				Upgrades = Rand.Range(0, compProperties_UpgradeTree.def.nodes.Count);
 			}
 			
 			RandomizeMask = randomizeMask;

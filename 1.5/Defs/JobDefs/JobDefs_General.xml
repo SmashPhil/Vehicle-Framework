@@ -87,7 +87,7 @@
 	
 	<JobDef>
 		<defName>UpgradeVehicle</defName>
-		<driverClass>Vehicles.JobDriver_WorkOnUpgrade</driverClass>
+		<driverClass>Vehicles.JobDriver_UpgradeVehicle</driverClass>
 		<reportString>Working on TargetA.</reportString>
 		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
 	</JobDef>

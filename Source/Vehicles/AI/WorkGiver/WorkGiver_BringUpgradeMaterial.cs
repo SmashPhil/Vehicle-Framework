@@ -10,9 +10,13 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class WorkGiver_BringUpgradeMaterial : WorkGiver_Scanner
+	public class WorkGiver_BringUpgradeMaterial : WorkGiver_CarryToVehicle
 	{
-		[ThreadStatic] public static List<Thing> tmpResourcesAvailable = new List<Thing>();
+		private static HashSet<ThingDef> neededThingDefs = new HashSet<ThingDef>();
+
+		public override string ReservationName => ReservationType.LoadUpgradeMaterials;
+
+		public override JobDef JobDef => JobDefOf_Vehicles.LoadUpgradeMaterials;
 
 		public override PathEndMode PathEndMode
 		{
@@ -22,89 +26,141 @@ namespace Vehicles
 			}
 		}
 
-		public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn) => pawn.Map.GetCachedMapComponent<VehicleReservationManager>().VehicleListers(ReservationType.LoadUpgradeMaterials);
+		public override bool JobAvailable(VehiclePawn vehicle)
+		{
+			return vehicle.CompUpgradeTree.CurrentlyUpgrading && !vehicle.CompUpgradeTree.StoredCostSatisfied;
+		}
 
+		public override ThingOwner<Thing> ThingOwner(VehiclePawn vehicle)
+		{
+			return vehicle.CompUpgradeTree.upgradeContainer;
+		}
+
+		public override IEnumerable<ThingDefCount> ThingDefs(VehiclePawn vehicle)
+		{
+			if (!vehicle.CompUpgradeTree.CurrentlyUpgrading || vehicle.CompUpgradeTree.NodeUnlocking.ingredients.NullOrEmpty())
+			{
+				yield break;
+			}
+			foreach (ThingDefCountClass thingDefCountClass in vehicle.CompUpgradeTree.NodeUnlocking.ingredients)
+			{
+				yield return new ThingDefCount(thingDefCountClass.thingDef, thingDefCountClass.count);
+			}
+		}
 
 		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
 		{
-			if (t.Faction != pawn.Faction)
+			VehiclePawn vehicle = t as VehiclePawn;
+			if (vehicle == null)
+			{
 				return null;
-			if (t is VehiclePawn availableBoat && t.TryGetComp<CompUpgradeTree>() != null && t.TryGetComp<CompUpgradeTree>().CurrentlyUpgrading && 
-				!t.TryGetComp<CompUpgradeTree>().NodeUnlocking.StoredCostSatisfied && pawn.CanReach(new LocalTargetInfo(t.Position), PathEndMode.Touch, Danger.Deadly))
-			{
-				return UpgradeNodeDeliverJob(pawn, availableBoat);
 			}
-			
-			return null;
-		}
-
-		protected Job UpgradeNodeDeliverJob(Pawn pawn, VehiclePawn vehicle)
-		{
-			UpgradeNode u = vehicle.CompUpgradeTree.NodeUnlocking;
-			List<ThingDefCountClass> materials = u.MaterialsRequired().ToList();
-			int count = materials.Count;
-
-			bool flag = false;
-			ThingDefCountClass thingDefCountClass = null;
-			var reservationManager = vehicle.Map.GetCachedMapComponent<VehicleReservationManager>();
-			for (int i = 0; i < count; i++)
+			if (pawn.Faction != t.Faction)
 			{
-				ThingDefCountClass materialRequired = materials[i];
-
-				if (!pawn.Map.itemAvailability.ThingsAvailableAnywhere(materialRequired.thingDef, thingDefCountClass.count, pawn))
-				{
-					flag = true;
-					thingDefCountClass = materialRequired;
-					break;
-				}
-
-				Thing foundResource = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForDef(materialRequired.thingDef), PathEndMode.ClosestTouch, TraverseParms.For(pawn,
-					Danger.Deadly, TraverseMode.ByPawn, false), 9999f, (Thing t) => t.def == materialRequired.thingDef && !t.IsForbidden(pawn) && pawn.CanReserve(t, 1, -1, null, false));
-
-				if(foundResource != null && pawn.Map.GetCachedMapComponent<VehicleReservationManager>().CanReserve<ThingDefCountClass, VehicleNodeReservation>(vehicle, pawn, null))
-				{
-					FindAvailableNearbyResources(foundResource, pawn, out int resourceTotalAvailable);
-					Job job = JobMaker.MakeJob(JobDefOf_Vehicles.LoadUpgradeMaterials, foundResource, vehicle);
-					int matCount = reservationManager.GetReservation<VehicleNodeReservation>(vehicle)?.MaterialsLeft().FirstOrDefault(m => m.thingDef == foundResource.def)?.count ?? int.MaxValue;
-					job.count = foundResource.stackCount > matCount ? matCount : foundResource.stackCount;
-					return job;
-				}
-				else
-				{
-					flag = true;
-					thingDefCountClass = materialRequired;
-				}
+				return null;
 			}
-
-			if (flag)
+			if (!JobAvailable(vehicle))
 			{
-				JobFailReason.Is(string.Format($"{"MissingMaterials".Translate()}: {thingDefCountClass.thingDef.label}"), null);
+				return null;
+			}
+			if (ThingDefs(vehicle).NotNullAndAny() && pawn.CanReach(new LocalTargetInfo(t.Position), PathEndMode.Touch, Danger.Deadly))
+			{
+				Thing thing = FindThingToPack(vehicle, pawn);
+				if (thing != null)
+				{
+					int countLeft = CountLeftToPack(vehicle, pawn, new ThingDefCount(thing.def, thing.stackCount));
+					int jobCount = Mathf.Min(thing.stackCount, countLeft);
+					if (jobCount > 0)
+					{
+						Job job = JobMaker.MakeJob(JobDef, thing, t);
+						job.count = jobCount;
+						return job;
+					}
+				}
 			}
 			return null;
 		}
 
-		private void FindAvailableNearbyResources(Thing firstFoundResource, Pawn pawn, out int resTotalAvailable)
+		public override Thing FindThingToPack(VehiclePawn vehicle, Pawn pawn)
 		{
-			int num = Mathf.Min(firstFoundResource.def.stackLimit, pawn.carryTracker.MaxStackSpaceEver(firstFoundResource.def));
-			resTotalAvailable = 0;
-			tmpResourcesAvailable.Clear();
-			tmpResourcesAvailable.Add(firstFoundResource);
-			resTotalAvailable += firstFoundResource.stackCount;
-			if (resTotalAvailable < num)
+			Thing result = null;
+			IEnumerable<ThingDefCount> thingDefs = ThingDefs(vehicle);
+			if (thingDefs.NotNullAndAny())
 			{
-				foreach (Thing thing in GenRadial.RadialDistinctThingsAround(firstFoundResource.Position, firstFoundResource.Map, 5f, false))
+				foreach (ThingDefCount thingDefCount in thingDefs)
 				{
-					if (resTotalAvailable >= num)
+					int countLeftToTransfer = CountLeftToPack(vehicle, pawn, thingDefCount);
+					if (countLeftToTransfer > 0)
 					{
-						break;
+						neededThingDefs.Add(thingDefCount.ThingDef);
 					}
-					if (thing.def == firstFoundResource.def && GenAI.CanUseItemForWork(pawn, thing))
+				}
+				if (!neededThingDefs.Any())
+				{
+					return null;
+				}
+
+				result = ClosestHaulable(pawn, ThingRequestGroup.Pawn, validator: ValidThingDef);
+				result ??= ClosestHaulable(pawn, ThingRequestGroup.HaulableEver, validator: ValidThingDef);
+				neededThingDefs.Clear();
+			}
+			return result;
+
+			bool ValidThingDef(Thing thing)
+			{
+				return neededThingDefs.Contains(thing.def) && pawn.CanReserve(thing) && !thing.IsForbidden(pawn.Faction);
+			}
+		}
+
+		private int CountLeftToPack(VehiclePawn vehicle, Pawn pawn, ThingDefCount thingDefCount)
+		{
+			if (thingDefCount.Count <= 0 || thingDefCount.ThingDef == null)
+			{
+				return 0;
+			}
+			return Mathf.Max(thingDefCount.Count - TransferableCountHauledByOthersForPacking(vehicle, pawn, thingDefCount), 0);
+		}
+
+		private int TransferableCountHauledByOthersForPacking(VehiclePawn vehicle, Pawn pawn, ThingDefCount thingDefCount)
+		{
+			int mechCount = 0;
+			if (ModsConfig.BiotechActive)
+			{
+				mechCount = HauledByOthers(pawn, thingDefCount, vehicle.Map.mapPawns.SpawnedColonyMechs());
+			}
+			int slaveCount = 0;
+			if (ModsConfig.IdeologyActive)
+			{
+				slaveCount = HauledByOthers(pawn, thingDefCount, vehicle.Map.mapPawns.SlavesOfColonySpawned);
+			}
+			return mechCount + slaveCount + HauledByOthers(pawn, thingDefCount, vehicle.Map.mapPawns.FreeColonistsSpawned);
+		}
+
+		private int HauledByOthers(Pawn pawn, ThingDefCount thingDefCount, List<Pawn> pawns)
+		{
+			int count = 0;
+			for (int i = 0; i < pawns.Count; i++)
+			{
+				Pawn target = pawns[i];
+				count += CountFromJob(pawn, target, thingDefCount, pawns);
+			}
+			return count;
+		}
+
+		protected virtual int CountFromJob(Pawn pawn, Pawn target, ThingDefCount thingDefCount, List<Pawn> pawns)
+		{
+			if (target != pawn && target.CurJob != null && (target.CurJob.def == JobDef || target.CurJob.def == JobDefOf_Vehicles.CarryItemToVehicle))
+			{
+				if (target.jobs.curDriver is JobDriver_LoadVehicle driver)
+				{
+					Thing toHaul = driver.Item;
+					if (toHaul != null && thingDefCount.ThingDef == toHaul.def)
 					{
-						tmpResourcesAvailable.Add(thing);
-						resTotalAvailable += thing.stackCount;
+						return toHaul.stackCount;
 					}
 				}
 			}
+			return 0;
 		}
 	}
 }

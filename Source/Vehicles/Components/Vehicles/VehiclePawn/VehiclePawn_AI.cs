@@ -26,9 +26,6 @@ namespace Vehicles
 		public SharedJob sharedJob;
 		public bool currentlyFishing = false;
 
-		[Obsolete("Renamed to vehiclePather, will be removed in 1.5")]
-		public Vehicle_PathFollower vPather;
-
 		public virtual bool DeconstructibleBy(Faction faction)
 		{
 			return DebugSettings.godMode || Faction == faction;

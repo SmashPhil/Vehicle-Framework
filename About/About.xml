@@ -2,6 +2,7 @@
 	<name>Vehicle Framework</name>
 	<author>Smash Phil</author>
 	<packageId>SmashPhil.VehicleFramework</packageId>
+	<modVersion IgnoreIfNoMatchingField = "True">1.5</modVersion>
 	
 	<supportedVersions>
 		<li>1.4</li>

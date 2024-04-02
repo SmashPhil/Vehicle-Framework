@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Vehicles
 {
-	public abstract class StatUpgradeCategoryDef : Def
+	public class StatUpgradeCategoryDef : Def
 	{
 		public StatUpgradeCategoryDef()
 		{
@@ -16,13 +16,8 @@ namespace Vehicles
 
 		public FloatRange? settingListerRange;
 
-		public virtual Texture2D StatFillableBar { get; }
-		public virtual Texture2D StatFillableBarAdded { get; }
-
-		public abstract bool AppliesToVehicle(VehicleDef def);
-
-		public abstract void ApplyStatUpgrade(VehiclePawn vehicle, float value);
-
-		public abstract void DrawStatLister(VehicleDef def, Listing_Settings lister, SaveableField field, float value);
+		public virtual void DrawStatLister(VehicleDef def, Listing_Settings lister, SaveableField field, float value)
+		{
+		}
 	}
 }

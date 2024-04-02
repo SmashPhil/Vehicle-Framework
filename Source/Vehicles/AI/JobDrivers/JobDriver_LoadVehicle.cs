@@ -32,6 +32,12 @@ namespace Vehicles
 			}
 		}
 
+		public virtual bool FailJob()
+		{
+			bool listed = !Map.GetCachedMapComponent<VehicleReservationManager>().VehicleListed(Vehicle, ListerTag);
+			return listed;
+		}
+
 		public override bool TryMakePreToilReservations(bool errorOnFailed)
 		{
 			if (!pawn.Reserve(Item, job))
@@ -47,10 +53,7 @@ namespace Vehicles
 			this.FailOnDestroyedOrNull(TargetIndex.A);
 			this.FailOnDestroyedOrNull(TargetIndex.B);
 			this.FailOnForbidden(TargetIndex.A);
-			this.FailOn(delegate ()
-			{
-				return !Map.GetCachedMapComponent<VehicleReservationManager>().VehicleListed(Vehicle, ListerTag);
-			});
+			this.FailOn(FailJob);
 			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch);
 			yield return Toils_Haul.StartCarryThing(TargetIndex.A);
 			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).FailOnDespawnedNullOrForbidden(TargetIndex.B);
@@ -92,7 +95,7 @@ namespace Vehicles
 						int stackCount = Item.stackCount; //store before transfer for transferable recache
 
 						int result = Vehicle.AddOrTransfer(Item, stackCount);
-						TransferableOneWay transferable = GetTransferable(Vehicle, Item);
+						TransferableOneWay transferable = GetTransferable(Vehicle.cargoToLoad, Vehicle, Item);
                         if (transferable != null)
                         {
 							int count = transferable.CountToTransfer - stackCount;
@@ -107,9 +110,9 @@ namespace Vehicles
 			};
 		}
 
-		public static TransferableOneWay GetTransferable(VehiclePawn vehicle, Thing thing)
+		public static TransferableOneWay GetTransferable(List<TransferableOneWay> transferables, VehiclePawn vehicle, Thing thing)
 		{
-			foreach (TransferableOneWay transferable in vehicle.cargoToLoad)
+			foreach (TransferableOneWay transferable in transferables)
 			{
 				foreach (Thing transferableThing in transferable.things)
 				{
@@ -120,7 +123,7 @@ namespace Vehicles
 				}
 			}
 			//Unable to find thing instance, match on def
-			foreach (TransferableOneWay transferable in vehicle.cargoToLoad)
+			foreach (TransferableOneWay transferable in transferables)
 			{
 				foreach (Thing transferableThing in transferable.things)
 				{

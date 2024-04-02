@@ -92,6 +92,7 @@
     <Compile Include="AI\JobDrivers\JobDriver_Deploy.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_DisassembleVehicle.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_GiveItemToVehicle.cs" />
+    <Compile Include="AI\JobDrivers\JobDriver_WorkVehicle.cs" />
     <Compile Include="AI\JobGivers\NPC\JobGiver_VehicleAI.cs" />
     <Compile Include="AI\JobGivers\NPC\JobGiver_AIBreachWalls.cs" />
     <Compile Include="AI\Lords\LordToil_PrepareCaravan_GatherAnimalsForVehicles.cs" />
@@ -150,6 +151,11 @@
     <Compile Include="AI\JobDrivers\VehicleJobDriver.cs" />
     <Compile Include="AI\WorkGiver\WorkGiver_DisassembleVehicle.cs" />
     <Compile Include="Components\Vehicles\VehicleSustainers.cs" />
+    <Compile Include="CustomFeatures\Upgrades\Node\VehicleUpgrade.cs" />
+    <Compile Include="CustomFeatures\Upgrades\StatOffset.cs" />
+    <Compile Include="CustomFeatures\Upgrades\UpgradeNode.cs" />
+    <Compile Include="CustomFeatures\Upgrades\Node\ActionUpgrade.cs" />
+    <Compile Include="CustomFeatures\Upgrades\UpgradeTreeDef.cs" />
     <Compile Include="Gizmo\Command_Turret.cs" />
     <Compile Include="Gizmo\Gizmo_VehicleCaravanInfo.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_StatSettings.cs" />
@@ -199,13 +205,14 @@
     <Compile Include="Turrets\Turret\Rendering\VehicleTurretRenderData.cs" />
     <Compile Include="Turrets\Turret\TargetLock.cs" />
     <Compile Include="Turrets\Turret\TurretComponentRequirement.cs" />
+    <Compile Include="UpgradeInProgress.cs" />
     <Compile Include="Utility\DesignatorCache.cs" />
     <Compile Include="AI\Incidents\IncidentWorker_ShuttleDowned.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_FollowVehicle.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_PaintVehicle.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_RefuelVehicleAtomic.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_RopeAnimalToVehicle.cs" />
-    <Compile Include="AI\JobDrivers\JobDriver_WorkOnUpgrade.cs" />
+    <Compile Include="AI\JobDrivers\JobDriver_UpgradeVehicle.cs" />
     <Compile Include="AI\JobGivers\JobGiver_FollowVehicle.cs" />
     <Compile Include="AI\JobDrivers\Job_Vehicle.cs" />
     <Compile Include="AI\JobGivers\JobGiver_PrepareVehicleCaravan_RopeAnimals.cs" />
@@ -359,12 +366,8 @@
     <Compile Include="CustomFeatures\Reservation\VehicleNodeReservation.cs" />
     <Compile Include="CustomFeatures\Damage\CustomHitFlags.cs" />
     <Compile Include="CustomFeatures\Reservation\VehiclePositionManager.cs" />
-    <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgradeFlySpeed.cs" />
-    <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgradeSpeed.cs" />
-    <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgradeCargo.cs" />
-    <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgradeFuelEfficiency.cs" />
-    <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgradeFuelCapacity.cs" />
-    <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgradeArmor.cs" />
+    <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgradeCategoryDef_FuelConsumption.cs" />
+    <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgradeCategoryDef_FuelEfficiency.cs" />
     <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgradeCategoryDef.cs" />
     <Compile Include="Gizmo\AltitudeMeter.cs" />
     <Compile Include="Gizmo\Command_LoadToAerialTransport.cs" />
@@ -421,7 +424,7 @@
     <Compile Include="CustomFeatures\Reservation\VehicleReservationManager.cs" />
     <Compile Include="AI\WorkGiver\WorkGiver_WorkOnUpgrade.cs" />
     <Compile Include="CustomFeatures\Reservation\VehicleJobLimitations.cs" />
-    <Compile Include="CustomFeatures\Upgrades\TurretUpgrade\TurretUpgrade.cs" />
+    <Compile Include="CustomFeatures\Upgrades\Node\TurretUpgrade.cs" />
     <Compile Include="CustomFeatures\Misc\IngredientFilter.cs" />
     <Compile Include="CustomFeatures\Misc\VehicleIdManager.cs" />
     <Compile Include="Components\Construction\VehicleBuildDef.cs" />
@@ -581,7 +584,7 @@
     <Compile Include="Harmony\ConditionalPatches\FishingCompatibility.cs" />
     <Compile Include="Harmony\VehicleHarmonyOnMod.cs" />
     <Compile Include="Harmony\VehicleHarmony.cs" />
-    <Compile Include="CustomFeatures\Upgrades\UpgradeNode.cs" />
+    <Compile Include="CustomFeatures\Upgrades\Node\Upgrade.cs" />
     <Compile Include="Misc\CellFinderExtended.cs" />
     <Compile Include="Graphics\Graphic\MaterialGeneration\MaterialPresets.cs" />
     <Compile Include="Misc\DefOf\RiverDefOf.cs" />
@@ -629,7 +632,7 @@
     <Compile Include="Graphics\Misc\ShipPassengerCardUtility.cs" />
     <Compile Include="Graphics\Textures\VehicleTex.cs" />
     <Compile Include="Graphics\Misc\TransferableVehicleWidget.cs" />
-    <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgrade.cs" />
+    <Compile Include="CustomFeatures\Upgrades\Node\StatUpgrade.cs" />
     <Compile Include="World\Caravan\CaravanArrivalAction_StashedVehicle.cs" />
     <Compile Include="World\WorldObjects\StashedVehicle.cs" />
     <Compile Include="World\Caravan\EnterMapUtilityVehicles.cs" />
@@ -641,6 +644,7 @@
     <Folder Include="Components\Rendering\PawnRenderNode\" />
     <Folder Include="Comps\Fishing\" />
     <Folder Include="CustomFeatures\AerialVehicles\Skyfaller\Bombs\" />
+    <Folder Include="CustomFeatures\Upgrades\TurretUpgrade\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Lib.Harmony">

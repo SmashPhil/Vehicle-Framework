@@ -88,11 +88,11 @@ namespace Vehicles
 			{
 				try
 				{
-					foreach (UpgradeNode upgradeNode in VehicleMod.selectedDefUpgradeComp.upgrades)
+					foreach (UpgradeNode upgradeNode in VehicleMod.selectedDefUpgradeComp.def.nodes)
 					{
 						if (!upgradeNode.prerequisiteNodes.NullOrEmpty())
 						{
-							foreach (UpgradeNode prerequisite in VehicleMod.selectedDefUpgradeComp.upgrades.FindAll(x => upgradeNode.prerequisiteNodes.Contains(x.upgradeID)))
+							foreach (UpgradeNode prerequisite in VehicleMod.selectedDefUpgradeComp.def.nodes.FindAll(x => upgradeNode.prerequisiteNodes.Contains(x.key)))
 							{
 								Vector2 start = new Vector2(vehicleDetailsContainer.x + ITab_Vehicle_Upgrades.GridOrigin.x + (ITab_Vehicle_Upgrades.GridSpacing.x * prerequisite.GridCoordinate.x),
 									vehicleDetailsContainer.y + ITab_Vehicle_Upgrades.GridOrigin.y + (ITab_Vehicle_Upgrades.GridSpacing.y * prerequisite.GridCoordinate.z) + (ITab_Vehicle_Upgrades.TopPadding * 2));
@@ -104,9 +104,9 @@ namespace Vehicles
 						}
 					}
 
-					for (int i = 0; i < VehicleMod.selectedDefUpgradeComp.upgrades.Count; i++)
+					for (int i = 0; i < VehicleMod.selectedDefUpgradeComp.def.nodes.Count; i++)
 					{
-						UpgradeNode upgradeNode = VehicleMod.selectedDefUpgradeComp.upgrades[i];
+						UpgradeNode upgradeNode = VehicleMod.selectedDefUpgradeComp.def.nodes[i];
 						float imageWidth = ITab_Vehicle_Upgrades.TotalIconSizeScalar / upgradeNode.UpgradeImage.width;
 						float imageHeight = ITab_Vehicle_Upgrades.TotalIconSizeScalar / upgradeNode.UpgradeImage.height;
 

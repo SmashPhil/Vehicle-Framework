@@ -12,9 +12,9 @@ namespace Vehicles
 	{
 		public abstract JobDef JobDef { get; }
 
-		public abstract Predicate<VehiclePawn> VehicleCondition { get; }
-
 		public override PathEndMode PathEndMode => PathEndMode.Touch;
+
+		public abstract bool CanBeWorkedOn(VehiclePawn vehicle);
 
 		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
 		{
@@ -22,7 +22,7 @@ namespace Vehicles
 			{
 				return null;
 			}
-			if (t is VehiclePawn vehicle && !vehicle.vehiclePather.Moving && pawn.CanReach(new LocalTargetInfo(t.Position), PathEndMode.Touch, Danger.Deadly) && VehicleCondition(vehicle))
+			if (t is VehiclePawn vehicle && !vehicle.vehiclePather.Moving && pawn.CanReach(new LocalTargetInfo(t.Position), PathEndMode.Touch, Danger.Deadly) && CanBeWorkedOn(vehicle))
 			{
 				VehicleReservationManager reservationManager = pawn.Map.GetCachedMapComponent<VehicleReservationManager>();
 				if (reservationManager.CanReserve(vehicle, pawn, JobDef))
