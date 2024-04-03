@@ -25,6 +25,8 @@ namespace Vehicles
 
 			this.node = node;
 			this.vehicle = vehicle;
+
+			WorkLeft = node.work;
 		}
 
 		public float WorkLeft
@@ -38,22 +40,8 @@ namespace Vehicles
 				if (workLeft != value)
 				{
 					workLeft = value;
-					if (TryComplete(workLeft))
-					{
-						vehicle.CompUpgradeTree.FinishUnlock(node);
-						vehicle.CompUpgradeTree.ClearUpgrade();
-					}
 				}
 			}
-		}
-
-		public bool TryComplete(float amount)
-		{
-			if (workLeft <= 0)
-			{
-				return true;
-			}
-			return false;
 		}
 
 		public void ExposeData()

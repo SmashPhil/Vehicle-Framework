@@ -37,7 +37,7 @@ namespace Vehicles
 
 		public override bool CanReserve(Pawn pawn, ThingDefCountClass target, StringBuilder stringBuilder = null)
 		{
-			return !claimants.ContainsKey(pawn) && claimants.Count < maxClaimants && vehicle.CompUpgradeTree.CurrentlyUpgrading && MaterialsLeft().NotNullAndAny();
+			return !claimants.ContainsKey(pawn) && claimants.Count < maxClaimants && vehicle.CompUpgradeTree.Upgrading && MaterialsLeft().NotNullAndAny();
 		}
 
 		public override bool ReservedBy(Pawn pawn, ThingDefCountClass target)

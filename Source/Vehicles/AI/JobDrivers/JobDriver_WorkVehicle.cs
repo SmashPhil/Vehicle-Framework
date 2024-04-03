@@ -28,6 +28,7 @@ namespace Vehicles
 			Toil gotoCell = Toils_Goto.GotoCell(TargetIndex.B, PathEndMode.OnCell);
 			gotoCell.FailOnMoving(TargetIndex.A);
 			yield return gotoCell;
+
 			Toil repair = new Toil
 			{
 				initAction = delegate ()

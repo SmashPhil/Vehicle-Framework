@@ -4,27 +4,72 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
+using Verse.Sound;
 using SmashTools;
 
 namespace Vehicles
 {
+	[StaticConstructorOnStartup]
 	public class CompUpgradeTree : VehicleAIComp
 	{
+		private static readonly Material UnderfieldMat = MaterialPool.MatFrom("Things/Building/BuildingFrame/Underfield", ShaderDatabase.Transparent);
+		private static readonly Texture2D CornerTex = ContentFinder<Texture2D>.Get("Things/Building/BuildingFrame/Corner", true);
+		private static readonly Texture2D TileTex = ContentFinder<Texture2D>.Get("Things/Building/BuildingFrame/Tile", true);
+
+		private Material cachedCornerMat;
+		private Material cachedTileMat;
+
 		private HashSet<string> upgrades = new HashSet<string>();
 
 		private string nodeUnlocking;
-
+		
 		public UpgradeInProgress upgrade;
 
 		public ThingOwner<Thing> upgradeContainer = new ThingOwner<Thing>();
 
 		public CompProperties_UpgradeTree Props => (CompProperties_UpgradeTree)props;
 
-		public int WorkLeftUpgrading => CurrentlyUpgrading ? Mathf.CeilToInt(upgrade.WorkLeft) : 0;
-
-		public bool CurrentlyUpgrading => NodeUnlocking != null;
+		public bool Upgrading => NodeUnlocking != null;
 
 		public UpgradeNode NodeUnlocking => upgrade?.node;
+
+		public Color FrameColor => new Color(0.6f, 0.6f, 0.6f);
+
+		public float PercentComplete
+		{
+			get
+			{
+				if (Upgrading && NodeUnlocking.work > 0)
+				{
+					return 1 - upgrade.WorkLeft / NodeUnlocking.work;
+				}
+				return 0;
+			}
+		}
+
+		private Material CornerMat
+		{
+			get
+			{
+				if (cachedCornerMat == null)
+				{
+					cachedCornerMat = MaterialPool.MatFrom(CornerTex, ShaderDatabase.MetaOverlay, FrameColor);
+				}
+				return cachedCornerMat;
+			}
+		}
+
+		private Material TileMat
+		{
+			get
+			{
+				if (cachedTileMat == null)
+				{
+					cachedTileMat = MaterialPool.MatFrom(TileTex, ShaderDatabase.MetaOverlay, FrameColor);
+				}
+				return cachedTileMat;
+			}
+		}
 
 		public bool StoredCostSatisfied
 		{
@@ -38,7 +83,6 @@ namespace Vehicles
 				{
 					if (upgradeContainer.TotalStackCountOfDef(thingDefCount.thingDef) < thingDefCount.count)
 					{
-						Log.Message($"Def: {thingDefCount} | {upgradeContainer.TotalStackCountOfDef(thingDefCount.thingDef)} vs. {thingDefCount.count} Count: {upgradeContainer.TotalStackCount}");
 						return false;
 					}
 				}
@@ -104,6 +148,7 @@ namespace Vehicles
 				{
 					upgrade.Refund(Vehicle);
 				}
+				node.resetSound?.PlayOneShot(new TargetInfo(Vehicle.Position, Vehicle.Map));
 			}
 		}
 
@@ -136,6 +181,7 @@ namespace Vehicles
 				upgrade.Unlock(Vehicle);
 			}
 			node.ApplyPattern(Vehicle);
+			node.unlockSound?.PlayOneShot(new TargetInfo(Vehicle.Position, Vehicle.Map));
 			upgrades.Add(node.key);
 
 			upgradeContainer.ClearAndDestroyContents();
@@ -145,9 +191,75 @@ namespace Vehicles
 		{
 		}
 
+		public void AddToContainer(ThingOwner<Thing> holder, Thing thing, int count)
+		{
+			holder.TryTransferToContainer(thing, upgradeContainer, count);
+			ValidateListers();
+		}
+
+		public override void PostDraw()
+		{
+			base.PostDraw();
+			if (Upgrading)
+			{
+				Vector3 drawPos = Vehicle.DrawPos;
+				Vector2 size = new Vector2(Vehicle.VehicleDef.Size.x, Vehicle.VehicleDef.Size.z);
+				size.x *= 1.15f;
+				size.y *= 1.15f;
+				Vector3 s = new Vector3(size.x, 1f, size.y);
+				Matrix4x4 matrix = default;
+				matrix.SetTRS(drawPos, Vehicle.FullRotation.AsQuat, s);
+				Graphics.DrawMesh(MeshPool.plane10, matrix, UnderfieldMat, 0);
+				int corners = 4;
+				for (int i = 0; i < corners; i++)
+				{
+					float num2 = Mathf.Min(Vehicle.RotatedSize.x, Vehicle.RotatedSize.z) * 0.38f;
+					IntVec3 intVec = default;
+					if (i == 0)
+					{
+						intVec = new IntVec3(-1, 0, -1);
+					}
+					else if (i == 1)
+					{
+						intVec = new IntVec3(-1, 0, 1);
+					}
+					else if (i == 2)
+					{
+						intVec = new IntVec3(1, 0, 1);
+					}
+					else if (i == 3)
+					{
+						intVec = new IntVec3(1, 0, -1);
+					}
+					Vector3 b = default;
+					b.x = intVec.x * (Vehicle.RotatedSize.x / 2f - num2 / 2f);
+					b.z = intVec.z * (Vehicle.RotatedSize.z / 2f - num2 / 2f);
+					Vector3 s2 = new Vector3(num2, 1f, num2);
+					Matrix4x4 matrix2 = default;
+					matrix2.SetTRS(drawPos + Vector3.up * 0.03f + b, new Rot4(i).AsQuat, s2);
+					Graphics.DrawMesh(MeshPool.plane10, matrix2, CornerMat, 0);
+				}
+				int tiles = Mathf.CeilToInt(PercentComplete * Vehicle.RotatedSize.x * Vehicle.RotatedSize.z * 4); //4 tiles per cell
+				IntVec2 intVec2 = Vehicle.RotatedSize * 2;
+				for (int j = 0; j < tiles; j++)
+				{
+					IntVec2 intVec3 = default;
+					intVec3.z = j / intVec2.x;
+					intVec3.x = j - intVec3.z * intVec2.x;
+					Vector3 a = new Vector3(intVec3.x * 0.5f, 0f, intVec3.z * 0.5f) + drawPos;
+					a.x -= Vehicle.RotatedSize.x * 0.5f - 0.25f;
+					a.z -= Vehicle.RotatedSize.z * 0.5f - 0.25f;
+					Vector3 s3 = new Vector3(0.5f, 1f, 0.5f);
+					Matrix4x4 matrix3 = default;
+					matrix3.SetTRS(a + Vector3.up * 0.02f, Quaternion.identity, s3);
+					Graphics.DrawMesh(MeshPool.plane10, matrix3, TileMat, 0);
+				}
+			}
+		}
+
 		public override bool CanDraft(out string failReason)
 		{
-			if (CurrentlyUpgrading)
+			if (Upgrading)
 			{
 				failReason = "VF_UpgradeInProgress".Translate();
 				return false;

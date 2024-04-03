@@ -28,7 +28,7 @@ namespace Vehicles
 
 		public override bool JobAvailable(VehiclePawn vehicle)
 		{
-			return vehicle.CompUpgradeTree.CurrentlyUpgrading && !vehicle.CompUpgradeTree.StoredCostSatisfied;
+			return vehicle.CompUpgradeTree.Upgrading && !vehicle.CompUpgradeTree.StoredCostSatisfied;
 		}
 
 		public override ThingOwner<Thing> ThingOwner(VehiclePawn vehicle)
@@ -38,7 +38,7 @@ namespace Vehicles
 
 		public override IEnumerable<ThingDefCount> ThingDefs(VehiclePawn vehicle)
 		{
-			if (!vehicle.CompUpgradeTree.CurrentlyUpgrading || vehicle.CompUpgradeTree.NodeUnlocking.ingredients.NullOrEmpty())
+			if (!vehicle.CompUpgradeTree.Upgrading || vehicle.CompUpgradeTree.NodeUnlocking.ingredients.NullOrEmpty())
 			{
 				yield break;
 			}

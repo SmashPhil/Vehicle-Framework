@@ -18,6 +18,9 @@ namespace Vehicles
 		public string icon;
 		public float work = 1;
 
+		public SoundDef unlockSound;
+		public SoundDef resetSound;
+
 		public IntVec2 gridCoordinate;
 
 		public Color? drawColorOne;
@@ -40,8 +43,6 @@ namespace Vehicles
 		public readonly List<GraphicOverlay> overlays = new List<GraphicOverlay>();
 
 		public Texture2D Icon { get; private set; }
-
-		public float Work => work;
 
 		public virtual IntVec2 GridCoordinate => gridCoordinate;
 

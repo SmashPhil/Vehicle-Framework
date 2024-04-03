@@ -145,7 +145,7 @@ namespace Vehicles
 			ThingDef targetCoverDef = (randomCoverToMissInto != null) ? randomCoverToMissInto.def : null;
 			if (!Rand.Chance(shotReport.AimOnTargetChance_IgnoringPosture))
 			{
-				shootLine.ChangeDestToMissWild(shotReport.AimOnTargetChance_StandardTarget, caster.Map);
+				shootLine.ChangeDestToMissWild_NewTemp(shotReport.AimOnTargetChance_StandardTarget, projectile.projectile.flyOverhead, caster.Map);
 				ThrowDebugText("ToWild" + (canHitNonTargetPawnsNow ? "\nchntp" : ""));
 				ThrowDebugText("Wild\nDest", shootLine.Dest);
 				ProjectileHitFlags projectileHitFlags2 = ProjectileHitFlags.NonTargetWorld;

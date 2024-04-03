@@ -34,11 +34,8 @@ namespace Vehicles
 			}
 			catch(Exception ex)
 			{
-				Log.Error($"{VehicleHarmony.LogLabel} Unable to add stat values to {vehicle.LabelShort}. Report on workshop page. \nException: {ex}");
-				return;
+				Log.Error($"{VehicleHarmony.LogLabel} Unable to unlock {GetType()} to {vehicle.LabelShort}. \nException: {ex}");
 			}
-
-			vehicle.VehicleDef.buildDef.soundBuilt?.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map, false));
 		}
 
 		public override void Refund(VehiclePawn vehicle)
@@ -56,11 +53,8 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"{VehicleHarmony.LogLabel} Unable to add stat values to {vehicle.LabelShort}. Report on workshop page. \nException: {ex}");
-				return;
+				Log.Error($"{VehicleHarmony.LogLabel} Unable to reset {GetType()} to {vehicle.LabelShort}. \nException: {ex}");
 			}
-
-			vehicle.VehicleDef.buildDef.soundBuilt?.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map, false));
 		}
 	}
 }

@@ -210,7 +210,7 @@ namespace Vehicles
 				DrawBackgroundGridLeft(rect.width);
 			}
 
-			if (selectedNode != null && !Vehicle.CompUpgradeTree.CurrentlyUpgrading)
+			if (selectedNode != null && !Vehicle.CompUpgradeTree.Upgrading)
 			{
 				Rect selectedRect = new Rect(GridCoordinateToScreenPosX(selectedNode.GridCoordinate.x), GridCoordinateToScreenPosY(selectedNode.GridCoordinate.z), UpgradeNodeDim, UpgradeNodeDim);
 				selectedRect = selectedRect.ExpandedBy(2f);
@@ -228,7 +228,7 @@ namespace Vehicles
 						if (!string.IsNullOrEmpty(upgradeNode.disableIfUpgradeNodeEnabled) && Vehicle.CompUpgradeTree.Props.def.GetNode(upgradeNode.disableIfUpgradeNodeEnabled) is UpgradeNode prereqNode)
 						{
 							Rect prerequisiteRect = new Rect(GridCoordinateToScreenPosX(prereqNode.GridCoordinate.x), GridCoordinateToScreenPosY(prereqNode.GridCoordinate.z), UpgradeNodeDim, UpgradeNodeDim);
-							if (!Vehicle.CompUpgradeTree.CurrentlyUpgrading && Mouse.IsOver(prerequisiteRect))
+							if (!Vehicle.CompUpgradeTree.Upgrading && Mouse.IsOver(prerequisiteRect))
 							{
 								color = Color.red;
 							}
@@ -384,7 +384,7 @@ namespace Vehicles
 							detailRect.y += textHeight;
 							detailRect.height -= textHeight;
 
-							string workLabel = $"Work: {Vehicle.CompUpgradeTree.upgrade.WorkLeft}";
+							string workLabel = $"Work: {Mathf.CeilToInt(Vehicle.CompUpgradeTree.upgrade.WorkLeft)}";
 							textHeight = Text.CalcHeight(workLabel, detailRect.width);
 							Rect workLabelRect = new Rect(detailRect.x, detailRect.y, detailRect.width, textHeight);
 							Widgets.Label(workLabelRect, workLabel);
@@ -501,7 +501,7 @@ namespace Vehicles
 				if (!string.IsNullOrEmpty(node.disableIfUpgradeNodeEnabled) && Vehicle.CompUpgradeTree.Props.def.GetNode(node.disableIfUpgradeNodeEnabled) is UpgradeNode prereqNode)
 				{
 					Rect prerequisiteRect = new Rect(GridCoordinateToScreenPosX(prereqNode.GridCoordinate.x), GridCoordinateToScreenPosY(prereqNode.GridCoordinate.z), UpgradeNodeDim, UpgradeNodeDim);
-					if (!Vehicle.CompUpgradeTree.CurrentlyUpgrading && Mouse.IsOver(prerequisiteRect))
+					if (!Vehicle.CompUpgradeTree.Upgrading && Mouse.IsOver(prerequisiteRect))
 					{
 						return true;
 					}

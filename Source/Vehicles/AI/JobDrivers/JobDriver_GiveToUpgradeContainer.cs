@@ -13,7 +13,7 @@ namespace Vehicles
 
 		public override bool FailJob()
 		{
-			if (!Vehicle.CompUpgradeTree.CurrentlyUpgrading || !Vehicle.CompUpgradeTree.NodeUnlocking.AvailableSpace(Vehicle, Item))
+			if (!Vehicle.CompUpgradeTree.Upgrading || !Vehicle.CompUpgradeTree.NodeUnlocking.AvailableSpace(Vehicle, Item))
 			{
 				Log.Message($"Failed Job");
 				return true;
@@ -44,7 +44,7 @@ namespace Vehicles
 						else
 						{
 							int count = Mathf.Min(materialRequired.count, Item.stackCount); //Check back here
-							pawn.carryTracker.innerContainer.TryTransferToContainer(Item, Vehicle.CompUpgradeTree.upgradeContainer, count, true);
+							Vehicle.CompUpgradeTree.AddToContainer(pawn.carryTracker.innerContainer, Item, count);
 						}
 					}
 				}

@@ -144,36 +144,23 @@ namespace Vehicles
 			return false;
 		}
 
-		public void AddTurrets(List<VehicleTurret> cannonList)
+		public void AddTurret(VehicleTurret turret)
 		{
-			if (cannonList.NullOrEmpty())
-			{
-				return;
-			}
-			foreach (VehicleTurret turret in cannonList)
-			{
-				VehicleTurret newTurret = CreateTurret(Vehicle, turret);
-				turrets.RemoveAll(t => t.key == newTurret.key);
-				turrets.Add(newTurret);
-			}
+			VehicleTurret newTurret = CreateTurret(Vehicle, turret);
+			turrets.Add(newTurret);
 		}
 
-		public void RemoveTurrets(List<VehicleTurret> turrets)
+		public bool RemoveTurret(string key)
 		{
-			if (turrets.NullOrEmpty())
-			{
-				return;
-			}
 			for (int i = turrets.Count - 1; i >= 0; i--)
 			{
 				VehicleTurret turret = turrets[i];
-				VehicleTurret matchingTurret = turrets.FirstOrDefault(c => c.key == turret.key);
-				if (matchingTurret is null)
+				if (turret.key == key)
 				{
-					Log.Error($"Unable to locate {turret.key} in cannonList for removal. Is Key missing on upgraded cannon?");
+					return RemoveTurret(turret);
 				}
-				RemoveTurret(matchingTurret);
 			}
+			return false;
 		}
 
 		public bool RemoveTurret(VehicleTurret turret)
@@ -631,7 +618,7 @@ namespace Vehicles
 		{
 			if (Props.turrets.NotNullAndAny())
 			{
-				foreach(VehicleTurret turret in Props.turrets)
+				foreach (VehicleTurret turret in Props.turrets)
 				{
 					try
 					{
@@ -643,10 +630,15 @@ namespace Vehicles
 						SmashLog.Error($"Exception thrown while attempting to generate <text>{turret.turretDef.label}</text> for <text>{Vehicle.Label}</text>. Exception=\"{ex}\"");
 					}
 				}
-				if (turrets.Select(x => x.key).GroupBy(y => y).NotNullAndAny(key => key.Count() > 1))
-				{
-					Log.Warning("Duplicate VehicleTurret key has been found. These are intended to be unique.");
-				}
+				CheckDuplicateKeys();
+			}
+		}
+
+		public void CheckDuplicateKeys()
+		{
+			if (turrets.Select(x => x.key).GroupBy(y => y).NotNullAndAny(key => key.Count() > 1))
+			{
+				Log.Warning("Duplicate VehicleTurret key has been found. These are intended to be unique.");
 			}
 		}
 

@@ -13,7 +13,7 @@ namespace Vehicles
 
 		protected override StatDef Stat => StatDefOf.ConstructionSpeed;
 
-		protected override float TotalWork => Vehicle.CompUpgradeTree.NodeUnlocking.Work;
+		protected override float TotalWork => Vehicle.CompUpgradeTree.NodeUnlocking.work;
 
 		protected override float Work
 		{
@@ -36,7 +36,13 @@ namespace Vehicles
 
 		protected override void WorkComplete(Pawn actor)
 		{
+			Vehicle.CompUpgradeTree.FinishUnlock(Vehicle.CompUpgradeTree.NodeUnlocking);
+			Vehicle.CompUpgradeTree.ClearUpgrade();
 			actor.jobs.EndCurrentJob(JobCondition.Succeeded, true);
+		}
+
+		protected override void ResetWork()
+		{
 		}
 	}
 }
