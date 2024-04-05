@@ -192,6 +192,7 @@
     <Compile Include="Misc\DefOf\VehicleTurretEventDefOf.cs" />
     <Compile Include="Misc\Enums\Turret\DeploymentType.cs" />
     <Compile Include="Misc\Enums\UI\WorldPathingDebugType.cs" />
+    <Compile Include="Misc\Enums\Vehicle\UpgradeType.cs" />
     <Compile Include="Misc\Enums\Vehicle\VehicleStrategy.cs" />
     <Compile Include="Misc\Enums\Vehicle\VehicleTracksFriendlyFire.cs" />
     <Compile Include="Misc\Interfaces\IDebugLordMeetingPoint.cs" />

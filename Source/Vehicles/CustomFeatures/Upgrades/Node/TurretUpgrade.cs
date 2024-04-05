@@ -9,68 +9,54 @@ namespace Vehicles
 {
 	public class TurretUpgrade : Upgrade
 	{
-		private List<VehicleTurret> turrets;
+		public readonly List<VehicleTurret> turrets;
 
-		private List<string> removeTurrets;
+		public readonly List<string> removeTurrets;
 
 		public override bool UnlockOnLoad => false;
 
-		public override void Unlock(VehiclePawn vehicle)
+		public override void Unlock(VehiclePawn vehicle, bool unlockingAfterLoad)
 		{
-			try
+			if (!turrets.NullOrEmpty())
 			{
-				if (!turrets.NullOrEmpty())
+				foreach (VehicleTurret turret in turrets)
 				{
-					foreach (VehicleTurret turret in turrets)
+					try
 					{
-						try
-						{
-							vehicle.CompVehicleTurrets.AddTurret(turret);
-						}
-						catch (Exception ex)
-						{
-							Log.Error($"{VehicleHarmony.LogLabel} Unable to unlock {GetType()} to {vehicle.LabelShort}. \nException: {ex}");
-						}
+						vehicle.CompVehicleTurrets.AddTurret(turret);
+					}
+					catch (Exception ex)
+					{
+						Log.Error($"{VehicleHarmony.LogLabel} Unable to unlock {GetType()} to {vehicle.LabelShort}. \nException: {ex}");
 					}
 				}
-				if (!removeTurrets.NullOrEmpty())
+			}
+			if (!removeTurrets.NullOrEmpty())
+			{
+				foreach (string key in removeTurrets)
 				{
-					foreach (string key in removeTurrets)
+					if (!vehicle.CompVehicleTurrets.RemoveTurret(key))
 					{
-						if (!vehicle.CompVehicleTurrets.RemoveTurret(key))
-						{
-							Log.Warning($"Unable to remove {key} from {vehicle}. Turret not found.");
-						}
+						Log.Warning($"Unable to remove {key} from {vehicle}. Turret not found.");
 					}
 				}
-				vehicle.CompVehicleTurrets.CheckDuplicateKeys();
 			}
-			catch (Exception ex)
-			{
-				Log.Error($"{VehicleHarmony.LogLabel} Unable to unlock {GetType()} to {vehicle.LabelShort}. \nException: {ex}");
-			}
+			vehicle.CompVehicleTurrets.CheckDuplicateKeys();
 		}
 
 		public override void Refund(VehiclePawn vehicle)
 		{
-			try
+			if (!turrets.NullOrEmpty())
 			{
-				if (!turrets.NullOrEmpty())
+				foreach (VehicleTurret turret in turrets)
 				{
-					foreach (VehicleTurret turret in turrets)
+					if (!vehicle.CompVehicleTurrets.RemoveTurret(turret.key))
 					{
-						if (!vehicle.CompVehicleTurrets.RemoveTurret(turret.key))
-						{
-							Log.Warning($"Unable to remove {turret.key} from {vehicle}. Turret not found.");
-						}
+						Log.Warning($"Unable to remove {turret.key} from {vehicle}. Turret not found.");
 					}
 				}
-				vehicle.CompVehicleTurrets.CheckDuplicateKeys();
 			}
-			catch (Exception ex)
-			{
-				Log.Error($"{VehicleHarmony.LogLabel} Unable to unlock {GetType()} to {vehicle.LabelShort}. \nException: {ex}");
-			}
+			vehicle.CompVehicleTurrets.CheckDuplicateKeys();
 		}
 	}
 }

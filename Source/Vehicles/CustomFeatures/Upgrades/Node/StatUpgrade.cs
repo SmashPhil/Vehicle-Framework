@@ -3,58 +3,141 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using Verse;
-using Verse.Sound;
+using RimWorld;
 using SmashTools;
 
 namespace Vehicles
 {
 	public class StatUpgrade : Upgrade
 	{
-		[PostToSettings(ParentHolder = true)]
-		public Dictionary<VehicleStatDef, float> vehicleStats = new Dictionary<VehicleStatDef, float>();
-		[PostToSettings(ParentHolder = true)]
-		public Dictionary<StatUpgradeCategoryDef, float> statCategories = new Dictionary<StatUpgradeCategoryDef, float>();
+		public List<StatDefUpgrade> stats;
 
-		public override int ListerCount => vehicleStats.Count + statCategories.Count;
+		public List<VehicleStatDefUpgrade> vehicleStats;
+
+		public List<StatCategoryUpgrade> statCategories;
 
 		public override bool UnlockOnLoad => true;
 
-		public override void Unlock(VehiclePawn vehicle)
+		public override void Unlock(VehiclePawn vehicle, bool unlockingAfterLoad)
 		{
-			try
+			if (!stats.NullOrEmpty())
 			{
-				foreach ((VehicleStatDef statDef, float value) in vehicleStats)
+				foreach (StatDefUpgrade statDefUpgrade in stats)
 				{
-					vehicle.statHandler.AddStatOffset(statDef, value);
-				}
-				foreach ((StatUpgradeCategoryDef upgradeCategory, float value) in statCategories)
-				{
-					vehicle.statHandler.AddStatOffset(upgradeCategory, value);
+					switch (statDefUpgrade.type)
+					{
+						case UpgradeType.Add:
+							vehicle.statHandler.AddUpgradeableStatValue(statDefUpgrade.def, statDefUpgrade.value);
+							break;
+						case UpgradeType.Set:
+							vehicle.statHandler.SetUpgradeableStatValue(node.key, statDefUpgrade.def, statDefUpgrade.value);
+							break;
+					}
 				}
 			}
-			catch(Exception ex)
+			if (!vehicleStats.NullOrEmpty())
 			{
-				Log.Error($"{VehicleHarmony.LogLabel} Unable to unlock {GetType()} to {vehicle.LabelShort}. \nException: {ex}");
+				foreach (VehicleStatDefUpgrade vehicleStatDefUpgrade in vehicleStats)
+				{
+					switch (vehicleStatDefUpgrade.type)
+					{
+						case UpgradeType.Add:
+							vehicle.statHandler.AddStatOffset(vehicleStatDefUpgrade.def, vehicleStatDefUpgrade.value);
+							break;
+						case UpgradeType.Set:
+							vehicle.statHandler.SetStatOffset(node.key, vehicleStatDefUpgrade.def, vehicleStatDefUpgrade.value);
+							break;
+					}
+				}
+			}
+			if (!statCategories.NullOrEmpty())
+			{
+				foreach (StatCategoryUpgrade statCategoryUpgrade in statCategories)
+				{
+					switch (statCategoryUpgrade.type)
+					{
+						case UpgradeType.Add:
+							vehicle.statHandler.AddStatOffset(statCategoryUpgrade.def, statCategoryUpgrade.value);
+							break;
+						case UpgradeType.Set:
+							vehicle.statHandler.SetStatOffset(node.key, statCategoryUpgrade.def, statCategoryUpgrade.value);
+							break;
+					}
+				}
 			}
 		}
 
 		public override void Refund(VehiclePawn vehicle)
 		{
-			try
+			if (!stats.NullOrEmpty())
 			{
-				foreach ((VehicleStatDef statDef, float value) in vehicleStats)
+				foreach (StatDefUpgrade statDefUpgrade in stats)
 				{
-					vehicle.statHandler.RemoveStatOffset(statDef, value);
-				}
-				foreach ((StatUpgradeCategoryDef upgradeCategory, float value) in statCategories)
-				{
-					vehicle.statHandler.RemoveStatOffset(upgradeCategory, value);
+					switch (statDefUpgrade.type)
+					{
+						case UpgradeType.Add:
+							vehicle.statHandler.SubtractUpgradeableStatValue(statDefUpgrade.def, statDefUpgrade.value);
+							break;
+						case UpgradeType.Set:
+							vehicle.statHandler.RemoveUpgradeableStatValue(node.key, statDefUpgrade.def);
+							break;
+					}
 				}
 			}
-			catch (Exception ex)
+			if (!vehicleStats.NullOrEmpty())
 			{
-				Log.Error($"{VehicleHarmony.LogLabel} Unable to reset {GetType()} to {vehicle.LabelShort}. \nException: {ex}");
+				foreach (VehicleStatDefUpgrade vehicleStatDefUpgrade in vehicleStats)
+				{
+					switch (vehicleStatDefUpgrade.type)
+					{
+						case UpgradeType.Add:
+							vehicle.statHandler.SubtractStatOffset(vehicleStatDefUpgrade.def, vehicleStatDefUpgrade.value);
+							break;
+						case UpgradeType.Set:
+							vehicle.statHandler.RemoveStatOffset(node.key, vehicleStatDefUpgrade.def);
+							break;
+					}
+				}
 			}
+			if (!statCategories.NullOrEmpty())
+			{
+				foreach (StatCategoryUpgrade statCategoryUpgrade in statCategories)
+				{
+					switch (statCategoryUpgrade.type)
+					{
+						case UpgradeType.Add:
+							vehicle.statHandler.SubtractStatOffset(statCategoryUpgrade.def, statCategoryUpgrade.value);
+							break;
+						case UpgradeType.Set:
+							vehicle.statHandler.RemoveStatOffset(node.key, statCategoryUpgrade.def);
+							break;
+					}
+				}
+			}
+		}
+
+		public struct StatDefUpgrade
+		{
+			public StatDef def;
+			public float value;
+
+			public UpgradeType type;
+		}
+
+		public struct VehicleStatDefUpgrade
+		{
+			public VehicleStatDef def;
+			public float value;
+
+			public UpgradeType type;
+		}
+
+		public struct StatCategoryUpgrade
+		{
+			public StatUpgradeCategoryDef def;
+			public float value;
+
+			public UpgradeType type;
 		}
 	}
 }

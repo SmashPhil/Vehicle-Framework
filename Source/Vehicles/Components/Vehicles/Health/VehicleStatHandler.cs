@@ -35,6 +35,7 @@ namespace Vehicles
 		public List<VehicleComponent> components = new List<VehicleComponent>();
 
 		private Dictionary<StatUpgradeCategoryDef, StatOffset> categoryOffsets = new Dictionary<StatUpgradeCategoryDef, StatOffset>();
+		private Dictionary<StatDef, StatOffset> baseStatOffsets = new Dictionary<StatDef, StatOffset>();
 
 		private Dictionary<VehicleStatDef, StatOffset> statOffsets = new Dictionary<VehicleStatDef, StatOffset>();
 
@@ -107,14 +108,34 @@ namespace Vehicles
 			categoryOffsets[upgradeCategoryDef].Offset += value;
 		}
 
-		public void RemoveStatOffset(VehicleStatDef statDef, float value)
+		public void SetStatOffset(string key, VehicleStatDef statDef, float value)
+		{
+			statOffsets[statDef].AddOverride(key, value);
+		}
+
+		public void SetStatOffset(string key, StatUpgradeCategoryDef upgradeCategoryDef, float value)
+		{
+			categoryOffsets[upgradeCategoryDef].AddOverride(key, value);
+		}
+
+		public void SubtractStatOffset(VehicleStatDef statDef, float value)
 		{
 			statOffsets[statDef].Offset -= value;
 		}
 
-		public void RemoveStatOffset(StatUpgradeCategoryDef upgradeCategoryDef, float value)
+		public void SubtractStatOffset(StatUpgradeCategoryDef upgradeCategoryDef, float value)
 		{
 			categoryOffsets[upgradeCategoryDef].Offset -= value;
+		}
+
+		public void RemoveStatOffset(string key, VehicleStatDef statDef)
+		{
+			statOffsets[statDef].RemoveOverride(key);
+		}
+
+		public void RemoveStatOffset(string key, StatUpgradeCategoryDef upgradeCategoryDef)
+		{
+			categoryOffsets[upgradeCategoryDef].RemoveOverride(key);
 		}
 
 		public float GetStatOffset(VehicleStatDef statDef)
@@ -130,6 +151,55 @@ namespace Vehicles
 		public float GetStatValue(VehicleStatDef statDef)
 		{
 			return statCache[statDef];
+		}
+
+		public void AddUpgradeableStatValue(StatDef statDef, float value)
+		{
+			if (!baseStatOffsets.TryGetValue(statDef, out StatOffset statOffset))
+			{
+				baseStatOffsets[statDef] = new StatOffset(vehicle, statDef);
+				statOffset = baseStatOffsets[statDef];
+			}
+			statOffset.Offset += value;
+		}
+
+		public void SubtractUpgradeableStatValue(StatDef statDef, float value)
+		{
+			if (!baseStatOffsets.TryGetValue(statDef, out StatOffset statOffset))
+			{
+				baseStatOffsets[statDef] = new StatOffset(vehicle, statDef);
+				statOffset = baseStatOffsets[statDef];
+			}
+			statOffset.Offset += value;
+		}
+
+		public void SetUpgradeableStatValue(string key, StatDef statDef, float value)
+		{
+			if (!baseStatOffsets.TryGetValue(statDef, out StatOffset statOffset))
+			{
+				baseStatOffsets[statDef] = new StatOffset(vehicle, statDef);
+				statOffset = baseStatOffsets[statDef];
+			}
+			statOffset.AddOverride(key, value);
+		}
+
+		public void RemoveUpgradeableStatValue(string key, StatDef statDef)
+		{
+			if (!baseStatOffsets.TryGetValue(statDef, out StatOffset statOffset))
+			{
+				baseStatOffsets[statDef] = new StatOffset(vehicle, statDef);
+				statOffset = baseStatOffsets[statDef];
+			}
+			statOffset.RemoveOverride(key);
+		}
+
+		public float GetUpgradeableStatValue(StatDef statDef)
+		{
+			if (baseStatOffsets.TryGetValue(statDef, out StatOffset statOffset))
+			{
+				return statOffset.Offset;
+			}
+			return vehicle.GetStatValue(statDef);
 		}
 
 		public void MarkStatDirty(VehicleStatDef statDef)
@@ -209,7 +279,7 @@ namespace Vehicles
 				Log.Error($"Unable to locate component {key} in stat handler.");
 				return;
 			}
-			component.health = component.props.health * value;
+			component.health = component.MaxHealth * value;
 			MarkAllDirty();
 		}
 

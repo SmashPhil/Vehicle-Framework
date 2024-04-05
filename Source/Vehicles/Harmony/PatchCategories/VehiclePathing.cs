@@ -109,7 +109,7 @@ namespace Vehicles
 				
 				if (vehicle.CompFueledTravel != null && vehicle.CompFueledTravel.EmptyTank)
 				{
-					Messages.Message("VF_OutOfFuel".Translate(), MessageTypeDefOf.RejectInput);
+					Messages.Message("VF_OutOfFuel".Translate(vehicle), MessageTypeDefOf.RejectInput);
 					return false;
 				}
 

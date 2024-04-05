@@ -70,7 +70,7 @@
 	<VF_Electric>Electric</VF_Electric>
 	<VF_ElectricFlick>Charge Battery</VF_ElectricFlick>
 	<VF_ElectricFlickDesc>Connect to PowerNet below vehicle.</VF_ElectricFlickDesc>
-	<VF_OutOfFuel>Cannot Move. Out of Fuel.</VF_OutOfFuel>
+	<VF_OutOfFuel>Cannot move. {0} needs more fuel.</VF_OutOfFuel>
 	
 	<VF_Assign>Assign</VF_Assign>
 	<VF_Assigned>Assigned</VF_Assigned>

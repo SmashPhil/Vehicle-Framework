@@ -301,9 +301,15 @@ namespace Vehicles
 			return new Vector2(width, height);
 		}
 
-		public Vector2 ScaleDrawRatio(GraphicData graphicData, Vector2 size, float iconScale = 1)
+		public Vector2 ScaleDrawRatio(GraphicData graphicData, Rot4 rot, Vector2 size, float iconScale = 1)
 		{
 			Vector2 drawSize = graphicData.drawSize;
+			if (rot.IsHorizontal)
+			{
+				float x = drawSize.x;
+				drawSize.x = drawSize.y;
+				drawSize.y = x;
+			}
 			Vector2 scalar = drawSize / this.graphicData.drawSize;
 
 			float width = size.x * uiIconScale * scalar.x * iconScale;

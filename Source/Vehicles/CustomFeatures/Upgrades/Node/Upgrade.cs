@@ -12,12 +12,10 @@ namespace Vehicles
 
 		public abstract bool UnlockOnLoad { get; }
 
-		public virtual int ListerCount { get; }
-
 		/// <summary>
 		/// Called when node has upgraded fully, after upgrade build ticks hits 0 or triggered by god mode
 		/// </summary>
-		public abstract void Unlock(VehiclePawn vehicle);
+		public abstract void Unlock(VehiclePawn vehicle, bool unlockingAfterLoad);
 
 		/// <summary>
 		/// Undo Upgrade action. Should be polar opposite of Upgrade functionality to revert changes

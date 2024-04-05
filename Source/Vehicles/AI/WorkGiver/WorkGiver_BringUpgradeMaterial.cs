@@ -28,7 +28,19 @@ namespace Vehicles
 
 		public override bool JobAvailable(VehiclePawn vehicle)
 		{
-			return vehicle.CompUpgradeTree.Upgrading && !vehicle.CompUpgradeTree.StoredCostSatisfied;
+			if (vehicle.CompUpgradeTree == null)
+			{
+				return false;
+			}
+			if (!vehicle.CompUpgradeTree.Upgrading)
+			{
+				return false;
+			}
+			if (vehicle.CompUpgradeTree.upgrade.Removal)
+			{
+				return false;
+			}
+			return !vehicle.CompUpgradeTree.StoredCostSatisfied;
 		}
 
 		public override ThingOwner<Thing> ThingOwner(VehiclePawn vehicle)

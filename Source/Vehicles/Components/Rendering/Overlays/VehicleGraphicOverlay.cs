@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.Linq;
 using UnityEngine;
 using Verse;
 using SmashTools;
@@ -13,13 +13,53 @@ namespace Vehicles
 
 		public readonly ExtraRotationRegistry rotationRegistry;
 
+		private Dictionary<string, List<GraphicOverlay>> extraOverlayLookup = new Dictionary<string, List<GraphicOverlay>>();
+		private List<GraphicOverlay> extraOverlays = new List<GraphicOverlay>();
+
 		public VehicleGraphicOverlay(VehiclePawn vehicle)
 		{
 			this.vehicle = vehicle;
 			rotationRegistry = new ExtraRotationRegistry(this);
 		}
 
-		public List<GraphicOverlay> Overlays => vehicle.VehicleDef.drawProperties.overlays;
+		public IEnumerable<GraphicOverlay> Overlays
+		{
+			get
+			{
+				if (!vehicle.VehicleDef.drawProperties.overlays.NullOrEmpty())
+				{
+					foreach (GraphicOverlay graphicOverlay in vehicle.VehicleDef.drawProperties.overlays)
+					{
+						yield return graphicOverlay;
+					}
+				}
+				if (!extraOverlays.NullOrEmpty())
+				{
+					foreach (GraphicOverlay graphicOverlay in extraOverlays)
+					{
+						yield return graphicOverlay;
+					}
+				}
+			}
+		}
+
+		public void AddOverlay(string key, GraphicOverlay graphicOverlay)
+		{
+			extraOverlayLookup.AddOrInsert(key, graphicOverlay);
+			extraOverlays.Add(graphicOverlay);
+		}
+
+		public void RemoveOverlays(string key)
+		{
+			if (extraOverlayLookup.ContainsKey(key))
+			{
+				foreach (GraphicOverlay graphicOverlay in extraOverlayLookup[key])
+				{
+					extraOverlays.Remove(graphicOverlay);
+				}
+				extraOverlayLookup.Remove(key);
+			}
+		}
 
 		public virtual void RenderGraphicOverlays(Vector3 drawPos, float angle, Rot8 rot)
 		{

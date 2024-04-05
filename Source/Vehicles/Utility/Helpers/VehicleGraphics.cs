@@ -264,7 +264,7 @@ namespace Vehicles
 		{
 			Rect overlayRect = OverlayRect(rect, vehicleDef, graphicOverlay, rot);
 			GraphicData graphicData = graphicOverlay.data.graphicData;
-			Texture2D texture = ContentFinder<Texture2D>.Get(graphicData.texPath);
+			Texture2D texture = graphicData.Graphic.MatAt(rot).mainTexture as Texture2D;
 			Material material = null;
 			Graphic graphic = graphicData.Graphic;
 			if (graphic.Shader.SupportsMaskTex() || graphic.Shader.SupportsRGBMaskTex())
@@ -357,7 +357,7 @@ namespace Vehicles
 		internal static Rect OverlayRect(Rect rect, VehicleDef vehicleDef, GraphicOverlay graphicOverlay, Rot8 rot)
 		{
 			//Scale to VehicleDef drawSize
-			Vector2 size = vehicleDef.ScaleDrawRatio(graphicOverlay.data.graphicData, rect.size);
+			Vector2 size = vehicleDef.ScaleDrawRatio(graphicOverlay.data.graphicData, rot, rect.size);
 			//Adjust position from new rect size
 			Vector2 adjustedPosition = rect.position + (rect.size - size) / 2f;
 			// Size / V_max = scalar

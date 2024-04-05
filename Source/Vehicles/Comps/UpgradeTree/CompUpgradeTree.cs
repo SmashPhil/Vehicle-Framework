@@ -136,6 +136,9 @@ namespace Vehicles
 			return !unlocksNodes.NotNullAndAny(preReqNode => Vehicle.CompUpgradeTree.NodeUnlocked(preReqNode));
 		}
 
+		/// <summary>
+		/// Resets unlock and triggers refund event
+		/// </summary>
 		public void ResetUnlock(UpgradeNode node)
 		{
 			if (node is null || !upgrades.Contains(node.key))
@@ -146,28 +149,30 @@ namespace Vehicles
 			{
 				foreach (Upgrade upgrade in node.upgrades)
 				{
-					upgrade.Refund(Vehicle);
+					try
+					{
+						upgrade.Refund(Vehicle);
+					}
+					catch (Exception ex)
+					{
+						Log.Error($"{VehicleHarmony.LogLabel} Unable to reset {GetType()} to {Vehicle.LabelShort}. \nException: {ex}");
+					}
 				}
+				node.RemoveOverlays(Vehicle);
 				node.resetSound?.PlayOneShot(new TargetInfo(Vehicle.Position, Vehicle.Map));
 			}
 		}
 
-		public void ClearUpgrade()
-		{
-			Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(Vehicle);
-			upgradeContainer.TryDropAll(Vehicle.Position, Vehicle.Map, ThingPlaceMode.Near);
-			upgrade = null;
-		}
-
-		public void StartUnlock(UpgradeNode node)
-		{
-			upgrade = new UpgradeInProgress(Vehicle, node);
-			upgradeContainer.TryDropAll(Vehicle.Position, Vehicle.Map, ThingPlaceMode.Near);
-			Vehicle.ignition.Drafted = false;
-		}
-
+		/// <summary>
+		/// Unlocks node and triggers unlock event for all upgrades of that node
+		/// </summary>
 		public void FinishUnlock(UpgradeNode node)
 		{
+			if (upgrade != null && upgrade.Removal)
+			{
+				ResetUnlock(node);
+				return;
+			}
 			if (!node.replaces.NullOrEmpty())
 			{
 				foreach (string replaceKey in node.replaces)
@@ -178,13 +183,76 @@ namespace Vehicles
 			}
 			foreach (Upgrade upgrade in node.upgrades)
 			{
-				upgrade.Unlock(Vehicle);
+				try
+				{
+					upgrade.Unlock(Vehicle, false);
+				}
+				catch (Exception ex)
+				{
+					Log.Error($"{VehicleHarmony.LogLabel} Unable to unlock {GetType()} for {Vehicle.LabelShort}. \nException: {ex}");
+				}
 			}
-			node.ApplyPattern(Vehicle);
+			node.AddOverlays(Vehicle);
 			node.unlockSound?.PlayOneShot(new TargetInfo(Vehicle.Position, Vehicle.Map));
 			upgrades.Add(node.key);
 
 			upgradeContainer.ClearAndDestroyContents();
+		}
+
+		public void ClearUpgrade()
+		{
+			Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(Vehicle);
+			upgradeContainer.TryDropAll(Vehicle.Position, Vehicle.Map, ThingPlaceMode.Near);
+			upgrade = null;
+		}
+
+		/// <summary>
+		/// Notifies job pool that vehicle has upgrade that wants to be unlocked, still requires job to be performed
+		/// </summary>
+		public void StartUnlock(UpgradeNode node)
+		{
+			upgrade = new UpgradeInProgress(Vehicle, node, false);
+			upgradeContainer.TryDropAll(Vehicle.Position, Vehicle.Map, ThingPlaceMode.Near);
+			Vehicle.ignition.Drafted = false;
+		}
+
+		/// <summary>
+		/// Notifies job pool that vehicle has upgrade that wants to be removed, still requires job to be performed
+		/// </summary>
+		public void RemoveUnlock(UpgradeNode node)
+		{
+			upgrade = new UpgradeInProgress(Vehicle, node, true);
+			upgradeContainer.TryDropAll(Vehicle.Position, Vehicle.Map, ThingPlaceMode.Near);
+			Vehicle.ignition.Drafted = false;
+		}
+
+		private void ReloadUnlocks()
+		{
+			if (!upgrades.NullOrEmpty())
+			{
+				foreach (string key in upgrades)
+				{
+					UpgradeNode node = Props.def.GetNode(key);
+					if (node != null)
+					{
+						node.AddOverlays(Vehicle);
+						foreach (Upgrade upgrade in node.upgrades)
+						{
+							if (upgrade.UnlockOnLoad)
+							{
+								try
+								{
+									upgrade.Unlock(Vehicle, true);
+								}
+								catch (Exception ex)
+								{
+									Log.Error($"{VehicleHarmony.LogLabel} Unable to unlock {GetType()} post-load for {Vehicle.LabelShort}. \nException: {ex}");
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 
 		public void InitializeUpgradeTree()
@@ -257,19 +325,26 @@ namespace Vehicles
 			}
 		}
 
-		public override bool CanDraft(out string failReason)
+		public override bool CanDraft(out string failReason, out bool allowDevMode)
 		{
+			allowDevMode = false;
 			if (Upgrading)
 			{
-				failReason = "VF_UpgradeInProgress".Translate();
+				failReason = "VF_UpgradeInProgress".Translate(Vehicle);
 				return false;
 			}
-			return base.CanDraft(out failReason);
+			return base.CanDraft(out failReason, out allowDevMode);
 		}
 
 		public override void PostGeneration()
 		{
 			InitializeUpgradeTree();
+		}
+
+		public override void PostLoad()
+		{
+			base.PostLoad();
+			ReloadUnlocks();
 		}
 
 		public override void PostSpawnSetup(bool respawningAfterLoad)
@@ -287,7 +362,7 @@ namespace Vehicles
 		{
 			if (NodeUnlocking != null)
 			{
-				if (StoredCostSatisfied)
+				if (upgrade.Removal || StoredCostSatisfied)
 				{
 					Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RegisterLister(Vehicle, ReservationType.Upgrade);
 					Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Vehicle, ReservationType.LoadUpgradeMaterials);
@@ -311,7 +386,7 @@ namespace Vehicles
 			Scribe_Collections.Look(ref upgrades, nameof(upgrades), LookMode.Value);
 			Scribe_Values.Look(ref nodeUnlocking, nameof(nodeUnlocking));
 			Scribe_Deep.Look(ref upgrade, nameof(upgrade));
-			Scribe_Deep.Look(ref upgradeContainer, nameof(upgradeContainer), new object[] { this });
+			Scribe_Deep.Look(ref upgradeContainer, nameof(upgradeContainer));
 		}
 	}
 }

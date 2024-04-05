@@ -15,11 +15,17 @@ namespace Vehicles
 
 		private VehiclePawn vehicle;
 
-		protected float workLeft;
+		private float workLeft;
+		private bool removal = false;
 
-		protected bool cachedStoredCostSatisfied = false;
-		
-		public UpgradeInProgress(VehiclePawn vehicle, UpgradeNode node)
+		/// <summary>
+		/// For Xml Deserialization
+		/// </summary>
+		public UpgradeInProgress()
+		{
+		}
+
+		public UpgradeInProgress(VehiclePawn vehicle, UpgradeNode node, bool removal)
 		{
 			nodeKey = node.key;
 
@@ -27,7 +33,10 @@ namespace Vehicles
 			this.vehicle = vehicle;
 
 			WorkLeft = node.work;
+			this.removal = removal;
 		}
+
+		public bool Removal => removal;
 
 		public float WorkLeft
 		{
@@ -50,9 +59,9 @@ namespace Vehicles
 			Scribe_References.Look(ref vehicle, nameof(vehicle));
 			Scribe_Values.Look(ref workLeft, nameof(workLeft));
 
-			if (Scribe.mode == LoadSaveMode.LoadingVars)
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
-				node = vehicle.CompUpgradeTree.Props.def.GetNode(nodeKey);
+				node = vehicle.GetComp<CompUpgradeTree>().Props.def.GetNode(nodeKey); //Must get comp the normal way since comps will not be cached at this time
 			}
 		}
 	}

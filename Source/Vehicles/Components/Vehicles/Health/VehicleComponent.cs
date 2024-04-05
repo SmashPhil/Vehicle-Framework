@@ -32,7 +32,7 @@ namespace Vehicles
 			this.vehicle = vehicle;
 		}
 
-		public float HealthPercent => Ext_Math.RoundTo(health / props.health, 0.01f);
+		public float HealthPercent => Ext_Math.RoundTo(health / MaxHealth, 0.01f);
 
 		public float Efficiency => props.efficiency.Evaluate(HealthPercent); //Allow evaluating beyond 100% via stat parts
 
@@ -40,11 +40,35 @@ namespace Vehicles
 
 		public Dictionary<string, List<StatModifier>> AddArmorModifiers { get; private set; } = new Dictionary<string, List<StatModifier>>();
 
+		public float SetHealthModifier { get; set; } = -1;
+
+		public Dictionary<string, float> AddHealthModifiers { get; private set; } = new Dictionary<string, float>();
+
 		public Color EfficiencyColor => gradient.Evaluate(Efficiency);
 
 		string ITweakFields.Category => props.key;
 
 		string ITweakFields.Label => props.key;
+
+		public float MaxHealth
+		{
+			get
+			{
+				if (SetHealthModifier > 0)
+				{
+					return SetHealthModifier;
+				}
+				float value = props.health;
+				if (!AddHealthModifiers.NullOrEmpty())
+				{
+					foreach (float health in AddHealthModifiers.Values)
+					{
+						value += health;
+					}
+				}
+				return value;
+			}
+		}
 
 		public virtual void DrawIcon(Rect rect)
 		{
@@ -70,7 +94,7 @@ namespace Vehicles
 			
 			health -= dinfo.Amount;
 			float remainingDamage = Mathf.Clamp(-health, 0, float.MaxValue);
-			health = health.Clamp(0, props.health);
+			health = health.Clamp(0, MaxHealth);
 
 			if (dinfo.Amount > 0)
 			{
@@ -93,7 +117,7 @@ namespace Vehicles
 				}
 			}
 
-			if (penetration > Penetration.Penetrated || health > (props.health / 2f))
+			if (penetration > Penetration.Penetrated || health > (MaxHealth / 2f))
 			{
 				//Don't fallthrough until part is below 50% health or damage has penetrated
 				dinfo.SetAmount(0);
@@ -109,9 +133,9 @@ namespace Vehicles
 		public virtual void HealComponent(float amount)
 		{
 			health += amount;
-			if (health > props.health)
+			if (health > MaxHealth)
 			{
-				health = props.health;
+				health = MaxHealth;
 			}
 			vehicle.EventRegistry[VehicleEventDefOf.Repaired].ExecuteEvents();
 		}
@@ -160,7 +184,7 @@ namespace Vehicles
 			upgraded = false;
 			if (!SetArmorModifiers.NullOrEmpty())
 			{
-				foreach ((_, List<StatModifier> statModifiers) in SetArmorModifiers)
+				foreach (List<StatModifier> statModifiers in SetArmorModifiers.Values)
 				{
 					if (TryGetModifier(statModifiers, out float setValue))
 					{
@@ -169,7 +193,7 @@ namespace Vehicles
 					}
 				}
 			}
-			float value = vehicle.GetStatValue(armorCategoryDef.armorRatingStat);
+			float value = vehicle.statHandler.GetUpgradeableStatValue(armorCategoryDef.armorRatingStat);
 			StatModifier armorModifier = props.armor?.FirstOrDefault(rating => rating.stat == armorCategoryDef.armorRatingStat);
 			if (armorModifier != null)
 			{
@@ -177,7 +201,7 @@ namespace Vehicles
 			}
 			if (!AddArmorModifiers.NullOrEmpty())
 			{
-				foreach ((_, List<StatModifier> statModifiers) in AddArmorModifiers)
+				foreach (List<StatModifier> statModifiers in AddArmorModifiers.Values)
 				{
 					if (TryGetModifier(statModifiers, out float addValue))
 					{
@@ -209,7 +233,7 @@ namespace Vehicles
 
 		public virtual void PostCreate()
 		{
-			health = props.health;
+			health = MaxHealth;
 		}
 
 		public virtual void Initialize(VehicleComponentProperties props)

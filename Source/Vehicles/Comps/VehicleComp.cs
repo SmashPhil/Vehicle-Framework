@@ -61,9 +61,10 @@ namespace Vehicles
 		{
 		}
 
-		public virtual bool CanDraft(out string failReason)
+		public virtual bool CanDraft(out string failReason, out bool allowDevMode)
 		{
 			failReason = string.Empty;
+			allowDevMode = true;
 			return true;
 		}
 

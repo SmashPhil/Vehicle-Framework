@@ -11,76 +11,83 @@ namespace Vehicles
 	{
 		public List<ArmorUpgrade> armor;
 
-		public List<VehicleRole> roles;
+		public List<HealthUpgrade> health;
 
-		public override int ListerCount => 1;
+		public List<VehicleRole> roles;
 
 		public override bool UnlockOnLoad => true;
 
-		public override void Unlock(VehiclePawn vehicle)
+		public override void Unlock(VehiclePawn vehicle, bool unlockingAfterLoad)
 		{
-			try
+			if (!roles.NullOrEmpty())
 			{
-				if (!armor.NullOrEmpty())
+
+			}
+			if (!armor.NullOrEmpty())
+			{
+				foreach (ArmorUpgrade armorUpgrade in armor)
 				{
-					foreach (ArmorUpgrade armorUpgrade in armor)
+					if (!armorUpgrade.key.NullOrEmpty() && !armorUpgrade.statModifiers.NullOrEmpty())
 					{
-						if (!armorUpgrade.key.NullOrEmpty() && !armorUpgrade.statModifiers.NullOrEmpty())
+						VehicleComponent component = vehicle.statHandler.GetComponent(armorUpgrade.key);
+						switch (armorUpgrade.type)
 						{
-							VehicleComponent component = vehicle.statHandler.GetComponent(armorUpgrade.key);
-							switch (armorUpgrade.type)
-							{
-								case UpgradeType.Add:
-									component.AddArmorModifiers[node.key] = armorUpgrade.statModifiers;
-									break;
-								case UpgradeType.Set:
-									component.SetArmorModifiers[node.key] = armorUpgrade.statModifiers;
-									break;
-							}
+							case UpgradeType.Add:
+								component.AddArmorModifiers[node.key] = armorUpgrade.statModifiers;
+								break;
+							case UpgradeType.Set:
+								component.SetArmorModifiers[node.key] = armorUpgrade.statModifiers;
+								break;
 						}
 					}
 				}
 			}
-			catch (Exception ex)
+			if (!health.NullOrEmpty())
 			{
-				Log.Error($"{VehicleHarmony.LogLabel} Unable to add stat values to {vehicle.LabelShort}. Report on workshop page. \nException: {ex}");
-				return;
+				foreach (HealthUpgrade healthUpgrade in health)
+				{
+					if (!healthUpgrade.key.NullOrEmpty())
+					{
+						VehicleComponent component = vehicle.statHandler.GetComponent(healthUpgrade.key);
+						switch (healthUpgrade.type)
+						{
+							case UpgradeType.Add:
+								component.AddHealthModifiers[node.key] = healthUpgrade.value;
+								break;
+							case UpgradeType.Set:
+								component.SetHealthModifier = healthUpgrade.value;
+								break;
+						}
+					}
+				}
 			}
-
-			vehicle.VehicleDef.buildDef.soundBuilt?.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map, false));
 		}
 
 		public override void Refund(VehiclePawn vehicle)
 		{
-			try
+			if (!roles.NullOrEmpty())
 			{
-				if (!armor.NullOrEmpty())
+
+			}
+			if (!armor.NullOrEmpty())
+			{
+				foreach (ArmorUpgrade armorUpgrade in armor)
 				{
-					foreach (ArmorUpgrade armorUpgrade in armor)
+					if (!armorUpgrade.key.NullOrEmpty() && !armorUpgrade.statModifiers.NullOrEmpty())
 					{
-						if (!armorUpgrade.key.NullOrEmpty() && !armorUpgrade.statModifiers.NullOrEmpty())
+						VehicleComponent component = vehicle.statHandler.GetComponent(armorUpgrade.key);
+						switch (armorUpgrade.type)
 						{
-							VehicleComponent component = vehicle.statHandler.GetComponent(armorUpgrade.key);
-							switch (armorUpgrade.type)
-							{
-								case UpgradeType.Add:
-									component.AddArmorModifiers.Remove(node.key);
-									break;
-								case UpgradeType.Set:
-									component.SetArmorModifiers.Remove(node.key);
-									break;
-							}
+							case UpgradeType.Add:
+								component.AddArmorModifiers.Remove(node.key);
+								break;
+							case UpgradeType.Set:
+								component.SetArmorModifiers.Remove(node.key);
+								break;
 						}
 					}
 				}
 			}
-			catch (Exception ex)
-			{
-				Log.Error($"{VehicleHarmony.LogLabel} Unable to add stat values to {vehicle.LabelShort}. Report on workshop page. \nException: {ex}");
-				return;
-			}
-
-			vehicle.VehicleDef.buildDef.soundBuilt?.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map, false));
 		}
 
 		public struct ArmorUpgrade
@@ -91,10 +98,12 @@ namespace Vehicles
 			public UpgradeType type;
 		}
 
-		public enum UpgradeType
+		public struct HealthUpgrade
 		{
-			Add,
-			Set,
+			public string key;
+			public float value;
+
+			public UpgradeType type;
 		}
 	}
 }

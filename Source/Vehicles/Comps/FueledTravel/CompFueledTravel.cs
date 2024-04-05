@@ -163,14 +163,15 @@ namespace Vehicles
 				false), 9999f, validator, null, 0, -1, false, RegionType.Set_Passable, false);
 		}
 
-		public override bool CanDraft(out string failReason)
+		public override bool CanDraft(out string failReason, out bool allowDevMode)
 		{
-			if (!VehicleMod.settings.debug.debugDraftAnyVehicle && EmptyTank)
+			allowDevMode = false;
+			if (EmptyTank)
 			{
-				failReason = "VF_OutOfFuel".Translate();
+				failReason = "VF_OutOfFuel".Translate(Vehicle);
 				return false;
 			}
-			return base.CanDraft(out failReason);
+			return base.CanDraft(out failReason, out allowDevMode);
 		}
 
 		public virtual void Refuel(List<Thing> fuelThings)
@@ -372,7 +373,7 @@ namespace Vehicles
 		{
 			if (EmptyTank)
 			{
-				stringBuilder.AppendLine("VF_OutOfFuel".Translate());
+				stringBuilder.AppendLine("VF_OutOfFuel".Translate(Vehicle));
 			}
 		}
 

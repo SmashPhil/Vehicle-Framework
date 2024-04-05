@@ -17,7 +17,15 @@ namespace Vehicles
 
 		public override bool CanBeWorkedOn(VehiclePawn vehicle)
 		{
-			return vehicle.CompUpgradeTree != null && vehicle.CompUpgradeTree.Upgrading && vehicle.CompUpgradeTree.StoredCostSatisfied;
+			if (vehicle.CompUpgradeTree == null)
+			{
+				return false;
+			}
+			if (!vehicle.CompUpgradeTree.Upgrading)
+			{
+				return false;
+			}
+			return vehicle.CompUpgradeTree.upgrade.Removal || vehicle.CompUpgradeTree.StoredCostSatisfied;
 		}
 	}
 }

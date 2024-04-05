@@ -125,17 +125,21 @@ namespace Vehicles
 		public virtual bool CanDraft(out string reason)
 		{
 			reason = "";
+			bool draftAnyVehicle = VehicleMod.settings.debug.debugDraftAnyVehicle;
 			foreach (ThingComp thingComp in AllComps)
 			{
-				if (thingComp is VehicleComp vehicleComp && !vehicleComp.CanDraft(out string failReason))
+				if (thingComp is VehicleComp vehicleComp)
 				{
-					reason = failReason;
-					return false;
+					if (!vehicleComp.CanDraft(out string failReason, out bool allowDevMode) && (!draftAnyVehicle || !allowDevMode))
+					{
+						reason = failReason;
+						return false;
+					}
 				}
 			}
-			if (!CanMoveWithOperators)
+			if (!draftAnyVehicle && !CanMoveWithOperators)
 			{
-				reason = "VF_NotEnoughToOperate".Translate();
+				reason = "VF_NotEnoughToOperate".Translate(this);
 				return false;
 			}
 			return true;

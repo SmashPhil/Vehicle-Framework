@@ -795,7 +795,7 @@ namespace Vehicles
 		public Rect ScaleUIRectRecursive(VehicleDef vehicleDef, Rect rect, Rot8 rot, float iconScale = 1)
 		{
 			//Scale to VehicleDef drawSize
-			Vector2 size = vehicleDef.ScaleDrawRatio(turretDef.graphicData, rect.size, iconScale: iconScale);
+			Vector2 size = vehicleDef.ScaleDrawRatio(turretDef.graphicData, rot, rect.size, iconScale: iconScale);
 			//Adjust position from new rect size
 			Vector2 adjustedPosition = rect.position + (rect.size - size) / 2f;
 			// Size / V_max = scalar

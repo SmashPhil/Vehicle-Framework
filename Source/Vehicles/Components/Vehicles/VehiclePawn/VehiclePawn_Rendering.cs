@@ -301,7 +301,10 @@ namespace Vehicles
 
 		public override void DynamicDrawPhaseAt(DrawPhase phase, Vector3 drawLoc, bool flip = false)
 		{
-			Draw();
+			if (phase == DrawPhase.Draw)
+			{
+				Draw();
+			}
 		}
 
 		public virtual void Draw()
@@ -324,7 +327,7 @@ namespace Vehicles
 			{
 				handler.RenderPawns();
 			}
-			statHandler.DrawHitbox(HighlightedComponent);
+			statHandler.DrawHitbox(HighlightedComponent); //Must be rendered with the vehicle or the field edges will not render quickly enough
 		}
 
 		/// <summary>
@@ -346,7 +349,7 @@ namespace Vehicles
 			{
 				Comps_PostDrawUnspawned(drawLoc, rot, extraRotation);
 			}
-			statHandler.DrawHitbox(HighlightedComponent);
+			statHandler.DrawHitbox(HighlightedComponent); //Must be rendered with the vehicle or the field edges will not render quickly enough
 		}
 
 		public virtual void Comps_PostDrawUnspawned(Vector3 drawLoc, Rot8 rot, float rotation)

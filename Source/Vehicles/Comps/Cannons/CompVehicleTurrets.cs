@@ -147,7 +147,9 @@ namespace Vehicles
 		public void AddTurret(VehicleTurret turret)
 		{
 			VehicleTurret newTurret = CreateTurret(Vehicle, turret);
+			newTurret.FillEvents_Def();
 			turrets.Add(newTurret);
+			RevalidateTurrets();
 		}
 
 		public bool RemoveTurret(string key)
@@ -646,6 +648,7 @@ namespace Vehicles
 		{
 			turretQueue ??= new List<TurretData>();
 			ResolveChildTurrets();
+			RecacheDeployment();
 			InitTurrets();
 		}
 
@@ -683,22 +686,75 @@ namespace Vehicles
 
 		public void InitTurrets()
 		{
-			RecacheDeployment();
 			for (int i = turrets.Count - 1; i >= 0; i--)
 			{
 				VehicleTurret turret = turrets[i];
-				if (Props.turrets.FirstOrDefault(turretProps => turretProps.key == turret.key) is VehicleTurret turretProps)
+				VehicleTurret reference = FindTurretReference(turret.key);
+				
+				if (reference != null)
 				{
-					turret.Init(turretProps);
-					ResolveChildTurrets(turret);
-					QueueTicker(turret); //Queue all turrets initially, will be sorted out after 1st tick
+					InitTurret(turret, reference);
 				}
 				else
 				{
-					Log.Error($"Unable to find matching turret from save file to CompProperties based on key {turret.key}. Was this changed or removed?");
+					Log.Error($"Unable to find reference turret for key {turret.key}. Turrets can only be added if they exist in the vehicle's upgrade tree or in its initial turrets.");
 					turrets.Remove(turret); //Remove from turret list, invalid turret will throw exceptions
 				}
 			}
+		}
+
+		private VehicleTurret FindTurretReference(string key)
+		{
+			if (MatchingTurret(key, Props.turrets, out VehicleTurret result))
+			{
+				return result;
+			}
+			else if (Vehicle.CompUpgradeTree != null)
+			{
+				foreach (UpgradeNode upgradeNode in Vehicle.CompUpgradeTree.Props.def.nodes)
+				{
+					if (!upgradeNode.upgrades.NullOrEmpty())
+					{
+						foreach (Upgrade upgrade in upgradeNode.upgrades)
+						{
+							if (upgrade is TurretUpgrade turretUpgrade)
+							{
+								if (MatchingTurret(key, turretUpgrade.turrets, out VehicleTurret upgradeResult))
+								{
+									return upgradeResult;
+								}
+							}
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+		private static bool MatchingTurret(string key, List<VehicleTurret> turrets, out VehicleTurret result)
+		{
+			result = null;
+			if (turrets.NullOrEmpty())
+			{
+				return false;
+			}
+
+			foreach (VehicleTurret turret in turrets)
+			{
+				if (turret.key == key)
+				{
+					result = turret;
+					return true;
+				}
+			}
+			return false;
+		}
+
+		private void InitTurret(VehicleTurret turret, VehicleTurret reference)
+		{
+			turret.Init(reference);
+			ResolveChildTurrets(turret);
+			QueueTicker(turret); //Queue all turrets initially, will be sorted out after 1st tick
 		}
 
 		public void FillMagazineCapacity()

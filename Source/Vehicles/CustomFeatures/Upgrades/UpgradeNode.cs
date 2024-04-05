@@ -18,10 +18,13 @@ namespace Vehicles
 		public string icon;
 		public float work = 1;
 
+		public bool hidden = false; //Hidden nodes are upgrades which only get unlocked via code
+
 		public SoundDef unlockSound;
 		public SoundDef resetSound;
 
 		public IntVec2 gridCoordinate;
+		public Vector2 drawSize = new Vector2(ITab_Vehicle_Upgrades.UpgradeNodeDim, ITab_Vehicle_Upgrades.UpgradeNodeDim);
 
 		public Color? drawColorOne;
 		public Color? drawColorTwo;
@@ -39,8 +42,6 @@ namespace Vehicles
 		public List<ThingDefCountClass> ingredients = new List<ThingDefCountClass>();
 
 		public List<GraphicDataOverlay> graphicOverlays;
-
-		public readonly List<GraphicOverlay> overlays = new List<GraphicOverlay>();
 
 		public Texture2D Icon { get; private set; }
 
@@ -73,8 +74,17 @@ namespace Vehicles
 		/// <summary>
 		/// Apply texture overlays and colors
 		/// </summary>
-		public virtual void ApplyPattern(VehiclePawn vehicle)
+		public void AddOverlays(VehiclePawn vehicle)
 		{
+			if (!graphicOverlays.NullOrEmpty())
+			{
+				foreach (GraphicDataOverlay graphicDataOverlay in graphicOverlays)
+				{
+					GraphicOverlay graphicOverlay = new GraphicOverlay(graphicDataOverlay);
+					graphicOverlay.data.graphicData.Init(vehicle.VehicleDef);
+					vehicle.graphicOverlay.AddOverlay(key, graphicOverlay);
+				}
+			}
 			if (VehicleMod.settings.main.overrideDrawColors)
 			{
 				bool colorChanged = false;
@@ -98,6 +108,11 @@ namespace Vehicles
 					vehicle.Notify_ColorChanged();
 				}
 			}
+		}
+
+		public void RemoveOverlays(VehiclePawn vehicle)
+		{
+			vehicle.graphicOverlay.RemoveOverlays(key);
 		}
 
 		public override bool Equals(object obj)
@@ -237,15 +252,6 @@ namespace Vehicles
 				foreach (Upgrade upgrade in upgrades)
 				{
 					upgrade.Init(this);
-				}
-			}
-			if (!overlays.NullOrEmpty())
-			{
-				foreach (GraphicDataOverlay graphicDataOverlay in graphicOverlays)
-				{
-					GraphicOverlay graphicOverlay = new GraphicOverlay(graphicDataOverlay);
-					//graphicOverlay.data.graphicData.Init(vehicleDef);
-					//overlays.Add(graphicOverlay);
 				}
 			}
 		}
