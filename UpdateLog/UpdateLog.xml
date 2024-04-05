@@ -6,8 +6,19 @@
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
-Updated to version 1.5
+Woohoo! Vehicle Framework is now updated for 1.5 and the Anomaly DLC.
 
+To celebrate the release of a new DLC, I've added 'upgrade' mechanics. This allows modders to create upgrade trees for their vehicles.
+
+&lt;i&gt;What does that mean? Can I make my vehicle go faster?&lt;/i&gt;
+Yup! There are tons of things that can be upgraded such as stats, armor, and even adding / swapping / removing turrets.  I won't list them all since it would take up a lot of space but it's very expansive so if modders make the effort to add them, expect some cool upgrade trees to customize your vehicles.
+
+&lt;i&gt;What about raiders? I thought those were coming first?&lt;/i&gt;
+I'm working on it I promise. I have the groundwork laid out for raider AI which is proving to be very time consuming. So I figured I'd spend a little time and give you guys something cool to play around with while I work on raiders :P
+
+When I do have the first iteration of raider AI finished, it will be an opt-in feature that you can enable in the mod settings. I'll post more info about it in a future update.
+
+P.S. River travel is now enabled, go crazy.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Fixed bug where MapComponentCache would not clear properly when exiting to menu and immediately loading back into a game.
 
@@ -33,12 +44,13 @@ Updated to version 1.5
 
 - Added 'canRoofPunch' and 'animationPunchAt' fields to CompProperties_VehicleLauncher, allowing aerial vehicles to punch through roofs.
 
+- Added UpgradeTree mechanics
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>
   <!--Show update log on next startup.-->
-  <update>false</update>
+  <update>true</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
   <testing>false</testing>
   <!--Icon bar shown to the right of the mod's name.-->
