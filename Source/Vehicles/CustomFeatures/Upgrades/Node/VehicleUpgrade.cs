@@ -13,7 +13,7 @@ namespace Vehicles
 
 		public List<HealthUpgrade> health;
 
-		public List<VehicleRole> roles;
+		public List<VehicleRole> roles; //TODO - VehicleHandler needs some changes to allow resolving roles from upgrades
 
 		public override bool UnlockOnLoad => true;
 

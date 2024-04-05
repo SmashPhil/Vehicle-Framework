@@ -44,6 +44,8 @@ namespace Vehicles
 
 		public static readonly Material WorldFullMatRed = MaterialPool.MatFrom(SearchLightTex, ShaderDatabase.WorldOverlayTransparent, Color.white, WorldMaterials.WorldLineRenderQueue);
 
+		public static readonly Texture2D TutorArrowRight = ContentFinder<Texture2D>.Get("UI/Overlays/TutorArrowRight");
+
 		/// <summary>
 		/// Preset UI colors
 		/// </summary>

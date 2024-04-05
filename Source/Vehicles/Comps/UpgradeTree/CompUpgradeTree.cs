@@ -147,15 +147,18 @@ namespace Vehicles
 			}
 			if (upgrades.Remove(node.key))
 			{
-				foreach (Upgrade upgrade in node.upgrades)
+				if (!node.upgrades.NullOrEmpty())
 				{
-					try
+					foreach (Upgrade upgrade in node.upgrades)
 					{
-						upgrade.Refund(Vehicle);
-					}
-					catch (Exception ex)
-					{
-						Log.Error($"{VehicleHarmony.LogLabel} Unable to reset {GetType()} to {Vehicle.LabelShort}. \nException: {ex}");
+						try
+						{
+							upgrade.Refund(Vehicle);
+						}
+						catch (Exception ex)
+						{
+							Log.Error($"{VehicleHarmony.LogLabel} Unable to reset {GetType()} to {Vehicle.LabelShort}. \nException: {ex}");
+						}
 					}
 				}
 				node.RemoveOverlays(Vehicle);
@@ -181,15 +184,18 @@ namespace Vehicles
 					ResetUnlock(replaceNode);
 				}
 			}
-			foreach (Upgrade upgrade in node.upgrades)
+			if (!node.upgrades.NullOrEmpty())
 			{
-				try
+				foreach (Upgrade upgrade in node.upgrades)
 				{
-					upgrade.Unlock(Vehicle, false);
-				}
-				catch (Exception ex)
-				{
-					Log.Error($"{VehicleHarmony.LogLabel} Unable to unlock {GetType()} for {Vehicle.LabelShort}. \nException: {ex}");
+					try
+					{
+						upgrade.Unlock(Vehicle, false);
+					}
+					catch (Exception ex)
+					{
+						Log.Error($"{VehicleHarmony.LogLabel} Unable to unlock {GetType()} for {Vehicle.LabelShort}. \nException: {ex}");
+					}
 				}
 			}
 			node.AddOverlays(Vehicle);
@@ -236,17 +242,20 @@ namespace Vehicles
 					if (node != null)
 					{
 						node.AddOverlays(Vehicle);
-						foreach (Upgrade upgrade in node.upgrades)
+						if (!node.upgrades.NullOrEmpty())
 						{
-							if (upgrade.UnlockOnLoad)
+							foreach (Upgrade upgrade in node.upgrades)
 							{
-								try
+								if (upgrade.UnlockOnLoad)
 								{
-									upgrade.Unlock(Vehicle, true);
-								}
-								catch (Exception ex)
-								{
-									Log.Error($"{VehicleHarmony.LogLabel} Unable to unlock {GetType()} post-load for {Vehicle.LabelShort}. \nException: {ex}");
+									try
+									{
+										upgrade.Unlock(Vehicle, true);
+									}
+									catch (Exception ex)
+									{
+										Log.Error($"{VehicleHarmony.LogLabel} Unable to unlock {GetType()} post-load for {Vehicle.LabelShort}. \nException: {ex}");
+									}
 								}
 							}
 						}

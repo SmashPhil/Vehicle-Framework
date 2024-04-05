@@ -189,6 +189,7 @@
     <Compile Include="Misc\DefOf\ThingDefOf_VehicleMotes.cs" />
     <Compile Include="Misc\DefOf\ThingDefOf_Vehicles.cs" />
     <Compile Include="Misc\DefOf\VehicleStatCategoryDefOf.cs" />
+    <Compile Include="Misc\DefOf\VehicleStatUpgradeCategoryDefOf.cs" />
     <Compile Include="Misc\DefOf\VehicleTurretEventDefOf.cs" />
     <Compile Include="Misc\Enums\Turret\DeploymentType.cs" />
     <Compile Include="Misc\Enums\UI\WorldPathingDebugType.cs" />
@@ -367,9 +368,7 @@
     <Compile Include="CustomFeatures\Reservation\VehicleNodeReservation.cs" />
     <Compile Include="CustomFeatures\Damage\CustomHitFlags.cs" />
     <Compile Include="CustomFeatures\Reservation\VehiclePositionManager.cs" />
-    <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgradeCategoryDef_FuelConsumption.cs" />
-    <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgradeCategoryDef_FuelEfficiency.cs" />
-    <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgradeCategoryDef.cs" />
+    <Compile Include="CustomFeatures\Upgrades\StatUpgradeCategoryDef.cs" />
     <Compile Include="Gizmo\AltitudeMeter.cs" />
     <Compile Include="Gizmo\Command_LoadToAerialTransport.cs" />
     <Compile Include="Gizmo\Landing\Command_ActionHighlighter.cs" />

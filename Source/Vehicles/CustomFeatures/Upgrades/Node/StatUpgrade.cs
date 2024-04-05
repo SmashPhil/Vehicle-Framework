@@ -116,7 +116,11 @@ namespace Vehicles
 			}
 		}
 
-		public struct StatDefUpgrade
+		/// <summary>
+		/// Anything with Def fields must be a reference type for Cross Reference resolving during parsing
+		/// </summary>
+
+		public class StatDefUpgrade
 		{
 			public StatDef def;
 			public float value;
@@ -124,7 +128,7 @@ namespace Vehicles
 			public UpgradeType type;
 		}
 
-		public struct VehicleStatDefUpgrade
+		public class VehicleStatDefUpgrade
 		{
 			public VehicleStatDef def;
 			public float value;
@@ -132,7 +136,7 @@ namespace Vehicles
 			public UpgradeType type;
 		}
 
-		public struct StatCategoryUpgrade
+		public class StatCategoryUpgrade
 		{
 			public StatUpgradeCategoryDef def;
 			public float value;

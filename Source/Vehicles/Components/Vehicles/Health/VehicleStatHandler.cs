@@ -77,80 +77,109 @@ namespace Vehicles
 				componentsByKeys[component.props.key] = component;
 				RecacheStatCategories(component);
 			}
-			InitializeStatOffsets();
 		}
 
-		public void InitializeStatOffsets()
+		public void AddStatOffset(VehicleStatDef vehicleStatDef, float value)
 		{
-			statOffsets.Clear();
-			categoryOffsets.Clear();
-
-			foreach (VehicleStatDef statDef in DefDatabase<VehicleStatDef>.AllDefsListForReading)
+			if (!statOffsets.TryGetValue(vehicleStatDef, out StatOffset statOffset))
 			{
-				StatOffset statOffset = new StatOffset(vehicle, statDef);
-				statOffsets[statDef] = statOffset;
+				statOffsets[vehicleStatDef] = new StatOffset(vehicle, vehicleStatDef);
+				statOffset = statOffsets[vehicleStatDef];
 			}
-
-			foreach (StatUpgradeCategoryDef upgradeCategoryDef in DefDatabase<StatUpgradeCategoryDef>.AllDefsListForReading)
-			{
-				StatOffset statOffset = new StatOffset(vehicle, upgradeCategoryDef);
-				categoryOffsets[upgradeCategoryDef] = statOffset;
-			}
-		}
-
-		public void AddStatOffset(VehicleStatDef statDef, float value)
-		{
-			statOffsets[statDef].Offset += value;
+			statOffset.Offset += value;
 		}
 
 		public void AddStatOffset(StatUpgradeCategoryDef upgradeCategoryDef, float value)
 		{
-			categoryOffsets[upgradeCategoryDef].Offset += value;
+			if (!categoryOffsets.TryGetValue(upgradeCategoryDef, out StatOffset statOffset))
+			{
+				categoryOffsets[upgradeCategoryDef] = new StatOffset(vehicle, upgradeCategoryDef);
+				statOffset = categoryOffsets[upgradeCategoryDef];
+			}
+			statOffset.Offset += value;
 		}
 
-		public void SetStatOffset(string key, VehicleStatDef statDef, float value)
+		public void SetStatOffset(string key, VehicleStatDef vehicleStatDef, float value)
 		{
-			statOffsets[statDef].AddOverride(key, value);
+			if (!statOffsets.TryGetValue(vehicleStatDef, out StatOffset statOffset))
+			{
+				statOffsets[vehicleStatDef] = new StatOffset(vehicle, vehicleStatDef);
+				statOffset = statOffsets[vehicleStatDef];
+			}
+			statOffset.AddOverride(key, value);
 		}
 
 		public void SetStatOffset(string key, StatUpgradeCategoryDef upgradeCategoryDef, float value)
 		{
-			categoryOffsets[upgradeCategoryDef].AddOverride(key, value);
+			if (!categoryOffsets.TryGetValue(upgradeCategoryDef, out StatOffset statOffset))
+			{
+				categoryOffsets[upgradeCategoryDef] = new StatOffset(vehicle, upgradeCategoryDef);
+				statOffset = categoryOffsets[upgradeCategoryDef];
+			}
+			statOffset.AddOverride(key, value);
 		}
 
-		public void SubtractStatOffset(VehicleStatDef statDef, float value)
+		public void SubtractStatOffset(VehicleStatDef vehicleStatDef, float value)
 		{
-			statOffsets[statDef].Offset -= value;
+			if (!statOffsets.TryGetValue(vehicleStatDef, out StatOffset statOffset))
+			{
+				statOffsets[vehicleStatDef] = new StatOffset(vehicle, vehicleStatDef);
+				statOffset = statOffsets[vehicleStatDef];
+			}
+			statOffset.Offset -= value;
 		}
 
 		public void SubtractStatOffset(StatUpgradeCategoryDef upgradeCategoryDef, float value)
 		{
-			categoryOffsets[upgradeCategoryDef].Offset -= value;
+			if (!categoryOffsets.TryGetValue(upgradeCategoryDef, out StatOffset statOffset))
+			{
+				categoryOffsets[upgradeCategoryDef] = new StatOffset(vehicle, upgradeCategoryDef);
+				statOffset = categoryOffsets[upgradeCategoryDef];
+			}
+			statOffset.Offset -= value;
 		}
 
-		public void RemoveStatOffset(string key, VehicleStatDef statDef)
+		public void RemoveStatOffset(string key, VehicleStatDef vehicleStatDef)
 		{
-			statOffsets[statDef].RemoveOverride(key);
+			if (!statOffsets.TryGetValue(vehicleStatDef, out StatOffset statOffset))
+			{
+				statOffsets[vehicleStatDef] = new StatOffset(vehicle, vehicleStatDef);
+				statOffset = statOffsets[vehicleStatDef];
+			}
+			statOffset.RemoveOverride(key);
 		}
 
 		public void RemoveStatOffset(string key, StatUpgradeCategoryDef upgradeCategoryDef)
 		{
-			categoryOffsets[upgradeCategoryDef].RemoveOverride(key);
+			if (!categoryOffsets.TryGetValue(upgradeCategoryDef, out StatOffset statOffset))
+			{
+				categoryOffsets[upgradeCategoryDef] = new StatOffset(vehicle, upgradeCategoryDef);
+				statOffset = categoryOffsets[upgradeCategoryDef];
+			}
+			statOffset.RemoveOverride(key);
 		}
 
-		public float GetStatOffset(VehicleStatDef statDef)
+		public float GetStatOffset(VehicleStatDef vehicleStatDef)
 		{
-			return statOffsets[statDef].Offset;
+			if (statOffsets.TryGetValue(vehicleStatDef, out StatOffset statOffset))
+			{
+				return statOffset.Offset;
+			}
+			return 0;
 		}
 
 		public float GetStatOffset(StatUpgradeCategoryDef upgradeCategoryDef)
 		{
-			return categoryOffsets[upgradeCategoryDef].Offset;
+			if (categoryOffsets.TryGetValue(upgradeCategoryDef, out StatOffset statOffset))
+			{
+				return statOffset.Offset;
+			}
+			return 0;
 		}
 
-		public float GetStatValue(VehicleStatDef statDef)
+		public float GetStatValue(VehicleStatDef vehicleStatDef)
 		{
-			return statCache[statDef];
+			return statCache[vehicleStatDef];
 		}
 
 		public void AddUpgradeableStatValue(StatDef statDef, float value)
@@ -737,10 +766,6 @@ namespace Vehicles
 			Scribe_References.Look(ref vehicle, nameof(vehicle), true);
 			Scribe_Collections.Look(ref components, nameof(components), LookMode.Deep, vehicle);
 			
-			if (Scribe.mode == LoadSaveMode.LoadingVars)
-			{
-				InitializeStatOffsets();
-			}
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
 				if (!components.NullOrEmpty())

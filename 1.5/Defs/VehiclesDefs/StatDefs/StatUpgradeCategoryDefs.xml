@@ -1,15 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <Defs>
-	<Vehicles.StatUpgradeFuelCapacity>
-		<defName>StatUpgrade_FuelCapacity</defName>
-		<label>Fuel Capacity</label>
-		<settingListerRange>-100000~100000</settingListerRange>
-	</Vehicles.StatUpgradeFuelCapacity>
+	<Vehicles.StatUpgradeCategoryDef>
+		<defName>FuelCapacity</defName>
+	</Vehicles.StatUpgradeCategoryDef>
 	
-	<Vehicles.StatUpgradeFuelEfficiency>
-		<defName>StatUpgrade_FuelEfficiency</defName>
-		<label>Fuel Efficiency</label>
-		<settingListerRange>-100000~100000</settingListerRange>
-	</Vehicles.StatUpgradeFuelEfficiency>
+	<Vehicles.StatUpgradeCategoryDef>
+		<defName>FuelEfficiency</defName>
+	</Vehicles.StatUpgradeCategoryDef>
+	
+	<Vehicles.StatUpgradeCategoryDef>
+		<defName>FuelConsumptionRate</defName>
+	</Vehicles.StatUpgradeCategoryDef>
+	
+	<Vehicles.StatUpgradeCategoryDef>
+		<defName>WorldSpeedMultiplier</defName>
+	</Vehicles.StatUpgradeCategoryDef>
+	
+	<Vehicles.StatUpgradeCategoryDef>
+		<defName>OffRoadEfficiency</defName>
+	</Vehicles.StatUpgradeCategoryDef>
+	
+	<Vehicles.StatUpgradeCategoryDef>
+		<defName>WinterPathCost</defName>
+	</Vehicles.StatUpgradeCategoryDef>
+	
+	<Vehicles.StatUpgradeCategoryDef>
+		<defName>PawnCollisionMultiplier</defName>
+	</Vehicles.StatUpgradeCategoryDef>
+	
+	<Vehicles.StatUpgradeCategoryDef>
+		<defName>PawnCollisionRecoilMultiplier</defName>
+	</Vehicles.StatUpgradeCategoryDef>
 </Defs>
