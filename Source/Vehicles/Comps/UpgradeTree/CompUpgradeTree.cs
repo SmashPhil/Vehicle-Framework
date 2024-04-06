@@ -10,7 +10,7 @@ using SmashTools;
 namespace Vehicles
 {
 	[StaticConstructorOnStartup]
-	public class CompUpgradeTree : VehicleAIComp
+	public class CompUpgradeTree : VehicleComp
 	{
 		private static readonly Material UnderfieldMat = MaterialPool.MatFrom("Things/Building/BuildingFrame/Underfield", ShaderDatabase.Transparent);
 		private static readonly Texture2D CornerTex = ContentFinder<Texture2D>.Get("Things/Building/BuildingFrame/Corner", true);

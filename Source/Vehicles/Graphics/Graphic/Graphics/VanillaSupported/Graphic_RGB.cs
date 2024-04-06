@@ -37,19 +37,57 @@ namespace Vehicles
 		public Material[] materials;
 		public int[] patternPointers;
 
-		public override Material MatSingle => MatNorth;
-
 		public virtual int MatCount => 4;
+
 		public override bool WestFlipped => westFlipped;
+
 		public override bool EastFlipped => eastFlipped;
+
 		public virtual bool EastRotated => eastRotated;
+
 		public virtual bool SouthRotated => southRotated;
+
 		public virtual bool EastDiagonalRotated => eastDiagonalRotated;
+
 		public virtual bool WestDiagonalRotated => westDiagonalRotated;
 
 		public override bool ShouldDrawRotated => (data is null || data.drawRotated) && (MatEast == MatNorth || MatWest == MatNorth);
 
 		public override float DrawRotatedExtraAngleOffset => drawRotatedExtraAngleOffset;
+
+		public override Material MatSingle => MatNorth;
+
+		public override Material MatNorth
+		{
+			get
+			{
+				return materials[0];
+			}
+		}
+
+		public override Material MatEast
+		{
+			get
+			{
+				return materials[1];
+			}
+		}
+
+		public override Material MatSouth
+		{
+			get
+			{
+				return materials[2];
+			}
+		}
+
+		public override Material MatWest
+		{
+			get
+			{
+				return materials[3];
+			}
+		}
 
 		public virtual GraphicDataRGB DataRGB
 		{

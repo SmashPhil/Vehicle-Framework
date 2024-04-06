@@ -13,13 +13,26 @@ namespace Vehicles
 
 		public readonly ExtraRotationRegistry rotationRegistry;
 
-		private Dictionary<string, List<GraphicOverlay>> extraOverlayLookup = new Dictionary<string, List<GraphicOverlay>>();
+		private List<GraphicOverlay> overlays = new List<GraphicOverlay>();
 		private List<GraphicOverlay> extraOverlays = new List<GraphicOverlay>();
 
+		private Dictionary<string, List<GraphicOverlay>> extraOverlayLookup = new Dictionary<string, List<GraphicOverlay>>();
+		
 		public VehicleGraphicOverlay(VehiclePawn vehicle)
 		{
 			this.vehicle = vehicle;
 			rotationRegistry = new ExtraRotationRegistry(this);
+
+			if (!vehicle.VehicleDef.drawProperties.overlays.NullOrEmpty())
+			{
+				overlays = new List<GraphicOverlay>();
+
+				foreach (GraphicDataOverlay graphicDataOverlay in vehicle.VehicleDef.drawProperties.graphicOverlays)
+				{
+					GraphicOverlay graphicOverlay = GraphicOverlay.Create(graphicDataOverlay, vehicle);
+					overlays.Add(graphicOverlay);
+				}
+			}
 		}
 
 		public IEnumerable<GraphicOverlay> Overlays
@@ -28,8 +41,13 @@ namespace Vehicles
 			{
 				if (!vehicle.VehicleDef.drawProperties.overlays.NullOrEmpty())
 				{
-					foreach (GraphicOverlay graphicOverlay in vehicle.VehicleDef.drawProperties.overlays)
+					for (int i = 0; i < overlays.Count; i++)
 					{
+						GraphicOverlay graphicOverlay = overlays[i];
+						if (graphicOverlay == null)
+						{
+							graphicOverlay = vehicle.VehicleDef.drawProperties.overlays[i];
+						}
 						yield return graphicOverlay;
 					}
 				}
@@ -81,7 +99,7 @@ namespace Vehicles
 				{
 					overlayDrawPos -= new Vector3(0, VehicleRenderer.YOffset_Body + VehicleRenderer.SubInterval, 0);
 				}
-				if (graphicOverlay.data.graphicData.Graphic is Graphic_Rotator rotator)
+				if (graphicOverlay.Graphic is Graphic_Rotator rotator)
 				{
 					extraAngle += rotationRegistry[rotator.RegistryKey].ClampAndWrap(0, 359);
 				}
@@ -109,10 +127,10 @@ namespace Vehicles
 						overlayAngle *= -1; //Flip angle for clockwise rotation facing north
 					}
 
-					Vector3 drawOffset = graphicOverlay.data.graphicData.Graphic.DrawOffset(rot);
+					Vector3 drawOffset = graphicOverlay.Graphic.DrawOffset(rot);
 					Vector2 drawOffsetNoY = new Vector2(drawOffset.x, drawOffset.z); //p0
 
-					Vector3 drawOffsetActual = graphicOverlay.data.graphicData.Graphic.DrawOffset(graphicRot);
+					Vector3 drawOffsetActual = graphicOverlay.Graphic.DrawOffset(graphicRot);
 					Vector2 drawOffsetActualNoY = new Vector2(drawOffsetActual.x, drawOffsetActual.z); //p1
 
 					Vector2 drawOffsetAdjusted = Ext_Math.RotatePointClockwise(drawOffsetActualNoY, overlayAngle); //p2
@@ -120,7 +138,15 @@ namespace Vehicles
 														 //Adds p3 (p2 - p0) which offsets the drawOffset being added in the draw worker, resulting in the drawOffset being p2 or the rotated p1 
 					overlayDrawPos = new Vector3(overlayDrawPos.x + drawOffsetAdjusted.x, overlayDrawPos.y, overlayDrawPos.z + drawOffsetAdjusted.y); 
 				}
-				graphicOverlay.data.graphicData.Graphic.DrawWorker(overlayDrawPos, rot, null, null, vehicle.Angle + extraAngle);
+				graphicOverlay.Graphic.DrawWorker(overlayDrawPos, rot, null, null, vehicle.Angle + extraAngle);
+			}
+		}
+
+		public void Notify_ColorChanged()
+		{
+			foreach (GraphicOverlay graphicOverlay in Overlays)
+			{
+				graphicOverlay.Notify_ColorChanged();
 			}
 		}
 	}

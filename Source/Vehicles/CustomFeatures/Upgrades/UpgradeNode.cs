@@ -80,8 +80,7 @@ namespace Vehicles
 			{
 				foreach (GraphicDataOverlay graphicDataOverlay in graphicOverlays)
 				{
-					GraphicOverlay graphicOverlay = new GraphicOverlay(graphicDataOverlay);
-					graphicOverlay.data.graphicData.Init(vehicle.VehicleDef);
+					GraphicOverlay graphicOverlay = GraphicOverlay.Create(graphicDataOverlay, vehicle);
 					vehicle.graphicOverlay.AddOverlay(key, graphicOverlay);
 				}
 			}

@@ -131,8 +131,17 @@ namespace Vehicles
 		public static (Rect rect, Texture mainTex, Color color, float layer, float angle) RetrieveOverlaySettingsGUIProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, GraphicOverlay graphicOverlay)
 		{
 			Rect overlayRect = VehicleGraphics.OverlayRect(rect, vehicleDef, graphicOverlay, rot);
-			Texture2D texture = graphicOverlay.data.graphicData.Graphic.MatAt(rot).mainTexture as Texture2D;
-			bool canMask = graphicOverlay.data.graphicData.Graphic.Shader.SupportsMaskTex() || graphicOverlay.data.graphicData.Graphic.Shader.SupportsRGBMaskTex();
+			Graphic graphic = graphicOverlay.Graphic;
+			Texture2D texture;
+			if (graphic is Graphic_RGB graphicRGB)
+			{
+				texture = graphicRGB.TexAt(rot);
+			}
+			else
+			{
+				texture = graphic.MatAt(rot).mainTexture as Texture2D;
+			}
+			bool canMask = graphicOverlay.Graphic.Shader.SupportsMaskTex() || graphicOverlay.Graphic.Shader.SupportsRGBMaskTex();
 			Color color = canMask ? graphicOverlay.data.graphicData.color : Color.white;
 			return (overlayRect, texture, color, graphicOverlay.data.graphicData.DrawOffsetFull(rot).y, graphicOverlay.data.rotation);
 		}

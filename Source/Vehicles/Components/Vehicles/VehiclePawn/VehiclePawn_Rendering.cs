@@ -399,6 +399,7 @@ namespace Vehicles
 		{
 			ResetGraphicCache();
 			Drawer.renderer.graphics.ResolveAllGraphics();
+			graphicOverlay.Notify_ColorChanged();
 			base.Notify_ColorChanged();
 		}
 
@@ -407,12 +408,11 @@ namespace Vehicles
 			if (UnityData.IsInMainThread)
 			{
 				RGBMaterialPool.SetProperties(this, patternData);
-				var cannonComp = CompVehicleTurrets;
-				if (cannonComp != null)
+				foreach (ThingComp thingComp in AllComps)
 				{
-					foreach (VehicleTurret cannon in cannonComp.turrets)
+					if (thingComp is VehicleComp vehicleComp)
 					{
-						cannon.ResolveCannonGraphics(patternData, true);
+						vehicleComp.Notify_ColorChanged();
 					}
 				}
 			}

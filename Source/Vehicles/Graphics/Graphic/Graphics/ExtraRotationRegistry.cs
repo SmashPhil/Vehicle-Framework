@@ -35,7 +35,7 @@ namespace Vehicles
 		{
 			foreach (GraphicOverlay graphicOverlay in vehicleGraphicOverlay.Overlays)
 			{
-				if (graphicOverlay.data.graphicData.Graphic is Graphic_Rotator graphicRotator)
+				if (graphicOverlay.Graphic is Graphic_Rotator graphicRotator)
 				{
 					this[graphicRotator.RegistryKey] += graphicRotator.ModifyIncomingRotation(addRotation);
 				}
@@ -48,7 +48,7 @@ namespace Vehicles
 			{
 				foreach (GraphicOverlay graphicOverlay in vehicleGraphicOverlay.Overlays)
 				{
-					if (graphicOverlay.data.graphicData.Graphic is Graphic_Rotator graphicRotator)
+					if (graphicOverlay.Graphic is Graphic_Rotator graphicRotator)
 					{
 						this[graphicRotator.RegistryKey] = graphicOverlay.data.rotation;
 					}

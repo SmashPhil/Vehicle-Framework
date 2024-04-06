@@ -263,10 +263,17 @@ namespace Vehicles
 		public static (Rect rect, Texture mainTex, Material material, float layer, float angle) RetrieveOverlaySettingsGraphicsProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, GraphicOverlay graphicOverlay)
 		{
 			Rect overlayRect = OverlayRect(rect, vehicleDef, graphicOverlay, rot);
-			GraphicData graphicData = graphicOverlay.data.graphicData;
-			Texture2D texture = graphicData.Graphic.MatAt(rot).mainTexture as Texture2D;
+			Graphic graphic = graphicOverlay.Graphic;
+			Texture2D texture;
+			if (graphic is Graphic_RGB graphicRGB)
+			{
+				texture = graphicRGB.TexAt(rot);
+			}
+			else
+			{
+				texture = graphic.MatAt(rot).mainTexture as Texture2D;
+			}
 			Material material = null;
-			Graphic graphic = graphicData.Graphic;
 			if (graphic.Shader.SupportsMaskTex() || graphic.Shader.SupportsRGBMaskTex())
 			{
 				material = graphic.MatAt(rot);

@@ -594,6 +594,14 @@ namespace Vehicles
 			}
 		}
 
+		public override void Notify_ColorChanged()
+		{
+			foreach (VehicleTurret turret in turrets)
+			{
+				turret.ResolveCannonGraphics(Vehicle.patternData, true);
+			}
+		}
+
 		public override void EventRegistration()
 		{
 			Vehicle.AddEvent(VehicleEventDefOf.PawnEntered, RecacheTurretPermissions);

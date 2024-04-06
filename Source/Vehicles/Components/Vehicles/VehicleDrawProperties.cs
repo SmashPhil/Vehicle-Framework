@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using RimWorld;
 using Verse;
 using SmashTools;
 
@@ -33,17 +34,21 @@ namespace Vehicles
 		/// </summary>
 		public List<GraphicDataOverlay> graphicOverlays = new List<GraphicDataOverlay>();
 
+		[Unsaved]
 		[TweakField]
 		public readonly List<GraphicOverlay> overlays = new List<GraphicOverlay>();
 
 		public void PostDefDatabase(VehicleDef vehicleDef)
 		{
-			foreach (GraphicDataOverlay graphicDataOverlay in graphicOverlays)
+			LongEventHandler.ExecuteWhenFinished(delegate ()
 			{
-				GraphicOverlay graphicOverlay = new GraphicOverlay(graphicDataOverlay);
-				graphicOverlay.data.graphicData.Init(vehicleDef);
-				overlays.Add(graphicOverlay);
-			}
+				foreach (GraphicDataOverlay graphicDataOverlay in graphicOverlays)
+				{
+					GraphicOverlay graphicOverlay = GraphicOverlay.Create(graphicDataOverlay, vehicleDef);
+					overlays.Add(graphicOverlay);
+				}
+			});
+			
 		}
 
 		public Vector3 DisplayOffsetForRot(Rot4 rot)
