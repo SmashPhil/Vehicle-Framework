@@ -467,24 +467,27 @@ namespace Vehicles
 					Rect moreDetailRect = new Rect(TabRect.x + detailRect.xMax + 5, TabRect.y + detailRect.y + heightDifference, infoScreenExtraGUIWidth, InfoScreenExtraGUIHeight);
 					Find.WindowStack.ImmediateWindow(InfoNode.GetHashCode() ^ Vehicle.GetHashCode(), moreDetailRect, WindowLayer.SubSuper, delegate ()
 					{
-						GUIState.Push();
+						if (Vehicle != null && InfoNode != null)
+						{
+							GUIState.Push();
 
-						Rect menuRect = new Rect(0, 0, moreDetailRect.width, moreDetailRect.height);
-						Widgets.DrawMenuSection(menuRect);
+							Rect menuRect = new Rect(0, 0, moreDetailRect.width, moreDetailRect.height);
+							Widgets.DrawMenuSection(menuRect);
 
-						Rect innerInfoRect = menuRect.ContractedBy(5);
+							Rect innerInfoRect = menuRect.ContractedBy(5);
 
-						Rect vehicleOriginalRect = new Rect(innerInfoRect.x, innerInfoRect.y, innerInfoRect.height, innerInfoRect.height);
-						VehicleGraphics.DrawVehicle(vehicleOriginalRect, Vehicle);
+							Rect vehicleOriginalRect = new Rect(innerInfoRect.x, innerInfoRect.y, innerInfoRect.height, innerInfoRect.height);
+							VehicleGraphics.DrawVehicle(vehicleOriginalRect, Vehicle);
 
-						float arrowSize = InfoPanelArrowPointerSize;
-						Rect arrowPointerRect = new Rect(vehicleOriginalRect.xMax + 5, vehicleOriginalRect.y + vehicleOriginalRect.height / 2 - arrowSize / 2, arrowSize, arrowSize);
-						Widgets.DrawTextureFitted(arrowPointerRect, TexData.TutorArrowRight, 1);
+							float arrowSize = InfoPanelArrowPointerSize;
+							Rect arrowPointerRect = new Rect(vehicleOriginalRect.xMax + 5, vehicleOriginalRect.y + vehicleOriginalRect.height / 2 - arrowSize / 2, arrowSize, arrowSize);
+							Widgets.DrawTextureFitted(arrowPointerRect, TexData.TutorArrowRight, 1);
 
-						Rect vehicleNewRect = new Rect(arrowPointerRect.xMax + 5, vehicleOriginalRect.y, vehicleOriginalRect.width, vehicleOriginalRect.height);
-						VehicleGraphics.DrawVehicle(vehicleNewRect, Vehicle);
+							Rect vehicleNewRect = new Rect(arrowPointerRect.xMax + 5, vehicleOriginalRect.y, vehicleOriginalRect.width, vehicleOriginalRect.height);
+							VehicleGraphics.DrawVehicle(vehicleNewRect, Vehicle, extraOverlays: Vehicle.CompUpgradeTree.Props.TryGetOverlays(InfoNode));
 
-						GUIState.Pop();
+							GUIState.Pop();
+						}
 					}, doBackground: false);
 				}
 			}

@@ -194,6 +194,8 @@ namespace Vehicles
 			this.RegisterEvents(); //Must register before comps call SpawnSetup to allow comps to access Registry
 			base.SpawnSetup(map, respawningAfterLoad);
 
+			graphicOverlay.Init();
+
 			ReleaseSustainerTarget(); //Ensure SustainerTarget and sustainer manager is given a clean slate to work with
 			EventRegistry[VehicleEventDefOf.Spawned].ExecuteEvents();
 			if (Drafted)

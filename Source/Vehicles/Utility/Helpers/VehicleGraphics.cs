@@ -148,9 +148,9 @@ namespace Vehicles
 			}
 		}
 
-		public static string DrawVehicle(Rect rect, VehiclePawn vehicle, Rot8? rot = null)
+		public static string DrawVehicle(Rect rect, VehiclePawn vehicle, Rot8? rot = null, List<GraphicOverlay> extraOverlays = null)
 		{
-			return DrawVehicleDef(rect, vehicle.VehicleDef, patternData: vehicle.patternData, rot: rot);
+			return DrawVehicleDef(rect, vehicle.VehicleDef, patternData: vehicle.patternData, rot: rot, extraOverlays: extraOverlays);
 		}
 
 		/// <summary>
@@ -160,7 +160,7 @@ namespace Vehicles
 		/// <param name="rect"></param>
 		/// <param name="vehicleDef"></param>
 		/// <param name="material"></param>
-		public static string DrawVehicleDef(Rect rect, VehicleDef vehicleDef, PatternData patternData = null, Rot8? rot = null, bool withoutTurrets = false)
+		public static string DrawVehicleDef(Rect rect, VehicleDef vehicleDef, PatternData patternData = null, Rot8? rot = null, bool withoutTurrets = false, List<GraphicOverlay> extraOverlays = null)
 		{
 			string drawStep = string.Empty;
 			try
@@ -223,7 +223,7 @@ namespace Vehicles
 					}
 				}
 				drawStep = "Retrieving graphic overlays";
-				overlays.AddRange(RetrieveAllOverlaySettingsGraphicsProperties(rect, vehicleDef, rotDrawn));
+				overlays.AddRange(RetrieveAllOverlaySettingsGraphicsProperties(rect, vehicleDef, rotDrawn, pattern: pattern, extraOverlays: extraOverlays));
 
 				drawStep = "Rendering overlays with layer < 0";
 				foreach (var overlay in overlays.Where(overlay => overlay.layer < 0).OrderBy(overlay => overlay.layer))
@@ -248,24 +248,37 @@ namespace Vehicles
 			return drawStep;
 		}
 
-		public static IEnumerable<(Rect rect, Texture mainTex, Material material, float layer, float angle)> RetrieveAllOverlaySettingsGraphicsProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, List<GraphicOverlay> graphicOverlays = null)
+		public static IEnumerable<(Rect rect, Texture mainTex, Material material, float layer, float angle)> RetrieveAllOverlaySettingsGraphicsProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, PatternData pattern = null, List<GraphicOverlay> extraOverlays = null)
 		{
-			List<GraphicOverlay> overlays = graphicOverlays ?? vehicleDef.drawProperties.overlays;
+			List<GraphicOverlay> overlays = vehicleDef.drawProperties.overlays;
 			foreach (GraphicOverlay graphicOverlay in overlays)
 			{
 				if (graphicOverlay.data.renderUI)
 				{
-					yield return RetrieveOverlaySettingsGraphicsProperties(rect, vehicleDef, rot, graphicOverlay);
+					yield return RetrieveOverlaySettingsGraphicsProperties(rect, vehicleDef, rot, graphicOverlay, pattern: pattern);
+				}
+			}
+			if (!extraOverlays.NullOrEmpty())
+			{
+				foreach (GraphicOverlay graphicOverlay in extraOverlays)
+				{
+					if (graphicOverlay.data.renderUI)
+					{
+						yield return RetrieveOverlaySettingsGraphicsProperties(rect, vehicleDef, rot, graphicOverlay, pattern: pattern);
+					}
 				}
 			}
 		}
 
-		public static (Rect rect, Texture mainTex, Material material, float layer, float angle) RetrieveOverlaySettingsGraphicsProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, GraphicOverlay graphicOverlay)
+		public static (Rect rect, Texture mainTex, Material material, float layer, float angle) RetrieveOverlaySettingsGraphicsProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, GraphicOverlay graphicOverlay, PatternData pattern)
 		{
 			Rect overlayRect = OverlayRect(rect, vehicleDef, graphicOverlay, rot);
 			Graphic graphic = graphicOverlay.Graphic;
 			Texture2D texture;
-			if (graphic is Graphic_RGB graphicRGB)
+			Material material = null;
+
+			Graphic_RGB graphicRGB = graphic as Graphic_RGB;
+			if (graphicRGB != null)
 			{
 				texture = graphicRGB.TexAt(rot);
 			}
@@ -273,8 +286,13 @@ namespace Vehicles
 			{
 				texture = graphic.MatAt(rot).mainTexture as Texture2D;
 			}
-			Material material = null;
-			if (graphic.Shader.SupportsMaskTex() || graphic.Shader.SupportsRGBMaskTex())
+			
+			if (graphic.Shader.SupportsRGBMaskTex())
+			{
+				material = RGBMaterialPool.Get(graphicOverlay, rot);
+				RGBMaterialPool.SetProperties(graphicOverlay, pattern, graphicRGB.TexAt, graphicRGB.MaskAt);
+			}
+			else if (graphic.Shader.SupportsMaskTex())
 			{
 				material = graphic.MatAt(rot);
 			}

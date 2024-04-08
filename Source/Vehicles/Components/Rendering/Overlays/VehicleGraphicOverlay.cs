@@ -22,17 +22,6 @@ namespace Vehicles
 		{
 			this.vehicle = vehicle;
 			rotationRegistry = new ExtraRotationRegistry(this);
-
-			if (!vehicle.VehicleDef.drawProperties.overlays.NullOrEmpty())
-			{
-				overlays = new List<GraphicOverlay>();
-
-				foreach (GraphicDataOverlay graphicDataOverlay in vehicle.VehicleDef.drawProperties.graphicOverlays)
-				{
-					GraphicOverlay graphicOverlay = GraphicOverlay.Create(graphicDataOverlay, vehicle);
-					overlays.Add(graphicOverlay);
-				}
-			}
 		}
 
 		public IEnumerable<GraphicOverlay> Overlays
@@ -57,6 +46,20 @@ namespace Vehicles
 					{
 						yield return graphicOverlay;
 					}
+				}
+			}
+		}
+
+		public void Init()
+		{
+			if (!vehicle.VehicleDef.drawProperties.overlays.NullOrEmpty())
+			{
+				overlays = new List<GraphicOverlay>();
+
+				foreach (GraphicDataOverlay graphicDataOverlay in vehicle.VehicleDef.drawProperties.graphicOverlays)
+				{
+					GraphicOverlay graphicOverlay = GraphicOverlay.Create(graphicDataOverlay, vehicle);
+					overlays.Add(graphicOverlay);
 				}
 			}
 		}
@@ -138,7 +141,14 @@ namespace Vehicles
 														 //Adds p3 (p2 - p0) which offsets the drawOffset being added in the draw worker, resulting in the drawOffset being p2 or the rotated p1 
 					overlayDrawPos = new Vector3(overlayDrawPos.x + drawOffsetAdjusted.x, overlayDrawPos.y, overlayDrawPos.z + drawOffsetAdjusted.y); 
 				}
-				graphicOverlay.Graphic.DrawWorker(overlayDrawPos, rot, null, null, vehicle.Angle + extraAngle);
+				if (graphicOverlay.Graphic is Graphic_RGB graphicRGB)
+				{
+					graphicRGB.DrawWorker(overlayDrawPos, rot, null, null, overlayAngle + extraAngle);
+				}
+				else
+				{
+					graphicOverlay.Graphic.DrawWorker(overlayDrawPos, rot, null, null, overlayAngle + extraAngle);
+				}
 			}
 		}
 

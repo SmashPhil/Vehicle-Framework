@@ -27,15 +27,6 @@ namespace Vehicles
 			}
 		}
 
-		public Material MatAtFull(Rot8 rot)
-		{
-			if (materials.OutOfBounds(rot.AsInt))
-			{
-				return BaseContent.BadMat;
-			}
-			return materials[rot.AsInt];
-		}
-
 		public override void Init(GraphicRequestRGB req)
 		{
 			base.Init(req);

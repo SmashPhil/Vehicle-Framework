@@ -26,7 +26,7 @@ namespace Vehicles
 			this.vehicle = vehicle;
 			this.vehicleDef = vehicle.VehicleDef;
 
-			vehicle.AddEvent(VehicleEventDefOf.Destroyed, OnDestroy);
+			this.vehicle.AddEvent(VehicleEventDefOf.Destroyed, OnDestroy);
 		}
 
 		public int MaterialCount => vehicle?.MaterialCount ?? vehicleDef.MaterialCount;
@@ -67,8 +67,7 @@ namespace Vehicles
 					}
 					else
 					{
-						var graphic = ((GraphicData)graphicData).Graphic;
-						graphicInt = graphic as Graphic_RGB; //Triggers vanilla Init call for normal material caching
+						graphicInt = ((GraphicData)graphicData).Graphic;
 					}
 				}
 				return graphicInt;

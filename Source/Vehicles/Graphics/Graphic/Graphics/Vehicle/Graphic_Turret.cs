@@ -43,15 +43,6 @@ namespace Vehicles
 			masks = Enumerable.Repeat(maskTex, MatCount).ToArray();
 		}
 
-		public virtual Material MatAtFull(Rot8 rot)
-		{
-			if (materials.OutOfBounds(rot.AsInt))
-			{
-				return BaseContent.BadMat;
-			}
-			return materials[rot.AsInt];
-		}
-
 		public override Graphic GetColoredVersion(Shader newShader, Color newColor, Color newColorTwo)
 		{
 			return GraphicDatabase.Get<Graphic_Turret>(path, newShader, drawSize, newColor, newColorTwo, DataRGB);

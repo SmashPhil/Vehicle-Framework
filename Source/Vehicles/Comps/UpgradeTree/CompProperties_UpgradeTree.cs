@@ -11,7 +11,8 @@ namespace Vehicles
 	{
 		public UpgradeTreeDef def;
 
-		//public List<UpgradeNode> upgrades;
+		[Unsaved]
+		private Dictionary<UpgradeNode, List<GraphicOverlay>> overlays;
 
 		public CompProperties_UpgradeTree()
 		{
@@ -28,7 +29,7 @@ namespace Vehicles
 			{
 				yield return "<field>def</field> is null. Consider removing CompProperties_UpgradeTree if you don't plan on using upgrades.".ConvertRichText();
 			}
-			else
+			else if (!def.nodes.NullOrEmpty())
 			{
 				foreach (UpgradeNode node in def.nodes)
 				{
@@ -38,6 +39,44 @@ namespace Vehicles
 					}
 				}
 			}
+		}
+
+		public override void ResolveReferences(ThingDef parentDef)
+		{
+			base.ResolveReferences(parentDef);
+			if (!(parentDef is VehicleDef vehicleDef))
+			{
+				Log.Error($"Attaching {GetType()} on non-vehicle def. This is not allowed.");
+				return;
+			}
+
+			if (def != null && !def.nodes.NullOrEmpty())
+			{
+				LongEventHandler.ExecuteWhenFinished(delegate ()
+				{
+					overlays = new Dictionary<UpgradeNode, List<GraphicOverlay>>();
+					foreach (UpgradeNode node in def.nodes)
+					{
+						if (!node.graphicOverlays.NullOrEmpty())
+						{
+							foreach (GraphicDataOverlay graphicDataOverlay in node.graphicOverlays)
+							{
+								GraphicOverlay graphicOverlay = GraphicOverlay.Create(graphicDataOverlay, vehicleDef);
+								overlays.AddOrInsert(node, graphicOverlay);
+							}
+						}
+					}
+				});
+			}
+		}
+
+		public List<GraphicOverlay> TryGetOverlays(UpgradeNode node)
+		{ 
+			if (!overlays.NullOrEmpty())
+			{
+				return overlays.TryGetValue(node, null);
+			}
+			return null;
 		}
 	}
 }

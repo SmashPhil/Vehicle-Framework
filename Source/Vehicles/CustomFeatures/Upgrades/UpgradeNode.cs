@@ -29,7 +29,6 @@ namespace Vehicles
 		public Color? drawColorOne;
 		public Color? drawColorTwo;
 		public Color? drawColorThree;
-		//TODO - Add texture overlays from upgrade
 
 		public List<Upgrade> upgrades;
 
@@ -253,10 +252,6 @@ namespace Vehicles
 					upgrade.Init(this);
 				}
 			}
-		}
-
-		public virtual void SettingsWindow(VehicleDef def, Listing_Settings listing)
-		{
 		}
 	}
 }

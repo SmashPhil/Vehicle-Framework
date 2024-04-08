@@ -58,7 +58,7 @@ namespace Vehicles
 		public override void DoWindowContents(Rect inRect)
 		{
 			Lister.Begin(inRect, 2);
-			UpgradeNode.SettingsWindow(VehicleDef, Lister);
+			//UpgradeNode.SettingsWindow(VehicleDef, Lister);
 			Lister.End();
 		}
 	}
