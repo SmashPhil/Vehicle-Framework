@@ -264,7 +264,7 @@ namespace Vehicles
 
 		public int ReloadTicks => reloadTicks;
 
-		public Dictionary<VehicleTurretEventDef, EventTrigger> EventRegistry { get; set; }
+		public EventManager<VehicleTurretEventDef> EventRegistry { get; set; }
 
 		public bool DeploymentSatisfied
 		{

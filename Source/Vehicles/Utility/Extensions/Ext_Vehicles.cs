@@ -204,7 +204,7 @@ namespace Vehicles
 
 		public static void RegisterEvents(this VehiclePawn vehicle)
 		{
-			if (vehicle.EventRegistry.NullOrEmpty())
+			if (vehicle.EventRegistry == null || !vehicle.EventRegistry.Initialized())
 			{
 				vehicle.FillEvents_Def();
 
@@ -255,38 +255,19 @@ namespace Vehicles
 				//One Shots
 				if (!vehicle.VehicleDef.soundOneShotsOnEvent.NullOrEmpty())
 				{
-					foreach ((VehicleEventDef eventDef, SoundDef soundDef) in vehicle.VehicleDef.soundOneShotsOnEvent)
+					foreach (var soundEventEntry in vehicle.VehicleDef.soundOneShotsOnEvent)
 					{
-						vehicle.AddEvent(eventDef, delegate ()
-						{
-							if (vehicle.Spawned)
-							{
-								soundDef.PlayOneShot(vehicle);
-							}
-						});
+						vehicle.AddEvent(soundEventEntry.key, () => PlayOneShot(vehicle, soundEventEntry), soundEventEntry.removalKey);
 					}
 				}
 
 				//Sustainers
 				if (!vehicle.VehicleDef.soundSustainersOnEvent.NullOrEmpty())
 				{
-					foreach ((Pair<VehicleEventDef, VehicleEventDef> eventStartStop, SoundDef soundDef) in vehicle.VehicleDef.soundSustainersOnEvent)
+					foreach (var soundEventEntry in vehicle.VehicleDef.soundSustainersOnEvent)
 					{
-						vehicle.AddEvent(eventStartStop.First, delegate ()
-						{
-							if (vehicle.Spawned)
-							{
-								vehicle.sustainers.Spawn(vehicle, soundDef);
-							}
-							else if (vehicle.SustainerTarget is ISustainerTarget sustainerTarget)
-							{
-								vehicle.sustainers.Spawn(sustainerTarget, soundDef);
-							}
-						});
-						vehicle.AddEvent(eventStartStop.Second, delegate ()
-						{
-							vehicle.sustainers.EndAll(soundDef);
-						});
+						vehicle.AddEvent(soundEventEntry.start, () => StartSustainer(vehicle, soundEventEntry), soundEventEntry.removalKey);
+						vehicle.AddEvent(soundEventEntry.stop, () => StopSustainer(vehicle, soundEventEntry), soundEventEntry.removalKey);
 					}
 				}
 
@@ -295,6 +276,31 @@ namespace Vehicles
 					comp.EventRegistration();
 				}
 			}
+		}
+
+		public static void PlayOneShot<T>(VehiclePawn vehicle, VehicleSoundEventEntry<T> soundEventEntry)
+		{
+			if (vehicle.Spawned)
+			{
+				soundEventEntry.value.PlayOneShot(vehicle);
+			}
+		}
+
+		public static void StartSustainer<T>(VehiclePawn vehicle, VehicleSustainerEventEntry<T> soundEventEntry)
+		{
+			if (vehicle.Spawned)
+			{
+				vehicle.sustainers.Spawn(vehicle, soundEventEntry.value);
+			}
+			else if (vehicle.SustainerTarget is ISustainerTarget sustainerTarget)
+			{
+				vehicle.sustainers.Spawn(sustainerTarget, soundEventEntry.value);
+			}
+		}
+
+		public static void StopSustainer<T>(VehiclePawn vehicle, VehicleSustainerEventEntry<T> soundEventEntry)
+		{
+			vehicle.sustainers.EndAll(soundEventEntry.value);
 		}
 
 		public static bool DeconstructibleBy(this VehiclePawn vehicle, Faction faction)

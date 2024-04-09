@@ -40,7 +40,7 @@ P.S. River travel is now enabled, go crazy.
 - Added 'Biome costs on Roads' to VF Mod Settings under 'Main'
 
 &lt;b&gt;Modders&lt;/b&gt;
-- Added 'riverTravel' field to vehicle properties.
+- Added 'riverCost' field to vehicle properties.
 
 - Added 'canRoofPunch' and 'animationPunchAt' fields to CompProperties_VehicleLauncher, allowing aerial vehicles to punch through roofs.
 

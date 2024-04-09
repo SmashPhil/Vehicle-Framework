@@ -19,7 +19,7 @@ namespace Vehicles
 	{
 		public bool Initialized { get; private set; }
 
-		public Dictionary<VehicleEventDef, EventTrigger> EventRegistry { get; set; }
+		public EventManager<VehicleEventDef> EventRegistry { get; set; }
 
 		public VehicleDef VehicleDef => def as VehicleDef;
 
