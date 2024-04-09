@@ -124,6 +124,15 @@ namespace Vehicles
 
 			Utilities.InvokeWithLogging(RegisterTweakFieldsInEditor);
 			Utilities.InvokeWithLogging(PatternDef.GenerateMaterials);
+
+			if (debug)
+			{
+				//DebugHelper.Local.VehicleDef = DefDatabase<VehicleDef>.GetNamedSilentFail("VF_TestMarshal");
+				if (DebugHelper.Local.VehicleDef != null)
+				{
+					//DebugHelper.Local.DebugType = DebugRegionType.Regions;
+				}
+			}
 		}
 		
 		public static void Patch(MethodBase original, HarmonyMethod prefix = null, HarmonyMethod postfix = null, HarmonyMethod transpiler = null, HarmonyMethod finalizer = null)

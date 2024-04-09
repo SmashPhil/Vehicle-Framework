@@ -20,6 +20,8 @@ namespace Vehicles
 		private readonly ConcurrentSet<VehicleRegion> regionsToDirty = new ConcurrentSet<VehicleRegion>();
 		private readonly ConcurrentSet<VehicleRegion> regionsToDirtyFromWalkability = new ConcurrentSet<VehicleRegion>();
 
+		internal object dirtyLock = new object();
+
 		public VehicleRegionDirtyer(VehicleMapping mapping, VehicleDef createdFor)
 		{
 			this.mapping = mapping;
@@ -29,7 +31,7 @@ namespace Vehicles
 		/// <summary>
 		/// <see cref="dirtyCells"/> getter
 		/// </summary>
-		public IEnumerable<IntVec3> DirtyCells
+		public ICollection<IntVec3> DirtyCells
 		{
 			get
 			{
@@ -45,6 +47,16 @@ namespace Vehicles
 			get
 			{
 				return dirtyCells.Count > 0;
+			}
+		}
+
+		public ICollection<IntVec3> DumpDirtyCells()
+		{
+			lock (dirtyLock)
+			{
+				var dump = dirtyCells.Keys;
+				SetAllClean();
+				return dump;
 			}
 		}
 
@@ -159,7 +171,7 @@ namespace Vehicles
 					return;
 				}
 				region.valid = false;
-				region.Room = null; //ArgumentOutOfRange exception is thrown here in the setter
+				region.Room = null;
 				step = "Deregistering";
 				foreach (VehicleRegionLink regionLink in region.links.Keys)
 				{

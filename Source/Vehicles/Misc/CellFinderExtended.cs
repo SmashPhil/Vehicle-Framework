@@ -90,10 +90,6 @@ namespace Vehicles
 				
 				foreach (IntVec3 cAll in pawn.PawnOccupiedCells(c, dir.Opposite))
 				{
-					if (VehicleHarmony.debug && cAll != c)
-					{
-						GenSpawn.Spawn(ThingDefOf.Beer, cAll, map);
-					}
 					if (!validator(cAll) || (riverSpawn && !riverSpawnValidator(cAll)))
 					{
 						goto Block_Skip;

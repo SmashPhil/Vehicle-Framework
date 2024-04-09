@@ -60,6 +60,7 @@ namespace Vehicles
 				Log.Warning($"Called RebuildAllVehicleRegions but VehicleRegionAndRoomUpdater is disabled. VehicleRegions won't be rebuilt. StackTrace: {StackTraceUtility.ExtractStackTrace()}");
 			}
 			mapping[createdFor].VehicleRegionDirtyer.SetAllDirty();
+			Log.Message($"Rebuilding All Regions for {createdFor}");
 			TryRebuildVehicleRegions();
 		}
 
@@ -72,7 +73,6 @@ namespace Vehicles
 			{
 				return;
 			}
-			string updateStep = "Initializing";
 			UpdatingRegion = true;
 			if (!Initialized)
 			{
@@ -85,17 +85,16 @@ namespace Vehicles
 			}
 			try
 			{
-				updateStep = "Generating new regions";
+				Log.Message($"Regenerating Regions!");
 				RegenerateNewVehicleRegions();
-				updateStep = "Creating or updating rooms";
 				CreateOrUpdateVehicleRooms();
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Exception while rebuilding vehicle regions for {createdFor}. Last step: {updateStep} Exception={ex}");
+				Log.Error($"Exception while rebuilding vehicle regions for {createdFor}. Exception={ex}");
 			}
 			newRegions.Clear();
-			mapping[createdFor].VehicleRegionDirtyer.SetAllClean();
+			//mapping[createdFor].VehicleRegionDirtyer.SetAllClean();
 			Initialized = true;
 			UpdatingRegion = false;
 		}
@@ -106,7 +105,8 @@ namespace Vehicles
 		private void RegenerateNewVehicleRegions()
 		{
 			newRegions.Clear();
-			foreach (IntVec3 cell in mapping[createdFor].VehicleRegionDirtyer.DirtyCells)
+			var dirtyCells = mapping[createdFor].VehicleRegionDirtyer.DumpDirtyCells();
+			foreach (IntVec3 cell in dirtyCells)
 			{
 				if (VehicleGridsUtility.GetRegion(cell, mapping.map, createdFor, RegionType.Set_All) == null)
 				{

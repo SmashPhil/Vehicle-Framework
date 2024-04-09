@@ -20,13 +20,15 @@ When I do have the first iteration of raider AI finished, it will be an opt-in f
 
 P.S. River travel is now enabled, go crazy.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed thread safety issue with region-making, causing some regions to not generate properly.
+
+- Fixed thread safety issue with region-dirtying, causing some regions to become invalid.
+
+- Fixed bug where region padding would result in certain vehicles having impassable center paths.
+
 - Fixed bug where MapComponentCache would not clear properly when exiting to menu and immediately loading back into a game.
 
 - Fixed bug where MapComponentCache would not clear properly when exiting to menu and starting a new game.
-
-- Fixed thread safety issue with region-making, causing some regions to not generate properly.
-
-- Fixed bug where region padding would result in certain vehicles having impassable center paths.
 
 - Fixed icon rendering for 'Form Vehicle Caravan' window.
 

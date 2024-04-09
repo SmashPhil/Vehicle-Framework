@@ -200,7 +200,7 @@ namespace Vehicles
 			{
 				foreach (VehicleRegion debugRegion in AllRegions_NoRebuild_InvalidAllowed)
 				{
-					debugRegion.DebugDraw();
+					debugRegion.DebugDrawMouseover(debugRegionType);
 				}
 			}
 			IntVec3 intVec = UI.MouseCell();

@@ -17,6 +17,14 @@ namespace Vehicles
 
 		public override Material MatSingle => materials[0];
 
+		public override Material MatNorth => MatSingle;
+
+		public override Material MatEast => MatSingle;
+
+		public override Material MatSouth => MatSingle;
+
+		public override Material MatWest => MatSingle;
+
 		public override int MatCount => 1;
 
 		public override void Init(GraphicRequestRGB req)

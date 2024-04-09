@@ -17,9 +17,16 @@ namespace Vehicles
 		/// <param name="allowedRegionTypes"></param>
 		public static VehicleRegion RegionAt(IntVec3 cell, Map map, VehicleDef vehicleDef, RegionType allowedRegionTypes = RegionType.Set_Passable)
 		{
-			if (!cell.InBounds(map)) return null;
+			if (!cell.InBounds(map))
+			{
+				return null;
+			}
 			VehicleRegion validRegionAt = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid.GetValidRegionAt(cell);
-			return !(validRegionAt is null) && (validRegionAt.type & allowedRegionTypes) != RegionType.None ? validRegionAt : null;
+			if (validRegionAt != null && (validRegionAt.type & allowedRegionTypes) != RegionType.None)
+			{
+				return validRegionAt;
+			}
+			return null;
 		}
 
 		/// <summary>
@@ -30,7 +37,10 @@ namespace Vehicles
 		/// <param name="allowedRegiontypes"></param>
 		public static VehicleRegion GetRegion(this Thing thing, VehicleDef vehicleDef, RegionType allowedRegiontypes = RegionType.Set_Passable)
 		{
-			if (!thing.Spawned) return null;
+			if (!thing.Spawned)
+			{
+				return null;
+			}
 			return !thing.Spawned ? null : RegionAt(thing.Position, thing.Map, vehicleDef, allowedRegiontypes);
 		}
 

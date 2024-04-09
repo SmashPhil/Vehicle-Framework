@@ -45,12 +45,12 @@ namespace Vehicles
 		{
 			if (VehicleHarmony.debug)
 			{
-				VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldRoutePlanner), nameof(WorldRoutePlanner.WorldRoutePlannerUpdate)), prefix: null,
-					postfix: new HarmonyMethod(typeof(Debug),
-					nameof(DebugSettlementPaths)));
-				VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldObjectsHolder), nameof(WorldObjectsHolder.Add)),
-					prefix: new HarmonyMethod(typeof(Debug),
-					nameof(DebugWorldObjects)));
+				//VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldRoutePlanner), nameof(WorldRoutePlanner.WorldRoutePlannerUpdate)), prefix: null,
+				//	postfix: new HarmonyMethod(typeof(Debug),
+				//	nameof(DebugSettlementPaths)));
+				//VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldObjectsHolder), nameof(WorldObjectsHolder.Add)),
+				//	prefix: new HarmonyMethod(typeof(Debug),
+				//	nameof(DebugWorldObjects)));
 			}
 
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(DebugToolsSpawning), "SpawnPawn"),
