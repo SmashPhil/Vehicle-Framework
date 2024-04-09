@@ -163,7 +163,6 @@ namespace Vehicles
 		/// <param name="addCellsToDirtyCells"></param>
 		private void SetRegionDirty(VehicleRegion region, bool addCellsToDirtyCells = true, bool dirtyLinkedRegions = true)
 		{
-			string step = "";
 			try
 			{
 				if (!region.valid)
@@ -172,7 +171,6 @@ namespace Vehicles
 				}
 				region.valid = false;
 				region.Room = null;
-				step = "Deregistering";
 				foreach (VehicleRegionLink regionLink in region.links.Keys)
 				{
 					VehicleRegion otherRegion = regionLink.Deregister(region, createdFor);
@@ -181,12 +179,10 @@ namespace Vehicles
 						SetRegionDirty(otherRegion, addCellsToDirtyCells: addCellsToDirtyCells, dirtyLinkedRegions: false);
 					}
 				}
-				step = "Clearing links and weights";
 				region.links.Clear();
 				region.weights.Clear();
 				if (addCellsToDirtyCells)
 				{
-					step = "Dirtying Cells";
 					foreach (IntVec3 intVec in region.Cells)
 					{
 						dirtyCells.Add(intVec);
@@ -195,7 +191,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Exception thrown in SetRegionDirty. Step = {step}\nNull: {region is null} Room: {region?.Room is null} links: {region?.links is null} weights: {region?.weights is null}");
+				Log.Error($"Exception thrown in SetRegionDirty. \nNull: {region is null} Room: {region?.Room is null} links: {region?.links is null} weights: {region?.weights is null}");
 				throw ex;
 			}
 		}

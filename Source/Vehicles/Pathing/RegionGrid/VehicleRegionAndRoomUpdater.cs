@@ -60,7 +60,6 @@ namespace Vehicles
 				Log.Warning($"Called RebuildAllVehicleRegions but VehicleRegionAndRoomUpdater is disabled. VehicleRegions won't be rebuilt. StackTrace: {StackTraceUtility.ExtractStackTrace()}");
 			}
 			mapping[createdFor].VehicleRegionDirtyer.SetAllDirty();
-			Log.Message($"Rebuilding All Regions for {createdFor}");
 			TryRebuildVehicleRegions();
 		}
 
@@ -85,7 +84,6 @@ namespace Vehicles
 			}
 			try
 			{
-				Log.Message($"Regenerating Regions!");
 				RegenerateNewVehicleRegions();
 				CreateOrUpdateVehicleRooms();
 			}
