@@ -20,7 +20,7 @@ namespace Vehicles
 		private readonly ConcurrentSet<VehicleRegion> regionsToDirty = new ConcurrentSet<VehicleRegion>();
 		private readonly ConcurrentSet<VehicleRegion> regionsToDirtyFromWalkability = new ConcurrentSet<VehicleRegion>();
 
-		internal object dirtyLock = new object();
+		private object dirtyLock = new object();
 
 		public VehicleRegionDirtyer(VehicleMapping mapping, VehicleDef createdFor)
 		{

@@ -15,7 +15,6 @@ namespace Vehicles
 		{
 			if (!Vehicle.CompUpgradeTree.Upgrading || !Vehicle.CompUpgradeTree.NodeUnlocking.AvailableSpace(Vehicle, Item))
 			{
-				Log.Message($"Failed Job");
 				return true;
 			}
 			return base.FailJob();
@@ -29,7 +28,6 @@ namespace Vehicles
 				{
 					if (Item is null || Item.stackCount <= 0)
 					{
-						Log.Message($"No item");
 						pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true);
 					}
 					else
@@ -38,7 +36,6 @@ namespace Vehicles
 						
 						if (materialRequired is null || materialRequired.count <= 0)
 						{
-							Log.Message($"No material");
 							pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true);
 						}
 						else
