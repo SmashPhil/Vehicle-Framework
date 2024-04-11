@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<LanguageData>
-  <FlightSpeed.label>Prędkość Lotu</FlightSpeed.label>
-  <FlightSpeed.description>Szybkość Poruszania Się po Mapie Świata Podczas Lotu.</FlightSpeed.description>
-  <FlightSpeed.formatString>{0} k/s</FlightSpeed.formatString>
-  <FlightControl.label>Kontrola Lotu</FlightControl.label>
-  <FlightControl.description>Zdolność pojazdu do lotu. Jeśli wartość osiągnie 0, pojazd zostanie zmuszony do awaryjnego lądowania.</FlightControl.description>
-</LanguageData>
-

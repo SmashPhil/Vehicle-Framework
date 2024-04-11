@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<LanguageData>
-  <FlightSpeed.label>скорость полёта</FlightSpeed.label>
-  <FlightSpeed.description>Скорость перемещения по карте мира во время полёта.</FlightSpeed.description>
-  <FlightSpeed.formatString>{0} кл. мира/с</FlightSpeed.formatString>
-  <FlightControl.label>управляемость</FlightControl.label>
-  <FlightControl.description>Способность летательного аппарата находиться в полёте. Если значение достигнет 0, то транспортное средство будет вынуждено совершить аварийную посадку.</FlightControl.description>
-</LanguageData>
-
