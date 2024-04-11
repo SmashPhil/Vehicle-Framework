@@ -130,7 +130,7 @@ namespace Vehicles
 			{
 				foreach (Pawn pawn in handlers)
 				{
-					pawn.Drawer.renderer.RenderPawnAt(vehicle.DrawPos + role.pawnRenderer.DrawOffsetFor(vehicle.FullRotation), role.pawnRenderer.RotFor(vehicle.FullRotation));
+					pawn.Drawer.renderer.DynamicDrawPhaseAt(DrawPhase.Draw, vehicle.DrawPos + role.pawnRenderer.DrawOffsetFor(vehicle.FullRotation), role.pawnRenderer.RotFor(vehicle.FullRotation));
 				}
 			}
 		}

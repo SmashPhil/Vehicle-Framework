@@ -56,7 +56,8 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(DebugToolsSpawning), "SpawnPawn"),
 				postfix: new HarmonyMethod(typeof(Debug),
 				nameof(DebugHideVehiclesFromPawnSpawner)));
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Caravan_NeedsTracker), "TrySatisfyPawnNeeds", parameters: new Type[] { typeof(Pawn) }),
+
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnRenderer), "GetBodyPos"),
 			//	prefix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestPrefix)));
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(XmlInheritance), nameof(XmlInheritance.TryRegister)),
@@ -67,11 +68,12 @@ namespace Vehicles
 			//	nameof(ExceptionCatcher)));
 		}
 
-		public static void TestPrefix(Pawn pawn)
+		public static void TestPrefix(Pawn ___pawn)
 		{
 			try
 			{
-				Log.Message($"Satisfying: {pawn}");
+				Log.Message($"Null: {___pawn is null} ParentHolder: {___pawn.ParentHolder}");
+				Log.Message($"ParentHolder of ParentHolder: {___pawn.ParentHolder.ParentHolder}");
 			}
 			catch (Exception ex)
 			{
