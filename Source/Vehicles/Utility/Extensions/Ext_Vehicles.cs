@@ -18,6 +18,31 @@ namespace Vehicles
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsRoofed(IntVec3 cell, Map map) => cell.Roofed(map);
 
+		public static bool IsRoofRestricted(VehicleDef vehicleDef, IntVec3 cell, Map map)
+		{
+			var compProperties = vehicleDef.GetCompProperties<CompProperties_VehicleLauncher>();
+			if (compProperties == null)
+			{
+				return true;
+			}
+			bool canRoofPunch = SettingsCache.TryGetValue(vehicleDef, typeof(CompProperties_VehicleLauncher), nameof(CompProperties_VehicleLauncher.canRoofPunch), compProperties.canRoofPunch);
+			return IsRoofRestricted(cell, map, canRoofPunch);
+		}
+
+		public static bool IsRoofRestricted(IntVec3 cell, Map map, bool canRoofPunch)
+		{
+			if (!canRoofPunch)
+			{
+				return IsRoofed(cell, map);
+			}
+			RoofDef roofDef = cell.GetRoof(map);
+			if (roofDef != null)
+			{
+				return roofDef.isThickRoof;
+			}
+			return false;
+		}
+
 		/// <summary>
 		/// Rotates <paramref name="cell"/> for vehicle rect.
 		/// </summary>
@@ -179,7 +204,7 @@ namespace Vehicles
 
 		public static void RegisterEvents(this VehiclePawn vehicle)
 		{
-			if (vehicle.EventRegistry.NullOrEmpty())
+			if (vehicle.EventRegistry == null || !vehicle.EventRegistry.Initialized())
 			{
 				vehicle.FillEvents_Def();
 
@@ -230,38 +255,19 @@ namespace Vehicles
 				//One Shots
 				if (!vehicle.VehicleDef.soundOneShotsOnEvent.NullOrEmpty())
 				{
-					foreach ((VehicleEventDef eventDef, SoundDef soundDef) in vehicle.VehicleDef.soundOneShotsOnEvent)
+					foreach (var soundEventEntry in vehicle.VehicleDef.soundOneShotsOnEvent)
 					{
-						vehicle.AddEvent(eventDef, delegate ()
-						{
-							if (vehicle.Spawned)
-							{
-								soundDef.PlayOneShot(vehicle);
-							}
-						});
+						vehicle.AddEvent(soundEventEntry.key, () => PlayOneShot(vehicle, soundEventEntry), soundEventEntry.removalKey);
 					}
 				}
 
 				//Sustainers
 				if (!vehicle.VehicleDef.soundSustainersOnEvent.NullOrEmpty())
 				{
-					foreach ((Pair<VehicleEventDef, VehicleEventDef> eventStartStop, SoundDef soundDef) in vehicle.VehicleDef.soundSustainersOnEvent)
+					foreach (var soundEventEntry in vehicle.VehicleDef.soundSustainersOnEvent)
 					{
-						vehicle.AddEvent(eventStartStop.First, delegate ()
-						{
-							if (vehicle.Spawned)
-							{
-								vehicle.sustainers.Spawn(vehicle, soundDef);
-							}
-							else if (vehicle.SustainerTarget is ISustainerTarget sustainerTarget)
-							{
-								vehicle.sustainers.Spawn(sustainerTarget, soundDef);
-							}
-						});
-						vehicle.AddEvent(eventStartStop.Second, delegate ()
-						{
-							vehicle.sustainers.EndAll(soundDef);
-						});
+						vehicle.AddEvent(soundEventEntry.start, () => StartSustainer(vehicle, soundEventEntry), soundEventEntry.removalKey);
+						vehicle.AddEvent(soundEventEntry.stop, () => StopSustainer(vehicle, soundEventEntry), soundEventEntry.removalKey);
 					}
 				}
 
@@ -270,6 +276,31 @@ namespace Vehicles
 					comp.EventRegistration();
 				}
 			}
+		}
+
+		public static void PlayOneShot<T>(VehiclePawn vehicle, VehicleSoundEventEntry<T> soundEventEntry)
+		{
+			if (vehicle.Spawned)
+			{
+				soundEventEntry.value.PlayOneShot(vehicle);
+			}
+		}
+
+		public static void StartSustainer<T>(VehiclePawn vehicle, VehicleSustainerEventEntry<T> soundEventEntry)
+		{
+			if (vehicle.Spawned)
+			{
+				vehicle.sustainers.Spawn(vehicle, soundEventEntry.value);
+			}
+			else if (vehicle.SustainerTarget is ISustainerTarget sustainerTarget)
+			{
+				vehicle.sustainers.Spawn(sustainerTarget, soundEventEntry.value);
+			}
+		}
+
+		public static void StopSustainer<T>(VehiclePawn vehicle, VehicleSustainerEventEntry<T> soundEventEntry)
+		{
+			vehicle.sustainers.EndAll(soundEventEntry.value);
 		}
 
 		public static bool DeconstructibleBy(this VehiclePawn vehicle, Faction faction)
@@ -671,7 +702,7 @@ namespace Vehicles
 		/// <param name="vehicleDef"></param>
 		/// <param name="cell"></param>
 		/// <param name="dir"></param>
-		public static bool WidthStandable(this VehicleDef vehicleDef, Map map, IntVec3 cell, Predicate<Thing> extraValidator = null)
+		public static bool WidthStandable(this VehicleDef vehicleDef, Map map, IntVec3 cell)
 		{
 			CellRect cellRect = CellRect.CenteredOn(cell, vehicleDef.SizePadding);
 			foreach (IntVec3 cellCheck in cellRect)

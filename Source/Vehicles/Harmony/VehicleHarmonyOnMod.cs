@@ -18,9 +18,6 @@ namespace Vehicles
 		{
 			var harmony = new Harmony($"{VehicleHarmony.VehiclesUniqueId}_preload");
 
-			harmony.Patch(original: AccessTools.Property(type: typeof(RaceProperties), name: nameof(RaceProperties.IsFlesh)).GetGetMethod(),
-				prefix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
-				nameof(VehiclesDontHaveFlesh)));
 			harmony.Patch(original: AccessTools.Method(typeof(ThingDef), nameof(ThingDef.ConfigErrors)), prefix: null,
 				postfix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
 				nameof(VehiclesAllowFullFillage)));
@@ -56,21 +53,6 @@ namespace Vehicles
 			{
 				Log.Error($"[Test Postfix] Exception Thrown.\n{ex.Message}\n{ex.InnerException}\n{ex.StackTrace}");
 			}
-		}
-
-		/// <summary>
-		/// Prevent Implied MeatDefs from being generated for flesh types of Metal, Spacer, and Wooden Vehicle
-		/// </summary>
-		/// <param name="__result"></param>
-		/// <param name="__instance"></param>
-		public static bool VehiclesDontHaveFlesh(ref bool __result, RaceProperties __instance)
-		{
-			if (__instance.FleshType is VehicleFleshTypeDef)
-			{
-				__result = false;
-				return false;
-			}
-			return true;
 		}
 
 		/// <summary>
@@ -117,8 +99,7 @@ namespace Vehicles
 				{
 					DefGenerator.AddImpliedDef(kindDef);
 				}
-				if (vehicleDef.vehicleType == VehicleType.Air && 
-					ThingDefGenerator_Skyfallers.GenerateImpliedSkyfallerDef(vehicleDef, out ThingDef skyfallerLeaving, out ThingDef skyfallerIncoming, out ThingDef skyfallerCrashing))
+				if (ThingDefGenerator_Skyfallers.GenerateImpliedSkyfallerDef(vehicleDef, out ThingDef skyfallerLeaving, out ThingDef skyfallerIncoming, out ThingDef skyfallerCrashing))
 				{
 					if (skyfallerLeaving != null)
 					{

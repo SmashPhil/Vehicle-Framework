@@ -10,38 +10,6 @@ namespace Vehicles
 	{
 		public override int MatCount => 8;
 
-		public override Material MatNorth
-		{
-			get
-			{
-				return materials[0];
-			}
-		}
-
-		public override Material MatEast
-		{
-			get
-			{
-				return materials[1];
-			}
-		}
-
-		public override Material MatSouth
-		{
-			get
-			{
-				return materials[2];
-			}
-		}
-
-		public override Material MatWest
-		{
-			get
-			{
-				return materials[3];
-			}
-		}
-
 		public IEnumerable<Rot8> RotationsRenderableByUI
 		{
 			get
@@ -57,15 +25,6 @@ namespace Vehicles
 					yield return Rot8.West;
 				}
 			}
-		}
-
-		public Material MatAtFull(Rot8 rot)
-		{
-			if (materials.OutOfBounds(rot.AsInt))
-			{
-				return BaseContent.BadMat;
-			}
-			return materials[rot.AsInt];
 		}
 
 		public override void Init(GraphicRequestRGB req)

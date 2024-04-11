@@ -37,11 +37,11 @@ namespace Vehicles
 				if (SpawnProps.thingToSpawn.defName == "Fire")
 				{
 					float fireSize = Rand.Range(0.25f, 0.925f);
-					if (!FireUtility.TryStartFireIn(position, map, fireSize))
+					if (!FireUtility.TryStartFireIn(position, map, fireSize, this))
 					{
 						foreach (Thing thing in map.thingGrid.ThingsAt(position))
 						{
-							thing.TryAttachFire(fireSize);
+							thing.TryAttachFire(fireSize, this);
 						}
 					}
 				}

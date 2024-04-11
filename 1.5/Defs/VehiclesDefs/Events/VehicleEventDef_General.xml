@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<!-- Movement -->
+	<Vehicles.VehicleEventDef>
+		<defName>IgnitionOn</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>IgnitionOff</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>Braking</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>MoveStart</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>MoveStop</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<!-- Inventory -->
+	
+	<Vehicles.VehicleEventDef>
+		<defName>CargoAdded</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>CargoRemoved</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<!-- Pawns -->
+	<Vehicles.VehicleEventDef>
+		<defName>PawnEntered</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>PawnExited</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>PawnChangedSeats</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>PawnCapacitiesDirty</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>PawnKilled</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>PawnRemoved</defName>
+	</Vehicles.VehicleEventDef>
+</Defs>

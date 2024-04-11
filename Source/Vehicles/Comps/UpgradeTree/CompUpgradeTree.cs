@@ -1,152 +1,348 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
+using Verse.Sound;
 using SmashTools;
 
 namespace Vehicles
 {
-	public class CompUpgradeTree : VehicleAIComp
+	[StaticConstructorOnStartup]
+	public class CompUpgradeTree : VehicleComp
 	{
+		private static readonly Material UnderfieldMat = MaterialPool.MatFrom("Things/Building/BuildingFrame/Underfield", ShaderDatabase.Transparent);
+		private static readonly Texture2D CornerTex = ContentFinder<Texture2D>.Get("Things/Building/BuildingFrame/Corner", true);
+		private static readonly Texture2D TileTex = ContentFinder<Texture2D>.Get("Things/Building/BuildingFrame/Tile", true);
+
+		private Material cachedCornerMat;
+		private Material cachedTileMat;
+
+		private HashSet<string> upgrades = new HashSet<string>();
+
+		private string nodeUnlocking;
+		
+		public UpgradeInProgress upgrade;
+
+		public ThingOwner<Thing> upgradeContainer = new ThingOwner<Thing>();
+
 		public CompProperties_UpgradeTree Props => (CompProperties_UpgradeTree)props;
 
-		public List<UpgradeNode> upgradeList = new List<UpgradeNode>();
+		public bool Upgrading => NodeUnlocking != null;
 
-		public int WorkLeftUpgrading => CurrentlyUpgrading ? Mathf.CeilToInt(NodeUnlocking.WorkLeft) : 0;
+		public UpgradeNode NodeUnlocking => upgrade?.node;
 
-		public bool CurrentlyUpgrading => NodeUnlocking != null && NodeUnlocking.upgradePurchased && !NodeUnlocking.upgradeActive;
+		public Color FrameColor => new Color(0.6f, 0.6f, 0.6f);
 
-		public UpgradeNode NodeUnlocking { get; set; }
+		public float PercentComplete
+		{
+			get
+			{
+				if (Upgrading && NodeUnlocking.work > 0)
+				{
+					return 1 - upgrade.WorkLeft / NodeUnlocking.work;
+				}
+				return 0;
+			}
+		}
+
+		private Material CornerMat
+		{
+			get
+			{
+				if (cachedCornerMat == null)
+				{
+					cachedCornerMat = MaterialPool.MatFrom(CornerTex, ShaderDatabase.MetaOverlay, FrameColor);
+				}
+				return cachedCornerMat;
+			}
+		}
+
+		private Material TileMat
+		{
+			get
+			{
+				if (cachedTileMat == null)
+				{
+					cachedTileMat = MaterialPool.MatFrom(TileTex, ShaderDatabase.MetaOverlay, FrameColor);
+				}
+				return cachedTileMat;
+			}
+		}
+
+		public bool StoredCostSatisfied
+		{
+			get
+			{
+				if (NodeUnlocking == null)
+				{
+					return false;
+				}
+				foreach (ThingDefCountClass thingDefCount in NodeUnlocking.ingredients)
+				{
+					if (upgradeContainer.TotalStackCountOfDef(thingDefCount.thingDef) < thingDefCount.count)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool NodeUnlocked(UpgradeNode node)
+		{
+			return upgrades.Contains(node.key);
+		}
 
 		public UpgradeNode RootNode(UpgradeNode child)
 		{
 			UpgradeNode parentOfChild = child;
-			while(parentOfChild.prerequisiteNodes.NotNullAndAny())
+			while (!parentOfChild.prerequisiteNodes.NullOrEmpty())
 			{
-				parentOfChild = NodeListed(parentOfChild.prerequisiteNodes.First());
+				parentOfChild = Props.def.GetNode(parentOfChild.prerequisiteNodes.First());
 			}
 			return parentOfChild;
 		}
 
 		public bool PrerequisitesMet(UpgradeNode node)
 		{
-			return upgradeList.Where(x => node.prerequisiteNodes.Contains(x.upgradeID)).All(y => y.upgradeActive);
+			if (!node.prerequisiteNodes.NullOrEmpty())
+			{
+				foreach (string prerequisiteKey in node.prerequisiteNodes)
+				{
+					if (!upgrades.Contains(prerequisiteKey))
+					{
+						return false;
+					}
+				}
+			}
+			return true;
 		}
 
 		public bool Disabled(UpgradeNode node)
 		{
-			return !string.IsNullOrEmpty(node.disableIfUpgradeNodeEnabled) && upgradeList.FirstOrDefault(x => x.upgradeID == node.disableIfUpgradeNodeEnabled).upgradeActive;
-		}
-
-		public UpgradeNode NodeListed(UpgradeNode node)
-		{
-			UpgradeNode matchedNode = upgradeList.Find(x => x == node);
-			if (matchedNode is null)
+			if (!node.disableIfUpgradeNodeEnabled.NullOrEmpty())
 			{
-				Log.Error($"Unable to locate node {node.upgradeID} in upgrade list. Cross referencing comp upgrades?");
-				return null;
+				return upgrades.Contains(node.disableIfUpgradeNodeEnabled);
 			}
-			return matchedNode;
-		}
-
-		public UpgradeNode NodeListed(string upgradeID)
-		{
-			UpgradeNode matchedNode = upgradeList.Find(x => x.upgradeID == upgradeID);
-			if (matchedNode is null)
-			{
-				Log.Error($"Unable to locate node {upgradeID} in upgrade list. Cross referencing comp upgrades?");
-				return null;
-			}
-			return matchedNode;
+			return false;
 		}
 
 		public bool LastNodeUnlocked(UpgradeNode node)
 		{
-			UpgradeNode nodeListed = NodeListed(node);
-			List<UpgradeNode> unlocksNodes = upgradeList.FindAll(x => x.prerequisiteNodes.Contains(nodeListed.upgradeID));
-			return !unlocksNodes.NotNullAndAny(x => x.upgradeActive);
+			List<UpgradeNode> unlocksNodes = Vehicle.CompUpgradeTree.Props.def.nodes.FindAll(x => x.prerequisiteNodes.Contains(node.key));
+			return !unlocksNodes.NotNullAndAny(preReqNode => Vehicle.CompUpgradeTree.NodeUnlocked(preReqNode));
 		}
 
-		public void RefundUnlock(UpgradeNode node)
+		/// <summary>
+		/// Resets unlock and triggers refund event
+		/// </summary>
+		public void ResetUnlock(UpgradeNode node)
 		{
-			if (node is null || !node.upgradeActive) return;
-			node.itemContainer.TryDropAll(Vehicle.Position, Vehicle.Map, ThingPlaceMode.Near);
-			node.Refund();
-			node.ResetNode();
+			if (node is null || !upgrades.Contains(node.key))
+			{
+				return;
+			}
+			if (upgrades.Remove(node.key))
+			{
+				if (!node.upgrades.NullOrEmpty())
+				{
+					foreach (Upgrade upgrade in node.upgrades)
+					{
+						try
+						{
+							upgrade.Refund(Vehicle);
+						}
+						catch (Exception ex)
+						{
+							Log.Error($"{VehicleHarmony.LogLabel} Unable to reset {GetType()} to {Vehicle.LabelShort}. \nException: {ex}");
+						}
+					}
+				}
+				node.RemoveOverlays(Vehicle);
+				node.resetSound?.PlayOneShot(new TargetInfo(Vehicle.Position, Vehicle.Map));
+			}
 		}
 
-		public void CancelUpgrade()
-		{
-			NodeUnlocking.itemContainer.TryDropAll(Vehicle.Position, Vehicle.Map, ThingPlaceMode.Near);
-			NodeUnlocking.ResetNode();
-			Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(Vehicle);
-		}
-
-		public void StartUnlock(UpgradeNode node)
-		{
-			NodeUnlocking = NodeListed(node);
-			NodeUnlocking.ResetTimer();
-		}
-
+		/// <summary>
+		/// Unlocks node and triggers unlock event for all upgrades of that node
+		/// </summary>
 		public void FinishUnlock(UpgradeNode node)
 		{
-			var actualNode = NodeListed(node);
-			if (!actualNode.replaces.NullOrEmpty())
+			if (upgrade != null && upgrade.Removal)
 			{
-				actualNode.replaces.ForEach(u =>
-				{
-					UpgradeNode node = NodeListed(u);
-					if (node.upgradeActive)
-					{
-						RefundUnlock(node);
-					}
-				});
+				ResetUnlock(node);
+				return;
 			}
-			actualNode.Upgrade();
-			actualNode.TextureAndColor();
-			actualNode.upgradeActive = true;
-			actualNode.upgradePurchased = true;
+			if (!node.replaces.NullOrEmpty())
+			{
+				foreach (string replaceKey in node.replaces)
+				{
+					UpgradeNode replaceNode = Props.def.GetNode(replaceKey);
+					ResetUnlock(replaceNode);
+				}
+			}
+			if (!node.upgrades.NullOrEmpty())
+			{
+				foreach (Upgrade upgrade in node.upgrades)
+				{
+					try
+					{
+						upgrade.Unlock(Vehicle, false);
+					}
+					catch (Exception ex)
+					{
+						Log.Error($"{VehicleHarmony.LogLabel} Unable to unlock {GetType()} for {Vehicle.LabelShort}. \nException: {ex}");
+					}
+				}
+			}
+			node.AddOverlays(Vehicle);
+			node.unlockSound?.PlayOneShot(new TargetInfo(Vehicle.Position, Vehicle.Map));
+			upgrades.Add(node.key);
+
+			upgradeContainer.ClearAndDestroyContents();
+		}
+
+		public void ClearUpgrade()
+		{
+			Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(Vehicle);
+			upgradeContainer.TryDropAll(Vehicle.Position, Vehicle.Map, ThingPlaceMode.Near);
+			upgrade = null;
+		}
+
+		/// <summary>
+		/// Notifies job pool that vehicle has upgrade that wants to be unlocked, still requires job to be performed
+		/// </summary>
+		public void StartUnlock(UpgradeNode node)
+		{
+			upgrade = new UpgradeInProgress(Vehicle, node, false);
+			upgradeContainer.TryDropAll(Vehicle.Position, Vehicle.Map, ThingPlaceMode.Near);
+			Vehicle.ignition.Drafted = false;
+		}
+
+		/// <summary>
+		/// Notifies job pool that vehicle has upgrade that wants to be removed, still requires job to be performed
+		/// </summary>
+		public void RemoveUnlock(UpgradeNode node)
+		{
+			upgrade = new UpgradeInProgress(Vehicle, node, true);
+			upgradeContainer.TryDropAll(Vehicle.Position, Vehicle.Map, ThingPlaceMode.Near);
+			Vehicle.ignition.Drafted = false;
+		}
+
+		private void ReloadUnlocks()
+		{
+			if (!upgrades.NullOrEmpty())
+			{
+				foreach (string key in upgrades)
+				{
+					UpgradeNode node = Props.def.GetNode(key);
+					if (node != null)
+					{
+						node.AddOverlays(Vehicle);
+						if (!node.upgrades.NullOrEmpty())
+						{
+							foreach (Upgrade upgrade in node.upgrades)
+							{
+								if (upgrade.UnlockOnLoad)
+								{
+									try
+									{
+										upgrade.Unlock(Vehicle, true);
+									}
+									catch (Exception ex)
+									{
+										Log.Error($"{VehicleHarmony.LogLabel} Unable to unlock {GetType()} post-load for {Vehicle.LabelShort}. \nException: {ex}");
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 
 		public void InitializeUpgradeTree()
 		{
-			upgradeList = new List<UpgradeNode>();
-			foreach (UpgradeNode node in Props.upgrades)
-			{
-				try
-				{
-					UpgradeNode permanentNode = (UpgradeNode)Activator.CreateInstance(node.GetType(), new object[] { node, Vehicle });
-					permanentNode.OnInit();
-					upgradeList.Add(permanentNode);
-				}
-				catch (Exception ex)
-				{
-					SmashLog.Error($"Exception thrown while generating <text>{node.upgradeID}</text> of type <type>{node.GetType()}</type> for {Vehicle.LabelShort}\nException=\"{ex}\"");
-					upgradeList.Add(UpgradeNode.BlankUpgrade(node, Vehicle));
-				}
-			}
+		}
 
-			if (upgradeList.Select(x => x.upgradeID).GroupBy(y => y).Where(y => y.Count() > 1).Select(z => z.Key).NotNullAndAny())
+		public void AddToContainer(ThingOwner<Thing> holder, Thing thing, int count)
+		{
+			holder.TryTransferToContainer(thing, upgradeContainer, count);
+			ValidateListers();
+		}
+
+		public override void PostDraw()
+		{
+			base.PostDraw();
+			if (Upgrading)
 			{
-				Log.Error(string.Format("Duplicate UpgradeID's detected on def {0}. This is not supported.", parent.def.defName));
-				Debug.Message("====== Duplicate UpgradeID's for this Vehicle ======");
-				foreach(UpgradeNode errorNode in upgradeList.GroupBy(grp => grp).Where(g => g.Count() > 1))
+				Vector3 drawPos = Vehicle.DrawPos;
+				Vector2 size = new Vector2(Vehicle.VehicleDef.Size.x, Vehicle.VehicleDef.Size.z);
+				size.x *= 1.15f;
+				size.y *= 1.15f;
+				Vector3 s = new Vector3(size.x, 1f, size.y);
+				Matrix4x4 matrix = default;
+				matrix.SetTRS(drawPos, Vehicle.FullRotation.AsQuat, s);
+				Graphics.DrawMesh(MeshPool.plane10, matrix, UnderfieldMat, 0);
+				int corners = 4;
+				for (int i = 0; i < corners; i++)
 				{
-					Debug.Message($"UpgradeID: {errorNode.upgradeID} UniqueID: {errorNode.GetUniqueLoadID()} Location: {errorNode.gridCoordinate}");
+					float num2 = Mathf.Min(Vehicle.RotatedSize.x, Vehicle.RotatedSize.z) * 0.38f;
+					IntVec3 intVec = default;
+					if (i == 0)
+					{
+						intVec = new IntVec3(-1, 0, -1);
+					}
+					else if (i == 1)
+					{
+						intVec = new IntVec3(-1, 0, 1);
+					}
+					else if (i == 2)
+					{
+						intVec = new IntVec3(1, 0, 1);
+					}
+					else if (i == 3)
+					{
+						intVec = new IntVec3(1, 0, -1);
+					}
+					Vector3 b = default;
+					b.x = intVec.x * (Vehicle.RotatedSize.x / 2f - num2 / 2f);
+					b.z = intVec.z * (Vehicle.RotatedSize.z / 2f - num2 / 2f);
+					Vector3 s2 = new Vector3(num2, 1f, num2);
+					Matrix4x4 matrix2 = default;
+					matrix2.SetTRS(drawPos + Vector3.up * 0.03f + b, new Rot4(i).AsQuat, s2);
+					Graphics.DrawMesh(MeshPool.plane10, matrix2, CornerMat, 0);
 				}
-				Debug.Message("===========================================");
+				int tiles = Mathf.CeilToInt(PercentComplete * Vehicle.RotatedSize.x * Vehicle.RotatedSize.z * 4); //4 tiles per cell
+				IntVec2 intVec2 = Vehicle.RotatedSize * 2;
+				for (int j = 0; j < tiles; j++)
+				{
+					IntVec2 intVec3 = default;
+					intVec3.z = j / intVec2.x;
+					intVec3.x = j - intVec3.z * intVec2.x;
+					Vector3 a = new Vector3(intVec3.x * 0.5f, 0f, intVec3.z * 0.5f) + drawPos;
+					a.x -= Vehicle.RotatedSize.x * 0.5f - 0.25f;
+					a.z -= Vehicle.RotatedSize.z * 0.5f - 0.25f;
+					Vector3 s3 = new Vector3(0.5f, 1f, 0.5f);
+					Matrix4x4 matrix3 = default;
+					matrix3.SetTRS(a + Vector3.up * 0.02f, Quaternion.identity, s3);
+					Graphics.DrawMesh(MeshPool.plane10, matrix3, TileMat, 0);
+				}
 			}
 		}
 
-		public override bool CanDraft(out string failReason)
+		public override bool CanDraft(out string failReason, out bool allowDevMode)
 		{
-			if (CurrentlyUpgrading)
+			allowDevMode = false;
+			if (Upgrading)
 			{
-				failReason = "VF_UpgradeInProgress".Translate();
+				failReason = "VF_UpgradeInProgress".Translate(Vehicle);
 				return false;
 			}
-			return base.CanDraft(out failReason);
+			return base.CanDraft(out failReason, out allowDevMode);
 		}
 
 		public override void PostGeneration()
@@ -154,58 +350,52 @@ namespace Vehicles
 			InitializeUpgradeTree();
 		}
 
+		public override void PostLoad()
+		{
+			base.PostLoad();
+			ReloadUnlocks();
+		}
+
 		public override void PostSpawnSetup(bool respawningAfterLoad)
 		{
 			base.PostSpawnSetup(respawningAfterLoad);
-			NodeUnlocking = upgradeList.Find(x => x.upgradePurchased && !x.upgradeActive);
-			foreach(UpgradeNode node in upgradeList)
-			{
-				node.ResolveReferences();
-			}
-		}
-
-		public void DoWork()
-		{
-			if (NodeUnlocking != null && !NodeUnlocking.upgradeActive && NodeUnlocking.StoredCostSatisfied)
-			{
-				NodeUnlocking.WorkLeft--;
-				if (NodeUnlocking.WorkLeft <= 0)
-				{
-					FinishUnlock(NodeUnlocking);
-				}
-			}
 		}
 
 		public override void CompTickRare()
 		{
 			base.CompTickRare();
-			if (Vehicle.Spawned)
+			ValidateListers();
+		}
+
+		public void ValidateListers()
+		{
+			if (NodeUnlocking != null)
 			{
-				if (NodeUnlocking != null)
+				if (upgrade.Removal || StoredCostSatisfied)
 				{
-					if (NodeUnlocking.StoredCostSatisfied)
-					{
-						Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RegisterLister(Vehicle, ReservationType.Upgrade);
-						Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Vehicle, ReservationType.LoadUpgradeMaterials);
-					}
-					else
-					{
-						Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RegisterLister(Vehicle, ReservationType.LoadUpgradeMaterials);
-						Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Vehicle, ReservationType.Upgrade);
-					}
+					Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RegisterLister(Vehicle, ReservationType.Upgrade);
+					Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Vehicle, ReservationType.LoadUpgradeMaterials);
 				}
 				else
 				{
-					Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Vehicle, ReservationType.LoadUpgradeMaterials);
-					Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Vehicle, ReservationType.LoadUpgradeMaterials);
+					Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RegisterLister(Vehicle, ReservationType.LoadUpgradeMaterials);
+					Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Vehicle, ReservationType.Upgrade);
 				}
+			}
+			else
+			{
+				Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Vehicle, ReservationType.Upgrade);
+				Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Vehicle, ReservationType.LoadUpgradeMaterials);
 			}
 		}
 
 		public override void PostExposeData()
 		{
 			base.PostExposeData();
-			Scribe_Collections.Look(ref upgradeList, "upgradeList", LookMode.Deep);
+			Scribe_Collections.Look(ref upgrades, nameof(upgrades), LookMode.Value);
+			Scribe_Values.Look(ref nodeUnlocking, nameof(nodeUnlocking));
+			Scribe_Deep.Look(ref upgrade, nameof(upgrade));
+			Scribe_Deep.Look(ref upgradeContainer, nameof(upgradeContainer));
 		}
 	}
 }

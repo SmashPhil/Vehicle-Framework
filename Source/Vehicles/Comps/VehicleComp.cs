@@ -61,9 +61,14 @@ namespace Vehicles
 		{
 		}
 
-		public virtual bool CanDraft(out string failReason)
+		public virtual void Notify_ColorChanged()
+		{
+		}
+
+		public virtual bool CanDraft(out string failReason, out bool allowDevMode)
 		{
 			failReason = string.Empty;
+			allowDevMode = true;
 			return true;
 		}
 

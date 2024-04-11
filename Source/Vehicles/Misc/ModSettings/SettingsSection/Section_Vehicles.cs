@@ -30,6 +30,8 @@ namespace Vehicles
 		private Dictionary<VehicleDef, Rot8> directionFacing = new Dictionary<VehicleDef, Rot8>();
 		private Rot8 currentVehicleFacing;
 
+		private static DesignationCategoryDef structureDesignationDef;
+
 		public override IEnumerable<FloatMenuOption> ResetOptions
 		{
 			get
@@ -85,6 +87,8 @@ namespace Vehicles
 			{
 				patternData.ExposeDataPostDefDatabase();
 			}
+
+			structureDesignationDef = DefDatabase<DesignationCategoryDef>.GetNamed("Structure");
 		}
 
 		public override void ExposeData()
@@ -320,7 +324,7 @@ namespace Vehicles
 				{
 					fieldSettings[VehicleMod.selectedDef.defName].Remove(saveableField);
 				}
-				GizmoHelper.DesignatorsChanged(DesignationCategoryDefOf.Structure);
+				GizmoHelper.DesignatorsChanged(VehicleMod.selectedDef.designationCategory ?? structureDesignationDef);
 			}
 			Text.Font = gameFont;
 		}

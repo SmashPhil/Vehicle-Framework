@@ -9,9 +9,8 @@
 	<VF_VehicleImmobileDeployed>{0_labelShort} is deployed and unable to move.</VF_VehicleImmobileDeployed>
 	<VF_HandlerNotEnoughRoom>Failed to add {0} to {1}. No more space available.</VF_HandlerNotEnoughRoom>
 	
-	<VF_NotEnoughToOperate>Needs more crew in order to operate.</VF_NotEnoughToOperate>
-	<VF_OutOfFuel>Cannot draft. Vehicle needs more fuel.</VF_OutOfFuel>
-	<VF_UpgradeInProgress>Cannot draft while Vehicle is upgrading.</VF_UpgradeInProgress>
+	<VF_NotEnoughToOperate>Cannot move. Needs more crew in order to operate.</VF_NotEnoughToOperate>
+	<VF_UpgradeInProgress>Cannot draft while {0} is upgrading.</VF_UpgradeInProgress>
 	<VF_NotEnoughCrew>Not enough colonists in {0} to operate {1}.</VF_NotEnoughCrew>
 	
 	<VF_CannotFit>Not enough space.</VF_CannotFit>

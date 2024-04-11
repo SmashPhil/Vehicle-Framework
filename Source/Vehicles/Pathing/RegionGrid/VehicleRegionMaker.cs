@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Verse;
+using LudeonTK;
 using SmashTools;
 
 namespace Vehicles
@@ -18,17 +19,17 @@ namespace Vehicles
 		private VehicleRegion newRegion;
 		private VehicleRegionGrid regionGrid;
 
-		private ConcurrentBag<IntVec3> newRegCells = new ConcurrentBag<IntVec3>();
+		private ConcurrentSet<IntVec3> newRegCells = new ConcurrentSet<IntVec3>();
 
 		/// <summary>
 		/// Contains hashset for 4 rotations
 		/// </summary>
-		private readonly HashSet<IntVec3>[] linksProcessedAt = new HashSet<IntVec3>[]
+		private readonly ConcurrentSet<IntVec3>[] linksProcessedAt = new ConcurrentSet<IntVec3>[]
 		{
-			new HashSet<IntVec3>(),
-			new HashSet<IntVec3>(),
-			new HashSet<IntVec3>(),
-			new HashSet<IntVec3>()
+			new ConcurrentSet<IntVec3>(),
+			new ConcurrentSet<IntVec3>(),
+			new ConcurrentSet<IntVec3>(),
+			new ConcurrentSet<IntVec3>()
 		};
 
 		public VehicleRegionMaker(VehicleMapping mapping, VehicleDef createdFor)
@@ -172,7 +173,7 @@ namespace Vehicles
 			{
 				linksProcessedAt[i].Clear();
 			}
-			foreach (IntVec3 cell in newRegCells)
+			foreach (IntVec3 cell in newRegCells.Keys)
 			{
 				SweepInTwoDirectionsAndTryToCreateLink(Rot4.North, cell);
 				SweepInTwoDirectionsAndTryToCreateLink(Rot4.South, cell);
@@ -193,7 +194,7 @@ namespace Vehicles
 				return;
 			}
 
-			HashSet<IntVec3> hashSet = linksProcessedAt[potentialOtherRegionDir.AsInt];
+			ConcurrentSet<IntVec3> hashSet = linksProcessedAt[potentialOtherRegionDir.AsInt];
 			if (hashSet.Contains(cell))
 			{
 				return;

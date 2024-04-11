@@ -31,9 +31,6 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MentalState_Manhunter), nameof(MentalState_Manhunter.ForceHostileTo), new Type[] { typeof(Thing) }), prefix: null,
 				postfix: new HarmonyMethod(typeof(Extra),
 				nameof(ManhunterDontAttackVehicles)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Projectile_Explosive), "Impact"),
-				prefix: new HarmonyMethod(typeof(Extra),
-				nameof(ShellsImpactWater)));
 			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(TickManager), nameof(TickManager.Paused)),
 				postfix: new HarmonyMethod(typeof(Extra),
 				nameof(PausedFromVehicles)));
@@ -96,23 +93,6 @@ namespace Vehicles
 			}
 		}
 
-		/// <summary>
-		/// Shells impacting water now have reduced radius of effect and different sound
-		/// </summary>
-		/// <param name="hitThing"></param>
-		/// <param name="__instance"></param>
-		public static bool ShellsImpactWater(Thing hitThing, ref Projectile __instance)
-		{
-			Map map = __instance.Map;
-			TerrainDef terrainImpact = map.terrainGrid.TerrainAt(__instance.Position);
-			if(__instance.def.projectile.explosionDelay == 0 && terrainImpact.IsWater && !__instance.Position.GetThingList(__instance.Map).NotNullAndAny(x => x is VehiclePawn vehicle))
-			{
-				DamageHelper.Explode(__instance);
-				return false;
-			}
-			return true;
-		}
-
 		public static void PausedFromVehicles(ref bool __result)
 		{
 			if (LandingTargeter.Instance.ForcedTargeting || StrafeTargeter.Instance.ForcedTargeting)
@@ -142,7 +122,7 @@ namespace Vehicles
 					yield return instruction; //WidgetRow.Icon
 					i += 2; //Skip Pop
 					instruction = instructionList[i];
-					yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
+					yield return new CodeInstruction(opcode: OpCodes.Ldarg_2);
 					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(Extra), nameof(ChangeAreaColor)));
 				}
 				/*

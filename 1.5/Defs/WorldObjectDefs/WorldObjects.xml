@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<WorldObjectDef>
+		<defName>DebugSettlement</defName>
+		<label>Original Location</label>
+		<description>Debug</description>
+		<worldObjectClass>PeaceTalks</worldObjectClass>
+		<texture>World/WorldObjects/PeaceTalks</texture>
+		<expandingIcon>true</expandingIcon>
+		<expandingIconTexture>Debug/SettlementOld</expandingIconTexture>
+		<expandingIconPriority>70</expandingIconPriority>
+	</WorldObjectDef>
+	
+	<WorldObjectDef>
+		<defName>StashedVehicle</defName>
+		<label>Stashed Vehicle</label>
+		<description>Stashed vehicles.</description>
+		<worldObjectClass>Vehicles.StashedVehicle</worldObjectClass>
+		<expandingIcon>true</expandingIcon>
+		<expandingIconPriority>60</expandingIconPriority>
+		<expandMore>true</expandMore>
+		<useDynamicDrawer>true</useDynamicDrawer>
+		
+		<comps>
+			<li Class="WorldObjectCompProperties_Timeout" />
+		</comps>
+	</WorldObjectDef>
+	
+	<WorldObjectDef>
+		<defName>VehicleCaravan</defName>
+		<label>Vehicle Caravan</label>
+		<description>A group of traveling people with vehicles.</description>
+		<worldObjectClass>Vehicles.VehicleCaravan</worldObjectClass>
+		<texture>UI/DefaultVehicleIcon</texture>
+		<useDynamicDrawer>true</useDynamicDrawer>
+		<expandingIcon>true</expandingIcon>
+		<expandingIconTexture>World/WorldObjects/Expanding/Caravan</expandingIconTexture>
+		<expandingIconPriority>100</expandingIconPriority>
+		<expandMore>true</expandMore>
+		<allowCaravanIncidentsWhichGenerateMap>true</allowCaravanIncidentsWhichGenerateMap>
+		
+		<IncidentTargetTags>
+			<li>Caravan</li>
+		</IncidentTargetTags>
+		
+		<inspectorTabs>
+			<li>Vehicles.WITab_Vehicle_Manifest</li> <!-- Similar to WITab_Caravan_Needs but contains drag & drop and entries of vehicle roles -->
+			<li>WITab_Caravan_Health</li>
+			<li>WITab_Caravan_Gear</li>
+			<li>WITab_Caravan_Social</li>
+			<li>WITab_Caravan_Items</li>
+			<li MayRequireAnyOf = "Mlie.RoadsOfTheRim,Mlie.RoadsOfTheRim_steam,Vampiresbane.RailsAndRoadsOfTheRim,Vampiresbane.RailsAndRoadsOfTheRim_steam">RoadsOfTheRim.WITab_Caravan_Build</li>
+		</inspectorTabs>
+		
+		<comps>
+			<li MayRequireAnyOf = "Mlie.RoadsOfTheRim,Mlie.RoadsOfTheRim_steam,Vampiresbane.RailsAndRoadsOfTheRim,Vampiresbane.RailsAndRoadsOfTheRim_steam">
+				<compClass>RoadsOfTheRim.WorldObjectComp_Caravan</compClass>
+			</li>
+		</comps>
+	</WorldObjectDef>
+	
+	<WorldObjectDef>
+		<defName>AerialVehicle</defName>
+		<label>Aerial Vehicle</label>
+		<description>An aerial vehicle capable of flight on the world map.</description>
+		<worldObjectClass>Vehicles.AerialVehicleInFlight</worldObjectClass>
+		<texture>UI/Icons/DefaultVehicleIcon</texture>
+		<useDynamicDrawer>true</useDynamicDrawer>
+		<expandingIcon>true</expandingIcon>
+		<expandingIconPriority>100</expandingIconPriority>
+		<expandMore>true</expandMore>
+		<allowCaravanIncidentsWhichGenerateMap>true</allowCaravanIncidentsWhichGenerateMap>
+		
+		<IncidentTargetTags>
+			<li>Caravan</li>
+		</IncidentTargetTags>
+		
+		<inspectorTabs>
+			<li>Vehicles.WITab_Vehicle_Manifest</li>
+			<li>Vehicles.WITab_AerialVehicle_Health</li>
+			<!-- <li>WITab_Caravan_Social</li> -->
+			<li>Vehicles.WITab_AerialVehicle_Items</li>
+		</inspectorTabs>
+	</WorldObjectDef>
+	
+	<WorldObjectDef>
+		<defName>CrashedShipSite</defName>
+		<label>Crash Site</label>
+		<description>A recently downed aerial vehicle with possible survivors.</description>
+		<worldObjectClass>Vehicles.CrashSite</worldObjectClass>
+		<texture>World/WorldObjects/Ambush</texture>
+		<expandingIcon>true</expandingIcon>
+		<expandingIconTexture>UI/Icons/WorldObject_CrashSite</expandingIconTexture>
+		<expandingIconPriority>100</expandingIconPriority>
+		<expandMore>true</expandMore>
+		<inspectorTabs/>
+	</WorldObjectDef>
+	
+	<Vehicles.AntiAircraftDef>
+		<defName>FlakProjectile</defName>
+		<label>Flak Projectile</label>
+		<worldObjectClass>Vehicles.Flak</worldObjectClass>
+		<antiAircraftWorker>Vehicles.FlakWorker</antiAircraftWorker>
+		<texture>Things/Projectile/ShellHighExplosive</texture>
+		<useDynamicDrawer>true</useDynamicDrawer>
+		<expandingIcon>true</expandingIcon>
+		<expandingIconTexture>Things/Projectile/ShellHighExplosive</expandingIconTexture>
+		<expandingIconPriority>90</expandingIconPriority>
+		<expandMore>true</expandMore>
+		<drawSizeMultiplier>0.25</drawSizeMultiplier>
+		
+		<explosionGraphic>
+			<texPath>Projectiles/World/Flak/Explosion</texPath>
+			<graphicClass>Vehicles.Graphic_Animate</graphicClass>
+			<drawSize>(1,1)</drawSize>
+		</explosionGraphic>
+		
+		<framesForExplosion>6</framesForExplosion>
+		<damage>80</damage>
+		<accuracy>0.1</accuracy>
+		<ticksBetweenShots>180</ticksBetweenShots>
+		
+		<properties>
+			<distance>5</distance>
+			<arc>30</arc>
+			<altitude>
+				<min>1</min>
+				<max>10000</max>
+			</altitude>
+			<buildings>
+				<min>1</min>
+				<max>4</max>
+			</buildings>
+		</properties>
+	</Vehicles.AntiAircraftDef>
+</Defs>

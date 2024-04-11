@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<LanguageData>
-  <FlightSpeed.label>Velocidade de Voo</FlightSpeed.label>
-  <FlightSpeed.description>Velocidade de movimento no mapa mundial durante o voo.</FlightSpeed.description>
-  <FlightSpeed.formatString>{0} t/s</FlightSpeed.formatString>
-  <FlightControl.label>Controle de Voo</FlightControl.label>
-  <FlightControl.description>Capacidade do veículo para voo. Se o valor chegar a 0, o veículo será forçado a aterrissar à força.</FlightControl.description>
-</LanguageData>
-

@@ -3,26 +3,29 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using SmashTools;
+using System;
 
 namespace Vehicles
 {
-	public class WorkGiver_WorkOnUpgrade : WorkGiver_Scanner
+	public class WorkGiver_WorkOnUpgrade : VehicleWorkGiver
 	{
 		public override PathEndMode PathEndMode => PathEndMode.Touch;
 
+		public override JobDef JobDef => JobDefOf_Vehicles.UpgradeVehicle;
+
 		public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn) => pawn.Map.GetCachedMapComponent<VehicleReservationManager>().VehicleListers(ReservationType.Upgrade);
 
-		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
+		public override bool CanBeWorkedOn(VehiclePawn vehicle)
 		{
-			if (t.Faction != pawn.Faction)
-				return null;
-			if(t is VehiclePawn vehicle && t.TryGetComp<CompUpgradeTree>() != null && t.TryGetComp<CompUpgradeTree>().CurrentlyUpgrading && 
-				pawn.Map.GetCachedMapComponent<VehicleReservationManager>().CanReserve<ThingDefCountClass, VehicleNodeReservation>(vehicle, pawn, null) &&
-				t.TryGetComp<CompUpgradeTree>().NodeUnlocking.StoredCostSatisfied && pawn.CanReach(new LocalTargetInfo(t.Position), PathEndMode.Touch, Danger.Deadly))
+			if (vehicle.CompUpgradeTree == null)
 			{
-				return JobMaker.MakeJob(JobDefOf_Vehicles.UpgradeVehicle, vehicle);
+				return false;
 			}
-			return null;
+			if (!vehicle.CompUpgradeTree.Upgrading)
+			{
+				return false;
+			}
+			return vehicle.CompUpgradeTree.upgrade.Removal || vehicle.CompUpgradeTree.StoredCostSatisfied;
 		}
 	}
 }

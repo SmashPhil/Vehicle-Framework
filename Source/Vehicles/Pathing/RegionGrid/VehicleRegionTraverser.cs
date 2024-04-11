@@ -280,7 +280,7 @@ namespace Vehicles
 					{
 						return;
 					}
-					foreach (VehicleRegionLink regionLink in region.links)
+					foreach (VehicleRegionLink regionLink in region.links.Keys)
 					{
 						for (int j = 0; j < 2; j++)
 						{

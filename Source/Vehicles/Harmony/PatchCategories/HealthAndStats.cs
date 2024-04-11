@@ -48,7 +48,7 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(StatWorker), nameof(StatWorker.IsDisabledFor)),
 				prefix: new HarmonyMethod(typeof(HealthAndStats),
 				nameof(StatDisabledForVehicle)));
-
+			
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(SchoolUtility), nameof(SchoolUtility.CanTeachNow)),
 				prefix: new HarmonyMethod(typeof(HealthAndStats),
 				nameof(CantTeachVehicles)));
@@ -67,7 +67,7 @@ namespace Vehicles
 		/// <param name="diagonal"></param>
 		/// <param name="__instance"></param>
 		/// <param name="__result"></param>
-		public static bool VehicleMoveSpeed(bool diagonal, Pawn __instance, ref int __result)
+		public static bool VehicleMoveSpeed(bool diagonal, Pawn __instance, ref float __result)
 		{
 			if (__instance is VehiclePawn vehicle)
 			{
@@ -80,7 +80,7 @@ namespace Vehicles
 				{
 					speed *= Ext_Math.Sqrt2;
 				}
-				__result = Mathf.RoundToInt(speed).Clamp(1, 450);
+				__result = speed.Clamp(1f, 450f);
 				return false;
 			}
 			return true;

@@ -74,6 +74,8 @@
 	<VF_ReconDistanceTooltip>Distance in tiles the shuttle will be able to perform recon of a site or settlement.</VF_ReconDistanceTooltip>
 	<VF_ControlInFlight>Control in Flight</VF_ControlInFlight>
 	<VF_ControlInFlightTooltip>Control the aerial vehicle while it is in flight. Allows for changing of flight paths midflight, choosing your landing after loading a map, and strafing maps that have not yet been loaded.</VF_ControlInFlightTooltip>
+	<VF_CanRoofPunch>Can Roof Punch</VF_CanRoofPunch>
+	<VF_CanRoofPunchTooltip>Vehicle can punch through roofs when landing.</VF_CanRoofPunchTooltip>
 	<VF_SpaceFlight>Space Faring</VF_SpaceFlight>
 	<VF_SpaceFlightTooltip>Vehicle is capable of launching to and taking off from space objects.</VF_SpaceFlightTooltip>
 	

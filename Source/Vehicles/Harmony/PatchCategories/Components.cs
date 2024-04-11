@@ -84,9 +84,6 @@ namespace Vehicles
 			if (pawn is VehiclePawn vehicle && vehicle.vehiclePather is null)
 			{
 				vehicle.vehiclePather = new Vehicle_PathFollower(vehicle);
-#pragma warning disable 0618
-				vehicle.vPather = vehicle.vehiclePather; //TODO - remove in 1.5
-#pragma warning restore 0618
 				vehicle.vehicleAI = new VehicleAI(vehicle);
 				vehicle.statHandler = new VehicleStatHandler(vehicle);
 				vehicle.sharedJob = new SharedJob();

@@ -3,13 +3,11 @@
   <Excluded>
     <exclude>.git</exclude>
     <exclude>.vs</exclude>
-    <exclude>1.4\Assemblies\SmashTools.pdb</exclude>
-    <exclude>1.4\Assemblies\UpdateLogTool.pdb</exclude>
-    <exclude>1.4\Assemblies\Vehicles.pdb</exclude>
     <exclude>1.4\Defs\Ignore</exclude>
+    <exclude>1.5\Defs\Ignore</exclude>
     <exclude>About\PreviewArt</exclude>
+    <exclude>AboutTemplate.xml</exclude>
     <exclude>Source</exclude>
     <exclude>Textures\Ignore</exclude>
-    <exclude>UpdateBuildFile.bat</exclude>
   </Excluded>
 </Configuration>

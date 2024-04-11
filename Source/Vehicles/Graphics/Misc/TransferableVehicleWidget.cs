@@ -30,6 +30,7 @@ namespace Vehicles
 		public const float CountColumnWidth = 75f;
 		public const float AdjustColumnWidth = 240f;
 		public const float MassColumnWidth = 100f;
+		public const float VehicleIconSize = 40;
 
 		private List<Section> sections = new List<Section>();
 		private string sourceLabel;
@@ -218,12 +219,12 @@ namespace Vehicles
 						num += 30f;
 					}
 				}
-				float num2 = 6f;
+				float curY = 6f;
 				float availableMass = (availableMassGetter != null) ? availableMassGetter() : float.MaxValue;
 				Rect viewRect = new Rect(0f, 0f, mainRect.width - 16f, num);
 				Widgets.BeginScrollView(mainRect, ref scrollPosition, viewRect, true);
-				float num3 = scrollPosition.y - 30f;
-				float num4 = scrollPosition.y + mainRect.height;
+				float bottomLimit = scrollPosition.y - VehicleIconSize;
+				float topLimit = scrollPosition.y + mainRect.height;
 				for (int j = 0; j < sections.Count; j++)
 				{
 					List<TransferableOneWay> cachedTransferables = sections[j].cachedTransferables;
@@ -231,17 +232,17 @@ namespace Vehicles
 					{
 						if (sections[j].title != null)
 						{
-							Widgets.ListSeparator(ref num2, viewRect.width, sections[j].title);
-							num2 += 5f;
+							Widgets.ListSeparator(ref curY, viewRect.width, sections[j].title);
+							curY += 5f;
 						}
 						for (int k = 0; k < cachedTransferables.Count; k++)
 						{
-							if (num2 > num3 && num2 < num4)
+							if (curY > bottomLimit && curY < topLimit)
 							{
-								Rect rect = new Rect(0f, num2, viewRect.width, 30f);
+								Rect rect = new Rect(0f, curY, viewRect.width, VehicleIconSize);
 								DoRow(rect, cachedTransferables[k], k, availableMass);
 							}
-							num2 += 30f;
+							curY += VehicleIconSize;
 						}
 					}
 				}

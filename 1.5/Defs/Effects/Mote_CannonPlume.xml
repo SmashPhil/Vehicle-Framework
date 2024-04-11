@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<ThingDef ParentName="MoteBase">
+		<defName>Mote_CannonPlume</defName>
+		<thingClass>Vehicles.MoteCannonPlume</thingClass>
+		<altitudeLayer>MoteOverhead</altitudeLayer>
+		
+		<graphicData>
+			<texPath>Animations/CannonPlume</texPath>
+			<graphicClass>Vehicles.Graphic_Animate</graphicClass>
+			<drawSize>(5,5)</drawSize>
+		</graphicData>
+		
+		<mote>
+			<fadeInTime>0</fadeInTime>
+			<solidTime>1</solidTime>
+			<fadeOutTime>0</fadeOutTime>
+			<growthRate>0</growthRate>
+		</mote>
+	</ThingDef>
+</Defs>

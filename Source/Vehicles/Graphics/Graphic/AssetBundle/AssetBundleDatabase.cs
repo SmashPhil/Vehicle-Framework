@@ -38,7 +38,8 @@ namespace Vehicles
 		private static readonly Dictionary<string, string> bundleBuildVersions = new Dictionary<string, string>()
 		{
 			{"1.3", "2019.4.30f1"},
-			{"1.4", "2019.4.30f1"}
+			{"1.4", "2019.4.30f1"},
+			{"1.5", "2019.4.30f1"}
 		};
 
 		private static readonly Dictionary<string, UnityEngine.Object> assetLookup = new Dictionary<string, UnityEngine.Object>();

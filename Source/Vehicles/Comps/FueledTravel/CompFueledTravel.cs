@@ -163,14 +163,15 @@ namespace Vehicles
 				false), 9999f, validator, null, 0, -1, false, RegionType.Set_Passable, false);
 		}
 
-		public override bool CanDraft(out string failReason)
+		public override bool CanDraft(out string failReason, out bool allowDevMode)
 		{
-			if (!VehicleMod.settings.debug.debugDraftAnyVehicle && EmptyTank)
+			allowDevMode = false;
+			if (EmptyTank)
 			{
-				failReason = "VF_OutOfFuel".Translate();
+				failReason = "VF_OutOfFuel".Translate(Vehicle);
 				return false;
 			}
-			return base.CanDraft(out failReason);
+			return base.CanDraft(out failReason, out allowDevMode);
 		}
 
 		public virtual void Refuel(List<Thing> fuelThings)
@@ -193,7 +194,7 @@ namespace Vehicles
 				return;
 			}
 			fuel += amount;
-			Vehicle.EventRegistry[VehicleEventDefOf.Refueled].ExecuteEvents();
+			Vehicle.EventRegistry?[VehicleEventDefOf.Refueled].ExecuteEvents();
 			if (fuel >= FuelCapacity)
 			{
 				fuel = FuelCapacity;
@@ -372,7 +373,7 @@ namespace Vehicles
 		{
 			if (EmptyTank)
 			{
-				stringBuilder.AppendLine("VF_OutOfFuel".Translate());
+				stringBuilder.AppendLine("VF_OutOfFuel".Translate(Vehicle));
 			}
 		}
 
@@ -562,6 +563,15 @@ namespace Vehicles
 			Vehicle.AddEvent(VehicleEventDefOf.Repaired, RevalidateConsumptionStatus);
 		}
 
+		public override void PostGeneration()
+		{
+			base.PostGeneration();
+			if (Vehicle.Faction != Faction.OfPlayer)
+			{
+				Refuel(FuelCapacity * Rand.Range(0.45f, 0.85f));
+			}
+		}
+
 		public override void PostSpawnSetup(bool respawningAfterLoad)
 		{
 			base.PostSpawnSetup(respawningAfterLoad);
@@ -569,10 +579,6 @@ namespace Vehicles
 			{
 				dischargeRate = ConsumptionRatePerTick * 0.1f;
 				targetFuelLevel = FuelCapacity;
-				if (Vehicle.Faction != Faction.OfPlayer)
-				{
-					RefuelHalfway();
-				}
 			}
 
 			RevalidateConsumptionStatus();

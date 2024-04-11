@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<IncidentDef>
+		<defName>ShuttleCrashed</defName>
+		<label>Shuttle Downed</label>
+		<workerClass>Vehicles.IncidentWorker_ShuttleDowned</workerClass>
+		<letterDef>ThreatBig</letterDef>
+		<category>ThreatBig</category>
+		
+		<targetTags>
+			<li>WorldEvent_Forced</li>
+		</targetTags>
+	</IncidentDef>
+</Defs>

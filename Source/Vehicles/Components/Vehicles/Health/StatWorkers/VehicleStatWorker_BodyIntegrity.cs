@@ -21,7 +21,7 @@ namespace Vehicles
 			foreach (VehicleComponent component in vehicle.statHandler.components)
 			{
 				current += component.health;
-				total += component.props.health;
+				total += component.MaxHealth;
 			}
 			if (total <= 0)
 			{

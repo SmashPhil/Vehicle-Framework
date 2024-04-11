@@ -37,7 +37,7 @@ namespace Vehicles
 
 		public override bool CanReserve(Pawn pawn, ThingDefCountClass target, StringBuilder stringBuilder = null)
 		{
-			return !claimants.ContainsKey(pawn) && claimants.Count < maxClaimants && vehicle.CompUpgradeTree.CurrentlyUpgrading && MaterialsLeft().NotNullAndAny();
+			return !claimants.ContainsKey(pawn) && claimants.Count < maxClaimants && vehicle.CompUpgradeTree.Upgrading && MaterialsLeft().NotNullAndAny();
 		}
 
 		public override bool ReservedBy(Pawn pawn, ThingDefCountClass target)
@@ -47,7 +47,7 @@ namespace Vehicles
 
 		public List<ThingDefCountClass> MaterialsLeft()
 		{
-			var materials = vehicle.CompUpgradeTree.NodeUnlocking.MaterialsRequired();
+			var materials = vehicle.CompUpgradeTree.NodeUnlocking.MaterialsRequired(Vehicle);
 			Dictionary<ThingDef, int> cachedTd = new Dictionary<ThingDef, int>();
 			foreach(ThingDefCountClass td in materials)
 			{
@@ -100,7 +100,7 @@ namespace Vehicles
 
 		public override void VerifyAndValidateClaimants()
 		{
-			var mats = vehicle.CompUpgradeTree.NodeUnlocking.MaterialsRequired();
+			var mats = vehicle.CompUpgradeTree.NodeUnlocking.MaterialsRequired(Vehicle);
 			var claims = new List<Pawn>(claimants.Keys);
 			foreach(Pawn actor in claims)
 			{

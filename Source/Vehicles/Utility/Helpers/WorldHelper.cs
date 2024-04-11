@@ -46,24 +46,20 @@ namespace Vehicles
 		/// <param name="list"></param>
 		public static Tile.RiverLink BiggestRiverOnTile(List<Tile.RiverLink> list)
 		{
-			return list.MaxBy(x => x.river.widthOnMap);
+			return list.MaxBy(riverlink => ModSettingsHelper.RiverMultiplier(riverlink.river));
 		}
 
 		/// <summary>
-		/// Determine if <paramref name="river"/> is large enough for all ships in <paramref name="pawns"/>
+		/// Determine if <paramref name="riverDef"/> is large enough to fit vehicle
 		/// </summary>
-		/// <param name="river"></param>
-		/// <param name="pawns"></param>
-		public static bool ShipsFitOnRiver(RiverDef river, List<Pawn> pawns)
+		public static bool VehicleBiggerThanRiver(VehicleDef vehicleDef, RiverDef riverDef)
 		{
-			foreach (VehiclePawn vehicle in pawns.Where(p => p.IsBoat()))
+			if (vehicleDef.properties.customRiverCosts.NullOrEmpty())
 			{
-				if ((vehicle.VehicleDef.properties.riverTraversability?.widthOnMap ?? int.MaxValue) > river.widthOnMap)
-				{
-					return false;
-				}
+				return false;
 			}
-			return true;
+			//Multiplied by sqrt(2) to account for worst case scenario where river is diagonal
+			return ModSettingsHelper.RiverMultiplier(riverDef) / 2 < vehicleDef.Size.x;
 		}
 
 		/// <summary>

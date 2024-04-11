@@ -5,7 +5,7 @@ namespace Vehicles
 	public class GraphicDataOverlay
 	{
 		[TweakField]
-		public GraphicDataLayered graphicData;
+		public GraphicDataRGB graphicData;
 		[TweakField(SettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(MinValue = 0, MaxValue = 360, RoundDecimalPlaces = 0, Increment = 1)]
 		public float rotation = 0;

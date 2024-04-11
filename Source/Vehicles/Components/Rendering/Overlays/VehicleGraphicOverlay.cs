@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.Linq;
 using UnityEngine;
 using Verse;
 using SmashTools;
@@ -13,13 +13,74 @@ namespace Vehicles
 
 		public readonly ExtraRotationRegistry rotationRegistry;
 
+		private List<GraphicOverlay> overlays = new List<GraphicOverlay>();
+		private List<GraphicOverlay> extraOverlays = new List<GraphicOverlay>();
+
+		private Dictionary<string, List<GraphicOverlay>> extraOverlayLookup = new Dictionary<string, List<GraphicOverlay>>();
+		
 		public VehicleGraphicOverlay(VehiclePawn vehicle)
 		{
 			this.vehicle = vehicle;
 			rotationRegistry = new ExtraRotationRegistry(this);
 		}
 
-		public List<GraphicOverlay> Overlays => vehicle.VehicleDef.drawProperties.overlays;
+		public IEnumerable<GraphicOverlay> Overlays
+		{
+			get
+			{
+				if (!vehicle.VehicleDef.drawProperties.overlays.NullOrEmpty())
+				{
+					for (int i = 0; i < overlays.Count; i++)
+					{
+						GraphicOverlay graphicOverlay = overlays[i];
+						if (graphicOverlay == null)
+						{
+							graphicOverlay = vehicle.VehicleDef.drawProperties.overlays[i];
+						}
+						yield return graphicOverlay;
+					}
+				}
+				if (!extraOverlays.NullOrEmpty())
+				{
+					foreach (GraphicOverlay graphicOverlay in extraOverlays)
+					{
+						yield return graphicOverlay;
+					}
+				}
+			}
+		}
+
+		public void Init()
+		{
+			if (!vehicle.VehicleDef.drawProperties.overlays.NullOrEmpty())
+			{
+				overlays = new List<GraphicOverlay>();
+
+				foreach (GraphicDataOverlay graphicDataOverlay in vehicle.VehicleDef.drawProperties.graphicOverlays)
+				{
+					GraphicOverlay graphicOverlay = GraphicOverlay.Create(graphicDataOverlay, vehicle);
+					overlays.Add(graphicOverlay);
+				}
+			}
+		}
+
+		public void AddOverlay(string key, GraphicOverlay graphicOverlay)
+		{
+			extraOverlayLookup.AddOrInsert(key, graphicOverlay);
+			extraOverlays.Add(graphicOverlay);
+		}
+
+		public void RemoveOverlays(string key)
+		{
+			if (extraOverlayLookup.ContainsKey(key))
+			{
+				foreach (GraphicOverlay graphicOverlay in extraOverlayLookup[key])
+				{
+					extraOverlays.Remove(graphicOverlay);
+				}
+				extraOverlayLookup.Remove(key);
+			}
+		}
 
 		public virtual void RenderGraphicOverlays(Vector3 drawPos, float angle, Rot8 rot)
 		{
@@ -41,7 +102,7 @@ namespace Vehicles
 				{
 					overlayDrawPos -= new Vector3(0, VehicleRenderer.YOffset_Body + VehicleRenderer.SubInterval, 0);
 				}
-				if (graphicOverlay.data.graphicData.Graphic is Graphic_Rotator rotator)
+				if (graphicOverlay.Graphic is Graphic_Rotator rotator)
 				{
 					extraAngle += rotationRegistry[rotator.RegistryKey].ClampAndWrap(0, 359);
 				}
@@ -69,10 +130,10 @@ namespace Vehicles
 						overlayAngle *= -1; //Flip angle for clockwise rotation facing north
 					}
 
-					Vector3 drawOffset = graphicOverlay.data.graphicData.Graphic.DrawOffset(rot);
+					Vector3 drawOffset = graphicOverlay.Graphic.DrawOffset(rot);
 					Vector2 drawOffsetNoY = new Vector2(drawOffset.x, drawOffset.z); //p0
 
-					Vector3 drawOffsetActual = graphicOverlay.data.graphicData.Graphic.DrawOffset(graphicRot);
+					Vector3 drawOffsetActual = graphicOverlay.Graphic.DrawOffset(graphicRot);
 					Vector2 drawOffsetActualNoY = new Vector2(drawOffsetActual.x, drawOffsetActual.z); //p1
 
 					Vector2 drawOffsetAdjusted = Ext_Math.RotatePointClockwise(drawOffsetActualNoY, overlayAngle); //p2
@@ -80,7 +141,22 @@ namespace Vehicles
 														 //Adds p3 (p2 - p0) which offsets the drawOffset being added in the draw worker, resulting in the drawOffset being p2 or the rotated p1 
 					overlayDrawPos = new Vector3(overlayDrawPos.x + drawOffsetAdjusted.x, overlayDrawPos.y, overlayDrawPos.z + drawOffsetAdjusted.y); 
 				}
-				graphicOverlay.data.graphicData.Graphic.DrawWorker(overlayDrawPos, rot, null, null, vehicle.Angle + extraAngle);
+				if (graphicOverlay.Graphic is Graphic_RGB graphicRGB)
+				{
+					graphicRGB.DrawWorker(overlayDrawPos, rot, null, null, overlayAngle + extraAngle);
+				}
+				else
+				{
+					graphicOverlay.Graphic.DrawWorker(overlayDrawPos, rot, null, null, overlayAngle + extraAngle);
+				}
+			}
+		}
+
+		public void Notify_ColorChanged()
+		{
+			foreach (GraphicOverlay graphicOverlay in Overlays)
+			{
+				graphicOverlay.Notify_ColorChanged();
 			}
 		}
 	}

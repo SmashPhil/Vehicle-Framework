@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<Vehicles.VehicleStatDef>
+		<defName>FlightSpeed</defName>
+		<label>Flight Speed</label>
+		<description>Speed of movement on the world map while flying.</description>
+		<category>VehicleAerial</category>
+		<defaultBaseValue>1</defaultBaseValue>
+		<minValue>0</minValue>
+		
+		<toStringStyle>FloatOne</toStringStyle>
+		<formatString>{0} t/s</formatString>
+		<operationType>Average</operationType>
+		<displayPriorityInCategory>100</displayPriorityInCategory>
+		
+		<modSettingsInfo>
+			<settingsType>FloatBox</settingsType>
+		</modSettingsInfo>
+	</Vehicles.VehicleStatDef>
+	
+	<Vehicles.VehicleStatDef>
+		<defName>FlightControl</defName>
+		<label>Flight Control</label>
+		<description>Capacity of vehicle for flight.  If value reaches 0, the vehicle will be forced to crash land.</description>
+		<category>VehicleAerial</category>
+		<defaultBaseValue>1</defaultBaseValue>
+		<minValue>0</minValue>
+		<maxValue>1</maxValue>
+		
+		<toStringStyle>PercentZero</toStringStyle>
+		<operationType>MinValue</operationType>
+		<alwaysHide>true</alwaysHide>
+	</Vehicles.VehicleStatDef>
+</Defs>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+	<DutyDef>
+		<defName>TravelOrLeaveOcean</defName>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="Vehicles.JobGiver_GotoTravelDestinationVehicle" />
+				<!-- Note this exit node can happen at odd times
+					like if you block siegers from hitting their siege location before they arrive-->
+				<li Class="JobGiver_ExitMapRandom">
+					<defaultLocomotion>Jog</defaultLocomotion>
+				</li>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+
+	<DutyDef>
+		<defName>TravelOrWaitVehicle</defName>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<!-- Goto travel destination if reachable -->
+				<li Class="Vehicles.JobGiver_GotoTravelDestinationVehicle" />
+
+				<li Class="Vehicles.JobGiver_AwaitOrders"/>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+
+	<!-- Defend -->
+
+	<!-- Follow -->
+	<DutyDef>
+		<defName>FollowVehicle</defName>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="Vehicles.JobGiver_FollowVehicle" />
+				<li Class="ThinkNode_ForbidOutsideFlagRadius">
+					<maxDistToSquadFlag>16</maxDistToSquadFlag>
+				</li>
+				<li Class="JobGiver_WanderNearDutyLocation">
+					<wanderRadius>3</wanderRadius>
+				</li>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+	
+	<!-- TODO - Modify for following vehicles in column -->
+	<DutyDef>
+		<defName>EscortVehicle</defName>
+		<alwaysShowWeapon>true</alwaysShowWeapon>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="JobGiver_TakeCombatEnhancingDrug">
+					<onlyIfInDanger>true</onlyIfInDanger>
+				</li>
+				<li Class="JobGiver_AIDefendEscortee">
+					<targetAcquireRadius>65</targetAcquireRadius>
+					<targetKeepRadius>72</targetKeepRadius>
+				</li>
+				<li Class="JobGiver_AIFollowEscortee"/>
+				<li Class="ThinkNode_Subtree">
+					<treeDef>SatisfyVeryUrgentNeeds</treeDef>
+				</li> 
+				<li Class="JobGiver_WanderNearDutyLocation">
+					<wanderRadius>8</wanderRadius>
+				</li>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+
+	<!-- AssaultColony -->
+	<DutyDef>
+		<defName>ArmoredAssault</defName>
+		<alwaysShowWeapon>true</alwaysShowWeapon>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="JobGiver_TakeCombatEnhancingDrug" />
+				<li Class="JobGiver_AIFightEnemies">
+					<targetAcquireRadius>65</targetAcquireRadius>
+					<targetKeepRadius>72</targetKeepRadius>
+				</li>
+				<li Class="JobGiver_AITrashColonyClose" />
+				<li Class="JobGiver_AITrashBuildingsDistant" />
+				<li Class="JobGiver_AIGotoNearestHostile" />
+				<li Class="JobGiver_AITrashBuildingsDistant">
+					<attackAllInert>true</attackAllInert>
+				</li>
+				<li Class="JobGiver_AISapper">
+					<canMineNonMineables>false</canMineNonMineables>
+				</li>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+
+	<!-- Escort -->
+
+	<!-- ExitMapRandom -->
+
+	<!-- ExitMapBest -->
+
+	<!-- ExitMapBestAndDefendSelf -->
+</Defs>

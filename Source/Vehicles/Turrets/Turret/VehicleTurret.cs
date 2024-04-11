@@ -264,7 +264,7 @@ namespace Vehicles
 
 		public int ReloadTicks => reloadTicks;
 
-		public Dictionary<VehicleTurretEventDef, EventTrigger> EventRegistry { get; set; }
+		public EventManager<VehicleTurretEventDef> EventRegistry { get; set; }
 
 		public bool DeploymentSatisfied
 		{
@@ -795,7 +795,7 @@ namespace Vehicles
 		public Rect ScaleUIRectRecursive(VehicleDef vehicleDef, Rect rect, Rot8 rot, float iconScale = 1)
 		{
 			//Scale to VehicleDef drawSize
-			Vector2 size = vehicleDef.ScaleDrawRatio(turretDef.graphicData, rect.size, iconScale: iconScale);
+			Vector2 size = vehicleDef.ScaleDrawRatio(turretDef.graphicData, rot, rect.size, iconScale: iconScale);
 			//Adjust position from new rect size
 			Vector2 adjustedPosition = rect.position + (rect.size - size) / 2f;
 			// Size / V_max = scalar
@@ -1178,7 +1178,7 @@ namespace Vehicles
 					Projectile projectileInstance = (Projectile)GenSpawn.Spawn(projectileDef, vehicle.Position, vehicle.Map, WipeMode.Vanish);
 					if (turretDef.projectileSpeed > 0)
 					{
-						projectileInstance.TryAddComp(new CompTurretProjectileProperties(vehicle)
+						projectileInstance.TryAddComp(new CompTurretProjectileProperties(projectileInstance)
 						{
 							speed = turretDef.projectileSpeed > 0 ? turretDef.projectileSpeed : projectileInstance.def.projectile.speed,
 							hitflag = turretDef.hitFlags,
@@ -1313,7 +1313,7 @@ namespace Vehicles
 								}
 								thrownMote.SetVelocity(thrownAngle, moteProps.speedThrown.RandomInRange);
 							}
-							if (mote is Mote_CannonPlume cannonMote)
+							if (mote is MoteCannonPlume cannonMote)
 							{
 								cannonMote.cyclesLeft = moteProps.cycles;
 								cannonMote.animationType = moteProps.animationType;
@@ -1637,6 +1637,11 @@ namespace Vehicles
 			return false;
 		}
 
+		public void SetMagazineCount(int count)
+		{
+			shellCount = Mathf.Clamp(count, 0, turretDef.magazineCapacity);
+		}
+
 		protected bool ReloadInternal(ThingDef ammo)
 		{
 			try
@@ -1802,13 +1807,6 @@ namespace Vehicles
 			{
 				StartTicking();
 			}
-		}
-
-		//TODO - remove in 1.5
-		[Obsolete("Use CheckTargetInvalid instead.", error: true)]
-		public virtual bool SetTargetConditionalOnThing(LocalTargetInfo target, bool resetPrefireTimer = true)
-		{
-			return CheckTargetInvalid(resetPrefireTimer);
 		}
 
 		/// <summary>

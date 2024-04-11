@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<ThinkTreeDef>
+		<defName>Vehicle</defName>
+		<thinkRoot Class="ThinkNode_Priority">
+			<subNodes>
+				<!--Do a queued job -->
+				<li Class = "ThinkNode_QueuedJob"/>
+				
+				<!-- Lord directives (high priority -->
+				<li Class="ThinkNode_JoinVoluntarilyJoinableLord">
+					<dutyHook>HighPriority</dutyHook>
+					<subNodes>
+						<li Class="ThinkNode_Subtree">
+							<treeDef>LordDuty</treeDef>
+						</li>
+					</subNodes>
+				</li>
+				
+				<!-- Lord directives (medium priority) -->
+				<li Class="ThinkNode_JoinVoluntarilyJoinableLord">
+					<dutyHook>MediumPriority</dutyHook>
+					<subNodes>
+						<li Class="ThinkNode_Subtree">
+							<treeDef>LordDuty</treeDef>
+								</li>
+					</subNodes>
+				</li>
+				
+				<!-- Go Idle -->
+				<li Class = "ThinkNode_Tagger">
+					<tagToGive>Idle</tagToGive>
+					<subNodes>
+						<li Class="Vehicles.JobGiver_AwaitOrders"/>
+					</subNodes>
+				</li>
+				
+				<!-- Idle Ship -->
+				<li Class= "Vehicles.JobGiver_AwaitOrders"/>
+			</subNodes>
+		</thinkRoot>
+	</ThinkTreeDef>
+	
+	<ThinkTreeDef>
+		<defName>Vehicle_Constant</defName>
+		<thinkRoot Class="ThinkNode_Priority">
+			<subNodes>
+				<!-- Despawned -->
+				<li Class="ThinkNode_Subtree">
+					<treeDef>Despawned</treeDef>
+				</li>
+
+				<li Class="ThinkNode_ConditionalCanDoConstantThinkTreeJobNow">
+					<subNodes>
+						<!-- Flee explosion -->
+						<li Class="JobGiver_FleePotentialExplosion" />
+
+						<!-- Join auto joinable caravan -->
+						<li Class="ThinkNode_Subtree">
+							<treeDef>JoinAutoJoinableCaravan</treeDef>
+						</li>
+
+						<!-- Hostility response -->
+						<li Class="JobGiver_ConfigurableHostilityResponse" />
+						
+					</subNodes>
+				</li>
+
+				<li Class="ThinkNode_ConditionalCanDoLordJobNow">
+					<subNodes>
+						<!-- Lord directives -->
+						<li Class="ThinkNode_Subtree">
+							<treeDef>LordDutyConstant</treeDef>
+						</li>
+					</subNodes>
+				</li>
+			</subNodes>
+		</thinkRoot>
+	</ThinkTreeDef>
+</Defs>

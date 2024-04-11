@@ -20,7 +20,7 @@ namespace Vehicles
 
 		private int delayLaunchingTicks;
 
-		public override void DrawAt(Vector3 drawLoc, bool flip = false)
+		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
 			(launchProtocolDrawPos, _) = vehicle.CompVehicleLauncher.launchProtocol.Draw(RootPos, 0);
 			//DrawDropSpotShadow();

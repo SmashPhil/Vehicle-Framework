@@ -37,19 +37,57 @@ namespace Vehicles
 		public Material[] materials;
 		public int[] patternPointers;
 
-		public override Material MatSingle => MatNorth;
+		public virtual int MatCount => 8;
 
-		public virtual int MatCount => 4;
 		public override bool WestFlipped => westFlipped;
+
 		public override bool EastFlipped => eastFlipped;
+
 		public virtual bool EastRotated => eastRotated;
+
 		public virtual bool SouthRotated => southRotated;
+
 		public virtual bool EastDiagonalRotated => eastDiagonalRotated;
+
 		public virtual bool WestDiagonalRotated => westDiagonalRotated;
 
 		public override bool ShouldDrawRotated => (data is null || data.drawRotated) && (MatEast == MatNorth || MatWest == MatNorth);
 
 		public override float DrawRotatedExtraAngleOffset => drawRotatedExtraAngleOffset;
+
+		public override Material MatSingle => MatNorth;
+
+		public override Material MatNorth
+		{
+			get
+			{
+				return materials[0];
+			}
+		}
+
+		public override Material MatEast
+		{
+			get
+			{
+				return materials[1];
+			}
+		}
+
+		public override Material MatSouth
+		{
+			get
+			{
+				return materials[2];
+			}
+		}
+
+		public override Material MatWest
+		{
+			get
+			{
+				return materials[3];
+			}
+		}
 
 		public virtual GraphicDataRGB DataRGB
 		{
@@ -125,6 +163,15 @@ namespace Vehicles
 				}
 			}
 			return MeshAt(rot);
+		}
+
+		public Material MatAtFull(Rot8 rot)
+		{
+			if (materials.OutOfBounds(rot.AsInt))
+			{
+				return BaseContent.BadMat;
+			}
+			return materials[rot.AsInt];
 		}
 
 		public override void Init(GraphicRequest req)
@@ -233,6 +280,7 @@ namespace Vehicles
 				if (textures[2] is null)
 				{
 					textures[2] = textures[0];
+					southRotated = DataAllowsFlip;
 				}
 				if (textures[1] is null)
 				{
@@ -244,6 +292,7 @@ namespace Vehicles
 					else
 					{
 						textures[1] = textures[0];
+						eastRotated = DataAllowsFlip;
 					}
 				}
 				if (textures[3] is null)
@@ -259,7 +308,6 @@ namespace Vehicles
 					}
 				}
 			}
-			
 			if (MatCount == 8)
 			{
 				if (textures[4] is null)
@@ -346,14 +394,12 @@ namespace Vehicles
 					}
 					if (masks[0] is null)
 					{
-						Log.Error("Failed to find any mask textures at " + path + " while constructing " + this.ToStringSafe());
 						return;
 					}
 					if (masks[2] is null)
 					{
 						masks[2] = masks[0];
 						patternPointers[2] = 0;
-						southRotated = DataAllowsFlip;
 					}
 					if (masks[1] is null)
 					{
@@ -361,20 +407,17 @@ namespace Vehicles
 						{
 							masks[1] = masks[3];
 							patternPointers[1] = 3;
-							eastFlipped = DataAllowsFlip;
 						}
 						else
 						{
 							masks[1] = masks[0];
 							patternPointers[1] = 0;
-							eastRotated = DataAllowsFlip;
 						}
 					}
 					if (masks[3] is null)
 					{
 						masks[3] = masks[1];
 						patternPointers[3] = 1;
-						westFlipped = DataAllowsFlip;
 					}
 				}
 				
@@ -405,6 +448,31 @@ namespace Vehicles
 						westDiagonalRotated = DataAllowsFlip;
 					}
 				}
+			}
+		}
+
+		public virtual void DrawWorker(Vector3 loc, Rot8 rot, ThingDef thingDef, Thing thing, float extraRotation)
+		{
+			Mesh mesh = MeshAtFull(rot);
+			Quaternion quaternion = QuatFromRot(rot);
+			if (EastDiagonalRotated && (rot == Rot8.NorthEast || rot == Rot8.SouthEast) || (WestDiagonalRotated && (rot == Rot8.NorthWest || rot == Rot8.SouthWest)))
+			{
+				quaternion *= Quaternion.Euler(-Vector3.up);
+			}
+			if (extraRotation != 0f)
+			{
+				quaternion *= Quaternion.Euler(Vector3.up * extraRotation);
+			}
+			if (data != null && data.addTopAltitudeBias)
+			{
+				quaternion *= Quaternion.Euler(Vector3.left * 2f);
+			}
+			loc += DrawOffset(rot);
+			Material mat = MatAtFull(rot);
+			DrawMeshInt(mesh, loc, quaternion, mat);
+			if (ShadowGraphic != null)
+			{
+				ShadowGraphic.DrawWorker(loc, rot, thingDef, thing, extraRotation);
 			}
 		}
 

@@ -34,6 +34,11 @@ namespace Vehicles
 		[TweakField]
 		public List<VehicleComponent> components = new List<VehicleComponent>();
 
+		private Dictionary<StatUpgradeCategoryDef, StatOffset> categoryOffsets = new Dictionary<StatUpgradeCategoryDef, StatOffset>();
+		private Dictionary<StatDef, StatOffset> baseStatOffsets = new Dictionary<StatDef, StatOffset>();
+
+		private Dictionary<VehicleStatDef, StatOffset> statOffsets = new Dictionary<VehicleStatDef, StatOffset>();
+
 		private static readonly List<IntVec3> hitboxHighlightCells = new List<IntVec3>();
 
 		private VehiclePawn vehicle;
@@ -74,9 +79,156 @@ namespace Vehicles
 			}
 		}
 
-		public float GetStatValue(VehicleStatDef statDef)
+		public void AddStatOffset(VehicleStatDef vehicleStatDef, float value)
 		{
-			return statCache[statDef];
+			if (!statOffsets.TryGetValue(vehicleStatDef, out StatOffset statOffset))
+			{
+				statOffsets[vehicleStatDef] = new StatOffset(vehicle, vehicleStatDef);
+				statOffset = statOffsets[vehicleStatDef];
+			}
+			statOffset.Offset += value;
+		}
+
+		public void AddStatOffset(StatUpgradeCategoryDef upgradeCategoryDef, float value)
+		{
+			if (!categoryOffsets.TryGetValue(upgradeCategoryDef, out StatOffset statOffset))
+			{
+				categoryOffsets[upgradeCategoryDef] = new StatOffset(vehicle, upgradeCategoryDef);
+				statOffset = categoryOffsets[upgradeCategoryDef];
+			}
+			statOffset.Offset += value;
+		}
+
+		public void SetStatOffset(string key, VehicleStatDef vehicleStatDef, float value)
+		{
+			if (!statOffsets.TryGetValue(vehicleStatDef, out StatOffset statOffset))
+			{
+				statOffsets[vehicleStatDef] = new StatOffset(vehicle, vehicleStatDef);
+				statOffset = statOffsets[vehicleStatDef];
+			}
+			statOffset.AddOverride(key, value);
+		}
+
+		public void SetStatOffset(string key, StatUpgradeCategoryDef upgradeCategoryDef, float value)
+		{
+			if (!categoryOffsets.TryGetValue(upgradeCategoryDef, out StatOffset statOffset))
+			{
+				categoryOffsets[upgradeCategoryDef] = new StatOffset(vehicle, upgradeCategoryDef);
+				statOffset = categoryOffsets[upgradeCategoryDef];
+			}
+			statOffset.AddOverride(key, value);
+		}
+
+		public void SubtractStatOffset(VehicleStatDef vehicleStatDef, float value)
+		{
+			if (!statOffsets.TryGetValue(vehicleStatDef, out StatOffset statOffset))
+			{
+				statOffsets[vehicleStatDef] = new StatOffset(vehicle, vehicleStatDef);
+				statOffset = statOffsets[vehicleStatDef];
+			}
+			statOffset.Offset -= value;
+		}
+
+		public void SubtractStatOffset(StatUpgradeCategoryDef upgradeCategoryDef, float value)
+		{
+			if (!categoryOffsets.TryGetValue(upgradeCategoryDef, out StatOffset statOffset))
+			{
+				categoryOffsets[upgradeCategoryDef] = new StatOffset(vehicle, upgradeCategoryDef);
+				statOffset = categoryOffsets[upgradeCategoryDef];
+			}
+			statOffset.Offset -= value;
+		}
+
+		public void RemoveStatOffset(string key, VehicleStatDef vehicleStatDef)
+		{
+			if (!statOffsets.TryGetValue(vehicleStatDef, out StatOffset statOffset))
+			{
+				statOffsets[vehicleStatDef] = new StatOffset(vehicle, vehicleStatDef);
+				statOffset = statOffsets[vehicleStatDef];
+			}
+			statOffset.RemoveOverride(key);
+		}
+
+		public void RemoveStatOffset(string key, StatUpgradeCategoryDef upgradeCategoryDef)
+		{
+			if (!categoryOffsets.TryGetValue(upgradeCategoryDef, out StatOffset statOffset))
+			{
+				categoryOffsets[upgradeCategoryDef] = new StatOffset(vehicle, upgradeCategoryDef);
+				statOffset = categoryOffsets[upgradeCategoryDef];
+			}
+			statOffset.RemoveOverride(key);
+		}
+
+		public float GetStatOffset(VehicleStatDef vehicleStatDef)
+		{
+			if (statOffsets.TryGetValue(vehicleStatDef, out StatOffset statOffset))
+			{
+				return statOffset.Offset;
+			}
+			return 0;
+		}
+
+		public float GetStatOffset(StatUpgradeCategoryDef upgradeCategoryDef)
+		{
+			if (categoryOffsets.TryGetValue(upgradeCategoryDef, out StatOffset statOffset))
+			{
+				return statOffset.Offset;
+			}
+			return 0;
+		}
+
+		public float GetStatValue(VehicleStatDef vehicleStatDef)
+		{
+			return statCache[vehicleStatDef];
+		}
+
+		public void AddUpgradeableStatValue(StatDef statDef, float value)
+		{
+			if (!baseStatOffsets.TryGetValue(statDef, out StatOffset statOffset))
+			{
+				baseStatOffsets[statDef] = new StatOffset(vehicle, statDef);
+				statOffset = baseStatOffsets[statDef];
+			}
+			statOffset.Offset += value;
+		}
+
+		public void SubtractUpgradeableStatValue(StatDef statDef, float value)
+		{
+			if (!baseStatOffsets.TryGetValue(statDef, out StatOffset statOffset))
+			{
+				baseStatOffsets[statDef] = new StatOffset(vehicle, statDef);
+				statOffset = baseStatOffsets[statDef];
+			}
+			statOffset.Offset += value;
+		}
+
+		public void SetUpgradeableStatValue(string key, StatDef statDef, float value)
+		{
+			if (!baseStatOffsets.TryGetValue(statDef, out StatOffset statOffset))
+			{
+				baseStatOffsets[statDef] = new StatOffset(vehicle, statDef);
+				statOffset = baseStatOffsets[statDef];
+			}
+			statOffset.AddOverride(key, value);
+		}
+
+		public void RemoveUpgradeableStatValue(string key, StatDef statDef)
+		{
+			if (!baseStatOffsets.TryGetValue(statDef, out StatOffset statOffset))
+			{
+				baseStatOffsets[statDef] = new StatOffset(vehicle, statDef);
+				statOffset = baseStatOffsets[statDef];
+			}
+			statOffset.RemoveOverride(key);
+		}
+
+		public float GetUpgradeableStatValue(StatDef statDef)
+		{
+			if (baseStatOffsets.TryGetValue(statDef, out StatOffset statOffset))
+			{
+				return statOffset.Offset;
+			}
+			return vehicle.GetStatValue(statDef);
 		}
 
 		public void MarkStatDirty(VehicleStatDef statDef)
@@ -156,7 +308,7 @@ namespace Vehicles
 				Log.Error($"Unable to locate component {key} in stat handler.");
 				return;
 			}
-			component.health = component.props.health * value;
+			component.health = component.MaxHealth * value;
 			MarkAllDirty();
 		}
 
@@ -229,7 +381,7 @@ namespace Vehicles
 		/// <remarks>The instigator is immediately deregistered upon dealing damage to make way for multiple damage instances from the same instigator (won't conflict with synchronous operations)</remarks>
 		/// <param name="thing"></param>
 		/// <param name="cell"></param>
-		public void RegisterImpacter(Thing thing, IntVec3 cell)
+		public IntVec3 RegisterImpacter(Thing thing, IntVec3 cell)
 		{
 			CellRect occupiedRect = vehicle.OccupiedRect();
 			if (!occupiedRect.Contains(cell))
@@ -237,6 +389,7 @@ namespace Vehicles
 				cell = occupiedRect.MinBy(c => Ext_Map.Distance(c, cell));
 			}
 			impacter[thing] = cell;
+			return cell;
 		}
 
 		public void DeregisterImpacter(Thing thing)
@@ -362,7 +515,7 @@ namespace Vehicles
 				VehicleComponent.VehiclePartDepth hitDepth = VehicleComponent.VehiclePartDepth.External;
 				for (int i = 0; i < Mathf.Max(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z); i++)
 				{
-					if (!vehicle.Spawned || dinfo.Amount <= 0)
+					if (vehicle.Destroyed || dinfo.Amount <= 0)
 					{
 						return;
 					}

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<HistoryEventDef>
+		<defName>VF_BoardLandVehicle</defName>
+		<label>boarding land vehicle</label>
+	</HistoryEventDef>
+	<HistoryEventDef>
+		<defName>VF_BoardAirVehicle</defName>
+		<label>boarding air vehicle</label>
+	</HistoryEventDef>
+	<HistoryEventDef>
+		<defName>VF_BoardSeaVehicle</defName>
+		<label>boarding sea vehicle</label>
+	</HistoryEventDef>
+	<HistoryEventDef>
+		<defName>VF_BoardUniversalVehicle</defName>
+		<label>boarding universal vehicle</label>
+	</HistoryEventDef>
+	
+	<HistoryEventDef>
+		<defName>VF_BoardedLandVehicle</defName>
+		<label>boarded land vehicle</label>
+	</HistoryEventDef>
+	<HistoryEventDef>
+		<defName>VF_BoardedAirVehicle</defName>
+		<label>boarded air vehicle</label>
+	</HistoryEventDef>
+	<HistoryEventDef>
+		<defName>VF_BoardedSeaVehicle</defName>
+		<label>boarded sea vehicle</label>
+	</HistoryEventDef>
+	<HistoryEventDef>
+		<defName>VF_BoardedUniversalVehicle</defName>
+		<label>boarded universal vehicle</label>
+	</HistoryEventDef>
+	
+</Defs>

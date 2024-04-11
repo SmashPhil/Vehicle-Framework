@@ -9,6 +9,7 @@ using RimWorld;
 using SmashTools;
 using SmashTools.Performance;
 using UpdateLogTool;
+using LudeonTK;
 
 namespace Vehicles
 {
@@ -117,10 +118,12 @@ namespace Vehicles
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugShootAnyTurret".Translate(), ref debugShootAnyTurret, "VF_DevMode_DebugShootAnyTurretTooltip".Translate());
 					
 					listingStandard.Header("Debugging Only", ListingExtension.BannerColor, fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);
-					//listingStandard.CheckboxLabeledWithMessage("Raiders / Traders (Experimental)", delegate (bool value)
-					//{
-					//	return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput);
-					//}, ref debugAllowRaiders, "Enables vehicle generation for NPCs.\n NOTE: This is an experimental feature. Use at your own risk.");
+
+					listingStandard.CheckboxLabeledWithMessage("Raiders / Traders (Experimental)", delegate (bool value)
+					{
+						return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput);
+					}, ref debugAllowRaiders, "Enables vehicle generation for NPCs.\n NOTE: This is an experimental feature. Use at your own risk.");
+
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugSpawnVehiclesGodMode".Translate(), ref debugSpawnVehicleBuildingGodMode, "VF_DevMode_DebugSpawnVehiclesGodModeTooltip".Translate());
 					bool checkOn = debugUseMultithreading;
 					listingStandard.CheckboxLabeled("Use Multithreading", ref checkOn);
@@ -208,7 +211,7 @@ namespace Vehicles
 
 		private void DoColumnButtons()
 		{
-			listingStandard.Gap(4);
+			listingStandard.Gap(2);
 			Rect buttonRect = listingStandard.GetRect(30);
 			if (Widgets.ButtonText(buttonRect, "VF_DevMode_DebugPathfinderDebugging".Translate()))
 			{
@@ -217,7 +220,7 @@ namespace Vehicles
 			}
 			TooltipHandler.TipRegionByKey(buttonRect, "VF_DevMode_DebugPathfinderDebuggingTooltip");
 
-			listingStandard.Gap(4);
+			listingStandard.Gap(2);
 			buttonRect = listingStandard.GetRect(30);
 			if (Widgets.ButtonText(buttonRect, "VF_DevMode_DebugWorldPathfinderDebugging".Translate()))
 			{
@@ -226,7 +229,7 @@ namespace Vehicles
 			}
 			TooltipHandler.TipRegionByKey(buttonRect, "VF_DevMode_DebugWorldPathfinderDebuggingTooltip");
 
-			listingStandard.Gap(4);
+			listingStandard.Gap(2);
 			buttonRect = listingStandard.GetRect(30);
 			if (Widgets.ButtonText(buttonRect, "Output Material Cache"))
 			{
@@ -234,7 +237,7 @@ namespace Vehicles
 				RGBMaterialPool.LogAllMaterials();
 			}
 
-			listingStandard.Gap(4);
+			listingStandard.Gap(2);
 			buttonRect = listingStandard.GetRect(30);
 			if (Widgets.ButtonText(buttonRect, "Output Owners"))
 			{
@@ -257,7 +260,7 @@ namespace Vehicles
 				}
 			}
 
-			listingStandard.Gap(4);
+			listingStandard.Gap(2);
 			buttonRect = listingStandard.GetRect(30);
 			if (Widgets.ButtonText(buttonRect, "Regenerate All Regions"))
 			{
@@ -280,7 +283,7 @@ namespace Vehicles
 				}, "Regenerating Regions", false, null);
 			}
 
-			listingStandard.Gap(4);
+			listingStandard.Gap(2);
 			buttonRect = listingStandard.GetRect(30);
 			if (Widgets.ButtonText(buttonRect, "Clear Region Cache"))
 			{
@@ -298,6 +301,7 @@ namespace Vehicles
 				}, "Clearing Region Cache", false, null);
 			}
 
+			listingStandard.Gap(2);
 			buttonRect = listingStandard.GetRect(30);
 			if (Widgets.ButtonText(buttonRect, "Flash Path Costs"))
 			{
@@ -456,7 +460,7 @@ namespace Vehicles
 				{
 					versionChecking = update.UpdateData.currentVersion;
 					string label = versionChecking;
-					if (versionChecking == VehicleHarmony.Version.VersionString)
+					if (versionChecking == VehicleHarmony.VehicleMMD.ModVersion)
 					{
 						label += " (Current)";
 					}

@@ -144,36 +144,25 @@ namespace Vehicles
 			return false;
 		}
 
-		public void AddTurrets(List<VehicleTurret> cannonList)
+		public void AddTurret(VehicleTurret turret)
 		{
-			if (cannonList.NullOrEmpty())
-			{
-				return;
-			}
-			foreach (VehicleTurret turret in cannonList)
-			{
-				VehicleTurret newTurret = CreateTurret(Vehicle, turret);
-				turrets.RemoveAll(t => t.key == newTurret.key);
-				turrets.Add(newTurret);
-			}
+			VehicleTurret newTurret = CreateTurret(Vehicle, turret);
+			newTurret.FillEvents_Def();
+			turrets.Add(newTurret);
+			RevalidateTurrets();
 		}
 
-		public void RemoveTurrets(List<VehicleTurret> turrets)
+		public bool RemoveTurret(string key)
 		{
-			if (turrets.NullOrEmpty())
-			{
-				return;
-			}
 			for (int i = turrets.Count - 1; i >= 0; i--)
 			{
 				VehicleTurret turret = turrets[i];
-				VehicleTurret matchingTurret = turrets.FirstOrDefault(c => c.key == turret.key);
-				if (matchingTurret is null)
+				if (turret.key == key)
 				{
-					Log.Error($"Unable to locate {turret.key} in cannonList for removal. Is Key missing on upgraded cannon?");
+					return RemoveTurret(turret);
 				}
-				RemoveTurret(matchingTurret);
 			}
+			return false;
 		}
 
 		public bool RemoveTurret(VehicleTurret turret)
@@ -213,7 +202,7 @@ namespace Vehicles
 
 		public override IEnumerable<Gizmo> CompGetGizmosExtra()
 		{
-			if (Vehicle.Faction != Faction.OfPlayer)
+			if (Vehicle.Faction != Faction.OfPlayer && !DebugSettings.ShowDevGizmos)
 			{
 				yield break; //Don't return any gizmos if belonging to another faction
 			}
@@ -547,7 +536,7 @@ namespace Vehicles
 
 		public override void AIAutoCheck()
 		{
-			foreach(VehicleTurret cannon in turrets)
+			foreach (VehicleTurret cannon in turrets)
 			{
 				if (cannon.shellCount < Mathf.CeilToInt(cannon.turretDef.magazineCapacity / 4f) && (!cannon.TargetLocked || cannon.shellCount <= 0))
 				{
@@ -599,6 +588,18 @@ namespace Vehicles
 		public override void PostGeneration()
 		{
 			CreateTurretInstances();
+			if (Vehicle.Faction != Faction.OfPlayer)
+			{
+				FillMagazineCapacity();
+			}
+		}
+
+		public override void Notify_ColorChanged()
+		{
+			foreach (VehicleTurret turret in turrets)
+			{
+				turret.ResolveCannonGraphics(Vehicle.patternData, true);
+			}
 		}
 
 		public override void EventRegistration()
@@ -627,7 +628,7 @@ namespace Vehicles
 		{
 			if (Props.turrets.NotNullAndAny())
 			{
-				foreach(VehicleTurret turret in Props.turrets)
+				foreach (VehicleTurret turret in Props.turrets)
 				{
 					try
 					{
@@ -639,10 +640,15 @@ namespace Vehicles
 						SmashLog.Error($"Exception thrown while attempting to generate <text>{turret.turretDef.label}</text> for <text>{Vehicle.Label}</text>. Exception=\"{ex}\"");
 					}
 				}
-				if (turrets.Select(x => x.key).GroupBy(y => y).NotNullAndAny(key => key.Count() > 1))
-				{
-					Log.Warning("Duplicate VehicleTurret key has been found. These are intended to be unique.");
-				}
+				CheckDuplicateKeys();
+			}
+		}
+
+		public void CheckDuplicateKeys()
+		{
+			if (turrets.Select(x => x.key).GroupBy(y => y).NotNullAndAny(key => key.Count() > 1))
+			{
+				Log.Warning("Duplicate VehicleTurret key has been found. These are intended to be unique.");
 			}
 		}
 
@@ -650,6 +656,7 @@ namespace Vehicles
 		{
 			turretQueue ??= new List<TurretData>();
 			ResolveChildTurrets();
+			RecacheDeployment();
 			InitTurrets();
 		}
 
@@ -687,21 +694,82 @@ namespace Vehicles
 
 		public void InitTurrets()
 		{
-			RecacheDeployment();
 			for (int i = turrets.Count - 1; i >= 0; i--)
 			{
 				VehicleTurret turret = turrets[i];
-				if (Props.turrets.FirstOrDefault(turretProps => turretProps.key == turret.key) is VehicleTurret turretProps)
+				VehicleTurret reference = FindTurretReference(turret.key);
+				
+				if (reference != null)
 				{
-					turret.Init(turretProps);
-					ResolveChildTurrets(turret);
-					QueueTicker(turret); //Queue all turrets initially, will be sorted out after 1st tick
+					InitTurret(turret, reference);
 				}
 				else
 				{
-					Log.Error($"Unable to find matching turret from save file to CompProperties based on key {turret.key}. Was this changed or removed?");
+					Log.Error($"Unable to find reference turret for key {turret.key}. Turrets can only be added if they exist in the vehicle's upgrade tree or in its initial turrets.");
 					turrets.Remove(turret); //Remove from turret list, invalid turret will throw exceptions
 				}
+			}
+		}
+
+		private VehicleTurret FindTurretReference(string key)
+		{
+			if (MatchingTurret(key, Props.turrets, out VehicleTurret result))
+			{
+				return result;
+			}
+			else if (Vehicle.CompUpgradeTree != null)
+			{
+				foreach (UpgradeNode upgradeNode in Vehicle.CompUpgradeTree.Props.def.nodes)
+				{
+					if (!upgradeNode.upgrades.NullOrEmpty())
+					{
+						foreach (Upgrade upgrade in upgradeNode.upgrades)
+						{
+							if (upgrade is TurretUpgrade turretUpgrade)
+							{
+								if (MatchingTurret(key, turretUpgrade.turrets, out VehicleTurret upgradeResult))
+								{
+									return upgradeResult;
+								}
+							}
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+		private static bool MatchingTurret(string key, List<VehicleTurret> turrets, out VehicleTurret result)
+		{
+			result = null;
+			if (turrets.NullOrEmpty())
+			{
+				return false;
+			}
+
+			foreach (VehicleTurret turret in turrets)
+			{
+				if (turret.key == key)
+				{
+					result = turret;
+					return true;
+				}
+			}
+			return false;
+		}
+
+		private void InitTurret(VehicleTurret turret, VehicleTurret reference)
+		{
+			turret.Init(reference);
+			ResolveChildTurrets(turret);
+			QueueTicker(turret); //Queue all turrets initially, will be sorted out after 1st tick
+		}
+
+		public void FillMagazineCapacity()
+		{
+			foreach (VehicleTurret turret in turrets)
+			{
+				turret.SetMagazineCount(int.MaxValue);
 			}
 		}
 

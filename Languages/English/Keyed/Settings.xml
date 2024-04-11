@@ -13,6 +13,8 @@
 	<VF_WorldMapGen>World/Map Generation</VF_WorldMapGen>
 	<VF_BeachGenMultiplier>Beach Size Multiplier</VF_BeachGenMultiplier>
 	<VF_BeachGenMultiplierTooltip>Increase the amount of water on the coastline.</VF_BeachGenMultiplierTooltip>
+	<VF_RiverGenMultiplier>River Size Multiplier</VF_RiverGenMultiplier>
+	<VF_RiverGenMultiplierTooltip>Increase the width of rivers on maps.</VF_RiverGenMultiplierTooltip>
 	<VF_ForceSettlementCoast>Push Settlement to Coast</VF_ForceSettlementCoast>
 	<VF_ForceSettlementCoastTooltip>Push nearby faction settlements to the coast if within given radius</VF_ForceSettlementCoastTooltip>
 	<VF_EverySettlementToCoast>Every Settlement</VF_EverySettlementToCoast>

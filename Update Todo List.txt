@@ -1,6 +1,4 @@
 - Rebuild entire solution
-- Reboot game to update Version.txt with current build date.
-- Update Manifest version
 - Verify UpdateLog version, testing update flag, and text
-- Update via PublisherPlus (ensure Ignore/ folders, source code, bat file, and git files are excluded)
+- Update via PublisherPlus (ensure Ignore/ folders, source code, and git files are excluded)
 - Archive UpdateLog and clear it for next version

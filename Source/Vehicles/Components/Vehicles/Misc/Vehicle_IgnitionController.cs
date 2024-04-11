@@ -35,7 +35,7 @@ namespace Vehicles
 
 				if (value)
 				{
-					if (!VehicleMod.settings.debug.debugDraftAnyVehicle && !vehicle.CanDraft(out string reason))
+					if (!vehicle.CanDraft(out string reason))
 					{
 						Messages.Message(reason, MessageTypeDefOf.RejectInput);
 						return;
@@ -158,6 +158,10 @@ namespace Vehicles
 			if (vehicle.Deploying)
 			{
 				draftCommand.Disable("VF_VehicleUnableToMove".Translate(vehicle));
+			}
+			if (!vehicle.CanDraft(out string reason))
+			{
+				draftCommand.Disable(reason);
 			}
 			if (!Drafted)
 			{

@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <!--Can utilize Version.txt file placed in mod's root directory-->
+  <currentVersion>1.5.1586</currentVersion>
+  <!--Startup,GameInit,LoadedGame,NewGame-->
+  <updateOn>GameInit</updateOn>
+  <!--Full description shown in update page-->
+  <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+Woohoo! Vehicle Framework is now updated for 1.5 and the Anomaly DLC.
+
+To celebrate the release of a new DLC, I've added 'upgrade' mechanics. This allows modders to create upgrade trees for their vehicles.
+
+&lt;i&gt;What does that mean? Can I make my vehicle go faster?&lt;/i&gt;
+Yup! There are tons of things that can be upgraded such as stats, armor, and even adding / swapping / removing turrets.  I won't list them all since it would take up a lot of space but it's very expansive so if modders make the effort to add them, expect some cool upgrade trees to customize your vehicles.
+
+&lt;i&gt;What about raiders? I thought those were coming first?&lt;/i&gt;
+I'm working on it I promise. I have the groundwork laid out for raider AI which is proving to be very time consuming. So I figured I'd spend a little time and give you guys something cool to play around with while I work on raiders :P
+
+When I do have the first iteration of raider AI finished, it will be an opt-in feature that you can enable in the mod settings. I'll post more info about it in a future update.
+
+P.S. River travel is now enabled, go crazy.
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed thread safety issues with regions, causing vehicles to not be able to path to specific areas on the map.
+
+- Fixed bug where region padding would result in certain vehicles not being able to path between walls.
+
+- Fixed bug where MapComponentCache would not clear properly when exiting to menu.
+
+- Fixed icon rendering for 'Form Vehicle Caravan' window.
+
+- Fixed bug where colonists with the same name would share the same "Unload _" gizmo generated for them.
+&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+&lt;b&gt;Players&lt;/b&gt;
+- Enabled river travel
+
+- Added 'River Size Multiplier' to VF Mod Settings under 'Main'
+
+- Added 'Biome Costs on Roads' to VF Mod Settings under 'Main'
+
+&lt;b&gt;Modders&lt;/b&gt;
+- Added 'riverCost' field to vehicle properties.
+
+- Added 'canRoofPunch' and 'animationPunchAt' fields to CompProperties_VehicleLauncher, allowing aerial vehicles to punch through roofs.
+
+- Added UpgradeTree mechanics
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
+  <!--Static parameterless method to execute when update log is executed-->
+  <actionOnUpdate></actionOnUpdate>
+  <!--Show update log on next startup.-->
+  <update>false</update>
+  <!--Testing mode prevents the update from saving over the UpdateLog file-->
+  <testing>false</testing>
+  <!--Icon bar shown to the right of the mod's name.-->
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon</icon>
+      <url>https://steamcommunity.com/sharedfiles/filedetails/?id=3014915404</url>
+    </li>
+  </rightIconBar>
+  <!--Icon bar shown to the left of the mod's name.-->
+  <leftIconBar>
+    <li>
+      <name>Patreon</name>
+      <icon>patreonIcon</icon>
+      <url>https://www.patreon.com/smashphil</url>
+    </li>
+    <li>
+      <name>Cursed Crew</name>
+      <icon>cursedCrewIcon</icon>
+      <url>https://discord.gg/NNe2VxAU7Z</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>

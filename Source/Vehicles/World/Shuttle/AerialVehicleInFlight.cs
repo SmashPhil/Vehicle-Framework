@@ -166,7 +166,7 @@ namespace Vehicles
 		public virtual void Initialize()
 		{
 			position = base.DrawPos;
-			rotatorGraphics = vehicle.graphicOverlay.Overlays.Where(g => g.data.graphicData.Graphic is Graphic_Rotator).Select(g => g.data.graphicData.Graphic).Cast<Graphic_Rotator>().ToList();
+			rotatorGraphics = vehicle.graphicOverlay.Overlays.Where(g => g.Graphic is Graphic_Rotator).Select(g => g.Graphic).Cast<Graphic_Rotator>().ToList();
 		}
 
 		public virtual Vector3 DrawPosAhead(int ticksAhead) => Vector3.Slerp(position, flightPath.First.GetCenter(this), transition + speedPctPerTick * ticksAhead);
@@ -211,9 +211,9 @@ namespace Vehicles
 		{
 			foreach (GraphicOverlay graphicOverlay in vehicle.graphicOverlay.Overlays)
 			{
-				Material material = graphicOverlay.data.graphicData.Graphic.MatAt(FullRotation);
+				Material material = graphicOverlay.Graphic.MatAt(FullRotation);
 				float quatRotation = 90;
-				if (graphicOverlay.data.graphicData.Graphic is Graphic_Rotator rotator)
+				if (graphicOverlay.Graphic is Graphic_Rotator rotator)
 				{
 					quatRotation += vehicle.graphicOverlay.rotationRegistry[rotator.RegistryKey];
 				}
@@ -301,7 +301,7 @@ namespace Vehicles
 					};
 					if (!vehicle.CompVehicleLauncher.CanLaunchWithCargoCapacity(out string disableReason))
 					{
-						launchCommand.disabled = true;
+						launchCommand.Disabled = true;
 						launchCommand.disabledReason = disableReason;
 					}
 					yield return launchCommand;

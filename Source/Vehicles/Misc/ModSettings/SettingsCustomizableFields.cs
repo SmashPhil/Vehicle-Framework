@@ -79,7 +79,7 @@ namespace Vehicles
 					{
 						VehicleMod.settings.upgrades.upgradeSettings.Add(def.defName, new Dictionary<SaveableField, SavedField<object>>());
 						currentUpgradeDict = VehicleMod.settings.upgrades.upgradeSettings[def.defName];
-						foreach (UpgradeNode node in def.GetSortedCompProperties<CompProperties_UpgradeTree>().upgrades)
+						foreach (UpgradeNode node in def.GetSortedCompProperties<CompProperties_UpgradeTree>().def.nodes)
 						{
 							IterateUpgradeNode(def, node, ref currentUpgradeDict);
 						}

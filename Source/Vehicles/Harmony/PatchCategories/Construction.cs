@@ -7,7 +7,6 @@ using Verse;
 using Verse.Sound;
 using RimWorld;
 using SmashTools;
-using Vehicles.Achievements;
 
 namespace Vehicles
 {
@@ -24,7 +23,7 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(ListerBuildingsRepairable), nameof(ListerBuildingsRepairable.Notify_BuildingRepaired)),
 				prefix: new HarmonyMethod(typeof(Construction),
 				nameof(Notify_RepairedVehicle)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenSpawn), name: nameof(GenSpawn.Spawn), new Type[] { typeof(Thing), typeof(IntVec3), typeof(Map), typeof(Rot4), typeof(WipeMode), typeof(bool) }),
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenSpawn), name: nameof(GenSpawn.Spawn), new Type[] { typeof(Thing), typeof(IntVec3), typeof(Map), typeof(Rot4), typeof(WipeMode), typeof(bool), typeof(bool) }),
 				prefix: new HarmonyMethod(typeof(Construction),
 				nameof(RegisterThingSpawned)));
 			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(DesignationCategoryDef), nameof(DesignationCategoryDef.ResolvedAllowedDesignators)),
@@ -83,7 +82,6 @@ namespace Vehicles
 				//Quality?
 				//Art?
 				//Tale RecordTale LongConstructionProject?
-				AchievementsHelper.TriggerVehicleConstructionEvent(vehicle);
 				return false;
 			}
 			return true;
@@ -165,7 +163,6 @@ namespace Vehicles
 					}
 					
 					__result = vehicleSpawned;
-					AchievementsHelper.TriggerVehicleConstructionEvent(vehicleSpawned);
 					return false;
 				}
 			}

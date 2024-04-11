@@ -21,7 +21,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\1.4\Assemblies\</OutputPath>
+    <OutputPath>..\..\1.5\Assemblies\</OutputPath>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -39,23 +39,62 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="SmashTools, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\1.4\Assemblies\SmashTools.dll</HintPath>
+      <HintPath>..\..\1.5\Assemblies\SmashTools.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Runtime">
+      <Private>False</Private>
     </Reference>
     <Reference Include="System.Runtime.InteropServices.RuntimeInformation">
       <Private>False</Private>
     </Reference>
-    <Reference Include="UpdateLogTool, Version=1.3.8688.405, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="System.Xml">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule">
+      <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UpdateLogTool, Version=1.3.8866.36782, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\1.4\Assemblies\UpdateLogTool.dll</HintPath>
+      <HintPath>..\..\1.5\Assemblies\UpdateLogTool.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Achievements\VehicleBuilderTracker.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_Deploy.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_DisassembleVehicle.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_GiveItemToVehicle.cs" />
+    <Compile Include="AI\JobDrivers\JobDriver_WorkVehicle.cs" />
+    <Compile Include="AI\JobGivers\NPC\JobGiver_VehicleAI.cs" />
+    <Compile Include="AI\JobGivers\NPC\JobGiver_AIBreachWalls.cs" />
     <Compile Include="AI\Lords\LordToil_PrepareCaravan_GatherAnimalsForVehicles.cs" />
     <Compile Include="AI\WorkGiver\VehicleWorkGiver.cs" />
     <Compile Include="AI\WorkGiver\WorkGiver_CarryToVehicle.cs" />
@@ -75,6 +114,7 @@
     <Compile Include="Components\Vehicles\Health\StatWorkers\VehicleStatWorker_BodyIntegrity.cs" />
     <Compile Include="Components\Vehicles\Health\VehicleStatDrawEntry.cs" />
     <Compile Include="Components\Vehicles\Misc\Vehicle_IgnitionController.cs" />
+    <Compile Include="Components\Vehicles\VehicleNPCProperties.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Combat.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Comps.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Handlers.cs" />
@@ -84,6 +124,7 @@
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Tickers.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Health.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Rendering.cs" />
+    <Compile Include="Components\Vehicles\VehicleRaidParamsDef.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalAction_LoadMap.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalAction_OfferGifts.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Events\AerialAnimationEvents.cs" />
@@ -103,6 +144,7 @@
     <Compile Include="CustomFeatures\AerialVehicles\Skyfaller\SkyfallerMaker\AirdropSkyfallerMaker.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Targeters\HaulTargeter.cs" />
     <Compile Include="CustomFeatures\Damage\TimedExplosion.cs" />
+    <Compile Include="CustomFeatures\EventDefs\VehicleSoundEventEntry.cs" />
     <Compile Include="CustomFeatures\EventDefs\VehicleTurretEventDef.cs" />
     <Compile Include="CustomFeatures\Misc\AnimationEditorTags.cs" />
     <Compile Include="CustomFeatures\Misc\DrawOffsets.cs" />
@@ -110,6 +152,12 @@
     <Compile Include="AI\JobDrivers\VehicleJobDriver.cs" />
     <Compile Include="AI\WorkGiver\WorkGiver_DisassembleVehicle.cs" />
     <Compile Include="Components\Vehicles\VehicleSustainers.cs" />
+    <Compile Include="CustomFeatures\Upgrades\Node\SoundUpgrade.cs" />
+    <Compile Include="CustomFeatures\Upgrades\Node\VehicleUpgrade.cs" />
+    <Compile Include="CustomFeatures\Upgrades\StatOffset.cs" />
+    <Compile Include="CustomFeatures\Upgrades\UpgradeNode.cs" />
+    <Compile Include="CustomFeatures\Upgrades\Node\ActionUpgrade.cs" />
+    <Compile Include="CustomFeatures\Upgrades\UpgradeTreeDef.cs" />
     <Compile Include="Gizmo\Command_Turret.cs" />
     <Compile Include="Gizmo\Gizmo_VehicleCaravanInfo.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_StatSettings.cs" />
@@ -143,9 +191,12 @@
     <Compile Include="Misc\DefOf\ThingDefOf_VehicleMotes.cs" />
     <Compile Include="Misc\DefOf\ThingDefOf_Vehicles.cs" />
     <Compile Include="Misc\DefOf\VehicleStatCategoryDefOf.cs" />
+    <Compile Include="Misc\DefOf\VehicleStatUpgradeCategoryDefOf.cs" />
     <Compile Include="Misc\DefOf\VehicleTurretEventDefOf.cs" />
     <Compile Include="Misc\Enums\Turret\DeploymentType.cs" />
     <Compile Include="Misc\Enums\UI\WorldPathingDebugType.cs" />
+    <Compile Include="Misc\Enums\Vehicle\UpgradeType.cs" />
+    <Compile Include="Misc\Enums\Vehicle\VehicleStrategy.cs" />
     <Compile Include="Misc\Enums\Vehicle\VehicleTracksFriendlyFire.cs" />
     <Compile Include="Misc\Interfaces\IDebugLordMeetingPoint.cs" />
     <Compile Include="Misc\Interfaces\IMaterialCacheTarget.cs" />
@@ -154,16 +205,18 @@
     <Compile Include="Pathing\Map\VehicleRegionUpdateCatalog.cs" />
     <Compile Include="Pathing\RegionGrid\ChunkSet.cs" />
     <Compile Include="Pathing\RegionGrid\ConcurrentListerThings.cs" />
+    <Compile Include="Turrets\Projectiles\Projectile_Deflected.cs" />
     <Compile Include="Turrets\Turret\Rendering\VehicleTurretRenderData.cs" />
     <Compile Include="Turrets\Turret\TargetLock.cs" />
     <Compile Include="Turrets\Turret\TurretComponentRequirement.cs" />
+    <Compile Include="UpgradeInProgress.cs" />
     <Compile Include="Utility\DesignatorCache.cs" />
     <Compile Include="AI\Incidents\IncidentWorker_ShuttleDowned.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_FollowVehicle.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_PaintVehicle.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_RefuelVehicleAtomic.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_RopeAnimalToVehicle.cs" />
-    <Compile Include="AI\JobDrivers\JobDriver_WorkOnUpgrade.cs" />
+    <Compile Include="AI\JobDrivers\JobDriver_UpgradeVehicle.cs" />
     <Compile Include="AI\JobGivers\JobGiver_FollowVehicle.cs" />
     <Compile Include="AI\JobDrivers\Job_Vehicle.cs" />
     <Compile Include="AI\JobGivers\JobGiver_PrepareVehicleCaravan_RopeAnimals.cs" />
@@ -317,13 +370,7 @@
     <Compile Include="CustomFeatures\Reservation\VehicleNodeReservation.cs" />
     <Compile Include="CustomFeatures\Damage\CustomHitFlags.cs" />
     <Compile Include="CustomFeatures\Reservation\VehiclePositionManager.cs" />
-    <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgradeFlySpeed.cs" />
-    <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgradeSpeed.cs" />
-    <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgradeCargo.cs" />
-    <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgradeFuelEfficiency.cs" />
-    <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgradeFuelCapacity.cs" />
-    <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgradeArmor.cs" />
-    <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgradeCategoryDef.cs" />
+    <Compile Include="CustomFeatures\Upgrades\StatUpgradeCategoryDef.cs" />
     <Compile Include="Gizmo\AltitudeMeter.cs" />
     <Compile Include="Gizmo\Command_LoadToAerialTransport.cs" />
     <Compile Include="Gizmo\Landing\Command_ActionHighlighter.cs" />
@@ -379,7 +426,7 @@
     <Compile Include="CustomFeatures\Reservation\VehicleReservationManager.cs" />
     <Compile Include="AI\WorkGiver\WorkGiver_WorkOnUpgrade.cs" />
     <Compile Include="CustomFeatures\Reservation\VehicleJobLimitations.cs" />
-    <Compile Include="CustomFeatures\Upgrades\TurretUpgrade\TurretUpgrade.cs" />
+    <Compile Include="CustomFeatures\Upgrades\Node\TurretUpgrade.cs" />
     <Compile Include="CustomFeatures\Misc\IngredientFilter.cs" />
     <Compile Include="CustomFeatures\Misc\VehicleIdManager.cs" />
     <Compile Include="Components\Construction\VehicleBuildDef.cs" />
@@ -418,7 +465,6 @@
     <Compile Include="Utility\Extensions\Ext_Toils.cs" />
     <Compile Include="Utility\Extensions\Ext_Settings.cs" />
     <Compile Include="Utility\Extensions\Ext_Vehicles.cs" />
-    <Compile Include="Utility\Helpers\AchievementsHelper.cs" />
     <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleAbandonOrBanishHelper.cs" />
     <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleLaunchHelper.cs" />
     <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleTabHelper.cs" />
@@ -430,11 +476,13 @@
     <Compile Include="Utility\Helpers\AsyncActions\AsyncRegionRegisterAction.cs" />
     <Compile Include="Utility\Helpers\CaravanHelper.cs" />
     <Compile Include="Utility\Helpers\CaravanInfoHelper.cs" />
-    <Compile Include="Utility\Helpers\DamageHelper.cs" />
+    <Compile Include="Utility\Helpers\Combat\ProjectileHelper.cs" />
+    <Compile Include="Utility\Helpers\Combat\DamageHelper.cs" />
     <Compile Include="Utility\Helpers\DebugHelper.cs" />
     <Compile Include="Utility\Helpers\HediffHelper.cs" />
     <Compile Include="Utility\Helpers\MapHelper.cs" />
     <Compile Include="Utility\Helpers\ModSettingsHelper.cs" />
+    <Compile Include="Utility\Helpers\Combat\RaidInjectionHelper.cs" />
     <Compile Include="Utility\Helpers\RenderHelper.cs" />
     <Compile Include="Utility\Helpers\SelectionHelper.cs" />
     <Compile Include="Utility\Helpers\GizmoHelper.cs" />
@@ -529,16 +577,14 @@
     <Compile Include="Comps\FueledTravel\CompProperties_FueledTravel.cs" />
     <Compile Include="Comps\UpgradeTree\CompProperties_UpgradeTree.cs" />
     <Compile Include="Components\Vehicles\VehicleProperties.cs" />
-    <Compile Include="Comps\VehicleTracks\CompProperties_VehicleDamager.cs" />
     <Compile Include="Comps\UpgradeTree\CompUpgradeTree.cs" />
-    <Compile Include="Comps\VehicleTracks\CompVehicleDamager.cs" />
     <Compile Include="Gizmo\Gizmo_RefuelableFuelTravel.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_DualWield.cs" />
     <Compile Include="Harmony\ConditionalPatches\CompatibilityPackageIDs.cs" />
     <Compile Include="Harmony\ConditionalPatches\FishingCompatibility.cs" />
     <Compile Include="Harmony\VehicleHarmonyOnMod.cs" />
     <Compile Include="Harmony\VehicleHarmony.cs" />
-    <Compile Include="CustomFeatures\Upgrades\UpgradeNode.cs" />
+    <Compile Include="CustomFeatures\Upgrades\Node\Upgrade.cs" />
     <Compile Include="Misc\CellFinderExtended.cs" />
     <Compile Include="Graphics\Graphic\MaterialGeneration\MaterialPresets.cs" />
     <Compile Include="Misc\DefOf\RiverDefOf.cs" />
@@ -586,7 +632,7 @@
     <Compile Include="Graphics\Misc\ShipPassengerCardUtility.cs" />
     <Compile Include="Graphics\Textures\VehicleTex.cs" />
     <Compile Include="Graphics\Misc\TransferableVehicleWidget.cs" />
-    <Compile Include="CustomFeatures\Upgrades\StatUpgrade\StatUpgrade.cs" />
+    <Compile Include="CustomFeatures\Upgrades\Node\StatUpgrade.cs" />
     <Compile Include="World\Caravan\CaravanArrivalAction_StashedVehicle.cs" />
     <Compile Include="World\WorldObjects\StashedVehicle.cs" />
     <Compile Include="World\Caravan\EnterMapUtilityVehicles.cs" />
@@ -595,22 +641,18 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AI\Designators\" />
+    <Folder Include="Components\Rendering\PawnRenderNode\" />
     <Folder Include="Comps\Fishing\" />
     <Folder Include="CustomFeatures\AerialVehicles\Skyfaller\Bombs\" />
+    <Folder Include="CustomFeatures\Upgrades\TurretUpgrade\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AchievementsExpanded">
-      <Version>1.4.82</Version>
-    </PackageReference>
-    <PackageReference Include="Krafs.Rimworld.Ref">
-      <Version>1.4.3704</Version>
-    </PackageReference>
     <PackageReference Include="Lib.Harmony">
       <Version>2.2.2</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>call $(ProjectDir)..\..\UpdateBuildFile.bat</PostBuildEvent>
+    <PostBuildEvent>Powershell.exe -ExecutionPolicy Unrestricted -file "$(ProjectDir)\UpdateVersion.ps1" 1 5 "07-DEC-2019" false true</PostBuildEvent>
   </PropertyGroup>
 </Project>

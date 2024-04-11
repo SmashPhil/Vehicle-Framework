@@ -19,7 +19,7 @@ namespace Vehicles
 	{
 		public bool Initialized { get; private set; }
 
-		public Dictionary<VehicleEventDef, EventTrigger> EventRegistry { get; set; }
+		public EventManager<VehicleEventDef> EventRegistry { get; set; }
 
 		public VehicleDef VehicleDef => def as VehicleDef;
 
@@ -145,6 +145,25 @@ namespace Vehicles
 			ageTracker.BirthAbsTicks = 0;
 			health.Reset();
 			statHandler.InitializeComponents();
+
+			if (Faction != Faction.OfPlayer && VehicleDef.npcProperties != null)
+			{
+				GenerateInventory();
+			}
+		}
+
+		private void GenerateInventory()
+		{
+			if (VehicleDef.npcProperties?.raidParamsDef?.inventory != null)
+			{
+				foreach (PawnInventoryOption inventoryOption in VehicleDef.npcProperties.raidParamsDef.inventory)
+				{
+					foreach (Thing thing in inventoryOption.GenerateThings())
+					{
+						inventory.innerContainer.TryAdd(thing);
+					}
+				}
+			}
 		}
 
 		/// <summary>
@@ -174,6 +193,8 @@ namespace Vehicles
 		{
 			this.RegisterEvents(); //Must register before comps call SpawnSetup to allow comps to access Registry
 			base.SpawnSetup(map, respawningAfterLoad);
+
+			graphicOverlay.Init();
 
 			ReleaseSustainerTarget(); //Ensure SustainerTarget and sustainer manager is given a clean slate to work with
 			EventRegistry[VehicleEventDefOf.Spawned].ExecuteEvents();
@@ -234,7 +255,7 @@ namespace Vehicles
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Deep.Look(ref vehiclePather, "vPather", new object[] { this }); //TODO - Rename to vehiclePather in 1.5
+			Scribe_Deep.Look(ref vehiclePather, nameof(vehiclePather), new object[] { this });
 			Scribe_Deep.Look(ref ignition, nameof(ignition), new object[] { this });
 			Scribe_Deep.Look(ref statHandler, nameof(statHandler), new object[] { this });
 			Scribe_Deep.Look(ref sharedJob, nameof(sharedJob));
@@ -266,9 +287,6 @@ namespace Vehicles
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
 				PostLoad();
-#pragma warning disable 0618
-				vPather = vehiclePather;
-#pragma warning restore 0618
 			}
 		}
 	}

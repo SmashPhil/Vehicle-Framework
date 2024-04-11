@@ -47,7 +47,7 @@ namespace Vehicles
 				int hash = Gen.HashCombine(num, graphicOverlay.data.graphicData);
 				if (!cachedGhostGraphics.TryGetValue(hash, out Graphic graphic))
 				{
-					graphic = graphicOverlay.data.graphicData.Graphic;
+					graphic = graphicOverlay.Graphic;
 					GraphicData graphicData = new GraphicData();
 					graphicData.CopyFrom(graphic.data);
 					graphicData.drawOffsetWest = graphic.data.drawOffsetWest; //TEMPORARY - Bug in vanilla copies South over to West
@@ -68,13 +68,17 @@ namespace Vehicles
 			{
 				foreach (VehicleTurret turret in props.turrets)
 				{
+					if (turret.NoGraphic)
+					{
+						continue;
+					}
 					if (!turret.parentKey.NullOrEmpty())
 					{
 						continue;
 					}
 
 					turret.ResolveCannonGraphics(vehicleDef);
-
+					
 					try
 					{
 						float locationRotation = turret.defaultAngleRotated + rot.AsAngle;

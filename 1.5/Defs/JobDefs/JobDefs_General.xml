@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<JobDef>
+		<defName>Board</defName>
+		<driverClass>Vehicles.JobDriver_Board</driverClass>
+		<reportString>Entering TargetA.</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+	
+	<JobDef>
+		<defName>LoadUpgradeMaterials</defName>
+		<driverClass>Vehicles.JobDriver_GiveToUpgradeContainer</driverClass>
+		<reportString>Loading upgrade materials into TargetB.</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+	
+	<JobDef>
+		<defName>IdleVehicle</defName>
+		<driverClass>Vehicles.JobDriver_IdleVehicle</driverClass>
+		<reportString>Idle.</reportString>
+		<isIdle>true</isIdle>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+	</JobDef>
+	
+	<JobDef>
+		<defName>DeployVehicle</defName>
+		<driverClass>Vehicles.JobDriver_Deploy</driverClass>
+		<reportString>Deploying.</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+	
+	<JobDef>
+		<defName>PrepareCaravan_GatheringVehicle</defName>
+		<driverClass>Vehicles.JobDriver_PrepareVehicleCaravan_GatheringItems</driverClass>
+		<reportString>Loading cargo for TargetB.</reportString>
+		<suspendable>false</suspendable>
+	</JobDef>
+	
+	<JobDef>
+		<defName>RopeAnimalToVehicle</defName>
+		<driverClass>Vehicles.JobDriver_RopeAnimalToVehicle</driverClass>
+		<reportString>Roping {0} to TargetA.</reportString>
+	</JobDef>
+	
+	<JobDef>
+		<defName>CarryPawnToVehicle</defName>
+		<driverClass>Vehicles.JobDriver_CarryPawnToVehicle</driverClass>
+		<reportString>Carrying TargetA to TargetB.</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+	
+	<JobDef>
+		<defName>LoadVehicle</defName>
+		<driverClass>Vehicles.JobDriver_LoadVehicle</driverClass>
+		<reportString>Loading TargetA onto TargetB</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+	
+	<JobDef>
+		<defName>CarryItemToVehicle</defName>
+		<driverClass>Vehicles.JobDriver_GiveItemToVehicle</driverClass>
+		<reportString>Loading TargetA onto TargetB</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+	
+	<JobDef>
+		<defName>RepairVehicle</defName>
+		<driverClass>Vehicles.JobDriver_RepairVehicle</driverClass>
+		<reportString>Repairing TargetA.</reportString>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+	</JobDef>
+	
+	<JobDef>
+		<defName>DisassembleVehicle</defName>
+		<driverClass>Vehicles.JobDriver_DisassembleVehicle</driverClass>
+		<reportString>Disassembling TargetA.</reportString>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+	</JobDef>
+	
+	<JobDef>
+		<defName>PaintVehicle</defName>
+		<driverClass>Vehicles.JobDriver_PaintVehicle</driverClass>
+		<reportString>Painting TargetA.</reportString>
+		<casualInterruptible>true</casualInterruptible>
+	</JobDef>
+	
+	<JobDef>
+		<defName>UpgradeVehicle</defName>
+		<driverClass>Vehicles.JobDriver_UpgradeVehicle</driverClass>
+		<reportString>Working on TargetA.</reportString>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+	</JobDef>
+	
+	<JobDef>
+		<defName>RefuelVehicle</defName>
+		<driverClass>Vehicles.JobDriver_RefuelVehicle</driverClass>
+		<reportString>Refueling TargetA</reportString>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+	
+	<JobDef>
+		<defName>RefuelVehicleAtomic</defName>
+		<driverClass>Vehicles.JobDriver_RefuelVehicleAtomic</driverClass>
+		<reportString>Refueling TargetA</reportString>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+	
+	<JobDef>
+		<defName>FollowVehicle</defName>
+		<driverClass>Vehicles.JobDriver_FollowVehicle</driverClass>
+		<reportString>Following TargetA.</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+	
+	<JobDef>
+		<defName>EscortVehicle</defName>
+		<driverClass>Vehicles.JobDriver_FollowVehicle</driverClass>
+		<reportString>Escorting TargetA.</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+</Defs>

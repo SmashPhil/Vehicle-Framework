@@ -17,6 +17,14 @@ namespace Vehicles
 
 		public override Material MatSingle => materials[0];
 
+		public override Material MatNorth => MatSingle;
+
+		public override Material MatEast => MatSingle;
+
+		public override Material MatSouth => MatSingle;
+
+		public override Material MatWest => MatSingle;
+
 		public override int MatCount => 1;
 
 		public override void Init(GraphicRequestRGB req)
@@ -41,15 +49,6 @@ namespace Vehicles
 
 			Texture2D maskTex = ContentFinder<Texture2D>.Get(path + TurretMaskSuffix, false);
 			masks = Enumerable.Repeat(maskTex, MatCount).ToArray();
-		}
-
-		public virtual Material MatAtFull(Rot8 rot)
-		{
-			if (materials.OutOfBounds(rot.AsInt))
-			{
-				return BaseContent.BadMat;
-			}
-			return materials[rot.AsInt];
 		}
 
 		public override Graphic GetColoredVersion(Shader newShader, Color newColor, Color newColorTwo)

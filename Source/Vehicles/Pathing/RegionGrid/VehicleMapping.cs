@@ -238,6 +238,11 @@ namespace Vehicles
 				VehiclePathData vehiclePathData = this[vehicleDef];
 				vehiclePathData.VehicleRegionGrid.UpdateClean();
 				vehiclePathData.VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
+				vehicleRegionGridIndexChecking++;
+				if (vehicleRegionGridIndexChecking >= owners.Count)
+				{
+					vehicleRegionGridIndexChecking = 0;
+				}
 			}
 		}
 

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<ThingDef ParentName="MoteBaseExpand">
+		<defName>Mote_FishingNet</defName>
+		<altitudeLayer>MoteOverhead</altitudeLayer>
+		
+		<graphicData>
+			<texPath>Animations/Fishing/FishingNetMote</texPath>
+			<drawSize>(1.5, 1.5)</drawSize>
+		</graphicData>
+		
+		<mote>
+			<fadeInTime>0.1</fadeInTime>
+			<solidTime>0.1</solidTime>
+			<fadeOutTime>0.5</fadeOutTime>
+			<growthRate>-0.25</growthRate>
+		</mote>
+	</ThingDef>
+</Defs>

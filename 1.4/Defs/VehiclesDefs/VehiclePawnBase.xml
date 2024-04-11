@@ -6,7 +6,7 @@
 		<category>Pawn</category>
 		<selectable>true</selectable>
 		<tickerType>Normal</tickerType>
-		<altitudeLayer>Pawn</altitudeLayer>
+		<altitudeLayer>LayingPawn</altitudeLayer>
 		<hasTooltip>true</hasTooltip>
 		
 		<passability>Standable</passability>

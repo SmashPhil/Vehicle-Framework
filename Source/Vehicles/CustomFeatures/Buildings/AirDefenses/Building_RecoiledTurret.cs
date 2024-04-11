@@ -43,7 +43,7 @@ namespace Vehicles
 				{
 					ResetForcedTarget();
 				}
-				if (Active && (mannableComp == null || mannableComp.MannedNow) && !stunner.Stunned && Spawned)
+				if (Active && (mannableComp == null || mannableComp.MannedNow) && !IsStunned && Spawned)
 				{
 					GunCompEq.verbTracker.VerbsTick();
 					if (AttackVerb.state != VerbState.Bursting)

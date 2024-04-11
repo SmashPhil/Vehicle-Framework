@@ -87,11 +87,11 @@ namespace Vehicles
 				{
 					comp.Notify_ProjectileLaunched();
 				}
-				CompReloadable comp2 = EquipmentSource.GetComp<CompReloadable>();
-				if (comp2 != null)
-				{
-					comp2.UsedOnce();
-				}
+				//CompReloadable comp2 = EquipmentSource.GetComp<CompReloadable>();
+				//if (comp2 != null)
+				//{
+				//	comp2.UsedOnce();
+				//}
 			}
 			Thing launcher = caster;
 			Thing equipment = EquipmentSource;
@@ -145,7 +145,7 @@ namespace Vehicles
 			ThingDef targetCoverDef = (randomCoverToMissInto != null) ? randomCoverToMissInto.def : null;
 			if (!Rand.Chance(shotReport.AimOnTargetChance_IgnoringPosture))
 			{
-				shootLine.ChangeDestToMissWild(shotReport.AimOnTargetChance_StandardTarget);
+				shootLine.ChangeDestToMissWild_NewTemp(shotReport.AimOnTargetChance_StandardTarget, projectile.projectile.flyOverhead, caster.Map);
 				ThrowDebugText("ToWild" + (canHitNonTargetPawnsNow ? "\nchntp" : ""));
 				ThrowDebugText("Wild\nDest", shootLine.Dest);
 				ProjectileHitFlags projectileHitFlags2 = ProjectileHitFlags.NonTargetWorld;
@@ -230,7 +230,7 @@ namespace Vehicles
 									expandMote.growthRate = moteProps.growthRate.RandomInRange;
 								}
 							}
-							if (mote is Mote_CannonPlume cannonMote)
+							if (mote is MoteCannonPlume cannonMote)
 							{
 								cannonMote.cyclesLeft = moteProps.cycles;
 								cannonMote.animationType = moteProps.animationType;

@@ -17,8 +17,10 @@ namespace Vehicles
 
 		private readonly ConcurrentSet<IntVec3> dirtyCells = new ConcurrentSet<IntVec3>();
 
-		private readonly ConcurrentBag<VehicleRegion> regionsToDirty = new ConcurrentBag<VehicleRegion>();
-		private readonly ConcurrentBag<VehicleRegion> regionsToDirtyFromWalkability = new ConcurrentBag<VehicleRegion>();
+		private readonly ConcurrentSet<VehicleRegion> regionsToDirty = new ConcurrentSet<VehicleRegion>();
+		private readonly ConcurrentSet<VehicleRegion> regionsToDirtyFromWalkability = new ConcurrentSet<VehicleRegion>();
+
+		private object dirtyLock = new object();
 
 		public VehicleRegionDirtyer(VehicleMapping mapping, VehicleDef createdFor)
 		{
@@ -29,7 +31,7 @@ namespace Vehicles
 		/// <summary>
 		/// <see cref="dirtyCells"/> getter
 		/// </summary>
-		public IEnumerable<IntVec3> DirtyCells
+		public ICollection<IntVec3> DirtyCells
 		{
 			get
 			{
@@ -45,6 +47,16 @@ namespace Vehicles
 			get
 			{
 				return dirtyCells.Count > 0;
+			}
+		}
+
+		public ICollection<IntVec3> DumpDirtyCells()
+		{
+			lock (dirtyLock)
+			{
+				var dump = dirtyCells.Keys;
+				SetAllClean();
+				return dump;
 			}
 		}
 
@@ -111,7 +123,7 @@ namespace Vehicles
 					regionsToDirty.Add(validRegionAt_NoRebuild);
 				}
 			}
-			foreach (VehicleRegion vehicleRegion in regionsToDirty)
+			foreach (VehicleRegion vehicleRegion in regionsToDirty.Keys)
 			{
 				SetRegionDirty(vehicleRegion);
 			}
@@ -132,7 +144,7 @@ namespace Vehicles
 					}
 				}
 			}
-			foreach (VehicleRegion vehicleRegion in regionsToDirty)
+			foreach (VehicleRegion vehicleRegion in regionsToDirty.Keys)
 			{
 				SetRegionDirty(vehicleRegion);
 			}
@@ -151,7 +163,6 @@ namespace Vehicles
 		/// <param name="addCellsToDirtyCells"></param>
 		private void SetRegionDirty(VehicleRegion region, bool addCellsToDirtyCells = true, bool dirtyLinkedRegions = true)
 		{
-			string step = "";
 			try
 			{
 				if (!region.valid)
@@ -159,9 +170,8 @@ namespace Vehicles
 					return;
 				}
 				region.valid = false;
-				region.Room = null; //ArgumentOutOfRange exception is thrown here in the setter
-				step = "Deregistering";
-				foreach (VehicleRegionLink regionLink in region.links)
+				region.Room = null;
+				foreach (VehicleRegionLink regionLink in region.links.Keys)
 				{
 					VehicleRegion otherRegion = regionLink.Deregister(region, createdFor);
 					if (otherRegion != null && dirtyLinkedRegions)
@@ -169,12 +179,10 @@ namespace Vehicles
 						SetRegionDirty(otherRegion, addCellsToDirtyCells: addCellsToDirtyCells, dirtyLinkedRegions: false);
 					}
 				}
-				step = "Clearing links and weights";
 				region.links.Clear();
 				region.weights.Clear();
 				if (addCellsToDirtyCells)
 				{
-					step = "Dirtying Cells";
 					foreach (IntVec3 intVec in region.Cells)
 					{
 						dirtyCells.Add(intVec);
@@ -183,7 +191,7 @@ namespace Vehicles
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Exception thrown in SetRegionDirty. Step = {step}\nNull: {region is null} Room: {region?.Room is null} links: {region?.links is null} weights: {region?.weights is null}");
+				Log.Error($"Exception thrown in SetRegionDirty. \nNull: {region is null} Room: {region?.Room is null} links: {region?.links is null} weights: {region?.weights is null}");
 				throw ex;
 			}
 		}

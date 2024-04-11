@@ -25,7 +25,7 @@ namespace Vehicles
 			doCloseX = true;
 			
 			float width = 400;
-			int rows = Mathf.Max(1, Mathf.FloorToInt(UpgradeNode.ListerCount / 2f));
+			int rows = 3;// Mathf.Max(1, Mathf.FloorToInt(UpgradeNode.ListerCount / 2f));
 			float height = rows * 100 + 50;
 			windowSize = new Vector2(width, height);
 			drawLoc = origin;
@@ -58,7 +58,7 @@ namespace Vehicles
 		public override void DoWindowContents(Rect inRect)
 		{
 			Lister.Begin(inRect, 2);
-			UpgradeNode.SettingsWindow(VehicleDef, Lister);
+			//UpgradeNode.SettingsWindow(VehicleDef, Lister);
 			Lister.End();
 		}
 	}

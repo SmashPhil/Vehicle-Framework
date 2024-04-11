@@ -22,7 +22,7 @@ namespace Vehicles
 		[DisableSetting]
 		[PostToSettings(Label = "VF_CombatPower", Translate = true, Tooltip = "VF_CombatPowerTooltip", UISettingsType = UISettingsType.FloatBox)]
 		[NumericBoxValues(MinValue = 0, MaxValue = float.MaxValue)]
-		public float combatPower = 0;
+		public float combatPower = 100;
 
 		//Editing in ModSettings is handled manually as StatModifier list won't serialize well to the config file in the existing setup.
 		public List<VehicleStatModifier> vehicleStats;
@@ -34,7 +34,7 @@ namespace Vehicles
 		[PostToSettings(Label = "VF_CanCaravan", Translate = true, Tooltip = "VF_CanCaravanTooltip", UISettingsType = UISettingsType.Checkbox)]
 		public bool canCaravan = true;
 
-		public VehicleCategory vehicleCategory = VehicleCategory.Misc;
+		public VehicleCategory vehicleCategory;
 		public VehicleType vehicleType = VehicleType.Land;
 
 		[PostToSettings(Label = "VF_NavigationType", Translate = true, Tooltip = "VF_NavigationTypeTooltip", UISettingsType = UISettingsType.SliderEnum)]
@@ -47,16 +47,20 @@ namespace Vehicles
 		[TweakField]
 		[PostToSettings(Label = "VF_Properties", Translate = true, ParentHolder = true)]
 		public VehicleProperties properties;
-		
+
+		//[TweakField]
+		//[PostToSettings(Label = "VF_NPCProperties", Translate = true, ParentHolder = true)]
+		public VehicleNPCProperties npcProperties;
+
 		[TweakField]
 		public VehicleDrawProperties drawProperties;
 
 		public List<StatCache.EventLister> statEvents;
 
 		//Event : SoundDef
-		public Dictionary<VehicleEventDef, SoundDef> soundOneShotsOnEvent = new Dictionary<VehicleEventDef, SoundDef>();
+		public List<VehicleSoundEventEntry<VehicleEventDef>> soundOneShotsOnEvent = new List<VehicleSoundEventEntry<VehicleEventDef>>();
 		//<Start Event, Stop Event> : SoundDef
-		public Dictionary<Pair<VehicleEventDef, VehicleEventDef>, SoundDef> soundSustainersOnEvent = new Dictionary<Pair<VehicleEventDef, VehicleEventDef>, SoundDef>();
+		public List<VehicleSustainerEventEntry<VehicleEventDef>> soundSustainersOnEvent = new List<VehicleSustainerEventEntry<VehicleEventDef>>();
 
 		public Dictionary<VehicleEventDef, List<ResolvedMethod<VehiclePawn>>> events = new Dictionary<VehicleEventDef, List<ResolvedMethod<VehiclePawn>>>();
 
@@ -139,6 +143,11 @@ namespace Vehicles
 		/// </remarks>
 		public override void ResolveReferences()
 		{
+			if (GetCompProperties<CompProperties_UpgradeTree>() != null)
+			{
+				inspectorTabs.Add(typeof(ITab_Vehicle_Upgrades));
+			}
+
 			base.ResolveReferences();
 			if (!components.NullOrEmpty())
 			{
@@ -244,7 +253,7 @@ namespace Vehicles
 			{
 				yield return error;
 			}
-			foreach (string error in properties.ConfigErrors())
+			foreach (string error in properties.ConfigErrors(this))
 			{
 				yield return error;
 			}
@@ -292,9 +301,15 @@ namespace Vehicles
 			return new Vector2(width, height);
 		}
 
-		public Vector2 ScaleDrawRatio(GraphicData graphicData, Vector2 size, float iconScale = 1)
+		public Vector2 ScaleDrawRatio(GraphicData graphicData, Rot4 rot, Vector2 size, float iconScale = 1)
 		{
 			Vector2 drawSize = graphicData.drawSize;
+			if (rot.IsHorizontal)
+			{
+				float x = drawSize.x;
+				drawSize.x = drawSize.y;
+				drawSize.y = x;
+			}
 			Vector2 scalar = drawSize / this.graphicData.drawSize;
 
 			float width = size.x * uiIconScale * scalar.x * iconScale;

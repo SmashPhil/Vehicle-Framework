@@ -79,8 +79,9 @@ namespace Vehicles
 
 		private void TryStartNextTargeter()
 		{
-			if (!IsTargeting && targeterQueue.TryDequeue(out Action beginTargeting))
+			if (!IsTargeting && targeterQueue.Count > 0)
 			{
+				Action beginTargeting = targeterQueue.Dequeue();
 				beginTargeting();
 			}
 		}
@@ -120,6 +121,22 @@ namespace Vehicles
 			else if (obstructed)
 			{
 				return PositionState.Obstructed;
+			}
+			
+			if (vehicle.CompVehicleLauncher.Props.canRoofPunch)
+			{
+				CellRect occupiedRect = GenAdj.OccupiedRect(cell, landingRotation, vehicle.VehicleDef.Size);
+				foreach (IntVec3 occupiedCell in occupiedRect)
+				{
+					if (occupiedCell.GetRoof(map) is RoofDef roofDef)
+					{
+						if (roofDef.isThickRoof)
+						{
+							return PositionState.Invalid;
+						}
+						return PositionState.Obstructed;
+					}
+				}
 			}
 			return PositionState.Valid;
 		}

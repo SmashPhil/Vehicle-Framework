@@ -22,11 +22,11 @@ namespace Vehicles
 			}
 		}
 
-		public override void DrawAt(Vector3 drawLoc, bool flip = false)
+		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
 			if (vehicle != null)
 			{
-				vehicle.DrawAt(drawLoc, flip);
+				vehicle.DrawNowAt(drawLoc, flip);
 				if (vehicle.CompVehicleTurrets != null)
 				{
 					vehicle.CompVehicleTurrets.PostDraw();

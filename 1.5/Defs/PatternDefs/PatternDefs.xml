@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<Vehicles.PatternDef>
+		<defName>Default</defName>
+		<label>Default</label>
+		<path>Graphics/Patterns/Default/Default</path>
+		<properties>
+			<equalize>false</equalize>
+		</properties>
+	</Vehicles.PatternDef>
+	
+	<Vehicles.PatternDef>
+		<defName>Tiger</defName>
+		<label>Tiger</label>
+		<path>Graphics/Patterns/Tiger/Tiger</path>
+	</Vehicles.PatternDef>
+	
+	<Vehicles.PatternDef>
+		<defName>TigerStripes</defName>
+		<label>Tiger Stripes</label>
+		<path>Graphics/Patterns/Tiger/TigerStripes</path>
+	</Vehicles.PatternDef>
+	
+	<Vehicles.PatternDef>
+		<defName>Woodland</defName>
+		<label>Woodland</label>
+		<path>Graphics/Patterns/Woodland/Woodland</path>
+	</Vehicles.PatternDef>
+	
+	<Vehicles.PatternDef>
+		<defName>Hearts</defName>
+		<label>Hearts</label>
+		<path>Graphics/Patterns/Hearts/Hearts</path>
+	</Vehicles.PatternDef>
+	
+	<Vehicles.PatternDef>
+		<defName>Panther</defName>
+		<label>Panther</label>
+		<path>Graphics/Patterns/Panther/Panther</path>
+	</Vehicles.PatternDef>
+	
+	<Vehicles.PatternDef>
+		<defName>Digital</defName>
+		<label>Digital</label>
+		<path>Graphics/Patterns/Digital/Digital</path>
+	</Vehicles.PatternDef>
+	
+	<Vehicles.PatternDef>
+		<defName>Polygon</defName>
+		<label>Polygon</label>
+		<path>Graphics/Patterns/Polygon/Polygon</path>
+	</Vehicles.PatternDef>
+	
+	<Vehicles.PatternDef>
+		<defName>Rusty</defName>
+		<label>Rusty</label>
+		<path>Graphics/Patterns/Rusty/Rusty</path>
+	</Vehicles.PatternDef>
+	
+	<Vehicles.PatternDef>
+		<defName>Waves</defName>
+		<label>Waves</label>
+		<path>Graphics/Patterns/Waves/Waves</path>
+	</Vehicles.PatternDef>
+	
+	<Vehicles.PatternDef>
+		<defName>ZigZag</defName>
+		<label>Zig Zag</label>
+		<path>Graphics/Patterns/ZigZag/ZigZag</path>
+	</Vehicles.PatternDef>
+	
+	<Vehicles.PatternDef>
+		<defName>Abstract_Medium</defName>
+		<label>Abstract Medium</label>
+		<path>Graphics/Patterns/Abstract/Abstract_Medium</path>
+	</Vehicles.PatternDef>
+	
+	<Vehicles.PatternDef>
+		<defName>Abstract_Large</defName>
+		<label>Abstract Large</label>
+		<path>Graphics/Patterns/Abstract/Abstract_Large</path>
+	</Vehicles.PatternDef>
+	
+	<Vehicles.PatternDef>
+		<defName>Lizard</defName>
+		<label>Lizard</label>
+		<path>Graphics/Patterns/Lizard/Lizard</path>
+	</Vehicles.PatternDef>
+	
+	<Vehicles.PatternDef>
+		<defName>Hexagon</defName>
+		<label>Hexagon</label>
+		<path>Graphics/Patterns/Hexagon/Hexagon</path>
+	</Vehicles.PatternDef>
+</Defs>

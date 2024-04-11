@@ -5,7 +5,7 @@ using Verse;
 
 namespace Vehicles
 {
-	public abstract class Graphic_Rotator : Graphic_Single
+	public abstract class Graphic_Rotator : Graphic_RGB
 	{
 		public abstract string RegistryKey { get; }
 

@@ -1,0 +1,10 @@
+<Patch>
+	<Operation Class="PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[@Name = "MeleeWeaponUltratech"]</xpath>
+		<value>
+			<li Class = "Vehicles.VehicleDamageMultiplierDefModExtension">
+				<multiplier>1.5</multiplier>
+			</li>
+		</value>
+	</Operation>
+</Patch>

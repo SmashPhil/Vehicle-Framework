@@ -9,8 +9,11 @@ namespace Vehicles
 	{
 		public override JobDef JobDef => JobDefOf_Vehicles.PaintVehicle;
 
-		public override Predicate<VehiclePawn> VehicleCondition => (vehicle) => vehicle.CanPaintNow;
-
 		public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn) => pawn.Map.mapPawns.AllPawnsSpawned.Where(pawn => pawn is VehiclePawn vehicle && vehicle.CanPaintNow);
+
+		public override bool CanBeWorkedOn(VehiclePawn vehicle)
+		{
+			return vehicle.CanPaintNow;
+		}
 	}
 }

@@ -14,6 +14,7 @@ namespace Vehicles
 
 		/* Map/World Generation */
 		public float beachMultiplier = 0f;
+		public float riverMultiplier = 0f;
 		public int forceFactionCoastRadius = 1;
 
 		/* General */
@@ -70,6 +71,7 @@ namespace Vehicles
 			base.ResetSettings();
 			/* Map/World Generation */
 			beachMultiplier = 0f;
+			riverMultiplier = 0f;
 			forceFactionCoastRadius = 1;
 
 			/* General */
@@ -124,6 +126,7 @@ namespace Vehicles
 		public override void ExposeData()
 		{
 			Scribe_Values.Look(ref beachMultiplier, nameof(beachMultiplier), defaultValue: 0f);
+			Scribe_Values.Look(ref riverMultiplier, nameof(riverMultiplier), defaultValue: 0f);
 			Scribe_Values.Look(ref forceFactionCoastRadius, nameof(forceFactionCoastRadius), defaultValue: 1);
 
 			Scribe_Values.Look(ref modifiableSettings, nameof(modifiableSettings), defaultValue: true);
@@ -183,7 +186,8 @@ namespace Vehicles
 				{
 					listingStandard.Header("VF_WorldMapGen".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 					listingStandard.Gap(4);
-					listingStandard.SliderLabeled("VF_BeachGenMultiplier".Translate(), "VF_BeachGenMultiplierTooltip".Translate(), "%", ref beachMultiplier, 0f, 2f, 100, 0);
+					listingStandard.SliderLabeled("VF_BeachGenMultiplier".Translate(), "VF_BeachGenMultiplierTooltip".Translate(), "%", ref beachMultiplier, 0f, 2f, multiplier: 100, decimalPlaces: 0);
+					listingStandard.SliderLabeled("VF_RiverGenMultiplier".Translate(), "VF_RiverGenMultiplierTooltip".Translate(), "%", ref riverMultiplier, 0f, 2f, multiplier: 100, decimalPlaces: 0);
 					listingStandard.SliderLabeled("VF_ForceSettlementCoast".Translate(), "VF_ForceSettlementCoastTooltip".Translate(), $" {"VF_WorldTiles".Translate()}", ref forceFactionCoastRadius, 0,
 						VehicleMod.MaxCoastalSettlementPush, 1, "VF_EverySettlementToCoast".Translate());
 
@@ -207,10 +211,11 @@ namespace Vehicles
 					//GUIState.Disable();
 					//listingStandard.CheckboxLabeled("VF_HierarchalPathfinding".Translate(), ref hierarchalPathfinding, "VF_HierarchalPathfindingTooltip".Translate());
 					//GUIState.Enable();
+					listingStandard.CheckboxLabeledWithMessage("VF_RoadBiomeCostPathing".Translate(), delegate (bool value)
+					{
+						return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput);
+					}, ref vehiclePathingBiomesCostOnRoads, "VF_RoadBiomeCostPathingTooltip".Translate());
 
-					//GUIState.Disable();
-					//listingStandard.CheckboxLabeled("VF_RoadBiomeCostPathing".Translate(), ref vehiclePathingBiomesCostOnRoads, "VF_RoadBiomeCostPathingTooltip".Translate());
-					//GUIState.Enable();
 					listingStandard.CheckboxLabeled("VF_MultiplePawnsPerJob".Translate(), ref multiplePawnsPerJob, "VF_MultiplePawnsPerJobTooltip".Translate());
 					bool checkBefore = hideDisabledVehicles;
 					listingStandard.CheckboxLabeled("VF_HideDisabledVehicles".Translate(), ref hideDisabledVehicles, "VF_HideDisabledVehiclesTooltip".Translate());
@@ -287,13 +292,9 @@ namespace Vehicles
 						}
 					}
 
-					GUIState.Disable();
-
 					listingStandard.Header("VF_Upgrades".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 					listingStandard.CheckboxLabeled("VF_DrawUpgradeInformationScreen".Translate(), ref drawUpgradeInformationScreen, "VF_DrawUpgradeInformationScreenTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_OverrideDrawColor".Translate(), ref overrideDrawColors, "VF_OverrideDrawColorTooltip".Translate());
-
-					GUIState.Enable();
 
 					listingStandard.NewColumn();
 					listingStandard.Header("VF_VehicleDamageMultipliers".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);

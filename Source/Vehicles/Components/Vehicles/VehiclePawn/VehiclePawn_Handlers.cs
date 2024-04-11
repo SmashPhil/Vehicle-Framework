@@ -689,7 +689,7 @@ namespace Vehicles
 
 		private static bool CanEatForNutrition(Thing item, Pawn forPawn)
 		{
-			return item.IngestibleNow && item.def.IsNutritionGivingIngestible && forPawn.WillEat_NewTemp(item, null) && item.def.ingestible.preferability > FoodPreferability.NeverForNutrition &&
+			return item.IngestibleNow && item.def.IsNutritionGivingIngestible && forPawn.WillEat(item, null) && item.def.ingestible.preferability > FoodPreferability.NeverForNutrition &&
 				(!item.def.IsDrug || !forPawn.IsTeetotaler()) && (!forPawn.RaceProps.Humanlike || forPawn.needs.food.CurCategory >= HungerCategory.Starving || item.def.ingestible.preferability >
 				FoodPreferability.DesperateOnlyForHumanlikes);
 		}

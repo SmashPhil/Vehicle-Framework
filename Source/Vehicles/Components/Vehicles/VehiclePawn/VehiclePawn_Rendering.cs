@@ -299,7 +299,15 @@ namespace Vehicles
 			return result;
 		}
 
-		public override void Draw()
+		public override void DynamicDrawPhaseAt(DrawPhase phase, Vector3 drawLoc, bool flip = false)
+		{
+			if (phase == DrawPhase.Draw)
+			{
+				Draw();
+			}
+		}
+
+		public virtual void Draw()
 		{
 			if (this.AnimationLocked()) return;
 
@@ -312,14 +320,14 @@ namespace Vehicles
 			Comps_PostDraw();
 		}
 
-		public override void DrawAt(Vector3 drawLoc, bool flip = false)
+		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
 			Drawer.DrawAt(drawLoc);
 			foreach (VehicleHandler handler in HandlersWithPawnRenderer)
 			{
 				handler.RenderPawns();
 			}
-			statHandler.DrawHitbox(HighlightedComponent);
+			statHandler.DrawHitbox(HighlightedComponent); //Must be rendered with the vehicle or the field edges will not render quickly enough
 		}
 
 		/// <summary>
@@ -341,7 +349,7 @@ namespace Vehicles
 			{
 				Comps_PostDrawUnspawned(drawLoc, rot, extraRotation);
 			}
-			statHandler.DrawHitbox(HighlightedComponent);
+			statHandler.DrawHitbox(HighlightedComponent); //Must be rendered with the vehicle or the field edges will not render quickly enough
 		}
 
 		public virtual void Comps_PostDrawUnspawned(Vector3 drawLoc, Rot8 rot, float rotation)
@@ -391,6 +399,7 @@ namespace Vehicles
 		{
 			ResetGraphicCache();
 			Drawer.renderer.graphics.ResolveAllGraphics();
+			graphicOverlay.Notify_ColorChanged();
 			base.Notify_ColorChanged();
 		}
 
@@ -399,12 +408,11 @@ namespace Vehicles
 			if (UnityData.IsInMainThread)
 			{
 				RGBMaterialPool.SetProperties(this, patternData);
-				var cannonComp = CompVehicleTurrets;
-				if (cannonComp != null)
+				foreach (ThingComp thingComp in AllComps)
 				{
-					foreach (VehicleTurret cannon in cannonComp.turrets)
+					if (thingComp is VehicleComp vehicleComp)
 					{
-						cannon.ResolveCannonGraphics(patternData, true);
+						vehicleComp.Notify_ColorChanged();
 					}
 				}
 			}
@@ -648,6 +656,7 @@ namespace Vehicles
 						Pawn currentPawn = handler.handlers.InnerListForReading[i];
 						Command_Action_PawnDrawer unloadAction = new Command_Action_PawnDrawer();
 						unloadAction.defaultLabel = "VF_DisembarkSinglePawn".Translate(currentPawn.LabelShort);
+						unloadAction.groupable = false;
 						unloadAction.pawn = currentPawn;
 						unloadAction.action = delegate ()
 						{

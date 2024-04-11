@@ -72,7 +72,6 @@ namespace Vehicles
 			{
 				return;
 			}
-			string updateStep = "Initializing";
 			UpdatingRegion = true;
 			if (!Initialized)
 			{
@@ -85,17 +84,15 @@ namespace Vehicles
 			}
 			try
 			{
-				updateStep = "Generating new regions";
 				RegenerateNewVehicleRegions();
-				updateStep = "Creating or updating rooms";
 				CreateOrUpdateVehicleRooms();
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Exception while rebuilding vehicle regions for {createdFor}. Last step: {updateStep} Exception={ex}");
+				Log.Error($"Exception while rebuilding vehicle regions for {createdFor}. Exception={ex}");
 			}
 			newRegions.Clear();
-			mapping[createdFor].VehicleRegionDirtyer.SetAllClean();
+			//mapping[createdFor].VehicleRegionDirtyer.SetAllClean();
 			Initialized = true;
 			UpdatingRegion = false;
 		}
@@ -106,9 +103,10 @@ namespace Vehicles
 		private void RegenerateNewVehicleRegions()
 		{
 			newRegions.Clear();
-			foreach (IntVec3 cell in mapping[createdFor].VehicleRegionDirtyer.DirtyCells)
+			var dirtyCells = mapping[createdFor].VehicleRegionDirtyer.DumpDirtyCells();
+			foreach (IntVec3 cell in dirtyCells)
 			{
-				if (VehicleGridsUtility.GetRegion(cell, mapping.map, createdFor, RegionType.Set_All) is null)
+				if (VehicleGridsUtility.GetRegion(cell, mapping.map, createdFor, RegionType.Set_All) == null)
 				{
 					VehicleRegion region = mapping[createdFor].VehicleRegionMaker.TryGenerateRegionFrom(cell);
 					if (region != null)

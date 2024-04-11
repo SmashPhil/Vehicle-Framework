@@ -369,7 +369,7 @@ namespace Vehicles
 					label = label.Colorize(modifiedColor);
 				}
 				float valueBefore = value;
-				value = Widgets.HorizontalSlider_NewTemp(rect, value, min, max, middleAlignment: false, label: null, leftAlignedLabel: label, rightAlignedLabel: format);
+				value = Widgets.HorizontalSlider(rect, value, min, max, middleAlignment: false, label: null, leftAlignedLabel: label, rightAlignedLabel: format);
 				float value2 = value;
 				if (endValue > 0 && value2 >= max)
 				{
@@ -452,7 +452,7 @@ namespace Vehicles
 					label = label.Colorize(modifiedColor);
 				}
 				float valueBefore = value;
-				value = Widgets.HorizontalSlider_NewTemp(rect, value, min, max, middleAlignment: false, label: null, leftAlignedLabel: label, rightAlignedLabel: format);
+				value = Widgets.HorizontalSlider(rect, value, min, max, middleAlignment: false, label: null, leftAlignedLabel: label, rightAlignedLabel: format);
 				float value2 = value;
 				if (increment > 0)
 				{
@@ -551,7 +551,7 @@ namespace Vehicles
 					label = label.Colorize(modifiedColor);
 				}
 				int valueBefore = value;
-				value = (int)Widgets.HorizontalSlider_NewTemp(rect, value, min, max, middleAlignment: false, label: null, leftAlignedLabel: label, rightAlignedLabel: format);
+				value = (int)Widgets.HorizontalSlider(rect, value, min, max, middleAlignment: false, label: null, leftAlignedLabel: label, rightAlignedLabel: format);
 				int value2 = value;
 				if (value2 >= max && endValue > 0)
 				{
@@ -631,7 +631,7 @@ namespace Vehicles
 					label = label.Colorize(modifiedColor);
 				}
 				int valueBefore = value;
-				value = (int)Widgets.HorizontalSlider_NewTemp(rect, value, min, max, middleAlignment: false, label: null, leftAlignedLabel: label, rightAlignedLabel: format);
+				value = (int)Widgets.HorizontalSlider(rect, value, min, max, middleAlignment: false, label: null, leftAlignedLabel: label, rightAlignedLabel: format);
 				if (valueBefore != value)
 				{
 					SetSettingsValue(def, field, value);

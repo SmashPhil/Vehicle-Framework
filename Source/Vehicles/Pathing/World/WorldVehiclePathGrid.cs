@@ -149,6 +149,24 @@ namespace Vehicles
 				}
 			}
 
+			//River costs
+			foreach ((RiverDef riverDef, float cost) in vehicleDef.properties.customRiverCosts)
+			{
+				if (!otherVehicleDef.properties.customRiverCosts.TryGetValue(riverDef, out float matchingCost) || matchingCost != cost)
+				{
+					return false;
+				}
+			}
+
+			//River costs
+			foreach ((RiverDef riverDef, float cost) in otherVehicleDef.properties.customRiverCosts)
+			{
+				if (!vehicleDef.properties.customRiverCosts.TryGetValue(riverDef, out float matchingCost) || matchingCost != cost)
+				{
+					return false;
+				}
+			}
+
 			return true;
 		}
 
@@ -175,6 +193,23 @@ namespace Vehicles
 					return false;
 				}
 			}
+
+			//if (!vehicleDef.properties.customRiverCosts.NullOrEmpty() && !otherVehicleDef.properties.customRiverCosts.NullOrEmpty())
+			//{
+			//	foreach (RiverDef riverDef in DefDatabase<RiverDef>.AllDefsListForReading)
+			//	{
+			//		float riverCost = vehicleDef.properties.customRiverCosts.TryGetValue(riverDef, 0);
+			//		float otherCost = otherVehicleDef.properties.customRiverCosts.TryGetValue(riverDef, 0);
+			//		if ((riverCost == ImpassableMovementDifficulty || otherCost == ImpassableMovementDifficulty) && riverCost != otherCost)
+			//		{
+			//			return false;
+			//		}
+			//	}
+			//	if (vehicleDef.properties.riverTravel != otherVehicleDef.properties.riverTravel)
+			//	{
+			//		return false;
+			//	}
+			//}
 			return true;
 		}
 
@@ -346,10 +381,26 @@ namespace Vehicles
 		public static float CalculatedMovementDifficultyAt(int tile, VehicleDef vehicleDef, int? ticksAbs = null, StringBuilder explanation = null, bool coastalTravel = true)
 		{
 			Tile worldTile = Find.WorldGrid[tile];
-			
+			if (worldTile == null)
+			{
+				Log.Error($"Attempting to calculate difficulty at null tile.");
+				return ImpassableMovementDifficulty;
+			}
+
 			if (explanation != null && explanation.Length > 0)
 			{
 				explanation.AppendLine();
+			}
+
+			List<Tile.RiverLink> rivers = worldTile.Rivers;
+			if (!rivers.NullOrEmpty())
+			{
+				Tile.RiverLink riverLink = WorldHelper.BiggestRiverOnTile(rivers);
+				if (riverLink.river != null && vehicleDef.properties.customRiverCosts.TryGetValue(riverLink.river, out float riverCost) && riverCost != ImpassableMovementDifficulty)
+				{
+					explanation?.Append($"{riverLink.river.LabelCap}: {riverCost.ToStringWithSign("0.#")}");
+					return riverCost;
+				}
 			}
 
 			float defaultBiomeCost = 1;
@@ -359,7 +410,7 @@ namespace Vehicles
 			}
 			else
 			{
-				BiomeDef biomeDef = Find.WorldGrid[tile].biome;
+				BiomeDef biomeDef = worldTile.biome;
 				defaultBiomeCost = biomeDef.impassable ? ImpassableMovementDifficulty : biomeDef.movementDifficulty;
 			}
 
@@ -371,6 +422,14 @@ namespace Vehicles
 			float biomeCost = vehicleDef.properties.customBiomeCosts.TryGetValue(worldTile.biome, defaultBiomeCost);
 			float hillinessCost = vehicleDef.properties.customHillinessCosts.TryGetValue(worldTile.hilliness, HillinessMovementDifficultyOffset(worldTile.hilliness));
 
+			if (!VehicleMod.settings.main.vehiclePathingBiomesCostOnRoads)
+			{
+				if (!worldTile.Roads.NullOrEmpty())
+				{
+					biomeCost = 1;
+					hillinessCost = 0;
+				}
+			}
 			if (ImpassableCost(biomeCost) || ImpassableCost(hillinessCost))
 			{
 				if (explanation != null)
@@ -379,12 +438,11 @@ namespace Vehicles
 				}
 				return ImpassableMovementDifficulty;
 			}
-			
 			if (explanation != null)
 			{
 				explanation.Append(worldTile.biome.LabelCap + ": " + biomeCost.ToStringWithSign("0.#"));
 			}
-			
+
 			float totalCost = biomeCost + hillinessCost;
 			if (explanation != null && hillinessCost != 0f)
 			{

@@ -66,7 +66,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref rotCrashing, "rotCrashing", Rot4.East);
 		}
 
-		public override void DrawAt(Vector3 drawLoc, bool flip = false)
+		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
 			float num = 0f;
 			if (def.skyfaller.rotateGraphicTowardsDirection)

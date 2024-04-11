@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<DutyDef>
+		<defName>PrepareVehicleCaravan_BoardVehicle</defName>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="ThinkNode_Subtree">
+					<treeDef>SatisfyVeryUrgentNeeds</treeDef>
+				</li>
+				
+				<li Class="Vehicles.JobGiver_BoardVehicle"/>
+				
+				<li Class="JobGiver_WanderAnywhere"/>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+	
+	<DutyDef>
+		<defName>PrepareVehicleCaravan_GatherDownedPawns</defName>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="ThinkNode_Subtree">
+					<treeDef>SatisfyVeryUrgentNeeds</treeDef>
+				</li>
+				
+				<li Class="Vehicles.JobGiver_CarryPawnToVehicle"/>
+				
+				<li Class="JobGiver_WanderAnywhere"/>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+	
+	<DutyDef>
+		<defName>PrepareVehicleCaravan_SendSlavesToVehicle</defName>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="ThinkNode_Subtree">
+					<treeDef>SatisfyVeryUrgentNeeds</treeDef>
+				</li>
+				
+				<li Class="Vehicles.JobGiver_BoardVehicle"/>
+				
+				<li Class="JobGiver_WanderAnywhere"/>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+	
+	<DutyDef>
+		<defName>PrepareVehicleCaravan_RopeAnimalsToVehicle</defName>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<!-- Basic needs -->
+				<li Class="ThinkNode_Subtree">
+					<treeDef>SatisfyVeryUrgentNeeds</treeDef>
+				</li>
+
+				<!-- Colonist -->
+				<li Class="ThinkNode_ConditionalColonist">
+					<subNodes>
+						<!-- Gather pawns -->
+						<li Class="Vehicles.JobGiver_PrepareVehicleCaravan_RopeAnimals"/>
+						<li Class="JobGiver_GotoTravelDestination">
+							<locomotionUrgency>Jog</locomotionUrgency>
+						</li>
+					</subNodes>
+				</li>
+
+				<!-- Wander anywhere -->
+				<li Class="JobGiver_WanderAnywhere"/>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+  
+	<DutyDef>
+		<defName>PrepareVehicleCaravan_GatherItems</defName>
+		<thinkNode Class="ThinkNode_Priority">
+		  <subNodes>
+			<!-- Basic needs -->
+			<li Class="ThinkNode_Subtree">
+			  <treeDef>SatisfyVeryUrgentNeeds</treeDef> <!--SatisfyVeryUrgentNeeds --> <!-- SatisfyBasicNeeds -->
+			</li>
+
+			<!-- Drop items if you're assigned to unload everything -->
+			<!-- (before loading new items!) -->
+			<li Class="JobGiver_UnloadYourInventory" />
+
+			<!-- Unload carriers if they're assigned to unload everything -->
+			<!-- (before loading new items!) -->
+			<li Class="JobGiver_UnloadMyLordCarriers" />
+
+			<!-- Gather items -->
+			<li Class="Vehicles.JobGiver_PrepareVehicleCaravan_GatheringItems"/>
+			
+			<!-- Wander -->
+			<li Class="ThinkNode_Tagger">
+			  <tagToGive>WaitingForOthersToFinishGatheringItems</tagToGive>
+			  <subNodes>
+				<li Class="JobGiver_WanderAnywhere"/>
+			  </subNodes>
+			</li>
+		  </subNodes>
+		</thinkNode>
+	</DutyDef>
+  
+	<DutyDef>
+		<defName>PrepareVehicleCaravan_WaitVehicle</defName>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="Vehicles.JobGiver_AwaitOrders"/>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+</Defs>

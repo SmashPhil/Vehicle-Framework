@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<BodyPartDef>
+			<defName>emptyBody</defName>
+			<label>body</label>
+			<hitPoints>1</hitPoints>
+			<skinCovered>false</skinCovered>
+			<solid>true</solid>
+			<bleedRate>0</bleedRate>
+			<alive>false</alive>
+			<frostbiteVulnerability>0.01</frostbiteVulnerability>
+	</BodyPartDef>
+	
+	<BodyDef>
+		<defName>emptyBody</defName>
+		<corePart>
+			<def>emptyBody</def>
+			<height>Middle</height>
+			<depth>Outside</depth>
+		</corePart>
+	</BodyDef>
+</Defs>
