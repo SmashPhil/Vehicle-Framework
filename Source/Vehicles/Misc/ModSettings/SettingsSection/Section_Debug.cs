@@ -460,7 +460,7 @@ namespace Vehicles
 				{
 					versionChecking = update.UpdateData.currentVersion;
 					string label = versionChecking;
-					if (versionChecking == VehicleHarmony.Version.VersionString)
+					if (versionChecking == VehicleHarmony.VehicleMMD.ModVersion)
 					{
 						label += " (Current)";
 					}

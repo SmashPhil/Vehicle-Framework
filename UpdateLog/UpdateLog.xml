@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1585</currentVersion>
+  <currentVersion>1.5.1586</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -20,15 +20,11 @@ When I do have the first iteration of raider AI finished, it will be an opt-in f
 
 P.S. River travel is now enabled, go crazy.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Fixed thread safety issue with region-making, causing some regions to not generate properly.
+- Fixed thread safety issues with regions, causing vehicles to not be able to path to specific areas on the map.
 
-- Fixed thread safety issue with region-dirtying, causing some regions to become invalid.
+- Fixed bug where region padding would result in certain vehicles not being able to path between walls.
 
-- Fixed bug where region padding would result in certain vehicles having impassable center paths.
-
-- Fixed bug where MapComponentCache would not clear properly when exiting to menu and immediately loading back into a game.
-
-- Fixed bug where MapComponentCache would not clear properly when exiting to menu and starting a new game.
+- Fixed bug where MapComponentCache would not clear properly when exiting to menu.
 
 - Fixed icon rendering for 'Form Vehicle Caravan' window.
 
@@ -37,9 +33,9 @@ P.S. River travel is now enabled, go crazy.
 &lt;b&gt;Players&lt;/b&gt;
 - Enabled river travel
 
-- Added 'river size multiplier' to VF Mod Settings under 'Main'
+- Added 'River Size Multiplier' to VF Mod Settings under 'Main'
 
-- Added 'Biome costs on Roads' to VF Mod Settings under 'Main'
+- Added 'Biome Costs on Roads' to VF Mod Settings under 'Main'
 
 &lt;b&gt;Modders&lt;/b&gt;
 - Added 'riverCost' field to vehicle properties.

@@ -1,0 +1,33 @@
+<!--
+This file is unused, it is a template for the auto-updating powershell script should there ever be
+a build error that results in the complete overwrite of the About.xml file.
+-->
+<ModMetaData>
+	<name>Vehicle Framework</name>
+	<author>Smash Phil</author>
+	<packageId>SmashPhil.VehicleFramework</packageId>
+	<modVersion>ERR</modVersion>
+	
+	<supportedVersions>
+		<li>1.4</li>
+		<li>1.5</li>
+	</supportedVersions>
+	
+	<loadAfter>
+		<li>brrainz.harmony</li>
+	</loadAfter>
+	
+	<modDependencies>
+		<li>
+			<packageId>brrainz.harmony</packageId>
+			<displayName>Harmony</displayName>
+			<steamWorkshopUrl>steam://url/CommunityFilePage/2009463077</steamWorkshopUrl>
+			<downloadUrl>https://github.com/pardeike/HarmonyRimWorld/releases/latest</downloadUrl>
+		</li>
+	</modDependencies>
+	
+	<description><![CDATA[<b><color=orange>Vehicle Framework</color></b>
+
+Enables the creation of vehicles in RimWorld.]]>
+	</description>
+</ModMetaData>

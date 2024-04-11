@@ -653,6 +653,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>call $(ProjectDir)..\..\UpdateBuildFile.bat</PostBuildEvent>
+    <PostBuildEvent>Powershell.exe -ExecutionPolicy Unrestricted -file "$(ProjectDir)\UpdateVersion.ps1" 1 5 "07-DEC-2019" false true</PostBuildEvent>
   </PropertyGroup>
 </Project>
