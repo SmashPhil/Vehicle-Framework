@@ -209,6 +209,7 @@ namespace Vehicles
 			}
 		}
 
+		[Obsolete("Use AddRole instead", true)] //TODO 1.6 - Remove
 		public void AddHandlers(List<VehicleHandler> handlerList)
 		{
 			if (handlerList.NullOrEmpty()) return;
@@ -227,12 +228,32 @@ namespace Vehicles
 			}
 		}
 
+		[Obsolete("Use RemoveHandler instead", true)] //TODO 1.6 - Remove
 		public void RemoveHandlers(List<VehicleHandler> handlerList)
 		{
 			if (handlerList.NullOrEmpty()) return;
 			foreach (VehicleHandler handler in handlerList)
 			{
 				VehicleHandler vehicleHandler = handlers.FirstOrDefault(h => h == handler);
+			}
+		}
+
+		public void AddRole(VehicleRole role)
+		{
+			role.ResolveReferences(VehicleDef);
+			handlers.Add(new VehicleHandler(this, role));
+		}
+
+		public void RemoveRole(VehicleRole role)
+		{
+			DisembarkAll(); //Temporary measure to avoid the destruction of all pawns within the role being removed
+			for (int i = handlers.Count - 1; i >= 0; i--)
+			{
+				VehicleHandler handler = handlers[i];
+				if (handler.role.key == role.key)
+				{
+					handlers.RemoveAt(i);
+				}
 			}
 		}
 

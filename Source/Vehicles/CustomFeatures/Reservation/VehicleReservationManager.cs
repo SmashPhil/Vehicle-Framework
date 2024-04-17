@@ -304,6 +304,9 @@ namespace Vehicles
 			base.ExposeData();
 			Scribe_Collections.Look(ref reservations, nameof(reservations), LookMode.Reference, LookMode.Deep, ref vehiclesReserving_tmp, ref vehicleReservations_tmp);
 			Scribe_Collections.Look(ref vehicleListers, nameof(vehicleListers), LookMode.Reference, LookMode.Deep, ref vehicleListerPawns_tmp, ref vehicleListerRequests_tmp);
+
+			reservations ??= new Dictionary<VehiclePawn, VehicleReservationCollection>();
+			vehicleListers ??= new Dictionary<VehiclePawn, VehicleRequestCollection>();
 		}
 
 		/// <summary>

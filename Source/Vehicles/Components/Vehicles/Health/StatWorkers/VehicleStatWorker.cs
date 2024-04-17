@@ -15,6 +15,18 @@ namespace Vehicles
 		protected Dictionary<VehicleDef, float> baseValues;
 		protected List<VehicleStatPart> statParts;
 
+		private static readonly Gradient gradient = new Gradient()
+		{
+			colorKeys = new[] { new GradientColorKey(Color.gray, 0),
+								new GradientColorKey(TexData.RedReadable, 0.25f),
+								new GradientColorKey(TexData.SevereDamage, 0.4f),
+								new GradientColorKey(TexData.ModerateDamage, 0.7f),
+								new GradientColorKey(TexData.MinorDamage, 0.75f),
+								new GradientColorKey(TexData.WorkingCondition, 1),
+								new GradientColorKey(TexData.Enhanced, 1.01f) //greater than 101% max efficiency
+			}
+		};
+
 		public VehicleStatWorker()
 		{
 		}
@@ -276,7 +288,7 @@ namespace Vehicles
 			float baseValue = GetBaseValue(vehicle.VehicleDef);
 			if (statDef.operationType > EfficiencyOperationType.None)
 			{
-				Color effColor = baseValue == 0 ? TexData.WorkingCondition : VehicleComponent.gradient.Evaluate(GetValue(vehicle) / baseValue);
+				Color effColor = baseValue == 0 ? TexData.WorkingCondition : gradient.Evaluate(GetValue(vehicle) / baseValue);
 				Widgets.Label(new Rect(leftRect.width * 0.65f, curY, leftRect.width * 0.35f, 30f), StatValueFormatted(vehicle).Colorize(effColor));
 				Rect rect2 = new Rect(0f, curY, leftRect.width, 20f);
 				if (Mouse.IsOver(rect2))

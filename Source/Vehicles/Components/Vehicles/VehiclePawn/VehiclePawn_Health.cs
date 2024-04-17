@@ -29,8 +29,6 @@ namespace Vehicles
 
 		public VehiclePermissions MovementPermissions => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), nameof(VehicleDef.vehicleMovementPermissions), VehicleDef.vehicleMovementPermissions);
 		
-		public float WorldSpeedMultiplier => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.worldSpeedMultiplier), VehicleDef.properties.worldSpeedMultiplier);
-		
 		public bool CanMove => GetStatValue(VehicleStatDefOf.MoveSpeed) > 0.1f && MovementPermissions > VehiclePermissions.NotAllowed && movementStatus == VehicleMovementStatus.Online;
 		
 		public bool CanMoveFinal => CanMove && (CanMoveWithOperators || VehicleMod.settings.debug.debugDraftAnyVehicle);
@@ -39,6 +37,16 @@ namespace Vehicles
 
 		public CellRect Hitbox { get; private set; }
 
+		public float WorldSpeedMultiplier
+		{
+			get
+			{
+				float worldSpeedMultiplier = SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.worldSpeedMultiplier), VehicleDef.properties.worldSpeedMultiplier);
+				worldSpeedMultiplier = statHandler.GetStatOffset(VehicleStatUpgradeCategoryDefOf.WorldSpeedMultiplier, worldSpeedMultiplier);
+				return worldSpeedMultiplier;
+			}
+		}
+		
 		public IEnumerable<IntVec3> SurroundingCells
 		{
 			get

@@ -55,9 +55,18 @@ namespace Vehicles
 
 		string ITweakFields.Label => label;
 
+		public bool Resolved { get; private set; } = false;
+
 		public void ResolveReferences(VehicleDef vehicleDef)
 		{
+			if (Resolved)
+			{
+				return;
+			}
+			
 			hitbox.Initialize(vehicleDef);
+
+			Resolved = true;
 		}
 
 		void ITweakFields.OnFieldChanged()

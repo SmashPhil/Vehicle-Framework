@@ -64,9 +64,9 @@ namespace Vehicles
 
 				if (instruction.Calls(propertyGetter))
 				{
-					i++;
-					instruction = instructionList[i];
-					yield return new CodeInstruction(opcode: OpCodes.Pop);
+					yield return instruction;
+					instruction = instructionList[++i]; //FloatRange::get_RandomInRange
+					//yield return new CodeInstruction(opcode: OpCodes.Pop);
 					yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
 					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(ModSettingsHelper), nameof(ModSettingsHelper.BeachMultiplier)));
 				}

@@ -52,7 +52,7 @@ namespace Vehicles
 		public static bool ViableForCaravan(this VehicleCaravan vehicleCaravan, VehiclePawn vehicle)
 		{
 			WorldVehiclePathGrid worldPathGrid = WorldVehiclePathGrid.Instance;
-			foreach (VehiclePawn caravanVehicle in vehicleCaravan.Vehicles)
+			foreach (VehiclePawn caravanVehicle in vehicleCaravan.VehiclesListForReading)
 			{
 				if (!worldPathGrid.MatchesReachability(caravanVehicle.VehicleDef, vehicle.VehicleDef))
 				{

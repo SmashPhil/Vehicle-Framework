@@ -51,6 +51,8 @@ namespace Vehicles
 
 		public IEnumerable<VehiclePawn> Vehicles => vehicles;
 
+		public List<VehiclePawn> VehiclesListForReading => vehicles;
+
 		public IEnumerable<Pawn> DismountedPawns
 		{
 			get
@@ -354,7 +356,7 @@ namespace Vehicles
 				}
 			}
 
-			foreach (VehiclePawn vehicle in Vehicles)
+			foreach (VehiclePawn vehicle in VehiclesListForReading)
 			{
 				foreach (VehicleComp vehicleComp in vehicle.AllComps.Where(comp => comp is VehicleComp))
 				{
@@ -381,7 +383,7 @@ namespace Vehicles
 					defaultLabel = "Repair all Vehicles",
 					action = delegate ()
 					{
-						foreach (VehiclePawn vehicle in Vehicles)
+						foreach (VehiclePawn vehicle in VehiclesListForReading)
 						{
 							vehicle.statHandler.components.ForEach(c => c.HealComponent(float.MaxValue));
 						}
@@ -511,7 +513,7 @@ namespace Vehicles
 			{
 				vehicleCounts.Clear();
 				{
-					foreach (VehiclePawn vehicle in Vehicles)
+					foreach (VehiclePawn vehicle in VehiclesListForReading)
 					{
 						if (vehicleCounts.ContainsKey(vehicle.VehicleDef))
 						{
@@ -560,7 +562,7 @@ namespace Vehicles
 				}
 				stringBuilder.Append("CaravanPawnsDowned".Translate(downed));
 			}
-			foreach (VehiclePawn vehicle in Vehicles)
+			foreach (VehiclePawn vehicle in VehiclesListForReading)
 			{
 				foreach (VehicleComp vehicleComp in vehicle.AllComps.Where(comp => comp is VehicleComp))
 				{

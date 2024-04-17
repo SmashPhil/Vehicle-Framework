@@ -13,15 +13,18 @@ namespace Vehicles
 
 		public List<HealthUpgrade> health;
 
-		public List<VehicleRole> roles; //TODO - VehicleHandler needs some changes to allow resolving roles from upgrades
+		public List<VehicleRole> roles;
 
 		public override bool UnlockOnLoad => true;
 
 		public override void Unlock(VehiclePawn vehicle, bool unlockingAfterLoad)
 		{
-			if (!roles.NullOrEmpty())
+			if (!unlockingAfterLoad && !roles.NullOrEmpty()) //Roles are serialized as VehicleHandler, no need to re-upgrade
 			{
-
+				foreach (VehicleRole role in roles)
+				{
+					vehicle.AddRole(role);
+				}
 			}
 			if (!armor.NullOrEmpty())
 			{
@@ -49,14 +52,24 @@ namespace Vehicles
 					if (!healthUpgrade.key.NullOrEmpty())
 					{
 						VehicleComponent component = vehicle.statHandler.GetComponent(healthUpgrade.key);
-						switch (healthUpgrade.type)
+
+						if (healthUpgrade.value.HasValue)
 						{
-							case UpgradeType.Add:
-								component.AddHealthModifiers[node.key] = healthUpgrade.value;
-								break;
-							case UpgradeType.Set:
-								component.SetHealthModifier = healthUpgrade.value;
-								break;
+							switch (healthUpgrade.type)
+							{
+								case UpgradeType.Add:
+									component.AddHealthModifiers[node.key] = healthUpgrade.value.Value;
+									break;
+								case UpgradeType.Set:
+									component.SetHealthModifier = healthUpgrade.value.Value;
+									break;
+							}
+						}
+
+
+						if (healthUpgrade.depth != null)
+						{
+							component.depthOverride = healthUpgrade.depth;
 						}
 					}
 				}
@@ -67,7 +80,10 @@ namespace Vehicles
 		{
 			if (!roles.NullOrEmpty())
 			{
-
+				foreach (VehicleRole role in roles)
+				{
+					vehicle.RemoveRole(role);
+				}
 			}
 			if (!armor.NullOrEmpty())
 			{
@@ -88,6 +104,35 @@ namespace Vehicles
 					}
 				}
 			}
+			if (!health.NullOrEmpty())
+			{
+				foreach (HealthUpgrade healthUpgrade in health)
+				{
+					if (!healthUpgrade.key.NullOrEmpty())
+					{
+						VehicleComponent component = vehicle.statHandler.GetComponent(healthUpgrade.key);
+
+						if (healthUpgrade.value.HasValue)
+						{
+							switch (healthUpgrade.type)
+							{
+								case UpgradeType.Add:
+									component.AddHealthModifiers.Remove(node.key);
+									break;
+								case UpgradeType.Set:
+									component.SetHealthModifier = -1;
+									break;
+							}
+						}
+
+
+						if (healthUpgrade.depth != null)
+						{
+							component.depthOverride = null;
+						}
+					}
+				}
+			}
 		}
 
 		public struct ArmorUpgrade
@@ -101,7 +146,9 @@ namespace Vehicles
 		public struct HealthUpgrade
 		{
 			public string key;
-			public float value;
+			public float? value;
+
+			public VehicleComponent.VehiclePartDepth? depth;
 
 			public UpgradeType type;
 		}

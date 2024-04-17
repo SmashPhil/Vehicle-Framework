@@ -121,7 +121,7 @@ namespace Vehicles
 
 			//navigationCategory = VehicleDef.defaultNavigation;
 
-			if (VehicleDef.properties.roles != null && VehicleDef.properties.roles.Count > 0)
+			if (!VehicleDef.properties.roles.NullOrEmpty())
 			{
 				foreach (VehicleRole role in VehicleDef.properties.roles)
 				{

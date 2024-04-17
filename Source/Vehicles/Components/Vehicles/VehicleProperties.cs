@@ -55,8 +55,12 @@ namespace Vehicles
 		public SimpleDictionary<ThingDef, int> customThingCosts;
 
 		// World Pathing
+		[PostToSettings(Label = "VF_OffRoadMultiplier", Tooltip = "VF_OFfRoadMultiplierTooltip", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
+		[SliderValues(MinValue = 0.01f, MaxValue = 2, RoundDecimalPlaces = 1)]
 		public float offRoadMultiplier = 1;
+
 		public float riverCost = -1;
+
 		public SimpleDictionary<RiverDef, float> customRiverCosts = new SimpleDictionary<RiverDef, float>();
 		public SimpleDictionary<BiomeDef, float> customBiomeCosts = new SimpleDictionary<BiomeDef, float>();
 		public SimpleDictionary<Hilliness, float> customHillinessCosts = new SimpleDictionary<Hilliness, float>();

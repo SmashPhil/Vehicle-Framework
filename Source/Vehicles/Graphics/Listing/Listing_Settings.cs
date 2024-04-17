@@ -174,7 +174,6 @@ namespace Vehicles
 				Rect rectLeft = new Rect(rect.x, centerY, leftLength, rect.height);
 				Rect rectRight = new Rect(rect.x + rect.width - rightLength, centerY, rightLength, Text.LineHeight);
 
-				Color color = GUI.color;
 				bool mouseOver = Mouse.IsOver(rect);
 				if (disabled)
 				{
@@ -213,7 +212,8 @@ namespace Vehicles
 				}
 				Widgets.Label(rectLeft, label);
 
-				Text.CurTextFieldStyle.alignment = TextAnchor.MiddleRight;
+				//Text.CurTextFieldStyle.alignment = TextAnchor.MiddleRight;
+				Text.Anchor = TextAnchor.MiddleRight;
 				string buffer = value.ToString();
 				int valueBefore = value;
 				Widgets.TextFieldNumeric(rectRight, ref value, ref buffer, min, max);

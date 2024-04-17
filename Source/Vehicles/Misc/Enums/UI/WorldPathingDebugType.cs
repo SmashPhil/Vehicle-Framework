@@ -12,5 +12,6 @@ namespace Vehicles
 		None,
 		PathCosts,
 		Reachability,
+		WinterPct,
 	}
 }

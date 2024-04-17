@@ -94,7 +94,7 @@ namespace Vehicles
 		/// <param name="terminator"></param>
 		public WorldPath FindPath(int startTile, int destTile, VehicleCaravan caravan, Func<float, bool> terminator = null)
 		{
-			return FindPath(startTile, destTile, caravan.Vehicles.ToList(), caravan.TicksPerMove, terminator);
+			return FindPath(startTile, destTile, caravan.VehiclesListForReading, caravan.TicksPerMove, terminator);
 		}
 
 		/// <summary>
@@ -149,7 +149,7 @@ namespace Vehicles
 				List<int> tileIDToNeighbors_offsets = grid.tileIDToNeighbors_offsets;
 				List<int> tileIDToNeighbors_values = grid.tileIDToNeighbors_values;
 				Vector3 normalized = grid.GetTileCenter(destTile).normalized;
-				float bestRoadDiscount = DefDatabase<RoadDef>.AllDefsListForReading.Min(road => VehicleCaravan_PathFollower.GetRoadMovementDifficultyMultiplier(vehicleDefs, road));
+				float bestRoadDiscount = DefDatabase<RoadDef>.AllDefsListForReading.Min(road => RoadCostHelper.GetRoadMovementDifficultyMultiplier(vehicleDefs, road));
 				int tilesSearched = 0;
 				int heuristicStrength = CalculateHeuristicStrength(startTile, destTile);
 				statusOpenValue += 2;
@@ -199,7 +199,8 @@ namespace Vehicles
 												highestTerrainCost = vehicleDefs.Max(vehicleDef => WorldVehiclePathGrid.ConsistentDirectionCost(tile, neighbor, vehicleDef));
 											}
 										}
-										float roadMultiplier = VehicleCaravan_PathFollower.GetRoadMovementDifficultyMultiplier(vehicleDefs, tile, neighbor);
+										float roadMultiplier = RoadCostHelper.GetRoadMovementDifficultyMultiplier(vehicleDefs, tile, neighbor);
+										float winterMultiplier = WinterPathingHelper.GetCurrentWinterMovementDifficultyOffset(vehicleDefs, tile);
 										int totalPathCost = (int)(ticksPerMove * highestTerrainCost * roadMultiplier) + calcGrid[tile].knownCost;
 										ushort status = calcGrid[neighbor].status;
 										bool diffStatusValues = status != statusClosedValue && status != statusOpenValue;

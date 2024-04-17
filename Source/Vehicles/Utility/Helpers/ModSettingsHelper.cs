@@ -7,15 +7,15 @@ namespace Vehicles
 	{
 		private const int MediumMapSize = 250;
 
-		public static float BeachMultiplier(Map map)
+		public static float BeachMultiplier(float coastWidth, Map map)
 		{
-			float mapSizeMultiplier = (map.Size.x >= map.Size.z ? map.Size.x : map.Size.z) / MediumMapSize;
-			float beach = 60f;
 			if (VehicleMod.settings.main.beachMultiplier <= 0)
 			{
-				beach = Rand.Range(60f, 100f);
+				return coastWidth; //If no beach multiplier, just return vanilla
 			}
-			return (float)(beach + (beach * VehicleMod.settings.main.beachMultiplier)) * mapSizeMultiplier;
+			float mapSizeMultiplier = (map.Size.x >= map.Size.z ? map.Size.x : map.Size.z) / MediumMapSize; //% is based on medium sized map at 250x250
+			float beach = 60f; //Set to max possible width by vanilla standards, then apply multiplier
+			return beach * (1 + VehicleMod.settings.main.beachMultiplier) * mapSizeMultiplier;
 		}
 
 		public static float RiverMultiplier(RiverDef riverDef)

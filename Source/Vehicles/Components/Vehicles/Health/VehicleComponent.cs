@@ -25,7 +25,7 @@ namespace Vehicles
 		public IndicatorDef indicator;
 		public Color highlightColor = Color.white;
 
-		public static Gradient gradient;
+		public VehiclePartDepth? depthOverride;
 
 		public VehicleComponent(VehiclePawn vehicle)
 		{
@@ -44,7 +44,7 @@ namespace Vehicles
 
 		public Dictionary<string, float> AddHealthModifiers { get; private set; } = new Dictionary<string, float>();
 
-		public Color EfficiencyColor => gradient.Evaluate(Efficiency);
+		public VehiclePartDepth Depth => depthOverride ?? props.depth;
 
 		string ITweakFields.Category => props.key;
 
@@ -241,17 +241,6 @@ namespace Vehicles
 			this.props = props;
 			indicator = props.reactors?.FirstOrDefault(reactor => reactor.indicator != null)?.indicator;
 			highlightColor = props.reactors?.FirstOrDefault()?.highlightColor ?? Color.white;
-			gradient = new Gradient()
-			{
-				colorKeys = new[] { new GradientColorKey(Color.gray, props.efficiency[0].x),
-									new GradientColorKey(TexData.RedReadable, props.efficiency[1].x),
-									new GradientColorKey(TexData.SevereDamage, props.efficiency[2].x),
-									new GradientColorKey(TexData.ModerateDamage, props.efficiency[3].x),
-									new GradientColorKey(TexData.MinorDamage, props.efficiency[4].x),
-									new GradientColorKey(TexData.WorkingCondition, props.efficiency[5].x),
-									new GradientColorKey(TexData.Enhanced, props.efficiency[5].x + 0.01f) //greater than 101% max efficiency
-				}
-			};
 		}
 
 		public virtual void ExposeData()

@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <Defs>
+
+	<!-- Fuel -->
 	<Vehicles.StatUpgradeCategoryDef>
 		<defName>FuelCapacity</defName>
-	</Vehicles.StatUpgradeCategoryDef>
-	
-	<Vehicles.StatUpgradeCategoryDef>
-		<defName>FuelEfficiency</defName>
 	</Vehicles.StatUpgradeCategoryDef>
 	
 	<Vehicles.StatUpgradeCategoryDef>
@@ -14,17 +12,27 @@
 	</Vehicles.StatUpgradeCategoryDef>
 	
 	<Vehicles.StatUpgradeCategoryDef>
+		<defName>ChargeRate</defName>
+	</Vehicles.StatUpgradeCategoryDef>
+	
+	<Vehicles.StatUpgradeCategoryDef>
+		<defName>DischargeRate</defName>
+	</Vehicles.StatUpgradeCategoryDef>
+	
+	<!-- World Map -->
+	<Vehicles.StatUpgradeCategoryDef>
 		<defName>WorldSpeedMultiplier</defName>
 	</Vehicles.StatUpgradeCategoryDef>
 	
 	<Vehicles.StatUpgradeCategoryDef>
-		<defName>OffRoadEfficiency</defName>
+		<defName>OffRoadMultiplier</defName>
 	</Vehicles.StatUpgradeCategoryDef>
 	
 	<Vehicles.StatUpgradeCategoryDef>
-		<defName>WinterPathCost</defName>
+		<defName>WinterCostMultiplier</defName>
 	</Vehicles.StatUpgradeCategoryDef>
 	
+	<!-- Combat -->
 	<Vehicles.StatUpgradeCategoryDef>
 		<defName>PawnCollisionMultiplier</defName>
 	</Vehicles.StatUpgradeCategoryDef>

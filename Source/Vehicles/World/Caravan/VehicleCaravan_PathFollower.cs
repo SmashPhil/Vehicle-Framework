@@ -206,7 +206,7 @@ namespace Vehicles
 
 		private bool TryRecoverFromUnwalkablePosition()
 		{
-			if (caravan.Vehicles.All(vehicle => vehicle.VehicleDef.vehicleType == VehicleType.Air))
+			if (caravan.VehiclesListForReading.All(vehicle => vehicle.VehicleDef.vehicleType == VehicleType.Air))
 			{
 				return false;
 			}
@@ -302,7 +302,7 @@ namespace Vehicles
 
 		public static int CostToMove(VehicleCaravan caravan, int start, int end, int? ticksAbs = null)
 		{
-			return CostToMove(caravan.UniqueVehicleDefsInCaravan().ToList(), caravan.TicksPerMove, start, end, ticksAbs);
+			return CostToMove(caravan.VehiclesListForReading, caravan.TicksPerMove, start, end, ticksAbs: ticksAbs);
 		}
 
 		public static int CostToMove(List<VehicleDef> vehicleDefs, int ticksPerMove, int start, int end, int? ticksAbs = null, StringBuilder explanation = null, string caravanTicksPerMoveExplanation = null)
@@ -315,16 +315,16 @@ namespace Vehicles
 			StringBuilder stringBuilder = (explanation != null) ? new StringBuilder() : null;
 			float cost = float.MaxValue;
 
-			foreach (VehicleDef vehicle in vehicleDefs)
+			foreach (VehicleDef vehicleDef in vehicleDefs)
 			{
-				float newCost = WorldVehiclePathGrid.CalculatedMovementDifficultyAt(end, vehicle, ticksAbs, stringBuilder);
+				float newCost = WorldVehiclePathGrid.CalculatedMovementDifficultyAt(end, vehicleDef, ticksAbs, stringBuilder);
 				if (newCost < cost)
 				{
 					cost = newCost;
 				}
 			}
 			
-			float roadMovementDifficultyMultiplier = GetRoadMovementDifficultyMultiplier(vehicleDefs, start, end, stringBuilder);
+			float roadMovementDifficultyMultiplier = RoadCostHelper.GetRoadMovementDifficultyMultiplier(vehicleDefs, start, end, stringBuilder);
 			if (explanation != null)
 			{
 				explanation.AppendLine();
@@ -332,7 +332,10 @@ namespace Vehicles
 				explanation.AppendLine(stringBuilder.ToString().Indented("  "));
 				explanation.AppendLine($"  = {cost * roadMovementDifficultyMultiplier:0.#}");
 			}
-			int finalCost = (int)(ticksPerMove * cost * roadMovementDifficultyMultiplier);
+
+			float winterMultiplier = WinterPathingHelper.GetCurrentWinterMovementDifficultyOffset(vehicleDefs, end, stringBuilder);
+
+			int finalCost = (int)(ticksPerMove * cost * roadMovementDifficultyMultiplier * winterMultiplier);
 			finalCost = Mathf.Clamp(finalCost, 1, MaxMoveTicks);
 			if (explanation != null)
 			{
@@ -344,56 +347,46 @@ namespace Vehicles
 			return finalCost;
 		}
 
-		public static float GetRoadMovementDifficultyMultiplier(VehicleCaravan caravan, int fromTile, int toTile, StringBuilder explanation = null)
+		public static int CostToMove(List<VehiclePawn> vehicles, int ticksPerMove, int start, int end, int? ticksAbs = null, StringBuilder explanation = null, string caravanTicksPerMoveExplanation = null)
 		{
-			List<VehicleDef> vehicleDefs = caravan.UniqueVehicleDefsInCaravan().ToList();
-			return GetRoadMovementDifficultyMultiplier(vehicleDefs, fromTile, toTile, explanation);
-		}
+			if (start == end)
+			{
+				return 0;
+			}
+			explanation?.AppendLine(caravanTicksPerMoveExplanation);
+			StringBuilder stringBuilder = (explanation != null) ? new StringBuilder() : null;
+			float cost = float.MaxValue;
 
-		public static float GetRoadMovementDifficultyMultiplier(List<VehicleDef> vehicleDefs, int fromTile, int toTile, StringBuilder explanation = null)
-		{
-			List<Tile.RoadLink> roads = Find.WorldGrid.tiles[fromTile].Roads;
-			if (roads == null)
+			foreach (VehiclePawn vehicle in vehicles)
 			{
-				return Mathf.Clamp(vehicleDefs.Max(vehicleDef => vehicleDef.properties.offRoadMultiplier), 0.1f, 100);
-			}
-			if (toTile == -1)
-			{
-				toTile = Find.WorldGrid.FindMostReasonableAdjacentTileForDisplayedPathCost(fromTile);
-			}
-			for (int i = 0; i < roads.Count; i++)
-			{
-				if (roads[i].neighbor == toTile)
+				float newCost = WorldVehiclePathGrid.CalculatedMovementDifficultyAt(end, vehicle.VehicleDef, ticksAbs, stringBuilder);
+				if (newCost < cost)
 				{
-					float roadMultiplier = GetRoadMovementDifficultyMultiplier(vehicleDefs, roads[i].road);
-					
-					if (explanation != null)
-					{
-						if (explanation.Length > 0)
-						{
-							explanation.AppendLine();
-						}
-						explanation.Append($"{roads[i].road.LabelCap}: {roadMultiplier.ToStringPercent()}");
-					}
-					return roadMultiplier;
+					cost = newCost;
 				}
 			}
-			return 1f;
-		}
 
-		public static float GetRoadMovementDifficultyMultiplier(List<VehicleDef> vehicleDefs, RoadDef roadDef)
-		{
-			float roadMultiplier = roadDef.movementCostMultiplier;
-			bool customRoadCosts = false;
-			foreach (VehicleDef vehicleDef in vehicleDefs)
+			float roadMovementDifficultyMultiplier = RoadCostHelper.GetRoadMovementDifficultyMultiplier(vehicles, start, end, stringBuilder);
+			if (explanation != null)
 			{
-				if (vehicleDef.properties.customRoadCosts.TryGetValue(roadDef, out float movementCostMultiplier) && (!customRoadCosts || movementCostMultiplier < roadMultiplier))
-				{
-					customRoadCosts = true;
-					roadMultiplier = movementCostMultiplier;
-				}
+				explanation.AppendLine();
+				explanation.AppendLine("TileMovementDifficulty".Translate() + ":");
+				explanation.AppendLine(stringBuilder.ToString().Indented("  "));
+				explanation.AppendLine($"  = {cost * roadMovementDifficultyMultiplier:0.#}");
 			}
-			return roadMultiplier;
+
+			float winterMultiplier = WinterPathingHelper.GetCurrentWinterMovementDifficultyOffset(vehicles, end, stringBuilder);
+
+			int finalCost = (int)(ticksPerMove * cost * roadMovementDifficultyMultiplier * winterMultiplier);
+			finalCost = Mathf.Clamp(finalCost, 1, MaxMoveTicks);
+			if (explanation != null)
+			{
+				explanation.AppendLine();
+				explanation.AppendLine("FinalCaravanMovementSpeed".Translate() + ":");
+				int num3 = Mathf.CeilToInt(finalCost / 1f);
+				explanation.Append($"  {GenDate.TicksPerDay / ticksPerMove:0.#} / {cost * roadMovementDifficultyMultiplier:0.#} = {GenDate.TicksPerDay / num3:0.#} {"TilesPerDay".Translate()}");
+			}
+			return finalCost;
 		}
 
 		public static bool IsValidFinalPushDestination(int tile)
