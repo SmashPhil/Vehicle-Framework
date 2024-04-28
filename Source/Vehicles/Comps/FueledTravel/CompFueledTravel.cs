@@ -597,7 +597,7 @@ namespace Vehicles
 
 			//CurValues
 			Scribe_Values.Look(ref fuel, nameof(fuel));
-			Scribe_Values.Look(ref targetFuelLevel, nameof(targetFuelLevel), defaultValue: FuelCapacity);
+			Scribe_Values.Look(ref targetFuelLevel, nameof(targetFuelLevel), defaultValue: Props.fuelCapacity);
 
 			if (Scribe.mode == LoadSaveMode.Saving)
 			{

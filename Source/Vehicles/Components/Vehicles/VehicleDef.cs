@@ -326,6 +326,46 @@ namespace Vehicles
 			return new Vector2(width, height);
 		}
 
+		public VehicleRole GetRole(string roleKey)
+		{
+			if (!properties.roles.NullOrEmpty())
+			{
+				foreach (VehicleRole vehicleRole in properties.roles)
+				{
+					if (vehicleRole.key == roleKey)
+					{
+						return vehicleRole;
+					}
+				}
+			}
+			if (GetCompProperties<CompProperties_UpgradeTree>() is CompProperties_UpgradeTree compPropertiesUpgradeTree)
+			{ 
+				foreach (UpgradeNode node in compPropertiesUpgradeTree.def.nodes)
+				{
+					if (!node.upgrades.NullOrEmpty())
+					{
+						foreach (Upgrade upgrade in node.upgrades)
+						{
+							if (upgrade is VehicleUpgrade vehicleUpgrade)
+							{
+								if (!vehicleUpgrade.roles.NullOrEmpty())
+								{
+									foreach (VehicleRole vehicleRole in vehicleUpgrade.roles)
+									{
+										if (vehicleRole.key == roleKey)
+										{
+											return vehicleRole;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			return null;
+		}
+
 		/// <summary>
 		/// Retrieve all <see cref="VehicleStatCategoryDef"/>'s for this VehicleDef
 		/// </summary>

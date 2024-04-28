@@ -203,7 +203,7 @@ namespace Vehicles
 				baseStatOffsets[statDef] = new StatOffset(vehicle, statDef);
 				statOffset = baseStatOffsets[statDef];
 			}
-			statOffset.Offset += value;
+			statOffset.Offset -= value;
 		}
 
 		public void SetUpgradeableStatValue(string key, StatDef statDef, float value)
@@ -232,7 +232,7 @@ namespace Vehicles
 			{
 				return statOffset.Offset;
 			}
-			return vehicle.GetStatValue(statDef);
+			return 0;
 		}
 
 		public void MarkStatDirty(VehicleStatDef statDef)

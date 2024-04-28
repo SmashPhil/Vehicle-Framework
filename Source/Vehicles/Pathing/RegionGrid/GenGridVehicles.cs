@@ -21,6 +21,10 @@ namespace Vehicles
 		/// <param name="map"></param>
 		public static bool Walkable(this IntVec3 cell, VehicleDef vehicleDef, Map map)
 		{
+			if (map == null)
+			{
+				return false;
+			}
 			return map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehiclePathGrid.Walkable(cell);
 		}
 

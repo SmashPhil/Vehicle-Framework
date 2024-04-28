@@ -188,9 +188,9 @@ namespace Vehicles
 			}
 			Scribe_Deep.Look(ref handlers, nameof(handlers), new object[] { this });
 			
-			if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
-				role = vehicle.VehicleDef.properties.roles.FirstOrDefault(role => role.key == roleKey);
+				role = vehicle.VehicleDef.GetRole(roleKey);
 				if (role is null)
 				{
 					Log.Error($"Could not load VehicleRole from {roleKey}. Was role removed or name changed?");

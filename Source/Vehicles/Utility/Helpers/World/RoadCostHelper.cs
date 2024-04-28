@@ -82,7 +82,7 @@ namespace Vehicles
 		{
 			float offRoadMultiplier = VehicleDefOffRoadMultiplier(vehicle.VehicleDef);
 			offRoadMultiplier = vehicle.statHandler.GetStatOffset(VehicleStatUpgradeCategoryDefOf.OffRoadMultiplier, offRoadMultiplier);
-			return offRoadMultiplier;
+			return Mathf.Clamp(offRoadMultiplier, 0.01f, 10);
 		}
 
 		public static float VehicleDefOffRoadMultiplier(VehicleDef vehicleDef)

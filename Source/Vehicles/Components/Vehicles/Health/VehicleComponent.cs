@@ -179,25 +179,30 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="armorCategoryDef"></param>
 		/// <returns>armor rating %</returns>
-		public float ArmorRating(DamageArmorCategoryDef armorCategoryDef, out bool upgraded)
+		public float ArmorRating(DamageArmorCategoryDef armorCategoryDef, out float upgraded)
 		{
-			upgraded = false;
+			float baseValue = vehicle.GetStatValue(armorCategoryDef.armorRatingStat);
+
+			upgraded = 0;
 			if (!SetArmorModifiers.NullOrEmpty())
 			{
 				foreach (List<StatModifier> statModifiers in SetArmorModifiers.Values)
 				{
 					if (TryGetModifier(statModifiers, out float setValue))
 					{
-						upgraded = true;
+						upgraded = setValue - baseValue;
 						return setValue;
 					}
 				}
 			}
-			float value = vehicle.statHandler.GetUpgradeableStatValue(armorCategoryDef.armorRatingStat);
+
+			float value = baseValue + vehicle.statHandler.GetUpgradeableStatValue(armorCategoryDef.armorRatingStat);
+
 			StatModifier armorModifier = props.armor?.FirstOrDefault(rating => rating.stat == armorCategoryDef.armorRatingStat);
 			if (armorModifier != null)
 			{
-				value = armorModifier.value;
+				baseValue = armorModifier.value; //Part-specific armor does not apply vehicle-wide armor upgrades
+				value = baseValue;
 			}
 			if (!AddArmorModifiers.NullOrEmpty())
 			{
@@ -205,11 +210,11 @@ namespace Vehicles
 				{
 					if (TryGetModifier(statModifiers, out float addValue))
 					{
-						upgraded = true;
 						value += addValue;
 					}
 				}
 			}
+			upgraded = value - baseValue;
 			return value;
 
 			bool TryGetModifier(List<StatModifier> statModifiers, out float value)

@@ -172,6 +172,7 @@ namespace Vehicles
 		/// <remarks>Called regardless if vehicle is spawned or unspawned. Responsible for important variables being set that may be called even for unspawned vehicles</remarks>
 		protected virtual void PostLoad()
 		{
+			this.RegisterEvents(); //Events must be registered before comp post loads, SpawnSetup won't trigger register in this case
 			RegenerateUnsavedComponents();
 			RecacheComponents();
 			RecachePawnCount();

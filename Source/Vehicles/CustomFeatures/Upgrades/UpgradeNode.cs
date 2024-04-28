@@ -75,6 +75,18 @@ namespace Vehicles
 		/// </summary>
 		public void AddOverlays(VehiclePawn vehicle)
 		{
+			if (!UnityData.IsInMainThread)
+			{
+				LongEventHandler.ExecuteWhenFinished(() => AddOverlaysInternal(vehicle));
+			}
+			else
+			{
+				AddOverlaysInternal(vehicle);
+			}
+		}
+
+		private void AddOverlaysInternal(VehiclePawn vehicle)
+		{
 			if (!graphicOverlays.NullOrEmpty())
 			{
 				foreach (GraphicDataOverlay graphicDataOverlay in graphicOverlays)
