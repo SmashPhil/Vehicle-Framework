@@ -512,6 +512,7 @@ namespace Vehicles
 			connectedPower = null;
 		}
 
+		//TODO - Refactor wind direction
 		public virtual void DrawMotes()
 		{
 			foreach (OffsetMote offset in Props.motesGenerated)
