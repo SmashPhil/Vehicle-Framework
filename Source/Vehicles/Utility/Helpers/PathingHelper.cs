@@ -267,9 +267,6 @@ namespace Vehicles
 		/// <summary>
 		/// Thread safe event for triggering dirtyer events
 		/// </summary>
-		/// <param name="thing"></param>
-		/// <param name="mapping"></param>
-		/// <param name="vehicleDefs"></param>
 		internal static void ThingInRegionSpawned(CellRect occupiedRect, VehicleMapping mapping, List<VehicleDef> vehicleDefs, List<List<Thing>> snapshotLists)
 		{
 			foreach (VehicleDef vehicleDef in vehicleDefs)

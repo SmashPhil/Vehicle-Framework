@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1603</currentVersion>
+  <currentVersion>1.5.1634</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -14,7 +14,7 @@
 
 - Fixed bug where 1.4 version would still try to fetch build date.
 
-
+- Fixed bug where red squares would render upon constructing a wall.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 &lt;b&gt;Players&lt;/b&gt;
 - Added 'Off Road Multiplier' to VF Mod Settings under 'Vehicles'

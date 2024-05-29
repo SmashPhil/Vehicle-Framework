@@ -341,6 +341,8 @@ namespace Vehicles
 			bool northSouthRotation = VehicleGraphic.EastDiagonalRotated && (FullRotation == Rot8.NorthEast || FullRotation == Rot8.SouthEast) ||
 				(VehicleGraphic.WestDiagonalRotated && (FullRotation == Rot8.NorthWest || FullRotation == Rot8.SouthWest));
 			Drawer.renderer.RenderPawnAt(drawLoc, extraRotation, northSouthRotation);
+
+			//TODO - consolidate rendering to VehicleRenderer
 			foreach (VehicleHandler handler in HandlersWithPawnRenderer)
 			{
 				handler.RenderPawns();

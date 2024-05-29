@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using System.Runtime.CompilerServices;
 using Verse;
 using SmashTools;
 
@@ -10,32 +11,33 @@ namespace Vehicles
 	/// <summary>
 	/// Region dirtyer handler for recaching
 	/// </summary>
-	public class VehicleRegionDirtyer
-	{
-		private readonly VehicleMapping mapping;
-		private readonly VehicleDef createdFor;
-
-		private readonly ConcurrentSet<IntVec3> dirtyCells = new ConcurrentSet<IntVec3>();
+	public class VehicleRegionDirtyer : VehicleRegionManager
+    {
+		private readonly HashSet<IntVec3> dirtyCells = new HashSet<IntVec3>();
 
 		private readonly ConcurrentSet<VehicleRegion> regionsToDirty = new ConcurrentSet<VehicleRegion>();
 		private readonly ConcurrentSet<VehicleRegion> regionsToDirtyFromWalkability = new ConcurrentSet<VehicleRegion>();
 
-		private object dirtyLock = new object();
+		private object dirtyCellsLock = new object();
 
-		public VehicleRegionDirtyer(VehicleMapping mapping, VehicleDef createdFor)
+		public VehicleRegionDirtyer(VehicleMapping mapping, VehicleDef createdFor) : base(mapping, createdFor)
 		{
-			this.mapping = mapping;
-			this.createdFor = createdFor;
 		}
 
 		/// <summary>
 		/// <see cref="dirtyCells"/> getter
 		/// </summary>
-		public ICollection<IntVec3> DirtyCells
+		public IEnumerable<IntVec3> DirtyCells
 		{
 			get
 			{
-				return dirtyCells.Keys; //Snapshots inner list of keys
+				lock (dirtyCellsLock)
+				{
+					foreach (IntVec3 cell in dirtyCells)
+					{
+						yield return cell;
+					}
+				}
 			}
 		}
 
@@ -46,26 +48,23 @@ namespace Vehicles
 		{
 			get
 			{
-				return dirtyCells.Count > 0;
-			}
-		}
-
-		public ICollection<IntVec3> DumpDirtyCells()
-		{
-			lock (dirtyLock)
-			{
-				var dump = dirtyCells.Keys;
-				SetAllClean();
-				return dump;
+				lock (dirtyCellsLock)
+				{
+					return dirtyCells.Count > 0;
+				}
 			}
 		}
 
 		/// <summary>
 		/// Clear all dirtyed cells
 		/// </summary>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void SetAllClean()
 		{
-			dirtyCells.Clear();
+			lock (dirtyCellsLock)
+			{
+				dirtyCells.Clear();
+			}
 		}
 
 		/// <summary>
@@ -73,11 +72,15 @@ namespace Vehicles
 		/// </summary>
 		internal void SetAllDirty()
 		{
-			dirtyCells.Clear();
-			foreach (IntVec3 cell in mapping.map)
+			lock (dirtyCellsLock)
 			{
-				dirtyCells.Add(cell);
+				dirtyCells.Clear();
+				foreach (IntVec3 cell in mapping.map)
+				{
+					dirtyCells.Add(cell);
+				}
 			}
+
 			foreach (VehicleRegion region in mapping[createdFor].VehicleRegionGrid.AllRegions_NoRebuild_InvalidAllowed)
 			{
 				SetRegionDirty(region, addCellsToDirtyCells: false);
@@ -106,7 +109,10 @@ namespace Vehicles
 			}
 			if (GenGridVehicles.Walkable(cell, createdFor, mapping.map))
 			{
-				dirtyCells.Add(cell);
+				lock (dirtyCellsLock)
+				{
+					dirtyCells.Add(cell);
+				}
 			}
 			regionsToDirtyFromWalkability.Clear();
 		}
@@ -116,7 +122,6 @@ namespace Vehicles
 			regionsToDirty.Clear();
 			foreach (IntVec3 cell in occupiedRect.ExpandedBy(createdFor.SizePadding + 1).ClipInsideMap(mapping.map))
 			{
-				mapping.map.DrawCell_ThreadSafe(cell, 0);
 				VehicleRegion validRegionAt_NoRebuild = mapping[createdFor].VehicleRegionGrid.GetValidRegionAt_NoRebuild(cell);
 				if (validRegionAt_NoRebuild != null)
 				{
@@ -150,9 +155,12 @@ namespace Vehicles
 			}
 			regionsToDirty.Clear();
 
-			foreach (IntVec3 cell in occupiedRect)
+			lock (dirtyCellsLock)
 			{
-				dirtyCells.Add(cell);
+				foreach (IntVec3 cell in occupiedRect)
+				{
+					dirtyCells.Add(cell);
+				}
 			}
 		}
 
@@ -180,19 +188,21 @@ namespace Vehicles
 					}
 				}
 				region.links.Clear();
-				region.weights.Clear();
+				region.ClearWeights();
 				if (addCellsToDirtyCells)
 				{
-					foreach (IntVec3 intVec in region.Cells)
+					lock (dirtyCellsLock)
 					{
-						dirtyCells.Add(intVec);
+						foreach (IntVec3 intVec in region.Cells)
+						{
+							dirtyCells.Add(intVec);
+						}
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				Log.Error($"Exception thrown in SetRegionDirty. \nNull: {region is null} Room: {region?.Room is null} links: {region?.links is null} weights: {region?.weights is null}");
-				throw ex;
+				Log.Error($"Exception thrown in SetRegionDirty. Exception={ex}");
 			}
 		}
 	}

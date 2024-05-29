@@ -142,7 +142,7 @@ namespace Vehicles
 
 			if (!transferables.EnumerableNullOrEmpty())
 			{
-				WorldVehiclePathGrid worldVehiclePathGrid = Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>();
+				WorldVehiclePathGrid worldVehiclePathGrid = Find.World.GetComponent<WorldVehiclePathGrid>();
 				foreach (TransferableOneWay transferable in transferables)
 				{
 					if (transferable.AnyThing is VehiclePawn vehicle)

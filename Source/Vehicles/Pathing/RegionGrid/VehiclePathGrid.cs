@@ -28,6 +28,10 @@ namespace Vehicles
 			ResetPathGrid();
 		}
 
+		public void PostInit()
+		{
+		}
+
 		/// <summary>
 		/// Clear path grid of all costs
 		/// </summary>
@@ -85,7 +89,6 @@ namespace Vehicles
 		/// <summary>
 		/// Recalculate path cost for tile <paramref name="vehicle"/> is registered on
 		/// </summary>
-		/// <param name="vehicle"></param>
 		public void RecalculatePerceivedPathCostUnderRect(CellRect cellRect, List<List<Thing>> snapshotLists)
 		{
 			int index = 0;

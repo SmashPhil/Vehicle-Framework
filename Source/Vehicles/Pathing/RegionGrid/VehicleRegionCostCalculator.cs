@@ -24,7 +24,6 @@ namespace Vehicles
 		private readonly VehicleMapping mapping;
 		private readonly VehicleDef vehicleDef;
 
-		private VehicleRegion[] regionGrid;
 		private ByteGrid avoidGrid;
 
 		private TraverseParms traverseParms;
@@ -64,7 +63,6 @@ namespace Vehicles
 		/// <param name="drafted"></param>
 		public void Init(CellRect destination, HashSet<VehicleRegion> destRegions, TraverseParms parms, float moveTicksCardinal, float moveTicksDiagonal, ByteGrid avoidGrid, bool drafted)
 		{
-			regionGrid = mapping[vehicleDef].VehicleRegionGrid.DirectGrid;
 			traverseParms = parms;
 			destinationCell = destination.CenterCell;
 			this.moveTicksCardinal = moveTicksCardinal;
@@ -419,7 +417,11 @@ namespace Vehicles
 		/// <param name="region"></param>
 		private IEnumerable<int> PreciseRegionLinkDistancesNeighborsGetter(int node, VehicleRegion region)
 		{
-			if (regionGrid[node] is null || regionGrid[node] != region) return null;
+			VehicleRegion[] directGrid = mapping[vehicleDef].VehicleRegionGrid.DirectGrid;
+			if (directGrid == null || directGrid[node] is null || directGrid[node] != region)
+			{
+				return null;
+			}
 			return PathableNeighborIndices(node);
 		}
 

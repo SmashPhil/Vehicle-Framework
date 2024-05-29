@@ -57,7 +57,7 @@ namespace Vehicles
 				postfix: new HarmonyMethod(typeof(Debug),
 				nameof(DebugHideVehiclesFromPawnSpawner)));
 
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnRenderer), "GetBodyPos"),
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Map), "FillComponents"),
 			//	prefix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestPrefix)));
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(XmlInheritance), nameof(XmlInheritance.TryRegister)),
@@ -68,12 +68,11 @@ namespace Vehicles
 			//	nameof(ExceptionCatcher)));
 		}
 
-		public static void TestPrefix(Pawn ___pawn)
+		public static void TestPrefix()
 		{
 			try
 			{
-				Log.Message($"Null: {___pawn is null} ParentHolder: {___pawn.ParentHolder}");
-				Log.Message($"ParentHolder of ParentHolder: {___pawn.ParentHolder.ParentHolder}");
+				Log.Message($"Filling components");
 			}
 			catch (Exception ex)
 			{
@@ -186,7 +185,7 @@ namespace Vehicles
 		[DebugAction(VehicleHarmony.VehiclesLabel, "Regenerate WorldPathGrid", allowedGameStates = AllowedGameStates.WorldRenderedNow)]
 		public static void DebugRegenerateWorldPathGrid()
 		{
-			Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().RecalculateAllPerceivedPathCosts();
+			Find.World.GetComponent<WorldVehiclePathGrid>().RecalculateAllPerceivedPathCosts();
 		}
 
 		[DebugAction(VehicleHarmony.VehiclesLabel, "Ground All Aerial Vehicles", allowedGameStates = AllowedGameStates.Playing)]

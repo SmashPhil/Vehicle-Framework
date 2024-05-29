@@ -10,24 +10,16 @@ namespace Vehicles
 	/// <summary>
 	/// Region and room update handler
 	/// </summary>
-	public class VehicleRegionAndRoomUpdater
-	{
-		private readonly VehicleMapping mapping;
-		private readonly VehicleDef createdFor;
-
+	public class VehicleRegionAndRoomUpdater : VehicleRegionManager
+    {
 		private readonly List<VehicleRegion> newRegions = new List<VehicleRegion>();
 		private readonly List<VehicleRoom> newRooms = new List<VehicleRoom>();
 		private readonly HashSet<VehicleRoom> reusedOldRooms = new HashSet<VehicleRoom>();
 
 		private readonly List<VehicleRegion> currentRegionGroup = new List<VehicleRegion>();
-		private readonly List<VehicleRoom> currentRoomGroup = new List<VehicleRoom>();
 
-		private readonly Stack<VehicleRoom> tmpRoomStack = new Stack<VehicleRoom>();
-
-		public VehicleRegionAndRoomUpdater(VehicleMapping mapping, VehicleDef createdFor)
+		public VehicleRegionAndRoomUpdater(VehicleMapping mapping, VehicleDef createdFor) : base(mapping, createdFor)
 		{
-			this.mapping = mapping;
-			this.createdFor = createdFor;
 		}
 
 		/// <summary>
@@ -72,6 +64,7 @@ namespace Vehicles
 			{
 				return;
 			}
+
 			UpdatingRegion = true;
 			if (!Initialized)
 			{
@@ -92,7 +85,7 @@ namespace Vehicles
 				Log.Error($"Exception while rebuilding vehicle regions for {createdFor}. Exception={ex}");
 			}
 			newRegions.Clear();
-			//mapping[createdFor].VehicleRegionDirtyer.SetAllClean();
+			mapping[createdFor].VehicleRegionDirtyer.SetAllClean();
 			Initialized = true;
 			UpdatingRegion = false;
 		}
@@ -103,12 +96,12 @@ namespace Vehicles
 		private void RegenerateNewVehicleRegions()
 		{
 			newRegions.Clear();
-			var dirtyCells = mapping[createdFor].VehicleRegionDirtyer.DumpDirtyCells();
-			foreach (IntVec3 cell in dirtyCells)
+			VehicleMapping.VehiclePathData pathData = mapping[createdFor];
+			foreach (IntVec3 cell in pathData.VehicleRegionDirtyer.DirtyCells)
 			{
 				if (VehicleGridsUtility.GetRegion(cell, mapping.map, createdFor, RegionType.Set_All) == null)
 				{
-					VehicleRegion region = mapping[createdFor].VehicleRegionMaker.TryGenerateRegionFrom(cell);
+					VehicleRegion region = pathData.VehicleRegionMaker.TryGenerateRegionFrom(cell);
 					if (region != null)
 					{
 						newRegions.Add(region);

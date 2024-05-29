@@ -23,7 +23,7 @@ namespace Vehicles
 			{
 				return false;
 			}
-			VehicleReservationManager reservationManager = pawn.Map.GetCachedMapComponent<VehicleReservationManager>();
+			VehicleReservationManager reservationManager = MapComponentCache<VehicleReservationManager>.GetComponent(Vehicle.Map);
 			bool reserved = reservationManager.Reserve<LocalTargetInfo, VehicleTargetReservation>(Vehicle, pawn, job, JobCell);
 			return reserved;
 		}

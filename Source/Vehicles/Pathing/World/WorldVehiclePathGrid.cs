@@ -249,7 +249,7 @@ namespace Vehicles
 					Find.World.debugDrawer.FlashTile(tile, colorPct: 0.8f, duration: 15);
 					foreach (int neighbor in neighbors)
 					{
-						bool canReach = Find.World.GetCachedWorldComponent<WorldVehicleReachability>().CanReach(vehicleDef: DebugHelper.World.VehicleDef, tile, neighbor);
+						bool canReach = Find.World.GetComponent<WorldVehicleReachability>().CanReach(vehicleDef: DebugHelper.World.VehicleDef, tile, neighbor);
 						float colorPct = canReach ? 0.55f : 0f;
 						Find.World.debugDrawer.FlashTile(neighbor, colorPct: colorPct, duration: 30);
 					}

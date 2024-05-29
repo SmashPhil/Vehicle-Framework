@@ -22,7 +22,7 @@ namespace Vehicles
 		{
 			if (!Vehicle.statHandler.ComponentsPrioritized.Any(c => c.HealthPercent < 1))
 			{
-				Vehicle.Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleRepaired(Vehicle);
+				MapComponentCache<ListerVehiclesRepairable>.GetComponent(Vehicle.Map).Notify_VehicleRepaired(Vehicle);
 				actor.records.Increment(RecordDefOf.ThingsRepaired);
 				actor.jobs.EndCurrentJob(JobCondition.Succeeded);
 				return;

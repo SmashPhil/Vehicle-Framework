@@ -8,9 +8,13 @@ namespace Vehicles
 	/// <summary>
 	/// Region links cache by hash code
 	/// </summary>
-	public class VehicleRegionLinkDatabase
-	{
+	public class VehicleRegionLinkDatabase : VehicleRegionManager
+    {
 		private readonly ConcurrentDictionary<ulong, VehicleRegionLink> links = new ConcurrentDictionary<ulong, VehicleRegionLink>();
+
+		public VehicleRegionLinkDatabase(VehicleMapping mapping, VehicleDef createdFor) : base(mapping, createdFor)
+		{
+		}
 
 		/// <summary>
 		/// Region link between <paramref name="span"/>

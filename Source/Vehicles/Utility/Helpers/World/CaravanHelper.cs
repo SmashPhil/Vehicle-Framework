@@ -83,7 +83,7 @@ namespace Vehicles
 		public static int BestExitTileToGoTo(List<VehicleDef> vehicleDefs, int destinationTile, Map from)
 		{
 			int exitTile = -1;
-			using WorldPath worldPath = Find.World.GetCachedWorldComponent<WorldVehiclePathfinder>().FindPath(from.Tile, destinationTile, vehicleDefs);
+			using WorldPath worldPath = Find.World.GetComponent<WorldVehiclePathfinder>().FindPath(from.Tile, destinationTile, vehicleDefs);
 			if (worldPath.Found && worldPath.NodesLeftCount >= 2)
 			{
 				exitTile = worldPath.NodesReversed[worldPath.NodesReversed.Count - 2];
@@ -151,7 +151,7 @@ namespace Vehicles
 				for (int i = 0; i < neighborTiles.Count; i++)
 				{
 					int tile = neighborTiles[i];
-					if (vehicleDefs.All(vehicleDef => Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().Passable(tile, vehicleDef)))
+					if (vehicleDefs.All(vehicleDef => Find.World.GetComponent<WorldVehiclePathGrid>().Passable(tile, vehicleDef)))
 					{
 						CaravanExitMapUtility.GetExitMapEdges(grid, currentTileID, tile, out var primary, out var secondary);
 						if ((primary != Rot4.Invalid && CellFinderExtended.TryFindRandomEdgeCellWith((IntVec3 cell) => vehicleDefs.All(vehicleDef => GenGridVehicles.Walkable(cell, vehicleDef, map) && !cell.Fogged(map)), map, primary, largestVehicle, CellFinder.EdgeRoadChance_Ignore, out IntVec3 result) || 
@@ -476,7 +476,7 @@ namespace Vehicles
 
 		public static bool OpportunistcallyCreatedAerialVehicle(VehiclePawn vehicle, int tile)
 		{
-			bool canExit = Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().Passable(tile, vehicle.VehicleDef);
+			bool canExit = Find.World.GetComponent<WorldVehiclePathGrid>().Passable(tile, vehicle.VehicleDef);
 			if (!canExit && vehicle.GetCachedComp<CompVehicleLauncher>() is CompVehicleLauncher)
 			{
 				AerialVehicleInFlight.Create(vehicle, tile);

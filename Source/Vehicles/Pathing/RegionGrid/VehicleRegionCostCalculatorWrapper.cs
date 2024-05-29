@@ -23,7 +23,6 @@ namespace Vehicles
 		private VehicleRegionLink cachedSecondBestLink;
 
 		private readonly HashSet<VehicleRegion> destRegions = new HashSet<VehicleRegion>();
-		private VehicleRegion[] regionGrid;
 		
 		private int cachedBestLinkCost;
 		private int cachedSecondBestLinkCost;
@@ -57,7 +56,6 @@ namespace Vehicles
 			cachedBestLinkCost = 0;
 			cachedSecondBestLinkCost = 0;
 			cachedRegionIsDestination = false;
-			regionGrid = mapping[vehicleDef].VehicleRegionGrid.DirectGrid;
 			destRegions.Clear();
 			if (end.Width == 1 && end.Height == 1)
 			{
@@ -97,7 +95,7 @@ namespace Vehicles
 		/// <param name="cellIndex"></param>
 		public int GetPathCostFromDestToRegion(int cellIndex)
 		{
-			VehicleRegion region = regionGrid[cellIndex];
+			VehicleRegion region = mapping[vehicleDef].VehicleRegionGrid.DirectGrid[cellIndex];
 			IntVec3 cell = mapping.map.cellIndices.IndexToCell(cellIndex);
 			if (region != cachedRegion)
 			{

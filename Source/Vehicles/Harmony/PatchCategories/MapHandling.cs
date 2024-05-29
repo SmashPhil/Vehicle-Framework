@@ -43,9 +43,6 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MapInterface), nameof(MapInterface.MapInterfaceOnGUI_AfterMainTabs)),
 				postfix: new HarmonyMethod(typeof(MapHandling),
 				nameof(DebugOnGUIVehicleRegions)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Map), nameof(Map.FinalizeInit)),
-				prefix: new HarmonyMethod(typeof(MapHandling),
-				nameof(PreFinalizeInitRegionBuilding)));
 		}
 
 		/// <summary>
@@ -234,11 +231,6 @@ namespace Vehicles
 			{
 				DebugHelper.DebugDrawVehiclePathCostsOverlay(Find.CurrentMap);
 			}
-		}
-
-		private static void PreFinalizeInitRegionBuilding(Map __instance)
-		{
-			__instance.GetCachedMapComponent<VehicleMapping>().RebuildVehiclePathData();
 		}
 	}
 }

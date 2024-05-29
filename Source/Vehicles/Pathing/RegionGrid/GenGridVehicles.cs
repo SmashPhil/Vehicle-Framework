@@ -25,7 +25,7 @@ namespace Vehicles
 			{
 				return false;
 			}
-			return map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehiclePathGrid.Walkable(cell);
+			return MapComponentCache<VehicleMapping>.GetComponent(map)[vehicleDef].VehiclePathGrid.Walkable(cell);
 		}
 
 		/// <summary>
@@ -52,7 +52,7 @@ namespace Vehicles
 		/// <param name="map"></param>
 		public static bool Standable(this IntVec3 cell, VehiclePawn vehicle, Map map)
 		{
-			if (!map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathGrid.Walkable(cell))
+			if (!MapComponentCache<VehicleMapping>.GetComponent(map)[vehicle.VehicleDef].VehiclePathGrid.Walkable(cell))
 			{
 				return false;
 			}
@@ -75,7 +75,7 @@ namespace Vehicles
 		/// <param name="map"></param>
 		public static bool Standable(this IntVec3 cell, VehicleDef vehicleDef, Map map)
 		{
-			if (!map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehiclePathGrid.Walkable(cell))
+			if (!MapComponentCache<VehicleMapping>.GetComponent(map)[vehicleDef].VehiclePathGrid.Walkable(cell))
 			{
 				return false;
 			}

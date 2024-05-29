@@ -32,7 +32,7 @@ namespace Vehicles
 		public Building_Door door;
 
 		public ConcurrentSet<VehicleRegionLink> links = new ConcurrentSet<VehicleRegionLink>();
-		public ConcurrentDictionary<int, Weight> weights = new ConcurrentDictionary<int, Weight>();
+		private Dictionary<int, Weight> weights = new Dictionary<int, Weight>();
 
 		private readonly ConcurrentDictionary<Pawn, Danger> cachedDangers = new ConcurrentDictionary<Pawn, Danger>();
 
@@ -56,6 +56,9 @@ namespace Vehicles
 
 		private int debug_makeTick = -1000;
 		private int debug_lastTraverseTick = -1000;
+
+		private object weightLock = new object();
+		//private object linkLock = new object();
 
 		private VehicleRegion(VehicleDef vehicleDef) 
 		{
@@ -282,25 +285,39 @@ namespace Vehicles
 		public Weight WeightBetween(VehicleRegionLink linkA, VehicleRegionLink linkB)
 		{
 			int hash = HashBetween(linkA, linkB);
-			if (weights.TryGetValue(hash, out Weight weight))
+			lock (weightLock)
 			{
-				return weight;
+				if (weights.TryGetValue(hash, out Weight weight))
+				{
+					return weight;
+				}
 			}
 			Log.Error($"Unable to pull weight between {linkA.anchor} and {linkB.anchor}");
 			return new Weight(linkA, linkB, 999);
 		}
 
+		public void ClearWeights()
+		{
+			lock (weightLock)
+			{
+				weights.Clear();
+			}
+		}
+
 		public void RecalculateWeights()
 		{
-			weights = new ConcurrentDictionary<int, Weight>();
-			foreach (VehicleRegionLink regionLink in links.Keys)
+			lock (weightLock)
 			{
-				foreach (VehicleRegionLink connectingToLink in links.Keys)
+				weights.Clear();
+				foreach (VehicleRegionLink regionLink in links.Keys)
 				{
-					if (regionLink == connectingToLink) continue; //Skip matching link
-					
-					int weight = EuclideanDistance(regionLink.anchor, connectingToLink);
-					weights[HashBetween(regionLink,  connectingToLink)] = new Weight(regionLink, connectingToLink, weight);
+					foreach (VehicleRegionLink connectingToLink in links.Keys)
+					{
+						if (regionLink == connectingToLink) continue; //Skip matching link
+
+						int weight = EuclideanDistance(regionLink.anchor, connectingToLink);
+						weights[HashBetween(regionLink, connectingToLink)] = new Weight(regionLink, connectingToLink, weight);
+					}
 				}
 			}
 		}
@@ -308,7 +325,7 @@ namespace Vehicles
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int HashBetween(VehicleRegionLink linkA, VehicleRegionLink linkB)
 		{
-			return linkA.anchor.GetHashCode() + linkB.anchor.GetHashCode();
+			return Gen.HashCombine(linkA.anchor.GetHashCode(), linkB.anchor);
 		}
 
 		/// <summary>
@@ -508,36 +525,39 @@ namespace Vehicles
 			}
 			if (debugRegionType.HasFlag(DebugRegionType.Weights))
 			{
-				foreach (VehicleRegionLink regionLink in links.Keys)
-				{
-					foreach (VehicleRegionLink toRegionLink in links.Keys)
-					{
-						if (regionLink == toRegionLink) continue;
-						
-						float weight = weights[HashBetween(regionLink, toRegionLink)].cost;
-						Vector3 from = regionLink.anchor.ToVector3();
-						from.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
-						Vector3 to = toRegionLink.anchor.ToVector3();
-						to.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
-						GenDraw.DrawLineBetween(from, to, VehicleRegionLink.WeightColor(weight));
-					}
-				}
-
-				foreach (VehicleRegion region in Neighbors)
+				lock (weightLock)
 				{
 					foreach (VehicleRegionLink regionLink in links.Keys)
 					{
-						foreach (VehicleRegionLink toRegionLink in region.links.Keys)
+						foreach (VehicleRegionLink toRegionLink in links.Keys)
 						{
 							if (regionLink == toRegionLink) continue;
-							if (regionLink.RegionA != this && regionLink.RegionB != this) continue;
 
-							float weight = region.weights[HashBetween(regionLink, toRegionLink)].cost;
+							float weight = weights[HashBetween(regionLink, toRegionLink)].cost;
 							Vector3 from = regionLink.anchor.ToVector3();
 							from.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
 							Vector3 to = toRegionLink.anchor.ToVector3();
 							to.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
 							GenDraw.DrawLineBetween(from, to, VehicleRegionLink.WeightColor(weight));
+						}
+					}
+
+					foreach (VehicleRegion region in Neighbors)
+					{
+						foreach (VehicleRegionLink regionLink in links.Keys)
+						{
+							foreach (VehicleRegionLink toRegionLink in region.links.Keys)
+							{
+								if (regionLink == toRegionLink) continue;
+								if (regionLink.RegionA != this && regionLink.RegionB != this) continue;
+
+								float weight = region.weights[HashBetween(regionLink, toRegionLink)].cost;
+								Vector3 from = regionLink.anchor.ToVector3();
+								from.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
+								Vector3 to = toRegionLink.anchor.ToVector3();
+								to.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
+								GenDraw.DrawLineBetween(from, to, VehicleRegionLink.WeightColor(weight));
+							}
 						}
 					}
 				}
