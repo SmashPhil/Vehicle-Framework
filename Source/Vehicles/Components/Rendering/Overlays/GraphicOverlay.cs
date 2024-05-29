@@ -10,8 +10,9 @@ namespace Vehicles
 		[TweakField]
 		public GraphicDataOverlay data;
 
-		private VehicleDef vehicleDef;
-		private VehiclePawn vehicle;
+		private readonly VehicleDef vehicleDef;
+		private readonly VehiclePawn vehicle;
+
 		private Graphic graphicInt;
 
 		public GraphicOverlay(GraphicDataOverlay graphicDataOverlay, VehicleDef vehicleDef)
@@ -76,9 +77,12 @@ namespace Vehicles
 
 		public void Notify_ColorChanged()
 		{
-			PatternData patternData = vehicle?.patternData ?? VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, new PatternData(vehicleDef.graphicData));
-			RGBMaterialPool.SetProperties(this, patternData);
-			graphicInt = null;
+			if (data.graphicData.shaderType.Shader.SupportsRGBMaskTex())
+			{
+				PatternData patternData = vehicle?.patternData ?? VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, new PatternData(vehicleDef.graphicData));
+				RGBMaterialPool.SetProperties(this, patternData);
+				graphicInt = null;
+			}
 		}
 
 		public void OnDestroy()

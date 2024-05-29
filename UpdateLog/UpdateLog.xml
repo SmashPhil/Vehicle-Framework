@@ -8,13 +8,20 @@
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Fixed bug where beach size would still be set to max vanilla size with beach multiplier set to 0%
+- Beach size would still be set to max vanilla size with beach multiplier set to 0%
 
-- Fixed compatibility patch for Roads of the Rim
+- Compatibility patch for Roads of the Rim
 
-- Fixed bug where 1.4 version would still try to fetch build date.
+- 1.4 version would still try to fetch build date.
 
-- Fixed bug where red squares would render upon constructing a wall.
+- Red squares would render upon constructing a wall.
+
+- Vehicles with overlays would throw an error when repainting.
+
+- Pawn reservations wouldn't clear properly when the pawn died, resulting in the vehicle being unable to be destroyed.
+
+- Missing translation keys
+
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 &lt;b&gt;Players&lt;/b&gt;
 - Added 'Off Road Multiplier' to VF Mod Settings under 'Vehicles'
