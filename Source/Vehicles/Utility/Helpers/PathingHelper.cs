@@ -557,5 +557,15 @@ namespace Vehicles
 			Find.FactionManager.Notify_PawnLeftMap(vehicle);
 			Find.IdeoManager.Notify_PawnLeftMap(vehicle);
 		}
+
+		public static void DisableAllRegionUpdaters(Map map)
+		{
+			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+			foreach (VehicleDef vehicleDef in mapping.Owners)
+			{
+				VehicleMapping.VehiclePathData pathData = mapping[vehicleDef];
+				pathData.VehicleRegionAndRoomUpdater.Enabled = false;
+			}
+		}
 	}
 }

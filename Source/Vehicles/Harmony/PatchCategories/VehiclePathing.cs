@@ -72,6 +72,10 @@ namespace Vehicles
 				nameof(SetRotationAndUpdateVehicleRegionsClipping)),
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(SetRotationAndUpdateVehicleRegions)));
+
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenStep_RocksFromGrid), nameof(GenStep_RocksFromGrid.Generate)),
+				prefix: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(DisableRegionUpdatingRockGen)));
 		}
 
 		private static void VehiclesCanTakeOrders(Pawn pawn, ref bool __result)
@@ -88,7 +92,7 @@ namespace Vehicles
 		/// <param name="clickCell"></param>
 		/// <param name="pawn"></param>
 		/// <param name="__result"></param>
-		public static bool GotoLocationVehicles(IntVec3 clickCell, Pawn pawn, ref FloatMenuOption __result, bool suppressAutoTakeableGoto)
+		private static bool GotoLocationVehicles(IntVec3 clickCell, Pawn pawn, ref FloatMenuOption __result, bool suppressAutoTakeableGoto)
 		{
 			if (pawn is VehiclePawn vehicle)
 			{
@@ -187,7 +191,7 @@ namespace Vehicles
 			return true;
 		}
 
-		public static IEnumerable<Toil> GotoToilsPassthrough(IEnumerable<Toil> __result, Job ___job, Pawn ___pawn)
+		private static IEnumerable<Toil> GotoToilsPassthrough(IEnumerable<Toil> __result, Job ___job, Pawn ___pawn)
 		{
 			bool first = true;
 			foreach (Toil toil in __result)
@@ -210,7 +214,7 @@ namespace Vehicles
 		/// <summary>
 		/// Bypass vanilla check for now, since it forces on-fire pawns to not be able to interrupt jobs which obviously shouldn't apply to vehicles.
 		/// </summary>
-		public static bool JobInterruptibleForVehicle(Pawn_JobTracker __instance, Pawn ___pawn, ref bool __result)
+		private static bool JobInterruptibleForVehicle(Pawn_JobTracker __instance, Pawn ___pawn, ref bool __result)
 		{
 			if (___pawn is VehiclePawn)
 			{
@@ -237,7 +241,7 @@ namespace Vehicles
 		/// <param name="__result"></param>
 		/// <param name="___pawn"></param>
 		/// <param name="nextCell"></param>
-		public static void IsVehicleInNextCell(ref bool __result, Pawn ___pawn, Pawn_PathFollower __instance)
+		private static void IsVehicleInNextCell(ref bool __result, Pawn ___pawn, Pawn_PathFollower __instance)
 		{
 			if (!__result)
 			{
@@ -253,7 +257,7 @@ namespace Vehicles
 		/// <param name="dest"></param>
 		/// <param name="peMode"></param>
 		/// <param name="___pawn"></param>
-		public static bool StartVehiclePath(LocalTargetInfo dest, PathEndMode peMode, Pawn ___pawn)
+		private static bool StartVehiclePath(LocalTargetInfo dest, PathEndMode peMode, Pawn ___pawn)
 		{
 			if (___pawn is VehiclePawn vehicle)
 			{
@@ -263,7 +267,7 @@ namespace Vehicles
 			return true;
 		}
 
-		public static bool AdjacentTo8WayOrInsideVehicle(IntVec3 root, Thing t, ref bool __result)
+		private static bool AdjacentTo8WayOrInsideVehicle(IntVec3 root, Thing t, ref bool __result)
 		{
 			if (t is VehiclePawn vehicle)
 			{
@@ -281,7 +285,7 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="instructions"></param>
 		/// <param name="ilg"></param>
-		public static IEnumerable<CodeInstruction> PathAroundVehicles(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+		private static IEnumerable<CodeInstruction> PathAroundVehicles(IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
 		{
 			List<CodeInstruction> instructionList = instructions.ToList();
 			for(int i = 0; i < instructionList.Count; i++)
@@ -323,7 +327,7 @@ namespace Vehicles
 				yield return instruction;
 			}
 		}
-		
+
 		/// <summary>
 		/// Modify CanReach result if position is claimed by Vehicle in PositionManager
 		/// </summary>
@@ -332,7 +336,7 @@ namespace Vehicles
 		/// <param name="peMode"></param>
 		/// <param name="traverseParams"></param>
 		/// <param name="__result"></param>
-		public static bool CanReachVehiclePosition(IntVec3 start, LocalTargetInfo dest, PathEndMode peMode, TraverseParms traverseParams, ref bool __result)
+		private static bool CanReachVehiclePosition(IntVec3 start, LocalTargetInfo dest, PathEndMode peMode, TraverseParms traverseParams, ref bool __result)
 		{
 			if (peMode == PathEndMode.OnCell && !(traverseParams.pawn is VehiclePawn) && traverseParams.pawn?.Map.GetCachedMapComponent<VehiclePositionManager>().ClaimedBy(dest.Cell) is VehiclePawn vehicle &&
 				vehicle.VehicleDef.passability != Traversability.Standable)
@@ -343,7 +347,7 @@ namespace Vehicles
 			return true;
 		}
 
-		public static void ImpassableThroughVehicle(IntVec3 c, Map map, ref bool __result)
+		private static void ImpassableThroughVehicle(IntVec3 c, Map map, ref bool __result)
 		{
 			if (!__result && !PathingHelper.RegionWorking(map))
 			{
@@ -351,7 +355,7 @@ namespace Vehicles
 			}
 		}
 
-		public static void WalkableThroughVehicle(IntVec3 loc, ref bool __result, Map ___map)
+		private static void WalkableThroughVehicle(IntVec3 loc, ref bool __result, Map ___map)
 		{
 			if (__result && !PathingHelper.RegionWorking(___map))
 			{
@@ -359,7 +363,7 @@ namespace Vehicles
 			}
 		}
 
-		public static void WalkableFastThroughVehicleIntVec3(IntVec3 loc, ref bool __result, Map ___map)
+		private static void WalkableFastThroughVehicleIntVec3(IntVec3 loc, ref bool __result, Map ___map)
 		{
 			if (__result && !PathingHelper.RegionWorking(___map))
 			{
@@ -367,7 +371,7 @@ namespace Vehicles
 			}
 		}
 
-		public static void WalkableFastThroughVehicleInt2(int x, int z, ref bool __result, Map ___map)
+		private static void WalkableFastThroughVehicleInt2(int x, int z, ref bool __result, Map ___map)
 		{
 			if (__result && !PathingHelper.RegionWorking(___map))
 			{
@@ -375,15 +379,15 @@ namespace Vehicles
 			}
 		}
 
-		public static void WalkableFastThroughVehicleInt(int index, ref bool __result, Map ___map)
+		private static void WalkableFastThroughVehicleInt(int index, ref bool __result, Map ___map)
 		{
 			if (__result && !PathingHelper.RegionWorking(___map))
 			{
 				__result = !PathingHelper.VehicleImpassableInCell(___map, ___map.cellIndices.IndexToCell(index));
 			}
 		}
-		
-		public static bool OccupiedRectVehicles(Thing t, ref CellRect __result)
+
+		private static bool OccupiedRectVehicles(Thing t, ref CellRect __result)
 		{
 			if (t is VehiclePawn vehicle)
 			{
@@ -393,12 +397,12 @@ namespace Vehicles
 			return true;
 		}
 
-		public static void RecalculateAllPerceivedPathCostForVehicle(PathingContext ___normal)
+		private static void RecalculateAllPerceivedPathCostForVehicle(PathingContext ___normal)
 		{
 			PathingHelper.RecalculateAllPerceivedPathCosts(___normal.map);
 		}
 
-		public static void RecalculatePerceivedPathCostForVehicle(IntVec3 c, PathingContext ___normal)
+		private static void RecalculatePerceivedPathCostForVehicle(IntVec3 c, PathingContext ___normal)
 		{
 			PathingHelper.RecalculatePerceivedPathCostAt(c, ___normal.map);
 		}
@@ -408,7 +412,7 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="c"></param>
 		/// <param name="___map"></param>
-		public static void SetTerrainAndUpdateVehiclePathCosts(ref IntVec3 c, Map ___map)
+		private static void SetTerrainAndUpdateVehiclePathCosts(ref IntVec3 c, Map ___map)
 		{
 			if (Current.ProgramState == ProgramState.Playing)
 			{
@@ -416,7 +420,7 @@ namespace Vehicles
 			}
 		}
 
-		public static IEnumerable<CodeInstruction> DeSpawnAndUpdateVehicleRegionsTranspiler(IEnumerable<CodeInstruction> instructions)
+		private static IEnumerable<CodeInstruction> DeSpawnAndUpdateVehicleRegionsTranspiler(IEnumerable<CodeInstruction> instructions)
 		{
 			List<CodeInstruction> instructionList = instructions.ToList();
 
@@ -439,7 +443,7 @@ namespace Vehicles
 			}
 		}
 
-		public static IEnumerable<CodeInstruction> SpawnAndUpdateVehicleRegionsTranspiler(IEnumerable<CodeInstruction> instructions)
+		private static IEnumerable<CodeInstruction> SpawnAndUpdateVehicleRegionsTranspiler(IEnumerable<CodeInstruction> instructions)
 		{
 			List<CodeInstruction> instructionList = instructions.ToList();
 
@@ -462,7 +466,7 @@ namespace Vehicles
 			}
 		}
 
-		public static void SetPositionAndUpdateVehicleRegions(Thing __instance)
+		private static void SetPositionAndUpdateVehicleRegions(Thing __instance)
 		{
 			if (__instance.Spawned)
 			{
@@ -470,7 +474,7 @@ namespace Vehicles
 			}
 		}
 
-		public static bool SetRotationAndUpdateVehicleRegionsClipping(Thing __instance, Rot4 value)
+		private static bool SetRotationAndUpdateVehicleRegionsClipping(Thing __instance, Rot4 value)
 		{
 			if (__instance is VehiclePawn vehicle && vehicle.Spawned)
 			{
@@ -492,7 +496,7 @@ namespace Vehicles
 			return true;
 		}
 
-		public static void SetRotationAndUpdateVehicleRegions(Thing __instance)
+		private static void SetRotationAndUpdateVehicleRegions(Thing __instance)
 		{
 			if (__instance.Spawned && (__instance.def.size.x != 1 || __instance.def.size.z != 1))
 			{
@@ -500,24 +504,31 @@ namespace Vehicles
 			}
 		}
 
-		public static void Notify_ThingAffectingVehicleRegionsSpawned(Thing b)
+		private static void DisableRegionUpdatingRockGen(Map map)
 		{
-			//For some reason other mods love to patch the SpawnSetup method and despawn the object immediately. Extra check is necessary
+			if (!map.TileInfo.WaterCovered)
+			{
+				PathingHelper.DisableAllRegionUpdaters(map);
+			}
+		}
+
+		private static void Notify_ThingAffectingVehicleRegionsSpawned(Thing b)
+		{
+			//Some mods patch the SpawnSetup method and despawn the object immediately. Extra check is necessary
 			if (b.Spawned)
 			{
 				PathingHelper.ThingAffectingRegionsStateChange(b, b.Map, true);
 			}
 		}
 
-		public static void Notify_ThingAffectingVehicleRegionsDespawned(Thing b)
+		private static void Notify_ThingAffectingVehicleRegionsDespawned(Thing b)
 		{
-			//For some reason other mods love to patch the SpawnSetup method and despawn the object immediately. Extra check is necessary
+			//Some mods patch the SpawnSetup method and despawn the object immediately. Extra check is necessary
 			if (b.Spawned)
 			{
 				PathingHelper.ThingAffectingRegionsStateChange(b, b.Map, false);
 			}
 		}
-
 
 		/* ---- Helper Methods related to patches ---- */
 

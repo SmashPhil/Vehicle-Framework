@@ -31,8 +31,8 @@ namespace Vehicles
 
 		private readonly VehicleReachabilityCache cache = new VehicleReachabilityCache();
 
-		private VehiclePathGrid pathGrid;
-		private VehicleRegionGrid regionGrid;
+		private readonly VehiclePathGrid pathGrid;
+		private readonly VehicleRegionGrid regionGrid;
 
 		public VehicleReachability(VehicleMapping mapping, VehicleDef createdFor, VehiclePathGrid pathGrid, VehicleRegionGrid regionGrid) : base(mapping, createdFor)
 		{

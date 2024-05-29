@@ -15,6 +15,8 @@ namespace Vehicles
 		private List<VehicleHandler> pawnClaimants = new List<VehicleHandler>();
 		private List<int> claimantCounts = new List<int>();
 
+		private static readonly List<Pawn> removeActors = new List<Pawn>();
+
 		public VehicleHandlerReservation()
 		{
 		}
@@ -78,10 +80,13 @@ namespace Vehicles
 
 		public override void ReleaseAllReservations()
 		{
-			foreach(Pawn p in claimants.Keys)
+			foreach (Pawn pawn in claimants.Keys)
 			{
-				p.jobs.EndCurrentJob(JobCondition.InterruptForced);
-				p.ClearMind();
+				if (pawn?.jobs != null)
+				{
+					pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
+					pawn.ClearMind();
+				}
 			}
 		}
 
@@ -99,23 +104,29 @@ namespace Vehicles
 
 		public override void VerifyAndValidateClaimants()
 		{
-			List<Pawn> actors = new List<Pawn>(claimants.Keys);
-			foreach (Pawn actor in actors)
+			removeActors.Clear();
+			foreach (Pawn actor in claimants.Keys)
 			{
 				Job matchedJob = actor.CurJob;
-				if (actor.CurJob?.def != jobDef)
+				if (actor?.jobs != null && actor.CurJob?.def != jobDef)
 				{
 					matchedJob = actor.jobs.jobQueue?.FirstOrDefault(j => j.job.def == jobDef)?.job;
 				}
+
 				if (!actor.Spawned || actor.InMentalState || actor.Downed || actor.Dead || matchedJob?.def != jobDef || matchedJob?.targetA != targetA)
 				{
 					if (--handlerClaimants[claimants[actor]] <= 0)
 					{
 						handlerClaimants.Remove(claimants[actor]);
 					}
-					claimants.Remove(actor);
+					removeActors.Add(actor);
 				}
 			}
+			foreach (Pawn removeActor in removeActors)
+			{
+				claimants.Remove(removeActor);
+			}
+			removeActors.Clear();
 		}
 
 		public override void ExposeData()

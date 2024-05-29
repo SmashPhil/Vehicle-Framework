@@ -20,8 +20,8 @@ namespace Vehicles
 		private const int EventMapId = 0;
 		private const int TempIncidentMapId = 1;
 
-		private static readonly FieldInfo currentEventField;
-		private static readonly FieldInfo longEventTextField;
+		//private static readonly FieldInfo currentEventField;
+		//private static readonly FieldInfo longEventTextField;
 
 		private VehiclePathData[] vehicleData;
 		private int[] piggyToOwner;
@@ -34,12 +34,12 @@ namespace Vehicles
 
 		private bool initialized;
 
-		static VehicleMapping()
-		{
-			currentEventField = AccessTools.Field(typeof(LongEventHandler), "currentEvent");
-			Type longQueuedEventType = AccessTools.TypeByName("Verse.LongEventHandler+QueuedLongEvent");
-			longEventTextField = AccessTools.Field(longQueuedEventType, "eventText");
-		}
+		//static VehicleMapping()
+		//{
+		//	currentEventField = AccessTools.Field(typeof(LongEventHandler), "currentEvent");
+		//	Type longQueuedEventType = AccessTools.TypeByName("Verse.LongEventHandler+QueuedLongEvent");
+		//	longEventTextField = AccessTools.Field(longQueuedEventType, "eventText");
+		//}
 
 		public VehicleMapping(Map map) : base(map)
 		{
@@ -211,6 +211,8 @@ namespace Vehicles
 			initialized = true;
 
 			GenerateAllPathData();
+
+			PathingHelper.DisableAllRegionUpdaters(map);
 
 			//if (LongEventHandler.AnyEventNowOrWaiting)
 			//{
