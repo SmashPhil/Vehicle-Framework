@@ -251,8 +251,7 @@ namespace Vehicles
 
 		public static IEnumerable<RenderData> RetrieveAllOverlaySettingsGraphicsProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, PatternData pattern = null, List<GraphicOverlay> extraOverlays = null)
 		{
-			List<GraphicOverlay> overlays = vehicleDef.drawProperties.overlays;
-			foreach (GraphicOverlay graphicOverlay in overlays)
+			foreach (GraphicOverlay graphicOverlay in vehicleDef.drawProperties.overlays)
 			{
 				if (graphicOverlay.data.renderUI)
 				{

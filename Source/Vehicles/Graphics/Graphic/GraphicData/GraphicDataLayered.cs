@@ -31,9 +31,26 @@ namespace Vehicles
 		{
 			base.CopyFrom(graphicData);
 			layer = graphicData.layer;
+			ResetDrawOffsetCache();
 		}
 
 		public virtual void Init(IMaterialCacheTarget target)
+		{
+			RecacheLayerOffsets();
+		}
+
+		private void ResetDrawOffsetCache()
+		{
+			OriginalDrawOffset = null;
+			OriginalDrawOffsetNorth = null;
+			OriginalDrawOffsetEast = null;
+			OriginalDrawOffsetSouth = null;
+			OriginalDrawOffsetWest = null;
+
+			RecacheLayerOffsets();
+		}
+
+		public void RecacheLayerOffsets()
 		{
 			OriginalDrawOffset ??= drawOffset;
 			OriginalDrawOffsetNorth ??= drawOffsetNorth;

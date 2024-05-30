@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1635</currentVersion>
+  <currentVersion>1.5.1636</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -19,6 +19,8 @@
 - Vehicles with overlays would throw an error when repainting.
 
 - Pawn reservations wouldn't clear properly when the pawn died, resulting in the vehicle being unable to be destroyed.
+
+- Input text boxes would become right justified upon exiting the Vehicle Framework mod settings.
 
 - Missing translation keys
 
