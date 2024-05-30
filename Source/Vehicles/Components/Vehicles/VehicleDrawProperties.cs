@@ -49,7 +49,6 @@ namespace Vehicles
 					overlays.Add(graphicOverlay);
 				}
 			});
-			
 		}
 
 		public Vector3 DisplayOffsetForRot(Rot4 rot)

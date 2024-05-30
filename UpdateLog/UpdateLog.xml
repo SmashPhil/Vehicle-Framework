@@ -6,11 +6,17 @@
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+A memory leak was brought to my attention recently.  There is a fix for that issue in this update. I also made some significant performance improvements related to memory usage. Vehicle Framework was never intended to be extremely taxing on performance, so if there are still hiccups related to CPU or GPU performance, please report them to me so I can make further optimizations. Unless you're using dozens of vehicles on 400x400 maps, the performance impact should be negligeable.
 
+Since the release of Anomaly and RimWorld 1.5, I've received much more caravan related bug reports. I'll be doing a 2nd pass over caravan mechanics to fix some longstanding issues, and spend some time improving caravan UI.
+
+As for vehicle raids, I'm still working on the AI so the first iteration isn't ready yet, but I'll be sure to post an announcement when it goes live. It's a very time consuming process and bugfixes / performance improvements always have priority. But keep an eye out! There will be a toggle in the mod settings for this experimental feature in the near future.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Thread safe coroutine queue not clearing from scene changes, resulting in memory leak on save reloads.
+
 - Beach size would still be set to max vanilla size with beach multiplier set to 0%
 
-- Compatibility patch for Roads of the Rim
+- Compatibility patch for Roads of the Rim unable to find class type.
 
 - 1.4 version would still try to fetch build date.
 
@@ -25,14 +31,15 @@
 - Missing translation keys
 
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Improved rendering performance of vehicle UI icons.
+
 &lt;b&gt;Players&lt;/b&gt;
 - Added 'Off Road Multiplier' to VF Mod Settings under 'Vehicles'
 
 &lt;b&gt;Modders&lt;/b&gt;
 - Added more upgrade types
-
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
+Please report any issues you find on either &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord) or &lt;link&gt;https://github.com/SmashPhil/Vehicle-Framework/issues&lt;/link&gt;(github).</description>
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>
   <!--Show update log on next startup.-->
