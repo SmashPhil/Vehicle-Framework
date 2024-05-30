@@ -212,7 +212,6 @@ namespace Vehicles
 				}
 				Widgets.Label(rectLeft, label);
 
-				//Text.CurTextFieldStyle.alignment = TextAnchor.MiddleRight;
 				Text.Anchor = TextAnchor.MiddleRight;
 				string buffer = value.ToString();
 				int valueBefore = value;
@@ -287,7 +286,7 @@ namespace Vehicles
 				}
 				Widgets.Label(rectLeft, label);
 
-				Text.CurTextFieldStyle.alignment = TextAnchor.MiddleRight;
+				Text.Anchor = TextAnchor.MiddleRight;
 				string buffer = value.ToString();
 				float valueBefore = value;
 				Widgets.TextFieldNumeric(rectRight, ref value, ref buffer, min, max);
