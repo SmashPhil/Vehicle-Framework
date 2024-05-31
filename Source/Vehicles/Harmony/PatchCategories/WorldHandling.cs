@@ -295,7 +295,9 @@ namespace Vehicles
 		public static void AerialVehiclesDontRandomizePrisoners(Pawn pawn, ref bool __result)
         {
 			if (ThingOwnerUtility.AnyParentIs<VehiclePawn>(pawn) || ThingOwnerUtility.AnyParentIs<AerialVehicleInFlight>(pawn))
+			{
 				__result = true;
+			}
 		}
 
 		/* -------------------- Launch Targeter -------------------- */

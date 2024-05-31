@@ -876,7 +876,7 @@ namespace Vehicles
 			{
 				yield break;
 			}
-			if (selPawn.Faction != this.Faction)
+			if (selPawn.Faction != Faction)
             {
 				yield break;
             }

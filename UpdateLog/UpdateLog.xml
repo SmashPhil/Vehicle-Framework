@@ -12,7 +12,7 @@ Since the release of Anomaly and RimWorld 1.5, I've received much more caravan r
 
 As for vehicle raids, I'm still working on the AI so the first iteration isn't ready yet, but I'll be sure to post an announcement when it goes live. It's a very time consuming process and bugfixes / performance improvements always have priority. But keep an eye out! There will be a toggle in the mod settings for this experimental feature in the near future.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Thread safe coroutine queue not clearing from scene changes, resulting in memory leak on save reloads.
+- Thread safe coroutine queue implementation wouldn't clear after scene changes, resulting in memory leak on save reloads.
 
 - Beach size would still be set to max vanilla size with beach multiplier set to 0%
 
@@ -26,12 +26,20 @@ As for vehicle raids, I'm still working on the AI so the first iteration isn't r
 
 - Pawn reservations wouldn't clear properly when the pawn died, resulting in the vehicle being unable to be destroyed.
 
+- Prisoner faction would sometimes reset upon traveling in an aerial vehicle.
+
+- Upgrade WorkGiver would fail to designate job to pawns, resulting in pawns getting frozen until interrupted or the upgrade being completed.
+
+- Colonists being able to be ordered to board non-player vehicles.
+
 - Input text boxes would become right justified upon exiting the Vehicle Framework mod settings.
 
 - Missing translation keys
 
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Improved rendering performance of vehicle UI icons.
+
+- Reduced memory allocation for region building.
 
 &lt;b&gt;Players&lt;/b&gt;
 - Added 'Off Road Multiplier' to VF Mod Settings under 'Vehicles'
