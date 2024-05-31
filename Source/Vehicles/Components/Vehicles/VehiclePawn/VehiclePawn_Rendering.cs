@@ -876,7 +876,10 @@ namespace Vehicles
 			{
 				yield break;
 			}
-
+			if (selPawn.Faction != this.Faction)
+            {
+				yield break;
+            }
 			if (!selPawn.RaceProps.ToolUser)
 			{
 				yield break;

@@ -37,6 +37,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnBanishUtility), nameof(PawnBanishUtility.Banish)),
 				prefix: new HarmonyMethod(typeof(WorldHandling),
 				nameof(BanishPawnFromAerialVehicle)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnUtility), nameof(PawnUtility.IsTravelingInTransportPodWorldObject)),
+				postfix: new HarmonyMethod(typeof(WorldHandling),
+				nameof(AerialVehiclesDontRandomizePrisoners)));
 
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(CameraJumper), nameof(CameraJumper.TryShowWorld)),
 				prefix: new HarmonyMethod(typeof(WorldHandling),
@@ -287,6 +290,12 @@ namespace Vehicles
 			Rect rect = new Rect(12f, 0f, inRect.width - 24f, 40f);
 			float yUsed = AerialVehicleTraderHelper.DrawAerialVehicleInfo(__instance, rect);
 			inRect.yMin += yUsed;
+		}
+
+		public static void AerialVehiclesDontRandomizePrisoners(Pawn pawn, ref bool __result)
+        {
+			if (ThingOwnerUtility.AnyParentIs<VehiclePawn>(pawn) || ThingOwnerUtility.AnyParentIs<AerialVehicleInFlight>(pawn))
+				__result = true;
 		}
 
 		/* -------------------- Launch Targeter -------------------- */
