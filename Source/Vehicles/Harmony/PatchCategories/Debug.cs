@@ -43,6 +43,10 @@ namespace Vehicles
 
 		public void PatchMethods()
 		{
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(DebugToolsSpawning), "SpawnPawn"),
+				postfix: new HarmonyMethod(typeof(Debug),
+				nameof(DebugHideVehiclesFromPawnSpawner)));
+
 			if (VehicleHarmony.debug)
 			{
 				//VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldRoutePlanner), nameof(WorldRoutePlanner.WorldRoutePlannerUpdate)), prefix: null,
@@ -53,11 +57,7 @@ namespace Vehicles
 				//	nameof(DebugWorldObjects)));
 			}
 
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(DebugToolsSpawning), "SpawnPawn"),
-				postfix: new HarmonyMethod(typeof(Debug),
-				nameof(DebugHideVehiclesFromPawnSpawner)));
-
-			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Map), "FillComponents"),
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(FloodFillerFog), nameof(FloodFillerFog.FloodUnfog)),
 			//	prefix: new HarmonyMethod(typeof(Debug),
 			//	nameof(TestPrefix)));
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(XmlInheritance), nameof(XmlInheritance.TryRegister)),
@@ -68,11 +68,11 @@ namespace Vehicles
 			//	nameof(ExceptionCatcher)));
 		}
 
-		public static void TestPrefix()
+		public static void TestPrefix(IntVec3 root)
 		{
 			try
 			{
-				Log.Message($"Filling components");
+				Log.Message($"Floodfilling map at {root}");
 			}
 			catch (Exception ex)
 			{

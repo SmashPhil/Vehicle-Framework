@@ -28,7 +28,8 @@ namespace Vehicles
 			}
 			return CanAttack(vehicle, parent);
 		}
-
+		
+		//NOTE - Needs Unfogger called if map is generated
 		public override bool Arrived(int tile)
 		{
 			LongEventHandler.QueueLongEvent(delegate ()

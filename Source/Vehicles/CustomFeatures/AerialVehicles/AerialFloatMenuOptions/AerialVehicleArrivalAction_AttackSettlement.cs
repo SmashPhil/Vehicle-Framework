@@ -31,12 +31,13 @@ namespace Vehicles
 			return CanAttack(vehicle, settlement);
 		}
 
-		protected override void MapLoaded(Map map)
+		protected override void MapLoaded(Map map, bool generatedMap)
 		{
+			base.MapLoaded(map, generatedMap);
 			TaggedString letterLabel = "LetterLabelCaravanEnteredEnemyBase".Translate();
 			TaggedString letterText = "LetterTransportPodsLandedInEnemyBase".Translate(map.Parent.Label).CapitalizeFirst();
 			SettlementUtility.AffectRelationsOnAttacked(settlement, ref letterText);
-			if (!settlement.HasMap)
+			if (generatedMap)
 			{
 				Find.TickManager.Notify_GeneratedPotentiallyHostileMap();
 				PawnRelationUtility.Notify_PawnsSeenByPlayer_Letter(map.mapPawns.AllPawns, ref letterLabel, ref letterText, "LetterRelatedPawnsInMapWherePlayerLanded".Translate(Faction.OfPlayer.def.pawnsPlural), true, true);

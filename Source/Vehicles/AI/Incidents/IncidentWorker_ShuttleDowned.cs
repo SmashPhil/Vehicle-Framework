@@ -6,6 +6,7 @@ using Verse;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using Verse.Noise;
 
 namespace Vehicles
 {
@@ -95,6 +96,7 @@ namespace Vehicles
 				{
 					ticksTillArrival = (crashSite.Parent as CrashSite).InitiateReinforcementsRequest(settlement);
 				}
+				GetOrGenerateMapUtility.UnfogMapFromEdge(crashSite);
 			}
 			return ticksTillArrival;
 		}
