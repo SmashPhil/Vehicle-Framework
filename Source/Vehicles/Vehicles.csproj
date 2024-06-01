@@ -47,18 +47,14 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\1.5\Assemblies\SmashTools.dll</HintPath>
     </Reference>
-    <Reference Include="System">
-      <Private>False</Private>
-    </Reference>
+    <Reference Include="System" />
     <Reference Include="System.Runtime">
       <Private>False</Private>
     </Reference>
     <Reference Include="System.Runtime.InteropServices.RuntimeInformation">
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Xml">
-      <Private>False</Private>
-    </Reference>
+    <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>

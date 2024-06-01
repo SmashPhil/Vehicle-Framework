@@ -6,9 +6,9 @@
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
-A memory leak was brought to my attention recently. It's been fixed in this update, and I've also included some optimizations for memory usage. Vehicle Framework was never intended to be extremely taxing on performance, so if there are still hiccups related to performance, please report them to me so I can make further optimizations.
+A memory leak was brought to my attention recently. A fix for this issue is included within this update.  I've also made this change retroactively, meaning those of you who still play on the 1.4 version will also receive this bugfix.
 
-Since the release of Anomaly and RimWorld 1.5, I've received many caravan related bug reports. I'll be doing a 2nd pass over caravan mechanics to fix some longstanding issues, and spend some time improving caravan UI.
+Since the release of Anomaly and RimWorld 1.5, I've received many caravan related bug reports. I'll be doing a 2nd pass over caravan mechanics to fix some longstanding issues, as well as spend some time improving caravan UI.
 
 As for vehicle raids, I'm still working on the AI so the first iteration isn't ready yet, but I'll be sure to post an announcement when it goes live. It's a very time consuming process and bugfixes / performance improvements always have priority. But keep an eye out! There will be a toggle in the mod settings for this experimental feature in the near future.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
