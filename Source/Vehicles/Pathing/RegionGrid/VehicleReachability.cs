@@ -361,7 +361,7 @@ namespace Vehicles
 			while (openQueue.Count > 0)
 			{
 				VehicleRegion region = openQueue.Dequeue();
-				foreach (VehicleRegionLink regionLink in region.links)
+				foreach (VehicleRegionLink regionLink in region.links.Keys)
 				{
 					for (int i = 0; i < 2; i++)
 					{
@@ -419,9 +419,9 @@ namespace Vehicles
 
 			if (drawLinks)
 			{
-				foreach (VehicleRegionLink regionLink in region.links)
+				foreach (VehicleRegionLink regionLink in region.links.Keys)
 				{
-					foreach (VehicleRegionLink toRegionLink in region.links)
+					foreach (VehicleRegionLink toRegionLink in region.links.Keys)
 					{
 						if (regionLink == toRegionLink) continue;
 						float weight = region.WeightBetween(regionLink, toRegionLink).cost;
@@ -439,14 +439,14 @@ namespace Vehicles
 
 		private static void MarkConnectedLinksForDrawing(Map map, VehicleRegionLink regionLink)
 		{
-			foreach (VehicleRegionLink drawingRegionLink in regionLink.RegionB.links)
+			foreach (VehicleRegionLink drawingRegionLink in regionLink.RegionB.links.Keys)
 			{
 				if (drawingRegionLink.RegionA != regionLink.RegionB && drawingRegionLink.RegionB != regionLink.RegionB) continue;
 				
 				float weight = regionLink.RegionB.WeightBetween(regionLink, drawingRegionLink).cost;
 				regionLink.DrawWeight(map, drawingRegionLink, weight);
 			}
-			foreach (VehicleRegionLink drawingRegionLink in regionLink.RegionA.links)
+			foreach (VehicleRegionLink drawingRegionLink in regionLink.RegionA.links.Keys)
 			{
 				if (drawingRegionLink.RegionA != regionLink.RegionA && drawingRegionLink.RegionB != regionLink.RegionA) continue;
 
@@ -803,7 +803,7 @@ namespace Vehicles
 				VehicleRegionLink closest2ndLinkHeuristically = null;
 				float firstClosest = float.MaxValue;
 				float secondClosest = float.MaxValue;
-				foreach (VehicleRegionLink startingLink in startingRegion.links)
+				foreach (VehicleRegionLink startingLink in startingRegion.links.Keys)
 				{
 					float heuristic = VehicleRegion.EuclideanDistance(dest.Cell, startingLink);
 					if (heuristic < firstClosest)
@@ -912,14 +912,14 @@ namespace Vehicles
 
 			private IEnumerable<VehicleRegionLink> Neighbors(Node node)
 			{
-				foreach (VehicleRegionLink regionLink in node.regionA.links)
+				foreach (VehicleRegionLink regionLink in node.regionA.links.Keys)
 				{
 					if (regionLink != node.regionLink && (!nodes.TryGetValue(regionLink.anchor, out Node neighborNode) || neighborNode.IsOpen))
 					{
 						yield return regionLink;
 					}
 				}
-				foreach (VehicleRegionLink regionLink in node.regionB.links)
+				foreach (VehicleRegionLink regionLink in node.regionB.links.Keys)
 				{
 					if (regionLink != node.regionLink && (!nodes.TryGetValue(regionLink.anchor, out Node neighborNode) || neighborNode.IsOpen))
 					{

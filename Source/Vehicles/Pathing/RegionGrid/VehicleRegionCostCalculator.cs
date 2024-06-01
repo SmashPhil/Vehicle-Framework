@@ -80,7 +80,7 @@ namespace Vehicles
 			foreach (VehicleRegion region in destRegions)
 			{
 				int minPathCost = RegionMedianPathCost(region);
-				foreach (VehicleRegionLink regionLink in region.links)
+				foreach (VehicleRegionLink regionLink in region.links.Keys)
 				{
 					if (regionLink.GetOtherRegion(region).Allows(traverseParms, false))
 					{
@@ -149,7 +149,7 @@ namespace Vehicles
 							num2 += OctileDistance(1, 0, moveTicksCardinal, moveTicksDiagonal);
 						}
 						int minPathCost = RegionMedianPathCost(otherRegion);
-						foreach(VehicleRegionLink regionLink in otherRegion.links)
+						foreach(VehicleRegionLink regionLink in otherRegion.links.Keys)
 						{
 							if(regionLink != regionLinkQueueEntry.Link && regionLink.GetOtherRegion(otherRegion).type.Passable())
 							{
@@ -199,7 +199,7 @@ namespace Vehicles
 			int regionDistance = GetRegionDistance(region, out bestLink);
 			secondBestLink = null;
 			secondBestCost = int.MaxValue;
-			foreach (VehicleRegionLink regionLink in region.links)
+			foreach (VehicleRegionLink regionLink in region.links.Keys)
 			{
 				if (regionLink != bestLink && regionLink.GetOtherRegion(region).type.Passable())
 				{
@@ -397,7 +397,7 @@ namespace Vehicles
 				}
 			}
 			Dijkstra<int>.Run(tmpCellIndices, (int x) => PreciseRegionLinkDistancesNeighborsGetter(x, region), preciseRegionLinkDistancesDistanceGetter, tmpDistances, null);
-			foreach (VehicleRegionLink regionLink in region.links)
+			foreach (VehicleRegionLink regionLink in region.links.Keys)
 			{
 				if (regionLink.GetOtherRegion(region).Allows(traverseParms, false))
 				{

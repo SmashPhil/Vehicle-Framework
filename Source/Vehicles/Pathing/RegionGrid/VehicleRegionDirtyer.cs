@@ -17,8 +17,8 @@ namespace Vehicles
 
 		private readonly ConcurrentSet<IntVec3> dirtyCells = new ConcurrentSet<IntVec3>();
 
-		private readonly ConcurrentBag<VehicleRegion> regionsToDirty = new ConcurrentBag<VehicleRegion>();
-		private readonly ConcurrentBag<VehicleRegion> regionsToDirtyFromWalkability = new ConcurrentBag<VehicleRegion>();
+		private readonly ConcurrentSet<VehicleRegion> regionsToDirty = new ConcurrentSet<VehicleRegion>();
+		private readonly ConcurrentSet<VehicleRegion> regionsToDirtyFromWalkability = new ConcurrentSet<VehicleRegion>();
 
 		public VehicleRegionDirtyer(VehicleMapping mapping, VehicleDef createdFor)
 		{
@@ -104,14 +104,13 @@ namespace Vehicles
 			regionsToDirty.Clear();
 			foreach (IntVec3 cell in occupiedRect.ExpandedBy(createdFor.SizePadding + 1).ClipInsideMap(mapping.map))
 			{
-				mapping.map.DrawCell_ThreadSafe(cell, 0);
 				VehicleRegion validRegionAt_NoRebuild = mapping[createdFor].VehicleRegionGrid.GetValidRegionAt_NoRebuild(cell);
 				if (validRegionAt_NoRebuild != null)
 				{
 					regionsToDirty.Add(validRegionAt_NoRebuild);
 				}
 			}
-			foreach (VehicleRegion vehicleRegion in regionsToDirty)
+			foreach (VehicleRegion vehicleRegion in regionsToDirty.Keys)
 			{
 				SetRegionDirty(vehicleRegion);
 			}
@@ -132,7 +131,7 @@ namespace Vehicles
 					}
 				}
 			}
-			foreach (VehicleRegion vehicleRegion in regionsToDirty)
+			foreach (VehicleRegion vehicleRegion in regionsToDirty.Keys)
 			{
 				SetRegionDirty(vehicleRegion);
 			}
@@ -161,7 +160,7 @@ namespace Vehicles
 				region.valid = false;
 				region.Room = null; //ArgumentOutOfRange exception is thrown here in the setter
 				step = "Deregistering";
-				foreach (VehicleRegionLink regionLink in region.links)
+				foreach (VehicleRegionLink regionLink in region.links.Keys)
 				{
 					VehicleRegion otherRegion = regionLink.Deregister(region, createdFor);
 					if (otherRegion != null && dirtyLinkedRegions)
