@@ -12,6 +12,7 @@ using RimWorld;
 using RimWorld.Planet;
 using LudeonTK;
 using SmashTools;
+using static UnityEngine.Scripting.GarbageCollector;
 
 namespace Vehicles
 {
@@ -47,7 +48,7 @@ namespace Vehicles
 				postfix: new HarmonyMethod(typeof(Debug),
 				nameof(DebugHideVehiclesFromPawnSpawner)));
 
-			if (VehicleHarmony.debug)
+			if (DebugProperties.debug)
 			{
 				//VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldRoutePlanner), nameof(WorldRoutePlanner.WorldRoutePlannerUpdate)), prefix: null,
 				//	postfix: new HarmonyMethod(typeof(Debug),
@@ -66,9 +67,18 @@ namespace Vehicles
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Thing), "ExposeData"),
 			//	finalizer: new HarmonyMethod(typeof(Debug),
 			//	nameof(ExceptionCatcher)));
+
+			//Type modType = AccessTools.TypeByName("SaveOurShip2.TEMPStopRedErrorOnTakeoff");
+
+			//VehicleHarmony.Harmony.Unpatch(original: AccessTools.Method(modType, "Prefix"), HarmonyPatchType.Prefix);
+			//VehicleHarmony.Harmony.Unpatch(original: AccessTools.Method(modType, "Postfix"), HarmonyPatchType.Postfix);
+
+			//VehicleHarmony.Patch(original: AccessTools.Method(modType, "Postfix"),
+			//	prefix: new HarmonyMethod(typeof(Debug),
+			//	nameof(TestModPatch)));
 		}
 
-		public static void TestPrefix(IntVec3 root)
+		private static void TestPrefix(IntVec3 root)
 		{
 			try
 			{
@@ -80,7 +90,7 @@ namespace Vehicles
 			}
 		}
 
-		public static void TestPostfix(XmlNode node, ModContentPack mod)
+		private static void TestPostfix(XmlNode node, ModContentPack mod)
 		{
 			try
 			{
@@ -96,7 +106,7 @@ namespace Vehicles
 			}
 		}
 
-		public static Exception ExceptionCatcher(Thing __instance, Exception __exception)
+		private static Exception ExceptionCatcher(Thing __instance, Exception __exception)
 		{
 			if (__exception != null)
 			{
@@ -105,15 +115,36 @@ namespace Vehicles
 			return __exception;
 		}
 
+		private static void TestModPatch(IntVec3 cell, VehicleDef vehicleDef, Map map)
+		{
+			string step = "cache";
+			try
+			{
+				step = "map info";
+				var comp = ComponentCache.GetCachedMapComponent<VehicleMapping>(map);
+				step = "PathData";
+				var pathData = comp[vehicleDef];
+				step = "PathGrid";
+				var pathGrid = pathData.VehiclePathGrid;
+				step = "Walkable";
+				bool result = pathGrid.Walkable(cell);
+				step = "Success";
+			}
+			catch (Exception ex)
+			{
+				Log.Error($"[Test ModPatch] Exception Thrown at step={step}.\nException={ex}\nInnerException={ex.InnerException}\n");
+			}
+		}
+
 		/// <summary>
 		/// Show original settlement positions before being moved to the coast
 		/// </summary>
 		/// <param name="o"></param>
-		public static void DebugWorldObjects(WorldObject o)
+		private static void DebugWorldObjects(WorldObject o)
 		{
 			if(o is Settlement)
 			{
-				VehicleHarmony.tiles.Add(new Pair<int, int>(o.Tile, 0));
+				DebugHelper.tiles.Add(new Pair<int, int>(o.Tile, 0));
 			}
 		}
 
@@ -121,7 +152,7 @@ namespace Vehicles
 		/// Removes Vehicle entries from Spawn Pawn menu, as that uses vanilla Pawn Generation whereas vehicles need special handling
 		/// </summary>
 		/// <param name="__result"></param>
-		public static void DebugHideVehiclesFromPawnSpawner(List<DebugActionNode> __result)
+		private static void DebugHideVehiclesFromPawnSpawner(List<DebugActionNode> __result)
 		{
 			for (int i = __result.Count - 1; i >= 0; i--)
 			{
@@ -137,27 +168,27 @@ namespace Vehicles
 		/// <summary>
 		/// Draw paths from original settlement position to new position when moving settlement to coastline
 		/// </summary>
-		public static void DebugSettlementPaths()
+		private static void DebugSettlementPaths()
 		{
-			if (VehicleHarmony.drawPaths && VehicleHarmony.debugLines.NullOrEmpty())
+			if (DebugProperties.drawPaths && DebugHelper.debugLines.NullOrEmpty())
 			{
 				return;
 			}
-			if (VehicleHarmony.drawPaths)
+			if (DebugProperties.drawPaths)
 			{
-				foreach (WorldPath wp in VehicleHarmony.debugLines)
+				foreach (WorldPath wp in DebugHelper.debugLines)
 				{
 					wp.DrawPath(null);
 				}
 			}
-			foreach (Pair<int, int> t in VehicleHarmony.tiles)
+			foreach (Pair<int, int> t in DebugHelper.tiles)
 			{
 				GenDraw.DrawWorldRadiusRing(t.First, t.Second);
 			}
 		}
 
 		[DebugAction(VehicleHarmony.VehiclesLabel, "Draw Hitbox Size", allowedGameStates = AllowedGameStates.PlayingOnMap)]
-		public static void DebugDrawHitbox()
+		private static void DebugDrawHitbox()
 		{
 			DebugTool tool = null;
 			IntVec3 first;
@@ -183,13 +214,13 @@ namespace Vehicles
 		}
 
 		[DebugAction(VehicleHarmony.VehiclesLabel, "Regenerate WorldPathGrid", allowedGameStates = AllowedGameStates.WorldRenderedNow)]
-		public static void DebugRegenerateWorldPathGrid()
+		private static void DebugRegenerateWorldPathGrid()
 		{
 			Find.World.GetComponent<WorldVehiclePathGrid>().RecalculateAllPerceivedPathCosts();
 		}
 
 		[DebugAction(VehicleHarmony.VehiclesLabel, "Ground All Aerial Vehicles", allowedGameStates = AllowedGameStates.Playing)]
-		public static void DebugGroundAllAerialVehicles()
+		private static void DebugGroundAllAerialVehicles()
 		{
 			foreach (AerialVehicleInFlight aerialVehicle in VehicleWorldObjectsHolder.Instance.AerialVehicles)
 			{

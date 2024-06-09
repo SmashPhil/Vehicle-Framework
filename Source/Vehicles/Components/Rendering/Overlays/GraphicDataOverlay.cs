@@ -10,6 +10,8 @@ namespace Vehicles
 		[SliderValues(MinValue = 0, MaxValue = 360, RoundDecimalPlaces = 0, Increment = 1)]
 		public float rotation = 0;
 
+		public bool dynamicShadows;
+
 		public ComponentRendering component;
 
 		public bool renderUI = true;

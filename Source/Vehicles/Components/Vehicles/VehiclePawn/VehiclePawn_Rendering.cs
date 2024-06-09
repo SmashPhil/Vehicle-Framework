@@ -27,11 +27,12 @@ namespace Vehicles
 		public VehicleGraphicOverlay graphicOverlay;
 
 		public PatternData patternData;
-		public RetextureDef retexture;
+		private RetextureDef retextureDef;
 
 		private float angle = 0f; /* -45 is left, 45 is right : relative to Rot4 direction*/
 
-		private Graphic_Vehicle graphicInt;
+		private Graphic_Vehicle graphic;
+
 		public PatternData patternToPaint;
 
 		private bool crashLanded;
@@ -110,43 +111,11 @@ namespace Vehicles
 		{
 			get
 			{
-				if (graphicInt is null)
+				if (graphic is null)
 				{
-					if (Destroyed && !RGBMaterialPool.GetAll(this).NullOrEmpty())
-					{
-						Log.Error($"Reinitializing RGB Materials but {this} has already been destroyed and the cache was not cleared for this entry. This may result in a memory leak.");
-						RGBMaterialPool.Release(this);
-					}
-
-					GraphicDataRGB graphicData = new GraphicDataRGB();
-					if (retexture != null)
-					{
-						graphicData.CopyFrom(retexture.graphicData);
-					}
-					else
-					{
-						graphicData.CopyFrom(VehicleDef.graphicData);
-					}
-					graphicData.color = patternData.color;
-					graphicData.colorTwo = patternData.colorTwo;
-					graphicData.colorThree = patternData.colorThree;
-					graphicData.tiles = patternData.tiles;
-					graphicData.displacement = patternData.displacement;
-					graphicData.pattern = patternData.patternDef;
-
-					if (graphicData.shaderType.Shader.SupportsRGBMaskTex())
-					{
-						RGBMaterialPool.CacheMaterialsFor(this);
-						graphicData.Init(this);
-						graphicInt = graphicData.Graphic as Graphic_Vehicle;
-						RGBMaterialPool.SetProperties(this, patternData, graphicInt.TexAt, graphicInt.MaskAt);
-					}
-					else
-					{
-						graphicInt = ((GraphicData)graphicData).Graphic as Graphic_Vehicle; //Triggers vanilla Init call for normal material caching
-					}
+					graphic = GenerateGraphic();
 				}
-				return graphicInt;
+				return graphic;
 			}
 		}
 
@@ -405,6 +374,12 @@ namespace Vehicles
 			base.Notify_ColorChanged();
 		}
 
+		public void ResetGraphic()
+		{
+			graphic = null;
+		}
+
+		//TODO 1.6 - Make private and rename to ResetMaterialProperties
 		internal void ResetGraphicCache()
 		{
 			if (UnityData.IsInMainThread)
@@ -418,6 +393,45 @@ namespace Vehicles
 					}
 				}
 			}
+		}
+
+		private Graphic_Vehicle GenerateGraphic()
+		{
+			if (Destroyed && !RGBMaterialPool.GetAll(this).NullOrEmpty())
+			{
+				Log.Error($"Reinitializing RGB Materials but {this} has already been destroyed and the cache was not cleared for this entry. This may result in a memory leak.");
+				RGBMaterialPool.Release(this);
+			}
+
+			Graphic_Vehicle newGraphic;
+			GraphicDataRGB graphicData = new GraphicDataRGB();
+			if (retextureDef != null)
+			{
+				graphicData.CopyFrom(retextureDef.graphicData);
+			}
+			else
+			{
+				graphicData.CopyFrom(VehicleDef.graphicData);
+			}
+			graphicData.color = patternData.color;
+			graphicData.colorTwo = patternData.colorTwo;
+			graphicData.colorThree = patternData.colorThree;
+			graphicData.tiles = patternData.tiles;
+			graphicData.displacement = patternData.displacement;
+			graphicData.pattern = patternData.patternDef;
+			
+			if (graphicData.shaderType.Shader.SupportsRGBMaskTex())
+			{
+				RGBMaterialPool.CacheMaterialsFor(this);
+				graphicData.Init(this);
+				newGraphic = graphicData.Graphic as Graphic_Vehicle;
+				RGBMaterialPool.SetProperties(this, patternData, newGraphic.TexAt, newGraphic.MaskAt);
+			}
+			else
+			{
+				newGraphic = ((GraphicData)graphicData).Graphic as Graphic_Vehicle; //Triggers vanilla Init call for normal material caching
+			}
+			return newGraphic;
 		}
 
 		public void UpdateRotationAndAngle()
@@ -988,6 +1002,12 @@ namespace Vehicles
 					SetColor();
 				}
 			});
+		}
+
+		public void SetRetexture(RetextureDef retextureDef)
+		{
+			this.retextureDef = retextureDef;
+			ResetGraphic();
 		}
 
 		public void Rename()

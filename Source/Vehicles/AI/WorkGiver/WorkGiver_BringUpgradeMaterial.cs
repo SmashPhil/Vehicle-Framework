@@ -28,6 +28,10 @@ namespace Vehicles
 
 		public override bool JobAvailable(VehiclePawn vehicle)
 		{
+			if (!vehicle.Spawned)
+			{
+				return false;
+			}
 			if (vehicle.CompUpgradeTree == null)
 			{
 				return false;
@@ -37,6 +41,10 @@ namespace Vehicles
 				return false;
 			}
 			if (vehicle.CompUpgradeTree.upgrade.Removal)
+			{
+				return false;
+			}
+			if (!MapComponentCache<VehicleReservationManager>.GetComponent(vehicle.Map).VehicleListed(vehicle, ReservationType.LoadUpgradeMaterials))
 			{
 				return false;
 			}

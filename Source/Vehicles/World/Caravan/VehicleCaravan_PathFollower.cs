@@ -323,7 +323,10 @@ namespace Vehicles
 					cost = newCost;
 				}
 			}
-			
+
+			float winterOffset = WinterPathingHelper.GetCurrentWinterMovementDifficultyOffset(vehicleDefs, end, stringBuilder);
+			cost += winterOffset;
+
 			float roadMovementDifficultyMultiplier = RoadCostHelper.GetRoadMovementDifficultyMultiplier(vehicleDefs, start, end, stringBuilder);
 			if (explanation != null)
 			{
@@ -333,9 +336,7 @@ namespace Vehicles
 				explanation.AppendLine($"  = {cost * roadMovementDifficultyMultiplier:0.#}");
 			}
 
-			float winterMultiplier = WinterPathingHelper.GetCurrentWinterMovementDifficultyOffset(vehicleDefs, end, stringBuilder);
-
-			int finalCost = (int)(ticksPerMove * cost * roadMovementDifficultyMultiplier * winterMultiplier);
+			int finalCost = (int)(ticksPerMove * cost * roadMovementDifficultyMultiplier);
 			finalCost = Mathf.Clamp(finalCost, 1, MaxMoveTicks);
 			if (explanation != null)
 			{
@@ -366,6 +367,9 @@ namespace Vehicles
 				}
 			}
 
+			float winterOffset = WinterPathingHelper.GetCurrentWinterMovementDifficultyOffset(vehicles, end, stringBuilder);
+			cost += winterOffset;
+
 			float roadMovementDifficultyMultiplier = RoadCostHelper.GetRoadMovementDifficultyMultiplier(vehicles, start, end, stringBuilder);
 			if (explanation != null)
 			{
@@ -375,9 +379,7 @@ namespace Vehicles
 				explanation.AppendLine($"  = {cost * roadMovementDifficultyMultiplier:0.#}");
 			}
 
-			float winterMultiplier = WinterPathingHelper.GetCurrentWinterMovementDifficultyOffset(vehicles, end, stringBuilder);
-
-			int finalCost = (int)(ticksPerMove * cost * roadMovementDifficultyMultiplier * winterMultiplier);
+			int finalCost = (int)(ticksPerMove * cost * roadMovementDifficultyMultiplier);
 			finalCost = Mathf.Clamp(finalCost, 1, MaxMoveTicks);
 			if (explanation != null)
 			{

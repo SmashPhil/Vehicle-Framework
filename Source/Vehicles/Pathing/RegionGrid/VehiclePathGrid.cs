@@ -46,7 +46,16 @@ namespace Vehicles
 		/// <param name="loc"></param>
 		public bool Walkable(IntVec3 loc)
 		{
-			return loc.InBounds(mapping.map) && WalkableFast(loc);
+			try
+			{
+				return loc.InBounds(mapping.map) && WalkableFast(loc);
+			}
+			catch (Exception ex)
+			{
+				Log.Error($"Mapping: {mapping is null} Map: {mapping?.map is null} CellInd: {mapping?.map?.cellIndices is null} Info: {mapping?.map?.info}Exception: {ex}");
+				Log.Error($"StackTrace: {StackTraceUtility.ExtractStackTrace()}");
+			}
+			return false;
 		}
 
 		/// <summary>

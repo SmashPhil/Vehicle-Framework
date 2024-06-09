@@ -265,13 +265,13 @@ namespace Vehicles
 			Scribe_Values.Look(ref crashLanded, nameof(crashLanded));
 
 			Scribe_Deep.Look(ref patternData, nameof(patternData));
-			Scribe_Defs.Look(ref retexture, nameof(retexture));
+			Scribe_Defs.Look(ref retextureDef, nameof(retextureDef));
 			Scribe_Deep.Look(ref patternToPaint, nameof(patternToPaint));
 
 			if (!VehicleMod.settings.main.useCustomShaders)
 			{
 				patternData = new PatternData(VehicleDef.graphicData.color, VehicleDef.graphicData.colorTwo, VehicleDef.graphicData.colorThree, PatternDefOf.Default, Vector2.zero, 0);
-				retexture = null;
+				retextureDef = null;
 				patternToPaint = null;
 			}
 

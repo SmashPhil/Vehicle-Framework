@@ -220,6 +220,7 @@ namespace Vehicles
 			upgrade = new UpgradeInProgress(Vehicle, node, false);
 			upgradeContainer.TryDropAll(Vehicle.Position, Vehicle.Map, ThingPlaceMode.Near);
 			Vehicle.ignition.Drafted = false;
+			Vehicle.Angle = 0;
 		}
 
 		/// <summary>
@@ -230,6 +231,7 @@ namespace Vehicles
 			upgrade = new UpgradeInProgress(Vehicle, node, true);
 			upgradeContainer.TryDropAll(Vehicle.Position, Vehicle.Map, ThingPlaceMode.Near);
 			Vehicle.ignition.Drafted = false;
+			Vehicle.Angle = 0;
 		}
 
 		private void ReloadUnlocks()
@@ -285,7 +287,7 @@ namespace Vehicles
 				size.y *= 1.15f;
 				Vector3 s = new Vector3(size.x, 1f, size.y);
 				Matrix4x4 matrix = default;
-				matrix.SetTRS(drawPos, Vehicle.FullRotation.AsQuat, s);
+				matrix.SetTRS(drawPos, Vehicle.Rotation.AsQuat, s);
 				Graphics.DrawMesh(MeshPool.plane10, matrix, UnderfieldMat, 0);
 				int corners = 4;
 				for (int i = 0; i < corners; i++)
@@ -364,7 +366,10 @@ namespace Vehicles
 		public override void CompTickRare()
 		{
 			base.CompTickRare();
-			ValidateListers();
+			if (Vehicle.Spawned)
+			{
+				ValidateListers();
+			}
 		}
 
 		public void ValidateListers()

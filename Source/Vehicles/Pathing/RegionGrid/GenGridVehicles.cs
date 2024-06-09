@@ -28,6 +28,11 @@ namespace Vehicles
 			return MapComponentCache<VehicleMapping>.GetComponent(map)[vehicleDef].VehiclePathGrid.Walkable(cell);
 		}
 
+		public static bool Walkable_TEMP(this IntVec3 cell, VehicleDef vehicleDef, VehicleMapping mapping)
+		{
+			return mapping[vehicleDef].VehiclePathGrid.Walkable(cell);
+		}
+
 		/// <summary>
 		/// Check if <paramref name="cell"/> is standable on <paramref name="map"/> for <paramref name="pawn"/> unknown to be a <see cref="VehiclePawn"/> or not
 		/// </summary>

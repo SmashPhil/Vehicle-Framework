@@ -1,8 +1,8 @@
 ########## DOCUMENTATION ##########
-# UpdateVersion version 1.0
+# UpdateVersion version 1.0.0
 #
 # To execute this file from the command line (or a post-build event in VisualStudio) you'll want to include the following arguments
-# Powershell.exe -ExecutionPolicy Unrestricted -file {Path to your ps1 file} {majorVersion} {minorVersion} {startDate} {createVersionFile}
+# Powershell.exe -ExecutionPolicy Bypass -file {Path to your ps1 file} {majorVersion} {minorVersion} {startDate} {createVersionFile}
 # 
 # NOTE: If you're executing it from a post-build event in VisualStudio, 
 # place the file in the same folder as your solution and use this file path for the post-build event:
@@ -18,7 +18,7 @@
 # useRevision: Outputs Revision number as part of your version number, otherwise it will use Major.Minor.Build
 # versionFile: create Version.txt file in your Mod's local folder. Outputs without revision number for misc. use
 # 
-# EXAMPLE: Powershell.exe -ExecutionPolicy Unrestricted -file "$(ProjectDir)\UpdateVersion.ps1" 1 5 "01-JAN-2021" false true
+# EXAMPLE: Powershell.exe -ExecutionPolicy Bypass -file "$(ProjectDir)\UpdateVersion.ps1" 1 5 "01-JAN-2021" false true
 #
 
 ########## Definitions ##########
@@ -59,24 +59,21 @@ switch ($useRevision){
 $buildDate = Get-Date
 
 Function UpDirectory {
-    cd ..
+    Set-Location ..
 }
 
 Function MapToContainingDirectory([string]$directoryName, [int]$maxAttempts = 10){
     for ($i = 0; $i -lt $maxAttempts; $i++){
-        Write-Output "Searching for About folder in directory: $(Get-Location)"
         if (Test-Path -path $directoryName){
-            Write-Output "Successfully mapped to directory: $(Get-Location)"
             return;
         }
         UpDirectory
     }
-    throw "Unable to locate About folder"
+    throw "Unable to locate directory $($directoryName)"
     exit;
 }
 
 Function GetVersionNumber {
-    $dateDifference = New-TimeSpan -Start $buildDate -End $startDate
     $build = [Math]::Abs([Math]::Floor(($buildDate - $startDate).TotalDays))
     $buildString = "{0:d4}" -f [int]$build
     return "$($major).$($minor).$($buildString)" 
@@ -90,7 +87,7 @@ Function GetVersionNumberWithRevision {
 
 ########## Version Output ##########
 
-Write-Output "Executing UpdateVersion script"
+Write-Output "Building version number"
 Write-Output "Project Reference Date: $($startDate)"
 Write-Output "Build Date: $($buildDate)"
 Write-Output "Create VersionFile: $($createVersionFile)"

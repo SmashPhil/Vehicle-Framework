@@ -9,11 +9,8 @@ namespace Vehicles
 	{
 		public GraphicDataRGB graphicData;
 
-#pragma warning disable IDE0044 // Add readonly modifier
-		private VehicleDef vehicle = null;
-#pragma warning restore IDE0044 // Add readonly modifier
-
-		public List<FactionDef> factions = new List<FactionDef>();
+		//TODO - Add faction specific retextures available for NPC generation
+		//public List<FactionDef> factions = new List<FactionDef>();
 
 		public override IEnumerable<string> ConfigErrors()
 		{
@@ -21,15 +18,11 @@ namespace Vehicles
 			{
 				yield return error;
 			}
-			if (vehicle is null)
-			{
-				yield return "<field>vehicle</field> must be specified for a valid retexture.".ConvertRichText();
-			}
 		}
 
 		public override void ResolveReferences()
 		{
-			factions ??= new List<FactionDef>();
+			//factions ??= new List<FactionDef>();
 		}
 	}
 }

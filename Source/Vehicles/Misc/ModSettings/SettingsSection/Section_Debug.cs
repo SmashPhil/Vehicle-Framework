@@ -90,7 +90,11 @@ namespace Vehicles
 			Scribe_Values.Look(ref debugDrawVehiclePathCosts, nameof(debugDrawVehiclePathCosts));
 			Scribe_Values.Look(ref debugDrawPathfinderSearch, nameof(debugDrawPathfinderSearch));
 
-			Scribe_Values.Look(ref debugSpawnVehicleBuildingGodMode, nameof(debugSpawnVehicleBuildingGodMode));
+			if (DebugProperties.debug)
+			{
+				Scribe_Values.Look(ref debugSpawnVehicleBuildingGodMode, nameof(debugSpawnVehicleBuildingGodMode));
+			}
+			
 			Scribe_Values.Look(ref debugUseMultithreading, nameof(debugUseMultithreading), defaultValue: true);
 			Scribe_Values.Look(ref debugLoadAssetBundles, nameof(debugLoadAssetBundles), defaultValue: true);
 
@@ -124,7 +128,11 @@ namespace Vehicles
 						return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput);
 					}, ref debugAllowRaiders, "Enables vehicle generation for NPCs.\n NOTE: This is an experimental feature. Use at your own risk.");
 
-					listingStandard.CheckboxLabeled("VF_DevMode_DebugSpawnVehiclesGodMode".Translate(), ref debugSpawnVehicleBuildingGodMode, "VF_DevMode_DebugSpawnVehiclesGodModeTooltip".Translate());
+					if (DebugProperties.debug)
+					{
+						listingStandard.CheckboxLabeled("VF_DevMode_DebugSpawnVehiclesGodMode".Translate(), ref debugSpawnVehicleBuildingGodMode, "VF_DevMode_DebugSpawnVehiclesGodModeTooltip".Translate());
+					}
+					
 					bool checkOn = debugUseMultithreading;
 					listingStandard.CheckboxLabeled("Use Multithreading", ref checkOn);
 

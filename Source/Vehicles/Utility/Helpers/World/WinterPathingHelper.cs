@@ -36,7 +36,7 @@ namespace Vehicles
 				}
 				return finalCost;
 			}
-			return 0f;
+			return 0;
 		}
 
 		public static float GetCurrentWinterMovementDifficultyOffset(List<VehicleDef> vehicleDefs, int tile, StringBuilder explanation = null)
@@ -44,60 +44,50 @@ namespace Vehicles
 			float winter = WorldVehiclePathGrid.Instance.WinterPercentAt(tile);
 			if (winter > 0.01f)
 			{
-				float winterSpeedMultiplier = HighestWinterOffset(vehicleDefs);
-				float finalCost = winter * winterSpeedMultiplier;
+				float winterCost = HighestWinterOffset(vehicleDefs);
+				float finalCost = winter * winterCost;
 				if (explanation != null)
 				{
-					WinterExplanation(explanation, winter, winterSpeedMultiplier, finalCost);
+					WinterExplanation(explanation, winter, winterCost, finalCost);
 				}
 				return finalCost;
 			}
 			return 0f;
 		}
 
-		private static void WinterExplanation(StringBuilder explanation, float winter, float winterSpeedMultiplier, float finalCost)
+		private static void WinterExplanation(StringBuilder explanation, float winter, float winterCost, float finalCost)
 		{
 			explanation.AppendLine();
-			explanation.Append("Winter".Translate());
-			if (winter < 0.999f)
-			{
-				explanation.Append($" ({winter.ToStringPercent("F0")})");
-			}
-			if (winterSpeedMultiplier != 1)
-			{
-				explanation.Append($" (Offset: {winterSpeedMultiplier})");
-			}
-			explanation.Append(": ");
-			explanation.Append(finalCost.ToStringWithSign("0.#"));
+			explanation.Append($"{"Winter".Translate()}: {finalCost.ToStringWithSign("0.#")}");
 		}
 
 		private static float HighestWinterOffset(List<VehicleDef> vehicleDefs)
 		{
-			float winterSpeedMultiplier = 0.01f;
+			float winterCost = 0.01f;
 			foreach (VehicleDef vehicleDef in vehicleDefs)
 			{
-				float vehicleDefWinterMultiplier = SettingsCache.TryGetValue(vehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.winterCostMultiplier), vehicleDef.properties.winterCostMultiplier);
-				if (vehicleDefWinterMultiplier > winterSpeedMultiplier)
+				float vehicleDefWinterCost = SettingsCache.TryGetValue(vehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.winterCost), vehicleDef.properties.winterCost);
+				if (vehicleDefWinterCost > winterCost)
 				{
-					winterSpeedMultiplier = vehicleDefWinterMultiplier;
+					winterCost = vehicleDefWinterCost;
 				}
 			}
-			return winterSpeedMultiplier;
+			return winterCost;
 		}
 
 		private static float HighestWinterOffset(List<VehiclePawn> vehicles)
 		{
-			float winterSpeedMultiplier = 0.01f;
+			float winterCost = 0.01f;
 			foreach (VehiclePawn vehicle in vehicles)
 			{
-				float settingsWinterCostMultiplier = SettingsCache.TryGetValue(vehicle.VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.winterCostMultiplier), vehicle.VehicleDef.properties.winterCostMultiplier);
-				float vehicleDefWinterMultiplier = vehicle.statHandler.GetStatOffset(VehicleStatUpgradeCategoryDefOf.WinterCostMultiplier, settingsWinterCostMultiplier);
-				if (vehicleDefWinterMultiplier > winterSpeedMultiplier)
+				float settingsWinterCostMultiplier = SettingsCache.TryGetValue(vehicle.VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.winterCost), vehicle.VehicleDef.properties.winterCost);
+				float vehicleDefWinterCost = vehicle.statHandler.GetStatOffset(VehicleStatUpgradeCategoryDefOf.WinterCostMultiplier, settingsWinterCostMultiplier);
+				if (vehicleDefWinterCost > winterCost)
 				{
-					winterSpeedMultiplier = vehicleDefWinterMultiplier;
+					winterCost = vehicleDefWinterCost;
 				}
 			}
-			return winterSpeedMultiplier;
+			return winterCost;
 		}
 	}
 }

@@ -191,7 +191,7 @@ namespace Vehicles
 			{
 				return;
 			}
-			if (VehicleHarmony.debug)
+			if (DebugProperties.debug)
 			{
 				foreach (VehicleRegion debugRegion in AllRegions_NoRebuild_InvalidAllowed)
 				{

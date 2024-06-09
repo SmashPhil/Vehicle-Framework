@@ -264,7 +264,7 @@ namespace Vehicles
 				while (open.Count > 0)
 				{
 					VehicleRegion region = open.Dequeue();
-					if (VehicleHarmony.debug)
+					if (DebugProperties.debug)
 					{
 						region.Debug_Notify_Traversed();
 					}

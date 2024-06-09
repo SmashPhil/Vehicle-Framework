@@ -61,6 +61,12 @@ namespace Vehicles
 			return true;
 		}
 
+		[Obsolete("Use new overload instead. Will be removed in 1.6")]
+		protected virtual void MapLoaded(Map map)
+		{
+			MapLoaded(map, true);
+		}
+
 		protected virtual void MapLoaded(Map map, bool hasMap)
 		{
 		}

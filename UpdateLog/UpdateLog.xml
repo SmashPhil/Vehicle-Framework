@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1638</currentVersion>
+  <currentVersion>1.5.1646</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -35,6 +35,8 @@ As for vehicle raids, I'm still working on the AI so the first iteration isn't r
 - Colonists being able to be ordered to board non-player vehicles.
 
 - Input text boxes would become right justified upon exiting the Vehicle Framework mod settings.
+
+- Fixed bug where upgradeable aerial vehicles would throw exceptions upon leaving the map.
 
 - Missing translation keys
 

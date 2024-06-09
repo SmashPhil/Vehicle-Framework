@@ -5,6 +5,7 @@ using System.Threading;
 using System.Runtime.CompilerServices;
 using Verse;
 using SmashTools;
+using Verse.Noise;
 
 namespace Vehicles
 {

@@ -183,7 +183,7 @@ namespace Vehicles
 				}
 			}
 
-			graphicInt = null;
+			ResetGraphic();
 			base.Destroy(mode);
 		}
 

@@ -34,8 +34,7 @@ namespace Vehicles
 
 		public virtual bool FailJob()
 		{
-			bool listed = !MapComponentCache<VehicleReservationManager>.GetComponent(Map).VehicleListed(Vehicle, ListerTag);
-			return listed;
+			return !MapComponentCache<VehicleReservationManager>.GetComponent(Map).VehicleListed(Vehicle, ListerTag);
 		}
 
 		public override bool TryMakePreToilReservations(bool errorOnFailed)

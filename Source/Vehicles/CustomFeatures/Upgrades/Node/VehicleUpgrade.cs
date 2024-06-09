@@ -15,6 +15,8 @@ namespace Vehicles
 
 		public List<VehicleRole> roles;
 
+		public RetextureDef retextureDef;
+
 		public override bool UnlockOnLoad => true;
 
 		public override void Unlock(VehiclePawn vehicle, bool unlockingAfterLoad)
@@ -25,6 +27,10 @@ namespace Vehicles
 				{
 					vehicle.AddRole(role);
 				}
+			}
+			if (!unlockingAfterLoad)
+			{
+				vehicle.SetRetexture(retextureDef);
 			}
 			if (!armor.NullOrEmpty())
 			{

@@ -34,7 +34,7 @@ namespace Vehicles
 
 		public List<string> replaces;
 
-		public string disableIfUpgradeNodeEnabled;
+		public string disableIfUpgradeNodeEnabled; //TODO - Remove in 1.6 in favor of disable conditions
 
 		public List<ResearchProjectDef> researchPrerequisites = new List<ResearchProjectDef>();
 		public List<string> prerequisiteNodes = new List<string>();

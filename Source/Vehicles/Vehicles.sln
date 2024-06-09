@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30204.135
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34902.65
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vehicles", "Vehicles.csproj", "{357562A0-ED54-4AE8-AA13-5FC3AC4C5B8E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{04DF45B1-9D4D-40A6-A51D-3DCB146A53C8} = {04DF45B1-9D4D-40A6-A51D-3DCB146A53C8}
+		{B6B2FD58-D7EC-482A-927D-EBB012A468A8} = {B6B2FD58-D7EC-482A-927D-EBB012A468A8}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmashTools", "..\..\..\..\..\..\..\..\SmashTools\SmashTools\SmashTools\SmashTools.csproj", "{B6B2FD58-D7EC-482A-927D-EBB012A468A8}"
 EndProject

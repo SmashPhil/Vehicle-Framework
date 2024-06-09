@@ -232,7 +232,7 @@ namespace Vehicles
 			{
 				if (Find.WorldGrid[tile].biome.canBuildBase && !(faction is null))
 				{
-					VehicleHarmony.tiles.Add(new Pair<int, int>(tile, 0));
+					DebugHelper.tiles.Add(new Pair<int, int>(tile, 0));
 				}
 				return tile;
 			}
@@ -244,13 +244,13 @@ namespace Vehicles
 				{
 					if (Find.WorldGrid[currentTile].biome.canBuildBase && Find.WorldGrid[currentTile].biome.implemented && Find.WorldGrid[currentTile].hilliness != Hilliness.Impassable)
 					{
-						if (VehicleHarmony.debug && !(faction is null))
+						if (DebugProperties.debug && !(faction is null))
 						{
 							DebugHelper.DebugDrawSettlement(tile, currentTile);
 						}
 						if (faction != null)
 						{
-							VehicleHarmony.tiles.Add(new Pair<int, int>(currentTile, currentRadius));
+							DebugHelper.tiles.Add(new Pair<int, int>(currentTile, currentRadius));
 						}
 						return true;
 					}

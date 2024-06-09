@@ -188,9 +188,8 @@ namespace Vehicles
 
 		public (Vector3 drawPos, float rotation) Draw(Vector3 drawPos, float rotation)
 		{
-
 			(Vector3 drawPos, float rotation) result = (drawPos, rotation);
-			ShadowData shadowData = ShadowData.CreateFrom(vehicle);
+			DynamicShadowData shadowData = DynamicShadowData.CreateFrom(vehicle);
 			switch (launchType)
 			{
 				case LaunchType.Landing:
@@ -253,7 +252,7 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="drawPos"
 		/// <param name="rotation"></param>
-		protected virtual (Vector3 drawPos, float rotation, ShadowData shadowData) AnimateLanding(Vector3 drawPos, float rotation, ShadowData shadowData)
+		protected virtual (Vector3 drawPos, float rotation, DynamicShadowData shadowData) AnimateLanding(Vector3 drawPos, float rotation, DynamicShadowData shadowData)
 		{
 			return (drawPos, rotation, shadowData);
 		}
@@ -263,7 +262,7 @@ namespace Vehicles
 		/// </summary>
 		/// <param name="drawPos"
 		/// <param name="rotation"></param>
-		protected virtual (Vector3 drawPos, float rotation, ShadowData shadowData) AnimateTakeoff(Vector3 drawPos, float rotation, ShadowData shadowData)
+		protected virtual (Vector3 drawPos, float rotation, DynamicShadowData shadowData) AnimateTakeoff(Vector3 drawPos, float rotation, DynamicShadowData shadowData)
 		{
 			return (drawPos, rotation, shadowData);
 		}

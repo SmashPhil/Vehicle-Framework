@@ -128,7 +128,7 @@
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\FleckData.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\FleckOneShot.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\Range.cs" />
-    <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\ShadowData.cs" />
+    <Compile Include="CustomFeatures\Misc\Rendering\DynamicShadowData.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Properties\DirectionalProtocolProperties.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Properties\PropellerProtocolProperties.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Restrictions\LaunchRestriction_ComponentHealth.cs" />
@@ -143,7 +143,8 @@
     <Compile Include="CustomFeatures\EventDefs\VehicleSoundEventEntry.cs" />
     <Compile Include="CustomFeatures\EventDefs\VehicleTurretEventDef.cs" />
     <Compile Include="CustomFeatures\Misc\AnimationEditorTags.cs" />
-    <Compile Include="CustomFeatures\Misc\DrawOffsets.cs" />
+    <Compile Include="CustomFeatures\Misc\Rendering\DrawOffsets.cs" />
+    <Compile Include="CustomFeatures\Misc\Rendering\DynamicShadows.cs" />
     <Compile Include="CustomFeatures\SharedJobs\SharedJob.cs" />
     <Compile Include="AI\JobDrivers\VehicleJobDriver.cs" />
     <Compile Include="AI\WorkGiver\WorkGiver_DisassembleVehicle.cs" />
@@ -158,6 +159,7 @@
     <Compile Include="Gizmo\Gizmo_VehicleCaravanInfo.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_StatSettings.cs" />
     <Compile Include="Graphics\Graphic\Graphics\Animated\Graphic_ReversePropeller.cs" />
+    <Compile Include="Graphics\Graphic\Graphics\VanillaSupported\Graphic_DynamicShadow.cs" />
     <Compile Include="Graphics\ITab\ITab_Airdrop_Container.cs" />
     <Compile Include="Graphics\ITab\WITab_AerialVehicle.cs" />
     <Compile Include="Graphics\ITab\WITab_AerialVehicle_Health.cs" />
@@ -175,6 +177,7 @@
     <Compile Include="Harmony\ConditionalPatches\Compatibility_VEFishing.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_SOS2.cs" />
     <Compile Include="Harmony\ConditionalPatches\ConditionalVehiclePatch.cs" />
+    <Compile Include="Harmony\DebugProperties.cs" />
     <Compile Include="Harmony\PatchCategories\DefGenerators\ThingDefGenerator_Buildables.cs" />
     <Compile Include="Harmony\PatchCategories\NPCAI.cs" />
     <Compile Include="Harmony\UnitTesting\WorldTesting.cs" />
@@ -443,7 +446,7 @@
     <Compile Include="Graphics\Graphic\GraphicGeneration\GraphicDatabaseRGB.cs" />
     <Compile Include="Graphics\Graphic\GraphicGeneration\GraphicRequestRGB.cs" />
     <Compile Include="Graphics\Graphic\Graphics\Animated\Graphic_Animate.cs" />
-    <Compile Include="Graphics\Graphic\Graphics\VanillaSupported\Graphic_RGB.cs" />
+    <Compile Include="Graphics\Graphic\Graphics\Vehicle\Graphic_RGB.cs" />
     <Compile Include="Graphics\Graphic\MaterialGeneration\MaterialRGBRequest.cs" />
     <Compile Include="Graphics\Graphic\MaterialGeneration\RGBMaterialPool.cs" />
     <Compile Include="Graphics\Graphic\MaterialGeneration\AdditionalShaderPropertyIDs.cs" />
@@ -647,11 +650,11 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Lib.Harmony">
-      <Version>2.2.2</Version>
+      <Version>2.3.3</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>Powershell.exe -ExecutionPolicy Unrestricted -file "$(ProjectDir)\UpdateVersion.ps1" 1 5 "07-DEC-2019" false true</PostBuildEvent>
+    <PostBuildEvent>Powershell.exe -ExecutionPolicy Bypass -file "$(ProjectDir)UpdateVersion.ps1" 1 5 "07-DEC-2019" false true</PostBuildEvent>
   </PropertyGroup>
 </Project>
