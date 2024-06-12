@@ -638,7 +638,7 @@ namespace Vehicles
 		{
 			CalculatingPath = true;
 			VehicleMapping vehicleMapping = MapComponentCache<VehicleMapping>.GetComponent(vehicle.Map);
-			if (vehicleMapping.ThreadAvailable)
+			if (vehicleMapping.ThreadAvailable && !vehicleMapping.ThreadBusy)
 			{
 				AsyncPathFindAction asyncAction = AsyncPool<AsyncPathFindAction>.Get();
 				asyncAction.Set(vehicle);
@@ -646,10 +646,6 @@ namespace Vehicles
 			}
 			else
 			{
-				if (!VehicleMod.settings.debug.debugUseMultithreading)
-				{
-					Log.WarningOnce($"Finding path on main thread. DedicatedThread was not available.", vehicle.Map.GetHashCode());
-				}
 				TrySetNewPath();
 				CalculatingPath = false;
 			}

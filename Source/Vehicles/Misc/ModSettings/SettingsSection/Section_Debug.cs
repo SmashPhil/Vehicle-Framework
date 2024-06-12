@@ -212,6 +212,21 @@ namespace Vehicles
 					SoundDefOf.Click.PlayOneShotOnCamera();
 					UnitTesting.OpenMenu();
 				}
+
+				if (listingStandard.ButtonText("VF_DevMode_LogThreadActivity".Translate(), "VF_DevMode_LogThreadActivityTooltip"))
+				{
+					SoundDefOf.Click.PlayOneShotOnCamera();
+					Find.WindowStack.Add(new Dialog_DedicatedThreadActivity(delegate ()
+					{
+						if (Find.CurrentMap == null)
+						{
+							return null;
+						}
+
+						VehicleMapping vehicleMapping = Find.CurrentMap.GetCachedMapComponent<VehicleMapping>();
+						return vehicleMapping.dedicatedThread;
+					}));
+				}
 #endif
 				if (listingStandard.ButtonText("VF_DevMode_GraphEditor".Translate()))
 				{

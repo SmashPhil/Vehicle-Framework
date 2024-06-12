@@ -23,7 +23,9 @@
 	<VF_DevMode_DebugLoggingTooltip>Enable message logging to output specific values and pieces of information useful for debugging Vehicles. Use only if you're making a Vehicle add-on.</VF_DevMode_DebugLoggingTooltip>
 	<VF_DevMode_DebugPathCostRecalculationLogging>Debug PathCost Recalculation Logging</VF_DevMode_DebugPathCostRecalculationLogging>
 	<VF_DevMode_DebugPathCostRecalculationLoggingTooltip>Log summary of path cost change for all vehicles affected by region dirtying.</VF_DevMode_DebugPathCostRecalculationLoggingTooltip>
-	
+	<VF_DevMode_LogThreadActivity>Log Thread Activity</VF_DevMode_LogThreadActivity>
+	<VF_DevMode_LogThreadActivityTooltip>Log ongoing async actions on the dedicated thread of the current map in view.</VF_DevMode_LogThreadActivityTooltip>
+
 	<!-- Bypass Mechanics -->
 	<VF_DevMode_DebugDraftAnyVehicle>Draft Any Vehicle</VF_DevMode_DebugDraftAnyVehicle>
 	<VF_DevMode_DebugDraftAnyVehicleTooltip>Be able to draft and move any vehicle regardless of passengers. Useful for empty boats in deep water or if you want to expedite testing.</VF_DevMode_DebugDraftAnyVehicleTooltip>

@@ -62,7 +62,7 @@ namespace Vehicles
 		/// <summary>
 		/// If dedicated thread is given long task, it should be marked as having a long operation so smaller tasks can avoid queueing up with a long wait time
 		/// </summary>
-		public bool ThreadBusy => !dedicatedThread.InLongOperation;
+		public bool ThreadBusy => dedicatedThread.InLongOperation;
 
 		/// <summary>
 		/// Get <see cref="VehiclePathData"/> for <paramref name="vehicleDef"/>
