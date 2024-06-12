@@ -210,9 +210,8 @@ namespace Vehicles
 					material = RGBMaterialPool.Get(vehicleDef, rotDrawn);
 					RGBMaterialPool.SetProperties(vehicleDef, pattern, graphic.TexAt, graphic.MaskAt);
 				}
-				
+
 				//drawStep = "Attempting to retrieve turret overlays";
-				
 				if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets props)
 				{
 					if (!withoutTurrets || Prefs.UIScale == 1) //NOTE: Temporary fix until Ludeon fixes vanilla bug with matrix rotations inside GUI groups
@@ -334,7 +333,7 @@ namespace Vehicles
 							material = RGBMaterialPool.Get(turretDrawData, Rot8.North);
 							RGBMaterialPool.SetProperties(turretDrawData, patternData, turretDrawData.graphic.TexAt, turretDrawData.graphic.MaskAt);
 						}
-						yield return new RenderData(turretRect, turretDrawData.graphic.TexAt(Rot8.North), material, turretDrawData.graphicDataRGB.drawOffset.y, turret.defaultAngleRotated + rot.AsAngle);
+						yield return new RenderData(turretRect, turretDrawData.graphic.TexAt(Rot8.North), material, turretDrawData.graphicDataRGB.DrawOffsetFull(rot).y + turret.DrawLayerOffset, turret.defaultAngleRotated + rot.AsAngle);
 					}
 				}
 			}
@@ -353,7 +352,7 @@ namespace Vehicles
 				material = RGBMaterialPool.Get(turret, Rot8.North);
 				RGBMaterialPool.SetProperties(turret, patternData, turret.CannonGraphic.TexAt, turret.CannonGraphic.MaskAt);
 			}
-			return new RenderData(turretRect, turret.CannonTexture, material, turret.CannonGraphicData.drawOffset.y, turret.defaultAngleRotated + rot.AsAngle);
+			return new RenderData(turretRect, turret.CannonTexture, material, turret.CannonGraphicData.DrawOffsetFull(rot).y + turret.DrawLayerOffset, turret.defaultAngleRotated + rot.AsAngle);
 		}
 
 		/// <summary>

@@ -212,6 +212,7 @@ namespace Vehicles
 					SoundDefOf.Click.PlayOneShotOnCamera();
 					UnitTesting.OpenMenu();
 				}
+#endif
 
 				if (listingStandard.ButtonText("VF_DevMode_LogThreadActivity".Translate(), "VF_DevMode_LogThreadActivityTooltip"))
 				{
@@ -227,7 +228,7 @@ namespace Vehicles
 						return vehicleMapping.dedicatedThread;
 					}));
 				}
-#endif
+
 				if (listingStandard.ButtonText("VF_DevMode_GraphEditor".Translate()))
 				{
 					SoundDefOf.Click.PlayOneShotOnCamera();

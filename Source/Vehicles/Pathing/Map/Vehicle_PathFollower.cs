@@ -638,7 +638,7 @@ namespace Vehicles
 		{
 			CalculatingPath = true;
 			VehicleMapping vehicleMapping = MapComponentCache<VehicleMapping>.GetComponent(vehicle.Map);
-			if (vehicleMapping.ThreadAvailable && !vehicleMapping.ThreadBusy)
+			if (vehicleMapping.ThreadAvailable)
 			{
 				AsyncPathFindAction asyncAction = AsyncPool<AsyncPathFindAction>.Get();
 				asyncAction.Set(vehicle);

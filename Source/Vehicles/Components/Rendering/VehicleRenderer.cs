@@ -18,7 +18,7 @@ namespace Vehicles
 
 		public VehicleGraphicSet graphics;
 
-		private Graphic_DynamicShadow shadowGraphic;
+		//private Graphic_DynamicShadow shadowGraphic;
 
 		//FOR TESTING ONLY
 		private PawnFirefoamDrawer firefoamOverlays;

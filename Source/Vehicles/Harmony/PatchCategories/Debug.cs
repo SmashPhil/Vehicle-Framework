@@ -115,27 +115,6 @@ namespace Vehicles
 			return __exception;
 		}
 
-		private static void TestModPatch(IntVec3 cell, VehicleDef vehicleDef, Map map)
-		{
-			string step = "cache";
-			try
-			{
-				step = "map info";
-				var comp = ComponentCache.GetCachedMapComponent<VehicleMapping>(map);
-				step = "PathData";
-				var pathData = comp[vehicleDef];
-				step = "PathGrid";
-				var pathGrid = pathData.VehiclePathGrid;
-				step = "Walkable";
-				bool result = pathGrid.Walkable(cell);
-				step = "Success";
-			}
-			catch (Exception ex)
-			{
-				Log.Error($"[Test ModPatch] Exception Thrown at step={step}.\nException={ex}\nInnerException={ex.InnerException}\n");
-			}
-		}
-
 		/// <summary>
 		/// Show original settlement positions before being moved to the coast
 		/// </summary>

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1648</currentVersion>
+  <currentVersion>1.5.1649</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -13,6 +13,8 @@ Since the release of Anomaly and RimWorld 1.5, I've received many caravan relate
 As for vehicle raids, I'm still working on the AI so the first iteration isn't ready yet, but I'll be sure to post an announcement when it goes live. It's a very time consuming process and bugfixes / performance improvements always have priority. But keep an eye out! There will be a toggle in the mod settings for this experimental feature in the near future.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Thread safe coroutine queue implementation wouldn't clear after scene changes, resulting in memory leak on save reloads.
+
+- Duplicate path and regen calculations during map generation.
 
 - Beach size would still be set to max vanilla size with beach multiplier set to 0%
 
@@ -44,6 +46,8 @@ As for vehicle raids, I'm still working on the AI so the first iteration isn't r
 - Improved rendering performance of vehicle UI icons.
 
 - Reduced memory allocation for region building.
+
+- Improved map generation time for vehicle regions.
 
 &lt;b&gt;Players&lt;/b&gt;
 - Added 'Off Road Multiplier' to VF Mod Settings under 'Vehicles'

@@ -43,7 +43,6 @@ namespace Vehicles
 
 		public VehicleMapping(Map map) : base(map)
 		{
-			dedicatedThread = GetDedicatedThread(map);
 		}
 
 		/// <summary>
@@ -54,15 +53,38 @@ namespace Vehicles
 		public DedicatedThread Thread => dedicatedThread;
 
 		/// <summary>
-		/// Check to make sure dedicated thread is instantiated and running.
+		/// Check if <see cref="dedicatedThread"/> is initialized and running.
 		/// </summary>
-		/// <remarks>Verify this is true before queueing up a method, otherwise you may just be sending it to the void where it will never be executed ever.</remarks>
-		public bool ThreadAvailable => dedicatedThread != null && dedicatedThread.thread.IsAlive;
+		public bool ThreadAlive
+		{
+			get
+			{
+				return dedicatedThread != null && dedicatedThread.thread.IsAlive;
+			}
+		}
 
 		/// <summary>
-		/// If dedicated thread is given long task, it should be marked as having a long operation so smaller tasks can avoid queueing up with a long wait time
+		/// Check if <see cref="dedicatedThread"/> is alive and not in long operation.
 		/// </summary>
-		public bool ThreadBusy => dedicatedThread.InLongOperation;
+		/// <remarks>Verify this is true before queueing up a method, otherwise you may just be sending it to the void where it will never be executed ever.</remarks>
+		public bool ThreadAvailable
+		{
+			get
+			{
+				return ThreadAlive && !ThreadBusy;
+			}
+		}
+
+		/// <summary>
+		/// DedicatedThread is either processing a long operation in its queue or the queue has grown large enough to warrant waiting.
+		/// </summary>
+		public bool ThreadBusy
+		{
+			get
+			{
+				return dedicatedThread.InLongOperation || dedicatedThread.QueueCount > 10000;
+			}
+		}
 
 		/// <summary>
 		/// Get <see cref="VehiclePathData"/> for <paramref name="vehicleDef"/>
@@ -195,6 +217,7 @@ namespace Vehicles
 					}
 				}
 			}
+			dedicatedThread = GetDedicatedThread(map); //Init dedicated thread after map generation to avoid duplicate pathgrid and region recalcs
 		}
 
 		/// <summary>

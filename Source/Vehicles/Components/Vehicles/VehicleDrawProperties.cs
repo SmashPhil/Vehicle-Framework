@@ -44,8 +44,8 @@ namespace Vehicles
 			{
 				foreach (GraphicDataOverlay graphicDataOverlay in graphicOverlays)
 				{
-					graphicDataOverlay.graphicData.RecacheLayerOffsets();
 					GraphicOverlay graphicOverlay = GraphicOverlay.Create(graphicDataOverlay, vehicleDef);
+					graphicOverlay.data.graphicData.RecacheLayerOffsets();
 					overlays.Add(graphicOverlay);
 				}
 			});

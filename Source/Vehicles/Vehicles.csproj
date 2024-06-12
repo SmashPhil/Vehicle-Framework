@@ -469,6 +469,7 @@
     <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleLaunchHelper.cs" />
     <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleTabHelper.cs" />
     <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleTraderHelper.cs" />
+    <Compile Include="Utility\Helpers\AsyncActions\AsyncLongOperationAction.cs" />
     <Compile Include="Utility\Helpers\AsyncActions\AsyncPathFindAction.cs" />
     <Compile Include="Utility\Helpers\AsyncActions\AsyncPathingAction.cs" />
     <Compile Include="Utility\Helpers\AsyncActions\AsyncRegionAction.cs" />

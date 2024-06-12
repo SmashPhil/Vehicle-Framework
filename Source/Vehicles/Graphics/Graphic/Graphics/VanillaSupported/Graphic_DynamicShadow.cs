@@ -15,11 +15,6 @@ namespace Vehicles
 
 		private Mesh shadowMesh;
 
-		[TweakValue("Graphics_DynamicShadow", -5f, 5f)]
-		private static float GlobalShadowPosOffsetX;
-		[TweakValue("Graphics_DynamicShadow", -5f, 5f)]
-		private static float GlobalShadowPosOffsetZ;
-
 		public Graphic_DynamicShadow(Texture2D texture, ShadowData shadowData)
 		{
 			this.shadowData = shadowData;
