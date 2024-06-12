@@ -12,6 +12,22 @@ namespace Vehicles
 
 		public abstract bool UnlockOnLoad { get; }
 
+		public virtual IEnumerable<string> UpgradeDescription
+		{
+			get
+			{
+				yield break;
+			}
+		}
+
+		public virtual IEnumerable<string> ConfigErrors
+		{
+			get
+			{
+				yield break;
+			}
+		}
+
 		/// <summary>
 		/// Called when node has upgraded fully, after upgrade build ticks hits 0 or triggered by god mode
 		/// </summary>

@@ -108,7 +108,7 @@ namespace Vehicles
 					}
 				}
 			}
-			if (GenGridVehicles.Walkable(cell, createdFor, mapping.map))
+			if (GenGridVehicles.Walkable(cell, createdFor, mapping))
 			{
 				lock (dirtyCellsLock)
 				{

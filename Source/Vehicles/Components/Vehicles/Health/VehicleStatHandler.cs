@@ -676,10 +676,10 @@ namespace Vehicles
 					}
 				}
 			}
-			if (handler != null && handler.handlers.Count > 0 && Rand.Chance(handler.role.chanceToHit * multiplier))
+			if (handler != null && handler.handlers.Count > 0 && Rand.Chance(handler.role.ChanceToHit * multiplier))
 			{
 				hitPawn = handler.handlers.InnerListForReading.RandomElement();
-				report?.AppendLine($"Hitting {handler} with chance {handler.role.chanceToHit * multiplier}");
+				report?.AppendLine($"Hitting {handler} with chance {handler.role.ChanceToHit * multiplier}");
 				hitPawn.TakeDamage(dinfo);
 				return true;
 			}
@@ -688,7 +688,7 @@ namespace Vehicles
 
 		private bool TrySelectHandler(IntVec2 cell, out VehicleHandler handler, bool exposed = false)
 		{
-			handler = vehicle.handlers.FirstOrDefault(handler => handler.role.hitbox != null && handler.role.hitbox.Contains(cell) && handler.handlers.Count > 0 && handler.role.exposed == exposed);
+			handler = vehicle.handlers.FirstOrDefault(handler => handler.role.Hitbox != null && handler.role.Hitbox.Contains(cell) && handler.handlers.Count > 0 && handler.role.Exposed == exposed);
 			return handler != null;
 		}
 

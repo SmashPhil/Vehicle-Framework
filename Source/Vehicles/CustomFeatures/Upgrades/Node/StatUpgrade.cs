@@ -5,6 +5,7 @@ using UnityEngine;
 using Verse;
 using RimWorld;
 using SmashTools;
+using static Vehicles.StatUpgrade;
 
 namespace Vehicles
 {
@@ -17,6 +18,58 @@ namespace Vehicles
 		public List<StatCategoryUpgrade> statCategories;
 
 		public override bool UnlockOnLoad => true;
+
+		public override IEnumerable<string> UpgradeDescription
+		{
+			get
+			{
+				if (!stats.NullOrEmpty())
+				{
+					foreach (StatDefUpgrade statDefUpgrade in stats)
+					{
+						switch (statDefUpgrade.type)
+						{
+							case UpgradeType.Add:
+								yield return $"{statDefUpgrade.def.LabelCap} +{statDefUpgrade.value}";
+								break;
+							case UpgradeType.Set:
+								yield return $"{statDefUpgrade.def.LabelCap} -> {statDefUpgrade.value}";
+								break;
+						}
+					}
+				}
+				if (!vehicleStats.NullOrEmpty())
+				{
+					foreach (VehicleStatDefUpgrade vehicleStatDefUpgrade in vehicleStats)
+					{
+						switch (vehicleStatDefUpgrade.type)
+						{
+							case UpgradeType.Add:
+								yield return $"{vehicleStatDefUpgrade.def.LabelCap} +{vehicleStatDefUpgrade.value}";
+								break;
+							case UpgradeType.Set:
+								yield return $"{vehicleStatDefUpgrade.def.LabelCap} -> {vehicleStatDefUpgrade.value}";
+								break;
+						}
+					}
+				}
+				if (!statCategories.NullOrEmpty())
+				{
+					foreach (StatCategoryUpgrade statCategoryUpgrade in statCategories)
+					{
+						switch (statCategoryUpgrade.type)
+						{
+							case UpgradeType.Add:
+								yield return $"{statCategoryUpgrade.def.LabelCap} +{statCategoryUpgrade.value}";
+								break;
+							case UpgradeType.Set:
+								yield return $"{statCategoryUpgrade.def.LabelCap} -> {statCategoryUpgrade.value}";
+								break;
+						}
+					}
+				}
+			}
+		}
 
 		public override void Unlock(VehiclePawn vehicle, bool unlockingAfterLoad)
 		{

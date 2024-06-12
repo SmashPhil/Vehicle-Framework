@@ -48,7 +48,6 @@ namespace Vehicles
 		/// </summary>
 		[TweakField]
 		public GraphicDataRGB graphicData;
-		//UPDATE - Merge to 1 list
 		[TweakField(SubCategory = "Layered Graphics")]
 		public List<VehicleTurretRenderData> graphics;
 
@@ -187,6 +186,8 @@ namespace Vehicles
 			{
 				graphicData.shaderType = graphicData.shaderType.Shader.SupportsRGBMaskTex(ignoreSettings: true) ? ShaderTypeDefOf.CutoutComplex : graphicData.shaderType;
 			}
+
+			graphicData.RecacheLayerOffsets();
 		}
 
 		public override IEnumerable<string> ConfigErrors()

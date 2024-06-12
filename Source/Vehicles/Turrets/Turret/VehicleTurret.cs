@@ -58,7 +58,7 @@ namespace Vehicles
 		public string gizmoLabel;
 
 		/* ----------------- */
-		//UPDATE - rename
+		//TODO 1.6 - rename
 		public LocalTargetInfo cannonTarget;
 
 		protected float rotation = 0; //True rotation of turret separate from Vehicle rotation and angle for saving
@@ -91,7 +91,7 @@ namespace Vehicles
 		[Unsaved]
 		public VehiclePawn vehicle;
 		[Unsaved]
-		public VehicleDef vehicleDef; //necessary separate from vehicle since VehicleTurrets can exist uninitialized in CompProperties_VehicleTurrets
+		public VehicleDef vehicleDef; ///Necessary to separate from vehicle for def-contained turrets, ie. <see cref="CompProperties_VehicleTurrets"/> for PatternData
 		[Unsaved]
 		public VehicleTurret attachedTo;
 		[Unsaved]
@@ -100,8 +100,8 @@ namespace Vehicles
 		protected List<VehicleTurret> groupTurrets;
 		[Unsaved]
 		public TurretRestrictions restrictions;
-		
-		//UPDATE - merge recoil trackers
+
+		//TODO 1.6 - merge recoil trackers
 		[Unsaved]
 		public Turret_RecoilTracker recoilTracker;
 		[Unsaved]
@@ -403,7 +403,7 @@ namespace Vehicles
 			}
 		}
 
-		//UPDATE - rename
+		//TODO 1.6 - rename
 		public float CannonIconAlphaTicked
 		{
 			get
@@ -416,7 +416,7 @@ namespace Vehicles
 			}
 		}
 
-		//UPDATE - rename
+		//TODO 1.6 - rename
 		public virtual Material CannonMaterial
 		{
 			get
@@ -429,7 +429,7 @@ namespace Vehicles
 			}
 		}
 
-		//UPDATE - rename
+		//TODO 1.6 - rename
 		public virtual Texture2D CannonTexture
 		{
 			get
@@ -462,7 +462,7 @@ namespace Vehicles
 			}
 		}
 
-		//UPDATE - rename
+		//TODO 1.6 - rename
 		public virtual Graphic_Turret CannonGraphic
 		{
 			get
@@ -475,7 +475,7 @@ namespace Vehicles
 			}
 		}
 
-		//UPDATE - rename
+		//TODO 1.6 - rename
 		public virtual List<TurretDrawData> TurretGraphics
 		{
 			get
@@ -484,7 +484,7 @@ namespace Vehicles
 			}
 		}
 
-		//UPDATE - rename
+		//TODO 1.6 - rename
 		public virtual GraphicDataRGB CannonGraphicData
 		{
 			get
@@ -702,12 +702,27 @@ namespace Vehicles
 			drawLayer = reference.drawLayer;
 			if (reference.turretDef.restrictionType != null)
 			{
-				restrictions = (TurretRestrictions)Activator.CreateInstance(reference.turretDef.restrictionType);
-				restrictions.Init(vehicle, this);
+				SetTurretRestriction(reference.turretDef.restrictionType);
 			}
 
 			ResetAngle();
 			LongEventHandler.ExecuteWhenFinished(RecacheRootDrawPos);
+		}
+
+		public void SetTurretRestriction(Type type)
+		{
+			if (!type.IsSubclassOf(typeof(TurretRestrictions)))
+			{
+				Log.Error($"Trying to create TurretRestriction with non-matching type.");
+				return;
+			}
+			restrictions = (TurretRestrictions)Activator.CreateInstance(type);
+			restrictions.Init(vehicle, this);
+		}
+
+		public void RemoveTurretRestriction()
+		{
+			restrictions = null;
 		}
 
 		public void OnFieldChanged()
@@ -763,7 +778,7 @@ namespace Vehicles
 			IsManned = true;
 			foreach (VehicleHandler handler in vehicle.handlers)
 			{
-				if (handler.role.handlingTypes.HasFlag(HandlingTypeFlags.Turret) && (handler.role.turretIds.Contains(key) || handler.role.turretIds.Contains(groupKey)))
+				if (handler.role.HandlingTypes.HasFlag(HandlingTypeFlags.Turret) && (handler.role.TurretIds.Contains(key) || handler.role.TurretIds.Contains(groupKey)))
 				{
 					if (!handler.RoleFulfilled)
 					{
@@ -1356,9 +1371,9 @@ namespace Vehicles
 			if (!NoGraphic)
 			{
 				VehicleGraphics.DrawTurret(this, drawPos, Rot8.North);
-				DrawTargeter();
-				DrawAimPie();
 			}
+			DrawTargeter();
+			DrawAimPie();
 		}
 
 		public virtual void Draw()
@@ -1366,9 +1381,9 @@ namespace Vehicles
 			if (!NoGraphic)
 			{
 				VehicleGraphics.DrawTurret(this, vehicle.FullRotation);
-				DrawTargeter();
-				DrawAimPie();
 			}
+			DrawTargeter();
+			DrawAimPie();
 		}
 
 		protected virtual void DrawTargeter()

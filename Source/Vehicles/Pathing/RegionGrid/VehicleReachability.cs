@@ -562,7 +562,7 @@ namespace Vehicles
 				return CanReachVehicle(cell, MapGenerator.PlayerStartSpot, PathEndMode.OnCell, TraverseParms.For(TraverseMode.PassDoors,
 					Danger.Deadly, false));
 			}
-			if (!GenGridVehicles.Walkable(cell, vehicleDef, mapping.map))
+			if (!GenGridVehicles.Walkable(cell, vehicleDef, mapping))
 			{
 				return false;
 			}

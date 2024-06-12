@@ -10,5 +10,8 @@ namespace Vehicles
 {
 	public class StatUpgradeCategoryDef : Def
 	{
+		public ToStringStyle toStringStyle = ToStringStyle.FloatTwo;
+		[MustTranslate]
+		public string formatString;
 	}
 }

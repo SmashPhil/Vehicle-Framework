@@ -98,7 +98,7 @@ namespace Vehicles
 		{
 			if (!Regions.ContainsKey(region))
 			{
-				Log.Error($"Tried to remove region from Room but this region is not here. region={region} room={this}");
+				Log.Warning($"Tried to remove region from Room but this region is not here. region={region} room={this}"); //TODO - resolve race condition where region is already destroyed before room can clear it
 				return;
 			}
 			Regions.Remove(region);

@@ -18,6 +18,7 @@
 	<VF_StopVehicleDesc>Stop the vehicle immediately.</VF_StopVehicleDesc>
 	<VF_UndraftVehicleDesc>Undrafts vehicle, disabling the consumption of fuel and disallowing movement.</VF_UndraftVehicleDesc>
 	<VF_RefuelFromInventory>Refuel From Inventory</VF_RefuelFromInventory>
+	<VF_VehicleFuelCost>Fuel: {0}</VF_VehicleFuelCost>
 	
 	<!-- UI / Buttons -->
 	<VF_ShowAllItemsOnMap>Show All Items On Map</VF_ShowAllItemsOnMap>

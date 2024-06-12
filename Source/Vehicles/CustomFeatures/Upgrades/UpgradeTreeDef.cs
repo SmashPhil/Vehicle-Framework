@@ -32,6 +32,16 @@ namespace Vehicles
 							}
 						}
 					}
+					if (!node.upgrades.NullOrEmpty())
+					{
+						foreach (Upgrade upgrade in node.upgrades)
+						{
+							foreach (string error in upgrade.ConfigErrors)
+							{
+								yield return $"(UpgradeNode={node.key} Type={upgrade.GetType()}) {error}";
+							}
+						}
+					}
 				}
 			}
 		}

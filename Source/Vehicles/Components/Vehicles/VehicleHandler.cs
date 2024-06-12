@@ -8,6 +8,9 @@ using SmashTools;
 
 namespace Vehicles
 {
+	/// <summary>
+	/// Handles instance behavior of a vehicle's role.
+	/// </summary>
 	public class VehicleHandler : IExposable, ILoadReferenceable, IThingHolderPawnOverlayer
 	{
 		public ThingOwner<Pawn> handlers;
@@ -20,10 +23,7 @@ namespace Vehicles
 
 		public VehicleHandler()
 		{
-			if (handlers is null)
-			{
-				handlers = new ThingOwner<Pawn>(this, false, LookMode.Deep);
-			}
+			handlers ??= new ThingOwner<Pawn>(this, false, LookMode.Deep);
 		}
 
 		public VehicleHandler(VehiclePawn vehicle) : this()
@@ -32,31 +32,31 @@ namespace Vehicles
 			this.vehicle = vehicle;
 		}
 
-		public VehicleHandler(VehiclePawn vehicle, VehicleRole newRole) : this(vehicle)
+		public VehicleHandler(VehiclePawn vehicle, VehicleRole role) : this(vehicle)
 		{
-			role = new VehicleRole(newRole);
+			this.role = new VehicleRole(role); //Role must be instance based for upgrades to modify data
 			roleKey = role.key;
 		}
 
 		public IThingHolder ParentHolder => vehicle;
 
-		Rot4 IThingHolderPawnOverlayer.PawnRotation => role.pawnRenderer?.RotFor(vehicle.FullRotation) ?? Rot4.South;
+		Rot4 IThingHolderPawnOverlayer.PawnRotation => role.PawnRenderer?.RotFor(vehicle.FullRotation) ?? Rot4.South;
 
-		float IThingHolderWithDrawnPawn.HeldPawnDrawPos_Y => vehicle.DrawPos.y + role.pawnRenderer.LayerFor(vehicle.FullRotation);
+		float IThingHolderWithDrawnPawn.HeldPawnDrawPos_Y => vehicle.DrawPos.y + role.PawnRenderer.LayerFor(vehicle.FullRotation);
 
-		float IThingHolderWithDrawnPawn.HeldPawnBodyAngle => role.pawnRenderer.AngleFor(vehicle.FullRotation);
+		float IThingHolderWithDrawnPawn.HeldPawnBodyAngle => role.PawnRenderer.AngleFor(vehicle.FullRotation);
 
 		PawnPosture IThingHolderWithDrawnPawn.HeldPawnPosture => PawnPosture.LayingInBedFaceUp;
 
-		bool IThingHolderPawnOverlayer.ShowBody => role.pawnRenderer.showBody;
+		bool IThingHolderPawnOverlayer.ShowBody => role.PawnRenderer.showBody;
 
-		public bool RequiredForMovement => role.handlingTypes.HasFlag(HandlingTypeFlags.Movement);
+		public bool RequiredForMovement => role.HandlingTypes.HasFlag(HandlingTypeFlags.Movement);
 
 		public bool RoleFulfilled
 		{
 			get
 			{
-				bool minRequirement = role != null && handlers.Count >= role.slotsToOperate;
+				bool minRequirement = role != null && handlers.Count >= role.SlotsToOperate;
 				if (!minRequirement)
 				{
 					return false;
@@ -69,7 +69,7 @@ namespace Vehicles
 						operationalCount++;
 					}
 				}
-				return operationalCount >= role.slotsToOperate;
+				return operationalCount >= role.SlotsToOperate;
 			}
 		}
 
@@ -78,7 +78,7 @@ namespace Vehicles
 			get
 			{
 				bool reservation = vehicle.Map?.GetCachedMapComponent<VehicleReservationManager>().CanReserve<VehicleHandler, VehicleHandlerReservation>(vehicle, null, this) ?? true;
-				return role != null && reservation && handlers.Count < role.slots;
+				return role != null && reservation && handlers.Count < role.Slots;
 			}
 		}
 
@@ -112,7 +112,7 @@ namespace Vehicles
 
 		public bool CanOperateRole(Pawn pawn)
 		{
-			if (role.handlingTypes > HandlingTypeFlags.None)
+			if (role.HandlingTypes > HandlingTypeFlags.None)
 			{
 				bool manipulation = pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation);
 				bool downed = pawn.Downed;
@@ -126,11 +126,11 @@ namespace Vehicles
 
 		public void RenderPawns()
 		{
-			if (role.pawnRenderer != null)
+			if (role.PawnRenderer != null)
 			{
 				foreach (Pawn pawn in handlers)
 				{
-					pawn.Drawer.renderer.DynamicDrawPhaseAt(DrawPhase.Draw, vehicle.DrawPos + role.pawnRenderer.DrawOffsetFor(vehicle.FullRotation), role.pawnRenderer.RotFor(vehicle.FullRotation));
+					pawn.Drawer.renderer.DynamicDrawPhaseAt(DrawPhase.Draw, vehicle.DrawPos + role.PawnRenderer.DrawOffsetFor(vehicle.FullRotation), role.PawnRenderer.RotFor(vehicle.FullRotation));
 				}
 			}
 		}
@@ -190,10 +190,15 @@ namespace Vehicles
 			
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
-				role = vehicle.VehicleDef.GetRole(roleKey);
+				role = vehicle.VehicleDef.CreateRole(roleKey);
 				if (role is null)
 				{
-					Log.Error($"Could not load VehicleRole from {roleKey}. Was role removed or name changed?");
+					Log.Error($"Unable to load role={roleKey}. Creating empty role to avoid game-breaking issues.");
+					role ??= new VehicleRole()
+					{
+						key = $"{roleKey}_INVALID",
+						label = $"{roleKey} (INVALID)",
+					};
 				}
 			}
 		}

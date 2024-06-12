@@ -4,6 +4,9 @@ using System.Linq;
 using Verse;
 using Verse.Sound;
 using RimWorld;
+using SmashTools;
+using Verse.Grammar;
+using static Vehicles.VehicleUpgrade;
 
 namespace Vehicles
 {
@@ -13,7 +16,7 @@ namespace Vehicles
 
 		public List<HealthUpgrade> health;
 
-		public List<VehicleRole> roles;
+		public List<RoleUpgrade> roles;
 
 		public RetextureDef retextureDef;
 
@@ -21,14 +24,14 @@ namespace Vehicles
 
 		public override void Unlock(VehiclePawn vehicle, bool unlockingAfterLoad)
 		{
-			if (!unlockingAfterLoad && !roles.NullOrEmpty()) //Roles are serialized as VehicleHandler, no need to re-upgrade
+			if (!roles.NullOrEmpty()) //Roles are serialized as VehicleHandler, no need to re-upgrade
 			{
-				foreach (VehicleRole role in roles)
+				foreach (RoleUpgrade roleUpgrade in roles)
 				{
-					vehicle.AddRole(role);
+					UpgradeRole(vehicle, roleUpgrade, false, unlockingAfterLoad);
 				}
 			}
-			if (!unlockingAfterLoad)
+			if (retextureDef != null && !unlockingAfterLoad)
 			{
 				vehicle.SetRetexture(retextureDef);
 			}
@@ -86,9 +89,9 @@ namespace Vehicles
 		{
 			if (!roles.NullOrEmpty())
 			{
-				foreach (VehicleRole role in roles)
+				foreach (RoleUpgrade roleUpgrade in roles)
 				{
-					vehicle.RemoveRole(role);
+					UpgradeRole(vehicle, roleUpgrade, true, false);
 				}
 			}
 			if (!armor.NullOrEmpty())
@@ -141,6 +144,61 @@ namespace Vehicles
 			}
 		}
 
+		public void UpgradeRole(VehiclePawn vehicle, RoleUpgrade roleUpgrade, bool isRefund, bool unlockingAfterLoad)
+		{
+			bool needsRemoval = roleUpgrade.remove ^ isRefund; //XOR operation for inverse behavior of removal upgrades
+			if (needsRemoval)
+			{
+				Debug.Message($"Removing upgrade {roleUpgrade.key}. Refund={isRefund} PostLoad={unlockingAfterLoad}");
+				VehicleHandler handler = vehicle.GetHandler(roleUpgrade.key);
+				if (!roleUpgrade.editKey.NullOrEmpty())
+				{
+					if (handler == null)
+					{
+						Log.Error($"Unable to edit {roleUpgrade.editKey}. Matching VehicleRole not found.");
+						return;
+					}
+					handler.role.RemoveUpgrade(roleUpgrade);
+					Debug.Message($"{roleUpgrade.editKey} removed from {roleUpgrade.key} as role edit.");
+				}
+				else if (!unlockingAfterLoad)
+				{
+					if (handler == null)
+					{
+						Log.Error($"Unable to remove {roleUpgrade.key} from {vehicle.Name}. Role not found.");
+						return;
+					}
+					vehicle.RemoveRole(roleUpgrade.key);
+					Debug.Message($"{roleUpgrade.key} removed.");
+				}
+			}
+			else
+			{
+				Debug.Message($"Adding upgrade {roleUpgrade.key}. Refund={isRefund} PostLoad={unlockingAfterLoad}");
+				VehicleHandler handler = vehicle.GetHandler(roleUpgrade.key);
+				if (!roleUpgrade.editKey.NullOrEmpty())
+				{
+					if (handler == null)
+					{
+						Log.Error($"Unable to edit {roleUpgrade.editKey}. Matching VehicleRole not found.");
+						return;
+					}
+					handler.role.AddUpgrade(roleUpgrade);
+					Debug.Message($"{roleUpgrade.editKey} added to {roleUpgrade.key} as role edit.");
+				}
+				else if (!unlockingAfterLoad)
+				{
+					if (handler != null)
+					{
+						Log.Error($"Attempting to create new role with existing key. If the upgrade is for modifying an existing role, an editKey must be specified.");
+						return;
+					}
+					vehicle.AddRole(RoleUpgrade.RoleFromUpgrade(roleUpgrade));
+					Debug.Message($"{roleUpgrade.key} added.");
+				}
+			}
+		}
+
 		public struct ArmorUpgrade
 		{
 			public string key;
@@ -157,6 +215,41 @@ namespace Vehicles
 			public VehicleComponent.VehiclePartDepth? depth;
 
 			public UpgradeType type;
+		}
+
+		public class RoleUpgrade
+		{
+			public string key;
+			public string label = "[MissingLabel]";
+			public string editKey;
+
+			public bool remove = false;
+
+			//Operating
+			public HandlingTypeFlags? handlingTypes;
+			public int? slots;
+			public int? slotsToOperate;
+			public float? comfort;
+			public List<string> turretIds;
+
+			//Damaging
+			public ComponentHitbox hitbox;
+			public bool? exposed;
+			public float? chanceToHit;
+
+			//Rendering
+			public PawnOverlayRenderer pawnRenderer;
+
+			public static VehicleRole RoleFromUpgrade(RoleUpgrade upgrade)
+			{
+				VehicleRole role = new VehicleRole()
+				{
+					key = upgrade.key,
+					label = upgrade.label
+				};
+				role.CopyFrom(upgrade);
+				return role;
+			}
 		}
 	}
 }

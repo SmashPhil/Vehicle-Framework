@@ -57,10 +57,10 @@ namespace Vehicles
 		public override bool CanReserve(Pawn pawn, VehicleHandler target, StringBuilder stringBuilder = null)
 		{
 			int reservations = handlerClaimants.TryGetValue(target, 0);
-			bool rolesAvailable = (target.handlers.Count + reservations) < target.role.slots;
+			bool rolesAvailable = (target.handlers.Count + reservations) < target.role.Slots;
 			if (!rolesAvailable)
 			{
-				stringBuilder?.AppendLine($"Roles not available.  Existing={target.handlers.Count} Claimants={string.Join(",", claimants.Where(kvp => kvp.Value == target).Select(kvp => kvp.Key))} Allowed: {target.role.slots}");
+				stringBuilder?.AppendLine($"Roles not available.  Existing={target.handlers.Count} Claimants={string.Join(",", claimants.Where(kvp => kvp.Value == target).Select(kvp => kvp.Key))} Allowed: {target.role.Slots}");
 				return false;
 			}
 			if (pawn is null)

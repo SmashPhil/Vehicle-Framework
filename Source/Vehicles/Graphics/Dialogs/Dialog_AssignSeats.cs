@@ -152,14 +152,14 @@ namespace Vehicles
 					{
 						DrawPawnRow(pawnRowRect, pawn, (ButtonHeight * 3, "VF_AddToRole".Translate(), delegate()
 						{
-							bool Validate(VehicleHandler handler) => assignedSeats.Where(seat => seat.Value.handler.role == handler.role).Select(p => p.Key).Count() < handler.role.slots;
+							bool Validate(VehicleHandler handler) => assignedSeats.Where(seat => seat.Value.handler.role == handler.role).Select(p => p.Key).Count() < handler.role.Slots;
 							VehicleHandler firstHandler = Vehicle.handlers.FirstOrDefault(handler => handler.CanOperateRole(pawn) && Validate(handler));
 							firstHandler ??= Vehicle.handlers.FirstOrDefault(handler => !handler.RequiredForMovement && Validate(handler));
 							if (firstHandler != null)
 							{
 								if (!firstHandler.CanOperateRole(pawn))
 								{
-									if (firstHandler.role.handlingTypes.HasFlag(HandlingTypeFlags.Movement))
+									if (firstHandler.role.HandlingTypes.HasFlag(HandlingTypeFlags.Movement))
 									{
 										Messages.Message("VF_IncapableStatusForRole".Translate(pawn.LabelShortCap), MessageTypeDefOf.RejectInput);
 									}
@@ -186,7 +186,7 @@ namespace Vehicles
 		private void DrawAssignees(Rect rect)
 		{
 			Widgets.Label(rect, "VF_Assigned".Translate());
-			Predicate<VehicleHandler> seatsAvailable = (handler) => assignedSeats.Where(seat => seat.Value.handler.role == handler.role).Select(p => p.Key).Count() < handler.role.slots;
+			Predicate<VehicleHandler> seatsAvailable = (handler) => assignedSeats.Where(seat => seat.Value.handler.role == handler.role).Select(p => p.Key).Count() < handler.role.Slots;
 			Rect pawnRowRect = new Rect(rect.x, rect.y + RowHeight + 5, rect.width - 1, RowHeight);
 			Rect outRect = new Rect(pawnRowRect)
 			{
@@ -203,9 +203,9 @@ namespace Vehicles
 				foreach (VehicleHandler handler in Vehicle.handlers)
 				{
 					int seatsOccupied = assignedSeats.Where(r => r.Value.handler.role == handler.role).Select(p => p.Key).Count();
-					Color countColor = handler.role.RequiredForCaravan ? seatsOccupied < handler.role.slotsToOperate ? Color.red : seatsOccupied == handler.role.slots ? Color.grey : Color.white : seatsOccupied == handler.role.slots ? Color.grey : Color.white;
+					Color countColor = handler.role.RequiredForCaravan ? seatsOccupied < handler.role.SlotsToOperate ? Color.red : seatsOccupied == handler.role.Slots ? Color.grey : Color.white : seatsOccupied == handler.role.Slots ? Color.grey : Color.white;
 					
-					UIElements.LabelUnderlined(pawnRowRect, handler.role.label, $"({handler.role.slots - assignedSeats.Where(r => r.Value.handler.role == handler.role).Select(p => p.Key).Count()})", Color.white, countColor, Color.white);
+					UIElements.LabelUnderlined(pawnRowRect, handler.role.label, $"({handler.role.Slots - assignedSeats.Where(r => r.Value.handler.role == handler.role).Select(p => p.Key).Count()})", Color.white, countColor, Color.white);
 					pawnRowRect.y += RowHeight;
 
 					Rect roleRect = new Rect(pawnRowRect.x, pawnRowRect.y, pawnRowRect.width, RowHeight + RowHeight * assignedSeats.Where(r => r.Value.handler.role == handler.role).Select(p => p.Key).Count());
@@ -215,9 +215,9 @@ namespace Vehicles
 					{
 						if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
 						{
-							if (handler.role.handlingTypes > HandlingTypeFlags.None && !draggedPawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) || draggedPawn.Downed || draggedPawn.Dead)
+							if (handler.role.HandlingTypes > HandlingTypeFlags.None && !draggedPawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) || draggedPawn.Downed || draggedPawn.Dead)
 							{
-								if (handler.role.handlingTypes.HasFlag(HandlingTypeFlags.Movement))
+								if (handler.role.HandlingTypes.HasFlag(HandlingTypeFlags.Movement))
 								{
 									Messages.Message("VF_IncapableStatusForRole".Translate(draggedPawn.LabelShortCap), MessageTypeDefOf.RejectInput);
 								}
@@ -291,7 +291,7 @@ namespace Vehicles
 			failReason = string.Empty;
 			foreach (VehicleHandler handler in Vehicle.handlers.Where(x => x.role.RequiredForCaravan))
 			{
-				if (assignedSeats.Where(r => r.Value.handler.role == handler.role).Select(k => k.Key).Count() < handler.role.slotsToOperate)
+				if (assignedSeats.Where(r => r.Value.handler.role == handler.role).Select(k => k.Key).Count() < handler.role.SlotsToOperate)
 				{
 					failReason = "VF_CantAssignVehicle".Translate(Vehicle.LabelCap);
 					return false;

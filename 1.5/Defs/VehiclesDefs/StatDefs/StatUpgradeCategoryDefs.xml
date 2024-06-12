@@ -5,39 +5,64 @@
 	<!-- Fuel -->
 	<Vehicles.StatUpgradeCategoryDef>
 		<defName>FuelCapacity</defName>
+		<label>Fuel Capacity</label>
+
+		<toStringStyle>Integer</toStringStyle>
 	</Vehicles.StatUpgradeCategoryDef>
 	
 	<Vehicles.StatUpgradeCategoryDef>
 		<defName>FuelConsumptionRate</defName>
+		<label>Fuel Consumption Rate</label>
+
+		<toStringStyle>FloatOne</toStringStyle>
+		<formatString>{0}/day</formatString>
 	</Vehicles.StatUpgradeCategoryDef>
 	
 	<Vehicles.StatUpgradeCategoryDef>
 		<defName>ChargeRate</defName>
+		<label>Charge Rate</label>
 	</Vehicles.StatUpgradeCategoryDef>
 	
 	<Vehicles.StatUpgradeCategoryDef>
 		<defName>DischargeRate</defName>
+		<label>Discharge Rate</label>
 	</Vehicles.StatUpgradeCategoryDef>
 	
 	<!-- World Map -->
 	<Vehicles.StatUpgradeCategoryDef>
 		<defName>WorldSpeedMultiplier</defName>
+		<label>World Speed Multiplier</label>
+
+		<toStringStyle>FloatOne</toStringStyle>
+		<formatString>{0} t/d</formatString>
 	</Vehicles.StatUpgradeCategoryDef>
 	
 	<Vehicles.StatUpgradeCategoryDef>
 		<defName>OffRoadMultiplier</defName>
+		<label>Off Road Efficiency</label>
+
+		<toStringStyle>PercentZero</toStringStyle>
 	</Vehicles.StatUpgradeCategoryDef>
 	
 	<Vehicles.StatUpgradeCategoryDef>
 		<defName>WinterCostMultiplier</defName>
+		<label>Winter Cost</label>
+
+		<toStringStyle>FloatTwo</toStringStyle>
 	</Vehicles.StatUpgradeCategoryDef>
 	
 	<!-- Combat -->
 	<Vehicles.StatUpgradeCategoryDef>
 		<defName>PawnCollisionMultiplier</defName>
+		<label>Impact Damage</label>
+
+		<toStringStyle>PercentZero</toStringStyle>
 	</Vehicles.StatUpgradeCategoryDef>
 	
 	<Vehicles.StatUpgradeCategoryDef>
 		<defName>PawnCollisionRecoilMultiplier</defName>
+		<label>Impact Damage Received</label>
+
+		<toStringStyle>PercentZero</toStringStyle>
 	</Vehicles.StatUpgradeCategoryDef>
 </Defs>

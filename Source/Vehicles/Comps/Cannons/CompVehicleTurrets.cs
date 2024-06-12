@@ -144,6 +144,18 @@ namespace Vehicles
 			return false;
 		}
 
+		public VehicleTurret GetTurret(string key)
+		{
+			foreach (VehicleTurret turret in turrets)
+			{
+				if (turret.key == key)
+				{
+					return turret;
+				}
+			}
+			return null;
+		}
+
 		public void AddTurret(VehicleTurret turret)
 		{
 			VehicleTurret newTurret = CreateTurret(Vehicle, turret);
@@ -167,6 +179,7 @@ namespace Vehicles
 
 		public bool RemoveTurret(VehicleTurret turret)
 		{
+			turret.TryRemoveShell();
 			return turrets.Remove(turret);
 		}
 
@@ -265,7 +278,7 @@ namespace Vehicles
 							turretNumber++;
 							foreach (VehicleHandler relatedHandler in Vehicle.GetAllHandlersMatch(HandlingTypeFlags.Turret, turret.key))
 							{
-								if (relatedHandler.handlers.Count < relatedHandler.role.slotsToOperate && !VehicleMod.settings.debug.debugShootAnyTurret)
+								if (relatedHandler.handlers.Count < relatedHandler.role.SlotsToOperate && !VehicleMod.settings.debug.debugShootAnyTurret)
 								{
 									turretTargeterGizmo.Disable("VF_NotEnoughCrew".Translate(Vehicle.LabelShort, relatedHandler.role.label));
 									break;
@@ -325,7 +338,7 @@ namespace Vehicles
 						
 						foreach (VehicleHandler relatedHandler in Vehicle.GetAllHandlersMatch(HandlingTypeFlags.Turret, turret.key))
 						{
-							if (relatedHandler.handlers.Count < relatedHandler.role.slotsToOperate && !VehicleMod.settings.debug.debugShootAnyTurret)
+							if (relatedHandler.handlers.Count < relatedHandler.role.SlotsToOperate && !VehicleMod.settings.debug.debugShootAnyTurret)
 							{
 								turretCommand.Disable("VF_NotEnoughCrew".Translate(Vehicle.LabelShort, relatedHandler.role.label));
 								break;
@@ -657,6 +670,7 @@ namespace Vehicles
 			turretQueue ??= new List<TurretData>();
 			ResolveChildTurrets();
 			RecacheDeployment();
+			RecacheTurretPermissions();
 			InitTurrets();
 		}
 

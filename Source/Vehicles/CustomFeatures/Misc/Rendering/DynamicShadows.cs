@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SmashTools;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,10 @@ namespace Vehicles
 
 		private static readonly Dictionary<int, Mesh> shadowMeshDict = new Dictionary<int, Mesh>();
 
+		//TopLeft = 4th bit, TopRight = 3rd bit, BottomLeft = 1st bit, BottomRight = 2nd bit
+		//Result: able to loop CW from top left, but bit place starts bottom left and goes CCW for contour values
+		private static int[] bitArray = { 4, 3, 1, 2 }; 
+
 		public static Mesh GetShadowMesh(Texture2D texture, ShadowData shadowData)
 		{
 			return GetShadowMesh(texture, shadowData.BaseX, shadowData.BaseZ, shadowData.BaseY);
@@ -24,7 +29,7 @@ namespace Vehicles
 			int key = HashOf(texture, baseWidth, baseHeight, tallness);
 			if (!shadowMeshDict.TryGetValue(key, out Mesh mesh))
 			{
-				//CreateMeshFromTexture(texture, baseWidth, baseHeight, tallness);
+				CreateMeshFromTexture(texture, baseWidth, baseHeight, tallness);
 				mesh = MeshMakerShadows.NewShadowMesh(baseWidth, baseHeight, tallness);
 				shadowMeshDict.Add(key, mesh);
 			}
@@ -37,28 +42,40 @@ namespace Vehicles
 		/// <remarks>See https://en.wikipedia.org/wiki/Marching_squares for algorithm</remarks>
 		public static Mesh CreateMeshFromTexture(Texture2D texture, float baseWidth, float baseHeight, float tallness)
 		{
-			int width = texture.width - 1;
-			int height = texture.height - 1;
-
-			int[,] contouringGrid = new int[width, height];
-			for (int x = 0; x < width; x++)
+			Texture2D readableTex = Ext_Texture.CreateReadableTexture(texture);
+			try
 			{
-				for (int y = 0; y < height; y++)
+				Color[] texData = readableTex.GetPixels();
+
+				int width = texture.width - 1;
+				int height = texture.height - 1;
+				int[,] contourGrid = new int[width, height];
+				for (int x = 0; x < width; x++)
 				{
-					int value = 0;
-					//Get 4 corners of contour cell for bit value
-					for (int i = 0; i < 2; i++)
+					for (int y = 0; y < height; y++)
 					{
-						for (int j = 0; j < 2; j++)
+						int value = 0;
+						//Get 4 corners of contour cell for bit value
+						for (int i = 0; i < 2; i++)
 						{
-							Color pixelColor = texture.GetPixel(x + i, y + j);
-							bool validPixel = pixelColor.a >= AlphaIsoThreshold;
-							value |= (validPixel ? 1 : 0) & (1 << (i + j));
+							for (int j = 0; j < 2; j++)
+							{
+								Color pixelColor = texData[(x + i) + (y + j)];
+								if (pixelColor.a >= AlphaIsoThreshold)
+								{
+									int contourIndex = bitArray[i + j];
+									value |= 1 << contourIndex; //Sets 2nd to 5th bit, or 1 -> 2 -> 4 -> 8 CCW starting from bottom left corner
+								}
+							}
 						}
+						//Final value between 0 and 15, depending on bit values of pixels. See link for mapping bit values to contour lines
+						contourGrid[x, y] = value;
 					}
-					contouringGrid[x, y] = value;
-					Log.Message($"Setting {value} at ({x}, {y})");
 				}
+			}
+			finally
+			{
+				UnityEngine.Object.Destroy(readableTex);
 			}
 			return null;
 		}

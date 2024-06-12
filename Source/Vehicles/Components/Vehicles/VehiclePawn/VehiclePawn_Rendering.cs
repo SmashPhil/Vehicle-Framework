@@ -363,7 +363,7 @@ namespace Vehicles
 
 		public void ResetRenderStatus()
 		{
-			HandlersWithPawnRenderer = handlers.Where(h => h.role.pawnRenderer != null).ToList();
+			HandlersWithPawnRenderer = handlers.Where(h => h.role.PawnRenderer != null).ToList();
 		}
 
 		public override void Notify_ColorChanged()
@@ -631,7 +631,7 @@ namespace Vehicles
 					{
 						if (target.Thing is Pawn pawn && pawn.IsColonistPlayerControlled && !pawn.Downed)
 						{
-							VehicleHandler handler = pawn.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(handler => handler.AreSlotsAvailable && handler.role.handlingTypes == HandlingTypeFlags.None);
+							VehicleHandler handler = pawn.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(handler => handler.AreSlotsAvailable && handler.role.HandlingTypes == HandlingTypeFlags.None);
 							PromptToBoardVehicle(pawn, handler);
 							return;
 						}
@@ -926,7 +926,7 @@ namespace Vehicles
 				if (handler.AreSlotsAvailable)
 				{
 					VehicleReservationManager reservationManager = Map.GetCachedMapComponent<VehicleReservationManager>();
-					FloatMenuOption opt = new FloatMenuOption("VF_EnterVehicle".Translate(LabelShort, handler.role.label, (handler.role.slots - (handler.handlers.Count +
+					FloatMenuOption opt = new FloatMenuOption("VF_EnterVehicle".Translate(LabelShort, handler.role.label, (handler.role.Slots - (handler.handlers.Count +
 						reservationManager.GetReservation<VehicleHandlerReservation>(this)?.ClaimantsOnHandler(handler) ?? 0)).ToString()), delegate ()
 						{
 							PromptToBoardVehicle(selPawn, handler);
@@ -1137,7 +1137,7 @@ namespace Vehicles
 						{
 							continue;
 						}
-						VehicleHandler handler = p.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(handler => handler.AreSlotsAvailable && handler.role.handlingTypes == HandlingTypeFlags.None);
+						VehicleHandler handler = p.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(handler => handler.AreSlotsAvailable && handler.role.HandlingTypes == HandlingTypeFlags.None);
 						PromptToBoardVehicle(p, handler);
 					}
 				}, MenuOptionPriority.Default, null, null, 0f, null, null);
