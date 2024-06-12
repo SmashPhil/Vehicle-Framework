@@ -20,9 +20,6 @@ namespace Vehicles
 		private const int EventMapId = 0;
 		private const int TempIncidentMapId = 1;
 
-		//private static readonly FieldInfo currentEventField;
-		//private static readonly FieldInfo longEventTextField;
-
 		private VehiclePathData[] vehicleData;
 		private int[] piggyToOwner;
 		private List<VehicleDef> owners = new List<VehicleDef>();
@@ -33,13 +30,6 @@ namespace Vehicles
 		internal DedicatedThread dedicatedThread;
 
 		private bool initialized;
-
-		//static VehicleMapping()
-		//{
-		//	currentEventField = AccessTools.Field(typeof(LongEventHandler), "currentEvent");
-		//	Type longQueuedEventType = AccessTools.TypeByName("Verse.LongEventHandler+QueuedLongEvent");
-		//	longEventTextField = AccessTools.Field(longQueuedEventType, "eventText");
-		//}
 
 		public VehicleMapping(Map map) : base(map)
 		{
@@ -204,19 +194,23 @@ namespace Vehicles
 				ConstructComponents();
 			}
 
+			LongEventHandler.SetCurrentEventText("Generating Vehicle PathGrids");
+			DeepProfiler.Start("Vehicle PathGrids");
 			foreach (VehiclePathData vehiclePathData in vehicleData)
 			{
 				//Needs to check validity, non-pathing vehicles are still indexed since sequential vehicles will have higher index numbers
 				if (vehiclePathData.IsValid)
 				{
 					vehiclePathData.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
-					if (IsOwner(vehiclePathData.Owner) && vehiclePathData.UsesRegions)
-					{
-						vehiclePathData.VehicleRegionAndRoomUpdater.Enabled = true;
-						vehiclePathData.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
-					}
 				}
 			}
+			foreach (VehicleDef vehicleDef in owners)
+			{
+				VehiclePathData vehiclePathData = this[vehicleDef];
+				vehiclePathData.VehicleRegionAndRoomUpdater.Enabled = true;
+				vehiclePathData.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
+			}
+			DeepProfiler.End();
 			dedicatedThread = GetDedicatedThread(map); //Init dedicated thread after map generation to avoid duplicate pathgrid and region recalcs
 		}
 
@@ -236,14 +230,6 @@ namespace Vehicles
 			GenerateAllPathData();
 
 			PathingHelper.DisableAllRegionUpdaters(map);
-
-			//if (LongEventHandler.AnyEventNowOrWaiting)
-			//{
-			//	string oldText = (string)longEventTextField.GetValue(currentEventField.GetValue(null));
-			//	LongEventHandler.SetCurrentEventText("VF_GeneratingPathData".Translate());
-			//	GenerateAllPathData();
-			//	LongEventHandler.SetCurrentEventText(oldText);
-			//}
 		}
 
 		public override void ExposeData()
@@ -295,6 +281,7 @@ namespace Vehicles
 		{
 			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading) //Even shuttles need path data for landing
 			{
+				LongEventHandler.SetCurrentEventText("VF_GeneratingPathData".Translate(vehicleDef));
 				GeneratePathData(vehicleDef);
 			}
 		}
