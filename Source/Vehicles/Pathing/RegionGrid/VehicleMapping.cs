@@ -195,7 +195,8 @@ namespace Vehicles
 			}
 
 			LongEventHandler.SetCurrentEventText("Generating Vehicle PathGrids");
-			DeepProfiler.Start("Vehicle PathGrids");
+
+			DeepProfiler.Start("Generating Vehicle PathGrids");
 			foreach (VehiclePathData vehiclePathData in vehicleData)
 			{
 				//Needs to check validity, non-pathing vehicles are still indexed since sequential vehicles will have higher index numbers
@@ -204,6 +205,9 @@ namespace Vehicles
 					vehiclePathData.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
 				}
 			}
+			DeepProfiler.End();
+
+			DeepProfiler.Start("Generating Vehicle Regions");
 			foreach (VehicleDef vehicleDef in owners)
 			{
 				VehiclePathData vehiclePathData = this[vehicleDef];
@@ -211,7 +215,10 @@ namespace Vehicles
 				vehiclePathData.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
 			}
 			DeepProfiler.End();
+
+			DeepProfiler.Start("Fetching DedicatedThread");
 			dedicatedThread = GetDedicatedThread(map); //Init dedicated thread after map generation to avoid duplicate pathgrid and region recalcs
+			DeepProfiler.End();
 		}
 
 		/// <summary>
@@ -279,11 +286,13 @@ namespace Vehicles
 
 		private void GenerateAllPathData()
 		{
+			DeepProfiler.Start("Generating VehiclePathData");
 			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading) //Even shuttles need path data for landing
 			{
-				LongEventHandler.SetCurrentEventText("VF_GeneratingPathData".Translate(vehicleDef));
+				LongEventHandler.SetCurrentEventText("VF_GeneratingPathData".Translate(vehicleDef.LabelCap));
 				GeneratePathData(vehicleDef);
 			}
+			DeepProfiler.End();
 		}
 
 		/// <summary>
@@ -322,6 +331,7 @@ namespace Vehicles
 			{
 				vehiclePathData.ReachabilityData.PostInit();
 			}
+
 			return vehiclePathData;
 		}
 
