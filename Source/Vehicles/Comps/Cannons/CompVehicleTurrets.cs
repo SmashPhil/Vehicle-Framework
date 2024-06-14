@@ -19,6 +19,7 @@ namespace Vehicles
 		internal int deployTicks;
 
 		private Dictionary<VehicleTurret, int> turretQuotas = new Dictionary<VehicleTurret, int>();
+		private List<BackupTurretQuota> backupQuotas = new List<BackupTurretQuota>();
 
 		[TweakField]
 		public List<VehicleTurret> turrets = new List<VehicleTurret>();
@@ -156,12 +157,44 @@ namespace Vehicles
 			return null;
 		}
 
-		public void AddTurret(VehicleTurret turret)
+		public void AddTurret(VehicleTurret turret, string upgradeKey = null)
 		{
-			VehicleTurret newTurret = CreateTurret(Vehicle, turret);
+			VehicleTurret newTurret = CreateTurret(Vehicle, turret, upgradeKey: upgradeKey);
 			newTurret.FillEvents_Def();
 			turrets.Add(newTurret);
 			RevalidateTurrets();
+
+			if (!backupQuotas.NullOrEmpty())
+			{
+				for (int i = 0; i < backupQuotas.Count; i++)
+				{
+					BackupTurretQuota quota = backupQuotas[i];
+					if (quota.key == newTurret.key && quota.upgradeKey == newTurret.upgradeKey)
+					{
+						SetQuotaLevel(newTurret, quota.config);
+						backupQuotas.RemoveAt(i);
+						break;
+					}
+				}
+			}
+
+			if (Vehicle.CompUpgradeTree != null && Vehicle.CompUpgradeTree.TryGetStates(turret.key, out List<UpgradeState> states))
+			{
+				//Re-unlock turret-type settings to ensure proper values are initialized for new turrets of existing keys
+				foreach (UpgradeState state in states)
+				{
+					if (!state.settings.NullOrEmpty())
+					{
+						foreach (UpgradeState.Setting setting in state.settings)
+						{
+							if (setting is UpgradeSetting_Turret turretSetting && turretSetting.turretKey == turret.key)
+							{
+								turretSetting.Unlocked(Vehicle, false);
+							}
+						}
+					}
+				}
+			}
 		}
 
 		public bool RemoveTurret(string key)
@@ -180,6 +213,18 @@ namespace Vehicles
 		public bool RemoveTurret(VehicleTurret turret)
 		{
 			turret.TryRemoveShell();
+			if (turretQuotas.TryGetValue(turret, out int quota))
+			{
+				//Move turret quota to simple list for storage, may pull config later if turret is re-added
+				backupQuotas.Add(new BackupTurretQuota()
+				{
+					key = turret.key,
+					upgradeKey = turret.upgradeKey,
+					config = quota,
+				});
+				turretQuotas.Remove(turret);
+			}
+			turret.OnDestroy();
 			return turrets.Remove(turret);
 		}
 
@@ -219,6 +264,9 @@ namespace Vehicles
 			{
 				yield break; //Don't return any gizmos if belonging to another faction
 			}
+
+			bool upgrading = Vehicle.CompUpgradeTree != null && Vehicle.CompUpgradeTree.Upgrading;
+			
 			if (CanDeploy)
 			{
 				Command_Toggle deployToggle = new Command_Toggle
@@ -244,6 +292,10 @@ namespace Vehicles
 				if (Vehicle.vehiclePather.Moving)
 				{
 					deployToggle.Disable();
+				}
+				if (upgrading)
+				{
+					deployToggle.Disable("VF_DisabledByVehicleUpgrading".Translate(Vehicle.LabelCap));
 				}
 				yield return deployToggle;
 			}
@@ -295,6 +347,10 @@ namespace Vehicles
 							if (turret.ComponentDisabled)
 							{
 								turretTargeterGizmo.Disable("VF_TurretComponentDisabled".Translate(turret.component.Label));
+							}
+							if (upgrading)
+							{
+								turretTargeterGizmo.Disable("VF_DisabledByVehicleUpgrading".Translate(Vehicle.LabelCap));
 							}
 							yield return turretTargeterGizmo;
 						}
@@ -354,6 +410,10 @@ namespace Vehicles
 						}
 						if (newCommand)
 						{
+							if (upgrading)
+							{
+								turretCommand.Disable("VF_DisabledByVehicleUpgrading".Translate(Vehicle.LabelCap));
+							}
 							yield return turretCommand;
 							if (!turret.groupKey.NullOrEmpty())
 							{
@@ -629,11 +689,12 @@ namespace Vehicles
 			}
 		}
 
-		public static VehicleTurret CreateTurret(VehiclePawn vehicle, VehicleTurret reference)
+		public static VehicleTurret CreateTurret(VehiclePawn vehicle, VehicleTurret reference, string upgradeKey = null)
 		{
 			VehicleTurret newTurret = (VehicleTurret)Activator.CreateInstance(reference.GetType(), new object[] { vehicle, reference });
 			newTurret.SetTarget(LocalTargetInfo.Invalid);
 			newTurret.ResetAngle();
+			newTurret.upgradeKey = upgradeKey;
 			return newTurret;
 		}
 
@@ -711,7 +772,7 @@ namespace Vehicles
 			for (int i = turrets.Count - 1; i >= 0; i--)
 			{
 				VehicleTurret turret = turrets[i];
-				VehicleTurret reference = FindTurretReference(turret.key);
+				VehicleTurret reference = FindTurretReference(turret);
 				
 				if (reference != null)
 				{
@@ -725,13 +786,9 @@ namespace Vehicles
 			}
 		}
 
-		private VehicleTurret FindTurretReference(string key)
+		private VehicleTurret FindTurretReference(VehicleTurret turret)
 		{
-			if (MatchingTurret(key, Props.turrets, out VehicleTurret result))
-			{
-				return result;
-			}
-			else if (Vehicle.CompUpgradeTree != null)
+			if (!turret.upgradeKey.NullOrEmpty() && Vehicle.CompUpgradeTree != null)
 			{
 				foreach (UpgradeNode upgradeNode in Vehicle.CompUpgradeTree.Props.def.nodes)
 				{
@@ -741,7 +798,31 @@ namespace Vehicles
 						{
 							if (upgrade is TurretUpgrade turretUpgrade)
 							{
-								if (MatchingTurret(key, turretUpgrade.turrets, out VehicleTurret upgradeResult))
+								if (MatchingTurret(turret.key, turretUpgrade.turrets, out VehicleTurret upgradeResult))
+								{
+									return upgradeResult;
+								}
+							}
+						}
+					}
+				}
+			}
+			if (MatchingTurret(turret.key, Props.turrets, out VehicleTurret result))
+			{
+				return result;
+			}
+			else if (Vehicle.CompUpgradeTree != null)
+			{
+				Log.Warning($"Unable to locate {turret.key} in CompProperties with null upgradeKey. Sweeping UpgradeTree for any matching turret.");
+				foreach (UpgradeNode upgradeNode in Vehicle.CompUpgradeTree.Props.def.nodes)
+				{
+					if (!upgradeNode.upgrades.NullOrEmpty())
+					{
+						foreach (Upgrade upgrade in upgradeNode.upgrades)
+						{
+							if (upgrade is TurretUpgrade turretUpgrade)
+							{
+								if (MatchingTurret(turret.key, turretUpgrade.turrets, out VehicleTurret upgradeResult))
 								{
 									return upgradeResult;
 								}
@@ -849,8 +930,10 @@ namespace Vehicles
 			Scribe_Collections.Look(ref turrets, nameof(turrets), LookMode.Deep, ctorArgs: Vehicle);
 			Scribe_Collections.Look(ref turretQueue, nameof(turretQueue), LookMode.Reference);
 			Scribe_Collections.Look(ref turretQuotas, nameof(turretQuotas), LookMode.Reference, LookMode.Value, ref tmpListTurrets, ref tmpListTurretQuota);
+			Scribe_Collections.Look(ref backupQuotas, nameof(backupQuotas), LookMode.Deep);
 
 			turretQuotas ??= new Dictionary<VehicleTurret, int>();
+			backupQuotas ??= new List<BackupTurretQuota>();
 		}
 
 		public struct TurretData : IExposable
@@ -871,6 +954,23 @@ namespace Vehicles
 				Scribe_Values.Look(ref shots, nameof(shots));
 				Scribe_Values.Look(ref ticksTillShot, nameof(ticksTillShot));
 				Scribe_References.Look(ref turret, nameof(turret));
+			}
+		}
+
+		/// <summary>
+		/// Used for serializing turret quotas of turrets that were removed, such that they will reload the quota if re-added
+		/// </summary>
+		public struct BackupTurretQuota : IExposable
+		{
+			public string key;
+			public string upgradeKey;
+			public int config;
+
+			public void ExposeData()
+			{
+				Scribe_Values.Look(ref key, nameof(key));
+				Scribe_Values.Look(ref upgradeKey, nameof(upgradeKey));
+				Scribe_Values.Look(ref config, nameof(config));
 			}
 		}
 	}

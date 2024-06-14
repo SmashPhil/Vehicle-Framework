@@ -11,6 +11,7 @@
 	<VF_DisembarkAllPawns>Unload All Pawns</VF_DisembarkAllPawns>
 	<VF_DisembarkSinglePawn>Unload {0}</VF_DisembarkSinglePawn>
 	<VF_DisembarkNoExit>Unable to exit vehicle. No valid cells to exit onto.</VF_DisembarkNoExit>
+	<VF_DisabledByVehicleUpgrading>{0} is being upgraded.</VF_DisabledByVehicleUpgrading>
 	
 	<VF_StopVehicle>Stop</VF_StopVehicle>
 	<VF_UndraftVehicle>Turn Off</VF_UndraftVehicle>

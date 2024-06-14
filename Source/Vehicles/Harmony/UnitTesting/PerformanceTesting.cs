@@ -24,9 +24,8 @@ namespace Vehicles
 		private static double[][] averageMilliseconds;
 
 		[UnitTest(Category = "Performance", Name = "Permanent Weather (Heavy Snow)", GameState = GameState.Playing)]
-		private static void SetPermanentWeather()
+		private static void UnitTest_SetPermanentWeather()
 		{
-			Prefs.DevMode = true;
 			LongEventHandler.ExecuteWhenFinished(delegate ()
 			{
 				Messages.Message("Patching PermanentWeatherTick for unit testing.", MessageTypeDefOf.NeutralEvent);
@@ -39,9 +38,8 @@ namespace Vehicles
 		}
 
 		[UnitTest(Category = "Performance", Name = "Component Caching", GameState = GameState.Playing)]
-		private static void ProfileComponentCaching()
+		private static void UnitTest_ProfileComponentCaching()
 		{
-			Prefs.DevMode = true;
 			LongEventHandler.ExecuteWhenFinished(delegate ()
 			{
 				Messages.Message("Patching ComponentCaching for unit testing.", MessageTypeDefOf.NeutralEvent);

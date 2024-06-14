@@ -423,6 +423,7 @@ namespace Vehicles
 			if (graphicData.shaderType.Shader.SupportsRGBMaskTex())
 			{
 				RGBMaterialPool.CacheMaterialsFor(this);
+				GraphicDatabaseRGB.Remove(this); //Clear cached graphic to pick up potential retexture changes
 				graphicData.Init(this);
 				newGraphic = graphicData.Graphic as Graphic_Vehicle;
 				RGBMaterialPool.SetProperties(this, patternData, newGraphic.TexAt, newGraphic.MaskAt);
@@ -553,6 +554,8 @@ namespace Vehicles
 				}
 			}
 
+			bool upgrading = CompUpgradeTree != null && CompUpgradeTree.Upgrading;
+
 			if (!cargoToLoad.NullOrEmpty())
 			{
 				Command_Action cancelLoad = new Command_Action
@@ -578,6 +581,10 @@ namespace Vehicles
 						Find.WindowStack.Add(new Dialog_LoadCargo(this));
 					}
 				};
+				if (upgrading)
+				{
+					loadVehicle.Disable("VF_DisabledByVehicleUpgrading".Translate(LabelCap));
+				}
 				yield return loadVehicle;
 			}
 
@@ -645,6 +652,10 @@ namespace Vehicles
 					}, this);
 				}
 			};
+			if (upgrading)
+			{
+				flagForLoading.Disable("VF_DisabledByVehicleUpgrading".Translate(LabelCap));
+			}
 			yield return flagForLoading;
 
 			if (!Drafted)
@@ -1008,6 +1019,7 @@ namespace Vehicles
 		{
 			this.retextureDef = retextureDef;
 			ResetGraphic();
+			Notify_ColorChanged();
 		}
 
 		public void Rename()

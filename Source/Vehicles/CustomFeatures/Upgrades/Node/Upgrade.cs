@@ -31,7 +31,7 @@ namespace Vehicles
 		/// <summary>
 		/// Called when node has upgraded fully, after upgrade build ticks hits 0 or triggered by god mode
 		/// </summary>
-		public abstract void Unlock(VehiclePawn vehicle, bool unlockingAfterLoad);
+		public abstract void Unlock(VehiclePawn vehicle, bool unlockingPostLoad);
 
 		/// <summary>
 		/// Undo Upgrade action. Should be polar opposite of Upgrade functionality to revert changes

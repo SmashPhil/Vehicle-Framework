@@ -48,6 +48,11 @@ namespace Vehicles
 			return (T)graphic;
 		}
 
+		public static bool Remove(IMaterialCacheTarget target)
+		{
+			return allGraphics.Remove(target);
+		}
+
 		public static void Clear()
 		{
 			allGraphics.Clear();

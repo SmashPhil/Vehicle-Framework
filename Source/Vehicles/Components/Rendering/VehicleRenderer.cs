@@ -84,7 +84,7 @@ namespace Vehicles
 			Rot8 vehicleRot = new Rot8(bodyFacing, angle);
 			Mesh mesh = graphics.vehicle.VehicleGraphic.MeshAtFull(vehicleRot);
 			List<Material> list = graphics.MatsBodyBaseAt(vehicleRot);
-
+			
 			for (int i = 0; i < list.Count; i++)
 			{
 				GenDraw.DrawMeshNowOrLater(mesh, aboveBodyPos, quaternion, list[i], false);

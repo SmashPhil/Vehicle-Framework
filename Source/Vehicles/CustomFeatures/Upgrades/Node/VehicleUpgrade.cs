@@ -22,16 +22,16 @@ namespace Vehicles
 
 		public override bool UnlockOnLoad => true;
 
-		public override void Unlock(VehiclePawn vehicle, bool unlockingAfterLoad)
+		public override void Unlock(VehiclePawn vehicle, bool unlockingPostLoad)
 		{
 			if (!roles.NullOrEmpty()) //Roles are serialized as VehicleHandler, no need to re-upgrade
 			{
 				foreach (RoleUpgrade roleUpgrade in roles)
 				{
-					UpgradeRole(vehicle, roleUpgrade, false, unlockingAfterLoad);
+					UpgradeRole(vehicle, roleUpgrade, false, unlockingPostLoad);
 				}
 			}
-			if (retextureDef != null && !unlockingAfterLoad)
+			if (retextureDef != null && !unlockingPostLoad)
 			{
 				vehicle.SetRetexture(retextureDef);
 			}
@@ -94,6 +94,10 @@ namespace Vehicles
 					UpgradeRole(vehicle, roleUpgrade, true, false);
 				}
 			}
+			if (retextureDef != null)
+			{
+				vehicle.SetRetexture(null);
+			}
 			if (!armor.NullOrEmpty())
 			{
 				foreach (ArmorUpgrade armorUpgrade in armor)
@@ -149,7 +153,6 @@ namespace Vehicles
 			bool needsRemoval = roleUpgrade.remove ^ isRefund; //XOR operation for inverse behavior of removal upgrades
 			if (needsRemoval)
 			{
-				Debug.Message($"Removing upgrade {roleUpgrade.key}. Refund={isRefund} PostLoad={unlockingAfterLoad}");
 				VehicleHandler handler = vehicle.GetHandler(roleUpgrade.key);
 				if (!roleUpgrade.editKey.NullOrEmpty())
 				{
@@ -159,7 +162,6 @@ namespace Vehicles
 						return;
 					}
 					handler.role.RemoveUpgrade(roleUpgrade);
-					Debug.Message($"{roleUpgrade.editKey} removed from {roleUpgrade.key} as role edit.");
 				}
 				else if (!unlockingAfterLoad)
 				{
@@ -169,12 +171,10 @@ namespace Vehicles
 						return;
 					}
 					vehicle.RemoveRole(roleUpgrade.key);
-					Debug.Message($"{roleUpgrade.key} removed.");
 				}
 			}
 			else
 			{
-				Debug.Message($"Adding upgrade {roleUpgrade.key}. Refund={isRefund} PostLoad={unlockingAfterLoad}");
 				VehicleHandler handler = vehicle.GetHandler(roleUpgrade.key);
 				if (!roleUpgrade.editKey.NullOrEmpty())
 				{
@@ -184,7 +184,6 @@ namespace Vehicles
 						return;
 					}
 					handler.role.AddUpgrade(roleUpgrade);
-					Debug.Message($"{roleUpgrade.editKey} added to {roleUpgrade.key} as role edit.");
 				}
 				else if (!unlockingAfterLoad)
 				{
@@ -194,7 +193,6 @@ namespace Vehicles
 						return;
 					}
 					vehicle.AddRole(RoleUpgrade.RoleFromUpgrade(roleUpgrade));
-					Debug.Message($"{roleUpgrade.key} added.");
 				}
 			}
 		}

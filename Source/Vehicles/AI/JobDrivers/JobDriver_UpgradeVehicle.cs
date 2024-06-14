@@ -13,7 +13,17 @@ namespace Vehicles
 
 		protected override StatDef Stat => StatDefOf.ConstructionSpeed;
 
-		protected override float TotalWork => Vehicle.CompUpgradeTree.NodeUnlocking.work;
+		protected override float TotalWork
+		{
+			get
+			{
+				if (Vehicle.CompUpgradeTree.upgrade.Removal)
+				{
+					return Vehicle.CompUpgradeTree.NodeUnlocking.work * 0.3f; //30% work cost for removing upgrades
+				}
+				return Vehicle.CompUpgradeTree.NodeUnlocking.work;
+			}
+		}
 
 		protected override float Work
 		{

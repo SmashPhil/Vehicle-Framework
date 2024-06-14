@@ -149,7 +149,11 @@
     <Compile Include="AI\JobDrivers\VehicleJobDriver.cs" />
     <Compile Include="AI\WorkGiver\WorkGiver_DisassembleVehicle.cs" />
     <Compile Include="Components\Vehicles\VehicleSustainers.cs" />
+    <Compile Include="CustomFeatures\Upgrades\Node\Settings\UpgradeSetting_Turret.cs" />
     <Compile Include="CustomFeatures\Upgrades\Node\SoundUpgrade.cs" />
+    <Compile Include="CustomFeatures\Upgrades\Node\Settings\UpgradeState.cs" />
+    <Compile Include="CustomFeatures\Upgrades\Node\Settings\UpgradeSetting_TurretRestriction.cs" />
+    <Compile Include="CustomFeatures\Upgrades\Node\SettingsUpgrade.cs" />
     <Compile Include="CustomFeatures\Upgrades\Node\VehicleUpgrade.cs" />
     <Compile Include="CustomFeatures\Upgrades\StatOffset.cs" />
     <Compile Include="CustomFeatures\Upgrades\UpgradeNode.cs" />
@@ -202,7 +206,6 @@
     <Compile Include="Misc\Interfaces\IMaterialCacheTarget.cs" />
     <Compile Include="Misc\Interfaces\ISustainerTarget.cs" />
     <Compile Include="Misc\Interfaces\IVehicleWorldObject.cs" />
-    <Compile Include="Pathing\Map\VehicleRegionUpdateCatalog.cs" />
     <Compile Include="Pathing\RegionGrid\ChunkSet.cs" />
     <Compile Include="Pathing\RegionGrid\ConcurrentListerThings.cs" />
     <Compile Include="Pathing\RegionGrid\VehicleRegionManager.cs" />

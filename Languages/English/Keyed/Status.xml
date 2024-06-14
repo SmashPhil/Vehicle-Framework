@@ -16,5 +16,7 @@
 	<VF_healthLabel_Dead>Ruined</VF_healthLabel_Dead>
 	<VF_healthLabel_Beached>Beached</VF_healthLabel_Beached>
 
-	<VF_GeneratingPathData>Generating PathGrid - {0}</VF_GeneratingPathData>
+	<VF_GeneratingPathData>Generating Vehicle PathData</VF_GeneratingPathData>
+	<VF_GeneratePathGrids>Generating Vehicle PathGrids</VF_GeneratePathGrids>
+	<VF_GenerateRegions>Generating Vehicle Regions</VF_GenerateRegions>
 </LanguageData>

@@ -51,5 +51,11 @@ namespace Vehicles
 		public static VehicleEventDef AerialVehicleCrashLanding;
 		public static VehicleEventDef AerialVehicleLeftMap;
 		public static VehicleEventDef AerialVehicleOrdered;
+
+		//Upgrades
+		public static VehicleEventDef VehicleUpgradeEnqueued;
+		public static VehicleEventDef VehicleUpgradeCompleted;
+		public static VehicleEventDef VehicleUpgradeRefundEnqueued;
+		public static VehicleEventDef VehicleUpgradeRefundCompleted;
 	}
 }

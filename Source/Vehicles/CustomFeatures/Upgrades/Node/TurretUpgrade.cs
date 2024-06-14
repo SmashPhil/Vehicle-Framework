@@ -13,14 +13,12 @@ namespace Vehicles
 		public readonly List<VehicleTurret> turrets;
 
 		public readonly List<string> removeTurrets;
-
-		public readonly List<TurretSettings> settings;
-
+		
 		public override bool UnlockOnLoad => false;
 
-		public override void Unlock(VehiclePawn vehicle, bool unlockingAfterLoad)
+		public override void Unlock(VehiclePawn vehicle, bool unlockingPostLoad)
 		{
-			if (!unlockingAfterLoad)
+			if (!unlockingPostLoad)
 			{
 				if (!removeTurrets.NullOrEmpty())
 				{
@@ -38,35 +36,11 @@ namespace Vehicles
 					{
 						try
 						{
-							vehicle.CompVehicleTurrets.AddTurret(turret);
+							vehicle.CompVehicleTurrets.AddTurret(turret, node.key);
 						}
 						catch (Exception ex)
 						{
 							Log.Error($"{VehicleHarmony.LogLabel} Unable to unlock {GetType()} to {vehicle.LabelShort}. \nException: {ex}");
-						}
-					}
-				}
-			}
-			if (!settings.NullOrEmpty())
-			{
-				foreach (TurretSettings setting in settings)
-				{
-					VehicleTurret turret = vehicle.CompVehicleTurrets.GetTurret(setting.key);
-					if (turret == null)
-					{
-						Log.ErrorOnce($"Unable to locate turret with key={setting.key}. The turret must be part of the vehicle to add upgrades.", setting.key.GetHashCodeSafe());
-						continue;
-					}
-					if (setting.restrictions != null)
-					{
-						switch (setting.restrictions.Value.operation)
-						{
-							case TurretRestrictionOperation.Add:
-								turret.SetTurretRestriction(setting.restrictions.Value.restrictionType);
-								break;
-							case TurretRestrictionOperation.Remove:
-								turret.RemoveTurretRestriction();
-								break;
 						}
 					}
 				}
@@ -101,50 +75,7 @@ namespace Vehicles
 					}
 				}
 			}
-			if (!settings.NullOrEmpty())
-			{
-				foreach (TurretSettings setting in settings)
-				{
-					VehicleTurret turret = vehicle.CompVehicleTurrets.GetTurret(setting.key);
-					if (turret == null)
-					{
-						Log.ErrorOnce($"Unable to locate turret with key={setting.key}. The turret must be part of the vehicle to add upgrades.", setting.key.GetHashCodeSafe());
-						continue;
-					}
-					if (setting.restrictions != null)
-					{
-						switch (setting.restrictions.Value.operation)
-						{
-							case TurretRestrictionOperation.Add:
-								turret.RemoveTurretRestriction();
-								break;
-							case TurretRestrictionOperation.Remove:
-								turret.SetTurretRestriction(setting.restrictions.Value.restrictionType);
-								break;
-						}
-					}
-				}
-			}
 			vehicle.CompVehicleTurrets.CheckDuplicateKeys();
-		}
-
-		public enum TurretRestrictionOperation 
-		{ 
-			Add,
-			Remove,
-		}
-
-		public struct TurretSettings
-		{
-			public string key;
-
-			public TurretRestrictionSetting? restrictions;
-		}
-
-		public struct TurretRestrictionSetting
-		{
-			public Type restrictionType;
-			public TurretRestrictionOperation operation;
 		}
 	}
 }

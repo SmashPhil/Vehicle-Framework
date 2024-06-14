@@ -77,6 +77,7 @@ namespace Vehicles
 				foreach (GraphicOverlay graphicOverlay in extraOverlayLookup[key])
 				{
 					extraOverlays.Remove(graphicOverlay);
+					graphicOverlay.OnDestroy();
 				}
 				extraOverlayLookup.Remove(key);
 			}

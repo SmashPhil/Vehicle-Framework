@@ -116,8 +116,9 @@ namespace Vehicles
 				if (SelPawn is null)
 				{
 					return null;
-				}    
-				throw new InvalidOperationException("Upgrade ITab on Pawn without CompUpgradeTree: " + SelThing);
+				}
+				CloseTab();
+				return null;
 			}
 		}
 
@@ -150,6 +151,12 @@ namespace Vehicles
 
 		protected override void FillTab()
 		{
+			//May occur if sub-window is open while selected entity changes inbetween frames
+			if (Vehicle == null)
+			{
+				return;
+			}
+
 			Rect rect = new Rect(0f, TopPadding, size.x, size.y - TopPadding);
 			Rect innerRect = rect.ContractedBy(5f);
 

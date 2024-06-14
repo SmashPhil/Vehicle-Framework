@@ -27,6 +27,8 @@ namespace Vehicles
 
 		public ThingOwner<Thing> upgradeContainer = new ThingOwner<Thing>();
 
+		private Dictionary<string, List<UpgradeState>> states { get; set; } = new Dictionary<string, List<UpgradeState>>();
+
 		public CompProperties_UpgradeTree Props => (CompProperties_UpgradeTree)props;
 
 		public bool Upgrading => NodeUnlocking != null;
@@ -163,6 +165,7 @@ namespace Vehicles
 				}
 				node.RemoveOverlays(Vehicle);
 				node.resetSound?.PlayOneShot(new TargetInfo(Vehicle.Position, Vehicle.Map));
+				Vehicle.EventRegistry[VehicleEventDefOf.VehicleUpgradeRefundCompleted].ExecuteEvents();
 			}
 		}
 
@@ -203,6 +206,8 @@ namespace Vehicles
 			upgrades.Add(node.key);
 
 			upgradeContainer.ClearAndDestroyContents();
+
+			Vehicle.EventRegistry[VehicleEventDefOf.VehicleUpgradeCompleted].ExecuteEvents();
 		}
 
 		public void ClearUpgrade()
@@ -219,8 +224,7 @@ namespace Vehicles
 		{
 			upgrade = new UpgradeInProgress(Vehicle, node, false);
 			upgradeContainer.TryDropAll(Vehicle.Position, Vehicle.Map, ThingPlaceMode.Near);
-			Vehicle.ignition.Drafted = false;
-			Vehicle.Angle = 0;
+			Vehicle.EventRegistry[VehicleEventDefOf.VehicleUpgradeEnqueued].ExecuteEvents();
 		}
 
 		/// <summary>
@@ -230,8 +234,14 @@ namespace Vehicles
 		{
 			upgrade = new UpgradeInProgress(Vehicle, node, true);
 			upgradeContainer.TryDropAll(Vehicle.Position, Vehicle.Map, ThingPlaceMode.Near);
+			Vehicle.EventRegistry[VehicleEventDefOf.VehicleUpgradeRefundEnqueued].ExecuteEvents();
+		}
+
+		private void PrepVehicleForWork()
+		{
 			Vehicle.ignition.Drafted = false;
 			Vehicle.Angle = 0;
+			Vehicle.DisembarkAll();
 		}
 
 		private void ReloadUnlocks()
@@ -274,6 +284,30 @@ namespace Vehicles
 		{
 			holder.TryTransferToContainer(thing, upgradeContainer, count);
 			ValidateListers();
+		}
+
+		public void AddSettings(UpgradeState state)
+		{
+			if (!states.ContainsKey(state.key))
+			{
+				states[state.key] = new List<UpgradeState>();
+			}
+			states[state.key].Add(state);
+		}
+
+		public bool TryGetStates(string key, out List<UpgradeState> outList)
+		{
+			return states.TryGetValue(key, out outList);
+		}
+
+		public void RemoveSettings(UpgradeState state)
+		{
+			if (!states.TryGetValue(state.key, out List<UpgradeState> innerList))
+			{
+				Log.Error($"Unable to locate {state.key} in state cache.");
+				return;
+			}
+			innerList.Remove(state);
 		}
 
 		public override void PostDraw()
@@ -341,7 +375,7 @@ namespace Vehicles
 			allowDevMode = false;
 			if (Upgrading)
 			{
-				failReason = "VF_UpgradeInProgress".Translate(Vehicle);
+				failReason = "VF_DisabledByVehicleUpgrading".Translate(Vehicle.LabelCap);
 				return false;
 			}
 			return base.CanDraft(out failReason, out allowDevMode);
@@ -392,6 +426,13 @@ namespace Vehicles
 				Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Vehicle, ReservationType.Upgrade);
 				Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Vehicle, ReservationType.LoadUpgradeMaterials);
 			}
+		}
+
+		public override void EventRegistration()
+		{
+			base.EventRegistration();
+			Vehicle.AddEvent(VehicleEventDefOf.VehicleUpgradeEnqueued, PrepVehicleForWork);
+			Vehicle.AddEvent(VehicleEventDefOf.VehicleUpgradeRefundEnqueued, PrepVehicleForWork);
 		}
 
 		public override void PostExposeData()

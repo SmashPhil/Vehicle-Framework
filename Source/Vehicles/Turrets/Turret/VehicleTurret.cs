@@ -58,6 +58,9 @@ namespace Vehicles
 		public string gizmoLabel;
 
 		/* ----------------- */
+
+		public string upgradeKey;
+
 		//TODO 1.6 - rename
 		public LocalTargetInfo cannonTarget;
 
@@ -1957,6 +1960,7 @@ namespace Vehicles
 
 			Scribe_Values.Look(ref uniqueID, nameof(uniqueID), defaultValue: -1);
 			Scribe_Values.Look(ref key, nameof(key));
+			Scribe_Values.Look(ref upgradeKey, nameof(upgradeKey), forceSave: true);
 
 			Scribe_Defs.Look(ref turretDef, nameof(turretDef));
 
