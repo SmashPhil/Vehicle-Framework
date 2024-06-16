@@ -62,6 +62,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: TrueCenter_Thing,
 				prefix: new HarmonyMethod(typeof(Rendering),
 				nameof(TrueCenterVehicle)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnRenderer), "ParallelGetPreRenderResults"),
+				prefix: new HarmonyMethod(typeof(Rendering),
+				nameof(DisableCachingPawnOverlays)));
 
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Targeter), nameof(Targeter.TargeterOnGUI)),
 				postfix: new HarmonyMethod(typeof(Rendering),
@@ -298,6 +301,14 @@ namespace Vehicles
 				return false;
 			}
 			return true;
+		}
+
+		private static void DisableCachingPawnOverlays(Pawn ___pawn, ref bool disableCache)
+		{
+			if (___pawn.IsInVehicle())
+			{
+				disableCache = true;
+			}
 		}
 
 		/* ---------------- Hooks onto Targeter calls ---------------- */

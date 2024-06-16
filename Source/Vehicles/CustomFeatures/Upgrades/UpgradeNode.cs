@@ -13,6 +13,7 @@ namespace Vehicles
 		public string key;
 		public string label;
 		public string description;
+		public string upgradeExplanation;
 
 		public bool displayLabel = false;
 		public string icon;
@@ -45,6 +46,8 @@ namespace Vehicles
 		public Texture2D Icon { get; private set; }
 
 		public virtual IntVec2 GridCoordinate => gridCoordinate;
+
+		public bool HasGraphics { get; private set; }
 
 		public virtual Texture2D UpgradeImage
 		{
@@ -257,11 +260,13 @@ namespace Vehicles
 
 		public void ResolveReferences()
 		{
+			HasGraphics = !graphicOverlays.NullOrEmpty();
 			if (!upgrades.NullOrEmpty())
 			{
 				foreach (Upgrade upgrade in upgrades)
 				{
 					upgrade.Init(this);
+					HasGraphics |= upgrade.HasGraphics;
 				}
 			}
 		}

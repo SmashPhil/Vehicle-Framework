@@ -26,12 +26,14 @@ namespace Vehicles
 		public const float ScreenWidth = 880f;
 		public const float ScreenHeight = 520f;
 
-		public const float InfoScreenWidth = 325;
+		public const float InfoSummaryWidth = 300;
+		public const float InfoScreenWidth = 375;
 		public const float InfoScreenHeight = 150;
-		public const float InfoScreenExtraGUIHeight = InfoScreenHeight;
 		public const float InfoPanelRowHeight = 20f;
 		public const float InfoPanelMoreDetailButtonSize = 24;
 		public const float InfoPanelArrowPointerSize = 45;
+
+		public const float OverlayGraphicHeight = (InfoScreenWidth - InfoPanelArrowPointerSize) / 2;
 
 		public const float BottomWindowEdge = ScreenHeight - TopPadding * 2;
 		public const float TotalIconSizeScalar = 6000f;
@@ -44,6 +46,10 @@ namespace Vehicles
 		public static readonly Color DisabledColor = new Color(0.25f, 0.25f, 0.25f, 1);
 		public static readonly Color DisabledLineColor = new Color(0.3f, 0.3f, 0.3f, 1);
 
+		public static readonly Color EffectColorPositive = new Color(0.1f, 1f, 0.1f);
+		public static readonly Color EffectColorNegative = new Color(0.8f, 0.4f, 0.4f);
+		public static readonly Color EffectColorNeutral = new Color(0.5f, 0.5f, 0.5f, 0.75f);
+
 		public static readonly Vector2 GridSpacing = new Vector2(20, 20);
 		public static readonly Vector2 GridOrigin = new Vector2(30, 30);
 
@@ -54,12 +60,16 @@ namespace Vehicles
 
 		private UpgradeNode selectedNode;
 		private UpgradeNode highlightedNode;
+		private List<UpgradeTextEntry> textEntries = new List<UpgradeTextEntry>();
+		private float textEntryHeight;
 
-		private Rect detailRect;
-		private bool moreDetail = false;
+		private List<VehicleTurret> renderTurrets = new List<VehicleTurret>();
+		private List<string> excludeTurrets = new List<string>();
 
-		private static Vector2 scrollPosition;
-		private static Vector2 resize;
+		private bool showDetails;
+
+		private Vector2 scrollPosition;
+		private Vector2 resize;
 		private bool resizeCheck;
 
 		public UpgradeNode InfoNode => selectedNode ?? highlightedNode;
@@ -74,8 +84,15 @@ namespace Vehicles
 			{
 				if (selectedNode != value)
 				{
+					ClearTurretRenderers(selectedNode);
+
 					selectedNode = value;
-					moreDetail = false;
+
+					if (selectedNode != null)
+					{
+						RecacheTextEntries();
+						RecacheTurretRenderers();
+					}
 				}
 			}
 		}
@@ -129,6 +146,74 @@ namespace Vehicles
 			highlightedNode = null;
 			resizeCheck = false;
 			scrollPosition = Vector2.zero;
+		}
+
+		private void RecacheTextEntries()
+		{
+			textEntries.Clear();
+			return;
+			if (SelectedNode != null && SelectedNode.upgradeExplanation != null)
+			{
+				textEntryHeight = Text.CalcHeight(SelectedNode.upgradeExplanation, InfoScreenWidth - 10);
+			}
+			else
+			{
+				foreach (Upgrade upgrade in InfoNode.upgrades)
+				{
+					foreach (UpgradeTextEntry textEntry in upgrade.UpgradeDescription(Vehicle))
+					{
+						textEntries.Add(textEntry);
+					}
+				}
+				textEntryHeight = textEntries.Count * InfoPanelRowHeight;
+			}
+		}
+
+		private void RecacheTurretRenderers()
+		{
+			if (!SelectedNode.upgrades.NullOrEmpty())
+			{
+				foreach (Upgrade upgrade in InfoNode.upgrades)
+				{
+					if (upgrade is TurretUpgrade turretUpgrade)
+					{
+						if (!turretUpgrade.turrets.NullOrEmpty())
+						{
+							foreach (VehicleTurret turret in turretUpgrade.turrets)
+							{
+								turret.ResolveCannonGraphics(Vehicle.VehicleDef, forceRegen: true);
+								renderTurrets.Add(turret);
+							}
+						}
+						if (!turretUpgrade.removeTurrets.NullOrEmpty())
+						{
+							excludeTurrets.AddRange(turretUpgrade.removeTurrets);
+						}
+					}
+				}
+			}
+		}
+
+		private void ClearTurretRenderers(UpgradeNode upgradeNode)
+		{
+			if (upgradeNode != null && !upgradeNode.upgrades.NullOrEmpty())
+			{
+				foreach (Upgrade upgrade in InfoNode.upgrades)
+				{
+					if (upgrade is TurretUpgrade turretUpgrade)
+					{
+						if (!turretUpgrade.turrets.NullOrEmpty())
+						{
+							foreach (VehicleTurret turret in turretUpgrade.turrets)
+							{
+								turret.OnDestroy();
+							}
+						}
+					}
+				}
+			}
+			renderTurrets.Clear();
+			excludeTurrets.Clear();
 		}
 
 		private Vector2 GridCoordinateToScreenPos(IntVec2 coord)
@@ -360,148 +445,202 @@ namespace Vehicles
 				}
 			}
 
-			float maxedInfoScreenHeight = InfoScreenHeight;
-			if (InfoNode != null)
-			{
-				Vector2 upgradeRectPos = GridCoordinateToScreenPosAdjusted(InfoNode.GridCoordinate, InfoNode.drawSize);
-				Rect upgradeRect = new Rect(upgradeRectPos, InfoNode.drawSize);
-
-				float ingredientsHeight = 0;
-				if (!InfoNode.ingredients.NullOrEmpty())
-				{
-					ingredientsHeight = InfoNode.ingredients.Count * InfoPanelRowHeight;
-				}
-
-				float textHeight = Text.CalcHeight(InfoNode.label, InfoScreenWidth) + Text.CalcHeight(InfoNode.description, InfoScreenWidth);
-				maxedInfoScreenHeight = Mathf.Max(InfoScreenHeight, textHeight) + ingredientsHeight;
-
-				float infoScreenX = upgradeRect.x + InfoNode.drawSize.x / 2f - InfoScreenWidth / 2f;
-				float windowRectX = Mathf.Clamp(infoScreenX, rect.x + 5, Screen.width - InfoScreenWidth - 5);
-
-				float windowRectY = upgradeRect.yMax + 5f;
-				if (windowRectY + maxedInfoScreenHeight >= ScreenHeight)
-				{
-					windowRectY -= maxedInfoScreenHeight + 10f + InfoNode.drawSize.y;
-				}
-
-				detailRect = new Rect(windowRectX, windowRectY, InfoScreenWidth, maxedInfoScreenHeight);
-			}
-
 			GUIState.Reset();
 
 			Rect selectedLabelRect = new Rect(5f, BottomWindowEdge, ScreenWidth, 150f);
 
 			if (InfoNode != null)
 			{
-				Rect infoRect = new Rect(TabRect.x + detailRect.x, TabRect.y + detailRect.y, detailRect.width, detailRect.height);
-				Find.WindowStack.ImmediateWindow(InfoNode.GetHashCode(), infoRect, WindowLayer.SubSuper, delegate ()
+				Rect detailRect = GetDetailRect(rect);
+				detailRect.position += TabRect.position;
+				Find.WindowStack.ImmediateWindow(InfoNode.GetHashCode() ^ Vehicle.GetHashCode(), detailRect, WindowLayer.SubSuper, delegate ()
 				{
 					if (Vehicle != null && InfoNode != null)
 					{
-						GUIState.Push();
-
-						Rect menuRect = new Rect(0, 0, infoRect.width, infoRect.height);
-						Widgets.DrawMenuSection(menuRect);
-						
-						Rect innerInfoRect = menuRect.ContractedBy(5);
-
-						Rect moreDetailRect = new Rect(innerInfoRect.xMax - InfoPanelMoreDetailButtonSize, innerInfoRect.y, InfoPanelMoreDetailButtonSize, InfoPanelMoreDetailButtonSize);
-
-						Color baseColor = !moreDetail ? Color.white : Color.green;
-						Color mouseoverColor = !moreDetail ? GenUI.MouseoverColor : new Color(0f, 0.5f, 0f);
-						if (!InfoNode.graphicOverlays.NullOrEmpty() && Widgets.ButtonImageFitted(moreDetailRect, CaravanThingsTabUtility.SpecificTabButtonTex, baseColor, mouseoverColor))
-						{
-							moreDetail = !moreDetail;
-
-							if (moreDetail)
-							{
-								SoundDefOf.TabOpen.PlayOneShotOnCamera(null);
-							}
-							else
-							{
-								SoundDefOf.TabClose.PlayOneShotOnCamera(null);
-							}
-						}
-						GUIState.Reset();
-
-						Rect detailRect = innerInfoRect;
-						Text.Font = GameFont.Medium;
-						float textHeight = Text.CalcHeight(InfoNode.label, detailRect.width);
-						Rect labelRect = new Rect(detailRect.x, detailRect.y, detailRect.width, textHeight);
-						Widgets.Label(labelRect, InfoNode.label);
-
-						detailRect.y += textHeight;
-						detailRect.height -= textHeight;
-
-						Text.Font = GameFont.Small;
-
-						float costY = DrawCostItems(detailRect);
-
-						detailRect.y += costY;
-						detailRect.height -= costY + 30;
-
-						Widgets.Label(detailRect, InfoNode.description);
-
-						if (Vehicle.CompUpgradeTree.NodeUnlocking == InfoNode)
-						{
-							textHeight = Text.CalcHeight(InfoNode.description, detailRect.width);
-							detailRect.y += textHeight;
-							detailRect.height -= textHeight;
-
-							string workLabel = $"{"WorkLeft".Translate()}: {Vehicle.CompUpgradeTree.upgrade.WorkLeft.ToStringWorkAmount()}";
-							textHeight = Text.CalcHeight(workLabel, detailRect.width);
-							Rect workLabelRect = new Rect(detailRect.x, detailRect.y, detailRect.width, textHeight);
-							Widgets.Label(workLabelRect, workLabel);
-
-							detailRect.y += textHeight;
-							detailRect.height -= textHeight;
-						}
-
-						if (SelectedNode != null)
-						{
-							Rect buttonRect = new Rect(detailRect.xMax - 125f, menuRect.yMax - 35, 120, 30);
-							DrawButtons(buttonRect);
-						}
-
-						GUIState.Pop();
+						Rect infoPanelRect = detailRect.AtZero();
+						DrawInfoPanel(infoPanelRect);
 					}
 				}, doBackground: false);
-
-				if (moreDetail)
-				{
-					float infoScreenExtraGUIWidth = InfoScreenExtraGUIHeight * 2 + InfoPanelArrowPointerSize;
-					float heightDifference = (maxedInfoScreenHeight - InfoScreenHeight) / 2;
-					Rect moreDetailRect = new Rect(TabRect.x + detailRect.xMax + 5, TabRect.y + detailRect.y + heightDifference, infoScreenExtraGUIWidth, InfoScreenExtraGUIHeight);
-					Find.WindowStack.ImmediateWindow(InfoNode.GetHashCode() ^ Vehicle.GetHashCode(), moreDetailRect, WindowLayer.SubSuper, delegate ()
-					{
-						if (Vehicle != null && InfoNode != null)
-						{
-							GUIState.Push();
-
-							Rect menuRect = new Rect(0, 0, moreDetailRect.width, moreDetailRect.height);
-							Widgets.DrawMenuSection(menuRect);
-
-							Rect innerInfoRect = menuRect.ContractedBy(5);
-
-							Rect vehicleOriginalRect = new Rect(innerInfoRect.x, innerInfoRect.y, innerInfoRect.height, innerInfoRect.height);
-							VehicleGraphics.DrawVehicle(vehicleOriginalRect, Vehicle);
-
-							float arrowSize = InfoPanelArrowPointerSize;
-							Rect arrowPointerRect = new Rect(vehicleOriginalRect.xMax + 5, vehicleOriginalRect.y + vehicleOriginalRect.height / 2 - arrowSize / 2, arrowSize, arrowSize);
-							Widgets.DrawTextureFitted(arrowPointerRect, TexData.TutorArrowRight, 1);
-
-							Rect vehicleNewRect = new Rect(arrowPointerRect.xMax + 5, vehicleOriginalRect.y, vehicleOriginalRect.width, vehicleOriginalRect.height);
-							VehicleGraphics.DrawVehicle(vehicleNewRect, Vehicle, extraOverlays: Vehicle.CompUpgradeTree.Props.TryGetOverlays(InfoNode));
-
-							GUIState.Pop();
-						}
-					}, doBackground: false);
-				}
 			}
 
 			//Widgets.EndScrollView();
 
 			GUIState.Pop();
+		}
+
+		private Rect GetDetailRect(Rect rect, float padding = 5)
+		{
+			GUIState.Push();
+
+			Vector2 upgradeRectPos = GridCoordinateToScreenPosAdjusted(InfoNode.GridCoordinate, InfoNode.drawSize);
+			Rect upgradeRect = new Rect(upgradeRectPos, InfoNode.drawSize);
+
+			float ingredientsHeight = 0;
+			if (!InfoNode.ingredients.NullOrEmpty())
+			{
+				ingredientsHeight = InfoNode.ingredients.Count * InfoPanelRowHeight;
+			}
+
+			float detailWidth = InfoScreenWidth - padding * 2;
+			if (SelectedNode != null)
+			{
+				//detailWidth = InfoScreenWidth - padding * 2;
+			}
+
+			Text.Font = GameFont.Medium;
+			float labelHeight = Text.CalcHeight(InfoNode.label, detailWidth);
+			Text.Font = GameFont.Small;
+			float descriptionHeight = Text.CalcHeight(InfoNode.description, detailWidth);
+			float totalCalculatedHeight = labelHeight + descriptionHeight + ingredientsHeight + 30 + padding;
+			if (SelectedNode != null)
+			{
+				totalCalculatedHeight += 10; //5 padding from description to line, and line to bottom rect
+				if (SelectedNode.HasGraphics)
+				{
+					totalCalculatedHeight += OverlayGraphicHeight;
+				}
+				
+				if (!textEntries.NullOrEmpty())
+				{
+					totalCalculatedHeight += textEntryHeight + 5;
+				}
+			}
+
+			float windowRectX = upgradeRect.x + InfoNode.drawSize.x + padding;
+			if (windowRectX + detailWidth > rect.xMax - padding)
+			{
+				windowRectX = upgradeRect.x - detailWidth - padding;
+				windowRectX = Mathf.Clamp(windowRectX, rect.x + padding, rect.xMax - detailWidth - padding);
+			}
+
+			float maxInfoScreenHeight = Mathf.Max(InfoScreenHeight, totalCalculatedHeight);
+			float windowRectY = upgradeRect.y + InfoNode.drawSize.y / 2 - maxInfoScreenHeight / 2;
+			windowRectY = Mathf.Clamp(windowRectY, rect.y + padding, rect.yMax - maxInfoScreenHeight - padding);
+
+			//if (windowRectY + maxInfoScreenHeight >= ScreenHeight)
+			//{
+			//	windowRectY -= maxInfoScreenHeight + padding * 2 + InfoNode.drawSize.y;
+			//}
+
+			GUIState.Pop();
+			return new Rect(windowRectX, windowRectY, detailWidth, maxInfoScreenHeight);
+		}
+
+		private void DrawInfoPanel(Rect rect, float padding = 5)
+		{
+			GUIState.Push();
+
+			Widgets.DrawMenuSection(rect);
+
+			Rect innerInfoRect = rect.ContractedBy(padding);
+
+			GUIState.Reset();
+
+			Text.Font = GameFont.Medium;
+
+			float labelHeight = Text.CalcHeight(InfoNode.label, innerInfoRect.width);
+			Rect labelRect = new Rect(innerInfoRect.x, innerInfoRect.y, innerInfoRect.width, labelHeight);
+			Widgets.Label(labelRect, InfoNode.label);
+
+			Text.Font = GameFont.Small;
+
+			Rect costListRect = new Rect(innerInfoRect.x, labelRect.yMax, innerInfoRect.width, innerInfoRect.height - labelRect.height);
+			float costY = DrawCostItems(costListRect);
+			Rect tempRect = costListRect;
+			tempRect.height = costY;
+
+			float descriptionHeight = Text.CalcHeight(InfoNode.description, innerInfoRect.width);
+			Rect descriptionRect = new Rect(innerInfoRect.x, costListRect.y + costY, innerInfoRect.width, descriptionHeight);
+			Widgets.Label(descriptionRect, InfoNode.description);
+			
+			if (Vehicle.CompUpgradeTree.NodeUnlocking == InfoNode)
+			{
+				//string workLabel = $"{"WorkLeft".Translate()}: {Vehicle.CompUpgradeTree.upgrade.WorkLeft.ToStringWorkAmount()}";
+				//textHeight = Text.CalcHeight(workLabel, upgradeInfoRect.width);
+				//Rect workLabelRect = new Rect(upgradeInfoRect.x, upgradeInfoRect.y, upgradeInfoRect.width, textHeight);
+				//Widgets.Label(workLabelRect, workLabel);
+
+				//upgradeInfoRect.y += textHeight;
+				//upgradeInfoRect.height -= textHeight;
+			}
+
+			if (SelectedNode != null)
+			{
+				bool hasGraphics = SelectedNode.HasGraphics;
+				bool showUpgradeList = false; //!SelectedNode.upgrades.NullOrEmpty();
+
+				if (hasGraphics || showUpgradeList)
+				{
+					Widgets.DrawLineHorizontal(rect.x, descriptionRect.yMax + 5, rect.width, UIElements.MenuSectionBGBorderColor);
+				}
+
+				Rect textEntryRect = new Rect(innerInfoRect.x, descriptionRect.yMax + 10, innerInfoRect.width, textEntryHeight);
+				if (showUpgradeList)
+				{
+					DrawUpgradeList(textEntryRect);
+				}
+
+				if (hasGraphics)
+				{
+					Rect overlayShowcaseRect = new Rect(innerInfoRect.x, textEntryRect.yMax + 5, innerInfoRect.width, (innerInfoRect.width - InfoPanelArrowPointerSize) / 2);
+					DrawVehicleGraphicComparison(overlayShowcaseRect);
+				}
+
+				Rect buttonRect = new Rect(innerInfoRect.xMax - 125f, innerInfoRect.yMax - 30, 120, 30);
+				DrawButtons(buttonRect);
+
+				Rect tempButtonRect = buttonRect;
+				tempButtonRect.width = innerInfoRect.width;
+
+			}
+
+			GUIState.Pop();
+		}
+
+		private void DrawVehicleGraphicComparison(Rect rect)
+		{
+			GUIState.Push();
+
+			Rect innerInfoRect = rect.ContractedBy(5);
+
+			Rect vehicleOriginalRect = new Rect(innerInfoRect.x, innerInfoRect.y, innerInfoRect.height, innerInfoRect.height);
+			VehicleGraphics.DrawVehicle(vehicleOriginalRect, Vehicle);
+
+			float arrowSize = InfoPanelArrowPointerSize;
+			Rect arrowPointerRect = new Rect(vehicleOriginalRect.xMax + 5, vehicleOriginalRect.y + vehicleOriginalRect.height / 2 - arrowSize / 2, arrowSize, arrowSize);
+			Widgets.DrawTextureFitted(arrowPointerRect, TexData.TutorArrowRight, 1);
+
+			Rect vehicleNewRect = new Rect(arrowPointerRect.xMax + 5, vehicleOriginalRect.y, vehicleOriginalRect.width, vehicleOriginalRect.height);
+			VehicleGraphics.DrawVehicle(vehicleNewRect, Vehicle, extraOverlays: Vehicle.CompUpgradeTree.Props.TryGetOverlays(InfoNode), extraTurrets: renderTurrets, excludeTurrets: excludeTurrets);
+
+			GUIState.Pop();
+		}
+
+		private void DrawSubIconsBar(Rect rect)
+		{
+			Rect subIconsRect = new Rect(rect.xMax - InfoPanelMoreDetailButtonSize, rect.y, rect.width, InfoPanelMoreDetailButtonSize);
+
+			Color baseColor = !showDetails ? Color.white : Color.green;
+			Color mouseoverColor = !showDetails ? GenUI.MouseoverColor : new Color(0f, 0.5f, 0f);
+
+			Rect buttonRect = new Rect(subIconsRect.x, subIconsRect.y, InfoPanelMoreDetailButtonSize, InfoPanelMoreDetailButtonSize);
+			if (!InfoNode.upgrades.NullOrEmpty())
+			{
+				if (Widgets.ButtonImageFitted(buttonRect, TexButton.Info, baseColor, mouseoverColor))
+				{
+					showDetails = !showDetails;
+
+					if (showDetails)
+					{
+						SoundDefOf.TabOpen.PlayOneShotOnCamera(null);
+					}
+					else
+					{
+						SoundDefOf.TabClose.PlayOneShotOnCamera(null);
+					}
+				}
+				buttonRect.x -= buttonRect.width;
+			}
 		}
 
 		protected override void UpdateSize()
@@ -577,6 +716,53 @@ namespace Vehicles
 			}
 			GUIState.Pop();
 			return currentY;
+		}
+
+		private void DrawUpgradeList(Rect rect)
+		{
+			GUIState.Push();
+			if (InfoNode.upgradeExplanation != null)
+			{
+				Widgets.Label(rect, InfoNode.upgradeExplanation);
+			}
+			else if (!InfoNode.upgrades.NullOrEmpty())
+			{
+				Text.Font = GameFont.Small;
+				Text.Anchor = TextAnchor.MiddleLeft;
+				//Lists upgrade details if none is included
+				foreach (Upgrade upgrade in InfoNode.upgrades)
+				{
+					foreach (UpgradeTextEntry textEntry in upgrade.UpgradeDescription(Vehicle))
+					{
+						float labelWidth = rect.width * 0.75f;
+						float labelHeight = Text.CalcHeight(textEntry.label, labelWidth);
+						float valueWidth = rect.width - labelWidth;
+						float valueHeight = Text.CalcHeight(textEntry.description, valueWidth);
+
+						float entryHeight = Mathf.Max(labelHeight, valueHeight);
+
+						Rect leftRect = new Rect(rect.x, rect.y, labelWidth, entryHeight);
+						Widgets.Label(leftRect, textEntry.label);
+
+						GUI.color = textEntry.effectType switch
+						{
+							UpgradeEffectType.Positive => EffectColorPositive,
+							UpgradeEffectType.Negative => EffectColorNegative,
+							UpgradeEffectType.Neutral => EffectColorNeutral,
+							UpgradeEffectType.None => Color.white,
+							_ => Color.white,
+						};
+
+						Rect rightRect = new Rect(leftRect.xMax, rect.y, valueWidth, entryHeight);
+						Widgets.Label(rightRect, textEntry.description);
+
+						rect.y += entryHeight;
+
+						GUIState.Reset();
+					}
+				}
+			}
+			GUIState.Pop();
 		}
 
 		private void DrawNodeCondition(Rect rect, UpgradeNode node, bool colored)

@@ -7,6 +7,7 @@ using RimWorld;
 using SmashTools;
 using Verse.Grammar;
 using static Vehicles.VehicleUpgrade;
+using System.Security.Cryptography;
 
 namespace Vehicles
 {
@@ -21,6 +22,32 @@ namespace Vehicles
 		public RetextureDef retextureDef;
 
 		public override bool UnlockOnLoad => true;
+
+		public override IEnumerable<UpgradeTextEntry> UpgradeDescription(VehiclePawn vehicle)
+		{
+			if (!armor.NullOrEmpty())
+			{
+				foreach (ArmorUpgrade armorUpgrade in armor)
+				{
+					if (!armorUpgrade.key.NullOrEmpty() && !armorUpgrade.statModifiers.NullOrEmpty())
+					{
+						VehicleComponent component = vehicle.statHandler.GetComponent(armorUpgrade.key);
+						switch (armorUpgrade.type)
+						{
+							case UpgradeType.Add:
+								foreach (UpgradeTextEntry textEntry in armorUpgrade.UpgradeEntries(vehicle, component))
+								{
+									yield return textEntry;
+								}
+								break;
+							case UpgradeType.Set:
+								component.SetArmorModifiers[node.key] = armorUpgrade.statModifiers;
+								break;
+						}
+					}
+				}
+			}
+		}
 
 		public override void Unlock(VehiclePawn vehicle, bool unlockingPostLoad)
 		{
@@ -203,16 +230,41 @@ namespace Vehicles
 			public List<StatModifier> statModifiers;
 
 			public UpgradeType type;
+
+			public IEnumerable<UpgradeTextEntry> UpgradeEntries(VehiclePawn vehicle, VehicleComponent component)
+			{
+				if (!statModifiers.NullOrEmpty())
+				{
+					foreach (StatModifier statModifier in statModifiers)
+					{
+						string valueFormatted = UpgradeTextEntry.FormatValue(statModifier.value, type, statModifier.stat.toStringStyle, statModifier.stat.toStringNumberSense, statModifier.stat.formatString);
+						yield return new UpgradeTextEntry($"{statModifier.stat.LabelCap} ({component.props.label})", valueFormatted, UpgradeEffectType.Positive);
+					}
+				}
+			}
 		}
 
 		public struct HealthUpgrade
 		{
 			public string key;
-			public float? value;
+			public int? value;
 
 			public VehicleComponent.VehiclePartDepth? depth;
 
 			public UpgradeType type;
+
+			public IEnumerable<UpgradeTextEntry> UpgradeEntries(VehiclePawn vehicle, VehicleComponent component)
+			{
+				if (value != null)
+				{
+					string valueFormatted = UpgradeTextEntry.FormatValue(value.Value, type, ToStringStyle.Integer);
+					yield return new UpgradeTextEntry($"{component.props.label}", valueFormatted, UpgradeEffectType.Positive);
+				}
+				if (depth != null)
+				{
+					yield return new UpgradeTextEntry($"{component.props.label}", $"{"Depth".Translate()} = {depth.Value.Translate()}");
+				}
+			}
 		}
 
 		public class RoleUpgrade

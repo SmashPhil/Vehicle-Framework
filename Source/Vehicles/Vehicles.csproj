@@ -154,10 +154,12 @@
     <Compile Include="CustomFeatures\Upgrades\Node\Settings\UpgradeState.cs" />
     <Compile Include="CustomFeatures\Upgrades\Node\Settings\UpgradeSetting_TurretRestriction.cs" />
     <Compile Include="CustomFeatures\Upgrades\Node\SettingsUpgrade.cs" />
+    <Compile Include="CustomFeatures\Upgrades\UpgradeEffectType.cs" />
     <Compile Include="CustomFeatures\Upgrades\Node\VehicleUpgrade.cs" />
     <Compile Include="CustomFeatures\Upgrades\StatOffset.cs" />
     <Compile Include="CustomFeatures\Upgrades\UpgradeNode.cs" />
     <Compile Include="CustomFeatures\Upgrades\Node\ActionUpgrade.cs" />
+    <Compile Include="CustomFeatures\Upgrades\UpgradeTextEntry.cs" />
     <Compile Include="CustomFeatures\Upgrades\UpgradeTreeDef.cs" />
     <Compile Include="Gizmo\Command_Turret.cs" />
     <Compile Include="Gizmo\Gizmo_VehicleCaravanInfo.cs" />
@@ -479,6 +481,7 @@
     <Compile Include="Utility\Helpers\AsyncActions\AsyncRegionAction.cs" />
     <Compile Include="Utility\Helpers\AsyncActions\AsyncReachabilityCacheAction.cs" />
     <Compile Include="Utility\Helpers\AsyncActions\AsyncRegionRegisterAction.cs" />
+    <Compile Include="Utility\Helpers\TranslationHelper.cs" />
     <Compile Include="Utility\Helpers\World\CaravanHelper.cs" />
     <Compile Include="Utility\Helpers\World\CaravanInfoHelper.cs" />
     <Compile Include="Utility\Helpers\Combat\ProjectileHelper.cs" />
@@ -651,7 +654,6 @@
     <Folder Include="Components\Rendering\PawnRenderNode\" />
     <Folder Include="Comps\Fishing\" />
     <Folder Include="CustomFeatures\AerialVehicles\Skyfaller\Bombs\" />
-    <Folder Include="CustomFeatures\Upgrades\TurretUpgrade\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Lib.Harmony">

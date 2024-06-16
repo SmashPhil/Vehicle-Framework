@@ -6,6 +6,7 @@ using Verse;
 using RimWorld;
 using SmashTools;
 using static Vehicles.StatUpgrade;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Vehicles
 {
@@ -19,53 +20,50 @@ namespace Vehicles
 
 		public override bool UnlockOnLoad => true;
 
-		public override IEnumerable<string> UpgradeDescription
+		public override IEnumerable<UpgradeTextEntry> UpgradeDescription(VehiclePawn vehicle)
 		{
-			get
+			if (!stats.NullOrEmpty())
 			{
-				if (!stats.NullOrEmpty())
+				foreach (StatDefUpgrade statDefUpgrade in stats)
 				{
-					foreach (StatDefUpgrade statDefUpgrade in stats)
+					switch (statDefUpgrade.type)
 					{
-						switch (statDefUpgrade.type)
-						{
-							case UpgradeType.Add:
-								yield return $"{statDefUpgrade.def.LabelCap} +{statDefUpgrade.value}";
-								break;
-							case UpgradeType.Set:
-								yield return $"{statDefUpgrade.def.LabelCap} -> {statDefUpgrade.value}";
-								break;
-						}
+						case UpgradeType.Add:
+							yield return new UpgradeTextEntry(statDefUpgrade.def.LabelCap, statDefUpgrade.ValueFormatted, statDefUpgrade.value, UpgradeEffectType.Positive);
+							break;
+						case UpgradeType.Set:
+							yield return new UpgradeTextEntry(statDefUpgrade.def.LabelCap, statDefUpgrade.value.ToString());
+							break;
 					}
 				}
-				if (!vehicleStats.NullOrEmpty())
+			}
+			if (!vehicleStats.NullOrEmpty())
+			{
+				foreach (VehicleStatDefUpgrade vehicleStatDefUpgrade in vehicleStats)
 				{
-					foreach (VehicleStatDefUpgrade vehicleStatDefUpgrade in vehicleStats)
+					switch (vehicleStatDefUpgrade.type)
 					{
-						switch (vehicleStatDefUpgrade.type)
-						{
-							case UpgradeType.Add:
-								yield return $"{vehicleStatDefUpgrade.def.LabelCap} +{vehicleStatDefUpgrade.value}";
-								break;
-							case UpgradeType.Set:
-								yield return $"{vehicleStatDefUpgrade.def.LabelCap} -> {vehicleStatDefUpgrade.value}";
-								break;
-						}
+						case UpgradeType.Add:
+							yield return new UpgradeTextEntry(vehicleStatDefUpgrade.def.LabelCap, vehicleStatDefUpgrade.ValueFormatted, vehicleStatDefUpgrade.value, vehicleStatDefUpgrade.def.upgradeEffectType);
+							break;
+						case UpgradeType.Set:
+							yield return new UpgradeTextEntry(vehicleStatDefUpgrade.def.LabelCap, vehicleStatDefUpgrade.value.ToString());
+							break;
 					}
 				}
-				if (!statCategories.NullOrEmpty())
+			}
+			if (!statCategories.NullOrEmpty())
+			{
+				foreach (StatCategoryUpgrade statCategoryUpgrade in statCategories)
 				{
-					foreach (StatCategoryUpgrade statCategoryUpgrade in statCategories)
+					switch (statCategoryUpgrade.type)
 					{
-						switch (statCategoryUpgrade.type)
-						{
-							case UpgradeType.Add:
-								yield return $"{statCategoryUpgrade.def.LabelCap} +{statCategoryUpgrade.value}";
-								break;
-							case UpgradeType.Set:
-								yield return $"{statCategoryUpgrade.def.LabelCap} -> {statCategoryUpgrade.value}";
-								break;
-						}
+						case UpgradeType.Add:
+							yield return new UpgradeTextEntry(statCategoryUpgrade.def.LabelCap, statCategoryUpgrade.ValueFormatted, statCategoryUpgrade.value, statCategoryUpgrade.def.upgradeEffectType);
+							break;
+						case UpgradeType.Set:
+							yield return new UpgradeTextEntry(statCategoryUpgrade.def.LabelCap, statCategoryUpgrade.value.ToString());
+							break;
 					}
 				}
 			}
@@ -179,6 +177,23 @@ namespace Vehicles
 			public float value;
 
 			public UpgradeType type;
+
+			public string ValueFormatted
+			{
+				get
+				{
+					string text = value.ToStringByStyle(def.toStringStyle, numberSense: def.toStringNumberSense);
+					if (def.toStringNumberSense != ToStringNumberSense.Factor && !def.formatString.NullOrEmpty())
+					{
+						text = string.Format(def.formatString, text);
+					}
+					if (type == UpgradeType.Add && value > 0)
+					{
+						text = "+" + text;
+					}
+					return text;
+				}
+			}
 		}
 
 		public class VehicleStatDefUpgrade
@@ -187,6 +202,14 @@ namespace Vehicles
 			public float value;
 
 			public UpgradeType type;
+
+			public string ValueFormatted
+			{
+				get
+				{
+					return UpgradeTextEntry.FormatValue(value, type, def.toStringStyle, def.toStringNumberSense, def.formatString);
+				}
+			}
 		}
 
 		public class StatCategoryUpgrade
@@ -195,6 +218,14 @@ namespace Vehicles
 			public float value;
 
 			public UpgradeType type;
+
+			public string ValueFormatted
+			{
+				get
+				{
+					return UpgradeTextEntry.FormatValue(value, type, def.toStringStyle, def.toStringNumberSense, def.formatString);
+				}
+			}
 		}
 	}
 }

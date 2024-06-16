@@ -150,9 +150,9 @@ namespace Vehicles
 			}
 		}
 
-		public static void DrawVehicle(Rect rect, VehiclePawn vehicle, Rot8? rot = null, List<GraphicOverlay> extraOverlays = null)
+		public static void DrawVehicle(Rect rect, VehiclePawn vehicle, Rot8? rot = null, List<GraphicOverlay> extraOverlays = null, List<VehicleTurret> extraTurrets = null, List<string> excludeTurrets = null)
 		{
-			DrawVehicleDef(rect, vehicle.VehicleDef, patternData: vehicle.patternData, rot: rot, extraOverlays: extraOverlays);
+			DrawVehicleDef(rect, vehicle.VehicleDef, patternData: vehicle.patternData, rot: rot, extraOverlays: extraOverlays, extraTurrets: extraTurrets, excludeTurrets: excludeTurrets);
 		}
 
 		/// <summary>
@@ -162,7 +162,7 @@ namespace Vehicles
 		/// <param name="rect"></param>
 		/// <param name="vehicleDef"></param>
 		/// <param name="material"></param>
-		public static void DrawVehicleDef(Rect rect, VehicleDef vehicleDef, PatternData patternData = null, Rot8? rot = null, bool withoutTurrets = false, List<GraphicOverlay> extraOverlays = null)
+		public static void DrawVehicleDef(Rect rect, VehicleDef vehicleDef, PatternData patternData = null, Rot8? rot = null, bool withoutTurrets = false, List<GraphicOverlay> extraOverlays = null, List<VehicleTurret> extraTurrets = null, List<string> excludeTurrets = null)
 		{
 			//string drawStep = string.Empty;
 			try
@@ -216,9 +216,16 @@ namespace Vehicles
 				{
 					if (!withoutTurrets || Prefs.UIScale == 1) //NOTE: Temporary fix until Ludeon fixes vanilla bug with matrix rotations inside GUI groups
 					{
-						foreach (RenderData turretRenderData in RetrieveAllTurretSettingsGraphicsProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer), pattern))
+						foreach (RenderData turretRenderData in RetrieveAllTurretSettingsGraphicsProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(t => t.drawLayer), pattern, excludeTurrets: excludeTurrets))
 						{
 							overlayRenderer.Add(turretRenderData);
+						}
+						if (!extraTurrets.NullOrEmpty())
+						{
+							foreach (RenderData turretRenderData in RetrieveAllTurretSettingsGraphicsProperties(rect, vehicleDef, rotDrawn, extraTurrets.OrderBy(t => t.drawLayer), pattern, excludeTurrets: excludeTurrets))
+							{
+								overlayRenderer.Add(turretRenderData);
+							}
 						}
 					}
 				}
@@ -306,17 +313,21 @@ namespace Vehicles
 		/// <param name="turrets"></param>
 		/// <param name="patternData"></param>
 		/// <param name="rot"></param>
-		public static IEnumerable<RenderData> RetrieveAllTurretSettingsGraphicsProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, IEnumerable<VehicleTurret> turrets, PatternData patternData)
+		public static IEnumerable<RenderData> RetrieveAllTurretSettingsGraphicsProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, IEnumerable<VehicleTurret> turrets, PatternData patternData, List<string> excludeTurrets = null)
 		{
 			foreach (VehicleTurret turret in turrets)
 			{
 				if (!turret.parentKey.NullOrEmpty())
 				{
-					continue; //Attached turrets temporarily disabled from rendering
+					//continue; //Attached turrets temporarily disabled from rendering
 				}
 				if (!turret.NoGraphic)
 				{
 					yield return RetrieveTurretSettingsGraphicsProperties(rect, vehicleDef, rot, turret, patternData);
+				}
+				if (excludeTurrets != null && (excludeTurrets.Contains(turret.key) || excludeTurrets.Contains(turret.parentKey)))
+				{
+					continue; //Skip if optional parameter contains turret's or parent turret's key.
 				}
 				if (!turret.TurretGraphics.NullOrEmpty())
 				{

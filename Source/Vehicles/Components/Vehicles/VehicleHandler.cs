@@ -5,6 +5,7 @@ using Verse;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using UnityEngine;
 
 namespace Vehicles
 {
@@ -130,7 +131,9 @@ namespace Vehicles
 			{
 				foreach (Pawn pawn in handlers)
 				{
-					pawn.Drawer.renderer.DynamicDrawPhaseAt(DrawPhase.Draw, vehicle.DrawPos + role.PawnRenderer.DrawOffsetFor(vehicle.FullRotation), role.PawnRenderer.RotFor(vehicle.FullRotation));
+					Vector3 position = vehicle.DrawPos + role.PawnRenderer.DrawOffsetFor(vehicle.FullRotation);
+					Rot4 rot = role.PawnRenderer.RotFor(vehicle.FullRotation);
+					pawn.Drawer.renderer.RenderPawnAt(position, rotOverride: rot);
 				}
 			}
 		}

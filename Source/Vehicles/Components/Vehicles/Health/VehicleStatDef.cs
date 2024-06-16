@@ -30,6 +30,7 @@ namespace Vehicles
 		public ToStringStyle toStringStyle = ToStringStyle.Integer;
 		public ToStringNumberSense toStringNumberSense = ToStringNumberSense.Absolute;
 		public EfficiencyOperationType operationType = EfficiencyOperationType.None;
+		public UpgradeEffectType upgradeEffectType = UpgradeEffectType.Positive;
 
 		public SimpleCurve postProcessCurve;
 		public List<VehicleStatDef> postProcessStatFactors;

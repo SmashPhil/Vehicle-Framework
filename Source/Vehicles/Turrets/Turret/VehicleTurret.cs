@@ -1531,7 +1531,7 @@ namespace Vehicles
 			}
 			if (cachedGraphicData.shaderType != null && cachedGraphicData.shaderType.Shader.SupportsRGBMaskTex())
 			{
-				RGBMaterialPool.CacheMaterialsFor(cacheTarget);
+				RGBMaterialPool.CacheMaterialsFor(cacheTarget, patternData.patternDef);
 				cachedGraphicData.Init(cacheTarget);
 				graphic = cachedGraphicData.Graphic as Graphic_Turret;
 				RGBMaterialPool.SetProperties(cacheTarget, cachedGraphicData, graphic.TexAt, graphic.MaskAt);

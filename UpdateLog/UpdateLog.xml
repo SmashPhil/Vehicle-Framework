@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1650</currentVersion>
+  <currentVersion>1.5.1652</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -43,6 +43,10 @@ As for vehicle raids, I'm still working on the AI so the first iteration isn't r
 - Role upgrades wouldn't recache turret status.
 
 - Turret upgrades would not pull back the right turret if same key as default turret is used.
+
+- Most recently spawned turret's settings would be applied to all vehicles on the map upon loading a save.
+
+- PawnRenderer not rendering at right offset with turret and overlay drawOffsets
 
 - Missing translation keys
 &lt;title&gt;Performance Optimization&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;

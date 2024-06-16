@@ -16,6 +16,8 @@ namespace Vehicles
 		
 		public override bool UnlockOnLoad => false;
 
+		public override bool HasGraphics => turrets.NotNullAndAny(turret => !turret.NoGraphic) || !removeTurrets.NullOrEmpty();
+
 		public override void Unlock(VehiclePawn vehicle, bool unlockingPostLoad)
 		{
 			if (!unlockingPostLoad)

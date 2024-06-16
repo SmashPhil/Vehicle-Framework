@@ -26,8 +26,8 @@ namespace Vehicles
 
 		private List<VehicleTurret> tickers = new List<VehicleTurret>();
 
-		private static List<VehicleTurret> tmpListTurrets = new List<VehicleTurret>();
-		private static List<int> tmpListTurretQuota = new List<int>();
+		private List<VehicleTurret> tmpListTurrets = new List<VehicleTurret>();
+		private List<int> tmpListTurretQuota = new List<int>();
 
 		public bool CanDeploy { get; private set; }
 

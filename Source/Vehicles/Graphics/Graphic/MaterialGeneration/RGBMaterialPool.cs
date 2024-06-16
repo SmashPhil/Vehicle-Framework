@@ -44,7 +44,12 @@ namespace Vehicles
 
 		public static void CacheMaterialsFor(IMaterialCacheTarget target, int renderQueue = 0, List<ShaderParameter> shaderParameters = null)
 		{
-			if (cache.ContainsKey(target) || target.PatternDef == null)
+			CacheMaterialsFor(target, target.PatternDef, renderQueue: renderQueue, shaderParameters: shaderParameters);
+		}
+
+		public static void CacheMaterialsFor(IMaterialCacheTarget target, PatternDef patternDef, int renderQueue = 0, List<ShaderParameter> shaderParameters = null)
+		{
+			if (cache.ContainsKey(target) || patternDef == null)
 			{
 				return;
 			}
@@ -53,7 +58,7 @@ namespace Vehicles
 			for (int i = 0; i < materials.Length; i++)
 			{
 				Rot8 rot = new Rot8(i);
-				Material material = new Material(target.PatternDef.ShaderTypeDef.Shader)
+				Material material = new Material(patternDef.ShaderTypeDef.Shader)
 				{
 					name = target.Name + rot.ToStringNamed(),
 					mainTexture = null,

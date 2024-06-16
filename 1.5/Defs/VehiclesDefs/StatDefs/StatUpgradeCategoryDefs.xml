@@ -8,47 +8,57 @@
 		<label>Fuel Capacity</label>
 
 		<toStringStyle>Integer</toStringStyle>
+		<upgradeEffectType>Positive</upgradeEffectType>
 	</Vehicles.StatUpgradeCategoryDef>
 	
 	<Vehicles.StatUpgradeCategoryDef>
 		<defName>FuelConsumptionRate</defName>
-		<label>Fuel Consumption Rate</label>
+		<label>Fuel Consumption</label>
 
 		<toStringStyle>FloatOne</toStringStyle>
 		<formatString>{0}/day</formatString>
+		<upgradeEffectType>Negative</upgradeEffectType>
 	</Vehicles.StatUpgradeCategoryDef>
 	
 	<Vehicles.StatUpgradeCategoryDef>
 		<defName>ChargeRate</defName>
 		<label>Charge Rate</label>
+
+		<formatString>{0} /day</formatString>
+		<upgradeEffectType>Positive</upgradeEffectType>
 	</Vehicles.StatUpgradeCategoryDef>
 	
 	<Vehicles.StatUpgradeCategoryDef>
 		<defName>DischargeRate</defName>
 		<label>Discharge Rate</label>
+
+		<formatString>{0} /day</formatString>
+		<upgradeEffectType>Negative</upgradeEffectType>
 	</Vehicles.StatUpgradeCategoryDef>
 	
 	<!-- World Map -->
 	<Vehicles.StatUpgradeCategoryDef>
 		<defName>WorldSpeedMultiplier</defName>
-		<label>World Speed Multiplier</label>
+		<label>World Speed</label>
 
-		<toStringStyle>FloatOne</toStringStyle>
-		<formatString>{0} t/d</formatString>
+		<toStringStyle>PercentZero</toStringStyle>
+		<upgradeEffectType>Positive</upgradeEffectType>
 	</Vehicles.StatUpgradeCategoryDef>
 	
 	<Vehicles.StatUpgradeCategoryDef>
 		<defName>OffRoadMultiplier</defName>
-		<label>Off Road Efficiency</label>
+		<label>Off Road Cost</label>
 
 		<toStringStyle>PercentZero</toStringStyle>
+		<upgradeEffectType>Negative</upgradeEffectType>
 	</Vehicles.StatUpgradeCategoryDef>
 	
 	<Vehicles.StatUpgradeCategoryDef>
 		<defName>WinterCostMultiplier</defName>
 		<label>Winter Cost</label>
 
-		<toStringStyle>FloatTwo</toStringStyle>
+		<toStringStyle>FloatOne</toStringStyle>
+		<upgradeEffectType>Negative</upgradeEffectType>
 	</Vehicles.StatUpgradeCategoryDef>
 	
 	<!-- Combat -->
@@ -57,6 +67,7 @@
 		<label>Impact Damage</label>
 
 		<toStringStyle>PercentZero</toStringStyle>
+		<upgradeEffectType>Positive</upgradeEffectType>
 	</Vehicles.StatUpgradeCategoryDef>
 	
 	<Vehicles.StatUpgradeCategoryDef>
@@ -64,5 +75,6 @@
 		<label>Impact Damage Received</label>
 
 		<toStringStyle>PercentZero</toStringStyle>
+		<upgradeEffectType>Negative</upgradeEffectType>
 	</Vehicles.StatUpgradeCategoryDef>
 </Defs>

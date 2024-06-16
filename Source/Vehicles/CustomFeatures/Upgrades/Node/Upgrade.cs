@@ -12,13 +12,7 @@ namespace Vehicles
 
 		public abstract bool UnlockOnLoad { get; }
 
-		public virtual IEnumerable<string> UpgradeDescription
-		{
-			get
-			{
-				yield break;
-			}
-		}
+		public virtual bool HasGraphics => false;
 
 		public virtual IEnumerable<string> ConfigErrors
 		{
@@ -26,6 +20,11 @@ namespace Vehicles
 			{
 				yield break;
 			}
+		}
+
+		public virtual IEnumerable<UpgradeTextEntry> UpgradeDescription(VehiclePawn vehicle)
+		{
+			yield break;
 		}
 
 		/// <summary>

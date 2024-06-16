@@ -13,6 +13,7 @@
 		<formatString>{0} t/s</formatString>
 		<operationType>Average</operationType>
 		<displayPriorityInCategory>100</displayPriorityInCategory>
+		<upgradeEffectType>Positive</upgradeEffectType>
 		
 		<modSettingsInfo>
 			<settingsType>FloatBox</settingsType>
