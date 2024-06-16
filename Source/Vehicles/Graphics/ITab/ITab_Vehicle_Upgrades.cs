@@ -452,15 +452,21 @@ namespace Vehicles
 			if (InfoNode != null)
 			{
 				Rect detailRect = GetDetailRect(rect);
-				detailRect.position += TabRect.position;
-				Find.WindowStack.ImmediateWindow(InfoNode.GetHashCode() ^ Vehicle.GetHashCode(), detailRect, WindowLayer.SubSuper, delegate ()
+				//detailRect.position += TabRect.position;
+				Widgets.BeginGroup(detailRect);
 				{
-					if (Vehicle != null && InfoNode != null)
-					{
-						Rect infoPanelRect = detailRect.AtZero();
-						DrawInfoPanel(infoPanelRect);
-					}
-				}, doBackground: false);
+					Rect infoPanelRect = detailRect.AtZero();
+					DrawInfoPanel(infoPanelRect);
+				}
+				Widgets.EndGroup();
+				//Find.WindowStack.ImmediateWindow(InfoNode.GetHashCode() ^ Vehicle.GetHashCode(), detailRect, WindowLayer.GameUI, delegate ()
+				//{
+				//	if (Vehicle != null && InfoNode != null)
+				//	{
+				//		Rect infoPanelRect = detailRect.AtZero();
+				//		DrawInfoPanel(infoPanelRect);
+				//	}
+				//}, doBackground: false);
 			}
 
 			//Widgets.EndScrollView();
