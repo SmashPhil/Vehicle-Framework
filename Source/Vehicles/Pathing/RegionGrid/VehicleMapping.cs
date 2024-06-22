@@ -209,18 +209,20 @@ namespace Vehicles
 					eventTextBuilder.AppendLine("VF_GeneratingPathGrids".Translate());
 					eventTextBuilder.AppendLine(vehiclePathData.Owner.defName);
 					LongEventHandler.SetCurrentEventText(eventTextBuilder.ToString());
+
 					vehiclePathData.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
 				}
 			}
 			DeepProfiler.End();
 
-			eventTextBuilder.Clear();
-
-			LongEventHandler.SetCurrentEventText("VF_GeneratingRegions".Translate());
-
 			DeepProfiler.Start("Vehicle Regions");
 			foreach (VehicleDef vehicleDef in owners)
 			{
+				eventTextBuilder.Clear();
+				eventTextBuilder.AppendLine("VF_GeneratingRegions".Translate());
+				eventTextBuilder.AppendLine(vehicleDef.defName);
+				LongEventHandler.SetCurrentEventText(eventTextBuilder.ToString());
+
 				VehiclePathData vehiclePathData = this[vehicleDef];
 				vehiclePathData.VehicleRegionAndRoomUpdater.Enabled = true;
 				vehiclePathData.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();

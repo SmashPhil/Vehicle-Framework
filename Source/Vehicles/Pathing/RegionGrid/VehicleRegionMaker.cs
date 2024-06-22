@@ -6,6 +6,7 @@ using System.Threading;
 using Verse;
 using LudeonTK;
 using SmashTools;
+using System.Diagnostics;
 
 namespace Vehicles
 {
@@ -62,13 +63,38 @@ namespace Vehicles
 			VehicleRegion region;
 			try
 			{
-
 				region = VehicleRegion.MakeNewUnfilled(root, mapping.map, createdFor);
 				region.type = expectedRegionType;
+#if DEBUG
+				DeepProfiler.Start("Floodfilling");
+#endif
 				FloodFillAndAddCells(region, root);
+#if DEBUG
+				DeepProfiler.End();
+#endif
+
+#if DEBUG
+				DeepProfiler.Start("Floodfilling");
+#endif
 				CreateLinks(region);
+#if DEBUG
+				DeepProfiler.End();
+#endif
+
+#if DEBUG
+				DeepProfiler.Start("Floodfilling");
+#endif
 				region.RecalculateWeights();
+#if DEBUG
+				DeepProfiler.End();
+#endif
+#if DEBUG
+				DeepProfiler.Start("Floodfilling");
+#endif
 				RegisterThingsInRegionListers(region);
+#if DEBUG
+				DeepProfiler.End();
+#endif
 			}
 			catch (Exception ex)
 			{

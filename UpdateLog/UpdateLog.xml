@@ -44,6 +44,8 @@ As for vehicle raids, I'm still working on the AI so the first iteration isn't r
 
 - Turret upgrades would not pull back the right turret if same key as default turret is used.
 
+- Turret deployment not canceling targeting
+
 - Most recently spawned turret's settings would be applied to all vehicles on the map upon loading a save.
 
 - PawnRenderer not rendering at right offset with turret and overlay drawOffsets
@@ -55,6 +57,8 @@ As for vehicle raids, I'm still working on the AI so the first iteration isn't r
 - Reduced memory allocation for region building.
 
 - Improved map generation time for vehicle regions.
+
+Note: Due to the memory-leak fix, map generation has been made syncronous for all vehicle grids. This will be optimized in a later update.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Turret auto-loading settings will persist even if turret is removed from an upgrade and re-added later.
 
@@ -65,6 +69,8 @@ As for vehicle raids, I'm still working on the AI so the first iteration isn't r
 &lt;b&gt;Modders&lt;/b&gt;
 - Added more upgrade types
 
+- Added deploy/undeploy event types for CompVehicleTurrets
+
 - Added upgrade states, allowing for upgrades that can be reapplied (such as swapping turrets)
 
 - Added texture swapping
@@ -73,7 +79,7 @@ Please report any issues you find on either &lt;link&gt;https://discord.gg/zXDyf
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>
   <!--Show update log on next startup.-->
-  <update>false</update>
+  <update>true</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
   <testing>false</testing>
   <!--Icon bar shown to the right of the mod's name.-->
