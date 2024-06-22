@@ -63,6 +63,7 @@ namespace Vehicles
 		//<Start Event, Stop Event> : SoundDef
 		public List<VehicleSustainerEventEntry<VehicleEventDef>> soundSustainersOnEvent = new List<VehicleSustainerEventEntry<VehicleEventDef>>();
 
+		//TODO 1.6 - refactor to container class for cleaner xml input
 		public Dictionary<VehicleEventDef, List<ResolvedMethod<VehiclePawn>>> events = new Dictionary<VehicleEventDef, List<ResolvedMethod<VehiclePawn>>>();
 
 		public List<Type> designatorTypes = new List<Type>();

@@ -85,11 +85,18 @@ namespace Vehicles
 		{
 			foreach (VehicleTurret turret in turrets)
 			{
-				if (turret.TurretRotation != turret.defaultAngleRotated)
+				if (turret.deployment != DeploymentType.None)
 				{
-					turret.SetTarget(LocalTargetInfo.Invalid);
-					turret.FlagForAlignment();
-					turret.StartTicking();
+					if (TurretTargeter.Turret == turret)
+					{
+						TurretTargeter.Instance.StopTargeting(true);
+					}
+					if (turret.TurretRotation != turret.defaultAngleRotated)
+					{
+						turret.SetTarget(LocalTargetInfo.Invalid);
+						turret.FlagForAlignment();
+						turret.StartTicking();
+					}
 				}
 			}
 		}
@@ -278,6 +285,7 @@ namespace Vehicles
 					{
 						Vehicle.jobs.StartJob(new Job(JobDefOf_Vehicles.DeployVehicle, targetA: Vehicle), JobCondition.InterruptForced);
 						deployTicks = DeployTicks;
+						
 					},
 					isActive = () => Deployed
 				};
@@ -641,10 +649,12 @@ namespace Vehicles
 			if (deployed)
 			{
 				Props.deploySound?.PlayOneShot(Vehicle);
+				Vehicle.EventRegistry[VehicleEventDefOf.Deployed].ExecuteEvents();
 			}
 			else
 			{
 				Props.undeploySound?.PlayOneShot(Vehicle);
+				Vehicle.EventRegistry[VehicleEventDefOf.Undeployed].ExecuteEvents();
 			}
 		}
 

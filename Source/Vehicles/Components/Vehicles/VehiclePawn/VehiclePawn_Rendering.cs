@@ -12,7 +12,7 @@ using Verse.Sound;
 using Verse.AI;
 using Verse.AI.Group;
 using SmashTools;
-using Mono.Security;
+using SmashTools.Animations;
 
 namespace Vehicles
 {
@@ -50,6 +50,8 @@ namespace Vehicles
 		public (Vector3 drawPos, float rotation) DrawData => (DrawPos, this.CalculateAngle(out _));
 
 		public ThingWithComps Thing => this;
+
+		public ModContentPack ModContentPack => VehicleDef.modContentPack;
 
 		public bool CrashLanded
 		{
@@ -1017,9 +1019,14 @@ namespace Vehicles
 
 		public void SetRetexture(RetextureDef retextureDef)
 		{
-			this.retextureDef = retextureDef;
-			ResetGraphic();
-			Notify_ColorChanged();
+			SetRetextureInternal(this, retextureDef);
+		}
+
+		private static void SetRetextureInternal(VehiclePawn vehicle, RetextureDef retextureDef)
+		{
+			vehicle.retextureDef = retextureDef;
+			vehicle.ResetGraphic();
+			vehicle.Notify_ColorChanged();
 		}
 
 		public void Rename()
@@ -1107,6 +1114,12 @@ namespace Vehicles
 						{
 							options.Add(new FloatMenuOption("Open in animator", OpenInAnimator));
 						}
+#if DEBUG
+						if (CompVehicleLauncher != null)
+						{
+							options.Add(new FloatMenuOption("Open in animator (test version)", OpenInAnimator_New));
+						}
+#endif
 						if (!options.NullOrEmpty())
 						{
 							Find.WindowStack.Add(new FloatMenu(options));
@@ -1125,6 +1138,12 @@ namespace Vehicles
 		{
 			Dialog_GraphEditor dialog_GraphEditor = new Dialog_GraphEditor(this, false);
 			//dialog_GraphEditor.LogReport = VehicleMod.settings.debug.debugLogging;
+			Find.WindowStack.Add(dialog_GraphEditor);
+		}
+
+		public void OpenInAnimator_New()
+		{
+			Dialog_AnimationEditor dialog_GraphEditor = new Dialog_AnimationEditor(this);
 			Find.WindowStack.Add(dialog_GraphEditor);
 		}
 

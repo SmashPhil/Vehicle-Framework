@@ -20,6 +20,26 @@ namespace Vehicles
 
 		public override bool IsTargeting => action != null;
 
+		public bool TargeterValid
+		{
+			get
+			{
+				if (vehicle is null || vehicle.Map != Find.CurrentMap || vehicle.Destroyed)
+				{
+					return false;
+				}
+				if (Turret is null || Turret.ComponentDisabled)
+				{
+					return false;
+				}
+				if (!Find.Selector.IsSelected(vehicle))
+				{
+					return false;
+				}
+				return true;
+			}
+		}
+
 		public static void BeginTargeting(TargetingParameters targetParams, Action<LocalTargetInfo> action, VehicleTurret turret, Action actionWhenFinished = null, Texture2D mouseAttachment = null)
 		{
 			Instance.action = action;
@@ -58,7 +78,11 @@ namespace Vehicles
 
 		public override void ProcessInputEvents()
 		{
-			ConfirmStillValid();
+			if (!TargeterValid)
+			{
+				StopTargeting(true);
+				return;
+			}
 			if (IsTargeting)
 			{
 				if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
@@ -119,14 +143,6 @@ namespace Vehicles
 						Turret.AlignToAngleRestricted((float)Turret.TurretLocation.ToIntVec3().AngleToCell(mouseTarget.Cell, map));
 					}
 				}
-			}
-		}
-
-		private void ConfirmStillValid()
-		{
-			if (vehicle is null || (vehicle.Map != Find.CurrentMap || vehicle.Destroyed || Turret.ComponentDisabled || !Find.Selector.IsSelected(vehicle)))
-			{
-				StopTargeting(true);
 			}
 		}
 

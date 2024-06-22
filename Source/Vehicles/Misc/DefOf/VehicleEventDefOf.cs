@@ -35,6 +35,8 @@ namespace Vehicles
 		//Comps
 		public static VehicleEventDef OutOfFuel;
 		public static VehicleEventDef Refueled;
+		public static VehicleEventDef Deployed;
+		public static VehicleEventDef Undeployed;
 
 		//Stats
 		public static VehicleEventDef DamageTaken;

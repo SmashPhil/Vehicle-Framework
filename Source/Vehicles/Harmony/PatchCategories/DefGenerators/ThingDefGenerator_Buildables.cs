@@ -17,7 +17,7 @@ namespace Vehicles
 			impliedBuildDef = null;
 			if (vehicleDef.buildDef is null)
 			{
-				Log.Warning($"Implied generation for vehicles is incomplete. Please define the VehicleBuildDef separately to avoid improper vehicle generation.");
+				Log.Warning($"[{vehicleDef}] Implied generation for vehicles is incomplete. Please define the VehicleBuildDef separately to avoid improper vehicle generation.");
 				impliedBuildDef = new VehicleBuildDef
 				{
 					defName = $"{vehicleDef.defName}_Blueprint",

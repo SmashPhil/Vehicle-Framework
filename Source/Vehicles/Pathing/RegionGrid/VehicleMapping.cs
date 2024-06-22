@@ -8,6 +8,7 @@ using UnityEngine;
 using HarmonyLib;
 using SmashTools;
 using SmashTools.Performance;
+using System.Text;
 
 namespace Vehicles
 {
@@ -195,20 +196,29 @@ namespace Vehicles
 			}
 
 			Ext_Map.StashLongEventText();
-			LongEventHandler.SetCurrentEventText("Generating Vehicle PathGrids");
 
-			DeepProfiler.Start("VF_GeneratePathGrids".Translate());
+			StringBuilder eventTextBuilder = new StringBuilder();
+
+			DeepProfiler.Start("Vehicle PathGrids".Translate());
 			foreach (VehiclePathData vehiclePathData in vehicleData)
 			{
 				//Needs to check validity, non-pathing vehicles are still indexed since sequential vehicles will have higher index numbers
 				if (vehiclePathData.IsValid)
 				{
+					eventTextBuilder.Clear();
+					eventTextBuilder.AppendLine("VF_GeneratingPathGrids".Translate());
+					eventTextBuilder.AppendLine(vehiclePathData.Owner.defName);
+					LongEventHandler.SetCurrentEventText(eventTextBuilder.ToString());
 					vehiclePathData.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
 				}
 			}
 			DeepProfiler.End();
 
-			DeepProfiler.Start("VF_GenerateRegions".Translate());
+			eventTextBuilder.Clear();
+
+			LongEventHandler.SetCurrentEventText("VF_GeneratingRegions".Translate());
+
+			DeepProfiler.Start("Vehicle Regions");
 			foreach (VehicleDef vehicleDef in owners)
 			{
 				VehiclePathData vehiclePathData = this[vehicleDef];

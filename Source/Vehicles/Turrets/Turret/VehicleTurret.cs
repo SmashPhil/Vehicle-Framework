@@ -278,8 +278,8 @@ namespace Vehicles
 				return deployment switch
 				{
 					DeploymentType.None => true,
-					DeploymentType.Deployed => vehicle.CompVehicleTurrets.Deployed,
-					DeploymentType.Undeployed => !vehicle.CompVehicleTurrets.Deployed,
+					DeploymentType.Deployed => vehicle.CompVehicleTurrets.Deployed && !vehicle.Deploying,
+					DeploymentType.Undeployed => !vehicle.CompVehicleTurrets.Deployed && !vehicle.Deploying,
 					_ => throw new NotImplementedException(nameof(DeploymentType))
 				};
 			}

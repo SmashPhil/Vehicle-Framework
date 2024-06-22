@@ -12,10 +12,11 @@ using Verse.Sound;
 using Verse.AI;
 using Verse.AI.Group;
 using SmashTools;
+using SmashTools.Animations;
 
 namespace Vehicles
 {
-	public partial class VehiclePawn : Pawn, IInspectable, IAnimationTarget, IEventManager<VehicleEventDef>, IMaterialCacheTarget
+	public partial class VehiclePawn : Pawn, IInspectable, IAnimationTarget, IAnimator, IEventManager<VehicleEventDef>, IMaterialCacheTarget
 	{
 		public bool Initialized { get; private set; }
 

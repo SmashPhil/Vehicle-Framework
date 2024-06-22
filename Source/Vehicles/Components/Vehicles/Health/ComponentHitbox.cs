@@ -44,14 +44,14 @@ namespace Vehicles
 				Empty = false;
 				CellRect rect = def.VehicleRect(new IntVec3(0, 0, 0), Rot4.North);
 				List<IntVec3> cells;
-				if (side == VehicleComponentPosition.Body) //TODO - Remove BodyNoOverlap in 1.5
+				if (side == VehicleComponentPosition.Body)
 				{
 					cells = rect.Cells.ToList();
 				}
-				else if (side == VehicleComponentPosition.BodyNoOverlap)
+				else if (side == VehicleComponentPosition.BodyNoOverlap) //TODO 1.6 - Remove BodyNoOverlap
 				{
 					cells = rect.Cells.ToList();
-					Log.Warning($"[{def}] BodyNoOverlap is obsolete, specify the cells directly or use Body. This option will be removed in 1.5");
+					Log.Warning($"[{def}] BodyNoOverlap is obsolete, specify the cells directly or use Body. This option will be removed in 1.6");
 				}
 				else if (side != VehicleComponentPosition.Empty)
 				{

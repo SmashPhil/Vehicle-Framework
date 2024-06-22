@@ -11,8 +11,10 @@ namespace Vehicles
 	[HeaderTitle(Label = "VF_Properties", Translate = true)]
 	public class VehicleProperties
 	{
+#if !FISHING_DISABLED
 		[PostToSettings(Label = "VF_FishingEnabled", Tooltip = "VF_FishingEnabledTooltip", Translate = true, UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Sea)]
 		[DisableSettingConditional(MayRequireAny = new string[] { CompatibilityPackageIds.VE_Fishing })]
+#endif
 		public bool fishing = false;
 
 		public VehicleTrack track;

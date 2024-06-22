@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<LanguageData>
+	<ST_AnimationWindow>Animation</ST_AnimationWindow>
+	<ST_CreateNewClip>Create New Clip...</ST_CreateNewClip>
+
+	<ST_PreviewAnimation>Preview</ST_PreviewAnimation>
+	<ST_PreviewAnimationTooltip>Enable/disable preview mode of entity's animation in-game</ST_PreviewAnimationTooltip>
+	<ST_PlayAnimationTooltip>Play the animation</ST_PlayAnimationTooltip>
+	<ST_PauseAnimationTooltip>Pause the animation</ST_PauseAnimationTooltip>
+	<ST_SkipFrameBeginningTooltip>Go to the beginning of the animation</ST_SkipFrameBeginningTooltip>
+	<ST_SkipFramePreviousTooltip>Go to previous keyframe</ST_SkipFramePreviousTooltip>
+	<ST_SkipFrameNextTooltip>Go to next keyframe</ST_SkipFrameNextTooltip>
+	<ST_SkipFrameEndTooltip>Go to the end of the animation</ST_SkipFrameEndTooltip>
+
+	<ST_AddKeyFrame>Add keyframe</ST_AddKeyFrame>
+	<ST_AddAnimationEvent>Add event</ST_AddAnimationEvent>
+	<ST_AddProperty>Add Property</ST_AddProperty>
+
+	<ST_DopesheetTab>Dopesheet</ST_DopesheetTab>
+	<ST_CurvesTab>Curves</ST_CurvesTab>
+</LanguageData>

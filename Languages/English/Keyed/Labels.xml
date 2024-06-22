@@ -105,7 +105,7 @@
 	<VF_Depth_Internal>Internal</VF_Depth_Internal>
 	<VF_Depth_External>External</VF_Depth_External>
 	<VF_Depth_Undefined>Undefined</VF_Depth_Undefined>
-	
+
 	<VF_NoFuelReturnTrip>No Return Trip</VF_NoFuelReturnTrip>
 	<VF_NotEnoughFuel>Out Of Range</VF_NotEnoughFuel>
 	<VF_ConfirmationCancelLanding>Cancel landing in this map? Aerial vehicle will be kicked out to the world map.</VF_ConfirmationCancelLanding>
