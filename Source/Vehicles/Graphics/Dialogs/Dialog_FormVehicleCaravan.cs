@@ -557,7 +557,7 @@ namespace Vehicles
 					else
 					{
 						List<VehiclePawn> vehiclesFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables).Where(pawn => pawn is VehiclePawn).Cast<VehiclePawn>().ToList();
-						if (vehiclesFromTransferables.Any(vehicle => !Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().PassableFast(map.Tile, vehicle.VehicleDef)))
+						if (vehiclesFromTransferables.Any(vehicle => !Find.World.GetComponent<WorldVehiclePathGrid>().PassableFast(map.Tile, vehicle.VehicleDef)))
 						{
 							Messages.Message("MessageNoValidExitTile".Translate(), MessageTypeDefOf.RejectInput, false);
 							return;
@@ -605,7 +605,7 @@ namespace Vehicles
 		private bool DebugTryFormCaravanInstantly()
 		{
 			List<VehiclePawn> vehiclesFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables).Where(pawn => pawn is VehiclePawn).Cast<VehiclePawn>().ToList();
-			if (vehiclesFromTransferables.Any(vehicle => !Find.World.GetCachedWorldComponent<WorldVehiclePathGrid>().PassableFast(map.Tile, vehicle.VehicleDef)))
+			if (vehiclesFromTransferables.Any(vehicle => !Find.World.GetComponent<WorldVehiclePathGrid>().PassableFast(map.Tile, vehicle.VehicleDef)))
 			{
 				Messages.Message("MessageNoValidExitTile".Translate(), MessageTypeDefOf.RejectInput, false);
 				return false;

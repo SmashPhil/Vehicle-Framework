@@ -18,7 +18,7 @@ namespace Vehicles
 
 		public VehicleGraphicSet graphics;
 
-		private Graphic_Shadow shadowGraphic;
+		//private Graphic_DynamicShadow shadowGraphic;
 
 		//FOR TESTING ONLY
 		private PawnFirefoamDrawer firefoamOverlays;
@@ -45,15 +45,15 @@ namespace Vehicles
 			
 			if (vehicle.def.race.specialShadowData != null)
 			{
-				if (shadowGraphic == null)
-				{
-					shadowGraphic = new Graphic_Shadow(vehicle.def.race.specialShadowData);
-				}
-				shadowGraphic.Draw(drawLoc, Rot4.North, vehicle, 0f);
+				//if (shadowGraphic == null)
+				//{
+				//	shadowGraphic = new Graphic_DynamicShadow(vehicle.def.race.specialShadowData);
+				//}
+				//shadowGraphic.Draw(drawLoc, Rot4.North, vehicle, 0f);
 			}
-			if (graphics.vehicle.VehicleGraphic != null && graphics.vehicle.VehicleGraphic.ShadowGraphic != null)
+			if (graphics.vehicle.VehicleGraphic?.ShadowGraphic != null)
 			{
-				graphics.vehicle.VehicleGraphic.ShadowGraphic.Draw(drawLoc, Rot4.North, vehicle, 0f);
+				graphics.vehicle.VehicleGraphic.ShadowGraphic.Draw(drawLoc, vehicle.FullRotation, vehicle, 0f);
 			}
 			if (vehicle.Spawned && !vehicle.Dead)
 			{
@@ -84,7 +84,7 @@ namespace Vehicles
 			Rot8 vehicleRot = new Rot8(bodyFacing, angle);
 			Mesh mesh = graphics.vehicle.VehicleGraphic.MeshAtFull(vehicleRot);
 			List<Material> list = graphics.MatsBodyBaseAt(vehicleRot);
-
+			
 			for (int i = 0; i < list.Count; i++)
 			{
 				GenDraw.DrawMeshNowOrLater(mesh, aboveBodyPos, quaternion, list[i], false);

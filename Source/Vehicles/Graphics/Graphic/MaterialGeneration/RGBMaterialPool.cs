@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,6 +8,10 @@ using UnityEngine;
 using Verse;
 using SmashTools;
 using Object = UnityEngine.Object;
+using RimWorld;
+using RimWorld.Planet;
+using Verse.AI;
+using Verse.Noise;
 
 namespace Vehicles
 {
@@ -39,7 +44,12 @@ namespace Vehicles
 
 		public static void CacheMaterialsFor(IMaterialCacheTarget target, int renderQueue = 0, List<ShaderParameter> shaderParameters = null)
 		{
-			if (cache.ContainsKey(target) || target.PatternDef == null)
+			CacheMaterialsFor(target, target.PatternDef, renderQueue: renderQueue, shaderParameters: shaderParameters);
+		}
+
+		public static void CacheMaterialsFor(IMaterialCacheTarget target, PatternDef patternDef, int renderQueue = 0, List<ShaderParameter> shaderParameters = null)
+		{
+			if (cache.ContainsKey(target) || patternDef == null)
 			{
 				return;
 			}
@@ -48,7 +58,7 @@ namespace Vehicles
 			for (int i = 0; i < materials.Length; i++)
 			{
 				Rot8 rot = new Rot8(i);
-				Material material = new Material(target.PatternDef.ShaderTypeDef.Shader)
+				Material material = new Material(patternDef.ShaderTypeDef.Shader)
 				{
 					name = target.Name + rot.ToStringNamed(),
 					mainTexture = null,
@@ -168,6 +178,7 @@ namespace Vehicles
 				}
 
 				cache.Remove(target);
+				GraphicDatabaseRGB.Remove(target);
 				Debug.Message($"<success>{VehicleHarmony.LogLabel}</success> Removed {target} from RGBMaterialPool and cleared all entries.");
 			}
 		}
@@ -184,6 +195,163 @@ namespace Vehicles
 			report.AppendLine($"----- End of Cache Output -----");
 
 			Log.Message(report.ToString());
+		}
+
+		[UnitTest(Category = "Performance", Name = "Material Memory Management", GameState = GameState.Playing)]
+		private static void UnitTest_MaterialMemoryManagement()
+		{
+			LongEventHandler.ExecuteWhenFinished(delegate ()
+			{
+				CoroutineManager.QueueInvoke(TestVehicleMaterialCaching);
+			});
+		}
+
+		private static IEnumerator TestVehicleMaterialCaching()
+		{
+			Log.Message($"------ Running MaterialMemoryManagement Test ------ ");
+			
+			Map map = Find.CurrentMap ?? Find.Maps.FirstOrDefault(map => map.Parent is Settlement settlement && settlement.Faction == Faction.OfPlayerSilentFail);
+			if (map == null)
+			{
+				Log.Error($"Unable to conduct material memory management unit test. Null map.");
+				yield break;
+			}
+
+			MaterialTesting materialTest = new MaterialTesting();
+
+			IntVec3 cell = map.Center;
+
+			materialTest.Start("Defs");
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+			{
+				materialTest.Start(vehicleDef.defName);
+				{
+					ClearAreaSpawnTerrain(vehicleDef, map, cell);
+
+					VehiclePawn generatedVehicle = VehicleSpawner.GenerateVehicle(vehicleDef, Faction.OfPlayer);
+					VehiclePawn vehicle = (VehiclePawn)GenSpawn.Spawn(generatedVehicle, cell, map, Rot8.North, WipeMode.FullRefund, false);
+					_ = vehicle.VehicleGraphic; //allow graphic to be cached before any upgrade calls
+					
+					if (vehicle.CompUpgradeTree != null)
+					{
+						foreach (UpgradeNode node in vehicle.CompUpgradeTree.Props.def.nodes)
+						{
+							materialTest.Start($"{vehicleDef.defName} {vehicle.CompUpgradeTree.Props.def}->{node.key}");
+							{
+								vehicle.CompUpgradeTree.FinishUnlock(node);
+								yield return null; //1 frame for rendering
+								vehicle.CompUpgradeTree.ResetUnlock(node);
+							}
+							materialTest.Stop();
+						}
+					}
+					vehicle.Destroy();
+				}
+				materialTest.Stop();
+				yield return null;
+			}
+			materialTest.Stop();
+			
+			Log.Message($"------ Report Complete ------ ");
+
+			if (materialTest.OngoingTests)
+			{
+				Log.Error($"Finished MaterialCache Report but material testing is still ongoing.");
+			}
+			
+		}
+
+		private static void ClearAreaSpawnTerrain(VehicleDef vehicleDef, Map map, IntVec3 cell)
+		{
+			TerrainDef validTerrain = DefDatabase<TerrainDef>.AllDefsListForReading.Where(terrainDef => TerrainCostFor(vehicleDef, terrainDef) < VehiclePathGrid.ImpassableCost).RandomElement();
+
+			try
+			{
+				IntVec2 sizeNeeded = vehicleDef.Size;
+				for (int x = -sizeNeeded.x; x < sizeNeeded.x; x++)
+				{
+					for (int z = -sizeNeeded.z; z < sizeNeeded.z; z++)
+					{
+						IntVec3 rectCell = new IntVec3(cell.x + x, 0, cell.z + z);
+						List<Thing> thingList = map.thingGrid.ThingsListAtFast(rectCell).ToList();
+						foreach (Thing thing in thingList)
+						{
+							thing.Destroy();
+						}
+						map.terrainGrid.SetTerrain(rectCell, validTerrain);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Log.Error($"Exception thrown clearing area for {vehicleDef}.\nException={ex}");
+			}
+		}
+
+		private static int TerrainCostFor(VehicleDef vehicleDef, TerrainDef terrainDef)
+		{
+			if (vehicleDef.properties.customTerrainCosts.TryGetValue(terrainDef, out int pathCost))
+			{
+				return pathCost;
+			}
+			return terrainDef.pathCost;
+		}
+
+		private class MaterialTesting
+		{
+			private StringBuilder reportBuilder = new StringBuilder();
+			private Stack<TestCase> ongoingTests = new Stack<TestCase>();
+
+			public bool OngoingTests => ongoingTests.Count > 0;
+
+			public void Start(string label)
+			{
+				int targets = cache.Count;
+				int materials = cache.Values.Sum(arr => arr.Length);
+
+				this.ongoingTests.Push(new TestCase(label, targets, materials));
+			}
+
+			public void Stop()
+			{
+				reportBuilder.Clear();
+				int targetsAfter = cache.Count;
+				int materialsAfter = cache.Values.Sum(arr => arr.Length);
+
+				TestCase testCase = ongoingTests.Pop();
+
+				bool targetResult = testCase.targets == targetsAfter;
+				bool materialsResult = testCase.materials == materialsAfter;
+
+				reportBuilder.AppendLine($"[<property>{testCase.label}</property>]: Targets={ResultString(targetResult)} Materials={ResultString(materialsResult)}");
+				reportBuilder.AppendInNewLine($"Targets: {testCase.targets}->{targetsAfter} Materials: {testCase.materials}->{materialsAfter}");
+
+				SmashLog.Message(reportBuilder.ToString());
+				reportBuilder.Clear();
+			}
+
+			private string ResultString(bool value)
+			{
+				if (value)
+				{
+					return $"<success>True</success>";
+				}
+				return $"<error>False</error>";
+			}
+
+			private class TestCase
+			{
+				public string label;
+				public int targets;
+				public int materials;
+
+				public TestCase(string label, int targets, int materials)
+				{
+					this.label = label;
+					this.targets = targets;
+					this.materials = materials;
+				}
+			}
 		}
 	}
 }

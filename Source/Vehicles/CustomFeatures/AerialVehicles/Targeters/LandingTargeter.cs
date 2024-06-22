@@ -128,8 +128,16 @@ namespace Vehicles
 				CellRect occupiedRect = GenAdj.OccupiedRect(cell, landingRotation, vehicle.VehicleDef.Size);
 				foreach (IntVec3 occupiedCell in occupiedRect)
 				{
+					if (RoofPunchOverride(map, occupiedCell, out int stateInt))
+					{
+						return (PositionState)stateInt;
+					}
 					if (occupiedCell.GetRoof(map) is RoofDef roofDef)
 					{
+						if (roofDef.GetModExtension<RoofDefPositionStateDefModExtension>() is RoofDefPositionStateDefModExtension roofDefPosition)
+						{
+							return roofDefPosition.state;
+						}
 						if (roofDef.isThickRoof)
 						{
 							return PositionState.Invalid;
@@ -139,6 +147,15 @@ namespace Vehicles
 				}
 			}
 			return PositionState.Valid;
+		}
+
+		/// <summary>
+		/// Hook for modders to patch with no VehicleFramework types. Returns the int value of <see cref="PositionState"/> at <see cref="cell"/>
+		/// </summary>
+		private bool RoofPunchOverride(Map map, IntVec3 cell, out int stateInt)
+		{
+			stateInt = 0;
+			return false;
 		}
 
 		public override void ProcessInputEvents()
@@ -304,11 +321,11 @@ namespace Vehicles
 			Instance = this;
 		}
 
-		public enum PositionState
+		public enum PositionState : int
 		{
-			Invalid,
-			Obstructed,
-			Valid
+			Invalid = 0,
+			Obstructed = 1,
+			Valid = 2
 		}
 	}
 }

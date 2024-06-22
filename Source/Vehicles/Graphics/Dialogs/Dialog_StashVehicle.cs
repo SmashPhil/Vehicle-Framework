@@ -393,7 +393,7 @@ namespace Vehicles
 			stashedVehicle.Tile = caravan.Tile;
 			
 			//Calculate days before removal from map
-			VehiclePawn largestVehicle = caravan.Vehicles.MaxBy(vehicle => vehicle.VehicleDef.Size.Magnitude);
+			VehiclePawn largestVehicle = caravan.VehiclesListForReading.MaxBy(vehicle => vehicle.VehicleDef.Size.Magnitude);
 			float t = Ext_Math.ReverseInterpolate(largestVehicle.VehicleDef.Size.Magnitude, 1, 10);
 			float timeoutDays = 25 * Mathf.Lerp(1.2f, 0.8f, t); //20 to 30 days depending on size of vehicle
 			stashedVehicle.GetComponent<TimeoutComp>().StartTimeout(Mathf.CeilToInt(timeoutDays * 60000));
@@ -467,7 +467,7 @@ namespace Vehicles
 
 		private void AddItemsToTransferables()
 		{
-			foreach (VehiclePawn vehicle in caravan.Vehicles)
+			foreach (VehiclePawn vehicle in caravan.VehiclesListForReading)
 			{
 				foreach (Thing thing in vehicle.inventory.innerContainer)
 				{

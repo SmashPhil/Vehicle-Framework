@@ -5,6 +5,8 @@ using UnityEngine;
 using Verse;
 using RimWorld;
 using SmashTools;
+using static Vehicles.StatUpgrade;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Vehicles
 {
@@ -18,7 +20,56 @@ namespace Vehicles
 
 		public override bool UnlockOnLoad => true;
 
-		public override void Unlock(VehiclePawn vehicle, bool unlockingAfterLoad)
+		public override IEnumerable<UpgradeTextEntry> UpgradeDescription(VehiclePawn vehicle)
+		{
+			if (!stats.NullOrEmpty())
+			{
+				foreach (StatDefUpgrade statDefUpgrade in stats)
+				{
+					switch (statDefUpgrade.type)
+					{
+						case UpgradeType.Add:
+							yield return new UpgradeTextEntry(statDefUpgrade.def.LabelCap, statDefUpgrade.ValueFormatted, statDefUpgrade.value, UpgradeEffectType.Positive);
+							break;
+						case UpgradeType.Set:
+							yield return new UpgradeTextEntry(statDefUpgrade.def.LabelCap, statDefUpgrade.value.ToString());
+							break;
+					}
+				}
+			}
+			if (!vehicleStats.NullOrEmpty())
+			{
+				foreach (VehicleStatDefUpgrade vehicleStatDefUpgrade in vehicleStats)
+				{
+					switch (vehicleStatDefUpgrade.type)
+					{
+						case UpgradeType.Add:
+							yield return new UpgradeTextEntry(vehicleStatDefUpgrade.def.LabelCap, vehicleStatDefUpgrade.ValueFormatted, vehicleStatDefUpgrade.value, vehicleStatDefUpgrade.def.upgradeEffectType);
+							break;
+						case UpgradeType.Set:
+							yield return new UpgradeTextEntry(vehicleStatDefUpgrade.def.LabelCap, vehicleStatDefUpgrade.value.ToString());
+							break;
+					}
+				}
+			}
+			if (!statCategories.NullOrEmpty())
+			{
+				foreach (StatCategoryUpgrade statCategoryUpgrade in statCategories)
+				{
+					switch (statCategoryUpgrade.type)
+					{
+						case UpgradeType.Add:
+							yield return new UpgradeTextEntry(statCategoryUpgrade.def.LabelCap, statCategoryUpgrade.ValueFormatted, statCategoryUpgrade.value, statCategoryUpgrade.def.upgradeEffectType);
+							break;
+						case UpgradeType.Set:
+							yield return new UpgradeTextEntry(statCategoryUpgrade.def.LabelCap, statCategoryUpgrade.value.ToString());
+							break;
+					}
+				}
+			}
+		}
+
+		public override void Unlock(VehiclePawn vehicle, bool unlockingPostLoad)
 		{
 			if (!stats.NullOrEmpty())
 			{
@@ -126,6 +177,23 @@ namespace Vehicles
 			public float value;
 
 			public UpgradeType type;
+
+			public string ValueFormatted
+			{
+				get
+				{
+					string text = value.ToStringByStyle(def.toStringStyle, numberSense: def.toStringNumberSense);
+					if (def.toStringNumberSense != ToStringNumberSense.Factor && !def.formatString.NullOrEmpty())
+					{
+						text = string.Format(def.formatString, text);
+					}
+					if (type == UpgradeType.Add && value > 0)
+					{
+						text = "+" + text;
+					}
+					return text;
+				}
+			}
 		}
 
 		public class VehicleStatDefUpgrade
@@ -134,6 +202,14 @@ namespace Vehicles
 			public float value;
 
 			public UpgradeType type;
+
+			public string ValueFormatted
+			{
+				get
+				{
+					return UpgradeTextEntry.FormatValue(value, type, def.toStringStyle, def.toStringNumberSense, def.formatString);
+				}
+			}
 		}
 
 		public class StatCategoryUpgrade
@@ -142,6 +218,14 @@ namespace Vehicles
 			public float value;
 
 			public UpgradeType type;
+
+			public string ValueFormatted
+			{
+				get
+				{
+					return UpgradeTextEntry.FormatValue(value, type, def.toStringStyle, def.toStringNumberSense, def.formatString);
+				}
+			}
 		}
 	}
 }

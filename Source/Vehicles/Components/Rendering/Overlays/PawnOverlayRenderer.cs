@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using HarmonyLib;
 using UnityEngine;
 using Verse;
 using RimWorld;
 using SmashTools;
 
+
 namespace Vehicles
 {
 	public class PawnOverlayRenderer
 	{
-		private const float LayersTotalAllowed = 10;
-
-		private static Listing_SplitColumns listing = new Listing_SplitColumns();
+		private Listing_SplitColumns listing = new Listing_SplitColumns();
 
 		[TweakField(SettingsType = UISettingsType.Checkbox)]
 		public bool showBody = true;
@@ -134,18 +135,19 @@ namespace Vehicles
 
 		public float LayerFor(Rot8 rot)
 		{
-			return rot.AsInt switch
+			int rotLayer = rot.AsInt switch
 			{
-				0 => (layerNorth ?? layerSouth ?? layer) / LayersTotalAllowed,
-				1 => (layerEast ?? layerWest ?? layer) / LayersTotalAllowed,
-				2 => (layerSouth ?? layerNorth ?? layer) / LayersTotalAllowed,
-				3 => (layerWest ?? layerEast ?? layer) / LayersTotalAllowed,
-				4 => (layerNorthEast ?? layerNorthWest ?? layerNorth ?? layer) / LayersTotalAllowed,
-				5 => (layerSouthEast ?? layerSouthWest ?? layerSouth ?? layer) / LayersTotalAllowed,
-				6 => (layerSouthWest ?? layerSouthEast ?? layerSouth ?? layer) / LayersTotalAllowed,
-				7 => (layerNorthWest ?? layerNorthEast ?? layerNorth ?? layer) / LayersTotalAllowed,
+				0 => (layerNorth ?? layerSouth ?? layer),
+				1 => (layerEast ?? layerWest ?? layer),
+				2 => (layerSouth ?? layerNorth ?? layer),
+				3 => (layerWest ?? layerEast ?? layer),
+				4 => (layerNorthEast ?? layerNorthWest ?? layerNorth ?? layer),
+				5 => (layerSouthEast ?? layerSouthWest ?? layerSouth ?? layer),
+				6 => (layerSouthWest ?? layerSouthEast ?? layerSouth ?? layer),
+				7 => (layerNorthWest ?? layerNorthEast ?? layerNorth ?? layer),
 				_ => throw new NotImplementedException(),
 			};
+			return rotLayer * (Altitudes.AltInc / GraphicDataLayered.SubLayerCount);
 		}
 
 		public Vector3 DrawOffsetFor(Rot8 rot)
@@ -162,7 +164,7 @@ namespace Vehicles
 				7 => drawOffsetNorthWest ?? drawOffsetNorthEast?.MirrorHorizontal() ?? drawOffsetNorth?.RotatedBy(-45) ?? drawOffset.RotatedBy(rot.AsAngle),
 				_ => throw new NotImplementedException(),
 			};
-			offset.y = LayerFor(rot);
+			offset.y += LayerFor(rot);
 			return offset;
 		}
 

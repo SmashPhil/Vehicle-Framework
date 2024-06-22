@@ -19,12 +19,13 @@ namespace Vehicles
 	public class WorldVehiclePathGrid : WorldComponent
 	{
 		public const float ImpassableMovementDifficulty = 1000f;
-		public const float MaxTempForWinterOffset = 5f;
-
+		
 		/// <summary>
 		/// Store entire pathGrid for each <see cref="VehicleDef"/>
 		/// </summary>
 		public PathGrid[] movementDifficulty;
+		private float[] winter;
+
 		private readonly List<VehicleDef> owners = new List<VehicleDef>();
 
 		private int allPathCostsRecalculatedDayOfYear = -1;
@@ -35,6 +36,7 @@ namespace Vehicles
 		{
 			this.world = world;
 			movementDifficulty = new PathGrid[DefDatabase<VehicleDef>.DefCount];
+			winter = new float[Find.WorldGrid.TilesCount];
 			ResetPathGrid();
 			Instance = this;
 			Initialized = false;
@@ -244,12 +246,26 @@ namespace Vehicles
 					List<int> neighbors = new List<int>();
 					Ext_World.BFS(tile, neighbors, radius: 10);
 
-					Find.World.debugDrawer.FlashTile(tile, colorPct: 0.8f, duration: 30);
+					Find.World.debugDrawer.FlashTile(tile, colorPct: 0.8f, duration: 15);
 					foreach (int neighbor in neighbors)
 					{
-						bool canReach = Find.World.GetCachedWorldComponent<WorldVehicleReachability>().CanReach(vehicleDef: DebugHelper.World.VehicleDef, tile, neighbor);
+						bool canReach = Find.World.GetComponent<WorldVehicleReachability>().CanReach(vehicleDef: DebugHelper.World.VehicleDef, tile, neighbor);
 						float colorPct = canReach ? 0.55f : 0f;
 						Find.World.debugDrawer.FlashTile(neighbor, colorPct: colorPct, duration: 30);
+					}
+				}
+				else if (DebugHelper.World.DebugType == WorldPathingDebugType.WinterPct)
+				{
+					int tile = Find.WorldSelector.selectedTile;
+					List<int> neighbors = new List<int>();
+					Ext_World.BFS(tile, neighbors, radius: 10);
+
+					float winterPct = WinterPercentAt(tile);
+					Find.World.debugDrawer.FlashTile(tile, colorPct: winterPct, text: winterPct.ToString("#.00"), duration: 15);
+					foreach (int neighbor in neighbors)
+					{
+						winterPct = WinterPercentAt(neighbor);
+						Find.World.debugDrawer.FlashTile(neighbor, colorPct: winterPct, text: winterPct.ToString("#.00"), duration: 30);
 					}
 				}
 			}
@@ -296,6 +312,11 @@ namespace Vehicles
 		public float PerceivedMovementDifficultyAt(int tile, VehicleDef vehicleDef)
 		{
 			return movementDifficulty[vehicleDef.DefIndex][tile];
+		}
+
+		public float WinterPercentAt(int tile)
+		{
+			return winter[tile];
 		}
 
 		/// <summary>
@@ -356,6 +377,10 @@ namespace Vehicles
 						RecalculatePerceivedMovementDifficultyAt(i, vehicleDef, ticksAbs);
 					}
 				}
+				for (int i = 0; i < Find.WorldGrid.TilesCount; i++)
+				{
+					RecalculateWinterPercentAt(i, ticksAbs);
+				}
 				allPathCostsRecalculatedDayOfYear = DayOfYearAt0Long;
 			}
 			finally
@@ -363,6 +388,11 @@ namespace Vehicles
 				Recalculating = false;
 				Initialized = true;
 			}
+		}
+
+		private void RecalculateWinterPercentAt(int tile, int? ticksAbs = null)
+		{
+			winter[tile] = WinterPathingHelper.GetWinterPercent(tile, ticksAbs: ticksAbs);
 		}
 
 		public override void FinalizeInit()
@@ -418,7 +448,6 @@ namespace Vehicles
 			{
 				defaultBiomeCost = Mathf.Min(defaultBiomeCost, vehicleDef.properties.customBiomeCosts[BiomeDefOf.Ocean]);
 			}
-			//float roadMultiplier = VehicleCaravan_PathFollower.GetRoadMovementDifficultyMultiplier(vehicleDefs, tile, neighbor, null)
 			float biomeCost = vehicleDef.properties.customBiomeCosts.TryGetValue(worldTile.biome, defaultBiomeCost);
 			float hillinessCost = vehicleDef.properties.customHillinessCosts.TryGetValue(worldTile.hilliness, HillinessMovementDifficultyOffset(worldTile.hilliness));
 
@@ -449,7 +478,7 @@ namespace Vehicles
 				explanation.AppendLine();
 				explanation.Append(worldTile.hilliness.GetLabelCap() + ": " + hillinessCost.ToStringWithSign("0.#"));
 			}
-			return totalCost + GetCurrentWinterMovementDifficultyOffset(tile, vehicleDef, new int?(ticksAbs ?? GenTicks.TicksAbs), explanation);
+			return totalCost;// + GetCurrentWinterMovementDifficultyOffset(tile, vehicleDef, new int?(ticksAbs ?? GenTicks.TicksAbs), explanation);
 		}
 
 		/// <summary>
@@ -467,47 +496,6 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Winter path cost multiplier for <paramref name="vehicleDef"/> at <paramref name="tile"/>
-		/// </summary>
-		/// <param name="tile"></param>
-		/// <param name="vehicleDef"></param>
-		/// <param name="ticksAbs"></param>
-		/// <param name="explanation"></param>
-		public static float GetCurrentWinterMovementDifficultyOffset(int tile, VehicleDef vehicleDef, int? ticksAbs = null, StringBuilder explanation = null)
-		{
-			if (ticksAbs == null)
-			{
-				ticksAbs = new int?(GenTicks.TicksAbs);
-			}
-			Vector2 vector = Find.WorldGrid.LongLatOf(tile);
-			SeasonUtility.GetSeason(GenDate.YearPercent(ticksAbs.Value, vector.x), vector.y, out _, out _, out _, out float winter, out _, out float permaWinter);
-			float totalWinter = winter + permaWinter;
-			totalWinter *= Mathf.InverseLerp(MaxTempForWinterOffset, 0f, GenTemperature.GetTemperatureFromSeasonAtTile(ticksAbs.Value, tile));
-			if (totalWinter > 0.01f)
-			{
-				float winterSpeedMultiplier = SettingsCache.TryGetValue(vehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.winterCostMultiplier), vehicleDef.properties.winterCostMultiplier);
-				float finalCost = totalWinter * winterSpeedMultiplier;
-				if (explanation != null)
-				{
-					explanation.AppendLine();
-					explanation.Append("Winter".Translate());
-					if (totalWinter < 0.999f)
-					{
-						explanation.Append($" ({totalWinter.ToStringPercent("F0")})");
-					}
-					if (winterSpeedMultiplier != 1)
-					{
-						explanation.Append($" (Offset: {winterSpeedMultiplier})");
-					}
-					explanation.Append(": ");
-					explanation.Append(finalCost.ToStringWithSign("0.#"));
-				}
-				return finalCost;
-			}
-			return 0f;
-		}
-
-		/// <summary>
 		/// Default hilliness path costs
 		/// </summary>
 		/// <param name="hilliness"></param>
@@ -518,7 +506,7 @@ namespace Vehicles
 		public class PathGrid
 		{
 			public readonly VehicleDef owner;
-			public readonly float[] costs;
+			private readonly float[] costs;
 
 			public float this[int index] { get => costs[index]; set => costs[index] = value; }
 

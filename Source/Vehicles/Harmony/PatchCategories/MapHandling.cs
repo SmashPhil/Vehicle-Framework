@@ -43,9 +43,6 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MapInterface), nameof(MapInterface.MapInterfaceOnGUI_AfterMainTabs)),
 				postfix: new HarmonyMethod(typeof(MapHandling),
 				nameof(DebugOnGUIVehicleRegions)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Map), nameof(Map.FinalizeInit)),
-				prefix: new HarmonyMethod(typeof(MapHandling),
-				nameof(PreFinalizeInitRegionBuilding)));
 		}
 
 		/// <summary>
@@ -64,9 +61,9 @@ namespace Vehicles
 
 				if (instruction.Calls(propertyGetter))
 				{
-					i++;
-					instruction = instructionList[i];
-					yield return new CodeInstruction(opcode: OpCodes.Pop);
+					yield return instruction;
+					instruction = instructionList[++i]; //FloatRange::get_RandomInRange
+					//yield return new CodeInstruction(opcode: OpCodes.Pop);
 					yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
 					yield return new CodeInstruction(opcode: OpCodes.Call, operand: AccessTools.Method(typeof(ModSettingsHelper), nameof(ModSettingsHelper.BeachMultiplier)));
 				}
@@ -234,11 +231,6 @@ namespace Vehicles
 			{
 				DebugHelper.DebugDrawVehiclePathCostsOverlay(Find.CurrentMap);
 			}
-		}
-
-		private static void PreFinalizeInitRegionBuilding(Map __instance)
-		{
-			__instance.GetCachedMapComponent<VehicleMapping>().RebuildVehiclePathData();
 		}
 	}
 }

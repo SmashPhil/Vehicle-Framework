@@ -10,6 +10,7 @@ namespace Vehicles
 	/// <summary>
 	/// Link between regions for reachability determination
 	/// </summary>
+	[StaticConstructorOnStartup] //Necessary for initializing static data before being accessed from outside main thread
 	public class VehicleRegionLink
 	{
 		private const float WeightColorCeiling = 30;

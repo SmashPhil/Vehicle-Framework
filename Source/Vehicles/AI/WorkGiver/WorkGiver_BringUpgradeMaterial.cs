@@ -28,6 +28,10 @@ namespace Vehicles
 
 		public override bool JobAvailable(VehiclePawn vehicle)
 		{
+			if (!vehicle.Spawned)
+			{
+				return false;
+			}
 			if (vehicle.CompUpgradeTree == null)
 			{
 				return false;
@@ -37,6 +41,10 @@ namespace Vehicles
 				return false;
 			}
 			if (vehicle.CompUpgradeTree.upgrade.Removal)
+			{
+				return false;
+			}
+			if (!MapComponentCache<VehicleReservationManager>.GetComponent(vehicle.Map).VehicleListed(vehicle, ReservationType.LoadUpgradeMaterials))
 			{
 				return false;
 			}
@@ -80,7 +88,7 @@ namespace Vehicles
 				Thing thing = FindThingToPack(vehicle, pawn);
 				if (thing != null)
 				{
-					int countLeft = CountLeftToPack(vehicle, pawn, new ThingDefCount(thing.def, thing.stackCount));
+					int countLeft = CountLeftToPack(vehicle, pawn, new ThingDefCount(thing.def, vehicle.CompUpgradeTree.upgrade.node.MaterialsRequired(vehicle).FirstOrDefault(thingDefCountClass => thingDefCountClass.thingDef==thing.def).count));
 					int jobCount = Mathf.Min(thing.stackCount, countLeft);
 					if (jobCount > 0)
 					{
@@ -96,7 +104,7 @@ namespace Vehicles
 		public override Thing FindThingToPack(VehiclePawn vehicle, Pawn pawn)
 		{
 			Thing result = null;
-			IEnumerable<ThingDefCount> thingDefs = ThingDefs(vehicle);
+			IEnumerable<ThingDefCountClass> thingDefs = vehicle.CompUpgradeTree.upgrade.node.MaterialsRequired(vehicle);
 			if (thingDefs.NotNullAndAny())
 			{
 				foreach (ThingDefCount thingDefCount in thingDefs)

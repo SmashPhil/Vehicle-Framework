@@ -15,7 +15,7 @@ namespace Vehicles
 		/// <param name="cell"></param>
 		/// <param name="map"></param>
 		/// <param name="vehicleDef"></param>
-		public static RegionType GetExpectedRegionType(this IntVec3 cell, VehicleMapping mapping, VehicleDef vehicleDef)
+		public static RegionType GetExpectedRegionType(IntVec3 cell, VehicleMapping mapping, VehicleDef vehicleDef)
 		{
 			if (!cell.InBounds(mapping.map))
 			{

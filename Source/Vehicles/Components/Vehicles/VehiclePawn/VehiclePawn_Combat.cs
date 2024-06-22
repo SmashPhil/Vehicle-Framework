@@ -14,8 +14,8 @@ namespace Vehicles
 			get
 			{
 				float multiplier = SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.pawnCollisionMultiplier), VehicleDef.properties.pawnCollisionMultiplier);
-				float offset = statHandler.GetStatOffset(VehicleStatUpgradeCategoryDefOf.PawnCollisionMultiplier);
-				return multiplier + offset;
+				multiplier = statHandler.GetStatOffset(VehicleStatUpgradeCategoryDefOf.PawnCollisionMultiplier, multiplier);
+				return multiplier;
 			}
 		}
 		
@@ -24,8 +24,8 @@ namespace Vehicles
 			get
 			{
 				float multiplier = SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.pawnCollisionRecoilMultiplier), VehicleDef.properties.pawnCollisionRecoilMultiplier); ;
-				float offset = statHandler.GetStatOffset(VehicleStatUpgradeCategoryDefOf.PawnCollisionRecoilMultiplier);
-				return multiplier + offset;
+				multiplier = statHandler.GetStatOffset(VehicleStatUpgradeCategoryDefOf.PawnCollisionRecoilMultiplier, multiplier);
+				return multiplier;
 			}
 		}
 			

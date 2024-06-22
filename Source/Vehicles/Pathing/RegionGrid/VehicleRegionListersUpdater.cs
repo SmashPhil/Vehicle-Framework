@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using Verse;
 using Verse.AI;
@@ -11,6 +12,8 @@ namespace Vehicles
 	/// </summary>
 	public static class VehicleRegionListersUpdater
 	{
+		private static ThreadLocal<List<VehicleRegion>> regions = new ThreadLocal<List<VehicleRegion>>(() => new List<VehicleRegion>());
+
 		/// <summary>
 		/// Deregister <paramref name="thing"/> from nearby region
 		/// </summary>
@@ -22,16 +25,17 @@ namespace Vehicles
 			{
 				return;
 			}
-			List<VehicleRegion> tmpRegions = new List<VehicleRegion>();
-			GetTouchableRegions(thing, mapping, vehicleDef, tmpRegions, true);
-			for (int i = 0; i < tmpRegions.Count; i++)
+
+			GetTouchableRegions(thing, mapping, vehicleDef, regions.Value, true);
+			for (int i = 0; i < regions.Value.Count; i++)
 			{
-				ConcurrentListerThings listerThings = tmpRegions[i].ListerThings;
+				ConcurrentListerThings listerThings = regions.Value[i].ListerThings;
 				if (listerThings.Contains(thing))
 				{
 					listerThings.Remove(thing);
 				}
 			}
+			regions.Value.Clear();
 		}
 
 		/// <summary>
@@ -45,24 +49,22 @@ namespace Vehicles
 			{
 				return;
 			}
-			List<VehicleRegion> tmpRegions = new List<VehicleRegion>();
-			GetTouchableRegions(thing, mapping, vehicleDef, tmpRegions, false);
-			for (int i = 0; i < tmpRegions.Count; i++)
+
+			GetTouchableRegions(thing, mapping, vehicleDef, regions.Value, false);
+			foreach (VehicleRegion vehicleRegion in regions.Value)
 			{
-				ConcurrentListerThings listerThings = tmpRegions[i].ListerThings;
+				ConcurrentListerThings listerThings = vehicleRegion.ListerThings;
 				if (!listerThings.Contains(thing))
 				{
 					listerThings.Add(thing);
 				}
 			}
+			regions.Value.Clear();
 		}
 
 		/// <summary>
 		/// Register all things at <paramref name="cell"/>
 		/// </summary>
-		/// <param name="c"></param>
-		/// <param name="mapping"></param>
-		/// <param name="processedThings"></param>
 		public static void RegisterAllAt(IntVec3 cell, VehicleMapping mapping, VehicleDef vehicleDef, HashSet<Thing> processedThings = null)
 		{
 			List<Thing> thingList = cell.GetThingList(mapping.map);
@@ -80,20 +82,18 @@ namespace Vehicles
 		/// <summary>
 		/// Get all touchable regions for <paramref name="thing"/> on region grid associated with <paramref name="vehicleDef"/>
 		/// </summary>
-		/// <param name="thing"></param>
-		/// <param name="map"></param>
-		/// <param name="outRegions"></param>
-		/// <param name="allowAdjacenttEvenIfCantTouch"></param>
 		public static void GetTouchableRegions(Thing thing, VehicleMapping mapping, VehicleDef vehicleDef, List<VehicleRegion> outRegions, bool allowAdjacenttEvenIfCantTouch = false)
 		{
 			outRegions.Clear();
 			CellRect cellRect = thing.OccupiedRect().ExpandedBy(1);
+
 			foreach (IntVec3 intVec in cellRect)
 			{
 				if (intVec.InBounds(mapping.map))
 				{
 					VehicleMapping.VehiclePathData vehiclePathData = mapping[vehicleDef];
 					VehicleRegion region = vehiclePathData.VehicleRegionGrid.GetValidRegionAt_NoRebuild(intVec);
+					
 					if (region != null && region.type.Passable() && !outRegions.Contains(region))
 					{
 						if (cellRect.Contains(intVec))

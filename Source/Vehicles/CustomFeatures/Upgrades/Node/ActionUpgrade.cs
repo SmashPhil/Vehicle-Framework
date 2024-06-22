@@ -18,7 +18,7 @@ namespace Vehicles
 
 		public override bool UnlockOnLoad => unlockOnLoad;
 
-		public override void Unlock(VehiclePawn vehicle, bool unlockingAfterLoad)
+		public override void Unlock(VehiclePawn vehicle, bool unlockingPostLoad)
 		{
 			if (!unlockMethods.NullOrEmpty())
 			{

@@ -35,6 +35,8 @@ namespace Vehicles
 		//Comps
 		public static VehicleEventDef OutOfFuel;
 		public static VehicleEventDef Refueled;
+		public static VehicleEventDef Deployed;
+		public static VehicleEventDef Undeployed;
 
 		//Stats
 		public static VehicleEventDef DamageTaken;
@@ -51,5 +53,11 @@ namespace Vehicles
 		public static VehicleEventDef AerialVehicleCrashLanding;
 		public static VehicleEventDef AerialVehicleLeftMap;
 		public static VehicleEventDef AerialVehicleOrdered;
+
+		//Upgrades
+		public static VehicleEventDef VehicleUpgradeEnqueued;
+		public static VehicleEventDef VehicleUpgradeCompleted;
+		public static VehicleEventDef VehicleUpgradeRefundEnqueued;
+		public static VehicleEventDef VehicleUpgradeRefundCompleted;
 	}
 }

@@ -208,20 +208,20 @@ namespace Vehicles
 				GUIState.Push();
 				{
 					Rect turretRect = gizmoRect.ContractedBy(2);
-					(Rect rect, Texture mainTex, Color color, float layer, float angle) turretProps;
+					VehicleGUI.RenderData turretRenderData;
 					if (turret.turretDef.gizmoIconTexPath.NullOrEmpty())
 					{
-						turretProps = VehicleGUI.RetrieveTurretSettingsGUIProperties(turretRect, vehicle.VehicleDef, turret, Rot8.North, vehicle.patternData, iconScale: iconDrawScale);
+						turretRenderData = VehicleGUI.RetrieveTurretSettingsGUIProperties(turretRect, vehicle.VehicleDef, turret, Rot8.North, vehicle.patternData, iconScale: iconDrawScale);
 					}
 					else
 					{
-						turretProps = (new Rect(0, 0, turretRect.width, turretRect.height), turret.GizmoIcon, Color.white, 1, 0);
+						turretRenderData = new VehicleGUI.RenderData(new Rect(0, 0, turretRect.width, turretRect.height), turret.GizmoIcon, Color.white, 1, 0);
 					}
 					Widgets.BeginGroup(turretRect);
 					{
-						GUI.color = turretProps.color;
+						GUI.color = turretRenderData.color;
 						//Draw turret facing North for gizmos
-						UIElements.DrawTextureWithMaterialOnGUI(turretRect.AtZero().ExpandedBy(turretRect.width * (iconDrawScale - 1)), turretProps.mainTex, null, 0); 
+						UIElements.DrawTextureWithMaterialOnGUI(turretRect.AtZero().ExpandedBy(turretRect.width * (iconDrawScale - 1)), turretRenderData.mainTex, null, 0); 
 					}
 					Widgets.EndGroup();
 				}

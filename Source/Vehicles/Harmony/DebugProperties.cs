@@ -1,0 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Vehicles
+{
+	public static class DebugProperties
+	{
+		public static readonly bool debug = false;
+
+		public static readonly bool drawPaths = false;
+	}
+}

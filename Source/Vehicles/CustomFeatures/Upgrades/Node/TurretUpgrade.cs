@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using Verse;
 using SmashTools;
+using System.Runtime;
 
 namespace Vehicles
 {
@@ -12,32 +13,37 @@ namespace Vehicles
 		public readonly List<VehicleTurret> turrets;
 
 		public readonly List<string> removeTurrets;
-
+		
 		public override bool UnlockOnLoad => false;
 
-		public override void Unlock(VehiclePawn vehicle, bool unlockingAfterLoad)
+		public override bool HasGraphics => turrets.NotNullAndAny(turret => !turret.NoGraphic) || !removeTurrets.NullOrEmpty();
+
+		public override void Unlock(VehiclePawn vehicle, bool unlockingPostLoad)
 		{
-			if (!turrets.NullOrEmpty())
+			if (!unlockingPostLoad)
 			{
-				foreach (VehicleTurret turret in turrets)
+				if (!removeTurrets.NullOrEmpty())
 				{
-					try
+					foreach (string key in removeTurrets)
 					{
-						vehicle.CompVehicleTurrets.AddTurret(turret);
-					}
-					catch (Exception ex)
-					{
-						Log.Error($"{VehicleHarmony.LogLabel} Unable to unlock {GetType()} to {vehicle.LabelShort}. \nException: {ex}");
+						if (!vehicle.CompVehicleTurrets.RemoveTurret(key))
+						{
+							Log.Error($"Unable to remove {key} from {vehicle}. Turret not found.");
+						}
 					}
 				}
-			}
-			if (!removeTurrets.NullOrEmpty())
-			{
-				foreach (string key in removeTurrets)
+				if (!turrets.NullOrEmpty())
 				{
-					if (!vehicle.CompVehicleTurrets.RemoveTurret(key))
+					foreach (VehicleTurret turret in turrets)
 					{
-						Log.Warning($"Unable to remove {key} from {vehicle}. Turret not found.");
+						try
+						{
+							vehicle.CompVehicleTurrets.AddTurret(turret, node.key);
+						}
+						catch (Exception ex)
+						{
+							Log.Error($"{VehicleHarmony.LogLabel} Unable to unlock {GetType()} to {vehicle.LabelShort}. \nException: {ex}");
+						}
 					}
 				}
 			}
@@ -52,7 +58,22 @@ namespace Vehicles
 				{
 					if (!vehicle.CompVehicleTurrets.RemoveTurret(turret.key))
 					{
-						Log.Warning($"Unable to remove {turret.key} from {vehicle}. Turret not found.");
+						Log.Error($"Unable to remove {turret.key} from {vehicle}. Turret not found.");
+					}
+				}
+			}
+			if (!removeTurrets.NullOrEmpty())
+			{
+				foreach (string key in removeTurrets)
+				{
+					VehicleTurret turret = vehicle.CompVehicleTurrets.Props.turrets.FirstOrDefault(turret => turret.key == key);
+					if (turret == null)
+					{
+						Log.Error($"Unable to add {key} to {vehicle}. Turret must be defined in the VehicleDef in order to be re-added post-refund.");
+					}
+					else
+					{
+						vehicle.CompVehicleTurrets.AddTurret(turret);
 					}
 				}
 			}

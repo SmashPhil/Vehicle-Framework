@@ -9,4 +9,13 @@
 	<Vehicles.VehicleEventDef>
 		<defName>Refueled</defName>
 	</Vehicles.VehicleEventDef>
+
+	<!-- Turrets -->
+	<Vehicles.VehicleEventDef>
+		<defName>Deployed</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>Undeployed</defName>
+	</Vehicles.VehicleEventDef>
 </Defs>

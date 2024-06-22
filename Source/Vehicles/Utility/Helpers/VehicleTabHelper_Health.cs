@@ -342,11 +342,11 @@ namespace Vehicles
 				{
 					labelRect.x += columnWidth;
 					DamageArmorCategoryDef armorCategoryDef = armorRatingDefs[i];
-					float armorRating = component.ArmorRating(armorCategoryDef, out bool upgraded);
+					float armorRating = component.ArmorRating(armorCategoryDef, out float upgraded);
 					string armorLabel = armorRating.ToStringByStyle(armorCategoryDef.armorRatingStat.toStringStyle);
-					if (upgraded)
+					if (upgraded != 0)
 					{
-						armorLabel = armorLabel.Colorize(Color.cyan);
+						armorLabel = armorLabel.Colorize(ArmorUpgradeQualityColor(upgraded));
 					}
 					Widgets.Label(labelRect, armorLabel);
 				}
@@ -356,6 +356,35 @@ namespace Vehicles
 			component.DrawIcon(iconRect);
 
 			return labelHeight;
+		}
+
+		private static Color ArmorUpgradeQualityColor(float upgraded)
+		{
+			if (upgraded <= -0.25f)
+			{
+				return Color.red;
+			}
+			if (upgraded < 0)
+			{
+				return Color.gray;
+			}
+			if (upgraded >= 0.5f)
+			{
+				return Color.cyan;
+			}
+			if (upgraded >= 0.25f)
+			{
+				return new Color(1, 0.84f, 0); //Gold
+			}
+			if (upgraded >= 0.15f)
+			{
+				return new Color(1, 0.65f, 0); //Orange
+			}
+			if (upgraded > 0)
+			{
+				return new Color(0.7f, 0.75f, 1); //Blue
+			}
+			return Color.white;
 		}
 
 		private static void RecacheWindowWidth()

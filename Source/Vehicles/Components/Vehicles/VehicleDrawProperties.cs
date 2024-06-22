@@ -45,10 +45,10 @@ namespace Vehicles
 				foreach (GraphicDataOverlay graphicDataOverlay in graphicOverlays)
 				{
 					GraphicOverlay graphicOverlay = GraphicOverlay.Create(graphicDataOverlay, vehicleDef);
+					graphicOverlay.data.graphicData.RecacheLayerOffsets();
 					overlays.Add(graphicOverlay);
 				}
 			});
-			
 		}
 
 		public Vector3 DisplayOffsetForRot(Rot4 rot)

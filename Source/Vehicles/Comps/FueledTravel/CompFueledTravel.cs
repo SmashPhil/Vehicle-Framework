@@ -39,10 +39,6 @@ namespace Vehicles
 
 		private CompPower connectedPower;
 		private bool postLoadReconnect;
-		public float dischargeRate;
-
-		private float fuelConsumptionRateOffset;
-		private float fuelCapacityOffset;
 
 		public List<(VehicleComponent component, Reactor_FuelLeak fuelLeak)> FuelComponents { get; private set; }
 
@@ -93,15 +89,33 @@ namespace Vehicles
 			}
 		}
 
+		public virtual float ChargeRate
+		{
+			get
+			{
+				float chargeRate = Props.chargeRate;
+				chargeRate = Vehicle.statHandler.GetStatOffset(VehicleStatUpgradeCategoryDefOf.ChargeRate, chargeRate);
+				return chargeRate;
+			}
+		}
+
+		public virtual float DischargeRate
+		{
+			get
+			{
+				float dischargeRate = Props.dischargeRate;// SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_FueledTravel), nameof(CompProperties_FueledTravel.dischargeRate), Props.dischargeRate);
+				dischargeRate = Vehicle.statHandler.GetStatOffset(VehicleStatUpgradeCategoryDefOf.DischargeRate, dischargeRate);
+				return dischargeRate;
+			}
+		}
+
 		public virtual float FuelEfficiency
 		{
 			get
 			{
-				return SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_FueledTravel), nameof(CompProperties_FueledTravel.fuelConsumptionRate), Props.fuelConsumptionRate) + fuelConsumptionRateOffset;
-			}
-			set
-			{
-				fuelConsumptionRateOffset = value;
+				float consumptionRate = SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_FueledTravel), nameof(CompProperties_FueledTravel.fuelConsumptionRate), Props.fuelConsumptionRate);
+				consumptionRate = Vehicle.statHandler.GetStatOffset(VehicleStatUpgradeCategoryDefOf.FuelConsumptionRate, consumptionRate);
+				return consumptionRate;
 			}
 		}
 
@@ -109,20 +123,9 @@ namespace Vehicles
 		{
 			get
 			{
-				return SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_FueledTravel), nameof(CompProperties_FueledTravel.fuelCapacity), Props.fuelCapacity) + fuelCapacityOffset;
-			}
-			set
-			{
-				fuelCapacityOffset = value;
-				if (fuelCapacityOffset < 0)
-				{
-					fuelCapacityOffset = 0f;
-				}
-
-				if (fuel > fuelCapacityOffset)
-				{
-					fuel = fuelCapacityOffset;
-				}
+				float fuelCapacity = SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_FueledTravel), nameof(CompProperties_FueledTravel.fuelCapacity), Props.fuelCapacity);
+				fuelCapacity = Vehicle.statHandler.GetStatOffset(VehicleStatUpgradeCategoryDefOf.FuelCapacity, fuelCapacity);
+				return fuelCapacity;
 			}
 		}
 
@@ -408,12 +411,12 @@ namespace Vehicles
 			{
 				if (!Charging)
 				{
-					ConsumeFuel(Mathf.Min(Props.dischargeRate * EfficiencyTickMultiplier, Fuel));
+					ConsumeFuel(Mathf.Min(DischargeRate * EfficiencyTickMultiplier, Fuel));
 				}
 				else if(Find.TickManager.TicksGame % TicksToCharge == 0)
 				{
-					PowerNetMethod.Invoke(connectedPower.PowerNet, new object[] { -Props.chargeRate });
-					Refuel(Props.chargeRate);
+					PowerNetMethod.Invoke(connectedPower.PowerNet, new object[] { -ChargeRate });
+					Refuel(ChargeRate);
 				}
 			}
 		}
@@ -509,6 +512,7 @@ namespace Vehicles
 			connectedPower = null;
 		}
 
+		//TODO - Refactor wind direction
 		public virtual void DrawMotes()
 		{
 			foreach (OffsetMote offset in Props.motesGenerated)
@@ -577,7 +581,6 @@ namespace Vehicles
 			base.PostSpawnSetup(respawningAfterLoad);
 			if (!respawningAfterLoad)
 			{
-				dischargeRate = ConsumptionRatePerTick * 0.1f;
 				targetFuelLevel = FuelCapacity;
 			}
 
@@ -593,14 +596,9 @@ namespace Vehicles
 		{
 			base.PostExposeData();
 
-			//Upgrades
-			Scribe_Values.Look(ref fuelConsumptionRateOffset, nameof(fuelConsumptionRateOffset));
-			Scribe_Values.Look(ref fuelCapacityOffset, nameof(fuelCapacityOffset));
-
 			//CurValues
 			Scribe_Values.Look(ref fuel, nameof(fuel));
-			Scribe_Values.Look(ref targetFuelLevel, nameof(targetFuelLevel), defaultValue: FuelCapacity);
-			Scribe_Values.Look(ref dischargeRate, nameof(dischargeRate));
+			Scribe_Values.Look(ref targetFuelLevel, nameof(targetFuelLevel), defaultValue: Props.fuelCapacity);
 
 			if (Scribe.mode == LoadSaveMode.Saving)
 			{

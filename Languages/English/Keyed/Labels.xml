@@ -11,13 +11,15 @@
 	<VF_DisembarkAllPawns>Unload All Pawns</VF_DisembarkAllPawns>
 	<VF_DisembarkSinglePawn>Unload {0}</VF_DisembarkSinglePawn>
 	<VF_DisembarkNoExit>Unable to exit vehicle. No valid cells to exit onto.</VF_DisembarkNoExit>
-	
+	<VF_DisabledByVehicleUpgrading>{0} is being upgraded.</VF_DisabledByVehicleUpgrading>
+
 	<VF_StopVehicle>Stop</VF_StopVehicle>
 	<VF_UndraftVehicle>Turn Off</VF_UndraftVehicle>
 	<VF_DraftVehicleDesc>Drafts vehicle allowing it to move. This will consume fuel if applicable even if the vehicle is idle.</VF_DraftVehicleDesc>
 	<VF_StopVehicleDesc>Stop the vehicle immediately.</VF_StopVehicleDesc>
 	<VF_UndraftVehicleDesc>Undrafts vehicle, disabling the consumption of fuel and disallowing movement.</VF_UndraftVehicleDesc>
 	<VF_RefuelFromInventory>Refuel From Inventory</VF_RefuelFromInventory>
+	<VF_VehicleFuelCost>Fuel: {0}</VF_VehicleFuelCost>
 	
 	<!-- UI / Buttons -->
 	<VF_ShowAllItemsOnMap>Show All Items On Map</VF_ShowAllItemsOnMap>
@@ -99,7 +101,11 @@
 	<VF_ComponentHealth>Health</VF_ComponentHealth>
 	<VF_ComponentEfficiency>Efficiency</VF_ComponentEfficiency>
 	<VF_ComponentArmor>Armor</VF_ComponentArmor>
-	
+	<VF_Depth>Depth</VF_Depth>
+	<VF_Depth_Internal>Internal</VF_Depth_Internal>
+	<VF_Depth_External>External</VF_Depth_External>
+	<VF_Depth_Undefined>Undefined</VF_Depth_Undefined>
+
 	<VF_NoFuelReturnTrip>No Return Trip</VF_NoFuelReturnTrip>
 	<VF_NotEnoughFuel>Out Of Range</VF_NotEnoughFuel>
 	<VF_ConfirmationCancelLanding>Cancel landing in this map? Aerial vehicle will be kicked out to the world map.</VF_ConfirmationCancelLanding>

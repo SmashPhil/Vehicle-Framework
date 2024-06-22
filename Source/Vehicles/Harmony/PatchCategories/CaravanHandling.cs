@@ -752,7 +752,7 @@ namespace Vehicles
 			{
 				tmpCaravanPawns.Clear();
 				tmpCaravanPawns.AddRange(__result);
-				foreach (VehiclePawn vehicle in vehicleCaravan.Vehicles)
+				foreach (VehiclePawn vehicle in vehicleCaravan.VehiclesListForReading)
 				{
 					tmpCaravanPawns.AddRange(vehicle.AllPawnsAboard);
 				}

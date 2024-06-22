@@ -12,7 +12,7 @@ using Verse.Sound;
 using Verse.AI;
 using Verse.AI.Group;
 using SmashTools;
-using Mono.Security;
+using SmashTools.Animations;
 
 namespace Vehicles
 {
@@ -27,11 +27,12 @@ namespace Vehicles
 		public VehicleGraphicOverlay graphicOverlay;
 
 		public PatternData patternData;
-		public RetextureDef retexture;
+		private RetextureDef retextureDef;
 
 		private float angle = 0f; /* -45 is left, 45 is right : relative to Rot4 direction*/
 
-		private Graphic_Vehicle graphicInt;
+		private Graphic_Vehicle graphic;
+
 		public PatternData patternToPaint;
 
 		private bool crashLanded;
@@ -49,6 +50,8 @@ namespace Vehicles
 		public (Vector3 drawPos, float rotation) DrawData => (DrawPos, this.CalculateAngle(out _));
 
 		public ThingWithComps Thing => this;
+
+		public ModContentPack ModContentPack => VehicleDef.modContentPack;
 
 		public bool CrashLanded
 		{
@@ -110,43 +113,11 @@ namespace Vehicles
 		{
 			get
 			{
-				if (graphicInt is null)
+				if (graphic is null)
 				{
-					if (Destroyed && !RGBMaterialPool.GetAll(this).NullOrEmpty())
-					{
-						Log.Error($"Reinitializing RGB Materials but {this} has already been destroyed and the cache was not cleared for this entry. This may result in a memory leak.");
-						RGBMaterialPool.Release(this);
-					}
-
-					GraphicDataRGB graphicData = new GraphicDataRGB();
-					if (retexture != null)
-					{
-						graphicData.CopyFrom(retexture.graphicData);
-					}
-					else
-					{
-						graphicData.CopyFrom(VehicleDef.graphicData);
-					}
-					graphicData.color = patternData.color;
-					graphicData.colorTwo = patternData.colorTwo;
-					graphicData.colorThree = patternData.colorThree;
-					graphicData.tiles = patternData.tiles;
-					graphicData.displacement = patternData.displacement;
-					graphicData.pattern = patternData.patternDef;
-
-					if (graphicData.shaderType.Shader.SupportsRGBMaskTex())
-					{
-						RGBMaterialPool.CacheMaterialsFor(this);
-						graphicData.Init(this);
-						graphicInt = graphicData.Graphic as Graphic_Vehicle;
-						RGBMaterialPool.SetProperties(this, patternData, graphicInt.TexAt, graphicInt.MaskAt);
-					}
-					else
-					{
-						graphicInt = ((GraphicData)graphicData).Graphic as Graphic_Vehicle; //Triggers vanilla Init call for normal material caching
-					}
+					graphic = GenerateGraphic();
 				}
-				return graphicInt;
+				return graphic;
 			}
 		}
 
@@ -341,6 +312,8 @@ namespace Vehicles
 			bool northSouthRotation = VehicleGraphic.EastDiagonalRotated && (FullRotation == Rot8.NorthEast || FullRotation == Rot8.SouthEast) ||
 				(VehicleGraphic.WestDiagonalRotated && (FullRotation == Rot8.NorthWest || FullRotation == Rot8.SouthWest));
 			Drawer.renderer.RenderPawnAt(drawLoc, extraRotation, northSouthRotation);
+
+			//TODO - consolidate rendering to VehicleRenderer
 			foreach (VehicleHandler handler in HandlersWithPawnRenderer)
 			{
 				handler.RenderPawns();
@@ -392,7 +365,7 @@ namespace Vehicles
 
 		public void ResetRenderStatus()
 		{
-			HandlersWithPawnRenderer = handlers.Where(h => h.role.pawnRenderer != null).ToList();
+			HandlersWithPawnRenderer = handlers.Where(h => h.role.PawnRenderer != null).ToList();
 		}
 
 		public override void Notify_ColorChanged()
@@ -403,6 +376,12 @@ namespace Vehicles
 			base.Notify_ColorChanged();
 		}
 
+		public void ResetGraphic()
+		{
+			graphic = null;
+		}
+
+		//TODO 1.6 - Make private and rename to ResetMaterialProperties
 		internal void ResetGraphicCache()
 		{
 			if (UnityData.IsInMainThread)
@@ -416,6 +395,46 @@ namespace Vehicles
 					}
 				}
 			}
+		}
+
+		private Graphic_Vehicle GenerateGraphic()
+		{
+			if (Destroyed && !RGBMaterialPool.GetAll(this).NullOrEmpty())
+			{
+				Log.Error($"Reinitializing RGB Materials but {this} has already been destroyed and the cache was not cleared for this entry. This may result in a memory leak.");
+				RGBMaterialPool.Release(this);
+			}
+
+			Graphic_Vehicle newGraphic;
+			GraphicDataRGB graphicData = new GraphicDataRGB();
+			if (retextureDef != null)
+			{
+				graphicData.CopyFrom(retextureDef.graphicData);
+			}
+			else
+			{
+				graphicData.CopyFrom(VehicleDef.graphicData);
+			}
+			graphicData.color = patternData.color;
+			graphicData.colorTwo = patternData.colorTwo;
+			graphicData.colorThree = patternData.colorThree;
+			graphicData.tiles = patternData.tiles;
+			graphicData.displacement = patternData.displacement;
+			graphicData.pattern = patternData.patternDef;
+			
+			if (graphicData.shaderType.Shader.SupportsRGBMaskTex())
+			{
+				RGBMaterialPool.CacheMaterialsFor(this);
+				GraphicDatabaseRGB.Remove(this); //Clear cached graphic to pick up potential retexture changes
+				graphicData.Init(this);
+				newGraphic = graphicData.Graphic as Graphic_Vehicle;
+				RGBMaterialPool.SetProperties(this, patternData, newGraphic.TexAt, newGraphic.MaskAt);
+			}
+			else
+			{
+				newGraphic = ((GraphicData)graphicData).Graphic as Graphic_Vehicle; //Triggers vanilla Init call for normal material caching
+			}
+			return newGraphic;
 		}
 
 		public void UpdateRotationAndAngle()
@@ -537,6 +556,8 @@ namespace Vehicles
 				}
 			}
 
+			bool upgrading = CompUpgradeTree != null && CompUpgradeTree.Upgrading;
+
 			if (!cargoToLoad.NullOrEmpty())
 			{
 				Command_Action cancelLoad = new Command_Action
@@ -562,6 +583,10 @@ namespace Vehicles
 						Find.WindowStack.Add(new Dialog_LoadCargo(this));
 					}
 				};
+				if (upgrading)
+				{
+					loadVehicle.Disable("VF_DisabledByVehicleUpgrading".Translate(LabelCap));
+				}
 				yield return loadVehicle;
 			}
 
@@ -615,7 +640,7 @@ namespace Vehicles
 					{
 						if (target.Thing is Pawn pawn && pawn.IsColonistPlayerControlled && !pawn.Downed)
 						{
-							VehicleHandler handler = pawn.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(handler => handler.AreSlotsAvailable && handler.role.handlingTypes == HandlingTypeFlags.None);
+							VehicleHandler handler = pawn.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(handler => handler.AreSlotsAvailable && handler.role.HandlingTypes == HandlingTypeFlags.None);
 							PromptToBoardVehicle(pawn, handler);
 							return;
 						}
@@ -629,6 +654,10 @@ namespace Vehicles
 					}, this);
 				}
 			};
+			if (upgrading)
+			{
+				flagForLoading.Disable("VF_DisabledByVehicleUpgrading".Translate(LabelCap));
+			}
 			yield return flagForLoading;
 
 			if (!Drafted)
@@ -874,7 +903,10 @@ namespace Vehicles
 			{
 				yield break;
 			}
-
+			if (selPawn.Faction != Faction)
+            {
+				yield break;
+            }
 			if (!selPawn.RaceProps.ToolUser)
 			{
 				yield break;
@@ -907,7 +939,7 @@ namespace Vehicles
 				if (handler.AreSlotsAvailable)
 				{
 					VehicleReservationManager reservationManager = Map.GetCachedMapComponent<VehicleReservationManager>();
-					FloatMenuOption opt = new FloatMenuOption("VF_EnterVehicle".Translate(LabelShort, handler.role.label, (handler.role.slots - (handler.handlers.Count +
+					FloatMenuOption opt = new FloatMenuOption("VF_EnterVehicle".Translate(LabelShort, handler.role.label, (handler.role.Slots - (handler.handlers.Count +
 						reservationManager.GetReservation<VehicleHandlerReservation>(this)?.ClaimantsOnHandler(handler) ?? 0)).ToString()), delegate ()
 						{
 							PromptToBoardVehicle(selPawn, handler);
@@ -983,6 +1015,18 @@ namespace Vehicles
 					SetColor();
 				}
 			});
+		}
+
+		public void SetRetexture(RetextureDef retextureDef)
+		{
+			SetRetextureInternal(this, retextureDef);
+		}
+
+		private static void SetRetextureInternal(VehiclePawn vehicle, RetextureDef retextureDef)
+		{
+			vehicle.retextureDef = retextureDef;
+			vehicle.ResetGraphic();
+			vehicle.Notify_ColorChanged();
 		}
 
 		public void Rename()
@@ -1070,6 +1114,12 @@ namespace Vehicles
 						{
 							options.Add(new FloatMenuOption("Open in animator", OpenInAnimator));
 						}
+#if DEBUG
+						if (CompVehicleLauncher != null)
+						{
+							options.Add(new FloatMenuOption("Open in animator (test version)", OpenInAnimator_New));
+						}
+#endif
 						if (!options.NullOrEmpty())
 						{
 							Find.WindowStack.Add(new FloatMenu(options));
@@ -1088,6 +1138,12 @@ namespace Vehicles
 		{
 			Dialog_GraphEditor dialog_GraphEditor = new Dialog_GraphEditor(this, false);
 			//dialog_GraphEditor.LogReport = VehicleMod.settings.debug.debugLogging;
+			Find.WindowStack.Add(dialog_GraphEditor);
+		}
+
+		public void OpenInAnimator_New()
+		{
+			Dialog_AnimationEditor dialog_GraphEditor = new Dialog_AnimationEditor(this);
 			Find.WindowStack.Add(dialog_GraphEditor);
 		}
 
@@ -1112,7 +1168,7 @@ namespace Vehicles
 						{
 							continue;
 						}
-						VehicleHandler handler = p.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(handler => handler.AreSlotsAvailable && handler.role.handlingTypes == HandlingTypeFlags.None);
+						VehicleHandler handler = p.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(handler => handler.AreSlotsAvailable && handler.role.HandlingTypes == HandlingTypeFlags.None);
 						PromptToBoardVehicle(p, handler);
 					}
 				}, MenuOptionPriority.Default, null, null, 0f, null, null);

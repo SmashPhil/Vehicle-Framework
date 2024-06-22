@@ -8,6 +8,7 @@ using Verse;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using static Vehicles.VehicleUpgrade;
 
 namespace Vehicles
 {
@@ -62,6 +63,7 @@ namespace Vehicles
 		//<Start Event, Stop Event> : SoundDef
 		public List<VehicleSustainerEventEntry<VehicleEventDef>> soundSustainersOnEvent = new List<VehicleSustainerEventEntry<VehicleEventDef>>();
 
+		//TODO 1.6 - refactor to container class for cleaner xml input
 		public Dictionary<VehicleEventDef, List<ResolvedMethod<VehiclePawn>>> events = new Dictionary<VehicleEventDef, List<ResolvedMethod<VehiclePawn>>>();
 
 		public List<Type> designatorTypes = new List<Type>();
@@ -324,6 +326,49 @@ namespace Vehicles
 				width = height * (drawSize.x / drawSize.y);
 			}
 			return new Vector2(width, height);
+		}
+
+		public VehicleRole CreateRole(string roleKey)
+		{
+			if (!properties.roles.NullOrEmpty())
+			{
+				foreach (VehicleRole vehicleRole in properties.roles)
+				{
+					if (vehicleRole.key == roleKey)
+					{
+						return new VehicleRole(vehicleRole);
+					}
+				}
+			}
+			if (GetCompProperties<CompProperties_UpgradeTree>() is CompProperties_UpgradeTree compPropertiesUpgradeTree)
+			{
+				foreach (UpgradeNode node in compPropertiesUpgradeTree.def.nodes)
+				{
+					if (!node.upgrades.NullOrEmpty())
+					{
+						foreach (Upgrade upgrade in node.upgrades)
+						{
+							if (upgrade is VehicleUpgrade vehicleUpgrade)
+							{
+								if (!vehicleUpgrade.roles.NullOrEmpty())
+								{
+									foreach (RoleUpgrade roleUpgrade in vehicleUpgrade.roles)
+									{
+										if (roleUpgrade.key == roleKey && roleUpgrade.editKey.NullOrEmpty())
+										{
+											return RoleUpgrade.RoleFromUpgrade(roleUpgrade);
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				Log.Error($"Unable to create role {roleKey}. Matching VehicleRole not found in VehicleDef ({defName}) or UpgradeTreeDef ({compPropertiesUpgradeTree.def.defName})");
+				return null;
+			}
+			Log.Error($"Unable to create role {roleKey}. Matching VehicleRole not found in VehicleDef ({defName}).");
+			return null;
 		}
 
 		/// <summary>

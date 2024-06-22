@@ -10,9 +10,11 @@ namespace Vehicles
 		[TweakField]
 		public GraphicDataOverlay data;
 
-		private VehicleDef vehicleDef;
-		private VehiclePawn vehicle;
-		private Graphic graphicInt;
+		private readonly VehicleDef vehicleDef;
+		private readonly VehiclePawn vehicle;
+
+		private Graphic graphic;
+		private Graphic_DynamicShadow graphicShadow;
 
 		public GraphicOverlay(GraphicDataOverlay graphicDataOverlay, VehicleDef vehicleDef)
 		{
@@ -27,6 +29,16 @@ namespace Vehicles
 			this.vehicleDef = vehicle.VehicleDef;
 
 			this.vehicle.AddEvent(VehicleEventDefOf.Destroyed, OnDestroy);
+
+			if (data.dynamicShadows)
+			{
+				ShadowData shadowData = new ShadowData()
+				{
+					volume = new Vector3(data.graphicData.drawSize.x, 0, data.graphicData.drawSize.y),
+					offset = new Vector3(data.graphicData.drawOffset.x, 0, data.graphicData.drawOffset.z + 5),
+				};
+				graphicShadow = new Graphic_DynamicShadow(data.graphicData.Graphic.TexAt(Rot8.North), shadowData);
+			}
 		}
 
 		public int MaterialCount => vehicle?.MaterialCount ?? vehicleDef.MaterialCount;
@@ -35,11 +47,13 @@ namespace Vehicles
 
 		public string Name => $"{vehicleDef.Name}_{data.graphicData.texPath}";
 
+		public Graphic_DynamicShadow ShadowGraphic => graphicShadow;
+
 		public Graphic Graphic
 		{
 			get
 			{
-				if (graphicInt is null)
+				if (graphic is null)
 				{
 					if (vehicle != null && vehicle.Destroyed && !RGBMaterialPool.GetAll(this).NullOrEmpty())
 					{
@@ -61,24 +75,27 @@ namespace Vehicles
 
 						RGBMaterialPool.CacheMaterialsFor(this);
 						graphicData.Init(this);
-						graphicInt = graphicData.Graphic;
-						var graphicRGB = graphicInt as Graphic_RGB;
+						graphic = graphicData.Graphic;
+						var graphicRGB = graphic as Graphic_RGB;
 						RGBMaterialPool.SetProperties(this, patternData, graphicRGB.TexAt, graphicRGB.MaskAt);
 					}
 					else
 					{
-						graphicInt = ((GraphicData)graphicData).Graphic;
+						graphic = ((GraphicData)graphicData).Graphic;
 					}
 				}
-				return graphicInt;
+				return graphic;
 			}
 		}
 
 		public void Notify_ColorChanged()
 		{
-			PatternData patternData = vehicle?.patternData ?? VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, new PatternData(vehicleDef.graphicData));
-			RGBMaterialPool.SetProperties(this, patternData);
-			graphicInt = null;
+			if (data.graphicData.shaderType.Shader.SupportsRGBMaskTex())
+			{
+				PatternData patternData = vehicle?.patternData ?? VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, new PatternData(vehicleDef.graphicData));
+				RGBMaterialPool.SetProperties(this, patternData);
+				graphic = null;
+			}
 		}
 
 		public void OnDestroy()
@@ -88,6 +105,11 @@ namespace Vehicles
 
 		public static GraphicOverlay Create(GraphicDataOverlay graphicDataOverlay, VehiclePawn vehicle)
 		{
+			if (!UnityData.IsInMainThread)
+			{
+				Log.Error($"Trying to create GraphicOverlay outside of the main thread.");
+				return null;
+			}
 			GraphicOverlay graphicOverlay = new GraphicOverlay(graphicDataOverlay, vehicle);
 			graphicDataOverlay.graphicData.shaderType ??= ShaderTypeDefOf.Cutout;
 			if (!VehicleMod.settings.main.useCustomShaders)

@@ -35,7 +35,7 @@ namespace Vehicles
 			{
 				foreach (VehicleHandler handler in handlers)
 				{
-					if (handler.role.handlingTypes.HasFlag(HandlingTypeFlags.Movement) && handler.handlers.Count < handler.role.slotsToOperate)
+					if (handler.role.HandlingTypes.HasFlag(HandlingTypeFlags.Movement) && handler.handlers.Count < handler.role.SlotsToOperate)
 					{
 						return false;
 					}
@@ -51,9 +51,9 @@ namespace Vehicles
 				int pawnCount = 0;
 				foreach (VehicleRole role in VehicleDef.properties.roles)
 				{
-					if (role.handlingTypes.HasFlag(HandlingTypeFlags.Movement))
+					if (role.HandlingTypes.HasFlag(HandlingTypeFlags.Movement))
 					{
-						pawnCount += role.slotsToOperate;
+						pawnCount += role.SlotsToOperate;
 					}
 				}
 				return pawnCount;
@@ -67,7 +67,7 @@ namespace Vehicles
 				int pawnsMounted = 0;
 				foreach (VehicleHandler handler in handlers)
 				{
-					if (handler.role.handlingTypes.HasFlag(HandlingTypeFlags.Movement))
+					if (handler.role.HandlingTypes.HasFlag(HandlingTypeFlags.Movement))
 					{
 						pawnsMounted += handler.handlers.Count;
 					}
@@ -86,7 +86,7 @@ namespace Vehicles
 				}
 				foreach (VehicleHandler handler in handlers)
 				{
-					if (handler.role.handlingTypes.HasFlag(HandlingTypeFlags.Movement) && !handler.RoleFulfilled)
+					if (handler.role.HandlingTypes.HasFlag(HandlingTypeFlags.Movement) && !handler.RoleFulfilled)
 					{
 						return false;
 					}
@@ -104,7 +104,7 @@ namespace Vehicles
 				{
 					foreach (VehicleHandler handler in handlers)
 					{
-						if (handler.role.handlingTypes.HasFlag(HandlingTypeFlags.Movement))
+						if (handler.role.HandlingTypes.HasFlag(HandlingTypeFlags.Movement))
 						{
 							crewOnShip.AddRange(handler.handlers);
 						}
@@ -121,7 +121,7 @@ namespace Vehicles
 				List<Pawn> weaponCrewOnShip = new List<Pawn>();
 				foreach (VehicleHandler handler in handlers)
 				{
-					if (handler.role.handlingTypes.HasFlag(HandlingTypeFlags.Turret))
+					if (handler.role.HandlingTypes.HasFlag(HandlingTypeFlags.Turret))
 					{
 						weaponCrewOnShip.AddRange(handler.handlers);
 					}
@@ -139,7 +139,7 @@ namespace Vehicles
 				{
 					foreach (VehicleHandler handler in handlers)
 					{
-						if (handler.role.handlingTypes == HandlingTypeFlags.None)
+						if (handler.role.HandlingTypes == HandlingTypeFlags.None)
 						{
 							passengers.AddRange(handler.handlers);
 						}
@@ -173,7 +173,7 @@ namespace Vehicles
 				int x = 0;
 				foreach (VehicleHandler handler in handlers)
 				{
-					x += handler.role.slots - handler.handlers.Count;
+					x += handler.role.Slots - handler.handlers.Count;
 				}
 				return x;
 			}
@@ -186,7 +186,7 @@ namespace Vehicles
 				int x = 0;
 				foreach (VehicleHandler handler in handlers)
 				{
-					x += handler.role.slots;
+					x += handler.role.Slots;
 				}
 				return x;
 			}
@@ -209,6 +209,7 @@ namespace Vehicles
 			}
 		}
 
+		[Obsolete("Use AddRole instead", true)] //TODO 1.6 - Remove
 		public void AddHandlers(List<VehicleHandler> handlerList)
 		{
 			if (handlerList.NullOrEmpty()) return;
@@ -217,7 +218,7 @@ namespace Vehicles
 				VehicleHandler existingHandler = handlers.FirstOrDefault(h => h == handler);
 				if (existingHandler != null)
 				{
-					existingHandler.role.turretIds.AddRange(handler.role.turretIds);
+					existingHandler.role.TurretIds.AddRange(handler.role.TurretIds);
 				}
 				else
 				{
@@ -227,6 +228,7 @@ namespace Vehicles
 			}
 		}
 
+		[Obsolete("Use RemoveHandler instead", true)] //TODO 1.6 - Remove
 		public void RemoveHandlers(List<VehicleHandler> handlerList)
 		{
 			if (handlerList.NullOrEmpty()) return;
@@ -236,18 +238,62 @@ namespace Vehicles
 			}
 		}
 
+		public void AddRole(VehicleRole role)
+		{
+			role.ResolveReferences(VehicleDef);
+			handlers.Add(new VehicleHandler(this, role));
+		}
+
+		public void RemoveRole(VehicleRole role)
+		{
+			DisembarkAll(); //Temporary measure to avoid the destruction of all pawns within the role being removed
+			for (int i = handlers.Count - 1; i >= 0; i--)
+			{
+				VehicleHandler handler = handlers[i];
+				if (handler.role.key == role.key)
+				{
+					handlers.RemoveAt(i);
+				}
+			}
+		}
+
+		public void RemoveRole(string roleKey)
+		{
+			DisembarkAll(); //Temporary measure to avoid the destruction of all pawns within the role being removed
+			for (int i = handlers.Count - 1; i >= 0; i--)
+			{
+				VehicleHandler handler = handlers[i];
+				if (handler.role.key == roleKey)
+				{
+					handlers.RemoveAt(i);
+				}
+			}
+		}
+
+		public VehicleHandler GetHandler(string roleKey)
+		{
+			foreach (VehicleHandler handler in handlers)
+			{
+				if (handler.role.key == roleKey)
+				{
+					return handler;
+				}
+			}
+			return null;
+		}
+
 		public List<VehicleHandler> GetAllHandlersMatch(HandlingTypeFlags? handlingTypeFlag, string turretKey = "")
 		{
 			if (handlingTypeFlag is null)
 			{
-				return handlers.Where(handler => handler.role.handlingTypes == HandlingTypeFlags.None).ToList();
+				return handlers.Where(handler => handler.role.HandlingTypes == HandlingTypeFlags.None).ToList();
 			}
-			return handlers.FindAll(x => x.role.handlingTypes.HasFlag(handlingTypeFlag) && (handlingTypeFlag != HandlingTypeFlags.Turret || (!x.role.turretIds.NullOrEmpty() && x.role.turretIds.Contains(turretKey))));
+			return handlers.FindAll(x => x.role.HandlingTypes.HasFlag(handlingTypeFlag) && (handlingTypeFlag != HandlingTypeFlags.Turret || (!x.role.TurretIds.NullOrEmpty() && x.role.TurretIds.Contains(turretKey))));
 		}
 
 		public List<VehicleHandler> GetPriorityHandlers(HandlingTypeFlags? handlingTypeFlag = null)
 		{
-			return handlers.Where(h => h.role.handlingTypes > HandlingTypeFlags.None && (handlingTypeFlag is null || h.role.handlingTypes.HasFlag(handlingTypeFlag.Value))).ToList();
+			return handlers.Where(h => h.role.HandlingTypes > HandlingTypeFlags.None && (handlingTypeFlag is null || h.role.HandlingTypes.HasFlag(handlingTypeFlag.Value))).ToList();
 		}
 
 		public VehicleHandler GetHandlersMatch(Pawn pawn)
@@ -258,8 +304,8 @@ namespace Vehicles
 		//REDO - cleanup
 		public VehicleHandler NextAvailableHandler(HandlingTypeFlags? handlingTypeFlag = null, bool priorityHandlers = false)
 		{
-			IEnumerable<VehicleHandler> prioritizedHandlers = priorityHandlers ? handlers.Where(h => h.role.handlingTypes > HandlingTypeFlags.None) : handlers;
-			IEnumerable<VehicleHandler> filteredHandlers = handlingTypeFlag is null ? prioritizedHandlers : prioritizedHandlers.Where(h => h.role.handlingTypes.HasFlag(handlingTypeFlag));
+			IEnumerable<VehicleHandler> prioritizedHandlers = priorityHandlers ? handlers.Where(h => h.role.HandlingTypes > HandlingTypeFlags.None) : handlers;
+			IEnumerable<VehicleHandler> filteredHandlers = handlingTypeFlag is null ? prioritizedHandlers : prioritizedHandlers.Where(h => h.role.HandlingTypes.HasFlag(handlingTypeFlag));
 			foreach (VehicleHandler handler in filteredHandlers)
 			{
 				if (handler.AreSlotsAvailable)
@@ -496,10 +542,10 @@ namespace Vehicles
 						}
 						break;
 					case Need_Comfort _:
-						need.CurLevel = 0.5f; //TODO - add comfort factor for roles
+						need.CurLevel = handler.role.Comfort; //TODO - add comfort factor for roles
 						break;
 					case Need_Outdoors _:
-						if (handler == null || handler.role.exposed)
+						if (handler == null || handler.role.Exposed)
 						{
 							need.NeedInterval();
 						}

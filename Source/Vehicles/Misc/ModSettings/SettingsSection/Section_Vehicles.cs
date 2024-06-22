@@ -157,11 +157,7 @@ namespace Vehicles
 					Widgets.BeginGroup(iconRect);
 					{
 						Rect vehicleTexRect = new Rect(Vector2.zero, iconRect.size);
-						drawStatusMessage = VehicleGraphics.DrawVehicleDef(vehicleTexRect, VehicleMod.selectedDef, rot: directionFacing.TryGetValue(VehicleMod.selectedDef, currentVehicleFacing), withoutTurrets: true);
-						if (!drawStatusMessage.NullOrEmpty())
-						{
-							throw new Exception(drawStatusMessage);
-						}
+						VehicleGraphics.DrawVehicleDef(vehicleTexRect, VehicleMod.selectedDef, rot: directionFacing.TryGetValue(VehicleMod.selectedDef, currentVehicleFacing), withoutTurrets: true);
 					}
 					Widgets.EndGroup();
 

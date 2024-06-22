@@ -1,16 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Reflection;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Linq;
 using Verse;
 using UnityEngine;
+using HarmonyLib;
 using SmashTools;
 using SmashTools.Performance;
+using System.Text;
 
 namespace Vehicles
 {
 	/// <summary>
 	/// MapComponent container for all pathing related sub-components for vehicles
 	/// </summary>
+	[StaticConstructorOnStartup]
 	public sealed class VehicleMapping : MapComponent
 	{
 		private const int EventMapId = 0;
@@ -20,15 +25,15 @@ namespace Vehicles
 		private int[] piggyToOwner;
 		private List<VehicleDef> owners = new List<VehicleDef>();
 
-		private int buildingFor = -1;
+		private VehicleDef buildingFor;
 		private int vehicleRegionGridIndexChecking = 0;
 
 		internal DedicatedThread dedicatedThread;
 
+		private bool initialized;
+
 		public VehicleMapping(Map map) : base(map)
 		{
-			ConstructComponents();
-			dedicatedThread = GetDedicatedThread(map);
 		}
 
 		/// <summary>
@@ -39,27 +44,36 @@ namespace Vehicles
 		public DedicatedThread Thread => dedicatedThread;
 
 		/// <summary>
-		/// Check to make sure dedicated thread is instantiated and running.
+		/// Check if <see cref="dedicatedThread"/> is initialized and running.
 		/// </summary>
-		/// <remarks>Verify this is true before queueing up a method, otherwise you may just be sending it to the void where it will never be executed ever.</remarks>
-		public bool ThreadAvailable => dedicatedThread != null && dedicatedThread.thread.IsAlive;
-
-		/// <summary>
-		/// If dedicated thread is given long task, it should be marked as having a long operation so smaller tasks can avoid queueing up with a long wait time
-		/// </summary>
-		public bool ThreadBusy => !dedicatedThread.InLongOperation;
-
-		/// <summary>
-		/// Retrieve all <see cref="VehiclePathData"/> for this map
-		/// </summary>
-		public IEnumerable<VehiclePathData> AllPathData
+		public bool ThreadAlive
 		{
 			get
 			{
-				foreach (VehiclePathData pathData in vehicleData)
-				{
-					yield return pathData;
-				}
+				return dedicatedThread != null && dedicatedThread.thread.IsAlive;
+			}
+		}
+
+		/// <summary>
+		/// Check if <see cref="dedicatedThread"/> is alive and not in long operation.
+		/// </summary>
+		/// <remarks>Verify this is true before queueing up a method, otherwise you may just be sending it to the void where it will never be executed ever.</remarks>
+		public bool ThreadAvailable
+		{
+			get
+			{
+				return ThreadAlive && !ThreadBusy;
+			}
+		}
+
+		/// <summary>
+		/// DedicatedThread is either processing a long operation in its queue or the queue has grown large enough to warrant waiting.
+		/// </summary>
+		public bool ThreadBusy
+		{
+			get
+			{
+				return dedicatedThread.InLongOperation || dedicatedThread.QueueCount > 10000;
 			}
 		}
 
@@ -72,12 +86,16 @@ namespace Vehicles
 			get
 			{
 #if DEBUG
-				if (buildingFor == vehicleDef.DefIndex)
+				if (buildingFor == vehicleDef)
 				{
-					Log.Error($"Trying to pull VehiclePathData by indexing when it's currently in the middle of generation. Recursion is not supported here!");
-					return VehiclePathData.Invalid;
+					Log.Error($"Trying to pull VehiclePathData by indexing when it's currently in the middle of generation. Recursion is not supported here.");
+					return null;
 				}
 #endif
+				if (!initialized)
+				{
+					ConstructComponents();
+				}
 				VehiclePathData pathData = vehicleData[vehicleDef.DefIndex];
 				if (!pathData.IsValid)
 				{
@@ -86,7 +104,7 @@ namespace Vehicles
 					if (!UnityData.IsInMainThread)
 					{
 						Log.Error($"Unable to generate path data outside of the main thread. May encounter thread safety issues.");
-						return VehiclePathData.Invalid;
+						return null;
 						
 					}
 					return GeneratePathData(vehicleDef);
@@ -168,21 +186,54 @@ namespace Vehicles
 		/// <summary>
 		/// Finalize initialization for map component
 		/// </summary>
-		public void RebuildVehiclePathData()
+		public override void FinalizeInit()
 		{
-			foreach (VehiclePathData vehiclePathData in AllPathData)
+			base.FinalizeInit();
+
+			if (!initialized)
+			{
+				ConstructComponents();
+			}
+
+			Ext_Map.StashLongEventText();
+
+			StringBuilder eventTextBuilder = new StringBuilder();
+
+			DeepProfiler.Start("Vehicle PathGrids".Translate());
+			foreach (VehiclePathData vehiclePathData in vehicleData)
 			{
 				//Needs to check validity, non-pathing vehicles are still indexed since sequential vehicles will have higher index numbers
 				if (vehiclePathData.IsValid)
 				{
+					eventTextBuilder.Clear();
+					eventTextBuilder.AppendLine("VF_GeneratingPathGrids".Translate());
+					eventTextBuilder.AppendLine(vehiclePathData.Owner.defName);
+					LongEventHandler.SetCurrentEventText(eventTextBuilder.ToString());
+
 					vehiclePathData.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
-					if (IsOwner(vehiclePathData.Owner) && vehiclePathData.UsesRegions)
-					{
-						vehiclePathData.VehicleRegionAndRoomUpdater.Enabled = true;
-						vehiclePathData.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
-					}
 				}
 			}
+			DeepProfiler.End();
+
+			DeepProfiler.Start("Vehicle Regions");
+			foreach (VehicleDef vehicleDef in owners)
+			{
+				eventTextBuilder.Clear();
+				eventTextBuilder.AppendLine("VF_GeneratingRegions".Translate());
+				eventTextBuilder.AppendLine(vehicleDef.defName);
+				LongEventHandler.SetCurrentEventText(eventTextBuilder.ToString());
+
+				VehiclePathData vehiclePathData = this[vehicleDef];
+				vehiclePathData.VehicleRegionAndRoomUpdater.Enabled = true;
+				vehiclePathData.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
+			}
+			DeepProfiler.End();
+
+			DeepProfiler.Start("Fetching DedicatedThread");
+			dedicatedThread = GetDedicatedThread(map); //Init dedicated thread after map generation to avoid duplicate pathgrid and region recalcs
+			DeepProfiler.End();
+
+			Ext_Map.RevertLongEventText();
 		}
 
 		/// <summary>
@@ -195,10 +246,12 @@ namespace Vehicles
 			piggyToOwner = new int[size].Populate(-1);
 
 			owners.Clear();
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading) //Even shuttles need path data for landing
-			{
-				GeneratePathData(vehicleDef);
-			}
+
+			initialized = true;
+
+			GenerateAllPathData();
+
+			PathingHelper.DisableAllRegionUpdaters(map);
 		}
 
 		public override void ExposeData()
@@ -215,7 +268,7 @@ namespace Vehicles
 
 		public override void MapRemoved()
 		{
-			bool result = ReleaseThread();
+			ReleaseThread();
 		}
 
 		internal bool ReleaseThread()
@@ -246,6 +299,20 @@ namespace Vehicles
 			}
 		}
 
+		private void GenerateAllPathData()
+		{
+			Ext_Map.StashLongEventText();
+			LongEventHandler.SetCurrentEventText("VF_GeneratingPathData".Translate());
+			DeepProfiler.Start("Generating VehiclePathData");
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading) //Even shuttles need path data for landing
+			{
+				GeneratePathData(vehicleDef);
+			}
+			DeepProfiler.End();
+
+			Ext_Map.RevertLongEventText();
+		}
+
 		/// <summary>
 		/// Generate new <see cref="VehiclePathData"/> for <paramref name="vehicleDef"/>
 		/// </summary>
@@ -253,8 +320,10 @@ namespace Vehicles
 		private VehiclePathData GeneratePathData(VehicleDef vehicleDef, bool compress = true)
 		{
 			VehiclePathData vehiclePathData = new VehiclePathData(vehicleDef);
+			vehicleData[vehicleDef.DefIndex] = vehiclePathData;
+			bool newOwner = false;
 
-			buildingFor = vehicleDef.DefIndex;
+			buildingFor = vehicleDef;
 			{
 				vehiclePathData.VehiclePathGrid = new VehiclePathGrid(this, vehicleDef);
 				vehiclePathData.VehiclePathFinder = new VehiclePathFinder(this, vehicleDef);
@@ -267,12 +336,20 @@ namespace Vehicles
 				}
 				else
 				{
-					vehiclePathData.ReachabilityData = new VehicleReachabilitySettings(this, vehicleDef);
+					vehiclePathData.ReachabilityData = new VehicleReachabilitySettings(this, vehicleDef, vehiclePathData);
 					AddOwner(vehicleDef);
+					newOwner = true;
 				}
-				vehicleData[vehicleDef.DefIndex] = vehiclePathData;
 			}
-			buildingFor = -1;
+			buildingFor = null;
+
+			vehiclePathData.VehiclePathGrid.PostInit();
+			vehiclePathData.VehiclePathFinder.PostInit();
+			if (newOwner)
+			{
+				vehiclePathData.ReachabilityData.PostInit();
+			}
+
 			return vehiclePathData;
 		}
 
@@ -297,13 +374,11 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Container for all path related sub-components specific to a <see cref="VehicleDef"/>.
+		/// Container for all path related subcomponents specific to a <see cref="VehicleDef"/>.
 		/// </summary>
 		/// <remarks>Stores data strictly for deviations from vanilla regarding impassable values</remarks>
-		public struct VehiclePathData
+		public class VehiclePathData
 		{
-			private readonly VehicleDef vehicleDef;
-
 			private readonly HashSet<ThingDef> impassableThingDefs;
 			private readonly HashSet<TerrainDef> impassableTerrain;
 			private readonly int size;
@@ -311,7 +386,7 @@ namespace Vehicles
 
 			public VehiclePathData(VehicleDef vehicleDef)
 			{
-				this.vehicleDef = vehicleDef;
+				Owner = vehicleDef;
 				size = Mathf.Min(vehicleDef.Size.x, vehicleDef.Size.z);
 				defaultTerrainImpassable = vehicleDef.properties.defaultTerrainImpassable;
 				impassableThingDefs = vehicleDef.properties.customThingCosts.Where(kvp => kvp.Value >= VehiclePathGrid.ImpassableCost).Select(kvp => kvp.Key).ToHashSet();
@@ -322,13 +397,11 @@ namespace Vehicles
 				ReachabilityData = null;
 			}
 
-			public static VehiclePathData Invalid => new VehiclePathData();
+			public bool IsValid => Owner != null;
 
-			public bool IsValid => vehicleDef != null;
+			public bool UsesRegions => Owner.vehicleMovementPermissions > VehiclePermissions.NotAllowed;
 
-			public bool UsesRegions => vehicleDef.vehicleMovementPermissions > VehiclePermissions.NotAllowed;
-
-			public VehicleDef Owner => vehicleDef;
+			public VehicleDef Owner { get; }
 
 			internal VehicleReachabilitySettings ReachabilityData { get; set; }
 
@@ -336,17 +409,17 @@ namespace Vehicles
 
 			public VehiclePathFinder VehiclePathFinder { get; set; }
 
-			public VehicleReachability VehicleReachability => ReachabilityData.vehicleReachability;
+			public VehicleReachability VehicleReachability => ReachabilityData.reachability;
 
-			public VehicleRegionGrid VehicleRegionGrid => ReachabilityData.vehicleRegionGrid;
+			public VehicleRegionGrid VehicleRegionGrid => ReachabilityData.regionGrid;
 
-			public VehicleRegionMaker VehicleRegionMaker => ReachabilityData.vehicleRegionMaker;
+			public VehicleRegionMaker VehicleRegionMaker => ReachabilityData.regionMaker;
 
-			public VehicleRegionLinkDatabase VehicleRegionLinkDatabase => ReachabilityData.vehicleRegionLinkDatabase;
+			public VehicleRegionLinkDatabase VehicleRegionLinkDatabase => ReachabilityData.regionLinkDatabase;
 
-			public VehicleRegionAndRoomUpdater VehicleRegionAndRoomUpdater => ReachabilityData.vehicleRegionAndRoomUpdater;
+			public VehicleRegionAndRoomUpdater VehicleRegionAndRoomUpdater => ReachabilityData.regionAndRoomUpdater;
 
-			public VehicleRegionDirtyer VehicleRegionDirtyer => ReachabilityData.vehicleRegionDirtyer;
+			public VehicleRegionDirtyer VehicleRegionDirtyer => ReachabilityData.regionDirtyer;
 
 			public bool MatchesReachability(VehiclePathData other)
 			{
@@ -359,24 +432,33 @@ namespace Vehicles
 			}
 		}
 
-		//Strictly for readability
 		public class VehicleReachabilitySettings
 		{
-			public VehicleReachability vehicleReachability;
-			public VehicleRegionGrid vehicleRegionGrid;
-			public VehicleRegionMaker vehicleRegionMaker;
-			public VehicleRegionLinkDatabase vehicleRegionLinkDatabase;
-			public VehicleRegionAndRoomUpdater vehicleRegionAndRoomUpdater;
-			public VehicleRegionDirtyer vehicleRegionDirtyer;
+			public readonly VehicleRegionGrid regionGrid;
+			public readonly VehicleRegionMaker regionMaker;
+			public readonly VehicleRegionLinkDatabase regionLinkDatabase;
+			public readonly VehicleRegionAndRoomUpdater regionAndRoomUpdater;
+			public readonly VehicleRegionDirtyer regionDirtyer;
+			public readonly VehicleReachability reachability;
 
-			public VehicleReachabilitySettings(VehicleMapping vehicleMapping, VehicleDef vehicleDef)
+			public VehicleReachabilitySettings(VehicleMapping vehicleMapping, VehicleDef vehicleDef, VehiclePathData pathData)
 			{
-				vehicleReachability = new VehicleReachability(vehicleMapping, vehicleDef);
-				vehicleRegionGrid = new VehicleRegionGrid(vehicleMapping, vehicleDef);
-				vehicleRegionMaker = new VehicleRegionMaker(vehicleMapping, vehicleDef);
-				vehicleRegionLinkDatabase = new VehicleRegionLinkDatabase();
-				vehicleRegionAndRoomUpdater = new VehicleRegionAndRoomUpdater(vehicleMapping, vehicleDef);
-				vehicleRegionDirtyer = new VehicleRegionDirtyer(vehicleMapping, vehicleDef);
+				regionGrid = new VehicleRegionGrid(vehicleMapping, vehicleDef);
+				regionMaker = new VehicleRegionMaker(vehicleMapping, vehicleDef);
+				regionLinkDatabase = new VehicleRegionLinkDatabase(vehicleMapping, vehicleDef);
+				regionAndRoomUpdater = new VehicleRegionAndRoomUpdater(vehicleMapping, vehicleDef);
+				regionDirtyer = new VehicleRegionDirtyer(vehicleMapping, vehicleDef);
+				reachability = new VehicleReachability(vehicleMapping, vehicleDef, pathData.VehiclePathGrid, regionGrid);
+			}
+
+			public void PostInit()
+			{
+				regionGrid.PostInit();
+				regionMaker.PostInit();
+				regionLinkDatabase.PostInit();
+				regionAndRoomUpdater.PostInit();
+				regionDirtyer.PostInit();
+				reachability.PostInit();
 			}
 		}
 	}

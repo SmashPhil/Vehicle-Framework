@@ -94,7 +94,7 @@ namespace Vehicles
 
 			Widgets.ListSeparator(ref curY, viewRect.width, label);
 
-			if (false && holder is VehicleHandler handler && handler?.role.pawnRenderer != null && Prefs.DevMode && DebugSettings.godMode) //TODO - implement runtime editing of pawn renderer positions for modders
+			if (false && holder is VehicleHandler handler && handler?.role.PawnRenderer != null && Prefs.DevMode && DebugSettings.godMode) //TODO - implement runtime editing of pawn renderer positions for modders
 			{
 				Rect editPawnOverlayRect = new Rect(viewRect.width - 15, curY + 3, 15, 15);
 				TooltipHandler.TipRegionByKey(editPawnOverlayRect, "VF_EditPawnOverlayRendererTooltip");

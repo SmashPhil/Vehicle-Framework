@@ -7,7 +7,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class VehicleGraphicOverlay
+	public class VehicleGraphicOverlay //TODO 1.6 - Choose better name to indicate this is a component of VehiclePawn
 	{
 		public readonly VehiclePawn vehicle;
 
@@ -77,6 +77,7 @@ namespace Vehicles
 				foreach (GraphicOverlay graphicOverlay in extraOverlayLookup[key])
 				{
 					extraOverlays.Remove(graphicOverlay);
+					graphicOverlay.OnDestroy();
 				}
 				extraOverlayLookup.Remove(key);
 			}
@@ -148,6 +149,10 @@ namespace Vehicles
 				else
 				{
 					graphicOverlay.Graphic.DrawWorker(overlayDrawPos, rot, null, null, overlayAngle + extraAngle);
+				}
+				if (graphicOverlay.ShadowGraphic != null)
+				{
+					graphicOverlay.ShadowGraphic.DrawWorker(overlayDrawPos, rot, null, null, overlayAngle + extraAngle);
 				}
 			}
 		}

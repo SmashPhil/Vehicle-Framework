@@ -233,6 +233,8 @@ namespace Vehicles
 					listingStandard.CheckboxLabeled("VF_OpportunisticTicking".Translate(), ref opportunisticTicking, "VF_OpportunisticTickingTooltip".Translate());
 
 					listingStandard.NewColumn();
+
+#if !FISHING_DISABLED
 					string fishingHeader = "VF_Fishing".Translate();
 					if (!FishingCompatibility.Active)
 					{
@@ -253,6 +255,7 @@ namespace Vehicles
 					listingStandard.Gap(8);
 
 					GUIState.Enable();
+#endif
 
 					listingStandard.Header("VF_AerialVehicles".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 					//listingStandard.Gap(4);

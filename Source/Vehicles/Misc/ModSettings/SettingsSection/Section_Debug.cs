@@ -17,7 +17,7 @@ namespace Vehicles
 	{
 		public const float ButtonHeight = 30f;
 		public const float VerticalGap = 2f;
-		public const int ButtonRows = 3;
+		public const int ButtonRows = 4;
 		public const int DebugSectionColumns = 2;
 
 		public bool debugDraftAnyVehicle;
@@ -90,7 +90,11 @@ namespace Vehicles
 			Scribe_Values.Look(ref debugDrawVehiclePathCosts, nameof(debugDrawVehiclePathCosts));
 			Scribe_Values.Look(ref debugDrawPathfinderSearch, nameof(debugDrawPathfinderSearch));
 
-			Scribe_Values.Look(ref debugSpawnVehicleBuildingGodMode, nameof(debugSpawnVehicleBuildingGodMode));
+			if (DebugProperties.debug)
+			{
+				Scribe_Values.Look(ref debugSpawnVehicleBuildingGodMode, nameof(debugSpawnVehicleBuildingGodMode));
+			}
+			
 			Scribe_Values.Look(ref debugUseMultithreading, nameof(debugUseMultithreading), defaultValue: true);
 			Scribe_Values.Look(ref debugLoadAssetBundles, nameof(debugLoadAssetBundles), defaultValue: true);
 
@@ -100,6 +104,7 @@ namespace Vehicles
 		public override void DrawSection(Rect rect)
 		{
 			Rect devModeRect = rect.ContractedBy(10);
+			devModeRect.yMin += VehicleMod.ResetImageSize + 5;
 			float buttonRowHeight = (ButtonHeight * ButtonRows + VerticalGap * (ButtonRows - 1));
 			devModeRect.height = devModeRect.height - buttonRowHeight;
 			
@@ -109,14 +114,28 @@ namespace Vehicles
 			{
 				GUIState.Push();
 				{
+#if DEBUG
 					listingStandard.Header("VF_DevMode_Logging".Translate(), ListingExtension.BannerColor, fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugLogging".Translate(), ref debugLogging, "VF_DevMode_DebugLoggingTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugPathCostRecalculationLogging".Translate(), ref debugPathCostChanges, "VF_DevMode_DebugPathCostRecalculationLoggingTooltip".Translate());
+#endif
 
 					listingStandard.Header("VF_DevMode_Troubleshooting".Translate(), ListingExtension.BannerColor, fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDraftAnyVehicle".Translate(), ref debugDraftAnyVehicle, "VF_DevMode_DebugDraftAnyVehicleTooltip".Translate());
+					bool shootAnyTurret = debugShootAnyTurret;
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugShootAnyTurret".Translate(), ref debugShootAnyTurret, "VF_DevMode_DebugShootAnyTurretTooltip".Translate());
-					
+
+					if (shootAnyTurret != debugShootAnyTurret && Current.ProgramState == ProgramState.Playing && !Find.Maps.NullOrEmpty())
+					{
+						foreach (Map map in Find.Maps)
+						{
+							foreach (VehiclePawn vehicle in map.AllPawnsOnMap<VehiclePawn>(Faction.OfPlayer))
+							{
+								vehicle.CompVehicleTurrets?.RecacheTurretPermissions();
+							}
+						}
+					}
+#if DEBUG
 					listingStandard.Header("Debugging Only", ListingExtension.BannerColor, fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);
 
 					listingStandard.CheckboxLabeledWithMessage("Raiders / Traders (Experimental)", delegate (bool value)
@@ -125,6 +144,7 @@ namespace Vehicles
 					}, ref debugAllowRaiders, "Enables vehicle generation for NPCs.\n NOTE: This is an experimental feature. Use at your own risk.");
 
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugSpawnVehiclesGodMode".Translate(), ref debugSpawnVehicleBuildingGodMode, "VF_DevMode_DebugSpawnVehiclesGodModeTooltip".Translate());
+
 					bool checkOn = debugUseMultithreading;
 					listingStandard.CheckboxLabeled("Use Multithreading", ref checkOn);
 
@@ -145,49 +165,40 @@ namespace Vehicles
 						}
 					}
 					listingStandard.CheckboxLabeled("Load AssetBundles", ref debugLoadAssetBundles);
-
-					if (Current.ProgramState == ProgramState.Playing && !Find.Maps.NullOrEmpty())
-					{
-						foreach (Map map in Find.Maps)
-						{
-							foreach (VehiclePawn vehicle in map.AllPawnsOnMap<VehiclePawn>(Faction.OfPlayer))
-							{
-								if (vehicle.CompVehicleTurrets != null)
-								{
-									vehicle.CompVehicleTurrets.RecacheTurretPermissions();
-								}
-							}
-						}
-					}
+#endif
 
 					listingStandard.Header("VF_DevMode_Drawers".Translate(), ListingExtension.BannerColor, fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawUpgradeNodeGrid".Translate(), ref debugDrawNodeGrid, "VF_DevMode_DebugDrawUpgradeNodeGridTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawHitbox".Translate(), ref debugDrawHitbox, "VF_DevMode_DebugDrawHitboxTooltip".Translate());
 
-					GUIState.Disable();
+#if DEBUG
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawVehicleTracks".Translate(), ref debugDrawVehicleTracks, "VF_DevMode_DebugDrawVehicleTracksTooltip".Translate());
-					GUIState.Enable();
+#endif
 
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawBumpers".Translate(), ref debugDrawBumpers, "VF_DevMode_DebugDrawBumpersTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawLordMeetingPoint".Translate(), ref debugDrawLordMeetingPoint, "VF_DevMode_DebugDrawLordMeetingPointTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawFleePoints".Translate(), ref debugDrawFleePoint, "VF_DevMode_DebugDrawFleePointsTooltip".Translate());
-					listingStandard.NewColumn();
 
 					listingStandard.Header("VF_DevMode_Pathing".Translate(), ListingExtension.BannerColor, fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawVehiclePathingCosts".Translate(), ref debugDrawVehiclePathCosts, "VF_DevMode_DebugDrawVehiclePathingCostsTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawPathfinderSearch".Translate(), ref debugDrawPathfinderSearch, "VF_DevMode_DebugDrawPathfinderSearchTooltip".Translate());
-
-					DoColumnButtons();
 				}
 				GUIState.Pop();
 			}
 			listingStandard.End();
 
-			Rect devModeButtonsRect = new Rect(devModeRect);
-			devModeButtonsRect.y = devModeRect.yMax;
+			DoBottomButtons(devModeRect, buttonRowHeight);
+
+			listingStandard.End();
+		}
+
+		private void DoBottomButtons(Rect rect, float buttonRowHeight)
+		{
+			Rect devModeButtonsRect = new Rect(rect);
+			devModeButtonsRect.y = rect.yMax;
 			devModeButtonsRect.height = buttonRowHeight;
 
-			listingStandard.ColumnWidth = devModeRect.width / 3;
+			listingStandard.ColumnWidth = devModeButtonsRect.width / 3 - 17;
 			listingStandard.Begin(devModeButtonsRect);
 			{
 				if (listingStandard.ButtonText("VF_DevMode_ShowRecentNews".Translate()))
@@ -195,117 +206,117 @@ namespace Vehicles
 					SoundDefOf.Click.PlayOneShotOnCamera();
 					ShowAllUpdates();
 				}
+#if DEBUG
 				if (listingStandard.ButtonText("VF_DevMode_OpenQuickTestSettings".Translate()))
 				{
 					SoundDefOf.Click.PlayOneShotOnCamera();
 					UnitTesting.OpenMenu();
 				}
+#endif
+
+				if (listingStandard.ButtonText("VF_DevMode_LogThreadActivity".Translate(), "VF_DevMode_LogThreadActivityTooltip"))
+				{
+					SoundDefOf.Click.PlayOneShotOnCamera();
+					Find.WindowStack.Add(new Dialog_DedicatedThreadActivity(delegate ()
+					{
+						if (Find.CurrentMap == null)
+						{
+							return null;
+						}
+
+						VehicleMapping vehicleMapping = Find.CurrentMap.GetCachedMapComponent<VehicleMapping>();
+						return vehicleMapping.dedicatedThread;
+					}));
+				}
+
 				if (listingStandard.ButtonText("VF_DevMode_GraphEditor".Translate()))
 				{
 					SoundDefOf.Click.PlayOneShotOnCamera();
 					Find.WindowStack.Add(new Dialog_GraphEditor());
 				}
-			}
-			listingStandard.End();
-		}
 
-		private void DoColumnButtons()
-		{
-			listingStandard.Gap(2);
-			Rect buttonRect = listingStandard.GetRect(30);
-			if (Widgets.ButtonText(buttonRect, "VF_DevMode_DebugPathfinderDebugging".Translate()))
-			{
-				SoundDefOf.Click.PlayOneShotOnCamera();
-				RegionDebugMenu();
-			}
-			TooltipHandler.TipRegionByKey(buttonRect, "VF_DevMode_DebugPathfinderDebuggingTooltip");
-
-			listingStandard.Gap(2);
-			buttonRect = listingStandard.GetRect(30);
-			if (Widgets.ButtonText(buttonRect, "VF_DevMode_DebugWorldPathfinderDebugging".Translate()))
-			{
-				SoundDefOf.Click.PlayOneShotOnCamera();
-				WorldPathingDebugMenu();
-			}
-			TooltipHandler.TipRegionByKey(buttonRect, "VF_DevMode_DebugWorldPathfinderDebuggingTooltip");
-
-			listingStandard.Gap(2);
-			buttonRect = listingStandard.GetRect(30);
-			if (Widgets.ButtonText(buttonRect, "Output Material Cache"))
-			{
-				SoundDefOf.Click.PlayOneShotOnCamera();
-				RGBMaterialPool.LogAllMaterials();
-			}
-
-			listingStandard.Gap(2);
-			buttonRect = listingStandard.GetRect(30);
-			if (Widgets.ButtonText(buttonRect, "Output Owners"))
-			{
-				Map map = Find.CurrentMap;
-				if (map != null)
+				if (listingStandard.ButtonText("VF_DevMode_DebugPathfinderDebugging".Translate(), "VF_DevMode_DebugPathfinderDebuggingTooltip"))
 				{
-					Log.Message($"Vehicles = {DefDatabase<VehicleDef>.AllDefsListForReading.Count}");
-					foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
+					SoundDefOf.Click.PlayOneShotOnCamera();
+					RegionDebugMenu();
+				}
+
+				if (listingStandard.ButtonText("VF_DevMode_DebugWorldPathfinderDebugging".Translate(), "VF_DevMode_DebugWorldPathfinderDebuggingTooltip"))
+				{
+					SoundDefOf.Click.PlayOneShotOnCamera();
+					WorldPathingDebugMenu();
+				}
+
+#if DEBUG
+				if (listingStandard.ButtonText("Output Material Cache"))
+				{
+					SoundDefOf.Click.PlayOneShotOnCamera();
+					RGBMaterialPool.LogAllMaterials();
+				}
+
+				if (listingStandard.ButtonText("Output Owners"))
+				{
+					Map map = Find.CurrentMap;
+					if (map != null)
 					{
-						Log.Message($"{vehicleDef} DefIndex = {vehicleDef.DefIndex}");
-					}
-					Log.Message("-------");
-					VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-					Log.Message($"Total Owners = {mapping.Owners.Count}");
-					foreach (VehicleDef vehicleDef in mapping.Owners)
-					{
-						List<VehicleDef> piggies = mapping.GetPiggies(vehicleDef);
-						Log.Message($"Owner: {vehicleDef} Piggies=({string.Join(",", piggies.Select(def => def.defName))})");
+						Log.Message($"Vehicles = {DefDatabase<VehicleDef>.AllDefsListForReading.Count}");
+						foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
+						{
+							Log.Message($"{vehicleDef} DefIndex = {vehicleDef.DefIndex}");
+						}
+						Log.Message("-------");
+						VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+						Log.Message($"Total Owners = {mapping.Owners.Count}");
+						foreach (VehicleDef vehicleDef in mapping.Owners)
+						{
+							List<VehicleDef> piggies = mapping.GetPiggies(vehicleDef);
+							Log.Message($"Owner: {vehicleDef} Piggies=({string.Join(",", piggies.Select(def => def.defName))})");
+						}
 					}
 				}
-			}
+#endif
 
-			listingStandard.Gap(2);
-			buttonRect = listingStandard.GetRect(30);
-			if (Widgets.ButtonText(buttonRect, "Regenerate All Regions"))
-			{
-				LongEventHandler.QueueLongEvent(delegate ()
+				if (listingStandard.ButtonText("Regenerate All Regions"))
 				{
-					SoundDefOf.Click.PlayOneShotOnCamera();
-					foreach (Map map in Find.Maps)
+					LongEventHandler.QueueLongEvent(delegate ()
 					{
-						VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
-						foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
+						SoundDefOf.Click.PlayOneShotOnCamera();
+						foreach (Map map in Find.Maps)
 						{
-							mapping[vehicleDef].VehiclePathGrid.RecalculateAllPerceivedPathCosts();
-							if (mapping.IsOwner(vehicleDef))
+							VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
+							foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
 							{
-								mapping[vehicleDef].VehicleRegionDirtyer.SetAllDirty();
-								mapping[vehicleDef].VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
+								mapping[vehicleDef].VehiclePathGrid.RecalculateAllPerceivedPathCosts();
+								if (mapping.IsOwner(vehicleDef))
+								{
+									mapping[vehicleDef].VehicleRegionDirtyer.SetAllDirty();
+									mapping[vehicleDef].VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
+								}
 							}
 						}
-					}
-				}, "Regenerating Regions", false, null);
-			}
+					}, "Regenerating Regions", false, null);
+				}
 
-			listingStandard.Gap(2);
-			buttonRect = listingStandard.GetRect(30);
-			if (Widgets.ButtonText(buttonRect, "Clear Region Cache"))
-			{
-				LongEventHandler.QueueLongEvent(delegate ()
+				if (listingStandard.ButtonText("Clear Region Cache"))
 				{
-					SoundDefOf.Click.PlayOneShotOnCamera();
-					foreach (Map map in Find.Maps)
+					LongEventHandler.QueueLongEvent(delegate ()
 					{
-						VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-						foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
+						SoundDefOf.Click.PlayOneShotOnCamera();
+						foreach (Map map in Find.Maps)
 						{
-							mapping[vehicleDef].VehicleReachability.ClearCache();
+							VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+							foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
+							{
+								mapping[vehicleDef].VehicleReachability.ClearCache();
+							}
 						}
-					}
-				}, "Clearing Region Cache", false, null);
-			}
+					}, "Clearing Region Cache", false, null);
+				}
 
-			listingStandard.Gap(2);
-			buttonRect = listingStandard.GetRect(30);
-			if (Widgets.ButtonText(buttonRect, "Flash Path Costs"))
-			{
-				OpenFlashPathCostsMenu();
+				if (listingStandard.ButtonText("Flash Path Costs"))
+				{
+					OpenFlashPathCostsMenu();
+				}
 			}
 		}
 

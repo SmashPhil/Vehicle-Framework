@@ -31,18 +31,10 @@ namespace Vehicles
 		internal static ModMetaData VehicleMMD;
 		internal static ModContentPack VehicleMCP;
 
-		/// <summary>
-		/// Debugging
-		/// </summary>
-		internal static List<WorldPath> debugLines = new List<WorldPath>();
-		internal static List<Pair<int, int>> tiles = new List<Pair<int, int>>(); // Pair -> TileID : Cycle
-		internal static readonly bool debug = false;
-		internal static readonly bool drawPaths = false;
-
 		private static string methodPatching = string.Empty;
 
 		internal static List<UpdateLog> updates = new List<UpdateLog>();
-
+		
 		internal static Harmony Harmony { get; private set; } = new Harmony(VehiclesUniqueId);
 
 		internal static string VersionPath => Path.Combine(VehicleMMD.RootDir.FullName, "Version.txt");
@@ -100,7 +92,7 @@ namespace Vehicles
 			Utilities.InvokeWithLogging(RegisterTweakFieldsInEditor);
 			Utilities.InvokeWithLogging(PatternDef.GenerateMaterials);
 
-			if (debug)
+			if (DebugProperties.debug)
 			{
 				//DebugHelper.Local.VehicleDef = DefDatabase<VehicleDef>.GetNamedSilentFail("VF_TestMarshal");
 				if (DebugHelper.Local.VehicleDef != null)

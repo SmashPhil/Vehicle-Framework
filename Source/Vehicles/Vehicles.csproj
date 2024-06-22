@@ -22,7 +22,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\1.5\Assemblies\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;FISHING_DISABLED</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -31,12 +31,13 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\Assemblies\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <OutputPath>..\..\1.5\Assemblies\</OutputPath>
+    <DefineConstants>TRACE;FISHING_DISABLED</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <Prefer32Bit>false</Prefer32Bit>
+    <NoWarn>CS0649</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
@@ -47,18 +48,14 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\1.5\Assemblies\SmashTools.dll</HintPath>
     </Reference>
-    <Reference Include="System">
-      <Private>False</Private>
-    </Reference>
+    <Reference Include="System" />
     <Reference Include="System.Runtime">
       <Private>False</Private>
     </Reference>
     <Reference Include="System.Runtime.InteropServices.RuntimeInformation">
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Xml">
-      <Private>False</Private>
-    </Reference>
+    <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
@@ -132,7 +129,7 @@
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\FleckData.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\FleckOneShot.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\Range.cs" />
-    <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\ShadowData.cs" />
+    <Compile Include="CustomFeatures\Misc\Rendering\DynamicShadowData.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Properties\DirectionalProtocolProperties.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Properties\PropellerProtocolProperties.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Restrictions\LaunchRestriction_ComponentHealth.cs" />
@@ -147,21 +144,29 @@
     <Compile Include="CustomFeatures\EventDefs\VehicleSoundEventEntry.cs" />
     <Compile Include="CustomFeatures\EventDefs\VehicleTurretEventDef.cs" />
     <Compile Include="CustomFeatures\Misc\AnimationEditorTags.cs" />
-    <Compile Include="CustomFeatures\Misc\DrawOffsets.cs" />
+    <Compile Include="CustomFeatures\Misc\Rendering\DrawOffsets.cs" />
+    <Compile Include="CustomFeatures\Misc\Rendering\DynamicShadows.cs" />
     <Compile Include="CustomFeatures\SharedJobs\SharedJob.cs" />
     <Compile Include="AI\JobDrivers\VehicleJobDriver.cs" />
     <Compile Include="AI\WorkGiver\WorkGiver_DisassembleVehicle.cs" />
     <Compile Include="Components\Vehicles\VehicleSustainers.cs" />
+    <Compile Include="CustomFeatures\Upgrades\Node\Settings\UpgradeSetting_Turret.cs" />
     <Compile Include="CustomFeatures\Upgrades\Node\SoundUpgrade.cs" />
+    <Compile Include="CustomFeatures\Upgrades\Node\Settings\UpgradeState.cs" />
+    <Compile Include="CustomFeatures\Upgrades\Node\Settings\UpgradeSetting_TurretRestriction.cs" />
+    <Compile Include="CustomFeatures\Upgrades\Node\SettingsUpgrade.cs" />
+    <Compile Include="CustomFeatures\Upgrades\UpgradeEffectType.cs" />
     <Compile Include="CustomFeatures\Upgrades\Node\VehicleUpgrade.cs" />
     <Compile Include="CustomFeatures\Upgrades\StatOffset.cs" />
     <Compile Include="CustomFeatures\Upgrades\UpgradeNode.cs" />
     <Compile Include="CustomFeatures\Upgrades\Node\ActionUpgrade.cs" />
+    <Compile Include="CustomFeatures\Upgrades\UpgradeTextEntry.cs" />
     <Compile Include="CustomFeatures\Upgrades\UpgradeTreeDef.cs" />
     <Compile Include="Gizmo\Command_Turret.cs" />
     <Compile Include="Gizmo\Gizmo_VehicleCaravanInfo.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_StatSettings.cs" />
     <Compile Include="Graphics\Graphic\Graphics\Animated\Graphic_ReversePropeller.cs" />
+    <Compile Include="Graphics\Graphic\Graphics\VanillaSupported\Graphic_DynamicShadow.cs" />
     <Compile Include="Graphics\ITab\ITab_Airdrop_Container.cs" />
     <Compile Include="Graphics\ITab\WITab_AerialVehicle.cs" />
     <Compile Include="Graphics\ITab\WITab_AerialVehicle_Health.cs" />
@@ -179,12 +184,14 @@
     <Compile Include="Harmony\ConditionalPatches\Compatibility_VEFishing.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_SOS2.cs" />
     <Compile Include="Harmony\ConditionalPatches\ConditionalVehiclePatch.cs" />
+    <Compile Include="Harmony\DebugProperties.cs" />
     <Compile Include="Harmony\PatchCategories\DefGenerators\ThingDefGenerator_Buildables.cs" />
     <Compile Include="Harmony\PatchCategories\NPCAI.cs" />
     <Compile Include="Harmony\UnitTesting\WorldTesting.cs" />
     <Compile Include="Harmony\UnitTesting\UITesting.cs" />
     <Compile Include="Misc\Attributes\ActionOnSettingsInputAttribute.cs" />
     <Compile Include="Misc\Attributes\DisableSettingConditionalAttribute.cs" />
+    <Compile Include="Misc\DefModExtension\RoofDefPositionStateDefModExtension.cs" />
     <Compile Include="Misc\DefOf\HistoryEventDefOf_Vehicles.cs" />
     <Compile Include="Misc\DefOf\KeyBindingDefOf_Vehicles.cs" />
     <Compile Include="Misc\DefOf\SkyfallerDefOf.cs" />
@@ -202,9 +209,9 @@
     <Compile Include="Misc\Interfaces\IMaterialCacheTarget.cs" />
     <Compile Include="Misc\Interfaces\ISustainerTarget.cs" />
     <Compile Include="Misc\Interfaces\IVehicleWorldObject.cs" />
-    <Compile Include="Pathing\Map\VehicleRegionUpdateCatalog.cs" />
     <Compile Include="Pathing\RegionGrid\ChunkSet.cs" />
     <Compile Include="Pathing\RegionGrid\ConcurrentListerThings.cs" />
+    <Compile Include="Pathing\RegionGrid\VehicleRegionManager.cs" />
     <Compile Include="Turrets\Projectiles\Projectile_Deflected.cs" />
     <Compile Include="Turrets\Turret\Rendering\VehicleTurretRenderData.cs" />
     <Compile Include="Turrets\Turret\TargetLock.cs" />
@@ -446,7 +453,7 @@
     <Compile Include="Graphics\Graphic\GraphicGeneration\GraphicDatabaseRGB.cs" />
     <Compile Include="Graphics\Graphic\GraphicGeneration\GraphicRequestRGB.cs" />
     <Compile Include="Graphics\Graphic\Graphics\Animated\Graphic_Animate.cs" />
-    <Compile Include="Graphics\Graphic\Graphics\VanillaSupported\Graphic_RGB.cs" />
+    <Compile Include="Graphics\Graphic\Graphics\Vehicle\Graphic_RGB.cs" />
     <Compile Include="Graphics\Graphic\MaterialGeneration\MaterialRGBRequest.cs" />
     <Compile Include="Graphics\Graphic\MaterialGeneration\RGBMaterialPool.cs" />
     <Compile Include="Graphics\Graphic\MaterialGeneration\AdditionalShaderPropertyIDs.cs" />
@@ -469,13 +476,15 @@
     <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleLaunchHelper.cs" />
     <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleTabHelper.cs" />
     <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleTraderHelper.cs" />
+    <Compile Include="Utility\Helpers\AsyncActions\AsyncLongOperationAction.cs" />
     <Compile Include="Utility\Helpers\AsyncActions\AsyncPathFindAction.cs" />
     <Compile Include="Utility\Helpers\AsyncActions\AsyncPathingAction.cs" />
     <Compile Include="Utility\Helpers\AsyncActions\AsyncRegionAction.cs" />
     <Compile Include="Utility\Helpers\AsyncActions\AsyncReachabilityCacheAction.cs" />
     <Compile Include="Utility\Helpers\AsyncActions\AsyncRegionRegisterAction.cs" />
-    <Compile Include="Utility\Helpers\CaravanHelper.cs" />
-    <Compile Include="Utility\Helpers\CaravanInfoHelper.cs" />
+    <Compile Include="Utility\Helpers\TranslationHelper.cs" />
+    <Compile Include="Utility\Helpers\World\CaravanHelper.cs" />
+    <Compile Include="Utility\Helpers\World\CaravanInfoHelper.cs" />
     <Compile Include="Utility\Helpers\Combat\ProjectileHelper.cs" />
     <Compile Include="Utility\Helpers\Combat\DamageHelper.cs" />
     <Compile Include="Utility\Helpers\DebugHelper.cs" />
@@ -483,21 +492,23 @@
     <Compile Include="Utility\Helpers\MapHelper.cs" />
     <Compile Include="Utility\Helpers\ModSettingsHelper.cs" />
     <Compile Include="Utility\Helpers\Combat\RaidInjectionHelper.cs" />
-    <Compile Include="Utility\Helpers\RenderHelper.cs" />
+    <Compile Include="Utility\Helpers\Rendering\RenderHelper.cs" />
+    <Compile Include="Utility\Helpers\World\RoadCostHelper.cs" />
     <Compile Include="Utility\Helpers\SelectionHelper.cs" />
     <Compile Include="Utility\Helpers\GizmoHelper.cs" />
     <Compile Include="Utility\Helpers\ThreadHelper.cs" />
     <Compile Include="Utility\Helpers\SoundHelper.cs" />
-    <Compile Include="Utility\Helpers\VehicleCaravanPathingHelper.cs" />
-    <Compile Include="Utility\Helpers\VehicleGraphics.cs" />
-    <Compile Include="Utility\Helpers\VehicleGUI.cs" />
+    <Compile Include="Utility\Helpers\World\VehicleCaravanPathingHelper.cs" />
+    <Compile Include="Utility\Helpers\Rendering\VehicleGraphics.cs" />
+    <Compile Include="Utility\Helpers\Rendering\VehicleGUI.cs" />
     <Compile Include="Utility\Helpers\VehicleTabHelper_Health.cs" />
     <Compile Include="Utility\Helpers\VehicleTabHelper_Passenger.cs" />
+    <Compile Include="Utility\Helpers\World\WinterPathingHelper.cs" />
     <Compile Include="Utility\Helpers\XmlHelper.cs" />
     <Compile Include="Utility\Helpers\SkyfallerHelper.cs" />
     <Compile Include="Utility\Helpers\TargetingHelper.cs" />
     <Compile Include="Utility\Helpers\UIHelper.cs" />
-    <Compile Include="Utility\Helpers\WorldHelper.cs" />
+    <Compile Include="Utility\Helpers\World\WorldHelper.cs" />
     <Compile Include="Utility\Helpers\PathingHelper.cs" />
     <Compile Include="Utility\VehicleEventMethods.cs" />
     <Compile Include="Utility\VehicleIncidentSwapper.cs" />
@@ -644,15 +655,14 @@
     <Folder Include="Components\Rendering\PawnRenderNode\" />
     <Folder Include="Comps\Fishing\" />
     <Folder Include="CustomFeatures\AerialVehicles\Skyfaller\Bombs\" />
-    <Folder Include="CustomFeatures\Upgrades\TurretUpgrade\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Lib.Harmony">
-      <Version>2.2.2</Version>
+      <Version>2.3.3</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>Powershell.exe -ExecutionPolicy Unrestricted -file "$(ProjectDir)\UpdateVersion.ps1" 1 5 "07-DEC-2019" false true</PostBuildEvent>
+    <PostBuildEvent>Powershell.exe -ExecutionPolicy Bypass -file "$(ProjectDir)UpdateVersion.ps1" 1 5 "07-DEC-2019" false true</PostBuildEvent>
   </PropertyGroup>
 </Project>

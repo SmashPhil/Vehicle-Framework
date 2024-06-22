@@ -125,6 +125,11 @@ namespace Vehicles
 			postCalculatedCells = new Dictionary<IntVec3, float>();
 		}
 
+		public void PostInit()
+		{
+			vehiclePathGrid = mapping[vehicleDef].VehiclePathGrid;
+		}
+
 		/// <summary>
 		/// Find path from <paramref name="start"/> to <paramref name="start"/>
 		/// </summary>
@@ -188,7 +193,6 @@ namespace Vehicles
 			}
 			cellIndices = mapping.map.cellIndices;
 			
-			vehiclePathGrid = mapping[vehicleDef].VehiclePathGrid;
 			this.edificeGrid = mapping.map.edificeGrid.InnerArray;
 			blueprintGrid = mapping.map.blueprintGrid.InnerArray;
 			int x = dest.Cell.x;
@@ -200,7 +204,7 @@ namespace Vehicles
 			bool freeTraversal = traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater && traverseParms.mode != TraverseMode.PassAllDestroyableThingsNotWater;
 			CellRect cellRect = CalculateDestinationRect(dest, peMode);
 			bool singleRect = cellRect.Width == 1 && cellRect.Height == 1;
-			int[] vehicleArray = vehiclePathGrid.pathGrid;
+			int[] pathGrid = vehiclePathGrid.pathGrid;
 			TerrainDef[] topGrid = mapping.map.terrainGrid.topGrid;
 			EdificeGrid edificeGrid = mapping.map.edificeGrid;
 			int searchCount = 0;
@@ -343,11 +347,11 @@ namespace Vehicles
 									int cellToCheckIndex = cellIndices.CellToIndex(cellInRect);
 									if (cellInRect == cellToCheck)
 									{
-										rootCost = vehicleArray[cellToCheckIndex] * RootPosWeight;
+										rootCost = pathGrid[cellToCheckIndex] * RootPosWeight;
 									}
 									else
 									{
-										totalAreaCost += vehicleArray[cellToCheckIndex] * (1 - RootPosWeight);
+										totalAreaCost += pathGrid[cellToCheckIndex] * (1 - RootPosWeight);
 									}
 								}
 								tickCost += Mathf.RoundToInt(totalAreaCost / (minSize * 2 - 1)); //minSize^2 - 1 to account for average of all cells except root

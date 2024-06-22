@@ -12,10 +12,11 @@ using Verse.Sound;
 using Verse.AI;
 using Verse.AI.Group;
 using SmashTools;
+using SmashTools.Animations;
 
 namespace Vehicles
 {
-	public partial class VehiclePawn : Pawn, IInspectable, IAnimationTarget, IEventManager<VehicleEventDef>, IMaterialCacheTarget
+	public partial class VehiclePawn : Pawn, IInspectable, IAnimationTarget, IAnimator, IEventManager<VehicleEventDef>, IMaterialCacheTarget
 	{
 		public bool Initialized { get; private set; }
 
@@ -121,7 +122,7 @@ namespace Vehicles
 
 			//navigationCategory = VehicleDef.defaultNavigation;
 
-			if (VehicleDef.properties.roles != null && VehicleDef.properties.roles.Count > 0)
+			if (!VehicleDef.properties.roles.NullOrEmpty())
 			{
 				foreach (VehicleRole role in VehicleDef.properties.roles)
 				{
@@ -172,6 +173,7 @@ namespace Vehicles
 		/// <remarks>Called regardless if vehicle is spawned or unspawned. Responsible for important variables being set that may be called even for unspawned vehicles</remarks>
 		protected virtual void PostLoad()
 		{
+			this.RegisterEvents(); //Events must be registered before comp post loads, SpawnSetup won't trigger register in this case
 			RegenerateUnsavedComponents();
 			RecacheComponents();
 			RecachePawnCount();
@@ -264,13 +266,13 @@ namespace Vehicles
 			Scribe_Values.Look(ref crashLanded, nameof(crashLanded));
 
 			Scribe_Deep.Look(ref patternData, nameof(patternData));
-			Scribe_Defs.Look(ref retexture, nameof(retexture));
+			Scribe_Defs.Look(ref retextureDef, nameof(retextureDef));
 			Scribe_Deep.Look(ref patternToPaint, nameof(patternToPaint));
 
 			if (!VehicleMod.settings.main.useCustomShaders)
 			{
 				patternData = new PatternData(VehicleDef.graphicData.color, VehicleDef.graphicData.colorTwo, VehicleDef.graphicData.colorThree, PatternDefOf.Default, Vector2.zero, 0);
-				retexture = null;
+				retextureDef = null;
 				patternToPaint = null;
 			}
 

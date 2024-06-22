@@ -1,54 +1,85 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1586</currentVersion>
+  <currentVersion>1.5.1659</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
-Woohoo! Vehicle Framework is now updated for 1.5 and the Anomaly DLC.
+A memory leak was brought to my attention recently. A fix for this issue is included within this update.  I've also made this change retroactively, meaning those of you who still play on the 1.4 version will also receive this bugfix.
 
-To celebrate the release of a new DLC, I've added 'upgrade' mechanics. This allows modders to create upgrade trees for their vehicles.
+Since the release of Anomaly and RimWorld 1.5, I've received many caravan related bug reports. I'll be doing a 2nd pass over caravan mechanics to fix some longstanding issues, as well as spend some time improving caravan UI.
 
-&lt;i&gt;What does that mean? Can I make my vehicle go faster?&lt;/i&gt;
-Yup! There are tons of things that can be upgraded such as stats, armor, and even adding / swapping / removing turrets.  I won't list them all since it would take up a lot of space but it's very expansive so if modders make the effort to add them, expect some cool upgrade trees to customize your vehicles.
-
-&lt;i&gt;What about raiders? I thought those were coming first?&lt;/i&gt;
-I'm working on it I promise. I have the groundwork laid out for raider AI which is proving to be very time consuming. So I figured I'd spend a little time and give you guys something cool to play around with while I work on raiders :P
-
-When I do have the first iteration of raider AI finished, it will be an opt-in feature that you can enable in the mod settings. I'll post more info about it in a future update.
-
-P.S. River travel is now enabled, go crazy.
+As for vehicle raids, I'm still working on the AI so the first iteration isn't ready yet, but I'll be sure to post an announcement when it goes live. It's a very time consuming process and bugfixes / performance improvements always have priority. But keep an eye out! There will be a toggle in the mod settings for this experimental feature in the near future.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Fixed thread safety issues with regions, causing vehicles to not be able to path to specific areas on the map.
+- Thread safe coroutine queue implementation wouldn't clear after scene changes, resulting in memory leak on save reloads.
 
-- Fixed bug where region padding would result in certain vehicles not being able to path between walls.
+- Duplicate path and regen calculations during map generation.
 
-- Fixed bug where MapComponentCache would not clear properly when exiting to menu.
+- Beach size would still be set to max vanilla size with beach multiplier set to 0%
 
-- Fixed icon rendering for 'Form Vehicle Caravan' window.
+- Compatibility patch for Roads of the Rim unable to find class type.
 
-- Fixed bug where colonists with the same name would share the same "Unload _" gizmo generated for them.
+- Event maps not unfogging the map when arriving from an aerial vehicle.
+
+- 1.4 version would still try to fetch build date.
+
+- Red squares would render upon constructing a wall.
+
+- Vehicles with overlays would throw an error when repainting.
+
+- Pawn reservations wouldn't clear properly when the pawn died, resulting in the vehicle being unable to be destroyed.
+
+- Prisoner faction would sometimes reset upon traveling in an aerial vehicle.
+
+- Upgrade WorkGiver would fail to designate job to pawns, resulting in pawns getting frozen until interrupted or the upgrade was completed.
+
+- Colonists being able to be ordered to board non-player vehicles.
+
+- Input text boxes would become right justified upon exiting the Vehicle Framework mod settings.
+
+- Upgradeable aerial vehicles would throw exceptions upon leaving the map.
+
+- Role upgrades wouldn't recache turret status.
+
+- Turret upgrades would not pull back the right turret if same key as default turret is used.
+
+- Turret deployment not canceling targeting
+
+- Most recently spawned turret's settings would be applied to all vehicles on the map upon loading a save.
+
+- PawnRenderer not rendering at right offset with turret and overlay drawOffsets
+
+- Missing translation keys
+&lt;title&gt;Performance Optimization&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Improved rendering performance of vehicle UI icons.
+
+- Reduced memory allocation for region building.
+
+- Improved map generation time for vehicle regions.
+
+Note: Due to the memory-leak fix, map generation has been made syncronous for all vehicle grids. This will be optimized in a later update.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Turret auto-loading settings will persist even if turret is removed from an upgrade and re-added later.
+
 &lt;b&gt;Players&lt;/b&gt;
-- Enabled river travel
+- Added 'Off Road Multiplier' to VF Mod Settings under 'Vehicles'
 
-- Added 'River Size Multiplier' to VF Mod Settings under 'Main'
-
-- Added 'Biome Costs on Roads' to VF Mod Settings under 'Main'
-
+- Upgrade removal reduced to 30% of work cost.
 &lt;b&gt;Modders&lt;/b&gt;
-- Added 'riverCost' field to vehicle properties.
+- Added more upgrade types
 
-- Added 'canRoofPunch' and 'animationPunchAt' fields to CompProperties_VehicleLauncher, allowing aerial vehicles to punch through roofs.
+- Added deploy/undeploy event types for CompVehicleTurrets
 
-- Added UpgradeTree mechanics
+- Added upgrade states, allowing for upgrades that can be reapplied (such as swapping turrets)
+
+- Added texture swapping
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-Please report any issues you find on the &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord server).</description>
+Please report any issues you find on either &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord) or &lt;link&gt;https://github.com/SmashPhil/Vehicle-Framework/issues&lt;/link&gt;(github).</description>
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>
   <!--Show update log on next startup.-->
-  <update>false</update>
+  <update>true</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
   <testing>false</testing>
   <!--Icon bar shown to the right of the mod's name.-->

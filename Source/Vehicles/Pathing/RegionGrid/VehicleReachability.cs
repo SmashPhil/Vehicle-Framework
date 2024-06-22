@@ -19,11 +19,8 @@ namespace Vehicles
 	/// <summary>
 	/// Reachability calculator for quick result path finding before running the algorithm
 	/// </summary>
-	public sealed class VehicleReachability
+	public sealed class VehicleReachability : VehicleRegionManager
 	{
-		private readonly VehicleMapping mapping;
-		private readonly VehicleDef createdFor;
-
 		private readonly Queue<VehicleRegion> openQueue = new Queue<VehicleRegion>();
 		private readonly AStar chunkSearch;
 
@@ -34,45 +31,20 @@ namespace Vehicles
 
 		private readonly VehicleReachabilityCache cache = new VehicleReachabilityCache();
 
-		private VehiclePathGrid pathGrid;
-		private VehicleRegionGrid regionGrid;
+		private readonly VehiclePathGrid pathGrid;
+		private readonly VehicleRegionGrid regionGrid;
 
-		public VehicleReachability(VehicleMapping mapping, VehicleDef createdFor)
+		public VehicleReachability(VehicleMapping mapping, VehicleDef createdFor, VehiclePathGrid pathGrid, VehicleRegionGrid regionGrid) : base(mapping, createdFor)
 		{
-			this.mapping = mapping;
-			this.createdFor = createdFor;
 			chunkSearch = new AStar(this, mapping, createdFor);
+			this.pathGrid = pathGrid;
+			this.regionGrid = regionGrid;
 		}
 
 		/// <summary>
 		/// Currently calculating reachability between regions
 		/// </summary>
 		private bool CalculatingReachability { get; set; }
-
-		public VehiclePathGrid PathGrid
-		{
-			get
-			{
-				if (pathGrid is null)
-				{
-					//Pathgrid is strictly for impassable cost check, so this will still match for copies
-					pathGrid = mapping[createdFor].VehiclePathGrid;
-				}
-				return pathGrid;
-			}
-		}
-
-		public VehicleRegionGrid RegionGrid
-		{
-			get
-			{
-				if (regionGrid is null)
-				{
-					regionGrid = mapping[createdFor].VehicleRegionGrid;
-				}
-				return regionGrid;
-			}
-		}
 
 		/// <summary>
 		/// Clear reachability cache
@@ -191,7 +163,7 @@ namespace Vehicles
 				return false;
 			}
 
-			if (!PathGrid.WalkableFast(start))
+			if (!pathGrid.WalkableFast(start))
 			{
 				Debug.Message($"Unable to start pathing from {start} to {dest}. Not walkable at {start}");
 				return false;
@@ -292,9 +264,9 @@ namespace Vehicles
 		private void DetermineStartRegions(IntVec3 start)
 		{
 			startingRegions.Clear();
-			if (PathGrid.WalkableFast(start))
+			if (pathGrid.WalkableFast(start))
 			{
-				VehicleRegion validRegionAt = RegionGrid.GetValidRegionAt(start);
+				VehicleRegion validRegionAt = regionGrid.GetValidRegionAt(start);
 				QueueNewOpenRegion(validRegionAt);
 				startingRegions.Add(validRegionAt);
 			}
@@ -305,9 +277,9 @@ namespace Vehicles
 					IntVec3 c = start + GenAdj.AdjacentCells[i];
 					if (c.InBounds(mapping.map))
 					{
-						if (PathGrid.WalkableFast(c))
+						if (pathGrid.WalkableFast(c))
 						{
-							VehicleRegion validRegionAt = RegionGrid.GetValidRegionAt(c);
+							VehicleRegion validRegionAt = regionGrid.GetValidRegionAt(c);
 							if (validRegionAt != null && validRegionAt.reachedIndex != reachedIndex)
 							{
 								QueueNewOpenRegion(validRegionAt);
@@ -524,7 +496,7 @@ namespace Vehicles
 			{
 				if (CanUseCache(traverseParms.mode))
 				{
-					VehicleRegion validRegionAt = RegionGrid.GetValidRegionAt(foundCell);
+					VehicleRegion validRegionAt = regionGrid.GetValidRegionAt(foundCell);
 					if (!(validRegionAt is null))
 					{
 						foreach (VehicleRegion startRegion in startingRegions)
@@ -557,7 +529,7 @@ namespace Vehicles
 			}
 			if (traverseParms.mode == TraverseMode.PassAllDestroyableThings || traverseParms.mode == TraverseMode.PassAllDestroyableThingsNotWater)
 			{
-				if (!PathGrid.WalkableFast(num))
+				if (!pathGrid.WalkableFast(num))
 				{
 					Building edifice = cell.GetEdifice(map);
 					if (edifice is null || !VehiclePathFinder.IsDestroyable(edifice))
@@ -569,12 +541,12 @@ namespace Vehicles
 			else if (traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater)
 			{
 				Log.ErrorOnce("Do not use this method for non-cell based modes!", 938476762);
-				if (!PathGrid.WalkableFast(num))
+				if (!pathGrid.WalkableFast(num))
 				{
 					return false;
 				}
 			}
-			VehicleRegion region = RegionGrid.DirectGrid[num];
+			VehicleRegion region = regionGrid.DirectGrid[num];
 			return region is null || region.Allows(traverseParms, false);
 		}
 
@@ -590,7 +562,7 @@ namespace Vehicles
 				return CanReachVehicle(cell, MapGenerator.PlayerStartSpot, PathEndMode.OnCell, TraverseParms.For(TraverseMode.PassDoors,
 					Danger.Deadly, false));
 			}
-			if (!GenGridVehicles.Walkable(cell, vehicleDef, mapping.map))
+			if (!GenGridVehicles.Walkable(cell, vehicleDef, mapping))
 			{
 				return false;
 			}
@@ -637,7 +609,7 @@ namespace Vehicles
 		{
 			VehicleRoom usableRoom = null;
 			//ConcurrentDictionary.Keys snapshots, but ConcurrentDictionary.GetEnumerator does not. Must utilize Key or Value collections for thread safe enumeration
-			foreach (VehicleRoom room in RegionGrid.allRooms.Keys)
+			foreach (VehicleRoom room in regionGrid.allRooms.Keys)
 			{
 				if (room.TouchesMapEdge)
 				{
@@ -930,7 +902,7 @@ namespace Vehicles
 
 			private bool InitRegions(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, out VehicleRegion startingRegion, out VehicleRegion destinationRegion)
 			{
-				startingRegion = vehicleReachability.RegionGrid.GetValidRegionAt(start);
+				startingRegion = vehicleReachability.regionGrid.GetValidRegionAt(start);
 				destinationRegion = null;
 				if (startingRegion == null)
 				{

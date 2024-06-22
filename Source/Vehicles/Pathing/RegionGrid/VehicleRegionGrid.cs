@@ -8,25 +8,20 @@ namespace Vehicles
 	/// <summary>
 	/// Region grid for vehicle specific regions
 	/// </summary>
-	public sealed class VehicleRegionGrid
-	{
-		public const int CleanSquaresPerFrame = 16;
+	public sealed class VehicleRegionGrid : VehicleRegionManager
+    {
+		private const int CleanSquaresPerFrame = 16;
 
-		private readonly VehicleMapping mapping;
-		private readonly VehicleDef createdFor;
-		
 		//Only accessed from the same thread within the same method, so it is thread safe.
 		private readonly HashSet<VehicleRegion> allRegionsYielded = new HashSet<VehicleRegion>();
 
 		private int curCleanIndex;
-		private VehicleRegion[] regionGrid; //TODO - needs checking for thread safety
+		private readonly VehicleRegion[] regionGrid; //TODO - needs checking for thread safety
 
 		public readonly ConcurrentSet<VehicleRoom> allRooms = new ConcurrentSet<VehicleRoom>();
 
-		public VehicleRegionGrid(VehicleMapping mapping, VehicleDef createdFor)
+		public VehicleRegionGrid(VehicleMapping mapping, VehicleDef createdFor) : base(mapping, createdFor)
 		{
-			this.mapping = mapping;
-			this.createdFor = createdFor;
 			regionGrid = new VehicleRegion[mapping.map.cellIndices.NumGridCells];
 		}
 
@@ -196,7 +191,7 @@ namespace Vehicles
 			{
 				return;
 			}
-			if (VehicleHarmony.debug)
+			if (DebugProperties.debug)
 			{
 				foreach (VehicleRegion debugRegion in AllRegions_NoRebuild_InvalidAllowed)
 				{

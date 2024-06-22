@@ -46,9 +46,16 @@ namespace Vehicles
 				{
 					return false;
 				}
-				if (!vehicleCaravan.Vehicles.All(vehicle => WorldVehiclePathGrid.Instance.Passable(tile, vehicle.VehicleDef) && vehicle.VehicleDef.vehicleType != VehicleType.Air))
+				if (vehicleCaravan.VehiclesListForReading.NullOrEmpty())
 				{
 					return false;
+				}
+				foreach (VehiclePawn vehicle in vehicleCaravan.VehiclesListForReading)
+				{
+					if (!WorldVehiclePathGrid.Instance.Passable(tile, vehicle.VehicleDef) || vehicle.VehicleDef.vehicleType == VehicleType.Air)
+					{
+						return false;
+					}
 				}
 				int bestTile = WorldHelper.BestGotoDestForVehicle(vehicleCaravan, tile);
 				if (bestTile >= 0)

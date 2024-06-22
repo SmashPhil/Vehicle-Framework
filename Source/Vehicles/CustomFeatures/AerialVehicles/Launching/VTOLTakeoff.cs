@@ -61,7 +61,7 @@ namespace Vehicles
 			return remaining;
 		}
 
-		protected override (Vector3 drawPos, float rotation, ShadowData shadowData) AnimateLanding(Vector3 drawPos, float rotation, ShadowData shadowData)
+		protected override (Vector3 drawPos, float rotation, DynamicShadowData shadowData) AnimateLanding(Vector3 drawPos, float rotation, DynamicShadowData shadowData)
 		{
 			if (!LandingProperties_VTOL.rotationVerticalCurve.NullOrEmpty())
 			{
@@ -100,7 +100,7 @@ namespace Vehicles
 			return base.AnimateLanding(drawPos, rotation, shadowData);
 		}
 
-		protected override (Vector3 drawPos, float rotation, ShadowData shadowData) AnimateTakeoff(Vector3 drawPos, float rotation, ShadowData shadowData)
+		protected override (Vector3 drawPos, float rotation, DynamicShadowData shadowData) AnimateTakeoff(Vector3 drawPos, float rotation, DynamicShadowData shadowData)
 		{
 			if (!LaunchProperties_VTOL.rotationVerticalCurve.NullOrEmpty())
 			{

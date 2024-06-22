@@ -267,9 +267,6 @@ namespace Vehicles
 		/// <summary>
 		/// Thread safe event for triggering dirtyer events
 		/// </summary>
-		/// <param name="thing"></param>
-		/// <param name="mapping"></param>
-		/// <param name="vehicleDefs"></param>
 		internal static void ThingInRegionSpawned(CellRect occupiedRect, VehicleMapping mapping, List<VehicleDef> vehicleDefs, List<List<Thing>> snapshotLists)
 		{
 			foreach (VehicleDef vehicleDef in vehicleDefs)
@@ -559,6 +556,16 @@ namespace Vehicles
 			QuestUtility.SendQuestTargetSignals(vehicle.questTags, "LeftMap", vehicle.Named("SUBJECT"));
 			Find.FactionManager.Notify_PawnLeftMap(vehicle);
 			Find.IdeoManager.Notify_PawnLeftMap(vehicle);
+		}
+
+		public static void DisableAllRegionUpdaters(Map map)
+		{
+			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+			foreach (VehicleDef vehicleDef in mapping.Owners)
+			{
+				VehicleMapping.VehiclePathData pathData = mapping[vehicleDef];
+				pathData.VehicleRegionAndRoomUpdater.Enabled = false;
+			}
 		}
 	}
 }

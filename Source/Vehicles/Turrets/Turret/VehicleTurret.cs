@@ -58,7 +58,10 @@ namespace Vehicles
 		public string gizmoLabel;
 
 		/* ----------------- */
-		//UPDATE - rename
+
+		public string upgradeKey;
+
+		//TODO 1.6 - rename
 		public LocalTargetInfo cannonTarget;
 
 		protected float rotation = 0; //True rotation of turret separate from Vehicle rotation and angle for saving
@@ -91,7 +94,7 @@ namespace Vehicles
 		[Unsaved]
 		public VehiclePawn vehicle;
 		[Unsaved]
-		public VehicleDef vehicleDef; //necessary separate from vehicle since VehicleTurrets can exist uninitialized in CompProperties_VehicleTurrets
+		public VehicleDef vehicleDef; ///Necessary to separate from vehicle for def-contained turrets, ie. <see cref="CompProperties_VehicleTurrets"/> for PatternData
 		[Unsaved]
 		public VehicleTurret attachedTo;
 		[Unsaved]
@@ -100,8 +103,8 @@ namespace Vehicles
 		protected List<VehicleTurret> groupTurrets;
 		[Unsaved]
 		public TurretRestrictions restrictions;
-		
-		//UPDATE - merge recoil trackers
+
+		//TODO 1.6 - merge recoil trackers
 		[Unsaved]
 		public Turret_RecoilTracker recoilTracker;
 		[Unsaved]
@@ -264,6 +267,8 @@ namespace Vehicles
 
 		public int ReloadTicks => reloadTicks;
 
+		public float DrawLayerOffset => drawLayer * (Altitudes.AltInc / GraphicDataLayered.SubLayerCount) + VehicleRenderer.YOffset_Body;
+
 		public EventManager<VehicleTurretEventDef> EventRegistry { get; set; }
 
 		public bool DeploymentSatisfied
@@ -273,8 +278,8 @@ namespace Vehicles
 				return deployment switch
 				{
 					DeploymentType.None => true,
-					DeploymentType.Deployed => vehicle.CompVehicleTurrets.Deployed,
-					DeploymentType.Undeployed => !vehicle.CompVehicleTurrets.Deployed,
+					DeploymentType.Deployed => vehicle.CompVehicleTurrets.Deployed && !vehicle.Deploying,
+					DeploymentType.Undeployed => !vehicle.CompVehicleTurrets.Deployed && !vehicle.Deploying,
 					_ => throw new NotImplementedException(nameof(DeploymentType))
 				};
 			}
@@ -403,7 +408,7 @@ namespace Vehicles
 			}
 		}
 
-		//UPDATE - rename
+		//TODO 1.6 - rename
 		public float CannonIconAlphaTicked
 		{
 			get
@@ -416,7 +421,7 @@ namespace Vehicles
 			}
 		}
 
-		//UPDATE - rename
+		//TODO 1.6 - rename
 		public virtual Material CannonMaterial
 		{
 			get
@@ -429,7 +434,7 @@ namespace Vehicles
 			}
 		}
 
-		//UPDATE - rename
+		//TODO 1.6 - rename
 		public virtual Texture2D CannonTexture
 		{
 			get
@@ -462,7 +467,7 @@ namespace Vehicles
 			}
 		}
 
-		//UPDATE - rename
+		//TODO 1.6 - rename
 		public virtual Graphic_Turret CannonGraphic
 		{
 			get
@@ -475,7 +480,7 @@ namespace Vehicles
 			}
 		}
 
-		//UPDATE - rename
+		//TODO 1.6 - rename
 		public virtual List<TurretDrawData> TurretGraphics
 		{
 			get
@@ -484,7 +489,7 @@ namespace Vehicles
 			}
 		}
 
-		//UPDATE - rename
+		//TODO 1.6 - rename
 		public virtual GraphicDataRGB CannonGraphicData
 		{
 			get
@@ -702,12 +707,27 @@ namespace Vehicles
 			drawLayer = reference.drawLayer;
 			if (reference.turretDef.restrictionType != null)
 			{
-				restrictions = (TurretRestrictions)Activator.CreateInstance(reference.turretDef.restrictionType);
-				restrictions.Init(vehicle, this);
+				SetTurretRestriction(reference.turretDef.restrictionType);
 			}
 
 			ResetAngle();
 			LongEventHandler.ExecuteWhenFinished(RecacheRootDrawPos);
+		}
+
+		public void SetTurretRestriction(Type type)
+		{
+			if (!type.IsSubclassOf(typeof(TurretRestrictions)))
+			{
+				Log.Error($"Trying to create TurretRestriction with non-matching type.");
+				return;
+			}
+			restrictions = (TurretRestrictions)Activator.CreateInstance(type);
+			restrictions.Init(vehicle, this);
+		}
+
+		public void RemoveTurretRestriction()
+		{
+			restrictions = null;
 		}
 
 		public void OnFieldChanged()
@@ -763,7 +783,7 @@ namespace Vehicles
 			IsManned = true;
 			foreach (VehicleHandler handler in vehicle.handlers)
 			{
-				if (handler.role.handlingTypes.HasFlag(HandlingTypeFlags.Turret) && (handler.role.turretIds.Contains(key) || handler.role.turretIds.Contains(groupKey)))
+				if (handler.role.HandlingTypes.HasFlag(HandlingTypeFlags.Turret) && (handler.role.TurretIds.Contains(key) || handler.role.TurretIds.Contains(groupKey)))
 				{
 					if (!handler.RoleFulfilled)
 					{
@@ -789,7 +809,7 @@ namespace Vehicles
 			}
 			Vector2 turretLoc = VehicleGraphics.TurretDrawOffset(rot, renderProperties, locationRotation, fullLoc ? attachedTo : null);
 			Vector3 graphicOffset = CannonGraphic?.DrawOffset(rot) ?? Vector3.zero;
-			return new Vector3(graphicOffset.x + turretLoc.x, graphicOffset.y + drawLayer * (Altitudes.AltInc / GraphicDataLayered.SubLayerCount) + VehicleRenderer.YOffset_Body, graphicOffset.z + turretLoc.y);
+			return new Vector3(graphicOffset.x + turretLoc.x, graphicOffset.y + DrawLayerOffset, graphicOffset.z + turretLoc.y);
 		}
 
 		public Rect ScaleUIRectRecursive(VehicleDef vehicleDef, Rect rect, Rot8 rot, float iconScale = 1)
@@ -1356,9 +1376,9 @@ namespace Vehicles
 			if (!NoGraphic)
 			{
 				VehicleGraphics.DrawTurret(this, drawPos, Rot8.North);
-				DrawTargeter();
-				DrawAimPie();
 			}
+			DrawTargeter();
+			DrawAimPie();
 		}
 
 		public virtual void Draw()
@@ -1366,9 +1386,9 @@ namespace Vehicles
 			if (!NoGraphic)
 			{
 				VehicleGraphics.DrawTurret(this, vehicle.FullRotation);
-				DrawTargeter();
-				DrawAimPie();
 			}
+			DrawTargeter();
+			DrawAimPie();
 		}
 
 		protected virtual void DrawTargeter()
@@ -1511,7 +1531,7 @@ namespace Vehicles
 			}
 			if (cachedGraphicData.shaderType != null && cachedGraphicData.shaderType.Shader.SupportsRGBMaskTex())
 			{
-				RGBMaterialPool.CacheMaterialsFor(cacheTarget);
+				RGBMaterialPool.CacheMaterialsFor(cacheTarget, patternData.patternDef);
 				cachedGraphicData.Init(cacheTarget);
 				graphic = cachedGraphicData.Graphic as Graphic_Turret;
 				RGBMaterialPool.SetProperties(cacheTarget, cachedGraphicData, graphic.TexAt, graphic.MaskAt);
@@ -1940,6 +1960,7 @@ namespace Vehicles
 
 			Scribe_Values.Look(ref uniqueID, nameof(uniqueID), defaultValue: -1);
 			Scribe_Values.Look(ref key, nameof(key));
+			Scribe_Values.Look(ref upgradeKey, nameof(upgradeKey), forceSave: true);
 
 			Scribe_Defs.Look(ref turretDef, nameof(turretDef));
 

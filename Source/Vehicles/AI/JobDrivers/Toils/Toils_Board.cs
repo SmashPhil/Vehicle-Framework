@@ -25,7 +25,7 @@ namespace Vehicles
 					VehicleHandler handler = vehicle.bills.FirstOrDefault(b => b.pawnToBoard == pawnBoarding)?.handler;
 					if (handler is null)
 					{
-						handler = vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().GetReservation<VehicleHandlerReservation>(vehicle)?.ReservedHandler(pawnBoarding);
+						handler = MapComponentCache<VehicleReservationManager>.GetComponent(vehicle.Map).GetReservation<VehicleHandlerReservation>(vehicle)?.ReservedHandler(pawnBoarding);
 						if (handler is null)
 						{
 							Log.Error("Could not find assigned spot for " + pawnBoarding.LabelShort + " to board.");

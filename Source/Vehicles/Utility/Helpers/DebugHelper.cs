@@ -12,6 +12,9 @@ namespace Vehicles
 		public static readonly PathDebugData<DebugRegionType> Local = new PathDebugData<DebugRegionType>();
 		public static readonly PathDebugData<WorldPathingDebugType> World = new PathDebugData<WorldPathingDebugType>();
 
+		internal static List<WorldPath> debugLines = new List<WorldPath>();
+		internal static List<Pair<int, int>> tiles = new List<Pair<int, int>>(); // Pair -> TileID : Cycle
+
 		/// <summary>
 		/// Draw settlement debug lines that show original locations before settlement was pushed to the coastline
 		/// </summary>
@@ -23,9 +26,9 @@ namespace Vehicles
 			o.Tile = from;
 			o.SetFaction(Faction.OfMechanoids);
 			Find.WorldObjects.Add(o);
-			if (VehicleHarmony.drawPaths)
+			if (DebugProperties.drawPaths)
 			{
-				VehicleHarmony.debugLines.Add(Find.WorldPathFinder.FindPath(from, to, null, null));
+				debugLines.Add(Find.WorldPathFinder.FindPath(from, to, null, null));
 			}
 		}
 

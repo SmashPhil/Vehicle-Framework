@@ -49,8 +49,10 @@
 	<VF_JobLimitations>Vehicle Jobs</VF_JobLimitations>
 	<VF_MaxWorkers>Max Workers</VF_MaxWorkers>
 	
+	<VF_OffRoadMultiplier>Off Road Multiplier</VF_OffRoadMultiplier>
+	<VF_OffRoadMultiplierTooltip>PathCost multiplier for traveling on roads.</VF_OffRoadMultiplierTooltip>
 	<VF_WinterSpeedMultiplier>Winter Speed Multiplier</VF_WinterSpeedMultiplier>
-	<VF_WinterSpeedMultiplierTooltip>Additional cost for traveling during winter.</VF_WinterSpeedMultiplierTooltip>
+	<VF_WinterSpeedMultiplierTooltip>PathCost multiplier for traveling during winter.</VF_WinterSpeedMultiplierTooltip>
 	<VF_WorldSpeedMultiplier>World Speed Multiplier</VF_WorldSpeedMultiplier>
 	<VF_WorldSpeedMultiplierTooltip>Multiplier to MoveSpeed when on the world map in a caravan.</VF_WorldSpeedMultiplierTooltip>
 	

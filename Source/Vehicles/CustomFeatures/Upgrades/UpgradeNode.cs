@@ -13,6 +13,7 @@ namespace Vehicles
 		public string key;
 		public string label;
 		public string description;
+		public string upgradeExplanation;
 
 		public bool displayLabel = false;
 		public string icon;
@@ -34,7 +35,7 @@ namespace Vehicles
 
 		public List<string> replaces;
 
-		public string disableIfUpgradeNodeEnabled;
+		public string disableIfUpgradeNodeEnabled; //TODO - Remove in 1.6 in favor of disable conditions
 
 		public List<ResearchProjectDef> researchPrerequisites = new List<ResearchProjectDef>();
 		public List<string> prerequisiteNodes = new List<string>();
@@ -45,6 +46,8 @@ namespace Vehicles
 		public Texture2D Icon { get; private set; }
 
 		public virtual IntVec2 GridCoordinate => gridCoordinate;
+
+		public bool HasGraphics { get; private set; }
 
 		public virtual Texture2D UpgradeImage
 		{
@@ -74,6 +77,18 @@ namespace Vehicles
 		/// Apply texture overlays and colors
 		/// </summary>
 		public void AddOverlays(VehiclePawn vehicle)
+		{
+			if (!UnityData.IsInMainThread)
+			{
+				LongEventHandler.ExecuteWhenFinished(() => AddOverlaysInternal(vehicle));
+			}
+			else
+			{
+				AddOverlaysInternal(vehicle);
+			}
+		}
+
+		private void AddOverlaysInternal(VehiclePawn vehicle)
 		{
 			if (!graphicOverlays.NullOrEmpty())
 			{
@@ -245,11 +260,13 @@ namespace Vehicles
 
 		public void ResolveReferences()
 		{
+			HasGraphics = !graphicOverlays.NullOrEmpty();
 			if (!upgrades.NullOrEmpty())
 			{
 				foreach (Upgrade upgrade in upgrades)
 				{
 					upgrade.Init(this);
+					HasGraphics |= upgrade.HasGraphics;
 				}
 			}
 		}

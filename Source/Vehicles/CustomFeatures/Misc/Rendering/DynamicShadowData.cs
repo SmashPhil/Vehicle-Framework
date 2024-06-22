@@ -5,15 +5,15 @@ using UnityEngine;
 
 namespace Vehicles
 {
-	public class ShadowData
+	public struct DynamicShadowData
 	{
 		public float width;
 		public float height;
 		public float alpha;
 
-		public static ShadowData CreateFrom(VehiclePawn vehicle)
+		public static DynamicShadowData CreateFrom(VehiclePawn vehicle)
 		{
-			ShadowData shadowData = new ShadowData();
+			DynamicShadowData shadowData = new DynamicShadowData();
 			Vector2 shadowSize = vehicle.VehicleGraphic.data.drawSize;
 			shadowData.width = shadowSize.x;
 			shadowData.height = shadowSize.y;

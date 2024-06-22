@@ -15,4 +15,8 @@
 	<VF_healthLabel_Immobile>Inoperable</VF_healthLabel_Immobile>
 	<VF_healthLabel_Dead>Ruined</VF_healthLabel_Dead>
 	<VF_healthLabel_Beached>Beached</VF_healthLabel_Beached>
+
+	<VF_GeneratingPathData>Generating Vehicle PathData</VF_GeneratingPathData>
+	<VF_GeneratingPathGrids>Generating PathGrids</VF_GeneratingPathGrids>
+	<VF_GeneratingRegions>Generating Vehicle Regions</VF_GeneratingRegions>
 </LanguageData>

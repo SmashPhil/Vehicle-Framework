@@ -113,7 +113,7 @@ namespace Vehicles
 						return;
 					}
 					Rect rendererRect = new Rect(0, 0, pawnOverlayRect.width, pawnOverlayRect.height).ContractedBy(5);
-					editingPawnOverlayRenderer.role.pawnRenderer.RenderEditor(rendererRect);
+					editingPawnOverlayRenderer.role.PawnRenderer.RenderEditor(rendererRect);
 					if (Widgets.CloseButtonFor(rendererRect))
 					{
 						editingPawnOverlayRenderer = null;

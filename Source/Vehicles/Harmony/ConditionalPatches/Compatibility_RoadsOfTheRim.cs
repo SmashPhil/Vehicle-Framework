@@ -20,7 +20,7 @@ namespace Vehicles
 
 		public override void PatchAll(ModMetaData mod, Harmony harmony)
 		{
-			Type alertClassType = AccessTools.TypeByName("RoadsOfTheRim.Patch_Alert_CaravanIdle_GetReport");
+			Type alertClassType = AccessTools.TypeByName("RoadsOfTheRim.HarmonyPatches.Alert_CaravanIdle_GetReport");
 			harmony.Patch(original: AccessTools.Method(alertClassType, "Postfix"),
 				transpiler: new HarmonyMethod(typeof(Compatibility_RoadsOfTheRim),
 				nameof(GetAlertReportIdleConstructionVehicle)));

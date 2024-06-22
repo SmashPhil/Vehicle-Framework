@@ -168,13 +168,17 @@ namespace Vehicles
 			return 0;
 		}
 
-		public float GetStatOffset(StatUpgradeCategoryDef upgradeCategoryDef)
+		public float GetStatOffset(StatUpgradeCategoryDef upgradeCategoryDef, float value)
 		{
 			if (categoryOffsets.TryGetValue(upgradeCategoryDef, out StatOffset statOffset))
 			{
-				return statOffset.Offset;
+				if (statOffset.TryGetOverride(out float setValue))
+				{
+					return setValue;
+				}
+				return value + statOffset.Offset;
 			}
-			return 0;
+			return value;
 		}
 
 		public float GetStatValue(VehicleStatDef vehicleStatDef)
@@ -199,7 +203,7 @@ namespace Vehicles
 				baseStatOffsets[statDef] = new StatOffset(vehicle, statDef);
 				statOffset = baseStatOffsets[statDef];
 			}
-			statOffset.Offset += value;
+			statOffset.Offset -= value;
 		}
 
 		public void SetUpgradeableStatValue(string key, StatDef statDef, float value)
@@ -228,7 +232,7 @@ namespace Vehicles
 			{
 				return statOffset.Offset;
 			}
-			return vehicle.GetStatValue(statDef);
+			return 0;
 		}
 
 		public void MarkStatDirty(VehicleStatDef statDef)
@@ -526,17 +530,17 @@ namespace Vehicles
 						report?.AppendLine($"components=({string.Join(",", components.Select(c => c.props.label))})");
 						report?.AppendLine($"hitDepth = {hitDepth}");
 						//If no components at hit cell, fallthrough to internal
-						var externalComponentsAtHitDepth = components.Where(comp => comp.props.depth == hitDepth && comp.HealthPercent > 0);
+						var externalComponentsAtHitDepth = components.Where(comp => comp.Depth == hitDepth && comp.HealthPercent > 0);
 						report?.AppendLine($"components at hitDepth {hitDepth}: ({string.Join(",", externalComponentsAtHitDepth.Select(comp => comp.props.label))})");
 						if (!externalComponentsAtHitDepth.TryRandomElementByWeight((component) => component.props.hitWeight, out component))
 						{
 							report?.AppendLine($"No components found. Hitting internal parts.");
 							hitDepth = VehicleComponent.VehiclePartDepth.Internal;
-							var internalComponentsAtHitDepth = components.Where(comp => comp.props.depth == hitDepth && comp.HealthPercent > 0);
+							var internalComponentsAtHitDepth = components.Where(comp => comp.Depth == hitDepth && comp.HealthPercent > 0);
 							if (!internalComponentsAtHitDepth.TryRandomElementByWeight((component) => component.props.hitWeight, out component))
 							{
 								//If depth = internal then pick random internal component even if it does not have a hitbox
-								component = this.components.Where(comp => comp.props.depth == hitDepth && comp.HealthPercent > 0).RandomElementByWeightWithFallback((component) => component.props.hitWeight);
+								component = this.components.Where(comp => comp.Depth == hitDepth && comp.HealthPercent > 0).RandomElementByWeightWithFallback((component) => component.props.hitWeight);
 								//If no internal components, pick random component w/ health
 								component ??= this.components.Where(comp => comp.HealthPercent > 0).RandomElementByWeightWithFallback((component) => component.props.hitWeight);
 								if (component is null)
@@ -559,7 +563,7 @@ namespace Vehicles
 						report?.AppendLine($"No components found. Hitting internal parts.");
 						hitDepth = VehicleComponent.VehiclePartDepth.Internal;
 						//If depth = internal then pick random internal component even if it does not have a hitbox
-						component = this.components.Where(comp => comp.props.depth == hitDepth && comp.HealthPercent > 0).RandomElementByWeightWithFallback((component) => component.props.hitWeight);
+						component = this.components.Where(comp => comp.Depth == hitDepth && comp.HealthPercent > 0).RandomElementByWeightWithFallback((component) => component.props.hitWeight);
 						//If no internal components, pick random component w/ health
 						component ??= this.components.Where(comp => comp.HealthPercent > 0).RandomElementByWeightWithFallback((component) => component.props.hitWeight);
 						if (component is null)
@@ -672,10 +676,10 @@ namespace Vehicles
 					}
 				}
 			}
-			if (handler != null && handler.handlers.Count > 0 && Rand.Chance(handler.role.chanceToHit * multiplier))
+			if (handler != null && handler.handlers.Count > 0 && Rand.Chance(handler.role.ChanceToHit * multiplier))
 			{
 				hitPawn = handler.handlers.InnerListForReading.RandomElement();
-				report?.AppendLine($"Hitting {handler} with chance {handler.role.chanceToHit * multiplier}");
+				report?.AppendLine($"Hitting {handler} with chance {handler.role.ChanceToHit * multiplier}");
 				hitPawn.TakeDamage(dinfo);
 				return true;
 			}
@@ -684,7 +688,7 @@ namespace Vehicles
 
 		private bool TrySelectHandler(IntVec2 cell, out VehicleHandler handler, bool exposed = false)
 		{
-			handler = vehicle.handlers.FirstOrDefault(handler => handler.role.hitbox != null && handler.role.hitbox.Contains(cell) && handler.handlers.Count > 0 && handler.role.exposed == exposed);
+			handler = vehicle.handlers.FirstOrDefault(handler => handler.role.Hitbox != null && handler.role.Hitbox.Contains(cell) && handler.handlers.Count > 0 && handler.role.Exposed == exposed);
 			return handler != null;
 		}
 
@@ -727,7 +731,7 @@ namespace Vehicles
 							hitboxHighlightCells.Add(new IntVec3(vehicle.Position.x + rotatedCell.x, 0, vehicle.Position.z + rotatedCell.z));
 						}
 					}
-					else if (component.props.depth == VehicleComponent.VehiclePartDepth.External) //Dont render Internal components without a hitbox
+					else if (component.Depth == VehicleComponent.VehiclePartDepth.External) //Dont render Internal components without a hitbox
 					{
 						hitboxHighlightCells.AddRange(vehicle.OccupiedRect());
 					}

@@ -11,8 +11,10 @@ namespace Vehicles
 	[HeaderTitle(Label = "VF_Properties", Translate = true)]
 	public class VehicleProperties
 	{
+#if !FISHING_DISABLED
 		[PostToSettings(Label = "VF_FishingEnabled", Tooltip = "VF_FishingEnabledTooltip", Translate = true, UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Sea)]
 		[DisableSettingConditional(MayRequireAny = new string[] { CompatibilityPackageIds.VE_Fishing })]
+#endif
 		public bool fishing = false;
 
 		public VehicleTrack track;
@@ -55,8 +57,12 @@ namespace Vehicles
 		public SimpleDictionary<ThingDef, int> customThingCosts;
 
 		// World Pathing
+		[PostToSettings(Label = "VF_OffRoadMultiplier", Tooltip = "VF_OffRoadMultiplierTooltip", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
+		[SliderValues(MinValue = 0.01f, MaxValue = 2, RoundDecimalPlaces = 1)]
 		public float offRoadMultiplier = 1;
+
 		public float riverCost = -1;
+
 		public SimpleDictionary<RiverDef, float> customRiverCosts = new SimpleDictionary<RiverDef, float>();
 		public SimpleDictionary<BiomeDef, float> customBiomeCosts = new SimpleDictionary<BiomeDef, float>();
 		public SimpleDictionary<Hilliness, float> customHillinessCosts = new SimpleDictionary<Hilliness, float>();
@@ -66,8 +72,10 @@ namespace Vehicles
 
 		[PostToSettings(Label = "VF_WinterSpeedMultiplier", Tooltip = "VF_WinterSpeedMultiplierTooltip", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(MinValue = 0, MaxValue = 10, RoundDecimalPlaces = 1)]
-		[LoadAlias("winterSpeedMultiplier")] //Changed in 1.5.1381
-		public float winterCostMultiplier = 2.5f;
+		[LoadAlias("winterSpeedMultiplier")] //Changed in 1.5.1381       1.6 - Remove LoadAlias
+		[LoadAlias("winterCostMultiplier")] //Changed in 1.5.1644        1.6 - Remove LoadAlias, Change UpgradeStatDef to match this name
+		public float winterCost = 2f;
+
 		[PostToSettings(Label = "VF_WorldSpeedMultiplier", Tooltip = "VF_WorldSpeedMultiplierTooltip", Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 		[SliderValues(MinValue = 0, MaxValue = 10, RoundDecimalPlaces = 1)]
 		public float worldSpeedMultiplier = 2.5f;

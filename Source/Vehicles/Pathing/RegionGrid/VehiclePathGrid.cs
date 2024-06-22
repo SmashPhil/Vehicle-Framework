@@ -28,6 +28,10 @@ namespace Vehicles
 			ResetPathGrid();
 		}
 
+		public void PostInit()
+		{
+		}
+
 		/// <summary>
 		/// Clear path grid of all costs
 		/// </summary>
@@ -42,7 +46,16 @@ namespace Vehicles
 		/// <param name="loc"></param>
 		public bool Walkable(IntVec3 loc)
 		{
-			return loc.InBounds(mapping.map) && WalkableFast(loc);
+			try
+			{
+				return loc.InBounds(mapping.map) && WalkableFast(loc);
+			}
+			catch (Exception ex)
+			{
+				Log.Error($"Mapping: {mapping is null} Map: {mapping?.map is null} CellInd: {mapping?.map?.cellIndices is null} Info: {mapping?.map?.info}Exception: {ex}");
+				Log.Error($"StackTrace: {StackTraceUtility.ExtractStackTrace()}");
+			}
+			return false;
 		}
 
 		/// <summary>
@@ -85,7 +98,6 @@ namespace Vehicles
 		/// <summary>
 		/// Recalculate path cost for tile <paramref name="vehicle"/> is registered on
 		/// </summary>
-		/// <param name="vehicle"></param>
 		public void RecalculatePerceivedPathCostUnderRect(CellRect cellRect, List<List<Thing>> snapshotLists)
 		{
 			int index = 0;

@@ -31,6 +31,14 @@ namespace Vehicles
 		{
 			LongEventHandler.QueueLongEvent(delegate ()
 			{
+				MapParent mapParent = Find.WorldObjects.MapParentAt(tile);
+				if (mapParent == null)
+				{
+					Log.Error($"Trying to arrive at map with null MapParent.");
+					return;
+				}
+				bool mapGenerated = !mapParent.HasMap;
+
 				Site site = Find.WorldObjects.WorldObjectAt<Site>(tile);
 				Map map;
 				if (site != null)
@@ -42,14 +50,24 @@ namespace Vehicles
 					map = GetOrGenerateMapUtility.GetOrGenerateMap(tile, null);
 				}
 				string label = map.Parent.Label;
-				MapLoaded(map);
+				if (mapGenerated)
+				{
+					GetOrGenerateMapUtility.UnfogMapFromEdge(map);
+				}
+				MapLoaded(map, mapGenerated);
 				ExecuteEvents();
 				arrivalModeDef.Worker.VehicleArrived(vehicle, launchProtocol, map);
 			}, "GeneratingMap", false, null, true);
 			return true;
 		}
 
+		[Obsolete("Use new overload instead. Will be removed in 1.6")]
 		protected virtual void MapLoaded(Map map)
+		{
+			MapLoaded(map, true);
+		}
+
+		protected virtual void MapLoaded(Map map, bool hasMap)
 		{
 		}
 

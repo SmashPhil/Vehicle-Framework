@@ -11,6 +11,8 @@ namespace Vehicles
 {
 	public static class VehicleGUI
 	{
+		private static readonly OverlayGUIRenderer overlayRenderer = new OverlayGUIRenderer();
+
 		public static void DrawVehicleDefOnGUI(Rect rect, VehicleDef vehicleDef, PatternData patternData = null, Rot8? rot = null, bool withoutTurrets = true)
 		{
 			//string drawStep = string.Empty;
@@ -58,30 +60,31 @@ namespace Vehicles
 
 				if (colorGUI) GUI.color = pattern?.color ?? Color.white;
 
+				overlayRenderer.Clear();
+
 				GUIState.Push();
 				{
 					//drawStep = "Attempting to retrieve turret overlays";
-					List<(Rect rect, Texture mainTex, Color color, float layer, float angle)> overlays = new List<(Rect, Texture, Color, float, float)>();
 					if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets props)
 					{
 						if (!withoutTurrets || Prefs.UIScale == 1)
 						{
-							overlays.AddRange(RetrieveAllTurretSettingsGUIProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer), pattern));
+							foreach (RenderData turretRenderData in RetrieveAllTurretSettingsGUIProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer), pattern))
+							{
+								overlayRenderer.Add(turretRenderData);
+							}
 						}
 					}
 					//drawStep = "Retrieving graphic overlays";
-					overlays.AddRange(RetrieveAllOverlaySettingsGUIProperties(rect, vehicleDef, rotDrawn));
+					foreach (RenderData turretRenderData in RetrieveAllOverlaySettingsGUIProperties(rect, vehicleDef, rotDrawn))
+					{
+						overlayRenderer.Add(turretRenderData);
+					}
+
+					overlayRenderer.FinalizeForRendering();
 
 					//drawStep = "Rendering overlays with layer < 0";
-					//(Rect, Texture, Material, Layer, Angle)
-					foreach (var overlay in overlays.Where(overlay => overlay.layer < 0).OrderBy(overlay => overlay.layer))
-					{
-						GUI.color = overlay.color;
-						{
-							UIElements.DrawTextureWithMaterialOnGUI(overlay.rect, overlay.mainTex, null, overlay.angle);
-						}
-						GUIState.Reset();
-					}
+					overlayRenderer.RenderLayer(GUILayer.Lower);
 
 					//drawStep = "Rendering main texture";
 					VehicleGraphics.DrawVehicleFitted(adjustedRect, angle, mainTex, material: null); //Null material will reroute to GUI methods
@@ -89,14 +92,7 @@ namespace Vehicles
 					GUIState.Reset();
 
 					//drawStep = "Rendering overlays with layer >= 0";
-					foreach (var overlay in overlays.Where(overlay => overlay.layer >= 0).OrderBy(overlay => overlay.layer))
-					{
-						GUI.color = overlay.color;
-						{
-							UIElements.DrawTextureWithMaterialOnGUI(overlay.rect, overlay.mainTex, null, overlay.angle);
-						}
-						GUIState.Reset();
-					}
+					overlayRenderer.RenderLayer(GUILayer.Upper);
 				}
 				GUIState.Pop();
 			}
@@ -107,6 +103,7 @@ namespace Vehicles
 			finally
 			{
 				GUIState.Pop();
+				overlayRenderer.Clear();
 			}
 		}
 
@@ -116,7 +113,7 @@ namespace Vehicles
 		/// <param name="rect"></param>
 		/// <param name="vehicleDef"></param>
 		/// <param name="rot"></param>
-		public static IEnumerable<(Rect rect, Texture mainTex, Color color, float layer, float angle)> RetrieveAllOverlaySettingsGUIProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, List<GraphicOverlay> graphicOverlays = null)
+		public static IEnumerable<RenderData> RetrieveAllOverlaySettingsGUIProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, List<GraphicOverlay> graphicOverlays = null)
 		{
 			List<GraphicOverlay> overlays = graphicOverlays ?? vehicleDef.drawProperties.overlays;
 			foreach (GraphicOverlay graphicOverlay in overlays)
@@ -128,7 +125,7 @@ namespace Vehicles
 			}
 		}
 
-		public static (Rect rect, Texture mainTex, Color color, float layer, float angle) RetrieveOverlaySettingsGUIProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, GraphicOverlay graphicOverlay)
+		public static RenderData RetrieveOverlaySettingsGUIProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, GraphicOverlay graphicOverlay)
 		{
 			Rect overlayRect = VehicleGraphics.OverlayRect(rect, vehicleDef, graphicOverlay, rot);
 			Graphic graphic = graphicOverlay.Graphic;
@@ -143,7 +140,7 @@ namespace Vehicles
 			}
 			bool canMask = graphicOverlay.Graphic.Shader.SupportsMaskTex() || graphicOverlay.Graphic.Shader.SupportsRGBMaskTex();
 			Color color = canMask ? graphicOverlay.data.graphicData.color : Color.white;
-			return (overlayRect, texture, color, graphicOverlay.data.graphicData.DrawOffsetFull(rot).y, graphicOverlay.data.rotation);
+			return new RenderData(overlayRect, texture, color, graphicOverlay.data.graphicData.DrawOffsetFull(rot).y, graphicOverlay.data.rotation);
 		}
 
 		/// <summary>
@@ -154,7 +151,7 @@ namespace Vehicles
 		/// <param name="cannons"></param>
 		/// <param name="patternData"></param>
 		/// <param name="rot"></param>
-		public static IEnumerable<(Rect rect, Texture mainTex, Color color, float layer, float angle)> RetrieveAllTurretSettingsGUIProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, IEnumerable<VehicleTurret> turrets, PatternData patternData)
+		public static IEnumerable<RenderData> RetrieveAllTurretSettingsGUIProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, IEnumerable<VehicleTurret> turrets, PatternData patternData)
 		{
 			foreach (VehicleTurret turret in turrets)
 			{
@@ -177,18 +174,18 @@ namespace Vehicles
 						{
 							color = patternData.color;
 						}
-						yield return (turretRect, turretDrawData.graphic.TexAt(Rot8.North), color, turretDrawData.graphicDataRGB.drawOffset.y, turret.defaultAngleRotated + rot.AsAngle);
+						yield return new RenderData(turretRect, turretDrawData.graphic.TexAt(Rot8.North), color, turretDrawData.graphicDataRGB.drawOffset.y, turret.defaultAngleRotated + rot.AsAngle);
 					}
 				}
 			}
 		}
 
-		public static (Rect rect, Texture mainTex, Color color, float layer, float angle) RetrieveTurretSettingsGUIProperties(Rect rect, VehicleDef vehicleDef, VehicleTurret turret, Rot8 rot, PatternData patternData, float iconScale = 1)
+		public static RenderData RetrieveTurretSettingsGUIProperties(Rect rect, VehicleDef vehicleDef, VehicleTurret turret, Rot8 rot, PatternData patternData, float iconScale = 1)
 		{
 			if (turret.NoGraphic)
 			{
 				Log.Warning($"Attempting to fetch GUI properties for VehicleTurret with no graphic.");
-				return (Rect.zero, null, Color.white, -1, 0);
+				return RenderData.Invalid;
 			}
 			Rect turretRect = VehicleGraphics.TurretRect(rect, vehicleDef, turret, rot, iconScale: iconScale);
 			bool canMask = turret.CannonGraphic.Shader.SupportsMaskTex() || turret.CannonGraphic.Shader.SupportsRGBMaskTex();
@@ -197,7 +194,7 @@ namespace Vehicles
 			{
 				color = patternData.color;
 			}
-			return (turretRect, turret.CannonTexture, color, turret.CannonGraphicData.drawOffset.y, turret.defaultAngleRotated + rot.AsAngle);
+			return new RenderData(turretRect, turret.CannonTexture, color, turret.CannonGraphicData.drawOffset.y, turret.defaultAngleRotated + rot.AsAngle);
 		}
 
 		/// <summary>
@@ -378,6 +375,106 @@ namespace Vehicles
 			finally
 			{
 				GUIState.Pop();
+			}
+		}
+
+		private enum GUILayer
+		{
+			Lower,
+			Upper
+		}
+
+		public readonly struct RenderData : IComparable<RenderData>
+		{
+			public readonly Rect rect;
+			public readonly Texture mainTex;
+			public readonly Color color;
+			public readonly float layer;
+			public readonly float angle;
+
+			public RenderData(Rect rect, Texture mainTex, Color color, float layer, float angle)
+			{
+				this.rect = rect;
+				this.mainTex = mainTex;
+				this.color = color;
+				this.layer = layer;
+				this.angle = angle;
+			}
+
+			public static RenderData Invalid => new RenderData(Rect.zero, null, Color.white, -1, 0);
+
+			readonly int IComparable<RenderData>.CompareTo(RenderData other)
+			{
+				if (this.layer < other.layer)
+				{
+					return -1;
+				}
+				else if (this.layer == other.layer)
+				{
+					return 0;
+				}
+				return 1;
+			}
+		}
+
+		private class OverlayGUIRenderer
+		{
+			private static readonly List<RenderData> renderDataLower = new List<RenderData>();
+			private static readonly List<RenderData> renderDataUpper = new List<RenderData>();
+
+			public void Add(RenderData renderData)
+			{
+				if (renderData.layer < 0)
+				{
+					renderDataLower.Add(renderData);
+				}
+				else
+				{
+					renderDataUpper.Add(renderData);
+				}
+			}
+
+			public void Clear()
+			{
+				renderDataLower.Clear();
+				renderDataUpper.Clear();
+			}
+
+			public void FinalizeForRendering()
+			{
+				renderDataLower.Sort();
+				renderDataUpper.Sort();
+			}
+
+			public void RenderLayer(GUILayer layer)
+			{
+				switch (layer)
+				{
+					case GUILayer.Lower:
+						{
+							foreach (RenderData renderData in renderDataLower)
+							{
+								GUI.color = renderData.color;
+								{
+									UIElements.DrawTextureWithMaterialOnGUI(renderData.rect, renderData.mainTex, null, renderData.angle);
+								}
+								GUIState.Reset();
+							}
+						}
+						break;
+					case GUILayer.Upper:
+						{
+							foreach (RenderData renderData in renderDataUpper)
+							{
+								GUI.color = renderData.color;
+								{
+									UIElements.DrawTextureWithMaterialOnGUI(renderData.rect, renderData.mainTex, null, renderData.angle);
+								}
+								GUIState.Reset();
+							}
+						}
+						break;
+				}
 			}
 		}
 	}
