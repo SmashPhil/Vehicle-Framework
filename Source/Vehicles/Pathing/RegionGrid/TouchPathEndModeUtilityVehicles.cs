@@ -71,6 +71,7 @@ namespace Vehicles
 		/// <param name="regions"></param>
 		public static void AddAllowedAdjacentRegions(LocalTargetInfo dest, TraverseParms traverseParams, Map map, VehicleDef vehicleDef, List<VehicleRegion> regions)
 		{
+			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
 			GenAdj.GetAdjacentCorners(dest, out IntVec3 bl, out IntVec3 tl, out IntVec3 tr, out IntVec3 br);
 			if (!dest.HasThing || (dest.Thing.def.size.x == 1 && dest.Thing.def.size.z == 1))
 			{
@@ -80,7 +81,7 @@ namespace Vehicles
 					IntVec3 intVec = GenAdj.AdjacentCells[i] + cell;
 					if (intVec.InBounds(map) && !IsAdjacentCornerAndNotAllowed(intVec, bl, tl, tr, br, map, vehicleDef))
 					{
-						VehicleRegion region = VehicleGridsUtility.GetRegion(intVec, map, vehicleDef, RegionType.Set_Passable);
+						VehicleRegion region = VehicleRegionAndRoomQuery.RegionAt(intVec, mapping, vehicleDef, RegionType.Set_Passable);
 						if (region != null && region.Allows(traverseParams, true))
 						{
 							regions.Add(region);
@@ -95,7 +96,7 @@ namespace Vehicles
 				{
 					if (list[j].InBounds(map) && !IsAdjacentCornerAndNotAllowed(list[j], bl, tl, tr, br, map, vehicleDef))
 					{
-						VehicleRegion region2 = VehicleGridsUtility.GetRegion(list[j], map, vehicleDef, RegionType.Set_Passable);
+						VehicleRegion region2 = VehicleRegionAndRoomQuery.RegionAt(list[j], mapping, vehicleDef, RegionType.Set_Passable);
 						if (region2 != null && region2.Allows(traverseParams, true))
 						{
 							regions.Add(region2);

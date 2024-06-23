@@ -2,27 +2,30 @@
 using System.Runtime.CompilerServices;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
+using System.Linq;
 using Verse;
 using LudeonTK;
 using SmashTools;
 using System.Diagnostics;
+using SmashTools.Pathfinding;
 
 namespace Vehicles
 {
 	public class VehicleRegionMaker : VehicleRegionManager
 	{
-		//Utilized in 1 method only called from the main thread
+		//Utilized in 1 method only called from the same thread
 		private readonly HashSet<Thing> tmpProcessedThings = new HashSet<Thing>();
 
 		private VehicleRegionGrid regionGrid;
 
-		private static ThreadLocal<HashSet<IntVec3>> regionCells = new ThreadLocal<HashSet<IntVec3>>(() => { return new HashSet<IntVec3>(); });
+		//Call stack is for the process of rebuilding a region, which cannot run asyncronously
+		private HashSet<IntVec3> regionCells = new HashSet<IntVec3>();
+		private BFS<IntVec3> floodfiller = new BFS<IntVec3>();
 
 		/// <summary>
 		/// Contains hashset for 4 rotations
 		/// </summary>
-		private static readonly HashSet<IntVec3>[] linksProcessedAt = new HashSet<IntVec3>[]
+		private readonly HashSet<IntVec3>[] linksProcessedAt = new HashSet<IntVec3>[]
 		{
 			new HashSet<IntVec3>(),
 			new HashSet<IntVec3>(),
@@ -59,6 +62,7 @@ namespace Vehicles
 				return null;
 			}
 			CreatingRegions = true;
+			regionCells.Clear();
 
 			VehicleRegion region;
 			try
@@ -74,22 +78,25 @@ namespace Vehicles
 #endif
 
 #if DEBUG
-				DeepProfiler.Start("Floodfilling");
+				DeepProfiler.Start("Creating Links");
 #endif
 				CreateLinks(region);
 #if DEBUG
 				DeepProfiler.End();
 #endif
 
-#if DEBUG
-				DeepProfiler.Start("Floodfilling");
-#endif
+#if !DISABLE_WEIGHTS
+	#if DEBUG
+				DeepProfiler.Start("Recalculating Weights");
+	#endif
 				region.RecalculateWeights();
-#if DEBUG
+	#if DEBUG
 				DeepProfiler.End();
+	#endif
 #endif
+
 #if DEBUG
-				DeepProfiler.Start("Floodfilling");
+				DeepProfiler.Start("Registering RegionLister");
 #endif
 				RegisterThingsInRegionListers(region);
 #if DEBUG
@@ -104,34 +111,17 @@ namespace Vehicles
 			finally
 			{
 				CreatingRegions = false;
-				regionCells.Value.Clear();
+				regionCells.Clear();
 			}
 			return region;
 		}
 
-		/// <summary>
-		/// Regenerate region at <paramref name="root"/>
-		/// </summary>
-		/// <param name="region"></param>
-		/// <param name="root"></param>
-		public void TryRegenerateRegionFrom(VehicleRegion region, IntVec3 root)
+		private IEnumerable<IntVec3> GetFloodFillNeighbors(IntVec3 root)
 		{
-			if (CreatingRegions)
+			IntVec3[] cardinalDirections = GenAdj.CardinalDirectionsAround;
+			for (int i = 0; i < cardinalDirections.Length; i++)
 			{
-				Log.Error("Trying to regenerate a current water region but we are currently generating one. Nested calls are not allowed.");
-				return;
-			}
-			CreatingRegions = true;
-			try
-			{
-				FloodFillAndAddCells(region, root);
-				CreateLinks(region);
-				RegisterThingsInRegionListers(region);
-			}
-			finally
-			{
-				CreatingRegions = false;
-				regionCells.Value.Clear();
+				yield return root + cardinalDirections[i];
 			}
 		}
 
@@ -141,18 +131,22 @@ namespace Vehicles
 		/// <param name="root"></param>
 		private void FloodFillAndAddCells(VehicleRegion region, IntVec3 root)
 		{
-			regionCells.Value.Clear();
+			regionCells.Clear();
 			if (region.type.IsOneCellRegion())
 			{
 				AddCell(region, root);
 			}
 			else
 			{
-				mapping.map.floodFiller.FloodFill(root, PassCheck, Processor);
+				floodfiller.FloodFill(root, GetFloodFillNeighbors, canEnter: Validator, processor: Processor);
 			}
 
-			bool PassCheck(IntVec3 cell)
+			bool Validator(IntVec3 cell)
 			{
+				if (!cell.InBounds(mapping.map))
+				{
+					return false;
+				}
 				if (!region.extentsLimit.Contains(cell))
 				{
 					return false;
@@ -173,7 +167,7 @@ namespace Vehicles
 		private void AddCell(VehicleRegion region, IntVec3 cell)
 		{
 			regionGrid.SetRegionAt(cell, region);
-			regionCells.Value.Add(cell);
+			regionCells.Add(cell);
 			if (region.extentsClose.minX > cell.x)
 			{
 				region.extentsClose.minX = cell.x;
@@ -211,7 +205,7 @@ namespace Vehicles
 		private void CreateLinks(VehicleRegion region)
 		{
 			ClearProcessedLinks();
-			foreach (IntVec3 cell in regionCells.Value)
+			foreach (IntVec3 cell in regionCells)
 			{
 				SweepInTwoDirectionsAndTryToCreateLink(region, Rot4.North, cell);
 				SweepInTwoDirectionsAndTryToCreateLink(region, Rot4.South, cell);

@@ -35,12 +35,12 @@ namespace Vehicles
 		/// <param name="traversableRegionTypes"></param>
 		public static bool WithinRegions(this IntVec3 A, IntVec3 B, Map map, VehicleDef vehicleDef, int regionLookCount, TraverseParms traverseParams, RegionType traversableRegionTypes = RegionType.Set_Passable)
 		{
-			VehicleRegion regionA = VehicleGridsUtility.GetRegion(A, map, vehicleDef, traversableRegionTypes);
+			VehicleRegion regionA = VehicleRegionAndRoomQuery.RegionAt(A, map, vehicleDef, traversableRegionTypes);
 			if (regionA is null)
 			{
 				return false;
 			}
-			VehicleRegion regionB = VehicleGridsUtility.GetRegion(B, map, vehicleDef, traversableRegionTypes);
+			VehicleRegion regionB = VehicleRegionAndRoomQuery.RegionAt(B, map, vehicleDef, traversableRegionTypes);
 			if (regionB is null)
 			{
 				return false;
@@ -114,7 +114,7 @@ namespace Vehicles
 		/// <param name="traversableRegionTypes"></param>
 		public static void BreadthFirstTraverse(IntVec3 start, Map map, VehicleDef vehicleDef, VehicleRegionEntry entryCondition, VehicleRegionProcessor regionProcessor, int maxRegions = 999999, RegionType traversableRegionTypes = RegionType.Set_Passable)
 		{
-			VehicleRegion region = VehicleGridsUtility.GetRegion(start, map, vehicleDef, traversableRegionTypes);
+			VehicleRegion region = VehicleRegionAndRoomQuery.RegionAt(start, map, vehicleDef, traversableRegionTypes);
 			if (region is null) return;
 			BreadthFirstTraverse(region, entryCondition, regionProcessor, maxRegions, traversableRegionTypes);
 		}
@@ -134,7 +134,7 @@ namespace Vehicles
 				Log.Error("No free workers for BFS. Either BFS recurred deeper than " + NumWorkers + ", or a bug has put this system in an inconsistent state. Resetting.");
 				return;
 			}
-			if(root is null)
+			if (root is null)
 			{
 				Log.Error("BFS with null root region.");
 				return;

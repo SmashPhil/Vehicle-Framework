@@ -59,7 +59,7 @@ namespace Vehicles
 			destRegions.Clear();
 			if (end.Width == 1 && end.Height == 1)
 			{
-				VehicleRegion region = VehicleGridsUtility.GetRegion(endCell, mapping.map, vehicleDef, RegionType.Set_Passable);
+				VehicleRegion region = VehicleRegionAndRoomQuery.RegionAt(endCell, mapping, vehicleDef, RegionType.Set_Passable);
 				if (region != null)
 				{
 					destRegions.Add(region);
@@ -71,7 +71,7 @@ namespace Vehicles
 				{
 					if (intVec.InBounds(mapping.map) && !disallowedCorners.Contains(mapping.map.cellIndices.CellToIndex(intVec)))
 					{
-						VehicleRegion region2 = VehicleGridsUtility.GetRegion(intVec, mapping.map, vehicleDef, RegionType.Set_Passable);
+						VehicleRegion region2 = VehicleRegionAndRoomQuery.RegionAt(intVec, mapping, vehicleDef, RegionType.Set_Passable);
 						if (region2 != null)
 						{
 							if (region2.Allows(traverseParms, true))

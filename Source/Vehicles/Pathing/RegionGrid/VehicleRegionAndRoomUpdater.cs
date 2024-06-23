@@ -4,6 +4,8 @@ using System.Linq;
 using Verse;
 using UnityEngine;
 using SmashTools;
+using System.Threading.Tasks;
+using Verse.Noise;
 
 namespace Vehicles
 {
@@ -99,7 +101,7 @@ namespace Vehicles
 			VehicleMapping.VehiclePathData pathData = mapping[createdFor];
 			foreach (IntVec3 cell in pathData.VehicleRegionDirtyer.DirtyCells)
 			{
-				if (VehicleGridsUtility.GetRegion(cell, mapping.map, createdFor, RegionType.Set_All) == null)
+				if (VehicleRegionAndRoomQuery.RegionAt(cell, mapping, createdFor, RegionType.Set_All) == null)
 				{
 					VehicleRegion region = pathData.VehicleRegionMaker.TryGenerateRegionFrom(cell);
 					if (region != null)

@@ -41,15 +41,17 @@ namespace Vehicles
 			{
 				return RegionType.Normal;
 			}
-			List<Thing> thingList = cell.GetThingList(mapping.map);
-			for (int i = 0; i < thingList.Count; i++)
-			{
-				if (thingList[i].def.Fillage == FillCategory.Full)
-				{
-					return RegionType.None;
-				}
-			}
-			return RegionType.ImpassableFreeAirExchange;
+			return RegionType.None;
+
+			//List<Thing> thingList = cell.GetThingList(mapping.map);
+			//for (int i = 0; i < thingList.Count; i++)
+			//{
+			//	if (thingList[i].def.Fillage == FillCategory.Full)
+			//	{
+			//		return RegionType.None;
+			//	}
+			//}
+			//return RegionType.ImpassableFreeAirExchange;
 		}
 
 		//TODO - Account for non-uniform combinations (eg. Y shape)

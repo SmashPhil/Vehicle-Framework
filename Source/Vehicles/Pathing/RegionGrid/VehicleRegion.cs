@@ -279,7 +279,9 @@ namespace Vehicles
 		public void AddLink(VehicleRegionLink regionLink)
 		{
 			links.Add(regionLink);
+#if !DISABLE_WEIGHTS
 			RecalculateWeights();
+#endif
 		}
 
 		public Weight WeightBetween(VehicleRegionLink linkA, VehicleRegionLink linkB)
@@ -298,14 +300,17 @@ namespace Vehicles
 
 		public void ClearWeights()
 		{
+#if !DISABLE_WEIGHTS
 			lock (weightLock)
 			{
 				weights.Clear();
 			}
+#endif
 		}
 
 		public void RecalculateWeights()
 		{
+#if !DISABLE_WEIGHTS
 			lock (weightLock)
 			{
 				weights.Clear();
@@ -317,9 +322,11 @@ namespace Vehicles
 
 						int weight = EuclideanDistance(regionLink.anchor, connectingToLink);
 						weights[HashBetween(regionLink, connectingToLink)] = new Weight(regionLink, connectingToLink, weight);
+						weights[HashBetween(connectingToLink, regionLink)] = new Weight(connectingToLink, regionLink, weight);
 					}
 				}
 			}
+#endif
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -525,42 +532,9 @@ namespace Vehicles
 			}
 			if (debugRegionType.HasFlag(DebugRegionType.Weights))
 			{
-				lock (weightLock)
-				{
-					foreach (VehicleRegionLink regionLink in links.Keys)
-					{
-						foreach (VehicleRegionLink toRegionLink in links.Keys)
-						{
-							if (regionLink == toRegionLink) continue;
-
-							float weight = weights[HashBetween(regionLink, toRegionLink)].cost;
-							Vector3 from = regionLink.anchor.ToVector3();
-							from.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
-							Vector3 to = toRegionLink.anchor.ToVector3();
-							to.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
-							GenDraw.DrawLineBetween(from, to, VehicleRegionLink.WeightColor(weight));
-						}
-					}
-
-					foreach (VehicleRegion region in Neighbors)
-					{
-						foreach (VehicleRegionLink regionLink in links.Keys)
-						{
-							foreach (VehicleRegionLink toRegionLink in region.links.Keys)
-							{
-								if (regionLink == toRegionLink) continue;
-								if (regionLink.RegionA != this && regionLink.RegionB != this) continue;
-
-								float weight = region.weights[HashBetween(regionLink, toRegionLink)].cost;
-								Vector3 from = regionLink.anchor.ToVector3();
-								from.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
-								Vector3 to = toRegionLink.anchor.ToVector3();
-								to.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
-								GenDraw.DrawLineBetween(from, to, VehicleRegionLink.WeightColor(weight));
-							}
-						}
-					}
-				}
+#if !DISABLE_WEIGHTS
+				DrawWeights();
+#endif
 			}
 			if (debugRegionType.HasFlag(DebugRegionType.Things))
 			{
@@ -569,6 +543,48 @@ namespace Vehicles
 					CellRenderer.RenderSpot(thing.TrueCenter(), (thing.thingIDNumber % 256) / 256f, 0.15f);
 				}
 			}
+		}
+
+		private void DrawWeights()
+		{
+#if !DISABLE_WEIGHTS
+			lock (weightLock)
+			{
+				foreach (VehicleRegionLink regionLink in links.Keys)
+				{
+					foreach (VehicleRegionLink toRegionLink in links.Keys)
+					{
+						if (regionLink == toRegionLink) continue;
+
+						float weight = weights[HashBetween(regionLink, toRegionLink)].cost;
+						Vector3 from = regionLink.anchor.ToVector3();
+						from.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
+						Vector3 to = toRegionLink.anchor.ToVector3();
+						to.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
+						GenDraw.DrawLineBetween(from, to, VehicleRegionLink.WeightColor(weight));
+					}
+				}
+
+				foreach (VehicleRegion region in Neighbors)
+				{
+					foreach (VehicleRegionLink regionLink in links.Keys)
+					{
+						foreach (VehicleRegionLink toRegionLink in region.links.Keys)
+						{
+							if (regionLink == toRegionLink) continue;
+							if (regionLink.RegionA != this && regionLink.RegionB != this) continue;
+
+							float weight = region.weights[HashBetween(regionLink, toRegionLink)].cost;
+							Vector3 from = regionLink.anchor.ToVector3();
+							from.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
+							Vector3 to = toRegionLink.anchor.ToVector3();
+							to.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
+							GenDraw.DrawLineBetween(from, to, VehicleRegionLink.WeightColor(weight));
+						}
+					}
+				}
+			}
+#endif
 		}
 
 		/// <summary>

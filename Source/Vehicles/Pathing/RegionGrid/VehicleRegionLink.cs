@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Verse;
 using UnityEngine;
 using SmashTools;
+using System.Threading;
 
 namespace Vehicles
 {
@@ -86,7 +87,7 @@ namespace Vehicles
 		{
 			if (regions[0] == reg || regions[1] == reg)
 			{
-				Log.Error($"Tried to double-register vehicle region {reg} in {this}");
+				Log.Error($"Tried to double-register vehicle region {reg} in {this}.");
 				return;
 			}
 			if (RegionA is null || !RegionA.valid)

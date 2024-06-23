@@ -210,7 +210,7 @@ namespace Vehicles
 			int searchCount = 0;
 			int nodesOpened = 0;
 			bool drawPaths = VehicleMod.settings.debug.debugDrawPathfinderSearch;
-			bool allowedRegionTraversal = !passAllDestroyableThings && VehicleGridsUtility.GetRegion(start, mapping.map, vehicleDef, RegionType.Set_Passable) != null && freeTraversal;
+			bool allowedRegionTraversal = !passAllDestroyableThings && VehicleRegionAndRoomQuery.RegionAt(start, mapping, vehicleDef, RegionType.Set_Passable) != null && freeTraversal;
 			bool weightedHeuristics = false;
 			bool drafted = vehicle.Drafted;
 			

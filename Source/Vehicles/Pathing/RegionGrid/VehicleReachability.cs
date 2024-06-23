@@ -198,7 +198,7 @@ namespace Vehicles
 				destRegions.Clear();
 				if (peMode == PathEndMode.OnCell)
 				{
-					VehicleRegion region = VehicleGridsUtility.GetRegion(dest.Cell, mapping.map, createdFor, RegionType.Set_Passable);
+					VehicleRegion region = VehicleRegionAndRoomQuery.RegionAt(dest.Cell, mapping, createdFor, RegionType.Set_Passable);
 					if (region != null && region.Allows(traverseParms, true))
 					{
 						destRegions.Add(region);
@@ -379,7 +379,7 @@ namespace Vehicles
 			return null;
 		}
 
-		private static void MarkRegionForDrawing(VehicleRegion region, Map map, bool drawRegions = true, bool drawLinks = true)
+		private static void MarkRegionForDrawing(VehicleRegion region, Map map, bool drawRegions = true, bool drawWeights = false)
 		{
 			if (drawRegions)
 			{
@@ -389,7 +389,7 @@ namespace Vehicles
 				}
 			}
 
-			if (drawLinks)
+			if (drawWeights)
 			{
 				foreach (VehicleRegionLink regionLink in region.links.Keys)
 				{
@@ -405,8 +405,10 @@ namespace Vehicles
 
 		private static void MarkLinksForDrawing(VehicleRegion region, Map map, VehicleRegionLink from, VehicleRegionLink to)
 		{
+#if !DISABLE_WEIGHTS
 			float weight = region.WeightBetween(from, to).cost;
 			from.DrawWeight(map, to, weight);
+#endif
 		}
 
 		private static void MarkConnectedLinksForDrawing(Map map, VehicleRegionLink regionLink)
@@ -642,7 +644,7 @@ namespace Vehicles
 					return false;
 				}
 			}
-			VehicleRegion region = VehicleGridsUtility.GetRegion(cell, mapping.map, createdFor, RegionType.Set_Passable);
+			VehicleRegion region = VehicleRegionAndRoomQuery.RegionAt(cell, mapping, createdFor, RegionType.Set_Passable);
 			if (region is null)
 			{
 				return false;
@@ -701,7 +703,7 @@ namespace Vehicles
 			{
 				return true;
 			}
-			VehicleRegion region = VehicleGridsUtility.GetRegion(cell, mapping.map, createdFor, RegionType.Set_Passable);
+			VehicleRegion region = VehicleRegionAndRoomQuery.RegionAt(cell, mapping, createdFor, RegionType.Set_Passable);
 			if (region == null)
 			{
 				return false;
@@ -838,7 +840,9 @@ namespace Vehicles
 								//Check if destination reached
 								if (otherRegion == destinationRegion)
 								{
+#if !DISABLE_WEIGHTS
 									if (debugDrawSearch) CoroutineManager.QueueOrInvoke(() => MarkLinksForDrawing(inFacingRegion, Map, current.regionLink, neighbor), secondsBetweenDrawing);
+#endif
 									return SolvePath(startingRegion, destinationRegion, current);
 								}
 								//Queue for traversal of neighbors
@@ -846,7 +850,9 @@ namespace Vehicles
 
 								if (debugDrawSearch)
 								{
+#if !DISABLE_WEIGHTS
 									CoroutineManager.QueueOrInvoke(() => MarkLinksForDrawing(inFacingRegion, Map, current.regionLink, neighbor), secondsBetweenDrawing);
+#endif
 								}
 							}
 						}
@@ -909,7 +915,7 @@ namespace Vehicles
 					Log.Error($"Unable to fetch valid starting region at {start}.");
 					return false;
 				}
-				destinationRegion = VehicleGridsUtility.GetRegion(dest.Cell, mapping.map, vehicleReachability.createdFor, RegionType.Set_Passable);
+				destinationRegion = VehicleRegionAndRoomQuery.RegionAt(dest.Cell, mapping, vehicleReachability.createdFor, RegionType.Set_Passable);
 				if (startingRegion == null || !destinationRegion.Allows(traverseParms, true))
 				{
 					Log.Error($"Unable to fetch valid starting region that allows traverseParms={traverseParms} at {start}.");
