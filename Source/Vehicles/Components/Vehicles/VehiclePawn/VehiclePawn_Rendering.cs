@@ -31,6 +31,11 @@ namespace Vehicles
 
 		private float angle = 0f; /* -45 is left, 45 is right : relative to Rot4 direction*/
 
+		[AnimationProperty(Name = "angle")]
+		private float angleOffset = 0;
+		[AnimationProperty]
+		private Vector3 drawOffset = Vector3.zero;
+		
 		private Graphic_Vehicle graphic;
 
 		public PatternData patternToPaint;
@@ -45,13 +50,26 @@ namespace Vehicles
 
 		public bool Nameable => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), nameof(VehicleDef.nameable), VehicleDef.nameable);
 
-		public override Vector3 DrawPos => Drawer.DrawPos;
+		public override Vector3 DrawPos => Drawer.DrawPos + drawOffset;
 
 		public (Vector3 drawPos, float rotation) DrawData => (DrawPos, this.CalculateAngle(out _));
 
 		public ThingWithComps Thing => this;
 
-		public ModContentPack ModContentPack => VehicleDef.modContentPack;
+		ModContentPack IAnimator.ModContentPack => VehicleDef.modContentPack;
+
+		AnimationController IAnimator.Controller => throw new NotImplementedException();
+
+		IEnumerable<object> IAnimator.ExtraAnimators
+		{
+			get
+			{
+				foreach (object thingComp in cachedComps)
+				{
+					yield return thingComp;
+				}
+			}
+		}
 
 		public bool CrashLanded
 		{
