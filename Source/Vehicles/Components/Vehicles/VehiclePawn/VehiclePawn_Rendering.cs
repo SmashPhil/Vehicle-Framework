@@ -32,9 +32,9 @@ namespace Vehicles
 		private float angle = 0f; /* -45 is left, 45 is right : relative to Rot4 direction*/
 
 		[AnimationProperty(Name = "angle")]
-		private float angleOffset = 0;
+		private float rotation = 0;
 		[AnimationProperty]
-		private Vector3 drawOffset = Vector3.zero;
+		private Vector3 position = Vector3.zero;
 		
 		private Graphic_Vehicle graphic;
 
@@ -50,7 +50,7 @@ namespace Vehicles
 
 		public bool Nameable => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), nameof(VehicleDef.nameable), VehicleDef.nameable);
 
-		public override Vector3 DrawPos => Drawer.DrawPos + drawOffset;
+		public override Vector3 DrawPos => Drawer.DrawPos + position;
 
 		public (Vector3 drawPos, float rotation) DrawData => (DrawPos, this.CalculateAngle(out _));
 
@@ -103,7 +103,7 @@ namespace Vehicles
 				{
 					return 0f;
 				}
-				return angle;
+				return angle + rotation;
 			}
 			set
 			{
