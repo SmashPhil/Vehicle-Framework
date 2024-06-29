@@ -125,9 +125,13 @@ namespace Vehicles
 
 		public bool Disabled(UpgradeNode node)
 		{
-			if (!node.disableIfUpgradeNodeEnabled.NullOrEmpty())
+			if (!node.disableIfUpgradeNodeEnabled.NullOrEmpty() && upgrades.Contains(node.disableIfUpgradeNodeEnabled))
 			{
-				return upgrades.Contains(node.disableIfUpgradeNodeEnabled);
+				return true;
+			}
+			if (!node.disableIfUpgradeNodesEnabled.NullOrEmpty() && node.disableIfUpgradeNodesEnabled.Any(key => upgrades.Contains(key)))
+			{
+				return true;
 			}
 			return false;
 		}
