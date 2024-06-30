@@ -274,9 +274,12 @@ namespace Vehicles
 				}
 			}
 
-			foreach (VehicleComp comp in vehicle.AllComps.Where(comp => comp is VehicleComp))
+			foreach (ThingComp comp in vehicle.AllComps)
 			{
-				comp.EventRegistration();
+				if (comp is VehicleComp vehicleComp)
+				{
+					vehicleComp.EventRegistration();
+				}
 			}
 		}
 

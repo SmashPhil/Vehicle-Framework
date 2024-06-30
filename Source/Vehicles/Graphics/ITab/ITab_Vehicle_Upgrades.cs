@@ -412,6 +412,8 @@ namespace Vehicles
 			}
 			GUIState.Reset();
 
+			Rect detailRect = Rect.zero;
+
 			foreach (UpgradeNode upgradeNode in Vehicle.CompUpgradeTree.Props.def.nodes)
 			{
 				if (upgradeNode.hidden)
@@ -454,7 +456,12 @@ namespace Vehicles
 					}
 				}
 
-				if (Widgets.ButtonInvisible(upgradeRect, true))
+				if (InfoNode != null)
+				{
+					detailRect = GetDetailRect(rect);
+				}
+
+				if (!Mouse.IsOver(detailRect) && Widgets.ButtonInvisible(upgradeRect, true))
 				{
 					if (SelectedNode != upgradeNode)
 					{
@@ -475,7 +482,7 @@ namespace Vehicles
 
 			if (InfoNode != null)
 			{
-				Rect detailRect = GetDetailRect(rect);
+				detailRect = GetDetailRect(rect);
 				//detailRect.position += TabRect.position;
 				Widgets.BeginGroup(detailRect);
 				{

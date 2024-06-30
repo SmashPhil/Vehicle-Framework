@@ -4,6 +4,10 @@
 	<ST_AnimationWindow>Animation</ST_AnimationWindow>
 	<ST_CreateNewClip>Create New Clip...</ST_CreateNewClip>
 
+	<ST_RemoveProperties>Remove Properties</ST_RemoveProperties>
+	<ST_AddKey>Add Key</ST_AddKey>
+	<ST_RemoveKey>Delete Key</ST_RemoveKey>
+
 	<ST_PreviewAnimation>Preview</ST_PreviewAnimation>
 	<ST_PreviewAnimationTooltip>Enable/disable preview mode of entity's animation in-game</ST_PreviewAnimationTooltip>
 	<ST_PlayAnimationTooltip>Play the animation</ST_PlayAnimationTooltip>

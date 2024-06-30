@@ -31,9 +31,9 @@ namespace Vehicles
 
 		private float angle = 0f; /* -45 is left, 45 is right : relative to Rot4 direction*/
 
-		[AnimationProperty(Name = "angle")]
+		[AnimationProperty(Name = "Rotation")]
 		private float rotation = 0;
-		[AnimationProperty]
+		[AnimationProperty(Name = "Position")]
 		private Vector3 position = Vector3.zero;
 		
 		private Graphic_Vehicle graphic;
@@ -1130,12 +1130,12 @@ namespace Vehicles
 						}));
 						if (CompVehicleLauncher != null)
 						{
-							options.Add(new FloatMenuOption("Open in animator", OpenInAnimator));
+							options.Add(new FloatMenuOption("Open in Graph Editor", OpenInAnimator));
 						}
 #if DEBUG
 						if (CompVehicleLauncher != null)
 						{
-							options.Add(new FloatMenuOption("Open in animator (test version)", OpenInAnimator_New));
+							options.Add(new FloatMenuOption("Open in Animator (test version)", OpenInAnimator_New));
 						}
 #endif
 						if (!options.NullOrEmpty())

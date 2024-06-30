@@ -30,7 +30,8 @@ namespace Vehicles
 		private bool leaking;
 
 		private float fuel;
-		private float targetFuelLevel;
+		private float targetFuelLevel; //TODO 1.6 - remove
+		private float targetFuelPercent = -1;
 
 		private bool terminateMotes = false;
 		private Vector3 motePosition;
@@ -48,12 +49,43 @@ namespace Vehicles
 
 		//Fuel Tank
 		public float Fuel => fuel;
+
 		public float FuelPercent => Fuel / FuelCapacity;
+
 		public bool EmptyTank => Fuel <= 0f;
-		public bool FullTank => fuel == FuelCapacity;
-		public int FuelCountToFull => Mathf.CeilToInt(TargetFuelLevel - Fuel);
-		public float TargetFuelLevel { get => targetFuelLevel; set => targetFuelLevel = value; }
-		public float FuelPercentOfTarget => fuel / TargetFuelLevel;
+
+		public bool FullTank => Mathf.Approximately(fuel, TargetFuelLevel);
+
+		public int FuelCountToFull => Mathf.RoundToInt(TargetFuelLevel - Fuel);
+
+		public float TargetFuelPercent
+		{
+			get
+			{
+				return targetFuelPercent;
+			}
+			set
+			{
+				if (targetFuelPercent != value)
+				{
+					targetFuelPercent = value;
+				}
+			}
+		}
+
+		public float TargetFuelLevel => targetFuelPercent * FuelCapacity;
+
+		public float FuelPercentOfTarget
+		{
+			get
+			{
+				if (TargetFuelLevel == 0)
+				{
+					return 0;
+				}
+				return fuel / TargetFuelLevel;
+			}
+		}
 
 		public bool FuelLeaking => leaking;
 
@@ -582,6 +614,7 @@ namespace Vehicles
 			if (!respawningAfterLoad)
 			{
 				targetFuelLevel = FuelCapacity;
+				targetFuelPercent = 1;
 			}
 
 			RevalidateConsumptionStatus();
@@ -598,7 +631,18 @@ namespace Vehicles
 
 			//CurValues
 			Scribe_Values.Look(ref fuel, nameof(fuel));
-			Scribe_Values.Look(ref targetFuelLevel, nameof(targetFuelLevel), defaultValue: Props.fuelCapacity);
+
+			if (Scribe.mode == LoadSaveMode.Saving && targetFuelPercent < 0)
+			{
+				targetFuelPercent = targetFuelLevel / FuelCapacity;
+			}
+
+			Scribe_Values.Look(ref targetFuelPercent, nameof(targetFuelPercent), defaultValue: 1);
+
+			if (Scribe.mode == LoadSaveMode.LoadingVars)
+			{
+				Scribe_Values.Look(ref targetFuelLevel, nameof(targetFuelLevel), defaultValue: Props.fuelCapacity);
+			}
 
 			if (Scribe.mode == LoadSaveMode.Saving)
 			{
