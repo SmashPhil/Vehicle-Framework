@@ -191,12 +191,12 @@ namespace Vehicles
 
 		protected virtual bool InterfaceDrop(Thing thing)
 		{
-			return Inventory.TryDrop(thing, SelThing.Position, SelThing.Map, ThingPlaceMode.Near, out Thing _);
+			return Inventory.TryDropOutsideVehicle(thing, SelThing.Map, SelThing.OccupiedRect());
 		}
 
 		protected virtual bool InterfaceDropAll()
 		{
-			return Inventory.TryDropAll(SelThing.Position, SelThing.Map, ThingPlaceMode.Near);
+			return Inventory.TryDropAllOutsideVehicle(SelThing.Map, SelThing.OccupiedRect());
 		}
 	}
 }

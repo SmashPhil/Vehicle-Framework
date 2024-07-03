@@ -10,6 +10,8 @@ using Verse.Sound;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using static UnityEngine.Scripting.GarbageCollector;
+using Verse.Noise;
 
 namespace Vehicles
 {
@@ -378,35 +380,80 @@ namespace Vehicles
 				Thing thing = vehicle.inventory.innerContainer[i];
 				thingOwner.TryAddOrTransfer(thing);
 			}
-			foreach (IRefundable refundable in vehicle.AllComps.Where(comp => comp is IRefundable))
+			foreach (ThingComp thingComp in vehicle.AllComps)
 			{
-				foreach ((ThingDef refundDef, float count) in refundable.Refunds)
+				if (thingComp is IRefundable refundable)
 				{
-					if (refundDef != null)
+					foreach ((ThingDef refundDef, float count) in refundable.Refunds)
 					{
-						int countRounded = GenMath.RoundRandom(count);
-						if (countRounded > 0)
+						if (refundDef != null)
 						{
-							Thing thing2 = ThingMaker.MakeThing(refundDef);
-							thing2.stackCount = countRounded;
-							thingOwner.TryAdd(thing2);
+							int countRounded = GenMath.RoundRandom(count);
+							if (countRounded > 0)
+							{
+								Thing thing2 = ThingMaker.MakeThing(refundDef);
+								thing2.stackCount = countRounded;
+								thingOwner.TryAdd(thing2);
+							}
 						}
 					}
 				}
 			}
-			RotatingList<IntVec3> occupiedCells = vehicle.OccupiedRect().Cells.InRandomOrder(null).ToRotatingList();
-			while (thingOwner.Count > 0)
+			TryDropAllOutsideVehicle(thingOwner, vehicle.Map, vehicle.OccupiedRect(), DestroyMode.Refund);
+		}
+
+		public static bool TryDropOutsideVehicle(this ThingOwner container, Thing thing, Map map, CellRect cellRect, DestroyMode mode = DestroyMode.Refund)
+		{
+			IntVec3 cell = cellRect.EdgeCells.RandomElement();
+			if (mode == DestroyMode.KillFinalize && !map.areaManager.Home[cell])
+			{
+				thing.SetForbidden(true, warnOnFail: false);
+			}
+			return container.TryDrop(thing, ThingPlaceMode.Near, thing.stackCount, out _, null, nearPlaceValidator: CanPlaceAt);
+
+			bool CanPlaceAt(IntVec3 cell)
+			{
+				if (!cell.InBounds(map))
+				{
+					return false;
+				}
+				if (map.thingGrid.ThingAt<VehiclePawn>(cell) != null)
+				{
+					return false;
+				}
+				return map.pathing.Normal.pathGrid.WalkableFast(cell);
+			}
+		}
+
+		public static bool TryDropAllOutsideVehicle(this ThingOwner container, Map map, CellRect cellRect, DestroyMode mode = DestroyMode.Refund)
+		{
+			RotatingList<IntVec3> occupiedCells = cellRect.EdgeCells.InRandomOrder().ToRotatingList();
+			while (container.Count > 0)
 			{
 				IntVec3 cell = occupiedCells.Next;
 				if (mode == DestroyMode.KillFinalize && !map.areaManager.Home[cell])
 				{
-					thingOwner[0].SetForbidden(true, false);
+					container[0].SetForbidden(true, warnOnFail: false);
 				}
-				if (!thingOwner.TryDrop(thingOwner[0], cell, map, ThingPlaceMode.Near, out _, null, nearPlaceValidator))
+				if (!container.TryDrop(container[0], cell, map, ThingPlaceMode.Near, out _, null, nearPlaceValidator: CanPlaceAt))
 				{
-					Log.Warning($"Failing to place all leavings for destroyed vehicle {vehicle} at {vehicle.OccupiedRect().CenterCell}");
-					return;
+					Log.Warning($"Failing to drop all from container {container.Owner}");
+					return false;
 				}
+			}
+			return true;
+
+			bool CanPlaceAt(IntVec3 cell)
+			{
+				if (!cell.InBounds(map))
+				{
+					return false;
+				}
+				if (map.thingGrid.ThingAt<VehiclePawn>(cell) != null)
+				{
+					return false;
+				}
+				return map.pathing.Normal.pathGrid.WalkableFast(cell);
 			}
 		}
 

@@ -20,6 +20,7 @@ namespace Vehicles
 					description = vehicleDef.description,
 					combatPower = vehicleDef.combatPower,
 					race = vehicleDef,
+					ignoresPainShock = true,
 					lifeStages = new List<PawnKindLifeStage>()
 					{
 						new PawnKindLifeStage()

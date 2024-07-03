@@ -105,6 +105,8 @@
 			<needsRest>false</needsRest>
 			<hasGenders>false</hasGenders>
 			<foodType>None</foodType>
+			<alwaysAwake>true</alwaysAwake>
+			<doesntMove>true</doesntMove> <!-- prevents vanilla from considering it capable of being downed -->
 			<renderTree>PointlessVehicleRenderTree</renderTree>
 			
 			<baseBodySize>1.0</baseBodySize>

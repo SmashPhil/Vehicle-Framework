@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1667</currentVersion>
+  <currentVersion>1.5.1670</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -10,12 +10,15 @@
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Upgrading FuelCapacity wouldn't update amount needed to refuel, causing pawns to attempt to refuel in a loop.
 
+- Under specific circumstances a vehicle would become 'incapacitated'
+
 &lt;title&gt;Performance Optimization&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Vehicle region generation during map gen parallelized
+- Vehicle Region step during map generation
 
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 
 &lt;b&gt;Players&lt;/b&gt;
+- Items dropped from cargo will be placed outside of the vehicle's hitbox.
 
 &lt;b&gt;Modders&lt;/b&gt;
 

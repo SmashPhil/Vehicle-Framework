@@ -1,0 +1,16 @@
+
+<Patch>
+	<Operation Class = "PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName = "Bullet_Shell_HighExplosive"]</xpath>
+		<value>
+			<li Class = "Vehicles.ReduceExplosionOnWater"/>
+		</value>
+	</Operation>
+
+	<Operation Class = "PatchOperationAddModExtension">
+		<xpath>Defs/ThingDef[defName = "Bullet_Shell_AntigrainWarhead"]</xpath>
+		<value>
+			<li Class = "Vehicles.ReduceExplosionOnWater"/>
+		</value>
+	</Operation>
+</Patch>

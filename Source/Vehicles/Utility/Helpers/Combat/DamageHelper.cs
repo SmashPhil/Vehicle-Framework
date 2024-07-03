@@ -24,13 +24,9 @@ namespace Vehicles
 			IntVec3 position = proj.Position;
 			Map map2 = map;
 
-			int waterDepth = map.terrainGrid.TerrainAt(proj.Position).IsWater ? map.terrainGrid.TerrainAt(proj.Position) == TerrainDefOf.WaterOceanShallow ||
-				map.terrainGrid.TerrainAt(proj.Position) == TerrainDefOf.WaterShallow || map.terrainGrid.TerrainAt(proj.Position) == TerrainDefOf.WaterMovingShallow ? 1 : 2 : 0;
-			if (waterDepth == 0)
-			{
-				SmashLog.Error("<field>waterDepth</field> is 0, but terrain is water.");
-			}
-			float explosionRadius = (proj.def.projectile.explosionRadius / (2f * waterDepth));
+			float waterDepth = map.terrainGrid.TerrainAt(proj.Position) == TerrainDefOf.WaterDeep ||
+				map.terrainGrid.TerrainAt(proj.Position) == TerrainDefOf.WaterMovingChestDeep || map.terrainGrid.TerrainAt(proj.Position) == TerrainDefOf.WaterOceanDeep ? 2.5f : 1.5f;
+			float explosionRadius = proj.def.projectile.explosionRadius / waterDepth;
 			if (explosionRadius < 1)
 			{
 				explosionRadius = 1f;

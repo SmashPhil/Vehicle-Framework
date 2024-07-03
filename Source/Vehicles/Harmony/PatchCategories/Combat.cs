@@ -181,19 +181,21 @@ namespace Vehicles
 		
 		public static bool ImpactExplosiveProjectiles(Thing hitThing, Projectile __instance, Thing ___launcher)
 		{
-			Map map = __instance.Map;
-			TerrainDef terrainImpact = map.terrainGrid.TerrainAt(__instance.Position);
-			if (__instance.def.projectile.explosionDelay == 0 && terrainImpact.IsWater && !__instance.Position.GetThingList(__instance.Map).NotNullAndAny(x => x is VehiclePawn vehicle))
-			{
-				DamageHelper.Explode(__instance);
-				return false;
-			}
-
 			if (hitThing is VehiclePawn vehicle)
 			{
 				IntVec3 cell = vehicle.statHandler.RegisterImpacter(___launcher, __instance.Position);
 				//ProjectileHelper.DeflectProjectile(__instance, vehicle);
 				//return false;
+			}
+			if (VehicleMod.settings.main.reduceExplosionsOnWater && __instance.def.GetModExtension<ReduceExplosionOnWater>() != null)
+			{
+				Map map = __instance.Map;
+				TerrainDef terrainImpact = map.terrainGrid.TerrainAt(__instance.Position);
+				if (__instance.def.projectile.explosionDelay == 0 && terrainImpact.IsWater && !__instance.Position.GetThingList(__instance.Map).NotNullAndAny(x => x is VehiclePawn vehicle))
+				{
+					DamageHelper.Explode(__instance);
+					return false;
+				}
 			}
 			return true;
 		}

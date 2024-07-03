@@ -6,6 +6,8 @@ using UnityEngine;
 using Verse;
 using Verse.Sound;
 using SmashTools;
+using static UnityEngine.Scripting.GarbageCollector;
+using Verse.Noise;
 
 namespace Vehicles
 {
@@ -167,9 +169,46 @@ namespace Vehicles
 						}
 					}
 				}
+				RefundNode(node);
 				node.RemoveOverlays(Vehicle);
 				node.resetSound?.PlayOneShot(new TargetInfo(Vehicle.Position, Vehicle.Map));
 				Vehicle.EventRegistry[VehicleEventDefOf.VehicleUpgradeRefundCompleted].ExecuteEvents();
+			}
+		}
+
+		private void RefundNode(UpgradeNode node)
+		{
+			if (!node.ingredients.NullOrEmpty())
+			{
+				List<ThingDefCount> refundList = new List<ThingDefCount>();
+				foreach (ThingDefCountClass thingDefCountClass in node.ingredients)
+				{
+					(ThingDef thingDef, float count) = (thingDefCountClass.thingDef, thingDefCountClass.count);
+					int refundCount;
+					if (!node.refundLeavings.NullOrEmpty() && node.refundLeavings.TryGetValue(thingDef, out float fraction))
+					{
+						refundCount = Mathf.RoundToInt(count * fraction);
+					}
+					else
+					{
+						refundCount = Mathf.RoundToInt(count * node.refundFraction);
+					}
+					if (refundCount > 0)
+					{
+						refundList.Add(new ThingDefCount(thingDef, refundCount));
+					}
+				}
+				if (!refundList.NullOrEmpty())
+				{
+					ThingOwner<Thing> thingOwner = new ThingOwner<Thing>();
+					foreach (ThingDefCount thingDefCount in refundList)
+					{
+						Thing thing = ThingMaker.MakeThing(thingDefCount.ThingDef);
+						thing.stackCount = thingDefCount.Count;
+						thingOwner.TryAdd(thing);
+					}
+					thingOwner.TryDropAllOutsideVehicle(Vehicle.Map, Vehicle.OccupiedRect());
+				}
 			}
 		}
 
